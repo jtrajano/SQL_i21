@@ -315,6 +315,7 @@ BEGIN TRY
 					,[dblReportingRate]	
 					,[dblForeignRate]
 					,[strRateType]
+					,[intSourceEntityId]
 				)
 				 EXEC	
 				 @intReturnValue = dbo.uspICUnpostCosting
@@ -495,7 +496,7 @@ BEGIN TRY
 			BEGIN
 				DELETE FROM tblGRSettleStorage WHERE intSettleStorageId = @intParentSettleStorageId
 			END
-			ELSE
+			ELSE IF (SELECT COUNT(*) FROM tblGRSettleStorageTicket WHERE intCustomerStorageId = @intCustomerStorageId) = 2
 			BEGIN
 				--if child settle storage; delete the customer storage id in tblGRSettleStorageTicket table		
 				DELETE FROM tblGRSettleStorageTicket WHERE intCustomerStorageId = @intCustomerStorageId AND intSettleStorageId = (SELECT intParentSettleStorageId FROM tblGRSettleStorage WHERE intSettleStorageId = @intSettleStorageId)

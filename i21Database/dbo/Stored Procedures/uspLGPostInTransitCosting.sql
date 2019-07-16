@@ -75,7 +75,7 @@ BEGIN TRY
 			,intItemLocationId = IL.intItemLocationId
 			,intItemUOMId = LD.intItemUOMId
 			,dtmDate = GETDATE()
-			,dblQty = LD.dblQuantity
+			,dblQty = dbo.[fnCalculateQtyBetweenUOM](LD.intWeightItemUOMId, LD.intItemUOMId,dblNet)--LD.dblQuantity
 			,dblUOMQty = IU.dblUnitQty
 			,dblCost = CASE WHEN (AD.dblSeqPrice IS NULL) THEN
 							CASE WHEN (LD.dblUnitPrice > 0) 
@@ -83,7 +83,7 @@ BEGIN TRY
 								ELSE dbo.fnCTGetSequencePrice(CD.intContractDetailId,NULL) END
 							ELSE AD.dblSeqPrice / CASE WHEN (AD.ysnSeqSubCurrency = 1) THEN 100 ELSE 1 END
 						END
-						* AD.dblQtyToPriceUOMConvFactor
+						* (dbo.[fnCalculateQtyBetweenUOM](intWeightItemUOMId, LD.intPriceUOMId,dblNet)/ dbo.[fnCalculateQtyBetweenUOM](LD.intWeightItemUOMId, LD.intItemUOMId,dblNet))
 						* CASE WHEN (@DefaultCurrencyId <> LD.intForexCurrencyId AND LD.intForexRateTypeId IS NOT NULL AND LD.dblForexRate IS NOT NULL) THEN ISNULL(LD.dblForexRate, 1) --FX on LS detail level
 							   WHEN (@DefaultCurrencyId <> ISNULL(SeqCUR.intMainCurrencyId, SeqCUR.intCurrencyID)) THEN ISNULL(CTFX.dblFXRate, 1) --FX on CT level
 							   WHEN (@DefaultCurrencyId <> L.intCurrencyId) THEN ISNULL(FX.dblFXRate, 1) --FX on LS header level
@@ -231,6 +231,7 @@ BEGIN TRY
 				,[dblCreditReport]
 				,[dblReportingRate]
 				,[dblForeignRate]
+				,[intSourceEntityId]
 				)
 			EXEC @intReturnValue = dbo.uspICPostInTransitCosting @ItemsToPost = @ItemsToPost
 				,@strBatchId = @strBatchIdUsed
@@ -298,6 +299,7 @@ BEGIN TRY
 				,[dblReportingRate]	
 				,[dblForeignRate]
 				,[strRateType]
+				,[intSourceEntityId]
 		)
 		EXEC	@intReturnValue = dbo.uspICUnpostCosting
 					@intLoadId

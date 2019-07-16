@@ -60,6 +60,7 @@ DECLARE @intItemId AS INT
 		,@InventoryTransactionIdentityId AS INT 
 		,@intInventoryTransactionId AS INT 
 		,@dtmCreated AS DATETIME 
+		,@intSourceEntityId INT
 
 DECLARE	@GLEntries AS RecapTableType 
 DECLARE @GLAccounts AS dbo.ItemGLAccount
@@ -288,6 +289,7 @@ BEGIN
 					,@intEntityUserSecurityId = t.intCreatedEntityId
 					,@intCostingMethod = t.intCostingMethod
 					,@intInventoryTransactionId = t.intInventoryTransactionId
+					,@intSourceEntityId = t.intSourceEntityId
 			FROM	tblICInventoryTransaction t
 			WHERE	t.intInventoryTransactionId = @intTemplateInventoryTransactionId
 		
@@ -317,6 +319,7 @@ BEGIN
 						,@intEntityUserSecurityId = t.intCreatedEntityId
 						,@intCostingMethod = t.intCostingMethod
 						,@intInventoryTransactionId = t.intInventoryTransactionId
+						,@intSourceEntityId = t.intSourceEntityId
 				FROM	irely02_25Oct.dbo.tblICInventoryTransaction t
 				WHERE	t.intInventoryTransactionId = @intTemplateInventoryTransactionId				
 			END 
@@ -359,6 +362,7 @@ BEGIN
 					,@strTransactionForm = @strTransactionForm
 					,@intEntityUserSecurityId = @intEntityUserSecurityId
 					,@intCostingMethod = @intCostingMethod
+					,@intSourceEntityId = @intSourceEntityId
 					,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT
 					,@dtmCreated = @dtmCreated OUTPUT 
 			
@@ -728,6 +732,7 @@ BEGIN
 					,@strTransactionForm = @strTransactionForm
 					,@intEntityUserSecurityId = @intEntityUserSecurityId
 					,@intCostingMethod = @intCostingMethod
+					,@intSourceEntityId = @intSourceEntityId
 					,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT
 					,@dtmCreated = @dtmCreated OUTPUT 
 			

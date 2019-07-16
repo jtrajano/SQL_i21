@@ -80,6 +80,7 @@ BEGIN
 		,[dblReportingRate]
 		,[dblForeignRate]
 		,[strRateType]
+		,[intSourceEntityId]
 	)
 	-----------------------------------------
 	-- Generate the g/l entries

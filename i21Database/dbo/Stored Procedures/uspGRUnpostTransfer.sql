@@ -28,10 +28,12 @@ BEGIN
 	);
 	INSERT INTO #tmpTransferCustomerStorage
 	SELECT 
-		intTransferToCustomerStorageId
-		,dblUnits
-	FROM tblGRTransferStorageSplit
-	WHERE intTransferStorageId = @intTransferStorageId
+		 ISNULL(intToCustomerStorageId,intTransferToCustomerStorageId)
+		,ISNULL(TSR.dblUnitQty,TSS.dblUnits)
+	FROM tblGRTransferStorageSplit TSS
+	LEFT JOIN tblGRTransferStorageReference TSR
+	ON TSR.intTransferStorageSplitId = TSS.intTransferStorageSplitId
+	WHERE TSS.intTransferStorageId = @intTransferStorageId   AND (CASE WHEN (TSR.intTransferStorageId IS NULL) THEN 1 ELSE CASE WHEN TSR.intTransferStorageId = @intTransferStorageId THEN 1 ELSE 0 END END) = 1
 
 	IF EXISTS(SELECT TOP 1 1 
 			FROM tblGRCustomerStorage A 
@@ -168,15 +170,37 @@ BEGIN
 		CLOSE c; DEALLOCATE c;
 
 		--update the source's customer storage open balance
-		UPDATE A
-		SET A.dblOpenBalance 	= ROUND(A.dblOpenBalance + B.dblDeductedUnits,@intDecimalPrecision)
+
+		UPDATE X
+		SET X.dblOpenBalance = Y.dblQty
+		FROM
+		tblGRCustomerStorage X
+		INNER JOIN  (SELECT A.intCustomerStorageId,B.intSourceCustomerStorageId,TSS.intTransferStorageId,  ROUND(A.dblOpenBalance + SUM(ISNULL(TSR.dblUnitQty,B.dblDeductedUnits)),6) dblQty
 		FROM tblGRCustomerStorage A 
 		INNER JOIN tblGRTransferStorageSourceSplit B 
 			ON B.intSourceCustomerStorageId = A.intCustomerStorageId
-		WHERE B.intTransferStorageId = @intTransferStorageId
+		LEFT JOIN tblGRTransferStorageReference TSR
+			ON TSR.intSourceCustomerStorageId = B.intSourceCustomerStorageId
+		LEFT JOIN tblGRTransferStorageSplit TSS
+			ON TSS.intTransferStorageSplitId = TSR.intTransferStorageSplitId
+		WHERE B.intTransferStorageId = @intTransferStorageId AND (CASE WHEN (TSR.intTransferStorageId IS NULL) THEN 1 ELSE CASE WHEN TSR.intTransferStorageId = @intTransferStorageId THEN 1 ELSE 0 END END) = 1
+		GROUP BY  A.intCustomerStorageId,B.intSourceCustomerStorageId, TSS.intTransferStorageId,A.dblOpenBalance) Y
+			ON Y.intCustomerStorageId = X.intCustomerStorageId
+
+		--UPDATE A
+		--SET A.dblOpenBalance 	= ROUND(A.dblOpenBalance + ISNULL(dblUnitQty,B.dblDeductedUnits),@intDecimalPrecision)
+		--FROM tblGRCustomerStorage A 
+		--INNER JOIN tblGRTransferStorageSourceSplit B 
+		--	ON B.intSourceCustomerStorageId = A.intCustomerStorageId
+		--LEFT JOIN tblGRTransferStorageReference TSR
+		--	ON TSR.intSourceCustomerStorageId = B.intSourceCustomerStorageId
+		--LEFT JOIN tblGRTransferStorageSplit TSS
+		--	ON TSS.intTransferStorageSplitId = TSR.intTransferStorageSplitId
+		--WHERE B.intTransferStorageId = @intTransferStorageId AND ISNULL(TSR.intTransferStorageId, @intTransferStorageId) = @intTransferStorageId
 
 		DELETE FROM tblGRTransferStorage WHERE intTransferStorageId = @intTransferStorageId
 		DELETE FROM tblGRCustomerStorage WHERE intCustomerStorageId IN (SELECT intCustomerStorageId FROM #tmpTransferCustomerStorage)
+		DELETE FROM tblGRTransferStorageReference WHERE intToCustomerStorageId IN (SELECT intCustomerStorageId FROM #tmpTransferCustomerStorage)
 
 		DONE:
 		IF @transCount = 0 COMMIT TRANSACTION

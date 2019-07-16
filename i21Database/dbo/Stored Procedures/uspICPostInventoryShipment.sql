@@ -427,6 +427,7 @@ BEGIN
 			,[dblReportingRate]	
 			,[dblForeignRate]
 			,[strRateType]
+			,[intSourceEntityId]
 		)	
 		EXEC @intReturnValue = dbo.uspICPostInventoryShipmentOtherCharges 
 			@intTransactionId
@@ -462,6 +463,7 @@ BEGIN
 				,intForexRateTypeId
 				,dblForexRate
 				,intCategoryId
+				,intSourceEntityId
 		) 
 		SELECT	intItemId					= DetailItem.intItemId
 				,intItemLocationId			= dbo.fnICGetItemLocation(DetailItem.intItemId, Header.intShipFromLocationId)
@@ -520,6 +522,7 @@ BEGIN
 				,intForexRateTypeId			= DetailItem.intForexRateTypeId
 				,dblForexRate				= 1 
 				,intCategoryId				= i.intCategoryId 
+				,intSourceEntityId			= Header.intEntityCustomerId
 		FROM    tblICInventoryShipment Header INNER JOIN  tblICInventoryShipmentItem DetailItem 
 					ON Header.intInventoryShipmentId = DetailItem.intInventoryShipmentId    
 				INNER JOIN tblICItemUOM ItemUOM 
@@ -577,6 +580,7 @@ BEGIN
 				,[dblReportingRate]	
 				,[dblForeignRate]
 				,[strRateType]
+				,[intSourceEntityId]
 			)	
 			EXEC	@intReturnValue = dbo.uspICPostCosting  
 					@ItemsForPost  
@@ -620,6 +624,7 @@ BEGIN
 					,[dblReportingRate]	
 					,[dblForeignRate]
 					,[strRateType]
+					,[intSourceEntityId]
 			)
 			EXEC @intReturnValue = dbo.uspICCreateGLEntries 
 				@strBatchId
@@ -653,6 +658,7 @@ BEGIN
 					,[intInTransitSourceLocationId]
 					,[intForexRateTypeId]
 					,[dblForexRate]
+					,intSourceEntityId
 			)
 			SELECT
 					[intItemId] 
@@ -678,6 +684,7 @@ BEGIN
 					,[intInTransitSourceLocationId] = t.intItemLocationId
 					,[intForexRateTypeId] = t.intForexRateTypeId
 					,[dblForexRate] = t.dblForexRate
+					,[intSourceEntityId] = t.intSourceEntityId
 			FROM	tblICInventoryTransaction t 
 			WHERE	t.strTransactionId = @strTransactionId
 					AND t.ysnIsUnposted = 0 
@@ -720,6 +727,7 @@ BEGIN
 						,[dblCreditReport]	
 						,[dblReportingRate]	
 						,[dblForeignRate]
+						,[intSourceEntityId]
 				)
 				EXEC	@intReturnValue = dbo.uspICPostInTransitCosting  
 						@ItemsForInTransitCosting  
@@ -754,6 +762,7 @@ BEGIN
 				,intStorageLocationId
 				,intForexRateTypeId
 				,dblForexRate
+				,intSourceEntityId
 		) 
 		SELECT	intItemId					= DetailItem.intItemId
 				,intItemLocationId			= dbo.fnICGetItemLocation(DetailItem.intItemId, Header.intShipFromLocationId)
@@ -809,6 +818,7 @@ BEGIN
 				,intStorageLocationId       = ISNULL(Lot.intStorageLocationId, DetailItem.intStorageLocationId) 
 				,intForexRateTypeId			= DetailItem.intForexRateTypeId
 				,dblForexRate				= 1 
+				,intSourceEntityId			= Header.intEntityCustomerId
 		FROM    tblICInventoryShipment Header INNER JOIN  tblICInventoryShipmentItem DetailItem 
 					ON Header.intInventoryShipmentId = DetailItem.intInventoryShipmentId    
 				INNER JOIN tblICItemUOM ItemUOM 
@@ -874,6 +884,7 @@ BEGIN
 			,[dblReportingRate]	
 			,[dblForeignRate]
 			,[strRateType]
+			,[intSourceEntityId]
 		)	
 		EXEC dbo.uspICPostInventoryShipmentTaxes 
 			@intTransactionId
@@ -925,6 +936,7 @@ BEGIN
 				,[dblReportingRate]	
 				,[dblForeignRate]
 				,[strRateType]
+				,[intSourceEntityId]
 		)
 		EXEC	@intReturnValue = dbo.uspICUnpostCosting
 				@intTransactionId
@@ -980,6 +992,7 @@ BEGIN
 				,[dblReportingRate]	
 				,[dblForeignRate]
 				,[strRateType]
+				,[intSourceEntityId]
 			)	
 			EXEC @intReturnValue = dbo.uspICPostInventoryShipmentOtherCharges 
 				@intTransactionId
@@ -1026,6 +1039,7 @@ BEGIN
 				,[dblReportingRate]	
 				,[dblForeignRate]
 				,[strRateType]
+				,[intSourceEntityId]
 			)	
 			EXEC dbo.uspICPostInventoryShipmentTaxes 
 				@intTransactionId
@@ -1173,10 +1187,6 @@ BEGIN
 			 
 	IF @ysnAllowBlankGLEntries = 0 
 	BEGIN 
-		UPDATE @GLEntries
-		SET intEntityId = @intEntityCustomerId
-		WHERE intEntityId IS NULL 
-
 		EXEC dbo.uspGLBookEntries @GLEntries, @ysnPost 
 	END
 

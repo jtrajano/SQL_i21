@@ -17,6 +17,7 @@
 	,@strTransactionForm NVARCHAR (255)
 	,@intEntityUserSecurityId INT
 	,@SourceInventoryLotStorageId INT 
+	,@intSourceEntityId INT = NULL 
 	,@InventoryLotTransactionStorageId INT OUTPUT 
 AS
 
@@ -51,6 +52,7 @@ INSERT INTO dbo.tblICInventoryLotTransactionStorage (
 		,[dtmCreated]
 		,[intCreatedEntityId]
 		,[intConcurrencyId]
+		,[intSourceEntityId]
 )
 SELECT	[intItemId]								= @intItemId
 		,[intLotId]								= @intLotId
@@ -74,6 +76,7 @@ SELECT	[intItemId]								= @intItemId
 		,[dtmCreated]							= GETDATE()
 		,[intCreatedEntityId]					= @intEntityUserSecurityId
 		,[intConcurrencyId]						= 1
+		,[intSourceEntityId]					= @intSourceEntityId
 FROM	dbo.tblICItemLocation ItemLocation
 WHERE	@intItemId IS NOT NULL
 		AND @intItemLocationId IS NOT NULL

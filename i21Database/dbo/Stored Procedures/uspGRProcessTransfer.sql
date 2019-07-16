@@ -13,7 +13,7 @@ BEGIN
 
 	DECLARE @ErrMsg AS NVARCHAR(MAX)
 	DECLARE @StorageHistoryStagingTable AS [StorageHistoryStagingTable]
-	DECLARE @newCustomerStorageIds AS TABLE (storageId INT, transferSplitId INT)
+	DECLARE @newCustomerStorageIds AS TABLE (intToCustomerStorageId INT, intTransferStorageSplitId INT, intSourceCustomerStorageId INT,dblUnitQty NUMERIC(38,20),dblSplitPercent NUMERIC(38,20),dtmProcessDate DATETIME NOT NULL DEFAULT(GETDATE()))
 	DECLARE @CustomerStorageStagingTable AS CustomerStorageStagingTable
 	DECLARE @CurrentItemOpenBalance DECIMAL(38,20)
 	DECLARE @intTransferContractDetailId INT
@@ -48,12 +48,9 @@ BEGIN
 		RAISERROR(@ErrMsg,16,1)
 		RETURN;
 	END
-
-	BEGIN TRY
 	
-		DECLARE @transCount INT = @@TRANCOUNT;
-		IF @transCount = 0 BEGIN TRANSACTION
-
+	BEGIN TRANSACTION
+	BEGIN TRY
 		--integration to IC
 		DECLARE @cnt INT = 0
 
@@ -129,7 +126,7 @@ BEGIN
 			[intCustomerStorageId]	= SourceSplit.intSourceCustomerStorageId
 			,[intTransferStorageId]	= SourceSplit.intTransferStorageId
 			,[intContractHeaderId]	= CD.intContractHeaderId
-			,[dblUnits]				= -(SourceSplit.dblDeductedUnits)
+			,[dblUnits]				= -(SourceSplit.dblOriginalUnits * (TransferStorageSplit.dblSplitPercent / 100))
 			,[dtmHistoryDate]		= GETDATE()
 			,[intUserId]			= @intUserId
 			,[ysnPost]				= 1
@@ -139,6 +136,10 @@ BEGIN
 		FROM tblGRTransferStorageSourceSplit SourceSplit
 		LEFT JOIN tblCTContractDetail CD
 			ON CD.intContractDetailId = SourceSplit.intContractDetailId
+		INNER JOIN tblGRTransferStorage TS
+			ON TS.intTransferStorageId = SourceSplit.intTransferStorageId
+		INNER JOIN tblGRTransferStorageSplit TransferStorageSplit
+			ON TransferStorageSplit.intTransferStorageId = SourceSplit.intTransferStorageId	
 		WHERE SourceSplit.intTransferStorageId = @intTransferStorageId	
 
 		EXEC uspGRInsertStorageHistoryRecord @StorageHistoryStagingTable, @intStorageHistoryId		
@@ -188,6 +189,9 @@ BEGIN
 			,[intDeliverySheetId]
 			,[ysnTransferStorage]
 			,[dblGrossQuantity]
+			,[intSourceCustomerStorageId]
+			,[dblUnitQty]
+			,[dblSplitPercent]
 		)	
 		SELECT 
 			[intEntityId]						= TransferStorageSplit.intEntityId
@@ -198,7 +202,7 @@ BEGIN
 			,[intDiscountScheduleId]			= CS.intDiscountScheduleId
 			,[dblTotalPriceShrink]				= CS.dblTotalPriceShrink		
 			,[dblTotalWeightShrink]				= CS.dblTotalWeightShrink		
-			,[dblQuantity]						= TransferStorageSplit.dblUnits
+			,[dblQuantity]						= SourceStorage.dblOriginalUnits * (TransferStorageSplit.dblSplitPercent / 100)
 			,[dtmDeliveryDate]					= CS.dtmDeliveryDate
 			,[dtmZeroBalanceDate]				= CS.dtmZeroBalanceDate			
 			,[strDPARecieptNumber]				= CS.strDPARecieptNumber		
@@ -218,7 +222,7 @@ BEGIN
 			,[dblDiscountsPaid]					= CS.dblDiscountsPaid			
 			,[strCustomerReference]				= CS.strCustomerReference		
 			,[intCurrencyId]					= CS.intCurrencyId
-			,[strTransactionNumber]				= TS.strTransferStorageTicket
+			,[strTransactionNumber]				= CS.strStorageTicketNumber--TS.strTransferStorageTicket
 			,[intItemId]						= CS.intItemId
 			,[intItemUOMId]						= CS.intItemUOMId
 			,[intTransferStorageSplitId]		= TransferStorageSplit.intTransferStorageSplitId
@@ -228,7 +232,10 @@ BEGIN
 			,[intTicketId]						= CS.intTicketId
 			,[intDeliverySheetId]				= CS.intDeliverySheetId
 			,[ysnTransferStorage]				= 1
-			,[dblGrossQuantity]					= ROUND((TransferStorageSplit.dblUnits / CS.dblOriginalBalance) * CS.dblGrossQuantity,@intDecimalPrecision)
+			,[dblGrossQuantity]					= ROUND(((SourceStorage.dblOriginalUnits * (TransferStorageSplit.dblSplitPercent / 100)) / CS.dblOriginalBalance) * CS.dblGrossQuantity,@intDecimalPrecision)
+			,[intSourceCustomerStorageId]		= CS.intCustomerStorageId
+			,[dblUnitQty]						= SourceStorage.dblOriginalUnits * (TransferStorageSplit.dblSplitPercent / 100)
+			,[intSplitPercent]					= TransferStorageSplit.dblSplitPercent
 		FROM tblGRCustomerStorage CS
 		INNER JOIN tblGRTransferStorageSourceSplit SourceStorage
 			ON SourceStorage.intSourceCustomerStorageId = CS.intCustomerStorageId
@@ -237,6 +244,8 @@ BEGIN
 		INNER JOIN tblGRTransferStorageSplit TransferStorageSplit
 			ON TransferStorageSplit.intTransferStorageId = SourceStorage.intTransferStorageId		
 		WHERE SourceStorage.intTransferStorageId = @intTransferStorageId
+
+		--SELECT * FROM @CustomerStorageStagingTable
 
 		MERGE INTO tblGRCustomerStorage AS destination
 		USING
@@ -333,15 +342,25 @@ BEGIN
 		)
 		OUTPUT
 			inserted.intCustomerStorageId,
-			SourceData.intTransferStorageSplitId
+			SourceData.intTransferStorageSplitId,
+			SourceData.[intSourceCustomerStorageId],
+			SourceData.dblUnitQty,
+			SourceData.dblSplitPercent,
+			GETDATE()
+			--SourceData.
 		INTO @newCustomerStorageIds;
+
+		INSERT INTO tblGRTransferStorageReference
+		SELECT intSourceCustomerStorageId,intToCustomerStorageId,intTransferStorageSplitId,@intTransferStorageId,dblUnitQty,dblSplitPercent,dtmProcessDate FROM @newCustomerStorageIds
 		
+		--(intToCustomerStorageId INT, intTransferStorageSplitId INT, intSourceCustomerStorageId INT,dblUnitQty NUMERIC(38,20),dblSplitPercent NUMERIC(38,20),dtmProcessDate DATETIME NOT NULL DEFAULT(GETDATE()))
+
 		--update tblGRTransferStorageSplit's intCustomerStorageId
 		UPDATE A
-		SET A.intTransferToCustomerStorageId = B.storageId
+		SET A.intTransferToCustomerStorageId = B.intToCustomerStorageId
 		FROM tblGRTransferStorageSplit A
 		INNER JOIN @newCustomerStorageIds B
-			ON B.transferSplitId = A.intTransferStorageSplitId
+			ON B.intTransferStorageSplitId = A.intTransferStorageSplitId
 
 		DELETE FROM @StorageHistoryStagingTable
 		--for new customer storage
@@ -359,10 +378,10 @@ BEGIN
 			,[strType]
 		)
 		SELECT
-			[intCustomerStorageId]	= A.storageId
+			[intCustomerStorageId]	= A.intToCustomerStorageId
 			,[intTransferStorageId]	= TransferStorageSplit.intTransferStorageId
 			,[intContractHeaderId]	= CD.intContractHeaderId
-			,[dblUnits]				= TransferStorageSplit.dblUnits
+			,[dblUnits]				= A.dblUnitQty
 			,[dtmHistoryDate]		= GETDATE()
 			,[intUserId]			= @intUserId
 			,[ysnPost]				= 1
@@ -371,7 +390,7 @@ BEGIN
 			,[strType]				= 'From Transfer'
 		FROM tblGRTransferStorageSplit TransferStorageSplit
 		INNER JOIN @newCustomerStorageIds A
-			ON A.transferSplitId = TransferStorageSplit.intTransferStorageSplitId
+			ON A.intTransferStorageSplitId = TransferStorageSplit.intTransferStorageSplitId
 		LEFT JOIN tblCTContractDetail CD
 			ON CD.intContractDetailId = TransferStorageSplit.intContractDetailId
 		
@@ -425,15 +444,16 @@ BEGIN
 		END
 		CLOSE c; DEALLOCATE c;
 		--DISCOUNTS
+		DECLARE @intSourceCustomerStorageId INT;
 		DECLARE c CURSOR LOCAL STATIC READ_ONLY FORWARD_ONLY
 		FOR
-			SELECT storageId FROM @newCustomerStorageIds
+			SELECT intToCustomerStorageId,intSourceCustomerStorageId FROM @newCustomerStorageIds
 		OPEN c;
-		FETCH NEXT FROM c INTO @intCustomerStorageId	
+		FETCH NEXT FROM c INTO @intCustomerStorageId,@intSourceCustomerStorageId
 
 		WHILE @@FETCH_STATUS = 0
 		BEGIN
-			INSERT INTO [dbo].[tblQMTicketDiscount]
+		INSERT INTO [dbo].[tblQMTicketDiscount]
 			(
 				[intConcurrencyId]         
 				,[dblGradeReading]
@@ -470,12 +490,11 @@ BEGIN
 				,[intSort] 						= [intSort]
 				,[strDiscountChargeType] 		= [strDiscountChargeType]
 			FROM tblQMTicketDiscount Discount
-			INNER JOIN tblGRTransferStorageSourceSplit SourceSplit
-				ON SourceSplit.intSourceCustomerStorageId = Discount.intTicketFileId
-					AND SourceSplit.intTransferStorageId = @intTransferStorageId
-					AND Discount.strSourceType = 'Storage'
-			
-			FETCH NEXT FROM c INTO @intCustomerStorageId
+			WHERE intTicketFileId = @intSourceCustomerStorageId AND Discount.strSourceType = 'Storage'
+
+
+
+			FETCH NEXT FROM c INTO @intCustomerStorageId,@intSourceCustomerStorageId
 		END
 		CLOSE c; DEALLOCATE c;
 
@@ -483,9 +502,9 @@ BEGIN
 		UPDATE tblGRStorageHistory 
 		SET strTransferTicket = (SELECT strTransferStorageTicket FROM tblGRTransferStorage WHERE intTransferStorageId = @intTransferStorageId) 
 		WHERE intTransferStorageId = @intTransferStorageId
-
+		
 		DONE:
-		IF @transCount = 0 COMMIT TRANSACTION
+		COMMIT TRANSACTION
 	
 	END TRY
 	BEGIN CATCH
@@ -501,7 +520,9 @@ BEGIN
 		SET @ErrorMessage  = ERROR_MESSAGE()
 		SET @ErrorState    = ERROR_STATE()
 		SET @ErrorLine     = ERROR_LINE()
-		IF @transCount = 0 AND XACT_STATE() <> 0 ROLLBACK TRANSACTION
+	
+		ROLLBACK TRANSACTION
+	
 		RAISERROR (@ErrorMessage , @ErrorSeverity, @ErrorState, @ErrorNumber)
 	END CATCH	
 	

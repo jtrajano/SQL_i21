@@ -807,6 +807,7 @@ BEGIN
 		,[dblReportingRate]
 		,[dblForeignRate]
 		,[strRateType]
+		,[intSourceEntityId]
 		)
 	EXEC dbo.uspICPostCosting @ItemsForPost
 		,@strProduceBatchId

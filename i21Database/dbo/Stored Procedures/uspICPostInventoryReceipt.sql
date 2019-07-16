@@ -527,6 +527,7 @@ BEGIN
 			,[dblReportingRate]	
 			,[dblForeignRate]
 			,[strRateType]
+			,[intSourceEntityId]
 		)	
 		EXEC @intReturnValue = dbo.uspICPostInventoryReceiptOtherCharges 
 			@intTransactionId
@@ -575,6 +576,7 @@ BEGIN
 				,dblForexRate
 				,intCategoryId
 				,dblUnitRetail
+				,intSourceEntityId
 		)  
 		SELECT	intItemId = DetailItem.intItemId  
 				,intItemLocationId = ItemLocation.intItemLocationId
@@ -762,6 +764,7 @@ BEGIN
 						,NULL--DetailItem.ysnSubCurrency
 						,NULL--Header.intSubCurrencyCents
 					)
+				,intSourceEntityId = Header.intEntityVendorId
 		FROM	dbo.tblICInventoryReceipt Header INNER JOIN dbo.tblICInventoryReceiptItem DetailItem 
 					ON Header.intInventoryReceiptId = DetailItem.intInventoryReceiptId 
 				INNER JOIN dbo.tblICItemLocation ItemLocation
@@ -849,6 +852,7 @@ BEGIN
 					,[intInTransitSourceLocationId]
 					,[intForexRateTypeId]
 					,[dblForexRate]
+					,[intSourceEntityId]
 			)
 			SELECT
 					t.[intItemId] 
@@ -890,6 +894,7 @@ BEGIN
 					,[intInTransitSourceLocationId] = t.intInTransitSourceLocationId
 					,[intForexRateTypeId] = t.intForexRateTypeId
 					,[dblForexRate] = t.dblForexRate
+					,[intSourceEntityId] = r.intEntityVendorId
 			FROM	tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptItem ri
 						ON r.intInventoryReceiptId = ri.intInventoryReceiptId
 					INNER JOIN vyuLGLoadContainerLookup loadShipmentLookup
@@ -947,6 +952,7 @@ BEGIN
 						,[dblCreditReport]	
 						,[dblReportingRate]	
 						,[dblForeignRate]
+						,[intSourceEntityId]
 				)
 				EXEC	@intReturnValue = dbo.uspICPostInTransitCosting  
 						@ItemsForInTransitCosting  
@@ -985,6 +991,7 @@ BEGIN
 					,[intInTransitSourceLocationId]
 					,[intForexRateTypeId]
 					,[dblForexRate]
+					,[intSourceEntityId]
 			)
 			SELECT 
 					[intItemId]				= t.intItemId  
@@ -1008,7 +1015,7 @@ BEGIN
 					,[intInTransitSourceLocationId] = dbo.fnICGetItemLocation(t.intItemId, r.intTransferorId)
 					,[intForexRateTypeId]			= tp.intForexRateTypeId
 					,[dblForexRate]					= tp.dblForexRate
-
+					,[intSourceEntityId]		= tp.intSourceEntityId
 			FROM	@ItemsForPost tp INNER JOIN tblICItem i 
 						ON tp.intItemId = i.intItemId
 					INNER JOIN (
@@ -1091,6 +1098,7 @@ BEGIN
 						,[dblCreditReport]	
 						,[dblReportingRate]	
 						,[dblForeignRate]
+						,[intSourceEntityId]
 				)
 				EXEC	@intReturnValue = dbo.uspICPostInTransitCosting  
 						@ItemsForTransferOrder  
@@ -1134,6 +1142,7 @@ BEGIN
 					,[dblCreditReport]	
 					,[dblReportingRate]	
 					,[dblForeignRate]
+					,[intSourceEntityId]
 			)
 			EXEC	@intReturnValue = dbo.uspICCreateReceiptGLEntriesForInTransit
 					@strBatchId  
@@ -1172,6 +1181,7 @@ BEGIN
 					,dblForexRate
 					,intCategoryId
 					,dblUnitRetail
+					,intSourceEntityId
 			)
 			SELECT 
 					intItemId  
@@ -1197,6 +1207,7 @@ BEGIN
 					,dblForexRate
 					,intCategoryId
 					,dblUnitRetail
+					,intSourceEntityId
 			FROM	@ItemsForPost
 			WHERE	dblQty > 0 
 					OR (dblQty < 0 AND @intSourceType = @SOURCE_TYPE_Store) -- Allow stock to reduce if source type is 'Store'
@@ -1240,6 +1251,7 @@ BEGIN
 							,[dblReportingRate]	
 							,[dblForeignRate]
 							,[strRateType]
+							,[intSourceEntityId]
 					)
 					EXEC	@intReturnValue = dbo.uspICPostCosting  
 							@CompanyOwnedItemsForPost  
@@ -1303,6 +1315,7 @@ BEGIN
 							,[dblReportingRate]	
 							,[dblForeignRate]
 							,[strRateType]
+							,[intSourceEntityId]
 					)
 					EXEC	@intReturnValue = dbo.uspICPostCosting  
 							@CompanyOwnedItemsForPost  
@@ -1391,6 +1404,7 @@ BEGIN
 							,[dblReportingRate]	
 							,[dblForeignRate]
 							,[strRateType]
+							,[intSourceEntityId]
 					)
 					EXEC	@intReturnValue = dbo.uspICPostCosting  
 							@CompanyOwnedItemsForPost  
@@ -1455,6 +1469,7 @@ BEGIN
 							,[dblReportingRate]	
 							,[dblForeignRate]
 							,[strRateType]
+							,[intSourceEntityId]
 					)
 					EXEC	@intReturnValue = uspICCreateReceiptGLEntries
 							@strBatchId 
@@ -1496,6 +1511,7 @@ BEGIN
 							,[dblReportingRate]	
 							,[dblForeignRate]
 							,[strRateType]
+							,[intSourceEntityId]
 					)
 					EXEC	@intReturnValue = uspICCreateReceiptGLEntriesForNonStockItems
 							@strBatchId 
@@ -1542,6 +1558,7 @@ BEGIN
 				,intInTransitSourceLocationId
 				,intForexRateTypeId
 				,dblForexRate
+				,intSourceEntityId
 		)  
 		SELECT	intItemId = DetailItem.intItemId  
 				,intItemLocationId = ItemLocation.intItemLocationId
@@ -1699,6 +1716,7 @@ BEGIN
 				,intInTransitSourceLocationId = InTransitSourceLocation.intItemLocationId
 				,intForexRateTypeId = DetailItem.intForexRateTypeId
 				,dblForexRate = DetailItem.dblForexRate
+				,intSourceEntityId = Header.intEntityVendorId
 		FROM	dbo.tblICInventoryReceipt Header INNER JOIN dbo.tblICInventoryReceiptItem DetailItem 
 					ON Header.intInventoryReceiptId = DetailItem.intInventoryReceiptId 
 				INNER JOIN dbo.tblICItemLocation ItemLocation
@@ -1797,6 +1815,7 @@ BEGIN
 			,[dblReportingRate]	
 			,[dblForeignRate]
 			,[strRateType]
+			,[intSourceEntityId]
 		)	
 		EXEC dbo.uspICPostInventoryReceiptTaxes 
 			@intTransactionId
@@ -1852,6 +1871,7 @@ BEGIN
 				,[dblReportingRate]	
 				,[dblForeignRate]
 				,[strRateType]
+				,[intSourceEntityId]
 		)
 		EXEC	@intReturnValue = dbo.uspICUnpostCosting
 				@intTransactionId
@@ -1907,6 +1927,7 @@ BEGIN
 				,[dblReportingRate]	
 				,[dblForeignRate]
 				,[strRateType]
+				,[intSourceEntityId]
 			)	
 			EXEC @intReturnValue = dbo.uspICPostInventoryReceiptOtherCharges 
 				@intTransactionId
@@ -1953,6 +1974,7 @@ BEGIN
 				,[dblReportingRate]	
 				,[dblForeignRate]
 				,[strRateType]
+				,[intSourceEntityId]
 			)	
 			EXEC @intReturnValue = dbo.uspICUnpostInventoryReceiptTaxes 
 				@intTransactionId
@@ -2229,10 +2251,6 @@ BEGIN
 
 	IF @ysnAllowBlankGLEntries = 0 OR EXISTS (SELECT TOP 1 1 FROM @GLEntries)
 	BEGIN 
-		UPDATE @GLEntries
-		SET intEntityId = @intEntityVendorId
-		WHERE intEntityId IS NULL 
-
 		EXEC dbo.uspGLBookEntries @GLEntries, @ysnPost 
 	END 	
 

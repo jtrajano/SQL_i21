@@ -340,7 +340,8 @@ BEGIN
 		,dblForexRate
 		,strRateType
 		,strItemNo 
-		,intEntityId
+		,intEntityCustomerId
+		,intEntityVendorId
 	)
 	AS 
 	(
@@ -363,7 +364,8 @@ BEGIN
 				,dblForexRate = ISNULL(ShipmentCharges.dblForexRate, 1) 
 				,strRateType = currencyRateType.strCurrencyExchangeRateType
 				,Charge.strItemNo
-				,intEntityId = Shipment.intEntityCustomerId
+				,Shipment.intEntityCustomerId
+				,ShipmentCharges.intEntityVendorId
 		FROM	dbo.tblICInventoryShipment Shipment INNER JOIN dbo.tblICInventoryShipmentItem ShipmentItem 
 					ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
 				INNER JOIN dbo.tblICInventoryShipmentItemAllocatedCharge AllocatedOtherCharges
@@ -420,6 +422,7 @@ BEGIN
 		,[dblReportingRate]	
 		,[dblForeignRate]
 		,[strRateType]
+		,[intSourceEntityId]
 	)	
 	-------------------------------------------------------------------------------------------
 	-- Accrue: No
@@ -448,7 +451,7 @@ BEGIN
 			,intJournalLineNo			= ForGLEntries_CTE.intInventoryShipmentItemId
 			,ysnIsUnposted				= 0
 			,intUserId					= @intEntityUserSecurityId
-			,intEntityId				= ForGLEntries_CTE.intEntityId
+			,intEntityId				= @intEntityUserSecurityId
 			,strTransactionId			= ForGLEntries_CTE.strTransactionId
 			,intTransactionId			= ForGLEntries_CTE.intTransactionId
 			,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName
@@ -462,6 +465,7 @@ BEGIN
 			,dblReportingRate			= NULL 
 			,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
 			,strRateType				= ForGLEntries_CTE.strRateType
+			,intSourceEntityId			= ForGLEntries_CTE.intEntityVendorId
 	FROM	ForGLEntries_CTE  
 			INNER JOIN @OtherChargesGLAccounts OtherChargesGLAccounts
 				ON ForGLEntries_CTE.intChargeId = OtherChargesGLAccounts.intChargeId
@@ -506,7 +510,7 @@ BEGIN
 			,intJournalLineNo			= ForGLEntries_CTE.intInventoryShipmentItemId
 			,ysnIsUnposted				= 0
 			,intUserId					= @intEntityUserSecurityId
-			,intEntityId				= ForGLEntries_CTE.intEntityId
+			,intEntityId				= @intEntityUserSecurityId
 			,strTransactionId			= ForGLEntries_CTE.strTransactionId
 			,intTransactionId			= ForGLEntries_CTE.intTransactionId
 			,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName
@@ -520,6 +524,7 @@ BEGIN
 			,dblReportingRate			= NULL 
 			,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
 			,strRateType				= ForGLEntries_CTE.strRateType
+			,intSourceEntityId			= ForGLEntries_CTE.intEntityVendorId
 	FROM	ForGLEntries_CTE INNER JOIN @OtherChargesGLAccounts OtherChargesGLAccounts
 				ON ForGLEntries_CTE.intChargeId = OtherChargesGLAccounts.intChargeId
 				AND ForGLEntries_CTE.intChargeItemLocation = OtherChargesGLAccounts.intItemLocationId
@@ -570,7 +575,7 @@ BEGIN
 			,intJournalLineNo			= ForGLEntries_CTE.intInventoryShipmentItemId
 			,ysnIsUnposted				= 0
 			,intUserId					= @intEntityUserSecurityId
-			,intEntityId				= ForGLEntries_CTE.intEntityId
+			,intEntityId				= @intEntityUserSecurityId
 			,strTransactionId			= ForGLEntries_CTE.strTransactionId
 			,intTransactionId			= ForGLEntries_CTE.intTransactionId
 			,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName
@@ -584,6 +589,7 @@ BEGIN
 			,dblReportingRate			= NULL 
 			,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
 			,strRateType				= ForGLEntries_CTE.strRateType
+			,intSourceEntityId			= ForGLEntries_CTE.intEntityVendorId
 	FROM	ForGLEntries_CTE INNER JOIN @OtherChargesGLAccounts OtherChargesGLAccounts
 				ON ForGLEntries_CTE.intChargeId = OtherChargesGLAccounts.intChargeId
 				AND ForGLEntries_CTE.intChargeItemLocation = OtherChargesGLAccounts.intItemLocationId
@@ -625,7 +631,7 @@ BEGIN
 			,intJournalLineNo			= ForGLEntries_CTE.intInventoryShipmentItemId
 			,ysnIsUnposted				= 0
 			,intUserId					= @intEntityUserSecurityId
-			,intEntityId				= ForGLEntries_CTE.intEntityId
+			,intEntityId				= @intEntityUserSecurityId
 			,strTransactionId			= ForGLEntries_CTE.strTransactionId
 			,intTransactionId			= ForGLEntries_CTE.intTransactionId
 			,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName
@@ -639,6 +645,7 @@ BEGIN
 			,dblReportingRate			= NULL 
 			,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
 			,strRateType				= ForGLEntries_CTE.strRateType
+			,intSourceEntityId			= ForGLEntries_CTE.intEntityVendorId
 	FROM	ForGLEntries_CTE INNER JOIN @OtherChargesGLAccounts OtherChargesGLAccounts
 				ON ForGLEntries_CTE.intChargeId = OtherChargesGLAccounts.intChargeId
 				AND ForGLEntries_CTE.intChargeItemLocation = OtherChargesGLAccounts.intItemLocationId
@@ -693,6 +700,7 @@ BEGIN
 			,[dblReportingRate]	
 			,[dblForeignRate]
 			,[strRateType]
+			,[intSourceEntityId]
 	FROM	@ChargesGLEntries
 END
 

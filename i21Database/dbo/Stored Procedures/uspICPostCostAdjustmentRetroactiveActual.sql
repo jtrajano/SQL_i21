@@ -31,6 +31,7 @@ CREATE PROCEDURE [dbo].[uspICPostCostAdjustmentRetroactiveActual]
 	,@ysnUpdateItemCostAndPrice AS BIT = 0 
 	,@IsEscalate AS BIT = 0 
 	,@dblNewAverageCost AS NUMERIC(38,20) = NULL
+	,@intSourceEntityId AS INT = NULL  
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -166,6 +167,7 @@ BEGIN
 			,[intFobPointId] TINYINT NULL 
 			,[intInTransitSourceLocationId] INT NULL 
 			,[dblNewAverageCost] NUMERIC(38,20) NULL
+			,[intSourceEntityId] INT NULL
 		)
 	END 
 END 
@@ -771,6 +773,7 @@ BEGIN
 			,@dblForexRate							= 1
 			,@strDescription						= @strDescription	
 			,@strActualCostId						= @strActualCostId
+			,@intSourceEntityId						= @intSourceEntityId 
 
 		UPDATE	tblICInventoryTransaction 
 		SET		ysnIsUnposted = CASE WHEN @ysnPost = 1 THEN 0 ELSE 1 END 
@@ -848,7 +851,8 @@ BEGIN
 			,@dblForexRate							= 1
 			,@strDescription						= @strDescription	
 			,@strActualCostId						= @strActualCostId
-
+			,@intSourceEntityId						= @intSourceEntityId 
+					   
 		-- Update ysnIsUnposted flag. 
 		BEGIN 
 			UPDATE	tblICInventoryTransaction 

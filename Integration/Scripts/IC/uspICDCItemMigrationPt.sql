@@ -21,7 +21,7 @@ SET ANSI_WARNINGS OFF
 
 INSERT INTO tblICItem(strItemNo, strType, strDescription, strStatus, strInventoryTracking, strLotTracking, intCategoryId, intPatronageCategoryId, intLifeTime, ysnLandedCost, ysnDropShip
 	,ysnSpecialCommission, ysnStockedItem, ysnDyedFuel, strBarcodePrint, ysnMSDSRequired, ysnAvailableTM, dblDefaultFull, ysnExtendPickTicket, ysnExportEDI, ysnHazardMaterial
-	,ysnMaterialFee, strCountCode, ysnTaxable, strKeywords, intConcurrencyId, ysnCommisionable)
+	,ysnMaterialFee, strCountCode, ysnTaxable, strKeywords, intConcurrencyId, ysnCommisionable, dtmDateCreated)
 SELECT
 	strItemNo				
 	, strType				
@@ -50,6 +50,7 @@ SELECT
 	, strKeywords			
 	, intConcurrencyId		
 	, ysnCommisionable
+	, GETUTCDATE()
 FROM (
 	SELECT
 			  strItemNo					= RTRIM(ptitm_itm_no) COLLATE Latin1_General_CI_AS

@@ -430,6 +430,7 @@ BEGIN
 				,[dblReportingRate]	
 				,[dblForeignRate]		
 				,[strRateType]		
+				,[intSourceEntityId]
 		)
 		EXEC @intReturnValue = dbo.uspICCreateGLEntries 
 			@strBatchId
@@ -480,6 +481,7 @@ BEGIN
 			,[dblReportingRate]	
 			,[dblForeignRate]
 			,[strRateType]
+			,[intSourceEntityId]
 	)
 	EXEC	@intReturnValue = dbo.uspICUnpostCosting
 			@intTransactionId

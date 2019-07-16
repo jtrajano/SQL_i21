@@ -84,7 +84,8 @@ BEGIN
         ,[dblSourceUnitCredit]
         ,[intCommodityId]
         ,[intSourceEntityId]
-        ,[ysnRebuild])	
+        ,[ysnRebuild]
+	)	
     SELECT
          [dtmDate]                      = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) AS DATE)
         ,[strBatchId]                   = I.[strBatchId]

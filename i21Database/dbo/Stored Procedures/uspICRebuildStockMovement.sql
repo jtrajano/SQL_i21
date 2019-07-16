@@ -74,6 +74,7 @@ BEGIN
 		,intCommodityId
 		,intCategoryId
 		,intLocationId
+		,intSourceEntityId
 	)
 	SELECT *
 	FROM (
@@ -115,6 +116,7 @@ BEGIN
 				,t.intItemCommodityId
 				,t.intItemCategoryId
 				,t.intLocationId 
+				,t.intSourceEntityId
 		FROM	tblICItem i
 				LEFT JOIN (
 					SELECT	
@@ -218,6 +220,7 @@ BEGIN
 				,t.intCommodityId
 				,t.intCategoryId
 				,t.intLocationId 
+				,t.intSourceEntityId
 		FROM	(
 					SELECT	
 						dblQty = SUM(t.dblQty)
@@ -326,6 +329,7 @@ BEGIN
 		,intCommodityId
 		,intCategoryId
 		,intLocationId
+		,intSourceEntityId
 	)
 	SELECT *
 	FROM (
@@ -367,6 +371,7 @@ BEGIN
 				,t.intCommodityId
 				,t.intCategoryId
 				,t.intLocationId 
+				,t.intSourceEntityId
 		FROM	tblICItem i 
 				LEFT JOIN (
 					SELECT	
@@ -468,6 +473,7 @@ BEGIN
 				,t.intCommodityId
 				,t.intCategoryId
 				,t.intLocationId 
+				,t.intSourceEntityId
 		FROM	(
 					SELECT	
 						dblQty = SUM(t.dblQty)

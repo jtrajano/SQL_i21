@@ -7,7 +7,7 @@ DECLARE @LayoutTitle NVARCHAR(100)
 -- BP Format
 SET @LayoutTitle = 'DCC - BP Format'
 
-UPDATE tblSMImportFileHeader SET  strFieldDelimiter = 'Tab' WHERE strLayoutTitle = @LayoutTitle AND strFieldDelimiter = 'Comma'
+UPDATE tblSMImportFileHeader SET strFieldDelimiter = 'Tab' WHERE strLayoutTitle = @LayoutTitle --AND strFieldDelimiter = 'Tab'
 
 IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMImportFileHeader WHERE strLayoutTitle = @LayoutTitle)
 BEGIN

@@ -25,6 +25,7 @@ CREATE PROCEDURE [dbo].[uspICPostActualCostInTransit]
 	,@intInTransitSourceLocationId AS INT
 	,@intForexRateTypeId AS INT
 	,@dblForexRate AS NUMERIC(38, 20)
+	,@intSourceEntityId INT = NULL 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -135,6 +136,7 @@ BEGIN
 					,@intForexRateTypeId = @intForexRateTypeId
 					,@dblForexRate = @dblForexRate
 					,@strActualCostId = @strActualCostId
+					,@intSourceEntityId = @intSourceEntityId
 					,@dtmCreated = @dtmCreated OUTPUT 
 
 			IF @intReturnValue < 0 RETURN @intReturnValue;
@@ -200,6 +202,7 @@ BEGIN
 				,@intForexRateTypeId = @intForexRateTypeId
 				,@dblForexRate = @dblForexRate
 				,@strActualCostId = @strActualCostId
+				,@intSourceEntityId = @intSourceEntityId
 				,@dtmCreated = @dtmCreated OUTPUT 
 
 		IF @intReturnValue < 0 RETURN @intReturnValue;
@@ -294,6 +297,7 @@ BEGIN
 							,@dblForexRate = @dblForexRate
 							,@strActualCostId = @strActualCostId
 							,@strDescription = @strDescription
+							,@intSourceEntityId = @intSourceEntityId
 							,@dtmCreated = @dtmCreated OUTPUT 
 
 					IF @intReturnValue < 0 RETURN @intReturnValue;

@@ -608,6 +608,7 @@ BEGIN TRY
 					,dblCreditReport
 					,dblReportingRate
 					,dblForeignRate
+					,intSourceEntityId
 					)
 				EXEC dbo.uspICCreateGLEntriesOnCostAdjustment @strBatchId = @strBatchId
 					,@intEntityUserSecurityId = @userId

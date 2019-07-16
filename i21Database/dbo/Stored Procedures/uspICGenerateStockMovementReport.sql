@@ -67,6 +67,7 @@ BEGIN
 		,intCommodityId
 		,intCategoryId
 		,intLocationId
+		,intSourceEntityId
 	)
 	SELECT 
 		*
@@ -119,6 +120,7 @@ BEGIN
 		,intCommodityId
 		,intCategoryId
 		,intLocationId
+		,intSourceEntityId
 	)
 	SELECT 
 		*
@@ -172,6 +174,7 @@ BEGIN
 		,intCommodityId
 		,intCategoryId
 		,intLocationId
+		,intSourceEntityId
 	)
 	SELECT 
 		*
@@ -226,6 +229,7 @@ BEGIN
 		,intCommodityId
 		,intCategoryId
 		,intLocationId
+		,intSourceEntityId
 	)
 	SELECT 
 		*
@@ -281,6 +285,7 @@ BEGIN
 		,intCommodityId
 		,intCategoryId
 		,intLocationId
+		,intSourceEntityId
 	)
 	SELECT 
 		*
@@ -336,6 +341,7 @@ BEGIN
 		,intCommodityId
 		,intCategoryId
 		,intLocationId
+		,intSourceEntityId
 	)
 	SELECT 
 		*

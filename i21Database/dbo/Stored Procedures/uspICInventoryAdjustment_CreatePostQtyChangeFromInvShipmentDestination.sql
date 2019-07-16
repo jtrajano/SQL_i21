@@ -76,9 +76,9 @@ BEGIN
 			,si.intInventoryShipmentItemId 
 			,si.intItemId
 			,s.intShipFromLocationId
-			,si.intSubLocationId
-			,si.intStorageLocationId
-			,strLotNumber = NULL
+			,intSubLocationId = case when sil.intLotId is not null then silot.intSubLocationId else si.intSubLocationId end
+			,intStorageLocationId = case when sil.intLotId is not null then silot.intStorageLocationId else si.intStorageLocationId end
+			,strLotNumber = silot.strLotNumber
 			,dblCost = dbo.fnCalculateCostBetweenUOM(
 				ISNULL(itemCost.intItemUOMId, stockUOM.intItemUOMId) 
 				, stockUOM.intItemUOMId
@@ -96,6 +96,10 @@ BEGIN
 			, inv.intInvoiceId
 	FROM	tblICInventoryShipment s INNER JOIN tblICInventoryShipmentItem si
 				ON s.intInventoryShipmentId = si.intInventoryShipmentId
+			left join tblICInventoryShipmentItemLot as sil
+				on sil.intInventoryShipmentItemId = si.intInventoryShipmentItemId
+			left join tblICLot as silot
+				on sil.intLotId = silot.intLotId
 			INNER JOIN tblICItem i 
 				ON i.intItemId = si.intItemId 
 			INNER JOIN tblICCommodity c

@@ -138,6 +138,8 @@ AS
 	, Lot.strContractNo
 	, sourceReceipt.strPurchaseContractNumber
 	, TransferDetail.intConcurrencyId
+	, ShipVia.strName strShipVia
+	, [Transfer].intShipViaId
 	FROM tblICInventoryTransferDetail TransferDetail
 		LEFT JOIN tblICInventoryTransfer [Transfer] ON [Transfer].intInventoryTransferId = TransferDetail.intInventoryTransferId
 		LEFT JOIN tblEMEntity e ON e.intEntityId = [Transfer].intTransferredById
@@ -190,3 +192,4 @@ AS
 			WHERE	ril.intLotId = Lot.intLotId
 					AND ri_lookup.intContractSeq IS NOT NULL 
 		) sourceReceipt
+		LEFT JOIN tblSMShipVia ShipVia ON ShipVia.intEntityId = [Transfer].intShipViaId

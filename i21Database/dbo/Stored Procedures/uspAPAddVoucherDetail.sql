@@ -208,7 +208,7 @@ SELECT TOP 100 PERCENT
 											END
 	,dblRate							=	CASE WHEN A.intCurrencyId != compPref.intDefaultCurrencyId
 												THEN (
-													CASE WHEN A.dblExchangeRate != 0 THEN A.dblExchangeRate --use the value we recieved for exchange rate if valid
+													CASE WHEN A.dblExchangeRate != 0 THEN ISNULL(NULLIF(A.dblExchangeRate,0),1) --use the value we recieved for exchange rate if valid
 													ELSE defaultExchangeRate.dblExchangeRate
 													END
 												)
@@ -282,7 +282,8 @@ UPDATE A
 									ELSE vp.dblQuantityBilled END)
 							ELSE vp.dblQuantityBilled END
 							,0),
-		A.dblTax = ISNULL(vp.dblTax, A.dblTax) --UPDATE THE TAX IF WE GENERATED IT
+		A.dblTax = ISNULL(vp.dblTax, A.dblTax), --UPDATE THE TAX IF WE GENERATED IT
+		A.intTaxGroupId = ISNULL(vp.intPurchaseTaxGroupId, A.intTaxGroupId)
 FROM #tmpVoucherPayableData A
 LEFT JOIN tblICItem item ON A.intItemId = item.intItemId
 LEFT JOIN vyuCTContractDetailView ctDetail ON ctDetail.intContractDetailId = A.intContractDetailId
@@ -523,6 +524,18 @@ INNER JOIN @payablesKey B
 	ON A.intVoucherPayableId = B.intNewPayableId
 INNER JOIN @voucherDetailsInfo C
 	ON B.intOldPayableId = C.intVoucherPayableId
+
+--GENERATE TAXES FOR ysnStage = 0
+DECLARE @idetailIds AS Id
+INSERT INTO @idetailIds
+SELECT
+	A.intBillDetailId
+FROM tblAPBillDetail A
+INNER JOIN @voucherDetailsInfo B
+	ON A.intBillDetailId = B.intBillDetailId
+WHERE A.ysnStage = 0
+
+EXEC uspAPUpdateVoucherDetailTax @idetailIds
 
 INSERT INTO @voucherDetailIds
 SELECT intBillDetailId FROM @voucherDetailsInfo

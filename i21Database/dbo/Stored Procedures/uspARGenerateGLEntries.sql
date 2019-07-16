@@ -15,57 +15,7 @@ DECLARE @SCREEN_NAME NVARCHAR(25) = 'Invoice'
 DECLARE @CODE NVARCHAR(25) = 'AR'
 DECLARE @POSTDESC NVARCHAR(10) = 'Posted '
 
---IF(OBJECT_ID('tempdb..#ARInvoiceGLEntries') IS NULL)
---BEGIN
---CREATE TABLE #ARInvoiceGLEntries
---	([dtmDate]                   DATETIME         NOT NULL,
---	[strBatchId]                NVARCHAR (40)    COLLATE Latin1_General_CI_AS NULL,
---	[intAccountId]              INT              NULL,
---	[dblDebit]                  NUMERIC (18, 6)  NULL,
---	[dblCredit]                 NUMERIC (18, 6)  NULL,
---	[dblDebitUnit]              NUMERIC (18, 6)  NULL,
---	[dblCreditUnit]             NUMERIC (18, 6)  NULL,
---	[strDescription]            NVARCHAR (255)   COLLATE Latin1_General_CI_AS NULL,
---	[strCode]                   NVARCHAR (40)    COLLATE Latin1_General_CI_AS NULL,    
---	[strReference]              NVARCHAR (255)   COLLATE Latin1_General_CI_AS NULL,
---	[intCurrencyId]             INT              NULL,
---	[dblExchangeRate]           NUMERIC (38, 20) DEFAULT 1 NOT NULL,
---	[dtmDateEntered]            DATETIME         NOT NULL,
---	[dtmTransactionDate]        DATETIME         NULL,
---	[strJournalLineDescription] NVARCHAR (250)   COLLATE Latin1_General_CI_AS NULL,
---	[intJournalLineNo]			INT              NULL,
---	[ysnIsUnposted]             BIT              NOT NULL,    
---	[intUserId]                 INT              NULL,
---	[intEntityId]				INT              NULL,
---	[strTransactionId]          NVARCHAR (40)    COLLATE Latin1_General_CI_AS NULL,
---	[intTransactionId]          INT              NULL,
---	[strTransactionType]        NVARCHAR (255)   COLLATE Latin1_General_CI_AS NOT NULL,
---	[strTransactionForm]        NVARCHAR (255)   COLLATE Latin1_General_CI_AS NOT NULL,
---	[strModuleName]             NVARCHAR (255)   COLLATE Latin1_General_CI_AS NOT NULL,
---	[intConcurrencyId]          INT              DEFAULT 1 NOT NULL,
---	[dblDebitForeign]			NUMERIC (18, 9) NULL,
---	[dblDebitReport]			NUMERIC (18, 9) NULL,
---	[dblCreditForeign]			NUMERIC (18, 9) NULL,
---	[dblCreditReport]			NUMERIC (18, 9) NULL,
---	[dblReportingRate]			NUMERIC (18, 9) NULL,
---	[dblForeignRate]			NUMERIC (18, 9) NULL,
---	[intCurrencyExchangeRateTypeId] INT NULL,
---	[strRateType]			    NVARCHAR(50)	COLLATE Latin1_General_CI_AS,
---	[strDocument]               NVARCHAR(255)   COLLATE Latin1_General_CI_AS NULL,
---	[strComments]               NVARCHAR(255)   COLLATE Latin1_General_CI_AS NULL,
---	[strSourceDocumentId] NVARCHAR(50) COLLATE Latin1_General_CI_AS,
---	[intSourceLocationId]		INT NULL,
---	[intSourceUOMId]			INT NULL,
---	[dblSourceUnitDebit]		NUMERIC (18, 6)  NULL,
---	[dblSourceUnitCredit]		NUMERIC (18, 6)  NULL,
---	[intCommodityId]			INT NULL,
---	intSourceEntityId INT NULL,
---	ysnRebuild BIT NULL)
---END
-
---DECLARE @PostingGLEntries AS RecapTableType
-
-IF @Post = 1 --AND EXISTS(SELECT NULL FROM #ARPostInvoiceHeader WHERE intOriginalInvoiceId IS NOT NULL AND [intSourceId] IS NOT NULL AND intOriginalInvoiceId <> 0 AND [intSourceId] = 2)
+IF @Post = 1
 BEGIN
     INSERT INTO #ARInvoiceGLEntries
         ([dtmDate]
@@ -216,97 +166,6 @@ END
 
 IF @Post = 1
 EXEC [dbo].[uspARGenerateGLEntriesForInvoices]
-						
---INSERT INTO @PostingGLEntries
---    ([dtmDate]
---    ,[strBatchId]
---    ,[intAccountId]
---    ,[dblDebit]
---    ,[dblCredit]
---    ,[dblDebitUnit]
---    ,[dblCreditUnit]
---    ,[strDescription]
---    ,[strCode]
---    ,[strReference]
---    ,[intCurrencyId]
---    ,[dblExchangeRate]
---    ,[dtmDateEntered]
---    ,[dtmTransactionDate]
---    ,[strJournalLineDescription]
---    ,[intJournalLineNo]
---    ,[ysnIsUnposted]
---    ,[intUserId]
---    ,[intEntityId]
---    ,[strTransactionId]
---    ,[intTransactionId]
---    ,[strTransactionType]
---    ,[strTransactionForm]
---    ,[strModuleName]
---    ,[intConcurrencyId]
---    ,[dblDebitForeign]
---    ,[dblDebitReport]
---    ,[dblCreditForeign]
---    ,[dblCreditReport]
---    ,[dblReportingRate]
---    ,[dblForeignRate]
---    ,[strRateType]
---    ,[strDocument]
---    ,[strComments]
---    ,[strSourceDocumentId]
---    ,[intSourceLocationId]
---    ,[intSourceUOMId]
---    ,[dblSourceUnitDebit]
---    ,[dblSourceUnitCredit]
---    ,[intCommodityId]
---    ,[intSourceEntityId]
---    ,[ysnRebuild])
---SELECT
---     [dtmDate]
---    ,[strBatchId]
---    ,[intAccountId]
---    ,[dblDebit]
---    ,[dblCredit]
---    ,[dblDebitUnit]
---    ,[dblCreditUnit]
---    ,[strDescription]
---    ,[strCode]
---    ,[strReference]
---    ,[intCurrencyId]
---    ,[dblExchangeRate]
---    ,[dtmDateEntered]
---    ,[dtmTransactionDate]
---    ,[strJournalLineDescription]
---    ,[intJournalLineNo]
---    ,[ysnIsUnposted]
---    ,[intUserId]
---    ,[intEntityId]
---    ,[strTransactionId]
---    ,[intTransactionId]
---    ,[strTransactionType]
---    ,[strTransactionForm]
---    ,[strModuleName]
---    ,[intConcurrencyId]
---    ,[dblDebitForeign]
---    ,[dblDebitReport]
---    ,[dblCreditForeign]
---    ,[dblCreditReport]
---    ,[dblReportingRate]
---    ,[dblForeignRate]
---    ,[strRateType]
---    ,[strDocument]
---    ,[strComments]
---    ,[strSourceDocumentId]
---    ,[intSourceLocationId]
---    ,[intSourceUOMId]
---    ,[dblSourceUnitDebit]
---    ,[dblSourceUnitCredit]
---    ,[intCommodityId]
---    ,[intSourceEntityId]
---    ,[ysnRebuild]
---FROM
---    #ARInvoiceGLEntries
-
---DELETE FROM #ARInvoiceGLEntries
 
 DECLARE  @AVERAGECOST   INT = 1
 		,@FIFO          INT = 2
@@ -318,11 +177,6 @@ DECLARE  @AVERAGECOST   INT = 1
 -- Get the items to post
 DECLARE @ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY AS NVARCHAR(255) = 'Cost of Goods'
 DECLARE @ItemsForPost AS ItemCostingTableType
---DECLARE @PostBatchId NVARCHAR(40)
---		,@UserId INT
---		,@PostDate DATETIME
-
---SELECT TOP 1 @PostBatchId = [strBatchId], @UserId = [intUserId], @PostDate = [dtmDatePosted] FROM #ARPostInvoiceHeader WHERE [ysnPost] = 1
 
 IF @Post = 1
 INSERT INTO @ItemsForPost
@@ -427,7 +281,9 @@ BEGIN
         ,[dblCreditReport]
         ,[dblReportingRate]
         ,[dblForeignRate]
-        ,[strRateType])
+        ,[strRateType]
+		,[intSourceEntityId]
+	)
     EXEC dbo.uspICPostCosting  
          @ItemsForPost  
         ,@BatchId  
@@ -525,31 +381,29 @@ BEGIN
         ,[dblCreditForeign]
         ,[dblCreditReport]
         ,[dblReportingRate]
-        ,[dblForeignRate])
+        ,[dblForeignRate]
+		,[intSourceEntityId]
+	)
 	EXEC dbo.uspICPostInTransitCosting  
          @InTransitItems  
         ,@BatchId  
         ,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
         ,@UserId
 
-
-	update 
-		B
-			set intAccountId =  dbo.fnGetItemGLAccount(C.intLinkedItemId, A.intItemLocationId, 'Cost Of Goods')		
-	from tblICInventoryTransaction  A
-			join #ARInvoiceGLEntries B
-				on A.intInventoryTransactionId = B.intJournalLineNo
-					and A.intTransactionId = B.intTransactionId
-					and A.strTransactionId = B.strTransactionId
-			join #ARItemsForInTransitCosting C
-				ON A.intTransactionId = C.intTransactionId
-					and A.strTransactionId = C.strTransactionId
-					and A.intTransactionDetailId =  C.intTransactionDetailId 
-					and A.intItemId = C.intItemId
-					and A.intItemLocationId = C.intItemLocationId
-
-		where A.strBatchId = @BatchId  and C.intLinkedItemId is not null 
-			and dbo.fnGetItemGLAccount(A.intItemId, A.intItemLocationId, 'Cost of Goods') = B.intAccountId
+	UPDATE B
+	SET intAccountId = dbo.fnGetItemGLAccount(C.intLinkedItemId, A.intItemLocationId, 'Cost Of Goods')		
+	FROM tblICInventoryTransaction  A
+	JOIN #ARInvoiceGLEntries B ON A.intInventoryTransactionId = B.intJournalLineNo
+							  AND A.intTransactionId = B.intTransactionId
+							  AND A.strTransactionId = B.strTransactionId
+	JOIN #ARItemsForInTransitCosting C ON A.intTransactionId = C.intTransactionId
+					             AND A.strTransactionId = C.strTransactionId
+					             AND A.intTransactionDetailId =  C.intTransactionDetailId 
+					             AND A.intItemId = C.intItemId
+					             AND A.intItemLocationId = C.intItemLocationId
+	WHERE A.strBatchId = @BatchId
+	  AND C.intLinkedItemId IS NOT NULL
+	  AND dbo.fnGetItemGLAccount(A.intItemId, A.intItemLocationId, 'Cost of Goods') = B.intAccountId
 
 END
 
@@ -633,104 +487,14 @@ BEGIN
         ,[dblCreditForeign]
         ,[dblCreditReport]
         ,[dblReportingRate]
-        ,[dblForeignRate])
+        ,[dblForeignRate]
+		,[intSourceEntityId]
+	)
     EXEC dbo.uspICPostStorage  
              @StorageItemsForPost  
             ,@BatchId  		
             ,@UserId			
 END
-
---INSERT INTO #ARInvoiceGLEntries
---	([dtmDate]
---	,[strBatchId]
---	,[intAccountId]
---	,[dblDebit]
---	,[dblCredit]
---	,[dblDebitUnit]
---	,[dblCreditUnit]
---	,[strDescription]
---	,[strCode]
---	,[strReference]
---	,[intCurrencyId]
---	,[dblExchangeRate]
---	,[dtmDateEntered]
---	,[dtmTransactionDate]
---	,[strJournalLineDescription]
---	,[intJournalLineNo]
---	,[ysnIsUnposted]
---	,[intUserId]
---	,[intEntityId]
---	,[strTransactionId]
---	,[intTransactionId]
---	,[strTransactionType]
---	,[strTransactionForm]
---	,[strModuleName]
---	,[intConcurrencyId]
---	,[dblDebitForeign]
---	,[dblDebitReport]
---	,[dblCreditForeign]
---	,[dblCreditReport]
---	,[dblReportingRate]
---	,[dblForeignRate]
---	,[strRateType]
---	,[strDocument]
---	,[strComments]
---	,[strSourceDocumentId]
---	,[intSourceLocationId]
---	,[intSourceUOMId]
---	,[dblSourceUnitDebit]
---	,[dblSourceUnitCredit]
---	,[intCommodityId]
---	,[intSourceEntityId]
---	,[ysnRebuild])
---SELECT
---     [dtmDate]                      = GLEntries.[dtmDate]
---    ,[strBatchId]                   = GLEntries.[strBatchId]
---    ,[intAccountId]                 = GLEntries.[intAccountId]
---    ,[dblDebit]                     = GLEntries.[dblDebit]
---    ,[dblCredit]                    = GLEntries.[dblCredit]
---    ,[dblDebitUnit]                 = DebitUnit.Value
---    ,[dblCreditUnit]                = CreditUnit.Value
---    ,[strDescription]               = GLEntries.[strDescription]
---    ,[strCode]                      = GLEntries.[strCode]
---    ,[strReference]                 = GLEntries.[strReference]
---    ,[intCurrencyId]                = GLEntries.[intCurrencyId]
---    ,[dblExchangeRate]              = GLEntries.[dblExchangeRate]
---    ,[dtmDateEntered]               = @PostDate
---    ,[dtmTransactionDate]           = GLEntries.[dtmTransactionDate]
---    ,[strJournalLineDescription]    = GLEntries.[strJournalLineDescription]
---    ,[intJournalLineNo]             = GLEntries.[intJournalLineNo]
---    ,[ysnIsUnposted]                = GLEntries.[ysnIsUnposted]
---    ,[intUserId]                    = GLEntries.[intUserId]
---    ,[intEntityId]                  = GLEntries.[intEntityId]
---    ,[strTransactionId]             = GLEntries.[strTransactionId]
---    ,[intTransactionId]             = GLEntries.[intTransactionId]
---    ,[strTransactionType]           = GLEntries.[strTransactionType]
---    ,[strTransactionForm]           = GLEntries.[strTransactionForm]
---    ,[strModuleName]                = GLEntries.[strModuleName]
---    ,[intConcurrencyId]             = GLEntries.[intConcurrencyId]
---    ,[dblDebitForeign]              = GLEntries.[dblDebitForeign]
---    ,[dblDebitReport]               = GLEntries.[dblDebitReport]
---    ,[dblCreditForeign]             = GLEntries.[dblCreditForeign]
---    ,[dblCreditReport]              = GLEntries.[dblCreditReport]
---    ,[dblReportingRate]             = GLEntries.[dblReportingRate]
---    ,[dblForeignRate]               = GLEntries.[dblForeignRate]
---    ,[strRateType]                  = GLEntries.[strRateType]
---    ,[strDocument]                  = GLEntries.[strDocument]
---    ,[strComments]                  = GLEntries.[strComments]
---    ,[strSourceDocumentId]          = GLEntries.[strSourceDocumentId]
---    ,[intSourceLocationId]          = GLEntries.[intSourceLocationId]
---    ,[intSourceUOMId]               = GLEntries.[intSourceUOMId]
---    ,[dblSourceUnitDebit]           = GLEntries.[dblSourceUnitDebit]
---    ,[dblSourceUnitCredit]          = GLEntries.[dblSourceUnitCredit]
---    ,[intCommodityId]               = GLEntries.[intCommodityId]
---    ,[intSourceEntityId]            = GLEntries.[intSourceEntityId]
---    ,[ysnRebuild]                   = GLEntries.[ysnRebuild]
---FROM
---    @PostingGLEntries GLEntries
---CROSS APPLY dbo.fnGetDebitUnit(ISNULL(GLEntries.dblDebitUnit, 0.000000) - ISNULL(GLEntries.dblCreditUnit, 0.000000)) DebitUnit
---CROSS APPLY dbo.fnGetCreditUnit(ISNULL(GLEntries.dblDebitUnit, 0.000000) - ISNULL(GLEntries.dblCreditUnit, 0.000000)) CreditUnit
-
 
 IF @Post = 0
 BEGIN
@@ -829,8 +593,15 @@ BEGIN
 END
 
 UPDATE #ARInvoiceGLEntries
-SET
-     [dtmDateEntered] = @PostDate
-	,[strBatchId]     = @BatchId
+SET [dtmDateEntered] = @PostDate
+   ,[strBatchId]     = @BatchId
 
+UPDATE GL
+SET GL.intSourceEntityId = I.intEntityCustomerId
+  , GL.intEntityId		 = I.intEntityId
+FROM #ARInvoiceGLEntries GL
+INNER JOIN tblARInvoice I ON GL.strTransactionId = I.strInvoiceNumber
+						 AND GL.intTransactionId = I.intInvoiceId
+WHERE GL.intSourceEntityId IS NULL
+ 
 RETURN 0

@@ -7,6 +7,7 @@
 	,@intRebuildItemId AS INT = NULL -- This is only used when rebuilding the stocks. 
 	,@strRebuildTransactionId AS NVARCHAR(50) = NULL -- This is only used when rebuilding the stocks. 
 	,@intRebuildCategoryId AS INT = NULL -- This is only used when rebuilding the stocks. 
+	,@dtmRebuildDate AS DATETIME = NULL 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -62,6 +63,7 @@ FROM	(
 					AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId) 
 					AND t.strTransactionId = ISNULL(@strRebuildTransactionId, t.strTransactionId) 
 					AND ISNULL(i.intCategoryId, 0) = COALESCE(@intRebuildCategoryId, i.intCategoryId, 0) 
+					AND (dbo.fnDateEquals(t.dtmDate, @dtmRebuildDate) = 1 OR @dtmRebuildDate IS NULL) 
 		) Query
 
 -- Validate the GL Accounts
@@ -156,6 +158,7 @@ BEGIN
 						AND t.dblQty * t.dblCost + t.dblValue <> 0
 						AND t.strTransactionId = ISNULL(@strRebuildTransactionId, t.strTransactionId) 
 						AND ISNULL(i.intCategoryId, 0) = COALESCE(@intRebuildCategoryId, i.intCategoryId, 0) 
+						AND (dbo.fnDateEquals(t.dtmDate, @dtmRebuildDate) = 1 OR @dtmRebuildDate IS NULL) 
 			)
 
 	SELECT	TOP 1 
@@ -214,6 +217,7 @@ FROM	dbo.tblICInventoryTransaction t INNER JOIN dbo.tblICInventoryTransactionTyp
 WHERE	t.strBatchId = @strBatchId
 		AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId) 
 		AND t.strTransactionId = ISNULL(@strRebuildTransactionId, t.strTransactionId) 
+		AND (dbo.fnDateEquals(t.dtmDate, @dtmRebuildDate) = 1 OR @dtmRebuildDate IS NULL) 
 ;
 
 -- Get the functional currency
@@ -242,6 +246,7 @@ WITH ForGLEntries_CTE (
 	,strTransactionForm
 	,strDescription
 	,dblForexRate
+	,intSourceEntityId
 )
 AS 
 (
@@ -262,6 +267,7 @@ AS
 			,t.strTransactionForm 
 			,t.strDescription
 			,t.dblForexRate
+			,t.intSourceEntityId
 	FROM	dbo.tblICInventoryTransaction t INNER JOIN dbo.tblICInventoryTransactionType TransType
 				ON t.intTransactionTypeId = TransType.intTransactionTypeId
 			INNER JOIN tblICItem i
@@ -272,6 +278,7 @@ AS
 			AND t.intInTransitSourceLocationId IS NOT NULL 
 			AND t.strTransactionId = ISNULL(@strRebuildTransactionId, t.strTransactionId) 
 			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intRebuildCategoryId, i.intCategoryId, 0) 
+			AND (dbo.fnDateEquals(t.dtmDate, @dtmRebuildDate) = 1 OR @dtmRebuildDate IS NULL) 
 )
 -------------------------------------------------------------------------------------------
 -- This part is for the usual G/L entries for Inventory Account and its contra account 
@@ -295,7 +302,7 @@ SELECT
 		,intJournalLineNo			= ForGLEntries_CTE.intInventoryTransactionId
 		,ysnIsUnposted				= 0
 		,intUserId					= @intEntityUserSecurityId 
-		,intEntityId				= NULL 
+		,intEntityId				= @intEntityUserSecurityId 
 		,strTransactionId			= ForGLEntries_CTE.strTransactionId
 		,intTransactionId			= ForGLEntries_CTE.intTransactionId
 		,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName
@@ -308,6 +315,7 @@ SELECT
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate  
+		,intSourceEntityId			= ForGLEntries_CTE.intSourceEntityId
 FROM	ForGLEntries_CTE  
 		INNER JOIN @GLAccounts GLAccounts
 			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
@@ -367,7 +375,7 @@ SELECT
 		,intJournalLineNo			= ForGLEntries_CTE.intInventoryTransactionId
 		,ysnIsUnposted				= 0
 		,intUserId					= @intEntityUserSecurityId 
-		,intEntityId				= NULL 
+		,intEntityId				= @intEntityUserSecurityId 
 		,strTransactionId			= ForGLEntries_CTE.strTransactionId
 		,intTransactionId			= ForGLEntries_CTE.intTransactionId
 		,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName
@@ -380,6 +388,7 @@ SELECT
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate  
+		,intSourceEntityId			= ForGLEntries_CTE.intSourceEntityId
 FROM	ForGLEntries_CTE 
 		INNER JOIN @GLAccounts GLAccounts
 			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
@@ -442,7 +451,7 @@ SELECT
 		,intJournalLineNo			= ForGLEntries_CTE.intInventoryTransactionId
 		,ysnIsUnposted				= 0
 		,intUserId					= @intEntityUserSecurityId 
-		,intEntityId				= NULL 
+		,intEntityId				= @intEntityUserSecurityId 
 		,strTransactionId			= ForGLEntries_CTE.strTransactionId
 		,intTransactionId			= ForGLEntries_CTE.intTransactionId
 		,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName
@@ -455,6 +464,7 @@ SELECT
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate  
+		,intSourceEntityId			= ForGLEntries_CTE.intSourceEntityId
 FROM	ForGLEntries_CTE 
 		INNER JOIN @GLAccounts GLAccounts
 			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
@@ -513,7 +523,7 @@ SELECT
 		,intJournalLineNo			= ForGLEntries_CTE.intInventoryTransactionId
 		,ysnIsUnposted				= 0
 		,intUserId					= @intEntityUserSecurityId 
-		,intEntityId				= NULL 
+		,intEntityId				= @intEntityUserSecurityId 
 		,strTransactionId			= ForGLEntries_CTE.strTransactionId
 		,intTransactionId			= ForGLEntries_CTE.intTransactionId
 		,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName
@@ -526,6 +536,7 @@ SELECT
 		,dblCreditReport			= NULL 
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
+		,intSourceEntityId			= ForGLEntries_CTE.intSourceEntityId
 FROM	ForGLEntries_CTE 
 		INNER JOIN @GLAccounts GLAccounts
 			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId

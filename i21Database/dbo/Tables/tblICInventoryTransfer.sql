@@ -6,7 +6,7 @@
     [strTransferType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
 	[intSourceType] INT NOT NULL DEFAULT ((0)),
     [intTransferredById] INT NULL, 
-    [strDescription] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
+    [strDescription] NVARCHAR(300) COLLATE Latin1_General_CI_AS NULL, 
     [intFromLocationId] INT NULL, 
     [intToLocationId] INT NULL, 
     [ysnShipmentRequired] BIT NULL DEFAULT ((0)), 

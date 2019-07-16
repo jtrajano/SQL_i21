@@ -59,6 +59,7 @@ BEGIN
 			,[intFobPointId] TINYINT NULL 
 			,[intInTransitSourceLocationId] INT NULL 
 			,[dblNewAverageCost] NUMERIC(38,20) NULL
+			,[intSourceEntityId] INT NULL
 		)
 	END 
 END 
@@ -165,6 +166,7 @@ BEGIN
 				,[intFobPointId]
 				,[intInTransitSourceLocationId]
 				,[dblNewAverageCost]
+				,[intSourceEntityId]
 		)
 		SELECT 
 				[intItemId]						= t.intItemId
@@ -206,6 +208,7 @@ BEGIN
 				,[intFobPointId]				= t.intFobPointId
 				,[intInTransitSourceLocationId]	= t.intInTransitSourceLocationId
 				,[dblNewAverageCost]			= @dblEscalateAvgCost
+				,[intSourceEntityId]			= t.intSourceEntityId
 		FROM	dbo.tblICInventoryTransaction t 
 				CROSS APPLY (
 					SELECT 
@@ -401,6 +404,7 @@ BEGIN
 			,[intFobPointId]
 			,[intInTransitSourceLocationId]
 			,[dblNewAverageCost]
+			,[intSourceEntityId]
 	)
 	SELECT 
 			[intItemId]						= t.intItemId
@@ -427,6 +431,7 @@ BEGIN
 			,[intFobPointId]				= t.intFobPointId
 			,[intInTransitSourceLocationId]	= t.intInTransitSourceLocationId
 			,[dblNewAverageCost]			= @dblEscalateAvgCost
+			,[intSourceEntityId]			= t.intSourceEntityId
 	FROM	dbo.tblICInventoryTransaction t 
 	WHERE	intInventoryTransactionId = @EscalateInventoryTransactionId
 END 

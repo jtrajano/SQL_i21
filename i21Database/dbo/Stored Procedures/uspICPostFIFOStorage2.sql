@@ -24,6 +24,7 @@ CREATE PROCEDURE [dbo].[uspICPostFIFOStorage]
 	,@intEntityUserSecurityId AS INT
 	,@intForexRateTypeId AS INT
 	,@dblForexRate NUMERIC(38, 20)
+	,@intSourceEntityId INT = NULL 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -130,6 +131,7 @@ BEGIN
 					,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT
 					,@intForexRateTypeId = @intForexRateTypeId
 					,@dblForexRate = @dblForexRate
+					,@intSourceEntityId = @intSourceEntityId
 					,@dtmCreated = @dtmCreated OUTPUT 
 								
 			IF @intReturnValue < 0 RETURN @intReturnValue;
@@ -191,7 +193,8 @@ BEGIN
 				,@intCostingMethod = @FIFO
 				,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT 	
 				,@intForexRateTypeId = @intForexRateTypeId
-				,@dblForexRate = @dblForexRate		
+				,@dblForexRate = @dblForexRate
+				,@intSourceEntityId = @intSourceEntityId
 				,@dtmCreated = @dtmCreated OUTPUT 				
 
 		IF @intReturnValue < 0 RETURN @intReturnValue;
@@ -280,6 +283,7 @@ BEGIN
 							,@intForexRateTypeId = @intForexRateTypeId
 							,@dblForexRate = @dblForexRate
 							,@strDescription = @strDescription
+							,@intSourceEntityId = @intSourceEntityId
 							,@dtmCreated = @dtmCreated OUTPUT 
 
 					IF @intReturnValue < 0 RETURN @intReturnValue;

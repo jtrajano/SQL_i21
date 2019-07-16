@@ -671,8 +671,11 @@ BEGIN
 					BEGIN
 						IF @TaxTaxOnly = 1
 							SET @TaxableAmount = @ZeroDecimal
-						ELSE
-							SET @TaxableAmount	= ISNULL(@ItemPrice, @ZeroDecimal) * ISNULL(@Quantity, @ZeroDecimal)
+						ELSE 
+							IF(@TaxableAmount = @ZeroDecimal) --SET TAXABLE AMOUNT AGAIN --
+							BEGIN
+								SET @TaxableAmount	= ISNULL(@ItemPrice, @ZeroDecimal) * ISNULL(@Quantity, @ZeroDecimal)
+							END
 
 						IF(@TaxAdjustedTax = 1)
 						BEGIN

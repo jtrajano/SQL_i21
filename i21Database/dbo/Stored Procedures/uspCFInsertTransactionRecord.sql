@@ -194,6 +194,7 @@ BEGIN
 	DECLARE @intCardTypeId				INT				= 0
 	DECLARE @ysnDualCard				BIT				= 0
 	DECLARE @ysnConvertMiscToVehicle	BIT				= 0
+	DECLARE @ysnInvoiced				BIT				= 0
 
 	--DECLARE @strSiteType				NVARCHAR(MAX)
 
@@ -215,6 +216,11 @@ BEGIN
 	IF (@ysnPosted != 1 OR @ysnPosted IS NULL)
 	BEGIN
 	SET @ysnPosted = @ysnPostedCSV
+	END
+
+	IF(ISNULL(@ysnPosted,0) = 1)
+	BEGIN
+		SET @ysnInvoiced = 1
 	END
 
 	------------------------------------------------------------
@@ -1404,6 +1410,7 @@ BEGIN
 			,[intCustomerId]
 			,[intImportCardId]
 			,[intDriverPinId]
+			,[ysnInvoiced]
 		)
 		VALUES
 		(
@@ -1455,6 +1462,7 @@ BEGIN
 			,@intCustomerId
 			,@intCardId
 			,@intDriverPinId
+			,@ysnInvoiced
 		)			
 	
 		DECLARE @Pk	INT		

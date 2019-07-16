@@ -154,6 +154,8 @@ AS
 	, Commodity.strDescription strCommodity
 	, Category.strCategoryCode
 	, Category.strDescription strCategory
+	, ShipVia.strShipVia
+	, [Transfer].intShipViaId
 	FROM tblICInventoryTransferDetail TransferDetail
 		LEFT JOIN tblICInventoryTransfer [Transfer] ON [Transfer].intInventoryTransferId = TransferDetail.intInventoryTransferId
 		LEFT JOIN tblEMEntity e ON e.intEntityId = [Transfer].intTransferredById
@@ -186,3 +188,4 @@ AS
 		LEFT JOIN tblICCostingMethod CostingMethod ON CostingMethod.intCostingMethodId = TransferDetail.intCostingMethod
 		LEFT JOIN tblICLotStatus NewLotStatus
 			ON NewLotStatus.intLotStatusId = TransferDetail.intNewLotStatusId
+		LEFT JOIN tblSMShipVia ShipVia ON ShipVia.intEntityId = [Transfer].intShipViaId

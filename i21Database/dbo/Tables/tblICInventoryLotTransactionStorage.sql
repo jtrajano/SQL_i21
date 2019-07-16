@@ -35,6 +35,7 @@ When adding or reducing the stock qty of an item under the company's custody, th
 		[intCreatedUserId] INT NULL, 
 		[intCreatedEntityId] INT NULL,
 		[intCompanyId] INT NULL, 
+		[intSourceEntityId] INT NULL,
 		[intConcurrencyId] INT NOT NULL DEFAULT 1, 
 		CONSTRAINT [PK_tblICInventoryLotTransactionStorage] PRIMARY KEY ([intInventoryLotTransactionStorageId]),
 		CONSTRAINT [FK_tblICInventoryLotTransactionStorage_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),

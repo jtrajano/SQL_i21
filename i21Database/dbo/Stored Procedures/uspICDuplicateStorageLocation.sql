@@ -60,6 +60,7 @@ BEGIN
 		,dblEffectiveDepth
 		,dblUnitPerFoot
 		,dblResidualUnit
+		,dtmDateCreated
 	)
 	SELECT @NewStorageLocationName
 		,strDescription
@@ -89,6 +90,7 @@ BEGIN
 		,dblEffectiveDepth
 		,dblUnitPerFoot
 		,dblResidualUnit
+		,GETUTCDATE()
 	FROM tblICStorageLocation
 	WHERE intStorageLocationId = @StorageLocationId
 	-----------------------------------------------

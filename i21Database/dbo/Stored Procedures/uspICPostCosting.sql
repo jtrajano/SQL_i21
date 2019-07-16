@@ -61,6 +61,7 @@ DECLARE @intId AS INT
 		,@intCategoryId INT 
 		,@dblAdjustCostValue NUMERIC(38, 20)
 		,@dblAdjustRetailValue NUMERIC(38, 20)
+		,@intSourceEntityId INT 
 
 DECLARE @CostingMethod AS INT 
 		,@strTransactionForm AS NVARCHAR(255)
@@ -124,6 +125,7 @@ SELECT  intId
 		,intCategoryId
 		,dblAdjustCostValue
 		,dblAdjustRetailValue
+		,intSourceEntityId
 FROM	@ItemsToPost 
 
 OPEN loopItems;
@@ -154,6 +156,7 @@ FETCH NEXT FROM loopItems INTO
 	,@intCategoryId
 	,@dblAdjustCostValue
 	,@dblAdjustRetailValue
+	,@intSourceEntityId
 ;
 	
 -----------------------------------------------------------------------------------------------------------------------------
@@ -209,6 +212,7 @@ BEGIN
 			,@dblForexRate
 			,@dblUnitRetail
 			,@ysnTransferOnSameLocation
+			,@intSourceEntityId
 
 		IF @intReturnValue < 0 GOTO _TerminateLoop;
 	END
@@ -238,6 +242,7 @@ BEGIN
 			,@intForexRateTypeId
 			,@dblForexRate
 			,@dblUnitRetail
+			,@intSourceEntityId
 
 		IF @intReturnValue < 0 GOTO _TerminateLoop;
 	END
@@ -267,6 +272,7 @@ BEGIN
 			,@intForexRateTypeId
 			,@dblForexRate
 			,@dblUnitRetail
+			,@intSourceEntityId
 
 		IF @intReturnValue < 0 GOTO _TerminateLoop;
 	END
@@ -297,6 +303,7 @@ BEGIN
 			,@intForexRateTypeId
 			,@dblForexRate
 			,@dblUnitRetail
+			,@intSourceEntityId
 
 		IF @intReturnValue < 0 GOTO _TerminateLoop;
 	END
@@ -329,6 +336,7 @@ BEGIN
 			,@dblForexRate
 			,@dblAdjustCostValue 
 			,@dblAdjustRetailValue
+			,@intSourceEntityId
 
 		IF @intReturnValue < 0 GOTO _TerminateLoop;
 	END
@@ -376,6 +384,7 @@ BEGIN
 					,@intForexRateTypeId
 					,@dblForexRate
 					,@dblUnitRetail
+					,@intSourceEntityId
 
 				IF @intReturnValue < 0 GOTO _TerminateLoop;
 			END 
@@ -404,6 +413,7 @@ BEGIN
 					,@intForexRateTypeId
 					,@dblForexRate
 					,@dblUnitRetail
+					,@intSourceEntityId
 
 				IF @intReturnValue < 0 GOTO _TerminateLoop;
 			END 
@@ -432,6 +442,7 @@ BEGIN
 					,@intForexRateTypeId
 					,@dblForexRate
 					,@dblUnitRetail
+					,@intSourceEntityId
 
 				IF @intReturnValue < 0 GOTO _TerminateLoop;
 			END 
@@ -461,6 +472,7 @@ BEGIN
 					,@intForexRateTypeId
 					,@dblForexRate
 					,@dblUnitRetail
+					,@intSourceEntityId
 
 				IF @intReturnValue < 0 GOTO _TerminateLoop;
 			END 
@@ -492,6 +504,7 @@ BEGIN
 					,@dblForexRate
 					,@dblAdjustCostValue
 					,@dblAdjustRetailValue
+					,@intSourceEntityId
 
 				IF @intReturnValue < 0 GOTO _TerminateLoop;
 			END
@@ -521,6 +534,7 @@ BEGIN
 				,@intForexRateTypeId
 				,@dblForexRate
 				,@dblUnitRetail
+				,@intSourceEntityId
 				;
 
 			IF @intReturnValue < 0 GOTO _TerminateLoop;
@@ -668,6 +682,7 @@ BEGIN
 		,@intCategoryId
 		,@dblAdjustCostValue
 		,@dblAdjustRetailValue
+		,@intSourceEntityId
 		;
 END;
 -----------------------------------------------------------------------------------------------------------------------------

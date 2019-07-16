@@ -422,6 +422,7 @@ BEGIN
 					,[dblReportingRate]	
 					,[dblForeignRate]
 					,[strRateType]
+					,[intSourceEntityId]
 			)
 			EXEC	@intReturnValue = dbo.uspICPostCosting  
 					@CompanyOwnedStock  
@@ -654,6 +655,7 @@ BEGIN
 				,[intInTransitSourceLocationId]
 				,[intForexRateTypeId]
 				,[dblForexRate]
+				,[intSourceEntityId]
 		)
 		SELECT
 				[intItemId] 
@@ -679,6 +681,7 @@ BEGIN
 				,[intInTransitSourceLocationId] = FromStock.intItemLocationId
 				,[intForexRateTypeId] = FromStock.intForexRateTypeId
 				,[dblForexRate] = FromStock.dblForexRate
+				,[intSourceEntityId]
 		FROM	tblICInventoryTransaction FromStock 
 		WHERE	FromStock.strTransactionId = @strTransactionId
 				AND ISNULL(FromStock.ysnIsUnposted, 0) = 0 
@@ -720,6 +723,7 @@ BEGIN
 					,[dblCreditReport]	
 					,[dblReportingRate]	
 					,[dblForeignRate]
+					,[intSourceEntityId]
 			)
 			EXEC	@intReturnValue = dbo.uspICPostInTransitCosting  
 					@CompanyOwnedStockInTransit  
@@ -770,6 +774,7 @@ BEGIN
 					,[dblReportingRate]	
 					,[dblForeignRate]
 					,[strRateType]
+					,[intSourceEntityId]
 			)
 			EXEC @intReturnValue = dbo.uspICCreateGLEntries 
 				@strBatchId
@@ -811,6 +816,7 @@ BEGIN
 					,[dblCreditReport]	
 					,[dblReportingRate]	
 					,[dblForeignRate]
+					,[intSourceEntityId]
 			)
 			EXEC @intReturnValue = dbo.uspICCreateGLEntriesForInTransitCosting 
 				@strBatchId
@@ -857,6 +863,7 @@ BEGIN
 				,[dblReportingRate]	
 				,[dblForeignRate]
 				,[strRateType]
+				,[intSourceEntityId]
 		)
 		EXEC @intReturnValue = dbo.uspICCreateGLEntriesForNegativeStockVariance
 			@strBatchId
@@ -907,6 +914,7 @@ BEGIN
 				,[dblReportingRate]	
 				,[dblForeignRate]
 				,[strRateType]
+				,[intSourceEntityId]
 		)
 		EXEC	@intReturnValue = dbo.uspICUnpostCosting
 				@intTransactionId

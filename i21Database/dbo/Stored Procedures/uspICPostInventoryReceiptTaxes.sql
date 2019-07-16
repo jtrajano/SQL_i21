@@ -166,7 +166,7 @@ BEGIN
 		,dblForexRate 
 		,strRateType
 		,strItemNo
-		,intEntityVendorId
+		,intSourceEntityId
 	)
 	AS 
 	(
@@ -193,7 +193,7 @@ BEGIN
 				,dblForexRate						= ISNULL(ReceiptItem.dblForexRate, 1)
 				,strRateType						= currencyRateType.strCurrencyExchangeRateType
 				,strItemNo							= item.strItemNo
-				,intEntityVendorId					= Receipt.intEntityVendorId 
+				,intSourceEntityId					= Receipt.intEntityVendorId 
 		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 					ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 				INNER JOIN dbo.tblICItemLocation ItemLocation
@@ -248,7 +248,7 @@ BEGIN
 				,dblForexRate						= ISNULL(ReceiptCharge.dblForexRate, 1)
 				,strRateType						= currencyRateType.strCurrencyExchangeRateType
 				,strItemNo							= item.strItemNo
-				,intEntityVendorId					= ReceiptCharge.intEntityVendorId
+				,intSourceEntityId					= Receipt.intEntityVendorId
 		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptCharge ReceiptCharge
 					ON Receipt.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId
 				INNER JOIN dbo.tblICItemLocation ItemLocation
@@ -301,7 +301,7 @@ BEGIN
 				,dblForexRate						= ISNULL(ReceiptCharge.dblForexRate, 1)
 				,strRateType						= currencyRateType.strCurrencyExchangeRateType
 				,strItemNo							= item.strItemNo
-				,intEntityVendorId					= ReceiptCharge.intEntityVendorId
+				,intSourceEntityId					= ReceiptCharge.intEntityVendorId
 		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptCharge ReceiptCharge
 					ON Receipt.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId
 				INNER JOIN dbo.tblICItemLocation ItemLocation
@@ -345,7 +345,7 @@ BEGIN
 			,intJournalLineNo			= ForGLEntries_CTE.intReceiptItemTaxId
 			,ysnIsUnposted				= 0
 			,intUserId					= @intEntityUserSecurityId 
-			,intEntityId				= ForGLEntries_CTE.intEntityVendorId 
+			,intEntityId				= @intEntityUserSecurityId 
 			,strTransactionId			= ForGLEntries_CTE.strTransactionId
 			,intTransactionId			= ForGLEntries_CTE.intTransactionId
 			,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName
@@ -359,6 +359,7 @@ BEGIN
 			,dblReportingRate			= NULL 
 			,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
 			,strRateType				= ForGLEntries_CTE.strRateType 
+			,intSourceEntityId			= ForGLEntries_CTE.intSourceEntityId
 	FROM	ForGLEntries_CTE LEFT JOIN dbo.tblGLAccount GLAccount 
 				ON GLAccount.intAccountId = ForGLEntries_CTE.intPurchaseTaxAccountId
 			CROSS APPLY dbo.fnGetDebitFunctional(
@@ -396,7 +397,7 @@ BEGIN
 			,intJournalLineNo			= ForGLEntries_CTE.intReceiptItemTaxId
 			,ysnIsUnposted				= 0
 			,intUserId					= @intEntityUserSecurityId 
-			,intEntityId				= ForGLEntries_CTE.intEntityVendorId 
+			,intEntityId				= @intEntityUserSecurityId
 			,strTransactionId			= ForGLEntries_CTE.strTransactionId
 			,intTransactionId			= ForGLEntries_CTE.intTransactionId
 			,strTransactionType			= ForGLEntries_CTE.strInventoryTransactionTypeName
@@ -410,6 +411,7 @@ BEGIN
 			,dblReportingRate			= NULL 
 			,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
 			,strRateType				= ForGLEntries_CTE.strRateType 
+			,intSourceEntityId			= ForGLEntries_CTE.intSourceEntityId
 	FROM	ForGLEntries_CTE INNER JOIN @GLAccounts InventoryAccounts
 				ON ForGLEntries_CTE.intItemId = InventoryAccounts.intItemId
 				AND ForGLEntries_CTE.intItemLocationId = InventoryAccounts.intItemLocationId

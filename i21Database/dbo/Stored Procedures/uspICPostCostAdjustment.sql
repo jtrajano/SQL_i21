@@ -68,6 +68,7 @@ BEGIN
 		,[intFobPointId] TINYINT NULL 
 		,[intInTransitSourceLocationId] INT NULL 
 		,[dblNewAverageCost] NUMERIC(38,20) NULL
+		,[intSourceEntityId] INT NULL
 	)
 END 
 
@@ -100,6 +101,7 @@ DECLARE @intId AS INT
 		,@dblNewAverageCost AS NUMERIC(38, 20) 
 
 		,@strTransactionId_Batch AS NVARCHAR(40) 
+		,@intSourceEntityId INT 
 
 DECLARE @CostingMethod AS INT 
 		,@TransactionFormName AS NVARCHAR(200)
@@ -149,6 +151,7 @@ BEGIN
 			,[intInTransitSourceLocationId]
 			,[intOtherChargeItemId]
 			,[dblNewAverageCost]
+			,[intSourceEntityId]
 	)
 	SELECT 
 			[intItemId] 
@@ -178,6 +181,7 @@ BEGIN
 			,[intInTransitSourceLocationId]
 			,[intOtherChargeItemId]
 			,[dblNewAverageCost]
+			,[intSourceEntityId]
 	FROM	@ItemsToAdjust 
 	ORDER BY	
 		[intItemId]
@@ -270,6 +274,7 @@ SELECT  intId
 		,intInTransitSourceLocationId
 		,intOtherChargeItemId
 		,dblNewAverageCost
+		,intSourceEntityId
 FROM	@Internal_ItemsToAdjust
 
 OPEN loopItemsToAdjust;
@@ -302,6 +307,7 @@ FETCH NEXT FROM loopItemsToAdjust INTO
 	,@intInTransitSourceLocationId
 	,@intOtherChargeItemId
 	,@dblNewAverageCost
+	,@intSourceEntityId
 ;
 
 -----------------------------------------------------------------------------------------------------------------------------
@@ -379,6 +385,7 @@ BEGIN
 			,@intOtherChargeItemId 
 			,@ysnUpdateItemCostAndPrice
 			,@IsEscalate
+			,@intSourceEntityId
 	END TRY
 	BEGIN CATCH
 		-- Get the error details. 
@@ -422,6 +429,7 @@ BEGIN
 			,@intOtherChargeItemId 
 			,@ysnUpdateItemCostAndPrice
 			,@IsEscalate
+			,@intSourceEntityId
 	END TRY
 	BEGIN CATCH
 		-- Get the error details. 
@@ -465,6 +473,7 @@ BEGIN
 			,@intOtherChargeItemId 
 			,@ysnUpdateItemCostAndPrice
 			,@IsEscalate
+			,@intSourceEntityId
 	END TRY
 	BEGIN CATCH
 		-- Get the error details. 
@@ -509,6 +518,7 @@ BEGIN
 			,@ysnUpdateItemCostAndPrice
 			,@intLotId 
 			,@IsEscalate
+			,@intSourceEntityId
 	END TRY
 	BEGIN CATCH
 		-- Get the error details. 
@@ -554,6 +564,7 @@ BEGIN
 			,@ysnUpdateItemCostAndPrice
 			,@IsEscalate
 			,@dblNewAverageCost
+			,@intSourceEntityId
 	END TRY
 	BEGIN CATCH
 		-- Get the error details. 
@@ -616,6 +627,7 @@ BEGIN
 		,@intInTransitSourceLocationId
 		,@intOtherChargeItemId
 		,@dblNewAverageCost
+		,@intSourceEntityId
 	;
 END;
 -----------------------------------------------------------------------------------------------------------------------------
@@ -680,6 +692,7 @@ BEGIN
 			,[intFobPointId]
 			,[intInTransitSourceLocationId]
 			,[dblNewAverageCost]
+			,[intSourceEntityId]
 	)
 	SELECT 
 			[intItemId] 
@@ -708,6 +721,7 @@ BEGIN
 			,[intFobPointId]
 			,[intInTransitSourceLocationId]
 			,[dblNewAverageCost]
+			,[intSourceEntityId]
 	FROM	#tmpRevalueProducedItems
 	ORDER BY [intItemId]
 			,[intItemLocationId]

@@ -6,7 +6,7 @@
 	, @intFamilyId						INT				
 	, @intClassId						INT				
 	, @intVendorId						INT				
-	, @strPOSDescription				NVARCHAR(250)	
+	--, @strPOSDescription				NVARCHAR(250)	
 
 	, @strVendorProduct					NVARCHAR(100)
 
@@ -503,7 +503,7 @@ BEGIN
 							,@intCountGroupId			= NULL
 							,@intStorageLocationId		= NULL
 							,@dblReorderPoint			= NULL 
-							,@strItemLocationDescription = @strPOSDescription 
+							,@strItemLocationDescription = NULL --@strPOSDescription 
 
 							,@intEntityUserSecurityId = @intEntityId
 

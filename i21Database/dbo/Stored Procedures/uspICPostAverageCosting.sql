@@ -55,6 +55,7 @@ CREATE PROCEDURE [dbo].[uspICPostAverageCosting]
 	,@dblForexRate NUMERIC(38, 20) 
 	,@dblUnitRetail NUMERIC(38, 20) 
 	,@ysnTransferOnSameLocation AS BIT = NULL
+	,@intSourceEntityId INT = NULL
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -173,6 +174,7 @@ BEGIN
 				,@intForexRateTypeId = @intForexRateTypeId
 				,@dblForexRate = @dblForexRate
 				,@dblUnitRetail = @dblUnitRetail
+				,@intSourceEntityId = @intSourceEntityId
 				,@dtmCreated = @dtmCreated OUTPUT 
 
 		IF @intReturnValue < 0 RETURN @intReturnValue;
@@ -257,6 +259,7 @@ BEGIN
 				,@intForexRateTypeId = @intForexRateTypeId
 				,@dblForexRate = @dblForexRate
 				,@dblUnitRetail = @dblUnitRetail
+				,@intSourceEntityId = @intSourceEntityId
 				,@dtmCreated = @dtmCreated OUTPUT 
 
 		IF @intReturnValue < 0 RETURN @intReturnValue;
@@ -348,6 +351,7 @@ BEGIN
 							,@dblForexRate = @dblForexRate
 							,@dblUnitRetail = @dblUnitRetail
 							,@strDescription = @strDescription
+							,@intSourceEntityId = @intSourceEntityId
 							,@dtmCreated = @dtmCreated OUTPUT 
 				END 
 			END
@@ -420,6 +424,7 @@ BEGIN
 				,@dblForexRate = @dblForexRate
 				,@dblUnitRetail = 0
 				,@dblCategoryRetailValue = @CategoryRetailValue
+				,@intSourceEntityId = @intSourceEntityId
 				,@dtmCreated = @dtmCreated OUTPUT 
 
 		IF @intReturnValue < 0 RETURN @intReturnValue;

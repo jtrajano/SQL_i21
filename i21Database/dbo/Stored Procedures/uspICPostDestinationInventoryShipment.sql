@@ -10,6 +10,7 @@ CREATE PROCEDURE [uspICPostDestinationInventoryShipment]
 	,@ShipmentCharges AS DestinationShipmentCharge READONLY
 	,@intEntityUserSecurityId AS INT = NULL 
 	,@strBatchId AS NVARCHAR(40) = NULL OUTPUT
+	,@DestinationItemLots as DestinationShipmentItemLot READONLY
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -171,6 +172,19 @@ BEGIN
 				AND l.intItemLocationId = d.intItemLocationId
 				AND si.intInventoryShipmentItemId = COALESCE(d.intInventoryShipmentItemId, si.intInventoryShipmentItemId) 
 
+	update c
+		set c.dblDestinationGrossWeight = b.dblDestinationGrossWeight,
+			c.dblDestinationQuantityShipped = b.dblDestinationQuantityShipped,
+			c.dblDestinationTareWeight = b.dblDestinationTareWeight	
+	from 
+		tblICInventoryShipmentItem as a
+			join @DestinationItemLots as b
+				on a.intInventoryShipmentItemId = b.intInventoryShipmentItemId
+					and a.intInventoryShipmentId = b.intInventoryShipmentId
+			join tblICInventoryShipmentItemLot c
+				on b.intLotId = c.intLotId
+					and b.intInventoryShipmentItemId = c.intInventoryShipmentItemId
+					
 	-- Clear the existing other charges
 	DELETE	sCharge
 	FROM	tblICInventoryShipment s INNER JOIN tblICInventoryShipmentCharge sCharge
