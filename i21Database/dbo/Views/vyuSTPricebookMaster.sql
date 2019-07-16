@@ -4,6 +4,7 @@ SELECT DISTINCT
 	ItemLoc.intItemLocationId AS intUniqueId
     , Item.intItemId
 	, Item.strItemNo
+	, Item.strShortName
 	, Item.strDescription
 	, Uom.strLongUPCCode
 	, Uom.strUpcCode
@@ -27,7 +28,7 @@ SELECT DISTINCT
 
 	-- Item Location
 	, ItemLoc.intItemLocationId
-	, ISNULL(ItemLoc.strDescription,'') AS strPOSDescription
+	--, ISNULL(ItemLoc.strDescription,'') AS strPOSDescription
 	, ItemLoc.intFamilyId
 	, ItemLoc.intClassId
 	, Family.strSubcategoryId AS strFamily
