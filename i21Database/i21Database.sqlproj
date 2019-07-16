@@ -7894,6 +7894,8 @@
     <Build Include="dbo\Views\vyuSTItemPricingOnFirstLocation.sql" />
     <Build Include="dbo\Views\vyuCTBrokerCommission.sql" />
     <None Include="Scripts\Post-Deployment\CT\TitleToCode.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRCreateItemGLEntries.sql" />
+    <Build Include="dbo\User Defined Types\SettleVoucherCreate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
