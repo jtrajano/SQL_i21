@@ -53,7 +53,7 @@ SELECT
 		ELSE CAST((SS.dblNetSettlement + SS.dblStorageDue + SS.dblDiscountsDue) AS DECIMAL(18,2))
 		END AS dblSettleStorageAmount
 	--,SS.dblSettleUnits AS dblSettleStorageQty
-	,CASE WHEN SS.dblUnpaidUnits != 0 THEN SS.dblUnpaidUnits ELSE SS.dblSettleUnits END AS dblSettleUnits
+	,CASE WHEN SS.dblUnpaidUnits != 0 THEN SS.dblUnpaidUnits ELSE SS.dblSettleUnits END AS dblSettleStorageQty
 	,CS.intCompanyLocationId AS intLocationId
 	,CL.strLocationName
 	,CAST(0 AS BIT) ysnAllowVoucher
