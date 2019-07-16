@@ -185,6 +185,21 @@ BEGIN
 	
 	DECLARE @ysnSubCurrency INT
 	SELECT @ysnSubCurrency = ysnSubCurrency FROM tblSMCurrency WHERE intCurrencyID = @intCurrencyId
+
+	SELECT 
+		b.intItemId
+		, b.intStorageLocationId
+		, ac.dblCost
+		, ic1.intUnitMeasureId
+		, b.intCurrencyId
+	INTO #tempAOP
+	FROM tblCTAOP a
+		JOIN tblCTAOPDetail  b ON a.intAOPId = b.intAOPId
+		JOIN tblCTAOPComponent ac ON ac.intAOPDetailId = b.intAOPDetailId
+		JOIN tblICItemUOM ic1 ON b.intPriceUOMId = ic1.intItemUOMId
+	WHERE a.dtmFromDate = @dtmAOPFromDate AND dtmToDate = @dtmAOPToDate AND strYear = @strYear
+		AND ISNULL(a.intBookId, 0) = CASE WHEN ISNULL(@intBookId, 0) = 0 THEN ISNULL(a.intBookId, 0) ELSE @intBookId END
+		AND ISNULL(a.intSubBookId, 0) = CASE WHEN ISNULL(@intSubBookId, 0) = 0 THEN ISNULL(a.intSubBookId, 0) ELSE @intSubBookId END
 	
 	SELECT intRowNum
 		, intContractDetailId
@@ -268,22 +283,29 @@ BEGIN
 				, t.intCompanyLocationId
 				, dblStandardRatio = ca.dblRatio
 				, ic.intItemId
-				, dblStandardPrice = (SELECT SUM(dblQty)
-									FROM (
-										SELECT dblQty = CONVERT(NUMERIC(18,6), dbo.[fnCTConvertQuantityToTargetItemUOM](cd.intItemId, @intUnitMeasureId, ic1.intUnitMeasureId
-																						, dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId, @intCurrencyId, ISNULL(ac.dblCost, 0), b.intCurrencyId, NULL, NULL)))
-										FROM tblCTAOP a
-										JOIN tblCTAOPDetail b ON a.intAOPId = b.intAOPId
-										JOIN tblICItemUOM ic1 ON b.intPriceUOMId = ic1.intItemUOMId
-										JOIN tblCTAOPComponent ac ON ac.intAOPDetailId = b.intAOPDetailId
-										WHERE a.dtmFromDate = @dtmAOPFromDate AND dtmToDate = @dtmAOPToDate AND strYear = @strYear
-											AND b.intItemId = cd.intItemId
-											AND a.intCommodityId = ic.intCommodityId
-											AND a.intCompanyLocationId = cd.intCompanyLocationId
-											AND ISNULL(a.intBookId, 0) = CASE WHEN ISNULL(@intBookId, 0) = 0 THEN ISNULL(a.intBookId, 0) ELSE @intBookId END
-											AND ISNULL(a.intSubBookId, 0) = CASE WHEN ISNULL(@intSubBookId, 0) = 0 THEN ISNULL(a.intSubBookId, 0) ELSE @intSubBookId END
-											AND ISNULL(b.intStorageLocationId, 0) = CASE WHEN ISNULL(cd.intSubLocationId, 0) = 0 THEN ISNULL(b.intStorageLocationId, 0) ELSE cd.intSubLocationId END
-									)t)
+				, dblStandardPrice = (SELECT SUM(dblQty) 
+										FROM (
+											SELECT dblQty = CONVERT(NUMERIC(18,6), dbo.[fnCTConvertQuantityToTargetItemUOM](cd.intItemId, @intUnitMeasureId, b.intUnitMeasureId
+																							, dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId, @intCurrencyId, ISNULL(b.dblCost, 0), b.intCurrencyId, NULL, NULL)))
+											FROM #tempAOP b
+											WHERE intItemId  = i.intItemId
+											AND (CASE WHEN ISNULL(cd.intSubLocationId,0) = 0 AND ISNULL(b.intStorageLocationId,0) = 0 THEN 0
+													WHEN ISNULL(cd.intSubLocationId,0) <> 0 AND ISNULL(b.intStorageLocationId,0) <> 0 THEN cd.intSubLocationId
+												END = 
+													CASE WHEN ISNULL(cd.intSubLocationId,0) = 0 AND ISNULL(b.intStorageLocationId,0) = 0 THEN 0
+													WHEN ISNULL(cd.intSubLocationId,0) <> 0 AND ISNULL(b.intStorageLocationId,0) <> 0 THEN b.intStorageLocationId
+												END
+													OR
+													CASE
+													WHEN ISNULL(cd.intSubLocationId,0) = 0 THEN
+														CASE WHEN (SELECT TOP 1 ISNULL(intStorageLocationId,-1) FROM #tempAOP WHERE intItemId = i.intItemId AND ISNULL(intStorageLocationId,0) = ISNULL(cd.intSubLocationId,0)) =  -1 THEN  NULL ELSE b.intStorageLocationId END  
+													END =   b.intStorageLocationId 
+													OR CASE WHEN ISNULL(cd.intSubLocationId,0) <> 0 THEN 
+														CASE WHEN ISNULL((SELECT TOP 1 ISNULL(intStorageLocationId,-1) FROM #tempAOP WHERE intItemId = i.intItemId AND ISNULL(intStorageLocationId,0) = ISNULL(cd.intSubLocationId,0)),-1) = -1 THEN  0 ELSE cd.intSubLocationId END
+														END = ISNULL(b.intStorageLocationId ,0)
+												)
+										)t
+									)
 				, dblPPVBasis = CONVERT(NUMERIC(18,6), dbo.[fnCTConvertQuantityToTargetItemUOM](cd.intItemId, @intUnitMeasureId, j.intUnitMeasureId
 																				, dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId, @intCurrencyId, ISNULL(cost.dblRate, t.dblBasis), NULL, NULL, NULL)))
 				, strLocationName
@@ -374,22 +396,29 @@ BEGIN
 				, dblPrice = dbo.[fnCTConvertQuantityToTargetItemUOM](cd.intItemId, @intUnitMeasureId, i.intUnitMeasureId, CONVERT(NUMERIC(18,6), dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId, @intCurrencyId, ISNULL(cd.dblCashPrice, 0), NULL, NULL, NULL)))
 				, t.intCompanyLocationId
 				, ic.intItemId
-				, dblStandardPrice = (SELECT SUM(dblQty)
-									FROM (
-										SELECT dblQty = CONVERT(NUMERIC(18, 6), dbo.[fnCTConvertQuantityToTargetItemUOM](cd.intItemId, @intUnitMeasureId, ic1.intUnitMeasureId
-																	, dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId, @intCurrencyId, ISNULL(ac.dblCost, 0), b.intCurrencyId, NULL, NULL)))
-										FROM tblCTAOP a
-										JOIN tblCTAOPDetail b ON a.intAOPId = b.intAOPId
-										JOIN tblCTAOPComponent ac ON ac.intAOPDetailId = b.intAOPDetailId
-										JOIN tblICItemUOM ic1 ON b.intPriceUOMId = ic1.intItemUOMId
-										WHERE a.dtmFromDate = @dtmAOPFromDate AND dtmToDate = @dtmAOPToDate AND strYear = @strYear
-											AND b.intItemId = cd.intItemId
-											AND a.intCommodityId = ic.intCommodityId
-											AND a.intCompanyLocationId = cd.intCompanyLocationId
-											AND ISNULL(a.intBookId, 0) = CASE WHEN ISNULL(@intBookId, 0) = 0 THEN ISNULL(a.intBookId, 0) ELSE @intBookId END
-											AND ISNULL(a.intSubBookId, 0) = CASE WHEN ISNULL(@intSubBookId, 0) = 0 THEN ISNULL(a.intSubBookId, 0) ELSE @intSubBookId END
-											AND ISNULL(b.intStorageLocationId, 0) = CASE WHEN ISNULL(cd.intSubLocationId, 0) = 0 THEN ISNULL(b.intStorageLocationId, 0) ELSE cd.intSubLocationId END
-									)t)
+				, dblStandardPrice = (SELECT SUM(dblQty) 
+										FROM (
+											SELECT dblQty = CONVERT(NUMERIC(18,6), dbo.[fnCTConvertQuantityToTargetItemUOM](cd.intItemId, @intUnitMeasureId, b.intUnitMeasureId
+																							, dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId, @intCurrencyId, ISNULL(b.dblCost, 0), b.intCurrencyId, NULL, NULL)))
+											FROM #tempAOP b
+											WHERE intItemId  = i.intItemId
+											AND (CASE WHEN ISNULL(cd.intSubLocationId,0) = 0 AND ISNULL(b.intStorageLocationId,0) = 0 THEN 0
+													WHEN ISNULL(cd.intSubLocationId,0) <> 0 AND ISNULL(b.intStorageLocationId,0) <> 0 THEN cd.intSubLocationId
+												END = 
+													CASE WHEN ISNULL(cd.intSubLocationId,0) = 0 AND ISNULL(b.intStorageLocationId,0) = 0 THEN 0
+													WHEN ISNULL(cd.intSubLocationId,0) <> 0 AND ISNULL(b.intStorageLocationId,0) <> 0 THEN b.intStorageLocationId
+												END
+													OR
+													CASE
+													WHEN ISNULL(cd.intSubLocationId,0) = 0 THEN
+														CASE WHEN (SELECT TOP 1 ISNULL(intStorageLocationId,-1) FROM #tempAOP WHERE intItemId = i.intItemId AND ISNULL(intStorageLocationId,0) = ISNULL(cd.intSubLocationId,0)) =  -1 THEN  NULL ELSE b.intStorageLocationId END  
+													END =   b.intStorageLocationId 
+													OR CASE WHEN ISNULL(cd.intSubLocationId,0) <> 0 THEN 
+														CASE WHEN ISNULL((SELECT TOP 1 ISNULL(intStorageLocationId,-1) FROM #tempAOP WHERE intItemId = i.intItemId AND ISNULL(intStorageLocationId,0) = ISNULL(cd.intSubLocationId,0)),-1) = -1 THEN  0 ELSE cd.intSubLocationId END
+														END = ISNULL(b.intStorageLocationId ,0)
+												)
+										)t
+									)
 				, strLocationName
 				, strPricingType
 				, strItemNo
