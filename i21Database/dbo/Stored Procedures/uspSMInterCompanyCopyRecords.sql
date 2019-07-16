@@ -10,11 +10,11 @@ BEGIN
 		END
 
 	--call Messaging and DMS SP here
-	IF UPPER(strType) = 'DMS'
+	IF UPPER(@strType) = 'DMS'
 	BEGIN
 		PRINT('CALL DMS SP HERE');
 	END
-	IF UPPER(strType) = 'COMMENT'
+	IF UPPER(@strType) = 'COMMENT'
 	BEGIN
 		EXEC dbo.[uspSMInterCompanyValidateRecordsForMessaging] @intInterCompanyMappingId
 	END
