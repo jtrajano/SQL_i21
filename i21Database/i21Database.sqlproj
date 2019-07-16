@@ -7661,6 +7661,8 @@
     <Build Include="dbo\Stored Procedures\uspICGetCommodityActivity.sql" />
     <Build Include="dbo\Stored Procedures\uspAPCreateVoucherForPendingPayable.sql" />
     <Build Include="dbo\Views\vyuAPPendingPayables.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRCreateItemGLEntries.sql" />
+    <Build Include="dbo\User Defined Types\SettleVoucherCreate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
