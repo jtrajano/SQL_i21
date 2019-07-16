@@ -55,6 +55,7 @@ DECLARE @dtmDateToLocal						AS DATETIME			= NULL
 	  , @intEntityUserIdLocal				AS INT				= NULL
 	  , @ysnStretchLogo						AS BIT				= 0
 	  , @blbLogo							AS VARBINARY(MAX)	= NULL
+	  , @blbStretchedLogo					AS VARBINARY(MAX)	= NULL
 	  , @strCompanyName						AS NVARCHAR(500)	= NULL
 	  , @strCompanyAddress					AS NVARCHAR(500)	= NULL
 
@@ -184,7 +185,10 @@ SET @intEntityUserIdLocal				= NULLIF(@intEntityUserId, 0)
 
 SELECT TOP 1 @ysnStretchLogo = ysnStretchLogo
 FROM tblARCompanyPreference WITH (NOLOCK)
+
 SELECT @blbLogo = dbo.fnSMGetCompanyLogo('Header')
+SELECT @blbStretchedLogo = dbo.fnSMGetCompanyLogo('Stretched Header')
+
 SELECT TOP 1 @strCompanyName = strCompanyName
 		   , @strCompanyAddress = dbo.[fnARFormatCustomerAddress](strPhone, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, NULL) 
 FROM dbo.tblSMCompanySetup WITH (NOLOCK)
@@ -1062,7 +1066,7 @@ INNER JOIN #CUSTOMERS CUSTOMER ON MAINREPORT.intEntityCustomerId = CUSTOMER.intE
 ORDER BY MAINREPORT.dtmDate
 
 UPDATE tblARCustomerStatementStagingTable
-SET blbLogo				= @blbLogo
+SET blbLogo				= CASE WHEN ISNULL(@ysnStretchLogo, 0) = 1 THEN ISNULL(@blbStretchedLogo, @blbLogo) ELSE @blbLogo END
   , strCompanyName		= @strCompanyName
   , strCompanyAddress	= @strCompanyAddress
   , ysnStretchLogo		= ISNULL(@ysnStretchLogo, 0)

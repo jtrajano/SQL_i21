@@ -28,7 +28,7 @@ SELECT PAYMENTS.intPaymentId
 	 , PAYMENTS.dblWriteOffAmount
 	 , PAYMENTS.dblPayment
 	 , ysnStretchLogo		= ISNULL(COMPANYPREF.ysnStretchLogo, 0)
-	 , blbLogo				= LOGO.blbLogo
+	 , blbLogo				= CASE WHEN ISNULL(COMPANYPREF.ysnStretchLogo, 0) = 1 THEN ISNULL(STRETCHEDLOGO.blbLogo, LOGO.blbLogo) ELSE LOGO.blbLogo END
 	 , strCompanyName       = CASE WHEN SMCL.strUseLocationAddress = 'Letterhead' THEN '' ELSE COMPANY.strCompanyName END COLLATE Latin1_General_CI_AS
      , strCompanyAddress	= CASE WHEN SMCL.strUseLocationAddress IS NULL OR SMCL.strUseLocationAddress IN ('','No','Always')
 										THEN COMPANY.strCompanyAddress
@@ -177,6 +177,13 @@ OUTER APPLY (
 	WHERE A.strScreen = 'SystemManager.CompanyPreference' 
 	  AND A.strComment = 'Header'
 ) LOGO
+OUTER APPLY (
+	SELECT TOP 1 blbLogo = blbFile 
+	FROM tblSMUpload U
+	INNER JOIN tblSMAttachment A ON U.intAttachmentId = A.intAttachmentId
+	WHERE A.strScreen = 'SystemManager.CompanyPreference' 
+	  AND A.strComment = 'Stretched Header'
+) STRETCHEDLOGO
 OUTER APPLY (
 	SELECT dblPayment = SUM(ISNULL(dblAmountPaid, 0.00)) 
 	FROM dbo.tblARPayment WITH (NOLOCK) 
