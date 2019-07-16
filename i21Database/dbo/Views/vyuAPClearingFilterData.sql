@@ -28,7 +28,6 @@ GROUP BY
 	,receiptItems.strTransactionNumber
 	,receiptItems.dtmDate
 	,receiptItems.strAccountId
-	,receiptItems.strTransactionNumber
 	,B.strVendorId
 	,C.strEntityNo
 	,C.strName
@@ -63,7 +62,6 @@ GROUP BY
 	,receiptChargeItems.strTransactionNumber
 	,receiptChargeItems.dtmDate
 	,receiptChargeItems.strAccountId
-	,receiptChargeItems.strTransactionNumber
 	,B.strVendorId
 	,C.strEntityNo
 	,C.strName
@@ -98,7 +96,6 @@ GROUP BY
 	,shipmentCharges.strTransactionNumber
 	,shipmentCharges.dtmDate
 	,shipmentCharges.strAccountId
-	,shipmentCharges.strTransactionNumber
 	,B.strVendorId
 	,C.strEntityNo
 	,C.strName
@@ -133,7 +130,6 @@ GROUP BY
 	,loadTran.strTransactionNumber
 	,loadTran.dtmDate
 	,loadTran.strAccountId
-	,loadTran.strTransactionNumber
 	,B.strVendorId
 	,C.strEntityNo
 	,C.strName
@@ -169,7 +165,6 @@ GROUP BY
 	,loadCost.dblLoadCostDetailQty
 	,loadCost.dtmDate
 	,loadCost.strAccountId
-	,loadCost.strTransactionNumber
 	,B.strVendorId
 	,C.strEntityNo
 	,C.strName
@@ -204,7 +199,6 @@ GROUP BY
 	,settleStorage.strTransactionNumber
 	,settleStorage.dtmDate
 	,settleStorage.strAccountId
-	,settleStorage.strTransactionNumber
 	,B.strVendorId
 	,C.strEntityNo
 	,C.strName
@@ -212,3 +206,37 @@ GROUP BY
 HAVING 
 	(SUM(settleStorage.dblSettleStorageQty) - SUM(settleStorage.dblVoucherQty)) != 0
 OR	(SUM(settleStorage.dblSettleStorageAmount) - SUM(settleStorage.dblVoucherTotal)) != 0
+UNION
+SELECT  DISTINCT
+	patClearing.dtmDate
+	,patClearing.strTransactionNumber
+	,item.strItemNo
+	,dbo.fnTrim(ISNULL(B.strVendorId, C.strEntityNo) + ' - ' + isnull(C.strName,'')) as strVendorIdName 
+	,patClearing.strAccountId
+	,compLoc.strLocationName
+FROM
+(
+	SELECT
+		*
+	FROM vyuAPPatClearing
+) patClearing
+LEFT JOIN (dbo.tblAPVendor B INNER JOIN dbo.tblEMEntity C ON B.[intEntityId] = C.intEntityId)
+		ON B.[intEntityId] = patClearing.[intEntityVendorId]
+INNER JOIN tblSMCompanyLocation compLoc
+		ON patClearing.intLocationId = compLoc.intCompanyLocationId
+INNER JOIN tblICItem item
+	ON item.intItemId = patClearing.intItemId
+GROUP BY
+	patClearing.intEntityVendorId
+	,item.strItemNo
+	,patClearing.intLocationId
+	,patClearing.strTransactionNumber
+	,patClearing.dtmDate
+	,patClearing.strAccountId
+	,B.strVendorId
+	,C.strEntityNo
+	,C.strName
+	,compLoc.strLocationName
+HAVING 
+	(SUM(patClearing.dblRefundTotal) - SUM(patClearing.dblVoucherQty)) != 0
+OR	(SUM(patClearing.dblRefundTotal) - SUM(patClearing.dblVoucherTotal)) != 0

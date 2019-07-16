@@ -16,7 +16,7 @@ SELECT
     ,NULL AS strUOM
     ,0 AS dblVoucherTotal
     ,0 AS dblVoucherQty
-    ,refundEntity.dblRefundAmount AS dblRefundTotal
+    ,refundEntity.dblCashRefund AS dblRefundTotal
     ,1 AS dblRefundQty
     ,NULL AS intLocationId
     ,NULL AS strLocationName
