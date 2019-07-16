@@ -134,9 +134,9 @@ BEGIN TRANSACTION
 		,ysnCreditCardUsed
 		,ysnOriginHistory
 		,strPrintTimeStamp
-		,strInvoiceReportNumber
-		,strTempInvoiceReportNumber
-		,intInvoiceId
+		,''
+		,''
+		,0
 		,intConcurrencyId
 		,strForeignCardId
 		,ysnDuplicate
@@ -153,7 +153,7 @@ BEGIN TRANSACTION
 		,intFreightTermId
 		,intForDeleteTransId
 		,intCustomerId
-		,ysnInvoiced
+		,0
 		,intImportCardId
 		,ysnExpensed
 		,intExpensedItemId

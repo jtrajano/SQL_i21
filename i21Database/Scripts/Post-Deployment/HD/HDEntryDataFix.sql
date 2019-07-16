@@ -868,4 +868,19 @@ GO
 
 GO
 	PRINT N'End fixing Ticket Watcher.';
+	PRINT N'Start fixing HD Ticket Customer Number';
+GO
+
+	update
+		a
+	set
+		a.strCustomerNumber = b.strEntityNo
+	from
+		tblHDTicket a, tblEMEntity b
+	where
+		b.intEntityId = a.intCustomerId
+		and a.strCustomerNumber <> b.strEntityNo
+
+GO
+	PRINT N'End fixing HD Ticket Customer Number';
 GO

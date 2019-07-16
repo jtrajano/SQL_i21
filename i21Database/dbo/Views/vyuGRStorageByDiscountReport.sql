@@ -28,14 +28,14 @@ WITH cte as (
 	WHERE	QM.strSourceType = 'Storage'
 ) ,
 cte1 as (
-	SELECT	RR.strReadingRange ,strCommodityCode,strLocationName,dblSubTotal,dtmDeliveryYear,'TEST WEIGHT' COLLATE Latin1_General_CI_AS as strDiscountCode 
+	SELECT	A.intCompanyLocationId, RR.strReadingRange ,strCommodityCode,strLocationName,dblSubTotal,dtmDeliveryYear,'TEST WEIGHT' COLLATE Latin1_General_CI_AS as strDiscountCode 
 		FROM cte A	
 		LEFT JOIN tblGRReadingRanges RR
 		ON A.dblGradeReading BETWEEN RR.intMinValue AND RR.intMaxValue
 			AND RR.intReadingType = 1
 		WHERE A.strDescription = 'TEST WEIGHT' 
 	UNION
-	SELECT RR.strReadingRange,strCommodityCode,strLocationName,dblSubTotal,dtmDeliveryYear,'DOCKAGE' COLLATE Latin1_General_CI_AS as strDiscountCode 
+	SELECT A.intCompanyLocationId, RR.strReadingRange,strCommodityCode,strLocationName,dblSubTotal,dtmDeliveryYear,'DOCKAGE' COLLATE Latin1_General_CI_AS as strDiscountCode 
 		FROM cte A
 		LEFT JOIN tblGRReadingRanges RR
 		ON (A.dblGradeReading BETWEEN RR.intMinValue AND RR.intMaxValue)
@@ -44,6 +44,7 @@ cte1 as (
 		WHERE  A.strDescription LIKE '%DOCKAGE%' 
 )
 SELECT 
+	TW.intCompanyLocationId intCompanyLocationId,
 	TW.strReadingRange strReadingRange
 	,TW.strCommodityCode strCommodityCode
 	,replace(replace(TW.strLocationName,'[',''),']','') strLocationName
@@ -52,7 +53,8 @@ SELECT
 	,SUM(ISNULL(TW.dblSubTotal,0)) dblSubTotalByLocation
 	,TW.strDiscountCode strDiscountCode
 	from cte1 TW
-GROUP BY TW.strReadingRange
+GROUP BY TW.intCompanyLocationId
+		,TW.strReadingRange
 		,TW.strCommodityCode
 		,TW.strLocationName
 		,TW.dtmDeliveryYear

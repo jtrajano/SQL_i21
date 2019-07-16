@@ -34,7 +34,7 @@ FROM dbo.tblAPBill A
 		--				LEFT JOIN dbo.tblCMBankTransaction C ON B1.strPaymentRecordNum = C.strTransactionId)
 		-- ON A.intBillId = B.intBillId
 		 OUTER APPLY(
-			SELECT TOP 1 B1.strPaymentInfo,
+			SELECT TOP 1 CASE WHEN C.ysnCheckVoid = 1 THEN strNotes ELSE B1.strPaymentInfo END as strPaymentInfo,
 						 B1.dtmDatePaid,
 						 B1.intPaymentId,
 						 B.dblDiscount,

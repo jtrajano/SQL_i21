@@ -146,13 +146,13 @@ BEGIN TRY
 		,[dblQuantityToBill] = LD.dblQuantity
 		,[dblQtyToBillUnitQty] = ISNULL(ItemUOM.dblUnitQty,1)
 		,[intQtyToBillUOMId] = LD.intItemUOMId
-		,[dblCost] = ISNULL(AD.dblSeqPrice, 0)
+		,[dblCost] = (CASE WHEN intPurchaseSale = 3 THEN ISNULL(AD.dblSeqPrice, 0) ELSE LD.dblUnitPrice END)
 		,[dblCostUnitQty] = CAST(ISNULL(ItemCostUOM.dblUnitQty,1) AS DECIMAL(38,20))
-		,[intCostUOMId] = AD.intSeqPriceUOMId
+		,[intCostUOMId] = (CASE WHEN intPurchaseSale = 3 THEN ISNULL(AD.intSeqPriceUOMId, 0) ELSE LD.intPriceUOMId END)
 		,[dblNetWeight] = ISNULL(LD.dblNet,0)
 		,[dblWeightUnitQty] = ISNULL(ItemWeightUOM.dblUnitQty,1)
 		,[intWeightUOMId] = ItemWeightUOM.intItemUOMId
-		,[intCostCurrencyId] = AD.intSeqCurrencyId
+		,[intCostCurrencyId] = (CASE WHEN intPurchaseSale = 3 THEN ISNULL(AD.intSeqCurrencyId, 0) ELSE LD.intPriceCurrencyId END)
 		,[dblTax] = ISNULL(receiptItem.dblTax, 0)
 		,[dblDiscount] = 0
 		,[dblExchangeRate] = 1

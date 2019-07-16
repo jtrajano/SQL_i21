@@ -23,6 +23,7 @@ DECLARE @intItemId AS INT
 		,@intFobPointId AS INT 
 		,@intEntityId AS INT 
 		,@intBackupId INT 
+		,@dtmDate AS DATETIME 
 
 DECLARE @ShipmentPostScenario AS TINYINT = NULL 
 		,@ShipmentPostScenario_FreightBased AS TINYINT = 1
@@ -662,7 +663,8 @@ BEGIN
 		ON #tmpICInventoryTransaction([strBatchId] ASC, [strTransactionId] ASC);
 
 	CREATE NONCLUSTERED INDEX [IX_tmpICInventoryTransaction_lookup]
-		ON #tmpICInventoryTransaction([strBatchId] ASC, [intTransactionId] ASC, [strTransactionId] ASC, [intItemId] ASC, [intTransactionDetailId] ASC, [intLotId] ASC, [intItemLocationId] ASC);
+		ON #tmpICInventoryTransaction([strBatchId] ASC, [intTransactionId] ASC, [intItemId] ASC)
+		INCLUDE (dblQty, intItemLocationId, strTransactionId, intLotId, intTransactionDetailId);
 
 	CREATE TABLE #tmpAutoVarianceBatchesForAVGCosting (
 		intItemId INT
@@ -1254,6 +1256,7 @@ BEGIN
 					,@dblUnitRetail = dblUnitRetail
 					,@dblCategoryCostValue = dblCategoryCostValue
 					,@dblCategoryRetailValue = dblCategoryRetailValue
+					,@dtmDate = dtmDate
 			FROM	#tmpICInventoryTransaction
 			--ORDER BY dtmDate ASC, id ASC, intSortByQty ASC
 			ORDER BY sortId ASC
@@ -1271,6 +1274,7 @@ BEGIN
 					,@dblUnitRetail = dblUnitRetail
 					,@dblCategoryCostValue = dblCategoryCostValue
 					,@dblCategoryRetailValue = dblCategoryRetailValue
+					,@dtmDate = dtmDate
 			FROM	#tmpICInventoryTransaction
 			--ORDER BY id2 ASC, id ASC
 			ORDER BY sortId ASC
@@ -3146,198 +3150,201 @@ BEGIN
 			END
 			 				
 			-- Repost 'Credit Memo'
+			--ELSE IF EXISTS (
+			--	SELECT	1 
+			--	FROM	tblICInventoryTransactionType 
+			--	WHERE	intTransactionTypeId = @intTransactionTypeId 
+			--			AND strName IN ('Credit Memo')
+			--	) 
+			--BEGIN 
+			--	INSERT INTO @ItemsToPost (
+			--			intItemId  
+			--			,intItemLocationId 
+			--			,intItemUOMId  
+			--			,dtmDate  
+			--			,dblQty  
+			--			,dblUOMQty  
+			--			,dblCost  
+			--			,dblSalesPrice  
+			--			,intCurrencyId  
+			--			,dblExchangeRate  
+			--			,intTransactionId  
+			--			,intTransactionDetailId  
+			--			,strTransactionId  
+			--			,intTransactionTypeId  
+			--			,intLotId 
+			--			,intSubLocationId
+			--			,intStorageLocationId	
+			--			,strActualCostId 	
+			--			,intForexRateTypeId
+			--			,dblForexRate
+			--			,intCostingMethod
+			--	)
+			--	SELECT 	RebuildInvTrans.intItemId  
+			--			,RebuildInvTrans.intItemLocationId 
+			--			,RebuildInvTrans.intItemUOMId  
+			--			,RebuildInvTrans.dtmDate  
+			--			,RebuildInvTrans.dblQty  
+			--			,ISNULL(ItemUOM.dblUnitQty, RebuildInvTrans.dblUOMQty) 
+			--			,dblCost  = CASE
+			--							WHEN RebuildInvTrans.dblQty < 0 THEN 
+			--								CASE	
+			--										WHEN dbo.fnGetCostingMethod(RebuildInvTrans.intItemId, RebuildInvTrans.intItemLocationId) = @AVERAGECOST THEN 
+			--											dbo.fnGetItemAverageCost(
+			--												RebuildInvTrans.intItemId
+			--												, RebuildInvTrans.intItemLocationId
+			--												, RebuildInvTrans.intItemUOMId
+			--											) 
+			--										ELSE 
+			--											ISNULL(lot.dblLastCost, itemPricing.dblLastCost)
+			--								END 
+
+			--							-- When it is a credit memo:
+			--							--WHEN (RebuildInvTrans.dblQty > 0 AND RebuildInvTrans.strTransactionId LIKE 'SI%') THEN 
+			--							WHEN RebuildInvTrans.dblQty > 0 THEN 											
+			--								CASE	WHEN dbo.fnGetCostingMethod(RebuildInvTrans.intItemId, RebuildInvTrans.intItemLocationId) = @AVERAGECOST THEN 
+			--											-- If using Average Costing, use Ave Cost.
+			--											dbo.fnGetItemAverageCost(
+			--												RebuildInvTrans.intItemId
+			--												, RebuildInvTrans.intItemLocationId
+			--												, RebuildInvTrans.intItemUOMId
+			--											) 
+			--										ELSE
+			--											-- Otherwise, get the last cost. 
+			--											ISNULL(lot.dblLastCost, itemPricing.dblLastCost)
+			--								END 
+
+			--							ELSE 
+			--								RebuildInvTrans.dblCost
+			--						END 
+			--			,RebuildInvTrans.dblSalesPrice  
+			--			,RebuildInvTrans.intCurrencyId  
+			--			,RebuildInvTrans.dblExchangeRate  
+			--			,RebuildInvTrans.intTransactionId  
+			--			,RebuildInvTrans.intTransactionDetailId  
+			--			,RebuildInvTrans.strTransactionId  
+			--			,RebuildInvTrans.intTransactionTypeId  
+			--			,RebuildInvTrans.intLotId 
+			--			,RebuildInvTrans.intSubLocationId
+			--			,RebuildInvTrans.intStorageLocationId
+			--			,RebuildInvTrans.strActualCostId
+			--			,RebuildInvTrans.intForexRateTypeId
+			--			,RebuildInvTrans.dblForexRate
+			--			,RebuildInvTrans.intCostingMethod
+
+			--	FROM	#tmpICInventoryTransaction RebuildInvTrans INNER JOIN tblICItem i
+			--				ON i.intItemId = RebuildInvTrans.intItemId 
+			--			INNER JOIN tblICItemLocation ItemLocation
+			--				ON RebuildInvTrans.intItemLocationId = ItemLocation.intItemLocationId
+			--			LEFT JOIN dbo.tblARInvoice Invoice
+			--				ON Invoice.intInvoiceId = RebuildInvTrans.intTransactionId
+			--				AND Invoice.strInvoiceNumber = RebuildInvTrans.strTransactionId
+			--			LEFT JOIN dbo.tblICItemUOM ItemUOM
+			--				ON RebuildInvTrans.intItemId = ItemUOM.intItemId
+			--				AND RebuildInvTrans.intItemUOMId = ItemUOM.intItemUOMId
+			--			LEFT JOIN dbo.tblICItemUOM StockUOM
+			--				ON StockUOM.intItemId = RebuildInvTrans.intItemId
+			--				AND StockUOM.ysnStockUnit = 1
+			--			OUTER APPLY (
+			--				SELECT
+			--					lot.intLotId
+			--					,dblLastCost = dbo.fnCalculateCostBetweenUOM(StockUOM.intItemUOMId, ItemUOM.intItemUOMId, lot.dblLastCost)
+			--				FROM	
+			--					dbo.tblICLot lot 
+			--				WHERE	
+			--					lot.intLotId = RebuildInvTrans.intLotId 
+			--					AND lot.intItemId = RebuildInvTrans.intItemId
+			--			) lot
+			--			OUTER APPLY (
+			--				SELECT	TOP 1 
+			--						dblLastCost = dbo.fnCalculateCostBetweenUOM(StockUOM.intItemUOMId, ItemUOM.intItemUOMId, p.dblLastCost)
+			--				FROM	tblICItemPricing p 
+			--				WHERE	p.intItemId = RebuildInvTrans.intItemId 
+			--						AND p.intItemLocationId = RebuildInvTrans.intItemLocationId
+			--			) itemPricing
+			--	WHERE	RebuildInvTrans.strBatchId = @strBatchId
+			--			AND RebuildInvTrans.intTransactionId = @intTransactionId
+			--			AND RebuildInvTrans.strTransactionId = @strTransactionId
+			--			AND ItemLocation.intLocationId IS NOT NULL -- It ensures that the item is not In-Transit. 
+			--			AND i.intItemId = ISNULL(@intItemId, i.intItemId)
+			--			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0)
+
+			--	IF EXISTS (SELECT TOP 1 1 FROM @ItemsToPost)
+			--	BEGIN 
+			--		EXEC @intReturnValue = dbo.uspICRepostCosting
+			--			@strBatchId
+			--			,@strAccountToCounterInventory
+			--			,@intEntityUserSecurityId
+			--			,@strGLDescription
+			--			,@ItemsToPost
+			--			,@strTransactionId
+
+			--		IF @intReturnValue <> 0 GOTO _EXIT_WITH_ERROR
+
+			--		SET @intReturnValue = NULL 
+			--		INSERT INTO @GLEntries (
+			--				[dtmDate] 
+			--				,[strBatchId]
+			--				,[intAccountId]
+			--				,[dblDebit]
+			--				,[dblCredit]
+			--				,[dblDebitUnit]
+			--				,[dblCreditUnit]
+			--				,[strDescription]
+			--				,[strCode]
+			--				,[strReference]
+			--				,[intCurrencyId]
+			--				,[dblExchangeRate]
+			--				,[dtmDateEntered]
+			--				,[dtmTransactionDate]
+			--				,[strJournalLineDescription]
+			--				,[intJournalLineNo]
+			--				,[ysnIsUnposted]
+			--				,[intUserId]
+			--				,[intEntityId]
+			--				,[strTransactionId]
+			--				,[intTransactionId]
+			--				,[strTransactionType]
+			--				,[strTransactionForm] 
+			--				,[strModuleName]
+			--				,[intConcurrencyId]
+			--				,[dblDebitForeign]
+			--				,[dblDebitReport]
+			--				,[dblCreditForeign]
+			--				,[dblCreditReport]
+			--				,[dblReportingRate]
+			--				,[dblForeignRate]
+			--				,[strRateType]
+			--		)			
+			--		EXEC @intReturnValue = dbo.uspICCreateGLEntries
+			--			@strBatchId 
+			--			,@strAccountToCounterInventory
+			--			,@intEntityUserSecurityId
+			--			,@strGLDescription
+			--			,NULL 
+			--			,@intItemId -- This is only used when rebuilding the stocks. 
+			--			,@strTransactionId -- This is only used when rebuilding the stocks. 
+			--			,@intCategoryId
+
+			--		IF @intReturnValue <> 0 
+			--		BEGIN 
+			--			--PRINT 'Error found in uspICCreateGLEntries - Credit Memo'
+			--			GOTO _EXIT_WITH_ERROR
+			--		END
+			--	END						
+			--END	
+
+			-- Repost 'Invoice' and 'Credit Memo'
 			ELSE IF EXISTS (
 				SELECT	1 
 				FROM	tblICInventoryTransactionType 
 				WHERE	intTransactionTypeId = @intTransactionTypeId 
-						AND strName IN ('Credit Memo')
+						AND strName IN ('Invoice', 'Credit Memo')
 				) 
 			BEGIN 
-				INSERT INTO @ItemsToPost (
-						intItemId  
-						,intItemLocationId 
-						,intItemUOMId  
-						,dtmDate  
-						,dblQty  
-						,dblUOMQty  
-						,dblCost  
-						,dblSalesPrice  
-						,intCurrencyId  
-						,dblExchangeRate  
-						,intTransactionId  
-						,intTransactionDetailId  
-						,strTransactionId  
-						,intTransactionTypeId  
-						,intLotId 
-						,intSubLocationId
-						,intStorageLocationId	
-						,strActualCostId 	
-						,intForexRateTypeId
-						,dblForexRate
-						,intCostingMethod
-				)
-				SELECT 	RebuildInvTrans.intItemId  
-						,RebuildInvTrans.intItemLocationId 
-						,RebuildInvTrans.intItemUOMId  
-						,RebuildInvTrans.dtmDate  
-						,RebuildInvTrans.dblQty  
-						,ISNULL(ItemUOM.dblUnitQty, RebuildInvTrans.dblUOMQty) 
-						,dblCost  = CASE
-										WHEN RebuildInvTrans.dblQty < 0 THEN 
-											CASE	
-													WHEN dbo.fnGetCostingMethod(RebuildInvTrans.intItemId, RebuildInvTrans.intItemLocationId) = @AVERAGECOST THEN 
-														dbo.fnGetItemAverageCost(
-															RebuildInvTrans.intItemId
-															, RebuildInvTrans.intItemLocationId
-															, RebuildInvTrans.intItemUOMId
-														) 
-													ELSE 
-														ISNULL(lot.dblLastCost, itemPricing.dblLastCost)
-											END 
+				-- Process the invoice as one batch. 
+				SET @strTransactionId = NULL 
 
-										-- When it is a credit memo:
-										--WHEN (RebuildInvTrans.dblQty > 0 AND RebuildInvTrans.strTransactionId LIKE 'SI%') THEN 
-										WHEN RebuildInvTrans.dblQty > 0 THEN 											
-											CASE	WHEN dbo.fnGetCostingMethod(RebuildInvTrans.intItemId, RebuildInvTrans.intItemLocationId) = @AVERAGECOST THEN 
-														-- If using Average Costing, use Ave Cost.
-														dbo.fnGetItemAverageCost(
-															RebuildInvTrans.intItemId
-															, RebuildInvTrans.intItemLocationId
-															, RebuildInvTrans.intItemUOMId
-														) 
-													ELSE
-														-- Otherwise, get the last cost. 
-														ISNULL(lot.dblLastCost, itemPricing.dblLastCost)
-											END 
-
-										ELSE 
-											RebuildInvTrans.dblCost
-									END 
-						,RebuildInvTrans.dblSalesPrice  
-						,RebuildInvTrans.intCurrencyId  
-						,RebuildInvTrans.dblExchangeRate  
-						,RebuildInvTrans.intTransactionId  
-						,RebuildInvTrans.intTransactionDetailId  
-						,RebuildInvTrans.strTransactionId  
-						,RebuildInvTrans.intTransactionTypeId  
-						,RebuildInvTrans.intLotId 
-						,RebuildInvTrans.intSubLocationId
-						,RebuildInvTrans.intStorageLocationId
-						,RebuildInvTrans.strActualCostId
-						,RebuildInvTrans.intForexRateTypeId
-						,RebuildInvTrans.dblForexRate
-						,RebuildInvTrans.intCostingMethod
-
-				FROM	#tmpICInventoryTransaction RebuildInvTrans INNER JOIN tblICItem i
-							ON i.intItemId = RebuildInvTrans.intItemId 
-						INNER JOIN tblICItemLocation ItemLocation
-							ON RebuildInvTrans.intItemLocationId = ItemLocation.intItemLocationId
-						LEFT JOIN dbo.tblARInvoice Invoice
-							ON Invoice.intInvoiceId = RebuildInvTrans.intTransactionId
-							AND Invoice.strInvoiceNumber = RebuildInvTrans.strTransactionId
-						LEFT JOIN dbo.tblICItemUOM ItemUOM
-							ON RebuildInvTrans.intItemId = ItemUOM.intItemId
-							AND RebuildInvTrans.intItemUOMId = ItemUOM.intItemUOMId
-						LEFT JOIN dbo.tblICItemUOM StockUOM
-							ON StockUOM.intItemId = RebuildInvTrans.intItemId
-							AND StockUOM.ysnStockUnit = 1
-						OUTER APPLY (
-							SELECT
-								lot.intLotId
-								,dblLastCost = dbo.fnCalculateCostBetweenUOM(StockUOM.intItemUOMId, ItemUOM.intItemUOMId, lot.dblLastCost)
-							FROM	
-								dbo.tblICLot lot 
-							WHERE	
-								lot.intLotId = RebuildInvTrans.intLotId 
-								AND lot.intItemId = RebuildInvTrans.intItemId
-						) lot
-						OUTER APPLY (
-							SELECT	TOP 1 
-									dblLastCost = dbo.fnCalculateCostBetweenUOM(StockUOM.intItemUOMId, ItemUOM.intItemUOMId, p.dblLastCost)
-							FROM	tblICItemPricing p 
-							WHERE	p.intItemId = RebuildInvTrans.intItemId 
-									AND p.intItemLocationId = RebuildInvTrans.intItemLocationId
-						) itemPricing
-				WHERE	RebuildInvTrans.strBatchId = @strBatchId
-						AND RebuildInvTrans.intTransactionId = @intTransactionId
-						AND RebuildInvTrans.strTransactionId = @strTransactionId
-						AND ItemLocation.intLocationId IS NOT NULL -- It ensures that the item is not In-Transit. 
-						AND i.intItemId = ISNULL(@intItemId, i.intItemId)
-						AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0)
-
-				IF EXISTS (SELECT TOP 1 1 FROM @ItemsToPost)
-				BEGIN 
-					EXEC @intReturnValue = dbo.uspICRepostCosting
-						@strBatchId
-						,@strAccountToCounterInventory
-						,@intEntityUserSecurityId
-						,@strGLDescription
-						,@ItemsToPost
-						,@strTransactionId
-
-					IF @intReturnValue <> 0 GOTO _EXIT_WITH_ERROR
-
-					SET @intReturnValue = NULL 
-					INSERT INTO @GLEntries (
-							[dtmDate] 
-							,[strBatchId]
-							,[intAccountId]
-							,[dblDebit]
-							,[dblCredit]
-							,[dblDebitUnit]
-							,[dblCreditUnit]
-							,[strDescription]
-							,[strCode]
-							,[strReference]
-							,[intCurrencyId]
-							,[dblExchangeRate]
-							,[dtmDateEntered]
-							,[dtmTransactionDate]
-							,[strJournalLineDescription]
-							,[intJournalLineNo]
-							,[ysnIsUnposted]
-							,[intUserId]
-							,[intEntityId]
-							,[strTransactionId]
-							,[intTransactionId]
-							,[strTransactionType]
-							,[strTransactionForm] 
-							,[strModuleName]
-							,[intConcurrencyId]
-							,[dblDebitForeign]
-							,[dblDebitReport]
-							,[dblCreditForeign]
-							,[dblCreditReport]
-							,[dblReportingRate]
-							,[dblForeignRate]
-							,[strRateType]
-					)			
-					EXEC @intReturnValue = dbo.uspICCreateGLEntries
-						@strBatchId 
-						,@strAccountToCounterInventory
-						,@intEntityUserSecurityId
-						,@strGLDescription
-						,NULL 
-						,@intItemId -- This is only used when rebuilding the stocks. 
-						,@strTransactionId -- This is only used when rebuilding the stocks. 
-						,@intCategoryId
-
-					IF @intReturnValue <> 0 
-					BEGIN 
-						--PRINT 'Error found in uspICCreateGLEntries - Credit Memo'
-						GOTO _EXIT_WITH_ERROR
-					END
-				END						
-			END	
-
-			-- Repost 'Invoice' 
-			ELSE IF EXISTS (
-				SELECT	1 
-				FROM	tblICInventoryTransactionType 
-				WHERE	intTransactionTypeId = @intTransactionTypeId 
-						AND strName IN ('Invoice')
-				) 
-			BEGIN 
 				INSERT INTO @ItemsToPost (
 						intItemId  
 						,intItemLocationId 
@@ -3385,7 +3392,6 @@ BEGIN
 											END 
 
 										-- When it is a credit memo:
-										--WHEN (RebuildInvTrans.dblQty > 0 AND RebuildInvTrans.strTransactionId LIKE 'SI%') THEN 
 										WHEN RebuildInvTrans.dblQty > 0 THEN 
 											
 											CASE	WHEN dbo.fnGetCostingMethod(RebuildInvTrans.intItemId, RebuildInvTrans.intItemLocationId) = @AVERAGECOST THEN 
@@ -3449,8 +3455,8 @@ BEGIN
 						) itemPricing
 
 				WHERE	RebuildInvTrans.strBatchId = @strBatchId
-						AND RebuildInvTrans.intTransactionId = @intTransactionId
-						AND RebuildInvTrans.strTransactionId = @strTransactionId
+						--AND RebuildInvTrans.intTransactionId = @intTransactionId
+						--AND RebuildInvTrans.strTransactionId = @strTransactionId
 						AND ItemLocation.intLocationId IS NOT NULL -- It ensures that the item is not In-Transit. 
 						AND i.intItemId = ISNULL(@intItemId, i.intItemId)
 						AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0)
@@ -3466,6 +3472,7 @@ BEGIN
 										1
 								END 
 						)
+						AND dbo.fnDateEquals(RebuildInvTrans.dtmDate, @dtmDate) = 1
 
 				IF EXISTS (SELECT TOP 1 1 FROM @ItemsToPost)
 				BEGIN 
@@ -3524,6 +3531,7 @@ BEGIN
 						,@intItemId -- This is only used when rebuilding the stocks. 
 						,@strTransactionId -- This is only used when rebuilding the stocks. 
 						,@intCategoryId -- This is only used when rebuilding the stocks. 
+						,@dtmDate
 				END
 						
 				IF @intReturnValue <> 0 
@@ -3608,8 +3616,9 @@ BEGIN
 							ON ld.intLoadDetailId = id.intLoadDetailId
 							AND l.ysnPosted = 1
 
-				WHERE	i.strInvoiceNumber = @strTransactionId
-						AND i.intInvoiceId = @intTransactionId
+				WHERE	--i.strInvoiceNumber = @strTransactionId
+						--AND i.intInvoiceId = @intTransactionId
+						t.strBatchId = @strBatchId
 						AND item.intItemId = ISNULL(@intItemId, item.intItemId)
 						AND ISNULL(item.intCategoryId, 0) = COALESCE(@intCategoryId, item.intCategoryId, 0)
 						AND (
@@ -3620,6 +3629,7 @@ BEGIN
 								ELSE 0
 							END
 						)
+						AND dbo.fnDateEquals(t.dtmDate, @dtmDate) = 1
 
 				IF EXISTS (SELECT TOP 1 1 FROM @ItemsForInTransitCosting)
 				BEGIN 
@@ -3674,6 +3684,7 @@ BEGIN
 						,@intItemId -- This is only used when rebuilding the stocks. 
 						,@strTransactionId -- This is only used when rebuilding the stocks. 
 						,@intCategoryId
+						,@dtmDate
 
 					IF @intReturnValue <> 0 
 					BEGIN 
@@ -3681,6 +3692,10 @@ BEGIN
 						GOTO _EXIT_WITH_ERROR
 					END 
 				END 
+								
+				DELETE	FROM #tmpICInventoryTransaction
+				WHERE	strBatchId = @strBatchId						
+						AND dbo.fnDateEquals(dtmDate, @dtmDate) = 1
 			END	
 			
 			-- Repost 'Inventory Receipt/Return'
@@ -5038,8 +5053,7 @@ BEGIN
 		
 		DELETE	FROM #tmpICInventoryTransaction
 		WHERE	strBatchId = @strBatchId
-				--AND intTransactionId = @intTransactionId
-				AND strTransactionId = @strTransactionId
+				AND strTransactionId = @strTransactionId 
 	END 
 END 
 

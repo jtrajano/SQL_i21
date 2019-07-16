@@ -111,6 +111,4 @@ BEGIN
 
 		DELETE FROM #tmpPayGroups WHERE intPayGroupId = @intPayGroupId
 	END
-
 END
-GO

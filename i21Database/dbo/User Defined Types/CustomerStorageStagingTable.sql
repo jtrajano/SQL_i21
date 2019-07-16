@@ -45,5 +45,8 @@
 	[ysnTransferStorage] BIT NULL,
 	[dblGrossQuantity] NUMERIC(38, 20) NULL, 	-- Distributed Quantity (Gross)
 	[intShipFromLocationId] INT NULL,			--Ship From (for Voucher); Farm/Field in DS or Entity Location
-	[intShipFromEntityId] INT NULL				--Ship From Entity (for Voucher)
+	[intShipFromEntityId] INT NULL,				--Ship From Entity (for Voucher)
+	[intSourceCustomerStorageId] [int] NULL,
+	[dblUnitQty] [numeric](38, 20) NOT NULL DEFAULT ((0)),
+	[dblSplitPercent] [numeric](38, 20) NOT NULL DEFAULT ((0))
 )
