@@ -78,6 +78,7 @@ FROM (
 		, ft.ysnFreezed
 		, ft.intTraderId
 		, sp.strName strSalespersonId
+		, ft.strReference
 FROM tblRKFutOptTransaction AS ft
 LEFT OUTER JOIN tblEMEntity AS e ON ft.[intEntityId] = e.[intEntityId]
 LEFT OUTER JOIN tblEMEntity sp ON sp.intEntityId = ft.intTraderId
