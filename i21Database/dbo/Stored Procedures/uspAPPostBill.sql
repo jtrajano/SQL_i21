@@ -182,7 +182,7 @@ BEGIN
 		,strTransactionNo
 		,intTransactionId
 		,26
-	FROM dbo.fnCCValidateAssociatedTransaction(@billIds, @transactionType)
+	FROM dbo.fnCCValidateAssociatedTransaction(@billIds, 1)
 	
 	--if there are invalid applied amount, undo updating of amountdue and payment
 	IF EXISTS(SELECT 1 FROM #tmpInvalidBillData WHERE intErrorKey = 1 OR intErrorKey = 33)
