@@ -86,7 +86,7 @@ FROM
 			,STUFF
 			(
 				(
-					SELECT  ', ' + b.strBillId
+					SELECT  ',' + b.strBillId
 					FROM	tblAPBill b INNER JOIN tblAPBillDetail bd
 								ON b.intBillId = bd.intBillId
 					WHERE	bd.intInventoryReceiptItemId IS NOT NULL
@@ -191,7 +191,7 @@ FROM
             intInventoryReceiptChargeId, intItemId
             ,STUFF(
                     (
-                        SELECT  ', ' + b.strBillId
+                        SELECT  ',' + b.strBillId
                         FROM	tblAPBill b INNER JOIN tblAPBillDetail bd
                                     ON b.intBillId = bd.intBillId
                         WHERE	bd.intInventoryReceiptChargeId IS NOT NULL
@@ -295,7 +295,7 @@ FROM
             intInventoryShipmentChargeId, intItemId
             ,STUFF(
                     (
-                        SELECT  ', ' + b.strBillId
+                        SELECT  ',' + b.strBillId
                         FROM	tblAPBill b INNER JOIN tblAPBillDetail bd
                                     ON b.intBillId = bd.intBillId
                         WHERE	bd.intInventoryShipmentChargeId IS NOT NULL
@@ -400,7 +400,7 @@ FROM
             intLoadDetailId, intItemId
             ,STUFF(
                     (
-                        SELECT  ', ' + b.strBillId
+                        SELECT  ',' + b.strBillId
                         FROM	tblAPBill b INNER JOIN tblAPBillDetail bd
                                     ON b.intBillId = bd.intBillId
                         WHERE	bd.intLoadDetailId = billDetail.intLoadDetailId AND ISNULL(bd.intItemId,-1) = ISNULL(billDetail.intItemId,-1)
@@ -505,7 +505,7 @@ FROM
             intLoadDetailId, intItemId
             ,STUFF(
                     (
-                        SELECT  ', ' + b.strBillId
+                        SELECT  ',' + b.strBillId
                         FROM	tblAPBill b INNER JOIN tblAPBillDetail bd
                                     ON b.intBillId = bd.intBillId
                         WHERE	bd.intLoadDetailId = billDetail.intLoadDetailId AND ISNULL(bd.intItemId,-1) = ISNULL(billDetail.intItemId,-1)
@@ -609,7 +609,7 @@ FROM
             intCustomerStorageId, intItemId
             ,STUFF(
                     (
-                        SELECT  ', ' + b.strBillId
+                        SELECT  ',' + b.strBillId
                         FROM	tblAPBill b INNER JOIN tblAPBillDetail bd
                                     ON b.intBillId = bd.intBillId
                         WHERE	bd.intCustomerStorageId = billDetail.intCustomerStorageId AND ISNULL(bd.intItemId,-1) = ISNULL(billDetail.intItemId,-1)
