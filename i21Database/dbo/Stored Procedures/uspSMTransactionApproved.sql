@@ -8,6 +8,7 @@ BEGIN
 	DECLARE @strToTransactionType NVARCHAR(100)
 	DECLARE @strInsert NVARCHAR(100)
 	DECLARE @intTransactionApprovedLogId INT
+	,@intToBookId INT
 
 	INSERT INTO [tblCTSMTransactionApprovedLog] (
 		strType
@@ -25,6 +26,7 @@ BEGIN
 		,@intToEntityId = TC.intEntityId
 		,@intCompanyLocationId = TC.intCompanyLocationId
 		,@strInsert = TC.strInsert
+		,@intToBookId = TC.intToBookId
 	FROM tblSMInterCompanyTransactionConfiguration TC
 	JOIN tblSMInterCompanyTransactionType TT ON TT.intInterCompanyTransactionTypeId = TC.intFromTransactionTypeId
 	JOIN tblSMInterCompanyTransactionType TT1 ON TT1.intInterCompanyTransactionTypeId = TC.intToTransactionTypeId
@@ -102,6 +104,8 @@ BEGIN
 							,@strToTransactionType
 							,@intToCompanyId
 							,'Added'
+							,0
+							,@intToBookId
 					ELSE
 						EXEC uspCTContractPopulateStgXML @recordId
 							,@intToEntityId
@@ -109,6 +113,8 @@ BEGIN
 							,@strToTransactionType
 							,@intToCompanyId
 							,'Modified'
+							,0
+							,@intToBookId
 				END
 			END
 		END TRY

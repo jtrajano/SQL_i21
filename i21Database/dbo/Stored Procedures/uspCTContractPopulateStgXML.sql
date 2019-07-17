@@ -5,7 +5,7 @@
 	,@intToCompanyId INT
 	,@strRowState NVARCHAR(100)
 	,@ysnReplication BIT = 1
-	,@intToBookId int=NULL
+	,@intToBookId INT = NULL
 AS
 BEGIN TRY
 	SET NOCOUNT ON
@@ -21,10 +21,17 @@ BEGIN TRY
 		,@strConditionXML NVARCHAR(MAX)
 		,@strCertificationXML NVARCHAR(MAX)
 		,@strCostCondition NVARCHAR(MAX)
-		,@strApproverXML  NVARCHAR(MAX)
+		,@strApproverXML NVARCHAR(MAX)
 		,@intContractStageId INT
 		,@intMultiCompanyId INT
 		,@strObjectName NVARCHAR(50)
+		,@intSContractDetailId INT
+		,@intPContractDetailId INT
+		,@intPContractHeaderId INT
+		,@strExternalContractNumber NVARCHAR(50)
+		,@strExternalEntity NVARCHAR(100)
+		,@intEntityId INT
+		,@strAdditionalInfo NVARCHAR(MAX)
 
 	SET @intContractStageId = NULL
 	SET @strContractNumber = NULL
@@ -49,6 +56,39 @@ BEGIN TRY
 		,@strHeaderXML OUTPUT
 		,NULL
 		,NULL
+
+	SELECT @intPContractDetailId = intPContractDetailId
+	FROM tblLGAllocationDetail
+	WHERE intSContractDetailId IN (
+			SELECT intContractDetailId
+			FROM tblCTContractDetail
+			WHERE intContractHeaderId = @ContractHeaderId
+			)
+
+	SELECT @intPContractHeaderId = intContractHeaderId
+	FROM tblCTContractDetail
+	WHERE intContractDetailId = @intPContractDetailId
+
+	SELECT @strExternalContractNumber = strContractNumber
+		,@intEntityId = intEntityId
+	FROM tblCTContractHeader
+	WHERE intContractHeaderId = @intPContractHeaderId
+
+	SELECT @strExternalEntity = strName
+	FROM tblEMEntity
+	WHERE intEntityId = @intEntityId
+
+	IF @strExternalContractNumber IS NOT NULL
+	BEGIN
+		SELECT @strAdditionalInfo = '<strExternalContractNumber>' + @strExternalContractNumber + '</strExternalContractNumber>'
+
+		SELECT @strAdditionalInfo = @strAdditionalInfo + '<strExternalEntity>' + @strExternalEntity + '</strExternalEntity>'
+
+		SELECT @strAdditionalInfo = @strAdditionalInfo + '</vyuCTContractHeaderView></vyuCTContractHeaderViews>'
+
+		IF @strAdditionalInfo <> ''
+			SELECT @strHeaderXML = Replace(@strHeaderXML, '</vyuCTContractHeaderView></vyuCTContractHeaderViews>', @strAdditionalInfo)
+	END
 
 	SET @intContractStageId = SCOPE_IDENTITY();
 
@@ -141,10 +181,9 @@ BEGIN TRY
 		,NULL
 		,NULL
 
-			---------------------------------------------Approver------------------------------------------
+	---------------------------------------------Approver------------------------------------------
 	SELECT @strApproverXML = NULL
 		,@strObjectName = NULL
-
 
 	SELECT @strObjectName = 'vyuCTContractApproverView'
 
@@ -184,8 +223,8 @@ BEGIN TRY
 		,intCompanyLocationId = @intCompanyLocationId
 		,strTransactionType = @strToTransactionType
 		,intMultiCompanyId = @intToCompanyId
-		,intToBookId=@intToBookId
-		,strApproverXML=@strApproverXML
+		,intToBookId = @intToBookId
+		,strApproverXML = @strApproverXML
 END TRY
 
 BEGIN CATCH

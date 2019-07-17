@@ -965,6 +965,8 @@ BEGIN TRY
 					,intInvoiceTypeId
 					,intArbitrationId
 					,intCountryId
+					,strExternalEntity
+					,strExternalContractNumber
 					,ysnReceivedSignedFixationLetter
 					)
 				OUTPUT INSERTED.intEntityId
@@ -1023,6 +1025,8 @@ BEGIN TRY
 					,@intInvoiceTypeId
 					,@intCityId
 					,@intCountryId
+					,strExternalEntity
+					,strExternalContractNumber
 					,IsNULL(ysnReceivedSignedFixationLetter,0)
 				FROM OPENXML(@idoc, 'vyuCTContractHeaderViews/vyuCTContractHeaderView', 2) WITH (
 						strEntityName NVARCHAR(100) Collate Latin1_General_CI_AS
@@ -1071,6 +1075,8 @@ BEGIN TRY
 						,strAssociationName NVARCHAR(100) Collate Latin1_General_CI_AS
 						,strInvoiceType NVARCHAR(30) Collate Latin1_General_CI_AS
 						,strArbitration NVARCHAR(50) Collate Latin1_General_CI_AS
+						,strExternalEntity [nvarchar](100) COLLATE Latin1_General_CI_AS 
+						,strExternalContractNumber [nvarchar](50) COLLATE Latin1_General_CI_AS 
 						,ysnReceivedSignedFixationLetter BIT
 						) x
 
