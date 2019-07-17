@@ -223,7 +223,7 @@ BEGIN
 		, dblPPVBasis
 		, strLocationName
 		, dblNewPPVPrice
-		, dblStandardValue = (dblBalanceQty * ISNULL(dblStandardPrice, 0))
+		, dblStandardValue = (dblBalanceQty * dblStandardPrice)
 		, dblPPV = (dblStandardPrice - dblPrice) * dblBalanceQty
 		, dblPPVNew = (dblStandardPrice - dblNewPPVPrice) * dblBalanceQty
 		, strPricingType
@@ -360,7 +360,7 @@ BEGIN
 		, dblPPVBasis = NULL
 		, strLocationName
 		, dblNewPPVPrice = NULL
-		, (dblBalanceQty * ISNULL(dblStandardPrice, 0)) dblStandardValue
+		, (dblBalanceQty * dblStandardPrice) dblStandardValue
 		, (dblStandardPrice - dblPrice) * dblBalanceQty dblPPV
 		, dblPPVNew = NULL
 		, strPricingType
