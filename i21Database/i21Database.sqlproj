@@ -7857,6 +7857,8 @@
     <Build Include="dbo\Views\vyuMFGetDemandEntry.sql" />
     <Build Include="dbo\Views\vyuMFGetDemandSubstituteItem.sql" />
     <Build Include="dbo\Views\vyuMFGetDemandMainItem.sql" />
+    <Build Include="dbo\Tables\tblSTReceiveLottery.sql" />
+    <Build Include="dbo\Tables\tblSTLotteryBook.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
