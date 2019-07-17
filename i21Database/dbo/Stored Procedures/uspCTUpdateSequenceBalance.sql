@@ -3,7 +3,8 @@
 	@dblQuantityToUpdate			NUMERIC(18,6),
 	@intUserId						INT,
 	@intExternalId					INT,
-	@strScreenName					NVARCHAR(50)
+	@strScreenName					NVARCHAR(50),
+	@ysnFromInvoice					bit = 0
 AS
 
 BEGIN TRY
@@ -20,7 +21,8 @@ BEGIN TRY
 			@intPricingTypeId		INT,
 			@dblTolerance			NUMERIC(18,6) = 0.0001,
 			@ysnLoad				BIT,
-			@intSequenceUsageHistoryId	INT
+			@intSequenceUsageHistoryId	INT,  
+			@dblQuantityPerLoad NUMERIC(18,6)
 	
 	BEGINING:
 
@@ -28,11 +30,17 @@ BEGIN TRY
 			@dblOldBalance			=	CASE WHEN ISNULL(CH.ysnLoad,0) = 0 THEN ISNULL(CD.dblBalance,0) ELSE ISNULL(CD.dblBalanceLoad,0) END,
 			@ysnUnlimitedQuantity	=	ISNULL(CH.ysnUnlimitedQuantity,0),
 			@intPricingTypeId		=	CD.intPricingTypeId,
-			@ysnLoad				=	CH.ysnLoad
+			@ysnLoad				=	CH.ysnLoad,
+			@dblQuantityPerLoad = CH.dblQuantityPerLoad
 
 	FROM	tblCTContractDetail		CD
 	JOIN	tblCTContractHeader		CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId 
 	WHERE	intContractDetailId		=	@intContractDetailId 
+
+	 if (@ysnLoad = 1 and @ysnFromInvoice = convert(bit,1)) 
+	 begin
+		set @dblQuantityToUpdate = (convert(numeric(18,6),convert(int,@dblQuantityToUpdate))/@dblQuantityPerLoad);
+	 end
 	
 	SELECT	@dblTransactionQuantity	=	- @dblQuantityToUpdate
 	SELECT	@dblNewBalance			=	@dblOldBalance - @dblQuantityToUpdate

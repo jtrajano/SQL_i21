@@ -752,7 +752,8 @@ SELECT
 	,[dblMaintenanceAmount]         = ID.[dblMaintenanceAmount]         
 	,[dblLicenseAmount]             = ID.[dblLicenseAmount]             
 	,[intContractDetailId]			= ID.[intContractDetailId]			
-	,[intTicketId]					= ID.[intTicketId]
+	--,[intTicketId]					= ID.[intTicketId]
+	,[intTicketId]     = (case when ID.strTransactionType = 'Credit Memo' and @Post = convert(bit,1) then null else ID.[intTicketId] end)
 	,[intCustomerStorageId]			= ID.[intCustomerStorageId]
 	,[intLoadDetailId]				= ID.[intLoadDetailId]
 	,[ysnLeaseBilling]				= ID.[ysnLeaseBilling]				
