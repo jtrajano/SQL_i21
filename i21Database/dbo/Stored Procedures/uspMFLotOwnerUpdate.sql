@@ -366,7 +366,7 @@ BEGIN TRY
 				,@ysnBulkChange = 0
 		END
 
-		IF IsNULL(@dtmOldDueDate, '1900-01-01') <> IsNULL(@dtmNewDueDate, '1900-01-01')
+		IF IsNULL(Convert(datetime,Convert(char,@dtmOldDueDate,101)), '1900-01-01') <> IsNULL(Convert(datetime,Convert(char,@dtmNewDueDate,101)), '1900-01-01')
 		BEGIN
 			EXEC dbo.uspMFSetLotDueDate @intLotId = @intLotId
 				,@dtmNewDueDate = @dtmNewDueDate

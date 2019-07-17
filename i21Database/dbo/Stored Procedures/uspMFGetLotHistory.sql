@@ -201,8 +201,8 @@ BEGIN
 		,NULL AS strNewOwnerName
 		,NULL AS dtmNewDueDate
 		,NULL AS dtmOldDueDate
-		,NULL AS strNewLoadNo
 		,NULL AS strOldLoadNo
+		,NULL AS strNewLoadNo
 	FROM tblICLot l
 	JOIN tblICInventoryTransaction ilt ON ilt.intLotId = l.intLotId
 	JOIN tblICInventoryTransactionType itt ON itt.intTransactionTypeId = ilt.intTransactionTypeId
@@ -322,8 +322,8 @@ BEGIN
 		,NULL AS strNewOwnerName
 		,NULL AS dtmNewDueDate
 		,NULL AS dtmOldDueDate
-		,NULL AS strNewLoadNo
 		,NULL AS strOldLoadNo
+		,NULL AS strNewLoadNo
 	FROM tblICLot l
 	JOIN tblICInventoryTransactionStorage ilt ON ilt.intLotId = l.intLotId
 	JOIN tblICInventoryTransactionType itt ON itt.intTransactionTypeId = ilt.intTransactionTypeId
@@ -492,8 +492,8 @@ BEGIN
 			,NULL AS strNewOwnerName
 			,NULL AS dtmNewDueDate
 			,NULL AS dtmOldDueDate
-			,NULL AS strNewLoadNo
 			,NULL AS strOldLoadNo
+			,NULL AS strNewLoadNo
 		FROM tblICLot l
 		JOIN tblICInventoryTransaction ilt ON ilt.intLotId = l.intLotId
 		JOIN tblICInventoryTransactionType itt ON itt.intTransactionTypeId = ilt.intTransactionTypeId
@@ -584,8 +584,8 @@ BEGIN
 		,e2.strEntityNo + ' - ' + e2.strName AS strNewOwnerName
 		,NULL AS dtmNewDueDate
 		,NULL AS dtmOldDueDate
-		,NULL AS strNewLoadNo
 		,NULL AS strOldLoadNo
+		,NULL AS strNewLoadNo
 	FROM tblICInventoryAdjustment ia
 	LEFT JOIN tblICInventoryAdjustmentDetail iad ON ia.intInventoryAdjustmentId = iad.intInventoryAdjustmentId
 	LEFT JOIN tblICLot l ON l.intLotId = iad.intLotId
@@ -629,6 +629,8 @@ BEGIN
 				THEN 'Inventory Adjustment - Vendor Lot Number Change'
 			WHEN IA.intTransactionTypeId = 103
 				THEN 'Inventory Adjustment - Due Date'
+			WHEN IA.intTransactionTypeId = 105
+				THEN 'Inventory Adjustment - Load Number Change'
 			END AS strTransaction
 		,CONVERT(NUMERIC(38, 20), 0.0) AS dblWeight
 		,CONVERT(NUMERIC(38, 20), ISNULL(IA.dblQty, 0)) * L.dblWeightPerQty AS dblTransactionWeight
@@ -658,8 +660,8 @@ BEGIN
 		,NULL AS strNewOwnerName
 		,IA.dtmNewDueDate AS dtmNewDueDate
 		,IA.dtmOldDueDate AS dtmOldDueDate
-		,IA.strNewLoadNo AS strNewLoadNo
 		,IA.strOldLoadNo AS strOldLoadNo
+		,IA.strNewLoadNo AS strNewLoadNo
 	FROM tblMFInventoryAdjustment IA
 	JOIN tblICLot L ON L.intLotId = IA.intSourceLotId
 	JOIN tblICItem I ON I.intItemId = L.intItemId
@@ -718,8 +720,8 @@ BEGIN
 		,strNewOwnerName
 		,dtmNewDueDate
 		,dtmOldDueDate
-		,strNewLoadNo
 		,strOldLoadNo
+		,strNewLoadNo
 		)
 	SELECT dtmDateTime
 		,strLotNo
@@ -757,8 +759,8 @@ BEGIN
 		,strNewOwnerName
 		,dtmNewDueDate
 		,dtmOldDueDate
-		,strNewLoadNo
 		,strOldLoadNo
+		,strNewLoadNo
 	FROM #tempLotHistory LH
 	ORDER BY LH.dtmDateTime ASC
 
