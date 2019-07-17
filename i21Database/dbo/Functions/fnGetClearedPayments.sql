@@ -34,7 +34,10 @@ DECLARE @BANK_DEPOSIT INT = 1
 		,@DIRECT_DEPOSIT AS INT = 23
 		,@BANK_INTEREST INT = 51
 		,@BANK_LOAN INT = 52
+		,@LastReconDate DATETIME
 		,@returnBalance AS NUMERIC(18,6)
+
+SELECT TOP 1 @LastReconDate = MAX(dtmDateReconciled) FROM tblCMBankReconciliation WHERE intBankAccountId = @intBankAccountId
 		
 SELECT	@returnBalance = SUM(ABS(ISNULL(dblAmount, 0)))
 FROM	tblCMBankTransaction 
@@ -55,6 +58,10 @@ WHERE	ysnPosted = 1
 			intBankTransactionTypeId IN (@BANK_WITHDRAWAL, @NSF, @BANK_INTEREST,@BANK_LOAN, @MISC_CHECKS, @BANK_TRANSFER_WD, @ORIGIN_CHECKS, @ORIGIN_EFT, @ORIGIN_WITHDRAWAL, @ORIGIN_WIRE, @AP_PAYMENT, @AP_ECHECK, @PAYCHECK, @ACH, @DIRECT_DEPOSIT)
 			OR ( dblAmount < 0 AND intBankTransactionTypeId = @BANK_TRANSACTION )
 		)
+		AND 1 = CASE WHEN CAST(FLOOR(CAST(@LastReconDate AS FLOAT)) AS DATETIME)  >= CAST(FLOOR(CAST(@dtmStatementDate AS FLOAT)) AS DATETIME) AND dtmDateReconciled IS NULL 
+			THEN 0 
+			ELSE 1 
+			END
 
 RETURN ISNULL(@returnBalance, 0)
 
