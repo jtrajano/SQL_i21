@@ -571,6 +571,7 @@ BEGIN
 		,strItem
 		,strBundleType
 		,intEntityVendorId
+		,intReceiptEntityVendorId
 	)
 	AS 
 	(
@@ -604,6 +605,7 @@ BEGIN
 				,strItem = Item.strItemNo
 				,strBundleType = ISNULL(Item.strBundleType,'')
 				,intEntityVendorId = ReceiptCharges.intEntityVendorId 
+				,intReceiptEntityVendorId = Receipt.intEntityVendorId
 		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem 
 					ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 				INNER JOIN dbo.tblICInventoryReceiptItemAllocatedCharge AllocatedOtherCharges
@@ -707,7 +709,7 @@ BEGIN
 			,dblReportingRate			= NULL 
 			,dblForeignRate				= InventoryCostCharges.dblForexRate 
 			,strRateType				= InventoryCostCharges.strRateType
-			,intSourceEntityId			= InventoryCostCharges.intEntityVendorId
+			,intSourceEntityId			= CASE WHEN InventoryCostCharges.ysnPrice = 1 THEN InventoryCostCharges.intReceiptEntityVendorId ELSE InventoryCostCharges.intEntityVendorId END
 	FROM	InventoryCostCharges  
 			INNER JOIN @ItemGLAccounts ItemGLAccounts
 				ON InventoryCostCharges.intItemId = ItemGLAccounts.intItemId
@@ -767,7 +769,7 @@ BEGIN
 			,dblReportingRate			= NULL 
 			,dblForeignRate				= InventoryCostCharges.dblForexRate 
 			,strRateType				= InventoryCostCharges.strRateType
-			,intSourceEntityId			= InventoryCostCharges.intEntityVendorId
+			,intSourceEntityId			= CASE WHEN InventoryCostCharges.ysnPrice = 1 THEN InventoryCostCharges.intReceiptEntityVendorId ELSE InventoryCostCharges.intEntityVendorId END
 	FROM	InventoryCostCharges INNER JOIN @OtherChargesGLAccounts OtherChargesGLAccounts
 				ON InventoryCostCharges.intChargeId = OtherChargesGLAccounts.intChargeId
 				AND InventoryCostCharges.intChargeItemLocation = OtherChargesGLAccounts.intItemLocationId
@@ -1085,6 +1087,7 @@ BEGIN
 		,strRateType 
 		,strCharge 
 		,intEntityVendorId
+		,intReceiptEntityVendorId
 	)
 	AS 
 	(
@@ -1113,6 +1116,7 @@ BEGIN
 				,strRateType = currencyRateType.strCurrencyExchangeRateType
 				,strCharge = Charge.strItemNo
 				,intEntityVendorId = ReceiptCharges.intEntityVendorId
+				,intReceiptEntityVendorId = Receipt.intEntityVendorId
 		FROM	dbo.tblICInventoryReceipt Receipt 
 				INNER JOIN dbo.tblICInventoryReceiptCharge ReceiptCharges
 					ON ReceiptCharges.intInventoryReceiptId = Receipt.intInventoryReceiptId
@@ -1451,7 +1455,7 @@ BEGIN
 			,dblReportingRate			= NULL 
 			,dblForeignRate				= NonInventoryCostCharges.dblForexRate 
 			,strRateType				= NonInventoryCostCharges.strRateType
-			,intSourceEntityId			= NonInventoryCostCharges.intEntityVendorId
+			,intSourceEntityId			= NonInventoryCostCharges.intReceiptEntityVendorId
 	FROM	NonInventoryCostCharges INNER JOIN @OtherChargesGLAccounts OtherChargesGLAccounts
 				ON NonInventoryCostCharges.intChargeId = OtherChargesGLAccounts.intChargeId
 				AND NonInventoryCostCharges.intChargeItemLocation = OtherChargesGLAccounts.intItemLocationId
@@ -1507,7 +1511,7 @@ BEGIN
 			,dblReportingRate			= NULL 
 			,dblForeignRate				= NonInventoryCostCharges.dblForexRate 
 			,strRateType				= NonInventoryCostCharges.strRateType
-			,intSourceEntityId			= NonInventoryCostCharges.intEntityVendorId
+			,intSourceEntityId			= NonInventoryCostCharges.intReceiptEntityVendorId
 	FROM	NonInventoryCostCharges INNER JOIN @OtherChargesGLAccounts OtherChargesGLAccounts
 				ON NonInventoryCostCharges.intChargeId = OtherChargesGLAccounts.intChargeId
 				AND NonInventoryCostCharges.intChargeItemLocation = OtherChargesGLAccounts.intItemLocationId
