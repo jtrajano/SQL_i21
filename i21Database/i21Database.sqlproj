@@ -7848,6 +7848,8 @@
     <Build Include="dbo\Tables\tblTRImportLoad.sql" />
     <Build Include="dbo\Tables\tblTRImportLoadDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspTRImportLoad.sql" />
+    <Build Include="dbo\Tables\tblCTStagingItemContractDetail.sql" />
+    <Build Include="dbo\Tables\tblCTStagingItemContract.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
