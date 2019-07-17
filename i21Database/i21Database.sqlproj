@@ -7844,8 +7844,6 @@
     <Build Include="dbo\Stored Procedures\uspMFValidateDemand.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetDemandError.sql" />
     <Build Include="dbo\Views\vyuCTInventoryItemBundle.sql" />
-    <Build Include="dbo\Tables\tblTRImportLoad_1.sql" />
-    <Build Include="dbo\Tables\tblTRImportLoadDetail_1.sql" />
     <Build Include="dbo\Functions\fnTRMessageConcat.sql" />
     <Build Include="dbo\Tables\tblTRImportLoad.sql" />
     <Build Include="dbo\Tables\tblTRImportLoadDetail.sql" />
