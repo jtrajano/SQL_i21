@@ -49,8 +49,10 @@ BEGIN TRY
 	DECLARE @tblMFDemandHeaderImport TABLE (
 		intDemandHeaderImportId INT NOT NULL IDENTITY
 		,strDemandName NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL
+		,dtmDate datetime
 		,strBook NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		,strSubBook NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		,intCreatedUserId int
 		)
 	DECLARE @tblMFDemandDetailImport TABLE (
 		intDemandDetailImportId INT NOT NULL IDENTITY
