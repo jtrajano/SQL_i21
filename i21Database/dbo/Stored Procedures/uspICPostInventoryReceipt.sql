@@ -919,7 +919,7 @@ BEGIN
 					
 			IF EXISTS (SELECT TOP 1 1 FROM @ItemsForInTransitCosting)
 			BEGIN 
-				-- Call the post routine for the In-Transit costing. 
+				-- Call the post routine for the In-Transit costing (Inbound Shipment) 
 				INSERT INTO @GLEntries (
 						[dtmDate] 
 						,[strBatchId]
@@ -957,7 +957,7 @@ BEGIN
 				EXEC	@intReturnValue = dbo.uspICPostInTransitCosting  
 						@ItemsForInTransitCosting  
 						,@strBatchId  
-						,'Inventory' 
+						,NULL -- 'Inventory' 
 						,@intEntityUserSecurityId
 			END 
 
@@ -1217,7 +1217,7 @@ BEGIN
 			BEGIN 
 				-- In-Transit GL Entries from Inbound Shipment 
 				IF (@intSourceType = @SOURCE_TYPE_InboundShipment AND @strFobPoint = 'Origin')
-				BEGIN 
+				BEGIN 				
 					INSERT INTO @DummyGLEntries (
 							[dtmDate] 
 							,[strBatchId]
@@ -1260,8 +1260,53 @@ BEGIN
 							,@intEntityUserSecurityId
 
 					IF @intReturnValue < 0 GOTO With_Rollback_Exit
+
+					-- Create the GL entries for Inbound Shipment (Company Owned)
+					INSERT INTO @GLEntries (
+						[dtmDate] 
+						,[strBatchId]
+						,[intAccountId]
+						,[dblDebit]
+						,[dblCredit]
+						,[dblDebitUnit]
+						,[dblCreditUnit]
+						,[strDescription]
+						,[strCode]
+						,[strReference]
+						,[intCurrencyId]
+						,[dblExchangeRate]
+						,[dtmDateEntered]
+						,[dtmTransactionDate]
+						,[strJournalLineDescription]
+						,[intJournalLineNo]
+						,[ysnIsUnposted]
+						,[intUserId]
+						,[intEntityId]
+						,[strTransactionId]
+						,[intTransactionId]
+						,[strTransactionType]
+						,[strTransactionForm]
+						,[strModuleName]
+						,[intConcurrencyId]
+						,[dblDebitForeign]	
+						,[dblDebitReport]	
+						,[dblCreditForeign]	
+						,[dblCreditReport]	
+						,[dblReportingRate]	
+						,[dblForeignRate]
+						,[strRateType]
+						,[intSourceEntityId]
+					)
+					EXEC	@intReturnValue = uspICCreateGLEntries
+							@strBatchId 
+							,NULL 
+							,@intEntityUserSecurityId
+							--,DEFAULT 
+
+					IF @intReturnValue < 0 GOTO With_Rollback_Exit
 				END 
 
+				
 				-- In-Transit GL entries from Transfer Order 
 				ELSE IF (
 						@receiptType = @RECEIPT_TYPE_TRANSFER_ORDER
@@ -1320,7 +1365,7 @@ BEGIN
 					EXEC	@intReturnValue = dbo.uspICPostCosting  
 							@CompanyOwnedItemsForPost  
 							,@strBatchId  
-							,NULL -- @TRANSFER_ORDER_ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY 
+							,@TRANSFER_ORDER_ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY 
 							,@intEntityUserSecurityId
 
 					-- Create the GL entries for Transfer Order 
