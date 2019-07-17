@@ -7358,6 +7358,8 @@
     <Build Include="dbo\Views\vyuAPReceiptChargeClearing.sql" />
     <Build Include="dbo\Views\vyuAPREceiptClearing.sql" />
     <Build Include="dbo\Views\vyuAPShipmentChargeClearing.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPCreateVoucherForPendingPayable.sql" />
+    <Build Include="dbo\Views\vyuAPPendingPayables.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
