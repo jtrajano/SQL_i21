@@ -7843,6 +7843,7 @@
     <Build Include="dbo\Stored Procedures\uspMFImportDemand.sql" />
     <Build Include="dbo\Stored Procedures\uspMFValidateDemand.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetDemandError.sql" />
+    <Build Include="dbo\Views\vyuCTInventoryItemBundle.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
