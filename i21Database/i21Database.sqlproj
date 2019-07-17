@@ -7355,6 +7355,8 @@
     <Build Include="dbo\Tables\tblAPForClearing.sql" />
     <Build Include="dbo\Stored Procedures\uspAPCreateVoucherForClearing.sql" />
     <Build Include="dbo\Functions\fCTConvertUOMtoUnit.sql" />
+    <Build Include="dbo\Views\vyuAPPendingPayables.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPCreateVoucherForPendingPayable.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
