@@ -120,8 +120,6 @@ INNER JOIN (
 ) ON refundEntity.intBillId = bill.intBillId
 INNER JOIN vyuGLAccountDetail accnt
     ON billDetail.intAccountId = accnt.intAccountId AND accnt.intAccountCategoryId = 45
-WHERE 
-    bill.ysnPosted = 1 
 
 GO
 
