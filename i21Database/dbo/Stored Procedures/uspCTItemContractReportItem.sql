@@ -121,7 +121,6 @@ BEGIN TRY
 											THEN C.intEntityLocationId
 										ELSE 0
 									END
-			AND A.strContractCategoryId = 'Item'
 			AND A.intItemContractHeaderId = @intItemContractHeaderId
 
 	INSERT INTO @ItemContractItems
