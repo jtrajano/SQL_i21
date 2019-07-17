@@ -69,7 +69,6 @@ INSERT INTO @GLPost
     ,[intCommodityId]
     ,[intSourceEntityId]
     ,[ysnRebuild]
-	,[intSourceEntityId]
 )
 SELECT
      [dtmDate]
@@ -115,7 +114,6 @@ SELECT
     ,[intCommodityId]
     ,[intSourceEntityId]
     ,[ysnRebuild]
-	,[intSourceEntityId]
 FROM
 	#ARInvoiceGLEntries
 
