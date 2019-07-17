@@ -32,6 +32,33 @@
     [ysnDeleteFromRegister] BIT NULL, 
     [ysnSentToRuby] BIT NULL, 
     [dtmLastUpdateDate] DATETIME NULL, 
+
+	[intPricingTypeId] INT NULL,
+
+	[ysnWeekDayPromotionSunday] BIT,
+	[ysnWeekDayPromotionMonday] BIT,
+	[ysnWeekDayPromotionTuesday] BIT,
+	[ysnWeekDayPromotionWednesday] BIT,
+	[ysnWeekDayPromotionThursday] BIT,
+	[ysnWeekDayPromotionFriday] BIT,
+	[ysnWeekDayPromotionSaturday] BIT,
+
+	[dtmStartTimePromotionSunday] TIME,
+	[dtmStartTimePromotionMonday] TIME,
+	[dtmStartTimePromotionTuesday] TIME,
+	[dtmStartTimePromotionWednesday] TIME,
+	[dtmStartTimePromotionThursday] TIME,
+	[dtmStartTimePromotionFriday] TIME,
+	[dtmStartTimePromotionSaturday] TIME,
+	
+	[dtmEndTimePromotionSunday] TIME,
+	[dtmEndTimePromotionMonday] TIME,
+	[dtmEndTimePromotionTuesday] TIME,
+	[dtmEndTimePromotionWednesday] TIME,
+	[dtmEndTimePromotionThursday] TIME,
+	[dtmEndTimePromotionFriday] TIME,
+	[dtmEndTimePromotionSaturday] TIME,
+
     [intConcurrencyId] INT NOT NULL, 
     CONSTRAINT [PK_tblSTPromotionSalesList] PRIMARY KEY CLUSTERED ([intPromoSalesListId] ASC), 
     CONSTRAINT [AK_tblSTPromotionSalesList_intStoreId_strPromoType_intPromoSalesId] UNIQUE NONCLUSTERED([intStoreId],[strPromoType],[intPromoSalesId] ASC), 
