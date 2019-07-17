@@ -1,5 +1,5 @@
 ﻿
-CREATE PROCEDURE uspSMUpdateInterCompanyMapping
+CREATE PROCEDURE uspSMInterCompanyUpdateMapping
 @currentTransactionId INT,
 @referenceTransactionId INT,
 @referenceCompanyId INT = NULL --if not exist reverse
@@ -45,15 +45,31 @@ begin try
 				end
 		end
 
-		SET @intInterCompanyMappingId = SCOPE_IDENTITY()
-
 		commit tran
 
 
-		IF ISNULL(@intInterCompanyMappingId, 0) <> 0
+
+
+		DECLARE @intCurrentCompanyId INT;
+		SELECT @intCurrentCompanyId = intInterCompanyId FROM tblSMInterCompany WHERE UPPER(strDatabaseName) = UPPER(DB_NAME()) AND UPPER(strServerName) = UPPER(@@SERVERNAME);
+
+		IF ISNULL(@intCurrentCompanyId, 0) <> 0
 		BEGIN
-			EXEC dbo.[uspSMInterCompanyCopyRecords] @intInterCompanyMappingId, 'DMS';
-			EXEC dbo.[uspSMInterCompanyCopyRecords] @intInterCompanyMappingId, 'COMMENT';
+			--always get the first entry in tblSMInterCompanyMapping to prevent looping in A-B,B-C,C-A scenario
+			SELECT TOP 1 @intInterCompanyMappingId = intInterCompanyMappingId 
+			FROM tblSMInterCompanyMapping
+			WHERE ((intCurrentTransactionId = @currentTransactionId OR 
+					intReferenceTransactionId = @currentTransactionId) AND
+					(ISNULL(intReferenceCompanyId, 0) = 0 OR ISNULL(intReferenceCompanyId, 0) = @intCurrentCompanyId))
+				  OR 
+				  (intCurrentTransactionId = @currentTransactionId AND ISNULL(intReferenceCompanyId, 0) <> 0)
+			ORDER BY intCurrentTransactionId
+
+			IF ISNULL(@intInterCompanyMappingId, 0) <> 0
+			BEGIN
+				EXEC dbo.[uspSMInterCompanyCopyRecords] @intInterCompanyMappingId, 'DMS';
+				EXEC dbo.[uspSMInterCompanyCopyRecords] @intInterCompanyMappingId, 'COMMENT';
+			END
 		END
 
 	end try
