@@ -8,7 +8,8 @@ select
 	c.strBook,
 	c.strBookDescription,
 	c.ysnActive,
-	c.intItemId
+	c.intItemId,
+	c.intBundleId
 from 
 (
 
@@ -17,7 +18,8 @@ select
 		a.strBook, 
 		a.strBookDescription, 
 		a.ysnActive,
-		-99 as intItemId
+		-99 as intItemId,
+		-99 as intBundleId
 	from tblCTBook as a
 
 union all
@@ -26,9 +28,25 @@ select
 		a.strBook, 
 		a.strBookDescription, 
 		a.ysnActive,
-		b.intItemId
+		b.intItemId,
+		-99 as intBundleId
 	from tblCTBook as a
 	join tblICItemBook b
 		on a.intBookId = b.intBookId
 
+union all
+
+select 
+		a.intBookId, 
+		a.strBook, 
+		a.strBookDescription, 
+		a.ysnActive,
+		b.intItemId,
+		d.intItemId as intBundleId
+	from tblCTBook as a
+	join tblICItemBook b
+		on a.intBookId = b.intBookId	
+	JOIN vyuICGetBundleItem	d
+		ON	d.intBundleItemId =	b.intItemId
+	
 ) c
