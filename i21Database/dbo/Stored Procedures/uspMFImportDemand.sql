@@ -1,4 +1,5 @@
 ﻿CREATE PROCEDURE uspMFImportDemand @intLocationId INT = NULL
+	,@intUserId INT = NULL
 AS
 BEGIN TRY
 	SET QUOTED_IDENTIFIER OFF
@@ -21,7 +22,7 @@ BEGIN TRY
 		,@dblQuantity NUMERIC(18, 6)
 		,@strUnitMeasure NVARCHAR(50)
 		,@strLocationName NVARCHAR(50)
-		,@strUserName NVARCHAR(100)
+		,@intCreatedUserId INT
 		,@dtmCreated DATETIME
 		,@intBookId INT
 		,@intSubBookId INT
@@ -47,14 +48,9 @@ BEGIN TRY
 		,@dblDemandGrowthPerc NUMERIC(18, 6)
 	DECLARE @tblMFDemandHeaderImport TABLE (
 		intDemandHeaderImportId INT NOT NULL IDENTITY
-		,intConcurrencyId INT NULL
-		,strDemandNo NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 		,strDemandName NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL
-		,dtmDate DATETIME NOT NULL
 		,strBook NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		,strSubBook NVARCHAR(100) COLLATE Latin1_General_CI_AS
-		,strUserName NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL
-		,dtmCreated DATETIME NULL
 		)
 	DECLARE @tblMFDemandDetailImport TABLE (
 		intDemandDetailImportId INT NOT NULL IDENTITY
@@ -105,21 +101,17 @@ BEGIN TRY
 	BEGIN TRANSACTION
 
 	INSERT INTO @tblMFDemandHeaderImport (
-		strDemandNo
-		,strDemandName
+		strDemandName
 		,dtmDate
 		,strBook
 		,strSubBook
-		,strUserName
-		,dtmCreated
+		,intCreatedUserId
 		)
-	SELECT DISTINCT strDemandNo
-		,strDemandName
-		,CONVERT(DATETIME, dtmDate, @intConvertYear)
+	SELECT DISTINCT strDemandName
+		,CONVERT(DATETIME, GETDATE(), @intConvertYear)
 		,strBook
 		,strSubBook
-		,strUserName
-		,dtmCreated
+		,intCreatedUserId
 	FROM tblMFDemandImport
 
 	SELECT @intDemandHeaderImportId = MIN(intDemandHeaderImportId)
@@ -132,19 +124,17 @@ BEGIN TRY
 			,@dtmDate = NULL
 			,@strBook = NULL
 			,@strSubBook = NULL
-			,@strUserName = NULL
 			,@dtmCreated = NULL
 			,@intBookId = NULL
 			,@intSubBookId = NULL
 			,@intDemandHeaderId = NULL
+			,@intCreatedUserId = NULL
 
-		SELECT @strDemandNo = strDemandNo
-			,@strDemandName = strDemandName
+		SELECT @strDemandName = strDemandName
 			,@dtmDate = dtmDate
 			,@strBook = strBook
 			,@strSubBook = strSubBook
-			,@strUserName = strUserName
-			,@dtmCreated = dtmCreated
+			,@intCreatedUserId = intCreatedUserId
 		FROM @tblMFDemandHeaderImport
 		WHERE intDemandHeaderImportId = @intDemandHeaderImportId
 
@@ -162,10 +152,8 @@ BEGIN TRY
 
 		IF @intDemandHeaderId IS NULL
 		BEGIN
-			IF @strDemandNo IS NULL
-				OR @strDemandNo = ''
-				EXEC uspCTGetStartingNumber 'Demand'
-					,@strDemandNo OUTPUT
+			EXEC uspCTGetStartingNumber 'Demand'
+				,@strDemandNo OUTPUT
 
 			INSERT INTO tblMFDemandHeader (
 				intConcurrencyId

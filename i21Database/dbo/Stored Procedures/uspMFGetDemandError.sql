@@ -9,9 +9,7 @@ BEGIN
 
 	SELECT intDemandImportId
 		,intConcurrencyId
-		,strDemandNo
 		,strDemandName
-		,dtmDate
 		,strBook
 		,strSubBook
 		,strItemNo
@@ -20,7 +18,6 @@ BEGIN
 		,dblQuantity
 		,strUnitMeasure
 		,strLocationName
-		,strUserName
 		,dtmCreated
 		,strErrorMessage
 	FROM tblMFDemandImportError
