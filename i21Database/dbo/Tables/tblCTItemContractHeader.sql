@@ -2,7 +2,7 @@ CREATE TABLE [dbo].[tblCTItemContractHeader](
 	[intItemContractHeaderId]			[int] IDENTITY(1,1) NOT NULL,
 	[intConcurrencyId]					[int] NOT NULL,
 
-	[intContractPlanId]					[int],
+	[intContractPlanId]					[int] NULL,
 	[intContractTypeId]					[int] NOT NULL,
 	[strContractCategoryId]				[nvarchar](50) COLLATE Latin1_General_CI_AS NOT NULL,
 	[intEntityId]						[int] NOT NULL,

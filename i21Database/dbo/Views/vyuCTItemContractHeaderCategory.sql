@@ -6,6 +6,7 @@ AS
 	FROM	(
 				SELECT	
 						IC.strCategoryCode,
+						IC.strDescription,
 						CH.*						
 
 					FROM	tblCTItemContractHeaderCategory			CH					
