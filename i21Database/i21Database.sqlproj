@@ -7852,6 +7852,11 @@
     <Build Include="dbo\Tables\tblCTStagingItemContract.sql" />
     <Build Include="dbo\Stored Procedures\uspAPCreateVoucherForPendingPayable.sql" />
     <Build Include="dbo\Views\vyuAPPendingPayables.sql" />
+    <Build Include="dbo\Tables\tblMFDemandHeader.sql" />
+    <Build Include="dbo\Tables\tblMFDemandDetail.sql" />
+    <Build Include="dbo\Views\vyuMFGetDemandEntry.sql" />
+    <Build Include="dbo\Views\vyuMFGetDemandSubstituteItem.sql" />
+    <Build Include="dbo\Views\vyuMFGetDemandMainItem.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
