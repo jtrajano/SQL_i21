@@ -13,7 +13,7 @@
 AS
 
 BEGIN TRY
-	
+
 	BEGIN TRAN
 
 	DECLARE @ErrMsg					NVARCHAR(MAX)
@@ -25,6 +25,14 @@ BEGIN TRY
 	DECLARE @dblShipQtyToAllocate	NUMERIC(38,20)
 	DECLARE @dblAllocatedQty		NUMERIC(38,20)
 	DECLARE @dblPriceQtyToAllocate  NUMERIC(38,20)
+
+	IF EXISTS(SELECT TOP 1 1 FROM tblCTCompanyPreference WHERE ysnContractBalanceInProgress = 1)
+	BEGIN
+		SET @ErrMsg = '"Contract summary is being accumulated, please wait...'
+		RAISERROR (@ErrMsg,18,1,'WITH NOWAIT')  	
+	END
+	-- SET "CONTRACT BALANCE" STATUS IN-PROGRESS TO AVOID SIMULTANEOUS REPORT BUILDING 
+	UPDATE tblCTCompanyPreference SET ysnContractBalanceInProgress = 1
 
 	DECLARE @SequenceHistory TABLE
 	(
@@ -1358,7 +1366,7 @@ BEGIN TRY
 	AND dtmEndDate			=  @dtmEndDate
 	END
  
-
+	UPDATE tblCTCompanyPreference SET ysnContractBalanceInProgress = 0
 
 END TRY
 
