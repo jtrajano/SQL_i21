@@ -124,6 +124,8 @@ BEGIN TRY
 	BEGIN
 		EXEC uspCTProcessApprovedContractToFeed @intApprovedContractId
 		
+		EXEC uspCTManagePayable @intContractHeaderId, 'header', 0
+		
 		SELECT @intApprovedContractId = MIN(intApprovedContractId) FROM @SCOPE_IDENTITY WHERE intApprovedContractId > @intApprovedContractId
 	END
 
