@@ -148,7 +148,7 @@ SELECT	intBankAccountId = BankTrans.intBankAccountId
 		,strMemo = BankTrans.strMemo
 		,strRecordNo = BankTrans.strTransactionId
 		,dblPayment = 0
-		,dblDeposit = ABS(BankTrans.dblAmount)
+		,dblDeposit = BankTrans.dblAmount
 		,intBankTransactionTypeId = BankTrans.intBankTransactionTypeId
 		,strBankTransactionTypeName = BankTypes.strBankTransactionTypeName
 FROM	[dbo].[tblCMBankTransaction] BankTrans INNER JOIN [dbo].[tblCMBankAccount] BankAccnt
