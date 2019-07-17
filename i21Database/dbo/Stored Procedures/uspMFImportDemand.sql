@@ -152,6 +152,19 @@ BEGIN TRY
 
 		IF @intDemandHeaderId IS NULL
 		BEGIN
+			EXEC dbo.uspMFGeneratePatternId @intCategoryId = NULL
+				,@intItemId = NULL
+				,@intManufacturingId = NULL
+				,@intSubLocationId = NULL
+				,@intLocationId = @intLocationId
+				,@intOrderTypeId = NULL
+				,@intBlendRequirementId = NULL
+				,@intPatternCode = 145
+				,@ysnProposed = 0
+				,@strPatternString = @strDemandNo OUTPUT
+				,@intShiftId = NULL
+				,@dtmDate = @dtmDate
+
 			EXEC uspCTGetStartingNumber 'Demand'
 				,@strDemandNo OUTPUT
 
