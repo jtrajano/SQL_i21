@@ -138,7 +138,6 @@ LEFT JOIN
         ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId
 )
     ON itemUOM.intItemUOMId = CS.intItemUOMId
-WHERE bill.ysnPosted = 1
 UNION ALL --Charges
 SELECT 
 	CS.intEntityId AS intEntityVendorId
@@ -247,7 +246,6 @@ LEFT JOIN
         ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId
 )
     ON itemUOM.intItemUOMId = CS.intItemUOMId
-WHERE bill.ysnPosted = 1
 UNION ALL --DISCOUNTS
 SELECT 
 	CS.intEntityId AS intEntityVendorId
@@ -384,4 +382,3 @@ LEFT JOIN
         ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId
 )
     ON itemUOM.intItemUOMId = CS.intItemUOMId
-WHERE bill.ysnPosted = 1

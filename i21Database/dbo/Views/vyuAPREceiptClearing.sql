@@ -286,7 +286,6 @@ LEFT JOIN (
 WHERE 
     billDetail.intInventoryReceiptItemId IS NOT NULL
 AND billDetail.intInventoryReceiptChargeId IS NULL
-AND bill.ysnPosted = 1 --voucher should be posted in 18.3
 AND 1 = (CASE WHEN receipt.intSourceType = 2 AND ft.intFreightTermId > 0 AND ft.strFobPoint = 'Origin' THEN 0 ELSE 1 END) --Inbound Shipment
 AND receipt.strReceiptType != 'Transfer Order'
 AND receiptItem.intOwnershipType != 2

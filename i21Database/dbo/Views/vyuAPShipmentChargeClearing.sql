@@ -116,4 +116,3 @@ OUTER APPLY (
 ) APClearing
 WHERE   
     billDetail.intInventoryShipmentChargeId IS NOT NULL  
-AND bill.ysnPosted = 1
