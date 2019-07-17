@@ -7850,6 +7850,8 @@
     <Build Include="dbo\Stored Procedures\uspTRImportLoad.sql" />
     <Build Include="dbo\Tables\tblCTStagingItemContractDetail.sql" />
     <Build Include="dbo\Tables\tblCTStagingItemContract.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPCreateVoucherForPendingPayable.sql" />
+    <Build Include="dbo\Views\vyuAPPendingPayables.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
