@@ -6,6 +6,7 @@
 	,@intContraInventory_ItemLocationId AS INT = NULL 
 	,@intRebuildItemId AS INT = NULL -- This is only used when rebuilding the stocks. 
 	,@strRebuildTransactionId AS NVARCHAR(50) = NULL -- This is only used when rebuilding the stocks. 
+	,@intRebuildCategoryId AS INT = NULL -- This is only used when rebuilding the stocks. 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -59,19 +60,24 @@ FROM	(
 					, t.intTransactionTypeId
 			FROM (
 				-- regular inventory transactions 
-				SELECT	intItemId, intItemLocationId, intTransactionTypeId
-				FROM	dbo.tblICInventoryTransaction t 
+				SELECT	t.intItemId, t.intItemLocationId, t.intTransactionTypeId
+				FROM	dbo.tblICInventoryTransaction t INNER JOIN tblICItem i
+							ON t.intItemId = i.intItemId
 				WHERE	t.strBatchId = @strBatchId
 						AND t.strTransactionId = ISNULL(@strRebuildTransactionId, t.strTransactionId)
 						AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId) 
+						AND ISNULL(i.intCategoryId, 0) = COALESCE(@intRebuildCategoryId, i.intCategoryId, 0) 
 				-- inventory-adj-qty-change transactions involved in the item return. 
 				UNION ALL 
 				SELECT	DISTINCT t.intItemId, t.intItemLocationId, t.intTransactionTypeId
 				FROM	dbo.tblICInventoryTransaction t INNER JOIN tblICInventoryReturned rtn 
 							ON t.intInventoryTransactionId = rtn.intInventoryTransactionId
+						INNER JOIN tblICItem i
+							ON t.intItemId = i.intItemId
 				WHERE	rtn.strBatchId = @strBatchId
 						AND rtn.strTransactionId = ISNULL(@strRebuildTransactionId, rtn.strTransactionId)
 						AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId)
+						AND ISNULL(i.intCategoryId, 0) = COALESCE(@intRebuildCategoryId, i.intCategoryId, 0) 
 			) t 			
 		) Query
 
@@ -190,11 +196,14 @@ BEGIN
 				SELECT	TOP 1 1 
 				FROM	dbo.tblICInventoryTransaction t INNER JOIN dbo.tblICInventoryTransactionType TransType
 							ON t.intTransactionTypeId = TransType.intTransactionTypeId
+						INNER JOIN tblICItem i 
+							ON i.intItemId = t.intItemId
 				WHERE	t.strBatchId = @strBatchId
 						AND TransType.intTransactionTypeId IN (@InventoryTransactionTypeId_AutoNegative, @InventoryTransactionTypeId_Auto_Variance_On_Sold_Or_Used_Stock)
 						AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId) 
 						AND t.intItemId = Item.intItemId
 						AND t.dblQty * t.dblCost + t.dblValue <> 0
+						AND ISNULL(i.intCategoryId, 0) = COALESCE(@intRebuildCategoryId, i.intCategoryId, 0) 
 			)
 
 	SELECT	TOP 1 
@@ -452,7 +461,7 @@ AS
 				ON currencyRateType.intCurrencyExchangeRateTypeId = ri.intForexRateTypeId
 	WHERE	t.strBatchId = @strBatchId
 			AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId) 
-
+			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intRebuildCategoryId, i.intCategoryId, 0) 
 	-- Load the Inventory-Adjustment
 	UNION ALL 
 	SELECT	
@@ -492,6 +501,7 @@ AS
 				ON currencyRateType.intCurrencyExchangeRateTypeId = t.intForexRateTypeId
 	WHERE	t.strBatchId = @strBatchId
 			AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId) 
+			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intRebuildCategoryId, i.intCategoryId, 0) 
 			AND t.intTransactionTypeId IN (
 				@InventoryTransactionTypeId_WriteOffSold
 				, @InventoryTransactionTypeId_RevalueSold
