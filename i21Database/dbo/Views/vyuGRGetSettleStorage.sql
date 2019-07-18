@@ -47,7 +47,12 @@ SELECT DISTINCT
 										CASE
 											WHEN CS.intDeliverySheetId IS NOT NULL AND CS.ysnTransferStorage = 0 THEN CS.intDeliverySheetId
 											WHEN CS.intTicketId IS NOT NULL AND CS.ysnTransferStorage = 0 THEN CS.intTicketId
-											ELSE TSS.intTransferStorageId
+											ELSE 
+												CASE 
+													WHEN TSS.intTransferStorageId IS NULL 
+														THEN (SELECT intTransferStorageId FROM tblGRTransferStorageReference WHERE intToCustomerStorageId = CS.intCustomerStorageId)
+													ELSE TSS.intTransferStorageId
+												END			
 										END
 								END
 	,CASE 
@@ -56,7 +61,14 @@ SELECT DISTINCT
 										CASE
 											WHEN CS.intDeliverySheetId IS NOT NULL AND CS.ysnTransferStorage = 0 THEN DeliverySheet.strDeliverySheetNumber
 											WHEN CS.intTicketId IS NOT NULL AND CS.ysnTransferStorage = 0 THEN SC.strTicketNumber
-											ELSE TS.strTransferStorageTicket
+											ELSE 
+												CASE 
+													WHEN TS.strTransferStorageTicket IS NULL 
+														THEN (SELECT strTransferStorageTicket FROM tblGRTransferStorage WHERE intTransferStorageId = 
+																(SELECT intTransferStorageId FROM tblGRTransferStorageReference WHERE intToCustomerStorageId = CS.intCustomerStorageId)
+															)
+													ELSE TS.strTransferStorageTicket
+												END
 										END 
 								END COLLATE Latin1_General_CI_AS AS strTransactionNumber
 	,CASE 
