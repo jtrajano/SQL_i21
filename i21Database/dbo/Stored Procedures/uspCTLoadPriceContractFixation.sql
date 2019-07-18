@@ -112,7 +112,7 @@ BEGIN TRY
 				PF.intFinalPriceUOMId,
 				PF.ysnSplit,
 
-				(SELECT SUM(dblQuantity) FROM tblCTContractDetail WHERE CD.intContractDetailId IN (intContractDetailId,intSplitFromId)) AS dblQuantity,
+				(SELECT SUM(dblQuantity) FROM tblCTContractDetail WHERE CD.intContractDetailId IN (intContractDetailId)) AS dblQuantity, -- ,intSplitFromId
 				CD.strPriceUOM,
 				CD.strItemUOM,
 				CD.intItemUOMId,

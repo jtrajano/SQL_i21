@@ -140,7 +140,7 @@ AS
 		AND			ISNULL(ysnMultiplePriceFixation,0) = 0
 		AND			intContractDetailId NOT IN (SELECT ISNULL(intContractDetailId,0) FROM tblCTPriceFixation)
 		AND			CD.intContractStatusId <> 3
-		AND			CD.intSplitFromId	IS NULL
+		--AND			CD.intSplitFromId	IS NULL
 		AND			CD.intContractStatusId NOT IN (2,3)
 
 		UNION ALL
