@@ -95,5 +95,6 @@ CREATE NONCLUSTERED INDEX [IX_tblAPVoucherPayableCompleted_deleteIX]
 								,intInventoryShipmentChargeId
 								,intCustomerStorageId
 								,intLoadShipmentDetailId 
-								,intLoadShipmentCostId ASC);
+								,intLoadShipmentCostId
+								,intItemId DESC);
 GO
