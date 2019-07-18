@@ -2229,12 +2229,6 @@ IF ((SELECT TOP 1 ysnIncludeInTransitInCompanyTitled FROM tblRKCompanyPreference
 ---------------- end
 			END
 		
-			DECLARE @intUnitMeasureId INT
-				, @strUnitMeasure NVARCHAR(250)
-			
-			SELECT TOP 1 @intUnitMeasureId = intUnitMeasureId FROM tblRKCompanyPreference
-			SELECT @strUnitMeasure = strUnitMeasure FROM tblICUnitMeasure WHERE intUnitMeasureId = @intUnitMeasureId
-		
 			IF @ysnDisplayAllStorage = 0
 			BEGIN
 				INSERT INTO @FinalTable (intSeqId
@@ -2282,8 +2276,8 @@ IF ((SELECT TOP 1 ysnIncludeInTransitInCompanyTitled FROM tblRKCompanyPreference
 					, strSeqHeader
 					, strCommodityCode
 					, strType
-					, dblTotal = CONVERT(DECIMAL(24,10), dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc.intCommodityUnitMeasureId, CASE WHEN ISNULL(@intUnitMeasureId,0) = 0 THEN cuc.intCommodityUnitMeasureId ELSE cuc1.intCommodityUnitMeasureId END, dblTotal))
-					, strUnitMeasure = isnull(@strUnitMeasure, um.strUnitMeasure)
+					, dblTotal
+					, um.strUnitMeasure
 					, intCollateralId
 					, strLocationName
 					, strCustomerName
@@ -2322,7 +2316,6 @@ IF ((SELECT TOP 1 ysnIncludeInTransitInCompanyTitled FROM tblRKCompanyPreference
 				FROM @Final t
 				LEFT JOIN tblICCommodityUnitMeasure cuc ON t.intCommodityId = cuc.intCommodityId AND cuc.ysnDefault = 1
 				LEFT JOIN tblICUnitMeasure um ON um.intUnitMeasureId = cuc.intUnitMeasureId
-				LEFT JOIN tblICCommodityUnitMeasure cuc1 ON t.intCommodityId = cuc1.intCommodityId AND @intUnitMeasureId = cuc1.intUnitMeasureId
 				WHERE t.intCommodityId = @intCommodityId AND ISNULL(dblTotal, 0) <> 0
 				ORDER BY intSeqId, strContractEndMonth, strDeliveryDate
 			END
@@ -2373,8 +2366,8 @@ IF ((SELECT TOP 1 ysnIncludeInTransitInCompanyTitled FROM tblRKCompanyPreference
 					, strSeqHeader
 					, strCommodityCode
 					, strType
-					, dblTotal = CONVERT(DECIMAL(24, 10), dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc.intCommodityUnitMeasureId, CASE WHEN ISNULL(@intUnitMeasureId,0) = 0 THEN cuc.intCommodityUnitMeasureId ELSE cuc1.intCommodityUnitMeasureId END, dblTotal))
-					, strUnitMeasure = ISNULL(@strUnitMeasure, um.strUnitMeasure)
+					, dblTotal
+					, um.strUnitMeasure
 					, intCollateralId
 					, strLocationName
 					, strCustomerName
@@ -2413,7 +2406,6 @@ IF ((SELECT TOP 1 ysnIncludeInTransitInCompanyTitled FROM tblRKCompanyPreference
 				FROM @Final t
 				LEFT JOIN tblICCommodityUnitMeasure cuc ON t.intCommodityId = cuc.intCommodityId AND cuc.ysnDefault = 1
 				LEFT JOIN tblICUnitMeasure um ON um.intUnitMeasureId = cuc.intUnitMeasureId
-				LEFT JOIN tblICCommodityUnitMeasure cuc1 ON t.intCommodityId = cuc1.intCommodityId AND @intUnitMeasureId = cuc1.intUnitMeasureId
 				WHERE t.intCommodityId = @intCommodityId AND intSeqId <> 5 AND dblTotal <> 0
 			
 				UNION ALL
@@ -2421,8 +2413,8 @@ IF ((SELECT TOP 1 ysnIncludeInTransitInCompanyTitled FROM tblRKCompanyPreference
 					, strSeqHeader
 					, strCommodityCode
 					, strType
-					, dblTotal = CONVERT(DECIMAL(24, 10), dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc.intCommodityUnitMeasureId, CASE WHEN ISNULL(@intUnitMeasureId, 0) = 0 THEN cuc.intCommodityUnitMeasureId ELSE cuc1.intCommodityUnitMeasureId END, dblTotal))
-					, strUnitMeasure = ISNULL(@strUnitMeasure, um.strUnitMeasure)
+					, dblTotal
+					, um.strUnitMeasure
 					, intCollateralId
 					, strLocationName
 					, strCustomerName
@@ -2461,7 +2453,6 @@ IF ((SELECT TOP 1 ysnIncludeInTransitInCompanyTitled FROM tblRKCompanyPreference
 				FROM @Final t
 				LEFT JOIN tblICCommodityUnitMeasure cuc ON t.intCommodityId = cuc.intCommodityId AND cuc.ysnDefault = 1
 				LEFT JOIN tblICUnitMeasure um ON um.intUnitMeasureId = cuc.intUnitMeasureId
-				LEFT JOIN tblICCommodityUnitMeasure cuc1 ON t.intCommodityId = cuc1.intCommodityId AND @intUnitMeasureId = cuc1.intUnitMeasureId
 				WHERE t.intCommodityId = @intCommodityId AND intSeqId = 5
 				ORDER BY intSeqId, strContractEndMonth, strDeliveryDate
 			END

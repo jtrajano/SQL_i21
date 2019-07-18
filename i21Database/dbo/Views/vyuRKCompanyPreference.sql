@@ -2,8 +2,7 @@
 
 AS
 
-SELECT A.* 
-	, B.strUnitMeasure
+SELECT A.*
 	, C.strInterfaceSystem
 	, D.strCurrency
 	, GL1.strAccountId strUnrealizedGainOnBasisId
@@ -38,7 +37,6 @@ SELECT A.*
 								WHEN intMarkExpiredMonthPositionId = 2 THEN 'Spot Month'
 								WHEN intMarkExpiredMonthPositionId = 3 THEN 'Nearby by Roll' END
 FROM tblRKCompanyPreference A
-LEFT JOIN tblICUnitMeasure B ON B.intUnitMeasureId = A.intUnitMeasureId
 LEFT JOIN tblRKInterfaceSystem C ON C.intInterfaceSystemId = A.intInterfaceSystemId
 LEFT JOIN tblSMCurrency D ON D.intCurrencyID = A.intCurrencyId
 LEFT JOIN tblGLAccount GL1 ON GL1.intAccountId = A.intUnrealizedGainOnBasisId
