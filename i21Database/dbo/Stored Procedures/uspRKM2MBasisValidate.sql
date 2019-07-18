@@ -317,10 +317,54 @@ BEGIN TRY
 				SELECT @PreviousErrMsg = strErrMessage
 				FROM tblRKM2MBasisImport_ErrLog
 				WHERE strItemNo = @strItemNo
+					AND strCommodityCode = @strCommodityCode
 				
 				UPDATE tblRKM2MBasisImport_ErrLog
 				SET strErrMessage = @PreviousErrMsg + 'Item (' + strItemNo + ') not configure the commodity (' + strCommodityCode + ').'
 				WHERE strItemNo = @strItemNo AND strCommodityCode = @strCommodityCode
+			END
+		END
+
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblRKCommodityMarketMapping MC
+					JOIN tblRKFutureMarket FM ON FM.intFutureMarketId = MC.intFutureMarketId
+					JOIN tblICCommodity C ON C.intCommodityId = MC.intCommodityId
+					WHERE FM.strFutMarketName = @strFutMarketName AND C.strCommodityCode = @strCommodityCode)
+		BEGIN
+			IF NOT EXISTS(SELECT TOP 1 1 FROM tblRKM2MBasisImport_ErrLog WHERE strFutMarketName = @strFutMarketName AND strCommodityCode = @strCommodityCode)
+			BEGIN
+				INSERT INTO tblRKM2MBasisImport_ErrLog (strFutMarketName
+					, strCommodityCode
+					, strItemNo
+					, strCurrency
+					, dblBasis
+					, strUnitMeasure
+					, strLocationName
+					, strMarketZone
+					, strPeriodTo
+					, strErrMessage)
+				SELECT strFutMarketName
+					, strCommodityCode
+					, strItemNo
+					, strCurrency
+					, dblBasis
+					, strUnitMeasure
+					, strLocationName
+					, strMarketZone
+					, strPeriodTo
+					, 'Future Market (' + strItemNo + ') is not configured for commodity (' + strCommodityCode + ').'
+				FROM tblRKM2MBasisImport
+				WHERE strItemNo = @strItemNo AND strCommodityCode = @strCommodityCode
+			END
+			ELSE
+			BEGIN
+				SELECT @PreviousErrMsg = strErrMessage
+				FROM tblRKM2MBasisImport_ErrLog
+				WHERE strCommodityCode = @strCommodityCode
+					AND strFutMarketName = @strFutMarketName
+				
+				UPDATE tblRKM2MBasisImport_ErrLog
+				SET strErrMessage = @PreviousErrMsg + 'Future Market (' + strItemNo + ') is not configured for commodity (' + strCommodityCode + ').'
+				WHERE strCommodityCode = @strCommodityCode AND strFutMarketName = @strFutMarketName
 			END
 		END
 		
