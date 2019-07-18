@@ -477,6 +477,7 @@ BEGIN
 	DECLARE @ItemsForPost AS ItemCostingTableType  
 	DECLARE @CompanyOwnedItemsForPost AS ItemCostingTableType  
 	DECLARE @ReturnItemsForPost AS ItemCostingTableType  
+	DECLARE @NonInventoryItemsForPost AS ItemCostingTableType  
 
 	DECLARE @StorageItemsForPost AS ItemCostingTableType  
 
@@ -549,7 +550,7 @@ BEGIN
 		GOTO With_Rollback_Exit;
 	END
 
-	-- Get company owned items to post. 
+	-- Get the items to post. 
 	BEGIN 
 		INSERT INTO @ItemsForPost (  
 				intItemId  
@@ -764,6 +765,8 @@ BEGIN
 					)
 		FROM	dbo.tblICInventoryReceipt Header INNER JOIN dbo.tblICInventoryReceiptItem DetailItem 
 					ON Header.intInventoryReceiptId = DetailItem.intInventoryReceiptId 
+				INNER JOIN tblICItem i 
+					ON DetailItem.intItemId = i.intItemId 
 				INNER JOIN dbo.tblICItemLocation ItemLocation
 					ON ItemLocation.intLocationId = (
 						CASE WHEN Header.strReceiptNumber = @RECEIPT_TYPE_TRANSFER_ORDER THEN Header.intTransferorId ELSE Header.intLocationId END 
@@ -795,8 +798,6 @@ BEGIN
 				LEFT JOIN dbo.tblICItemLocation InTransitSourceLocation 
 					ON InTransitSourceLocation.intItemId = DetailItem.intItemId 
 					AND InTransitSourceLocation.intLocationId = Header.intTransferorId
-				LEFT JOIN tblICItem i 
-					ON DetailItem.intItemId = i.intItemId 
 
 		WHERE	Header.intInventoryReceiptId = @intTransactionId   
 				AND ISNULL(DetailItem.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own
@@ -818,6 +819,93 @@ BEGIN
 			FROM	@ItemsForPost itemCost
 			WHERE	itemCost.intCurrencyId <> @intFunctionalCurrencyId 
 		END
+	END
+
+	-- Get the non-inventory items
+	BEGIN 
+		INSERT INTO @NonInventoryItemsForPost (
+			[intItemId] 
+			,[intItemLocationId] 
+			,[intItemUOMId] 
+			,[dtmDate] 
+			,[dblQty] 
+			,[dblUOMQty] 
+			,[dblCost] 
+			,[dblValue]
+			,[dblSalesPrice] 
+			,[intCurrencyId] 
+			,[dblExchangeRate] 
+			,[intTransactionId] 
+			,[intTransactionDetailId] 
+			,[strTransactionId] 
+			,[intTransactionTypeId] 
+			,[intLotId] 
+			,[intSubLocationId] 
+			,[intStorageLocationId] 
+			,[ysnIsStorage] 
+			,[strActualCostId] 
+			,[intSourceTransactionId] 
+			,[strSourceTransactionId] 
+			,[intInTransitSourceLocationId] 
+			,[intForexRateTypeId] 
+			,[dblForexRate] 
+			,[intStorageScheduleTypeId] 
+			,[dblUnitRetail] 
+			,[intCategoryId] 
+			,[dblAdjustCostValue] 
+			,[dblAdjustRetailValue] 
+			,[intCostingMethod] 
+			,[ysnAllowVoucher] 
+		)
+		SELECT 
+			itemsToPost.intItemId
+			,itemsToPost.intItemLocationId
+			,itemsToPost.intItemUOMId
+			,itemsToPost.dtmDate
+			,itemsToPost.dblQty
+			,itemsToPost.dblUOMQty
+			,itemsToPost.dblCost
+			,itemsToPost.dblValue
+			,itemsToPost.dblSalesPrice
+			,itemsToPost.intCurrencyId
+			,itemsToPost.dblExchangeRate
+			,itemsToPost.intTransactionId
+			,itemsToPost.intTransactionDetailId
+			,itemsToPost.strTransactionId
+			,itemsToPost.intTransactionTypeId
+			,itemsToPost.intLotId
+			,itemsToPost.intSubLocationId
+			,itemsToPost.intStorageLocationId
+			,itemsToPost.ysnIsStorage
+			,itemsToPost.strActualCostId
+			,itemsToPost.intSourceTransactionId
+			,itemsToPost.strSourceTransactionId
+			,itemsToPost.intInTransitSourceLocationId
+			,itemsToPost.intForexRateTypeId
+			,itemsToPost.dblForexRate
+			,itemsToPost.intStorageScheduleTypeId
+			,itemsToPost.dblUnitRetail
+			,itemsToPost.intCategoryId
+			,itemsToPost.dblAdjustCostValue
+			,itemsToPost.dblAdjustRetailValue
+			,itemsToPost.intCostingMethod
+			,itemsToPost.ysnAllowVoucher
+		FROM	
+			@ItemsForPost itemsToPost INNER JOIN tblICItem i 
+				ON itemsToPost.intItemId = i.intItemId
+		WHERE
+			i.strType = 'Non-Inventory'
+	END 
+
+	-- Process the company owned-stocks. 
+	BEGIN
+		-- Remove the non-inventory types from @ItemsForPost. 
+		DELETE itemsToPost
+		FROM	
+			@ItemsForPost itemsToPost INNER JOIN tblICItem i 
+				ON itemsToPost.intItemId = i.intItemId
+		WHERE
+			i.strType = 'Non-Inventory'
 
 		-- Reduce In-Transit stocks coming from Inbound Shipment. 
 		IF	(@intSourceType = @SOURCE_TYPE_InboundShipment) 
@@ -1848,6 +1936,51 @@ BEGIN
 			,@intEntityUserSecurityId
 			,@INVENTORY_RECEIPT_TYPE		
 	END 
+
+	-- Process the GL Entries for the Non-Stock Items
+	BEGIN 
+		INSERT INTO @GLEntries (
+				[dtmDate] 
+				,[strBatchId]
+				,[intAccountId]
+				,[dblDebit]
+				,[dblCredit]
+				,[dblDebitUnit]
+				,[dblCreditUnit]
+				,[strDescription]
+				,[strCode]
+				,[strReference]
+				,[intCurrencyId]
+				,[dblExchangeRate]
+				,[dtmDateEntered]
+				,[dtmTransactionDate]
+				,[strJournalLineDescription]
+				,[intJournalLineNo]
+				,[ysnIsUnposted]
+				,[intUserId]
+				,[intEntityId]
+				,[strTransactionId]
+				,[intTransactionId]
+				,[strTransactionType]
+				,[strTransactionForm]
+				,[strModuleName]
+				,[intConcurrencyId]
+				,[dblDebitForeign]	
+				,[dblDebitReport]	
+				,[dblCreditForeign]	
+				,[dblCreditReport]	
+				,[dblReportingRate]	
+				,[dblForeignRate]
+				,[strRateType]
+		)
+		EXEC	@intReturnValue = uspICCreateReceiptGLEntriesForNonStockItems
+					@NonInventoryItemsForPost 
+					,@strBatchId 
+					,@intTransactionId 
+					,@intEntityUserSecurityId 					
+
+		IF @intReturnValue < 0 GOTO With_Rollback_Exit
+	END
 END   
 
 --------------------------------------------------------------------------------------------  
@@ -1862,6 +1995,50 @@ BEGIN
 			AND @receiptType <> @RECEIPT_TYPE_PURCHASE_CONTRACT
 		)
 	BEGIN 
+		-- Unpost the non-inventory items
+		BEGIN 
+			INSERT INTO @GLEntries (
+				[dtmDate] 
+				,[strBatchId]
+				,[intAccountId]
+				,[dblDebit]
+				,[dblCredit]
+				,[dblDebitUnit]
+				,[dblCreditUnit]
+				,[strDescription]
+				,[strCode]
+				,[strReference]
+				,[intCurrencyId]
+				,[dblExchangeRate]
+				,[dtmDateEntered]
+				,[dtmTransactionDate]
+				,[strJournalLineDescription]
+				,[intJournalLineNo]
+				,[ysnIsUnposted]
+				,[intUserId]
+				,[intEntityId]
+				,[strTransactionId]
+				,[intTransactionId]
+				,[strTransactionType]
+				,[strTransactionForm]
+				,[strModuleName]
+				,[intConcurrencyId]
+				,[dblDebitForeign]	
+				,[dblDebitReport]	
+				,[dblCreditForeign]	
+				,[dblCreditReport]	
+				,[dblReportingRate]	
+				,[dblForeignRate]
+				,[strRateType]
+			)				
+			EXEC dbo.uspICCreateReversalGLEntriesForNonStockItems
+				@strBatchId
+				,@intTransactionId
+				,@strTransactionId
+				,@intEntityUserSecurityId
+			;
+		END 
+
 		-- Unpost the company owned stocks. 
 		INSERT INTO @GLEntries (
 				[dtmDate] 

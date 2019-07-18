@@ -40,76 +40,58 @@ BEGIN
 			) Query
 END 
 
-
-
 BEGIN 
 	-------------------------------------------------------------------------------------------
 	-- Reverse the G/L entries for the main transactions
 	-------------------------------------------------------------------------------------------
 	SELECT	
-			dtmDate						= GLEntries.dtmDate
-			,strBatchId					= @strBatchId
-			,intAccountId				= GLEntries.intAccountId
-			,dblDebit					= GLEntries.dblCredit	-- Reverse the Debit with Credit 
-			,dblCredit					= GLEntries.dblDebit	-- Reverse the Credit with Debit 
-			,dblDebitUnit				= 0--GLEntries.dblCreditUnit 
-			,dblCreditUnit				= 0--GLEntries.dblDebitUnit 
-			,strDescription				= GLEntries.strDescription
-			,strCode					= GLEntries.strCode
-			,strReference				= GLEntries.strReference
-			,intCurrencyId				= GLEntries.intCurrencyId
-			,dblExchangeRate			= GLEntries.dblExchangeRate
-			,dtmDateEntered				= GETDATE()
-			,dtmTransactionDate			= GLEntries.dtmDate
-			,strJournalLineDescription	= GLEntries.strJournalLineDescription
-			,intJournalLineNo			= Reversal.intInventoryTransactionId
-			,ysnIsUnposted				= 1
-			,intUserId					= @intEntityUserSecurityId 
-			,intEntityId				= GLEntries.intEntityId
-			,strTransactionId			= GLEntries.strTransactionId
-			,intTransactionId			= GLEntries.intTransactionId
-			,strTransactionType			= GLEntries.strTransactionType
-			,strTransactionForm			= GLEntries.strTransactionForm
-			,strModuleName				= GLEntries.strModuleName
-			,intConcurrencyId			= 1
-			,dblDebitForeign			= GLEntries.dblCreditForeign
-			,dblDebitReport				= GLEntries.dblDebitReport
-			,dblCreditForeign			= GLEntries.dblDebitForeign 
-			,dblCreditReport			= GLEntries.dblCreditReport
-			,dblReportingRate			= GLEntries.dblReportingRate
-			,dblForeignRate				= GLEntries.dblForeignRate
-			,strRateType				= currencyRateType.strCurrencyExchangeRateType
-	FROM	dbo.tblGLDetail GLEntries INNER JOIN dbo.tblICInventoryTransaction Reversal
-				ON GLEntries.intJournalLineNo = Reversal.intRelatedInventoryTransactionId
-				AND GLEntries.intTransactionId = Reversal.intTransactionId
-				AND GLEntries.strTransactionId = Reversal.strTransactionId
-				AND ISNULL(GLEntries.ysnIsUnposted, 0) = 0
-			LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType
-				ON currencyRateType.intCurrencyExchangeRateTypeId = Reversal.intForexRateTypeId
-	WHERE	Reversal.strBatchId = @strBatchId			
-			
-	
+			[dtmDate]					= GLEntries.dtmDate
+			,[strBatchId]				= @strBatchId
+			,[intAccountId]				= GLEntries.intAccountId
+			,[dblDebit]					= GLEntries.dblCredit	-- Reverse the Debit with Credit 
+			,[dblCredit]				= GLEntries.dblDebit	-- Reverse the Credit with Debit 
+			,[dblDebitUnit]				= GLEntries.dblCreditUnit
+			,[dblCreditUnit]			= GLEntries.dblDebitUnit
+			,[strDescription]			= GLEntries.strDescription
+			,[strCode]					= GLEntries.strCode
+			,[strReference]				= GLEntries.strReference
+			,[intCurrencyId]			= GLEntries.intCurrencyId
+			,[dblExchangeRate]			= GLEntries.dblExchangeRate
+			,[dtmDateEntered]			= GETDATE()
+			,[dtmTransactionDate]		= GLEntries.dtmDate
+			,[strJournalLineDescription] = GLEntries.strJournalLineDescription
+			,[intJournalLineNo]			= GLEntries.intJournalLineNo
+			,[ysnIsUnposted]			= 1
+			,[intUserId]				= @intEntityUserSecurityId
+			,[intEntityId]				= @intEntityUserSecurityId
+			,[strTransactionId]			= GLEntries.strTransactionId
+			,[intTransactionId]			= GLEntries.intTransactionId
+			,[strTransactionType]		= GLEntries.strTransactionType
+			,[strTransactionForm]		= GLEntries.strTransactionForm
+			,[strModuleName]			= GLEntries.strModuleName
+			,[intConcurrencyId]			= 1
+			,[dblDebitForeign]			= GLEntries.dblCreditForeign
+			,[dblDebitReport]			= GLEntries.dblCreditReport
+			,[dblCreditForeign]			= GLEntries.dblDebitForeign
+			,[dblCreditReport]			= GLEntries.dblDebitReport
+			,[dblReportingRate]			= GLEntries.dblReportingRate
+			,[dblForeignRate]			= GLEntries.dblForeignRate
+			,[strRateType]				= currencyRateType.strCurrencyExchangeRateType
+	FROM	tblGLDetail GLEntries INNER JOIN (
+				tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptItem ri
+					ON r.intInventoryReceiptId = ri.intInventoryReceiptId	
+				INNER JOIN tblICItem i 
+					ON ri.intItemId = i.intItemId
+			)
+				ON GLEntries.intJournalLineNo = ri.intInventoryReceiptItemId
+				AND GLEntries.strTransactionId = r.strReceiptNumber
+				AND GLEntries.intTransactionId = r.intInventoryReceiptId				
 
+			LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType
+				ON currencyRateType.intCurrencyExchangeRateTypeId = ri.intForexRateTypeId
+	WHERE	
+		GLEntries.strTransactionId = @strTransactionId			
+		AND i.strType = 'Non-Inventory'
+		AND ISNULL(GLEntries.ysnIsUnposted, 0) = 0
 END
 ;
-
-BEGIN 
-	-- Update the ysnPostedFlag for the main transaction 
-	UPDATE	GLEntries
-	SET		ysnIsUnposted = 1
-	FROM	dbo.tblGLDetail GLEntries
-	WHERE	GLEntries.intTransactionId = @intTransactionId
-			AND GLEntries.strTransactionId = @strTransactionId
-			AND strTransactionType <> @AccountCategory_Auto_Negative
-	;
-	-- Update the ysnPostedFlag for the related transactions
-	UPDATE	GLEntries
-	SET		ysnIsUnposted = 1
-	FROM	dbo.tblGLDetail GLEntries INNER JOIN dbo.tblICInventoryTransaction ItemTransactions 
-				ON GLEntries.intJournalLineNo = ItemTransactions.intInventoryTransactionId
-				AND GLEntries.intTransactionId = ItemTransactions.intRelatedTransactionId
-				AND GLEntries.strTransactionId = ItemTransactions.strRelatedTransactionId
-	WHERE	ItemTransactions.strBatchId = @strBatchId
-		AND GLEntries.strTransactionType <> @AccountCategory_Auto_Negative
-	;
-END 
