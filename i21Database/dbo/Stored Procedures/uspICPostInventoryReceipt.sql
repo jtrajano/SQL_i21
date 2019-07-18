@@ -62,6 +62,7 @@ DECLARE @strItemNo AS NVARCHAR(50)
 		,@strFunctionalCurrencyId AS NVARCHAR(50)
 		,@strForexRateType AS NVARCHAR(50)
 		,@intEntityVendorId AS INT = NULL 
+		,@dblStandardCost NUMERIC(18, 6)
 
 -- Get the default currency ID
 DECLARE @intFunctionalCurrencyId AS INT = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
@@ -910,6 +911,39 @@ BEGIN
 		WHERE
 			i.strType = 'Non-Inventory'
 
+		-- Validate the item cost. 
+		BEGIN
+			SET @intItemId = NULL 
+			SET @strItemNo = NULL 
+			SET @dblStandardCost = NULL 
+					   
+			SELECT	TOP 1 
+					@intItemId = i.intItemId
+					,@strItemNo = i.strItemNo
+					,@dblStandardCost = pricing.dblStandardCost
+			FROM	@ItemsForPost itemToPost INNER JOIN tblICItem i
+						ON itemToPost.intItemId = i.intItemId
+					INNER JOIN tblAPVendor vendor
+						ON itemToPost.intSourceEntityId = vendor.intEntityId
+					INNER JOIN tblICItemUOM stockUOM
+						ON stockUOM.intItemId = itemToPost.intItemId
+						AND stockUOM.ysnStockUnit = 1
+					INNER JOIN tblICItemPricing pricing
+						ON pricing.intItemId = itemToPost.intItemId
+						AND pricing.intItemLocationId = itemToPost.intItemLocationId
+			WHERE
+				ISNULL(dbo.fnCalculateCostBetweenUOM(itemToPost.intItemUOMId, stockUOM.intItemUOMId, itemToPost.dblCost), 0) > ISNULL(pricing.dblStandardCost, 0)
+				AND vendor.ysnMatchVendorCost = 1
+				AND itemToPost.dblQty > 0
+
+			IF @intItemId IS NOT NULL 
+			BEGIN 
+				-- 'The cost for {Item No} is more than the vendor cost of {#,##0.00}. Unable to post.'
+				EXEC uspICRaiseError 80235, @strItemNo, @dblStandardCost
+				GOTO With_Rollback_Exit    
+			END 
+		END
+
 		-- Reduce In-Transit stocks coming from Inbound Shipment. 
 		IF	(@intSourceType = @SOURCE_TYPE_InboundShipment) 
 			AND EXISTS (SELECT TOP 1 1 FROM @ItemsForPost)	
@@ -1609,49 +1643,7 @@ BEGIN
 							,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
 							,@intEntityUserSecurityId
 					IF @intReturnValue < 0 GOTO With_Rollback_Exit
-					
-					-- Create GL Entries for Non-Stock Items
-					INSERT INTO @GLEntries (
-							[dtmDate] 
-							,[strBatchId]
-							,[intAccountId]
-							,[dblDebit]
-							,[dblCredit]
-							,[dblDebitUnit]
-							,[dblCreditUnit]
-							,[strDescription]
-							,[strCode]
-							,[strReference]
-							,[intCurrencyId]
-							,[dblExchangeRate]
-							,[dtmDateEntered]
-							,[dtmTransactionDate]
-							,[strJournalLineDescription]
-							,[intJournalLineNo]
-							,[ysnIsUnposted]
-							,[intUserId]
-							,[intEntityId]
-							,[strTransactionId]
-							,[intTransactionId]
-							,[strTransactionType]
-							,[strTransactionForm]
-							,[strModuleName]
-							,[intConcurrencyId]
-							,[dblDebitForeign]	
-							,[dblDebitReport]	
-							,[dblCreditForeign]	
-							,[dblCreditReport]	
-							,[dblReportingRate]	
-							,[dblForeignRate]
-							,[strRateType]
-							,[intSourceEntityId]
-					)
-					EXEC	@intReturnValue = uspICCreateReceiptGLEntriesForNonStockItems
-							@strBatchId 
-							,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
-							,@intEntityUserSecurityId				
-					IF @intReturnValue < 0 GOTO With_Rollback_Exit
-
+			
 					--BEGIN 
 					--	-- Create an auto-variance for inventory returns posted in IR. 
 					--	EXEC @intReturnValue = [uspICCreateReceiptGLEntriesForReturnVariance]
