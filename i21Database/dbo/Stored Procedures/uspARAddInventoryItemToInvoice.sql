@@ -50,7 +50,10 @@
 	,@ItemSalesOrderDetailId		INT				= NULL												
 	,@ItemSalesOrderNumber			NVARCHAR(50)	= NULL
 	,@ItemContractHeaderId			INT				= NULL
-	,@ItemContractDetailId			INT				= NULL			
+	,@ItemContractDetailId			INT				= NULL
+	,@ItemItemContractHeaderId		INT				= NULL
+	,@ItemItemContractDetailId		INT				= NULL
+	,@ItemItemContract				BIT				= 0			
 	,@ItemShipmentId				INT				= NULL			
 	,@ItemShipmentPurchaseSalesContractId	INT		= NULL
 	,@ItemWeightUOMId				INT				= NULL	
@@ -354,6 +357,9 @@ BEGIN TRY
 				,[strSalesOrderNumber]
 				,[intContractHeaderId]
 				,[intContractDetailId]
+				,[intItemContractHeaderId]
+			    ,[intItemContractDetailId]
+				,[ysnItemContract]
 				,[intShipmentId]
 				,[intShipmentPurchaseSalesContractId]
 				,[intItemWeightUOMId]
@@ -468,6 +474,9 @@ BEGIN TRY
 				,[strSalesOrderNumber]				= @ItemSalesOrderNumber 
 				,[intContractHeaderId]				= @ItemContractHeaderId
 				,[intContractDetailId]				= @ItemContractDetailId
+				,[intItemContractHeaderId]			= @ItemItemContractHeaderId
+			    ,[intItemContractDetailId]			= @ItemItemContractDetailId
+				,[ysnItemContract]					= ISNULL(@ItemItemContract, 0)
 				,[intShipmentId]					= @ItemShipmentId
 				,[intShipmentPurchaseSalesContractId] =	@ItemShipmentPurchaseSalesContractId 
 				,[intItemWeightUOMId]				= @ItemWeightUOMId

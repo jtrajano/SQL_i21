@@ -66,6 +66,8 @@ SELECT intInvoiceDetailId					= INV.intInvoiceDetailId
 	 , strSalesOrderNumber					= INV.strSalesOrderNumber
 	 , intContractHeaderId					= INV.intContractHeaderId
 	 , intContractDetailId					= INV.intContractDetailId
+	 , intItemContractHeaderId				= INV.intItemContractHeaderId
+	 , intItemContractDetailId				= INV.intItemContractDetailId
 	 , dblContractBalance					= INV.dblContractBalance
 	 , dblContractAvailable					= INV.dblContractAvailable
 	 , intShipmentId						= INV.intShipmentId
@@ -119,8 +121,10 @@ SELECT intInvoiceDetailId					= INV.intInvoiceDetailId
      , strWeightUnitMeasure					= ISNULL(WOUM.strUnitMeasure, '')
 	 , strSalespersonId						= ISNULL(SPER.strSalespersonId, '')
 	 , strSiteNumber						= ISNULL(CSITE.strSiteNumber, '') COLLATE Latin1_General_CI_AS
-     , strContractNumber					= ISNULL(CT.strContractNumber, '')
+     , strContractNumber					= ISNULL(CT.strContractNumber, '')	 
 	 , intContractSeq						= CT.intContractSeq
+	 , strItemContractNumber				= ISNULL(ICT.strContractNumber, '')
+	 , intItemContractSeq					= ICT.intItemContractDetailId
      , dblOriginalQty						= INV.dblQtyShipped
      , dblOriginalPrice						= INV.dblPrice
      , intOriginalItemUOMId					= INV.intItemUOMId
@@ -159,6 +163,7 @@ SELECT intInvoiceDetailId					= INV.intInvoiceDetailId
      , intOriginDestWeight					= DWEIGHT.intOriginDest
 	 , strAddonDetailKey					= INV.strAddonDetailKey
      , ysnAddonParent						= INV.ysnAddonParent
+	 , ysnItemContract						= INV.ysnItemContract
 	 , dblAddOnQuantity						= INV.dblAddOnQuantity
 	 , dblPriceAdjustment					= INV.dblPriceAdjustment
 	 , strBOLNumberDetail					= INV.strBOLNumberDetail
@@ -205,10 +210,15 @@ LEFT JOIN (
 		 , PT.strPricingType				
 	FROM tblCTContractDetail CD
 	JOIN tblCTContractHeader CH	ON CH.intContractHeaderId	= CD.intContractHeaderId
-							   --AND CH.intContractTypeId		= 2
 							   AND CD.intPricingTypeId		NOT IN(4,7)
 	JOIN tblCTPricingType PT ON PT.intPricingTypeId	 =	CD.intPricingTypeId
 ) CT ON INV.intContractDetailId = CT.intContractDetailId
+LEFT JOIN ( 
+	SELECT intItemContractDetailId
+		 , strContractNumber
+	FROM tblCTItemContractDetail ICD
+	JOIN tblCTItemContractHeader ICH ON ICH.intItemContractHeaderId	= ICD.intItemContractHeaderId
+) ICT ON INV.intItemContractDetailId = ICT.intItemContractDetailId
 LEFT JOIN ( 
 	SELECT intTaxGroupId
 		 , strTaxGroup

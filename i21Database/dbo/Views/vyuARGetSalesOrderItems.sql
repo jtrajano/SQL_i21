@@ -10,6 +10,8 @@ SELECT intSalesOrderId					= SO.intSalesOrderId
 	 , intPriceUOMId					= SODETAIL.intPriceUOMId
 	 , intContractHeaderId				= SODETAIL.intContractHeaderId
 	 , intContractDetailId				= SODETAIL.intContractDetailId
+	 , intItemContractHeaderId			= SODETAIL.intItemContractHeaderId
+	 , intItemContractDetailId			= SODETAIL.intItemContractDetailId
 	 , intRecipeId						= SODETAIL.intRecipeId
 	 , intRecipeItemId					= SODETAIL.intRecipeItemId
 	 , intSubLocationId					= SODETAIL.intSubLocationId
@@ -43,19 +45,22 @@ SELECT intSalesOrderId					= SO.intSalesOrderId
 	 , strLotTracking					= SODETAIL.strLotTracking
 	 , intContractSeq					= CONTRACTS.intContractSeq
 	 , strContractNumber				= CONTRACTS.strContractNumber
+	 , strItemContractNumber			= ITEMCONTRACTS.strItemContractNumber
+	 , intItemContractSeq				= ITEMCONTRACTS.intItemContractSeq
 	 , strItemNo						= SODETAIL.strItemNo
 	 , strUnitMeasure					= UOM.strUnitMeasure
 	 , strPriceUnitMeasure				= PUOM.strUnitMeasure
 	 , dtmDate							= SO.dtmDate
 	 , ysnBlended						= SODETAIL.ysnBlended
+	 , ysnItemContract					= SODETAIL.ysnItemContract
 	 , intTaxGroupId					= SODETAIL.intTaxGroupId
 	 , strSubCurrency					= CURRENCY.strCurrency
 	 , strStorageLocation				= STOLOC.strName
 	 , strSubLocationName				= SUBLOC.strSubLocationName	
 	 , strTaxGroup						= TAXGROUP.strTaxGroup
-	 ,strAddonDetailKey					= SODETAIL.strAddonDetailKey
-	 ,ysnAddonParent					= SODETAIL.ysnAddonParent
-	 ,dblAddOnQuantity					= SODETAIL.dblAddOnQuantity
+	 , strAddonDetailKey				= SODETAIL.strAddonDetailKey
+	 , ysnAddonParent					= SODETAIL.ysnAddonParent
+	 , dblAddOnQuantity					= SODETAIL.dblAddOnQuantity
 FROM dbo.tblSOSalesOrder SO WITH (NOLOCK)
 INNER JOIN (
 	SELECT SOD.intSalesOrderId
@@ -65,6 +70,8 @@ INNER JOIN (
 		 , SOD.intPriceUOMId
 		 , SOD.intContractHeaderId
 		 , SOD.intContractDetailId
+		 , SOD.intItemContractHeaderId
+		 , SOD.intItemContractDetailId
 		 , SOD.intRecipeId
 		 , SOD.intRecipeItemId
 		 , SOD.intSubLocationId
@@ -90,6 +97,7 @@ INNER JOIN (
 		 , SOD.strPricing
 		 , SOD.strVFDDocumentNumber
 		 , SOD.ysnBlended
+		 , SOD.ysnItemContract
 		 , SOD.intTaxGroupId
 		 , SOD.intStorageLocationId
 		 , SOD.strAddonDetailKey
@@ -122,6 +130,8 @@ INNER JOIN (
 		 , intPriceUOMId = COMP.intUnitMeasureId
 		 , SOD.intContractHeaderId
 		 , SOD.intContractDetailId
+		 , SOD.intItemContractHeaderId
+		 , SOD.intItemContractDetailId
 		 , SOD.intRecipeId
 		 , SOD.intRecipeItemId
 		 , SOD.intSubLocationId
@@ -147,6 +157,7 @@ INNER JOIN (
 		 , SOD.strPricing
 		 , SOD.strVFDDocumentNumber
 		 , SOD.ysnBlended
+		 , SOD.ysnItemContract
 		 , SOD.intTaxGroupId
 		 , SOD.intStorageLocationId
 		 , SOD.strAddonDetailKey
@@ -231,6 +242,19 @@ LEFT JOIN (
 	) CD ON CH.intContractHeaderId = CD.intContractHeaderId
 ) CONTRACTS ON SODETAIL.intContractHeaderId = CONTRACTS.intContractHeaderId
 	       AND SODETAIL.intContractDetailId = CONTRACTS.intContractDetailId
+LEFT JOIN (
+	SELECT ICH.intItemContractHeaderId
+		 , ICD.intItemContractDetailId
+		 , strItemContractNumber = strContractNumber
+		 , intItemContractSeq	 = ICD.intItemContractDetailId
+	FROM dbo.tblCTItemContractHeader ICH WITH (NOLOCK)
+	INNER JOIN (
+		SELECT intItemContractHeaderId
+			 , intItemContractDetailId
+		FROM dbo.tblCTItemContractDetail
+	) ICD ON ICH.intItemContractHeaderId = ICD.intItemContractHeaderId
+) ITEMCONTRACTS ON SODETAIL.intItemContractHeaderId = ITEMCONTRACTS.intItemContractHeaderId
+	           AND SODETAIL.intItemContractDetailId = ITEMCONTRACTS.intItemContractDetailId 
 LEFT OUTER JOIN (
 	SELECT intCurrencyID
 		 , intCent

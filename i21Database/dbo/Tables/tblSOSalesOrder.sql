@@ -43,6 +43,7 @@
 	[ysnQuote]					BIT				CONSTRAINT [DF_tblSOSalesOrder_ysnQuote] DEFAULT ((0)) NULL,
 	[ysnPreliminaryQuote]		BIT				NULL,
 	[ysnRejected]				BIT				CONSTRAINT [DF_tblSOSalesOrder_ysnRejected] DEFAULT ((0)) NOT NULL,
+	[ysnFromItemContract]		BIT				CONSTRAINT [DF_tblSOSalesOrder_ysnFromItemContract] DEFAULT ((0)) NOT NULL,
     [strComments]				NVARCHAR(MAX)   COLLATE Latin1_General_CI_AS NULL,
 	[strFooterComments]			NVARCHAR(MAX)	COLLATE Latin1_General_CI_AS NULL,
 	[intFreightTermId]			INT				NULL, 
