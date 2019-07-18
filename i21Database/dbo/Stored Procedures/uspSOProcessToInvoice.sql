@@ -95,6 +95,7 @@ ELSE
 												   , @intUserId = @UserId
 												   , @dblNetWeight = 0
 												   , @ysnFromSalesOrder = 1
+												   , @intTicketId = NULL
 			END
 		
 		IF ISNULL(@NewInvoiceId, 0) > 0
