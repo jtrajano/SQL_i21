@@ -4,6 +4,8 @@ SELECT RM.intInvPlngReportMasterID
 	,RM.strInvPlngReportName
 	,RM.intCategoryId
 	,C.strCategoryCode
+	,RM.intDemandHeaderId
+	,DH.strDemandName
 	,dbo.fnCTGetItemNames(RM.intInvPlngReportMasterID) COLLATE Latin1_General_CI_AS AS strItemNames
 	,RM.intNoOfMonths
 	,RM.ysnIncludeInventory
@@ -13,5 +15,6 @@ SELECT RM.intInvPlngReportMasterID
 	,UOM.strUnitMeasure
 FROM tblCTInvPlngReportMaster AS RM
 JOIN tblICCategory AS C ON C.intCategoryId = RM.intCategoryId
+LEFT JOIN tblMFDemandHeader DH ON DH.intDemandHeaderId = RM.intDemandHeaderId
 LEFT JOIN tblICUnitMeasure AS UOM ON UOM.intUnitMeasureId = RM.intUnitMeasureId
 LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = RM.intCompanyLocationId

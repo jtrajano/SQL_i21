@@ -8,6 +8,7 @@ SELECT DD.intDemandDetailId
 	,B.strBook
 	,SB.strSubBook
 	,I.strItemNo
+	,I.strType
 	,I1.strItemNo AS strSubstituteItemNo
 	,dtmDemandDate
 	,dblQuantity

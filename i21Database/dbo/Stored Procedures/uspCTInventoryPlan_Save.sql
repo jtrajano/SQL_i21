@@ -55,6 +55,7 @@ BEGIN TRY
 			,[intCategoryId]
 			,[intCompanyLocationId]
 			,[intUnitMeasureId]
+			,intDemandHeaderId
 			,[intCreatedUserId]
 			,[dtmCreated]
 			,[intLastModifiedUserId]
@@ -67,6 +68,7 @@ BEGIN TRY
 			,[intCategoryId]
 			,intCompanyLocationId
 			,intUnitMeasureId
+			,intDemandHeaderId
 			,[intCreatedUserId]
 			,GETDATE()
 			,[intLastModifiedUserId]
@@ -78,6 +80,7 @@ BEGIN TRY
 				,intCategoryId INT
 				,intCompanyLocationId INT
 				,intUnitMeasureId INT
+				,intDemandHeaderId INT
 				,intCreatedUserId INT
 				,intLastModifiedUserId INT
 				)
@@ -141,6 +144,7 @@ BEGIN TRY
 			,[intCategoryId] = x.intCategoryId
 			,intCompanyLocationId = x.intCompanyLocationId
 			,intUnitMeasureId = x.intUnitMeasureId
+			,intDemandHeaderId = x.intDemandHeaderId
 			,[intLastModifiedUserId] = x.intLastModifiedUserId
 			,[dtmLastModified] = GETDATE()
 		FROM OPENXML(@idoc, 'root/InvPlngReportMaster', 2) WITH (
@@ -150,6 +154,7 @@ BEGIN TRY
 				,intCategoryId INT
 				,intCompanyLocationId INT
 				,intUnitMeasureId INT
+				,intDemandHeaderId INT
 				,intLastModifiedUserId INT
 				) x
 		WHERE intInvPlngReportMasterID = @intInvPlngReportMasterID

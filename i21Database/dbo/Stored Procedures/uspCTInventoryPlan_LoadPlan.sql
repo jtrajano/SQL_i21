@@ -39,12 +39,14 @@ BEGIN
 
 	SELECT RM.*
 		,C.strCategoryCode
+		,DH.strDemandName
 		,UOM.strUnitMeasure
 		,CL.strLocationName
 		,@intItemIdList AS 'intItemIdList'
 		,@strItemNoList AS 'strItemNoList'
 	FROM dbo.tblCTInvPlngReportMaster RM
 	JOIN tblICCategory C ON C.intCategoryId = RM.intCategoryId
+	LEFT JOIN tblMFDemandHeader DH ON DH.intDemandHeaderId = RM.intDemandHeaderId
 	LEFT JOIN tblICUnitMeasure AS UOM ON UOM.intUnitMeasureId = RM.intUnitMeasureId
 	LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = RM.intCompanyLocationId
 	WHERE RM.intInvPlngReportMasterID = @intInvPlngReportMasterID

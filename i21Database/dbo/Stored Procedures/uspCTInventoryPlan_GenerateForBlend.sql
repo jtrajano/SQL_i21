@@ -5,6 +5,7 @@
 	,@ysnIncludeInventory BIT
 	,@intCompanyLocationId INT
 	,@intUnitMeasureId INT
+	,@intDemandHeaderId INT
 	,@PlannedPurchasesXML VARCHAR(MAX)
 	,@WeeksOfSupplyTargetXML VARCHAR(MAX)
 	,@ForecastedConsumptionXML VARCHAR(MAX)

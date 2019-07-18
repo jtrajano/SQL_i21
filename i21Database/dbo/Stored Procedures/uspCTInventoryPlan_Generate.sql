@@ -5,6 +5,7 @@
 	,@ysnIncludeInventory BIT
 	,@intCompanyLocationId INT
 	,@intUnitMeasureId INT
+	,@intDemandHeaderId INT
 	,@PlannedPurchasesXML VARCHAR(MAX)
 	,@WeeksOfSupplyTargetXML VARCHAR(MAX)
 	,@ForecastedConsumptionXML VARCHAR(MAX)
@@ -33,6 +34,7 @@ BEGIN TRY
 				,@ysnIncludeInventory
 				,@intCompanyLocationId
 				,@intUnitMeasureId
+				,@intDemandHeaderId
 				,@PlannedPurchasesXML
 				,@WeeksOfSupplyTargetXML
 				,@ForecastedConsumptionXML
@@ -48,6 +50,7 @@ BEGIN TRY
 				,@ysnIncludeInventory
 				,@intCompanyLocationId
 				,@intUnitMeasureId
+				,@intDemandHeaderId
 				,@PlannedPurchasesXML
 				,@WeeksOfSupplyTargetXML
 				,@ForecastedConsumptionXML

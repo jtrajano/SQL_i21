@@ -7866,6 +7866,7 @@
     <Build Include="dbo\Views\vyuARItemContractNumberSearch.sql" />
     <Build Include="dbo\Views\vyuARItemContractSequenceSearch.sql" />
     <Build Include="dbo\Stored Procedures\uspCTImportItemContractFromStaging.sql" />
+    <Build Include="dbo\Views\vyuMFGetDemandList.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
