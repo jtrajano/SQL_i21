@@ -2,36 +2,41 @@
 
 AS
 
-SELECT isnull(dblGrossPL,0.0) as dblGrossPL
+SELECT dblGrossPL = ISNULL(dblGrossPL, 0.00)
 	, intMatchFuturesPSHeaderId
 	, intMatchFuturesPSDetailId
 	, intFutOptTransactionId
 	, intLFutOptTransactionId
 	, intSFutOptTransactionId
-	, isnull(dblMatchQty,0.0) dblMatchQty
+	, dblMatchQty = ISNULL(dblMatchQty, 0.00)
 	, intLFutOptTransactionHeaderId
 	, intSFutOptTransactionHeaderId
 	, dtmLTransDate
 	, dtmSTransDate
-	, isnull(dblLPrice,0.0) as dblLPrice
-	, isnull(dblSPrice,0.0) as dblSPrice
+	, dblLPrice = ISNULL(dblLPrice, 0.00)
+	, dblSPrice = ISNULL(dblSPrice, 0.00)
 	, strLInternalTradeNo
 	, strSInternalTradeNo
 	, strLBrokerTradeNo
 	, strSBrokerTradeNo
-	, isnull(dblContractSize,0.0) as dblContractSize
+	, dblContractSize = ISNULL(dblContractSize, 0.00)
 	, intConcurrencyId
-	, isnull(dblFutCommission,0.0) as dblFutCommission
+	, dblFutCommission = ISNULL(dblFutCommission, 0.00)
 	, intCurrencyId
 	, strCurrency
 	, intMainCurrencyId
 	, strMainCurrency
 	, intCent
 	, ysnSubCurrency
-	, isnull((dblGrossPL + dblFutCommission),0.0)  AS dblNetPL 
-	, dtmLFilledDate,dtmSFilledDate
+	, dblNetPL = ISNULL((dblGrossPL + dblFutCommission), 0.00)
+	, dtmLFilledDate
+	, dtmSFilledDate
+	, intLFutureMonthId
+	, strLFutureMonth
+	, intSFutureMonthId
+	, strSFutureMonth
 FROM (
-	SELECT ((dblSPrice - dblLPrice)*dblMatchQty*dblContractSize)/ case when ysnSubCurrency = 1 then intCent else 1 end as dblGrossPL
+	SELECT dblGrossPL = ((dblSPrice - dblLPrice) * dblMatchQty * dblContractSize) / CASE WHEN ysnSubCurrency = 1 THEN intCent ELSE 1 END
 		, *
 	FROM (
 		SELECT psh.intMatchFuturesPSHeaderId
@@ -39,35 +44,41 @@ FROM (
 			, ot.intFutOptTransactionId
 			, psd.intLFutOptTransactionId
 			, psd.intSFutOptTransactionId
-			, isnull(psd.dblMatchQty,0) as dblMatchQty
-			, ot.intFutOptTransactionHeaderId as intLFutOptTransactionHeaderId
-			, ot1.intFutOptTransactionHeaderId as intSFutOptTransactionHeaderId
-			, ot.dtmTransactionDate dtmLTransDate
-			, ot1.dtmTransactionDate dtmSTransDate
-			, ot.dtmFilledDate dtmLFilledDate
-			, ot1.dtmFilledDate dtmSFilledDate
-			, isnull(ot.dblPrice,0) dblLPrice
-			, isnull(ot1.dblPrice,0) dblSPrice
-			, ot.strInternalTradeNo strLInternalTradeNo
-			, ot1.strInternalTradeNo strSInternalTradeNo
-			, ot.strBrokerTradeNo strLBrokerTradeNo
-			, ot1.strBrokerTradeNo strSBrokerTradeNo
-			, fm.dblContractSize dblContractSize
+			, dblMatchQty = ISNULL(psd.dblMatchQty, 0.00)
+			, intLFutOptTransactionHeaderId = ot.intFutOptTransactionHeaderId
+			, intSFutOptTransactionHeaderId = ot1.intFutOptTransactionHeaderId
+			, intLFutureMonthId = ot.intFutureMonthId
+			, intSFutureMonthId = ot1.intFutureMonthId
+			, strLFutureMonth = LFM.strFutureMonth
+			, strSFutureMonth = SFM.strFutureMonth
+			, dtmLTransDate = ot.dtmTransactionDate
+			, dtmSTransDate = ot1.dtmTransactionDate
+			, dtmLFilledDate = ot.dtmFilledDate
+			, dtmSFilledDate = ot1.dtmFilledDate
+			, dblLPrice = ISNULL(ot.dblPrice, 0.00)
+			, dblSPrice = ISNULL(ot1.dblPrice, 0.00)
+			, strLInternalTradeNo = ot.strInternalTradeNo
+			, strSInternalTradeNo = ot1.strInternalTradeNo
+			, strLBrokerTradeNo = ot.strBrokerTradeNo
+			, strSBrokerTradeNo = ot1.strBrokerTradeNo
+			, dblContractSize = fm.dblContractSize
 			, psd.dblFutCommission
-			, c.intCurrencyID as intCurrencyId
+			, intCurrencyId = c.intCurrencyID
 			, c.strCurrency
 			, intMainCurrencyId = CASE WHEN c.ysnSubCurrency = 1 THEN c.intMainCurrencyId ELSE c.intCurrencyID END
 			, strMainCurrency = CASE WHEN c.ysnSubCurrency = 0 THEN c.strCurrency ELSE MainCurrency.strCurrency END
 			, c.intCent
 			, c.ysnSubCurrency
-			,psd.intConcurrencyId
+			, psd.intConcurrencyId
 		FROM tblRKMatchFuturesPSHeader psh
-		JOIN tblRKMatchFuturesPSDetail psd on psd.intMatchFuturesPSHeaderId=psh.intMatchFuturesPSHeaderId
-		JOIN tblRKFutOptTransaction ot on psd.intLFutOptTransactionId= ot.intFutOptTransactionId
-		LEFT JOIN tblRKFutureMarket fm on ot.intFutureMarketId=fm.intFutureMarketId
-		LEFT JOIN tblSMCurrency c on c.intCurrencyID=fm.intCurrencyId
+		JOIN tblRKMatchFuturesPSDetail psd ON psd.intMatchFuturesPSHeaderId = psh.intMatchFuturesPSHeaderId
+		JOIN tblRKFutOptTransaction ot ON psd.intLFutOptTransactionId = ot.intFutOptTransactionId
+		JOIN tblRKFutOptTransaction ot1 ON psd.intSFutOptTransactionId = ot1.intFutOptTransactionId
+		LEFT JOIN tblRKFutureMarket fm ON ot.intFutureMarketId = fm.intFutureMarketId
+		LEFT JOIN tblSMCurrency c ON c.intCurrencyID = fm.intCurrencyId
 		LEFT JOIN tblSMCurrency MainCurrency ON MainCurrency.intCurrencyID = c.intMainCurrencyId
-		LEFT JOIN tblRKBrokerageAccount ba on ot.intBrokerageAccountId=ba.intBrokerageAccountId and ot.intInstrumentTypeId in(1)
-		JOIN tblRKFutOptTransaction ot1 on psd.intSFutOptTransactionId= ot1.intFutOptTransactionId
+		LEFT JOIN tblRKFuturesMonth LFM ON LFM.intFutureMonthId = ot.intFutureMonthId
+		LEFT JOIN tblRKFuturesMonth SFM ON SFM.intFutureMonthId = ot1.intFutureMonthId
+		LEFT JOIN tblRKBrokerageAccount ba ON ot.intBrokerageAccountId = ba.intBrokerageAccountId AND ot.intInstrumentTypeId IN (1)
 	)t
 )t1
