@@ -558,9 +558,7 @@ BEGIN
 		, @strCommodityCode NVARCHAR(200)
 		, @intOneCommodityId INT
 		, @intCommodityUnitMeasureId INT
-		, @intUnitMeasureId INT
 		, @ysnExchangeTraded BIT
-		, @strUnitMeasure NVARCHAR(200)
 		
 	SELECT @mRowNumber = MIN(intCommodityIdentity) FROM @Commodity
 	
@@ -2121,11 +2119,6 @@ BEGIN
 						AND cd.intCompanyLocationId = ISNULL(@intLocationId, cd.intCompanyLocationId)
 				) t WHERE intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation WHERE @ysnExchangeTraded = 1)
 				
-				SELECT @intUnitMeasureId = NULL
-				SELECT @strUnitMeasure = NULL
-				SELECT TOP 1 @intUnitMeasureId = intUnitMeasureId FROM tblRKCompanyPreference
-				SELECT @strUnitMeasure = strUnitMeasure FROM tblICUnitMeasure WHERE intUnitMeasureId = @intUnitMeasureId
-
 				INSERT INTO @Final (intCommodityId
 					, strCommodityCode
 					, intContractHeaderId
@@ -2185,8 +2178,8 @@ BEGIN
 					, strType
 					, strContractType
 					, strContractEndMonth
-					, dblTotal = (CASE WHEN (ISNULL(@intUnitMeasureId, 0) = 0 OR cuc.intCommodityUnitMeasureId = @intUnitMeasureId) THEN dblTotal ELSE CONVERT(DECIMAL(24, 10), dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc.intCommodityUnitMeasureId, cuc1.intCommodityUnitMeasureId, dblTotal)) END)
-					, strUnitMeasure = (CASE WHEN ISNULL(@strUnitMeasure, '') = '' THEN um.strUnitMeasure ELSE @strUnitMeasure END) 
+					, dblTotal
+					, um.strUnitMeasure
 					, intInventoryReceiptItemId
 					, strLocationName
 					, strTicketNumber
@@ -2229,7 +2222,6 @@ BEGIN
 				FROM @tempFinal t
 				JOIN tblICCommodityUnitMeasure cuc ON t.intCommodityId = cuc.intCommodityId AND cuc.ysnDefault = 1
 				JOIN tblICUnitMeasure um ON um.intUnitMeasureId = cuc.intUnitMeasureId
-				LEFT JOIN tblICCommodityUnitMeasure cuc1 ON t.intCommodityId = cuc1.intCommodityId AND @intUnitMeasureId = cuc1.intUnitMeasureId
 				WHERE t.intCommodityId = @intCommodityId AND strType NOT IN ('Net Payable ($)', 'Net Receivable ($)')
 				
 				INSERT INTO @Final (intCommodityId
@@ -2292,7 +2284,7 @@ BEGIN
 					, strContractType
 					, strContractEndMonth
 					, dblTotal
-					, strUnitMeasure = (CASE WHEN ISNULL(@strUnitMeasure, '') = '' THEN um.strUnitMeasure ELSE @strUnitMeasure END)
+					, um.strUnitMeasure
 					, intInventoryReceiptItemId
 					, strLocationName
 					, strTicketNumber
@@ -2649,11 +2641,6 @@ BEGIN
 					, ysnPreCrush
 				FROM @tempFinal WHERE strType = 'Net Receivable ($)' AND intCommodityId = @intCommodityId
 				
-				SELECT @intUnitMeasureId = NULL
-				SELECT @strUnitMeasure = NULL
-				SELECT TOP 1 @intUnitMeasureId = intUnitMeasureId FROM tblRKCompanyPreference
-				
-				SELECT @strUnitMeasure = strUnitMeasure FROM tblICUnitMeasure WHERE intUnitMeasureId = @intUnitMeasureId
 				INSERT INTO @Final (intCommodityId
 					, strCommodityCode 
 					, intContractHeaderId
@@ -2710,8 +2697,8 @@ BEGIN
 					, strSubType
 					, strContractType
 					, strContractEndMonth
-					, dblTotal = CONVERT(DECIMAL(24, 10), dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc.intCommodityUnitMeasureId, CASE WHEN (ISNULL(@intUnitMeasureId, 0) = 0 OR cuc.intCommodityUnitMeasureId = @intUnitMeasureId) THEN cuc.intCommodityUnitMeasureId ELSE cuc1.intCommodityUnitMeasureId END, dblTotal))
-					, strUnitMeasure = CASE WHEN ISNULL(@strUnitMeasure, '') = '' THEN um.strUnitMeasure ELSE @strUnitMeasure END
+					, dblTotal
+					, um.strUnitMeasure
 					, intInventoryReceiptItemId
 					, strLocationName
 					, strTicketNumber
@@ -2749,7 +2736,6 @@ BEGIN
 				FROM @tempFinal t
 				JOIN tblICCommodityUnitMeasure cuc ON t.intCommodityId = cuc.intCommodityId AND cuc.ysnDefault = 1
 				JOIN tblICUnitMeasure um ON um.intUnitMeasureId = cuc.intUnitMeasureId
-				LEFT JOIN tblICCommodityUnitMeasure cuc1 ON t.intCommodityId = cuc1.intCommodityId AND @intUnitMeasureId = cuc1.intUnitMeasureId
 				WHERE t.intCommodityId = @intCommodityId AND strType NOT IN ('Net Payable ($)', 'Net Receivable ($)')
 				
 				UNION ALL
@@ -2764,7 +2750,7 @@ BEGIN
 					, strContractType
 					, strContractEndMonth
 					, dblTotal
-					, strUnitMeasure = CASE WHEN ISNULL(@strUnitMeasure, '') = '' THEN um.strUnitMeasure ELSE @strUnitMeasure END
+					, um.strUnitMeasure
 					, intInventoryReceiptItemId
 					, strLocationName
 					, strTicketNumber
