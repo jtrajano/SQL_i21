@@ -7865,6 +7865,7 @@
     <Build Include="dbo\Tables\tblSTLotteryBook.sql" />
     <Build Include="dbo\Views\vyuARItemContractNumberSearch.sql" />
     <Build Include="dbo\Views\vyuARItemContractSequenceSearch.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTImportItemContractFromStaging.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
