@@ -18,7 +18,27 @@ BEGIN TRY
 	SET @UserEntityID = ISNULL((SELECT [intEntityId] FROM tblSMUserSecurity WHERE [intEntityId] = @UserId),@UserId) 
 		
 	IF(EXISTS(SELECT NULL FROM tblARInvoice WHERE intInvoiceId = @InvoiceId AND ISNULL(ysnPosted,0) = 1))
-		RAISERROR('Posted invoice cannot be deleted!', 16, 1);		
+		RAISERROR('Posted invoice cannot be deleted!', 16, 1);
+
+	IF(EXISTS(SELECT NULL FROM tblARPrepaidAndCredit WHERE intPrepaymentId = @InvoiceId AND ISNULL(ysnApplied,0) = 1))
+		BEGIN
+			DECLARE @strInvoiceNumber 	NVARCHAR(100) = NULL
+				  , @strPrepaidNumber 	NVARCHAR(100) = NULL
+				  , @strError			NVARCHAR(200) = NULL
+
+			SELECT @strPrepaidNumber = strInvoiceNumber
+			FROM tblARInvoice I
+			WHERE intInvoiceId = @InvoiceId
+
+			SELECT TOP 1 @strInvoiceNumber = strInvoiceNumber
+			FROM tblARInvoice I
+			INNER JOIN tblARPrepaidAndCredit PC ON I.intInvoiceId = PC.intInvoiceId
+			WHERE PC.intPrepaymentId = @InvoiceId
+
+			SET @strError = 'Unable to delete prepaid/credit! ' + @strPrepaidNumber + ' was already applied in ' + @strInvoiceNumber + '.'
+
+			RAISERROR(@strError, 16, 1);
+		END		
 
 	IF @InvoiceDetailId IS NOT NULL
 		BEGIN
@@ -50,6 +70,10 @@ BEGIN TRY
 
 			DELETE FROM tblARInvoiceDetailTax 
 			WHERE intInvoiceDetailId IN (SELECT intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @InvoiceId)
+
+			DELETE FROM tblARPrepaidAndCredit
+			WHERE intPrepaymentId = @InvoiceId
+			  AND ysnApplied = 0
 
 			DELETE FROM tblARInvoiceDetail 
 			WHERE intInvoiceId = @InvoiceId
