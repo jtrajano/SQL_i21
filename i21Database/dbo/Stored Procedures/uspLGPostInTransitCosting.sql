@@ -75,7 +75,7 @@ BEGIN TRY
 			,intItemLocationId = IL.intItemLocationId
 			,intItemUOMId = LD.intItemUOMId
 			,dtmDate = GETDATE()
-			,dblQty = dbo.[fnCalculateQtyBetweenUOM](LD.intWeightItemUOMId, LD.intItemUOMId,dblNet)--LD.dblQuantity
+			,dblQty = LD.dblQuantity
 			,dblUOMQty = IU.dblUnitQty
 			,dblCost = ISNULL(LD.dblAmount/LD.dblQuantity ,
 									CASE WHEN (AD.dblSeqPrice IS NULL) THEN
