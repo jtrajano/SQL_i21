@@ -28,12 +28,25 @@ BEGIN
 			@strSupplier NVARCHAR(100) = NULL,
 			@strDestination NVARCHAR(100) = NULL,
 			@strPullProduct NVARCHAR(100) = NULL,
-			@strDropProduct NVARCHAR(100) = NULL
+			@strDropProduct NVARCHAR(100) = NULL,
+		    @ysnValid BIT = NULL,
+			@strMessage NVARCHAR(MAX) = NULL
 	
 		DECLARE @CursorTran AS CURSOR
 
 		SET @CursorTran = CURSOR FOR
-		SELECT D.intImportLoadDetailId, D.strTruck, D.strTerminal, D.strCarrier, D.strDriver, D.strTrailer, D.strSupplier, D.strDestination, D.strPullProduct, D.strDropProduct 
+		SELECT D.intImportLoadDetailId
+			, D.strTruck
+			, D.strTerminal
+			, D.strCarrier
+			, D.strDriver
+			, D.strTrailer
+			, D.strSupplier
+			, D.strDestination
+			, D.strPullProduct
+			, D.strDropProduct 
+			, D.ysnValid
+			, D.strMessage
 		FROM tblTRImportLoad L 
 		INNER JOIN tblTRImportLoadDetail D ON D.intImportLoadId = L.intImportLoadId
 		WHERE L.guidImportIdentifier = @guidImportIdentifier AND D.ysnValid = 1 
@@ -41,7 +54,7 @@ BEGIN
 		BEGIN TRANSACTION
 
 		OPEN @CursorTran
-		FETCH NEXT FROM @CursorTran INTO @intImportLoadDetailId, @strTruck, @strTerminal, @strCarrier, @strDriver, @strTrailer, @strSupplier, @strDestination, @strPullProduct, @strDropProduct
+		FETCH NEXT FROM @CursorTran INTO @intImportLoadDetailId, @strTruck, @strTerminal, @strCarrier, @strDriver, @strTrailer, @strSupplier, @strDestination, @strPullProduct, @strDropProduct, @ysnValid, @strMessage
 		WHILE @@FETCH_STATUS = 0
 		BEGIN
 			
@@ -56,7 +69,7 @@ BEGIN
             
             IF (@intCarrierId IS NULL)
 			BEGIN
-				UPDATE tblTRImportLoadDetail SET strMessage = 'Invalid Carrier', ysnValid = 0 WHERE intImportLoadDetailId = @intImportLoadDetailId
+				SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, 'Invalid Carrier')
 			END
 			ELSE
 			BEGIN
@@ -72,7 +85,7 @@ BEGIN
 
             IF (@intDriverId IS NULL)
 			BEGIN
-				UPDATE tblTRImportLoadDetail SET strMessage = 'Invalid Driver', ysnValid = 0 WHERE intImportLoadDetailId = @intImportLoadDetailId
+				SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, 'Invalid Driver')
 			END
 			ELSE
 			BEGIN
@@ -87,7 +100,7 @@ BEGIN
 
             IF (@intTrailerId IS NULL)
 			BEGIN
-				UPDATE tblTRImportLoadDetail SET strMessage = 'Invalid Trailer', ysnValid = 0 WHERE intImportLoadDetailId = @intImportLoadDetailId
+				SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, 'Invalid Trailer')	
 			END
 			ELSE
 			BEGIN
@@ -103,7 +116,7 @@ BEGIN
 
             IF (@intSupplierId IS NULL)
 			BEGIN
-				UPDATE tblTRImportLoadDetail SET strMessage = 'Invalid Supplier', ysnValid = 0 WHERE intImportLoadDetailId = @intImportLoadDetailId
+				SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, 'Invalid Supplier')
 			END
 			ELSE
 			BEGIN
@@ -119,7 +132,7 @@ BEGIN
 
             IF (@intTerminalId IS NULL)
 			BEGIN
-				UPDATE tblTRImportLoadDetail SET strMessage = 'Invalid Terminal', ysnValid = 0 WHERE intImportLoadDetailId = @intImportLoadDetailId
+				SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, 'Invalid Terminal')
 			END
 			ELSE
 			BEGIN
@@ -140,7 +153,7 @@ BEGIN
 
             IF (@intPullProductId IS NULL)
 			BEGIN
-				UPDATE tblTRImportLoadDetail SET strMessage = 'Invalid Pulled Product', ysnValid = 0 WHERE intImportLoadDetailId = @intImportLoadDetailId
+				SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, 'Invalid Pulled Product')
 			END
 			ELSE
 			BEGIN
@@ -157,30 +170,26 @@ BEGIN
 
             IF (@intPullProductId IS NULL)
 			BEGIN
-				UPDATE tblTRImportLoadDetail SET strMessage = 'Invalid Dropped Product', ysnValid = 0 WHERE intImportLoadDetailId = @intImportLoadDetailId
+				SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, 'Invalid Dropped Product')
 			END
 			ELSE
 			BEGIN
 				UPDATE tblTRImportLoadDetail SET intDropProductId = @intDropProductId WHERE intImportLoadDetailId = @intImportLoadDetailId
 			END
 
-			FETCH NEXT FROM @CursorTran INTO @intImportLoadDetailId, @strTruck, @strTerminal, @strCarrier, @strDriver, @strTrailer, @strSupplier, @strDestination, @strPullProduct, @strDropProduct
+			IF((@strMessage IS NULL OR @strMessage = '') AND @ysnValid = 1)
+			BEGIN
+				UPDATE tblTRImportLoadDetail SET ysnValid = 1 WHERE intImportLoadDetailId = @intImportLoadDetailId 
+			END
+			ELSE
+			BEGIN
+				UPDATE tblTRImportLoadDetail SET strMessage = @strMessage, ysnValid = 0 WHERE intImportLoadDetailId = @intImportLoadDetailId 
+			END
+
+			FETCH NEXT FROM @CursorTran INTO @intImportLoadDetailId, @strTruck, @strTerminal, @strCarrier, @strDriver, @strTrailer, @strSupplier, @strDestination, @strPullProduct, @strDropProduct, @ysnValid, @strMessage
 		END
 		CLOSE @CursorTran
 		DEALLOCATE @CursorTran
-
-		-- CHECK IF HAS DIFFERENT TRANSACTION DATE
-		-- IF ((SELECT COUNT(*) FROM (SELECT COUNT(DCCD.dtmTransactionDate) CNT FROM tblCCImportDealerCreditCardReconDetail DCCD INNER JOIN tblCCImportDealerCreditCardRecon DCC ON DCC.intImportDealerCreditCardReconId = DCCD.intImportDealerCreditCardReconId WHERE DCC.guidImportIdentifier = @guidImportIdentifier) A) > 1)
-		-- BEGIN
-		-- 	UPDATE DCCD SET DCCD.strMessage = ', Has different date with other transaction' FROM tblCCImportDealerCreditCardReconDetail DCCD 
-		-- 	INNER JOIN tblCCImportDealerCreditCardRecon DCC ON DCC.intImportDealerCreditCardReconId = DCCD.intImportDealerCreditCardReconId 
-		-- 	WHERE DCC.guidImportIdentifier = @guidImportIdentifier AND DCCD.ysnValid = 0
-
-		-- 	UPDATE DCCD SET DCCD.strMessage = 'Has different date with other transaction', DCCD.ysnValid = 0 
-		-- 	FROM tblCCImportDealerCreditCardReconDetail DCCD 
-		-- 	INNER JOIN tblCCImportDealerCreditCardRecon DCC ON DCC.intImportDealerCreditCardReconId = DCCD.intImportDealerCreditCardReconId 
-		-- 	WHERE DCC.guidImportIdentifier = @guidImportIdentifier AND DCCD.ysnValid = 1
-		-- END
 
 		COMMIT TRANSACTION
 
