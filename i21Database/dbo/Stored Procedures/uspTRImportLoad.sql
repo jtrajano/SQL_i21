@@ -60,10 +60,21 @@ BEGIN
 			
             -- CHECK IF HAS VALID TRUCK
 			DECLARE @intTruckId INT = NULL
-			
+
+			SELECT TOP 1 @intTruckId = intTruckDriverReferenceId FROM tblSCTruckDriverReference 
+            WHERE strData = @strTruck
+			IF (@intTruckId IS NULL)
+			BEGIN
+				SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, 'Invalid Truck')
+			END
+			ELSE
+			BEGIN
+				UPDATE tblTRImportLoadDetail SET intTruckId = @intTruckId WHERE intImportLoadDetailId = @intImportLoadDetailId
+			END
 
             -- CHECK IF HAS VALID CARRIER
             DECLARE @intCarrierId INT = NULL
+
             SELECT @intCarrierId = intEntityId FROM tblSMShipVia 
             WHERE strShipVia = @strCarrier
             
@@ -176,6 +187,7 @@ BEGIN
 			BEGIN
 				UPDATE tblTRImportLoadDetail SET intDropProductId = @intDropProductId WHERE intImportLoadDetailId = @intImportLoadDetailId
 			END
+
 
 			IF((@strMessage IS NULL OR @strMessage = '') AND @ysnValid = 1)
 			BEGIN
