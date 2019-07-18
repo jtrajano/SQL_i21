@@ -234,6 +234,8 @@
 	,Basis.ysnRestricted AS ysnBasisAdvancedRestricted
 	,APPayment.dblPayment
 	,intSourceType as intLoadSourceType
+	,tblSMShipViaTrailer.strTrailerLicenseNumber
+	,tblSMShipViaTrailer.intEntityShipViaTrailerId
   FROM tblSCTicket SCT
 	LEFT JOIN tblSCTicketPool SCTPool on SCTPool.intTicketPoolId = SCT.intTicketPoolId
 	LEFT JOIN tblSCScaleSetup SCSetup on SCSetup.intScaleSetupId = SCT.intScaleSetupId
@@ -322,3 +324,4 @@
 		GROUP BY intScaleTicketId
 	) APPayment
 		ON APPayment.intScaleTicketId = SCT.intTicketId
+	LEFT JOIN tblSMShipViaTrailer on SCT.intEntityShipViaTrailerId = tblSMShipViaTrailer.intEntityShipViaTrailerId

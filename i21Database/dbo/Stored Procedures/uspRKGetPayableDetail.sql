@@ -679,51 +679,14 @@ BEGIN
 	END
 END
 
-DECLARE @intUnitMeasureId int
-SELECT TOP 1 @intUnitMeasureId = intUnitMeasureId FROM tblRKCompanyPreference
-
-if isnull(@intUnitMeasureId,'')<> ''
-BEGIN
-	IF ((@intSeqId = 11) OR (@intSeqId=13))
-		BEGIN
-			SELECT intInventoryReceiptItemId
-						,strLocationName
-						,strTicketNumber
-						,dtmTicketDateTime
-						,strCustomerReference
-						,strDistributionOption, 
-						 dblUnitCost
-						,dblQtyReceived,cuc.intCommodityUnitMeasureId,cuc1.intCommodityUnitMeasureId,t.intCommodityId
-						,isnull(dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc.intCommodityUnitMeasureId,case when isnull(cuc1.intCommodityUnitMeasureId,0) = 0 then cuc.intCommodityUnitMeasureId else cuc1.intCommodityUnitMeasureId end,dblTotal),0) dblTotal
-				FROM @tblTemp t
-			JOIN tblICCommodityUnitMeasure cuc on t.intCommodityId=cuc.intCommodityId and cuc.ysnDefault=1 
-			JOIN tblICCommodityUnitMeasure cuc1 on t.intCommodityId=cuc1.intCommodityId and @intUnitMeasureId=cuc1.intUnitMeasureId
-		END
-	ELSE
-		BEGIN
-		SELECT intInventoryReceiptItemId
-				,strLocationName
-				,strTicketNumber
-				,dtmTicketDateTime
-				,strCustomerReference
-				,strDistributionOption
-				,dblUnitCost
-				,dblQtyReceived
-				,intCommodityId
-				,dblTotal FROM @tblTemp
-			END	
-END
-ELSE
-BEGIN
 SELECT intInventoryReceiptItemId
-			,strLocationName
-			,strTicketNumber
-			,dtmTicketDateTime
-			,strCustomerReference
-			,strDistributionOption
-			,dblUnitCost
-			,dblQtyReceived
-			,intCommodityId
-			,dblTotal FROM @tblTemp
-END
-
+	, strLocationName
+	, strTicketNumber
+	, dtmTicketDateTime
+	, strCustomerReference
+	, strDistributionOption
+	, dblUnitCost
+	, dblQtyReceived
+	, intCommodityId
+	, dblTotal
+FROM @tblTemp

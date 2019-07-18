@@ -52,7 +52,10 @@
 	,@ItemSalesOrderDetailId		INT				= NULL												
 	,@ItemSalesOrderNumber			NVARCHAR(50)	= NULL
 	,@ItemContractHeaderId			INT				= NULL
-	,@ItemContractDetailId			INT				= NULL			
+	,@ItemContractDetailId			INT				= NULL
+	,@ItemItemContractHeaderId		INT				= NULL
+	,@ItemItemContractDetailId		INT				= NULL
+	,@ItemItemContract				BIT				= 0
 	,@ItemShipmentId				INT				= NULL			
 	,@ItemShipmentPurchaseSalesContractId	INT		= NULL	
 	,@ItemWeightUOMId				INT				= NULL	
@@ -199,6 +202,9 @@ IF (ISNULL(@ItemIsInventory,0) = 1) OR [dbo].[fnIsStockTrackingItem](@ItemId) = 
 			,@ItemSalesOrderNumber			= @ItemSalesOrderNumber
 			,@ItemContractHeaderId			= @ItemContractHeaderId
 			,@ItemContractDetailId			= @ItemContractDetailId
+			,@ItemItemContractHeaderId		= @ItemItemContractHeaderId
+			,@ItemItemContractDetailId		= @ItemItemContractDetailId
+			,@ItemItemContract				= @ItemItemContract
 			,@ItemShipmentId				= @ItemShipmentId
 			,@ItemShipmentPurchaseSalesContractId	= @ItemShipmentPurchaseSalesContractId
 			,@ItemWeightUOMId				= @ItemWeightUOMId
@@ -398,6 +404,9 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 				,[intPriceUOMId]
 				,[intContractHeaderId]
 				,[intContractDetailId]
+				,[intItemContractHeaderId]
+				,[intItemContractDetailId]
+				,[ysnItemContract]
 				,[dblQtyOrdered]
 				,[dblQtyShipped]
 				,[dblUnitQuantity]
@@ -467,6 +476,9 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 				,@ItemPriceUOMId
 				,@ItemContractHeaderId
 				,@ItemContractDetailId
+				,@ItemItemContractHeaderId
+				,@ItemItemContractDetailId
+				,@ItemItemContract
 				,@ItemQtyOrdered
 				,@ItemQtyShipped
 				,@ItemUnitQuantity

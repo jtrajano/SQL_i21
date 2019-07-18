@@ -311,25 +311,29 @@ BEGIN TRY
 
 	IF EXISTS(SELECT * FROM #tmpExtracted)
 	BEGIN
-		INSERT	INTO #tmpContractHeader(intContractTypeId,intEntityId,dtmContractDate,intCommodityId,intCommodityUOMId,dblQuantity,intSalespersonId,ysnSigned,strContractNumber,ysnPrinted,intCropYearId,intPositionId,intPricingTypeId,intCreatedById,dtmCreated,intConcurrencyId)
-		SELECT	intContractTypeId,intEntityId,dtmContractDate,intCommodityId,intCommodityUOMId,dblHeaderQuantity,intSalespersonId,ysnSigned,strContractNumber,ysnPrinted,intCropYearId,intPositionId,intPricingTypeId,intCreatedById,dtmCreated,intConcurrencyId
+		INSERT	INTO #tmpContractHeader(intContractTypeId,intEntityId,dtmContractDate,intCommodityId,intCommodityUOMId,dblQuantity,intSalespersonId,ysnSigned,strContractNumber,ysnPrinted,intCropYearId,intPositionId,intPricingTypeId,intCreatedById,dtmCreated,intConcurrencyId, ysnReceivedSignedFixationLetter)
+		SELECT	intContractTypeId,intEntityId,dtmContractDate,intCommodityId,intCommodityUOMId,dblHeaderQuantity,intSalespersonId,ysnSigned,strContractNumber,ysnPrinted,intCropYearId,intPositionId,intPricingTypeId,intCreatedById,dtmCreated,intConcurrencyId, 0
 		FROM	#tmpExtracted
 		
 		EXEC	uspCTGetTableDataInXML '#tmpContractHeader',null,@strTblXML OUTPUT,'tblCTContractHeader'
 		EXEC	uspCTValidateContractHeader @strTblXML,'Added'
+		
+		
+		
 		EXEC	uspCTInsertINTOTableFromXML 'tblCTContractHeader',@strTblXML,@intContractHeaderId OUTPUT
 		
 		INSERT	INTO #tmpContractDetail
 				(
 					intContractHeaderId,intItemId,intItemUOMId,intContractSeq,intStorageScheduleRuleId,dtmEndDate,intCompanyLocationId,dblQuantity,intContractStatusId,dblBalance,dtmStartDate,intPriceItemUOMId,dtmCreated,intConcurrencyId,intCreatedById,
-					intFutureMarketId,intFutureMonthId,dblFutures,dblBasis,dblCashPrice,strRemark,intPricingTypeId,dblTotalCost,intCurrencyId,intUnitMeasureId,dblNetWeight,intNetWeightUOMId,dtmM2MDate
+					intFutureMarketId,intFutureMonthId,dblFutures,dblBasis,dblCashPrice,strRemark,intPricingTypeId,dblTotalCost,intCurrencyId,intUnitMeasureId,dblNetWeight,intNetWeightUOMId,dtmM2MDate, ysnProvisionalPNL, ysnFinalPNL
 				)
 		SELECT	@intContractHeaderId,intItemId,intItemUOMId,intContractSeq,intStorageScheduleRuleId,dtmEndDate,intCompanyLocationId,dblQuantity,intContractStatusId,dblBalance,dtmStartDate,intPriceItemUOMId,dtmCreated,intConcurrencyId,intCreatedById,
-				intFutureMarketId,intFutureMonthId,dblFutures,dblBasis,dblCashPrice,strRemark,intPricingTypeId,dblTotalCost,intCurrencyId,intUnitMeasureId,dblQuantity,intItemUOMId,dtmM2MDate
+				intFutureMarketId,intFutureMonthId,dblFutures,dblBasis,dblCashPrice,strRemark,intPricingTypeId,dblTotalCost,intCurrencyId,intUnitMeasureId,dblQuantity,intItemUOMId,dtmM2MDate, 0, 0
 		FROM	#tmpExtracted
-
+		
 		EXEC	uspCTGetTableDataInXML '#tmpContractDetail',null,@strTblXML OUTPUT,'tblCTContractDetail'
 		EXEC	uspCTValidateContractDetail @strTblXML,'Added'
+		
 		EXEC	uspCTInsertINTOTableFromXML 'tblCTContractDetail',@strTblXML,@intContractDetailId OUTPUT
 		EXEC	uspCTCreateDetailHistory	NULL, @intContractDetailId
 	END

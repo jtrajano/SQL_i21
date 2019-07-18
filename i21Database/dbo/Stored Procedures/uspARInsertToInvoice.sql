@@ -60,6 +60,9 @@ DECLARE @tblItemsToInvoiceUnsorted TABLE (intItemId			INT,
 							intPriceUOMId					INT,
 							intContractHeaderId				INT,
 							intContractDetailId				INT,
+							intItemContractHeaderId			INT,
+							intItemContractDetailId			INT,
+							ysnItemContract					BIT,
 							dblQtyOrdered					NUMERIC(38,20),
 							dblQtyRemaining					NUMERIC(38,20),
 							dblLicenseAmount				NUMERIC(18,6),
@@ -115,6 +118,9 @@ DECLARE @tblItemsToInvoice TABLE (intItemToInvoiceId		INT IDENTITY (1, 1),
 							intPriceUOMId					INT,
 							intContractHeaderId				INT,
 							intContractDetailId				INT,
+							intItemContractHeaderId			INT,
+							intItemContractDetailId			INT,
+							ysnItemContract					BIT,
 							dblQtyOrdered					NUMERIC(38,20),
 							dblQtyRemaining					NUMERIC(38,20),
 							dblLicenseAmount				NUMERIC(18,6),
@@ -182,6 +188,9 @@ SELECT intItemId						= SI.intItemId
 	 , intPriceUOMId					= SOD.intPriceUOMId
 	 , intContractHeaderId				= SOD.intContractHeaderId
 	 , intContractDetailId				= SOD.intContractDetailId
+	 , intItemContractHeaderId			= SOD.intItemContractHeaderId
+	 , intItemContractDetailId			= SOD.intItemContractDetailId
+	 , ysnItemContract					= SOD.ysnItemContract
 	 , dblQtyOrdered					= SI.dblQtyOrdered
 	 , dblQtyRemaining					= CASE WHEN ISNULL(ISHI.intLineNo, 0) > 0 THEN SOD.dblQtyOrdered - ISHI.dblQuantity ELSE SI.dblQtyRemaining END
 	 , dblLicenseAmount					= CASE WHEN I.strType = 'Software' THEN SOD.dblLicenseAmount ELSE SI.dblPrice END
@@ -249,6 +258,9 @@ SELECT intItemId						= SOD.intItemId
 	 , intPriceUOMId					= NULL
 	 , intContractHeaderId				= SOD.intContractHeaderId
 	 , intContractDetailId				= SOD.intContractDetailId
+	 , intItemContractHeaderId			= NULL
+	 , intItemContractDetailId			= NULL
+	 , ysnItemContract					= 0
 	 , dblQtyOrdered					= 0
 	 , dblQtyRemaining					= 0
 	 , dblLicenseAmount					= 0
@@ -309,6 +321,9 @@ SELECT intItemId						= ICSI.intItemId
 	 , intPriceUOMId					= ICSI.intPriceUOMId
 	 , intContractHeaderId				= SOD.intContractHeaderId
 	 , intContractDetailId				= SOD.intContractDetailId
+	 , intItemContractHeaderId			= NULL
+	 , intItemContractDetailId			= NULL
+	 , ysnItemContract					= 0
 	 , dblQtyOrdered					= SOD.dblQtyOrdered
 	 , dblQtyRemaining					= ICSI.dblQuantity
 	 , dblLicenseAmount					= @dblZeroAmount
@@ -372,6 +387,9 @@ SELECT intItemId						= ARSI.intItemId
 	 , intPriceUOMId					= ARSI.intPriceUOMId
 	 , intContractHeaderId				= ARSI.intContractHeaderId
 	 , intContractDetailId				= ARSI.intContractDetailId
+	 , intItemContractHeaderId			= NULL
+	 , intItemContractDetailId			= NULL
+	 , ysnItemContract					= 0
 	 , dblQtyOrdered					= 0
 	 , dblQtyRemaining					= ARSI.dblQtyRemaining
 	 , dblLicenseAmount					= 0  
@@ -918,6 +936,9 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 						@ItemUOMId							INT,
 						@ItemContractHeaderId				INT,
 						@ItemContractDetailId				INT,
+						@ItemItemContractHeaderId			INT,
+						@ItemItemContractDetailId			INT,
+						@ItemItemContract					BIT,
 						@ItemQtyOrdered						NUMERIC(38,20),
 						@ItemQtyShipped						NUMERIC(38,20),
 						@ItemDiscount						NUMERIC(18,6),
@@ -965,6 +986,9 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 						@ItemUOMId							= intItemUOMId,
 						@ItemContractHeaderId				= intContractHeaderId,
 						@ItemContractDetailId				= intContractDetailId,
+						@ItemItemContractHeaderId			= intItemContractHeaderId,
+						@ItemItemContractDetailId			= intItemContractDetailId,
+						@ItemItemContract					= ysnItemContract,
 						@ItemQtyOrdered						= dblQtyOrdered,
 						@ItemQtyShipped						= dblQtyRemaining,
 						@ItemDiscount						= dblDiscount,
@@ -1019,6 +1043,9 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 							,@ItemUOMId							= @ItemUOMId
 							,@ItemContractHeaderId				= @ItemContractHeaderId
 							,@ItemContractDetailId				= @ItemContractDetailId
+							,@ItemItemContractHeaderId			= @ItemItemContractHeaderId
+							,@ItemItemContractDetailId			= @ItemItemContractDetailId
+						    ,@ItemItemContract					= @ItemItemContract
 							,@ItemQtyOrdered					= @ItemQtyOrdered
 							,@ItemQtyShipped					= @ItemQtyShipped
 							,@ItemDiscount						= @ItemDiscount

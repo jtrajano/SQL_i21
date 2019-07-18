@@ -49,7 +49,8 @@
 	[intProtocolNumber] INT NULL,--
 	[intPortNumber] INT NULL,--
 	[intChainAccountNumber] INT NULL,--
-	[intCsvFormat] INT NULL
+	[intCsvFormat] INT NULL,
+	[ysnMatchVendorCost] BIT DEFAULT 0 NULL,
 
 	--store
     CONSTRAINT [PK_dbo.tblAPVendor] PRIMARY KEY CLUSTERED ([intEntityId] ASC),

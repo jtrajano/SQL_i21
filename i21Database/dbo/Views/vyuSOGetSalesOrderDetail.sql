@@ -1,190 +1,188 @@
 ﻿CREATE VIEW [dbo].[vyuSOGetSalesOrderDetail]
-	AS 
-	
-	
-SELECT 
-
-		SO.intSalesOrderDetailId,
-        SO.intSalesOrderId,
-        SO.intItemId,
-        SO.strItemDescription,
-        SO.strComments,
-        SO.intItemUOMId,
-		--SO.intPriceUOMId,
-        SO.dblQtyShipped,
-        SO.dblQtyOrdered,
-        SO.dblQtyAllocated,
-        SO.dblDiscount,
-		SO.dblDiscountValue,
-        SO.dblItemTermDiscount,
-        SO.strItemTermDiscountBy,
-        SO.dblPrice,
-        SO.dblBasePrice,
-		SO.dblUnitPrice,
-        SO.dblBaseUnitPrice,
-        SO.strPricing,
-        SO.dblTotalTax,
-        SO.dblBaseTotalTax,
-        SO.dblTotal,
-        SO.dblBaseTotal,
-        SO.intAccountId,
-        SO.intCOGSAccountId,
-        SO.intSalesAccountId,
-        SO.intInventoryAccountId,
-        SO.intStorageLocationId,
-        SO.strMaintenanceType,
-        SO.strFrequency,
-        SO.dtmMaintenanceDate,
-        SO.dblMaintenanceAmount,
-        SO.dblBaseMaintenanceAmount,
-        SO.dblLicenseAmount,
-        SO.dblBaseLicenseAmount,
-        SO.intContractHeaderId,
-        SO.intContractDetailId,
-        SO.dblContractBalance,
-        SO.dblContractAvailable,
-        SO.ysnBlended,
-        SO.intTaxGroupId,
-        SO.intRecipeId,
-        SO.intSubLocationId,
-        SO.dblItemWeight,
-        SO.dblOriginalItemWeight,
-        SO.intItemWeightUOMId,
-        SO.intCostTypeId,
-        SO.intMarginById,
-        SO.intCommentTypeId,
-        SO.intRecipeItemId,
-        SO.dblMargin,
-        SO.dblRecipeQuantity,
-        SO.intCustomerStorageId,
-        SO.intStorageScheduleTypeId,
-        SO.intConcurrencyId,
-        SO.strVFDDocumentNumber,
-        SO.intCurrencyExchangeRateTypeId,
-        SO.intCurrencyExchangeRateId,
-        SO.dblCurrencyExchangeRate,
-		--SO.intEntityVendorId,
-		--SO.intPurchaseDetailId,
-		SO.intPriceUOMId,
-		SO.dblUnitQuantity,
-		--SO.dblUnitPrice,
-		--SO.dblPriceMargin,
-		--SO.dblMarginPercentage,
-		--SO.dblLastCost,
-		--SO.dblBaseUnitPrice,
-        strItemNo = ITMNO.strItemNo,
-        strBundleType = ITMNO.strBundleType,
-        strUnitMeasure = ITMUOM.strUnitMeasure,
-		strPriceUnitMeasure = ITMPUOM.strUnitMeasure,
-        intUnitMeasureId = ITMUOM.intUnitMeasureId,
-
-        strWeightUnitMeasure = ITMWUOM.strUnitMeasure,
-        strStorageLocation = SLOC.strName,
-    	strSubLocation = isnull(SMSLOC.strSubLocationName, ''),
-        strContractNumber = CDET.strContractNumber,
-        intContractSeq = CDET.intContractSeq,
-        strItemType = ITMNO.strType,
-        strLotTracking = ITMNO.strLotTracking,
-        strModule = ITMNO.strModule,
-        dblOriginalQty = SO.dblQtyOrdered,
-        dblOriginalPrice = SO.dblPrice,
-        intOriginalItemUOMId = SO.intItemUOMId,
-        strTaxGroup = TAXGRP.strTaxGroup,
-        intPricingTypeId = CDET.intPricingTypeId,
-        strPricingType = CDET.strPricingType,
-        ysnLoad = CDET.ysnLoad,
-        strCurrency = CUR.strCurrency,
-        dblOriginalLicenseAmount = CASE WHEN ITM.strType =  'Software' THEN dblSalePrice ELSE 0 END,
-        dblOriginalMaintenanceAmount = CASE WHEN ITM.strType = 'Software' THEN
-											CASE WHEN ITM.strMaintenanceCalculationMethod = 'Percentage' THEN 
-												dblMaintenanceRatePercentage 
-											ELSE  dblMaintenanceRate END
-										ELSE 0 END,
-        dblDiscountAmount = CASE WHEN ISNULL(SO.dblDiscount, 0) > 0 THEN  ((SO.dblQtyOrdered * SO.dblPrice) * (SO.dblDiscount / 100)) ELSE 0 END,
-        strStorageTypeDescription = STORAGETYPE.strStorageTypeDescription,
-        strRequired = ITMNO.strRequired,
-        strCurrencyExchangeRateType = CURTYPE.strCurrencyExchangeRateType,
-		--strVendorName = VPER.strName,
-		--strPurchaseOrderNumber = PO.strPurchaseOrderNumber,
-		strPriceUOM = PITMUOM.strUnitMeasure,
-		strAddonDetailKey,
-        ysnAddonParent,
-		dblAddOnQuantity
-	from tblSOSalesOrderDetail SO
-		INNER JOIN ( SELECT intSalesOrderId, intCompanyLocationId 
-			FROM tblSOSalesOrder  WITH(NOLOCK) ) OSO
-		ON SO.intSalesOrderId = OSO.intSalesOrderId
-		LEFT JOIN (SELECT		intItemId,				strItemNo,
-								strBundleType,			strType,
-								strLotTracking,			strModule,				
-								strRequired,			strMaintenanceCalculationMethod							
-			FROM tblICItem ICITM
-				LEFT JOIN tblSMModule MODULE WITH(NOLOCK)
-					ON ICITM.intModuleId = MODULE.intModuleId) ITMNO
-		ON SO.intItemId = ITMNO.intItemId 
-		LEFT JOIN ( SELECT		ICITM.intItemId,		ICPRICING.intItemLocationId,
-								strType,				strMaintenanceCalculationMethod,					
-								dblSalePrice = ISNULL(ICPRICING.dblSalePrice, 0),
-								dblMaintenanceRate = ISNULL(dblMaintenanceRate, 0),
-								dblMaintenanceRatePercentage = ISNULL(dblSalePrice, 0) * (ISNULL(dblMaintenanceRate, 0) / 100),
-								intLocationId
-			FROM tblICItem ICITM WITH(NOLOCK) 				
-				LEFT JOIN tblICItemLocation CLOC WITH(NOLOCK)  
-					ON ICITM.intItemId = CLOC.intItemId					
-				LEFT JOIN tblICItemPricing ICPRICING WITH(NOLOCK) 
-					ON ICITM.intItemId = ICPRICING.intItemId 
-						AND CLOC.intItemLocationId = ICPRICING.intItemLocationId
-				
-		) ITM
-		ON SO.intItemId = ITM.intItemId AND ITM.intLocationId = OSO.intCompanyLocationId
-
-		LEFT JOIN ( SELECT		intItemUOMId,			strUnitMeasure,
-								intUnitMeasureId
-			FROM vyuARItemUOM WITH(NOLOCK)) ITMUOM
-		ON SO.intItemUOMId = ITMUOM.intItemUOMId
-
-		LEFT JOIN ( SELECT		intItemUOMId,		strUnitMeasure 
-			FROM vyuARItemWUOM  WITH(NOLOCK)) ITMPUOM
-		ON SO.intPriceUOMId = ITMPUOM.intItemUOMId
-		
-		LEFT JOIN ( SELECT		intItemWeightUOMId,		strUnitMeasure 
-			FROM vyuARItemWUOM  WITH(NOLOCK)) ITMWUOM
-		ON SO.intItemWeightUOMId = ITMWUOM.intItemWeightUOMId
-
-		LEFT JOIN ( SELECT		intStorageLocationId,	strName 
-			FROM tblICStorageLocation  WITH(NOLOCK)) SLOC
-		ON SO.intStorageLocationId = SLOC.intStorageLocationId
-		LEFT JOIN ( SELECT intCompanyLocationSubLocationId, strSubLocationName
-				FROM tblSMCompanyLocationSubLocation WITH(NOLOCK)) SMSLOC
-		ON SO.intSubLocationId = SMSLOC.intCompanyLocationSubLocationId
-		LEFT JOIN ( SELECT		intContractDetailId,	strContractNumber,
-								intContractSeq,			intPricingTypeId,
-								strPricingType,			ysnLoad
-			FROM vyuCTCustomerContract WITH(NOLOCK)) CDET
-		ON SO.intContractDetailId = CDET.intContractDetailId
-		LEFT JOIN ( SELECT		intTaxGroupId,			strTaxGroup 
-			FROM tblSMTaxGroup ) TAXGRP
-		ON SO.intTaxGroupId = TAXGRP.intTaxGroupId
-		LEFT JOIN ( SELECT		intCurrencyExchangeRateTypeId,
-								strCurrencyExchangeRateType
-			FROM tblSMCurrencyExchangeRateType WITH(NOLOCK) ) CURTYPE
-		ON SO.intCurrencyExchangeRateTypeId = CURTYPE.intCurrencyExchangeRateTypeId
-		LEFT JOIN ( SELECT		intCurrencyID,			strCurrency
-			FROM tblSMCurrency WITH(NOLOCK)) CUR
-		ON SO.intSubCurrencyId = CUR.intCurrencyID 
-		LEFT JOIN ( SELECT		intStorageScheduleTypeId,	
-								strStorageTypeDescription
-			FROM tblGRStorageType ) STORAGETYPE
-		ON SO.intStorageScheduleTypeId = STORAGETYPE.intStorageScheduleTypeId
-		--LEFT JOIN ( SELECT		intEntityId,			strName
-		--	FROM tblEMEntity WITH(NOLOCK) ) VPER
-		--ON SO.intEntityVendorId = VPER.intEntityId
-		--LEFT JOIN ( SELECT		intPurchaseDetailId,	strPurchaseOrderNumber
-		--	FROM tblPOPurchase ZPO WITH(NOLOCK) 
-		--		JOIN tblPOPurchaseDetail ZPOD WITH(NOLOCK)
-		--			ON ZPO.intPurchaseId = ZPOD.intPurchaseId)  PO
-		--ON SO.intPurchaseDetailId = PO.intPurchaseDetailId
-		LEFT JOIN ( SELECT		intItemUOMId,			strUnitMeasure,
-								intUnitMeasureId
-			FROM vyuARItemUOM WITH(NOLOCK)) PITMUOM
-		ON SO.intPriceUOMId = PITMUOM.intItemUOMId
+AS 
+SELECT intSalesOrderDetailId			= SOD.intSalesOrderDetailId
+     , intSalesOrderId					= SOD.intSalesOrderId
+     , intItemId						= SOD.intItemId
+     , strItemDescription				= SOD.strItemDescription
+     , strComments						= SOD.strComments
+     , intItemUOMId						= SOD.intItemUOMId
+     , dblQtyShipped					= SOD.dblQtyShipped
+     , dblQtyOrdered					= SOD.dblQtyOrdered
+     , dblQtyAllocated					= SOD.dblQtyAllocated
+     , dblDiscount						= SOD.dblDiscount
+	 , dblDiscountValue					= SOD.dblDiscountValue
+     , dblItemTermDiscount				= SOD.dblItemTermDiscount
+     , strItemTermDiscountBy			= SOD.strItemTermDiscountBy
+     , dblPrice							= SOD.dblPrice
+     , dblBasePrice						= SOD.dblBasePrice
+	 , dblUnitPrice						= SOD.dblUnitPrice
+     , dblBaseUnitPrice					= SOD.dblBaseUnitPrice
+     , strPricing						= SOD.strPricing
+     , dblTotalTax						= SOD.dblTotalTax
+     , dblBaseTotalTax					= SOD.dblBaseTotalTax
+     , dblTotal							= SOD.dblTotal
+     , dblBaseTotal						= SOD.dblBaseTotal
+     , intAccountId						= SOD.intAccountId
+     , intCOGSAccountId					= SOD.intCOGSAccountId
+     , intSalesAccountId				= SOD.intSalesAccountId
+     , intInventoryAccountId			= SOD.intInventoryAccountId
+     , intStorageLocationId				= SOD.intStorageLocationId
+     , strMaintenanceType				= SOD.strMaintenanceType
+     , strFrequency						= SOD.strFrequency
+     , dtmMaintenanceDate				= SOD.dtmMaintenanceDate
+     , dblMaintenanceAmount				= SOD.dblMaintenanceAmount
+     , dblBaseMaintenanceAmount			= SOD.dblBaseMaintenanceAmount
+     , dblLicenseAmount					= SOD.dblLicenseAmount
+     , dblBaseLicenseAmount				= SOD.dblBaseLicenseAmount
+     , intContractHeaderId				= SOD.intContractHeaderId
+     , intContractDetailId				= SOD.intContractDetailId
+	 , intItemContractHeaderId			= SOD.intItemContractHeaderId
+     , intItemContractDetailId			= SOD.intItemContractDetailId
+     , dblContractBalance				= SOD.dblContractBalance
+     , dblContractAvailable				= SOD.dblContractAvailable
+     , ysnBlended						= SOD.ysnBlended
+     , intTaxGroupId					= SOD.intTaxGroupId
+     , intRecipeId						= SOD.intRecipeId
+     , intSubLocationId					= SOD.intSubLocationId
+     , dblItemWeight					= SOD.dblItemWeight
+     , dblOriginalItemWeight			= SOD.dblOriginalItemWeight
+     , intItemWeightUOMId				= SOD.intItemWeightUOMId
+     , intCostTypeId					= SOD.intCostTypeId
+     , intMarginById					= SOD.intMarginById
+     , intCommentTypeId					= SOD.intCommentTypeId
+     , intRecipeItemId					= SOD.intRecipeItemId
+     , dblMargin						= SOD.dblMargin
+     , dblRecipeQuantity				= SOD.dblRecipeQuantity
+     , intCustomerStorageId				= SOD.intCustomerStorageId
+     , intStorageScheduleTypeId			= SOD.intStorageScheduleTypeId
+     , intConcurrencyId					= SOD.intConcurrencyId
+     , strVFDDocumentNumber				= SOD.strVFDDocumentNumber
+     , intCurrencyExchangeRateTypeId	= SOD.intCurrencyExchangeRateTypeId
+     , intCurrencyExchangeRateId		= SOD.intCurrencyExchangeRateId
+     , dblCurrencyExchangeRate			= SOD.dblCurrencyExchangeRate
+	 , intPriceUOMId					= SOD.intPriceUOMId
+	 , dblUnitQuantity					= SOD.dblUnitQuantity
+	 , dblOriginalQty					= SOD.dblQtyOrdered
+     , dblOriginalPrice					= SOD.dblPrice
+     , intOriginalItemUOMId				= SOD.intItemUOMId
+     , strItemNo						= ITEM.strItemNo
+     , strBundleType					= ITEM.strBundleType
+     , strUnitMeasure					= ITEMUOM.strUnitMeasure
+	 , intUnitMeasureId					= ITEMUOM.intUnitMeasureId
+	 , strPriceUnitMeasure				= PRICEUOM.strUnitMeasure
+	 , strPriceUOM						= PRICEUOM.strUnitMeasure     
+     , strWeightUnitMeasure				= WEIGHTUOM.strUnitMeasure
+     , strStorageLocation				= STORAGELOCATION.strName
+     , strSubLocation					= ISNULL(SUBLOCATION.strSubLocationName, '')
+     , strContractNumber				= CONT.strContractNumber
+	 , intContractSeq					= CONT.intContractSeq
+	 , intPricingTypeId					= CONT.intPricingTypeId
+     , strPricingType					= CONT.strPricingType
+     , ysnLoad							= CONT.ysnLoad
+	 , strItemContractNumber			= ISNULL(ITEMCONTRACT.strContractNumber, '')
+	 , intItemContractSeq				= ITEMCONTRACT.intItemContractDetailId
+     , strItemType						= ITEM.strType
+     , strLotTracking					= ITEM.strLotTracking
+     , strModule						= ITEM.strModule
+	 , strRequired						= ITEM.strRequired
+     , strTaxGroup						= TAXGROUP.strTaxGroup     
+     , strCurrency						= CURRENCY.strCurrency
+     , dblOriginalLicenseAmount			= CASE WHEN ITEM.strType =  'Software' THEN ITEM.dblSalePrice ELSE 0 END
+     , dblOriginalMaintenanceAmount		= CASE WHEN ITEM.strType = 'Software' THEN
+											CASE WHEN ITEM.strMaintenanceCalculationMethod = 'Percentage' THEN 
+												ITEM.dblMaintenanceRatePercentage 
+											ELSE ITEM.dblMaintenanceRate END
+										  ELSE 0 END
+     , dblDiscountAmount				= CASE WHEN ISNULL(SOD.dblDiscount, 0) > 0 THEN ((SOD.dblQtyOrdered * SOD.dblPrice) * (SOD.dblDiscount / 100)) ELSE 0 END
+     , strStorageTypeDescription		= STORAGETYPE.strStorageTypeDescription     
+     , strCurrencyExchangeRateType		= CURRENCYTYPE.strCurrencyExchangeRateType	 
+	 , strAddonDetailKey				= SOD.strAddonDetailKey
+     , ysnAddonParent					= SOD.ysnAddonParent
+	 , ysnItemContract					= SOD.ysnItemContract
+	 , dblAddOnQuantity					= SOD.dblAddOnQuantity
+FROM tblSOSalesOrderDetail SOD WITH(NOLOCK)
+INNER JOIN (
+	SELECT intSalesOrderId
+		 , intCompanyLocationId 
+	FROM tblSOSalesOrder WITH(NOLOCK)
+) SO ON SO.intSalesOrderId = SOD.intSalesOrderId
+LEFT JOIN (
+	SELECT intItemId						= I.intItemId
+		 , strItemNo						= I.strItemNo
+		 , strBundleType					= I.strBundleType
+		 , strType							= I.strType
+		 , strLotTracking					= I.strLotTracking
+		 , strModule						= MODULE.strModule
+		 , strRequired						= I.strRequired
+		 , strMaintenanceCalculationMethod	= I.strMaintenanceCalculationMethod
+		 , dblSalePrice						= ISNULL(PRICING.dblSalePrice, 0)
+		 , dblMaintenanceRate				= ISNULL(dblMaintenanceRate, 0)
+		 , dblMaintenanceRatePercentage		= ISNULL(dblSalePrice, 0) * (ISNULL(dblMaintenanceRate, 0) / 100)
+		 , intLocationId
+	FROM tblICItem I WITH(NOLOCK) 
+	LEFT JOIN tblSMModule MODULE WITH(NOLOCK) ON I.intModuleId = MODULE.intModuleId
+	LEFT JOIN tblICItemLocation ITEMLOC WITH(NOLOCK) ON I.intItemId = ITEMLOC.intItemId					
+	LEFT JOIN tblICItemPricing PRICING WITH(NOLOCK) ON I.intItemId = PRICING.intItemId AND ITEMLOC.intItemLocationId = PRICING.intItemLocationId
+) ITEM ON SOD.intItemId = ITEM.intItemId 
+      AND SO.intCompanyLocationId = ITEM.intLocationId
+LEFT JOIN (
+	SELECT intItemUOMId
+		 , strUnitMeasure
+		 , intUnitMeasureId
+	FROM vyuARItemUOM WITH(NOLOCK)
+) ITEMUOM ON SOD.intItemUOMId = ITEMUOM.intItemUOMId
+LEFT JOIN (
+	SELECT intItemUOMId
+		 , strUnitMeasure
+	FROM vyuARItemWUOM WITH(NOLOCK)
+) PRICEUOM ON SOD.intPriceUOMId = PRICEUOM.intItemUOMId		
+LEFT JOIN (
+	SELECT intItemWeightUOMId
+		  , strUnitMeasure 
+	FROM vyuARItemWUOM WITH(NOLOCK)
+) WEIGHTUOM ON SOD.intItemWeightUOMId = WEIGHTUOM.intItemWeightUOMId
+LEFT JOIN (
+	SELECT intStorageLocationId
+		  ,	strName 
+	FROM tblICStorageLocation WITH(NOLOCK)
+) STORAGELOCATION ON SOD.intStorageLocationId = STORAGELOCATION.intStorageLocationId
+LEFT JOIN (
+	SELECT intCompanyLocationSubLocationId
+		 , strSubLocationName
+	FROM tblSMCompanyLocationSubLocation WITH(NOLOCK)
+) SUBLOCATION ON SOD.intSubLocationId = SUBLOCATION.intCompanyLocationSubLocationId
+LEFT JOIN (
+	SELECT intContractDetailId
+		  ,	strContractNumber
+		  , intContractSeq
+		  ,	intPricingTypeId
+		  , strPricingType
+		  ,	ysnLoad
+	FROM vyuCTCustomerContract WITH(NOLOCK)
+) CONT ON SOD.intContractDetailId = CONT.intContractDetailId
+LEFT JOIN ( 
+	SELECT intItemContractDetailId
+		 , strContractNumber
+	FROM tblCTItemContractDetail ICD WITH(NOLOCK)
+	INNER JOIN tblCTItemContractHeader ICH WITH(NOLOCK) ON ICH.intItemContractHeaderId	= ICD.intItemContractHeaderId
+) ITEMCONTRACT ON SOD.intItemContractDetailId = ITEMCONTRACT.intItemContractDetailId
+LEFT JOIN (
+	SELECT intTaxGroupId
+		 , strTaxGroup 
+	FROM tblSMTaxGroup WITH(NOLOCK)
+) TAXGROUP ON SOD.intTaxGroupId = TAXGROUP.intTaxGroupId
+LEFT JOIN (
+	SELECT intCurrencyExchangeRateTypeId
+		 , strCurrencyExchangeRateType
+	FROM tblSMCurrencyExchangeRateType WITH(NOLOCK)
+) CURRENCYTYPE ON SOD.intCurrencyExchangeRateTypeId = CURRENCYTYPE.intCurrencyExchangeRateTypeId
+LEFT JOIN (
+	SELECT intCurrencyID
+		 , strCurrency
+	FROM tblSMCurrency WITH(NOLOCK)
+) CURRENCY ON SOD.intSubCurrencyId = CURRENCY.intCurrencyID 
+LEFT JOIN (
+	SELECT intStorageScheduleTypeId
+		 , strStorageTypeDescription
+	FROM tblGRStorageType WITH(NOLOCK)
+) STORAGETYPE ON SOD.intStorageScheduleTypeId = STORAGETYPE.intStorageScheduleTypeId

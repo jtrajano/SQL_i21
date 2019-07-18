@@ -389,10 +389,13 @@ LEFT JOIN (
 		INNER JOIN dbo.tblLGLoad L ON LD.intLoadId = L.intLoadId
 	) LGLOAD ON ID.intLoadDetailId = LGLOAD.intLoadDetailId
 	LEFT JOIN (
-		SELECT intLotId
-			 , strLotNumber
-		FROM dbo.tblICLot WITH (NOLOCK)
-	) LOT ON ID.intLotId = LOT.intLotId
+		SELECT DISTINCT
+			intInvoiceDetailId,
+			strLotNumber 
+		FROM tblARInvoiceDetailLot IDLot
+		INNER JOIN tblICLot ICLot
+		ON ICLot.intLotId = IDLot.intLotId
+	) LOT ON ID.intInvoiceDetailId = LOT.intInvoiceDetailId
 	LEFT JOIN (
 		SELECT intTransactionId
 			 , intTransactionDetailId

@@ -107,7 +107,7 @@ BEGIN
             DECLARE @intTrailerId INT = NULL
 
             SELECT @intTrailerId = intEntityShipViaTrailerId FROM tblSMShipViaTrailer T 
-            WHERE T.strTrailerLicenseNumber = @strTrailer AND T.intEntityShipViaId = @intCarrierId
+            WHERE T.strTrailerNumber = @strTrailer AND T.intEntityShipViaId = @intCarrierId
 
             IF (@intTrailerId IS NULL)
 			BEGIN

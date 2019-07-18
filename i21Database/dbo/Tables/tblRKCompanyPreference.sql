@@ -2,7 +2,6 @@
 (
 	[intCompanyPreferenceId] INT NOT NULL IDENTITY, 
     [intConcurrencyId] INT NOT NULL,
-    [intUnitMeasureId] INT NULL, 
     [dblDecimals] NUMERIC(18, 6) NULL, 
     [dblRefreshRate] NUMERIC(18, 6) NULL, 
     [ysnIncludeInTransitInCompanyTitled] BIT NULL, 
@@ -68,7 +67,6 @@
 	[ysnIncludeDerivatives] BIT NULL DEFAULT((0)),
 	[ysnUseBoardMonth] BIT NULL DEFAULT((0)),
     CONSTRAINT [PK_tblRKCompanyPreference_intCompanyPreferenceId] PRIMARY KEY ([intCompanyPreferenceId]), 
-    CONSTRAINT [FK_tblRKCompanyPreference_tblICUnitMeasure_intUnitMeasureId] FOREIGN KEY([intUnitMeasureId]) REFERENCES [dbo].[tblICUnitMeasure] ([intUnitMeasureId]),
 	CONSTRAINT [FK_tblRKCompanyPreference_tblSMCurrency_intCurrencyId] FOREIGN KEY([intCurrencyId])REFERENCES [dbo].[tblSMCurrency] ([intCurrencyID]),
 	CONSTRAINT [FK_tblRKCompanyPreference_tblRKInterfaceSystem_intCurrencyId] FOREIGN KEY([intInterfaceSystemId])REFERENCES [dbo].[tblRKInterfaceSystem] ([intInterfaceSystemId]),
 	CONSTRAINT [FK_tblRKCompanyPreference_tblGLAccount_intUnrealizedGainOnBasisId] FOREIGN KEY(intUnrealizedGainOnBasisId)REFERENCES [dbo].[tblGLAccount] ([intAccountId]),

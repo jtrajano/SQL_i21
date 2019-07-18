@@ -860,6 +860,8 @@
     <Build Include="dbo\Tables\tblSCTicketPool.sql" />
     <Build Include="dbo\Tables\tblSCTicketStorageType.sql" />
     <Build Include="dbo\Tables\tblSCTicketType.sql" />
+    <Build Include="dbo\Tables\tblSCSealNumber.sql" />
+    <Build Include="dbo\Tables\tblSCTicketSealNumber.sql" />
     <Build Include="dbo\Stored Procedures\uspICCreateGLEntries.sql" />
     <Build Include="dbo\Functions\fnGetDebit.sql" />
     <Build Include="dbo\Functions\fnGetCredit.sql" />
@@ -1457,6 +1459,8 @@
     <Build Include="dbo\Stored Procedures\uspSCAddScaleTicketToItemReceipt.sql" />
     <Build Include="dbo\Stored Procedures\uspSCGetScaleItemForItemReceipt.sql" />
     <Build Include="dbo\Stored Procedures\uspSCProcessToItemReceipt.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCGetScaleTicketByNumber.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCScanAndSaveSealNumber.sql" />
     <Build Include="dbo\Views\vyuCFAccountSearchCustomer.sql" />
     <Build Include="dbo\Functions\fnICGetItemLocationIdFromDuplicateItem.sql" />
     <Build Include="dbo\Functions\fnICGetItemUOMIdFromDuplicateItem.sql" />
@@ -7859,7 +7863,8 @@
     <Build Include="dbo\Views\vyuMFGetDemandMainItem.sql" />
     <Build Include="dbo\Tables\tblSTReceiveLottery.sql" />
     <Build Include="dbo\Tables\tblSTLotteryBook.sql" />
-    <Build Include="dbo\Stored Procedures\uspCTImportItemContractFromStaging.sql" />
+    <Build Include="dbo\Views\vyuARItemContractNumberSearch.sql" />
+    <Build Include="dbo\Views\vyuARItemContractSequenceSearch.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

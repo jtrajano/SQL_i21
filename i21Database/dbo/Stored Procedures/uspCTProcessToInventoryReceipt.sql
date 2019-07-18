@@ -25,7 +25,7 @@ AS
 	
 	SELECT TOP 1 @ysnRequireProducerQty = ysnRequireProducerQty FROM tblCTCompanyPreference 
 
-	SELECT	@ysnLoad	=	CH.ysnLoad 
+	SELECT	@ysnLoad	=	ISNULL(CH.ysnLoad, 0) 
 	FROM	tblCTContractDetail CD 
 	JOIN	tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 	WHERE	CD.intContractDetailId	= @intContractDetailId
