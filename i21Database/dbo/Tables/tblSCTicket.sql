@@ -144,6 +144,7 @@
 	[ysnReadyToTransfer] BIT NOT NULL DEFAULT 0, 
 	[ysnExport] BIT NOT NULL DEFAULT 0, 
 	[dtmImportedDate] DATETIME NULL, 
+    [intEntityShipViaTrailerId] INT NULL, 
     CONSTRAINT [PK_tblSCTicket_intTicketId] PRIMARY KEY CLUSTERED ([intTicketId] ASC), 
     CONSTRAINT [UK_tblSCTicket_intTicketPoolId_strTicketNumber] UNIQUE ([intTicketPoolId], [intTicketType], [strInOutFlag], [strTicketNumber],[intEntityId],[intProcessingLocationId]),
 	CONSTRAINT [FK_tblSCScaleSetup_tblSMCompanyLocation_intTicketLocationId] FOREIGN KEY ([intTicketLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),
@@ -172,7 +173,8 @@
 	CONSTRAINT [FK_tblSCTicket_tblAPBill_intBillId] FOREIGN KEY ([intBillId]) REFERENCES [tblAPBill]([intBillId]),
 	CONSTRAINT [FK_tblSCTicket_tblARInvoice_intInvoiceId] FOREIGN KEY ([intInvoiceId]) REFERENCES [tblARInvoice]([intInvoiceId]),
 	CONSTRAINT [FK_tblSCTicket_tblSOSalesOrder_intSalesOrderId] FOREIGN KEY ([intSalesOrderId]) REFERENCES [tblSOSalesOrder],
-    CONSTRAINT [FK_tblSCTicket_tblEMEntitySplit_intSplitId] FOREIGN KEY ([intSplitId]) REFERENCES [dbo].[tblEMEntitySplit] ([intSplitId])
+    CONSTRAINT [FK_tblSCTicket_tblEMEntitySplit_intSplitId] FOREIGN KEY ([intSplitId]) REFERENCES [dbo].[tblEMEntitySplit] ([intSplitId]),
+	CONSTRAINT [FK_tblSCTicket_tblSMShipViaTrailer_intEntityShipViaTrailerId]FOREIGN KEY ([intEntityShipViaTrailerId]) REFERENCES [dbo].[tblSMShipViaTrailer] ([intEntityShipViaTrailerId])
 )
 GO
 CREATE NONCLUSTERED INDEX [IX_tblSCTicket_intDeliverySheetId] ON [dbo].[tblSCTicket](
