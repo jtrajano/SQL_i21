@@ -39,6 +39,7 @@ SELECT DISTINCT
 	 , USec.ysnAdmin AS ysnIsUserAdmin
 	 , USec.strDashboardRole
 	 , USec.intEntityId
+	 ,Store.strState
 FROM tblSTStore Store
 INNER JOIN tblSMUserSecurity USec
 	ON Store.intCompanyLocationId = USec.intCompanyLocationId
