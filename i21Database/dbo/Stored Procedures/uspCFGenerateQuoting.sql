@@ -360,7 +360,7 @@ BEGIN
 		SELECT	@dblOutTaxCalculatedAmount = ISNULL(SUM(dblTaxCalculatedAmount),0)	FROM tblCFTransactionTaxType
 
 
-		IF(LOWER(ISNULL(@strOutPriceBasis,'')) IN ('local index cost','local index retail','local index fixed'))
+		IF(LOWER(ISNULL(@strOutPriceBasis,'')) IN ('index cost','index retail','index fixed'))
 		BEGIN
 			SET @ysnHavePriceIndex = 1
 		END
