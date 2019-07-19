@@ -7871,6 +7871,8 @@
     <Build Include="dbo\Views\vyuRKGetReplacementPriceByForecast.sql" />
     <Build Include="dbo\Stored Procedures\uspSMGetVendorRefNoPrefix.sql" />
     <Build Include="dbo\Functions\fnSMGetVendorRefNoPrefix.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPValidateImportedPaidVouchers.sql" />
+    <Build Include="dbo\Tables\tblAPImportPaidVouchersForPayment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
