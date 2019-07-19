@@ -279,6 +279,7 @@ BEGIN TRY
 				AND intItemId = @intItemId
 				AND dtmDemandDate = @dtmDemandDate
 				AND IsNULL(intSubstituteItemId,0)=IsNULL(@intSubstituteItemId,IsNULL(intSubstituteItemId,0))
+				AND IsNULL(intCompanyLocationId,0)=IsNULL(@intLocationId,IsNULL(intCompanyLocationId,0))
 
 			IF @intDemandDetailId IS NULL
 			BEGIN
@@ -305,12 +306,8 @@ BEGIN TRY
 			BEGIN
 				UPDATE tblMFDemandDetail
 				SET intConcurrencyId = intConcurrencyId + 1
-					,intItemId = @intItemId
-					,intSubstituteItemId = @intSubstituteItemId
-					,dtmDemandDate = @dtmDemandDate
 					,dblQuantity = @dblQuantity
 					,intItemUOMId = @intItemUOMId
-					,intCompanyLocationId = @intLocationId
 				WHERE intDemandDetailId = @intDemandDetailId
 			END
 
