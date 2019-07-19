@@ -64,6 +64,9 @@ BEGIN
 			)
 		END
 
+
+
+
 		IF(@strRegisterClass = 'PASSPORT')
 			BEGIN
 				---- Create Unique Identifier
