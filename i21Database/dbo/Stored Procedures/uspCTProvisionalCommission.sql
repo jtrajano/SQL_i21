@@ -120,7 +120,14 @@ BEGIN TRY
 	SELECT	@blbFile    AS  blbFile,
 			@strAddress AS  strAddress,
 			--@strCity + ', ' + CONVERT(NVARCHAR(15),GETDATE(),106) AS strCity,
-			@strCity + ', ' + LEFT(DATENAME(DAY,getdate()),2) + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,LEFT(DATENAME(MONTH,getdate()),3)),LEFT(DATENAME(MONTH,getdate()),3)) + ' ' + LEFT(DATENAME(YEAR,getdate()),4) AS strCity,
+			@strCity + ', ' + 
+			CASE 
+			   WHEN DAY(GETDATE()) In (1,21,31)   THEN TRIM(STR(DAY(GETDATE()))  + 'st')
+			   WHEN DAY(GETDATE()) In (2,22)   THEN TRIM(STR(DAY(GETDATE()))  + 'nd')
+			   WHEN DAY(GETDATE()) In (3,23)   THEN TRIM(STR(DAY(GETDATE()))  + 'rd')
+			   ELSE TRIM(STR(DAY(GETDATE())))  + 'th'
+			END
+			+ ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,DATENAME(MONTH,getdate())),DATENAME(MONTH,getdate())) + ' ' + LEFT(DATENAME(YEAR,getdate()),4) AS strCity,
 			ch.strContractNumber,
 			strSellerRef,
 			strSeller,

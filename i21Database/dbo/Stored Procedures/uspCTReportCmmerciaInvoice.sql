@@ -100,7 +100,13 @@ BEGIN TRY
 			@strAddress AS strAddress,
 			'YR VAT NO.: - ' + @strVATNumber AS strVATNo,
 			'INVOICE NO. ' + @strInvoiceNumber AS strInvoiceNo,
-			@strCity + ', ' + CONVERT(NVARCHAR(15),GETDATE(),106) AS strCity,
+			@strCity + ', ' +
+			 CASE 
+			   WHEN DAY(GETDATE()) In (1,21,31)   THEN FORMAT(GETDATE(),'d' + '''st''' + ' MMMM yyyy')  
+			   WHEN DAY(GETDATE()) In (2,22)   THEN FORMAT(GETDATE(),'d' + '''nd''' + ' MMMM yyyy')
+			   WHEN DAY(GETDATE()) In (3,23)   THEN FORMAT(GETDATE(),'d' + '''rd''' + ' MMMM yyyy')
+			   ELSE FORMAT(GETDATE(),'d' + '''th''' + ' MMMM yyyy')   
+			END AS strCity,
 			'Issued for commission received as per enclosed list dated ' + CONVERT(NVARCHAR,GETDATE(),103) + ' = ' AS strIssued,
 			@strCurrency + '. ' + LTRIM(@dblRcvdPaidAmount) AS strPrice,
 			'Operazione non soggetta - Art. 7-ter DPR 633/72'   AS strOperazione,
