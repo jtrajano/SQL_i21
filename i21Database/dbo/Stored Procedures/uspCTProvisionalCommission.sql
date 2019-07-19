@@ -122,10 +122,10 @@ BEGIN TRY
 			--@strCity + ', ' + CONVERT(NVARCHAR(15),GETDATE(),106) AS strCity,
 			@strCity + ', ' + 
 			CASE 
-			   WHEN DAY(GETDATE()) In (1,21,31)   THEN TRIM(STR(DAY(GETDATE()))  + 'st')
-			   WHEN DAY(GETDATE()) In (2,22)   THEN TRIM(STR(DAY(GETDATE()))  + 'nd')
-			   WHEN DAY(GETDATE()) In (3,23)   THEN TRIM(STR(DAY(GETDATE()))  + 'rd')
-			   ELSE TRIM(STR(DAY(GETDATE())))  + 'th'
+			   WHEN DAY(GETDATE()) In (1,21,31)   THEN LTRIM(RTRIM(STR(DAY(GETDATE()))  + 'st'))
+			   WHEN DAY(GETDATE()) In (2,22)   THEN LTRIM(RTRIM(STR(DAY(GETDATE()))  + 'nd'))
+			   WHEN DAY(GETDATE()) In (3,23)   THEN LTRIM(RTRIM(STR(DAY(GETDATE()))  + 'rd'))
+			   ELSE LTRIM(RTRIM(STR(DAY(GETDATE()))  + 'th'))
 			END
 			+ ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,DATENAME(MONTH,getdate())),DATENAME(MONTH,getdate())) + ' ' + LEFT(DATENAME(YEAR,getdate()),4) AS strCity,
 			ch.strContractNumber,

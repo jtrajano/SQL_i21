@@ -646,10 +646,10 @@ BEGIN TRY
 														+ ' ' + dbo.fnCTGetTranslation('ContractManagement.view.Associations',AN.intAssociationId,@intLaguageId,'Printable Contract Text',AN.strComment) + ' ('+dbo.fnCTGetTranslation('ContractManagement.view.Associations',AN.intAssociationId,@intLaguageId,'Name',AN.strName)+')'+' '+@rtStrGABAssociation2+'.'
 			,strEQTAssociation						=	@rtStrAssociation1 + ' '+ dbo.fnCTGetTranslation('ContractManagement.view.Associations',AN.intAssociationId,@intLaguageId,'Printable Contract Text',AN.strComment)+' '+@rtStrAssociation2+'.'
 			,strCompanyCityAndDate					=	ISNULL(@strCity + ', ', '') + 
-														CASE WHEN DAY(CH.dtmContractDate) In (1,21,31)   THEN TRIM(STR(DAY(CH.dtmContractDate))  + 'st')
-														WHEN DAY(CH.dtmContractDate) In (2,22)   THEN TRIM(STR(DAY(CH.dtmContractDate))  + 'nd')
-														WHEN DAY(CH.dtmContractDate) In (3,23)   THEN TRIM(STR(DAY(CH.dtmContractDate))  + 'rd')
-														ELSE TRIM(STR(DAY(CH.dtmContractDate))  + 'th')
+														CASE WHEN DAY(CH.dtmContractDate) In (1,21,31)   THEN LTRIM(RTRIM(STR(DAY(CH.dtmContractDate))  + 'st'))
+														WHEN DAY(CH.dtmContractDate) In (2,22)   THEN LTRIM(RTRIM(STR(DAY(CH.dtmContractDate))  + 'nd'))
+														WHEN DAY(CH.dtmContractDate) In (3,23)   THEN LTRIM(RTRIM(STR(DAY(CH.dtmContractDate))  + 'rd'))
+														ELSE LTRIM(RTRIM(STR(DAY(CH.dtmContractDate))  + 'th'))
 														END 
 														+ ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,DATENAME(MONTH,CH.dtmContractDate)), DATENAME(MONTH,CH.dtmContractDate)) + ' ' + LEFT(DATENAME(YEAR,CH.dtmContractDate),4)
 			,strGABCompanyCityAndDate				=	ISNULL(@strCity + ', ', '') + LEFT(DATENAME(DAY,CH.dtmContractDate),2) + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,LEFT(DATENAME(MONTH,CH.dtmContractDate),3)), LEFT(DATENAME(MONTH,CH.dtmContractDate),3)) + ' ' + LEFT(DATENAME(YEAR,CH.dtmContractDate),4)
