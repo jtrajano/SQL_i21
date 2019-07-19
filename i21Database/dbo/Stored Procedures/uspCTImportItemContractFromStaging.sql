@@ -102,6 +102,7 @@ BEGIN
 
 	DECLARE @intStagingItemId INT
 	DECLARE @intItemHeaderId INT
+	DECLARE @IncrementValue INT = 0
 
 	SELECT TOP 1 @intStagingItemId = intStagingItemId FROM @ItemContractItems ORDER BY intStagingItemId	
 	EXEC uspSMGetStartingNumber 144, @itemContractRecordNum OUT
@@ -198,6 +199,8 @@ BEGIN
 		,intTaxGroupId
 	FROM tblCTStagingItemContractDetail
 	WHERE intStagingItemId = @intStagingItemId
+
+	UPDATE tblCTItemContractDetail SET intLineNo = ISNULL(intLineNo,0) + @IncrementValue, @IncrementValue = @IncrementValue + 1 WHERE intItemContractHeaderId = @intItemHeaderId
 
 	DELETE @ItemContractItems WHERE intStagingItemId = @intStagingItemId
 
