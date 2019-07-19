@@ -4,10 +4,18 @@ SELECT strTransactionType = 'Load Schedule' COLLATE Latin1_General_CI_AS
 	,strTransactionNumber = L.strLoadNumber
 	,strShippedItemId = 'lgis:' + CAST(L.intLoadId AS NVARCHAR(250)) COLLATE Latin1_General_CI_AS
 	,intEntityCustomerId = LD.intCustomerEntityId
-	,intCurrencyId = CASE WHEN L.intSourceType = 7 THEN LD.intPriceCurrencyId ELSE 
+	,intCurrencyId = CASE WHEN L.intSourceType = 7 
+						THEN LD.intPriceCurrencyId 
+					 ELSE 
 						CASE WHEN (CD.ysnUseFXPrice = 1 AND CD.intCurrencyExchangeRateId IS NOT NULL AND CD.dblRate IS NOT NULL AND CD.intFXPriceUOMId IS NOT NULL) 
-						THEN CD.intInvoiceCurrencyId 
-						ELSE AD.intSeqCurrencyId END
+							THEN CD.intInvoiceCurrencyId 
+						ELSE 
+							CASE WHEN AD.ysnSeqSubCurrency = 1 THEN 
+									(SELECT ISNULL(intMainCurrencyId,0) FROM dbo.tblSMCurrency WHERE intCurrencyID = intSeqCurrencyId )
+								ELSE 
+									AD.intSeqCurrencyId 
+								END
+							END
 					 END
 	,intSalesOrderId = NULL
 	,intSalesOrderDetailId = NULL
