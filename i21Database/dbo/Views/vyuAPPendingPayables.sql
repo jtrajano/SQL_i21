@@ -147,6 +147,16 @@ LEFT JOIN
 	INNER JOIN tblAPBillDetail B
 	ON B.intBillId = B2.intBillId
 	WHERE B2.intTransactionType IN (1, 3) --AND B2.ysnPosted = 1
+	GROUP BY 
+		B.intPurchaseDetailId
+		,B.intContractDetailId
+		,B2.intEntityVendorId
+		,B.intScaleTicketId
+		,B.intInventoryReceiptChargeId
+		,B.intInventoryReceiptItemId
+		,B.intLoadDetailId
+		,B.intInventoryShipmentChargeId
+		,B.intItemId
 ) A2
 ON	ISNULL(A.intPurchaseDetailId,-1) = ISNULL(A2.intPurchaseDetailId,-1)
 AND ISNULL(A.intContractDetailId,-1) = ISNULL(A2.intContractDetailId,-1)
