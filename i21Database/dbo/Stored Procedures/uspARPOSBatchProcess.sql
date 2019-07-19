@@ -2,11 +2,11 @@
 	@intPOSEndOfDayId	INT
 AS
 
-IF EXISTS(SELECT TOP 1 NULL FROM tblARPOSEndOfDay WHERE intPOSEndOfDayId = @intPOSEndOfDayId AND ysnClosed = 1)
-	BEGIN
-		RAISERROR('EOD is already closed.', 16, 1)
-		RETURN
-	END
+--IF EXISTS(SELECT TOP 1 NULL FROM tblARPOSEndOfDay WHERE intPOSEndOfDayId = @intPOSEndOfDayId AND ysnClosed = 1)
+--	BEGIN
+--		RAISERROR('EOD is already closed.', 16, 1)
+--		RETURN
+--	END
 
 --REGULAR POS
 IF(OBJECT_ID('tempdb..#REGULARTRANS') IS NOT NULL)
