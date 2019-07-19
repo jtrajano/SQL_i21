@@ -508,7 +508,9 @@ FROM
 	LEFT JOIN dbo.tblGLAccount apClearing ON apClearing.intAccountId = itemAccnt.intAccountId
 	OUTER APPLY 
 	(
-		SELECT SUM(ISNULL(H.dblQtyReceived,0)) AS dblQty FROM tblAPBillDetail H WHERE H.intInventoryReceiptItemId = B.intInventoryReceiptItemId AND H.intInventoryReceiptChargeId IS NULL
+		SELECT SUM(ISNULL(H.dblQtyReceived,0)) AS dblQty FROM (tblAPBillDetail H INNER JOIN tblAPBill H2 ON H.intBillId = H2.intBillId)
+		WHERE H.intInventoryReceiptItemId = B.intInventoryReceiptItemId AND H.intInventoryReceiptChargeId IS NULL
+		AND H2.ysnPosted = 1 --Billed Qty should be count only for posted
 		GROUP BY H.intInventoryReceiptItemId
 	) Billed
 	OUTER APPLY (
