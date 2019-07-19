@@ -30,10 +30,10 @@ RETURNS TABLE AS RETURN
 					ELSE 0 END
 		END) as dblTotalUnits
 		,CASE 
-			WHEN B.intInventoryReceiptChargeId > 0
+			WHEN B.intPurchaseDetailId > 0 AND poDetail.intAccountId > 0
+				THEN poDetail.intAccountId
+			WHEN B.intInventoryReceiptChargeId > 0 OR F.strType = 'Non-Inventory'
 				THEN [dbo].[fnGetItemGLAccount](B.intItemId, loc.intItemLocationId, 'Other Charge Expense')
-			WHEN F.strType = 'Non-Inventory'
-				THEN [dbo].[fnGetItemGLAccount](B.intItemId, loc.intItemLocationId, 'General')
 			ELSE [dbo].[fnGetItemGLAccount](B.intItemId, loc.intItemLocationId, 'AP Clearing')
 			END AS intAccountId
 		,G.intCurrencyExchangeRateTypeId
@@ -45,6 +45,8 @@ RETURNS TABLE AS RETURN
 		ON B.intInventoryReceiptItemId = E.intInventoryReceiptItemId
 	LEFT JOIN tblICInventoryReceiptCharge charges
 		ON B.intInventoryReceiptChargeId = charges.intInventoryReceiptChargeId
+	LEFT JOIN tblPOPurchaseDetail poDetail
+		ON B.intPurchaseDetailId = poDetail.intPurchaseDetailId
 	LEFT JOIN dbo.tblSMCurrencyExchangeRateType G
 		ON B.intCurrencyExchangeRateTypeId = G.intCurrencyExchangeRateTypeId
 	LEFT JOIN tblICItem B2
