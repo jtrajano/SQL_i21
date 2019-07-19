@@ -1,8 +1,9 @@
 CREATE TABLE [dbo].[tblCTItemContractDetail] (
     [intItemContractDetailId]				[int] IDENTITY(1,1) NOT NULL,
-    [intItemContractHeaderId]				[int] NOT NULL,
+    [intItemContractHeaderId]				[int] NOT NULL,	
 
-    [intItemId]								[int] NULL,	
+    [intLineNo]								[int] NULL,	
+	[intItemId]								[int] NULL,	
     [strItemDescription]					[nvarchar](250)	COLLATE Latin1_General_CI_AS NULL,
 	
     [dtmDeliveryDate]						[datetime] NULL,
