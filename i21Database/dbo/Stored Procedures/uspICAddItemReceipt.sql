@@ -369,7 +369,7 @@ BEGIN
 					AND ISNULL(RawHeaderData.ReceiptType,0) = ISNULL(RawData.strReceiptType,0)
 					AND ISNULL(RawHeaderData.ShipFrom,0) = ISNULL(RawData.intShipFromId,0)
 					AND ISNULL(RawHeaderData.ShipVia,0) = ISNULL(RawData.intShipViaId,0)
-					AND ISNULL(RawHeaderData.strVendorRefNo,0) = ISNULL(RawData.strVendorRefNo,0)
+					AND ISNULL(dbo.fnSMGetVendorRefNoPrefix(RawHeaderData.[Location], RawHeaderData.strVendorRefNo),'') = ISNULL(dbo.fnSMGetVendorRefNoPrefix(RawData.intLocationId, RawData.strVendorRefNo),'')	
 		WHERE	RawHeaderData.intId = @intId
 		ORDER BY RawData.intInventoryReceiptId DESC
 
@@ -472,7 +472,7 @@ BEGIN
 						AND ISNULL(RawHeaderData.ReceiptType,0) = ISNULL(RawData.strReceiptType,0)
 						AND ISNULL(RawHeaderData.ShipFrom,0) = ISNULL(RawData.intShipFromId,0)
 						AND ISNULL(RawHeaderData.ShipVia,0) = ISNULL(RawData.intShipViaId,0)
-						AND ISNULL(RawHeaderData.strVendorRefNo,0) = ISNULL(RawData.strVendorRefNo,0)	
+						AND ISNULL(dbo.fnSMGetVendorRefNoPrefix(RawHeaderData.[Location], RawHeaderData.strVendorRefNo),'') = ISNULL(dbo.fnSMGetVendorRefNoPrefix(RawData.intLocationId, RawData.strVendorRefNo),'')	
 						AND ISNULL(RawHeaderData.ShipFromEntity,0) = ISNULL(RawData.intShipFromEntityId,0)	
 
 			WHERE	RawHeaderData.intId = @intId
@@ -488,7 +488,7 @@ BEGIN
 				,intSourceType          = IntegrationData.intSourceType
 				,intBlanketRelease		= NULL
 				,intLocationId			= IntegrationData.intLocationId
-				,strVendorRefNo			= IntegrationData.strVendorRefNo
+				,strVendorRefNo			= dbo.fnSMGetVendorRefNoPrefix(IntegrationData.intLocationId, IntegrationData.strVendorRefNo) 
 				,strBillOfLading		= IntegrationData.strBillOfLadding
 				,intShipViaId			= IntegrationData.intShipViaId
 				,intShipFromId			= IntegrationData.intShipFromId
@@ -574,7 +574,7 @@ BEGIN
 				/*intSourceType*/				,IntegrationData.intSourceType
 				/*intBlanketRelease*/			,NULL
 				/*intLocationId*/				,IntegrationData.intLocationId
-				/*strVendorRefNo*/				,IntegrationData.strVendorRefNo
+				/*strVendorRefNo*/				,dbo.fnSMGetVendorRefNoPrefix(IntegrationData.intLocationId, IntegrationData.strVendorRefNo)
 				/*strBillOfLading*/				,IntegrationData.strBillOfLadding
 				/*intShipViaId*/				,IntegrationData.intShipViaId
 				/*intShipFromId*/				,IntegrationData.intShipFromId
@@ -999,8 +999,6 @@ BEGIN
 					AND ISNULL(RawHeaderData.ReceiptType,0) = ISNULL(RawData.strReceiptType,0)
 					AND ISNULL(RawHeaderData.ShipFrom,0) = ISNULL(RawData.intShipFromId,0)
 					AND ISNULL(RawHeaderData.ShipVia,0) = ISNULL(RawData.intShipViaId,0)		   
-					--AND ISNULL(RawHeaderData.strVendorRefNo,0) = ISNULL(RawData.strVendorRefNo,0)
-					--AND ISNULL(RawHeaderData.ShipFromEntity,0) = ISNULL(RawData.intShipFromEntityId,0)	
 				INNER JOIN tblICItem Item
 					ON Item.intItemId = RawData.intItemId
 				INNER JOIN dbo.tblICItemUOM ItemUOM			
@@ -1370,8 +1368,6 @@ BEGIN
 						AND ISNULL(RawHeaderData.ReceiptType,0) = ISNULL(RawData.strReceiptType,0)						
 						AND ISNULL(RawHeaderData.ShipFrom,0) = ISNULL(RawData.intShipFromId,0)
 						AND ISNULL(RawHeaderData.ShipVia,0) = ISNULL(RawData.intShipViaId,0)
-						--AND ISNULL(RawHeaderData.strVendorRefNo,0) = ISNULL(RawData.strVendorRefNo,0)
-						--AND ISNULL(RawHeaderData.ShipFromEntity,0) = ISNULL(RawData.intShipFromEntityId,0)	
 						
 					LEFT JOIN tblSMCurrency subCurrency
 						ON subCurrency.intCurrencyID = RawData.intCostCurrencyId
@@ -1454,8 +1450,6 @@ BEGIN
 					AND ISNULL(RawHeaderData.ReceiptType,0) = ISNULL(RawData.strReceiptType,0)					
 					AND ISNULL(RawHeaderData.ShipFrom,0) = ISNULL(RawData.intShipFromId,0)
 					AND ISNULL(RawHeaderData.ShipVia,0) = ISNULL(RawData.intShipViaId,0)		   
-					--AND ISNULL(RawHeaderData.strVendorRefNo,0) = ISNULL(RawData.strVendorRefNo,0)
-					--AND ISNULL(RawHeaderData.ShipFromEntity,0) = ISNULL(RawData.intShipFromEntityId,0)					
 
 				INNER JOIN tblICInventoryReceipt r
 					ON r.intInventoryReceiptId = @inventoryReceiptId
@@ -1924,8 +1918,6 @@ BEGIN
 					AND ISNULL(RawHeaderData.ShipFrom,0) = ISNULL(ItemLot.intShipFromId,0)
 					AND ISNULL(RawHeaderData.ShipVia,0) = ISNULL(ItemLot.intShipViaId,0)		   
 					AND ISNULL(RawHeaderData.intSourceType,0) = ISNULL(ItemLot.intSourceType, 0)					
-					--AND ISNULL(RawHeaderData.strVendorRefNo,0) = ISNULL(ItemLot.strVendorRefNo,0)
-					--AND ISNULL(RawHeaderData.ShipFromEntity,0) = ISNULL(ItemLot.intShipFromEntityId,0)											
 				INNER JOIN tblICInventoryReceiptItem ReceiptItem 
 					ON ReceiptItem.intItemId = ItemLot.intItemId
 					AND ISNULL(ReceiptItem.intSubLocationId, 0) = ISNULL(ItemLot.intSubLocationId, 0)

@@ -7869,6 +7869,8 @@
     <Build Include="dbo\Views\vyuMFGetDemandList.sql" />
     <Build Include="dbo\Views\vyuRKGetReplacementPriceByMarketDifference.sql" />
     <Build Include="dbo\Views\vyuRKGetReplacementPriceByForecast.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMGetVendorRefNoPrefix.sql" />
+    <Build Include="dbo\Functions\fnSMGetVendorRefNoPrefix.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

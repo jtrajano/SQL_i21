@@ -204,6 +204,7 @@
 	[ysnProductCaseCodeScanningRequired] BIT NULL DEFAULT (0), 
 	[ysnYieldAdjustmentAllowed] BIT NULL DEFAULT (0), 
 	[ysnPrintInvTagOnReceivingComplete] BIT NULL DEFAULT (0), 
+	[strVendorRefNoPrefix] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 	---------------------------------------------------------------------
 	/* Credit Card Processing */
 	[ysnEnableCreditCardProcessing] BIT NOT NULL DEFAULT 0, 
