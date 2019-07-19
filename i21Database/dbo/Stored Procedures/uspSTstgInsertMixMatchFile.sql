@@ -182,7 +182,7 @@ BEGIN
 										[PromotionReason]			NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
 										[MixMatchDescription]		NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL, 
 										[TransactionLimit]			INT,
-										[ItemListID]				INT,
+										[ItemListId]				INT,
 										[StartDate]					DATE,
 										[StartTime]					TIME,
 										[StopDate]					DATE,
@@ -225,7 +225,7 @@ BEGIN
 										[PromotionReason], 
 										[MixMatchDescription], 
 										[TransactionLimit],
-										[ItemListID],
+										[ItemListId],
 										[StartDate],
 										[StartTime],
 										[StopDate],
@@ -256,7 +256,7 @@ BEGIN
 										[PromotionReason]				= PSL.strPromoReason, 
 										[MixMatchDescription]			= PSL.strPromoSalesDescription, 
 										[TransactionLimit]				= 9999,
-										[ItemListID]					= PIL.intPromoItemListNo,
+										[ItemListId]					= PIL.intPromoItemListNo,
 										[StartDate]						= CONVERT(nvarchar(10), PSL.dtmPromoBegPeriod, 126),
 										[StartTime]						= CONVERT(varchar, CAST('0:00:00' AS TIME), 108),
 										[StopDate]						= CONVERT(nvarchar(10), PSL.dtmPromoEndPeriod, 126),
@@ -411,7 +411,7 @@ BEGIN
 															, MMTDetail.MixMatchDescription		AS [MixMatchDescription]
 															, MMTDetail.TransactionLimit		AS [TransactionLimit]
 															, MMTDetail.ItemListId				AS [ItemListId]
-															, MMTDetail.startDate				AS [StartDate]
+															, MMTDetail.StartDate				AS [StartDate]
 															, MMTDetail.StartTime				AS [StartTime]
 															, MMTDetail.StopDate				AS [StopDate]
 															, MMTDetail.StopTime				AS [StopTime]
@@ -450,7 +450,7 @@ BEGIN
 																, mixDetail.MixMatchDescription
 																, mixDetail.TransactionLimit
 																, mixDetail.ItemListId
-																, mixDetail.startDate
+																, mixDetail.StartDate
 																, mixDetail.StartTime
 																, mixDetail.StopDate
 																, mixDetail.StopTime
