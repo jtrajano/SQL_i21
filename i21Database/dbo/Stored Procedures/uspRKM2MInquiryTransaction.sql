@@ -2234,7 +2234,7 @@ BEGIN
 				, (SELECT TOP 1 strFutureMonth strFutureMonth FROM tblRKFuturesMonth WHERE ysnExpired = 0 AND  dtmSpotDate <= GETDATE() AND intFutureMarketId =c.intFutureMarketId  ORDER BY 1 DESC) strFutureMonth
 				, (SELECT TOP 1 intFutureMonthId strFutureMonth FROM tblRKFuturesMonth WHERE ysnExpired = 0 AND  dtmSpotDate <= GETDATE() AND intFutureMarketId =c.intFutureMarketId  ORDER BY 1 DESC) intFutureMonthId
 				, c.intFutureMarketId
-				, dblNotLotTrackedPrice = ROUND(dbo.fnCTConvertQuantityToTargetCommodityUOM(cu1.intCommodityUnitMeasureId,cu2.intCommodityUnitMeasureId,ISNULL(dbo.fnCalculateValuationAverageCost(i.intItemId, s.intItemLocationId, @dtmTransactionDateUpTo), 0)),4)
+				, dblNotLotTrackedPrice = dbo.fnCalculateQtyBetweenUOM(iuomTo.intItemUOMId, iuomStck.intItemUOMId,  ISNULL(dbo.fnCalculateValuationAverageCost(i.intItemId, s.intItemLocationId, @dtmTransactionDateUpTo), 0))
 				, cu2.intCommodityUnitMeasureId intToPriceUOM
 			FROM vyuRKGetInventoryValuation s
 			JOIN tblICItem i on i.intItemId=s.intItemId
@@ -2260,7 +2260,8 @@ BEGIN
 					,c.intCommodityId
 					,c.intFutureMarketId
 					,cuom.intCommodityUnitMeasureId
-					,cu1.intCommodityUnitMeasureId
+					,iuomTo.intItemUOMId
+					,iuomStck.intItemUOMId
 					,cu2.intCommodityUnitMeasureId
 					
 		) t1
