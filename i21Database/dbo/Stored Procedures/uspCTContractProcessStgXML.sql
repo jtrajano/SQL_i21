@@ -189,6 +189,7 @@ BEGIN TRY
 		SELECT @intContractHeaderId = intContractHeaderId
 			,@strContractNumber = strContractNumber
 			,@strCustomerContract = strContractNumber
+			,@strNewContractNumber=strContractNumber
 			,@strHeaderXML = strHeaderXML
 			,@strDetailXML = strDetailXML
 			,@strCostXML = strCostXML
@@ -896,9 +897,6 @@ BEGIN TRY
 							)
 					BEGIN
 						SELECT @strRowState = 'Added'
-
-						EXEC uspCTGetStartingNumber 'PurchaseContract'
-							,@strNewContractNumber OUTPUT
 					END
 					ELSE
 					BEGIN
@@ -988,7 +986,7 @@ BEGIN TRY
 					,@intUserId
 					,GETDATE()
 					,1 intConcurrencyId
-					,@strCustomerContract
+					,x.strCustomerContract
 					,@intContractHeaderRefId
 					,@intFreightTermId
 					,@intTermID
@@ -1078,6 +1076,7 @@ BEGIN TRY
 						,strExternalEntity [nvarchar](100) COLLATE Latin1_General_CI_AS 
 						,strExternalContractNumber [nvarchar](50) COLLATE Latin1_General_CI_AS 
 						,ysnReceivedSignedFixationLetter BIT
+						,strCustomerContract NVARCHAR(30) Collate Latin1_General_CI_AS
 						) x
 
 				EXEC uspCTGetTableDataInXML '#tmpContractHeader'
