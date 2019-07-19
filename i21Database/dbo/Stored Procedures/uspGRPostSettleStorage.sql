@@ -326,7 +326,7 @@ BEGIN TRY
 				AND SSC.dblUnits > 0
 			ORDER BY SSC.intSettleContractId
 
-			IF EXISTS(SELECT TOP 1 1 FROM @SettleContract WHERE strPricingType <> 'Cash')
+			IF EXISTS(SELECT TOP 1 1 FROM @SettleContract WHERE strPricingType = 'Basis')
 			BEGIN
 				IF @intFutureMarketId = 0 AND @ysnExchangeTraded = 1
 				BEGIN
@@ -977,10 +977,11 @@ BEGIN TRY
 														ELSE 0 
 												  END			
 					,dblUOMQty					=  @dblUOMQty
-					,dblCost					=  CASE 
+					,dblCost					=  (CASE 
 														WHEN SV.intPricingTypeId = 1 OR SV.intPricingTypeId = 6 OR SV.intPricingTypeId IS NULL THEN SV.[dblCashPrice]
 														ELSE @dblFutureMarkePrice + ISNULL(SV.dblBasis,0)
-												   END
+												   END)
+												   + DiscountCost.dblTotalCashPrice
 					,dblSalesPrice				= 0.00
 					,intCurrencyId				= @intCurrencyId
 					,dblExchangeRate			= 1
@@ -1004,6 +1005,14 @@ BEGIN TRY
 				JOIN tblICItemStock ItemStock 
 					ON ItemStock.intItemId = CS.intItemId 
 						AND ItemStock.intItemLocationId = @ItemLocationId
+				OUTER APPLY (
+					SELECT 
+						ISNULL(SUM((ROUND(SV.dblCashPrice * SV.dblUnits,2)) / SV.dblUnits),0)  AS dblTotalCashPrice
+					FROM @SettleVoucherCreate SV
+					INNER JOIN tblICItem I
+						ON I.intItemId = SV.intItemId
+							AND I.ysnInventoryCost = 1
+				) DiscountCost
 
 				INSERT INTO @ItemsToPost 
 				(
@@ -1042,7 +1051,6 @@ BEGIN TRY
 														ELSE @dblFutureMarkePrice + ISNULL(SV.dblBasis,0)
 												   END)
 												   + DiscountCost.dblTotalCashPrice
-
 					,dblSalesPrice				= 0.00
 					,intCurrencyId				= @intCurrencyId
 					,dblExchangeRate			= 1
@@ -1062,13 +1070,26 @@ BEGIN TRY
 				--	AND CU.ysnStockUnit = 1
 				OUTER APPLY (
 					SELECT 
-						SUM((ROUND(SV.dblCashPrice * SV.dblUnits,2)) / SV.dblUnits)  AS dblTotalCashPrice
+						ISNULL(SUM((ROUND(SV.dblCashPrice * SV.dblUnits,2)) / SV.dblUnits),0) AS dblTotalCashPrice
 					FROM @SettleVoucherCreate SV
 					INNER JOIN tblICItem I
 						ON I.intItemId = SV.intItemId
 							AND I.ysnInventoryCost = 1
 				) DiscountCost
 				WHERE SV.intItemType = 1
+
+				--UPDATE the price in tblGRSettleContract
+				IF EXISTS(SELECT 1 FROM tblGRSettleContract WHERE intSettleStorageId = @intSettleStorageId)
+				BEGIN
+					UPDATE SC1
+					SET dblPrice = CASE
+										WHEN SC2.strPricingType <> 'Basis' THEN SC2.dblCashPrice
+										ELSE @dblFutureMarkePrice + SC2.dblBasis
+									END
+					FROM tblGRSettleContract SC1
+					INNER JOIN @SettleContract SC2
+						ON SC2.intSettleContractId = SC1.intSettleContractId
+				END
 
 				--Reduce the On-Storage Quantity		
 				BEGIN
