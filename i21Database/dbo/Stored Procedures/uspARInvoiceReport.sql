@@ -306,8 +306,8 @@ LEFT JOIN (
 		 , dblEstimatedPercentLeft	= [SITE].dblEstimatedPercentLeft
 		 , strTicketNumber			= SCALE.strTicketNumber
 		 , strTicketNumberDate		= SCALE.strTicketNumber + ' - ' + CONVERT(NVARCHAR(50), SCALE.dtmTicketDateTime, 101) 
-		 , strCustomerReference		= SCALE.strCustomerReference
-		 , strSalesReference		= ISNULL(LGLOAD.strCustomerReference, CONTRACTS.strCustomerContract)
+		 , strCustomerReference		= ISNULL(NULLIF(SCALE.strCustomerReference, ''), CONTRACTS.strCustomerContract)
+		 , strSalesReference		= ISNULL(NULLIF(LGLOAD.strCustomerReference, ''), CONTRACTS.strCustomerContract)
 	 	 , strPurchaseReference		= LGLOAD.strExternalLoadNumber
 		 , strLoadNumber			= ISNULL(LGLOAD.strLoadNumber, SCALE.strLoadNumber)
 		 , strTruckName				= SCALE.strTruckName
@@ -330,7 +330,7 @@ LEFT JOIN (
 		SELECT intItemUOMId
 			 , intItemId
 			 , strUnitMeasure
-		FROM dbo. vyuARItemUOM WITH (NOLOCK)
+		FROM dbo.vyuARItemUOM WITH (NOLOCK)
 	) UOM ON ID.intItemUOMId = UOM.intItemUOMId
 	     AND ID.intItemId = UOM.intItemId
 	LEFT JOIN (
@@ -397,14 +397,14 @@ LEFT JOIN (
 		ON ICLot.intLotId = IDLot.intLotId
 	) LOT ON ID.intInvoiceDetailId = LOT.intInvoiceDetailId
 	LEFT JOIN (
-		SELECT intTransactionId
+		SELECT DISTINCT
+			   intTransactionId
 			 , intTransactionDetailId
 			 , strPricing
 		FROM dbo.tblARPricingHistory WITH (NOLOCK)
 		WHERE ysnApplied = 1
 	) PRICING ON ID.intInvoiceId = PRICING.intTransactionId
-			 AND ID.intInvoiceDetailId = PRICING.intTransactionDetailId
-	WHERE ID.ysnAddonParent IS NULL OR ID.ysnAddonParent = 1
+			 AND ID.intInvoiceDetailId = PRICING.intTransactionDetailId	
 ) INVOICEDETAIL ON INV.intInvoiceId = INVOICEDETAIL.intInvoiceId
 LEFT JOIN (
 	SELECT intCurrencyID
