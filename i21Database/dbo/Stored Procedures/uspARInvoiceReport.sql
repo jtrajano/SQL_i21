@@ -315,7 +315,7 @@ LEFT JOIN (
 		 , strAddonDetailKey		= ID.strAddonDetailKey
 		 , ysnAddonParent			= ID.ysnAddonParent
 		 , strBOLNumberDetail		= ID.strBOLNumberDetail
-		 , strLotNumber				= LOT.strLotNumber
+		 , strLotNumber				= LOT.strLotNumbers
 	FROM dbo.tblARInvoiceDetail ID WITH (NOLOCK)
 	LEFT JOIN (
 		SELECT intItemId
@@ -388,14 +388,16 @@ LEFT JOIN (
 		FROM dbo.tblLGLoadDetail LD WITH (NOLOCK)
 		INNER JOIN dbo.tblLGLoad L ON LD.intLoadId = L.intLoadId
 	) LGLOAD ON ID.intLoadDetailId = LGLOAD.intLoadDetailId
-	LEFT JOIN (
-		SELECT DISTINCT
-			intInvoiceDetailId,
-			strLotNumber 
-		FROM tblARInvoiceDetailLot IDLot
-		INNER JOIN tblICLot ICLot
-		ON ICLot.intLotId = IDLot.intLotId
-	) LOT ON ID.intInvoiceDetailId = LOT.intInvoiceDetailId
+	OUTER APPLY (
+		SELECT strLotNumbers = LEFT(strLotNumber, LEN(strLotNumber) - 1)
+		FROM (
+			SELECT CAST(ICLOT.strLotNumber AS VARCHAR(200)) + ', '
+			FROM dbo.tblARInvoiceDetailLot IDL WITH(NOLOCK)		
+			INNER JOIN dbo.tblICLot ICLOT WITH(NOLOCK) ON IDL.intLotId = ICLOT.intLotId
+			WHERE IDL.intInvoiceDetailId = ID.intInvoiceDetailId
+			FOR XML PATH ('')
+		) IDLOT (strLotNumber)
+	) LOT
 	LEFT JOIN (
 		SELECT DISTINCT
 			   intTransactionId
