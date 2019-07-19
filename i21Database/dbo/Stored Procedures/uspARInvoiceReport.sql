@@ -306,8 +306,8 @@ LEFT JOIN (
 		 , dblEstimatedPercentLeft	= [SITE].dblEstimatedPercentLeft
 		 , strTicketNumber			= SCALE.strTicketNumber
 		 , strTicketNumberDate		= SCALE.strTicketNumber + ' - ' + CONVERT(NVARCHAR(50), SCALE.dtmTicketDateTime, 101) 
-		 , strCustomerReference		= SCALE.strCustomerReference
-		 , strSalesReference		= ISNULL(LGLOAD.strCustomerReference, CONTRACTS.strCustomerContract)
+		 , strCustomerReference		= ISNULL(NULLIF(SCALE.strCustomerReference, ''), CONTRACTS.strCustomerContract)
+		 , strSalesReference		= ISNULL(NULLIF(LGLOAD.strCustomerReference, ''), CONTRACTS.strCustomerContract)
 	 	 , strPurchaseReference		= LGLOAD.strExternalLoadNumber
 		 , strLoadNumber			= ISNULL(LGLOAD.strLoadNumber, SCALE.strLoadNumber)
 		 , strTruckName				= SCALE.strTruckName
@@ -315,7 +315,7 @@ LEFT JOIN (
 		 , strAddonDetailKey		= ID.strAddonDetailKey
 		 , ysnAddonParent			= ID.ysnAddonParent
 		 , strBOLNumberDetail		= ID.strBOLNumberDetail
-		 , strLotNumber				= LOT.strLotNumber
+		 , strLotNumber				= LOT.strLotNumbers
 	FROM dbo.tblARInvoiceDetail ID WITH (NOLOCK)
 	LEFT JOIN (
 		SELECT intItemId
@@ -330,7 +330,7 @@ LEFT JOIN (
 		SELECT intItemUOMId
 			 , intItemId
 			 , strUnitMeasure
-		FROM dbo. vyuARItemUOM WITH (NOLOCK)
+		FROM dbo.vyuARItemUOM WITH (NOLOCK)
 	) UOM ON ID.intItemUOMId = UOM.intItemUOMId
 	     AND ID.intItemId = UOM.intItemId
 	LEFT JOIN (
@@ -388,23 +388,25 @@ LEFT JOIN (
 		FROM dbo.tblLGLoadDetail LD WITH (NOLOCK)
 		INNER JOIN dbo.tblLGLoad L ON LD.intLoadId = L.intLoadId
 	) LGLOAD ON ID.intLoadDetailId = LGLOAD.intLoadDetailId
+	OUTER APPLY (
+		SELECT strLotNumbers = LEFT(strLotNumber, LEN(strLotNumber) - 1)
+		FROM (
+			SELECT CAST(ICLOT.strLotNumber AS VARCHAR(200)) + ', '
+			FROM dbo.tblARInvoiceDetailLot IDL WITH(NOLOCK)		
+			INNER JOIN dbo.tblICLot ICLOT WITH(NOLOCK) ON IDL.intLotId = ICLOT.intLotId
+			WHERE IDL.intInvoiceDetailId = ID.intInvoiceDetailId
+			FOR XML PATH ('')
+		) IDLOT (strLotNumber)
+	) LOT
 	LEFT JOIN (
 		SELECT DISTINCT
-			intInvoiceDetailId,
-			strLotNumber 
-		FROM tblARInvoiceDetailLot IDLot
-		INNER JOIN tblICLot ICLot
-		ON ICLot.intLotId = IDLot.intLotId
-	) LOT ON ID.intInvoiceDetailId = LOT.intInvoiceDetailId
-	LEFT JOIN (
-		SELECT intTransactionId
+			   intTransactionId
 			 , intTransactionDetailId
 			 , strPricing
 		FROM dbo.tblARPricingHistory WITH (NOLOCK)
 		WHERE ysnApplied = 1
 	) PRICING ON ID.intInvoiceId = PRICING.intTransactionId
-			 AND ID.intInvoiceDetailId = PRICING.intTransactionDetailId
-	WHERE ID.ysnAddonParent IS NULL OR ID.ysnAddonParent = 1
+			 AND ID.intInvoiceDetailId = PRICING.intTransactionDetailId	
 ) INVOICEDETAIL ON INV.intInvoiceId = INVOICEDETAIL.intInvoiceId
 LEFT JOIN (
 	SELECT intCurrencyID
