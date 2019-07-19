@@ -26,7 +26,6 @@ BEGIN TRY
 		,@intBookId INT
 		,@intSubBookId INT
 		,@intDemandHeaderImportId INT
-		,@intDemandHeaderId INT
 		,@intDemandDetailImportId INT
 		,@intItemId INT
 		,@intUnitMeasureId INT
@@ -34,6 +33,7 @@ BEGIN TRY
 		,@intDemandDetailId INT
 		,@intSubstituteItemId INT
 		,@strErrorMessage NVARCHAR(MAX)
+		,@strDetailErrorMessage NVARCHAR(MAX)
 		,@dtmMinDemandDate DATETIME
 		,@dtmMaxDemandDate DATETIME
 		,@intMinMonth INT
@@ -115,6 +115,9 @@ BEGIN TRY
 
 	BEGIN TRANSACTION
 
+	DELETE
+	FROM tblMFDemandImportError
+
 	INSERT INTO @tblMFDemandHeaderImport (
 		strDemandName
 		,dtmDate
@@ -130,6 +133,7 @@ BEGIN TRY
 		,intCreatedUserId
 		,dtmCreated
 	FROM tblMFDemandImport
+	Order by dtmCreated
 
 	SELECT @intDemandHeaderImportId = MIN(intDemandHeaderImportId)
 	FROM @tblMFDemandHeaderImport
@@ -149,7 +153,6 @@ BEGIN TRY
 			,@dtmCreated = NULL
 			,@intBookId = NULL
 			,@intSubBookId = NULL
-			,@intDemandHeaderId = NULL
 
 		SELECT @strErrorMessage = ''
 
@@ -162,10 +165,24 @@ BEGIN TRY
 		FROM @tblMFDemandHeaderImport
 		WHERE intDemandHeaderImportId = @intDemandHeaderImportId
 
-		IF @strDemandName IS NULL
-			AND @strDemandName = ''
+		IF EXISTS (
+				SELECT Count(*)
+				FROM (
+					SELECT DISTINCT strBook
+						,strSubBook
+					FROM @tblMFDemandHeaderImport
+					WHERE strDemandName = @strDemandName
+					) AS DT
+				HAVING count(*) > 1
+				)
 		BEGIN
-			SELECT @strErrorMessage = @strErrorMessage + 'Demand Name ' + @strDemandName + ' cannot be empty. '
+			SELECT @strErrorMessage = @strErrorMessage + 'All the book and sub book name should be same for the demand name ' + @strDemandName + '. '
+		END
+
+		IF @strDemandName IS NULL
+			OR @strDemandName = ''
+		BEGIN
+			SELECT @strErrorMessage = @strErrorMessage + 'Demand Name cannot be empty. '
 		END
 
 		SELECT @intBookId = intBookId
@@ -229,6 +246,11 @@ BEGIN TRY
 				,@dblQuantity = NULL
 				,@strUnitMeasure = NULL
 				,@strLocationName = NULL
+				,@intSubstituteItemId = NULL
+				,@intItemId = NULL
+				,@intUnitMeasureId = NULL
+				,@intLocationId = NULL
+				,@strDetailErrorMessage = ''
 
 			SELECT @strItemNo = strItemNo
 				,@strSubstituteItemNo = strSubstituteItemNo
@@ -239,24 +261,35 @@ BEGIN TRY
 			FROM @tblMFDemandDetailImport
 			WHERE intDemandDetailImportId = @intDemandDetailImportId
 
+			IF IsNumeric(@dblQuantity) = 0
+			BEGIN
+				SELECT @strDetailErrorMessage = @strDetailErrorMessage + 'Quantity ' + ltrim(@dblQuantity) + ' is invalid. '
+			END
+
+			IF @dtmDemandDate IS NULL
+				OR @dtmDemandDate = '1900-01-01 00:00:00.000'
+			BEGIN
+				SELECT @strDetailErrorMessage = @strDetailErrorMessage + 'Demand Date cannot be empty. '
+			END
+			ELSE IF Isdate(@dtmDemandDate) = 0
+			BEGIN
+				SELECT @strDetailErrorMessage = @strDetailErrorMessage + 'Demand Date ' + ltrim(@dtmDemandDate) + ' is invalid. '
+			END
+
+			IF @strItemNo IS NULL
+				OR @strItemNo = ''
+			BEGIN
+				SELECT @strDetailErrorMessage = @strDetailErrorMessage + 'Item is not available. '
+			END
+
 			SELECT @intItemId = intItemId
 			FROM tblICItem I
 			WHERE I.strItemNo = @strItemNo
 
-			IF @dtmDemandDate IS NULL
-				OR @dtmDemandDate = ''
-			BEGIN
-				SELECT @strErrorMessage = @strErrorMessage + 'Demand Date ' + ltrim(@dtmDemandDate) + ' cannot be empty. '
-			END
-			ELSE IF Isdate(@dtmDemandDate) = 0
-			BEGIN
-				SELECT @strErrorMessage = @strErrorMessage + 'Demand Date ' + ltrim(@dtmDemandDate) + ' is invalid. '
-			END
-
 			IF @intItemId IS NULL
 				AND @strItemNo <> ''
 			BEGIN
-				SELECT @strErrorMessage = @strErrorMessage + 'Item ' + @strItemNo + ' is not available. '
+				SELECT @strDetailErrorMessage = @strDetailErrorMessage + 'Item ' + @strItemNo + ' is not available. '
 			END
 
 			SELECT @intSubstituteItemId = intItemId
@@ -265,39 +298,36 @@ BEGIN TRY
 
 			IF @intSubstituteItemId IS NULL
 				AND @strSubstituteItemNo <> ''
+				AND @intItemId IS NOT NULL
 			BEGIN
-				SELECT @strErrorMessage = @strErrorMessage + 'Substitute Item ' + @strSubstituteItemNo + ' is not available. '
+				SELECT @strDetailErrorMessage = @strDetailErrorMessage + 'Substitute Item ' + @strSubstituteItemNo + ' is not available. '
 			END
-			ELSE IF NOT EXISTS (
+			ELSE IF @intSubstituteItemId IS NOT NULL
+				AND NOT EXISTS (
 					SELECT *
 					FROM vyuMFGetDemandSubstituteItem
 					WHERE intMainItemId = @intItemId
 						AND intItemId = @intSubstituteItemId
 					)
+				AND @intItemId IS NOT NULL
 			BEGIN
-				SELECT @strErrorMessage = @strErrorMessage + 'Substitute item ' + @strSubstituteItemNo + ' is not configured for the item ' + @strItemNo + '. '
+				SELECT @strDetailErrorMessage = @strDetailErrorMessage + 'Substitute item ' + @strSubstituteItemNo + ' is not configured for the item ' + @strItemNo + '. '
 			END
 
 			IF @strUnitMeasure IS NULL
-				AND @strUnitMeasure = ''
+				OR @strUnitMeasure = ''
 			BEGIN
-				SELECT @strErrorMessage = @strErrorMessage + 'Unit Measure ' + @strUnitMeasure + ' cannot be empty. '
+				SELECT @strDetailErrorMessage = @strDetailErrorMessage + 'Unit Measure cannot be empty. '
 			END
 
 			SELECT @intUnitMeasureId = intUnitMeasureId
 			FROM tblICUnitMeasure U1
 			WHERE U1.strUnitMeasure = @strUnitMeasure
 
-			IF @strUnitMeasure IS NULL
-				AND @strUnitMeasure = ''
-			BEGIN
-				SELECT @strErrorMessage = @strErrorMessage + 'Unit Measure ' + @strUnitMeasure + ' cannot be empty. '
-			END
-
 			IF @intUnitMeasureId IS NULL
 				AND @strUnitMeasure <> ''
 			BEGIN
-				SELECT @strErrorMessage = @strErrorMessage + 'Unit Measure ' + @strUnitMeasure + ' is not available. '
+				SELECT @strDetailErrorMessage = @strDetailErrorMessage + 'Unit Measure ' + @strUnitMeasure + ' is not available. '
 			END
 
 			SELECT @intItemUOMId = intItemUOMId
@@ -307,7 +337,7 @@ BEGIN TRY
 
 			IF @intItemUOMId IS NULL
 			BEGIN
-				SELECT @strErrorMessage = @strErrorMessage + 'Unit Measure ' + @strUnitMeasure + ' is not configured for the item ' + @strItemNo + '. '
+				SELECT @strDetailErrorMessage = @strDetailErrorMessage + 'Unit Measure ' + @strUnitMeasure + ' is not configured for the item ' + @strItemNo + '. '
 			END
 
 			SELECT @intLocationId = intCompanyLocationId
@@ -317,10 +347,12 @@ BEGIN TRY
 			IF @intLocationId IS NULL
 				AND @strLocationName <> ''
 			BEGIN
-				SELECT @strErrorMessage = @strErrorMessage + 'Location Name ' + @strLocationName + ' is not available. '
+				SELECT @strDetailErrorMessage = @strDetailErrorMessage + 'Location Name ' + @strLocationName + ' is not available. '
 			END
 
-			IF @strErrorMessage <> ''
+			SELECT @strDetailErrorMessage = @strErrorMessage + @strDetailErrorMessage
+
+			IF @strDetailErrorMessage <> ''
 			BEGIN
 				SELECT @intDemandImportId = NULL
 
@@ -362,7 +394,7 @@ BEGIN TRY
 						,@strUnitMeasure
 						,@strLocationName
 						,@dtmCreated
-						,@strErrorMessage
+						,@strDetailErrorMessage
 				END
 			END
 
@@ -371,12 +403,17 @@ BEGIN TRY
 			WHERE intDemandDetailImportId > @intDemandDetailImportId
 		END
 
+		DELETE
+		FROM @tblMFDemandHeaderImport
+		WHERE strDemandName = @strDemandName
+
 		SELECT @intDemandHeaderImportId = MIN(intDemandHeaderImportId)
 		FROM @tblMFDemandHeaderImport
 		WHERE intDemandHeaderImportId > @intDemandHeaderImportId
 	END
 
-	SELECT intDemandImportId
+	SELECT intDemandImportErrorId
+		,intDemandImportId
 		,intConcurrencyId
 		,strDemandName
 		,strBook
@@ -387,6 +424,7 @@ BEGIN TRY
 		,dblQuantity
 		,strUnitMeasure
 		,strLocationName
+		,intCreatedUserId
 		,dtmCreated
 		,strErrorMessage
 	FROM tblMFDemandImportError

@@ -7,7 +7,8 @@ BEGIN
 	SET XACT_ABORT ON
 	SET ANSI_WARNINGS OFF
 
-	SELECT intDemandImportId
+	SELECT intDemandImportErrorId
+		,intDemandImportId
 		,intConcurrencyId
 		,strDemandName
 		,strBook
@@ -18,6 +19,7 @@ BEGIN
 		,dblQuantity
 		,strUnitMeasure
 		,strLocationName
+		,intCreatedUserId
 		,dtmCreated
 		,strErrorMessage
 	FROM tblMFDemandImportError

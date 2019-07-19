@@ -49,10 +49,10 @@ BEGIN TRY
 	DECLARE @tblMFDemandHeaderImport TABLE (
 		intDemandHeaderImportId INT NOT NULL IDENTITY
 		,strDemandName NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL
-		,dtmDate datetime
+		,dtmDate DATETIME
 		,strBook NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		,strSubBook NVARCHAR(100) COLLATE Latin1_General_CI_AS
-		,intCreatedUserId int
+		,intCreatedUserId INT
 		)
 	DECLARE @tblMFDemandDetailImport TABLE (
 		intDemandDetailImportId INT NOT NULL IDENTITY
@@ -116,6 +116,7 @@ BEGIN TRY
 		,intCreatedUserId
 	FROM tblMFDemandImport
 
+
 	SELECT @intDemandHeaderImportId = MIN(intDemandHeaderImportId)
 	FROM @tblMFDemandHeaderImport
 
@@ -167,9 +168,6 @@ BEGIN TRY
 				,@intShiftId = NULL
 				,@dtmDate = @dtmDate
 
-			EXEC uspCTGetStartingNumber 'Demand'
-				,@strDemandNo OUTPUT
-
 			INSERT INTO tblMFDemandHeader (
 				intConcurrencyId
 				,strDemandNo
@@ -212,7 +210,7 @@ BEGIN TRY
 		SELECT strDemandName
 			,strItemNo
 			,strSubstituteItemNo
-			,CONVERT(DATETIME, dtmDemandDate, @intConvertYear)
+			,Convert(DATETIME, CONVERT(CHAR, dtmDemandDate, @intConvertYear))
 			,sum(dblQuantity)
 			,strUnitMeasure
 			,strLocationName
@@ -221,7 +219,7 @@ BEGIN TRY
 		GROUP BY strDemandName
 			,strItemNo
 			,strSubstituteItemNo
-			,CONVERT(DATETIME, dtmDemandDate, @intConvertYear)
+			,Convert(DATETIME, CONVERT(CHAR, dtmDemandDate, @intConvertYear))
 			,strUnitMeasure
 			,strLocationName
 
@@ -280,6 +278,7 @@ BEGIN TRY
 			WHERE intDemandHeaderId = @intDemandHeaderId
 				AND intItemId = @intItemId
 				AND dtmDemandDate = @dtmDemandDate
+				AND intSubstituteItemId=IsNULL(@intSubstituteItemId,intSubstituteItemId)
 
 			IF @intDemandDetailId IS NULL
 			BEGIN
