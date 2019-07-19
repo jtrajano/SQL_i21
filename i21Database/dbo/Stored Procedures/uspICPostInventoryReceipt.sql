@@ -935,6 +935,7 @@ BEGIN
 				ISNULL(dbo.fnCalculateCostBetweenUOM(itemToPost.intItemUOMId, stockUOM.intItemUOMId, itemToPost.dblCost), 0) > ISNULL(pricing.dblStandardCost, 0)
 				AND vendor.ysnMatchVendorCost = 1
 				AND itemToPost.dblQty > 0
+				AND ISNULL(itemToPost.dblCost, 0) <> 0 
 
 			IF @intItemId IS NOT NULL 
 			BEGIN 
