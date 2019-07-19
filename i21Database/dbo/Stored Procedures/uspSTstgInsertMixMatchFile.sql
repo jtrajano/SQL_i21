@@ -418,10 +418,10 @@ BEGIN
 
 															, (
 																SELECT
-																	wda.strStartTime			AS [@startTime],
-																	wda.strAvailable			AS [@available],
+																	--wda.strStartTime			AS [@startTime],
 																	wda.strWeekDay				AS [@weekday],
-																	wda.strEndTime				AS [@stopTime]
+																	wda.strAvailable			AS [@available]
+																	--wda.strEndTime				AS [@stopTime]
 																FROM 
 																(
 																	SELECT DISTINCT
