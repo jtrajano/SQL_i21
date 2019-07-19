@@ -10,19 +10,26 @@ BEGIN
        
 	   BEGIN TRY
               
-			  BEGIN TRANSACTION
+				BEGIN TRANSACTION
 
 
-			  DECLARE @intStoreId int
-              SELECT @intStoreId = intStoreId
-              FROM dbo.tblSTCheckoutHeader
-              WHERE intCheckoutId = @intCheckoutId
+				DECLARE @intStoreId INT
+					  , @intCustomerChargeMopId INT
+					  , @intCashTransctionMopId INT
+
+				SELECT @intStoreId			  = ch.intStoreId
+					 , @intCustomerChargeMopId = st.intCustomerChargeMopId
+					 , @intCashTransctionMopId = st.intCashTransctionMopId
+				FROM dbo.tblSTCheckoutHeader ch
+				INNER JOIN dbo.tblSTStore st
+					ON ch.intStoreId = st.intStoreId
+				WHERE ch.intCheckoutId = @intCheckoutId
 
 
 
-			-- ==================================================================================================================  
-			-- Start Validate if Summary xml file matches the Mapping on i21 
-			-- ------------------------------------------------------------------------------------------------------------------
+				-- ==================================================================================================================  
+				-- Start Validate if Summary xml file matches the Mapping on i21 
+				-- ------------------------------------------------------------------------------------------------------------------
 				IF NOT EXISTS(SELECT TOP 1 1 FROM #tempCheckoutInsert)
 					BEGIN
 							-- Add to error logging
@@ -50,59 +57,62 @@ BEGIN
 
 							GOTO ExitWithCommit
 					END
-			-- ------------------------------------------------------------------------------------------------------------------
-			-- End Validate if Summary xml file matches the Mapping on i21   
-			-- ==================================================================================================================
+				-- ------------------------------------------------------------------------------------------------------------------
+				-- End Validate if Summary xml file matches the Mapping on i21   
+				-- ==================================================================================================================
 
 
 
-			  -- ================================================================================================================== 
-				-- Get Error logs. Check Register XML that is not configured in i21
+				-- ================================================================================================================== 
+				-- [START] Get Error logs. Check Register XML that is not configured in i21
 				-- Compare <mopInfo sysid> tag of (RegisterXML) and (Store -> Store -> Payment Option(Tab) -> 'Register Mop'(strRegisterMopId))
-				-- ------------------------------------------------------------------------------------------------------------------ 
-				INSERT INTO tblSTCheckoutErrorLogs 
-				(
-					strErrorType
-					, strErrorMessage 
-					, strRegisterTag
-					, strRegisterTagValue
-					, intCheckoutId
-					, intConcurrencyId
-				)
-				SELECT DISTINCT
-					'NO MATCHING TAG' as strErrorType
-					, 'No Matching Register MOP in Payment Options' as strErrorMessage
-					, 'mopInfo sysid' as strRegisterTag
-					, ISNULL(Chk.mopInfosysid, '') AS strRegisterTagValue
-					, @intCheckoutId
-					, 1
-				FROM #tempCheckoutInsert Chk
-				WHERE ISNULL(Chk.mopInfosysid, '') NOT IN
-				(
-					SELECT DISTINCT 
-						tbl.strXmlRegisterMiscellaneousSummarySubCodeModifier
-					FROM
-					(
+				-- ================================================================================================================== 
+				IF(@intCustomerChargeMopId IS NULL AND @intCashTransctionMopId IS NULL)
+					BEGIN
+						INSERT INTO tblSTCheckoutErrorLogs 
+						(
+							strErrorType
+							, strErrorMessage 
+							, strRegisterTag
+							, strRegisterTagValue
+							, intCheckoutId
+							, intConcurrencyId
+						)
 						SELECT DISTINCT
-							Chk.mopInfosysid AS strXmlRegisterMiscellaneousSummarySubCodeModifier
+							'NO MATCHING TAG' as strErrorType
+							, 'No Matching Register MOP in Payment Options' as strErrorMessage
+							, 'mopInfo sysid' as strRegisterTag
+							, ISNULL(Chk.mopInfosysid, '') AS strRegisterTagValue
+							, @intCheckoutId
+							, 1
 						FROM #tempCheckoutInsert Chk
-						JOIN tblSTPaymentOption PO 
-							ON ISNULL(Chk.mopInfosysid, '') COLLATE DATABASE_DEFAULT = PO.strRegisterMop
-						JOIN tblSTStore Store 
-							ON Store.intStoreId = PO.intStoreId
-						JOIN tblSTCheckoutPaymentOptions CPO 
-							ON CPO.intPaymentOptionId = PO.intPaymentOptionId
-						WHERE Store.intStoreId = @intStoreId
-							--AND Chk.MiscellaneousSummaryCode = 'sales' 
-							--AND Chk.MiscellaneousSummarySubCode = 'MOP'
-							AND ISNULL(Chk.mopInfosysid, '') != ''
-					) AS tbl
-				)
-				--AND Chk.MiscellaneousSummaryCode = 'sales' 
-				--AND Chk.MiscellaneousSummarySubCode = 'MOP'
-				AND ISNULL(Chk.mopInfosysid, '') != ''
-				-- ------------------------------------------------------------------------------------------------------------------  
-				-- END Get Error logs. Check Register XML that is not configured in i21.  
+						WHERE ISNULL(Chk.mopInfosysid, '') NOT IN
+						(
+							SELECT DISTINCT 
+								tbl.strXmlRegisterMiscellaneousSummarySubCodeModifier
+							FROM
+							(
+								SELECT DISTINCT
+									Chk.mopInfosysid AS strXmlRegisterMiscellaneousSummarySubCodeModifier
+								FROM #tempCheckoutInsert Chk
+								JOIN tblSTPaymentOption PO 
+									ON ISNULL(Chk.mopInfosysid, '') COLLATE DATABASE_DEFAULT = PO.strRegisterMop
+								JOIN tblSTStore Store 
+									ON Store.intStoreId = PO.intStoreId
+								JOIN tblSTCheckoutPaymentOptions CPO 
+									ON CPO.intPaymentOptionId = PO.intPaymentOptionId
+								WHERE Store.intStoreId = @intStoreId
+									--AND Chk.MiscellaneousSummaryCode = 'sales' 
+									--AND Chk.MiscellaneousSummarySubCode = 'MOP'
+									AND ISNULL(Chk.mopInfosysid, '') != ''
+							) AS tbl
+						)
+						--AND Chk.MiscellaneousSummaryCode = 'sales' 
+						--AND Chk.MiscellaneousSummarySubCode = 'MOP'
+						AND ISNULL(Chk.mopInfosysid, '') != ''
+					END
+				-- ==================================================================================================================  
+				-- [END] Get Error logs. Check Register XML that is not configured in i21.  
 				-- ==================================================================================================================
 
 

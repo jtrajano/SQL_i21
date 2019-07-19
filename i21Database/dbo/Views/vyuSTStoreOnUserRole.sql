@@ -5,7 +5,10 @@ SELECT DISTINCT
 	 , Perm.intEntityUserSecurityId
      , Store.intStoreId
 	 , Store.intStoreNo
-	 , Store.strDescription   
+	 , Store.strDescription  
+	 , Store.intLastShiftNo
+	 , Store.dtmLastShiftOpenDate
+	 , Store.intNumberOfShifts
 
 	 , Store.strRegisterCheckoutDataEntry
 	 , HS.intHandheldScannerId
@@ -39,7 +42,7 @@ SELECT DISTINCT
 	 , USec.ysnAdmin AS ysnIsUserAdmin
 	 , USec.strDashboardRole
 	 , USec.intEntityId
-	 ,Store.strState
+	 , Store.strState
 FROM tblSTStore Store
 INNER JOIN tblSMUserSecurity USec
 	ON Store.intCompanyLocationId = USec.intCompanyLocationId
