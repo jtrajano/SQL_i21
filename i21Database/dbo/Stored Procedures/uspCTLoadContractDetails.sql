@@ -305,7 +305,7 @@ CROSS	APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId)	AD
 		OUTER	APPLY	dbo.fnCTGetShipmentStatus(CD.intContractDetailId) LD
 		OUTER	APPLY	dbo.fnCTGetFinancialStatus(CD.intContractDetailId) FS
 		LEFT	JOIN	tblAPBillDetail					BD	ON	BD.intContractDetailId				=		CD.intContractDetailId
-		LEFT	JOIN	tblLGAllocationDetail			AD	ON AD.intPContractDetailId = CD.intContractDetailId
+		LEFT	JOIN	tblLGAllocationDetail			AD	ON AD.intSContractDetailId = CD.intContractDetailId
 	)t ORDER BY intContractSeq
 
 END TRY
