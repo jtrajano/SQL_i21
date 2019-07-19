@@ -195,7 +195,7 @@ BEGIN
 
 	--Compute Interest Here
 	UPDATE A
-		SET dblInterest = dbo.fnGetInterestBasedOnTerm(A.dblTotal, A.dtmBillDate, ISNULL(@datePaid, GETDATE()), A.intTermsId)
+		SET dblInterest = dbo.fnGetInterestBasedOnTerm(A.dblTotal, A.dtmBillDate, ISNULL(@datePaid, GETDATE()), NULL, A.intTermsId)
 	FROM tblAPBill A
 	WHERE A.intBillId IN (SELECT intID FROM #tmpBillsId) AND A.intTransactionType = 1
 
