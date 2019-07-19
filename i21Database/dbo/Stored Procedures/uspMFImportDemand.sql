@@ -278,7 +278,7 @@ BEGIN TRY
 			WHERE intDemandHeaderId = @intDemandHeaderId
 				AND intItemId = @intItemId
 				AND dtmDemandDate = @dtmDemandDate
-				AND intSubstituteItemId=IsNULL(@intSubstituteItemId,intSubstituteItemId)
+				AND IsNULL(intSubstituteItemId,0)=IsNULL(@intSubstituteItemId,IsNULL(intSubstituteItemId,0))
 
 			IF @intDemandDetailId IS NULL
 			BEGIN
