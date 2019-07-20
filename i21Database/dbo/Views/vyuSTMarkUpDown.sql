@@ -1,14 +1,15 @@
 ﻿CREATE VIEW [dbo].[vyuSTMarkUpDown]
 AS
-
-select A.intMarkUpDownId
-, B.intStoreNo
-, A.dtmMarkUpDownDate
-, A.intShiftNo
-, A.strType
-, A.strAdjustmentType
-, B.intCompanyLocationId
-, A.ysnIsPosted
-
-from tblSTMarkUpDown A inner join tblSTStore B
-on A.intStoreId = B.intStoreId
+SELECT 
+	mud.intMarkUpDownId
+	, mud.strMarkUpDownNumber
+	, store.intStoreNo
+	, mud.dtmMarkUpDownDate
+	, mud.intShiftNo
+	, mud.strType
+	, mud.strAdjustmentType
+	, store.intCompanyLocationId
+	, mud.ysnIsPosted
+FROM tblSTMarkUpDown mud 
+INNER JOIN tblSTStore store
+	ON mud.intStoreId = store.intStoreId
