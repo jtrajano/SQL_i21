@@ -1,10 +1,11 @@
 ﻿CREATE TABLE [dbo].[tblSTStoreTaxTotals]
 (
-	[intStoreTaxTotalId] INT NOT NULL IDENTITY, 
-	[intStoreId] INT NOT NULL, 
-	[intTaxCodeId] INT NOT NULL,
-    [intItemId] INT NOT NULL, 
-    [intConcurrencyId] INT NOT NULL,
+	[intStoreTaxTotalId]		INT				NOT NULL						IDENTITY, 
+	[intStoreId]				INT				NOT NULL, 
+	[intTaxCodeId]				INT				NOT NULL,
+    [intItemId]					INT				NOT NULL, 
+	[strTaxCodeNumber]			NVARCHAR(15)	COLLATE Latin1_General_CI_AS	NULL, 
+    [intConcurrencyId]			INT				NOT NULL,
 	CONSTRAINT [PK_tblSTStoreTaxTotals] PRIMARY KEY CLUSTERED ([intStoreTaxTotalId]),
 	CONSTRAINT [AK_tblSTStoreTaxTotals_intStoreId_intTaxCodeId] UNIQUE ([intStoreId], [intTaxCodeId]),
 	CONSTRAINT [AK_tblSTStoreTaxTotals_intStoreId_intItemId] UNIQUE ([intStoreId], [intItemId]),

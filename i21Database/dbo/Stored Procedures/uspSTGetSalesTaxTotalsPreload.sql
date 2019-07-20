@@ -38,16 +38,21 @@ BEGIN
 
 
 	INSERT INTO @tbl
-	SELECT TC.strStoreTaxNumber AS strTaxNumber
-			, TC.intSalesTaxAccountId AS intAccountId
-			, I.intItemId AS intItemId
-			, I.strItemNo AS strItemNo
-			, I.strDescription AS strItemDescription
-	FROM tblSTStoreTaxTotals STT
-	JOIN tblSTStore ST ON STT.intStoreId = ST.intStoreId
-	JOIN tblSMTaxCode TC ON STT.intTaxCodeId = TC.intTaxCodeId
-	JOIN tblICItem I ON STT.intItemId = I.intItemId
-	WHERE STT.intStoreId = @intStoreId
+	SELECT 
+		--TC.strStoreTaxNumber		AS strTaxNumber
+		storeTax.strTaxCodeNumber	AS strTaxNumber
+		, TC.intSalesTaxAccountId	AS intAccountId
+		, I.intItemId				AS intItemId
+		, I.strItemNo				AS strItemNo
+		, I.strDescription			AS strItemDescription
+	FROM tblSTStoreTaxTotals storeTax
+	JOIN tblSTStore store 
+		ON storeTax.intStoreId = store.intStoreId
+	JOIN tblSMTaxCode TC 
+		ON storeTax.intTaxCodeId = TC.intTaxCodeId
+	JOIN tblICItem I 
+		ON storeTax.intItemId = I.intItemId
+	WHERE storeTax.intStoreId = @intStoreId
 
 
 	SELECT t.strTaxNumber
@@ -57,6 +62,7 @@ BEGIN
 		 , t.strItemNo
 		 , t.strItemDescription
 	FROM @tbl t
-	LEFT JOIN dbo.tblGLAccount Acc ON Acc.intAccountId = t.intAccountId
+	LEFT JOIN dbo.tblGLAccount Acc 
+		ON Acc.intAccountId = t.intAccountId
 
 END
