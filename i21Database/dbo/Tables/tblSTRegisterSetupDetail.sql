@@ -12,6 +12,6 @@
 	[strStoredProcedure]			NVARCHAR(250) COLLATE Latin1_General_CI_AS NOT NULL,
 	[intConcurrencyId]				INT				NOT NULL,
     CONSTRAINT [PK_tblSTRegisterSetupDetail] PRIMARY KEY CLUSTERED ([intRegisterSetupDetailId] ASC), 
-    CONSTRAINT [FK_tblSTRegisterSetupDetail_tblSTRegisterSetup_intRegisterId] FOREIGN KEY ([intRegisterSetupId]) REFERENCES [tblSTRegisterSetup]([intRegisterSetupId]),
+    CONSTRAINT [FK_tblSTRegisterSetupDetail_tblSTRegisterSetup_intRegisterId] FOREIGN KEY ([intRegisterSetupId]) REFERENCES [tblSTRegisterSetup]([intRegisterSetupId]) ON DELETE CASCADE,
 	CONSTRAINT [AK_tblSTRegisterSetupDetail_intRegisterSetupId_strImportFileHeaderName_strStoredProcedure] UNIQUE ([intRegisterSetupId], [strImportFileHeaderName], [strStoredProcedure]),   
 )
