@@ -7883,6 +7883,7 @@
     <None Include="Scripts\Post-Deployment\ST\31_FileFieldMapping_Commander_uPLUs.sql" />
     <None Include="Scripts\Post-Deployment\ST\32_FileFieldMapping_Commander_uMaintenance_ItemList.sql" />
     <None Include="Scripts\Post-Deployment\ST\33_FileFieldMapping_Commander_uMaintenance_Combo.sql" />
+    <Build Include="dbo\Views\vyuSTRegisterSetupDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
