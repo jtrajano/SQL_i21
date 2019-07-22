@@ -1,23 +1,130 @@
 ﻿CREATE PROCEDURE [dbo].[uspARPOSBatchProcess]
-	@intPOSEndOfDayId	INT
+	  @intPOSEndOfDayId	INT
+	, @intEntityUserId	INT
 AS
 
---IF EXISTS(SELECT TOP 1 NULL FROM tblARPOSEndOfDay WHERE intPOSEndOfDayId = @intPOSEndOfDayId AND ysnClosed = 1)
---	BEGIN
---		RAISERROR('EOD is already closed.', 16, 1)
---		RETURN
---	END
+SET QUOTED_IDENTIFIER OFF
+SET ANSI_NULLS ON
+SET NOCOUNT ON
+SET XACT_ABORT ON
+SET ANSI_WARNINGS OFF
 
---REGULAR POS
-IF(OBJECT_ID('tempdb..#REGULARTRANS') IS NOT NULL)
+DECLARE @EntriesForInvoice 				InvoiceStagingTable
+DECLARE @TaxDetails 					LineItemTaxDetailStagingTable
+DECLARE @EntriesForPayment				PaymentIntegrationStagingTable
+DECLARE @intDiscountAccountId			INT = NULL
+	  , @intCashPaymentMethodId			INT = NULL
+	  , @intDebitMemoPaymentMethodId	INT = NULL
+	  , @dblCashReceipt					NUMERIC(18, 6) = 0
+	  , @dblCashReturn					NUMERIC(18, 6) = 0
+
+--CREATE DEFAULT PAYMENT METHODS IF DOES NOT EXISTS
+IF NOT EXISTS (SELECT TOP 1 NULL FROM dbo.tblSMPaymentMethod WITH (NOLOCK) WHERE UPPER(strPaymentMethod) = 'CASH')
+	BEGIN
+		INSERT INTO tblSMPaymentMethod (
+			  strPaymentMethod
+			, intNumber
+			, ysnActive
+			, intSort
+			, intConcurrencyId
+		)
+		SELECT strPaymentMethod = 'Cash'
+			, intNumber		 	= 1
+			, ysnActive			= 1
+			, intSort			= 0
+			, intConcurrencyId	= 1
+	END
+IF NOT EXISTS (SELECT TOP 1 NULL FROM dbo.tblSMPaymentMethod WITH (NOLOCK) WHERE UPPER(strPaymentMethod) = 'CHECK')
+	BEGIN
+		INSERT INTO tblSMPaymentMethod (
+			  strPaymentMethod
+			, intNumber
+			, ysnActive
+			, intSort
+			, intConcurrencyId
+		)
+		SELECT strPaymentMethod = 'Check'
+			, intNumber		 	= 1
+			, ysnActive			= 1
+			, intSort			= 0
+			, intConcurrencyId	= 1
+	END
+IF NOT EXISTS (SELECT TOP 1 NULL FROM dbo.tblSMPaymentMethod WITH (NOLOCK) WHERE UPPER(strPaymentMethod) = 'CREDIT CARD')
+	BEGIN
+		INSERT INTO tblSMPaymentMethod (
+			  strPaymentMethod
+			, intNumber
+			, ysnActive
+			, intSort
+			, intConcurrencyId
+		)
+		SELECT strPaymentMethod = 'Credit Card'
+			, intNumber		 	= 1
+			, ysnActive			= 1
+			, intSort			= 0
+			, intConcurrencyId	= 1
+	END
+IF NOT EXISTS (SELECT TOP 1 NULL FROM dbo.tblSMPaymentMethod WITH (NOLOCK) WHERE UPPER(strPaymentMethod) = 'DEBIT CARD')
+	BEGIN
+		INSERT INTO tblSMPaymentMethod (
+			  strPaymentMethod
+			, intNumber
+			, ysnActive
+			, intSort
+			, intConcurrencyId
+		)
+		SELECT strPaymentMethod = 'Debit Card'
+			, intNumber		 	= 1
+			, ysnActive			= 1
+			, intSort			= 0
+			, intConcurrencyId	= 1
+	END
+IF NOT EXISTS (SELECT TOP 1 NULL FROM dbo.tblSMPaymentMethod WITH (NOLOCK) WHERE UPPER(strPaymentMethod) = 'DEBIT MEMOS AND PAYMENTS')
+	BEGIN
+		INSERT INTO tblSMPaymentMethod (
+			  strPaymentMethod
+			, intNumber
+			, ysnActive
+			, intSort
+			, intConcurrencyId
+		)
+		SELECT strPaymentMethod = 'Debit Memos and Payments'
+			, intNumber		 	= 1
+			, ysnActive			= 1
+			, intSort			= 0
+			, intConcurrencyId	= 1
+	END
+
+SELECT TOP 1 @intDiscountAccountId = intDiscountAccountId FROM tblARCompanyPreference WITH (NOLOCK)
+SELECT TOP 1 @intCashPaymentMethodId = intPaymentMethodID FROM dbo.tblSMPaymentMethod WITH (NOLOCK) WHERE UPPER(strPaymentMethod) = 'CASH'
+SELECT TOP 1 @intDebitMemoPaymentMethodId = intPaymentMethodID FROM dbo.tblSMPaymentMethod WITH (NOLOCK) WHERE UPPER(strPaymentMethod) = 'DEBIT MEMOS AND PAYMENTS'
+
+--TEMP TABLES
+IF(OBJECT_ID('tempdb..#POSTRANSACTIONS') IS NOT NULL)
 BEGIN
-	DROP TABLE #REGULARTRANS
+	DROP TABLE #POSTRANSACTIONS
 END
 
+IF(OBJECT_ID('tempdb..#POSPAYMENTS') IS NOT NULL)
+BEGIN
+	DROP TABLE #POSPAYMENTS
+END
+
+CREATE TABLE #POSTRANSACTIONS (
+	  intPOSId			INT
+	, intEntityUserId	INT
+	, strPOSType		NVARCHAR(100)
+)
+
+--GET POS TRANSACTIONS
+INSERT INTO #POSTRANSACTIONS (
+	   intPOSId
+	, intEntityUserId
+	, strPOSType
+)
 SELECT intPOSId			= POS.intPOSId
-	 , intEntityUserId	= POS.intEntityUserId
-	 , ysnProcessed		= CAST(0 AS BIT)
-INTO #REGULARTRANS
+	, intEntityUserId	= POS.intEntityUserId
+	, strPOSType		= 'Regular'
 FROM tblARPOS POS
 INNER JOIN tblARPOSLog POSLOG ON POS.intPOSLogId = POSLOG.intPOSLogId
 INNER JOIN tblARPOSEndOfDay EOD ON POSLOG.intPOSEndOfDayId = EOD.intPOSEndOfDayId
@@ -28,24 +135,18 @@ OUTER APPLY (
 	  AND POSD.intPOSId = POS.intPOSId
 	GROUP BY intPOSId	
 ) NEGQTY
-WHERE POS.ysnReturn = 0
-  AND POS.ysnHold = 0
+WHERE POS.ysnHold = 0
   AND POS.intInvoiceId IS NULL
   AND POS.intCreditMemoId IS NULL
   AND POS.dblTotal > 0
   AND NEGQTY.intPOSId IS NULL
   AND EOD.intPOSEndOfDayId = @intPOSEndOfDayId
 
---RETURNED POS
-IF(OBJECT_ID('tempdb..#RETURNEDTRANS') IS NOT NULL)
-BEGIN
-	DROP TABLE #RETURNEDTRANS
-END
+UNION ALL
 
 SELECT intPOSId			= POS.intPOSId
 	 , intEntityUserId	= POS.intEntityUserId
-	 , ysnProcessed		= CAST(0 AS BIT)
-INTO #RETURNEDTRANS
+	 , strPOSType		= 'Returned'
 FROM tblARPOS POS
 INNER JOIN tblARPOSLog POSLOG ON POS.intPOSLogId = POSLOG.intPOSLogId
 INNER JOIN tblARPOSEndOfDay EOD ON POSLOG.intPOSEndOfDayId = EOD.intPOSEndOfDayId
@@ -56,16 +157,11 @@ WHERE ((POS.ysnReturn = 1 AND POS.intOriginalPOSTransactionId IS NOT NULL) OR (P
   AND POS.dblTotal < 0
   AND EOD.intPOSEndOfDayId = @intPOSEndOfDayId
 
---MIXED POS
- IF(OBJECT_ID('tempdb..#MIXEDTRANS') IS NOT NULL)
-BEGIN
-	DROP TABLE #MIXEDTRANS
-END
+UNION ALL
 
 SELECT intPOSId			= POS.intPOSId
 	 , intEntityUserId	= POS.intEntityUserId
-	 , ysnProcessed		= CAST(0 AS BIT)
-INTO #MIXEDTRANS
+	 , strPOSType		= 'Mixed'
 FROM tblARPOS POS
 INNER JOIN tblARPOSLog POSLOG ON POS.intPOSLogId = POSLOG.intPOSLogId
 INNER JOIN tblARPOSEndOfDay EOD ON POSLOG.intPOSEndOfDayId = EOD.intPOSEndOfDayId
@@ -89,33 +185,19 @@ WHERE POS.ysnReturn = 0
   AND POS.intCreditMemoId IS NULL
   AND EOD.intPOSEndOfDayId = @intPOSEndOfDayId
 
+--CLEAR BATCH PROCESS LOG
 DELETE BP
 FROM tblARPOSBatchProcessLog BP
-INNER JOIN #REGULARTRANS RT ON BP.intPOSId = RT.intPOSId
-
-DELETE BP
-FROM tblARPOSBatchProcessLog BP
-INNER JOIN #RETURNEDTRANS RT ON BP.intPOSId = RT.intPOSId
-
-DELETE BP
-FROM tblARPOSBatchProcessLog BP
-INNER JOIN #MIXEDTRANS MT ON BP.intPOSId = MT.intPOSId
+INNER JOIN #POSTRANSACTIONS REG ON BP.intPOSId = REG.intPOSId
 
 --PROCESS REGULAR TRANSACTIONS
-WHILE EXISTS (SELECT TOP 1 NULL FROM #REGULARTRANS WHERE ysnProcessed = 0)
+IF EXISTS (SELECT TOP 1 NULL FROM #POSTRANSACTIONS)
 	BEGIN
-		DECLARE @intRTPOSId		INT = NULL
-			  , @intRTUserId	INT = NULL
-			  , @InitTranCount	INT = NULL
-			  , @strRTErrMsg	NVARCHAR(MAX) = NULL
-			  , @strInvIds		NVARCHAR(MAX) = NULL
-			  , @Savepoint		NVARCHAR(32)  = NULL
-
-		SELECT TOP 1 @intRTPOSId	= intPOSId
-				   , @intRTUserId	= intEntityUserId
-		FROM #REGULARTRANS 
-		WHERE ysnProcessed = 0 
-		ORDER BY intPOSId
+		DECLARE @InitTranCount		INT = NULL
+			  , @intInvoiceLogId	INT = NULL
+			  , @intPaymentLogId	INT = NULL
+			  , @strErrorMsg		NVARCHAR(MAX) = NULL			  
+			  , @Savepoint			NVARCHAR(32)  = NULL
 
 		SET @InitTranCount = @@TRANCOUNT
 		SET @Savepoint = SUBSTRING(('ARPostInvoice' + CONVERT(VARCHAR, @InitTranCount)), 1, 32)
@@ -126,8 +208,341 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #REGULARTRANS WHERE ysnProcessed = 0)
 			SAVE TRANSACTION @Savepoint
 		
 		BEGIN TRY
-			EXEC dbo.uspARProcessPOSToInvoice @intRTPOSId, @intRTUserId, 'Invoice', @strRTErrMsg OUT, @strInvIds OUT
+			--GET INVOICES AND DISCOUNTS (FOR REGULAR AND RETURN TRANSACTIONS)
+			INSERT INTO @EntriesForInvoice(
+				 [intId]
+				,[strTransactionType]
+				,[strType]
+				,[strSourceTransaction]
+				,[intSourceId]
+				,[strSourceId]
+				,[intEntityCustomerId]
+				,[intCompanyLocationId]
+				,[intCurrencyId]
+				,[dtmDate]
+				,[dtmShipDate]
+				,[strComments]
+				,[intEntityId]
+				,[ysnPost]
+				,[intItemId]
+				,[ysnInventory]
+				,[strItemDescription]
+				,[intItemUOMId]
+				,[dblQtyShipped]
+				,[dblDiscount]
+				,[dblPrice]
+				,[ysnRefreshPrice]
+				,[ysnRecomputeTax]
+				,[ysnClearDetailTaxes]					
+				,[intTempDetailIdForTaxes]
+				,[dblCurrencyExchangeRate]
+				,[dblSubCurrencyRate]
+				,[intSalesAccountId]
+				,[strPONumber]
+				,[intFreightTermId]
+			)
+			SELECT [intId]								= POS.intPOSId
+				,[strTransactionType]					= CASE WHEN strPOSType = 'Returned' THEN 'Credit Memo' ELSE 'Invoice' END
+				,[strType]								= 'POS'
+				,[strSourceTransaction]					= 'POS'
+				,[intSourceId]							= POS.intPOSId
+				,[strSourceId]							= POS.strReceiptNumber
+				,[intEntityCustomerId]					= POS.intEntityCustomerId
+				,[intCompanyLocationId]					= POS.intCompanyLocationId
+				,[intCurrencyId]						= POS.intCurrencyId
+				,[dtmDate]								= POS.dtmDate
+				,[dtmShipDate]							= POS.dtmDate
+				,[strComments]							= '<p><span style="font-family: Arial;">' + POS.strComment + '</span></p>'
+				,[intEntityId]							= POS.intEntityUserId
+				,[ysnPost]								= 1
+				,[intItemId]							= DETAILS.intItemId
+				,[ysnInventory]							= 1
+				,[strItemDescription]					= DETAILS.strItemDescription 
+				,[intItemUOMId]							= DETAILS.intItemUOMId
+				,[dblQtyShipped]						= ABS(DETAILS.dblQuantity)
+				,[dblDiscount]							= 0
+				,[dblPrice]								= ABS((DETAILS.dblExtendedPrice / DETAILS.dblQuantity))
+				,[ysnRefreshPrice]						= 0
+				,[ysnRecomputeTax]						= CASE WHEN ISNULL(POS.ysnTaxExempt,0) = 0 THEN 1 ELSE 0 END
+				,[ysnClearDetailTaxes]					= 1
+				,[intTempDetailIdForTaxes]				= POS.intPOSId
+				,[dblCurrencyExchangeRate]				= 1.000000
+				,[dblSubCurrencyRate]					= 1.000000
+				,[intSalesAccountId]					= NULL
+				,[strPONumber]							= POS.strPONumber
+				,[intFreightTermId]						= CASE WHEN ISNULL(POS.ysnTaxExempt,0) = 0 THEN CL.intFreightTermId ELSE NULL END
+			FROM tblARPOS POS 
+			INNER JOIN #POSTRANSACTIONS RT ON POS.intPOSId = RT.intPOSId
+			INNER JOIN tblARPOSDetail DETAILS ON POS.intPOSId = DETAILS.intPOSId
+			INNER JOIN tblSMCompanyLocation CL ON POS.intCompanyLocationId = CL.intCompanyLocationId
+			WHERE RT.strPOSType NOT IN ('Mixed')
 
+			UNION ALL
+
+			SELECT TOP 1 [intId]						= POS.intPOSId
+				,[strTransactionType]					= CASE WHEN strPOSType = 'Returned' THEN 'Credit Memo' ELSE 'Invoice' END
+				,[strType]								= 'POS'
+				,[strSourceTransaction]					= 'POS'
+				,[intSourceId]							= POS.intPOSId
+				,[strSourceId]							= POS.strReceiptNumber
+				,[intEntityCustomerId]					= POS.intEntityCustomerId
+				,[intCompanyLocationId]					= POS.intCompanyLocationId
+				,[intCurrencyId]						= POS.intCurrencyId
+				,[dtmDate]								= POS.dtmDate
+				,[dtmShipDate]							= POS.dtmDate
+				,[strComments]							= '<p><span style="font-family: Arial;">' + POS.strComment + '</span></p>'
+				,[intEntityId]							= POS.intEntityUserId
+				,[ysnPost]								= 1
+				,[intItemId]							= NULL
+				,[ysnInventory]							= 0
+				,[strItemDescription]					= 'POS Discount - ' + CAST(CAST(POS.dblDiscountPercent AS INT) AS VARCHAR(3)) + '%'
+				,[intItemUOMId]							= NULL
+				,[dblQtyShipped]						= 1.000000
+				,[dblDiscount]							= NULL
+				,[dblPrice]								= POS.dblDiscount * -1
+				,[ysnRefreshPrice]						= 0
+				,[ysnRecomputeTax]						= CASE WHEN ISNULL(POS.ysnTaxExempt,0) = 0 THEN 1 ELSE 0 END
+				,[ysnClearDetailTaxes]					= 1
+				,[intTempDetailIdForTaxes]				= POS.intPOSId
+				,[dblCurrencyExchangeRate]				= 1.000000
+				,[dblSubCurrencyRate]					= 1.000000
+				,[intSalesAccountId]					= ISNULL(CL.intSalesDiscounts, @intDiscountAccountId)
+				,[strPONumber]							= POS.strPONumber
+				,[intFreightTermId]						= CASE WHEN ISNULL(POS.ysnTaxExempt,0) = 0 THEN CL.intFreightTermId ELSE NULL END
+			FROM tblARPOS POS
+			INNER JOIN #POSTRANSACTIONS RT ON POS.intPOSId = RT.intPOSId
+			INNER JOIN tblSMCompanyLocation CL ON POS.intCompanyLocationId = CL.intCompanyLocationId
+			WHERE ISNULL(POS.dblDiscountPercent, 0) > 0
+			   AND RT.strPOSType NOT IN ('Mixed')
+
+			--GET INVOICES AND DISCOUNTS (INVOICE FOR MIXED TRANSACTIONS)
+			INSERT INTO @EntriesForInvoice(
+				 [intId]
+				,[strTransactionType]
+				,[strType]
+				,[strSourceTransaction]
+				,[intSourceId]
+				,[strSourceId]
+				,[intEntityCustomerId]
+				,[intCompanyLocationId]
+				,[intCurrencyId]
+				,[dtmDate]
+				,[dtmShipDate]
+				,[strComments]
+				,[intEntityId]
+				,[ysnPost]
+				,[intItemId]
+				,[ysnInventory]
+				,[strItemDescription]
+				,[intItemUOMId]
+				,[dblQtyShipped]
+				,[dblDiscount]
+				,[dblPrice]
+				,[ysnRefreshPrice]
+				,[ysnRecomputeTax]
+				,[ysnClearDetailTaxes]					
+				,[intTempDetailIdForTaxes]
+				,[dblCurrencyExchangeRate]
+				,[dblSubCurrencyRate]
+				,[intSalesAccountId]
+				,[strPONumber]
+				,[intFreightTermId]
+			)
+			SELECT [intId]								= POS.intPOSId
+				,[strTransactionType]					= 'Invoice'
+				,[strType]								= 'POS'
+				,[strSourceTransaction]					= 'POS'
+				,[intSourceId]							= POS.intPOSId
+				,[strSourceId]							= POS.strReceiptNumber
+				,[intEntityCustomerId]					= POS.intEntityCustomerId
+				,[intCompanyLocationId]					= POS.intCompanyLocationId
+				,[intCurrencyId]						= POS.intCurrencyId
+				,[dtmDate]								= POS.dtmDate
+				,[dtmShipDate]							= POS.dtmDate
+				,[strComments]							= POS.strComment
+				,[intEntityId]							= POS.intEntityUserId
+				,[ysnPost]								= 1
+				,[intItemId]							= DETAILS.intItemId
+				,[ysnInventory]							= 1
+				,[strItemDescription]					= DETAILS.strItemDescription 
+				,[intItemUOMId]							= DETAILS.intItemUOMId
+				,[dblQtyShipped]						= DETAILS.dblQuantity 
+				,[dblDiscount]							= 0
+				,[dblPrice]								= (DETAILS.dblExtendedPrice / DETAILS.dblQuantity)
+				,[ysnRefreshPrice]						= 0
+				,[ysnRecomputeTax]						= CASE WHEN ISNULL(POS.ysnTaxExempt,0) = 0 THEN 1 ELSE 0 END
+				,[ysnClearDetailTaxes]					= 1
+				,[intTempDetailIdForTaxes]				= POS.intPOSId
+				,[dblCurrencyExchangeRate]				= 1.000000
+				,[dblSubCurrencyRate]					= 1.000000
+				,[intSalesAccountId]					= NULL
+				,[strPONumber]							= POS.strPONumber
+				,[intFreightTermId]						= CASE WHEN ISNULL(POS.ysnTaxExempt,0) = 0 THEN CL.intFreightTermId ELSE NULL END
+			FROM tblARPOS POS
+			INNER JOIN tblARPOSDetail DETAILS ON POS.intPOSId = DETAILS.intPOSId
+			INNER JOIN #POSTRANSACTIONS RT ON POS.intPOSId = RT.intPOSId
+			INNER JOIN tblSMCompanyLocation CL ON POS.intCompanyLocationId = CL.intCompanyLocationId
+			WHERE DETAILS.dblQuantity > 0
+			  AND RT.strPOSType = 'Mixed'
+
+			UNION ALL
+
+			SELECT TOP 1
+				 [intId]								= POS.intPOSId
+				,[strTransactionType]					= 'Invoice'
+				,[strType]								= 'POS'
+				,[strSourceTransaction]					= 'POS'
+				,[intSourceId]							= POS.intPOSId
+				,[strSourceId]							= POS.strReceiptNumber
+				,[intEntityCustomerId]					= POS.intEntityCustomerId
+				,[intCompanyLocationId]					= POS.intCompanyLocationId
+				,[intCurrencyId]						= POS.intCurrencyId
+				,[dtmDate]								= POS.dtmDate
+				,[dtmShipDate]							= POS.dtmDate
+				,[strComments]							= POS.strComment
+				,[intEntityId]							= POS.intEntityUserId
+				,[ysnPost]								= 1
+				,[intItemId]							= NULL
+				,[ysnInventory]							= 0
+				,[strItemDescription]					= 'POS Discount - ' + CAST(CAST(POS.dblDiscountPercent AS INT) AS VARCHAR(3)) + '%'
+				,[intItemUOMId]							= NULL
+				,[dblQtyShipped]						= 1.000000
+				,[dblDiscount]							= NULL
+				,[dblPrice]								= POS.dblDiscount * -1
+				,[ysnRefreshPrice]						= 0
+				,[ysnRecomputeTax]						= CASE WHEN ISNULL(POS.ysnTaxExempt,0) = 0 THEN 1 ELSE 0 END
+				,[ysnClearDetailTaxes]					= 1
+				,[intTempDetailIdForTaxes]				= POS.intPOSId
+				,[dblCurrencyExchangeRate]				= 1.000000
+				,[dblSubCurrencyRate]					= 1.000000
+				,[intSalesAccountId]					= ISNULL(CL.intSalesDiscounts, @intDiscountAccountId)
+				,[strPONumber]							= POS.strPONumber
+				,[intFreightTermId]						= CASE WHEN ISNULL(POS.ysnTaxExempt,0) = 0 THEN CL.intFreightTermId ELSE NULL END
+			FROM tblARPOS POS
+			INNER JOIN #POSTRANSACTIONS RT ON POS.intPOSId = RT.intPOSId
+			INNER JOIN tblSMCompanyLocation CL ON POS.intCompanyLocationId = CL.intCompanyLocationId
+			WHERE ISNULL(dblDiscountPercent, 0) > 0
+			  AND RT.strPOSType = 'Mixed'
+
+			--GET INVOICES AND DISCOUNTS (CREDIT MEMO FOR MIXED TRANSACTIONS)
+			INSERT INTO @EntriesForInvoice(
+				 [intId]
+				,[strTransactionType]
+				,[strType]
+				,[strSourceTransaction]
+				,[intSourceId]
+				,[strSourceId]
+				,[intEntityCustomerId]
+				,[intCompanyLocationId]
+				,[intCurrencyId]
+				,[dtmDate]
+				,[dtmShipDate]
+				,[strComments]
+				,[intEntityId]
+				,[ysnPost]
+				,[intItemId]
+				,[ysnInventory]
+				,[strItemDescription]
+				,[intItemUOMId]
+				,[dblQtyShipped]
+				,[dblDiscount]
+				,[dblPrice]
+				,[ysnRefreshPrice]
+				,[ysnRecomputeTax]
+				,[ysnClearDetailTaxes]					
+				,[intTempDetailIdForTaxes]
+				,[dblCurrencyExchangeRate]
+				,[dblSubCurrencyRate]
+				,[intSalesAccountId]
+				,[strPONumber]
+				,[intFreightTermId]
+			)
+			SELECT [intId]								= POS.intPOSId + 10000 --TEMPORARAY FIX
+				,[strTransactionType]					= 'Credit Memo'
+				,[strType]								= 'POS'
+				,[strSourceTransaction]					= 'POS'
+				,[intSourceId]							= POS.intPOSId
+				,[strSourceId]							= POS.strReceiptNumber
+				,[intEntityCustomerId]					= POS.intEntityCustomerId
+				,[intCompanyLocationId]					= POS.intCompanyLocationId
+				,[intCurrencyId]						= POS.intCurrencyId
+				,[dtmDate]								= POS.dtmDate
+				,[dtmShipDate]							= POS.dtmDate
+				,[strComments]							= 'POS Return:' + ISNULL(POS.strComment, '')
+				,[intEntityId]							= POS.intEntityUserId
+				,[ysnPost]								= 1
+				,[intItemId]							= DETAILS.intItemId
+				,[ysnInventory]							= 1
+				,[strItemDescription]					= DETAILS.strItemDescription 
+				,[intItemUOMId]							= DETAILS.intItemUOMId
+				,[dblQtyShipped]						= ABS(DETAILS.dblQuantity)
+				,[dblDiscount]							= 0
+				,[dblPrice]								= (DETAILS.dblExtendedPrice / DETAILS.dblQuantity)
+				,[ysnRefreshPrice]						= 0
+				,[ysnRecomputeTax]						= CASE WHEN ISNULL(POS.ysnTaxExempt,0) = 0 THEN 1 ELSE 0 END
+				,[ysnClearDetailTaxes]					= 1
+				,[intTempDetailIdForTaxes]				= POS.intPOSId
+				,[dblCurrencyExchangeRate]				= 1.000000
+				,[dblSubCurrencyRate]					= 1.000000
+				,[intSalesAccountId]					= NULL
+				,[strPONumber]							= POS.strPONumber
+				,[intFreightTermId]						= CASE WHEN ISNULL(POS.ysnTaxExempt,0) = 0 THEN CL.intFreightTermId ELSE NULL END
+			FROM tblARPOS POS 
+			INNER JOIN tblARPOSDetail DETAILS ON POS.intPOSId = DETAILS.intPOSId
+			INNER JOIN #POSTRANSACTIONS RT ON POS.intPOSId = RT.intPOSId
+			INNER JOIN tblSMCompanyLocation CL ON POS.intCompanyLocationId = CL.intCompanyLocationId
+			WHERE DETAILS.dblQuantity < 0
+			  AND RT.strPOSType = 'Mixed'
+
+			UNION ALL
+
+			SELECT TOP 1
+				 [intId]								= POS.intPOSId + 10000 --TEMPORARAY FIX
+				,[strTransactionType]					= 'Credit Memo'
+				,[strType]								= 'POS'
+				,[strSourceTransaction]					= 'POS'
+				,[intSourceId]							= POS.intPOSId
+				,[strSourceId]							= POS.strReceiptNumber
+				,[intEntityCustomerId]					= POS.intEntityCustomerId
+				,[intCompanyLocationId]					= POS.intCompanyLocationId
+				,[intCurrencyId]						= POS.intCurrencyId
+				,[dtmDate]								= POS.dtmDate
+				,[dtmShipDate]							= POS.dtmDate
+				,[strComments]							= 'POS Return:' + ISNULL(POS.strComment, '')
+				,[intEntityId]							= POS.intEntityUserId
+				,[ysnPost]								= 1
+				,[intItemId]							= NULL
+				,[ysnInventory]							= 0
+				,[strItemDescription]					= 'POS Discount - ' + CAST(CAST(POS.dblDiscountPercent AS INT) AS VARCHAR(3)) + '%'
+				,[intItemUOMId]							= NULL
+				,[dblQtyShipped]						= 1.000000
+				,[dblDiscount]							= NULL
+				,[dblPrice]								= POS.dblDiscount * -1
+				,[ysnRefreshPrice]						= 0
+				,[ysnRecomputeTax]						= CASE WHEN ISNULL(POS.ysnTaxExempt,0) = 0 THEN 1 ELSE 0 END
+				,[ysnClearDetailTaxes]					= 1
+				,[intTempDetailIdForTaxes]				= POS.intPOSId
+				,[dblCurrencyExchangeRate]				= 1.000000
+				,[dblSubCurrencyRate]					= 1.000000
+				,[intSalesAccountId]					= ISNULL(CL.intSalesDiscounts, @intDiscountAccountId)
+				,[strPONumber]							= POS.strPONumber
+				,[intFreightTermId]						= CASE WHEN ISNULL(POS.ysnTaxExempt,0) = 0 THEN CL.intFreightTermId ELSE NULL END
+			FROM tblARPOS POS
+			INNER JOIN #POSTRANSACTIONS RT ON POS.intPOSId = RT.intPOSId
+			INNER JOIN tblSMCompanyLocation CL ON POS.intCompanyLocationId = CL.intCompanyLocationId
+			WHERE ISNULL(dblDiscountPercent, 0) > 0
+			  AND RT.strPOSType = 'Mixed'
+
+			--PROCESS TO INVOICE
+			EXEC dbo.uspARProcessInvoicesByBatch @InvoiceEntries		= @EntriesForInvoice
+											   , @LineItemTaxEntries	= @TaxDetails
+											   , @UserId				= @intEntityUserId
+											   , @GroupingOption		= 11
+											   , @RaiseError			= 0
+											   , @ErrorMessage			= @strErrorMsg OUT
+											   , @LogId					= @intInvoiceLogId OUT
+
+			--UPDATE POS BATCH LOG
 			INSERT INTO tblARPOSBatchProcessLog (
 				   intPOSId
 				 , strDescription
@@ -135,191 +550,332 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #REGULARTRANS WHERE ysnProcessed = 0)
 				 , dtmDateProcessed
 			) 
 			SELECT intPOSId				= POS.intPOSId
-				 , strMessage			= 'Successfully Processed.'
-				 , ysnSuccess			= CAST(1 AS BIT)
+				 , strMessage			= CASE WHEN ISNULL(ysnSuccess, 0) = 1 THEN 'Successfully Processed.' ELSE I.strMessage END
+				 , ysnSuccess			= ISNULL(ysnSuccess, 0)
 				 , dtmDateProcessed		= GETDATE()
 			FROM tblARPOS POS
-			WHERE intPOSId = @intRTPOSId
+			INNER JOIN tblARInvoiceIntegrationLogDetail I ON POS.intPOSId = I.intSourceId AND POS.strReceiptNumber = I.strSourceId
+			WHERE intIntegrationLogId = @intInvoiceLogId
+			  AND ISNULL(ysnHeader, 0) = 1
+
+			--UPDATE INVOICE REFERENCE TO POS
+			UPDATE POS
+			SET intInvoiceId	= II.intInvoiceId
+			FROM tblARPOS POS
+			INNER JOIN tblARInvoiceIntegrationLogDetail II ON POS.intPOSId = II.intSourceId AND POS.strReceiptNumber = II.strSourceId
+			WHERE II.intIntegrationLogId = @intInvoiceLogId
+			  AND ISNULL(II.ysnHeader, 0) = 1
+			  AND ISNULL(II.ysnSuccess, 0) = 1
+			  AND II.strTransactionType = 'Invoice'
+
+			UPDATE POS
+			SET intCreditMemoId	= II.intInvoiceId
+			FROM tblARPOS POS
+			INNER JOIN tblARInvoiceIntegrationLogDetail II ON POS.intPOSId = II.intSourceId AND POS.strReceiptNumber = II.strSourceId
+			WHERE II.intIntegrationLogId = @intInvoiceLogId
+			  AND ISNULL(II.ysnHeader, 0) = 1
+			  AND ISNULL(II.ysnSuccess, 0) = 1
+			  AND II.strTransactionType = 'Credit Memo'
+
+			--GET POS PAYMENTS
+			SELECT intPOSId				= POS.intPOSId
+				 , intPOSPaymentId		= POSP.intPOSPaymentId
+				 , strPaymentMethod		= CASE WHEN POSP.strPaymentMethod = 'Credit Card' THEN 'Manual Credit Card' ELSE POSP.strPaymentMethod END
+				 , strReferenceNo		= POSP.strReferenceNo
+				 , dblAmount			= POSP.dblAmount
+			INTO #POSPAYMENTS
+			FROM tblARPOS POS
+			INNER JOIN tblARInvoiceIntegrationLogDetail I ON POS.intPOSId = I.intSourceId AND POS.strReceiptNumber = I.strSourceId
+			INNER JOIN tblARPOSPayment POSP ON POS.intPOSId = POSP.intPOSId
+			WHERE intIntegrationLogId = @intInvoiceLogId
+			  AND ISNULL(ysnHeader, 0) = 1
+			  AND ISNULL(ysnSuccess, 0) = 1
+			  AND ISNULL(ysnPosted, 0) = 1
+			  AND ISNULL(strPaymentMethod, '') <> 'On Account'
+
+			--GET POS PAYMENTS (FOR REGULAR AND RETURN TRANSACTIONS) 
+			INSERT INTO @EntriesForPayment (
+				 intId
+				,strSourceTransaction
+				,intSourceId
+				,strSourceId
+				,intEntityCustomerId
+				,intCompanyLocationId
+				,intCurrencyId
+				,dtmDatePaid
+				,intPaymentMethodId
+				,strPaymentMethod
+				,strPaymentInfo
+				,strNotes
+				,intBankAccountId
+				,dblAmountPaid
+				,intEntityId
+				,intInvoiceId
+				,strTransactionType
+				,strTransactionNumber
+				,intTermId
+				,intInvoiceAccountId
+				,dblInvoiceTotal
+				,dblBaseInvoiceTotal
+				,dblPayment
+				,dblAmountDue
+				,dblBaseAmountDue
+				,strInvoiceReportNumber
+				,dblCurrencyExchangeRate
+				,ysnPost
+			)
+			SELECT intId						= POSPAYMENTS.intPOSPaymentId
+			    ,strSourceTransaction			= 'Direct'
+				,intSourceId					= IFP.intInvoiceId
+				,strSourceId					= IFP.strInvoiceNumber
+				,intEntityCustomerId			= IFP.intEntityCustomerId
+				,intCompanyLocationId			= IFP.intCompanyLocationId
+				,intCurrencyId					= IFP.intCurrencyId
+				,dtmDatePaid					= DATEADD(dd, DATEDIFF(dd, 0, POS.dtmDate), 0)
+				,intPaymentMethodId				= PM.intPaymentMethodID
+				,strPaymentMethod				= PM.strPaymentMethod
+				,strPaymentInfo					= CASE WHEN POSPAYMENTS.strPaymentMethod IN ('Check' ,'Debit Card', 'Manual Credit Card') THEN POSPAYMENTS.strReferenceNo ELSE NULL END
+				,strNotes						= POS.strReceiptNumber
+				,intBankAccountId				= BA.intBankAccountId
+				,dblAmountPaid					= ISNULL(POSPAYMENTS.dblAmount, 0) * dbo.fnARGetInvoiceAmountMultiplier(IFP.strTransactionType)
+				,intEntityId					= @intEntityUserId
+				,intInvoiceId					= IFP.intInvoiceId
+				,strTransactionType				= IFP.strTransactionType
+				,strTransactionNumber			= IFP.strInvoiceNumber
+				,intTermId						= IFP.intTermId
+				,intInvoiceAccountId			= IFP.intAccountId
+				,dblInvoiceTotal				= IFP.dblInvoiceTotal * dbo.fnARGetInvoiceAmountMultiplier(IFP.strTransactionType)
+				,dblBaseInvoiceTotal			= IFP.dblBaseInvoiceTotal * dbo.fnARGetInvoiceAmountMultiplier(IFP.strTransactionType)
+				,dblPayment						= ISNULL(POSPAYMENTS.dblAmount, 0) * dbo.fnARGetInvoiceAmountMultiplier(IFP.strTransactionType)
+				,dblAmountDue					= IFP.dblInvoiceTotal * dbo.fnARGetInvoiceAmountMultiplier(IFP.strTransactionType)
+				,dblBaseAmountDue				= IFP.dblInvoiceTotal * dbo.fnARGetInvoiceAmountMultiplier(IFP.strTransactionType)
+				,strInvoiceReportNumber			= IFP.strInvoiceNumber
+				,dblCurrencyExchangeRate		= IFP.dblCurrencyExchangeRate
+				,ysnPost						= CAST(1 AS BIT)
+			FROM #POSPAYMENTS POSPAYMENTS
+			INNER JOIN tblARPOS POS ON POSPAYMENTS.intPOSId = POS.intPOSId
+			INNER JOIN #POSTRANSACTIONS RT ON POS.intPOSId = RT.intPOSId
+			INNER JOIN tblARInvoiceIntegrationLogDetail II ON POS.intPOSId = II.intSourceId AND POS.strReceiptNumber = II.strSourceId
+			INNER JOIN tblARInvoice IFP ON IFP.intInvoiceId = CASE WHEN II.strTransactionType = 'Credit Memo' THEN POS.intCreditMemoId ELSE POS.intInvoiceId END
+			INNER JOIN tblSMCompanyLocation CL ON IFP.intCompanyLocationId = CL.intCompanyLocationId
+			LEFT JOIN tblCMBankAccount BA ON CL.intCashAccount = BA.intGLAccountId
+			CROSS APPLY (
+				SELECT TOP 1 intPaymentMethodID
+						   , strPaymentMethod
+				FROM tblSMPaymentMethod WITH (NOLOCK)
+				WHERE ((POSPAYMENTS.strPaymentMethod = 'Debit Card' AND strPaymentMethod = 'Debit Card') OR (POSPAYMENTS.strPaymentMethod <> 'Debit Card' AND strPaymentMethod = POSPAYMENTS.strPaymentMethod))
+			) PM
+			WHERE IFP.ysnPosted = 1
+			  AND IFP.ysnPaid = 0
+			  AND II.intIntegrationLogId = @intInvoiceLogId
+			  AND ISNULL(II.ysnHeader, 0) = 1
+			  AND ISNULL(II.ysnSuccess, 0) = 1
+			  AND ISNULL(II.ysnPosted, 0) = 1
+			  AND RT.strPOSType <> 'Mixed'
+
+			--GET POS PAYMENTS (FOR MIXED TRANSACTIONS)
+			--IF INV > CM = 2 RCVs (OFFSET [DEBIT MEMO] AND + AMOUNT DUE [CASH])
+			--IF CM > INV = 2 RCVs (OFFSET [DEBIT MEMO] AND - AMOUNT DUE [CASH])
+			INSERT INTO @EntriesForPayment (
+				   intId
+				 , strSourceTransaction
+				 , intSourceId
+				 , strSourceId
+				 , intEntityCustomerId
+				 , intCompanyLocationId
+				 , intCurrencyId
+				 , dtmDatePaid
+				 , intPaymentMethodId
+				 , strPaymentMethod
+				 , strPaymentInfo
+				 , strNotes
+				 , intBankAccountId
+				 , dblAmountPaid
+				 , intEntityId
+				 , intInvoiceId
+				 , strTransactionType
+				 , strTransactionNumber
+				 , intTermId
+				 , intInvoiceAccountId
+				 , dblInvoiceTotal
+				 , dblBaseInvoiceTotal
+				 , dblPayment
+				 , dblAmountDue
+				 , dblBaseAmountDue
+				 , strInvoiceReportNumber
+				 , dblCurrencyExchangeRate
+				 , ysnPost
+			)
+			SELECT intId							= POS.intPOSId
+				 , strSourceTransaction				= 'Direct'
+				 , intSourceId						= INV.intInvoiceId
+				 , strSourceId						= INV.strInvoiceNumber
+				 , intEntityCustomerId				= INV.intEntityCustomerId
+				 , intCompanyLocationId				= INV.intCompanyLocationId
+				 , intCurrencyId					= INV.intCurrencyId
+				 , dtmDatePaid						= DATEADD(dd, DATEDIFF(dd, 0, POS.dtmDate), 0)
+				 , intPaymentMethodId				= @intDebitMemoPaymentMethodId
+				 , strPaymentMethod					= 'Debit Memos and Payments'
+				 , strPaymentInfo					= 'POS Exchange Item Transaction'
+				 , strNotes							= POS.strReceiptNumber
+				 , intBankAccountId					= BA.intBankAccountId
+				 , dblAmountPaid					= 0.00
+				 , intEntityId						= @intEntityUserId
+				 , intInvoiceId						= INV.intInvoiceId
+				 , strTransactionType				= INV.strTransactionType
+				 , strTransactionNumber				= INV.strInvoiceNumber
+				 , intTermId						= INV.intTermId
+				 , intInvoiceAccountId				= INV.intAccountId
+				 , dblInvoiceTotal					= INV.dblInvoiceTotal * dbo.fnARGetInvoiceAmountMultiplier(INV.strTransactionType)
+				 , dblBaseInvoiceTotal				= INV.dblBaseInvoiceTotal * dbo.fnARGetInvoiceAmountMultiplier(INV.strTransactionType)
+				 , dblPayment						= CASE WHEN INV.dblAmountDue > CM.dblAmountDue THEN CM.dblAmountDue ELSE INV.dblAmountDue END
+				 , dblAmountDue						= INV.dblInvoiceTotal * dbo.fnARGetInvoiceAmountMultiplier(INV.strTransactionType)
+				 , dblBaseAmountDue					= INV.dblInvoiceTotal * dbo.fnARGetInvoiceAmountMultiplier(INV.strTransactionType)
+				 , strInvoiceReportNumber			= INV.strInvoiceNumber
+				 , dblCurrencyExchangeRate			= INV.dblCurrencyExchangeRate
+				 , ysnPost							= CAST(1 AS BIT)
+			FROM tblARPOS POS 
+			INNER JOIN #POSTRANSACTIONS RT ON POS.intPOSId = RT.intPOSId
+			INNER JOIN tblARInvoice INV ON POS.intInvoiceId = INV.intInvoiceId AND INV.strTransactionType = 'Invoice'
+			INNER JOIN tblARInvoice CM ON POS.intCreditMemoId = CM.intInvoiceId AND CM.strTransactionType = 'Credit Memo'
+			INNER JOIN tblSMCompanyLocation CL ON POS.intCompanyLocationId = CL.intCompanyLocationId
+			LEFT JOIN tblCMBankAccount BA ON CL.intCashAccount = BA.intGLAccountId			
+			WHERE POS.intCreditMemoId IS NOT NULL
+			  AND POS.intInvoiceId IS NOT NULL
+			  AND INV.ysnPosted = 1
+			  AND INV.ysnPaid = 0
+			  AND RT.strPOSType = 'Mixed'
+
+			UNION ALL
+
+			SELECT intId							= POS.intPOSId
+				 , strSourceTransaction				= 'Direct'
+				 , intSourceId						= CM.intInvoiceId
+				 , strSourceId						= CM.strInvoiceNumber
+				 , intEntityCustomerId				= CM.intEntityCustomerId
+				 , intCompanyLocationId				= CM.intCompanyLocationId
+				 , intCurrencyId					= CM.intCurrencyId
+				 , dtmDatePaid						= DATEADD(dd, DATEDIFF(dd, 0, POS.dtmDate), 0)
+				 , intPaymentMethodId				= @intDebitMemoPaymentMethodId
+				 , strPaymentMethod					= 'Debit Memos and Payments'
+				 , strPaymentInfo					= 'POS Exchange Item Transaction'
+				 , strNotes							= POS.strReceiptNumber
+				 , intBankAccountId					= BA.intBankAccountId
+				 , dblAmountPaid					= 0.00
+				 , intEntityId						= @intEntityUserId
+				 , intInvoiceId						= CM.intInvoiceId
+				 , strTransactionType				= CM.strTransactionType
+				 , strTransactionNumber				= CM.strInvoiceNumber
+				 , intTermId						= CM.intTermId
+				 , intInvoiceAccountId				= CM.intAccountId
+				 , dblInvoiceTotal					= CM.dblInvoiceTotal * dbo.fnARGetInvoiceAmountMultiplier(CM.strTransactionType)
+				 , dblBaseInvoiceTotal				= CM.dblBaseInvoiceTotal * dbo.fnARGetInvoiceAmountMultiplier(INV.strTransactionType)
+				 , dblPayment						= CASE WHEN INV.dblAmountDue > CM.dblAmountDue THEN CM.dblAmountDue ELSE INV.dblAmountDue END
+				 , dblAmountDue						= CM.dblInvoiceTotal * dbo.fnARGetInvoiceAmountMultiplier(CM.strTransactionType)
+				 , dblBaseAmountDue					= CM.dblInvoiceTotal * dbo.fnARGetInvoiceAmountMultiplier(CM.strTransactionType)
+				 , strInvoiceReportNumber			= CM.strInvoiceNumber
+				 , dblCurrencyExchangeRate			= CM.dblCurrencyExchangeRate
+				 , ysnPost							= CAST(1 AS BIT)
+			FROM tblARPOS POS 
+			INNER JOIN #POSTRANSACTIONS RT ON POS.intPOSId = RT.intPOSId
+			INNER JOIN tblARInvoice INV ON POS.intInvoiceId = INV.intInvoiceId AND INV.strTransactionType = 'Invoice'
+			INNER JOIN tblARInvoice CM ON POS.intCreditMemoId = CM.intInvoiceId AND CM.strTransactionType = 'Credit Memo'
+			INNER JOIN tblSMCompanyLocation CL ON POS.intCompanyLocationId = CL.intCompanyLocationId
+			LEFT JOIN tblCMBankAccount BA ON CL.intCashAccount = BA.intGLAccountId			
+			WHERE POS.intCreditMemoId IS NOT NULL
+			  AND POS.intInvoiceId IS NOT NULL
+			  AND INV.ysnPosted = 1
+			  AND INV.ysnPaid = 0
+			  AND RT.strPOSType = 'Mixed'
+
+			UNION ALL
+
+			SELECT intId							= POS.intPOSId + 10000
+				 , strSourceTransaction				= 'Direct'
+				 , intSourceId						= CASE WHEN INV.dblAmountDue > CM.dblAmountDue THEN INV.intInvoiceId ELSE CM.intInvoiceId END
+				 , strSourceId						= CASE WHEN INV.dblAmountDue > CM.dblAmountDue THEN INV.strInvoiceNumber ELSE CM.strInvoiceNumber END
+				 , intEntityCustomerId				= CASE WHEN INV.dblAmountDue > CM.dblAmountDue THEN INV.intEntityCustomerId ELSE CM.intEntityCustomerId END
+				 , intCompanyLocationId				= CASE WHEN INV.dblAmountDue > CM.dblAmountDue THEN INV.intCompanyLocationId ELSE CM.intCompanyLocationId END
+				 , intCurrencyId					= CASE WHEN INV.dblAmountDue > CM.dblAmountDue THEN INV.intCurrencyId ELSE CM.intCurrencyId END
+				 , dtmDatePaid						= DATEADD(dd, DATEDIFF(dd, 0, POS.dtmDate), 0)
+				 , intPaymentMethodId				= @intCashPaymentMethodId
+				 , strPaymentMethod					= 'Cash'
+				 , strPaymentInfo					= 'POS Settle Amount Due of Exchange Transaction'
+				 , strNotes							= POS.strReceiptNumber
+				 , intBankAccountId					= BA.intBankAccountId
+				 , dblAmountPaid					= INV.dblAmountDue - CM.dblAmountDue
+				 , intEntityId						= @intEntityUserId
+				 , intInvoiceId						= CASE WHEN INV.dblAmountDue > CM.dblAmountDue THEN INV.intInvoiceId ELSE CM.intInvoiceId END
+				 , strTransactionType				= CASE WHEN INV.dblAmountDue > CM.dblAmountDue THEN INV.strTransactionType ELSE CM.strTransactionType END
+				 , strTransactionNumber				= CASE WHEN INV.dblAmountDue > CM.dblAmountDue THEN INV.strInvoiceNumber ELSE CM.strInvoiceNumber END
+				 , intTermId						= CASE WHEN INV.dblAmountDue > CM.dblAmountDue THEN INV.intTermId ELSE CM.intTermId END
+				 , intInvoiceAccountId				= CASE WHEN INV.dblAmountDue > CM.dblAmountDue THEN INV.intAccountId ELSE CM.intAccountId END
+				 , dblInvoiceTotal					= CASE WHEN INV.dblAmountDue > CM.dblAmountDue THEN INV.dblInvoiceTotal ELSE CM.dblInvoiceTotal * dbo.fnARGetInvoiceAmountMultiplier(CM.strTransactionType) END
+				 , dblBaseInvoiceTotal				= CASE WHEN INV.dblAmountDue > CM.dblAmountDue THEN INV.dblBaseInvoiceTotal ELSE CM.dblBaseInvoiceTotal * dbo.fnARGetInvoiceAmountMultiplier(INV.strTransactionType) END
+				 , dblPayment						= CASE WHEN INV.dblAmountDue > CM.dblAmountDue THEN INV.dblAmountDue - CM.dblAmountDue ELSE CM.dblAmountDue - INV.dblAmountDue END
+				 , dblAmountDue						= CASE WHEN INV.dblAmountDue > CM.dblAmountDue THEN INV.dblInvoiceTotal ELSE CM.dblInvoiceTotal * dbo.fnARGetInvoiceAmountMultiplier(CM.strTransactionType) END
+				 , dblBaseAmountDue					= CASE WHEN INV.dblAmountDue > CM.dblAmountDue THEN INV.dblInvoiceTotal ELSE CM.dblInvoiceTotal * dbo.fnARGetInvoiceAmountMultiplier(CM.strTransactionType) END
+				 , strInvoiceReportNumber			= CASE WHEN INV.dblAmountDue > CM.dblAmountDue THEN INV.strInvoiceNumber ELSE CM.strInvoiceNumber END
+				 , dblCurrencyExchangeRate			= CASE WHEN INV.dblAmountDue > CM.dblAmountDue THEN INV.dblCurrencyExchangeRate ELSE CM.dblCurrencyExchangeRate END
+				 , ysnPost							= CAST(1 AS BIT)
+			FROM tblARPOS POS 
+			INNER JOIN #POSTRANSACTIONS RT ON POS.intPOSId = RT.intPOSId
+			INNER JOIN tblARInvoice INV ON POS.intInvoiceId = INV.intInvoiceId AND INV.strTransactionType = 'Invoice'
+			INNER JOIN tblARInvoice CM ON POS.intCreditMemoId = CM.intInvoiceId AND CM.strTransactionType = 'Credit Memo'
+			INNER JOIN tblSMCompanyLocation CL ON POS.intCompanyLocationId = CL.intCompanyLocationId
+			LEFT JOIN tblCMBankAccount BA ON CL.intCashAccount = BA.intGLAccountId			
+			WHERE POS.intCreditMemoId IS NOT NULL
+			  AND POS.intInvoiceId IS NOT NULL			  
+			  AND INV.ysnPosted = 1
+			  AND INV.ysnPaid = 0
+			  AND CM.dblAmountDue <> INV.dblAmountDue 
+			  AND RT.strPOSType = 'Mixed'
+
+			--PROCESS TO RCV
+			EXEC [dbo].[uspARProcessPayments] @PaymentEntries	= @EntriesForPayment
+											, @UserId			= @intEntityUserId
+											, @GroupingOption	= 7
+											, @RaiseError		= 1
+											, @ErrorMessage		= @strErrorMsg OUTPUT
+											, @LogId			= @intPaymentLogId OUTPUT
+
+			--UPDATE PAYMENT REFERENCE TO POS PAYMENTS
+			UPDATE POSPAYMENT
+			SET intPaymentId = IP.intPaymentId
+			FROM tblARPOSPayment POSPAYMENT
+			INNER JOIN tblARPOS POS ON POSPAYMENT.intPOSId = POS.intPOSId			
+			INNER JOIN tblARPayment P ON CASE WHEN P.strPaymentMethod = 'Manual Credit Card' THEN 'Credit Card' ELSE P.strPaymentMethod END = POSPAYMENT.strPaymentMethod AND P.strNotes = POS.strReceiptNumber
+			INNER JOIN tblARPaymentIntegrationLogDetail IP ON IP.intPaymentId = P.intPaymentId			
+			WHERE IP.intIntegrationLogId = @intPaymentLogId
+			  AND ISNULL(IP.ysnHeader, 0) = 1
+			  AND ISNULL(IP.ysnSuccess, 0) = 1
+
+			--UPDATE POS ENDING BALANCE
+			SELECT @dblCashReceipt = SUM(POSP.dblAmount)
+			FROM #POSPAYMENTS POSP
+			INNER JOIN #POSTRANSACTIONS POS ON POSP.intPOSId = POS.intPOSId
+			WHERE POSP.strPaymentMethod IN ('Cash', 'Check') 
+			  AND POS.strPOSType = 'Regular'
+
+			SELECT @dblCashReturn = SUM(POSP.dblAmount)
+			FROM #POSPAYMENTS POSP
+			INNER JOIN #POSTRANSACTIONS POS ON POSP.intPOSId = POS.intPOSId
+			WHERE POSP.strPaymentMethod IN ('Cash', 'Check')
+			   AND POS.strPOSType = 'Return'
+
+			UPDATE tblARPOSEndOfDay
+			SET dblExpectedEndingBalance = ISNULL(dblExpectedEndingBalance, 0) + ISNULL(@dblCashReceipt, 0)
+			  , dblCashReturn			 = ISNULL(dblCashReturn, 0) + ISNULL(@dblCashReturn, 0)
+			WHERE intPOSEndOfDayId = @intPOSEndOfDayId
+
 		END TRY
 		BEGIN CATCH
-			SELECT @strRTErrMsg = ERROR_MESSAGE()					
+			SELECT @strErrorMsg = ERROR_MESSAGE()					
 			IF @InitTranCount = 0
 				IF (XACT_STATE()) <> 0
 					ROLLBACK TRANSACTION
 			ELSE
 				IF (XACT_STATE()) <> 0
 					ROLLBACK TRANSACTION @Savepoint
-		
-			INSERT INTO tblARPOSBatchProcessLog (
-				   intPOSId
-				 , strDescription
-				 , ysnSuccess
-				 , dtmDateProcessed
-			)
-			SELECT intPOSId				= POS.intPOSId
-				 , strMessage			= @strRTErrMsg
-				 , ysnSuccess			= CAST(0 AS BIT)
-				 , dtmDateProcessed		= GETDATE() 
-			FROM tblARPOS POS
-			WHERE intPOSId = @intRTPOSId
 		END CATCH
-		
-		IF @InitTranCount = 0
-			BEGIN
-				IF (XACT_STATE()) = -1
-					ROLLBACK TRANSACTION
-				IF (XACT_STATE()) = 1
-					COMMIT TRANSACTION
-			END	
-			
-		UPDATE #REGULARTRANS SET ysnProcessed = 1 WHERE intPOSId = @intRTPOSId
-	END
-
---PROCESS RETURNED TRANSACTIONS
-WHILE EXISTS (SELECT TOP 1 NULL FROM #RETURNEDTRANS WHERE ysnProcessed = 0)
-	BEGIN
-		DECLARE @intRefundPOSId			INT = NULL
-			  , @intRefundUserId		INT = NULL
-			  , @RefundInitTranCount	INT = NULL
-			  , @strRefundErrMsg		NVARCHAR(MAX) = NULL
-			  , @strRefundInvIds		NVARCHAR(MAX) = NULL
-			  , @RefundSavepoint		NVARCHAR(32)  = NULL
-
-		SELECT TOP 1 @intRefundPOSId	= intPOSId
-				   , @intRefundUserId	= intEntityUserId
-		FROM #RETURNEDTRANS 
-		WHERE ysnProcessed = 0 
-		ORDER BY intPOSId
-
-		SET @RefundInitTranCount = @@TRANCOUNT
-		SET @RefundSavepoint = SUBSTRING(('ARPostInvoice' + CONVERT(VARCHAR, @RefundInitTranCount)), 1, 32)
-
-		IF @RefundInitTranCount = 0
-			BEGIN TRANSACTION
-		ELSE
-			SAVE TRANSACTION @RefundSavepoint
-		
-		BEGIN TRY
-			EXEC dbo.uspARPOSNegativeTransaction @intRefundPOSId, @intRefundUserId, @strRefundErrMsg OUT, @strRefundInvIds OUT
-
-			INSERT INTO tblARPOSBatchProcessLog (
-				   intPOSId
-				 , strDescription
-				 , ysnSuccess
-				 , dtmDateProcessed
-			) 
-			SELECT intPOSId				= POS.intPOSId
-				 , strMessage			= 'Successfully Processed.'
-				 , ysnSuccess			= CAST(1 AS BIT)
-				 , dtmDateProcessed		= GETDATE()
-			FROM tblARPOS POS
-			WHERE intPOSId = @intRefundPOSId
-		END TRY
-		BEGIN CATCH
-			SELECT @strRefundErrMsg = ERROR_MESSAGE()					
-			IF @RefundInitTranCount = 0
-				IF (XACT_STATE()) <> 0
-					ROLLBACK TRANSACTION
-			ELSE
-				IF (XACT_STATE()) <> 0
-					ROLLBACK TRANSACTION @RefundSavepoint
-		
-			INSERT INTO tblARPOSBatchProcessLog (
-				   intPOSId
-				 , strDescription
-				 , ysnSuccess
-				 , dtmDateProcessed
-			)
-			SELECT intPOSId				= POS.intPOSId
-				 , strMessage			= @strRefundErrMsg
-				 , ysnSuccess			= CAST(0 AS BIT)
-				 , dtmDateProcessed		= GETDATE() 
-			FROM tblARPOS POS
-			WHERE intPOSId = @intRefundPOSId
-		END CATCH
-		
-		IF @RefundInitTranCount = 0
-			BEGIN
-				IF (XACT_STATE()) = -1
-					ROLLBACK TRANSACTION
-				IF (XACT_STATE()) = 1
-					COMMIT TRANSACTION
-			END	
-
-		UPDATE #RETURNEDTRANS SET ysnProcessed = 1 WHERE intPOSId = @intRefundPOSId
-	END
-
---PROCESS MIXED TRANSACTIONS
-WHILE EXISTS (SELECT TOP 1 NULL FROM #MIXEDTRANS WHERE ysnProcessed = 0)
-	BEGIN
-		DECLARE @intMTPOSId			INT = NULL
-			  , @intMTUserId		INT = NULL
-			  , @MTInitTranCount	INT = NULL
-			  , @strMTErrMsg		NVARCHAR(MAX) = NULL
-			  , @strMTInvIds		NVARCHAR(MAX) = NULL
-			  , @MTSavepoint		NVARCHAR(32) = NULL
-
-		SELECT TOP 1 @intMTPOSId	= intPOSId
-				   , @intMTUserId	= intEntityUserId
-		FROM #MIXEDTRANS 
-		WHERE ysnProcessed = 0 
-		ORDER BY intPOSId
-
-		SET @MTInitTranCount = @@TRANCOUNT
-		SET @MTSavepoint = SUBSTRING(('ARPostInvoice' + CONVERT(VARCHAR, @MTInitTranCount)), 1, 32)
-
-		IF @MTInitTranCount = 0
-			BEGIN TRANSACTION
-		ELSE
-			SAVE TRANSACTION @MTSavepoint
-		
-		BEGIN TRY
-			EXEC dbo.uspARPOSMixedTransaction @intMTPOSId, @intMTUserId, @strMTErrMsg OUT, @strMTInvIds OUT
-
-			INSERT INTO tblARPOSBatchProcessLog (
-				   intPOSId
-				 , strDescription
-				 , ysnSuccess
-				 , dtmDateProcessed
-			) 
-			SELECT intPOSId				= POS.intPOSId
-				 , strMessage			= 'Successfully Processed.'
-				 , ysnSuccess			= CAST(1 AS BIT)
-				 , dtmDateProcessed		= GETDATE()
-			FROM tblARPOS POS
-			WHERE intPOSId = @intMTPOSId
-		END TRY
-		BEGIN CATCH
-			SELECT @strMTErrMsg = ERROR_MESSAGE()
-								
-			IF @MTInitTranCount = 0
-				IF (XACT_STATE()) <> 0
-					ROLLBACK TRANSACTION
-			ELSE
-				IF (XACT_STATE()) <> 0
-					ROLLBACK TRANSACTION @MTSavepoint
-		
-			INSERT INTO tblARPOSBatchProcessLog (
-				   intPOSId
-				 , strDescription
-				 , ysnSuccess
-				 , dtmDateProcessed
-			)
-			SELECT intPOSId				= POS.intPOSId
-				 , strMessage			= @strMTErrMsg
-				 , ysnSuccess			= CAST(0 AS BIT)
-				 , dtmDateProcessed		= GETDATE() 
-			FROM tblARPOS POS		
-			WHERE intPOSId = @intMTPOSId
-		END CATCH
-		
-		IF @MTInitTranCount = 0
-			BEGIN
-				IF (XACT_STATE()) = -1
-					ROLLBACK TRANSACTION
-				IF (XACT_STATE()) = 1
-					COMMIT TRANSACTION
-			END	
-
-		UPDATE #MIXEDTRANS SET ysnProcessed = 1 WHERE intPOSId = @intMTPOSId
 	END

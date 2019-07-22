@@ -27,29 +27,31 @@
 )
 RETURNS @returntable TABLE
 (
-	 [intTransactionDetailTaxId]	INT
-	,[intTransactionDetailId]		INT
-	,[intTaxGroupId]				INT
-	,[intTaxCodeId]					INT
-	,[intTaxClassId]				INT
-	,[strTaxableByOtherTaxes]		NVARCHAR(MAX)
-	,[strCalculationMethod]			NVARCHAR(30)
-	,[dblRate]						NUMERIC(18,6)
-	,[dblBaseRate]					NUMERIC(18,6)
-	,[dblExemptionPercent]			NUMERIC(18,6)
-	,[dblTax]						NUMERIC(18,6)
-	,[dblAdjustedTax]				NUMERIC(18,6)
-	,[ysnSeparateOnInvoice]			BIT
-	,[intTaxAccountId]				INT
-	,[ysnTaxAdjusted]				BIT
-	,[ysnCheckoffTax]				BIT
-	,[strTaxCode]					NVARCHAR(100)						
-	,[ysnTaxExempt]					BIT
-	,[ysnTaxOnly]					BIT
-	,[ysnInvalidSetup]				BIT
-	,[strTaxGroup]					NVARCHAR(100)
-	,[strNotes]						NVARCHAR(500)
-	,[intUnitMeasureId]				INT
+	 [intTransactionDetailTaxId]		INT
+	,[intTransactionDetailId]			INT
+	,[intTaxGroupId]					INT
+	,[intTaxCodeId]						INT
+	,[intTaxClassId]					INT
+	,[strTaxableByOtherTaxes]			NVARCHAR(MAX)
+	,[strCalculationMethod]				NVARCHAR(30)
+	,[dblRate]							NUMERIC(18,6)
+	,[dblBaseRate]						NUMERIC(18,6)
+	,[dblExemptionPercent]				NUMERIC(18,6)
+	,[dblTax]							NUMERIC(18,6)
+	,[dblAdjustedTax]					NUMERIC(18,6)
+	,[ysnSeparateOnInvoice]				BIT
+	,[intTaxAccountId]					INT
+	,[intSalesTaxExemptionAccountId]	INT
+	,[ysnTaxAdjusted]					BIT
+	,[ysnCheckoffTax]					BIT
+	,[strTaxCode]						NVARCHAR(100)						
+	,[ysnTaxExempt]						BIT
+	,[ysnTaxOnly]						BIT
+	,[ysnInvalidSetup]					BIT
+	,[ysnAddToCost]						BIT
+	,[strTaxGroup]						NVARCHAR(100)
+	,[strNotes]							NVARCHAR(500)
+	,[intUnitMeasureId]					INT
 )
 AS
 BEGIN
@@ -63,32 +65,34 @@ BEGIN
 	SET @ItemType = ISNULL((SELECT strType FROM tblICItem WHERE [intItemId] = @ItemId),'')
 	
 	DECLARE @ItemTaxes AS TABLE(
-			 [Id]							INT IDENTITY(1,1)
-			,[intTransactionDetailTaxId]	INT
-			,[intTransactionDetailId]		INT
-			,[intTaxGroupId]				INT
-			,[intTaxCodeId]					INT
-			,[intTaxClassId]				INT
-			,[strTaxableByOtherTaxes]		NVARCHAR(MAX)
-			,[strCalculationMethod]			NVARCHAR(30)
-			,[dblRate]						NUMERIC(18,6)
-			,[dblBaseRate]					NUMERIC(18,6)
-			,[dblExemptionPercent]			NUMERIC(18,6)
-			,[dblTax]						NUMERIC(18,6)
-			,[dblAdjustedTax]				NUMERIC(18,6)
-			,[intTaxAccountId]				INT
-			,[ysnSeparateOnInvoice]			BIT
-			,[ysnCheckoffTax]				BIT
-			,[strTaxCode]					NVARCHAR(100)						
-			,[ysnTaxExempt]					BIT
-			,[ysnTaxOnly]					BIT
-			,[ysnInvalidSetup]				BIT
-			,[strTaxGroup]					NVARCHAR(100)
-			,[strNotes]						NVARCHAR(500)
-			,[ysnTaxAdjusted]				BIT
-			,[intUnitMeasureId]				INT
-			,[ysnComputed]					BIT
-			,[ysnTaxableFlagged]			BIT
+			 [Id]								INT IDENTITY(1,1)
+			,[intTransactionDetailTaxId]		INT
+			,[intTransactionDetailId]			INT
+			,[intTaxGroupId]					INT
+			,[intTaxCodeId]						INT
+			,[intTaxClassId]					INT
+			,[strTaxableByOtherTaxes]			NVARCHAR(MAX)
+			,[strCalculationMethod]				NVARCHAR(30)
+			,[dblRate]							NUMERIC(18,6)
+			,[dblBaseRate]						NUMERIC(18,6)
+			,[dblExemptionPercent]				NUMERIC(18,6)
+			,[dblTax]							NUMERIC(18,6)
+			,[dblAdjustedTax]					NUMERIC(18,6)
+			,[intTaxAccountId]					INT
+			,[intSalesTaxExemptionAccountId] 	INT
+			,[ysnSeparateOnInvoice]				BIT
+			,[ysnCheckoffTax]					BIT
+			,[strTaxCode]						NVARCHAR(100)						
+			,[ysnTaxExempt]						BIT
+			,[ysnTaxOnly]						BIT
+			,[ysnInvalidSetup]					BIT
+			,[strTaxGroup]						NVARCHAR(100)
+			,[strNotes]							NVARCHAR(500)
+			,[ysnTaxAdjusted]					BIT
+			,[intUnitMeasureId]					INT
+			,[ysnComputed]						BIT
+			,[ysnTaxableFlagged]				BIT
+			,[ysnAddToCost]						BIT
 			)
 			
 			
@@ -114,6 +118,7 @@ BEGIN
 		,[dblTax]
 		,[dblAdjustedTax]
 		,[intTaxAccountId]
+		,[intSalesTaxExemptionAccountId]
 		,[ysnSeparateOnInvoice]
 		,[ysnCheckoffTax]
 		,[strTaxCode]
@@ -125,6 +130,7 @@ BEGIN
 		,[intUnitMeasureId]
         ,[ysnComputed]
         ,[ysnTaxableFlagged]
+		,[ysnAddToCost]
 	)
 	SELECT
 		 [intTransactionDetailTaxId]
@@ -140,6 +146,7 @@ BEGIN
 		,[dblTax]
 		,[dblAdjustedTax]
 		,[intTaxAccountId]
+		,[intSalesTaxExemptionAccountId]
 		,[ysnSeparateOnInvoice]
 		,[ysnCheckoffTax]
 		,[strTaxCode]
@@ -151,6 +158,7 @@ BEGIN
 		,[intUnitMeasureId]
         ,CAST(0 AS BIT)
         ,CAST(0 AS BIT)
+		,[ysnAddToCost]
 	FROM
 		[dbo].[fnGetTaxGroupTaxCodesForCustomer](@TaxGroupId, @CustomerId, @TransactionDate, @ItemId, @CustomerLocationId, @IncludeExemptedCodes, @IncludeInvalidCodes, @IsCustomerSiteTaxable, @CardId, @VehicleId, @SiteId, @DisregardExemptionSetup, @ItemUOMId, @CompanyLocationId, @FreightTermId, @CFSiteId, @IsDeliver, @IsCFQuote, @CurrencyId, @CurrencyExchangeRateTypeId, @CurrencyExchangeRate)
 															
@@ -369,6 +377,7 @@ BEGIN
 		,[dblAdjustedTax]
 		,[ysnSeparateOnInvoice]
 		,[intTaxAccountId]
+		,[intSalesTaxExemptionAccountId]
 		,[ysnTaxAdjusted]
 		,[ysnCheckoffTax]
 		,[strTaxCode]
@@ -377,7 +386,8 @@ BEGIN
 		,[ysnInvalidSetup]
 		,[strTaxGroup]
 		,[strNotes]
-		,[intUnitMeasureId] 
+		,[intUnitMeasureId]
+		,[ysnAddToCost] 
 	)
 	SELECT
 		 [intTransactionDetailTaxId]
@@ -394,6 +404,7 @@ BEGIN
 		,[dblAdjustedTax]
 		,[ysnSeparateOnInvoice]
 		,[intTaxAccountId]
+		,[intSalesTaxExemptionAccountId]
 		,[ysnTaxAdjusted]
 		,[ysnCheckoffTax]
 		,[strTaxCode]
@@ -402,7 +413,8 @@ BEGIN
 		,[ysnInvalidSetup]
 		,[strTaxGroup]
 		,[strNotes]
-		,[intUnitMeasureId] 
+		,[intUnitMeasureId]
+		,[ysnAddToCost] 
 	FROM
 		@ItemTaxes 	
 	RETURN				
