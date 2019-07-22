@@ -333,12 +333,12 @@ BEGIN
 														  , @LoadId		= @LoadIDP
 														  , @UserId		= @UserId
 		
-		--CANCEL LOAD SHIPMENT FROM CREDIT MEMO RETURN
-		IF ISNULL(@ysnFromReturnP, 0) = 0 AND @LoadIDP IS NOT NULL
-			EXEC dbo.[uspLGCancelLoadSchedule] @intLoadId 				 = @LoadIDP
-											 , @ysnCancel				 = 1
-											 , @intEntityUserSecurityId  = @UserId
-											 , @intShipmentType			 = 1
+		-- --CANCEL LOAD SHIPMENT FROM CREDIT MEMO RETURN
+		-- IF ISNULL(@ysnFromReturnP, 0) = 0 AND @LoadIDP IS NOT NULL
+		-- 	EXEC dbo.[uspLGCancelLoadSchedule] @intLoadId 				 = @LoadIDP
+		-- 									 , @ysnCancel				 = 1
+		-- 									 , @intEntityUserSecurityId  = @UserId
+		-- 									 , @intShipmentType			 = 1
 
 		DELETE FROM @IdsP WHERE [intInvoiceId] = @InvoiceIDP
 	END
@@ -649,12 +649,12 @@ BEGIN
 														  , @LoadId		= @LoadIDU
 														  , @UserId		= @UserId
 
-		--CANCEL LOAD SHIPMENT FROM CREDIT MEMO RETURN
-		IF ISNULL(@ysnFromReturnU, 0) = 0 AND @LoadIDU IS NOT NULL
-			EXEC dbo.[uspLGCancelLoadSchedule] @intLoadId 				 = @LoadIDU
-											 , @ysnCancel				 = 0
-											 , @intEntityUserSecurityId  = @UserId
-											 , @intShipmentType			 = 1
+		-- --CANCEL LOAD SHIPMENT FROM CREDIT MEMO RETURN
+		-- IF ISNULL(@ysnFromReturnU, 0) = 0 AND @LoadIDU IS NOT NULL
+		-- 	EXEC dbo.[uspLGCancelLoadSchedule] @intLoadId 				 = @LoadIDU
+		-- 									 , @ysnCancel				 = 0
+		-- 									 , @intEntityUserSecurityId  = @UserId
+		-- 									 , @intShipmentType			 = 1
 
 		DELETE FROM @IdsU WHERE [intInvoiceId] = @InvoiceIDU
 	END
