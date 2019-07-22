@@ -129,7 +129,7 @@ BEGIN TRY
 																	AND	EY.strEntityType	=	(CASE WHEN CH.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END)
 LEFT	JOIN	tblCTBookVsEntity				BE	WITH (NOLOCK)	ON	BE.intBookId		=	CH.intBookId
 LEFT	JOIN	vyuCTEntity						EV	WITH (NOLOCK)	ON	EV.intEntityId		=	BE.intEntityId        
-																	AND EV.strEntityType	=	'Vendor'				
+																	AND EV.strEntityType	IN	('Vendor', 'Customer')
 LEFT	JOIN	tblICCommodityUnitMeasure		CU	WITH (NOLOCK)	ON	CU.intCommodityUnitMeasureId	=	CH.intCommodityUOMId		
 LEFT	JOIN	tblICUnitMeasure				UM	WITH (NOLOCK)	ON	UM.intUnitMeasureId				=	CU.intUnitMeasureId																									
 LEFT	JOIN	(
