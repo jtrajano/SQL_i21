@@ -174,6 +174,17 @@ BEGIN
 END
 GO
 
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFHandheldMenuItem
+		WHERE strHandheldMenuItemName = 'Scan Seals'
+		)
+BEGIN
+	INSERT INTO tblMFHandheldMenuItem
+	VALUES ('Scan Seals')
+END
+GO
+
 --INSERT INTO tblMFHaldheldUserMenuItemMap
 --SELECT b.intEntityId
 -- ,intHandheldMenuItemId
