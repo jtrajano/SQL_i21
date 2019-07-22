@@ -1644,18 +1644,6 @@ BEGIN
 							,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
 							,@intEntityUserSecurityId
 					IF @intReturnValue < 0 GOTO With_Rollback_Exit
-			
-					--BEGIN 
-					--	-- Create an auto-variance for inventory returns posted in IR. 
-					--	EXEC @intReturnValue = [uspICCreateReceiptGLEntriesForReturnVariance]
-					--		@intTransactionId 
-					--		,@strTransactionId
-					--		,@strBatchId
-					--		,@intEntityUserSecurityId
-
-					--	IF @intReturnValue < 0 GOTO With_Rollback_Exit
-					--END
-
 				END 			
 			END
 		END
