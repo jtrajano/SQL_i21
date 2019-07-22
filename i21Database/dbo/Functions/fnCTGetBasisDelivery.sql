@@ -206,7 +206,7 @@ BEGIN
 	,C.strCommodityCode
 	,C.intCommodityId
 	,InvTran.dtmDate
-	,dblQuantity = SUM(ISNULL(ABS(InvTran.dblQty),0))
+	,dblQuantity = SUM(ISNULL(ABS(dbo.fnICConvertUOMtoStockUnit( InvTran.intItemId, InvTran.intItemUOMId, isnull(InvTran.dblQty,0))     ),0)) --dblQuantity = SUM(ISNULL(ABS(InvTran.dblQty),0))
 	,'Inventory Shipment'
 	,CAST(replace(convert(varchar, InvTran.dtmDate,101),'/','') + replace(convert(varchar, InvTran.dtmDate,108),':','')	 AS BIGINT) + CAST( Shipment.intInventoryShipmentId AS BIGINT)
 	FROM tblCTContractDetail CD
@@ -269,7 +269,7 @@ BEGIN
 	,C.strCommodityCode
 	,C.intCommodityId
 	,I.dtmDate
-	,SUM(ID.dblQtyShipped) * -1
+	,SUM(dbo.fnICConvertUOMtoStockUnit( ID.intItemId, ID.intItemUOMId, ID.dblQtyShipped )    ) * -1 --SUM(ID.dblQtyShipped) * -1
 	,'Invoice'
 	,CAST(replace(convert(varchar, I.dtmDate,101),'/','') + replace(convert(varchar, I.dtmDate,108),':','')	AS BIGINT) + CAST(ID.intInvoiceDetailId AS BIGINT)
 	FROM tblCTContractDetail CD
