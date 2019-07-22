@@ -1,6 +1,5 @@
-﻿PRINT N'BEGIN - STORE Item Movement Data Fix for Gross Sales = NULL'
-GO
-
+﻿GO
+PRINT N'BEGIN - STORE Item Movement Data Fix for Gross Sales = NULL'
 IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSTCheckoutItemMovements' AND COLUMN_NAME = 'dblGrossSales') 
 	BEGIN
 		EXEC('
@@ -14,7 +13,5 @@ IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSTChe
 					END
 			')
 	END
-
-GO
 PRINT N'END - STORE - Item Movement Data Fix for Gross Sales = NULL'
 GO
