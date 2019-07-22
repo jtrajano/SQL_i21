@@ -74,11 +74,14 @@
 	ysnAllocationMandatorySales	BIT NOT NULL DEFAULT 0,
 	ysnMultiplePriceFixation	BIT NOT NULL DEFAULT 0,
 	ysnContractBalanceInProgress BIT NOT NULL DEFAULT 0,
+	ysnEnableFreightBasis BIT,
+	intFreightBasisCostItemId INT,
 
     CONSTRAINT [PK_tblCTCompanyPreference_intCompanyPreferenceId] PRIMARY KEY CLUSTERED ([intCompanyPreferenceId] ASC),
 	CONSTRAINT [FK_tblCTCompanyPreference_tblSMCurrency_intCleanCostCurrencyId_intCurrencyId] FOREIGN KEY ([intCleanCostCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID]),
 	CONSTRAINT [FK_tblCTCompanyPreference_tblICUnitMeasure_intCleanCostUOMId_intUnitMeasureId] FOREIGN KEY ([intCleanCostUOMId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
 	CONSTRAINT [FK_tblCTCompanyPreference_tblEMEntity_intDefSalespersonId_intEntityId] FOREIGN KEY (intDefSalespersonId) REFERENCES tblEMEntity(intEntityId),
 	CONSTRAINT [FK_tblCTCompanyPreference_tblGRStorageScheduleRule_intDefStorageSchedule] FOREIGN KEY (intDefStorageSchedule) REFERENCES [tblGRStorageScheduleRule]([intStorageScheduleRuleId]),
+	CONSTRAINT [FK_tblCTCompanyPreference_tblICItem_intItemId] FOREIGN KEY (intFreightBasisCostItemId) REFERENCES [tblICItem]([intItemId]),
 
 )

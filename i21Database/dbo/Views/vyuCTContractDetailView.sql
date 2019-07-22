@@ -163,7 +163,13 @@ AS
 			CH.intINCOLocationTypeId,			CH.intCountryId,				CH.strCountry,
 			CH.ysnMultiplePriceFixation,		CH.strINCOLocation,				CH.ysnLoad,
 			CH.strCropYear,						CH.ysnExported,					CH.dtmExported,
-			CH.ysnBrokerage,					CH.strCounterPartyName,			CH.strCPContract
+			CH.ysnBrokerage,					CH.strCounterPartyName,			CH.strCPContract,
+			CD.dblFreightBasisBase,
+			CD.dblFreightBasis,
+			CD.intFreightBasisBaseUOMId,
+			CD.intFreightBasisUOMId,
+			strFreightBasisUOM = FBUM.strUnitMeasure,
+			strFreightBasisBaseUOM = FBBUM.strUnitMeasure
 			
 	FROM	tblCTContractDetail				CD	CROSS
 	JOIN	tblCTCompanyPreference			CP	CROSS
@@ -214,6 +220,11 @@ AS
 	JOIN	tblGRStorageScheduleRule		SR	ON	SR.intStorageScheduleRuleId	=	CD.intStorageScheduleRuleId	LEFT
 	JOIN	tblCTBook						BK	ON	BK.intBookId				=	CD.intBookId				LEFT 
 	JOIN	tblCTSubBook					SO	ON	SO.intSubBookId				=	CD.intSubBookId				LEFT
+	
+	JOIN	tblICItemUOM					FB	ON	FB.intItemUOMId				=	CD.intFreightBasisUOMId		LEFT
+	JOIN	tblICUnitMeasure				FBUM	ON FBUM.intUnitMeasureId	=	FB.intUnitMeasureId			LEFT
+	JOIN	tblICItemUOM					FBB	ON	FBB.intItemUOMId			=	CD.intFreightBasisBaseUOMId	LEFT
+	JOIN	tblICUnitMeasure				FBBUM	ON FBBUM.intUnitMeasureId	=	FBB.intUnitMeasureId		LEFT
 
 	JOIN	(
 				SELECT  intItemUOMId AS intStockUOM,strUnitMeasure AS strStockUOM,strUnitType AS strStockUOMType,dblUnitQty AS dblStockUOMCF 

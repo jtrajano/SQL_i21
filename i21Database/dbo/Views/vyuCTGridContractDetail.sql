@@ -109,7 +109,10 @@ AS
 						ELSE CASE WHEN BD.intContractDetailId IS NOT NULL THEN 'Purchase Invoice Received' END
 					END
 				ELSE FS.strFinancialStatus
-			END AS strFinancialStatus			
+			END AS strFinancialStatus,
+			strFreightBasisUOM = FBUM.strUnitMeasure,
+			strFreightBasisBaseUOM = FBBUM.strUnitMeasure			
+
 	FROM			tblCTContractDetail				CD
 			JOIN	tblCTContractHeader				CH	ON	CH.intContractHeaderId				=		CD.intContractHeaderId	
 	LEFT	JOIN	tblARMarketZone					MZ	ON	MZ.intMarketZoneId					=		CD.intMarketZoneId			--strMarketZoneCode
@@ -192,6 +195,12 @@ AS
 	LEFT    JOIN	tblICCategoryUOM				GU	ON	GU.intCategoryId					=		CD.intCategoryId																	
 														AND	GU.intUnitMeasureId					=		CH.intCategoryUnitMeasureId		
 	LEFT    JOIN	tblCTPriceFixation				PF	ON	CD.intContractDetailId				=		PF.intContractDetailId		
+	
+	LEFT	JOIN	tblICItemUOM					FB	ON	FB.intItemUOMId				=	CD.intFreightBasisUOMId		
+	LEFT	JOIN	tblICUnitMeasure				FBUM	ON FBUM.intUnitMeasureId	=	FB.intUnitMeasureId			
+	LEFT	JOIN	tblICItemUOM					FBB	ON	FBB.intItemUOMId			=	CD.intFreightBasisBaseUOMId	
+	LEFT	JOIN	tblICUnitMeasure				FBBUM	ON FBBUM.intUnitMeasureId	=	FBB.intUnitMeasureId		
+
 	LEFT    JOIN	(
 						SELECT	 intPriceFixationId,
 								 COUNT(intPriceFixationDetailId) intPFDCount,

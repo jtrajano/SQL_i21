@@ -46,6 +46,10 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	dblConvertedBasis numeric(18, 6) NULL,
 	intBasisCurrencyId INT,
 	intBasisUOMId INT,
+	dblFreightBasisBase numeric(18, 6) NULL,
+	intFreightBasisBaseUOMId INT,
+	dblFreightBasis numeric(18, 6) NULL,
+	intFreightBasisUOMId INT,
 	dblRatio NUMERIC(18,6),
 	dblCashPrice numeric(18, 6) NULL,
 	dblTotalCost numeric(18, 6) NULL,
@@ -190,6 +194,10 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	CONSTRAINT [FK_tblCTContractDetail_tblICItemUOM_intNetWeightUOMId_intItemUOMId] FOREIGN KEY ([intNetWeightUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblICItemUOM_intFXPriceUOMId_intItemUOMId] FOREIGN KEY (intFXPriceUOMId) REFERENCES [tblICItemUOM]([intItemUOMId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblICItemUOM_intBasisUOMId_intItemUOMId] FOREIGN KEY (intBasisUOMId) REFERENCES [tblICItemUOM]([intItemUOMId]),
+
+	CONSTRAINT [FK_tblCTContractDetail_tblICItemUOM_intFreightBasisBaseUOMId_intItemUOMId] FOREIGN KEY (intFreightBasisBaseUOMId) REFERENCES [tblICItemUOM]([intItemUOMId]),
+	CONSTRAINT [FK_tblCTContractDetail_tblICItemUOM_intFreightBasisUOMId_intItemUOMId] FOREIGN KEY (intFreightBasisUOMId) REFERENCES [tblICItemUOM]([intItemUOMId]),
+
 	CONSTRAINT [FK_tblCTContractDetail_tblICItemUOM_intConvPriceUOMId_intItemUOMId] FOREIGN KEY (intConvPriceUOMId) REFERENCES [tblICItemUOM]([intItemUOMId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblICCategoryUOM_intCategoryUOMId] FOREIGN KEY([intCategoryUOMId])REFERENCES [tblICCategoryUOM] ([intCategoryUOMId]),
 	

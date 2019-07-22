@@ -265,7 +265,9 @@ CROSS	APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId)	AD
 				,dblShipmentQuantity = Shipment.dblQuantity
 				,dblBillQty          = Bill.dblQuantity
 				,ISNULL(OL.ysnOpenLoad,0)	AS ysnOpenLoad
-				,CAST(CASE WHEN AD.intAllocationDetailId IS NOT NULL THEN 1 ELSE 0 END AS BIT) AS ysnContractAllocated
+				,CAST(CASE WHEN AD.intAllocationDetailId IS NOT NULL THEN 1 ELSE 0 END AS BIT) AS ysnContractAllocated,
+			strFreightBasisUOM = FBUM.strUnitMeasure,
+			strFreightBasisBaseUOM = FBBUM.strUnitMeasure
 
 		FROM			ContractDetail					CD
 				JOIN    CTE1							CT	ON CT.intContractDetailId				=		CD.intContractDetailId
@@ -305,7 +307,13 @@ CROSS	APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId)	AD
 		OUTER	APPLY	dbo.fnCTGetShipmentStatus(CD.intContractDetailId) LD
 		OUTER	APPLY	dbo.fnCTGetFinancialStatus(CD.intContractDetailId) FS
 		LEFT	JOIN	tblAPBillDetail					BD	ON	BD.intContractDetailId				=		CD.intContractDetailId
-		LEFT	JOIN	tblLGAllocationDetail			AD	ON AD.intSContractDetailId = CD.intContractDetailId
+		LEFT	JOIN	tblLGAllocationDetail			AD	ON AD.intPContractDetailId = CD.intContractDetailId	
+	
+		LEFT	JOIN	tblICItemUOM					FB	ON	FB.intItemUOMId				=	CD.intFreightBasisUOMId		
+		LEFT	JOIN	tblICUnitMeasure				FBUM	ON FBUM.intUnitMeasureId	=	FB.intUnitMeasureId			
+		LEFT	JOIN	tblICItemUOM					FBB	ON	FBB.intItemUOMId			=	CD.intFreightBasisBaseUOMId	
+		LEFT	JOIN	tblICUnitMeasure				FBBUM	ON FBBUM.intUnitMeasureId	=	FBB.intUnitMeasureId
+
 	)t ORDER BY intContractSeq
 
 END TRY
