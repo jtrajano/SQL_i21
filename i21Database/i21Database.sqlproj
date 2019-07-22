@@ -7663,6 +7663,7 @@
     <Build Include="dbo\Stored Procedures\uspAPCreateVoucherForPendingPayable.sql" />
     <Build Include="dbo\Views\vyuAPPendingPayables.sql" />
     <None Include="Scripts\Post-Deployment\GR\ContractPrice.sql" />
+    <Build Include="dbo\Stored Procedures\uspICRebuildCleanUp.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
