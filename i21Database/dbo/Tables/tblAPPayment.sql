@@ -32,6 +32,7 @@
     --[ysnVoid] BIT NOT NULL DEFAULT 0, 
     [ysnPrinted] BIT NOT NULL DEFAULT 0, 
 	[ysnPrepay] BIT NOT NULL DEFAULT 0, 
+	[ysnHasImportedPaidVouchers] BIT NOT NULL DEFAULT 0, 
 	[ysnLienExists] BIT NOT NULL DEFAULT 0, 
 	[ysnOverrideCheckPayee] BIT NOT NULL DEFAULT 0, 
 	[ysnOverrideSettlement] BIT NOT NULL DEFAULT 0, 
