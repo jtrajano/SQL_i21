@@ -32,7 +32,6 @@
 	[ysnHostLocation] BIT NULL DEFAULT (0),
 	[ysnTrackMFTActivity] BIT NULL DEFAULT (0),
 	[strOregonFacilityNumber] NVARCHAR(30) COLLATE Latin1_General_CI_AS NULL, 
-	[strVendorRefNoPrefix] NVARCHAR(50) COLLATE  Latin1_General_CI_AS NULL,
 	[strOutOfStockWarning] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 	[strLotOverdrawnWarning] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 	[strDefaultCarrier] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
