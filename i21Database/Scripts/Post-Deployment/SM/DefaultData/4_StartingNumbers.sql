@@ -1036,7 +1036,7 @@ GO
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 108
 			,[strTransactionType]	= N'Process Refund'
-			,[strPrefix]			= N'PR-'
+			,[strPrefix]			= N'PATR-'
 			,[intNumber]			= 1
 			,[strModule]			= 'Patronage'
 			,[ysnEnable]			= 1
