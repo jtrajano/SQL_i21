@@ -7886,6 +7886,7 @@
     <None Include="Scripts\Post-Deployment\ST\33_FileFieldMapping_Commander_uMaintenance_Combo.sql" />
     <Build Include="dbo\Views\vyuSTRegisterSetupDetail.sql" />
     <Build Include="dbo\Views\vyuSCUberGetLoadDistributionOption.sql" />
+    <Build Include="dbo\Stored Procedures\uspICRebuildCleanUp.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
