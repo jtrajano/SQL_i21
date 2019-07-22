@@ -12,8 +12,8 @@ IF (@intTableCount = 3)
 		DECLARE @intRegisterSetupId AS INT
 
 		-- Header
-		DECLARE @strRegisterName		AS NVARCHAR(100)
-			  , @strXmlGateWayVersion	AS NVARCHAR(30)
+		DECLARE @strRegisterClass		AS NVARCHAR(100)
+			  , @strXmlVersion	AS NVARCHAR(30)
 
 		-- Detail
 		DECLARE @intImportFileHeaderId	AS INT
@@ -30,22 +30,22 @@ IF (@intTableCount = 3)
 		-- ============================================================================================================
 		BEGIN
 			-- Version 3.4
-			SET @strRegisterName		= N'PASSPORT'
-			SET @strXmlGateWayVersion	= N'3.4'
+			SET @strRegisterClass		= N'PASSPORT'
+			SET @strXmlVersion	= N'3.4'
 
 			-- HEADER
-			IF NOT EXISTS(SELECT TOP 1 1 FROM tblSTRegisterSetup WHERE strRegisterName = @strRegisterName AND strXmlGateWayVersion = @strXmlGateWayVersion)
+			IF NOT EXISTS(SELECT TOP 1 1 FROM tblSTRegisterSetup WHERE strRegisterClass = @strRegisterClass AND strXmlVersion = @strXmlVersion)
 				BEGIN				
 					-- Insert Header
 					INSERT INTO tblSTRegisterSetup
 					(
-						strRegisterName,
-						strXmlGateWayVersion,
+						strRegisterClass,
+						strXmlVersion,
 						intConcurrencyId
 					)
 					SELECT 
-						strRegisterName			= @strRegisterName,
-						strXmlGateWayVersion	= @strXmlGateWayVersion,
+						strRegisterClass			= @strRegisterClass,
+						strXmlVersion	= @strXmlVersion,
 						intConcurrencyId		= 1
 
 
@@ -59,8 +59,8 @@ IF (@intTableCount = 3)
 					SELECT TOP 1
 						@intRegisterSetupId = intRegisterSetupId
 					FROM tblSTRegisterSetup 
-					WHERE strRegisterName = @strRegisterName 
-						AND strXmlGateWayVersion = @strXmlGateWayVersion
+					WHERE strRegisterClass = @strRegisterClass 
+						AND strXmlVersion = @strXmlVersion
 
 				END
 
@@ -672,22 +672,22 @@ IF (@intTableCount = 3)
 		-- ============================================================================================================
 		BEGIN
 			-- Version 3.4
-			SET @strRegisterName		= N'SAPPHIRE/COMMANDER'
-			SET @strXmlGateWayVersion	= N'all'
+			SET @strRegisterClass		= N'SAPPHIRE/COMMANDER'
+			SET @strXmlVersion	= N'all'
 
 			-- HEADER
-			IF NOT EXISTS(SELECT TOP 1 1 FROM tblSTRegisterSetup WHERE strRegisterName = @strRegisterName AND strXmlGateWayVersion = @strXmlGateWayVersion)
+			IF NOT EXISTS(SELECT TOP 1 1 FROM tblSTRegisterSetup WHERE strRegisterClass = @strRegisterClass AND strXmlVersion = @strXmlVersion)
 				BEGIN				
 					-- Insert Header
 					INSERT INTO tblSTRegisterSetup
 					(
-						strRegisterName,
-						strXmlGateWayVersion,
+						strRegisterClass,
+						strXmlVersion,
 						intConcurrencyId
 					)
 					SELECT 
-						strRegisterName			= @strRegisterName,
-						strXmlGateWayVersion	= @strXmlGateWayVersion,
+						strRegisterClass			= @strRegisterClass,
+						strXmlVersion	= @strXmlVersion,
 						intConcurrencyId		= 1
 
 
@@ -701,8 +701,8 @@ IF (@intTableCount = 3)
 					SELECT TOP 1
 						@intRegisterSetupId = intRegisterSetupId
 					FROM tblSTRegisterSetup 
-					WHERE strRegisterName = @strRegisterName 
-						AND strXmlGateWayVersion = @strXmlGateWayVersion
+					WHERE strRegisterClass = @strRegisterClass 
+						AND strXmlVersion = @strXmlVersion
 
 				END
 
@@ -1380,22 +1380,22 @@ IF (@intTableCount = 3)
 		-- ============================================================================================================
 		BEGIN
 			-- Version 3.3
-			SET @strRegisterName		= N'RADIANT'
-			SET @strXmlGateWayVersion	= N'3.3'
+			SET @strRegisterClass		= N'RADIANT'
+			SET @strXmlVersion	= N'3.3'
 
 			-- HEADER
-			IF NOT EXISTS(SELECT TOP 1 1 FROM tblSTRegisterSetup WHERE strRegisterName = @strRegisterName AND strXmlGateWayVersion = @strXmlGateWayVersion)
+			IF NOT EXISTS(SELECT TOP 1 1 FROM tblSTRegisterSetup WHERE strRegisterClass = @strRegisterClass AND strXmlVersion = @strXmlVersion)
 				BEGIN				
 					-- Insert Header
 					INSERT INTO tblSTRegisterSetup
 					(
-						strRegisterName,
-						strXmlGateWayVersion,
+						strRegisterClass,
+						strXmlVersion,
 						intConcurrencyId
 					)
 					SELECT 
-						strRegisterName			= @strRegisterName,
-						strXmlGateWayVersion	= @strXmlGateWayVersion,
+						strRegisterClass			= @strRegisterClass,
+						strXmlVersion	= @strXmlVersion,
 						intConcurrencyId		= 1
 
 
@@ -1409,8 +1409,8 @@ IF (@intTableCount = 3)
 					SELECT TOP 1
 						@intRegisterSetupId = intRegisterSetupId
 					FROM tblSTRegisterSetup 
-					WHERE strRegisterName = @strRegisterName 
-						AND strXmlGateWayVersion = @strXmlGateWayVersion
+					WHERE strRegisterClass = @strRegisterClass 
+						AND strXmlVersion = @strXmlVersion
 
 				END
 

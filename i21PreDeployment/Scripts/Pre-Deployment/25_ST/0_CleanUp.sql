@@ -385,5 +385,41 @@ IF EXISTS(SELECT TOP 1 1 FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tb
 -- End: Remove records from tblSTTranslogRebates if intCheckoutId is not Existing on tblSTCheckoutHeader
 ----------------------------------------------------------------------------------------------------------------------------------
 
+
+----------------------------------------------------------------------------------------------------------------------------------
+-- Start: Rename tblSTRegisterSetup.strRegisterName and tblSTRegisterSetup.strXmlGateWayVersion
+----------------------------------------------------------------------------------------------------------------------------------
+IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = N'tblSTRegisterSetup' AND COLUMN_NAME = N'strRegisterName') 
+	BEGIN
+		
+		IF NOT EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = N'tblSTRegisterSetup' AND COLUMN_NAME = N'strRegisterClass')
+			BEGIN
+
+				PRINT('Rename tblSTRegisterSetup.strRegisterName	to	   tblSTRegisterSetup.strRegisterClass')
+				EXEC('
+						EXEC sp_rename ''tblSTRegisterSetup.strRegisterName'' , ''strRegisterClass'', ''COLUMN''
+					')
+
+			END
+	END
+
+IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = N'tblSTRegisterSetup' AND COLUMN_NAME = N'strXmlGateWayVersion') 
+	BEGIN
+		
+		IF NOT EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = N'tblSTRegisterSetup' AND COLUMN_NAME = N'strXmlVersion')
+			BEGIN
+
+				PRINT('Rename tblSTRegisterSetup.strXmlGateWayVersion	to	   tblSTRegisterSetup.strXmlVersion')
+				EXEC('
+						EXEC sp_rename ''tblSTRegisterSetup.strXmlGateWayVersion'' , ''strXmlVersion'', ''COLUMN''
+					')
+
+			END
+	END
+----------------------------------------------------------------------------------------------------------------------------------
+-- End: Rename tblSTRegisterSetup.strRegisterName and tblSTRegisterSetup.strXmlGateWayVersion
+----------------------------------------------------------------------------------------------------------------------------------
+
+
 PRINT('*** ST Cleanup - End ***')
 PRINT('')
