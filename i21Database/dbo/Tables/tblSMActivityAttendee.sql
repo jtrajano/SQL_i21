@@ -4,6 +4,7 @@
 	[intActivityId]				[int]	NOT NULL,
 	[intEntityId]				[int]	NOT NULL,
 	[ysnAddCalendarEvent]		[bit]	NULL,
+	[intInterCompanyId]			[int]	NULL,
 	[intConcurrencyId]			[int]	NOT NULL DEFAULT ((1)), 
     CONSTRAINT [FK_tblSMActivityAttendee_tblSMActivity] FOREIGN KEY ([intActivityId]) REFERENCES [tblSMActivity]([intActivityId]) ON DELETE CASCADE
 )

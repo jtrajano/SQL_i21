@@ -308,9 +308,9 @@ BEGIN
 
 				SET @sql = N'
 					INSERT INTO ' + @strDestinationDatabaseName + '.dbo.[tblSMActivityAttendee](
-						[intActivityId], [intEntityId], [ysnAddCalendarEvent]
+						[intActivityId], [intEntityId], [ysnAddCalendarEvent], [intInterCompanyId]
 					)
-					SELECT TOP 1 ' + CONVERT(VARCHAR, @intNewActivityId) + ', [intEntityId], [ysnAddCalendarEvent]
+					SELECT TOP 1 ' + CONVERT(VARCHAR, @intNewActivityId) + ', [intEntityId], [ysnAddCalendarEvent], ' + CONVERT(VARCHAR, @intCurrentCompanyId) + '
 					FROM #TempActivityAttendee;
 
 					SELECT @paramOut = SCOPE_IDENTITY()
@@ -379,7 +379,7 @@ BEGIN
 					WHILE EXISTS(SELECT 1 FROM #TempNotification)
 					BEGIN
 						--copy individual notification
-						SELECT TOP 1 @intNotificationId = intNoficationId FROM #TempNotification
+						SELECT TOP 1 @intNotificationId = intNotificationId FROM #TempNotification
 
 						--INSERT INTO tblSMNotification(
 						--	[intCommentId], [intActivityId], [strTitle], [strAction], [strType], [strRoute], [ysnSent],	[ysnSeen], [ysnRead], [intFromEntityId], [intToEntityId]
@@ -392,8 +392,8 @@ BEGIN
 								[intCommentId], [intActivityId], [strTitle], [strAction], [strType], [strRoute], [ysnSent],	[ysnSeen], [ysnRead], [intFromEntityId], [intToEntityId]
 							)
 							SELECT TOP 1 ' + CONVERT(VARCHAR, @intNewCommentId) + ', ' +
-											 CONVERT(VARCHAR, @intNewActivityId) + ', ' +
-											 CONVERT(VARCHAR, @strNewActivityNo) + ', [strAction], [strType], [strRoute], [ysnSent], [ysnSeen], [ysnRead], [intFromEntityId], [intToEntityId]
+											 CONVERT(VARCHAR, @intNewActivityId) + ', ''' +
+											 CONVERT(VARCHAR, @strNewActivityNo) + ''', [strAction], [strType], [strRoute], [ysnSent], [ysnSeen], [ysnRead], [intFromEntityId], [intToEntityId]
 							FROM #TempNotification;
 
 							SELECT @paramOut = SCOPE_IDENTITY()
@@ -545,9 +545,9 @@ BEGIN
 				--FROM #TempActivityAttendee
 				SET @sql = N'
 					INSERT INTO ' + @strDestinationDatabaseName + '.dbo.[tblSMActivityAttendee](
-						[intActivityId], [intEntityId], [ysnAddCalendarEvent]
+						[intActivityId], [intEntityId], [ysnAddCalendarEvent], [intInterCompanyId]
 					)
-					SELECT TOP 1 ' + CONVERT(VARCHAR, @intDestinationActivityId) + ', [intEntityId], [ysnAddCalendarEvent]
+					SELECT TOP 1 ' + CONVERT(VARCHAR, @intDestinationActivityId) + ', [intEntityId], [ysnAddCalendarEvent], ' + CONVERT(VARCHAR, @intCurrentCompanyId) + '
 					FROM #TempActivityAttendee;
 
 					SELECT @paramOut = SCOPE_IDENTITY()
@@ -682,7 +682,7 @@ BEGIN
 					WHILE EXISTS(SELECT 1 FROM #TempNotification)
 					BEGIN
 						--copy individual notification'
-						SELECT TOP 1 @intNotificationId = intNoficationId FROM #TempNotification
+						SELECT TOP 1 @intNotificationId = intNotificationId FROM #TempNotification
 					
 						--INSERT INTO tblSMNotification(
 						--	[intCommentId], [intActivityId], [strTitle], [strAction], [strType], [strRoute], [ysnSent],	[ysnSeen], [ysnRead], [intFromEntityId], [intToEntityId]
@@ -695,8 +695,8 @@ BEGIN
 							)
 							SELECT TOP 1 ' +
 								CONVERT(VARCHAR, @intNewCommentId) + ', ' + 
-								CONVERT(VARCHAR, @intDestinationActivityId) + ', ' +
-								CONVERT(VARCHAR, @strNewActivityNo) + ', [strAction], [strType], [strRoute], [ysnSent],	[ysnSeen], [ysnRead], [intFromEntityId], [intToEntityId]
+								CONVERT(VARCHAR, @intDestinationActivityId) + ', ''' +
+								CONVERT(VARCHAR, @strNewActivityNo) + ''', [strAction], [strType], [strRoute], [ysnSent],	[ysnSeen], [ysnRead], [intFromEntityId], [intToEntityId]
 							FROM #TempNotification;
 
 							SELECT @paramOut = SCOPE_IDENTITY()
