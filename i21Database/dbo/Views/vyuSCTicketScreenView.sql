@@ -237,6 +237,7 @@
 	,intSourceType as intLoadSourceType
 	,tblSMShipViaTrailer.strTrailerLicenseNumber
 	,tblSMShipViaTrailer.intEntityShipViaTrailerId
+	,strTicketSealNumber
   FROM tblSCTicket SCT
 	LEFT JOIN tblSCTicketPool SCTPool on SCTPool.intTicketPoolId = SCT.intTicketPoolId
 	LEFT JOIN tblSCScaleSetup SCSetup on SCSetup.intScaleSetupId = SCT.intScaleSetupId
@@ -326,3 +327,4 @@
 	) APPayment
 		ON APPayment.intScaleTicketId = SCT.intTicketId
 	LEFT JOIN tblSMShipViaTrailer on SCT.intEntityShipViaTrailerId = tblSMShipViaTrailer.intEntityShipViaTrailerId
+	LEFT JOIN (SELECT TOP 1 TSN.intTicketId,SCN.strSealNumber strTicketSealNumber FROM tblSCTicketSealNumber TSN INNER JOIN tblSCSealNumber SCN ON SCN.intSealNumberId = TSN.intSealNumberId) TSCN ON TSCN.intTicketId = SCT.intTicketId
