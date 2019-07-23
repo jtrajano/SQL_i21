@@ -9,7 +9,13 @@ SELECT intInvoiceId				= I.intInvoiceId
 	 , strFinalInvoiceNumber	= I.strInvoiceNumber
 	 , strContractNumber		= CHD.strContractNumber
 	 , intContractSeq			= CTD.intContractSeq
-	 , strStatus				= CASE WHEN I.strType <> 'Provisional' THEN 'Direct Invoiced' ELSE CASE WHEN ISNULL(I.ysnFinalized, 0) = 0 THEN 'Provisionally Invoiced' ELSE 'Final Invoiced' END END 
+	 , strStatus				= CASE WHEN ISNULL(CTD.dblBalance, 0) = 0 THEN 
+									CASE WHEN I.strType <> 'Provisional' THEN 'Direct Invoiced' 
+									ELSE 
+										CASE WHEN ISNULL(I.ysnFinalized, 0) = 0 THEN 'Provisionally Invoiced' 
+										ELSE 'Final Invoiced' END 
+									END
+								  ELSE NULL END
 FROM (
 	SELECT intInvoiceId				= I.intInvoiceId
 		 , intFinalInvoiceId		= FI.intInvoiceId
@@ -42,3 +48,4 @@ FROM (
 INNER JOIN tblARInvoiceDetail ID ON I.intInvoiceId = ID.intInvoiceId
 INNER JOIN tblCTContractDetail CTD ON ID.intContractDetailId = CTD.intContractDetailId
 INNER JOIN tblCTContractHeader CHD ON CTD.intContractHeaderId = CHD.intContractHeaderId
+WHERE ID.intContractDetailId IS NOT NULL
