@@ -20,6 +20,7 @@ SELECT intId = CAST(ROW_NUMBER() OVER(ORDER BY ItemLocation.intItemLocationId, I
 	, ItemLocation.intLocationId
 	, CompLoc.strLocationName
 	, ItemUOM.intConcurrencyId
+	, ItemLocation.ysnLinkedItem
 FROM tblICItemUOM ItemUOM
 INNER JOIN tblICItem Item
 	ON Item.intItemId = ItemUOM.intItemId
