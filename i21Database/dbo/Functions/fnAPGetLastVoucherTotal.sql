@@ -13,7 +13,7 @@ AS
 BEGIN
 	DECLARE @lastVoucherAmount DECIMAL(18,2);
 
-	WITH result
+	WITH dataResult
 	(
 		intKey,
 		intEntityVendorId,
