@@ -1,4 +1,4 @@
-﻿ALTER FUNCTION [dbo].[fnRKGetSourcingCurrencyConversion] (
+﻿CREATE FUNCTION [dbo].[fnRKGetSourcingCurrencyConversion] (
 	@intContractDetailId INT
 	, @intToCurrencyId INT
 	, @Price NUMERIC(18, 6)
