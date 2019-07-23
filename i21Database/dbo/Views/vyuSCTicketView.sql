@@ -16,6 +16,7 @@ AS
 		END) COLLATE Latin1_General_CI_AS AS strTicketStatusDescription
 	   ,SCT.strTicketStatus
        ,SCT.strTicketNumber
+	   ,SCT.strOriginalTicketNumber
        ,SCT.intScaleSetupId
        ,SCT.intTicketPoolId
        ,SCT.intTicketLocationId

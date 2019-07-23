@@ -3,6 +3,7 @@
 	SCT.intTicketId
 	,SCT.strTicketStatus
 	,SCT.strTicketNumber
+	,SCT.strOriginalTicketNumber
 	,SCT.intScaleSetupId
 	,SCT.intTicketPoolId
 	,SCT.intTicketLocationId
