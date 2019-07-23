@@ -454,6 +454,23 @@ BEGIN TRY
 					[strCountyProducer] NVARCHAR(MAX)
 				)
 
+				-------------Get All Non Existing Delivery Sheets
+				DECLARE @existingDeliverySheets TABLE 
+				(
+					intDeliverySheetId INT NOT NULL PRIMARY KEY
+					,strDeliverySheetNumber NVARCHAR(100)
+				)
+
+				INSERT INTO @existingDeliverySheets(
+					intDeliverySheetId
+					,strDeliverySheetNumber
+				)
+				SELECT 
+					A.intDeliverySheetId 
+					,A.strDeliverySheetNumber
+				FROM @temp_xml_deliverysheet_sc A
+				WHERE EXISTS(SELECT TOP 1 1 FROM tblSCDeliverySheet WHERE strDeliverySheetNumber = A.strDeliverySheetNumber)
+
 				--DELIVERY SHEET DISCOUNT
 				DECLARE @temp_xml_qmdstable_sc TABLE 
 				(
@@ -634,15 +651,15 @@ BEGIN TRY
 					,[intDiscountScheduleCodeId]		= QM.intDiscountScheduleCodeId
 					,[dtmDiscountPaidDate] 	 			= QM.dtmDiscountPaidDate
 					,[intTicketId]						= NULL
-					,[intTicketFileId]					= SCD.intDeliverySheetId
+					,[intTicketFileId]					= DS.intDeliverySheetId
 					,[strSourceType]					= QM.strSourceType
 					,[intSort]							= QM.intSort
 					,[strDiscountChargeType]			= QM.strDiscountChargeType
 					,[intConcurrencyId]					= 1
 				FROM @temp_xml_qmdstable_sc QM
 				INNER JOIN @temp_xml_deliverysheet_sc SCD ON SCD.intDeliverySheetId = QM.intTicketFileId
-				LEFT JOIN tblSCDeliverySheet DS ON DS.strDeliverySheetNumber = SCD.strDeliverySheetNumber 
-				WHERE DS.strDeliverySheetNumber IS NULL
+				INNER JOIN tblSCDeliverySheet DS ON DS.strDeliverySheetNumber = SCD.strDeliverySheetNumber 
+				WHERE NOT EXISTS (SELECT TOP 1 1 FROM @existingDeliverySheets WHERE intDeliverySheetId = DS.intDeliverySheetId)
 
 				INSERT INTO tblSCDeliverySheetSplit(
 					[intDeliverySheetId],
@@ -664,11 +681,10 @@ BEGIN TRY
 				FROM @temp_xml_splitdstable_sc SCDS
 				INNER JOIN @temp_xml_deliverysheet_sc SCD ON SCD.intDeliverySheetId = SCDS.intDeliverySheetId
 				INNER JOIN tblSCDeliverySheet DS ON DS.strDeliverySheetNumber = SCD.strDeliverySheetNumber 
-				OUTER APPLY(
-					SELECT intDeliverySheetSplitId FROM tblSCDeliverySheetSplit WHERE intDeliverySheetId = DS.intDeliverySheetId
-				) DSS
-				WHERE DSS.intDeliverySheetSplitId IS NULL
+				WHERE NOT EXISTS (SELECT TOP 1 1 FROM @existingDeliverySheets WHERE intDeliverySheetId = DS.intDeliverySheetId)
+
 			END
+			
 			IF ISNULL(@ysnUpdateData, 0) = 0
 			BEGIN
 				UPDATE @temp_xml_table SET strTicketStatus = 'O' WHERE strTicketStatus = 'C'
@@ -1083,10 +1099,11 @@ BEGIN TRY
 				--AND SC.intEntityId = SCT.intEntityId
 				AND SC.intProcessingLocationId = SCT.intProcessingLocationId
 				WHERE NOT EXISTS (SELECT TOP 1 1 FROM @existingTicketTable ERT WHERE SCS.intTicketId = ERT.intTicketId)
+
 			END
 			ELSE
 			BEGIN
-				SELECT 'UPDATE TICKET'
+				-- SELECT 'UPDATE TICKET'
 
 				UPDATE SC SET
 					SC.strTicketStatus							= SCT.strTicketStatus 
