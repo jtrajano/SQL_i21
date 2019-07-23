@@ -135,22 +135,6 @@ IF NOT EXISTS(SELECT TOP 1 NULL FROM @IIDs)
 
 EXEC dbo.[uspCTInvoicePosted] @ItemsFromInvoice, @UserId
 
-
-UPDATE ARID
-SET
-	ARID.dblContractBalance = CTCD.dblBalance
-FROM
-	(SELECT intInvoiceId, dblContractBalance, intContractDetailId FROM dbo.tblARInvoiceDetail WITH (NOLOCK) ) ARID
-INNER JOIN
-	(SELECT intContractDetailId, dblBalance FROM dbo.tblCTContractDetail WITH (NOLOCK))  CTCD
-	ON ARID.intContractDetailId = CTCD.intContractDetailId
-INNER JOIN
-	@IIDs IIDs
-		ON ARID.[intInvoiceId] = IIDs.[intHeaderId]
-WHERE 
-	ARID.dblContractBalance <> CTCD.dblBalance
-
-
 --Prepaids
 EXEC dbo.[uspARUpdatePrepaymentsAndCreditMemos] @InvoiceIds = @IIDs
 

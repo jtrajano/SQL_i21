@@ -780,24 +780,6 @@ WHERE ID.[intInventoryShipmentChargeId] IS NULL
 
 EXEC dbo.[uspCTInvoicePosted] @ItemsFromInvoice, @UserId
 
---UPDATE INVOICE CONTRACT BALANCE
-UPDATE ARID
-SET ARID.dblContractBalance = CTCD.dblBalance
-FROM (
-	SELECT intInvoiceDetailId
-		 , dblContractBalance
-		 , intContractDetailId 
-	FROM dbo.tblARInvoiceDetail WITH (NOLOCK)
-) ARID
-INNER JOIN #ARPostInvoiceDetail PID ON ARID.[intInvoiceDetailId] = PID.[intInvoiceDetailId]
-INNER JOIN (
-	SELECT intContractDetailId
-		 , dblBalance 
-	FROM dbo.tblCTContractDetail WITH (NOLOCK)
-) CTCD ON ARID.intContractDetailId = CTCD.intContractDetailId
-WHERE ARID.dblContractBalance <> CTCD.dblBalance
-  AND PID.[strType] NOT IN ('Card Fueling Transaction','CF Tran','CF Invoice')
-
 DELETE A
 FROM tblARPrepaidAndCredit A
 INNER JOIN #ARPostInvoiceHeader B ON A.intInvoiceId = B.intInvoiceId 
