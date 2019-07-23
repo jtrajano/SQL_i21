@@ -7887,6 +7887,8 @@
     <Build Include="dbo\Views\vyuSTRegisterSetupDetail.sql" />
     <Build Include="dbo\Views\vyuSCUberGetLoadDistributionOption.sql" />
     <Build Include="dbo\Stored Procedures\uspICRebuildCleanUp.sql" />
+    <Build Include="dbo\Tables\tblSTReturnLottery.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTProcessLotteryToInventoryReceipt.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

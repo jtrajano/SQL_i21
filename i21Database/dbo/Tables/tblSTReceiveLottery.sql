@@ -8,11 +8,14 @@
     [dtmReceiptDate]        DATETIME       NOT NULL,
     [ysnPosted]             BIT            CONSTRAINT [DF_tblSTReceiveLottery_ysnPosted] DEFAULT ((0)) NOT NULL,
     [intConcurrencyId]      INT            CONSTRAINT [DF_tblSTReceiveLottery_intConcurrencyId] DEFAULT ((1)) NULL,
-    CONSTRAINT [PK_tblSTReceiveLottery] PRIMARY KEY CLUSTERED ([intReceiveLotteryId] ASC),
+    CONSTRAINT [PK_tblSTReceiveLottery] PRIMARY KEY CLUSTERED ([intReceiveLotteryId] ASC) WITH (FILLFACTOR = 70),
+    CONSTRAINT [FK_tblSTReceiveLottery_tblICInventoryReceipt] FOREIGN KEY ([intInventoryReceiptId]) REFERENCES [dbo].[tblICInventoryReceipt] ([intInventoryReceiptId]) ON DELETE CASCADE,
     CONSTRAINT [FK_tblSTReceiveLottery_tblSTLotteryBook] FOREIGN KEY ([intLotteryBookId]) REFERENCES [dbo].[tblSTLotteryBook] ([intLotteryBookId]) ON DELETE CASCADE,
     CONSTRAINT [FK_tblSTReceiveLottery_tblSTLotteryGame] FOREIGN KEY ([intLotteryGameId]) REFERENCES [dbo].[tblSTLotteryGame] ([intLotteryGameId]),
     CONSTRAINT [FK_tblSTReceiveLottery_tblSTStore] FOREIGN KEY ([intStoreId]) REFERENCES [dbo].[tblSTStore] ([intStoreId])
 );
+
+
 
 
 GO
