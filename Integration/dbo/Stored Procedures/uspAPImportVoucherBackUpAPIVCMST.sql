@@ -161,7 +161,7 @@ BEGIN
 	--	ON A.apivc_ivc_no = B.aphgl_ivc_no 
 	--	AND A.apivc_vnd_no = B.aphgl_vnd_no
 	--join to make sure import only those have details will get top 1 to avoid unique constraints error.
-	CROSS APPLY 
+	OUTER APPLY 
         (
         SELECT  TOP 1 *
         FROM    aphglmst B
@@ -178,7 +178,17 @@ BEGIN
 			AND G.apchk_cbk_no = A.apivc_cbk_no
 			AND G.apchk_alt_trx_ind != 'O'
 	) PaymentInfo
-	WHERE A.apivc_trans_type IN ('I', 'C', 'A')
+	WHERE 
+		1 = (
+				CASE 
+					WHEN A.apivc_trans_type IN ('I','C','A') 
+					THEN
+					(
+						CASE WHEN A.apivc_trans_type IN ('I','C') AND aphglmst.A4GLIdentity IS NULL THEN 0
+						ELSE 1 END
+					)
+				ELSE 0 END
+			)
 	AND A.apivc_status_ind = 'U'
 
 	SET @hasCCReconciliation = 0;
@@ -266,7 +276,7 @@ BEGIN
 	--	ON A.apivc_ivc_no = B.aphgl_ivc_no 
 	--	AND A.apivc_vnd_no = B.aphgl_vnd_no
 	--join to make sure import only those have details will get top 1 to avoid unique constraints error.
-	CROSS APPLY
+	OUTER APPLY
 	(
 		SELECT  TOP 1 *
 		FROM    aphglmst B
@@ -284,12 +294,21 @@ BEGIN
 	-- 		--AND G.apchk_chk_amt <> 0
 	-- ) PaymentInfo
 	WHERE 1 = CASE WHEN ISDATE(A.apivc_gl_rev_dt) = 1 AND CONVERT(DATE, CAST(A.apivc_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo THEN 1 ELSE 0 END
-	AND A.apivc_comment IN ('CCD Reconciliation', 'CCD Reconciliation Reversal') AND A.apivc_status_ind = 'U'
-	AND A.apivc_trans_type IN ('I', 'C', 'A')
+	AND A.apivc_comment IN ('CCD Reconciliation', 'CCD Reconciliation Reversal')
 	AND NOT EXISTS(
 		SELECT 1 FROM tblAPapivcmst H
 		WHERE A.apivc_ivc_no = H.apivc_ivc_no AND A.apivc_vnd_no = H.apivc_vnd_no
 	) --MAKE SURE TO IMPORT CCD IF NOT YET IMPORTED
+	AND 1 = (
+				CASE 
+					WHEN A.apivc_trans_type IN ('I','C','A') 
+					THEN
+					(
+						CASE WHEN A.apivc_trans_type IN ('I','C') AND aphglmst.A4GLIdentity IS NULL THEN 0
+						ELSE 1 END
+					)
+				ELSE 0 END
+			)
 	AND A.apivc_status_ind = 'U'
 
 	IF EXISTS(SELECT TOP 1 1 FROM tmp_apivcmstImport A WHERE A.apivc_comment IN ('CCD Reconciliation', 'CCD Reconciliation Reversal') AND A.apivc_status_ind = 'U'
