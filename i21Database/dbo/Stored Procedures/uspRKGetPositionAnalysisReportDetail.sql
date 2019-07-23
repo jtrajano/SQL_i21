@@ -1,13 +1,13 @@
 ﻿CREATE PROCEDURE uspRKGetPositionAnalysisReportDetail
-	@strFilterBy nvarchar(20)= NULL
-	, @strCondition nvarchar(20)
-	, @dtmDateFrom nvarchar(30) = NULL
-	, @dtmDateTo nvarchar(30) = NULL
-	, @intFutureMarketId int= NULL
-	, @intCommodityId int= NULL
-	, @intQtyUOMId int = NULL
-	, @intCurrencyId int= NULL
-	, @intPriceUOMId int = NULL
+	@strFilterBy NVARCHAR(20) = NULL
+	, @strCondition NVARCHAR(20)
+	, @dtmDateFrom NVARCHAR(30) = NULL
+	, @dtmDateTo NVARCHAR(30) = NULL
+	, @intFutureMarketId INT = NULL
+	, @intCommodityId INT = NULL
+	, @intQtyUOMId INT = NULL
+	, @intCurrencyId INT = NULL
+	, @intPriceUOMId INT = NULL
 
 AS
 
@@ -15,7 +15,7 @@ BEGIN
 	DECLARE @date NVARCHAR(50)
 		, @dateFilter NVARCHAR(MAX)
 
-	SELECT CONVERT(INT,ROW_NUMBER() OVER(ORDER BY dtmTransactionDate ASC)) AS intRowNum
+	SELECT CONVERT(INT, ROW_NUMBER() OVER(ORDER BY dtmTransactionDate ASC)) AS intRowNum
 		, intFutureMarketId
 		, intCommodityId
 		, intCurrencyId
@@ -26,14 +26,14 @@ BEGIN
 		, dtmEntryDate
 		, dtmTransactionDate
 		, strItemNo
-		, (CONVERT(VARCHAR(50), CAST(dblOriginalQty AS MONEY), 1) + ' ' + strSymbol) COLLATE Latin1_General_CI_AS as strOriginalQtyUOM
-		, CASE WHEN strBuySell = 'Buy' THEN dblQty ELSE dblQty * -1 END AS dblQty
-		, CASE WHEN strBuySell = 'Buy' THEN ISNULL(dblDeltaQty,0) ELSE ISNULL(dblDeltaQty,0) * -1 END AS dblDeltaQty
+		, strOriginalQtyUOM = (CONVERT(VARCHAR(50), CAST(dblOriginalQty AS MONEY), 1) + ' ' + strSymbol) COLLATE Latin1_General_CI_AS
+		, dblQty = CASE WHEN strBuySell = 'Buy' THEN dblQty ELSE dblQty * -1 END
+		, dblDeltaQty = CASE WHEN strBuySell = 'Buy' THEN ISNULL(dblDeltaQty,0) ELSE ISNULL(dblDeltaQty,0) * -1 END
 		, dblNoOfLots
 		, strPosition
 		, strFutureMonth
 		, dblPrice
-		, ISNULL(dblValue,0) as dblValue
+		, dblValue = ISNULL(dblValue, 0.00)
 		, intPriceFixationId
 		, dblFutures
 	INTO #tmpReportDetail
@@ -44,27 +44,26 @@ BEGIN
 		SELECT CD.intFutureMarketId
 			, CH.intCommodityId
 			, CD.intCurrencyId
-			, 'Outright' COLLATE Latin1_General_CI_AS AS strActivity
-			, CASE WHEN CH.intContractTypeId = 1 THEN 'Buy' ELSE 'Sell' END COLLATE Latin1_General_CI_AS AS strBuySell
-			, CH.strContractNumber AS strTransactionId
-			, CH.intContractHeaderId AS intTransactionId
-			, CONVERT(date,CH.dtmCreated,101) AS dtmEntryDate
-			, CONVERT(date,CH.dtmContractDate,101) AS dtmTransactionDate
+			, strActivity = 'Outright' COLLATE Latin1_General_CI_AS
+			, strBuySell = CASE WHEN CH.intContractTypeId = 1 THEN 'Buy' ELSE 'Sell' END COLLATE Latin1_General_CI_AS
+			, strTransactionId = CH.strContractNumber
+			, intTransactionId = CH.intContractHeaderId
+			, dtmEntryDate = CONVERT(DATE, CH.dtmCreated, 101)
+			, dtmTransactionDate = CONVERT(DATE, CH.dtmContractDate, 101)
 			, ITM.strItemNo
 			, ITM.intItemId
-			, CD.dblQuantity AS dblOriginalQty
-			, dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,(select top 1 intItemUOMId from tblICItemUOM where intItemId = ITM.intItemId and intUnitMeasureId = ISNULL(@intQtyUOMId, 0)), ISNULL(CD.dblQuantity,0)) AS dblQty
+			, dblOriginalQty = CD.dblQuantity
+			, dblQty = dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId, QtyUOM.intItemUOMId, ISNULL(CD.dblQuantity, 0)) * (CASE WHEN CH.intContractTypeId = 1 THEN -1 ELSE 1 END)
 			, CD.intItemUOMId
 			, UM.strSymbol
-			, CASE WHEN ITM.intProductLineId IS NOT NULL THEN ISNULL(CD.dblQuantity,0) * (ISNULL(CPL.dblDeltaPercent,0) /100)
-				ELSE ISNULL(CD.dblQuantity,0) END AS dblDeltaQty
+			, dblDeltaQty = dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId, QtyUOM.intItemUOMId, CASE WHEN ITM.intProductLineId IS NOT NULL THEN ISNULL(CD.dblQuantity, 0) * (ISNULL(CPL.dblDeltaPercent, 0) /100) ELSE ISNULL(CD.dblQuantity, 0) END) * (CASE WHEN CH.intContractTypeId = 1 THEN -1 ELSE 1 END)
 			, CD.dblNoOfLots
 			, P.strPosition
 			, FMo.strFutureMonth
-			, dbo.fnCTConvertQtyToTargetItemUOM((select top 1 intItemUOMId from tblICItemUOM where intItemId = ITM.intItemId and intUnitMeasureId = ISNULL(@intPriceUOMId, 0)),CD.intItemUOMId, ISNULL(CD.dblCashPrice,0)) AS dblPrice
-			, CD.dblTotalCost as dblValue
+			, dblPrice = dbo.[fnRKGetSourcingCurrencyConversion](CD.intContractDetailId, @intCurrencyId, dbo.fnCTConvertQtyToTargetItemUOM(PriceUOM.intItemUOMId, CD.intItemUOMId, ISNULL(CD.dblCashPrice, 0)), NULL, NULL, NULL)
+			, dblValue = dbo.[fnRKGetSourcingCurrencyConversion](CD.intContractDetailId, @intCurrencyId, CD.dblTotalCost * (CASE WHEN CH.intContractTypeId = 1 THEN -1 ELSE 1 END), NULL, NULL, NULL)
 			, PF.intPriceFixationId
-			, dbo.fnCTConvertQtyToTargetCommodityUOM(CH.intCommodityId,ISNULL(@intPriceUOMId, 0),FM.intUnitMeasureId,ISNULL(CD.dblFutures,0)) dblFutures
+			, dblFutures = ISNULL(dbo.[fnRKGetSourcingCurrencyConversion](CD.intContractDetailId, @intCurrencyId, dbo.fnCTConvertQtyToTargetCommodityUOM(CH.intCommodityId, ISNULL(@intPriceUOMId, 0), FM.intUnitMeasureId, ISNULL(CD.dblFutures, 0)), NULL, NULL, NULL), 0.00)
 		FROM tblCTContractHeader CH
 		INNER JOIN tblCTContractDetail CD ON CH.intContractHeaderId = CD.intContractHeaderId
 		INNER JOIN tblICItem ITM ON CD.intItemId = ITM.intItemId
@@ -75,11 +74,12 @@ BEGIN
 		LEFT JOIN tblRKFutureMarket FM ON CD.intFutureMarketId = FM.intFutureMarketId
 		INNER JOIN tblICItemUOM UOM ON CD.intItemUOMId = UOM.intItemUOMId
 		INNER JOIN tblICUnitMeasure UM ON UOM.intUnitMeasureId = UM.intUnitMeasureId
+		LEFT JOIN tblICItemUOM QtyUOM ON QtyUOM.intItemId = ITM.intItemId AND QtyUOM.intUnitMeasureId = ISNULL(@intQtyUOMId, 0)
+		LEFT JOIN tblICItemUOM PriceUOM ON PriceUOM.intItemId = ITM.intItemId AND PriceUOM.intUnitMeasureId = ISNULL(@intPriceUOMId, 0)
 		WHERE CH.intPricingTypeId = 1 --Priced
 			AND PF.intPriceFixationId IS NULL
 			AND CD.intFutureMarketId = ISNULL(@intFutureMarketId, CD.intFutureMarketId)
 			AND CH.intCommodityId = ISNULL(@intCommodityId, CH.intCommodityId)
-			--AND CD.intCurrencyId = ISNULL(@intCurrencyId, CD.intCurrencyId)
 
 		--=========================================
 		-- Price Fixations
@@ -87,27 +87,26 @@ BEGIN
 		UNION ALL SELECT CD.intFutureMarketId
 			, CH.intCommodityId
 			, CD.intCurrencyId
-			, 'Price Fixing' COLLATE Latin1_General_CI_AS AS strActivity
-			, CASE WHEN CH.intContractTypeId = 1 THEN 'Buy' ELSE 'Sell' END COLLATE Latin1_General_CI_AS AS strBuySell
-			, CH.strContractNumber AS strTransactionId
-			, CH.intContractHeaderId AS intTransactionId
-			, CONVERT(date,CH.dtmCreated,101) AS dtmEntryDate
-			, CONVERT(date,CH.dtmContractDate,101) AS dtmTransactionDate
+			, strActivity = 'Price Fixing' COLLATE Latin1_General_CI_AS
+			, strBuySell = CASE WHEN CH.intContractTypeId = 1 THEN 'Buy' ELSE 'Sell' END COLLATE Latin1_General_CI_AS
+			, strTransactionId = CH.strContractNumber
+			, intTransactionId = CH.intContractHeaderId
+			, dtmEntryDate = CONVERT(DATE, CH.dtmCreated, 101)
+			, dtmTransactionDate = CONVERT(DATE, CH.dtmContractDate, 101)
 			, ITM.strItemNo
 			, ITM.intItemId
-			, CD.dblQuantity AS dblOriginalQty
-			, dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,(select top 1 intItemUOMId from tblICItemUOM where intItemId = ITM.intItemId and intUnitMeasureId = ISNULL(@intQtyUOMId, 0)), ISNULL(CD.dblQuantity,0)) AS dblQty
+			, dblOriginalQty = CD.dblQuantity
+			, dblQty = dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId, QtyUOM.intItemUOMId, (ISNULL(CD.dblQuantity, 0) * (PFD.dblNoOfLots / CD.dblNoOfLots))) * (CASE WHEN CH.intContractTypeId = 1 THEN -1 ELSE 1 END)
 			, CD.intItemUOMId
 			, UM.strSymbol
-			, CASE WHEN ITM.intProductLineId IS NOT NULL THEN ISNULL(PFD.dblQuantity,0) * (ISNULL(CPL.dblDeltaPercent,0) /100)
-				ELSE ISNULL(PFD.dblQuantity,0) END AS dblDeltaQty
+			, dblDeltaQty = dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId, QtyUOM.intItemUOMId, CASE WHEN ITM.intProductLineId IS NOT NULL THEN ISNULL(PFD.dblQuantity,0) * (ISNULL(CPL.dblDeltaPercent,0) /100) ELSE ISNULL(PFD.dblQuantity,0) END) * (CASE WHEN CH.intContractTypeId = 1 THEN -1 ELSE 1 END)
 			, PFD.dblNoOfLots
 			, P.strPosition
 			, FMo.strFutureMonth
-			, dbo.fnCTConvertQtyToTargetItemUOM((select top 1 intItemUOMId from tblICItemUOM where intItemId = ITM.intItemId and intUnitMeasureId = ISNULL(@intPriceUOMId, 0)),CD.intItemUOMId, ISNULL(PFD.dblFixationPrice,0)) AS dblPrice
-			, PFD.dblFixationPrice * PFD.dblQuantity AS dblValue
+			, dblPrice = dbo.[fnRKGetSourcingCurrencyConversion](CD.intContractDetailId, @intCurrencyId, dbo.fnCTConvertQtyToTargetItemUOM(PriceUOM.intItemUOMId, CD.intItemUOMId, ISNULL(PFD.dblFixationPrice, 0)), NULL, NULL, NULL)
+			, dblValue = dbo.[fnRKGetSourcingCurrencyConversion](CD.intContractDetailId, @intCurrencyId, (PFD.dblFixationPrice * PFD.dblQuantity) * (CASE WHEN CH.intContractTypeId = 1 THEN -1 ELSE 1 END), NULL, NULL, NULL)
 			, PF.intPriceFixationId
-			, dbo.fnCTConvertQtyToTargetCommodityUOM(CH.intCommodityId,ISNULL(@intPriceUOMId, 0),FM.intUnitMeasureId,ISNULL(CD.dblFutures,0)) dblFutures
+			, dblFutures = ISNULL(dbo.[fnRKGetSourcingCurrencyConversion](CD.intContractDetailId, @intCurrencyId, dbo.fnCTConvertQtyToTargetCommodityUOM(CH.intCommodityId,ISNULL(@intPriceUOMId, 0),FM.intUnitMeasureId,ISNULL(CD.dblFutures,0)), NULL, NULL, NULL), 0.00)
 		FROM tblCTContractHeader CH
 		INNER JOIN tblCTContractDetail CD ON CH.intContractHeaderId = CD.intContractHeaderId
 		INNER JOIN tblICItem ITM ON CD.intItemId = ITM.intItemId
@@ -119,10 +118,11 @@ BEGIN
 		LEFT JOIN tblRKFutureMarket FM ON CD.intFutureMarketId = FM.intFutureMarketId
 		INNER JOIN tblICItemUOM UOM ON CD.intItemUOMId = UOM.intItemUOMId
 		INNER JOIN tblICUnitMeasure UM ON UOM.intUnitMeasureId = UM.intUnitMeasureId
+		LEFT JOIN tblICItemUOM QtyUOM ON QtyUOM.intItemId = ITM.intItemId AND QtyUOM.intUnitMeasureId = ISNULL(@intQtyUOMId, 0)
+		LEFT JOIN tblICItemUOM PriceUOM ON PriceUOM.intItemId = ITM.intItemId AND PriceUOM.intUnitMeasureId = ISNULL(@intPriceUOMId, 0)
 		WHERE PF.intPriceFixationId IS NOT NULL
 			AND CD.intFutureMarketId = ISNULL(@intFutureMarketId, CD.intFutureMarketId)
 			AND CH.intCommodityId = ISNULL(@intCommodityId, CH.intCommodityId)
-			--AND CD.intCurrencyId = ISNULL(@intCurrencyId, CD.intCurrencyId)
 
 		--===================
 		-- Future Trades
@@ -130,33 +130,33 @@ BEGIN
 		UNION ALL SELECT DD.intFutureMarketId
 			, DD.intCommodityId
 			, DD.intCurrencyId
-			, 'Futures' COLLATE Latin1_General_CI_AS AS strActivity
+			, strActivity = 'Futures' COLLATE Latin1_General_CI_AS
 			, DD.strBuySell
-			, DD.strInternalTradeNo AS strTransactionId
-			, DD.intFutOptTransactionHeaderId AS intTransactionId
-			, CONVERT(date,DD.dtmTransactionDate,101) AS dtmEntryDate
-			, CONVERT(date,DD.dtmFilledDate,101) AS dtmTransactionDate
-			, '' COLLATE Latin1_General_CI_AS AS strItemNo
-			, 0 AS intItemId
-			, ISNULL(DD.dblNoOfContract,0) * ISNULL(FM.dblContractSize,0)  AS dblOriginalQty
-			, dbo.fnCTConvertQtyToTargetCommodityUOM(DD.intCommodityId,FM.intUnitMeasureId,ISNULL(@intQtyUOMId, 0),ISNULL(DD.dblNoOfContract,0) * ISNULL(FM.dblContractSize,0) ) AS dblQty
-			, null AS intItemUOMId
+			, strTransactionId = DD.strInternalTradeNo
+			, intTransactionId = DD.intFutOptTransactionHeaderId
+			, dtmEntryDate = CONVERT(DATE, DD.dtmTransactionDate, 101)
+			, dtmTransactionDate = CONVERT(DATE, DD.dtmFilledDate, 101)
+			, strItemNo = ''
+			, intItemId = 0
+			, dblOriginalQty = ISNULL(DD.dblNoOfContract,0) * ISNULL(FM.dblContractSize,0)
+			, dblQty = dbo.fnCTConvertQtyToTargetCommodityUOM(DD.intCommodityId,FM.intUnitMeasureId, ISNULL(@intQtyUOMId, 0), ISNULL(DD.dblNoOfContract,0) * ISNULL(FM.dblContractSize,0)) * (CASE WHEN DD.strBuySell = 'Buy' THEN -1 ELSE 1 END)
+			, intItemUOMId = NULL
 			, UM.strSymbol
-			, ISNULL(DD.dblNoOfContract,0) * ISNULL(FM.dblContractSize,0)  AS dblDeltaQty
+			, dblDeltaQty = dbo.fnCTConvertQtyToTargetCommodityUOM(DD.intCommodityId,FM.intUnitMeasureId,ISNULL(@intQtyUOMId, 0),ISNULL(DD.dblNoOfContract,0) * ISNULL(FM.dblContractSize,0)) * (CASE WHEN DD.strBuySell = 'Buy' THEN -1 ELSE 1 END)
 			, DD.dblNoOfContract
-			, '' COLLATE Latin1_General_CI_AS AS strPosition
-			, '' COLLATE Latin1_General_CI_AS AS strFutureMonth
-			, dbo.fnCTConvertQtyToTargetCommodityUOM(DD.intCommodityId,ISNULL(@intPriceUOMId, 0),FM.intUnitMeasureId,ISNULL(DD.dblPrice,0)) AS dblPrice 
-			, (ISNULL(DD.dblNoOfContract,0) * ISNULL(FM.dblContractSize,0)) * DD.dblPrice AS strValue
-			, null AS intPriceFixationId
-			, dbo.fnCTConvertQtyToTargetCommodityUOM(DD.intCommodityId,ISNULL(@intPriceUOMId, 0),FM.intUnitMeasureId,ISNULL(DD.dblPrice,0)) dblFutures
+			, strPosition = '' COLLATE Latin1_General_CI_AS
+			, strFutureMonth = FMonth.strFutureMonth
+			, dblPrice = dbo.fnRKGetCurrencyConvertion(FM.intCurrencyId, @intCurrencyId) * (dbo.fnCTConvertQtyToTargetCommodityUOM(DD.intCommodityId,ISNULL(@intPriceUOMId, 0),FM.intUnitMeasureId,ISNULL(DD.dblPrice,0)))
+			, strValue = dbo.fnRKGetCurrencyConvertion(FM.intCurrencyId, @intCurrencyId) * (((ISNULL(DD.dblNoOfContract,0) * ISNULL(FM.dblContractSize,0)) * DD.dblPrice) * (CASE WHEN DD.strBuySell = 'Buy' THEN -1 ELSE 1 END))
+			, intPriceFixationId = NULL
+			, dblFutures = ISNULL(dbo.fnRKGetCurrencyConvertion(FM.intCurrencyId, @intCurrencyId) * (dbo.fnCTConvertQtyToTargetCommodityUOM(DD.intCommodityId,ISNULL(@intPriceUOMId, 0),FM.intUnitMeasureId,ISNULL(DD.dblPrice,0))), 0.00)
 		FROM tblRKFutOptTransactionHeader DH
 		INNER JOIN tblRKFutOptTransaction DD ON DH.intFutOptTransactionHeaderId = DD.intFutOptTransactionHeaderId
 		INNER JOIN tblRKFutureMarket FM ON DD.intFutureMarketId = FM.intFutureMarketId
 		INNER JOIN tblICUnitMeasure UM ON FM.intUnitMeasureId = UM.intUnitMeasureId
+		INNER JOIN tblRKFuturesMonth FMonth ON FMonth.intFutureMonthId = DD.intFutureMonthId
 		WHERE  DD.intFutureMarketId = ISNULL(@intFutureMarketId, DD.intFutureMarketId)
 		AND DD.intCommodityId = ISNULL(@intCommodityId, DD.intCommodityId)
-		--AND DD.intCurrencyId = ISNULL(@intCurrencyId, DD.intCurrencyId)
 	) tbl
 
 	IF @strFilterBy = 'Transaction Date'
