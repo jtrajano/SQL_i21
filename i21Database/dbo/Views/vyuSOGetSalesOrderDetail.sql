@@ -38,7 +38,7 @@ SELECT intSalesOrderDetailId			= SOD.intSalesOrderDetailId
      , intContractDetailId				= SOD.intContractDetailId
 	 , intItemContractHeaderId			= SOD.intItemContractHeaderId
      , intItemContractDetailId			= SOD.intItemContractDetailId
-     , dblContractBalance				= SOD.dblContractBalance
+     , dblContractBalance				= ISNULL(CONT.dblBalance, 0)
      , dblContractAvailable				= SOD.dblContractAvailable
      , ysnBlended						= SOD.ysnBlended
      , intTaxGroupId					= SOD.intTaxGroupId
@@ -156,6 +156,7 @@ LEFT JOIN (
 		  ,	strContractNumber
 		  , intContractSeq
 		  ,	intPricingTypeId
+              , dblBalance
 		  , strPricingType
 		  ,	ysnLoad
 	FROM vyuCTCustomerContract WITH(NOLOCK)
