@@ -645,62 +645,171 @@ BEGIN
 			END
 		ELSE IF(@strRegisterClass = 'SAPPHIRE/COMMANDER')
 			BEGIN
+				
+				-- Create temp table @tblTempSapphireCommanderCombos
+				BEGIN
+					DECLARE @tblTempSapphireCommanderCombos TABLE 
+					(
+						[intPrimaryId] INT,
+						[strStoreNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+						[strVendorName] NVARCHAR(150) COLLATE Latin1_General_CI_AS NULL, 
+						[strVendorModelVersion] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 
-				DECLARE @tblTempSapphireCommanderCombos TABLE 
-				(
-					[intPrimaryId] INT,
-					[strStoreNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
-					[strVendorName] NVARCHAR(150) COLLATE Latin1_General_CI_AS NULL, 
-					[strVendorModelVersion] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+						[strRecordActionType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 
-					[strRecordActionType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+						[strPromotionID] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+						[strComboDescription] NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL,
 
-					[strPromotionID] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
-					[strComboDescription] NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL,
+						[strItemListID] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+						[strComboItemQuantity] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+						[strComboItemUnitPrice] NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL,
 
-					[strItemListID] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
-					[strComboItemQuantity] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
-					[strComboItemUnitPrice] NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL,
+						[strStartDate] NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL,
+						[strStartTime] NVARCHAR(8) COLLATE Latin1_General_CI_AS NULL,
+						[strStopDate] NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL,
+						[strStopTime] NVARCHAR(8) COLLATE Latin1_General_CI_AS NULL
+					)
+				END
 
-					[strStartDate] NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL,
-					[strStartTime] NVARCHAR(8) COLLATE Latin1_General_CI_AS NULL,
-					[strStopDate] NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL,
-					[strStopTime] NVARCHAR(8) COLLATE Latin1_General_CI_AS NULL
-				)
+				-- Insert to temp table @tblTempSapphireCommanderCombos
+				BEGIN
+					INSERT INTO @tblTempSapphireCommanderCombos
+					SELECT
+						[intPrimaryId]						=	CAST(SL.intPromoSalesListId AS NVARCHAR(50)), 
+						[strStoreNo]						=	CAST(Store.intStoreNo AS NVARCHAR(50)), 
+						[strVendorName]						=	'iRely', 
+						[strVendorModelVersion]				=	(SELECT TOP (1) strVersionNo FROM tblSMBuildNumber ORDER BY intVersionID DESC),
 
+						[strRecordActionType]				=	CASE
+																	WHEN (SL.ysnDeleteFromRegister = 1)
+																		THEN 'delete'
+																	ELSE 'addchange'
+																END, 
+						[strPromotionID]					=	CAST(SL.intPromoSalesId AS NVARCHAR(50)),
+						[strComboDescription]				=	SL.strPromoSalesDescription,
 
-				INSERT INTO @tblTempSapphireCommanderCombos
-				SELECT
-					[intPrimaryId]						=	CAST(SL.intPromoSalesListId AS NVARCHAR(50)), 
-					[strStoreNo]						=	CAST(Store.intStoreNo AS NVARCHAR(50)), 
-					[strVendorName]						=	'iRely', 
-					[strVendorModelVersion]				=	(SELECT TOP (1) strVersionNo FROM tblSMBuildNumber ORDER BY intVersionID DESC),
+						[strItemListID]						=	PIL.strPromoItemListId,
+						[strComboItemQuantity]				=	CAST(SLD.intQuantity AS NVARCHAR(50)),
+						[strComboItemUnitPrice]				=	CAST(CAST(SLD.dblPrice AS DECIMAL(18, 2)) AS NVARCHAR(50)),
 
-					[strRecordActionType]				=	CASE
-																WHEN (SL.ysnDeleteFromRegister = 1)
-																	THEN 'delete'
-																ELSE 'addchange'
-														    END, 
-					[strPromotionID]					=	CAST(SL.intPromoSalesId AS NVARCHAR(50)),
-					[strComboDescription]				=	SL.strPromoSalesDescription,
+						[strStartDate]						=	CAST(CONVERT(DATE, SL.dtmPromoBegPeriod) AS NVARCHAR(10)),
+						[strStartTime]						=	CAST(CONVERT(TIME, SL.dtmPromoBegPeriod) AS NVARCHAR(8)),
+						[strStopDate]						=	CAST(CONVERT(DATE, SL.dtmPromoEndPeriod) AS NVARCHAR(10)),
+						[strStopTime]						=	CAST(CONVERT(TIME, SL.dtmPromoEndPeriod) AS NVARCHAR(8))
+					FROM tblSTPromotionSalesListDetail SLD
+					INNER JOIN tblSTPromotionSalesList SL
+						ON SLD.intPromoSalesListId = SL.intPromoSalesListId
+					INNER JOIN tblSTPromotionItemList PIL
+						ON SLD.intPromoItemListId = PIL.intPromoItemListId
+					INNER JOIN tblSTStore Store
+						ON SL.intStoreId = Store.intStoreId
+					WHERE SL.intStoreId = @intStoreId
+						AND SL.strPromoType = 'C'
+				END
 
-					[strItemListID]						=	PIL.strPromoItemListId,
-					[strComboItemQuantity]				=	CAST(SLD.intQuantity AS NVARCHAR(50)),
-					[strComboItemUnitPrice]				=	CAST(CAST(SLD.dblPrice AS DECIMAL(18, 2)) AS NVARCHAR(50)),
+				-- INSERT @tblTempSapphireCommanderWeekDayAvailability
+				BEGIN
+					INSERT INTO @tblTempSapphireCommanderWeekDayAvailability
+					(
+						[intPromoSalesListId],
+						[strAvailable],
+						[strWeekDay], 
+						[intSort], 
+						[strStartTime],
+						[strEndTime]
+					)
+					SELECT 
+						[intPromoSalesListId]	= [Changes].intPromoSalesListId,
+						[strAvailable]			= [Changes].strAvailable,
+						[strWeekDay]			= [Changes].strWeekDay, 
+						[intSort]				= [Changes].intSort, 
+						[strStartTime]			= [Changes].strStartTime,
+						[strEndTime]			= [Changes].strEndTime
+					FROM 
+					(
+						SELECT DISTINCT 
+							intPromoSalesListId, 
+							strWeekDay = CASE	
+											WHEN StartTime = 'strStartTimePromotionSunday'
+												THEN 'Sunday'
+											WHEN StartTime = 'strStartTimePromotionMonday'
+												THEN 'Monday'
+											WHEN StartTime = 'strStartTimePromotionTuesday'
+												THEN 'Tuesday'
+											WHEN StartTime = 'strStartTimePromotionWednesday'
+												THEN 'Wednesday'
+											WHEN StartTime = 'strStartTimePromotionThursday'
+												THEN 'Thursday'
+											WHEN StartTime = 'strStartTimePromotionFriday'
+												THEN 'Friday'
+											WHEN StartTime = 'strStartTimePromotionSaturday'
+												THEN 'Saturday'
+										END,
+							intSort = CASE	
+											WHEN StartTime = 'strStartTimePromotionSunday'
+												THEN 1
+											WHEN StartTime = 'strStartTimePromotionMonday'
+												THEN 2
+											WHEN StartTime = 'strStartTimePromotionTuesday'
+												THEN 3
+											WHEN StartTime = 'strStartTimePromotionWednesday'
+												THEN 4
+											WHEN StartTime = 'strStartTimePromotionThursday'
+												THEN 5
+											WHEN StartTime = 'strStartTimePromotionFriday'
+												THEN 6
+											WHEN StartTime = 'strStartTimePromotionSaturday'
+												THEN 7
+										END,
+							strAvailable,
+							strStartTime, 
+							strEndTime
+						FROM 
+						(
+							SELECT sl.intPromoSalesListId
+									, strWeekDayPromotionSunday				= CASE WHEN sl.ysnWeekDayPromotionSunday = 1 THEN 'yes' ELSE 'no' END
+									, strWeekDayPromotionMonday				= CASE WHEN sl.ysnWeekDayPromotionMonday = 1 THEN 'yes' ELSE 'no' END
+									, strWeekDayPromotionTuesday			= CASE WHEN sl.ysnWeekDayPromotionTuesday = 1 THEN 'yes' ELSE 'no' END
+									, strWeekDayPromotionWednesday			= CASE WHEN sl.ysnWeekDayPromotionWednesday = 1 THEN 'yes' ELSE 'no' END
+									, strWeekDayPromotionThursday			= CASE WHEN sl.ysnWeekDayPromotionThursday = 1 THEN 'yes' ELSE 'no' END
+									, strWeekDayPromotionFriday				= CASE WHEN sl.ysnWeekDayPromotionFriday = 1 THEN 'yes' ELSE 'no' END
+									, strWeekDayPromotionSaturday			= CASE WHEN sl.ysnWeekDayPromotionSaturday = 1 THEN 'yes' ELSE 'no' END
 
-					[strStartDate]						=	CAST(CONVERT(DATE, SL.dtmPromoBegPeriod) AS NVARCHAR(10)),
-					[strStartTime]						=	CAST(CONVERT(TIME, SL.dtmPromoBegPeriod) AS NVARCHAR(8)),
-					[strStopDate]						=	CAST(CONVERT(DATE, SL.dtmPromoEndPeriod) AS NVARCHAR(10)),
-					[strStopTime]						=	CAST(CONVERT(TIME, SL.dtmPromoEndPeriod) AS NVARCHAR(8))
-				FROM tblSTPromotionSalesListDetail SLD
-				INNER JOIN tblSTPromotionSalesList SL
-					ON SLD.intPromoSalesListId = SL.intPromoSalesListId
-				INNER JOIN tblSTPromotionItemList PIL
-					ON SLD.intPromoItemListId = PIL.intPromoItemListId
-				INNER JOIN tblSTStore Store
-					ON SL.intStoreId = Store.intStoreId
-				WHERE SL.intStoreId = @intStoreId
-					AND SL.strPromoType = 'C'
+									, strStartTimePromotionSunday			= CAST(ISNULL(sl.dtmStartTimePromotionSunday, '') AS NVARCHAR(8))
+									, strStartTimePromotionMonday			= CAST(ISNULL(sl.dtmStartTimePromotionMonday, '') AS NVARCHAR(8))
+									, strStartTimePromotionTuesday			= CAST(ISNULL(sl.dtmStartTimePromotionTuesday, '') AS NVARCHAR(8))
+									, strStartTimePromotionWednesday		= CAST(ISNULL(sl.dtmStartTimePromotionWednesday, '') AS NVARCHAR(8))
+									, strStartTimePromotionThursday			= CAST(ISNULL(sl.dtmStartTimePromotionThursday, '') AS NVARCHAR(8))
+									, strStartTimePromotionFriday			= CAST(ISNULL(sl.dtmStartTimePromotionFriday, '') AS NVARCHAR(8))
+									, strStartTimePromotionSaturday			= CAST(ISNULL(sl.dtmStartTimePromotionSaturday, '') AS NVARCHAR(8))
+			
+									, strEndTimePromotionSunday				= CAST(ISNULL(sl.dtmEndTimePromotionSunday, '') AS NVARCHAR(8))
+									, strEndTimePromotionMonday				= CAST(ISNULL(sl.dtmEndTimePromotionMonday, '') AS NVARCHAR(8))
+									, strEndTimePromotionTuesday			= CAST(ISNULL(sl.dtmEndTimePromotionTuesday, '') AS NVARCHAR(8))
+									, strEndTimePromotionWednesday			= CAST(ISNULL(sl.dtmEndTimePromotionWednesday, '') AS NVARCHAR(8))
+									, strEndTimePromotionThursday			= CAST(ISNULL(sl.dtmEndTimePromotionThursday, '') AS NVARCHAR(8))
+									, strEndTimePromotionFriday				= CAST(ISNULL(sl.dtmEndTimePromotionFriday, '') AS NVARCHAR(8))
+									, strEndTimePromotionSaturday			= CAST(ISNULL(sl.dtmEndTimePromotionSaturday, '') AS NVARCHAR(8))
+							FROM tblSTPromotionSalesList sl
+							LEFT JOIN @tblTempSapphireCommanderCombos temp
+								ON sl.intPromoSalesId = temp.intPrimaryId
+						) t
+						unpivot
+						(
+							strAvailable for Available in (strWeekDayPromotionSunday, strWeekDayPromotionMonday, strWeekDayPromotionTuesday, strWeekDayPromotionWednesday, strWeekDayPromotionThursday, strWeekDayPromotionFriday, strWeekDayPromotionSaturday)
+						) a
+						unpivot
+						(
+							strStartTime for StartTime in (strStartTimePromotionSunday, strStartTimePromotionMonday, strStartTimePromotionTuesday, strStartTimePromotionWednesday, strStartTimePromotionThursday, strStartTimePromotionFriday, strStartTimePromotionSaturday)
+						) o
+						unpivot
+						(
+							strEndTime for EndTime in (strEndTimePromotionSunday, strEndTimePromotionMonday, strEndTimePromotionTuesday, strEndTimePromotionWednesday, strEndTimePromotionThursday, strEndTimePromotionFriday, strEndTimePromotionSaturday)
+						) n
+						WHERE REPLACE(StartTime, 'strStartTimePromotion', '') = REPLACE(EndTime, 'strEndTimePromotion', '')	
+							AND REPLACE(Available, 'strWeekDayPromotion', '') = REPLACE(StartTime, 'strStartTimePromotion', '')
+					) [Changes]
+				END
 
 
 				IF EXISTS(SELECT TOP 1 1 FROM @tblTempSapphireCommanderCombos)
@@ -757,11 +866,34 @@ BEGIN
 												Combo.strStartDate		AS [StartDate],
 												Combo.strStartTime		AS [StartTime],
 												Combo.strStopDate		AS [StopDate],
-												Combo.strStopTime		AS [StopTime]
+												Combo.strStopTime		AS [StopTime],
+
+												(
+													SELECT 
+														wda.strStartTime			AS [@startTime],
+														wda.strAvailable			AS [@available],
+														wda.strWeekDay				AS [@weekday],
+														wda.strEndTime				AS [@stopTime]
+													FROM 
+													(
+														SELECT DISTINCT
+															wda.intSort
+															, wda.strAvailable
+															, wda.strStartTime
+															, wda.strEndTime
+															, wda.strWeekDay
+														FROM @tblTempSapphireCommanderWeekDayAvailability wda
+														WHERE wda.intPromoSalesListId = Combo.intPrimaryId
+													) wda
+													ORDER BY wda.intSort ASC
+													FOR XML PATH('WeekdayAvailability'), TYPE
+												)
+
 											FROM 
 											(
 												SELECT DISTINCT
-													strPromotionID
+													intPrimaryId
+													, strPromotionID
 													, strRecordActionType
 													, strComboDescription
 													, strStartDate
