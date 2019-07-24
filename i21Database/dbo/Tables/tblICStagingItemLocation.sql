@@ -4,6 +4,7 @@ CREATE TABLE [dbo].[tblICStagingItemLocation] (
 	, intItemLocationId INT NULL -- Normally used when this field is included in export
 	, intLocationId INT NULL -- Normally used when this field is included in export
 	, strLocationName NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	, strLocationNo NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, strCostingMethod NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, ysnAllowNegativeInventory BIT NULL
 	, intAllowZeroCostTypeId INT NULL -- 1 OR NULL = No, 2 = Yes, 3 = Yes but warn user
