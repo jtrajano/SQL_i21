@@ -253,7 +253,7 @@ AS
 		ON currencyRateType.intCurrencyExchangeRateTypeId = t.intForexRateTypeId
 	OUTER APPLY (
 		SELECT 
-			SUM(ISNULL(SV.dblCashPrice,0)) AS dblTotalDiscountCost
+			ISNULL(SUM((ROUND(SV.dblCashPrice * SV.dblUnits,2)) / SV.dblUnits),0)  AS dblTotalDiscountCost
 		FROM @SettleVoucherCreate SV
 		INNER JOIN tblICItem IC
 			ON IC.intItemId = SV.intItemId
