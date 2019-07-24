@@ -15,13 +15,13 @@ BEGIN TRY
 	IF @strMode ='new'
 	BEGIN
 			IF EXISTS(SELECT 1  FROM tblGRStorageStatement WHERE strFormNumber = @strFormNumber)
-			BEGIN
-				SET @StorageStmtValidationmsg = 'The FormNumber already exist.'
-			END
-			ELSE IF @strFormNumber < = @HighestUsedFormNo
-			BEGIN
-				SET @StorageStmtValidationmsg = 'The form number should be greater than the highest used form number '+LTRIM(@HighestUsedFormNo)+'.'
-			END
+				BEGIN
+					SET @StorageStmtValidationmsg = 'The FormNumber already exist.'
+				END
+			ELSE
+				BEGIN			
+				SELECT @StorageStmtValidationmsg = CASE WHEN ISNUMERIC(@HighestUsedFormNo) = 1 THEN CASE WHEN @strFormNumber <= @HighestUsedFormNo THEN 'The form number should be greater than the highest used form number '+LTRIM(@HighestUsedFormNo)+'.' ELSE @StorageStmtValidationmsg END ELSE @StorageStmtValidationmsg END
+				END
 	END
 	ELSE IF @strMode ='edit' AND NOT EXISTS(SELECT 1 FROM tblGRStorageStatement WHERE strFormNumber = @strFormNumber)
 	BEGIN
@@ -34,4 +34,4 @@ BEGIN CATCH
 	SET @ErrMsg = ERROR_MESSAGE()
 	SET @ErrMsg = 'uspGRValidateStorageStmtFormNo: ' + @ErrMsg
 	RAISERROR (@ErrMsg,16,1,'WITH NOWAIT')	
-END CATCH
+END CATCH;
