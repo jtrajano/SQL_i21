@@ -81,11 +81,11 @@ BEGIN
 		LEFT OUTER JOIN tblICUnitMeasure u ON u.intUnitMeasureId = m.intUnitMeasureId
 
 	/* Item Locations */
-	INSERT INTO tblICStagingItemLocation(intItemId, intItemLocationId, intLocationId, strLocationName
+	INSERT INTO tblICStagingItemLocation(intItemId, intItemLocationId, intLocationId, strLocationName, strLocationNo
 		, strCostingMethod, ysnAllowNegativeInventory, intAllowZeroCostTypeId, ysnRequireStorageUnit, strDefaultVendorNo
 		, strDefaultStorageLocation, strDefaultStorageUnit, strDefaultSaleUom, strDefaultPurchaseUom
 		, strDefaultGrossUom, strInventoryCountGroup, dblReorderPoint, dblLeadTime)
-	SELECT i.intItemId, il.intItemLocationId, il.intLocationId, c.strLocationName
+	SELECT i.intItemId, il.intItemLocationId, il.intLocationId, c.strLocationName, c.strLocationNumber
 		, cm.strCostingMethod
 		, il.intAllowNegativeInventory, il.intAllowZeroCostTypeId, il.ysnStorageUnitRequired, e.strName AS strDefaultVendorNo
 		, sl.strSubLocationName AS strDefaultStorageLocation, su.strName AS strDefaultStorageUnit
