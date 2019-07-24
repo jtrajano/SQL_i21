@@ -14,7 +14,7 @@
     [dblTotalInventoryCost]  NUMERIC (18, 15) NULL,
     [intConcurrencyId]       INT              NOT NULL,
     CONSTRAINT [PK_tblSTLotteryBook] PRIMARY KEY CLUSTERED ([intLotteryBookId] ASC),
-    CONSTRAINT [FK_tblSTLotteryBook_tblSTLotteryGame] FOREIGN KEY ([intLotteryGameId]) REFERENCES [dbo].[tblSTLotteryGame] ([intLotteryGameId]) ON DELETE CASCADE,
+    CONSTRAINT [FK_tblSTLotteryBook_tblSTLotteryGame] FOREIGN KEY ([intLotteryGameId]) REFERENCES [dbo].[tblSTLotteryGame] ([intLotteryGameId]),
     CONSTRAINT [FK_tblSTLotteryBook_tblSTStore] FOREIGN KEY ([intStoreId]) REFERENCES [dbo].[tblSTStore] ([intStoreId])
 );
 

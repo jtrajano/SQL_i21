@@ -7891,6 +7891,7 @@
     <Build Include="dbo\Stored Procedures\uspSTProcessLotteryToInventoryReceipt.sql" />
     <Build Include="dbo\Stored Procedures\uspSMInterCompanyValidateRecordsForDMS.sql" />
     <Build Include="dbo\Stored Procedures\uspSMInterCompanyCopyDMS.sql" />
+    <Build Include="dbo\Views\vyuSTItemPricingOnFirstLocation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
