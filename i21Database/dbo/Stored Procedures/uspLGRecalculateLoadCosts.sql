@@ -36,15 +36,15 @@ BEGIN TRY
 										ELSE 		
 											CASE (LGC.strCostMethod) 
 											WHEN 'Per Unit' THEN
-												LGC.dblRate * dbo.fnCalculateQtyBetweenUOM(
+												COALESCE(LGC.dblRate, CTC.dblRate, 0) * dbo.fnCalculateQtyBetweenUOM(
 														ISNULL(LGD.intWeightItemUOMId, IU.intUnitMeasureId), 
 														dbo.fnGetMatchingItemUOMId(LGD.intItemId, LGC.intItemUOMId), 
 														CASE WHEN LGD.intWeightItemUOMId IS NOT NULL THEN ISNULL(LGD.dblNet, 0) ELSE ISNULL(LGD.dblQuantity, 0) END 
 													)
 											WHEN 'Percentage' THEN
-												(LGC.dblRate / 100) * LGD.dblAmount
+												(COALESCE(LGC.dblRate, CTC.dblRate, 0) / 100) * LGD.dblAmount
 											ELSE 
-												LGC.dblRate
+												COALESCE(LGC.dblRate, CTC.dblRate, 0)
 											END
 										END,2)
 							ELSE 
@@ -55,20 +55,20 @@ BEGIN TRY
 											
 											CASE (LGC.strCostMethod) 
 											WHEN 'Per Unit' THEN
-												LGC.dblRate * dbo.fnCalculateQtyBetweenUOM(
+												COALESCE(LGC.dblRate, CTC.dblRate, 0) * dbo.fnCalculateQtyBetweenUOM(
 														ISNULL(LGD.intWeightItemUOMId, IU.intUnitMeasureId), 
 														dbo.fnGetMatchingItemUOMId(LGD.intItemId, LGC.intItemUOMId), 
 														CASE WHEN LGD.intWeightItemUOMId IS NOT NULL THEN ISNULL(LGD.dblNet, 0) ELSE ISNULL(LGD.dblQuantity, 0) END 
 													)
 											WHEN 'Percentage' THEN
-												(LGC.dblRate / 100) * LGD.dblAmount
+												(COALESCE(LGC.dblRate, CTC.dblRate, 0) / 100) * LGD.dblAmount
 											ELSE 
-												LGC.dblRate
+												COALESCE(LGC.dblRate, CTC.dblRate, 0)
 											END
 
 										END,2))
 							END
-			,dblRate = ISNULL(IRC.dblRate, LGC.dblRate)
+			,dblRate = COALESCE(IRC.dblRate, LGC.dblRate, CTC.dblRate, 0)
 			FROM
 				tblLGLoadCost LGC
 				INNER JOIN tblLGLoad LG
@@ -112,7 +112,7 @@ BEGIN TRY
 					ON IU.intItemUOMId = LGD.intItemUOMId
 				LEFT JOIN tblICItemUOM WU
 					ON WU.intWeightUOMId = LGD.intWeightItemUOMId
-				LEFT JOIN 
+				OUTER APPLY 
 				(SELECT TOP 1 
 					CTC.intContractCostId
 					,CTC.intItemId
@@ -126,13 +126,12 @@ BEGIN TRY
 					FROM tblCTContractCost CTC
 					INNER JOIN tblCTContractDetail CTD
 						ON CTC.intContractDetailId = CTD.intContractDetailId
-					WHERE CTC.intContractDetailId IN (
-						SELECT intPContractDetailId FROM tblLGLoadDetail WHERE intLoadId = @intLoadId)
+					WHERE 
+						LGC.intItemId = CTC.intItemId
+						AND LGC.intVendorId = CTC.intVendorId
+						--AND LGC.strCostMethod = CTC.strCostMethod
+						AND LGD.intPContractDetailId = CTC.intContractDetailId
 					) [CTC] --Join with Contract Costs on the same Item, Vendor, and Cost Method
-				ON LGC.intItemId = CTC.intItemId
-					AND LGC.intVendorId = CTC.intVendorId
-					--AND LGC.strCostMethod = CTC.strCostMethod
-					AND LGD.intPContractDetailId = CTC.intContractDetailId
 			WHERE LGC.intLoadCostId = @intLoadCostId
 			GROUP BY
 				LGC.intLoadCostId,
@@ -147,8 +146,11 @@ BEGIN TRY
 				IRC.dblAmount,
 				IRC.strCostMethod,
 				CTC.intContractCostId,
-				ISNULL(LGD.intWeightItemUOMId, IU.intUnitMeasureId),
-				ISNULL(IRC.dblRate, LGC.dblRate)) LGC_Calc ON LGC_Calc.intLoadCostId = LGC.intLoadCostId
+				CTC.dblRate,
+				IRC.dblRate,
+				LGC.dblRate,
+				ISNULL(LGD.intWeightItemUOMId, IU.intUnitMeasureId)
+			) LGC_Calc ON LGC_Calc.intLoadCostId = LGC.intLoadCostId
 		WHERE LGC.intLoadCostId = @intLoadCostId
 
 		DELETE FROM #tmpLoadCost WHERE intLoadCostId = @intLoadCostId

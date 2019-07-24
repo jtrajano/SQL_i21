@@ -9,6 +9,8 @@ BEGIN
 
 	IF (@intLoadId IS NOT NULL)
 	BEGIN
+		EXEC uspLGRecalculateLoadCosts @intLoadId, @intEntityUserSecurityId
+
 		INSERT INTO @voucherPayable(
 			[intEntityVendorId]
 			,[intTransactionType]
