@@ -554,7 +554,7 @@ BEGIN
 		END
 
 		--insert into tblEMEntityType		
-		IF NOT EXISTS (SELECT TOP 1 1 From tblEMEntityType where strType = ''Vendor'' and intEntityId = @EntityId)
+		IF NOT EXISTS (SELECT TOP 1 1 FROM tblEMEntityType WHERE strType = ''Vendor'' AND intEntityId = @EntityId)
 		BEGIN
 			INSERT INTO tblEMEntityType ( intEntityId, strType, intConcurrencyId)
 			VALUES (@EntityId, ''Vendor'', 0)
@@ -562,9 +562,12 @@ BEGIN
 		
 		--insert into tblEMEntityLocation if no duplicate
 		BEGIN
-
-		INSERT [dbo].[tblEMEntityLocation]	([intEntityId], [strLocationName], [strCheckPayeeName], [strAddress], [strCity], [strCountry], [strState], [strZipCode], [strNotes],  [intShipViaId], [intTermsId], [intWarehouseId], [ysnDefaultLocation])
-		VALUES								(@EntityId, @strLocationName, @strLocationName, @strAddress, @strCity, @strCountry, @strState, @strZipCode, @strLocationNotes,  @intLocationShipViaId, @intTermsId, @intWarehouseId, @ysnIsDefault)
+		
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblEMEntityLocation WHERE intEntityId = @EntityId and strLocationName = @strLocationName)
+		BEGIN
+			INSERT [dbo].[tblEMEntityLocation]	([intEntityId], [strLocationName], [strCheckPayeeName], [strAddress], [strCity], [strCountry], [strState], [strZipCode], [strNotes],  [intShipViaId], [intTermsId], [intWarehouseId], [ysnDefaultLocation])
+			VALUES								(@EntityId, @strLocationName, @strLocationName, @strAddress, @strCity, @strCountry, @strState, @strZipCode, @strLocationNotes,  @intLocationShipViaId, @intTermsId, @intWarehouseId, @ysnIsDefault)
+		END
 
 		DECLARE @EntityLocationId INT
 		SET @EntityLocationId = SCOPE_IDENTITY()
@@ -574,11 +577,18 @@ BEGIN
 			SET @ysnPymtCtrlActive = 1
 		END
 
-		INSERT [dbo].[tblAPVendor]	([intEntityId], [intDefaultLocationId], [intDefaultContactId], [intCurrencyId], [strVendorPayToId], [intPaymentMethodId], [intTaxCodeId], [intGLAccountExpenseId], [intVendorType], [strVendorId], [strVendorAccountNum], [ysnPymtCtrlActive], [ysnPymtCtrlAlwaysDiscount], [ysnPymtCtrlEFTActive], [ysnPymtCtrlHold], [ysnWithholding], [intCreatedUserId], [intLastModifiedUserId], [dtmLastModified], [dblCreditLimit], [dtmCreated], [strTaxState], [intBillToId], [intShipFromId], [intTermsId])
-		VALUES						(@EntityId, @EntityLocationId, @EntityContactId, @intCurrencyId, @strVendorPayToId, @intPaymentMethodId, @intVendorTaxCodeId, @intGLAccountExpenseId, @intVendorType, @originVendor, @strVendorAccountNum, @ysnPymtCtrlActive, ISNULL(@ysnPymtCtrlAlwaysDiscount,0), ISNULL(@ysnPymtCtrlEFTActive,0), @ysnPymtCtrlHold, @ysnWithholding, @intCreatedUserId, @intLastModifiedUserId, @dtmLastModified, @dblCreditLimit, @dtmCreated, @strTaxState, @EntityLocationId, @EntityLocationId, @intTermsId)
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblAPVendor WHERE intEntityId = @EntityId)
+		BEGIN
+			INSERT [dbo].[tblAPVendor]	([intEntityId], [intDefaultLocationId], [intDefaultContactId], [intCurrencyId], [strVendorPayToId], [intPaymentMethodId], [intTaxCodeId], [intGLAccountExpenseId], [intVendorType], [strVendorId], [strVendorAccountNum], [ysnPymtCtrlActive], [ysnPymtCtrlAlwaysDiscount], [ysnPymtCtrlEFTActive], [ysnPymtCtrlHold], [ysnWithholding], [intCreatedUserId], [intLastModifiedUserId], [dtmLastModified], [dblCreditLimit], [dtmCreated], [strTaxState], [intBillToId], [intShipFromId], [intTermsId])
+			VALUES						(@EntityId, @EntityLocationId, @EntityContactId, @intCurrencyId, @strVendorPayToId, @intPaymentMethodId, @intVendorTaxCodeId, @intGLAccountExpenseId, @intVendorType, @originVendor, @strVendorAccountNum, @ysnPymtCtrlActive, ISNULL(@ysnPymtCtrlAlwaysDiscount,0), ISNULL(@ysnPymtCtrlEFTActive,0), @ysnPymtCtrlHold, @ysnWithholding, @intCreatedUserId, @intLastModifiedUserId, @dtmLastModified, @dblCreditLimit, @dtmCreated, @strTaxState, @EntityLocationId, @EntityLocationId, @intTermsId)
+		END
 
-		INSERT INTO dbo.tblAPVendorTerm(intEntityVendorId, intTermId)
-		VALUES(@EntityId, @intTermsId)
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblAPVendorTerm WHERE intEntityVendorId = @EntityId AND intTermId = @intTermsId)
+		BEGIN
+			INSERT INTO dbo.tblAPVendorTerm(intEntityVendorId, intTermId)
+			VALUES(@EntityId, @intTermsId)
+		END
+
 
 		DECLARE @VendorIdentityId INT
 		SET @VendorIdentityId = SCOPE_IDENTITY()		
