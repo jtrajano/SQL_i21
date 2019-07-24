@@ -1,15 +1,16 @@
 ﻿CREATE PROCEDURE [dbo].[uspSTStoreAppValidateStoreAndRegister]
 	@intStoreNo INT,
 	@ysnSuccess BIT OUTPUT,
-	@strResult AS NVARCHAR(1000) OUTPUT
+	@strResult AS NVARCHAR(1000) OUTPUT,
+	@strRegisterClass AS NVARCHAR(30) OUTPUT
 AS
 BEGIN
 	BEGIN TRY
 		SET @ysnSuccess = CAST(1 AS BIT)
+		SET @strRegisterClass = ''
 
-
-		DECLARE @strRegisterClass AS NVARCHAR(50) = ''
-		--DECLARE @strFilePrefixMain AS NVARCHAR(20) = ''
+		--DECLARE @strRegisterClass AS NVARCHAR(50) = ''
+		----DECLARE @strFilePrefixMain AS NVARCHAR(20) = ''
 
 		-- Create table for error
 		DECLARE @tempTableError TABLE (
