@@ -64,8 +64,8 @@ BEGIN
 			ELSE
 			BEGIN
 				--CHECK IF THE CURRENT and REFERENCE transactionId is already executed in the other database
-				IF CHARINDEX(',' + CONVERT(VARCHAR, @intCurrentTransactionId) + ':' + CONVERT(VARCHAR, ISNULL(@intCurrentCompanyId, 0)) + ',', @strFinishedTransactionId) = 0 AND
-				   CHARINDEX(',' + CONVERT(VARCHAR, @intReferenceTransactionId) + ':' + CONVERT(VARCHAR, ISNULL(@intReferenceCompanyId, 0)) + ',', @strFinishedTransactionId) = 0 AND
+				IF (CHARINDEX(',' + CONVERT(VARCHAR, @intCurrentTransactionId) + ':' + CONVERT(VARCHAR, ISNULL(@intCurrentCompanyId, 0)) + ',', @strFinishedTransactionId) = 0 OR
+				   CHARINDEX(',' + CONVERT(VARCHAR, @intReferenceTransactionId) + ':' + CONVERT(VARCHAR, ISNULL(@intReferenceCompanyId, 0)) + ',', @strFinishedTransactionId) = 0) AND
 				   (ISNULL(@intReferenceCompanyId, 0) <> 0 AND ISNULL(@intReferenceCompanyId, 0) <> @intCurrentCompanyId)
 				BEGIN
 					EXEC dbo.[uspSMInterCompanyCopyMessagingDetails] @intCurrentTransactionId, @intReferenceTransactionId, @intReferenceCompanyId

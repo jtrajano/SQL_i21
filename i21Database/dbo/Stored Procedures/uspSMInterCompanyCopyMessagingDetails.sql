@@ -121,7 +121,8 @@ BEGIN
 			[intInterCompanyTransferLogForCommentId]	INT,
 			[intSourceRecordId]							INT,
 			[intDestinationRecordId]					INT,
-			[intDestinationCompanyId]					INT NULL --TODO
+			[intDestinationCompanyId]					INT NULL,
+			[dtmCreated]								DATETIME
 		)
 
 		--END CREATE TEMPOPARY TABLES
@@ -142,6 +143,7 @@ BEGIN
 
 		DECLARE @ParamStringDefinition NVARCHAR(250) = N'@paramOut NVARCHAR(250) OUTPUT';
 		DECLARE @ParamIntDefinition NVARCHAR(250) = N'@paramOut INT OUTPUT';
+		DECLARE @ParamDateTimeDefinition NVARCHAR(250) = N'@paramOut DATETIME OUTPUT';
 
 		IF ISNULL(@intDestinationCompanyId, 0) <> 0
 		BEGIN
@@ -310,7 +312,7 @@ BEGIN
 					INSERT INTO ' + @strDestinationDatabaseName + '.dbo.[tblSMActivityAttendee](
 						[intActivityId], [intEntityId], [ysnAddCalendarEvent], [intInterCompanyId]
 					)
-					SELECT TOP 1 ' + CONVERT(VARCHAR, @intNewActivityId) + ', [intEntityId], [ysnAddCalendarEvent], ' + CONVERT(VARCHAR, @intCurrentCompanyId) + '
+					SELECT TOP 1 ' + CONVERT(VARCHAR, @intNewActivityId) + ', [intEntityId], [ysnAddCalendarEvent], ' + CONVERT(VARCHAR, ISNULL(@intCurrentCompanyId, 0)) + '
 					FROM #TempActivityAttendee;
 
 					SELECT @paramOut = SCOPE_IDENTITY()
@@ -547,7 +549,7 @@ BEGIN
 					INSERT INTO ' + @strDestinationDatabaseName + '.dbo.[tblSMActivityAttendee](
 						[intActivityId], [intEntityId], [ysnAddCalendarEvent], [intInterCompanyId]
 					)
-					SELECT TOP 1 ' + CONVERT(VARCHAR, @intDestinationActivityId) + ', [intEntityId], [ysnAddCalendarEvent], ' + CONVERT(VARCHAR, @intCurrentCompanyId) + '
+					SELECT TOP 1 ' + CONVERT(VARCHAR, @intDestinationActivityId) + ', [intEntityId], [ysnAddCalendarEvent], ' + CONVERT(VARCHAR, ISNULL(@intCurrentCompanyId, 0)) + '
 					FROM #TempActivityAttendee;
 
 					SELECT @paramOut = SCOPE_IDENTITY()
@@ -598,8 +600,8 @@ BEGIN
 
 			--Get all comments in intSourceRecordId when the source activity id and destination activity id are equals
 			SET @sql = N'
-				INSERT INTO #TempTransferLogForUpdating ([intInterCompanyTransferLogForCommentId], [intSourceRecordId], [intDestinationRecordId])
-				SELECT [intInterCompanyTransferLogForCommentId], [intSourceRecordId], [intDestinationRecordId]
+				INSERT INTO #TempTransferLogForUpdating ([intInterCompanyTransferLogForCommentId], [intSourceRecordId], [intDestinationRecordId], [dtmCreated])
+				SELECT [intInterCompanyTransferLogForCommentId], [intSourceRecordId], [intDestinationRecordId], [dtmCreated]
 				FROM ' + @strCurrentDatabaseName + '.dbo.[tblSMInterCompanyTransferLogForComment] a
 				INNER JOIN ' + @strCurrentDatabaseName + '.dbo.[tblSMComment] b ON a.intSourceRecordId = b.intCommentId
 				INNER JOIN ' + @strDestinationDatabaseName + '.dbo.[tblSMComment] c ON a.intDestinationRecordId = c.intCommentId
@@ -614,8 +616,8 @@ BEGIN
 
 			--Get all comments in intDestinationRecordId when the destination activity id is equal to @intSourceActivityId and source transaction is equal to @intDestinationActivityId
 			SET @sql = N'
-				INSERT INTO #TempTransferLogForUpdating ([intInterCompanyTransferLogForCommentId], [intSourceRecordId], [intDestinationRecordId])
-				SELECT [intInterCompanyTransferLogForCommentId], [intDestinationRecordId], [intSourceRecordId]
+				INSERT INTO #TempTransferLogForUpdating ([intInterCompanyTransferLogForCommentId], [intSourceRecordId], [intDestinationRecordId], [dtmCreated])
+				SELECT [intInterCompanyTransferLogForCommentId], [intDestinationRecordId], [intSourceRecordId], [dtmCreated]
 				FROM ' + @strDestinationDatabaseName + '.dbo.[tblSMInterCompanyTransferLogForComment] a
 				INNER JOIN ' + @strDestinationDatabaseName + '.dbo.[tblSMComment] b ON a.intSourceRecordId = b.intCommentId
 				INNER JOIN ' + @strCurrentDatabaseName + '.dbo.[tblSMComment] c ON a.intDestinationRecordId = c.intCommentId
@@ -719,6 +721,41 @@ BEGIN
 
 				DELETE FROM #TempComment where intCommentId = @intCommentId
 			END
+
+			---------------------------------------------------------update existing comment---------------------------------------------------------
+			DECLARE @intTempTransferLogId INT = 0;
+			DECLARE @intTempSourceCommentId INT = 0;
+			DECLARE @intTempDestinationCommentId INT = 0;
+			DECLARE @dtmLogDate DATETIME;
+			DECLARE @dtmSourceDate DATETIME;
+			WHILE EXISTS(SELECT 1 FROM #TempTransferLogForUpdating)
+			BEGIN
+				SELECT TOP 1 
+					@intTempTransferLogId = intInterCompanyTransferLogForCommentId, 
+					@intTempSourceCommentId = intSourceRecordId, 
+					@intTempDestinationCommentId = intDestinationRecordId,
+					@dtmLogDate = dtmCreated
+				FROM #TempTransferLogForUpdating
+
+				--ALWAYS UPDATE  COMMENT WHEN LATEST
+				SET @sql = N'SELECT @paramOut = DATEADD(MILLISECOND,DATEDIFF(MILLISECOND,getutcdate(),GETDATE()), dtmModified) FROM ' + @strCurrentDatabaseName + '.dbo.[tblSMComment] WHERE intCommentId = ' + CONVERT(VARCHAR, @intTempSourceCommentId);
+				EXEC sp_executesql @sql, @ParamDateTimeDefinition, @paramOut = @dtmSourceDate OUTPUT;
+				
+				IF ISNULL(@dtmSourceDate, 0) > ISNULL(@dtmLogDate, 0)
+				BEGIN
+					SET @sql = N'
+						UPDATE ' + @strDestinationDatabaseName + '.dbo.[tblSMComment] SET 
+						strComment = (
+							SELECT strComment FROM ' + @strCurrentDatabaseName + '.dbo.[tblSMComment] WHERE intCommentId = ' + CONVERT(VARCHAR, @intTempSourceCommentId) + '
+						)
+						WHERE intCommentId = ' + CONVERT(VARCHAR, @intTempDestinationCommentId);
+					EXEC sp_executesql @sql
+				END
+
+				DELETE FROM #TempTransferLogForUpdating WHERE intInterCompanyTransferLogForCommentId = @intTempTransferLogId
+			END
+			---------------------------------------------------------end update existing comment---------------------------------------------------------
+
 			--end copy comments
 
 			DELETE FROM #TempTransferLog WHERE intInterCompanyTransferLogForCommentId = @intTransferLogId
