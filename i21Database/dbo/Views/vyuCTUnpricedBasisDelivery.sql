@@ -44,7 +44,13 @@ FROM (SELECT DISTINCT
 		 , strCustomerContract = CH.strCustomerContract
 		 , dblBasisQty = CASE WHEN CH.intContractBasisId IS NOT NULL THEN 0 ELSE SCTC.dblScheduleQty END
 		 , dblBalance = CD.dblBalance
-		 , dblFutures = CD.dblFutures
+		 --, dblFutures = CD.dblFutures
+		 , dblFutures = isnull(CD.dblFutures, (
+												select top 1 PFD.dblFutures from tblCTPriceFixationDetail PFD where PFD.intPriceFixationId = (
+													select top 1 PF.intPriceFixationId from tblCTPriceFixation PF where PF.intContractHeaderId = CH.intContractHeaderId and PF.intContractDetailId = CD.intContractDetailId
+												)
+											)
+						)
 		 , dblBasis = CD.dblBasis
 		 , intInvoiceVoucherId = ISNULL(ARID.intInvoiceId, APBD.intBillId)
 		 , strInvoiceVoucher = ISNULL(strInvoiceNumber,strBillId)
