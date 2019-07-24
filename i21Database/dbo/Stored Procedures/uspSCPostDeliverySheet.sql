@@ -115,29 +115,38 @@ BEGIN TRY
 			AND VNDL.ysnDefaultLocation = 1
 	WHERE SDS.intDeliverySheetId = @intDeliverySheetId
 	
-	DECLARE splitCursor CURSOR FOR SELECT intEntityId, dblSplitPercent, strDistributionOption, intStorageScheduleId, intItemId, intCompanyLocationId, intStorageScheduleTypeId, intShipFromEntityId, intShipFrom FROM @splitTable
-	OPEN splitCursor;  
-	FETCH NEXT FROM splitCursor INTO @intEntityId, @dblSplitPercent, @strDistributionOption, @intStorageScheduleId, @intItemId, @intLocationId, @intStorageScheduleTypeId, @shipFromEntityId, @shipFrom;  
-	WHILE @@FETCH_STATUS = 0  
+
+	-----------------------------------------------------------------------------------------------
+	------------------------------ Customer Storage Update
+	-----------------------------------------------------------------------------------------------
 	BEGIN
-		SET @dblFinalSplitQty =  ROUND((@dblNetUnits * @dblSplitPercent) / 100, @currencyDecimal);
-		IF @dblTempSplitQty > @dblFinalSplitQty
-			SET @dblTempSplitQty = @dblTempSplitQty - @dblFinalSplitQty;
-		ELSE
-			SET @dblFinalSplitQty = @dblTempSplitQty
+		DECLARE splitCursor CURSOR FOR SELECT intEntityId, dblSplitPercent, strDistributionOption, intStorageScheduleId, intItemId, intCompanyLocationId, intStorageScheduleTypeId, intShipFromEntityId, intShipFrom FROM @splitTable
+		OPEN splitCursor;  
+		FETCH NEXT FROM splitCursor INTO @intEntityId, @dblSplitPercent, @strDistributionOption, @intStorageScheduleId, @intItemId, @intLocationId, @intStorageScheduleTypeId, @shipFromEntityId, @shipFrom;  
+		WHILE @@FETCH_STATUS = 0  
+		BEGIN
+			SET @dblFinalSplitQty =  ROUND((@dblNetUnits * @dblSplitPercent) / 100, @currencyDecimal);
+			IF @dblTempSplitQty > @dblFinalSplitQty
+				SET @dblTempSplitQty = @dblTempSplitQty - @dblFinalSplitQty;
+			ELSE
+				SET @dblFinalSplitQty = @dblTempSplitQty
 
-		SELECT @intCustomerStorageId = intCustomerStorageId  FROM tblGRCustomerStorage WHERE intEntityId = @intEntityId AND intItemId = @intItemId AND intCompanyLocationId = @intLocationId AND intDeliverySheetId = @intDeliverySheetId
+			SELECT @intCustomerStorageId = intCustomerStorageId  FROM tblGRCustomerStorage WHERE intEntityId = @intEntityId AND intItemId = @intItemId AND intCompanyLocationId = @intLocationId AND intDeliverySheetId = @intDeliverySheetId
 
-		UPDATE tblGRCustomerStorage SET dblOpenBalance = 0 , dblOriginalBalance = 0 WHERE intCustomerStorageId = @intCustomerStorageId
+			UPDATE tblGRCustomerStorage SET dblOpenBalance = 0 , dblOriginalBalance = 0 WHERE intCustomerStorageId = @intCustomerStorageId
 
-		EXEC uspGRCustomerStorageBalance NULL,NULL,NULL,NULL,@intCustomerStorageId,@dblFinalSplitQty,@intStorageScheduleTypeId,@intStorageScheduleId,1,@shipFrom,@shipFromEntityId,@newBalance OUT
+			EXEC uspGRCustomerStorageBalance NULL,NULL,NULL,NULL,@intCustomerStorageId,@dblFinalSplitQty,@intStorageScheduleTypeId,@intStorageScheduleId,1,@shipFrom,@shipFromEntityId,@newBalance OUT
 
-		FETCH NEXT FROM splitCursor INTO @intEntityId, @dblSplitPercent, @strDistributionOption, @intStorageScheduleId, @intItemId, @intLocationId, @intStorageScheduleTypeId, @shipFromEntityId, @shipFrom;
+			FETCH NEXT FROM splitCursor INTO @intEntityId, @dblSplitPercent, @strDistributionOption, @intStorageScheduleId, @intItemId, @intLocationId, @intStorageScheduleTypeId, @shipFromEntityId, @shipFrom;
+		END
+		CLOSE splitCursor;  
+		DEALLOCATE splitCursor;
 	END
-	CLOSE splitCursor;  
-	DEALLOCATE splitCursor;
+
+
 	DECLARE @ysnDPOwned as BIT = 0;
-	SELECT @ysnDPOwned = CASE WHEN CD.intPricingTypeId = 5 AND ISNULL(GR.strOwnedPhysicalStock, 'Company') = 'Company' THEN 1 ELSE 0 END FROM tblSCTicket SC
+	SELECT @ysnDPOwned = CASE WHEN CD.intPricingTypeId = 5 AND ISNULL(GR.strOwnedPhysicalStock, 'Company') = 'Company' THEN 1 ELSE 0 END 
+	FROM tblSCTicket SC
 	INNER JOIN tblSCDeliverySheet SDS
 		ON SDS.intDeliverySheetId = SC.intDeliverySheetId
 	INNER JOIN tblCTContractDetail CD
@@ -146,6 +155,52 @@ BEGIN TRY
 					SELECT strOwnedPhysicalStock FROM tblGRStorageType WHERE strStorageTypeCode = @strDistributionOption
 				) GR
 	WHERE SDS.intDeliverySheetId = @intDeliverySheetId
+
+	DECLARE @splitCustomerCompany TABLE(
+		cntId INT IDENTITY(1,1)
+		,intDeliverySheetId INT
+		,ysnCompanyOwned BIT
+		,dblPercent NUMERIC(18,6)
+	)
+
+	DECLARE @splitPerEntityBasedOnCustomerCompany TABLE(
+		cntId INT IDENTITY(1,1)
+		,intEntityId INT
+		,ysnCompanyOwned BIT
+		,dblPercent NUMERIC(36,20)
+	)
+
+
+	--- get the company and customer owned split percentage
+	BEGIN
+		INSERT INTO @splitCustomerCompany
+		SELECT
+			intDeliverySheetId
+			,ysnCompanyOwned = CASE WHEN ISNULL(GR.strOwnedPhysicalStock, 'Company') = 'Company' THEN 1 ELSE 0 END 
+			,dblPercent = SUM(DSS.dblSplitPercent)
+		FROM tblSCDeliverySheetSplit DSS
+		INNER JOIN tblGRStorageType GR
+			ON DSS.intStorageScheduleTypeId = GR.intStorageScheduleTypeId
+		WHERE intDeliverySheetId = @intDeliverySheetId
+		GROUP BY intDeliverySheetId,ISNULL(GR.strOwnedPhysicalStock, 'Company')
+	END
+
+	----GET per Entity split % based on company or Customer owned
+	BEGIN
+		INSERT INTO @splitPerEntityBasedOnCustomerCompany
+		SELECT 
+			intEntityId = DSS.intEntityId
+			,ysnCompanyOwned = A.ysnCompanyOwned
+			,dblPercent = DSS.dblSplitPercent/A.dblPercent * 100
+		FROM tblSCDeliverySheetSplit DSS
+		INNER JOIN tblGRStorageType ST
+			ON DSS.intStorageScheduleTypeId = ST.intStorageScheduleTypeId
+		INNER JOIN @splitCustomerCompany A
+			ON A.ysnCompanyOwned = CASE WHEN ISNULL(ST.strOwnedPhysicalStock, 'Company') = 'Company' THEN 1 ELSE 0 END 
+		WHERE DSS.intDeliverySheetId = @intDeliverySheetId
+	END
+	
+
 	INSERT INTO @processTicket(
 		[intItemId]
 		,[dtmDate]
@@ -166,13 +221,15 @@ BEGIN TRY
 		,[intSubLocationId]					= SC.intSubLocationId
 		,[intStorageLocationId]				= SC.intStorageLocationId
 		,[strLotNumber]						= ''
-		,[dblOrigQuantity]					= SC.dblNetUnits
-		,[dblAdjustByQuantity]				= ROUND(((SC.dblNetUnits / SCD.dblGross) * @dblNetUnits) - SC.dblNetUnits, @currencyDecimal)
+		,[dblOrigQuantity]					= SC.dblNetUnits * SPL.dblPercent /100
+		,[dblAdjustByQuantity]				= ROUND((((SC.dblNetUnits / SCD.dblGross) * @dblNetUnits) - SC.dblNetUnits) * SPL.dblPercent / 100, @currencyDecimal)
 		,[dblNewUnitCost]					= 0
 		,[intItemUOMId]						= SC.intItemUOMIdTo
-		,[intOwnershipType]					= CASE WHEN @ysnDPOwned = 1 THEN 1 ELSE 2 END
+		,[intOwnershipType]					= CASE WHEN SPL.ysnCompanyOwned = 1 THEN 1 ELSE 2 END
 	FROM 
 	tblSCDeliverySheet SCD
+	INNER JOIN @splitCustomerCompany SPL
+		ON SCD.intDeliverySheetId = SPL.intDeliverySheetId
 	CROSS APPLY(
 		SELECT intSubLocationId
 		,intStorageLocationId
@@ -184,6 +241,7 @@ BEGIN TRY
 	) SC
 	WHERE SCD.intDeliverySheetId = @intDeliverySheetId
 
+	
 	DECLARE ticketCursor CURSOR FOR SELECT intItemId,dtmDate,intLocationId,intSubLocationId,intStorageLocationId,strLotNumber,dblOrigQuantity,dblAdjustByQuantity,intItemUOMId,intOwnershipType
 	FROM @processTicket
 	OPEN ticketCursor;  
@@ -237,16 +295,16 @@ BEGIN TRY
 			SET @dblTempAdjustByQuantity = CASE WHEN @dblAdjustByQuantity  < 0 THEN @dblAdjustByQuantity * -1 ELSE @dblAdjustByQuantity END;
 			DELETE FROM @storageHistoryData
 
-			DECLARE splitCursor CURSOR FOR SELECT intEntityId, dblSplitPercent FROM @splitTable
+			DECLARE splitCursor CURSOR FOR SELECT intEntityId, dblPercent FROM @splitPerEntityBasedOnCustomerCompany
 			OPEN splitCursor;  
 			FETCH NEXT FROM splitCursor INTO @intEntityId, @dblSplitPercent;  
 			WHILE @@FETCH_STATUS = 0  
 			BEGIN
 				SET @dblFinalSplitQty = ROUND((@dblTempAdjustByQuantity * @dblSplitPercent) / 100, @currencyDecimal);
-				IF @dblTempSplitQty > @dblFinalSplitQty
-					SET @dblTempSplitQty = @dblTempSplitQty - @dblFinalSplitQty;
-				ELSE
-					SET @dblFinalSplitQty = @dblTempSplitQty
+				--IF @dblTempSplitQty > @dblFinalSplitQty
+				--	SET @dblTempSplitQty = @dblTempSplitQty - @dblFinalSplitQty;
+				--ELSE
+				--	SET @dblFinalSplitQty = @dblTempSplitQty
 
 					INSERT INTO @storageHistoryData(
 						[intCustomerStorageId]
@@ -278,7 +336,11 @@ BEGIN TRY
 						,[ysnPost]							= 1
 						,[strTransactionId]					= @strTransactionId
 					FROM tblGRCustomerStorage GR
+					INNER JOIN tblGRStorageType ST
+						ON GR.intStorageTypeId = ST.intStorageScheduleTypeId
+							AND CASE WHEN ISNULL(ST.strOwnedPhysicalStock, 'Company') = 'Company' THEN 1 ELSE 2 END = @intOwnershipType
 					WHERE GR.intDeliverySheetId = @intDeliverySheetId AND intEntityId = @intEntityId
+						
 
 				FETCH NEXT FROM splitCursor INTO @intEntityId, @dblSplitPercent;
 			END
