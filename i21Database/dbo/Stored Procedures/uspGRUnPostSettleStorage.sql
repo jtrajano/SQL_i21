@@ -252,8 +252,11 @@ BEGIN TRY
 				END
 
 				UPDATE CS
-				SET CS.dblOpenBalance = CS.dblOpenBalance + SH.dblUnit
+				SET CS.dblOpenBalance = CS.dblOpenBalance + ROUND(dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId,IU.intUnitMeasureId,CS.intUnitMeasureId,SH.dblUnit),6)
 				FROM tblGRCustomerStorage CS
+				JOIN tblICItemUOM IU
+					ON IU.intItemId = CS.intItemId
+						AND IU.ysnStockUnit = 1
 				JOIN (
 						SELECT intCustomerStorageId
 							,SUM(dblUnits) dblUnit
