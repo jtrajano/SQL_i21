@@ -317,7 +317,26 @@ BEGIN
 			inner join vyuGRSettleStorageTicketNotMapped SS ON Inv.intTransactionId = SS.intSettleStorageId
 			left join tblGRStorageType ST ON SS.intStorageTypeId = ST.intStorageScheduleTypeId
 			WHERE Inv.strTransactionType = 'Storage Settlement'
-			
+
+			UNION ALL SELECT dtmDate = GH.dtmHistoryDate
+				, dblUnits
+				, strTransactionType = 'Inventory Adjustment - DP'
+				, strTransactionId
+				, intTransactionId = intInventoryAdjustmentId
+				, strDistribution = 'DP'
+			FROM tblGRStorageHistory GH
+			JOIN tblSCDeliverySheet DS ON DS.intDeliverySheetId = GH.intDeliverySheetId
+			JOIN tblSCDeliverySheetSplit DSS ON DSS.intDeliverySheetId = DS.intDeliverySheetId AND strDistributionOption = 'DP'
+			JOIN tblGRCustomerStorage CS ON CS.intCustomerStorageId = GH.intCustomerStorageId AND CS.intEntityId = DSS.intEntityId
+			JOIN tblICItem Item ON Item.intItemId = DS.intItemId
+			JOIN tblICCommodity Commodity ON Commodity.intCommodityId = Item.intCommodityId 
+			WHERE DS.ysnPost = 1
+				AND CONVERT(DATETIME, CONVERT(VARCHAR(10), GH.dtmDistributionDate, 110), 110) >= CONVERT(DATETIME, @dtmFromTransactionDate)
+				AND CONVERT(DATETIME, CONVERT(VARCHAR(10), GH.dtmDistributionDate, 110), 110) <= CONVERT(DATETIME, @dtmToTransactionDate)
+				AND Commodity.intCommodityId = @intCommodityId
+				AND Item.intItemId = @intItemId
+				AND GH.intTransactionTypeId = 9
+				AND DSS.dblSplitPercent <> 100
 
 			INSERT INTO @tblResult (
 				dtmDate
