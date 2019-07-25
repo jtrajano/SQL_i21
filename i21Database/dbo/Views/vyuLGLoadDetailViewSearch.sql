@@ -44,6 +44,7 @@ SELECT   L.intLoadId
         ,L.strEmbargoNo
         ,L.strEmbargoPermitNo
         ,L.strComments
+		,L.strBOLInstructions
         ,ysnDispatched = CASE WHEN L.ysnDispatched = 1 THEN CAST(1 AS bit) ELSE CAST(0 AS Bit) END
 		,L.dtmDispatchedDate
 		,L.ysnDispatchMailSent

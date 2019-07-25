@@ -76,6 +76,7 @@ SELECT L.intLoadId
     ,L.strEmbargoNo
     ,L.strEmbargoPermitNo
 	,L.strComments
+	,L.strBOLInstructions
 	,L.ysnPosted
     ,ysnInProgress = ISNULL(L.ysnInProgress, 0)
 	,strTransUsedBy = CASE L.intTransUsedBy

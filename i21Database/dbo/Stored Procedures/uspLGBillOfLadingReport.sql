@@ -12,7 +12,8 @@ BEGIN TRY
 			,'' AS 'strShipToAddress'
 			,'' AS 'strShipmentNumber'
 			,'' AS 'strShipFromAddress'
-			,'' AS 'strBOLNumber'
+			,'' AS 'strBLNumber'
+			,'' AS 'strBookingReference'
 			,'' AS 'strOrderNumber'
 			,'' AS 'strCustomerPO'
 			,'' AS 'dtmShipDate'
@@ -35,13 +36,18 @@ BEGIN TRY
 			,'' AS 'strShipFromLocation'
 			,'' AS 'strReferenceNumber'
 			,'' AS 'strVessel'
+			,'' AS 'strTrailerNo1'
+			,'' AS 'strTrailerNo2'
 			,'' AS 'strSealNumber'
 			,'' AS 'strCustomCustomerPO'
 			,'' AS 'intPalletsCount'
 			,'' AS 'strTruckNo'
 			,'' AS 'strBOLText' 
 			,'' AS 'strLoadDirectionMsg' 
-
+			,'' AS 'strBOLInstructions'
+			,'' AS 'strContainerNumbers'
+			,'' AS 'strCarrier'
+			
 		RETURN
 	END
 
@@ -110,9 +116,9 @@ BEGIN TRY
 		SELECT *
 			,COUNT(1) OVER () AS intPalletsCount
 		FROM (
-			SELECT Load.intLoadId
-				,Load.strLoadNumber
-				,LTRIM(RTRIM(CASE 
+			SELECT L.intLoadId
+				,L.strLoadNumber
+				,strShipFromAddress = LTRIM(RTRIM(CASE 
 							WHEN ISNULL(CL.strAddress, '') = ''
 								THEN ''
 							ELSE CL.strAddress + CHAR(13)
@@ -132,8 +138,8 @@ BEGIN TRY
 							WHEN ISNULL(CL.strCountry, '') = ''
 								THEN ''
 							ELSE CL.strCountry
-							END)) AS strShipFromAddress
-				,LTRIM(RTRIM(CASE 
+							END))
+				,strShipToAddress = LTRIM(RTRIM(CASE 
 							WHEN ISNULL(EL.strLocationName, '') = ''
 								THEN ''
 							ELSE EL.strLocationName + ' '
@@ -157,36 +163,37 @@ BEGIN TRY
 							WHEN ISNULL(EL.strCountry, '') = ''
 								THEN ''
 							ELSE EL.strCountry
-							END)) AS strShipToAddress
-				,Load.strBLNumber
-				,'' AS strOrderNumber
-				,strCustomerPO = Load.strCustomerReference
-				,Load.dtmScheduledDate
-				,Via.strName AS strShipVia
-				,Load.strTruckNo
-				,Load.strComments
+							END))
+				,L.strBLNumber
+				,L.strBookingReference
+				,strOrderNumber = ''
+				,strCustomerPO = L.strCustomerReference
+				,L.dtmScheduledDate
+				,strShipVia = Via.strName
+				,L.strTruckNo
+				,L.strComments
 				,FreightTerm.strFreightTerm
 				,Item.strItemNo
 				,strItemDescription = Item.strDescription
 				,Lot.strLotNumber
 				,Lot.strLotAlias
-				,ISNULL(LoadDetailLot.dblLotQuantity, ISNULL(LoadDetail.dblQuantity, 0)) AS dblQty
-				,ISNULL(LUOM.strUnitMeasure, UOM.strUnitMeasure) AS strUOM
-				,(
+				,dblQty = ISNULL(LoadDetailLot.dblLotQuantity, ISNULL(LoadDetail.dblQuantity, 0))
+				,strUOM = ISNULL(LUOM.strUnitMeasure, UOM.strUnitMeasure)
+				,dblNetWeight = (
 					CASE 
 						WHEN LUOM.strUnitMeasure <> ISNULL(LWUOM.strUnitMeasure, '')
 							THEN (ISNULL(LoadDetailLot.dblLotQuantity, ISNULL(LoadDetail.dblQuantity, 0)) * 
 									dbo.fnCalculateQtyBetweenUOM(LotItemUOM.intItemUOMId, LotWeightUOM.intItemUOMId, 1))
 						ELSE ISNULL(ISNULL(LoadDetailLot.dblGross, 0) - ISNULL(LoadDetailLot.dblTare, 0), ISNULL(LoadDetail.dblNet, 0))
 						END
-					) AS dblNetWeight
-				,SUM(ISNULL(LoadDetailLot.dblGross, 0) - ISNULL(LoadDetailLot.dblTare, 0)) OVER () AS dblTotalWeight
+					)
+				,dblTotalWeight = SUM(ISNULL(LoadDetailLot.dblGross, 0) - ISNULL(LoadDetailLot.dblTare, 0)) OVER ()
 				,intWarehouseInstructionHeaderId = 0
 				,strCompanyName = (
 					SELECT TOP 1 strCompanyName
 					FROM tblSMCompanySetup
 					)
-				,LTRIM(RTRIM(CASE 
+				,strCompanyAddress = LTRIM(RTRIM(CASE 
 							WHEN ISNULL(CL.strAddress, '') = ''
 								THEN ''
 							ELSE CL.strAddress + ', '
@@ -206,22 +213,27 @@ BEGIN TRY
 							WHEN ISNULL(CL.strCountry, '') = ''
 								THEN ''
 							ELSE CL.strCountry
-							END)) AS strCompanyAddress
+							END))
 				,ParentLot.strParentLotNumber
-				,Entity.strName AS strCustomerName
+				,strCustomerName = Entity.strName
 				,strShipFromLocation = CL.strLocationName
-				,Load.strExternalLoadNumber AS strReferenceNumber
-				,Load.strMVessel
-				,Load.strMarks
-				,Load.strTrailerNo3 AS strSealNumber
-				,LoadDetail.strLoadDirectionMsg AS strDeliveryInstruction
-				,ISNULL('', '') AS strCustomCustomerPO
-				,dbo.fnSMGetCompanyLogo('Header') AS blbHeaderLogo
-				,dbo.fnSMGetCompanyLogo('Footer') AS blbFooterLogo
+				,strReferenceNumber = L.strExternalLoadNumber
+				,L.strMVessel
+				,L.strMarks
+				,L.strTrailerNo1
+				,L.strTrailerNo2
+				,strSealNumber = L.strTrailerNo3
+				,strDeliveryInstruction = LoadDetail.strLoadDirectionMsg
+				,strCustomCustomerPO = ISNULL('', '')
+				,blbHeaderLogo = dbo.fnSMGetCompanyLogo('Header')
+				,blbFooterLogo = dbo.fnSMGetCompanyLogo('Footer')
 				,CP.strBOLText
+				,L.strBOLInstructions
 				,LoadDetail.strLoadDirectionMsg
-			FROM tblLGLoad Load
-			JOIN tblLGLoadDetail LoadDetail ON LoadDetail.intLoadId = Load.intLoadId
+				,LoadDetail.strContainerNumbers
+				,strCarrier = CASE WHEN (ISNULL(L.strGenerateLoadHauler, '') <> '') THEN L.strGenerateLoadHauler ELSE Via.strName END
+			FROM tblLGLoad L
+			JOIN tblLGLoadDetail LoadDetail ON LoadDetail.intLoadId = L.intLoadId
 			LEFT JOIN tblLGLoadDetailLot LoadDetailLot ON LoadDetailLot.intLoadDetailId = LoadDetail.intLoadDetailId
 			LEFT JOIN tblICItem Item ON Item.intItemId = LoadDetail.intItemId
 			LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = LoadDetail.intItemUOMId
@@ -235,9 +247,9 @@ BEGIN TRY
 			LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = LoadDetail.intSCompanyLocationId
 			LEFT JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = LoadDetail.intCustomerEntityLocationId
 			LEFT JOIN tblEMEntity Entity ON Entity.intEntityId = LoadDetail.intCustomerEntityId
-			LEFT JOIN tblEMEntity Via ON Via.intEntityId = Load.intHaulerEntityId
-			LEFT JOIN tblSMFreightTerms FreightTerm ON FreightTerm.intFreightTermId = Load.intFreightTermId
-				AND Load.intPurchaseSale = 2 -- 'Outbound Order'
+			LEFT JOIN tblEMEntity Via ON Via.intEntityId = L.intHaulerEntityId
+			LEFT JOIN tblSMFreightTerms FreightTerm ON FreightTerm.intFreightTermId = L.intFreightTermId
+				AND L.intPurchaseSale = 2 -- 'Outbound Order'
 			CROSS APPLY tblLGCompanyPreference CP
 			) AS a
 		WHERE strLoadNumber =  @strShipmentNo

@@ -175,6 +175,7 @@ SELECT LoadDetail.intLoadDetailId
 	, Load.strEmbargoNo
 	, Load.strEmbargoPermitNo
 	, Load.strComments
+	, Load.strBOLInstructions
 	, ysnDispatched = CASE WHEN Load.ysnDispatched = 1 THEN CAST(1 AS bit) ELSE CAST(0 AS Bit) END
 	, Load.dtmDispatchedDate
 	, Load.ysnDispatchMailSent
