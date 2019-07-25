@@ -98,7 +98,7 @@ BEGIN TRY
 
 	SELECT	@blbFile AS blbFile,
 			@strAddress AS strAddress,
-			'YR VAT NO.: - ' + @strVATNumber AS strVATNo,
+			'YR VAT NO.: ' + @strVATNumber AS strVATNo,
 			'INVOICE NO. ' + @strInvoiceNumber AS strInvoiceNo,
 			@strCity + ', ' +
 			 CASE 
