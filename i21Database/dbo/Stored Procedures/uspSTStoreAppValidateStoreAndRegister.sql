@@ -8,6 +8,7 @@
 	, @strRegisterPassword AS NVARCHAR(150) OUTPUT
 	, @intPeriodNum AS INT OUTPUT
 	, @intSetNum AS INT OUTPUT
+	, @strPullTime AS NVARCHAR(30) OUTPUT
 AS
 BEGIN
 	BEGIN TRY
@@ -18,6 +19,7 @@ BEGIN
 		SET @strRegisterPassword = ''
 		SET @intPeriodNum = 0
 		SET @intSetNum = 0
+		SET @strPullTime = ''
 
 		--DECLARE @strRegisterClass AS NVARCHAR(50) = ''
 		----DECLARE @strFilePrefixMain AS NVARCHAR(20) = ''
@@ -36,6 +38,7 @@ BEGIN
 			, @strRegisterPassword = ISNULL(strSAPPHIREPassword, '')
 			, @intPeriodNum = ISNULL(intSAPPHIRECheckoutPullTimePeriodId, 0)
 			, @intSetNum = ISNULL(intSAPPHIRECheckoutPullTimeSetId, 0)
+			, @strPullTime = ISNULL(strSAPPHIRECheckoutPullTime, '')
 		FROM tblSTRegister Reg
 		JOIN tblSTStore ST
 			ON Reg.intRegisterId = ST.intRegisterId

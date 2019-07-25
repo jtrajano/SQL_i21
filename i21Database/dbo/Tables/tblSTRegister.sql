@@ -46,6 +46,7 @@
 	[strSAPPHIREPassword] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
 	[intSAPPHIRECheckoutPullTimePeriodId] INT NULL, 
 	[intSAPPHIRECheckoutPullTimeSetId] INT NULL, 
+	[strSAPPHIRECheckoutPullTime] NVARCHAR(15) COLLATE Latin1_General_CI_AS NULL, 
 
     [ysnDealTotals] BIT NULL, 
     [ysnHourlyTotals] BIT NULL, 
