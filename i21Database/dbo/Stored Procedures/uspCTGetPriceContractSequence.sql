@@ -11,7 +11,7 @@ BEGIN TRY
 	
 	SELECT	CAST(ROW_NUMBER() OVER (ORDER BY intContractSeq ASC) AS INT) intUniqueId,
 			*,
-		    dbo.fnCTConvertQuantityToTargetCommodityUOM(intFinalPriceUOMId,intBasisCommodityUOMId,dblOriginalBasis)/ 
+			dbo.fnCTConvertQuantityToTargetCommodityUOM(intFinalPriceUOMId,intBasisCommodityUOMId,dblOriginalBasis)/ 
 			CASE	WHEN	intBasisCurrencyId = intCurrencyId	THEN 1
 					WHEN	intBasisCurrencyId <> intCurrencyId 
 					AND		ysnBasisSubCurrency = 1				THEN 100 ELSE 0.01 
@@ -79,9 +79,7 @@ BEGIN TRY
 				CD.intNoOfLoad,
 				CD.dblQuantityPerLoad,
 				CD.intBookId,	
-				CD.intSubBookId,
-				CD.dblBasis,
-				CD.dblCashPrice
+				CD.intSubBookId	
 
 		FROM	vyuCTContractSequence		CD
 		JOIN	tblICItemUOM				IM	ON	IM.intItemUOMId		=	CD.intPriceItemUOMId
@@ -102,12 +100,10 @@ LEFT	JOIN	tblICItem					SI	ON	SI.intItemId		=	SC.intItemId
 		UNION ALL
 
 		SELECT 	CH.intContractHeaderId,
-				--CAST (NULL AS INT)				AS	intContractDetailId, 
-				intContractDetailId = (case when CH.ysnMultiplePriceFixation = convert(bit,1) then CD.intContractDetailId else CAST (NULL AS INT) end), 
+				CAST (NULL AS INT)				AS	intContractDetailId, 
 				CH.intFutureMarketId			AS	intOriginalFutureMarketId,
 				CH.intFutureMonthId				AS	intOriginalFutureMonthId,
-				--CAST (NULL AS NUMERIC(18,6))	AS	dblOriginalBasis,
-				dblOriginalBasis = (case when CH.ysnMultiplePriceFixation = convert(bit,1) then CD.dblBasis else CAST (NULL AS NUMERIC(18,6)) end),
+				CAST (NULL AS NUMERIC(18,6))	AS	dblOriginalBasis,
 				CH.dblNoOfLots					AS	dblTotalLots,
 				CAST(NULL AS NUMERIC(18,6))		AS	dblAdditionalCost,
 				CU.intCommodityUnitMeasureId	AS	intFinalPriceUOMId,
@@ -117,8 +113,7 @@ LEFT	JOIN	tblICItem					SI	ON	SI.intItemId		=	SC.intItemId
 				QM.strUnitMeasure				AS	strItemUOM,
 				MA.strFutMarketName				AS	strFutureMarket,
 				MO.strFutureMonth				AS	strFutureMonth,
-				--CAST (NULL AS INT)				AS	intContractSeq,
-				intContractSeq = (case when CH.ysnMultiplePriceFixation = convert(bit,1) then CD.intContractSeq else CAST (NULL AS INT) end),	
+				CAST (NULL AS INT)				AS	intContractSeq,
 				CT.strContractType,
 				EY.strName						AS	strEntityName,
 				CH.strContractNumber,					
@@ -142,9 +137,7 @@ LEFT	JOIN	tblICItem					SI	ON	SI.intItemId		=	SC.intItemId
 				CD.intNoOfLoad,
 				CD.dblQuantityPerLoad,
 				CH.intBookId,	
-				CH.intSubBookId,
-				CD.dblBasis,
-				CD.dblCashPrice 	
+				CH.intSubBookId	
 
 		FROM	tblCTContractHeader			CH	
 		JOIN	tblCTContractType			CT	ON	CT.intContractTypeId	=	CH.intContractTypeId
