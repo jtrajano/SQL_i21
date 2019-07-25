@@ -1,25 +1,41 @@
 ﻿CREATE PROCEDURE [dbo].[uspSTStoreAppValidateStoreAndRegister]
-	@intStoreNo INT,
-	@ysnSuccess BIT OUTPUT,
-	@strResult AS NVARCHAR(1000) OUTPUT,
-	@strRegisterClass AS NVARCHAR(30) OUTPUT
+	@intStoreNo INT
+	, @ysnSuccess BIT OUTPUT
+	, @strResult AS NVARCHAR(1000) OUTPUT
+	, @strRegisterClass AS NVARCHAR(30) OUTPUT
+	, @strRegisterIPAddress AS NVARCHAR(150) OUTPUT
+	, @strRegisterUsername AS NVARCHAR(150) OUTPUT
+	, @strRegisterPassword AS NVARCHAR(150) OUTPUT
+	, @intPeriodNum AS INT OUTPUT
+	, @intSetNum AS INT OUTPUT
 AS
 BEGIN
 	BEGIN TRY
 		SET @ysnSuccess = CAST(1 AS BIT)
 		SET @strRegisterClass = ''
+		SET @strRegisterIPAddress = ''
+		SET @strRegisterUsername = ''
+		SET @strRegisterPassword = ''
+		SET @intPeriodNum = 0
+		SET @intSetNum = 0
 
 		--DECLARE @strRegisterClass AS NVARCHAR(50) = ''
 		----DECLARE @strFilePrefixMain AS NVARCHAR(20) = ''
 
 		-- Create table for error
 		DECLARE @tempTableError TABLE (
-				[intErrorId] INT NOT NULL PRIMARY KEY IDENTITY(1,1),
-				[strErrorMessage] NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
+				[intErrorId]		INT				NOT NULL PRIMARY KEY IDENTITY(1,1),
+				[strErrorMessage]	NVARCHAR(1000)	COLLATE Latin1_General_CI_AS NULL
 		)
 
 		-- Get Register Class if exists
-		SELECT @strRegisterClass = strRegisterClass
+		SELECT 
+			@strRegisterClass = ISNULL(strRegisterClass, '')
+			, @strRegisterIPAddress = ISNULL(strSapphireIpAddress, '')
+			, @strRegisterUsername = ISNULL(strSAPPHIREUserName, '')
+			, @strRegisterPassword = ISNULL(strSAPPHIREPassword, '')
+			, @intPeriodNum = ISNULL(intSAPPHIRECheckoutPullTimePeriodId, 0)
+			, @intSetNum = ISNULL(intSAPPHIRECheckoutPullTimeSetId, 0)
 		FROM tblSTRegister Reg
 		JOIN tblSTStore ST
 			ON Reg.intRegisterId = ST.intRegisterId
