@@ -145,7 +145,7 @@ END
 BEGIN 
 	IF EXISTS (SELECT TOP 1 1 FROM @GLEntries)
 	AND EXISTS (SELECT TOP 1 1 FROM tblGLDetail gd WHERE gd.strTransactionId = @strTransactionId AND gd.ysnIsUnposted = 0 AND ISNULL(@ysnPost, 0) = 1) 
-	BEGIN 
+	BEGIN 		
 		MERGE INTO @result 
 		AS result
 		USING (
@@ -166,7 +166,7 @@ BEGIN
 				INNER JOIN tblGLAccountCategory ac 
 					ON ac.intAccountCategoryId = gm.intAccountCategoryId 
 			WHERE 
-				ac.strAccountCategory IN ('Inventory')
+				ac.strAccountCategory IN ('Inventory', 'Work In Progress')
 			GROUP BY 				
 				gd.strTransactionType
 				,gd.strTransactionId
@@ -225,7 +225,7 @@ BEGIN
 				AND (gd.strTransactionType = @strTransactionType OR @strTransactionType IS NULL) 
 				AND (dbo.fnDateGreaterThanEquals(gd.dtmDate, @dtmDateFrom) = 1 OR @dtmDateFrom IS NULL)
 				AND (dbo.fnDateLessThanEquals(gd.dtmDate, @dtmDateTo) = 1 OR @dtmDateTo IS NULL)
-				AND ac.strAccountCategory IN ('Inventory')
+				AND ac.strAccountCategory IN ('Inventory', 'Work In Progress')
 				AND gd.ysnIsUnposted = 0 
 			GROUP BY 				
 				gd.strTransactionType
@@ -283,7 +283,7 @@ BEGIN
 				INNER JOIN tblGLAccountCategory ac 
 					ON ac.intAccountCategoryId = gm.intAccountCategoryId 
 			WHERE 
-				ac.strAccountCategory IN ('Inventory')
+				ac.strAccountCategory IN ('Inventory', 'Work In Progress')
 			GROUP BY 				
 				gd.strTransactionType
 				,gd.strTransactionId
@@ -319,7 +319,7 @@ BEGIN
 		;
 	END 
 	ELSE 
-	BEGIN 
+	BEGIN
 		MERGE INTO @result 
 		AS result
 		USING (
@@ -340,7 +340,7 @@ BEGIN
 				AND (gd.strTransactionType = @strTransactionType OR @strTransactionType IS NULL) 
 				AND (dbo.fnDateGreaterThanEquals(gd.dtmDate, @dtmDateFrom) = 1 OR @dtmDateFrom IS NULL)
 				AND (dbo.fnDateLessThanEquals(gd.dtmDate, @dtmDateTo) = 1 OR @dtmDateTo IS NULL)
-				AND ac.strAccountCategory IN ('Inventory')
+				AND ac.strAccountCategory IN ('Inventory', 'Work In Progress')
 			GROUP BY 
 				gd.strTransactionType
 		) AS glResult 
