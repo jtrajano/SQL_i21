@@ -44,6 +44,9 @@ BEGIN
 			ON Reg.intRegisterId = ST.intRegisterId
 		WHERE ST.intStoreNo = @intStoreNo
 
+		-- Convert TIME
+		SET @strPullTime = LTRIM(RIGHT(CONVERT(CHAR(20), CAST(('2019-01-01 ' + @strPullTime) AS DATETIME), 22), 11))
+
 		--IF(@strRegisterClass IN ('PASSPORT', 'RADIANT'))
 		--	BEGIN
 		--		SET @strFilePrefixMain = 'ISM'
