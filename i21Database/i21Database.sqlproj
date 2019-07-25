@@ -7896,6 +7896,11 @@
     <None Include="Scripts\Post-Deployment\CT\TitleToCode.sql" />
     <Build Include="dbo\Stored Procedures\uspGRCreateItemGLEntries.sql" />
     <Build Include="dbo\User Defined Types\SettleVoucherCreate.sql" />
+    <Build Include="dbo\Tables\tblRKCoverageEntry.sql" />
+    <Build Include="dbo\Tables\tblRKCoverageEntryDetail.sql" />
+    <Build Include="dbo\Views\vyuRKGetCoverageEntry.sql" />
+    <Build Include="dbo\Views\vyuRKGetCoverageEntryDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetCoverageEntryDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
