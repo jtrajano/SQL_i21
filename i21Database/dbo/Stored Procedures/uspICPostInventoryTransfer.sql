@@ -980,7 +980,8 @@ END
 --------------------------------------------------------------------------------------------  
 IF @ysnRecap = 0
 BEGIN 	
-	IF @ysnGLEntriesRequired = 1 AND EXISTS (SELECT TOP 1 1 FROM @CompanyOwnedStock)
+	IF (@ysnGLEntriesRequired = 1 AND EXISTS (SELECT TOP 1 1 FROM @CompanyOwnedStock))
+		OR (EXISTS (SELECT TOP 1 1 FROM @GLEntries) AND @ysnPost = 0) 
 	BEGIN 
 		EXEC dbo.uspGLBookEntries @GLEntries, @ysnPost 	
 	END
