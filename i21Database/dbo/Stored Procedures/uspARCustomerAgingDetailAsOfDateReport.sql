@@ -174,7 +174,7 @@ WHERE ysnPosted = 1
 	AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal	
 
 --#INVOICETOTALPREPAYMENTS
-SELECT dblPayment	= SUM(dblPayment)
+SELECT dblPayment	= SUM(dblPayment) + SUM(ISNULL(dblWriteOffAmount, 0))
 	 , intInvoiceId = PD.intInvoiceId
 INTO #INVOICETOTALPREPAYMENTS
 FROM dbo.tblARPaymentDetail PD WITH (NOLOCK) INNER JOIN #ARPOSTEDPAYMENT P ON PD.intPaymentId = P.intPaymentId AND P.ysnInvoicePrepayment = 0
@@ -463,7 +463,7 @@ SELECT I.intInvoiceId
 FROM #POSTEDINVOICES I WITH (NOLOCK)
 	LEFT JOIN #ARPOSTEDPAYMENT P ON I.intPaymentId = P.intPaymentId
 	LEFT JOIN (
-		SELECT dblPayment = SUM(dblPayment)
+		SELECT dblPayment = SUM(dblPayment) + SUM(ISNULL(dblWriteOffAmount, 0))
 			 , PD.intInvoiceId
 		FROM dbo.tblARPaymentDetail PD WITH (NOLOCK) INNER JOIN #ARPOSTEDPAYMENT P ON PD.intPaymentId = P.intPaymentId 
 		GROUP BY PD.intInvoiceId
