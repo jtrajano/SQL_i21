@@ -1541,6 +1541,7 @@ BEGIN
 				AND strContractType = 'Purchase'
 				AND intCompanyLocationId = ISNULL(@intLocationId, intCompanyLocationId)
 				AND intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
+				AND BD.ysnOpenGetBasisDelivery = 1
 		
 			INSERT INTO @Final (intSeqId
 				, strSeqHeader
@@ -1605,6 +1606,7 @@ BEGIN
 				AND strContractType = 'Sale'
 				AND intCompanyLocationId = ISNULL(@intLocationId, intCompanyLocationId)
 				AND intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
+				AND BD.ysnOpenGetBasisDelivery = 1
 			
 			INSERT INTO @Final(intSeqId
 				, strSeqHeader
