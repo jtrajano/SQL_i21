@@ -466,8 +466,28 @@ INNER JOIN (tmp_apivcmstImport C2 INNER JOIN tmp_aphglmstImport C
 ON A.strVendorOrderNumber COLLATE Latin1_General_CS_AS = C2.apivc_ivc_no
 	AND B.strVendorId COLLATE Latin1_General_CS_AS = C2.apivc_vnd_no
 WHERE A.intTransactionType != 2
---ORDER BY C.aphgl_dist_no
-UNION ALL
+) tmp
+ORDER BY intLineNo
+
+SET @totalInsertedBillDetail = @@ROWCOUNT;
+
+SET @totalDetailImported = @totalInsertedBillDetail;
+
+--insert detail record for prepayment after getting the record added
+INSERT INTO tblAPBillDetail
+(
+	[intBillId],
+	[strMiscDescription],
+	[dblQtyOrdered],
+	[dblQtyReceived],
+	[intAccountId],
+	[dblTotal],
+	[dblCost],
+	[dbl1099],
+	[int1099Form],
+	[int1099Category],
+	[intLineNo]
+)
 SELECT 
 	[intBillId]				=	A.intBillId,
 	[strMiscDescription]	=	A.strReference,
@@ -490,12 +510,6 @@ INNER JOIN (tmp_apivcmstImport C2 LEFT JOIN tmp_aphglmstImport C
 ON A.strVendorOrderNumber COLLATE Latin1_General_CS_AS = C2.apivc_ivc_no
 	AND B.strVendorId COLLATE Latin1_General_CS_AS = C2.apivc_vnd_no
 WHERE A.intTransactionType = 2
-) tmp
-ORDER BY intLineNo
-
-SET @totalInsertedBillDetail = @@ROWCOUNT;
-
-SET @totalDetailImported = @totalInsertedBillDetail;
 
 --UPDATE THE intBillId of tblAPapivcmst
 UPDATE A
