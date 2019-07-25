@@ -1879,6 +1879,7 @@ BEGIN
 							,[dblForeignRate]
 							,[strRateType]
 							,[intSourceEntityId]
+							,[intCommodityId]
 					)			
 					EXEC @intReturnValue = dbo.uspICCreateGLEntries
 						@strBatchId 
@@ -1936,6 +1937,7 @@ BEGIN
 						,[dblReportingRate]
 						,[dblForeignRate]
 						,[intSourceEntityId]
+						,[intCommodityId]
 					)			
 					EXEC @intReturnValue = dbo.uspICCreateGLEntriesForInTransitCosting
 						@strBatchId 
@@ -1987,6 +1989,7 @@ BEGIN
 							,[dblForeignRate]
 							,[strRateType]
 							,[intSourceEntityId]
+							,[intCommodityId]
 					)			
 					EXEC @intReturnValue = dbo.uspICCreateGLEntries
 						@strBatchId 
@@ -2045,6 +2048,7 @@ BEGIN
 							,[dblForeignRate]
 							,[strRateType]
 							,[intSourceEntityId]
+							,[intCommodityId]
 					)			
 					EXEC @intReturnValue = dbo.uspICCreateGLEntriesForNegativeStockVariance
 						@strBatchId 
@@ -3036,6 +3040,7 @@ BEGIN
 						,[dblForeignRate]
 						,[strRateType]
 						,[intSourceEntityId]
+						,[intCommodityId]
 				)			
 				EXEC @intReturnValue = dbo.uspICCreateGLEntries
 					@strBatchId 
@@ -3152,6 +3157,7 @@ BEGIN
 						,[dblReportingRate]
 						,[dblForeignRate]
 						,[intSourceEntityId]
+						,[intCommodityId]
 					)
 					EXEC @intReturnValue = dbo.uspICCreateGLEntriesForInTransitCosting 
 						@strBatchId
@@ -3543,6 +3549,7 @@ BEGIN
 							,[dblForeignRate]
 							,[strRateType]
 							,[intSourceEntityId]
+							,[intCommodityId]
 					)			
 					EXEC @intReturnValue = dbo.uspICCreateGLEntries
 						@strBatchId 
@@ -3698,6 +3705,7 @@ BEGIN
 						,[dblReportingRate]
 						,[dblForeignRate]
 						,[intSourceEntityId]
+						,[intCommodityId]
 					)
 					EXEC @intReturnValue = dbo.uspICCreateGLEntriesForInTransitCosting 
 						@strBatchId
@@ -4048,6 +4056,7 @@ BEGIN
 								,[dblReportingRate]	
 								,[dblForeignRate]
 								,[intSourceEntityId]
+								,[intCommodityId]
 						)
 						EXEC	@intReturnValue = dbo.uspICPostInTransitCosting  
 								@ItemsForInTransitCosting  
@@ -4203,6 +4212,7 @@ BEGIN
 							,[dblReportingRate]
 							,[dblForeignRate]
 							,[intSourceEntityId]
+							,[intCommodityId]
 						)
 						EXEC @intReturnValue = dbo.uspICCreateReceiptGLEntriesForInTransit 
 							@strBatchId
@@ -4280,6 +4290,7 @@ BEGIN
 							,[dblForeignRate]
 							,[strRateType]
 							,[intSourceEntityId]
+							,[intCommodityId]
 					)			
 					EXEC @intReturnValue = dbo.uspICCreateGLEntries
 						@strBatchId 
@@ -4436,6 +4447,7 @@ BEGIN
 					--		,[dblForeignRate]
 					--		,[strRateType]
 					--		,[intSourceEntityId]
+					--		,[intCommodityId]
 					--)			
 					--EXEC @intReturnValue = dbo.uspICCreateGLEntries
 					--	@strBatchId 
@@ -4724,6 +4736,7 @@ BEGIN
 						,[dblForeignRate]
 						,[strRateType]
 						,[intSourceEntityId]
+						,[intCommodityId]
 				)			
 				EXEC @intReturnValue = dbo.uspICCreateGLEntries
 					@strBatchId 
@@ -4838,6 +4851,7 @@ BEGIN
 						,[dblReportingRate]
 						,[dblForeignRate]
 						,[intSourceEntityId]
+						,[intCommodityId]
 				)
 				EXEC @intReturnValue = dbo.uspICCreateGLEntriesForInTransitCosting 
 					@strBatchId
@@ -5160,6 +5174,7 @@ BEGIN
 						,[dblForeignRate]
 						,[strRateType]
 						,[intSourceEntityId]
+						,[intCommodityId]
 				)			
 				EXEC @intReturnValue = dbo.uspICCreateGLEntries
 					@strBatchId 

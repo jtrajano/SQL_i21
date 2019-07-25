@@ -250,6 +250,7 @@ WITH ForGLEntries_CTE (
 	,strItemNo
 	,strRateType
 	,intSourceEntityId
+	,intCommodityId
 )
 AS 
 (
@@ -273,6 +274,7 @@ AS
 			,i.strItemNo
 			,strRateType = currencyRateType.strCurrencyExchangeRateType
 			,t.intSourceEntityId
+			,i.intCommodityId
 	FROM	dbo.tblICInventoryTransaction t INNER JOIN dbo.tblICInventoryTransactionType TransType
 				ON t.intTransactionTypeId = TransType.intTransactionTypeId
 			INNER JOIN tblICItem i
@@ -324,6 +326,7 @@ SELECT
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
 		,strRateType				= ForGLEntries_CTE.strRateType
 		,intSourceEntityId			= ForGLEntries_CTE.intSourceEntityId
+		,intCommodityId				= ForGLEntries_CTE.intCommodityId
 FROM	ForGLEntries_CTE  
 		INNER JOIN @GLAccounts GLAccounts
 			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
@@ -398,6 +401,7 @@ SELECT
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
 		,strRateType				= ForGLEntries_CTE.strRateType 
 		,intSourceEntityId			= ForGLEntries_CTE.intSourceEntityId
+		,intCommodityId				= ForGLEntries_CTE.intCommodityId
 FROM	ForGLEntries_CTE 
 		INNER JOIN @GLAccounts GLAccounts
 			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
@@ -475,6 +479,7 @@ SELECT
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
 		,strRateType				= ForGLEntries_CTE.strRateType 
 		,intSourceEntityId			= ForGLEntries_CTE.intSourceEntityId
+		,intCommodityId				= ForGLEntries_CTE.intCommodityId
 FROM	ForGLEntries_CTE 
 		INNER JOIN @GLAccounts GLAccounts
 			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
@@ -545,6 +550,7 @@ SELECT
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
 		,strRateType				= ForGLEntries_CTE.strRateType 
 		,intSourceEntityId			= ForGLEntries_CTE.intSourceEntityId
+		,intCommodityId				= ForGLEntries_CTE.intCommodityId
 FROM	ForGLEntries_CTE 
 		INNER JOIN @GLAccounts GLAccounts
 			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
@@ -618,6 +624,7 @@ SELECT
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
 		,strRateType				= ForGLEntries_CTE.strRateType 
 		,intSourceEntityId			= ForGLEntries_CTE.intSourceEntityId
+		,intCommodityId				= ForGLEntries_CTE.intCommodityId
 FROM	ForGLEntries_CTE 
 		INNER JOIN @GLAccounts GLAccounts
 			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
@@ -688,6 +695,7 @@ SELECT
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
 		,strRateType				= ForGLEntries_CTE.strRateType 
 		,intSourceEntityId			= ForGLEntries_CTE.intSourceEntityId
+		,intCommodityId				= ForGLEntries_CTE.intCommodityId
 FROM	ForGLEntries_CTE 
 		INNER JOIN @GLAccounts GLAccounts
 			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId

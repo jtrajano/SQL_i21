@@ -81,6 +81,7 @@ BEGIN
 		,[dblForeignRate]
 		,[strRateType]
 		,[intSourceEntityId]
+		,[intCommodityId]
 	)
 	-----------------------------------------
 	-- Generate the g/l entries

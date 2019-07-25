@@ -660,6 +660,7 @@ WITH ForGLEntries_CTE (
 	,intOtherChargeItemId
 	,ysnFixInventoryRoundingDiscrepancy 
 	,intSourceEntityId
+	,intCommodityId
 )
 AS
 (
@@ -688,6 +689,7 @@ AS
 			,charge.intItemId
 			,ysnFixInventoryRoundingDiscrepancy = CAST(0 AS BIT)
 			,t.intSourceEntityId
+			,i.intCommodityId
 	FROM	dbo.tblICInventoryTransaction t INNER JOIN dbo.tblICInventoryTransactionType TransType
 				ON t.intTransactionTypeId = TransType.intTransactionTypeId
 			INNER JOIN tblICItem i 
@@ -727,6 +729,7 @@ AS
 			,charge.intItemId
 			,ysnFixInventoryRoundingDiscrepancy = CAST(0 AS BIT)
 			,t.intSourceEntityId
+			,i.intCommodityId
 	FROM	dbo.tblICInventoryTransaction t INNER JOIN dbo.tblICInventoryTransactionType TransType
 				ON t.intTransactionTypeId = TransType.intTransactionTypeId
 			INNER JOIN tblICItem i 
@@ -778,6 +781,7 @@ AS
 			,charge.intItemId
 			,ysnFixInventoryRoundingDiscrepancy = CAST(0 AS BIT)
 			,t.intSourceEntityId
+			,i.intCommodityId
 	FROM	dbo.tblICInventoryTransaction t INNER JOIN dbo.tblICInventoryTransactionType TransType
 				ON t.intTransactionTypeId = TransType.intTransactionTypeId
 			INNER JOIN tblICItem i 
@@ -817,6 +821,7 @@ AS
 			,charge.intItemId
 			,ysnFixInventoryRoundingDiscrepancy = CAST(0 AS BIT)
 			,t.intSourceEntityId
+			,i.intCommodityId
 	FROM	dbo.tblICInventoryTransaction t INNER JOIN dbo.tblICInventoryTransactionType TransType
 				ON t.intTransactionTypeId = TransType.intTransactionTypeId
 			INNER JOIN tblICItem i 
@@ -868,6 +873,7 @@ AS
 			,charge.intItemId
 			,ysnFixInventoryRoundingDiscrepancy = CAST(0 AS BIT)
 			,t.intSourceEntityId
+			,i.intCommodityId
 	FROM	dbo.tblICInventoryTransaction t INNER JOIN dbo.tblICInventoryTransactionType TransType
 				ON t.intTransactionTypeId = TransType.intTransactionTypeId
 			INNER JOIN tblICItem i 
@@ -907,6 +913,7 @@ AS
 			,charge.intItemId
 			,ysnFixInventoryRoundingDiscrepancy = CAST(0 AS BIT)
 			,t.intSourceEntityId
+			,i.intCommodityId
 	FROM	dbo.tblICInventoryTransaction t INNER JOIN dbo.tblICInventoryTransactionType TransType
 				ON t.intTransactionTypeId = TransType.intTransactionTypeId
 			INNER JOIN tblICItem i 
@@ -958,6 +965,7 @@ AS
 			,charge.intItemId
 			,ysnFixInventoryRoundingDiscrepancy = CAST(0 AS BIT)
 			,t.intSourceEntityId
+			,i.intCommodityId
 	FROM	dbo.tblICInventoryTransaction t INNER JOIN dbo.tblICInventoryTransactionType TransType
 				ON t.intTransactionTypeId = TransType.intTransactionTypeId
 			INNER JOIN tblICItem i 
@@ -997,6 +1005,7 @@ AS
 			,charge.intItemId
 			,ysnFixInventoryRoundingDiscrepancy = CAST(0 AS BIT)
 			,t.intSourceEntityId
+			,i.intCommodityId
 	FROM	dbo.tblICInventoryTransaction t INNER JOIN dbo.tblICInventoryTransactionType TransType
 				ON t.intTransactionTypeId = TransType.intTransactionTypeId
 			INNER JOIN tblICItem i 
@@ -1048,6 +1057,7 @@ AS
 			,intOtherChargeItemId = NULL 
 			,ysnFixInventoryRoundingDiscrepancy = CAST(0 AS BIT)
 			,t.intSourceEntityId
+			,i.intCommodityId
 	FROM	dbo.tblICInventoryTransaction t INNER JOIN dbo.tblICInventoryTransactionType TransType
 				ON t.intTransactionTypeId = TransType.intTransactionTypeId
 			INNER JOIN tblICItem i 
@@ -1089,6 +1099,7 @@ INSERT INTO @GLEntries (
 	,dblReportingRate
 	,dblForeignRate
 	,intSourceEntityId
+	,intCommodityId
 )
 
 /*-----------------------------------------------------------------------------------
@@ -1136,6 +1147,7 @@ SELECT
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
 		,intSourceEntityId			= ForGLEntries_CTE.intSourceEntityId 
+		,intCommodityId				= ForGLEntries_CTE.intCommodityId
 FROM	ForGLEntries_CTE
 		INNER JOIN @GLAccounts GLAccounts
 			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
@@ -1187,6 +1199,7 @@ SELECT
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
 		,intSourceEntityId			= ForGLEntries_CTE.intSourceEntityId
+		,intCommodityId				= ForGLEntries_CTE.intCommodityId
 FROM	ForGLEntries_CTE 
 		INNER JOIN @GLAccounts GLAccounts
 			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
@@ -1239,6 +1252,7 @@ SELECT
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
 		,intSourceEntityId			= ForGLEntries_CTE.intSourceEntityId
+		,intCommodityId				= ForGLEntries_CTE.intCommodityId
 FROM	ForGLEntries_CTE 
 		INNER JOIN @OtherChargeGLAccounts GLAccounts
 			ON ForGLEntries_CTE.intOtherChargeItemId = GLAccounts.intItemId		
@@ -1302,6 +1316,7 @@ SELECT
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
 		,intSourceEntityId			= ForGLEntries_CTE.intSourceEntityId
+		,intCommodityId				= ForGLEntries_CTE.intCommodityId
 FROM	ForGLEntries_CTE
 		INNER JOIN @GLAccounts GLAccounts
 			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
@@ -1352,6 +1367,7 @@ SELECT
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate
 		,intSourceEntityId			= ForGLEntries_CTE.intSourceEntityId
+		,intCommodityId				= ForGLEntries_CTE.intCommodityId
 FROM	ForGLEntries_CTE 
 		INNER JOIN @GLAccounts GLAccounts
 			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
@@ -1407,6 +1423,7 @@ SELECT
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
 		,intSourceEntityId			= ForGLEntries_CTE.intSourceEntityId
+		,intCommodityId				= ForGLEntries_CTE.intCommodityId
 FROM	ForGLEntries_CTE 
 		INNER JOIN @GLAccounts GLAccounts
 			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
@@ -1456,6 +1473,7 @@ SELECT
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
 		,intSourceEntityId			= ForGLEntries_CTE.intSourceEntityId
+		,intCommodityId				= ForGLEntries_CTE.intCommodityId
 FROM	ForGLEntries_CTE 
 		INNER JOIN @GLAccounts GLAccounts
 			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
@@ -1511,6 +1529,7 @@ SELECT
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
 		,intSourceEntityId			= ForGLEntries_CTE.intSourceEntityId
+		,intCommodityId				= ForGLEntries_CTE.intCommodityId
 FROM	ForGLEntries_CTE 
 		INNER JOIN @GLAccounts GLAccounts
 			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
@@ -1560,6 +1579,7 @@ SELECT
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
 		,intSourceEntityId			= ForGLEntries_CTE.intSourceEntityId
+		,intCommodityId				= ForGLEntries_CTE.intCommodityId
 FROM	ForGLEntries_CTE 
 		INNER JOIN @GLAccounts GLAccounts
 			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
@@ -1615,6 +1635,7 @@ SELECT
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
 		,intSourceEntityId			= ForGLEntries_CTE.intSourceEntityId
+		,intCommodityId				= ForGLEntries_CTE.intCommodityId
 FROM	ForGLEntries_CTE 
 		INNER JOIN @GLAccounts GLAccounts
 			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
@@ -1664,6 +1685,7 @@ SELECT
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
 		,intSourceEntityId			= ForGLEntries_CTE.intSourceEntityId
+		,intCommodityId				= ForGLEntries_CTE.intCommodityId
 FROM	ForGLEntries_CTE 
 		INNER JOIN @GLAccounts GLAccounts
 			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
@@ -1725,6 +1747,7 @@ SELECT
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
 		,intSourceEntityId			= ForGLEntries_CTE.intSourceEntityId
+		,intCommodityId				= ForGLEntries_CTE.intCommodityId
 FROM	ForGLEntries_CTE
 		INNER JOIN @GLAccounts GLAccounts
 			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
@@ -1780,6 +1803,7 @@ SELECT
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
 		,intSourceEntityId			= ForGLEntries_CTE.intSourceEntityId
+		,intCommodityId				= ForGLEntries_CTE.intCommodityId
 FROM	ForGLEntries_CTE
 		INNER JOIN @GLAccounts GLAccounts
 			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
@@ -1830,6 +1854,7 @@ SELECT
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
 		,intSourceEntityId			= ForGLEntries_CTE.intSourceEntityId
+		,intCommodityId				= ForGLEntries_CTE.intCommodityId
 FROM	ForGLEntries_CTE 
 		INNER JOIN @GLAccounts GLAccounts
 			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
@@ -1885,6 +1910,7 @@ SELECT
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
 		,intSourceEntityId			= ForGLEntries_CTE.intSourceEntityId
+		,intCommodityId				= ForGLEntries_CTE.intCommodityId
 FROM	ForGLEntries_CTE
 		INNER JOIN @GLAccounts GLAccounts
 			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
@@ -1936,6 +1962,7 @@ SELECT
 		,dblReportingRate			= NULL 
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
 		,intSourceEntityId			= ForGLEntries_CTE.intSourceEntityId
+		,intCommodityId				= ForGLEntries_CTE.intCommodityId
 FROM	ForGLEntries_CTE 
 		INNER JOIN @GLAccounts GLAccounts
 			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
@@ -1984,6 +2011,7 @@ BEGIN
 		,intOtherChargeItemId
 		,ysnFixInventoryRoundingDiscrepancy 
 		,intSourceEntityId
+		,intCommodityId
 	)
 	AS
 	(
@@ -2016,6 +2044,7 @@ BEGIN
 				,intOtherChargeItemId = NULL 
 				,ysnFixInventoryRoundingDiscrepancy = CAST(1 AS BIT)
 				,t.intSourceEntityId
+				,t.intCommodityId
 		FROM	dbo.tblICInventoryTransactionType TransType
 				CROSS APPLY (
 					SELECT	cbLog.strRelatedTransactionId 
@@ -2043,6 +2072,7 @@ BEGIN
 					SELECT	TOP 1 
 							t.* 
 							,i.strItemNo
+							,i.intCommodityId
 					FROM	tblICInventoryTransaction t INNER JOIN tblICItem i
 								ON i.intItemId = t.intItemId
 							INNER JOIN tblICInventoryLotCostAdjustmentLog cbLog 
@@ -2103,6 +2133,7 @@ BEGIN
 				,intOtherChargeItemId = NULL 
 				,ysnFixInventoryRoundingDiscrepancy = CAST(1 AS BIT)
 				,t.intSourceEntityId
+				,t.intCommodityId
 		FROM	dbo.tblICInventoryTransactionType TransType
 				CROSS APPLY (
 					SELECT	cbLog.strRelatedTransactionId 
@@ -2127,6 +2158,7 @@ BEGIN
 					SELECT	TOP 1 
 							t.* 
 							,i.strItemNo
+							,i.intCommodityId
 					FROM	tblICInventoryTransaction t INNER JOIN tblICItem i
 								ON i.intItemId = t.intItemId
 							INNER JOIN tblICCostingMethod c
@@ -2190,6 +2222,7 @@ BEGIN
 				,intOtherChargeItemId = NULL 
 				,ysnFixInventoryRoundingDiscrepancy = CAST(1 AS BIT)
 				,t.intSourceEntityId
+				,t.intCommodityId
 		FROM	dbo.tblICInventoryTransactionType TransType
 				CROSS APPLY (
 					SELECT	cbLog.strRelatedTransactionId 
@@ -2214,6 +2247,7 @@ BEGIN
 					SELECT	TOP 1 
 							t.* 
 							,i.strItemNo
+							,i.intCommodityId
 					FROM	tblICInventoryTransaction t INNER JOIN tblICItem i
 								ON i.intItemId = t.intItemId
 							INNER JOIN tblICInventoryLIFOCostAdjustmentLog cbLog 
@@ -2274,6 +2308,7 @@ BEGIN
 				,intOtherChargeItemId = NULL 
 				,ysnFixInventoryRoundingDiscrepancy = CAST(1 AS BIT)
 				,t.intSourceEntityId
+				,t.intCommodityId
 		FROM	dbo.tblICInventoryTransactionType TransType
 				CROSS APPLY (
 					SELECT	cbLog.strRelatedTransactionId 
@@ -2298,6 +2333,7 @@ BEGIN
 					SELECT	TOP 1 
 							t.* 
 							,i.strItemNo
+							,i.intCommodityId
 					FROM	tblICInventoryTransaction t INNER JOIN tblICItem i
 								ON i.intItemId = t.intItemId
 							INNER JOIN tblICInventoryActualCostAdjustmentLog cbLog 
@@ -2361,6 +2397,7 @@ BEGIN
 		,dblReportingRate
 		,dblForeignRate
 		,intSourceEntityId
+		,intCommodityId
 	)
 	SELECT	
 			dtmDate						= DecimalDiscrepancy.dtmDate
@@ -2400,6 +2437,7 @@ BEGIN
 			,dblReportingRate			= NULL 
 			,dblForeignRate				= DecimalDiscrepancy.dblForexRate 
 			,intSourceEntityId			= DecimalDiscrepancy.intSourceEntityId
+			,intCommodityId				= DecimalDiscrepancy.intCommodityId
 	FROM	DecimalDiscrepancy 
 			INNER JOIN @GLAccounts GLAccounts
 				ON DecimalDiscrepancy.intItemId = GLAccounts.intItemId
@@ -2459,6 +2497,7 @@ BEGIN
 			,dblReportingRate
 			,dblForeignRate	
 			,intSourceEntityId
+			,intCommodityId
 		)
 		SELECT	TOP 1 
 				dtmDate
@@ -2493,6 +2532,7 @@ BEGIN
 				,dblReportingRate
 				,dblForeignRate
 				,intSourceEntityId
+				,intCommodityId
 		FROM	@GLEntries glEntries
 				CROSS APPLY dbo.fnGetDebit(@discrepancy) Debit
 				CROSS APPLY dbo.fnGetCredit(@discrepancy) Credit	
@@ -2538,6 +2578,7 @@ SELECT
 		,dblReportingRate
 		,dblForeignRate 
 		,intSourceEntityId
+		,intCommodityId
 FROM	@GLEntries
 
 IF @ysnPost = 0 

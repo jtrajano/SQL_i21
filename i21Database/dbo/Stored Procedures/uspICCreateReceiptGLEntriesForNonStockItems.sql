@@ -342,6 +342,7 @@ WITH ForGLEntries_CTE (
 	,strRateType
 	,dblLineTotal
 	,intSourceEntityId
+	,intCommodityId
 )
 AS 
 (
@@ -380,6 +381,7 @@ AS
 					,r.intSubCurrencyCents
 				)
 		,intSourceEntityId = r.intEntityVendorId
+		,intCommodityId = i.intCommodityId
 	FROM 
 		@NonInventoryItem t INNER JOIN tblICInventoryTransactionType TransType 
 			ON t.intTransactionTypeId = TransType.intTransactionTypeId
@@ -437,6 +439,7 @@ SELECT
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
 		,strRateType				= ForGLEntries_CTE.strRateType 
 		,intSourceEntityId			= ForGLEntries_CTE.intSourceEntityId
+		,intCommodityId				= ForGLEntries_CTE.intCommodityId
 FROM	ForGLEntries_CTE INNER JOIN @NonStockGLAccounts GLAccounts 
 			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
 			AND ForGLEntries_CTE.intItemLocationId = GLAccounts.intItemLocationId
@@ -504,6 +507,7 @@ SELECT
 		,dblForeignRate				= ForGLEntries_CTE.dblForexRate 
 		,strRateType				= ForGLEntries_CTE.strRateType 
 		,intSourceEntityId			= ForGLEntries_CTE.intSourceEntityId
+		,intCommodityId				= ForGLEntries_CTE.intCommodityId
 FROM	ForGLEntries_CTE INNER JOIN @NonStockGLAccounts GLAccounts 
 			ON ForGLEntries_CTE.intItemId = GLAccounts.intItemId
 			AND ForGLEntries_CTE.intItemLocationId = GLAccounts.intItemLocationId

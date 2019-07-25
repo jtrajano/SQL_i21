@@ -428,6 +428,7 @@ BEGIN
 			,[dblForeignRate]
 			,[strRateType]
 			,[intSourceEntityId]
+			,[intCommodityId]
 		)	
 		EXEC @intReturnValue = dbo.uspICPostInventoryShipmentOtherCharges 
 			@intTransactionId
@@ -581,6 +582,7 @@ BEGIN
 				,[dblForeignRate]
 				,[strRateType]
 				,[intSourceEntityId]
+				,[intCommodityId]
 			)	
 			EXEC	@intReturnValue = dbo.uspICPostCosting  
 					@ItemsForPost  
@@ -625,6 +627,7 @@ BEGIN
 					,[dblForeignRate]
 					,[strRateType]
 					,[intSourceEntityId]
+					,[intCommodityId]
 			)
 			EXEC @intReturnValue = dbo.uspICCreateGLEntries 
 				@strBatchId
@@ -728,6 +731,7 @@ BEGIN
 						,[dblReportingRate]	
 						,[dblForeignRate]
 						,[intSourceEntityId]
+						,[intCommodityId]
 				)
 				EXEC	@intReturnValue = dbo.uspICPostInTransitCosting  
 						@ItemsForInTransitCosting  
@@ -885,6 +889,7 @@ BEGIN
 			,[dblForeignRate]
 			,[strRateType]
 			,[intSourceEntityId]
+			,[intCommodityId]
 		)	
 		EXEC dbo.uspICPostInventoryShipmentTaxes 
 			@intTransactionId
@@ -937,6 +942,7 @@ BEGIN
 				,[dblForeignRate]
 				,[strRateType]
 				,[intSourceEntityId]
+				,[intCommodityId]
 		)
 		EXEC	@intReturnValue = dbo.uspICUnpostCosting
 				@intTransactionId
@@ -993,6 +999,7 @@ BEGIN
 				,[dblForeignRate]
 				,[strRateType]
 				,[intSourceEntityId]
+				,[intCommodityId]
 			)	
 			EXEC @intReturnValue = dbo.uspICPostInventoryShipmentOtherCharges 
 				@intTransactionId
@@ -1040,6 +1047,7 @@ BEGIN
 				,[dblForeignRate]
 				,[strRateType]
 				,[intSourceEntityId]
+				,[intCommodityId]
 			)	
 			EXEC dbo.uspICPostInventoryShipmentTaxes 
 				@intTransactionId

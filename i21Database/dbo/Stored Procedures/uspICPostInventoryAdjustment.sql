@@ -496,6 +496,7 @@ BEGIN
 				,[dblForeignRate]
 				,[strRateType]
 				,[intSourceEntityId]
+				,[intCommodityId]
 			)
 			EXEC	@intReturnValue = dbo.uspICPostCosting  
 					@ItemsForAdjust  
@@ -544,6 +545,7 @@ BEGIN
 				,[dblForeignRate]
 				,[strRateType]
 				,[intSourceEntityId]
+				,[intCommodityId]
 		)
 		EXEC @intReturnValue = dbo.uspICCreateGLEntries 
 			@strBatchId
@@ -607,6 +609,7 @@ BEGIN
 				,[dblForeignRate]
 				,[strRateType]
 				,[intSourceEntityId]
+				,[intCommodityId]
 		)
 		EXEC	@intReturnValue = dbo.uspICUnpostCosting
 				@intTransactionId
