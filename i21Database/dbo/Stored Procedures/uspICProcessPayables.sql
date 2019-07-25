@@ -176,7 +176,7 @@ BEGIN
 			SELECT 
 				[intEntityVendorId]			
 				,[intTransactionType] = 1
-				,[intLocationId]	
+				,ShipmentCharges.[intLocationId]	
 				,[intShipToId] = NULL	
 				,[intShipFromId] = NULL	 		
 				,[intShipFromEntityId] = NULL
@@ -197,7 +197,7 @@ BEGIN
 				,[intInventoryShipmentChargeId]		
 				,[intLoadShipmentId] = NULL				
 				,[intLoadShipmentDetailId] = NULL			
-				,[intItemId]						
+				,ShipmentCharges.[intItemId]						
 				,[intPurchaseTaxGroupId] = NULL		
 				,[strMiscDescription]				
 				,[dblOrderQty]						
@@ -222,14 +222,17 @@ BEGIN
 				,[dblExchangeRate] = ShipmentCharges.dblForexRate
 				,[ysnSubCurrency]					
 				,[intSubCurrencyCents]				
-				,[intAccountId]						
-				,[intShipViaId]						
+				,[dbo].[fnGetItemGLAccount](ShipmentCharges.intItemId, ItemLocation.intItemLocationId, 'AP Clearing')					
+				,Shipment.[intShipViaId]						
 				,[intTermId] = NULL 			
 				,[strBillOfLading] = Shipment.strBOLNumber
 				,[ysnReturn] = 0 
 			FROM vyuICShipmentChargesForBilling ShipmentCharges
 			INNER JOIN tblICInventoryShipment Shipment
 				ON Shipment.intInventoryShipmentId = ShipmentCharges.intInventoryShipmentId
+			INNER JOIN tblICItemLocation ItemLocation 
+				ON ItemLocation.intItemId = ShipmentCharges.intItemId
+				AND ItemLocation.intLocationId = ShipmentCharges.intLocationId
 			WHERE Shipment.intInventoryShipmentId = @intShipmentId
 				AND Shipment.ysnPosted = 1
 	END
