@@ -21,8 +21,9 @@ BEGIN
 		tblSMCompanyLocation cl
 	WHERE
 		cl.intCompanyLocationId = @intLocationId
-		AND (cl.intCompanyLocationId IS NOT NULL AND LTRIM(RTRIM(cl.intCompanyLocationId)) <> '') 
+		AND (cl.strVendorRefNoPrefix IS NOT NULL AND LTRIM(RTRIM(cl.strVendorRefNoPrefix)) <> '') 
 		AND ISNULL(@strVendorRefNo, '') NOT LIKE strVendorRefNoPrefix + '%'
+		AND LTRIM(RTRIM(ISNULL(@strVendorRefNo, ''))) <> ''
 
 	RETURN @strVendorRefNo
 END
