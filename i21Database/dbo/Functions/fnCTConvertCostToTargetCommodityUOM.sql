@@ -1,21 +1,22 @@
 ﻿CREATE FUNCTION [dbo].[fnCTConvertCostToTargetCommodityUOM]  
 (  
- @intCommodityId INT,  
- @intFromCommodityUOMId INT,  
- @intToCommodityUOMId INT,  
- @dblCost  NUMERIC(26,12)  
+	@intCommodityId INT,  
+	@intFromCommodityUOMId INT,  
+	@intToCommodityUOMId INT,  
+	@dblCost  NUMERIC(26,12)  
 )  
 RETURNS NUMERIC(26,12)  
 AS  
 BEGIN  
- Declare @dblUnitQtyFrom NUMERIC(26,12)=1  
- Declare @dblUnitQtyTo NUMERIC(26,12)=1  
+	DECLARE @dblUnitQtyFrom NUMERIC(26,12)=1  
+	DECLARE @unitMeasureId INT
+
+	SELECT @unitMeasureId = intUnitMeasureId from tblICItemUOM where intItemUOMId = @intFromCommodityUOMId
+	SELECT @dblUnitQtyFrom=ISNULL(dblUnitQty,1) From tblICCommodityUnitMeasure Where intCommodityId = @intCommodityId and intUnitMeasureId =@unitMeasureId
   
- Select @dblUnitQtyFrom=ISNULL(dblUnitQty,1) From tblICCommodityUnitMeasure Where intCommodityId = @intCommodityId and intUnitMeasureId =@intFromCommodityUOMId
- --Select @dblUnitQtyTo=ISNULL(dblUnitQty,1) From tblICCommodityUnitMeasure Where intCommodityUnitMeasureId=@intToCommodityUOMId  
-  
- return @dblCost / (NULLIF(@dblUnitQtyFrom,0)/1)--NULLIF(@dblUnitQtyTo,0))  
+	RETURN @dblCost / (NULLIF(@dblUnitQtyFrom,0)/1)
 END
+
 
 /*
 CREATE FUNCTION [dbo].[fnCTConvertCostToTargetCommodityUOM]
