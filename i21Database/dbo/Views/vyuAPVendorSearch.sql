@@ -31,6 +31,7 @@ SELECT
 	a.ysnPymtCtrlActive as ysnActive
 	---
 	,
+	b.dtmOriginationDate,
 	a.intVendorType, --get the actual text
 	strVendorType = case when a.intVendorType = 1 then 'Person' when a.intVendorType = '0' then 'Company' else '' end,
 	a.intGLAccountExpenseId, -- get the actual text
