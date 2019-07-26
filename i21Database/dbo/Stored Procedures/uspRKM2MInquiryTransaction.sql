@@ -2218,7 +2218,7 @@ BEGIN
 			, dblMarketRatio = 0
 			, dblCosts = 0
 			, SUM(dblOpenQty) dblOpenQty
-			, SUM(dblOpenQty1) dblResult
+			, SUM(dblOpenQty) dblResult
 			, dblCashOrFuture  = dbo.fnCTConvertQuantityToTargetCommodityUOM(PriceSourceUOMId, intMarketBasisUOM, dblCashOrFuture)
 			,intCurrencyId
 		FROM (
@@ -2230,8 +2230,22 @@ BEGIN
 				, c.intCommodityId
 				, i.strItemNo
 				, i.intItemId
-				, SUM(dbo.fnCalculateQtyBetweenUOM(iuomStck.intItemUOMId, iuomTo.intItemUOMId, (ISNULL(s.dblQuantity , 0)))) dblOpenQty
-				, SUM(dbo.fnCalculateQtyBetweenUOM(iuomStck.intItemUOMId, iuomTo.intItemUOMId, (ISNULL(s.dblQuantity , 0)))) dblOpenQty1
+				, dblOpenQty = SUM(dbo.fnCalculateQtyBetweenUOM(iuomStck.intItemUOMId, iuomTo.intItemUOMId, (ISNULL(s.dblQuantity , 0))))  
+						+ 
+						ISNULL((SELECT dbo.fnCTConvertQuantityToTargetCommodityUOM(col.intUnitMeasureId,@intQuantityUOMId,col.dblOriginalQuantity - ca.dblAdjustmentAmount)
+									* CASE WHEN col.strType = 'Sale' THEN -1 ELSE 1 END
+							FROM tblRKCollateral col
+							LEFT JOIN (
+								SELECT intCollateralId, sum(dblAdjustmentAmount) as dblAdjustmentAmount FROM tblRKCollateralAdjustment 
+								WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmAdjustmentDate, 110), 110) <= CONVERT(DATETIME, @dtmTransactionDateUpTo)
+								GROUP BY intCollateralId
+
+							) ca on col.intCollateralId = ca.intCollateralId
+							WHERE col.intCommodityId = c.intCommodityId
+							AND col.intItemId = i.intItemId
+							AND col.intLocationId = s.intLocationId
+							AND col.ysnIncludeInPriceRiskAndCompanyTitled = 1
+						),0)
 				, ISNULL((SELECT TOP 1 intUnitMeasureId FROM tblRKM2MBasisDetail temp
 						WHERE temp.intM2MBasisId = @intM2MBasisId
 							AND ISNULL(temp.intCommodityId,0) = CASE WHEN ISNULL(temp.intCommodityId,0)= 0 THEN 0 ELSE c.intCommodityId END
