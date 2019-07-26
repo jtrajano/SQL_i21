@@ -3752,3 +3752,74 @@ BEGIN
 		,0
 END
 GO
+
+-- Migrating data from tblCTBlendDemand to tblMFDemandHeader,tblMFDemandDetail
+GO
+IF EXISTS (
+		SELECT 1
+		FROM tblCTBlendDemand
+		)
+	AND NOT EXISTS (
+		SELECT 1
+		FROM tblMFDemandHeader
+		)
+BEGIN
+	DECLARE @strDemandNo NVARCHAR(50)
+		,@intDemandHeaderId INT
+
+	EXEC dbo.uspMFGeneratePatternId @intCategoryId = NULL
+		,@intItemId = NULL
+		,@intManufacturingId = NULL
+		,@intSubLocationId = NULL
+		,@intLocationId = NULL
+		,@intOrderTypeId = NULL
+		,@intBlendRequirementId = NULL
+		,@intPatternCode = 145
+		,@ysnProposed = 0
+		,@strPatternString = @strDemandNo OUTPUT
+		,@intShiftId = NULL
+		,@dtmDate = NULL
+
+	INSERT INTO tblMFDemandHeader (
+		intConcurrencyId
+		,strDemandNo
+		,strDemandName
+		,dtmDate
+		,intBookId
+		,intSubBookId
+		,ysnImported
+		)
+	SELECT 1
+		,@strDemandNo
+		,'Default'
+		,GETDATE()
+		,NULL
+		,NULL
+		,0
+
+	SELECT @intDemandHeaderId = SCOPE_IDENTITY()
+
+	INSERT INTO tblMFDemandDetail (
+		intConcurrencyId
+		,intDemandHeaderId
+		,intItemId
+		,intSubstituteItemId
+		,dtmDemandDate
+		,dblQuantity
+		,intItemUOMId
+		,intCompanyLocationId
+		,dtmCreated
+		)
+	SELECT 1
+		,@intDemandHeaderId
+		,intItemId
+		,NULL
+		,dtmDemandDate
+		,dblQuantity
+		,intItemUOMId
+		,intCompanyLocationId
+		,GETDATE()
+	FROM tblCTBlendDemand
+END
+GO
+
