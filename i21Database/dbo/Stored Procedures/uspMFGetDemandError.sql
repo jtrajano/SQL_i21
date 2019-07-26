@@ -23,4 +23,5 @@ BEGIN
 		,dtmCreated
 		,strErrorMessage
 	FROM tblMFDemandImportError
+	ORDER BY intDemandImportErrorId
 END
