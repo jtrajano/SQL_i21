@@ -384,7 +384,12 @@ BEGIN TRY
 
 	EXEC	uspCTCreateDetailHistory		@intContractHeaderId
 	EXEC	uspCTInterCompanyContract		@intContractHeaderId
-	--EXEC	uspCTManagePayable				@intContractHeaderId, 'header', 0
+
+	-- Add Payables if Create Other Cost Payable on Save Contract set to true
+	IF EXISTS(SELECT TOP 1 1 FROM tblCTCompanyPreference WHERE ysnCreateOtherCostPayable = 1)
+	BEGIN
+		EXEC uspCTManagePayable @intContractHeaderId, 'header', 0
+	END	
 
 END TRY
 
