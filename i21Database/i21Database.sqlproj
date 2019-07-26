@@ -7664,6 +7664,8 @@
     <Build Include="dbo\Views\vyuAPPendingPayables.sql" />
     <None Include="Scripts\Post-Deployment\GR\ContractPrice.sql" />
     <Build Include="dbo\Stored Procedures\uspICRebuildCleanUp.sql" />
+    <Build Include="dbo\Functions\fnCTConvertQtyToStockItemUOM.sql" />
+    <Build Include="dbo\Functions\fnCTConvertPriceToStockItemUOM.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
