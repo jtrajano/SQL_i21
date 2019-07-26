@@ -26,12 +26,13 @@ BEGIN
 	WHERE ISNULL(intCommodityId, 0) = ISNULL(@CommodityId, 0)
 		AND strType = 'ProductType'
 
-	SELECT *
+	SELECT intBookId, intSubBookId, intCommodityId, dblContracts = ISNULL([Contracts], 0), dblInTransit = ISNULL([In-Transit], 0), dblStock = ISNULL([Stock], 0), dblFutures = ISNULL([Futures], 0)
+	INTO #tmpBalances
 	FROM (
 		SELECT DISTINCT strType = 'Contracts'
 			, Detail.intBookId
 			, Detail.intSubBookId
-			, dblBalance = SUM(dbo.[fnCTConvertQuantityToTargetItemUOM](cd.intItemId, cd.intUnitMeasureId, @intUnitMeasureId, Detail.dblBalance))
+			, dblBalance = SUM(ISNULL(dbo.[fnCTConvertQuantityToTargetItemUOM](Detail.intItemId, Detail.intUnitMeasureId, @intUnitMeasureId, Detail.dblBalance), 0))
 			, Header.intCommodityId
 		FROM tblCTContractDetail Detail
 		JOIN tblCTContractHeader Header ON Header.intContractHeaderId = Detail.intContractHeaderId
@@ -50,7 +51,7 @@ BEGIN
 		UNION ALL SELECT DISTINCT strType = 'In-Transit'
 			, L.intBookId
 			, L.intSubBookId
-			, dblBalance = SUM(dbo.[fnCTConvertQuantityToTargetItemUOM](LD.intItemId, ItemUOM.intUnitMeasureId, @intUnitMeasureId, LD.dblQuantity))
+			, dblBalance = SUM(ISNULL(dbo.[fnCTConvertQuantityToTargetItemUOM](LD.intItemId, ItemUOM.intUnitMeasureId, @intUnitMeasureId, LD.dblQuantity), 0))
 			, CH.intCommodityId
 		FROM tblLGLoad L
 		JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId AND L.intPurchaseSale = 1
@@ -61,8 +62,8 @@ BEGIN
 			AND L.intShipmentStatus = 3
 			AND ISNULL(CH.intCommodityId, 0) = ISNULL(@CommodityId, 0)
 			AND CAST(FLOOR(CAST(L.dtmDispatchedDate AS FLOAT)) AS DATETIME) <= @Date
-			AND ISNULL(Detail.intBookId, 0) = ISNULL(@BookId, 0)
-			AND ISNULL(Detail.intSubBookId, 0) = ISNULL(@SubBookId, 0)
+			AND ISNULL(L.intBookId, 0) = ISNULL(@BookId, 0)
+			AND ISNULL(L.intSubBookId, 0) = ISNULL(@SubBookId, 0)
 		GROUP BY L.intBookId
 			, L.intSubBookId
 			, CH.intCommodityId
@@ -70,7 +71,7 @@ BEGIN
 		UNION ALL SELECT DISTINCT strType = 'Stock'
 			, Lots.intBookId
 			, Lots.intSubBookId
-			, dblBalance = SUM(dbo.[fnCTConvertQuantityToTargetItemUOM](Lots.intItemId, ItemUOM.intUnitMeasureId, @intUnitMeasureId, Lots.dblBalance))
+			, dblBalance = SUM(ISNULL(dbo.[fnCTConvertQuantityToTargetItemUOM](Lots.intItemId, ItemUOM.intUnitMeasureId, @intUnitMeasureId, Lots.dblBalance), 0))
 			, Lots.intCommodityId
 		FROM vyuLGPickOpenInventoryLots Lots
 		JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = Lots.intItemUOMId
@@ -85,7 +86,7 @@ BEGIN
 		UNION ALL SELECT DISTINCT strType = 'Futures'
 			, DAP.intBookId
 			, DAP.intSubBookId
-			, dblBalance = SUM(DAP.dblNoOfLots * FM.dblContractSize)
+			, dblBalance = SUM(ISNULL(DAP.dblNoOfLots * FM.dblContractSize, 0))
 			, DAP.intCommodityId
 		FROM vyuRKGetDailyAveragePriceDetail DAP
 		JOIN tblRKFutureMarket FM ON FM.intFutureMarketId = DAP.intFutureMarketId
@@ -101,6 +102,32 @@ BEGIN
 			, DAP.intSubBookId
 			, DAP.intCommodityId
 	) t
+	PIVOT (
+		SUM(dblBalance)
+		FOR strType IN ([Contracts], [In-Transit], [Stock], [Futures])
+	) tblPivot
+
+	SELECT ComAtt.intCommodityAttributeId
+		, strProductType = ComAtt.strDescription
+		, Book.intBookId
+		, Book.strBook
+		, SubBook.intSubBookId
+		, SubBook.strSubBook
+		, Balance.dblContracts
+		, Balance.dblInTransit
+		, Balance.dblStock
+		, dblTotalPhysical = Balance.dblContracts + Balance.dblInTransit + Balance.dblStock
+		, Balance.dblFutures
+		, dblTotalPosition = Balance.dblContracts + Balance.dblInTransit + Balance.dblStock + Balance.dblFutures
+
+	FROM tblICCommodityAttribute ComAtt
+	LEFT JOIN #tmpBalances Balance ON Balance.intCommodityId = ComAtt.intCommodityId
+	LEFT JOIN tblCTBook Book ON Book.intBookId = Balance.intBookId
+	LEFT JOIN tblCTSubBook SubBook ON SubBook.intSubBookId = Balance.intSubBookId
+	WHERE ISNULL(ComAtt.intCommodityId, 0) = ISNULL(@CommodityId, 0)
+		AND strType = 'ProductType'
+
+	DROP TABLE #tmpBalances
 
 	
 

@@ -48,6 +48,7 @@ CREATE TABLE [dbo].[tblRKFutureMarket](
 	[strOptionSymbolPrefix] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	[intCompanyId] INT NULL,
 	[dblForecastPrice] NUMERIC(18, 6) NULL DEFAULT ((0)),
+	[dblM2MSimulationPercent] NUMERIC(18,6) NULL DEFAULT((0)),
     CONSTRAINT [PK_tblRKFutureMarket_intFutureMarketId] PRIMARY KEY CLUSTERED ([intFutureMarketId] ASC),
 	CONSTRAINT [FK_tblRKFutureMarket_tblICUnitMeasure_intUnitMeasureId] FOREIGN KEY([intUnitMeasureId]) REFERENCES [dbo].[tblICUnitMeasure] ([intUnitMeasureId]),
 	CONSTRAINT [FK_tblRKFutureMarket_tblSMCurrency_intCurrencyId] FOREIGN KEY([intCurrencyId])REFERENCES [dbo].[tblSMCurrency] ([intCurrencyID]),
