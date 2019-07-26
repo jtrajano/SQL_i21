@@ -362,7 +362,16 @@ BEGIN
 END
 
 IF @ysnThrowError = 1 
-	AND EXISTS (SELECT TOP 1 1 FROM @result WHERE ISNULL(dblICAmount, 0) - ISNULL(dblGLAmount, 0) <> 0 )
+	AND EXISTS (
+		SELECT TOP 1 
+			SUM(ISNULL(dblICAmount, 0) - ISNULL(dblGLAmount, 0))
+		FROM 
+			@result 
+		GROUP BY
+			intAccountId
+		HAVING 
+			SUM(ISNULL(dblICAmount, 0) - ISNULL(dblGLAmount, 0)) <> 0 
+	)
 BEGIN 
 	DECLARE @difference AS NUMERIC(18, 6) 
 			,@strItemDescription NVARCHAR(500) 
