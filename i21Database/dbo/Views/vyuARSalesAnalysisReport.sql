@@ -158,7 +158,7 @@ FROM
 			 , strTransactionId
 			 , intItemId
 			 , intItemUOMId
-			 , dblCost				= AVG(dblCost)
+			 , dblCost				= SUM(dblQty * dblCost + dblValue) / SUM(dblQty)
 		FROM tblICInventoryTransaction 
 		WHERE ysnIsUnposted = 0
 		GROUP BY intTransactionId, strTransactionId, intItemId, intItemUOMId
@@ -532,7 +532,7 @@ FROM
 			 , strTransactionId
 			 , intItemId
 			 , intItemUOMId
-			 , dblCost			= AVG(dblCost)
+			 , dblCost			= SUM(dblQty * dblCost + dblValue) / SUM(dblQty)
 		FROM tblICInventoryTransaction 
 		WHERE ysnIsUnposted = 0
 		GROUP BY intTransactionId, strTransactionId, intItemId, intItemUOMId
@@ -777,7 +777,7 @@ FROM
 			 , strTransactionId
 			 , intItemId
 			 , intItemUOMId
-			 , dblCost				= AVG(dblCost)
+			 , dblCost				= SUM(dblQty * dblCost + dblValue) / SUM(dblQty)
 		FROM tblICInventoryTransaction 
 		WHERE ysnIsUnposted = 0
 		GROUP BY intTransactionId, strTransactionId, intItemId, intItemUOMId
@@ -1021,7 +1021,7 @@ FROM
 			 , strTransactionId
 			 , intItemId
 			 , intItemUOMId
-			 , dblCost				= AVG(dblCost)
+			 , dblCost				= SUM(dblQty * dblCost + dblValue) / SUM(dblQty)
 		FROM tblICInventoryTransaction 
 		WHERE ysnIsUnposted = 0
 		GROUP BY intTransactionId, strTransactionId, intItemId, intItemUOMId
