@@ -234,8 +234,8 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , strPurchaseReference		= INVOICEDETAIL.strPurchaseReference
 	 , strLoadNumber			= INVOICEDETAIL.strLoadNumber
 	 , strTruckDriver			= INVOICEDETAIL.strTruckName
-	 , strTrailer				= INVOICEDETAIL.strCustomerReference
-	 , strSeals					= ''
+	 , strTrailer				= INVOICEDETAIL.strTrailerNumber
+	 , strSeals					= INVOICEDETAIL.strSealNumber
 	 , strLotNumber				= INVOICEDETAIL.strLotNumber
 	 , blbLogo                  = CASE WHEN ISNULL(SELECTEDINV.ysnStretchLogo, 0) = 1 THEN @blbStretchedLogo ELSE @blbLogo END
 	 , strAddonDetailKey		= INVOICEDETAIL.strAddonDetailKey
@@ -303,6 +303,8 @@ LEFT JOIN (
 		 , dblEstimatedPercentLeft	= [SITE].dblEstimatedPercentLeft
 		 , strTicketNumber			= SCALE.strTicketNumber
 		 , strTicketNumberDate		= SCALE.strTicketNumber + ' - ' + CONVERT(NVARCHAR(50), SCALE.dtmTicketDateTime, 101) 
+		 , strTrailerNumber			= SCALE.strTrailerNumber
+		 , strSealNumber			= SCALE.strSealNumber
 		 , strCustomerReference		= ISNULL(NULLIF(SCALE.strCustomerReference, ''), CONTRACTS.strCustomerContract)
 		 , strSalesReference		= ISNULL(NULLIF(LGLOAD.strCustomerReference, ''), CONTRACTS.strCustomerContract)
 	 	 , strPurchaseReference		= LGLOAD.strExternalLoadNumber
@@ -370,11 +372,16 @@ LEFT JOIN (
 	LEFT JOIN (
 		SELECT SC.intTicketId
 			 , SC.strTicketNumber
-			 , SC.strCustomerReference
+			 , SC.strCustomerReference			 
 			 , SC.strTruckName
 			 , LG.strLoadNumber
 			 , SC.dtmTicketDateTime
+			 , SVT.strTrailerNumber
+			 , SCN.strSealNumber
 		FROM dbo.tblSCTicket SC WITH (NOLOCK)
+		LEFT JOIN dbo.tblSMShipViaTrailer SVT ON SC.intEntityShipViaTrailerId = SVT.intEntityShipViaTrailerId 
+		LEFT JOIN dbo.tblSCTicketSealNumber TSN ON SC.intTicketId = TSN.intTicketId
+		LEFT JOIN tblSCSealNumber SCN ON SCN.intSealNumberId = TSN.intSealNumberId
 		LEFT JOIN dbo.tblLGLoad LG ON SC.intLoadId = LG.intLoadId
 	) SCALE ON ID.intTicketId = SCALE.intTicketId
 	LEFT JOIN (

@@ -16,6 +16,7 @@
 [intEntityLocationId] INT NULL,
 [intContractDetailId] INT NULL,
 [strComments] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
+[strBOLInstructions] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 [intHaulerEntityId] INT NULL,
 [intTicketId] INT NULL,
 [ysnInProgress] [bit] NULL,

@@ -572,6 +572,8 @@ BEGIN
 		,strBundleType
 		,intEntityVendorId
 		,intReceiptEntityVendorId
+		,intItemCommodityId
+		,intChargeCommodityId
 	)
 	AS 
 	(
@@ -606,6 +608,8 @@ BEGIN
 				,strBundleType = ISNULL(Item.strBundleType,'')
 				,intEntityVendorId = ReceiptCharges.intEntityVendorId 
 				,intReceiptEntityVendorId = Receipt.intEntityVendorId
+				,intItemCommodityId = Item.intCommodityId 
+				,intChargeCommodityId = Charge.intCommodityId
 		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem 
 					ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 				INNER JOIN dbo.tblICInventoryReceiptItemAllocatedCharge AllocatedOtherCharges
@@ -668,6 +672,7 @@ BEGIN
 		,[dblForeignRate]
 		,[strRateType]
 		,[intSourceEntityId]
+		,[intCommodityId]
 	)	
 	-------------------------------------------------------------------------------------------
 	-- Cost billed by: None
@@ -710,6 +715,7 @@ BEGIN
 			,dblForeignRate				= InventoryCostCharges.dblForexRate 
 			,strRateType				= InventoryCostCharges.strRateType
 			,intSourceEntityId			= CASE WHEN InventoryCostCharges.ysnPrice = 1 THEN InventoryCostCharges.intReceiptEntityVendorId ELSE InventoryCostCharges.intEntityVendorId END
+			,intCommodityId				= intItemCommodityId
 	FROM	InventoryCostCharges  
 			INNER JOIN @ItemGLAccounts ItemGLAccounts
 				ON InventoryCostCharges.intItemId = ItemGLAccounts.intItemId
@@ -770,6 +776,7 @@ BEGIN
 			,dblForeignRate				= InventoryCostCharges.dblForexRate 
 			,strRateType				= InventoryCostCharges.strRateType
 			,intSourceEntityId			= CASE WHEN InventoryCostCharges.ysnPrice = 1 THEN InventoryCostCharges.intReceiptEntityVendorId ELSE InventoryCostCharges.intEntityVendorId END
+			,intCommodityId				= intChargeCommodityId
 	FROM	InventoryCostCharges INNER JOIN @OtherChargesGLAccounts OtherChargesGLAccounts
 				ON InventoryCostCharges.intChargeId = OtherChargesGLAccounts.intChargeId
 				AND InventoryCostCharges.intChargeItemLocation = OtherChargesGLAccounts.intItemLocationId
@@ -836,6 +843,7 @@ BEGIN
 			,dblForeignRate				= InventoryCostCharges.dblForexRate 
 			,strRateType				= InventoryCostCharges.strRateType
 			,intSourceEntityId			= InventoryCostCharges.intEntityVendorId
+			,intCommodityId				= intItemCommodityId
 	FROM	InventoryCostCharges INNER JOIN @ItemGLAccounts ItemGLAccounts
 				ON InventoryCostCharges.intItemId = ItemGLAccounts.intItemId
 				AND InventoryCostCharges.intItemLocationId = ItemGLAccounts.intItemLocationId
@@ -893,6 +901,7 @@ BEGIN
 			,dblForeignRate				= InventoryCostCharges.dblForexRate 
 			,strRateType				= InventoryCostCharges.strRateType
 			,intSourceEntityId			= InventoryCostCharges.intEntityVendorId
+			,intCommodityId				= InventoryCostCharges.intChargeCommodityId
 	FROM	InventoryCostCharges INNER JOIN @OtherChargesGLAccounts OtherChargesGLAccounts
 				ON InventoryCostCharges.intChargeId = OtherChargesGLAccounts.intChargeId
 				AND InventoryCostCharges.intChargeItemLocation = OtherChargesGLAccounts.intItemLocationId
@@ -928,7 +937,8 @@ BEGIN
 				InventoryCostCharges.intTransactionId,
 				InventoryCostCharges.strInventoryTransactionTypeName,
 				InventoryCostCharges.strTransactionForm,
-				InventoryCostCharges.strRateType
+				InventoryCostCharges.strRateType,
+				InventoryCostCharges.intChargeCommodityId
 
 	-------------------------------------------------------------------------------------------
 	-- If linked item is a 'Kit' and Inventory Cost = true
@@ -972,6 +982,7 @@ BEGIN
 			,dblForeignRate				= InventoryCostCharges.dblForexRate 
 			,strRateType				= InventoryCostCharges.strRateType
 			,intSourceEntityId			= InventoryCostCharges.intEntityVendorId
+			,intCommodityId				= intItemCommodityId
 	FROM	InventoryCostCharges INNER JOIN @ItemGLAccounts ItemGLAccounts
 				ON InventoryCostCharges.intItemId = ItemGLAccounts.intItemId
 				AND InventoryCostCharges.intItemLocationId = ItemGLAccounts.intItemLocationId
@@ -1029,6 +1040,7 @@ BEGIN
 			,dblForeignRate				= InventoryCostCharges.dblForexRate 
 			,strRateType				= InventoryCostCharges.strRateType
 			,intSourceEntityId			= InventoryCostCharges.intEntityVendorId
+			,intCommodityId				= InventoryCostCharges.intItemCommodityId
 	FROM	InventoryCostCharges INNER JOIN @ItemGLAccounts ItemGLAccounts
 				ON InventoryCostCharges.intItemId = ItemGLAccounts.intItemId
 				AND InventoryCostCharges.intItemLocationId = ItemGLAccounts.intItemLocationId
@@ -1063,7 +1075,8 @@ BEGIN
 				InventoryCostCharges.intTransactionId,
 				InventoryCostCharges.strInventoryTransactionTypeName,
 				InventoryCostCharges.strTransactionForm,
-				InventoryCostCharges.strRateType
+				InventoryCostCharges.strRateType,
+				InventoryCostCharges.intItemCommodityId
 
 	;
 	-- Generate the G/L Entries here: 
@@ -1088,6 +1101,7 @@ BEGIN
 		,strCharge 
 		,intEntityVendorId
 		,intReceiptEntityVendorId
+		,intChargeCommodityId
 	)
 	AS 
 	(
@@ -1117,6 +1131,7 @@ BEGIN
 				,strCharge = Charge.strItemNo
 				,intEntityVendorId = ReceiptCharges.intEntityVendorId
 				,intReceiptEntityVendorId = Receipt.intEntityVendorId
+				,intChargeCommodityId = Charge.intCommodityId
 		FROM	dbo.tblICInventoryReceipt Receipt 
 				INNER JOIN dbo.tblICInventoryReceiptCharge ReceiptCharges
 					ON ReceiptCharges.intInventoryReceiptId = Receipt.intInventoryReceiptId
@@ -1166,6 +1181,7 @@ BEGIN
 		,[dblForeignRate]
 		,[strRateType]
 		,[intSourceEntityId]
+		,[intCommodityId]
 	)	
 
 	-------------------------------------------------------------------------------------------
@@ -1209,6 +1225,7 @@ BEGIN
 			,dblForeignRate				= NonInventoryCostCharges.dblForexRate 
 			,strRateType				= NonInventoryCostCharges.strRateType
 			,intSourceEntityId			= NonInventoryCostCharges.intEntityVendorId
+			,intCommodityId				= NonInventoryCostCharges.intChargeCommodityId
 	FROM	NonInventoryCostCharges INNER JOIN @OtherChargesGLAccounts OtherChargesGLAccounts
 				ON NonInventoryCostCharges.intChargeId = OtherChargesGLAccounts.intChargeId
 				AND NonInventoryCostCharges.intChargeItemLocation = OtherChargesGLAccounts.intItemLocationId
@@ -1268,6 +1285,7 @@ BEGIN
 			,dblForeignRate				= NonInventoryCostCharges.dblForexRate 
 			,strRateType				= NonInventoryCostCharges.strRateType
 			,intSourceEntityId			= NonInventoryCostCharges.intEntityVendorId
+			,intCommodityId				= NonInventoryCostCharges.intChargeCommodityId
 	FROM	NonInventoryCostCharges INNER JOIN @OtherChargesGLAccounts OtherChargesGLAccounts
 				ON NonInventoryCostCharges.intChargeId = OtherChargesGLAccounts.intChargeId
 				AND NonInventoryCostCharges.intChargeItemLocation = OtherChargesGLAccounts.intItemLocationId
@@ -1334,6 +1352,7 @@ BEGIN
 			,dblForeignRate				= NonInventoryCostCharges.dblForexRate 
 			,strRateType				= NonInventoryCostCharges.strRateType
 			,intSourceEntityId			= NonInventoryCostCharges.intEntityVendorId
+			,intCommodityId				= NonInventoryCostCharges.intChargeCommodityId
 	FROM	NonInventoryCostCharges INNER JOIN @OtherChargesGLAccounts OtherChargesGLAccounts
 				ON NonInventoryCostCharges.intChargeId = OtherChargesGLAccounts.intChargeId
 				AND NonInventoryCostCharges.intChargeItemLocation = OtherChargesGLAccounts.intItemLocationId
@@ -1391,6 +1410,7 @@ BEGIN
 			,dblForeignRate				= NonInventoryCostCharges.dblForexRate 
 			,strRateType				= NonInventoryCostCharges.strRateType
 			,intSourceEntityId			= NonInventoryCostCharges.intEntityVendorId
+			,intCommodityId				= NonInventoryCostCharges.intChargeCommodityId
 	FROM	NonInventoryCostCharges INNER JOIN @OtherChargesGLAccounts OtherChargesGLAccounts
 				ON NonInventoryCostCharges.intChargeId = OtherChargesGLAccounts.intChargeId
 				AND NonInventoryCostCharges.intChargeItemLocation = OtherChargesGLAccounts.intItemLocationId
@@ -1456,6 +1476,7 @@ BEGIN
 			,dblForeignRate				= NonInventoryCostCharges.dblForexRate 
 			,strRateType				= NonInventoryCostCharges.strRateType
 			,intSourceEntityId			= NonInventoryCostCharges.intReceiptEntityVendorId
+			,intCommodityId				= NonInventoryCostCharges.intChargeCommodityId
 	FROM	NonInventoryCostCharges INNER JOIN @OtherChargesGLAccounts OtherChargesGLAccounts
 				ON NonInventoryCostCharges.intChargeId = OtherChargesGLAccounts.intChargeId
 				AND NonInventoryCostCharges.intChargeItemLocation = OtherChargesGLAccounts.intItemLocationId
@@ -1512,6 +1533,7 @@ BEGIN
 			,dblForeignRate				= NonInventoryCostCharges.dblForexRate 
 			,strRateType				= NonInventoryCostCharges.strRateType
 			,intSourceEntityId			= NonInventoryCostCharges.intReceiptEntityVendorId
+			,intCommodityId				= NonInventoryCostCharges.intChargeCommodityId
 	FROM	NonInventoryCostCharges INNER JOIN @OtherChargesGLAccounts OtherChargesGLAccounts
 				ON NonInventoryCostCharges.intChargeId = OtherChargesGLAccounts.intChargeId
 				AND NonInventoryCostCharges.intChargeItemLocation = OtherChargesGLAccounts.intItemLocationId
@@ -1566,6 +1588,7 @@ BEGIN
 			,[dblForeignRate]
 			,[strRateType]
 			,[intSourceEntityId]
+			,[intCommodityId]
 	FROM	@ChargesGLEntries
 END
 

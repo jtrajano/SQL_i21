@@ -295,6 +295,7 @@ BEGIN TRY
 			,dblReportingRate
 			,dblForeignRate
 			,intSourceEntityId
+			,intCommodityId
 			)
 		EXEC dbo.uspICCreateGLEntriesOnCostAdjustment @strBatchId = @strBatchIdForUnpost
 			,@intEntityUserSecurityId = @intUserId
@@ -637,6 +638,7 @@ BEGIN TRY
 				,[dblForeignRate]
 				,[strRateType]
 				,[intSourceEntityId]
+				,[intCommodityId]
 				)
 			EXEC dbo.uspICPostCosting @ItemsForPost
 				,@strBatchId

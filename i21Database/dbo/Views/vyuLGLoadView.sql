@@ -67,6 +67,7 @@ SELECT -- Load Header
 	,L.strEmbargoNo
 	,L.strEmbargoPermitNo
 	,L.strComments
+	,L.strBOLInstructions
 	,ysnDispatched = CAST(CASE WHEN L.ysnDispatched = 1 THEN 1 ELSE 0 END AS BIT)
 	,L.dtmDispatchedDate
 	,L.ysnDispatchMailSent

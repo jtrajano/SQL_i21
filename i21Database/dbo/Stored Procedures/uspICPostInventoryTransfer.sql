@@ -423,6 +423,7 @@ BEGIN
 					,[dblForeignRate]
 					,[strRateType]
 					,[intSourceEntityId]
+					,[intCommodityId]
 			)
 			EXEC	@intReturnValue = dbo.uspICPostCosting  
 					@CompanyOwnedStock  
@@ -724,6 +725,7 @@ BEGIN
 					,[dblReportingRate]	
 					,[dblForeignRate]
 					,[intSourceEntityId]
+					,[intCommodityId]
 			)
 			EXEC	@intReturnValue = dbo.uspICPostInTransitCosting  
 					@CompanyOwnedStockInTransit  
@@ -775,6 +777,7 @@ BEGIN
 					,[dblForeignRate]
 					,[strRateType]
 					,[intSourceEntityId]
+					,[intCommodityId]
 			)
 			EXEC @intReturnValue = dbo.uspICCreateGLEntries 
 				@strBatchId
@@ -817,6 +820,7 @@ BEGIN
 					,[dblReportingRate]	
 					,[dblForeignRate]
 					,[intSourceEntityId]
+					,[intCommodityId]
 			)
 			EXEC @intReturnValue = dbo.uspICCreateGLEntriesForInTransitCosting 
 				@strBatchId
@@ -864,6 +868,7 @@ BEGIN
 				,[dblForeignRate]
 				,[strRateType]
 				,[intSourceEntityId]
+				,[intCommodityId]
 		)
 		EXEC @intReturnValue = dbo.uspICCreateGLEntriesForNegativeStockVariance
 			@strBatchId
@@ -915,6 +920,7 @@ BEGIN
 				,[dblForeignRate]
 				,[strRateType]
 				,[intSourceEntityId]
+				,[intCommodityId]
 		)
 		EXEC	@intReturnValue = dbo.uspICUnpostCosting
 				@intTransactionId
@@ -988,7 +994,8 @@ END
 --------------------------------------------------------------------------------------------  
 IF @ysnRecap = 0
 BEGIN 	
-	IF @ysnGLEntriesRequired = 1 AND EXISTS (SELECT TOP 1 1 FROM @CompanyOwnedStock)
+	IF (@ysnGLEntriesRequired = 1 AND EXISTS (SELECT TOP 1 1 FROM @CompanyOwnedStock))
+		OR (EXISTS (SELECT TOP 1 1 FROM @GLEntries) AND @ysnPost = 0) 
 	BEGIN 
 		EXEC dbo.uspGLBookEntries @GLEntries, @ysnPost 	
 	END

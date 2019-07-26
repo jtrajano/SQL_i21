@@ -283,6 +283,7 @@ BEGIN
         ,[dblForeignRate]
         ,[strRateType]
 		,[intSourceEntityId]
+		,[intCommodityId]
 	)
     EXEC dbo.uspICPostCosting  
          @ItemsForPost  
@@ -383,6 +384,7 @@ BEGIN
         ,[dblReportingRate]
         ,[dblForeignRate]
 		,[intSourceEntityId]
+		,[intCommodityId]
 	)
 	EXEC dbo.uspICPostInTransitCosting  
          @InTransitItems  
@@ -489,6 +491,7 @@ BEGIN
         ,[dblReportingRate]
         ,[dblForeignRate]
 		,[intSourceEntityId]
+		,[intCommodityId]
 	)
     EXEC dbo.uspICPostStorage  
              @StorageItemsForPost  

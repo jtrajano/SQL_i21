@@ -813,6 +813,7 @@ BEGIN
 		,[dblForeignRate]
 		,[strRateType]
 		,[intSourceEntityId]
+		,[intCommodityId]
 		)
 	EXEC dbo.uspICCreateGLEntries @strBatchId
 		,NULL

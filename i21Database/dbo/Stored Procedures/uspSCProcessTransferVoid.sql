@@ -113,6 +113,7 @@ BEGIN
 			,[dblForeignRate]
 			,[strRateType]
 			,[intSourceEntityId]
+			,[intCommodityId]
 		)
 		EXEC	dbo.uspICPostCosting  
 				@ItemsForRemovalPost  

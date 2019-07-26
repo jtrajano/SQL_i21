@@ -7385,4 +7385,25 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intDailyAveragePriceDetailTransactionId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="0bca5d4e-c6d9-47bd-b47e-2e4c92ad63a4" ChangeDateTime="07/22/2019 11:49:47">
+    <Property Name="ElementName" Value="[dbo].[tblRKCoverageEntry].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblRKCoverageEntry]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intCoverageEntryId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="dad84be3-9cb7-47bc-a468-e4d7f715d0c4" ChangeDateTime="07/22/2019 12:03:43">
+    <Property Name="ElementName" Value="[dbo].[tblRKCoverageEntry].[intBookIf]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblRKCoverageEntry]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intBookId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="456764e1-3d86-42a3-bea7-5b790f7d9694" ChangeDateTime="07/22/2019 12:11:17">
+    <Property Name="ElementName" Value="[dbo].[tblRKCoverageEntryDetail].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblRKCoverageEntryDetail]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intCoverageEntryDetailId" />
+  </Operation>
 </Operations>

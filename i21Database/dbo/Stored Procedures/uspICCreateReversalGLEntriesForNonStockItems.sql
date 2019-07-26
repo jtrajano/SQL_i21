@@ -78,6 +78,7 @@ BEGIN
 			,[dblForeignRate]			= GLEntries.dblForeignRate
 			,[strRateType]				= currencyRateType.strCurrencyExchangeRateType
 			,[intSourceEntityId]		= GLEntries.intSourceEntityId
+			,[intCommodityId]			= GLEntries.intCommodityId
 	FROM	tblGLDetail GLEntries INNER JOIN (
 				tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptItem ri
 					ON r.intInventoryReceiptId = ri.intInventoryReceiptId	

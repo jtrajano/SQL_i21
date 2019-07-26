@@ -143,6 +143,7 @@ BEGIN
 			,dblForeignRate				= GLEntries.dblForeignRate
 			,strRateType				= currencyRateType.strCurrencyExchangeRateType		
 			,intSourceEntityId			= GLEntries.intSourceEntityId
+			,intCommodityId				= GLEntries.intCommodityId
 	FROM	dbo.tblGLDetail GLEntries INNER JOIN dbo.tblICInventoryTransaction Reversal
                 ON GLEntries.intJournalLineNo = Reversal.intRelatedInventoryTransactionId
 				AND GLEntries.intTransactionId = Reversal.intTransactionId
@@ -191,6 +192,7 @@ BEGIN
 			,dblForeignRate				= GLEntries.dblForeignRate
 			,strRateType				= currencyRateType.strCurrencyExchangeRateType
 			,intSourceEntityId			= GLEntries.intSourceEntityId
+			,intCommodityId				= GLEntries.intCommodityId
 	FROM	tblGLDetail GLEntries INNER JOIN (	
 				tblICInventoryTransaction Reversal INNER JOIN tblICInventoryReturned rtn
 					ON Reversal.intInventoryTransactionId = rtn.intInventoryTransactionId
@@ -245,7 +247,10 @@ BEGIN
 			,dblForeignRate				= NULL 
 			,strRateType				= NULL 
 			,intSourceEntityId			= ItemTransactions.intSourceEntityId
-	FROM	dbo.tblICInventoryTransaction ItemTransactions INNER JOIN @GLAccounts GLAccounts
+			,i.intCommodityId
+	FROM	dbo.tblICInventoryTransaction ItemTransactions INNER JOIN tblICItem i
+				ON ItemTransactions.intItemId = i.intItemId
+			INNER JOIN @GLAccounts GLAccounts
 				ON ItemTransactions.intItemId = GLAccounts.intItemId
 				AND ItemTransactions.intItemLocationId = GLAccounts.intItemLocationId
 				AND ItemTransactions.intTransactionTypeId = GLAccounts.intTransactionTypeId
@@ -295,7 +300,10 @@ BEGIN
 			,dblForeignRate				= NULL 
 			,strRateType				= NULL 
 			,intSourceEntityId			= ItemTransactions.intSourceEntityId
-	FROM	dbo.tblICInventoryTransaction ItemTransactions INNER JOIN @GLAccounts GLAccounts
+			,i.intCommodityId
+	FROM	dbo.tblICInventoryTransaction ItemTransactions INNER JOIN tblICItem i
+				ON ItemTransactions.intItemId = i.intItemId
+			INNER JOIN @GLAccounts GLAccounts
 				ON ItemTransactions.intItemId = GLAccounts.intItemId
 				AND ItemTransactions.intItemLocationId = GLAccounts.intItemLocationId
 				AND ItemTransactions.intTransactionTypeId = GLAccounts.intTransactionTypeId

@@ -607,6 +607,7 @@ BEGIN
 			,dblReportingRate			
 			,dblForeignRate
 			,intSourceEntityId
+			,intCommodityId
 		)
 		EXEC dbo.uspICCreateGLEntriesOnCostAdjustment 
 			@strBatchId = @batchId
@@ -978,6 +979,7 @@ BEGIN
 			,dblReportingRate			
 			,dblForeignRate
 			,intSourceEntityId
+			,intCommodityId
 		)
 		EXEC dbo.uspICCreateGLEntriesOnCostAdjustment 
 			@strBatchId = @batchId
