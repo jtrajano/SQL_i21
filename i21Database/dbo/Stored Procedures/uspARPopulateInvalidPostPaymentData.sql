@@ -278,7 +278,7 @@ BEGIN
 		#ARPostPaymentDetail P
     WHERE
             P.[ysnPost] = @OneBit
-        AND P.[intInvoiceId] IS NOT NULL
+        AND (P.[intInvoiceId] IS NOT NULL OR P.[intBillId] IS NOT NULL)
         AND P.[dblDiscount] <> @ZeroDecimal
         AND ISNULL(P.[intDiscountAccount], 0) = 0
 
