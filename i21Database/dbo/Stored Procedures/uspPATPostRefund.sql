@@ -140,7 +140,7 @@ BEGIN
 	EXEC [dbo].[uspAPPostBill]
 		@batchId = NULL,
 		@billBatchId = NULL,
-		@transactionType = NULL,
+		@transactionType = 'Credit Card',
 		@post = 0,
 		@recap = 0,
 		@isBatch = 0,

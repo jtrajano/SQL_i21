@@ -311,7 +311,7 @@ BEGIN TRY
 				if @ysnLoad = 1
 				begin
 					INSERT	INTO @tblToProcess
-					SELECT	@intInventoryReceiptId,@intInventoryReceiptItemId,@dblShipped,@intPriceFixationDetailId
+					SELECT	@intInventoryReceiptId,@intInventoryReceiptItemId,@dblReceived,@intPriceFixationDetailId
 				end 
 				else
 				begin

@@ -3,6 +3,8 @@ CREATE PROCEDURE [dbo].[uspICExportItemsToStaging]
 	@ysnIncludeDetails BIT = 1
 AS
 
+SET @dtmDate = DATEADD(MI, DATEDIFF(MI, GETDATE(),  GETUTCDATE()), @dtmDate)
+
 DECLARE @Items TABLE(
 	intItemId INT, 
 	strItemNo NVARCHAR(100) COLLATE Latin1_General_CI_AS, 
@@ -25,6 +27,7 @@ DECLARE @Items TABLE(
 	dtmDateModified DATETIME NULL,
 	dtmDate DATETIME
 )
+
 
 INSERT INTO @Items
 SELECT
@@ -78,11 +81,11 @@ BEGIN
 		LEFT OUTER JOIN tblICUnitMeasure u ON u.intUnitMeasureId = m.intUnitMeasureId
 
 	/* Item Locations */
-	INSERT INTO tblICStagingItemLocation(intItemId, intItemLocationId, intLocationId, strLocationName
+	INSERT INTO tblICStagingItemLocation(intItemId, intItemLocationId, intLocationId, strLocationName, strLocationNo
 		, strCostingMethod, ysnAllowNegativeInventory, intAllowZeroCostTypeId, ysnRequireStorageUnit, strDefaultVendorNo
 		, strDefaultStorageLocation, strDefaultStorageUnit, strDefaultSaleUom, strDefaultPurchaseUom
 		, strDefaultGrossUom, strInventoryCountGroup, dblReorderPoint, dblLeadTime)
-	SELECT i.intItemId, il.intItemLocationId, il.intLocationId, c.strLocationName
+	SELECT i.intItemId, il.intItemLocationId, il.intLocationId, c.strLocationName, c.strLocationNumber
 		, cm.strCostingMethod
 		, il.intAllowNegativeInventory, il.intAllowZeroCostTypeId, il.ysnStorageUnitRequired, e.strName AS strDefaultVendorNo
 		, sl.strSubLocationName AS strDefaultStorageLocation, su.strName AS strDefaultStorageUnit

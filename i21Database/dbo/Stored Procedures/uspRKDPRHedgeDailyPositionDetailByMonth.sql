@@ -583,12 +583,7 @@ BEGIN
 				AND e.intEntityId = ISNULL(@intVendorId, e.intEntityId)
 				AND intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 			
-			--Net Hedge option end
-			DECLARE @intUnitMeasureId int
-			DECLARE @strUnitMeasure NVARCHAR(50)
-			SELECT TOP 1 @intUnitMeasureId = intUnitMeasureId FROM tblRKCompanyPreference
-			SELECT @strUnitMeasure = strUnitMeasure FROM tblICUnitMeasure WHERE intUnitMeasureId = @intUnitMeasureId
-			
+			--Net Hedge option end			
 			INSERT INTO @FinalList (strCommodityCode
 				, strContractNumber
 				, intContractHeaderId
@@ -628,8 +623,8 @@ BEGIN
 				, strLocationName
 				, strContractEndMonth
 				, strContractEndMonthNearBy
-				, dblTotal = CONVERT(DECIMAL(24,10), dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc.intCommodityUnitMeasureId, CASE WHEN ISNULL(@intUnitMeasureId,0) = 0 THEN cuc.intCommodityUnitMeasureId ELSE cuc1.intCommodityUnitMeasureId END, dblTotal))
-				, strUnitMeasure = ISNULL(@strUnitMeasure, um.strUnitMeasure)
+				, dblTotal
+				, um.strUnitMeasure
 				, strAccountNumber
 				, strTranType
 				, dblNoOfLot
@@ -652,7 +647,6 @@ BEGIN
 			FROM @List t
 			JOIN tblICCommodityUnitMeasure cuc ON t.intCommodityId = cuc.intCommodityId AND cuc.ysnDefault = 1
 			JOIN tblICUnitMeasure um ON um.intUnitMeasureId = cuc.intUnitMeasureId
-			LEFT JOIN tblICCommodityUnitMeasure cuc1 ON t.intCommodityId = cuc1.intCommodityId AND @intUnitMeasureId = cuc1.intUnitMeasureId
 			WHERE t.intCommodityId = @intCommodityId
 		END
 		

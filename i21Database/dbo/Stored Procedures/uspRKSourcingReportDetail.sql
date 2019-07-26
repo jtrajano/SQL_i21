@@ -186,12 +186,12 @@ BEGIN
 	DECLARE @ysnSubCurrency INT
 	SELECT @ysnSubCurrency = ysnSubCurrency FROM tblSMCurrency WHERE intCurrencyID = @intCurrencyId
 
-	SELECT 
-		b.intItemId
+	SELECT b.intItemId
 		, b.intStorageLocationId
 		, ac.dblCost
 		, ic1.intUnitMeasureId
 		, b.intCurrencyId
+		, a.intCompanyLocationId
 	INTO #tempAOP
 	FROM tblCTAOP a
 		JOIN tblCTAOPDetail  b ON a.intAOPId = b.intAOPId
@@ -283,29 +283,16 @@ BEGIN
 				, t.intCompanyLocationId
 				, dblStandardRatio = ca.dblRatio
 				, ic.intItemId
-				, dblStandardPrice = (SELECT SUM(dblQty) 
-										FROM (
-											SELECT dblQty = CONVERT(NUMERIC(18,6), dbo.[fnCTConvertQuantityToTargetItemUOM](cd.intItemId, @intUnitMeasureId, b.intUnitMeasureId
+				, dblStandardPrice = (SELECT SUM(dblQty)
+									FROM (
+										SELECT dblQty = CONVERT(NUMERIC(18,6), dbo.[fnCTConvertQuantityToTargetItemUOM](cd.intItemId, @intUnitMeasureId, b.intUnitMeasureId
 																							, dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId, @intCurrencyId, ISNULL(b.dblCost, 0), b.intCurrencyId, NULL, NULL)))
-											FROM #tempAOP b
-											WHERE intItemId  = i.intItemId
-											AND (CASE WHEN ISNULL(cd.intSubLocationId,0) = 0 AND ISNULL(b.intStorageLocationId,0) = 0 THEN 0
-													WHEN ISNULL(cd.intSubLocationId,0) <> 0 AND ISNULL(b.intStorageLocationId,0) <> 0 THEN cd.intSubLocationId
-												END = 
-													CASE WHEN ISNULL(cd.intSubLocationId,0) = 0 AND ISNULL(b.intStorageLocationId,0) = 0 THEN 0
-													WHEN ISNULL(cd.intSubLocationId,0) <> 0 AND ISNULL(b.intStorageLocationId,0) <> 0 THEN b.intStorageLocationId
-												END
-													OR
-													CASE
-													WHEN ISNULL(cd.intSubLocationId,0) = 0 THEN
-														CASE WHEN (SELECT TOP 1 ISNULL(intStorageLocationId,-1) FROM #tempAOP WHERE intItemId = i.intItemId AND ISNULL(intStorageLocationId,0) = ISNULL(cd.intSubLocationId,0)) =  -1 THEN  NULL ELSE b.intStorageLocationId END  
-													END =   b.intStorageLocationId 
-													OR CASE WHEN ISNULL(cd.intSubLocationId,0) <> 0 THEN 
-														CASE WHEN ISNULL((SELECT TOP 1 ISNULL(intStorageLocationId,-1) FROM #tempAOP WHERE intItemId = i.intItemId AND ISNULL(intStorageLocationId,0) = ISNULL(cd.intSubLocationId,0)),-1) = -1 THEN  0 ELSE cd.intSubLocationId END
-														END = ISNULL(b.intStorageLocationId ,0)
-												)
-										)t
-									)
+										FROM #tempAOP b
+										WHERE intItemId  = i.intItemId
+											AND isnull(b.intStorageLocationId,0) = isnull(cd.intSubLocationId,0)
+											AND isnull(b.intCompanyLocationId,0) = isnull(cd.intCompanyLocationId,0)
+									) t
+								)
 				, dblPPVBasis = CONVERT(NUMERIC(18,6), dbo.[fnCTConvertQuantityToTargetItemUOM](cd.intItemId, @intUnitMeasureId, j.intUnitMeasureId
 																				, dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId, @intCurrencyId, ISNULL(cost.dblRate, t.dblBasis), NULL, NULL, NULL)))
 				, strLocationName
@@ -402,21 +389,8 @@ BEGIN
 																							, dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId, @intCurrencyId, ISNULL(b.dblCost, 0), b.intCurrencyId, NULL, NULL)))
 											FROM #tempAOP b
 											WHERE intItemId  = i.intItemId
-											AND (CASE WHEN ISNULL(cd.intSubLocationId,0) = 0 AND ISNULL(b.intStorageLocationId,0) = 0 THEN 0
-													WHEN ISNULL(cd.intSubLocationId,0) <> 0 AND ISNULL(b.intStorageLocationId,0) <> 0 THEN cd.intSubLocationId
-												END = 
-													CASE WHEN ISNULL(cd.intSubLocationId,0) = 0 AND ISNULL(b.intStorageLocationId,0) = 0 THEN 0
-													WHEN ISNULL(cd.intSubLocationId,0) <> 0 AND ISNULL(b.intStorageLocationId,0) <> 0 THEN b.intStorageLocationId
-												END
-													OR
-													CASE
-													WHEN ISNULL(cd.intSubLocationId,0) = 0 THEN
-														CASE WHEN (SELECT TOP 1 ISNULL(intStorageLocationId,-1) FROM #tempAOP WHERE intItemId = i.intItemId AND ISNULL(intStorageLocationId,0) = ISNULL(cd.intSubLocationId,0)) =  -1 THEN  NULL ELSE b.intStorageLocationId END  
-													END =   b.intStorageLocationId 
-													OR CASE WHEN ISNULL(cd.intSubLocationId,0) <> 0 THEN 
-														CASE WHEN ISNULL((SELECT TOP 1 ISNULL(intStorageLocationId,-1) FROM #tempAOP WHERE intItemId = i.intItemId AND ISNULL(intStorageLocationId,0) = ISNULL(cd.intSubLocationId,0)),-1) = -1 THEN  0 ELSE cd.intSubLocationId END
-														END = ISNULL(b.intStorageLocationId ,0)
-												)
+												AND isnull(b.intStorageLocationId,0) = isnull(cd.intSubLocationId,0)
+												AND isnull(b.intCompanyLocationId,0) = isnull(cd.intCompanyLocationId,0)
 										)t
 									)
 				, strLocationName

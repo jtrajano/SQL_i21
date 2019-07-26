@@ -63,7 +63,8 @@ INSERT INTO [tblICInventoryReceiptItemTax]
 		,[ysnSeparateOnInvoice]
 		,[ysnCheckoffTax]
 		,[strTaxCode]
-		,[intConcurrencyId])			   
+		,[intConcurrencyId]
+		,dtmDateCreated)			   
 select 
 		INVD.intInventoryReceiptItemId,--[intInventoryReceiptItemId]
 		TAXG.intTaxGroupId,	--[intTaxGroupId]
@@ -79,6 +80,7 @@ select
 		0,--[ysnCheckoffTax]
 		TAXC.strTaxCode,
 		0--[intConcurrencyId]
+		,GETUTCDATE()
  from #purnotax PHS
 INNER JOIN  tblICInventoryReceiptItem INVD ON INVD.intInventoryReceiptId = PHS.intInventoryReceiptId and INVD.intItemId = PHS.intItemId
 			AND INVD.intLineNo = PHS.agphs_line_no

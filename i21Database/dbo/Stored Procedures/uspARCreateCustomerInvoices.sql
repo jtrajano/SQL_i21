@@ -172,6 +172,7 @@ INSERT INTO @InvoicesToGenerate (
 	,[intDestinationWeightId]
     ,[strAddonDetailKey]
     ,[ysnAddonParent]
+	,[ysnConvertToStockUOM]
     ,[dblAddOnQuantity]
 )
 SELECT
@@ -319,6 +320,7 @@ SELECT
 	,[intDestinationWeightId]			= [intDestinationWeightId]
     ,[strAddonDetailKey]                = [strAddonDetailKey]
     ,[ysnAddonParent]                   = [ysnAddonParent]
+	,[ysnConvertToStockUOM]				= [ysnConvertToStockUOM]
     ,[dblAddOnQuantity]                 = [dblAddOnQuantity]
 FROM
 	@InvoiceEntries 
@@ -639,7 +641,7 @@ SELECT
 FROM
 	@InvoicesToGenerate ITG --WITH (NOLOCK)
 WHERE
-	ITG.[strType] NOT IN ('Meter Billing', 'Standard', 'Software', 'Tank Delivery', 'Provisional', 'Service Charge', 'Transport Delivery', 'Store', 'Card Fueling', 'CF Tran', 'CF Invoice', 'Store Checkout')
+	ITG.[strType] NOT IN ('Meter Billing', 'Standard', 'POS', 'Software', 'Tank Delivery', 'Provisional', 'Service Charge', 'Transport Delivery', 'Store', 'Card Fueling', 'CF Tran', 'CF Invoice', 'Store Checkout')
 
 INSERT INTO #ARInvalidInvoiceRecords
     ([intId]
@@ -2072,6 +2074,7 @@ BEGIN TRY
 		,[intDestinationWeightId]
         ,[strAddonDetailKey]
         ,[ysnAddonParent]
+		,[ysnConvertToStockUOM]
         ,[dblAddOnQuantity])
 	SELECT
 		 [intId]								= IL.[intId]
@@ -2218,6 +2221,7 @@ BEGIN TRY
 		,[intDestinationWeightId]				= ITG.[intDestinationWeightId]
         ,[strAddonDetailKey]                    = ITG.[strAddonDetailKey]
         ,[ysnAddonParent]                       = ITG.[ysnAddonParent]
+		,[ysnConvertToStockUOM]					= ITG.[ysnConvertToStockUOM]
         ,[dblAddOnQuantity]                     = ITG.[dblAddOnQuantity]
 	FROM
 		@InvoicesToGenerate ITG

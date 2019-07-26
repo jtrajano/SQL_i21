@@ -281,40 +281,16 @@ BEGIN
 	END
 END
 
-DECLARE @intUnitMeasureId int
-SELECT TOP 1 @intUnitMeasureId = intUnitMeasureId FROM tblRKCompanyPreference
-
-IF ISNULL(@intUnitMeasureId,'') <> ''
-BEGIN
-	SELECT intCustomerStorageId
-		, strType
-		, strLocation
-		, dtmDeliveryDate
-		, strTicket
-		, strCustomerReference
-		, strDPAReceiptNo
-		, dblDiscDue
-		, dblStorageDue
-		, dtmLastStorageAccrueDate
-		, strScheduleId
-		, isnull(dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc.intCommodityUnitMeasureId,case when isnull(cuc1.intCommodityUnitMeasureId,0) = 0 then cuc.intCommodityUnitMeasureId else cuc1.intCommodityUnitMeasureId end,round(dblTotal,4)),0) dblTotal
-	FROM @tblTemp t
-	JOIN tblICCommodityUnitMeasure cuc on t.intCommodityId=cuc.intCommodityId and cuc.ysnDefault=1
-	JOIN tblICCommodityUnitMeasure cuc1 on t.intCommodityId=cuc1.intCommodityId and @intUnitMeasureId=cuc1.intUnitMeasureId
-END
-ELSE
-BEGIN
-	SELECT intCustomerStorageId
-		, strType
-		, strLocation
-		, dtmDeliveryDate
-		, strTicket
-		, strCustomerReference
-		, strDPAReceiptNo
-		, dblDiscDue
-		, dblStorageDue
-		, dtmLastStorageAccrueDate
-		, strScheduleId
-		, dblTotal
-	FROM @tblTemp
-END
+SELECT intCustomerStorageId
+	, strType
+	, strLocation
+	, dtmDeliveryDate
+	, strTicket
+	, strCustomerReference
+	, strDPAReceiptNo
+	, dblDiscDue
+	, dblStorageDue
+	, dtmLastStorageAccrueDate
+	, strScheduleId
+	, dblTotal
+FROM @tblTemp

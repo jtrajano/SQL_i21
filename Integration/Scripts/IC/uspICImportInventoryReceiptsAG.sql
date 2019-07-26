@@ -65,7 +65,8 @@ BEGIN
 			   ,[intEntityId]
 			   ,[intConcurrencyId]
 			   ,strReceiptOriginId
-			   ,ysnOrigin)
+			   ,ysnOrigin
+			   ,dtmDateCreated)
 			SELECT
 					'Direct'--[strReceiptType]
 					,0--[intSourceType]
@@ -95,6 +96,7 @@ BEGIN
 					,0--[intConcurrencyId]
 					,PHS.agphs_ord_no--strReceiptOriginId
 					,0
+					,GETUTCDATE()
 			FROM agphsmst PHS
 			LEFT JOIN tblICInventoryReceipt Inv ON PHS.agphs_ord_no COLLATE Latin1_General_CI_AS = Inv.strReceiptOriginId COLLATE Latin1_General_CI_AS
 			INNER JOIN tblAPVendor Vnd ON  strVendorId COLLATE Latin1_General_CI_AS = PHS.agphs_vnd_no COLLATE Latin1_General_CI_AS
@@ -129,7 +131,8 @@ BEGIN
 				   ,[dblNet]
 				   ,[dblTax]
 				   ,[intConcurrencyId]
-				   ,[strComments])
+				   ,[strComments]
+				   ,dtmDateCreated)
 			SELECT 
 					INV.intInventoryReceiptId	--[intInventoryReceiptId]
 					 ,agphs_line_no-- [intLineNo]
@@ -156,7 +159,8 @@ BEGIN
 					 ,agphs_rcvd_net_un-- [dblNet]
 					 ,0-- [dblTax]
 					 ,0-- [intConcurrencyId]
-					 ,DTL.agphs_desc_override 		 			
+					 ,DTL.agphs_desc_override 
+					 ,GETUTCDATE()		 			
 			FROM	agphsmst DTL
 					INNER JOIN tblICInventoryReceipt INV ON INV.strReceiptOriginId COLLATE Latin1_General_CI_AS = DTL.agphs_ord_no COLLATE Latin1_General_CI_AS
 					INNER JOIN tblICItem ITM ON ITM.strItemNo COLLATE Latin1_General_CI_AS = RTRIM(DTL.agphs_itm_no  COLLATE Latin1_General_CI_AS)

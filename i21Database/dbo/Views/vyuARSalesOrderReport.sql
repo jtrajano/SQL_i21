@@ -103,7 +103,7 @@ LEFT JOIN (
 		 , dblPrice					= CASE WHEN ISNULL(SD.intCommentTypeId, 0) = 0 THEN ISNULL(SD.dblPrice, 0) ELSE NULL END
 		 , dblItemPrice				= CASE WHEN ISNULL(SD.intCommentTypeId, 0) = 0 THEN ISNULL(SD.dblTotal, 0) ELSE NULL END
 		 , dblAdjustedTax			= SDT.dblAdjustedTax
-		 , dblContractBalance		= CASE WHEN ISNULL(SD.intCommentTypeId, 0) = 0 THEN CASE WHEN SD.dblContractBalance = 0 THEN CD.dblBalance ELSE SD.dblContractBalance END ELSE NULL END
+		 , dblContractBalance		= CASE WHEN ISNULL(SD.intCommentTypeId, 0) = 0 THEN CD.dblBalance ELSE NULL END
 		 , strContractNumber		= CASE WHEN ISNULL(SD.intCommentTypeId, 0) = 0 THEN CH.strContractNumber ELSE NULL END
 		 , strCategoryDescription   = CASE WHEN I.intCategoryId IS NULL THEN 'No Item Category' ELSE ICC.strCategoryCode + ' - ' + ICC.strDescription END
 		 , ysnListBundleSeparately	= I.ysnListBundleSeparately

@@ -31,7 +31,8 @@ Type the overview for the table here.
 		CONSTRAINT [PK_tblICItemBundle] PRIMARY KEY ([intItemBundleId]),
 		CONSTRAINT [FK_tblICItemBundle_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]) ON DELETE CASCADE, 
 		CONSTRAINT [FK_tblICItemBundle_BundleItem] FOREIGN KEY ([intBundleItemId]) REFERENCES [tblICItem]([intItemId]), 
-		CONSTRAINT [FK_tblICItemBundle_tblICItemUOM] FOREIGN KEY ([intItemUnitMeasureId]) REFERENCES [tblICItemUOM]([intItemUOMId])
+		CONSTRAINT [FK_tblICItemBundle_tblICItemUOM] FOREIGN KEY ([intItemUnitMeasureId]) REFERENCES [tblICItemUOM]([intItemUOMId]),
+		CONSTRAINT [AK_tblICItemBundle_intItemId_intBundleItemId_intItemUnitMeasureId] UNIQUE ([intItemId], [intBundleItemId], [intItemUnitMeasureId])
 	)
 
 	GO

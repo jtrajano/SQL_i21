@@ -48,12 +48,13 @@ SET ANSI_WARNINGS OFF
 	,ysnTonnageTax
 	,intTonnageTaxUOMId
 	,intConcurrencyId
+	,dtmDateCreated
 	) 
 SELECT ei.ItemNo, ei.ItemType, ei.ShortName, ei.ItemName, ei.ItemStatus, ei.InvValuation, ei.LotTracking,
 	ei.CategoryId, ei.CommodityId, ei.[LifeTime], ei.LandedCost, ei.DropDhip, ei.SpecialCommission
 	, ei.ysnStockedItem, ei.DyedFuel, ei.BarcodePrinted, ei.MSDSRequired, ei.AvailableTM
 	, ei.DefaultFull, ei.PickTicket, ei.ExportEDI, ei.HazardMaterial, ei.MaterialFee, ei.CountCode
-	, ei.Taxable, ei.KeyWords, ei.Commisionable,ei.TonnageTax,ei.TonnageTaxUOM, ei.ConcurrencyId
+	, ei.Taxable, ei.KeyWords, ei.Commisionable,ei.TonnageTax,ei.TonnageTaxUOM, ei.ConcurrencyId, GETUTCDATE()
 FROM
 	 (
 	SELECT RTRIM(agitm_no) ItemNo

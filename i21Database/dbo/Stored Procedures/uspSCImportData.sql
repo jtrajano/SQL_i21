@@ -454,6 +454,23 @@ BEGIN TRY
 					[strCountyProducer] NVARCHAR(MAX)
 				)
 
+				-------------Get All Non Existing Delivery Sheets
+				DECLARE @existingDeliverySheets TABLE 
+				(
+					intDeliverySheetId INT NOT NULL PRIMARY KEY
+					,strDeliverySheetNumber NVARCHAR(100)
+				)
+
+				INSERT INTO @existingDeliverySheets(
+					intDeliverySheetId
+					,strDeliverySheetNumber
+				)
+				SELECT 
+					A.intDeliverySheetId 
+					,A.strDeliverySheetNumber
+				FROM @temp_xml_deliverysheet_sc A
+				WHERE EXISTS(SELECT TOP 1 1 FROM tblSCDeliverySheet WHERE strDeliverySheetNumber = A.strDeliverySheetNumber)
+
 				--DELIVERY SHEET DISCOUNT
 				DECLARE @temp_xml_qmdstable_sc TABLE 
 				(
@@ -634,15 +651,15 @@ BEGIN TRY
 					,[intDiscountScheduleCodeId]		= QM.intDiscountScheduleCodeId
 					,[dtmDiscountPaidDate] 	 			= QM.dtmDiscountPaidDate
 					,[intTicketId]						= NULL
-					,[intTicketFileId]					= SCD.intDeliverySheetId
+					,[intTicketFileId]					= DS.intDeliverySheetId
 					,[strSourceType]					= QM.strSourceType
 					,[intSort]							= QM.intSort
 					,[strDiscountChargeType]			= QM.strDiscountChargeType
 					,[intConcurrencyId]					= 1
 				FROM @temp_xml_qmdstable_sc QM
 				INNER JOIN @temp_xml_deliverysheet_sc SCD ON SCD.intDeliverySheetId = QM.intTicketFileId
-				LEFT JOIN tblSCDeliverySheet DS ON DS.strDeliverySheetNumber = SCD.strDeliverySheetNumber 
-				WHERE DS.strDeliverySheetNumber IS NULL
+				INNER JOIN tblSCDeliverySheet DS ON DS.strDeliverySheetNumber = SCD.strDeliverySheetNumber 
+				WHERE NOT EXISTS (SELECT TOP 1 1 FROM @existingDeliverySheets WHERE intDeliverySheetId = DS.intDeliverySheetId)
 
 				INSERT INTO tblSCDeliverySheetSplit(
 					[intDeliverySheetId],
@@ -664,11 +681,10 @@ BEGIN TRY
 				FROM @temp_xml_splitdstable_sc SCDS
 				INNER JOIN @temp_xml_deliverysheet_sc SCD ON SCD.intDeliverySheetId = SCDS.intDeliverySheetId
 				INNER JOIN tblSCDeliverySheet DS ON DS.strDeliverySheetNumber = SCD.strDeliverySheetNumber 
-				OUTER APPLY(
-					SELECT intDeliverySheetSplitId FROM tblSCDeliverySheetSplit WHERE intDeliverySheetId = DS.intDeliverySheetId
-				) DSS
-				WHERE DSS.intDeliverySheetSplitId IS NULL
+				WHERE NOT EXISTS (SELECT TOP 1 1 FROM @existingDeliverySheets WHERE intDeliverySheetId = DS.intDeliverySheetId)
+
 			END
+			
 			IF ISNULL(@ysnUpdateData, 0) = 0
 			BEGIN
 				UPDATE @temp_xml_table SET strTicketStatus = 'O' WHERE strTicketStatus = 'C'
@@ -1083,10 +1099,11 @@ BEGIN TRY
 				--AND SC.intEntityId = SCT.intEntityId
 				AND SC.intProcessingLocationId = SCT.intProcessingLocationId
 				WHERE NOT EXISTS (SELECT TOP 1 1 FROM @existingTicketTable ERT WHERE SCS.intTicketId = ERT.intTicketId)
+
 			END
 			ELSE
 			BEGIN
-				SELECT 'UPDATE TICKET'
+				-- SELECT 'UPDATE TICKET'
 
 				UPDATE SC SET
 					SC.strTicketStatus							= SCT.strTicketStatus 
@@ -1398,6 +1415,8 @@ BEGIN TRY
 				[intStorageScheduleRuleId] INT
 			)
 
+
+
 			IF ISNULL(@ysnUpdateData, 0) = 0
 			BEGIN
 				INSERT INTO tblSCDeliverySheet (
@@ -1447,7 +1466,12 @@ BEGIN TRY
 					,[strCountyProducer]					= SCD.strCountyProducer
 					,[intConcurrencyId]						= 1
 					,dtmImportedDate						= GETDATE()
-				FROM @temp_xml_deliverysheet SCD ORDER BY strDeliverySheetNumber ASC
+				FROM @temp_xml_deliverysheet SCD 
+				LEFT JOIN tblSCDeliverySheet DSDestination 
+					ON DSDestination.strDeliverySheetNumber = SCD.strDeliverySheetNumber
+				WHERE DSDestination.strDeliverySheetNumber IS NULL
+				ORDER BY strDeliverySheetNumber ASC
+				
 
 
 				----------------------------------------------------------------------------------------------------------------------
@@ -1508,7 +1532,7 @@ BEGIN TRY
 					,[intDiscountScheduleCodeId]		= QM.intDiscountScheduleCodeId
 					,[dtmDiscountPaidDate] 	 			= QM.dtmDiscountPaidDate
 					,[intTicketId]						= NULL
-					,[intTicketFileId]					= SCD.intDeliverySheetId
+					,[intTicketFileId]					= DS.intDeliverySheetId
 					,[strSourceType]					= QM.strSourceType
 					,[intSort]							= QM.intSort
 					,[strDiscountChargeType]			= QM.strDiscountChargeType
@@ -1517,6 +1541,7 @@ BEGIN TRY
 				INNER JOIN @temp_xml_deliverysheet SCD ON SCD.intDeliverySheetId = QM.intTicketFileId
 				INNER JOIN tblSCDeliverySheet DS ON DS.strDeliverySheetNumber = SCD.strDeliverySheetNumber 
 				WHERE QM.strSourceType = 'Delivery Sheet'
+					AND DS.intDeliverySheetId IS NULL
 				ORDER BY QM.intSort ASC
 
 				INSERT INTO tblSCDeliverySheetSplit(
@@ -1539,70 +1564,11 @@ BEGIN TRY
 				FROM @temp_xml_splitdstable SCDS
 				INNER JOIN @temp_xml_deliverysheet SCD ON SCD.intDeliverySheetId = SCDS.intDeliverySheetId
 				INNER JOIN tblSCDeliverySheet DS ON DS.strDeliverySheetNumber = SCD.strDeliverySheetNumber 
+				WHERE DS.intDeliverySheetId IS NULL
+				ORDER BY SCDS.intDeliverySheetSplitId  ASC
 			END
 			ELSE
 			BEGIN
-				UPDATE DS SET
-					DS.[intEntityId]						= SCD.intEntityId
-					,DS.[intCompanyLocationId]				= SCD.intCompanyLocationId
-					,DS.[intItemId]							= SCD.intItemId
-					,DS.[intDiscountId]						= SCD.intDiscountId
-					,DS.[strDeliverySheetNumber]			= SCD.strDeliverySheetNumber
-					,DS.[dtmDeliverySheetDate]				= SCD.dtmDeliverySheetDate
-					,DS.[intCurrencyId]						= SCD.intCurrencyId
-					,DS.[intTicketTypeId]					= SCD.intTicketTypeId
-					,DS.[intSplitId]						= SCD.intSplitId
-					,DS.[strSplitDescription]				= SCD.strSplitDescription
-					,DS.[intFarmFieldId]					= SCD.intFarmFieldId
-					,DS.[dblGross]							= SCD.dblGross
-					,DS.[dblShrink]							= SCD.dblShrink
-					,DS.[dblNet]							= SCD.dblNet
-					,DS.[intStorageScheduleRuleId]			= SCD.intStorageScheduleRuleId
-					,DS.[intCompanyId]						= SCD.intCompanyId
-					,DS.[ysnPost]							= SCD.ysnPost
-					,DS.[ysnLockSummaryGrid]				= SCD.ysnLockSummaryGrid
-					,DS.[ysnExport]							= 1
-					,DS.[strCountyProducer]					= SCD.strCountyProducer
-				FROM tblSCDeliverySheet DS  
-				INNER JOIN @temp_xml_deliverysheet SCD ON SCD.strDeliverySheetNumber = DS.strDeliverySheetNumber 
-				AND DS.intCompanyLocationId = SCD.intCompanyLocationId
-				AND DS.intEntityId = SCD.intEntityId
-				AND DS.intItemId = SCD.intItemId
-				AND DS.intDiscountId = SCD.intDiscountId
-				AND DS.intTicketTypeId = SCD.intTicketTypeId
-
-				UPDATE QM SET
-					QM.dblGradeReading				= QMT.dblGradeReading
-					,QM.strCalcMethod				= QMT.strCalcMethod			
-					,QM.strShrinkWhat				= QMT.strShrinkWhat 
-					,QM.dblShrinkPercent			= QMT.dblShrinkPercent
-					,QM.dblDiscountAmount			= QMT.dblDiscountAmount
-					,QM.dblDiscountDue				= QMT.dblDiscountDue
-					,QM.dblDiscountPaid				= QMT.dblDiscountPaid
-					,QM.ysnGraderAutoEntry 			= QMT.ysnGraderAutoEntry
-					,QM.intDiscountScheduleCodeId	= QMT.intDiscountScheduleCodeId
-					,QM.dtmDiscountPaidDate 	 	= QMT.dtmDiscountPaidDate
-					,QM.intTicketId					= NULL
-					,QM.intTicketFileId				= DS.intDeliverySheetId
-					,QM.strSourceType				= QMT.strSourceType
-					,QM.intSort						= QMT.intSort
-					,QM.strDiscountChargeType		= QMT.strDiscountChargeType
-				FROM @temp_xml_qmdstable QMT
-				INNER JOIN @temp_xml_deliverysheet SCD ON SCD.intDeliverySheetId = QMT.intTicketFileId AND QMT.strSourceType = 'Delivery Sheet'
-				INNER JOIN tblSCDeliverySheet DS ON DS.strDeliverySheetNumber = SCD.strDeliverySheetNumber
-				INNER JOIN tblQMTicketDiscount QM ON QM.intTicketFileId = DS.intDeliverySheetId AND QM.strSourceType = 'Delivery Sheet'
-
-				UPDATE DSCS SET
-					DSCS.intEntityId					= SCST.intEntityId 
-					,DSCS.dblSplitPercent				= SCST.dblSplitPercent 
-					,DSCS.intStorageScheduleTypeId		= SCST.intStorageScheduleTypeId
-					,DSCS.strDistributionOption			= SCST.strDistributionOption
-					,DSCS.intStorageScheduleRuleId		= SCST.intStorageScheduleRuleId
-				FROM @temp_xml_splitdstable SCST
-				INNER JOIN @temp_xml_deliverysheet SCD ON SCD.intDeliverySheetId = SCST.intDeliverySheetId 
-				INNER JOIN tblSCDeliverySheet DS ON DS.strDeliverySheetNumber = SCD.strDeliverySheetNumber
-				INNER JOIN tblSCDeliverySheetSplit DSCS ON DSCS.intDeliverySheetId = DS.intDeliverySheetId
-				AND DSCS.intEntityId = SCST.intEntityId
 
 				INSERT INTO tblSCDeliverySheet (
 					[intEntityId]
@@ -1680,6 +1646,45 @@ BEGIN TRY
 				END
 				----------------------------------------------------------------------------------------------------------------------
 				----------------------------------------------------------------------------------------------------------------------
+				----------------------------------------------------------------------------------------------------------------------
+
+
+
+				UPDATE DS SET
+					DS.[intEntityId]						= SCD.intEntityId
+					,DS.[intCompanyLocationId]				= SCD.intCompanyLocationId
+					,DS.[intItemId]							= SCD.intItemId
+					,DS.[intDiscountId]						= SCD.intDiscountId
+					,DS.[strDeliverySheetNumber]			= SCD.strDeliverySheetNumber
+					,DS.[dtmDeliverySheetDate]				= SCD.dtmDeliverySheetDate
+					,DS.[intCurrencyId]						= SCD.intCurrencyId
+					,DS.[intTicketTypeId]					= SCD.intTicketTypeId
+					,DS.[intSplitId]						= SCD.intSplitId
+					,DS.[strSplitDescription]				= SCD.strSplitDescription
+					,DS.[intFarmFieldId]					= SCD.intFarmFieldId
+					,DS.[dblGross]							= SCD.dblGross
+					,DS.[dblShrink]							= SCD.dblShrink
+					,DS.[dblNet]							= SCD.dblNet
+					,DS.[intStorageScheduleRuleId]			= SCD.intStorageScheduleRuleId
+					,DS.[intCompanyId]						= SCD.intCompanyId
+					,DS.[ysnPost]							= SCD.ysnPost
+					,DS.[ysnLockSummaryGrid]				= SCD.ysnLockSummaryGrid
+					,DS.[ysnExport]							= 1
+					,DS.[strCountyProducer]					= SCD.strCountyProducer
+				FROM tblSCDeliverySheet DS  
+				INNER JOIN @temp_xml_deliverysheet SCD ON SCD.strDeliverySheetNumber = DS.strDeliverySheetNumber 
+		
+
+				---------------------------------------------------------------------------------------------------------------
+				--------------------Discount
+				---------------------------------------------------------------------------------------------------------------
+
+				DELETE FROM tblQMTicketDiscount
+				WHERE strSourceType = 'Delivery Sheet'
+					AND intTicketFileId IN (	SELECT intDeliverySheetId 
+												FROM tblSCDeliverySheet
+												WHERE strDeliverySheetNumber IN (	SELECT strDeliverySheetNumber
+																					FROM @temp_xml_deliverysheet))
 
 				INSERT INTO tblQMTicketDiscount
 				(
@@ -1719,16 +1724,28 @@ BEGIN TRY
 					,[intConcurrencyId]					= 1
 				FROM @temp_xml_qmdstable QM
 				INNER JOIN @temp_xml_deliverysheet SCD ON SCD.intDeliverySheetId = QM.intTicketFileId
-				LEFT JOIN tblSCDeliverySheet DS ON DS.strDeliverySheetNumber = SCD.strDeliverySheetNumber 
-				WHERE --DS.strDeliverySheetNumber IS NULL
-					NOT EXISTS(		SELECT TOP 1 1 
-									FROM tblQMTicketDiscount Z 
-									WHERE Z.intTicketFileId = DS.intDeliverySheetId 
-										AND QM.intDiscountScheduleCodeId = Z.intDiscountScheduleCodeId
-										AND Z.strSourceType = 'Delivery Sheet')
-					AND QM.strSourceType = 'Delivery Sheet'
-				ORDER BY intSort ASC
+				INNER JOIN tblSCDeliverySheet DS ON DS.strDeliverySheetNumber = SCD.strDeliverySheetNumber 
+				WHERE QM.strSourceType = 'Delivery Sheet'
+				ORDER BY QM.intSort ASC
 
+				---------------------------------------------------------------------------------------------------------------
+				---------------------------------------------------------------------------------------------------------------
+				---------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+				---------------------------------------------------------------------------------------------------------------
+				--------------------SPLIT
+				---------------------------------------------------------------------------------------------------------------
+			
+				DELETE FROM tblSCDeliverySheetSplit
+				WHERE intDeliverySheetId IN (	SELECT intDeliverySheetId 
+												FROM tblSCDeliverySheet
+												WHERE strDeliverySheetNumber IN (	SELECT strDeliverySheetNumber
+																					FROM @temp_xml_deliverysheet))
+				
 				INSERT INTO tblSCDeliverySheetSplit(
 					[intDeliverySheetId],
 					[intEntityId], 
@@ -1749,10 +1766,11 @@ BEGIN TRY
 				FROM @temp_xml_splitdstable SCDS
 				INNER JOIN @temp_xml_deliverysheet SCD ON SCD.intDeliverySheetId = SCDS.intDeliverySheetId
 				INNER JOIN tblSCDeliverySheet DS ON DS.strDeliverySheetNumber = SCD.strDeliverySheetNumber 
-				OUTER APPLY(
-					SELECT intDeliverySheetSplitId FROM tblSCDeliverySheetSplit WHERE intDeliverySheetId = DS.intDeliverySheetId
-				) DSS
-				WHERE DSS.intDeliverySheetSplitId IS NULL
+		
+				---------------------------------------------------------------------------------------------------------------
+				---------------------------------------------------------------------------------------------------------------
+				---------------------------------------------------------------------------------------------------------------
+				
 			END
 		END
 END TRY

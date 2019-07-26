@@ -37,7 +37,7 @@ select strQuery = 'UNION ALL SELECT intProductCodeId = ' + CAST(intProductCodeId
  UNION ALL SELECT intProductCodeId = 892, strProductCode = '092', strDescription = 'Other/Substitute Fuel', strProductCodeGroup = '', strNote = NULL, intMasterId = 40892
  UNION ALL SELECT intProductCodeId = 893, strProductCode = '122', strDescription = 'Blending Components', strProductCodeGroup = '', strNote = NULL, intMasterId = 40893
  UNION ALL SELECT intProductCodeId = 894, strProductCode = 'E00', strDescription = 'Ethanol', strProductCodeGroup = '', strNote = NULL, intMasterId = 40894
- UNION ALL SELECT intProductCodeId = 895, strProductCode = 'E01', strDescription = 'Gasohol', strProductCodeGroup = '', strNote = NULL, intMasterId = 40895
+ UNION ALL SELECT intProductCodeId = 895, strProductCode = 'E10', strDescription = 'Gasohol', strProductCodeGroup = '', strNote = NULL, intMasterId = 40895
  UNION ALL SELECT intProductCodeId = 896, strProductCode = 'E05', strDescription = 'Gasohol', strProductCodeGroup = '', strNote = NULL, intMasterId = 40896
  UNION ALL SELECT intProductCodeId = 897, strProductCode = 'E07', strDescription = 'Gasohol', strProductCodeGroup = '', strNote = NULL, intMasterId = 40897
  UNION ALL SELECT intProductCodeId = 898, strProductCode = 'E75', strDescription = 'Gasohol', strProductCodeGroup = '', strNote = NULL, intMasterId = 40898
@@ -434,7 +434,7 @@ select strQuery = 'UNION ALL SELECT intValidProductCodeId = ' + CAST(intReportin
  UNION ALL SELECT intValidProductCodeId = 8412, strProductCode = 'D99', strFormCode = 'L-2110', strScheduleCode = '8', strType = 'Dyed Fuel', intMasterId = 408412
  UNION ALL SELECT intValidProductCodeId = 8086, strProductCode = '065', strFormCode = 'L-2110', strScheduleCode = '8', strType = 'Gasoline/Gasohol', intMasterId = 408086
  UNION ALL SELECT intValidProductCodeId = 8087, strProductCode = 'E00', strFormCode = 'L-2110', strScheduleCode = '8', strType = 'Gasoline/Gasohol', intMasterId = 408087
- UNION ALL SELECT intValidProductCodeId = 8088, strProductCode = 'E01', strFormCode = 'L-2110', strScheduleCode = '8', strType = 'Gasoline/Gasohol', intMasterId = 408088
+ UNION ALL SELECT intValidProductCodeId = 8088, strProductCode = 'E10', strFormCode = 'L-2110', strScheduleCode = '8', strType = 'Gasoline/Gasohol', intMasterId = 408088
  UNION ALL SELECT intValidProductCodeId = 8089, strProductCode = 'E05', strFormCode = 'L-2110', strScheduleCode = '8', strType = 'Gasoline/Gasohol', intMasterId = 408089
  UNION ALL SELECT intValidProductCodeId = 8090, strProductCode = 'E07', strFormCode = 'L-2110', strScheduleCode = '8', strType = 'Gasoline/Gasohol', intMasterId = 408090
  UNION ALL SELECT intValidProductCodeId = 8091, strProductCode = 'E75', strFormCode = 'L-2110', strScheduleCode = '8', strType = 'Gasoline/Gasohol', intMasterId = 408091
@@ -457,7 +457,7 @@ select strQuery = 'UNION ALL SELECT intValidProductCodeId = ' + CAST(intReportin
  UNION ALL SELECT intValidProductCodeId = 8418, strProductCode = 'D99', strFormCode = 'L-2110', strScheduleCode = '9-C', strType = 'Dyed Fuel', intMasterId = 408418
  UNION ALL SELECT intValidProductCodeId = 8093, strProductCode = '065', strFormCode = 'L-2110', strScheduleCode = '9-C', strType = 'Gasoline/Gasohol', intMasterId = 408093
  UNION ALL SELECT intValidProductCodeId = 8094, strProductCode = 'E00', strFormCode = 'L-2110', strScheduleCode = '9-C', strType = 'Gasoline/Gasohol', intMasterId = 408094
- UNION ALL SELECT intValidProductCodeId = 8095, strProductCode = 'E01', strFormCode = 'L-2110', strScheduleCode = '9-C', strType = 'Gasoline/Gasohol', intMasterId = 408095
+ UNION ALL SELECT intValidProductCodeId = 8095, strProductCode = 'E10', strFormCode = 'L-2110', strScheduleCode = '9-C', strType = 'Gasoline/Gasohol', intMasterId = 408095
  UNION ALL SELECT intValidProductCodeId = 8096, strProductCode = 'E05', strFormCode = 'L-2110', strScheduleCode = '9-C', strType = 'Gasoline/Gasohol', intMasterId = 408096
  UNION ALL SELECT intValidProductCodeId = 8097, strProductCode = 'E07', strFormCode = 'L-2110', strScheduleCode = '9-C', strType = 'Gasoline/Gasohol', intMasterId = 408097
  UNION ALL SELECT intValidProductCodeId = 8098, strProductCode = 'E75', strFormCode = 'L-2110', strScheduleCode = '9-C', strType = 'Gasoline/Gasohol', intMasterId = 408098
@@ -480,7 +480,7 @@ select strQuery = 'UNION ALL SELECT intValidProductCodeId = ' + CAST(intReportin
  UNION ALL SELECT intValidProductCodeId = 8424, strProductCode = 'D99', strFormCode = 'L-2112', strScheduleCode = '7-A', strType = 'Dyed Fuel', intMasterId = 408424
  UNION ALL SELECT intValidProductCodeId = 8100, strProductCode = '065', strFormCode = 'L-2112', strScheduleCode = '7-A', strType = 'Gasoline/Gasohol', intMasterId = 408100
  UNION ALL SELECT intValidProductCodeId = 8101, strProductCode = 'E00', strFormCode = 'L-2112', strScheduleCode = '7-A', strType = 'Gasoline/Gasohol', intMasterId = 408101
- UNION ALL SELECT intValidProductCodeId = 8102, strProductCode = 'E01', strFormCode = 'L-2112', strScheduleCode = '7-A', strType = 'Gasoline/Gasohol', intMasterId = 408102
+ UNION ALL SELECT intValidProductCodeId = 8102, strProductCode = 'E10', strFormCode = 'L-2112', strScheduleCode = '7-A', strType = 'Gasoline/Gasohol', intMasterId = 408102
  UNION ALL SELECT intValidProductCodeId = 8103, strProductCode = 'E05', strFormCode = 'L-2112', strScheduleCode = '7-A', strType = 'Gasoline/Gasohol', intMasterId = 408103
  UNION ALL SELECT intValidProductCodeId = 8104, strProductCode = 'E07', strFormCode = 'L-2112', strScheduleCode = '7-A', strType = 'Gasoline/Gasohol', intMasterId = 408104
  UNION ALL SELECT intValidProductCodeId = 8105, strProductCode = 'E75', strFormCode = 'L-2112', strScheduleCode = '7-A', strType = 'Gasoline/Gasohol', intMasterId = 408105
@@ -499,7 +499,7 @@ select strQuery = 'UNION ALL SELECT intValidProductCodeId = ' + CAST(intReportin
  UNION ALL SELECT intValidProductCodeId = 7698, strProductCode = '092', strFormCode = 'L-2176', strScheduleCode = '14A', strType = '', intMasterId = 407698
  UNION ALL SELECT intValidProductCodeId = 7699, strProductCode = '122', strFormCode = 'L-2176', strScheduleCode = '14A', strType = '', intMasterId = 407699
  UNION ALL SELECT intValidProductCodeId = 7700, strProductCode = 'E00', strFormCode = 'L-2176', strScheduleCode = '14A', strType = '', intMasterId = 407700
- UNION ALL SELECT intValidProductCodeId = 7701, strProductCode = 'E01', strFormCode = 'L-2176', strScheduleCode = '14A', strType = '', intMasterId = 407701
+ UNION ALL SELECT intValidProductCodeId = 7701, strProductCode = 'E10', strFormCode = 'L-2176', strScheduleCode = '14A', strType = '', intMasterId = 407701
  UNION ALL SELECT intValidProductCodeId = 7702, strProductCode = 'E05', strFormCode = 'L-2176', strScheduleCode = '14A', strType = '', intMasterId = 407702
  UNION ALL SELECT intValidProductCodeId = 7703, strProductCode = 'E07', strFormCode = 'L-2176', strScheduleCode = '14A', strType = '', intMasterId = 407703
  UNION ALL SELECT intValidProductCodeId = 7704, strProductCode = 'E75', strFormCode = 'L-2176', strScheduleCode = '14A', strType = '', intMasterId = 407704
@@ -522,7 +522,7 @@ select strQuery = 'UNION ALL SELECT intValidProductCodeId = ' + CAST(intReportin
  UNION ALL SELECT intValidProductCodeId = 7721, strProductCode = '092', strFormCode = 'L-2176', strScheduleCode = '14B', strType = '', intMasterId = 407721
  UNION ALL SELECT intValidProductCodeId = 7722, strProductCode = '122', strFormCode = 'L-2176', strScheduleCode = '14B', strType = '', intMasterId = 407722
  UNION ALL SELECT intValidProductCodeId = 7723, strProductCode = 'E00', strFormCode = 'L-2176', strScheduleCode = '14B', strType = '', intMasterId = 407723
- UNION ALL SELECT intValidProductCodeId = 7724, strProductCode = 'E01', strFormCode = 'L-2176', strScheduleCode = '14B', strType = '', intMasterId = 407724
+ UNION ALL SELECT intValidProductCodeId = 7724, strProductCode = 'E10', strFormCode = 'L-2176', strScheduleCode = '14B', strType = '', intMasterId = 407724
  UNION ALL SELECT intValidProductCodeId = 7725, strProductCode = 'E05', strFormCode = 'L-2176', strScheduleCode = '14B', strType = '', intMasterId = 407725
  UNION ALL SELECT intValidProductCodeId = 7726, strProductCode = 'E07', strFormCode = 'L-2176', strScheduleCode = '14B', strType = '', intMasterId = 407726
  UNION ALL SELECT intValidProductCodeId = 7727, strProductCode = 'E75', strFormCode = 'L-2176', strScheduleCode = '14B', strType = '', intMasterId = 407727
@@ -545,7 +545,7 @@ select strQuery = 'UNION ALL SELECT intValidProductCodeId = ' + CAST(intReportin
  UNION ALL SELECT intValidProductCodeId = 7744, strProductCode = '092', strFormCode = 'L-2176', strScheduleCode = '14C', strType = '', intMasterId = 407744
  UNION ALL SELECT intValidProductCodeId = 7745, strProductCode = '122', strFormCode = 'L-2176', strScheduleCode = '14C', strType = '', intMasterId = 407745
  UNION ALL SELECT intValidProductCodeId = 7746, strProductCode = 'E00', strFormCode = 'L-2176', strScheduleCode = '14C', strType = '', intMasterId = 407746
- UNION ALL SELECT intValidProductCodeId = 7747, strProductCode = 'E01', strFormCode = 'L-2176', strScheduleCode = '14C', strType = '', intMasterId = 407747
+ UNION ALL SELECT intValidProductCodeId = 7747, strProductCode = 'E10', strFormCode = 'L-2176', strScheduleCode = '14C', strType = '', intMasterId = 407747
  UNION ALL SELECT intValidProductCodeId = 7748, strProductCode = 'E05', strFormCode = 'L-2176', strScheduleCode = '14C', strType = '', intMasterId = 407748
  UNION ALL SELECT intValidProductCodeId = 7749, strProductCode = 'E07', strFormCode = 'L-2176', strScheduleCode = '14C', strType = '', intMasterId = 407749
  UNION ALL SELECT intValidProductCodeId = 7750, strProductCode = 'E75', strFormCode = 'L-2176', strScheduleCode = '14C', strType = '', intMasterId = 407750
@@ -572,7 +572,7 @@ select strQuery = 'UNION ALL SELECT intValidProductCodeId = ' + CAST(intReportin
  UNION ALL SELECT intValidProductCodeId = 8298, strProductCode = 'D99', strFormCode = 'L-2105', strScheduleCode = '10', strType = 'Dyed Fuel', intMasterId = 408298
  UNION ALL SELECT intValidProductCodeId = 7974, strProductCode = '065', strFormCode = 'L-2105', strScheduleCode = '10', strType = 'Gasoline/Gasohol', intMasterId = 407974
  UNION ALL SELECT intValidProductCodeId = 7975, strProductCode = 'E00', strFormCode = 'L-2105', strScheduleCode = '10', strType = 'Gasoline/Gasohol', intMasterId = 407975
- UNION ALL SELECT intValidProductCodeId = 7976, strProductCode = 'E01', strFormCode = 'L-2105', strScheduleCode = '10', strType = 'Gasoline/Gasohol', intMasterId = 407976
+ UNION ALL SELECT intValidProductCodeId = 7976, strProductCode = 'E10', strFormCode = 'L-2105', strScheduleCode = '10', strType = 'Gasoline/Gasohol', intMasterId = 407976
  UNION ALL SELECT intValidProductCodeId = 7977, strProductCode = 'E05', strFormCode = 'L-2105', strScheduleCode = '10', strType = 'Gasoline/Gasohol', intMasterId = 407977
  UNION ALL SELECT intValidProductCodeId = 7978, strProductCode = 'E07', strFormCode = 'L-2105', strScheduleCode = '10', strType = 'Gasoline/Gasohol', intMasterId = 407978
  UNION ALL SELECT intValidProductCodeId = 7979, strProductCode = 'E75', strFormCode = 'L-2105', strScheduleCode = '10', strType = 'Gasoline/Gasohol', intMasterId = 407979
@@ -595,7 +595,7 @@ select strQuery = 'UNION ALL SELECT intValidProductCodeId = ' + CAST(intReportin
  UNION ALL SELECT intValidProductCodeId = 8304, strProductCode = 'D99', strFormCode = 'L-2105', strScheduleCode = '1-A', strType = 'Dyed Fuel', intMasterId = 408304
  UNION ALL SELECT intValidProductCodeId = 7981, strProductCode = '065', strFormCode = 'L-2105', strScheduleCode = '1-A', strType = 'Gasoline/Gasohol', intMasterId = 407981
  UNION ALL SELECT intValidProductCodeId = 7982, strProductCode = 'E00', strFormCode = 'L-2105', strScheduleCode = '1-A', strType = 'Gasoline/Gasohol', intMasterId = 407982
- UNION ALL SELECT intValidProductCodeId = 7983, strProductCode = 'E01', strFormCode = 'L-2105', strScheduleCode = '1-A', strType = 'Gasoline/Gasohol', intMasterId = 407983
+ UNION ALL SELECT intValidProductCodeId = 7983, strProductCode = 'E10', strFormCode = 'L-2105', strScheduleCode = '1-A', strType = 'Gasoline/Gasohol', intMasterId = 407983
  UNION ALL SELECT intValidProductCodeId = 7984, strProductCode = 'E05', strFormCode = 'L-2105', strScheduleCode = '1-A', strType = 'Gasoline/Gasohol', intMasterId = 407984
  UNION ALL SELECT intValidProductCodeId = 7985, strProductCode = 'E07', strFormCode = 'L-2105', strScheduleCode = '1-A', strType = 'Gasoline/Gasohol', intMasterId = 407985
  UNION ALL SELECT intValidProductCodeId = 7986, strProductCode = 'E75', strFormCode = 'L-2105', strScheduleCode = '1-A', strType = 'Gasoline/Gasohol', intMasterId = 407986
@@ -618,7 +618,7 @@ select strQuery = 'UNION ALL SELECT intValidProductCodeId = ' + CAST(intReportin
  UNION ALL SELECT intValidProductCodeId = 8310, strProductCode = 'D99', strFormCode = 'L-2105', strScheduleCode = '3', strType = 'Dyed Fuel', intMasterId = 408310
  UNION ALL SELECT intValidProductCodeId = 7988, strProductCode = '065', strFormCode = 'L-2105', strScheduleCode = '3', strType = 'Gasoline/Gasohol', intMasterId = 407988
  UNION ALL SELECT intValidProductCodeId = 7989, strProductCode = 'E00', strFormCode = 'L-2105', strScheduleCode = '3', strType = 'Gasoline/Gasohol', intMasterId = 407989
- UNION ALL SELECT intValidProductCodeId = 7990, strProductCode = 'E01', strFormCode = 'L-2105', strScheduleCode = '3', strType = 'Gasoline/Gasohol', intMasterId = 407990
+ UNION ALL SELECT intValidProductCodeId = 7990, strProductCode = 'E10', strFormCode = 'L-2105', strScheduleCode = '3', strType = 'Gasoline/Gasohol', intMasterId = 407990
  UNION ALL SELECT intValidProductCodeId = 7991, strProductCode = 'E05', strFormCode = 'L-2105', strScheduleCode = '3', strType = 'Gasoline/Gasohol', intMasterId = 407991
  UNION ALL SELECT intValidProductCodeId = 7992, strProductCode = 'E07', strFormCode = 'L-2105', strScheduleCode = '3', strType = 'Gasoline/Gasohol', intMasterId = 407992
  UNION ALL SELECT intValidProductCodeId = 7993, strProductCode = 'E75', strFormCode = 'L-2105', strScheduleCode = '3', strType = 'Gasoline/Gasohol', intMasterId = 407993
@@ -641,7 +641,7 @@ select strQuery = 'UNION ALL SELECT intValidProductCodeId = ' + CAST(intReportin
  UNION ALL SELECT intValidProductCodeId = 8316, strProductCode = 'D99', strFormCode = 'L-2105', strScheduleCode = '5-A', strType = 'Dyed Fuel', intMasterId = 408316
  UNION ALL SELECT intValidProductCodeId = 7995, strProductCode = '065', strFormCode = 'L-2105', strScheduleCode = '5-A', strType = 'Gasoline/Gasohol', intMasterId = 407995
  UNION ALL SELECT intValidProductCodeId = 7996, strProductCode = 'E00', strFormCode = 'L-2105', strScheduleCode = '5-A', strType = 'Gasoline/Gasohol', intMasterId = 407996
- UNION ALL SELECT intValidProductCodeId = 7997, strProductCode = 'E01', strFormCode = 'L-2105', strScheduleCode = '5-A', strType = 'Gasoline/Gasohol', intMasterId = 407997
+ UNION ALL SELECT intValidProductCodeId = 7997, strProductCode = 'E10', strFormCode = 'L-2105', strScheduleCode = '5-A', strType = 'Gasoline/Gasohol', intMasterId = 407997
  UNION ALL SELECT intValidProductCodeId = 7998, strProductCode = 'E05', strFormCode = 'L-2105', strScheduleCode = '5-A', strType = 'Gasoline/Gasohol', intMasterId = 407998
  UNION ALL SELECT intValidProductCodeId = 7999, strProductCode = 'E07', strFormCode = 'L-2105', strScheduleCode = '5-A', strType = 'Gasoline/Gasohol', intMasterId = 407999
  UNION ALL SELECT intValidProductCodeId = 8000, strProductCode = 'E75', strFormCode = 'L-2105', strScheduleCode = '5-A', strType = 'Gasoline/Gasohol', intMasterId = 408000
@@ -664,7 +664,7 @@ select strQuery = 'UNION ALL SELECT intValidProductCodeId = ' + CAST(intReportin
  UNION ALL SELECT intValidProductCodeId = 8322, strProductCode = 'D99', strFormCode = 'L-2105', strScheduleCode = '5-C', strType = 'Dyed Fuel', intMasterId = 408322
  UNION ALL SELECT intValidProductCodeId = 8002, strProductCode = '065', strFormCode = 'L-2105', strScheduleCode = '5-C', strType = 'Gasoline/Gasohol', intMasterId = 408002
  UNION ALL SELECT intValidProductCodeId = 8003, strProductCode = 'E00', strFormCode = 'L-2105', strScheduleCode = '5-C', strType = 'Gasoline/Gasohol', intMasterId = 408003
- UNION ALL SELECT intValidProductCodeId = 8004, strProductCode = 'E01', strFormCode = 'L-2105', strScheduleCode = '5-C', strType = 'Gasoline/Gasohol', intMasterId = 408004
+ UNION ALL SELECT intValidProductCodeId = 8004, strProductCode = 'E10', strFormCode = 'L-2105', strScheduleCode = '5-C', strType = 'Gasoline/Gasohol', intMasterId = 408004
  UNION ALL SELECT intValidProductCodeId = 8005, strProductCode = 'E05', strFormCode = 'L-2105', strScheduleCode = '5-C', strType = 'Gasoline/Gasohol', intMasterId = 408005
  UNION ALL SELECT intValidProductCodeId = 8006, strProductCode = 'E07', strFormCode = 'L-2105', strScheduleCode = '5-C', strType = 'Gasoline/Gasohol', intMasterId = 408006
  UNION ALL SELECT intValidProductCodeId = 8007, strProductCode = 'E75', strFormCode = 'L-2105', strScheduleCode = '5-C', strType = 'Gasoline/Gasohol', intMasterId = 408007
@@ -695,7 +695,7 @@ select strQuery = 'UNION ALL SELECT intValidProductCodeId = ' + CAST(intReportin
  UNION ALL SELECT intValidProductCodeId = 8334, strProductCode = 'D99', strFormCode = 'L-2105', strScheduleCode = '8', strType = 'Dyed Fuel', intMasterId = 408334
  UNION ALL SELECT intValidProductCodeId = 8009, strProductCode = '065', strFormCode = 'L-2105', strScheduleCode = '8', strType = 'Gasoline/Gasohol', intMasterId = 408009
  UNION ALL SELECT intValidProductCodeId = 8010, strProductCode = 'E00', strFormCode = 'L-2105', strScheduleCode = '8', strType = 'Gasoline/Gasohol', intMasterId = 408010
- UNION ALL SELECT intValidProductCodeId = 8011, strProductCode = 'E01', strFormCode = 'L-2105', strScheduleCode = '8', strType = 'Gasoline/Gasohol', intMasterId = 408011
+ UNION ALL SELECT intValidProductCodeId = 8011, strProductCode = 'E10', strFormCode = 'L-2105', strScheduleCode = '8', strType = 'Gasoline/Gasohol', intMasterId = 408011
  UNION ALL SELECT intValidProductCodeId = 8012, strProductCode = 'E05', strFormCode = 'L-2105', strScheduleCode = '8', strType = 'Gasoline/Gasohol', intMasterId = 408012
  UNION ALL SELECT intValidProductCodeId = 8013, strProductCode = 'E07', strFormCode = 'L-2105', strScheduleCode = '8', strType = 'Gasoline/Gasohol', intMasterId = 408013
  UNION ALL SELECT intValidProductCodeId = 8014, strProductCode = 'E75', strFormCode = 'L-2105', strScheduleCode = '8', strType = 'Gasoline/Gasohol', intMasterId = 408014
@@ -718,7 +718,7 @@ select strQuery = 'UNION ALL SELECT intValidProductCodeId = ' + CAST(intReportin
  UNION ALL SELECT intValidProductCodeId = 8340, strProductCode = 'D99', strFormCode = 'L-2105', strScheduleCode = '9-C', strType = 'Dyed Fuel', intMasterId = 408340
  UNION ALL SELECT intValidProductCodeId = 8016, strProductCode = '065', strFormCode = 'L-2105', strScheduleCode = '9-C', strType = 'Gasoline/Gasohol', intMasterId = 408016
  UNION ALL SELECT intValidProductCodeId = 8017, strProductCode = 'E00', strFormCode = 'L-2105', strScheduleCode = '9-C', strType = 'Gasoline/Gasohol', intMasterId = 408017
- UNION ALL SELECT intValidProductCodeId = 8018, strProductCode = 'E01', strFormCode = 'L-2105', strScheduleCode = '9-C', strType = 'Gasoline/Gasohol', intMasterId = 408018
+ UNION ALL SELECT intValidProductCodeId = 8018, strProductCode = 'E10', strFormCode = 'L-2105', strScheduleCode = '9-C', strType = 'Gasoline/Gasohol', intMasterId = 408018
  UNION ALL SELECT intValidProductCodeId = 8019, strProductCode = 'E05', strFormCode = 'L-2105', strScheduleCode = '9-C', strType = 'Gasoline/Gasohol', intMasterId = 408019
  UNION ALL SELECT intValidProductCodeId = 8020, strProductCode = 'E07', strFormCode = 'L-2105', strScheduleCode = '9-C', strType = 'Gasoline/Gasohol', intMasterId = 408020
  UNION ALL SELECT intValidProductCodeId = 8021, strProductCode = 'E75', strFormCode = 'L-2105', strScheduleCode = '9-C', strType = 'Gasoline/Gasohol', intMasterId = 408021
@@ -741,7 +741,7 @@ select strQuery = 'UNION ALL SELECT intValidProductCodeId = ' + CAST(intReportin
  UNION ALL SELECT intValidProductCodeId = 8346, strProductCode = 'D99', strFormCode = 'L-2107', strScheduleCode = '10', strType = 'Dyed Fuel', intMasterId = 408346
  UNION ALL SELECT intValidProductCodeId = 8023, strProductCode = '065', strFormCode = 'L-2107', strScheduleCode = '10', strType = 'Gasoline/Gasohol', intMasterId = 408023
  UNION ALL SELECT intValidProductCodeId = 8024, strProductCode = 'E00', strFormCode = 'L-2107', strScheduleCode = '10', strType = 'Gasoline/Gasohol', intMasterId = 408024
- UNION ALL SELECT intValidProductCodeId = 8025, strProductCode = 'E01', strFormCode = 'L-2107', strScheduleCode = '10', strType = 'Gasoline/Gasohol', intMasterId = 408025
+ UNION ALL SELECT intValidProductCodeId = 8025, strProductCode = 'E10', strFormCode = 'L-2107', strScheduleCode = '10', strType = 'Gasoline/Gasohol', intMasterId = 408025
  UNION ALL SELECT intValidProductCodeId = 8026, strProductCode = 'E05', strFormCode = 'L-2107', strScheduleCode = '10', strType = 'Gasoline/Gasohol', intMasterId = 408026
  UNION ALL SELECT intValidProductCodeId = 8027, strProductCode = 'E07', strFormCode = 'L-2107', strScheduleCode = '10', strType = 'Gasoline/Gasohol', intMasterId = 408027
  UNION ALL SELECT intValidProductCodeId = 8028, strProductCode = 'E75', strFormCode = 'L-2107', strScheduleCode = '10', strType = 'Gasoline/Gasohol', intMasterId = 408028
@@ -764,7 +764,7 @@ select strQuery = 'UNION ALL SELECT intValidProductCodeId = ' + CAST(intReportin
  UNION ALL SELECT intValidProductCodeId = 8352, strProductCode = 'D99', strFormCode = 'L-2107', strScheduleCode = '1-A', strType = 'Dyed Fuel', intMasterId = 408352
  UNION ALL SELECT intValidProductCodeId = 8030, strProductCode = '065', strFormCode = 'L-2107', strScheduleCode = '1-A', strType = 'Gasoline/Gasohol', intMasterId = 408030
  UNION ALL SELECT intValidProductCodeId = 8031, strProductCode = 'E00', strFormCode = 'L-2107', strScheduleCode = '1-A', strType = 'Gasoline/Gasohol', intMasterId = 408031
- UNION ALL SELECT intValidProductCodeId = 8032, strProductCode = 'E01', strFormCode = 'L-2107', strScheduleCode = '1-A', strType = 'Gasoline/Gasohol', intMasterId = 408032
+ UNION ALL SELECT intValidProductCodeId = 8032, strProductCode = 'E10', strFormCode = 'L-2107', strScheduleCode = '1-A', strType = 'Gasoline/Gasohol', intMasterId = 408032
  UNION ALL SELECT intValidProductCodeId = 8033, strProductCode = 'E05', strFormCode = 'L-2107', strScheduleCode = '1-A', strType = 'Gasoline/Gasohol', intMasterId = 408033
  UNION ALL SELECT intValidProductCodeId = 8034, strProductCode = 'E07', strFormCode = 'L-2107', strScheduleCode = '1-A', strType = 'Gasoline/Gasohol', intMasterId = 408034
  UNION ALL SELECT intValidProductCodeId = 8035, strProductCode = 'E75', strFormCode = 'L-2107', strScheduleCode = '1-A', strType = 'Gasoline/Gasohol', intMasterId = 408035
@@ -787,7 +787,7 @@ select strQuery = 'UNION ALL SELECT intValidProductCodeId = ' + CAST(intReportin
  UNION ALL SELECT intValidProductCodeId = 8358, strProductCode = 'D99', strFormCode = 'L-2107', strScheduleCode = '1-C', strType = 'Dyed Fuel', intMasterId = 408358
  UNION ALL SELECT intValidProductCodeId = 8037, strProductCode = '065', strFormCode = 'L-2107', strScheduleCode = '1-C', strType = 'Gasoline/Gasohol', intMasterId = 408037
  UNION ALL SELECT intValidProductCodeId = 8038, strProductCode = 'E00', strFormCode = 'L-2107', strScheduleCode = '1-C', strType = 'Gasoline/Gasohol', intMasterId = 408038
- UNION ALL SELECT intValidProductCodeId = 8039, strProductCode = 'E01', strFormCode = 'L-2107', strScheduleCode = '1-C', strType = 'Gasoline/Gasohol', intMasterId = 408039
+ UNION ALL SELECT intValidProductCodeId = 8039, strProductCode = 'E10', strFormCode = 'L-2107', strScheduleCode = '1-C', strType = 'Gasoline/Gasohol', intMasterId = 408039
  UNION ALL SELECT intValidProductCodeId = 8040, strProductCode = 'E05', strFormCode = 'L-2107', strScheduleCode = '1-C', strType = 'Gasoline/Gasohol', intMasterId = 408040
  UNION ALL SELECT intValidProductCodeId = 8041, strProductCode = 'E07', strFormCode = 'L-2107', strScheduleCode = '1-C', strType = 'Gasoline/Gasohol', intMasterId = 408041
  UNION ALL SELECT intValidProductCodeId = 8042, strProductCode = 'E75', strFormCode = 'L-2107', strScheduleCode = '1-C', strType = 'Gasoline/Gasohol', intMasterId = 408042
@@ -810,7 +810,7 @@ select strQuery = 'UNION ALL SELECT intValidProductCodeId = ' + CAST(intReportin
  UNION ALL SELECT intValidProductCodeId = 8364, strProductCode = 'D99', strFormCode = 'L-2107', strScheduleCode = '3-A', strType = 'Dyed Fuel', intMasterId = 408364
  UNION ALL SELECT intValidProductCodeId = 8044, strProductCode = '065', strFormCode = 'L-2107', strScheduleCode = '3-A', strType = 'Gasoline/Gasohol', intMasterId = 408044
  UNION ALL SELECT intValidProductCodeId = 8045, strProductCode = 'E00', strFormCode = 'L-2107', strScheduleCode = '3-A', strType = 'Gasoline/Gasohol', intMasterId = 408045
- UNION ALL SELECT intValidProductCodeId = 8046, strProductCode = 'E01', strFormCode = 'L-2107', strScheduleCode = '3-A', strType = 'Gasoline/Gasohol', intMasterId = 408046
+ UNION ALL SELECT intValidProductCodeId = 8046, strProductCode = 'E10', strFormCode = 'L-2107', strScheduleCode = '3-A', strType = 'Gasoline/Gasohol', intMasterId = 408046
  UNION ALL SELECT intValidProductCodeId = 8047, strProductCode = 'E05', strFormCode = 'L-2107', strScheduleCode = '3-A', strType = 'Gasoline/Gasohol', intMasterId = 408047
  UNION ALL SELECT intValidProductCodeId = 8048, strProductCode = 'E07', strFormCode = 'L-2107', strScheduleCode = '3-A', strType = 'Gasoline/Gasohol', intMasterId = 408048
  UNION ALL SELECT intValidProductCodeId = 8049, strProductCode = 'E75', strFormCode = 'L-2107', strScheduleCode = '3-A', strType = 'Gasoline/Gasohol', intMasterId = 408049
@@ -841,7 +841,7 @@ select strQuery = 'UNION ALL SELECT intValidProductCodeId = ' + CAST(intReportin
  UNION ALL SELECT intValidProductCodeId = 8376, strProductCode = 'D99', strFormCode = 'L-2107', strScheduleCode = '8', strType = 'Dyed Fuel', intMasterId = 408376
  UNION ALL SELECT intValidProductCodeId = 8051, strProductCode = '065', strFormCode = 'L-2107', strScheduleCode = '8', strType = 'Gasoline/Gasohol', intMasterId = 408051
  UNION ALL SELECT intValidProductCodeId = 8052, strProductCode = 'E00', strFormCode = 'L-2107', strScheduleCode = '8', strType = 'Gasoline/Gasohol', intMasterId = 408052
- UNION ALL SELECT intValidProductCodeId = 8053, strProductCode = 'E01', strFormCode = 'L-2107', strScheduleCode = '8', strType = 'Gasoline/Gasohol', intMasterId = 408053
+ UNION ALL SELECT intValidProductCodeId = 8053, strProductCode = 'E10', strFormCode = 'L-2107', strScheduleCode = '8', strType = 'Gasoline/Gasohol', intMasterId = 408053
  UNION ALL SELECT intValidProductCodeId = 8054, strProductCode = 'E05', strFormCode = 'L-2107', strScheduleCode = '8', strType = 'Gasoline/Gasohol', intMasterId = 408054
  UNION ALL SELECT intValidProductCodeId = 8055, strProductCode = 'E07', strFormCode = 'L-2107', strScheduleCode = '8', strType = 'Gasoline/Gasohol', intMasterId = 408055
  UNION ALL SELECT intValidProductCodeId = 8056, strProductCode = 'E75', strFormCode = 'L-2107', strScheduleCode = '8', strType = 'Gasoline/Gasohol', intMasterId = 408056
@@ -864,7 +864,7 @@ select strQuery = 'UNION ALL SELECT intValidProductCodeId = ' + CAST(intReportin
  UNION ALL SELECT intValidProductCodeId = 8382, strProductCode = 'D99', strFormCode = 'L-2107', strScheduleCode = '9-C', strType = 'Dyed Fuel', intMasterId = 408382
  UNION ALL SELECT intValidProductCodeId = 8058, strProductCode = '065', strFormCode = 'L-2107', strScheduleCode = '9-C', strType = 'Gasoline/Gasohol', intMasterId = 408058
  UNION ALL SELECT intValidProductCodeId = 8059, strProductCode = 'E00', strFormCode = 'L-2107', strScheduleCode = '9-C', strType = 'Gasoline/Gasohol', intMasterId = 408059
- UNION ALL SELECT intValidProductCodeId = 8060, strProductCode = 'E01', strFormCode = 'L-2107', strScheduleCode = '9-C', strType = 'Gasoline/Gasohol', intMasterId = 408060
+ UNION ALL SELECT intValidProductCodeId = 8060, strProductCode = 'E10', strFormCode = 'L-2107', strScheduleCode = '9-C', strType = 'Gasoline/Gasohol', intMasterId = 408060
  UNION ALL SELECT intValidProductCodeId = 8061, strProductCode = 'E05', strFormCode = 'L-2107', strScheduleCode = '9-C', strType = 'Gasoline/Gasohol', intMasterId = 408061
  UNION ALL SELECT intValidProductCodeId = 8062, strProductCode = 'E07', strFormCode = 'L-2107', strScheduleCode = '9-C', strType = 'Gasoline/Gasohol', intMasterId = 408062
  UNION ALL SELECT intValidProductCodeId = 8063, strProductCode = 'E75', strFormCode = 'L-2107', strScheduleCode = '9-C', strType = 'Gasoline/Gasohol', intMasterId = 408063
@@ -887,7 +887,7 @@ select strQuery = 'UNION ALL SELECT intValidProductCodeId = ' + CAST(intReportin
  UNION ALL SELECT intValidProductCodeId = 8388, strProductCode = 'D99', strFormCode = 'L-2110', strScheduleCode = '10', strType = 'Dyed Fuel', intMasterId = 408388
  UNION ALL SELECT intValidProductCodeId = 8065, strProductCode = '065', strFormCode = 'L-2110', strScheduleCode = '10', strType = 'Gasoline/Gasohol', intMasterId = 408065
  UNION ALL SELECT intValidProductCodeId = 8066, strProductCode = 'E00', strFormCode = 'L-2110', strScheduleCode = '10', strType = 'Gasoline/Gasohol', intMasterId = 408066
- UNION ALL SELECT intValidProductCodeId = 8067, strProductCode = 'E01', strFormCode = 'L-2110', strScheduleCode = '10', strType = 'Gasoline/Gasohol', intMasterId = 408067
+ UNION ALL SELECT intValidProductCodeId = 8067, strProductCode = 'E10', strFormCode = 'L-2110', strScheduleCode = '10', strType = 'Gasoline/Gasohol', intMasterId = 408067
  UNION ALL SELECT intValidProductCodeId = 8068, strProductCode = 'E05', strFormCode = 'L-2110', strScheduleCode = '10', strType = 'Gasoline/Gasohol', intMasterId = 408068
  UNION ALL SELECT intValidProductCodeId = 8069, strProductCode = 'E07', strFormCode = 'L-2110', strScheduleCode = '10', strType = 'Gasoline/Gasohol', intMasterId = 408069
  UNION ALL SELECT intValidProductCodeId = 8070, strProductCode = 'E75', strFormCode = 'L-2110', strScheduleCode = '10', strType = 'Gasoline/Gasohol', intMasterId = 408070
@@ -910,7 +910,7 @@ select strQuery = 'UNION ALL SELECT intValidProductCodeId = ' + CAST(intReportin
  UNION ALL SELECT intValidProductCodeId = 8394, strProductCode = 'D99', strFormCode = 'L-2110', strScheduleCode = '1-A', strType = 'Dyed Fuel', intMasterId = 408394
  UNION ALL SELECT intValidProductCodeId = 8072, strProductCode = '065', strFormCode = 'L-2110', strScheduleCode = '1-A', strType = 'Gasoline/Gasohol', intMasterId = 408072
  UNION ALL SELECT intValidProductCodeId = 8073, strProductCode = 'E00', strFormCode = 'L-2110', strScheduleCode = '1-A', strType = 'Gasoline/Gasohol', intMasterId = 408073
- UNION ALL SELECT intValidProductCodeId = 8074, strProductCode = 'E01', strFormCode = 'L-2110', strScheduleCode = '1-A', strType = 'Gasoline/Gasohol', intMasterId = 408074
+ UNION ALL SELECT intValidProductCodeId = 8074, strProductCode = 'E10', strFormCode = 'L-2110', strScheduleCode = '1-A', strType = 'Gasoline/Gasohol', intMasterId = 408074
  UNION ALL SELECT intValidProductCodeId = 8075, strProductCode = 'E05', strFormCode = 'L-2110', strScheduleCode = '1-A', strType = 'Gasoline/Gasohol', intMasterId = 408075
  UNION ALL SELECT intValidProductCodeId = 8076, strProductCode = 'E07', strFormCode = 'L-2110', strScheduleCode = '1-A', strType = 'Gasoline/Gasohol', intMasterId = 408076
  UNION ALL SELECT intValidProductCodeId = 8077, strProductCode = 'E75', strFormCode = 'L-2110', strScheduleCode = '1-A', strType = 'Gasoline/Gasohol', intMasterId = 408077
@@ -933,7 +933,7 @@ select strQuery = 'UNION ALL SELECT intValidProductCodeId = ' + CAST(intReportin
  UNION ALL SELECT intValidProductCodeId = 8400, strProductCode = 'D99', strFormCode = 'L-2110', strScheduleCode = '3-A', strType = 'Dyed Fuel', intMasterId = 408400
  UNION ALL SELECT intValidProductCodeId = 8079, strProductCode = '065', strFormCode = 'L-2110', strScheduleCode = '3-A', strType = 'Gasoline/Gasohol', intMasterId = 408079
  UNION ALL SELECT intValidProductCodeId = 8080, strProductCode = 'E00', strFormCode = 'L-2110', strScheduleCode = '3-A', strType = 'Gasoline/Gasohol', intMasterId = 408080
- UNION ALL SELECT intValidProductCodeId = 8081, strProductCode = 'E01', strFormCode = 'L-2110', strScheduleCode = '3-A', strType = 'Gasoline/Gasohol', intMasterId = 408081
+ UNION ALL SELECT intValidProductCodeId = 8081, strProductCode = 'E10', strFormCode = 'L-2110', strScheduleCode = '3-A', strType = 'Gasoline/Gasohol', intMasterId = 408081
  UNION ALL SELECT intValidProductCodeId = 8082, strProductCode = 'E05', strFormCode = 'L-2110', strScheduleCode = '3-A', strType = 'Gasoline/Gasohol', intMasterId = 408082
  UNION ALL SELECT intValidProductCodeId = 8083, strProductCode = 'E07', strFormCode = 'L-2110', strScheduleCode = '3-A', strType = 'Gasoline/Gasohol', intMasterId = 408083
  UNION ALL SELECT intValidProductCodeId = 8084, strProductCode = 'E75', strFormCode = 'L-2110', strScheduleCode = '3-A', strType = 'Gasoline/Gasohol', intMasterId = 408084

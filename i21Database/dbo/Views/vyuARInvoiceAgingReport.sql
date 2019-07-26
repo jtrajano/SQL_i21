@@ -146,7 +146,7 @@ LEFT JOIN (
 	  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) <= GETDATE()
 ) P ON I.intPaymentId = P.intPaymentId
 LEFT JOIN (
-	SELECT dblPayment = SUM(dblPayment)
+	SELECT dblPayment = SUM(dblPayment) + SUM(ISNULL(dblWriteOffAmount, 0))
 		 , PD.intInvoiceId
 	FROM dbo.tblARPaymentDetail PD WITH (NOLOCK) 
 	INNER JOIN (
@@ -212,7 +212,7 @@ INNER JOIN (
 	  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) <= GETDATE()
 ) P ON I.intPaymentId = P.intPaymentId 
 LEFT JOIN (
-	SELECT dblPayment = SUM(dblPayment)
+	SELECT dblPayment = SUM(dblPayment) + SUM(ISNULL(dblWriteOffAmount, 0))
 		 , PD.intInvoiceId
 	FROM dbo.tblARPaymentDetail PD WITH (NOLOCK) 
 	INNER JOIN (

@@ -165,7 +165,7 @@ SET ANSI_WARNINGS OFF
 			,r.intItemLocationId
 			,r.intItemUOMId
 			,NULL
-			,LD.intPSubLocationId
+			,ISNULL(LW.intSubLocationId, LD.intPSubLocationId)
 			,NULL
 			,-r.dblQty
 			,LD.intLoadId
@@ -176,6 +176,8 @@ SET ANSI_WARNINGS OFF
 			(
 				tblLGLoadDetail LD	INNER JOIN tblLGLoad L 
 				ON L.intLoadId = LD.intLoadId			
+				LEFT JOIN tblLGLoadWarehouse LW 
+				ON LW.intLoadId= L.intLoadId
 			)
 				ON r.intSourceId = LD.intLoadDetailId
 			LEFT JOIN vyuCTCompactContractDetailView CT --LEFT JOIN vyuCTContractDetailView CT 

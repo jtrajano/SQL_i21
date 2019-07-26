@@ -66,7 +66,7 @@ SELECT intInvoiceDetailId					= INV.intInvoiceDetailId
 	 , strSalesOrderNumber					= INV.strSalesOrderNumber
 	 , intContractHeaderId					= INV.intContractHeaderId
 	 , intContractDetailId					= INV.intContractDetailId
-	 , dblContractBalance					= INV.dblContractBalance
+	 , dblContractBalance					= ISNULL(CT.dblBalance, 0)
 	 , dblContractAvailable					= INV.dblContractAvailable
 	 , intShipmentId						= INV.intShipmentId
 	 , intShipmentPurchaseSalesContractId	= INV.intShipmentPurchaseSalesContractId
@@ -201,6 +201,7 @@ LEFT JOIN (
 	SELECT intContractDetailId
 		 , strContractNumber
 		 , intContractSeq
+		 , dblBalance
 		 , PT.intPricingTypeId
 		 , PT.strPricingType				
 	FROM tblCTContractDetail CD

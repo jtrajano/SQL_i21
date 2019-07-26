@@ -333,12 +333,12 @@ BEGIN
 														  , @LoadId		= @LoadIDP
 														  , @UserId		= @UserId
 		
-		-- --CANCEL LOAD SHIPMENT FROM CREDIT MEMO RETURN
-		-- IF ISNULL(@ysnFromReturnP, 0) = 0 AND @LoadIDP IS NOT NULL
-		-- 	EXEC dbo.[uspLGCancelLoadSchedule] @intLoadId 				 = @LoadIDP
-		-- 									 , @ysnCancel				 = 1
-		-- 									 , @intEntityUserSecurityId  = @UserId
-		-- 									 , @intShipmentType			 = 1
+		--CANCEL LOAD SHIPMENT FROM CREDIT MEMO RETURN
+		IF ISNULL(@ysnFromReturnP, 0) = 1 AND @LoadIDP IS NOT NULL
+			EXEC dbo.[uspLGCancelLoadSchedule] @intLoadId 				 = @LoadIDP
+											 , @ysnCancel				 = 1
+											 , @intEntityUserSecurityId  = @UserId
+											 , @intShipmentType			 = 1
 
 		DELETE FROM @IdsP WHERE [intInvoiceId] = @InvoiceIDP
 	END
@@ -649,12 +649,12 @@ BEGIN
 														  , @LoadId		= @LoadIDU
 														  , @UserId		= @UserId
 
-		-- --CANCEL LOAD SHIPMENT FROM CREDIT MEMO RETURN
-		-- IF ISNULL(@ysnFromReturnU, 0) = 0 AND @LoadIDU IS NOT NULL
-		-- 	EXEC dbo.[uspLGCancelLoadSchedule] @intLoadId 				 = @LoadIDU
-		-- 									 , @ysnCancel				 = 0
-		-- 									 , @intEntityUserSecurityId  = @UserId
-		-- 									 , @intShipmentType			 = 1
+		--CANCEL LOAD SHIPMENT FROM CREDIT MEMO RETURN
+		IF ISNULL(@ysnFromReturnU, 0) = 1 AND @LoadIDU IS NOT NULL
+			EXEC dbo.[uspLGCancelLoadSchedule] @intLoadId 				 = @LoadIDU
+											 , @ysnCancel				 = 0
+											 , @intEntityUserSecurityId  = @UserId
+											 , @intShipmentType			 = 1
 
 		DELETE FROM @IdsU WHERE [intInvoiceId] = @InvoiceIDU
 	END
@@ -752,7 +752,8 @@ SELECT
 	,[dblMaintenanceAmount]         = ID.[dblMaintenanceAmount]         
 	,[dblLicenseAmount]             = ID.[dblLicenseAmount]             
 	,[intContractDetailId]			= ID.[intContractDetailId]			
-	,[intTicketId]					= ID.[intTicketId]
+	--,[intTicketId]					= ID.[intTicketId]
+	,[intTicketId]     = (case when ID.strTransactionType = 'Credit Memo' and @Post = convert(bit,1) then null else ID.[intTicketId] end)
 	,[intCustomerStorageId]			= ID.[intCustomerStorageId]
 	,[intLoadDetailId]				= ID.[intLoadDetailId]
 	,[ysnLeaseBilling]				= ID.[ysnLeaseBilling]				
@@ -778,24 +779,6 @@ WHERE ID.[intInventoryShipmentChargeId] IS NULL
     AND ISNULL(ID.[strItemType], '') <> 'Other Charge'
 
 EXEC dbo.[uspCTInvoicePosted] @ItemsFromInvoice, @UserId
-
---UPDATE INVOICE CONTRACT BALANCE
-UPDATE ARID
-SET ARID.dblContractBalance = CTCD.dblBalance
-FROM (
-	SELECT intInvoiceDetailId
-		 , dblContractBalance
-		 , intContractDetailId 
-	FROM dbo.tblARInvoiceDetail WITH (NOLOCK)
-) ARID
-INNER JOIN #ARPostInvoiceDetail PID ON ARID.[intInvoiceDetailId] = PID.[intInvoiceDetailId]
-INNER JOIN (
-	SELECT intContractDetailId
-		 , dblBalance 
-	FROM dbo.tblCTContractDetail WITH (NOLOCK)
-) CTCD ON ARID.intContractDetailId = CTCD.intContractDetailId
-WHERE ARID.dblContractBalance <> CTCD.dblBalance
-  AND PID.[strType] NOT IN ('Card Fueling Transaction','CF Tran','CF Invoice')
 
 DELETE A
 FROM tblARPrepaidAndCredit A

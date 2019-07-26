@@ -150,49 +150,20 @@ BEGIN
 	JOIN tblRKBrokerageAccount ba on ba.intBrokerageAccountId=ft.intBrokerageAccountId
 END
 
-DECLARE @intUnitMeasureId int
-
-SELECT TOP 1 @intUnitMeasureId = intUnitMeasureId FROM tblRKCompanyPreference
-
-if isnull(@intUnitMeasureId, '') <> ''
-BEGIN
-	SELECT strLocationName
-		,dtmFilledDate
-		,strInternalTradeNo
-		,strFutureMonth
-		,strInstrumentType
-		,strBroker
-		,strAccountNumber
-		,intFutOptTransactionId
-		,strFutMarketName
-		,dblNoOfContract
-		,dblMatchQty
-		,dblContractSize
-		,intFutureMarketId
-		,BuySell
-		,OpenLots
-		,isnull(dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc.intCommodityUnitMeasureId,case when isnull(cuc1.intCommodityUnitMeasureId,0) = 0 then cuc.intCommodityUnitMeasureId else cuc1.intCommodityUnitMeasureId end,round(HedgedQty,4)),0) HedgedQty
-	FROM @tblTemp t
-	JOIN tblICCommodityUnitMeasure cuc on t.intCommodityId=cuc.intCommodityId and cuc.ysnDefault=1
-	JOIN tblICCommodityUnitMeasure cuc1 on t.intCommodityId=cuc1.intCommodityId and @intUnitMeasureId=cuc1.intUnitMeasureId
-END
-ELSE
-BEGIN
-	SELECT strLocationName
-		,dtmFilledDate
-		,strInternalTradeNo
-		,strFutureMonth
-		,strInstrumentType
-		,strBroker
-		,strAccountNumber
-		,intFutOptTransactionId
-		,strFutMarketName
-		,dblNoOfContract
-		,dblMatchQty
-		,dblContractSize
-		,intFutureMarketId
-		,BuySell
-		,OpenLots
-		,HedgedQty
-	FROM @tblTemp
-END
+SELECT strLocationName
+	, dtmFilledDate
+	, strInternalTradeNo
+	, strFutureMonth
+	, strInstrumentType
+	, strBroker
+	, strAccountNumber
+	, intFutOptTransactionId
+	, strFutMarketName
+	, dblNoOfContract
+	, dblMatchQty
+	, dblContractSize
+	, intFutureMarketId
+	, BuySell
+	, OpenLots
+	, HedgedQty
+FROM @tblTemp

@@ -205,9 +205,21 @@ BEGIN TRY
 							@dblQuantityToUpdate	=	@dblConvertedQty,
 							@intUserId				=	@intUserId,
 							@intExternalId			=	@intInvoiceDetailId,
+							@strScreenName			=	'Invoice',
+							@ysnFromInvoice = 1 
+
+					EXEC	uspCTUpdateScheduleQuantity
+							@intContractDetailId	=	@intContractDetailId,
+							@dblQuantityToUpdate	=	@dblSchQuantityToUpdate,
+							@intUserId				=	@intUserId,
+							@intExternalId			=	@intInvoiceDetailId,
 							@strScreenName			=	'Invoice' 
+
 				END
 				
+
+
+				/*
 				IF ISNULL(@strTransactionType, '') <> 'Credit Memo'
 				BEGIN
 					EXEC	uspCTUpdateScheduleQuantity
@@ -217,6 +229,7 @@ BEGIN TRY
 							@intExternalId			=	@intInvoiceDetailId,
 							@strScreenName			=	'Invoice' 
 					END
+					*/
 		END
 
 		IF @ysnDestWtGrd = 1
@@ -230,7 +243,8 @@ BEGIN TRY
 						@dblQuantityToUpdate	=	@dblConvertedQty,
 						@intUserId				=	@intUserId,
 						@intExternalId			=	@intInvoiceDetailId,
-						@strScreenName			=	'Invoice' 
+						@strScreenName			=	'Invoice',
+							@ysnFromInvoice = 1  
 
 				SELECT @dblConvertedQty =	dbo.fnCalculateQtyBetweenUOM(@intFromItemUOMId,@intToItemUOMId,@dblQty)
 
@@ -239,7 +253,8 @@ BEGIN TRY
 						@dblQuantityToUpdate	=	@dblConvertedQty,
 						@intUserId				=	@intUserId,
 						@intExternalId			=	@intInvoiceDetailId,
-						@strScreenName			=	'Invoice' 
+						@strScreenName			=	'Invoice',
+							@ysnFromInvoice = 1  
 			END
 			ELSE --Unpost
 			BEGIN
@@ -250,7 +265,8 @@ BEGIN TRY
 						@dblQuantityToUpdate	=	@dblConvertedQty,
 						@intUserId				=	@intUserId,
 						@intExternalId			=	@intInvoiceDetailId,
-						@strScreenName			=	'Invoice'
+						@strScreenName			=	'Invoice',
+							@ysnFromInvoice = 1 
 						
 				SELECT @dblConvertedQty =	dbo.fnCalculateQtyBetweenUOM(@intShippedQtyUOMId,@intToItemUOMId,@dblShippedQty) 	
 
@@ -259,7 +275,8 @@ BEGIN TRY
 						@dblQuantityToUpdate	=	@dblConvertedQty,
 						@intUserId				=	@intUserId,
 						@intExternalId			=	@intInvoiceDetailId,
-						@strScreenName			=	'Invoice'  	
+						@strScreenName			=	'Invoice',
+							@ysnFromInvoice = 1   	
 			END
 		END
 
