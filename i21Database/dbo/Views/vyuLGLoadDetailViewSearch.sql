@@ -191,9 +191,9 @@ SELECT   L.intLoadId
 						WHEN (L.ysnArrivedInPort = 1) THEN 'Arrived in Port'
 						ELSE 'Outbound Transit' END
 			WHEN 6 THEN 
-				CASE WHEN (L.intPurchaseSale = 3 AND L.ysnCustomsReleased = 1) THEN 'Customs Released'
-						WHEN (L.intPurchaseSale = 3 AND L.ysnDocumentsApproved = 1) THEN 'Documents Approved'
-						WHEN (L.intPurchaseSale = 3 AND L.ysnArrivedInPort = 1) THEN 'Arrived in Port'
+				CASE WHEN (L.ysnCustomsReleased = 1) THEN 'Customs Released'
+						WHEN (L.ysnDocumentsApproved = 1) THEN 'Documents Approved'
+						WHEN (L.ysnArrivedInPort = 1) THEN 'Arrived in Port'
 						ELSE 'Delivered' END
 			WHEN 7 THEN 
 				CASE WHEN (ISNULL(L.strBookingReference, '') <> '') THEN 'Booked'
