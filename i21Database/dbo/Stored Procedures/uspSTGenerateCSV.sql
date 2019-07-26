@@ -269,7 +269,18 @@ BEGIN
 											, strTrlDept as strCategory
 											, EM.strName as strManufacturerName
 											, strTrlUPC as strSKUCode --14
-											, strTrlUPC as strUpcCode
+
+											--, strTrlUPC as strUpcCode
+											, CASE
+												-- Freadom Oil 
+												--   > using ean13 without checkdigit
+												--	 > after removing check digit it should be back to ean13(has 13 digits)
+												WHEN strTrlUPCwithoutCheckDigit IS NOT NULL
+													THEN strTrlUPCwithoutCheckDigit
+												WHEN (strTrlUPC IS NOT NULL AND strTrlUPC != '' AND SUBSTRING(strTrlUPC, 1, 1) = '0' AND LEN(strTrlUPC) = 14 )
+													THEN LEFT (strTrlUPC, LEN (strTrlUPC)-1)		-- Remove last characters since this character is a check digit								
+											END AS strUpcCode
+
 											, strTrlDesc as strSkuUpcDescription
 											, CASE	
 												--WHEN TR.strTrlDept = 'OTP'
@@ -448,7 +459,17 @@ BEGIN
 											  END as dblPrice
 
 
-											, strTrlUPC as strUpcCode
+											--, strTrlUPC as strUpcCode
+											, CASE
+												-- Freadom Oil 
+												--   > using ean13 without checkdigit
+												--	 > after removing check digit it should be back to ean13(has 13 digits)
+												WHEN strTrlUPCwithoutCheckDigit IS NOT NULL
+													THEN strTrlUPCwithoutCheckDigit
+												WHEN (strTrlUPC IS NOT NULL AND strTrlUPC != '' AND SUBSTRING(strTrlUPC, 1, 1) = '0' AND LEN(strTrlUPC) = 14 )
+													THEN LEFT (strTrlUPC, LEN (strTrlUPC)-1)		-- Remove last characters since this character is a check digit								
+											END AS strUpcCode
+
 											, REPLACE(strTrlDesc, ',', ' ') as strUpcDescription
 											, CASE	
 												--WHEN TR.strTrlDept = 'OTP'

@@ -7906,6 +7906,7 @@
     <Build Include="dbo\Stored Procedures\uspCTItemContractUpdateScheduleQuantity.sql" />
     <Build Include="dbo\Stored Procedures\uspCTItemContractInvoicePosted.sql" />
     <Build Include="dbo\Stored Procedures\uspCTItemContractCreateHistory.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTCheckoutUpdateAfterSave.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

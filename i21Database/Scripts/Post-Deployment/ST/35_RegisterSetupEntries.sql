@@ -1045,7 +1045,7 @@ IF (@intTableCount = 3)
 				SET @strFileType			= N'Inbound'
 				SET @strFilePrefix			= N'vtransset-tlog'
 				SET @strFileNamePattern		= N'[prefix]+[MMddyyyyHHmmss]'
-				SET @strStoredProcedure		= N'uspSTstgInsertPricebookSendFile'
+				SET @strStoredProcedure		= N'uspSTCheckoutCommanderTranslog'
 						
 				IF EXISTS (SELECT TOP 1 1 FROM tblSMImportFileHeader WHERE strLayoutTitle = @strImportFileHeader)
 					BEGIN

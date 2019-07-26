@@ -122,6 +122,8 @@
 	[dblTrlLineTot] decimal(18, 3) NULL,
 	[strTrlDesc] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
 	[strTrlUPC] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
+	[strTrlUPCwithoutCheckDigit] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
+
 	[strTrlModifier] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
 	[strTrlUPCEntryType] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
     [strTrPaylineType] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
