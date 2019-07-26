@@ -29,6 +29,14 @@ DECLARE @ItemEntries InvoiceStagingTable
 DELETE FROM @ItemEntries
 INSERT INTO @ItemEntries SELECT * FROM @InvoiceEntries
 
+--UPDATE TO STOCK UOM
+IF EXISTS(SELECT TOP 1 NULL FROM @ItemEntries WHERE ISNULL(ysnConvertToStockUOM, 0) = 1)
+	BEGIN
+		UPDATE @ItemEntries
+		SET intItemUOMId 	= dbo.fnGetItemStockUOM(intItemId)
+		  , dblQtyShipped	= dbo.fnICConvertUOMtoStockUnit(intItemId, intItemUOMId, dblQtyShipped)
+		WHERE ISNULL(ysnConvertToStockUOM, 0) = 1
+	END
 
 DECLARE @InvalidRecords AS TABLE (
 	 [intId]				INT
