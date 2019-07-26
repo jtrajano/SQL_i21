@@ -7,7 +7,8 @@ CREATE PROCEDURE uspCTUpdationFromTicketDistribution
 	@intUserId				INT,
 	@ysnDP					BIT,
 	@ysnDeliverySheet		BIT = 0,
-	@ysnAutoDistribution	BIT = 1
+	@ysnAutoDistribution	BIT = 1,
+	@locationId				INT = NULL
 	
 AS
 
@@ -164,7 +165,7 @@ BEGIN TRY
 				IF OBJECT_ID('tempdb..#FutureAndBasisPrice') IS NOT NULL  						
 					DROP TABLE #FutureAndBasisPrice						
 
-				SELECT * INTO #FutureAndBasisPrice FROM dbo.fnRKGetFutureAndBasisPrice(@intContractTypeId,@intCommodityId,@strSeqMonth,3,null,null,null,null,0,@intItemId,null)
+				SELECT * INTO #FutureAndBasisPrice FROM dbo.fnRKGetFutureAndBasisPrice(@intContractTypeId,@intCommodityId,@strSeqMonth,3,null,null,null,@locationId,0,@intItemId,null)
 
 				IF NOT EXISTS(SELECT * FROM #FutureAndBasisPrice)
 				BEGIN
