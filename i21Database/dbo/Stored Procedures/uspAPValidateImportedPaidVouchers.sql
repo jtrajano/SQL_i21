@@ -16,19 +16,34 @@ IF @transCount = 0 BEGIN TRANSACTION;
 
 UPDATE A
 	SET A.strNotes = CASE
-						WHEN A.intEntityVendorId != B.intEntityVendorId
-						THEN 'Vendor is different on current selected vendor.'
-						WHEN A.intCurrencyId != B.intCurrencyId
-						THEN 'Currency is different on current selected currency.'
-						WHEN B.ysnPaid = 1
-						THEN 'Voucher already paid.'
-						WHEN B.ysnPosted = 0
-						THEN 'Voucher is not yet posted'
-						WHEN B.intBillId IS NULL
-						THEN 'Voucher not found.'
-						WHEN A.dblPayment > B.dblAmountDue
-						THEN 'Overpayment'
-						ELSE NULL
+						WHEN 
+						NOT
+								(A.intEntityVendorId != B.intEntityVendorId
+							AND A.intCurrencyId != B.intCurrencyId
+							AND B.ysnPaid = 1
+							AND B.ysnPosted = 0
+							AND B.intBillId IS NULL
+							AND A.dblPayment > B.dblAmountDue)
+						THEN NULL
+					WHEN 
+						A.intEntityVendorId != B.intEntityVendorId
+					THEN 'Vendor is different on current selected vendor.'
+					WHEN 
+						A.intCurrencyId != B.intCurrencyId
+					THEN 'Currency is different on current selected currency.'
+					WHEN 
+						B.ysnPaid = 1
+					THEN 'Voucher already paid.'
+					WHEN 
+						B.ysnPosted = 0
+					THEN 'Voucher is not yet posted'
+					WHEN 
+						B.intBillId IS NULL
+					THEN 'Voucher not found.'
+					WHEN 
+						A.dblPayment > B.dblAmountDue
+					THEN 'Overpayment'
+					ELSE NULL
 					END,
 		A.strBillId = B.strBillId
 FROM tblAPImportPaidVouchersForPayment A
