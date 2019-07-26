@@ -3,16 +3,16 @@
 	@intItemId INT,
 	@IntFromUnitMeasureId INT,
 	@intToUnitMeasureId INT,
-	@dblQty NUMERIC(26,16)
+	@dblQty NUMERIC(26,12)
 )
-RETURNS NUMERIC(26,16)
+RETURNS NUMERIC(26,12)
 AS 
 BEGIN 
-	DECLARE	@result AS NUMERIC(26,16),
+	DECLARE	@result AS NUMERIC(26,12),
 			@intItemUOMIdFrom INT,
 			@intItemUOMIdTo INT,
-			@dblUnitQtyFrom AS NUMERIC(26,16),
-			@dblUnitQtyTo AS NUMERIC(26,16)
+			@dblUnitQtyFrom AS NUMERIC(26,12),
+			@dblUnitQtyTo AS NUMERIC(26,12)
 
 	SELECT @dblUnitQtyFrom = ItemUOM.dblUnitQty
 	FROM dbo.tblICItemUOM ItemUOM 
@@ -38,7 +38,7 @@ BEGIN
 					CASE	WHEN @dblUnitQtyTo <> 0 THEN 
 								CASE	WHEN	@dblQty = 1 
 										THEN	@dblUnitQtyFrom  / @dblUnitQtyTo 
-										ELSE	CAST(@dblQty * (@dblUnitQtyFrom  / @dblUnitQtyTo) AS NUMERIC(26, 16))		
+										ELSE	CAST(@dblQty * (@dblUnitQtyFrom  / @dblUnitQtyTo) AS NUMERIC(26, 12))		
 								END					
 							ELSE NULL 
 					END
