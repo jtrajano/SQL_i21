@@ -165,7 +165,7 @@ BEGIN TRY
 			,@strScreenName
 			,NULL
 			,T.strBuySell
-			,GETDATE()
+			,CASE WHEN @action = 'ADD' THEN T.dtmTransactionDate ELSE GETDATE() END
 			,intBookId
 			,intSubBookId
 			,ysnMonthExpired = (SELECT TOP 1 ysnExpired FROM tblRKFuturesMonth a WHERE a.intFutureMonthId = T.intFutureMonthId)
