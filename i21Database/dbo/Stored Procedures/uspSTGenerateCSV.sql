@@ -268,7 +268,14 @@ BEGIN
 
 											, strTrlDept as strCategory
 											, EM.strName as strManufacturerName
-											, strTrlUPC as strSKUCode --14
+
+											--, strTrlUPC as strSKUCode --14
+											, CASE
+												WHEN strTrlUPCwithoutCheckDigit IS NOT NULL
+													THEN strTrlUPCwithoutCheckDigit
+												WHEN (strTrlUPC IS NOT NULL AND strTrlUPC != '' AND SUBSTRING(strTrlUPC, 1, 1) = '0' AND LEN(strTrlUPC) = 14 )
+													THEN LEFT (strTrlUPC, LEN (strTrlUPC)-1)		-- Remove last characters since this character is a check digit								
+											END AS strSKUCode
 
 											--, strTrlUPC as strUpcCode
 											, CASE
