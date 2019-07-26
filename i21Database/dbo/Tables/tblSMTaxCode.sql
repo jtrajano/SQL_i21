@@ -26,6 +26,7 @@
 	[intPayToVendorId]			INT		NULL, 
     [intPurchaseTaxExemptionAccountId] INT		NULL, 
     [intSalesTaxExemptionAccountId] INT		NULL, 
+	[ysnIncludeInvoicePrice] BIT NULL DEFAULT 0,
     [intConcurrencyId]			INT		NOT NULL	DEFAULT 1, 
     CONSTRAINT [FK_tblSMTaxCode_tblSMTaxClass] FOREIGN KEY ([intTaxClassId]) REFERENCES tblSMTaxClass(intTaxClassId),
     CONSTRAINT [FK_tblSMTaxCode_tblGLAccount_salesTax] FOREIGN KEY ([intSalesTaxAccountId]) REFERENCES tblGLAccount(intAccountId),
