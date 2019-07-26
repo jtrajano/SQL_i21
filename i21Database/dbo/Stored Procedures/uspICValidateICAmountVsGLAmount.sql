@@ -25,8 +25,15 @@ DECLARE @result TABLE (
 	,strAccountDescription NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL
 )
 
+-- Get the transaction id if @GLEntries is processing only one transaction 
+IF EXISTS (SELECT COUNT(1) FROM (SELECT DISTINCT strTransactionId FROM @GLEntries) N_GLEntries HAVING COUNT(1) = 1)
+BEGIN 
+	SELECT TOP 1 @strTransactionId = strTransactionId FROM @GLEntries
+END 
+
 -- Get the inventory value from the Inventory Valuation 
 BEGIN 
+
 	IF EXISTS (SELECT TOP 1 1 FROM @GLEntries)
 	BEGIN 
 		INSERT INTO @result (
@@ -35,7 +42,6 @@ BEGIN
 			,strBatchId
 			,dblICAmount
 			,intAccountId  
-			--,strItemDescription 
 		)
 		SELECT	
 			[strTransactionType] = ty.strName
@@ -46,7 +52,6 @@ BEGIN
 					ROUND(dbo.fnMultiply(t.dblQty, t.dblCost) + ISNULL(t.dblValue, 0), 2)
 				)
 			,[intAccountId] = glAccount.intAccountId
-			--,[strItemDescription] = i.strDescription
 		FROM	
 			tblICInventoryTransaction t INNER JOIN tblICInventoryTransactionType ty
 				ON t.intTransactionTypeId = ty.intTransactionTypeId			
@@ -73,7 +78,43 @@ BEGIN
 			,t.strTransactionId
 			,t.strBatchId
 			,glAccount.intAccountId
-			--,i.strDescription
+		UNION ALL 
+		SELECT	
+			[strTransactionType] = ty.strName
+			,[strTransactionId] = t.strTransactionId
+			,[strBatchId] = t.strBatchId			
+			,[dblICAmount] = 
+				SUM (
+					ROUND(dbo.fnMultiply(-t.dblQty, t.dblCost) + ISNULL(t.dblValue, 0), 2)
+				)
+			,[intAccountId] = glAccount.intAccountId
+		FROM	
+			tblICInventoryTransaction t INNER JOIN tblICInventoryTransactionType ty
+				ON t.intTransactionTypeId = ty.intTransactionTypeId			
+			INNER JOIN tblICItem i
+				ON i.intItemId = t.intItemId 
+			INNER JOIN (
+				SELECT DISTINCT 
+					gl.strTransactionId
+					,gl.strBatchId 					
+				FROM 
+					@GLEntries gl
+			) gl
+				ON t.strTransactionId = gl.strTransactionId 
+				AND t.strBatchId = gl.strBatchId
+			OUTER APPLY dbo.fnGetItemGLAccountAsTable(
+				t.intItemId
+				,t.intItemLocationId
+				,'Work In Progress'
+			) glAccount
+		WHERE	
+			t.intInTransitSourceLocationId IS NULL 
+			AND ty.strName IN ('Consume', 'Produce')
+		GROUP BY 
+			ty.strName 
+			,t.strTransactionId
+			,t.strBatchId
+			,glAccount.intAccountId
 	END 
 	ELSE 
 	BEGIN 
@@ -103,6 +144,124 @@ END
 -- Get the inventory value from GL 
 BEGIN 
 	IF EXISTS (SELECT TOP 1 1 FROM @GLEntries)
+	AND EXISTS (SELECT TOP 1 1 FROM tblGLDetail gd WHERE gd.strTransactionId = @strTransactionId AND gd.ysnIsUnposted = 0 AND ISNULL(@ysnPost, 0) = 1) 
+	BEGIN 		
+		MERGE INTO @result 
+		AS result
+		USING (
+			SELECT 
+				[strTransactionType] = gd.strTransactionType
+				,[strTransactionId] = gd.strTransactionId
+				,[strBatchId] = gd.strBatchId
+				,[intAccountId] = gd.intAccountId 
+				,[dblGLAmount] = SUM(ROUND(ISNULL(dblDebit, 0) - ISNULL(dblCredit, 0),2))			
+				,[strAccountDescription] = ga.strDescription
+			FROM	
+				@GLEntries gd INNER JOIN tblGLAccount ga
+					ON gd.intAccountId = ga.intAccountId
+				INNER JOIN tblGLAccountSegmentMapping gs
+					ON gs.intAccountId = ga.intAccountId
+				INNER JOIN tblGLAccountSegment gm
+					ON gm.intAccountSegmentId = gs.intAccountSegmentId
+				INNER JOIN tblGLAccountCategory ac 
+					ON ac.intAccountCategoryId = gm.intAccountCategoryId 
+			WHERE 
+				ac.strAccountCategory IN ('Inventory', 'Work In Progress')
+			GROUP BY 				
+				gd.strTransactionType
+				,gd.strTransactionId
+				,gd.strBatchId
+				,gd.intAccountId 
+				,ga.strDescription
+		) AS glResult 
+			ON 
+				result.strTransactionId = glResult.strTransactionId
+				AND result.strBatchId = glResult.strBatchId
+				AND result.strTransactionType = glResult.strTransactionType
+				AND result.intAccountId = glResult.intAccountId
+				
+		WHEN MATCHED THEN 
+			UPDATE 
+			SET 
+				dblGLAmount = glResult.[dblGLAmount]
+				,strAccountDescription = glResult.[strAccountDescription]
+
+		WHEN NOT MATCHED THEN
+			INSERT (
+				strTransactionType 
+				,strTransactionId
+				,dblGLAmount
+				,strAccountDescription
+			)	 
+			VALUES (
+				glResult.[strTransactionType]
+				,glResult.[strTransactionId]
+				,glResult.[dblGLAmount]
+				,glResult.[strAccountDescription]
+			)
+		;
+
+		MERGE INTO @result 
+		AS result
+		USING (
+			SELECT 
+				[strTransactionType] = gd.strTransactionType
+				,[strTransactionId] = gd.strTransactionId
+				,[strBatchId] = gd.strBatchId
+				,[intAccountId] = gd.intAccountId 
+				,[dblGLAmount] = SUM(ROUND(ISNULL(dblDebit, 0) - ISNULL(dblCredit, 0),2))			
+				,[strAccountDescription] = ga.strDescription
+			FROM	
+				tblGLDetail gd INNER JOIN tblGLAccount ga
+					ON gd.intAccountId = ga.intAccountId
+				INNER JOIN tblGLAccountSegmentMapping gs
+					ON gs.intAccountId = ga.intAccountId
+				INNER JOIN tblGLAccountSegment gm
+					ON gm.intAccountSegmentId = gs.intAccountSegmentId
+				INNER JOIN tblGLAccountCategory ac 
+					ON ac.intAccountCategoryId = gm.intAccountCategoryId 
+			WHERE 
+				(gd.strTransactionId = @strTransactionId OR @strTransactionId IS NULL) 
+				AND (gd.strTransactionType = @strTransactionType OR @strTransactionType IS NULL) 
+				AND (dbo.fnDateGreaterThanEquals(gd.dtmDate, @dtmDateFrom) = 1 OR @dtmDateFrom IS NULL)
+				AND (dbo.fnDateLessThanEquals(gd.dtmDate, @dtmDateTo) = 1 OR @dtmDateTo IS NULL)
+				AND ac.strAccountCategory IN ('Inventory', 'Work In Progress')
+				AND gd.ysnIsUnposted = 0 
+			GROUP BY 				
+				gd.strTransactionType
+				,gd.strTransactionId
+				,gd.strBatchId
+				,gd.intAccountId 
+				,ga.strDescription
+		) AS glResult 
+			ON 
+				result.strTransactionId = glResult.strTransactionId
+				AND result.strBatchId = glResult.strBatchId
+				AND result.strTransactionType = glResult.strTransactionType
+				AND result.intAccountId = glResult.intAccountId
+				
+		WHEN MATCHED THEN 
+			UPDATE 
+			SET 
+				dblGLAmount = glResult.[dblGLAmount]
+				,strAccountDescription = glResult.[strAccountDescription]
+
+		WHEN NOT MATCHED THEN
+			INSERT (
+				strTransactionType 
+				,strTransactionId
+				,dblGLAmount
+				,strAccountDescription
+			)	 
+			VALUES (
+				glResult.[strTransactionType]
+				,glResult.[strTransactionId]
+				,glResult.[dblGLAmount]
+				,glResult.[strAccountDescription]
+			)
+		;
+	END 
+	ELSE IF EXISTS (SELECT TOP 1 1 FROM @GLEntries)
 	BEGIN 
 		MERGE INTO @result 
 		AS result
@@ -124,7 +283,7 @@ BEGIN
 				INNER JOIN tblGLAccountCategory ac 
 					ON ac.intAccountCategoryId = gm.intAccountCategoryId 
 			WHERE 
-				ac.strAccountCategory IN ('Inventory')
+				ac.strAccountCategory IN ('Inventory', 'Work In Progress')
 			GROUP BY 				
 				gd.strTransactionType
 				,gd.strTransactionId
@@ -160,7 +319,7 @@ BEGIN
 		;
 	END 
 	ELSE 
-	BEGIN 
+	BEGIN
 		MERGE INTO @result 
 		AS result
 		USING (
@@ -181,7 +340,7 @@ BEGIN
 				AND (gd.strTransactionType = @strTransactionType OR @strTransactionType IS NULL) 
 				AND (dbo.fnDateGreaterThanEquals(gd.dtmDate, @dtmDateFrom) = 1 OR @dtmDateFrom IS NULL)
 				AND (dbo.fnDateLessThanEquals(gd.dtmDate, @dtmDateTo) = 1 OR @dtmDateTo IS NULL)
-				AND ac.strAccountCategory IN ('Inventory')
+				AND ac.strAccountCategory IN ('Inventory', 'Work In Progress')
 			GROUP BY 
 				gd.strTransactionType
 		) AS glResult 
@@ -203,7 +362,16 @@ BEGIN
 END
 
 IF @ysnThrowError = 1 
-	AND EXISTS (SELECT TOP 1 1 FROM @result WHERE ISNULL(dblICAmount, 0) - ISNULL(dblGLAmount, 0) <> 0 )
+	AND EXISTS (
+		SELECT TOP 1 
+			SUM(ISNULL(dblICAmount, 0) - ISNULL(dblGLAmount, 0))
+		FROM 
+			@result 
+		GROUP BY
+			intAccountId
+		HAVING 
+			SUM(ISNULL(dblICAmount, 0) - ISNULL(dblGLAmount, 0)) <> 0 
+	)
 BEGIN 
 	DECLARE @difference AS NUMERIC(18, 6) 
 			,@strItemDescription NVARCHAR(500) 

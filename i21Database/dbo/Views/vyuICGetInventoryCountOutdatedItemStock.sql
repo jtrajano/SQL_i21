@@ -68,34 +68,24 @@ FROM
 		LEFT JOIN dbo.tblICItemUOM ItemUOM ON cd.intItemUOMId = ItemUOM.intItemUOMId
 		LEFT JOIN dbo.tblICLot ItemLot ON ItemLot.intLotId = cd.intLotId AND Item.strLotTracking <> 'No'
 		LEFT JOIN dbo.tblICItemUOM StockUOM ON cd.intItemId = StockUOM.intItemId AND StockUOM.ysnStockUnit = 1
-		LEFT JOIN (
+		OUTER APPLY (
 			SELECT 
-				ss.intItemId
+				  ss.intItemId
 				, ss.intItemUOMId
-				, ss.intItemLocationId
-				, ss.intSubLocationId
-				, ss.intStorageLocationId
 				, dblOnHand =  SUM(COALESCE(ss.dblOnHand, 0.00))
 				, dblLastCost = MAX(ISNULL(ss.dblLastCost, 0))
-				, dtmDate
 			FROM vyuICGetItemStockSummary ss
+				INNER JOIN tblICItem i ON i.intItemId = ss.intItemId
+			WHERE ss.intItemId = cd.intItemId
+				AND ss.intItemLocationId = cd.intItemLocationId
+				AND CASE WHEN cd.intSubLocationId IS NULL THEN 0 ELSE ss.intSubLocationId END = ISNULL(cd.intSubLocationId, 0)
+				AND CASE WHEN cd.intStorageLocationId IS NULL THEN 0 ELSE ss.intStorageLocationId END = ISNULL(cd.intStorageLocationId, 0)
+				AND dbo.fnDateLessThanEquals(ss.dtmDate, c.dtmCountDate) = 1
+				AND i.strLotTracking = 'No'
 			GROUP BY 
 				ss.intItemId,
-				intItemUOMId,
-				intItemLocationId,
-				intSubLocationId,
-				intStorageLocationId,
-				dtmDate
-		) nonLotted ON nonLotted.intItemId = cd.intItemId
-			AND nonLotted.intItemLocationId = cd.intItemLocationId
-			--AND ss.intItemUOMId = cd.intItemUOMId
-			AND (
-				((CASE WHEN cd.intSubLocationId IS NULL AND cd.intStorageLocationId IS NULL THEN 0 ELSE 1 END) = 0) OR
-				((CASE WHEN cd.intSubLocationId = nonLotted.intSubLocationId AND cd.intStorageLocationId = nonLotted.intStorageLocationId THEN 0 ELSE 1 END) = 0) OR
-				((CASE WHEN cd.intSubLocationId IS NOT NULL AND cd.intStorageLocationId IS NULL AND cd.intSubLocationId = nonLotted.intSubLocationId THEN 0 ELSE 1 END) = 0)
-			)
-			AND dbo.fnDateLessThanEquals(nonLotted.dtmDate, c.dtmCountDate) = 1
-			AND Item.strLotTracking = 'No'
+				intItemUOMId
+		) nonLotted
 		OUTER APPLY(
 			SELECT TOP 1
 			dblCost

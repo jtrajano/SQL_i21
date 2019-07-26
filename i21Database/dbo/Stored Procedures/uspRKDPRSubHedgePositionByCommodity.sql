@@ -489,9 +489,7 @@ BEGIN
 	DECLARE @strDescription NVARCHAR(200)
 	declare @intOneCommodityId int
 	declare @intCommodityUnitMeasureId int
-	DECLARE @intUnitMeasureId int
 	DECLARE @ysnExchangeTraded bit
-	DECLARE @strUnitMeasure NVARCHAR(200)
 	
 	SELECT @mRowNumber = MIN(intCommodityIdentity) FROM @Commodity
 
@@ -1021,6 +1019,7 @@ BEGIN
 					AND strContractType = 'Purchase'
 					AND intCompanyLocationId = ISNULL(@intLocationId, intCompanyLocationId)
 					AND intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
+					AND BD.ysnOpenGetBasisDelivery = 1
 
 				INSERT INTO @tempFinal(strCommodityCode
                     , strType
@@ -1052,6 +1051,7 @@ BEGIN
 					AND strContractType = 'Sale'
 					AND intCompanyLocationId = ISNULL(@intLocationId, intCompanyLocationId)
 					AND intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
+					AND BD.ysnOpenGetBasisDelivery = 1
 
 				INSERT INTO @tempFinal(strCommodityCode
 					, strType
@@ -1318,11 +1318,6 @@ BEGIN
 				) t
 				WHERE intCompanyLocationId  IN (SELECT intCompanyLocationId FROM #LicensedLocation)	
 	 
-				SELECT @intUnitMeasureId = null
-				select @strUnitMeasure = null
-				SELECT TOP 1 @intUnitMeasureId = intUnitMeasureId FROM tblRKCompanyPreference
-				SELECT @strUnitMeasure=strUnitMeasure from tblICUnitMeasure where intUnitMeasureId=@intUnitMeasureId
-
 				INSERT INTO @Final (intCommodityId
 					, strType
 					, dblTotal
@@ -1330,20 +1325,18 @@ BEGIN
 					, strLocationName)
 				SELECT t.intCommodityId
 					, strType
-					, case when (isnull(@intUnitMeasureId, 0) = 0 OR cuc.intCommodityUnitMeasureId = @intUnitMeasureId) then dblTotal
-							else Convert(decimal(24,10),dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc.intCommodityUnitMeasureId,cuc1.intCommodityUnitMeasureId ,dblTotal)) end dblTotal
-					, isnull(@strUnitMeasure, um.strUnitMeasure) as strUnitMeasure
+					, dblTotal
+					, um.strUnitMeasure
 					, strLocationName
 				FROM  @tempFinal t
 				JOIN tblICCommodityUnitMeasure cuc on t.intCommodityId=cuc.intCommodityId and cuc.ysnDefault=1
 				JOIN tblICUnitMeasure um on um.intUnitMeasureId=cuc.intUnitMeasureId
-				LEFT JOIN tblICCommodityUnitMeasure cuc1 on t.intCommodityId=cuc1.intCommodityId and @intUnitMeasureId=cuc1.intUnitMeasureId
 				WHERE t.intCommodityId= @intCommodityId
 		
 				INSERT INTO @Final (intCommodityId
 					, strUnitMeasure)
 				SELECT top 1 t.intCommodityId
-					, isnull(@strUnitMeasure, um.strUnitMeasure) as strUnitMeasure 
+					, um.strUnitMeasure
 				FROM tblICCommodity t 
 				JOIN tblICCommodityUnitMeasure cuc on t.intCommodityId=cuc.intCommodityId and cuc.ysnDefault=1 
 				JOIN tblICUnitMeasure um on um.intUnitMeasureId=cuc.intUnitMeasureId
@@ -1384,32 +1377,25 @@ BEGIN
 				)t
 				WHERE intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)		
 		
-				SELECT @intUnitMeasureId =null
-				SELECT @strUnitMeasure =null
-				SELECT TOP 1 @intUnitMeasureId = intUnitMeasureId FROM tblRKCompanyPreference
-				SELECT @strUnitMeasure=strUnitMeasure from tblICUnitMeasure where intUnitMeasureId=@intUnitMeasureId
-
 				INSERT INTO @Final (intCommodityId
 					, strType
 					, dblTotal
 					, strUnitMeasure
 					, strLocationName)
 				SELECT t.intCommodityId,strType
-					, Convert(decimal(24,10),dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc.intCommodityUnitMeasureId
-					, case when (isnull(@intUnitMeasureId, 0) = 0 OR cuc.intCommodityUnitMeasureId = @intUnitMeasureId) then cuc.intCommodityUnitMeasureId else cuc1.intCommodityUnitMeasureId end,dblTotal)) dblTotal
-					, isnull(@strUnitMeasure, um.strUnitMeasure) as strUnitMeasure
+					, dblTotal
+					, um.strUnitMeasure
 					, strLocationName
 				FROM tblICCommodity c
 				LEFT JOIN @tempFinal t on c.intCommodityId=t.intCommodityId
 				JOIN tblICCommodityUnitMeasure cuc on t.intCommodityId=cuc.intCommodityId and cuc.ysnDefault=1
 				JOIN tblICUnitMeasure um on um.intUnitMeasureId=cuc.intUnitMeasureId
-				LEFT JOIN tblICCommodityUnitMeasure cuc1 on t.intCommodityId=cuc1.intCommodityId and @intUnitMeasureId=cuc1.intUnitMeasureId
 				WHERE t.intCommodityId= @intCommodityId
 		
 				INSERT INTO @Final (intCommodityId
 					, strUnitMeasure)
 				SELECT top 1 t.intCommodityId
-					, isnull(@strUnitMeasure,um.strUnitMeasure) as strUnitMeasure
+					, um.strUnitMeasure
 				FROM tblICCommodity t
 				JOIN tblICCommodityUnitMeasure cuc on t.intCommodityId=cuc.intCommodityId and cuc.ysnDefault=1
 				JOIN tblICUnitMeasure um on um.intUnitMeasureId=cuc.intUnitMeasureId

@@ -20,7 +20,8 @@ BEGIN
 	DECLARE @daysInYear INT;
 
 	--handle leap year
-	SELECT @daysInYear =  DATEDIFF(d,CAST(CONCAT('01/01/',@year) AS DATETIME),CAST(CONCAT('12/31/',@year) AS DATETIME) + 1)
+	SELECT @daysInYear =  DATEDIFF(d,CAST(('01/01/' + CAST(@year AS NVARCHAR)) AS DATETIME),CAST(('12/31/' + CAST(@year AS NVARCHAR)) AS DATETIME) + 1)
+	--SELECT @daysInYear =  DATEDIFF(d,CAST(CONCAT('01/01/',@year) AS DATETIME),CAST(CONCAT('12/31/',@year) AS DATETIME) + 1)
 
 	SET @isDue = dbo.fnIsDue(@transactionDate, @dateToCompute, @termId);
 

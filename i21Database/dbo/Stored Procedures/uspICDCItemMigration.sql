@@ -102,6 +102,7 @@ INSERT INTO tblICItem (
 	,strKeywords
 	,intConcurrencyId
 	,ysnCommisionable
+	,dtmDateCreated
 	) (
 	SELECT RTRIM(ptitm_itm_no)
 --** Items with physical count set to 'No' is classified as 'Inventory Type' = Service and 
@@ -221,7 +222,7 @@ INSERT INTO tblICItem (
 				THEN 1
 			ELSE 0
 			END
-		) FROM ptitmmst AS inv GROUP BY ptitm_itm_no
+		),GETUTCDATE() FROM ptitmmst AS inv GROUP BY ptitm_itm_no
 	)
 --** Group By ptitim_itm_no is done inorder to support single item in multiple locations. **
 

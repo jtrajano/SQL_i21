@@ -1157,17 +1157,7 @@ BEGIN
 				)t 	
 				WHERE intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 				GROUP BY intCommodityId,strLocationName,intCompanyLocationId
-
-
-
-
-
 			END
-			
-			DECLARE @intUnitMeasureId int
-			DECLARE @strUnitMeasure nvarchar(250)
-			SELECT TOP 1 @intUnitMeasureId = intUnitMeasureId FROM tblRKCompanyPreference
-			select @strUnitMeasure=strUnitMeasure from tblICUnitMeasure where intUnitMeasureId=@intUnitMeasureId
 
 			INSERT INTO @FinalTable (intSeqId
 				, strSeqHeader
@@ -1180,15 +1170,14 @@ BEGIN
 			SELECT intSeqId
 				, strSeqHeader
 				, strType 
-				, Convert(decimal(24,10),dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc.intCommodityUnitMeasureId,case when ISNULL(@intUnitMeasureId, 0) = 0 then cuc.intCommodityUnitMeasureId else cuc1.intCommodityUnitMeasureId end,dblTotal)) dblTotal
-				, case when ISNULL(@strUnitMeasure,'')='' then um.strUnitMeasure else @strUnitMeasure end as strUnitMeasure
+				, dblTotal
+				, um.strUnitMeasure
 				, strLocationName
 				, t.intCommodityId
 				, intCompanyLocationId
 			FROM @Final  t
 			LEFT JOIN tblICCommodityUnitMeasure cuc on t.intCommodityId=cuc.intCommodityId AND cuc.ysnDefault=1
 			LEFT JOIN tblICUnitMeasure um on um.intUnitMeasureId=cuc.intUnitMeasureId
-			LEFT JOIN tblICCommodityUnitMeasure cuc1 on t.intCommodityId=cuc1.intCommodityId AND @intUnitMeasureId=cuc1.intUnitMeasureId
 			WHERE t.intCommodityId = @intCommodityId
 		END
 

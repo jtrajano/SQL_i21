@@ -41,7 +41,7 @@ SELECT
         SO.dblBaseLicenseAmount,
         SO.intContractHeaderId,
         SO.intContractDetailId,
-        SO.dblContractBalance,
+        dblContractBalance = CDET.dblBalance,
         SO.dblContractAvailable,
         SO.ysnBlended,
         SO.intTaxGroupId,
@@ -159,7 +159,8 @@ SELECT
 		ON SO.intSubLocationId = SMSLOC.intCompanyLocationSubLocationId
 		LEFT JOIN ( SELECT		intContractDetailId,	strContractNumber,
 								intContractSeq,			intPricingTypeId,
-								strPricingType,			ysnLoad
+								strPricingType,			ysnLoad,
+								dblBalance
 			FROM vyuCTCustomerContract WITH(NOLOCK)) CDET
 		ON SO.intContractDetailId = CDET.intContractDetailId
 		LEFT JOIN ( SELECT		intTaxGroupId,			strTaxGroup 

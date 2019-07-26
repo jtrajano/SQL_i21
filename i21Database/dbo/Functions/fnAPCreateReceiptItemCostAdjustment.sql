@@ -187,9 +187,11 @@ BEGIN
 		LEFT JOIN tblICInventoryTransactionType transType
 			ON transType.strName = 'Bill' -- 'Cost Adjustment'
 
-		WHERE	 B.intInventoryReceiptChargeId IS NULL 
+		WHERE	 
+			B.intInventoryReceiptChargeId IS NULL 
 		AND B.intInventoryReceiptItemId > 0
 		AND E2.intOwnershipType != 2
+		AND item.strType IN ('Inventory','Finished Good','Raw Material')
 		-- Compare the cost used in Voucher against the IR cost. 
 		-- Compare the ForexRate use in Voucher against IR Rate
 		-- If there is a difference, add it to @adjustedEntries table variable. 

@@ -58,9 +58,7 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , dblAmountDue				= ISNULL(INV.dblAmountDue, 0)
 	 , strItemNo				= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN INVOICEDETAIL.strItemNo ELSE NULL END
 	 , intInvoiceDetailId		= INVOICEDETAIL.intInvoiceDetailId
-	 , dblContractBalance		= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN
-									CASE WHEN INVOICEDETAIL.dblContractBalance = 0 THEN INVOICEDETAIL.dblBalance ELSE INVOICEDETAIL.dblContractBalance END
-								  ELSE NULL END
+	 , dblContractBalance		= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN INVOICEDETAIL.dblBalance ELSE NULL END
 	 , strContractNumber		= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN INVOICEDETAIL.strContractNumber ELSE NULL END				
 	 , strItem					= CASE WHEN ISNULL(INVOICEDETAIL.strItemNo, '') = '' THEN ISNULL(INVOICEDETAIL.strItemDescription, INVOICEDETAIL.strSCInvoiceNumber) ELSE LTRIM(RTRIM(INVOICEDETAIL.strItemNo)) + '-' + ISNULL(INVOICEDETAIL.strItemDescription, '') END
 	 , strItemDescription		= INVOICEDETAIL.strItemDescription
@@ -107,7 +105,7 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , strSiteNumber			= INVOICEDETAIL.strSiteNumber
 	 , dblEstimatedPercentLeft	= INVOICEDETAIL.dblEstimatedPercentLeft
 	 , dblPercentFull			= INVOICEDETAIL.dblPercentFull
-	 , blbLogo					= LOGO.blbLogo
+	 , blbLogo					= CASE WHEN ISNULL(ARPREFERENCE.ysnStretchLogo, 0) = 1 THEN ISNULL(STRETCHEDLOGO.blbLogo, LOGO.blbLogo) ELSE LOGO.blbLogo END
 	 , strAddonDetailKey		= INVOICEDETAIL.strAddonDetailKey
 	 , ysnHasAddOnItem			= CASE WHEN (ADDON.strAddonDetailKey) IS NOT NULL THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END
 FROM dbo.tblARInvoice INV WITH (NOLOCK)
@@ -139,7 +137,6 @@ LEFT JOIN (
 	     , ID.intInvoiceDetailId
 		 , ID.intCommentTypeId
 		 , ID.dblTotalTax
-		 , ID.dblContractBalance
 		 , ID.dblQtyShipped
 		 , ID.dblQtyOrdered
 		 , ID.dblDiscount
@@ -338,10 +335,19 @@ LEFT JOIN(
 	WHERE  ysnAddonParent = 0
 ) ADDON ON INV.intInvoiceId = ADDON.intInvoiceId AND ADDON.strAddonDetailKey =  INVOICEDETAIL.strAddonDetailKey
 OUTER APPLY (
-	SELECT blbLogo = blbFile 
-	FROM tblSMUpload 
-	WHERE intAttachmentId = (SELECT TOP 1 intAttachmentId FROM tblSMAttachment WHERE strScreen = 'SystemManager.CompanyPreference' AND strComment = 'Header' ORDER BY intAttachmentId DESC)
+	SELECT TOP 1 blbLogo = blbFile 
+	FROM tblSMUpload U
+	INNER JOIN tblSMAttachment A ON U.intAttachmentId = A.intAttachmentId
+	WHERE A.strScreen = 'SystemManager.CompanyPreference' 
+	  AND A.strComment = 'Header'
 ) LOGO
+OUTER APPLY (
+	SELECT TOP 1 blbLogo = blbFile 
+	FROM tblSMUpload U
+	INNER JOIN tblSMAttachment A ON U.intAttachmentId = A.intAttachmentId
+	WHERE A.strScreen = 'SystemManager.CompanyPreference' 
+	  AND A.strComment = 'Stretched Header'
+) STRETCHEDLOGO
 OUTER APPLY (
 	SELECT strCustomerComments = LEFT(strMessage, LEN(strMessage) - 1) COLLATE Latin1_General_CI_AS
 	FROM (

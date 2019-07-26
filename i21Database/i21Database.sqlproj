@@ -7663,6 +7663,8 @@
     <Build Include="dbo\Views\vyuAPPendingPayables.sql" />
     <Build Include="dbo\Stored Procedures\uspGRCreateItemGLEntries.sql" />
     <Build Include="dbo\User Defined Types\SettleVoucherCreate.sql" />
+    <None Include="Scripts\Post-Deployment\GR\ContractPrice.sql" />
+    <Build Include="dbo\Stored Procedures\uspICRebuildCleanUp.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

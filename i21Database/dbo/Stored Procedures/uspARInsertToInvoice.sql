@@ -213,7 +213,7 @@ SELECT intItemId						= SI.intItemId
 	 , strItemType						= I.strType
 	 , strSalesOrderNumber				= SI.strSalesOrderNumber
 	 , strShipmentNumber				= NULL
-	 , dblContractBalance				= SOD.dblContractBalance
+	 , dblContractBalance				= ISNULL(CD.dblBalance, 0)
 	 , dblContractAvailable				= SOD.dblContractAvailable
 	 , intEntityContactId				= SO.intEntityContactId
 	 , intStorageScheduleTypeId			= SOD.intStorageScheduleTypeId
@@ -228,12 +228,15 @@ SELECT intItemId						= SI.intItemId
 	 ,ysnAddonParent					= SOD.ysnAddonParent
 	 ,dblAddOnQuantity					= SOD.dblAddOnQuantity
 FROM tblSOSalesOrder SO 
-	INNER JOIN vyuARGetSalesOrderItems SI ON SO.intSalesOrderId = SI.intSalesOrderId
-	LEFT JOIN tblSOSalesOrderDetail SOD ON SI.intSalesOrderDetailId = SOD.intSalesOrderDetailId
-	LEFT JOIN tblICItem I ON SI.intItemId = I.intItemId
-	LEFT JOIN (
-				SELECT D.* FROM tblICInventoryShipmentItem D INNER JOIN tblICInventoryShipment H ON D.intInventoryShipmentId = H.intInventoryShipmentId AND H.ysnPosted = 1 AND H.intOrderType = 2
-				) ISHI ON SOD.intSalesOrderDetailId = ISHI.intLineNo
+INNER JOIN vyuARGetSalesOrderItems SI ON SO.intSalesOrderId = SI.intSalesOrderId
+LEFT JOIN tblSOSalesOrderDetail SOD ON SI.intSalesOrderDetailId = SOD.intSalesOrderDetailId
+LEFT JOIN tblCTContractDetail CD ON SOD.intContractDetailId = CD.intContractDetailId
+LEFT JOIN tblICItem I ON SI.intItemId = I.intItemId
+LEFT JOIN (
+	SELECT D.* 
+	FROM tblICInventoryShipmentItem D 
+	INNER JOIN tblICInventoryShipment H ON D.intInventoryShipmentId = H.intInventoryShipmentId AND H.ysnPosted = 1 AND H.intOrderType = 2
+) ISHI ON SOD.intSalesOrderDetailId = ISHI.intLineNo
 WHERE SO.intSalesOrderId = @SalesOrderId
 	AND SI.dblQtyRemaining <> @dblZeroAmount
 	AND (ISNULL(ISHI.intLineNo, 0) = 0 OR ISHI.dblQuantity < SOD.dblQtyOrdered)
@@ -280,7 +283,7 @@ SELECT intItemId						= SOD.intItemId
 	 , strItemType						= 'Comment'
 	 , strSalesOrderNumber				= NULL
 	 , strShipmentNumber				= NULL 
-	 , dblContractBalance				= SOD.dblContractBalance
+	 , dblContractBalance				= 0
 	 , dblContractAvailable				= SOD.dblContractAvailable
 	 , intEntityContactId				= SO.intEntityContactId
 	 , intStorageScheduleTypeId			= SOD.intStorageScheduleTypeId
@@ -340,7 +343,7 @@ SELECT intItemId						= ICSI.intItemId
 	 , strItemType						= ICI.strType
 	 , strSalesOrderNumber				= SO.strSalesOrderNumber
 	 , strShipmentNumber				= ICS.strShipmentNumber
-	 , dblContractBalance				= SOD.dblContractBalance
+	 , dblContractBalance				= ISNULL(CD.dblBalance, 0)
 	 , dblContractAvailable				= SOD.dblContractAvailable
 	 , intEntityContactId				= SO.intEntityContactId
 	 , intStorageScheduleTypeId			= SOD.intStorageScheduleTypeId
@@ -358,6 +361,7 @@ FROM tblSOSalesOrder SO
 INNER JOIN tblSOSalesOrderDetail SOD ON SO.intSalesOrderId = SOD.intSalesOrderId
 INNER JOIN tblICInventoryShipmentItem ICSI ON SOD.intSalesOrderDetailId = ICSI.intLineNo AND SOD.intSalesOrderId = ICSI.intOrderId
 INNER JOIN tblICInventoryShipment ICS ON ICS.intInventoryShipmentId = ICSI.intInventoryShipmentId AND ICS.ysnPosted = 1 AND ICS.intOrderType = 2
+LEFT JOIN tblCTContractDetail CD ON SOD.intContractDetailId = CD.intContractDetailId
 LEFT JOIN tblICItem ICI ON ICSI.intItemId = ICI.intItemId
 WHERE SO.intSalesOrderId = @SalesOrderId
 AND ICS.ysnPosted = 1
@@ -1059,8 +1063,7 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 				IF ISNULL(@ItemContractHeaderId, 0) <> 0 AND ISNULL(@ItemContractDetailId, 0) <> 0
 					BEGIN
 						UPDATE tblARInvoiceDetail 
-						SET dblContractBalance = ISNULL(@ContractBalance, 0.00)
-						  , dblContractAvailable = ISNULL(@ContractAvailable, 0.00)
+						SET dblContractAvailable = ISNULL(@ContractAvailable, 0.00)
 						FROM @tblItemsToInvoice 
 						WHERE intInvoiceId = @NewInvoiceId 
 						AND tblARInvoiceDetail.intItemId = @ItemId 

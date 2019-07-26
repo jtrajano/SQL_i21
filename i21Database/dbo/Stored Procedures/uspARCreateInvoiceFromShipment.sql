@@ -620,17 +620,6 @@ WHERE
 
 DECLARE @ErrorMessage NVARCHAR(250)
 
-IF NOT EXISTS (SELECT TOP 1 NULL FROM @UnsortedEntriesForInvoice)
-	BEGIN
-		IF ISNULL(@IgnoreNoAvailableItemError,0) = 1 RETURN 0;
-		SELECT TOP 1 @ShipmentNumber = strShipmentNumber FROM tblICInventoryShipment WHERE intInventoryShipmentId = @ShipmentId
-		
-		SET @ErrorMessage = 'The items in ' + @ShipmentNumber + ' are not allowed to be converted to Invoice. It could be a DP or Zero Spot Priced.'
-		RAISERROR(@ErrorMessage, 16, 1);
-		RETURN 0;
-	END
-
-
 IF EXISTS (SELECT TOP 1 1 FROM @UnsortedEntriesForInvoice A 
 				JOIN (SELECT intContractDetailId FROM tblCTContractDetail WHERE intPricingTypeId = 2) B 
 					ON A.intContractDetailId = B.intContractDetailId
@@ -640,6 +629,15 @@ IF EXISTS (SELECT TOP 1 1 FROM @UnsortedEntriesForInvoice A
 		RETURN 0;
 	END
 
+IF NOT EXISTS (SELECT TOP 1 NULL FROM @UnsortedEntriesForInvoice)
+	BEGIN
+		IF ISNULL(@IgnoreNoAvailableItemError,0) = 1 RETURN 0;
+		SELECT TOP 1 @ShipmentNumber = strShipmentNumber FROM tblICInventoryShipment WHERE intInventoryShipmentId = @ShipmentId
+		
+		SET @ErrorMessage = 'The items in ' + @ShipmentNumber + ' are not allowed to be converted to Invoice. It could be a DP or Zero Spot Priced.'
+		RAISERROR(@ErrorMessage, 16, 1);
+		RETURN 0;
+	END
 
 SELECT * INTO #TempTable
 FROM @UnsortedEntriesForInvoice

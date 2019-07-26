@@ -347,6 +347,7 @@ BEGIN
 		,[intDestinationWeightId]
         ,[strAddonDetailKey]
         ,[ysnAddonParent]
+		,[ysnConvertToStockUOM]
         ,[dblAddOnQuantity]
 	)								
 	SELECT		 	
@@ -486,6 +487,7 @@ BEGIN
 		,[intDestinationWeightId]			= (CASE WHEN @GroupingOption = 0 THEN IE.[intDestinationWeightId] ELSE NULL END)
         ,[strAddonDetailKey]                = (CASE WHEN @GroupingOption = 0 THEN IE.[strAddonDetailKey] ELSE NULL END)
         ,[ysnAddonParent]                   = (CASE WHEN @GroupingOption = 0 THEN IE.[ysnAddonParent] ELSE NULL END)
+		,[ysnConvertToStockUOM]				= (CASE WHEN @GroupingOption = 0 THEN IE.[ysnConvertToStockUOM] ELSE NULL END)
         ,[dblAddOnQuantity]                 = (CASE WHEN @GroupingOption = 0 THEN IE.[dblAddOnQuantity] ELSE NULL END)
 	FROM
 		#EntriesForProcessing EFP
@@ -703,6 +705,7 @@ BEGIN
 			,[intDestinationWeightId]
             ,[strAddonDetailKey]
             ,[ysnAddonParent]
+			,[ysnConvertToStockUOM]
             ,[dblAddOnQuantity])
 		SELECT
 			 [intId]								= ITG.[intId]
@@ -846,6 +849,7 @@ BEGIN
 			,[intDestinationWeightId]				= ITG.[intDestinationWeightId]
             ,[strAddonDetailKey]                    = ITG.[strAddonDetailKey]
             ,[ysnAddonParent]                       = ITG.[ysnAddonParent]
+			,[ysnConvertToStockUOM]					= ITG.[ysnConvertToStockUOM]
             ,[dblAddOnQuantity]                     = ITG.[dblAddOnQuantity]
 		FROM
 			@InvoiceEntries ITG
@@ -1313,6 +1317,7 @@ BEGIN
 		,[intDestinationWeightId]
         ,[strAddonDetailKey]
         ,[ysnAddonParent]
+		,[ysnConvertToStockUOM]
         ,[dblAddOnQuantity]
 		,[intTempDetailIdForTaxes]
 	)								
@@ -1451,6 +1456,7 @@ BEGIN
 		,[intDestinationWeightId]			= IE.[intDestinationWeightId]
         ,[strAddonDetailKey]                = IE.[strAddonDetailKey]
         ,[ysnAddonParent]                   = IE.[ysnAddonParent]
+		,[ysnConvertToStockUOM]				= IE.[ysnConvertToStockUOM]
         ,[dblAddOnQuantity]                 = IE.[dblAddOnQuantity]
 		,[intTempDetailIdForTaxes]			= IE.[intTempDetailIdForTaxes]
 	FROM

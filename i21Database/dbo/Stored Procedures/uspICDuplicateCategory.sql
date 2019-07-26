@@ -46,7 +46,8 @@ INSERT INTO [dbo].[tblICCategory]
            ,[strCostDistributionMethod]
            ,[ysnSellable]
            ,[ysnYieldAdjustment]
-           ,[ysnWarehouseTracked])
+           ,[ysnWarehouseTracked]
+           ,[dtmDateCreated])
 SELECT [strCategoryCode] + '-copy'
            ,[strDescription] + '-copy'
            ,[strInventoryType]
@@ -82,6 +83,7 @@ SELECT [strCategoryCode] + '-copy'
            ,[ysnSellable]
            ,[ysnYieldAdjustment]
            ,[ysnWarehouseTracked]
+           ,GETUTCDATE()
 FROM tblICCategory
 WHERE intCategoryId = @intCategoryId
 

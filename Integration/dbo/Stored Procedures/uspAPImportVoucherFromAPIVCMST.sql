@@ -380,6 +380,10 @@ INSERT INTO tblAPBillDetail
 	[int1099Category],
 	[intLineNo]
 )
+SELECT
+	TOP 100 PERCENT *
+FROM 
+(
 SELECT 
 	[intBillId]				=	A.intBillId,
 	[strMiscDescription]	=	A.strReference,
@@ -461,11 +465,51 @@ INNER JOIN (tmp_apivcmstImport C2 INNER JOIN tmp_aphglmstImport C
 			AND C2.apivc_vnd_no = C.aphgl_vnd_no)
 ON A.strVendorOrderNumber COLLATE Latin1_General_CS_AS = C2.apivc_ivc_no
 	AND B.strVendorId COLLATE Latin1_General_CS_AS = C2.apivc_vnd_no
-ORDER BY C.aphgl_dist_no
+WHERE A.intTransactionType != 2
+) tmp
+ORDER BY intLineNo
 
 SET @totalInsertedBillDetail = @@ROWCOUNT;
 
 SET @totalDetailImported = @totalInsertedBillDetail;
+
+--insert detail record for prepayment after getting the record added
+INSERT INTO tblAPBillDetail
+(
+	[intBillId],
+	[strMiscDescription],
+	[dblQtyOrdered],
+	[dblQtyReceived],
+	[intAccountId],
+	[dblTotal],
+	[dblCost],
+	[dbl1099],
+	[int1099Form],
+	[int1099Category],
+	[intLineNo]
+)
+SELECT 
+	[intBillId]				=	A.intBillId,
+	[strMiscDescription]	=	A.strReference,
+	[dblQtyOrdered]			=	1,
+	[dblQtyReceived]		=	1,
+	[intAccountId]			=	NULL,
+	[dblTotal]				=	ABS(C2.apivc_net_amt), --IF 'I' the amount sign is correct
+	[dblCost]				=	ABS(C2.apivc_net_amt),
+	[dbl1099]				=	0, --COMPUTE WITHHELD ONLY IF TOTAL IS POSITIVE
+	[int1099Form]			=	(CASE WHEN C2.apivc_1099_amt > 0 THEN 1 ELSE 0 END),
+	[int1099Category]		=	(CASE WHEN C2.apivc_1099_amt > 0 THEN 8 ELSE 0 END),
+	[intLineNo]				=	0
+FROM tblAPBill A
+INNER JOIN tblAPVendor B
+	ON A.intEntityVendorId = B.intEntityId
+INNER JOIN #tmpVouchersWithRecordNumber tmpCreatedVouchers ON A.intBillId = tmpCreatedVouchers.intBillId
+INNER JOIN (tmp_apivcmstImport C2 LEFT JOIN tmp_aphglmstImport C 
+			ON C2.apivc_ivc_no = C.aphgl_ivc_no 
+			AND C2.apivc_vnd_no = C.aphgl_vnd_no)
+ON A.strVendorOrderNumber COLLATE Latin1_General_CS_AS = C2.apivc_ivc_no
+	AND B.strVendorId COLLATE Latin1_General_CS_AS = C2.apivc_vnd_no
+WHERE A.intTransactionType = 2
 
 --UPDATE THE intBillId of tblAPapivcmst
 UPDATE A

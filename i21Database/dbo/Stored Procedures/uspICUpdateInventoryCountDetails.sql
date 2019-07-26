@@ -166,7 +166,7 @@ BEGIN
 			ON stockUOM.intItemId = il.intItemId
 			AND stockUOM.ysnStockUnit = 1
 		INNER JOIN tblICItem i ON i.intItemId = il.intItemId
-		LEFT JOIN (
+		OUTER APPLY (
 			SELECT	intItemId
 					,intItemUOMId
 					,intItemLocationId
@@ -174,18 +174,19 @@ BEGIN
 					,intStorageLocationId
 					,dblOnHand =  SUM(COALESCE(dblOnHand, 0.00))
 					,dblLastCost = MAX(dblLastCost)
-			FROM	vyuICGetItemStockSummary
+			FROM	vyuICGetItemStockSummary summary
 			WHERE	dbo.fnDateLessThanEquals(dtmDate, @AsOfDate) = 1
+				AND summary.intItemId = i.intItemId
+				AND summary.intItemUOMId = stockUOM.intItemUOMId
+				AND summary.intItemLocationId = il.intItemLocationId
 			GROUP BY 
 					intItemId,
 					intItemUOMId,
 					intItemLocationId,
 					intSubLocationId,
 					intStorageLocationId
-		) stock ON stock.intItemId = i.intItemId
-			AND stockUOM.intItemUOMId = stock.intItemUOMId
-			AND stock.intItemLocationId = il.intItemLocationId
-		LEFT JOIN (
+		) stock
+		OUTER APPLY (
 			SELECT	 st.intItemId
 					,st.intItemLocationId
 					,st.intSubLocationId
@@ -198,6 +199,10 @@ BEGIN
 				LEFT OUTER JOIN tblICItemUOM suom ON suom.intItemId = st.intItemId
 					AND suom.ysnStockUnit = 1
 			WHERE	dbo.fnDateLessThanEquals(dtmDate, @AsOfDate) = 1
+				AND st.intItemId = i.intItemId
+				--AND ISNULL(stockUnit.ysnStockUnit, 0) = 0
+				AND st.intItemLocationId = il.intItemLocationId
+				AND st.intLocationId = il.intLocationId
 			GROUP BY 
 					st.intItemId,
 					st.intItemLocationId,
@@ -205,10 +210,7 @@ BEGIN
 					st.intStorageLocationId,
 					--st.ysnStockUnit,
 					st.intLocationId
-		) stockUnit ON stockUnit.intItemId = i.intItemId
-			--AND ISNULL(stockUnit.ysnStockUnit, 0) = 0
-			AND stockUnit.intItemLocationId = il.intItemLocationId
-			AND stockUnit.intLocationId = il.intLocationId
+		) stockUnit
 		OUTER APPLY(
 			SELECT TOP 1
 					dblCost

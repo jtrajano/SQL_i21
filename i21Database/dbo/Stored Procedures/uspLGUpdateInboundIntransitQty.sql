@@ -41,7 +41,7 @@ BEGIN TRY
 	  ,intItemLocationId = IL.intItemLocationId
 	  ,CT.intItemUOMId
 	  ,NULL
-	  ,LW.intSubLocationId
+	  ,ISNULL(LW.intSubLocationId, LD.intPSubLocationId)
 	  ,NULL
 	  ,CASE 
 	   WHEN @ysnUnShip = 0
