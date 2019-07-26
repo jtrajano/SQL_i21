@@ -6,7 +6,7 @@
 	,dtmDate DATETIME NOT NULL
 	,intBookId INT
 	,intSubBookId INT
-
+	,ysnImported BIT CONSTRAINT [DF_tblMFDemandHeader_ysnImported] DEFAULT 0
 	,CONSTRAINT [PK_tblMFDemandHeader] PRIMARY KEY (intDemandHeaderId)
 	,CONSTRAINT [UK_tblMFDemandHeader_strDemandName] UNIQUE (strDemandName)
 	,CONSTRAINT [FK_tblMFDemandHeader_tblCTBook_intBookId] FOREIGN KEY (intBookId) REFERENCES [tblCTBook](intBookId)
