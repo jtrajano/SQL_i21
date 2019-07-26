@@ -38,7 +38,7 @@ BEGIN TRY
 			ISNULL(intUnconfirmedCount,0)		AS intUnconfirmedCount,
 			ISNULL(intApprovedNotSentCount,0)	AS intApprovedNotSentCount,
 			ISNULL(intUnsignedCount,0)			AS intUnsignedCount,
-			ISNULL(intPreshipmentNotYetApproved,0)			AS intPreshipmentNotYetApproved
+			ISNULL(intPreshipmentNotYetApprovedCount,0)			AS intPreshipmentNotYetApprovedCount
 	FROM
 	@NotificationCount
 	PIVOT
@@ -50,7 +50,7 @@ BEGIN TRY
 			intUnconfirmedCount,
 			intApprovedNotSentCount,
 			intUnsignedCount,
-			intPreshipmentNotYetApproved
+			intPreshipmentNotYetApprovedCount
 		)
 	)g
 

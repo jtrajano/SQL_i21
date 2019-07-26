@@ -157,20 +157,22 @@ BEGIN TRY
 	END
 	ELSE IF @strNotificationType = 'Pre-shipment Sample not yet approved'
 	BEGIN
-		SELECT @SQL += '		
+		SELECT @SQL += 'SELECT EDPEXO.*
+							,CAST(ROW_NUMBER() OVER(ORDER BY EDPEXO.intContractHeaderId DESC) AS INT) AS intUniqueId,
+							DENSE_RANK() OVER (ORDER BY EDPEXO.intContractHeaderId DESC) intRankNo	
+			FROM (	
+				
 			SELECT	DISTINCT CH.intContractHeaderId,			CH.intContractSeq,			CH.dtmStartDate,				CH.dtmEndDate,
 					CH.dblQuantity,					CH.dblFutures,				CH.dblBasis,					CH.dblCashPrice,
 					CH.dblScheduleQty,				CH.dblNoOfLots,				CH.strItemNo,					CH.strPricingType,
 					CH.strFutMarketName,			CH.strItemUOM,				CH.strLocationName,				CH.strPriceUOM,
 					CH.strCurrency,					CH.strFutureMonth,			CH.strStorageLocation,			CH.strSubLocation,
 					CH.strPurchasingGroup,			CH.strCreatedByNo,			CH.strContractNumber,			CH.dtmContractDate,
-					CH.strContractType,				CH.strCommodityCode,		CH.strEntityName,				''Approved Not Sent'' AS strNotificationType,
+					CH.strContractType,				CH.strCommodityCode,		CH.strEntityName,				''Preshipment Not Yet Approved'' AS strNotificationType,
 					CH.strItemDescription,			CH.dblQtyInStockUOM,		CH.intContractDetailId,			CH.strProductType,
 					CH.strBasisComponent,			CH.strPosition,				CH.strContractBasis,			CH.strCountry,			
 					CH.strCustomerContract,			strSalesperson,				CH.intContractStatusId,			CH.strContractItemName,		
-					CH.strContractItemNo,
-					CAST(ROW_NUMBER() OVER(ORDER BY CH.intContractHeaderId DESC) AS INT) AS intUniqueId,
-					DENSE_RANK() OVER (ORDER BY CH.intContractHeaderId DESC) intRankNo		
+					CH.strContractItemNo		
 
 			FROM	vyuCTNotificationHeader CH
 			JOIN	tblQMSample as SM
@@ -181,7 +183,43 @@ BEGIN TRY
 			JOIN	tblQMSampleStatus as SMS
 					on SMS.intSampleStatusId = SM.intSampleStatusId
 						and SMS. strStatus <> ''Approved''
-	LEFT	JOIN	vyuCTEventRecipientFilter	RF	ON	RF.intEntityId			=	'+LTRIM(@intUserId)+' AND RF.strNotificationType = ''Pre-shipment sample not yet approved'' 
+	
+		UNION 
+
+		SELECT	DISTINCT CH.intContractHeaderId,			CH.intContractSeq,			CH.dtmStartDate,				CH.dtmEndDate,
+							CH.dblQuantity,					CH.dblFutures,				CH.dblBasis,					CH.dblCashPrice,
+							CH.dblScheduleQty,				CH.dblNoOfLots,				CH.strItemNo,					CH.strPricingType,
+							CH.strFutMarketName,			CH.strItemUOM,				CH.strLocationName,				CH.strPriceUOM,
+							CH.strCurrency,					CH.strFutureMonth,			CH.strStorageLocation,			CH.strSubLocation,
+							CH.strPurchasingGroup,			CH.strCreatedByNo,			CH.strContractNumber,			CH.dtmContractDate,
+							CH.strContractType,				CH.strCommodityCode,		CH.strEntityName,				''Preshipment Not Yet Approved'' AS strNotificationType,
+							CH.strItemDescription,			CH.dblQtyInStockUOM,		CH.intContractDetailId,			CH.strProductType,
+							CH.strBasisComponent,			CH.strPosition,				CH.strContractBasis,			CH.strCountry,			
+							CH.strCustomerContract,			strSalesperson,				CH.intContractStatusId,			CH.strContractItemName,		
+							CH.strContractItemNo	
+
+					FROM	vyuCTNotificationHeader CH
+					JOIN (
+						SELECT intContractHeaderId from tblCTContractHeader b
+							join tblCTWeightGrade c
+								on b.intGradeId = c.intWeightGradeId and ysnSample = 1
+						Union
+						SELECT intContractHeaderId from tblCTContractHeader b
+							join tblCTWeightGrade c
+								on b.intWeightId = c.intWeightGradeId and ysnSample = 1
+					) a
+						on CH.intContractHeaderId = a.intContractHeaderId
+					LEFT JOIN ( Select intSampleId, intContractHeaderId from tblQMSample as SM			
+									JOIN tblQMSampleType as SMT
+										on SM.intSampleTypeId = SMT.intSampleTypeId
+											and SMT.strSampleTypeName = ''Pre-shipment Sample''			
+								) SMC1
+						on SMC1.intContractHeaderId = CH.intContractHeaderId
+			WHERE SMC1.intSampleId is null
+		
+			) EDPEXO			
+			LEFT	JOIN	vyuCTEventRecipientFilter	RF	ON	RF.intEntityId			=	'+LTRIM(@intUserId)+' AND RF.strNotificationType = ''Pre-shipment sample not yet approved'' 
+
 												'
 	END
 

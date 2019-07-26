@@ -1396,7 +1396,7 @@ BEGIN
 	SELECT [strReminder]        =        N'Pre-shipment Sample not yet approved',
 			[strType]        	=        N'Contract',
 			[strMessage]		=        N'{0} {1} {2} sample not yet approved',
-			[strQuery]  		=        N'	SELECT	DISTINCT CH.intContractHeaderId , SM.intSampleId
+			[strQuery]  		=        N'	SELECT	DISTINCT CH.intContractHeaderId , null as s
 												FROM	tblCTContractHeader CH	CROSS	
 												JOIN	tblCTEvent			EV	
 												JOIN	tblCTAction			AC	ON	AC.intActionId			=	EV.intActionId
@@ -1412,7 +1412,37 @@ BEGIN
 															and SMS. strStatus <> ''Approved''
 												LEFT JOIN tblCTEventRecipientFilter RF ON RF.intEntityId = ER.intEntityId AND ER.intEventId = RF.intEventId
 												WHERE	ER.intEntityId = {0}
-												GROUP BY CH.intContractHeaderId, SM.intSampleId',
+												GROUP BY CH.intContractHeaderId, SM.intSampleId
+												
+												union
+
+												SELECT	DISTINCT CH.intContractHeaderId , null as s
+														FROM	tblCTContractHeader CH	CROSS	
+														JOIN	tblCTEvent			EV	
+														JOIN	tblCTAction			AC	ON	AC.intActionId			=	EV.intActionId
+														JOIN	tblCTEventRecipient ER	ON	ER.intEventId			=	EV.intEventId	LEFT
+														JOIN	tblCTContractDetail CD	ON	CD.intContractHeaderId	=	CH.intContractHeaderId
+														JOIN (
+																		SELECT intContractHeaderId from tblCTContractHeader b
+																			join tblCTWeightGrade c
+																				on b.intGradeId = c.intWeightGradeId and ysnSample = 1
+																		Union
+																		SELECT intContractHeaderId from tblCTContractHeader b
+																			join tblCTWeightGrade c
+																				on b.intWeightId = c.intWeightGradeId and ysnSample = 1
+																	) a
+																		on CH.intContractHeaderId = a.intContractHeaderId
+																	LEFT JOIN ( Select intSampleId, intContractHeaderId from tblQMSample as SM			
+																					JOIN tblQMSampleType as SMT
+																						on SM.intSampleTypeId = SMT.intSampleTypeId
+																							and SMT.strSampleTypeName = ''Pre-shipment Sample''
+																				) SMC1
+																		on SMC1.intContractHeaderId = CH.intContractHeaderId
+														LEFT JOIN tblCTEventRecipientFilter RF ON RF.intEntityId = ER.intEntityId AND ER.intEventId = RF.intEventId
+														WHERE	ER.intEntityId = {0}
+														GROUP BY CH.intContractHeaderId
+												
+												',
 			[strNamespace]       =        N'ContractManagement.view.ContractAlerts?activeTab=Sample not approved', 
 			[intSort]            =        19
 END
@@ -1420,7 +1450,7 @@ ELSE
 BEGIN
 	UPDATE [tblSMReminderList]
 	SET	[strMessage]		=        N'{0} {1} {2} sample not yet approved',
-		[strQuery]  		=        N'	SELECT	DISTINCT CH.intContractHeaderId , SM.intSampleId
+		[strQuery]  		=        N'	SELECT	DISTINCT CH.intContractHeaderId , null as s
 												FROM	tblCTContractHeader CH	CROSS	
 												JOIN	tblCTEvent			EV	
 												JOIN	tblCTAction			AC	ON	AC.intActionId			=	EV.intActionId
@@ -1436,7 +1466,39 @@ BEGIN
 															and SMS. strStatus <> ''Approved''
 												LEFT JOIN tblCTEventRecipientFilter RF ON RF.intEntityId = ER.intEntityId AND ER.intEventId = RF.intEventId
 												WHERE	ER.intEntityId = {0}
-												GROUP BY CH.intContractHeaderId, SM.intSampleId'
+												GROUP BY CH.intContractHeaderId, SM.intSampleId
+												
+										
+												
+												union
+
+												SELECT	DISTINCT CH.intContractHeaderId , null as s
+														FROM	tblCTContractHeader CH	CROSS	
+														JOIN	tblCTEvent			EV	
+														JOIN	tblCTAction			AC	ON	AC.intActionId			=	EV.intActionId
+														JOIN	tblCTEventRecipient ER	ON	ER.intEventId			=	EV.intEventId	LEFT
+														JOIN	tblCTContractDetail CD	ON	CD.intContractHeaderId	=	CH.intContractHeaderId
+														JOIN (
+																		SELECT intContractHeaderId from tblCTContractHeader b
+																			join tblCTWeightGrade c
+																				on b.intGradeId = c.intWeightGradeId and ysnSample = 1
+																		Union
+																		SELECT intContractHeaderId from tblCTContractHeader b
+																			join tblCTWeightGrade c
+																				on b.intWeightId = c.intWeightGradeId and ysnSample = 1
+																	) a
+																		on CH.intContractHeaderId = a.intContractHeaderId
+																	LEFT JOIN ( Select intSampleId, intContractHeaderId from tblQMSample as SM			
+																					JOIN tblQMSampleType as SMT
+																						on SM.intSampleTypeId = SMT.intSampleTypeId
+																							and SMT.strSampleTypeName = ''Pre-shipment Sample''
+																				) SMC1
+																		on SMC1.intContractHeaderId = CH.intContractHeaderId
+														LEFT JOIN tblCTEventRecipientFilter RF ON RF.intEntityId = ER.intEntityId AND ER.intEventId = RF.intEventId
+														WHERE	ER.intEntityId = {0}
+														GROUP BY CH.intContractHeaderId
+														
+														'
 	WHERE [strReminder] = N'Pre-shipment Sample not yet approved' AND [strType] = N'Contract' 
 END
 
