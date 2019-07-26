@@ -201,5 +201,6 @@ CREATE TYPE [dbo].[InvoiceStagingTable] AS TABLE
 
     ,[strAddonDetailKey]                    NVARCHAR(100)   COLLATE Latin1_General_CI_AS    NULL
     ,[ysnAddonParent]                       BIT                                             NULL
-    ,[dblAddOnQuantity]                     NUMERIC(38, 20)                                  NULL
+    ,[dblAddOnQuantity]                     NUMERIC(38, 20)                                 NULL
+	,[ysnConvertToStockUOM]					BIT                                             NULL		-- If true, intItemUOMId will be converted to Stock UOM
 )

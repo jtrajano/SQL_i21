@@ -172,6 +172,7 @@ INSERT INTO @InvoicesToGenerate (
 	,[intDestinationWeightId]
     ,[strAddonDetailKey]
     ,[ysnAddonParent]
+	,[ysnConvertToStockUOM]
     ,[dblAddOnQuantity]
 )
 SELECT
@@ -319,6 +320,7 @@ SELECT
 	,[intDestinationWeightId]			= [intDestinationWeightId]
     ,[strAddonDetailKey]                = [strAddonDetailKey]
     ,[ysnAddonParent]                   = [ysnAddonParent]
+	,[ysnConvertToStockUOM]				= [ysnConvertToStockUOM]
     ,[dblAddOnQuantity]                 = [dblAddOnQuantity]
 FROM
 	@InvoiceEntries 
@@ -2072,6 +2074,7 @@ BEGIN TRY
 		,[intDestinationWeightId]
         ,[strAddonDetailKey]
         ,[ysnAddonParent]
+		,[ysnConvertToStockUOM]
         ,[dblAddOnQuantity])
 	SELECT
 		 [intId]								= IL.[intId]
@@ -2218,6 +2221,7 @@ BEGIN TRY
 		,[intDestinationWeightId]				= ITG.[intDestinationWeightId]
         ,[strAddonDetailKey]                    = ITG.[strAddonDetailKey]
         ,[ysnAddonParent]                       = ITG.[ysnAddonParent]
+		,[ysnConvertToStockUOM]					= ITG.[ysnConvertToStockUOM]
         ,[dblAddOnQuantity]                     = ITG.[dblAddOnQuantity]
 	FROM
 		@InvoicesToGenerate ITG
