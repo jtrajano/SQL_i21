@@ -1163,7 +1163,26 @@ BEGIN TRY
 
 
 
-		
+		-- Clean up (ITEM, ITEM UOM, ITEM LOCATION, VendorXref)
+		BEGIN
+			IF OBJECT_ID('tempdb..#tmpUpdateItemForCStore_itemAuditLog') IS NOT NULL  
+				DROP TABLE #tmpUpdateItemForCStore_itemAuditLog 
+
+			IF OBJECT_ID('tempdb..#tmpUpdateItemUOMForCStore_itemAuditLog') IS NOT NULL  
+				DROP TABLE #tmpUpdateItemUOMForCStore_itemAuditLog 
+
+			IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_ItemPricingAuditLog') IS NOT NULL  
+				DROP TABLE #tmpUpdateItemPricingForCStore_ItemPricingAuditLog 
+				
+			IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_ItemSpecialPricingAuditLog') IS NOT NULL  
+				DROP TABLE #tmpUpdateItemPricingForCStore_ItemSpecialPricingAuditLog 
+
+			IF OBJECT_ID('tempdb..#tmpUpdateItemVendorXrefForCStore_itemAuditLog') IS NOT NULL  
+				DROP TABLE #tmpUpdateItemVendorXrefForCStore_itemAuditLog 
+
+			IF OBJECT_ID('tempdb..#tmpUpdateItemLocationForCStore_itemLocationAuditLog') IS NOT NULL  
+				DROP TABLE #tmpUpdateItemLocationForCStore_itemLocationAuditLog 
+		END
 
 			
 

@@ -267,6 +267,20 @@ BEGIN TRY
 			)
 		;
 
+		-- Create the temp table for the audit log. 
+		IF OBJECT_ID('tempdb..#tmpUpdateItemUOMForCStore_itemAuditLog') IS NULL  
+			CREATE TABLE #tmpUpdateItemUOMForCStore_itemAuditLog (
+				intItemUOMId INT 
+				,intItemId INT 
+				-- Original Fields
+				,strUPCCode_Original NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+				,strLongUPCCode_Original NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+				-- Modified Fields
+				,strUPCCode_New NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+				,strLongUPCCode_New NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+			)
+		;
+
 		-- Item Account Audit Log
 		IF OBJECT_ID('tempdb..#tmpUpdateItemAccountForCStore_itemAuditLog') IS NULL  
 			CREATE TABLE #tmpUpdateItemAccountForCStore_itemAuditLog (
@@ -547,13 +561,21 @@ BEGIN TRY
 
 
 		-- Get strUpcCode
-		DECLARE @strUpcCode AS NVARCHAR(20) = (
-												SELECT CASE
-															WHEN strLongUPCCode IS NOT NULL AND strLongUPCCode != '' THEN strLongUPCCode ELSE strUpcCode
-													   END AS strUpcCode
-												FROM tblICItemUOM 
-												WHERE intItemUOMId = @intItemUOMId
-											  )
+		DECLARE @strUpcCode AS NVARCHAR(20) = NULL
+		DECLARE @intItemId AS INT			= NULL
+		IF(@intItemUOMId IS NOT NULL)
+			BEGIN
+				SELECT 
+					@strUpcCode = CASE
+										WHEN strLongUPCCode IS NOT NULL AND strLongUPCCode != '' 
+											THEN strLongUPCCode ELSE strUpcCode
+									END,
+					@intItemId = intItemId
+				FROM tblICItemUOM 
+				WHERE intItemUOMId = @intItemUOMId
+			END
+		
+		
 
 		-- MARK START UPDATE
 		SET @dtmDateTimeModifiedFrom = GETUTCDATE()
@@ -589,7 +611,7 @@ BEGIN TRY
 					@strDescription				= @strDescription 
 					,@dblRetailPriceFrom		= NULL  
 					,@dblRetailPriceTo			= NULL 
-					,@intItemId					= NULL 
+					,@intItemId					= @intItemId 
 					,@intItemUOMId				= @intItemUOMId 
 					-- update params
 					,@intCategoryId				= @intNewCategory
@@ -2003,7 +2025,16 @@ BEGIN TRY
 				DROP TABLE #tmpUpdateItemForCStore_Class 
 
 			IF OBJECT_ID('tempdb..#tmpUpdateItemForCStore_itemAuditLog') IS NOT NULL  
-				DROP TABLE #tmpUpdateItemForCStore_itemAuditLog 
+				BEGIN
+					--PRINT 'Will DROP TABLE #tmpUpdateItemForCStore_itemAuditLog'
+					DROP TABLE #tmpUpdateItemForCStore_itemAuditLog 
+				END
+			
+			IF OBJECT_ID('tempdb..#tmpUpdateItemUOMForCStore_itemAuditLog') IS NOT NULL  
+				BEGIN
+					--PRINT 'Will DROP TABLE #tmpUpdateItemUOMForCStore_itemAuditLog'
+					DROP TABLE #tmpUpdateItemUOMForCStore_itemAuditLog 
+				END	
 
 			IF OBJECT_ID('tempdb..#tmpUpdateItemAccountForCStore_itemAuditLog') IS NOT NULL  
 				DROP TABLE #tmpUpdateItemAccountForCStore_itemAuditLog 

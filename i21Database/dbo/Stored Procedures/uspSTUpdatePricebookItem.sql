@@ -126,6 +126,19 @@ BEGIN
 				;
 			END
 
+			-- Create the temp table for the audit log. 
+			IF OBJECT_ID('tempdb..#tmpUpdateItemUOMForCStore_itemAuditLog') IS NULL  
+				CREATE TABLE #tmpUpdateItemUOMForCStore_itemAuditLog (
+					intItemUOMId INT 
+					,intItemId INT 
+					-- Original Fields
+					,strUPCCode_Original NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+					,strLongUPCCode_Original NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+					-- Modified Fields
+					,strUPCCode_New NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+					,strLongUPCCode_New NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+				)
+			;
 
 			-- ITEM PRICING AuditLog temp table
 			BEGIN
@@ -1104,6 +1117,18 @@ BEGIN
 
 					IF OBJECT_ID('tempdb..#tmpUpdateItemForCStore_itemAuditLog') IS NOT NULL  
 						DROP TABLE #tmpUpdateItemForCStore_itemAuditLog 
+
+					IF OBJECT_ID('tempdb..#tmpUpdateItemUOMForCStore_itemAuditLog') IS NOT NULL  
+						DROP TABLE #tmpUpdateItemUOMForCStore_itemAuditLog 
+
+					IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_ItemPricingAuditLog') IS NOT NULL  
+						DROP TABLE #tmpUpdateItemPricingForCStore_ItemPricingAuditLog 
+
+					IF OBJECT_ID('tempdb..#tmpUpdateItemVendorXrefForCStore_itemAuditLog') IS NOT NULL  
+						DROP TABLE #tmpUpdateItemVendorXrefForCStore_itemAuditLog 
+
+					IF OBJECT_ID('tempdb..#tmpUpdateItemLocationForCStore_itemLocationAuditLog') IS NOT NULL  
+						DROP TABLE #tmpUpdateItemLocationForCStore_itemLocationAuditLog 
 			END
 
 
