@@ -344,17 +344,34 @@ BEGIN TRANSACTION
 		BEGIN
 			-- UPDATE ITEM
 			EXEC [dbo].[uspICUpdateItemForCStore]
-				@strUpcCode = NULL --@strUpcCode  
-				,@strDescription = NULL --@strCurrentItemDescription  
-				,@dblRetailPriceFrom = NULL  
-				,@dblRetailPriceTo = NULL 
-				,@intItemId = @intItemId
+				-- filter params	
+				@strDescription				= NULL 
+				,@dblRetailPriceFrom		= NULL  
+				,@dblRetailPriceTo			= NULL 
+				,@intItemId					= @intItemId 
+				,@intItemUOMId				= NULL 
+				-- update params
+				,@intCategoryId				= @intCategoryId
+				,@strCountCode				= NULL
+				,@strItemDescription		= @strDescription  	
+				,@strItemNo					= NULL 
+				,@strShortName				= NULL 
+				,@strUpcCode				= NULL 
+				,@strLongUpcCode			= NULL 
+				,@intEntityUserSecurityId	= 1
 
-				,@intCategoryId = @intCategoryId
-				,@strCountCode = NULL
-				,@strItemDescription = @strDescription 
+			--EXEC [dbo].[uspICUpdateItemForCStore]
+			--	@strUpcCode = NULL --@strUpcCode  
+			--	,@strDescription = NULL --@strCurrentItemDescription  
+			--	,@dblRetailPriceFrom = NULL  
+			--	,@dblRetailPriceTo = NULL 
+			--	,@intItemId = @intItemId
 
-				,@intEntityUserSecurityId = 1
+			--	,@intCategoryId = @intCategoryId
+			--	,@strCountCode = NULL
+			--	,@strItemDescription = @strDescription 
+
+			--	,@intEntityUserSecurityId = 1
 		END
 
 		-- ITEM PRICING

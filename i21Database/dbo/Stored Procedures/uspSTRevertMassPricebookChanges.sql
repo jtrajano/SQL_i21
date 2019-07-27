@@ -170,16 +170,34 @@ BEGIN TRY
 
 								-- UPDATE ITEM
 								EXEC [dbo].[uspICUpdateItemForCStore]
-									 @strUpcCode				= NULL 
-									 ,@strDescription			= NULL 
-									 ,@dblRetailPriceFrom		= NULL  
-									 ,@dblRetailPriceTo			= NULL 
-									 ,@intItemId				= @intItemId
+									-- filter params	
+									@strDescription				= NULL 
+									,@dblRetailPriceFrom		= NULL  
+									,@dblRetailPriceTo			= NULL 
+									,@intItemId					= @intItemId 
+									,@intItemUOMId				= NULL 
+									-- update params
+									,@intCategoryId				= @intCategoryId
+									,@strCountCode				= NULL
+									,@strItemDescription		= @strCountCode 	
+									,@strItemNo					= NULL 
+									,@strShortName				= NULL 
+									,@strUpcCode				= NULL 
+									,@strLongUpcCode			= NULL 
+									,@intEntityUserSecurityId	=  @intEntityId
 
-									 ,@intCategoryId			= @intCategoryId
-									 ,@strCountCode				= @strCountCode
-									 ,@strItemDescription		= NULL
-									 ,@intEntityUserSecurityId	= @intEntityId -- *** ADD EntityId of the user who commited the revert ***
+								--OLD
+								--EXEC [dbo].[uspICUpdateItemForCStore]
+								--	 @strUpcCode				= NULL 
+								--	 ,@strDescription			= NULL 
+								--	 ,@dblRetailPriceFrom		= NULL  
+								--	 ,@dblRetailPriceTo			= NULL 
+								--	 ,@intItemId				= @intItemId
+
+								--	 ,@intCategoryId			= @intCategoryId
+								--	 ,@strCountCode				= @strCountCode
+								--	 ,@strItemDescription		= NULL
+								--	 ,@intEntityUserSecurityId	= @intEntityId -- *** ADD EntityId of the user who commited the revert ***
 
 								
 

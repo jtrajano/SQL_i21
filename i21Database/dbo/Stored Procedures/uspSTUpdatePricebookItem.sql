@@ -106,17 +106,22 @@ BEGIN
 
 			-- ITEM AuditLog temp table
 			BEGIN
+				-- Create the temp table for the audit log. 
 				IF OBJECT_ID('tempdb..#tmpUpdateItemForCStore_itemAuditLog') IS NULL  
 					CREATE TABLE #tmpUpdateItemForCStore_itemAuditLog (
-							intItemId INT
-							-- Original Fields
-							,intCategoryId_Original INT NULL
-							,strCountCode_Original NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
-							,strDescription_Original NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL
-							-- Modified Fields
-							,intCategoryId_New INT NULL
-							,strCountCode_New NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
-							,strDescription_New NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL
+						intItemId INT
+						-- Original Fields
+						,intCategoryId_Original INT NULL
+						,strCountCode_Original NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+						,strDescription_Original NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL
+						,strItemNo_Original NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL
+						,strShortName_Original NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL
+						-- Modified Fields
+						,intCategoryId_New INT NULL
+						,strCountCode_New NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+						,strDescription_New NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL
+						,strItemNo_New NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL
+						,strShortName_New NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL
 					)
 				;
 			END
@@ -287,18 +292,35 @@ BEGIN
 
 
 						EXEC [dbo].[uspICUpdateItemForCStore]
-							@strUpcCode = NULL  
-							,@strDescription = NULL  
-							,@dblRetailPriceFrom = NULL  
-							,@dblRetailPriceTo = NULL 
-							,@intItemId = @intItemId
+							-- filter params	
+							@strDescription				= NULL 
+							,@dblRetailPriceFrom		= NULL  
+							,@dblRetailPriceTo			= NULL 
+							,@intItemId					= @intItemId 
+							,@intItemUOMId				= NULL 
+							-- update params
+							,@intCategoryId				= @intCategoryId
+							,@strCountCode				= NULL
+							,@strItemDescription		= @strDescription 	
+							,@strItemNo					= NULL 
+							,@strShortName				= NULL 
+							,@strUpcCode				= NULL 
+							,@strLongUpcCode			= NULL 
+							,@intEntityUserSecurityId	=  @intEntityId
 
-							,@intCategoryId = @intCategoryId
-							,@strCountCode = NULL
-							,@strItemDescription = @strDescription 
+						--OLD
+						-- EXEC [dbo].[uspICUpdateItemForCStore]
+							--@strUpcCode = NULL  
+							--,@strDescription = NULL  
+							--,@dblRetailPriceFrom = NULL  
+							--,@dblRetailPriceTo = NULL 
+							--,@intItemId = @intItemId
 
-							,@intEntityUserSecurityId = @intEntityId
+							--,@intCategoryId = @intCategoryId
+							--,@strCountCode = NULL
+							--,@strItemDescription = @strDescription 
 
+							--,@intEntityUserSecurityId = @intEntityId
 						
 						-- ===============================================
 						-- [START] - PREVIEW IF DEBUG (ITEM)

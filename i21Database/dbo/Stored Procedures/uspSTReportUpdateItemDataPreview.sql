@@ -652,16 +652,34 @@ BEGIN TRY
 				BEGIN 
 					-- Item Update
 					EXEC [dbo].[uspICUpdateItemForCStore]
-							@strUpcCode = @strUpcCode 
-							,@strDescription = @strDescription 
-							,@dblRetailPriceFrom = NULL  
-							,@dblRetailPriceTo = NULL 
+						-- filter params	
+						@strDescription				= @strDescription 
+						,@dblRetailPriceFrom		= NULL  
+						,@dblRetailPriceTo			= NULL 
+						,@intItemId					= NULL 
+						,@intItemUOMId				= @intItemUOMId 
+						-- update params
+						,@intCategoryId				= @intNewCategory
+						,@strCountCode				= @strNewCountCode
+						,@strItemDescription		= NULL 	
+						,@strItemNo					= NULL 
+						,@strShortName				= NULL 
+						,@strUpcCode				= NULL 
+						,@strLongUpcCode			= NULL 
+						,@intEntityUserSecurityId	= @intCurrentUserId
 
-							,@intCategoryId = @intNewCategory
-							,@strCountCode = @strNewCountCode
-							,@strItemDescription = NULL
+					--OLD
+					--EXEC [dbo].[uspICUpdateItemForCStore]
+					--		@strUpcCode = @strUpcCode 
+					--		,@strDescription = @strDescription 
+					--		,@dblRetailPriceFrom = NULL  
+					--		,@dblRetailPriceTo = NULL 
 
-							,@intEntityUserSecurityId = @intCurrentUserId
+					--		,@intCategoryId = @intNewCategory
+					--		,@strCountCode = @strNewCountCode
+					--		,@strItemDescription = NULL
+
+					--		,@intEntityUserSecurityId = @intCurrentUserId
 				END
 
 
