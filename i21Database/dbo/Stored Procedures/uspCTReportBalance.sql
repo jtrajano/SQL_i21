@@ -69,7 +69,7 @@ BEGIN TRY
 	
 	SELECT	@IntCommodityId = [from]
 	FROM	@temp_xml_table   
-	WHERE	[fieldname] = 'IntCommodityId'
+	WHERE	[fieldname] = 'intCommodityId'
 
 	SELECT	@intUnitMeasureId = [from]
 	FROM	@temp_xml_table   
