@@ -162,22 +162,9 @@ BEGIN TRY
 			,strNewValue	    = AH.strNewValue
 			,strE			    = @strCompanyName
 			,strF		        = AH.strEntityName
-			,blbSalesPersonP	= CASE
-										WHEN	AH.intContractTypeId  =	1	THEN	NULL
-										WHEN	AH.intContractTypeId  =	2   THEN	ES.blbFile
-								  END
-			,blbSalesPersonS	= CASE
-										WHEN	AH.intContractTypeId  =	1	THEN	ES.blbFile
-										WHEN	AH.intContractTypeId  =	2   THEN	NULL
-								  END
-			,strSalesPersonP	= CASE
-										WHEN	AH.intContractTypeId  =	1	THEN	'|' + @strCompanyName
-										WHEN	AH.intContractTypeId  =	2   THEN	AH.strSalesPerson + '|' + @strCompanyName
-								  END
-			,strSalesPersonS	= CASE
-										WHEN	AH.intContractTypeId  =	1	THEN	AH.strSalesPerson + '|' + AH.strEntityName
-										WHEN	AH.intContractTypeId  =	2   THEN	'|' + AH.strEntityName
-								  END
+			,blbSalesPerson		= ES.blbFile
+			,strSalesPerson		= AH.strSalesPerson + CHAR(13)+CHAR(10) + @strCompanyName
+			,strOtherCompany	= CHAR(13)+CHAR(10) + AH.strEntityName
 			,blbHeaderLogo		= dbo.fnSMGetCompanyLogo('Header')
 			,intSalesPersonId
 
