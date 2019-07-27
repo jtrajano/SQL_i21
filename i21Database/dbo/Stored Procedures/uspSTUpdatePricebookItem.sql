@@ -1,28 +1,32 @@
 ﻿CREATE PROCEDURE [dbo].[uspSTUpdatePricebookItem]
 	@intItemId							INT				
-	, @strDescription					NVARCHAR(250)
-	, @intCategoryId					INT				
+	, @strDescription					NVARCHAR(250)		= NULL
+	, @intCategoryId					INT					= NULL		
+	, @strItemNo						NVARCHAR(100)		= NULL
+	, @strShortName						NVARCHAR(100)		= NULL
+	, @strUpcCode						NVARCHAR(100)		= NULL
+	, @strLongUpcCode					NVARCHAR(100)		= NULL
 
-	, @intFamilyId						INT				
-	, @intClassId						INT				
-	, @intVendorId						INT				
+	, @intFamilyId						INT					= NULL		
+	, @intClassId						INT					= NULL		
+	, @intVendorId						INT					= NULL
 	--, @strPOSDescription				NVARCHAR(250)	
 
-	, @strVendorProduct					NVARCHAR(100)
+	, @strVendorProduct					NVARCHAR(100)		= NULL
 
 	, @UDTItemPricing StoreItemPricing	READONLY
 
 	, @intEntityId						INT
-	, @strGuid							UNIQUEIDENTIFIER
-	, @ysnDebug							BIT
+	, @strGuid							UNIQUEIDENTIFIER	= NULL
+	, @ysnDebug							BIT					
 	, @ysnPreview						BIT
 	, @ysnResultSuccess					BIT				OUTPUT
 	, @strResultMessage					NVARCHAR(1000)	OUTPUT
 AS
 BEGIN
 
-	SET ANSI_WARNINGS OFF
-	set nocount on;
+	SET ANSI_WARNINGS ON -- Since uspICUpdateItemForCStore is using 'ANSI_WARNINGS' set to 'ON'
+	SET NOCOUNT ON;
     declare @InitTranCount INT;
     SET @InitTranCount = @@TRANCOUNT
 	DECLARE @Savepoint NVARCHAR(32) = SUBSTRING(('uspSTUpdatePricebookItem' + CONVERT(VARCHAR, @InitTranCount)), 1, 32)
@@ -51,21 +55,27 @@ BEGIN
 				
 			----TEST
 			--DECLARE @strParameters AS NVARCHAR(500) = ''
+			--DECLARE @intUDTCount AS INT = (SELECT COUNT(*) FROM @UDTItemPricing)
+			--DECLARE @strUDTCount AS NVARCHAR(10) = CAST(@intUDTCount AS NVARCHAR(50))
 			--SET @strParameters = '@intItemId: ' + CAST(@intItemId AS NVARCHAR(50))
 			--				+ ' - @strDescription: ' + ISNULL(@strDescription, 'NULL')
 			--				+ ' - @intCategoryId: ' + ISNULL(CAST(@intCategoryId AS NVARCHAR(50)), 'NULL')
 			--				+ ' - @intFamilyId: ' + ISNULL(CAST(@intFamilyId AS NVARCHAR(50)), 'NULL')
 			--				+ ' - @intClassId: ' + ISNULL(CAST(@intClassId AS NVARCHAR(50)), 'NULL')
 			--				+ ' - @intVendorId: ' + ISNULL(CAST(@intVendorId AS NVARCHAR(50)), 'NULL')
-			--				+ ' - @strPOSDescription: ' + ISNULL(@strPOSDescription, 'NULL')
+			--				+ ' - @strItemNo: ' + ISNULL(@strItemNo, 'NULL')
 			--				+ ' - @intVendorId: ' + ISNULL(CAST(@intVendorId AS NVARCHAR(50)), 'NULL')
 			--				+ ' - @strVendorProduct: ' + ISNULL(@strVendorProduct, 'NULL')
 			--				+ ' - @strGuid: ' + ISNULL(CAST(@strGuid AS NVARCHAR(100)), 'NULL')
+			--				+ ' - @strShortName: ' + ISNULL(CAST(@strShortName AS NVARCHAR(100)), 'NULL')
+			--				+ ' - @strUpcCode: ' + ISNULL(CAST(@strUpcCode AS NVARCHAR(100)), 'NULL')
+			--				+ ' - @strLongUpcCode: ' + ISNULL(CAST(@strLongUpcCode AS NVARCHAR(100)), 'NULL')
+			--				+ ' - @strUDTCount: ' + ISNULL(CAST(@strUDTCount AS NVARCHAR(100)), 'NULL')
 
 
 			DECLARE @intRecordsCount AS INT = 0
 			DECLARE @strRecordsCount AS NVARCHAR(50) = ''
-
+			DECLARE @intItemUOMId AS INT = (SELECT TOP 1 intItemUOMId FROM tblICItemUOM WHERE intItemId = @intItemId AND ysnStockUnit = 1)
 
 			SET @ysnResultSuccess = CAST(1 AS BIT)
 			SET @strResultMessage = ''
@@ -310,16 +320,16 @@ BEGIN
 							,@dblRetailPriceFrom		= NULL  
 							,@dblRetailPriceTo			= NULL 
 							,@intItemId					= @intItemId 
-							,@intItemUOMId				= NULL 
+							,@intItemUOMId				= @intItemUOMId 
 							-- update params
 							,@intCategoryId				= @intCategoryId
 							,@strCountCode				= NULL
 							,@strItemDescription		= @strDescription 	
-							,@strItemNo					= NULL 
-							,@strShortName				= NULL 
-							,@strUpcCode				= NULL 
-							,@strLongUpcCode			= NULL 
-							,@intEntityUserSecurityId	=  @intEntityId
+							,@strItemNo					= @strItemNo 
+							,@strShortName				= @strShortName 
+							,@strUpcCode				= @strUpcCode 
+							,@strLongUpcCode			= @strLongUpcCode 
+							,@intEntityUserSecurityId	= @intEntityId
 
 						--OLD
 						-- EXEC [dbo].[uspICUpdateItemForCStore]
@@ -454,12 +464,12 @@ BEGIN
 			-- ============================================================================================================================
 			BEGIN
 					DECLARE @strNewItemDescription AS NVARCHAR(150)
-							, @strUpcCode AS NVARCHAR(20)
+							, @strUpcCodeFilter AS NVARCHAR(20)
 				
 					-- Get Item filter to update only based on intItemId
 					SELECT TOP 1
 						@strNewItemDescription	= Item.strDescription
-						, @strUpcCode			= ISNULL(Uom.strLongUPCCode, Uom.strUpcCode)
+						, @strUpcCodeFilter		= ISNULL(Uom.strLongUPCCode, Uom.strUpcCode)
 					FROM tblICItem Item
 					LEFT JOIN tblICItemUOM Uom
 						ON Item.intItemId = Uom.intItemId
@@ -502,7 +512,7 @@ BEGIN
 
 
 						EXEC [dbo].[uspICUpdateItemLocationForCStore]
-							@strUpcCode					= @strUpcCode 
+							@strUpcCode					= @strUpcCodeFilter 
 							,@strDescription			= @strNewItemDescription 
 							,@dblRetailPriceFrom		= NULL  
 							,@dblRetailPriceTo			= NULL 
@@ -1098,7 +1108,7 @@ BEGIN
 
 
 
-			-- Clean up (ITEM, ITEM LOCATION, VendorXref)
+			-- Clean up (ITEM, ITEM UOM, ITEM LOCATION, VendorXref)
 			BEGIN
 					IF OBJECT_ID('tempdb..#tmpUpdateItemForCStore_Location') IS NOT NULL  
 						DROP TABLE #tmpUpdateItemForCStore_Location 

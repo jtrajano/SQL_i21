@@ -10,6 +10,10 @@ SELECT DISTINCT
 	, Uom.strUpcCode
 	, Item.intConcurrencyId
 	
+	-- Unit Of Measure
+	, unit.intUnitMeasureId
+	, unit.strUnitMeasure
+
 	-- Category
 	, Category.intCategoryId
 	, Category.strCategoryCode
@@ -58,6 +62,8 @@ LEFT JOIN dbo.tblICItemPricing Pricing
 	AND Item.intItemId = Pricing.intItemId
 LEFT JOIN dbo.tblICItemUOM Uom
 	ON Item.intItemId = Uom.intItemId
+LEFT JOIN dbo.tblICUnitMeasure unit
+	ON Uom.intUnitMeasureId = unit.intUnitMeasureId
 LEFT JOIN dbo.tblSTSubcategory Family
 	ON ItemLoc.intFamilyId = Family.intSubcategoryId
 LEFT JOIN dbo.tblSTSubcategory Class
