@@ -103,7 +103,10 @@ AS
 	
 			CH.*,
 
-			CI.strInvoiceNumber			
+			CI.strInvoiceNumber		
+			,strDetailFreightTerm = CDFT.strFreightTerm
+			,intDetailFreightTermId = CDFT.intFreightTermId	
+
 
 	FROM	tblCTContractDetail				CD LEFT	
 	JOIN	tblSMCompanyLocation			CL	ON	CL.intCompanyLocationId		=	CD.intCompanyLocationId		LEFT
@@ -167,3 +170,5 @@ AS
 				GROUP BY	intContractDetailId
 			)								SY	ON	SY.intContractDetailId		=	CD.intContractDetailId		LEFT
 	JOIN tblCTContractInvoice				CI	ON	CI.intContractDetailId		=	CD.intContractDetailId
+	LEFT	JOIN	tblSMFreightTerms	CDFT	ON CDFT.intFreightTermId = CD.intFreightTermId
+
