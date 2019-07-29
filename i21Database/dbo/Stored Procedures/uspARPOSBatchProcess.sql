@@ -550,8 +550,16 @@ IF EXISTS (SELECT TOP 1 NULL FROM #POSTRANSACTIONS)
 				 , dtmDateProcessed
 			) 
 			SELECT intPOSId				= POS.intPOSId
-				 , strMessage			= CASE WHEN ISNULL(ysnSuccess, 0) = 1 THEN 'Successfully Processed.' ELSE I.strMessage END
-				 , ysnSuccess			= ISNULL(ysnSuccess, 0)
+				 , strMessage			= CASE WHEN ISNULL(ysnSuccess, 0) = 1 AND ISNULL(ysnPosted, 0) = 1 
+											   THEN 'Successfully Processed.' 
+											   ELSE 
+													CASE WHEN ISNULL(ysnSuccess, 0) = 0 
+													     THEN I.strMessage
+														 WHEN ISNULL(ysnPosted, 0) = 0
+														 THEN I.strPostingMessage
+													END													 
+										  END
+				 , ysnSuccess			= CASE WHEN ISNULL(ysnSuccess, 0) = 1 AND ISNULL(ysnPosted, 0) = 1 THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
 				 , dtmDateProcessed		= GETDATE()
 			FROM tblARPOS POS
 			INNER JOIN tblARInvoiceIntegrationLogDetail I ON POS.intPOSId = I.intSourceId AND POS.strReceiptNumber = I.strSourceId
@@ -835,7 +843,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM #POSTRANSACTIONS)
 			EXEC [dbo].[uspARProcessPayments] @PaymentEntries	= @EntriesForPayment
 											, @UserId			= @intEntityUserId
 											, @GroupingOption	= 7
-											, @RaiseError		= 1
+											, @RaiseError		= 0
 											, @ErrorMessage		= @strErrorMsg OUTPUT
 											, @LogId			= @intPaymentLogId OUTPUT
 
