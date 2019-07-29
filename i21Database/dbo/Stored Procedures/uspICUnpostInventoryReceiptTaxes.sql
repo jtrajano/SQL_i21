@@ -192,7 +192,7 @@ BEGIN
 				,dblExchangeRate					= ISNULL(ReceiptItem.dblForexRate, 0)
 				,strInventoryTransactionTypeName	= TransType.strName
 				,strTransactionForm					= @strTransactionForm
-				,intPurchaseTaxAccountId			= TaxCode.intPurchaseTaxAccountId
+				,intPurchaseTaxAccountId			= CASE WHEN TaxCode.ysnAddToCost = 1 THEN dbo.fnGetItemGLAccount(item.intItemId, ItemLocation.intItemLocationId, 'Inventory') ELSE TaxCode.intPurchaseTaxAccountId END
 				,dblForexRate						= ISNULL(ReceiptItem.dblForexRate, 0)
 				,strRateType						= currencyRateType.strCurrencyExchangeRateType
 				,strItemNo							= item.strItemNo
