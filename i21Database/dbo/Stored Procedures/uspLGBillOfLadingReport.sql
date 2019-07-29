@@ -183,7 +183,7 @@ BEGIN TRY
 					CASE 
 						WHEN LUOM.strUnitMeasure <> ISNULL(LWUOM.strUnitMeasure, '')
 							THEN (ISNULL(LoadDetailLot.dblLotQuantity, ISNULL(LoadDetail.dblQuantity, 0)) * 
-									dbo.fnCalculateQtyBetweenUOM(LotItemUOM.intItemUOMId, LotWeightUOM.intItemUOMId, 1))
+									dbo.fnCalculateQtyBetweenUOM(LotItemUOM.intItemUOMId, ISNULL(LoadDetailLot.intWeightUOMId, LotWeightUOM.intItemUOMId), 1))
 						ELSE ISNULL(ISNULL(LoadDetailLot.dblGross, 0) - ISNULL(LoadDetailLot.dblTare, 0), ISNULL(LoadDetail.dblNet, 0))
 						END
 					)
