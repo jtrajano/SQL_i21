@@ -7,9 +7,7 @@ CREATE PROCEDURE uspCTUpdationFromTicketDistribution
 	@intUserId				INT,
 	@ysnDP					BIT,
 	@ysnDeliverySheet		BIT = 0,
-	@ysnAutoDistribution	BIT = 1,
-	@locationId				INT = NULL
-	
+	@ysnAutoDistribution	BIT = 1	
 AS
 
 BEGIN TRY
@@ -49,7 +47,8 @@ BEGIN TRY
 			@ysnAutoIncreaseSchQty	BIT = 0,
 			@intTicketContractDetailId INT,
 			@dblNetUnitsToCompare	NUMERIC(18,6),
-			@intDistributionMethod	INT
+			@intDistributionMethod	INT,
+			@locationId				INT
 	
 	SET @ErrMsg =	'uspCTUpdationFromTicketDistribution '+ 
 					LTRIM(@intTicketId) +',' + 
@@ -88,7 +87,8 @@ BEGIN TRY
 			END
 			
 			SELECT	@intItemId		=	intItemId,
-					@strInOutFlag	=	strInOutFlag 
+					@strInOutFlag	=	strInOutFlag,
+					@locationId		=	intProcessingLocationId
 			FROM	tblSCTicket
 			WHERE	intTicketId		=	@intTicketId
 
@@ -165,7 +165,7 @@ BEGIN TRY
 				IF OBJECT_ID('tempdb..#FutureAndBasisPrice') IS NOT NULL  						
 					DROP TABLE #FutureAndBasisPrice						
 
-				SELECT * INTO #FutureAndBasisPrice FROM dbo.fnRKGetFutureAndBasisPrice(@intContractTypeId,@intCommodityId,@strSeqMonth,3,null,null,null,@locationId,0,@intItemId,null)
+				SELECT * INTO #FutureAndBasisPrice FROM dbo.fnRKGetFutureAndBasisPrice(@intContractTypeId,@intCommodityId,@strSeqMonth,3,null,null,@locationId,null,0,@intItemId,null)
 
 				IF NOT EXISTS(SELECT * FROM #FutureAndBasisPrice)
 				BEGIN
