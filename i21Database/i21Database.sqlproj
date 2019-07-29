@@ -2687,6 +2687,11 @@
     <Build Include="dbo\Views\vyuICGetInventoryReceiptItemByEntity.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryReceiptItemLotByEntity.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryReceiptChargeByEntity.sql" />
+    <Build Include="dbo\Views\vyuICUserCompanyLocations.sql" />
+    <Build Include="dbo\Views\vyuICGetInventoryReceiptSearchByLocation.sql" />
+    <Build Include="dbo\Views\vyuICGetInventoryReceiptItemByLocation.sql" />
+    <Build Include="dbo\Views\vyuICGetInventoryReceiptItemLotByLocation.sql" />
+    <Build Include="dbo\Views\vyuICGetInventoryReceiptChargeByLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspLGDeleteBill.sql" />
     <Build Include="dbo\Stored Procedures\uspWHAutoCheckInSKU.sql" />
     <Build Include="dbo\Stored Procedures\uspWHCheckInSKU.sql" />
