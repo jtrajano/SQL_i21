@@ -26,7 +26,9 @@
     [dtmSalesEndDate] DATETIME NULL, 
 	[ysnPosted] BIT NULL, 
 	[strPriceType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
-    [intConcurrencyId] INT NOT NULL, 
+    [intModifiedByUserId] INT NULL, 
+	[intConcurrencyId] INT NOT NULL, 
+
     CONSTRAINT [PK_tblSTRetailPriceAdjustmentDetail] PRIMARY KEY CLUSTERED ([intRetailPriceAdjustmentDetailId] ASC), 
     CONSTRAINT [FK_tblSTRetailPriceAdjustmentDetail_tblSTRetailPriceAdjustment] FOREIGN KEY ([intRetailPriceAdjustmentId]) REFERENCES [tblSTRetailPriceAdjustment]([intRetailPriceAdjustmentId]) ON DELETE CASCADE, 
 	CONSTRAINT [FK_tblSTRetailPriceAdjustmentDetail_tblSMCompanyLocation] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]), 
