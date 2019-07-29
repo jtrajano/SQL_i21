@@ -142,7 +142,8 @@ AS
 			NM.strMarketMainCurrency,
 			NM.strBroker,
 			NM.strBrokerAccount,
-			CH.ysnReceivedSignedFixationLetter
+			CH.ysnReceivedSignedFixationLetter,
+			dbo.[fnCTGetLastApprovalStatus](CH.intContractHeaderId) strApprovalStatus
 
 	FROM	tblCTContractHeader				CH
 	JOIN	vyuCTContractHeaderNotMapped	NM	ON	NM.intContractHeaderId	=	CH.intContractHeaderId

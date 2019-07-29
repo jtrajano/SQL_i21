@@ -664,6 +664,7 @@ FROM	ForGLEntries_CTE
 		) CreditUnit 
 
 WHERE	ForGLEntries_CTE.dblQty <> 0 
+		AND GLAccounts.intContraInventoryId IS NOT NULL 
 		AND ForGLEntries_CTE.intTransactionTypeId NOT IN (
 				@InventoryTransactionTypeId_WriteOffSold
 				, @InventoryTransactionTypeId_RevalueSold

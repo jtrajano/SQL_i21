@@ -937,8 +937,8 @@ SELECT
     ,[intWriteOffAccountId]             = ARP.[intWriteOffAccountId]
     ,[intAccountId]                     = ARP.[intAccountId]
     ,[intBankAccountId]                 = ARP.[intBankAccountId]
-    ,[intARAccountId]                   = ARP.[intARAccountId]
-    ,[intDiscountAccount]               = ARP.[intDiscountAccount]
+    ,[intARAccountId]                   = APB.[intAccountId]
+    ,[intDiscountAccount]               = CL.[intDiscountAccountId]
     ,[intInterestAccount]               = ARP.[intInterestAccount]
     ,[intCFAccountId]                   = ARP.[intCFAccountId]
     ,[intGainLossAccount]               = ARP.[intGainLossAccount]
@@ -1003,19 +1003,12 @@ SELECT
  	,[intCurrencyExchangeRateTypeId]    = ARPD.[intCurrencyExchangeRateTypeId]
     ,[dblCurrencyExchangeRate]          = ARPD.[dblCurrencyExchangeRate]
     ,[strRateType]                      = ISNULL(SMCER.[strCurrencyExchangeRateType], '') 
-FROM
-    tblARPaymentDetail ARPD
-INNER JOIN
-    #ARPostPaymentHeader ARP
-        ON ARPD.[intPaymentId] = ARP.[intTransactionId]
-INNER JOIN
-    (SELECT [intBillId], [strBillId], [ysnPosted], [ysnPaid], [dtmBillDate], [dblDiscount], [dblInterest], [dblAmountDue], [intAccountId], [intTransactionType] FROM tblAPBill) APB
-        ON ARPD.[intBillId] = APB.[intBillId]
-LEFT OUTER JOIN
-    (SELECT [intCurrencyExchangeRateTypeId], [strCurrencyExchangeRateType] FROM tblSMCurrencyExchangeRateType) SMCER
-        ON ARPD.[intCurrencyExchangeRateTypeId] = SMCER.[intCurrencyExchangeRateTypeId]
+FROM tblARPaymentDetail ARPD
+INNER JOIN #ARPostPaymentHeader ARP ON ARPD.[intPaymentId] = ARP.[intTransactionId]
+INNER JOIN (SELECT [intBillId], [intStoreLocationId], [strBillId], [ysnPosted], [ysnPaid], [dtmBillDate], [dblDiscount], [dblInterest], [dblAmountDue], [intAccountId], [intTransactionType] FROM tblAPBill) APB ON ARPD.[intBillId] = APB.[intBillId]
+INNER JOIN tblSMCompanyLocation CL ON APB.intStoreLocationId = CL.intCompanyLocationId
+LEFT OUTER JOIN (SELECT [intCurrencyExchangeRateTypeId], [strCurrencyExchangeRateType] FROM tblSMCurrencyExchangeRateType) SMCER ON ARPD.[intCurrencyExchangeRateTypeId] = SMCER.[intCurrencyExchangeRateTypeId]
 OPTION(recompile)
-
 
 INSERT INTO #ARPostZeroPayment([intTransactionId])
 SELECT
