@@ -9,7 +9,7 @@
     [strZipCode]          NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
     [strPhone]            NVARCHAR (50)  COLLATE Latin1_General_CI_AS NULL,
     [strFax]              NVARCHAR (50)  COLLATE Latin1_General_CI_AS NULL,
-	[strPricingLevel]     NVARCHAR (2)  COLLATE Latin1_General_CI_AS NULL,
+	[strPricingLevel]     NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [strNotes]            NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
 	[strOregonFacilityNumber] NVARCHAR (30) COLLATE Latin1_General_CI_AS NULL,
     [intShipViaId]        INT            NULL,
