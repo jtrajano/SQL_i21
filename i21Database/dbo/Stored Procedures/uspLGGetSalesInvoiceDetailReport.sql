@@ -93,7 +93,7 @@ BEGIN
 		strCustomerContract = CH.strCustomerContract,
 		strContractNumber = CH.strContractNumber,
 		intContractSeq = CD.intContractSeq,
-		strContainerNumber = Cont.strContainerNumber,
+		strContainerNumber = ISNULL(Cont.strContainerNumber, ReceiptLot.strContainerNo),
 		strMarks = ISNULL(ReceiptLot.strMarkings, Cont.strMarks),
 		strLotNumber = ReceiptLot.strLotNumber,
 		strParentLotNumber = ReceiptLot.strParentLotNumber,
