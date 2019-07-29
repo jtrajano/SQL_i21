@@ -32,4 +32,3 @@ LEFT JOIN tblRKFutureMarket Market ON Market.intFutureMarketId = Detail.intFutur
 LEFT JOIN tblRKFuturesMonth Month ON Month.intFutureMonthId = Detail.intFutureMonthId
 LEFT JOIN tblICCommodity Commodity ON Commodity.intCommodityId = Detail.intCommodityId
 LEFT JOIN tblRKBroker Broker ON Broker.intBrokerId = Detail.intBrokerId
-WHERE ISNULL(dblNoOfLots, 0) > 0
