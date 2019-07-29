@@ -17,7 +17,7 @@ BEGIN TRY
 		,@strSubBook NVARCHAR(100)
 		,@strItemNo NVARCHAR(50)
 		,@strSubstituteItemNo NVARCHAR(50)
-		,@dtmDemandDate DATETIME
+		,@dtmDemandDate NVARCHAR(50)
 		,@dblQuantity NUMERIC(18, 6)
 		,@strUnitMeasure NVARCHAR(50)
 		,@strLocationName NVARCHAR(50)
@@ -47,7 +47,7 @@ BEGIN TRY
 		,@intConvertYear INT
 	DECLARE @tblMFDemandHeaderImport TABLE (
 		intDemandHeaderImportId INT NOT NULL IDENTITY
-		,strDemandName NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL
+		,strDemandName NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		,dtmDate DATETIME
 		,strBook NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		,strSubBook NVARCHAR(100) COLLATE Latin1_General_CI_AS
@@ -56,49 +56,20 @@ BEGIN TRY
 		)
 	DECLARE @tblMFDemandDetailImport TABLE (
 		intDemandDetailImportId INT NOT NULL IDENTITY
-		,strDemandName NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL
-		,strItemNo NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
+		,strDemandName NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		,strItemNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
 		,strSubstituteItemNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
-		,dtmDemandDate DATETIME NOT NULL
-		,dblQuantity NUMERIC(18, 6) NOT NULL
-		,strUnitMeasure NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
-		,strLocationName NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
+		,dtmDemandDate NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		,dblQuantity NUMERIC(18, 6)
+		,strUnitMeasure NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		,strLocationName NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		,intDemandImportId INT
 		)
 
 	SELECT @strDemandImportDateTimeFormat = IsNULL(strDemandImportDateTimeFormat, 'MM DD YYYY HH:MI')
 		,@intMinimumDemandMonth = IsNULL(intMinimumDemandMonth, 12)
 		,@intMaximumDemandMonth = IsNULL(intMaximumDemandMonth, 12)
 	FROM tblMFCompanyPreference
-
-	SELECT @dtmMinDemandDate = MIN(dtmDemandDate)
-		,@dtmMaxDemandDate = Max(dtmDemandDate)
-	FROM tblMFDemandImport
-
-	SELECT @intMinMonth = Datepart(mm, @dtmMinDemandDate)
-		,@intMaxMonth = Datepart(mm, @dtmMaxDemandDate)
-		,@intMinYear = Datepart(yy, @dtmMinDemandDate)
-		,@intMaxYear = Datepart(yy, @dtmMaxDemandDate)
-
-	IF @intMinYear <> @intMaxYear
-	BEGIN
-		SELECT @intMaxMonth = @intMaxMonth + 12
-	END
-
-	SELECT @intMonthDiff = @intMaxMonth - @intMinMonth + 1
-
-	IF NOT (
-			@intMinimumDemandMonth <= @intMonthDiff
-			AND @intMaximumDemandMonth >= @intMinimumDemandMonth
-			)
-	BEGIN
-		RAISERROR (
-				'Demand date is not between minimum and maximum month.'
-				,16
-				,1
-				)
-
-		RETURN
-	END
 
 	SELECT @intConvertYear = 101
 
@@ -127,13 +98,13 @@ BEGIN TRY
 		,dtmCreated
 		)
 	SELECT DISTINCT strDemandName
-		,CONVERT(DATETIME, GETDATE(), @intConvertYear)
+		,CONVERT(NVARCHAR, GETDATE(), @intConvertYear)
 		,strBook
 		,strSubBook
 		,intCreatedUserId
 		,dtmCreated
 	FROM tblMFDemandImport
-	Order by dtmCreated
+	ORDER BY dtmCreated
 
 	SELECT @intDemandHeaderImportId = MIN(intDemandHeaderImportId)
 	FROM @tblMFDemandHeaderImport
@@ -185,6 +156,15 @@ BEGIN TRY
 			SELECT @strErrorMessage = @strErrorMessage + 'Demand Name cannot be empty. '
 		END
 
+		IF EXISTS (
+				SELECT *
+				FROM tblMFDemandHeader
+				WHERE strDemandName = @strDemandName
+				)
+		BEGIN
+			SELECT @strErrorMessage = @strErrorMessage + 'Demand Name already exists. '
+		END
+
 		SELECT @intBookId = intBookId
 		FROM tblCTBook
 		WHERE strBook = @strBook
@@ -216,22 +196,19 @@ BEGIN TRY
 			,dblQuantity
 			,strUnitMeasure
 			,strLocationName
+			,intDemandImportId
 			)
 		SELECT strDemandName
 			,strItemNo
 			,strSubstituteItemNo
-			,CONVERT(DATETIME, dtmDemandDate, @intConvertYear)
-			,sum(dblQuantity)
+			,dtmDemandDate
+			,dblQuantity
 			,strUnitMeasure
 			,strLocationName
+			,intDemandImportId
 		FROM tblMFDemandImport
 		WHERE strDemandName = @strDemandName
-		GROUP BY strDemandName
-			,strItemNo
-			,strSubstituteItemNo
-			,CONVERT(DATETIME, dtmDemandDate, @intConvertYear)
-			,strUnitMeasure
-			,strLocationName
+		ORDER BY intDemandImportId
 
 		SELECT @intDemandDetailImportId = NULL
 
@@ -251,6 +228,13 @@ BEGIN TRY
 				,@intUnitMeasureId = NULL
 				,@intLocationId = NULL
 				,@strDetailErrorMessage = ''
+				,@intDemandImportId = NULL
+				,@dtmMinDemandDate = NULL
+				,@dtmMaxDemandDate = NULL
+				,@intMinMonth = NULL
+				,@intMaxMonth = NULL
+				,@intMinYear = NULL
+				,@intMaxYear = NULL
 
 			SELECT @strItemNo = strItemNo
 				,@strSubstituteItemNo = strSubstituteItemNo
@@ -258,16 +242,76 @@ BEGIN TRY
 				,@dblQuantity = dblQuantity
 				,@strUnitMeasure = strUnitMeasure
 				,@strLocationName = strLocationName
+				,@intDemandImportId = intDemandImportId
 			FROM @tblMFDemandDetailImport
 			WHERE intDemandDetailImportId = @intDemandDetailImportId
+
+			IF (
+					SELECT Count(*)
+					FROM @tblMFDemandDetailImport
+					WHERE strItemNo = @strItemNo
+						AND IsNULL(strSubstituteItemNo, '') = IsNULL(@strSubstituteItemNo, IsNULL(strSubstituteItemNo, ''))
+						AND IsNULL(strLocationName, '') = IsNULL(@strLocationName, IsNULL(strLocationName, ''))
+						AND Datepart(mm, dtmDemandDate) = Datepart(mm, @dtmDemandDate)
+					) > 1
+			BEGIN
+				IF @strSubstituteItemNo <> ''
+				BEGIN
+					SELECT @strDetailErrorMessage = @strDetailErrorMessage + 'The item and substitute item ' + @strItemNo + ' and ' + @strSubstituteItemNo + ' is available multiple times for the same month. '
+				END
+				ELSE
+				BEGIN
+					SELECT @strDetailErrorMessage = @strDetailErrorMessage + 'The item ' + @strItemNo + ' is available multiple times for the same month. '
+				END
+			END
+
+			SELECT @dtmMinDemandDate = MIN(dtmDemandDate)
+				,@dtmMaxDemandDate = Max(dtmDemandDate)
+			FROM @tblMFDemandDetailImport
+			WHERE strItemNo = @strItemNo
+				AND IsNULL(strSubstituteItemNo, '') = IsNULL(@strSubstituteItemNo, IsNULL(strSubstituteItemNo, ''))
+				AND IsNULL(strLocationName, '') = IsNULL(@strLocationName, IsNULL(strLocationName, ''))
+
+			SELECT @intMinMonth = Datepart(mm, @dtmMinDemandDate)
+				,@intMaxMonth = Datepart(mm, @dtmMaxDemandDate)
+				,@intMinYear = Datepart(yy, @dtmMinDemandDate)
+				,@intMaxYear = Datepart(yy, @dtmMaxDemandDate)
+
+			IF @intMinYear <> @intMaxYear
+			BEGIN
+				SELECT @intMaxMonth = @intMaxMonth + 12
+			END
+
+			SELECT @intMonthDiff = @intMaxMonth - @intMinMonth + 1
+
+			IF (
+					@intMonthDiff > @intMaximumDemandMonth
+					OR @intMonthDiff < @intMinimumDemandMonth
+					)
+			BEGIN
+				IF @strSubstituteItemNo <> ''
+				BEGIN
+					SELECT @strDetailErrorMessage = @strDetailErrorMessage + 'Demand date is not between minimum and maximum month for the item ' + @strItemNo + ' and substitute item ' + @strSubstituteItemNo + ' '
+				END
+				ELSE
+				BEGIN
+					SELECT @strDetailErrorMessage = @strDetailErrorMessage + 'Demand date is not between minimum and maximum month for the item ' + @strItemNo + ' '
+				END
+			END
 
 			IF IsNumeric(@dblQuantity) = 0
 			BEGIN
 				SELECT @strDetailErrorMessage = @strDetailErrorMessage + 'Quantity ' + ltrim(@dblQuantity) + ' is invalid. '
 			END
 
+			IF @dblQuantity <= 0
+			BEGIN
+				SELECT @strDetailErrorMessage = @strDetailErrorMessage + 'Quantity should be greater than zero. '
+			END
+
 			IF @dtmDemandDate IS NULL
 				OR @dtmDemandDate = '1900-01-01 00:00:00.000'
+				OR @dtmDemandDate = ''
 			BEGIN
 				SELECT @strDetailErrorMessage = @strDetailErrorMessage + 'Demand Date cannot be empty. '
 			END
@@ -354,13 +398,6 @@ BEGIN TRY
 
 			IF @strDetailErrorMessage <> ''
 			BEGIN
-				SELECT @intDemandImportId = NULL
-
-				SELECT @intDemandImportId = intDemandImportId
-				FROM tblMFDemandImport
-				WHERE strDemandName = @strDemandName
-					AND strItemNo = @strItemNo
-
 				IF NOT EXISTS (
 						SELECT 1
 						FROM tblMFDemandImportError
@@ -381,6 +418,7 @@ BEGIN TRY
 						,strLocationName
 						,dtmCreated
 						,strErrorMessage
+						,intCreatedUserId
 						)
 					SELECT @intDemandImportId
 						,1 intConcurrencyId
@@ -395,6 +433,7 @@ BEGIN TRY
 						,@strLocationName
 						,@dtmCreated
 						,@strDetailErrorMessage
+						,@intCreatedUserId
 				END
 			END
 

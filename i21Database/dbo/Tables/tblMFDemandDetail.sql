@@ -9,6 +9,7 @@
 	,intItemUOMId INT NOT NULL
 	,intCompanyLocationId INT
 	,dtmCreated datetime CONSTRAINT [DF_tblMFDemandDetail_ydtmCreated] DEFAULT GETDATE()
+	,ysnPopulatedBySystem BIT CONSTRAINT [DF_tblMFDemandDetail_ysnPopulatedBySystem] DEFAULT 0
 	,CONSTRAINT [PK_tblMFDemandDetail] PRIMARY KEY (intDemandDetailId)
 	,CONSTRAINT [FK_tblMFDemandDetail_tblMFDemandHeader] FOREIGN KEY (intDemandHeaderId) REFERENCES [tblMFDemandHeader](intDemandHeaderId) ON DELETE CASCADE
 	,CONSTRAINT [FK_tblMFDemandDetail_tblICItem_intItemId] FOREIGN KEY (intItemId) REFERENCES [tblICItem](intItemId)
