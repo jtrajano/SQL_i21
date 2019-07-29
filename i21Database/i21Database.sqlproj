@@ -7909,6 +7909,9 @@
     <Build Include="dbo\Stored Procedures\uspSTCheckoutUpdateAfterSave.sql" />
     <Build Include="dbo\Functions\fnCTConvertPriceToStockItemUOM.sql" />
     <Build Include="dbo\Functions\fnCTConvertQtyToStockItemUOM.sql" />
+    <Build Include="dbo\Tables\tblTRCrossReference.sql" />
+    <Build Include="dbo\Tables\tblTRCrossReferenceBol.sql" />
+    <Build Include="dbo\Views\vyuTRCrossReferenceBol.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
