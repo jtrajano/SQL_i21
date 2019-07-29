@@ -267,7 +267,11 @@ BEGIN
 		AS result
 		USING (
 			SELECT 
-				[strTransactionType] = gd.strTransactionType
+				[strTransactionType] = 
+						CASE 
+							WHEN gd.strTransactionType = 'Inventory Adjustment' THEN 'Inventory Auto Variance'
+							ELSE gd.strTransactionType
+						END COLLATE Latin1_General_CI_AS
 				,[strTransactionId] = gd.strTransactionId
 				,[strBatchId] = gd.strBatchId
 				,[intAccountId] = gd.intAccountId 
@@ -285,7 +289,11 @@ BEGIN
 			WHERE 
 				ac.strAccountCategory IN ('Inventory', 'Work In Progress')
 			GROUP BY 				
-				gd.strTransactionType
+				--gd.strTransactionType
+				CASE 
+					WHEN gd.strTransactionType = 'Inventory Adjustment' THEN 'Inventory Auto Variance'
+					ELSE gd.strTransactionType
+				END COLLATE Latin1_General_CI_AS
 				,gd.strTransactionId
 				,gd.strBatchId
 				,gd.intAccountId 
