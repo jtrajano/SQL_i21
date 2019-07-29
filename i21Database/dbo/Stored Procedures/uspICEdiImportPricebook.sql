@@ -49,6 +49,20 @@ SET   l.intClassId = ISNULL(ISNULL(sc.intSubcategoryId, catLoc.intClassId), l.in
 	, l.dblSuggestedQty = ISNULL(NULLIF(p.strSuggestedOrderQuantity, ''), l.dblSuggestedQty)
 	, l.dblMinOrder = ISNULL(NULLIF(p.strMinimumOrderQuantity, ''), l.dblMinOrder)
 	, l.intBottleDepositNo = ISNULL(NULLIF(p.strBottleDepositNumber, ''), l.intBottleDepositNo)
+	, l.ysnTaxFlag1 = ISNULL(l.ysnTaxFlag1, catLoc.ysnUseTaxFlag1)
+	, l.ysnTaxFlag2 = ISNULL(l.ysnTaxFlag2, catLoc.ysnUseTaxFlag2)
+	, l.ysnTaxFlag3 = ISNULL(l.ysnTaxFlag3, catLoc.ysnUseTaxFlag3)
+	, l.ysnTaxFlag4 = ISNULL(l.ysnTaxFlag4, catLoc.ysnUseTaxFlag4)
+	, l.ysnApplyBlueLaw1 = ISNULL(l.ysnApplyBlueLaw1, catLoc.ysnBlueLaw1)
+	, l.ysnApplyBlueLaw2 = ISNULL(l.ysnApplyBlueLaw2, catLoc.ysnBlueLaw2)
+	, l.intProductCodeId = ISNULL(l.intProductCodeId, catLoc.intProductCodeId)
+	, l.ysnFoodStampable = ISNULL(l.ysnFoodStampable, catLoc.ysnFoodStampable)
+	, l.ysnReturnable = ISNULL(l.ysnReturnable, catLoc.ysnReturnable)
+	, l.ysnSaleable = ISNULL(l.ysnSaleable, catLoc.ysnSaleable)
+	, l.ysnIdRequiredCigarette = ISNULL(l.ysnIdRequiredCigarette, catLoc.ysnIdRequiredCigarette)
+	, l.ysnIdRequiredLiquor = ISNULL(l.ysnIdRequiredLiquor, catLoc.ysnIdRequiredLiquor)
+	, l.intMinimumAge = ISNULL(l.intMinimumAge, catLoc.intMinimumAge)
+
 FROM tblICEdiPricebook p
 	INNER JOIN tblICItemUOM u ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) = p.strSellingUpcNumber
 	INNER JOIN tblICItem i ON i.intItemId = u.intItemId
