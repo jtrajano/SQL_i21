@@ -907,6 +907,314 @@ BEGIN
 		WHERE
 			i.strType = 'Non-Inventory'
 
+		-- Receive the company owned stocks.  
+		IF EXISTS (SELECT TOP 1 1 FROM @ItemsForPost)
+		BEGIN 
+			INSERT INTO @CompanyOwnedItemsForPost (
+					intItemId  
+					,intItemLocationId 
+					,intItemUOMId  
+					,dtmDate  
+					,dblQty  
+					,dblUOMQty  
+					,dblCost  
+					,dblSalesPrice  
+					,intCurrencyId  
+					,dblExchangeRate  
+					,intTransactionId  
+					,intTransactionDetailId   
+					,strTransactionId  
+					,intTransactionTypeId  
+					,intLotId 
+					,intSubLocationId
+					,intStorageLocationId
+					,strActualCostId
+					,intInTransitSourceLocationId
+					,intForexRateTypeId
+					,dblForexRate
+					,intCategoryId
+					,dblUnitRetail
+			)
+			SELECT 
+					intItemId  
+					,intItemLocationId 
+					,intItemUOMId  
+					,dtmDate  
+					,dblQty  
+					,dblUOMQty  
+					,dblCost  
+					,dblSalesPrice  
+					,intCurrencyId  
+					,dblExchangeRate  
+					,intTransactionId  
+					,intTransactionDetailId   
+					,strTransactionId  
+					,intTransactionTypeId  
+					,intLotId 
+					,intSubLocationId
+					,intStorageLocationId
+					,strActualCostId
+					,intInTransitSourceLocationId
+					,intForexRateTypeId
+					,dblForexRate
+					,intCategoryId
+					,dblUnitRetail
+			FROM	@ItemsForPost
+			WHERE	dblQty > 0 
+					OR (dblQty < 0 AND @intSourceType = @SOURCE_TYPE_Store) -- Allow stock to reduce if source type is 'Store'
+		
+			-- Call the post routine for posting the company owned items 
+			IF EXISTS (SELECT TOP 1 1 FROM @CompanyOwnedItemsForPost)
+			BEGIN 
+				-- In-Transit GL Entries from Inbound Shipment 
+				IF (@intSourceType = @SOURCE_TYPE_InboundShipment AND @strFobPoint = 'Origin')
+				BEGIN 				
+					INSERT INTO @DummyGLEntries (
+							[dtmDate] 
+							,[strBatchId]
+							,[intAccountId]
+							,[dblDebit]
+							,[dblCredit]
+							,[dblDebitUnit]
+							,[dblCreditUnit]
+							,[strDescription]
+							,[strCode]
+							,[strReference]
+							,[intCurrencyId]
+							,[dblExchangeRate]
+							,[dtmDateEntered]
+							,[dtmTransactionDate]
+							,[strJournalLineDescription]
+							,[intJournalLineNo]
+							,[ysnIsUnposted]
+							,[intUserId]
+							,[intEntityId]
+							,[strTransactionId]
+							,[intTransactionId]
+							,[strTransactionType]
+							,[strTransactionForm]
+							,[strModuleName]
+							,[intConcurrencyId]
+							,[dblDebitForeign]	
+							,[dblDebitReport]	
+							,[dblCreditForeign]	
+							,[dblCreditReport]	
+							,[dblReportingRate]	
+							,[dblForeignRate]
+							,[strRateType]
+					)
+					EXEC	@intReturnValue = dbo.uspICPostCosting  
+							@CompanyOwnedItemsForPost  
+							,@strBatchId  
+							,@TRANSFER_ORDER_ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY 
+							,@intEntityUserSecurityId
+
+					IF @intReturnValue < 0 GOTO With_Rollback_Exit
+
+					-- Create the GL entries specific for Inventory Receipt
+					INSERT INTO @GLEntries (
+							[dtmDate] 
+							,[strBatchId]
+							,[intAccountId]
+							,[dblDebit]
+							,[dblCredit]
+							,[dblDebitUnit]
+							,[dblCreditUnit]
+							,[strDescription]
+							,[strCode]
+							,[strReference]
+							,[intCurrencyId]
+							,[dblExchangeRate]
+							,[dtmDateEntered]
+							,[dtmTransactionDate]
+							,[strJournalLineDescription]
+							,[intJournalLineNo]
+							,[ysnIsUnposted]
+							,[intUserId]
+							,[intEntityId]
+							,[strTransactionId]
+							,[intTransactionId]
+							,[strTransactionType]
+							,[strTransactionForm]
+							,[strModuleName]
+							,[intConcurrencyId]
+							,[dblDebitForeign]	
+							,[dblDebitReport]	
+							,[dblCreditForeign]	
+							,[dblCreditReport]	
+							,[dblReportingRate]	
+							,[dblForeignRate]
+							,[strRateType]
+					)
+					EXEC	@intReturnValue = uspICCreateReceiptGLEntries
+							@strBatchId 
+							,NULL -- @ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
+							,@intEntityUserSecurityId
+
+					IF @intReturnValue < 0 GOTO With_Rollback_Exit
+				END 
+
+				
+				-- In-Transit GL entries from Transfer Order 
+				ELSE IF (
+						@receiptType = @RECEIPT_TYPE_TRANSFER_ORDER
+						AND EXISTS (SELECT TOP 1 1 FROM @ItemsForTransferOrder)
+					)
+				BEGIN 
+					INSERT INTO @DummyGLEntries (
+							[dtmDate] 
+							,[strBatchId]
+							,[intAccountId]
+							,[dblDebit]
+							,[dblCredit]
+							,[dblDebitUnit]
+							,[dblCreditUnit]
+							,[strDescription]
+							,[strCode]
+							,[strReference]
+							,[intCurrencyId]
+							,[dblExchangeRate]
+							,[dtmDateEntered]
+							,[dtmTransactionDate]
+							,[strJournalLineDescription]
+							,[intJournalLineNo]
+							,[ysnIsUnposted]
+							,[intUserId]
+							,[intEntityId]
+							,[strTransactionId]
+							,[intTransactionId]
+							,[strTransactionType]
+							,[strTransactionForm]
+							,[strModuleName]
+							,[intConcurrencyId]
+							,[dblDebitForeign]	
+							,[dblDebitReport]	
+							,[dblCreditForeign]	
+							,[dblCreditReport]	
+							,[dblReportingRate]	
+							,[dblForeignRate]
+							,[strRateType]
+					)
+					EXEC	@intReturnValue = dbo.uspICPostCosting  
+							@CompanyOwnedItemsForPost  
+							,@strBatchId  
+							,@TRANSFER_ORDER_ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY 
+							,@intEntityUserSecurityId
+										
+					IF @intReturnValue < 0 GOTO With_Rollback_Exit
+				END 
+
+				-- GL Entries for a regular Inventory Receipt. 
+				ELSE 
+				BEGIN 
+					-- Do the inventory valuation
+					INSERT INTO @DummyGLEntries (
+							[dtmDate] 
+							,[strBatchId]
+							,[intAccountId]
+							,[dblDebit]
+							,[dblCredit]
+							,[dblDebitUnit]
+							,[dblCreditUnit]
+							,[strDescription]
+							,[strCode]
+							,[strReference]
+							,[intCurrencyId]
+							,[dblExchangeRate]
+							,[dtmDateEntered]
+							,[dtmTransactionDate]
+							,[strJournalLineDescription]
+							,[intJournalLineNo]
+							,[ysnIsUnposted]
+							,[intUserId]
+							,[intEntityId]
+							,[strTransactionId]
+							,[intTransactionId]
+							,[strTransactionType]
+							,[strTransactionForm]
+							,[strModuleName]
+							,[intConcurrencyId]
+							,[dblDebitForeign]	
+							,[dblDebitReport]	
+							,[dblCreditForeign]	
+							,[dblCreditReport]	
+							,[dblReportingRate]	
+							,[dblForeignRate]
+							,[strRateType]
+					)
+					EXEC	@intReturnValue = dbo.uspICPostCosting  
+							@CompanyOwnedItemsForPost  
+							,@strBatchId  
+							,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
+							,@intEntityUserSecurityId
+
+					IF @intReturnValue < 0 GOTO With_Rollback_Exit
+
+
+					-- Retain this code for Transfer Orders that was posted not using the In-Transit costing. 
+					IF @receiptType = @RECEIPT_TYPE_TRANSFER_ORDER
+					BEGIN 
+						SET @ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY = @TRANSFER_ORDER_ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
+
+						-- -- Assign the Source Location Id. 			
+						-- UPDATE	t
+						-- SET		t.intInTransitSourceLocationId = UDT.intInTransitSourceLocationId
+						-- FROM	tblICInventoryTransaction t INNER JOIN @CompanyOwnedItemsForPost UDT
+						-- 			ON t.intItemId = UDT.intItemId
+						-- 			AND t.intItemLocationId = UDT.intItemLocationId
+						-- 			AND t.intItemUOMId = UDT.intItemUOMId
+						-- 			AND t.dblQty = UDT.dblQty
+						-- 			AND t.intTransactionId = UDT.intTransactionId
+						-- 			AND t.intTransactionDetailId = UDT.intTransactionDetailId
+						-- 			AND t.strTransactionId = UDT.strTransactionId
+						-- WHERE	t.dblQty > 0 
+						-- 		AND UDT.intInTransitSourceLocationId IS NOT NULL 
+					END 
+
+					-- Create the GL entries specific for Inventory Receipt
+					INSERT INTO @GLEntries (
+							[dtmDate] 
+							,[strBatchId]
+							,[intAccountId]
+							,[dblDebit]
+							,[dblCredit]
+							,[dblDebitUnit]
+							,[dblCreditUnit]
+							,[strDescription]
+							,[strCode]
+							,[strReference]
+							,[intCurrencyId]
+							,[dblExchangeRate]
+							,[dtmDateEntered]
+							,[dtmTransactionDate]
+							,[strJournalLineDescription]
+							,[intJournalLineNo]
+							,[ysnIsUnposted]
+							,[intUserId]
+							,[intEntityId]
+							,[strTransactionId]
+							,[intTransactionId]
+							,[strTransactionType]
+							,[strTransactionForm]
+							,[strModuleName]
+							,[intConcurrencyId]
+							,[dblDebitForeign]	
+							,[dblDebitReport]	
+							,[dblCreditForeign]	
+							,[dblCreditReport]	
+							,[dblReportingRate]	
+							,[dblForeignRate]
+							,[strRateType]
+					)
+					EXEC	@intReturnValue = uspICCreateReceiptGLEntries
+							@strBatchId 
+							,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
+							,@intEntityUserSecurityId
+					IF @intReturnValue < 0 GOTO With_Rollback_Exit
+				END 			
+			END
+		END
+
 		-- Reduce In-Transit stocks coming from Inbound Shipment. 
 		IF	(@intSourceType = @SOURCE_TYPE_InboundShipment) 
 			AND EXISTS (SELECT TOP 1 1 FROM @ItemsForPost)	
@@ -1189,7 +1497,7 @@ BEGIN
 			END 
 
 			IF @intReturnValue < 0 GOTO With_Rollback_Exit
-
+						
 			INSERT INTO @GLEntries (
 					[dtmDate] 
 					,[strBatchId]
@@ -1230,372 +1538,8 @@ BEGIN
 					,DEFAULT 
 					,@intLocationId
 
-			IF @intReturnValue < 0 GOTO With_Rollback_Exit
+			IF @intReturnValue < 0 GOTO With_Rollback_Exit			
 		END 
-
-		-- Receive the company owned stocks.  
-		IF EXISTS (SELECT TOP 1 1 FROM @ItemsForPost)
-		BEGIN 
-			INSERT INTO @CompanyOwnedItemsForPost (
-					intItemId  
-					,intItemLocationId 
-					,intItemUOMId  
-					,dtmDate  
-					,dblQty  
-					,dblUOMQty  
-					,dblCost  
-					,dblSalesPrice  
-					,intCurrencyId  
-					,dblExchangeRate  
-					,intTransactionId  
-					,intTransactionDetailId   
-					,strTransactionId  
-					,intTransactionTypeId  
-					,intLotId 
-					,intSubLocationId
-					,intStorageLocationId
-					,strActualCostId
-					,intInTransitSourceLocationId
-					,intForexRateTypeId
-					,dblForexRate
-					,intCategoryId
-					,dblUnitRetail
-			)
-			SELECT 
-					intItemId  
-					,intItemLocationId 
-					,intItemUOMId  
-					,dtmDate  
-					,dblQty  
-					,dblUOMQty  
-					,dblCost  
-					,dblSalesPrice  
-					,intCurrencyId  
-					,dblExchangeRate  
-					,intTransactionId  
-					,intTransactionDetailId   
-					,strTransactionId  
-					,intTransactionTypeId  
-					,intLotId 
-					,intSubLocationId
-					,intStorageLocationId
-					,strActualCostId
-					,intInTransitSourceLocationId
-					,intForexRateTypeId
-					,dblForexRate
-					,intCategoryId
-					,dblUnitRetail
-			FROM	@ItemsForPost
-			WHERE	dblQty > 0 
-					OR (dblQty < 0 AND @intSourceType = @SOURCE_TYPE_Store) -- Allow stock to reduce if source type is 'Store'
-		
-			-- Call the post routine for posting the company owned items 
-			IF EXISTS (SELECT TOP 1 1 FROM @CompanyOwnedItemsForPost)
-			BEGIN 
-				-- In-Transit GL Entries from Inbound Shipment 
-				IF (@intSourceType = @SOURCE_TYPE_InboundShipment AND @strFobPoint = 'Origin')
-				BEGIN 				
-					INSERT INTO @DummyGLEntries (
-							[dtmDate] 
-							,[strBatchId]
-							,[intAccountId]
-							,[dblDebit]
-							,[dblCredit]
-							,[dblDebitUnit]
-							,[dblCreditUnit]
-							,[strDescription]
-							,[strCode]
-							,[strReference]
-							,[intCurrencyId]
-							,[dblExchangeRate]
-							,[dtmDateEntered]
-							,[dtmTransactionDate]
-							,[strJournalLineDescription]
-							,[intJournalLineNo]
-							,[ysnIsUnposted]
-							,[intUserId]
-							,[intEntityId]
-							,[strTransactionId]
-							,[intTransactionId]
-							,[strTransactionType]
-							,[strTransactionForm]
-							,[strModuleName]
-							,[intConcurrencyId]
-							,[dblDebitForeign]	
-							,[dblDebitReport]	
-							,[dblCreditForeign]	
-							,[dblCreditReport]	
-							,[dblReportingRate]	
-							,[dblForeignRate]
-							,[strRateType]
-					)
-					EXEC	@intReturnValue = dbo.uspICPostCosting  
-							@CompanyOwnedItemsForPost  
-							,@strBatchId  
-							,@TRANSFER_ORDER_ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY 
-							,@intEntityUserSecurityId
-
-					IF @intReturnValue < 0 GOTO With_Rollback_Exit
-
-					-- Create the GL entries for Inbound Shipment (Company Owned)
-					INSERT INTO @GLEntries (
-						[dtmDate] 
-						,[strBatchId]
-						,[intAccountId]
-						,[dblDebit]
-						,[dblCredit]
-						,[dblDebitUnit]
-						,[dblCreditUnit]
-						,[strDescription]
-						,[strCode]
-						,[strReference]
-						,[intCurrencyId]
-						,[dblExchangeRate]
-						,[dtmDateEntered]
-						,[dtmTransactionDate]
-						,[strJournalLineDescription]
-						,[intJournalLineNo]
-						,[ysnIsUnposted]
-						,[intUserId]
-						,[intEntityId]
-						,[strTransactionId]
-						,[intTransactionId]
-						,[strTransactionType]
-						,[strTransactionForm]
-						,[strModuleName]
-						,[intConcurrencyId]
-						,[dblDebitForeign]	
-						,[dblDebitReport]	
-						,[dblCreditForeign]	
-						,[dblCreditReport]	
-						,[dblReportingRate]	
-						,[dblForeignRate]
-						,[strRateType]
-					)
-					EXEC	@intReturnValue = uspICCreateGLEntries
-							@strBatchId 
-							,NULL 
-							,@intEntityUserSecurityId
-							--,DEFAULT 
-
-					IF @intReturnValue < 0 GOTO With_Rollback_Exit
-				END 
-
-				
-				-- In-Transit GL entries from Transfer Order 
-				ELSE IF (
-						@receiptType = @RECEIPT_TYPE_TRANSFER_ORDER
-						AND EXISTS (SELECT TOP 1 1 FROM @ItemsForTransferOrder)
-					)
-				BEGIN 
-					-- Assign the Source Location Id. 			
-					-- UPDATE	t
-					-- SET		t.intInTransitSourceLocationId = UDT.intInTransitSourceLocationId
-					-- FROM	tblICInventoryTransaction t INNER JOIN @CompanyOwnedItemsForPost UDT
-					-- 			ON t.intItemId = UDT.intItemId
-					-- 			AND t.intItemLocationId = UDT.intItemLocationId
-					-- 			AND t.intItemUOMId = UDT.intItemUOMId
-					-- 			AND t.dblQty = UDT.dblQty
-					-- 			AND t.intTransactionId = UDT.intTransactionId
-					-- 			AND t.intTransactionDetailId = UDT.intTransactionDetailId
-					-- 			AND t.strTransactionId = UDT.strTransactionId
-					-- WHERE	t.dblQty > 0 
-					-- 		AND UDT.intInTransitSourceLocationId IS NOT NULL 
-
-					INSERT INTO @DummyGLEntries (
-							[dtmDate] 
-							,[strBatchId]
-							,[intAccountId]
-							,[dblDebit]
-							,[dblCredit]
-							,[dblDebitUnit]
-							,[dblCreditUnit]
-							,[strDescription]
-							,[strCode]
-							,[strReference]
-							,[intCurrencyId]
-							,[dblExchangeRate]
-							,[dtmDateEntered]
-							,[dtmTransactionDate]
-							,[strJournalLineDescription]
-							,[intJournalLineNo]
-							,[ysnIsUnposted]
-							,[intUserId]
-							,[intEntityId]
-							,[strTransactionId]
-							,[intTransactionId]
-							,[strTransactionType]
-							,[strTransactionForm]
-							,[strModuleName]
-							,[intConcurrencyId]
-							,[dblDebitForeign]	
-							,[dblDebitReport]	
-							,[dblCreditForeign]	
-							,[dblCreditReport]	
-							,[dblReportingRate]	
-							,[dblForeignRate]
-							,[strRateType]
-					)
-					EXEC	@intReturnValue = dbo.uspICPostCosting  
-							@CompanyOwnedItemsForPost  
-							,@strBatchId  
-							,@TRANSFER_ORDER_ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY 
-							,@intEntityUserSecurityId
-
-					-- Create the GL entries for Transfer Order 
-					--INSERT INTO @GLEntries (
-					--	[dtmDate] 
-					--	,[strBatchId]
-					--	,[intAccountId]
-					--	,[dblDebit]
-					--	,[dblCredit]
-					--	,[dblDebitUnit]
-					--	,[dblCreditUnit]
-					--	,[strDescription]
-					--	,[strCode]
-					--	,[strReference]
-					--	,[intCurrencyId]
-					--	,[dblExchangeRate]
-					--	,[dtmDateEntered]
-					--	,[dtmTransactionDate]
-					--	,[strJournalLineDescription]
-					--	,[intJournalLineNo]
-					--	,[ysnIsUnposted]
-					--	,[intUserId]
-					--	,[intEntityId]
-					--	,[strTransactionId]
-					--	,[intTransactionId]
-					--	,[strTransactionType]
-					--	,[strTransactionForm]
-					--	,[strModuleName]
-					--	,[intConcurrencyId]
-					--	,[dblDebitForeign]	
-					--	,[dblDebitReport]	
-					--	,[dblCreditForeign]	
-					--	,[dblCreditReport]	
-					--	,[dblReportingRate]	
-					--	,[dblForeignRate]
-					--	,[strRateType]
-					--)
-					--EXEC	@intReturnValue = uspICCreateGLEntries
-					--		@strBatchId 
-					--		,NULL 
-					--		,@intEntityUserSecurityId
-					--		--,DEFAULT 
-										
-					IF @intReturnValue < 0 GOTO With_Rollback_Exit
-				END 
-
-				-- GL Entries for a regular Inventory Receipt. 
-				ELSE 
-				BEGIN 
-					-- Do the inventory valuation
-					INSERT INTO @DummyGLEntries (
-							[dtmDate] 
-							,[strBatchId]
-							,[intAccountId]
-							,[dblDebit]
-							,[dblCredit]
-							,[dblDebitUnit]
-							,[dblCreditUnit]
-							,[strDescription]
-							,[strCode]
-							,[strReference]
-							,[intCurrencyId]
-							,[dblExchangeRate]
-							,[dtmDateEntered]
-							,[dtmTransactionDate]
-							,[strJournalLineDescription]
-							,[intJournalLineNo]
-							,[ysnIsUnposted]
-							,[intUserId]
-							,[intEntityId]
-							,[strTransactionId]
-							,[intTransactionId]
-							,[strTransactionType]
-							,[strTransactionForm]
-							,[strModuleName]
-							,[intConcurrencyId]
-							,[dblDebitForeign]	
-							,[dblDebitReport]	
-							,[dblCreditForeign]	
-							,[dblCreditReport]	
-							,[dblReportingRate]	
-							,[dblForeignRate]
-							,[strRateType]
-					)
-					EXEC	@intReturnValue = dbo.uspICPostCosting  
-							@CompanyOwnedItemsForPost  
-							,@strBatchId  
-							,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
-							,@intEntityUserSecurityId
-
-					IF @intReturnValue < 0 GOTO With_Rollback_Exit
-
-
-					-- Retain this code for Transfer Orders that was posted not using the In-Transit costing. 
-					IF @receiptType = @RECEIPT_TYPE_TRANSFER_ORDER
-					BEGIN 
-						SET @ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY = @TRANSFER_ORDER_ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
-
-						-- -- Assign the Source Location Id. 			
-						-- UPDATE	t
-						-- SET		t.intInTransitSourceLocationId = UDT.intInTransitSourceLocationId
-						-- FROM	tblICInventoryTransaction t INNER JOIN @CompanyOwnedItemsForPost UDT
-						-- 			ON t.intItemId = UDT.intItemId
-						-- 			AND t.intItemLocationId = UDT.intItemLocationId
-						-- 			AND t.intItemUOMId = UDT.intItemUOMId
-						-- 			AND t.dblQty = UDT.dblQty
-						-- 			AND t.intTransactionId = UDT.intTransactionId
-						-- 			AND t.intTransactionDetailId = UDT.intTransactionDetailId
-						-- 			AND t.strTransactionId = UDT.strTransactionId
-						-- WHERE	t.dblQty > 0 
-						-- 		AND UDT.intInTransitSourceLocationId IS NOT NULL 
-					END 
-
-					-- Create the GL entries specific for Inventory Receipt
-					INSERT INTO @GLEntries (
-							[dtmDate] 
-							,[strBatchId]
-							,[intAccountId]
-							,[dblDebit]
-							,[dblCredit]
-							,[dblDebitUnit]
-							,[dblCreditUnit]
-							,[strDescription]
-							,[strCode]
-							,[strReference]
-							,[intCurrencyId]
-							,[dblExchangeRate]
-							,[dtmDateEntered]
-							,[dtmTransactionDate]
-							,[strJournalLineDescription]
-							,[intJournalLineNo]
-							,[ysnIsUnposted]
-							,[intUserId]
-							,[intEntityId]
-							,[strTransactionId]
-							,[intTransactionId]
-							,[strTransactionType]
-							,[strTransactionForm]
-							,[strModuleName]
-							,[intConcurrencyId]
-							,[dblDebitForeign]	
-							,[dblDebitReport]	
-							,[dblCreditForeign]	
-							,[dblCreditReport]	
-							,[dblReportingRate]	
-							,[dblForeignRate]
-							,[strRateType]
-					)
-					EXEC	@intReturnValue = uspICCreateReceiptGLEntries
-							@strBatchId 
-							,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
-							,@intEntityUserSecurityId
-					IF @intReturnValue < 0 GOTO With_Rollback_Exit
-				END 			
-			END
-		END
 	END 
 
 	-- Process Storage items 
