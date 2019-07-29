@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].uspRKGetAllElectronicPricingURL
+﻿CREATE PROCEDURE [dbo].[uspRKGetAllElectronicPricingURL]
 	@FutureMarketId INT
 	, @intUserId INT
 
@@ -10,6 +10,7 @@ BEGIN TRY
 	DECLARE @ErrMsg NVARCHAR(MAX)
 	DECLARE @strUserName NVARCHAR(100)
 	DECLARE @strPassword NVARCHAR(100)
+	DECLARE @strAPIKey NVARCHAR(MAX)
 	DECLARE @IntinterfaceSystem INT
 	DECLARE @StrQuoteProvider NVARCHAR(100)
 	DECLARE @StrTradedMonthSymbol NVARCHAR(1000)
@@ -17,12 +18,7 @@ BEGIN TRY
 	DECLARE @Commoditycode NVARCHAR(10)
 	DECLARE @URL NVARCHAR(1000)
 	DECLARE @SymbolPrefix NVARCHAR(5)
-	DECLARE @strOpen nvarchar(50)
-	DECLARE @strHigh nvarchar(50)
-	DECLARE @strLow nvarchar(50)
-	DECLARE @strLastSettle nvarchar(50)
-	DECLARE @strLastElement nvarchar(50)
-	DECLARE @strInterfaceSystem nvarchar(50)
+	DECLARE @intInterfaceSystem int
 	declare @dblConversionRate numeric(16,10)
 
 	SELECT @Commoditycode = strFutSymbol
@@ -31,43 +27,57 @@ BEGIN TRY
 	FROM tblRKFutureMarket
 	WHERE intFutureMarketId = @FutureMarketId		
 
-	select @strInterfaceSystem=fs.strInterfaceSystem from tblRKCompanyPreference p
-	join tblRKInterfaceSystem fs on p.intInterfaceSystemId=fs.intInterfaceSystemId	
+	select 
+		@intInterfaceSystem = intInterfaceSystemId  --1 = DTN, 2 = AgriCharts
+		,@strUserName = strQuotingSystemBatchUserID
+		,@strPassword = strQuotingSystemBatchUserPassword
+		,@strAPIKey = strAPIKey
+		,@URL = strInterfaceWebServicesURL
+	from tblSMCompanyPreference 
 
-	SELECT @strUserName = strProviderUserId FROM tblGRUserPreference Where [intEntityUserSecurityId]= @intUserId 	
-	SELECT @strPassword = strProviderPassword FROM tblGRUserPreference Where [intEntityUserSecurityId]=@intUserId 
-
-	IF @strInterfaceSystem = 'DTN'
-	BEGIN
-		IF @strPassword = ''
-		SET @strPassword = '?'
-	END
 	
-	SELECT TOP 1 @URL = s.strInterfaceSystemURL
-		, @strOpen = strOpen
-		, @strHigh = strHigh
-		, @strLow = strLow
-		, @strLastSettle = strLastSettle
-		, @strLastElement = strLastElement
-	FROM tblRKCompanyPreference c
-	JOIN tblRKInterfaceSystem s on c.intInterfaceSystemId=s.intInterfaceSystemId 
-
-	if isnull(@URL,'') <> ''
+	IF ISNULL(@URL,'') <> '' AND @intInterfaceSystem = 1 --DTN
 	BEGIN
-		SELECT REPLACE(REPLACE(@URL+@SymbolPrefix+@Commoditycode + strSymbol+RIGHT(intYear,1),'¶¶¶¶',@strUserName),'¶¶~~',@strPassword) COLLATE Latin1_General_CI_AS as URL
+		SELECT (@URL + 'UserID=' + @strUserName + '&Password=' + @strPassword + '&Type=F' + '&Symbol=@'+@SymbolPrefix+@Commoditycode + strSymbol+RIGHT(intYear,1)) COLLATE Latin1_General_CI_AS as URL
 			, strFutureMonth strFutureMonthYearWOSymbol
 			, intFutureMonthId as intFutureMonthId
-			, @strOpen as strOpen
-			, @strHigh as strHigh
-			, @strLow as strLow
-			, @strLastSettle as strLastSettle
-			, @strLastElement as strLastElement
+			, 'Open' as strOpen
+			, 'High' as strHigh
+			, 'Low' as strLow
+			, 'Last' as strLastSettle
+			, '' as strLastElement
 			, @dblConversionRate as dblConversionRate
-		FROM tblRKFuturesMonth where intFutureMarketId=@FutureMarketId and ysnExpired = 0 
-	END	
+			, 'DTN' as strInterfaceSystem
+		FROM tblRKFuturesMonth 
+		WHERE intFutureMarketId=@FutureMarketId 
+			AND ysnExpired = 0 
+			AND dtmLastTradingDate > GETDATE()
+	END
+	ELSE IF ISNULL(@URL,'') <> '' AND @intInterfaceSystem = 2 --AgriCharts
+	BEGIN
+
+		SELECT (@URL + 'apikey=' + @strAPIKey + '&symbols='+@SymbolPrefix+@Commoditycode + strSymbol+RIGHT(intYear,1)) COLLATE Latin1_General_CI_AS as URL
+			, strFutureMonth strFutureMonthYearWOSymbol
+			, intFutureMonthId as intFutureMonthId
+			, 'open' as strOpen
+			, 'high' as strHigh
+			, 'low' as strLow
+			, 'lastPrice' as strLastSettle
+			, '' as strLastElement
+			, @dblConversionRate as dblConversionRate
+			, 'AgriCharts' as strInterfaceSystem
+		FROM tblRKFuturesMonth 
+		WHERE intFutureMarketId=@FutureMarketId 
+			AND ysnExpired = 0 
+			AND dtmLastTradingDate > GETDATE()
+	END
+	ELSE
+	BEGIN
+		RAISERROR ('Interface Web Services URL is not properly setup. <br/> Please check the Electronic Pricing Options in Company Configuration/System Manager.',16,1,'WITH NOWAIT')	
+	END
 END TRY	
 BEGIN CATCH
 	SET @ErrMsg = ERROR_MESSAGE()
-	SET @ErrMsg = 'uspRKGetAllElectronicPricingURL: ' + @ErrMsg
+	SET @ErrMsg = @ErrMsg
 	RAISERROR (@ErrMsg,16,1,'WITH NOWAIT')	
 END CATCH
