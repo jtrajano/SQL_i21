@@ -14,6 +14,8 @@ AS
 		SELECT COUNT(1) AS intCount, 'intUnsignedCount' AS strNotificationCount  FROM vyuCTNotification WHERE strNotificationType = 'Unsigned'
 		UNION
 		SELECT COUNT(1) AS intCount, 'intUnsubmittedCount' AS strNotificationCount  FROM vyuCTNotification WHERE strNotificationType = 'Unsubmitted'
+		UNION
+		SELECT COUNT(1) AS intCount, 'intPreshipmentNotYetApproved' AS strNotificationCount  FROM vyuCTNotification WHERE strNotificationType = 'Pre-shipment Sample not yet approved'
 	)t
 	PIVOT
 	(
@@ -23,6 +25,7 @@ AS
 			intEmptyCount,
 			intUnconfirmedCount,
 			intApprovedNotSentCount,
-			intUnsignedCount
+			intUnsignedCount,
+			intPreshipmentNotYetApproved
 		)
 	)g
