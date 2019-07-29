@@ -118,7 +118,9 @@ AS
 
 			CI.strInvoiceNumber,
 			case when CH.strHeaderPricingType = 'Basis' then ISNULL(FI.dblQuantityPriceFixed, 0) else null end AS dblPricedQty,
-			case when CH.strHeaderPricingType = 'Basis' then CD.dblQuantity - ISNULL(FI.dblQuantityPriceFixed, 0) else null end AS dblUnPricedQty		
+			case when CH.strHeaderPricingType = 'Basis' then CD.dblQuantity - ISNULL(FI.dblQuantityPriceFixed, 0) else null end AS dblUnPricedQty
+			,strDetailFreightTerm = CDFT.strFreightTerm
+			,intDetailFreightTermId = CDFT.intFreightTermId
 
 	FROM	tblCTContractDetail				CD LEFT	
 	JOIN	tblSMCompanyLocation			CL	ON	CL.intCompanyLocationId		=	CD.intCompanyLocationId		LEFT
@@ -187,3 +189,4 @@ AS
 	OUTER	APPLY	dbo.fnCTGetFinancialStatus(CD.intContractDetailId) FS
 	OUTER	APPLY	dbo.fnCTGetSeqPriceFixationInfo(CD.intContractDetailId) FI
 	LEFT	JOIN	tblAPBillDetail			BD	ON	BD.intContractDetailId		=	CD.intContractDetailId
+	LEFT	JOIN	tblSMFreightTerms	CDFT	ON CDFT.intFreightTermId = CD.intFreightTermId
