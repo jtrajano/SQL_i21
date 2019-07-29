@@ -1058,7 +1058,7 @@ BEGIN
 				-- In-Transit GL entries from Transfer Order 
 				ELSE IF (
 						@receiptType = @RECEIPT_TYPE_TRANSFER_ORDER
-						AND EXISTS (SELECT TOP 1 1 FROM @ItemsForTransferOrder)
+						--AND EXISTS (SELECT TOP 1 1 FROM @ItemsForTransferOrder)
 					)
 				BEGIN 
 					INSERT INTO @DummyGLEntries (
