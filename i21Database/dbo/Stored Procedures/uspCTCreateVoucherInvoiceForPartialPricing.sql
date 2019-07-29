@@ -534,7 +534,8 @@ BEGIN TRY
 						begin
 							--Update the load applied and priced
 							update tblCTPriceFixationDetail 
-								set dblLoadApplied = isnull(dblLoadApplied, 0)  + @dblInventoryItemLoadApplied  
+								set dblLoadApplied = isnull(dblLoadApplied, 0)  + @dblInventoryItemLoadApplied,
+									dblLoadAppliedAndPriced = isnull(dblLoadAppliedAndPriced, 0) + @dblInventoryItemLoadApplied
 							where intPriceFixationDetailId = @intPriceFixationDetailId
 						end
 
@@ -917,7 +918,8 @@ BEGIN TRY
 						begin
 							--Update the load applied and priced
 							update tblCTPriceFixationDetail 
-								set dblLoadApplied = isnull(dblLoadApplied, 0)  + @dblInventoryShipmentItemLoadApplied  
+								set dblLoadApplied = isnull(dblLoadApplied, 0)  + @dblInventoryShipmentItemLoadApplied,
+									dblLoadAppliedAndPriced = isnull(dblLoadAppliedAndPriced, 0) + @dblInventoryShipmentItemLoadApplied
 							where intPriceFixationDetailId = @intPriceFixationDetailId
 						end						
 
