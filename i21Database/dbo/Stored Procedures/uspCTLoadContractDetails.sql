@@ -185,7 +185,6 @@ CROSS	APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId)	AD
 				,dbo.[fnCTGetSeqDisplayField](CD.intStorageLocationId,'tblICStorageLocation') strStorageLocationName --SL.strName AS strStorageLocationName
 				,dbo.[fnCTGetSeqDisplayField](CD.intLoadingPortId,'tblSMCity') strLoadingPoint--LP.strCity AS strLoadingPoint
 				,dbo.[fnCTGetSeqDisplayField](CD.intDestinationPortId,'tblSMCity') strDestinationPoint--DP.strCity AS strDestinationPoint
-				,dbo.[fnCTGetLastApprovalStatus](CD.intContractHeaderId) strApprovalStatus
 				,MA.dblContractSize AS dblMarketContractSize
 				,MA.intUnitMeasureId AS intMarketUnitMeasureId
 				,MA.intCurrencyId AS intMarketCurrencyId
