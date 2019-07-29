@@ -139,18 +139,19 @@ BEGIN
                         SET @Count = @Count + 1
                     END
 
+					IF(@CusNo IS NOT NULL AND @CusZip IS NOT NULL)
+					BEGIN
+						INSERT INTO ptcusmst(
+								ptcus_cus_no,		ptcus_last_name,		ptcus_first_name, 
+								ptcus_mid_init,		ptcus_name_suffx,		ptcus_zip,				ptcus_phone)
+						SELECT	@CusNo,				@CusLastName,			@CusFirstName,
+								@CusMidInit,		@CusSuffix,				@CusZip,				@CusPhone
 
-                    INSERT INTO ptcusmst(
-                            ptcus_cus_no,		ptcus_last_name,		ptcus_first_name, 
-                            ptcus_mid_init,		ptcus_name_suffx,		ptcus_zip,				ptcus_phone)
-                    SELECT	@CusNo,				@CusLastName,			@CusFirstName,
-                            @CusMidInit,		@CusSuffix,				@CusZip,				@CusPhone
 
-
-                    UPDATE tblEMEntityLocation 
-                        SET strOriginLinkCustomer = @CusNo
-                    WHERE intEntityLocationId = @EntityLocationId
-
+						UPDATE tblEMEntityLocation 
+							SET strOriginLinkCustomer = @CusNo
+						WHERE intEntityLocationId = @EntityLocationId
+					END
                 END
 
             END
