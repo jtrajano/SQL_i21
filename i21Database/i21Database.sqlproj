@@ -7912,6 +7912,8 @@
     <Build Include="dbo\Tables\tblTRCrossReference.sql" />
     <Build Include="dbo\Tables\tblTRCrossReferenceBol.sql" />
     <Build Include="dbo\Views\vyuTRCrossReferenceBol.sql" />
+    <Build Include="dbo\Views\vyuFRUserReportRestriction.sql" />
+    <Build Include="dbo\Tables\tblFRUserReportRestriction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
