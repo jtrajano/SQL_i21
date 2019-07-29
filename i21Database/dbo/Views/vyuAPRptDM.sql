@@ -45,6 +45,7 @@ SELECT
 									ELSE NULL END
 		,strContainerNumber		=	LCointainer.strContainerNumber
 		,strShipVia				=	shipVia.strShipVia
+		,ysnPaid				=	DM.ysnPaid
 	FROM tblAPBill DM
 	INNER JOIN tblAPBillDetail DMDetails ON DM.intBillId = DMDetails.intBillId
 	INNER JOIN tblGLAccount DetailAccount ON DetailAccount.intAccountId = DMDetails.intAccountId
