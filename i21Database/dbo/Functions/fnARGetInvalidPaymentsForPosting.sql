@@ -247,13 +247,32 @@ BEGIN
         ,[strTransactionType]       = @TransType
         ,[intTransactionDetailId]   = P.[intTransactionDetailId]
         ,[strBatchId]               = P.[strBatchId]
-        ,[strError]                 = 'The Discounts account in Company Configuration was not set.'
+        ,[strError]                 = 'The Sales Discount account in Company Configuration was not set.'
 	FROM
 		@Payments P
     WHERE
             P.[ysnPost] = 1
         AND P.[intTransactionDetailId] IS NOT NULL
         AND P.[intInvoiceId] IS NOT NULL
+        AND P.[dblDiscount] <> @ZeroDecimal
+        AND ISNULL(P.[intDiscountAccount], 0) = 0
+
+    UNION
+
+    --Purchase Discount Account
+	SELECT
+         [intTransactionId]         = P.[intTransactionId]
+        ,[strTransactionId]         = P.[strTransactionId]
+        ,[strTransactionType]       = @TransType
+        ,[intTransactionDetailId]   = P.[intTransactionDetailId]
+        ,[strBatchId]               = P.[strBatchId]
+        ,[strError]                 = 'The Purchase Discount account in Company Location was not set.'
+	FROM
+		@Payments P
+    WHERE
+            P.[ysnPost] = 1
+        AND P.[intTransactionDetailId] IS NOT NULL
+        AND P.[intBillId] IS NOT NULL
         AND P.[dblDiscount] <> @ZeroDecimal
         AND ISNULL(P.[intDiscountAccount], 0) = 0
 
