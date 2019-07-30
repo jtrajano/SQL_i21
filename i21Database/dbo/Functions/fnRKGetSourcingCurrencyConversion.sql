@@ -14,43 +14,49 @@ BEGIN
 	DECLARE @dblResult NUMERIC(18, 6)
 		, @intFromCurrencyId1 INT
 		, @intFromCurrencyId INT
-		, @intItemId INT
-		, @intFromUom INT
 		, @dblRate NUMERIC(18, 6)
 		, @intCurrencyExchangeRateId INT
 		, @intExchangeRateFromId INT
 		, @intExchangeRateToId INT
 	
-	SELECT @intFromCurrencyId = CASE WHEN ISNULL(@intFromBasisCurrencyId, 0) <> 0 THEN @intFromBasisCurrencyId
-									WHEN ISNULL(@intFromMarketCurrency, 0)<>0 THEN @intFromMarketCurrency
-									ELSE CASE WHEN ISNULL(@intCostCurrencyId, 0)<> 0 THEN @intCostCurrencyId ELSE intCurrencyId END END
-		, @intItemId = d.intItemId
-		, @intFromUom = PU.intUnitMeasureId
-		, @dblRate = dblRate
-		, @intCurrencyExchangeRateId = intCurrencyExchangeRateId
-	FROM tblCTContractDetail d
-	JOIN tblICItemUOM PU ON PU.intItemUOMId = d.intPriceItemUOMId
-	WHERE intContractDetailId = @intContractDetailId
+	IF @intContractDetailId IS NULL
+	BEGIN
+		SELECT @intFromCurrencyId = CASE WHEN ISNULL(@intFromBasisCurrencyId, 0) <> 0 THEN @intFromBasisCurrencyId
+										WHEN ISNULL(@intFromMarketCurrency, 0)<>0 THEN @intFromMarketCurrency
+										ELSE CASE WHEN ISNULL(@intCostCurrencyId, 0)<> 0 THEN @intCostCurrencyId ELSE intCurrencyId END END
+			, @dblRate = dblRate
+			, @intCurrencyExchangeRateId = intCurrencyExchangeRateId
+		FROM tblCTContractDetail d
+		JOIN tblICItemUOM PU ON PU.intItemUOMId = d.intPriceItemUOMId
+		WHERE intContractDetailId = @intContractDetailId
+	END
+	ELSE
+	BEGIN
+		SET @intFromCurrencyId = @intCostCurrencyId
+		SET @dblRate = 1
+	END
 
 	DECLARE @SubFromCurrency BIT = 0
 		, @SubToCurrency BIT = 0
 
 	SELECT TOP 1 @SubFromCurrency = 1
-		, @intFromCurrencyId = intMainCurrencyId
 	FROM tblSMCurrency
 	WHERE intCurrencyID = @intFromCurrencyId AND ysnSubCurrency = 1
 
 	SELECT TOP 1 @SubToCurrency = 1
-		, @intToCurrencyId = intMainCurrencyId
 	FROM tblSMCurrency WHERE intCurrencyID = @intToCurrencyId AND ysnSubCurrency = 1
 
 	IF (@SubFromCurrency = 1 AND @SubToCurrency = 0)
 	BEGIN
-		SELECT @Price = @Price / intCent FROM tblSMCurrency WHERE intCurrencyID = @intFromCurrencyId
+		SELECT @Price = @Price / intCent
+			, @intFromCurrencyId = intMainCurrencyId
+		FROM tblSMCurrency WHERE intCurrencyID = @intFromCurrencyId
 	END
 	ELSE IF (@SubFromCurrency = 0 AND @SubToCurrency = 1)
 	BEGIN
-		SELECT @Price = @Price * intCent FROM tblSMCurrency WHERE intCurrencyID = @intToCurrencyId
+		SELECT @Price = @Price * intCent
+			, @intToCurrencyId = intMainCurrencyId
+		FROM tblSMCurrency WHERE intCurrencyID = @intToCurrencyId
 	END
 
 	IF (ISNULL(@intCurrencyExchangeRateId, 0) <> 0)

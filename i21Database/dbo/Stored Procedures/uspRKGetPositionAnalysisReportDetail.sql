@@ -38,9 +38,6 @@ BEGIN
 		, dblFutures
 	INTO #tmpReportDetail
 	FROM (
-		--=========================================
-		-- Outright Physicals
-		--=========================================
 		SELECT CD.intFutureMarketId
 			, CH.intCommodityId
 			, CD.intCurrencyId
@@ -60,7 +57,7 @@ BEGIN
 			, CD.dblNoOfLots
 			, P.strPosition
 			, FMo.strFutureMonth
-			, dblPrice = dbo.[fnRKGetSourcingCurrencyConversion](CD.intContractDetailId, @intCurrencyId, dbo.fnCTConvertQtyToTargetItemUOM(PriceUOM.intItemUOMId, CD.intItemUOMId, ISNULL(CD.dblCashPrice, 0)), NULL, NULL, NULL)
+			, dblPrice = dbo.[fnRKGetSourcingCurrencyConversion](CD.intContractDetailId, @intCurrencyId, dbo.fnCTConvertQtyToTargetItemUOM(CD.intPriceItemUOMId, PriceUOM.intItemUOMId, ISNULL(CD.dblCashPrice, 0)), NULL, NULL, NULL)
 			, dblValue = dbo.[fnRKGetSourcingCurrencyConversion](CD.intContractDetailId, @intCurrencyId, CD.dblTotalCost, NULL, NULL, NULL)
 			, PF.intPriceFixationId
 			, dblFutures = ISNULL(dbo.[fnRKGetSourcingCurrencyConversion](CD.intContractDetailId, @intCurrencyId, dbo.fnCTConvertQtyToTargetCommodityUOM(CH.intCommodityId, FM.intUnitMeasureId, ISNULL(@intPriceUOMId, 0), ISNULL(CD.dblFutures, 0)), NULL, NULL, NULL), 0.00)
@@ -103,7 +100,7 @@ BEGIN
 			, PFD.dblNoOfLots
 			, P.strPosition
 			, FMo.strFutureMonth
-			, dblPrice = dbo.[fnRKGetSourcingCurrencyConversion](CD.intContractDetailId, @intCurrencyId, dbo.fnCTConvertQtyToTargetItemUOM(PriceUOM.intItemUOMId, CD.intItemUOMId, ISNULL(PFD.dblFixationPrice, 0)), NULL, NULL, NULL)
+			, dblPrice = dbo.[fnRKGetSourcingCurrencyConversion](CD.intContractDetailId, @intCurrencyId, dbo.fnCTConvertQtyToTargetItemUOM(CD.intPriceItemUOMId, PriceUOM.intItemUOMId, ISNULL(PFD.dblFixationPrice, 0)), NULL, NULL, NULL)
 			, dblValue = dbo.[fnRKGetSourcingCurrencyConversion](CD.intContractDetailId, @intCurrencyId, (PFD.dblFixationPrice * PFD.dblQuantity), NULL, NULL, NULL)
 			, PF.intPriceFixationId
 			, dblFutures = ISNULL(dbo.[fnRKGetSourcingCurrencyConversion](CD.intContractDetailId, @intCurrencyId, dbo.fnCTConvertQtyToTargetCommodityUOM(CH.intCommodityId, FM.intUnitMeasureId, ISNULL(@intPriceUOMId, 0), ISNULL(CD.dblFutures,0)), NULL, NULL, NULL), 0.00)
@@ -143,20 +140,20 @@ BEGIN
 			, intItemUOMId = NULL
 			, UM.strSymbol
 			, dblDeltaQty = dbo.fnCTConvertQtyToTargetCommodityUOM(DD.intCommodityId, FM.intUnitMeasureId,ISNULL(@intQtyUOMId, 0),ISNULL(DD.dblNoOfContract,0) * ISNULL(FM.dblContractSize,0))
-			, DD.dblNoOfContract
+			, dblNoOfLots = DD.dblNoOfContract
 			, strPosition = '' COLLATE Latin1_General_CI_AS
 			, strFutureMonth = FMonth.strFutureMonth
-			, dblPrice = dbo.fnRKGetCurrencyConvertion(FM.intCurrencyId, @intCurrencyId) * (dbo.fnCTConvertQtyToTargetCommodityUOM(DD.intCommodityId, FM.intUnitMeasureId, ISNULL(@intPriceUOMId, 0), ISNULL(DD.dblPrice,0)))
-			, strValue = dbo.fnRKGetCurrencyConvertion(FM.intCurrencyId, @intCurrencyId) * (((ISNULL(DD.dblNoOfContract,0) * ISNULL(FM.dblContractSize,0)) * DD.dblPrice))
+			, dblPrice = ISNULL(dbo.[fnRKGetSourcingCurrencyConversion](NULL, @intCurrencyId, (dbo.fnCTConvertQtyToTargetCommodityUOM(DD.intCommodityId, FM.intUnitMeasureId, ISNULL(@intPriceUOMId, 0), ISNULL(DD.dblPrice,0))), FM.intUnitMeasureId, NULL, NULL), 0.00)
+			, dblValue = ISNULL(dbo.[fnRKGetSourcingCurrencyConversion](NULL, @intCurrencyId, (((ISNULL(DD.dblNoOfContract,0) * ISNULL(FM.dblContractSize,0)) * DD.dblPrice)), FM.intUnitMeasureId, NULL, NULL), 0.00)
 			, intPriceFixationId = NULL
-			, dblFutures = ISNULL(dbo.fnRKGetCurrencyConvertion(FM.intCurrencyId, @intCurrencyId) * (dbo.fnCTConvertQtyToTargetCommodityUOM(DD.intCommodityId, FM.intUnitMeasureId, ISNULL(@intPriceUOMId, 0), ISNULL(DD.dblPrice,0))), 0.00)
+			, dblFutures = ISNULL(dbo.[fnRKGetSourcingCurrencyConversion](NULL, @intCurrencyId, (dbo.fnCTConvertQtyToTargetCommodityUOM(DD.intCommodityId, FM.intUnitMeasureId, ISNULL(@intPriceUOMId, 0), ISNULL(DD.dblPrice,0))), FM.intUnitMeasureId, NULL, NULL), 0.00)
 		FROM tblRKFutOptTransactionHeader DH
 		INNER JOIN tblRKFutOptTransaction DD ON DH.intFutOptTransactionHeaderId = DD.intFutOptTransactionHeaderId
 		INNER JOIN tblRKFutureMarket FM ON DD.intFutureMarketId = FM.intFutureMarketId
 		INNER JOIN tblICUnitMeasure UM ON FM.intUnitMeasureId = UM.intUnitMeasureId
 		INNER JOIN tblRKFuturesMonth FMonth ON FMonth.intFutureMonthId = DD.intFutureMonthId
 		WHERE  DD.intFutureMarketId = ISNULL(@intFutureMarketId, DD.intFutureMarketId)
-		AND DD.intCommodityId = ISNULL(@intCommodityId, DD.intCommodityId)
+			AND DD.intCommodityId = ISNULL(@intCommodityId, DD.intCommodityId)
 	) tbl
 
 	IF @strFilterBy = 'Transaction Date'
