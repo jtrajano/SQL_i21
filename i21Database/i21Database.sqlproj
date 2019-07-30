@@ -7924,6 +7924,8 @@
     <Build Include="dbo\Functions\fnGRValidateBillPost.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateItemContractOnInvoice.sql" />
     <Build Include="dbo\Stored Procedures\uspSOUpdateItemContractOnSalesOrder.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPopulateRetailValuationByDate.sql" />
+    <Build Include="dbo\Functions\fnDateRange.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
