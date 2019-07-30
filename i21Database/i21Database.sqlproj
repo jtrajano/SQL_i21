@@ -7926,6 +7926,8 @@
     <Build Include="dbo\Stored Procedures\uspSOUpdateItemContractOnSalesOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspICPopulateRetailValuationByDate.sql" />
     <Build Include="dbo\Functions\fnDateRange.sql" />
+    <Build Include="dbo\Tables\tblAPImportPaidVoucherOhio.sql" />
+    <Build Include="dbo\Tables\tblAPVendorImportInfo.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

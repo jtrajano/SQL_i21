@@ -20,6 +20,7 @@
 	[ysnPostVoucher] 	         BIT            DEFAULT 0 NOT NULL,
 	[intCompanyId]				INT             NULL ,
     [dblCreditLimit]            DECIMAL(18, 6)     NOT NULL,
+	[dblInvoiceAdjPercentage] 	DECIMAL(18,2) NOT NULL DEFAULT(0),
     [intCreatedUserId]          INT            NULL,
     [intLastModifiedUserId]     INT            NULL,
     [dtmLastModified]           DATETIME       NULL,
