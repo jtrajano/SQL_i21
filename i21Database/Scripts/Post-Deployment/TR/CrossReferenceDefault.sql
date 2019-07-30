@@ -1,0 +1,14 @@
+﻿
+
+PRINT N'INSERT DEFAULT - TRANSPORT CROSS REFERENCE'
+GO
+
+IF NOT EXISTS (SELECT TOP 1 1 FROM tblTRCrossReference)
+BEGIN
+		SET IDENTITY_INSERT tblTRCrossReference ON
+
+		INSERT INTO tblTRCrossReference (intCrossReferenceId,strName, dtmDateCreated) VALUES(1,'TPVision', GETDATE())
+		
+		SET IDENTITY_INSERT tblTRCrossReference OFF
+END
+GO
