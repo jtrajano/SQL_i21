@@ -236,11 +236,11 @@ QuitWithRollback:
 			
 
 EndSave:
-	-- Turn Off Agent XPs --
-	EXEC sp_configure'AGENT XPs',0
-	RECONFIGURE
-	EXEC sp_configure'SHOW ADVANCE',0
-	RECONFIGURE
+	-- DO NOT Turn Off Agent XPs --
+	--EXEC sp_configure'AGENT XPs',0
+	--RECONFIGURE
+	--EXEC sp_configure'SHOW ADVANCE',0
+	--RECONFIGURE
 
 GO
 
