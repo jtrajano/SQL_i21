@@ -47,6 +47,17 @@ SELECT	@intEntityId = [intEntityId]
 FROM	dbo.tblSMUserSecurity 
 WHERE	[intEntityId] = @intUserId
 
+-- Maybe this is a portal user
+IF @intEntityId IS NULL
+BEGIN
+	SELECT @intEntityId = ec.intEntityId
+	FROM tblEMEntityToContact ec
+		INNER JOIN tblEMEntity e ON e.intEntityId = ec.intEntityContactId
+		INNER JOIN tblEMEntityLocation el ON el.intEntityLocationId = ec.intEntityLocationId
+			AND el.intEntityId = ec.intEntityId
+	WHERE ec.ysnPortalAccess = 1
+		AND e.intEntityId = @intUserId
+END
 
 -- Validate the user id. 
 IF @intEntityId IS NULL 
