@@ -7666,6 +7666,7 @@
     <Build Include="dbo\Stored Procedures\uspICRebuildCleanUp.sql" />
     <Build Include="dbo\Functions\fnCTConvertQtyToStockItemUOM.sql" />
     <Build Include="dbo\Functions\fnCTConvertPriceToStockItemUOM.sql" />
+    <Build Include="dbo\Functions\fnGRValidateBillPost.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

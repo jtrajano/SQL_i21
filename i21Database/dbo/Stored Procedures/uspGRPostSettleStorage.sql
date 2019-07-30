@@ -1728,6 +1728,7 @@ BEGIN TRY
 								,@isBatch = 0
 								,@param = @intVoucherId
 								,@userId = @intCreatedUserId
+								,@transactionType = 'Settle Storage'
 								,@success = @success OUTPUT
 					END
 					
