@@ -124,7 +124,7 @@ BEGIN TRY
 		 ,(D.[dblScheduled]) - (I.dblQtyShipped)
 		 ,(D.[dblContracted] - (D.[dblScheduled] - I.dblQtyShipped)) - (D.[dblApplied] + I.dblQtyShipped)
 		 ,(D.[dblApplied]) + (I.dblQtyShipped)
-		 ,(D.[dblContracted] - (D.[dblApplied]) + (I.dblQtyShipped))
+		 ,(D.[dblContracted] - ((D.[dblApplied]) + (I.dblQtyShipped)))
 		 ,(D.[dblTax])
 		 ,(D.[dblPrice])
 		 ,(D.[dblTotal])
@@ -177,8 +177,6 @@ BEGIN TRY
 
 		SELECT TOP 1 
 				@intItemContractDetailId = intItemContractDetailId, 
-				@intItemContractDetailId = intItemContractDetailId, 
-				@intItemContractDetailId = intItemContractDetailId, 
 				@dblNewContracted		 = dblNewContracted, 
 				@dblNewScheduled		 = dblNewScheduled,
 				@dblNewAvailable		 = dblNewAvailable,
@@ -227,6 +225,8 @@ BEGIN TRY
 				@dblNewBalance				=	@dblNewBalance,
 				@intNewContractStatusId		=	@intContractStatusId,
 				@dtmNewLastDeliveryDate		=	@dtmOrigLastDeliveryDate
+
+		DELETE @tblToProcess WHERE intItemContractDetailId = @intItemContractDetailId
 
 	END
 
