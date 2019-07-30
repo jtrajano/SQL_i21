@@ -752,8 +752,7 @@ SELECT
 	,[dblMaintenanceAmount]         = ID.[dblMaintenanceAmount]         
 	,[dblLicenseAmount]             = ID.[dblLicenseAmount]             
 	,[intContractDetailId]			= ID.[intContractDetailId]			
-	--,[intTicketId]					= ID.[intTicketId]
-	,[intTicketId]     = (case when ID.strTransactionType = 'Credit Memo' and @Post = convert(bit,1) then null else ID.[intTicketId] end)
+	,[intTicketId]     				= (CASE WHEN ID.strTransactionType = 'Credit Memo' AND @Post = CONVERT(BIT,1) THEN NULL ELSE ID.[intTicketId] END)
 	,[intCustomerStorageId]			= ID.[intCustomerStorageId]
 	,[intLoadDetailId]				= ID.[intLoadDetailId]
 	,[ysnLeaseBilling]				= ID.[ysnLeaseBilling]				
@@ -779,6 +778,60 @@ WHERE ID.[intInventoryShipmentChargeId] IS NULL
     AND ISNULL(ID.[strItemType], '') <> 'Other Charge'
 
 EXEC dbo.[uspCTInvoicePosted] @ItemsFromInvoice, @UserId
+
+--UPDATE ITEM CONTRACT BALANCE
+DECLARE @tblItemContracts CTItemContractTable
+
+INSERT INTO @tblItemContracts (
+	  intTransactionId
+	, strTransactionId
+	, intEntityCustomerId
+	, strTransactionType
+	, dtmDate
+	, intCurrencyId
+	, intCompanyLocationId
+	, intInvoiceDetailId
+	, intItemId
+	, strItemNo
+	, strItemDescription
+	, intItemUOMId
+	, dblQtyOrdered
+	, dblQtyShipped
+	, dblDiscount
+	, dblPrice
+	, dblTotalTax
+	, dblTotal
+	, intItemContractHeaderId
+	, intItemContractDetailId
+	, intItemContractLineNo
+)
+SELECT intTransactionId			= PID.intInvoiceId
+	, strTransactionId			= PID.strInvoiceNumber
+	, intEntityCustomerId		= PID.intEntityCustomerId
+	, strTransactionType		= PID.strTransactionType
+	, dtmDate					= PID.dtmDate
+	, intCurrencyId				= PID.intCurrencyId
+	, intCompanyLocationId		= PID.intCompanyLocationId
+	, intInvoiceDetailId		= PID.intInvoiceDetailId
+	, intItemId					= PID.intItemId
+	, strItemNo					= PID.strItemNo
+	, strItemDescription		= ID.strItemDescription
+	, intItemUOMId				= PID.intItemUOMId
+	, dblQtyOrdered				= ID.dblQtyOrdered
+	, dblQtyShipped				= PID.dblQtyShipped * (CASE WHEN PID.[ysnPost] = 0 THEN -@OneDecimal ELSE @OneDecimal END) * (CASE WHEN PID.[ysnIsInvoicePositive] = 0 THEN -@OneDecimal ELSE @OneDecimal END)
+	, dblDiscount				= ID.dblDiscount
+	, dblPrice					= PID.dblPrice
+	, dblTotalTax				= ID.dblTotalTax
+	, dblTotal					= PID.dblTotal
+	, intItemContractHeaderId	= ID.intItemContractHeaderId
+	, intItemContractDetailId	= ID.intItemContractDetailId
+	, intItemContractLineNo		= ICD.intLineNo
+FROM #ARPostInvoiceDetail PID
+INNER JOIN tblARInvoiceDetail ID ON PID.intInvoiceDetailId = ID.intInvoiceDetailId
+INNER JOIN tblCTItemContractDetail ICD ON ID.intItemContractDetailId = ICD.intItemContractDetailId
+WHERE ID.intItemContractDetailId IS NOT NULL
+
+EXEC dbo.uspCTItemContractInvoicePosted @tblItemContracts, @UserId
 
 DELETE A
 FROM tblARPrepaidAndCredit A

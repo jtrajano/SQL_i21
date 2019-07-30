@@ -7922,6 +7922,8 @@
     <Build Include="dbo\Stored Procedures\uspSTCStoreSQLScheduler.sql" />
     <None Include="Scripts\Post-Deployment\ST\36_CStoreSQLJobScheduler.sql" />
     <Build Include="dbo\Functions\fnGRValidateBillPost.sql" />
+    <Build Include="dbo\Stored Procedures\uspARUpdateItemContractOnInvoice.sql" />
+    <Build Include="dbo\Stored Procedures\uspSOUpdateItemContractOnSalesOrder.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
