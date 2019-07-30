@@ -15,6 +15,8 @@
 	[intSalesOrderDetailId]					INT				NULL,
 	[intContractHeaderId]					INT				NULL,    
 	[intContractDetailId]					INT				NULL,
+	[intItemContractHeaderId]				INT				NULL,
+	[intItemContractDetailId]				INT				NULL,
 	[intShipmentId]							INT				NULL,
 	[intLoadDetailId]						INT				NULL,
 	[intTicketId]							INT				NULL,

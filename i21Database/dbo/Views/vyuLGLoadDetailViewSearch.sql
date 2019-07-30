@@ -87,7 +87,7 @@ SELECT   L.intLoadId
 		,LoadDetail.ysnPrintLoadDirections
 		,LoadDetail.strExternalShipmentItemNumber
 		,LoadDetail.strExternalBatchNo
-		,strSampleStatus = SS.strStatus
+		,strSampleStatus = ISNULL(LSS.strStatus, CSS.strStatus)
         ,intGenerateReferenceNumber = GLoad.intReferenceNumber
         ,intNumberOfLoads = GLoad.intNumberOfLoads
 		,intContractHeaderId = CASE WHEN L.intPurchaseSale = 2 THEN SHeader.intContractHeaderId ELSE PHeader.intContractHeaderId END 
@@ -280,4 +280,11 @@ LEFT JOIN tblLGReasonCode ETSPOLRC ON ETSPOLRC.intReasonCodeId = L.intETSPOLReas
 LEFT JOIN tblLGReasonCode ETAPODRC ON ETAPODRC.intReasonCodeId = L.intETAPODReasonCodeId
 OUTER APPLY (SELECT TOP 1 strStatus = CASE WHEN (SS.strStatus NOT IN ('Approved', 'Rejected')) THEN 'Sample Sent' ELSE SS.strStatus END
 				FROM tblQMSample S JOIN tblQMSampleStatus SS ON SS.intSampleStatusId = S.intSampleStatusId
-				WHERE S.intLoadDetailId = LoadDetail.intLoadDetailId) SS
+				WHERE (S.intContractDetailId = SDetail.intContractDetailId OR S.intContractDetailId = PDetail.intContractDetailId)
+					AND SS.strStatus <> 'Rejected'
+				ORDER BY S.dtmTestingEndDate DESC, S.intSampleId DESC) CSS
+OUTER APPLY (SELECT TOP 1 strStatus = CASE WHEN (SS.strStatus NOT IN ('Approved', 'Rejected')) THEN 'Sample Sent' ELSE SS.strStatus END
+				FROM tblQMSample S JOIN tblQMSampleStatus SS ON SS.intSampleStatusId = S.intSampleStatusId
+				WHERE S.intLoadDetailId = LoadDetail.intLoadDetailId
+					AND SS.strStatus <> 'Rejected'
+				ORDER BY S.dtmTestingEndDate DESC, S.intSampleId DESC) LSS

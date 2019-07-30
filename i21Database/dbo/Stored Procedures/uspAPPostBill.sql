@@ -143,6 +143,11 @@ BEGIN
 	INSERT INTO @voucherBillId
 	SELECT intBillId FROM #tmpPostBillData
 
+	IF @transactionType IS NULL
+	BEGIN
+		SET @transactionType = 'Voucher';
+	END
+
 	--VALIDATIONS
 	INSERT INTO #tmpInvalidBillData (
 		strError
@@ -183,6 +188,14 @@ BEGIN
 		,intTransactionId
 		,26
 	FROM dbo.fnCCValidateAssociatedTransaction(@billIds, 1, @transactionType)
+	UNION ALL
+	SELECT
+		strError
+		,strTransactionType
+		,strTransactionNo
+		,intTransactionId
+		,27
+	FROM dbo.[fnGRValidateBillPost](@billIds, @post, @transactionType)
 	
 	--if there are invalid applied amount, undo updating of amountdue and payment
 	IF EXISTS(SELECT 1 FROM #tmpInvalidBillData WHERE intErrorKey = 1 OR intErrorKey = 33)

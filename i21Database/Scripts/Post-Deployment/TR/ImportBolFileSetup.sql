@@ -3,11 +3,13 @@
 	, @DetailId INT = NULL
 
 -- BP Format
-SET @LayoutTitle = 'TR - Electronic BOL Format'
+SET @LayoutTitle = 'TR - Electronic BOL – TPVision'
+
+UPDATE tblSMImportFileHeader SET strLayoutTitle = 'TR - Electronic BOL – TPVision' WHERE strLayoutTitle = 'TR - Electronic BOL Format'
 
 IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMImportFileHeader WHERE strLayoutTitle = @LayoutTitle)
 BEGIN
-	PRINT ('Deploying TR - Electronic BOL Format')
+	PRINT ('Deploying TR - Electronic BOL – TPVision')
 
 	INSERT INTO tblSMImportFileHeader (strLayoutTitle
 		, strFileType

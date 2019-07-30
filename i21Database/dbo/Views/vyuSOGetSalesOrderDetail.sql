@@ -80,7 +80,7 @@ SELECT intSalesOrderDetailId			= SOD.intSalesOrderDetailId
      , strPricingType					= CONT.strPricingType
      , ysnLoad							= CONT.ysnLoad
 	 , strItemContractNumber			= ISNULL(ITEMCONTRACT.strContractNumber, '')
-	 , intItemContractSeq				= ITEMCONTRACT.intItemContractDetailId
+	 , intItemContractSeq				= ITEMCONTRACT.intLineNo
      , strItemType						= ITEM.strType
      , strLotTracking					= ITEM.strLotTracking
      , strModule						= ITEM.strModule
@@ -164,6 +164,7 @@ LEFT JOIN (
 LEFT JOIN ( 
 	SELECT intItemContractDetailId
 		 , strContractNumber
+             , intLineNo
 	FROM tblCTItemContractDetail ICD WITH(NOLOCK)
 	INNER JOIN tblCTItemContractHeader ICH WITH(NOLOCK) ON ICH.intItemContractHeaderId	= ICD.intItemContractHeaderId
 ) ITEMCONTRACT ON SOD.intItemContractDetailId = ITEMCONTRACT.intItemContractDetailId

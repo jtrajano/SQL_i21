@@ -44,6 +44,7 @@ EXEC dbo.[uspSOUpdateItemComponent] @intSalesOrderId, 0
 EXEC dbo.[uspSOUpdateCommitted] @intSalesOrderId, @ysnForDelete
 EXEC dbo.[uspSOUpdateItemComponent] @intSalesOrderId, 1
 EXEC dbo.[uspSOUpdateContractOnSalesOrder] @intSalesOrderId, @ysnForDelete, @intUserId
+EXEC dbo.[uspSOUpdateItemContractOnSalesOrder] @intSalesOrderId, @ysnForDelete, @intUserId
 
 DECLARE @Ids AS Id
 DECLARE @ItemAccounts AS [InvoiceItemAccount]

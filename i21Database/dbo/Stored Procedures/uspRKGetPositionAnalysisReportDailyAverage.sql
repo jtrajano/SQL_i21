@@ -41,7 +41,6 @@ BEGIN
 	,dtmTransactionDate AS dtmDate
 	,intFutureMarketId
 	,intCommodityId
-	,intCurrencyId
 	,SUM(dblOutrightPhysicalDeltaQty)	AS dblOutrightPhysicalDeltaQty
 	,SUM(dblOutrightPhysicalQty)		AS dblOutrightPhysicalQty
 	,SUM(dblOutrightPhysicalPrice)		AS dblOutrightPhysicalPrice
@@ -278,8 +277,7 @@ BEGIN
 	GROUP BY 
 	 dtmEntryDate
 	,intFutureMarketId
-	,intCommodityId
-	,intCurrencyId '
+	,intCommodityId'
 
 	EXEC(@queryHeader + @query1 + @query2 + @query3)
 END

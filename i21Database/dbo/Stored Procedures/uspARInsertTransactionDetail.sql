@@ -2,18 +2,20 @@
 	@InvoiceId	INT
 AS
 BEGIN
-	DECLARE @TransactionType AS NVARCHAR(25)
-	SELECT @TransactionType = [strTransactionType] FROM tblARInvoice WHERE [intInvoiceId] = @InvoiceId
-	DELETE FROM [tblARTransactionDetail] WHERE [intTransactionId] = @InvoiceId AND [strTransactionType] = @TransactionType
+	DECLARE @strTransactionType		NVARCHAR(25) = NULL
+		  , @dblAmountDue			NUMERIC(18, 6) = 0
+		  , @intCurrencyId			INT = NULL
+		  , @intCompanyLocationId	INT
+	
+	SELECT TOP 1 @strTransactionType	= strTransactionType 
+			   , @dblAmountDue			= dblAmountDue
+			   , @intCurrencyId			= intCurrencyId
+			   , @intCompanyLocationId	= intCompanyLocationId
+	FROM tblARInvoice 
+	WHERE intInvoiceId = @InvoiceId
 
-	DECLARE @AmountDue NUMERIC(18, 6)
-	DECLARE @CurrencyId INT
-	DECLARE @CompanyLocationId INT
-
-	SELECT TOP 1 @AmountDue = [dblAmountDue], 
-				@CurrencyId = intCurrencyId,
-				@CompanyLocationId = intCompanyLocationId
-	FROM tblARInvoice WHERE intInvoiceId = @InvoiceId
+	DELETE FROM [tblARTransactionDetail] WHERE [intTransactionId] = @InvoiceId AND [strTransactionType] = @strTransactionType	
+	
 	INSERT INTO [tblARTransactionDetail](
 		 [intTransactionDetailId]
 		,[intTransactionId]
@@ -28,6 +30,8 @@ BEGIN
 		,[intSalesOrderDetailId]
 		,[intContractHeaderId]
 		,[intContractDetailId]
+		,[intItemContractHeaderId]
+		,[intItemContractDetailId]
 		,[intShipmentId]
 		,[intLoadDetailId]
 		,[intTicketId]
@@ -45,7 +49,7 @@ BEGIN
 	SELECT
 		 [intTransactionDetailId]				= [intInvoiceDetailId]
 		,[intTransactionId]						= [intInvoiceId] 
-		,[strTransactionType]					= @TransactionType
+		,[strTransactionType]					= @strTransactionType
 		,[intItemId]							= [intItemId] 
 		,[intItemUOMId]							= [intItemUOMId] 
 		,[dblQtyOrdered]						= [dblQtyOrdered] 
@@ -56,6 +60,8 @@ BEGIN
 		,[intSalesOrderDetailId]				= [intSalesOrderDetailId]
 		,[intContractHeaderId]					= [intContractHeaderId]
 		,[intContractDetailId]					= [intContractDetailId]
+		,[intItemContractHeaderId]				= [intItemContractHeaderId]
+		,[intItemContractDetailId]				= [intItemContractDetailId]
 		,[intShipmentId]						= [intShipmentId]
         ,[intLoadDetailId]						= [intLoadDetailId]
         ,[intTicketId]							= [intTicketId]
@@ -66,13 +72,10 @@ BEGIN
 		,[intStorageLocationId]					= [intStorageLocationId]
 		,[intOwnershipTypeId]					= NULL
 		,[intStorageScheduleTypeId]				= [intStorageScheduleTypeId]
-		,[intCurrencyId]						= @CurrencyId
+		,[intCurrencyId]						= @intCurrencyId
 		,[intSubCurrencyId] 					= [intSubCurrencyId]
-		,[dblAmountDue]							= @AmountDue
-		,[intCompanyLocationId]					= @CompanyLocationId
-	FROM
-		[tblARInvoiceDetail]
-	WHERE
-		[intInvoiceId] = @InvoiceId
-	
+		,[dblAmountDue]							= @dblAmountDue
+		,[intCompanyLocationId]					= @intCompanyLocationId
+	FROM [tblARInvoiceDetail]
+	WHERE [intInvoiceId] = @InvoiceId	
 END

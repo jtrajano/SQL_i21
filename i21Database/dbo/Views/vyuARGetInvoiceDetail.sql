@@ -124,7 +124,7 @@ SELECT intInvoiceDetailId					= INV.intInvoiceDetailId
      , strContractNumber					= ISNULL(CT.strContractNumber, '')	 
 	 , intContractSeq						= CT.intContractSeq
 	 , strItemContractNumber				= ISNULL(ICT.strContractNumber, '')
-	 , intItemContractSeq					= ICT.intItemContractDetailId
+	 , intItemContractSeq					= ICT.intLineNo
      , dblOriginalQty						= INV.dblQtyShipped
      , dblOriginalPrice						= INV.dblPrice
      , intOriginalItemUOMId					= INV.intItemUOMId
@@ -217,6 +217,7 @@ LEFT JOIN (
 LEFT JOIN ( 
 	SELECT intItemContractDetailId
 		 , strContractNumber
+		 , intLineNo
 	FROM tblCTItemContractDetail ICD
 	JOIN tblCTItemContractHeader ICH ON ICH.intItemContractHeaderId	= ICD.intItemContractHeaderId
 ) ICT ON INV.intItemContractDetailId = ICT.intItemContractDetailId

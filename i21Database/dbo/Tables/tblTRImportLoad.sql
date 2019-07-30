@@ -5,6 +5,7 @@
     [intImportFileHeaderId] INT NOT NULL,
 	[intUserId] INT NOT NULL,
 	[dtmImportDate] DATETIME NOT NULL,
+	[intConcurrencyId] INT NOT NULL DEFAULT ((1)),
     CONSTRAINT [PK_tblTRImportLoad] PRIMARY KEY ([intImportLoadId]),
 	CONSTRAINT [FK_tblTRImportLoad_tblSMImportFileHeader] FOREIGN KEY ([intImportFileHeaderId]) REFERENCES [tblSMImportFileHeader]([intImportFileHeaderId])
 )

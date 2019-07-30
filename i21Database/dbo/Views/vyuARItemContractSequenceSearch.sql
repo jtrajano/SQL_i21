@@ -3,7 +3,7 @@ AS
 SELECT intItemContractHeaderId		= ICH.intItemContractHeaderId
 	 , intItemContractDetailId		= ICD.intItemContractDetailId
 	 , strItemContractNumber		= ICH.strContractNumber
-	 , intItemContractSeq			= ICD.intItemContractDetailId
+	 , intItemContractSeq			= ICD.intLineNo
 	 , strContractCategoryId		= ICH.strContractCategoryId
 	 , intContractTypeId			= ICH.intContractTypeId
 	 , intEntityCustomerId			= ICH.intEntityId
