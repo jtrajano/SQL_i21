@@ -23,7 +23,7 @@ GO
 	--IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Contract vs Market Differential Analysis' AND strModuleName = 'Logistics' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Contract vs Market Differential Analysis' AND strModuleName = 'Logistics') AND strCommand = N'Logistics.view.ContractVsMarketDifferential') 
 	--IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Blend Demand' AND strModuleName = 'Manufacturing' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Blend Demand' AND strModuleName = 'Contract Management') AND strCommand = N'ContractManagement.view.ItemContract?showSearch=true') 
 	--IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Comment Maintenance' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Comment Maintenance' AND strModuleName = 'Accounts Receivable') AND strCommand = N'AccountsReceivable.view.StatementFooterMessage') 
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Seal Numbers' AND strModuleName = 'Ticket Management' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Seal Numbers' AND strModuleName = 'Ticket Management') AND strCommand = N'Grain.view.TicketSealNumber') 
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Import Bill Of Lading' AND strModuleName = 'Transports' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Import Bill Of Lading' AND strModuleName = 'Transports') AND strCommand = N'Transports.view.ImportLoad') 
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 		
@@ -5423,6 +5423,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Import Ra
 	VALUES (N'Import Rack Price', N'Transports', @TransportsImportParentMenuId, N'Import Rack Price', N'Import', N'Screen', N'Transports.view.ImportRackPrice', N'small-menu-import', 0, 0, 0, 1, 0, 1)
 ELSE
 	UPDATE tblSMMasterMenu SET strCommand = N'Transports.view.ImportRackPrice', intSort = 0 WHERE strMenuName = 'Import Rack Price' AND strModuleName = 'Transports' AND intParentMenuID = @TransportsImportParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Import Bill Of Lading' AND strModuleName = 'Transports' AND intParentMenuID = @TransportsImportParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Import Bill Of Lading', N'Transports', @TransportsImportParentMenuId, N'Import Bill Of Lading', N'Import', N'Screen', N'Transports.view.ImportLoad', N'small-menu-import', 0, 0, 0, 1, 1, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET strCommand = N'Transports.view.ImportLoad', intSort = 0 WHERE strMenuName = 'Import Bill Of Lading' AND strModuleName = 'Transports' AND intParentMenuID = @TransportsImportParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'New Rack Price' AND strModuleName = 'Transports' AND intParentMenuID = @TransportsCreateParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
