@@ -496,6 +496,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\ST\33_FileFieldMapping_Commander_uMaintenance_Combo.sql
 :r .\ST\34_FileFieldMapping_Commander_uMaintenance_MixMatch.sql
 :r .\ST\35_RegisterSetupEntries.sql
+:r .\ST\36_CStoreSQLJobScheduler.sql
 
 
 -- Motor Fuel Tax

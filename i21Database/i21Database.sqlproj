@@ -7915,6 +7915,7 @@
     <Build Include="dbo\Views\vyuFRUserReportRestriction.sql" />
     <Build Include="dbo\Tables\tblFRUserReportRestriction.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCStoreSQLScheduler.sql" />
+    <None Include="Scripts\Post-Deployment\ST\36_CStoreSQLJobScheduler.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
