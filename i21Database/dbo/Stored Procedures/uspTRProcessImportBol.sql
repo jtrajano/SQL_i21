@@ -66,28 +66,15 @@ BEGIN
 		BEGIN TRANSACTION
 
 		OPEN @CursorTran
-		FETCH NEXT FROM @CursorTran INTO @intImportLoadDetailId, @intTruckId, @intVendorId, @intSupplyPointId,
-			@intVendorCompanyLocationId,
-			@intCustomerId, 
-			@intShipToId, 
-			@intCustomerCompanyLocationId,
-			@intCarrierId,
-			@intDriverId,
-			@intTrailerId,
-			@intPullProductId,
-			@intDropProductId,
-			@dblDropGross,
-			@dblDropNet,
-			@dtmPullDate,
-			@dtmInvoiceDate, 
-			@dtmDropDate, 
-			@ysnValid, 
-			@strMessage
+		FETCH NEXT FROM @CursorTran INTO @intImportLoadDetailId, @intTruckId, @intVendorId, @intSupplyPointId, @intVendorCompanyLocationId, @intCustomerId, @intShipToId, @intCustomerCompanyLocationId,
+			@intCarrierId, @intDriverId, @intTrailerId, @intPullProductId, @intDropProductId, @dblDropGross, @dblDropNet, @dtmPullDate, @dtmInvoiceDate, @dtmDropDate,  @ysnValid, @strMessage
 		WHILE @@FETCH_STATUS = 0
 		BEGIN	
 			
+			
 
-			FETCH NEXT FROM @CursorTran INTO
+			FETCH NEXT FROM @CursorTran INTO @intImportLoadDetailId, @intTruckId, @intVendorId, @intSupplyPointId, @intVendorCompanyLocationId, @intCustomerId, @intShipToId, @intCustomerCompanyLocationId,
+			@intCarrierId, @intDriverId, @intTrailerId, @intPullProductId, @intDropProductId, @dblDropGross, @dblDropNet, @dtmPullDate, @dtmInvoiceDate, @dtmDropDate,  @ysnValid, @strMessage
 		END
 
 		COMMIT TRANSACTION
