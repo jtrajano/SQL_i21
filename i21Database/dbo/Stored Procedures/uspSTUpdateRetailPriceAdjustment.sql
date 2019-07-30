@@ -10,9 +10,15 @@ BEGIN
 		SET @ysnSuccess = CAST(1 AS BIT)
 		SET @strMessage = ''
 
+		--TEST
+		--SELECT 'uspSTUpdateRetailPriceAdjustment'
+
 		IF EXISTS(SELECT TOP 1 1 FROM tblSTRetailPriceAdjustment WHERE CAST(dtmEffectiveDate AS DATE) = CAST(GETDATE() AS DATE))
 			BEGIN
 				
+				--TEST
+				--SELECT 'GETDATE()', CAST(GETDATE() AS DATE)
+
 				-- ===========================================================================================================
 				-- START Create the filter tables
 				BEGIN
@@ -47,17 +53,17 @@ BEGIN
 					intRetailPriceAdjustmentDetailId
 					--ysnProcessed
 				)
-				SELECT 
+				SELECT DISTINCT
 					intRetailPriceAdjustmentDetailId	= pad.intRetailPriceAdjustmentDetailId 
 					--ysnProcessed = CAST(0 AS BIT)
 				FROM tblSTRetailPriceAdjustmentDetail pad
 				INNER JOIN dbo.tblSTRetailPriceAdjustment rpa
 					ON pad.intRetailPriceAdjustmentId = rpa.intRetailPriceAdjustmentId
 				WHERE pad.intRetailPriceAdjustmentId = @intRetailPriceAdjustmentId
-					AND pad.ysnPosted = CAST(0 AS BIT)
+					AND (pad.ysnPosted = CAST(0 AS BIT) OR pad.ysnPosted IS NULL)
 
 				--TEST
-				SELECT '@tblRetailPriceAdjustmentDetailIds', * FROM @tblRetailPriceAdjustmentDetailIds
+				--SELECT '@tblRetailPriceAdjustmentDetailIds', * FROM @tblRetailPriceAdjustmentDetailIds
 
 				IF EXISTS(SELECT TOP 1 1 FROM @tblRetailPriceAdjustmentDetailIds)
 					BEGIN
@@ -76,6 +82,7 @@ BEGIN
 							, @intItemUOMId							INT
 							, @dblRetailPrice						DECIMAL(18,6)
 							, @dblLastCost							DECIMAL(18,6)
+							, @intSavedUserId						INT
 
 
 						WHILE EXISTS(SELECT TOP 1 1 FROM @tblRetailPriceAdjustmentDetailIds)
@@ -86,7 +93,8 @@ BEGIN
 									@intRetailPriceAdjustmentDetailId = intRetailPriceAdjustmentDetailId 
 								FROM @tblRetailPriceAdjustmentDetailIds 
 
-								SELECT TOP 1 'LOOP', * FROM @tblRetailPriceAdjustmentDetailIds 
+								--TEST
+								--SELECT TOP 1 'LOOP', * FROM @tblRetailPriceAdjustmentDetailIds 
 
 								-- GET params
 								SELECT TOP 1
@@ -96,6 +104,7 @@ BEGIN
 									   , @intCategoryId						= PAD.intCategoryId
 									   , @intFamilyId						= PAD.intFamilyId
 									   , @intClassId						= PAD.intClassId
+									   , @intSavedUserId					= PAD.intModifiedByUserId
 									   , @strUpcCode						= CASE 
 																				WHEN ISNULL(UOM.strLongUPCCode, '') != ''
 																					THEN UOM.strLongUPCCode
@@ -129,6 +138,8 @@ BEGIN
 								DECLARE @dblRetailPriceConv AS NUMERIC(38, 20) = CAST(@dblRetailPrice AS NUMERIC(38, 20))
 								DECLARE @dblLastCostConv AS NUMERIC(38, 20) = CAST(@dblLastCost AS NUMERIC(38, 20))
 
+								SET @intCurrentUserId = ISNULL(@intCurrentUserId, @intSavedUserId)
+
 								-- ITEM PRICING
 								BEGIN TRY
 									EXEC [uspICUpdateItemPricingForCStore]
@@ -144,8 +155,8 @@ BEGIN
 										,@intEntityUserSecurityId	= @intCurrentUserId
 
 								-- TEST
-								SELECT '@intItemPricingId', * FROM tblICItemPricing WHERE intItemPricingId = @intItemPricingId
-								SELECT '#tmpUpdateItemPricingForCStore_ItemPricingAuditLog', * FROM #tmpUpdateItemPricingForCStore_ItemPricingAuditLog
+								--SELECT '@intItemPricingId', * FROM tblICItemPricing WHERE intItemPricingId = @intItemPricingId
+								--SELECT '#tmpUpdateItemPricingForCStore_ItemPricingAuditLog', * FROM #tmpUpdateItemPricingForCStore_ItemPricingAuditLog
 
 								-- Check if Successfull
 								IF EXISTS(SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_ItemPricingAuditLog WHERE intItemPricingId = @intItemPricingId)
