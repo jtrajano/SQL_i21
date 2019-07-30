@@ -466,8 +466,8 @@ SELECT
     ,[intWriteOffAccountId]             = ARP.[intWriteOffAccountId]
     ,[intAccountId]                     = ARP.[intAccountId]
     ,[intBankAccountId]                 = ARP.[intBankAccountId]
-    ,[intARAccountId]                   = APB.[intAccountId]
-    ,[intDiscountAccount]               = CL.[intDiscountAccountId]
+    ,[intARAccountId]                   = ARP.[intARAccountId]
+    ,[intDiscountAccount]               = ARP.[intDiscountAccount]
     ,[intInterestAccount]               = ARP.[intInterestAccount]
     ,[intCFAccountId]                   = ARP.[intCFAccountId]
     ,[intGainLossAccount]               = ARP.[intGainLossAccount]
@@ -527,9 +527,8 @@ INNER JOIN
     @Header ARP
         ON ARP.[intTransactionId] = ARPD.[intPaymentId]
 INNER JOIN
-    (SELECT [intBillId], [intStoreLocationId], [strBillId], [ysnPosted], [ysnPaid], [dtmBillDate], [dblDiscount], [dblInterest], [dblAmountDue], [intAccountId] FROM tblAPBill) APB
+    (SELECT [intBillId], [strBillId], [ysnPosted], [ysnPaid], [dtmBillDate], [dblDiscount], [dblInterest], [dblAmountDue], [intAccountId] FROM tblAPBill) APB
         ON ARPD.[intBillId] = APB.[intBillId]
-INNER JOIN tblSMCompanyLocation CL ON APB.intStoreLocationId = CL.intCompanyLocationId
 LEFT OUTER JOIN
     (SELECT [intCurrencyExchangeRateTypeId], [strCurrencyExchangeRateType] FROM tblSMCurrencyExchangeRateType) SMCER
         ON ARP.[intCurrencyExchangeRateTypeId] = SMCER.[intCurrencyExchangeRateTypeId]
