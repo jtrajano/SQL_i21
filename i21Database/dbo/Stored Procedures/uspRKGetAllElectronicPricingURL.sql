@@ -11,7 +11,6 @@ BEGIN TRY
 	DECLARE @strUserName NVARCHAR(100)
 	DECLARE @strPassword NVARCHAR(100)
 	DECLARE @strAPIKey NVARCHAR(MAX)
-	DECLARE @IntinterfaceSystem INT
 	DECLARE @StrQuoteProvider NVARCHAR(100)
 	DECLARE @StrTradedMonthSymbol NVARCHAR(1000)
 	DECLARE @MarketExchangeCode NVARCHAR(10)
