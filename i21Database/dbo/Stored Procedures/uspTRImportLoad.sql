@@ -56,29 +56,15 @@ BEGIN
 		OPEN @CursorTran
 		FETCH NEXT FROM @CursorTran INTO @intImportLoadDetailId, @strTruck, @strTerminal, @strCarrier, @strDriver, @strTrailer, @strSupplier, @strDestination, @strPullProduct, @strDropProduct, @ysnValid, @strMessage
 		WHILE @@FETCH_STATUS = 0
-		BEGIN
-			
-            -- CHECK IF HAS VALID TRUCK
-			DECLARE @intTruckId INT = NULL
+		BEGIN	
 
-			SELECT TOP 1 @intTruckId = intTruckDriverReferenceId FROM tblSCTruckDriverReference 
-            WHERE strData = @strTruck
-			IF (@intTruckId IS NULL)
-			BEGIN
-				SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, 'Invalid Truck')
-			END
-			ELSE
-			BEGIN
-				UPDATE tblTRImportLoadDetail SET intTruckId = @intTruckId WHERE intImportLoadDetailId = @intImportLoadDetailId
-			END
+			-- SHIP VIA / CARRIER
+			DECLARE @intCarrierId INT = NULL
+			SELECT @intCarrierId = CRB.intCarrierId
+			FROM tblTRCrossReferenceBol CRB 
+			WHERE CRB.strType = 'Carrier' AND CRB.strImportValue = @strCarrier
 
-            -- CHECK IF HAS VALID CARRIER
-            DECLARE @intCarrierId INT = NULL
-
-            SELECT @intCarrierId = intEntityId FROM tblSMShipVia 
-            WHERE strShipVia = @strCarrier
-            
-            IF (@intCarrierId IS NULL)
+			IF(@intCarrierId IS NULL)
 			BEGIN
 				SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, 'Invalid Carrier')
 			END
@@ -87,12 +73,11 @@ BEGIN
 				UPDATE tblTRImportLoadDetail SET intCarrierId = @intCarrierId WHERE intImportLoadDetailId = @intImportLoadDetailId
 			END
 
-            -- CHECK IF HAS VALID DRIVER
+			 -- DRIVER
             DECLARE @intDriverId INT = NULL
-
-            SELECT @intDriverId = S.intEntityId FROM tblARSalesperson S 
-            INNER JOIN tblEMEntity E ON E.intEntityId = S.intEntityId
-            WHERE S.strType = 'Driver' AND E.strName = @strDriver
+			SELECT @intDriverId = CRB.intDriverId
+			FROM tblTRCrossReferenceBol CRB 
+			WHERE CRB.strType = 'Driver' AND CRB.strImportValue = @strDriver
 
             IF (@intDriverId IS NULL)
 			BEGIN
@@ -103,11 +88,11 @@ BEGIN
 				UPDATE tblTRImportLoadDetail SET intDriverId = @intDriverId WHERE intImportLoadDetailId = @intImportLoadDetailId
 			END
 
-            -- CHECK IF HAS VALID TRAILER
+			-- TRAILER
             DECLARE @intTrailerId INT = NULL
-
-            SELECT @intTrailerId = intEntityShipViaTrailerId FROM tblSMShipViaTrailer T 
-            WHERE T.strTrailerNumber = @strTrailer AND T.intEntityShipViaId = @intCarrierId
+			SELECT @intTrailerId  = CRB.intTrailerId
+			FROM tblTRCrossReferenceBol CRB 
+			WHERE CRB.strType = 'Trailer' AND CRB.strImportValue = @strTrailer
 
             IF (@intTrailerId IS NULL)
 			BEGIN
@@ -118,49 +103,64 @@ BEGIN
 				UPDATE tblTRImportLoadDetail SET intTrailerId = @intTrailerId WHERE intImportLoadDetailId = @intImportLoadDetailId
 			END
 
-            -- CHECK IF HAS VALID SUPLLIER
-            DECLARE @intSupplierId INT = NULL
+			-- SUPLLIER / VENDOR
+            DECLARE @intVendorId INT = NULL
+			DECLARE @intSupplyPointId INT = NULL
+			DECLARE @intVendorCompanyLocationId INT = NULL
+			
+			SELECT @intVendorId = CRB.intSupplierId, @intSupplyPointId = CRB.intSupplyPointId, @intVendorCompanyLocationId = CRB.intCompanyLocationId
+			FROM tblTRCrossReferenceBol CRB 
+			WHERE CRB.strType = 'Supplier' AND CRB.strImportValue = @strSupplier
 
-            SELECT @intSupplierId = V.intEntityId FROM tblAPVendor V
-            INNER JOIN tblEMEntity E ON E.intEntityId = V.intEntityId
-            WHERE ysnTransportTerminal = 1 AND E.strName = @strSupplier
-
-            IF (@intSupplierId IS NULL)
+            IF (@intVendorId IS NULL)
 			BEGIN
-				SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, 'Invalid Supplier')
+				IF (@intVendorCompanyLocationId IS NULL)
+				BEGIN
+					SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, 'Invalid Supplier')
+				END
+				ELSE
+				BEGIN
+					UPDATE tblTRImportLoadDetail SET intVendorCompanyLocationId = @intVendorCompanyLocationId WHERE intImportLoadDetailId = @intImportLoadDetailId
+				END
 			END
 			ELSE
 			BEGIN
-				UPDATE tblTRImportLoadDetail SET intSupplierId = @intSupplierId WHERE intImportLoadDetailId = @intImportLoadDetailId
+				UPDATE tblTRImportLoadDetail SET intVendorId = @intVendorId, intSupplyPointId = @intSupplyPointId WHERE intImportLoadDetailId = @intImportLoadDetailId
 			END
 
-            -- CHECK IF HAS VALID TERMINAL
-            DECLARE @intTerminalId INT = NULL
+			 -- CHECK IF HAS VALID DESTINATION
+            DECLARE @intCustomerId INT = NULL
+			DECLARE @intShipToId INT = NULL
+			DECLARE @intCustomerCompanyLocationId INT = NULL
 
-            SELECT @intTerminalId = EL.intEntityLocationId FROM tblEMEntityLocation EL
-            INNER JOIN tblEMEntity E ON E.intEntityId = EL.intEntityId
-            where EL.intEntityId = @intSupplierId AND EL.strLocationName = @strTerminal 
+			SELECT @intCustomerId = CRB.intCustomerId, @intShipToId = CRB.intCustomerLocationId, @intCustomerCompanyLocationId = CRB.intCompanyLocationId
+			FROM tblTRCrossReferenceBol CRB 
+			WHERE CRB.strType = 'Destination' AND CRB.strImportValue = @strDestination
 
-            IF (@intTerminalId IS NULL)
+            IF (@intCustomerId IS NULL)
 			BEGIN
-				SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, 'Invalid Terminal')
+				IF (@intCustomerCompanyLocationId IS NULL)
+				BEGIN
+					SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, 'Invalid Destination')
+				END
+				ELSE
+				BEGIN
+					UPDATE tblTRImportLoadDetail SET intCustomerCompanyLocationId = @intCustomerCompanyLocationId WHERE intImportLoadDetailId = @intImportLoadDetailId
+					
+				END
 			END
 			ELSE
 			BEGIN
-				UPDATE tblTRImportLoadDetail SET intTerminalId = @intTerminalId WHERE intImportLoadDetailId = @intImportLoadDetailId
+				UPDATE tblTRImportLoadDetail SET intCustomerId = @intCustomerId, intShipToId = @intShipToId WHERE intImportLoadDetailId = @intImportLoadDetailId
 			END
 
-            -- CHECK IF HAS VALID DESTINATION
-            DECLARE @intDestinationId INT = NULL
 
-
-            -- CHECK IF HAS VALID PULLED PRODUCT
+            -- PULLED PRODUCT
             DECLARE @intPullProductId INT = NULL
 
-            SELECT @intPullProductId = I.intItemId FROM vyuICItemLocation IL
-            INNER JOIN tblICItem I ON I.intItemId = IL.intItemId
-            INNER JOIN tblSMUserSecurity U ON U.intCompanyLocationId = IL.intLocationId
-            WHERE U.intEntityId = @intUserId AND I.strItemNo = @strPullProduct
+            SELECT @intPullProductId = CRB.intItemId
+			FROM tblTRCrossReferenceBol CRB 
+			WHERE CRB.strType = 'Item' AND CRB.strImportValue = @strPullProduct
 
             IF (@intPullProductId IS NULL)
 			BEGIN
@@ -171,15 +171,15 @@ BEGIN
 				UPDATE tblTRImportLoadDetail SET intPullProductId = @intPullProductId WHERE intImportLoadDetailId = @intImportLoadDetailId
 			END
 
-            -- CHECK IF HAS VALID DROPPED PRODUCT
+
+			-- DROPPED PRODUCT
             DECLARE @intDropProductId INT = NULL
 
-            SELECT @intPullProductId = I.intItemId FROM vyuICItemLocation IL
-            INNER JOIN tblICItem I ON I.intItemId = IL.intItemId
-            INNER JOIN tblSMUserSecurity U ON U.intCompanyLocationId = IL.intLocationId
-            WHERE U.intEntityId = @intUserId AND I.strItemNo = @strDropProduct
+            SELECT @intDropProductId = CRB.intItemId
+			FROM tblTRCrossReferenceBol CRB 
+			WHERE CRB.strType = 'Item' AND CRB.strImportValue = @strDropProduct
 
-            IF (@intPullProductId IS NULL)
+            IF (@intDropProductId IS NULL)
 			BEGIN
 				SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, 'Invalid Dropped Product')
 			END
@@ -188,14 +188,19 @@ BEGIN
 				UPDATE tblTRImportLoadDetail SET intDropProductId = @intDropProductId WHERE intImportLoadDetailId = @intImportLoadDetailId
 			END
 
+			-- CHECK DUPLICATE BOL
 
-			IF((@strMessage IS NULL OR @strMessage = '') AND @ysnValid = 1)
-			BEGIN
-				UPDATE tblTRImportLoadDetail SET ysnValid = 1 WHERE intImportLoadDetailId = @intImportLoadDetailId 
+
+            IF(@ysnValid = 1)
+			BEGIN			
+				IF(ISNULL(@strMessage, '') != '')
+				BEGIN
+					UPDATE tblTRImportLoadDetail SET strMessage = @strMessage, ysnValid = 0 WHERE intImportLoadDetailId = @intImportLoadDetailId 
+				END	
 			END
 			ELSE
 			BEGIN
-				UPDATE tblTRImportLoadDetail SET strMessage = @strMessage, ysnValid = 0 WHERE intImportLoadDetailId = @intImportLoadDetailId 
+				UPDATE tblTRImportLoadDetail SET strMessage = @strMessage, ysnValid = 0 WHERE intImportLoadDetailId = @intImportLoadDetailId
 			END
 
 			FETCH NEXT FROM @CursorTran INTO @intImportLoadDetailId, @strTruck, @strTerminal, @strCarrier, @strDriver, @strTrailer, @strSupplier, @strDestination, @strPullProduct, @strDropProduct, @ysnValid, @strMessage
