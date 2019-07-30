@@ -18,6 +18,10 @@ DECLARE @ReturnCode				INT				= 0,
 		@stri21Folder			NVARCHAR(150)   = N'i21CStoreSQLLog'
 		
 DECLARE @stri21LogPath			NVARCHAR(150)   = N'C:\\' + @stri21Folder + '\'
+DECLARE @stri21OutputFilename	NVARCHAR(150)   = @stri21LogPath + 'i21_CStoreRetailPriceAdjustment_Log'
+
+SELECT '@stri21LogPath', @stri21LogPath
+SELECT '@stri21OutputFilename', @stri21OutputFilename
 
 --Note: category_class
 --1 = Job
@@ -155,7 +159,7 @@ SELECT @serverName = Convert(varchar(250), SERVERPROPERTY('ServerName'))
 			@subsystem = N'TSQL',   
 			--@command = @stepCommand,
 			@os_run_priority=0,
-			@output_file_name=N'C:\\i21Log\i21_Reindex_Log', 
+			@output_file_name= @stri21OutputFilename, 
 			@flags=2														--Append to output file
 		IF (@@ERROR <> 0 OR @ReturnCode <> 0) GOTO QuitWithRollback
 
@@ -223,7 +227,6 @@ SELECT @serverName = Convert(varchar(250), SERVERPROPERTY('ServerName'))
 
 	GOTO EndSave
 
-
 QuitWithRollback:
 		IF (@@TRANCOUNT > 0)
 			BEGIN
@@ -233,6 +236,11 @@ QuitWithRollback:
 			
 
 EndSave:
+	-- Turn Off Agent XPs --
+	EXEC sp_configure'AGENT XPs',0
+	RECONFIGURE
+	EXEC sp_configure'SHOW ADVANCE',0
+	RECONFIGURE
 
 GO
 
