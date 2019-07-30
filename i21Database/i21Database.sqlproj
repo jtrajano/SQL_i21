@@ -7928,6 +7928,8 @@
     <Build Include="dbo\Functions\fnDateRange.sql" />
     <Build Include="dbo\Tables\tblAPImportPaidVoucherOhio.sql" />
     <Build Include="dbo\Tables\tblAPVendorImportInfo.sql" />
+    <Build Include="dbo\Tables\tblGLPrimarySegmentRestriction.sql" />
+    <Build Include="dbo\Views\vyuGLPrimarySegmentRestriction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
