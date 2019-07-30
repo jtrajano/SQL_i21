@@ -39,6 +39,7 @@
 	[intUserSecurityIdOld]			INT NULL,
 	[ysnSecurityPolicyUpdated]		BIT DEFAULT ((0)) NOT NULL,
 	[ysnOverrideDistribution]		BIT DEFAULT ((0)) NOT NULL,
+    [ysnActiveDirectory] BIT NOT NULL DEFAULT 0, 
     CONSTRAINT [PK_User] PRIMARY KEY CLUSTERED ([intEntityId] ASC),
     CONSTRAINT [FK_UserSecurity_tblSMSecurityPolicy] FOREIGN KEY ([intSecurityPolicyId]) REFERENCES [dbo].[tblSMSecurityPolicy] ([intSecurityPolicyId]),
     CONSTRAINT [FK_UserSecurity_UserRole] FOREIGN KEY ([intUserRoleID]) REFERENCES [dbo].[tblSMUserRole] ([intUserRoleID]),
