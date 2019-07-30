@@ -667,9 +667,9 @@ BEGIN TRY
 	,strLocationName		= L.strLocationName					   
 	,strCustomer			= EY.strEntityName
 	,strContract			= CH.strContractNumber+'-' +LTRIM(CD.intContractSeq)
-	,intPricingTypeId		= CASE WHEN ISNULL(PF.dblQuantity,0) = 0 THEN CD.intPricingTypeId ELSE 2 END
-	,strPricingType			= 'B'
-	,strPricingTypeDesc	    = CASE WHEN ISNULL(PF.dblQuantity,0) = 0 THEN PT.strPricingType ELSE 'Basis' END
+	,intPricingTypeId		= CD.intPricingTypeId	
+	,strPricingType			= LEFT(PT.strPricingType,1)
+	,strPricingTypeDesc	    = PT.strPricingType
 	,strContractDate		= LEFT(CONVERT(NVARCHAR,CH.dtmContractDate,101),5)
 	,strShipMethod			= FT.strFreightTerm
 	,strShipmentPeriod		=    LTRIM(DATEPART(mm,CD.dtmStartDate)) + '/' + LTRIM(DATEPART(dd,CD.dtmStartDate))+' - '
@@ -822,7 +822,7 @@ BEGIN TRY
 		WHERE dblQuantity > 0
 
 	INSERT INTO @tblChange(intSequenceHistoryId,intContractDetailId)
-	SELECT MAX(intSequenceHistoryId),intContractDetailId FROM tblCTSequenceHistory 
+	SELECT MIN(intSequenceHistoryId),intContractDetailId FROM tblCTSequenceHistory 
 	WHERE  dbo.fnRemoveTimeOnDate(dtmHistoryCreated)	<= CASE WHEN @dtmEndDate IS NOT NULL THEN @dtmEndDate ELSE dbo.fnRemoveTimeOnDate(dtmHistoryCreated) END
 	GROUP BY intContractDetailId
 
