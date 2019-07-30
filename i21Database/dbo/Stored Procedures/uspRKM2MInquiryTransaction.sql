@@ -23,6 +23,7 @@ BEGIN
 	DECLARE @ysnCanadianCustomer BIT
 	DECLARE @intDefaultCurrencyId int
 	DECLARE @intMarkExpiredMonthPositionId INT
+	DECLARE @ysnIncludeDerivatives BIT
 
 SELECT @dtmPriceDate = dtmM2MBasisDate FROM tblRKM2MBasis WHERE intM2MBasisId = @intM2MBasisId
 
@@ -31,6 +32,7 @@ SELECT TOP 1 @ysnIncludeBasisDifferentialsInResults = ysnIncludeBasisDifferentia
 	, @ysnIncludeInventoryM2M = ysnIncludeInventoryM2M
 	, @ysnCanadianCustomer = ISNULL(ysnCanadianCustomer, 0)
 	, @intMarkExpiredMonthPositionId = intMarkExpiredMonthPositionId
+	, @ysnIncludeDerivatives = ysnIncludeDerivatives
 FROM tblRKCompanyPreference
 
 SELECT TOP 1 @dtmSettlemntPriceDate = dtmPriceDate FROM tblRKFuturesSettlementPrice WHERE intFutureSettlementPriceId = @intFutureSettlementPriceId
@@ -2193,6 +2195,7 @@ INTO #Temp
 FROM (
 	SELECT intContractHeaderId
 		, intContractDetailId
+		, intTransactionId = intContractHeaderId
 		, strContractOrInventoryType
 		, strContractSeq
 		, strEntityName
@@ -2450,6 +2453,56 @@ BEGIN
 			,intCurrencyId,dblCashOrFuture
 	)t2 WHERE ISNULL(dblOpenQty,0) <> 0
 END
+
+	--Derivative Entries
+	IF @ysnIncludeDerivatives = 1
+	BEGIN
+		
+		INSERT INTO #Temp (strContractOrInventoryType
+			, intTransactionId
+			, strContractSeq
+			, strEntityName
+			, intEntityId
+			, strCommodityCode
+			, intCommodityId
+			, strLocationName
+			, intCompanyLocationId
+			, strFutureMonth
+			, intFutureMonthId
+			, strFutMarketName
+			, intFutureMarketId
+			, dblFutures
+			, dblOpenQty
+			, dblInvFuturePrice
+			, intCurrencyId)
+		SELECT  
+			  strContractOrInventoryType = CASE WHEN strNewBuySell = 'Buy' THEN 'Futures(B)' ELSE 'Futures(S)' END
+			, intFutOptTransactionHeaderId
+			, strInternalTradeNo
+			, strBroker
+			, intEntityId
+			, strCommodityCode
+			, intCommodityId
+			, strLocationName
+			, intLocationId
+			, strFutureMonth
+			, DER.intFutureMonthId
+			, strFutureMarket
+			, DER.intFutureMarketId
+			, dblPrice
+			, dblOpenQty = dblOpenContract * dblContractSize
+			, dblInvFuturePrice = SP.dblLastSettle
+			, intCurrencyId
+		FROM fnRKGetOpenFutureByDate (@intCommodityId, '1/1/1900',@dtmTransactionDateUpTo, 1) DER
+		LEFT JOIN @tblGetSettlementPrice SP ON SP.intFutureMarketId = DER.intFutureMarketId AND SP.intFutureMonthId = DER.intFutureMonthId
+		WHERE intCommodityId = @intCommodityId 
+			AND ysnPreCrush = 0 
+			AND ysnExpired = 0
+			AND intInstrumentTypeId = 1
+			AND dblOpenContract <> 0
+
+	END
+
 
 DECLARE @strM2MCurrency NVARCHAR(20)
 	, @dblRateConfiguration NUMERIC(18,6)
@@ -2722,7 +2775,7 @@ FROM (
 	WHERE dblOpenQty <> 0 and intContractHeaderId is not NULL 
 	
 	UNION ALL SELECT intConcurrencyId = 0
-		, intContractHeaderId
+		, intContractHeaderId = intTransactionId
 		, intContractDetailId
 		, strContractOrInventoryType
 		, strContractSeq
@@ -2753,18 +2806,18 @@ FROM (
 		, dblActualFutures = dblFutures
 		, dblFutures = (CASE WHEN strPricingType = 'Basis' THEN 0
 							ELSE dblFutures END)
-		, dblCash
-		, dblCosts = ABS(dblCosts)
+		, dblCash = ISNULL(dblCash,0)
+		, dblCosts = ABS(ISNULL(dblCosts,0))
 		, dblMarketBasis = ISNULL(dblInvMarketBasis,0)
 		, dblMarketRatio = ISNULl(dblMarketRatio,0)
 		, dblFuturePrice = ISNULL(dblInvFuturePrice,0)
 		, intContractTypeId
-		, dblAdjustedContractPrice =  ISNULL(dblCash,0)
-		, dblCashPrice 
+		, dblAdjustedContractPrice =  CASE WHEN strContractOrInventoryType like 'Futures%' THEN dblFutures ELSE  ISNULL(dblCash,0) END
+		, dblCashPrice  = ISNULL(dblCashPrice,0)
 		, dblMarketPrice = ISNULL(dblInvMarketBasis, 0) + ISNULL(dblInvFuturePrice, 0)  + ISNULL(dblCashPrice,0)
 		, dblResultBasis = 0
 		, dblResultCash =  ROUND((ISNULL(dblCashPrice,0) - ISNULL(dblCash, 0)) * Round(dblOpenQty,2),2)
-		, dblContractPrice = ISNULL(dblCash, 0)
+		, dblContractPrice = CASE WHEN strContractOrInventoryType like 'Futures%' THEN dblFutures ELSE  ISNULL(dblCash,0) END
 		, intQuantityUOMId
 		, intCommodityUnitMeasureId
 		, intPriceUOMId
