@@ -63,5 +63,8 @@
     [intCompanySetupId] INT NOT NULL,
 	[intMultiCurrencyId] INT NULL,
     [intPDFExportLimit] INT NOT NULL DEFAULT(10000),
+	[ysnADEnabled] BIT NOT NULL DEFAULT 0,
+	[strADDomain] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	[strADGroup] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
     [intConcurrencyId] INT NOT NULL DEFAULT 1
 )
