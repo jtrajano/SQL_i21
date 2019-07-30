@@ -23,7 +23,7 @@ SELECT CRB.intCrossReferenceBolId,
     CRB.intTrailerId,
     ST.strTrailerNumber,
     CRB.intCarrierId,
-    SV.strName strCarrierName,
+    SV.strShipVia strCarrierName,
     CRB.intConcurrencyId
 FROM tblTRCrossReferenceBol CRB
 LEFT JOIN tblEMEntity EMV ON EMV.intEntityId = CRB.intSupplierId

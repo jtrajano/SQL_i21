@@ -88,6 +88,21 @@ BEGIN
 				UPDATE tblTRImportLoadDetail SET intDriverId = @intDriverId WHERE intImportLoadDetailId = @intImportLoadDetailId
 			END
 
+			-- TRUCK
+			DECLARE @intTruckId INT = NULL
+			SELECT @intTruckId  = CRB.intTruckId
+			FROM tblTRCrossReferenceBol CRB 
+			WHERE CRB.strType = 'Truck' AND CRB.strImportValue = @strTruck
+
+            IF (@intTruckId IS NULL)
+			BEGIN
+				SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, 'Invalid Truck')	
+			END
+			ELSE
+			BEGIN
+				UPDATE tblTRImportLoadDetail SET intTruckId = @intTruckId WHERE intImportLoadDetailId = @intImportLoadDetailId
+			END
+
 			-- TRAILER
             DECLARE @intTrailerId INT = NULL
 			SELECT @intTrailerId  = CRB.intTrailerId
@@ -125,7 +140,7 @@ BEGIN
 			END
 			ELSE
 			BEGIN
-				UPDATE tblTRImportLoadDetail SET intVendorId = @intVendorId, intSupplyPointId = @intSupplyPointId WHERE intImportLoadDetailId = @intImportLoadDetailId
+				UPDATE tblTRImportLoadDetail SET intVendorId = @intVendorId, intSupplyPointId = @intSupplyPointId, intVendorCompanyLocationId = @intVendorCompanyLocationId WHERE intImportLoadDetailId = @intImportLoadDetailId
 			END
 
 			 -- CHECK IF HAS VALID DESTINATION
@@ -151,7 +166,7 @@ BEGIN
 			END
 			ELSE
 			BEGIN
-				UPDATE tblTRImportLoadDetail SET intCustomerId = @intCustomerId, intShipToId = @intShipToId WHERE intImportLoadDetailId = @intImportLoadDetailId
+				UPDATE tblTRImportLoadDetail SET intCustomerId = @intCustomerId, intShipToId = @intShipToId, intCustomerCompanyLocationId = @intCustomerCompanyLocationId WHERE intImportLoadDetailId = @intImportLoadDetailId
 			END
 
 
@@ -188,7 +203,7 @@ BEGIN
 				UPDATE tblTRImportLoadDetail SET intDropProductId = @intDropProductId WHERE intImportLoadDetailId = @intImportLoadDetailId
 			END
 
-			-- CHECK DUPLICATE BOL
+
 
 
             IF(@ysnValid = 1)
