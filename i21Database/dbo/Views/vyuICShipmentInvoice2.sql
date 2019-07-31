@@ -8,6 +8,7 @@ SELECT	t.intInventoryShipmentId
 		,t.dtmShipDate
 		,t.strCustomer
 		,t.strLocationName
+		,ship.intShipFromLocationId intLocationId
 		,t.strDestination
 		,t.strBOLNumber
 		,t.strOrderType
@@ -34,3 +35,4 @@ SELECT	t.intInventoryShipmentId
 		,t.strItemUOM
 		,t.intItemUOMId
 FROM	[tblICSearchShipmentInvoice] t
+	LEFT OUTER JOIN tblICInventoryShipment ship ON ship.intInventoryShipmentId = t.intInventoryShipmentId

@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspICGetCommodityActivity]
 	@dtmDate AS DATETIME,
-	@guidSessionId UNIQUEIDENTIFIER
+	@guidSessionId UNIQUEIDENTIFIER,
+	@intUserId INT
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -12,7 +13,7 @@ SET ANSI_WARNINGS OFF
 
 
 
-	exec uspICGetDailyStockPosition @dtmDate, @guidSessionId
+	exec uspICGetDailyStockPosition @dtmDate, @guidSessionId, @intUserId
 
 
 

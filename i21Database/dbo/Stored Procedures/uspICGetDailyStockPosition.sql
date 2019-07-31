@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspICGetDailyStockPosition]
 	@dtmDate AS DATETIME,
-	@guidSessionId UNIQUEIDENTIFIER
+	@guidSessionId UNIQUEIDENTIFIER,
+	@intUserId INT
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -433,3 +434,5 @@ CREATE TABLE #tmpDailyStockPosition
 		ON Category.intCategoryId = Item.intCategoryId
 	INNER JOIN tblSMCompanyLocation Loc 
 		ON Loc.intCompanyLocationId = tmpDSP.intLocationId
+	INNER JOIN vyuICUserCompanyLocations permission ON permission.intCompanyLocationId = Loc.intCompanyLocationId
+	WHERE permission.intEntityId = @intUserId

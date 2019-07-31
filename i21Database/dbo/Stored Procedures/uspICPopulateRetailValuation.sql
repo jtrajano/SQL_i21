@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [uspICPopulateRetailValuation]
 	@dtmDateFrom AS DATETIME
 	,@dtmDateTo AS DATETIME 
+	,@intUserId INT
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -60,7 +61,9 @@ FROM 	tblICCategory category LEFT JOIN tblICCategoryLocation categoryLocation
 			ON category.intCategoryId = categoryLocation.intCategoryId
 		LEFT JOIN tblSMCompanyLocation companyLocation
 			ON categoryLocation.intLocationId = companyLocation.intCompanyLocationId
+		INNER JOIN vyuICUserCompanyLocations permission ON permission.intCompanyLocationId = categoryLocation.intLocationId
 WHERE	category.ysnRetailValuation = 1
+	AND permission.intEntityId = @intUserId
 
 -- Populate the beginning retail 
 UPDATE	rv

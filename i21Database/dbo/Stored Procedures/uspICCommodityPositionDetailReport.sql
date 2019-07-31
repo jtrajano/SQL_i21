@@ -1,7 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspICCommodityPositionDetailReport]	
 	@ysnGetHeader	bit  = 0,
 	@dtmDate		date = null,
-	@strLocationName nvarchar(max) = ''
+	@strLocationName nvarchar(max) = '',
+	@intUserId INT = NULL
 as
 begin
 	DECLARE @Columns VARCHAR(MAX)
@@ -112,6 +113,8 @@ begin
 			
 
 		) b
+		INNER JOIN vyuICUserCompanyLocations permission ON permission.intCompanyLocationId = b.intLocationId
+		WHERE permission.intEntityId = ' + CAST(@intUserId AS VARCHAR(50)) + '
 	'
 	
 	EXEC(@sql) 

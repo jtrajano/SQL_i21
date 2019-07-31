@@ -3,7 +3,8 @@
 	@ysnGetHeader	bit  = 0,
 	@dtmDate		date = null,
 	@strLocationName nvarchar(max) = '',
-	@ysnLocationLicensed bit = null
+	@ysnLocationLicensed bit = null,
+	@intUserId INT = NULL
 as
 begin
 	DECLARE @Columns VARCHAR(MAX)
@@ -114,10 +115,11 @@ begin
 		SUM( dblQty)
 		FOR strCommodityCode IN (' + @Columns + ')
 	) AS PVT
-	
+	INNER JOIN vyuICUserCompanyLocations permission ON permission.intCompanyLocationId = PVT.intCompanyLocationId
+	WHERE permission.intEntityId = ' + CAST(@intUserId AS VARCHAR(50)) + '
 	--WHERE 
 	--	[Canola] IS NOT NULL 	
-	ORDER BY strLocationName 
+	ORDER BY PVT.strLocationName 
 	'	
 	EXEC(@sql) 
 	
