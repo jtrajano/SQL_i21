@@ -7961,6 +7961,7 @@
     <Build Include="dbo\Stored Procedures\uspICAddItemLocationForCStore.sql" />
     <Build Include="dbo\Stored Procedures\uspICAddItemPricingForCStore.sql" />
     <Build Include="dbo\Stored Procedures\uspICAddItemVendorXrefForCStore.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCImportData.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
