@@ -251,6 +251,7 @@ BEGIN TRANSACTION
 		strBinNumber = NULL
 		,dblQuantityRemaining = 0
 		,strStatus = 'Returned'
+		WHERE intLotteryBookId = @Id
 	
 
 		SET @strReceiptType = 'Direct'
@@ -378,7 +379,7 @@ BEGIN TRANSACTION
 			strStatus = 'In Active'
 		FROM 
 		tblSTReturnLottery
-		WHERE intReturnLotteryId = @Id
+		WHERE intReturnLotteryId = @Id AND tblSTReturnLottery.intLotteryBookId = tblSTLotteryBook.intLotteryBookId
 		
 		SELECT TOP 1 @intInventoryReceiptId = intInventoryReceiptId FROM tblSTReturnLottery WHERE intReturnLotteryId = @Id
 

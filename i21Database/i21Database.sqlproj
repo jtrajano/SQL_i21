@@ -7962,6 +7962,8 @@
     <Build Include="dbo\Stored Procedures\uspICAddItemPricingForCStore.sql" />
     <Build Include="dbo\Stored Procedures\uspICAddItemVendorXrefForCStore.sql" />
     <Build Include="dbo\Stored Procedures\uspSCImportData.sql" />
+    <Build Include="dbo\Tables\tblSTCheckoutLotteryCount.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTGetLotteryCountData.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

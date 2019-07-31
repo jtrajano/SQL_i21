@@ -1,7 +1,7 @@
 ﻿
 CREATE VIEW dbo.vyuSTItemPricingOnFirstLocation
 AS 
-	SELECT 
+SELECT 
 		tblICItem.intItemId,
 		tblICItem.strItemNo,
 		tblICItem.strDescription as strItemDescription,
@@ -12,7 +12,10 @@ AS
 		tblICItemPricing.dblAverageCost,
 		tblICItemPricing.dblStandardCost,
 		tblICItemPricing.dblSalePrice,
-		strItemNoAndDescription = ISNULL(tblICItem.strItemNo,'') + '-' + ISNULL(tblICItem.strDescription,'')
+		strItemNoAndDescription = ISNULL(tblICItem.strItemNo,'') + '-' + ISNULL(tblICItem.strDescription,''),
+		tblICCategory.strCategoryCode,
+		strCategoryDescription = tblICCategory.strDescription,
+		tblICCategory.intCategoryId
 	FROM 
 	(
 		SELECT * FROM (
@@ -34,3 +37,5 @@ AS
 		ON tblICItem.intItemId = tblICItemPricing.intItemId
 	LEFT JOIN tblICItemUOM 
 		ON tblICItemUOM.intItemUOMId = tblICItemLocation.intIssueUOMId
+	LEFT JOIN tblICCategory
+		ON tblICCategory.intCategoryId = tblICItem.intCategoryId
