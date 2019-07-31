@@ -1286,7 +1286,10 @@ BEGIN TRY
 													ELSE a.dblUnits 
 												END
 					,[strMiscDescription]		= c.[strItemNo]
-					,[dblCost]					= a.[dblCashPrice]
+					,[dblCost]					= CASE
+																WHEN a.[intContractHeaderId] IS NOT NULL THEN dbo.fnCTConvertQtyToTargetItemUOM(a.intContractUOMId,b.intItemUOMId,a.dblCashPrice)
+																ELSE a.dblCashPrice
+															END
 					,[intContractHeaderId]		= a.[intContractHeaderId]
 					,[intContractDetailId]		= a.[intContractDetailId]
 					,[intUnitOfMeasureId]		= CASE
