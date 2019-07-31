@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspSTCStoreSQLScheduler]
+﻿CREATE PROCEDURE [dbo].[uspSTCStoreSQLSchedulerDaily]
 AS
 BEGIN
 	

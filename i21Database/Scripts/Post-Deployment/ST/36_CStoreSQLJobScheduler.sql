@@ -12,13 +12,13 @@ RECONFIGURE
 BEGIN TRANSACTION
 
 DECLARE @ReturnCode				INT				= 0,
-		@strCStoreSchedulerName NVARCHAR(100)	= N'i21 CStore Scheduler',
-		@strCStorePlanName		NVARCHAR(100)	= N'i21_PostRetailPrice_Maintenance_Plan',
-		@strCStoreJobName		NVARCHAR(100)	= N'i21_PostRetailPrice_Maintenance_Job',
+		@strCStoreSchedulerName NVARCHAR(100)	= N'i21 CStore Scheduler Daily',
+		@strCStorePlanName		NVARCHAR(100)	= N'i21_CStore_Daily_Maintenance_Plan',
+		@strCStoreJobName		NVARCHAR(100)	= N'i21_CStore_Daily_Maintenance_Job',
 		@stri21Folder			NVARCHAR(150)   = N'i21CStoreSQLLog'
 		
 DECLARE @stri21LogPath			NVARCHAR(150)   = N'C:\\' + @stri21Folder + '\'
-DECLARE @stri21OutputFilename	NVARCHAR(150)   = @stri21LogPath + 'i21_CStoreRetailPriceAdjustment_Log'
+DECLARE @stri21OutputFilename	NVARCHAR(150)   = @stri21LogPath + 'i21_CStore_Log'
 
 SELECT '@stri21LogPath', @stri21LogPath
 SELECT '@stri21OutputFilename', @stri21OutputFilename
@@ -85,7 +85,7 @@ SELECT @serverName = Convert(varchar(250), SERVERPROPERTY('ServerName'))
 		   @job_name				=	@strCStoreJobName,
 		   @enabled					=	1,
 		   @notify_level_eventlog	=	2, 
-		   @description				=	N'Post Retail Price Adjustment',
+		   @description				=	N'CStore Daily Maintenance Scheduler',
 		   @category_name			=	@strCStoreSchedulerName, 
 		   @job_id = @jobId OUTPUT
 
@@ -125,13 +125,13 @@ SELECT @serverName = Convert(varchar(250), SERVERPROPERTY('ServerName'))
 
 	SET @maxStepId = 0;
 	SET @currentDate = convert(NVARCHAR, GETDATE(), 112)
-	SET @stepName = N'Invoke Post Retail Price Stored Procedure in ' + Convert(varchar(100), @currentDatabaseName)
-	SET @stepNameSchedule = N'i21_PostRetailPriceSchedule in' + Convert(varchar(100), @currentDatabaseName)
+	SET @stepName = N'Invoke CStore Daily Maintenance Scheduler in ' + Convert(varchar(100), @currentDatabaseName)
+	SET @stepNameSchedule = N'i21_CStore_Daily_Scheduler in' + Convert(varchar(100), @currentDatabaseName)
 	SET @stepCommand = N'
 	GO
 	BEGIN TRY
 		USE [' + Convert(varchar(50), @currentDatabaseName) + '] 
-		EXEC [uspSTCStoreSQLScheduler]
+		EXEC [uspSTCStoreSQLSchedulerDaily]
 	END TRY
 	BEGIN CATCH
 		SELECT 

@@ -7942,7 +7942,7 @@
     <Build Include="dbo\Views\vyuTRCrossReferenceBol.sql" />
     <Build Include="dbo\Views\vyuFRUserReportRestriction.sql" />
     <Build Include="dbo\Tables\tblFRUserReportRestriction.sql" />
-    <Build Include="dbo\Stored Procedures\uspSTCStoreSQLScheduler.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTCStoreSQLSchedulerDaily.sql" />
     <None Include="Scripts\Post-Deployment\ST\36_CStoreSQLJobScheduler.sql" />
     <Build Include="dbo\Functions\fnGRValidateBillPost.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateItemContractOnInvoice.sql" />

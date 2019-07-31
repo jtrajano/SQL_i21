@@ -421,5 +421,41 @@ IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = N'tb
 ----------------------------------------------------------------------------------------------------------------------------------
 
 
+----------------------------------------------------------------------------------------------------------------------------------
+-- Start: DROP uspSTCStoreSQLScheduler
+----------------------------------------------------------------------------------------------------------------------------------
+IF EXISTS(SELECT TOP 1 1 FROM sys.objects WHERE type = 'P' AND name = 'uspSTCStoreSQLScheduler')
+	BEGIN
+		PRINT(N'Drop uspSTCStoreSQLScheduler')
+		EXEC('
+				DROP PROCEDURE [dbo].[uspSTCStoreSQLScheduler]
+			')
+	END
+----------------------------------------------------------------------------------------------------------------------------------
+-- End: DROP uspSTCStoreSQLScheduler
+----------------------------------------------------------------------------------------------------------------------------------
+
+
+----------------------------------------------------------------------------------------------------------------------------------
+-- Start: Remove Job Scheduler named 'i21_PostRetailPrice_Maintenance_Job'
+----------------------------------------------------------------------------------------------------------------------------------
+IF EXISTS (SELECT TOP 1 1 FROM msdb.dbo.sysjobs WHERE name = N'i21_PostRetailPrice_Maintenance_Job')
+	BEGIN
+		PRINT(N'Drop i21_PostRetailPrice_Maintenance_Job')
+		EXEC('
+				DECLARE @jobId binary(16)
+
+				SELECT @jobId = job_id FROM msdb.dbo.sysjobs WHERE (name = N''i21_PostRetailPrice_Maintenance_Job'')
+
+				IF (@jobId IS NOT NULL)
+					BEGIN
+						EXEC msdb.dbo.sp_delete_job @jobId
+					END
+			')
+	END
+----------------------------------------------------------------------------------------------------------------------------------
+-- End: Remove Job Scheduler named 'i21_PostRetailPrice_Maintenance_Job'
+----------------------------------------------------------------------------------------------------------------------------------
+
 PRINT('*** ST Cleanup - End ***')
 PRINT('')
