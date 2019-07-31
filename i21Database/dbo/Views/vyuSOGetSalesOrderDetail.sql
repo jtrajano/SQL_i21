@@ -41,7 +41,7 @@ SELECT
         SO.dblBaseLicenseAmount,
         SO.intContractHeaderId,
         SO.intContractDetailId,
-        dblContractBalance = CDET.dblBalance,
+        dblContractBalance = ISNULL(CDET.dblBalance,0),
         SO.dblContractAvailable,
         SO.ysnBlended,
         SO.intTaxGroupId,
