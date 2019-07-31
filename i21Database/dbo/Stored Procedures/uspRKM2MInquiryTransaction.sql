@@ -1237,7 +1237,7 @@ FROM (
 				  ch.intContractHeaderId
 				, cd.intContractDetailId
                 , 'In-transit' + '(S)' as strContractOrInventoryType
-                , strContractSeq = ch.strContractNumber + '-' + CONVERT(nvarchar(10),cd.intContractSeq)
+                , strContractSeq = it.strTransactionId
                 , strEntityName = e.strName
                 , ch.intEntityId
                 , fm.strFutMarketName
