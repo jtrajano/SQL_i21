@@ -1,5 +1,6 @@
 CREATE PROCEDURE [dbo].[uspICGenerateStockMovementReport]
-	@strResetType AS NVARCHAR(500) = 'Commodity'
+	@strResetType AS NVARCHAR(500) = 'Commodity',
+	@intUserId INT
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -288,16 +289,18 @@ BEGIN
 		,intSourceEntityId
 	)
 	SELECT 
-		*
+		m.*
 	FROM 
-		vyuICGenerateStockMovement
+		vyuICGenerateStockMovement m
+			INNER JOIN vyuICUserCompanyLocations permission ON permission.intCompanyLocationId = m.intLocationId
+	WHERE permission.intEntityId = @intUserId
 	ORDER BY
-		intItemId ASC 
-		,intLocationId ASC 
-		,dtmDate ASC
-		,dtmCreated ASC 
-		,intCommodityId ASC 
-		,intCategoryId ASC
+		 m.intItemId ASC 
+		,m.intLocationId ASC 
+		,m.dtmDate ASC
+		,m.dtmCreated ASC 
+		,m.intCommodityId ASC 
+		,m.intCategoryId ASC
 
 END 
 
@@ -344,14 +347,16 @@ BEGIN
 		,intSourceEntityId
 	)
 	SELECT 
-		*
+		m.*
 	FROM 
-		vyuICGenerateStockMovement
+		vyuICGenerateStockMovement m
+			INNER JOIN vyuICUserCompanyLocations permission ON permission.intCompanyLocationId = m.intLocationId
+	WHERE permission.intEntityId = @intUserId
 	ORDER BY
-		intCommodityId ASC 
-		,intCategoryId ASC 
-		,intItemId ASC 
-		,intLocationId ASC
-		,dtmDate ASC
-		,dtmCreated ASC 
+		 m.intCommodityId ASC 
+		,m.intCategoryId ASC 
+		,m.intItemId ASC 
+		,m.intLocationId ASC
+		,m.dtmDate ASC
+		,m.dtmCreated ASC 
 END 

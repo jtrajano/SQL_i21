@@ -6,6 +6,7 @@ SELECT
 	, intItemLocationId = lot.intItemLocationId
 	, intSubLocationId = lot.intSubLocationId
 	, intStorageLocationId = lot.intStorageLocationId
+	, intLocationId = lot.intLocationId
 	, intLotStatusId = lot.intLotStatusId
 	, strLotStatus = lotStatus.strSecondaryStatus
 	, intItemUOMId = lot.intItemUOMId
