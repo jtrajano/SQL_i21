@@ -325,6 +325,12 @@ BEGIN
 	END
 END
 
+IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblRKCompanyPreference' AND COLUMN_NAME = 'ysnIncludeDerivatives')
+BEGIN
+	UPDATE tblRKCompanyPreference
+	SET ysnIncludeDerivatives = 1
+	WHERE ysnIncludeDerivatives IS NULL
+END
 
 print('/*******************  END Risk Management Data Fixess *******************/')
 GO
