@@ -7668,6 +7668,7 @@
     <Build Include="dbo\Functions\fnCTConvertQtyToStockItemUOM.sql" />
     <Build Include="dbo\Functions\fnCTConvertPriceToStockItemUOM.sql" />
     <Build Include="dbo\Functions\fnGRValidateBillPost.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCImportData.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
