@@ -16,6 +16,7 @@
     [ysnPromo] BIT NULL, 
     [strPriceMethod] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [dblFactor] NUMERIC(18, 6) NULL, 
+	[strRoundPrice] NVARCHAR(3) COLLATE Latin1_General_CI_AS NULL,
     [dblPrice] NUMERIC(18, 6) NULL, 
 	[dblLastCost] NUMERIC(18, 6) NULL, 
     [ysnActive] BIT NULL, 
