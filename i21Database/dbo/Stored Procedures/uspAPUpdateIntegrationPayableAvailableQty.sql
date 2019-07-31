@@ -230,7 +230,7 @@ BEGIN --MISC PO ITEM
 		LEFT JOIN tblICItem C
 			ON B.intItemId = C.intItemId
 		WHERE 
-			B.intPurchaseDetailId > 0
+			B.intPurchaseDetailId > 0 AND B.intUnitOfMeasureId > 0
 		AND B.intInventoryReceiptItemId IS NULL
 		AND (dbo.fnIsStockTrackingItem(C.intItemId) = 0 OR C.intItemId IS NULL)
 		-- AND EXISTS 
