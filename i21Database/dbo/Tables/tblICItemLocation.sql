@@ -82,7 +82,8 @@ Type the overview for the table here.
 		[dtmDateCreated] DATETIME NULL,
         [dtmDateModified] DATETIME NULL,
         [intCreatedByUserId] INT NULL,
-        [intModifiedByUserId] INT NULL, 		
+        [intModifiedByUserId] INT NULL,
+		[intDataSourceId] TINYINT NULL,
 		CONSTRAINT [FK_tblICItemLocation_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]) ON DELETE CASCADE, 
 		CONSTRAINT [FK_tblICItemLocation_tblSMCompanyLocation] FOREIGN KEY ([intLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),
 		CONSTRAINT [FK_tblICItemLocation_tblICUnitMeasure_Issue] FOREIGN KEY ([intIssueUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]),
@@ -93,7 +94,8 @@ Type the overview for the table here.
 		CONSTRAINT [FK_tblICItemLocation_tblSMShipVia] FOREIGN KEY ([intShipViaId]) REFERENCES [tblSMShipVia]([intEntityId]), 
 		CONSTRAINT [FK_tblICItemLocation_tblICStorageLocation] FOREIGN KEY ([intStorageLocationId]) REFERENCES [tblICStorageLocation]([intStorageLocationId]), 
 		CONSTRAINT [FK_tblICItemLocation_tblSMCompanyLocationSubLocation] FOREIGN KEY ([intSubLocationId]) REFERENCES [tblSMCompanyLocationSubLocation]([intCompanyLocationSubLocationId]), 
-		CONSTRAINT [AK_tblICItemLocation] UNIQUE ([intItemId], [intLocationId])
+		CONSTRAINT [AK_tblICItemLocation] UNIQUE ([intItemId], [intLocationId]),
+		CONSTRAINT [FK_tblICItemLocation_tblICDataSource] FOREIGN KEY ([intDataSourceId]) REFERENCES [tblICDataSource]([intDataSourceId])
 	)
 	GO
 

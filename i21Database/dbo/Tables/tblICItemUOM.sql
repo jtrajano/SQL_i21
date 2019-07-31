@@ -37,13 +37,15 @@ Type the overview for the table here.
         [dtmDateModified] DATETIME NULL,
         [intCreatedByUserId] INT NULL,
         [intModifiedByUserId] INT NULL, 
+		[intDataSourceId] TINYINT NULL,
 		CONSTRAINT [PK_tblICItemUOM] PRIMARY KEY ([intItemUOMId]), 
 		CONSTRAINT [FK_tblICItemUOM_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]) ON DELETE CASCADE, 
 		CONSTRAINT [FK_tblICItemUOM_tblICUnitMeasure] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
 		CONSTRAINT [FK_tblICItemUOM_WeightUOM] FOREIGN KEY ([intWeightUOMId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
 		CONSTRAINT [FK_tblICItemUOM_DimensionUOM] FOREIGN KEY ([intDimensionUOMId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
 		CONSTRAINT [FK_tblICItemUOM_VolumeUOM] FOREIGN KEY ([intVolumeUOMId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]), 
-		CONSTRAINT [AK_tblICItemUOM] UNIQUE ([intItemId], [intUnitMeasureId])
+		CONSTRAINT [AK_tblICItemUOM] UNIQUE ([intItemId], [intUnitMeasureId]),
+		CONSTRAINT [FK_tblICItemUOM_tblICDataSource] FOREIGN KEY ([intDataSourceId]) REFERENCES [tblICDataSource]([intDataSourceId])
 	)
 	GO
 

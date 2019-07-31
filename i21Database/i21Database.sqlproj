@@ -7930,6 +7930,14 @@
     <Build Include="dbo\Tables\tblAPVendorImportInfo.sql" />
     <Build Include="dbo\Tables\tblGLPrimarySegmentRestriction.sql" />
     <Build Include="dbo\Views\vyuGLPrimarySegmentRestriction.sql" />
+    <Build Include="dbo\Stored Procedures\uspICAddItemForCStore.sql" />
+    <Build Include="dbo\Tables\tblICDataSource.sql" />
+    <None Include="Scripts\Post-Deployment\IC\19_InventoryDataSource.sql" />
+    <Build Include="dbo\Stored Procedures\uspICAddItemUOMForCStore.sql" />
+    <Build Include="dbo\Functions\fnUPCAtoUPCE.sql" />
+    <Build Include="dbo\Stored Procedures\uspICAddItemLocationForCStore.sql" />
+    <Build Include="dbo\Stored Procedures\uspICAddItemPricingForCStore.sql" />
+    <Build Include="dbo\Stored Procedures\uspICAddItemVendorXrefForCStore.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -8155,7 +8163,7 @@
     <None Include="Scripts\Post-Deployment\AP\PurgePayableCompleted.sql" />
     <Build Include="dbo\Views\vyuARGetInvoiceDetailLot.sql" />
     <Build Include="dbo\Functions\fnCCValidateAssociatedTransaction.sql" />
-	<Build Include="dbo\Stored Procedures\uspTRProcessImportBol.sql" />
+    <Build Include="dbo\Stored Procedures\uspTRProcessImportBol.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

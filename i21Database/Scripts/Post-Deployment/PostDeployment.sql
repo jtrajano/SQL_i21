@@ -325,6 +325,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\IC\15_Migrate_Old_Receipt_Totals.sql 
 :r .\IC\17_Inventory_Constraints.sql
 :r .\IC\18_Set_Commodity_Market_To_Market_Default_Data.sql
+:r .\IC\19_InventoryDataSource.sql 
 :r .\IC\Data_Fix_For_18.3\01_UpdateContractItemStatuses.sql 
 :r .\IC\Data_Fix_For_18.3\02_Update_ActualCostId_On_InventoryTransaction.sql 
 :r .\IC\Data_Fix_For_18.3\03_MigratePackedTypeToQuantityType.sql 
@@ -339,6 +340,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\IC\Data_Fix_For_18.3\12_PopulateGLEntityForICTransactions.sql
 :r .\IC\Data_Fix_For_18.3\13_PopulateLotInTransitQtyAndWgt.sql
 :r .\IC\Data_Fix_For_18.3\14_PopulateShipFromEntity.sql
+
 
 -- Patronage
 :r .\PAT\DefaultData\1_AddDefaultLetters.sql 

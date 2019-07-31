@@ -174,7 +174,8 @@ Type the overview for the table here.
 		[intCreatedByUserId] INT NULL,
 		[intModifiedByUserId] INT NULL,
 		[strServiceType] NVARCHAR(50)  COLLATE Latin1_General_CI_AS NULL,
-    CONSTRAINT [AK_tblICItem_strItemNo] UNIQUE ([strItemNo]), 
+		[intDataSourceId] TINYINT NULL,
+		CONSTRAINT [AK_tblICItem_strItemNo] UNIQUE ([strItemNo]), 
 		CONSTRAINT [PK_tblICItem] PRIMARY KEY ([intItemId]), 
 		CONSTRAINT [FK_tblICItem_tblICManufacturer] FOREIGN KEY ([intManufacturerId]) REFERENCES [tblICManufacturer]([intManufacturerId]), 
 		CONSTRAINT [FK_tblICItem_tblICBrand] FOREIGN KEY ([intBrandId]) REFERENCES [tblICBrand]([intBrandId]), 
@@ -195,7 +196,8 @@ Type the overview for the table here.
 		CONSTRAINT [FK_tblICItem_tblEMEntity] FOREIGN KEY ([intAccountManagerId]) REFERENCES tblEMEntity([intEntityId]),
 		CONSTRAINT [FK_tblICItem_tblICLotStatus] FOREIGN KEY (intLotStatusId) REFERENCES tblICLotStatus([intLotStatusId]),
 		CONSTRAINT [FK_tblICItem_tblICM2MComputation] FOREIGN KEY ([intM2MComputationId]) REFERENCES [tblICM2MComputation]([intM2MComputationId]), 
-		CONSTRAINT [FK_tblICItem_tblICUnitMeasure] FOREIGN KEY ([intTonnageTaxUOMId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId])
+		CONSTRAINT [FK_tblICItem_tblICUnitMeasure] FOREIGN KEY ([intTonnageTaxUOMId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
+		CONSTRAINT [FK_tblICItem_tblICDataSource] FOREIGN KEY ([intDataSourceId]) REFERENCES [tblICDataSource]([intDataSourceId])
 	);
 	GO
 

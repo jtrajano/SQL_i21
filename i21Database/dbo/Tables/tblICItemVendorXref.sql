@@ -27,12 +27,14 @@ Type the overview for the table here.
         [dtmDateModified] DATETIME NULL,
         [intCreatedByUserId] INT NULL,
         [intModifiedByUserId] INT NULL, 
+		[intDataSourceId] TINYINT NULL,
 		CONSTRAINT [PK_tblICItemVendorXref] PRIMARY KEY ([intItemVendorXrefId]), 
 		CONSTRAINT [FK_tblICItemVendorXref_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]) ON DELETE CASCADE, 
 		CONSTRAINT [FK_tblICItemVendorXref_tblICItemLocation] FOREIGN KEY ([intItemLocationId]) REFERENCES [tblICItemLocation]([intItemLocationId]),
 		CONSTRAINT [FK_tblICItemVendorXref_tblAPVendor] FOREIGN KEY ([intVendorId]) REFERENCES [tblAPVendor]([intEntityId]), 
 		CONSTRAINT [FK_tblICItemVendorXref_tblICItemUOM] FOREIGN KEY ([intItemUnitMeasureId]) REFERENCES [tblICItemUOM]([intItemUOMId]),
-		CONSTRAINT [FK_tblICItemVendorXref_tblVRVendorSetup] FOREIGN KEY ([intVendorSetupId]) REFERENCES [tblVRVendorSetup]([intVendorSetupId]) ON DELETE CASCADE
+		CONSTRAINT [FK_tblICItemVendorXref_tblVRVendorSetup] FOREIGN KEY ([intVendorSetupId]) REFERENCES [tblVRVendorSetup]([intVendorSetupId]) ON DELETE CASCADE,
+		CONSTRAINT [FK_tblICItemVendorXref_tblICDataSource] FOREIGN KEY ([intDataSourceId]) REFERENCES [tblICDataSource]([intDataSourceId])
 	)
 
 	GO
