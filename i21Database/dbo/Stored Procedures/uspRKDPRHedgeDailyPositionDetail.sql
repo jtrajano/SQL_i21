@@ -1300,7 +1300,8 @@ BEGIN
 					, intFutureMonthId
 					, strFutureMonth
 					, strEntityName
-					, strDeliveryDate)
+					, strDeliveryDate
+					, strContractEndMonth)
 				SELECT strCommodityCode
 					, strType = 'Price Risk' COLLATE Latin1_General_CI_AS
 					, strContractType = 'Open Contract' COLLATE Latin1_General_CI_AS
@@ -1319,6 +1320,7 @@ BEGIN
 					, strFutureMonth
 					, strEntityName
 					, strDeliveryDate
+					, strContractEndMonth
 				FROM (
 					SELECT strCommodityCode
 						, dblTotal = ISNULL(cd.dblTotal, 0)
@@ -1337,7 +1339,8 @@ BEGIN
 						, intFutureMonthId
 						, strFutureMonth
 						, strEntityName
-						, strDeliveryDate = RIGHT(CONVERT(VARCHAR(11), cd.dtmTicketDateTime, 106), 8) COLLATE Latin1_General_CI_AS
+						, strDeliveryDate = strDeliveryDate
+						, strContractEndMonth
 					FROM @tempFinal cd
 					WHERE cd.intCommodityId = @intCommodityId and strType IN('Sale Priced', 'Purchase Priced', 'Purchase HTA', 'Sale HTA') 
 						AND cd.intCompanyLocationId = ISNULL(@intLocationId, cd.intCompanyLocationId)
@@ -1358,6 +1361,7 @@ BEGIN
 					, strFutureMonth
 					, strEntityName
 					, strDeliveryDate
+					, strContractEndMonth
 				
 				INSERT INTO @tempFinal(strCommodityCode
 					, strType
