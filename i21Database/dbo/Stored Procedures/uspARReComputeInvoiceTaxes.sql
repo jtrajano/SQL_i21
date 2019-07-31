@@ -145,6 +145,7 @@ WHILE EXISTS(SELECT NULL FROM @InvoiceDetail)
 		   ,[dblBaseRate]
 		   ,[dblExemptionPercent]
            ,[intSalesTaxAccountId]
+		   ,[intSalesTaxExemptionAccountId]
            ,[dblTax]
            ,[dblAdjustedTax]
 		   ,[dblBaseAdjustedTax]
@@ -153,6 +154,7 @@ WHILE EXISTS(SELECT NULL FROM @InvoiceDetail)
            ,[ysnCheckoffTax]
            ,[ysnTaxExempt]
 		   ,[ysnTaxOnly]
+		   ,[ysnAddToCost]
 		   ,[strNotes]
 		   ,[intUnitMeasureId] 
            ,[intConcurrencyId])		
@@ -167,6 +169,7 @@ WHILE EXISTS(SELECT NULL FROM @InvoiceDetail)
 			,[dblBaseRate]
 			,[dblExemptionPercent]
 			,[intTaxAccountId]
+			,[intSalesTaxExemptionAccountId]
 			,[dblTax]
 			,[dblAdjustedTax]
 			,[dblBaseAdjustedTax] = [dbo].fnRoundBanker([dblAdjustedTax] * @CurrencyExchangeRate, [dbo].[fnARGetDefaultDecimal]())
@@ -175,6 +178,7 @@ WHILE EXISTS(SELECT NULL FROM @InvoiceDetail)
 			,[ysnCheckoffTax]
 			,[ysnTaxExempt]
 			,[ysnTaxOnly]
+			,[ysnAddToCost]
 			,[strNotes]
 			,[intUnitMeasureId] 
 			,1
