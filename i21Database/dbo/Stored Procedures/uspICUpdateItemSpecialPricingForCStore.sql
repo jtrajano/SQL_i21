@@ -225,158 +225,6 @@ END
 
 IF EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemSpecialPricingForCStore_AuditLog)
 BEGIN 
-	--DECLARE @json1 AS NVARCHAR(2000) = '{"action":"Updated","change":"Updated - Record: %s","iconCls":"small-menu-maintenance","children":[%s]}'
-	
-	--DECLARE @json2_int AS NVARCHAR(2000) = '{"change":"%s","iconCls":"small-menu-maintenance","from":"%i","to":"%i","leaf":true}'
-	--DECLARE @json2_float AS NVARCHAR(2000) = '{"change":"%s","iconCls":"small-menu-maintenance","from":"%f","to":"%f","leaf":true}'
-	--DECLARE @json2_string AS NVARCHAR(2000) = '{"change":"%s","iconCls":"small-menu-maintenance","from":"%s","to":"%s","leaf":true}'
-	--DECLARE @json2_date AS NVARCHAR(2000) = '{"change":"%s","iconCls":"small-menu-maintenance","from":"%d","to":"%d","leaf":true}'
-
-
-	---- Add audit logs for Standard Cost changes. 
-	--INSERT INTO tblSMAuditLog(
-	--		strActionType
-	--		, strTransactionType
-	--		, strRecordNo
-	--		, strDescription
-	--		, strRoute
-	--		, strJsonData
-	--		, dtmDate
-	--		, intEntityId
-	--		, intConcurrencyId
-	--)
-	--SELECT 
-	--		strActionType = 'Updated'
-	--		, strTransactionType =  'Inventory.view.Item'
-	--		, strRecordNo = auditLog.intItemId
-	--		, strDescription = ''
-	--		, strRoute = null 
-	--		, strJsonData = auditLog.strJsonData
-	--		, dtmDate = GETUTCDATE()
-	--		, intEntityId = @intEntityUserSecurityId 
-	--		, intConcurrencyId = 1
-	--FROM	(
-	--	SELECT	intItemId
-	--			,strJsonData = 
-	--				dbo.fnFormatMessage(
-	--					@json1
-	--					, CAST(intItemId AS NVARCHAR(20)) 
-	--					, dbo.fnFormatMessage(
-	--						@json2_date
-	--						, 'C-Store updates the Begin Date in Promotional Pricing and Exemptions Grid'
-	--						, dtmBeginDate_Original
-	--						, dtmBeginDate_New
-	--						, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
-	--					) 
-	--					, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
-	--				) 
-	--	FROM	#tmpUpdateItemSpecialPricingForCStore_AuditLog 
-	--	WHERE	ISNULL(dtmBeginDate_Original, 0) <> ISNULL(dtmBeginDate_New, 0)
-	--	UNION ALL 
-	--	SELECT	intItemId
-	--			,strJsonData = 
-	--				dbo.fnFormatMessage(
-	--					@json1
-	--					, CAST(intItemId AS NVARCHAR(20)) 
-	--					, dbo.fnFormatMessage(
-	--						@json2_date
-	--						, 'C-Store updates the End Date in Promotional Pricing and Exemptions Grid'
-	--						, dtmEndDate_Original
-	--						, dtmEndDate_New
-	--						, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
-	--					) 
-	--					, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
-	--				) 
-	--	FROM	#tmpUpdateItemSpecialPricingForCStore_AuditLog 
-	--	WHERE	ISNULL(dtmEndDate_Original, 0) <> ISNULL(dtmEndDate_New, 0)
-	--	UNION ALL 
-	--	SELECT	intItemId
-	--			,strJsonData = 
-	--				dbo.fnFormatMessage(
-	--					@json1
-	--					, CAST(intItemId AS NVARCHAR(20)) 
-	--					, dbo.fnFormatMessage(
-	--						@json2_float
-	--						, 'C-Store updates the Discount Amount/Percent in Promotional Pricing and Exemptions Grid'
-	--						, dblDiscount_Original
-	--						, dblDiscount_New
-	--						, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
-	--					) 
-	--					, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
-	--				) 
-	--	FROM	#tmpUpdateItemSpecialPricingForCStore_AuditLog 
-	--	WHERE	ISNULL(dblDiscount_Original, 0) <> ISNULL(dblDiscount_New, 0)
-	--	UNION ALL 
-	--	SELECT	intItemId
-	--			,strJsonData = 
-	--				dbo.fnFormatMessage(
-	--					@json1
-	--					, CAST(intItemId AS NVARCHAR(20)) 
-	--					, dbo.fnFormatMessage(
-	--						@json2_float
-	--						, 'C-Store updates the Accumulated Amount in Promotional Pricing and Exemptions Grid'
-	--						, dblAccumulatedAmount_Original
-	--						, dblAccumulatedAmount_New
-	--						, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
-	--					) 
-	--					, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
-	--				) 
-	--	FROM	#tmpUpdateItemSpecialPricingForCStore_AuditLog 
-	--	WHERE	ISNULL(dblAccumulatedAmount_Original, 0) <> ISNULL(dblAccumulatedAmount_New, 0)
-	--	UNION ALL 
-	--	SELECT	intItemId
-	--			,strJsonData = 
-	--				dbo.fnFormatMessage(
-	--					@json1
-	--					, CAST(intItemId AS NVARCHAR(20)) 
-	--					, dbo.fnFormatMessage(
-	--						@json2_float
-	--						, 'C-Store updates the Accumulated Qty in Promotional Pricing and Exemptions Grid'
-	--						, dblAccumulatedQty_Original
-	--						, dblAccumulatedQty_New
-	--						, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
-	--					) 
-	--					, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
-	--				) 
-	--	FROM	#tmpUpdateItemSpecialPricingForCStore_AuditLog 
-	--	WHERE	ISNULL(dblAccumulatedQty_Original, 0) <> ISNULL(dblAccumulatedQty_New, 0)
-	--	UNION ALL 
-	--	SELECT	intItemId
-	--			,strJsonData = 
-	--				dbo.fnFormatMessage(
-	--					@json1
-	--					, CAST(intItemId AS NVARCHAR(20)) 
-	--					, dbo.fnFormatMessage(
-	--						@json2_float
-	--						, 'C-Store updates the Discount thru Amount in Promotional Pricing and Exemptions Grid'
-	--						, dblDiscountThruAmount_Original
-	--						, dblDiscountThruAmount_New
-	--						, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
-	--					) 
-	--					, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
-	--				) 
-	--	FROM	#tmpUpdateItemSpecialPricingForCStore_AuditLog 
-	--	WHERE	ISNULL(dblDiscountThruAmount_Original, 0) <> ISNULL(dblDiscountThruAmount_New, 0)
-	--	UNION ALL 
-	--	SELECT	intItemId
-	--			,strJsonData = 
-	--				dbo.fnFormatMessage(
-	--					@json1
-	--					, CAST(intItemId AS NVARCHAR(20)) 
-	--					, dbo.fnFormatMessage(
-	--						@json2_float
-	--						, 'C-Store updates the Discount thru Qty in Promotional Pricing and Exemptions Grid'
-	--						, dblDiscountThruQty_Original
-	--						, dblDiscountThruQty_New
-	--						, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
-	--					) 
-	--					, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT
-	--				) 
-	--	FROM	#tmpUpdateItemSpecialPricingForCStore_AuditLog 
-	--	WHERE	ISNULL(dblDiscountThruQty_Original, 0) <> ISNULL(dblDiscountThruQty_New, 0)
-	--) auditLog
-	--WHERE auditLog.strJsonData IS NOT NULL 
-
 	DECLARE @auditLog_strDescription AS NVARCHAR(255) 
 			,@auditLog_actionType AS NVARCHAR(50) = 'Updated'
 			,@auditLog_id AS INT 
@@ -386,58 +234,54 @@ BEGIN
 	DECLARE loopAuditLog CURSOR LOCAL FAST_FORWARD
 	FOR 	
 	SELECT	intItemId
-			,strDescription = 
-				CASE 
-					WHEN ISNULL(dtmBeginDate_Original, 0) <> ISNULL(dtmBeginDate_New, 0) THEN 
-						'C-Store updates the Begin Date in Promotional Pricing and Exemptions Grid'
-					WHEN ISNULL(dtmEndDate_Original, 0) <> ISNULL(dtmEndDate_New, 0) THEN 
-						'C-Store updates the End Date in Promotional Pricing and Exemptions Grid'
-					WHEN ISNULL(dblDiscount_Original, 0) <> ISNULL(dblDiscount_New, 0) THEN 
-						'C-Store updates the Discount Amount/Percent in Promotional Pricing and Exemptions Grid'
-					WHEN ISNULL(dblAccumulatedAmount_Original, 0) <> ISNULL(dblAccumulatedAmount_New, 0) THEN 
-						'C-Store updates the Accumulated Amount in Promotional Pricing and Exemptions Grid'
-					WHEN ISNULL(dblAccumulatedQty_Original, 0) <> ISNULL(dblAccumulatedQty_New, 0) THEN 
-						'C-Store updates the Accumulated Qty in Promotional Pricing and Exemptions Grid'
-					WHEN ISNULL(dblDiscountThruAmount_Original, 0) <> ISNULL(dblDiscountThruAmount_New, 0) THEN 
-						'C-Store updates the Discount thru Amount in Promotional Pricing and Exemptions Grid'
-					WHEN ISNULL(dblDiscountThruQty_Original, 0) <> ISNULL(dblDiscountThruQty_New, 0) THEN 
-						'C-Store updates the Discount thru Qty in Promotional Pricing and Exemptions Grid'
-				END 
-			,strOld = 
-				CASE 
-					WHEN ISNULL(dtmBeginDate_Original, 0) <> ISNULL(dtmBeginDate_New, 0) THEN 
-						dtmBeginDate_Original
-					WHEN ISNULL(dtmEndDate_Original, 0) <> ISNULL(dtmEndDate_New, 0) THEN 
-						dtmEndDate_Original
-					WHEN ISNULL(dblDiscount_Original, 0) <> ISNULL(dblDiscount_New, 0) THEN 
-						dblDiscount_Original
-					WHEN ISNULL(dblAccumulatedAmount_Original, 0) <> ISNULL(dblAccumulatedAmount_New, 0) THEN 
-						dblAccumulatedAmount_Original
-					WHEN ISNULL(dblAccumulatedQty_Original, 0) <> ISNULL(dblAccumulatedQty_New, 0) THEN 
-						dblAccumulatedQty_Original
-					WHEN ISNULL(dblDiscountThruAmount_Original, 0) <> ISNULL(dblDiscountThruAmount_New, 0) THEN 
-						dblDiscountThruAmount_Original
-					WHEN ISNULL(dblDiscountThruQty_Original, 0) <> ISNULL(dblDiscountThruQty_New, 0) THEN 
-						dblDiscountThruQty_Original
-				END 
-			,strNew = 
-				CASE 
-					WHEN ISNULL(dtmBeginDate_Original, 0) <> ISNULL(dtmBeginDate_New, 0) THEN 
-						dtmBeginDate_New
-					WHEN ISNULL(dtmEndDate_Original, 0) <> ISNULL(dtmEndDate_New, 0) THEN 
-						dtmEndDate_New
-					WHEN ISNULL(dblDiscount_Original, 0) <> ISNULL(dblDiscount_New, 0) THEN 
-						dblDiscount_New
-					WHEN ISNULL(dblAccumulatedAmount_Original, 0) <> ISNULL(dblAccumulatedAmount_New, 0) THEN 
-						dblAccumulatedAmount_New
-					WHEN ISNULL(dblAccumulatedQty_Original, 0) <> ISNULL(dblAccumulatedQty_New, 0) THEN 
-						dblAccumulatedQty_New
-					WHEN ISNULL(dblDiscountThruAmount_Original, 0) <> ISNULL(dblDiscountThruAmount_New, 0) THEN 
-						dblDiscountThruAmount_New
-					WHEN ISNULL(dblDiscountThruQty_Original, 0) <> ISNULL(dblDiscountThruQty_New, 0) THEN 
-						dblDiscountThruQty_New
-				END 
+			,strDescription = 'C-Store updates the Begin Date in Promotional Pricing and Exemptions Grid'
+			,strOld = dtmBeginDate_Original
+			,strNew = dtmBeginDate_New
 	FROM	#tmpUpdateItemForCStore_itemAuditLog auditLog
+	WHERE	ISNULL(dtmBeginDate_Original, 0) <> ISNULL(dtmBeginDate_New, 0)
+	UNION ALL
+	SELECT	intItemId
+			,strDescription = 'C-Store updates the End Date in Promotional Pricing and Exemptions Grid'
+			,strOld = dtmEndDate_Original
+			,strNew = dtmEndDate_New
+	FROM	#tmpUpdateItemForCStore_itemAuditLog auditLog
+	WHERE	ISNULL(dtmEndDate_Original, 0) <> ISNULL(dtmEndDate_New, 0)
+	UNION ALL
+	SELECT	intItemId
+			,strDescription = 'C-Store updates the Discount Amount/Percent in Promotional Pricing and Exemptions Grid'
+			,strOld = dblDiscount_Original
+			,strNew = dblDiscount_New
+	FROM	#tmpUpdateItemForCStore_itemAuditLog auditLog
+	WHERE	ISNULL(dblDiscount_Original, 0) <> ISNULL(dblDiscount_New, 0)
+	UNION ALL
+	SELECT	intItemId
+			,strDescription = 'C-Store updates the Accumulated Amount in Promotional Pricing and Exemptions Grid'
+			,strOld = dblAccumulatedAmount_Original
+			,strNew = dblAccumulatedAmount_New
+	FROM	#tmpUpdateItemForCStore_itemAuditLog auditLog
+	WHERE	ISNULL(dblAccumulatedAmount_Original, 0) <> ISNULL(dblAccumulatedAmount_New, 0)
+	UNION ALL
+	SELECT	intItemId
+			,strDescription = 'C-Store updates the Accumulated Qty in Promotional Pricing and Exemptions Grid'
+			,strOld = dblAccumulatedQty_Original
+			,strNew = dblAccumulatedQty_New
+	FROM	#tmpUpdateItemForCStore_itemAuditLog auditLog
+	WHERE	ISNULL(dblAccumulatedQty_Original, 0) <> ISNULL(dblAccumulatedQty_New, 0)
+	UNION ALL
+	SELECT	intItemId
+			,strDescription = 'C-Store updates the Discount thru Amount in Promotional Pricing and Exemptions Grid'
+			,strOld = dblDiscountThruAmount_Original
+			,strNew = dblDiscountThruAmount_New
+	FROM	#tmpUpdateItemForCStore_itemAuditLog auditLog
+	WHERE	ISNULL(dblDiscountThruAmount_Original, 0) <> ISNULL(dblDiscountThruAmount_New, 0)
+	UNION ALL
+	SELECT	intItemId
+			,strDescription = 'C-Store updates the Discount thru Qty in Promotional Pricing and Exemptions Grid'
+			,strOld = dblDiscountThruQty_Original
+			,strNew = dblDiscountThruQty_New
+	FROM	#tmpUpdateItemForCStore_itemAuditLog auditLog
+	WHERE	ISNULL(dblDiscountThruQty_Original, 0) <> ISNULL(dblDiscountThruQty_New, 0)
+
 	OPEN loopAuditLog;
 
 	FETCH NEXT FROM loopAuditLog INTO 
