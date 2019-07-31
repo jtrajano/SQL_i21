@@ -219,7 +219,7 @@ BEGIN
 			, dblFutures
 			, dblBasis
 			, dblCash)
-		SELECT strSummary = 'Physical'
+		SELECT strSummary = CASE WHEN strContractOrInventoryType like 'Futures%' THEN 'Derivatives' ELSE 'Physical' END
 			, intCommodityId
 			, strCommodityCode = ''
 			, strContractOrInventoryType
@@ -234,125 +234,6 @@ BEGIN
 			, strCommodityCode
 			, strContractOrInventoryType
 		
-		DECLARE @UnRelaized AS TABLE (intFutOptTransactionId INT
-			, dblGrossPnL NUMERIC(24, 10)
-			, dblLong NUMERIC(24, 10)
-			, dblShort NUMERIC(24, 10)
-			, dblFutCommission NUMERIC(24, 10)
-			, strFutMarketName NVARCHAR(100)
-			, strFutureMonth NVARCHAR(100)
-			, dtmTradeDate DATETIME
-			, strInternalTradeNo NVARCHAR(100)
-			, strName NVARCHAR(100) COLLATE Latin1_General_CI_AS
-			, strAccountNumber NVARCHAR(100) COLLATE Latin1_General_CI_AS
-			, strBook NVARCHAR(100)
-			, strSubBook NVARCHAR(100)
-			, strSalespersonId NVARCHAR(100)
-			, strCommodityCode NVARCHAR(100)
-			, strLocationName NVARCHAR(100)
-			, dblLong1 INT
-			, dblSell1 INT
-			, dblNet INT
-			, dblActual NUMERIC(24, 10)
-			, dblClosing NUMERIC(24, 10)
-			, dblPrice NUMERIC(24, 10)
-			, dblContractSize NUMERIC(24, 10)
-			, dblFutCommission1 NUMERIC(24, 10)
-			, dblMatchLong NUMERIC(24, 10)
-			, dblMatchShort NUMERIC(24, 10)
-			, dblNetPnL NUMERIC(24, 10)
-			, intFutureMarketId INT
-			, intFutureMonthId INT
-			, intOriginalQty INT
-			, intFutOptTransactionHeaderId INT
-			, strMonthOrder NVARCHAR(100)
-			, RowNum INT
-			, intCommodityId INT
-			, ysnExpired BIT
-			, dblVariationMargin NUMERIC(24, 10)
-			, dblInitialMargin NUMERIC(24, 10)
-			, LongWaitedPrice NUMERIC(24, 10)
-			, ShortWaitedPrice NUMERIC(24, 10)
-			, intSelectedInstrumentTypeId INT)
-		INSERT INTO @UnRelaized (RowNum
-			, strMonthOrder
-			, intFutOptTransactionId
-			, dblGrossPnL
-			, dblLong
-			, dblShort
-			, dblFutCommission
-			, strFutMarketName
-			, strFutureMonth
-			, dtmTradeDate
-			, strInternalTradeNo
-			, strName
-			, strAccountNumber
-			, strBook
-			, strSubBook
-			, strSalespersonId
-			, strCommodityCode
-			, strLocationName
-			, dblLong1
-			, dblSell1
-			, dblNet
-			, dblActual
-			, dblClosing
-			, dblPrice
-			, dblContractSize
-			, dblFutCommission1
-			, dblMatchLong
-			, dblMatchShort
-			, dblNetPnL
-			, intFutureMarketId
-			, intFutureMonthId
-			, intOriginalQty
-			, intFutOptTransactionHeaderId
-			, intCommodityId
-			, ysnExpired
-			, dblVariationMargin
-			, dblInitialMargin
-			, LongWaitedPrice
-			, ShortWaitedPrice
-			, intSelectedInstrumentTypeId)
-		
-		EXEC uspRKUnrealizedPnL @dtmFromDate ='01-01-1900'
-			, @dtmToDate = @dtmTransactionDateUpTo
-			, @intCommodityId = @intCommodityId
-			, @ysnExpired = 0
-			, @intFutureMarketId = NULL
-			, @intEntityId = NULL
-			, @intBrokerageAccountId = NULL
-			, @intFutureMonthId = NULL
-			, @strBuySell = NULL
-			, @intBookId = NULL
-			, @intSubBookId = NULL
-		
-		INSERT INTO @tblFinalDetail (strSummary
-			, intCommodityId
-			, strCommodityCode
-			, strContractOrInventoryType
-			, dblQty
-			, dblTotal
-			, dblFutures
-			, dblBasis
-			, dblCash)
-		SELECT strSummary = 'Derivatives'
-			, intCommodityId
-			, strCommodityCode = ''
-			, strContractOrInventoryType = ''
-			, dblQty = NULL
-			, dblTotal = pnl
-			, dblFutures = NULL
-			, dblBasis = NULL
-			, dblCash = NULL
-		FROM (
-			SELECT DISTINCT intCommodityId
-				, strCommodityCode
-				, pnl = SUM(dblGrossPnL)
-			FROM @UnRelaized
-			GROUP BY intCommodityId
-				, strCommodityCode
-		) t
 		
 		INSERT INTO @tblFinalDetail (strSummary
 			, dblQty
