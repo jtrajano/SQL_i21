@@ -292,6 +292,28 @@ Begin
 	--AND dtmFeedCreated > CONVERT(DATE, GETDATE() - 1)
 End
 
+If @strMessageType='Failure'
+Begin
+	SET @strHeader = '<tr>
+						<th>&nbsp;Log Id</th>
+						<th>&nbsp;Info 1</th>
+						<th>&nbsp;Info 2</th>
+						<th>&nbsp;Message</th>
+					</tr>'
+	
+	Select @strDetail=@strDetail + 
+	'<tr>
+		   <td>&nbsp;' + ISNULL(CONVERT(VARCHAR,intLogId),'') + '</td>'
+		+ '<td>&nbsp;' + ISNULL(strInfo1,'') + '</td>'
+		+ '<td>&nbsp;' + ISNULL(strInfo2,'') + '</td>'
+		+ '<td>&nbsp;' + ISNULL(strMessage,'') + '</td>
+	</tr>'
+	FROM tblIPLog
+	WHERE dtmDate >= DATEADD(hh, -1, GETDATE())
+		AND ISNULL(strMessage, '') <> 'Success'
+
+End
+
 Set @strHtml=REPLACE(@strHtml,'@header',@strHeader)
 Set @strHtml=REPLACE(@strHtml,'@detail',@strDetail)
 Set @strMessage=@strStyle + @strHtml
