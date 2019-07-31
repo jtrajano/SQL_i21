@@ -332,5 +332,12 @@ BEGIN
 	WHERE ysnIncludeDerivatives IS NULL
 END
 
+IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblRKCompanyPreference' AND COLUMN_NAME = 'intPostToGLId')
+BEGIN
+	UPDATE tblRKCompanyPreference
+	SET intPostToGLId = 1
+	WHERE ISNULL(intPostToGLId, 0) = 0
+END
+
 print('/*******************  END Risk Management Data Fixess *******************/')
 GO

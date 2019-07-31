@@ -63,7 +63,7 @@
 	[intDefaultInstrumentId] INT NULL,
 	[intDefaultInstrumentTypeId] INT NULL,
 	[ysnDefaultTraderLoggedUser] BIT NULL DEFAULT((0)),
-	[intPostToGLId] INT NULL DEFAULT ((0)),
+	[intPostToGLId] INT NULL DEFAULT ((1)),
 	[ysnIncludeDerivatives] BIT NULL DEFAULT((1)),
 	[ysnUseBoardMonth] BIT NULL DEFAULT((0)),
     CONSTRAINT [PK_tblRKCompanyPreference_intCompanyPreferenceId] PRIMARY KEY ([intCompanyPreferenceId]), 
