@@ -2,6 +2,7 @@
 (
 	[intRetailPriceAdjustmentDetailId] INT NOT NULL IDENTITY, 
     [intRetailPriceAdjustmentId] INT NOT NULL, 
+	[intItemPricingId] INT NULL,
     [intCompanyLocationId] INT NULL, 
     [strRegion] NVARCHAR(6) COLLATE Latin1_General_CI_AS NULL, 
     [strDistrict] NVARCHAR(6) COLLATE Latin1_General_CI_AS NULL, 

@@ -42,7 +42,8 @@ BEGIN
 				-- CREATE Temp Table
 				DECLARE @tblRetailPriceAdjustmentDetailIds TABLE 
 				(
-					intRetailPriceAdjustmentDetailId INT
+					intRetailPriceAdjustmentDetailId	INT,
+					ysnOneTimeUse						BIT
 				)
 
 
@@ -50,12 +51,12 @@ BEGIN
 				-- INSERT to Temp Table
 				INSERT INTO @tblRetailPriceAdjustmentDetailIds
 				(
-					intRetailPriceAdjustmentDetailId
-					--ysnProcessed
+					intRetailPriceAdjustmentDetailId,
+					ysnOneTimeUse
 				)
 				SELECT DISTINCT
-					intRetailPriceAdjustmentDetailId	= pad.intRetailPriceAdjustmentDetailId 
-					--ysnProcessed = CAST(0 AS BIT)
+					intRetailPriceAdjustmentDetailId	= pad.intRetailPriceAdjustmentDetailId,
+					ysnOneTimeUse						= rpa.ysnOneTimeUse
 				FROM tblSTRetailPriceAdjustmentDetail pad
 				INNER JOIN dbo.tblSTRetailPriceAdjustment rpa
 					ON pad.intRetailPriceAdjustmentId = rpa.intRetailPriceAdjustmentId
@@ -83,6 +84,7 @@ BEGIN
 							, @dblRetailPrice						DECIMAL(18,6)
 							, @dblLastCost							DECIMAL(18,6)
 							, @intSavedUserId						INT
+							, @ysnOneTimeUse						BIT
 
 
 						WHILE EXISTS(SELECT TOP 1 1 FROM @tblRetailPriceAdjustmentDetailIds)
@@ -90,7 +92,8 @@ BEGIN
 								
 								-- Get Primary Id
 								SELECT TOP 1 
-									@intRetailPriceAdjustmentDetailId = intRetailPriceAdjustmentDetailId 
+									@intRetailPriceAdjustmentDetailId	= intRetailPriceAdjustmentDetailId,
+									@ysnOneTimeUse						= ysnOneTimeUse
 								FROM @tblRetailPriceAdjustmentDetailIds 
 
 								--TEST
@@ -105,6 +108,7 @@ BEGIN
 									   , @intFamilyId						= PAD.intFamilyId
 									   , @intClassId						= PAD.intClassId
 									   , @intSavedUserId					= PAD.intModifiedByUserId
+									   , @ysnOneTimeUse						= ysnOneTimeUse
 									   , @strUpcCode						= CASE 
 																				WHEN ISNULL(UOM.strLongUPCCode, '') != ''
 																					THEN UOM.strLongUPCCode
@@ -161,11 +165,16 @@ BEGIN
 								-- Check if Successfull
 								IF EXISTS(SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_ItemPricingAuditLog WHERE intItemPricingId = @intItemPricingId)
 									BEGIN 
+										
+										IF(@ysnOneTimeUse = CAST(1 AS BIT))
+											BEGIN
 
-										UPDATE tblSTRetailPriceAdjustmentDetail
-										SET ysnPosted = 1
-										WHERE intRetailPriceAdjustmentDetailId = @intRetailPriceAdjustmentDetailId
+												UPDATE tblSTRetailPriceAdjustmentDetail
+												SET ysnPosted = 1
+												WHERE intRetailPriceAdjustmentDetailId = @intRetailPriceAdjustmentDetailId
 
+											END
+										
 									END
 								END TRY
 								BEGIN CATCH

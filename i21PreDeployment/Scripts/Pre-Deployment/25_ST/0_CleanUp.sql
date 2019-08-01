@@ -457,5 +457,41 @@ IF EXISTS (SELECT TOP 1 1 FROM msdb.dbo.sysjobs WHERE name = N'i21_PostRetailPri
 -- End: Remove Job Scheduler named 'i21_PostRetailPrice_Maintenance_Job'
 ----------------------------------------------------------------------------------------------------------------------------------
 
+
+
+----------------------------------------------------------------------------------------------------------------------------------
+-- Start: Update tblSTRetailPriceAdjustmentDetail.intItemPricingId = NULL
+----------------------------------------------------------------------------------------------------------------------------------
+IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = N'tblSTRetailPriceAdjustmentDetail') 
+	BEGIN
+		IF EXISTS(SELECT TOP 1 1 FROM tblSTRetailPriceAdjustmentDetail WHERE intItemPricingId IS NULL)
+			BEGIN
+
+				PRINT('Update tblSTRetailPriceAdjustmentDetail.intItemPricingId field')
+
+				EXEC('
+						UPDATE rpad
+							SET intItemPricingId	= itemPricing.intItemPricingId
+						FROM tblSTRetailPriceAdjustmentDetail rpad
+						INNER JOIN tblICItemLocation itemLoc
+							ON rpad.intCompanyLocationId = itemLoc.intLocationId
+						INNER JOIN tblICItemUOM uom
+							ON rpad.intItemUOMId = uom.intItemUOMId
+						INNER JOIN tblICItem item
+							ON uom.intItemId = item.intItemId
+						INNER JOIN tblICItemPricing itemPricing
+							ON item.intItemId = itemPricing.intItemId
+								AND itemLoc.intItemLocationId = itemPricing.intItemLocationId
+						WHERE rpad.intCompanyLocationId IS NOT NULL
+							AND rpad.intItemUOMId IS NOT NULL
+					')		
+					
+			END
+	END
+----------------------------------------------------------------------------------------------------------------------------------
+-- End: Update tblSTRetailPriceAdjustmentDetail.intItemPricingId = NULL
+----------------------------------------------------------------------------------------------------------------------------------
+
+
 PRINT('*** ST Cleanup - End ***')
 PRINT('')
