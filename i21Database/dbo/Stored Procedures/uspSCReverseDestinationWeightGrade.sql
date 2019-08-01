@@ -97,6 +97,7 @@ BEGIN TRY
 		IF ISNULL(@intInvoiceId, 0) > 0
 		BEGIN
 			DELETE FROM tblCTPriceFixationDetailAPAR WHERE intInvoiceId = @intInvoiceId;
+			DELETE FROM tblCTPriceFixationDetailAPAR WHERE intInvoiceDetailId in(SELECT intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @intInvoiceId)
 			EXEC [dbo].[uspARDeleteInvoice] @intInvoiceId, @intUserId
 		END
 	END
@@ -127,7 +128,11 @@ BEGIN TRY
 				@raiseError			= 1
 		END
 		IF ISNULL(@intInvoiceId, 0) > 0
+		BEGIN
+			DELETE FROM tblCTPriceFixationDetailAPAR WHERE intInvoiceId = @intInvoiceId;
+			DELETE FROM tblCTPriceFixationDetailAPAR WHERE intInvoiceDetailId in(SELECT intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @intInvoiceId)
 			EXEC [dbo].[uspARDeleteInvoice] @intInvoiceId, @intUserId
+		END
 		EXEC dbo.uspSCInsertDestinationInventoryShipment @intTicketId, @intUserId, 0
 	END
 
