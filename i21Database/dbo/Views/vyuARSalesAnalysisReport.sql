@@ -158,7 +158,7 @@ FROM
 			 , strTransactionId
 			 , intItemId
 			 , intItemUOMId
-			 , dblCost				= SUM(dblQty * dblCost + dblValue) / SUM(dblQty)
+			 , dblCost				= CASE WHEN SUM(dblQty) <> 0 THEN SUM(dblQty * dblCost + dblValue) / SUM(dblQty) ELSE 0 END
 		FROM tblICInventoryTransaction 
 		WHERE ysnIsUnposted = 0
 		GROUP BY intTransactionId, strTransactionId, intItemId, intItemUOMId
@@ -532,7 +532,7 @@ FROM
 			 , strTransactionId
 			 , intItemId
 			 , intItemUOMId
-			 , dblCost			= SUM(dblQty * dblCost + dblValue) / SUM(dblQty)
+			 , dblCost			= CASE WHEN SUM(dblQty) <> 0 THEN SUM(dblQty * dblCost + dblValue) / SUM(dblQty) ELSE 0 END
 		FROM tblICInventoryTransaction 
 		WHERE ysnIsUnposted = 0
 		GROUP BY intTransactionId, strTransactionId, intItemId, intItemUOMId
@@ -777,7 +777,7 @@ FROM
 			 , strTransactionId
 			 , intItemId
 			 , intItemUOMId
-			 , dblCost				= SUM(dblQty * dblCost + dblValue) / SUM(dblQty)
+			 , dblCost				= CASE WHEN SUM(dblQty) <> 0 THEN SUM(dblQty * dblCost + dblValue) / SUM(dblQty) ELSE 0 END
 		FROM tblICInventoryTransaction 
 		WHERE ysnIsUnposted = 0
 		GROUP BY intTransactionId, strTransactionId, intItemId, intItemUOMId
@@ -1021,7 +1021,7 @@ FROM
 			 , strTransactionId
 			 , intItemId
 			 , intItemUOMId
-			 , dblCost				= SUM(dblQty * dblCost + dblValue) / SUM(dblQty)
+			 , dblCost				= CASE WHEN SUM(dblQty) <> 0 THEN SUM(dblQty * dblCost + dblValue) / SUM(dblQty) ELSE 0 END
 		FROM tblICInventoryTransaction 
 		WHERE ysnIsUnposted = 0
 		GROUP BY intTransactionId, strTransactionId, intItemId, intItemUOMId
