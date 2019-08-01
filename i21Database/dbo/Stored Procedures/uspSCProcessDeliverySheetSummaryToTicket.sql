@@ -91,10 +91,41 @@ BEGIN TRY
 		SET @TicketCurrentRowCount = @TicketCurrentRowCount + 1
 	END
 
-	UPDATE tblGRCustomerStorage
-	SET dblOriginalBalance = 0 
-		,dblOpenBalance = 0
+	-- UPDATE tblGRCustomerStorage
+	-- SET dblOriginalBalance = 0 
+	-- 	,dblOpenBalance = 0
+	-- WHERE intDeliverySheetId = @intDeliverySheetId
+
+	DELETE FROM tblGRCustomerStorage
 	WHERE intDeliverySheetId = @intDeliverySheetId
+
+	DELETE FROM @splitTable
+		
+	INSERT INTO @splitTable(
+		[intTicketId]
+		,[intEntityId]
+		,[dblSplitPercent]
+		,[intStorageScheduleTypeId]
+		,[strDistributionOption]
+		,[intStorageScheduleId]
+		,[intConcurrencyId]
+	)
+	SELECT  
+		[intTicketId]					= SC.intTicketId
+		,[intEntityId]					= SDS.intEntityId
+		,[dblSplitPercent]				= SDS.dblSplitPercent
+		,[intStorageScheduleTypeId]		= SDS.intStorageScheduleTypeId
+		,[strDistributionOption]		= SDS.strDistributionOption
+		,[intStorageScheduleId]			= SDS.intStorageScheduleRuleId
+		,[intConcurrencyId]				= 1
+	FROM tblSCDeliverySheetSplit SDS
+	INNER JOIN tblSCTicket SC
+		ON SDS.intDeliverySheetId = SC.intDeliverySheetId
+	WHERE SDS.intDeliverySheetId = @intDeliverySheetId 
+
+	--REset All Ticket Splits
+	DELETE FROM tblSCTicketSplit 
+	WHERE intTicketId IN (SELECT intTicketId FROM tblSCTicket WHERE intDeliverySheetId = @intDeliverySheetId)
 
 
 	DECLARE ticketCursor CURSOR FOR SELECT intTicketId,intEntityId,dblNetUnits FROM @processTicket  
@@ -103,30 +134,6 @@ BEGIN TRY
 	WHILE @@FETCH_STATUS = 0  
 	BEGIN  
 		SET @dblTempSplitQty = @dblNetUnits;
-		DELETE FROM tblSCTicketSplit WHERE intTicketId = @intTicketId
-		
-		DELETE FROM @splitTable
-		
-		INSERT INTO @splitTable(
-			[intTicketId]
-			,[intEntityId]
-			,[dblSplitPercent]
-			,[intStorageScheduleTypeId]
-			,[strDistributionOption]
-			,[intStorageScheduleId]
-			,[intConcurrencyId]
-		)
-		SELECT  
-			[intTicketId]					= SC.intTicketId
-			,[intEntityId]					= SDS.intEntityId
-			,[dblSplitPercent]				= SDS.dblSplitPercent
-			,[intStorageScheduleTypeId]		= SDS.intStorageScheduleTypeId
-			,[strDistributionOption]		= SDS.strDistributionOption
-			,[intStorageScheduleId]			= SDS.intStorageScheduleRuleId
-			,[intConcurrencyId]				= 1
-		FROM tblSCDeliverySheetSplit SDS
-		INNER JOIN tblSCTicket SC ON SC.intDeliverySheetId = SDS.intDeliverySheetId
-		WHERE SDS.intDeliverySheetId = @intDeliverySheetId AND SC.intTicketId = @intTicketId
 		
 		IF EXISTS(SELECT NULL FROM @splitTable)
 		BEGIN
