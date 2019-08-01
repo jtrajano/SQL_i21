@@ -153,7 +153,7 @@ FROM
 	OUTER APPLY dbo.fnICGetScaleTicketIdForReceiptCharge(Receipt.intInventoryReceiptId, Receipt.strReceiptNumber) ScaleTicket
 
 WHERE	ReceiptCharge.ysnAccrue = 1 
-		AND ISNULL(Receipt.ysnPosted, 0) = 1
+		--AND ISNULL(Receipt.ysnPosted, 0) = 1
 		AND (
 			ISNULL(ReceiptCharge.dblAmountBilled, 0) < ROUND(ReceiptCharge.dblAmount, 6) 
 			OR (
@@ -327,7 +327,7 @@ FROM tblICInventoryReceiptCharge ReceiptCharge INNER JOIN tblICItem Item
 	OUTER APPLY dbo.fnICGetScaleTicketIdForReceiptCharge(Receipt.intInventoryReceiptId, Receipt.strReceiptNumber) ScaleTicket
 
 WHERE	ReceiptCharge.ysnPrice = 1
-		AND ISNULL(Receipt.ysnPosted, 0) = 1
+		--AND ISNULL(Receipt.ysnPosted, 0) = 1
 		AND (
 			ISNULL(-ReceiptCharge.dblAmountPriced, 0) < ROUND(ReceiptCharge.dblAmount, 6) 
 			OR (
