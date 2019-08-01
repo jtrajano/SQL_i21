@@ -625,7 +625,8 @@ BEGIN
 						UPDATE ' + @strDestinationDatabaseName + '.dbo.[tblSMComment] SET 
 						strComment = (
 							SELECT strComment FROM ' + @strCurrentDatabaseName + '.dbo.[tblSMComment] WHERE intCommentId = ' + CONVERT(VARCHAR, @intTempSourceCommentId) + '
-						)
+						),
+						dtmModified = ''' + LEFT(CONVERT(VARCHAR, @dtmSourceDate, 121), 23) + '''
 						WHERE intCommentId = ' + CONVERT(VARCHAR, @intTempDestinationCommentId);
 					EXEC sp_executesql @sql
 
