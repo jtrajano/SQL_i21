@@ -8,6 +8,8 @@ BEGIN
 	-- Generate Payables
 	DECLARE @voucherPayable VoucherPayable
 	DECLARE @voucherPayableTax VoucherDetailTax
+	DECLARE @ysnCreateOtherCostPayable BIT
+	SELECT @ysnCreateOtherCostPayable = ysnCreateOtherCostPayable FROM tblCTCompanyPreference
 
 	IF(@intReceiptId IS NOT NULL)
 	BEGIN
@@ -235,6 +237,7 @@ BEGIN
 				AND ItemLocation.intLocationId = ShipmentCharges.intLocationId
 			WHERE Shipment.intInventoryShipmentId = @intShipmentId
 				AND Shipment.ysnPosted = 1
+				AND (ShipmentCharges.intContractHeaderId IS NOT NULL AND @ysnCreateOtherCostPayable = 1 OR ShipmentCharges.intContractHeaderId IS NULL)
 	END
 
 
