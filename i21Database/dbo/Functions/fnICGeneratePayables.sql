@@ -109,6 +109,9 @@ DECLARE
 	WHERE r.ysnPosted = 1
 		AND r.intInventoryReceiptId = @intReceiptId
 
+DECLARE @ysnCreateOtherCostPayable BIT
+SELECT @ysnCreateOtherCostPayable = ysnCreateOtherCostPayable FROM tblCTCompanyPreference
+
 INSERT INTO @table
 SELECT DISTINCT
 	[intEntityVendorId]			=	A.intEntityVendorId
@@ -466,6 +469,7 @@ WHERE
 		AND 1 =  CASE WHEN CD.intPricingTypeId IS NOT NULL AND CD.intPricingTypeId IN (2) THEN 0 ELSE 1 END  --EXLCUDE ALL BASIS
 		AND 1 = CASE WHEN (A.intEntityVendorId = IR.intEntityVendorId AND CD.intPricingTypeId IS NOT NULL AND CD.intPricingTypeId = 5) THEN 0 ELSE 1 END --EXCLUDE DELAYED PRICING TYPE FOR RECEIPT VENDOR
 	)
+	AND (CH.intContractHeaderId IS NOT NULL AND @ysnCreateOtherCostPayable = 1 OR CH.intContractHeaderId IS NULL)
 RETURN
 END
 
