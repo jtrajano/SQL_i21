@@ -187,6 +187,8 @@ BEGIN TRY
 
 	SELECT @strObjectName = 'vyuCTContractApproverView'
 
+	SELECT @strHeaderCondition = 'strContractNumber = ''' + @strContractNumber+''''
+
 	EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
 		,@strHeaderCondition
 		,@strApproverXML OUTPUT

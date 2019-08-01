@@ -3167,6 +3167,7 @@ BEGIN TRY
 							)
 				END
 
+
 				DELETE
 				FROM tblCTContractCondition
 				WHERE intContractHeaderId = @intNewContractHeaderId
@@ -3182,6 +3183,11 @@ BEGIN TRY
 				FROM OPENXML(@idoc, 'vyuCTContractConditionViews/vyuCTContractConditionView', 2) WITH (strConditionName NVARCHAR(200) Collate Latin1_General_CI_AS) x
 				JOIN tblCTCondition C ON C.strConditionName = x.strConditionName
 
+				EXEC sp_xml_removedocument @idoc
+
+				EXEC sp_xml_preparedocument @idoc OUTPUT
+					,@strApproverXML
+
 				DELETE
 				FROM tblCTIntrCompApproval
 				WHERE intContractHeaderId = @intNewContractHeaderId
@@ -3196,12 +3202,12 @@ BEGIN TRY
 				SELECT @intNewContractHeaderId
 					,strName
 					,strUserName
-					,strScreen
+					,strScreenName
 					,1 AS intConcurrencyId
 				FROM OPENXML(@idoc, 'vyuCTContractApproverViews/vyuCTContractApproverView', 2) WITH (
 						strName NVARCHAR(100) Collate Latin1_General_CI_AS
 						,strUserName NVARCHAR(100) Collate Latin1_General_CI_AS
-						,strScreen NVARCHAR(250) Collate Latin1_General_CI_AS
+						,strScreenName NVARCHAR(250) Collate Latin1_General_CI_AS
 						) x
 
 				SELECT @strHeaderCondition = 'intContractHeaderId = ' + LTRIM(@intNewContractHeaderId)
