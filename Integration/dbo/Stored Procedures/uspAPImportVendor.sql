@@ -596,8 +596,11 @@ BEGIN
 		DECLARE @VendorIdentityId INT
 		SET @VendorIdentityId = SCOPE_IDENTITY()		
 		
-		INSERT [dbo].[tblEMEntityToContact] ([intEntityId], [intEntityContactId], [intEntityLocationId],[ysnPortalAccess], ysnDefaultContact)
-		VALUES							  (@EntityId, @EntityContactId, @EntityLocationId, 0, @ysnIsDefault)/**/
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblEMEntityToContact WHERE intEntityId = @EntityId AND intEntityContactId = @EntityContactId)
+		BEGIN
+			INSERT [dbo].[tblEMEntityToContact] ([intEntityId], [intEntityContactId], [intEntityLocationId],[ysnPortalAccess], ysnDefaultContact)
+			VALUES							  (@EntityId, @EntityContactId, @EntityLocationId, 0, @ysnIsDefault)/**/
+		END
 
 		INSERT INTO [dbo].[tblAPImportedVendors]
 			VALUES(@originVendor, 1)
