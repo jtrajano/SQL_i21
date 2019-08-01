@@ -149,7 +149,6 @@ BEGIN TRY
 		,[intEntityId]							= @UserEntityId
 		,[ysnResetDetails]						= 1
 		,[ysnPost]								= @Post
-	
 		,[intInvoiceDetailId]					= NULL
 		,[intItemId]							= MRDetail.intItemId
 		,[ysnInventory]							= 1
@@ -197,6 +196,7 @@ BEGIN TRY
 	LEFT JOIN vyuARCustomer Customer ON Customer.[intEntityId] = MRDetail.intEntityCustomerId
 	LEFT JOIN tblEMEntityLocation EntityLocation ON EntityLocation.intEntityLocationId = MRDetail.intEntityLocationId AND MRDetail.intEntityCustomerId = EntityLocation.intEntityId
 	WHERE MRDetail.intMeterReadingId = @TransactionId
+	AND MRDetail.dblCurrentReading > 0
 	GROUP BY MRDetail.intMeterReadingId
 		, MRDetail.strTransactionId
 		, MRDetail.intEntityCustomerId
