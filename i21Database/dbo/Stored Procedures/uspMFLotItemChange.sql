@@ -66,9 +66,10 @@ BEGIN TRY
 		,@intOldProduceUnitMeasureId INT
 		,@intOldPhysicalUnitMeasureId INT
 		,@intProduceItemUOMId INT
-		,@ysnProductionReversal Bit
+		,@ysnProductionReversal BIT
+		,@ysnLotExistsInDestinationLocation BIT
+		,@intNewParentLotId INT
 
-	
 	SELECT @intTransactionCount = @@TRANCOUNT
 
 	SELECT @strDescription = Ltrim(isNULL(@strReasonCode, '') + ' ' + isNULL(@strNotes, ''))
@@ -184,6 +185,29 @@ BEGIN TRY
 
 	IF @ysnProducedItemChange = 0
 	BEGIN
+		SELECT @strNewLotNumber = NULL
+			,@intNewLotId = NULL
+			,@intNewParentLotId = NULL
+
+		SELECT @strNewLotNumber = strLotNumber
+			,@intNewLotId = intLotId
+			,@intNewParentLotId = intParentLotId
+		FROM dbo.tblICLot
+		WHERE strLotNumber = @strLotNumber
+			AND intItemId = @intNewItemId
+			AND intStorageLocationId = @intStorageLocationId
+
+		IF @intNewLotId IS NULL
+		BEGIN
+			SELECT @ysnLotExistsInDestinationLocation = 0
+		END
+		ELSE
+		BEGIN
+			SELECT @intParentLotId = @intNewParentLotId
+
+			SELECT @ysnLotExistsInDestinationLocation = 1
+		END
+
 		EXEC uspICInventoryAdjustment_CreatePostItemChange @intItemId = @intItemId
 			,@dtmDate = @dtmDate
 			,@intLocationId = @intLocationId
@@ -201,11 +225,23 @@ BEGIN TRY
 			,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
 			,@strDescription = @strDescription
 
-		SELECT TOP 1 @strNewLotNumber = strLotNumber
-			,@intNewLotId = intLotId
-		FROM tblICLot
-		WHERE intSplitFromLotId = @intLotId
-		ORDER BY intLotId DESC
+		IF @ysnLotExistsInDestinationLocation = 0
+		BEGIN
+			SELECT TOP 1 @strNewLotNumber = strLotNumber
+				,@intNewLotId = intLotId
+			FROM tblICLot
+			WHERE intSplitFromLotId = @intLotId
+			ORDER BY intLotId DESC
+		END
+		ELSE
+		BEGIN
+			SELECT @strNewLotNumber = strLotNumber
+				,@intNewLotId = intLotId
+			FROM dbo.tblICLot
+			WHERE strLotNumber = @strLotNumber
+				AND intItemId = @intNewItemId
+				AND intStorageLocationId = @intStorageLocationId
+		END
 
 		EXEC dbo.uspMFAdjustInventory @dtmDate = @dtmDate
 			,@intTransactionTypeId = 15
@@ -234,14 +270,14 @@ BEGIN TRY
 	END
 	ELSE
 	BEGIN
-		If @dblPhysicalCount is null 
-		Begin
-			Select @ysnProductionReversal=0
-		End
-		Else
-		Begin
-			Select @ysnProductionReversal=1
-		End
+		IF @dblPhysicalCount IS NULL
+		BEGIN
+			SELECT @ysnProductionReversal = 0
+		END
+		ELSE
+		BEGIN
+			SELECT @ysnProductionReversal = 1
+		END
 
 		SELECT @intWorkOrderId = intWorkOrderId
 			,@intBatchId = intBatchId
@@ -267,7 +303,8 @@ BEGIN TRY
 				WHERE strLotNumber = @strLotNumber
 				)
 
-		IF @dblPhysicalCount <> Abs(@dblAdjustByQuantity) and @ysnProductionReversal=0
+		IF @dblPhysicalCount <> Abs(@dblAdjustByQuantity)
+			AND @ysnProductionReversal = 0
 		BEGIN
 			RAISERROR (
 					'Item change is not allowed for this pallet. Qty is adjusted.'
