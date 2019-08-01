@@ -18,7 +18,9 @@ GO
 
 	UPDATE tblSMStartingNumber SET strPrefix = 'PCE-'
 	WHERE strPrefix = 'CE-' AND strTransactionType = N'Cancel Equity' AND strModule = 'Patronage'
-
+	
+	UPDATE tblSMStartingNumber SET strPrefix = 'PATR-'
+	WHERE strPrefix = 'PR-' AND strTransactionType = N'Process Refund' AND strModule = 'Patronage'
 
 	UPDATE tblSMStartingNumber SET strPrefix = 'PSS-'
 	WHERE strPrefix = 'SS-' AND strTransactionType = N'Change Stock Status Number' AND strModule = 'Patronage'	
