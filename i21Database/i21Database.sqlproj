@@ -7966,6 +7966,13 @@
     <Build Include="dbo\Stored Procedures\uspSTGetLotteryCountData.sql" />
     <Build Include="dbo\Stored Procedures\uspAPValidateImportedPaidVouchersOhio.sql" />
     <Build Include="dbo\Functions\fnRKConvertUOMCurrency.sql" />
+    <Build Include="dbo\Tables\tblIPContractFeedHeader.sql" />
+    <Build Include="dbo\Tables\tblIPContractFeedDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPGenerateContactFeedDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPGetContactFeedDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessContactFeedDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPGetContactFeedAckDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessContactFeedAckDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
