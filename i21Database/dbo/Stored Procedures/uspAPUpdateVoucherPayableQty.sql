@@ -26,6 +26,7 @@ DECLARE @invalidPayables TABLE(intVoucherPayableId INT, strError NVARCHAR(1000))
 DECLARE @validPayables AS VoucherPayable
 DECLARE @validPayablesTax AS VoucherDetailTax
 DECLARE @payablesKey TABLE(intOldPayableId int, intNewPayableId int);
+DECLARE @payablesKeyPartial TABLE(intOldPayableId int, intNewPayableId int);
 DECLARE @invalidCount INT;
 DECLARE @SavePoint NVARCHAR(32) = 'uspAPUpdateVoucherPayableQty';
 
@@ -563,12 +564,51 @@ ELSE SAVE TRAN @SavePoint
 	ELSE IF @post = 0
 	BEGIN
 	
+		--GET PAYABLES FOR PARTIAL
+		INSERT INTO @payablesKeyPartial(intOldPayableId, intNewPayableId)
+		SELECT
+			intOldPayableId
+			,intNewPayableId
+		FROM dbo.fnAPGetPayableKeyInfo(@validPayables)
+
+		--UPDATE QTY FOR PARTIAL
+		UPDATE B
+			SET B.dblQuantityToBill = (B.dblQuantityToBill + C.dblQuantityToBill),
+				B.dblQuantityBilled = 0 --when returning to tblAPVoucherPayable, we expect that qty to billed is 0
+		FROM tblAPVoucherPayable B
+		INNER JOIN @payablesKeyPartial B2
+			ON B2.intNewPayableId = B.intVoucherPayableId
+		INNER JOIN @validPayables C
+			ON C.intVoucherPayableId = B2.intOldPayableId
+
+		UPDATE A
+			SET A.dblTax = taxData.dblTax, A.dblAdjustedTax = taxData.dblAdjustedTax
+		FROM tblAPVoucherPayableTaxStaging A
+		INNER JOIN @payablesKeyPartial A2
+			ON A2.intNewPayableId = A.intVoucherPayableId
+		INNER JOIN @validPayables B
+			ON B.intVoucherPayableId = A2.intOldPayableId
+		INNER JOIN tblAPVoucherPayable C
+			ON A2.intNewPayableId = C.intVoucherPayableId
+		CROSS APPLY (
+			SELECT
+				*
+			FROM dbo.fnAPRecomputeStagingTaxes(A.intVoucherPayableId, B.dblCost, C.dblQuantityToBill) taxes
+			WHERE A.intTaxCodeId = taxes.intTaxCodeId AND A.intTaxGroupId = taxes.intTaxGroupId
+		) taxData
+
+
 		--IF ALREADY EXISTS GET PAYABLES KEY
 		INSERT INTO @payablesKey(intOldPayableId, intNewPayableId)
 		SELECT
 			intOldPayableId
 			,intNewPayableId
-		FROM dbo.fnAPGetPayableCompletedKeyInfo(@validPayables)
+		FROM dbo.fnAPGetPayableCompletedKeyInfo(@validPayables) A
+		WHERE A.intOldPayableId NOT IN
+		(
+			--exclude the partial
+			SELECT intOldPayableId FROM @payablesKeyPartial
+		)
 		
 		--if unpost and the record were already removed because it has 0 qty, re-insert
 		MERGE INTO tblAPVoucherPayable AS destination
@@ -912,18 +952,6 @@ ELSE SAVE TRAN @SavePoint
 			ON B.intVoucherPayableId = B2.intNewPayableId
 		INNER JOIN @validPayables C
 			ON B2.intVoucherPayableKey = C.intVoucherPayableId
-		-- --LEFT JOIN (tblAPBillDetail C INNER JOIN tblAPBill C2 ON C.intBillId = C2.intBillId)
-		-- 	ON 	C.intTransactionType = B.intTransactionType
-		-- 	AND	ISNULL(C.intPurchaseDetailId,-1) = ISNULL(B.intPurchaseDetailId,-1)
-		-- 	AND ISNULL(C.intContractDetailId,-1) = ISNULL(B.intContractDetailId,-1)
-		-- 	AND ISNULL(C.intEntityVendorId,-1) = ISNULL(B.intEntityVendorId,-1)
-		-- 	AND ISNULL(C.intScaleTicketId,-1) = ISNULL(B.intScaleTicketId,-1)
-		-- 	AND ISNULL(C.intInventoryReceiptChargeId,-1) = ISNULL(B.intInventoryReceiptChargeId,-1)
-		-- 	AND ISNULL(C.intInventoryReceiptItemId,-1) = ISNULL(B.intInventoryReceiptItemId,-1)
-		-- 	--AND ISNULL(C.intLoadDetailId,-1) = ISNULL(B.intLoadShipmentDetailId,-1)
-		-- 	AND ISNULL(C.intLoadShipmentDetailId,-1) = ISNULL(B.intLoadShipmentDetailId,-1)
-		-- 	AND ISNULL(C.intInventoryShipmentChargeId,-1) = ISNULL(B.intInventoryShipmentChargeId,-1)
-		-- --WHERE C.intBillId IN (SELECT intId FROM @voucherIds)
 
 		UPDATE A
 			SET A.dblTax = taxData.dblTax, A.dblAdjustedTax = taxData.dblAdjustedTax
