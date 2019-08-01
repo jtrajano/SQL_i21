@@ -23,6 +23,7 @@ BEGIN
 			,[intContractHeaderId]
 			,[intContractDetailId]
 			,[intContractSeqId]
+			,[intContractCostId]
 			,[intInventoryReceiptItemId]
 			,[intLoadShipmentId]
 			,[intLoadShipmentDetailId]
@@ -65,6 +66,7 @@ BEGIN
 			,[intContractHeaderId] = CH.intContractHeaderId
 			,[intContractDetailId] = LD.intPContractDetailId
 			,[intContractSeqId] = CT.intContractSeq
+			,[intContractCostId] = NULL
 			,[intInventoryReceiptItemId] = receiptItem.intInventoryReceiptItemId
 			,[intLoadShipmentId] = L.intLoadId
 			,[intLoadShipmentDetailId] = LD.intLoadDetailId
@@ -134,6 +136,7 @@ BEGIN
 			,[intContractHeaderId] = CH.intContractHeaderId
 			,[intContractDetailId] = CT.intContractDetailId
 			,[intContractSeqId] = CT.intContractSeq
+			,[intContractCostId] = CTC.intContractCostId
 			,[intInventoryReceiptItemId] = NULL
 			,[intLoadShipmentId] = A.intLoadId
 			,[intLoadShipmentDetailId] = A.intLoadDetailId
@@ -181,11 +184,18 @@ BEGIN
 			INNER JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.[intEntityId] = D2.intEntityId) ON A.[intEntityVendorId] = D1.[intEntityId]
 			OUTER APPLY dbo.fnGetItemGLAccountAsTable(A.intItemId, ItemLoc.intItemLocationId, 'AP Clearing') itemAccnt
 			LEFT JOIN dbo.tblGLAccount apClearing ON apClearing.intAccountId = itemAccnt.intAccountId
+			OUTER APPLY (SELECT TOP 1 ysnCreateOtherCostPayable = ISNULL(ysnCreateOtherCostPayable, 0) FROM tblCTCompanyPreference) COC
+			OUTER APPLY (SELECT TOP 1 CTC.intContractCostId FROM tblCTContractCost CTC
+						WHERE CT.intContractDetailId = CTC.intContractDetailId
+							AND A.intItemId = CTC.intItemId
+							AND A.intEntityVendorId = CTC.intVendorId
+						) CTC
 			WHERE A.intLoadId = @intLoadId
 				AND A.intLoadCostId = ISNULL(@intLoadCostId, A.intLoadCostId)
 				AND A.intLoadDetailId NOT IN 
 					(SELECT IsNull(BD.intLoadDetailId, 0) FROM tblAPBillDetail BD JOIN tblICItem Item ON Item.intItemId = BD.intItemId
 					WHERE BD.intItemId = A.intItemId AND Item.strType = 'Other Charge' AND ISNULL(A.ysnAccrue,0) = 1)
+				AND NOT (COC.ysnCreateOtherCostPayable = 1 AND CTC.intContractCostId IS NOT NULL)
 
 	END
 
