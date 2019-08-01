@@ -382,7 +382,7 @@ BEGIN
 			,GP.[intTermId]						
 			,GP.[strBillOfLading]					
 			,GP.[ysnReturn]	 
-		FROM dbo.fnICGeneratePayablesForRemoval (@intReceiptId, @ysnPost) GP
+		FROM dbo.fnICGeneratePayables (@intReceiptId, @ysnPost) GP
 		EXEC dbo.uspAPRemoveVoucherPayable @voucherPayableForRemoval
 	END
 END
