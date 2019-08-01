@@ -36,6 +36,34 @@ RETURNS @Transaction TABLE
 )
 AS
 BEGIN
+	DECLARE @OpenBasisContract TABLE
+	(
+		intContractHeaderId		INT,
+		intContractDetailId		INT
+	)
+
+	insert into @OpenBasisContract	(intContractDetailId, intContractHeaderId)
+	select 		
+		CD.intContractDetailId,
+		CH.intContractHeaderId
+	from tblCTContractHeader CH
+	join tblCTContractDetail CD on CH.intContractHeaderId = CD.intContractHeaderId
+	left JOIN (
+		
+		SELECT intRowId = ROW_NUMBER() OVER(PARTITION BY a.intContractHeaderId, a.intContractDetailId ORDER BY a.dtmHistoryCreated DESC)
+			, a.intPricingTypeId
+			, a.intContractHeaderId
+			, a.intContractDetailId
+			, dtmHistoryCreated
+		from tblCTSequenceHistory a
+			join tblCTContractHeader b
+				on a.intContractHeaderId = b.intContractHeaderId
+		where dtmHistoryCreated < DATEADD(DAY, 1, @dtmDate)
+		
+	) tbl ON tbl.intContractDetailId = CD.intContractDetailId
+		AND tbl.intContractHeaderId = CD.intContractHeaderId
+		AND tbl.intRowId = 1
+	where CH.intPricingTypeId = 2	and tbl.intPricingTypeId = 2
 
 	DECLARE @TemporaryTable TABLE 
 	(  
@@ -94,6 +122,8 @@ BEGIN
 	FROM tblCTContractDetail CD
 	INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 		AND CH.intContractTypeId = 1 AND CH.intPricingTypeId = 2
+	JOIN @OpenBasisContract OC
+		ON CD.intContractDetailId = OC.intContractDetailId and CD.intContractHeaderId = OC.intContractHeaderId
 	INNER JOIN tblICInventoryReceiptItem ReceiptItem ON CD.intContractDetailId = ReceiptItem.intLineNo
 	INNER JOIN tblICInventoryReceipt Receipt ON Receipt.strReceiptType = 'Purchase Contract'
 		AND ReceiptItem.intInventoryReceiptId = Receipt.intInventoryReceiptId
@@ -155,6 +185,8 @@ BEGIN
 	FROM tblCTContractDetail CD
 	INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 		AND CH.intContractTypeId = 1 AND CH.intPricingTypeId = 2
+	JOIN @OpenBasisContract OC
+		ON CD.intContractDetailId = OC.intContractDetailId and CD.intContractHeaderId = OC.intContractHeaderId
 	INNER JOIN tblAPBillDetail BD ON BD.intContractDetailId  = CD.intContractDetailId AND BD.intContractSeq IS NOT NULL  and BD.intInventoryReceiptItemId is not null
 		AND BD.intItemId = CD.intItemId
 	INNER JOIN tblAPBill B ON B.intBillId = BD.intBillId
@@ -212,6 +244,8 @@ BEGIN
 	FROM tblCTContractDetail CD
 	INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId 
 		AND intContractTypeId = 2 AND CH.intPricingTypeId = 2
+	JOIN @OpenBasisContract OC
+		ON CD.intContractDetailId = OC.intContractDetailId and CD.intContractHeaderId = OC.intContractHeaderId
 	INNER JOIN tblICInventoryShipmentItem ShipmentItem ON ShipmentItem.intLineNo = CD.intContractDetailId
 		AND CH.intContractHeaderId = ShipmentItem.intOrderId
 	INNER JOIN tblICInventoryShipment Shipment ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId	
@@ -275,13 +309,15 @@ BEGIN
 	FROM tblCTContractDetail CD
 	INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 		AND CH.intContractTypeId = 2 AND CH.intPricingTypeId = 2
+	JOIN @OpenBasisContract OC
+		ON CD.intContractDetailId = OC.intContractDetailId and CD.intContractHeaderId = OC.intContractHeaderId
 	INNER JOIN tblARInvoiceDetail ID ON ID.intContractDetailId  = CD.intContractDetailId AND ID.intInventoryShipmentItemId is not null	
 		AND ID.intItemId = CD.intItemId
 	INNER JOIN tblARInvoice I ON I.intInvoiceId = ID.intInvoiceId
 	INNER JOIN tblICCommodity C ON CH.intCommodityId = C.intCommodityId
 	INNER JOIN tblCTContractType CT ON CH.intContractTypeId = CT.intContractTypeId
 	INNER JOIN vyuCTEntity E ON E.intEntityId = CH.intEntityId and E.strEntityType = (CASE WHEN CH.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END)
-	WHERE I.ysnPosted = 1
+	--WHERE I.ysnPosted = 1
 	GROUP BY CH.intContractHeaderId
 	,CD.intContractDetailId
 	,ID.intInvoiceDetailId
