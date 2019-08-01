@@ -401,10 +401,7 @@ BEGIN
                 @intVendorTaxCodeId     	= NULL,
                 @intGLAccountExpenseId    	= (SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = CONVERT(NVARCHAR(50),ssvnd_gl_pur)),
                 @strVendorAccountNum      	= ssvnd_our_cus_no,
-                @ysnPymtCtrlActive        	= CASE 	WHEN ssvnd_pay_ctl_ind = ''A'' THEN 1 
-													WHEN ssvnd_pay_ctl_ind = ''D'' THEN 1
-													WHEN ssvnd_pay_ctl_ind = ''H'' THEN 1
-												ELSE 0 END,
+                @ysnPymtCtrlActive        	= CASE WHEN ssvnd_pay_ctl_ind = ''A'' THEN 1 ELSE 0 END,
                 @ysnPymtCtrlAlwaysDiscount	= CASE WHEN ssvnd_pay_ctl_ind = ''D'' THEN 1 ELSE 0 END,
                 @ysnPymtCtrlEFTActive     	= CASE WHEN ssvnd_pay_ctl_ind = ''E'' THEN 1 ELSE 0 END,
                 @ysnPymtCtrlHold          	= CASE WHEN ssvnd_pay_ctl_ind = ''H'' THEN 1 ELSE 0 END,
@@ -596,8 +593,11 @@ BEGIN
 		DECLARE @VendorIdentityId INT
 		SET @VendorIdentityId = SCOPE_IDENTITY()		
 		
-		INSERT [dbo].[tblEMEntityToContact] ([intEntityId], [intEntityContactId], [intEntityLocationId],[ysnPortalAccess], ysnDefaultContact)
-		VALUES							  (@EntityId, @EntityContactId, @EntityLocationId, 0, @ysnIsDefault)/**/
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblEMEntityToContact WHERE intEntityId = @EntityId AND intEntityContactId = @EntityContactId)
+		BEGIN
+			INSERT [dbo].[tblEMEntityToContact] ([intEntityId], [intEntityContactId], [intEntityLocationId],[ysnPortalAccess], ysnDefaultContact)
+			VALUES							  (@EntityId, @EntityContactId, @EntityLocationId, 0, @ysnIsDefault)/**/
+		END
 
 		INSERT INTO [dbo].[tblAPImportedVendors]
 			VALUES(@originVendor, 1)
