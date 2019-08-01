@@ -31,7 +31,11 @@ SELECT intEntityId				= ENTITY.intEntityId
 	 , ysnHasBudgetSetup		= CUSTOMER.ysnHasBudgetSetup
 	 , intEntityContactId		= CONTACT.intEntityContactId
 	 , strPhone					= CONTACT.strPhone
+	 , strPhone1				= CONTACT.strPhone1
+	 , strPhone2				= CONTACT.strPhone2
 	 , strContactName			= CONTACT.strName
+	 , strInternalNotes			= CONTACT.strInternalNotes
+	 , strEmail					= CONTACT.strEmail
 	 , intShipViaId				= CUSTOMERLOCATION.intShipViaId
 	 , intFreightTermId			= CUSTOMERLOCATION.intFreightTermId
 	 , intTaxGroupId			= CUSTOMERLOCATION.intTaxGroupId 
@@ -44,6 +48,8 @@ SELECT intEntityId				= ENTITY.intEntityId
 	 , strShipViaName			= CUSTOMERLOCATION.strShipVia
 	 , strFreightTerm			= CUSTOMERLOCATION.strFreightTerm
 	 , strCounty				= CUSTOMERLOCATION.strCounty
+	 , strCountry				= CUSTOMERLOCATION.strCountry
+	 , strLocationName			= CUSTOMERLOCATION.strLocationName
      , strShipToLocationName	= SHIPTOLOCATION.strLocationName
      , strShipToAddress			= SHIPTOLOCATION.strAddress 
      , strShipToCity			= SHIPTOLOCATION.strCity
@@ -134,17 +140,25 @@ INNER JOIN (
 	) BUDGET
 ) CUSTOMER ON ENTITY.intEntityId = CUSTOMER.intEntityId
 LEFT JOIN (
-	SELECT ETC.intEntityId
-		 , ETCE.strPhone
-		 , ETCE.strName
-		 , ETC.intEntityContactId
+	SELECT intEntityId			= ETC.intEntityId
+		 , strPhone				= ETCE.strPhone
+		 , strPhone1			= EPN.strPhone
+		 , strPhone2			= ETCE.strPhone2
+		 , strName				= ETCE.strName
+		 , strEmail				= ETCE.strEmail
+		 , intEntityContactId	= ETC.intEntityContactId
+		 , strInternalNotes		= ETCE.strInternalNotes
 	FROM dbo.tblEMEntityToContact ETC WITH (NOLOCK) 
 	INNER JOIN (
 		SELECT intEntityId
 			 , strName
 			 , strPhone
+			 , strPhone2
+			 , strEmail
+			 , strInternalNotes
 		FROM dbo.tblEMEntity WITH(NOLOCK)
 	) ETCE ON ETC.intEntityContactId = ETCE.intEntityId	
+	LEFT JOIN tblEMEntityPhoneNumber EPN ON ETC.intEntityContactId = EPN.intEntityId	
 	WHERE ETC.ysnDefaultContact = 1
 ) CONTACT ON CUSTOMER.intEntityId = CONTACT.intEntityId
 LEFT JOIN (
@@ -164,6 +178,8 @@ LEFT JOIN (
 		 , strCounty		= TAXCODE.strCounty
 		 , intWarehouseId	= ISNULL(L.intWarehouseId, -99)
 		 , strWarehouseName	= WH.strWarehouseName
+		 , strLocationName
+		 , strCountry
 	FROM dbo.tblEMEntityLocation L WITH (NOLOCK)
 	LEFT JOIN (
 		SELECT intTaxGroupId
