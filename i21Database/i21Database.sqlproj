@@ -7965,6 +7965,7 @@
     <Build Include="dbo\Tables\tblSTCheckoutLotteryCount.sql" />
     <Build Include="dbo\Stored Procedures\uspSTGetLotteryCountData.sql" />
     <Build Include="dbo\Stored Procedures\uspAPValidateImportedPaidVouchersOhio.sql" />
+    <Build Include="dbo\Functions\fnRKConvertUOMCurrency.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
