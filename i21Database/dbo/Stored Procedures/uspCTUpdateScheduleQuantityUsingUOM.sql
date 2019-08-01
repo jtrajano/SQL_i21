@@ -14,6 +14,9 @@ BEGIN TRY
 	DECLARE @ErrMsg			NVARCHAR(MAX),
 			@intItemUOMId	INT
 
+	IF @strScreenName = 'Inventory Return'
+		RETURN
+
 	IF NOT EXISTS(SELECT * FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId)
 	BEGIN
 		RAISERROR('Sequence is deleted by other user.',16,1)
