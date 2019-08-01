@@ -37,7 +37,8 @@ SET ANSI_WARNINGS OFF
 		[dblCost] NUMERIC(18,6),
 		[dblUnitQty] NUMERIC(18,6),
 		[ysnDirectCategory] BIT,
-		[ysnSubtractVolume] BIT
+		[ysnSubtractVolume] BIT,
+		[dtmPostDate] DATETIME
 	);
 
 	DECLARE @tempPatronageVolumes TABLE(
@@ -71,7 +72,8 @@ SET ANSI_WARNINGS OFF
 					ABD.dblCost,
 					UOM.dblUnitQty,
 					ysnDirectCategory = 0,
-					ysnSubtractVolume = CASE WHEN AB.intTransactionType = 3 THEN 1 ELSE 0 END
+					ysnSubtractVolume = CASE WHEN AB.intTransactionType = 3 THEN 1 ELSE 0 END,
+					dtmPostDate = DATEADD(dd, DATEDIFF(dd, 0, AB.dtmDate), 0)
 			FROM tblAPBill AB
 			INNER JOIN tblAPBillDetail ABD
 					ON ABD.intBillId = AB.intBillId
@@ -103,7 +105,8 @@ SET ANSI_WARNINGS OFF
 				ARID.dblPrice,
 				UOM.dblUnitQty,
 				ysnDirectCategory = CAST((CASE WHEN ARID.intTicketId IS NOT NULL THEN 1 ELSE 0 END) AS BIT),
-				ysnSubtractVolume = CASE WHEN ARI.strTransactionType = 'Credit Memo' THEN 1 ELSE 0 END
+				ysnSubtractVolume = CASE WHEN ARI.strTransactionType = 'Credit Memo' THEN 1 ELSE 0 END,
+				dtmPostDate = DATEADD(dd, DATEDIFF(dd, 0, ARI.dtmPostDate), 0)
 		FROM tblARInvoice ARI
 		INNER JOIN tblARInvoiceDetail ARID
 			ON ARID.intInvoiceId = ARI.intInvoiceId
@@ -173,14 +176,15 @@ SET ANSI_WARNINGS OFF
 	-----====== BEGIN - Update Customer Volume Log ======-----
 	IF(@post = 1)
 	BEGIN
-		INSERT INTO tblPATCustomerVolumeLog(intInvoiceId,intBillId,dtmTransactionDate,ysnDirectSale,intItemId,dblVolume)
+		INSERT INTO tblPATCustomerVolumeLog(intInvoiceId,intBillId,dtmTransactionDate,ysnDirectSale,intItemId,dblVolume, dtmPostDate)
 		SELECT	intInvoiceId = NULL,
 				intBillId = PVS.intTransactionId,
 				dtmTransactionDate = PVS.dtmDate,
 				ysnDirectSale = PVS.ysnDirectCategory,
 				intItemId = PVS.intItemId,
 				dblVolume = ROUND((CASE WHEN PVS.strUnitAmount = @TYPE_AMOUNT THEN (CASE WHEN PVS.dblQuantity <= 0 THEN 0 ELSE (PVS.dblQuantity * PVS.dblCost) END) 
-						ELSE PVS.dblQuantity * PVS.dblUnitQty END),2) * CASE WHEN PVS.ysnSubtractVolume = 1 THEN -1 ELSE 1 END
+						ELSE PVS.dblQuantity * PVS.dblUnitQty END),2) * CASE WHEN PVS.ysnSubtractVolume = 1 THEN -1 ELSE 1 END,
+				dtmPostDate = PVS.dtmPostDate
 		FROM @patronageVolumeStaging PVS
 		WHERE PVS.strPurchaseSale = @TYPE_PURCHASE
 		UNION ALL
@@ -190,7 +194,8 @@ SET ANSI_WARNINGS OFF
 				ysnDirectSale = PVS.ysnDirectCategory,
 				intItemId = PVS.intItemId,
 				dblVolume = ROUND((CASE WHEN PVS.strUnitAmount = @TYPE_AMOUNT THEN (CASE WHEN PVS.dblQuantity <= 0 THEN 0 ELSE (PVS.dblQuantity * PVS.dblCost) END) 
-						ELSE PVS.dblQuantity * PVS.dblUnitQty END),2) * CASE WHEN PVS.ysnSubtractVolume = 1 THEN -1 ELSE 1 END
+						ELSE PVS.dblQuantity * PVS.dblUnitQty END),2) * CASE WHEN PVS.ysnSubtractVolume = 1 THEN -1 ELSE 1 END,
+			   dtmPostDate = PVS.dtmPostDate
 		FROM @patronageVolumeStaging PVS
 		WHERE PVS.strPurchaseSale = @TYPE_SALE
 	END

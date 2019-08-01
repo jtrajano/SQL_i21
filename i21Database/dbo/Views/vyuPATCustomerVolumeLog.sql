@@ -9,6 +9,7 @@ SELECT	id = NEWID(),
 		EM.strEntityNo,
 		EM.strName,
 		A.dtmTransactionDate,
+		A.dtmPostDate,
 		dblTotalVolume = SUM(A.dblVolume)
 FROM (
 	SELECT  intEntityId = CASE WHEN CVL.intBillId IS NOT NULL THEN APB.intEntityVendorId ELSE ARI.intEntityCustomerId END, 
@@ -20,6 +21,7 @@ FROM (
 							ELSE (CASE WHEN CVL.ysnDirectSale = 1 THEN 'Direct' ELSE 'Sale' END) END,
 		strTransactionNo = CASE WHEN CVL.intBillId IS NOT NULL THEN APB.strBillId ELSE ARI.strInvoiceNumber END,
 		dtmTransactionDate = CASE WHEN CVL.intBillId IS NOT NULL THEN APB.dtmDate ELSE ARI.dtmDate END,
+		CVL.dtmPostDate,
 		CVL.dblVolume
 	FROM tblPATCustomerVolumeLog CVL
 	LEFT OUTER JOIN tblAPBill APB
@@ -38,4 +40,5 @@ GROUP BY	A.intBillId,
 			EM.strEntityNo,
 			EM.strName,
 			A.dtmTransactionDate,
+			A.dtmPostDate,
 			A.strCategorySource
