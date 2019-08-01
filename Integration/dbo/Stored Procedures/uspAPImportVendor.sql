@@ -401,7 +401,10 @@ BEGIN
                 @intVendorTaxCodeId     	= NULL,
                 @intGLAccountExpenseId    	= (SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = CONVERT(NVARCHAR(50),ssvnd_gl_pur)),
                 @strVendorAccountNum      	= ssvnd_our_cus_no,
-                @ysnPymtCtrlActive        	= CASE WHEN ssvnd_pay_ctl_ind = ''A'' THEN 1 ELSE 0 END,
+                @ysnPymtCtrlActive        	= CASE 	WHEN ssvnd_pay_ctl_ind = ''A'' THEN 1 
+													WHEN ssvnd_pay_ctl_ind = ''D'' THEN 1
+													WHEN ssvnd_pay_ctl_ind = ''H'' THEN 1
+												ELSE 0 END,
                 @ysnPymtCtrlAlwaysDiscount	= CASE WHEN ssvnd_pay_ctl_ind = ''D'' THEN 1 ELSE 0 END,
                 @ysnPymtCtrlEFTActive     	= CASE WHEN ssvnd_pay_ctl_ind = ''E'' THEN 1 ELSE 0 END,
                 @ysnPymtCtrlHold          	= CASE WHEN ssvnd_pay_ctl_ind = ''H'' THEN 1 ELSE 0 END,
