@@ -155,7 +155,7 @@ AS SELECT
 	,vyuEMSearchShipVia.strName AS strHaulerName
 	--,EMDriver.strName AS strDriverName
 	
-	,tblSMCompanyLocation.strLocationName
+	,ISNULL(tblSMCompanyLocation.strLocationName,Origin.strLocationName) strLocationName
 	,tblSMCompanyLocationSubLocation.strSubLocationName
 
 	,tblGRDiscountId.strDiscountId
