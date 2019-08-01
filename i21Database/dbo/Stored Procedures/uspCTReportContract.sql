@@ -717,9 +717,11 @@ BEGIN TRY
 			,strStraussApplicableLaw				=	@strApplicableLaw
 			,strStraussContract						=	'In accordance with '+AN.strComment+' (latest edition)'
 			--,strStrussOtherCondition				=	W2.strWeightGradeDesc +  CHAR(13)+CHAR(10) + @strGeneralCondition
-			,strStrussOtherCondition    = isnull(W2.strWeightGradeDesc,'') +  CHAR(13)+CHAR(10) + isnull(@strGeneralCondition,'')  
+		   --,strStrussOtherCondition    = isnull(W2.strWeightGradeDesc,'') +  CHAR(13)+CHAR(10) + isnull(@strGeneralCondition,'')    
+		   ,strStrussOtherCondition    = '<span style="font-family:Arial;font-size:13px;">' + isnull(W2.strWeightGradeDesc,'') +  '</br>' + isnull(@strGeneralCondition,'') + '</span>'
 			--,strStraussShipment						=	REPLACE(CONVERT (VARCHAR,GETDATE(),107),LTRIM(DAY (GETDATE())) + ', ' ,'') + ' shipment at '+ SQ.strFixationBy+'''s option'
-			,strStraussShipment      = REPLACE(CONVERT (VARCHAR,GETDATE(),107),LTRIM(DAY (GETDATE())) + ', ' ,'') + ' shipment'  
+		   --,strStraussShipment      = REPLACE(CONVERT (VARCHAR,GETDATE(),107),LTRIM(DAY (GETDATE())) + ', ' ,'') + ' shipment'    
+		   ,strStraussShipment      = substring(CONVERT(VARCHAR,SQ.dtmEndDate,107),1,4) + substring(CONVERT(VARCHAR,SQ.dtmEndDate,107),9,4) + ' shipment'  
 			,intContractTypeId						=	CH.intContractTypeId
 
 	FROM	tblCTContractHeader				CH
@@ -798,6 +800,7 @@ BEGIN TRY
 							CD.intPricingTypeId,
 							CY.strCurrency + '-' + dbo.fnCTGetTranslation('Inventory.view.ReportTranslation',UM.intUnitMeasureId,@intLaguageId,'Name',UM.strUnitMeasure) AS	strPriceCurrencyAndUOM,
 							CD.dtmStartDate,
+							CD.dtmEndDate,
 							dbo.fnCTGetTranslation('RiskManagement.view.FuturesTradingMonths',CD.intFutureMonthId,@intLaguageId,'Future Trading Month',MO.strFutureMonth) strFutureMonth,
 							BC.strCurrency AS strBasisCurrency,
 							dbo.fnCTGetTranslation('Inventory.view.ReportTranslation',BM.intUnitMeasureId,@intLaguageId,'Name',BM.strUnitMeasure) strBasisUnitMeasure,
