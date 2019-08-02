@@ -203,9 +203,6 @@ BEGIN
 				UPDATE tblTRImportLoadDetail SET intDropProductId = @intDropProductId WHERE intImportLoadDetailId = @intImportLoadDetailId
 			END
 
-
-
-
             IF(@ysnValid = 1)
 			BEGIN			
 				IF(ISNULL(@strMessage, '') != '')

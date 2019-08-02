@@ -35,6 +35,11 @@
     [ysnValid] BIT,
     [strMessage] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	[intConcurrencyId] INT NOT NULL DEFAULT ((1)),
+	[intLoadHeaderId] INT NULL,
+	[intLoadReceiptId] INT NULL,
+	[intLoadDistributionHeaderId] INT NULL,
+    [intLoadDistributionDetailId] INT NULL,
+    [strReceiptLink] NVARCHAR(50) NULL,
     CONSTRAINT [PK_tblTRImportLoadDetail] PRIMARY KEY ([intImportLoadDetailId]),
 	CONSTRAINT [FK_tblTRImportLoadDetail_tblTRImportLoad_intImportLoadId] FOREIGN KEY ([intImportLoadId]) REFERENCES [dbo].[tblTRImportLoad] ([intImportLoadId]) ON DELETE CASCADE
 )
