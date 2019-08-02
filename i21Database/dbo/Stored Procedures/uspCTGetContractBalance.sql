@@ -264,7 +264,8 @@ BEGIN TRY
 	  ,InvTran.dtmDate	  
 	  ,@dtmEndDate AS dtmEndDate
 	  ,dblQuantity = CASE
-			 			WHEN ISNULL(INV.ysnPosted, 0) = 1 AND UPPER(WG.strWhereFinalized) = UPPER('Destination') THEN SUM(ShipmentItem.dblDestinationNet * 1)
+			 			WHEN ISNULL(INV.ysnPosted, 0) = 1 AND ShipmentItem.dblDestinationNet IS NOT NULL
+							THEN SUM(ShipmentItem.dblDestinationNet * 1)
 			 			ELSE SUM(InvTran.dblQty * - 1) 
 					 END
 	  ,0
@@ -285,7 +286,6 @@ BEGIN TRY
 			FROM tblARInvoice IV
 			INNER JOIN tblARInvoiceDetail ID ON IV.intInvoiceId = ID.intInvoiceId
 	   ) INV ON INV.intInventoryShipmentItemId = ShipmentItem.intInventoryShipmentItemId	  
-	   LEFT JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = CH.intWeightId
 	   WHERE InvTran.strTransactionForm = 'Inventory Shipment'	   
 	   	AND InvTran.ysnIsUnposted = 0
 	   	AND dbo.fnRemoveTimeOnDate(InvTran.dtmDate) <= CASE WHEN @dtmEndDate IS NOT NULL   THEN @dtmEndDate   ELSE dbo.fnRemoveTimeOnDate(InvTran.dtmDate) END
@@ -298,7 +298,7 @@ BEGIN TRY
 		,InvTran.dtmDate
 		,Shipment.intInventoryShipmentId
 		,INV.ysnPosted
-		,WG.strWhereFinalized
+		,ShipmentItem.dblDestinationNet
 		
 	INSERT INTO @Shipment
 	  (
