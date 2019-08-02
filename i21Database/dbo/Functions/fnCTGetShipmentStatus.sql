@@ -11,7 +11,7 @@ BEGIN
 	INSERT INTO @returntable	
 	SELECT TOP 1 strShipmentStatus
 	FROM vyuLGLoadDetailViewSearch
-	WHERE intPContractDetailId = @intContractDetailId
+	WHERE (intPContractDetailId = @intContractDetailId or intSContractDetailId = @intContractDetailId)
 	AND ((intShipmentType = 2 AND strShipmentStatus <> 'Scheduled') OR intShipmentType = 1)
 	ORDER BY dtmScheduledDate, intLoadDetailId DESC
 		
