@@ -340,7 +340,7 @@ BEGIN
 			,[intItemUOMId]							= ActualTransaction.intItemUOMId
 			,[intSubLocationId]						= ActualTransaction.intSubLocationId
 			,[intStorageLocationId]					= ActualTransaction.intStorageLocationId
-			,[dtmDate]								= ActualTransaction.dtmDate
+			,[dtmDate]								= dbo.fnRemoveTimeOnDate(ActualTransaction.dtmDate)
 			,[dblQty]								= -ActualTransaction.dblQty
 			,[dblUOMQty]							= ActualTransaction.dblUOMQty
 			,[dblCost]								= ActualTransaction.dblCost
@@ -413,7 +413,7 @@ BEGIN
 			,[intItemLocationId]		= ActualTransaction.intItemLocationId
 			,[intSubLocationId]			= ActualTransaction.intSubLocationId
 			,[intStorageLocationId]		= ActualTransaction.intStorageLocationId
-			,[dtmDate]					= ActualTransaction.dtmDate
+			,[dtmDate]					= dbo.fnRemoveTimeOnDate(ActualTransaction.dtmDate)
 			,[dblQty]					= -ActualTransaction.dblQty
 			,[intItemUOMId]				= ActualTransaction.intItemUOMId
 			,[dblCost]					= ActualTransaction.dblCost
@@ -665,7 +665,7 @@ BEGIN
 
 		SELECT	TOP 1 
 				@intCurrencyId				= intCurrencyId
-				,@dtmDate					= dtmDate
+				,@dtmDate					= dbo.fnRemoveTimeOnDate(dtmDate)
 				,@dblExchangeRate			= dblExchangeRate
 				,@intTransactionId_AutoNegative	= intTransactionId
 				,@strTransactionId_AutoNegative	= strTransactionId
@@ -837,7 +837,7 @@ BEGIN
 		,t.intSubLocationId
 		,t.intStorageLocationId
 		,t.intLotId
-		,t.dtmDate
+		,dbo.fnRemoveTimeOnDate(t.dtmDate)
 		,-t.dblQty
 		,t.dblUOMQty
 		,t.dblCost

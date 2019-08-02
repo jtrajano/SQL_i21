@@ -264,7 +264,7 @@ BEGIN
 			,[intItemUOMId]							= ActualTransaction.intItemUOMId
 			,[intSubLocationId]						= ActualTransaction.intSubLocationId
 			,[intStorageLocationId]					= ActualTransaction.intStorageLocationId
-			,[dtmDate]								= ActualTransaction.dtmDate
+			,[dtmDate]								= dbo.fnRemoveTimeOnDate(ActualTransaction.dtmDate)
 			,[dblQty]								= -ActualTransaction.dblQty
 			,[dblUOMQty]							= ActualTransaction.dblUOMQty
 			,[dblCost]								= ActualTransaction.dblCost
@@ -325,7 +325,7 @@ BEGIN
 			,[intItemLocationId]		= ActualTransaction.intItemLocationId
 			,[intSubLocationId]			= ActualTransaction.intSubLocationId
 			,[intStorageLocationId]		= ActualTransaction.intStorageLocationId
-			,[dtmDate]					= ActualTransaction.dtmDate
+			,[dtmDate]					= dbo.fnRemoveTimeOnDate(ActualTransaction.dtmDate)
 			,[dblQty]					= -ActualTransaction.dblQty
 			,[intItemUOMId]				= ActualTransaction.intItemUOMId
 			,[dblCost]					= ActualTransaction.dblCost

@@ -105,7 +105,7 @@ SELECT  intId
 		,intItemId
 		,intItemLocationId
 		,intItemUOMId
-		,dtmDate
+		,dtmDate = dbo.fnRemoveTimeOnDate(dtmDate)
 		,dblQty
 		,dblUOMQty
 		,dblCost

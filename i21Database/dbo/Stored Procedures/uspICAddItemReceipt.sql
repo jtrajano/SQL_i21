@@ -493,7 +493,7 @@ BEGIN
 		WHEN MATCHED THEN 
 			UPDATE
 			SET 
-				dtmReceiptDate			= dbo.fnRemoveTimeOnDate(ISNULL(IntegrationData.dtmDate, GETDATE()))
+				dtmReceiptDate			= ISNULL(IntegrationData.dtmDate, GETDATE())
 				,intEntityVendorId		= IntegrationData.intEntityVendorId
 				,strReceiptType			= IntegrationData.strReceiptType
 				,intSourceType          = IntegrationData.intSourceType
@@ -579,7 +579,7 @@ BEGIN
 			)
 			VALUES (
 				/*strReceiptNumber*/			@receiptNumber
-				/*dtmReceiptDate*/				,dbo.fnRemoveTimeOnDate(ISNULL(IntegrationData.dtmDate, GETDATE()))
+				/*dtmReceiptDate*/				,ISNULL(IntegrationData.dtmDate, GETDATE())
 				/*intEntityVendorId*/			,IntegrationData.intEntityVendorId
 				/*strReceiptType*/				,IntegrationData.strReceiptType
 				/*intSourceType*/				,IntegrationData.intSourceType

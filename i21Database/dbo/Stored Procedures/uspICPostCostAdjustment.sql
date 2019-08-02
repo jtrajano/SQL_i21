@@ -157,7 +157,7 @@ BEGIN
 			[intItemId] 
 			,[intItemLocationId] 
 			,[intItemUOMId] 
-			,[dtmDate] 
+			,[dtmDate] = dbo.fnRemoveTimeOnDate([dtmDate])
 			,[dblQty] 
 			,[dblUOMQty] 
 			,[intCostUOMId]
@@ -254,7 +254,7 @@ SELECT  intId
 		,intItemUOMId
 		,intSubLocationId
 		,intStorageLocationId
-		,dtmDate
+		,dtmDate = dbo.fnRemoveTimeOnDate(dtmDate)
 		,dblQty 
 		,intCostUOMId
 		,dblVoucherCost
@@ -698,7 +698,7 @@ BEGIN
 			[intItemId] 
 			,[intItemLocationId] 
 			,[intItemUOMId] 
-			,[dtmDate] 
+			,[dtmDate] = dbo.fnRemoveTimeOnDate([dtmDate]) 
 			,[dblQty] 
 			,[dblUOMQty] 
 			,[intItemUOMId] -- Use the cost bucket item uom id as the Cost UOM id. 
