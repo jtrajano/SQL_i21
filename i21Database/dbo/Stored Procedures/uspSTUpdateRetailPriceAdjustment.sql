@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspSTUpdateRetailPriceAdjustment]
 	@intRetailPriceAdjustmentId		INT,
 	@intCurrentUserId				INT,
+	@ysnHasPreviewReport			BIT,
 	@ysnSuccess						BIT				OUTPUT,
 	@strMessage						NVARCHAR(1000)	OUTPUT
 AS
@@ -196,104 +197,133 @@ BEGIN
 
 		
 				
-				-- Handle preview using Table variable
-				DECLARE @tblPreview TABLE 
-				(
-					intItemId					INT NULL
-					, intItemUOMId				INT NULL
-					, intItemLocationId			INT NULL
-					, intItemPricingId			INT NULL
-					, intCompanyLocationId		INT
-					, dtmDateModified			DATETIME NOT NULL
+				-- ==============================================================================================
+				-- [START] IF HAS PREVIEW REPORT
+				-- ==============================================================================================
+				IF(@ysnHasPreviewReport = CAST(1 AS BIT))
+					BEGIN
+						-- Handle preview using Table variable
+						DECLARE @tblPreview TABLE 
+						(
+							intItemId					INT NULL
+							, intItemUOMId				INT NULL
+							, intItemLocationId			INT NULL
+							, intItemPricingId			INT NULL
+							, intCompanyLocationId		INT
+							, dtmDateModified			DATETIME NOT NULL
 						
-					, strItemNo					NVARCHAR(150)
-					, strItemDescription		NVARCHAR(250)
-					, strLongUPCCode			NVARCHAR(50)
-					, strLocationName			NVARCHAR(150)
-					, strChangeDescription		NVARCHAR(100)
-					, strPreviewOldData			NVARCHAR(MAX)
-					, strPreviewNewData			NVARCHAR(MAX)
-				)
+							, strItemNo					NVARCHAR(150)
+							, strItemDescription		NVARCHAR(250)
+							, strLongUPCCode			NVARCHAR(50)
+							, strLocationName			NVARCHAR(150)
+							, strChangeDescription		NVARCHAR(100)
+							, strPreviewOldData			NVARCHAR(MAX)
+							, strPreviewNewData			NVARCHAR(MAX)
+						)
 			
-				-- Generate Preview of records changes
-				BEGIN
-					INSERT INTO @tblPreview 
-					(
-						intItemId
-						, intItemUOMId
-						, intItemLocationId
-						, intItemPricingId
-						, intCompanyLocationId
-						, dtmDateModified
+						-- Generate Preview of records changes
+						BEGIN
+							INSERT INTO @tblPreview 
+							(
+								intItemId
+								, intItemUOMId
+								, intItemLocationId
+								, intItemPricingId
+								, intCompanyLocationId
+								, dtmDateModified
 							
-						, strItemNo
-						, strItemDescription
-						, strLongUPCCode
-						, strLocationName
-						, strChangeDescription
-						, strPreviewOldData
-						, strPreviewNewData
-					)
-					SELECT	DISTINCT
-							intItemId						= item.intItemId
-							, intItemUOMId					= uom.intItemUOMId
-							, intItemLocationId				= itemLoc.intItemLocationId
-							, intItemPricingId				= itemPricing.intItemPricingId
-							, intCompanyLocationId			= companyLoc.intCompanyLocationId
-							, dtmDateModified				= itemPricing.dtmDateModified
+								, strItemNo
+								, strItemDescription
+								, strLongUPCCode
+								, strLocationName
+								, strChangeDescription
+								, strPreviewOldData
+								, strPreviewNewData
+							)
+							SELECT	DISTINCT
+									intItemId						= item.intItemId
+									, intItemUOMId					= uom.intItemUOMId
+									, intItemLocationId				= itemLoc.intItemLocationId
+									, intItemPricingId				= itemPricing.intItemPricingId
+									, intCompanyLocationId			= companyLoc.intCompanyLocationId
+									, dtmDateModified				= itemPricing.dtmDateModified
 							
-							, strItemNo						= item.strItemNo
-							, strItemDescription			= item.strDescription
-							, strLongUPCCode				= uom.strLongUPCCode
-							, strLocationName				= companyLoc.strLocationName
-							, strChangeDescription			= CASE
-																WHEN [Changes].oldColumnName = 'strStandardCost_Original' THEN 'Standard Cost'
-																WHEN [Changes].oldColumnName = 'strSalePrice_Original' THEN 'Sale Price'
-																WHEN [Changes].oldColumnName = 'strLastCost_Original' THEN 'Last Cost'
-															END			
-							, strPreviewOldData				= ISNULL([Changes].strOldData, '')
-							, strPreviewNewData				= ISNULL([Changes].strNewData, '')
-					FROM 
-					(
-						SELECT DISTINCT intItemId, intItemPricingId, oldColumnName, strOldData, strNewData
-						FROM 
-						(
-							SELECT intItemId
-							   , intItemPricingId
-							   , CAST(CAST(dblOldStandardCost AS DECIMAL(18,3)) AS NVARCHAR(50)) AS strStandardCost_Original
-							   , CAST(CAST(dblOldSalePrice AS DECIMAL(18,3))  AS NVARCHAR(50)) AS strSalePrice_Original
-							   , CAST(CAST(dblOldLastCost AS DECIMAL(18,3))  AS NVARCHAR(50)) AS strLastCost_Original
-							   , CAST(CAST(dblNewStandardCost AS DECIMAL(18,3))  AS NVARCHAR(50)) AS strStandardCost_New
-							   , CAST(CAST(dblNewSalePrice AS DECIMAL(18,3))  AS NVARCHAR(50)) AS strSalePrice_New
-							   , CAST(CAST(dblNewLastCost AS DECIMAL(18,3))  AS NVARCHAR(50)) AS strLastCost_New
-							FROM #tmpUpdateItemPricingForCStore_ItemPricingAuditLog
-						) t
-						unpivot
-						(
-							strOldData for oldColumnName in (strStandardCost_Original, strSalePrice_Original, strLastCost_Original)
-						) o
-						unpivot
-						(
-							strNewData for newColumnName in (strStandardCost_New, strSalePrice_New, strLastCost_New)
-						) n
-						WHERE  REPLACE(oldColumnName, '_Original', '') = REPLACE(newColumnName, '_New', '')	
-					) [Changes]
-					INNER JOIN tblICItem item
-						ON [Changes].intItemId = item.intItemId
-					INNER JOIN tblICItemPricing itemPricing 
-						ON [Changes].intItemPricingId = itemPricing.intItemPricingId
-							AND [Changes].intItemId = itemPricing.intItemId
-					INNER JOIN tblICItemLocation itemLoc 
-						ON itemPricing.intItemLocationId = itemLoc.intItemLocationId 
-							AND itemPricing.intItemId = itemLoc.intItemId
-					INNER JOIN tblSMCompanyLocation companyLoc 
-						ON itemLoc.intLocationId = companyLoc.intCompanyLocationId
-					LEFT JOIN tblICItemUOM uom 
-						ON itemPricing.intItemId = uom.intItemId
-					WHERE uom.ysnStockUnit = CAST(1 AS BIT) 
-				END
+									, strItemNo						= item.strItemNo
+									, strItemDescription			= item.strDescription
+									, strLongUPCCode				= uom.strLongUPCCode
+									, strLocationName				= companyLoc.strLocationName
+									, strChangeDescription			= CASE
+																		WHEN [Changes].oldColumnName = 'strStandardCost_Original' THEN 'Standard Cost'
+																		WHEN [Changes].oldColumnName = 'strSalePrice_Original' THEN 'Sale Price'
+																		WHEN [Changes].oldColumnName = 'strLastCost_Original' THEN 'Last Cost'
+																	END			
+									, strPreviewOldData				= ISNULL([Changes].strOldData, '')
+									, strPreviewNewData				= ISNULL([Changes].strNewData, '')
+							FROM 
+							(
+								SELECT DISTINCT intItemId, intItemPricingId, oldColumnName, strOldData, strNewData
+								FROM 
+								(
+									SELECT intItemId
+									   , intItemPricingId
+									   , CAST(CAST(dblOldStandardCost AS DECIMAL(18,3)) AS NVARCHAR(50)) AS strStandardCost_Original
+									   , CAST(CAST(dblOldSalePrice AS DECIMAL(18,3))  AS NVARCHAR(50)) AS strSalePrice_Original
+									   , CAST(CAST(dblOldLastCost AS DECIMAL(18,3))  AS NVARCHAR(50)) AS strLastCost_Original
+									   , CAST(CAST(dblNewStandardCost AS DECIMAL(18,3))  AS NVARCHAR(50)) AS strStandardCost_New
+									   , CAST(CAST(dblNewSalePrice AS DECIMAL(18,3))  AS NVARCHAR(50)) AS strSalePrice_New
+									   , CAST(CAST(dblNewLastCost AS DECIMAL(18,3))  AS NVARCHAR(50)) AS strLastCost_New
+									FROM #tmpUpdateItemPricingForCStore_ItemPricingAuditLog
+								) t
+								unpivot
+								(
+									strOldData for oldColumnName in (strStandardCost_Original, strSalePrice_Original, strLastCost_Original)
+								) o
+								unpivot
+								(
+									strNewData for newColumnName in (strStandardCost_New, strSalePrice_New, strLastCost_New)
+								) n
+								WHERE  REPLACE(oldColumnName, '_Original', '') = REPLACE(newColumnName, '_New', '')	
+							) [Changes]
+							INNER JOIN tblICItem item
+								ON [Changes].intItemId = item.intItemId
+							INNER JOIN tblICItemPricing itemPricing 
+								ON [Changes].intItemPricingId = itemPricing.intItemPricingId
+									AND [Changes].intItemId = itemPricing.intItemId
+							INNER JOIN tblICItemLocation itemLoc 
+								ON itemPricing.intItemLocationId = itemLoc.intItemLocationId 
+									AND itemPricing.intItemId = itemLoc.intItemId
+							INNER JOIN tblSMCompanyLocation companyLoc 
+								ON itemLoc.intLocationId = companyLoc.intCompanyLocationId
+							LEFT JOIN tblICItemUOM uom 
+								ON itemPricing.intItemId = uom.intItemId
+							WHERE uom.ysnStockUnit = CAST(1 AS BIT) 
+						END
 
 
+						-- Return Preview
+						SELECT DISTINCT
+								intItemId
+								, intItemUOMId
+								, intItemLocationId
+								, intItemPricingId
+								, intCompanyLocationId
+								, dtmDateModified
+						
+								, strItemNo
+								, strItemDescription
+								, strLongUPCCode		AS strUpc
+								, strLocationName		AS strLocation
+								, strChangeDescription
+								, strPreviewOldData		AS strOldData
+								, strPreviewNewData		AS strNewData
+						FROM @tblPreview
+						WHERE strPreviewOldData != strPreviewNewData
+						ORDER BY strItemNo, strLocationName ASC
+					END
+				-- ==============================================================================================
+				-- [END] IF HAS PREVIEW REPORT
+				-- ==============================================================================================
+				
 
 
 				-- Clean up 
@@ -301,27 +331,6 @@ BEGIN
 					IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_ItemPricingAuditLog') IS NOT NULL  
 						DROP TABLE #tmpUpdateItemPricingForCStore_ItemPricingAuditLog 
 				END
-
-
-				-- Return Preview
-				SELECT DISTINCT
-						intItemId
-						, intItemUOMId
-						, intItemLocationId
-						, intItemPricingId
-						, intCompanyLocationId
-						, dtmDateModified
-						
-						, strItemNo
-						, strItemDescription
-						, strLongUPCCode		AS strUpc
-						, strLocationName		AS strLocation
-						, strChangeDescription
-						, strPreviewOldData		AS strOldData
-						, strPreviewNewData		AS strNewData
-				FROM @tblPreview
-				WHERE strPreviewOldData != strPreviewNewData
-				ORDER BY strItemNo, strLocationName ASC
 
 			END
 		ELSE

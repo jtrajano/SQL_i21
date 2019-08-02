@@ -47,6 +47,7 @@ BEGIN
 						EXEC [uspSTUpdateRetailPriceAdjustment]
 							@intRetailPriceAdjustmentId		= @intRetailPriceAdjustmentId,
 							@intCurrentUserId				= NULL,
+							@ysnHasPreviewReport			= 0,
 							@ysnSuccess						= @ysnSuccess	OUTPUT,
 							@strMessage						= @strMessage	OUTPUT
 
