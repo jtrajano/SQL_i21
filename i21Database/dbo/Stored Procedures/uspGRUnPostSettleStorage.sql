@@ -74,7 +74,7 @@ BEGIN TRY
 
 		SELECT @strBillId = strBillId FROM tblAPBill WHERE intBillId = @BillId
 
-		IF ISNULL(@BillId,0) = 0 AND @isParentSettleStorage = 1
+		IF ISNULL(@BillId,0) = 0 AND (@isParentSettleStorage = 1 OR NOT EXISTS(SELECT NULL FROM tblGRSettleStorage WHERE intParentSettleStorageId = @intParentSettleStorageId))
 		BEGIN
 			SELECT @intSettleStorageId = MIN(intSettleStorageId)
 			FROM tblGRSettleStorage
