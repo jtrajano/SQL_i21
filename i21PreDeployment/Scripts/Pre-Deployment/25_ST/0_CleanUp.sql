@@ -462,9 +462,21 @@ IF EXISTS (SELECT TOP 1 1 FROM msdb.dbo.sysjobs WHERE name = N'i21_PostRetailPri
 ----------------------------------------------------------------------------------------------------------------------------------
 -- Start: Update tblSTRetailPriceAdjustmentDetail.intItemPricingId = NULL
 ----------------------------------------------------------------------------------------------------------------------------------
-IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = N'tblSTRetailPriceAdjustmentDetail') 
+IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = N'tblSTRetailPriceAdjustmentDetail' AND COLUMN_NAME = 'intItemPricingId') 
 	BEGIN
-		IF EXISTS(SELECT TOP 1 1 FROM tblSTRetailPriceAdjustmentDetail WHERE intItemPricingId IS NULL)
+
+	
+	DECLARE @sqlCommand NVARCHAR(MAX)
+	DECLARE @count INT = 0
+	SET @sqlCommand = 'SELECT @count = Count(1)
+	FROM tblSTRetailPriceAdjustmentDetail
+	WHERE intItemPricingId IS NULL'
+	EXEC sp_executesql @sqlCommand, N'@count int OUTPUT',
+	@count = @count OUTPUT
+
+	SELECT @count 
+
+		IF (@count > 0)
 			BEGIN
 
 				PRINT('Update tblSTRetailPriceAdjustmentDetail.intItemPricingId field')
