@@ -6,6 +6,8 @@
 	,@intCompanyLocationId INT
 	,@intUnitMeasureId INT
 	,@intDemandHeaderId INT
+	,@ysnTest BIT
+	,@ysnAllItem BIT
 	,@PlannedPurchasesXML VARCHAR(MAX)
 	,@WeeksOfSupplyTargetXML VARCHAR(MAX)
 	,@ForecastedConsumptionXML VARCHAR(MAX)

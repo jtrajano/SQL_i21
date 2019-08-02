@@ -13,6 +13,7 @@ BEGIN TRY
 		,@strReportName NVARCHAR(50)
 		,@intInvPlngReportMasterID INT
 		,@strInvPlngReportName NVARCHAR(150)
+		,@strPlanNo NVARCHAR(50)
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXML
@@ -47,6 +48,45 @@ BEGIN TRY
 					)
 		END
 
+		EXEC dbo.uspMFGeneratePatternId @intCategoryId = NULL
+				,@intItemId = NULL
+				,@intManufacturingId = NULL
+				,@intSubLocationId = NULL
+				,@intLocationId = NULL
+				,@intOrderTypeId = NULL
+				,@intBlendRequirementId = NULL
+				,@intPatternCode = 147
+				,@ysnProposed = 0
+				,@strPatternString = @strPlanNo OUTPUT
+				,@intShiftId = NULL
+				,@dtmDate = NULL
+
+		IF ISNULL(@strPlanNo, '') = ''
+		BEGIN
+			SET @ErrMsg = 'Plan No cannot be empty.'
+
+			RAISERROR (
+					@ErrMsg
+					,16
+					,1
+					)
+		END
+
+		IF EXISTS (
+				SELECT 1
+				FROM tblCTInvPlngReportMaster
+				WHERE strPlanNo = @strPlanNo
+				)
+		BEGIN
+			SET @ErrMsg = 'Plan No must be unique.'
+
+			RAISERROR (
+					@ErrMsg
+					,16
+					,1
+					)
+		END
+
 		INSERT INTO [dbo].[tblCTInvPlngReportMaster] (
 			[strInvPlngReportName]
 			,[intReportMasterID]
@@ -56,6 +96,13 @@ BEGIN TRY
 			,[intCompanyLocationId]
 			,[intUnitMeasureId]
 			,intDemandHeaderId
+			,dtmDate
+			,intBookId
+			,intSubBookId
+			,ysnTest
+			,strPlanNo
+			,ysnAllItem
+			,strComment
 			,[intCreatedUserId]
 			,[dtmCreated]
 			,[intLastModifiedUserId]
@@ -69,6 +116,13 @@ BEGIN TRY
 			,intCompanyLocationId
 			,intUnitMeasureId
 			,intDemandHeaderId
+			,GETDATE()
+			,intBookId
+			,intSubBookId
+			,ysnTest
+			,@strPlanNo
+			,ysnAllItem
+			,strComment
 			,[intCreatedUserId]
 			,GETDATE()
 			,[intLastModifiedUserId]
@@ -81,6 +135,11 @@ BEGIN TRY
 				,intCompanyLocationId INT
 				,intUnitMeasureId INT
 				,intDemandHeaderId INT
+				,intBookId INT
+				,intSubBookId INT
+				,ysnTest BIT
+				,ysnAllItem BIT
+				,strComment NVARCHAR(MAX)
 				,intCreatedUserId INT
 				,intLastModifiedUserId INT
 				)
@@ -137,7 +196,7 @@ BEGIN TRY
 					)
 		END
 
-		UPDATE [dbo].[tblCTInvPlngReportMaster]
+		UPDATE tblCTInvPlngReportMaster
 		SET [strInvPlngReportName] = x.strInvPlngReportName
 			,[intNoOfMonths] = x.intNoOfMonths
 			,[ysnIncludeInventory] = x.ysnIncludeInventory
@@ -145,6 +204,11 @@ BEGIN TRY
 			,intCompanyLocationId = x.intCompanyLocationId
 			,intUnitMeasureId = x.intUnitMeasureId
 			,intDemandHeaderId = x.intDemandHeaderId
+			,intBookId = x.intBookId
+			,intSubBookId = x.intSubBookId
+			,ysnTest = x.ysnTest
+			,ysnAllItem = x.ysnAllItem
+			,strComment = x.strComment
 			,[intLastModifiedUserId] = x.intLastModifiedUserId
 			,[dtmLastModified] = GETDATE()
 		FROM OPENXML(@idoc, 'root/InvPlngReportMaster', 2) WITH (
@@ -155,6 +219,11 @@ BEGIN TRY
 				,intCompanyLocationId INT
 				,intUnitMeasureId INT
 				,intDemandHeaderId INT
+				,intBookId INT
+				,intSubBookId INT
+				,ysnTest BIT
+				,ysnAllItem BIT
+				,strComment NVARCHAR(MAX)
 				,intLastModifiedUserId INT
 				) x
 		WHERE intInvPlngReportMasterID = @intInvPlngReportMasterID

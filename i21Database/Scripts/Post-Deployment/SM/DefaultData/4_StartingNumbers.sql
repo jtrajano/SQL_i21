@@ -1426,6 +1426,16 @@ GO
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Retail Price Adjustment' and strModule = 'Store')
 
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 147
+			,[strTransactionType]	= N'Demand Plan'
+			,[strPrefix]			= N'DP-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Manufacturing'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Demand Plan' and strModule = 'Manufacturing')
+
 	--Make sure to check with 19.1 and lower version. 142 is the last number
 
 

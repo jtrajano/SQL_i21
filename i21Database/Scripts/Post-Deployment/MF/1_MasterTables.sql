@@ -3823,3 +3823,20 @@ BEGIN
 END
 GO
 
+GO
+UPDATE tblCTInvPlngReportMaster
+SET dtmDate = dtmCreated
+WHERE dtmDate IS NULL
+
+UPDATE tblCTInvPlngReportMaster
+SET ysnTest = 0
+WHERE ysnTest IS NULL
+
+UPDATE tblCTInvPlngReportMaster
+SET ysnAllItem = 0
+WHERE ysnAllItem IS NULL
+
+UPDATE tblCTInvPlngReportMaster
+SET strPlanNo = LEFT(strInvPlngReportName, 50)
+WHERE strPlanNo IS NULL
+GO

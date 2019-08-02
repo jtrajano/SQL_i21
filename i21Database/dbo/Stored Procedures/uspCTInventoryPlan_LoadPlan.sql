@@ -40,6 +40,8 @@ BEGIN
 	SELECT RM.*
 		,C.strCategoryCode
 		,DH.strDemandName
+		,B.strBook
+		,SB.strSubBook
 		,UOM.strUnitMeasure
 		,CL.strLocationName
 		,@intItemIdList AS 'intItemIdList'
@@ -49,6 +51,8 @@ BEGIN
 	LEFT JOIN tblMFDemandHeader DH ON DH.intDemandHeaderId = RM.intDemandHeaderId
 	LEFT JOIN tblICUnitMeasure AS UOM ON UOM.intUnitMeasureId = RM.intUnitMeasureId
 	LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = RM.intCompanyLocationId
+	LEFT JOIN tblCTBook B ON B.intBookId = DH.intBookId
+	LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = DH.intSubBookId
 	WHERE RM.intInvPlngReportMasterID = @intInvPlngReportMasterID
 
 	DECLARE @intReportMasterID INT

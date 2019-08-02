@@ -9,6 +9,13 @@
 	intCompanyLocationId INT,
 	intUnitMeasureId INT,
 	intDemandHeaderId INT,
+	dtmDate DATETIME,
+	intBookId INT,
+	intSubBookId INT,
+	ysnTest BIT CONSTRAINT [DF_tblCTInvPlngReportMaster_ysnTest] DEFAULT 0,
+	strPlanNo NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	ysnAllItem BIT CONSTRAINT [DF_tblCTInvPlngReportMaster_ysnAllItem] DEFAULT 0,
+	strComment NVARCHAR(MAX) COLLATE Latin1_General_CI_AS,
 
 	[intCreatedUserId] [int] NULL,
 	[dtmCreated] [datetime] NULL CONSTRAINT [DF_tblCTInvPlngReportMaster_dtmCreated] DEFAULT GetDate(),
@@ -17,5 +24,7 @@
 
 	CONSTRAINT [PK_tblCTInvPlngReportMaster] PRIMARY KEY ([intInvPlngReportMasterID]),
 	CONSTRAINT [FK_tblCTInvPlngReportMaster_tblCTReportMaster] FOREIGN KEY ([intReportMasterID]) REFERENCES [tblCTReportMaster]([intReportMasterID]),
-	CONSTRAINT [FK_tblCTInvPlngReportMaster_tblMFDemandHeader] FOREIGN KEY (intDemandHeaderId) REFERENCES [tblMFDemandHeader](intDemandHeaderId)
+	CONSTRAINT [FK_tblCTInvPlngReportMaster_tblMFDemandHeader] FOREIGN KEY (intDemandHeaderId) REFERENCES [tblMFDemandHeader](intDemandHeaderId),
+	CONSTRAINT [FK_tblCTInvPlngReportMaster_tblCTBook_intBookId] FOREIGN KEY (intBookId) REFERENCES [tblCTBook](intBookId),
+	CONSTRAINT [FK_tblCTInvPlngReportMaster_tblCTSubBook_intSubBookId] FOREIGN KEY (intSubBookId) REFERENCES [tblCTSubBook](intSubBookId)
 )
