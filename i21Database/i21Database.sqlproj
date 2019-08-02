@@ -7973,6 +7973,7 @@
     <Build Include="dbo\Stored Procedures\uspIPProcessContactFeedDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGetContactFeedAckDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessContactFeedAckDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTGetStartingNumber.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

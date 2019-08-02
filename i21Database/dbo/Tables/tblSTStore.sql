@@ -146,5 +146,5 @@
 	strHandheldScannerServerFolderPath
   )
   WHERE strHandheldScannerServerFolderPath IS NOT NULL
-  AND strHandheldScannerServerFolderPath <> ''
+	AND strHandheldScannerServerFolderPath <> ''
  
