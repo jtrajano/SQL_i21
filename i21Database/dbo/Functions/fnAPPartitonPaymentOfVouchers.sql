@@ -13,12 +13,12 @@ RETURNS TABLE AS RETURN
 			,voucher.intPayToAddressId
 			,voucher.intEntityVendorId
 			,DENSE_RANK() OVER(ORDER BY voucher.intEntityVendorId, voucher.intPayToAddressId DESC) AS intPaymentId
-			,SUM(ISNULL((CASE WHEN (voucher.intTransactionType NOT IN (1, 2, 14) OR (voucher.intTransactionType = 2 AND voucher.ysnPrepayHasPayment = 1))
+			,SUM(ISNULL((CASE WHEN (voucher.intTransactionType NOT IN (1, 2, 13, 14) OR (voucher.intTransactionType IN (2,13) AND voucher.ysnPrepayHasPayment = 1))
 							THEN -ISNULL(payScheds.dblPayment, voucher.dblTempPayment) --use the payment sched payment amount to compute the total payment
 							ELSE ISNULL(payScheds.dblPayment, voucher.dblTempPayment)
 						END), 0))
 						OVER(PARTITION BY voucher.intEntityVendorId, voucher.intPayToAddressId) AS dblTempPayment
-			,SUM(ISNULL((CASE WHEN (voucher.intTransactionType NOT IN (1, 2, 14) OR (voucher.intTransactionType = 2 AND voucher.ysnPrepayHasPayment = 1))
+			,SUM(ISNULL((CASE WHEN (voucher.intTransactionType NOT IN (1, 2, 13, 14) OR (voucher.intTransactionType IN (2,13) AND voucher.ysnPrepayHasPayment = 1))
 							THEN 
 								-voucher.dblTempWithheld 
 							ELSE voucher.dblTempWithheld 
