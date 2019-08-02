@@ -173,9 +173,9 @@ BEGIN
 								IF ISNULL(@intInterCompanyMappingIdToUse, 0) <> 0
 								BEGIN
 									SET @sql = N'EXEC ' + @strReferenceDatabaseName + '.dbo.[uspSMInterCompanyValidateRecordsForMessaging] ' + 
-														 CONVERT(VARCHAR, @intInterCompanyMappingIdToUse) + ', ' +
-														 CONVERT(VARCHAR, @intCurrentCompanyId) + ', ''' +
-														 CONVERT(VARCHAR, @strFinishedTransactionId) + ''''
+														 CONVERT(VARCHAR(MAX), @intInterCompanyMappingIdToUse) + ', ' +
+														 CONVERT(VARCHAR(MAX), @intCurrentCompanyId) + ', ''' +
+														 CONVERT(VARCHAR(MAX), @strFinishedTransactionId) + ''''
 									EXEC sp_executesql @sql;
 								END
 							END

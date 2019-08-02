@@ -1,9 +1,10 @@
 ﻿
-CREATE PROCEDURE [uspSMInterCompanyValidateRecordsForDMS]
+CREATE PROCEDURE [uspSMInterCompanyValidateMovedDMSRecords]
 @intInterCompanyMappingId INT,
 @intInvokedFromInterCompanyId INT = NULL,
 @strFinishedTransactionId NVARCHAR(MAX) = ',',
-@strUpdatedTransactionId NVARCHAR(MAX) = '' OUTPUT
+@strUpdatedTransactionId NVARCHAR(MAX) = '' OUTPUT,
+@intOldMovedReferenceTransId INT = NULL -- for moved documents
 
 AS 
 BEGIN
@@ -12,7 +13,7 @@ BEGIN
 	DECLARE @referenceCompanyId INT
 
 
-	if(object_id('tempdb.#TempInterCompanyMapping') is not null)
+	IF(OBJECT_ID('tempdb.#TempInterCompanyMapping') IS NOT NULL)
 		DROP TABLE #TempInterCompanyMapping
 
 	CREATE TABLE #TempInterCompanyMapping
@@ -59,8 +60,8 @@ BEGIN
 			IF ISNULL(@intReferenceCompanyId, 0) = 0
 			BEGIN				
 				--A <-> B
-				EXEC dbo.[uspSMInterCompanyCopyDMS] @intCurrentTransactionId, @intReferenceTransactionId
-				EXEC dbo.[uspSMInterCompanyCopyDMS] @intReferenceTransactionId, @intCurrentTransactionId
+				EXEC dbo.[uspSMInterCompanyDeleteMovedDMS] @intCurrentTransactionId, @intReferenceTransactionId,NULL, @intOldMovedReferenceTransId
+				EXEC dbo.[uspSMInterCompanyDeleteMovedDMS] @intReferenceTransactionId, @intCurrentTransactionId, NULL, @intOldMovedReferenceTransId
 
 				SET @strFinishedTransactionId = @strFinishedTransactionId + 
 											CONVERT(VARCHAR, @intCurrentTransactionId) + ':' + CONVERT(VARCHAR, ISNULL(@intCurrentCompanyId, 0)) + ',' + 
@@ -73,7 +74,7 @@ BEGIN
 				   CHARINDEX(',' + CONVERT(VARCHAR, @intReferenceTransactionId) + ':' + CONVERT(VARCHAR, ISNULL(@intReferenceCompanyId, 0)) + ',', @strFinishedTransactionId) = 0) AND
 				   (ISNULL(@intReferenceCompanyId, 0) <> 0 AND ISNULL(@intReferenceCompanyId, 0) <> @intCurrentCompanyId)
 				BEGIN
-					EXEC dbo.[uspSMInterCompanyCopyDMS] @intCurrentTransactionId, @intReferenceTransactionId, @intReferenceCompanyId
+					EXEC dbo.[uspSMInterCompanyDeleteMovedDMS] @intCurrentTransactionId, @intReferenceTransactionId, @intReferenceCompanyId,@intOldMovedReferenceTransId
 
 					SET @strFinishedTransactionId = @strFinishedTransactionId + 
 												CONVERT(VARCHAR, @intCurrentTransactionId) + ':' + CONVERT(VARCHAR, ISNULL(@intCurrentCompanyId, 0)) + ',' + 
@@ -133,7 +134,7 @@ BEGIN
 				BEGIN
 					
 					--1: COPY THE SOURCE FILES TO DESTINATION
-					EXEC dbo.[uspSMInterCompanyValidateRecordsForDMS] @intInterCompanyMappingIdToUse, @intCurrentCompanyId, @strFinishedTransactionId,@strUpdatedTransactionId =  @strFinishedTransactionId OUTPUT;
+					EXEC dbo.[uspSMInterCompanyValidateMovedDMSRecords] @intInterCompanyMappingIdToUse, @intCurrentCompanyId, @strFinishedTransactionId,@strUpdatedTransactionId =  @strFinishedTransactionId OUTPUT
 					
 
 					--2: INVOKE THE OTHER DATABASE SP TO COPY THE FILES TO ITS SIBLINGS
@@ -177,7 +178,7 @@ BEGIN
 								--execute the sp in the other database.
 								IF ISNULL(@intInterCompanyMappingIdToUse, 0) <> 0
 								BEGIN
-									SET @sql = N'EXEC [' + @strReferenceDatabaseName + '].dbo.[uspSMInterCompanyValidateRecordsForDMS2] ' + 
+									SET @sql = N'EXEC [' + @strReferenceDatabaseName + '].dbo.[uspSMInterCompanyValidateMovedDMSRecords] ' + 
 														 CONVERT(VARCHAR(MAX), @intInterCompanyMappingIdToUse) + ', ' +
 														 CONVERT(VARCHAR(MAX), @intCurrentCompanyId) + ', ''' +
 														 CONVERT(VARCHAR(MAX), @strFinishedTransactionId) + ''''

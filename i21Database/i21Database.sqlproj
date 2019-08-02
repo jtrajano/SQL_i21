@@ -7974,6 +7974,8 @@
     <Build Include="dbo\Stored Procedures\uspIPGetContactFeedAckDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessContactFeedAckDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspSTGetStartingNumber.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMInterCompanyDeleteMovedDMS.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMInterCompanyValidateMovedDMSRecords.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
