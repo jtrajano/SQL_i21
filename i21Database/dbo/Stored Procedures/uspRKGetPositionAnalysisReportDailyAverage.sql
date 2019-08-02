@@ -52,10 +52,9 @@ BEGIN
 			, CD.intFutureMarketId
 			, CH.intCommodityId
 			, CD.intCurrencyId
-			, dblOutrightPhysicalDeltaQty = CASE WHEN ITM.intProductLineId IS NOT NULL THEN dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId, QtyUOM.intItemUOMId, ISNULL(CD.dblQuantity, 0)) * (ISNULL(CPL.dblDeltaPercent, 0) /100)
-												ELSE dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId, QtyUOM.intItemUOMId, ISNULL(CD.dblQuantity, 0)) END
+			, dblOutrightPhysicalDeltaQty = dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId, QtyUOM.intItemUOMId, CASE WHEN ITM.intProductLineId IS NOT NULL THEN ISNULL(CD.dblQuantity, 0) * (ISNULL(CPL.dblDeltaPercent, 0) /100) ELSE ISNULL(CD.dblQuantity, 0) END)
 			, dblOutrightPhysicalQty = dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId, QtyUOM.intItemUOMId, ISNULL(CD.dblQuantity, 0))
-			, dblOutrightPhysicalPrice = dbo.fnCTConvertQtyToTargetItemUOM(PriceUOM.intItemUOMId, CD.intItemUOMId, ISNULL(CD.dblCashPrice, 0))
+			, dblOutrightPhysicalPrice = ISNULL(dbo.[fnRKConvertUOMCurrency]('ItemUOM', CD.intPriceItemUOMId, PriceUOM.intItemUOMId, 1, CD.intCurrencyId, @intCurrencyId, ISNULL(CD.dblCashPrice, 0)), 0.00)
 			, dblFutureTradeDeltaQty = 0.00
 			, dblFutureTradeQty = 0.00
 			, dblFutureTradePrice = 0.00
@@ -84,10 +83,9 @@ BEGIN
 			, dblFutureTradeDeltaQty = 0.00
 			, dblFutureTradeQty = 0.00
 			, dblFutureTradePrice = 0.00
-			, dblPriceFixationDeltaQty = CASE WHEN ITM.intProductLineId IS NOT NULL THEN dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId, QtyUOM.intItemUOMId, ISNULL(PFD.dblQuantity, 0)) * (ISNULL(CPL.dblDeltaPercent, 0) /100)
-											ELSE dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId, QtyUOM.intItemUOMId, ISNULL(PFD.dblQuantity, 0)) END
-			, dblPriceFixationQty = dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId, QtyUOM.intItemUOMId, ISNULL(PFD.dblQuantity, 0))
-			, dblPriceFixationPrice = dbo.fnCTConvertQtyToTargetItemUOM( PriceUOM.intItemUOMId,CD.intItemUOMId, ISNULL(PFD.dblFixationPrice, 0))
+			, dblPriceFixationDeltaQty = dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId, QtyUOM.intItemUOMId, CASE WHEN ITM.intProductLineId IS NOT NULL THEN ISNULL(PFD.dblQuantity,0) * (ISNULL(CPL.dblDeltaPercent,0) /100) ELSE ISNULL(PFD.dblQuantity,0) END)
+			, dblPriceFixationQty = dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId, QtyUOM.intItemUOMId, ISNULL(PFD.dblQuantity,0))
+			, dblPriceFixationPrice = ISNULL(dbo.[fnRKConvertUOMCurrency]('ItemUOM', CD.intPriceItemUOMId, PriceUOM.intItemUOMId, 1, CD.intCurrencyId, @intCurrencyId, ISNULL(PFD.dblFinalPrice, 0)), 0.00)
 		FROM tblCTContractHeader CH
 		INNER JOIN tblCTContractDetail CD ON CH.intContractHeaderId = CD.intContractHeaderId
 		INNER JOIN tblICItem ITM ON CD.intItemId = ITM.intItemId
@@ -110,14 +108,16 @@ BEGIN
 			, dblOutrightPhysicalQty = 0.00
 			, dblOutrightPhysicalPrice = 0.00
 			, dblFutureTradeDeltaQty = 0.00
-			, dblFutureTradeQty = dbo.fnCTConvertQtyToTargetCommodityUOM(DD.intCommodityId, FM.intUnitMeasureId, @intQtyUOMId, ISNULL(DD.dblNoOfContract, 0) * ISNULL(FM.dblContractSize, 0))
-			, dblFutureTradePrice = dbo.fnCTConvertQtyToTargetCommodityUOM(DD.intCommodityId, @intPriceUOMId, FM.intUnitMeasureId, ISNULL(DD.dblPrice, 0))
+			, dblFutureTradeQty = dbo.fnCTConvertQtyToTargetCommodityUOM(DD.intCommodityId, FM.intUnitMeasureId, ISNULL(@intQtyUOMId, 0), ISNULL(DD.dblNoOfContract,0) * ISNULL(FM.dblContractSize,0))
+			, dblFutureTradePrice = ISNULL(dbo.[fnRKConvertUOMCurrency]('CommodityUOM', MarketUOM.intCommodityUnitMeasureId, PriceUOM.intCommodityUnitMeasureId, 1, FM.intCurrencyId, @intCurrencyId, ISNULL(DD.dblPrice, 0)), 0.00)
 			, dblPriceFixationDeltaQty = 0.00
 			, dblPriceFixationQty = 0.00
 			, dblPriceFixationPrice = 0.00
 		FROM tblRKFutOptTransactionHeader DH
 		INNER JOIN tblRKFutOptTransaction DD ON DH.intFutOptTransactionHeaderId = DD.intFutOptTransactionHeaderId
 		INNER JOIN tblRKFutureMarket FM ON DD.intFutureMarketId = FM.intFutureMarketId
+		LEFT JOIN tblICCommodityUnitMeasure MarketUOM ON MarketUOM.intCommodityId = DD.intCommodityId AND MarketUOM.intUnitMeasureId = FM.intUnitMeasureId
+		LEFT JOIN tblICCommodityUnitMeasure PriceUOM ON PriceUOM.intCommodityId = DD.intCommodityId AND PriceUOM.intUnitMeasureId = ISNULL(@intPriceUOMId, 0)
 	) tbl
 	WHERE intFutureMarketId = @intFutureMarketId
 		AND intCommodityId = @intCommodityId

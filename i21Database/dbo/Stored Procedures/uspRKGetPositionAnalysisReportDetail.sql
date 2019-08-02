@@ -93,7 +93,7 @@ BEGIN
 			, ITM.strItemNo
 			, ITM.intItemId
 			, dblOriginalQty = CD.dblQuantity
-			, dblQty = dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId, QtyUOM.intItemUOMId, (ISNULL(CD.dblQuantity, 0) * (PFD.dblNoOfLots / CD.dblNoOfLots)))
+			, dblQty = dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId, QtyUOM.intItemUOMId, ISNULL(PFD.dblQuantity,0))
 			, CD.intItemUOMId
 			, UM.strSymbol
 			, dblDeltaQty = dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId, QtyUOM.intItemUOMId, CASE WHEN ITM.intProductLineId IS NOT NULL THEN ISNULL(PFD.dblQuantity,0) * (ISNULL(CPL.dblDeltaPercent,0) /100) ELSE ISNULL(PFD.dblQuantity,0) END)
@@ -123,7 +123,8 @@ BEGIN
 		--===================
 		-- Future Trades
 		--===================
-		UNION ALL SELECT DD.intFutureMarketId
+		UNION ALL 
+		SELECT DD.intFutureMarketId
 			, DD.intCommodityId
 			, DD.intCurrencyId
 			, strActivity = 'Futures' COLLATE Latin1_General_CI_AS
@@ -142,14 +143,17 @@ BEGIN
 			, dblNoOfLots = DD.dblNoOfContract
 			, strPosition = '' COLLATE Latin1_General_CI_AS
 			, strFutureMonth = FMonth.strFutureMonth
-			, dblPrice = ISNULL(dbo.[fnRKGetSourcingCurrencyConversion](NULL, @intCurrencyId, (dbo.fnCTConvertQtyToTargetCommodityUOM(DD.intCommodityId, FM.intUnitMeasureId, ISNULL(@intPriceUOMId, 0), ISNULL(DD.dblPrice,0))), FM.intUnitMeasureId, NULL, NULL), 0.00)
+			, dblPrice = ISNULL(dbo.[fnRKConvertUOMCurrency]('CommodityUOM', MarketUOM.intCommodityUnitMeasureId, PriceUOM.intCommodityUnitMeasureId, 1, FM.intCurrencyId, @intCurrencyId, ISNULL(DD.dblPrice, 0)), 0.00)
 			, intPriceFixationId = NULL
-			, dblFutures = ISNULL(dbo.[fnRKGetSourcingCurrencyConversion](NULL, @intCurrencyId, (dbo.fnCTConvertQtyToTargetCommodityUOM(DD.intCommodityId, FM.intUnitMeasureId, ISNULL(@intPriceUOMId, 0), ISNULL(DD.dblPrice,0))), FM.intUnitMeasureId, NULL, NULL), 0.00)
+			, dblFutures = ISNULL(dbo.[fnRKConvertUOMCurrency]('CommodityUOM', MarketUOM.intCommodityUnitMeasureId, PriceUOM.intCommodityUnitMeasureId, 1, FM.intCurrencyId, @intCurrencyId, ISNULL(DD.dblPrice, 0)), 0.00)
 		FROM tblRKFutOptTransactionHeader DH
 		INNER JOIN tblRKFutOptTransaction DD ON DH.intFutOptTransactionHeaderId = DD.intFutOptTransactionHeaderId
 		INNER JOIN tblRKFutureMarket FM ON DD.intFutureMarketId = FM.intFutureMarketId
 		INNER JOIN tblICUnitMeasure UM ON FM.intUnitMeasureId = UM.intUnitMeasureId
 		INNER JOIN tblRKFuturesMonth FMonth ON FMonth.intFutureMonthId = DD.intFutureMonthId
+		LEFT JOIN tblICCommodityUnitMeasure MarketUOM ON MarketUOM.intCommodityId = DD.intCommodityId AND MarketUOM.intUnitMeasureId = FM.intUnitMeasureId
+		LEFT JOIN tblICCommodityUnitMeasure QtyUOM ON QtyUOM.intCommodityId = DD.intCommodityId AND QtyUOM.intUnitMeasureId = ISNULL(@intQtyUOMId, 0)
+		LEFT JOIN tblICCommodityUnitMeasure PriceUOM ON PriceUOM.intCommodityId = DD.intCommodityId AND PriceUOM.intUnitMeasureId = ISNULL(@intPriceUOMId, 0)
 		WHERE  DD.intFutureMarketId = ISNULL(@intFutureMarketId, DD.intFutureMarketId)
 			AND DD.intCommodityId = ISNULL(@intCommodityId, DD.intCommodityId)
 	) tbl
