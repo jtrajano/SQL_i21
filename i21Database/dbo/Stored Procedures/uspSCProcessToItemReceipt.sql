@@ -483,6 +483,14 @@ BEGIN TRY
 		FROM tblICInventoryReceipt r 
 		JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptId = r.intInventoryReceiptId
 		WHERE ri.intInventoryReceiptId = @InventoryReceiptId AND r.strReceiptType = 'Purchase Contract' AND ri.intLineNo > @intContractDetailId
+
+		select @intBillId = intBillId from tblAPBillDetail where intInventoryReceiptItemId in (
+			select ri.intInventoryReceiptItemId
+			FROM tblICInventoryReceipt r 
+				JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptId = r.intInventoryReceiptId					
+					WHERE ri.intInventoryReceiptId = @InventoryReceiptId 
+		) and intInventoryReceiptChargeId is null
+		
 	END
 
 	SELECT @intLotType = dbo.fnGetItemLotType(@intItemId)
@@ -556,8 +564,16 @@ BEGIN TRY
 					END
 					SELECT @intContractDetailId = MIN(ri.intLineNo)
 					FROM tblICInventoryReceipt r 
-					JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptId = r.intInventoryReceiptId
+					JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptId = r.intInventoryReceiptId					
 					WHERE ri.intInventoryReceiptId = @InventoryReceiptId AND r.strReceiptType = 'Purchase Contract' AND ri.intLineNo > @intContractDetailId
+					
+					
+					select @intBillId = intBillId from tblAPBillDetail where intInventoryReceiptItemId in (
+						select ri.intInventoryReceiptItemId
+						FROM tblICInventoryReceipt r 
+							JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptId = r.intInventoryReceiptId					
+								WHERE ri.intInventoryReceiptId = @InventoryReceiptId 
+					) and intInventoryReceiptChargeId is null
 				END
 		END
 
