@@ -265,7 +265,7 @@ BEGIN TRY
 	  ,@dtmEndDate AS dtmEndDate
 	  ,dblQuantity = CASE
 			 			WHEN ISNULL(INV.ysnPosted, 0) = 1 AND ShipmentItem.dblDestinationNet IS NOT NULL
-							THEN SUM(ShipmentItem.dblDestinationNet * 1)
+							THEN MAX(ShipmentItem.dblDestinationNet * 1)
 			 			ELSE SUM(InvTran.dblQty * - 1) 
 					 END
 	  ,0
