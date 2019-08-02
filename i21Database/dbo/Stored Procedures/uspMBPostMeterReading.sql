@@ -262,21 +262,44 @@ BEGIN TRY
 			FROM tblMBMeterReading
 			WHERE intMeterReadingId = @TransactionId
 
-			UPDATE tblMBMeterAccountDetail
-			SET dblLastMeterReading = 0
-				, dblLastTotalSalesDollar = 0
+			-- UPDATE tblMBMeterAccountDetail A SET A.dblLastMeterReading = ISNULL(MRD.dblLastMeterReading, 0),
+			-- MRD.dblLastMeterReading, dblLastTotalSalesDollar = ISNULL(MRD.dblLastReading, 0) 
+			-- FROM tblMBMeterReadingDetail MRD
+			-- INNER JOIN tblMBMeterReading MR ON MR.intMeterReadingId = MRD.intMeterReadingId
+			-- WHERE A.intMeterAccountDetailId = MRD.intMeterAccountDetailId
+			-- AND MR.intMeterReadingId = @TransactionId
 
-			UPDATE tblMBMeterAccountDetail
-			SET tblMBMeterAccountDetail.dblLastMeterReading = ISNULL(MRDetail.dblCurrentReading, 0)
-				, tblMBMeterAccountDetail.dblLastTotalSalesDollar = ISNULL(MRDetail.dblCurrentDollars, 0)
-			FROM (
-				SELECT TOP 100 PERCENT * FROM vyuMBGetMeterReadingDetail
-				WHERE intMeterAccountId = @meterAccountId
-					AND dtmTransaction < @transactionDate
-					AND ysnPosted = 1
-				ORDER BY dtmTransaction DESC
-				) MRDetail
-			WHERE MRDetail.intMeterAccountDetailId = tblMBMeterAccountDetail.intMeterAccountDetailId
+			DECLARE @CursorTran AS CURSOR
+
+			SET @CursorTran = CURSOR FOR
+			SELECT A.intMeterAccountDetailId
+			FROM tblMBMeterAccountDetail A
+			WHERE A.intMeterAccountId = @meterAccountId
+
+			DECLARE @intMeterAccountDetailId INT = NULL
+
+			OPEN @CursorTran
+			FETCH NEXT FROM @CursorTran INTO @intMeterAccountDetailId
+        	WHILE @@FETCH_STATUS = 0
+			BEGIN
+
+				DECLARE @dblCurrentReading NUMERIC(18,6) = NULL,
+					@dblCurrentDollar NUMERIC(18,6) = NULL
+
+				SELECT TOP 1 @dblCurrentReading = MRD.dblCurrentReading, @dblCurrentDollar = MRD.dblCurrentDollars FROM tblMBMeterReadingDetail MRD
+				INNER JOIN tblMBMeterReading MR ON MR.intMeterReadingId = MRD.intMeterReadingId
+			 	WHERE MRD.intMeterAccountDetailId = @intMeterAccountDetailId
+				AND MR.dtmTransaction <= @transactionDate
+				AND MR.intMeterReadingId < @TransactionId
+				ORDER BY MR.intMeterReadingId DESC
+
+				UPDATE tblMBMeterAccountDetail SET dblLastMeterReading = @dblCurrentReading, dblLastTotalSalesDollar = @dblCurrentDollar
+				WHERE intMeterAccountDetailId = @intMeterAccountDetailId
+
+
+				FETCH NEXT FROM @CursorTran INTO @intMeterAccountDetailId
+			END
+		
 		END
 	END
 
