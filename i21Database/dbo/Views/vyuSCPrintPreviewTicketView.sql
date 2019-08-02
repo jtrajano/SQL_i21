@@ -213,6 +213,7 @@ AS SELECT
 	,SMS.intEntityId AS intUserId
 	,(SELECT intCurrencyDecimal FROM tblSMCompanyPreference) AS intDecimalPrecision
 	,tblSCTicketFormat.ysnSuppressCashPrice
+	,strSealNumbers = ISNULL(SUBSTRING(SealNumber.strSealNumbers,3, LEN(SealNumber.strSealNumbers)-2),'')
   FROM tblSCTicket SC
   LEFT JOIN tblEMEntity tblEMEntity on tblEMEntity.intEntityId = SC.intEntityId
   LEFT JOIN vyuEMSearchShipVia vyuEMSearchShipVia on vyuEMSearchShipVia.intEntityId = SC.intHaulerId
@@ -266,6 +267,17 @@ AS SELECT
 	AND IC.ysnUseWeighScales = 1
 	GROUP BY intSalesOrderId
   ) SOD
+   OUTER APPLY(
+	SELECT strSealNumbers = (
+		SELECT ', ' + strSealNumber 
+		FROM tblSCTicketSealNumber TSN
+		INNER JOIN tblSCSealNumber SN
+			ON TSN.intSealNumberId = SN.intSealNumberId
+		WHERE TSN.intTicketId = SC.intTicketId
+		ORDER BY SN.strSealNumber
+		FOR XML PATH('')) 
+
+  )SealNumber
 ,(
 	SELECT TOP 1 strCompanyName,strCity, strState, strZip,strPhone, strFax, strAddress FROM tblSMCompanySetup
   ) SMCompanySetup
