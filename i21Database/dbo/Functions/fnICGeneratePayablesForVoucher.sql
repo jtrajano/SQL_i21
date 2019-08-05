@@ -53,6 +53,7 @@ RETURNS @table TABLE
 , [intContractSequence]				INT NULL 
 , [intScaleTicketId]				INT NULL 
 , [strScaleTicketNumber]			NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
+, [strLoadShipmentNumber]			NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL 
 , [intShipmentId]					INT NULL 
 , [intLoadDetailId]					INT NULL 
 , [intUnitMeasureId]				INT NULL 
@@ -169,8 +170,9 @@ SELECT DISTINCT
 	,[intContractSequence]		=	CASE WHEN A.strReceiptType IN ('Purchase Contract', 'Inventory Return') THEN CD.intContractSeq ELSE NULL END
 	,[intScaleTicketId]			=	G.intTicketId
 	,[strScaleTicketNumber]		=	CAST(G.strTicketNumber AS NVARCHAR(200))
+	,[strLoadShipmentNumber]	=   ISNULL(LogisticsView.strLoadNumber, '')
 	,[intShipmentId]			=	0
-	,[intLoadDetailId]			=	NULL
+	,[intLoadDetailId]			=	B.intSourceId 
   	,[intUnitMeasureId]			=	CASE WHEN CD.intContractDetailId > 0 THEN CD.intItemUOMId ELSE B.intUnitMeasureId END 
 	,[strUOM]					=	CASE WHEN CD.intContractDetailId > 0 THEN ctUOM.strUnitMeasure ELSE UOM.strUnitMeasure END
 	,[intWeightUOMId]			=	B.intWeightUOMId
@@ -209,11 +211,11 @@ SELECT DISTINCT
 	,[strSubLocationName]		=	subLoc.strSubLocationName
 	,[intStorageLocationId]		=	B.intStorageLocationId	 
 	,[strStorageLocationName]	=	ISL.strName
-	,[dblNetShippedWeight]		=	ISNULL(CASE WHEN A.strReceiptType = 'Purchase Contract' AND A.intSourceType = 2 THEN Loads.dblNet ELSE B.dblGross END,0)
-	,[dblWeightLoss]			=	CASE WHEN A.strReceiptType = 'Purchase Contract' AND A.intSourceType = 2 THEN ISNULL(ISNULL(Loads.dblNet,0) - B.dblNet,0) ELSE 0 END
+	,[dblNetShippedWeight]		=	ISNULL(CASE WHEN A.strReceiptType = 'Purchase Contract' AND A.intSourceType = 2 THEN LogisticsView.dblNetWt ELSE B.dblGross END,0)
+	,[dblWeightLoss]			=	CASE WHEN A.strReceiptType = 'Purchase Contract' AND A.intSourceType = 2 THEN ISNULL(ISNULL(LogisticsView.dblNetWt,0) - B.dblNet,0) ELSE 0 END
 	,[dblFranchiseWeight]		=	CASE WHEN J.dblFranchise > 0 THEN ISNULL(B.dblGross,0) * (J.dblFranchise / 100) ELSE 0 END
 	,[dblClaimAmount]			=	CASE WHEN A.strReceiptType = 'Purchase Contract' AND A.intSourceType = 2 THEN
-										(CASE WHEN (ISNULL(ISNULL(Loads.dblNet,0) - B.dblNet,0) > 0) THEN 
+										(CASE WHEN (ISNULL(ISNULL(LogisticsView.dblNetWt,0) - B.dblNet,0) > 0) THEN 
 										(
 											(ISNULL(B.dblGross - B.dblNet,0) - (CASE WHEN J.dblFranchise > 0 THEN ISNULL(B.dblGross,0) * (J.dblFranchise / 100) ELSE 0 END)) * 
 											(CASE WHEN B.dblNet > 0 THEN B.dblUnitCost * (CAST(ItemWeightUOM.dblUnitQty AS DECIMAL(18,6)) / CAST(ISNULL(ItemCostUOM.dblUnitQty,1) AS DECIMAL(18,6))) 
@@ -277,16 +279,41 @@ FROM tblICInventoryReceipt A
 		SELECT SUM(ISNULL(H.dblQtyReceived,0)) AS dblQty FROM tblAPBillDetail H WHERE H.intInventoryReceiptItemId = B.intInventoryReceiptItemId AND H.intInventoryReceiptChargeId IS NULL
 		GROUP BY H.intInventoryReceiptItemId
 	) Billed
+	--OUTER APPLY (
+	--	SELECT 
+	--		K.dblNetWt AS dblNet
+	--	FROM tblLGLoadContainer K
+	--	WHERE K.intLoadContainerId = B.intContainerId
+	--	--WHERE 1 = (CASE WHEN A.strReceiptType = 'Purchase Contract' AND A.intSourceType = 2
+	--	--					AND K.intLoadContainerId = B.intContainerId 
+	--	--				THEN 1
+	--	--				ELSE 0 END)
+	--) Loads
 	OUTER APPLY (
-		SELECT 
-			K.dblNetWt AS dblNet
-		FROM tblLGLoadContainer K
-		WHERE K.intLoadContainerId = B.intContainerId
-		--WHERE 1 = (CASE WHEN A.strReceiptType = 'Purchase Contract' AND A.intSourceType = 2
-		--					AND K.intLoadContainerId = B.intContainerId 
-		--				THEN 1
-		--				ELSE 0 END)
-	) Loads
+		SELECT	dblQtyReturned = ri.dblOpenReceive - ISNULL(ri.dblQtyReturned, 0) 
+				,r.strReceiptType
+				,r.strReceiptNumber
+		FROM	tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptItem ri
+					ON r.intInventoryReceiptId = ri.intInventoryReceiptId				
+		WHERE	r.intInventoryReceiptId = A.intSourceInventoryReceiptId
+				AND ri.intInventoryReceiptItemId = B.intSourceInventoryReceiptItemId
+				AND A.strReceiptType = 'Inventory Return'
+	) rtn
+
+	OUTER APPLY (
+		SELECT	* 
+		FROM	vyuLGLoadContainerLookup LogisticsView 
+		WHERE	LogisticsView.intLoadDetailId = B.intSourceId 
+				AND LogisticsView.intLoadContainerId = B.intContainerId
+				AND A.intSourceType = 2
+				AND (
+					A.strReceiptType = 'Purchase Contract'
+					OR (
+						A.strReceiptType = 'Inventory Return'
+						AND rtn.strReceiptType = 'Purchase Contract'
+					)
+				)
+	) LogisticsView
 WHERE 
 	A.strReceiptType IN ('Direct','Purchase Contract','Inventory Return','Purchase Order') 
 	AND A.ysnPosted = @ysnPosted 
@@ -380,8 +407,9 @@ SELECT DISTINCT
 		,[intContractSequence]						=	NULL
 		,[intScaleTicketId]							=	A.intScaleTicketId
 		,[strScaleTicketNumber]						=	A.strScaleTicketNumber
+		,[strLoadShipmentNumber]					=	A.strLoadNumber 
 		,[intShipmentId]							=	0      
-		,[intLoadDetailId]							=	NULL
+		,[intLoadDetailId]							=	A.intLoadDetailId
   		,[intUnitMeasureId]							=	A.intCostUnitMeasureId
 		,[strUOM]									=	A.strCostUnitMeasure
 		,[intWeightUOMId]							=	NULL

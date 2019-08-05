@@ -100,7 +100,8 @@ BEGIN
 			,[intInventoryReceiptItemId]		
 			,[intInventoryReceiptChargeId]		
 			,[intInventoryShipmentItemId]		
-			,[intInventoryShipmentChargeId]		
+			,[intInventoryShipmentChargeId]
+			,[strLoadShipmentNumber]		
 			,[intLoadShipmentId]				
 			,[intLoadShipmentDetailId]			
 			,[intItemId]						
@@ -156,8 +157,9 @@ BEGIN
 		,GP.[intInventoryReceiptChargeId]		
 		,GP.[intInventoryShipmentItemId]		
 		,GP.[intInventoryShipmentChargeId]		
+		,GP.strLoadShipmentNumber
 		,[intLoadShipmentId] = NULL				
-		,[intLoadShipmentDetailId] = NULL			
+		,GP.intLoadDetailId--[intLoadShipmentDetailId] = NULL			
 		,GP.[intItemId]						
 		,GP.[intPurchaseTaxGroupId]			
 		,GP.[strMiscDescription]				

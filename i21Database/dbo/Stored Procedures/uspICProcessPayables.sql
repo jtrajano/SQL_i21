@@ -35,6 +35,7 @@ BEGIN
 			,[intInventoryReceiptChargeId]		
 			,[intInventoryShipmentItemId]		
 			,[intInventoryShipmentChargeId]		
+			,[strLoadShipmentNumber]
 			,[intLoadShipmentId]				
 			,[intLoadShipmentDetailId]			
 			,[intItemId]						
@@ -63,7 +64,7 @@ BEGIN
 			,[intShipViaId]						
 			,[intTermId]						
 			,[strBillOfLading]					
-			,[ysnReturn]		
+			,[ysnReturn]
 		)
 		SELECT 
 			 GP.[intEntityVendorId]			
@@ -86,9 +87,10 @@ BEGIN
 			,GP.[intInventoryReceiptItemId]		
 			,GP.[intInventoryReceiptChargeId]		
 			,GP.[intInventoryShipmentItemId]		
-			,GP.[intInventoryShipmentChargeId]		
+			,GP.[intInventoryShipmentChargeId]	
+			,GP.strLoadShipmentNumber 
 			,[intLoadShipmentId] = NULL				
-			,[intLoadShipmentDetailId] = NULL			
+			,GP.intLoadDetailId
 			,GP.[intItemId]						
 			,GP.[intPurchaseTaxGroupId]			
 			,GP.[strMiscDescription]				
@@ -145,6 +147,7 @@ BEGIN
 				,[intInventoryReceiptChargeId]		
 				,[intInventoryShipmentItemId]		
 				,[intInventoryShipmentChargeId]		
+				,[strLoadShipmentNumber]
 				,[intLoadShipmentId]				
 				,[intLoadShipmentDetailId]			
 				,[intItemId]						
@@ -197,6 +200,7 @@ BEGIN
 				,[intInventoryReceiptChargeId] = NULL
 				,[intInventoryShipmentItemId]		
 				,[intInventoryShipmentChargeId]		
+				,[strLoadShipmentNumber] = NULL 
 				,[intLoadShipmentId] = NULL				
 				,[intLoadShipmentDetailId] = NULL			
 				,ShipmentCharges.[intItemId]						
@@ -304,6 +308,7 @@ BEGIN
 			,[intInventoryReceiptChargeId]		
 			,[intInventoryShipmentItemId]		
 			,[intInventoryShipmentChargeId]		
+			,[strLoadShipmentNumber]
 			,[intLoadShipmentId]				
 			,[intLoadShipmentDetailId]			
 			,[intItemId]						
@@ -356,6 +361,7 @@ BEGIN
 			,GP.[intInventoryReceiptChargeId]		
 			,GP.[intInventoryShipmentItemId]		
 			,GP.[intInventoryShipmentChargeId]		
+			,[strLoadShipmentNumber] = NULL 
 			,[intLoadShipmentId] = NULL				
 			,[intLoadShipmentDetailId] = NULL			
 			,GP.[intItemId]						
