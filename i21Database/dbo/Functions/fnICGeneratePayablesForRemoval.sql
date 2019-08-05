@@ -313,7 +313,7 @@ WHERE
 	AND C.strType <> 'Bundle'
 	AND ISNULL(A.strReceiptType, '') <> 'Transfer Order'
 	AND ISNULL(B.ysnAllowVoucher, 1) = 1
-	AND (A.intSourceType <> 2 OR (A.intSourceType = 2 AND FreightTerms.strFobPoint <> 'Origin'))
+	-- AND (A.intSourceType <> 2 OR (A.intSourceType = 2 AND FreightTerms.strFobPoint <> 'Origin')) -- Deprecated
 	ORDER BY B.intInventoryReceiptItemId ASC 
 
 
