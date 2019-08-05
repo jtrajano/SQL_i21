@@ -25,7 +25,7 @@ SELECT
 	dtmDateModified,
 	intSize,
 	A.intEntityId,
-	D.strName AS strUserName,
+	(CASE WHEN D.strName IS NULL THEN A.strInterCompanyEntityName ELSE D.strName END) AS strUserName,
 	A.intTransactionId,
 	intUploadId,
 	B.strFolderPath AS strFolderPath,
