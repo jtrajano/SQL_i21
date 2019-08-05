@@ -293,12 +293,14 @@ BEGIN TRY
 				AND MR.intMeterReadingId < @TransactionId
 				ORDER BY MR.intMeterReadingId DESC
 
-				UPDATE tblMBMeterAccountDetail SET dblLastMeterReading = @dblCurrentReading, dblLastTotalSalesDollar = @dblCurrentDollar
+				UPDATE tblMBMeterAccountDetail SET dblLastMeterReading = ISNULL(@dblCurrentReading, 0), dblLastTotalSalesDollar = ISNULL(@dblCurrentDollar, 0)
 				WHERE intMeterAccountDetailId = @intMeterAccountDetailId
 
 
 				FETCH NEXT FROM @CursorTran INTO @intMeterAccountDetailId
 			END
+			CLOSE @CursorTran
+			DEALLOCATE @CursorTran
 		
 		END
 	END
