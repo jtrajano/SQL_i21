@@ -41,7 +41,8 @@ BEGIN
 			FROM vyuSTBatchPostingRetailPriceAdjustment vrpa
 			INNER JOIN tblSTRetailPriceAdjustment rpa
 				ON vrpa.intTransactionId = rpa.intRetailPriceAdjustmentId
-			WHERE ISNULL(rpa.ysnPosted, 0) = 0
+			WHERE ISNULL(vrpa.ysnPosted, 0) = 0
+				AND CAST(rpa.dtmEffectiveDate AS DATE) <= CAST(GETDATE() AS DATE)
 		END
 	ELSE 
 		BEGIN
@@ -52,7 +53,10 @@ BEGIN
 			SELECT DISTINCT 
 				intId	= vrpa.intTransactionId
 			FROM vyuSTBatchPostingRetailPriceAdjustment vrpa
+			INNER JOIN tblSTRetailPriceAdjustment rpa
+				ON vrpa.intTransactionId = rpa.intRetailPriceAdjustmentId
 			WHERE ISNULL(vrpa.ysnPosted, 0) = 0
+				AND CAST(rpa.dtmEffectiveDate AS DATE) <= CAST(GETDATE() AS DATE)
 				AND vrpa.intTransactionId IN (SELECT Item FROM [fnSplitStringWithTrim](@TransactionId,',') )
 		END
 
