@@ -7893,12 +7893,8 @@
     <None Include="Scripts\Post-Deployment\AP\UpdateVoucherPayableTranType.sql" />
     <None Include="Scripts\Post-Deployment\AP\PurgePayableCompleted.sql" />
     <Build Include="dbo\Stored Procedures\uspSMSetExcessUserToDisabled.sql" />
-<<<<<<< HEAD
-=======
-    <Build Include="dbo\Stored Procedures\uspARCustomerInquiryReport.sql" />
     <Build Include="dbo\User Defined Types\InvoiceEAStagingTable.sql" />
     <Build Include="dbo\Stored Procedures\uspAREAImportInvoice.sql" />
->>>>>>> c472efd... AR-10717, IN-391
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
