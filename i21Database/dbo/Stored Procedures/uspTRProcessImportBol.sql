@@ -33,10 +33,11 @@ BEGIN
 			@dtmPullDate DATETIME = NULL,
 			@strTransactionNumber NVARCHAR(50) = NULL,
 			@intLoadHeaderId INT = NULL,
-			@intSellerId INT = NULL
+			@intSellerId INT = NULL,
+			@intFreightItemId INT = NULL
 
 		-- GET DEFAULT SELLER
-		SELECT TOP 1 @intSellerId = intSellerId FROM tblTRCompanyPreference 
+		SELECT TOP 1 @intSellerId = intSellerId, @intFreightItemId = intItemForFreightId FROM tblTRCompanyPreference 
 
 		BEGIN TRANSACTION
 
@@ -50,13 +51,19 @@ BEGIN
 			EXEC uspSMGetStartingNumber 54, @strTransactionNumber OUT
 			
 			-- TR HEADER
-			INSERT INTO tblTRLoadHeader (dtmLoadDateTime, intShipViaId, intSellerId, intDriverId, intTruckDriverReferenceId, intTrailerId, strTransaction, intConcurrencyId)
-			VALUES (@dtmPullDate, @intCarrierId, @intSellerId, @intDriverId, @intTruckId, @intTrailerId, @strTransactionNumber, 1)
+			INSERT INTO tblTRLoadHeader (dtmLoadDateTime, intShipViaId, intSellerId, intDriverId, intTruckDriverReferenceId, intTrailerId, strTransaction, intFreightItemId, intConcurrencyId)
+			VALUES (@dtmPullDate, @intCarrierId, @intSellerId, @intDriverId, @intTruckId, @intTrailerId, @strTransactionNumber, @intFreightItemId, 1)
 			
 			SET @intLoadHeaderId = @@identity
 
 			UPDATE tblTRImportLoadDetail SET strMessage = @strTransactionNumber, intLoadHeaderId = @intLoadHeaderId
-			WHERE intImportLoadId = @intImportLoadId AND intTruckId = @intTruckId AND intCarrierId = @intCarrierId AND intDriverId = @intDriverId AND intTrailerId = @intTrailerId AND dtmPullDate = @dtmPullDate
+			WHERE intImportLoadId = @intImportLoadId 
+			AND intTruckId = @intTruckId 
+			AND intCarrierId = @intCarrierId 
+			AND intDriverId = @intDriverId 
+			AND intTrailerId = @intTrailerId 
+			AND dtmPullDate = @dtmPullDate
+			AND ysnValid = 1
 
 			-- RECEIPT
 			DECLARE @CursorReceiptTran AS CURSOR
@@ -81,12 +88,19 @@ BEGIN
 				@dblUnitCost NUMERIC(18,6) = NULL,
 				@strBillOfLading NVARCHAR(50) = NULL,
 				@intReceiptCounter INT = 0,
-				@intLoadReceiptId INT = NULL
+				@intLoadReceiptId INT = NULL,
+				@intReceiptTaxGroupId INT = NULL,
+				@strReceiptZipCode NVARCHAR(50) = NULL,
+				@strGrossNet NVARCHAR(20) = NULL
 
 			OPEN @CursorReceiptTran
 			FETCH NEXT FROM @CursorReceiptTran INTO @intVendorId, @intSupplyPointId, @intVendorCompanyLocationId, @intPullProductId, @dblDropGross, @dblDropNet, @strBillOfLading
 			WHILE @@FETCH_STATUS = 0
 			BEGIN
+
+				SELECT @intReceiptTaxGroupId = EL.intTaxGroupId, @strReceiptZipCode = EL.strZipCode, @strGrossNet = ISNULL(SP.strGrossOrNet, 'Gross') FROM tblTRSupplyPoint SP
+				INNER JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = SP.intEntityLocationId 
+				WHERE SP.intSupplyPointId = @intSupplyPointId AND EL.intEntityId = @intVendorId
 
 				-- RECEIPT COUNTER
 				SET @intReceiptCounter = @intReceiptCounter + 1
@@ -119,6 +133,7 @@ BEGIN
 					dblFreightRate, 
 					dblPurSurcharge, 
 					strReceiptLine,
+					intTaxGroupId,
 					intConcurrencyId)
 				VALUES (@intLoadHeaderId, 
 					@strOrigin, 
@@ -133,17 +148,22 @@ BEGIN
 					NULL,
 					NULL,
 					'RL-'+ CONVERT(NVARCHAR(20), @intReceiptCounter),
+					@intReceiptTaxGroupId,
 					1)
 
 				SET @intLoadReceiptId = @@identity
 	
-				UPDATE tblTRImportLoadDetail SET intLoadReceiptId = @intLoadReceiptId, strReceiptLink = 'RL-'+ CONVERT(NVARCHAR(20), @intReceiptCounter)
+				UPDATE tblTRImportLoadDetail SET intLoadReceiptId = @intLoadReceiptId, 
+					strReceiptLink = 'RL-'+ CONVERT(NVARCHAR(20), @intReceiptCounter), 
+					strReceiptZipCode = @strReceiptZipCode,
+					strGrossNet = @strGrossNet
 				WHERE intImportLoadId = @intImportLoadId
 				AND intVendorId = @intVendorId
 				AND intSupplyPointId = @intSupplyPointId
 				AND intVendorCompanyLocationId = @intVendorCompanyLocationId
 				AND intPullProductId = @intPullProductId
 				AND strBillOfLading = @strBillOfLading
+				AND ysnValid = 1
 
 				FETCH NEXT FROM @CursorReceiptTran INTO @intVendorId, @intSupplyPointId, @intVendorCompanyLocationId, @intPullProductId, @dblDropGross, @dblDropNet, @strBillOfLading
 			END
@@ -208,6 +228,7 @@ BEGIN
 				AND intCustomerCompanyLocationId = @intCustomerCompanyLocationId 
 				AND intDropProductId = @intDropProductId 
 				AND dtmInvoiceDate = @dtmInvoiceDate
+				AND ysnValid = 1
 
 				-- DISTRIBUTION DETAIL - BLENDING - START
 				DECLARE @CursorDistributionDetailTran AS CURSOR
@@ -216,11 +237,12 @@ BEGIN
 					LD.intDropProductId,
 					SUM(LD.dblDropGross) dblDropGross ,
 					SUM(LD.dblDropNet) dblDropNet,
-					LD.strBillOfLading
+					LD.strBillOfLading,
+					LD.strGrossNet
 				FROM tblTRImportLoadDetail LD WHERE LD.ysnValid = 1 AND LD.intLoadHeaderId = @intLoadHeaderId 
 				AND LD.intLoadDistributionHeaderId = @intLoadDistributionHeaderId
 				AND LD.intPullProductId <> LD.intDropProductId
-				GROUP BY LD.intPullProductId, LD.intDropProductId, LD.strBillOfLading
+				GROUP BY LD.intPullProductId, LD.intDropProductId, LD.strBillOfLading, LD.strGrossNet
 
 				DECLARE @intDDPullProductId INT = NULL,
 					@intDDDropProductId INT = NULL,
@@ -229,11 +251,12 @@ BEGIN
 					@strDDBillOfLading NVARCHAR(50) = NULL,
 					@intDDLoadReceiptId INT = NULL,
 					@intLoadDistributionDetailId INT = NULL,
+					@strDDGrossNet NVARCHAR(20) = NULL,
 					@ysnMain BIT = 1,
 					@dblSum NUMERIC(18, 6) = 0
 
 				OPEN @CursorDistributionDetailTran
-				FETCH NEXT FROM @CursorDistributionDetailTran INTO @intDDPullProductId, @intDDDropProductId, @dblDDDropGross, @dblDDDropNet, @strDDBillOfLading
+				FETCH NEXT FROM @CursorDistributionDetailTran INTO @intDDPullProductId, @intDDDropProductId, @dblDDDropGross, @dblDDDropNet, @strDDBillOfLading, @strDDGrossNet
 				WHILE @@FETCH_STATUS = 0
 				BEGIN
 					IF(@ysnMain = 1)
@@ -266,6 +289,7 @@ BEGIN
 						UPDATE tblTRImportLoadDetail SET intLoadDistributionDetailId = @intLoadDistributionDetailId
 						WHERE intImportLoadId = @intImportLoadId AND intLoadDistributionHeaderId = @intLoadDistributionHeaderId
 						AND intDropProductId = @intDDDropProductId
+						AND ysnValid = 1
 
 						SET @ysnMain = 0
 					END
@@ -282,8 +306,7 @@ BEGIN
 						DECLARE @strReceiptLink NVARCHAR(50) = NULL,
 							@dblPercentageValue NUMERIC(18,6) = NULL
 						
-
-						SET @dblPercentageValue = @dblDDDropGross * @dblPercentage
+						SET @dblPercentageValue = CASE WHEN @strDDGrossNet = 'Gross' THEN @dblDDDropGross * @dblPercentage ELSE @dblDDDropNet * @dblPercentage END
 
 						SET @dblSum = @dblSum + @dblPercentageValue 
 
@@ -292,6 +315,7 @@ BEGIN
 						AND LR.intDropProductId = @intDDDropProductId
 						AND LR.strBillOfLading = @strDDBillOfLading
 						AND LR.intLoadHeaderId = @intLoadHeaderId
+						AND LR.ysnValid = 1
 						
 						INSERT INTO tblTRLoadBlendIngredient (intLoadDistributionDetailId, 
 							strBillOfLading, 
@@ -309,7 +333,7 @@ BEGIN
 
 					UPDATE tblTRLoadDistributionDetail SET dblUnits = @dblSum WHERE intLoadDistributionDetailId = @intLoadDistributionDetailId
 					
-					FETCH NEXT FROM @CursorDistributionDetailTran INTO @intDDPullProductId, @intDDDropProductId, @dblDDDropGross, @dblDDDropNet, @strDDBillOfLading
+					FETCH NEXT FROM @CursorDistributionDetailTran INTO @intDDPullProductId, @intDDDropProductId, @dblDDDropGross, @dblDDDropNet, @strDDBillOfLading, @strDDGrossNet
 				END
 				CLOSE @CursorDistributionDetailTran
 				DEALLOCATE @CursorDistributionDetailTran
@@ -323,11 +347,13 @@ BEGIN
 					SUM(LD.dblDropGross) dblDropGross ,
 					SUM(LD.dblDropNet) dblDropNet,
 					LD.strBillOfLading,
-					LD.strReceiptLink
+					LD.strReceiptLink,
+					LD.strReceiptZipCode,
+					LD.strGrossNet
 				FROM tblTRImportLoadDetail LD WHERE LD.ysnValid = 1 AND LD.intLoadHeaderId = @intLoadHeaderId 
 				AND LD.intLoadDistributionHeaderId = @intLoadDistributionHeaderId
 				AND LD.intPullProductId = LD.intDropProductId
-				GROUP BY LD.intPullProductId, LD.intDropProductId, LD.strBillOfLading, LD.strReceiptLink
+				GROUP BY LD.intPullProductId, LD.intDropProductId, LD.strBillOfLading, LD.strReceiptLink, LD.strReceiptZipCode, LD.strGrossNet
 				
 				DECLARE @intNonBlendPullProductId INT = NULL,
 					@intNonBlendDropProductId INT = NULL,
@@ -335,12 +361,67 @@ BEGIN
 					@dblNonBlendDropNet NUMERIC(18,6) = NULL,
 					@strNonBlendBillOfLading NVARCHAR(50) = NULL,
 					@strNonBlendReceiptLink NVARCHAR(50) = NULL,
-					@intNonBlendLoadDistributionDetailId INT = NULL
+					@intNonBlendLoadDistributionDetailId INT = NULL,
+					@strNonBlendReceiptZipCode NVARCHAR(50) = NULL,
+					@strNonBlendGrossNet NVARCHAR(50) = NULL,
+					@intNonBlendTaxGroupId INT = NULL
 
 				OPEN @CursorDistributionDetailNonBlendTran
-				FETCH NEXT FROM @CursorDistributionDetailNonBlendTran INTO @intNonBlendPullProductId, @intNonBlendDropProductId, @dblNonBlendDropGross, @dblNonBlendDropNet, @strNonBlendBillOfLading, @strNonBlendReceiptLink
+				FETCH NEXT FROM @CursorDistributionDetailNonBlendTran INTO @intNonBlendPullProductId, @intNonBlendDropProductId, @dblNonBlendDropGross, @dblNonBlendDropNet, @strNonBlendBillOfLading, @strNonBlendReceiptLink, @strNonBlendReceiptZipCode, @strNonBlendGrossNet
 				WHILE @@FETCH_STATUS = 0
 				BEGIN
+					-- GET TAX GROUP 
+					SELECT @intNonBlendTaxGroupId = EL.intTaxGroupId FROM tblEMEntityLocation EL
+					WHERE EL.intEntityLocationId = @intShipToId
+
+					-- FREIGHT RATE & SURCHARGE - RECEIPT
+					DECLARE @dblReceiptGallon DECIMAL(18,6) = NULL,
+						@ysnToBulkPlant BIT = 0,
+						@dblFreightRateDistribution DECIMAL(18,6),
+						@dblFreightRateReceipt DECIMAL(18,6),
+						@dblSurchargeReceipt DECIMAL(18,6),
+						@dblSurchargeDistribution DECIMAL(18,6),
+						@ysnFreightInPrice BIT,
+						@ysnFreightOnly BIT
+
+					IF(@intNonBlendDropProductId IS NOT NULL AND @intCarrierId IS NOT NULL)
+					BEGIN
+						IF(@intCustomerId IS NULL)
+						BEGIN
+							SET @ysnToBulkPlant = 1
+						END
+
+						IF(@strNonBlendGrossNet = 'Gross')
+						BEGIN
+							SET @dblReceiptGallon = @dblDropGross
+						END
+						ELSE
+						BEGIN
+							SET @dblReceiptGallon = @dblDropNet
+						END
+
+						EXECUTE [dbo].[uspTRGetCustomerFreight]
+							@intCustomerId -- Customer
+							,@intDropProductId -- Receipt Item
+							,@strNonBlendReceiptZipCode -- Supply Point
+							,@intCarrierId -- Ship Via
+							,@intShipToId -- Ship To
+							,@dblReceiptGallon
+							,@dblReceiptGallon
+							,@dtmPullDate
+							,@dtmInvoiceDate
+							,@ysnToBulkPlant
+							,@dblFreightRateDistribution OUTPUT
+							,@dblFreightRateReceipt OUTPUT
+							,@dblSurchargeReceipt OUTPUT
+							,@dblSurchargeDistribution OUTPUT
+							,@ysnFreightInPrice OUTPUT
+							,@ysnFreightOnly OUTPUT
+					END
+
+					UPDATE tblTRLoadReceipt SET dblFreightRate = @dblFreightRateReceipt, dblPurSurcharge = @dblSurchargeReceipt
+					WHERE intLoadHeaderId = @intLoadHeaderId
+					AND strReceiptLine = @strNonBlendReceiptLink
 
 					INSERT INTO tblTRLoadDistributionDetail(intLoadDistributionHeaderId, 
 						strBillOfLading, 
@@ -357,11 +438,11 @@ BEGIN
 						@strNonBlendBillOfLading,
 						@strNonBlendReceiptLink ,
 						@intNonBlendDropProductId,
-						@dblNonBlendDropGross,
+						CASE WHEN @strNonBlendGrossNet = 'Gross' THEN @dblNonBlendDropGross ELSE @dblNonBlendDropNet END,
 						null,
-						null,
-						null,
-						null,
+						@dblFreightRateDistribution,
+						@dblSurchargeDistribution,
+						@intNonBlendTaxGroupId,
 						0,
 						1)
 
@@ -370,8 +451,9 @@ BEGIN
 					UPDATE tblTRImportLoadDetail SET intLoadDistributionDetailId = @intNonBlendLoadDistributionDetailId
 					WHERE intImportLoadId = @intImportLoadId AND intLoadDistributionHeaderId = @intLoadDistributionHeaderId
 					AND intDropProductId = @intNonBlendDropProductId
+					AND ysnValid = 1
 
-					FETCH NEXT FROM @CursorDistributionDetailNonBlendTran INTO @intNonBlendPullProductId, @intNonBlendDropProductId, @dblNonBlendDropGross, @dblNonBlendDropNet, @strNonBlendBillOfLading, @strNonBlendReceiptLink
+					FETCH NEXT FROM @CursorDistributionDetailNonBlendTran INTO @intNonBlendPullProductId, @intNonBlendDropProductId, @dblNonBlendDropGross, @dblNonBlendDropNet, @strNonBlendBillOfLading, @strNonBlendReceiptLink, @strNonBlendReceiptZipCode, @strNonBlendGrossNet
 				END
 				CLOSE @CursorDistributionDetailNonBlendTran
 				DEALLOCATE @CursorDistributionDetailNonBlendTran
