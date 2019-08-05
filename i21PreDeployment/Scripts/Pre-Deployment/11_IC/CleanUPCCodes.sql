@@ -13,6 +13,17 @@ BEGIN
 		WHERE strLongUPCCode = '' OR strLongUPCCode = '0' OR 
 			strLongUPCCode IN (SELECT strLongUPCCode FROM tblICItemUOM GROUP BY strLongUPCCode HAVING (COUNT(strLongUPCCode) > 1))
 	END
+
+	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblICItemUOM' AND [COLUMN_NAME] = 'intUpcCode')
+	BEGIN
+		;WITH CTE AS
+		(
+			SELECT intUpcCode, strLongUPCCode, ROW_NUMBER() OVER (PARTITION BY intUpcCode ORDER BY intUpcCode) AS rc
+			FROM tblICItemUOM
+			WHERE intUpcCode IS NOT NULL
+		)
+		UPDATE CTE SET strLongUPCCode = NULL WHERE rc > 1;
+	END
 END
 GO
 PRINT N'END - Clean Short and Long UPC for tblICItemUOM'
