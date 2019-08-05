@@ -159,24 +159,25 @@ BEGIN
 										,@dblLastCost				= @dblLastCostConv
 										,@intEntityUserSecurityId	= @intCurrentUserId
 
-								-- TEST
-								--SELECT '@intItemPricingId', * FROM tblICItemPricing WHERE intItemPricingId = @intItemPricingId
-								--SELECT '#tmpUpdateItemPricingForCStore_ItemPricingAuditLog', * FROM #tmpUpdateItemPricingForCStore_ItemPricingAuditLog
+									-- TEST
+									--SELECT '@intItemPricingId', * FROM tblICItemPricing WHERE intItemPricingId = @intItemPricingId
+									--SELECT '#tmpUpdateItemPricingForCStore_ItemPricingAuditLog', * FROM #tmpUpdateItemPricingForCStore_ItemPricingAuditLog
 
-								-- Check if Successfull
-								IF EXISTS(SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_ItemPricingAuditLog WHERE intItemPricingId = @intItemPricingId)
-									BEGIN 
+									-- Check if Successfull
+									IF EXISTS(SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_ItemPricingAuditLog WHERE intItemPricingId = @intItemPricingId)
+										BEGIN 
 										
-										IF(@ysnOneTimeUse = CAST(1 AS BIT))
-											BEGIN
+											IF(@ysnOneTimeUse = CAST(1 AS BIT))
+												BEGIN
 
-												UPDATE tblSTRetailPriceAdjustmentDetail
-												SET ysnPosted = 1
-												WHERE intRetailPriceAdjustmentDetailId = @intRetailPriceAdjustmentDetailId
+													UPDATE tblSTRetailPriceAdjustmentDetail
+													SET ysnPosted = 1
+													WHERE intRetailPriceAdjustmentDetailId = @intRetailPriceAdjustmentDetailId
 
-											END
+												END
 										
-									END
+										END
+
 								END TRY
 								BEGIN CATCH
 									SET @ysnSuccess = CAST(0 AS BIT)
@@ -187,6 +188,16 @@ BEGIN
 								DELETE FROM @tblRetailPriceAdjustmentDetailIds
 								WHERE intRetailPriceAdjustmentDetailId = @intRetailPriceAdjustmentDetailId
 							END
+
+						
+						-- UPDATE tblRetailPriceAdjustment
+						UPDATE rpa
+							SET rpa.dtmPostedDate	= GETUTCDATE(),
+							    rpa.intEntityId		= @intCurrentUserId,
+								rpa.ysnPosted		= CAST(1 AS BIT)
+						FROM tblSTRetailPriceAdjustment rpa
+						WHERE rpa.intRetailPriceAdjustmentId = @intRetailPriceAdjustmentId 
+
 					END
 				ELSE
 					BEGIN

@@ -7976,6 +7976,8 @@
     <Build Include="dbo\Stored Procedures\uspSTGetStartingNumber.sql" />
     <Build Include="dbo\Stored Procedures\uspSMInterCompanyDeleteMovedDMS.sql" />
     <Build Include="dbo\Stored Procedures\uspSMInterCompanyValidateMovedDMSRecords.sql" />
+    <Build Include="dbo\Views\vyuSTBatchPostingRetailPriceAdjustment.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTBatchPostingRetailPriceAdjustment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -16,14 +16,14 @@ BEGIN TRY
 		DECLARE @Savepoint NVARCHAR(32) = SUBSTRING(('uspSTGetStartingNumber' + CONVERT(VARCHAR, @InitTranCount)), 1, 32)
 
 		IF @InitTranCount = 0
-				BEGIN
-					BEGIN TRANSACTION
-				END
+			BEGIN
+				BEGIN TRANSACTION
+			END
 				
-			ELSE
-				BEGIN
-					SAVE TRANSACTION @Savepoint
-				END
+		ELSE
+			BEGIN
+				SAVE TRANSACTION @Savepoint
+			END
 
 
 
