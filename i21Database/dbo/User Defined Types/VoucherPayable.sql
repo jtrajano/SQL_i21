@@ -69,6 +69,7 @@ CREATE TYPE [dbo].[VoucherPayable] AS TABLE
 	[intInventoryReceiptChargeId]	INT NULL,
 	[intInventoryShipmentItemId]	INT NULL,
 	[intInventoryShipmentChargeId]	INT NULL,
+	[strLoadShipmentNumber]			NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[intLoadShipmentId]				INT NULL,
 	[intLoadShipmentDetailId]		INT NULL,
 	[intLoadShipmentCostId]			INT NULL,
