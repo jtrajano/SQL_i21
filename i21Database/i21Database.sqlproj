@@ -7983,6 +7983,7 @@
     <Build Include="dbo\Views\vyuRKSearchDerivativeEntryHistory.sql" />
     <Build Include="dbo\Stored Procedures\uspAPValidateImportedPaidVouchersIndiana.sql" />
     <Build Include="dbo\Functions\fnICGetShipmentScheduleIdForReceiptCharge.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFRecipeDateRangeValidation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
