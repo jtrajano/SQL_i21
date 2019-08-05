@@ -28,7 +28,7 @@ BEGIN
 		, strItemNo
 		, strOriginalQtyUOM = (CONVERT(VARCHAR(50), CAST(dblOriginalQty AS MONEY), 1) + ' ' + strSymbol) COLLATE Latin1_General_CI_AS
 		, dblQty = CASE WHEN strBuySell = 'Buy' THEN dblQty * -1 ELSE ABS(dblQty) END
-		, dblDeltaQty = CASE WHEN strBuySell = 'Buy' THEN ISNULL(dblDeltaQty,0) * -1 ELSE ABS(ISNULL(dblDeltaQty,0)) END
+		, dblDeltaQty = CASE WHEN strBuySell = 'Buy' THEN ABS(ISNULL(dblDeltaQty,0)) ELSE ABS(ISNULL(dblDeltaQty,0)) * -1 END
 		, dblNoOfLots
 		, strPosition
 		, strFutureMonth
