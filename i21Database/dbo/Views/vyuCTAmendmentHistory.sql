@@ -12,7 +12,31 @@ SELECT
 	,intContractTypeId              =  CH.intContractTypeId
 	,strContractType	            =  TP.strContractType
 	,strItemChanged		            =  SAL.strItemChanged
-	,strOldValue		            =  SAL.strOldValue
+	--,strOldValue		            =  SAL.strOldValue
+	,strOldValue = (
+			case
+			when
+				SAL.strItemChanged in ('Partial Price Qty','Full Price Qty','Partial Price Fixation','Full Price Fixation') and SAL.strOldValue = '0'
+			then
+					isnull(
+						(
+							select
+								top 1 b.strNewValue
+							from
+								tblCTSequenceAmendmentLog b
+							where
+								b.intContractHeaderId = SAL.intContractHeaderId
+								and b.intContractDetailId = SAL.intContractDetailId
+								and b.strItemChanged = SAL.strItemChanged
+								and b.intSequenceAmendmentLogId < SAL.intSequenceAmendmentLogId
+							order by
+								b.intSequenceAmendmentLogId desc
+						),
+					'0')
+			else
+				SAL.strOldValue
+			end
+		)
 	,strNewValue		            =  SAL.strNewValue
 	,intCommodityId		            =  CH.intCommodityId
 	,strCommodityCode	            =  CO.strCommodityCode
