@@ -1,20 +1,25 @@
 ﻿CREATE VIEW [dbo].[vyuSTBatchPostingRetailPriceAdjustment]
 	AS 
 SELECT 
-	'Retail Price Adjustment'			AS	strTransactionType,
-	rpa.intRetailPriceAdjustmentId		AS	intTransactionId,
-	rpa.strRetailPriceAdjustmentNumber	AS	strTransactionId, 
-	rpa.intEntityId						AS	intEntityId, 
-	SUM(rpad.dblPrice)					AS	dblAmount,
-	NULL								AS	strVendorInvoiceNumber,
-	NULL								AS  intEntityVendorId,
-	NULL								AS	strVendorName,
-	ISNULL(userSec.strUserName, '')		AS	strUserName,
-	rpa.strDescription					AS	strDescription,
-	rpa.dtmPostedDate					AS	dtmDate,
-	NULL								AS  strFiscalUniqueId,
-	companyLoc.strLocationName			AS	strLocation,
-	ISNULL(rpa.ysnPosted, 0)			AS  ysnPosted					
+	'Retail Price Adjustment'				COLLATE Latin1_General_CI_AS 			AS 	strTransactionType,
+	rpa.intRetailPriceAdjustmentId													AS	intTransactionId,
+	rpa.strRetailPriceAdjustmentNumber		COLLATE Latin1_General_CI_AS			AS 	strTransactionId , 
+	CASE 
+		WHEN rpa.intEntityId IS NULL 
+			THEN (SELECT TOP 1 intEntityId FROM tblSMUserSecurity) 
+		ELSE rpa.intEntityId 
+	END AS intEntityId, 
+	SUM(rpad.dblPrice)																AS	dblAmount,
+	''										COLLATE Latin1_General_CI_AS			AS	strVendorInvoiceNumber,
+	NULL																			AS  intEntityVendorId,
+	''										COLLATE Latin1_General_CI_AS			AS	strVendorName,
+	ISNULL(userSec.strUserName, '')													AS	strUserName,
+	ISNULL(rpa.strDescription, '')			COLLATE Latin1_General_CI_AS			AS	strDescription,
+	rpa.dtmPostedDate																AS	dtmDate,
+	''										COLLATE Latin1_General_CI_AS			AS  strFiscalUniqueId,
+	ISNULL(companyLoc.strLocationName, '')	COLLATE Latin1_General_CI_AS			AS	strLocation,
+	ISNULL(rpa.ysnPosted, 0)														AS  ysnPosted,
+	companyLoc.intCompanyLocationId													AS  intCompanyLocationId
 FROM tblSTRetailPriceAdjustment rpa
 INNER JOIN tblSTRetailPriceAdjustmentDetail rpad
 	ON rpa.intRetailPriceAdjustmentId = rpad.intRetailPriceAdjustmentId
@@ -32,4 +37,5 @@ GROUP BY rpa.intRetailPriceAdjustmentId,
 		 rpa.strDescription,
 		 rpa.dtmPostedDate,
 		 companyLoc.strLocationName,
-		 rpa.ysnPosted
+		 rpa.ysnPosted,
+		 companyLoc.intCompanyLocationId
