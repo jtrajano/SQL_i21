@@ -1,5 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspAPValidateImportedPaidVouchers]
-	
+﻿CREATE PROCEDURE [dbo].[uspAPValidateImportedPaidVouchersIndiana]
 AS
 
 BEGIN  
@@ -11,17 +10,30 @@ SET ANSI_WARNINGS OFF
   
 BEGIN TRY  
   
+DECLARE @locRef NVARCHAR(50);
 DECLARE @transCount INT = @@TRANCOUNT;  
 IF @transCount = 0 BEGIN TRANSACTION; 
 
 UPDATE A
+	SET A.strVendorOrderNumber = D.strLocationNumber + SUBSTRING(A.strVendorOrderNumber, CHARINDEX('-', A.strVendorOrderNumber), LEN(A.strVendorOrderNumber))
+						+ CASE WHEN A.dblPayment < 0 THEN 'R' ELSE '' END
+FROM tblAPImportPaidVouchersForPayment A
+INNER JOIN tblAPVendor B
+	ON A.intEntityVendorId = B.intEntityId
+LEFT JOIN tblAPVendorImportInfo C
+	ON B.intEntityId = C.intEntityVendorId
+LEFT JOIN tblSMCompanyLocation D
+	ON D.intCompanyLocationId = C.intCompanyLocationId
+WHERE C.strLocationXRef = SUBSTRING(A.strVendorOrderNumber, 1, CHARINDEX('-', A.strVendorOrderNumber) - 1)
+
+UPDATE A
 	SET A.strNotes = CASE
-					WHEN 
-							A.intCurrencyId = B.intCurrencyId
-						AND B.ysnPaid = 0
-						AND B.ysnPosted = 1
-						AND B.intBillId > 0
-						AND A.dblPayment <= B.dblAmountDue
+						WHEN 
+								A.intCurrencyId = B.intCurrencyId
+							AND B.ysnPaid = 0
+							AND B.ysnPosted = 1
+							AND B.intBillId > 0
+							AND A.dblPayment <= B.dblAmountDue
 						THEN NULL
 					WHEN 
 						A.intCurrencyId != B.intCurrencyId

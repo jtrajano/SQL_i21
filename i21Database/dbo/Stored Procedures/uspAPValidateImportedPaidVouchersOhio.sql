@@ -28,18 +28,13 @@ WHERE C.strLocationXRef = SUBSTRING(A.strVendorOrderNumber, 1, CHARINDEX('-', A.
 
 UPDATE A
 	SET A.strNotes = CASE
-						WHEN 
-						NOT
-								(A.intEntityVendorId != B.intEntityVendorId
-							AND A.intCurrencyId != B.intCurrencyId
-							AND B.ysnPaid = 1
-							AND B.ysnPosted = 0
-							AND B.intBillId IS NULL
-							AND A.dblPayment > B.dblAmountDue)
-						THEN NULL
 					WHEN 
-						A.intEntityVendorId != B.intEntityVendorId
-					THEN 'Vendor is different on current selected vendor.'
+							A.intCurrencyId = B.intCurrencyId
+						AND B.ysnPaid = 0
+						AND B.ysnPosted = 1
+						AND B.intBillId > 0
+						AND A.dblPayment <= B.dblAmountDue
+						THEN NULL
 					WHEN 
 						A.intCurrencyId != B.intCurrencyId
 					THEN 'Currency is different on current selected currency.'
@@ -62,6 +57,7 @@ FROM tblAPImportPaidVouchersForPayment A
 LEFT JOIN tblAPBill B
 ON 
 	B.strVendorOrderNumber = A.strVendorOrderNumber
+AND B.intEntityVendorId = A.intEntityVendorId
 	
 IF @transCount = 0 COMMIT TRANSACTION;  
   

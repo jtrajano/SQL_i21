@@ -7981,6 +7981,7 @@
     <Build Include="dbo\Tables\tblSTPostResult.sql" />
     <None Include="Scripts\Post-Deployment\GR\ContractPrice.sql" />
     <Build Include="dbo\Views\vyuRKSearchDerivativeEntryHistory.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPValidateImportedPaidVouchersIndiana.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
