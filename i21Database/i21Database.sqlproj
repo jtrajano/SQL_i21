@@ -7980,6 +7980,7 @@
     <Build Include="dbo\Stored Procedures\uspSTBatchPostingRetailPriceAdjustment.sql" />
     <Build Include="dbo\Tables\tblSTPostResult.sql" />
     <None Include="Scripts\Post-Deployment\GR\ContractPrice.sql" />
+    <Build Include="dbo\Views\vyuRKSearchDerivativeEntryHistory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

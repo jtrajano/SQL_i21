@@ -29,9 +29,10 @@ SELECT intFutOptTransactionHistoryId
 	, dblPrice
 	, strStatus
 	, dtmFilledDate
-	, dblOldNoOfContract
-	, dblContractBalance = (ISNULL(dblNewNoOfContract, 0) - ISNULL(dblOldNoOfContract, 0))
-	, dblNewNoOfContract
+	, dblOldNoOfLots
+	, dblLotBalance = (ISNULL(dblNewNoOfLots, 0) - ISNULL(dblOldNoOfLots, 0))
+	, dblContractBalance = dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUOMId, intStockUOMId, ((ISNULL(dblNewNoOfLots, 0) - ISNULL(dblOldNoOfLots, 0))) * dblContractSize)
+	, dblNewNoOfLots
 	, strScreenName
 	, strOldBuySell
 	, strNewBuySell	
@@ -52,7 +53,6 @@ SELECT intFutOptTransactionHistoryId
 	, intRollingMonthId
 	, intTraderId
 	, strSalespersonId
-	
 FROM (
 	SELECT intFutOptTransactionHistoryId
 		, History.intFutOptTransactionId
@@ -81,13 +81,13 @@ FROM (
 		, History.dblPrice
 		, History.strStatus
 		, History.dtmFilledDate
-		, dblOldNoOfContract = (SELECT TOP 1 ISNULL(dblNewNoOfContract, 0)
+		, dblOldNoOfLots = (SELECT TOP 1 CASE WHEN strNewBuySell = 'Buy' THEN ISNULL(dblNewNoOfContract, 0) ELSE - ISNULL(dblNewNoOfContract, 0) END
 								FROM tblRKFutOptTransactionHistory PrevRec
 								WHERE PrevRec.intFutOptTransactionId = History.intFutOptTransactionId
 									AND PrevRec.intFutOptTransactionHistoryId != History.intFutOptTransactionHistoryId
 									AND PrevRec.dtmTransactionDate < History.dtmTransactionDate
 								ORDER BY PrevRec.dtmTransactionDate DESC)
-		, dblNewNoOfContract = CASE WHEN History.strNewBuySell = 'Buy' THEN History.dblNewNoOfContract ELSE - History.dblNewNoOfContract END
+		, dblNewNoOfLots = CASE WHEN History.strNewBuySell = 'Buy' THEN History.dblNewNoOfContract ELSE - History.dblNewNoOfContract END
 		, History.strScreenName
 		, History.strOldBuySell
 		, History.strNewBuySell	
@@ -108,6 +108,9 @@ FROM (
 		, intRollingMonthId
 		, Entity1.intEntityId intTraderId
 		, History.strTrader strSalespersonId
+		, FutMarket.intUnitMeasureId
+		, intCommodityUOMId = CommodityUOM.intCommodityUnitMeasureId
+		, intStockUOMId = CommodityStock.intCommodityUnitMeasureId
 	FROM tblRKFutOptTransactionHistory History
 	LEFT JOIN tblRKFutOptTransaction Trans ON Trans.intFutOptTransactionId = History.intFutOptTransactionId
 	LEFT JOIN tblRKFutureMarket FutMarket ON FutMarket.strFutMarketName = History.strFutureMarket
@@ -123,6 +126,11 @@ FROM (
 	LEFT JOIN tblEMEntity Entity ON Entity.strName = History.strBroker AND Entity.intEntityId = BrokerAccount.intEntityId
 	LEFT JOIN tblEMEntity Entity1 ON Entity1.strName = History.strTrader 
 	LEFT JOIN tblEMEntityType ET1 ON ET1.intEntityId = Entity1.intEntityId
+	LEFT JOIN tblICCommodityUnitMeasure CommodityUOM ON CommodityUOM.intCommodityId = Trans.intCommodityId AND CommodityUOM.intUnitMeasureId = FutMarket.intUnitMeasureId
+	LEFT JOIN tblICCommodityUnitMeasure CommodityStock ON CommodityStock.intCommodityId = Trans.intCommodityId AND CommodityStock.ysnStockUnit = 1
 	WHERE ISNULL(History.strAction, '') <> ''
 		AND ET1.strType = 'Salesperson'
+		AND History.intFutOptTransactionId NOT IN (SELECT DISTINCT intFutOptTransactionId FROM tblRKOptionsPnSExercisedAssigned)
+		AND History.intFutOptTransactionId NOT IN (SELECT DISTINCT intFutOptTransactionId FROM tblRKOptionsPnSExpired)
+		AND History.strStatus = 'Filled'
 ) t

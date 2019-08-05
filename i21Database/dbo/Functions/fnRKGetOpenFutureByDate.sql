@@ -216,7 +216,7 @@ BEGIN
 				SELECT * FROM (
 					SELECT ROW_NUMBER() OVER (PARTITION BY History.intFutOptTransactionId ORDER BY History.intFutOptTransactionId, History.dtmTransactionDate DESC) intRowNum
 						, History.*
-						, dblOpenContract = History.dblNewNoOfContract - ISNULL(mc.dblMatchContract, 0)
+						, dblOpenContract = History.dblNewNoOfLots - ISNULL(mc.dblMatchContract, 0)
 						, dblMatchContract = ISNULL(mc.dblMatchContract, 0)
 					FROM vyuRKGetFutOptTransactionHistory History
 					LEFT JOIN MatchDerivatives mc ON mc.intFutOptTransactionId = FOT.intFutOptTransactionId
@@ -289,7 +289,7 @@ BEGIN
 				SELECT * FROM (
 					SELECT ROW_NUMBER() OVER (PARTITION BY History.intFutOptTransactionId ORDER BY History.intFutOptTransactionId, History.dtmTransactionDate DESC) intRowNum
 						, History.*
-						, dblOpenContract = History.dblNewNoOfContract - ISNULL(mc.dblMatchContract, 0)
+						, dblOpenContract = History.dblNewNoOfLots - ISNULL(mc.dblMatchContract, 0)
 						, dblMatchContract = ISNULL(mc.dblMatchContract, 0)
 					FROM vyuRKGetFutOptTransactionHistory History 
 					LEFT JOIN MatchDerivatives mc ON mc.intFutOptTransactionId = FOT.intFutOptTransactionId
@@ -361,7 +361,7 @@ BEGIN
 				SELECT * FROM (
 					SELECT ROW_NUMBER() OVER (PARTITION BY History.intFutOptTransactionId ORDER BY History.intFutOptTransactionId, History.dtmTransactionDate DESC) intRowNum
 						, History.*
-						, dblOpenContract = History.dblNewNoOfContract - ISNULL(mc.dblMatchContract, 0)
+						, dblOpenContract = History.dblNewNoOfLots - ISNULL(mc.dblMatchContract, 0)
 						, dblMatchContract = ISNULL(mc.dblMatchContract, 0)
 					FROM vyuRKGetFutOptTransactionHistory History 
 					LEFT JOIN MatchDerivatives mc ON mc.intFutOptTransactionId = History.intFutOptTransactionId
