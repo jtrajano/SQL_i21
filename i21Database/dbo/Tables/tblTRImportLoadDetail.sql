@@ -40,6 +40,8 @@
 	[intLoadDistributionHeaderId] INT NULL,
     [intLoadDistributionDetailId] INT NULL,
     [strReceiptLink] NVARCHAR(50) NULL,
+    [strReceiptZipCode] NVARCHAR(50) NULL,
+    [strGrossNet] NVARCHAR(20) NULL
     CONSTRAINT [PK_tblTRImportLoadDetail] PRIMARY KEY ([intImportLoadDetailId]),
 	CONSTRAINT [FK_tblTRImportLoadDetail_tblTRImportLoad_intImportLoadId] FOREIGN KEY ([intImportLoadId]) REFERENCES [dbo].[tblTRImportLoad] ([intImportLoadId]) ON DELETE CASCADE
 )
