@@ -1281,9 +1281,18 @@ BEGIN TRY
 					 [intCustomerStorageId]		= a.[intCustomerStorageId]
 					,[intItemId]				= a.[intItemId]
 					,[intAccountId]				= [dbo].[fnGetItemGLAccount](a.intItemId,@ItemLocationId, CASE WHEN ((a.intItemType = 3 AND DSC.strDiscountChargeType = 'Dollar') OR a.intItemType = 2) AND @ysnDPOwnedType = 0 THEN 'AP Clearing' ELSE 'Other Charge Expense' END)
-					,[dblQtyReceived]			= CASE 
-													WHEN @origdblSpotUnits > 0 THEN ROUND(dbo.fnCalculateQtyBetweenUOM(b.intItemUOMId,@intCashPriceUOMId,a.dblUnits),6) 
-													ELSE a.dblUnits 
+					-- ,[dblQtyReceived]			= CASE 
+					-- 								WHEN @origdblSpotUnits > 0 THEN ROUND(dbo.fnCalculateQtyBetweenUOM(b.intItemUOMId,@intCashPriceUOMId,a.dblUnits),6) 
+					-- 								ELSE a.dblUnits 
+					-- 							END
+					,[dblQtyReceived]			= 
+												CASE 
+													WHEN a.intItemType = 1 THEN RI.dblOpenReceive
+													ELSE
+														CASE 
+															WHEN @origdblSpotUnits > 0 THEN ROUND(dbo.fnCalculateQtyBetweenUOM(b.intItemUOMId,@intCashPriceUOMId,a.dblUnits),6)
+															ELSE a.dblUnits
+														END														
 												END
 					,[strMiscDescription]		= c.[strItemNo]
 					,[dblCost]					= CASE
@@ -1312,22 +1321,31 @@ BEGIN TRY
 													WHEN a.[intContractHeaderId] IS NOT NULL THEN b.intItemUOMId
 													ELSE NULL
 												END
-					,[intInventoryReceiptItemId] = CASE 
-													WHEN ST.ysnDPOwnedType = 0 THEN NULL
-													ELSE
-														CASE
-															WHEN a.intItemType = 1 THEN
-																(
-																	SELECT intInventoryReceiptItemId 
-																	FROM tblICInventoryReceiptItem RI
-																	INNER JOIN tblGRStorageHistory SH
-																		ON SH.intInventoryReceiptId = RI.intInventoryReceiptId
-																	WHERE RI.intContractHeaderId = ISNULL(SH.intContractHeaderId,RI.intContractHeaderId)
-																		AND SH.intCustomerStorageId = CS.intCustomerStorageId
-																)
-															ELSE NULL
-														END
-												END
+					,[intInventoryReceiptItemId] = 
+												--CASE 
+												--	WHEN ST.ysnDPOwnedType = 0 THEN NULL
+												--	ELSE
+												--		CASE
+												--			WHEN a.intItemType = 1 THEN
+												--				(
+												--					SELECT intInventoryReceiptItemId 
+												--					FROM tblICInventoryReceiptItem RI
+												--					INNER JOIN tblGRStorageHistory SH
+												--						ON SH.intInventoryReceiptId = RI.intInventoryReceiptId
+												--					WHERE RI.intContractHeaderId = ISNULL(SH.intContractHeaderId,RI.intContractHeaderId)
+												--						AND SH.intCustomerStorageId = CS.intCustomerStorageId
+												--				)
+												--			ELSE NULL
+												--		END
+												--END
+													CASE 
+														WHEN ST.ysnDPOwnedType = 0 THEN NULL
+														ELSE 
+															CASE 
+																WHEN a.intItemType = 1 THEN RI.intInventoryReceiptItemId
+																ELSE NULL
+															END
+													END
 				FROM @SettleVoucherCreate a
 				JOIN tblICItemUOM b 
 					ON b.intItemId = a.intItemId 
@@ -1343,6 +1361,14 @@ BEGIN TRY
 						AND DSC.intItemId = a.intItemId
 				JOIN tblGRStorageType ST
 					ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
+				LEFT JOIN (
+							tblICInventoryReceiptItem RI
+							INNER JOIN tblGRStorageHistory SH
+								ON SH.intInventoryReceiptId = RI.intInventoryReceiptId
+									AND RI.intContractHeaderId = ISNULL(SH.intContractHeaderId,RI.intContractHeaderId)
+						) 
+							ON SH.intCustomerStorageId = CS.intCustomerStorageId
+								AND a.intItemType = 1
 				WHERE a.dblCashPrice <> 0 
 					AND a.dblUnits <> 0 
 					AND SST.intSettleStorageId = @intSettleStorageId
