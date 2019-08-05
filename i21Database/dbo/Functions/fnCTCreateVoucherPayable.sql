@@ -6,13 +6,8 @@
 )
 RETURNS TABLE AS RETURN
 (
-
 	SELECT	DISTINCT
-		[intEntityVendorId]							=	CASE  
-															WHEN CC.ysnPrice = 1 AND CD.intPricingTypeId IN (1,6) THEN CH.intEntityId
-															WHEN CC.ysnAccrue = 1 THEN CC.intVendorId
-															ELSE payable.intEntityVendorId
-														END
+		[intEntityVendorId]							=	entity.intEntityId
 		,[intTransactionType]						=	1 --voucher
 		,[intLocationId]							=	NULL --Contract doesn't have location
 		,[intShipToId]								=	NULL --?
@@ -114,6 +109,11 @@ RETURNS TABLE AS RETURN
 			ELSE 0
 		END = 1
 	) payable
+	INNER JOIN
+	(
+		SELECT intEntityId 
+		FROM tblEMEntity
+	) entity ON entity.intEntityId = CH.intEntityId OR entity.intEntityId = CC.intVendorId
 	WHERE RC.intInventoryReceiptChargeId IS NULL AND CC.ysnAccrue = @accrue AND --CC.ysnBasis = 0 AND
 	NOT EXISTS(SELECT 1 FROM tblICInventoryShipmentCharge WHERE intContractDetailId = CD.intContractDetailId AND intChargeId = CC.intItemId) AND
 	CASE 
