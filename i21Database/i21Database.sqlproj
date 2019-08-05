@@ -7889,6 +7889,8 @@
     <None Include="Scripts\Post-Deployment\AP\PurgePayableCompleted.sql" />
     <Build Include="dbo\Stored Procedures\uspSMSetExcessUserToDisabled.sql" />
     <Build Include="dbo\Stored Procedures\uspARCustomerInquiryReport.sql" />
+    <Build Include="dbo\User Defined Types\InvoiceEAStagingTable.sql" />
+    <Build Include="dbo\Stored Procedures\uspAREAImportInvoice.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
