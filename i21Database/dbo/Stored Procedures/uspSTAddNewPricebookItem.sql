@@ -28,7 +28,7 @@ BEGIN
 	SET NOCOUNT ON;
     DECLARE @InitTranCount INT;
     SET @InitTranCount = @@TRANCOUNT
-	DECLARE @Savepoint NVARCHAR(32) = SUBSTRING(('uspSTUpdatePricebookItem' + CONVERT(VARCHAR, @InitTranCount)), 1, 32)
+	DECLARE @Savepoint NVARCHAR(32) = SUBSTRING(('uspSTAddNewPricebookItem' + CONVERT(VARCHAR, @InitTranCount)), 1, 32)
 	
 	BEGIN TRY
 		
@@ -260,6 +260,15 @@ BEGIN
 							,@strDescription			= @strDescription
 							,@intEntityUserSecurityId	= @intEntityId
 							,@intItemId					= @intNewItemId OUTPUT 
+ 
+						IF NOT EXISTS(SELECT TOP 1 1 FROM tblICItem WHERE intItemId = @intNewItemId)
+							BEGIN
+
+								SET @ysnResultSuccess = 0
+								SET @strResultMessage = 'Item is not created successfully'  
+
+								GOTO ExitWithRollback
+							END
 
 					END TRY
 					BEGIN CATCH
@@ -291,6 +300,15 @@ BEGIN
 							,@ysnStockUnit				= 1
 							,@intEntityUserSecurityId	= @intEntityId 
 							,@intItemUOMId				= @intNewItemUOMId OUTPUT 
+
+						IF NOT EXISTS(SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intNewItemUOMId)
+							BEGIN
+
+								SET @ysnResultSuccess = 0
+								SET @strResultMessage = 'Item UOM is not created successfully'  
+
+								GOTO ExitWithRollback
+							END
 
 					END TRY
 					BEGIN CATCH
@@ -463,7 +481,15 @@ BEGIN
 											,@intEntityUserSecurityId	= @intEntityId
 											,@intItemLocationId			= @intNewItemLocationId OUTPUT 
 						
-										
+										IF NOT EXISTS(SELECT TOP 1 1 FROM tblICItemLocation WHERE intItemLocationId = @intNewItemLocationId)
+											BEGIN
+
+												SET @ysnResultSuccess = 0
+												SET @strResultMessage = 'Item Location is not created successfully'  
+
+												GOTO ExitWithRollback
+											END
+
 										IF(@intVendorId IS NOT NULL AND @intNewItemId IS NOT NULL AND @intNewItemLocationId IS NOT NULL)
 											BEGIN
 
@@ -475,6 +501,15 @@ BEGIN
 													,@strVendorProduct			= @strVendorProduct
 													,@intEntityUserSecurityId	= @intEntityId 
 													,@intItemVendorXrefId		= @intNewItemVendorXrefId OUTPUT 
+
+												IF NOT EXISTS(SELECT TOP 1 1 FROM tblICItemVendorXref WHERE intItemVendorXrefId = @intNewItemVendorXrefId)
+													BEGIN
+
+														SET @ysnResultSuccess = 0
+														SET @strResultMessage = 'Item Vendor is not created successfully'  
+
+														GOTO ExitWithRollback
+													END
 											END
 										
 
@@ -501,6 +536,15 @@ BEGIN
 															,@dblSalePrice				= @dblSalePrice_New
 															,@intEntityUserSecurityId	= @intEntityId
 															,@intItemPricingId			= @intNewItemPricingId OUTPUT
+
+														IF NOT EXISTS(SELECT TOP 1 1 FROM tblICItemPricing WHERE intItemPricingId = @intNewItemPricingId)
+															BEGIN
+
+																SET @ysnResultSuccess = 0
+																SET @strResultMessage = 'Item Pricing is not created successfully'  
+
+																GOTO ExitWithRollback
+															END
 													END
 												
 
