@@ -90,7 +90,23 @@ RETURNS TABLE AS RETURN
 	LEFT JOIN vyuPATEntityPatron patron ON patron.intEntityId = CC.intItemId
 	LEFT JOIN tblSMCurrencyExchangeRateType rtype ON rtype.intCurrencyExchangeRateTypeId = CC.intRateTypeId
 	LEFT JOIN tblSMTerm term ON term.intTermID =  CC.intTermId
-	OUTER APPLY dbo.fnGetItemGLAccountAsTable(CC.intItemId, ItemLoc.intItemLocationId,  case when CC.strCostType = 'Other Charges' then 'Other Charge Expense' else 'AP Clearing' end) itemAccnt
+	OUTER APPLY dbo.fnGetItemGLAccountAsTable(CC.intItemId, ItemLoc.intItemLocationId,  case
+																						when CC.strCostType = 'Other Charges'
+																						or (
+																								select
+																									count(*)
+																								from
+																									tblICInventoryReceiptItem a
+																									,tblICInventoryReceipt b
+																								where
+																									a.intContractHeaderId = CD.intContractHeaderId
+																									and a.intContractDetailId = CD.intContractDetailId
+																									and b.intInventoryReceiptId = a.intInventoryReceiptId
+																							) = 0
+																						then 'Other Charge Expense'
+																						else 'AP Clearing' 
+																						end
+											) itemAccnt
 	LEFT JOIN dbo.tblGLAccount apClearing ON apClearing.intAccountId = itemAccnt.intAccountId
 	OUTER APPLY 
 	(
