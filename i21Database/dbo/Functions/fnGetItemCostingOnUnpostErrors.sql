@@ -18,25 +18,29 @@ RETURN (
 		SELECT	intItemId = @intItemId
 				,intItemLocationId = @intItemLocationId
 				,strText =	dbo.fnFormatMessage(
-								dbo.fnICGetErrorMessage(80003)
+								dbo.fnICGetErrorMessage(80235)
 								,(SELECT strItemNo FROM dbo.tblICItem WHERE intItemId = @intItemId)
 								,dbo.fnFormatMsg80003(
 									@intItemLocationId
 									,@intSubLocationId
 									,@intStorageLocationId
 								)
-								, DEFAULT
-								, DEFAULT
-								, DEFAULT
+								, v.dblOnHand
+								, v.dblUnitReserved
+								, v.dblOnHand - v.dblUnitReserved
 								, DEFAULT
 								, DEFAULT
 								, DEFAULT
 								, DEFAULT
 								, DEFAULT
 							)
-				,intErrorCode = 80003
-		WHERE	EXISTS (
-					SELECT	TOP 1 1
+				,intErrorCode = 80235
+		FROM	(
+				
+					SELECT	TOP 1 
+							Item.intItemId
+							,dblOnHand = ISNULL(StockUOM.dblOnHand, 0)
+							,dblUnitReserved = ISNULL(StockUOM.dblUnitReserved, 0)
 					FROM	dbo.tblICItem Item INNER JOIN dbo.tblICItemLocation Location
 								ON Item.intItemId = @intItemId								
 								AND Location.intItemLocationId = @intItemLocationId
@@ -48,7 +52,9 @@ RETURN (
 								AND ISNULL(StockUOM.intStorageLocationId, 0) = ISNULL(@intStorageLocationId, 0)
 					WHERE	ROUND(ISNULL(@dblQty, 0) + ISNULL(StockUOM.dblOnHand, 0) - ISNULL(StockUOM.dblUnitReserved, 0), 6) < 0
 							AND Location.intAllowNegativeInventory = 3 -- Value 3 means "NO", Negative stock is NOT allowed. 													
-				)
+						
+				) v
+		WHERE	v.intItemId IS NOT NULL 
 
 		-- Check for negative stocks at the lot table. 
 		-- 'Negative stock quantity is not allowed for {Item Name} on {Location Name}, {Sub Location Name}, and {Storage Location Name}.'
