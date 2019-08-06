@@ -53,12 +53,12 @@ BEGIN
 
 			SET @ysnResultSuccess = CAST(1 AS BIT)
 			SET @strResultMessage = ''
-			SET @intNewItemId = 0
-			SET @intNewItemUOMId = 0
-			SET @intNewUniqueId = 0
-			SET @intNewItemLocationId = 0
-			SET @intNewItemPricingId = 0
-			SET @intNewItemVendorXrefId = 0
+			--SET @intNewItemId = 0
+			--SET @intNewItemUOMId = 0
+			--SET @intNewUniqueId = 0
+			--SET @intNewItemLocationId = 0
+			--SET @intNewItemPricingId = 0
+			--SET @intNewItemVendorXrefId = 0
 
 
 			-- ITEM AuditLog temp table
@@ -260,7 +260,8 @@ BEGIN
 							,@strDescription			= @strDescription
 							,@intEntityUserSecurityId	= @intEntityId
 							,@intItemId					= @intNewItemId OUTPUT 
- 
+						
+
 						IF NOT EXISTS(SELECT TOP 1 1 FROM tblICItem WHERE intItemId = @intNewItemId)
 							BEGIN
 
