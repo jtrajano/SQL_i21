@@ -73,7 +73,7 @@ INNER JOIN vyuGLDetail GD
 		AND GD.intTransactionId = SS.intSettleStorageId
 		AND GD.strTransactionType = 'Storage Settlement'
 		AND GD.ysnIsUnposted = 0
-		AND GD.strCode = 'STR' --get only the AP Clearing for item
+		AND GD.strCode = 'IC' --get only the AP Clearing for item
 INNER JOIN vyuGLAccountDetail AD
 	ON GD.intAccountId = AD.intAccountId AND AD.intAccountCategoryId = 45
 LEFT JOIN 
