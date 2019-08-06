@@ -227,12 +227,7 @@ BEGIN
 			ORDER BY dtmDate DESC)
 			BEGIN
 				DECLARE @ErrMsg NVARCHAR(200)
-				SET @ErrMsg = 'An unposted previous daily average price'
-								+ CASE WHEN ISNULL(@bookId, '') <> '' THEN ' Book: ' + @book ELSE ' ' END + ' '
-								+ CASE WHEN ISNULL(@subBookId, '') <> '' THEN ' SubBook: ' + @subBook ELSE ' ' END + ' '
-								+ CASE WHEN ISNULL(@marketId, '') <> '' THEN ' Future Market: ' + @market ELSE ' ' END + ' '
-								+ CASE WHEN ISNULL(@monthId, '') <> '' THEN ' Future Month: ' + @month ELSE ' ' END + ' '
-								+ 'was found. Please post all daily average prices before generating another.'
+				SET @ErrMsg = 'An unposted previous daily average price was found. Please post all daily average prices before generating another.'
 				RAISERROR(@ErrMsg, 16, 1)
 				RETURN
 			END
@@ -462,24 +457,36 @@ BEGIN
 				, strEntity
 				, dblNoOfContract
 				, strInstrumentType
-				, dblPrice)
+				, dblPrice
+				, strBuySell)
 			SELECT Detail.intDailyAveragePriceDetailId
-				, Derivative.intTransactionId
+				, RefDetail.intDailyAveragePriceDetailId
 				, 'DailyAveragePrice'
-				, RefDetail.dtmDate
-				, strEntity = RefDetail.strBrokerName
-				, RefDetail.dblNoOfLots - (SELECT ISNULL(SUM(ISNULL(dblNoOfLots, 0)), 0) FROM tblCTPriceFixationDetail CT WHERE CT.intDailyAveragePriceDetailId = Detail.intDailyAveragePriceDetailId)
+				, Detail.dtmDate
+				, strEntity = Detail.strBrokerName
+				, RefDetail.dblNoOfLots - (SELECT ISNULL(SUM(ISNULL(dblNoOfLots, 0)), 0) FROM tblCTPriceFixationDetail CT WHERE CT.intDailyAveragePriceDetailId = RefDetail.intDailyAveragePriceDetailId)
 				, 'Futures'
-				, RefDetail.dblNetLongAvg
-			FROM vyuRKGetDailyAveragePriceDetail Detail
-			JOIN @DetailTable Derivative ON ((Derivative.intBookId IS NULL AND @bookId IS NULL) OR (Derivative.intBookId = @bookId))
-				AND ((Derivative.intSubBookId IS NULL AND @subBookId IS NULL) OR (Derivative.intSubBookId = @subBookId))
-				AND Derivative.intFutureMarketId = Detail.intFutureMarketId
-				AND Derivative.intCommodityId = Detail.intCommodityId
-				AND Derivative.intFutureMonthId = Detail.intFutureMonthId
-			JOIN vyuRKGetDailyAveragePriceDetail RefDetail ON RefDetail.intDailyAveragePriceDetailId = Derivative.intTransactionId
-			WHERE Detail.intDailyAveragePriceId = @intDailyAveragePriceId
-				AND Derivative.strTransactionType = 'DailyAveragePrice'
+				, dblNetLongAvg = ISNULL(RefDetail.dblAverageLongPrice, 0.00) + ISNULL(RefDetail.dblSwitchPL, 0.00) + ISNULL(RefDetail.dblOptionsPL, 0.00)
+				, 'Buy'
+			FROM @DetailTable Derivative
+			JOIN vyuRKGetDailyAveragePriceDetail Detail ON ((Detail.intBookId IS NULL AND @bookId IS NULL) OR (Detail.intBookId = @bookId))
+				AND ((Detail.intSubBookId IS NULL AND @subBookId IS NULL) OR (Detail.intSubBookId = @subBookId))
+				AND Detail.intFutureMarketId = Derivative.intFutureMarketId
+				AND Detail.intCommodityId = Derivative.intCommodityId
+				AND Detail.intFutureMonthId = Derivative.intFutureMonthId
+			JOIN vyuRKGetDailyAveragePriceDetail RefDetail ON ((RefDetail.intBookId IS NULL AND @bookId IS NULL) OR (RefDetail.intBookId = @bookId))
+				AND ((RefDetail.intSubBookId IS NULL AND @subBookId IS NULL) OR (RefDetail.intSubBookId = @subBookId))
+				AND RefDetail.intFutureMarketId = Derivative.intFutureMarketId
+				AND RefDetail.intCommodityId = Derivative.intCommodityId
+				AND RefDetail.intFutureMonthId = Derivative.intFutureMonthId
+			WHERE ISNULL(RefDetail.dblNoOfLots, 0) <> 0
+				AND Detail.intDailyAveragePriceId = @intDailyAveragePriceId
+				AND RefDetail.intDailyAveragePriceId = (SELECT TOP 1 intDailyAveragePriceId FROM tblRKDailyAveragePrice
+													WHERE dtmDate < GETDATE()
+														AND ((intBookId IS NULL AND @bookId IS NULL) OR (intBookId = @bookId))
+														AND ((intSubBookId IS NULL AND @subBookId IS NULL) OR (intSubBookId = @subBookId))
+														AND ysnPosted = 1
+													ORDER BY dtmDate DESC)
 
 			UPDATE tblRKDailyAveragePriceDetail
 			SET dblAverageLongPrice = tblPatch.dblAvgLongPrice
