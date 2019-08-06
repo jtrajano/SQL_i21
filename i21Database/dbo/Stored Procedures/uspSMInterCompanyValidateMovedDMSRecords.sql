@@ -60,8 +60,8 @@ BEGIN
 			IF ISNULL(@intReferenceCompanyId, 0) = 0
 			BEGIN				
 				--A <-> B
-				EXEC dbo.[uspSMInterCompanyDeleteMovedDMS] @intCurrentTransactionId, @intReferenceTransactionId,NULL, @intOldMovedReferenceTransId
-				EXEC dbo.[uspSMInterCompanyDeleteMovedDMS] @intReferenceTransactionId, @intCurrentTransactionId, NULL, @intOldMovedReferenceTransId
+				EXEC dbo.[uspSMInterCompanyDeleteMovedDMS] @intCurrentTransactionId, @intReferenceTransactionId,NULL
+				EXEC dbo.[uspSMInterCompanyDeleteMovedDMS] @intReferenceTransactionId, @intCurrentTransactionId, NULL
 
 				SET @strFinishedTransactionId = @strFinishedTransactionId + 
 											CONVERT(VARCHAR, @intCurrentTransactionId) + ':' + CONVERT(VARCHAR, ISNULL(@intCurrentCompanyId, 0)) + ',' + 
@@ -74,7 +74,7 @@ BEGIN
 				   CHARINDEX(',' + CONVERT(VARCHAR, @intReferenceTransactionId) + ':' + CONVERT(VARCHAR, ISNULL(@intReferenceCompanyId, 0)) + ',', @strFinishedTransactionId) = 0) AND
 				   (ISNULL(@intReferenceCompanyId, 0) <> 0 AND ISNULL(@intReferenceCompanyId, 0) <> @intCurrentCompanyId)
 				BEGIN
-					EXEC dbo.[uspSMInterCompanyDeleteMovedDMS] @intCurrentTransactionId, @intReferenceTransactionId, @intReferenceCompanyId,@intOldMovedReferenceTransId
+					EXEC dbo.[uspSMInterCompanyDeleteMovedDMS] @intCurrentTransactionId, @intReferenceTransactionId, @intReferenceCompanyId
 
 					SET @strFinishedTransactionId = @strFinishedTransactionId + 
 												CONVERT(VARCHAR, @intCurrentTransactionId) + ':' + CONVERT(VARCHAR, ISNULL(@intCurrentCompanyId, 0)) + ',' + 

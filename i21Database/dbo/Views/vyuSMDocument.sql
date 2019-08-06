@@ -40,6 +40,6 @@ SELECT
 FROM tblSMDocument A 
 	INNER JOIN FolderHeirarchy B ON A.intDocumentSourceFolderId = B.intDocumentSourceFolderId
 	INNER JOIN tblSMTransaction C ON A.intTransactionId = C.intTransactionId
-	INNER JOIN tblEMEntity D ON A.intEntityId = D.intEntityId
+	LEFT JOIN tblEMEntity D ON A.intEntityId = D.intEntityId
 	INNER JOIN tblSMScreen E ON C.intScreenId = E.intScreenId
 	LEFT JOIN tblSMDocumentType F ON F.intDocumentTypeId = B.intDocumentTypeId

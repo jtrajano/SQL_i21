@@ -3,7 +3,8 @@ CREATE PROCEDURE [dbo].[uspSMInterCompanyCopyDMS]
 @currentTransId INT, 
 @referenceTransId INT,
 @referenceCompanyId INT = NULL,
-@intOldMovedReferenceTransId INT = NULL
+@intReferToDocumentId INT = NULL,
+@strDatabaseToUseForUpdate NVARCHAR(MAX) = NULL
 AS 
 BEGIN
 
@@ -86,7 +87,7 @@ IF(OBJECT_ID('tempdb..#exclusionTable') IS NOT NULL)
 
 			--insert those not in existing logs
 			INSERT INTO @dmsTable
-			SELECT intDocumentId, strName,intDocumentSourceFolderId,intTransactionId,intEntityId, intSize,strType, intUploadId FROM vyuSMDocument WHERE intTransactionId = @currentTransId
+			SELECT intDocumentId, strName,intDocumentSourceFolderId,intTransactionId,intEntityId, intSize,strType, intUploadId, strFolderPath FROM vyuSMDocument WHERE intTransactionId = @currentTransId
 			AND intDocumentId NOT IN
 			(
 				SELECT  intSourceRecordId FROM #exclusionTable
@@ -130,6 +131,8 @@ IF(OBJECT_ID('tempdb..#exclusionTable') IS NOT NULL)
 				 FROM @dmsTable
 
 				 SELECT @blbFile = blbFile FROM tblSMUpload WHERE intUploadId = @intUploadId
+				 SELECT @strEntityName = strName FROM tblEMEntity WHERE intEntityId = @intEntityId
+
 				 --Temp Table Folder Path
 				 IF(OBJECT_ID('tempdb..#folderPathTable') IS NOT NULL) 
 						DROP TABLE #folderPathTable
@@ -186,6 +189,7 @@ IF(OBJECT_ID('tempdb..#exclusionTable') IS NOT NULL)
 
 				 EXEC sp_executesql @smUploadSQL, N'@id INT OUTPUT', @intNewUploadId OUTPUT
 
+				 DECLARE @placeHolderEntityId INT; --Documents copied from other db should have null entity id
 
 
 				-- SET @smDocumentSQL = N' INSERT INTO [@db].[dbo].[tblSMDocument] (strName, strType,dtmDateModified, intSize, intDocumentSourceFolderId, intTransactionId, intEntityId, intUploadId, intConcurrencyId) ' +
@@ -201,7 +205,7 @@ IF(OBJECT_ID('tempdb..#exclusionTable') IS NOT NULL)
 												 '+CASE WHEN @intSize IS NULL THEN 'NULL' ELSE  CONVERT(NVARCHAR,@intSize) END + ', 
 												 '+CASE WHEN @intDocumentSourceFolderId IS NULL THEN 'NULL' ELSE CONVERT(NVARCHAR,@intDocumentSourceFolderId) END+ ',
 												  '+CASE WHEN @referenceTransId IS NULL THEN 'NULL' ELSE CONVERT(NVARCHAR,@referenceTransId) END +', 
-												  '+CASE WHEN @intEntityId IS NULL THEN 'NULL' ELSE CONVERT(VARCHAR,@intEntityId) END+', 
+												  '+CASE WHEN @placeHolderEntityId IS NULL THEN 'NULL' ELSE CONVERT(VARCHAR,@placeHolderEntityId) END+', 
 												  '+CASE WHEN @intNewUploadId IS NULL THEN 'NULL' ELSE CONVERT(NVARCHAR,@intNewUploadId) END+', 
 												  '+CASE WHEN @intEntityId IS NULL THEN 'NULL' ELSE CONVERT(NVARCHAR,@intEntityId) END+',
 												  '+CASE WHEN @intCurrentCompanyId IS NULL THEN 'NULL' ELSE CONVERT(NVARCHAR,@intCurrentCompanyId) END+', 
@@ -226,7 +230,15 @@ IF(OBJECT_ID('tempdb..#exclusionTable') IS NOT NULL)
 			DECLARE @dtmSourceDate DATETIME;
 			DECLARE @strLogTableDataSource NVARCHAR(250);
 			DECLARE @sql NVARCHAR(MAX) = N'';
+			DECLARE @folderPathOut NVARCHAR(MAX);
 			DECLARE @ParamDateTimeDefinition NVARCHAR(250) = N'@paramOut DATETIME OUTPUT';
+			DECLARE @ParamFolderPath NVARCHAR(MAX) = N'@pathOut NVARCHAR(MAX) OUTPUT';
+
+		    IF(ISNULL(@strDatabaseToUseForUpdate,'') = '')
+				BEGIN
+					SET @strDatabaseToUseForUpdate = DB_NAME()
+				END
+
 
 			WHILE EXISTS(SELECT TOP 1 1 FROM #exclusionTable)
 			BEGIN
@@ -241,13 +253,60 @@ IF(OBJECT_ID('tempdb..#exclusionTable') IS NOT NULL)
 				SET @sql = N'SELECT @paramOut = DATEADD(MILLISECOND,DATEDIFF(MILLISECOND,getutcdate(),GETDATE()), dtmDateModified) FROM [' + @strCurrentDatabaseName + '].dbo.[tblSMDocument] WHERE intDocumentId = ' + CONVERT(VARCHAR, @intTempSourceDocumentId);
 				EXEC sp_executesql @sql, @ParamDateTimeDefinition, @paramOut = @dtmSourceDate OUTPUT;
 
+		/*===============================START CHECKING FOLDER PATH================================================*/
+				IF(OBJECT_ID('tempdb..#tmpFolderTable') IS NOT NULL) 
+						DROP TABLE #tmpFolderTable
+
+			 SET @sql = N'SELECT @pathOut = strFolderPath FROM ['+ @strDatabaseToUseForUpdate +'].dbo.[vyuSMDocument] WHERE intDocumentId = ' + CONVERT(VARCHAR,ISNULL(@intReferToDocumentId, @intTempSourceDocumentId)) 
+			 EXEC sp_executesql @sql, @ParamFolderPath,@pathOut = @folderPathOut OUTPUT;
+			--DECLARE @folderPath NVARCHAR(MAX) = (SELECT strFolderPath FROM vyuSMDocument WHERE intDocumentId = ISNULL(@intReferToDocumentId, @intTempSourceDocumentId)) --folder path of updated document
+
+			CREATE TABLE #tmpFolderTable
+			(
+				[intDocumentSourceFolderId] INT,
+				[intDocumentTypeId] INT,
+				[strFolderPath] NVARCHAR(MAX)
+			)
+
+				SET @smFolderPathSQL = N'WITH FolderHeirarchy AS (
+										  SELECT 
+											intDocumentSourceFolderId,  
+											A.intDocumentTypeId,
+											CAST(strName AS VARCHAR(MAX)) AS strFolderPath
+										  FROM ['+ @strDestinationDatabaseName +'].dbo.tblSMDocumentSourceFolder A
+										  WHERE intDocumentFolderParentId IS NULL
+
+										  UNION ALL
+
+										  SELECT 
+											B.intDocumentSourceFolderId, 
+											B.intDocumentTypeId,
+											CAST(strFolderPath + ''\'' + CAST(B.strName AS VARCHAR(MAX)) AS VARCHAR(MAX)) AS strFolderPath
+										  FROM ['+ @strDestinationDatabaseName +'].dbo.tblSMDocumentSourceFolder B
+											INNER JOIN FolderHeirarchy C ON C.intDocumentSourceFolderId = B.intDocumentFolderParentId
+										) INSERT INTO #tmpFolderTable 
+												SELECT intDocumentSourceFolderId, intDocumentTypeId, strFolderPath FROM FolderHeirarchy WHERE strFolderPath = '''+ @folderPathOut + ''''
+				
+				EXEC sp_executesql @smFolderPathSQL
+
+		/*=====================================END CHECKING FOLDER PATH===============================================================*/
+
+
 			--	IF ISNULL(@dtmSourceDate, 0 ) > ISNULL(@dtmLogDate, 0)
 				--BEGIN
+					--SET @sql = N'
+					--	UPDATE [' + @strDestinationDatabaseName + '].dbo.[tblSMDocument] SET
+					--	intDocumentSourceFolderId = (
+					--		SELECT intDocumentSourceFolderId FROM [' + @strCurrentDatabaseName +'].dbo.tblSMDocument WHERE intDocumentId = ' + CONVERT(VARCHAR, @intTempSourceDocumentId) + '
+					--	) WHERE intDocumentId = ' + CONVERT(VARCHAR, @intTempDestinationDocumentId);
+
+					DECLARE @newDocumentSourceFolderID INT = (SELECT TOP 1 intDocumentSourceFolderId FROM #tmpFolderTable)
+
 					SET @sql = N'
 						UPDATE [' + @strDestinationDatabaseName + '].dbo.[tblSMDocument] SET
 						intDocumentSourceFolderId = (
-							SELECT intDocumentSourceFolderId FROM [' + @strCurrentDatabaseName +'].dbo.tblSMDocument WHERE intDocumentId = ' + CONVERT(VARCHAR, @intTempSourceDocumentId) + '
-						) WHERE intDocumentId = ' + CONVERT(VARCHAR, @intTempDestinationDocumentId);
+							'+ CONVERT(VARCHAR, @newDocumentSourceFolderID) +'
+						) WHERE intDocumentId = ' + CONVERT(VARCHAR, ISNULL(@intTempDestinationDocumentId, 0));
 
 					EXEC sp_executesql @sql
 

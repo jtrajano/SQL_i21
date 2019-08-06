@@ -1,6 +1,8 @@
 ﻿CREATE PROCEDURE uspSMInterCompanyCopyRecords
 @intInterCompanyMappingId INT,
-@strType NVARCHAR(250)
+@strType NVARCHAR(250),
+@intReferToDocumentId INT = NULL
+
 AS 
 BEGIN
 	IF(ISNULL(@intInterCompanyMappingId,0) = 0)
@@ -12,7 +14,7 @@ BEGIN
 	--call Messaging and DMS SP here
 	IF UPPER(@strType) = 'DMS'
 	BEGIN
-		EXEC dbo.[uspSMInterCompanyValidateRecordsForDMS] @intInterCompanyMappingId
+		EXEC dbo.[uspSMInterCompanyValidateRecordsForDMS] @intInterCompanyMappingId, @intReferToDocumentId = @intReferToDocumentId
 		PRINT('CALL DMS SP HERE');
 	END
 	IF UPPER(@strType) = 'COMMENT'

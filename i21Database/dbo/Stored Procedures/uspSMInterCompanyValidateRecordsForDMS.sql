@@ -3,7 +3,10 @@ CREATE PROCEDURE [uspSMInterCompanyValidateRecordsForDMS]
 @intInterCompanyMappingId INT,
 @intInvokedFromInterCompanyId INT = NULL,
 @strFinishedTransactionId NVARCHAR(MAX) = ',',
-@strUpdatedTransactionId NVARCHAR(MAX) = '' OUTPUT
+@strUpdatedTransactionId NVARCHAR(MAX) = '' OUTPUT,
+@intReferToDocumentId INT = NULL, -- this is the document id of updated record
+@strDatabaseToUseForUpdate NVARCHAR(MAX) =  NULL -- database to use when moving of folder is triggered on other db
+
 
 AS 
 BEGIN
@@ -59,8 +62,8 @@ BEGIN
 			IF ISNULL(@intReferenceCompanyId, 0) = 0
 			BEGIN				
 				--A <-> B
-				EXEC dbo.[uspSMInterCompanyCopyDMS] @intCurrentTransactionId, @intReferenceTransactionId
-				EXEC dbo.[uspSMInterCompanyCopyDMS] @intReferenceTransactionId, @intCurrentTransactionId
+				EXEC dbo.[uspSMInterCompanyCopyDMS] @intCurrentTransactionId, @intReferenceTransactionId, NULL, @intReferToDocumentId, @strDatabaseToUseForUpdate
+				EXEC dbo.[uspSMInterCompanyCopyDMS] @intReferenceTransactionId, @intCurrentTransactionId,NULL, @intReferToDocumentId, @strDatabaseToUseForUpdate 
 
 				SET @strFinishedTransactionId = @strFinishedTransactionId + 
 											CONVERT(VARCHAR, @intCurrentTransactionId) + ':' + CONVERT(VARCHAR, ISNULL(@intCurrentCompanyId, 0)) + ',' + 
@@ -73,7 +76,7 @@ BEGIN
 				   CHARINDEX(',' + CONVERT(VARCHAR, @intReferenceTransactionId) + ':' + CONVERT(VARCHAR, ISNULL(@intReferenceCompanyId, 0)) + ',', @strFinishedTransactionId) = 0) AND
 				   (ISNULL(@intReferenceCompanyId, 0) <> 0 AND ISNULL(@intReferenceCompanyId, 0) <> @intCurrentCompanyId)
 				BEGIN
-					EXEC dbo.[uspSMInterCompanyCopyDMS] @intCurrentTransactionId, @intReferenceTransactionId, @intReferenceCompanyId
+					EXEC dbo.[uspSMInterCompanyCopyDMS] @intCurrentTransactionId, @intReferenceTransactionId, @intReferenceCompanyId, @intReferToDocumentId, @strDatabaseToUseForUpdate
 
 					SET @strFinishedTransactionId = @strFinishedTransactionId + 
 												CONVERT(VARCHAR, @intCurrentTransactionId) + ':' + CONVERT(VARCHAR, ISNULL(@intCurrentCompanyId, 0)) + ',' + 
@@ -133,7 +136,7 @@ BEGIN
 				BEGIN
 					
 					--1: COPY THE SOURCE FILES TO DESTINATION
-					EXEC dbo.[uspSMInterCompanyValidateRecordsForDMS] @intInterCompanyMappingIdToUse, @intCurrentCompanyId, @strFinishedTransactionId,@strUpdatedTransactionId =  @strFinishedTransactionId OUTPUT;
+					EXEC dbo.[uspSMInterCompanyValidateRecordsForDMS] @intInterCompanyMappingIdToUse, @intCurrentCompanyId, @strFinishedTransactionId,@strUpdatedTransactionId =  @strFinishedTransactionId OUTPUT, @intReferToDocumentId = @intReferToDocumentId, @strDatabaseToUseForUpdate = @strDatabaseToUseForUpdate;
 					
 
 					--2: INVOKE THE OTHER DATABASE SP TO COPY THE FILES TO ITS SIBLINGS
@@ -177,10 +180,13 @@ BEGIN
 								--execute the sp in the other database.
 								IF ISNULL(@intInterCompanyMappingIdToUse, 0) <> 0
 								BEGIN
-									SET @sql = N'EXEC [' + @strReferenceDatabaseName + '].dbo.[uspSMInterCompanyValidateRecordsForDMS2] ' + 
+									SET @sql = N'EXEC [' + @strReferenceDatabaseName + '].dbo.[uspSMInterCompanyValidateRecordsForDMS] ' + 
 														 CONVERT(VARCHAR(MAX), @intInterCompanyMappingIdToUse) + ', ' +
 														 CONVERT(VARCHAR(MAX), @intCurrentCompanyId) + ', ''' +
-														 CONVERT(VARCHAR(MAX), @strFinishedTransactionId) + ''''
+														 CONVERT(VARCHAR(MAX), @strFinishedTransactionId) + ','',' +
+														 '@intReferToDocumentId = ' + CONVERT(VARCHAR(MAX), @intReferToDocumentId) + ', ' +
+														 '@strDatabaseToUseForUpdate = ''' + CONVERT(VARCHAR(MAX),DB_NAME()) + ''''
+
 									EXEC sp_executesql @sql;
 								END
 							END
