@@ -1198,7 +1198,7 @@ BEGIN TRY
 		,[ysnClearDetailTaxes]					= IE.ysnClearDetailTaxes
 		,[intTempDetailIdForTaxes]				= IE.intTempDetailIdForTaxes
 		,[intLoadDistributionHeaderId]			= IE.intLoadDistributionHeaderId
-		,[ysnImpactInventory]					= IE.ysnImpactInventory
+		,[ysnImpactInventory]					= ISNULL(IE.ysnImpactInventory,0)
 	FROM @FreightSurchargeEntries IE
 	GROUP BY [strSourceTransaction]
 		,[strSourceId]
