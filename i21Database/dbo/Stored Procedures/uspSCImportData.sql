@@ -454,7 +454,7 @@ BEGIN TRY
 					[strCountyProducer] NVARCHAR(MAX)
 				)
 
-				-------------Get All Non Existing Delivery Sheets
+				-------------Get All Existing Delivery Sheets
 				DECLARE @existingDeliverySheets TABLE 
 				(
 					intDeliverySheetId INT NOT NULL PRIMARY KEY
@@ -659,7 +659,7 @@ BEGIN TRY
 				FROM @temp_xml_qmdstable_sc QM
 				INNER JOIN @temp_xml_deliverysheet_sc SCD ON SCD.intDeliverySheetId = QM.intTicketFileId
 				INNER JOIN tblSCDeliverySheet DS ON DS.strDeliverySheetNumber = SCD.strDeliverySheetNumber 
-				WHERE NOT EXISTS (SELECT TOP 1 1 FROM @existingDeliverySheets WHERE intDeliverySheetId = DS.intDeliverySheetId)
+				WHERE NOT EXISTS (SELECT TOP 1 1 FROM @existingDeliverySheets WHERE intDeliverySheetId = SCD.intDeliverySheetId)
 
 				INSERT INTO tblSCDeliverySheetSplit(
 					[intDeliverySheetId],
@@ -681,7 +681,7 @@ BEGIN TRY
 				FROM @temp_xml_splitdstable_sc SCDS
 				INNER JOIN @temp_xml_deliverysheet_sc SCD ON SCD.intDeliverySheetId = SCDS.intDeliverySheetId
 				INNER JOIN tblSCDeliverySheet DS ON DS.strDeliverySheetNumber = SCD.strDeliverySheetNumber 
-				WHERE NOT EXISTS (SELECT TOP 1 1 FROM @existingDeliverySheets WHERE intDeliverySheetId = DS.intDeliverySheetId)
+				WHERE NOT EXISTS (SELECT TOP 1 1 FROM @existingDeliverySheets WHERE intDeliverySheetId = SCD.intDeliverySheetId)
 
 			END
 			
