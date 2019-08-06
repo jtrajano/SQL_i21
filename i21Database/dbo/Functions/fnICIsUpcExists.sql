@@ -1,0 +1,37 @@
+CREATE FUNCTION dbo.fnICIsUpcExists(@Upc NVARCHAR(100))
+RETURNS BIT
+AS
+BEGIN
+DECLARE @ValidUPC TABLE(intItemUOMId INT, intUPC BIGINT)
+
+;WITH CTE
+AS
+(
+	SELECT intItemUOMId, strLongUPCCode, CAST(RTRIM(LTRIM(strLongUPCCode)) AS BIGINT) intUnique, ROW_NUMBER() OVER (PARTITION BY strLongUPCCode ORDER BY strLongUPCCode) AS rc
+	FROM tblICItemUOM
+	WHERE strLongUPCCode IS NOT NULL
+		AND ISNUMERIC(RTRIM(LTRIM(strLongUPCCode))) = 1 AND NOT (strLongUPCCode LIKE '%.%' OR strLongUPCCode LIKE '%e%' OR strLongUPCCode LIKE '%E%')
+)
+INSERT INTO @ValidUPC(intItemUOMId, intUPC)
+SELECT intItemUOMId, intUnique FROM CTE;
+
+
+;WITH GTE
+AS
+(
+	SELECT intItemUOMId, intUPC, ROW_NUMBER() OVER (PARTITION BY intUPC ORDER BY intUPC) AS RC
+	FROM @ValidUPC
+)
+DELETE GTE WHERE RC <= 1;
+
+DECLARE @ReturnValue BIT
+
+IF EXISTS(SELECT * FROM @ValidUPC WHERE ISNUMERIC(RTRIM(LTRIM(@Upc))) = 1 AND NOT (@Upc LIKE '%.%' OR @Upc LIKE '%e%' OR @Upc LIKE '%E%') AND CAST(RTRIM(LTRIM(@Upc)) AS BIGINT) = intUPC)
+	SET @ReturnValue = 1
+ELSE
+	SET @ReturnValue = 0
+
+RETURN @ReturnValue
+END
+
+GO

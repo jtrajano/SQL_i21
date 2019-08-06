@@ -41,7 +41,7 @@ Type the overview for the table here.
         [intUpcCode] AS 
             CASE WHEN ISNUMERIC(RTRIM(LTRIM(strLongUPCCode))) = 1 AND NOT (strLongUPCCode LIKE '%.%' OR strLongUPCCode LIKE '%e%' OR strLongUPCCode LIKE '%E%') AND strLongUPCCode IS NOT NULL
                 THEN CAST(RTRIM(LTRIM(strLongUPCCode)) AS BIGINT) 
-            ELSE NULL END
+            ELSE NULL END PERSISTED
 		CONSTRAINT [PK_tblICItemUOM] PRIMARY KEY ([intItemUOMId]), 
 		CONSTRAINT [FK_tblICItemUOM_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]) ON DELETE CASCADE, 
 		CONSTRAINT [FK_tblICItemUOM_tblICUnitMeasure] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
