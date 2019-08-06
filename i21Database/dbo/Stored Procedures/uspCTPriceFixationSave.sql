@@ -604,42 +604,7 @@ BEGIN TRY
 			  ,intContractDetailId	  = @intContractDetailId
 			  ,intAmendmentApprovalId = 1
 			  ,strItemChanged		  = CASE WHEN PFD.dblQuantity <> CD.dblQuantity THEN 'Partial Price Qty' ELSE 'Full Price Qty' END
-			  --,strOldValue			  =  0
-			  ,strOldValue			  =  (
-											case
-											when PFD.dblQuantity <> CD.dblQuantity
-											then
-												isnull(
-													(
-														select
-															top 1 strNewValue
-														from
-															tblCTSequenceAmendmentLog
-														where
-															intContractHeaderId = @intContractHeaderId
-															and intContractDetailId = @intContractDetailId
-															and strItemChanged = 'Partial Price Qty'
-														order by
-															intSequenceAmendmentLogId desc
-													),
-												'0')
-											else
-												isnull(
-													(
-														select
-															top 1 strNewValue
-														from
-															tblCTSequenceAmendmentLog
-														where
-															intContractHeaderId = @intContractHeaderId
-															and intContractDetailId = @intContractDetailId
-															and strItemChanged = 'Full Price Qty'
-														order by
-															intSequenceAmendmentLogId desc
-													),
-												'0')
-											end
-										 )
+			  ,strOldValue			  =  0
 			  ,strNewValue		      =  PFD.dblQuantity
 			  ,intConcurrencyId		  =  1 
 			  FROM 
@@ -662,42 +627,7 @@ BEGIN TRY
 			 ,intContractDetailId	  = @intContractDetailId
 			 ,intAmendmentApprovalId = 1
 			 ,strItemChanged		  = CASE WHEN PFD.dblQuantity <> CD.dblQuantity THEN 'Partial Price Fixation' ELSE 'Full Price Fixation' END
-			 --,strOldValue			  =  0
-			 ,strOldValue			  =  (
-											case
-											when PFD.dblQuantity <> CD.dblQuantity
-											then
-												isnull(
-													(
-														select
-															top 1 strNewValue
-														from
-															tblCTSequenceAmendmentLog
-														where
-															intContractHeaderId = @intContractHeaderId
-															and intContractDetailId = @intContractDetailId
-															and strItemChanged = 'Partial Price Fixation'
-														order by
-															intSequenceAmendmentLogId desc
-													),
-												'0')
-											else
-												isnull(
-													(
-														select
-															top 1 strNewValue
-														from
-															tblCTSequenceAmendmentLog
-														where
-															intContractHeaderId = @intContractHeaderId
-															and intContractDetailId = @intContractDetailId
-															and strItemChanged = 'Full Price Fixation'
-														order by
-															intSequenceAmendmentLogId desc
-													),
-												'0')
-											end
-										 )
+			 ,strOldValue			  =  0
 			 ,strNewValue		      =  PFD.dblFutures
 			 ,intConcurrencyId		  =  1 
 			 FROM 
