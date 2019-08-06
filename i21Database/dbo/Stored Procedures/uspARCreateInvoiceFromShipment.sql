@@ -620,10 +620,7 @@ WHERE
 
 DECLARE @ErrorMessage NVARCHAR(250)
 
-IF EXISTS (SELECT TOP 1 1 FROM @UnsortedEntriesForInvoice A 
-				JOIN (SELECT intContractDetailId FROM tblCTContractDetail WHERE intPricingTypeId = 2) B 
-					ON A.intContractDetailId = B.intContractDetailId
- )
+IF EXISTS (SELECT TOP 1 1 FROM tblICInventoryShipmentItem ICISI INNER JOIN tblCTContractDetail CTD ON ICISI.intLineNo = CTD.intContractDetailId AND ICISI.intOrderId = CTD.intContractHeaderId WHERE CTD.intPricingTypeId = 2 AND ICISI.intInventoryShipmentId = @ShipmentId)
 	BEGIN
 		RAISERROR('Unable to process. Use Price Contract screen to process Basis Contract shipments.', 16, 1);
 		RETURN 0;
