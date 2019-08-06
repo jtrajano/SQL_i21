@@ -248,7 +248,7 @@ BEGIN
 		WHEN @msgId = 80232 THEN 'Inventory and GL mismatch in %s. Discrepancy of %f in %s does not match with %s. Cannot %s. See Post Preview for details.'
 		WHEN @msgId = 80233 THEN 'Inventory and GL mismatch for %s. Discrepancy of %f is found for %s. See Post Preview for details.'
 		WHEN @msgId = 80234 THEN 'The non-inventory item <b>%s</b> at location <b>%s</b> is missing a setup for <b>%s</b> or <b>%s</b> GL accounts. (1) Verify if these accounts are properly set up in the <i>item</i> or <i>category</i> screen. (2) Make sure these accounts exist in the GL chart of accounts.'
-		
+		WHEN @msgId = 80235 THEN 'Negative stock quantity is not allowed for %s at %s.<p><br>On Hand is %f<br>Reserved is %f<br>Available is %f.</p>'
 	END 
 
 	RETURN @msg
