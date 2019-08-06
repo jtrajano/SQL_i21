@@ -30,6 +30,7 @@ IF(OBJECT_ID('tempdb..#exclusionTable') IS NOT NULL)
 			[intEntityId] int,
 			[intSize] int,
 			[strType] nvarchar(max),
+			[strFolderPath] nvarchar(max),
 			[intUploadId] int
 	)
 
