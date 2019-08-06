@@ -17,7 +17,7 @@ SELECT
 	tblSTLotteryBook.strStatus,
     tblSTLotteryBook.intStoreId,
     tblSTLotteryBook.intLotteryBookId, 
-    tblSTLotteryBook.strBinNumber, 
+    tblSTLotteryBook.intBinNumber, 
     tblSTLotteryGame.strGame, 
 	tblSTLotteryGame.intLotteryGameId,
     tblSTLotteryBook.strBookNumber, 
@@ -45,7 +45,7 @@ SELECT
 	OR 'returned' = LOWER(strStatus)) 
 	AND tblSTLotteryBook.intStoreId = @storeId
 	ORDER BY 
-    tblSTLotteryBook.strBinNumber ASC
+    tblSTLotteryBook.intBinNumber ASC
 
 
 

@@ -1,4 +1,5 @@
-﻿CREATE PROCEDURE [dbo].[uspSTProcessLotteryToInventoryReceipt]
+﻿
+CREATE PROCEDURE [dbo].[uspSTProcessLotteryToInventoryReceipt]
 	@Id INT,
 	@UserId INT,
 	@ProcessType INT,
@@ -180,7 +181,7 @@ BEGIN TRANSACTION
 		-- Flag Success
 		SET @Success = CAST(1 AS BIT)
 		SET @StatusMsg = ''
-
+		
 
 	END
 	ELSE IF(@ProcessType = 3) --DELETE--
@@ -248,7 +249,7 @@ BEGIN TRANSACTION
 		--UPDATE LOTTERY BOOK--
 		UPDATE tblSTLotteryBook
 		SET 
-		strBinNumber = NULL
+		intBinNumber = NULL
 		,dblQuantityRemaining = 0
 		,strStatus = 'Returned'
 		WHERE intLotteryBookId = @Id
@@ -429,10 +430,23 @@ BEGIN CATCH
 		@ErrorSeverity = ERROR_SEVERITY(),
 		@ErrorState = ERROR_STATE();
 
+
+		IF(@ErrorMessage = 'Cannot insert the value NULL into column ''intShipFromId'', table ''@ReceiptStagingTable''; column does not allow nulls. INSERT fails.')
+		BEGIN
+			SET @ErrorMessage = 'Invalid vendor ship from location'
+		END
+
 		SET @StatusMsg = @ErrorMessage
 		SET @Success = CAST(0 AS BIT)
 	
 	ROLLBACK TRANSACTION
+
+
+	IF(@ProcessType = 1)  --ADD 
+	BEGIN
+		--DELETE LOTTERY BOOK
+		DELETE FROM tblSTLotteryBook WHERE intLotteryBookId = (SELECT TOP 1 intLotteryBookId FROM tblSTReceiveLottery WHERE intReceiveLotteryId = @Id)	 
+	END
 
 	RAISERROR (
 		@ErrorMessage, -- Message text.
