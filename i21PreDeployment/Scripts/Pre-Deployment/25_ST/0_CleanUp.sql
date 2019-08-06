@@ -510,74 +510,81 @@ IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = N'tb
 ----------------------------------------------------------------------------------------------------------------------------------
 IF EXISTS(SELECT TOP 1 1 FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = N'tblSTRetailPriceAdjustment' AND COLUMN_NAME = N'strRetailPriceAdjustmentNumber') 
 	BEGIN
-		IF EXISTS(SELECT TOP 1 1 FROM tblSTRetailPriceAdjustment WHERE strRetailPriceAdjustmentNumber IS NULL)
+		
+		IF EXISTS(SELECT TOP 1 1 FROM sys.objects WHERE type = 'P' AND name = 'uspSTGetStartingNumber')
 			BEGIN
-				PRINT(N'There are Retail Price Adjustment that has no starting number. Updating Retail Price batch number')
-				EXEC('
-						----TEST BEFORE
-						--BEGIN
-						--	SELECT ''BEFORE'', strRetailPriceAdjustmentNumber, * FROM tblSTRetailPriceAdjustment
-						--END
-
-						-- CREATE TEMP TABLE
-						DECLARE @tempTable TABLE
-						(
-							intRetailPriceAdjustmentId INT
-						)
-
-						-- INSERT TO TEMP TABLE
-						INSERT INTO @tempTable
-						(
-							intRetailPriceAdjustmentId
-						)
-						SELECT DISTINCT
-							intRetailPriceAdjustmentId = rpa.intRetailPriceAdjustmentId
-						FROM tblSTRetailPriceAdjustment rpa
-						WHERE rpa.strRetailPriceAdjustmentNumber IS NULL
-
-
-						DECLARE @intRetailPriceAdjustmentId	INT,
-								@strBatchId					NVARCHAR(100), 
-								@ysnSuccess					BIT,
-								@strMessage					NVARCHAR(1000)
-
-						WHILE EXISTS(SELECT TOP 1 1 FROM @tempTable)
-							BEGIN
-
-								SELECT TOP 1
-									@intRetailPriceAdjustmentId = temp.intRetailPriceAdjustmentId 
-								FROM @tempTable temp
-
-
-								EXEC [dbo].[uspSTGetStartingNumber]
-									@strModule				= N''Store''
-									, @strTransactionType	= N''Retail Price Adjustment''
-									, @strPrefix			= N''RPA-''
-									, @intLocationId		= NULL
-									, @strBatchId			= @strBatchId OUTPUT
-									, @ysnSuccess			= @ysnSuccess OUTPUT
-									, @strMessage			= @strMessage OUTPUT
-
-								--PRINT ''@strBatchId: '' + @strBatchId
-
-								UPDATE rpa
-									SET rpa.strRetailPriceAdjustmentNumber = @strBatchId
-								FROM tblSTRetailPriceAdjustment rpa
-								WHERE rpa.intRetailPriceAdjustmentId = @intRetailPriceAdjustmentId
-
-
-								DELETE FROM @tempTable
-								WHERE intRetailPriceAdjustmentId = @intRetailPriceAdjustmentId
-
-							END
 				
-						----TEST AFTER
-						--BEGIN
-						--	SELECT ''AFTER'', strRetailPriceAdjustmentNumber, * FROM tblSTRetailPriceAdjustment
-						--END
+				EXEC('
+						IF EXISTS(SELECT TOP 1 1 FROM tblSTRetailPriceAdjustment WHERE strRetailPriceAdjustmentNumber IS NULL)
+							BEGIN
+									PRINT(N''There are Retail Price Adjustment that has no starting number. Updating Retail Price batch number'')
+
+									----TEST BEFORE
+									--BEGIN
+									--	SELECT ''BEFORE'', strRetailPriceAdjustmentNumber, * FROM tblSTRetailPriceAdjustment
+									--END
+
+									-- CREATE TEMP TABLE
+									DECLARE @tempTable TABLE
+									(
+										intRetailPriceAdjustmentId INT
+									)
+
+									-- INSERT TO TEMP TABLE
+									INSERT INTO @tempTable
+									(
+										intRetailPriceAdjustmentId
+									)
+									SELECT DISTINCT
+											intRetailPriceAdjustmentId = rpa.intRetailPriceAdjustmentId
+									FROM tblSTRetailPriceAdjustment rpa
+									WHERE rpa.strRetailPriceAdjustmentNumber IS NULL
+
+									DECLARE @intRetailPriceAdjustmentId	INT,
+											@strBatchId					NVARCHAR(100), 
+											@ysnSuccess					BIT,
+											@strMessage					NVARCHAR(1000)
+
+									WHILE EXISTS(SELECT TOP 1 1 FROM @tempTable)
+										BEGIN
+
+											SELECT TOP 1
+												@intRetailPriceAdjustmentId = temp.intRetailPriceAdjustmentId 
+											FROM @tempTable temp
+
+
+											EXEC [dbo].[uspSTGetStartingNumber]
+													@strModule				= N''Store''
+													, @strTransactionType	= N''Retail Price Adjustment''
+													, @strPrefix			= N''RPA-''
+													, @intLocationId		= NULL
+													, @strBatchId			= @strBatchId OUTPUT
+													, @ysnSuccess			= @ysnSuccess OUTPUT
+													, @strMessage			= @strMessage OUTPUT
+
+											--PRINT ''@strBatchId: '' + @strBatchId
+
+											UPDATE rpa
+												SET rpa.strRetailPriceAdjustmentNumber = @strBatchId
+											FROM tblSTRetailPriceAdjustment rpa
+											WHERE rpa.intRetailPriceAdjustmentId = @intRetailPriceAdjustmentId
+
+
+											DELETE FROM @tempTable
+											WHERE intRetailPriceAdjustmentId = @intRetailPriceAdjustmentId
+
+										END
+
+									----TEST AFTER
+									--BEGIN
+									--	SELECT ''AFTER'', strRetailPriceAdjustmentNumber, * FROM tblSTRetailPriceAdjustment
+									--END
+							END		
 					')
+
 			END
 	END
+
 ----------------------------------------------------------------------------------------------------------------------------------
 -- End: Add Retail Price Adjustment Number if there is  tblSTRetailPriceAdjustment.strRetailPriceAdjustmentNumber=NULL
 ----------------------------------------------------------------------------------------------------------------------------------
