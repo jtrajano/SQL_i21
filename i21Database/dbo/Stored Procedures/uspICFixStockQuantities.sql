@@ -455,6 +455,14 @@ BEGIN
 		,r.intSubLocationId
 		,r.intStorageLocationId
 
+	-- Clear the stock detail 
+	DELETE sd
+	FROM	
+		tblICItemStockDetail sd INNER JOIN tblICItemStockType sdType
+			ON sdType.intItemStockTypeId = sd.intItemStockTypeId
+	WHERE 
+		sdType.strName = 'Reserved'	
+
 	-- Call this SP to increase the reserved qty. 
 	EXEC dbo.uspICIncreaseReservedQty
 		@FixStockReservation
