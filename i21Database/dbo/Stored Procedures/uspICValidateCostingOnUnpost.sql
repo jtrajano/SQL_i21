@@ -28,6 +28,7 @@ DECLARE @strItemNo AS NVARCHAR(50)
 		,@strLocationName AS NVARCHAR(2000)
 		,@intItemLocationId AS INT 
 		,@strRelatedTransactionId AS NVARCHAR(50)
+		,@strErrorMsg AS NVARCHAR(2000) 
 
 -- Create the variables for the internal transaction types used by costing. 
 DECLARE @AUTO_NEGATIVE AS INT = 1
@@ -92,6 +93,22 @@ BEGIN
 
 	--'Negative stock quantity is not allowed for {Item No} in {Location Name}.'
 	EXEC uspICRaiseError 80003, @strItemNo, @strLocationName; 
+	RETURN -1
+END 
+
+-- Check for negative stock qty 
+IF EXISTS (SELECT TOP 1 1 FROM #FoundErrors WHERE intErrorCode = 80236)
+BEGIN 
+	SELECT @strItemNo = NULL, @intItemId = NULL 
+
+	SELECT TOP 1 
+			@strErrorMsg = Errors.strText
+	FROM	#FoundErrors Errors INNER JOIN tblICItem Item
+				ON Errors.intItemId = Item.intItemId
+	WHERE	intErrorCode = 80236
+
+	--'Negative stock quantity is not allowed for {Item No} in {Location Name}. On Hand is {On Hand Qty}. Reserved is {Reserved Qty}. Available is {Available Qty}.'
+	EXEC uspICRaiseError @strErrorMsg; 
 	RETURN -1
 END 
 
