@@ -23,9 +23,16 @@ SELECT intItemContractHeaderId		= ICH.intItemContractHeaderId
 	 , dblPrice						= ICD.dblPrice
 	 , dblTotal						= ICD.dblTotal
 	 , ysnPrepaid					= ICH.ysnPrepaid
+	 , intSubLocationId				= IL.intSubLocationId
+	 , intStorageLocationId			= IL.intStorageLocationId
+	 , strStorageLocation			= STOLOC.strName
+	 , strSubLocationName			= SUBLOC.strSubLocationName	
 FROM dbo.tblCTItemContractDetail ICD
 INNER JOIN dbo.tblCTItemContractHeader ICH ON ICD.intItemContractHeaderId = ICH.intItemContractHeaderId
 INNER JOIN dbo.tblICItem I ON ICD.intItemId = I.intItemId
 INNER JOIN dbo.tblICItemUOM IUOM ON ICD.intItemUOMId = IUOM.intItemUOMId
 INNER JOIN dbo.tblICUnitMeasure UOM ON IUOM.intUnitMeasureId = UOM.intUnitMeasureId
+INNER JOIN dbo.tblICItemLocation IL ON I.intItemId = IL.intItemId AND ICH.intCompanyLocationId = IL.intLocationId
 LEFT JOIN dbo.tblSMTaxGroup TG ON ICD.intTaxGroupId = TG.intTaxGroupId
+LEFT JOIN dbo.tblICStorageLocation STOLOC ON STOLOC.intStorageLocationId = IL.intStorageLocationId
+LEFT JOIN dbo.tblSMCompanyLocationSubLocation SUBLOC ON SUBLOC.intCompanyLocationSubLocationId = IL.intSubLocationId
