@@ -29,6 +29,7 @@ BEGIN TRY
 		,@intConsumptionSubLocationId INT
 		,@ItemsToReserve AS dbo.ItemReservationTableType
 		,@intInventoryTransactionType AS INT = 8
+		,@strCycleCount nvarchar(50)
 
 	SELECT @intManufacturingProcessId = intManufacturingProcessId
 		,@strCostAdjustmentBatchId = strCostAdjustmentBatchId
@@ -53,6 +54,18 @@ BEGIN TRY
 		OR @strCostDistribution = ''
 	BEGIN
 		SELECT @strCostDistribution = 'False'
+	END
+
+	SELECT @strCycleCount = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intAttributeId = 7 --Is Cycle Count Required
+		AND intLocationId = @intLocationId
+
+	IF @strCycleCount IS NULL
+		OR @strCycleCount = ''
+	BEGIN
+		SELECT @strCycleCount = 'False'
 	END
 
 	SELECT @intTransactionCount = @@TRANCOUNT
@@ -203,7 +216,7 @@ BEGIN TRY
 		END
 	END
 
-	IF @strAttributeValue = 'False' --Is Instant Consumption
+	IF @strAttributeValue = 'False' and @strCycleCount='False'--Is Instant Consumption
 	BEGIN
 		SELECT @strBatchId = NULL
 			,@intBatchId = NULL
