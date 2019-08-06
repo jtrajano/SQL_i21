@@ -38,7 +38,10 @@ Type the overview for the table here.
         [intCreatedByUserId] INT NULL,
         [intModifiedByUserId] INT NULL, 
 		[intDataSourceId] TINYINT NULL,
-        [intUpcCode] AS CASE WHEN ISNUMERIC(RTRIM(LTRIM(strLongUPCCode))) = 1 THEN CAST(RTRIM(LTRIM(strLongUPCCode)) AS BIGINT) ELSE NULL END,
+        [intUpcCode] AS 
+            CASE WHEN ISNUMERIC(RTRIM(LTRIM(strLongUPCCode))) = 1 AND NOT (strLongUPCCode LIKE '%.%' OR strLongUPCCode LIKE '%e%' OR strLongUPCCode LIKE '%E%') AND strLongUPCCode IS NOT NULL
+                THEN CAST(RTRIM(LTRIM(strLongUPCCode)) AS BIGINT) 
+            ELSE NULL END
 		CONSTRAINT [PK_tblICItemUOM] PRIMARY KEY ([intItemUOMId]), 
 		CONSTRAINT [FK_tblICItemUOM_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]) ON DELETE CASCADE, 
 		CONSTRAINT [FK_tblICItemUOM_tblICUnitMeasure] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
