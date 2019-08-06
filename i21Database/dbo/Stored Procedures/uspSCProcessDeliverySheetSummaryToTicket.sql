@@ -54,6 +54,16 @@ BEGIN TRY
 		,[dblFreight] NUMERIC(38,20) NULL
 		,[dblFees] NUMERIC(38,20) NULL
 	)
+
+	DECLARE @dsSplitTable TABLE(
+		[intEntityId] INT NOT NULL, 
+		[dblSplitPercent] DECIMAL(18, 6) NOT NULL, 
+		[intStorageScheduleTypeId] INT NULL,
+		[strDistributionOption] NVARCHAR(3) COLLATE Latin1_General_CI_AS NULL,
+		[intStorageScheduleId] INT NULL,
+		[intConcurrencyId] INT NULL
+	);
+
 	DECLARE @TicketCurrentRowCount INT
 	DECLARE @TicketRowMaxCount INT
 
@@ -127,6 +137,33 @@ BEGIN TRY
 	DELETE FROM tblSCTicketSplit 
 	WHERE intTicketId IN (SELECT intTicketId FROM tblSCTicket WHERE intDeliverySheetId = @intDeliverySheetId)
 
+	IF EXISTS(SELECT NULL FROM @splitTable)
+	BEGIN
+		INSERT INTO tblSCTicketSplit
+		SELECT * FROM @splitTable
+	END
+
+
+	DELETE FROM @dsSplitTable
+
+	INSERT INTO @dsSplitTable(
+		[intEntityId]
+		,[dblSplitPercent]
+		,[intStorageScheduleTypeId]
+		,[strDistributionOption]
+		,[intStorageScheduleId]
+		,[intConcurrencyId]
+	)
+	SELECT 
+		intEntityId
+		, dblSplitPercent
+		, [intStorageScheduleTypeId]
+		,[strDistributionOption]
+		, intStorageScheduleId = intStorageScheduleRuleId 
+		, 1
+	FROM tblSCDeliverySheetSplit 
+	WHERE intDeliverySheetId = @intDeliverySheetId
+
 
 	DECLARE ticketCursor CURSOR FOR SELECT intTicketId,intEntityId,dblNetUnits FROM @processTicket  
 	OPEN ticketCursor;  
@@ -135,13 +172,9 @@ BEGIN TRY
 	BEGIN  
 		SET @dblTempSplitQty = @dblNetUnits;
 		
-		IF EXISTS(SELECT NULL FROM @splitTable)
-		BEGIN
-			INSERT INTO tblSCTicketSplit
-			SELECT * FROM @splitTable
-		END
+	
 
-		DECLARE splitCursor CURSOR FOR SELECT intEntityId, dblSplitPercent, strDistributionOption, intStorageScheduleId FROM @splitTable
+		DECLARE splitCursor CURSOR FOR SELECT intEntityId, dblSplitPercent, strDistributionOption, intStorageScheduleId FROM @dsSplitTable
 		OPEN splitCursor;  
 		FETCH NEXT FROM splitCursor INTO @intSplitEntityId, @dblSplitPercent, @strDistributionOption, @intStorageScheduleId;  
 		WHILE @@FETCH_STATUS = 0  
