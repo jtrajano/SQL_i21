@@ -376,7 +376,7 @@ BEGIN
 						, intItemId				= udt.intItemId
 						, dblStandardCost		= udt.dblStandardCost
 						, dblLastCost			= udt.dblLastCost
-						, intCompanyLocationId = st.intCompanyLocationId
+						, intCompanyLocationId  = st.intCompanyLocationId
 					FROM @UDTItemPricing udt
 					INNER JOIN tblSTStore st
 						ON udt.intStoreId = st.intStoreId
@@ -464,7 +464,7 @@ BEGIN
 											,@intItemLocationId			= @intNewItemLocationId OUTPUT 
 						
 										
-										IF(@intVendorId IS NOT NULL)
+										IF(@intVendorId IS NOT NULL AND @intNewItemId IS NOT NULL AND @intNewItemLocationId IS NOT NULL)
 											BEGIN
 
 												-- ITEM VENDOR
@@ -489,16 +489,20 @@ BEGIN
 												FROM @tblCStoreItemPricing 
 												WHERE intCompanyLocationId = @intCompanyLocationId_New
 
-												-- ITEM PRICING
-												EXEC [uspICAddItemPricingForCStore]
-													@intItemId					= @intNewItemId
-													,@intItemLocationId			= @intNewItemLocationId
+												IF(@intNewItemId IS NOT NULL AND @intNewItemLocationId IS NOT NULL)
+													BEGIN
+														-- ITEM PRICING
+														EXEC [uspICAddItemPricingForCStore]
+															@intItemId					= @intNewItemId
+															,@intItemLocationId			= @intNewItemLocationId
 
-													,@dblStandardCost			= @dblStandardCost_New 
-													,@dblLastCost				= @dblLastCost_New 
-													,@dblSalePrice				= @dblSalePrice_New
-													,@intEntityUserSecurityId	= @intEntityId
-													,@intItemPricingId			= @intNewItemPricingId OUTPUT
+															,@dblStandardCost			= @dblStandardCost_New 
+															,@dblLastCost				= @dblLastCost_New 
+															,@dblSalePrice				= @dblSalePrice_New
+															,@intEntityUserSecurityId	= @intEntityId
+															,@intItemPricingId			= @intNewItemPricingId OUTPUT
+													END
+												
 
 											END
 
