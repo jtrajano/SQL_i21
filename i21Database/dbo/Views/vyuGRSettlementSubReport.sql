@@ -280,8 +280,8 @@ FROM
 				ON StorageDiscount.intTicketFileId = BillDtl.intCustomerStorageId 
 					AND StorageDiscount.intItemId = BillDtl.intItemId
 		WHERE Item.strType = 'Other Charge'
-			AND ((StrgHstry.intContractHeaderId IS NOT NULL) --settlement with contract
-				OR (BillDtl.intInventoryReceiptChargeId IS NOT NULL AND BillDtl.intContractDetailId IS NOT NULL)) 
+			--AND ((StrgHstry.intContractHeaderId IS NOT NULL) --settlement with contract
+				--OR (BillDtl.intInventoryReceiptChargeId IS NOT NULL AND BillDtl.intContractDetailId IS NOT NULL)) 
 		) tbl 
 		GROUP BY 
 			 strId
