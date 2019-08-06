@@ -19,7 +19,7 @@ BEGIN TRY
 	DECLARE @ysnRemote BIT = 0
 
 	SELECT TOP 1 @ysnRemote = ISNULL(ysnIsRemote,0) FROM tblGRCompanyPreference
-
+	--This is just a comment to trigger rebuild for this file
 	IF LTRIM(RTRIM(@xmlParam1)) = ''
 		SET @xmlParam1 = NULL
 	IF LTRIM(RTRIM(@xmlParam2)) = ''
