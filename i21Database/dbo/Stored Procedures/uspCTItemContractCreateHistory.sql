@@ -2,7 +2,7 @@
 	@intItemContractDetailId	INT, 
 	@intTransactionId			INT,
 	@intTransactionDetailId		INT,
-	@strTransactionId			INT,
+	@strTransactionId			NVARCHAR(50),
 	@intUserId					INT,
 	@strTransactionType			NVARCHAR(50),
 	@dblNewContracted			NUMERIC(18,6),
