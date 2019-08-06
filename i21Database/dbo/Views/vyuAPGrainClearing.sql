@@ -77,7 +77,7 @@ INNER JOIN vyuGLDetail GD
 		AND GD.intTransactionId = SS.intSettleStorageId
 		AND GD.strTransactionType = 'Storage Settlement'
 		AND GD.ysnIsUnposted = 0
-		AND GD.strCode = 'IC' --get only the AP Clearing for item
+		AND GD.strCode = 'STR' --get only the AP Clearing for item
 INNER JOIN vyuGLAccountDetail AD
 	ON GD.intAccountId = AD.intAccountId AND AD.intAccountCategoryId = 45
 LEFT JOIN 
@@ -99,7 +99,7 @@ SELECT
 	,billDetail.intItemId
 	,CS.intItemUOMId  AS intItemUOMId
     ,unitMeasure.strUnitMeasure AS strUOM 
-	,billDetail.dblTotal + billDetail.dblTax AS dblVoucherTotal
+	,billDetail.dblTotal AS dblVoucherTotal
     ,CASE 
 		WHEN billDetail.intWeightUOMId IS NULL THEN 
 			ISNULL(billDetail.dblQtyReceived, 0) 
@@ -202,7 +202,7 @@ SELECT
 	,billDetail.intItemId
 	,CS.intItemUOMId  AS intItemUOMId
     ,unitMeasure.strUnitMeasure AS strUOM 
-	,billDetail.dblTotal + billDetail.dblTax AS dblVoucherTotal
+	,billDetail.dblTotal AS dblVoucherTotal
     ,CASE 
 		WHEN billDetail.intWeightUOMId IS NULL THEN 
 			ISNULL(billDetail.dblQtyReceived, 0) 
@@ -337,7 +337,7 @@ SELECT
 	,billDetail.intItemId
 	,CS.intItemUOMId  AS intItemUOMId
     ,unitMeasure.strUnitMeasure AS strUOM 
-	,billDetail.dblTotal + billDetail.dblTax AS dblVoucherTotal
+	,billDetail.dblTotal AS dblVoucherTotal
     ,CASE 
 		WHEN billDetail.intWeightUOMId IS NULL THEN 
 			ISNULL(billDetail.dblQtyReceived, 0) 
