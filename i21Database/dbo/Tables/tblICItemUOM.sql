@@ -84,11 +84,6 @@ Type the overview for the table here.
 		WHERE [strLongUPCCode] IS NOT NULL;
 	GO
 
-        CREATE UNIQUE INDEX [AK_tblICItemUOM_intUpcCode]
-        ON tblICItemUOM ([intUpcCode])
-        WHERE strLongUPCCode IS NOT NULL;
-    GO
-
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Identity Field',
