@@ -168,9 +168,11 @@ BEGIN
 			,[intStorageLocationId] = NULL
 			,[intSubLocationId] = NULL
 		FROM vyuLGLoadCostForVendor A
+			OUTER APPLY tblLGCompanyPreference CP
 			JOIN tblLGLoad L ON L.intLoadId = A.intLoadId
 			JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
-			JOIN tblCTContractDetail CT ON CT.intContractDetailId = LD.intPContractDetailId
+			JOIN tblCTContractDetail CT ON CT.intContractDetailId = CASE WHEN (CP.ysnEnableAccrualsForOutbound = 1 AND L.intPurchaseSale = 2 AND A.ysnAccrue = 1 AND A.intEntityVendorId IS NOT NULL) 
+																	THEN LD.intSContractDetailId ELSE LD.intPContractDetailId END
 			JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CT.intContractHeaderId
 			JOIN tblSMCurrency C ON C.intCurrencyID = L.intCurrencyId
 			LEFT JOIN tblSMCurrency CC ON CC.intCurrencyID = A.intCurrencyId
@@ -191,7 +193,7 @@ BEGIN
 							AND A.intEntityVendorId = CTC.intVendorId
 						) CTC
 			WHERE A.intLoadId = @intLoadId
-				AND A.intLoadCostId = ISNULL(@intLoadCostId, A.intLoadCostId)
+				AND A.intLoadCostId = ISNULL(NULL, A.intLoadCostId)
 				AND A.intLoadDetailId NOT IN 
 					(SELECT IsNull(BD.intLoadDetailId, 0) FROM tblAPBillDetail BD JOIN tblICItem Item ON Item.intItemId = BD.intItemId
 					WHERE BD.intItemId = A.intItemId AND Item.strType = 'Other Charge' AND ISNULL(A.ysnAccrue,0) = 1)
