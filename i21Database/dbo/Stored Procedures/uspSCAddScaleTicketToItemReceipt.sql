@@ -332,6 +332,7 @@ END
 												WHEN QM.dblDiscountAmount > 0 THEN QM.dblDiscountAmount
 											END
 											WHEN IC.strCostMethod = 'Amount' THEN 0
+											ELSE 0
 										END
 	,[intCostUOMId]						= CASE
 											WHEN ISNULL(UM.intUnitMeasureId,0) = 0 THEN dbo.fnGetMatchingItemUOMId(GR.intItemId, @intTicketItemUOMId)
@@ -943,7 +944,8 @@ IF ISNULL(@intFreightItemId,0) = 0
 						,[ysnPrice]							= CASE WHEN RE.ysnIsStorage = 0 THEN @ysnPrice ELSE 0 END
 						,[strChargesLink]					= RE.strChargesLink
 						,[ysnAllowVoucher]				= RE.ysnAllowVoucher
-						FROM @ReceiptStagingTable RE 
+						FROM @ReceiptStagingTable RE 						
+						JOIN tblICItem ICI on RE.intItemId = @intFreightItemId
 						LEFT JOIN tblSCTicket SC ON SC.intTicketId = RE.intSourceId
 						LEFT JOIN tblSCScaleSetup SCS ON SC.intScaleSetupId = SCS.intScaleSetupId
 						LEFT JOIN tblICItem IC ON IC.intItemId = SCS.intFreightItemId
@@ -1378,6 +1380,9 @@ BEGIN
 		INNER JOIN tblICItem IC ON IC.intItemId = RE.intItemId
 	END
 END
+
+
+-- update @OtherCharges set dblRate = isnull(dblRate, 0) where dblRate is null
 
 EXEC dbo.uspICAddItemReceipt 
 		@ReceiptStagingTable
