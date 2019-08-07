@@ -23,10 +23,19 @@ BEGIN TRY
 
 	BEGIN TRANSACTION
 
+	-- VALIDATION
+	uspMBPostMeterReadingValidation
+
 	DECLARE @UserEntityId INT
 	DECLARE @DefaultCurrency INT
+	DECLARE @ynsValid BIT = NULL
 	SET @UserEntityId = ISNULL((SELECT [intEntityId] FROM tblSMUserSecurity WHERE [intEntityId] = @UserId), @UserId)
 	SELECT @DefaultCurrency = ISNULL(intDefaultCurrencyId, 1) FROM tblSMCompanyPreference
+
+	EXEC [dbo].[uspMBPostMeterReadingValidation]
+		@intMeterReadingId = @TransactionId
+		,@Post = @Post
+		,@ynsValid = @ynsValid OUTPUT
 
 	DECLARE @EntriesForInvoice AS InvoiceIntegrationStagingTable
 
