@@ -4,8 +4,28 @@
 	,@intForm941Id INT = NULL OUTPUT
 AS
 
+
+
+DECLARE @tmpPayCheckTax TABLE
+		(
+		 dblTaxableAmount [numeric](18, 6) NULL
+		 ,strCalculationType [nvarchar](50)
+		 ,intPaycheckId INT
+		 ,intTypeTaxStateId INT NULL
+		 ,[strVal1] [nvarchar](75) COLLATE Latin1_General_CI_AS NULL
+		 ,[strVal2] [nvarchar](75) COLLATE Latin1_General_CI_AS NULL
+		 ,[strVal3] [nvarchar](75) COLLATE Latin1_General_CI_AS NULL
+		)		
+
+		INSERT INTO @tmpPayCheckTax(dblTaxableAmount,strCalculationType,intPaycheckId, intTypeTaxStateId,strVal1,strVal2,strVal3 )
+		SELECT MAX(dblTaxableAmount),strCalculationType,intPaycheckId,intTypeTaxStateId,strVal1	,strVal2,strVal3 
+		FROM  vyuPRPaycheckTax 
+		WHERE YEAR(dtmPayDate) = @intYear AND DATEPART(QQ, dtmPayDate) = @intQuarter AND ysnVoid = 0
+		GROUP BY intPaycheckId , strCalculationType,intPaycheckId,intTypeTaxStateId,strVal1,strVal2,strVal3
+
+
 /* If if there are existing Paychecks with the specified Year and Quarter */
-IF EXISTS(SELECT TOP 1 1 FROM tblPRPaycheck WHERE YEAR(dtmPayDate) = @intYear AND DATEPART(QQ, dtmPayDate) = @intQuarter AND ysnPosted = 1 AND ysnVoid = 0)
+IF @@ROWCOUNT > 0
 BEGIN
 	/* Check if Form 941 with Year and Quarter exists */
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblPRForm941 WHERE intYear = @intYear AND intQuarter = @intQuarter)
@@ -114,9 +134,9 @@ BEGIN
 			,intConcurrencyId = 1
 		FROM 
 			/* Taxable Amount */
-			(SELECT dblTotal = SUM(dblTaxableAmount) FROM vyuPRPaycheckTax WHERE YEAR(dtmPayDate) = @intYear AND DATEPART(QQ, dtmPayDate) = @intQuarter AND strCalculationType = 'USA Federal Tax' AND strPaidBy = 'Employee' AND ysnVoid = 0) [TXBLFIT],
-			(SELECT dblTotal = SUM(dblTaxableAmount) FROM vyuPRPaycheckTax WHERE YEAR(dtmPayDate) = @intYear AND DATEPART(QQ, dtmPayDate) = @intQuarter AND strCalculationType = 'USA Social Security' AND strPaidBy = 'Employee' AND ysnVoid = 0) [TXBLSS],
-			(SELECT dblTotal = SUM(dblTaxableAmount) FROM vyuPRPaycheckTax WHERE YEAR(dtmPayDate) = @intYear AND DATEPART(QQ, dtmPayDate) = @intQuarter AND strCalculationType = 'USA Medicare' AND strPaidBy = 'Employee' AND ysnVoid = 0) [TXBLMED],
+			(SELECT dblTotal = SUM(dblTaxableAmount) FROM @tmpPayCheckTax WHERE YEAR(dtmPayDate) = @intYear AND DATEPART(QQ, dtmPayDate) = @intQuarter AND strCalculationType = 'USA Federal Tax' AND ysnVoid = 0) [TXBLFIT],
+			(SELECT dblTotal = SUM(dblTaxableAmount) FROM @tmpPayCheckTax WHERE YEAR(dtmPayDate) = @intYear AND DATEPART(QQ, dtmPayDate) = @intQuarter AND strCalculationType = 'USA Social Security' AND ysnVoid = 0) [TXBLSS],
+			(SELECT dblTotal = SUM(dblTaxableAmount) FROM @tmpPayCheckTax WHERE YEAR(dtmPayDate) = @intYear AND DATEPART(QQ, dtmPayDate) = @intQuarter AND strCalculationType = 'USA Medicare' AND ysnVoid = 0) [TXBLMED],
 
 			/* Tax Amounts */
 			(SELECT dblTotal = SUM(dblFIT) FROM vyuPRMonthlyTaxTotal WHERE intYear = @intYear AND intQuarter = @intQuarter) [FIT],
