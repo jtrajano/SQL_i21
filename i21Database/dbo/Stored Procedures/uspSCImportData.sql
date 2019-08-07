@@ -454,6 +454,24 @@ BEGIN TRY
 					[strCountyProducer] NVARCHAR(MAX)
 				)
 
+				-------------Get All Non Existing Delivery Sheets
+				DECLARE @existingDeliverySheets TABLE 
+				(
+					intDeliverySheetId INT NOT NULL PRIMARY KEY
+					,strDeliverySheetNumber NVARCHAR(100)
+				)
+
+				INSERT INTO @existingDeliverySheets(
+					intDeliverySheetId
+					,strDeliverySheetNumber
+				)
+				SELECT 
+					A.intDeliverySheetId 
+					,A.strDeliverySheetNumber
+				FROM @temp_xml_deliverysheet_sc A
+				WHERE EXISTS(SELECT TOP 1 1 FROM tblSCDeliverySheet WHERE strDeliverySheetNumber = A.strDeliverySheetNumber)
+
+
 				--DELIVERY SHEET DISCOUNT
 				DECLARE @temp_xml_qmdstable_sc TABLE 
 				(
