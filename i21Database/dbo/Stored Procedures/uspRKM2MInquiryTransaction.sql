@@ -1243,7 +1243,7 @@ FROM (
 			JOIN tblCTContractDetail cd on cd.intContractDetailId = it.intLineNo
 			JOIN tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
 			JOIN tblICItem i on cd.intItemId=i.intItemId
-			JOIN tblICItemUOM iuom on i.intItemId=iuom.intItemId and ysnStockUnit=1
+			JOIN tblICItemUOM iuom on i.intItemId=iuom.intItemId and iuom.intUnitMeasureId = cd.intBasisUOMId
 			JOIN tblEMEntity e on ch.intEntityId = e.intEntityId
 			JOIN tblICCommodity com on ch.intCommodityId = com.intCommodityId
 			JOIN tblRKFutureMarket fm on cd.intFutureMarketId = fm.intFutureMarketId
@@ -1373,7 +1373,7 @@ FROM (
 			JOIN tblCTContractDetail cd on cd.intContractDetailId = it.intLineNo
 			JOIN tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
 			JOIN tblICItem i on cd.intItemId=i.intItemId
-			JOIN tblICItemUOM iuom on i.intItemId=iuom.intItemId and ysnStockUnit=1
+			JOIN tblICItemUOM iuom on i.intItemId=iuom.intItemId and iuom.intItemUOMId = cd.intBasisUOMId
 			JOIN tblEMEntity e on ch.intEntityId = e.intEntityId
 			JOIN tblICCommodity com on ch.intCommodityId = com.intCommodityId
 			JOIN tblRKFutureMarket fm on cd.intFutureMarketId = fm.intFutureMarketId
