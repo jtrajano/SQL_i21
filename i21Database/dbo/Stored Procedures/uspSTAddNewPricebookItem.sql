@@ -52,9 +52,11 @@ BEGIN
 			DECLARE @intNewItemLocationId	AS INT
 			DECLARE @intNewItemPricingId	AS INT
 			DECLARE @intNewItemVendorXrefId AS INT
+			DECLARE @strLongUpcCode_Entry	AS NVARCHAR(100)
 
 			SET @ysnResultSuccess	= CAST(1 AS BIT)
 			SET @strResultMessage	= ''
+			SET @strLongUpcCode_Entry = @strLongUpcCode
 
 			-- ITEM AuditLog temp table
 			BEGIN
@@ -318,7 +320,7 @@ BEGIN
 						IF NOT EXISTS(SELECT TOP 1 1 FROM tblICItemUOM WHERE strLongUPCCode = @strLongUpcCode OR intUpcCode = CONVERT(NUMERIC(32, 0), CAST(@strLongUpcCode AS FLOAT)))
 							BEGIN
 
-								IF NOT EXISTS(SELECT TOP 1 1 FROM tblICItemUOM WHERE strUpcCode = dbo.fnUPCAtoUPCE(@strLongUPCCode))	
+								IF NOT EXISTS(SELECT TOP 1 1 FROM tblICItemUOM WHERE strUpcCode = dbo.fnUPCAtoUPCE(@strLongUpcCode_Entry))	
 									BEGIN
 										
 										-- ITEM UOM
@@ -360,7 +362,7 @@ BEGIN
 									END
 								ELSE
 									BEGIN
-										SET @strResultMessage = 'Short UPC of ' + dbo.fnUPCAtoUPCE(@strLongUPCCode) + ' already exists.'  
+										SET @strResultMessage = 'Short UPC of ' + dbo.fnUPCAtoUPCE(@strLongUpcCode_Entry) + ' already exists.'  
 
 										GOTO ExitWithRollback
 									END
@@ -368,7 +370,7 @@ BEGIN
 							END
 						ELSE
 							BEGIN
-								SET @strResultMessage = 'Long UPC of ' + @strLongUPCCode + ' already exists.'  
+								SET @strResultMessage = 'Long UPC of ' + @strLongUpcCode_Entry + ' already exists.'  
 
 								GOTO ExitWithRollback
 							END
