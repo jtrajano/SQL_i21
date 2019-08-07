@@ -1510,7 +1510,7 @@ BEGIN TRY
 					,[strVendorOrderNumber]			= @TicketNo
 					,[strMiscDescription] 			= Item.[strItemNo]
 					,[intItemId] 					= ReceiptCharge.[intChargeId]
-					,[intAccountId] 				= NULL
+					,[intAccountId] 				= [dbo].[fnGetItemGLAccount](ReceiptCharge.[intChargeId],CL.intItemLocationId,'AP Clearing')
 					,[intContractHeaderId] 			= NULL
 					,[intContractDetailId] 			= NULL
 					,[intInventoryReceiptChargeId]	= CASE WHEN @ysnDPOwnedType = 0 THEN NULL ELSE ReceiptCharge.intInventoryReceiptChargeId END
@@ -1563,12 +1563,15 @@ BEGIN TRY
 				JOIN tblSCScaleSetup ScaleSetup 
 					ON ScaleSetup.intScaleSetupId = SC.intScaleSetupId 
 						AND ScaleSetup.intFreightItemId = ReceiptCharge.[intChargeId]
+				LEFT JOIN tblICItemLocation CL
+					ON CL.intItemId = Item.intItemId
+						AND CL.intLocationId = @LocationId
 				WHERE SST.intSettleStorageId = @intSettleStorageId
 				AND 
 				(
 					(ReceiptCharge.intEntityVendorId = SS.intEntityId AND ISNULL(ReceiptCharge.ysnAccrue, 0) = 1 AND ISNULL(ReceiptCharge.ysnPrice, 0) = 0)
 					OR
-					(ReceiptCharge.intEntityVendorId = SS.intEntityId AND ISNULL(ReceiptCharge.ysnAccrue, 0) = 0 AND ISNULL(ReceiptCharge.ysnPrice, 0) = 1)
+					(ISNULL(ReceiptCharge.ysnAccrue, 0) = 0 AND ISNULL(ReceiptCharge.ysnPrice, 0) = 1)
 					OR
 					(ReceiptCharge.intEntityVendorId <> SS.intEntityId AND ISNULL(ReceiptCharge.ysnAccrue, 0) = 1 AND ISNULL(ReceiptCharge.ysnPrice, 0) = 1)
 					OR
