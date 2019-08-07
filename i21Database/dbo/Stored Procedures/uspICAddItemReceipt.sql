@@ -7,6 +7,12 @@ Accepted values for ReceiptStagingTable.intGrossNetUOMId:
 	2. NULL means it will use the stock uom of the item as the gross/net uom
 	3. or provide a [valid gross/net uom id]
 	4. If you provided an invalid gross/net uom id, it will use the stock unit of the item. 
+
+Accepted values for ReceiptStagingTable.intTaxGroupId and ReceiptOtherChargesTableType.intTaxGroupId
+	1. -1 (or any negative value) means a NULL tax group. 
+	2. NULL means it will get the tax group from the tax group hierarchy (fnGetTaxGroupIdForVendor) 
+	3. or provide a valid tax group. 
+
 */
 
 CREATE PROCEDURE [dbo].[uspICAddItemReceipt]
@@ -647,6 +653,8 @@ BEGIN
 		FROM	@ReceiptEntries RawData LEFT JOIN tblSMTaxGroup tg
 					ON tg.intTaxGroupId = RawData.intTaxGroupId
 		WHERE	tg.intTaxGroupId IS NULL 
+				AND RawData.intTaxGroupId IS NOT NULL 
+				AND RawData.intTaxGroupId > 0 
 
 		IF @valueTaxGroupId IS NOT NULL 
 		BEGIN
@@ -770,7 +778,8 @@ BEGIN
 		FROM	@ReceiptEntries RawData LEFT JOIN tblICItemUOM iu 
 					ON iu.intItemUOMId = RawData.intGrossNetUOMId
 		WHERE	iu.intItemUOMId IS NULL 
-				AND RawData.intGrossNetUOMId IS NOT NULL 
+				AND RawData.intGrossNetUOMId IS NOT NULL
+				AND RawData.intGrossNetUOMId > 0 
 
 		IF @getItemId IS NOT NULL 
 		BEGIN
@@ -948,6 +957,7 @@ BEGIN
 				,ysnSubCurrency			= ISNULL(RawData.ysnSubCurrency, 0)
 				,intTaxGroupId			= 
 										CASE 
+											WHEN RawData.intTaxGroupId < 0 THEN NULL 
 											WHEN RawData.strReceiptType = 'Transfer Order' THEN NULL 
 											ELSE ISNULL(RawData.intTaxGroupId, taxHierarcy.intTaxGroupId) 
 										END
@@ -1317,8 +1327,9 @@ BEGIN
 				@valueOtherChargeTaxGroupId = RawData.intTaxGroupId	
 		FROM	@OtherCharges RawData LEFT JOIN tblSMTaxGroup tg
 					ON RawData.intTaxGroupId = tg.intTaxGroupId
-		WHERE	RawData.intTaxGroupId IS NOT NULL 
-				AND tg.intTaxGroupId IS NULL 
+		WHERE	tg.intTaxGroupId IS NULL 
+				AND RawData.intTaxGroupId IS NOT NULL 
+				AND RawData.intTaxGroupId > 0 
 		
 		IF @valueOtherChargeTaxGroupId IS NOT NULL
 		BEGIN
@@ -1417,7 +1428,7 @@ BEGIN
 				,[ysnSubCurrency]			= ISNULL(RawData.ysnSubCurrency, 0) 
 				,[intCurrencyId]			= COALESCE(RawData.intCostCurrencyId, RawData.intCurrencyId, @intFunctionalCurrencyId) 
 				,[intCent]					= CostCurrency.intCent
-				,[intTaxGroupId]			= ISNULL(RawData.intTaxGroupId, taxHierarcy.intTaxGroupId)
+				,[intTaxGroupId]			= CASE WHEN RawData.intTaxGroupId < 0 THEN NULL ELSE ISNULL(RawData.intTaxGroupId, taxHierarcy.intTaxGroupId) END 
 				,[intForexRateTypeId]		= CASE WHEN COALESCE(RawData.intCostCurrencyId, RawData.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(RawData.ysnSubCurrency, 0) = 0 THEN ISNULL(RawData.intForexRateTypeId, @intDefaultForexRateTypeId) ELSE NULL END 						
 				,[dblForexRate]				= CASE WHEN COALESCE(RawData.intCostCurrencyId, RawData.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(RawData.ysnSubCurrency, 0) = 0 THEN ISNULL(RawData.dblForexRate, forexRate.dblRate) ELSE NULL END 			
 				,[strChargesLink]			= RawData.strChargesLink
