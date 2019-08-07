@@ -16,8 +16,8 @@
 
 	, @UDTItemPricing StoreItemPricing	READONLY
 
+	, @ysnDebug							BIT
 	, @intEntityId						INT
-	, @intNewUniqueId					INT				OUTPUT
 	, @intNewItemId						INT				OUTPUT
 	, @ysnResultSuccess					BIT				OUTPUT
 	, @strResultMessage					NVARCHAR(1000)	OUTPUT
@@ -46,20 +46,15 @@ BEGIN
 
 			DECLARE @intRecordsCount		AS INT = 0
 			DECLARE @strRecordsCount		AS NVARCHAR(50) = ''
+			
+
 			DECLARE @intNewItemUOMId		AS INT
 			DECLARE @intNewItemLocationId	AS INT
 			DECLARE @intNewItemPricingId	AS INT
 			DECLARE @intNewItemVendorXrefId AS INT
 
-			SET @ysnResultSuccess = CAST(1 AS BIT)
-			SET @strResultMessage = ''
-			--SET @intNewItemId = 0
-			--SET @intNewItemUOMId = 0
-			--SET @intNewUniqueId = 0
-			--SET @intNewItemLocationId = 0
-			--SET @intNewItemPricingId = 0
-			--SET @intNewItemVendorXrefId = 0
-
+			SET @ysnResultSuccess	= CAST(1 AS BIT)
+			SET @strResultMessage	= ''
 
 			-- ITEM AuditLog temp table
 			BEGIN
@@ -250,35 +245,60 @@ BEGIN
 			-- [START] - ADD ITEM
 			-- ============================================================================================================================
 			BEGIN
-					-- ITEM
-					BEGIN TRY
-						
-						EXEC [uspICAddItemForCStore]
-							@intCategoryId				= @intCategoryId
-							,@strItemNo					= @strItemNo 
-							,@strShortName				= @strShortName 
-							,@strDescription			= @strDescription
-							,@intEntityUserSecurityId	= @intEntityId
-							,@intItemId					= @intNewItemId OUTPUT 
-						
 
-						IF NOT EXISTS(SELECT TOP 1 1 FROM tblICItem WHERE intItemId = @intNewItemId)
+				IF(@intCategoryId IS NOT NULL AND @strItemNo IS NOT NULL AND @strDescription IS NOT NULL)
+					BEGIN
+						
+						IF NOT EXISTS(SELECT TOP 1 1 FROM tblICItem WHERE strItemNo = @strItemNo)
 							BEGIN
 
-								SET @ysnResultSuccess = 0
-								SET @strResultMessage = 'Item is not created successfully'  
+								-- ITEM
+								BEGIN TRY
+
+									EXEC [uspICAddItemForCStore]
+										@intCategoryId				= @intCategoryId
+										,@strItemNo					= @strItemNo 
+										,@strShortName				= @strShortName 
+										,@strDescription			= @strDescription
+										,@intEntityUserSecurityId	= @intEntityId
+										,@intItemId					= @intNewItemId OUTPUT 
+									
+									-- =================================================================================
+									-- [START] - ADD ITEM DEBUG
+									-- =================================================================================
+									IF(@ysnDebug = 1)
+										BEGIN
+											SELECT 'New Added Item', * FROM tblICItem WHERE intItemId = @intNewItemId
+										END
+									-- =================================================================================
+									-- [END] - ADD ITEM DEBUG
+									-- =================================================================================
+
+									IF NOT EXISTS(SELECT TOP 1 1 FROM tblICItem WHERE intItemId = @intNewItemId)
+										BEGIN
+											SET @strResultMessage	= 'Item is not created successfully'  
+
+											GOTO ExitWithRollback
+										END
+
+								END TRY
+								BEGIN CATCH
+									SET @strResultMessage	= 'Error Adding new Item: ' + ERROR_MESSAGE()  
+
+									GOTO ExitWithRollback
+								END CATCH
+
+							END
+						ELSE
+							BEGIN
+								SET @strResultMessage	= 'Item number of ' + @strItemNo + ' already exists.'  
 
 								GOTO ExitWithRollback
 							END
 
-					END TRY
-					BEGIN CATCH
-						SET @ysnResultSuccess = 0
-						SET @strResultMessage = 'Error Adding new Item: ' + ERROR_MESSAGE()  
+						
 
-						GOTO ExitWithRollback
-					END CATCH
-
+					END
 			END
 			-- ============================================================================================================================
 			-- [END] - ADD ITEM
@@ -291,33 +311,70 @@ BEGIN
 			-- [START] - ADD ITEM UOM
 			-- ============================================================================================================================
 			BEGIN
-					-- ITEM UOM
-					BEGIN TRY
-						
-						EXEC [uspICAddItemUOMForCStore]
-							@intUnitMeasureId			= @intUnitMeasureId
-							,@intItemId					= @intNewItemId
-							,@strLongUPCCode			= @strLongUpcCode
-							,@ysnStockUnit				= 1
-							,@intEntityUserSecurityId	= @intEntityId 
-							,@intItemUOMId				= @intNewItemUOMId OUTPUT 
 
-						IF NOT EXISTS(SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intNewItemUOMId)
+				IF(@intUnitMeasureId IS NOT NULL AND @intNewItemId IS NOT NULL AND @strLongUpcCode IS NOT NULL)
+					BEGIN		
+
+						IF NOT EXISTS(SELECT TOP 1 1 FROM tblICItemUOM WHERE strLongUPCCode = @strLongUpcCode OR intUpcCode = CONVERT(NUMERIC(32, 0), CAST(@strLongUpcCode AS FLOAT)))
 							BEGIN
 
-								SET @ysnResultSuccess = 0
-								SET @strResultMessage = 'Item UOM is not created successfully'  
+								IF NOT EXISTS(SELECT TOP 1 1 FROM tblICItemUOM WHERE strUpcCode = dbo.fnUPCAtoUPCE(@strLongUPCCode))	
+									BEGIN
+										
+										-- ITEM UOM
+										BEGIN TRY
+
+											EXEC [uspICAddItemUOMForCStore]
+												@intUnitMeasureId			= @intUnitMeasureId
+												,@intItemId					= @intNewItemId
+												,@strLongUPCCode			= @strLongUpcCode
+												,@ysnStockUnit				= 1
+												,@intEntityUserSecurityId	= @intEntityId 
+												,@intItemUOMId				= @intNewItemUOMId OUTPUT 
+
+											-- =================================================================================
+											-- [START] - ADD ITEM UOM DEBUG
+											-- =================================================================================
+											IF(@ysnDebug = 1)
+												BEGIN
+													SELECT 'New Added Item Uom', * FROM tblICItemUOM WHERE intItemUOMId = @intNewItemUOMId
+												END
+											-- =================================================================================
+											-- [END] - ADD ITEM UOM DEBUG
+											-- =================================================================================
+
+											IF NOT EXISTS(SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intNewItemUOMId)
+												BEGIN
+													SET @strResultMessage = 'Item UOM is not created successfully'  
+
+													GOTO ExitWithRollback
+												END
+
+										END TRY
+										BEGIN CATCH
+											SET @strResultMessage = 'Error Adding new Item UOM: ' + ERROR_MESSAGE()  
+
+											GOTO ExitWithRollback
+										END CATCH
+
+									END
+								ELSE
+									BEGIN
+										SET @strResultMessage = 'Short UPC of ' + dbo.fnUPCAtoUPCE(@strLongUPCCode) + ' already exists.'  
+
+										GOTO ExitWithRollback
+									END
+
+							END
+						ELSE
+							BEGIN
+								SET @strResultMessage = 'Long UPC of ' + @strLongUPCCode + ' already exists.'  
 
 								GOTO ExitWithRollback
 							END
+						
 
-					END TRY
-					BEGIN CATCH
-						SET @ysnResultSuccess = 0
-						SET @strResultMessage = 'Error Adding new Item UOM: ' + ERROR_MESSAGE()  
-
-						GOTO ExitWithRollback
-					END CATCH
+					END			
 			END
 			-- ============================================================================================================================
 			-- [END] - ADD ITEM UOM
@@ -358,18 +415,18 @@ BEGIN
 						intCompanyLocationId		= st.intCompanyLocationId,
 
 						-- Item Location
-						ysnUseTaxFlag1				= ISNULL(catLoc.ysnUseTaxFlag1, 0),
-						ysnUseTaxFlag2				= ISNULL(catLoc.ysnUseTaxFlag2, 0),
-						ysnUseTaxFlag3				= ISNULL(catLoc.ysnUseTaxFlag3, 0),
-						ysnUseTaxFlag4				= ISNULL(catLoc.ysnUseTaxFlag4, 0),
-						ysnBlueLaw1					= ISNULL(catLoc.ysnBlueLaw1, 0),
-						ysnBlueLaw2					= ISNULL(catLoc.ysnBlueLaw2, 0),
-						ysnFoodStampable			= ISNULL(catLoc.ysnFoodStampable, 0),
-						ysnReturnable				= ISNULL(catLoc.ysnReturnable, 0),
-						ysnSaleable					= ISNULL(catLoc.ysnSaleable, 0),
-						ysnPrePriced				= ISNULL(catLoc.ysnPrePriced, 0),
-						ysnIdRequiredLiquor			= ISNULL(catLoc.ysnIdRequiredLiquor, 0),
-						ysnIdRequiredCigarette		= ISNULL(catLoc.ysnIdRequiredCigarette, 0),
+						ysnUseTaxFlag1				= ISNULL(catLoc.ysnUseTaxFlag1, CAST(0 AS BIT)),
+						ysnUseTaxFlag2				= ISNULL(catLoc.ysnUseTaxFlag2, CAST(0 AS BIT)),
+						ysnUseTaxFlag3				= ISNULL(catLoc.ysnUseTaxFlag3, CAST(0 AS BIT)),
+						ysnUseTaxFlag4				= ISNULL(catLoc.ysnUseTaxFlag4, CAST(0 AS BIT)),
+						ysnBlueLaw1					= ISNULL(catLoc.ysnBlueLaw1, CAST(0 AS BIT)),
+						ysnBlueLaw2					= ISNULL(catLoc.ysnBlueLaw2, CAST(0 AS BIT)),
+						ysnFoodStampable			= ISNULL(catLoc.ysnFoodStampable, CAST(0 AS BIT)),
+						ysnReturnable				= ISNULL(catLoc.ysnReturnable, CAST(0 AS BIT)),
+						ysnSaleable					= ISNULL(catLoc.ysnSaleable, CAST(0 AS BIT)),
+						ysnPrePriced				= ISNULL(catLoc.ysnPrePriced, CAST(0 AS BIT)),
+						ysnIdRequiredLiquor			= ISNULL(catLoc.ysnIdRequiredLiquor, CAST(0 AS BIT)),
+						ysnIdRequiredCigarette		= ISNULL(catLoc.ysnIdRequiredCigarette, CAST(0 AS BIT)),
 						intProductCodeId			= catLoc.intProductCodeId,
 						intFamilyId					= ISNULL(@intFamilyId, catLoc.intFamilyId),
 						intClassId					= ISNULL(@intClassId, catLoc.intClassId),
@@ -401,33 +458,44 @@ BEGIN
 						ON udt.intStoreId = st.intStoreId
 
 
+					-- =================================================================================
+					-- [START] - ADD ITEM LOCATION DEBUG
+					-- =================================================================================
+					IF(@ysnDebug = 1)
+						BEGIN
+								SELECT '@tempCStoreLocation', * FROM @tempCStoreLocation
+								SELECT '@tblCStoreItemPricing', * FROM @tblCStoreItemPricing
+						END
+					-- =================================================================================
+					-- [END] - ADD ITEM LOCATION DEBUG
+					-- =================================================================================
 
 
 					IF EXISTS(SELECT TOP 1 1 FROM @tempCStoreLocation)
 						BEGIN
 							
-							DECLARE @intStoreId_New				INT,
-									@intCompanyLocationId_New	INT,
-									@ysnUseTaxFlag1_New			BIT,
-									@ysnUseTaxFlag2_New			BIT,
-									@ysnUseTaxFlag3_New			BIT,
-									@ysnUseTaxFlag4_New			BIT,
-									@ysnBlueLaw1_New			BIT,
-									@ysnBlueLaw2_New			BIT,
-									@ysnFoodStampable_New		BIT,
-									@ysnReturnable_New			BIT,
-									@ysnSaleable_New			BIT,
-									@ysnPrePriced_New			BIT,
-									@ysnIdRequiredLiquor_New	BIT,
-									@ysnIdRequiredCigarette_New	BIT,
-									@intProductCodeId_New		INT,
-									@intFamilyId_New			INT,
-									@intClassId_New				INT,
-									@intMinimumAge_New			INT,
+							DECLARE @intStoreId_New					INT,
+									@intCompanyLocationId_New		INT,
+									@ysnUseTaxFlag1_New				BIT,
+									@ysnUseTaxFlag2_New				BIT,
+									@ysnUseTaxFlag3_New				BIT,
+									@ysnUseTaxFlag4_New				BIT,
+									@ysnBlueLaw1_New				BIT,
+									@ysnBlueLaw2_New				BIT,
+									@ysnFoodStampable_New			BIT,
+									@ysnReturnable_New				BIT,
+									@ysnSaleable_New				BIT,
+									@ysnPrePriced_New				BIT,
+									@ysnIdRequiredLiquor_New		BIT,
+									@ysnIdRequiredCigarette_New		BIT,
+									@intProductCodeId_New			INT,
+									@intFamilyId_New				INT,
+									@intClassId_New					INT,
+									@intMinimumAge_New				INT,
 
-									@dblStandardCost_New		NUMERIC(18, 6),
-									@dblLastCost_New			NUMERIC(18, 6),
-									@dblSalePrice_New			NUMERIC(18, 6)
+									@dblStandardCost_New			NUMERIC(18, 6),
+									@dblLastCost_New				NUMERIC(18, 6),
+									@dblSalePrice_New				NUMERIC(18, 6)
 
 
 							WHILE EXISTS(SELECT TOP 1 1 FROM @tempCStoreLocation)
@@ -454,7 +522,20 @@ BEGIN
 											@intMinimumAge_New			= intMinimumAge
 									FROM @tempCStoreLocation
 
+									
+									-- =================================================================================
+									-- [START] - ADD ITEM LOCATION DEBUG
+									-- =================================================================================
+									IF(@ysnDebug = 1)
+										BEGIN
+												SELECT 'LOOP', @intStoreId_New, @intCompanyLocationId_New, @ysnUseTaxFlag1_New, @ysnUseTaxFlag2_New, @ysnUseTaxFlag3_New, @ysnUseTaxFlag4_New, @ysnBlueLaw1_New, @ysnBlueLaw2_New, @ysnFoodStampable_New,
+															   @ysnReturnable_New, @ysnSaleable_New, @ysnPrePriced_New, @ysnIdRequiredLiquor_New, @ysnIdRequiredCigarette_New, @intProductCodeId_New, @intFamilyId_New, @intClassId_New, @intMinimumAge_New
+										END
+									-- =================================================================================
+									-- [END] - ADD ITEM LOCATION DEBUG
+									-- =================================================================================
 
+	
 									-- ITEM LOCATION
 									BEGIN TRY
 										
@@ -481,11 +562,20 @@ BEGIN
 											,@intVendorId				= @intVendorId
 											,@intEntityUserSecurityId	= @intEntityId
 											,@intItemLocationId			= @intNewItemLocationId OUTPUT 
-						
+										
+										-- =================================================================================
+										-- [START] - ADD ITEM UOM DEBUG
+										-- =================================================================================
+										IF(@ysnDebug = 1)
+											BEGIN
+												SELECT 'New Added Item Location', * FROM tblICItemLocation WHERE intItemLocationId = @intNewItemLocationId
+											END
+										-- =================================================================================
+										-- [END] - ADD ITEM UOM DEBUG
+										-- =================================================================================
+
 										IF NOT EXISTS(SELECT TOP 1 1 FROM tblICItemLocation WHERE intItemLocationId = @intNewItemLocationId)
 											BEGIN
-
-												SET @ysnResultSuccess = 0
 												SET @strResultMessage = 'Item Location is not created successfully'  
 
 												GOTO ExitWithRollback
@@ -502,6 +592,17 @@ BEGIN
 													,@strVendorProduct			= @strVendorProduct
 													,@intEntityUserSecurityId	= @intEntityId 
 													,@intItemVendorXrefId		= @intNewItemVendorXrefId OUTPUT 
+												
+												-- =================================================================================
+												-- [START] - ADD ITEM VENDOR DEBUG
+												-- =================================================================================
+												IF(@ysnDebug = 1)
+													BEGIN
+														SELECT 'New Added Item Vendor', * FROM tblICItemVendorXref WHERE intItemVendorXrefId = @intNewItemVendorXrefId
+													END
+												-- =================================================================================
+												-- [END] - ADD ITEM VENDOR DEBUG
+												-- =================================================================================
 
 												IF NOT EXISTS(SELECT TOP 1 1 FROM tblICItemVendorXref WHERE intItemVendorXrefId = @intNewItemVendorXrefId)
 													BEGIN
@@ -538,10 +639,19 @@ BEGIN
 															,@intEntityUserSecurityId	= @intEntityId
 															,@intItemPricingId			= @intNewItemPricingId OUTPUT
 
+														-- =================================================================================
+														-- [START] - ADD ITEM PRICING DEBUG
+														-- =================================================================================
+														IF(@ysnDebug = 1)
+															BEGIN
+																SELECT 'New Added Item Pricing', * FROM tblICItemPricing WHERE intItemPricingId = @intNewItemPricingId
+															END
+														-- =================================================================================
+														-- [END] - ADD ITEM PRICING DEBUG
+														-- =================================================================================
+
 														IF NOT EXISTS(SELECT TOP 1 1 FROM tblICItemPricing WHERE intItemPricingId = @intNewItemPricingId)
 															BEGIN
-
-																SET @ysnResultSuccess = 0
 																SET @strResultMessage = 'Item Pricing is not created successfully'  
 
 																GOTO ExitWithRollback
@@ -553,16 +663,20 @@ BEGIN
 
 									END TRY
 									BEGIN CATCH
-										SET @ysnResultSuccess = 0
 										SET @strResultMessage = 'Error Adding new Item Location: ' + ERROR_MESSAGE()  
 
 										GOTO ExitWithRollback
 									END CATCH
 
 
+									SET @intNewItemLocationId		= NULL
+									SET @intNewItemPricingId		= NULL
+									SET @intNewItemVendorXrefId		= NULL
 
 
-									DELETE @tempCStoreLocation WHERE intStoreId = @intStoreId_New
+									DELETE @tempCStoreLocation 
+									WHERE intStoreId = @intStoreId_New
+										AND intCompanyLocationId = @intCompanyLocationId_New
 								END
 						END
 
@@ -594,15 +708,15 @@ BEGIN
 			END
 
 
-		
-			
+	
+
 			GOTO ExitWithCommit
 
 	END TRY
 
 	BEGIN CATCH
 		SET @ysnResultSuccess = CAST(0 AS BIT)
-		SET @strResultMessage = ERROR_MESSAGE()  
+		SET @strResultMessage = 'End script error: ' + ERROR_MESSAGE()  
 
 		GOTO ExitWithRollback
 	END CATCH
@@ -625,11 +739,13 @@ ExitWithCommit:
 
 
 ExitWithRollback:
+		SET @intNewItemId		= 0
+		SET @ysnResultSuccess	= 0
+
 		IF @InitTranCount = 0
 			BEGIN
 				IF ((XACT_STATE()) <> 0)
 				BEGIN
-					PRINT 'Will Rollback Transaction.'
 					SET @strResultMessage = @strResultMessage + '. Will Rollback Transaction.'
 
 					ROLLBACK TRANSACTION
@@ -640,7 +756,6 @@ ExitWithRollback:
 			BEGIN
 				IF ((XACT_STATE()) <> 0)
 					BEGIN
-						PRINT 'Will Rollback to Save point.'
 						SET @strResultMessage = @strResultMessage + '. Will Rollback to Save point.'
 
 						ROLLBACK TRANSACTION @Savepoint
