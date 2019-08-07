@@ -896,7 +896,7 @@ BEGIN TRY
 		,[intLoadDistributionHeaderId]			= TR.intLoadDistributionHeaderId
 		,intTruckDriverId						= TR.intTruckDriverId
 		,intTruckDriverReferenceId				= TR.intTruckDriverReferenceId
-		,ysnImpactInventory						= TR.ysnImpactInventory
+		,ysnImpactInventory						= ISNULL(TR.ysnImpactInventory, 0)
 	FROM #tmpSourceTableFinal TR
 	ORDER BY TR.intLoadDistributionDetailId, intId DESC
 
