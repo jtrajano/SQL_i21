@@ -5,5 +5,6 @@
 	[strDescription] NVARCHAR(100) NULL,
 	[strContact] NVARCHAR(100) NULL,
 	[ysnUserShipperWeight] BIT NOT NULL DEFAULT(0),
-	[intVendorType] INT NOT NULL
+	[strVendorType] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
+	[intVendorType] INT DEFAULT(0) NOT NULL
 )

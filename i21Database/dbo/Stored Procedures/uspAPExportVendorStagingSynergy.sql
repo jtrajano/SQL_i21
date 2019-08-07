@@ -47,6 +47,7 @@ INTO tblEMEntityToContactStaging
 FROM tblEMEntityToContact contact
 INNER JOIN tblEMEntityStaging entStg
 	ON contact.intEntityId = entStg.intEntityId
+WHERE contact.ysnDefaultContact = 1
 
 --GET ALL OF CONTACT DATA
 SELECT
