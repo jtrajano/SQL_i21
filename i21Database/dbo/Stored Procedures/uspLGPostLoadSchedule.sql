@@ -100,12 +100,14 @@ BEGIN TRY
 						FROM tblLGLoad L
 						JOIN tblARInvoice I ON L.intLoadId = I.intLoadId
 						WHERE L.intLoadId = @intLoadId
+						AND I.ysnReturned = 0 and I.strTransactionType <> 'Credit Memo'
 						)
 				BEGIN
 					SELECT TOP 1 @strInvoiceNo = I.strInvoiceNumber
 					FROM tblLGLoad L
 					JOIN tblARInvoice I ON L.intLoadId = I.intLoadId
 					WHERE L.intLoadId = @intLoadId
+						AND I.ysnReturned = 0 and I.strTransactionType <> 'Credit Memo'
 
 					SET @strMsg = 'Invoice ' + @strInvoiceNo + ' has been generated for ' + @strLoadNumber + '. Cannot unpost. Please delete the invoice and try again.';
 
