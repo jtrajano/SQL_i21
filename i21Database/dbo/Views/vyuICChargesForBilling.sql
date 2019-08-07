@@ -84,6 +84,8 @@ SELECT
 	,[ysnAccrue]								= ReceiptCharge.ysnAccrue
 	,LG.strLoadNumber
 	,LG.intLoadDetailId
+	,intLoadShipmentId							= ReceiptCharge.intLoadShipmentId
+	,intLoadShipmentCostId						= ReceiptCharge.intLoadShipmentCostId
 FROM 
 	tblICInventoryReceiptCharge ReceiptCharge  INNER JOIN tblICItem Item 
 		ON ReceiptCharge.intChargeId = Item.intItemId
@@ -261,7 +263,8 @@ SELECT
 	,[ysnAccrue]								= ReceiptCharge.ysnAccrue
 	,LG.strLoadNumber
 	,LG.intLoadDetailId
-
+	,[intLoadShipmentId]						= ReceiptCharge.intLoadShipmentId
+	,[intLoadShipmentCostId]					= ReceiptCharge.intLoadShipmentCostId
 FROM tblICInventoryReceiptCharge ReceiptCharge INNER JOIN tblICItem Item 
 		ON ReceiptCharge.intChargeId = Item.intItemId
 

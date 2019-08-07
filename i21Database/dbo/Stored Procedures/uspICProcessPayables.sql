@@ -8,8 +8,6 @@ BEGIN
 	-- Generate Payables
 	DECLARE @voucherPayable VoucherPayable
 	DECLARE @voucherPayableTax VoucherDetailTax
-	DECLARE @ysnCreateOtherCostPayable BIT
-	SELECT @ysnCreateOtherCostPayable = ysnCreateOtherCostPayable FROM tblCTCompanyPreference
 
 	IF(@intReceiptId IS NOT NULL)
 	BEGIN
@@ -37,7 +35,8 @@ BEGIN
 			,[intInventoryShipmentChargeId]		
 			,[strLoadShipmentNumber]
 			,[intLoadShipmentId]				
-			,[intLoadShipmentDetailId]			
+			,[intLoadShipmentDetailId]	
+			,[intLoadShipmentCostId]		
 			,[intItemId]						
 			,[intPurchaseTaxGroupId]			
 			,[strMiscDescription]				
@@ -89,8 +88,9 @@ BEGIN
 			,GP.[intInventoryShipmentItemId]		
 			,GP.[intInventoryShipmentChargeId]	
 			,GP.strLoadShipmentNumber 
-			,[intLoadShipmentId] = NULL				
-			,GP.intLoadDetailId
+			,[intLoadShipmentId] = GP.intLoadShipmentId			
+			,[intLoadShipmentDetailId] = GP.intLoadShipmentDetailId
+			,[intLoadShipmentCostId] = GP.intLoadShipmentCostId
 			,GP.[intItemId]						
 			,GP.[intPurchaseTaxGroupId]			
 			,GP.[strMiscDescription]				
@@ -241,7 +241,7 @@ BEGIN
 				AND ItemLocation.intLocationId = ShipmentCharges.intLocationId
 			WHERE Shipment.intInventoryShipmentId = @intShipmentId
 				AND Shipment.ysnPosted = 1
-				AND (ShipmentCharges.intContractHeaderId IS NOT NULL AND @ysnCreateOtherCostPayable = 1 OR ShipmentCharges.intContractHeaderId IS NULL)
+
 	END
 
 
@@ -310,7 +310,8 @@ BEGIN
 			,[intInventoryShipmentChargeId]		
 			,[strLoadShipmentNumber]
 			,[intLoadShipmentId]				
-			,[intLoadShipmentDetailId]			
+			,[intLoadShipmentDetailId]		
+			,[intLoadShipmentCostId]		
 			,[intItemId]						
 			,[intPurchaseTaxGroupId]			
 			,[strMiscDescription]				
@@ -362,8 +363,9 @@ BEGIN
 			,GP.[intInventoryShipmentItemId]		
 			,GP.[intInventoryShipmentChargeId]		
 			,[strLoadShipmentNumber] = NULL 
-			,[intLoadShipmentId] = NULL				
-			,[intLoadShipmentDetailId] = NULL			
+			,GP.[intLoadShipmentId]				
+			,GP.[intLoadShipmentDetailId]	
+			,GP.[intLoadShipmentCostId]			
 			,GP.[intItemId]						
 			,GP.[intPurchaseTaxGroupId]			
 			,GP.[strMiscDescription]				
