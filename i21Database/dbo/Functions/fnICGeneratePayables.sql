@@ -1,4 +1,4 @@
-ALTER FUNCTION dbo.fnICGeneratePayables (@intReceiptId INT, @ysnPosted BIT)
+CREATE FUNCTION dbo.fnICGeneratePayables (@intReceiptId INT, @ysnPosted BIT)
 RETURNS @table TABLE
 (
   [intEntityVendorId]			    INT NULL 
