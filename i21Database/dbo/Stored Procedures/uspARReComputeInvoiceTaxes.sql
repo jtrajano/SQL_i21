@@ -155,6 +155,7 @@ WHILE EXISTS(SELECT NULL FROM @InvoiceDetail)
            ,[ysnTaxExempt]
 		   ,[ysnTaxOnly]
 		   ,[ysnAddToCost]
+		   ,[ysnInvalidSetup]
 		   ,[strNotes]
 		   ,[intUnitMeasureId] 
            ,[intConcurrencyId])		
@@ -179,6 +180,7 @@ WHILE EXISTS(SELECT NULL FROM @InvoiceDetail)
 			,[ysnTaxExempt]
 			,[ysnTaxOnly]
 			,[ysnAddToCost]
+			,[ysnInvalidSetup]
 			,[strNotes]
 			,[intUnitMeasureId] 
 			,1

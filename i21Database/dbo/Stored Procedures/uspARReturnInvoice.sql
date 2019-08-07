@@ -324,6 +324,7 @@ INSERT INTO @LineItemTaxes(
 	,[ysnCheckoffTax]
 	,[ysnTaxExempt]
 	,[ysnTaxOnly]
+	,[ysnInvalidSetup]
 	,[strNotes]
 	,[intTempDetailIdForTaxes]
 )
@@ -345,6 +346,7 @@ SELECT
 	,[ysnCheckoffTax]			= ARIDT.[ysnCheckoffTax]
 	,[ysnTaxExempt]				= ARIDT.[ysnTaxExempt]
 	,[ysnTaxOnly]				= ARIDT.[ysnTaxOnly]
+	,[ysnInvalidSetup]			= ARIDT.[ysnInvalidSetup]
 	,[strNotes]					= ARIDT.[strNotes]
 	,[intTempDetailIdForTaxes]	= EFI.[intTempDetailIdForTaxes]
 FROM
