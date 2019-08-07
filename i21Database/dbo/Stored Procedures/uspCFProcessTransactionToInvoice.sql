@@ -883,7 +883,49 @@ EXEC [dbo].[uspARProcessInvoicesByBatch]
 
 IF (@ErrorMessage IS NULL)
 	BEGIN
-		COMMIT TRANSACTION
+		IF (@ErrorMessage IS NULL OR @ErrorMessage = '')
+		BEGIN
+
+		DECLARE @intInvoiceId INT
+
+		--SELECT TOP 1 @intInvoiceId = intInvoiceId FROM tblARInvoiceIntegrationLogDetail where intIntegrationLogId = @LogId AND ISNULL(ysnSuccess,0) = 1
+
+		--UPDATE tblCFTransaction SET intInvoiceId = @intInvoiceId, ysnPosted = @Post 
+		--WHERE intTransactionId = @TransactionId
+
+			UPDATE CFTran
+			SET 
+				 CFTran.ysnPosted	 = ARL.ysnPosted
+				,CFTran.intInvoiceId = ARL.intInvoiceId
+			FROM
+			tblCFTransaction CFTran
+			INNER JOIN tblARInvoice ARL
+			ON CFTran.intTransactionId = ARL.intTransactionId
+			WHERE CFTran.intTransactionId = @TransactionId
+
+
+			IF (@Post = 1)
+			BEGIN
+				UPDATE tblCFCard SET dtmLastUsedDated = @transactionDate WHERE intCardId = @intCardId AND ( dtmLastUsedDated < @transactionDate OR dtmLastUsedDated IS NULL)
+			END
+			ELSE
+			BEGIN
+				select top 1 @transactionDate = dtmTransactionDate from tblCFTransaction where intCardId = @intCardId AND ysnPosted = 1 order by dtmTransactionDate desc 
+				UPDATE tblCFCard SET dtmLastUsedDated = @transactionDate WHERE intCardId = @intCardId
+			END
+
+		END
+
+		IF((SELECT COUNT(1) FROM tblCFTransaction WHERE intTransactionId =  @TransactionId AND ISNULL(intInvoiceId,0) != 0) > 0 )
+		BEGIN
+			COMMIT TRANSACTION
+		END
+		ELSE
+		BEGIN
+			SET @ErrorMessage = 'Failed to link cf transaction and invoice'
+			ROLLBACK TRANSACTION
+		END
+		
 	END
 ELSE
 	BEGIN
@@ -891,66 +933,4 @@ ELSE
 	END
 
 
-IF (@ErrorMessage IS NULL OR @ErrorMessage = '')
-BEGIN
 
-DECLARE @intInvoiceId INT
-
---SELECT TOP 1 @intInvoiceId = intInvoiceId FROM tblARInvoiceIntegrationLogDetail where intIntegrationLogId = @LogId AND ISNULL(ysnSuccess,0) = 1
-
---UPDATE tblCFTransaction SET intInvoiceId = @intInvoiceId, ysnPosted = @Post 
---WHERE intTransactionId = @TransactionId
-
-UPDATE CFTran
-		SET 
-			 CFTran.ysnPosted	 = ARL.ysnPosted
-			,CFTran.intInvoiceId = ARL.intInvoiceId
-		FROM
-		tblCFTransaction CFTran
-		INNER JOIN tblARInvoice ARL
-		ON CFTran.intTransactionId = ARL.intTransactionId
-		WHERE CFTran.intTransactionId = @TransactionId
-
-
-	IF (@Post = 1)
-		BEGIN
-			UPDATE tblCFCard SET dtmLastUsedDated = @transactionDate WHERE intCardId = @intCardId AND ( dtmLastUsedDated < @transactionDate OR dtmLastUsedDated IS NULL)
-		END
-		ELSE
-		BEGIN
-			select top 1 @transactionDate = dtmTransactionDate from tblCFTransaction where intCardId = @intCardId AND ysnPosted = 1 order by dtmTransactionDate desc 
-			UPDATE tblCFCard SET dtmLastUsedDated = @transactionDate WHERE intCardId = @intCardId
-		END
-
-END
-
-
---IF (@CreatedIvoices IS NOT NULL AND @ErrorMessage IS NULL)
---BEGIN
---	UPDATE tblCFTransaction 
---	SET intInvoiceId = @CreatedIvoices,
---		ysnPosted = @Post 
---	WHERE intTransactionId = @TransactionId
-
-	
-
---END
-
---IF (@UpdatedIvoices IS NOT NULL AND @ErrorMessage IS NULL)
---BEGIN
---	UPDATE tblCFTransaction 
---	SET ysnPosted = @Post 
---	WHERE intTransactionId = @TransactionId 
-
-
---	IF (@Post = 1)
---	BEGIN
---		UPDATE tblCFCard SET dtmLastUsedDated = @transactionDate WHERE intCardId = @intCardId AND ( dtmLastUsedDated < @transactionDate OR dtmLastUsedDated IS NULL)
---	END
---	ELSE
---	BEGIN
---		select top 1 @transactionDate = dtmTransactionDate from tblCFTransaction where intCardId = @intCardId AND ysnPosted = 1 order by dtmTransactionDate desc 
---		UPDATE tblCFCard SET dtmLastUsedDated = @transactionDate WHERE intCardId = @intCardId
---	END
-
---END
