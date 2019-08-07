@@ -570,7 +570,7 @@ BEGIN
 				,dtmDateCreated
 				,intCreatedByUserId
 				,strDataSource
-				,intShipFromEntityId	
+				,intShipFromEntityId
 			)
 			VALUES (
 				/*strReceiptNumber*/			@receiptNumber
@@ -907,6 +907,8 @@ BEGIN
 				,dtmDateCreated
 				,intCreatedByUserId
 				,strActualCostId
+				,intLoadShipmentId
+				,intLoadShipmentDetailId
 		)
 		SELECT	intInventoryReceiptId	= @inventoryReceiptId
 				,intLineNo				= ISNULL(RawData.intContractDetailId, 0)
@@ -1001,6 +1003,8 @@ BEGIN
 				,dtmDateCreated = GETDATE()
 				,intCreatedByUserId = @intUserId
 				,strActualCostId				= RawData.strActualCostId
+				,RawData.intLoadShipmentId
+				,RawData.intLoadShipmentDetailId
 		FROM	@ReceiptEntries RawData INNER JOIN @DataForReceiptHeader RawHeaderData 
 					ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(RawData.intEntityVendorId, 0) 
 					AND ISNULL(RawHeaderData.BillOfLadding,0) = ISNULL(RawData.strBillOfLadding,0) 
@@ -1426,6 +1430,8 @@ BEGIN
 				,[ysnAllowVoucher]
 				,dtmDateCreated
 				,intCreatedByUserId
+				,intLoadShipmentId
+				,intLoadShipmentCostId
 		)
 		SELECT 
 				[intInventoryReceiptId]		= @inventoryReceiptId
@@ -1456,7 +1462,8 @@ BEGIN
 				,[ysnAllowVoucher]			= RawData.ysnAllowVoucher
 				,GETDATE()
 				,@intUserId
-
+				,intLoadShipmentId			= RawData.intLoadShipmentId
+				,intLoadShipmentCostId		= RawData.intLoadShipmentCostId
 		FROM	@OtherCharges RawData INNER JOIN @DataForReceiptHeader RawHeaderData 
 					ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(RawData.intEntityVendorId, 0)
 					AND ISNULL(RawHeaderData.BillOfLadding,0) = ISNULL(RawData.strBillOfLadding,0) 
