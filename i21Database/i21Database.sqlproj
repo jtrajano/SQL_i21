@@ -7983,6 +7983,7 @@
     <Build Include="dbo\Functions\fnICGetShipmentScheduleIdForReceiptCharge.sql" />
     <Build Include="dbo\Stored Procedures\uspMFRecipeDateRangeValidation.sql" />
     <Build Include="dbo\Stored Procedures\uspSTAddNewPricebookItem.sql" />
+	<Build Include="dbo\Stored Procedures\uspMBPostMeterReadingValidation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
