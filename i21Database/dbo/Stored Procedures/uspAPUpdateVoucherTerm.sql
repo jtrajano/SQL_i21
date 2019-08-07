@@ -28,7 +28,7 @@ BEGIN
 		SET 
 			A.intTermsId = @termId,
 			A.dtmDueDate = ISNULL(dbo.fnGetDueDateBasedOnTerm(A.dtmDate, A.intTermsId), A.dtmDueDate),
-			A.dblDiscount = CASE WHEN A.ysnDiscountOverride = 1 THEN A.dblDiscount ELSE dbo.fnGetDiscountBasedOnTerm(GETDATE(), A.dtmDate, A.intTermsId, A.dblTotal) END,
+			A.dblDiscount = CASE WHEN A.ysnDiscountOverride = 1 THEN A.dblDiscount ELSE dbo.fnGetDiscountBasedOnTerm(GETDATE(), A.dtmBillDate, A.intTermsId, A.dblTotal) END,
 			A.dtmDeferredInterestDate = (CASE WHEN term.ysnDeferredPay = 1 THEN A.dtmBillDate ELSE NULL END)
 	OUTPUT 
 		inserted.intBillId,

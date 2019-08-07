@@ -117,7 +117,7 @@ BEGIN
 											(
 												paySchedDetails.dblDiscount,
 												CASE WHEN C.intTransactionType = 1 
-													THEN dbo.fnGetDiscountBasedOnTerm(A.dtmDatePaid, C.dtmDate, C.intTermsId, @amountDue) 
+													THEN dbo.fnGetDiscountBasedOnTerm(A.dtmDatePaid, C.dtmBillDate, C.intTermsId, @amountDue) 
 												ELSE 0 END
 											)
 										END),
