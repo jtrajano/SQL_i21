@@ -23,6 +23,9 @@ FROM
 	SELECT intResult as intResultId, strBatchId as strBatchNumber, intTransactionId, strTransactionId, strTransactionType, strDescription, dtmDate, strTransactionType, intEntityId
 	FROM tblSTPostResult
 	UNION ALL
+	SELECT intResult as intResultId, strBatchId as strBatchNumber, intTransactionId, strTransactionId, strTransactionType, strDescription, dtmDate, strTransactionType, intEntityId
+	FROM tblTRPostResult
+	UNION ALL
 	SELECT ARIILD.intIntegrationLogDetailId as intResultId, ARIILD.strBatchId as strBatchNumber, ARIILD.intInvoiceId as intTransactionId, ARIILD.[strPostedTransactionId] as strTransactionId, ARIILD.strPostingMessage as strMessage, ARIIL.dtmDate as dtmDate, ARIILD.strTransactionType, ARIIL.[intEntityId] as intEntityId
 	FROM tblARInvoiceIntegrationLogDetail ARIILD
 	INNER JOIN
