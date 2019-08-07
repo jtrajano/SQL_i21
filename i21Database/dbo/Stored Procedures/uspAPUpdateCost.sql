@@ -133,7 +133,7 @@ EXEC uspAPUpdateVoucherTotal @billIds
 
 --UPDATE DISCOUNT
 UPDATE Voucher
-	SET Voucher.dblDiscount = dbo.fnGetDiscountBasedOnTerm(GETDATE(), Voucher.dtmDate, Voucher.intTermsId, Voucher.dblTotal)
+	SET Voucher.dblDiscount = dbo.fnGetDiscountBasedOnTerm(GETDATE(), Voucher.dtmBillDate, Voucher.intTermsId, Voucher.dblTotal)
 FROM tblAPBill Voucher
 WHERE Voucher.intBillId = @voucherId
 
