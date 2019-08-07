@@ -6,16 +6,16 @@ SELECT
 	,ISNULL((CASE WHEN A.ysnSubCurrency > 0 --CHECK IF SUB-CURRENCY
 	THEN (CASE 
 			WHEN A.intWeightUOMId > 0 
-				THEN CAST(A.dblCost / ISNULL(A.intSubCurrencyCents,1)  * A.dblNetWeight * A.dblWeightUnitQty / ISNULL(A.dblCostUnitQty,1) AS DECIMAL(18,2)) --Formula With Weight UOM
+				THEN CAST(A.dblCost / ISNULL(NULLIF(A.intSubCurrencyCents,0),1)  * A.dblNetWeight * A.dblWeightUnitQty / ISNULL(NULLIF(A.dblCostUnitQty,0),1) AS DECIMAL(18,2)) --Formula With Weight UOM
 			WHEN (A.intQtyToBillUOMId > 0 AND A.intCostUOMId > 0)
-				THEN CAST((A.dblQuantityToBill) *  (A.dblCost / ISNULL(A.intSubCurrencyCents,1))  * (A.dblQtyToBillUnitQty/ ISNULL(A.dblCostUnitQty,1)) AS DECIMAL(18,2))  --Formula With Receipt UOM and Cost UOM
-			ELSE CAST((A.dblQuantityToBill) * (A.dblCost / ISNULL(A.intSubCurrencyCents,1))  AS DECIMAL(18,2))  --Orig Calculation
+				THEN CAST((A.dblQuantityToBill) *  (A.dblCost / ISNULL(NULLIF(A.intSubCurrencyCents,0),1))  * (A.dblQtyToBillUnitQty/ ISNULL(NULLIF(A.dblCostUnitQty,0),1)) AS DECIMAL(18,2))  --Formula With Receipt UOM and Cost UOM
+			ELSE CAST((A.dblQuantityToBill) * (A.dblCost / ISNULL(NULLIF(A.intSubCurrencyCents,0),1))  AS DECIMAL(18,2))  --Orig Calculation
 		END)
 	ELSE (CASE 
 			WHEN A.intWeightUOMId > 0 --CHECK IF SUB-CURRENCY
-				THEN CAST(A.dblCost  * A.dblNetWeight * A.dblWeightUnitQty / ISNULL(A.dblCostUnitQty,1) AS DECIMAL(18,2)) --Formula With Weight UOM
+				THEN CAST(A.dblCost  * A.dblNetWeight * A.dblWeightUnitQty / ISNULL(NULLIF(A.dblCostUnitQty,0),1) AS DECIMAL(18,2)) --Formula With Weight UOM
 			WHEN (A.intQtyToBillUOMId > 0 AND A.intCostUOMId > 0)
-				THEN CAST((A.dblQuantityToBill) *  (A.dblCost)  * (A.dblQtyToBillUnitQty/ ISNULL(A.dblCostUnitQty,1)) AS DECIMAL(18,2))  --Formula With Receipt UOM and Cost UOM
+				THEN CAST((A.dblQuantityToBill) *  (A.dblCost)  * (A.dblQtyToBillUnitQty/ ISNULL(NULLIF(A.dblCostUnitQty,0),1)) AS DECIMAL(18,2))  --Formula With Receipt UOM and Cost UOM
 			ELSE CAST((A.dblQuantityToBill) * (A.dblCost)  AS DECIMAL(18,2))  --Orig Calculation
 		END)
 	END),0) AS dblTotal
