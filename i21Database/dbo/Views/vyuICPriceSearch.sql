@@ -5,7 +5,8 @@ AS
 		,intCurrencyId,intDecimalPlaces,intEntityVendorId,intItemId,intItemLocationId,intItemPricingId,intItemSpecialPricingId,intItemUOMId,intItemUnitMeasureId,intKey = NEWID()
 		,intLocationId,intPricingKey,intSort,intUnitMeasureId,intVendorId,intVendorPricingId,strCategory,strCommodity,strCurrency,strDescription,strDiscountBy,strEntityLocation
 		,strItemNo,strLocationName,strLocationType,strLongUPCCode,strLotTracking,strName,strPricingMethod,strPricingType,strPromotionType,strStatus,strType,strUPC
-		,strUnitMeasure,strUnitType,strUpcCode,strVendorId,strVendorName,ysnAllowPurchase,ysnAllowSale,ysnStockUnit, strFamily, strClass, ysnSaleable, strProductCode, dblGrossMargin
+		,strUnitMeasure,strUnitType,strUpcCode,strVendorId,strVendorName,ysnAllowPurchase,ysnAllowSale,ysnStockUnit, strFamily, strClass, ysnSaleable, strProductCode
+		,dblGrossMargin = CASE WHEN dblSalePrice = 0 AND dblLastCost = 0 THEN 0 ELSE (dblSalePrice - dblLastCost) / ISNULL(NULLIF(dblSalePrice, 0), dblLastCost) END * 100.00
 	FROM (
 		SELECT 'Item Pricing' COLLATE Latin1_General_CI_AS strPricingCategory,
 			dblAccumulatedAmount = NULL, dblAccumulatedQty = NULL, p.dblAmountPercent, p.dblAverageCost, dblDiscount = NULL, dblDiscountThruAmount = NULL, dblDiscountThruQty = NULL, dblDiscountedPrice = NULL
@@ -15,7 +16,7 @@ AS
 		, p.intUnitMeasureId, p.intVendorId, intVendorPricingId = NULL, strCategory = cr.strCategoryCode, strCommodity = cm.strCommodityCode, strCurrency = NULL, p.strDescription, strDiscountBy = NULL, strEntityLocation = NULL
 		, p.strItemNo, p.strLocationName, p.strLocationType, p.strLongUPCCode, strLotTracking = NULL, strName = NULL, p.strPricingMethod, strPricingType = NULL, strPromotionType = NULL
 		, i.strStatus, i.strType, strUPC = p.strLongUPCCode, p.strUnitMeasure, p.strUnitType, p.strUpcCode, p.strVendorId, p.strVendorName, p.ysnAllowPurchase, p.ysnAllowSale, p.ysnStockUnit
-		, strFamily = sf.strSubcategoryId, strClass = sc.strSubcategoryId, il.ysnSaleable, strProductCode = sp.strRegProdCode, dblGrossMargin = ((p.dblSalePrice - p.dblLastCost) / ISNULL(NULLIF(p.dblSalePrice, 0), 1))
+		, strFamily = sf.strSubcategoryId, strClass = sc.strSubcategoryId, il.ysnSaleable, strProductCode = sp.strRegProdCode
 		FROM vyuICGetItemPricing p
 			INNER JOIN tblICItem i ON i.intItemId = p.intItemId
 			LEFT OUTER JOIN tblICCategory cr ON cr.intCategoryId = i.intCategoryId
@@ -36,7 +37,7 @@ AS
 		, intUnitMeasureId = NULL, intVendorId = NULL, p.intVendorPricingId, strCategory = cr.strCategoryCode, strCommodity = cm.strCommodityCode, p.strCurrency, strDescription = i.strDescription, strDiscountBy = NULL, p.strEntityLocation
 		, p.strItemNo, strLocationName = NULL, strLocationType = NULL, strLongUPCCode = NULL, strLotTracking = i.strLotTracking, strName = NULL, strPricingMethod = NULL, strPricingType = NULL, strPromotionType = NULL
 		, strStatus = i.strStatus, strType = i.strType, strUPC = NULL, p.strUnitMeasure, strUnitType = NULL, strUpcCode = NULL, strVendorId = NULL, strVendorName = strName, ysnAllowPurchase = NULL, ysnAllowSale = NULL, ysnStockUnit = NULL
-		, strFamily = NULL, strClass = NULL, ysnSaleable = NULL, strProductCode = NULL, dblGrossMargin = 0
+		, strFamily = NULL, strClass = NULL, ysnSaleable = NULL, strProductCode = NULL
 		FROM vyuICGetItemVendorPricing p
 			INNER JOIN tblICItem i ON i.intItemId = p.intItemId
 			LEFT OUTER JOIN tblICCategory cr ON cr.intCategoryId = i.intCategoryId
@@ -54,7 +55,7 @@ AS
 			, p.strCurrency, p.strDescription, strDiscountBy = NULL, strEntityLocation = NULL, p.strItemNo, p.strLocationName, strLocationType = NULL, strLongUPCCode = NULL
 			, p.strLotTracking, strName = NULL, p.strPricingMethod, strPricingType = NULL, strPromotionType = NULL, p.strStatus, p.strType, p.strUPC, p.strUnitMeasure
 			, strUnitType = um.strUnitType, strUpcCode = p.strUPC, strVendorId = NULL, strVendorName = NULL, ysnAllowPurchase = u.ysnAllowPurchase, ysnAllowSale = u.ysnAllowSale, ysnStockUnit = u.ysnStockUnit
-			, strFamily = sf.strSubcategoryId, strClass = sc.strSubcategoryId, ysnSaleable = il.ysnSaleable, strProductCode = sp.strRegProdCode, dblGrossMargin = ((p.dblUnitPrice - pr.dblLastCost) / ISNULL(NULLIF(p.dblUnitPrice, 0), 1))
+			, strFamily = sf.strSubcategoryId, strClass = sc.strSubcategoryId, ysnSaleable = il.ysnSaleable, strProductCode = sp.strRegProdCode
 		FROM vyuICGetItemPricingLevel p
 			LEFT OUTER JOIN tblICItemLocation il ON il.intItemId = p.intItemId AND p.intLocationId = il.intLocationId
 			LEFT OUTER JOIN tblICItemPricing pr ON pr.intItemLocationId = il.intItemLocationId
@@ -75,7 +76,7 @@ AS
 			, strEntityLocation = NULL, p.strItemNo, p.strLocationName, strLocationType = NULL, strLongUPCCode = NULL, p.strLotTracking, strName = NULL
 			, strPricingMethod = pr.strPricingMethod, strPricingType = NULL, p.strPromotionType, p.strStatus, p.strType, p.strUPC, p.strUnitMeasure, strUnitType = um.strUnitType
 			, strUpcCode = u.strLongUPCCode, strVendorId = NULL, strVendorName = NULL, ysnAllowPurchase = u.ysnAllowPurchase, ysnAllowSale = u.ysnAllowSale, ysnStockUnit = u.ysnStockUnit
-			, strFamily = sf.strSubcategoryId, strClass = sc.strSubcategoryId, ysnSaleable = il.ysnSaleable, strProductCode = sp.strRegProdCode, dblGrossMargin = ((p.dblUnitAfterDiscount - pr.dblLastCost) / ISNULL(NULLIF(p.dblUnitAfterDiscount, 0), 1))
+			, strFamily = sf.strSubcategoryId, strClass = sc.strSubcategoryId, ysnSaleable = il.ysnSaleable, strProductCode = sp.strRegProdCode
 		FROM vyuICGetItemSpecialPricing p
 			LEFT OUTER JOIN tblICItemLocation il ON il.intItemId = p.intItemId AND p.intLocationId = il.intLocationId
 			LEFT OUTER JOIN tblICItemPricing pr ON pr.intItemLocationId = il.intItemLocationId
