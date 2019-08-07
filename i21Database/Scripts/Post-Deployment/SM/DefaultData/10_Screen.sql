@@ -550,6 +550,11 @@ WHERE strNamespace = 'ContractManagement.view.WeightsGrades' AND strModule = N'C
 UPDATE tblSMScreen SET strScreenName = N'Price Contracts',strNamespace = 'ContractManagement.view.PriceContracts' 
 WHERE strNamespace = 'ContractManagement.view.PriceContractsNew' AND strModule = N'Contract Management'
 
+--Include Price Contracts on approval
+
+UPDATE TOP(1) tblSMScreen SET ysnApproval =  1 WHERE strNamespace = 'ContractManagement.view.PriceContracts'
+
+
 ------------------------END Contract Management------------
 GO
 -------------------------LOGISTICS------------
