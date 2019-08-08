@@ -76,41 +76,22 @@ BEGIN
 				@intRetailPriceAdjustmentId		= @intId,
 				@intCurrentUserId				= @UserEntityId,
 				@ysnHasPreviewReport			= 1,
+				@ysnRecap						= @Recap,
 				@ysnSuccess						= @ysnSuccess	OUTPUT,
 				@strMessage						= @strMessage	OUTPUT
 			
-			SET @SuccessfulCount = @SuccessfulCount + 1;
+			IF(@ysnSuccess = 1)
+				BEGIN
+					SET @SuccessfulCount = @SuccessfulCount + 1;
+				END
+			ELSE
+				BEGIN
+					SET @ErrorMessage = @strMessage
+					RETURN
+				END
+			
 
 			DELETE FROM @tmpData WHERE intId = @intId
 		END
-
-
-	--DECLARE CursorTran CURSOR FOR
-	--SELECT intLoadHeaderId
-	--	FROM tblTRLoadHeader  
-	--	WHERE ysnPosted = 0	AND 1=1
-	
-	--SET @SuccessfulCount = 0
-
-	--OPEN CursorTran 
-	--FETCH NEXT FROM CursorTran INTO @intId  
-
-
-	--WHILE @@FETCH_STATUS = 0
-	--	BEGIN
-	--		EXEC [uspTRLoadPosting]
-	--			 @intLoadHeaderId = @intId
-	--			,@intUserId = @UserId
-	--			,@ysnRecap = @Recap
-	--			,@ysnPostOrUnPost = @Post
-
-	--		SET @SuccessfulCount = @SuccessfulCount + 1;
-
-	--		FETCH NEXT FROM CursorTran INTO @intId  
-	--	END
-
-
-	--CLOSE CursorTran
-	--DEALLOCATE CursorTran
 
 END

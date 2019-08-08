@@ -2,12 +2,30 @@
 	@intRetailPriceAdjustmentId		INT,
 	@intCurrentUserId				INT,
 	@ysnHasPreviewReport			BIT,
+	@ysnRecap						BIT,
 	@ysnSuccess						BIT				OUTPUT,
 	@strMessage						NVARCHAR(1000)	OUTPUT
 AS
 BEGIN
+	
+	SET NOCOUNT ON;
+    DECLARE @InitTranCount INT;
+    SET @InitTranCount = @@TRANCOUNT
+	DECLARE @Savepoint NVARCHAR(32) = SUBSTRING(('uspSTUpdateRetailPriceAdjustment' + CONVERT(VARCHAR, @InitTranCount)), 1, 32)
+
 	BEGIN TRY
 		
+
+		IF @InitTranCount = 0
+			BEGIN
+				BEGIN TRANSACTION
+			END		
+		ELSE
+			BEGIN
+				SAVE TRANSACTION @Savepoint
+			END
+
+
 		SET @ysnSuccess = CAST(1 AS BIT)
 		SET @strMessage = ''
 
@@ -182,6 +200,8 @@ BEGIN
 								BEGIN CATCH
 									SET @ysnSuccess = CAST(0 AS BIT)
 									SET @strMessage = 'uspICUpdateItemPricingForCStore: ' + ERROR_MESSAGE()
+
+									GOTO ExitWithRollback
 								END CATCH
 
 								-- Flag as processed
@@ -203,6 +223,8 @@ BEGIN
 					BEGIN
 						SET @ysnSuccess = CAST(0 AS BIT)
 						SET @strMessage = 'There are no Retail Price Adjustment to process. Make sure that there is a record that is not yet Posted.'
+
+						GOTO ExitWithRollback
 					END
 
 
@@ -343,11 +365,26 @@ BEGIN
 						DROP TABLE #tmpUpdateItemPricingForCStore_ItemPricingAuditLog 
 				END
 
+
+				IF(@ysnRecap = 0)
+					BEGIN
+						GOTO ExitWithCommit
+					END
+				ELSE
+					BEGIN
+						SET @ysnSuccess = CAST(1 AS BIT)
+						SET @strMessage = 'Post Recap successfully.'
+
+						GOTO ExitWithRollback
+					END
+
 			END
 		ELSE
 			BEGIN
 				SET @ysnSuccess = CAST(0 AS BIT)
 				SET @strMessage = 'No Posting to Inventory will be executed. No Retail Price Adjustment for this day.'
+
+				GOTO ExitWithRollback
 			END
 		
 	END TRY
@@ -355,5 +392,53 @@ BEGIN
 	BEGIN CATCH
 		SET @ysnSuccess = CAST(0 AS BIT)
 		SET @strMessage = ERROR_MESSAGE()
+
+		GOTO ExitWithRollback
 	End CATCH
 END
+
+
+
+
+ExitWithCommit:
+	IF @InitTranCount = 0
+		BEGIN
+			COMMIT TRANSACTION
+		END
+
+	GOTO ExitPost
+	
+
+
+
+
+ExitWithRollback:
+		SET @ysnSuccess			= CAST(0 AS BIT)
+
+		IF @InitTranCount = 0
+			BEGIN
+				IF ((XACT_STATE()) <> 0)
+				BEGIN
+					SET @strMessage = @strMessage + '. Will Rollback Transaction.'
+
+					ROLLBACK TRANSACTION
+				END
+			END
+			
+		ELSE
+			BEGIN
+				IF ((XACT_STATE()) <> 0)
+					BEGIN
+						SET @strMessage = @strMessage + '. Will Rollback to Save point.'
+
+						ROLLBACK TRANSACTION @Savepoint
+					END
+			END
+			
+				
+		
+		
+	
+
+		
+ExitPost:
