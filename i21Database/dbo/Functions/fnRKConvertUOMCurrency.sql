@@ -55,28 +55,28 @@ BEGIN
 			WHERE intUnitMeasureId = @ToUOMId
 		END
 
-		IF (@FromUOMRate = 1)
-		BEGIN
+		IF (@FromUOMRate = @ToUOMRate)
+		BEGIN			
 			SET @FinalValue = @dblValue
 		END
-		ELSE IF (@FromUOMRate < 1)
+		ELSE IF (@FromUOMRate < @ToUOMRate)
 		BEGIN
 			SET @FinalValue = @dblValue / @FromUOMRate
 		END
-		ELSE IF (@FromUOMRate > 1)
+		ELSE IF (@FromUOMRate > @ToUOMRate)
 		BEGIN
 			SET @FinalValue = @dblValue * @FromUOMRate
 		END
 
-		IF (@ToUOMRate = 1)
+		IF (@ToUOMRate = @FromUOMRate)
 		BEGIN
 			SET @FinalValue = @FinalValue
 		END
-		ELSE IF (@ToUOMRate < 1)
+		ELSE IF (@ToUOMRate < @FromUOMRate)
 		BEGIN
 			SET @FinalValue = @FinalValue / @ToUOMRate
 		END
-		ELSE IF (@ToUOMRate > 1)
+		ELSE IF (@ToUOMRate > @FromUOMRate)
 		BEGIN
 			SET @FinalValue = @FinalValue * @ToUOMRate
 		END
