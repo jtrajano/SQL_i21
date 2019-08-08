@@ -47,6 +47,8 @@ DECLARE @SourceType_NONE AS INT = 0
 		,@SourceType_DELIVERY_SHEET AS INT = 5
 		,@SourceType_PURCHASE_ORDER AS INT = 6
 		,@SourceType_STORE AS INT = 7
+		,@SourceType_STORE_LOTTERY_MODULE AS INT = 8
+
 
 -- Get the entity id
 SELECT	@intEntityId = [intEntityId]
@@ -365,6 +367,7 @@ BEGIN
 			,@SourceType_DELIVERY_SHEET 
 			,@SourceType_PURCHASE_ORDER 
 			,@SourceType_STORE 
+			,@SourceType_STORE_LOTTERY_MODULE
 		)
 			BEGIN
 				-- Source Type Id is invalid or missing.
