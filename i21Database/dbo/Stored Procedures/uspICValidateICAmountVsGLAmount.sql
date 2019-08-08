@@ -25,10 +25,15 @@ DECLARE @result TABLE (
 	,strAccountDescription NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL
 )
 
+DECLARE @strBatchId AS NVARCHAR(50) = NULL 
+
 -- Get the transaction id if @GLEntries is processing only one transaction 
 IF EXISTS (SELECT COUNT(1) FROM (SELECT DISTINCT strTransactionId FROM @GLEntries) N_GLEntries HAVING COUNT(1) = 1)
 BEGIN 
-	SELECT TOP 1 @strTransactionId = strTransactionId FROM @GLEntries
+	SELECT TOP 1 
+		@strTransactionId = strTransactionId 
+		,@strBatchId = strBatchId
+	FROM @GLEntries
 END 
 
 -- Get the inventory value from the Inventory Valuation 
@@ -78,6 +83,7 @@ BEGIN
 			,t.strTransactionId
 			,t.strBatchId
 			,glAccount.intAccountId
+		-- Get the Consume Inventory Transactions 
 		UNION ALL 
 		SELECT	
 			[strTransactionType] = ty.strName
@@ -109,7 +115,84 @@ BEGIN
 			) glAccount
 		WHERE	
 			t.intInTransitSourceLocationId IS NULL 
-			AND ty.strName IN ('Consume', 'Produce')
+			AND ty.strName IN ('Consume')
+		GROUP BY 
+			ty.strName 
+			,t.strTransactionId
+			,t.strBatchId
+			,glAccount.intAccountId
+		-- Get the Produce Inventory Transactions 
+		UNION ALL 
+		SELECT	
+			[strTransactionType] = ty.strName
+			,[strTransactionId] = t.strTransactionId
+			,[strBatchId] = t.strBatchId			
+			,[dblICAmount] = 
+				SUM (
+					ROUND(dbo.fnMultiply(t.dblQty, t.dblCost) + ISNULL(t.dblValue, 0), 2)
+				)
+			,[intAccountId] = glAccount.intAccountId
+		FROM	
+			tblICInventoryTransaction t INNER JOIN tblICInventoryTransactionType ty
+				ON t.intTransactionTypeId = ty.intTransactionTypeId			
+			INNER JOIN tblICItem i
+				ON i.intItemId = t.intItemId 
+			INNER JOIN (
+				SELECT DISTINCT 
+					gl.strTransactionId
+					,gl.strBatchId 					
+				FROM 
+					@GLEntries gl
+			) gl
+				ON t.strTransactionId = gl.strTransactionId 
+				AND t.strBatchId = gl.strBatchId
+			OUTER APPLY dbo.fnGetItemGLAccountAsTable(
+				t.intItemId
+				,t.intItemLocationId
+				,'Work In Progress'
+			) glAccount
+		WHERE	
+			t.intInTransitSourceLocationId IS NULL 
+			AND ty.strName IN ('Produce')
+		GROUP BY 
+			ty.strName 
+			,t.strTransactionId
+			,t.strBatchId
+			,glAccount.intAccountId
+		-- Get the Cost Adjustment from MFG. 
+		UNION ALL 
+		SELECT	
+			[strTransactionType] = ty.strName
+			,[strTransactionId] = t.strTransactionId
+			,[strBatchId] = t.strBatchId			
+			,[dblICAmount] = 
+				SUM (
+					-ROUND(dbo.fnMultiply(t.dblQty, t.dblCost) + ISNULL(t.dblValue, 0), 2)
+				)
+			,[intAccountId] = glAccount.intAccountId
+		FROM	
+			tblICInventoryTransaction t INNER JOIN tblICInventoryTransactionType ty
+				ON t.intTransactionTypeId = ty.intTransactionTypeId			
+			INNER JOIN tblICItem i
+				ON i.intItemId = t.intItemId 
+			INNER JOIN (
+				SELECT DISTINCT 
+					gl.strTransactionId
+					,gl.strBatchId 					
+				FROM 
+					@GLEntries gl
+			) gl
+				ON t.strTransactionId = gl.strTransactionId 
+				AND t.strBatchId = gl.strBatchId
+			OUTER APPLY dbo.fnGetItemGLAccountAsTable(
+				t.intItemId
+				,t.intItemLocationId
+				,'Work In Progress'
+			) glAccount
+		WHERE	
+			t.intInTransitSourceLocationId IS NULL 
+			AND ty.strName IN ('Cost Adjustment')
+			AND t.strTransactionForm IN ('Consume', 'Produce')
 		GROUP BY 
 			ty.strName 
 			,t.strTransactionId
@@ -141,10 +224,19 @@ BEGIN
 	END 
 END 
 
+
+
 -- Get the inventory value from GL 
 BEGIN 
 	IF EXISTS (SELECT TOP 1 1 FROM @GLEntries)
-	AND EXISTS (SELECT TOP 1 1 FROM tblGLDetail gd WHERE gd.strTransactionId = @strTransactionId AND gd.ysnIsUnposted = 0 AND ISNULL(@ysnPost, 0) = 1) 
+	AND EXISTS (
+			SELECT TOP 1 1 
+			FROM tblGLDetail gd 
+			WHERE 
+				gd.strTransactionId = @strTransactionId 
+				AND (gd.ysnIsUnposted = 0 AND ISNULL(@ysnPost, 0) = 1)
+				AND (@strBatchId IS NULL OR gd.strBatchId = @strBatchId)  
+		) 
 	BEGIN 		
 		MERGE INTO @result 
 		AS result
@@ -222,6 +314,7 @@ BEGIN
 					ON ac.intAccountCategoryId = gm.intAccountCategoryId 
 			WHERE 
 				(gd.strTransactionId = @strTransactionId OR @strTransactionId IS NULL) 
+				AND (gd.strBatchId = @strBatchId OR @strBatchId IS NULL) 
 				AND (gd.strTransactionType = @strTransactionType OR @strTransactionType IS NULL) 
 				AND (dbo.fnDateGreaterThanEquals(gd.dtmDate, @dtmDateFrom) = 1 OR @dtmDateFrom IS NULL)
 				AND (dbo.fnDateLessThanEquals(gd.dtmDate, @dtmDateTo) = 1 OR @dtmDateTo IS NULL)
@@ -345,6 +438,7 @@ BEGIN
 					ON ac.intAccountCategoryId = gm.intAccountCategoryId 
 			WHERE 
 				(gd.strTransactionId = @strTransactionId OR @strTransactionId IS NULL) 
+				AND (gd.strBatchId = @strBatchId OR @strBatchId IS NULL) 
 				AND (gd.strTransactionType = @strTransactionType OR @strTransactionType IS NULL) 
 				AND (dbo.fnDateGreaterThanEquals(gd.dtmDate, @dtmDateFrom) = 1 OR @dtmDateFrom IS NULL)
 				AND (dbo.fnDateLessThanEquals(gd.dtmDate, @dtmDateTo) = 1 OR @dtmDateTo IS NULL)
