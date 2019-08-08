@@ -2226,9 +2226,9 @@ FROM (
 															then dbo.fnCTConvertQuantityToTargetCommodityUOM(intPriceUOMId,case when ISNULL(PriceSourceUOMId,0)=0 then intPriceUOMId else PriceSourceUOMId end,ISNULL(dblContractBasis,0))*dblRate 
 											else dbo.fnCTConvertQuantityToTargetCommodityUOM(intPriceUOMId,case when ISNULL(PriceSourceUOMId,0)=0 then intPriceUOMId else PriceSourceUOMId end,ISNULL(dblContractBasis,0)) end end) as dblCanadianContractBasis
 		, case when @ysnCanadianCustomer = 1 then dblFutures
-				else convert(decimal(24,6), case when ISNULL(dblRate,0)=0 then dbo.fnRKGetCurrencyConvertion(case when ysnSubCurrency = 1 then intMainCurrencyId else intCurrencyId end,@intCurrencyUOMId) * dblFutures
-			else case when case when ysnSubCurrency = 1 then intMainCurrencyId else intCurrencyId end <> @intCurrencyUOMId then dblFutures * dblRate
-					else dblFutures end end) end as dblFutures
+				else convert(decimal(24,6), case when ISNULL(dblRate,0)=0 then dbo.fnRKGetCurrencyConvertion(case when ysnSubCurrency = 1 then intMainCurrencyId else intCurrencyId end,@intCurrencyUOMId) * dbo.fnCTConvertQuantityToTargetCommodityUOM(intPriceUOMId,case when ISNULL(PriceSourceUOMId,0)=0 then intPriceUOMId else PriceSourceUOMId end,ISNULL(dblFutures,0))
+			else case when case when ysnSubCurrency = 1 then intMainCurrencyId else intCurrencyId end <> @intCurrencyUOMId then dbo.fnCTConvertQuantityToTargetCommodityUOM(intPriceUOMId,case when ISNULL(PriceSourceUOMId,0)=0 then intPriceUOMId else PriceSourceUOMId end,ISNULL(dblFutures,0)) * dblRate
+					else dbo.fnCTConvertQuantityToTargetCommodityUOM(intPriceUOMId,case when ISNULL(PriceSourceUOMId,0)=0 then intPriceUOMId else PriceSourceUOMId end,ISNULL(dblFutures,0)) end end) end as dblFutures
 		, convert(decimal(24,6),dbo.fnCTConvertQuantityToTargetCommodityUOM(intPriceUOMId,case when ISNULL(PriceSourceUOMId,0)=0 then intPriceUOMId else PriceSourceUOMId end,dblCash)) as dblCash
 		, dblCosts as dblCosts
 		, dblMarketRatio
