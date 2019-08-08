@@ -134,9 +134,9 @@ BEGIN
 			,intConcurrencyId = 1
 		FROM 
 			/* Taxable Amount */
-			(SELECT dblTotal = SUM(dblTaxableAmount) FROM @tmpPayCheckTax WHERE YEAR(dtmPayDate) = @intYear AND DATEPART(QQ, dtmPayDate) = @intQuarter AND strCalculationType = 'USA Federal Tax' AND ysnVoid = 0) [TXBLFIT],
-			(SELECT dblTotal = SUM(dblTaxableAmount) FROM @tmpPayCheckTax WHERE YEAR(dtmPayDate) = @intYear AND DATEPART(QQ, dtmPayDate) = @intQuarter AND strCalculationType = 'USA Social Security' AND ysnVoid = 0) [TXBLSS],
-			(SELECT dblTotal = SUM(dblTaxableAmount) FROM @tmpPayCheckTax WHERE YEAR(dtmPayDate) = @intYear AND DATEPART(QQ, dtmPayDate) = @intQuarter AND strCalculationType = 'USA Medicare' AND ysnVoid = 0) [TXBLMED],
+			(SELECT dblTotal = SUM(dblTaxableAmount) FROM @tmpPayCheckTax WHERE strCalculationType = 'USA Federal Tax' ) [TXBLFIT],
+			(SELECT dblTotal = SUM(dblTaxableAmount) FROM @tmpPayCheckTax WHERE strCalculationType = 'USA Social Security' ) [TXBLSS],
+			(SELECT dblTotal = SUM(dblTaxableAmount) FROM @tmpPayCheckTax WHERE strCalculationType = 'USA Medicare' ) [TXBLMED],
 
 			/* Tax Amounts */
 			(SELECT dblTotal = SUM(dblFIT) FROM vyuPRMonthlyTaxTotal WHERE intYear = @intYear AND intQuarter = @intQuarter) [FIT],
@@ -187,9 +187,10 @@ BEGIN
 			,dblMonth3 = ISNULL(MONTH3.dblMonthTotal, 0)
 		FROM 
 			/* Taxable Amount */
-			(SELECT dblTotal = SUM(dblTaxableAmount) FROM vyuPRPaycheckTax WHERE YEAR(dtmPayDate) = @intYear AND DATEPART(QQ, dtmPayDate) = @intQuarter AND strCalculationType = 'USA Federal Tax' AND strPaidBy = 'Employee' AND ysnVoid = 0) [TXBLFIT],
-			(SELECT dblTotal = SUM(dblTaxableAmount) FROM vyuPRPaycheckTax WHERE YEAR(dtmPayDate) = @intYear AND DATEPART(QQ, dtmPayDate) = @intQuarter AND strCalculationType = 'USA Social Security' AND strPaidBy = 'Employee' AND ysnVoid = 0) [TXBLSS],
-			(SELECT dblTotal = SUM(dblTaxableAmount) FROM vyuPRPaycheckTax WHERE YEAR(dtmPayDate) = @intYear AND DATEPART(QQ, dtmPayDate) = @intQuarter AND strCalculationType = 'USA Medicare' AND strPaidBy = 'Employee' AND ysnVoid = 0) [TXBLMED],
+			/* Taxable Amount */
+			(SELECT dblTotal = SUM(dblTaxableAmount) FROM @tmpPayCheckTax WHERE strCalculationType = 'USA Federal Tax' ) [TXBLFIT],
+			(SELECT dblTotal = SUM(dblTaxableAmount) FROM @tmpPayCheckTax WHERE strCalculationType = 'USA Social Security' ) [TXBLSS],
+			(SELECT dblTotal = SUM(dblTaxableAmount) FROM @tmpPayCheckTax WHERE strCalculationType = 'USA Medicare' ) [TXBLMED],
 
 			/* Tax Amounts */
 			(SELECT dblTotal = SUM(dblFIT) FROM vyuPRMonthlyTaxTotal WHERE intYear = @intYear AND intQuarter = @intQuarter) [FIT],
