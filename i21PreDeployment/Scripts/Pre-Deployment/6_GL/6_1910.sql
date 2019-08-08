@@ -1,6 +1,10 @@
 /*
 REMOVE INDEX FROM OBSOLETE REPORT GL By Account Id Detail Report
 */
+GO
+PRINT ('Begin removing unused GL Table Index')
+GO
+
 DECLARE @tblIndex TABLE (
 	strIndex NVARCHAR(100)
 )
@@ -26,7 +30,10 @@ BEGIN
     BEGIN
         
         EXEC ('drop index tblGLDetail.' + @strIndex ) 
-        
     END
     DELETE FROM @tblIndex WHERE strIndex = @strIndex
 END
+
+GO
+PRINT ('Finished removing unused GL Table Index')
+GO
