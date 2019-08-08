@@ -17,7 +17,8 @@ AS
 				
 					JOIN	tblCTItemContractHeader				CH	ON	CH.intItemContractHeaderId			=		CD.intItemContractHeaderId	
 			LEFT	JOIN	tblICItem							IC	ON	IC.intItemId						=		CD.intItemId
-			LEFT	JOIN	tblICUnitMeasure					UM	ON	UM.intUnitMeasureId					=		CD.intItemUOMId
+			LEFT	JOIN	tblICItemUOM						IU	ON	IU.intItemUOMId						=		CD.intItemUOMId
+			LEFT	JOIN	tblICUnitMeasure					UM	ON	UM.intUnitMeasureId					=		IU.intUnitMeasureId
 			LEFT	JOIN	tblSMTaxGroup						TG	ON	TG.intTaxGroupId					=		CD.intTaxGroupId
 			LEFT	JOIN	tblCTContractStatus					CS	ON	CS.intContractStatusId				=		CD.intContractStatusId
 			
