@@ -37,3 +37,4 @@ INNER JOIN dbo.tblICItemLocation IL ON I.intItemId = IL.intItemId AND ICH.intCom
 LEFT JOIN dbo.tblSMTaxGroup TG ON ICD.intTaxGroupId = TG.intTaxGroupId
 LEFT JOIN dbo.tblICStorageLocation STOLOC ON STOLOC.intStorageLocationId = IL.intStorageLocationId
 LEFT JOIN dbo.tblSMCompanyLocationSubLocation SUBLOC ON SUBLOC.intCompanyLocationSubLocationId = IL.intSubLocationId
+WHERE ICD.intContractStatusId IN (1, 4)
