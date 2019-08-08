@@ -2672,8 +2672,6 @@ SELECT intRowNum = CONVERT(INT,ROW_NUMBER() OVER(ORDER BY intFutureMarketId DESC
 	, strLocationName 
 	, dblResult = case when strPricingType='Cash' then 
 							ROUND(dblResultCash,2) 
-						when strPricingType = 'Basis'  or strPricingType = 'HTA'then
-							0
 						else 
 							ROUND((dblMarketPrice - dblAdjustedContractPrice) * dblOpenQty,2)
 				  end
