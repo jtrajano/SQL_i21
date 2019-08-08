@@ -108,6 +108,10 @@ BEGIN TRY
 	DELETE FROM tblGRCustomerStorage
 	WHERE intDeliverySheetId = @intDeliverySheetId
 
+	UPDATE tblSCDeliverySheet 
+	SET dblGross = 0 
+	WHERE intDeliverySheetId = @intDeliverySheetId
+
 	DELETE FROM @splitTable
 		
 	INSERT INTO @splitTable(
