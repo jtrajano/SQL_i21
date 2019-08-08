@@ -30,7 +30,37 @@ BEGIN
 	END
 END
 
+exec(
+'
+delete from tblTMTankMonitorInterfaceType;
+set identity_insert tblTMTankMonitorInterfaceType on;
+insert into tblTMTankMonitorInterfaceType (
+	[intInterfaceTypeId],
+	[strInterfaceType],
+    [ysnFromAPI],
+    [intConcurrencyId]
+)
+	select
+	intInterfaceTypeId = 1,
+	strInterfaceType = ''Wesroc'',
+    ysnFromAPI = 0,
+    intConcurrencyId = 1
 
+insert into tblTMTankMonitorInterfaceType (
+	[intInterfaceTypeId],
+	[strInterfaceType],
+    [ysnFromAPI],
+    [intConcurrencyId]
+)
+	select
+	intInterfaceTypeId = 2,
+	strInterfaceType = ''EcoGreen'',
+    ysnFromAPI = 1,
+    intConcurrencyId = 1
+
+set identity_insert tblTMTankMonitorInterfaceType off;
+'
+);
 
 GO
 	PRINT N'END INSERT DEFAULT TM PREFERENCE COMPANY'
