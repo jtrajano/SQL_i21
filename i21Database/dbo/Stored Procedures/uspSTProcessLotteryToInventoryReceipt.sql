@@ -72,7 +72,7 @@ BEGIN TRANSACTION
 		END
 
 		SET @strReceiptType = 'Direct'
-		SET @strSourceScreenName = 'Receive Lottery'
+		SET @strSourceScreenName = 'Lottery Module'
 	
 		INSERT INTO @ReceiptStagingTable(
 			 strReceiptType
@@ -138,7 +138,7 @@ BEGIN TRANSACTION
 		,ysnIsStorage			= 0
 		,dblFreightRate			= 0
 		,intSourceId			= tblSTReceiveLottery.intReceiveLotteryId
-		,intSourceType		 	= 7 -- 7 means 'Store'
+		,intSourceType		 	= 8
 		,dblGross				= NULL
 		,dblNet					= NULL
 		,intInventoryReceiptId	= tblSTReceiveLottery.intInventoryReceiptId 
@@ -256,7 +256,7 @@ BEGIN TRANSACTION
 	
 
 		SET @strReceiptType = 'Direct'
-		SET @strSourceScreenName = 'Return Lottery'
+		SET @strSourceScreenName = 'Lottery Module'
 
 
 		--CREATE RETURN RECEIPT--
@@ -324,7 +324,7 @@ BEGIN TRANSACTION
 		,ysnIsStorage			= 0
 		,dblFreightRate			= 0
 		,intSourceId			= tblSTReturnLottery.intReturnLotteryId
-		,intSourceType		 	= 7 -- 7 means 'Store'
+		,intSourceType		 	= 8
 		,dblGross				= NULL
 		,dblNet					= NULL
 		,intInventoryReceiptId	= tblSTReturnLottery.intInventoryReceiptId 
