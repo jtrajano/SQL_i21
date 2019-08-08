@@ -2273,7 +2273,7 @@ FROM (
 SELECT *
 	, ISNULL(dblContractBasis,0) + (ISNULL(dblFutures,0) * ISNULL(dblContractRatio,1)) as dblContractPrice
 	, convert(decimal(24,6),((ISNULL(dblMarketBasis,0) - ISNULL(dblContractBasis,0)+ISNULL(dblCosts,0)))*ISNULL(dblResultBasis1,0)) + convert(decimal(24,6),((ISNULL(dblFutures,0)- ISNULL(dblFuturePrice,0))*ISNULL(dblMarketFuturesResult1,0))) dblResult
-	, dblResultBasis = convert(decimal(24,6),((ISNULL(dblMarketBasis,0) - ISNULL(dblContractBasis,0))) * ISNULL(dblOpenQty,0)) 
+	, dblResultBasis = convert(decimal(24,6),((ISNULL(dblMarketBasis,0) - (ISNULL(dblContractBasis,0) + ISNULL(dblCosts,0)))) * ISNULL(dblOpenQty,0)) 
 	, CASE WHEN intContractTypeId = 1 THEN 
 		convert(decimal(24,6),((ISNULL(dblFuturePrice,0) - ISNULL(dblFutures,0))*ISNULL(dblOpenQty,0)))
 		ELSE
