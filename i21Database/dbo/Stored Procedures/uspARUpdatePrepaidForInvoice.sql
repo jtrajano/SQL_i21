@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspARUpdatePrepaidForInvoice]  
-	 @InvoiceId		INT	
-	,@UserId		INT
+	  @InvoiceId	INT	
+	, @UserId		INT
 AS  
   
 SET QUOTED_IDENTIFIER OFF  
@@ -9,129 +9,215 @@ SET NOCOUNT ON
 SET XACT_ABORT ON  
 SET ANSI_WARNINGS OFF  
 
-DECLARE @EntityCustomerId	INT
-	  , @Posted				BIT
-	  , @ZeroDecimal		NUMERIC(18, 6)
+DECLARE @intEntityCustomerId	INT	= NULL
+	  , @intErrorSeverity		INT = NULL
+	  , @intErrorNumber			INT = NULL
+	  , @intErrorState			INT = NULL
+	  , @ysnPosted				BIT	= 0
+	  , @strErrorMessage		NVARCHAR(MAX)
+	  , @ZeroDecimal			NUMERIC(18, 6)	= 0
 
-SELECT @EntityCustomerId	= [intEntityCustomerId]
-	 , @Posted				= [ysnPosted]
+SELECT @intEntityCustomerId	= intEntityCustomerId
+	 , @ysnPosted			= ysnPosted
 FROM tblARInvoice
-WHERE [intInvoiceId] = @InvoiceId
+WHERE intInvoiceId = @InvoiceId
 
-IF @Posted = 1 RETURN;
+IF @ysnPosted = 1 RETURN;
 
-SET @ZeroDecimal = 0.000000
+IF(OBJECT_ID('tempdb..#APPLIEDINVOICES') IS NOT NULL)
+BEGIN
+	DROP TABLE #APPLIEDINVOICES
+END
 
-DECLARE @ErrorSeverity	INT
-	  , @ErrorNumber	INT
-	  , @ErrorState		INT
-	  , @ErrorMessage	NVARCHAR(MAX)
+IF(OBJECT_ID('tempdb..#OPENCREDITMEMO') IS NOT NULL)
+BEGIN
+	DROP TABLE #OPENCREDITMEMO
+END
 
-DECLARE @AppliedInvoices TABLE(
-	  intPrepaymentId 					INT
-	, intPrepaymentDetailId				INT
-	, intInvoiceId 						INT
-	, dblAppliedInvoiceDetailAmount 	NUMERIC(18, 6)
-	, dblBaseAppliedInvoiceDetailAmount NUMERIC(18, 6)
-)
+IF(OBJECT_ID('tempdb..#OPENPREPAIDS') IS NOT NULL)
+BEGIN
+	DROP TABLE #OPENPREPAIDS
+END
+
+IF(OBJECT_ID('tempdb..#UNRESTRICTED') IS NOT NULL)
+BEGIN
+	DROP TABLE #UNRESTRICTED
+END
+
+IF(OBJECT_ID('tempdb..#RESTRICTEDITEMS') IS NOT NULL)
+BEGIN
+	DROP TABLE #RESTRICTEDITEMS
+END
+
+IF(OBJECT_ID('tempdb..#RESTRICTEDCONTRACTS') IS NOT NULL)
+BEGIN
+	DROP TABLE #RESTRICTEDCONTRACTS
+END
+
+IF(OBJECT_ID('tempdb..#RESTRICTEDITEMCONTRACTS') IS NOT NULL)
+BEGIN
+	DROP TABLE #RESTRICTEDITEMCONTRACTS
+END
+
+IF(OBJECT_ID('tempdb..#RESTRICTEDITEMCATEGORY') IS NOT NULL)
+BEGIN
+	DROP TABLE #RESTRICTEDITEMCATEGORY
+END
+
+IF(OBJECT_ID('tempdb..#APPLIEDCONTRACTS') IS NOT NULL)
+BEGIN
+	DROP TABLE #APPLIEDCONTRACTS
+END
+
+IF(OBJECT_ID('tempdb..#APPLIEDITEMCONTRACTS') IS NOT NULL)
+BEGIN
+	DROP TABLE #APPLIEDITEMCONTRACTS
+END
 
 BEGIN TRY
-	INSERT INTO @AppliedInvoices(
-		  intPrepaymentId
-        , intPrepaymentDetailId
-		, intInvoiceId
-		, dblAppliedInvoiceDetailAmount
-		, dblBaseAppliedInvoiceDetailAmount
-	)
+	--GET APPLIED INVOICES
 	SELECT intPrepaymentId
          , intPrepaymentDetailId
 		 , intInvoiceId
 		 , dblAppliedInvoiceDetailAmount
-		 , dblBaseAppliedInvoiceDetailAmount 
+		 , dblBaseAppliedInvoiceDetailAmount
+	INTO #APPLIEDINVOICES 
 	FROM tblARPrepaidAndCredit
-	WHERE tblARPrepaidAndCredit.[intInvoiceId] = @InvoiceId 
+	WHERE intInvoiceId = @InvoiceId 
 	  AND ysnApplied = 1 
 	  AND ysnPosted = 0
 		
-	DELETE FROM tblARPrepaidAndCredit WHERE tblARPrepaidAndCredit.[intInvoiceId] = @InvoiceId		
-END TRY
-BEGIN CATCH	
-	SET @ErrorSeverity = ERROR_SEVERITY()
-	SET @ErrorNumber   = ERROR_NUMBER()
-	SET @ErrorMessage  = ERROR_MESSAGE()
-	SET @ErrorState    = ERROR_STATE()	
+	DELETE FROM tblARPrepaidAndCredit WHERE intInvoiceId = @InvoiceId
 
-	RAISERROR (@ErrorMessage , @ErrorSeverity, @ErrorState, @ErrorNumber) 	
-END CATCH		
-		
-BEGIN TRY
-	DECLARE @intContractDetailId	INT = 0
-		  , @intItemId				INT = 0
+	--GET OPEN CREDIT MEMO AND OVERPAYMENTS
+	SELECT intInvoiceId
+	INTO #OPENCREDITMEMO
+	FROM tblARInvoice
+	WHERE ysnPosted = 1
+	  AND ysnPaid = 0
+	  AND strTransactionType IN ('Credit Memo', 'Overpayment')
+	  AND intEntityCustomerId = @intEntityCustomerId
+	  AND dblAmountDue > 0
+	  AND intInvoiceId <> @InvoiceId
 
-	SELECT TOP 1 @intContractDetailId = intContractDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @InvoiceId AND ysnRestricted = 1 AND intContractDetailId IS NOT NULL
-	SELECT TOP 1 @intItemId = intItemId FROM tblARInvoiceDetail WHERE intInvoiceId = @InvoiceId AND ysnRestricted = 1 AND intContractDetailId IS NULL
+	--GET OPEN PREPAIDS
+	SELECT intInvoiceId
+	INTO #OPENPREPAIDS
+	FROM tblARInvoice OP
+	INNER JOIN tblARPayment PAYMENT ON OP.intPaymentId = PAYMENT.intPaymentId
+	WHERE OP.ysnPosted = 1
+	  AND PAYMENT.ysnPosted = 1
+	  AND PAYMENT.ysnProcessedToNSF = 0
+	  AND OP.ysnPaid = 0
+	  AND OP.strTransactionType = 'Customer Prepayment'
+	  AND OP.intEntityCustomerId = @intEntityCustomerId
+	  AND OP.dblAmountDue > 0
+	  AND OP.intInvoiceId <> @InvoiceId
 
-	DECLARE @RestrictedItems	TABLE(intItemId INT)
-	DECLARE @AppliedContracts	TABLE(intContractDetailId INT, intInvoiceDetailId INT, intInvoiceId INT)
-
+	--GET UN-RESTRICTED PREPAIDS
+	SELECT intInvoiceId			= OP.intInvoiceId
+		 , intInvoiceDetailId	= OPD.intInvoiceDetailId
+	INTO #UNRESTRICTED
+	FROM #OPENPREPAIDS OP
+	INNER JOIN tblARInvoiceDetail OPD ON OP.intInvoiceId = OPD.intInvoiceId
+	WHERE OPD.ysnRestricted = 0
+	
 	--GET RESTRICTED ITEMS
-	INSERT INTO @RestrictedItems(intItemId)
-	SELECT ID.intItemId FROM dbo.tblARInvoice I WITH (NOLOCK)
-	INNER JOIN (
-		SELECT * FROM dbo.tblARInvoiceDetail
-	)ID ON ID.intInvoiceId = I.intInvoiceId
-	INNER JOIN(
-		SELECT ID.intItemId FROM dbo.tblARInvoice I WITH (NOLOCK)
-		INNER JOIN(
-			SELECT * FROM dbo.tblARInvoiceDetail 
-		)ID ON ID.intInvoiceId = I.intInvoiceId
-		INNER JOIN (
-			SELECT intPaymentId 
-			FROM dbo.tblARPayment WITH (NOLOCK)
-			WHERE ysnPosted = 1
-			  AND ysnProcessedToNSF = 0
-		) AS P ON I.intPaymentId = P.intPaymentId
-		WHERE I.strTransactionType = 'Customer Prepayment'
-		AND I.intInvoiceId <> @InvoiceId
-		AND I.intEntityCustomerId = @EntityCustomerId
-		AND ID.intItemId IS NOT NULL
-		AND ID.ysnRestricted = 1
-	) RESTRICTEDITEM ON RESTRICTEDITEM.intItemId = ID.intItemId
-	WHERE I.intInvoiceId  = @InvoiceId
-	AND I.intEntityCustomerId = @EntityCustomerId
-	AND ID.intItemId IS NOT NULL
+	SELECT intInvoiceId			= OP.intInvoiceId
+		 , intInvoiceDetailId	= OPD.intInvoiceDetailId
+		 , intItemId			= OPD.intItemId
+	INTO #RESTRICTEDITEMS
+	FROM #OPENPREPAIDS OP
+	INNER JOIN tblARInvoiceDetail OPD ON OP.intInvoiceId = OPD.intInvoiceId
+	WHERE OPD.ysnRestricted = 1
+	  AND OPD.intContractDetailId IS NULL
+	  AND OPD.intItemContractDetailId IS NULL
+	  AND OPD.intItemCategoryId IS NULL
+
+	--GET RESTRICTED CONTRACTS
+	SELECT intInvoiceId			= OP.intInvoiceId
+		 , intInvoiceDetailId	= OPD.intInvoiceDetailId
+		 , intContractDetailId	= OPD.intContractDetailId
+	INTO #RESTRICTEDCONTRACTS
+	FROM #OPENPREPAIDS OP
+	INNER JOIN tblARInvoiceDetail OPD ON OP.intInvoiceId = OPD.intInvoiceId
+	WHERE OPD.ysnRestricted = 1
+	  AND OPD.intContractDetailId IS NOT NULL
+	  AND OPD.intItemContractDetailId IS NULL
+	  AND OPD.intItemCategoryId IS NULL
+
+	--GET RESTRICTED ITEM CONTRACT
+	SELECT intInvoiceId				= OP.intInvoiceId
+		 , intInvoiceDetailId		= OPD.intInvoiceDetailId
+		 , intItemContractDetailId	= OPD.intItemContractDetailId
+	INTO #RESTRICTEDITEMCONTRACTS
+	FROM #OPENPREPAIDS OP
+	INNER JOIN tblARInvoiceDetail OPD ON OP.intInvoiceId = OPD.intInvoiceId
+	WHERE OPD.ysnRestricted = 1
+	  AND OPD.intContractDetailId IS NULL
+	  AND OPD.intItemContractDetailId IS NOT NULL
+	  AND OPD.intItemCategoryId IS NULL
+
+	--GET RESTRICTED CATEGORY
+	SELECT intInvoiceId			= OP.intInvoiceId
+		 , intInvoiceDetailId	= OPD.intInvoiceDetailId
+		 , intItemCategoryId	= OPD.intItemCategoryId
+		 , intCategoryId		= OPD.intCategoryId
+	INTO #RESTRICTEDITEMCATEGORY
+	FROM #OPENPREPAIDS OP
+	INNER JOIN tblARInvoiceDetail OPD ON OP.intInvoiceId = OPD.intInvoiceId
+	WHERE OPD.ysnRestricted = 1
+	  AND OPD.intContractDetailId IS NULL
+	  AND OPD.intItemContractHeaderId IS NOT NULL
+	  AND OPD.intItemCategoryId IS NOT NULL
+	  AND OPD.intCategoryId IS NOT NULL
 
 	--GET APPLIED CONTRACTS
-	INSERT INTO @AppliedContracts(intContractDetailId, intInvoiceDetailId, intInvoiceId)
 	SELECT ID.intContractDetailId
 		 , ID.intInvoiceDetailId
 		 , ID.intInvoiceId
+	INTO #APPLIEDCONTRACTS
 	FROM tblARPrepaidAndCredit PC
 	INNER JOIN tblARInvoice I ON PC.intInvoiceId = I.intInvoiceId
 	INNER JOIN tblARInvoiceDetail ID ON PC.intPrepaymentDetailId = ID.intInvoiceDetailId
 	WHERE ID.intContractHeaderId IS NOT NULL
 	  AND ID.intContractDetailId IS NOT NULL
-	  AND I.intEntityCustomerId = @EntityCustomerId
+	  AND I.intEntityCustomerId = @intEntityCustomerId
 	  AND PC.ysnApplied = 1
 	  AND I.intInvoiceId <> @InvoiceId
 
-	INSERT INTO tblARPrepaidAndCredit
-		([intInvoiceId]
-		,[intInvoiceDetailId]
-		,[intPrepaymentId]
-		,[intPrepaymentDetailId]
-		,[dblPostedAmount]
-		,[dblBasePostedAmount]
-		,[dblPostedDetailAmount]
-		,[dblBasePostedDetailAmount]
-		,[dblAppliedInvoiceAmount]
-		,[dblBaseAppliedInvoiceAmount]
-		,[dblAppliedInvoiceDetailAmount]
-		,[dblBaseAppliedInvoiceDetailAmount]
-		,[ysnApplied]
-		,[ysnPosted]
-		,[intRowNumber]
-		,[intConcurrencyId])
+	--GET APPLIED ITEM CONTRACTS
+	SELECT ID.intItemContractDetailId
+		 , ID.intInvoiceDetailId
+		 , ID.intInvoiceId
+	INTO #APPLIEDITEMCONTRACTS
+	FROM tblARPrepaidAndCredit PC
+	INNER JOIN tblARInvoice I ON PC.intInvoiceId = I.intInvoiceId
+	INNER JOIN tblARInvoiceDetail ID ON PC.intPrepaymentDetailId = ID.intInvoiceDetailId
+	WHERE ID.intItemContractHeaderId IS NOT NULL
+	  AND ID.intItemContractDetailId IS NOT NULL
+	  AND I.intEntityCustomerId = @intEntityCustomerId
+	  AND PC.ysnApplied = 1
+	  AND I.intInvoiceId <> @InvoiceId
+
+	INSERT INTO tblARPrepaidAndCredit (
+		  intInvoiceId
+		, intInvoiceDetailId
+		, intPrepaymentId
+		, intPrepaymentDetailId
+		, dblPostedAmount
+		, dblBasePostedAmount
+		, dblPostedDetailAmount
+		, dblBasePostedDetailAmount
+		, dblAppliedInvoiceAmount
+		, dblBaseAppliedInvoiceAmount
+		, dblAppliedInvoiceDetailAmount
+		, dblBaseAppliedInvoiceDetailAmount
+		, ysnApplied
+		, ysnPosted
+		, intRowNumber
+		, intConcurrencyId
+	)
 	SELECT DISTINCT
 		  intInvoiceId						= @InvoiceId
 		, intInvoiceDetailId				= NULL
@@ -150,43 +236,53 @@ BEGIN TRY
 		, intRowNumber						= ROW_NUMBER() OVER(ORDER BY I.intInvoiceId ASC)
 		, intConcurrencyId					= 1
 	FROM (
-		SELECT I.intInvoiceId
-			 , DETAILS.intInvoiceDetailId
-		FROM dbo.tblARInvoice I WITH (NOLOCK)
-		INNER JOIN (
-			SELECT intPaymentId 
-			FROM dbo.tblARPayment WITH (NOLOCK)
-			WHERE ysnPosted = 1
-			  AND ysnProcessedToNSF = 0
-		) AS P ON I.intPaymentId = P.intPaymentId
-		INNER JOIN (
-			SELECT intInvoiceDetailId, intItemId, intInvoiceId 
-			FROM dbo.tblARInvoiceDetail ID WITH (NOLOCK)
-			WHERE (ID.ysnRestricted = 0 OR (ID.ysnRestricted = 1 AND ID.intContractDetailId = @intContractDetailId) OR (ID.intContractDetailId IS NULL AND ID.intItemId = @intItemId)
-				OR(ID.ysnRestricted = 1 AND ID.intItemId IN (SELECT * FROM @RestrictedItems))
-			)
-		) AS DETAILS ON DETAILS.intInvoiceId = I.intInvoiceId
-		WHERE I.strTransactionType = 'Customer Prepayment'
-			AND I.ysnPosted = 1
-			AND I.ysnPaid = 0
-			AND I.intEntityCustomerId = @EntityCustomerId
-			AND I.intInvoiceId <> @InvoiceId
+		SELECT intInvoiceId			= UR.intInvoiceId
+			 , intInvoiceDetailId	= UR.intInvoiceDetailId
+		FROM #UNRESTRICTED UR
 
 		UNION ALL
 
-		SELECT I.intInvoiceId
-			 , intInvoiceDetailId = NULL		 
-		FROM dbo.tblARInvoice I WITH (NOLOCK)
-		WHERE I.strTransactionType IN ('Credit Memo', 'Overpayment')
-		  AND I.ysnPosted = 1
-		  AND I.ysnPaid = 0
-		  AND I.intEntityCustomerId = @EntityCustomerId
-		  AND I.intInvoiceId <> @InvoiceId
+		SELECT intInvoiceId			= RI.intInvoiceId
+			 , intInvoiceDetailId	= RI.intInvoiceDetailId
+		FROM tblARInvoiceDetail ID
+		INNER JOIN #RESTRICTEDITEMS RI ON ID.intItemId = RI.intItemId
+		WHERE ID.intInvoiceId = @InvoiceId
+
+		UNION ALL
+
+		SELECT intInvoiceId			= RC.intInvoiceId
+			 , intInvoiceDetailId	= RC.intInvoiceDetailId
+		FROM tblARInvoiceDetail ID
+		INNER JOIN #RESTRICTEDCONTRACTS RC ON ID.intContractDetailId = RC.intContractDetailId
+		WHERE ID.intInvoiceId = @InvoiceId
+
+		UNION ALL
+
+		SELECT intInvoiceId			= RIC.intInvoiceId
+			 , intInvoiceDetailId	= RIC.intInvoiceDetailId
+		FROM tblARInvoiceDetail ID
+		INNER JOIN #RESTRICTEDITEMCONTRACTS RIC ON ID.intItemContractDetailId = RIC.intItemContractDetailId
+		WHERE ID.intInvoiceId = @InvoiceId
+		
+		UNION ALL
+
+		SELECT intInvoiceId			= RCAT.intInvoiceId
+			 , intInvoiceDetailId	= RCAT.intInvoiceDetailId
+		FROM tblARInvoiceDetail ID
+		INNER JOIN tblICItem ITEM ON ID.intItemId = ITEM.intItemId 
+		INNER JOIN #RESTRICTEDITEMCATEGORY RCAT ON ITEM.intCategoryId = RCAT.intCategoryId
+		WHERE ID.intInvoiceId = @InvoiceId
+
+		UNION ALL
+
+		SELECT intInvoiceId			= OM.intInvoiceId
+			 , intInvoiceDetailId	= NULL
+		FROM #OPENCREDITMEMO OM
 	) I
 	
 	DELETE PC
 	FROM tblARPrepaidAndCredit PC
-	INNER JOIN @AppliedContracts AC ON PC.intPrepaymentDetailId = AC.intInvoiceDetailId AND PC.intPrepaymentId = AC.intInvoiceId
+	INNER JOIN #APPLIEDCONTRACTS AC ON PC.intPrepaymentDetailId = AC.intInvoiceDetailId AND PC.intPrepaymentId = AC.intInvoiceId
 	WHERE PC.intInvoiceId = @InvoiceId
 		
 	UPDATE A 
@@ -194,17 +290,18 @@ BEGIN TRY
 	  , dblAppliedInvoiceDetailAmount		= B.dblAppliedInvoiceDetailAmount
 	  , dblBaseAppliedInvoiceDetailAmount	= B.dblBaseAppliedInvoiceDetailAmount
 	FROM tblARPrepaidAndCredit A
-	INNER JOIN @AppliedInvoices B ON A.intPrepaymentId = B.intPrepaymentId
+	INNER JOIN #APPLIEDINVOICES B ON A.intPrepaymentId = B.intPrepaymentId
 								 AND A.intInvoiceId = B.intInvoiceId
 								 AND (A.intPrepaymentDetailId IS NULL OR (A.intPrepaymentDetailId IS NOT NULL AND A.intPrepaymentDetailId = B.intPrepaymentDetailId))
 		
 END TRY
 BEGIN CATCH	
-	SET @ErrorSeverity = ERROR_SEVERITY()
-	SET @ErrorNumber   = ERROR_NUMBER()
-	SET @ErrorMessage  = ERROR_MESSAGE()
-	SET @ErrorState    = ERROR_STATE()	
-	RAISERROR (@ErrorMessage , @ErrorSeverity, @ErrorState, @ErrorNumber) 	
+	SET @intErrorSeverity = ERROR_SEVERITY()
+	SET @intErrorNumber   = ERROR_NUMBER()
+	SET @strErrorMessage  = ERROR_MESSAGE()
+	SET @intErrorState    = ERROR_STATE()
+		
+	RAISERROR (@strErrorMessage, @intErrorSeverity, @intErrorState, @intErrorNumber) 	
 END CATCH
 
 GO

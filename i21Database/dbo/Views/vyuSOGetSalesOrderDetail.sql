@@ -10,12 +10,12 @@ SELECT intSalesOrderDetailId			= SOD.intSalesOrderDetailId
      , dblQtyOrdered					= SOD.dblQtyOrdered
      , dblQtyAllocated					= SOD.dblQtyAllocated
      , dblDiscount						= SOD.dblDiscount
-	 , dblDiscountValue					= SOD.dblDiscountValue
+     , dblDiscountValue					= SOD.dblDiscountValue
      , dblItemTermDiscount				= SOD.dblItemTermDiscount
      , strItemTermDiscountBy			= SOD.strItemTermDiscountBy
      , dblPrice							= SOD.dblPrice
      , dblBasePrice						= SOD.dblBasePrice
-	 , dblUnitPrice						= SOD.dblUnitPrice
+     , dblUnitPrice						= SOD.dblUnitPrice
      , dblBaseUnitPrice					= SOD.dblBaseUnitPrice
      , strPricing						= SOD.strPricing
      , dblTotalTax						= SOD.dblTotalTax
@@ -36,9 +36,10 @@ SELECT intSalesOrderDetailId			= SOD.intSalesOrderDetailId
      , dblBaseLicenseAmount				= SOD.dblBaseLicenseAmount
      , intContractHeaderId				= SOD.intContractHeaderId
      , intContractDetailId				= SOD.intContractDetailId
-	 , intItemContractHeaderId			= SOD.intItemContractHeaderId
+     , intItemContractHeaderId			= SOD.intItemContractHeaderId
      , intItemContractDetailId			= SOD.intItemContractDetailId
      , dblContractBalance				= ISNULL(CONT.dblBalance, 0)
+     , dblItemContractBalance				= ISNULL(ITEMCONTRACT.dblBalance, 0)
      , dblContractAvailable				= SOD.dblContractAvailable
      , ysnBlended						= SOD.ysnBlended
      , intTaxGroupId					= SOD.intTaxGroupId
@@ -60,31 +61,31 @@ SELECT intSalesOrderDetailId			= SOD.intSalesOrderDetailId
      , intCurrencyExchangeRateTypeId	= SOD.intCurrencyExchangeRateTypeId
      , intCurrencyExchangeRateId		= SOD.intCurrencyExchangeRateId
      , dblCurrencyExchangeRate			= SOD.dblCurrencyExchangeRate
-	 , intPriceUOMId					= SOD.intPriceUOMId
-	 , dblUnitQuantity					= SOD.dblUnitQuantity
-	 , dblOriginalQty					= SOD.dblQtyOrdered
+     , intPriceUOMId					= SOD.intPriceUOMId
+     , dblUnitQuantity					= SOD.dblUnitQuantity
+     , dblOriginalQty					= SOD.dblQtyOrdered
      , dblOriginalPrice					= SOD.dblPrice
      , intOriginalItemUOMId				= SOD.intItemUOMId
      , strItemNo						= ITEM.strItemNo
      , strBundleType					= ITEM.strBundleType
      , strUnitMeasure					= ITEMUOM.strUnitMeasure
-	 , intUnitMeasureId					= ITEMUOM.intUnitMeasureId
-	 , strPriceUnitMeasure				= PRICEUOM.strUnitMeasure
-	 , strPriceUOM						= PRICEUOM.strUnitMeasure     
+     , intUnitMeasureId					= ITEMUOM.intUnitMeasureId
+     , strPriceUnitMeasure				= PRICEUOM.strUnitMeasure
+     , strPriceUOM						= PRICEUOM.strUnitMeasure     
      , strWeightUnitMeasure				= WEIGHTUOM.strUnitMeasure
      , strStorageLocation				= STORAGELOCATION.strName
      , strSubLocation					= ISNULL(SUBLOCATION.strSubLocationName, '')
      , strContractNumber				= CONT.strContractNumber
-	 , intContractSeq					= CONT.intContractSeq
-	 , intPricingTypeId					= CONT.intPricingTypeId
+     , intContractSeq					= CONT.intContractSeq
+     , intPricingTypeId					= CONT.intPricingTypeId
      , strPricingType					= CONT.strPricingType
      , ysnLoad							= CONT.ysnLoad
-	 , strItemContractNumber			= ISNULL(ITEMCONTRACT.strContractNumber, '')
-	 , intItemContractSeq				= ITEMCONTRACT.intLineNo
+     , strItemContractNumber			= ISNULL(ITEMCONTRACT.strContractNumber, '')
+     , intItemContractSeq				= ITEMCONTRACT.intLineNo
      , strItemType						= ITEM.strType
      , strLotTracking					= ITEM.strLotTracking
      , strModule						= ITEM.strModule
-	 , strRequired						= ITEM.strRequired
+     , strRequired						= ITEM.strRequired
      , strTaxGroup						= TAXGROUP.strTaxGroup     
      , strCurrency						= CURRENCY.strCurrency
      , dblOriginalLicenseAmount			= CASE WHEN ITEM.strType =  'Software' THEN ITEM.dblSalePrice ELSE 0 END
@@ -165,6 +166,7 @@ LEFT JOIN (
 	SELECT intItemContractDetailId
 		 , strContractNumber
              , intLineNo
+             , dblBalance
 	FROM tblCTItemContractDetail ICD WITH(NOLOCK)
 	INNER JOIN tblCTItemContractHeader ICH WITH(NOLOCK) ON ICH.intItemContractHeaderId	= ICD.intItemContractHeaderId
 ) ITEMCONTRACT ON SOD.intItemContractDetailId = ITEMCONTRACT.intItemContractDetailId

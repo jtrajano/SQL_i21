@@ -25,9 +25,11 @@ FROM (
 		 , intContractDetailId		= CC.intContractDetailId
 		 , intItemContractHeaderId	= NULL
 		 , intItemContractDetailId	= NULL
+		 , intItemCategoryId		= NULL
 		 , strContractNumber		= CC.strContractNumber
 		 , intContractSeq			= CC.intContractSeq
 		 , strContractType			= CC.strContractType
+		 , strContractCategoryId	= NULL
 		 , dtmStartDate				= CC.dtmStartDate
 		 , dtmEndDate				= CC.dtmEndDate
 		 , dtmDueDate				= dbo.fnGetDueDateBasedOnTerm(CAST(CC.dtmStartDate AS DATE), CC.intTermId)
@@ -67,6 +69,9 @@ FROM (
 		 , strDestinationGrade		= CC.strDestinationGrade
 		 , intDestinationWeightId	= CC.intDestinationWeightId
 		 , strDestinationWeight		= CC.strDestinationWeight
+		 , intCategoryId			= NULL
+		 , strCategoryCode			= NULL
+		 , strCategoryDescription	= NULL
 	FROM vyuCTCustomerContract CC
 	WHERE CC.intCurrencyId = (
 		SELECT TOP 1 intCurrencyID = ISNULL(SMC.intMainCurrencyId, SMC.intCurrencyID)
@@ -83,9 +88,11 @@ FROM (
 		 , intContractDetailId		= NULL
 		 , intItemContractHeaderId	= ICC.intItemContractHeaderId
 		 , intItemContractDetailId	= ICD.intItemContractDetailId
+		 , intItemCategoryId		= NULL
 		 , strContractNumber		= ICC.strContractNumber
 		 , intContractSeq			= ICD.intLineNo
 		 , strContractType			= 'Sale'
+		 , strContractCategoryId	= ICC.strContractCategoryId
 		 , dtmStartDate				= ICC.dtmContractDate
 		 , dtmEndDate				= ICC.dtmExpirationDate
 		 , dtmDueDate				= dbo.fnGetDueDateBasedOnTerm(CAST(ICC.dtmContractDate AS DATE), ICC.intTermId)
@@ -125,11 +132,73 @@ FROM (
 		 , strDestinationGrade		= NULL
 		 , intDestinationWeightId	= NULL
 		 , strDestinationWeight		= NULL
+		 , intCategoryId			= NULL
+		 , strCategoryCode			= NULL
+		 , strCategoryDescription	= NULL
 	FROM tblCTItemContractHeader ICC
 	INNER JOIN tblCTItemContractDetail ICD ON ICC.intItemContractHeaderId = ICD.intItemContractHeaderId
-	LEFT JOIN tblICItem ITEM ON ICD.intItemId = ITEM.intItemId
+	INNER JOIN tblICItem ITEM ON ICD.intItemId = ITEM.intItemId
 	LEFT JOIN vyuARItemUOM UOM ON ICD.intItemUOMId = UOM.intItemUOMId
 	WHERE ICD.intContractStatusId = 1
+	  AND ICC.strContractCategoryId <> 'Dollar'
+
+	UNION ALL
+
+	SELECT intContractHeaderId		= NULL
+		 , intContractDetailId		= NULL
+		 , intItemContractHeaderId	= ICC.intItemContractHeaderId
+		 , intItemContractDetailId	= NULL
+		 , intItemCategoryId		= ICHC.intItemCategoryId
+		 , strContractNumber		= ICC.strContractNumber
+		 , intContractSeq			= ICHC.intItemCategoryId
+		 , strContractType			= 'Sale'
+		 , strContractCategoryId	= ICC.strContractCategoryId
+		 , dtmStartDate				= ICC.dtmContractDate
+		 , dtmEndDate				= ICC.dtmExpirationDate
+		 , dtmDueDate				= dbo.fnGetDueDateBasedOnTerm(CAST(ICC.dtmContractDate AS DATE), ICC.intTermId)
+		 , strContractStatus		= 'Open'
+		 , intEntityCustomerId		= ICC.intEntityId		 
+		 , intCurrencyId			= ICC.intCurrencyId
+		 , strCurrency				= NULL
+		 , intCompanyLocationId		= ICC.intCompanyLocationId		 
+		 , intItemId				= NULL
+		 , strItemNo				= NULL
+		 , strItemDescription		= 'Prepay for Item Category ' + ISNULL(IC.strDescription, IC.strCategoryCode)
+		 , intOrderUOMId			= NULL
+		 , strOrderUnitMeasure		= NULL
+		 , intItemUOMId				= NULL
+		 , strUnitMeasure			= NULL
+		 , intPricingTypeId			= NULL
+		 , strPricingType			= 'Item Contract'
+		 , dblOrderPrice			= CAST(0 AS NUMERIC(18, 6))
+		 , dblCashPrice				= CAST(0 AS NUMERIC(18, 6))
+		 , intSubCurrencyId			= NULL
+		 , dblSubCurrencyRate		= NULL
+		 , strSubCurrency			= NULL
+		 , intPriceItemUOMId		= NULL
+		 , dblBalance				= CAST(1 AS NUMERIC(18, 6))
+		 , dblScheduleQty			= CAST(1 AS NUMERIC(18, 6))
+		 , dblAvailableQty			= CAST(1 AS NUMERIC(18, 6))
+		 , dblDetailQuantity		= CAST(1 AS NUMERIC(18, 6))
+		 , dblOrderQuantity			= CAST(1 AS NUMERIC(18, 6))
+		 , dblShipQuantity			= CAST(1 AS NUMERIC(18, 6))
+		 , ysnUnlimitedQuantity		= CAST(0 AS BIT)
+		 , ysnLoad					= CAST(0 AS BIT)
+		 , ysnAllowedToShow			= CAST(1 AS BIT)
+		 , intFreightTermId			= ICC.intFreightTermId
+		 , intTermId				= ICC.intTermId		 
+		 , intShipViaId				= NULL
+		 , intDestinationGradeId	= NULL
+		 , strDestinationGrade		= NULL
+		 , intDestinationWeightId	= NULL
+		 , strDestinationWeight		= NULL
+		 , intCategoryId			= ICHC.intCategoryId
+		 , strCategoryCode			= IC.strCategoryCode
+		 , strCategoryDescription	= IC.strDescription
+	FROM tblCTItemContractHeader ICC
+	INNER JOIN tblCTItemContractHeaderCategory ICHC ON ICC.intItemContractHeaderId = ICHC.intItemContractHeaderId
+	INNER JOIN tblICCategory IC ON IC.intCategoryId = ICHC.intCategoryId
+	WHERE ICC.strContractCategoryId = 'Dollar'
 ) CONTRACTS
 INNER JOIN vyuARCustomerSearch ARC ON CONTRACTS.intEntityCustomerId = ARC.intEntityId
 LEFT OUTER JOIN tblSMTerm SMT ON CONTRACTS.intTermId = SMT.intTermID

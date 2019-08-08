@@ -68,7 +68,10 @@ SELECT intInvoiceDetailId					= INV.intInvoiceDetailId
 	 , intContractDetailId					= INV.intContractDetailId
 	 , intItemContractHeaderId				= INV.intItemContractHeaderId
 	 , intItemContractDetailId				= INV.intItemContractDetailId
+	 , intItemCategoryId					= INV.intItemCategoryId
+	 , intCategoryId						= INV.intCategoryId
 	 , dblContractBalance					= ISNULL(CT.dblBalance, 0)
+	 , dblItemContractBalance				= ISNULL(ICT.dblBalance, 0)
 	 , dblContractAvailable					= INV.dblContractAvailable
 	 , intShipmentId						= INV.intShipmentId
 	 , intShipmentPurchaseSalesContractId	= INV.intShipmentPurchaseSalesContractId
@@ -167,6 +170,8 @@ SELECT intInvoiceDetailId					= INV.intInvoiceDetailId
 	 , dblAddOnQuantity						= INV.dblAddOnQuantity
 	 , dblPriceAdjustment					= INV.dblPriceAdjustment
 	 , strBOLNumberDetail					= INV.strBOLNumberDetail
+	 , strCategoryCode						= ICATEGORY.strCategoryCode
+	 , strCategoryDescription				= ICATEGORY.strDescription
 FROM tblARInvoice PINV WITH(NOLOCK)
 JOIN tblARInvoiceDetail INV ON INV.intInvoiceId = PINV.intInvoiceId 
 LEFT JOIN (
@@ -218,6 +223,7 @@ LEFT JOIN (
 	SELECT intItemContractDetailId
 		 , strContractNumber
 		 , intLineNo
+		 , dblBalance
 	FROM tblCTItemContractDetail ICD
 	JOIN tblCTItemContractHeader ICH ON ICH.intItemContractHeaderId	= ICD.intItemContractHeaderId
 ) ICT ON INV.intItemContractDetailId = ICT.intItemContractDetailId
@@ -302,3 +308,9 @@ LEFT JOIN (
 		 , strCurrencyExchangeRateType
 	FROM tblSMCurrencyExchangeRateType WITH(NOLOCK)
 ) RTYPE ON INV.intCurrencyExchangeRateTypeId = RTYPE.intCurrencyExchangeRateTypeId
+LEFT JOIN (
+	SELECT intCategoryId
+		 , strCategoryCode
+		 , strDescription
+	FROM tblICCategory WITH(NOLOCK)
+) ICATEGORY ON INV.intCategoryId = ICATEGORY.intCategoryId
