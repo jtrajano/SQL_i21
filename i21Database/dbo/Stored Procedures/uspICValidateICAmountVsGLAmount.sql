@@ -160,44 +160,44 @@ BEGIN
 			,t.strBatchId
 			,glAccount.intAccountId
 		-- Get the Cost Adjustment from MFG. 
-		UNION ALL 
-		SELECT	
-			[strTransactionType] = ty.strName
-			,[strTransactionId] = t.strTransactionId
-			,[strBatchId] = t.strBatchId			
-			,[dblICAmount] = 
-				SUM (
-					-ROUND(dbo.fnMultiply(t.dblQty, t.dblCost) + ISNULL(t.dblValue, 0), 2)
-				)
-			,[intAccountId] = glAccount.intAccountId
-		FROM	
-			tblICInventoryTransaction t INNER JOIN tblICInventoryTransactionType ty
-				ON t.intTransactionTypeId = ty.intTransactionTypeId			
-			INNER JOIN tblICItem i
-				ON i.intItemId = t.intItemId 
-			INNER JOIN (
-				SELECT DISTINCT 
-					gl.strTransactionId
-					,gl.strBatchId 					
-				FROM 
-					@GLEntries gl
-			) gl
-				ON t.strTransactionId = gl.strTransactionId 
-				AND t.strBatchId = gl.strBatchId
-			OUTER APPLY dbo.fnGetItemGLAccountAsTable(
-				t.intItemId
-				,t.intItemLocationId
-				,'Work In Progress'
-			) glAccount
-		WHERE	
-			t.intInTransitSourceLocationId IS NULL 
-			AND ty.strName IN ('Cost Adjustment')
-			AND t.strTransactionForm IN ('Consume', 'Produce')
-		GROUP BY 
-			ty.strName 
-			,t.strTransactionId
-			,t.strBatchId
-			,glAccount.intAccountId
+		--UNION ALL 
+		--SELECT	
+		--	[strTransactionType] = ty.strName
+		--	,[strTransactionId] = t.strTransactionId
+		--	,[strBatchId] = t.strBatchId			
+		--	,[dblICAmount] = 
+		--		SUM (
+		--			-ROUND(dbo.fnMultiply(t.dblQty, t.dblCost) + ISNULL(t.dblValue, 0), 2)
+		--		)
+		--	,[intAccountId] = glAccount.intAccountId
+		--FROM	
+		--	tblICInventoryTransaction t INNER JOIN tblICInventoryTransactionType ty
+		--		ON t.intTransactionTypeId = ty.intTransactionTypeId			
+		--	INNER JOIN tblICItem i
+		--		ON i.intItemId = t.intItemId 
+		--	INNER JOIN (
+		--		SELECT DISTINCT 
+		--			gl.strTransactionId
+		--			,gl.strBatchId 					
+		--		FROM 
+		--			@GLEntries gl
+		--	) gl
+		--		ON t.strTransactionId = gl.strTransactionId 
+		--		AND t.strBatchId = gl.strBatchId
+		--	OUTER APPLY dbo.fnGetItemGLAccountAsTable(
+		--		t.intItemId
+		--		,t.intItemLocationId
+		--		,'Work In Progress'
+		--	) glAccount
+		--WHERE	
+		--	t.intInTransitSourceLocationId IS NULL 
+		--	AND ty.strName IN ('Cost Adjustment')
+		--	AND t.strTransactionForm IN ('Consume', 'Produce')
+		--GROUP BY 
+		--	ty.strName 
+		--	,t.strTransactionId
+		--	,t.strBatchId
+		--	,glAccount.intAccountId
 	END 
 	ELSE 
 	BEGIN 
@@ -223,7 +223,6 @@ BEGIN
 		GROUP BY ty.strName 
 	END 
 END 
-
 
 
 -- Get the inventory value from GL 
@@ -257,8 +256,13 @@ BEGIN
 					ON gm.intAccountSegmentId = gs.intAccountSegmentId
 				INNER JOIN tblGLAccountCategory ac 
 					ON ac.intAccountCategoryId = gm.intAccountCategoryId 
-			WHERE 
-				ac.strAccountCategory IN ('Inventory', 'Work In Progress')
+			WHERE 			
+				1 = 
+					CASE 
+						WHEN gd.strTransactionType = 'Cost Adjustment' AND ac.strAccountCategory IN ('Inventory') THEN 1 
+						WHEN gd.strTransactionType <> 'Cost Adjustment' AND ac.strAccountCategory IN ('Inventory', 'Work In Progress') THEN 1 
+						ELSE 0 
+					END 
 			GROUP BY 				
 				gd.strTransactionType
 				,gd.strTransactionId
@@ -318,8 +322,13 @@ BEGIN
 				AND (gd.strTransactionType = @strTransactionType OR @strTransactionType IS NULL) 
 				AND (dbo.fnDateGreaterThanEquals(gd.dtmDate, @dtmDateFrom) = 1 OR @dtmDateFrom IS NULL)
 				AND (dbo.fnDateLessThanEquals(gd.dtmDate, @dtmDateTo) = 1 OR @dtmDateTo IS NULL)
-				AND ac.strAccountCategory IN ('Inventory', 'Work In Progress')
 				AND gd.ysnIsUnposted = 0 
+				AND 1 = 
+					CASE 
+						WHEN gd.strTransactionType = 'Cost Adjustment' AND ac.strAccountCategory IN ('Inventory') THEN 1 
+						WHEN gd.strTransactionType <> 'Cost Adjustment' AND ac.strAccountCategory IN ('Inventory', 'Work In Progress') THEN 1 
+						ELSE 0 
+					END 
 			GROUP BY 				
 				gd.strTransactionType
 				,gd.strTransactionId
@@ -380,9 +389,14 @@ BEGIN
 				INNER JOIN tblGLAccountCategory ac 
 					ON ac.intAccountCategoryId = gm.intAccountCategoryId 
 			WHERE 
-				ac.strAccountCategory IN ('Inventory', 'Work In Progress')
+				1 = 
+					CASE 
+						WHEN gd.strTransactionType = 'Cost Adjustment' AND ac.strAccountCategory IN ('Inventory') THEN 1 
+						WHEN gd.strTransactionType <> 'Cost Adjustment' AND ac.strAccountCategory IN ('Inventory', 'Work In Progress') THEN 1 
+						ELSE 0 
+					END 
+
 			GROUP BY 				
-				--gd.strTransactionType
 				CASE 
 					WHEN gd.strTransactionType = 'Inventory Adjustment' THEN 'Inventory Auto Variance'
 					ELSE gd.strTransactionType
@@ -442,7 +456,13 @@ BEGIN
 				AND (gd.strTransactionType = @strTransactionType OR @strTransactionType IS NULL) 
 				AND (dbo.fnDateGreaterThanEquals(gd.dtmDate, @dtmDateFrom) = 1 OR @dtmDateFrom IS NULL)
 				AND (dbo.fnDateLessThanEquals(gd.dtmDate, @dtmDateTo) = 1 OR @dtmDateTo IS NULL)
-				AND ac.strAccountCategory IN ('Inventory', 'Work In Progress')
+				AND 1 = 
+					CASE 
+						WHEN gd.strTransactionType = 'Cost Adjustment' AND ac.strAccountCategory IN ('Inventory') THEN 1 
+						WHEN gd.strTransactionType <> 'Cost Adjustment' AND ac.strAccountCategory IN ('Inventory', 'Work In Progress') THEN 1 
+						ELSE 0 
+					END 
+
 			GROUP BY 
 				gd.strTransactionType
 		) AS glResult 
