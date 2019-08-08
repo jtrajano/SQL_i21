@@ -12,6 +12,7 @@ BEGIN TRY
 	DECLARE @strStorageType NVARCHAR(100)
 	DECLARE @dblThereAfterCharge NUMERIC(18,10)
 	DECLARE @dtmTerminationOfReceipt DATETIME
+	DECLARE @dtmStartTerminationOfReceipt DATETIME
 	DECLARE @strItemNo NVARCHAR(100)
 	DECLARE @strLicenseNumber NVARCHAR(100)
 	DECLARE @strPrefix NVARCHAR(100)
@@ -33,7 +34,7 @@ BEGIN TRY
 	WHERE intStorageScheduleRule = @intStorageScheduleId 
 		AND strPeriodType='Thereafter'
 
-	SELECT TOP 1 @dtmTerminationOfReceipt = ISNULL(dtmEndingDate,0) 
+	SELECT TOP 1 @dtmTerminationOfReceipt = ISNULL(dtmEndingDate,0), @dtmStartTerminationOfReceipt = dtmEffectiveDate
 	FROM tblGRStorageSchedulePeriod 
 	WHERE intStorageScheduleRule = @intStorageScheduleId 
 		AND strPeriodType = 'Date Range'
@@ -72,6 +73,7 @@ BEGIN TRY
 			@strStorageType AS strStorageType,
 			dbo.fnRemoveTrailingZeroes(@dblThereAfterCharge) AS dblCharges,
 			CONVERT(NVARCHAR,@dtmTerminationOfReceipt,101) AS dtmTerminationOfReceipt,
+			CONVERT(NVARCHAR,@dtmStartTerminationOfReceipt,101) AS dtmStartTerminationOfReceipt,
 			'Dry ' + UOM.strUnitMeasure AS strDryUOM,
 			CONVERT(NVARCHAR,@dtmTerminationOfReceipt + 1,101)dtmThereaferStart,
 			UOM.strUnitMeasure,
@@ -121,6 +123,7 @@ BEGIN TRY
 				[strStorageType],
 				[dblCharges],
 				[dtmTerminationOfReceipt],
+				[dtmStartTerminationOfReceipt],
 				[intUnitMeasureId]
 			)
 			SELECT	
@@ -142,6 +145,7 @@ BEGIN TRY
 				@strStorageType AS strStorageType,
 				@dblThereAfterCharge,
 				@dtmTerminationOfReceipt,
+				@dtmStartTerminationOfReceipt,
 				@intUnitMeasureId
 			FROM tblGRCustomerStorage CS
 			JOIN tblICCommodity COM 
@@ -223,6 +227,7 @@ BEGIN TRY
 			ST.strStorageType AS strStorageType,
 			dbo.fnRemoveTrailingZeroes(dblCharges) AS dblCharges,
 			CONVERT(NVARCHAR,dtmTerminationOfReceipt,101) AS dtmTerminationOfReceipt,
+			CONVERT(NVARCHAR,dtmStartTerminationOfReceipt,101) AS dtmStartTerminationOfReceipt,
 			('Dry ' + strUnitMeasure) AS strDryUOM,
 			CONVERT(NVARCHAR,dtmTerminationOfReceipt + 1,101) dtmThereaferStart,
 			UOM.strUnitMeasure,
