@@ -1004,11 +1004,8 @@ FROM(
             ,cd.intPricingTypeId
             ,cd.strPricingType
 			,cd.dblRatio
-			,isnull(CASE WHEN @ysnIncludeBasisDifferentialsInResults = 1 THEN 
-							isnull(cd.dblBasis,0) 
-						ELSE 
-							0 
-					END,0) / case when ysnSubCurrency = 1 then 100 else 1 end dblContractBasis
+			, ISNULL(CASE WHEN @ysnIncludeBasisDifferentialsInResults = 1 THEN ISNULL(cd.dblBasis,0)
+						ELSE 0 END,0) / CASE WHEN ysnSubCurrency = 1 THEN 100 ELSE 1 END dblContractBasis
 			,isnull(cd.dblBasis,0) dblDummyContractBasis
             ,CASE WHEN cd.intPricingTypeId=6 THEN
 					dblCashPrice 
@@ -1016,10 +1013,10 @@ FROM(
 					null 
 			 END dblCash
 			,dblFuturePrice as dblFuturesClosingPrice1
-			,CASE WHEN cd.intPricingTypeId=2 and strPricingStatus='Unpriced' THEN 
-					dblFuturePrice
+			,CASE WHEN cd.intPricingTypeId=2 and strPricingStatus IN('Unpriced','Partially Priced') THEN 
+					0--dblFuturePrice
 				ELSE                                                        
-					case when cd.intPricingTypeId in(1,3) then isnull(p.dblFutures,0) else dblFuture end 
+					case when cd.intPricingTypeId in(1,3) then isnull(cd.dblFutures,0) else ISNULL(cd.dblFutures,0) end 
 			 END AS dblFutures
 			 ,(SELECT TOP 1 dblRatio FROM tblRKM2MBasisDetail temp 
 					LEFT JOIN  tblSMCurrency c on temp.intCurrencyId=c.intCurrencyID
