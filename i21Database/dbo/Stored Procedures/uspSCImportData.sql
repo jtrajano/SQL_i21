@@ -28,7 +28,7 @@ BEGIN TRY
 		SET @xmlParam3 = NULL
 	IF LTRIM(RTRIM(@xmlParamDS)) = ''
 		SET @xmlParamDS = NULL
-	IF LTRIM(RTRIM(@xmlParamDS)) = ''
+	IF LTRIM(RTRIM(@xmlParamDSS)) = ''
 		SET @xmlParamDSS = NULL
 	IF  LTRIM(RTRIM(@xmlParamDSXref)) = ''
 		SET @xmlParamDSXref = NULL
