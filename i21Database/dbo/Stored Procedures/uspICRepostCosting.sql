@@ -713,7 +713,7 @@ BEGIN
 	
 	DECLARE @msg AS NVARCHAR(1000)
 			,@strItemNo AS NVARCHAR(50)
-			,@TransactionTotal AS NUMERIC(18, 16)
+			,@TransactionTotal AS NUMERIC(38, 20)
 
 	SELECT	@strItemNo = strItemNo
 	FROM	tblICItem i
