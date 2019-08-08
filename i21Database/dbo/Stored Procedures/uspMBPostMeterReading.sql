@@ -39,12 +39,6 @@ BEGIN TRY
 
 	DECLARE @EntriesForInvoice AS InvoiceIntegrationStagingTable
 
-	IF ((SELECT ISNULL(MA.intCompanyLocationId, 0) FROM tblMBMeterReading MR INNER JOIN tblMBMeterAccount MA ON MA.intMeterAccountId = MR.intMeterAccountId where intMeterReadingId = @TransactionId) = 0)
-    BEGIN
-		RAISERROR('Company Location is required!', 16, 1)
-		RETURN
-    END
-
 	INSERT INTO @EntriesForInvoice(
 		[strType]
 		,[strSourceTransaction]
@@ -255,12 +249,28 @@ BEGIN TRY
 
 		IF (@Post = 1)
 		BEGIN
-			UPDATE tblMBMeterAccountDetail
-			SET tblMBMeterAccountDetail.dblLastMeterReading = MRDetail.dblCurrentReading
-				, tblMBMeterAccountDetail.dblLastTotalSalesDollar = MRDetail.dblCurrentDollars
+			-- UPDATE tblMBMeterAccountDetail
+			-- SET tblMBMeterAccountDetail.dblLastMeterReading = MRDetail.dblCurrentReading
+			-- 	, tblMBMeterAccountDetail.dblLastTotalSalesDollar = MRDetail.dblCurrentDollars
+			-- FROM tblMBMeterAccountDetail MADetail
+			-- LEFT JOIN tblMBMeterReadingDetail MRDetail ON MRDetail.intMeterAccountDetailId = MADetail.intMeterAccountDetailId
+			-- WHERE MRDetail.intMeterReadingId = @TransactionId
+
+			-- UPDATE METER READING
+			UPDATE tblMBMeterReadingDetail SET tblMBMeterReadingDetail.dblLastReading = AD.dblLastMeterReading
+			FROM tblMBMeterReadingDetail RD
+			INNER JOIN tblMBMeterReading MR ON RD.intMeterReadingId = MR.intMeterReadingId
+			INNER JOIN tblMBMeterAccountDetail AD ON AD.intMeterAccountDetailId = RD.intMeterAccountDetailId
+			WHERE RD.intMeterReadingId = @TransactionId
+			AND RD.dblLastReading < AD.dblLastMeterReading
+
+			-- UPDATE METER ACCOUNT DETAIL
+			UPDATE tblMBMeterAccountDetail SET tblMBMeterAccountDetail.dblLastMeterReading = CASE WHEN MRDetail.dblCurrentReading > MADetail.dblLastMeterReading THEN  MRDetail.dblCurrentReading ELSE MADetail.dblLastMeterReading END
+				, tblMBMeterAccountDetail.dblLastTotalSalesDollar = CASE WHEN MRDetail.dblCurrentDollars > MADetail.dblLastTotalSalesDollar THEN MRDetail.dblCurrentDollars ELSE MADetail.dblLastTotalSalesDollar END
 			FROM tblMBMeterAccountDetail MADetail
 			LEFT JOIN tblMBMeterReadingDetail MRDetail ON MRDetail.intMeterAccountDetailId = MADetail.intMeterAccountDetailId
 			WHERE MRDetail.intMeterReadingId = @TransactionId
+
 		END
 		ELSE IF (@Post = 0)
 		BEGIN
@@ -270,13 +280,6 @@ BEGIN TRY
 				, @meterAccountId = intMeterAccountId
 			FROM tblMBMeterReading
 			WHERE intMeterReadingId = @TransactionId
-
-			-- UPDATE tblMBMeterAccountDetail A SET A.dblLastMeterReading = ISNULL(MRD.dblLastMeterReading, 0),
-			-- MRD.dblLastMeterReading, dblLastTotalSalesDollar = ISNULL(MRD.dblLastReading, 0) 
-			-- FROM tblMBMeterReadingDetail MRD
-			-- INNER JOIN tblMBMeterReading MR ON MR.intMeterReadingId = MRD.intMeterReadingId
-			-- WHERE A.intMeterAccountDetailId = MRD.intMeterAccountDetailId
-			-- AND MR.intMeterReadingId = @TransactionId
 
 			DECLARE @CursorTran AS CURSOR
 
@@ -291,7 +294,6 @@ BEGIN TRY
 			FETCH NEXT FROM @CursorTran INTO @intMeterAccountDetailId
         	WHILE @@FETCH_STATUS = 0
 			BEGIN
-
 				DECLARE @dblCurrentReading NUMERIC(18,6) = NULL,
 					@dblCurrentDollar NUMERIC(18,6) = NULL
 
@@ -304,7 +306,6 @@ BEGIN TRY
 
 				UPDATE tblMBMeterAccountDetail SET dblLastMeterReading = ISNULL(@dblCurrentReading, 0), dblLastTotalSalesDollar = ISNULL(@dblCurrentDollar, 0)
 				WHERE intMeterAccountDetailId = @intMeterAccountDetailId
-
 
 				FETCH NEXT FROM @CursorTran INTO @intMeterAccountDetailId
 			END

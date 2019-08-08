@@ -19,6 +19,12 @@ BEGIN TRY
 
 	DECLARE @strTransactionId NVARCHAR(100) = NULL
 
+	IF ((SELECT ISNULL(MA.intCompanyLocationId, 0) FROM tblMBMeterReading MR INNER JOIN tblMBMeterAccount MA ON MA.intMeterAccountId = MR.intMeterAccountId where intMeterReadingId = @intMeterReadingId) = 0)
+    BEGIN
+		RAISERROR('Company Location is required!', 16, 1)
+		RETURN
+    END
+
 	IF (@Post = 1)
 	BEGIN
 		SELECT TOP 1 @strTransactionId = strTransactionId FROM tblMBMeterReading
@@ -26,7 +32,7 @@ BEGIN TRY
 		AND intMeterAccountId = (SELECT intMeterAccountId FROM tblMBMeterReading
 		WHERE intMeterReadingId = @intMeterReadingId)
 		AND ysnPosted = 0
-		ORDER BY intMeterReadingId DESC
+		ORDER BY dtmTransaction DESC, intMeterReadingId DESC
 
 		IF(@strTransactionId IS NOT NULL)
 		BEGIN
@@ -35,17 +41,17 @@ BEGIN TRY
 		END
 
 
-		IF EXISTS(SELECT TOP 1 RD.intMeterAccountDetailId FROM tblMBMeterReadingDetail RD
-			INNER JOIN tblMBMeterReading MR ON RD.intMeterReadingId = MR.intMeterReadingId
-			INNER JOIN tblMBMeterAccountDetail AD ON AD.intMeterAccountDetailId = RD.intMeterAccountDetailId
-			WHERE RD.intMeterReadingId = @intMeterReadingId
-			AND (RD.dblLastReading <> AD.dblLastMeterReading
-			OR RD.dblLastDollars <> AD.dblLastTotalSalesDollar)
-		)
-		BEGIN
-			RAISERROR('This transaction cannot be Posted. Last reading/dollars is not equal.', 16, 1)
-			RETURN
-		END
+		-- IF EXISTS(SELECT TOP 1 RD.intMeterAccountDetailId FROM tblMBMeterReadingDetail RD
+		-- 	INNER JOIN tblMBMeterReading MR ON RD.intMeterReadingId = MR.intMeterReadingId
+		-- 	INNER JOIN tblMBMeterAccountDetail AD ON AD.intMeterAccountDetailId = RD.intMeterAccountDetailId
+		-- 	WHERE RD.intMeterReadingId = @intMeterReadingId
+		-- 	AND (RD.dblLastReading <> AD.dblLastMeterReading
+		-- 	OR RD.dblLastDollars <> AD.dblLastTotalSalesDollar)
+		-- )
+		-- BEGIN
+		-- 	RAISERROR('This transaction cannot be Posted. Last reading/dollars is not equal.', 16, 1)
+		-- 	RETURN
+		-- END
 
 	END
 	ELSE IF (@Post = 0)
@@ -55,7 +61,7 @@ BEGIN TRY
 		AND intMeterAccountId = (SELECT intMeterAccountId FROM tblMBMeterReading
 		WHERE intMeterReadingId = @intMeterReadingId)
 		AND ysnPosted = 1
-		ORDER BY intMeterReadingId DESC
+		ORDER BY dtmTransaction DESC, intMeterReadingId DESC
 
 		IF(@strTransactionId IS NOT NULL)
 		BEGIN
