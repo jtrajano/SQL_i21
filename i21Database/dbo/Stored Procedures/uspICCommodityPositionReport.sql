@@ -58,7 +58,7 @@ begin
 			,cl.intCompanyLocationId
 			,cl.strLocationName 
 			, dblQty = ROUND(dbo.fnICConvertUOMtoStockUnit(t.intItemId, t.intItemUOMId, t.dblQty), ISNULL(com.intDecimalDPR,2))
-			, dtmDate = ''' + cast(@dtmDate as nvarchar) + '''
+			, dtmDate = cast(''' + cast(@dtmDate as nvarchar) + ''' as datetime) 
 			, ysnLicensed = cl.ysnLicensed
 		FROM 
 			tblICItem i inner join tblICItemLocation il
