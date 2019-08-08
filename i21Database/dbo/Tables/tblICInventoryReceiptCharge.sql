@@ -37,6 +37,7 @@
 	[dtmDateModified] DATETIME NULL,
 	[intCreatedByUserId] INT NULL,
 	[intModifiedByUserId] INT NULL, 
+	intLoadShipmentCostId INT NULL, 
 	[ysnAllowVoucher] BIT NULL,
     CONSTRAINT [PK_tblICInventoryReceiptCharge] PRIMARY KEY ([intInventoryReceiptChargeId]), 
     CONSTRAINT [FK_tblICInventoryReceiptCharge_tblICInventoryReceipt] FOREIGN KEY ([intInventoryReceiptId]) REFERENCES [tblICInventoryReceipt]([intInventoryReceiptId]) ON DELETE CASCADE, 
