@@ -62,6 +62,7 @@ FROM (
 			END dblAmount
 		,RT.strCurrencyExchangeRateType
 		,strEntityType = 'Vendor' COLLATE Latin1_General_CI_AS
+		,IM.intOnCostTypeId
 	FROM tblCTContractCost CC
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = CC.intContractDetailId
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
@@ -126,8 +127,10 @@ FROM (
 		,CCV.dblAmount
 		,CCV.strCurrencyExchangeRateType
 		,strEntityType = CASE WHEN CH.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END COLLATE Latin1_General_CI_AS
+		,IM.intOnCostTypeId
 	FROM vyuCTContractCostView CCV
+	JOIN tblICItem IM ON IM.intItemId = CCV.intItemId
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CCV.intContractHeaderId
 	JOIN tblEMEntity E ON E.intEntityId = CH.intEntityId
-	WHERE ysnPrice = 1
+	WHERE CCV.ysnPrice = 1
 	) tbl
