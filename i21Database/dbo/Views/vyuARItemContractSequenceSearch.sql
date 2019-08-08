@@ -26,7 +26,8 @@ SELECT intItemContractHeaderId		= ICH.intItemContractHeaderId
 	 , intSubLocationId				= IL.intSubLocationId
 	 , intStorageLocationId			= IL.intStorageLocationId
 	 , strStorageLocation			= STOLOC.strName
-	 , strSubLocationName			= SUBLOC.strSubLocationName	
+	 , strSubLocationName			= SUBLOC.strSubLocationName
+	 , strLotTracking				= I.strLotTracking		
 FROM dbo.tblCTItemContractDetail ICD
 INNER JOIN dbo.tblCTItemContractHeader ICH ON ICD.intItemContractHeaderId = ICH.intItemContractHeaderId
 INNER JOIN dbo.tblICItem I ON ICD.intItemId = I.intItemId
