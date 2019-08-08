@@ -430,9 +430,8 @@ BEGIN
 			join (select intContractHeaderId
 		from @Transaction
 			where @dtmDate is null or dtmDate <= @dtmDate
-		--group by intContractHeaderId 
-		--having(sum(dblQuantity) > 0)) b
-		and dblQuantity > 0) b
+		group by intContractHeaderId 
+		having(sum(dblQuantity) > 0)) b
 			on a.intContractHeaderId = b.intContractHeaderId
 	-- TEMPORARY SOLUTION
 	IF @dtmDate IS NOT NULL
