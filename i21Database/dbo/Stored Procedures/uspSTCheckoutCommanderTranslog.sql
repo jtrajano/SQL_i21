@@ -69,11 +69,18 @@ BEGIN
 		BEGIN
 
 			--Get StoreId
-			DECLARE @intStoreId INT
+			DECLARE @intStoreId			INT,
+					@strRegisterClass	NVARCHAR(50)
 
-			SELECT @intStoreId = intStoreId 
-			FROM tblSTCheckoutHeader 
-			WHERE intCheckoutId = @intCheckoutId
+			SELECT 
+				@intStoreId			= chk.intStoreId,
+				@strRegisterClass	= r.strRegisterClass
+			FROM tblSTCheckoutHeader chk
+			INNER JOIN tblSTStore st
+				ON chk.intStoreId = st.intStoreId
+			INNER JOIN tblSTRegister r
+				ON st.intRegisterId = r.intRegisterId
+			WHERE chk.intCheckoutId = @intCheckoutId
 
 			
 			-- ================================================================================================================== 
@@ -445,7 +452,7 @@ BEGIN
 								[strTrlDept]								= NULLIF(chk.trLinetrlDept, ''),
 								[strTrlDeptType]							= NULLIF(chk.trlDepttype, ''),
 								[intTrlDeptNumber]							= NULLIF(chk.trlDeptnumber, ''),
-								[strTrlCat]									= NULLIF(chk.trLinetrlCat, ''),                 				      -- trLine type="preFuel"
+								[strTrlCat]									= NULLIF(chk.trLinetrlCat, ''),                 			  -- trLine type="preFuel"
 								[strTrlCatNumber]							= NULLIF(chk.trlCatnumber, ''),               				  -- trLine type="preFuel"
 								[strTrlNetwCode]							= NULLIF(chk.trLinetrlNetwCode, ''),
 								[dblTrlQty]									= NULLIF(chk.trLinetrlQty, ''),
@@ -454,13 +461,59 @@ BEGIN
 								[dblTrlUnitPrice]							= NULLIF(chk.trLinetrlUnitPrice, ''),
 								[dblTrlLineTot]								= NULLIF(chk.trLinetrlLineTot, ''),
 								[strTrlDesc]								= NULLIF(chk.trLinetrlDesc, ''),
-								[strTrlUPC]									= NULLIF(chk.trLinetrlUPC, ''),
-								[strTrlUPCwithoutCheckDigit]				= CASE 
-																				WHEN (chk.trLinetrlUPC IS NOT NULL AND chk.trLinetrlUPC != '' AND LEN(chk.trLinetrlUPC) = 14 AND SUBSTRING(chk.trLinetrlUPC, 1, 1) = '0')
-																					THEN LEFT (chk.trLinetrlUPC, LEN (chk.trLinetrlUPC)-1) -- Remove Check digit on last character
-																					-- THEN LEFT (RIGHT (strTrlUPC, LEN (strTrlUPC)-1), LEN (strTrlUPC)-2)
-																				ELSE NULL
+
+								-- NOTE: in the future if we will be supporting PASSPORT for rebate file
+								-- Assumption
+								-- COMMANDER file  -  check digit is included
+								-- PASSPORT  file  -  check digit is NOT included
+								--
+								-- Check Register Class by
+								--SELECT TOP 1
+								--	r.strRegisterClass 
+								--FROM tblSTTranslogRebates tlr
+								--INNER JOIN tblSTCheckoutHeader chk
+								--	ON tlr.intCheckoutId = chk.intCheckoutId
+								--INNER JOIN tblSTStore st
+								--	ON chk.intStoreId = st.intStoreId
+								--INNER JOIN tblSTRegister r
+								--	ON st.intRegisterId = r.intRegisterId
+								--WHERE chk.intCheckoutId = @intCheckoutId
+								--
+								-- IF strRegisterClass = PASSPORT
+								--	 THEN INSERT UPC with check digit to column 'strTrlUPC'						(Since PASSPORT is not generating UPC with check digit then calculate check digit using chk.trLinetrlUPC)
+								--	 THEN INSERT UPC without check digit to column 'strTrlUPCwithoutCheckDigit' (Just insert using chk.trLinetrlUPC since PASSPORT is generating UPC without check digit)
+								--
+								-- ELSE IF strRegisterClass = COMMANDER
+								--	 THEN INSERT UPC with check digit to column 'strTrlUPC'						(Since COMMANDER is generating UPC with check digit then just use chk.trLinetrlUPC)
+								--	 THEN INSERT UPC without check digit to column 'strTrlUPCwithoutCheckDigit' (Just remove the last digit of chk.trLinetrlUPC)
+								--[strTrlUPC]									= NULLIF(chk.trLinetrlUPC, ''),
+								--[strTrlUPCwithoutCheckDigit]				= CASE 
+								--												WHEN (chk.trLinetrlUPC IS NOT NULL AND chk.trLinetrlUPC != '' AND LEN(chk.trLinetrlUPC) = 14 AND SUBSTRING(chk.trLinetrlUPC, 1, 1) = '0')
+								--													THEN LEFT (chk.trLinetrlUPC, LEN (chk.trLinetrlUPC)-1) -- Remove Check digit on last character
+								--												ELSE NULL
+								--											END,
+								[strTrlUPC]									= CASE
+																				WHEN (@strRegisterClass = N'SAPPHIRE/COMMANDER')
+																					THEN NULLIF(chk.trLinetrlUPC, '')
+																				WHEN (@strRegisterClass = N'PASSPORT')
+																					THEN NULLIF(chk.trLinetrlUPC, '') + CAST(dbo.fnSTGenerateCheckDigit(dbo.fnSTGenerateCheckDigit(NULLIF(chk.trLinetrlUPC, ''))) AS NVARCHAR(1))
+																				ELSE
+																					NULLIF(chk.trLinetrlUPC, '')
 																			END,
+								[strTrlUPCwithoutCheckDigit]				= CASE
+																				WHEN (@strRegisterClass = N'SAPPHIRE/COMMANDER')
+																					THEN CASE 
+																							WHEN (chk.trLinetrlUPC IS NOT NULL AND chk.trLinetrlUPC != '' AND LEN(chk.trLinetrlUPC) = 14 AND SUBSTRING(chk.trLinetrlUPC, 1, 1) = '0')
+																								THEN LEFT (chk.trLinetrlUPC, LEN (chk.trLinetrlUPC)-1) -- Remove Check digit on last character
+																							ELSE NULL
+																						END
+																				WHEN (@strRegisterClass = N'PASSPORT')
+																					THEN NULLIF(chk.trLinetrlUPC, '')
+																				ELSE
+																					NULLIF(chk.trLinetrlUPC, '')
+																			END,
+
+
 								[strTrlModifier]							= NULLIF(chk.trLinetrlModifier, ''),
 								[strTrlUPCEntryType]						= NULLIF(chk.trLinetrlUPCEntry, ''),
 

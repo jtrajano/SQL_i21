@@ -91,12 +91,34 @@ BEGIN
 				AND SurchargedOtherCharges.intChargeId IS NOT NULL			-- it is a surcharge item
 				AND SurchargedOtherCharges.dblCalculatedAmount IS NOT NULL	-- there is a surcharged amount
 				AND CalculatedSurcharge.intInventoryShipmentChargeId IS NULL -- surcharge is not yet calculated. 
+				--AND (
+				--	Surcharge.intContractId IS NULL 
+				--	OR (
+				--		Surcharge.intContractId IS NOT NULL 
+				--		AND Surcharge.intContractId = SurchargedOtherCharges.intContractId
+				--		--AND Surcharge.intContractDetailId = SurchargedOtherCharges.intContractDetailId //removing this because Shipment could have many contract details/sequences per contract
+				--	)
+				--)
 				AND (
-					Surcharge.intContractId IS NULL 
+					(
+						Surcharge.strChargesLink IS NOT NULL 
+						AND Surcharge.intContractId IS NULL 
+						AND Surcharge.strChargesLink = SurchargedOtherCharges.strChargesLink
+					)
 					OR (
 						Surcharge.intContractId IS NOT NULL 
+						AND Surcharge.strChargesLink IS NULL
 						AND Surcharge.intContractId = SurchargedOtherCharges.intContractId
-						--AND Surcharge.intContractDetailId = SurchargedOtherCharges.intContractDetailId //removing this because Shipment could have many contract details/sequences per contract
+					)
+					OR (
+						Surcharge.intContractId IS NOT NULL 
+						AND Surcharge.strChargesLink IS NOT NULL
+						AND Surcharge.intContractId = SurchargedOtherCharges.intContractId
+						AND Surcharge.strChargesLink = SurchargedOtherCharges.strChargesLink
+					)
+					OR (
+						Surcharge.intContractId IS NULL 
+						AND Surcharge.strChargesLink IS NULL 						
 					)
 				)
 	)
@@ -139,12 +161,34 @@ BEGIN
 				AND SurchargedOtherCharges.intChargeId IS NOT NULL			-- it is a surcharge item
 				AND SurchargedOtherCharges.dblCalculatedAmount IS NOT NULL	-- there is a surcharged amount
 				AND CalculatedSurcharge.intInventoryShipmentChargeId IS NULL -- surcharge is not yet calculated. 
+				--AND (
+				--	Surcharge.intContractId IS NULL 
+				--	OR (
+				--		Surcharge.intContractId IS NOT NULL 
+				--		AND Surcharge.intContractId = SurchargedOtherCharges.intContractId
+				--		--AND Surcharge.intContractDetailId = SurchargedOtherCharges.intContractDetailId //removing this because Shipment could have many contract details/sequences per contract
+				--	)
+				--)
 				AND (
-					Surcharge.intContractId IS NULL 
+					(
+						Surcharge.strChargesLink IS NOT NULL 
+						AND Surcharge.intContractId IS NULL 
+						AND Surcharge.strChargesLink = SurchargedOtherCharges.strChargesLink
+					)
 					OR (
 						Surcharge.intContractId IS NOT NULL 
+						AND Surcharge.strChargesLink IS NULL
 						AND Surcharge.intContractId = SurchargedOtherCharges.intContractId
-						--AND Surcharge.intContractDetailId = SurchargedOtherCharges.intContractDetailId //removing this because Shipment could have many contract details/sequences per contract
+					)
+					OR (
+						Surcharge.intContractId IS NOT NULL 
+						AND Surcharge.strChargesLink IS NOT NULL
+						AND Surcharge.intContractId = SurchargedOtherCharges.intContractId
+						AND Surcharge.strChargesLink = SurchargedOtherCharges.strChargesLink
+					)
+					OR (
+						Surcharge.intContractId IS NULL 
+						AND Surcharge.strChargesLink IS NULL 						
 					)
 				)
 
