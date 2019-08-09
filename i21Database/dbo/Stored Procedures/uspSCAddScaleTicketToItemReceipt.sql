@@ -1238,6 +1238,12 @@ BEGIN
 	UPDATE @OtherCharges SET strReceiptType = 'Purchase Contract'
 END
 
+IF @strReceiptType = 'Delayed Price' 
+BEGIN
+	UPDATE @ReceiptStagingTable SET intTaxGroupId = -1
+	UPDATE @OtherCharges SET intTaxGroupId = -1
+END
+
 SELECT @total = COUNT(*) FROM @ReceiptStagingTable;
 IF (@total = 0)
 	RETURN;
