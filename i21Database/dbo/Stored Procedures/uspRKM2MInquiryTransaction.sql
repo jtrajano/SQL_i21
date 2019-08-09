@@ -1216,7 +1216,7 @@ FROM (
 			JOIN tblCTContractDetail cd on cd.intContractDetailId = it.intLineNo
 			JOIN tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
 			JOIN tblICItem i on cd.intItemId=i.intItemId
-			JOIN tblICItemUOM iuom on i.intItemId=iuom.intItemId and iuom.intUnitMeasureId = cd.intBasisUOMId
+			JOIN tblICItemUOM iuom on i.intItemId=iuom.intItemId and iuom.intItemUOMId = cd.intBasisUOMId
 			JOIN tblEMEntity e on ch.intEntityId = e.intEntityId
 			JOIN tblICCommodity com on ch.intCommodityId = com.intCommodityId
 			JOIN tblRKFutureMarket fm on cd.intFutureMarketId = fm.intFutureMarketId
@@ -2238,7 +2238,7 @@ FROM (
 														then dbo.fnCTConvertQuantityToTargetCommodityUOM(intPriceUOMId,case when ISNULL(PriceSourceUOMId,0)=0 then intPriceUOMId else PriceSourceUOMId end,ISNULL(dblMarketBasis,0)) * dblRate
 													else dbo.fnCTConvertQuantityToTargetCommodityUOM(intPriceUOMId,case when ISNULL(PriceSourceUOMId,0)=0 then intPriceUOMId else PriceSourceUOMId end,ISNULL(dblMarketBasis,0)) end end) end as dblMarketBasis
 		, intMarketBasisCurrencyId
-		, dblFuturePrice1 as dblFuturePrice
+		, dblFuturePrice = CASE WHEN strPricingType = 'Basis' THEN 0 ELSE dblFuturePrice1 END
 		, intFuturePriceCurrencyId
 		, convert(decimal(24,6),dblFuturesClosingPrice) dblFuturesClosingPrice
 		, CONVERT(int,intContractTypeId) as intContractTypeId,CONVERT(int,0) as intConcurrencyId
