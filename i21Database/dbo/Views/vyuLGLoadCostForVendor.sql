@@ -61,8 +61,10 @@ FROM tblLGLoad L
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 	JOIN tblLGLoadCost LC ON LC.intLoadId = L.intLoadId
 	JOIN tblAPVendor ARC ON LC.intVendorId = ARC.[intEntityId]
-	JOIN tblEMEntity EME ON ARC.[intEntityId] = EME.[intEntityId]
-	LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
+	JOIN tblEMEntity EME ON ARC.[intEntityId] = EME.[intEntityId] AND ISNULL(LC.strEntityType, '') <> 'Customer'
+	OUTER APPLY tblLGCompanyPreference CP
+	LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = CASE WHEN (CP.ysnEnableAccrualsForOutbound = 1 AND L.intPurchaseSale = 2 AND LC.ysnAccrue = 1 AND LC.intVendorId IS NOT NULL) 
+																	THEN LD.intSContractDetailId ELSE LD.intPContractDetailId END
 	LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 	LEFT JOIN tblICItemUOM IU ON IU.intItemUOMId = LC.intItemUOMId
 	LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = IU.intUnitMeasureId
