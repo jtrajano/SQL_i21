@@ -3,6 +3,7 @@
 	@intCurrentUserId				INT,
 	@ysnHasPreviewReport			BIT,
 	@ysnRecap						BIT,
+	@ysnBatchPost					BIT		= 1,
 	@ysnSuccess						BIT				OUTPUT,
 	@strMessage						NVARCHAR(1000)	OUTPUT
 AS
@@ -32,7 +33,21 @@ BEGIN
 		--TEST
 		--SELECT 'uspSTUpdateRetailPriceAdjustment'
 
-		IF EXISTS(SELECT TOP 1 1 FROM tblSTRetailPriceAdjustment WHERE intRetailPriceAdjustmentId = @intRetailPriceAdjustmentId AND CAST(dtmEffectiveDate AS DATE) = CAST(GETDATE() AS DATE))
+		IF EXISTS(SELECT TOP 1 1 
+		          FROM tblSTRetailPriceAdjustment 
+				  WHERE intRetailPriceAdjustmentId = @intRetailPriceAdjustmentId 
+					AND (
+							-- IF BATCH POST
+							(@ysnBatchPost = 1
+								AND CAST(dtmEffectiveDate AS DATE) <= CAST(GETDATE() AS DATE)
+							)
+							OR
+							-- IF NORMAL POST
+							(@ysnBatchPost = 0
+								AND CAST(dtmEffectiveDate AS DATE) = CAST(GETDATE() AS DATE)
+							)
+						)
+					)
 			BEGIN
 				
 				--TEST
