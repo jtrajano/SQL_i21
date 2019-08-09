@@ -48,9 +48,24 @@ SELECT
 	,dblDiscountUnPaid			  	= ISNULL(CS.dblDiscountsDue,0) - ISNULL(CS.dblDiscountsPaid,0)
 	,dblStorageUnPaid			  	= ISNULL(CS.dblStorageDue,0) - ISNULL(CS.dblStoragePaid,0)
 	,strSplitNumber				  	= EMSplit.strSplitNumber
-	,intContractHeaderId          	= CASE WHEN ST.ysnDPOwnedType = 1 THEN CH.intContractHeaderId ELSE NULL END
-    ,intContractDetailId		  	= CASE WHEN ST.ysnDPOwnedType = 1  THEN SC.intContractId ELSE NULL END
-    ,strContractNumber			  	= CASE WHEN ST.ysnDPOwnedType = 1  THEN CH.strContractNumber ELSE NULL END
+	--,intContractHeaderId          	= CASE WHEN ST.ysnDPOwnedType = 1 THEN CH.intContractHeaderId ELSE NULL END
+ --   ,intContractDetailId		  	= CASE WHEN ST.ysnDPOwnedType = 1  THEN SC.intContractId ELSE NULL END
+ --   ,strContractNumber			  	= CASE WHEN ST.ysnDPOwnedType = 1  THEN CH.strContractNumber ELSE NULL END
+	,intContractHeaderId            = CASE 
+										WHEN CS.ysnTransferStorage = 0 AND ST.ysnDPOwnedType = 1 THEN CH.intContractHeaderId 
+										WHEN CS.ysnTransferStorage = 1 AND ST.ysnDPOwnedType = 1 THEN CH_Transfer.intContractHeaderId
+										ELSE NULL
+									END
+    ,intContractDetailId			= CASE 
+										WHEN CS.ysnTransferStorage = 0 AND ST.ysnDPOwnedType = 1 THEN SC.intContractId 
+										WHEN CS.ysnTransferStorage = 1 AND ST.ysnDPOwnedType = 1 THEN CD_Transfer.intContractDetailId 
+										ELSE NULL
+									END
+    ,strContractNumber				= CASE 
+										WHEN CS.ysnTransferStorage = 0 AND ST.ysnDPOwnedType = 1 THEN CH.strContractNumber 
+										WHEN CS.ysnTransferStorage = 1 AND ST.ysnDPOwnedType = 1 THEN CH_Transfer.strContractNumber 
+										ELSE NULL
+									END
 	,strDeliverySheetNumber		  	= DeliverySheet.strDeliverySheetNumber
 	,dtmLastStorageAccrueDate	  	= CS.dtmLastStorageAccrueDate
 	,dblSplitPercent			  	= CASE WHEN SCTicketSplit.dblSplitPercent IS NULL		
@@ -126,3 +141,8 @@ LEFT JOIN (
 		LEFT JOIN tblGRTransferStorageReference TSR
 			ON TSR.intTransferStorageSplitId  = TSS.intTransferStorageSplitId
 	) ON ISNULL(TSR.intToCustomerStorageId,TSS.intTransferToCustomerStorageId) = CS.intCustomerStorageId
+LEFT JOIN tblCTContractDetail CD_Transfer
+    ON CD_Transfer.intContractDetailId = TSS.intContractDetailId
+		AND CS.ysnTransferStorage = 1
+LEFT JOIN tblCTContractHeader CH_Transfer
+    ON CH_Transfer.intContractHeaderId = CD_Transfer.intContractHeaderId  
