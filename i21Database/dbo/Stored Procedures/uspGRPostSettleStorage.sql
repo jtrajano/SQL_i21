@@ -1443,7 +1443,7 @@ BEGIN TRY
 				FROM @SettleVoucherCreate a
 				JOIN tblICItemUOM b 
 					ON b.intItemId = a.intItemId 
-						AND b.dblUnitQty = 1
+						AND b.ysnStockUnit = 1
 				JOIN tblICItem c 
 					ON c.intItemId = a.intItemId
 				JOIN tblGRSettleStorageTicket SST 
