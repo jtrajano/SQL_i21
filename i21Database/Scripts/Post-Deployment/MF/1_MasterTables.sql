@@ -3839,4 +3839,13 @@ WHERE ysnAllItem IS NULL
 UPDATE tblCTInvPlngReportMaster
 SET strPlanNo = LEFT(strInvPlngReportName, 50)
 WHERE strPlanNo IS NULL
+
+UPDATE tblCTInvPlngReportMaster
+SET ysnPost = 0
+WHERE ysnPost IS NULL
+GO
+
+UPDATE tblMFCompanyPreference
+SET strSupplyTarget = 'Weekly'
+WHERE strSupplyTarget IS NULL
 GO

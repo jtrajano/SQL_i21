@@ -81,6 +81,8 @@
     strDemandImportDateTimeFormat nvarchar(50) COLLATE Latin1_General_CI_AS,
 	intMinimumDemandMonth INT,
 	intMaximumDemandMonth INT,
+	strSupplyTarget NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	strContainerType NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 	dblDemandGrowthPerc NUMERIC(18,6),
 	CONSTRAINT [PK_tblMFCompanyPreference_intCompanyPreferenceId] PRIMARY KEY ([intCompanyPreferenceId]) 
 )

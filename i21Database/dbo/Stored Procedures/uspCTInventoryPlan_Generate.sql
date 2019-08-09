@@ -12,6 +12,8 @@
 	,@WeeksOfSupplyTargetXML VARCHAR(MAX)
 	,@ForecastedConsumptionXML VARCHAR(MAX)
 	,@ysnCalculatePlannedPurchases BIT
+	,@ysnRefreshContract BIT
+	,@ysnRefreshStock BIT
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -41,6 +43,8 @@ BEGIN TRY
 				,@WeeksOfSupplyTargetXML
 				,@ForecastedConsumptionXML
 				,@ysnCalculatePlannedPurchases
+				,@ysnRefreshContract
+				,@ysnRefreshStock
 		END
 	ELSE
 		BEGIN
@@ -57,6 +61,8 @@ BEGIN TRY
 				,@WeeksOfSupplyTargetXML
 				,@ForecastedConsumptionXML
 				,@ysnCalculatePlannedPurchases
+				,@ysnRefreshContract
+				,@ysnRefreshStock
 		END
 END TRY
 

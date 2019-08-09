@@ -103,6 +103,7 @@ BEGIN TRY
 			,strPlanNo
 			,ysnAllItem
 			,strComment
+			,ysnPost
 			,[intCreatedUserId]
 			,[dtmCreated]
 			,[intLastModifiedUserId]
@@ -123,6 +124,7 @@ BEGIN TRY
 			,@strPlanNo
 			,ysnAllItem
 			,strComment
+			,ysnPost
 			,[intCreatedUserId]
 			,GETDATE()
 			,[intLastModifiedUserId]
@@ -140,6 +142,7 @@ BEGIN TRY
 				,ysnTest BIT
 				,ysnAllItem BIT
 				,strComment NVARCHAR(MAX)
+				,ysnPost BIT
 				,intCreatedUserId INT
 				,intLastModifiedUserId INT
 				)
@@ -209,6 +212,7 @@ BEGIN TRY
 			,ysnTest = x.ysnTest
 			,ysnAllItem = x.ysnAllItem
 			,strComment = x.strComment
+			,ysnPost = x.ysnPost
 			,[intLastModifiedUserId] = x.intLastModifiedUserId
 			,[dtmLastModified] = GETDATE()
 		FROM OPENXML(@idoc, 'root/InvPlngReportMaster', 2) WITH (
@@ -224,6 +228,7 @@ BEGIN TRY
 				,ysnTest BIT
 				,ysnAllItem BIT
 				,strComment NVARCHAR(MAX)
+				,ysnPost BIT
 				,intLastModifiedUserId INT
 				) x
 		WHERE intInvPlngReportMasterID = @intInvPlngReportMasterID
