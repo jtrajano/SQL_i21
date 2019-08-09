@@ -11,6 +11,8 @@ AS
 						UM.strUnitMeasure,
 						TG.strTaxGroup,
 						CS.strContractStatus,
+						ysnIsUsed = CONVERT(BIT, CASE WHEN (SELECT TOP 1 1 FROM tblARInvoiceDetail WHERE intItemContractDetailId = CD.intItemContractDetailId) = 1 THEN 1
+						ELSE 0 END),
 						CD.*						
 
 					FROM	tblCTItemContractDetail				CD	
