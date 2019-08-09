@@ -276,6 +276,7 @@ BEGIN
 					,@recap = 0
 					,@isBatch = 0
 					,@param = @intBillId
+					,@transactionType = 'Credit Card'
 					,@userId = @userId
 					,@success = @success OUTPUT
 			END
