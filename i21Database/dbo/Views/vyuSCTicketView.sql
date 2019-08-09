@@ -116,6 +116,11 @@ AS
        ,SCT.intStorageScheduleId
        ,SCT.dblNetWeightDestination
        ,SCT.ysnHasGeneratedTicketNumber
+	   ,CASE 
+			WHEN SCT.ysnDestinationWeightGradePost = 1 THEN 'Posted' 
+			WHEN CTH.intWeightId = 2 OR CTH.intGradeId = 2 THEN 'Not yet posted' 
+		END AS strWeightGradePostStatus
+	   ,CASE WHEN CTH.intWeightId = 2 OR CTH.intGradeId = 2 THEN 'Destination' END AS strWeightGradeDest
        ,SCT.intInventoryTransferId
        ,SCT.dblShrink
        ,SCT.dblConvertedUOMQty
@@ -183,3 +188,5 @@ AS
 	LEFT JOIN tblICItem IC ON IC.intItemId = SCT.intItemId
 	--LEFT JOIN tblEMEntity EMDriver ON EMDriver.intEntityId = SCT.intEntityContactId
 	LEFT JOIN tblSMShipViaTrailer on SCT.intEntityShipViaTrailerId = tblSMShipViaTrailer.intEntityShipViaTrailerId
+	LEFT JOIN tblCTContractDetail CTD ON SCT.intContractId = CTD.intContractDetailId
+	LEFT JOIN tblCTContractHeader CTH ON CTH.intContractHeaderId = CTD.intContractHeaderId 
