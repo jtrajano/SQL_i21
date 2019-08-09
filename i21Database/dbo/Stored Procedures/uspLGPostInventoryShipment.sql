@@ -760,7 +760,7 @@ SELECT @ysnDirectShip = CASE
 FROM tblLGLoad S
 WHERE intLoadId = @intTransactionId
 
-SELECT CASE WHEN EXISTS (SELECT TOP 1 1
+SELECT @ysnIsReturn = CASE WHEN EXISTS (SELECT TOP 1 1
 	FROM tblLGLoad L JOIN tblARInvoice I ON L.intLoadId = I.intLoadId
 	WHERE L.intLoadId = @intTransactionId
 	AND I.strTransactionType = 'Credit Memo'

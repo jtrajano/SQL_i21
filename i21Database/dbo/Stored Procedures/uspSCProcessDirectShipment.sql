@@ -209,6 +209,11 @@ BEGIN TRY
 					EXEC dbo.uspARUpdateOverageContracts @intInvoiceId,@intTicketItemUOMId,@intUserId,@dblNetUnits
 				END
 			END
+
+			declare @InAdj as InventoryAdjustmentIntegrationId
+			insert into @InAdj(intInventoryShipmentId, intTicketId, intInvoiceId)
+			select @InventoryShipmentId, @intTicketId, @intInvoiceId
+			Exec uspICInventoryAdjustmentUpdateLinkingId @LinkingData = @InAdj, @ysnShipment = 1
 		END
 	END
 	ELSE
