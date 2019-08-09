@@ -887,7 +887,7 @@ FROM (
 						THEN ISNULL(temp.strPeriodTo,'') ELSE (RIGHT(CONVERT(VARCHAR(11),convert(datetime,stuff(cd.strFutureMonth,5,0,'20')),106),8))  END else ISNULL(temp.strPeriodTo,'') end
 						AND temp.strContractInventory = 'Contract'
 					),0) AS intMarketBasisCurrencyId
-		, p.dblFuturePrice as dblFuturePrice1
+		, dblFuturePrice1 = CASE WHEN cd.strPricingType = 'Basis' THEN 0 ELSE p.dblFuturePrice END
 		, intFuturePriceCurrencyId
 		, CONVERT(int,cd.intContractTypeId) intContractTypeId
 		, cd.dblRate
