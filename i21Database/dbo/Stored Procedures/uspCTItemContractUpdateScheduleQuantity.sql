@@ -98,15 +98,8 @@ BEGIN TRY
 		END 
 	END
 
-	SELECT	@dblNewScheduled =	ISNULL(@dblOrigScheduled,0) + ISNULL(@dblQuantityToUpdate,0)
-
-
-	-- UPDATE ITEM CONTRACT
-	UPDATE 	tblCTItemContractDetail
-	SET		dblScheduled			=	ISNULL(@dblNewScheduled,0),
-			dblAvailable			=	(ISNULL(@dblOrigContracted,0) - ISNULL(@dblNewScheduled,0)) - ISNULL(@dblNewApplied,0),
-			intConcurrencyId		=	intConcurrencyId + 1
-	WHERE	intItemContractDetailId =	@intItemContractDetailId
+	SELECT	@dblNewScheduled =	ISNULL(@dblOrigScheduled,0) + ISNULL(@dblQuantityToUpdate,0)	
+	SELECT	@dblNewAvailable =	(ISNULL(@dblOrigContracted,0) - ISNULL(@dblNewScheduled,0)) - ISNULL(@dblNewApplied,0)
 
 
 	-- SCREEN / MODULE SWITCHER
@@ -135,6 +128,14 @@ BEGIN TRY
 			@dblNewBalance				=	@dblOrigBalance,
 			@intNewContractStatusId		=	@intContractStatusId,
 			@dtmNewLastDeliveryDate		=	@dtmOrigLastDeliveryDate
+
+
+	-- UPDATE ITEM CONTRACT
+	UPDATE 	tblCTItemContractDetail
+	SET		dblScheduled			=	ISNULL(@dblNewScheduled,0),
+			dblAvailable			=	ISNULL(@dblNewAvailable,0),
+			intConcurrencyId		=	intConcurrencyId + 1
+	WHERE	intItemContractDetailId =	@intItemContractDetailId
 
 
 END TRY

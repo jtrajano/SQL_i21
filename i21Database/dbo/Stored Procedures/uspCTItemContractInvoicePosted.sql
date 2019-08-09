@@ -109,7 +109,7 @@ BEGIN TRY
 		 
 		 ,D.[dtmDeliveryDate]			
 		 ,D.[dtmLastDeliveryDate]	
-		 ,I.[dtmDate]	
+		 ,GETDATE()
 		 
 		 ,D.[dblContracted]			
 		 ,D.[dblScheduled]			
@@ -163,8 +163,9 @@ BEGIN TRY
 				@dblQuantityToUpdate		NUMERIC(18,6),
 				@dblTolerance				NUMERIC(18,6) = 0.0001,
 				@ysnAllowOverSchedule		BIT,
-				@intContractStatusId		INT,
-				@dtmOrigLastDeliveryDate	DATETIME,
+				@intOldContractStatusId		INT,
+				@intNewContractStatusId		INT,
+				@dtmNewLastDeliveryDate		DATETIME,
 				@intLineNo					INT,
 				@intItemContractDetailId	INT,
 				@strItemContractNumber		NVARCHAR(50),
@@ -181,25 +182,20 @@ BEGIN TRY
 				@dblNewScheduled		 = dblNewScheduled,
 				@dblNewAvailable		 = dblNewAvailable,
 				@dblNewApplied			 = dblNewApplied,
-				@dblNewBalance			 = dblNewBalance
+				@dblNewBalance			 = dblNewBalance,
+				@intNewContractStatusId	 = CASE WHEN [dblNewBalance] = 0 THEN 5 ELSE [intNewContractStatusId] END,
+				@dtmNewLastDeliveryDate = dtmNewLastDeliveryDate,
+				@strTransactionType		 = strTransactionType,
+				@intTransactionDetailId	 = intTransactionDetailId,
+				@intTransactionId		 = intTransactionId,
+				@strTransactionId		 = strTransactionId
 		FROM @tblToProcess
 
 		IF NOT EXISTS(SELECT * FROM tblCTItemContractDetail WHERE intItemContractDetailId = @intItemContractDetailId)
 		BEGIN
 			RAISERROR('Item contract is deleted by other user.',16,1)
 		END 	
-
-		-- UPDATE ITEM CONTRACT
-		UPDATE 	tblCTItemContractDetail
-		SET		dblScheduled			= 	ISNULL(@dblNewScheduled,0),
-				dblApplied				=	ISNULL(@dblNewApplied,0),
-				dblAvailable			=	ISNULL(@dblNewAvailable,0),
-				dblBalance				=	ISNULL(@dblNewBalance,0),
-				dtmLastDeliveryDate		=	GETDATE(),
-				intConcurrencyId		=	intConcurrencyId + 1
-		WHERE	intItemContractDetailId =	@intItemContractDetailId
-
-
+		
 		-- SCREEN / MODULE SWITCHER
 		IF @strTransactionType = 'Invoice'
 		BEGIN
@@ -224,8 +220,21 @@ BEGIN TRY
 				@dblNewAvailable			=	@dblNewAvailable,
 				@dblNewApplied				=	@dblNewApplied,
 				@dblNewBalance				=	@dblNewBalance,
-				@intNewContractStatusId		=	@intContractStatusId,
-				@dtmNewLastDeliveryDate		=	@dtmOrigLastDeliveryDate
+				@intNewContractStatusId		=	@intNewContractStatusId,
+				@dtmNewLastDeliveryDate		=	@dtmNewLastDeliveryDate
+
+
+		-- UPDATE ITEM CONTRACT
+		UPDATE 	tblCTItemContractDetail
+		SET		dblScheduled			= 	ISNULL(@dblNewScheduled,0),
+				dblApplied				=	ISNULL(@dblNewApplied,0),
+				dblAvailable			=	ISNULL(@dblNewAvailable,0),
+				dblBalance				=	ISNULL(@dblNewBalance,0),
+				dtmLastDeliveryDate		=	GETDATE(),
+				intContractStatusId		=	@intNewContractStatusId,
+				intConcurrencyId		=	intConcurrencyId + 1
+		WHERE	intItemContractDetailId =	@intItemContractDetailId
+
 
 		DELETE @tblToProcess WHERE intItemContractDetailId = @intItemContractDetailId
 
