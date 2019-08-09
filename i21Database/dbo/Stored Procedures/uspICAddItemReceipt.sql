@@ -48,6 +48,9 @@ DECLARE @SourceType_NONE AS INT = 0
 		,@SourceType_PURCHASE_ORDER AS INT = 6
 		,@SourceType_STORE AS INT = 7
 
+DECLARE @PricingType_Basis AS INT = 2
+		,@PricingType_DP_PricedLater AS INT = 5
+
 -- Get the entity id
 SELECT	@intEntityId = [intEntityId]
 FROM	dbo.tblSMUserSecurity 
@@ -958,6 +961,7 @@ BEGIN
 				,ysnSubCurrency			= ISNULL(RawData.ysnSubCurrency, 0)
 				,intTaxGroupId			= 
 										CASE 
+											WHEN ContractView.intPricingTypeId IN (@PricingType_Basis, @PricingType_DP_PricedLater) THEN NULL 
 											WHEN RawData.intTaxGroupId < 0 THEN NULL 
 											WHEN RawData.strReceiptType = 'Transfer Order' THEN NULL 
 											ELSE ISNULL(RawData.intTaxGroupId, taxHierarcy.intTaxGroupId) 

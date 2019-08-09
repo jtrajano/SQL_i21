@@ -20,6 +20,7 @@ AS
 			,strPurchasingGroup = PG.strName 
 			,strINCOShipTerm = CB.strContractBasis
 			,CD.intCompanyLocationId
+			,PT.intPricingTypeId
 	FROM	tblCTContractDetail					CD	
 	CROSS APPLY tblCTCompanyPreference			CP	
 	LEFT JOIN	tblCTContractHeader			    CH	ON	CH.intContractHeaderId		=	CD.intContractHeaderId				
