@@ -436,7 +436,8 @@ BEGIN TRY
 	IF EXISTS (
 			SELECT *
 			FROM tblMFProductionSummary
-			WHERE intItemTypeId IN (
+			WHERE intWorkOrderId = @intWorkOrderId
+				AND intItemTypeId IN (
 					1
 					,3
 					)
@@ -449,7 +450,8 @@ BEGIN TRY
 			,@strLowerToleranceQty = dblLowerToleranceQty
 			,@intInputItemId = intItemId
 		FROM tblMFProductionSummary
-		WHERE intItemTypeId IN (
+		WHERE intWorkOrderId = @intWorkOrderId
+			AND intItemTypeId IN (
 				1
 				,3
 				)
@@ -474,7 +476,8 @@ BEGIN TRY
 	IF EXISTS (
 			SELECT *
 			FROM tblMFProductionSummary
-			WHERE intItemTypeId IN (
+			WHERE intWorkOrderId = @intWorkOrderId
+				AND intItemTypeId IN (
 					1
 					,3
 					)
@@ -487,7 +490,8 @@ BEGIN TRY
 			,@strUpperToleranceQty = dblUpperToleranceQty
 			,@intInputItemId = intItemId
 		FROM tblMFProductionSummary
-		WHERE intItemTypeId IN (
+		WHERE intWorkOrderId = @intWorkOrderId
+			AND intItemTypeId IN (
 				1
 				,3
 				)
@@ -514,7 +518,7 @@ BEGIN TRY
 	SELECT @intProductionSummaryId = Min(F.intItemId)
 	FROM tblMFProductionSummary F
 	JOIN @tblInputItem I ON I.intItemId = F.intItemId
-		AND IsNULL(F.intMainItemId,I.intMainItemId) = I.intMainItemId
+		AND IsNULL(F.intMainItemId, I.intMainItemId) = I.intMainItemId
 	WHERE F.intWorkOrderId = @intWorkOrderId
 		AND F.dblYieldQuantity <> 0
 		AND F.intItemTypeId IN (
@@ -535,9 +539,17 @@ BEGIN TRY
 		SELECT @intItemId = F.intItemId
 			,@dblYieldQuantity = SUM(ABS(F.dblYieldQuantity))
 			,@dblItemYieldQuantity = SUM(ABS(F.dblYieldQuantity))
-			,@intStorageLocationId = IsNULL(F.intStageLocationId, (Select Top 1 I.intStorageLocationId from @tblInputItem I Where I.intItemId=F.intItemId))
+			,@intStorageLocationId = IsNULL(F.intStageLocationId, (
+					SELECT TOP 1 I.intStorageLocationId
+					FROM @tblInputItem I
+					WHERE I.intItemId = F.intItemId
+					))
 			,@intMachineId = F.intMachineId
-			,@intYieldItemUOMId = (Select Top 1 I.intItemUOMId from @tblInputItem I Where I.intItemId=F.intItemId)
+			,@intYieldItemUOMId = (
+				SELECT TOP 1 I.intItemUOMId
+				FROM @tblInputItem I
+				WHERE I.intItemId = F.intItemId
+				)
 			,@ysnYieldLoss = CASE 
 				WHEN SUM(F.dblYieldQuantity) < 0
 					THEN 1
@@ -1859,7 +1871,7 @@ BEGIN TRY
 		SELECT @intProductionSummaryId = Min(F.intItemId)
 		FROM tblMFProductionSummary F
 		JOIN @tblInputItem I ON I.intItemId = F.intItemId
-			AND IsNULL(F.intMainItemId,I.intMainItemId)  = I.intMainItemId
+			AND IsNULL(F.intMainItemId, I.intMainItemId) = I.intMainItemId
 		WHERE F.intItemId > @intProductionSummaryId
 			AND F.intWorkOrderId = @intWorkOrderId
 			AND F.dblYieldQuantity < 0
