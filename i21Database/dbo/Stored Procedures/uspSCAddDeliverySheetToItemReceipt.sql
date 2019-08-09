@@ -544,6 +544,7 @@ SELECT @checkContract = COUNT(intId) FROM @ReceiptStagingTable WHERE strReceiptT
 IF(@checkContract > 0)
 	UPDATE @ReceiptStagingTable SET strReceiptType = 'Purchase Contract'
 
+
 IF @strReceiptType = 'Delayed Price' 
 BEGIN
 	UPDATE @ReceiptStagingTable SET intTaxGroupId = -1
