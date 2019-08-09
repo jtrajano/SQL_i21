@@ -20,40 +20,55 @@ SELECT
 	,intEntityId				  = CS.intEntityId
 	,strName					  = E.strName  
 	,strStorageTicketNumber		  = CASE WHEN CS.ysnTransferStorage = 1 THEN TS.strTransferStorageTicket ELSE CS.strStorageTicketNumber END
-	,intStorageTypeId			  = CS.intStorageTypeId
-	,strStorageTypeDescription	  = ST.strStorageTypeDescription
-	,intCommodityId				  = CS.intCommodityId
-	,strCommodityCode			  = Commodity.strCommodityCode
-	,intItemId					  = CS.intItemId
-	,strItemNo					  = Item.strItemNo
-	,intCompanyLocationId		  = CS.intCompanyLocationId
-	,strLocationName			  = LOC.strLocationName
-	,intStorageScheduleId		  = CS.intStorageScheduleId
-	,strScheduleId				  = SR.strScheduleDescription
-	,strDPARecieptNumber		  = CS.strDPARecieptNumber
-	,strCustomerReference		  = ISNULL(CS.strCustomerReference,'')  
-	,dblOriginalBalance			  = dbo.fnCTConvertQtyToTargetItemUOM(CS.intItemUOMId,ItemUOM.intItemUOMId,CS.dblOriginalBalance) 
-	,dblOpenBalance				  = dbo.fnCTConvertQtyToTargetItemUOM(CS.intItemUOMId,ItemUOM.intItemUOMId,CS.dblOpenBalance) 
-	,dtmDeliveryDate			  = CS.dtmDeliveryDate
-	,strDiscountComment			  = CS.strDiscountComment
-	,dblInsuranceRate			  = ISNULL(CS.dblInsuranceRate,0)
-	,dblStorageDue				  = ISNULL(CS.dblStorageDue,0)
-	,dblStoragePaid				  = ISNULL(CS.dblStoragePaid,0)
-	,dblFeesDue					  = ISNULL(CS.dblFeesDue,0)
-	,dblFeesPaid				  = ISNULL(CS.dblFeesPaid,0)
-	,dblDiscountsDue			  = ISNULL(CS.dblDiscountsDue,0)
-	,dblDiscountsPaid			  = ISNULL(CS.dblDiscountsPaid,0)
-	,intDiscountScheduleId		  = CS.intDiscountScheduleId
-	,strDiscountDescription		  = DS.strDiscountDescription
-	,dblDiscountUnPaid			  = ISNULL(CS.dblDiscountsDue,0) - ISNULL(CS.dblDiscountsPaid,0)
-	,dblStorageUnPaid			  = ISNULL(CS.dblStorageDue,0) - ISNULL(CS.dblStoragePaid,0)
-	,strSplitNumber				  = EMSplit.strSplitNumber
-	,intContractHeaderId          = CH.intContractHeaderId
-    ,intContractDetailId		  = SC.intContractId
-    ,strContractNumber			  = CH.strContractNumber   
-	,strDeliverySheetNumber		  = DeliverySheet.strDeliverySheetNumber
-	,dtmLastStorageAccrueDate	  = CS.dtmLastStorageAccrueDate
-	,dblSplitPercent			  = CASE WHEN SCTicketSplit.dblSplitPercent IS NULL		
+	,intStorageTypeId			  	= CS.intStorageTypeId
+	,strStorageTypeDescription	  	= ST.strStorageTypeDescription
+	,intCommodityId				  	= CS.intCommodityId
+	,strCommodityCode			  	= Commodity.strCommodityCode
+	,intItemId					  	= CS.intItemId
+	,strItemNo					  	= Item.strItemNo
+	,intCompanyLocationId		  	= CS.intCompanyLocationId
+	,strLocationName			  	= LOC.strLocationName
+	,intStorageScheduleId		  	= CS.intStorageScheduleId
+	,strScheduleId				  	= SR.strScheduleDescription
+	,strDPARecieptNumber		  	= CS.strDPARecieptNumber
+	,strCustomerReference		  	= ISNULL(CS.strCustomerReference,'')  
+	,dblOriginalBalance			  	= dbo.fnCTConvertQtyToTargetItemUOM(CS.intItemUOMId,ItemUOM.intItemUOMId,CS.dblOriginalBalance) 
+	,dblOpenBalance				  	= dbo.fnCTConvertQtyToTargetItemUOM(CS.intItemUOMId,ItemUOM.intItemUOMId,CS.dblOpenBalance) 
+	,dtmDeliveryDate			  	= CS.dtmDeliveryDate
+	,strDiscountComment			  	= CS.strDiscountComment
+	,dblInsuranceRate			  	= ISNULL(CS.dblInsuranceRate,0)
+	,dblStorageDue				  	= ISNULL(CS.dblStorageDue,0)
+	,dblStoragePaid				  	= ISNULL(CS.dblStoragePaid,0)
+	,dblFeesDue					  	= ISNULL(CS.dblFeesDue,0)
+	,dblFeesPaid				  	= ISNULL(CS.dblFeesPaid,0)
+	,dblDiscountsDue			  	= ISNULL(CS.dblDiscountsDue,0)
+	,dblDiscountsPaid			  	= ISNULL(CS.dblDiscountsPaid,0)
+	,intDiscountScheduleId		  	= CS.intDiscountScheduleId
+	,strDiscountDescription		  	= DS.strDiscountDescription
+	,dblDiscountUnPaid			  	= ISNULL(CS.dblDiscountsDue,0) - ISNULL(CS.dblDiscountsPaid,0)
+	,dblStorageUnPaid			  	= ISNULL(CS.dblStorageDue,0) - ISNULL(CS.dblStoragePaid,0)
+	,strSplitNumber				  	= EMSplit.strSplitNumber
+	--,intContractHeaderId          	= CASE WHEN ST.ysnDPOwnedType = 1 THEN CH.intContractHeaderId ELSE NULL END
+ --   ,intContractDetailId		  	= CASE WHEN ST.ysnDPOwnedType = 1  THEN SC.intContractId ELSE NULL END
+ --   ,strContractNumber			  	= CASE WHEN ST.ysnDPOwnedType = 1  THEN CH.strContractNumber ELSE NULL END
+	,intContractHeaderId            = CASE 
+										WHEN CS.ysnTransferStorage = 0 AND ST.ysnDPOwnedType = 1 THEN CH.intContractHeaderId 
+										WHEN CS.ysnTransferStorage = 1 AND ST.ysnDPOwnedType = 1 THEN CH_Transfer.intContractHeaderId
+										ELSE NULL
+									END
+    ,intContractDetailId			= CASE 
+										WHEN CS.ysnTransferStorage = 0 AND ST.ysnDPOwnedType = 1 THEN SC.intContractId 
+										WHEN CS.ysnTransferStorage = 1 AND ST.ysnDPOwnedType = 1 THEN CD_Transfer.intContractDetailId 
+										ELSE NULL
+									END
+    ,strContractNumber				= CASE 
+										WHEN CS.ysnTransferStorage = 0 AND ST.ysnDPOwnedType = 1 THEN CH.strContractNumber 
+										WHEN CS.ysnTransferStorage = 1 AND ST.ysnDPOwnedType = 1 THEN CH_Transfer.strContractNumber 
+										ELSE NULL
+									END
+	,strDeliverySheetNumber		  	= DeliverySheet.strDeliverySheetNumber
+	,dtmLastStorageAccrueDate	  	= CS.dtmLastStorageAccrueDate
+	,dblSplitPercent			  	= CASE WHEN SCTicketSplit.dblSplitPercent IS NULL		
 										THEN 
 											CASE 
 												WHEN DSS.dblSplitPercent IS NOT NULL THEN DSS.dblSplitPercent 
@@ -122,3 +137,8 @@ LEFT JOIN (
 		LEFT JOIN tblGRTransferStorageReference TSR
 			ON TSR.intTransferStorageSplitId  = TSS.intTransferStorageSplitId
 	) ON ISNULL(TSR.intToCustomerStorageId,TSS.intTransferToCustomerStorageId) = CS.intCustomerStorageId
+LEFT JOIN tblCTContractDetail CD_Transfer
+    ON CD_Transfer.intContractDetailId = TSS.intContractDetailId
+		AND CS.ysnTransferStorage = 1
+LEFT JOIN tblCTContractHeader CH_Transfer
+    ON CH_Transfer.intContractHeaderId = CD_Transfer.intContractHeaderId  

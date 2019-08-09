@@ -20,9 +20,9 @@ SELECT
     ,strDPARecieptNumber				= ISNULL(CS.strDPARecieptNumber,'')
     ,dblOpenBalance						= ROUND(dbo.fnCTConvertQtyToTargetItemUOM(CS.intItemUOMId, ItemUOM.intItemUOMId, CS.dblOpenBalance), 6)
     ,ysnDPOwnedType						= ST.ysnDPOwnedType
-    ,intContractHeaderId                = CH.intContractHeaderId
-    ,intContractDetailId				= SC.intContractId
-    ,strContractNumber					= CH.strContractNumber   
+    ,intContractHeaderId                = CASE WHEN CS.ysnTransferStorage = 0 THEN CH_Ticket.intContractHeaderId ELSE CH_Transfer.intContractHeaderId END
+    ,intContractDetailId				= CASE WHEN CS.ysnTransferStorage = 0 THEN SC.intContractId ELSE CD_Transfer.intContractDetailId END
+    ,strContractNumber					= CASE WHEN CS.ysnTransferStorage = 0 THEN CH_Ticket.strContractNumber ELSE CH_Transfer.strContractNumber END
     ,intTicketId						= ISNULL(SC.intTicketId,0)
     ,dblDiscountUnPaid					= ISNULL(dblDiscountsDue,0) - ISNULL(dblDiscountsPaid,0)
     ,dblStorageUnPaid					= ISNULL(dblStorageDue,0) - ISNULL(dblStoragePaid,0)
@@ -59,10 +59,18 @@ LEFT JOIN tblSMCompanyLocationSubLocation SLOC
     ON SLOC.intCompanyLocationSubLocationId = CS.intCompanyLocationSubLocationId
 LEFT JOIN tblSCTicket SC
 	ON SC.intTicketId = CS.intTicketId
-LEFT JOIN tblCTContractDetail CD
-    ON CD.intContractDetailId = SC.intContractId  
-LEFT JOIN tblCTContractHeader CH 
-    ON CH.intContractHeaderId = CD.intContractHeaderId  
+LEFT JOIN tblCTContractDetail CD_Ticket
+    ON CD_Ticket.intContractDetailId = SC.intContractId
+		AND CS.ysnTransferStorage = 0
+LEFT JOIN tblCTContractHeader CH_Ticket 
+    ON CH_Ticket.intContractHeaderId = CD_Ticket.intContractHeaderId
+LEFT JOIN tblGRTransferStorageSplit TSS
+	ON TSS.intTransferToCustomerStorageId = CS.intCustomerStorageId
+LEFT JOIN tblCTContractDetail CD_Transfer
+    ON CD_Transfer.intContractDetailId = TSS.intContractDetailId
+		AND CS.ysnTransferStorage = 1
+LEFT JOIN tblCTContractHeader CH_Transfer
+    ON CH_Transfer.intContractHeaderId = CD_Transfer.intContractHeaderId  
 LEFT JOIN tblICInventoryReceipt IR 
     ON IR.intInventoryReceiptId = SC.intInventoryReceiptId
 LEFT JOIN tblSCDeliverySheet DS
