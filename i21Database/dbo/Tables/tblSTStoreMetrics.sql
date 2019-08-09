@@ -9,7 +9,9 @@
     [intConcurrencyId]														INT						NOT NULL, 
     CONSTRAINT [PK_tblSTStoreMetrics]										PRIMARY KEY CLUSTERED	([intStoreMetricsId]), 
     CONSTRAINT [AK_tblSTStoreMetrics_intStoreId_strRegisterImportField]		UNIQUE	NONCLUSTERED	([intStoreId],[intRegisterImportFieldId]), 
-	CONSTRAINT [FK_tblSTStoreMetrics_tblSTStore]							FOREIGN KEY				([intStoreId])							REFERENCES [tblSTStore]([intStoreId]) ON DELETE CASCADE
+	CONSTRAINT [FK_tblSTStoreMetrics_tblSTStore]							FOREIGN KEY				([intStoreId])							REFERENCES [tblSTStore]([intStoreId]) ON DELETE CASCADE,
+	CONSTRAINT [FK_tblSTStoreMetrics_tblICItemMetrics]						FOREIGN KEY				([intMetricItemId])						REFERENCES [tblICItem]([intItemId]),
+	CONSTRAINT [FK_tblSTStoreMetrics_tblICItemOffset]						FOREIGN KEY				([intOffsetItemId])						REFERENCES [tblICItem]([intItemId])
  );
 
  -- intRegisterImportFieldId
@@ -18,4 +20,3 @@
  -- 3 = No Sales
 
  -- DROP TABLE [dbo].[tblSTStoreMetrics]
-
