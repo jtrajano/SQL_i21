@@ -195,6 +195,7 @@ BEGIN TRY
 				dblApplied				=	ISNULL(@dblNewApplied,0),
 				dblAvailable			=	ISNULL(@dblNewAvailable,0),
 				dblBalance				=	ISNULL(@dblNewBalance,0),
+				dtmLastDeliveryDate		=	GETDATE(),
 				intConcurrencyId		=	intConcurrencyId + 1
 		WHERE	intItemContractDetailId =	@intItemContractDetailId
 
