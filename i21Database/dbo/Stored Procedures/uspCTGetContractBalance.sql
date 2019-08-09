@@ -822,7 +822,7 @@ BEGIN TRY
 		WHERE dblQuantity > 0
 
 	INSERT INTO @tblChange(intSequenceHistoryId,intContractDetailId)
-	SELECT MIN(intSequenceHistoryId),intContractDetailId FROM tblCTSequenceHistory 
+	SELECT MAX(intSequenceHistoryId),intContractDetailId FROM tblCTSequenceHistory 
 	WHERE  dbo.fnRemoveTimeOnDate(dtmHistoryCreated)	<= CASE WHEN @dtmEndDate IS NOT NULL THEN @dtmEndDate ELSE dbo.fnRemoveTimeOnDate(dtmHistoryCreated) END
 	GROUP BY intContractDetailId
 
