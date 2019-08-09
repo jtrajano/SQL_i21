@@ -129,7 +129,7 @@ SELECT DISTINCT
 	,[strSourceNumber]			=	A.strReceiptNumber
 	,[strVendorOrderNumber]		=	ISNULL(NULLIF(LTRIM(RTRIM(A.strBillOfLading)), ''), A.strVendorRefNo) 
 	,[strPurchaseOrderNumber]	=	po.strPurchaseOrderNumber
-	,[intPurchaseDetailId]		=	po.intPurchaseDetailId
+	,[intPurchaseDetailId]		=	CASE WHEN A.strReceiptType = 'Inventory Return' THEN NULL ELSE po.intPurchaseDetailId END 
 	,[intItemId]				=	B.intItemId
 	,[strMiscDescription]		=	C.strDescription
 	,[strItemNo]				=	C.strItemNo
