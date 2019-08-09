@@ -208,7 +208,7 @@ BEGIN TRY
 		,S.strSampleNumber
 		,dbo.fnCTGetTranslation('Quality.view.SampleType', ST.intSampleTypeId, @intLanguageId, 'Sample Type', ST.strSampleTypeName) AS strSampleTypeName
 		,@strSampleRef AS strSampleRef
-		,ISNULL(CH.strContractNumber + ' - ' + LTRIM(CD.intContractSeq), '') AS strContractNumber
+		,ISNULL(CH.strContractNumber, '') AS strContractNumber
 		,dbo.fnRemoveTrailingZeroes(ISNULL(S.dblRepresentingQty, 0)) + ' / ' + dbo.fnCTGetTranslation('Inventory.view.ReportTranslation', UM1.intUnitMeasureId, @intLanguageId, 'Name', UM1.strUnitMeasure) AS strRepresentingQtyUOM
 		,dbo.fnCTGetTranslation('Inventory.view.Item', I.intItemId, @intLanguageId, 'Description', I.strDescription) + CASE 
 			WHEN ISNULL(CD.strItemSpecification, '') = ''
