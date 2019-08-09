@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE uspIPProcessContactFeedDetail
+﻿CREATE PROCEDURE uspIPProcessContractFeedDetail
 AS
 BEGIN TRY
 	DECLARE @intContractFeedHeaderId INT

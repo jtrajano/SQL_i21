@@ -7966,11 +7966,11 @@
     <Build Include="dbo\Functions\fnRKConvertUOMCurrency.sql" />
     <Build Include="dbo\Tables\tblIPContractFeedHeader.sql" />
     <Build Include="dbo\Tables\tblIPContractFeedDetail.sql" />
-    <Build Include="dbo\Stored Procedures\uspIPGenerateContactFeedDetail.sql" />
-    <Build Include="dbo\Stored Procedures\uspIPGetContactFeedDetail.sql" />
-    <Build Include="dbo\Stored Procedures\uspIPProcessContactFeedDetail.sql" />
-    <Build Include="dbo\Stored Procedures\uspIPGetContactFeedAckDetail.sql" />
-    <Build Include="dbo\Stored Procedures\uspIPProcessContactFeedAckDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPGenerateContractFeedDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPGetContractFeedDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessContractFeedDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPGetContractFeedAckDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessContractFeedAckDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspSTGetStartingNumber.sql" />
     <Build Include="dbo\Stored Procedures\uspSMInterCompanyDeleteMovedDMS.sql" />
     <Build Include="dbo\Stored Procedures\uspSMInterCompanyValidateMovedDMSRecords.sql" />

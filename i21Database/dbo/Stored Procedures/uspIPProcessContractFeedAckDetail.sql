@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE uspIPProcessContactFeedAckDetail (
+﻿CREATE PROCEDURE uspIPProcessContractFeedAckDetail (
 	@intContractFeedHeaderRefId INT
 	,@intContractFeedHeaderId INT
 	)

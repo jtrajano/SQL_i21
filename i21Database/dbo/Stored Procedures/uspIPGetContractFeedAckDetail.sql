@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE uspIPGetContactFeedAckDetail
+﻿CREATE PROCEDURE uspIPGetContractFeedAckDetail
 AS
 BEGIN
 	SELECT intContractFeedHeaderRefId
