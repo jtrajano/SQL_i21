@@ -171,7 +171,7 @@ SELECT
         END
     )
     +
-    billDetail.dblTax
+    receiptItem.dblTax
     AS dblVoucherTotal
     ,CASE 
         WHEN billDetail.intWeightUOMId IS NULL THEN 
