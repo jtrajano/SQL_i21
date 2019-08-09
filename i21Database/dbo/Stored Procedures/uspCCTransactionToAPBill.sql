@@ -130,6 +130,7 @@ BEGIN
 			@post = @post
 			,@recap = @recap
 			,@isBatch = 0
+			,@transactionType = 'Credit Card'
 			,@param = @createdVouchersId
 			,@userId = @userId
 			,@success = @success OUTPUT
