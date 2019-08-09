@@ -496,7 +496,7 @@ BEGIN
 																				WHEN (@strRegisterClass = N'SAPPHIRE/COMMANDER')
 																					THEN NULLIF(chk.trLinetrlUPC, '')
 																				WHEN (@strRegisterClass = N'PASSPORT')
-																					THEN NULLIF(chk.trLinetrlUPC, '') + dbo.fnSTGenerateCheckDigit(NULLIF(chk.trLinetrlUPC, ''))
+																					THEN NULLIF(chk.trLinetrlUPC, '') + CAST(dbo.fnSTGenerateCheckDigit(dbo.fnSTGenerateCheckDigit(NULLIF(chk.trLinetrlUPC, ''))) AS NVARCHAR(1))
 																				ELSE
 																					NULLIF(chk.trLinetrlUPC, '')
 																			END,
