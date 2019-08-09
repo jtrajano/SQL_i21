@@ -29,6 +29,8 @@ DECLARE @join NVARCHAR(10)
 DECLARE @begingroup NVARCHAR(50)
 DECLARE @endgroup NVARCHAR(50)
 DECLARE @datatype NVARCHAR(50)
+DECLARE @strAccountId NVARCHAR(50)  
+DECLARE @strAccountIdTo NVARCHAR(50)  
 
 	-- Sanitize the @xmlParam 
 IF LTRIM(RTRIM(@xmlParam)) = '' 
@@ -37,24 +39,15 @@ BEGIN
 --Add this so that XtraReports have fields to get
 	SELECT 
 		NULL AS dtmDate,
-		NULL AS dtmDueDate,
 		NULL AS strVendorId,
 		0 AS intEntityVendorId,
-		0 AS intBillId,
-		NULL AS strBillId,
 		NULL AS strCompanyName,
 		NULL AS strCompanyAddress,
 		NULL AS strVendorIdName,
-		NULL AS strAge,
-		0 AS dblTotal,
-		0 AS dblVoucherAmount,
-		0 AS dblAmountDue,
-		0 AS dblCurrent,
 		0 AS dbl1,
 		0 AS dbl30,
 		0 AS dbl60,
 		0 AS dbl90,
-		0 AS intAging,
 		NULL as dtmCurrentDate
 END
 
@@ -125,9 +118,27 @@ BEGIN
 	SET @dateFrom = CONVERT(VARCHAR(10), '1/1/1900', 110)
 	SET @dateTo = GETDATE();
 END
-
 DELETE FROM @temp_xml_table WHERE [fieldname] = 'dtmDate'
 DELETE FROM @temp_xml_table  where [condition] = 'Dummy'
+
+SELECT @strAccountId = [from], @strAccountIdTo = [to], @condition = condition FROM @temp_xml_table WHERE [fieldname] = 'strAccountId';  
+IF @strAccountId IS NOT NULL
+BEGIN
+  IF @condition = 'Equal To'  
+  BEGIN   
+    SET @innerQueryFilter = @innerQueryFilter + CASE WHEN NULLIF(@innerQueryFilter,'') IS NOT NULL THEN ' AND strAccountId = ''' + @strAccountId + ''''   
+    ELSE ' WHERE strAccountId = ''' + @strAccountId + '''' END   
+  END
+  ELSE
+  BEGIN
+    SET @innerQueryFilter = @innerQueryFilter + CASE WHEN NULLIF(@innerQueryFilter,'') IS NOT NULL   
+            THEN ' AND strAccountId BETWEEN ''' + @strAccountId + ''' AND '''  + @strAccountIdTo + ''''   
+          ELSE ' WHERE strAccountId BETWEEN ''' + @strAccountId + ''' AND '''  + @strAccountIdTo + ''''   
+          END
+  END
+END
+DELETE FROM @temp_xml_table WHERE [fieldname] = 'strAccountId'  
+
 WHILE EXISTS(SELECT 1 FROM @temp_xml_table)
 BEGIN
 	SELECT @id = id, @fieldname = [fieldname], @condition = [condition], @from = [from], @to = [to], @join = [join], @datatype = [datatype] FROM @temp_xml_table
