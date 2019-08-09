@@ -216,7 +216,7 @@ BEGIN TRY
 				ELSE DATEADD(d, 0, DATEDIFF(d, 0, GETDATE()))
 				END,
 				intCompanyLocationId =	TSS.intCompanyLocationId,
-				dblQuantity			=	TSS.dblUnits,
+				dblQuantity			=	0,
 				intContractStatusId =	1,
 				dblBalance			=	0,
 				dtmStartDate		=	TS.dtmTransferStorageDate,
