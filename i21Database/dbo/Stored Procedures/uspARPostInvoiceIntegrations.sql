@@ -658,14 +658,15 @@ BEGIN
 		--POST AND UN-CANCEL LOAD SHIPMENT FROM CREDIT MEMO RETURN
 		IF ISNULL(@ysnFromReturnU, 0) = 1 AND @LoadIDU IS NOT NULL
 			BEGIN
-				EXEC dbo.[uspLGPostLoadSchedule] @intLoadId 				= @LoadIDP
-											   , @ysnPost				 	= 1
-											   , @intEntityUserSecurityId  	= @UserId
-
 				EXEC dbo.[uspLGCancelLoadSchedule] @intLoadId 				 = @LoadIDU
 												 , @ysnCancel				 = 0
 												 , @intEntityUserSecurityId  = @UserId
 												 , @intShipmentType			 = 1
+												 
+				EXEC dbo.[uspLGPostLoadSchedule] @intLoadId 				= @LoadIDP
+											   , @ysnPost				 	= 1
+											   , @intEntityUserSecurityId  	= @UserId
+				
 			END	
 
 		DELETE FROM @IdsU WHERE [intInvoiceId] = @InvoiceIDU
