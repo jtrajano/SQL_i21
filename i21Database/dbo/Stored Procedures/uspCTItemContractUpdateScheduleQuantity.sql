@@ -30,6 +30,7 @@ BEGIN TRY
 			@intContractStatusId		INT,
 			@dtmOrigLastDeliveryDate	DATETIME,
 			@intLineNo					INT,
+			@strLineNo					NVARCHAR(50),
 			@strItemContractNumber		NVARCHAR(50),
 			@strTransactionId			NVARCHAR(50),
 			@intTransactionId			INT,
@@ -61,13 +62,14 @@ BEGIN TRY
 	SET @strBalance = LTRIM(CAST(@dblOrigBalance AS NVARCHAR(100)))
 	SET @strAvailable = LTRIM(CAST(@dblOrigAvailable AS NVARCHAR(100)))
 	SET @strQuantityToUpdate = @dblQuantityToUpdate
+	SET @strLineNo = LTRIM(CAST(@intLineNo AS NVARCHAR(50)))
 
 	-- VALIDATION #1
 	IF @dblOrigScheduled + @dblQuantityToUpdate > @dblOrigBalance
 	BEGIN		
 		IF ((@dblOrigScheduled + @dblQuantityToUpdate) - @dblOrigBalance) > @dblTolerance
 		BEGIN
-			RAISERROR('Available quantity for the item contract %s and line number %s is %s, which is insufficient to Save/Post a quantity of %s therefore could not Save/Post this transaction.',16,1,@strItemContractNumber,@intLineNo,@strAvailable,@strQuantityToUpdate)
+			RAISERROR('Available quantity for the item contract %s and line number %s is %s, which is insufficient to Save/Post a quantity of %s therefore could not Save/Post this transaction.',16,1,@strItemContractNumber,@strLineNo,@strAvailable,@strQuantityToUpdate)
 		END
 		ELSE
 		BEGIN
@@ -86,7 +88,7 @@ BEGIN TRY
 			END
 			ELSE
 			BEGIN
-				SET @ErrMsg = 'Total scheduled quantity cannot be less than zero for item contract '+ @strItemContractNumber + ' and line number ' +	@intLineNo	+'.'
+				SET @ErrMsg = 'Total scheduled quantity cannot be less than zero for item contract '+ @strItemContractNumber + ' and line number ' +	@strLineNo	+'.'
 				RAISERROR(@ErrMsg,16,1)
 			END
 		END
