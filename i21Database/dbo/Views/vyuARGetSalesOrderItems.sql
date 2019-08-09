@@ -246,11 +246,12 @@ LEFT JOIN (
 	SELECT ICH.intItemContractHeaderId
 		 , ICD.intItemContractDetailId
 		 , strItemContractNumber = strContractNumber
-		 , intItemContractSeq	 = ICD.intItemContractDetailId
+		 , intItemContractSeq	 = intLineNo
 	FROM dbo.tblCTItemContractHeader ICH WITH (NOLOCK)
 	INNER JOIN (
 		SELECT intItemContractHeaderId
 			 , intItemContractDetailId
+			 , intLineNo
 		FROM dbo.tblCTItemContractDetail
 	) ICD ON ICH.intItemContractHeaderId = ICD.intItemContractHeaderId
 ) ITEMCONTRACTS ON SODETAIL.intItemContractHeaderId = ITEMCONTRACTS.intItemContractHeaderId
