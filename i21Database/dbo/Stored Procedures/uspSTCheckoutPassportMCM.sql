@@ -4,8 +4,8 @@
 	@intCountRows INT OUTPUT
 AS
 BEGIN
-	BEGIN TRY
-		
+
+	BEGIN TRY	
 		BEGIN TRANSACTION
 
 
@@ -138,6 +138,9 @@ BEGIN
 					, 0 [dblTaxAmount4]
 					, I.intItemId [intItemId]
 					, 1 [intConcurrencyId]
+					, 0 [dblTotalLotterySalesAmountComputed]
+					, NULL [intLotteryItemsSold]
+					, 0 [ysnLotteryItemAdded] 
 				FROM #tempCheckoutInsert Chk
 				JOIN dbo.tblICCategoryLocation Cat 
 					ON CAST(ISNULL(Chk.MCMDetailMerchandiseCode, '') AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS = CAST(Cat.intRegisterDepartmentId AS NVARCHAR(50))
@@ -198,6 +201,7 @@ BEGIN
 
 			END
 
+
 		-- Update Register Amount
 		UPDATE dbo.tblSTCheckoutDepartmetTotals 
 		SET dblRegisterSalesAmountComputed = dblTotalSalesAmountComputed
@@ -213,8 +217,8 @@ BEGIN
 
 	BEGIN CATCH
 		SET @intCountRows = 0
-		SET @strStatusMsg = ERROR_MESSAGE()
-		
+		SET @strStatusMsg = 'Error on uspSTCheckoutPassportMCM: ' + ERROR_MESSAGE()
+PRINT 	@strStatusMsg
 		-- ROLLBACK
 		GOTO ExitWithRollback
 	END CATCH
