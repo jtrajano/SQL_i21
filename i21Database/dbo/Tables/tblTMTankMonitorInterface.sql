@@ -9,5 +9,6 @@
     [ysnFromAPI] bit NOT NULL default 0,
     [intConcurrencyId] INT NOT NULL DEFAULT 1,
 	CONSTRAINT [PK_tblTankMonitorInterface_intTankMonitorInterfaceId] PRIMARY KEY CLUSTERED ([intTankMonitorInterfaceId] ASC),
+	CONSTRAINT [UQ_tblTankMonitorInterface_intInterfaceTypeId] UNIQUE NONCLUSTERED ([intInterfaceTypeId] ASC), 
     CONSTRAINT [FK_tblTankMonitorInterface_tblTMTankMonitorInterfaceType_intInterfaceTypeId] FOREIGN KEY ([intInterfaceTypeId]) REFERENCES [dbo].[tblTMTankMonitorInterfaceType] ([intInterfaceTypeId])
 )
