@@ -154,7 +154,7 @@ BEGIN
 
 
 			  -------------------------------------------------------------------------------------------------------------
-			  ---------------------------------------- TOTAL TAX -----------------------------------------------------
+			  ---------------------------------------- TOTAL TAX ----------------------------------------------------------
 			  -------------------------------------------------------------------------------------------------------------
 			  UPDATE dbo.tblSTCheckoutHeader 
 			  SET dblTotalTax = (
@@ -262,9 +262,48 @@ BEGIN
 			  -------------------------------------------------------------------------------------------------------------
 			  -- [START] - METRICS TAB 
 			  -------------------------------------------------------------------------------------------------------------
-			  --BEGIN
+			  BEGIN
+					-- intRegisterImportFieldId
+					-- 1 = Customer Count
+					-- 2 = Manual
+					-- 3 = No Sales
+					 
+					DECLARE @intCustomerCount	INT = 1
+					       ,@intNoSales			INT = 3
 
-			  --END
+					-- NO SALES COUNT METRIC
+					IF EXISTS(SELECT TOP 1 1 FROM tblSTCheckoutMetrics WHERE intCheckoutId = @intCheckoutId AND intRegisterImportFieldId = @intNoSales)
+						BEGIN
+							UPDATE chkMet
+								SET chkMet.dblAmount = (		
+														-- SELECT SUM(CAST(MSMSalesTotalsMiscellaneousSummaryAmount AS DECIMAL(18, 6)))										
+														SELECT SUM(CAST(MSMSalesTotalsMiscellaneousSummaryCount AS DECIMAL(18, 6))) 
+														FROM #tempCheckoutInsert 
+														WHERE ISNULL(MiscellaneousSummaryCodesMiscellaneousSummaryCode, '')  = 'statistics' 
+															AND ISNULL(MiscellaneousSummaryCodesMiscellaneousSummarySubCode, '') = 'noSales'									 
+												       )
+							FROM tblSTCheckoutMetrics chkMet
+							WHERE chkMet.intCheckoutId = @intCheckoutId 
+								AND chkMet.intRegisterImportFieldId = @intNoSales
+						END
+
+					-- CUSTOMER COUNT METRIC
+					IF EXISTS(SELECT TOP 1 1 FROM tblSTCheckoutMetrics WHERE intCheckoutId = @intCheckoutId AND intRegisterImportFieldId = @intCustomerCount)
+						BEGIN
+							UPDATE chkMet
+								SET chkMet.dblAmount = (		
+														-- SELECT SUM(CAST(MSMSalesTotalsMiscellaneousSummaryAmount AS DECIMAL(18, 6))) 
+														SELECT SUM(CAST(ISNULL(MSMSalesTotalsMiscellaneousSummaryCount, 0) AS DECIMAL(18, 6))) 
+														FROM #tempCheckoutInsert
+														WHERE ISNULL(MiscellaneousSummaryCodesMiscellaneousSummaryCode, '')  = 'totalizer' 
+															AND ISNULL(MiscellaneousSummaryCodesMiscellaneousSummarySubCode, '') = 'sales'
+															AND ISNULL(MiscellaneousSummaryCodesMiscellaneousSummarySubCodeModifier, '') = 'sales'									 
+												       )
+							FROM tblSTCheckoutMetrics chkMet
+							WHERE chkMet.intCheckoutId = @intCheckoutId 
+								AND chkMet.intRegisterImportFieldId = @intCustomerCount
+						END
+			  END
 			  -------------------------------------------------------------------------------------------------------------
 			  -- [END] - METRICS TAB 
 			  -------------------------------------------------------------------------------------------------------------

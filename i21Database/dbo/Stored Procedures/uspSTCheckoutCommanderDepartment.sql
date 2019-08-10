@@ -136,6 +136,9 @@ BEGIN
 					, 0 [dblTaxAmount4]
 					, I.intItemId [intItemId]
 					, 1 [intConcurrencyId]
+					, 0 [dblTotalLotterySalesAmountComputed]
+					, NULL [intLotteryItemsSold]
+					, 0 [ysnLotteryItemAdded]
 				FROM #tempCheckoutInsert Chk
 				JOIN dbo.tblICCategoryLocation Cat 
 					ON CAST(ISNULL(Chk.deptBasesysid, '') AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS = CAST(Cat.intRegisterDepartmentId AS NVARCHAR(50))

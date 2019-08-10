@@ -252,15 +252,47 @@ BEGIN
 
 
 
-			  -------------------------------------------------------------------------------------------------------------
-			  -- [START] - METRICS TAB 
-			  -------------------------------------------------------------------------------------------------------------
-			  --BEGIN
+		  -------------------------------------------------------------------------------------------------------------
+		  -- [START] - METRICS TAB 
+		  -------------------------------------------------------------------------------------------------------------
+		  BEGIN
+					-- intRegisterImportFieldId
+					-- 1 = Customer Count
+					-- 2 = Manual
+					-- 3 = No Sales
+					 
+					DECLARE @intCustomerCount	INT = 1
+					       ,@intNoSales			INT = 3
 
-			  --END
-			  -------------------------------------------------------------------------------------------------------------
-			  -- [END] - METRICS TAB 
-			  -------------------------------------------------------------------------------------------------------------
+					-- NO SALES COUNT METRIC
+					IF EXISTS(SELECT TOP 1 1 FROM tblSTCheckoutMetrics WHERE intCheckoutId = @intCheckoutId AND intRegisterImportFieldId = @intNoSales)
+						BEGIN
+							UPDATE chkMet
+								SET chkMet.dblAmount = (		
+														SELECT TOP 1 CAST(ISNULL(summaryInfonoSaleCount, 0) AS DECIMAL(18, 6))
+														FROM #tempCheckoutInsert								 
+												       )
+							FROM tblSTCheckoutMetrics chkMet
+							WHERE chkMet.intCheckoutId = @intCheckoutId 
+								AND chkMet.intRegisterImportFieldId = @intNoSales
+						END
+
+					-- CUSTOMER COUNT METRIC
+					IF EXISTS(SELECT TOP 1 1 FROM tblSTCheckoutMetrics WHERE intCheckoutId = @intCheckoutId AND intRegisterImportFieldId = @intCustomerCount)
+						BEGIN
+							UPDATE chkMet
+								SET chkMet.dblAmount = (		
+														SELECT TOP 1 CAST(ISNULL(summaryInfocustomerCount, 0) AS DECIMAL(18, 6))
+														FROM #tempCheckoutInsert									 
+												       )
+							FROM tblSTCheckoutMetrics chkMet
+							WHERE chkMet.intCheckoutId = @intCheckoutId 
+								AND chkMet.intRegisterImportFieldId = @intCustomerCount
+						END
+			  END
+		  -------------------------------------------------------------------------------------------------------------
+		  -- [END] - METRICS TAB 
+		  -------------------------------------------------------------------------------------------------------------
 
 
 
