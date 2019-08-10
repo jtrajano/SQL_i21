@@ -7988,7 +7988,7 @@
     <Build Include="dbo\Tables\tblTMTankMonitorInterfaceType.sql" />
     <Build Include="dbo\Tables\tblSTStoreMetrics.sql" />
     <Build Include="dbo\Tables\tblSTCheckoutMetrics.sql" />
-    <Build Include="Scripts\Post-Deployment\SM\1910_UpdateNoSpaceModuleName.sql" />
+    <None Include="Scripts\Post-Deployment\SM\1910_UpdateNoSpaceModuleName.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
