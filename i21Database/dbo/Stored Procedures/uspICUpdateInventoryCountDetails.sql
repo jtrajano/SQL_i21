@@ -170,6 +170,7 @@ BEGIN
 			(@ysnIsMultiFilter = 1 AND storageUnitFilter.intStorageUnitId = Lot.intStorageLocationId OR @StorageUnitFilterCount = 0))
 		AND Item.strLotTracking <> 'No'
 		AND ((dblQty > 0 AND @ysnIncludeZeroOnHand = 0) OR (@ysnIncludeZeroOnHand = 1))
+		AND Item.strType IN ('Inventory', 'Raw Material', 'Finished Good')
 END
 ELSE
 BEGIN
@@ -190,7 +191,7 @@ BEGIN
 		, intConcurrencyId
 		, intSort
 		, dblPhysicalCount)
-	SELECT
+	SELECT DISTINCT
 		intInventoryCountId = @intInventoryCountId
 		, intItemId = il.intItemId
 		, intItemLocationId = COALESCE(stock.intItemLocationId, il.intItemLocationId)
@@ -308,5 +309,6 @@ BEGIN
 			-- If multi-filter is enabled
 			(@ysnIsMultiFilter = 1 AND storageUnitFilter.intStorageUnitId = stock.intStorageLocationId OR @StorageUnitFilterCount = 0))
 		AND i.strLotTracking = 'No'
+		AND i.strType IN ('Inventory', 'Raw Material', 'Finished Good')
 
 END
