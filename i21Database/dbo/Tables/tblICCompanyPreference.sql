@@ -22,5 +22,6 @@
     [dtmDateModified] DATETIME NULL,
     [intCreatedByUserId] INT NULL,
     [intModifiedByUserId] INT NULL,
+    [ysnIsCountSheetMultiFilter] BIT NULL DEFAULT(1),
     CONSTRAINT [PK_tblICCompanyPreference] PRIMARY KEY ([intCompanyPreferenceId]) 
 )

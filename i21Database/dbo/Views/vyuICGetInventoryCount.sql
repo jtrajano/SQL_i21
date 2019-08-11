@@ -28,6 +28,11 @@ SELECT InventoryCount.intInventoryCountId,
 	InventoryCount.ysnRecount,
 	InventoryCount.intRecountReferenceId,
 	InventoryCount.intStatus,
+	InventoryCount.[strStorageLocationsFilter],
+	InventoryCount.[strStorageUnitsFilter],
+	InventoryCount.[strCommoditiesFilter],
+	InventoryCount.[strCategoriesFilter],
+	InventoryCount.[ysnIsMultiFilter],
 	strRecountReferenceNo = ReferenceCount.strCountNo,
 	strStatus = (CASE WHEN InventoryCount.intStatus = 1 THEN 'Open'
 					WHEN InventoryCount.intStatus = 2 THEN 'Count Sheet Printed'

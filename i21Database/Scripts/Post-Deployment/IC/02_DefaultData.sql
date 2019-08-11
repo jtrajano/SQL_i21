@@ -157,4 +157,7 @@ BEGIN
 	INSERT INTO tblICRestriction(strInternalCode, strDisplayMember, ysnDefault, ysnLocked, strLastUpdateBy, dtmLastUpdateOn) VALUES ('BONDED','BONDED',0,1,'dbo',GETDATE())
 END
 
-
+IF EXISTS(SELECT * FROM sys.columns WHERE object_id = object_id('tblICCompanyPreference') AND name = 'ysnIsCountSheetMultiFilter')
+BEGIN
+	UPDATE	tblICCompanyPreference SET ysnIsCountSheetMultiFilter = 1
+END
