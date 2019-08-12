@@ -8,10 +8,12 @@
 	,@intDemandHeaderId INT
 	,@ysnTest BIT
 	,@ysnAllItem BIT
+	,@intCategoryId INT
 	,@PlannedPurchasesXML VARCHAR(MAX)
 	,@WeeksOfSupplyTargetXML VARCHAR(MAX)
 	,@ForecastedConsumptionXML VARCHAR(MAX)
 	,@ysnCalculatePlannedPurchases BIT
+	,@ysnCalculateEndInventory BIT
 	,@ysnRefreshContract BIT
 	,@ysnRefreshStock BIT
 AS
