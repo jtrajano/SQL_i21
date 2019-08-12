@@ -31,7 +31,7 @@ BEGIN
 	)
 
 	INSERT INTO @table
-	SELECT * FROM result
+	SELECT * FROM dataResult
 
 	RETURN;
 END

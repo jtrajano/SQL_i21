@@ -35,7 +35,7 @@ BEGIN
 		intEntityVendorId,
 		dblTotal,
 		dtmDate
-	FROM result
+	FROM dataResult
 	WHERE intKey = 1 --only show result 1 row per vendor
 	
 	RETURN;
