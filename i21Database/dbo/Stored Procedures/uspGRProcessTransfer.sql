@@ -21,8 +21,7 @@ BEGIN
 	DECLARE @intSourceItemUOMId INT
 	DECLARE @intCustomerStorageId INT --new customer storage id
 	DECLARE @intStorageHistoryId INT = 0
-	DECLARE @intDecimalPrecision INT	
-	SELECT @intDecimalPrecision = intCurrencyDecimal FROM tblSMCompanyPreference
+	DECLARE @intDecimalPrecision INT = 20
 
 	---START---TRANSACTIONS FOR THE SOURCE-----	
 	IF EXISTS(SELECT TOP 1 1 
