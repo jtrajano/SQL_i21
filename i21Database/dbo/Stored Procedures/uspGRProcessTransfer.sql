@@ -20,7 +20,7 @@ BEGIN
 	DECLARE @intSourceItemUOMId INT
 	DECLARE @intCustomerStorageId INT --new customer storage id
 	DECLARE @intStorageHistoryId INT = 0
-	DECLARE @intDecimalPrecision INT
+	DECLARE @intDecimalPrecision INT = 20
 	DECLARE @intTransferStorageSplitId INT
 	DECLARE @XML NVARCHAR(MAX)
 	DECLARE @strScreenName NVARCHAR(50)
@@ -37,8 +37,6 @@ BEGIN
 		,dblSplitPercent NUMERIC(38,20)
 		,dtmProcessDate DATETIME NOT NULL DEFAULT(GETDATE())
 	)
-
-	SELECT @intDecimalPrecision = intCurrencyDecimal FROM tblSMCompanyPreference
 
 	---START---TRANSACTIONS FOR THE SOURCE-----	
 	IF EXISTS(SELECT TOP 1 1 
