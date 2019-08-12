@@ -7665,7 +7665,7 @@
     <Build Include="dbo\Functions\fnGRValidateBillPost.sql" />
     <Build Include="dbo\Stored Procedures\uspSCImportData.sql" />
     <Build Include="dbo\Stored Procedures\uspMBPostMeterReadingValidation.sql" />
-    <Build Include="Scripts\Post-Deployment\SM\1910_UpdateNoSpaceModuleName.sql" />
+    <None Include="Scripts\Post-Deployment\SM\1910_UpdateNoSpaceModuleName.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
