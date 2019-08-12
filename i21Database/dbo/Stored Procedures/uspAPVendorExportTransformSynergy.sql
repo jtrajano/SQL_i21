@@ -30,8 +30,8 @@ USING
 	SELECT
 		intEntityId				=	entStg.intEntityId,
 		strVendorId				=	dbo.fnTrim(vndStg.strVendorId),
-		strDescription			=	entStg.strName,
-		strContact				=	cntcDataStg.strName,
+		strDescription			=	dbo.fnTrim(entStg.strName),
+		strContact				=	dbo.fnTrim(cntcDataStg.strName),
 		ysnUserShipperWeight	=	0,
 		intVendorType			=	0,
 		strVendorType			=	'Both'
