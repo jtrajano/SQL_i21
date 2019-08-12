@@ -10,20 +10,48 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-DECLARE @blbLogo             VARBINARY (MAX) = NULL
-      , @blbStretchedLogo    VARBINARY (MAX) = NULL
+DECLARE @blbLogo						VARBINARY (MAX) = NULL
+      , @blbStretchedLogo				VARBINARY (MAX) = NULL
+	  , @ysnPrintInvoicePaymentDetail	BIT = 0
+	  , @strInvoiceReportName			NVARCHAR(100) = NULL
+	  , @strCompanyName					NVARCHAR(200) = NULL
+	  , @strAddress						NVARCHAR(200) = NULL
+	  , @strCity						NVARCHAR(200) = NULL
+	  , @strState						NVARCHAR(200) = NULL
+	  , @strZip							NVARCHAR(200) = NULL
+	  , @strCountry						NVARCHAR(200) = NULL
+	  , @strPhone						NVARCHAR(200) = NULL
+	  , @strEmail						NVARCHAR(200) = NULL
 
+--LOGO
 SELECT TOP 1 @blbLogo = U.blbFile 
 FROM tblSMUpload U
 INNER JOIN tblSMAttachment A ON U.intAttachmentId = A.intAttachmentId
 WHERE A.strScreen = 'SystemManager.CompanyPreference' 
   AND A.strComment = 'Header'
 
+--LOGO
 SELECT TOP 1 @blbStretchedLogo = U.blbFile 
 FROM tblSMUpload U
 INNER JOIN tblSMAttachment A ON U.intAttachmentId = A.intAttachmentId
 WHERE A.strScreen = 'SystemManager.CompanyPreference' 
   AND A.strComment = 'Stretched Header'
+
+--AR PREFERENCE
+SELECT TOP 1 @ysnPrintInvoicePaymentDetail	= ysnPrintInvoicePaymentDetail
+		   , @strInvoiceReportName			= strInvoiceReportName
+FROM dbo.tblARCompanyPreference WITH (NOLOCK)
+
+--COMPANY INFO
+SELECT TOP 1 @strCompanyName = strCompanyName 
+		   , @strAddress	 = strAddress
+		   , @strCity		 = strCity
+		   , @strState		 = strState
+		   , @strZip		 = strZip
+		   , @strCountry	 = strCountry
+		   , @strPhone		 = strPhone
+		   , @strEmail		 = strEmail
+FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 
 SET @blbStretchedLogo = ISNULL(@blbStretchedLogo, @blbLogo)
 
@@ -125,23 +153,23 @@ INSERT INTO tblARInvoiceReportStagingTable (
 )
 SELECT intInvoiceId				= INV.intInvoiceId
 	 , intCompanyLocationId		= INV.intCompanyLocationId
-	 , strCompanyName			= CASE WHEN [LOCATION].strUseLocationAddress = 'Letterhead' THEN '' ELSE COMPANY.strCompanyName END
-	 , strCompanyAddress		= CASE WHEN [LOCATION].strUseLocationAddress IS NULL OR [LOCATION].strUseLocationAddress = 'No' OR [LOCATION].strUseLocationAddress = '' OR [LOCATION].strUseLocationAddress = 'Always'
-											THEN dbo.fnARFormatCustomerAddress(NULL, NULL, NULL, COMPANY.strAddress, COMPANY.strCity, COMPANY.strState, COMPANY.strZip, COMPANY.strCountry, NULL, COMPANY.ysnIncludeEntityName)
+	 , strCompanyName			= CASE WHEN [LOCATION].strUseLocationAddress = 'Letterhead' THEN '' ELSE @strCompanyName END
+	 , strCompanyAddress		= CASE WHEN ISNULL([LOCATION].strUseLocationAddress, '') = '' OR [LOCATION].strUseLocationAddress = 'No' OR [LOCATION].strUseLocationAddress = 'Always'
+											THEN dbo.fnARFormatCustomerAddress(NULL, NULL, NULL, @strAddress, @strCity, @strState, @strZip, @strCountry, NULL, 0)
 									   WHEN [LOCATION].strUseLocationAddress = 'Yes'
 											THEN dbo.fnARFormatCustomerAddress(NULL, NULL, NULL, [LOCATION].strAddress, [LOCATION].strCity, [LOCATION].strStateProvince, [LOCATION].strZipPostalCode, [LOCATION].strCountry, NULL, CUSTOMER.ysnIncludeEntityName)
 									   WHEN [LOCATION].strUseLocationAddress = 'Letterhead'
 											THEN ''
 								  END
 	 , strCompanyInfo			= CASE WHEN [LOCATION].strUseLocationAddress IS NULL OR [LOCATION].strUseLocationAddress = 'No' OR [LOCATION].strUseLocationAddress = '' OR [LOCATION].strUseLocationAddress = 'Always'
-											THEN dbo.fnARFormatCustomerAddress(NULL, NULL, NULL, COMPANY.strAddress, COMPANY.strCity, COMPANY.strState, COMPANY.strZip, COMPANY.strCountry, NULL, COMPANY.ysnIncludeEntityName)
+											THEN dbo.fnARFormatCustomerAddress(NULL, NULL, NULL, @strAddress, @strCity, @strState, @strZip, @strCountry, NULL, 0)
 									   WHEN [LOCATION].strUseLocationAddress = 'Yes'
 											THEN dbo.fnARFormatCustomerAddress(NULL, NULL, NULL, [LOCATION].strAddress, [LOCATION].strCity, [LOCATION].strStateProvince, [LOCATION].strZipPostalCode, [LOCATION].strCountry, NULL, CUSTOMER.ysnIncludeEntityName)
 									   WHEN [LOCATION].strUseLocationAddress = 'Letterhead'
 											THEN ''
-								  END  + CHAR(10) + ISNULL(COMPANY.strEmail,'')   + CHAR(10) + ISNULL(COMPANY.strPhone,'')
-	 , strCompanyPhoneNumber	= COMPANY.strPhone
-	 , strCompanyEmail			= COMPANY.strEmail
+								  END  + CHAR(10) + ISNULL(@strEmail,'')   + CHAR(10) + ISNULL(@strPhone,'')
+	 , strCompanyPhoneNumber	= @strPhone
+	 , strCompanyEmail			= @strEmail
 	 , strType					= ISNULL(INV.strType, 'Standard')
      , strCustomerName			= CUSTOMER.strName
 	 , strCustomerNumber        = CUSTOMER.strCustomerNumber
@@ -173,12 +201,10 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , strComments				= dbo.fnEliminateHTMLTags(INV.strComments, 0)
 	 , strInvoiceHeaderComment	= INV.strComments
 	 , strInvoiceFooterComment	= INV.strFooterComments
-	 , dblInvoiceSubtotal		= CASE WHEN INV.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment') THEN ISNULL(INV.dblInvoiceSubtotal, 0) * -1 ELSE ISNULL(INV.dblInvoiceSubtotal, 0) END
-	 , dblShipping				= CASE WHEN INV.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment') THEN ISNULL(INV.dblShipping, 0) * -1 ELSE ISNULL(INV.dblShipping, 0) END
-	 , dblTax					= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN
-									CASE WHEN INV.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment') THEN ISNULL(INVOICEDETAIL.dblTotalTax, 0) * -1 ELSE ISNULL(INVOICEDETAIL.dblTotalTax, 0) END
-								  ELSE NULL END
-	 , dblInvoiceTotal			= (dbo.fnARGetInvoiceAmountMultiplier(INV.strTransactionType) * ISNULL(INV.dblInvoiceTotal, 0)) - ISNULL(INV.dblProvisionalAmount, 0) - CASE WHEN ISNULL(ARPREFERENCE.strInvoiceReportName, 'Standard') <> 'Format 2 - Mcintosh' THEN 0 ELSE ISNULL(TOTALTAX.dblNonSSTTax, 0) END 
+	 , dblInvoiceSubtotal		= ISNULL(INV.dblInvoiceSubtotal, 0) * dbo.fnARGetInvoiceAmountMultiplier(INV.strTransactionType)
+	 , dblShipping				= ISNULL(INV.dblShipping, 0) * dbo.fnARGetInvoiceAmountMultiplier(INV.strTransactionType)
+	 , dblTax					= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN (ISNULL(INVOICEDETAIL.dblTotalTax, 0) - CASE WHEN INV.strType = 'Transport Delivery' THEN ISNULL(TOTALTAX.dblIncludePrice, 0) * INVOICEDETAIL.dblQtyShipped ELSE 0 END) * dbo.fnARGetInvoiceAmountMultiplier(INV.strTransactionType) ELSE NULL END
+	 , dblInvoiceTotal			= (dbo.fnARGetInvoiceAmountMultiplier(INV.strTransactionType) * ISNULL(INV.dblInvoiceTotal, 0)) - ISNULL(INV.dblProvisionalAmount, 0) - CASE WHEN ISNULL(@strInvoiceReportName, 'Standard') <> 'Format 2 - Mcintosh' THEN 0 ELSE ISNULL(TOTALTAX.dblNonSSTTax, 0) END 
 	 , dblAmountDue				= ISNULL(INV.dblAmountDue, 0)
 	 , strItemNo				= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN INVOICEDETAIL.strItemNo ELSE NULL END
 	 , intInvoiceDetailId		= INVOICEDETAIL.intInvoiceDetailId
@@ -188,20 +214,14 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , strItem					= CASE WHEN ISNULL(INVOICEDETAIL.strItemNo, '') = '' THEN ISNULL(INVOICEDETAIL.strItemDescription, INVOICEDETAIL.strSCInvoiceNumber) ELSE LTRIM(RTRIM(INVOICEDETAIL.strItemNo)) + '-' + ISNULL(INVOICEDETAIL.strItemDescription, '') END
 	 , strItemDescription		= INVOICEDETAIL.strItemDescription
 	 , strUnitMeasure			= INVOICEDETAIL.strUnitMeasure
-	 , dblQtyShipped			= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN
-									CASE WHEN INV.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment') THEN ISNULL(INVOICEDETAIL.dblQtyShipped, 0) * -1 ELSE ISNULL(INVOICEDETAIL.dblQtyShipped, 0) END
-								  ELSE NULL END
-	 , dblQtyOrdered			= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN
-									CASE WHEN INV.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment') THEN ISNULL(INVOICEDETAIL.dblQtyOrdered, 0) * -1 ELSE ISNULL(INVOICEDETAIL.dblQtyOrdered, 0) END
-								  ELSE NULL END
+	 , dblQtyShipped			= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN ISNULL(INVOICEDETAIL.dblQtyShipped, 0) * dbo.fnARGetInvoiceAmountMultiplier(INV.strTransactionType) ELSE NULL END
+	 , dblQtyOrdered			= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN ISNULL(INVOICEDETAIL.dblQtyOrdered, 0) * dbo.fnARGetInvoiceAmountMultiplier(INV.strTransactionType) ELSE NULL END
 	 , dblDiscount				= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN
 									ISNULL(INVOICEDETAIL.dblDiscount, 0) / 100
 								  ELSE NULL END
-	 , dblTotalTax				= dbo.fnARGetInvoiceAmountMultiplier(INV.strTransactionType) * CASE WHEN ISNULL(ARPREFERENCE.strInvoiceReportName, 'Standard') <> 'Format 2 - Mcintosh' THEN ISNULL(INV.dblTax, 0) ELSE ISNULL(TOTALTAX.dblSSTTax, 0) END
-	 , dblPrice					= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN ISNULL(INVOICEDETAIL.dblPrice, 0) ELSE NULL END
-	 , dblItemPrice				= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN
-									CASE WHEN INV.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment') THEN ISNULL(INVOICEDETAIL.dblTotal, 0) * -1 ELSE ISNULL(INVOICEDETAIL.dblTotal, 0) END
-								  ELSE NULL END
+	 , dblTotalTax				= dbo.fnARGetInvoiceAmountMultiplier(INV.strTransactionType) * CASE WHEN ISNULL(@strInvoiceReportName, 'Standard') <> 'Format 2 - Mcintosh' THEN ISNULL(INV.dblTax, 0) - CASE WHEN INV.strType = 'Transport Delivery' THEN ISNULL(TOTALTAX.dblIncludePriceTotal, 0) ELSE 0 END ELSE ISNULL(TOTALTAX.dblSSTTax, 0) END
+	 , dblPrice					= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN ISNULL(INVOICEDETAIL.dblPrice, 0) + CASE WHEN INV.strType = 'Transport Delivery' THEN ISNULL(TOTALTAX.dblIncludePrice, 0) ELSE 0 END ELSE NULL END
+	 , dblItemPrice				= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN (ISNULL(INVOICEDETAIL.dblTotal, 0) + CASE WHEN INV.strType = 'Transport Delivery' THEN ISNULL(TOTALTAX.dblIncludePriceTotal, 0) ELSE 0 END) * dbo.fnARGetInvoiceAmountMultiplier(INV.strTransactionType) ELSE NULL END
 	 , strPaid					= CASE WHEN ysnPaid = 1 THEN 'Yes' ELSE 'No' END
 	 , strPosted				= CASE WHEN INV.ysnPosted = 1 THEN 'Yes' ELSE 'No' END
 	 , strTransactionType		= INV.strTransactionType
@@ -220,7 +240,7 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , ysnHasProvisional		= CASE WHEN (ISNULL(PROVISIONAL.strProvisionalDescription, '')) <> '' THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END
 	 , strProvisional			= PROVISIONAL.strProvisionalDescription
 	 , dblTotalProvisional		= PROVISIONAL.dblProvisionalTotal	 
-	 , ysnPrintInvoicePaymentDetail = ARPREFERENCE.ysnPrintInvoicePaymentDetail
+	 , ysnPrintInvoicePaymentDetail = @ysnPrintInvoicePaymentDetail
 	 , ysnListBundleSeparately	= ISNULL(INVOICEDETAIL.ysnListBundleSeparately, CONVERT(BIT, 0))
 	 , strTicketNumbers			= SCALETICKETS.strTicketNumbers
 	 , strSiteNumber			= INVOICEDETAIL.strSiteNumber
@@ -433,31 +453,11 @@ LEFT JOIN (
 		 , strFobPoint
 	FROM dbo.tblSMFreightTerms WITH (NOLOCK)
 ) FREIGHT ON INV.intFreightTermId = FREIGHT.intFreightTermId
-LEFT JOIN (
-	SELECT strCode
-		 , strMessage
-	FROM vyuARDocumentMaintenanceMessage
-) Comments ON INV.strComments = Comments.strCode
 OUTER APPLY (
-	SELECT TOP 1 strCompanyName 
-			   , strAddress
-			   , strCity
-			   , strState
-			   , strZip
-			   , strCountry
-			   , ysnIncludeEntityName
-			   , strPhone
-			   , strEmail
-	FROM dbo.tblSMCompanySetup WITH (NOLOCK)
-) COMPANY
-OUTER APPLY (
-	SELECT TOP 1 ysnPrintInvoicePaymentDetail
-			   , strInvoiceReportName
-	FROM dbo.tblARCompanyPreference WITH (NOLOCK)
-) ARPREFERENCE
-OUTER APPLY (
-	SELECT dblSSTTax 		= SUM(CASE WHEN UPPER(strTaxClass) = 'STATE SALES TAX (SST)' OR dblComputedGrossPrice = 0 THEN dblAdjustedTax ELSE 0 END)
-		 , dblNonSSTTax 	= SUM(CASE WHEN UPPER(strTaxClass) <> 'STATE SALES TAX (SST)' AND dblComputedGrossPrice <> 0 THEN dblAdjustedTax ELSE 0 END)
+	SELECT dblSSTTax 			= SUM(CASE WHEN UPPER(strTaxClass) = 'STATE SALES TAX (SST)' OR dblComputedGrossPrice = 0 THEN dblAdjustedTax ELSE 0 END)
+		 , dblNonSSTTax 		= SUM(CASE WHEN UPPER(strTaxClass) <> 'STATE SALES TAX (SST)' AND dblComputedGrossPrice <> 0 THEN dblAdjustedTax ELSE 0 END)
+		 , dblIncludePrice		= SUM(CASE WHEN ysnIncludeInvoicePrice = 1 THEN dblTaxPerQty ELSE 0 END)
+		 , dblIncludePriceTotal	= SUM(CASE WHEN ysnIncludeInvoicePrice = 1 THEN dblAdjustedTax ELSE 0 END)
 	FROM vyuARTaxDetailReport
 	WHERE strTaxTransactionType = 'Invoice'
 	  AND intTransactionId = INV.intInvoiceId	  
