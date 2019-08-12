@@ -25,7 +25,7 @@ BEGIN TRY
 	FROM tblGRStorageType 
 	WHERE intStorageScheduleTypeId = @intStorageTypeId	
 	
-	SELECT @dblThereAfterCharge = ISNULL(dblStorageRate,0), @strCurrency = CC.strCurrency, @strRate = strStorageRate
+	SELECT @dblThereAfterCharge = ISNULL(dblStorageRate,0), @strCurrency = CC.strCurrency, @strRate = strStorageRate,@dtmTerminationOfReceipt = ISNULL(dtmTerminationDate,0)
 	FROM tblGRStorageSchedulePeriod SSP
 	INNER JOIN tblGRStorageScheduleRule SR
 		ON SR.intStorageScheduleRuleId = SSP.intStorageScheduleRule
@@ -34,7 +34,7 @@ BEGIN TRY
 	WHERE intStorageScheduleRule = @intStorageScheduleId 
 		AND strPeriodType='Thereafter'
 
-	SELECT TOP 1 @dtmTerminationOfReceipt = ISNULL(dtmEndingDate,0), @dtmStartTerminationOfReceipt = dtmEffectiveDate
+	SELECT TOP 1 @dtmStartTerminationOfReceipt = dtmEndingDate + 1
 	FROM tblGRStorageSchedulePeriod 
 	WHERE intStorageScheduleRule = @intStorageScheduleId 
 		AND strPeriodType = 'Date Range'
@@ -75,7 +75,7 @@ BEGIN TRY
 			CONVERT(NVARCHAR,@dtmTerminationOfReceipt,101) AS dtmTerminationOfReceipt,
 			CONVERT(NVARCHAR,@dtmStartTerminationOfReceipt,101) AS dtmStartTerminationOfReceipt,
 			'Dry ' + UOM.strUnitMeasure AS strDryUOM,
-			CONVERT(NVARCHAR,@dtmTerminationOfReceipt + 1,101)dtmThereaferStart,
+			CONVERT(NVARCHAR,@dtmTerminationOfReceipt,101)dtmThereaferStart,
 			UOM.strUnitMeasure,
 			@strCurrency strCurrency,
 			@strRate strStorageRate
