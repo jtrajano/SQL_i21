@@ -31,8 +31,8 @@ IF(OBJECT_ID('tempdb..#exclusionTable') IS NOT NULL)
 			[intEntityId] int,
 			[intSize] int,
 			[strType] nvarchar(max),
-			[strFolderPath] nvarchar(max),
-			[intUploadId] int
+			[intUploadId] int,
+			[strFolderPath] nvarchar(max)
 	)
 
 	DECLARE @strCurrentDatabaseName NVARCHAR(250) = DB_NAME();

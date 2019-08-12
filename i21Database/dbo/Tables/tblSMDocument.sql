@@ -8,7 +8,7 @@
 	[intTransactionId]			INT				NOT NULL,
 	[intEntityId]				INT				NULL,
 	[intUploadId]				INT				NOT NULL,
-	[intInterCompanyEntityId]   INT				NOT NULL,
+	[intInterCompanyEntityId]   INT			    NULL,
 	[intInterCompanyId]			INT				NULL,
 	[strInterCompanyEntityName] NVARCHAR(250) COLLATE Latin1_General_CI_AS	NULL,
     [intConcurrencyId]			INT				NOT NULL,
