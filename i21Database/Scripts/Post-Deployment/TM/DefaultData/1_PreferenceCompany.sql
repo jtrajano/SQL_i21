@@ -32,31 +32,37 @@ END
 
 exec(
 '
-delete from tblTMTankMonitorInterfaceType;
 set identity_insert tblTMTankMonitorInterfaceType on;
-insert into tblTMTankMonitorInterfaceType (
-	[intInterfaceTypeId],
-	[strInterfaceType],
-    [ysnFromAPI],
-    [intConcurrencyId]
-)
-	select
-	intInterfaceTypeId = 1,
-	strInterfaceType = ''Wesroc'',
-    ysnFromAPI = 0,
-    intConcurrencyId = 1
 
-insert into tblTMTankMonitorInterfaceType (
-	[intInterfaceTypeId],
-	[strInterfaceType],
-    [ysnFromAPI],
-    [intConcurrencyId]
-)
-	select
-	intInterfaceTypeId = 2,
-	strInterfaceType = ''EcoGreen'',
-    ysnFromAPI = 1,
-    intConcurrencyId = 1
+if not exists (select * from tblTMTankMonitorInterfaceType where strInterfaceType = ''Wesroc'')
+begin
+	insert into tblTMTankMonitorInterfaceType (
+		[intInterfaceTypeId],
+		[strInterfaceType],
+		[ysnFromAPI],
+		[intConcurrencyId]
+	)
+		select
+		intInterfaceTypeId = 1,
+		strInterfaceType = ''Wesroc'',
+		ysnFromAPI = 0,
+		intConcurrencyId = 1
+end
+
+if not exists (select * from tblTMTankMonitorInterfaceType where strInterfaceType = ''EcoGreen'')
+begin
+	insert into tblTMTankMonitorInterfaceType (
+		[intInterfaceTypeId],
+		[strInterfaceType],
+		[ysnFromAPI],
+		[intConcurrencyId]
+	)
+		select
+		intInterfaceTypeId = 2,
+		strInterfaceType = ''EcoGreen'',
+		ysnFromAPI = 1,
+		intConcurrencyId = 1
+end
 
 set identity_insert tblTMTankMonitorInterfaceType off;
 '
