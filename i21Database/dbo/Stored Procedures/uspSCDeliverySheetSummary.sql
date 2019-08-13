@@ -138,7 +138,7 @@ BEGIN
 		AND IR.intSourceType = 5 AND CTD.intPricingTypeId = 6),0)
 
 		--For Storage
-		SET @Storage = ISNULL((SELECT dblOriginalBalance FROM tblGRCustomerStorage GRS
+		SET @Storage = ISNULL((SELECT sum(dblOriginalBalance) FROM tblGRCustomerStorage GRS
 		LEFT JOIN tblGRStorageType GR ON GR.intStorageScheduleTypeId = GRS.intStorageTypeId AND GR.intStorageScheduleTypeId > 0
 		WHERE GR.ysnReceiptedStorage = 0 AND GR.ysnDPOwnedType = 0 AND GR.ysnGrainBankType = 0 AND GR.ysnCustomerStorage = 0
 		AND GRS.intEntityId = @intEntityId AND GRS.intItemId = @intItemId 
@@ -147,7 +147,7 @@ BEGIN
 		AND GRS.ysnTransferStorage = 0), 0)
 		
 		--For DP contract
-		SET @DP = ISNULL((SELECT dblOriginalBalance FROM tblGRCustomerStorage GRS
+		SET @DP = ISNULL((SELECT sum(dblOriginalBalance) FROM tblGRCustomerStorage GRS
 		LEFT JOIN tblGRStorageType GR ON GR.intStorageScheduleTypeId = GRS.intStorageTypeId AND GR.intStorageScheduleTypeId > 0
 		WHERE GRS.intEntityId = @intEntityId AND GRS.intItemId = @intItemId
 		AND GR.ysnDPOwnedType = 1 AND GR.ysnCustomerStorage = 0
@@ -166,7 +166,7 @@ BEGIN
 		AND IR.intSourceType = 5 AND CTD.intPricingTypeId = 2), 0)
 		
 		--For WHGB
-		SET @WHGB = ISNULL((SELECT dblOriginalBalance FROM tblGRCustomerStorage GRS
+		SET @WHGB = ISNULL((SELECT sum(dblOriginalBalance) FROM tblGRCustomerStorage GRS
 		LEFT JOIN tblGRStorageType GR ON GR.intStorageScheduleTypeId = GRS.intStorageTypeId AND GR.intStorageScheduleTypeId > 0
 		WHERE (GR.ysnReceiptedStorage = 1 OR GR.ysnGrainBankType = 1) AND GR.ysnDPOwnedType = 0 AND GR.ysnCustomerStorage = 0 
 		AND GRS.intDeliverySheetId = @intDeliverySheetId AND GRS.intEntityId = @intEntityId 
