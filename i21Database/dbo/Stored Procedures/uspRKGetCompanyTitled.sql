@@ -312,26 +312,33 @@ BEGIN
 
 			--Collateral
 			INSERT INTO @InventoryStock(strCommodityCode
+				, dtmDate
 				, dblTotal
 				, strLocationName
 				, intCommodityId
 				, intFromCommodityUnitMeasureId
-				, strInventoryType)
+				, strTransactionType
+				, intSourceId)
 			SELECT strCommodityCode
+				, dtmDate
 				, dblTotal = SUM(dblTotal)
 				, strLocationName
 				, intCommodityId
 				, intFromCommodityUnitMeasureId
-				, strInventoryType
+				, strTransactionType
+				, intCollateralId
 			FROM (
 				SELECT strCommodityCode
+					,dtmDate
 					, dblTotal
 					, strLocationName
 					, intCommodityId
 					, intFromCommodityUnitMeasureId
-					, strInventoryType = 'Collateral' COLLATE Latin1_General_CI_AS
+					, strTransactionType = 'Collateral' COLLATE Latin1_General_CI_AS
+					, intCollateralId
 				FROM (
 					SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY c.intCollateralId ORDER BY c.dtmOpenDate DESC)
+						, dtmDate = c.dtmOpenDate
 						, dblTotal = CASE WHEN c.strType = 'Purchase' THEN dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId, @intCommodityUnitMeasureId, ISNULL(c.dblOriginalQuantity, 0) - ISNULL(ca.dblAdjustmentAmount, 0))
 										ELSE - ABS(dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId, @intCommodityUnitMeasureId, ISNULL(c.dblOriginalQuantity, 0) -  ISNULL(ca.dblAdjustmentAmount, 0))) END
 						, intCommodityId = @intCommodityId
@@ -339,6 +346,7 @@ BEGIN
 						, cl.strLocationName
 						, intFromCommodityUnitMeasureId = @intCommodityUnitMeasureId
 						, ysnIncludeInPriceRiskAndCompanyTitled
+						, c.intCollateralId
 					FROM tblRKCollateral c
 					LEFT JOIN (
 						SELECT intCollateralId, sum(dblAdjustmentAmount) as dblAdjustmentAmount FROM tblRKCollateralAdjustment 
@@ -349,14 +357,17 @@ BEGIN
 					JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = c.intCommodityId AND c.intUnitMeasureId = ium.intUnitMeasureId
 					JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = c.intLocationId
 					WHERE c.intCommodityId = @intCommodityId 
+						AND c.intItemId = ISNULL(@intItemId, c.intItemId)
 						AND c.intLocationId = ISNULL(@intLocationId, c.intLocationId)
 						AND CONVERT(DATETIME, CONVERT(VARCHAR(10), c.dtmOpenDate, 110), 110) <= CONVERT(DATETIME, @dtmToTransactionDate)
 				) a WHERE a.intRowNum = 1 AND ysnIncludeInPriceRiskAndCompanyTitled = 1
 			) t GROUP BY strCommodityCode
 				, strLocationName
 				, intCommodityId
+				, dtmDate
 				, intFromCommodityUnitMeasureId
-				, strInventoryType
+				, strTransactionType
+				, intCollateralId
 
 			--=========================================
 			-- Includes DP based on Company Preference
@@ -726,6 +737,29 @@ BEGIN
 				inner join tblICInventoryTransfer I on ID.intInventoryTransferId = I.intInventoryTransferId
 				where Inv.strTransactionType = 'Inventory Transfer'
 					AND I.ysnPosted = 1
+						
+			) t
+
+
+			UNION ALL--COLLATERAL
+			SELECT
+				dtmDate
+				,dblUnpaidIncrease = 0
+				,dblUnpaidDecrease = 0
+				,dblUnpaidBalance = 0
+				,dblPaidBalance = dblTotal
+				,strTransactionId
+				,intTransactionId
+				,'CLT'
+			FROM (
+				select
+						dtmDate =  CONVERT(DATETIME, CONVERT(VARCHAR(10),Inv.dtmDate, 110), 110)
+					,Inv.dblTotal
+					,strTransactionId = Col.strReceiptNo
+					,intTransactionId = Inv.intSourceId
+				from @InventoryStock Inv
+				inner join tblRKCollateral Col on Col.intCollateralId = Inv.intSourceId
+				where Inv.strTransactionType = 'Collateral'
 						
 			) t
 
