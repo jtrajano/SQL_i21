@@ -85,7 +85,7 @@ BEGIN
 		,[strComments]
 		--,[intInvoiceId]
     )
-    SELECT [strTransactionType] = 'Credit Memo' 
+    SELECT [strTransactionType] = CASE WHEN ccItem.strItem = 'Dealer Site Fees' AND ccSite.strSiteType = 'Dealer Site Shared Fees' THEN 'Debit Memo' ELSE 'Credit Memo' END
         ,[strSourceTransaction] = 'Credit Card Reconciliation'
         --,[intSourceId] = ccSiteHeader.intSiteHeaderId
         ,[strSourceId] = ccSiteDetail.intSiteDetailId
