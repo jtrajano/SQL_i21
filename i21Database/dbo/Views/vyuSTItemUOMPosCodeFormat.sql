@@ -10,7 +10,13 @@ SELECT Item.intItemId
 	   , UOM.strLongUPCWOLeadingZero
 	   , LEN(UOM.strLongUPCWOLeadingZero) AS intUpcWOLeadingZeroLength
 	   , UOM.dblUPCwthOrwthOutCheckDigit
-	   
+
+	   -- ***************************************************
+	   -- Compare XML UPC with this field
+	   -- But first remove leading zeros and last digit(check digit)
+	   , UOM.intUpcCode 
+	   -- ***************************************************
+
 	   --, LEN(UOM.strUPCwthOrwthOutCheckDigit) AS intUpcWithCheckDigitLength
 	   , CASE
 			WHEN UOM.dblUPCwthOrwthOutCheckDigit <= 99999
@@ -95,7 +101,7 @@ SELECT Item.intItemId
 									WHEN LEN(UOM.dblUPCwthOrwthOutCheckDigit) < 14
 										THEN RIGHT(('00000000000000' + CAST(UOM.dblUPCwthOrwthOutCheckDigit AS NVARCHAR(14))), 14)
 									ELSE 
-										CAST(UOM.dblUPCwthOrwthOutCheckDigit AS NVARCHAR(14)) 
+										CAST(UOM.dblUPCwthOrwthOutCheckDigit AS NVARCHAR(15)) 
 							END
 					END
 			ELSE ''

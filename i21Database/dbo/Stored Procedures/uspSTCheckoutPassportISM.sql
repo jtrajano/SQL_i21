@@ -20,10 +20,123 @@ BEGIN
 		WHERE CH.intCheckoutId = @intCheckoutId
 
 
+		DECLARE @tblTemp TABLE
+		(
+			intRowCount											INT,
+			intTransmissionHeaderStoreLocationID				INT,
+			strTransmissionHeaderVendorName						NVARCHAR(150),
+			strTransmissionHeaderVendorModelVersion				NVARCHAR(150),
+			intMovementHeaderReportSequenceNumber				INT,
+			intMovementHeaderPrimaryReportPeriod				INT,
+			intMovementHeaderSecondaryReportPeriod				INT,
+			dtmMovementHeaderBusinessDate						DATE,
+			dtmMovementHeaderBeginDate							DATE,
+			dtmMovementHeaderBeginTime							TIME,
+			dtmMovementHeaderEndDate							DATE,
+			dtmMovementHeaderEndTime							TIME,
+			strISMDetailItemID									NVARCHAR(50),
+			strISMDetailDescription								NVARCHAR(150),
+			strISMDetailMerchandiseCode							NVARCHAR(50),
+			intISMDetailSellingUnits							INT,
+			strPOSCodeFormatformat								NVARCHAR(20),
+			strItemCodePOSCodeFormat							NVARCHAR(50),
+			strItemCodePOSCode									NVARCHAR(20),
+			intItemCodePOSCodeModifier							INT,
+			dblISMSellPriceSummaryActualSalesPrice				DECIMAL(18, 6),
+			intISMSalesTotalsSalesQuantity						INT,
+			dblISMSalesTotalsSalesAmount						DECIMAL(18, 6),
+			dblISMSalesTotalsDiscountAmount						DECIMAL(18, 6),
+			intISMSalesTotalsDiscountCount						INT,
+			dblISMSalesTotalsPromotionAmount					DECIMAL(18, 6),
+			intISMSalesTotalsPromotionCount						INT,
+			dblISMSalesTotalsRefundAmount						DECIMAL(18, 6),
+			intISMSalesTotalsRefundCount						INT,
+			intISMSalesTotalsTransactionCount					INT,
+			intRegisterUpcCode									BIGINT
+		)
+
+		BEGIN TRY
+			INSERT INTO @tblTemp
+			(
+				intRowCount,
+				intTransmissionHeaderStoreLocationID,
+				strTransmissionHeaderVendorName,
+				strTransmissionHeaderVendorModelVersion,
+				intMovementHeaderReportSequenceNumber,
+				intMovementHeaderPrimaryReportPeriod,
+				intMovementHeaderSecondaryReportPeriod,
+				dtmMovementHeaderBusinessDate,
+				dtmMovementHeaderBeginDate,
+				dtmMovementHeaderBeginTime,
+				dtmMovementHeaderEndDate,
+				dtmMovementHeaderEndTime,
+				strISMDetailItemID,
+				strISMDetailDescription,
+				strISMDetailMerchandiseCode,
+				intISMDetailSellingUnits,
+				strPOSCodeFormatformat,
+				strItemCodePOSCodeFormat,
+				strItemCodePOSCode,
+				intItemCodePOSCodeModifier,
+				dblISMSellPriceSummaryActualSalesPrice,
+				intISMSalesTotalsSalesQuantity,
+				dblISMSalesTotalsSalesAmount,
+				dblISMSalesTotalsDiscountAmount,
+				intISMSalesTotalsDiscountCount,
+				dblISMSalesTotalsPromotionAmount,
+				intISMSalesTotalsPromotionCount,
+				dblISMSalesTotalsRefundAmount,
+				intISMSalesTotalsRefundCount,
+				intISMSalesTotalsTransactionCount,
+				intRegisterUpcCode
+			)
+			SELECT 
+				intRowCount									= CAST(temp.intRowCount AS INT),
+				intTransmissionHeaderStoreLocationID		= CAST(temp.TransmissionHeaderStoreLocationID AS INT),
+				strTransmissionHeaderVendorName				= ISNULL(temp.TransmissionHeaderVendorName, ''),
+				strTransmissionHeaderVendorModelVersion		= ISNULL(temp.TransmissionHeaderVendorModelVersion, ''),
+				intMovementHeaderReportSequenceNumber		= CAST(temp.MovementHeaderReportSequenceNumber AS INT),
+				intMovementHeaderPrimaryReportPeriod		= CAST(temp.MovementHeaderPrimaryReportPeriod AS INT),
+				intMovementHeaderSecondaryReportPeriod		= CAST(temp.MovementHeaderSecondaryReportPeriod AS INT),
+				dtmMovementHeaderBusinessDate				= CAST(temp.MovementHeaderBusinessDate AS DATE),
+				dtmMovementHeaderBeginDate					= CAST(temp.MovementHeaderBeginDate AS DATE),
+				dtmMovementHeaderBeginTime					= CAST(temp.MovementHeaderBeginTime AS TIME),
+				dtmMovementHeaderEndDate					= CAST(temp.MovementHeaderEndDate AS DATE),
+				dtmMovementHeaderEndTime					= CAST(temp.MovementHeaderEndTime AS TIME),
+				strISMDetailItemID							= ISNULL(temp.ISMDetailItemID, ''),
+				strISMDetailDescription						= ISNULL(temp.ISMDetailDescription, ''),
+				strISMDetailMerchandiseCode					= ISNULL(temp.ISMDetailMerchandiseCode, ''),
+				intISMDetailSellingUnits					= CAST(temp.ISMDetailSellingUnits AS INT),
+				strPOSCodeFormatformat						= ISNULL(temp.POSCodeFormatformat, ''),
+				strItemCodePOSCodeFormat					= ISNULL(temp.ItemCodePOSCodeFormat, ''),
+				strItemCodePOSCode							= ISNULL(temp.ItemCodePOSCode, ''),
+				intItemCodePOSCodeModifier					= CAST(temp.ItemCodePOSCodeModifier AS INT),
+				dblISMSellPriceSummaryActualSalesPrice		= CAST(temp.ISMSellPriceSummaryActualSalesPrice AS DECIMAL(18, 6)),
+				intISMSalesTotalsSalesQuantity				= CAST(temp.ISMSalesTotalsSalesQuantity AS INT),
+				dblISMSalesTotalsSalesAmount				= CAST(temp.ISMSalesTotalsSalesAmount AS DECIMAL(18, 6)),
+				dblISMSalesTotalsDiscountAmount				= CAST(temp.ISMSalesTotalsDiscountAmount AS DECIMAL(18, 6)),
+				intISMSalesTotalsDiscountCount				= CAST(temp.ISMSalesTotalsDiscountCount AS INT),
+				dblISMSalesTotalsPromotionAmount			= CAST(temp.ISMSalesTotalsPromotionAmount AS DECIMAL(18, 6)),
+				intISMSalesTotalsPromotionCount				= CAST(temp.ISMSalesTotalsPromotionCount AS INT),
+				dblISMSalesTotalsRefundAmount				= CAST(temp.ISMSalesTotalsRefundAmount AS DECIMAL(18, 6)),
+				intISMSalesTotalsRefundCount				= CAST(temp.ISMSalesTotalsRefundCount AS INT),
+				intISMSalesTotalsTransactionCount			= CAST(temp.ISMSalesTotalsTransactionCount AS INT),
+				intRegisterUpcCode							= CONVERT(NUMERIC(32, 0),CAST(temp.ItemCodePOSCode AS FLOAT)) -- Remove Leading Zeros if PASSPORT,									
+			FROM #tempCheckoutInsert temp
+		END TRY
+		BEGIN CATCH
+			SET @intCountRows = 0
+			SET @strStatusMsg = 'Passport ISM - Insert to temporary table: ' + ERROR_MESSAGE()
+
+			GOTO ExitWithRollback
+		END CATCH
+
+
+
 		-- ==================================================================================================================  
 		-- Start Validate if ISM xml file matches the Mapping on i21 
 		-- ------------------------------------------------------------------------------------------------------------------
-		IF NOT EXISTS(SELECT TOP 1 1 FROM #tempCheckoutInsert)
+		IF NOT EXISTS(SELECT TOP 1 1 FROM @tblTemp)
 			BEGIN
 					-- Add to error logging
 					INSERT INTO tblSTCheckoutErrorLogs 
@@ -75,52 +188,38 @@ BEGIN
 			'NO MATCHING TAG' as strErrorType
 			, 'No Matching UPC/Item in Inventory' as strErrorMessage
 			, 'POSCode' as strRegisterTag
-			, ISNULL(Chk.ItemCodePOSCode, '') AS strRegisterTagValue
+			, ISNULL(Chk.strItemCodePOSCode, '') AS strRegisterTagValue
 			, @intCheckoutId
 			, 1
-		FROM #tempCheckoutInsert Chk
-		WHERE ISNULL(Chk.ItemCodePOSCode, '') NOT IN
+		FROM @tblTemp Chk
+		WHERE CAST(Chk.intRegisterUpcCode AS BIGINT) NOT IN
 		(
-			SELECT DISTINCT 
-				tbl.strXmlRegisterPOSCode
-			FROM
-			(
-				SELECT DISTINCT
-					Chk.ItemCodePOSCode AS strXmlRegisterPOSCode
-				FROM #tempCheckoutInsert Chk
-				INNER JOIN
-				(
-					SELECT intItemUOMId
-						, intItemId
-						, strLongUPCCode
-						, CASE 
-							WHEN strLongUPCCode NOT LIKE '%[^0-9]%' 
-								THEN CONVERT(NUMERIC(32, 0),CAST(strLongUPCCode AS FLOAT))
-							ELSE NULL
-						END AS intLongUpcCode 
-					FROM dbo.tblICItemUOM
-				) AS UOM
-					ON Chk.ItemCodePOSCode COLLATE Latin1_General_CI_AS = ISNULL(UOM.strLongUPCCode, '')
-					OR CONVERT(NUMERIC(32, 0),CAST(Chk.ItemCodePOSCode AS FLOAT)) = UOM.intLongUpcCode
-				INNER JOIN dbo.tblICItem I 
-					ON I.intItemId = UOM.intItemId
-				INNER JOIN dbo.tblICItemLocation IL 
-					ON IL.intItemId = I.intItemId
-				LEFT JOIN dbo.tblICItemPricing P 
-					ON IL.intItemLocationId = P.intItemLocationId 
-					AND I.intItemId = P.intItemId
-				INNER JOIN dbo.tblSMCompanyLocation CL 
-					ON CL.intCompanyLocationId = IL.intLocationId
-				INNER JOIN dbo.tblSTStore S 
-					ON S.intCompanyLocationId = CL.intCompanyLocationId
-				WHERE S.intStoreId = @intStoreId
-					AND ISNULL(Chk.ItemCodePOSCode, '') != ''
-			) AS tbl
+			SELECT DISTINCT
+				CAST(UOM.intUpcCode AS BIGINT) AS intUpcCode
+			FROM @tblTemp Chk
+			INNER JOIN vyuSTItemUOMPosCodeFormat UOM
+				ON CAST(Chk.intRegisterUpcCode AS BIGINT) = CAST(UOM.intUpcCode AS BIGINT)
+			INNER JOIN dbo.tblICItem I 
+				ON I.intItemId = UOM.intItemId
+			INNER JOIN dbo.tblICItemLocation IL 
+				ON IL.intItemId = I.intItemId
+				AND UOM.intLocationId = IL.intLocationId
+			LEFT JOIN dbo.tblICItemPricing P 
+				ON IL.intItemLocationId = P.intItemLocationId 
+				AND I.intItemId = P.intItemId
+			INNER JOIN dbo.tblSMCompanyLocation CL 
+				ON CL.intCompanyLocationId = IL.intLocationId
+			INNER JOIN dbo.tblSTStore S 
+				ON S.intCompanyLocationId = CL.intCompanyLocationId
+			WHERE S.intStoreId = @intStoreId
+				AND ISNULL(Chk.strItemCodePOSCode, '') != ''
 		)
-		AND ISNULL(Chk.ItemCodePOSCode, '') != ''
+			AND ISNULL(Chk.strItemCodePOSCode, '') != ''
 		-- ------------------------------------------------------------------------------------------------------------------  
 		-- END Get Error logs. Check Register XML that is not configured in i21.  
 		-- ==================================================================================================================
+
+
 
 
 
@@ -129,17 +228,20 @@ BEGIN
 		-- ==================================================================================================================
 		DECLARE @tblTempForCalculation TABLE
 		(
-			SalesQuantity INT,
-			DiscountAmount DECIMAL(18, 6),
-			PromotionAmount DECIMAL(18, 6),
-			RefundAmount DECIMAL(18, 6),
-			RefundCount INT,
-			SalesAmount DECIMAL(18, 6),
-			ActualSalesPrice DECIMAL(18, 6),
-			POSCode NVARCHAR(15),
-			dblAveragePrice DECIMAL(18, 6),
+			SalesQuantity				INT,
+			DiscountAmount				DECIMAL(18, 6),
+			PromotionAmount				DECIMAL(18, 6),
+			RefundAmount				DECIMAL(18, 6),
+			RefundCount					INT,
+			SalesAmount					DECIMAL(18, 6),
+			ActualSalesPrice			DECIMAL(18, 6),
+			POSCode						NVARCHAR(15),
+			intPOSCode					BIGINT,
+			dblAveragePrice				DECIMAL(18, 6),
 			dblAveragePriceWthDiscounts DECIMAL(18, 6)
 		)
+
+
 
 		INSERT INTO @tblTempForCalculation
 		(
@@ -151,29 +253,31 @@ BEGIN
 			RefundCount,
 			ActualSalesPrice,
 			POSCode,
+			intPOSCode,
 			dblAveragePrice,
 			dblAveragePriceWthDiscounts
 		)
 		SELECT 
-			CAST(ISNULL(ISMSalesTotalsSalesQuantity ,0) AS INT),
-			CAST(ISMSalesTotalsDiscountAmount AS DECIMAL(18,6)),
-			CAST(ISMSalesTotalsPromotionAmount AS DECIMAL(18,6)),
-			CAST(ISMSalesTotalsSalesAmount AS DECIMAL(18,6)),
-			CAST(ISNULL(ISMSalesTotalsRefundAmount, 0) AS DECIMAL(18,6)),
-			CAST(ISNULL(ISMSalesTotalsRefundCount, 0) AS INT),
-			CAST(ISMSellPriceSummaryActualSalesPrice AS DECIMAL(18,6)),
-			ItemCodePOSCode,
-			CASE 
-				WHEN ( CAST(ISMSalesTotalsSalesQuantity AS INT) - CAST(ISMSalesTotalsRefundCount AS INT) ) = 0
-					THEN 0
-				ELSE ISNULL( NULLIF( CAST(ISMSalesTotalsSalesAmount AS DECIMAL(18, 6)) + CAST(ISMSalesTotalsRefundAmount AS DECIMAL(18, 6)) ,0) , 0) / ( CAST(ISMSalesTotalsSalesQuantity AS INT) - CAST(ISMSalesTotalsRefundCount AS INT) )
-			END AS dblAveragePrice,
-			CASE 
-				WHEN ( CAST(ISMSalesTotalsSalesQuantity AS INT) - CAST(ISMSalesTotalsRefundCount AS INT) ) = 0
-					THEN 0
-				ELSE ISNULL( NULLIF( CAST(ISMSalesTotalsSalesAmount AS DECIMAL(18, 6)) + CAST(ISMSalesTotalsRefundAmount AS DECIMAL(18, 6)) + CAST(ISMSalesTotalsDiscountAmount AS DECIMAL(18, 6)) + CAST(ISMSalesTotalsPromotionAmount AS DECIMAL(18, 6)) ,0) , 0) / ( CAST(ISMSalesTotalsSalesQuantity AS INT) - CAST(ISMSalesTotalsRefundCount AS INT) )
-			END AS dblAveragePriceWthDiscounts
-		FROM #tempCheckoutInsert
+			SalesQuantity				= CAST(ISNULL(Chk.intISMSalesTotalsSalesQuantity ,0) AS INT),
+			DiscountAmount				= CAST(Chk.dblISMSalesTotalsDiscountAmount AS DECIMAL(18,6)),
+			PromotionAmount				= CAST(Chk.dblISMSalesTotalsPromotionAmount AS DECIMAL(18,6)),
+			SalesAmount					= CAST(Chk.dblISMSalesTotalsSalesAmount AS DECIMAL(18,6)),
+			RefundAmount				= CAST(ISNULL(Chk.dblISMSalesTotalsRefundAmount, 0) AS DECIMAL(18,6)),
+			RefundCount					= CAST(ISNULL(Chk.intISMSalesTotalsRefundCount, 0) AS INT),
+			ActualSalesPrice			= CAST(Chk.dblISMSellPriceSummaryActualSalesPrice AS DECIMAL(18,6)),
+			POSCode						= Chk.strItemCodePOSCode,
+			intPOSCode					= CAST(Chk.intRegisterUpcCode AS BIGINT),
+			dblAveragePrice				= CASE 
+											WHEN ( CAST(Chk.intISMSalesTotalsSalesQuantity AS INT) - CAST(Chk.intISMSalesTotalsRefundCount AS INT) ) = 0
+												THEN 0
+											ELSE ISNULL( NULLIF( CAST(Chk.dblISMSalesTotalsSalesAmount AS DECIMAL(18, 6)) + CAST(Chk.dblISMSalesTotalsRefundAmount AS DECIMAL(18, 6)) ,0) , 0) / ( CAST(Chk.intISMSalesTotalsSalesQuantity AS INT) - CAST(Chk.intISMSalesTotalsRefundCount AS INT) )
+										END,
+			dblAveragePriceWthDiscounts = CASE 
+											WHEN ( CAST(Chk.intISMSalesTotalsSalesQuantity AS INT) - CAST(Chk.intISMSalesTotalsRefundCount AS INT) ) = 0
+												THEN 0
+											ELSE ISNULL( NULLIF( CAST(Chk.dblISMSalesTotalsSalesAmount AS DECIMAL(18, 6)) + CAST(Chk.dblISMSalesTotalsRefundAmount AS DECIMAL(18, 6)) + CAST(Chk.dblISMSalesTotalsDiscountAmount AS DECIMAL(18, 6)) + CAST(Chk.dblISMSalesTotalsPromotionAmount AS DECIMAL(18, 6)) ,0) , 0) / ( CAST(Chk.intISMSalesTotalsSalesQuantity AS INT) - CAST(Chk.intISMSalesTotalsRefundCount AS INT) )
+										END
+		FROM @tblTemp Chk
 		-- ==================================================================================================================
 		-- End: Insert to temporary table
 		-- ==================================================================================================================
@@ -220,43 +324,27 @@ BEGIN
 			  , dblItemStandardCost = NULL --ISNULL(CAST(P.dblStandardCost AS DECIMAL(18,6)),0)
 			  , intConcurrencyId	= 1
 			FROM @tblTempForCalculation TempChk
-			WHERE ISNULL(TempChk.POSCode, '') NOT IN
+			WHERE CAST(TempChk.intPOSCode AS BIGINT) NOT IN
 			(
-				SELECT DISTINCT 
-					tbl.strXmlRegisterPOSCode
-				FROM
-				(
-					SELECT DISTINCT
-						Chk.ItemCodePOSCode AS strXmlRegisterPOSCode
-					FROM #tempCheckoutInsert Chk
-					INNER JOIN
-					(
-						SELECT intItemUOMId
-							, intItemId
-							, strLongUPCCode
-							, CASE 
-								WHEN strLongUPCCode NOT LIKE '%[^0-9]%' 
-									THEN CONVERT(NUMERIC(32, 0),CAST(strLongUPCCode AS FLOAT))
-								ELSE NULL
-							END AS intLongUpcCode 
-						FROM dbo.tblICItemUOM
-					) AS UOM
-						ON Chk.ItemCodePOSCode COLLATE Latin1_General_CI_AS = ISNULL(UOM.strLongUPCCode, '')
-						OR CONVERT(NUMERIC(32, 0),CAST(Chk.ItemCodePOSCode AS FLOAT)) = UOM.intLongUpcCode
-					INNER JOIN dbo.tblICItem I 
-						ON I.intItemId = UOM.intItemId
-					INNER JOIN dbo.tblICItemLocation IL 
-						ON IL.intItemId = I.intItemId
-					LEFT JOIN dbo.tblICItemPricing P 
-						ON IL.intItemLocationId = P.intItemLocationId 
-						AND I.intItemId = P.intItemId
-					INNER JOIN dbo.tblSMCompanyLocation CL 
-						ON CL.intCompanyLocationId = IL.intLocationId
-					INNER JOIN dbo.tblSTStore S 
-						ON S.intCompanyLocationId = CL.intCompanyLocationId
-					WHERE S.intStoreId = @intStoreId
-						AND ISNULL(Chk.ItemCodePOSCode, '') != ''
-				) AS tbl
+				SELECT DISTINCT
+					CAST(UOM.intUpcCode AS BIGINT) AS intUpcCode
+				FROM @tblTemp Chk
+				INNER JOIN vyuSTItemUOMPosCodeFormat UOM
+					ON CAST(Chk.intRegisterUpcCode AS BIGINT) = CAST(UOM.intUpcCode AS BIGINT)
+				INNER JOIN dbo.tblICItem I 
+					ON I.intItemId = UOM.intItemId
+				INNER JOIN dbo.tblICItemLocation IL 
+					ON IL.intItemId = I.intItemId
+					AND UOM.intLocationId = IL.intLocationId
+				LEFT JOIN dbo.tblICItemPricing P 
+					ON IL.intItemLocationId = P.intItemLocationId 
+					AND I.intItemId = P.intItemId
+				INNER JOIN dbo.tblSMCompanyLocation CL 
+					ON CL.intCompanyLocationId = IL.intLocationId
+				INNER JOIN dbo.tblSTStore S 
+					ON S.intCompanyLocationId = CL.intCompanyLocationId
+				WHERE S.intStoreId = @intStoreId
+					AND ISNULL(Chk.strItemCodePOSCode, '') != ''
 			)
 			AND ISNULL(TempChk.POSCode, '') != ''
 		-- ==================================================================================================================
@@ -304,25 +392,13 @@ BEGIN
 			  , dblItemStandardCost = ISNULL(CAST(P.dblStandardCost AS DECIMAL(18,6)),0)
 			  , intConcurrencyId	= 1
 			FROM @tblTempForCalculation TempChk
-			INNER JOIN
-			(
-				SELECT intItemUOMId
-					, intItemId
-					, strLongUPCCode
-					, CASE 
-						WHEN strLongUPCCode NOT LIKE '%[^0-9]%' 
-							THEN CONVERT(NUMERIC(32, 0),CAST(strLongUPCCode AS FLOAT))
-						ELSE NULL
-					END AS intLongUpcCode 
-				FROM dbo.tblICItemUOM
-			) AS UOM
-				ON TempChk.POSCode COLLATE Latin1_General_CI_AS = ISNULL(UOM.strLongUPCCode, '')
-				OR CONVERT(NUMERIC(32, 0),CAST(TempChk.POSCode AS FLOAT)) = UOM.intLongUpcCode
-
+			INNER JOIN vyuSTItemUOMPosCodeFormat UOM
+				ON CAST(TempChk.intPOSCode AS BIGINT) = CAST(UOM.intUpcCode AS BIGINT)
 			INNER JOIN dbo.tblICItem I 
 				ON I.intItemId = UOM.intItemId
 			INNER JOIN dbo.tblICItemLocation IL 
 				ON IL.intItemId = I.intItemId
+				AND UOM.intLocationId = IL.intLocationId
 			LEFT JOIN dbo.tblICItemPricing P 
 				ON IL.intItemLocationId = P.intItemLocationId 
 				AND I.intItemId = P.intItemId
@@ -331,6 +407,7 @@ BEGIN
 			INNER JOIN dbo.tblSTStore S 
 				ON S.intCompanyLocationId = CL.intCompanyLocationId
 			WHERE S.intStoreId = @intStoreId
+				AND ISNULL(TempChk.POSCode, '') != ''
 		-- ==================================================================================================================
 		-- End: All Item Movement
 		-- ==================================================================================================================
@@ -372,25 +449,13 @@ BEGIN
 			  , dblItemStandardCost = ISNULL(CAST(P.dblStandardCost AS DECIMAL(18,6)),0)
 			  , intConcurrencyId	= 1
 			FROM @tblTempForCalculation TempChk
-			INNER JOIN
-			(
-				SELECT intItemUOMId
-					, intItemId
-					, strLongUPCCode
-					, CASE 
-						WHEN strLongUPCCode NOT LIKE '%[^0-9]%' 
-							THEN CONVERT(NUMERIC(32, 0),CAST(strLongUPCCode AS FLOAT))
-						ELSE NULL
-					END AS intLongUpcCode 
-				FROM dbo.tblICItemUOM
-			) AS UOM
-				ON TempChk.POSCode COLLATE Latin1_General_CI_AS = ISNULL(UOM.strLongUPCCode, '')
-				OR CONVERT(NUMERIC(32, 0),CAST(TempChk.POSCode AS FLOAT)) = UOM.intLongUpcCode
-
+			INNER JOIN vyuSTItemUOMPosCodeFormat UOM
+				ON CAST(TempChk.intPOSCode AS BIGINT) = CAST(UOM.intUpcCode AS BIGINT)
 			INNER JOIN dbo.tblICItem I 
 				ON I.intItemId = UOM.intItemId
 			INNER JOIN dbo.tblICItemLocation IL 
 				ON IL.intItemId = I.intItemId
+				AND UOM.intLocationId = IL.intLocationId
 			LEFT JOIN dbo.tblICItemPricing P 
 				ON IL.intItemLocationId = P.intItemLocationId 
 				AND I.intItemId = P.intItemId
@@ -400,6 +465,7 @@ BEGIN
 				ON S.intCompanyLocationId = CL.intCompanyLocationId
 			WHERE S.intStoreId = @intStoreId
 				AND TempChk.RefundCount > 0 -- Only Items with REFUND
+				AND ISNULL(TempChk.POSCode, '') != ''
 		-- ==================================================================================================================
 		-- End: Item Movement Add extra line for refund
 		-- ==================================================================================================================
@@ -425,16 +491,16 @@ BEGIN
 							WHEN @strAllowMarkUpDown = 'I'
 								THEN CASE
 										WHEN TempChk.dblAveragePrice > ISNULL(P.dblSalePrice, 0) 
-											THEN (TempChk.dblAveragePrice)							-- Chk.dblAveragePrice - P.dblSalePrice
+											THEN (TempChk.dblAveragePrice)
 										WHEN TempChk.dblAveragePrice < ISNULL(P.dblSalePrice, 0) 
-											THEN (TempChk.dblAveragePrice)							-- P.dblSalePrice - Chk.dblAveragePrice
+											THEN (TempChk.dblAveragePrice)
 									END
 							WHEN @strAllowMarkUpDown = 'D'
 								THEN CASE
 										WHEN TempChk.dblAveragePriceWthDiscounts > ISNULL(P.dblSalePrice, 0) 
-											THEN (TempChk.dblAveragePriceWthDiscounts)				-- Chk.dblAveragePriceWthDiscounts - P.dblSalePrice
+											THEN (TempChk.dblAveragePriceWthDiscounts)
 										WHEN TempChk.dblAveragePriceWthDiscounts < ISNULL(P.dblSalePrice, 0) 
-											THEN (TempChk.dblAveragePriceWthDiscounts)				-- P.dblSalePrice - Chk.dblAveragePriceWthDiscounts
+											THEN (TempChk.dblAveragePriceWthDiscounts)
 									END
 						END) AS dblRetailUnit
 
@@ -443,16 +509,16 @@ BEGIN
 							WHEN @strAllowMarkUpDown = 'I'
 								THEN CASE
 										WHEN TempChk.dblAveragePrice > ISNULL(P.dblSalePrice, 0) 
-											THEN (TempChk.dblAveragePrice * TempChk.SalesQuantity)			-- (Chk.dblAveragePrice - P.dblSalePrice) * ISNULL(CAST(Chk.SalesQuantity as int),0)
+											THEN (TempChk.dblAveragePrice * TempChk.SalesQuantity)
 										WHEN TempChk.dblAveragePrice < ISNULL(P.dblSalePrice, 0) 
-											THEN (TempChk.dblAveragePrice * TempChk.SalesQuantity)			-- (P.dblSalePrice - Chk.dblAveragePrice) * ISNULL(CAST(Chk.SalesQuantity as int),0)
+											THEN (TempChk.dblAveragePrice * TempChk.SalesQuantity)
 									END
 							WHEN @strAllowMarkUpDown = 'D'
 								THEN CASE
 										WHEN TempChk.dblAveragePriceWthDiscounts > ISNULL(P.dblSalePrice, 0) 
-											THEN (TempChk.dblAveragePriceWthDiscounts * TempChk.SalesQuantity)	-- (Chk.dblAveragePriceWthDiscounts - P.dblSalePrice) * ISNULL(CAST(Chk.SalesQuantity as int),0)
+											THEN (TempChk.dblAveragePriceWthDiscounts * TempChk.SalesQuantity)
 										WHEN TempChk.dblAveragePriceWthDiscounts < ISNULL(P.dblSalePrice, 0) 
-											THEN (TempChk.dblAveragePriceWthDiscounts * TempChk.SalesQuantity)  -- (P.dblSalePrice - Chk.dblAveragePriceWthDiscounts) * ISNULL(CAST(Chk.SalesQuantity as int),0)
+											THEN (TempChk.dblAveragePriceWthDiscounts * TempChk.SalesQuantity)
 									END
 						END) AS dblAmount
 
@@ -486,24 +552,13 @@ BEGIN
 						END) AS strUpDownNotes
 					 , 1
 				FROM @tblTempForCalculation TempChk
-				INNER JOIN
-				(
-					SELECT intItemUOMId
-						, intItemId
-						, strLongUPCCode
-						, CASE 
-							WHEN strLongUPCCode NOT LIKE '%[^0-9]%' 
-								THEN CONVERT(NUMERIC(32, 0),CAST(strLongUPCCode AS FLOAT))
-							ELSE NULL
-						END AS intLongUpcCode 
-					FROM dbo.tblICItemUOM
-				) AS UOM
-					ON TempChk.POSCode COLLATE Latin1_General_CI_AS = ISNULL(UOM.strLongUPCCode, '')
-					OR CONVERT(NUMERIC(32, 0),CAST(TempChk.POSCode AS FLOAT)) = UOM.intLongUpcCode
+				INNER JOIN vyuSTItemUOMPosCodeFormat UOM
+					ON CAST(TempChk.intPOSCode AS BIGINT) = CAST(UOM.intUpcCode AS BIGINT)
 				INNER JOIN dbo.tblICItem I 
 					ON I.intItemId = UOM.intItemId
 				INNER JOIN dbo.tblICItemLocation IL 
 					ON IL.intItemId = I.intItemId
+					AND UOM.intLocationId = IL.intLocationId
 				LEFT JOIN dbo.tblICItemPricing P 
 					ON IL.intItemLocationId = P.intItemLocationId 
 					AND I.intItemId = P.intItemId
@@ -514,6 +569,7 @@ BEGIN
 				INNER JOIN dbo.tblSTStore S 
 					ON S.intCompanyLocationId = CL.intCompanyLocationId
 				WHERE S.intStoreId = @intStoreId
+					AND ISNULL(TempChk.POSCode, '') != ''
 					AND I.strLotTracking = 'No'
 					AND TempChk.SalesQuantity > 0
 					AND 0 < CASE
@@ -529,8 +585,8 @@ BEGIN
 													THEN TempChk.dblAveragePriceWthDiscounts
 											END
 
-				-- Get MUD- next Batch number
 
+				-- Get MUD- next Batch number
 				DECLARE @strMUDbatchId AS NVARCHAR(1000)
 				EXEC uspSTGetMarkUpDownBatchId @strMUDbatchId OUT, @intLocationId
 
@@ -565,16 +621,14 @@ BEGIN
 END
 
 ExitWithCommit:
-	-- Commit Transaction
-	COMMIT TRANSACTION --@TransactionName
+	COMMIT TRANSACTION
 	GOTO ExitPost
 	
 
 ExitWithRollback:
-    -- Rollback Transaction here
 	IF @@TRANCOUNT > 0
 		BEGIN
-			ROLLBACK TRANSACTION --@TransactionName
+			ROLLBACK TRANSACTION
 		END
 	
 ExitPost:
