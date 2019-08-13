@@ -135,7 +135,10 @@ FROM	dbo.tblICInventoryLIFO LIFOBucket INNER JOIN (
 			SELECT	LIFOOut.intRevalueLifoId, dblQty = SUM(LIFOOut.dblQty)
 			FROM	dbo.tblICInventoryLIFOOut LIFOOut INNER JOIN #tmpInventoryTransactionStockToReverse Reversal
 						ON LIFOOut.intInventoryTransactionId = Reversal.intInventoryTransactionId
+					INNER JOIN dbo.tblICInventoryTransaction OutTransactions
+						ON OutTransactions.intInventoryTransactionId = LIFOOut.intInventoryTransactionId
 			WHERE	LIFOOut.intRevalueLifoId IS NOT NULL 	
+					AND ISNULL(OutTransactions.ysnIsUnposted, 0) = 0
 			GROUP BY LIFOOut.intRevalueLifoId
 		) AS LIFOOutGrouped
 			ON LIFOOutGrouped.intRevalueLifoId = LIFOBucket.intInventoryLIFOId

@@ -147,7 +147,10 @@ FROM	dbo.tblICInventoryLotStorage LotBucket INNER JOIN (
 					, dblQty = SUM(LotOut.dblQty)
 			FROM	dbo.tblICInventoryLotStorageOut LotOut INNER JOIN #tmpInventoryTransactionStockToReverse Reversal
 						ON LotOut.intInventoryTransactionStorageId = Reversal.intInventoryTransactionStorageId
+					INNER JOIN dbo.tblICInventoryTransactionStorage OutTransactions
+						ON OutTransactions.intInventoryTransactionStorageId = LotOut.intInventoryTransactionStorageId
 			WHERE	LotOut.intRevalueLotId IS NOT NULL 	
+					AND ISNULL(OutTransactions.ysnIsUnposted, 0) = 0			
 			GROUP BY LotOut.intRevalueLotId
 		) AS LotOutGrouped
 			ON LotOutGrouped.intRevalueLotId = LotBucket.intInventoryLotStorageId
