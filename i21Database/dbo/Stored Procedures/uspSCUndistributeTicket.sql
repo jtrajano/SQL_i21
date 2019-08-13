@@ -255,6 +255,7 @@ BEGIN TRY
 					END
 					ELSE
 					BEGIN
+						
 						SELECT @strMatchTicketStatus = strTicketStatus
 							, @intMatchTicketId = intTicketId
 							, @intTicketType = intTicketType
@@ -429,6 +430,7 @@ BEGIN TRY
 					END
 					IF ISNULL(@ysnDirectShip,0) = 1
 					BEGIN 
+						
 						SELECT TOP 1 @intInvoiceId = intInvoiceId FROM tblARInvoiceDetail WHERE intTicketId = @intTicketId
 						SELECT @ysnPosted = ysnPosted FROM tblARInvoice WHERE intInvoiceId = @intInvoiceId;
 						IF @ysnPosted = 1
@@ -461,21 +463,35 @@ BEGIN TRY
 						DECLARE @dblNetUnit DECIMAL(18,6)
 						DECLARE @_intContractDetailId INT
 						DECLARE @_strDistributionOption VARCHAR(MAX)
+						DECLARE @strGrade VARCHAR(MAX)
+						DECLARE @strWght VARCHAR(MAX)
 						SELECT @strTicketType = strTicketType,@dblNetUnit = dblNetUnits*-1,@_intContractDetailId = intContractId, @_strDistributionOption  = strDistributionOption FROM vyuSCTicketScreenView WHERE intTicketId = @intTicketId
-
-						IF(@strTicketType = 'Direct Out')
+						
+						SELECT @strGrade = Grade.strWeightGradeDesc,@strWght = Wght.strWeightGradeDesc FROM tblSCTicket SC
+						LEFT JOIN tblCTWeightGrade Grade  ON Grade.intWeightGradeId = SC.intGradeId
+						LEFT JOIN tblCTWeightGrade Wght ON Wght.intWeightGradeId = SC.intWeightId
+						WHERE intTicketId = @intTicketId
+						IF(@strTicketType = 'Direct Out' and ((LOWER(ISNULL(@strGrade,'')) <> 'destination') AND LOWER(ISNULL(@strWght,'')) <> 'destination'))
 						BEGIN
-													
-							EXEC uspCTUpdateSequenceBalance @_intContractDetailId, @dblNetUnit, @intUserId, @intTicketId, 'Scale'
-							SET @dblNetUnit = @dblNetUnit *-1
-							IF(@_strDistributionOption = 'LOD')
+							IF(ISNULL(@dblScheduleQty,0) = 0)
 							BEGIN
-								EXEC uspCTUpdateScheduleQuantity
-													@intContractDetailId	=	@_intContractDetailId,
-													@dblQuantityToUpdate	=	@dblNetUnit,
-													@intUserId				=	@intUserId,
-													@intExternalId			=	@intTicketId,
-													@strScreenName			=	'Scale'													
+								SELECT @dblScheduleQty = -dblScheduleQty  FROM tblSCTicket WHERE intTicketId = @intTicketId
+							END
+
+							IF((SELECT strPricingType FROM vyuCTContractDetailView WHERE intContractDetailId = @_intContractDetailId) <> 'Basis')
+							BEGIN
+								EXEC uspCTUpdateSequenceBalance @_intContractDetailId, @dblScheduleQty, @intUserId, @intTicketId, 'Scale'
+								SET @dblScheduleQty = @dblScheduleQty *-1
+								IF(@_strDistributionOption = 'LOD')
+								BEGIN
+									EXEC uspCTUpdateScheduleQuantity
+														@intContractDetailId	=	@_intContractDetailId,
+														@dblQuantityToUpdate	=	@dblScheduleQty,
+														@intUserId				=	@intUserId,
+														@intExternalId			=	@intTicketId,
+														@strScreenName			=	'Scale'		
+																								
+								END
 							END
 						END
 
