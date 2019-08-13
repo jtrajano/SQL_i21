@@ -49,7 +49,7 @@ BEGIN
 		) tbl WHERE intRowId = 1
 
 		SET @dblNearByFuturePrice = dbo.fnRKGetLastSettlementPrice (@intNearByFutureMarketId, @intNearByFutureMonthId)
-		SET @dblSpread = @dblFuturePrice - @dblNearByFuturePrice
+		SET @dblSpread = @dblNearByFuturePrice - @dblFuturePrice
 
 		INSERT INTO @Result(intContractDetailId
 			, intFutureMonthId
