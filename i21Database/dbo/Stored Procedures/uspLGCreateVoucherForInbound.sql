@@ -94,6 +94,7 @@ BEGIN TRY
 		,[intContractSeqId]
 		,[intInventoryReceiptItemId]
 		,[intLoadShipmentId]
+		,[strLoadShipmentNumber]
 		,[intLoadShipmentDetailId]
 		,[intLoadShipmentCostId]
 		,[intItemId]
@@ -136,6 +137,7 @@ BEGIN TRY
 		,[intContractSeqId] = CT.intContractSeq
 		,[intInventoryReceiptItemId] = receiptItem.intInventoryReceiptItemId
 		,[intLoadShipmentId] = L.intLoadId
+		,[strLoadShipmentNumber] = LTRIM(L.strLoadNumber)
 		,[intLoadShipmentDetailId] = LD.intLoadDetailId
 		,[intLoadShipmentCostId] = NULL
 		,[intItemId] = LD.intItemId
@@ -205,6 +207,7 @@ BEGIN TRY
 		,[intContractSeqId] = CT.intContractSeq
 		,[intInventoryReceiptItemId] = NULL
 		,[intLoadShipmentId] = A.intLoadId
+		,[strLoadShipmentNumber] = LTRIM(A.strLoadNumber)
 		,[intLoadShipmentDetailId] = A.intLoadDetailId
 		,[intLoadShipmentCostId] = A.intLoadCostId
 		,[intItemId] = A.intItemId
@@ -321,6 +324,7 @@ BEGIN TRY
 			,[intContractSeqId]
 			,[intInventoryReceiptItemId]
 			,[intLoadShipmentId]
+			,[strLoadShipmentNumber]
 			,[intLoadShipmentDetailId]
 			,[intLoadShipmentCostId]
 			,[intItemId]
@@ -363,6 +367,7 @@ BEGIN TRY
 			,[intContractSeqId]
 			,[intInventoryReceiptItemId]
 			,[intLoadShipmentId]
+			,[strLoadShipmentNumber]
 			,[intLoadShipmentDetailId]
 			,[intLoadShipmentCostId]
 			,[intItemId]

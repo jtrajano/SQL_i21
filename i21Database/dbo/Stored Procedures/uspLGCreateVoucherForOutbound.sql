@@ -72,9 +72,12 @@ BEGIN TRY
 		,[intContractHeaderId]
 		,[intContractDetailId]
 		,[intContractSeqId]
+		,[intContractCostId]
 		,[intInventoryReceiptItemId]
 		,[intLoadShipmentId]
+		,[strLoadShipmentNumber]
 		,[intLoadShipmentDetailId]
+		,[intLoadShipmentCostId]
 		,[intItemId]
 		,[strMiscDescription]
 		,[dblOrderQty]
@@ -113,9 +116,12 @@ BEGIN TRY
 		,[intContractHeaderId] = CH.intContractHeaderId
 		,[intContractDetailId] = CD.intContractDetailId
 		,[intContractSeqId] = CD.intContractSeq
+		,[intContractCostId] = NULL
 		,[intInventoryReceiptItemId] = NULL
 		,[intLoadShipmentId] = L.intLoadId
+		,[strLoadShipmentNumber] = LTRIM(L.strLoadNumber)
 		,[intLoadShipmentDetailId] = LD.intLoadDetailId
+		,[intLoadShipmentCostId] = NULL
 		,[intItemId] = Item.intItemId
 		,[strMiscDescription] = Item.strDescription
 		,[dblOrderQty] = 1
@@ -210,9 +216,12 @@ BEGIN TRY
 		,[intContractHeaderId] = A.intContractHeaderId
 		,[intContractDetailId] = A.intContractDetailId
 		,[intContractSeqId] = A.intContractSeq
+		,[intContractCostId] = CTC.intContractCostId
 		,[intInventoryReceiptItemId] = NULL
 		,[intLoadShipmentId] = A.intLoadId
+		,[strLoadShipmentNumber] = LTRIM(A.strLoadNumber)
 		,[intLoadShipmentDetailId] = A.intLoadDetailId
+		,[intLoadShipmentCostId] = A.intLoadCostId
 		,[intItemId] = A.intItemId
 		,[strMiscDescription] = A.strItemDescription
 		,[dblOrderQty] = CASE WHEN A.strCostMethod IN ('Amount','Percentage') THEN 1 ELSE LD.dblQuantity END
@@ -243,6 +252,8 @@ BEGIN TRY
 		JOIN tblLGLoad L ON L.intLoadId = A.intLoadId
 		JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
 		JOIN tblSMCurrency C ON C.intCurrencyID = L.intCurrencyId
+		LEFT JOIN tblCTContractDetail CT ON CT.intContractDetailId = LD.intPContractDetailId
+		LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CT.intContractHeaderId
 		LEFT JOIN tblSMCurrency CC ON CC.intCurrencyID = A.intCurrencyId
 		LEFT JOIN tblICItemLocation ItemLoc ON ItemLoc.intItemId = A.intItemId and ItemLoc.intLocationId = A.intCompanyLocationId
 		LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = A.intItemUOMId
@@ -253,6 +264,11 @@ BEGIN TRY
 		LEFT JOIN tblICUnitMeasure CostUOM ON CostUOM.intUnitMeasureId = ItemCostUOM.intUnitMeasureId
 		INNER JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.[intEntityId] = D2.intEntityId) ON A.[intEntityVendorId] = D1.[intEntityId]
 		OUTER APPLY dbo.fnGetItemGLAccountAsTable(A.intItemId, ItemLoc.intItemLocationId, 'AP Clearing') itemAccnt
+		OUTER APPLY (SELECT TOP 1 CTC.intContractCostId FROM tblCTContractCost CTC
+						WHERE CT.intContractDetailId = CTC.intContractDetailId
+							AND A.intItemId = CTC.intItemId
+							AND A.intEntityVendorId = CTC.intVendorId
+						) CTC
 		LEFT JOIN dbo.tblGLAccount apClearing ON apClearing.intAccountId = itemAccnt.intAccountId
 		WHERE A.intLoadId = @intLoadId
 			AND A.intLoadDetailId NOT IN 
@@ -316,6 +332,7 @@ BEGIN TRY
 			,[intContractSeqId]
 			,[intInventoryReceiptItemId]
 			,[intLoadShipmentId]
+			,[strLoadShipmentNumber]
 			,[intLoadShipmentDetailId]
 			,[intItemId]
 			,[strMiscDescription]
@@ -355,6 +372,7 @@ BEGIN TRY
 			,[intContractSeqId]
 			,[intInventoryReceiptItemId]
 			,[intLoadShipmentId]
+			,[strLoadShipmentNumber]
 			,[intLoadShipmentDetailId]
 			,[intItemId]
 			,[strMiscDescription]
