@@ -7989,6 +7989,9 @@
     <Build Include="dbo\Tables\tblSTStoreMetrics.sql" />
     <Build Include="dbo\Tables\tblSTCheckoutMetrics.sql" />
     <None Include="Scripts\Post-Deployment\SM\1910_UpdateNoSpaceModuleName.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFGetFactorEventSequenceNumber.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFGenerateTransactionExportToThirdPartyCSV.sql" />
+    <Build Include="dbo\Tables\tblCFExportFactorEventSequenceNumber.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
