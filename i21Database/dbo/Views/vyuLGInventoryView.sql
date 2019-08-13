@@ -174,4 +174,125 @@ FROM (
 	LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = CD.intCurrencyId			
 	LEFT JOIN tblSMCurrency	CY ON CY.intCurrencyID = CU.intMainCurrencyId
 	WHERE Spot.dblQty > 0.0
+
+	UNION ALL
+
+	--Drop Ship
+	SELECT 
+		'In-transit' COLLATE Latin1_General_CI_AS AS strStatus
+		,strContractNumber = PCH.strContractNumber
+		,intContractSeq = PCD.intContractSeq
+		,intContractDetailId = PCD.intContractDetailId
+		,dtmStartDate = PCD.dtmStartDate
+		,dtmEndDate = PCD.dtmEndDate
+		,dblOriginalQty = PCD.dblOriginalQty
+		,strOriginalQtyUOM = PUM.strUnitMeasure
+		,dblStockQty = LD.dblQuantity
+		,strStockUOM = LDUM.strUnitMeasure
+		,dblNetWeight = LD.dblNet
+		,strWeightUOM = LDWUM.strUnitMeasure
+		,intEntityVendorId = LD.intVendorEntityId
+		,strVendor = V.strName
+		,intCustomerEntityId = LD.intCustomerEntityId
+		,strCustomer = C.strName
+		,strCommodity = CMDT.strCommodityCode
+		,strItemNo = I.strItemNo
+		,strItemDescription = I.strDescription
+		,strItemType = I.strType
+		,strItemSpecification = PCD.strItemSpecification
+		,strBundleItemNo = PBun.strItemNo
+		,strGrade = GRADE.strDescription
+		,strOrigin = ORIGIN.strDescription
+		,strVessel = L.strMVessel
+		,strDestinationCity = L.strDestinationCity
+		,dtmETAPOL = L.dtmETAPOL
+		,dtmETSPOL = L.dtmETSPOL
+		,dtmETAPOD = L.dtmETAPOD
+		,strTrackingNumber = L.strLoadNumber
+		,strBLNumber = L.strBLNumber
+		,dtmBLDate = L.dtmBLDate
+		,strContainerNumber = '' COLLATE Latin1_General_CI_AS
+		,strMarks = L.strMarks
+		,strLotNumber = '' COLLATE Latin1_General_CI_AS
+		,strWarehouse = '' COLLATE Latin1_General_CI_AS
+		,strLocationName = '' COLLATE Latin1_General_CI_AS
+		,strCondition = '' COLLATE Latin1_General_CI_AS
+		,dtmPostedDate = L.dtmPostedDate
+		,dblQtyInStockUOM = LD.dblQuantity * dbo.fnICConvertUOMtoStockUnit (I.intItemId, LD.intItemUOMId, 1)
+		,intItemId = I.intItemId
+		,intWeightItemUOMId = LD.intWeightItemUOMId
+		,strWarehouseRefNo = '' COLLATE Latin1_General_CI_AS
+		,dtmReceiptDate = CAST(NULL AS DATETIME)
+		,dblTotalCost = CAST(ISNULL((dbo.fnCTConvertQtyToTargetItemUOM(LD.intWeightItemUOMId, PCD.intPriceItemUOMId, LD.dblNet)) 
+										* dbo.fnCTGetSequencePrice(LD.intPContractDetailId,NULL),0) AS NUMERIC(18,6))
+		,dblFutures = PCD.dblFutures
+		,dblCashPrice = PCD.dblCashPrice
+		,dblBasis = PCD.dblBasis
+		,strPricingType = CASE WHEN PCH.intPricingTypeId = 2 
+							THEN  CASE WHEN ISNULL(PF.dblTotalLots,0) > 0 AND ISNULL(PF.dblLotsFixed,0) = 0 THEN 'Unfixed'
+										WHEN ISNULL(PF.dblTotalLots,0) = ISNULL(PF.dblLotsFixed,0) THEN 'Fully Fixed'
+										ELSE 'Partially Fixed' END
+							WHEN PCH.intPricingTypeId = 1 THEN 'Priced'
+							ELSE '' END COLLATE Latin1_General_CI_AS
+		,strPriceBasis = CAST(BC.strCurrency as VARCHAR(100)) + '/' + CAST(BUM.strUnitMeasure as VARCHAR(100))
+		,strINCOTerm = CB.strContractBasis
+		,strTerm = Term.strTerm
+		,strExternalShipmentNumber = L.strExternalShipmentNumber
+		,strERPPONumber = PCD.strERPPONumber
+		,strPosition = PO.strPosition
+		,intLoadId = L.intLoadId
+		,intCompanyLocationId = PCD.intCompanyLocationId
+		,intBookId = L.intBookId
+		,strBook = BK.strBook
+		,intSubBookId = L.intSubBookId
+		,strSubBook = SBK.strBook
+		,intCropYear = PCH.intCropYearId
+		,strCropYear = CRY.strCropYear
+		,strProducer = PRO.strName
+		,strCertification = (SELECT TOP 1 CER.strCertificationName FROM tblCTContractCertification CC JOIN tblICCertification CER ON CER.intCertificationId = CC.intCertificationId WHERE CC.intContractDetailId = PCD.intContractDetailId)
+		,strCertificationId = '' COLLATE Latin1_General_CI_AS
+	FROM tblLGLoadDetail LD
+		INNER JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
+		LEFT JOIN tblICItemUOM LDUOM ON LDUOM.intItemUOMId = LD.intItemUOMId
+		LEFT JOIN tblICUnitMeasure LDUM ON LDUM.intUnitMeasureId = LDUOM.intUnitMeasureId 
+		LEFT JOIN tblICItemUOM LDWUOM ON LDWUOM.intItemUOMId = LD.intWeightItemUOMId
+		LEFT JOIN tblICUnitMeasure LDWUM ON LDWUM.intUnitMeasureId = LDWUOM.intUnitMeasureId
+		LEFT JOIN tblICItem I ON I.intItemId = LD.intItemId
+		LEFT JOIN tblICCommodity CMDT ON CMDT.intCommodityId = I.intCommodityId
+		LEFT JOIN tblICCommodityAttribute GRADE ON GRADE.intCommodityAttributeId = I.intGradeId
+		LEFT JOIN tblICCommodityAttribute ORIGIN ON ORIGIN.intCommodityAttributeId = I.intOriginId
+		LEFT JOIN tblCTPosition PO ON PO.intPositionId = L.intPositionId
+		LEFT JOIN tblCTBook BK ON BK.intBookId = L.intBookId
+		LEFT JOIN tblCTBook SBK ON SBK.intBookId = L.intSubBookId
+		--Purchase
+		INNER JOIN tblCTContractDetail PCD ON PCD.intContractDetailId = LD.intPContractDetailId
+		INNER JOIN tblCTContractHeader PCH ON PCH.intContractHeaderId = PCD.intContractHeaderId
+		LEFT JOIN tblICUnitMeasure PUM ON PUM.intUnitMeasureId = PCD.intUnitMeasureId
+		LEFT JOIN tblEMEntity V ON V.intEntityId = LD.intVendorEntityId
+		LEFT JOIN tblSMCurrency BC ON BC.intCurrencyID = PCD.intBasisCurrencyId
+		LEFT JOIN tblICItemUOM BIU ON BIU.intItemUOMId = PCD.intBasisUOMId
+		LEFT JOIN tblICUnitMeasure BUM ON BUM.intUnitMeasureId = BIU.intUnitMeasureId
+		LEFT JOIN tblICItem PBun ON PBun.intItemId = PCD.intItemBundleId
+		LEFT JOIN tblCTContractBasis CB ON CB.intContractBasisId = PCH.intContractBasisId
+		LEFT JOIN tblCTCropYear CRY ON CRY.intCropYearId = PCH.intCropYearId
+		LEFT JOIN tblEMEntity PRO ON PRO.intEntityId = PCH.intProducerId
+		LEFT JOIN tblAPBillDetail BD ON BD.intContractDetailId = PCD.intContractDetailId
+		LEFT JOIN tblAPBill B ON B.intBillId = BD.intBillId AND B.intTransactionType = 1
+		LEFT JOIN tblSMTerm Term ON Term.intTermID = PCH.intTermId
+		OUTER APPLY fnCTGetSeqPriceFixationInfo(PCD.intContractDetailId) PF
+		--Sales
+		INNER JOIN tblCTContractDetail SCD ON SCD.intContractDetailId = LD.intSContractDetailId
+		INNER JOIN tblCTContractHeader SCH ON SCH.intContractHeaderId = SCD.intContractHeaderId
+		LEFT JOIN tblEMEntity C ON C.intEntityId = LD.intCustomerEntityId
+		LEFT JOIN tblARInvoiceDetail ID ON SCD.intContractDetailId = ID.intContractDetailId AND LD.intLoadDetailId = ID.intLoadDetailId
+		LEFT JOIN tblARInvoice IV ON IV.intInvoiceId = ID.intInvoiceId
+
+		OUTER APPLY (SELECT TOP 1 ID2.intInvoiceId 
+					 FROM tblLGLoadDetail PLD
+					 LEFT JOIN tblLGLoadDetail SLD ON PLD.intPContractDetailId = SLD.intPContractDetailId
+					 LEFT JOIN tblARInvoiceDetail ID2 ON SLD.intSContractDetailId = ID2.intContractDetailId
+					 WHERE PLD.intPContractDetailId = LD.intPContractDetailId AND ID2.intInvoiceId IS NOT NULL) I2
+	WHERE L.intPurchaseSale = 3 AND L.ysnPosted = 1
+		AND IV.strInvoiceNumber IS NULL
+		AND LD.intPickLotDetailId IS NULL
 	) t1
