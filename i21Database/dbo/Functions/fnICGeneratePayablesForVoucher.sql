@@ -277,9 +277,6 @@ FROM tblICInventoryReceipt A
 	LEFT OUTER JOIN tblAPVendor payToVendor ON payToVendor.intEntityId = A.intEntityVendorId
 	LEFT OUTER JOIN tblEMEntityLocation payToAddress ON payToAddress.intEntityId = payToVendor.intEntityId
 		AND payToAddress.ysnDefaultLocation = 1
-	LEFT JOIN vyuPODetails po ON po.intPurchaseId = B.intOrderId
-		AND po.intPurchaseDetailId = B.intLineNo
-		AND A.strReceiptType = 'Purchase Order'
 	OUTER APPLY 
 	(
 		SELECT SUM(ISNULL(H.dblQtyReceived,0)) AS dblQty FROM tblAPBillDetail H WHERE H.intInventoryReceiptItemId = B.intInventoryReceiptItemId AND H.intInventoryReceiptChargeId IS NULL
@@ -299,6 +296,8 @@ FROM tblICInventoryReceipt A
 		SELECT	dblQtyReturned = ri.dblOpenReceive - ISNULL(ri.dblQtyReturned, 0) 
 				,r.strReceiptType
 				,r.strReceiptNumber
+				,ri.intOrderId 
+				,ri.intLineNo 
 		FROM	tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptItem ri
 					ON r.intInventoryReceiptId = ri.intInventoryReceiptId				
 		WHERE	r.intInventoryReceiptId = A.intSourceInventoryReceiptId
@@ -320,6 +319,14 @@ FROM tblICInventoryReceipt A
 					)
 				)
 	) LogisticsView
+
+	LEFT JOIN vyuPODetails po ON 
+		po.intPurchaseId = ISNULL(rtn.intOrderId, B.intOrderId)
+		AND po.intPurchaseDetailId = ISNULL(rtn.intOrderId, B.intLineNo) 
+		AND (
+			A.strReceiptType = 'Purchase Order'
+			OR rtn.strReceiptType = 'Purchase Order'
+		)
 WHERE 
 	A.strReceiptType IN ('Direct','Purchase Contract','Inventory Return','Purchase Order') 
 	AND A.ysnPosted = @ysnPosted 
