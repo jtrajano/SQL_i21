@@ -20,6 +20,8 @@ SELECT CONTRACTS.*
 	 , strBillToCountry			= ARC.strBillToCountry 
 	 , strTerm					= SMT.strTerm
 	 , strCompanyLocationName	= LOC.strLocationName
+	 , strSalespersonName		= SP.strName
+	 , strFreightTerm			= FT.strFreightTerm
 FROM (
 	SELECT intContractHeaderId		= CC.intContractHeaderId
 		 , intContractDetailId		= CC.intContractDetailId
@@ -62,7 +64,6 @@ FROM (
 		 , ysnUnlimitedQuantity		= CC.ysnUnlimitedQuantity
 		 , ysnLoad					= CC.ysnLoad
 		 , ysnAllowedToShow			= CC.ysnAllowedToShow
-		 , intFreightTermId			= CC.intFreightTermId
 		 , intTermId				= CC.intTermId		 
 		 , intShipViaId				= CC.intShipViaId		 
 		 , intDestinationGradeId	= CC.intDestinationGradeId
@@ -72,6 +73,8 @@ FROM (
 		 , intCategoryId			= NULL
 		 , strCategoryCode			= NULL
 		 , strCategoryDescription	= NULL
+		 , intEntitySalespersonId	= NULL
+		 , intFreightTermId			= CC.intFreightTermId
 	FROM vyuCTCustomerContract CC
 	WHERE CC.intCurrencyId = (
 		SELECT TOP 1 intCurrencyID = ISNULL(SMC.intMainCurrencyId, SMC.intCurrencyID)
@@ -125,7 +128,6 @@ FROM (
 		 , ysnUnlimitedQuantity		= CAST(0 AS BIT)
 		 , ysnLoad					= CAST(0 AS BIT)
 		 , ysnAllowedToShow			= CAST(1 AS BIT)
-		 , intFreightTermId			= ICC.intFreightTermId
 		 , intTermId				= ICC.intTermId		 
 		 , intShipViaId				= NULL
 		 , intDestinationGradeId	= NULL
@@ -135,6 +137,8 @@ FROM (
 		 , intCategoryId			= NULL
 		 , strCategoryCode			= NULL
 		 , strCategoryDescription	= NULL
+		 , intEntitySalespersonId	= ICC.intSalespersonId
+		 , intFreightTermId			= ICC.intFreightTermId
 	FROM tblCTItemContractHeader ICC
 	INNER JOIN tblCTItemContractDetail ICD ON ICC.intItemContractHeaderId = ICD.intItemContractHeaderId
 	INNER JOIN tblICItem ITEM ON ICD.intItemId = ITEM.intItemId
@@ -185,7 +189,6 @@ FROM (
 		 , ysnUnlimitedQuantity		= CAST(0 AS BIT)
 		 , ysnLoad					= CAST(0 AS BIT)
 		 , ysnAllowedToShow			= CAST(1 AS BIT)
-		 , intFreightTermId			= ICC.intFreightTermId
 		 , intTermId				= ICC.intTermId		 
 		 , intShipViaId				= NULL
 		 , intDestinationGradeId	= NULL
@@ -195,6 +198,8 @@ FROM (
 		 , intCategoryId			= ICHC.intCategoryId
 		 , strCategoryCode			= IC.strCategoryCode
 		 , strCategoryDescription	= IC.strDescription
+		 , intEntitySalespersonId	= ICC.intSalespersonId
+		 , intFreightTermId			= ICC.intFreightTermId
 	FROM tblCTItemContractHeader ICC
 	INNER JOIN tblCTItemContractHeaderCategory ICHC ON ICC.intItemContractHeaderId = ICHC.intItemContractHeaderId
 	INNER JOIN tblICCategory IC ON IC.intCategoryId = ICHC.intCategoryId
@@ -203,3 +208,5 @@ FROM (
 INNER JOIN vyuARCustomerSearch ARC ON CONTRACTS.intEntityCustomerId = ARC.intEntityId
 LEFT OUTER JOIN tblSMTerm SMT ON CONTRACTS.intTermId = SMT.intTermID
 LEFT OUTER JOIN tblSMCompanyLocation LOC ON CONTRACTS.intCompanyLocationId = LOC.intCompanyLocationId
+LEFT OUTER JOIN tblSMFreightTerms FT ON CONTRACTS.intFreightTermId = FT.intFreightTermId
+LEFT OUTER JOIN tblEMEntity SP ON CONTRACTS.intEntitySalespersonId = SP.intEntityId
