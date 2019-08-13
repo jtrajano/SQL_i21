@@ -7669,6 +7669,9 @@
     <Build Include="dbo\Functions\fnCTConvertPriceToStockItemUOM.sql" />
     <Build Include="dbo\Functions\fnGRValidateBillPost.sql" />
     <Build Include="dbo\Stored Procedures\uspSCImportData.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFGetFactorEventSequenceNumber.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFGenerateTransactionExportToThirdPartyCSV.sql" />
+    <Build Include="dbo\Tables\tblCFExportFactorEventSequenceNumber.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
