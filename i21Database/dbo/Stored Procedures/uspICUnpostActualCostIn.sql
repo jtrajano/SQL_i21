@@ -138,7 +138,10 @@ FROM	dbo.tblICInventoryActualCost ActualCostBucket INNER JOIN (
 					,dblQty = SUM(ActualCostOut.dblQty)
 			FROM	dbo.tblICInventoryActualCostOut ActualCostOut INNER JOIN #tmpInventoryTransactionStockToReverse Reversal
 						ON ActualCostOut.intInventoryTransactionId = Reversal.intInventoryTransactionId
+					INNER JOIN dbo.tblICInventoryTransaction OutTransactions
+						ON OutTransactions.intInventoryTransactionId = ActualCostOut.intInventoryTransactionId
 			WHERE	ActualCostOut.intRevalueActualCostId IS NOT NULL 
+					AND ISNULL(OutTransactions.ysnIsUnposted, 0) = 0
 			GROUP BY ActualCostOut.intRevalueActualCostId
 		) AS ActualCostOutGrouped
 			ON ActualCostOutGrouped.intRevalueActualCostId = ActualCostBucket.intInventoryActualCostId
