@@ -51,6 +51,7 @@ DECLARE @ysnDeductFreightFarmer AS BIT
 DECLARE @total AS INT
 DECLARE @ysnDPStorage AS BIT
 DECLARE @strLotTracking AS NVARCHAR(100)
+DECLARE @intIRContractPricingType AS INT
 DECLARE @intInventoryReceiptItemId AS INT
 		,@intOrderId INT
 		,@intOwnershipType INT
@@ -469,19 +470,26 @@ BEGIN TRY
 	WHERE SC.intTicketId = @intTicketId
 
 	SELECT @intContractDetailId = MIN(ri.intLineNo)
+			,@intIRContractPricingType = MIN(CD.intPricingTypeId)
 	FROM tblICInventoryReceipt r 
 	JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptId = r.intInventoryReceiptId
-	WHERE ri.intInventoryReceiptId = @InventoryReceiptId AND r.strReceiptType = 'Purchase Contract' 
+	LEFT JOIN tblCTContractDetail CD 
+		ON ri.intContractDetailId = CD.intContractDetailId
+	WHERE ri.intInventoryReceiptId = @InventoryReceiptId AND r.strReceiptType = 'Purchase Contract'
  
-	WHILE ISNULL(@intContractDetailId,0) > 0
+	WHILE ISNULL(@intContractDetailId,0) > 0 AND @intIRContractPricingType = 2
 	BEGIN
 		IF EXISTS(SELECT TOP 1 1 FROM tblCTPriceFixation WHERE intContractDetailId = @intContractDetailId)
 		BEGIN
-		EXEC uspCTCreateVoucherInvoiceForPartialPricing @intContractDetailId, @intUserId
+			EXEC uspCTCreateVoucherInvoiceForPartialPricing @intContractDetailId, @intUserId
 		END
+
 		SELECT @intContractDetailId = MIN(ri.intLineNo)
+				,@intIRContractPricingType = MIN(CD.intPricingTypeId)
 		FROM tblICInventoryReceipt r 
 		JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptId = r.intInventoryReceiptId
+		LEFT JOIN tblCTContractDetail CD 
+			ON ri.intContractDetailId = CD.intContractDetailId
 		WHERE ri.intInventoryReceiptId = @InventoryReceiptId AND r.strReceiptType = 'Purchase Contract' AND ri.intLineNo > @intContractDetailId
 
 		select @intBillId = intBillId from tblAPBillDetail where intInventoryReceiptItemId in (
