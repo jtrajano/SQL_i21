@@ -23,9 +23,6 @@ BEGIN TRY
 
 	BEGIN TRANSACTION
 
-	-- VALIDATION
-	uspMBPostMeterReadingValidation
-
 	DECLARE @UserEntityId INT
 	DECLARE @DefaultCurrency INT
 	DECLARE @ynsValid BIT = NULL
@@ -199,7 +196,7 @@ BEGIN TRY
 	LEFT JOIN vyuARCustomer Customer ON Customer.[intEntityId] = MRDetail.intEntityCustomerId
 	LEFT JOIN tblEMEntityLocation EntityLocation ON EntityLocation.intEntityLocationId = MRDetail.intEntityLocationId AND MRDetail.intEntityCustomerId = EntityLocation.intEntityId
 	WHERE MRDetail.intMeterReadingId = @TransactionId
-	AND MRDetail.dblCurrentReading > 0
+	AND MRDetail.dblQuantitySold > 0
 	GROUP BY MRDetail.intMeterReadingId
 		, MRDetail.strTransactionId
 		, MRDetail.intEntityCustomerId
@@ -223,16 +220,8 @@ BEGIN TRY
 		,@CreatedIvoices	= @CreatedInvoices OUTPUT
 		,@UpdatedIvoices	= @UpdatedInvoices OUTPUT
 
-	IF (@ErrorMessage IS NULL)
-		BEGIN
-			COMMIT TRANSACTION
-		END
-	ELSE
-		BEGIN
-			ROLLBACK TRANSACTION
-		END
-
-	IF (@ErrorMessage IS NULL)
+	
+	IF (ISNULL(@ErrorMessage, '')  = '')
 	BEGIN
 
 		IF (@CreatedInvoices IS NOT NULL)
@@ -314,11 +303,22 @@ BEGIN TRY
 		
 		END
 	END
+	ELSE
+	BEGIN
+		IF(@@TRANCOUNT > 0)
+		BEGIN
+			COMMIT TRANSACTION
+		END
+	END
 
 END TRY
 BEGIN CATCH
 		
-	ROLLBACK TRANSACTION
+	IF(@@TRANCOUNT > 0)
+	BEGIN
+		ROLLBACK TRANSACTION
+	END
+	
 	SET @ErrorMessage = ERROR_MESSAGE()
 		--SET @ErrorMessage = ERROR_MESSAGE()
 	SET @ErrorSeverity = ERROR_SEVERITY()
