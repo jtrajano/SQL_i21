@@ -105,10 +105,7 @@ BEGIN
 	) tbl
 	WHERE intFutureMarketId = @intFutureMarketId
 		AND intCommodityId = @intCommodityId
-
-	SELECT * FROM #tmpTransactions
-	WHERE dtmDate = @dtmDateFrom
-
+	
 	IF @strCondition = 'Between' 
 	BEGIN
 		SELECT intRowNum = CONVERT(INT, ROW_NUMBER() OVER (ORDER BY dtmDate ASC))
