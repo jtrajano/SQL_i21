@@ -241,6 +241,20 @@ BEGIN
 				AND ItemLocation.intLocationId = ShipmentCharges.intLocationId
 			WHERE Shipment.intInventoryShipmentId = @intShipmentId
 				AND Shipment.ysnPosted = 1
+				AND (ShipmentCharges.intContractDetailId IS NULL OR 
+					(
+						CASE WHEN ShipmentCharges.intContractDetailId IS NOT NULL 
+							AND EXISTS(
+								SELECT TOP 1 1 
+								FROM tblAPVoucherPayable 
+								WHERE intEntityVendorId = ShipmentCharges.intEntityVendorId 
+								AND intContractDetailId = ShipmentCharges.intContractDetailId
+								AND strSourceNumber != ShipmentCharges.strSourceNumber
+							)
+							THEN 0 ELSE 1 
+						END = 1
+					)
+				)
 
 	END
 
