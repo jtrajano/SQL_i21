@@ -150,7 +150,7 @@ FROM (
 		 , intItemContractDetailId	= NULL
 		 , intItemCategoryId		= ICHC.intItemCategoryId
 		 , strContractNumber		= ICC.strContractNumber
-		 , intContractSeq			= ICHC.intItemCategoryId
+		 , intContractSeq			= NULL
 		 , strContractType			= 'Sale'
 		 , strContractCategoryId	= ICC.strContractCategoryId
 		 , dtmStartDate				= ICC.dtmContractDate
