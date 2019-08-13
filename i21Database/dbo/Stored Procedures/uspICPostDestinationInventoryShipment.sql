@@ -298,6 +298,8 @@ BEGIN
 				,[dblReportingRate]	
 				,[dblForeignRate]
 				,[strRateType]
+				,[intSourceEntityId]
+				,[intCommodityId]
 			)	
 			EXEC @intReturnValue = dbo.uspICPostInventoryShipmentOtherCharges 
 				@intShipmentId
@@ -405,6 +407,8 @@ BEGIN
 				,[dblReportingRate]	
 				,[dblForeignRate]
 				,[strRateType]
+				,[intSourceEntityId]
+				,[intCommodityId]
 			)	
 			EXEC @intReturnValue = dbo.uspICPostInventoryShipmentOtherCharges 
 				@intShipmentId
