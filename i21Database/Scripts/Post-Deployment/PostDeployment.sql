@@ -345,6 +345,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\PAT\3_UpdateIssueStockNo.sql
 :r .\PAT\4_UpdateRetiredStockNo.sql
 :r .\PAT\5_UpdatePayoutType.sql
+:r .\PAT\6_UpdateVolumeLogPostDate.sql
 
 --Contract Management
 :R .\CT\1_MasterTables.sql
