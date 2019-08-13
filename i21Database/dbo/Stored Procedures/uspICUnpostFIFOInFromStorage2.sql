@@ -144,7 +144,10 @@ FROM	dbo.tblICInventoryFIFOStorage fifoStorageBucket INNER JOIN (
 			SELECT	fifoOut.intRevalueFifoId, dblQty = SUM(fifoOut.dblQty)
 			FROM	dbo.tblICInventoryFIFOStorageOut fifoOut INNER JOIN #tmpInventoryTransactionStockToReverse Reversal
 						ON fifoOut.intInventoryTransactionStorageId = Reversal.intInventoryTransactionStorageId
-			WHERE	fifoOut.intRevalueFifoId IS NOT NULL 	
+					INNER JOIN dbo.tblICInventoryTransactionStorage OutTransactions
+						ON OutTransactions.intInventoryTransactionStorageId = fifoOut.intInventoryTransactionStorageId
+			WHERE	fifoOut.intRevalueFifoId IS NOT NULL 
+					AND ISNULL(OutTransactions.ysnIsUnposted, 0) = 0
 			GROUP BY fifoOut.intRevalueFifoId
 		) AS fifoOutGrouped
 			ON fifoOutGrouped.intRevalueFifoId = fifoStorageBucket.intInventoryFIFOStorageId
