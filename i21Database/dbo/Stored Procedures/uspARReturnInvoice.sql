@@ -1,29 +1,42 @@
 ﻿CREATE PROCEDURE [dbo].[uspARReturnInvoice]
-	 @InvoiceId		INT
-	,@UserId		INT	
-	,@RaiseError	BIT				= 0
-	,@NewInvoiceId	INT				= NULL	OUTPUT
-	,@ErrorMessage	NVARCHAR(250)	= NULL	OUTPUT
+	 @intInvoiceId			INT	
+	,@intUserId				INT	
+	,@strInvoiceDetailIds	NVARCHAR(500)	= NULL
+	,@ysnRaiseError			BIT				= 0
+	,@intNewInvoiceId		INT				= NULL	OUTPUT
+	,@strErrorMessage		NVARCHAR(250)	= NULL	OUTPUT
 AS
 
 SET QUOTED_IDENTIFIER OFF  
 SET ANSI_NULLS ON  
 SET NOCOUNT ON  
 SET ANSI_WARNINGS OFF
+SET XACT_ABORT ON
 
---IF @RaiseError = 1
-	SET XACT_ABORT ON
-
---IF ISNULL(@RaiseError,0) = 0
-	BEGIN TRANSACTION
-
-DECLARE @ZeroDecimal NUMERIC(18, 6)
-		,@DateOnly DATETIME
-
-SET @ZeroDecimal = 0.000000
-SELECT @DateOnly = CAST(GETDATE() AS DATE)
+BEGIN TRANSACTION
 
 DECLARE @EntriesForInvoice AS InvoiceIntegrationStagingTable
+DECLARE @InvoiceDetails AS TABLE (intInvoiceId INT, intInvoiceDetailId INT)
+DECLARE @dblZeroDecimal NUMERIC(18, 6) = 0
+	  , @dtmDateOnly	DATETIME = CAST(GETDATE() AS DATE)
+
+IF ISNULL(@strInvoiceDetailIds, '') = ''
+	BEGIN
+		INSERT INTO @InvoiceDetails
+		SELECT intInvoiceId
+			 , intInvoiceDetailId 
+		FROM tblARInvoiceDetail 
+		WHERE intInvoiceId = @intInvoiceId
+	END
+ELSE
+	BEGIN
+		INSERT INTO @InvoiceDetails
+		SELECT intInvoiceId
+			 , intInvoiceDetailId 
+		FROM tblARInvoiceDetail ID
+		INNER JOIN dbo.fnGetRowsFromDelimitedValues(@strInvoiceDetailIds) DV ON ID.intInvoiceDetailId = DV.intID
+		WHERE intInvoiceId = @intInvoiceId
+	END
 
 BEGIN TRY
 	INSERT INTO @EntriesForInvoice(
@@ -164,7 +177,7 @@ BEGIN TRY
 	SELECT
 		 [strTransactionType]					= 'Credit Memo'
 		,[strType]								= ARI.[strType]
-		,[strSourceTransaction]					= 'Direct'--'Invoice'
+		,[strSourceTransaction]					= 'Direct'
 		,[intSourceId]							= NULL 
 		,[strSourceId]							= ARI.[strInvoiceNumber]
 		,[intInvoiceId]							= NULL
@@ -174,10 +187,10 @@ BEGIN TRY
 		,[intCurrencyId]						= ARI.[intCurrencyId]
 		,[intTermId]							= ARI.[intTermId]
 		,[intPeriodsToAccrue]					= ARI.[intPeriodsToAccrue]
-		,[dtmDate]								= @DateOnly
+		,[dtmDate]								= @dtmDateOnly
 		,[dtmDueDate]							= NULL
-		,[dtmShipDate]							= @DateOnly
-		,[dtmPostDate]							= @DateOnly
+		,[dtmShipDate]							= @dtmDateOnly
+		,[dtmPostDate]							= @dtmDateOnly
 		,[intEntitySalespersonId]				= ARI.[intEntitySalespersonId]
 		,[intFreightTermId]						= ARI.[intFreightTermId]
 		,[intShipViaId]							= ARI.[intShipViaId]
@@ -193,7 +206,7 @@ BEGIN TRY
 		,[ysnForgiven]							= ARI.[ysnForgiven]
 		,[ysnCalculated]						= ARI.[ysnCalculated]
 		,[ysnSplitted]							= ARI.[ysnSplitted]
-		,[ysnImpactInventory]					= 1 --ARI.[ysnImpactInventory]
+		,[ysnImpactInventory]					= CAST(1 AS BIT)
 		,[intPaymentId]							= ARI.[intPaymentId]
 		,[intSplitId]							= ARI.[intSplitId]
 		,[intLoadDistributionHeaderId]			= ARI.[intLoadDistributionHeaderId]
@@ -204,7 +217,7 @@ BEGIN TRY
 		,[intContractHeaderId]					= ARI.[intContractHeaderId]
 		,[intLoadId]							= ARI.[intLoadId]
 		,[intOriginalInvoiceId]					= ARI.[intInvoiceId]
-		,[intEntityId]							= @UserId
+		,[intEntityId]							= @intUserId
 		,[intTruckDriverId]						= ARI.[intTruckDriverId]
 		,[intTruckDriverReferenceId]			= ARI.[intTruckDriverReferenceId]
 		,[ysnResetDetails]						= 0
@@ -289,20 +302,16 @@ BEGIN TRY
 		,[dblSubCurrencyRate]					= ARID.[dblSubCurrencyRate]
 		,[ysnBlended]							= ARID.[ysnBlended]
 		,[strImportFormat]						= NULL
-		,[dblCOGSAmount]						= @ZeroDecimal
+		,[dblCOGSAmount]						= @dblZeroDecimal
 		,[intConversionAccountId]				= ARID.[intConversionAccountId]
 		,[intSalesAccountId]					= ARID.[intSalesAccountId]
 		,[intStorageScheduleTypeId]				= ARID.[intStorageScheduleTypeId]
 		,[intDestinationGradeId]				= ARID.[intDestinationGradeId]
 		,[intDestinationWeightId]				= ARID.[intDestinationWeightId]
-	FROM
-		tblARInvoiceDetail ARID
-	INNER JOIN
-		tblARInvoice ARI
-			ON ARID.[intInvoiceId] = ARI.[intInvoiceId]
-	WHERE
-		ARI.[intInvoiceId] = @InvoiceId
-
+	FROM tblARInvoiceDetail ARID
+	INNER JOIN tblARInvoice ARI ON ARID.[intInvoiceId] = ARI.[intInvoiceId]
+	INNER JOIN @InvoiceDetails ID ON ARID.intInvoiceDetailId = ID.intInvoiceDetailId
+	WHERE ARI.[intInvoiceId] = @intInvoiceId
 
 DECLARE @LineItemTaxes AS LineItemTaxDetailStagingTable
 
@@ -349,66 +358,63 @@ SELECT
 	,[ysnInvalidSetup]			= ARIDT.[ysnInvalidSetup]
 	,[strNotes]					= ARIDT.[strNotes]
 	,[intTempDetailIdForTaxes]	= EFI.[intTempDetailIdForTaxes]
-FROM
-	@EntriesForInvoice  EFI
-INNER JOIN
-	tblARInvoiceDetailTax ARIDT
-		ON EFI.[intTempDetailIdForTaxes] = ARIDT.[intInvoiceDetailId] 
-ORDER BY 
-	 EFI.[intInvoiceDetailId] ASC
-	,ARIDT.[intInvoiceDetailTaxId] ASC
-									
+FROM @EntriesForInvoice  EFI
+INNER JOIN tblARInvoiceDetailTax ARIDT ON EFI.[intTempDetailIdForTaxes] = ARIDT.[intInvoiceDetailId] 
+ORDER BY EFI.[intInvoiceDetailId] ASC, ARIDT.[intInvoiceDetailTaxId] ASC
 	
 DECLARE	@CurrentErrorMessage NVARCHAR(250)
 		,@CreatedIvoices NVARCHAR(MAX)
 		,@UpdatedIvoices NVARCHAR(MAX)	
-
 				
 EXEC [dbo].[uspARProcessInvoices]
 	 @InvoiceEntries		= @EntriesForInvoice
 	,@LineItemTaxEntries	= @LineItemTaxes
-	,@UserId				= @UserId
+	,@UserId				= @intUserId
 	,@GroupingOption		= 1--11
-	,@RaiseError			= @RaiseError
+	,@RaiseError			= @ysnRaiseError
 	,@ErrorMessage			= @CurrentErrorMessage	OUTPUT
 	,@CreatedIvoices		= @CreatedIvoices		OUTPUT
 	,@UpdatedIvoices		= @UpdatedIvoices		OUTPUT
 
 
-	IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
-		BEGIN
-			IF ISNULL(@RaiseError,0) = 0
-				ROLLBACK TRANSACTION
-			SET @ErrorMessage = @CurrentErrorMessage;
-			IF ISNULL(@RaiseError,0) = 1
-				RAISERROR(@ErrorMessage, 16, 1);
-				ROLLBACK TRANSACTION
-			RETURN 0;
-		END
+IF LEN(ISNULL(@CurrentErrorMessage,'')) > 0
+	BEGIN
+		IF ISNULL(@ysnRaiseError,0) = 0
+			ROLLBACK TRANSACTION
+		SET @strErrorMessage = @CurrentErrorMessage;
+		IF ISNULL(@ysnRaiseError,0) = 1
+			RAISERROR(@strErrorMessage, 16, 1);
+			ROLLBACK TRANSACTION
+		RETURN 0;
+	END
 
 END TRY
 BEGIN CATCH
-	IF ISNULL(@RaiseError,0) = 0
+	IF ISNULL(@ysnRaiseError,0) = 0
 		ROLLBACK TRANSACTION
-	SET @ErrorMessage = ERROR_MESSAGE();
-	IF ISNULL(@RaiseError,0) = 1
+	SET @strErrorMessage = ERROR_MESSAGE();
+	IF ISNULL(@ysnRaiseError,0) = 1
 		BEGIN
-			RAISERROR(@ErrorMessage, 16, 1);
+			RAISERROR(@strErrorMessage, 16, 1);
 			ROLLBACK TRANSACTION
 		END
 	RETURN 0;
 END CATCH
 		
-SELECT TOP 1 @NewInvoiceId = intInvoiceId FROM tblARInvoice WHERE intInvoiceId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@CreatedIvoices))
+SELECT TOP 1 @intNewInvoiceId = intInvoiceId FROM tblARInvoice WHERE intInvoiceId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@CreatedIvoices))
 
-UPDATE tblARInvoice 
+UPDATE ARI
 SET ysnReturned = 1 
-  , dblDiscountAvailable = @ZeroDecimal
-  , dblBaseDiscountAvailable = @ZeroDecimal
-WHERE intInvoiceId = @InvoiceId
+  , dblDiscountAvailable = @dblZeroDecimal
+  , dblBaseDiscountAvailable = @dblZeroDecimal
+FROM tblARInvoice ARI
+WHERE ARI.intInvoiceId = @intInvoiceId
 
---IF ISNULL(@RaiseError,0) = 0
---BEGIN
-	COMMIT TRANSACTION 
-	RETURN 1;
---END
+UPDATE ARID 
+SET ysnReturned = 1 
+FROM tblARInvoiceDetail ARID
+INNER JOIN @InvoiceDetails ID ON ARID.intInvoiceDetailId = ID.intInvoiceDetailId
+WHERE ARID.intInvoiceId = @intInvoiceId
+
+COMMIT TRANSACTION 
+RETURN 1;

@@ -42,6 +42,7 @@ SELECT intInvoiceDetailId					= INV.intInvoiceDetailId
 	 , intSubCurrencyId						= INV.intSubCurrencyId
 	 , dblSubCurrencyRate					= INV.dblSubCurrencyRate
 	 , ysnRestricted						= INV.ysnRestricted
+	 , ysnReturned							= INV.ysnReturned
 	 , intAccountId							= INV.intAccountId
 	 , intCOGSAccountId						= INV.intCOGSAccountId
 	 , intSalesAccountId					= INV.intSalesAccountId
