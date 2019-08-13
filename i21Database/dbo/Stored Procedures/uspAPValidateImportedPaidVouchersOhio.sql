@@ -33,7 +33,9 @@ UPDATE A
 						AND B.ysnPaid = 0
 						AND B.ysnPosted = 1
 						AND B.intBillId > 0
-						AND A.dblPayment <= B.dblAmountDue
+						AND 1 = (CASE WHEN B.intTransactionType = 1 AND A.dblPayment > 0 AND A.dblPayment <= B.dblAmountDue THEN 1
+									WHEN B.intTransactionType = 3 AND A.dblPayment < 0 AND ABS(A.dblPayment) <= B.dblAmountDue THEN 1
+									ELSE 0 END)
 						THEN NULL
 					WHEN 
 						A.intCurrencyId != B.intCurrencyId
@@ -48,8 +50,11 @@ UPDATE A
 						B.intBillId IS NULL
 					THEN 'Voucher not found.'
 					WHEN 
-						A.dblPayment > B.dblAmountDue
+						ABS(A.dblPayment) > B.dblAmountDue
 					THEN 'Overpayment'
+					WHEN 
+						A.dblPayment < 0 AND B.intTransactionType != 3
+					THEN 'Amount is negative. Debit Memo type is expected.'
 					ELSE NULL
 					END,
 		A.strBillId = B.strBillId
