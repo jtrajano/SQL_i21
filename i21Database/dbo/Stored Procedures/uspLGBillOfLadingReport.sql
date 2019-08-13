@@ -170,17 +170,25 @@ BEGIN TRY
 				,strItemDescription = Item.strDescription
 				,Lot.strLotNumber
 				,Lot.strLotAlias
-				,ISNULL(LoadDetailLot.dblLotQuantity, ISNULL(LoadDetail.dblQuantity, 0)) AS dblQty
-				,ISNULL(LUOM.strUnitMeasure, UOM.strUnitMeasure) AS strUOM
-				,(
-					CASE 
-						WHEN LUOM.strUnitMeasure <> ISNULL(LWUOM.strUnitMeasure, '')
-							THEN (ISNULL(LoadDetailLot.dblLotQuantity, ISNULL(LoadDetail.dblQuantity, 0)) * 
-									dbo.fnCalculateQtyBetweenUOM(LotItemUOM.intItemUOMId, ISNULL(LoadDetailLot.intWeightUOMId, LotWeightUOM.intItemUOMId), 1))
-						ELSE ISNULL(ISNULL(LoadDetailLot.dblGross, 0) - ISNULL(LoadDetailLot.dblTare, 0), ISNULL(LoadDetail.dblNet, 0))
+				,dblQty = ISNULL(LoadDetailLot.dblLotQuantity, ISNULL(LoadDetail.dblQuantity, 0))
+				,strUOM = ISNULL(LUOM.strUnitMeasure, UOM.strUnitMeasure)
+				,dblNetWeight = 
+					CASE WHEN ISNULL(LDLC.intCount, 0) > 0 THEN
+						CASE WHEN ISNULL(LUOM.strUnitMeasure, '') <> COALESCE(MWUOM.strUnitMeasure, LWUOM.strUnitMeasure, '')
+							THEN (ISNULL(LoadDetailLot.dblLotQuantity, ISNULL(LoadDetail.dblQuantity, 0))
+								* dbo.fnCalculateQtyBetweenUOM(LotItemUOM.intItemUOMId, COALESCE(MWUOM.intItemUOMId, LoadDetailLot.intWeightUOMId, LotWeightUOM.intItemUOMId), 1))
+						ELSE 
+							ISNULL(ISNULL(LoadDetailLot.dblGross, 0) - ISNULL(LoadDetailLot.dblTare, 0), ISNULL(LoadDetail.dblNet, 0))
 						END
-					) AS dblNetWeight
-				,SUM(ISNULL(LoadDetailLot.dblGross, 0) - ISNULL(LoadDetailLot.dblTare, 0)) OVER () AS dblTotalWeight
+					ELSE
+						ISNULL(ISNULL(LoadDetail.dblGross, 0) - ISNULL(LoadDetail.dblTare, 0), ISNULL(LoadDetail.dblNet, 0))
+					END
+				,dblTotalWeight = 
+					CASE WHEN ISNULL(LDLC.intCount, 0) > 0 THEN
+						SUM(ISNULL(LoadDetailLot.dblGross, 0) - ISNULL(LoadDetailLot.dblTare, 0)) OVER () 
+					ELSE 
+						SUM(ISNULL(LoadDetail.dblGross, 0) - ISNULL(LoadDetail.dblTare, 0)) OVER () 
+					END
 				,intWarehouseInstructionHeaderId = 0
 				,strCompanyName = (
 					SELECT TOP 1 strCompanyName
@@ -223,9 +231,14 @@ BEGIN TRY
 			FROM tblLGLoad Load
 			JOIN tblLGLoadDetail LoadDetail ON LoadDetail.intLoadId = Load.intLoadId
 			LEFT JOIN tblLGLoadDetailLot LoadDetailLot ON LoadDetailLot.intLoadDetailId = LoadDetail.intLoadDetailId
+			OUTER APPLY (SELECT intCount = COUNT(1) FROM tblLGLoadDetailLot WHERE intLoadDetailId = LoadDetail.intLoadDetailId) LDLC
 			LEFT JOIN tblICItem Item ON Item.intItemId = LoadDetail.intItemId
 			LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = LoadDetail.intItemUOMId
 			LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
+			LEFT JOIN tblICUnitMeasure WUOM ON WUOM.intUnitMeasureId = Item.intWeightUOMId
+			OUTER APPLY (SELECT TOP 1 intItemUOMId, strUnitMeasure FROM tblICItemUOM u1
+				INNER JOIN tblICUnitMeasure u2 ON u1.intUnitMeasureId = u2.intUnitMeasureId
+				WHERE u1.intItemId = Item.intItemId AND u1.intUnitMeasureId = Item.intWeightUOMId) MWUOM
 			LEFT JOIN tblICLot Lot ON Lot.intLotId = LoadDetailLot.intLotId
 			LEFT JOIN tblICItemUOM LotItemUOM ON LotItemUOM.intItemUOMId = Lot.intItemUOMId
 			LEFT JOIN tblICUnitMeasure LUOM ON LUOM.intUnitMeasureId = LotItemUOM.intUnitMeasureId
