@@ -1077,7 +1077,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				ptcus_addr2 = CASE WHEN CHARINDEX(CHAR(10), Loc.strAddress) > 0 THEN SUBSTRING(SUBSTRING(Loc.strAddress, CHARINDEX(CHAR(10),Loc.strAddress) + 1, LEN(Loc.strAddress)),1,30) ELSE NULL END,
 				ptcus_city = SUBSTRING(Loc.strCity,1,20),
 				ptcus_state = SUBSTRING(Loc.strState,1,2),
-				ptcus_zip = SUBSTRING(Loc.strZipCode,1,10),
+				ptcus_zip = ISNULL(SUBSTRING(Loc.strZipCode,1,10), ''''),
 				ptcus_country = (CASE WHEN LEN(Loc.strCountry) = 10 THEN Loc.strCountry ELSE '''' END),
 				--Contact
 				ptcus_contact = SUBSTRING((Con.strName),1,20),
@@ -1213,7 +1213,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				(CASE WHEN CHARINDEX(CHAR(10), Loc.strAddress) > 0 THEN SUBSTRING(SUBSTRING(Loc.strAddress, CHARINDEX(CHAR(10),Loc.strAddress) + 1, LEN(Loc.strAddress)),1,30) ELSE NULL END) AS strAddress2,
 				SUBSTRING(Loc.strCity,1,20) as strCity,
 				SUBSTRING(Loc.strState,1,2) as strState,
-				SUBSTRING(Loc.strZipCode,1,10) as strZipCode,
+				ISNULL(SUBSTRING(Loc.strZipCode,1,10), '''') as strZipCode,
 				(CASE WHEN LEN(Loc.strCountry) = 10 THEN Loc.strCountry ELSE '''' END)as strCountry,
 				--Customer
 				SUBSTRING(Ent.strEntityNo,1,10) as strCustomerNumber,
@@ -1452,7 +1452,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 						@strCity         = LTRIM(RTRIM(ptcus_city)),
 						@strCountry      = LTRIM(RTRIM(ptcus_country)),
 						@strState        = LTRIM(RTRIM(ptcus_state)),
-						@strZipCode      = LTRIM(RTRIM(ptcus_zip)),
+						@strZipCode      = ISNULL(LTRIM(RTRIM(ptcus_zip)), ''''),
 						@strLocationNotes        = NULL,
 						@intShipViaId = NULL,
 						@intTaxCodeId    = NULL,

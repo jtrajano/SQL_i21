@@ -130,7 +130,7 @@ BEGIN TRY
 		 ,(D.[dblTotal])
 		
 		 ,D.[intContractStatusId]	
-		 ,CASE WHEN D.[dblBalance] = 0 THEN 5 ELSE D.[intContractStatusId] END
+		 ,CASE WHEN D.[dblBalance] = 0 THEN 5 WHEN D.[intContractStatusId] = 5 THEN 1 ELSE D.[intContractStatusId] END
 		 
 		 ,D.[intItemUOMId]				
 		 ,D.[intTaxGroupId]				
@@ -183,7 +183,7 @@ BEGIN TRY
 				@dblNewAvailable		 = dblNewAvailable,
 				@dblNewApplied			 = dblNewApplied,
 				@dblNewBalance			 = dblNewBalance,
-				@intNewContractStatusId	 = CASE WHEN [dblNewBalance] = 0 THEN 5 ELSE [intNewContractStatusId] END,
+				@intNewContractStatusId	 = CASE WHEN [dblNewBalance] = 0 THEN 5 WHEN [intNewContractStatusId] = 5 THEN 1  ELSE [intNewContractStatusId] END,
 				@dtmNewLastDeliveryDate = dtmNewLastDeliveryDate,
 				@strTransactionType		 = strTransactionType,
 				@intTransactionDetailId	 = intTransactionDetailId,

@@ -169,7 +169,7 @@ BEGIN
 					AND PL.intItemLocationId = @ItemLocationId
 					AND PL.intItemUnitMeasureId = @ItemUOMId
 					AND ISNULL(PL.intCurrencyId, @FunctionalCurrencyId) = @CurrencyId
-					AND ((@Quantity BETWEEN ISNULL(PL.dblMin, 0) AND ISNULL(PL.dblMax, 0) ) OR ( ISNULL(PL.dblMin, 0) = 0 AND ISNULL(PL.dblMax, 0) = 0))
+					AND ((@Quantity BETWEEN ISNULL(PL.dblMin, 0) AND ISNULL(NULLIF(PL.dblMax, 0), 999999999999)) OR ( ISNULL(PL.dblMin, 0) = 0 AND ISNULL(PL.dblMax, 0) = 0))
 					AND CAST(@TransactionDate AS DATE) BETWEEN CAST(ISNULL(PL.dtmEffectiveDate, @TransactionDate) AS DATE) AND CAST('12/31/2999' AS DATE)
 				ORDER BY CAST(ISNULL(PL.dtmEffectiveDate, '01/01/1900') AS DATE) DESC
 		

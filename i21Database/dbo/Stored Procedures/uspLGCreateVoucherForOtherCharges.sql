@@ -279,6 +279,7 @@ BEGIN TRY
 				,[intContractCostId]
 				,[intInventoryReceiptItemId]
 				,[intLoadShipmentId]
+				,[strLoadShipmentNumber]
 				,[intLoadShipmentDetailId]
 				,[intLoadShipmentCostId]
 				,[intItemId]
@@ -322,6 +323,7 @@ BEGIN TRY
 				,[intContractCostId] = CTC.intContractCostId
 				,[intInventoryReceiptItemId] = NULL
 				,[intLoadShipmentId] = VDD.intLoadId
+				,[strLoadShipmentNumber] = LTRIM(L.strLoadNumber)
 				,[intLoadShipmentDetailId] = VDD.intLoadDetailId
 				,[intLoadShipmentCostId] = VDD.intLoadCostId
 				,[intItemId] = VDD.intItemId
@@ -435,6 +437,7 @@ BEGIN TRY
 					,[intContractCostId]
 					,[intInventoryReceiptItemId]
 					,[intLoadShipmentId]
+					,[strLoadShipmentNumber]
 					,[intLoadShipmentDetailId]
 					,[intLoadShipmentCostId]
 					,[intItemId]
@@ -478,6 +481,7 @@ BEGIN TRY
 					,[intContractCostId] = CTC.intContractCostId
 					,[intInventoryReceiptItemId] = NULL
 					,[intLoadShipmentId] = VDD.intLoadId
+					,[strLoadShipmentNumber] = LTRIM(L.strLoadNumber)
 					,[intLoadShipmentDetailId] = VDD.intLoadDetailId
 					,[intLoadShipmentCostId] = VDD.intLoadCostId
 					,[intItemId] = VDD.intItemId
@@ -576,6 +580,7 @@ BEGIN TRY
 					,[intInventoryReceiptItemId]
 					,[intInventoryReceiptChargeId]
 					,[intLoadShipmentId]
+					,[strLoadShipmentNumber]
 					,[intLoadShipmentDetailId]
 					,[intLoadShipmentCostId]
 					,[intItemId]
@@ -620,6 +625,7 @@ BEGIN TRY
 					,[intInventoryReceiptItemId] = NULL
 					,[intInventoryReceiptChargeId] = IRC.intInventoryReceiptChargeId
 					,[intLoadShipmentId] = VDD.intLoadId
+					,[strLoadShipmentNumber] = LTRIM(L.strLoadNumber)
 					,[intLoadShipmentDetailId] = VDD.intLoadDetailId
 					,[intLoadShipmentCostId] = VDD.intLoadCostId
 					,[intItemId] = VDD.intItemId

@@ -19,7 +19,7 @@ BEGIN
 		, @intExchangeRateFromId INT
 		, @intExchangeRateToId INT
 	
-	IF @intContractDetailId IS NULL
+	IF @intContractDetailId IS NOT NULL
 	BEGIN
 		SELECT @intFromCurrencyId = CASE WHEN ISNULL(@intFromBasisCurrencyId, 0) <> 0 THEN @intFromBasisCurrencyId
 										WHEN ISNULL(@intFromMarketCurrency, 0)<>0 THEN @intFromMarketCurrency

@@ -294,6 +294,7 @@ BEGIN TRY
 			,[intContractDetailId]
 			,[intContractSeqId]
 			,[intLoadShipmentId]
+			,[strLoadShipmentNumber]
 			,[intItemId]
 			,[strMiscDescription]
 			,[dblOrderQty]
@@ -336,6 +337,7 @@ BEGIN TRY
 			,[intContractDetailId] = VDD.intContractDetailId
 			,[intContractSeqId] = CD.intContractSeq
 			,[intLoadShipmentId] = WC.intLoadId
+			,[strLoadShipmentNumber] = LTRIM(L.strLoadNumber)
 			,[intItemId] = VDD.intItemId
 			,[strMiscDescription] = I.strDescription
 			,[dblOrderQty] = VDD.dblQtyReceived
@@ -372,6 +374,7 @@ BEGIN TRY
 			LEFT JOIN tblCTContractDetail CD ON VDD.intContractDetailId = CD.intContractDetailId
 			LEFT JOIN tblLGWeightClaim WC ON WC.intWeightClaimId = VDD.intWeightClaimId
 			LEFT JOIN tblLGWeightClaimDetail WCD ON WCD.intWeightClaimDetailId = VDD.intWeightClaimDetailId
+			LEFT JOIN tblLGLoad L ON L.intLoadId = WC.intLoadId
 			LEFT JOIN tblSMCurrency CUR ON VDD.intCurrencyId = CUR.intCurrencyID
 			LEFT JOIN tblAPVendor V ON VDD.intPartyEntityId = V.intEntityId
 		WHERE VDD.intPartyEntityId = @intVendorEntityId

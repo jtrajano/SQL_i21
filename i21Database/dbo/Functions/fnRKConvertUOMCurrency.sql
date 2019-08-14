@@ -6,7 +6,8 @@
 	@ConvertCurrency BIT,
 	@FromCurrencyId INT,
 	@ToCurrencyId INT,
-	@dblValue NUMERIC(26, 12) 
+	@dblValue NUMERIC(26, 12),
+	@intContractDetailId INT
 )
 RETURNS NUMERIC(26, 6)
 AS
@@ -93,32 +94,46 @@ BEGIN
 			, @intCurrencyExchangeRateId INT
 			, @intExchangeRateFromId INT
 			, @intExchangeRateToId INT
+			, @dblRate NUMERIC(26, 12)
 
-		SELECT TOP 1 @SubFromCurrency = 1
-		FROM tblSMCurrency
-		WHERE intCurrencyID = @FromCurrencyId AND ysnSubCurrency = 1
-
-		SELECT TOP 1 @SubToCurrency = 1
-		FROM tblSMCurrency WHERE intCurrencyID = @ToCurrencyId AND ysnSubCurrency = 1
-
-		IF (@SubFromCurrency = 1 AND @SubToCurrency = 0)
+		IF @intContractDetailId IS NOT NULL
 		BEGIN
-			SELECT @FinalValue = @FinalValue / intCent
-				, @FromCurrencyId = intMainCurrencyId
-			FROM tblSMCurrency WHERE intCurrencyID = @FromCurrencyId
+			SELECT @dblRate = dblRate
+				, @intCurrencyExchangeRateId = intCurrencyExchangeRateId
+			FROM tblCTContractDetail d
+			JOIN tblICItemUOM PU ON PU.intItemUOMId = d.intPriceItemUOMId
+			WHERE intContractDetailId = @intContractDetailId
 		END
-		ELSE IF (@SubFromCurrency = 0 AND @SubToCurrency = 1)
+		ELSE
 		BEGIN
-			SELECT @FinalValue = @FinalValue * intCent
-				, @ToCurrencyId = intMainCurrencyId
-			FROM tblSMCurrency WHERE intCurrencyID = @ToCurrencyId
+			SET @dblRate = 1
+
+			SELECT TOP 1 @SubFromCurrency = 1
+			FROM tblSMCurrency
+			WHERE intCurrencyID = @FromCurrencyId AND ysnSubCurrency = 1
+
+			SELECT TOP 1 @SubToCurrency = 1
+			FROM tblSMCurrency WHERE intCurrencyID = @ToCurrencyId AND ysnSubCurrency = 1
+
+			IF (@SubFromCurrency = 1 AND @SubToCurrency = 0)
+			BEGIN
+				SELECT @FinalValue = @FinalValue / intCent
+					, @FromCurrencyId = intMainCurrencyId
+				FROM tblSMCurrency WHERE intCurrencyID = @FromCurrencyId
+			END
+			ELSE IF (@SubFromCurrency = 0 AND @SubToCurrency = 1)
+			BEGIN
+				SELECT @FinalValue = @FinalValue * intCent
+					, @ToCurrencyId = intMainCurrencyId
+				FROM tblSMCurrency WHERE intCurrencyID = @ToCurrencyId
+			END
 		END
 
 		SELECT TOP 1 @intCurrencyExchangeRateId = intCurrencyExchangeRateId
 		FROM tblSMCurrencyExchangeRate
 		WHERE intFromCurrencyId = @FromCurrencyId
 			AND intToCurrencyId = @ToCurrencyId
-			
+
 		IF (ISNULL(@intCurrencyExchangeRateId, 0) = 0)
 		BEGIN
 			SELECT TOP 1 @intCurrencyExchangeRateId = intCurrencyExchangeRateId
@@ -136,19 +151,33 @@ BEGIN
 		BEGIN
 			IF (@intExchangeRateFromId = @FromCurrencyId)
 			BEGIN
-				SELECT TOP 1 @FinalValue = @FinalValue * RD.dblRate
-				FROM tblSMCurrencyExchangeRate ER
-				JOIN tblSMCurrencyExchangeRateDetail RD ON RD.intCurrencyExchangeRateId = ER.intCurrencyExchangeRateId
-				WHERE ER.intCurrencyExchangeRateId = @intCurrencyExchangeRateId
-				ORDER BY RD.dtmValidFromDate DESC				
+				IF (ISNULL(@dblRate, 0) <> 0)
+				BEGIN
+					SELECT @FinalValue = @FinalValue * @dblRate
+				END
+				ELSE
+				BEGIN
+					SELECT TOP 1 @FinalValue = @FinalValue * RD.dblRate
+					FROM tblSMCurrencyExchangeRate ER
+					JOIN tblSMCurrencyExchangeRateDetail RD ON RD.intCurrencyExchangeRateId = ER.intCurrencyExchangeRateId
+					WHERE ER.intCurrencyExchangeRateId = @intCurrencyExchangeRateId
+					ORDER BY RD.dtmValidFromDate DESC				
+				END
 			END
 			ELSE
 			BEGIN
-				SELECT TOP 1 @FinalValue = @FinalValue / RD.dblRate
-				FROM tblSMCurrencyExchangeRate ER
-				JOIN tblSMCurrencyExchangeRateDetail RD ON RD.intCurrencyExchangeRateId = ER.intCurrencyExchangeRateId
-				WHERE ER.intCurrencyExchangeRateId = @intCurrencyExchangeRateId
-				ORDER BY RD.dtmValidFromDate DESC
+				IF (ISNULL(@dblRate, 0) <> 0)
+				BEGIN
+					SELECT @FinalValue = @FinalValue * @dblRate
+				END
+				ELSE
+				BEGIN
+					SELECT TOP 1 @FinalValue = @FinalValue / RD.dblRate
+					FROM tblSMCurrencyExchangeRate ER
+					JOIN tblSMCurrencyExchangeRateDetail RD ON RD.intCurrencyExchangeRateId = ER.intCurrencyExchangeRateId
+					WHERE ER.intCurrencyExchangeRateId = @intCurrencyExchangeRateId
+					ORDER BY RD.dtmValidFromDate DESC
+				END
 			END
 		END
 	END

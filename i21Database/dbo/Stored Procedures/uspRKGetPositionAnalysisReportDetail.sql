@@ -57,9 +57,9 @@ BEGIN
 			, CD.dblNoOfLots
 			, P.strPosition
 			, FMo.strFutureMonth
-			, dblPrice = ISNULL(dbo.[fnRKConvertUOMCurrency]('ItemUOM', CD.intPriceItemUOMId, PriceUOM.intItemUOMId, 1, CD.intCurrencyId, @intCurrencyId, ISNULL(CD.dblCashPrice, 0)), 0.00)
+			, dblPrice = ISNULL(dbo.[fnRKConvertUOMCurrency]('ItemUOM', CD.intPriceItemUOMId, PriceUOM.intItemUOMId, 1, CD.intCurrencyId, @intCurrencyId, ISNULL(CD.dblCashPrice, 0), CD.intContractDetailId), 0.00)
 			, PF.intPriceFixationId
-			, dblFutures = ISNULL(dbo.[fnRKConvertUOMCurrency]('ItemUOM', CD.intPriceItemUOMId, PriceUOM.intItemUOMId, 1, CD.intCurrencyId, @intCurrencyId, ISNULL(CD.dblFutures, 0)), 0.00)
+			, dblFutures = ISNULL(dbo.[fnRKConvertUOMCurrency]('ItemUOM', CD.intPriceItemUOMId, PriceUOM.intItemUOMId, 1, CD.intCurrencyId, @intCurrencyId, ISNULL(CD.dblFutures, 0), CD.intContractDetailId), 0.00)
 		FROM tblCTContractHeader CH
 		INNER JOIN tblCTContractDetail CD ON CH.intContractHeaderId = CD.intContractHeaderId
 		INNER JOIN tblICItem ITM ON CD.intItemId = ITM.intItemId
@@ -100,9 +100,9 @@ BEGIN
 			, PFD.dblNoOfLots
 			, P.strPosition
 			, FMo.strFutureMonth
-			, dblPrice = ISNULL(dbo.[fnRKConvertUOMCurrency]('ItemUOM', CD.intPriceItemUOMId, PriceUOM.intItemUOMId, 1, CD.intCurrencyId, @intCurrencyId, ISNULL(PFD.dblFinalPrice, 0)), 0.00)
+			, dblPrice = ISNULL(dbo.[fnRKConvertUOMCurrency]('ItemUOM', CD.intPriceItemUOMId, PriceUOM.intItemUOMId, 1, CD.intCurrencyId, @intCurrencyId, ISNULL(PFD.dblFinalPrice, 0), CD.intContractDetailId), 0.00)
 			, PF.intPriceFixationId
-			, dblFutures = ISNULL(dbo.[fnRKConvertUOMCurrency]('ItemUOM', CD.intPriceItemUOMId, PriceUOM.intItemUOMId, 1, CD.intCurrencyId, @intCurrencyId, ISNULL(PFD.dblFixationPrice, 0)), 0.00)
+			, dblFutures = ISNULL(dbo.[fnRKConvertUOMCurrency]('ItemUOM', CD.intPriceItemUOMId, PriceUOM.intItemUOMId, 1, CD.intCurrencyId, @intCurrencyId, ISNULL(PFD.dblFixationPrice, 0), CD.intContractDetailId), 0.00)
 		FROM tblCTContractHeader CH
 		INNER JOIN tblCTContractDetail CD ON CH.intContractHeaderId = CD.intContractHeaderId
 		INNER JOIN tblICItem ITM ON CD.intItemId = ITM.intItemId
@@ -143,9 +143,9 @@ BEGIN
 			, dblNoOfLots = DD.dblNoOfContract
 			, strPosition = '' COLLATE Latin1_General_CI_AS
 			, strFutureMonth = FMonth.strFutureMonth
-			, dblPrice = ISNULL(dbo.[fnRKConvertUOMCurrency]('CommodityUOM', MarketUOM.intCommodityUnitMeasureId, PriceUOM.intCommodityUnitMeasureId, 1, FM.intCurrencyId, @intCurrencyId, ISNULL(DD.dblPrice, 0)), 0.00)
+			, dblPrice = ISNULL(dbo.[fnRKConvertUOMCurrency]('CommodityUOM', MarketUOM.intCommodityUnitMeasureId, PriceUOM.intCommodityUnitMeasureId, 1, FM.intCurrencyId, @intCurrencyId, ISNULL(DD.dblPrice, 0), NULL), 0.00)
 			, intPriceFixationId = NULL
-			, dblFutures = ISNULL(dbo.[fnRKConvertUOMCurrency]('CommodityUOM', MarketUOM.intCommodityUnitMeasureId, PriceUOM.intCommodityUnitMeasureId, 1, FM.intCurrencyId, @intCurrencyId, ISNULL(DD.dblPrice, 0)), 0.00)
+			, dblFutures = ISNULL(dbo.[fnRKConvertUOMCurrency]('CommodityUOM', MarketUOM.intCommodityUnitMeasureId, PriceUOM.intCommodityUnitMeasureId, 1, FM.intCurrencyId, @intCurrencyId, ISNULL(DD.dblPrice, 0), NULL), 0.00)
 		FROM tblRKFutOptTransactionHeader DH
 		INNER JOIN tblRKFutOptTransaction DD ON DH.intFutOptTransactionHeaderId = DD.intFutOptTransactionHeaderId
 		INNER JOIN tblRKFutureMarket FM ON DD.intFutureMarketId = FM.intFutureMarketId
