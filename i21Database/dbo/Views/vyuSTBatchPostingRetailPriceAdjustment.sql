@@ -18,7 +18,7 @@ SELECT
 
 	--rpa.dtmPostedDate																AS	dtmDate,
 	--MAX(auditLog.dtmDate)															AS	dtmDate,
-	MAX(rpa.dtmEffectiveDate)														AS	dtmDate,
+	rpa.dtmEffectiveDate															AS	dtmDate,
 
 	''										COLLATE Latin1_General_CI_AS			AS  strFiscalUniqueId,
 	ISNULL(companyLoc.strLocationName, '')	COLLATE Latin1_General_CI_AS			AS	strLocation,
