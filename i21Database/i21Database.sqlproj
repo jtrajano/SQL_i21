@@ -8226,6 +8226,7 @@
     <Build Include="dbo\User Defined Types\InvoiceEAStagingTable.sql" />
     <Build Include="dbo\Stored Procedures\uspAREAImportInvoice.sql" />
     <Build Include="dbo\Views\vyuARGetPrepaidsAndCreditMemos.sql" />
+    <Build Include="dbo\Stored Procedures\uspARUpdateOverageItemContracts.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

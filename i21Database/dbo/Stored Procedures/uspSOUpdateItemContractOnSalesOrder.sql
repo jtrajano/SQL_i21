@@ -157,10 +157,11 @@ BEGIN TRY
 			  , @intSalesOrderDetailId		INT = NULL
 			  , @dblQty						NUMERIC(18, 6) = 0
 
-		SELECT @intItemContractDetailId = intItemContractDetailId
-			 , @dblQty					= dblQty * (CASE WHEN @ysnForDelete = 1 THEN -1 ELSE 1 END)
-			 , @intSalesOrderDetailId	= intSalesOrderDetailId
-		FROM @tblToProcess 
+		SELECT @intItemContractDetailId = P.intItemContractDetailId
+			 , @dblQty					= (CASE WHEN P.[dblQty] > ICTD.[dblBalance] THEN ICTD.[dblBalance] ELSE P.[dblQty] END) * (CASE WHEN @ysnForDelete = 1 THEN -1 ELSE 1 END)
+			 , @intSalesOrderDetailId	= P.intSalesOrderDetailId
+		FROM @tblToProcess P
+		INNER JOIN tblCTItemContractDetail ICTD ON P.[intItemContractDetailId] = ICTD.[intItemContractDetailId]
 		WHERE [intUniqueId]	= @intUniqueId
 
 		IF NOT EXISTS(SELECT * FROM tblCTItemContractDetail WHERE intItemContractDetailId = @intItemContractDetailId)

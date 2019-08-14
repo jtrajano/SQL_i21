@@ -465,6 +465,8 @@ CREATE TABLE #InvoiceInventoryItem
 	,[strBOLNumberDetail]				NVARCHAR(50) 	COLLATE Latin1_General_CI_AS	NULL
 	,[intContractHeaderId]				INT												NULL
 	,[intContractDetailId]				INT												NULL
+	,[intItemContractHeaderId]			INT												NULL
+	,[intItemContractDetailId]			INT												NULL
 	,[dblContractBalance]				NUMERIC(18, 6)									NULL
 	,[dblContractAvailable]				NUMERIC(18, 6)									NULL
 	,[intShipmentId]					INT												NULL
@@ -590,6 +592,8 @@ INSERT INTO #InvoiceInventoryItem
 	,[strBOLNumberDetail]
 	,[intContractHeaderId]
 	,[intContractDetailId]
+	,[intItemContractHeaderId]
+	,[intItemContractDetailId]
 	,[dblContractBalance]
 	,[dblContractAvailable]
 	,[intShipmentId]
@@ -730,6 +734,8 @@ SELECT
 	,[strBOLNumberDetail]					= IE.[strBOLNumberDetail]
 	,[intContractHeaderId]					= ISNULL(IP.[intContractHeaderId], IE.[intContractHeaderId])
 	,[intContractDetailId]					= ISNULL(IP.[intContractDetailId], IE.[intContractDetailId])
+	,[intItemContractHeaderId]				= IE.[intItemContractHeaderId]
+	,[intItemContractDetailId]				= IE.[intItemContractDetailId]
 	,[dblContractBalance]					= @ZeroDecimal
 	,[dblContractAvailable]					= ISNULL(IP.[dblAvailableQty], @ZeroDecimal)
 	,[intShipmentId]						= IE.[intShipmentId]
@@ -928,6 +934,8 @@ USING
 		,[strBOLNumberDetail]
 		,[intContractHeaderId]
 		,[intContractDetailId]
+		,[intItemContractHeaderId]
+		,[intItemContractDetailId]
 		,[dblContractBalance]
 		,[dblContractAvailable]
 		,[intShipmentId]
@@ -1057,6 +1065,8 @@ INSERT(
 	,[strBOLNumberDetail]
 	,[intContractHeaderId]
 	,[intContractDetailId]
+	,[intItemContractHeaderId]
+	,[intItemContractDetailId]
 	,[dblContractBalance]
 	,[dblContractAvailable]
 	,[intShipmentId]
@@ -1171,6 +1181,8 @@ VALUES(
 	,[strBOLNumberDetail]
 	,[intContractHeaderId]
 	,[intContractDetailId]
+	,[intItemContractHeaderId]
+	,[intItemContractDetailId]
 	,[dblContractBalance]
 	,[dblContractAvailable]
 	,[intShipmentId]
