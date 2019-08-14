@@ -973,6 +973,7 @@ BEGIN
 					,dblForexRate
 					,intCategoryId
 					,dblUnitRetail
+					,intSourceEntityId
 			)
 			SELECT 
 					intItemId  
@@ -998,6 +999,7 @@ BEGIN
 					,dblForexRate
 					,intCategoryId
 					,dblUnitRetail
+					,intSourceEntityId
 			FROM	@ItemsForPost
 			WHERE	dblQty > 0 
 					OR (dblQty < 0 AND @intSourceType = @SOURCE_TYPE_Store) -- Allow stock to reduce if source type is 'Store'
