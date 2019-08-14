@@ -31,20 +31,107 @@ DECLARE @StorageLocationIds TABLE (intStorageLocationId INT)
 DECLARE @StorageUnitIds TABLE (intStorageUnitId INT)
 DECLARE @CommodityIds TABLE (intCommodityId INT)
 DECLARE @CategoryIds TABLE (intCategoryId INT)
-DECLARE @ysnIsMultiFilter BIT = 0
+DECLARE @ysnUseRange BIT = 1
+DECLARE @ysnIsMultiFilter BIT = 1
 DECLARE @CategoryFilterCount INT = 0
 DECLARE @CommodityFilterCount INT = 0
 DECLARE @StorageLocationFilterCount INT = 0
 DECLARE @StorageUnitFilterCount INT = 0
 
+/*
+Ranges: 
+	Ranges allow you to select a range of filter. For example, the following list of commodities are the available filter that can be selected in range.
+		
+	Soybeans
+	Corn
+	Yeast
+	Soya
+	LPG
+	Rice
+
+	Example 1:
+		Range Lower Value = Corn
+		Range Upper Value = Soya
+
+	So the selected range will be [Corn, Yeast, Soya]
+
+	Example 2:
+		Range Lower Value = Rice
+		Range Upper value = Corn
+	
+	So the selected range will be [Corn, Yeast, Soya, LPG, Rice]
+	
+	If neither of the upper or lower ranges are specified, all items in the list will selected
+
+*/
+IF @ysnUseRange = 1
+BEGIN
+	DECLARE @Values JointDelimitedValues
+	
+	-- Convert Storage Location Ranges to multi-filter
+	INSERT INTO @Values
+	SELECT DISTINCT sb.intCompanyLocationSubLocationId
+	FROM tblICInventoryCount c
+    INNER JOIN tblSMCompanyLocationSubLocation sb
+      ON (sb.intCompanyLocationSubLocationId >= ISNULL(dbo.fnMinNumeric(c.intSubLocationId, c.intSubLocationToId), ISNULL(c.intSubLocationId, c.intSubLocationToId))
+        AND sb.intCompanyLocationSubLocationId <= ISNULL(dbo.fnMaxNumeric(c.intSubLocationToId, c.intSubLocationId), ISNULL(c.intSubLocationToId, c.intSubLocationId)))
+	WHERE c.intLocationId = sb.intCompanyLocationId
+		AND c.intInventoryCountId = @intInventoryCountId
+
+	-- Update multi-filter and clean up
+	UPDATE tblICInventoryCount SET strStorageLocationsFilter = NULLIF(dbo.fnJoinDelimitedValues(@Values, ','), '') WHERE intInventoryCountId = @intInventoryCountId
+	DELETE FROM @Values
+
+-- Convert Storage Unit Ranges to multi-filter
+	INSERT INTO @Values
+	SELECT DISTINCT sb.intStorageLocationId
+	FROM tblICInventoryCount c
+    INNER JOIN tblICStorageLocation sb
+      ON (sb.intStorageLocationId >= ISNULL(dbo.fnMinNumeric(c.intStorageLocationId, c.intStorageLocationToId), ISNULL(c.intStorageLocationId, c.intStorageLocationToId))
+        AND sb.intStorageLocationId <= ISNULL(dbo.fnMaxNumeric(c.intStorageLocationToId, c.intStorageLocationId), ISNULL(c.intStorageLocationToId, c.intStorageLocationId)))
+	WHERE c.intLocationId = sb.intLocationId
+		AND c.intInventoryCountId = @intInventoryCountId
+
+	-- Update multi-filter and clean up
+	UPDATE tblICInventoryCount SET strStorageUnitsFilter = NULLIF(dbo.fnJoinDelimitedValues(@Values, ','), '') WHERE intInventoryCountId = @intInventoryCountId
+	DELETE FROM @Values
+
+	-- Convert Commodity Ranges to multi-filter
+	INSERT INTO @Values
+	SELECT DISTINCT sb.intCommodityId
+	FROM tblICInventoryCount c
+    INNER JOIN tblICCommodity sb
+      ON (sb.intCommodityId >= ISNULL(dbo.fnMinNumeric(c.intCommodityId, c.intCommodityToId), ISNULL(c.intCommodityId, c.intCommodityToId))
+        AND sb.intCommodityId <= ISNULL(dbo.fnMaxNumeric(c.intCommodityToId, c.intCommodityId), ISNULL(c.intCommodityToId, c.intCommodityId)))
+	WHERE c.intInventoryCountId = @intInventoryCountId
+
+	-- Update multi-filter and clean up
+	UPDATE tblICInventoryCount SET strCommoditiesFilter = NULLIF(dbo.fnJoinDelimitedValues(@Values, ','), '') WHERE intInventoryCountId = @intInventoryCountId
+	DELETE FROM @Values
+
+	-- Convert Category Ranges to multi-filter
+	INSERT INTO @Values
+	SELECT DISTINCT sb.intCategoryId
+	FROM tblICInventoryCount c
+    INNER JOIN tblICCategory sb
+      ON (sb.intCategoryId >= ISNULL(dbo.fnMinNumeric(c.intCategoryId, c.intCategoryToId), ISNULL(c.intCategoryId, c.intCategoryToId))
+        AND sb.intCategoryId <= ISNULL(dbo.fnMaxNumeric(c.intCategoryToId, c.intCategoryId), ISNULL(c.intCategoryToId, c.intCategoryId)))
+	WHERE c.intInventoryCountId = @intInventoryCountId
+
+	-- Update multi-filter and clean up
+	UPDATE tblICInventoryCount SET strCategoriesFilter = NULLIF(dbo.fnJoinDelimitedValues(@Values, ','), '') WHERE intInventoryCountId = @intInventoryCountId
+	DELETE FROM @Values
+END
+
+-- Update variables
 SELECT 
     @strStorageLocationsFilter = c.strStorageLocationsFilter,
     @strStorageUnitsFilter = c.strStorageUnitsFilter,
     @strCommoditiesFilter = c.strCommoditiesFilter,
-    @strCategoriesFilter = c.strCategoriesFilter,
-	@ysnIsMultiFilter = ISNULL(c.ysnIsMultiFilter, 0)
+    @strCategoriesFilter = c.strCategoriesFilter
 FROM tblICInventoryCount c
 WHERE c.intInventoryCountId = @intInventoryCountId
+
 
 IF @ysnIsMultiFilter = 1
 BEGIN
@@ -73,7 +160,6 @@ BEGIN
 	SELECT @StorageLocationFilterCount = COUNT(*) FROM @StorageLocationIds
 	SELECT @StorageUnitFilterCount = COUNT(*) FROM @StorageUnitIds
 END
-
 
 IF @ysnCountByLots = 1
 BEGIN
