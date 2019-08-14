@@ -118,7 +118,7 @@ AS
        ,SCT.ysnHasGeneratedTicketNumber
 	   ,CASE 
 			WHEN SCT.ysnDestinationWeightGradePost = 1 THEN 'Posted' 
-			WHEN CTH.intWeightId = 2 OR CTH.intGradeId = 2 THEN 'Not yet posted' 
+			WHEN CTH.intWeightId = 2 OR CTH.intGradeId = 2 THEN 'Unposted' 
 		END AS strWeightGradePostStatus
 	   ,CASE WHEN CTH.intWeightId = 2 OR CTH.intGradeId = 2 THEN 'Destination' END AS strWeightGradeDest
        ,SCT.intInventoryTransferId
