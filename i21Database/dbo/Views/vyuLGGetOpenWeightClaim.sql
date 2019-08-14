@@ -48,7 +48,7 @@ FROM
 		,dblReceivedNetWt = (RI.dblNet - ISNULL(IRN.dblIRNet, 0))
 		,dblFranchisePercent = WG.dblFranchise
 		,dblFranchise = WG.dblFranchise / 100
-		,dblFranchiseWt = CASE WHEN (CASE WHEN (CLCT.intCount > 0) THEN (CLNW.dblLinkNetWt) ELSE LD.dblNet END * WG.dblFranchise / 100) > 0.0
+		,dblFranchiseWt = CASE WHEN (CASE WHEN (CLCT.intCount > 0) THEN (CLNW.dblLinkNetWt) ELSE LD.dblNet END * WG.dblFranchise / 100) <> 0.0
 							THEN ((CASE WHEN (CLCT.intCount > 0) THEN (CLNW.dblLinkNetWt) ELSE LD.dblNet END - ISNULL(IRN.dblIRNet, 0)) * WG.dblFranchise / 100)
 						ELSE 0.0 END
 		,dblWeightLoss = CASE WHEN (RI.dblNet - CASE WHEN (CLCT.intCount > 0) THEN (CLNW.dblLinkNetWt) ELSE LD.dblNet END) < 0.0
@@ -210,7 +210,9 @@ FROM
 		,dblReceivedNetWt = CASE WHEN (CLCT.intCount) > 0 THEN (CLNW.dblLinkNetWt) ELSE LD.dblNet END
 		,dblFranchisePercent = WG.dblFranchise
 		,dblFranchise = WG.dblFranchise / 100
-		,dblFranchiseWt = 0.0
+		,dblFranchiseWt = CASE WHEN (CASE WHEN (CLCT.intCount > 0) THEN (CLNW.dblLinkNetWt) ELSE LD.dblNet END * WG.dblFranchise / 100) <> 0.0
+							THEN ((CASE WHEN (CLCT.intCount > 0) THEN (CLNW.dblLinkNetWt) ELSE LD.dblNet END) * WG.dblFranchise / 100)
+						ELSE 0.0 END
 		,dblWeightLoss = 0.0
 		,dblClaimableWt = 0.0
 		,intWeightClaimId = WC.intWeightClaimId
