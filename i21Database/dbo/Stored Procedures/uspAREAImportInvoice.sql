@@ -66,8 +66,7 @@ FROM @InvoiceEAEntries I
 INNER JOIN tblARCustomer C ON RTRIM(LTRIM(I.strCustomerNumber)) = RTRIM(LTRIM(C.strCustomerNumber))
 INNER JOIN tblSMCompanyLocation CL ON RTRIM(LTRIM(I.strCompanyLocation)) = RTRIM(LTRIM(CL.strLocationNumber))
 LEFT JOIN tblICItem ITEM ON I.strItemNo = ITEM.strItemNo
-LEFT JOIN tblICUnitMeasure UOM ON UPPER(I.strItemUOM) = UPPER(UOM.strUnitMeasure)
-LEFT JOIN tblICItemUOM IUOM ON UOM.intUnitMeasureId = IUOM.intUnitMeasureId AND ITEM.intItemId = IUOM.intItemId
+LEFT JOIN tblICItemUOM IUOM ON I.intItemUOMId = IUOM.intItemUOMId AND ITEM.intItemId = IUOM.intItemId
 
 IF EXISTS (SELECT TOP 1 NULL FROM @InvoiceEntries)
 	EXEC uspARProcessInvoicesByBatch @InvoiceEntries, @LineItemTaxEntries, @intUserId, 12, 1
