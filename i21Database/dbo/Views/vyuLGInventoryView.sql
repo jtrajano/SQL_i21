@@ -187,9 +187,9 @@ FROM (
 		,dtmEndDate = PCD.dtmEndDate
 		,dblOriginalQty = PCD.dblOriginalQty
 		,strOriginalQtyUOM = PUM.strUnitMeasure
-		,dblStockQty = LD.dblQuantity
+		,dblStockQty = ISNULL(LDCL.dblQuantity, LD.dblQuantity)
 		,strStockUOM = LDUM.strUnitMeasure
-		,dblNetWeight = LD.dblNet
+		,dblNetWeight = ISNULL(LDCL.dblLinkNetWt, LD.dblNet)
 		,strWeightUOM = LDWUM.strUnitMeasure
 		,intEntityVendorId = LD.intVendorEntityId
 		,strVendor = V.strName
@@ -211,20 +211,20 @@ FROM (
 		,strTrackingNumber = L.strLoadNumber
 		,strBLNumber = L.strBLNumber
 		,dtmBLDate = L.dtmBLDate
-		,strContainerNumber = '' COLLATE Latin1_General_CI_AS
-		,strMarks = L.strMarks
-		,strLotNumber = '' COLLATE Latin1_General_CI_AS
+		,strContainerNumber = LC.strContainerNumber
+		,strMarks = LC.strMarks
+		,strLotNumber = LC.strLotNumber
 		,strWarehouse = '' COLLATE Latin1_General_CI_AS
 		,strLocationName = '' COLLATE Latin1_General_CI_AS
 		,strCondition = '' COLLATE Latin1_General_CI_AS
 		,dtmPostedDate = L.dtmPostedDate
-		,dblQtyInStockUOM = LD.dblQuantity * dbo.fnICConvertUOMtoStockUnit (I.intItemId, LD.intItemUOMId, 1)
+		,dblQtyInStockUOM = ISNULL(LDCL.dblLinkNetWt, LD.dblNet) * dbo.fnICConvertUOMtoStockUnit (I.intItemId, LD.intItemUOMId, 1)
 		,intItemId = I.intItemId
 		,intWeightItemUOMId = LD.intWeightItemUOMId
 		,strWarehouseRefNo = '' COLLATE Latin1_General_CI_AS
 		,dtmReceiptDate = CAST(NULL AS DATETIME)
-		,dblTotalCost = CAST(ISNULL((dbo.fnCTConvertQtyToTargetItemUOM(LD.intWeightItemUOMId, PCD.intPriceItemUOMId, LD.dblNet)) 
-										* dbo.fnCTGetSequencePrice(LD.intPContractDetailId,NULL),0) AS NUMERIC(18,6))
+		,dblTotalCost = CAST(ISNULL((dbo.fnCTConvertQtyToTargetItemUOM(ISNULL(LCWUM.intWeightItemUOMId, LD.intWeightItemUOMId), PCD.intPriceItemUOMId, ISNULL(LDCL.dblLinkNetWt, LD.dblNet))) 
+										* dbo.fnCTGetSequencePrice(LD.intPContractDetailId,NULL),0) AS NUMERIC(18,6)) / CASE WHEN (BC.ysnSubCurrency = 1) THEN BC.intCent ELSE 1 END
 		,dblFutures = PCD.dblFutures
 		,dblCashPrice = PCD.dblCashPrice
 		,dblBasis = PCD.dblBasis
@@ -253,11 +253,14 @@ FROM (
 		,strCertificationId = '' COLLATE Latin1_General_CI_AS
 	FROM tblLGLoadDetail LD
 		INNER JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
+		LEFT JOIN tblICItem I ON I.intItemId = LD.intItemId
+		LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadDetailId = LD.intLoadDetailId
+		OUTER APPLY (SELECT TOP 1 * FROM tblLGLoadContainer WHERE intLoadContainerId = LDCL.intLoadContainerId) LC
+		OUTER APPLY (SELECT TOP 1 intWeightItemUOMId = intItemUOMId FROM tblICItemUOM WHERE intItemId = I.intItemId AND intUnitMeasureId = LC.intWeightUnitMeasureId) LCWUM
 		LEFT JOIN tblICItemUOM LDUOM ON LDUOM.intItemUOMId = LD.intItemUOMId
 		LEFT JOIN tblICUnitMeasure LDUM ON LDUM.intUnitMeasureId = LDUOM.intUnitMeasureId 
 		LEFT JOIN tblICItemUOM LDWUOM ON LDWUOM.intItemUOMId = LD.intWeightItemUOMId
 		LEFT JOIN tblICUnitMeasure LDWUM ON LDWUM.intUnitMeasureId = LDWUOM.intUnitMeasureId
-		LEFT JOIN tblICItem I ON I.intItemId = LD.intItemId
 		LEFT JOIN tblICCommodity CMDT ON CMDT.intCommodityId = I.intCommodityId
 		LEFT JOIN tblICCommodityAttribute GRADE ON GRADE.intCommodityAttributeId = I.intGradeId
 		LEFT JOIN tblICCommodityAttribute ORIGIN ON ORIGIN.intCommodityAttributeId = I.intOriginId
