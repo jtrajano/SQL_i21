@@ -2271,16 +2271,13 @@ FROM (
 ) t1
 
 SELECT *
-	, ISNULL(dblContractBasis,0) + (ISNULL(dblFutures,0) * ISNULL(dblContractRatio,1)) as dblContractPrice
-	, convert(decimal(24,6),((ISNULL(dblMarketBasis,0) - ISNULL(dblContractBasis,0)+ISNULL(dblCosts,0)))*ISNULL(dblResultBasis1,0)) + convert(decimal(24,6),((ISNULL(dblFutures,0)- ISNULL(dblFuturePrice,0))*ISNULL(dblMarketFuturesResult1,0))) dblResult
-	, dblResultBasis = convert(decimal(24,6),((ISNULL(dblMarketBasis,0) - (ISNULL(dblContractBasis,0) + ISNULL(dblCosts,0)))) * ISNULL(dblOpenQty,0)) 
-	, CASE WHEN intContractTypeId = 1 THEN 
-		convert(decimal(24,6),((ISNULL(dblFuturePrice,0) - ISNULL(dblFutures,0))*ISNULL(dblOpenQty,0)))
-		ELSE
-		0
-	  END dblMarketFuturesResult
-	, case when strPricingType='Cash' then convert(decimal(24,6),(ISNULL(dblCash,0)-ISNULL(dblCashPrice,0))*ISNULL(dblResult1,0))
-			else 0 end as dblResultCash
+	, dblContractPrice = ISNULL(dblContractBasis, 0) + (ISNULL(dblFutures, 0) * ISNULL(dblContractRatio, 1))
+	, dblResult = CONVERT(DECIMAL(24, 6), ((ISNULL(dblMarketBasis, 0) - ISNULL(dblContractBasis, 0) + ISNULL(dblCosts, 0))) * ISNULL(dblResultBasis1, 0)) + CONVERT(DECIMAL(24, 6),((ISNULL(dblFutures, 0) - ISNULL(dblFuturePrice, 0)) * ISNULL(dblMarketFuturesResult1, 0)))
+	, dblResultBasis = CONVERT(DECIMAL(24, 6), ((ISNULL(dblMarketBasis, 0) - (ISNULL(dblContractBasis, 0) + ISNULL(dblCosts, 0)) - (CASE WHEN ysnExpired = 1 THEN dblSpread ELSE 0 END))) * ISNULL(dblOpenQty, 0)) 
+	, dblMarketFuturesResult = CASE WHEN intContractTypeId = 1 THEN CONVERT(DECIMAL(24, 6), ((ISNULL(dblFuturePrice, 0) - ISNULL(dblFutures, 0)) * ISNULL(dblOpenQty, 0)))
+									ELSE 0 END
+	, dblResultCash = CASE WHEN strPricingType = 'Cash' THEN CONVERT(DECIMAL(24, 6), (ISNULL(dblCash, 0) - ISNULL(dblCashPrice, 0)) * ISNULL(dblResult1, 0))
+							ELSE 0 END
 INTO #Temp
 FROM (
 	SELECT intContractHeaderId
@@ -2675,12 +2672,9 @@ SELECT intRowNum = CONVERT(INT,ROW_NUMBER() OVER(ORDER BY intFutureMarketId DESC
 						else 
 							ROUND((dblMarketPrice - dblAdjustedContractPrice) * dblOpenQty,2)
 				  end
-	, dblMarketFuturesResult = CASE WHEN strContractOrInventoryType = 'Inventory' THEN
-										0
-									WHEN strPricingType = 'Basis' then
-										0
-									ELSE
-										((ISNULL(dblFuturePrice,0) - ISNULL(dblActualFutures,0) ) * dblOpenQty) + (CASE WHEN ysnExpired = 1 THEN dblSpread ELSE 0 END)
+	, dblMarketFuturesResult = CASE WHEN strContractOrInventoryType = 'Inventory' THEN 0
+									WHEN strPricingType = 'Basis' then 0
+									ELSE ((ISNULL(dblFuturePrice, 0) - ISNULL(dblActualFutures, 0) + (CASE WHEN ysnExpired = 1 THEN dblSpread ELSE 0 END)) * dblOpenQty)
 									END
 	, dblResultRatio = (CASE WHEN dblContractRatio <> 0 AND dblMarketRatio  <> 0 THEN ((dblMarketPrice - dblContractPrice) * dblOpenQty)
 								- ((dblFuturePrice - dblActualFutures) * dblOpenQty) - dblResultBasis
@@ -2803,7 +2797,7 @@ FROM (
 											--Can be used other currency exchange
 											ELSE ISNULL(dblMarketBasis, 0) + (dblConvertedFuturePrice * case when ISNULL(dblMarketRatio, 0)=0 then 1 else dblMarketRatio end) + ISNULL(dblCashPrice, 0) END)
 								ELSE ISNULL(dblMarketBasis, 0) + (ISNULL(dblConvertedFuturePrice,0) * case when ISNULL(dblMarketRatio, 0)=0 then 1 else ISNULL(dblMarketRatio, 0) end) + ISNULL(dblCashPrice, 0) END
-		, dblResultBasis = dblResultBasis - (CASE WHEN ysnExpired = 1 THEN dblSpread ELSE 0 END)
+		, dblResultBasis = dblResultBasis
 		, dblResultCash
 		--Contract Price
 		, dblContractPrice = (CASE WHEN @ysnCanadianCustomer = 1 AND @strM2MCurrency = 'CAD'
