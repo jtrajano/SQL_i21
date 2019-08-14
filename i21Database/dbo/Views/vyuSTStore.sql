@@ -17,6 +17,11 @@ SELECT ST.*
 	   , CL.strLocationName
 	   , CL.strLocationType
 	   , EM.strEntityNo AS strVendorId
+	   , strATMFundBegBalanceItemId 	 = 	  ATMFundBegBalanceItem.strItemNo
+	   , strATMFundReplenishedItemId	 = 	  ATMFundReplenishedItem.strItemNo
+	   , strATMFundWithdrawalItemId		 = 	  ATMFundWithdrawalItem.strItemNo
+	   , strATMFundEndBalanceItemId		 = 	  ATMFundEndBalanceItem.strItemNo
+	   , strATMFundVarianceItemId		 = 	  ATMFundVarianceItem.strItemNo
 FROM tblSTStore ST
 LEFT JOIN tblSTPaymentOption PO 
 	ON ST.intDefaultPaidoutId = PO.intPaymentOptionId
@@ -43,3 +48,15 @@ LEFT JOIN tblICCategory CAT
 	ON ST.intLoyaltyDiscountCategoryId = CAT.intCategoryId
 LEFT JOIN tblSMCompanyLocation CL 
 	ON ST.intCompanyLocationId = CL.intCompanyLocationId
+LEFT JOIN tblICItem ATMFundBegBalanceItem 
+	ON ST.intATMFundBegBalanceItemId = ATMFundBegBalanceItem.intItemId
+LEFT JOIN tblICItem ATMFundReplenishedItem 
+	ON ST.intATMFundReplenishedItemId = ATMFundReplenishedItem.intItemId
+LEFT JOIN tblICItem ATMFundWithdrawalItem 
+	ON ST.intATMFundWithdrawalItemId = ATMFundWithdrawalItem.intItemId
+LEFT JOIN tblICItem ATMFundEndBalanceItem 
+	ON ST.intATMFundEndBalanceItemId = ATMFundEndBalanceItem.intItemId
+LEFT JOIN tblICItem ATMFundVarianceItem 
+	ON ST.intATMFundVarianceItemId = ATMFundVarianceItem.intItemId
+
+
