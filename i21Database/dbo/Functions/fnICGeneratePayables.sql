@@ -315,7 +315,7 @@ FROM tblICInventoryReceipt A
 
 	LEFT JOIN vyuPODetails po ON 
 		po.intPurchaseId = ISNULL(rtn.intOrderId, B.intOrderId)
-		AND po.intPurchaseDetailId = ISNULL(rtn.intOrderId, B.intLineNo) 
+		AND po.intPurchaseDetailId = ISNULL(rtn.intLineNo, B.intLineNo) 
 		AND (
 			A.strReceiptType = 'Purchase Order'
 			OR rtn.strReceiptType = 'Purchase Order'
