@@ -118,14 +118,18 @@
 	[strStoreAppMacAddress] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
 	[dtmStoreAppLastDateLog] DATETIME NULL,
 	[strHandheldScannerServerFolderPath] NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL, 
+
+	-- ATM
 	[intATMFundBegBalanceItemId]	INT NULL, 
 	[intATMFundReplenishedItemId]	INT NULL, 
 	[intATMFundWithdrawalItemId]	INT NULL, 
 	[intATMFundEndBalanceItemId]	INT NULL, 
 	[intATMFundVarianceItemId]		INT NULL, 
+
+	-- CHANGE FUND
 	[intChangeFundReplenishItemId]	INT NULL, 
 	[intChangeFundEndBalanceItemId]	INT NULL, 
-	[intChangeFundBegBalanceItemId]		INT NULL, 
+	[intChangeFundBegBalanceItemId]	INT NULL, 
 
     [intConcurrencyId] INT NOT NULL, 
     CONSTRAINT [PK_tblSTStore] PRIMARY KEY CLUSTERED ([intStoreId] ASC),
