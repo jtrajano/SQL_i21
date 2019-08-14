@@ -8004,6 +8004,8 @@
     <Build Include="dbo\Functions\fnSCGetLoadFreightItemCharges.sql" />
     <Build Include="dbo\Views\vyuSCScaleLoadView.sql" />
     <Build Include="dbo\Stored Procedures\uspSCUpdateTicketLoadUsed.sql" />
+    <Build Include="dbo\Tables\tblICInventoryShiftPhysicalCount.sql" />
+    <Build Include="dbo\Stored Procedures\uspICGetCountGroupAsOfDate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
