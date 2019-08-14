@@ -28,6 +28,7 @@ BEGIN
 	DECLARE @strReferenceServerName NVARCHAR(250);
 	DECLARE @strReferenceDatabaseName NVARCHAR(250);
 	DECLARE @intReferenceActualInterCompanyId INT;
+	DECLARE @intIdForDelete INT;
 	
 	SELECT
 		@intSourceRecordId = intSourceRecordId,
@@ -195,7 +196,7 @@ BEGIN
 			CLOSE TempInterCompanyTransferLogForComment_Cursor
 			DEALLOCATE TempInterCompanyTransferLogForComment_Cursor
 			
-			SET @strUpdatedTransactionId = @strFinishedLogId;
+			SET @strUpdatedLogId = @strFinishedLogId;
 		END	
 	END
 
