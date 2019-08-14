@@ -12,6 +12,7 @@
 	,@PlannedPurchasesXML VARCHAR(MAX)
 	,@WeeksOfSupplyTargetXML VARCHAR(MAX)
 	,@ForecastedConsumptionXML VARCHAR(MAX)
+	,@OpenPurchaseXML VARCHAR(MAX)
 	,@ysnCalculatePlannedPurchases BIT
 	,@ysnCalculateEndInventory BIT
 	,@ysnRefreshContract BIT
