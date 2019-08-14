@@ -15,8 +15,11 @@ SELECT
 	''										COLLATE Latin1_General_CI_AS			AS	strVendorName,
 	ISNULL(userSec.strUserName, '')													AS	strUserName,
 	ISNULL(rpa.strDescription, '')			COLLATE Latin1_General_CI_AS			AS	strDescription,
+
 	--rpa.dtmPostedDate																AS	dtmDate,
-	MAX(auditLog.dtmDate)															AS	dtmDate,
+	--MAX(auditLog.dtmDate)															AS	dtmDate,
+	MAX(rpa.dtmEffectiveDate)														AS	dtmDate,
+
 	''										COLLATE Latin1_General_CI_AS			AS  strFiscalUniqueId,
 	ISNULL(companyLoc.strLocationName, '')	COLLATE Latin1_General_CI_AS			AS	strLocation,
 	ISNULL(rpa.ysnPosted, 0)														AS  ysnPosted,
