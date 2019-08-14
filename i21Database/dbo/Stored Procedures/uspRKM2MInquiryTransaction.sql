@@ -936,6 +936,7 @@ FROM (
 		, strContractEndMonth = RIGHT(CONVERT(VARCHAR(11), Inv.dtmDate, 106), 8)
 		, Inv.intLocationId
 		, Inv.strLocationName
+		, Inv.intItemLocationId
 	FROM dbo.fnICOutstandingInTransitAsOf(NULL, @intCommodityId, @dtmTransactionDateUpTo) InTran
 				INNER JOIN vyuICGetInventoryValuation Inv ON InTran.intInventoryTransactionId = Inv.intInventoryTransactionId
 				INNER JOIN tblICItem Itm ON InTran.intItemId = Itm.intItemId
@@ -959,6 +960,7 @@ FROM (
 		, Inv.dtmDate
 		, Inv.intLocationId
 		, Inv.strLocationName
+		, Inv.intItemLocationId
 ) tbl
 
 -- intransit
@@ -1384,7 +1386,7 @@ FROM (
                 , dblContractBasis = 0
 				, dblDummyContractBasis = 0
 				, dblFutures = 0
-				, dblCash =  it.dblPrice
+				, dblCash =  ISNULL(dbo.fnCalculateValuationAverageCost(intItemId, intItemLocationId, @dtmTransactionDateUpTo), 0) --it.dblPrice
 				, dblMarketRatio = 0
 				, dblMarketBasis1 = 0
 				, dblMarketBasisUOM = 0
