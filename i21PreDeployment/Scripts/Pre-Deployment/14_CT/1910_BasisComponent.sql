@@ -17,7 +17,7 @@ GO
 			EXEC
 			('
 				UPDATE tblCTCompanyPreference 
-				SET ysnBasisComponentPurchase = ysnBasisComponent, ysnBasisComponentSales = ysnBasisComponent
+				SET ysnBasisComponentPurchase = ISNULL(ysnBasisComponent,0), ysnBasisComponentSales = ISNULL(ysnBasisComponent,0)
 				FROM tblCTCompanyPreference
 			')
 		END		
