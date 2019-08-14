@@ -76,18 +76,19 @@ SELECT
 												 END  
 										END
 									ELSE 0 END,	
-	[dblAmountApplied]		=	(B.dblTotal + B.dblTax) - (CASE B.intPrepayTypeId 
-									WHEN 1 THEN
-											A.dblAmountDue 
-									WHEN 2 THEN 
-										CASE WHEN B.dblQtyReceived < CurrentBill.dblQtyReceived 
-											THEN B.dblTotal + B.dblTax
-											ELSE B.dblTotal + B.dblTax END
-									WHEN 3 THEN
-										CASE WHEN (B.dblTotal + B.dblTax) < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal)
-											THEN B.dblTotal + B.dblTax
-											ELSE B.dblTotal + B.dblTax END
-									ELSE 0 END),
+	-- [dblAmountApplied]		=	(B.dblTotal + B.dblTax) - (CASE B.intPrepayTypeId 
+	-- 								WHEN 1 THEN
+	-- 										A.dblAmountDue 
+	-- 								WHEN 2 THEN 
+	-- 									CASE WHEN B.dblQtyReceived < CurrentBill.dblQtyReceived 
+	-- 										THEN B.dblTotal + B.dblTax
+	-- 										ELSE B.dblTotal + B.dblTax END
+	-- 								WHEN 3 THEN
+	-- 									CASE WHEN (B.dblTotal + B.dblTax) < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal)
+	-- 										THEN B.dblTotal + B.dblTax
+	-- 										ELSE B.dblTotal + B.dblTax END
+	-- 								ELSE 0 END),
+	[dblAmountApplied]		=	0,
 	[ysnApplied]			=	0,
 	[intConcurrencyId]		=	0
 FROM tblAPBill A
@@ -171,18 +172,19 @@ SELECT
 												 END  
 										END
 									ELSE 0 END,
-	[dblAmountApplied]			=	(B.dblTotal + B.dblTax) - (CASE B.intPrepayTypeId 
-									WHEN 1 THEN
-											A.dblAmountDue 
-									WHEN 2 THEN 
-										CASE WHEN B.dblQtyReceived < CurrentBill.dblQtyReceived 
-											THEN (B.dblTotal + B.dblTax)
-											ELSE (B.dblTotal + B.dblTax) END
-									WHEN 3 THEN
-										CASE WHEN (B.dblTotal + B.dblTax) < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal)
-											THEN (B.dblTotal + B.dblTax)  
-											ELSE (B.dblTotal + B.dblTax) END
-									ELSE 0 END),
+	-- [dblAmountApplied]			=	(B.dblTotal + B.dblTax) - (CASE B.intPrepayTypeId 
+	-- 								WHEN 1 THEN
+	-- 										A.dblAmountDue 
+	-- 								WHEN 2 THEN 
+	-- 									CASE WHEN B.dblQtyReceived < CurrentBill.dblQtyReceived 
+	-- 										THEN (B.dblTotal + B.dblTax)
+	-- 										ELSE (B.dblTotal + B.dblTax) END
+	-- 								WHEN 3 THEN
+	-- 									CASE WHEN (B.dblTotal + B.dblTax) < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal)
+	-- 										THEN (B.dblTotal + B.dblTax)  
+	-- 										ELSE (B.dblTotal + B.dblTax) END
+	-- 								ELSE 0 END),
+	[dblAmountApplied]		=	0,
 	[ysnApplied]			=	0,
 	[intConcurrencyId]		=	0
 FROM tblAPBill A
@@ -274,18 +276,19 @@ SELECT
 												 END  
 										END                                       
 									ELSE 0 END,
-	[dblAmountApplied]			=	(B.dblTotal + B.dblTax) - (CASE B.intPrepayTypeId 
-									WHEN 1 THEN
-											A.dblAmountDue 
-									WHEN 2 THEN 
-										CASE WHEN B.dblQtyReceived < CurrentBill.dblQtyReceived 
-											THEN (B.dblTotal + B.dblTax)
-											ELSE (B.dblTotal + B.dblTax) END
-									WHEN 3 THEN
-										CASE WHEN (B.dblTotal + B.dblTax) < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal)
-											THEN (B.dblTotal + B.dblTax)
-											ELSE (B.dblTotal + B.dblTax) END
-									ELSE 0 END),
+	-- [dblAmountApplied]			=	(B.dblTotal + B.dblTax) - (CASE B.intPrepayTypeId 
+	-- 								WHEN 1 THEN
+	-- 										A.dblAmountDue 
+	-- 								WHEN 2 THEN 
+	-- 									CASE WHEN B.dblQtyReceived < CurrentBill.dblQtyReceived 
+	-- 										THEN (B.dblTotal + B.dblTax)
+	-- 										ELSE (B.dblTotal + B.dblTax) END
+	-- 								WHEN 3 THEN
+	-- 									CASE WHEN (B.dblTotal + B.dblTax) < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal)
+	-- 										THEN (B.dblTotal + B.dblTax)
+	-- 										ELSE (B.dblTotal + B.dblTax) END
+	-- 								ELSE 0 END),
+	[dblAmountApplied]		=	0,
 	[ysnApplied]			=	0,
 	[intConcurrencyId]		=	0
 FROM tblAPBill A
@@ -369,19 +372,20 @@ SELECT
 												 END  
 										END
 									ELSE 0 END,
-	[dblAmountApplied]		=	(B.dblTotal + B.dblTax) - (CASE B.intPrepayTypeId 
-									WHEN 1 THEN
-											A.dblAmountDue 
-									WHEN 2 THEN 
-										CASE WHEN B.dblQtyReceived < CurrentBill.dblQtyReceived 
-											THEN (B.dblTotal + B.dblTax)
-											ELSE (B.dblTotal + B.dblTax)  END
-									WHEN 3 THEN
+	-- [dblAmountApplied]		=	(B.dblTotal + B.dblTax) - (CASE B.intPrepayTypeId 
+	-- 								WHEN 1 THEN
+	-- 										A.dblAmountDue 
+	-- 								WHEN 2 THEN 
+	-- 									CASE WHEN B.dblQtyReceived < CurrentBill.dblQtyReceived 
+	-- 										THEN (B.dblTotal + B.dblTax)
+	-- 										ELSE (B.dblTotal + B.dblTax)  END
+	-- 								WHEN 3 THEN
                                     
-										CASE WHEN (B.dblTotal + B.dblTax) < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal)
-											THEN (B.dblTotal + B.dblTax)
-											ELSE (B.dblTotal + B.dblTax) END
-									ELSE 0 END),
+	-- 									CASE WHEN (B.dblTotal + B.dblTax) < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal)
+	-- 										THEN (B.dblTotal + B.dblTax)
+	-- 										ELSE (B.dblTotal + B.dblTax) END
+	-- 								ELSE 0 END),
+	[dblAmountApplied]		=	0,
 	[ysnApplied]			=	0,
 	[intConcurrencyId]		=	0
 FROM tblAPBill A
@@ -501,18 +505,19 @@ SELECT
 												 END  
 										END                                        
 									ELSE 0 END,
-	[dblAmountApplied]			=	(B.dblTotal + B.dblTax) - (CASE B.intPrepayTypeId 
-									WHEN 1 THEN
-											A.dblAmountDue 
-									WHEN 2 THEN 
-										CASE WHEN B.dblQtyReceived < CurrentBill.dblQtyReceived 
-											THEN (B.dblTotal + B.dblTax)
-											ELSE (B.dblTotal + B.dblTax) END
-									WHEN 3 THEN
-										CASE WHEN (B.dblTotal + B.dblTax) < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal)
-											THEN (B.dblTotal + B.dblTax)
-											ELSE (B.dblTotal + B.dblTax) END
-									ELSE 0 END),
+	-- [dblAmountApplied]			=	(B.dblTotal + B.dblTax) - (CASE B.intPrepayTypeId 
+	-- 								WHEN 1 THEN
+	-- 										A.dblAmountDue 
+	-- 								WHEN 2 THEN 
+	-- 									CASE WHEN B.dblQtyReceived < CurrentBill.dblQtyReceived 
+	-- 										THEN (B.dblTotal + B.dblTax)
+	-- 										ELSE (B.dblTotal + B.dblTax) END
+	-- 								WHEN 3 THEN
+	-- 									CASE WHEN (B.dblTotal + B.dblTax) < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal)
+	-- 										THEN (B.dblTotal + B.dblTax)
+	-- 										ELSE (B.dblTotal + B.dblTax) END
+	-- 								ELSE 0 END),
+	[dblAmountApplied]		=	0,
 	[ysnApplied]			=	0,
 	[intConcurrencyId]		=	0
 FROM tblAPBill A
@@ -600,18 +605,19 @@ SELECT
 												 END  
 										END                                        
 									ELSE 0 END,
-	[dblAmountApplied]			=	(B.dblTotal + B.dblTax) - (CASE B.intPrepayTypeId 
-									WHEN 1 THEN
-											A.dblAmountDue 
-									WHEN 2 THEN 
-										CASE WHEN B.dblQtyReceived < CurrentBill.dblQtyReceived 
-											THEN (B.dblTotal + B.dblTax)
-											ELSE (B.dblTotal + B.dblTax) END
-									WHEN 3 THEN
-										CASE WHEN (B.dblTotal + B.dblTax) < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal)
-											THEN (B.dblTotal + B.dblTax)
-											ELSE (B.dblTotal + B.dblTax) END
-									ELSE 0 END),
+	-- [dblAmountApplied]			=	(B.dblTotal + B.dblTax) - (CASE B.intPrepayTypeId 
+	-- 								WHEN 1 THEN
+	-- 										A.dblAmountDue 
+	-- 								WHEN 2 THEN 
+	-- 									CASE WHEN B.dblQtyReceived < CurrentBill.dblQtyReceived 
+	-- 										THEN (B.dblTotal + B.dblTax)
+	-- 										ELSE (B.dblTotal + B.dblTax) END
+	-- 								WHEN 3 THEN
+	-- 									CASE WHEN (B.dblTotal + B.dblTax) < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal)
+	-- 										THEN (B.dblTotal + B.dblTax)
+	-- 										ELSE (B.dblTotal + B.dblTax) END
+	-- 								ELSE 0 END),
+	[dblAmountApplied]		=	0,
 	[ysnApplied]			=	0,
 	[intConcurrencyId]		=	0
 FROM tblAPBill A
@@ -694,18 +700,19 @@ SELECT
 												 END  
 										END                                        
 									ELSE 0 END,
-	[dblAmountApplied]			=	(B.dblTotal + B.dblTax) - (CASE B.intPrepayTypeId 
-									WHEN 1 THEN
-											A.dblAmountDue 
-									WHEN 2 THEN 
-										CASE WHEN B.dblQtyReceived < CurrentBill.dblQtyReceived 
-											THEN (B.dblTotal + B.dblTax)
-											ELSE (B.dblTotal + B.dblTax) END
-									WHEN 3 THEN
-										CASE WHEN (B.dblTotal + B.dblTax) < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal)
-											THEN (B.dblTotal + B.dblTax)
-											ELSE (B.dblTotal + B.dblTax) END
-									ELSE 0 END),
+	-- [dblAmountApplied]			=	(B.dblTotal + B.dblTax) - (CASE B.intPrepayTypeId 
+	-- 								WHEN 1 THEN
+	-- 										A.dblAmountDue 
+	-- 								WHEN 2 THEN 
+	-- 									CASE WHEN B.dblQtyReceived < CurrentBill.dblQtyReceived 
+	-- 										THEN (B.dblTotal + B.dblTax)
+	-- 										ELSE (B.dblTotal + B.dblTax) END
+	-- 								WHEN 3 THEN
+	-- 									CASE WHEN (B.dblTotal + B.dblTax) < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal)
+	-- 										THEN (B.dblTotal + B.dblTax)
+	-- 										ELSE (B.dblTotal + B.dblTax) END
+	-- 								ELSE 0 END),
+	[dblAmountApplied]		=	0,
 	[ysnApplied]			=	0,
 	[intConcurrencyId]		=	0
 FROM tblAPBill A
@@ -764,7 +771,8 @@ SELECT
 	[dblTotal]				=	A.dblTotal,
 	[dblBillAmount]			=	CurrentBill.dblTotal,
 	[dblBalance]			=	A.dblAmountDue,
-	[dblAmountApplied]		=	A.dblTotal - A.dblAmountDue, 
+	-- [dblAmountApplied]		=	A.dblTotal - A.dblAmountDue, 
+	[dblAmountApplied]		=	0,
 	[ysnApplied]			=	0,
 	[intConcurrencyId]		=	0
 FROM tblAPBill A
