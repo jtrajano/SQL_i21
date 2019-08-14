@@ -195,16 +195,12 @@ INNER JOIN (
 	FROM tblICInventoryShipmentItem ICISI WITH (NOLOCK)  
 	INNER JOIN tblICInventoryShipment ICIS WITH (NOLOCK) ON ICISI.intInventoryShipmentId = ICIS.intInventoryShipmentId
 ) ICS ON ICS.[intInventoryShipmentItemId] = ARID.[intInventoryShipmentItemId]
-CROSS APPLY (
-	SELECT TOP 1 IT.* 
-	FROM tblICInventoryTransaction IT 
-	WHERE IT.[intTransactionId] = ICS.[intInventoryShipmentId] 
-	  AND IT.[strTransactionId] = ICS.[strShipmentNumber] 
-	  AND IT.[intTransactionDetailId] = ICS.[intInventoryShipmentItemId]
-	  AND IT.[intItemId] = ARID.[intItemId]
-	  AND IT.[ysnIsUnposted] = 0			 
-	  AND ISNULL(IT.[intInTransitSourceLocationId], 0) <> 0 
-) ICIT
+INNER JOIN tblICInventoryTransaction ICIT ON ICIT.[intTransactionId] = ICS.[intInventoryShipmentId] 
+										 AND ICIT.[strTransactionId] = ICS.[strShipmentNumber] 
+										 AND ICIT.[intTransactionDetailId] = ICS.[intInventoryShipmentItemId]
+										 AND ICIT.[intItemId] = ARID.[intItemId]
+										 AND ICIT.[ysnIsUnposted] = 0
+										 AND ISNULL(ICIT.[intInTransitSourceLocationId], 0) <> 0 
 LEFT JOIN (
 	SELECT intContractDetailId  = CPF.intContractDetailId
 		, intContractHeaderId	= CPF.intContractHeaderId 
