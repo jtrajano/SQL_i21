@@ -35,6 +35,13 @@
     [dblTotalRefundCount] DECIMAL(18, 6) NULL,
     [dblTotalRefundAmount] DECIMAL(18, 6) NULL,
 
+	[dblBegBalance] DECIMAL(18, 6) NULL,
+	[dblReplenished] DECIMAL(18, 6) NULL,
+	[dblWithdrawal] DECIMAL(18, 6) NULL,
+	[dblEndBalanceCalculated] DECIMAL(18, 6) NULL,
+	[dblEndBalanceActual] DECIMAL(18, 6) NULL,
+	[dblVariance] DECIMAL(18, 6) NULL,
+
     [intCategoryId] INT NULL,
     [intCommodityId] INT NULL,
     [intCountGroupId] INT NULL,
