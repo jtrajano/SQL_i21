@@ -22,6 +22,9 @@ SELECT ST.*
 	   , strATMFundWithdrawalItemId		 = 	  ATMFundWithdrawalItem.strItemNo
 	   , strATMFundEndBalanceItemId		 = 	  ATMFundEndBalanceItem.strItemNo
 	   , strATMFundVarianceItemId		 = 	  ATMFundVarianceItem.strItemNo
+	   , strChangeFundBegBalanceItemId		 = 	  ChangeFundBegBalanceItem.strItemNo
+	   , strChangeFundEndBalanceItemId		 = 	  ChangeFundEndBalanceItem.strItemNo
+	   , strChangeFundReplenishItemId		 = 	  ChangeFundReplenishItem.strItemNo
 FROM tblSTStore ST
 LEFT JOIN tblSTPaymentOption PO 
 	ON ST.intDefaultPaidoutId = PO.intPaymentOptionId
@@ -58,5 +61,17 @@ LEFT JOIN tblICItem ATMFundEndBalanceItem
 	ON ST.intATMFundEndBalanceItemId = ATMFundEndBalanceItem.intItemId
 LEFT JOIN tblICItem ATMFundVarianceItem 
 	ON ST.intATMFundVarianceItemId = ATMFundVarianceItem.intItemId
+LEFT JOIN tblICItem ChangeFundBegBalanceItem 
+	ON ST.intChangeFundBegBalanceItemId = ChangeFundBegBalanceItem.intItemId
+LEFT JOIN tblICItem ChangeFundEndBalanceItem 
+	ON ST.intChangeFundEndBalanceItemId = ChangeFundEndBalanceItem.intItemId
+LEFT JOIN tblICItem ChangeFundReplenishItem 
+	ON ST.intChangeFundReplenishItemId = ChangeFundReplenishItem.intItemId
+
+
+
+
+	
+	   
 
 

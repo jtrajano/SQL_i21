@@ -123,6 +123,10 @@
 	[intATMFundWithdrawalItemId]	INT NULL, 
 	[intATMFundEndBalanceItemId]	INT NULL, 
 	[intATMFundVarianceItemId]		INT NULL, 
+	[intChangeFundReplenishItemId]	INT NULL, 
+	[intChangeFundEndBalanceItemId]	INT NULL, 
+	[intChangeFundBegBalanceItemId]		INT NULL, 
+
     [intConcurrencyId] INT NOT NULL, 
     CONSTRAINT [PK_tblSTStore] PRIMARY KEY CLUSTERED ([intStoreId] ASC),
     CONSTRAINT [AK_tblSTStore_intStoreNo] UNIQUE NONCLUSTERED ([intStoreNo] ASC), 

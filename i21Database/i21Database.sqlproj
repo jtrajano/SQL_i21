@@ -7995,6 +7995,7 @@
     <Build Include="dbo\Stored Procedures\uspCFGenerateTransactionExportToThirdPartyCSV.sql" />
     <Build Include="dbo\Tables\tblCFExportFactorEventSequenceNumber.sql" />
     <Build Include="dbo\Views\vyuCFExportARBalancesTripleEFormat.sql" />
+    <Build Include="dbo\Tables\tblSTStoreChangeFund.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
