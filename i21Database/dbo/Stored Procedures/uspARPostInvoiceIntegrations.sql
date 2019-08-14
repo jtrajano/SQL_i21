@@ -789,7 +789,7 @@ WHERE ID.[intInventoryShipmentChargeId] IS NULL
 		)
 	AND ID.[strType] NOT IN ('Card Fueling Transaction','CF Tran','CF Invoice')
     AND ISNULL(ID.[strItemType], '') <> 'Other Charge'
-	AND (ISNULL(RI.[intInvoiceId], 0) IS NULL OR ID.[intTicketId] IS NOT NULL)
+	AND (ISNULL(RI.[intInvoiceId], 0) = 0 OR (ISNULL(RI.[intInvoiceId], 0) <> 0 AND ID.[intTicketId] IS NOT NULL))
 
 EXEC dbo.[uspCTInvoicePosted] @ItemsFromInvoice, @UserId
 
