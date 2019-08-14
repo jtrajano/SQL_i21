@@ -425,6 +425,8 @@ BEGIN
 	) as RunningBalanceSource
 
 
+	/*Add this comment to see if changes below will include in the next build*/
+
 	update a set ysnOpenGetBasisDelivery = 1 FROM 
 		@Transaction a
 			join (select intContractHeaderId
