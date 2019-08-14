@@ -48,6 +48,8 @@ BEGIN
 							@intRetailPriceAdjustmentId		= @intRetailPriceAdjustmentId,
 							@intCurrentUserId				= NULL,
 							@ysnHasPreviewReport			= 0,
+							@ysnRecap						= 0,
+							@ysnBatchPost					= 1,
 							@ysnSuccess						= @ysnSuccess	OUTPUT,
 							@strMessage						= @strMessage	OUTPUT
 
