@@ -69,6 +69,7 @@ BEGIN
 			,[strCurrency]						=	tranCur.strCurrency
 			,[dtmDate]							=	A.dtmDate
 			,[strReference]						=	A.strReference
+			,[strLoadShipmentNumber]			=	A.strLoadShipmentNumber
 			,[strSourceNumber]					=	A.strSourceNumber
 			,[intPurchaseDetailId]				=	A.intPurchaseDetailId
 			,[strPurchaseOrderNumber]			=	po.strPurchaseOrderNumber
@@ -304,7 +305,8 @@ BEGIN
 		,[intCurrencyId]					
 		,[strCurrency]					
 		,[dtmDate]						
-		,[strReference]					
+		,[strReference]			
+		,[strLoadShipmentNumber]		
 		,[strSourceNumber]				
 		,[intPurchaseDetailId]			
 		,[strPurchaseOrderNumber]		
@@ -382,7 +384,8 @@ BEGIN
 		,[intCurrencyId]					
 		,[strCurrency]					
 		,[dtmDate]						
-		,[strReference]					
+		,[strReference]			
+		,[strLoadShipmentNumber]
 		,[strSourceNumber]				
 		,[intPurchaseDetailId]			
 		,[strPurchaseOrderNumber]		
