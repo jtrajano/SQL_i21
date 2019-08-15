@@ -1236,11 +1236,11 @@ FROM (
 				, dblLotsFixed = NULL --cd.dblLotsFixed
 				, dblPriceWORollArb = NULL --cd.dblPriceWORollArb
 				, dblCashPrice = 0.00
-				, intSpreadMonthId = CASE WHEN rk.ysnExpired = 1 THEN rk.intNearByFutureMonthId ELSE NULL END
-				, strSpreadMonth = CASE WHEN rk.ysnExpired = 1 THEN rk.strNearByFutureMonth ELSE NULL END
-				, dblSpreadMonthPrice = CASE WHEN rk.ysnExpired = 1 THEN rk.dblNearByFuturePrice ELSE NULL END
-				, dblSpread = CASE WHEN rk.ysnExpired = 1 THEN rk.dblSpread ELSE NULL END
-				, ysnExpired = ISNULL(rk.ysnExpired, 0)
+				, intSpreadMonthId = CASE WHEN strPricingType = 'Priced' THEN CASE WHEN rk.ysnExpired = 1 THEN rk.intNearByFutureMonthId ELSE NULL END ELSE NULL END
+				, strSpreadMonth = CASE WHEN strPricingType = 'Priced' THEN CASE WHEN rk.ysnExpired = 1 THEN rk.strNearByFutureMonth ELSE NULL END ELSE NULL END
+				, dblSpreadMonthPrice = CASE WHEN strPricingType = 'Priced' THEN CASE WHEN rk.ysnExpired = 1 THEN rk.dblNearByFuturePrice ELSE NULL END ELSE NULL END
+				, dblSpread = CASE WHEN strPricingType = 'Priced' THEN CASE WHEN rk.ysnExpired = 1 THEN rk.dblSpread ELSE NULL END ELSE NULL END
+				, ysnExpired = CASE WHEN strPricingType = 'Priced' THEN ISNULL(rk.ysnExpired, 0) ELSE NULL END
 			FROM #tempIntransit it
 			JOIN tblCTContractDetail cd on cd.intContractDetailId = it.intLineNo
 			JOIN tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
@@ -1365,11 +1365,11 @@ FROM (
 				, dblLotsFixed = NULL --cd.dblLotsFixed
 				, dblPriceWORollArb = NULL --cd.dblPriceWORollArb
 				, dblCashPrice = 0.00
-				, intSpreadMonthId = CASE WHEN rk.ysnExpired = 1 THEN rk.intNearByFutureMonthId ELSE NULL END
-				, strSpreadMonth = CASE WHEN rk.ysnExpired = 1 THEN rk.strNearByFutureMonth ELSE NULL END
-				, dblSpreadMonthPrice = CASE WHEN rk.ysnExpired = 1 THEN rk.dblNearByFuturePrice ELSE NULL END
-				, dblSpread = CASE WHEN rk.ysnExpired = 1 THEN rk.dblSpread ELSE NULL END
-				, ysnExpired = ISNULL(rk.ysnExpired, 0)
+				, intSpreadMonthId = CASE WHEN strPricingType = 'Priced' THEN CASE WHEN rk.ysnExpired = 1 THEN rk.intNearByFutureMonthId ELSE NULL END ELSE NULL END
+				, strSpreadMonth = CASE WHEN strPricingType = 'Priced' THEN CASE WHEN rk.ysnExpired = 1 THEN rk.strNearByFutureMonth ELSE NULL END ELSE NULL END
+				, dblSpreadMonthPrice = CASE WHEN strPricingType = 'Priced' THEN CASE WHEN rk.ysnExpired = 1 THEN rk.dblNearByFuturePrice ELSE NULL END ELSE NULL END
+				, dblSpread = CASE WHEN strPricingType = 'Priced' THEN CASE WHEN rk.ysnExpired = 1 THEN rk.dblSpread ELSE NULL END ELSE NULL END
+				, ysnExpired = CASE WHEN strPricingType = 'Priced' THEN ISNULL(rk.ysnExpired, 0) ELSE NULL END
 			FROM #tempIntransit it
 			JOIN tblLGLoadDetail ld on ld.intLoadDetailId = it.intTransactionDetailId
 			JOIN tblCTContractDetail cd on cd.intContractDetailId = it.intLineNo
@@ -1464,7 +1464,7 @@ FROM (
 				, strSpreadMonth = NULL
 				, dblSpreadMonthPrice = NULL
 				, dblSpread = NULL
-				, ysnExpired = 0
+				, ysnExpired = NULL
 			FROM #tempIntransit it
 			WHERE it.intLineNo IS NULL
 			AND it.strTransactionId NOT LIKE 'LS-%'
@@ -1732,11 +1732,11 @@ SELECT  distinct
       ,cd.dblNoOfLots
       ,cd.dblLotsFixed
       ,cd.dblPriceWORollArb ,dblCashPrice
-	  , intSpreadMonthId = CASE WHEN rk.ysnExpired = 1 THEN rk.intNearByFutureMonthId ELSE NULL END
-		, strSpreadMonth = CASE WHEN rk.ysnExpired = 1 THEN rk.strNearByFutureMonth ELSE NULL END
-		, dblSpreadMonthPrice = CASE WHEN rk.ysnExpired = 1 THEN rk.dblNearByFuturePrice ELSE NULL END
-		, dblSpread = CASE WHEN rk.ysnExpired = 1 THEN rk.dblSpread ELSE NULL END
-		, ysnExpired = ISNULL(rk.ysnExpired, 0)
+	  , intSpreadMonthId = CASE WHEN strPricingType = 'Priced' THEN CASE WHEN rk.ysnExpired = 1 THEN rk.intNearByFutureMonthId ELSE NULL END ELSE NULL END
+		, strSpreadMonth = CASE WHEN strPricingType = 'Priced' THEN CASE WHEN rk.ysnExpired = 1 THEN rk.strNearByFutureMonth ELSE NULL END ELSE NULL END
+		, dblSpreadMonthPrice = CASE WHEN strPricingType = 'Priced' THEN CASE WHEN rk.ysnExpired = 1 THEN rk.dblNearByFuturePrice ELSE NULL END ELSE NULL END
+		, dblSpread = CASE WHEN strPricingType = 'Priced' THEN CASE WHEN rk.ysnExpired = 1 THEN rk.dblSpread ELSE NULL END ELSE NULL END
+		, ysnExpired = CASE WHEN strPricingType = 'Priced' THEN ISNULL(rk.ysnExpired, 0) ELSE NULL END
         FROM @tblOpenContractList cd
         LEFT JOIN (
        select 
@@ -1992,11 +1992,11 @@ BEGIN
 					, cd.dblLotsFixed
 					, cd.dblPriceWORollArb
 					, dblCashPrice
-					, intSpreadMonthId = CASE WHEN rk.ysnExpired = 1 THEN rk.intNearByFutureMonthId ELSE NULL END
-					, strSpreadMonth = CASE WHEN rk.ysnExpired = 1 THEN rk.strNearByFutureMonth ELSE NULL END
-					, dblSpreadMonthPrice = CASE WHEN rk.ysnExpired = 1 THEN rk.dblNearByFuturePrice ELSE NULL END
-					, dblSpread = CASE WHEN rk.ysnExpired = 1 THEN rk.dblSpread ELSE NULL END
-					, ysnExpired = ISNULL(rk.ysnExpired, 0)
+					, intSpreadMonthId = CASE WHEN strPricingType = 'Priced' THEN CASE WHEN rk.ysnExpired = 1 THEN rk.intNearByFutureMonthId ELSE NULL END ELSE NULL END
+					, strSpreadMonth = CASE WHEN strPricingType = 'Priced' THEN CASE WHEN rk.ysnExpired = 1 THEN rk.strNearByFutureMonth ELSE NULL END ELSE NULL END
+					, dblSpreadMonthPrice = CASE WHEN strPricingType = 'Priced' THEN CASE WHEN rk.ysnExpired = 1 THEN rk.dblNearByFuturePrice ELSE NULL END ELSE NULL END
+					, dblSpread = CASE WHEN strPricingType = 'Priced' THEN CASE WHEN rk.ysnExpired = 1 THEN rk.dblSpread ELSE NULL END ELSE NULL END
+					, ysnExpired = CASE WHEN strPricingType = 'Priced' THEN ISNULL(rk.ysnExpired, 0) ELSE NULL END
 				FROM @tblOpenContractList cd
 				JOIN vyuRKGetPurchaseInventory l ON cd.intContractDetailId =l.intContractDetailId
 				JOIN tblICItem i on cd.intItemId= i.intItemId and i.strLotTracking<>'No'
@@ -2245,11 +2245,11 @@ FROM (
 				, cd.dblLotsFixed
 				, cd.dblPriceWORollArb
 				, dblCashPrice
-				, intSpreadMonthId = CASE WHEN rk.ysnExpired = 1 THEN rk.intNearByFutureMonthId ELSE NULL END
-				, strSpreadMonth = CASE WHEN rk.ysnExpired = 1 THEN rk.strNearByFutureMonth ELSE NULL END
-				, dblSpreadMonthPrice = CASE WHEN rk.ysnExpired = 1 THEN rk.dblNearByFuturePrice ELSE NULL END
-				, dblSpread = CASE WHEN rk.ysnExpired = 1 THEN rk.dblSpread ELSE NULL END
-				, ysnExpired = ISNULL(rk.ysnExpired, 0)
+				, intSpreadMonthId = CASE WHEN strPricingType = 'Priced' THEN CASE WHEN rk.ysnExpired = 1 THEN rk.intNearByFutureMonthId ELSE NULL END ELSE NULL END
+				, strSpreadMonth = CASE WHEN strPricingType = 'Priced' THEN CASE WHEN rk.ysnExpired = 1 THEN rk.strNearByFutureMonth ELSE NULL END ELSE NULL END
+				, dblSpreadMonthPrice = CASE WHEN strPricingType = 'Priced' THEN CASE WHEN rk.ysnExpired = 1 THEN rk.dblNearByFuturePrice ELSE NULL END ELSE NULL END
+				, dblSpread = CASE WHEN strPricingType = 'Priced' THEN CASE WHEN rk.ysnExpired = 1 THEN rk.dblSpread ELSE NULL END ELSE NULL END
+				, ysnExpired = CASE WHEN strPricingType = 'Priced' THEN ISNULL(rk.ysnExpired, 0) ELSE NULL END
 			FROM @tblOpenContractList cd
 			LEFT JOIN (SELECT sum(LD.dblQuantity)dblQuantity
 							, PCT.intContractDetailId
@@ -2275,7 +2275,7 @@ FROM (
 SELECT *
 	, dblContractPrice = ISNULL(dblContractBasis, 0) + (ISNULL(dblFutures, 0) * ISNULL(dblContractRatio, 1))
 	, dblResult = CONVERT(DECIMAL(24, 6), ((ISNULL(dblMarketBasis, 0) - ISNULL(dblContractBasis, 0) + ISNULL(dblCosts, 0))) * ISNULL(dblResultBasis1, 0)) + CONVERT(DECIMAL(24, 6),((ISNULL(dblFutures, 0) - ISNULL(dblFuturePrice, 0)) * ISNULL(dblMarketFuturesResult1, 0)))
-	, dblResultBasis = CONVERT(DECIMAL(24, 6), ((ISNULL(dblMarketBasis, 0) - (ISNULL(dblContractBasis, 0) + ISNULL(dblCosts, 0)) - (CASE WHEN ysnExpired = 1 THEN dblSpread ELSE 0 END))) * ISNULL(dblOpenQty, 0)) 
+	, dblResultBasis = CONVERT(DECIMAL(24, 6), ((ISNULL(dblMarketBasis, 0) - (ISNULL(dblContractBasis, 0) + ISNULL(dblCosts, 0)) - (CASE WHEN ysnExpired = 1 THEN ISNULL(dblSpread, 0) ELSE 0 END))) * ISNULL(dblOpenQty, 0)) 
 	, dblMarketFuturesResult = CASE WHEN intContractTypeId = 1 THEN CONVERT(DECIMAL(24, 6), ((ISNULL(dblFuturePrice, 0) - ISNULL(dblFutures, 0)) * ISNULL(dblOpenQty, 0)))
 									ELSE 0 END
 	, dblResultCash = CASE WHEN strPricingType = 'Cash' THEN CONVERT(DECIMAL(24, 6), (ISNULL(dblCash, 0) - ISNULL(dblCashPrice, 0)) * ISNULL(dblResult1, 0))
@@ -2676,7 +2676,7 @@ SELECT intRowNum = CONVERT(INT,ROW_NUMBER() OVER(ORDER BY intFutureMarketId DESC
 				  end
 	, dblMarketFuturesResult = CASE WHEN strContractOrInventoryType = 'Inventory' THEN 0
 									WHEN strPricingType = 'Basis' then 0
-									ELSE ((ISNULL(dblFuturePrice, 0) - ISNULL(dblActualFutures, 0) + (CASE WHEN ysnExpired = 1 THEN dblSpread ELSE 0 END)) * dblOpenQty)
+									ELSE ((ISNULL(dblFuturePrice, 0) - ISNULL(dblActualFutures, 0) + (CASE WHEN ysnExpired = 1 THEN ISNULL(dblSpread, 0) ELSE 0 END)) * dblOpenQty)
 									END
 	, dblResultRatio = (CASE WHEN dblContractRatio <> 0 AND dblMarketRatio  <> 0 THEN ((dblMarketPrice - dblContractPrice) * dblOpenQty)
 								- ((dblFuturePrice - dblActualFutures) * dblOpenQty) - dblResultBasis
