@@ -7996,6 +7996,9 @@
     <Build Include="dbo\Tables\tblCFExportFactorEventSequenceNumber.sql" />
     <Build Include="dbo\Views\vyuCFExportARBalancesTripleEFormat.sql" />
     <Build Include="dbo\Tables\tblSTStoreChangeFund.sql" />
+    <Build Include="dbo\Tables\tblTROverrideTaxGroup.sql" />
+    <Build Include="dbo\Tables\tblTROverrideTaxGroupDetail.sql" />
+    <Build Include="dbo\Views\vyuTROverrideTaxGroupDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
