@@ -7997,6 +7997,8 @@
     <Build Include="dbo\Views\vyuCFExportARBalancesTripleEFormat.sql" />
     <Build Include="dbo\Tables\tblSTStoreChangeFund.sql" />
     <Build Include="dbo\Tables\tblSTCheckoutChangeFund.sql" />
+    <Build Include="dbo\Tables\tblSCTicketUberScaleStatusUpdate.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCTicketUpdateUberScaleStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

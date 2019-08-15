@@ -145,6 +145,7 @@
 	[ysnReadyToTransfer] BIT NOT NULL DEFAULT 0, 
 	[ysnExport] BIT NOT NULL DEFAULT 0, 
 	[dtmImportedDate] DATETIME NULL, 
+    [strUberStatusCode] NVARCHAR(3) COLLATE Latin1_General_CI_AS NULL,
     [intEntityShipViaTrailerId] INT NULL, 
     CONSTRAINT [PK_tblSCTicket_intTicketId] PRIMARY KEY CLUSTERED ([intTicketId] ASC), 
     CONSTRAINT [UK_tblSCTicket_intTicketPoolId_strTicketNumber] UNIQUE ([intTicketPoolId], [intTicketType], [strInOutFlag], [strTicketNumber],[intEntityId],[intProcessingLocationId]),
