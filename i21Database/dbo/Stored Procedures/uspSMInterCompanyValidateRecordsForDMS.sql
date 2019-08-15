@@ -184,7 +184,7 @@ BEGIN
 														 CONVERT(VARCHAR(MAX), @intInterCompanyMappingIdToUse) + ', ' +
 														 CONVERT(VARCHAR(MAX), @intCurrentCompanyId) + ', ''' +
 														 CONVERT(VARCHAR(MAX), @strFinishedTransactionId) + ','',' +
-														 '@intReferToDocumentId = ' + CONVERT(VARCHAR(MAX), @intReferToDocumentId) + ', ' +
+														 '@intReferToDocumentId = ' + CONVERT(VARCHAR(MAX), ISNULL(CAST(@intReferToDocumentId AS NVARCHAR), 'NULL')) + ', ' +
 														 '@strDatabaseToUseForUpdate = ''' + CONVERT(VARCHAR(MAX),DB_NAME()) + ''''
 
 									EXEC sp_executesql @sql;
