@@ -674,3 +674,38 @@ SET item.strEPANumber = a.agitm_epa_no
 FROM tblICItem item
 	INNER JOIN agitmmst a ON item.strItemNo = a.agitm_no COLLATE SQL_Latin1_General_CP1_CS_AS
 WHERE a.agitm_rest_chem_rpt_yn = 'Y'
+
+-- Update Medication & Ingredient tags
+INSERT INTO tblICTag(strTagNumber, strType)
+SELECT DISTINCT LTRIM(RTRIM(o.agitm_med_tag)) COLLATE Latin1_General_CI_AS, 'Medication Tag'
+FROM agitmmst o
+WHERE NULLIF(LTRIM(RTRIM(o.agitm_med_tag)) COLLATE Latin1_General_CI_AS, '') IS NOT NULL
+AND NOT EXISTS(
+    SELECT * FROM tblICTag WHERE strTagNumber = LTRIM(RTRIM(o.agitm_med_tag)) COLLATE Latin1_General_CI_AS
+)
+
+INSERT INTO tblICTag(strTagNumber, strType)
+SELECT DISTINCT LTRIM(RTRIM(o.agitm_invc_tag)) COLLATE Latin1_General_CI_AS, 'Ingredient Tag'
+FROM agitmmst o
+WHERE NULLIF(LTRIM(RTRIM(o.agitm_invc_tag)) COLLATE Latin1_General_CI_AS, '') IS NOT NULL
+AND NOT EXISTS(
+    SELECT * FROM tblICTag WHERE strTagNumber = LTRIM(RTRIM(o.agitm_invc_tag)) COLLATE Latin1_General_CI_AS
+)
+
+UPDATE i
+SET i.intMedicationTag = med.intTagId
+FROM agitmmst o
+    INNER JOIN tblICItem i ON i.strItemNo COLLATE Latin1_General_CI_AS  = LTRIM(RTRIM(o.agitm_no)) COLLATE Latin1_General_CI_AS
+    LEFT OUTER JOIN tblICTag med ON med.strTagNumber COLLATE Latin1_General_CI_AS = LTRIM(RTRIM(o.agitm_med_tag)) COLLATE Latin1_General_CI_AS
+        AND med.strType = 'Medication Tag'
+WHERE i.intMedicationTag IS NULL
+    AND o.agitm_med_tag IS NOT NULL
+
+UPDATE i
+SET i.intIngredientTag = inv.intTagId
+FROM agitmmst o
+    INNER JOIN tblICItem i ON i.strItemNo COLLATE Latin1_General_CI_AS  = LTRIM(RTRIM(o.agitm_no)) COLLATE Latin1_General_CI_AS
+    LEFT OUTER JOIN tblICTag inv ON inv.strTagNumber COLLATE Latin1_General_CI_AS = LTRIM(RTRIM(o.agitm_invc_tag)) COLLATE Latin1_General_CI_AS
+        AND inv.strType = 'Ingredient Tag'
+WHERE i.intIngredientTag IS NULL
+    AND o.agitm_invc_tag IS NOT NULL
