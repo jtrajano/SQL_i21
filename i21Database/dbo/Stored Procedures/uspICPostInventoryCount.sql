@@ -57,6 +57,7 @@ BEGIN
 			,@InventoryCount_TransactionType INT = 23
 			,@intLocationId AS INT
 			,@intLockType INT
+			,@strCountBy AS NVARCHAR(50) 
   
 	SELECT TOP 1   
 			@intTransactionId = intInventoryCountId
@@ -66,6 +67,7 @@ BEGIN
 			,@intCreatedEntityId = intEntityId
 			,@strCountDescription = strDescription
 			,@intLocationId = intLocationId
+			,@strCountBy = strCountBy
 	FROM	dbo.tblICInventoryCount
 	WHERE	strCountNo = @strTransactionId  
 END  
@@ -376,8 +378,7 @@ BEGIN
 
 	-----------------------------------
 	--  Call the costing routine 
-	-----------------------------------
-	
+	-----------------------------------	
 	IF EXISTS (SELECT TOP 1 1 FROM @ItemsForAdjust)
 	BEGIN 
 		-----------------------------------------
@@ -441,6 +442,59 @@ BEGIN
 	END				
 
 	IF @intReturnValue < 0 GOTO With_Rollback_Exit
+
+	-----------------------------------
+	--  Post the 'Pack Count'
+	-----------------------------------	
+	IF @strCountBy = 'Pack'
+	BEGIN 
+		INSERT INTO tblICInventoryShiftPhysicalHistory (
+			intCountGroupId
+			,strShiftNo
+			,intLocationId
+			,intSubLocationId
+			,intStorageLocationId
+			,dtmDate
+			,dblSystemCount
+			,dblQtyReceived
+			,dblQtySold
+			,dblPhysicalCount
+			,intTransactionId
+			,strTransactionId
+			,intTransactionDetailId
+			,ysnIsUnposted
+			,dtmCreated
+			,intCreatedEntityId
+			,intConcurrencyId		
+		)
+		SELECT 
+			intCountGroupId = cd.intCountGroupId
+			,strShiftNo = c.strShiftNo
+			,intLocationId = c.intLocationId
+			,intSubLocationId = cd.intSubLocationId
+			,intStorageLocationId = cd.intStorageLocationId
+			,dtmDate = c.dtmCountDate
+			,dblSystemCount = cd.dblSystemCount
+			,dblQtyReceived = cd.dblQtyReceived
+			,dblQtySold = cd.dblQtySold
+			,dblPhysicalCount = cd.dblPhysicalCount
+			,intTransactionId = c.intInventoryCountId
+			,strTransactionId = c.strCountNo
+			,intTransactionDetailId = cd.intInventoryCountDetailId
+			,ysnIsUnposted = 0 
+			,dtmCreated = GETDATE()
+			,intCreatedEntityId = @intEntityUserSecurityId
+			,intConcurrencyId = 1			
+		FROM 
+			tblICInventoryCount c INNER JOIN tblICInventoryCountDetail cd
+				ON c.intInventoryCountId = cd.intInventoryCountId
+		WHERE
+			c.strCountNo = @strTransactionId
+			AND cd.intCountGroupId IS NOT NULL 
+			AND cd.intItemId IS NULL 
+			AND cd.dblPhysicalCount IS NOT NULL 
+	END 
+
 END   
 
 --------------------------------------------------------------------------------------------  
@@ -492,7 +546,22 @@ BEGIN
 			,@intEntityUserSecurityId
 			,@ysnRecap
 		
-	IF @intReturnValue < 0 GOTO With_Rollback_Exit				
+	IF @intReturnValue < 0 GOTO With_Rollback_Exit		
+	
+
+	-----------------------------------
+	--  Unpost the 'Pack Count'
+	-----------------------------------
+	IF @strCountBy = 'Pack'
+	BEGIN 
+		UPDATE tblICInventoryShiftPhysicalHistory
+		SET ysnIsUnposted = 1
+		FROM 
+			tblICInventoryShiftPhysicalHistory
+		WHERE 
+			strTransactionId = @strTransactionId
+			AND ysnIsUnposted = 0
+	END 
 END   
 
 --------------------------------------------------------------------------------------------  
@@ -514,7 +583,7 @@ BEGIN
 			@GLEntries
 			,@intEntityUserSecurityId
 	END 
-	ELSE 
+	ELSE IF @strCountBy <> 'Pack'
 	BEGIN 
 		-- Post preview is not available. Financials are only booked for company-owned stocks.
 		EXEC uspICRaiseError 80185; 

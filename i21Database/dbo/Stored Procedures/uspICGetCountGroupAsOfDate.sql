@@ -30,6 +30,22 @@ DECLARE @tblInventoryTransaction TABLE(
 	,dblSold				NUMERIC(38, 20)
 );
 
+DECLARE @dtmDateFrom AS DATETIME 
+
+-- Get the last 'pack count'
+SELECT TOP 1 
+	@dtmDateFrom = spHistory.dtmDate
+FROM 
+	tblICInventoryShiftPhysicalHistory spHistory
+WHERE
+	spHistory.intCountGroupId = @intCountGroupId
+	AND spHistory.intLocationId = @intLocationId
+	AND (@intSubLocationId IS NULL OR @intSubLocationId = spHistory.intSubLocationId)
+	AND (@intStorageLocationId IS NULL OR @intStorageLocationId = spHistory.intStorageLocationId)
+	AND spHistory.ysnIsUnposted = 0 
+ORDER BY 
+	intInventoryShiftPhysicalCountId DESC 
+
 --INSERT INTO @tblInventoryTransaction (
 --	intCountGroupId
 --	,intLocationId
@@ -59,7 +75,36 @@ DECLARE @tblInventoryTransaction TABLE(
 --	AND (@intSubLocationId IS NULL OR @intSubLocationId = t.intSubLocationId)
 --	AND (@intStorageLocationId IS NULL OR @intStorageLocationId = t.intStorageLocationId)
 
--- Get the On-Hand Qty
+---- Get the On-Hand Qty
+--INSERT INTO @tblInventoryTransaction (
+--	intCountGroupId
+--	,intLocationId
+--	,intSubLocationId
+--	,intStorageLocationId
+--	,dtmDate
+--	,dblOnHandQty
+--)
+--SELECT	
+--	IL.intCountGroupId
+--	,intLocationId		= IL.intLocationId
+--	,intSubLocationId	= t.intSubLocationId 
+--	,intStorageLocationId = t.intStorageLocationId 
+--	,dtmDate			= dbo.fnRemoveTimeOnDate(dtmDate)
+--	,dblOnHandQty		= dbo.fnCalculateQtyBetweenUOM(t.intItemUOMId, stockUnit.intItemUOMId, t.dblQty) 
+--FROM	
+--	tblICInventoryTransaction t INNER JOIN tblICItemLocation IL 
+--		ON IL.intItemLocationId = t.intItemLocationId	
+--	INNER JOIN tblICItemUOM stockUnit
+--		ON stockUnit.intItemId = t.intItemId
+--		AND stockUnit.ysnStockUnit = 1
+--WHERE	
+--	IL.intCountGroupId = @intCountGroupId
+--	AND dbo.fnDateLessThanEquals(t.dtmDate, @dtmDate) = 1
+--	AND IL.intLocationId = @intLocationId
+--	AND (@intSubLocationId IS NULL OR @intSubLocationId = t.intSubLocationId)
+--	AND (@intStorageLocationId IS NULL OR @intStorageLocationId = t.intStorageLocationId)
+
+-- Get the Begin Qty
 INSERT INTO @tblInventoryTransaction (
 	intCountGroupId
 	,intLocationId
@@ -68,27 +113,29 @@ INSERT INTO @tblInventoryTransaction (
 	,dtmDate
 	,dblOnHandQty
 )
-SELECT	
-	IL.intCountGroupId
-	,intLocationId		= IL.intLocationId
-	,intSubLocationId	= t.intSubLocationId 
-	,intStorageLocationId = t.intStorageLocationId 
-	,dtmDate			= dbo.fnRemoveTimeOnDate(dtmDate)
-	,dblOnHandQty		= dbo.fnCalculateQtyBetweenUOM(t.intItemUOMId, stockUnit.intItemUOMId, t.dblQty) 
-FROM	
-	tblICInventoryTransaction t INNER JOIN tblICItemLocation IL 
-		ON IL.intItemLocationId = t.intItemLocationId	
-	INNER JOIN tblICItemUOM stockUnit
-		ON stockUnit.intItemId = t.intItemId
-		AND stockUnit.ysnStockUnit = 1
-WHERE	
-	IL.intCountGroupId = @intCountGroupId
-	AND dbo.fnDateLessThanEquals(t.dtmDate, @dtmDate) = 1
-	AND IL.intLocationId = @intLocationId
-	AND (@intSubLocationId IS NULL OR @intSubLocationId = t.intSubLocationId)
-	AND (@intStorageLocationId IS NULL OR @intStorageLocationId = t.intStorageLocationId)
+SELECT TOP 1 
+	spHistory.intCountGroupId
+	,spHistory.intLocationId
+	,spHistory.intSubLocationId
+	,spHistory.intStorageLocationId
+	,@dtmDate
+	,dblOnHandQty = ISNULL(spHistory.dblPhysicalCount, 0) 
+		--ISNULL(spHistory.dblPhysicalCount, 0) 
+		--- ISNULL(spHistory.dblSystemCount, 0) 
+		--+ ISNULL(spHistory.dblQtyReceived, 0) 
+		--- ISNULL(spHistory.dblQtySold, 0)
+FROM 
+	tblICInventoryShiftPhysicalHistory spHistory
+WHERE
+	spHistory.intCountGroupId = @intCountGroupId
+	AND spHistory.intLocationId = @intLocationId
+	AND (@intSubLocationId IS NULL OR @intSubLocationId = spHistory.intSubLocationId)
+	AND (@intStorageLocationId IS NULL OR @intStorageLocationId = spHistory.intStorageLocationId)
+	AND spHistory.ysnIsUnposted = 0 
+ORDER BY 
+	spHistory.intInventoryShiftPhysicalCountId DESC  
 
--- Get the unposted receipts
+-- Get the receipts
 INSERT INTO @tblInventoryTransaction (
 	intCountGroupId
 	,intLocationId
@@ -119,11 +166,12 @@ FROM
 		AND stockUnit.ysnStockUnit = 1
 WHERE	
 	il.intCountGroupId = @intCountGroupId
+	AND dbo.fnDateGreaterThanEquals(r.dtmReceiptDate, @dtmDateFrom) = 1
 	AND dbo.fnDateLessThanEquals(r.dtmReceiptDate, @dtmDate) = 1
 	AND il.intLocationId = @intLocationId
 	AND (@intSubLocationId IS NULL OR @intSubLocationId = ri.intSubLocationId)
 	AND (@intStorageLocationId IS NULL OR @intStorageLocationId = ri.intStorageLocationId)
-	AND ISNULL(r.ysnPosted, 0) = 0 
+	--AND ISNULL(r.ysnPosted, 0) = 0 
 
 -- Get the unposted sales invoices
 INSERT INTO @tblInventoryTransaction (
@@ -152,11 +200,12 @@ FROM
 		AND stockUnit.ysnStockUnit = 1
 WHERE	
 	il.intCountGroupId = @intCountGroupId
+	AND dbo.fnDateGreaterThanEquals(inv.dtmDate, @dtmDateFrom) = 1
 	AND dbo.fnDateLessThanEquals(inv.dtmDate, @dtmDate) = 1
 	AND il.intLocationId = @intLocationId
 	AND (@intSubLocationId IS NULL OR @intSubLocationId = invD.intSubLocationId)
 	AND (@intStorageLocationId IS NULL OR @intStorageLocationId = invD.intStorageLocationId)
-	AND ISNULL(inv.ysnPosted, 0) = 0 
+	--AND ISNULL(inv.ysnPosted, 0) = 0 
 
 -- Get the unposted check out -> Stock Movement
 INSERT INTO @tblInventoryTransaction (
@@ -186,11 +235,12 @@ FROM
 		AND il.intItemId = itemUOM.intItemId
 WHERE	
 	il.intCountGroupId = @intCountGroupId
+	AND dbo.fnDateGreaterThanEquals(ch.dtmCheckoutDate, @dtmDateFrom) = 1
 	AND dbo.fnDateLessThanEquals(ch.dtmCheckoutDate, @dtmDate) = 1
 	AND il.intLocationId = @intLocationId
 	AND (@intSubLocationId IS NULL OR @intSubLocationId = ch.intCompanyLocationSubLocationId)
 	AND (@intStorageLocationId IS NULL OR @intStorageLocationId = ch.intStorageLocationId)
-	AND ch.intInvoiceId IS NULL -- If NULL, check out is not yet posted. 
+	--AND ch.intInvoiceId IS NULL -- If NULL, check out is not yet posted. 
 	
 -- Return the result back. 
 SELECT 
