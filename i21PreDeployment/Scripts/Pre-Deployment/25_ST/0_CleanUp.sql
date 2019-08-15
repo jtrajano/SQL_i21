@@ -421,6 +421,30 @@ IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = N'tb
 ----------------------------------------------------------------------------------------------------------------------------------
 
 
+
+----------------------------------------------------------------------------------------------------------------------------------
+-- Start: Remove records from tblSTRegisterSetup that strRegisterClass = null or empty and strXmlVersion is null or empty
+----------------------------------------------------------------------------------------------------------------------------------
+IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = N'tblSTRegisterSetup')
+	BEGIN
+		EXEC('
+				DELETE FROM tblSTRegisterSetup
+				WHERE strRegisterClass IS NULL
+					AND strXmlVersion IS NULL
+
+				DELETE FROM tblSTRegisterSetup
+				WHERE strRegisterClass = ''''
+					AND strXmlVersion = ''''
+			')
+	END
+----------------------------------------------------------------------------------------------------------------------------------
+-- End: Remove records from tblSTRegisterSetup that strRegisterClass = null or empty and strXmlVersion is null or empty
+----------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
 ----------------------------------------------------------------------------------------------------------------------------------
 -- Start: DROP uspSTCStoreSQLScheduler
 ----------------------------------------------------------------------------------------------------------------------------------

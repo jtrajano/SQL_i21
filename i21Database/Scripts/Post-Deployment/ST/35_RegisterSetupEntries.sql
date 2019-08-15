@@ -31,7 +31,7 @@ IF (@intTableCount = 3)
 		BEGIN
 			-- Version 3.4
 			SET @strRegisterClass		= N'PASSPORT'
-			SET @strXmlVersion	= N'3.4'
+			SET @strXmlVersion			= N'3.4'
 
 			-- HEADER
 			IF NOT EXISTS(SELECT TOP 1 1 FROM tblSTRegisterSetup WHERE strRegisterClass = @strRegisterClass AND strXmlVersion = @strXmlVersion)
@@ -44,9 +44,9 @@ IF (@intTableCount = 3)
 						intConcurrencyId
 					)
 					SELECT 
-						strRegisterClass			= @strRegisterClass,
-						strXmlVersion	= @strXmlVersion,
-						intConcurrencyId		= 1
+						strRegisterClass	= @strRegisterClass,
+						strXmlVersion		= @strXmlVersion,
+						intConcurrencyId	= 1
 
 
 					-- Get New created Id
