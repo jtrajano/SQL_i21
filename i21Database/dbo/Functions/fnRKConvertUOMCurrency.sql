@@ -107,7 +107,10 @@ BEGIN
 		ELSE
 		BEGIN
 			SET @dblRate = 1
+		END
 
+		IF (@intCurrencyExchangeRateId IS NULL)
+		BEGIN
 			SELECT TOP 1 @SubFromCurrency = 1
 			FROM tblSMCurrency
 			WHERE intCurrencyID = @FromCurrencyId AND ysnSubCurrency = 1
