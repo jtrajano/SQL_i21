@@ -5,6 +5,8 @@
 	[intSourceRecordId]								INT NOT NULL,
 	[intDestinationRecordId]						INT NOT NULL,
 	[intDestinationCompanyId]						INT NULL,
+	[intSourceActivityId]							INT NULL,
+	[intDestinationActivityId]						INT NULL,
 	[dtmCreated]									DATETIME NULL DEFAULT(GETDATE())
 	
 	CONSTRAINT [PK_tblSMInterCompanyTransferLogForComment_intInterCompanyTransferLogForCommentId] PRIMARY KEY CLUSTERED ([intInterCompanyTransferLogForCommentId] ASC)

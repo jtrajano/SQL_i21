@@ -250,9 +250,9 @@ BEGIN
 
 
 			INSERT INTO tblSMInterCompanyTransferLogForComment (
-				[strTable], [intSourceRecordId], [intDestinationRecordId], [intDestinationCompanyId]
+				[strTable], [intSourceRecordId], [intDestinationRecordId], [intDestinationCompanyId], [intSourceActivityId], [intDestinationActivityId]
 			)
-			VALUES ('tblSMActivity', @intActivityId, @intNewActivityId, @intDestinationCompanyId);
+			VALUES ('tblSMActivity', @intActivityId, @intNewActivityId, @intDestinationCompanyId, @intActivityId, @intNewActivityId);
 					
 			----------------------------------------ACTIVITY ATTENDEE----------------------------------------
 			INSERT INTO #TempActivityAttendee (
@@ -281,9 +281,9 @@ BEGIN
 				--SET @intNewActivityAttendeeId = SCOPE_IDENTITY()
 
 				INSERT INTO tblSMInterCompanyTransferLogForComment (
-					[strTable], [intSourceRecordId], [intDestinationRecordId], [intDestinationCompanyId]
+					[strTable], [intSourceRecordId], [intDestinationRecordId], [intDestinationCompanyId], [intSourceActivityId], [intDestinationActivityId]
 				)
-				VALUES ('tblSMActivityAttendee', @intActivityAttendeeId, @intNewActivityAttendeeId, @intDestinationCompanyId);
+				VALUES ('tblSMActivityAttendee', @intActivityAttendeeId, @intNewActivityAttendeeId, @intDestinationCompanyId, @intActivityId, @intNewActivityId);
 
 				DELETE FROM #TempActivityAttendee where intActivityAttendeeId = @intActivityAttendeeId
 			END
@@ -318,9 +318,9 @@ BEGIN
 				--SET @intNewCommentId = SCOPE_IDENTITY()
 
 				INSERT INTO tblSMInterCompanyTransferLogForComment (
-					[strTable], [intSourceRecordId], [intDestinationRecordId], [intDestinationCompanyId]
+					[strTable], [intSourceRecordId], [intDestinationRecordId], [intDestinationCompanyId], [intSourceActivityId], [intDestinationActivityId]
 				)
-				VALUES ('tblSMComment', @intCommentId, @intNewCommentId, @intDestinationCompanyId)
+				VALUES ('tblSMComment', @intCommentId, @intNewCommentId, @intDestinationCompanyId, @intActivityId, @intNewActivityId)
 
 				----------------------------------------ACTIVITY COMMENTS NOTIFICATION----------------------------------------
 				--copy all notification for this comment, greater than one, due to we can mention any user
@@ -355,9 +355,9 @@ BEGIN
 						--SET @intNewNotificationId = SCOPE_IDENTITY();
 
 						INSERT INTO tblSMInterCompanyTransferLogForComment (
-							[strTable], [intSourceRecordId], [intDestinationRecordId], [intDestinationCompanyId]
+							[strTable], [intSourceRecordId], [intDestinationRecordId], [intDestinationCompanyId], [intSourceActivityId], [intDestinationActivityId]
 						)
-						VALUES ('tblSMNotification', @intNotificationId, @intNewNotificationId, @intDestinationCompanyId);
+						VALUES ('tblSMNotification', @intNotificationId, @intNewNotificationId, @intDestinationCompanyId, @intActivityId, @intNewActivityId);
 
 						DELETE FROM #TempNotification where intNotificationId = @intNotificationId
 					END
@@ -466,9 +466,9 @@ BEGIN
 				EXEC sp_executesql @sql, @ParamIntDefinition, @paramOut = @intNewActivityAttendeeId OUTPUT;
 
 				INSERT INTO tblSMInterCompanyTransferLogForComment (
-					[strTable], [intSourceRecordId], [intDestinationRecordId], [intDestinationCompanyId]
+					[strTable], [intSourceRecordId], [intDestinationRecordId], [intDestinationCompanyId], [intSourceActivityId], [intDestinationActivityId]
 				)
-				VALUES ('tblSMActivityAttendee', @intActivityAttendeeId, @intNewActivityAttendeeId, @intDestinationCompanyId);
+				VALUES ('tblSMActivityAttendee', @intActivityAttendeeId, @intNewActivityAttendeeId, @intDestinationCompanyId, @intSourceActivityId, @intDestinationActivityId);
 			
 				DELETE FROM #TempActivityAttendee where intActivityAttendeeId = @intActivityAttendeeId
 			END
@@ -541,9 +541,9 @@ BEGIN
 				--SET @intNewCommentId = SCOPE_IDENTITY()
 
 				INSERT INTO tblSMInterCompanyTransferLogForComment (
-					[strTable], [intSourceRecordId], [intDestinationRecordId], [intDestinationCompanyId]
+					[strTable], [intSourceRecordId], [intDestinationRecordId], [intDestinationCompanyId], [intSourceActivityId], [intDestinationActivityId]
 				)
-				VALUES ('tblSMComment', @intCommentId, @intNewCommentId, @intDestinationCompanyId)
+				VALUES ('tblSMComment', @intCommentId, @intNewCommentId, @intDestinationCompanyId, @intSourceActivityId, @intDestinationActivityId)
 
 				----------------------------------------ACTIVITY COMMENTS NOTIFICATION----------------------------------------
 				--copy all notification for this comment, greater than one, due to we can mention any user
@@ -586,9 +586,9 @@ BEGIN
 						--SET @intNewNotificationId = SCOPE_IDENTITY();
 
 						INSERT INTO tblSMInterCompanyTransferLogForComment (
-							[strTable], [intSourceRecordId], [intDestinationRecordId], [intDestinationCompanyId]
+							[strTable], [intSourceRecordId], [intDestinationRecordId], [intDestinationCompanyId], [intSourceActivityId], [intDestinationActivityId]
 						)
-						VALUES ('tblSMNotification', @intNotificationId, @intNewNotificationId, @intDestinationCompanyId);
+						VALUES ('tblSMNotification', @intNotificationId, @intNewNotificationId, @intDestinationCompanyId, @intSourceActivityId, @intDestinationActivityId);
 
 						DELETE FROM #TempNotification where intNotificationId = @intNotificationId
 					END
