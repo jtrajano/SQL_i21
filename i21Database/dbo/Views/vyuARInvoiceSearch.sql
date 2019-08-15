@@ -13,7 +13,7 @@ SELECT
 	,strBOLNumber					= I.strBOLNumber
 	,intTermId						= I.intTermId
 	,intAccountId					= I.intAccountId
-	,dtmDate						= I.dtmDate
+	,dtmDate						= CAST(I.dtmDate AS DATE)
 	,dtmDueDate						= I.dtmDueDate
 	,dtmPostDate					= I.dtmPostDate
 	,dtmShipDate					= I.dtmShipDate

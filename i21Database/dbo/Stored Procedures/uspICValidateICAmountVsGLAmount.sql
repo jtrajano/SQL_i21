@@ -91,7 +91,7 @@ BEGIN
 			,[strBatchId] = t.strBatchId			
 			,[dblICAmount] = 
 				SUM (
-					ROUND(dbo.fnMultiply(-t.dblQty, t.dblCost) + ISNULL(t.dblValue, 0), 2)
+					-ROUND(dbo.fnMultiply(t.dblQty, t.dblCost) + ISNULL(t.dblValue, 0), 2)
 				)
 			,[intAccountId] = glAccount.intAccountId
 		FROM	
@@ -129,7 +129,7 @@ BEGIN
 			,[strBatchId] = t.strBatchId			
 			,[dblICAmount] = 
 				SUM (
-					ROUND(dbo.fnMultiply(t.dblQty, t.dblCost) + ISNULL(t.dblValue, 0), 2)
+					-ROUND(dbo.fnMultiply(t.dblQty, t.dblCost) + ISNULL(t.dblValue, 0), 2)
 				)
 			,[intAccountId] = glAccount.intAccountId
 		FROM	

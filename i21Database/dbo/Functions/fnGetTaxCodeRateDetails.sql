@@ -111,7 +111,8 @@ BEGIN
 			OR 
 				(SMTCR.[strCalculationMethod] <> 'Unit')
 			)
-		AND CAST(@TransactionDate AS DATE) >= CAST([dtmEffectiveDate]  AS DATE)
+		AND ((CAST(@TransactionDate AS TIME) = '00:00:00:000' AND CAST(@TransactionDate AS DATE) >= CAST([dtmEffectiveDate] AS DATE)) OR 
+			 (CAST(@TransactionDate AS TIME) <> '00:00:00:000' AND @TransactionDate >= dtmEffectiveDate))
 	ORDER BY 
 		 (CASE 
 			WHEN SMTCR.[strCalculationMethod] = 'Unit' AND (UOM.[intItemUOMId] = @ItemUOMId AND @ItemUOMId IS NOT NULL) THEN 4

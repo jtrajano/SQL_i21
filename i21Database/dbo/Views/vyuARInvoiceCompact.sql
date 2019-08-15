@@ -8,7 +8,7 @@ SELECT
 	,intEntityCustomerId			= ARC.[intEntityId]
 	,strTransactionType				= ARI.strTransactionType
 	,strType						= ISNULL(ARI.strType, 'Standard')	
-	,dtmDate						= ARI.dtmDate
+	,dtmDate						= CAST(ARI.dtmDate AS DATE)
 	,dtmDueDate						= ARI.dtmDueDate
 	,dtmPostDate					= ARI.dtmPostDate
 	,dtmShipDate					= ARI.dtmShipDate

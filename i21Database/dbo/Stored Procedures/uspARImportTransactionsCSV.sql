@@ -489,6 +489,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 							,[dblCurrencyExchangeRate]
 							,[intSubCurrencyId]
 							,[dblSubCurrencyRate]
+							,[ysnUseOriginIdAsInvoiceNumber]
 						)
 						SELECT 
 							 [strSourceTransaction]		= 'Import'
@@ -591,6 +592,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 							,[dblCurrencyExchangeRate]	= 1.000000
 							,[intSubCurrencyId]			= NULL
 							,[dblSubCurrencyRate]		= 1.000000
+							,[ysnUseOriginIdAsInvoiceNumber] = CASE WHEN @ImportFormat = @IMPORTFORMAT_CARQUEST THEN 1 ELSE 0 END
 				
 						IF @ImportFormat = @IMPORTFORMAT_CARQUEST
 							BEGIN
