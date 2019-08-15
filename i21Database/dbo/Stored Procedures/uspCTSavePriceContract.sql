@@ -146,7 +146,7 @@ BEGIN TRY
 					SELECT @intFutOptTransactionHeaderId = intFutOptTransactionHeaderId FROM tblRKFutOptTransaction WHERE intFutOptTransactionId = @intOutputId
 					EXEC uspRKFutOptTransactionHistory @intOutputId, @intFutOptTransactionHeaderId, 'Price Contracts', @intUserId, 'DELETE'
 					UPDATE tblCTPriceFixationDetail SET intFutOptTransactionId = NULL WHERE intPriceFixationDetailId = @intPriceFixationDetailId
-					EXEC uspRKDeleteAutoHedge @intFutOptTransactionId
+					EXEC uspRKDeleteAutoHedge @intFutOptTransactionId, @intUserId
 				END
 			END 
 			SELECT	@intPriceFixationDetailId = MIN(intPriceFixationDetailId)	FROM	tblCTPriceFixationDetail WHERE intPriceFixationId = @intPriceFixationId AND intPriceFixationDetailId > @intPriceFixationDetailId

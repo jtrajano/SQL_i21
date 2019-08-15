@@ -185,7 +185,7 @@ BEGIN TRY
 						SET		intFutOptTransactionId = NULL
 						WHERE	intPriceFixationDetailId = @intPriceFixationDetailId
 
-						EXEC	uspRKDeleteAutoHedge @intFutOptTransactionId
+						EXEC	uspRKDeleteAutoHedge @intFutOptTransactionId, @intUserId
 					END
 
 					SELECT	@intPriceFixationDetailId = MIN(intPriceFixationDetailId) 
