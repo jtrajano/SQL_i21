@@ -373,7 +373,7 @@ BEGIN
 		,@AccountId						= [intAccountId]
 		,@CurrencyId					= [intCurrencyId]
 		,@TermId						= [intTermId]
-		,@Date							= CAST(ISNULL([dtmDate], @DateNow) AS DATE)
+		,@Date							= CASE WHEN ISNULL([strSourceTransaction],'') = 'Transport Load' THEN ISNULL([dtmDate], @DateNow) ELSE CAST(ISNULL([dtmDate], @DateNow) AS DATE) END
 		,@DueDate						= [dtmDueDate]
 		,@ShipDate						= CAST(ISNULL([dtmShipDate], [dtmPostDate]) AS DATE)
 		,@CalculatedDate				= [dtmCalculated]
@@ -1376,7 +1376,7 @@ BEGIN TRY
 			,@AccountId						= [intAccountId] 
 			,@CurrencyId					= ISNULL([intCurrencyId], [dbo].[fnARGetCustomerDefaultCurrency]([intEntityCustomerId]))
 			,@TermId						= [intTermId]
-			,@Date							= CAST([dtmDate] AS DATE)
+			,@Date							= CASE WHEN [strSourceTransaction] = 'Transport Load' THEN [dtmDate] ELSE CAST([dtmDate] AS DATE) END
 			,@DueDate						= [dtmDueDate]
 			,@ShipDate						= [dtmShipDate]
 			,@CalculatedDate				= [dtmCalculated]

@@ -28,7 +28,7 @@ SELECT I.intInvoiceId
 FROM (
 	SELECT I.intInvoiceId
 		 , I.intEntityCustomerId
-		 , I.dtmDate
+		 , dtmDate = CAST(I.dtmDate AS DATE)
 		 , I.dtmDueDate
 		 , I.strType
 		 , I.intTermId
@@ -75,7 +75,7 @@ FROM (
 		)		
 	) I
 	OUTER APPLY (
-		SELECT TOP 1 dblDiscount = CASE WHEN GETDATE() BETWEEN I.dtmDate AND DATEADD(DAYOFYEAR, T.intDiscountDay, I.dtmDate) THEN I.dblInvoiceTotal * (T.dblDiscountEP/100) ELSE 0.00 END
+		SELECT TOP 1 dblDiscount = CASE WHEN GETDATE() BETWEEN CAST(I.dtmDate AS DATE) AND DATEADD(DAYOFYEAR, T.intDiscountDay, I.dtmDate) THEN I.dblInvoiceTotal * (T.dblDiscountEP/100) ELSE 0.00 END
 		FROM dbo.tblSMTerm T
 		WHERE T.intTermID = I.intTermId
 	) DISCOUNT
