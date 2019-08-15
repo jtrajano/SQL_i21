@@ -26,7 +26,6 @@
     [dblWeightQty] NUMERIC(38, 20) NULL DEFAULT((0)),
     [dblNetQty] NUMERIC(38, 20) NULL DEFAULT((0)),
     [ysnRecount] BIT NOT NULL DEFAULT ((0)), 
-	[dblBeginQty] NUMERIC(38, 20) NOT NULL DEFAULT ((0)), 
 	[dblQtyReceived] NUMERIC(38, 20) NULL DEFAULT((0)),
 	[dblQtySold] NUMERIC(38, 20) NULL DEFAULT((0)),
     [intEntityUserSecurityId] INT NOT NULL, 

@@ -12,7 +12,7 @@ CREATE TABLE [dbo].[tblICInventoryShiftPhysicalHistory]
 	[intSubLocationId] INT NULL,
 	[intStorageLocationId] INT NULL,
 	[dtmDate] DATETIME NOT NULL, 
-	[dblBeginQty] NUMERIC(38, 20) NOT NULL DEFAULT 0, 
+	[dblSystemCount] NUMERIC(38, 20) NOT NULL DEFAULT 0, 
 	[dblQtyReceived] NUMERIC(38, 20) NOT NULL DEFAULT 0, 
 	[dblQtySold] NUMERIC(38, 20) NOT NULL DEFAULT 0, 	
 	[dblPhysicalCount] NUMERIC(38, 20) NOT NULL DEFAULT 0, 	
