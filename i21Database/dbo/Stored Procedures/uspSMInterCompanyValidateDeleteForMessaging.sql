@@ -28,15 +28,13 @@ BEGIN
 	DECLARE @strReferenceServerName NVARCHAR(250);
 	DECLARE @strReferenceDatabaseName NVARCHAR(250);
 	DECLARE @intReferenceActualInterCompanyId INT;
-	DECLARE @intIdForDelete INT;
 	
 	SELECT
 		@intSourceRecordId = intSourceRecordId,
 		@intDestinationRecordId = intDestinationRecordId,
 		@intDestinationCompanyId = intDestinationCompanyId
 	FROM tblSMInterCompanyTransferLogForComment
-	WHERE intSourceRecordId = @intIdForDelete
-	AND intInterCompanyTransferLogForCommentId = @intInterCompanyTransferLogForCommentId
+	WHERE intInterCompanyTransferLogForCommentId = @intInterCompanyTransferLogForCommentId
 		
 	IF ISNULL(@intSourceRecordId, 0) <> 0 AND ISNULL(@intDestinationRecordId, 0) <> 0
 	BEGIN
