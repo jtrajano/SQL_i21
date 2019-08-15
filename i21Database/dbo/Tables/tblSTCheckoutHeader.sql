@@ -36,15 +36,17 @@
     [dblTotalRefundAmount] DECIMAL(18, 6) NULL,
 
 	-- ATM
-	[dblATMBegBalance]				DECIMAL(18, 6) NULL,
-	[dblATMReplenished]				DECIMAL(18, 6) NULL,
-	[dblATMWithdrawal]				DECIMAL(18, 6) NULL,
-	[dblATMEndBalanceCalculated]	DECIMAL(18, 6) NULL,
-	[dblATMEndBalanceActual]		DECIMAL(18, 6) NULL,
-	[dblATMVariance]				DECIMAL(18, 6) NULL,
+	[dblATMBegBalance]					DECIMAL(18, 6) NULL,
+	[dblATMReplenished]					DECIMAL(18, 6) NULL,
+	[dblATMWithdrawal]					DECIMAL(18, 6) NULL,
+	[dblATMEndBalanceCalculated]		DECIMAL(18, 6) NULL,
+	[dblATMEndBalanceActual]			DECIMAL(18, 6) NULL,
+	[dblATMVariance]					DECIMAL(18, 6) NULL,
 
 	-- CHANGE FUND
-
+	[dblChangeFundBegBalance]			DECIMAL(18, 6) NULL,
+	[dblChangeFundEndBalance]			DECIMAL(18, 6) NULL,
+	[dblChangeFundChangeReplenishment]	DECIMAL(18, 6) NULL,
 
     [intCategoryId] INT NULL,
     [intCommodityId] INT NULL,
