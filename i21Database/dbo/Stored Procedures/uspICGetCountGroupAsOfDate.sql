@@ -3,9 +3,7 @@
 	@intLocationId AS INT,
 	@intSubLocationId AS INT = NULL,
 	@intStorageLocationId AS INT = NULL,
-	@dtmDate AS DATETIME = NULL
-	--@ysnHasStockOnly AS BIT = 0,
-	--@ysnPostedOnly AS BIT = 0
+	@dtmDate AS DATETIME = NULL	
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -32,34 +30,34 @@ DECLARE @tblInventoryTransaction TABLE(
 	,dblSold				NUMERIC(38, 20)
 );
 
-INSERT INTO @tblInventoryTransaction (
-	intCountGroupId
-	,intLocationId
-	,intSubLocationId
-	,intStorageLocationId
-	,dtmDate
-	,dblBeginQty
-)
--- Get the begin Qty
-SELECT	
-	IL.intCountGroupId
-	,intLocationId		= IL.intLocationId
-	,intSubLocationId	= t.intSubLocationId 
-	,intStorageLocationId = t.intStorageLocationId 
-	,dtmDate			= dbo.fnRemoveTimeOnDate(dtmDate)
-	,dblOnHandQty		= dbo.fnCalculateQtyBetweenUOM(t.intItemUOMId, stockUnit.intItemUOMId, t.dblQty) 
-FROM	
-	tblICInventoryTransaction t INNER JOIN tblICItemLocation IL 
-		ON IL.intItemLocationId = t.intItemLocationId	
-	INNER JOIN tblICItemUOM stockUnit
-		ON stockUnit.intItemId = t.intItemId
-		AND stockUnit.ysnStockUnit = 1
-WHERE	
-	IL.intCountGroupId = @intCountGroupId
-	AND dbo.fnDateLessThan(t.dtmDate, @dtmDate) = 1
-	AND IL.intLocationId = @intLocationId
-	AND (@intSubLocationId IS NULL OR @intSubLocationId = t.intSubLocationId)
-	AND (@intStorageLocationId IS NULL OR @intStorageLocationId = t.intStorageLocationId)
+--INSERT INTO @tblInventoryTransaction (
+--	intCountGroupId
+--	,intLocationId
+--	,intSubLocationId
+--	,intStorageLocationId
+--	,dtmDate
+--	,dblBeginQty
+--)
+---- Get the begin Qty
+--SELECT	
+--	IL.intCountGroupId
+--	,intLocationId		= IL.intLocationId
+--	,intSubLocationId	= t.intSubLocationId 
+--	,intStorageLocationId = t.intStorageLocationId 
+--	,dtmDate			= dbo.fnRemoveTimeOnDate(dtmDate)
+--	,dblOnHandQty		= dbo.fnCalculateQtyBetweenUOM(t.intItemUOMId, stockUnit.intItemUOMId, t.dblQty) 
+--FROM	
+--	tblICInventoryTransaction t INNER JOIN tblICItemLocation IL 
+--		ON IL.intItemLocationId = t.intItemLocationId	
+--	INNER JOIN tblICItemUOM stockUnit
+--		ON stockUnit.intItemId = t.intItemId
+--		AND stockUnit.ysnStockUnit = 1
+--WHERE	
+--	IL.intCountGroupId = @intCountGroupId
+--	AND dbo.fnDateLessThan(t.dtmDate, @dtmDate) = 1
+--	AND IL.intLocationId = @intLocationId
+--	AND (@intSubLocationId IS NULL OR @intSubLocationId = t.intSubLocationId)
+--	AND (@intStorageLocationId IS NULL OR @intStorageLocationId = t.intStorageLocationId)
 
 -- Get the On-Hand Qty
 INSERT INTO @tblInventoryTransaction (
@@ -85,7 +83,7 @@ FROM
 		AND stockUnit.ysnStockUnit = 1
 WHERE	
 	IL.intCountGroupId = @intCountGroupId
-	AND dbo.fnDateEquals(t.dtmDate, @dtmDate) = 1
+	AND dbo.fnDateLessThanEquals(t.dtmDate, @dtmDate) = 1
 	AND IL.intLocationId = @intLocationId
 	AND (@intSubLocationId IS NULL OR @intSubLocationId = t.intSubLocationId)
 	AND (@intStorageLocationId IS NULL OR @intStorageLocationId = t.intStorageLocationId)
