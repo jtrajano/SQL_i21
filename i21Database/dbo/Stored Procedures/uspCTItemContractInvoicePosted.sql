@@ -184,7 +184,7 @@ BEGIN TRY
 				@dblNewApplied			 = dblNewApplied,
 				@dblNewBalance			 = dblNewBalance,
 				@intNewContractStatusId	 = CASE WHEN [dblNewBalance] = 0 THEN 5 WHEN [intNewContractStatusId] = 5 THEN 1  ELSE [intNewContractStatusId] END,
-				@dtmNewLastDeliveryDate = dtmNewLastDeliveryDate,
+				@dtmNewLastDeliveryDate  = dtmNewLastDeliveryDate,
 				@strTransactionType		 = strTransactionType,
 				@intTransactionDetailId	 = intTransactionDetailId,
 				@intTransactionId		 = intTransactionId,
@@ -199,8 +199,9 @@ BEGIN TRY
 		-- SCREEN / MODULE SWITCHER
 		IF @strTransactionType = 'Invoice'
 		BEGIN
-			SELECT @strTransactionId	=	B.strInvoiceNumber,
-				   @intTransactionId	=	A.intInvoiceId
+			SELECT @strTransactionId		=	B.strInvoiceNumber,
+				   @intTransactionId		=	A.intInvoiceId,
+				   @dtmNewLastDeliveryDate	=	CASE WHEN @intNewContractStatusId = 5 THEN B.dtmShipDate ELSE NULL END
 				FROM tblARInvoiceDetail A
 				LEFT JOIN tblARInvoice B ON A.intInvoiceId = B.intInvoiceId
 					WHERE A.intInvoiceDetailId = @intTransactionDetailId
@@ -230,7 +231,7 @@ BEGIN TRY
 				dblApplied				=	ISNULL(@dblNewApplied,0),
 				dblAvailable			=	ISNULL(@dblNewAvailable,0),
 				dblBalance				=	ISNULL(@dblNewBalance,0),
-				dtmLastDeliveryDate		=	GETDATE(),
+				dtmLastDeliveryDate		=	@dtmNewLastDeliveryDate,
 				intContractStatusId		=	@intNewContractStatusId,
 				intConcurrencyId		=	intConcurrencyId + 1
 		WHERE	intItemContractDetailId =	@intItemContractDetailId
