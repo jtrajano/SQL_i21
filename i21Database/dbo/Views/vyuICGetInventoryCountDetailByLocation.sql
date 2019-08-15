@@ -83,7 +83,8 @@ SELECT InvCountDetail.intInventoryCountDetailId,
 	ItemLocation.strStorageUnitNo
 	, permission.intEntityId intUserId
     , permission.intUserRoleID intRoleId
-FROM tblICInventoryCountDetail InvCountDetail
+FROM 
+	tblICInventoryCount InvCountHeader INNER JOIN tblICInventoryCountDetail InvCountDetail ON InvCountHeader.intInventoryCountId = InvCountDetail.intInventoryCountId		
 	LEFT JOIN tblICInventoryCount InvCount ON InvCount.intInventoryCountId = InvCountDetail.intInventoryCountId
 	LEFT JOIN tblICCountGroup CountGroup ON CountGroup.intCountGroupId = InvCountDetail.intCountGroupId
 	LEFT JOIN tblICItem Item ON Item.intItemId = InvCountDetail.intItemId
@@ -101,4 +102,7 @@ FROM tblICInventoryCountDetail InvCountDetail
 	LEFT JOIN tblICUnitMeasure StockUOM ON StockUOM.intUnitMeasureId = ItemStockUOM.intUnitMeasureId
 	LEFT JOIN tblSMUserSecurity UserSecurity ON UserSecurity.[intEntityId] = InvCountDetail.intEntityUserSecurityId
 	LEFT JOIN tblICCommodity Commodity ON Commodity.intCommodityId = InvCount.intCommodityId
-	INNER JOIN vyuICUserCompanyLocations permission ON permission.intCompanyLocationId = ItemLocation.intLocationId
+	LEFT JOIN vyuICUserCompanyLocations permission ON permission.intCompanyLocationId = ISNULL(ItemLocation.intLocationId, InvCountHeader.intLocationId)
+WHERE
+	(Item.intItemId IS NOT NULL AND permission.intCompanyLocationId IS NOT NULL)
+	OR (Item.intItemId IS NULL AND CountGroup.intCountGroupId IS NOT NULL)
