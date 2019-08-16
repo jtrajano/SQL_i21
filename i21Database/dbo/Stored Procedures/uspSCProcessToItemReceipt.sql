@@ -84,7 +84,8 @@ DECLARE @intInventoryReceiptItemId AS INT
 		,@intLotId INT
 		,@intContractDetailId INT
 		,@shipFromEntityId INT
-		,@intFarmFieldId INT;
+		,@intFarmFieldId INT
+		,@intLoadDetailId INT;
 
     SELECT TOP 1 @intLoadId = ST.intLoadId
 	, @dblTicketFreightRate = ST.dblFreightRate
@@ -97,6 +98,7 @@ DECLARE @intInventoryReceiptItemId AS INT
 	, @intTicketItemUOMId = ST.intItemUOMIdTo
 	, @shipFromEntityId = ST.intEntityId
 	, @intFarmFieldId = ST.intFarmFieldId
+	, @intLoadDetailId = ST.intLoadDetailId
 	FROM dbo.tblSCTicket ST WHERE
 	ST.intTicketId = @intTicketId
 
@@ -186,13 +188,27 @@ BEGIN TRY
 					BEGIN
 						EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoadContractId, @dblLoadContractUnits, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId
 						EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intLoadContractId, @dblLoadContractUnits, @intEntityId;
+						
+					END
+					ELSE
+					BEGIN
+						EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intLoadContractId, @dblLoadContractUnits, @intEntityId,1;
 					END
 				END
+
+				IF(ISNULL(@intLoadDetailId,0) > 0)
+				BEGIN 
+					EXEC dbo.uspSCUpdateTicketLoadUsed @intTicketId, @intLoadDetailId, @dblLoadContractUnits, @intEntityId;	
+				END
+
 				-- Attempt to fetch next row from cursor
 				FETCH NEXT FROM intListCursor INTO @intLoadContractId, @dblLoadContractUnits;
 			END;
 			CLOSE intListCursor;
 			DEALLOCATE intListCursor;
+
+
+			
 		END
 
 		SELECT TOP 1 @dblRemainingUnits = LI.dblUnitsRemaining FROM @LineItems LI

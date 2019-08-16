@@ -34,6 +34,7 @@ BEGIN
 			WHERE SC.intTicketId = @scId AND SC.intContractDetailId != ISNULL(@intContractDetailId,0)
 
 			DELETE FROM tblSCTicketContractUsed WHERE intTicketId = @scId
+			DELETE FROM tblSCTicketLoadUsed WHERE intTicketId = @scId
 		END
 	END
 	ELSE

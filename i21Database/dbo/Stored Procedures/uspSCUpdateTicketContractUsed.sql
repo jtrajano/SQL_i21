@@ -3,7 +3,8 @@
 	@intContractDetailId INT,
 	@dblScheduleQty DECIMAL(38,20),
 	@intEntityId int,
-	@ysnStorage int = null
+	@ysnStorage int = null,
+	@ysnInsertToContractUsedOnly BIT = 0
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -21,25 +22,62 @@ BEGIN TRY
 		INSERT INTO tblSCTicketContractUsed (intTicketId,intContractDetailId,dblScheduleQty,intEntityId)
 		VALUES(@intTicketId,@intContractDetailId,@dblScheduleQty,@intEntityId)
 	END
-	IF(ISNULL(@ysnStorage,0) = 0)
-		BEGIN
-			IF EXISTS(SELECT TOP 1 intContractId FROM tblSCTicket WHERE intTicketId = @intTicketId AND ISNULL(intContractId,0) = 0 AND strDistributionOption != 'SPL')
+	IF(ISNULL(@ysnInsertToContractUsedOnly,0) = 0)
+	BEGIN
+		IF(ISNULL(@ysnStorage,0) = 0)
 			BEGIN
-				UPDATE tblSCTicket SET 
-				intContractId = CT.intContractDetailId
-				, strContractNumber = CT.strContractNumber
-				, intContractSequence = CT.intContractSeq
-				, strContractLocation = CT.strLocationName
-				, dblScheduleQty = CASE WHEN ISNULL(CT.intContractDetailId,0) > 0 THEN @dblScheduleQty ELSE 0 END
-				, dblUnitPrice = CT.dblFutures
-				, dblUnitBasis = CT.dblBasis
-				, dblFreightRate = ISNULL(CT.dblRate,SC.dblFreightRate)
-                , intHaulerId = ISNULL(CT.intVendorId,SC.intHaulerId)
-                , ysnFarmerPaysFreight = ISNULL(CT.ysnPrice,SC.ysnFarmerPaysFreight)
-				, intWeightId = CT.intWeightId
-				, intGradeId  = CT.intGradeId
-				FROM tblSCTicket SC 
-				INNER JOIN tblSCScaleSetup SCS ON SCS.intScaleSetupId = SC.intScaleSetupId
+				IF EXISTS(SELECT TOP 1 intContractId FROM tblSCTicket WHERE intTicketId = @intTicketId AND ISNULL(intContractId,0) = 0 AND strDistributionOption != 'SPL')
+				BEGIN
+					UPDATE tblSCTicket SET 
+					intContractId = CT.intContractDetailId
+					, strContractNumber = CT.strContractNumber
+					, intContractSequence = CT.intContractSeq
+					, strContractLocation = CT.strLocationName
+					, dblScheduleQty = CASE WHEN ISNULL(CT.intContractDetailId,0) > 0 THEN @dblScheduleQty ELSE 0 END
+					, dblUnitPrice = CT.dblFutures
+					, dblUnitBasis = CT.dblBasis
+					, dblFreightRate = ISNULL(CT.dblRate,SC.dblFreightRate)
+					, intHaulerId = ISNULL(CT.intVendorId,SC.intHaulerId)
+					, ysnFarmerPaysFreight = ISNULL(CT.ysnPrice,SC.ysnFarmerPaysFreight)
+					, intWeightId = CT.intWeightId
+					, intGradeId  = CT.intGradeId
+					FROM tblSCTicket SC 
+					INNER JOIN tblSCScaleSetup SCS ON SCS.intScaleSetupId = SC.intScaleSetupId
+					OUTER APPLY(
+						SELECT 
+						CTD.intContractHeaderId
+						,CTD.intContractDetailId
+						,CTH.strContractNumber 
+						,SM.strLocationName 
+						,CTD.intContractSeq 
+						,CTD.dblFutures 
+						,CTD.dblBasis 
+						,CTCost.dblRate
+						,CTCost.intVendorId
+						,CTCost.ysnPrice
+						,CTH.intWeightId
+						,CTH.intGradeId
+						FROM tblCTContractDetail CTD 
+						INNER JOIN tblCTContractHeader CTH ON CTH.intContractHeaderId = CTD.intContractHeaderId
+						INNER JOIN tblSMCompanyLocation SM ON SM.intCompanyLocationId = CTD.intCompanyLocationId
+						LEFT JOIN tblCTContractCost CTCost ON CTCost.intContractDetailId = CTD.intContractDetailId AND CTCost.intItemId = SCS.intFreightItemId
+						WHERE CTD.intContractDetailId = @intContractDetailId
+					) CT
+					WHERE intTicketId = @intTicketId AND SC.strDistributionOption != 'SPL'
+				END
+				ELSE
+				BEGIN 
+					UPDATE tblSCTicket SET dblScheduleQty = @dblScheduleQty  WHERE intTicketId = @intTicketId AND ISNULL(intContractId,0) = @intContractDetailId AND strDistributionOption != 'SPL'
+				END
+			END
+		ELSE
+		BEGIN
+			UPDATE tblSCTicket SET 
+			intContractId = CT.intContractDetailId
+			, strContractNumber = CT.strContractNumber
+			, intContractSequence = CT.intContractSeq
+			, strContractLocation = CT.strLocationName
+			FROM tblSCTicket SC 
 				OUTER APPLY(
 					SELECT 
 					CTD.intContractHeaderId
@@ -49,47 +87,13 @@ BEGIN TRY
 					,CTD.intContractSeq 
 					,CTD.dblFutures 
 					,CTD.dblBasis 
-					,CTCost.dblRate
-					,CTCost.intVendorId
-					,CTCost.ysnPrice
-					,CTH.intWeightId
-					,CTH.intGradeId
 					FROM tblCTContractDetail CTD 
 					INNER JOIN tblCTContractHeader CTH ON CTH.intContractHeaderId = CTD.intContractHeaderId
 					INNER JOIN tblSMCompanyLocation SM ON SM.intCompanyLocationId = CTD.intCompanyLocationId
-					LEFT JOIN tblCTContractCost CTCost ON CTCost.intContractDetailId = CTD.intContractDetailId AND CTCost.intItemId = SCS.intFreightItemId
 					WHERE CTD.intContractDetailId = @intContractDetailId
 				) CT
-				WHERE intTicketId = @intTicketId AND SC.strDistributionOption != 'SPL'
-			END
-			ELSE
-			BEGIN 
-				UPDATE tblSCTicket SET dblScheduleQty = @dblScheduleQty  WHERE intTicketId = @intTicketId AND ISNULL(intContractId,0) = @intContractDetailId AND strDistributionOption != 'SPL'
-			END
+			WHERE intTicketId = @intTicketId AND ISNULL(intContractId,0) = 0
 		END
-	ELSE
-	BEGIN
-		UPDATE tblSCTicket SET 
-		intContractId = CT.intContractDetailId
-		, strContractNumber = CT.strContractNumber
-		, intContractSequence = CT.intContractSeq
-		, strContractLocation = CT.strLocationName
-		FROM tblSCTicket SC 
-			OUTER APPLY(
-				SELECT 
-				CTD.intContractHeaderId
-				,CTD.intContractDetailId
-				,CTH.strContractNumber 
-				,SM.strLocationName 
-				,CTD.intContractSeq 
-				,CTD.dblFutures 
-				,CTD.dblBasis 
-				FROM tblCTContractDetail CTD 
-				INNER JOIN tblCTContractHeader CTH ON CTH.intContractHeaderId = CTD.intContractHeaderId
-				INNER JOIN tblSMCompanyLocation SM ON SM.intCompanyLocationId = CTD.intCompanyLocationId
-				WHERE CTD.intContractDetailId = @intContractDetailId
-			) CT
-		WHERE intTicketId = @intTicketId AND ISNULL(intContractId,0) = 0
 	END
 END TRY
 BEGIN CATCH

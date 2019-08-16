@@ -153,6 +153,7 @@ BEGIN TRY
 						BEGIN
 							EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoadContractId, @dblLoadContractUnits, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId
 							EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intLoadContractId, @dblLoadContractUnits, @intEntityId;
+							EXEC dbo.uspSCUpdateTicketLoadUsed @intTicketId, @intLoadId, @dblLoopContractUnits, @intEntityId;	
 						END
 					END
 				   -- Attempt to fetch next row from cursor

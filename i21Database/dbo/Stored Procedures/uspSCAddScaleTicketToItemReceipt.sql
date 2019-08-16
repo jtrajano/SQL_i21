@@ -472,14 +472,20 @@ IF @ysnDeductFreightFarmer = 0 AND ISNULL(@intHaulerId,0) = 0
 IF ISNULL(@intFreightItemId,0) = 0
 	SET @intFreightItemId = 0
 
+	--LOAD SCHEDULE
 	BEGIN
 		IF	ISNULL(@intLoadId,0) != 0 
 			BEGIN
+
+				-------OLD CODE--------------------------------------------------------------------------------------
+				-----------------------------------------------------------------------------------------------------
+				/*BEGIN
 				SELECT @intLoadContractId = LGLD.intPContractDetailId, @intLoadCostId = LGCOST.intLoadCostId FROM tblLGLoad LGL
 				INNER JOIN tblLGLoadDetail LGLD ON LGL.intLoadId = LGLD.intLoadId
 				INNER JOIN tblLGLoadCost LGCOST ON LGL.intLoadId = LGCOST.intLoadId  
 				WHERE LGL.intLoadId = @intLoadId
 
+				
 				IF ISNULL(@intFreightItemId,0) != 0
 					BEGIN
 						IF ISNULL(@intLoadCostId,0) != 0
@@ -880,6 +886,124 @@ IF ISNULL(@intFreightItemId,0) = 0
 								WHERE RE.intContractDetailId = @intLoadContractId AND ContractCost.dblRate != 0
 							END
 					END
+				END*/
+				---------------------------------------------------------------------------------------------------------
+				---------------------------------------------------------------------------------------------------------
+
+				BEGIN
+					SELECT @intLoadContractId = LGLD.intPContractDetailId, @intLoadCostId = LGCOST.intLoadCostId FROM tblLGLoad LGL
+					INNER JOIN tblLGLoadDetail LGLD ON LGL.intLoadId = LGLD.intLoadId
+					INNER JOIN tblLGLoadCost LGCOST ON LGL.intLoadId = LGCOST.intLoadId  
+					WHERE LGL.intLoadId = @intLoadId
+				
+					IF ISNULL(@intFreightItemId,0) != 0
+					BEGIN
+						-- freight other charge
+						INSERT INTO @OtherCharges
+								(
+									[intEntityVendorId] 
+									,[strBillOfLadding] 
+									,[strReceiptType] 
+									,[intLocationId] 
+									,[intShipViaId] 
+									,[intShipFromId] 
+									,[intCurrencyId]
+									,[intCostCurrencyId]  	
+									,[intChargeId]
+									,[intForexRateTypeId]
+									,[dblForexRate] 
+									,[ysnInventoryCost] 
+									,[strCostMethod] 
+									,[dblRate] 
+									,[intCostUOMId] 
+									,[intOtherChargeEntityVendorId] 
+									,[dblAmount] 
+									,[intContractHeaderId]
+									,[intContractDetailId] 
+									,[ysnAccrue]
+									,[ysnPrice]
+									,[strChargesLink]
+									,[ysnAllowVoucher]
+								)
+								SELECT	
+									[intEntityVendorId]					
+									,[strBillOfLadding]					
+									,[strReceiptType]					
+									,[intLocationId]					
+									,[intShipViaId]						
+									,[intShipFromId]					
+									,[intCurrencyId]  					
+									,[intCostCurrencyId]  				
+									,[intChargeId]						
+									,[intForexRateTypeId]				
+									,[dblForexRate]						
+									,[ysnInventoryCost]					
+									,[strCostMethod]                    
+									,[dblRate]							
+									,[intCostUOMId]						
+									,[intOtherChargeEntityVendorId]		
+									,[dblAmount]						
+									,[intContractHeaderId]				
+									,[intContractDetailId]				
+									,[ysnAccrue]						
+									,[ysnPrice]							
+									,[strChargesLink]					
+									,[ysnAllowVoucher]				
+								FROM [dbo].[fnSCGetLoadFreightItemCharges](@ReceiptStagingTable,@ysnPrice,@ysnAccrue,@intFreightItemId,@intLoadCostId)
+					END
+					-- non freight
+					INSERT INTO @OtherCharges
+					(
+						[intEntityVendorId] 
+						,[strBillOfLadding] 
+						,[strReceiptType] 
+						,[intLocationId] 
+						,[intShipViaId] 
+						,[intShipFromId] 
+						,[intCurrencyId]
+						,[intCostCurrencyId]  	
+						,[intChargeId]
+						,[intForexRateTypeId]
+						,[dblForexRate] 
+						,[ysnInventoryCost] 
+						,[strCostMethod] 
+						,[dblRate] 
+						,[intCostUOMId] 
+						,[intOtherChargeEntityVendorId] 
+						,[dblAmount] 
+						,[intContractHeaderId]
+						,[intContractDetailId] 
+						,[ysnAccrue]
+						,[ysnPrice]
+						,[strChargesLink]
+						,[ysnAllowVoucher]
+					)
+					SELECT	
+						[intEntityVendorId]				
+						,[strBillOfLadding]				
+						,[strReceiptType]				
+						,[intLocationId]				
+						,[intShipViaId]					
+						,[intShipFromId]				
+						,[intCurrencyId]  				
+						,[intCostCurrencyId]  			
+						,[intChargeId]					
+						,[intForexRateTypeId]			
+						,[dblForexRate]					
+						,[ysnInventoryCost]				
+						,[strCostMethod]                
+						,[dblRate]						
+						,[intCostUOMId]					
+						,[intOtherChargeEntityVendorId]	
+						,[dblAmount]					
+						,[intContractHeaderId]			
+						,[intContractDetailId]			
+						,[ysnAccrue]					
+						,[ysnPrice]						
+						,[strChargesLink]				
+						,[ysnAllowVoucher]				
+					FROM dbo.[fnSCGetLoadNoneFreightItemCharges](@ReceiptStagingTable,@ysnPrice,@ysnAccrue,@intFreightItemId,@intLoadCostId)
+				END	
 			END
 		ELSE
 			BEGIN
@@ -1468,3 +1592,6 @@ BEGIN
 	ON ISH.intSourceId = SD.intTicketId AND SD.strSourceType = 'Scale' AND
 	SD.intTicketFileId = @intTicketId WHERE	ISH.intSourceId = @intTicketId AND ISH.intInventoryReceiptId = @InventoryReceiptId
 END
+
+GO
+
