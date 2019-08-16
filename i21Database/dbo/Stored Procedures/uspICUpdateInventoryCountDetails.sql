@@ -257,6 +257,7 @@ BEGIN
 		AND Item.strLotTracking <> 'No'
 		AND ((dblQty > 0 AND @ysnIncludeZeroOnHand = 0) OR (@ysnIncludeZeroOnHand = 1))
 		AND Item.strType IN ('Inventory', 'Raw Material', 'Finished Good')
+		AND (ItemLocation.intCountGroupId = @intCountGroupId OR ISNULL(@intCountGroupId, 0) = 0)
 END
 ELSE
 BEGIN
@@ -396,5 +397,5 @@ BEGIN
 			(@ysnIsMultiFilter = 1 AND storageUnitFilter.intStorageUnitId = stock.intStorageLocationId OR @StorageUnitFilterCount = 0))
 		AND i.strLotTracking = 'No'
 		AND i.strType IN ('Inventory', 'Raw Material', 'Finished Good')
-
+		AND (il.intCountGroupId = @intCountGroupId OR ISNULL(@intCountGroupId, 0) = 0)
 END
