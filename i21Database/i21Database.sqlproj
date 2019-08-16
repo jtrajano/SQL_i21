@@ -8007,6 +8007,7 @@
     <Build Include="dbo\Stored Procedures\uspSCUpdateTicketLoadUsed.sql" />
     <Build Include="dbo\Tables\tblICInventoryShiftPhysicalCount.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetCountGroupAsOfDate.sql" />
+    <Build Include="dbo\Views\vyuICGetShiftPhysical.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
