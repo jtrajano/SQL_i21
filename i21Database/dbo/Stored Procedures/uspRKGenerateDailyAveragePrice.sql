@@ -29,6 +29,7 @@ BEGIN
 		, @month NVARCHAR(50)
 		, @commodityId INT
 		, @commodity NVARCHAR(50)
+		, @ErrMsg NVARCHAR(200)
 
 	DECLARE @DetailTable TABLE (intRowId INT IDENTITY
 		, intBookId INT
@@ -56,66 +57,6 @@ BEGIN
 		, intFutureMonthId INT
 		, strFutureMonth NVARCHAR(50))
 
-	INSERT INTO @Categories (intRowId
-		, intBookId
-		, strBook
-		, intSubBookId
-		, strSubBook
-		, intFutureMarketId
-		, strFutureMarket
-		, intFutureMonthId
-		, strFutureMonth)
-	SELECT DISTINCT intRowId = ROW_NUMBER() OVER (ORDER BY Book.intBookId, SubBook.intSubBookId, FM.intFutureMarketId, FM.intFutureMonthId DESC)
-		, Book.intBookId
-		, Book.strBook
-		, SubBook.intSubBookId
-		, SubBook.strSubBook
-		, FM.intFutureMarketId
-		, FM.strFutureMarket
-		, FM.intFutureMonthId
-		, FM.strFutureMonth
-	FROM tblCTSubBook SubBook
-	LEFT JOIN tblCTBook Book ON Book.intBookId = SubBook.intBookId
-	CROSS APPLY (
-		SELECT DISTINCT FMarket.intFutureMarketId
-			, strFutureMarket = FMarket.strFutMarketName
-			, FMonth.intFutureMonthId
-			, FMonth.strFutureMonth
-		FROM tblRKFuturesMonth FMonth
-		LEFT JOIN tblRKFutureMarket FMarket ON FMarket.intFutureMarketId = FMonth.intFutureMarketId
-		WHERE FMonth.ysnExpired = 0
-			AND FMarket.ysnActive = 1
-	) FM
-	WHERE Book.ysnActive = 1
-		AND SubBook.ysnActive = 1
-	ORDER BY Book.intBookId
-		, Book.strBook
-		, SubBook.intSubBookId
-		, SubBook.strSubBook
-		, FM.intFutureMarketId
-		, FM.strFutureMarket
-		, FM.intFutureMonthId
-		, FM.strFutureMonth
-
-	INSERT INTO @Categories(intRowId
-		, intBookId
-		, strBook
-		, intSubBookId
-		, strSubBook
-		, intFutureMarketId
-		, strFutureMarket
-		, intFutureMonthId
-		, strFutureMonth)
-	SELECT 0
-		, NULL
-		, NULL
-		, NULL
-		, NULL
-		, NULL
-		, NULL
-		, NULL
-		, NULL
-
 	SELECT *
 	INTO #tmpDerivatives
 	FROM dbo.fnRKGetOpenFutureByDate(NULL, '1/1/1900', @dtmDate, 1)
@@ -123,90 +64,217 @@ BEGIN
 		AND intFutureMonthId NOT IN (SELECT intFutureMonthId FROM tblRKFuturesMonth WHERE ysnExpired = 1)
 		AND dblOpenContract <> 0
 
-	WHILE EXISTS (SELECT TOP 1 1 FROM @Categories)
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblRKDailyAveragePrice)
 	BEGIN
-		SELECT TOP 1 @intRowId = intRowId
-			, @bookId = intBookId
-			, @book = strBook
-			, @subBookId  = intSubBookId
-			, @subBook = strSubBook
-			, @marketId = intFutureMarketId
-			, @market = strFutureMarket
-			, @monthId = intFutureMonthId
-			, @month = strFutureMonth
-		FROM @Categories
-		
-		IF (ISNULL(@intRowId, 0) = 0)
-		BEGIN
-			INSERT INTO @DetailTable(intBookId
-				, strBook
-				, intSubBookId
-				, strSubBook 
-				, intFutureMarketId 
-				, strFutureMarket 
-				, intFutureMonthId
-				, strFutureMonth
-				, intCommodityId
-				, strCommodity
-				, intBrokerId
-				, strBrokerName
-				, intTransactionId
-				, strTransactionType)
-			SELECT DISTINCT intBookId
-				, strBook
-				, intSubBookId
-				, strSubBook 
-				, intFutureMarketId 
-				, strFutureMarket 
-				, intFutureMonthId
-				, strFutureMonth
-				, intCommodityId
-				, strCommodityCode
-				, intEntityId
-				, strName
-				, intFutOptTransactionId
-				, 'FutOptTransaction'
-			FROM #tmpDerivatives Derivative
-			WHERE (Derivative.intBookId IS NULL)
-				AND (Derivative.intSubBookId IS NULL)
-		END
-		ELSE
-		BEGIN
-			INSERT INTO @DetailTable(intBookId
-				, strBook
-				, intSubBookId
-				, strSubBook 
-				, intFutureMarketId 
-				, strFutureMarket 
-				, intFutureMonthId
-				, strFutureMonth
-				, intCommodityId
-				, strCommodity
-				, intBrokerId
-				, strBrokerName
-				, intTransactionId
-				, strTransactionType)
-			SELECT DISTINCT intBookId
-				, strBook
-				, intSubBookId
-				, strSubBook 
-				, intFutureMarketId 
-				, strFutureMarket 
-				, intFutureMonthId
-				, strFutureMonth
-				, intCommodityId
-				, strCommodityCode
-				, intEntityId
-				, strName
-				, intFutOptTransactionId
-				, 'FutOptTransaction'
-			FROM #tmpDerivatives Derivative
-			WHERE ((Derivative.intBookId IS NULL AND @bookId IS NULL) OR (Derivative.intBookId = @bookId))
-				AND ((Derivative.intSubBookId IS NULL AND @subBookId IS NULL) OR (Derivative.intSubBookId = @subBookId))
-				AND ((Derivative.intFutureMarketId IS NULL AND @marketId IS NULL) OR (Derivative.intFutureMarketId = @marketId))
-				AND ((Derivative.intFutureMonthId IS NULL AND @monthId IS NULL) OR (Derivative.intFutureMonthId = @monthId))
-		END
+		INSERT INTO @Categories (intRowId
+			, intBookId
+			, strBook
+			, intSubBookId
+			, strSubBook
+			, intFutureMarketId
+			, strFutureMarket
+			, intFutureMonthId
+			, strFutureMonth)
+		SELECT DISTINCT intRowId = ROW_NUMBER() OVER (ORDER BY Book.intBookId, SubBook.intSubBookId, FM.intFutureMarketId, FM.intFutureMonthId DESC)
+			, Book.intBookId
+			, Book.strBook
+			, SubBook.intSubBookId
+			, SubBook.strSubBook
+			, FM.intFutureMarketId
+			, FM.strFutureMarket
+			, FM.intFutureMonthId
+			, FM.strFutureMonth
+		FROM tblCTSubBook SubBook
+		LEFT JOIN tblCTBook Book ON Book.intBookId = SubBook.intBookId
+		CROSS APPLY (
+			SELECT DISTINCT FMarket.intFutureMarketId
+				, strFutureMarket = FMarket.strFutMarketName
+				, FMonth.intFutureMonthId
+				, FMonth.strFutureMonth
+			FROM tblRKFuturesMonth FMonth
+			LEFT JOIN tblRKFutureMarket FMarket ON FMarket.intFutureMarketId = FMonth.intFutureMarketId
+			WHERE FMonth.ysnExpired = 0
+				AND FMarket.ysnActive = 1
+		) FM
+		WHERE Book.ysnActive = 1
+			AND SubBook.ysnActive = 1
+		ORDER BY Book.intBookId
+			, Book.strBook
+			, SubBook.intSubBookId
+			, SubBook.strSubBook
+			, FM.intFutureMarketId
+			, FM.strFutureMarket
+			, FM.intFutureMonthId
+			, FM.strFutureMonth
 
+		INSERT INTO @Categories(intRowId
+			, intBookId
+			, strBook
+			, intSubBookId
+			, strSubBook
+			, intFutureMarketId
+			, strFutureMarket
+			, intFutureMonthId
+			, strFutureMonth)
+		SELECT 0
+			, NULL
+			, NULL
+			, NULL
+			, NULL
+			, NULL
+			, NULL
+			, NULL
+			, NULL
+
+		WHILE EXISTS (SELECT TOP 1 1 FROM @Categories)
+		BEGIN
+			SELECT TOP 1 @intRowId = intRowId
+				, @bookId = intBookId
+				, @book = strBook
+				, @subBookId  = intSubBookId
+				, @subBook = strSubBook
+				, @marketId = intFutureMarketId
+				, @market = strFutureMarket
+				, @monthId = intFutureMonthId
+				, @month = strFutureMonth
+			FROM @Categories
+		
+			IF (ISNULL(@intRowId, 0) = 0)
+			BEGIN
+				INSERT INTO @DetailTable(intBookId
+					, strBook
+					, intSubBookId
+					, strSubBook 
+					, intFutureMarketId 
+					, strFutureMarket 
+					, intFutureMonthId
+					, strFutureMonth
+					, intCommodityId
+					, strCommodity
+					, intBrokerId
+					, strBrokerName
+					, intTransactionId
+					, strTransactionType)
+				SELECT DISTINCT intBookId
+					, strBook
+					, intSubBookId
+					, strSubBook 
+					, intFutureMarketId 
+					, strFutureMarket 
+					, intFutureMonthId
+					, strFutureMonth
+					, intCommodityId
+					, strCommodityCode
+					, intEntityId
+					, strName
+					, intFutOptTransactionId
+					, 'FutOptTransaction'
+				FROM #tmpDerivatives Derivative
+				WHERE (Derivative.intBookId IS NULL)
+					AND (Derivative.intSubBookId IS NULL)
+			END
+			ELSE
+			BEGIN
+				INSERT INTO @DetailTable(intBookId
+					, strBook
+					, intSubBookId
+					, strSubBook 
+					, intFutureMarketId 
+					, strFutureMarket 
+					, intFutureMonthId
+					, strFutureMonth
+					, intCommodityId
+					, strCommodity
+					, intBrokerId
+					, strBrokerName
+					, intTransactionId
+					, strTransactionType)
+				SELECT DISTINCT intBookId
+					, strBook
+					, intSubBookId
+					, strSubBook 
+					, intFutureMarketId 
+					, strFutureMarket 
+					, intFutureMonthId
+					, strFutureMonth
+					, intCommodityId
+					, strCommodityCode
+					, intEntityId
+					, strName
+					, intFutOptTransactionId
+					, 'FutOptTransaction'
+				FROM #tmpDerivatives Derivative
+				WHERE ((Derivative.intBookId IS NULL AND @bookId IS NULL) OR (Derivative.intBookId = @bookId))
+					AND ((Derivative.intSubBookId IS NULL AND @subBookId IS NULL) OR (Derivative.intSubBookId = @subBookId))
+					AND ((Derivative.intFutureMarketId IS NULL AND @marketId IS NULL) OR (Derivative.intFutureMarketId = @marketId))
+					AND ((Derivative.intFutureMonthId IS NULL AND @monthId IS NULL) OR (Derivative.intFutureMonthId = @monthId))
+			END
+
+			SET @intDailyAveragePriceId = NULL
+			SELECT TOP 1 @intDailyAveragePriceId = intDailyAveragePriceId
+			FROM tblRKDailyAveragePrice
+			WHERE ((intBookId IS NULL AND @bookId IS NULL) OR (intBookId = @bookId))
+				AND ((intSubBookId IS NULL AND @subBookId IS NULL) OR (intSubBookId = @subBookId))
+				AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) < @dtmDate
+				AND ysnPosted = 1
+			ORDER BY dtmDate DESC
+
+			IF (ISNULL(@intDailyAveragePriceId, 0) = 0)
+			BEGIN
+				IF EXISTS (SELECT TOP 1 1
+				FROM tblRKDailyAveragePrice
+				WHERE ((intBookId IS NULL AND @bookId IS NULL) OR (intBookId = @bookId))
+					AND ((intSubBookId IS NULL AND @subBookId IS NULL) OR (intSubBookId = @subBookId))
+					AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) < @dtmDate
+					AND ysnPosted = 0
+				ORDER BY dtmDate DESC)
+				BEGIN
+					SET @ErrMsg = 'An unposted previous daily average price was found. Please post all daily average prices before generating another.'
+					RAISERROR(@ErrMsg, 16, 1)
+					RETURN
+				END
+			END
+			ELSE
+			BEGIN
+				INSERT INTO @DetailTable(intBookId
+					, strBook
+					, intSubBookId
+					, strSubBook 
+					, intFutureMarketId 
+					, strFutureMarket 
+					, intFutureMonthId
+					, strFutureMonth
+					, intCommodityId
+					, strCommodity
+					, intBrokerId
+					, strBrokerName
+					, intTransactionId
+					, strTransactionType)
+				SELECT Detail.intBookId
+					, Detail.strBook
+					, Detail.intSubBookId
+					, Detail.strSubBook 
+					, Detail.intFutureMarketId 
+					, Detail.strFutureMarket 
+					, Detail.intFutureMonthId
+					, Detail.strFutureMonth
+					, Detail.intCommodityId
+					, Detail.strCommodity
+					, Detail.intBrokerId
+					, Detail.strBrokerName
+					, Detail.intDailyAveragePriceDetailId
+					, 'DailyAveragePrice'
+				FROM vyuRKGetDailyAveragePriceDetail Detail
+				LEFT JOIN tblRKFuturesMonth FM ON FM.intFutureMonthId = Detail.intFutureMonthId
+				WHERE Detail.intDailyAveragePriceId = @intDailyAveragePriceId
+					AND FM.ysnExpired = 0
+			END
+
+			DELETE FROM @Categories WHERE intRowId = @intRowId
+		END
+	END
+	ELSE
+	BEGIN
 		SET @intDailyAveragePriceId = NULL
 		SELECT TOP 1 @intDailyAveragePriceId = intDailyAveragePriceId
 		FROM tblRKDailyAveragePrice
@@ -226,7 +294,6 @@ BEGIN
 				AND ysnPosted = 0
 			ORDER BY dtmDate DESC)
 			BEGIN
-				DECLARE @ErrMsg NVARCHAR(200)
 				SET @ErrMsg = 'An unposted previous daily average price was found. Please post all daily average prices before generating another.'
 				RAISERROR(@ErrMsg, 16, 1)
 				RETURN
@@ -265,10 +332,38 @@ BEGIN
 			FROM vyuRKGetDailyAveragePriceDetail Detail
 			LEFT JOIN tblRKFuturesMonth FM ON FM.intFutureMonthId = Detail.intFutureMonthId
 			WHERE Detail.intDailyAveragePriceId = @intDailyAveragePriceId
-				AND FM.ysnExpired <> 0
+				AND FM.ysnExpired = 0
 		END
 
-		DELETE FROM @Categories WHERE intRowId = @intRowId
+		INSERT INTO @DetailTable(intBookId
+			, strBook
+			, intSubBookId
+			, strSubBook 
+			, intFutureMarketId 
+			, strFutureMarket 
+			, intFutureMonthId
+			, strFutureMonth
+			, intCommodityId
+			, strCommodity
+			, intBrokerId
+			, strBrokerName
+			, intTransactionId
+			, strTransactionType)
+		SELECT DISTINCT intBookId
+			, strBook
+			, intSubBookId
+			, strSubBook 
+			, intFutureMarketId 
+			, strFutureMarket 
+			, intFutureMonthId
+			, strFutureMonth
+			, intCommodityId
+			, strCommodityCode
+			, intEntityId
+			, strName
+			, intFutOptTransactionId
+			, 'FutOptTransaction'
+		FROM #tmpDerivatives Derivative
 	END
 
 	SELECT intRowId = ROW_NUMBER() OVER (ORDER BY intBookId DESC)
@@ -396,7 +491,7 @@ BEGIN
 				, dtmCreateDateTime
 				, ysnFreezed
 				, ysnPreCrush)
-			SELECT Detail.intDailyAveragePriceDetailId
+			SELECT DISTINCT Detail.intDailyAveragePriceDetailId
 				, intFutOptTransactionId
 				, 'FutOptTransaction'
 				, Trans.dtmTransactionDate
@@ -459,7 +554,7 @@ BEGIN
 				, strInstrumentType
 				, dblPrice
 				, strBuySell)
-			SELECT Detail.intDailyAveragePriceDetailId
+			SELECT DISTINCT Detail.intDailyAveragePriceDetailId
 				, RefDetail.intDailyAveragePriceDetailId
 				, 'DailyAveragePrice'
 				, Detail.dtmDate
@@ -474,19 +569,19 @@ BEGIN
 				AND Detail.intFutureMarketId = Derivative.intFutureMarketId
 				AND Detail.intCommodityId = Derivative.intCommodityId
 				AND Detail.intFutureMonthId = Derivative.intFutureMonthId
+				AND Detail.intDailyAveragePriceId = @intDailyAveragePriceId
 			JOIN vyuRKGetDailyAveragePriceDetail RefDetail ON ((RefDetail.intBookId IS NULL AND @bookId IS NULL) OR (RefDetail.intBookId = @bookId))
 				AND ((RefDetail.intSubBookId IS NULL AND @subBookId IS NULL) OR (RefDetail.intSubBookId = @subBookId))
 				AND RefDetail.intFutureMarketId = Derivative.intFutureMarketId
 				AND RefDetail.intCommodityId = Derivative.intCommodityId
 				AND RefDetail.intFutureMonthId = Derivative.intFutureMonthId
-			WHERE ISNULL(RefDetail.dblNoOfLots, 0) <> 0
-				AND Detail.intDailyAveragePriceId = @intDailyAveragePriceId
 				AND RefDetail.intDailyAveragePriceId = (SELECT TOP 1 intDailyAveragePriceId FROM tblRKDailyAveragePrice
-													WHERE dtmDate < GETDATE()
-														AND ((intBookId IS NULL AND @bookId IS NULL) OR (intBookId = @bookId))
-														AND ((intSubBookId IS NULL AND @subBookId IS NULL) OR (intSubBookId = @subBookId))
-														AND ysnPosted = 1
-													ORDER BY dtmDate DESC)
+														WHERE dtmDate < GETDATE()
+															AND ((intBookId IS NULL AND @bookId IS NULL) OR (intBookId = @bookId))
+															AND ((intSubBookId IS NULL AND @subBookId IS NULL) OR (intSubBookId = @subBookId))
+															AND ysnPosted = 1
+														ORDER BY dtmDate DESC)
+			WHERE ISNULL(RefDetail.dblNoOfLots, 0) <> 0
 
 			UPDATE tblRKDailyAveragePriceDetail
 			SET dblAverageLongPrice = tblPatch.dblAvgLongPrice
