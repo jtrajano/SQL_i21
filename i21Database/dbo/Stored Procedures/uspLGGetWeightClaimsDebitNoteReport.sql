@@ -176,10 +176,12 @@ SELECT DISTINCT WC.intWeightClaimId
 	,strTotalAmountInfo = LTRIM(CASE WHEN CU.ysnSubCurrency = 1 THEN MCU.strCurrency ELSE CU.strCurrency END) + ' ' + CONVERT(NVARCHAR(50), CONVERT(DECIMAL(10, 2), ROUND(WCD.dblClaimAmount,2)))
 	,I.strItemNo
 	,strItemDescription = isnull(rtITranslation.strTranslation,I.strDescription)
-	,strInvoiceNo = B.strVendorOrderNumber
-	,dblReceivedGross = IRI.dblGross
-	,dblReceivedNet = IRI.dblNet
-	,dblReceivedTare = (ISNULL(IRI.dblGross,0) - ISNULL(IRI.dblNet,0))
+	,strInvoiceNo = VIN.strVendorOrderNumber
+	,dblReceivedGross = CASE WHEN (IRI.dblGross IS NOT NULL) THEN IRI.dblGross - ISNULL(IRN.dblGross, 0) ELSE LD.dblGross END
+	,dblReceivedNet = CASE WHEN (IRI.dblNet IS NOT NULL) THEN IRI.dblNet - ISNULL(IRN.dblNet, 0) ELSE LD.dblNet END
+	,dblReceivedTare = CASE WHEN (IRI.dblNet IS NOT NULL) THEN
+						(ISNULL(IRI.dblGross - ISNULL(IRN.dblGross, 0),0) - ISNULL(IRI.dblNet - ISNULL(IRN.dblNet, 0),0))
+						ELSE LD.dblTare END
 	,WC.dtmActualWeighingDate
 	,VEN.strTaxNumber
 	,intReportLogoHeight = ISNULL(CP.intReportLogoHeight,0)
@@ -221,8 +223,31 @@ LEFT JOIN tblICItemUOM PUM ON PUM.intItemUOMId = WCD.intPriceItemUOMId
 LEFT JOIN tblICUnitMeasure PRU ON PRU.intUnitMeasureId = PUM.intUnitMeasureId
 LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = WCD.intCurrencyId
 LEFT JOIN tblSMCurrency MCU ON MCU.intCurrencyID = CU.intMainCurrencyId
-LEFT JOIN tblICInventoryReceiptItem IRI ON IRI.intSourceId = LD.intLoadDetailId
-LEFT JOIN tblICInventoryReceipt IR ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
+CROSS APPLY (SELECT TOP 1 strVendorOrderNumber FROM tblAPBill v1 
+			INNER JOIN tblAPBillDetail v2 ON v1.intBillId = v2.intBillId 
+			WHERE v2.intContractDetailId = CD.intContractDetailId
+			AND v1.intTransactionType = 1) VIN
+CROSS APPLY (
+		SELECT dblNet = SUM(ReceiptItem.dblNet) 
+			   ,dblGross = SUM(ReceiptItem.dblGross)
+		FROM tblICInventoryReceiptItem ReceiptItem
+		JOIN tblICInventoryReceipt RI ON RI.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
+		WHERE RI.strReceiptType <> 'Inventory Return'
+			AND intSourceId = LD.intLoadDetailId
+			AND intLineNo = CD.intContractDetailId
+			AND intOrderId = CH.intContractHeaderId
+			AND L.intPurchaseSale IN (1, 3)
+		) IRI
+CROSS APPLY (SELECT dblNet = SUM(IRI.dblNet) 
+					,dblGross = SUM(IRI.dblGross)
+			 FROM tblICInventoryReceipt IR 
+				JOIN tblICInventoryReceiptItem IRI ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
+				WHERE IR.strReceiptType = 'Inventory Return'
+				AND IRI.intSourceId = LD.intLoadDetailId 
+				AND IRI.intLineNo = CD.intContractDetailId
+				AND IRI.intOrderId = CH.intContractHeaderId 
+				AND L.intPurchaseSale IN (1, 3)
+		) IRN
 
 left join tblSMCountry				rtELCountry on lower(rtrim(ltrim(rtELCountry.strCountry))) = lower(rtrim(ltrim(EL.strCountry)))
 left join tblSMScreen				rtELScreen on rtELScreen.strNamespace = 'i21.view.Country'
@@ -301,7 +326,10 @@ GROUP BY WC.intWeightClaimId
 	,B.strVendorOrderNumber	
 	,IRI.dblGross
 	,IRI.dblNet
+	,IRN.dblGross
+	,IRN.dblNet
 	,WC.dtmActualWeighingDate
+	,VIN.strVendorOrderNumber
 	,PRU.strUnitMeasure
 	,rtELTranslation.strTranslation
 	,rtWUOMTranslation.strTranslation

@@ -170,6 +170,7 @@ SELECT DISTINCT WC.intWeightClaimId
 	,I.strItemNo
 	,strItemDescription = isnull(rtITranslation.strTranslation,I.strDescription)
 	,INV.strPONumber
+	,strOriginalInvoiceNumber = OINV.strInvoiceNumber
 	,WC.dtmActualWeighingDate
 	,INV.strComments
 	,CUS.strVatNumber
@@ -211,6 +212,10 @@ LEFT JOIN tblICItemUOM PUM ON PUM.intItemUOMId = WCD.intPriceItemUOMId
 LEFT JOIN tblICUnitMeasure PRU ON PRU.intUnitMeasureId = PUM.intUnitMeasureId
 LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = WCD.intCurrencyId
 LEFT JOIN tblSMCurrency MCU ON MCU.intCurrencyID = CU.intMainCurrencyId
+CROSS APPLY (SELECT TOP 1 i1.strInvoiceNumber FROM tblARInvoice i1 
+			INNER JOIN tblARInvoiceDetail i2 ON i1.intInvoiceId = i2.intInvoiceId 
+			WHERE i2.intContractDetailId = CD.intContractDetailId
+			AND i1.strTransactionType <> 'Credit Memo') OINV
 
 left join tblSMCountry				rtELCountry on lower(rtrim(ltrim(rtELCountry.strCountry))) = lower(rtrim(ltrim(EL.strCountry)))
 left join tblSMScreen				rtELScreen on rtELScreen.strNamespace = 'i21.view.Country'
@@ -287,6 +292,7 @@ GROUP BY WC.intWeightClaimId
 	,INV.strComments
 	,INV.strPONumber
 	,CUS.strVatNumber
+	,OINV.strInvoiceNumber
 	,rtELTranslation.strTranslation
 	,rtWUOMTranslation.strTranslation
 	,rtUMTranslation.strTranslation
