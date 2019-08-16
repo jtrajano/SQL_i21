@@ -446,7 +446,7 @@ BEGIN
 	-----------------------------------
 	--  Post the 'Pack Count'
 	-----------------------------------	
-	IF @strCountBy = 'Pack'
+	IF @strCountBy = 'Item Group'
 	BEGIN 
 		INSERT INTO tblICInventoryShiftPhysicalHistory (
 			intCountGroupId
@@ -552,7 +552,7 @@ BEGIN
 	-----------------------------------
 	--  Unpost the 'Pack Count'
 	-----------------------------------
-	IF @strCountBy = 'Pack'
+	IF @strCountBy = 'Item Group'
 	BEGIN 
 		UPDATE tblICInventoryShiftPhysicalHistory
 		SET ysnIsUnposted = 1
@@ -583,7 +583,7 @@ BEGIN
 			@GLEntries
 			,@intEntityUserSecurityId
 	END 
-	ELSE IF @strCountBy <> 'Pack'
+	ELSE IF @strCountBy <> 'Item Group'
 	BEGIN 
 		-- Post preview is not available. Financials are only booked for company-owned stocks.
 		EXEC uspICRaiseError 80185; 

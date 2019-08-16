@@ -25,7 +25,7 @@ WHERE intInventoryCountId = @intInventoryCountId
         ) AS intRank
     FROM tblICInventoryCountDetail cd
 		INNER JOIN tblICInventoryCount c ON c.intInventoryCountId = cd.intInventoryCountId
-	WHERE ISNULL(NULLIF(c.strCountBy, ''), 'Item') = 'Pack'
+	WHERE ISNULL(NULLIF(c.strCountBy, ''), 'Item') = 'Item Group'
 		AND cd.intCountGroupId IS NOT NULL
 		AND (cd.intCountGroupId = @intCountGroupId OR ISNULL(@intCountGroupId, 0) = 0)
 )
