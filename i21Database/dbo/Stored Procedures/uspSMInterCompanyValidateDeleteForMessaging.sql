@@ -154,7 +154,7 @@ BEGIN
 						BEGIN
 							SET @intReferenceActualInterCompanyId = 0;
 							DECLARE @ParamDefinition NVARCHAR(250) = N'@paramOut INT OUTPUT';
-							SET @sql = N'SELECT @paramOut = intInterCompanyId FROM ' + @strReferenceDatabaseName + '.dbo.[tblSMInterCompany]
+							SET @sql = N'SELECT @paramOut = intInterCompanyId FROM [' + @strReferenceDatabaseName + '].dbo.[tblSMInterCompany]
 											WHERE UPPER(strServerName) = UPPER(''' + @strReferenceServerName + ''') AND UPPER(strDatabaseName) = UPPER(''' + @strReferenceDatabaseName + ''')';
 
 							EXEC sp_executesql @sql, @ParamDefinition, @paramOut = @intReferenceActualInterCompanyId OUTPUT;
@@ -168,7 +168,7 @@ BEGIN
 
 								--DELETE  IN OTHER DATABASE--
 								--this will delete the data in the other database and log in the current database
-								SET @sql = N'EXEC ' + @strReferenceDatabaseName + '.dbo.[uspSMInterCompanyDeleteMessagingDetails] ' + 
+								SET @sql = N'EXEC [' + @strReferenceDatabaseName + '].dbo.[uspSMInterCompanyDeleteMessagingDetails] ' + 
 																				CONVERT(VARCHAR(250), @intDestinationRecordId) + 
 																				', ' + @strTableName +
 																				', ' + @strReferenceDatabaseName +
@@ -183,7 +183,7 @@ BEGIN
 								SET @intInterCompanyTransferLogForCommentIdInTheOtherDatabase = 0;
 								SET @sql = N'
 								SELECT @paramOut = intInterCompanyTransferLogForCommentId
-								FROM ' + @strReferenceDatabaseName + '.dbo.tblSMInterCompanyTransferLogForComment
+								FROM [' + @strReferenceDatabaseName + '].dbo.tblSMInterCompanyTransferLogForComment
 								WHERE intSourceRecordId = ' + CONVERT(VARCHAR(250), @intDestinationRecordId)
 
 								EXEC sp_executesql @sql, @ParamDefinition, @paramOut = @intInterCompanyTransferLogForCommentIdInTheOtherDatabase OUTPUT;
@@ -191,7 +191,7 @@ BEGIN
 								--execute the sp delete wise in the other database.
 								IF ISNULL(@intInterCompanyTransferLogForCommentIdInTheOtherDatabase, 0) <> 0
 								BEGIN
-									SET @sql = N'EXEC ' + @strReferenceDatabaseName + '.dbo.[uspSMInterCompanyValidateDeleteForMessaging] ' + 
+									SET @sql = N'EXEC [' + @strReferenceDatabaseName + '].dbo.[uspSMInterCompanyValidateDeleteForMessaging] ' + 
 														 CONVERT(VARCHAR(MAX), @intInterCompanyTransferLogForCommentIdInTheOtherDatabase) + ', ' +
 														 CONVERT(VARCHAR(MAX), @intCurrentCompanyId) + ', ''' +
 														 CONVERT(VARCHAR(MAX), @strTableName) + ''''

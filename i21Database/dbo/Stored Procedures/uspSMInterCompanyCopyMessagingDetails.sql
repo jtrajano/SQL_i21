@@ -167,9 +167,9 @@ BEGIN
 		--VALIDATION 1: Get all activities in intSourceRecordId when the source transaction id and destination transaction id are equals
 		SET @sql = N'INSERT INTO #TempTransferLog ([intInterCompanyTransferLogForCommentId], [intSourceRecordId], [intDestinationRecordId])
 		SELECT [intInterCompanyTransferLogForCommentId], [intSourceRecordId], [intDestinationRecordId]
-		FROM ' + @strCurrentDatabaseName + '.dbo.[tblSMInterCompanyTransferLogForComment] a
-		INNER JOIN ' + @strCurrentDatabaseName + '.dbo.[tblSMActivity] b ON a.intSourceRecordId = b.intActivityId
-		INNER JOIN ' + @strDestinationDatabaseName + '.dbo.[tblSMActivity] c ON a.intDestinationRecordId = c.intActivityId
+		FROM [' + @strCurrentDatabaseName + '].dbo.[tblSMInterCompanyTransferLogForComment] a
+		INNER JOIN [' + @strCurrentDatabaseName + '].dbo.[tblSMActivity] b ON a.intSourceRecordId = b.intActivityId
+		INNER JOIN [' + @strDestinationDatabaseName + '].dbo.[tblSMActivity] c ON a.intDestinationRecordId = c.intActivityId
 		WHERE (
 			b.intTransactionId = ' + CONVERT(VARCHAR, @intSourceTransactionId) + ' AND
 			c.intTransactionId = ' + CONVERT(VARCHAR, @intDestinationTransactionId) + ' AND
@@ -181,9 +181,9 @@ BEGIN
 		--VALIDATION 2: Get all activities in intDestinationRecordId when the destination transaction id is equal to @intSourceTransactionId and source transaction is equal to @intDestinationTransactionId
 		SET @sql = N'INSERT INTO #TempTransferLog ([intInterCompanyTransferLogForCommentId], [intSourceRecordId], [intDestinationRecordId])
 		SELECT [intInterCompanyTransferLogForCommentId], [intDestinationRecordId], [intSourceRecordId]
-		FROM ' + @strDestinationDatabaseName + '.dbo.[tblSMInterCompanyTransferLogForComment] a
-		INNER JOIN ' + @strDestinationDatabaseName +'.dbo.[tblSMActivity] b ON a.intSourceRecordId = b.intActivityId
-		INNER JOIN ' + @strCurrentDatabaseName + '.dbo.[tblSMActivity] c ON a.intDestinationRecordId = c.intActivityId
+		FROM [' + @strDestinationDatabaseName + '].dbo.[tblSMInterCompanyTransferLogForComment] a
+		INNER JOIN [' + @strDestinationDatabaseName +'].dbo.[tblSMActivity] b ON a.intSourceRecordId = b.intActivityId
+		INNER JOIN [' + @strCurrentDatabaseName + '].dbo.[tblSMActivity] c ON a.intDestinationRecordId = c.intActivityId
 		WHERE (
 			b.intTransactionId = ' + CONVERT(VARCHAR, @intDestinationTransactionId) + ' AND
 			c.intTransactionId = ' + CONVERT(VARCHAR, @intSourceTransactionId) + ' AND
@@ -219,17 +219,17 @@ BEGIN
 			
 			---STARTING NUMBERS--
 			SET @sql = N'
-				SELECT @paramOut = strPrefix + CONVERT(VARCHAR, intNumber) FROM ' + @strDestinationDatabaseName + '.dbo.[tblSMStartingNumber] 
+				SELECT @paramOut = strPrefix + CONVERT(VARCHAR, intNumber) FROM [' + @strDestinationDatabaseName + '].dbo.[tblSMStartingNumber] 
 				WHERE strTransactionType = ''Activity'' AND strModule = ''System Manager''';
 			EXEC sp_executesql @sql, @ParamStringDefinition, @paramOut = @strNewActivityNo OUTPUT;
 
 			SET @sql = N'
-				UPDATE ' + @strDestinationDatabaseName + '.dbo.[tblSMStartingNumber] SET intNumber = intNumber+1 WHERE strTransactionType = ''Activity'' and strModule = ''System Manager'';
+				UPDATE [' + @strDestinationDatabaseName + '].dbo.[tblSMStartingNumber] SET intNumber = intNumber+1 WHERE strTransactionType = ''Activity'' and strModule = ''System Manager'';
 			';
 			EXEC sp_executesql @sql
 			---END STARTING NUMBERS--
 
-			SET @sql = N'INSERT INTO ' + @strDestinationDatabaseName + '.dbo.[tblSMActivity]
+			SET @sql = N'INSERT INTO [' + @strDestinationDatabaseName + '].dbo.[tblSMActivity]
 			(
 				[intTransactionId], [strType], [strSubject], [intEntityContactId], [intEntityId], [intCompanyLocationId], [dtmStartDate], [dtmEndDate], [dtmStartTime], [dtmEndTime], [ysnAllDayEvent],
 				[ysnRemind], [strReminder], [strStatus], [strPriority], [strCategory], [intAssignedTo], [strRelatedTo], [strRecordNo], [strLocation], [strDetails], [strShowTimeAs],
@@ -268,7 +268,7 @@ BEGIN
 				SELECT TOP 1 @intActivityAttendeeId = intActivityAttendeeId FROM #TempActivityAttendee
 
 				SET @sql = N'
-					INSERT INTO ' + @strDestinationDatabaseName + '.dbo.[tblSMActivityAttendee](
+					INSERT INTO [' + @strDestinationDatabaseName + '].dbo.[tblSMActivityAttendee](
 						[intActivityId], [intEntityId], [ysnAddCalendarEvent], [intInterCompanyId]
 					)
 					SELECT TOP 1 ' + CONVERT(VARCHAR, @intNewActivityId) + ', [intEntityId], [ysnAddCalendarEvent], ' + CONVERT(VARCHAR, ISNULL(@intCurrentCompanyId, 0)) + '
@@ -303,7 +303,7 @@ BEGIN
 				SELECT TOP 1 @strCommentEntityName = strName FROM tblEMEntity where intEntityId = @intCommentEntityId
 
 				SET @sql = N'
-					INSERT INTO ' + @strDestinationDatabaseName + '.dbo.[tblSMComment] (
+					INSERT INTO [' + @strDestinationDatabaseName + '].dbo.[tblSMComment] (
 						[strComment], [strScreen], [strRecordNo], [dtmAdded], [dtmModified], [ysnPublic], [ysnEdited], [intEntityId], [intTransactionId], [intActivityId], 
 						[intInterCompanyId], [strInterCompanyEntityName], [intInterCompanyEntityId]
 					)
@@ -340,7 +340,7 @@ BEGIN
 						SELECT TOP 1 @intNotificationId = intNotificationId FROM #TempNotification
 
 						SET @sql = N'
-							INSERT INTO ' + @strDestinationDatabaseName + '.dbo.[tblSMNotification](
+							INSERT INTO [' + @strDestinationDatabaseName + '].dbo.[tblSMNotification](
 								[intCommentId], [intActivityId], [strTitle], [strAction], [strType], [strRoute], [ysnSent],	[ysnSeen], [ysnRead], [intFromEntityId], [intToEntityId]
 							)
 							SELECT TOP 1 ' + CONVERT(VARCHAR, @intNewCommentId) + ', ' +
@@ -388,17 +388,17 @@ BEGIN
 				@intDestinationActivityId = intDestinationRecordId 
 			FROM #TempTransferLog
 
-			SET @sql = N'SELECT @paramOut = strActivityNo FROM ' + @strDestinationDatabaseName + '.dbo.[tblSMActivity] where intActivityId = ' + CONVERT(VARCHAR, @intDestinationActivityId);
+			SET @sql = N'SELECT @paramOut = strActivityNo FROM [' + @strDestinationDatabaseName + '].dbo.[tblSMActivity] where intActivityId = ' + CONVERT(VARCHAR, @intDestinationActivityId);
 			EXEC sp_executesql @sql, @ParamStringDefinition, @paramOut = @strNewActivityNo OUTPUT;
 
 			--ALWAYS UPDATE  SUBJECT AND PUBLIC
 			SET @sql = N'
-				UPDATE ' + @strDestinationDatabaseName + '.dbo.[tblSMActivity] SET 
+				UPDATE [' + @strDestinationDatabaseName + '].dbo.[tblSMActivity] SET 
 				strSubject = (
-					SELECT strSubject FROM ' + @strCurrentDatabaseName + '.dbo.[tblSMActivity] WHERE intActivityId = ' + CONVERT(VARCHAR, @intSourceActivityId) + '
+					SELECT strSubject FROM [' + @strCurrentDatabaseName + '].dbo.[tblSMActivity] WHERE intActivityId = ' + CONVERT(VARCHAR, @intSourceActivityId) + '
 				),
 				ysnPublic = (
-					SELECT ysnPublic FROM ' + @strCurrentDatabaseName + '.dbo.[tblSMActivity] WHERE intActivityId = ' + CONVERT(VARCHAR, @intSourceActivityId) + '
+					SELECT ysnPublic FROM [' + @strCurrentDatabaseName + '].dbo.[tblSMActivity] WHERE intActivityId = ' + CONVERT(VARCHAR, @intSourceActivityId) + '
 				)
 				WHERE intActivityId = ' + CONVERT(VARCHAR, @intDestinationActivityId);
 			EXEC sp_executesql @sql
@@ -411,9 +411,9 @@ BEGIN
 			SET @sql = N'
 				INSERT INTO #TempTransferLogForUpdating ([intInterCompanyTransferLogForCommentId], [intSourceRecordId], [intDestinationRecordId])
 				SELECT [intInterCompanyTransferLogForCommentId], [intSourceRecordId], [intDestinationRecordId]
-				FROM ' + @strCurrentDatabaseName + '.dbo.[tblSMInterCompanyTransferLogForComment] a
-				INNER JOIN ' + @strCurrentDatabaseName + '.dbo.[tblSMActivityAttendee] b ON a.intSourceRecordId = b.intActivityAttendeeId
-				INNER JOIN ' + @strDestinationDatabaseName + '.dbo.[tblSMActivityAttendee] c ON a.intDestinationRecordId = c.intActivityAttendeeId
+				FROM [' + @strCurrentDatabaseName + '].dbo.[tblSMInterCompanyTransferLogForComment] a
+				INNER JOIN [' + @strCurrentDatabaseName + '].dbo.[tblSMActivityAttendee] b ON a.intSourceRecordId = b.intActivityAttendeeId
+				INNER JOIN [' + @strDestinationDatabaseName + '].dbo.[tblSMActivityAttendee] c ON a.intDestinationRecordId = c.intActivityAttendeeId
 				WHERE (
 					b.intActivityId = ' + CONVERT(VARCHAR, @intSourceActivityId) + ' AND
 					c.intActivityId = ' + CONVERT(VARCHAR, @intDestinationActivityId) + ' AND
@@ -427,9 +427,9 @@ BEGIN
 			SET @sql = N'
 				INSERT INTO #TempTransferLogForUpdating ([intInterCompanyTransferLogForCommentId], [intSourceRecordId], [intDestinationRecordId])
 				SELECT [intInterCompanyTransferLogForCommentId], [intDestinationRecordId], [intSourceRecordId]
-				FROM ' + @strDestinationDatabaseName + '.dbo.[tblSMInterCompanyTransferLogForComment] a
-				INNER JOIN ' + @strDestinationDatabaseName + '.dbo.[tblSMActivityAttendee] b ON a.intSourceRecordId = b.intActivityAttendeeId
-				INNER JOIN ' + @strCurrentDatabaseName + '.dbo.[tblSMActivityAttendee] c ON a.intDestinationRecordId = c.intActivityAttendeeId
+				FROM [' + @strDestinationDatabaseName + '].dbo.[tblSMInterCompanyTransferLogForComment] a
+				INNER JOIN [' + @strDestinationDatabaseName + '].dbo.[tblSMActivityAttendee] b ON a.intSourceRecordId = b.intActivityAttendeeId
+				INNER JOIN [' + @strCurrentDatabaseName + '].dbo.[tblSMActivityAttendee] c ON a.intDestinationRecordId = c.intActivityAttendeeId
 				WHERE (
 					b.intActivityId = ' + CONVERT(VARCHAR, @intDestinationActivityId) + ' AND
 					c.intActivityId = ' + CONVERT(VARCHAR, @intSourceActivityId) + ' AND
@@ -454,7 +454,7 @@ BEGIN
 			BEGIN
 				SELECT TOP 1 @intActivityAttendeeId = intActivityAttendeeId FROM #TempActivityAttendee
 				SET @sql = N'
-					INSERT INTO ' + @strDestinationDatabaseName + '.dbo.[tblSMActivityAttendee](
+					INSERT INTO [' + @strDestinationDatabaseName + '].dbo.[tblSMActivityAttendee](
 						[intActivityId], [intEntityId], [ysnAddCalendarEvent], [intInterCompanyId]
 					)
 					SELECT TOP 1 ' + CONVERT(VARCHAR, @intDestinationActivityId) + ', [intEntityId], [ysnAddCalendarEvent], ' + CONVERT(VARCHAR, ISNULL(@intCurrentCompanyId, 0)) + '
@@ -480,9 +480,9 @@ BEGIN
 			SET @sql = N'
 				INSERT INTO #TempTransferLogForUpdating ([intInterCompanyTransferLogForCommentId], [intSourceRecordId], [intDestinationRecordId], [dtmCreated], [strDatabaseName])
 				SELECT [intInterCompanyTransferLogForCommentId], [intSourceRecordId], [intDestinationRecordId], [dtmCreated], ''' + @strCurrentDatabaseName + '''
-				FROM ' + @strCurrentDatabaseName + '.dbo.[tblSMInterCompanyTransferLogForComment] a
-				INNER JOIN ' + @strCurrentDatabaseName + '.dbo.[tblSMComment] b ON a.intSourceRecordId = b.intCommentId
-				INNER JOIN ' + @strDestinationDatabaseName + '.dbo.[tblSMComment] c ON a.intDestinationRecordId = c.intCommentId
+				FROM [' + @strCurrentDatabaseName + '].dbo.[tblSMInterCompanyTransferLogForComment] a
+				INNER JOIN [' + @strCurrentDatabaseName + '].dbo.[tblSMComment] b ON a.intSourceRecordId = b.intCommentId
+				INNER JOIN [' + @strDestinationDatabaseName + '].dbo.[tblSMComment] c ON a.intDestinationRecordId = c.intCommentId
 				WHERE (
 					b.intActivityId = ' + CONVERT(VARCHAR, @intSourceActivityId) + ' AND
 					c.intActivityId = ' + CONVERT(VARCHAR, @intDestinationActivityId) + ' AND
@@ -496,9 +496,9 @@ BEGIN
 			SET @sql = N'
 				INSERT INTO #TempTransferLogForUpdating ([intInterCompanyTransferLogForCommentId], [intSourceRecordId], [intDestinationRecordId], [dtmCreated], [strDatabaseName])
 				SELECT [intInterCompanyTransferLogForCommentId], [intDestinationRecordId], [intSourceRecordId], [dtmCreated], ''' + @strDestinationDatabaseName + '''
-				FROM ' + @strDestinationDatabaseName + '.dbo.[tblSMInterCompanyTransferLogForComment] a
-				INNER JOIN ' + @strDestinationDatabaseName + '.dbo.[tblSMComment] b ON a.intSourceRecordId = b.intCommentId
-				INNER JOIN ' + @strCurrentDatabaseName + '.dbo.[tblSMComment] c ON a.intDestinationRecordId = c.intCommentId
+				FROM [' + @strDestinationDatabaseName + '].dbo.[tblSMInterCompanyTransferLogForComment] a
+				INNER JOIN [' + @strDestinationDatabaseName + '].dbo.[tblSMComment] b ON a.intSourceRecordId = b.intCommentId
+				INNER JOIN [' + @strCurrentDatabaseName + '].dbo.[tblSMComment] c ON a.intDestinationRecordId = c.intCommentId
 				WHERE (
 					b.intActivityId = ' + CONVERT(VARCHAR, @intDestinationActivityId) + ' AND
 					c.intActivityId = ' + CONVERT(VARCHAR, @intSourceActivityId) + ' AND
@@ -525,7 +525,7 @@ BEGIN
 				SELECT TOP 1 @strCommentEntityName = strName FROM tblEMEntity where intEntityId = @intCommentEntityId
 
 				SET @sql = N'
-					INSERT INTO ' + @strDestinationDatabaseName + '.dbo.[tblSMComment] (
+					INSERT INTO [' + @strDestinationDatabaseName + '].dbo.[tblSMComment] (
 						[strComment], [strScreen], [strRecordNo], [dtmAdded], [dtmModified], [ysnPublic], [ysnEdited], [intEntityId], [intTransactionId], [intActivityId],
 						[intInterCompanyId], [strInterCompanyEntityName], [intInterCompanyEntityId]
 					)
@@ -568,7 +568,7 @@ BEGIN
 						--SELECT TOP 1 @intNewCommentId, @intDestinationActivityId, @strNewActivityNo, [strAction], [strType], [strRoute], [ysnSent],	[ysnSeen], [ysnRead], [intFromEntityId], [intToEntityId]
 						--FROM #TempNotification
 						SET @sql = N'
-							INSERT INTO ' + @strDestinationDatabaseName + '.dbo.[tblSMNotification](
+							INSERT INTO [' + @strDestinationDatabaseName + '].dbo.[tblSMNotification](
 								[intCommentId], [intActivityId], [strTitle], [strAction], [strType], [strRoute], [ysnSent],	[ysnSeen], [ysnRead], [intFromEntityId], [intToEntityId]
 							)
 							SELECT TOP 1 ' +
@@ -616,15 +616,15 @@ BEGIN
 				FROM #TempTransferLogForUpdating
 
 				--ALWAYS UPDATE  COMMENT WHEN LATEST
-				SET @sql = N'SELECT @paramOut = DATEADD(MILLISECOND,DATEDIFF(MILLISECOND,getutcdate(),GETDATE()), dtmModified) FROM ' + @strCurrentDatabaseName + '.dbo.[tblSMComment] WHERE intCommentId = ' + CONVERT(VARCHAR, @intTempSourceCommentId);
+				SET @sql = N'SELECT @paramOut = DATEADD(MILLISECOND,DATEDIFF(MILLISECOND,getutcdate(),GETDATE()), dtmModified) FROM [' + @strCurrentDatabaseName + '].dbo.[tblSMComment] WHERE intCommentId = ' + CONVERT(VARCHAR, @intTempSourceCommentId);
 				EXEC sp_executesql @sql, @ParamDateTimeDefinition, @paramOut = @dtmSourceDate OUTPUT;
 				
 				IF ISNULL(@dtmSourceDate, 0) > ISNULL(@dtmLogDate, 0)
 				BEGIN
 					SET @sql = N'
-						UPDATE ' + @strDestinationDatabaseName + '.dbo.[tblSMComment] SET 
+						UPDATE [' + @strDestinationDatabaseName + '].dbo.[tblSMComment] SET 
 						strComment = (
-							SELECT strComment FROM ' + @strCurrentDatabaseName + '.dbo.[tblSMComment] WHERE intCommentId = ' + CONVERT(VARCHAR, @intTempSourceCommentId) + '
+							SELECT strComment FROM [' + @strCurrentDatabaseName + '].dbo.[tblSMComment] WHERE intCommentId = ' + CONVERT(VARCHAR, @intTempSourceCommentId) + '
 						),
 						dtmModified = ''' + LEFT(CONVERT(VARCHAR, @dtmSourceDate, 121), 23) + '''
 						WHERE intCommentId = ' + CONVERT(VARCHAR, @intTempDestinationCommentId);
@@ -632,7 +632,7 @@ BEGIN
 
 					--update logging table
 					SET @sql = N'
-						UPDATE ' + @strLogTableDataSource + '.dbo.[tblSMInterCompanyTransferLogForComment] SET dtmCreated = ''' + LEFT(CONVERT(VARCHAR, @dtmSourceDate, 121), 23) + '''
+						UPDATE [' + @strLogTableDataSource + '].dbo.[tblSMInterCompanyTransferLogForComment] SET dtmCreated = ''' + LEFT(CONVERT(VARCHAR, @dtmSourceDate, 121), 23) + '''
 						WHERE intInterCompanyTransferLogForCommentId = ' + CONVERT(VARCHAR, @intTempTransferLogId)
 					EXEC sp_executesql @sql
 				END

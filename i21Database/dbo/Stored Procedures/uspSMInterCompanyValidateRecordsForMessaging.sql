@@ -147,7 +147,7 @@ BEGIN
 						BEGIN
 							SET @intReferenceActualInterCompanyId = 0;
 							DECLARE @ParamDefinition NVARCHAR(250) = N'@paramOut INT OUTPUT';
-							SET @sql = N'SELECT @paramOut = intInterCompanyId FROM ' + @strReferenceDatabaseName + '.dbo.[tblSMInterCompany]
+							SET @sql = N'SELECT @paramOut = intInterCompanyId FROM [' + @strReferenceDatabaseName + '].dbo.[tblSMInterCompany]
 											WHERE UPPER(strServerName) = UPPER(''' + @strReferenceServerName + ''') AND UPPER(strDatabaseName) = UPPER(''' + @strReferenceDatabaseName + ''')';
 
 							EXEC sp_executesql @sql, @ParamDefinition, @paramOut = @intReferenceActualInterCompanyId OUTPUT;
@@ -162,7 +162,7 @@ BEGIN
 								SET @intInterCompanyMappingIdToUse = 0;
 								--Get the mapping id in tblSMInterCompanyMapping table in the other database
 								SET @sql = N'
-								SELECT @paramOut = intInterCompanyMappingId FROM ' + @strReferenceDatabaseName + '.dbo.[tblSMInterCompanyMapping]
+								SELECT @paramOut = intInterCompanyMappingId FROM [' + @strReferenceDatabaseName + '].dbo.[tblSMInterCompanyMapping]
 								WHERE intCurrentTransactionId = ' + CONVERT(VARCHAR, @intReferenceTransactionId) + ' AND 
 								intReferenceTransactionId = ' + CONVERT(VARCHAR, @intCurrentTransactionId) + ' AND 
 								intReferenceCompanyId = ' + CONVERT(VARCHAR, @intCurrentCompanyId);
@@ -172,7 +172,7 @@ BEGIN
 								--execute the sp in the other database.
 								IF ISNULL(@intInterCompanyMappingIdToUse, 0) <> 0
 								BEGIN
-									SET @sql = N'EXEC ' + @strReferenceDatabaseName + '.dbo.[uspSMInterCompanyValidateRecordsForMessaging] ' + 
+									SET @sql = N'EXEC [' + @strReferenceDatabaseName + '].dbo.[uspSMInterCompanyValidateRecordsForMessaging] ' + 
 														 CONVERT(VARCHAR(MAX), @intInterCompanyMappingIdToUse) + ', ' +
 														 CONVERT(VARCHAR(MAX), @intCurrentCompanyId) + ', ''' +
 														 CONVERT(VARCHAR(MAX), @strFinishedTransactionId) + ''''
