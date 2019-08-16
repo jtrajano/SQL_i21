@@ -71,6 +71,9 @@ DECLARE @intStorageScheduleId AS INT
 		,@shipFromEntityId INT
 		,@intFarmFieldId INT
 		,@ysnCustomerStorage BIT;
+DECLARE @dblLoadScheduleQty NUMERIC (38,20)  
+DECLARE @intLoadItemUOMId INT  
+DECLARE @intLoadContractDetailId INT  
 
 SELECT	
 	@intTicketItemUOMId = UOM.intItemUOMId
@@ -105,16 +108,38 @@ OPEN intListCursor;
 
 			IF @ysnIsStorage = 0 AND ISNULL(@ysnDPStorage,0) = 0 AND ISNULL(@intStorageScheduleTypeId, 0) <= 0
 				BEGIN
-					IF @strDistributionOption = 'CNT' OR @strDistributionOption = 'LOD'
-					BEGIN
-						IF ISNULL(@intLoopContractId,0) != 0 AND @strDistributionOption = 'CNT'
-						EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoopContractId, @dblLoopContractUnits, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId
-						EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intLoopContractId, @dblLoopContractUnits, @intEntityId;
-						
-						IF(@strDistributionOption = 'LOD' AND @intLoadDetailId > 0)
-						BEGIN
-							EXEC dbo.uspSCUpdateTicketLoadUsed @intTicketId, @intLoadDetailId, @dblLoopContractUnits, @intEntityId;	
-						END
+					IF @strDistributionOption = 'CNT' OR @strDistributionOption = 'LOD'  
+					BEGIN  
+							IF(@strDistributionOption = 'LOD' AND @intLoadDetailId > 0)  
+						BEGIN  
+							--get contract Detail Id of the load detail  
+							SELECT @intLoadContractDetailId = intPContractDetailId FROM tblLGLoadDetail WHERE intLoadDetailId = @intLoadDetailId  
+							
+							-- remove schedule quantity of the load schedule  					
+							SELECT TOP 1 @dblLoadScheduleQty = dblQuantity,@intLoadItemUOMId = intItemUOMId FROM tblLGLoadDetail WHERE intLoadDetailId = @intLoadDetailId  
+							SET @dblLoadScheduleQty  = @dblLoadScheduleQty * -1  
+							EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoadContractDetailId, @dblLoadScheduleQty , @intUserId, @intTicketId, 'Scale', @intLoadItemUOMId  
+								
+							-- add schedule quantity of the ticket  
+							EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoadContractDetailId, @dblLoopContractUnits, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId  
+							
+							IF(@intLoopContractId = @intLoadContractDetailId)  
+							BEGIN   
+
+								EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intLoopContractId, @dblLoopContractUnits, @intEntityId;  
+							END  
+							
+					
+							EXEC dbo.uspSCUpdateTicketLoadUsed @intTicketId, @intLoadDetailId, @dblLoopContractUnits, @intEntityId;   
+						END  
+						ELSE  
+						BEGIN  
+							IF ISNULL(@intLoopContractId,0) != 0 AND @strDistributionOption = 'CNT'  
+							BEGIN  
+							EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoopContractId, @dblLoopContractUnits, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId  
+							EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intLoopContractId, @dblLoopContractUnits, @intEntityId;  
+							END  
+						END  
 						
 
 						INSERT INTO @ItemsForItemReceipt (

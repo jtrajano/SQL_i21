@@ -35,10 +35,22 @@ SELECT
 	,intTicketId = B.intTicketId
 FROM vyuLGLoadDetailViewSearch A
 OUTER APPLY (
+	SELECT TOP 1
+		intLoadDetailId 
+		,intTicketId
+	FROM ( 
 	SELECT TOP 1 
 		intLoadDetailId 
 		,intTicketId
 	FROM tblSCTicketLoadUsed 
 	WHERE intLoadDetailId = A.intLoadDetailId
+	UNION ALL
+
+	SELECT TOP 1
+		intLoadDetailId 
+		,intTicketId
+	FROM tblSCTicket 
+	WHERE intLoadDetailId = A.intLoadDetailId
+	)A1
 )B
 
