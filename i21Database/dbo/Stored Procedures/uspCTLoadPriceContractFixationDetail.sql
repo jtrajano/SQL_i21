@@ -22,7 +22,9 @@ BEGIN TRY
 								WHEN	CH.ysnLoad = 1
 								THEN	ISNULL(CD.intNoOfLoad,0)	-	ISNULL(CD.dblBalanceLoad,0)
 								ELSE	ISNULL(CD.dblQuantity,0)	-	ISNULL(CD.dblBalance,0)												
-							END
+							END,
+			TR.strInternalTradeNo,
+			TR.intFutOptTransactionHeaderId
 
 	FROM	tblCTPriceFixationDetail	FD
 	JOIN	tblCTPriceFixation			PF	ON	PF.intPriceFixationId			=	FD.intPriceFixationId
