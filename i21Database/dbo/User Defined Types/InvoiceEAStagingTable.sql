@@ -18,6 +18,7 @@ CREATE TYPE [dbo].[InvoiceEAStagingTable] AS TABLE
     ,[strItemNo]							NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NULL
     ,[strItemDescription]					NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NULL		-- Line Item Description(If NULL the item's description will be used)
 	,[intItemUOMId]							INT												NULL		-- Item UOM Id
+	,[intUnitMeasureId]						INT												NULL		-- UOM Id
     ,[dblQtyShipped]						NUMERIC(38, 20)									NULL		-- The quantity to ship
 	,[dblDiscount]							NUMERIC(18, 6)									NULL		-- (%) The discount to apply to a line item
     ,[dblPrice]								NUMERIC(18, 6)									NULL		-- The line item price
