@@ -143,7 +143,7 @@ BEGIN TRY
 			UPPER(C.strUnitMeasure) as strLineUnitMeasure,
 			UPPER(C.strSymbol) as strLineSymbol,
 			UPPER(B.dblRate) as dblLinePrice,
-			CAST(ROUND(ISNULL(B.dblRate,0) * ISNULL(G.dblContracted,0),2) as NUMERIC(36,2))  as dblLineTotal,
+			CAST(ROUND(ISNULL(B.dblAdjustedTax,0),2) as NUMERIC(36,2))  as dblLineTotal,
 			UPPER(G.strContractNumber) as strContractNumber,
 			A.intItemContractHeaderId,
 			A.intItemContractDetailId
