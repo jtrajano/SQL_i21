@@ -15,8 +15,22 @@ DECLARE @NetValue NUMERIC(18,6)
 	, @NetReceivablesValue NUMERIC(18,6)
 	, @intCommodityId AS INT
 
-IF @strPurchaseSales = 'Purchase'
+IF ISNULL(@strPurchaseSales, '') <> '' AND @strPurchaseSales <> 'Both'
 BEGIN
+	IF @strPurchaseSales = 'Purchase'
+	BEGIN
+		SET @strPurchaseSales = 'Sale'
+	END
+	ELSE
+	BEGIN
+		SET @strPurchaseSales = 'Purchase'
+	END
+END
+
+
+--===================================
+--			PURCHASE
+--===================================
 	SELECT * INTO #tmpSourcePurchase
 	FROM (
 		SELECT IR.intEntityVendorId as intEntityId
@@ -245,24 +259,23 @@ BEGIN
 		DELETE FROM #tmpCommodityIdPurchase WHERE Item = @intCommodityId
 	END
 	
-	SELECT CONVERT(INT,ROW_NUMBER() OVER(ORDER BY t.intEntityId ASC)) AS intRowNumber
+	SELECT 1 AS intRowNumber
+		, strType = 'Purchase'
 		, t.intEntityId
 		, t.intCommodityId
 		, c.strCommodityCode
 		, t.FieldName
 		, t.dblTotal
+	INTO #tmpYearToDate
 	FROM #tmpSourcePurchase t
 	inner join tblICCommodity c on t.intCommodityId = c.intCommodityId
 	where FieldName NOT IN('Paid') 
 		and isnull(dblTotal,0) != 0 --Remove all the fields that has 0 value
 	order by intSorting
-END
 
 --===================================
---			SALES
+--			SALE
 --===================================
-ELSE
-BEGIN
 	SELECT *
 	INTO #tmpSourceSales
 	FROM (
@@ -404,7 +417,6 @@ BEGIN
 			AND T.intCommodityId IN (SELECT Item from [dbo].[fnSplitString](@intCommodityIds, ','))
 		GROUP BY  InvShp.intEntityCustomerId,T.intCommodityId,Itm.strItemNo
 	) src
-END
 
 --Add the columns with 0 value if there are no records found.
 --This is to make sure we are still returning the columns
@@ -464,7 +476,17 @@ BEGIN
 	DELETE FROM #tmpCommodityIdSales WHERE Item = @intCommodityId
 END
 
-SELECT CONVERT(INT,ROW_NUMBER() OVER(ORDER BY t.intEntityId ASC)) AS intRowNumber
+INSERT INTO #tmpYearToDate(
+	intRowNumber
+	,strType
+	,intEntityId
+	,intCommodityId
+	,strCommodityCode
+	,FieldName
+	,dblTotal
+)
+SELECT 2 AS intRowNumber
+	, 'Sale'
 	, t.intEntityId
 	, t.intCommodityId
 	, c.strCommodityCode
@@ -475,3 +497,8 @@ inner join tblICCommodity c on t.intCommodityId = c.intCommodityId
 where FieldName NOT IN('Paid')
 	and isnull(dblTotal,0) != 0 --Remove all the fields that has 0 value
 order by intSorting
+
+
+SELECT * 
+FROM #tmpYearToDate
+WHERE strType <> @strPurchaseSales

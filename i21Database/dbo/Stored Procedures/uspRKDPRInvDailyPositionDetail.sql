@@ -2724,7 +2724,7 @@ BEGIN
 			, strNotes
 			, ysnPreCrush
 		FROM @FinalTable 
-		WHERE strSeqHeader <> 'Company Titled Stock'
+		WHERE strSeqHeader NOT IN ('Company Titled Stock','Sales In-Transit')
 			AND strType <> 'Receipt' 
 			-- and strType not like '%'+@strPurchaseSales+'%'
 		ORDER BY strCommodityCode, intSeqId ASC, intContractHeaderId DESC

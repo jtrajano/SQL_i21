@@ -51,17 +51,18 @@ BEGIN
 		SELECT Item COLLATE Latin1_General_CI_AS FROM [dbo].[fnSplitString](@intCommodityId, ',')
 	END
 
-	if isnull(@strPurchaseSales,'') <> ''
+	IF ISNULL(@strPurchaseSales, '') <> '' AND @strPurchaseSales <> 'Both'
 	BEGIN
-	if @strPurchaseSales='Purchase'
-	BEGIN
-	select @strPurchaseSales='Sale'
+		IF @strPurchaseSales = 'Purchase'
+		BEGIN
+			SET @strPurchaseSales = 'Sale'
+		END
+		ELSE
+		BEGIN
+			SET @strPurchaseSales = 'Purchase'
+		END
 	END
-	ELSE
-	BEGIN
-	SELECT @strPurchaseSales='Purchase'
-	END
-	END
+
 	
 	DECLARE @tempFinal AS TABLE (intRow INT IDENTITY
 		, intContractHeaderId INT

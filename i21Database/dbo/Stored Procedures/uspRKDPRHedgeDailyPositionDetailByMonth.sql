@@ -12,7 +12,7 @@ AS
 BEGIN
 	SET @dtmToDate = CONVERT(DATETIME, CONVERT(VARCHAR(10), @dtmToDate, 110), 110)
 
-	IF ISNULL(@strPurchaseSales, '') <> ''
+	IF ISNULL(@strPurchaseSales, '') <> '' AND @strPurchaseSales <> 'Both'
 	BEGIN
 		IF @strPurchaseSales = 'Purchase'
 		BEGIN
@@ -23,6 +23,7 @@ BEGIN
 			SET @strPurchaseSales = 'Purchase'
 		END
 	END
+
 
 	IF ISNULL(@intLocationId, 0) = 0
 	BEGIN
