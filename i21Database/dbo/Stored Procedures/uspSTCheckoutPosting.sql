@@ -3088,6 +3088,284 @@ BEGIN
 
 
 
+--PRINT 'CHANGE FUND'
+				----------------------------------------------------------------------
+				---------------------- [START] - CHANGE FUND -------------------------
+				----------------------------------------------------------------------
+				DECLARE @tblCheckout_CHANGEFUND TABLE
+				(
+					intCheckoutId	INT
+					, strType		NVARCHAR(50)
+					, intItemId		INT
+					, dblItemAmount DECIMAL(18, 6)
+				)
+
+				INSERT INTO @tblCheckout_CHANGEFUND
+				(
+					intCheckoutId
+					, strType
+					, intItemId
+					, dblItemAmount
+				)
+				SELECT DISTINCT 
+					intCheckoutId,  
+					CASE
+						WHEN REPLACE(ITEM, '_ItemId', '') = 'BegBalance'
+							THEN 'Change Fund Beg Balance'
+						WHEN REPLACE(ITEM, '_ItemId', '') = 'EndBalance'
+							THEN 'Change Fund End Balance'
+						WHEN REPLACE(ITEM, '_ItemId', '') = 'Replenishment'
+							THEN 'Change Fund Replenishment'
+					END AS strType,
+					intItemId, 
+					dblItemAmount
+				FROM 
+				(
+					SELECT ch.intCheckoutId
+
+						 , ch.dblChangeFundBegBalance			AS BegBalance_Amount
+						 , ch.dblChangeFundEndBalance			AS EndBalance_Amount
+						 , ch.dblChangeFundChangeReplenishment	AS Replenishment_Amount
+
+						 , st.intChangeFundBegBalanceItemId		AS BegBalance_ItemId
+						 , st.intChangeFundEndBalanceItemId		AS EndBalance_ItemId
+						 , st.intChangeFundReplenishItemId		AS Replenishment_ItemId
+					FROM tblSTCheckoutHeader ch
+					INNER JOIN tblSTStore st
+						ON ch.intStoreId = st.intStoreId
+					WHERE intCheckoutId = @intCheckoutId
+				)t
+				unpivot
+				(
+					intItemId for ITEM in (BegBalance_ItemId, EndBalance_ItemId, Replenishment_ItemId)
+				) o
+				unpivot
+				(
+					dblItemAmount for ITEMAMOUNT in (BegBalance_Amount, EndBalance_Amount, Replenishment_Amount)
+				) n
+				WHERE  REPLACE(ITEM, '_ItemId', '') = REPLACE(ITEMAMOUNT, '_Amount', '')
+
+
+
+				IF EXISTS(SELECT TOP 1 1 FROM @tblCheckout_CHANGEFUND WHERE intCheckoutId = @intCheckoutId AND dblItemAmount != 0)
+					BEGIN
+						INSERT INTO @EntriesForInvoice(
+											 [strSourceTransaction]
+											,[strTransactionType]
+											,[strType]
+											,[intSourceId]
+											,[strSourceId]
+											,[intInvoiceId]
+											,[intEntityCustomerId]
+											,[intCompanyLocationId]
+											,[intCurrencyId]
+											,[intTermId]
+											,[dtmDate]
+											,[dtmDueDate]
+											,[dtmShipDate]
+											,[dtmCalculated]
+											,[dtmPostDate]
+											,[intEntitySalespersonId]
+											,[intFreightTermId]
+											,[intShipViaId]
+											,[intPaymentMethodId]
+											,[strInvoiceOriginId]
+											,[strPONumber]
+											,[strBOLNumber]
+											,[strComments]
+											,[intShipToLocationId]
+											,[intBillToLocationId]
+											,[ysnTemplate]
+											,[ysnForgiven]
+											,[ysnCalculated]
+											,[ysnSplitted]
+											,[intPaymentId]
+											,[intSplitId]
+											,[intLoadDistributionHeaderId]
+											,[strActualCostId]
+											,[intShipmentId]
+											,[intTransactionId]
+											,[intEntityId]
+											,[ysnResetDetails]
+											,[ysnRecap] -- RECAP
+											,[ysnPost]
+											,[intInvoiceDetailId]
+											,[intItemId]
+											,[ysnInventory]
+											,[strItemDescription]
+											,[intOrderUOMId]
+											,[dblQtyOrdered]
+											,[intItemUOMId]
+											,[dblQtyShipped]
+											,[dblDiscount]
+											,[dblPrice]
+											,[ysnRefreshPrice]
+											,[strMaintenanceType]
+											,[strFrequency]
+											,[dtmMaintenanceDate]
+											,[dblMaintenanceAmount]
+											,[dblLicenseAmount]
+											,[intTaxGroupId]
+											,[ysnRecomputeTax]
+											,[intSCInvoiceId]
+											,[strSCInvoiceNumber]
+											,[intInventoryShipmentItemId]
+											,[strShipmentNumber]
+											,[intSalesOrderDetailId]
+											,[strSalesOrderNumber]
+											,[intContractHeaderId]
+											,[intContractDetailId]
+											,[intShipmentPurchaseSalesContractId]
+											,[intTicketId]
+											,[intTicketHoursWorkedId]
+											,[intSiteId]
+											,[strBillingBy]
+											,[dblPercentFull]
+											,[dblNewMeterReading]
+											,[dblPreviousMeterReading]
+											,[dblConversionFactor]
+											,[intPerformerId]
+											,[ysnLeaseBilling]
+											,[ysnVirtualMeterReading]
+											,[strImportFormat]
+											,[dblCOGSAmount]
+											,[intTempDetailIdForTaxes]
+											,[intConversionAccountId]
+											,[intCurrencyExchangeRateTypeId]
+											,[intCurrencyExchangeRateId]
+											,[dblCurrencyExchangeRate]
+											,[intSubCurrencyId]
+											,[dblSubCurrencyRate]
+											--,[ysnImportedFromOrigin]
+											--,[ysnImportedAsPosted]
+										)
+										SELECT 
+											 [strSourceTransaction]		= 'Invoice'
+											,[strTransactionType]		= @strInvoiceTransactionTypeMain
+										    ,[strType]					= @strInvoiceTypeMain
+											,[intSourceId]				= @intCheckoutId
+											,[strSourceId]				= CAST(@intCheckoutId AS NVARCHAR(250))
+											,[intInvoiceId]				= @intCurrentInvoiceId -- NULL = New
+											,[intEntityCustomerId]		= @intEntityCustomerId
+											,[intCompanyLocationId]		= @intCompanyLocationId
+											,[intCurrencyId]			= @intCurrencyId -- Default 3(USD)
+											,[intTermId]				= vC.intTermsId						--ADDED
+											,[dtmDate]					= @dtmCheckoutDate --GETDATE()
+											,[dtmDueDate]				= @dtmCheckoutDate --GETDATE()
+											,[dtmShipDate]				= @dtmCheckoutDate --GETDATE()
+											,[dtmCalculated]			= @dtmCheckoutDate --GETDATE()
+											,[dtmPostDate]				= @dtmCheckoutDate --GETDATE()
+											,[intEntitySalespersonId]	= vC.intSalespersonId				--ADDED
+											,[intFreightTermId]			= vC.intFreightTermId				--ADDED
+											,[intShipViaId]				= vC.intShipViaId					--ADDED
+											,[intPaymentMethodId]		= @intPaymentMethodIdMain --vC.intPaymentMethodId				--ADDED
+											,[strInvoiceOriginId]		= NULL -- not sure
+											,[strPONumber]				= NULL -- not sure
+											,[strBOLNumber]				= NULL -- not sure
+											,[strComments]				= @strComments
+											,[intShipToLocationId]		= vC.intShipToId					--ADDED
+											,[intBillToLocationId]		= NULL
+											,[ysnTemplate]				= 0
+											,[ysnForgiven]				= 0
+											,[ysnCalculated]			= 0 -- not sure
+											,[ysnSplitted]				= 0
+											,[intPaymentId]				= NULL
+											,[intSplitId]				= NULL
+											,[intLoadDistributionHeaderId]	= NULL
+											,[strActualCostId]			= NULL
+											,[intShipmentId]			= NULL
+											,[intTransactionId]			= NULL
+											,[intEntityId]				= @intCurrentUserId
+											,[ysnResetDetails]			= CASE
+																			WHEN @intCurrentInvoiceId IS NOT NULL
+																				THEN CAST(0 AS BIT)
+																			ELSE CAST(1 AS BIT)
+																	      END
+											,[ysnRecap]					= @ysnRecap
+											,[ysnPost]					= 1 -- 1 = 'Post', 2 = 'UnPost'
+											,[intInvoiceDetailId]		= NULL
+											,[intItemId]				= item.intItemId
+											,[ysnInventory]				= 1
+											,[strItemDescription]		= item.strDescription
+											,[intOrderUOMId]			= NULL
+											,[dblQtyOrdered]			= 0
+											,[intItemUOMId]				= NULL
+
+											,[dblQtyShipped]			= CASE
+																				-- CHANGE FUND: Cash
+																				WHEN (@strInvoiceTransactionTypeMain = 'Cash' AND cf.strType = 'Change Fund Beg Balance')
+																					THEN 1	
+																				WHEN (@strInvoiceTransactionTypeMain = 'Cash' AND cf.strType = 'Change Fund End Balance')
+																					THEN -1																			
+																					
+																				-- CHANGE FUND: Cash Refund
+																				WHEN (@strInvoiceTransactionTypeMain = 'Cash Refund' AND cf.strType = 'Change Fund Beg Balance')
+																					THEN -1	
+																				WHEN (@strInvoiceTransactionTypeMain = 'Cash Refund' AND cf.strType = 'Change Fund End Balance')
+																					THEN 1 																		
+																		END
+
+											,[dblDiscount]				= 0
+
+											,[dblPrice]					= cf.dblItemAmount
+
+											,[ysnRefreshPrice]			= 0
+											,[strMaintenanceType]		= NULL
+											,[strFrequency]				= NULL
+											,[dtmMaintenanceDate]		= NULL
+											,[dblMaintenanceAmount]		= NULL
+											,[dblLicenseAmount]			= NULL
+											,[intTaxGroupId]			= NULL -- Null for none Pump Total Items
+											,[ysnRecomputeTax]			= 0 -- no Tax for none Pump Total Items
+											,[intSCInvoiceId]			= NULL
+											,[strSCInvoiceNumber]		= NULL
+											,[intInventoryShipmentItemId] = NULL
+											,[strShipmentNumber]		= NULL
+											,[intSalesOrderDetailId]	= NULL
+											,[strSalesOrderNumber]		= NULL
+											,[intContractHeaderId]		= NULL
+											,[intContractDetailId]		= NULL
+											,[intShipmentPurchaseSalesContractId]	= NULL
+											,[intTicketId]				= NULL
+											,[intTicketHoursWorkedId]	= NULL
+											,[intSiteId]				= NULL -- not sure
+											,[strBillingBy]				= NULL -- not sure
+											,[dblPercentFull]			= NULL
+											,[dblNewMeterReading]		= NULL
+											,[dblPreviousMeterReading]	= NULL -- not sure
+											,[dblConversionFactor]		= NULL -- not sure
+											,[intPerformerId]			= NULL -- not sure
+											,[ysnLeaseBilling]			= NULL
+											,[ysnVirtualMeterReading]	= 0 --'Not Familiar'
+											,[strImportFormat]			= ''
+											,[dblCOGSAmount]			= 0 --IP.dblSalePrice
+											,[intTempDetailIdForTaxes]  = NULL
+											,[intConversionAccountId]	= NULL -- not sure
+											,[intCurrencyExchangeRateTypeId]	= NULL
+											,[intCurrencyExchangeRateId]		= NULL
+											,[dblCurrencyExchangeRate]	= 1.000000
+											,[intSubCurrencyId]			= NULL
+											,[dblSubCurrencyRate]		= 1.000000
+											--,0
+											--,1
+										FROM @tblCheckout_CHANGEFUND cf
+										INNER JOIN tblICItem item
+											ON cf.intItemId = item.intItemId
+										INNER JOIN tblSTCheckoutHeader chk
+											ON cf.intCheckoutId = chk.intCheckoutId
+										INNER JOIN tblSTStore st 
+											ON chk.intStoreId = st.intStoreId
+										INNER JOIN vyuEMEntityCustomerSearch vC 
+											ON st.intCheckoutCustomerId = vC.intEntityId
+										WHERE cf.intCheckoutId = @intCheckoutId
+											AND cf.dblItemAmount != 0
+					END
+				----------------------------------------------------------------------
+				----------------------- [END] - CHANGE FUND --------------------------
+				----------------------------------------------------------------------
+
+
+
 
 
 --PRINT 'START CREATE SEPARATE INVOICE for Customer Charges'
