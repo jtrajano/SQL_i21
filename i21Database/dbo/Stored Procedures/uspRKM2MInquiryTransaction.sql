@@ -581,7 +581,6 @@ JOIN tblICCommodityUnitMeasure cu on cu.intCommodityId=@intCommodityId and cu.in
 JOIN @tblGetSettlementPrice sm on sm.intFutureMonthId=ffm.intFutureMonthId
 WHERE cd.intCommodityId = @intCommodityId
 
-
 SELECT intContractDetailId
 	, (avgLot / intTotLot) dblFuture
 INTO #tblContractFuture
@@ -836,7 +835,7 @@ FROM (
 				and ISNULL(temp.intContractTypeId,0) = CASE WHEN ISNULL(temp.intContractTypeId,0)= 0 THEN 0 ELSE cd.intContractTypeId  END
 				AND ISNULL(temp.intCompanyLocationId,0) = CASE WHEN ISNULL(temp.intCompanyLocationId,0)= 0 THEN 0 ELSE ISNULL(cd.intCompanyLocationId,0)  END
 				AND ISNULL(temp.strPeriodTo,'') = case when @ysnEnterForwardCurveForMarketBasisDifferential= 1 THEN CASE WHEN ISNULL(temp.strPeriodTo,'')= '' 
-						THEN ISNULL(temp.strPeriodTo,'') ELSE (RIGHT(CONVERT(VARCHAR(11),convert(datetime,stuff(cd.strFutureMonth,5,0,'20')),106),8))  END else ISNULL(temp.strPeriodTo,'') end
+						THEN ISNULL(temp.strPeriodTo,'') ELSE dbo.fnRKFormatDate(cd.dtmEndDate,'MMM yyyy') END else ISNULL(temp.strPeriodTo,'') end
 						AND temp.strContractInventory = 'Contract'
 				),0) AS dblMarketRatio
 		, ISNULL((SELECT top 1 (ISNULL(dblBasisOrDiscount,0)+ISNULL(dblCashOrFuture,0))
@@ -884,10 +883,10 @@ FROM (
 						and ISNULL(temp.intContractTypeId,0) = CASE WHEN ISNULL(temp.intContractTypeId,0)= 0 THEN 0 ELSE cd.intContractTypeId  END
 						AND ISNULL(temp.intCompanyLocationId,0) = CASE WHEN ISNULL(temp.intCompanyLocationId,0)= 0 THEN 0 ELSE ISNULL(cd.intCompanyLocationId,0)  END
 						AND ISNULL(temp.strPeriodTo,'') = case when @ysnEnterForwardCurveForMarketBasisDifferential= 1 THEN CASE WHEN ISNULL(temp.strPeriodTo,'')= '' 
-						THEN ISNULL(temp.strPeriodTo,'') ELSE (RIGHT(CONVERT(VARCHAR(11),convert(datetime,stuff(cd.strFutureMonth,5,0,'20')),106),8))  END else ISNULL(temp.strPeriodTo,'') end
+						THEN ISNULL(temp.strPeriodTo,'') ELSE dbo.fnRKFormatDate(cd.dtmEndDate,'MMM yyyy') END else ISNULL(temp.strPeriodTo,'') end
 						AND temp.strContractInventory = 'Contract'
 					),0) AS intMarketBasisCurrencyId
-		, dblFuturePrice1 = CASE WHEN cd.strPricingType = 'Basis' THEN 0 ELSE p.dblFuturePrice END
+		, dblFuturePrice1 = CASE WHEN cd.strPricingType IN ('Basis', 'Ratio') THEN 0 ELSE p.dblFuturePrice END
 		, intFuturePriceCurrencyId
 		, CONVERT(int,cd.intContractTypeId) intContractTypeId
 		, cd.dblRate
@@ -1172,7 +1171,7 @@ FROM (
 						and ISNULL(temp.intContractTypeId,0) = CASE WHEN ISNULL(temp.intContractTypeId,0)= 0 THEN 0 ELSE ch.intContractTypeId  END
 						AND ISNULL(temp.intCompanyLocationId,0) = CASE WHEN ISNULL(temp.intCompanyLocationId,0)= 0 THEN 0 ELSE ISNULL(cd.intCompanyLocationId,0)  END
 						AND ISNULL(temp.strPeriodTo,'') = case when @ysnEnterForwardCurveForMarketBasisDifferential= 1 THEN CASE WHEN ISNULL(temp.strPeriodTo,'')= '' 
-								THEN ISNULL(temp.strPeriodTo,'') ELSE (RIGHT(CONVERT(VARCHAR(11),convert(datetime,stuff(fmo.strFutureMonth,5,0,'20')),106),8))  END else ISNULL(temp.strPeriodTo,'') end
+								THEN ISNULL(temp.strPeriodTo,'') ELSE dbo.fnRKFormatDate(cd.dtmEndDate,'MMM yyyy') END else ISNULL(temp.strPeriodTo,'') end
 								AND temp.strContractInventory = 'Contract'
 						),0) AS dblMarketRatio
 				, ISNULL((SELECT top 1 (ISNULL(dblBasisOrDiscount,0)+ISNULL(dblCashOrFuture,0))
@@ -1196,7 +1195,7 @@ FROM (
 								and ISNULL(temp.intContractTypeId,0) = CASE WHEN ISNULL(temp.intContractTypeId,0)= 0 THEN 0 ELSE ch.intContractTypeId  END
 								AND ISNULL(temp.intCompanyLocationId,0) = CASE WHEN ISNULL(temp.intCompanyLocationId,0)= 0 THEN 0 ELSE ISNULL(cd.intCompanyLocationId,0) END
 								AND ISNULL(temp.strPeriodTo,'') = case when @ysnEnterForwardCurveForMarketBasisDifferential= 1 THEN CASE WHEN ISNULL(temp.strPeriodTo,'')= '' 
-								THEN ISNULL(temp.strPeriodTo,'') ELSE (RIGHT(CONVERT(VARCHAR(11),convert(datetime,stuff(fmo.strFutureMonth,5,0,'20')),106),8))  END else ISNULL(temp.strPeriodTo,'') end
+								THEN ISNULL(temp.strPeriodTo,'') ELSE dbo.fnRKFormatDate(cd.dtmEndDate,'MMM yyyy') END else ISNULL(temp.strPeriodTo,'') end
 								AND temp.strContractInventory = 'Contract'
 							),0) AS dblMarketBasisUOM
 				, ISNULL((SELECT top 1 intCurrencyId as intMarketBasisCurrencyId FROM tblRKM2MBasisDetail temp
@@ -1207,7 +1206,7 @@ FROM (
 								and ISNULL(temp.intContractTypeId,0) = CASE WHEN ISNULL(temp.intContractTypeId,0)= 0 THEN 0 ELSE ch.intContractTypeId  END
 								AND ISNULL(temp.intCompanyLocationId,0) = CASE WHEN ISNULL(temp.intCompanyLocationId,0)= 0 THEN 0 ELSE ISNULL(cd.intCompanyLocationId,0)  END
 								AND ISNULL(temp.strPeriodTo,'') = case when @ysnEnterForwardCurveForMarketBasisDifferential= 1 THEN CASE WHEN ISNULL(temp.strPeriodTo,'')= '' 
-								THEN ISNULL(temp.strPeriodTo,'') ELSE (RIGHT(CONVERT(VARCHAR(11),convert(datetime,stuff(fmo.strFutureMonth,5,0,'20')),106),8))  END else ISNULL(temp.strPeriodTo,'') end
+								THEN ISNULL(temp.strPeriodTo,'') ELSE dbo.fnRKFormatDate(cd.dtmEndDate,'MMM yyyy') END else ISNULL(temp.strPeriodTo,'') end
 								AND temp.strContractInventory = 'Contract'
 							),0) AS intMarketBasisCurrencyId
 				, dblFuturePrice1 = p.dblFuturePrice
@@ -1301,7 +1300,7 @@ FROM (
 						and ISNULL(temp.intContractTypeId,0) = CASE WHEN ISNULL(temp.intContractTypeId,0)= 0 THEN 0 ELSE ch.intContractTypeId  END
 						AND ISNULL(temp.intCompanyLocationId,0) = CASE WHEN ISNULL(temp.intCompanyLocationId,0)= 0 THEN 0 ELSE ISNULL(cd.intCompanyLocationId,0)  END
 						AND ISNULL(temp.strPeriodTo,'') = case when @ysnEnterForwardCurveForMarketBasisDifferential= 1 THEN CASE WHEN ISNULL(temp.strPeriodTo,'')= '' 
-								THEN ISNULL(temp.strPeriodTo,'') ELSE (RIGHT(CONVERT(VARCHAR(11),convert(datetime,stuff(fmo.strFutureMonth,5,0,'20')),106),8))  END else ISNULL(temp.strPeriodTo,'') end
+								THEN ISNULL(temp.strPeriodTo,'') ELSE dbo.fnRKFormatDate(cd.dtmEndDate,'MMM yyyy') END else ISNULL(temp.strPeriodTo,'') end
 								AND temp.strContractInventory = 'Contract'
 						),0) AS dblMarketRatio
 				, ISNULL((SELECT top 1 (ISNULL(dblBasisOrDiscount,0)+ISNULL(dblCashOrFuture,0))
@@ -1325,7 +1324,7 @@ FROM (
 								and ISNULL(temp.intContractTypeId,0) = CASE WHEN ISNULL(temp.intContractTypeId,0)= 0 THEN 0 ELSE ch.intContractTypeId  END
 								AND ISNULL(temp.intCompanyLocationId,0) = CASE WHEN ISNULL(temp.intCompanyLocationId,0)= 0 THEN 0 ELSE ISNULL(cd.intCompanyLocationId,0) END
 								AND ISNULL(temp.strPeriodTo,'') = case when @ysnEnterForwardCurveForMarketBasisDifferential= 1 THEN CASE WHEN ISNULL(temp.strPeriodTo,'')= '' 
-								THEN ISNULL(temp.strPeriodTo,'') ELSE (RIGHT(CONVERT(VARCHAR(11),convert(datetime,stuff(fmo.strFutureMonth,5,0,'20')),106),8))  END else ISNULL(temp.strPeriodTo,'') end
+								THEN ISNULL(temp.strPeriodTo,'') ELSE dbo.fnRKFormatDate(cd.dtmEndDate,'MMM yyyy') END else ISNULL(temp.strPeriodTo,'') end
 								AND temp.strContractInventory = 'Contract'
 							),0) AS dblMarketBasisUOM
 				, ISNULL((SELECT top 1 intCurrencyId as intMarketBasisCurrencyId FROM tblRKM2MBasisDetail temp
@@ -1336,7 +1335,7 @@ FROM (
 								and ISNULL(temp.intContractTypeId,0) = CASE WHEN ISNULL(temp.intContractTypeId,0)= 0 THEN 0 ELSE ch.intContractTypeId  END
 								AND ISNULL(temp.intCompanyLocationId,0) = CASE WHEN ISNULL(temp.intCompanyLocationId,0)= 0 THEN 0 ELSE ISNULL(cd.intCompanyLocationId,0)  END
 								AND ISNULL(temp.strPeriodTo,'') = case when @ysnEnterForwardCurveForMarketBasisDifferential= 1 THEN CASE WHEN ISNULL(temp.strPeriodTo,'')= '' 
-								THEN ISNULL(temp.strPeriodTo,'') ELSE (RIGHT(CONVERT(VARCHAR(11),convert(datetime,stuff(fmo.strFutureMonth,5,0,'20')),106),8))  END else ISNULL(temp.strPeriodTo,'') end
+								THEN ISNULL(temp.strPeriodTo,'') ELSE dbo.fnRKFormatDate(cd.dtmEndDate,'MMM yyyy') END else ISNULL(temp.strPeriodTo,'') end
 								AND temp.strContractInventory = 'Contract'
 							),0) AS intMarketBasisCurrencyId
 				, dblFuturePrice1 = p.dblFuturePrice
@@ -2939,5 +2938,13 @@ FROM (
 	WHERE  dblOpenQty <> 0 AND intContractHeaderId IS NULL
 )t 
 ORDER BY intContractHeaderId DESC
+
+DROP TABLE #tblPriceFixationDetail
+DROP TABLE #tblContractCost
+DROP TABLE #tblSettlementPrice
+DROP TABLE #tblContractFuture
+DROP TABLE #tempIntransit
+DROP TABLE #tblPIntransitView
+DROP TABLE #Temp
 
 END
