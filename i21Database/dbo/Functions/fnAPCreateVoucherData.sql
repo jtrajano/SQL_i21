@@ -149,7 +149,7 @@ BEGIN
 									-- ELSE vendor.intTermsId END, --vendor
 		[dtmDate]				=	A.dtmDate,
 		[dtmDueDate]			=	dbo.fnGetDueDateBasedOnTerm(A.dtmDate, termData.intTermID),
-		[dtmBillDate]			=	A.dtmVoucherDate,
+		[dtmBillDate]			=	ISNULL(A.dtmVoucherDate, A.dtmDate),
 		[intAccountId]			=	CASE WHEN A.intAPAccount > 0 THEN A.intAPAccount
 										WHEN A.intTransactionType IN (2, 13)
 											THEN (CASE WHEN A.intLocationId > 0 THEN payableLoc.intPurchaseAdvAccount

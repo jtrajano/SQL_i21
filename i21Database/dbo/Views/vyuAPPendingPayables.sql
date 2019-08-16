@@ -2,8 +2,8 @@
 AS 
 
 SELECT 
-	-- ISNULL(A2.strVoucherIds, 'New Voucher') AS strVoucherIds
-	A2.strVoucherIds
+	 ISNULL(A2.strVoucherIds, 'New Voucher') AS strVoucherIds
+	--A2.strVoucherIds
 	,ISNULL((CASE WHEN A.ysnSubCurrency > 0 --CHECK IF SUB-CURRENCY
 	THEN (CASE 
 			WHEN A.intWeightUOMId > 0 

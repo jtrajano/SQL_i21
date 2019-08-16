@@ -63,12 +63,20 @@ BEGIN
 			,[strName]							=	entity.strName
 			,[intLocationId]					=	A.intLocationId
 			,[strLocationName] 					=	loc.strLocationName
+			,[intShipToId]						=	A.intShipToId
+			,[intShipFromId]					=	A.intShipFromId
+			,[intShipFromEntityId]				=	A.intShipFromEntityId
+			,[intPayToAddressId]				=	A.intPayToAddressId
 			,[intItemLocationId]				=	ISNULL(A.intItemLocationId, A.intLocationId)
 			,[strItemLocationName]				=	ISNULL(itemLoc.strLocationName, loc.strLocationName)
 			,[intCurrencyId]					=	A.intCurrencyId
 			,[strCurrency]						=	tranCur.strCurrency
 			,[dtmDate]							=	A.dtmDate
+			,[dtmVoucherDate]					=	ISNULL(A.dtmVoucherDate, A.dtmDate)
+			,[dtmDueDate]						=	dbo.fnGetDueDateBasedOnTerm(A.[dtmVoucherDate], A.[intTermId])
 			,[strReference]						=	A.strReference
+			,[strLoadShipmentNumber]			=	A.strLoadShipmentNumber
+			,[strVendorOrderNumber]				=	A.strVendorOrderNumber
 			,[strSourceNumber]					=	A.strSourceNumber
 			,[intPurchaseDetailId]				=	A.intPurchaseDetailId
 			,[strPurchaseOrderNumber]			=	po.strPurchaseOrderNumber
@@ -197,6 +205,7 @@ BEGIN
 														END
 													)
 													ELSE costUOM.strUnitMeasure END
+			,[dblWeight]						=	A.dblWeight
 			,[dblNetWeight]						=	A.dblNetWeight
 			,[dblWeightUnitQty]					=	A.dblWeightUnitQty
 			,[intWeightUOMId]					=	NULLIF(A.intWeightUOMId,0)
@@ -210,6 +219,7 @@ BEGIN
 			,[dblExchangeRate]					=	ISNULL(NULLIF(A.dblExchangeRate,0),1)
 			,[ysnSubCurrency]					=	ISNULL(ISNULL(A.ysnSubCurrency,costCur.ysnSubCurrency),0)
 			,[intSubCurrencyCents]				=	CASE WHEN costCur.intCurrencyID > 0 AND costCur.ysnSubCurrency = 1 THEN A.intSubCurrencyCents ELSE 1 END
+			,[intAPAccountId]					=	NULL
 			,[intAccountId]						=	ISNULL(A.intAccountId, vendor.intGLAccountExpenseId)
 			,[strAccountId]						=	ISNULL(accnt.strAccountId, vendorAccnt.strAccountId)
 			,[strAccountDesc]					=	ISNULL(accnt.strDescription, vendorAccnt.strDescription)
@@ -253,6 +263,7 @@ BEGIN
 			,[strStorageLocationName]			=	storageLoc.strName
 			,[intSubLocationId]					=	A.intSubLocationId
 			,[strSubLocationName]				=	subLoc.strSubLocationName
+			,[intLineNo]						=	A.intLineNo
 		FROM @voucherPayable A
 		INNER JOIN (tblAPVendor vendor INNER JOIN tblEMEntity entity ON vendor.intEntityId = entity.intEntityId)
 			ON A.intEntityVendorId = vendor.intEntityId
@@ -304,7 +315,9 @@ BEGIN
 		,[intCurrencyId]					
 		,[strCurrency]					
 		,[dtmDate]						
-		,[strReference]					
+		,[strReference]		
+		,[strLoadShipmentNumber]
+		,[strVendorOrderNumber]			
 		,[strSourceNumber]				
 		,[intPurchaseDetailId]			
 		,[strPurchaseOrderNumber]		
@@ -338,7 +351,8 @@ BEGIN
 		,[dblCost]						
 		,[dblCostUnitQty]				
 		,[intCostUOMId]					
-		,[strCostUOM]					
+		,[strCostUOM]	
+		,[dblWeight]				
 		,[dblNetWeight]					
 		,[dblWeightUnitQty]				
 		,[intWeightUOMId]				
@@ -382,7 +396,9 @@ BEGIN
 		,[intCurrencyId]					
 		,[strCurrency]					
 		,[dtmDate]						
-		,[strReference]					
+		,[strReference]			
+		,[strLoadShipmentNumber]	
+		,[strVendorOrderNumber]							
 		,[strSourceNumber]				
 		,[intPurchaseDetailId]			
 		,[strPurchaseOrderNumber]		
@@ -416,7 +432,8 @@ BEGIN
 		,[dblCost]						
 		,[dblCostUnitQty]				
 		,[intCostUOMId]					
-		,[strCostUOM]					
+		,[strCostUOM]		
+		,[dblWeight]			
 		,[dblNetWeight]					
 		,[dblWeightUnitQty]				
 		,[intWeightUOMId]				

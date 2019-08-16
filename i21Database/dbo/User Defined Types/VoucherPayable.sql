@@ -39,6 +39,7 @@ CREATE TYPE [dbo].[VoucherPayable] AS TABLE
 	[dtmDueDate]					DATETIME NULL DEFAULT GETDATE(),
 	[strVendorOrderNumber]			NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
 	[strReference]					NVARCHAR(400) COLLATE Latin1_General_CI_AS NULL,
+	[strLoadShipmentNumber]			NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[strSourceNumber]				NVARCHAR(400) COLLATE Latin1_General_CI_AS NULL, --record number of integrated module
 	[intSubCurrencyCents]			INT NULL, --default to cents of currency setup
 	[intShipViaId]					INT NULL, --default to vendor location ship via if not provided
@@ -69,7 +70,6 @@ CREATE TYPE [dbo].[VoucherPayable] AS TABLE
 	[intInventoryReceiptChargeId]	INT NULL,
 	[intInventoryShipmentItemId]	INT NULL,
 	[intInventoryShipmentChargeId]	INT NULL,
-	[strLoadShipmentNumber]			NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[intLoadShipmentId]				INT NULL,
 	[intLoadShipmentDetailId]		INT NULL,
 	[intLoadShipmentCostId]			INT NULL,
