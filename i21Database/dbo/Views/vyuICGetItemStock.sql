@@ -20,6 +20,7 @@ SELECT
 	Category.ysnRetailValuation,
 	Item.intCommodityId,
 	Commodity.strCommodityCode,
+	Commodity.ysnExchangeTraded,
 	StorageLocation.strName AS strStorageLocationName,
 	SubLocation.strSubLocationName AS strSubLocationName,
 	ItemLocation.intStorageLocationId,
