@@ -8008,6 +8008,8 @@
     <Build Include="dbo\Tables\tblICInventoryShiftPhysicalCount.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetCountGroupAsOfDate.sql" />
     <Build Include="dbo\Views\vyuICGetShiftPhysical.sql" />
+    <Build Include="dbo\Views\vyuSTCheckoutATMFund.sql" />
+    <Build Include="dbo\Views\vyuSTCheckoutChangeFund.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
