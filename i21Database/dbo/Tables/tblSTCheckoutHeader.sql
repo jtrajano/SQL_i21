@@ -47,6 +47,7 @@
 	[dblChangeFundBegBalance]			DECIMAL(18, 6) NULL,
 	[dblChangeFundEndBalance]			DECIMAL(18, 6) NULL,
 	[dblChangeFundChangeReplenishment]	DECIMAL(18, 6) NULL,
+	[dblChangeFundIncreaseDecrease]		DECIMAL(18, 6) NULL,
 
     [intCategoryId] INT NULL,
     [intCommodityId] INT NULL,
