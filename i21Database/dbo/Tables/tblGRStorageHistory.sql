@@ -37,7 +37,7 @@
 	CONSTRAINT [FK_tblGRStorageHistory_tblARInvoice_intInvoiceId] FOREIGN KEY ([intInvoiceId]) REFERENCES [dbo].[tblARInvoice] ([intInvoiceId]),
 	CONSTRAINT [FK_tblGRStorageHistory_tblICInventoryShipment_intInventoryShipmentId] FOREIGN KEY ([intInventoryShipmentId]) REFERENCES [dbo].[tblICInventoryShipment] ([intInventoryShipmentId]),
 	CONSTRAINT [FK_tblGRStorageHistory_tblAPBill_intBillId] FOREIGN KEY ([intBillId]) REFERENCES [dbo].[tblAPBill] ([intBillId]),
-	CONSTRAINT [FK_tblGRStorageHistory_tblGRSettleStorage_intSettleStorageId] FOREIGN KEY ([intSettleStorageId]) REFERENCES [dbo].[tblGRSettleStorage] ([intSettleStorageId]),
+	--CONSTRAINT [FK_tblGRStorageHistory_tblGRSettleStorage_intSettleStorageId] FOREIGN KEY ([intSettleStorageId]) REFERENCES [dbo].[tblGRSettleStorage] ([intSettleStorageId]),
 	CONSTRAINT [FK_tblGRStorageHistory_tblSCDeliverySheet_intDeliverySheetId] FOREIGN KEY ([intDeliverySheetId]) REFERENCES [dbo].[tblSCDeliverySheet] ([intDeliverySheetId]),
 	CONSTRAINT [FK_tblGRStorageHistory_tblCTContractHeader_intContractHeaderId] FOREIGN KEY ([intContractHeaderId]) REFERENCES [dbo].[tblCTContractHeader] ([intContractHeaderId]),
 	CONSTRAINT [FK_tblGRStorageHistory_tblSMUserSecurity_intEntityId] FOREIGN KEY ([intUserId]) REFERENCES [dbo].[tblSMUserSecurity] ([intEntityId])
