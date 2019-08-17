@@ -1,4 +1,4 @@
-﻿CREATE VIEW [dbo].[vyuSTConsolidatedCheckoutATMFundReport]
+﻿CREATE VIEW [dbo].[vyuSTConsolidatedCheckoutChangeFundReport]
 	AS 
 SELECT ST.intStoreId
 	, ST.intStoreNo
@@ -7,19 +7,19 @@ SELECT ST.intStoreId
 	, ST.strDescription strStoreDescription
 	, CH.dtmCheckoutDate
 	, ISNULL(Inv.ysnPosted, 0) ysnPosted
-	, REPLACE(atm.strType, 'ATM ', '') AS strType
+	, REPLACE(cf.strType, 'Change Fund ', '') AS strType
 	, item.strItemNo
-	, SUM(atm.dblItemAmount) dblItemAmountTotal
+	, SUM(cf.dblItemAmount) dblItemAmountTotal
 FROM tblSTCheckoutHeader CH 
 INNER JOIN tblSTStore ST 
 	ON ST.intStoreId = CH.intStoreId 
 LEFT JOIN tblARInvoice Inv 
 	ON Inv.intInvoiceId = CH.intInvoiceId 
-INNER JOIN vyuSTCheckoutATMFund atm 
-	ON atm.intCheckoutId = CH.intCheckoutId 
+INNER JOIN vyuSTCheckoutChangeFund cf 
+	ON cf.intCheckoutId = CH.intCheckoutId 
 INNER JOIN tblICItem item 
-	ON item.intItemId = atm.intItemId 
-WHERE atm.dblItemAmount > 0	
+	ON item.intItemId = cf.intItemId 
+WHERE cf.dblItemAmount > 0	
 GROUP BY ST.intStoreId, 
 		 ST.intStoreNo, 
 		 ST.strRegion, 
@@ -27,5 +27,5 @@ GROUP BY ST.intStoreId,
 		 ST.strDescription, 
 		 CH.dtmCheckoutDate, 
 		 ISNULL(Inv.ysnPosted, 0), 
-		 atm.strType,
+		 cf.strType,
 		 item.strItemNo
