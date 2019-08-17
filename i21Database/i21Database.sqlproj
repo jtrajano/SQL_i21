@@ -8012,6 +8012,9 @@
     <Build Include="dbo\Functions\fnAPCreateVoucherPayable.sql" />
     <Build Include="dbo\Stored Procedures\uspSTReportCheckoutATMFundRecap.sql" />
     <Build Include="dbo\Stored Procedures\uspSTReportCheckoutChangeFundRecap.sql" />
+    <Build Include="dbo\tblCTContractFutures.sql" />
+    <Build Include="dbo\Views\vyuCTContractFutures.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTManageDerivatives.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

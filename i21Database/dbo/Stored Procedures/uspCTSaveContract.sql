@@ -338,6 +338,9 @@ BEGIN TRY
 			UPDATE	tblCTPriceFixation SET dblTotalLots = @dblNoOfLots WHERE intPriceFixationId = @intPriceFixationId
 			EXEC	[uspCTPriceFixationSave] @intPriceFixationId, '', @intLastModifiedById
 		END
+		
+		-- ADD DERIVATIVES
+		EXEC uspCTManageDerivatives @intContractDetailId
 
 		SELECT @intContractDetailId = MIN(intContractDetailId) FROM tblCTContractDetail WHERE intContractHeaderId = @intContractHeaderId AND intContractDetailId > @intContractDetailId
 	END
@@ -389,7 +392,7 @@ BEGIN TRY
 	IF EXISTS(SELECT TOP 1 1 FROM tblCTCompanyPreference WHERE ysnCreateOtherCostPayable = 1)
 	BEGIN
 		EXEC uspCTManagePayable @intContractHeaderId, 'header', 0
-	END	
+	END
 
 END TRY
 

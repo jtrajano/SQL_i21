@@ -25,7 +25,8 @@ BEGIN TRY
 			@ysnSlice					BIT,
 			@intParentDetailId			INT,
 			@intContractCostId			INT,
-			@intCostUniqueId			INT
+			@intCostUniqueId			INT,
+			@intFuturesUniqueId			INT
 
 	SELECT	@ysnMultiplePriceFixation	=	ysnMultiplePriceFixation,
 			@strContractNumber			=	strContractNumber
@@ -40,6 +41,9 @@ BEGIN TRY
 
 		-- DELETE ALL PAYABLES
 		EXEC uspCTManagePayable @intContractHeaderId, 'header', 1
+		
+		-- DELETE DERIVATIVES
+		EXEC uspCTManageDerivatives @intContractHeaderId, 'header', 1
 	END
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT, @strXML   
@@ -99,6 +103,9 @@ BEGIN TRY
 
 			-- DELETE ALL PAYABLES UNDER DELETED DETAILS
 			EXEC uspCTManagePayable @intContractDetailId, 'detail', 1
+			
+			-- DELETE DERIVATIVES
+			EXEC uspCTManageDerivatives @intContractDetailId, 'detail', 1
 		END
 		ELSE IF(@strRowState = 'Modified')
 		BEGIN
@@ -143,6 +150,39 @@ BEGIN TRY
 				SELECT @intCostUniqueId = MIN(intCostUniqueId) FROM #ProcessCost WHERE intCostUniqueId > @intCostUniqueId
 			END
 			--------------- END CONTRACT COST -------------------
+
+			--------------- START CONTRACT FUTURES -------------------
+			IF OBJECT_ID('tempdb..#ContractFutures') IS NOT NULL
+				DROP TABLE #ContractFutures
+
+			SELECT  * 
+			INTO	#ContractFutures
+			FROM	OPENXML(@idoc,'tblCTContractDetails/tblCTContractDetail/tblCTContractFutures',2)
+			WITH	(intContractFuturesId INT,intContractDetailId INT,strRowState NVARCHAR(50))     
+
+			IF OBJECT_ID('tempdb..#ProcessFutures') IS NOT NULL
+				DROP TABLE #ProcessFutures
+			
+			SELECT  ROW_NUMBER() OVER(ORDER BY strRowState) intFuturesUniqueId,*					
+			INTO	#ProcessFutures
+			FROM	#ContractFutures
+			WHERE	intContractDetailId = @intContractDetailId
+
+			SELECT @intFuturesUniqueId = MIN(intFuturesUniqueId) FROM #ProcessFutures
+
+			WHILE ISNULL(@intFuturesUniqueId,0) > 0
+			BEGIN
+				SELECT	@intFuturesUniqueId = intContractFuturesId
+				FROM	#ProcessFutures 
+				WHERE	intFuturesUniqueId = @intFuturesUniqueId
+				AND		intContractDetailId = @intContractDetailId
+			
+				-- DELETE SPECIFIC DERIVATIVE
+				EXEC uspCTManageDerivatives @intFuturesUniqueId, 'futures', 1
+
+				SELECT @intFuturesUniqueId = MIN(intFuturesUniqueId) FROM #ProcessFutures WHERE intFuturesUniqueId > @intFuturesUniqueId
+			END
+			--------------- END CONTRACT FUTURES -------------------
 		END
 
 		SELECT @intUniqueId = MIN(intUniqueId) FROM #ProcessDetail WHERE intUniqueId > @intUniqueId
