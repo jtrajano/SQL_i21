@@ -8015,6 +8015,7 @@
     <Build Include="dbo\tblCTContractFutures.sql" />
     <Build Include="dbo\Views\vyuCTContractFutures.sql" />
     <Build Include="dbo\Stored Procedures\uspCTManageDerivatives.sql" />
+    <Build Include="dbo\Views\vyuSTConsolidatedCheckoutATMFundReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
