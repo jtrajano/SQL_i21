@@ -377,6 +377,7 @@ BEGIN TRY
 					,intTicketDiscountId
 					,dblSettleContractUnits
 					,ysnDiscountFromGrossWeight
+					,intPricingTypeId
 				)
 				SELECT 
 					 intCustomerStorageId		= CS.intCustomerStorageId
@@ -408,6 +409,7 @@ BEGIN TRY
 													WHEN DCO.strDiscountCalculationOption = 'Gross Weight' THEN 1
 													ELSE 0
 												END
+					,intPricingTypeId				= CD.intPricingTypeId
 				FROM tblGRCustomerStorage CS
 				JOIN tblGRSettleStorageTicket SST 
 					ON SST.intCustomerStorageId = CS.intCustomerStorageId 
@@ -435,7 +437,7 @@ BEGIN TRY
 				LEFT JOIN tblCTContractDetail CD
 					ON CD.intContractDetailId = SC.intContractDetailId
 				WHERE (ISNULL(QM.dblDiscountDue, 0) - ISNULL(QM.dblDiscountPaid, 0)) <> 0
-					AND CASE WHEN (CD.intPricingTypeId = 2 AND (ISNULL(CD.dblTotalCost, 0) = 0)) THEN 0 ELSE 1 END = 1
+					--AND CASE WHEN (CD.intPricingTypeId = 2 AND (ISNULL(CD.dblTotalCost, 0) = 0)) THEN 0 ELSE 1 END = 1
 			END
 
 			--Unpaid Fee		
@@ -1322,6 +1324,7 @@ BEGIN TRY
 					ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
 				WHERE SST.intSettleStorageId = @intSettleStorageId
 
+
 			 IF EXISTS(SELECT 1 FROM @SettleVoucherCreate WHERE ISNULL(dblCashPrice,0) <> 0 AND ISNULL(dblUnits,0) <> 0 )
 			 BEGIN
 				--Inventory Item and Discounts
@@ -1463,11 +1466,14 @@ BEGIN TRY
 				) 
 						ON SH.intCustomerStorageId = CS.intCustomerStorageId
 								AND a.intItemType = 1
+				LEFT JOIN tblCTContractDetail CD
+					ON CD.intContractDetailId = a.intContractDetailId
 				WHERE a.dblCashPrice <> 0 
 					AND a.dblUnits <> 0 
 					AND SST.intSettleStorageId = @intSettleStorageId
+				AND CASE WHEN (a.intPricingTypeId = 2) THEN 0 ELSE 1 END = 1
 				ORDER BY SST.intSettleStorageTicketId
-					,a.intItemType				
+					,a.intItemType	
 				 
 				INSERT INTO @voucherPayable
 				(
@@ -1687,12 +1693,13 @@ BEGIN TRY
 					ON UOM.intItemUOMId = CC.intItemUOMId
 				 LEFT JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemId = CC.[intItemId]
 				 WHERE ItemLocation.intLocationId = @LocationId
-					AND CASE WHEN (CD.intPricingTypeId = 2 AND (ISNULL(CD.dblTotalCost, 0) = 0)) THEN 0 ELSE 1 END = 1
+					AND CASE WHEN (SV.intPricingTypeId = 2) THEN 0 ELSE 1 END = 1
 
 				UPDATE @voucherPayable SET dblQuantityToBill = dblQuantityToBill * -1 WHERE ISNULL(dblCost,0) < 0
 				UPDATE @voucherPayable SET dblCost = dblCost * -1 WHERE ISNULL(dblCost,0) < 0
-
-				EXEC uspAPCreateVoucher @voucherPayable, @voucherPayableTax, @intCreatedUserId, 1, @ErrMsg, @createdVouchersId OUTPUT
+				
+				IF EXISTS(SELECT NULL FROM @voucherPayable WHERE intItemId <> @intStorageChargeItemId)
+					EXEC uspAPCreateVoucher @voucherPayable, @voucherPayableTax, @intCreatedUserId, 1, @ErrMsg, @createdVouchersId OUTPUT
 
 				IF @createdVouchersId IS NOT NULL
 				BEGIN
