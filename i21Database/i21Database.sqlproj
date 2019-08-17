@@ -8011,6 +8011,7 @@
     <Build Include="dbo\Views\vyuSTCheckoutChangeFund.sql" />
     <Build Include="dbo\Functions\fnAPCreateVoucherPayable.sql" />
     <Build Include="dbo\Stored Procedures\uspSTReportCheckoutATMFundRecap.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTReportCheckoutChangeFundRecap.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

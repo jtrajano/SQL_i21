@@ -7,7 +7,7 @@ BEGIN TRY
 
 	SELECT 
 		atm.intCheckoutId,
-		atm.strType,
+		REPLACE(atm.strType, 'ATM ', '') AS strType,
 		atm.intItemId,
 		atm.dblItemAmount,
 		item.strItemNo,
@@ -22,7 +22,6 @@ BEGIN TRY
 		atm.intItemId,
 		atm.dblItemAmount,
 		item.strItemNo
-	--ORDER BY intCheckoutId ASC
 
 END TRY
 BEGIN CATCH
