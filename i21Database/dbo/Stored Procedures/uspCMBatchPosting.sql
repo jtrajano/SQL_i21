@@ -64,8 +64,15 @@ BEGIN
 		SELECT TOP 1 @intTransactionId = intTransactionId FROM #tmpTransactionId
 
 		SELECT @strTransactionId = strTransactionId FROM tblCMBankTransaction WHERE intTransactionId = @intTransactionId
-
-		EXEC uspCMPostBankTransaction @ysnPost, @ysnRecap, @strTransactionId, @BatchId, @intUserId, @intEntityId, @isSuccessful OUTPUT
+		
+		EXEC uspCMPostBankTransaction 
+			@ysnPost=@ysnPost, 
+			@ysnRecap=@ysnRecap, 
+			@strTransactionId=@strTransactionId, 
+			@strBatchId=@BatchId, 
+			@intUserId=@intUserId, 
+			@intEntityId=@intEntityId, 
+			@isSuccessful=@isSuccessful OUTPUT
 
 		IF @@ERROR = 0 AND @isSuccessful = 1
 		BEGIN
