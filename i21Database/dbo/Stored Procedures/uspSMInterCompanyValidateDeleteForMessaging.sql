@@ -13,7 +13,6 @@ BEGIN
 	Create TABLE #TempInterCompanyTransferLogForComment
 	(
 		[intInterCompanyTransferLogForCommentId]		INT					NOT NULL,
-		[strTable]										NVARCHAR(250)		NOT NULL,
 		[intSourceRecordId]								INT					NOT NULL,
 		[intDestinationRecordId]						INT					NOT NULL,
 		[intDestinationCompanyId]						INT					NULL DEFAULT(0),
@@ -28,15 +27,14 @@ BEGIN
 	DECLARE @strReferenceServerName NVARCHAR(250);
 	DECLARE @strReferenceDatabaseName NVARCHAR(250);
 	DECLARE @intReferenceActualInterCompanyId INT;
-	DECLARE @intIdForDelete INT;
+	DECLARE @intInterCompanyTransferLogForCommentIdInTheOtherDatabase INT;
 	
 	SELECT
 		@intSourceRecordId = intSourceRecordId,
 		@intDestinationRecordId = intDestinationRecordId,
 		@intDestinationCompanyId = intDestinationCompanyId
 	FROM tblSMInterCompanyTransferLogForComment
-	WHERE intSourceRecordId = @intIdForDelete
-	AND intInterCompanyTransferLogForCommentId = @intInterCompanyTransferLogForCommentId
+	WHERE intInterCompanyTransferLogForCommentId = @intInterCompanyTransferLogForCommentId
 		
 	IF ISNULL(@intSourceRecordId, 0) <> 0 AND ISNULL(@intDestinationRecordId, 0) <> 0
 	BEGIN
@@ -55,8 +53,8 @@ BEGIN
 			IF ISNULL(@intDestinationCompanyId, 0) = 0
 			BEGIN				
 				--A <-> B
-				EXEC dbo.[uspSMInterCompanyDeleteMessagingDetails] @intSourceRecordId, @strTableName		--DELETE A
-				EXEC dbo.[uspSMInterCompanyDeleteMessagingDetails] @intDestinationRecordId, @strTableName	--DELETE B
+				EXEC dbo.[uspSMInterCompanyDeleteMessagingDetails] @intSourceRecordId, @strTableName		--DELETE SOURCE
+				EXEC dbo.[uspSMInterCompanyDeleteMessagingDetails] @intDestinationRecordId, @strTableName		--DELETE DESTINATION
 
 				SET @strFinishedLogId = @strFinishedLogId + 
 											CONVERT(VARCHAR, @intSourceRecordId) + ':' + CONVERT(VARCHAR, ISNULL(@intCurrentCompanyId, 0)) + ',' + 
@@ -130,15 +128,21 @@ BEGIN
 				IF ISNULL(@intCurrentCompanyId, 0) <> 0
 				BEGIN
 					
-					--1: DELETE THE SOURCE AND DESTINATION RECORDS
-					EXEC dbo.[uspSMInterCompanyValidateDeleteForMessaging] @intInterCompanyTransferLogForCommentId, @intCurrentCompanyId, @strTableName, @strFinishedLogId, @strUpdatedLogId = @strFinishedLogId OUTPUT;
-					
+					--1: DELETE THE SOURCE AND DESTINATION RECORDS IN THE CURRENT DATABASE
+					--IF ISNULL(@intDestinationCompanyId, 0) = 0
+					--BEGIN
+						--EXEC dbo.[uspSMInterCompanyValidateDeleteForMessaging] @intInterCompanyTransferLogForCommentId, @intCurrentCompanyId, @strTableName, @strFinishedLogId, @strUpdatedLogId = @strFinishedLogId OUTPUT;
+						EXEC dbo.[uspSMInterCompanyValidateDeleteForMessaging]	@intInterCompanyTransferLogForCommentId, 
+																				@intCurrentCompanyId, 
+																				@strTableName, 
+																				@strFinishedLogId,
+																				@strUpdatedLogId = @strFinishedLogId OUTPUT;
+					--END
 
-					--2: INVOKE THE OTHER DATABASE SP TO DELETE THE RECORDS TO ITS SIBLINGS
+					--2: DELETE THE DESTINATION RECORDS IN THE OTHER DATABASE
 					IF ISNULL(@intDestinationCompanyId, 0) <> 0
 					BEGIN
 
-						----EXECUTE [uspSMInterCompanyValidateRecordsForMessaging] IN THE OTHER DATABASE
 						----ALL tblSMInterCompany in each databases should have the same primary keys, but to be sure, lets get the intInterCompanyId based on the server and database name
 						SELECT 
 							@strReferenceServerName = strServerName, 
@@ -150,7 +154,7 @@ BEGIN
 						BEGIN
 							SET @intReferenceActualInterCompanyId = 0;
 							DECLARE @ParamDefinition NVARCHAR(250) = N'@paramOut INT OUTPUT';
-							SET @sql = N'SELECT @paramOut = intInterCompanyId FROM ' + @strReferenceDatabaseName + '.dbo.[tblSMInterCompany]
+							SET @sql = N'SELECT @paramOut = intInterCompanyId FROM [' + @strReferenceDatabaseName + '].dbo.[tblSMInterCompany]
 											WHERE UPPER(strServerName) = UPPER(''' + @strReferenceServerName + ''') AND UPPER(strDatabaseName) = UPPER(''' + @strReferenceDatabaseName + ''')';
 
 							EXEC sp_executesql @sql, @ParamDefinition, @paramOut = @intReferenceActualInterCompanyId OUTPUT;
@@ -162,24 +166,35 @@ BEGIN
 								(ISNULL(@intInvokedFromInterCompanyId, 0) <> 0 AND ISNULL(@intInvokedFromInterCompanyId, 0) <> @intDestinationCompanyId))
 							BEGIN
 
-								SET @intInterCompanyTransferLogForCommentId = 0;
-								--Get the logging id in tblSMInterCompanyTransferLogForComment table in the other database
-								SET @sql = N'
-								SELECT @paramOut = intInterCompanyTransferLogForCommentId FROM ' + @strReferenceDatabaseName + '.dbo.[tblSMInterCompanyTransferLogForComment]
-								WHERE intSourceRecordId = ' + CONVERT(VARCHAR, @intDestinationRecordId) + ' AND 
-								intDestinationRecordId = ' + CONVERT(VARCHAR, @intSourceRecordId) + ' AND 
-								@intDestinationCompanyId = ' + CONVERT(VARCHAR, @intCurrentCompanyId);
+								--DELETE  IN OTHER DATABASE--
+								--this will delete the data in the other database and log in the current database
+								SET @sql = N'EXEC [' + @strReferenceDatabaseName + '].dbo.[uspSMInterCompanyDeleteMessagingDetails] ' + 
+																				CONVERT(VARCHAR(250), @intDestinationRecordId) + 
+																				', ''' + @strTableName +
+																				''', ''' + @strReferenceDatabaseName +
+																				''', ''' + DB_NAME() +
+																				''', ' + CONVERT(NVARCHAR(250), ISNULL(@intDestinationCompanyId, 0))
+								EXEC sp_executesql @sql;
+								DELETE FROM dbo.[tblSMInterCompanyTransferLogForComment] WHERE intInterCompanyTransferLogForCommentId = @intInterCompanyTransferLogForCommentId
 
-								EXEC sp_executesql @sql, @ParamDefinition, @paramOut = @intInterCompanyTransferLogForCommentId OUTPUT;
+
+
+								--CHECK IF THE DESTINATION RECORD WAS COPIED IN ANOTHER TRANSACTION
+								SET @intInterCompanyTransferLogForCommentIdInTheOtherDatabase = 0;
+								SET @sql = N'
+								SELECT @paramOut = intInterCompanyTransferLogForCommentId
+								FROM [' + @strReferenceDatabaseName + '].dbo.tblSMInterCompanyTransferLogForComment
+								WHERE intSourceRecordId = ' + CONVERT(VARCHAR(250), @intDestinationRecordId)
+
+								EXEC sp_executesql @sql, @ParamDefinition, @paramOut = @intInterCompanyTransferLogForCommentIdInTheOtherDatabase OUTPUT;
 								
-								--execute the sp in the other database.
-								IF ISNULL(@intInterCompanyTransferLogForCommentId, 0) <> 0
+								--execute the sp delete wise in the other database.
+								IF ISNULL(@intInterCompanyTransferLogForCommentIdInTheOtherDatabase, 0) <> 0
 								BEGIN
-									SET @sql = N'EXEC ' + @strReferenceDatabaseName + '.dbo.[uspSMInterCompanyValidateDeleteForMessaging] ' + 
-														 CONVERT(VARCHAR(MAX), @intInterCompanyTransferLogForCommentId) + ', ' +
+									SET @sql = N'EXEC [' + @strReferenceDatabaseName + '].dbo.[uspSMInterCompanyValidateDeleteForMessaging] ' + 
+														 CONVERT(VARCHAR(MAX), @intInterCompanyTransferLogForCommentIdInTheOtherDatabase) + ', ' +
 														 CONVERT(VARCHAR(MAX), @intCurrentCompanyId) + ', ''' +
-														 CONVERT(VARCHAR(MAX), @strTableName) + ',''' + 
-														 CONVERT(VARCHAR(MAX), @strFinishedLogId) + ''''
+														 CONVERT(VARCHAR(MAX), @strTableName) + ''''
 									EXEC sp_executesql @sql;
 								END
 							END
