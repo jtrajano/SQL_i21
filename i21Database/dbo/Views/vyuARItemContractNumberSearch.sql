@@ -10,3 +10,9 @@ SELECT intItemContractHeaderId		= ICH.intItemContractHeaderId
      , dtmExpirationDate            = ICH.dtmExpirationDate
 	 , ysnPrepaid					= ICH.ysnPrepaid
 FROM dbo.tblCTItemContractHeader ICH
+INNER JOIN (
+	SELECT intItemContractHeaderId
+	FROM tblCTItemContractDetail ICD
+	WHERE ICD.intContractStatusId IN (1, 4)
+	GROUP BY ICD.intItemContractHeaderId
+) ICD ON ICH.intItemContractHeaderId = ICD.intItemContractHeaderId
