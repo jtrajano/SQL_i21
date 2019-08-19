@@ -170,10 +170,10 @@ BEGIN
 								--this will delete the data in the other database and log in the current database
 								SET @sql = N'EXEC [' + @strReferenceDatabaseName + '].dbo.[uspSMInterCompanyDeleteMessagingDetails] ' + 
 																				CONVERT(VARCHAR(250), @intDestinationRecordId) + 
-																				', ' + @strTableName +
-																				', ' + @strReferenceDatabaseName +
-																				', ' + DB_NAME() +
-																				', ' + CONVERT(NVARCHAR(250), ISNULL(@intDestinationCompanyId, 0))
+																				', ''' + @strTableName +
+																				''', ''' + @strReferenceDatabaseName +
+																				''', ''' + DB_NAME() +
+																				''', ' + CONVERT(NVARCHAR(250), ISNULL(@intDestinationCompanyId, 0))
 								EXEC sp_executesql @sql;
 								DELETE FROM dbo.[tblSMInterCompanyTransferLogForComment] WHERE intInterCompanyTransferLogForCommentId = @intInterCompanyTransferLogForCommentId
 
