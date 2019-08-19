@@ -754,7 +754,6 @@
     <Build Include="dbo\Tables\tblICInventoryReceiptInspection.sql" />
     <Build Include="dbo\Tables\tblICInventoryReceiptItemTax.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostCosting.sql" />
-    <Build Include="dbo\Stored Procedures\uspICUpdateItemTransactionStockUnits.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdateDetailsForRecount.sql" />
     <Build Include="dbo\Functions\fnGetCostingMethod.sql" />
     <Build Include="dbo\Functions\fnGetItemGLAccount.sql" />
@@ -1864,7 +1863,6 @@
     <Build Include="dbo\Stored Procedures\uspICAddItemReceipt.sql" />
     <Build Include="dbo\Stored Procedures\uspICImportReceipt.sql" />
     <Build Include="dbo\User Defined Types\ReceiptStagingTable.sql" />
-    <Build Include="dbo\User Defined Types\JointDelimitedValues.sql" />
     <Build Include="dbo\User Defined Types\ShipmentItemTableType.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetItemsFromItemShipment.sql" />
     <Build Include="dbo\Stored Procedures\uspSOShipped.sql" />
@@ -2354,7 +2352,6 @@
     <Build Include="dbo\Functions\fnARGetItemPricingDetails.sql" />
     <Build Include="dbo\Functions\fnARGetItemPrice.sql" />
     <Build Include="dbo\Functions\fnSplitStringWithTrim.sql" />
-    <Build Include="dbo\Functions\fnJoinDelimitedValues.sql" />
     <Build Include="dbo\Functions\fnEMCheckEmailDistributionOption.sql" />
     <Build Include="dbo\Stored Procedures\uspICIncreaseReservedQty.sql" />
     <Build Include="dbo\Stored Procedures\uspICIncreaseInTransitInBoundQty.sql" />
@@ -6018,7 +6015,7 @@
     <Build Include="dbo\Views\vyuMFGetPutawayDate.sql" />
     <Build Include="dbo\Views\vyuCTGridBrokerageCommissionDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspCTSaveBrokerageCommission.sql" />
-    <Build Include="dbo\Stored Procedures\uspCTReportCmmerciaInvoice.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTReportCommerciaInvoice.sql" />
     <Build Include="dbo\Stored Procedures\uspCTProvisionalCommission.sql" />
     <Build Include="dbo\Stored Procedures\uspCTSubagentStatement.sql" />
     <Build Include="dbo\Views\vyuSMIdentityUserInfo.sql" />
@@ -7991,32 +7988,11 @@
     <Build Include="dbo\Tables\tblTMTankMonitorInterfaceType.sql" />
     <Build Include="dbo\Tables\tblSTStoreMetrics.sql" />
     <Build Include="dbo\Tables\tblSTCheckoutMetrics.sql" />
+    <None Include="Scripts\Post-Deployment\SM\1910_UpdateNoSpaceModuleName.sql" />
     <Build Include="dbo\Stored Procedures\uspCFGetFactorEventSequenceNumber.sql" />
     <Build Include="dbo\Stored Procedures\uspCFGenerateTransactionExportToThirdPartyCSV.sql" />
     <Build Include="dbo\Tables\tblCFExportFactorEventSequenceNumber.sql" />
     <Build Include="dbo\Views\vyuCFExportARBalancesTripleEFormat.sql" />
-    <Build Include="dbo\Tables\tblSTStoreChangeFund.sql" />
-    <Build Include="dbo\Tables\tblSTCheckoutChangeFund.sql" />
-    <Build Include="dbo\Tables\tblSCTicketUberScaleStatusUpdate.sql" />
-    <Build Include="dbo\Stored Procedures\uspSCTicketUpdateUberScaleStatus.sql" />
-    <Build Include="dbo\Tables\tblSCTicketLoadUsed.sql" />
-    <Build Include="dbo\Functions\fnSCGetLoadNoneFreightItemCharges.sql" />
-    <Build Include="dbo\Functions\fnSCGetLoadFreightItemCharges.sql" />
-    <Build Include="dbo\Views\vyuSCScaleLoadView.sql" />
-    <Build Include="dbo\Stored Procedures\uspSCUpdateTicketLoadUsed.sql" />
-    <Build Include="dbo\Tables\tblICInventoryShiftPhysicalCount.sql" />
-    <Build Include="dbo\Stored Procedures\uspICGetCountGroupAsOfDate.sql" />
-    <Build Include="dbo\Views\vyuICGetShiftPhysical.sql" />
-    <Build Include="dbo\Views\vyuSTCheckoutATMFund.sql" />
-    <Build Include="dbo\Views\vyuSTCheckoutChangeFund.sql" />
-    <Build Include="dbo\Functions\fnAPCreateVoucherPayable.sql" />
-    <Build Include="dbo\Stored Procedures\uspSTReportCheckoutATMFundRecap.sql" />
-    <Build Include="dbo\Stored Procedures\uspSTReportCheckoutChangeFundRecap.sql" />
-    <Build Include="dbo\tblCTContractFutures.sql" />
-    <Build Include="dbo\Views\vyuCTContractFutures.sql" />
-    <Build Include="dbo\Stored Procedures\uspCTManageDerivatives.sql" />
-    <Build Include="dbo\Views\vyuSTConsolidatedCheckoutATMFundReport.sql" />
-    <Build Include="dbo\Views\vyuSTConsolidatedCheckoutChangeFundReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -8247,9 +8223,6 @@
     <Build Include="dbo\User Defined Types\InvoiceEAStagingTable.sql" />
     <Build Include="dbo\Stored Procedures\uspAREAImportInvoice.sql" />
     <Build Include="dbo\Views\vyuARGetPrepaidsAndCreditMemos.sql" />
-    <Build Include="dbo\Stored Procedures\uspARUpdateOverageItemContracts.sql" />
-    <Build Include="dbo\Stored Procedures\uspSMInterCompanyValidateDeleteForMessaging.sql" />
-    <Build Include="dbo\Stored Procedures\uspSMInterCompanyDeleteMessagingDetails.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
