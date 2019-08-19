@@ -8023,6 +8023,8 @@
     <Build Include="dbo\Views\vyuSTConsolidatedCheckoutChangeFundReport.sql" />
     <Build Include="dbo\Tables\tblMFDemandPreStage.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGenerateDemand.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMInterCompanyDeleteDMSFromStaging.sql" />
+    <Build Include="dbo\Tables\tblSMInterCompanyStageDelete.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

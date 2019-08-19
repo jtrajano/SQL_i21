@@ -101,13 +101,13 @@ IF(OBJECT_ID('tempdb..#deleteMovedDMSTable') IS NOT NULL)
 
 				--DELETE HERE IF DOCUMENT IS MOVED
 			
-					SET @sql = N'
-						DELETE FROM [' +@strDestinationDatabaseName+ '].dbo.[tblSMDocument] 
-						WHERE intDocumentId = ' + CONVERT(VARCHAR, @intTempDestinationDocumentId) + '';
+					--SET @sql = N'
+					--	DELETE FROM [' +@strDestinationDatabaseName+ '].dbo.[tblSMDocument] 
+					--	WHERE intDocumentId = ' + CONVERT(VARCHAR, @intTempDestinationDocumentId) + '';
 
-						EXEC sp_executesql @sql
+					--	EXEC sp_executesql @sql
 						
-				
+				INSERT INTO tblSMInterCompanyStageDelete (intSourceId,intDestinationId,strDatabaseName, dtmDate) VALUES (@intTempSourceDocumentId, @intTempDestinationDocumentId,@strDestinationDatabaseName, GETUTCDATE() )
 				
 				DELETE FROM #deleteMovedDMSTable WHERE intInterCompanyTransferLogForDMS = @intTempTransferLogId
 
