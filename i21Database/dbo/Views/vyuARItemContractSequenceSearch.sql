@@ -15,6 +15,7 @@ SELECT intItemContractHeaderId		= ICH.intItemContractHeaderId
 	 , intCompanyLocationId			= ICH.intCompanyLocationId
 	 , dtmContractDate				= ICH.dtmContractDate
 	 , dtmExpirationDate			= ICH.dtmExpirationDate
+	 , dtmDeliveryDate				= ICD.dtmDeliveryDate
 	 , intTaxGroupId				= ICD.intTaxGroupId
 	 , strTaxGroup					= TG.strTaxGroup
 	 , dblContracted				= ICD.dblContracted
