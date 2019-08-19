@@ -10,32 +10,49 @@ BEGIN
 	DECLARE @Txt1 VARCHAR(MAX)
 		,@intItemIdList VARCHAR(MAX)
 		,@strItemNoList VARCHAR(MAX)
+		,@ysnAllItem BIT
 
 	IF ISNULL((
-				SELECT TOP 1 intItemId
-				FROM dbo.tblCTInvPlngReportMaterial
+				SELECT 1
+				FROM tblCTInvPlngReportMaster
 				WHERE intInvPlngReportMasterID = @intInvPlngReportMasterID
 				), 0) = 0
 	BEGIN
-		--SELECT NULL
-
 		RETURN
 	END
 
-	SET @Txt1 = ''
-	SELECT @Txt1 = @Txt1 + CAST(intItemId AS VARCHAR(20)) + ','
-	FROM tblCTInvPlngReportMaterial
+	SELECT @ysnAllItem = ysnAllItem
+	FROM tblCTInvPlngReportMaster
 	WHERE intInvPlngReportMasterID = @intInvPlngReportMasterID
 
-	SELECT @intItemIdList = LEFT(@Txt1, LEN(@Txt1) - 1)
+	IF ISNULL(@ysnAllItem, 0) = 0
+	BEGIN
+		IF ISNULL((
+					SELECT TOP 1 intItemId
+					FROM tblCTInvPlngReportMaterial
+					WHERE intInvPlngReportMasterID = @intInvPlngReportMasterID
+					), 0) = 0
+		BEGIN
+			--SELECT NULL
 
-	SET @Txt1 = ''
-	SELECT @Txt1 = @Txt1 + CAST(I.strItemNo AS VARCHAR(50)) + '^' -- ItemNo can contain ,
-	FROM tblCTInvPlngReportMaterial RM
-	JOIN tblICItem I ON I.intItemId = RM.intItemId
-	WHERE RM.intInvPlngReportMasterID = @intInvPlngReportMasterID
+			RETURN
+		END
 
-	SELECT @strItemNoList = LEFT(@Txt1, LEN(@Txt1) - 1)
+		SET @Txt1 = ''
+		SELECT @Txt1 = @Txt1 + CAST(intItemId AS VARCHAR(20)) + ','
+		FROM tblCTInvPlngReportMaterial
+		WHERE intInvPlngReportMasterID = @intInvPlngReportMasterID
+
+		SELECT @intItemIdList = LEFT(@Txt1, LEN(@Txt1) - 1)
+
+		SET @Txt1 = ''
+		SELECT @Txt1 = @Txt1 + CAST(I.strItemNo AS VARCHAR(50)) + '^' -- ItemNo can contain ,
+		FROM tblCTInvPlngReportMaterial RM
+		JOIN tblICItem I ON I.intItemId = RM.intItemId
+		WHERE RM.intInvPlngReportMasterID = @intInvPlngReportMasterID
+
+		SELECT @strItemNoList = LEFT(@Txt1, LEN(@Txt1) - 1)
+	END
 
 	SELECT RM.*
 		,C.strCategoryCode

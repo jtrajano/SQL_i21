@@ -6,7 +6,11 @@ SELECT RM.intInvPlngReportMasterID
 	,C.strCategoryCode
 	,RM.intDemandHeaderId
 	,DH.strDemandName
-	,dbo.fnCTGetItemNames(RM.intInvPlngReportMasterID) COLLATE Latin1_General_CI_AS AS strItemNames
+	,CASE 
+		WHEN ISNULL(RM.ysnAllItem, 0) = 0
+			THEN dbo.fnCTGetItemNames(RM.intInvPlngReportMasterID) COLLATE Latin1_General_CI_AS
+		ELSE ''
+		END AS strItemNames
 	,RM.intNoOfMonths
 	,RM.ysnIncludeInventory
 	,RM.intCompanyLocationId
