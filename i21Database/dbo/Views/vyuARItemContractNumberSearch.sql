@@ -15,4 +15,10 @@ INNER JOIN (
 	FROM tblCTItemContractDetail ICD
 	WHERE ICD.intContractStatusId IN (1, 4)
 	GROUP BY ICD.intItemContractHeaderId
+
+	UNION ALL
+
+	SELECT intItemContractHeaderId
+	FROM tblCTItemContractHeaderCategory
+	GROUP BY intItemContractHeaderId
 ) ICD ON ICH.intItemContractHeaderId = ICD.intItemContractHeaderId
