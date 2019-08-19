@@ -223,11 +223,11 @@ LEFT JOIN tblICItemUOM PUM ON PUM.intItemUOMId = WCD.intPriceItemUOMId
 LEFT JOIN tblICUnitMeasure PRU ON PRU.intUnitMeasureId = PUM.intUnitMeasureId
 LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = WCD.intCurrencyId
 LEFT JOIN tblSMCurrency MCU ON MCU.intCurrencyID = CU.intMainCurrencyId
-CROSS APPLY (SELECT TOP 1 strVendorOrderNumber FROM tblAPBill v1 
+OUTER APPLY (SELECT TOP 1 strVendorOrderNumber FROM tblAPBill v1 
 			INNER JOIN tblAPBillDetail v2 ON v1.intBillId = v2.intBillId 
 			WHERE v2.intContractDetailId = CD.intContractDetailId
 			AND v1.intTransactionType = 1) VIN
-CROSS APPLY (
+OUTER APPLY (
 		SELECT dblNet = SUM(ReceiptItem.dblNet) 
 			   ,dblGross = SUM(ReceiptItem.dblGross)
 		FROM tblICInventoryReceiptItem ReceiptItem
@@ -238,7 +238,7 @@ CROSS APPLY (
 			AND intOrderId = CH.intContractHeaderId
 			AND L.intPurchaseSale IN (1, 3)
 		) IRI
-CROSS APPLY (SELECT dblNet = SUM(IRI.dblNet) 
+OUTER APPLY (SELECT dblNet = SUM(IRI.dblNet) 
 					,dblGross = SUM(IRI.dblGross)
 			 FROM tblICInventoryReceipt IR 
 				JOIN tblICInventoryReceiptItem IRI ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
