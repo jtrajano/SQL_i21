@@ -11,7 +11,7 @@ SELECT
 	, strUnitMeasure 
 FROM tblRKCollateral c
 JOIN tblICCommodity co on c.intCommodityId=co.intCommodityId
-JOIN tblICItem itm on itm.intItemId = c.intItemId
+LEFT JOIN tblICItem itm on itm.intItemId = c.intItemId
 JOIN tblICUnitMeasure m on m.intUnitMeasureId=c.intUnitMeasureId
 JOIN tblSMCompanyLocation l on l.intCompanyLocationId=c.intLocationId
 LEFT JOIN tblCTContractHeader ch on c.intContractHeaderId=ch.intContractHeaderId
