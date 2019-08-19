@@ -516,20 +516,6 @@ WHERE
 		AND 1 =  CASE WHEN CD.intPricingTypeId IS NOT NULL AND CD.intPricingTypeId IN (2) THEN 0 ELSE 1 END  --EXLCUDE ALL BASIS
 		AND 1 = CASE WHEN (A.intEntityVendorId = IR.intEntityVendorId AND CD.intPricingTypeId IS NOT NULL AND CD.intPricingTypeId = 5) THEN 0 ELSE 1 END --EXCLUDE DELAYED PRICING TYPE FOR RECEIPT VENDOR
 	)
-	AND (CD.intContractDetailId IS NULL OR 
-			(
-				CASE WHEN CD.intContractDetailId IS NOT NULL AND A.strReceiptType = 'Purchase Contract' 
-					AND EXISTS(
-						SELECT TOP 1 1 
-						FROM tblAPVoucherPayable 
-						WHERE intEntityVendorId = A.intEntityVendorId 
-						AND intContractDetailId = CD.intContractDetailId
-						AND strSourceNumber != A.strSourceNumber
-					)
-					THEN 0 ELSE 1 
-				END = 1
-			)
-		)
 RETURN
 END
 
