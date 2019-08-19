@@ -1132,8 +1132,7 @@ FROM (
 			, CASE WHEN intPricingTypeId = 6  then  ISNULL(dblCosts,0)+(ISNULL(dblCash,0)) + CONVERT(DECIMAL(24,6), CASE WHEN ISNULL(dblRate,0)=0 then dblFutures else dblFutures end) + ISNULL(dblCosts,0) end dblAdjustedContractPrice
 			, dbo.fnCTConvertQuantityToTargetCommodityUOM(PriceSourceUOMId,case when ISNULL(dblMarketBasisUOM,0)=0 then PriceSourceUOMId else dblMarketBasisUOM end,dblFuturesClosingPrice1) as dblFuturesClosingPrice
 			, dbo.fnCTConvertQuantityToTargetCommodityUOM(PriceSourceUOMId,case when ISNULL(dblMarketBasisUOM,0)=0 then PriceSourceUOMId else dblMarketBasisUOM end,dblFuturePrice1) as dblFuturePrice
-			, (ISNULL(convert(decimal(24,6),case when ISNULL(intCommodityUnitMeasureId,0) = 0 then dblOpenQty1 else dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,case when ISNULL(intQuantityUOMId,0)=0 then intCommodityUnitMeasureId else intQuantityUOMId end,ISNULL(dblOpenQty1,0))end),0))
-				-(ISNULL(convert(decimal(24,6),case when ISNULL(intCommodityUnitMeasureId,0) = 0 then dblInvoicedQuantity else dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,case when ISNULL(intQuantityUOMId,0)=0 then intCommodityUnitMeasureId else intQuantityUOMId end,ISNULL(dblInvoicedQuantity,0))end),0)) as dblOpenQty
+			, dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId, case when ISNULL(intQuantityUOMId,0)=0 then intCommodityUnitMeasureId else intQuantityUOMId end ,ISNULL(dblOpenQty1,0)) as dblOpenQty
 		FROM (
 			SELECT
 				  ch.intContractHeaderId
@@ -1250,7 +1249,7 @@ FROM (
 			JOIN tblRKFutureMarket fm on cd.intFutureMarketId = fm.intFutureMarketId
 			JOIN tblRKFuturesMonth fmo on cd.intFutureMonthId = fmo.intFutureMonthId
 			JOIN tblCTPricingType pt on cd.intPricingTypeId = pt.intPricingTypeId
-			JOIN tblICCommodityUnitMeasure cuc on ch.intCommodityId=cuc.intCommodityId and cuc.intUnitMeasureId = cd.intUnitMeasureId and ch.intCommodityId = @intCommodityId
+			JOIN tblICCommodityUnitMeasure cuc on ch.intCommodityId=cuc.intCommodityId and cuc.intUnitMeasureId = it.intUnitMeasureId and ch.intCommodityId = @intCommodityId
 			JOIN tblICCommodityUnitMeasure cuc1 on ch.intCommodityId=cuc1.intCommodityId and cuc1.intUnitMeasureId = @intQuantityUOMId
 			JOIN tblICCommodityUnitMeasure cuc2 on ch.intCommodityId=cuc2.intCommodityId and  cuc2.intUnitMeasureId = @intPriceUOMId
 			JOIN tblICCommodityUnitMeasure cuc3 on ch.intCommodityId=cuc3.intCommodityId and cuc3.intUnitMeasureId= iuom.intUnitMeasureId
@@ -1380,7 +1379,7 @@ FROM (
 			JOIN tblRKFutureMarket fm on cd.intFutureMarketId = fm.intFutureMarketId
 			JOIN tblRKFuturesMonth fmo on cd.intFutureMonthId = fmo.intFutureMonthId
 			JOIN tblCTPricingType pt on cd.intPricingTypeId = pt.intPricingTypeId
-			JOIN tblICCommodityUnitMeasure cuc on ch.intCommodityId=cuc.intCommodityId and cuc.intUnitMeasureId = cd.intUnitMeasureId and ch.intCommodityId = @intCommodityId
+			JOIN tblICCommodityUnitMeasure cuc on ch.intCommodityId=cuc.intCommodityId and cuc.intUnitMeasureId = it.intUnitMeasureId and ch.intCommodityId = @intCommodityId
 			JOIN tblICCommodityUnitMeasure cuc1 on ch.intCommodityId=cuc1.intCommodityId and cuc1.intUnitMeasureId = @intQuantityUOMId
 			JOIN tblICCommodityUnitMeasure cuc2 on ch.intCommodityId=cuc2.intCommodityId and  cuc2.intUnitMeasureId = @intPriceUOMId
 			JOIN tblICCommodityUnitMeasure cuc3 on ch.intCommodityId=cuc3.intCommodityId and cuc3.intUnitMeasureId= iuom.intUnitMeasureId
