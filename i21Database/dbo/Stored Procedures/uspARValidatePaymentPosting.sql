@@ -265,7 +265,7 @@ END
 
 CREATE TABLE #ARPostPrePayment ([intTransactionId] INT  NOT NULL PRIMARY KEY)
 
-IF @post = @OneBit
+IF @Post = @OneBit
 BEGIN
 	--OVERPAYMENT
 	INSERT INTO #ARPostOverPayment
