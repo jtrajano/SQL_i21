@@ -7,6 +7,7 @@ SELECT SupplyPoint.intSupplyPointId
 	, SupplyPoint.intEntityLocationId
 	, strSupplyPoint = EntityLocation.strLocationName
 	, strZipCode = EntityLocation.strZipCode
+	, strState = EntityLocation.strState
 	, SupplyPoint.intTerminalControlNumberId
 	, strTerminalNumber = Terminal.strTerminalControlNumber
 	, SupplyPoint.strGrossOrNet
