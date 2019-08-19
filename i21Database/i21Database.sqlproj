@@ -7993,6 +7993,34 @@
     <Build Include="dbo\Stored Procedures\uspCFGenerateTransactionExportToThirdPartyCSV.sql" />
     <Build Include="dbo\Tables\tblCFExportFactorEventSequenceNumber.sql" />
     <Build Include="dbo\Views\vyuCFExportARBalancesTripleEFormat.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUpdateItemTransactionStockUnits.sql" />
+    <Build Include="dbo\User Defined Types\JointDelimitedValues.sql" />
+    <Build Include="dbo\Functions\fnJoinDelimitedValues.sql" />
+    <Build Include="dbo\Stored Procedures\uspARUpdateOverageItemContracts.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMInterCompanyValidateDeleteForMessaging.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMInterCompanyDeleteMessagingDetails.sql" />
+    <Build Include="dbo\Tables\tblSTStoreChangeFund.sql" />
+    <Build Include="dbo\Tables\tblSTCheckoutChangeFund.sql" />
+    <Build Include="dbo\Tables\tblSCTicketUberScaleStatusUpdate.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCTicketUpdateUberScaleStatus.sql" />
+    <Build Include="dbo\Tables\tblSCTicketLoadUsed.sql" />
+    <Build Include="dbo\Functions\fnSCGetLoadNoneFreightItemCharges.sql" />
+    <Build Include="dbo\Functions\fnSCGetLoadFreightItemCharges.sql" />
+    <Build Include="dbo\Views\vyuSCScaleLoadView.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCUpdateTicketLoadUsed.sql" />
+    <Build Include="dbo\Tables\tblICInventoryShiftPhysicalCount.sql" />
+    <Build Include="dbo\Stored Procedures\uspICGetCountGroupAsOfDate.sql" />
+    <Build Include="dbo\Views\vyuICGetShiftPhysical.sql" />
+    <Build Include="dbo\Views\vyuSTCheckoutATMFund.sql" />
+    <Build Include="dbo\Views\vyuSTCheckoutChangeFund.sql" />
+    <Build Include="dbo\Functions\fnAPCreateVoucherPayable.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTReportCheckoutATMFundRecap.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTReportCheckoutChangeFundRecap.sql" />
+    <Build Include="dbo\tblCTContractFutures.sql" />
+    <Build Include="dbo\Views\vyuCTContractFutures.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTManageDerivatives.sql" />
+    <Build Include="dbo\Views\vyuSTConsolidatedCheckoutATMFundReport.sql" />
+    <Build Include="dbo\Views\vyuSTConsolidatedCheckoutChangeFundReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
