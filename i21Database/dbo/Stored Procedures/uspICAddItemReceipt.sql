@@ -1963,8 +1963,10 @@ BEGIN
 					AND ISNULL(ReceiptItem.intSort, 1) = ISNULL(ItemLot.intSort, 1)
 				INNER JOIN tblICInventoryReceipt Receipt
 					ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
+				INNER JOIN tblICItem i ON i.intItemId = ItemLot.intItemId
 			WHERE
 				Receipt.intInventoryReceiptId = @inventoryReceiptId
+				AND i.strLotTracking != 'No'
 		END 
 
 		-- Calculate the tax per line item 
