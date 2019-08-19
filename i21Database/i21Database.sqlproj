@@ -8021,6 +8021,8 @@
     <Build Include="dbo\Stored Procedures\uspCTManageDerivatives.sql" />
     <Build Include="dbo\Views\vyuSTConsolidatedCheckoutATMFundReport.sql" />
     <Build Include="dbo\Views\vyuSTConsolidatedCheckoutChangeFundReport.sql" />
+    <Build Include="dbo\Tables\tblMFDemandPreStage.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGenerateDemand.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

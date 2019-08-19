@@ -3849,3 +3849,19 @@ UPDATE tblMFCompanyPreference
 SET strSupplyTarget = 'Weekly'
 WHERE strSupplyTarget IS NULL
 GO
+UPDATE tblCTReportAttribute
+SET intDisplayOrder = 3
+WHERE strAttributeName = 'Forecasted Consumption'
+
+UPDATE tblCTReportAttribute
+SET intDisplayOrder = 10
+WHERE strAttributeName = 'Expected Deliveries'
+
+UPDATE tblCTReportAttribute
+SET strAttributeName ='Planned Purchases'
+WHERE strAttributeName = 'Planned Purchases - Bags'
+Go
+Update tblCTReportAttribute
+Set strAttributeName='Previous Planned Purchases'
+Where strAttributeName='Planned Purchases - '
+
