@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspCTReportCmmerciaInvoice]
+﻿CREATE PROCEDURE [dbo].[uspCTReportCommerciaInvoice]
 
   @xmlParam NVARCHAR(MAX) = NULL  
 	
@@ -102,10 +102,10 @@ BEGIN TRY
 			'INVOICE NO. ' + @strInvoiceNumber AS strInvoiceNo,
 			@strCity + ', ' +
 			 CASE 
-			   WHEN DAY(GETDATE()) In (1,21,31)   THEN FORMAT(GETDATE(),'d' + '''st''' + ' MMMM yyyy')  
-			   WHEN DAY(GETDATE()) In (2,22)   THEN FORMAT(GETDATE(),'d' + '''nd''' + ' MMMM yyyy')
-			   WHEN DAY(GETDATE()) In (3,23)   THEN FORMAT(GETDATE(),'d' + '''rd''' + ' MMMM yyyy')
-			   ELSE FORMAT(GETDATE(),'d' + '''th''' + ' MMMM yyyy')   
+			   WHEN DAY(GETDATE()) In (1,21,31)   THEN LTRIM(RTRIM(STR(DAY(GETDATE()))  + 'st ' + DATENAME(MONTH, GETDATE()) + ' ' +  LEFT(DATENAME(YEAR,getdate()),4)))
+			   WHEN DAY(GETDATE()) In (2,22)   THEN LTRIM(RTRIM(STR(DAY(GETDATE()))  + 'nd ' + DATENAME(MONTH, GETDATE()) + ' ' +  LEFT(DATENAME(YEAR,getdate()),4)))
+			   WHEN DAY(GETDATE()) In (3,23)   THEN LTRIM(RTRIM(STR(DAY(GETDATE()))  + 'rd ' + DATENAME(MONTH, GETDATE()) + ' ' +  LEFT(DATENAME(YEAR,getdate()),4)))
+			   ELSE LTRIM(RTRIM(STR(DAY(GETDATE()))  + 'th ' + DATENAME(MONTH, GETDATE()) + ' ' +  LEFT(DATENAME(YEAR,getdate()),4)))   
 			END AS strCity,
 			'Issued for commission received as per enclosed list dated ' + CONVERT(NVARCHAR,GETDATE(),103) + ' = ' AS strIssued,
 			@strCurrency + '. ' + LTRIM(@dblRcvdPaidAmount) AS strPrice,

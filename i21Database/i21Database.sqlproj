@@ -6017,7 +6017,7 @@
     <Build Include="dbo\Views\vyuMFGetPutawayDate.sql" />
     <Build Include="dbo\Views\vyuCTGridBrokerageCommissionDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspCTSaveBrokerageCommission.sql" />
-    <Build Include="dbo\Stored Procedures\uspCTReportCmmerciaInvoice.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTReportCommerciaInvoice.sql" />
     <Build Include="dbo\Stored Procedures\uspCTProvisionalCommission.sql" />
     <Build Include="dbo\Stored Procedures\uspCTSubagentStatement.sql" />
     <Build Include="dbo\Views\vyuSMIdentityUserInfo.sql" />
