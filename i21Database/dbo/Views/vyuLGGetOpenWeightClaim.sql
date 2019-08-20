@@ -117,7 +117,7 @@ FROM
 				ON ISNULL(CD.ysnUseFXPrice,0) = 1 AND CD.intCurrencyExchangeRateId IS NOT NULL AND CD.dblRate IS NOT NULL AND CD.intFXPriceUOMId IS NOT NULL
 				AND CYXF.intCurrencyExchangeRateId = CD.intCurrencyExchangeRateId 
 				AND CYXF.intFromCurrencyId = ISNULL(CY.intMainCurrencyId, CY.intCurrencyID)
-			LEFT JOIN tblSMCurrency CYF ON CYF.intCurrencyID = CYXF.intToCurrencyId
+			LEFT JOIN tblSMCurrency CYF ON CYF.intCurrencyID = CYXF.intFromCurrencyId
 			LEFT JOIN tblSMCurrencyExchangeRate CYXT 
 				ON ISNULL(CD.ysnUseFXPrice,0) = 1 AND CD.intCurrencyExchangeRateId IS NOT NULL AND CD.dblRate IS NOT NULL AND CD.intFXPriceUOMId IS NOT NULL
 				AND CYXT.intCurrencyExchangeRateId = CD.intCurrencyExchangeRateId 
@@ -274,7 +274,7 @@ FROM
 				ON ISNULL(CD.ysnUseFXPrice,0) = 1 AND CD.intCurrencyExchangeRateId IS NOT NULL AND CD.dblRate IS NOT NULL AND CD.intFXPriceUOMId IS NOT NULL
 				AND CYXF.intCurrencyExchangeRateId = CD.intCurrencyExchangeRateId 
 				AND CYXF.intFromCurrencyId = ISNULL(CY.intMainCurrencyId, CY.intCurrencyID)
-			LEFT JOIN tblSMCurrency CYF ON CYF.intCurrencyID = CYXF.intToCurrencyId
+			LEFT JOIN tblSMCurrency CYF ON CYF.intCurrencyID = CYXF.intFromCurrencyId
 			LEFT JOIN tblSMCurrencyExchangeRate CYXT 
 				ON ISNULL(CD.ysnUseFXPrice,0) = 1 AND CD.intCurrencyExchangeRateId IS NOT NULL AND CD.dblRate IS NOT NULL AND CD.intFXPriceUOMId IS NOT NULL
 				AND CYXT.intCurrencyExchangeRateId = CD.intCurrencyExchangeRateId 
