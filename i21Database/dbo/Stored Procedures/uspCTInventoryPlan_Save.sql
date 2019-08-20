@@ -49,17 +49,17 @@ BEGIN TRY
 		END
 
 		EXEC dbo.uspMFGeneratePatternId @intCategoryId = NULL
-				,@intItemId = NULL
-				,@intManufacturingId = NULL
-				,@intSubLocationId = NULL
-				,@intLocationId = NULL
-				,@intOrderTypeId = NULL
-				,@intBlendRequirementId = NULL
-				,@intPatternCode = 147
-				,@ysnProposed = 0
-				,@strPatternString = @strPlanNo OUTPUT
-				,@intShiftId = NULL
-				,@dtmDate = NULL
+			,@intItemId = NULL
+			,@intManufacturingId = NULL
+			,@intSubLocationId = NULL
+			,@intLocationId = NULL
+			,@intOrderTypeId = NULL
+			,@intBlendRequirementId = NULL
+			,@intPatternCode = 147
+			,@ysnProposed = 0
+			,@strPatternString = @strPlanNo OUTPUT
+			,@intShiftId = NULL
+			,@dtmDate = NULL
 
 		IF ISNULL(@strPlanNo, '') = ''
 		BEGIN
@@ -272,6 +272,37 @@ BEGIN TRY
 				,intCreatedUserId INT
 				,intLastModifiedUserId INT
 				)
+	END
+
+	IF EXISTS (
+			SELECT *
+			FROM tblCTInvPlngReportMaster
+			WHERE intInvPlngReportMasterID = @intInvPlngReportMasterID
+				AND ysnPost = 1
+			)
+	BEGIN
+		IF NOT EXISTS (
+				SELECT *
+				FROM tblMFDemandPreStage
+				WHERE intInvPlngReportMasterID = @intInvPlngReportMasterID
+				)
+		BEGIN
+			INSERT INTO tblMFDemandPreStage (
+				intInvPlngReportMasterID
+				,strRowState
+				)
+			SELECT @intInvPlngReportMasterID
+				,'Added'
+		END
+		ELSE
+		BEGIN
+			INSERT INTO tblMFDemandPreStage (
+				intInvPlngReportMasterID
+				,strRowState
+				)
+			SELECT @intInvPlngReportMasterID
+				,'Modified'
+		END
 	END
 
 	EXEC sp_xml_removedocument @idoc
