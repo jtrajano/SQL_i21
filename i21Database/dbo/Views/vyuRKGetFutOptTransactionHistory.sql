@@ -30,8 +30,8 @@ SELECT intFutOptTransactionHistoryId
 	, strStatus
 	, dtmFilledDate
 	, dblOldNoOfLots
-	, dblLotBalance = (ISNULL(dblNewNoOfLots, 0) - ISNULL(dblOldNoOfLots, 0))
-	, dblContractBalance = dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUOMId, intStockUOMId, ((ISNULL(dblNewNoOfLots, 0) - ISNULL(dblOldNoOfLots, 0))) * dblContractSize)
+	, dblLotBalance = (ISNULL(dblNewNoOfLots, 0.00) - ISNULL(dblOldNoOfLots, 0.00))
+	, dblContractBalance = dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUOMId, intStockUOMId, ((ISNULL(dblNewNoOfLots, 0.00) - ISNULL(dblOldNoOfLots, 0.00))) * dblContractSize)
 	, dblNewNoOfLots
 	, strScreenName
 	, strOldBuySell
@@ -81,7 +81,7 @@ FROM (
 		, History.dblPrice
 		, History.strStatus
 		, History.dtmFilledDate
-		, dblOldNoOfLots = (SELECT TOP 1 CASE WHEN strNewBuySell = 'Buy' THEN ISNULL(dblNewNoOfContract, 0) ELSE - ISNULL(dblNewNoOfContract, 0) END
+		, dblOldNoOfLots = (SELECT TOP 1 CASE WHEN strNewBuySell = 'Buy' THEN ISNULL(dblNewNoOfContract, 0.00) ELSE - ISNULL(dblNewNoOfContract, 0.00) END
 								FROM tblRKFutOptTransactionHistory PrevRec
 								WHERE PrevRec.intFutOptTransactionId = History.intFutOptTransactionId
 									AND PrevRec.intFutOptTransactionHistoryId != History.intFutOptTransactionHistoryId

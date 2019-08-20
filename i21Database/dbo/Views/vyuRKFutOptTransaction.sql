@@ -4,8 +4,8 @@ AS
 
 SELECT TOP 100 PERCENT *
 	, intRowNum = CONVERT(INT,ROW_NUMBER() OVER (ORDER BY intFutOptTransactionId))
-	, dblHedgeQty = ISNULL(dblContractSize, 0) * dblOpenContract
-	, dblContractPrice = ISNULL(dblPrice, 0) * dblOpenContract
+	, dblHedgeQty = ISNULL(dblContractSize, 0.00) * dblOpenContract
+	, dblContractPrice = ISNULL(dblPrice, 0.00) * dblOpenContract
 FROM (
 	SELECT ft.intFutOptTransactionId
 		, ft.intFutOptTransactionHeaderId

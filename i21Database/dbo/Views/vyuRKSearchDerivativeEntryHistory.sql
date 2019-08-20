@@ -2,7 +2,7 @@
 
 AS
 
-SELECT intRowId = ROW_NUMBER() OVER (ORDER BY intFutOptTransactionHistoryId)
+SELECT intRowId = CAST(ROW_NUMBER() OVER (ORDER BY intFutOptTransactionHistoryId) AS INT)
 	, *
 FROM (
 	SELECT intFutOptTransactionHistoryId
