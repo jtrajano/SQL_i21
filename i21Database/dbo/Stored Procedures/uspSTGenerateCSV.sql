@@ -602,7 +602,6 @@ BEGIN
 								JOIN tblSTStore ST 
 									ON ST.intStoreId = TR.intStoreId
 								LEFT JOIN vyuSTCigaretteRebatePrograms CRP 
-									-- ON (TR.strTrlUPC = CRP.strLongUPCCode OR TR.strTrlUPC = CRP.intLongUpcCode)
 									ON TR.strTrlUPCwithoutCheckDigit = CRP.strLongUPCCode -- Always compare UPC without check digit since Inventory UPC has no check digit
 									AND (CAST(TR.dtmDate AS DATE) BETWEEN CRP.dtmStartDate AND CRP.dtmEndDate)
 								LEFT JOIN
@@ -612,8 +611,7 @@ BEGIN
 									GROUP BY [intID]
 								) x ON x.intID IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](CRP.strStoreIdList))
 								WHERE TR.intTrlDeptNumber IN (SELECT DISTINCT intRegisterDepartmentId FROM fnSTRebateDepartment(CAST(ST.intStoreId AS NVARCHAR(10)))) -- ST-1358
-									--AND (TR.strTrlUPC != '' AND TR.strTrlUPC IS NOT NULL)
-									AND TR.strTrlUPCwithoutCheckDigit = CRP.strLongUPCCode -- Always compare UPC without check digit since Inventory UPC has no check digit
+									AND (TR.strTrlUPC != '' AND TR.strTrlUPC IS NOT NULL)
 
 								-- Check if has record
 								IF EXISTS(select * from @tblTempRJR)
