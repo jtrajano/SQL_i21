@@ -10,11 +10,13 @@ SET NOCOUNT ON
 SET XACT_ABORT ON  
 SET ANSI_WARNINGS OFF
   
-DECLARE @intInvoiceId			INT	  
-	  , @intUserId				INT
-	  , @intOriginalInvoiceId	INT
-	  , @intSalesOrderId		INT
-	  , @strTransactionType		NVARCHAR(25)
+DECLARE @intInvoiceId				INT	  
+	  , @intUserId					INT
+	  , @intOriginalInvoiceId		INT
+	  , @intSalesOrderId			INT
+	  , @intItemContractHeaderId	INT
+	  , @strTransactionType			NVARCHAR(25)
+	  , @ysnFromItemContract		BIT
 	  	  
 SET @intInvoiceId = @InvoiceId
 SET @intUserId = @UserId
@@ -22,6 +24,7 @@ SET @intUserId = @UserId
 SELECT TOP 1 @intOriginalInvoiceId = intOriginalInvoiceId
 		   , @intSalesOrderId = intSalesOrderId
 		   , @strTransactionType = strTransactionType
+		   , @ysnFromItemContract = ISNULL(ysnFromItemContract, 0)
 FROM tblARInvoice 
 WHERE intInvoiceId = @InvoiceId
 
@@ -37,6 +40,17 @@ IF @ForDelete = 1
 
 		IF ISNULL(@intSalesOrderId, 0) <> 0
 			EXEC dbo.uspSOUpdateReservedStock @intSalesOrderId, 0
+
+		--UPDATE PREPAID ITEM CONTRACT
+		IF ISNULL(@ysnFromItemContract, 0) <> 0
+			BEGIN
+				SELECT TOP 1 @intItemContractHeaderId = intItemContractHeaderId
+				FROM tblARInvoiceDetail
+				WHERE intInvoiceId = @intInvoiceId
+				  AND intItemContractHeaderId IS NOT NULL
+
+				UPDATE tblCTItemContractHeader SET ysnPrepaid = 0 WHERE intItemContractHeaderId = @intItemContractHeaderId
+			END
 	END
 	
 EXEC dbo.[uspARUpdatePricingHistory] 2, @intInvoiceId, @intUserId
