@@ -113,11 +113,11 @@ BEGIN
 				   ,[intConcurrencyId])
 
 		SELECT DISTINCT CUS.intEntityId
-			  ,(CASE WHEN SP.spprc_itm_no > ' ' THEN 
+			  ,NULLIF((CASE WHEN SP.spprc_itm_no > ' ' THEN 
 					 (SELECT intItemId FROM tblICItem  
 							 WHERE strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS 
 							 = SP.spprc_itm_no COLLATE SQL_Latin1_General_CP1_CS_AS)
-					 ELSE SP.spprc_itm_no END) 
+					 ELSE SP.spprc_itm_no END), 0) --intItemId 
 			  ,SP.spprc_class	  
 			  ,CASE WHEN SP.spprc_basis_ind = 'V' THEN 'R' ELSE spprc_basis_ind END
 			  ,CASE WHEN SP.spprc_cost_to_use_las = 'L' THEN 'Last'
@@ -130,13 +130,13 @@ BEGIN
 			  ,SP.spprc_comment
 			  ,(CASE WHEN ISDATE(SP.spprc_begin_rev_dt) = 1 THEN CONVERT(DATE,CAST(SP.spprc_begin_rev_dt AS CHAR(12)), 112) ELSE ' ' END)
 			  ,(CASE WHEN ISDATE(SP.spprc_end_rev_dt) = 1 THEN CONVERT(DATE,CAST(SP.spprc_end_rev_dt AS CHAR(12)), 112) ELSE ' ' END)
-			  ,CASE WHEN SP.spprc_cus_no <> OCUS.agcus_bill_to THEN CLOC.intEntityLocationId ELSE NULL END -- intEntityLocationId
+			  ,NULLIF((CASE WHEN SP.spprc_cus_no <> OCUS.agcus_bill_to THEN CLOC.intEntityLocationId ELSE NULL END), 0) -- intCustomerLocationId
 			  --,'Standard' 
-			  ,(CASE WHEN SP.spprc_class > ' ' THEN 
+			  ,NULLIF((CASE WHEN SP.spprc_class > ' ' THEN 
 							(SELECT CAT.intCategoryId FROM tblICCategory CAT
 							 WHERE CAT.strCategoryCode COLLATE SQL_Latin1_General_CP1_CS_AS = SP.spprc_class COLLATE SQL_Latin1_General_CP1_CS_AS)
 					 ELSE ''
-				END) 
+				END), 0) --intCategoryId 
 			  ,1 
 		FROM spprcmst SP
 		INNER JOIN tmpagcusname OCUS ON OCUS.agcus_key COLLATE SQL_Latin1_General_CP1_CS_AS = SP.spprc_cus_no COLLATE SQL_Latin1_General_CP1_CS_AS
@@ -175,16 +175,16 @@ BEGIN
 				   ,[intCategoryId]
 				   ,[intConcurrencyId])
 		SELECT  DISTINCT CUS.intEntityId
-			  ,(CASE WHEN PDV.ptpdv_vnd_no > ' ' THEN 
+			  ,NULLIF((CASE WHEN PDV.ptpdv_vnd_no > ' ' THEN 
 					 (SELECT intEntityId FROM tblAPVendor  
 							 WHERE strVendorId COLLATE SQL_Latin1_General_CP1_CS_AS 
 							 = PDV.ptpdv_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS)
-					 ELSE PDV.ptpdv_vnd_no END) 
-			  ,(CASE WHEN PDV.ptpdv_itm_no > ' ' THEN 
+					 ELSE PDV.ptpdv_vnd_no END), 0) --intEntityVendorId
+			  ,NULLIF((CASE WHEN PDV.ptpdv_itm_no > ' ' THEN 
 					 (SELECT intItemId FROM tblICItem  
 							 WHERE strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS 
 							 = PDV.ptpdv_itm_no COLLATE SQL_Latin1_General_CP1_CS_AS)
-					 ELSE PDV.ptpdv_itm_no END) 
+					 ELSE PDV.ptpdv_itm_no END), 0) --intItemId
 			  ,PDV.ptpdv_class	  
 			  ,CASE WHEN PDV.ptpdv_basis_ind = 'V' THEN 'R' ELSE PDV.ptpdv_basis_ind END
 			  ,PDV.ptpdv_grp_cus_no
@@ -198,41 +198,41 @@ BEGIN
 			  ,PDV.ptpdv_comment
 			  ,(CASE WHEN ISDATE(PDV.ptpdv_begin_rev_dt) = 1 THEN CONVERT(DATE,CAST(PDV.ptpdv_begin_rev_dt AS CHAR(12)), 112) ELSE ' ' END)
 			  ,(CASE WHEN ISDATE(PDV.ptpdv_end_rev_dt) = 1 THEN CONVERT(DATE,CAST(PDV.ptpdv_end_rev_dt AS CHAR(12)), 112) ELSE ' ' END)
-			  ,(CASE WHEN PDV.ptpdv_rack_vnd_no > ' ' THEN 
+			  ,NULLIF((CASE WHEN PDV.ptpdv_rack_vnd_no > ' ' THEN 
 					 (SELECT intEntityId FROM tblAPVendor  
 							 WHERE strVendorId COLLATE SQL_Latin1_General_CP1_CS_AS 
 							 = PDV.ptpdv_rack_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS)
 					 ELSE PDV.ptpdv_rack_vnd_no 
-				END) 
-			  ,(CASE WHEN PDV.ptpdv_rack_itm_no > ' ' THEN 
+				END), 0) --intRackVendorId
+			  ,NULLIF((CASE WHEN PDV.ptpdv_rack_itm_no > ' ' THEN 
 					 (SELECT intItemId FROM tblICItem  
 							 WHERE strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS 
 							 = PDV.ptpdv_rack_itm_no COLLATE SQL_Latin1_General_CP1_CS_AS)
 					 ELSE PDV.ptpdv_rack_itm_no 
-				END) 
-			  ,(CASE WHEN PDV.ptpdv_vnd_no > ' ' THEN 
+				END), 0) --intRackItemId
+			  ,NULLIF((CASE WHEN PDV.ptpdv_vnd_no > ' ' THEN 
 							(SELECT VLOC.intEntityLocationId FROM tmpvndname OVND
 								INNER JOIN tblAPVendor VND ON VND.strVendorId COLLATE SQL_Latin1_General_CP1_CS_AS = OVND.ssvnd_pay_to COLLATE SQL_Latin1_General_CP1_CS_AS
 								INNER JOIN tblEMEntityLocation VLOC ON VLOC.intEntityId = VND.intEntityId 
 								 AND VLOC.strLocationName COLLATE SQL_Latin1_General_CP1_CS_AS = OVND.ssvnd_name COLLATE SQL_Latin1_General_CP1_CS_AS			  
 							 WHERE OVND.ssvnd_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS = PDV.ptpdv_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS)
 					 ELSE NULL 
-				END) 
-			  ,(CASE WHEN PDV.ptpdv_rack_vnd_no > ' ' THEN 
+				END), 0) --intEntityLocationId
+			  ,NULLIF((CASE WHEN PDV.ptpdv_rack_vnd_no > ' ' THEN 
 							(SELECT VLOC.intEntityLocationId FROM tmpvndname OVND
 								INNER JOIN tblAPVendor VND ON VND.strVendorId COLLATE SQL_Latin1_General_CP1_CS_AS = OVND.ssvnd_pay_to COLLATE SQL_Latin1_General_CP1_CS_AS
 								INNER JOIN tblEMEntityLocation VLOC ON VLOC.intEntityId = VND.intEntityId 
 								 AND VLOC.strLocationName COLLATE SQL_Latin1_General_CP1_CS_AS = OVND.ssvnd_name COLLATE SQL_Latin1_General_CP1_CS_AS			  
 							 WHERE OVND.ssvnd_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS = PDV.ptpdv_rack_vnd_no COLLATE SQL_Latin1_General_CP1_CS_AS)
 					 ELSE NULL 
-				END)
-			  ,CASE WHEN PDV.ptpdv_cus_no <> OCUS.ptcus_bill_to THEN CLOC.intEntityLocationId ELSE NULL END -- intEntityLocationId
+				END), 0) --intRackLocationId
+			  ,NULLIF((CASE WHEN PDV.ptpdv_cus_no <> OCUS.ptcus_bill_to THEN CLOC.intEntityLocationId ELSE NULL END), 0) -- intCustomerLocationId
 			  --,'Standard' 
-			  ,(CASE WHEN PDV.ptpdv_class > ' ' THEN 
+			  ,NULLIF((CASE WHEN PDV.ptpdv_class > ' ' THEN 
 							(SELECT CAT.intCategoryId FROM tblICCategory CAT
 							 WHERE CAT.strCategoryCode COLLATE SQL_Latin1_General_CP1_CS_AS = PDV.ptpdv_class COLLATE SQL_Latin1_General_CP1_CS_AS)
 					 ELSE ''
-				END) 
+				END), 0) --intCategoryId
 			  ,1 
 		FROM ptpdvmst PDV
 		INNER JOIN tmpptcusname OCUS ON OCUS.ptcus_cus_no COLLATE SQL_Latin1_General_CP1_CS_AS = PDV.ptpdv_cus_no COLLATE SQL_Latin1_General_CP1_CS_AS
