@@ -8037,6 +8037,11 @@
     <Build Include="dbo\Stored Procedures\uspGRCalculateSettleStorageFeeForContract.sql" />
     <Build Include="dbo\Stored Procedures\uspRKProcessDerivativeEntry.sql" />
     <Build Include="dbo\Views\vyuSTSTPaymentOptionCheckoutPreload.sql" />
+    <Build Include="dbo\Tables\tblICInventoryCountByCategoryDetail.sql" />
+    <Build Include="dbo\Tables\tblICInventoryCountByCategory.sql" />
+    <Build Include="dbo\Views\vyuICGetInventoryCountByCategoryDetail.sql" />
+    <Build Include="dbo\Views\vyuICGetInventoryCountByCategory.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPopulateRetailValuationByLocation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

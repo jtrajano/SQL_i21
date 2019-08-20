@@ -1,0 +1,25 @@
+﻿CREATE TABLE [dbo].[tblICInventoryCountByCategoryDetail] (
+    [intInventoryCountByCategoryDetailId] INT              IDENTITY (1, 1) NOT NULL,
+    [intInventoryCountByCategoryId]       INT              NOT NULL,
+    [intCategoryId]                       INT              NULL,
+    [dblTargetMargin]                     NUMERIC (38, 20) CONSTRAINT [DF__tblICInve__dblTa__2C1D2053] DEFAULT ((0)) NOT NULL,
+    [dblCurrentMargin]                    NUMERIC (38, 20) CONSTRAINT [DF__tblICInve__dblCu__2D11448C] DEFAULT ((0)) NOT NULL,
+    [dblCurrentRetail]                    NUMERIC (38, 20) CONSTRAINT [DF__tblICInve__dblCu__2E0568C5] DEFAULT ((0)) NOT NULL,
+    [dblCurrentCost]                      NUMERIC (38, 20) CONSTRAINT [DF__tblICInve__dblCu__2EF98CFE] DEFAULT ((0)) NOT NULL,
+    [dblNewRetail]                        NUMERIC (38, 20) CONSTRAINT [DF__tblICInve__dblNe__2FEDB137] DEFAULT ((0)) NOT NULL,
+    [dblNewCost]                          NUMERIC (38, 20) CONSTRAINT [DF__tblICInve__dblNe__30E1D570] DEFAULT ((0)) NOT NULL,
+    [dblNewMargin]                        NUMERIC (38, 20) CONSTRAINT [DF__tblICInve__dblNe__31D5F9A9] DEFAULT ((0)) NOT NULL,
+    [strCountLine]                        NVARCHAR (50)    COLLATE Latin1_General_CI_AS NULL,
+    [intCountGroupId]                     INT              NULL,
+    [intSort]                             INT              NULL,
+    [intConcurrencyId]                    INT              CONSTRAINT [DF__tblICInve__intCo__32CA1DE2] DEFAULT ((0)) NULL,
+    [intUserId]                           INT              NULL,
+    [dtmDateCreated]                      DATETIME         NULL,
+    [dtmDateModified]                     DATETIME         NULL,
+    [intCreatedByUserId]                  INT              NULL,
+    [intModifiedByUserId]                 INT              NULL,
+    CONSTRAINT [PK_tblICInventoryCountByCategoryDetail] PRIMARY KEY CLUSTERED ([intInventoryCountByCategoryDetailId] ASC) WITH (FILLFACTOR = 70),
+    CONSTRAINT [FK_tblICInventoryCountByCategoryDetail_tblICCategory] FOREIGN KEY ([intCategoryId]) REFERENCES [dbo].[tblICCategory] ([intCategoryId]),
+    CONSTRAINT [FK_tblICInventoryCountByCategoryDetail_tblICInventoryCountByCategory] FOREIGN KEY ([intInventoryCountByCategoryId]) REFERENCES [dbo].[tblICInventoryCountByCategory] ([intInventoryCountByCategoryId]) ON DELETE CASCADE
+);
+
