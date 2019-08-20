@@ -156,7 +156,6 @@ SELECT intInvoiceId							= INV.intInvoiceId
 	 , ysnValidCreditCode					= INV.ysnValidCreditCode
 	 , ysnServiceChargeCredit				= INV.ysnServiceChargeCredit
 	 , blbSignature							= INV.blbSignature
-	 , ysnFromReturnedInvoice				= CASE WHEN ISNULL(RI.intInvoiceId, 0) <> 0 THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
 FROM tblARInvoice INV WITH (NOLOCK)
 INNER JOIN (
     SELECT intEntityId
@@ -312,9 +311,3 @@ OUTER APPLY (
     WHERE INV.intInvoiceId = ID.intInvoiceId
       AND (ISNULL(intTicketId, 0) <> 0 OR ISNULL(intInventoryShipmentItemId, 0) <> 0 OR ISNULL(intLoadDetailId, 0) <> 0)
 ) INTEG
-OUTER APPLY (
-    SELECT TOP 1 intInvoiceId
-    FROM dbo.tblARInvoice RI WITH (NOLOCK)
-    WHERE RI.strInvoiceNumber = INV.strInvoiceOriginId
-      AND RI.ysnReturned = 1
-) RI
