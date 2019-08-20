@@ -1757,7 +1757,7 @@ SELECT  distinct
 		CROSS APPLY dbo.fnRKRollToNearby(cd.intContractDetailId, cd.intFutureMarketId, cd.intFutureMonthId, cd.dblFuturePrice1) rk
 		WHERE rk.intContractDetailId = cd.intContractDetailId
 			AND rk.intFutureMonthId = cd.intFutureMonthId
-                                      
+			AND cd.intPricingTypeId = 2 
                                 )t       
                 )t
 )t2  
