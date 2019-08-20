@@ -1,12 +1,14 @@
 ﻿CREATE PROCEDURE [dbo].[uspSTstgInsertComboSalesFile]
-	@strFilePrefix NVARCHAR(50)
-	, @intStoreId INT
-	, @intRegisterId INT
-	, @ysnClearRegisterPromotion BIT
-	, @strGeneratedXML NVARCHAR(MAX) OUTPUT
-	, @intImportFileHeaderId INT OUTPUT
-	, @ysnSuccessResult BIT OUTPUT
-	, @strMessageResult NVARCHAR(1000) OUTPUT
+	@strFilePrefix						NVARCHAR(50)
+	, @intStoreId						INT
+	, @intRegisterId					INT
+	, @ysnClearRegisterPromotion		BIT
+	, @dtmBeginningChangeDate			DATETIME
+	, @dtmEndingChangeDate				DATETIME
+	, @strGeneratedXML					NVARCHAR(MAX)	OUTPUT
+	, @intImportFileHeaderId			INT				OUTPUT
+	, @ysnSuccessResult					BIT				OUTPUT
+	, @strMessageResult					NVARCHAR(1000)	OUTPUT
 AS
 BEGIN
 	BEGIN TRY
@@ -306,6 +308,11 @@ BEGIN
 										ON IUM.intUnitMeasureId = IUOM.intUnitMeasureId 
 									WHERE ST.intStoreId = @intStoreId
 										AND PSL.strPromoType = 'C' -- <--- 'C' = Combo
+										AND (
+										       CAST(@dtmBeginningChangeDate AS DATE) >= CAST(PSL.dtmPromoBegPeriod AS DATE)
+										        AND 
+											   CAST(@dtmEndingChangeDate AS DATE) <= CAST(PSL.dtmPromoEndPeriod AS DATE) 
+											) -- ST-1227
 
 								END
 
@@ -622,10 +629,14 @@ BEGIN
 				JOIN tblICUnitMeasure IUM 
 					ON IUM.intUnitMeasureId = IUOM.intUnitMeasureId 
 				WHERE R.intRegisterId = @intRegisterId 
-				AND ST.intStoreId = @intStoreId
-				AND PSL.strPromoType = 'C' -- <--- 'C' = Combo
-				-- AND PSL.intPromoSalesId BETWEEN @BeginningComboId AND @EndingComboId
-	
+					AND ST.intStoreId = @intStoreId
+					AND PSL.strPromoType = 'C' -- <--- 'C' = Combo
+					-- AND PSL.intPromoSalesId BETWEEN @BeginningComboId AND @EndingComboId
+					AND (
+							CAST(@dtmBeginningChangeDate AS DATE) >= CAST(PSL.dtmPromoBegPeriod AS DATE)
+							 AND 
+							CAST(@dtmEndingChangeDate AS DATE) <= CAST(PSL.dtmPromoEndPeriod AS DATE) 
+						) -- ST-1227
 				
 
 				IF EXISTS(SELECT StoreLocationID FROM tblSTstgComboSalesFile)
@@ -705,6 +716,11 @@ BEGIN
 						ON SL.intStoreId = Store.intStoreId
 					WHERE SL.intStoreId = @intStoreId
 						AND SL.strPromoType = 'C'
+						AND (
+								CAST(@dtmBeginningChangeDate AS DATE) >= CAST(SL.dtmPromoBegPeriod AS DATE)
+								 AND 
+								CAST(@dtmEndingChangeDate AS DATE) <= CAST(SL.dtmPromoEndPeriod AS DATE) 
+							) -- ST-1227
 				END
 
 				-- INSERT @tblTempSapphireCommanderWeekDayAvailability
