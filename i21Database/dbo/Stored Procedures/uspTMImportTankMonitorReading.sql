@@ -110,7 +110,7 @@
 		END
 		IF(@siteId IS NULL)
 		BEGIN 
-			SET @resultLog = @resultLog + 'Exception: Not Matching' + char(10)
+			SET @resultLog = @resultLog + 'Exception: Not matching Customer Number and Tank Serial.' + char(10)
 			RETURN 
 		END 
 		SET @resultLog = @resultLog + 'Site ID = ' + CAST(ISNULL(@siteId,'') AS NVARCHAR(10)) + char(10) 
