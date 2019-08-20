@@ -1,4 +1,4 @@
-﻿Create PROCEDURE uspMFGenerateDemand (
+﻿CREATE PROCEDURE uspMFGenerateDemand (
 	@intInvPlngReportMasterID INT = NULL
 	,@ExistingDataXML NVARCHAR(MAX) = NULL
 	,@MaterialKeyXML NVARCHAR(MAX) = NULL
@@ -31,6 +31,42 @@ BEGIN TRY
 		,@intPrevInvPlngReportMasterID INT
 	DECLARE @tblMFItem TABLE (intItemId INT)
 
+	IF OBJECT_ID('tempdb..#TempOpenPurchase') IS NOT NULL
+		DROP TABLE #TempOpenPurchase
+
+	CREATE TABLE #TempOpenPurchase (
+		[intItemId] INT
+		,[strName] NVARCHAR(50)
+		,[strValue] DECIMAL(24, 6)
+		)
+
+	IF OBJECT_ID('tempdb..#TempPlannedPurchases') IS NOT NULL
+		DROP TABLE #TempPlannedPurchases
+
+	CREATE TABLE #TempPlannedPurchases (
+		[intItemId] INT
+		,[strName] NVARCHAR(50)
+		,[strValue] DECIMAL(24, 6)
+		)
+
+	IF OBJECT_ID('tempdb..#TempForecastedConsumption') IS NOT NULL
+		DROP TABLE #TempForecastedConsumption
+
+	CREATE TABLE #TempForecastedConsumption (
+		[intItemId] INT
+		,[strName] NVARCHAR(50)
+		,[strValue] DECIMAL(24, 6)
+		)
+
+	IF OBJECT_ID('tempdb..#TempWeeksOfSupplyTarget') IS NOT NULL
+		DROP TABLE #TempWeeksOfSupplyTarget
+
+	CREATE TABLE #TempWeeksOfSupplyTarget (
+		[intItemId] INT
+		,[strName] NVARCHAR(50)
+		,[strValue] DECIMAL(24, 6)
+		)
+
 	SELECT @intReportMasterID = intReportMasterID
 	FROM tblCTReportMaster
 	WHERE strReportName = 'Inventory Planning Report'
@@ -49,7 +85,8 @@ BEGIN TRY
 	--To get a previously saved demand view
 	SELECT TOP 1 @intPrevInvPlngReportMasterID = intInvPlngReportMasterID
 	FROM tblCTInvPlngReportMaster
-	WHERE dtmDate < @dtmDate and ysnPost=1
+	WHERE dtmDate < @dtmDate
+		AND ysnPost = 1
 	ORDER BY intInvPlngReportMasterID DESC
 
 	IF @intCompanyLocationId IS NULL
@@ -82,10 +119,14 @@ BEGIN TRY
 		EXEC sp_xml_preparedocument @idoc OUTPUT
 			,@OpenPurchaseXML
 
+		INSERT INTO #TempOpenPurchase (
+			[intItemId]
+			,[strName]
+			,[strValue]
+			)
 		SELECT [intItemId]
 			,Replace([Name], 'strMonth', '') AS [Name]
 			,[Value]
-		INTO #TempOpenPurchase
 		FROM OPENXML(@idoc, 'root/OpenPurchase', 2) WITH (
 				[intItemId] INT
 				,[Name] NVARCHAR(50)
@@ -100,10 +141,14 @@ BEGIN TRY
 		EXEC sp_xml_preparedocument @idoc OUTPUT
 			,@PlannedPurchasesXML
 
+		INSERT INTO #TempPlannedPurchases (
+			[intItemId]
+			,[strName]
+			,[strValue]
+			)
 		SELECT [intItemId]
 			,Replace([Name], 'strMonth', '') AS [Name]
 			,[Value]
-		INTO #TempPlannedPurchases
 		FROM OPENXML(@idoc, 'root/PlannedPurchases', 2) WITH (
 				[intItemId] INT
 				,[Name] NVARCHAR(50)
@@ -118,10 +163,14 @@ BEGIN TRY
 		EXEC sp_xml_preparedocument @idoc OUTPUT
 			,@ForecastedConsumptionXML
 
+		INSERT INTO #TempForecastedConsumption (
+			[intItemId]
+			,[strName]
+			,[strValue]
+			)
 		SELECT [intItemId]
 			,Replace([Name], 'strMonth', '') AS [Name]
 			,[Value]
-		INTO #TempForecastedConsumption
 		FROM OPENXML(@idoc, 'root/ForecastedConsumption', 2) WITH (
 				[intItemId] INT
 				,[Name] NVARCHAR(50)
@@ -136,10 +185,14 @@ BEGIN TRY
 		EXEC sp_xml_preparedocument @idoc OUTPUT
 			,@WeeksOfSupplyTargetXML
 
+		INSERT INTO #TempWeeksOfSupplyTarget (
+			[intItemId]
+			,[strName]
+			,[strValue]
+			)
 		SELECT [intItemId]
 			,Replace([Name], 'strMonth', '') AS [Name]
 			,[Value]
-		INTO #TempWeeksOfSupplyTarget
 		FROM OPENXML(@idoc, 'root/WeeksOfSupplyTarget', 2) WITH (
 				[intItemId] INT
 				,[Name] NVARCHAR(50)
@@ -168,37 +221,6 @@ BEGIN TRY
 		,intAttributeId INT
 		,intMonthId INT
 		)
-
-	INSERT INTO #tblMFDemandList (
-		intItemId
-		,dblQty
-		,intAttributeId
-		,intMonthId
-		)
-	SELECT I.intItemId
-		,NULL
-		,2 AS intAttributeId --Opening Inventory
-		,- 1 AS intMonthId
-	FROM @tblMFItem I
-
-	INSERT INTO #tblMFDemandList (
-		intItemId
-		,dblQty
-		,intAttributeId
-		,intMonthId
-		)
-	SELECT I.intItemId
-		,NULL
-		,A.intReportAttributeID AS intAttributeId
-		,0 AS intMonthId
-	FROM @tblMFItem I
-		,tblCTReportAttribute A
-	WHERE A.intReportAttributeID IN (
-			4 --Existing Purchases
-			,13 --Open Purchases
-			,14 --In-transit Purchases
-			)
-		AND A.intReportMasterID = @intReportMasterID
 
 	SELECT @dtmStartOfMonth = DATEADD(month, DATEDIFF(month, 0, Getdate()), 0)
 
@@ -372,57 +394,110 @@ BEGIN TRY
 			WHERE DD.dtmDemandDate >= @dtmStartOfMonth
 		END
 	END
-
-	IF @ysnRefreshContract = 1
+	ELSE
 	BEGIN
-		INSERT INTO #tblMFDemand (
-			intItemId
-			,dblQty
-			,intAttributeId
-			,intMonthId
-			)
-		SELECT SS.intItemId
-			,sum(dbo.fnCTConvertQuantityToTargetItemUOM(SS.intItemId, IU.intUnitMeasureId, @intUnitMeasureId, SS.dblBalance)) AS dblIntrasitQty
-			,13 AS intAttributeId --Open Purchases
-			,0 AS intMonthId
-		FROM @tblMFItem I
-		JOIN dbo.tblCTContractDetail SS ON SS.intItemId = I.intItemId
-		JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = SS.intItemUOMId
-			AND ISNULL(SS.intCompanyLocationId, 0) = (
-				CASE 
-					WHEN @intCompanyLocationId = 0
-						THEN ISNULL(SS.intCompanyLocationId, 0)
-					ELSE @intCompanyLocationId
-					END
-				)
-		WHERE SS.intContractStatusId = 1
-			AND SS.dtmUpdatedAvailabilityDate < @dtmStartOfMonth
-		GROUP BY SS.intItemId
+		MERGE #tblMFDemand AS target
+		USING (
+			SELECT intItemId
+				,[strName]
+				,[strValue]
+			FROM #TempForecastedConsumption
+			) AS source(intItemId, [strName], [strValue])
+			ON (
+					target.intItemId = source.intItemId
+					AND target.intMonthId = source.[strName]
+					AND target.intAttributeId = 8
+					AND target.intMonthId > 0
+					)
+		WHEN MATCHED
+			THEN
+				UPDATE
+				SET target.dblQty = source.[strValue]
+		WHEN NOT MATCHED
+			THEN
+				INSERT (
+					intItemId
+					,intMonthId
+					,dblQty
+					,intAttributeId
+					)
+				VALUES (
+					source.intItemId
+					,source.[strName]
+					,source.[strValue]
+					,8
+					);
+	END
 
-		INSERT INTO #tblMFDemand (
-			intItemId
-			,dblQty
-			,intAttributeId
-			,intMonthId
-			)
-		SELECT SS.intItemId
-			,sum(dbo.fnCTConvertQuantityToTargetItemUOM(SS.intItemId, IU.intUnitMeasureId, @intUnitMeasureId, SS.dblBalance)) AS dblIntrasitQty
-			,13 AS intAttributeId --Open Purchases
-			,DATEDIFF(mm, 0, SS.dtmUpdatedAvailabilityDate) + 1 - @intCurrentMonth AS intMonthId
-		FROM dbo.tblCTContractDetail SS
-		JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = SS.intItemUOMId
-			AND ISNULL(SS.intCompanyLocationId, 0) = (
-				CASE 
-					WHEN @intCompanyLocationId = 0
-						THEN ISNULL(SS.intCompanyLocationId, 0)
-					ELSE @intCompanyLocationId
-					END
+	IF IsNULL(@OpenPurchaseXML, '') = ''
+	BEGIN
+		IF @ysnRefreshContract = 1
+		BEGIN
+			INSERT INTO #tblMFDemand (
+				intItemId
+				,dblQty
+				,intAttributeId
+				,intMonthId
 				)
-		WHERE SS.intContractStatusId = 1
-			AND SS.dtmUpdatedAvailabilityDate >= @dtmStartOfMonth
-		GROUP BY datename(m, SS.dtmUpdatedAvailabilityDate) + ' ' + cast(datepart(yyyy, SS.dtmUpdatedAvailabilityDate) AS VARCHAR)
-			,SS.intItemId
-			,DATEDIFF(mm, 0, SS.dtmUpdatedAvailabilityDate)
+			SELECT SS.intItemId
+				,sum(dbo.fnCTConvertQuantityToTargetItemUOM(SS.intItemId, IU.intUnitMeasureId, @intUnitMeasureId, SS.dblBalance)) AS dblIntrasitQty
+				,13 AS intAttributeId --Open Purchases
+				,0 AS intMonthId
+			FROM @tblMFItem I
+			JOIN dbo.tblCTContractDetail SS ON SS.intItemId = I.intItemId
+			JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = SS.intItemUOMId
+				AND ISNULL(SS.intCompanyLocationId, 0) = (
+					CASE 
+						WHEN @intCompanyLocationId = 0
+							THEN ISNULL(SS.intCompanyLocationId, 0)
+						ELSE @intCompanyLocationId
+						END
+					)
+			WHERE SS.intContractStatusId = 1
+				AND SS.dtmUpdatedAvailabilityDate < @dtmStartOfMonth
+			GROUP BY SS.intItemId
+
+			INSERT INTO #tblMFDemand (
+				intItemId
+				,dblQty
+				,intAttributeId
+				,intMonthId
+				)
+			SELECT SS.intItemId
+				,sum(dbo.fnCTConvertQuantityToTargetItemUOM(SS.intItemId, IU.intUnitMeasureId, @intUnitMeasureId, SS.dblBalance)) AS dblIntrasitQty
+				,13 AS intAttributeId --Open Purchases
+				,DATEDIFF(mm, 0, SS.dtmUpdatedAvailabilityDate) + 1 - @intCurrentMonth AS intMonthId
+			FROM dbo.tblCTContractDetail SS
+			JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = SS.intItemUOMId
+				AND ISNULL(SS.intCompanyLocationId, 0) = (
+					CASE 
+						WHEN @intCompanyLocationId = 0
+							THEN ISNULL(SS.intCompanyLocationId, 0)
+						ELSE @intCompanyLocationId
+						END
+					)
+			WHERE SS.intContractStatusId = 1
+				AND SS.dtmUpdatedAvailabilityDate >= @dtmStartOfMonth
+			GROUP BY datename(m, SS.dtmUpdatedAvailabilityDate) + ' ' + cast(datepart(yyyy, SS.dtmUpdatedAvailabilityDate) AS VARCHAR)
+				,SS.intItemId
+				,DATEDIFF(mm, 0, SS.dtmUpdatedAvailabilityDate)
+		END
+		ELSE
+		BEGIN
+			INSERT INTO #tblMFDemand (
+				intItemId
+				,dblQty
+				,intAttributeId
+				,intMonthId
+				)
+			SELECT intItemId
+				,strValue
+				,13 --Open Purchases 
+				,Replace(Replace(Replace(strFieldName, 'strMonth', ''), 'OpeningInv', '-1'), 'PastDue', '0') intMonthId
+			FROM tblCTInvPlngReportAttributeValue
+			WHERE intReportAttributeID = 13 --Open Purchases 
+				AND intInvPlngReportMasterID = @intPrevInvPlngReportMasterID
+		END
 	END
 	ELSE
 	BEGIN
@@ -433,12 +508,10 @@ BEGIN TRY
 			,intMonthId
 			)
 		SELECT intItemId
-			,strValue 
-			,13--Open Purchases 
-			,Replace(Replace(Replace(strFieldName, 'strMonth', ''), 'OpeningInv', '-1'), 'PastDue', '0') intMonthId
-		FROM tblCTInvPlngReportAttributeValue
-		WHERE intReportAttributeID = 13 --Open Purchases 
-			AND intInvPlngReportMasterID = @intPrevInvPlngReportMasterID
+			,strValue
+			,13 --Open Purchases 
+			,[strName] AS intMonthId
+		FROM #TempOpenPurchase
 	END
 
 	INSERT INTO #tblMFDemand (
@@ -587,92 +660,36 @@ BEGIN TRY
 		)
 	SELECT intItemId
 		,NULL
-		,11 --Weeks of Supply Target
-		,intMonthId
-	FROM #tblMFDemand
-	WHERE intAttributeId = 2 --Opening Inventory
-		AND intMonthId > 0
-
-	INSERT INTO #tblMFDemand (
-		intItemId
-		,dblQty
-		,intAttributeId
-		,intMonthId
-		)
-	SELECT intItemId
-		,NULL
 		,9 --Ending Inventory
 		,intMonthId
 	FROM #tblMFDemand
 	WHERE intAttributeId = 2 --Opening Inventory
 		AND intMonthId > 0
 
-	IF @OpenPurchaseXML <> ''
-	BEGIN
-		UPDATE D
-		SET dblQty = Purchase.[Value]
-		FROM #tblMFDemand D
-		JOIN #TempOpenPurchase Purchase ON Purchase.intItemId = D.intItemId
-			AND Purchase.[Name] = D.intMonthId
-		WHERE intAttributeId = 13 --Planned Purchases -
-			AND intMonthId >= 0
-	END
-
 	IF @PlannedPurchasesXML <> ''
 	BEGIN
 		UPDATE D
-		SET dblQty = Purchase.[Value]
+		SET dblQty = Purchase.[strValue]
 		FROM #tblMFDemand D
 		JOIN #TempPlannedPurchases Purchase ON Purchase.intItemId = D.intItemId
-			AND Purchase.[Name] = D.intMonthId
+			AND Purchase.[strName] = D.intMonthId
 		WHERE intAttributeId = 5 --Planned Purchases -
 			AND intMonthId > 0
 	END
 
-	IF @ForecastedConsumptionXML <> ''
-	BEGIN
-		MERGE #tblMFDemand AS target
-		USING (
-			SELECT intItemId
-				,[Name]
-				,[Value]
-			FROM #TempForecastedConsumption
-			) AS source(intItemId, [Name], [Value])
-			ON (
-					target.intItemId = source.intItemId
-					AND target.intMonthId = source.[Name]
-					AND target.intAttributeId = 8
-					AND target.intMonthId > 0
-					)
-		WHEN MATCHED
-			THEN
-				UPDATE
-				SET target.dblQty = source.[Value]
-		WHEN NOT MATCHED
-			THEN
-				INSERT (
-					intItemId
-					,intMonthId
-					,dblQty
-					,intAttributeId
-					)
-				VALUES (
-					source.intItemId
-					,source.[Name]
-					,source.[Value]
-					,8
-					);
-	END
-
 	IF @WeeksOfSupplyTargetXML <> ''
 	BEGIN
-		UPDATE D
-		SET dblQty = WeeksOfSupply.[Value]
-		FROM #tblMFDemand D
-		JOIN #TempWeeksOfSupplyTarget WeeksOfSupply ON WeeksOfSupply.intItemId = D.intItemId
-			AND WeeksOfSupply.[Name] = D.intMonthId
-		WHERE intAttributeId = 11 --Weeks of Supply Target
-			AND intMonthId > 0
+		INSERT INTO #tblMFDemand (
+			intItemId
+			,dblQty
+			,intAttributeId
+			,intMonthId
+			)
+		SELECT intItemId
+			,strValue
+			,11 --Weeks of Supply Target
+			,[strName] AS intMonthId
+		FROM #TempWeeksOfSupplyTarget
 	END
 
 	INSERT INTO #tblMFDemand (
@@ -699,13 +716,13 @@ BEGIN TRY
 							FROM #tblMFDemand OpenInv
 							WHERE OpenInv.intItemId = D.intItemId
 								AND intMonthId IN (
-									- 1--Opening Inventory
-									,0--Past Due
+									- 1 --Opening Inventory
+									,0 --Past Due
 									)
 								AND intAttributeId IN (
-									2--Opening Inventory
-									,13--Open Purchases
-									,14--In-transit Purchases
+									2 --Opening Inventory
+									,13 --Open Purchases
+									,14 --In-transit Purchases
 									)
 							)
 				ELSE (
@@ -713,7 +730,7 @@ BEGIN TRY
 						FROM #tblMFDemand OpenInv
 						WHERE OpenInv.intItemId = D.intItemId
 							AND intMonthId = @intMonthId - 1
-							AND intAttributeId = 9--Ending Inventory
+							AND intAttributeId = 9 --Ending Inventory
 						)
 				END
 		FROM #tblMFDemand D
@@ -869,11 +886,13 @@ BEGIN TRY
 						)
 					) * (
 					(
-						SELECT dblQty
-						FROM #tblMFDemand D3
-						WHERE D3.intItemId = Demand.intItemId
-							AND D3.intAttributeId = 10 --Weeks of Supply
-							AND D3.intMonthId = Demand.intMonthId
+						IsNULL((
+								SELECT dblQty
+								FROM #tblMFDemand D3
+								WHERE D3.intItemId = Demand.intItemId
+									AND D3.intAttributeId = 10 --Weeks of Supply 
+									AND D3.intMonthId = Demand.intMonthId
+								), 0)
 						) - IsNULL((
 							SELECT dblQty
 							FROM #tblMFDemand D4
@@ -887,6 +906,37 @@ BEGIN TRY
 		,intMonthId
 	FROM #tblMFDemand Demand
 	WHERE intAttributeId = 2;
+
+	INSERT INTO #tblMFDemandList (
+		intItemId
+		,dblQty
+		,intAttributeId
+		,intMonthId
+		)
+	SELECT I.intItemId
+		,NULL
+		,2 AS intAttributeId --Opening Inventory
+		,- 1 AS intMonthId
+	FROM @tblMFItem I
+
+	INSERT INTO #tblMFDemandList (
+		intItemId
+		,dblQty
+		,intAttributeId
+		,intMonthId
+		)
+	SELECT I.intItemId
+		,NULL
+		,A.intReportAttributeID AS intAttributeId
+		,0 AS intMonthId
+	FROM @tblMFItem I
+		,tblCTReportAttribute A
+	WHERE A.intReportAttributeID IN (
+			4 --Existing Purchases
+			,13 --Open Purchases
+			,14 --In-transit Purchases
+			)
+		AND A.intReportMasterID = @intReportMasterID;
 
 	WITH tblMFGenerateDemandData (intMonthId)
 	AS (
