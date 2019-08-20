@@ -1698,7 +1698,7 @@ SELECT  distinct
        group by PCT.intContractDetailId
        ) AS LG 
         ON LG.intContractDetailId = cd.intContractDetailId
-                                      
+		WHERE cd.intPricingTypeId = 2
                                 )t       
                 )t
 )t2  
