@@ -35,6 +35,7 @@ DECLARE @tblInvoiceDetailEntries	InvoiceStagingTable
 
 INSERT INTO @tblInvoiceDetailEntries (
       intInvoiceDetailId
+    , intSalesOrderDetailId
     , strSourceTransaction
     , strSourceId
     , intEntityCustomerId
@@ -62,29 +63,30 @@ INSERT INTO @tblInvoiceDetailEntries (
     , intCompanyLocationSubLocationId
 )
 SELECT intInvoiceDetailId				= NULL
-    , strSourceTransaction				= 'Direct'
-    , strSourceId						= ''
+    , intSalesOrderDetailId     = ID.intSalesOrderDetailId
+    , strSourceTransaction			= 'Direct'
+    , strSourceId						    = ''
     , intEntityCustomerId				= I.intEntityCustomerId
-    , intCompanyLocationId				= I.intCompanyLocationId
-    , dtmDate							= I.dtmDate
-    , intEntityId						= I.intEntityId
-    , intInvoiceId						= @intInvoiceId
-    , intItemId							= ID.intItemId
+    , intCompanyLocationId			= I.intCompanyLocationId
+    , dtmDate							      = I.dtmDate
+    , intEntityId						    = I.intEntityId
+    , intInvoiceId					  	= @intInvoiceId
+    , intItemId							    = ID.intItemId
     , strItemDescription				= ID.strItemDescription
-    , intOrderUOMId						= ID.intOrderUOMId
-    , dblQtyOrdered						= OVERAGE.dblOverageQty
-    , intItemUOMId						= ID.intItemUOMId
-    , intPriceUOMId						= ID.intPriceUOMId
-    , dblQtyShipped						= OVERAGE.dblOverageQty
-    , dblPrice							= 0
-    , dblUnitPrice						= 0
+    , intOrderUOMId						  = ID.intOrderUOMId
+    , dblQtyOrdered						  = OVERAGE.dblOverageQty
+    , intItemUOMId						  = ID.intItemUOMId
+    , intPriceUOMId						  = ID.intPriceUOMId
+    , dblQtyShipped						  = OVERAGE.dblOverageQty
+    , dblPrice							    = 0
+    , dblUnitPrice						  = 0
     , intItemWeightUOMId				= ID.intItemWeightUOMId
-    , intItemContractDetailId			= ID.intItemContractDetailId
-    , intItemContractHeaderId			= ID.intItemContractHeaderId
-    , intTicketId						= ID.intTicketId
-    , intTaxGroupId						= ID.intTaxGroupId
-    , dblCurrencyExchangeRate			= ID.dblCurrencyExchangeRate
-    , intStorageLocationId				= ID.intStorageLocationId
+    , intItemContractDetailId		= ID.intItemContractDetailId
+    , intItemContractHeaderId		= ID.intItemContractHeaderId
+    , intTicketId						    = ID.intTicketId
+    , intTaxGroupId						  = ID.intTaxGroupId
+    , dblCurrencyExchangeRate		= ID.dblCurrencyExchangeRate
+    , intStorageLocationId			= ID.intStorageLocationId
     , intSubLocationId					= ID.intSubLocationId
     , intCompanyLocationSubLocationId	= ID.intCompanyLocationSubLocationId
 FROM #OVERAGEINVOICEDETAILS OVERAGE
@@ -93,7 +95,7 @@ INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId
 
 EXEC dbo.uspARAddItemToInvoices @InvoiceEntries		= @tblInvoiceDetailEntries
                               , @IntegrationLogId	= NULL
-							  , @UserId				= @intUserId
+							                , @UserId				    = @intUserId
 
 --RECOMPUTE INVOICE AMOUNTS
 EXEC dbo.uspARReComputeInvoiceTaxes @intInvoiceId

@@ -844,6 +844,7 @@ FROM #ARPostInvoiceDetail PID
 INNER JOIN tblARInvoiceDetail ID ON PID.intInvoiceDetailId = ID.intInvoiceDetailId
 INNER JOIN tblCTItemContractDetail ICD ON ID.intItemContractDetailId = ICD.intItemContractDetailId
 WHERE ID.intItemContractDetailId IS NOT NULL
+  AND ISNULL(ID.strPricing, 'Inventory - Standard Pricing') <> 'Subsystem - Direct'
 
 EXEC dbo.uspCTItemContractInvoicePosted @tblItemContracts, @UserId
 
