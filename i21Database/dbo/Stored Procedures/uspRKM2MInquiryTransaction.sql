@@ -64,6 +64,8 @@ DECLARE @tblFinalDetail TABLE (intContractHeaderId int
 	, strPosition NVARCHAR(200) COLLATE Latin1_General_CI_AS
 	, strPeriod NVARCHAR(200) COLLATE Latin1_General_CI_AS
 	, strPeriodTo NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	, strStartDate NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	, strEndDate NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, strPriOrNotPriOrParPriced NVARCHAR(200) COLLATE Latin1_General_CI_AS
 	, intPricingTypeId INT
 	, strPricingType NVARCHAR(200) COLLATE Latin1_General_CI_AS
@@ -624,6 +626,8 @@ DECLARE @tblOpenContractList TABLE (intContractHeaderId int
 	, strPosition NVARCHAR(200) COLLATE Latin1_General_CI_AS
 	, strPeriod NVARCHAR(200) COLLATE Latin1_General_CI_AS
 	, strPeriodTo NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	, strStartDate NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	, strEndDate NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, strPriOrNotPriOrParPriced NVARCHAR(200) COLLATE Latin1_General_CI_AS
 	, intPricingTypeId int
 	, strPricingType NVARCHAR(200) COLLATE Latin1_General_CI_AS
@@ -687,6 +691,8 @@ INSERT INTO @tblOpenContractList (intContractHeaderId
 	, strPosition
 	, strPeriod
 	, strPeriodTo
+	, strStartDate
+	, strEndDate
 	, strPriOrNotPriOrParPriced
 	, intPricingTypeId
 	, strPricingType
@@ -749,6 +755,8 @@ SELECT intContractHeaderId
 	, strPosition
 	, strPeriod
 	, strPeriodTo
+	, strStartDate
+	, strEndDate
 	, strPriOrNotPriOrParPriced
 	, intPricingTypeId
 	, strPricingType
@@ -915,6 +923,8 @@ FROM (
 		, cd.dblNoOfLots
 		, cd.dblLotsFixed
 		, cd.dblPriceWORollArb
+		, strStartDate = CONVERT(NVARCHAR(20), cd.dtmStartDate, 106)
+		, strEndDate = CONVERT(NVARCHAR(20), cd.dtmEndDate, 106)
 	FROM @GetContractDetailView cd
 	JOIN tblICCommodityUnitMeasure cuc on cd.intCommodityId=cuc.intCommodityId and cuc.intUnitMeasureId = cd.intUnitMeasureId and cd.intCommodityId = @intCommodityId
 	JOIN tblICCommodityUnitMeasure cuc1 on cd.intCommodityId=cuc1.intCommodityId and cuc1.intUnitMeasureId = @intQuantityUOMId
@@ -994,6 +1004,8 @@ INSERT INTO @tblFinalDetail (intContractHeaderId
     , strPosition 
     , strPeriod 
     , strPeriodTo
+	, strStartDate
+	, strEndDate
     , strPriOrNotPriOrParPriced 
     , intPricingTypeId 
     , strPricingType 
@@ -1066,6 +1078,8 @@ SELECT intContractHeaderId
 	, strPosition
 	, strPeriod
 	, strPeriodTo
+	, strStartDate
+	, strEndDate
 	, strPriOrNotPriOrParPriced
 	, intPricingTypeId
 	, strPricingType
@@ -1154,6 +1168,8 @@ FROM (
                 , strPosition = NULL --cd.strPosition
 				, strPeriod = RIGHT(CONVERT(VARCHAR(8), cd.dtmStartDate, 3), 5)+'-'+RIGHT(CONVERT(VARCHAR(8), cd.dtmEndDate, 3), 5)
 				, strPeriodTo = SUBSTRING(CONVERT(NVARCHAR(20),cd.dtmEndDate,106),4,8)
+				, strStartDate = CONVERT(NVARCHAR(20), cd.dtmStartDate, 106)
+				, strEndDate = CONVERT(NVARCHAR(20), cd.dtmEndDate, 106)
 				, strPriOrNotPriOrParPriced = ISNULL((select strPricingStatus from @tblGetOpenContractDetail where intContractDetailId = cd.intContractDetailId), pt.strPricingType)
                 , intPricingTypeId = ISNULL((select intPricingTypeId from @tblGetOpenContractDetail where intContractDetailId = cd.intContractDetailId),pt.intPricingTypeId)
                 , strPricingType = ISNULL((select strPricingType from @tblGetOpenContractDetail where intContractDetailId = cd.intContractDetailId), pt.strPricingType)
@@ -1283,6 +1299,8 @@ FROM (
                 , strPosition = NULL --cd.strPosition
 				, strPeriod = RIGHT(CONVERT(VARCHAR(8), cd.dtmStartDate, 3), 5)+'-'+RIGHT(CONVERT(VARCHAR(8), cd.dtmEndDate, 3), 5)
 				, strPeriodTo = SUBSTRING(CONVERT(NVARCHAR(20),cd.dtmEndDate,106),4,8)
+				, strStartDate = CONVERT(NVARCHAR(20), cd.dtmStartDate, 106)
+				, strEndDate = CONVERT(NVARCHAR(20), cd.dtmEndDate, 106)
 				, strPriOrNotPriOrParPriced = ISNULL((select strPricingStatus from @tblGetOpenContractDetail where intContractDetailId = cd.intContractDetailId), pt.strPricingType)
                 , intPricingTypeId = ISNULL((select intPricingTypeId from @tblGetOpenContractDetail where intContractDetailId = cd.intContractDetailId),pt.intPricingTypeId)
                 , strPricingType = ISNULL((select strPricingType from @tblGetOpenContractDetail where intContractDetailId = cd.intContractDetailId), pt.strPricingType)
@@ -1415,6 +1433,8 @@ FROM (
                 , strPosition = NULL --cd.strPosition
 				, strPeriod = NULL
 				, strPeriodTo = NULL
+				, strStartDate = NULL
+				, strEndDate = NULL
 				, strPriOrNotPriOrParPriced = NULL
                 , intPricingTypeId = NULL
                 , strPricingType = NULL
@@ -1494,6 +1514,8 @@ INSERT INTO @tblFinalDetail (
     ,strPosition 
     ,strPeriod 
     ,strPeriodTo
+	, strStartDate
+	, strEndDate
     ,strPriOrNotPriOrParPriced 
     ,intPricingTypeId 
     ,strPricingType 
@@ -1567,6 +1589,8 @@ SELECT DISTINCT
 	,strPosition 
 	,strPeriod 
 	,strPeriodTo
+	, strStartDate
+	, strEndDate
 	,strPriOrNotPriOrParPriced 
 	,intPricingTypeId 
 	,strPricingType 
@@ -1692,6 +1716,8 @@ SELECT  distinct
                 ,cd.strPosition
       ,cd.strPeriod
       ,cd.strPeriodTo
+	  ,cd.strStartDate
+	  ,cd.strEndDate
       ,cd.strPriOrNotPriOrParPriced
       ,cd.intPricingTypeId
       ,cd.strPricingType
@@ -1783,6 +1809,8 @@ BEGIN
 		, strPosition 
 		, strPeriod 
 		, strPeriodTo
+		, strStartDate
+		, strEndDate
 		, strPriOrNotPriOrParPriced 
 		, intPricingTypeId 
 		, strPricingType 
@@ -1855,6 +1883,8 @@ BEGIN
 		, strPosition 
 		, strPeriod 
 		, strPeriodTo
+		, strStartDate
+		, strEndDate
 		, strPriOrNotPriOrParPriced 
 		, intPricingTypeId 
 		, strPricingType 
@@ -1952,6 +1982,8 @@ BEGIN
 					, cd.strPosition
 					, cd.strPeriod
 					, cd.strPeriodTo
+					, cd.strStartDate
+					, cd.strEndDate
 					, cd.strPriOrNotPriOrParPriced
 					, cd.intPricingTypeId
 					, cd.strPricingType
@@ -2028,6 +2060,8 @@ INSERT INTO @tblFinalDetail (intContractHeaderId
 	, strPosition
 	, strPeriod
 	, strPeriodTo
+	, strStartDate
+	, strEndDate
 	, strPriOrNotPriOrParPriced
 	, intPricingTypeId
 	, strPricingType
@@ -2102,6 +2136,8 @@ SELECT DISTINCT intContractHeaderId
 	, strPosition 
 	, strPeriod 
 	, strPeriodTo
+	, strStartDate
+	, strEndDate
 	, strPriOrNotPriOrParPriced 
 	, intPricingTypeId 
 	, strPricingType 
@@ -2200,6 +2236,8 @@ FROM (
 				, cd.strPosition
 				, cd.strPeriod
 				, cd.strPeriodTo
+				, strStartDate
+				, strEndDate
 				, cd.strPriOrNotPriOrParPriced
 				, cd.intPricingTypeId
 				, cd.strPricingType
@@ -2301,6 +2339,8 @@ FROM (
 		, strPosition
 		, strPeriod
 		, strPeriodTo
+		, strStartDate
+		, strEndDate
 		, strPriOrNotPriOrParPriced
 		, case when intContractTypeId = 2 then - dblOpenQty
 				else dblOpenQty end dblOpenQty
@@ -2637,6 +2677,8 @@ SELECT intRowNum = CONVERT(INT,ROW_NUMBER() OVER(ORDER BY intFutureMarketId DESC
 	, strPosition
 	, strPeriod
 	, strPeriodTo
+	, strStartDate
+	, strEndDate
 	, strPriOrNotPriOrParPriced
 	, intPricingTypeId
 	, strPricingType
@@ -2706,6 +2748,8 @@ FROM (
 		, strPosition
 		, strPeriod
 		, strPeriodTo
+		, strStartDate
+		, strEndDate
 		, strPriOrNotPriOrParPriced
 		, intPricingTypeId
 		, strPricingType
@@ -2892,6 +2936,8 @@ FROM (
 		, strPosition
 		, strPeriod
 		, strPeriodTo
+		, strStartDate
+		, strEndDate
 		, strPriOrNotPriOrParPriced
 		, intPricingTypeId
 		, strPricingType

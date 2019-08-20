@@ -55,6 +55,8 @@ BEGIN
 		, strPosition NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		, strPeriod NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		, strPeriodTo NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		, strStartDate NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		, strEndDate NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		, strPriOrNotPriOrParPriced NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		, intPricingTypeId INT
 		, strPricingType NVARCHAR(200) COLLATE Latin1_General_CI_AS
@@ -114,6 +116,8 @@ BEGIN
 		, strPosition
 		, strPeriod
 		, strPeriodTo
+		, strStartDate
+		, strEndDate
 		, strPriOrNotPriOrParPriced
 		, intPricingTypeId
 		, strPricingType
