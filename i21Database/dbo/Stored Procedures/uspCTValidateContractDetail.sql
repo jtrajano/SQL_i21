@@ -434,7 +434,7 @@ BEGIN TRY
 				JOIN	tblCTPriceFixationDetail FD ON FD.intPriceFixationId = PF.intPriceFixationId
 				WHERE	intContractDetailId = @intContractDetailId
 
-				IF @dblNewQuantity < @dblQtyFixed
+				IF @dblNewQuantity < @dblQtyFixed AND ISNULL(@ysnSlice,0) = 0
 				BEGIN
 					SET @ErrMsg = 'Cannot reduce the quantity for the Sequence ' + LTRIM(@intContractSeq) + ' to '+dbo.fnRemoveTrailingZeroes(@dblNewQuantity)+', as '+dbo.fnRemoveTrailingZeroes(@dblQtyFixed)+' is price fixed.'
 					RAISERROR(@ErrMsg,16,1) 
