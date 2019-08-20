@@ -422,7 +422,7 @@ BEGIN TRY
 			IF @strPricingQuantity = 'By Futures Contracts'
 			BEGIN
 				SELECT @dblLotsFixed = dblLotsFixed FROM tblCTPriceFixation WHERE intContractDetailId = @intContractDetailId
-				IF @dblNewNoOfLots < @dblLotsFixed
+				IF @dblNewNoOfLots < @dblLotsFixed AND ISNULL(@ysnSlice,0) = 0
 				BEGIN
 					SET @ErrMsg = 'Cannot reduce the lots for the Sequence ' + LTRIM(@intContractSeq) + ' to '+dbo.fnRemoveTrailingZeroes(@dblNewNoOfLots)+', as '+dbo.fnRemoveTrailingZeroes(@dblLotsFixed)+' lots are price fixed.'
 					RAISERROR(@ErrMsg,16,1) 
