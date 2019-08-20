@@ -127,7 +127,7 @@ SELECT intInvoiceDetailId					= INV.intInvoiceDetailId
 	 , strSiteNumber						= ISNULL(CSITE.strSiteNumber, '') COLLATE Latin1_General_CI_AS
      , strContractNumber					= ISNULL(CT.strContractNumber, '')	 
 	 , intContractSeq						= CT.intContractSeq
-	 , strItemContractNumber				= ISNULL(ICT.strContractNumber, '')
+	 , strItemContractNumber				= ISNULL(ICTH.strContractNumber, '')
 	 , intItemContractSeq					= ICT.intLineNo
      , dblOriginalQty						= INV.dblQtyShipped
      , dblOriginalPrice						= INV.dblPrice
@@ -221,13 +221,16 @@ LEFT JOIN (
 	JOIN tblCTPricingType PT ON PT.intPricingTypeId	 =	CD.intPricingTypeId
 ) CT ON INV.intContractDetailId = CT.intContractDetailId
 LEFT JOIN ( 
-	SELECT intItemContractDetailId
-		 , strContractNumber
+	SELECT intItemContractDetailId		 
 		 , intLineNo
 		 , dblBalance
 	FROM tblCTItemContractDetail ICD
-	JOIN tblCTItemContractHeader ICH ON ICH.intItemContractHeaderId	= ICD.intItemContractHeaderId
 ) ICT ON INV.intItemContractDetailId = ICT.intItemContractDetailId
+LEFT JOIN (
+	SELECT intItemContractHeaderId
+		 , strContractNumber
+	FROM tblCTItemContractHeader
+) ICTH ON INV.intItemContractHeaderId = ICTH.intItemContractHeaderId
 LEFT JOIN ( 
 	SELECT intTaxGroupId
 		 , strTaxGroup
