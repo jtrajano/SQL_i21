@@ -1,12 +1,14 @@
 ﻿CREATE PROCEDURE [dbo].[uspSTstgInsertMixMatchFile]
-	@strFilePrefix NVARCHAR(50)
-	, @intStoreId INT
-	, @intRegisterId INT
-	, @ysnClearRegisterPromotion BIT
-	, @strGeneratedXML NVARCHAR(MAX) OUTPUT
-	, @intImportFileHeaderId INT OUTPUT
-	, @ysnSuccessResult BIT OUTPUT
-	, @strMessageResult NVARCHAR(1000) OUTPUT
+	@strFilePrefix						NVARCHAR(50)
+	, @intStoreId						INT
+	, @intRegisterId					INT
+	, @ysnClearRegisterPromotion		BIT
+	, @dtmBeginningChangeDate			DATETIME
+	, @dtmEndingChangeDate				DATETIME
+	, @strGeneratedXML					NVARCHAR(MAX)	OUTPUT
+	, @intImportFileHeaderId			INT				OUTPUT
+	, @ysnSuccessResult					BIT				OUTPUT
+	, @strMessageResult					NVARCHAR(1000)	OUTPUT
 AS
 BEGIN
 	BEGIN TRY
@@ -50,9 +52,9 @@ BEGIN
 			END
 		-- =========================================================================================================
 
-		-- Create temp table @tblTempSapphireCommanderWeekDayAvailability
+		-- Create temp table @tblTempWeekDayAvailability
 		BEGIN
-			DECLARE @tblTempSapphireCommanderWeekDayAvailability TABLE 
+			DECLARE @tblTempWeekDayAvailability TABLE 
 			(
 				[intPromoSalesListId]		INT,
 				[PromotionID]				INT,
@@ -278,11 +280,16 @@ BEGIN
 										ON CL.intCompanyLocationId = IL.intLocationId
 									WHERE ST.intStoreId = @intStoreId
 										AND PSL.strPromoType = 'M' 
+										AND (
+										       CAST(@dtmBeginningChangeDate AS DATE) >= CAST(PSL.dtmPromoBegPeriod AS DATE)
+										        AND 
+											   CAST(@dtmEndingChangeDate AS DATE) <= CAST(PSL.dtmPromoEndPeriod AS DATE) 
+											) -- ST-1227
 								END
 
-								-- INSERT @tblTempSapphireCommanderWeekDayAvailability
+								-- INSERT @tblTempWeekDayAvailability
 								BEGIN
-									INSERT INTO @tblTempSapphireCommanderWeekDayAvailability
+									INSERT INTO @tblTempWeekDayAvailability
 									(
 										[intPromoSalesListId],
 										[PromotionID],
@@ -430,7 +437,7 @@ BEGIN
 																		, wda.strStartTime
 																		, wda.strEndTime
 																		, wda.strWeekDay
-																	FROM @tblTempSapphireCommanderWeekDayAvailability wda
+																	FROM @tblTempWeekDayAvailability wda
 																	WHERE wda.intPromoSalesListId = MMTDetail.intPromoSalesListId
 																) wda
 																ORDER BY wda.intSort ASC
@@ -587,9 +594,14 @@ BEGIN
 				JOIN tblSTPromotionSalesListDetail PSLD 
 					ON PSLD.intPromoSalesListId = PSL.intPromoSalesListId
 				WHERE R.intRegisterId = @intRegisterId 
-				AND ST.intStoreId = @intStoreId 
-				AND PSL.strPromoType = 'M' -- <--- 'M' = Mix and Match
-				-- AND PSL.intPromoSalesId BETWEEN @BeginningMixMatchId AND @EndingMixMatchId
+					AND ST.intStoreId = @intStoreId 
+					AND PSL.strPromoType = 'M' -- <--- 'M' = Mix and Match
+					-- AND PSL.intPromoSalesId BETWEEN @BeginningMixMatchId AND @EndingMixMatchId
+					AND (
+							CAST(@dtmBeginningChangeDate AS DATE) >= CAST(PSL.dtmPromoBegPeriod AS DATE)
+							 AND 
+							CAST(@dtmEndingChangeDate AS DATE) <= CAST(PSL.dtmPromoEndPeriod AS DATE) 
+						) -- ST-1227
 				
 
 
@@ -708,6 +720,11 @@ BEGIN
 							AND PSL.strPromoType = 'M'
 							AND (PSLD.intQuantity IS NOT NULL AND PSLD.intQuantity != 0)
 							AND (PSLD.dblPrice IS NOT NULL AND PSLD.dblPrice != 0)
+							AND (
+									CAST(@dtmBeginningChangeDate AS DATE) >= CAST(PSL.dtmPromoBegPeriod AS DATE)
+									 AND 
+									CAST(@dtmEndingChangeDate AS DATE) <= CAST(PSL.dtmPromoEndPeriod AS DATE) 
+								) -- ST-1227
 						--ORDER BY PSLD.intPromoSalesListDetailId ASC
 					) SalesList 
 					JOIN tblSTPromotionItemList PIL
@@ -717,7 +734,7 @@ BEGIN
 
 				-- INSERT @tblTempSapphireCommanderWeekDayAvailability
 				BEGIN
-					INSERT INTO @tblTempSapphireCommanderWeekDayAvailability
+					INSERT INTO @tblTempWeekDayAvailability
 					(
 						[intPromoSalesListId],
 						[strAvailable],
@@ -862,7 +879,7 @@ BEGIN
 															, wda.strStartTime
 															, wda.strEndTime
 															, wda.strWeekDay
-														FROM @tblTempSapphireCommanderWeekDayAvailability wda
+														FROM @tblTempWeekDayAvailability wda
 														WHERE wda.intPromoSalesListId = MixMatch.intPrimaryId
 													) wda
 													ORDER BY wda.intSort ASC
