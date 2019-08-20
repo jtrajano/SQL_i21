@@ -1069,7 +1069,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 						,[strChargesLink]					= RE.strChargesLink
 						,[ysnAllowVoucher]				= RE.ysnAllowVoucher
 						FROM @ReceiptStagingTable RE 						
-						JOIN tblICItem ICI on RE.intItemId = @intFreightItemId
+						-- JOIN tblICItem ICI on RE.intItemId = @intFreightItemId
 						LEFT JOIN tblSCTicket SC ON SC.intTicketId = RE.intSourceId
 						LEFT JOIN tblSCScaleSetup SCS ON SC.intScaleSetupId = SCS.intScaleSetupId
 						LEFT JOIN tblICItem IC ON IC.intItemId = SCS.intFreightItemId
