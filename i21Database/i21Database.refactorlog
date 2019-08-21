@@ -7406,4 +7406,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intCoverageEntryDetailId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="ceec37e3-002c-4e19-89f3-69253dafcf5e" ChangeDateTime="08/21/2019 02:44:08">
+    <Property Name="ElementName" Value="[dbo].[uspRKM2MInqTranExpMonthValidation]" />
+    <Property Name="ElementType" Value="SqlProcedure" />
+    <Property Name="ParentElementName" Value="[dbo]" />
+    <Property Name="ParentElementType" Value="SqlSchema" />
+    <Property Name="NewName" Value="uspRKM2MValidateInquiryTransaction" />
+  </Operation>
 </Operations>

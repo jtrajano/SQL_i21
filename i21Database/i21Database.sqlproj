@@ -6262,7 +6262,7 @@
     <Build Include="dbo\Views\vyuICCategoryLocation.sql" />
     <Build Include="dbo\Functions\fnICGetTransWeightedAveCost.sql" />
     <Build Include="dbo\Stored Procedures\uspSMUpdateUserPassword.sql" />
-    <Build Include="dbo\Stored Procedures\uspRKM2MInqTranExpMonthValidation.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKM2MValidateInquiryTransaction.sql" />
     <Build Include="dbo\Views\vyuRKGetFutureSettlementPriceString.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGenerateNM41164.sql" />
     <Build Include="dbo\Tables\tblFRBudgetSummary.sql" />
