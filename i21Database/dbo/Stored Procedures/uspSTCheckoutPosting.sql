@@ -4784,6 +4784,31 @@ IF(@ysnDebug = 1)
 				----------------- END POST TO AR RECIEVE PAYMENT ---------------------
 				----------------------------------------------------------------------
 
+				
+				------------------------------------------------------
+				----------------- LOTTERY COUNT  ---------------------
+				------------------------------------------------------
+				
+				UPDATE tblSTLotteryBook SET tblSTLotteryBook.dblQuantityRemaining = tblSTLotteryBook.dblQuantityRemaining - tblSTCheckoutLotteryCount.dblQuantitySold
+				FROM tblSTCheckoutLotteryCount 
+				WHERE tblSTCheckoutLotteryCount.intLotteryBookId = tblSTLotteryBook.intLotteryBookId
+				AND tblSTCheckoutLotteryCount.intCheckoutId = @intCheckoutId
+				AND tblSTCheckoutLotteryCount.strSoldOut = 'No'
+				AND tblSTLotteryBook.strStatus = 'Active'
+
+
+				UPDATE tblSTLotteryBook 
+				SET strStatus = CASE WHEN (ISNULL(tblSTLotteryBook.dblQuantityRemaining,0) = 0) THEN 'Sold'ELSE tblSTLotteryBook.strStatus END
+				FROM tblSTCheckoutLotteryCount 
+				WHERE tblSTCheckoutLotteryCount.intLotteryBookId = tblSTLotteryBook.intLotteryBookId 
+				AND tblSTCheckoutLotteryCount.intCheckoutId = @intCheckoutId
+				AND tblSTCheckoutLotteryCount.strSoldOut = 'No'
+				AND tblSTLotteryBook.strStatus = 'Active'
+
+				------------------------------------------------------
+				----------------- LOTTERY COUNT  ---------------------
+				------------------------------------------------------
+
 			END
 		ELSE IF(@ysnPost = 0)
 			BEGIN
@@ -5383,6 +5408,26 @@ IF(@ysnDebug = 1)
 				----------------------------------------------------------------------
 
 
+				------------------------------------------------------
+				----------------- LOTTERY COUNT  ---------------------
+				------------------------------------------------------
+				
+				UPDATE tblSTLotteryBook SET tblSTLotteryBook.dblQuantityRemaining = ISNULL(tblSTLotteryBook.dblQuantityRemaining,0) + ISNULL(tblSTCheckoutLotteryCount.dblQuantitySold,0)
+				FROM tblSTCheckoutLotteryCount 
+				WHERE tblSTCheckoutLotteryCount.intLotteryBookId = tblSTLotteryBook.intLotteryBookId
+				AND tblSTCheckoutLotteryCount.intCheckoutId = @intCheckoutId
+
+
+				UPDATE tblSTLotteryBook 
+				SET strStatus = CASE WHEN (ISNULL(tblSTLotteryBook.dblQuantityRemaining,0) != 0) THEN 'Active'ELSE tblSTLotteryBook.strStatus END
+				FROM tblSTCheckoutLotteryCount 
+				WHERE tblSTCheckoutLotteryCount.intLotteryBookId = tblSTLotteryBook.intLotteryBookId 
+				AND tblSTCheckoutLotteryCount.intCheckoutId = @intCheckoutId
+				AND tblSTLotteryBook.strStatus != 'Returned'
+
+				------------------------------------------------------
+				----------------- LOTTERY COUNT  ---------------------
+				------------------------------------------------------
 
 
 
