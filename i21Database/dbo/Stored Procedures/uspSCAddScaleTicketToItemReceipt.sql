@@ -81,6 +81,7 @@ BEGIN
 	)
 END 
 
+
 INSERT INTO @ReceiptStagingTable(
 		-- Header
 		strReceiptType
