@@ -1478,7 +1478,7 @@ BEGIN TRY
 															WHEN ReceiptCharge.intEntityVendorId = SS.intEntityId  AND  ISNULL(ReceiptCharge.ysnAccrue, 0) = 0 AND ISNULL(SC.ysnFarmerPaysFreight, 0) = 1 THEN	-ROUND(dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CU.intUnitMeasureId, CS.intUnitMeasureId, SC.dblFreightRate), 20)
 															WHEN ReceiptCharge.intEntityVendorId <> SS.intEntityId AND  ISNULL(ReceiptCharge.ysnAccrue, 0) = 1 AND ISNULL(SC.ysnFarmerPaysFreight, 0) = 1 THEN	-ROUND(dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CU.intUnitMeasureId, CS.intUnitMeasureId, SC.dblFreightRate), 20)
 														END
-						,[intTaxGroupId]				= ReceiptCharge.intTaxGroupId
+						,[intTaxGroupId]				= NULL--ReceiptCharge.intTaxGroupId
 					FROM tblICInventoryReceiptCharge ReceiptCharge
 					JOIN tblICItem Item 
 						ON Item.intItemId = ReceiptCharge.intChargeId
