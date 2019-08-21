@@ -1224,9 +1224,9 @@ FROM (
 								THEN ISNULL(temp.strPeriodTo,'') ELSE dbo.fnRKFormatDate(cd.dtmEndDate,'MMM yyyy') END else ISNULL(temp.strPeriodTo,'') end
 								AND temp.strContractInventory = 'Contract'
 							),0) AS intMarketBasisCurrencyId
-				, dblFuturePrice1 = p.dblFuturePrice
-				, intFuturePriceCurrencyId =p.intContractDetailId
-				, dblFuturesClosingPrice1 = p.dblFuturePrice
+				, dblFuturePrice1 = p.dblLastSettle
+				, intFuturePriceCurrencyId = null
+				, dblFuturesClosingPrice1 = p.dblLastSettle
 				, ch.intContractTypeId
 				, 0 as intConcurrencyId
 				, it.dblBalanceToInvoice dblOpenQty1
@@ -1269,12 +1269,12 @@ FROM (
 			JOIN tblICCommodityUnitMeasure cuc1 on ch.intCommodityId=cuc1.intCommodityId and cuc1.intUnitMeasureId = @intQuantityUOMId
 			JOIN tblICCommodityUnitMeasure cuc2 on ch.intCommodityId=cuc2.intCommodityId and  cuc2.intUnitMeasureId = @intPriceUOMId
 			JOIN tblICCommodityUnitMeasure cuc3 on ch.intCommodityId=cuc3.intCommodityId and cuc3.intUnitMeasureId= iuom.intUnitMeasureId
-			LEFT JOIN #tblSettlementPrice p on cd.intContractDetailId=p.intContractDetailId
+			LEFT JOIN @tblGetSettlementPrice p on cd.intFutureMonthId = p.intFutureMonthId
 			LEFT JOIN #tblContractCost cc on cd.intContractDetailId=cc.intContractDetailId
 			JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = cd.intCompanyLocationId
 			LEFT JOIN tblARMarketZone mz ON mz.intMarketZoneId = cd.intMarketZoneId
 			JOIN tblSMCurrency cu ON cu.intCurrencyID = cd.intCurrencyId
-			CROSS APPLY dbo.fnRKRollToNearby(cd.intContractDetailId, cd.intFutureMarketId, cd.intFutureMonthId, p.dblFuturePrice) rk
+			CROSS APPLY dbo.fnRKRollToNearby(cd.intContractDetailId, cd.intFutureMarketId, cd.intFutureMonthId, p.dblLastSettle) rk
 				WHERE rk.intContractDetailId = cd.intContractDetailId
 					AND rk.intFutureMonthId = cd.intFutureMonthId
 
@@ -1355,9 +1355,9 @@ FROM (
 								THEN ISNULL(temp.strPeriodTo,'') ELSE dbo.fnRKFormatDate(cd.dtmEndDate,'MMM yyyy') END else ISNULL(temp.strPeriodTo,'') end
 								AND temp.strContractInventory = 'Contract'
 							),0) AS intMarketBasisCurrencyId
-				, dblFuturePrice1 = p.dblFuturePrice
-				, intFuturePriceCurrencyId =p.intContractDetailId
-				, dblFuturesClosingPrice1 = p.dblFuturePrice
+				, dblFuturePrice1 = p.dblLastSettle
+				, intFuturePriceCurrencyId = null
+				, dblFuturesClosingPrice1 = p.dblLastSettle
 				, ch.intContractTypeId
 				, 0 as intConcurrencyId
 				, it.dblBalanceToInvoice dblOpenQty1
@@ -1401,12 +1401,12 @@ FROM (
 			JOIN tblICCommodityUnitMeasure cuc1 on ch.intCommodityId=cuc1.intCommodityId and cuc1.intUnitMeasureId = @intQuantityUOMId
 			JOIN tblICCommodityUnitMeasure cuc2 on ch.intCommodityId=cuc2.intCommodityId and  cuc2.intUnitMeasureId = @intPriceUOMId
 			JOIN tblICCommodityUnitMeasure cuc3 on ch.intCommodityId=cuc3.intCommodityId and cuc3.intUnitMeasureId= iuom.intUnitMeasureId
-			LEFT JOIN #tblSettlementPrice p on cd.intContractDetailId=p.intContractDetailId
+			LEFT JOIN @tblGetSettlementPrice p on cd.intFutureMonthId = p.intFutureMonthId
 			LEFT JOIN #tblContractCost cc on cd.intContractDetailId=cc.intContractDetailId
 			JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = cd.intCompanyLocationId
 			LEFT JOIN tblARMarketZone mz ON mz.intMarketZoneId = cd.intMarketZoneId
 			JOIN tblSMCurrency cu ON cu.intCurrencyID = cd.intCurrencyId
-			CROSS APPLY dbo.fnRKRollToNearby(cd.intContractDetailId, cd.intFutureMarketId, cd.intFutureMonthId, p.dblFuturePrice) rk
+			CROSS APPLY dbo.fnRKRollToNearby(cd.intContractDetailId, cd.intFutureMarketId, cd.intFutureMonthId, p.dblLastSettle) rk
 			WHERE rk.intContractDetailId = cd.intContractDetailId
 				AND rk.intFutureMonthId = cd.intFutureMonthId
 				AND it.intLineNo IS NULL
