@@ -3865,3 +3865,8 @@ Update tblCTReportAttribute
 Set strAttributeName='Previous Planned Purchases'
 Where strAttributeName='Planned Purchases - '
 
+GO
+UPDATE tblMFCompanyPreference
+SET ysnCalculateNoOfContainerByBagQty = 0
+Where ysnCalculateNoOfContainerByBagQty IS NULL
+GO

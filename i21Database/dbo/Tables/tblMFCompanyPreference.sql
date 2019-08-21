@@ -82,7 +82,8 @@
 	intMinimumDemandMonth INT,
 	intMaximumDemandMonth INT,
 	strSupplyTarget NVARCHAR(50) COLLATE Latin1_General_CI_AS,
-	strContainerType NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	intContainerTypeId INT,
+	ysnCalculateNoOfContainerByBagQty BIT CONSTRAINT [DF_tblMFCompanyPreference_ysnCalculateNoOfContainerByBagQty] DEFAULT 0,
 	dblDemandGrowthPerc NUMERIC(18,6),
 	CONSTRAINT [PK_tblMFCompanyPreference_intCompanyPreferenceId] PRIMARY KEY ([intCompanyPreferenceId]) 
 )
