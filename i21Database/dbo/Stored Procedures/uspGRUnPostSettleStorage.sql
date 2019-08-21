@@ -132,7 +132,7 @@ BEGIN TRY
 
 			IF(@success = 0)
 			BEGIN
-				SELECT TOP 1 @ErrMsg = strMessage FROM tblAPPostResult WHERE intTransactionId = @BillId;
+				SELECT TOP 1 @ErrMsg = strMessage FROM tblAPPostResult WHERE intTransactionId = @intSettleStorageId;
 				RAISERROR (@ErrMsg, 16, 1);
 				GOTO SettleStorage_Exit;
 			END
