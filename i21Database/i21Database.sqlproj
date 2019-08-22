@@ -8025,9 +8025,10 @@
     <Build Include="dbo\Stored Procedures\uspMFGenerateDemand.sql" />
     <Build Include="dbo\Stored Procedures\uspSMInterCompanyDeleteDMSFromStaging.sql" />
     <Build Include="dbo\Tables\tblSMInterCompanyStageDelete.sql" />
-	<Build Include="dbo\Tables\tblTROverrideTaxGroup.sql" />
+    <Build Include="dbo\Tables\tblTROverrideTaxGroup.sql" />
     <Build Include="dbo\Tables\tblTROverrideTaxGroupDetail.sql" />
     <Build Include="dbo\Views\vyuTROverrideTaxGroupDetail.sql" />
+    <Build Include="dbo\Views\vyuCMRemittanceAdviceReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
