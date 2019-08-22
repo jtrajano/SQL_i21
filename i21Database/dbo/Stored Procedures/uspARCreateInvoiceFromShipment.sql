@@ -356,6 +356,7 @@ WHERE
 	ARSI.[strTransactionType] = 'Inventory Shipment'
 	AND ARSI.[intInventoryShipmentId] = @ShipmentId
 	AND ARSI.intEntityCustomerId = @EntityCustomerId
+	AND ISNULL(ARSI.intPricingTypeId, 0) <> 2
 
 UNION ALL
 
@@ -620,14 +621,14 @@ WHERE
 
 DECLARE @ErrorMessage NVARCHAR(250)
 
-IF EXISTS (SELECT TOP 1 1 FROM tblICInventoryShipmentItem ICISI INNER JOIN tblCTContractDetail CTD ON ICISI.intLineNo = CTD.intContractDetailId AND ICISI.intOrderId = CTD.intContractHeaderId WHERE CTD.intPricingTypeId = 2 AND ICISI.intInventoryShipmentId = @ShipmentId)
-	BEGIN
-		RAISERROR('Unable to process. Use Price Contract screen to process Basis Contract shipments.', 16, 1);
-		RETURN 0;
-	END
-
 IF NOT EXISTS (SELECT TOP 1 NULL FROM @UnsortedEntriesForInvoice)
 	BEGIN
+		IF EXISTS (SELECT TOP 1 1 FROM tblICInventoryShipmentItem ICISI INNER JOIN tblCTContractDetail CTD ON ICISI.intLineNo = CTD.intContractDetailId AND ICISI.intOrderId = CTD.intContractHeaderId WHERE CTD.intPricingTypeId = 2 AND ICISI.intInventoryShipmentId = @ShipmentId)
+		BEGIN
+			RAISERROR('Unable to process. Use Price Contract screen to process Basis Contract shipments.', 16, 1);
+			RETURN 0;
+		END
+
 		IF ISNULL(@IgnoreNoAvailableItemError,0) = 1 RETURN 0;
 		SELECT TOP 1 @ShipmentNumber = strShipmentNumber FROM tblICInventoryShipment WHERE intInventoryShipmentId = @ShipmentId
 		
