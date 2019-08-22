@@ -1709,7 +1709,12 @@ BEGIN TRY
 				UPDATE @voucherPayable SET dblQuantityToBill = dblQuantityToBill * -1 WHERE ISNULL(dblCost,0) < 0
 				UPDATE @voucherPayable SET dblCost = dblCost * -1 WHERE ISNULL(dblCost,0) < 0
 				
-				EXEC uspAPCreateVoucher @voucherPayable, @voucherPayableTax, @intCreatedUserId, 1, @ErrMsg, @createdVouchersId OUTPUT
+				IF EXISTS(SELECT * FROM @voucherPayable vp INNER JOIN tblICItem I ON I.intItemId = vp.intItemId WHERE I.strType = 'Inventory')
+				BEGIN 
+						EXEC uspAPCreateVoucher @voucherPayable, @voucherPayableTax, @intCreatedUserId, 1, @ErrMsg, @createdVouchersId OUTPUT	
+				END
+
+				
 
 				IF @createdVouchersId IS NOT NULL
 				BEGIN
