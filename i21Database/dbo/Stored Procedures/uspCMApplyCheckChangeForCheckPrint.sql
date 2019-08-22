@@ -73,5 +73,6 @@ BEGIN
 			AND ( intBankTransactionTypeId = @intBankTransactionTypeId OR intBankTransactionTypeId = @intBankTransactionTypeId + 100)
 			AND ysnPosted = 1
 			AND dtmCheckPrinted IS NULL
+			AND dblAmount <> 0
 			AND ISNULL(strReferenceNo,'') NOT IN ('CASH') -- Do not include AP Payments that is paid thru a "Cash" payment method. 
 END

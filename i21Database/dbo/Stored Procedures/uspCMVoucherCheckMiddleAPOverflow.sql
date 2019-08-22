@@ -126,5 +126,6 @@ SELECT
 				ON PYMTDetail.intBillId = BILL.intBillId
 	WHERE	PYMT.strPaymentRecordNum = @strPaymentRecordNum
 			AND F.intBankTransactionTypeId IN (@AP_PAYMENT, @AP_ECHECK)
+			AND F.dblAmount <> 0 -- Excludes Debit Memo
 ) Data
 WHERE [row_number] > 10

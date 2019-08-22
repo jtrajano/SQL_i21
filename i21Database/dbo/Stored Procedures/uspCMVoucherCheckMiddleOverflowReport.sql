@@ -151,4 +151,5 @@ FROM	dbo.tblCMBankTransaction CHK
 WHERE	CHK.intBankAccountId = @intBankAccountId
 		AND CHK.strTransactionId IN (SELECT strValues COLLATE Latin1_General_CI_AS FROM dbo.fnARGetRowsFromDelimitedValues(@strTransactionId))
 		AND (SELECT COUNT(intPaymentId) FROM tblAPPaymentDetail WHERE intPaymentId = PYMT.intPaymentId) > 10
+		AND CHK.dblAmount <> 0
 ORDER BY CHK.strReferenceNo ASC
