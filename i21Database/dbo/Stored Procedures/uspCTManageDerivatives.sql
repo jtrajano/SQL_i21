@@ -158,7 +158,7 @@ BEGIN TRY
 				BEGIN
 					SELECT @intFutOptTransactionHeaderId = intFutOptTransactionHeaderId FROM tblRKFutOptTransaction WHERE intFutOptTransactionId = @intFutOptTransactionId
 					EXEC uspRKFutOptTransactionHistory @intOutputId, @intFutOptTransactionHeaderId, 'Priced Contract', @intUserId, 'DELETE'
-					EXEC uspRKDeleteAutoHedge @id
+					EXEC uspRKDeleteAutoHedge @id, @intUserId
 				
 					SELECT @intFutOptTransactionId = MIN(intFutOptTransactionId) FROM tblCTContractFutures WHERE intContractDetailId = @intContractDetailId AND intFutOptTransactionId > @intFutOptTransactionId
 				END
@@ -172,7 +172,7 @@ BEGIN TRY
 			BEGIN
 				SELECT @intFutOptTransactionHeaderId = intFutOptTransactionHeaderId FROM tblRKFutOptTransaction WHERE intFutOptTransactionId = @intFutOptTransactionId
 				EXEC uspRKFutOptTransactionHistory @intOutputId, @intFutOptTransactionHeaderId, 'Priced Contract', @intUserId, 'DELETE'
-				EXEC uspRKDeleteAutoHedge @intFutOptTransactionId
+				EXEC uspRKDeleteAutoHedge @intFutOptTransactionId, @intUserId
 				
 				SELECT @intFutOptTransactionId = MIN(intFutOptTransactionId) FROM tblCTContractFutures WHERE intContractDetailId = @id AND intFutOptTransactionId > @intFutOptTransactionId
 			END
@@ -182,7 +182,7 @@ BEGIN TRY
 			SELECT @intFutOptTransactionId = MIN(intFutOptTransactionId) FROM tblCTContractFutures WHERE intContractFuturesId = @id
 			SELECT @intFutOptTransactionHeaderId = intFutOptTransactionHeaderId FROM tblRKFutOptTransaction WHERE intFutOptTransactionId = @intFutOptTransactionId
 			EXEC uspRKFutOptTransactionHistory @intOutputId, @intFutOptTransactionHeaderId, 'Priced Contract', @intUserId, 'DELETE'
-			EXEC uspRKDeleteAutoHedge @intFutOptTransactionId
+			EXEC uspRKDeleteAutoHedge @intFutOptTransactionId, @intUserId
 		END
 	END
 	
