@@ -26,6 +26,7 @@ SELECT id							= NEWID()
 	 , strContractNumber			= CUSTOMERCONTRACT.strContractNumber
 	 , intContractDetailId			= SHIPPEDITEMS.intContractDetailId
 	 , intContractSeq				= CUSTOMERCONTRACT.intContractSeq
+	 , intPricingTypeId				= CUSTOMERCONTRACT.intPricingTypeId
 	 , intCompanyLocationId			= SHIPPEDITEMS.intCompanyLocationId
 	 , strLocationName				= COMPANYLOCATION.strLocationName
 	 , intShipToLocationId			= SHIPPEDITEMS.intShipToLocationId
@@ -1315,6 +1316,7 @@ LEFT OUTER JOIN (
 		 , intItemUOMId
 		 , strOrderUnitMeasure
 		 , intItemWeightUOMId
+		 , intPricingTypeId
 		 , dblCashPrice
 		 , dblDetailQuantity
 		 , intFreightTermId
