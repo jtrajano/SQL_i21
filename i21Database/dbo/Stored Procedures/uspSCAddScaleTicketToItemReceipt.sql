@@ -882,7 +882,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 			END
 		ELSE
 			BEGIN
-				IF ISNULL(@intContractDetailId,0) = 0 
+				IF ISNULL(@intContractDetailId,0) = 0 and isnull(@intFreightItemId, 0) != 0
 				BEGIN
 					INSERT INTO @OtherCharges
 					(
