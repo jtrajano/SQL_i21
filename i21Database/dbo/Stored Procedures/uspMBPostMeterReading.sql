@@ -238,13 +238,6 @@ BEGIN TRY
 
 		IF (@Post = 1)
 		BEGIN
-			-- UPDATE tblMBMeterAccountDetail
-			-- SET tblMBMeterAccountDetail.dblLastMeterReading = MRDetail.dblCurrentReading
-			-- 	, tblMBMeterAccountDetail.dblLastTotalSalesDollar = MRDetail.dblCurrentDollars
-			-- FROM tblMBMeterAccountDetail MADetail
-			-- LEFT JOIN tblMBMeterReadingDetail MRDetail ON MRDetail.intMeterAccountDetailId = MADetail.intMeterAccountDetailId
-			-- WHERE MRDetail.intMeterReadingId = @TransactionId
-
 			-- UPDATE METER READING
 			UPDATE tblMBMeterReadingDetail SET tblMBMeterReadingDetail.dblLastReading = AD.dblLastMeterReading
 			FROM tblMBMeterReadingDetail RD
@@ -300,6 +293,15 @@ BEGIN TRY
 			END
 			CLOSE @CursorTran
 			DEALLOCATE @CursorTran
+
+			-- DELETE INVOICE WHEN ALL LINE ITEMS ARE ZERO QTY
+			IF NOT EXISTS(SELECT TOP 1 1 FROM @EntriesForInvoice)
+			BEGIN			
+				UPDATE tblMBMeterReading SET intInvoiceId = NULL WHERE intMeterReadingId = @TransactionId
+				EXEC [dbo].[uspARDeleteInvoice] 
+					@InvoiceId = @InvoiceId,
+					@UserId = @UserId
+			END
 		
 		END
 

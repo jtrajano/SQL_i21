@@ -47,6 +47,20 @@ BEGIN TRY
 			RAISERROR('This transaction cannot be Posted, because it is not the latest Unposted Meter Billing Transaction. To post this transaction, you must first post all transaction for the same Meter Key with an earlier Date.', 16, 1)
 			RETURN
 		END
+
+		-- TOTAL SOLD QTY SHOULD BE > 0
+		DECLARE @dblTotalSoldQty NUMERIC(18,6) = NULL
+
+		SELECT @dblTotalSoldQty = SUM(dblCurrentReading) - SUM(dblLastReading) 
+		FROM tblMBMeterReadingDetail 
+		WHERE intMeterReadingId = @intMeterReadingId
+
+		IF (@dblTotalSoldQty <= 0)
+		BEGIN
+			RAISERROR('"Total Quantity Sold" should be greater than 0.', 16, 1)
+			RETURN
+		END
+
 	END
 	ELSE IF (@Post = 0)
 	BEGIN
