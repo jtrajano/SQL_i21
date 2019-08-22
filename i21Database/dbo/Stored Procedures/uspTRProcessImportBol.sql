@@ -470,6 +470,69 @@ BEGIN
 		CLOSE @CursorHeaderTran  
 		DEALLOCATE @CursorHeaderTran
 
+		-- OVERRIDE TAX GROUP
+		DECLARE @CursorOverrideTax AS CURSOR,
+			@intOVLoadReceiptId INT = NULL,
+			@intOVLoadDistributionDetailId INT = NULL,
+			@intOVTerminalId INT = NULL,
+			@intOVSupplyPointId INT = NULL,
+			@strOVReceiptState NVARCHAR(5) = NULL,
+			@intOVEntityCustomerId INT = NULL,
+			@intOVShipToLocationId INT = NULL,
+			@strOVDistributionState NVARCHAR(5) = NULL,
+			@intOVBulkLocationId INT = NULL,
+			@intShipViaId INT = NULL,
+			@intOVReceiptTaxGroupId INT = NULL,
+			@intOVDistributionTaxGroupId INT = NULL
+
+		SET @CursorOverrideTax = CURSOR FOR
+		SELECT LR.intLoadReceiptId, LDD.intLoadDistributionDetailId, LR.intTerminalId, LR.intSupplyPointId, SPL.strState strReceiptState,
+			LDH.intEntityCustomerId, LDH.intShipToLocationId, CPL.strState strDistributionState,
+			LR.intCompanyLocationId, LH.intShipViaId
+		FROM tblTRImportLoadDetail ILD 
+		INNER JOIN tblTRLoadHeader LH ON LH.intLoadHeaderId = ILD.intLoadHeaderId
+		INNER JOIN tblTRLoadReceipt LR ON LR.intLoadReceiptId = ILD.intLoadReceiptId
+		INNER JOIN tblTRLoadDistributionHeader LDH ON LDH.intLoadDistributionHeaderId = ILD.intLoadDistributionHeaderId
+		INNER JOIN tblTRLoadDistributionDetail LDD ON LDD.intLoadDistributionDetailId = ILD.intLoadDistributionDetailId
+		LEFT JOIN tblTRSupplyPoint SP ON SP.intSupplyPointId = LR.intSupplyPointId
+		LEFT JOIN tblEMEntityLocation SPL ON SPL.intEntityLocationId = SP.intEntityLocationId 
+		LEFT JOIN tblEMEntityLocation CPL ON CPL.intEntityLocationId = LDH.intShipToLocationId AND CPL.intEntityId = LDH.intEntityCustomerId
+		WHERE ILD.intImportLoadId = @intImportLoadId AND ILD.ysnValid = 1
+
+		OPEN @CursorOverrideTax
+		FETCH NEXT FROM @CursorOverrideTax INTO @intOVLoadReceiptId, @intOVLoadDistributionDetailId, @intOVTerminalId, @intOVSupplyPointId, @strOVReceiptState,
+			@intOVEntityCustomerId, @intOVShipToLocationId, @strOVDistributionState, @intOVBulkLocationId, @intShipViaId
+
+		WHILE @@FETCH_STATUS = 0
+		BEGIN
+					
+			SELECT TOP 1 @intOVReceiptTaxGroupId = OTGD.intReceiptTaxGroupId, @intOVDistributionTaxGroupId = OTGD.intDistributionTaxGroupId FROM tblTROverrideTaxGroupDetail OTGD
+			WHERE OTGD.intSupplierId = @intOVTerminalId
+				AND OTGD.intSupplyPointId = @intOVSupplyPointId
+				AND OTGD.strReceiptState = @strOVReceiptState
+				AND OTGD.intCustomerId = @intOVEntityCustomerId
+				AND OTGD.intCustomerShipToId = @intOVShipToLocationId
+				AND OTGD.strDistributionState = @strOVDistributionState
+				AND OTGD.intBulkLocationId = @intOVBulkLocationId
+				AND OTGD.intShipViaId = @intShipViaId
+			ORDER BY intOverrideTaxGroupDetailId
+
+			IF(@intOVReceiptTaxGroupId IS NOT NULL)
+			BEGIN
+				UPDATE tblTRLoadReceipt SET intTaxGroupId = @intOVReceiptTaxGroupId WHERE intLoadReceiptId = @intOVLoadReceiptId
+			END
+
+			IF(@intOVDistributionTaxGroupId IS NOT NULL)
+			BEGIN
+				UPDATE tblTRLoadDistributionDetail SET intTaxGroupId = @intOVDistributionTaxGroupId WHERE intLoadDistributionDetailId = @intOVLoadDistributionDetailId
+			END
+
+			FETCH NEXT FROM @CursorOverrideTax INTO @intOVLoadReceiptId, @intOVLoadDistributionDetailId, @intOVTerminalId, @intOVSupplyPointId, @strOVReceiptState,
+				@intOVEntityCustomerId, @intOVShipToLocationId, @strOVDistributionState, @intOVBulkLocationId, @intShipViaId
+		END
+		CLOSE @CursorOverrideTax
+		DEALLOCATE @CursorOverrideTax
+
 		COMMIT TRANSACTION
 
 	END TRY
