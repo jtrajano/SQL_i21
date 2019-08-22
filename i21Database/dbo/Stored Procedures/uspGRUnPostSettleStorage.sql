@@ -126,6 +126,7 @@ BEGIN TRY
 					,@recap = 0
 					,@isBatch = 0
 					,@param = @BillId
+					,@transactionType = 'Settle Storage'
 					,@userId = @UserId
 					,@success = @success OUTPUT
 			END
