@@ -377,6 +377,7 @@ print 'BEGIN POST DEPLOYMENT'
 :R .\GR\GR_InsertReadingRanges.sql
 :R .\GR\GR_FarmField.sql
 :R .\GR\ContractPrice.sql
+:R .\GR\SC_ScaleLVControlIntegration.sql
 
 --Manufacturing
 :R .\MF\1_MasterTables.sql

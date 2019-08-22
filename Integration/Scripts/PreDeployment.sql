@@ -249,7 +249,7 @@
 :r "..\dbo\Stored Procedures\uspGRImportStorageType.sql"
 :r "..\dbo\Stored Procedures\uspGRImportWeightGrades.sql"
 :r "..\dbo\Stored Procedures\uspGRImportShipTo.sql"
-:r "..\dbo\Views\vyuSCTicketLVControlView.sql"
+--:r "..\dbo\Views\vyuSCTicketLVControlView.sql"
 :r "..\dbo\Stored Procedures\uspGRImportStorageSchedule.sql"
 :r "..\dbo\Stored Procedures\uspGRImportDiscountAndStorageChargeItem.sql"
 :r "..\dbo\Stored Procedures\uspGRImportDiscountCode.sql"
