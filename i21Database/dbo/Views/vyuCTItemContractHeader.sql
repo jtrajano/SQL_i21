@@ -20,9 +20,9 @@ AS
 						LB.strLineOfBusiness,
 						CL.strLocationName,
 						OP.strName					AS strOpportunityName,
-						ysnIsUsed = CONVERT(BIT, CASE WHEN (SELECT TOP 1 1 FROM tblARInvoiceDetail WHERE intItemContractHeaderId = CH.intItemContractHeaderId) = 1 THEN 1
-						ELSE 0 END),
-						CH.*
+						ysnIsUsed = CONVERT(BIT, CASE WHEN (SELECT TOP 1 1 FROM tblARInvoiceDetail WHERE intItemContractHeaderId = CH.intItemContractHeaderId) = 1 THEN 1 ELSE 0 END),
+						ysnPrepaid = CAST(CASE WHEN ISNULL(dbo.fnCTGetPrepaidIdsItemContract(CH.intItemContractHeaderId),'') = '' THEN 0 ELSE 1 END AS BIT),
+						CH.*						
 						
 
 					FROM	tblCTItemContractHeader				CH	

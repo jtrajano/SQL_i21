@@ -17,7 +17,6 @@ CREATE TABLE [dbo].[tblCTItemContractHeader](
 	[intFreightTermId]					[int] NULL,	
     [intCountryId]						[int] NULL, 
 	[intTermId]							[int] NULL,
-	[ysnPrepaid]						[bit] NULL, 
 
 	[strContractNumber]					[nvarchar](50) COLLATE Latin1_General_CI_AS NOT NULL,
 	[intSalespersonId]					[int] NOT NULL,
