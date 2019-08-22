@@ -1610,21 +1610,22 @@ BEGIN TRY
 					@dblVoucherTotal = SUM(dblQtyReceived * dblCost)
 				FROM @voucherDetailStorage
 
-				IF @dblVoucherTotal > 0
+				IF @dblVoucherTotal > 0 AND EXISTS(SELECT NULL FROM @voucherDetailStorage DS INNER JOIN tblICItem I on I.intItemId = DS.intItemId WHERE I.strType = 'Inventory')
 				BEGIN
 					EXEC [dbo].[uspAPCreateBillData] 
-						@userId = @intCreatedUserId
-						,@vendorId = @EntityId
-						,@type = 1
-						,@voucherDetailStorage = @voucherDetailStorage
-						,@voucherDetailReceiptCharge = @VoucherDetailReceiptCharge
-						,@shipTo = @LocationId
-						,@shipFrom = @intShipFrom
-						,@shipFromEntityId = @shipFromEntityId
-						,@vendorOrderNumber = NULL
-						,@voucherDate = @dtmDate
-						,@billId = @intCreatedBillId OUTPUT
-				END
+					@userId = @intCreatedUserId
+					,@vendorId = @EntityId
+					,@type = 1
+					,@voucherDetailStorage = @voucherDetailStorage
+					,@voucherDetailReceiptCharge = @VoucherDetailReceiptCharge
+					,@shipTo = @LocationId
+					,@shipFrom = @intShipFrom
+					,@shipFromEntityId = @shipFromEntityId
+					,@vendorOrderNumber = NULL
+					,@voucherDate = @dtmDate
+					,@billId = @intCreatedBillId OUTPUT
+				END					
+				
 
 				IF @intCreatedBillId IS NOT NULL
 				BEGIN
