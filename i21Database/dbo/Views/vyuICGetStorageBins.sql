@@ -6,8 +6,8 @@ SELECT
 	, bd.strLocation
 	, bd.strStorageLocation
 	, CAST(dbo.fnMaxNumeric(SUM(bd.dblStock), 0) AS NUMERIC(16, 8)) dblStock
-	, CAST(SUM(bd.dblCapacity) AS NUMERIC(16, 8)) dblCapacity
-	, CAST(dbo.fnMaxNumeric(SUM(bd.dblAvailable), 0) AS NUMERIC(16, 8)) dblAvailable
+	, CAST(dbo.fnMaxNumeric(AVG(bd.dblCapacity), 0) AS NUMERIC(16, 8)) dblCapacity
+	, CAST(dbo.fnMaxNumeric(AVG(bd.dblCapacity) - SUM(bd.dblStock), 0) AS NUMERIC(16, 8)) dblAvailable
 FROM 
 	vyuICGetStorageBinDetails bd	
 WHERE	
