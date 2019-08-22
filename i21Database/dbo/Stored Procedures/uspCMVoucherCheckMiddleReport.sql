@@ -215,5 +215,6 @@ FROM	dbo.tblCMBankTransaction CHK
 		)AmtInWords
 WHERE	CHK.intBankAccountId = @intBankAccountId
 		AND CHK.strTransactionId IN (SELECT strValues COLLATE Latin1_General_CI_AS FROM dbo.fnARGetRowsFromDelimitedValues(@strTransactionId))
+		AND CHK.dblAmount <> 0
 		--AND PRINTSPOOL.strBatchId = ISNULL(@strBatchId, PRINTSPOOL.strBatchId)
 ORDER BY CHK.strReferenceNo ASC
