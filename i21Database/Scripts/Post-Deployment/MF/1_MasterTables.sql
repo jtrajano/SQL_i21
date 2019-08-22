@@ -3870,3 +3870,9 @@ UPDATE tblMFCompanyPreference
 SET ysnCalculateNoOfContainerByBagQty = 0
 Where ysnCalculateNoOfContainerByBagQty IS NULL
 GO
+
+GO
+UPDATE tblCTInvPlngReportMaster
+SET intConcurrencyId = 1
+Where intConcurrencyId IS NULL
+GO

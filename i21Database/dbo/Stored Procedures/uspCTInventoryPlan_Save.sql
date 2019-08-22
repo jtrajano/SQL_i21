@@ -14,6 +14,8 @@ BEGIN TRY
 		,@intInvPlngReportMasterID INT
 		,@strInvPlngReportName NVARCHAR(150)
 		,@strPlanNo NVARCHAR(50)
+		,@intConcurrencyId INT
+		,@intOldConcurrencyId INT
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXML
@@ -31,6 +33,9 @@ BEGIN TRY
 	SELECT @strInvPlngReportName = strInvPlngReportName
 	FROM OPENXML(@idoc, 'root/InvPlngReportMaster', 2) WITH (strInvPlngReportName NVARCHAR(150))
 
+	SELECT @intConcurrencyId = intConcurrencyId
+	FROM OPENXML(@idoc, 'root/InvPlngReportMaster', 2) WITH (intConcurrencyId INT)
+
 	IF @intInvPlngReportMasterID = 0
 	BEGIN
 		IF EXISTS (
@@ -39,7 +44,7 @@ BEGIN TRY
 				WHERE [strInvPlngReportName] = @strInvPlngReportName
 				)
 		BEGIN
-			SET @ErrMsg = 'Plan name must be unique.'
+			SET @ErrMsg = 'Plan Name must be unique.'
 
 			RAISERROR (
 					@ErrMsg
@@ -88,7 +93,8 @@ BEGIN TRY
 		END
 
 		INSERT INTO [dbo].[tblCTInvPlngReportMaster] (
-			[strInvPlngReportName]
+			intConcurrencyId
+			,[strInvPlngReportName]
 			,[intReportMasterID]
 			,[intNoOfMonths]
 			,[ysnIncludeInventory]
@@ -109,7 +115,8 @@ BEGIN TRY
 			,[intLastModifiedUserId]
 			,[dtmLastModified]
 			)
-		SELECT [strInvPlngReportName]
+		SELECT 1
+			,[strInvPlngReportName]
 			,@intReportMasterID
 			,[intNoOfMonths]
 			,[ysnIncludeInventory]
@@ -187,10 +194,25 @@ BEGIN TRY
 				SELECT 1
 				FROM [tblCTInvPlngReportMaster]
 				WHERE [strInvPlngReportName] = @strInvPlngReportName
-					AND [strInvPlngReportName] <> @strInvPlngReportName
+					AND intInvPlngReportMasterID <> @intInvPlngReportMasterID
 				)
 		BEGIN
-			SET @ErrMsg = 'Plan name must be unique.'
+			SET @ErrMsg = 'Plan Name must be unique.'
+
+			RAISERROR (
+					@ErrMsg
+					,16
+					,1
+					)
+		END
+
+		SELECT @intOldConcurrencyId = intConcurrencyId
+		FROM tblCTInvPlngReportMaster
+		WHERE intInvPlngReportMasterID = @intInvPlngReportMasterID
+
+		IF @intConcurrencyId < @intOldConcurrencyId
+		BEGIN
+			SET @ErrMsg = 'Demand data is already modified by other user. Please refresh.'
 
 			RAISERROR (
 					@ErrMsg
@@ -200,7 +222,8 @@ BEGIN TRY
 		END
 
 		UPDATE tblCTInvPlngReportMaster
-		SET [strInvPlngReportName] = x.strInvPlngReportName
+		SET intConcurrencyId = (intConcurrencyId + 1)
+			,[strInvPlngReportName] = x.strInvPlngReportName
 			,[intNoOfMonths] = x.intNoOfMonths
 			,[ysnIncludeInventory] = x.ysnIncludeInventory
 			,[intCategoryId] = x.intCategoryId
