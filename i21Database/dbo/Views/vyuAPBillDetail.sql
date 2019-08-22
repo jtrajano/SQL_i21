@@ -79,18 +79,18 @@ SELECT
 	A.strRemarks,
 	PG.strName as strPurchasingGroupName,
 	CB.strContractBasis as strINCO,
-	A2.ysnPaid,
+	ISNULL(A2.ysnPaid,0) AS ysnPaid,
 	A2.strPaymentInfo,
 	A2.dtmDatePaid,
 	A2.dtmPaymentDateReconciled,
-	A2.dblPayment,
-	A2.ysnClr,
+	ISNULL(A2.dblPayment,0) AS dblPayment,
+	ISNULL(A2.ysnClr,0) AS ysnClr,
 	A2.dtmClr
 FROM dbo.tblAPBill A
 INNER JOIN (dbo.tblAPVendor G INNER JOIN dbo.tblEMEntity G2 ON G.[intEntityId] = G2.intEntityId) ON G.[intEntityId] = A.intEntityVendorId
 INNER JOIN dbo.tblAPBillDetail B 
 	ON A.intBillId = B.intBillId
-INNER JOIN dbo.fnAPGetVouchersPaymentInfo() A2
+LEFT JOIN dbo.fnAPGetVouchersPaymentInfo() A2
 	ON A2.intBillId = A.intBillId
 LEFT JOIN dbo.tblAPBillDetailTax BD 
 	ON BD.intBillDetailId = B.intBillDetailId
