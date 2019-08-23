@@ -74,20 +74,11 @@ RETURNS TABLE AS RETURN
 		,forPay.ysnPymtCtrlAlwaysDiscount
 		-- ,forPay.ysnPaySchedule
 		,forPay.ysnOffset
-		,entityGroup.strEntityGroupName
 	FROM vyuAPBillForPayment forPay
 	INNER JOIN tblAPBill voucher ON voucher.intBillId = forPay.intBillId
 	LEFT JOIN tblAPPaymentDetail payDetail
 		ON voucher.intBillId = payDetail.intBillId AND payDetail.intPaymentId = @paymentId
 		AND ISNULL(payDetail.intPayScheduleId,-1) = ISNULL(forPay.intPayScheduleId,-1)
-	OUTER APPLY (
-		SELECT TOP 1
-			eg.strEntityGroupName,
-			eg.intEntityGroupId
-		FROM tblEMEntityGroup eg
-		INNER JOIN tblEMEntityGroupDetail egd ON eg.intEntityGroupId = egd.intEntityGroupId
-		WHERE egd.intEntityId = forPay.intEntityVendorId
-	) entityGroup
 	WHERE (forPay.intPaymentMethodId = @paymentMethodId OR forPay.intPaymentMethodId IS NULL)
 	AND forPay.intCurrencyId = @currencyId
 	AND 1 = (CASE WHEN @showDeferred = 1 THEN 1

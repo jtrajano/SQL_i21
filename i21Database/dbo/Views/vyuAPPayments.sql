@@ -30,8 +30,7 @@ SELECT
 	D.strVendorId,
 	D1.strName,
 	ISNULL(E.ysnClr,0) AS ysnClear,
-	F.strPaymentMethod,
-	entityGroup.strEntityGroupName
+	F.strPaymentMethod
 	FROM dbo.tblAPPayment A
 		LEFT JOIN dbo.tblCMBankAccount B
 			ON A.intBankAccountId = B.intBankAccountId
@@ -43,11 +42,3 @@ SELECT
 			ON A.strPaymentRecordNum = E.strTransactionId
 		LEFT JOIN dbo.tblSMPaymentMethod F
 			ON A.intPaymentMethodId = F.intPaymentMethodID
-		OUTER APPLY (
-			SELECT TOP 1
-				eg.strEntityGroupName,
-				eg.intEntityGroupId
-			FROM dbo.tblEMEntityGroup eg
-			INNER JOIN dbo.tblEMEntityGroupDetail egd ON eg.intEntityGroupId = egd.intEntityGroupId
-			WHERE egd.intEntityId = A.intEntityVendorId
-		) entityGroup
