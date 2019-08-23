@@ -571,7 +571,7 @@ BEGIN
 				,intTransactionId = intInvoiceId
 				,strDistribution
 			FROM (
-				select
+				select distinct
 						dtmDate =  CONVERT(DATETIME, CONVERT(VARCHAR(10),Inv.dtmDate, 110), 110)
 					,dblQtyShipped = ID.dblQtyShipped * -1
 					,I.strInvoiceNumber
@@ -739,6 +739,27 @@ BEGIN
 						
 			) t
 
+			UNION ALL--PRODUCE
+			SELECT
+				dtmDate
+				,dblUnpaidIncrease = 0
+				,dblUnpaidDecrease = 0
+				,dblUnpaidBalance = 0
+				,dblPaidBalance = dblTotal
+				,strTransactionId
+				,intTransactionId
+				,'PRDC'
+			FROM (
+				select
+					dtmDate =  CONVERT(DATETIME, CONVERT(VARCHAR(10),Inv.dtmDate, 110), 110)
+					,Inv.dblTotal
+					,strTransactionId = It.strTransactionId
+					,Inv.intTransactionId 
+				from @InventoryStock Inv
+				inner join tblICInventoryTransaction It on It.intTransactionId = Inv.intTransactionId
+				where Inv.strTransactionType = 'Produce'
+						
+			) t
 
 			UNION ALL--COLLATERAL
 			SELECT
