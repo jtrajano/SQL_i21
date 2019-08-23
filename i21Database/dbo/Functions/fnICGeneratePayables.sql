@@ -46,6 +46,7 @@ RETURNS @table TABLE
 , [intContractHeaderId]				INT NULL 
 , [intContractDetailId]				INT NULL 
 , [intContractSequence]				INT NULL 
+, [intContractCostId]				INT NULL 
 , [intScaleTicketId]				INT NULL 
 , [strScaleTicketNumber]			NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
 , [strLoadShipmentNumber]			NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL 
@@ -164,6 +165,7 @@ SELECT DISTINCT
 	,[intContractHeaderId]		=	F1.intContractHeaderId
 	,[intContractDetailId]		=	CASE WHEN A.strReceiptType IN ('Purchase Contract', 'Inventory Return') THEN B.intLineNo ELSE NULL END
 	,[intContractSequence]		=	CASE WHEN A.strReceiptType IN ('Purchase Contract', 'Inventory Return') THEN CD.intContractSeq ELSE NULL END
+	,[intContractCostId]		= 	NULL
 	,[intScaleTicketId]			=	G.intTicketId
 	,[strScaleTicketNumber]		=	CAST(G.strTicketNumber AS NVARCHAR(200))
 	,[strLoadShipmentNumber]	=   ISNULL(LogisticsView.strLoadNumber, '')
@@ -230,8 +232,8 @@ SELECT DISTINCT
 	,intShipFromId = A.intShipFromId
 	,intShipFromEntityId = A.intShipFromEntityId 
 	,intPaytoAddressId = payToAddress.intEntityLocationId
-	,[intLoadShipmentId]			 = B.intLoadShipmentId     
-	,[intLoadShipmentDetailId]	     = B.intLoadShipmentDetailId 
+	,[intLoadShipmentId]			 = B.intSourceId
+	,[intLoadShipmentDetailId]	     = LogisticsView.intLoadDetailId
 	,[intLoadShipmentCostId]	     = NULL 
 FROM tblICInventoryReceipt A
 	INNER JOIN tblICInventoryReceiptItem B
@@ -410,6 +412,7 @@ SELECT DISTINCT
 		,[intContractHeaderId]						=	A.intContractHeaderId
 		,[intContractDetailId]						=	A.intContractDetailId
 		,[intContractSequence]						=	NULL
+		,[intContractCostId]						= 	NULL
 		,[intScaleTicketId]							=	A.intScaleTicketId
 		,[strScaleTicketNumber]						=	A.strScaleTicketNumber
 		,[strLoadShipmentNumber]					=	A.strLoadNumber 
@@ -466,7 +469,7 @@ SELECT DISTINCT
 		,intShipFromEntityId						=	NULL 
 		,intPaytoAddressId							=	payToAddress.intEntityLocationId
 		,[intLoadShipmentId]			 			= A.intLoadShipmentId     
-		,[intLoadShipmentDetailId]	     			= NULL
+		,[intLoadShipmentDetailId]	     			= A.intLoadDetailId
 		,[intLoadShipmentCostId]	     			= A.intLoadShipmentCostId
 FROM [vyuICChargesForBilling] A
 	LEFT JOIN dbo.tblSMCurrency H1 ON H1.intCurrencyID = A.intCurrencyId
