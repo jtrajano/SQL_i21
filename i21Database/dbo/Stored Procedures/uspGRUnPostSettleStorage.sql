@@ -495,8 +495,8 @@ BEGIN TRY
 				UPDATE tblGRSettleContract SET dblUnits = dblUnits - ABS(@dblUnits) WHERE intSettleStorageId = @intParentSettleStorageId
 			END
 
-			DELETE FROM tblGRSettleStorage WHERE intSettleStorageId = @intSettleStorageId
 			
+
 			IF NOT EXISTS(SELECT 1 FROM tblGRSettleStorage WHERE intParentSettleStorageId = @intParentSettleStorageId)
 			BEGIN
 				DELETE FROM tblGRSettleStorage WHERE intSettleStorageId = @intParentSettleStorageId
@@ -506,6 +506,8 @@ BEGIN TRY
 				--if child settle storage; delete the customer storage id in tblGRSettleStorageTicket table		
 				DELETE FROM tblGRSettleStorageTicket WHERE intCustomerStorageId = @intCustomerStorageId AND intSettleStorageId = (SELECT intParentSettleStorageId FROM tblGRSettleStorage WHERE intSettleStorageId = @intSettleStorageId)
 			END
+
+			DELETE FROM tblGRSettleStorage WHERE intSettleStorageId = @intSettleStorageId
 
 			--5. Removing Voucher
 			BEGIN
