@@ -228,6 +228,8 @@ BEGIN
 		-- ==================================================================================================================
 		DECLARE @tblTempForCalculation TABLE
 		(
+			intCalculationId			INT	NOT NULL IDENTITY,
+			intCheckoutId				INT,
 			SalesQuantity				INT,
 			DiscountAmount				DECIMAL(18, 6),
 			PromotionAmount				DECIMAL(18, 6),
@@ -245,6 +247,7 @@ BEGIN
 
 		INSERT INTO @tblTempForCalculation
 		(
+			intCheckoutId,
 			SalesQuantity,
 			DiscountAmount,
 			PromotionAmount,
@@ -258,6 +261,7 @@ BEGIN
 			dblAveragePriceWthDiscounts
 		)
 		SELECT 
+			intCheckoutId				= @intCheckoutId,
 			SalesQuantity				= CAST(ISNULL(Chk.intISMSalesTotalsSalesQuantity ,0) AS INT),
 			DiscountAmount				= CAST(Chk.dblISMSalesTotalsDiscountAmount AS DECIMAL(18,6)),
 			PromotionAmount				= CAST(Chk.dblISMSalesTotalsPromotionAmount AS DECIMAL(18,6)),
@@ -305,6 +309,7 @@ BEGIN
 				, dblTotalSales
 				, dblItemStandardCost
 				, intConcurrencyId
+				, intCalculationId
 			)
 			SELECT 
 				intCheckoutId		= @intCheckoutId
@@ -323,6 +328,7 @@ BEGIN
 			  , dblTotalSales		= (TempChk.SalesAmount) + (TempChk.DiscountAmount + TempChk.PromotionAmount)
 			  , dblItemStandardCost = NULL --ISNULL(CAST(P.dblStandardCost AS DECIMAL(18,6)),0)
 			  , intConcurrencyId	= 1
+			  , intCalculationId	= TempChk.intCalculationId
 			FROM @tblTempForCalculation TempChk
 			WHERE CAST(TempChk.intPOSCode AS BIGINT) NOT IN
 			(
@@ -372,6 +378,7 @@ BEGIN
 				, dblTotalSales
 				, dblItemStandardCost
 				, intConcurrencyId
+				, intCalculationId
 			)
 			SELECT 
 				intCheckoutId		= @intCheckoutId
@@ -391,6 +398,7 @@ BEGIN
 			  , dblTotalSales		= (TempChk.SalesAmount) + (TempChk.DiscountAmount + TempChk.PromotionAmount)
 			  , dblItemStandardCost = ISNULL(CAST(P.dblStandardCost AS DECIMAL(18,6)),0)
 			  , intConcurrencyId	= 1
+			  , intCalculationId	= TempChk.intCalculationId
 			FROM @tblTempForCalculation TempChk
 			INNER JOIN vyuSTItemUOMPosCodeFormat UOM
 				ON CAST(TempChk.intPOSCode AS BIGINT) = CAST(UOM.intUpcCode AS BIGINT)
@@ -433,6 +441,7 @@ BEGIN
 				, dblTotalSales
 				, dblItemStandardCost
 				, intConcurrencyId
+				, intCalculationId
 			)
 			SELECT 
 				intCheckoutId		= @intCheckoutId
@@ -448,6 +457,7 @@ BEGIN
 			  , dblTotalSales		= (TempChk.RefundCount * -1) * (ABS(TempChk.RefundAmount) / TempChk.RefundCount)
 			  , dblItemStandardCost = ISNULL(CAST(P.dblStandardCost AS DECIMAL(18,6)),0)
 			  , intConcurrencyId	= 1
+			  , intCalculationId	= TempChk.intCalculationId
 			FROM @tblTempForCalculation TempChk
 			INNER JOIN vyuSTItemUOMPosCodeFormat UOM
 				ON CAST(TempChk.intPOSCode AS BIGINT) = CAST(UOM.intUpcCode AS BIGINT)
@@ -554,7 +564,7 @@ BEGIN
 				INSERT INTO dbo.tblSTCheckoutMarkUpDowns
 				(
 					[intCheckoutId],
-				    [intItemMovementId],						--> This will be used to modify MarkU/D when ItemMovement value is changed
+				    [intItemMovementId],								--> This will be used to modify MarkU/D when ItemMovement value is changed
 					[intCategoryId],
 					[intItemUOMId],
 					[dblQty],
@@ -566,7 +576,7 @@ BEGIN
 				)
 				SELECT 
 					[intCheckoutId]			= @intCheckoutId,
-				    [intItemMovementId]		= NULL,				--> This will be used to modify MarkU/D when ItemMovement value is changed
+				    [intItemMovementId]		= im.intItemMovementId,		--> This will be used to modify MarkU/D when ItemMovement value is changed
 					[intCategoryId]			= IC.intCategoryId,
 					[intItemUOMId]			= UOM.intItemUOMId,
 					[dblQty]				= ISNULL(CAST(TempChk.SalesQuantity AS INT),0),
@@ -632,6 +642,9 @@ BEGIN
 											END),
 					[intConcurrencyId]		= 1
 				FROM @tblTempForCalculation TempChk
+				INNER JOIN tblSTCheckoutItemMovements im
+					ON TempChk.intCalculationId = im.intCalculationId
+					AND TempChk.intCheckoutId = im.intCheckoutId
 				INNER JOIN vyuSTItemUOMPosCodeFormat UOM
 					ON CAST(TempChk.intPOSCode AS BIGINT) = CAST(UOM.intUpcCode AS BIGINT)
 				INNER JOIN dbo.tblICItem I 
@@ -649,6 +662,7 @@ BEGIN
 				INNER JOIN dbo.tblSTStore S 
 					ON S.intCompanyLocationId = CL.intCompanyLocationId
 				WHERE S.intStoreId = @intStoreId
+					AND im.intCheckoutId = @intCheckoutId
 					AND ISNULL(TempChk.POSCode, '') != ''
 					AND I.strLotTracking = 'No'
 					AND TempChk.SalesQuantity > 0

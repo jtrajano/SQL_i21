@@ -106,8 +106,6 @@ BEGIN
 		END CATCH
 
 
---TEST
-SELECT '@tblTemp', * FROM @tblTemp
 
 		-- ==================================================================================================================  
 		-- Start Validate if PLU xml file matches the Mapping on i21 
@@ -192,46 +190,6 @@ SELECT '@tblTemp', * FROM @tblTemp
 		)
 			AND ISNULL(Chk.strpluBaseupc, '') != ''
 
-		--FROM #tempCheckoutInsert Chk
-		--WHERE ISNULL(Chk.pluBaseupc, '') NOT IN
-		--(
-		--	SELECT DISTINCT 
-		--		tbl.strXmlRegisterPOSCode
-		--	FROM
-		--	(
-		--		SELECT DISTINCT
-		--			Chk.pluBaseupc AS strXmlRegisterPOSCode
-		--		FROM #tempCheckoutInsert Chk
-		--		INNER JOIN
-		--		(
-		--			SELECT intItemUOMId
-		--				, intItemId
-		--				, strLongUPCCode
-		--				, CASE 
-		--					WHEN strLongUPCCode NOT LIKE '%[^0-9]%' 
-		--						THEN CONVERT(NUMERIC(32, 0),CAST(strLongUPCCode AS FLOAT))
-		--					ELSE NULL
-		--				END AS intLongUpcCode 
-		--			FROM dbo.tblICItemUOM
-		--		) AS UOM
-		--			ON Chk.pluBaseupc COLLATE Latin1_General_CI_AS = ISNULL(UOM.strLongUPCCode, '')
-		--			OR CONVERT(NUMERIC(32, 0),CAST(Chk.pluBaseupc AS FLOAT)) = UOM.intLongUpcCode
-		--		INNER JOIN dbo.tblICItem I 
-		--			ON I.intItemId = UOM.intItemId
-		--		INNER JOIN dbo.tblICItemLocation IL 
-		--			ON IL.intItemId = I.intItemId
-		--		LEFT JOIN dbo.tblICItemPricing P 
-		--			ON IL.intItemLocationId = P.intItemLocationId 
-		--			AND I.intItemId = P.intItemId
-		--		INNER JOIN dbo.tblSMCompanyLocation CL 
-		--			ON CL.intCompanyLocationId = IL.intLocationId
-		--		INNER JOIN dbo.tblSTStore S 
-		--			ON S.intCompanyLocationId = CL.intCompanyLocationId
-		--		WHERE S.intStoreId = @intStoreId
-		--			AND ISNULL(Chk.pluBaseupc, '') != ''
-		--	) AS tbl
-		--)
-		--AND ISNULL(Chk.pluBaseupc, '') != ''
 		-- ------------------------------------------------------------------------------------------------------------------  
 		-- END Get Error logs. Check Register XML that is not configured in i21.  
 		-- ==================================================================================================================
@@ -243,21 +201,24 @@ SELECT '@tblTemp', * FROM @tblTemp
 		-- ==================================================================================================================
 		DECLARE @tblTempForCalculation TABLE
 		(
-			SalesQuantity					INT,
-			DiscountAmount					DECIMAL(18, 6),
-			PromotionAmount					DECIMAL(18, 6),
-			RefundAmount					DECIMAL(18, 6),
-			RefundCount						INT,
-			SalesAmount						DECIMAL(18, 6),
-			ActualSalesPrice				DECIMAL(18, 6),
-			POSCode							NVARCHAR(15),
-			intPOSCode						BIGINT,
-			dblAveragePrice					DECIMAL(18, 6),
-			dblAveragePriceWthDiscounts		DECIMAL(18, 6)
+			intCalculationId			INT	NOT NULL IDENTITY,
+			intCheckoutId				INT,
+			SalesQuantity				INT,
+			DiscountAmount				DECIMAL(18, 6),
+			PromotionAmount				DECIMAL(18, 6),
+			RefundAmount				DECIMAL(18, 6),
+			RefundCount					INT,
+			SalesAmount					DECIMAL(18, 6),
+			ActualSalesPrice			DECIMAL(18, 6),
+			POSCode						NVARCHAR(15),
+			intPOSCode					BIGINT,
+			dblAveragePrice				DECIMAL(18, 6),
+			dblAveragePriceWthDiscounts	DECIMAL(18, 6)
 		)
 
 		INSERT INTO @tblTempForCalculation
 		(
+			intCheckoutId,
 			SalesQuantity,
 			DiscountAmount,
 			PromotionAmount,
@@ -271,6 +232,7 @@ SELECT '@tblTemp', * FROM @tblTemp
 			dblAveragePriceWthDiscounts
 		)
 		SELECT 
+			intCheckoutId					= @intCheckoutId,
 			SalesQuantity					= CAST(ISNULL(CAST(dblnetSalesitemCount AS DECIMAL(18, 6)) ,0) AS INT),
 			DiscountAmount					= 0, -- Commander has No Discount in PLU xml //CAST(DiscountAmount AS DECIMAL(18,6)),
 			PromotionAmount					= 0, -- Commander has No Promotion in PLU xml //CAST(PromotionAmount AS DECIMAL(18,6)),
@@ -319,6 +281,7 @@ SELECT '@tblTemp', * FROM @tblTemp
 				, dblTotalSales
 				, dblItemStandardCost
 				, intConcurrencyId
+				, intCalculationId
 			)
 			SELECT 
 				intCheckoutId		= @intCheckoutId
@@ -337,6 +300,7 @@ SELECT '@tblTemp', * FROM @tblTemp
 			  , dblTotalSales		= (TempChk.SalesAmount) + (TempChk.DiscountAmount + TempChk.PromotionAmount)
 			  , dblItemStandardCost = NULL --ISNULL(CAST(P.dblStandardCost AS DECIMAL(18,6)),0)
 			  , intConcurrencyId	= 1
+			  , intCalculationId	= TempChk.intCalculationId
 			FROM @tblTempForCalculation TempChk
 			WHERE CAST(TempChk.intPOSCode AS BIGINT) NOT IN
 			(
@@ -387,6 +351,7 @@ SELECT '@tblTemp', * FROM @tblTemp
 				, dblTotalSales
 				, dblItemStandardCost
 				, intConcurrencyId
+				, intCalculationId
 			)
 			SELECT 
 				intCheckoutId		= @intCheckoutId
@@ -406,6 +371,7 @@ SELECT '@tblTemp', * FROM @tblTemp
 			  , dblTotalSales		= (TempChk.SalesAmount) + (TempChk.DiscountAmount + TempChk.PromotionAmount)
 			  , dblItemStandardCost = ISNULL(CAST(P.dblStandardCost AS DECIMAL(18,6)),0)
 			  , intConcurrencyId	= 1
+			  , intCalculationId	= TempChk.intCalculationId
 			FROM @tblTempForCalculation TempChk
 			INNER JOIN vyuSTItemUOMPosCodeFormat UOM
 				ON CAST(TempChk.intPOSCode AS BIGINT) = CAST(UOM.intUpcCode AS BIGINT)
@@ -448,6 +414,7 @@ SELECT '@tblTemp', * FROM @tblTemp
 				, dblTotalSales
 				, dblItemStandardCost
 				, intConcurrencyId
+				, intCalculationId
 			)
 			SELECT 
 				intCheckoutId		= @intCheckoutId
@@ -463,6 +430,7 @@ SELECT '@tblTemp', * FROM @tblTemp
 			  , dblTotalSales		= (TempChk.RefundCount * -1) * (ABS(TempChk.RefundAmount) / TempChk.RefundCount)
 			  , dblItemStandardCost = ISNULL(CAST(P.dblStandardCost AS DECIMAL(18,6)),0)
 			  , intConcurrencyId	= 1
+			  , intCalculationId	=TempChk.intCalculationId
 			FROM @tblTempForCalculation TempChk
 			INNER JOIN vyuSTItemUOMPosCodeFormat UOM
 				ON CAST(TempChk.intPOSCode AS BIGINT) = CAST(UOM.intUpcCode AS BIGINT)
@@ -569,7 +537,7 @@ SELECT '@tblTemp', * FROM @tblTemp
 				INSERT INTO dbo.tblSTCheckoutMarkUpDowns
 				(
 					[intCheckoutId],
-				    [intItemMovementId],						--> This will be used to modify MarkU/D when ItemMovement value is changed
+				    [intItemMovementId],								--> This will be used to modify MarkU/D when ItemMovement value is changed
 					[intCategoryId],
 					[intItemUOMId],
 					[dblQty],
@@ -581,7 +549,7 @@ SELECT '@tblTemp', * FROM @tblTemp
 				)
 				SELECT 
 					[intCheckoutId]			= @intCheckoutId,
-				    [intItemMovementId]		= NULL,				--> This will be used to modify MarkU/D when ItemMovement value is changed
+				    [intItemMovementId]		= im.intItemMovementId,		--> This will be used to modify MarkU/D when ItemMovement value is changed
 					[intCategoryId]			= IC.intCategoryId,
 					[intItemUOMId]			= UOM.intItemUOMId,
 					[dblQty]				= ISNULL(CAST(TempChk.SalesQuantity AS INT),0),
@@ -647,6 +615,9 @@ SELECT '@tblTemp', * FROM @tblTemp
 											END),
 					[intConcurrencyId]		= 1
 				FROM @tblTempForCalculation TempChk
+				INNER JOIN tblSTCheckoutItemMovements im
+					ON TempChk.intCalculationId = im.intCalculationId
+					AND TempChk.intCheckoutId = im.intCheckoutId
 				INNER JOIN vyuSTItemUOMPosCodeFormat UOM
 					ON CAST(TempChk.intPOSCode AS BIGINT) = CAST(UOM.intUpcCode AS BIGINT)
 				INNER JOIN dbo.tblICItem I 
@@ -664,6 +635,7 @@ SELECT '@tblTemp', * FROM @tblTemp
 				INNER JOIN dbo.tblSTStore S 
 					ON S.intCompanyLocationId = CL.intCompanyLocationId
 				WHERE S.intStoreId = @intStoreId
+					AND im.intCheckoutId = @intCheckoutId
 					AND ISNULL(TempChk.POSCode, '') != ''
 					AND I.strLotTracking = 'No'
 					AND TempChk.SalesQuantity > 0

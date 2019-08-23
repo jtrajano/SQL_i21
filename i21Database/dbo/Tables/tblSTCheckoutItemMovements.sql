@@ -11,8 +11,9 @@
     [dblGrossSales]       DECIMAL (18, 6) NULL,
     [dblTotalSales]       DECIMAL (18, 6) NULL,
     [dblItemStandardCost] DECIMAL (18, 6) NULL,
-    [intConcurrencyId]    INT             NULL,
-    [ysnLotteryItem]      BIT             
+    [intCalculationId]    INT             NULL,
+	[intConcurrencyId]    INT             NULL,
+    [ysnLotteryItem]      BIT            	
 	CONSTRAINT [DF_tblSTCheckoutItemMovements_ysnLotteryItem] DEFAULT ((0)) NULL,
     CONSTRAINT [PK_tblSTCheckoutItemMovements_intItemMovementId] PRIMARY KEY CLUSTERED ([intItemMovementId] ASC) WITH (FILLFACTOR = 70),
     CONSTRAINT [FK_tblSTCheckoutItemMovements_tblICItemUOM] FOREIGN KEY ([intItemUPCId]) REFERENCES [dbo].[tblICItemUOM] ([intItemUOMId]),
