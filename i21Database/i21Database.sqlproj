@@ -8415,4 +8415,7 @@
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\TR\OverrideTaxGroupDefault.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\CT\5_DataFix.sql" />
+  </ItemGroup>
 </Project>

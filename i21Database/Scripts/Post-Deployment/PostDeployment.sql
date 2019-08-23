@@ -362,6 +362,7 @@ print 'BEGIN POST DEPLOYMENT'
 :R .\CT\fnCTGetBasisDeliveryAboveR2.sql
 :R .\CT\PariallyToPartially.sql
 :R .\CT\TitleToCode.sql
+:R .\CT\5_DataFix.sql
 
 --Notes Receivable
 :R .\NR\1_NoteTransType.sql
