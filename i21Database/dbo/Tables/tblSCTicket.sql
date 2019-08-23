@@ -65,7 +65,7 @@
     [intCurrencyId] INT NULL, 
     [dblCurrencyRate] NUMERIC(38, 20) NULL, 
     [strTicketComment] NVARCHAR(80) COLLATE Latin1_General_CI_AS NULL, 
-    [strCustomerReference] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL, 
+    [strCustomerReference] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
     [ysnTicketPrinted] BIT NULL, 
     [ysnPlantTicketPrinted] BIT NULL, 
     [ysnGradingTagPrinted] BIT NULL, 
