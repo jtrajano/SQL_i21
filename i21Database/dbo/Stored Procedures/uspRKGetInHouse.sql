@@ -616,6 +616,36 @@ BEGIN
 
 			INSERT INTO @tblResultInventory(
 				dtmDate
+				, dblInvIn
+				, strTransactionId
+				, intTransactionId
+				, strDistribution 
+			)
+			SELECT 
+				dtmDate
+				, dblTotal 
+				, strTransactionId
+				, intTransactionId
+				, strDistribution 
+			FROM (
+				SELECT
+					dtmDate 
+					, dblTotal = SUM(ISNULL(dblTotal, 0))
+					, strTransactionId
+					, intTransactionId
+					, strDistribution ='PRDC' 
+				FROM @tblResult
+				WHERE strTransactionType IN ('Produce')
+				GROUP By
+					dtmDate
+					, strTransactionId
+					, intTransactionId
+					, strDistribution 
+			) t 
+
+
+			INSERT INTO @tblResultInventory(
+				dtmDate
 				, dblInvOut
 				, strTransactionId
 				, intTransactionId
@@ -667,6 +697,36 @@ BEGIN
 					, strDistribution 
 				FROM @tblResult
 				WHERE strTransactionType IN ('Inventory Shipment')
+				GROUP By
+					dtmDate
+					, strTransactionId
+					, intTransactionId
+					, strDistribution 
+			) t
+			WHERE dblTotal <> 0
+
+			INSERT INTO @tblResultInventory(
+				dtmDate
+				, dblInvOut
+				, strTransactionId
+				, intTransactionId
+				, strDistribution 
+			)
+			SELECT 
+				dtmDate
+				, ABS(dblTotal)
+				, strTransactionId
+				, intTransactionId
+				, strDistribution 
+			FROM (
+				SELECT
+					dtmDate 
+					, dblTotal = SUM(ISNULL(dblTotal, 0))
+					, strTransactionId
+					, intTransactionId
+					, strDistribution  = 'CNSM'
+				FROM @tblResult
+				WHERE strTransactionType IN ('Consume')
 				GROUP By
 					dtmDate
 					, strTransactionId
