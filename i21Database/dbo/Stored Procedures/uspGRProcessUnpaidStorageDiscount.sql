@@ -30,6 +30,7 @@ BEGIN TRY
 	
 	DECLARE @voucherDetailNonInventory AS VoucherDetailNonInventory
 	DECLARE @intCreatedBillId INT
+	DECLARE @ysnInventoryCost BIT = 0;
 	
 
 	SET @dtmDate = GETDATE()
@@ -100,12 +101,20 @@ BEGIN TRY
 			,@EntityId = intEntityId
 			,@LocationId = intCompanyLocationId
 			,@dblOpenBalance = dblOpenBalance
-		FROM @BillDiscounts
+			,@ysnInventoryCost = ysnInventoryCost
+		FROM @BillDiscounts BD
+		INNER JOIN tblICItem I
+			ON I.intItemId = BD.intItemId
 		WHERE intBillDiscountKey = @intBillDiscountKey
 
 		SELECT @dblTotalDiscountUnpaid = SUM(ISNULL(dblDiscountUnpaid, 0))
 		FROM @BillDiscounts
 		WHERE intEntityId = @EntityId AND intCompanyLocationId = @LocationId
+
+		IF(@ysnInventoryCost = 1)
+		BEGIN
+			SELECT @dblTotalDiscountUnpaid = CASE WHEN @dblTotalDiscountUnpaid < 0 THEN @dblTotalDiscountUnpaid ELSE -1*(@dblTotalDiscountUnpaid) END
+		END
 
 		IF @dblTotalDiscountUnpaid > 0
 		BEGIN
