@@ -97,7 +97,7 @@ BEGIN
 							
 							SET @sql = N'
 									DELETE FROM [' + @strCurrentLogDatabaseName + '].dbo.tblSMInterCompanyTransferLogForComment
-									WHERE strTable = ''tblSMActivityNotification''
+									WHERE strTable = ''tblSMNotification''
 									AND ' + @strRecordColumnName + ' = ' + CONVERT(NVARCHAR(250), @intNotificationId) + '
 									AND ISNULL(intDestinationCompanyId, 0) = ' + CONVERT(NVARCHAR(250), ISNULL(@intDestinationCompanyId, 0)) + '
 							'
@@ -155,6 +155,36 @@ BEGIN
 					END
 					
 					
+
+					--IF TABLE NAME IS COMMENT, DELETE ALL ENTRIES IN tblSMNotification
+					IF @strTableName = 'tblSMComment'
+					BEGIN
+						----------------------------NOTIFICATION----------------------------
+						SET @sql = N'
+							INSERT INTO #TempPrimaryKeys
+							SELECT intNotificationId FROM [' + @strCurrentDataDatabaseName + '].dbo.tblSMNotification WHERE intCommentId = ' + CONVERT(VARCHAR(250), @intRecordIdToUse) + '
+						'
+						EXEC sp_executesql @sql
+
+						WHILE EXISTS(SELECT 1 FROM #TempPrimaryKeys)
+						BEGIN
+							SELECT TOP 1 @intNotificationId = intPrimaryKeyId FROM #TempPrimaryKeys
+							
+							
+							SET @sql = N'
+									DELETE FROM [' + @strCurrentLogDatabaseName + '].dbo.tblSMInterCompanyTransferLogForComment
+									WHERE strTable = ''tblSMNotification''
+									AND ' + @strRecordColumnName + ' = ' + CONVERT(NVARCHAR(250), @intNotificationId) + '
+									AND ISNULL(intDestinationCompanyId, 0) = ' + CONVERT(NVARCHAR(250), ISNULL(@intDestinationCompanyId, 0)) + '
+							'
+							EXEC sp_executesql @sql
+
+							DELETE FROM #TempPrimaryKeys where intPrimaryKeyId = @intNotificationId
+						END
+
+						
+					END
+
 					
 					--DELETE THE RECORD
 					SET @sql = 'DELETE FROM [' + @strCurrentDataDatabaseName + '].dbo.[' + @strTableName + '] WHERE ' + @strPrimaryKey + ' = ' + CONVERT(NVARCHAR(100), @intRecordIdToUse)
@@ -167,7 +197,18 @@ BEGIN
 					BEGIN
 						--tblSMActivity
 						SET @sql = N'DELETE FROM [' + @strCurrentLogDatabaseName + '].dbo.tblSMInterCompanyTransferLogForComment
-									WHERE strTable IN (''tblSMActivityNotification'', ''tblSMComment'', ''tblSMActivityAttendee'')
+									WHERE strTable IN (''tblSMNotification'', ''tblSMComment'', ''tblSMActivityAttendee'')
+									AND ' + @strActivityColumnName + ' = ' + CONVERT(NVARCHAR(250), @intRecordIdToDelete) + '
+									AND ISNULL(intDestinationCompanyId, 0) = ' + CONVERT(NVARCHAR(250), ISNULL(@intDestinationCompanyId, 0)) + '
+									'
+						EXEC sp_executesql @sql
+					END
+
+					IF @strTableName = 'tblSMComment'
+					BEGIN
+						--tblSMActivity
+						SET @sql = N'DELETE FROM [' + @strCurrentLogDatabaseName + '].dbo.tblSMInterCompanyTransferLogForComment
+									WHERE strTable IN (''tblSMNotification'')
 									AND ' + @strActivityColumnName + ' = ' + CONVERT(NVARCHAR(250), @intRecordIdToDelete) + '
 									AND ISNULL(intDestinationCompanyId, 0) = ' + CONVERT(NVARCHAR(250), ISNULL(@intDestinationCompanyId, 0)) + '
 									'
