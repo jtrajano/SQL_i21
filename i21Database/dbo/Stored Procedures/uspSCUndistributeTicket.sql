@@ -549,7 +549,7 @@ BEGIN TRY
 								INNER JOIN tblICInventoryShipmentItem ICISI
 									ON ARID.[intInventoryShipmentItemId] = ICISI.[intInventoryShipmentItemId]
 								WHERE ICISI.[intInventoryShipmentId] = @InventoryShipmentId
-								ORDER BY intInvoiceId ASC
+								ORDER BY ARID.intInvoiceId ASC
 
 								SELECT @intInvoiceId = MIN(intInvoiceId) 
 								FROM #invoiceIdTable
