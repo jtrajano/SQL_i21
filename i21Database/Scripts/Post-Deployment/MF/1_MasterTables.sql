@@ -3876,3 +3876,17 @@ UPDATE tblCTInvPlngReportMaster
 SET intConcurrencyId = 1
 Where intConcurrencyId IS NULL
 GO
+
+GO
+UPDATE tblMFCompanyPreference
+SET ysnSupplyTargetbyAverage = 1
+Where ysnSupplyTargetbyAverage IS NULL
+
+UPDATE tblMFCompanyPreference
+SET intNoofWeeksorMonthstoCalculateSupplyTarget = 3
+Where intNoofWeeksorMonthstoCalculateSupplyTarget IS NULL
+
+UPDATE tblMFCompanyPreference
+SET intNoofWeekstoCalculateSupplyTargetbyAverage = 13
+Where intNoofWeekstoCalculateSupplyTargetbyAverage IS NULL
+GO
