@@ -495,6 +495,7 @@ BEGIN
 				@tx_lnoxmit BIT = 1,
 				@ts_tankserialnum NVARCHAR(50) = '''', --19 tank Serial
 				@userID INT = NULL,
+				@is_wesroc BIT = 1,
 				@resultLog NVARCHAR(4000)= '''' OUTPUT
 			AS  
 			BEGIN 
@@ -524,6 +525,7 @@ BEGIN
 				DECLARE @TotalItemTax	NUMERIC(18,6) = 0.00 	
 				DECLARE @CustomerEntityId INT
 				DECLARE @SiteTaxable    BIT
+				DECLARE @ExceptionValue NVARCHAR(50)
 	
 				SET @rpt_date_ti = @str_rpt_date_ti
  
@@ -533,24 +535,35 @@ BEGIN
 				--	RETURN 
 				--END
 	
-				SET @resultLog = @resultLog +  ''passed customerid validation'' + char(10)
+				--SET @resultLog = @resultLog +  ''passed customerid validation'' + char(10)
+				SET @resultLog = @resultLog +  case when @is_wesroc = 1 then ''passed customerid validation'' + char(10) else '''' end
 	
 				--IF(ISNULL(@ts_cat_1,'''') = '''')BEGIN
 				--	SET @resultLog = @resultLog +  ''Failed Tank Monitor Serial validation'' + char(10)
 				--	RETURN
 				--END
 	
-				SET @resultLog = @resultLog + ''passed Tank Monitor Serial validation'' + char(10)
+				--SET @resultLog = @resultLog + ''passed Tank Monitor Serial validation'' + char(10)
+				SET @resultLog = @resultLog + case when @is_wesroc = 1 then ''passed Tank Monitor Serial validation'' + char(10) else '''' end
 	
 				--IF(ISNULL(@ts_tankserialnum,'''') = '''')
 				--BEGIN 
 				--	SET @resultLog = @resultLog + ''Failed Tank Serial validation'' + char(10)
 				--	RETURN 
 				--END
-				SET @resultLog = @resultLog +  ''passed Tank Serial validation'' + char(10)
+				--SET @resultLog = @resultLog +  ''passed Tank Serial validation'' + char(10)
+				SET @resultLog = @resultLog +  case when @is_wesroc = 1 then ''passed Tank Serial validation'' + char(10) else '''' end
 	
 				IF(@tx_nosensor <> 0) RETURN 10
 				IF(@tx_lnoxmit <> 0) RETURN 10
+	
+				SET @ExceptionValue = ''Exception'';
+
+				if (@is_wesroc = 0)
+				begin
+					SET @resultLog = @resultLog +   ''ESN = '' + ISNULL(@tx_serialnum,'''') + char(10)
+					SET @ExceptionValue = ''Status'';
+				end
 	
 				SET @resultLog = @resultLog +   ''Customer Number = '' + ISNULL(@ts_cat_1,'''') + char(10)
 				print ''Customer Number = '' + ISNULL(@ts_cat_1,'''')
@@ -593,7 +606,8 @@ BEGIN
 				END
 				IF(@siteId IS NULL)
 				BEGIN 
-					SET @resultLog = @resultLog + ''Exception: Not Matching'' + char(10)
+					--SET @resultLog = @resultLog + ''Exception: Not Matching'' + char(10)
+					SET @resultLog = @resultLog + @ExceptionValue + '': Not Matching.'' + char(10)
 					RETURN 
 				END 
 				SET @resultLog = @resultLog + ''Site ID = '' + CAST(ISNULL(@siteId,'''') AS NVARCHAR(10)) + char(10) 
@@ -620,7 +634,8 @@ BEGIN
 				IF EXISTS(SELECT TOP 1 1 FROM tblTMEvent WHERE (intEventTypeID = @TankMonitorEventID AND dtmTankMonitorReading = @rpt_date_ti AND intSiteID = @siteId ))	
 				BEGIN
 					SET @resultLog = @resultLog + ''Duplicate Reading'' + char(10)
-					SET @resultLog = @resultLog + ''Exception: Duplicate Reading'' + char(10)
+					--SET @resultLog = @resultLog + ''Exception: Duplicate Reading'' + char(10)
+					SET @resultLog = @resultLog + @ExceptionValue + '': Duplicate Reading'' + char(10)
 					RETURN
 				END
 				IF EXISTS(SELECT TOP 1 1 FROM tblTMEvent 
@@ -760,6 +775,9 @@ BEGIN
 		
 					RETURN
 					CREATECALLENTRY:
+			
+					if (@is_wesroc = 0) return;
+			
 					IF EXISTS(SELECT TOP 1 1 FROM tblTMDispatch WHERE intSiteID = @siteId) 
 					BEGIN
 						SET @resultLog = @resultLog +  ''Already have call entry'' + CHAR(10)
