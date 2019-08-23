@@ -647,7 +647,7 @@ BEGIN TRY
 				INSERT INTO @tblShipment
 				SELECT  RI.intInventoryShipmentId,
 						RI.intInventoryShipmentItemId,
-						dbo.fnCTConvertQtyToTargetItemUOM(RI.intItemUOMId,CD.intItemUOMId,RI.dblQuantity) dblShipped,
+						dbo.fnCTConvertQtyToTargetItemUOM(RI.intItemUOMId,CD.intItemUOMId,ISNULL(RI.dblDestinationQuantity,RI.dblQuantity)) dblShipped,
 						IR.strShipmentNumber,
 						(
 							SELECT  SUM(dbo.fnCTConvertQtyToTargetItemUOM(ID.intItemUOMId,@intItemUOMId,dblQtyShipped)) 
@@ -680,7 +680,7 @@ BEGIN TRY
 				INSERT INTO @tblShipment
 				SELECT  RI.intInventoryShipmentId,
 						RI.intInventoryShipmentItemId,
-						dbo.fnCTConvertQtyToTargetItemUOM(RI.intItemUOMId,CD.intItemUOMId,RI.dblQuantity) dblShipped,
+						dbo.fnCTConvertQtyToTargetItemUOM(RI.intItemUOMId,CD.intItemUOMId,ISNULL(RI.dblDestinationQuantity,RI.dblQuantity)) dblShipped,
 						IR.strShipmentNumber,
 						(
 							SELECT  SUM(dbo.fnCTConvertQtyToTargetItemUOM(ID.intItemUOMId,@intItemUOMId,dblQtyShipped)) 
@@ -766,9 +766,12 @@ BEGIN TRY
 					CONTINUE
 				END
 
-				IF @dblTotalIVForSHQty = @dblShipped AND @dblTotalIVForPFQty > 0
+				IF @dblTotalIVForSHQty = @dblShipped AND @dblTotalIVForPFQty >= 0
 				BEGIN
-					SELECT	@dblRemainingQty = @dblPriceFxdQty - @dblTotalIVForPFQty
+					IF @dblTotalIVForPFQty = 0
+						SELECT	@dblRemainingQty = CASE WHEN @dblRemainingQty = 0 THEN @dblPriceFxdQty ELSE @dblRemainingQty END - @dblShipped
+					ELSE
+						SELECT	@dblRemainingQty = @dblPriceFxdQty - @dblTotalIVForPFQty
 					SELECT	@intShipmentUniqueId = MIN(intShipmentUniqueId)  FROM @tblShipment WHERE intShipmentUniqueId > @intShipmentUniqueId
 					CONTINUE
 				END
@@ -898,8 +901,11 @@ BEGIN TRY
 								,@raiseError		= 1
 						*/
 
-						INSERT INTO tblCTPriceFixationDetailAPAR(intPriceFixationDetailId,intInvoiceId,intInvoiceDetailId,intConcurrencyId)
-						SELECT @intPFDetailId,@intNewInvoiceId,@intInvoiceDetailId,1
+						IF @intNewInvoiceId IS NOT NULL
+						BEGIN
+							INSERT INTO tblCTPriceFixationDetailAPAR(intPriceFixationDetailId,intInvoiceId,intInvoiceDetailId,intConcurrencyId)
+							SELECT @intPFDetailId,@intNewInvoiceId,@intInvoiceDetailId,1
+						END
 					
 						--UPDATE	tblCTPriceFixationDetail SET intInvoiceId = @intNewInvoiceId,intInvoiceDetailId = @intInvoiceDetailId WHERE intPriceFixationDetailId = @intPriceFixationDetailId
 						IF @ysnLoad = 1

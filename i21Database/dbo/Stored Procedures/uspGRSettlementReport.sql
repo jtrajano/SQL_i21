@@ -301,7 +301,15 @@ BEGIN
 				,strTime				    	= CONVERT(VARCHAR(8), GETDATE(), 108)
 				,strAccountNumber		    	= dbo.fnAESDecryptASym(EFT.strAccountNumber)
 				,strReferenceNo			    	= BNKTRN.strReferenceNo
-				,strEntityName			    	= ENTITY.strName
+				,strEntityName			    	= case when 
+														PYMT.ysnOverrideCheckPayee = 1 and 
+														PYMT.ysnOverrideSettlement = 1 and 
+														isnull(PYMT.strOverridePayee, '')  <> '' then 
+															PYMT.strOverridePayee 
+													else 
+														ENTITY.strName
+													end
+
 				,strVendorAddress				= dbo.fnConvertToFullAddress(EL.strAddress, EL.strCity, EL.strState, EL.strZipCode)
 				,dtmDeliveryDate		    	= dbo.fnGRConvertDateToReportDateFormat(SC.dtmTicketDateTime)
 				,intTicketId			    	= SC.intTicketId		
@@ -584,7 +592,14 @@ BEGIN
 				,strTime					 	= CONVERT(VARCHAR(8), GETDATE(), 108)
 				,strAccountNumber			 	= dbo.fnAESDecryptASym(EFT.strAccountNumber)
 				,strReferenceNo				 	= BNKTRN.strReferenceNo
-				,strEntityName				 	= ENTITY.strName
+				,strEntityName				 	= case when 
+														PYMT.ysnOverrideCheckPayee = 1 and 
+														PYMT.ysnOverrideSettlement = 1 and 
+														isnull(PYMT.strOverridePayee, '')  <> '' then 
+															PYMT.strOverridePayee 
+													else 
+														ENTITY.strName
+													end
 				,strVendorAddress			 	= dbo.fnConvertToFullAddress(EL.strAddress, EL.strCity, EL.strState, EL.strZipCode)
 				,dtmDeliveryDate			 	= dbo.fnGRConvertDateToReportDateFormat(SC.dtmTicketDateTime)
 				,intTicketId				 	= SC.intTicketId		
@@ -857,7 +872,14 @@ BEGIN
 				,strTime						= CONVERT(VARCHAR(8), GETDATE(), 108)
 				,strAccountNumber				= dbo.fnAESDecryptASym(EFT.strAccountNumber)
 				,strReferenceNo					= BNKTRN.strReferenceNo
-				,strEntityName					= ENTITY.strName
+				,strEntityName					= case when 
+														PYMT.ysnOverrideCheckPayee = 1 and 
+														PYMT.ysnOverrideSettlement = 1 and 
+														isnull(PYMT.strOverridePayee, '')  <> '' then 
+															PYMT.strOverridePayee 
+													else 
+														ENTITY.strName
+													end
 				,strVendorAddress				= dbo.fnConvertToFullAddress(EL.strAddress, EL.strCity, EL.strState, EL.strZipCode)
 				,dtmDeliveryDate				= CS.dtmDeliveryDate		
 				,intTicketId					= DS.intDeliverySheetId		
