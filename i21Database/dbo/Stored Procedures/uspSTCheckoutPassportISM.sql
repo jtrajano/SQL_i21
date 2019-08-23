@@ -480,77 +480,157 @@ BEGIN
 		-- =============================================================================================================================================================================
 		IF (@strAllowMarkUpDown = 'I' OR @strAllowMarkUpDown = 'D')
 			BEGIN
+				--INSERT INTO dbo.tblSTCheckoutMarkUpDowns
+				--SELECT @intCheckoutId
+				--	 , IC.intCategoryId
+				--	 , UOM.intItemUOMId
+				--	 , ISNULL(CAST(TempChk.SalesQuantity as int),0)
+
+				--	 -- Sales Price
+				--	 , (CASE 
+				--			WHEN @strAllowMarkUpDown = 'I'
+				--				THEN CASE
+				--						WHEN TempChk.dblAveragePrice > ISNULL(P.dblSalePrice, 0) 
+				--							THEN (TempChk.dblAveragePrice)
+				--						WHEN TempChk.dblAveragePrice < ISNULL(P.dblSalePrice, 0) 
+				--							THEN (TempChk.dblAveragePrice)
+				--					END
+				--			WHEN @strAllowMarkUpDown = 'D'
+				--				THEN CASE
+				--						WHEN TempChk.dblAveragePriceWthDiscounts > ISNULL(P.dblSalePrice, 0) 
+				--							THEN (TempChk.dblAveragePriceWthDiscounts)
+				--						WHEN TempChk.dblAveragePriceWthDiscounts < ISNULL(P.dblSalePrice, 0) 
+				--							THEN (TempChk.dblAveragePriceWthDiscounts)
+				--					END
+				--		END) AS dblRetailUnit
+
+				--	 -- Total Amount
+				--	 , (CASE 
+				--			WHEN @strAllowMarkUpDown = 'I'
+				--				THEN CASE
+				--						WHEN TempChk.dblAveragePrice > ISNULL(P.dblSalePrice, 0) 
+				--							THEN (TempChk.dblAveragePrice * TempChk.SalesQuantity)
+				--						WHEN TempChk.dblAveragePrice < ISNULL(P.dblSalePrice, 0) 
+				--							THEN (TempChk.dblAveragePrice * TempChk.SalesQuantity)
+				--					END
+				--			WHEN @strAllowMarkUpDown = 'D'
+				--				THEN CASE
+				--						WHEN TempChk.dblAveragePriceWthDiscounts > ISNULL(P.dblSalePrice, 0) 
+				--							THEN (TempChk.dblAveragePriceWthDiscounts * TempChk.SalesQuantity)
+				--						WHEN TempChk.dblAveragePriceWthDiscounts < ISNULL(P.dblSalePrice, 0) 
+				--							THEN (TempChk.dblAveragePriceWthDiscounts * TempChk.SalesQuantity)
+				--					END
+				--		END) AS dblAmount
+
+				--	 , (CASE 
+				--			WHEN @strAllowMarkUpDown = 'I'
+				--				THEN CASE
+				--						WHEN TempChk.dblAveragePrice > ISNULL(P.dblSalePrice, 0) 
+				--							THEN CAST((TempChk.dblAveragePrice - ISNULL(P.dblSalePrice, 0)) AS DECIMAL(18,6))
+				--						WHEN TempChk.dblAveragePrice < ISNULL(P.dblSalePrice, 0) 
+				--							THEN CAST((ISNULL(P.dblSalePrice, 0) - TempChk.dblAveragePrice) AS DECIMAL(18,6))
+				--					END
+				--			WHEN @strAllowMarkUpDown = 'D'
+				--				THEN CASE
+				--						WHEN TempChk.dblAveragePriceWthDiscounts > ISNULL(P.dblSalePrice, 0) 
+				--							THEN CAST((TempChk.dblAveragePriceWthDiscounts - ISNULL(P.dblSalePrice, 0)) AS DECIMAL(18,6))
+				--						WHEN TempChk.dblAveragePriceWthDiscounts < ISNULL(P.dblSalePrice, 0)
+				--							THEN CAST((ISNULL(P.dblSalePrice, 0) - TempChk.dblAveragePriceWthDiscounts) AS DECIMAL(18,6))
+				--					END
+				--		END) AS dblShrink
+				--	 , (CASE 
+				--			WHEN @strAllowMarkUpDown = 'I'
+				--				THEN CASE
+				--						WHEN TempChk.dblAveragePrice > ISNULL(P.dblSalePrice, 0) THEN 'Mark Up'
+				--						WHEN TempChk.dblAveragePrice < ISNULL(P.dblSalePrice, 0) THEN 'Mark Down' 
+				--					END
+				--			WHEN @strAllowMarkUpDown = 'D'
+				--				THEN CASE
+				--						WHEN TempChk.dblAveragePriceWthDiscounts > ISNULL(P.dblSalePrice, 0) THEN 'Mark Up'
+				--						WHEN TempChk.dblAveragePriceWthDiscounts < ISNULL(P.dblSalePrice, 0) THEN 'Mark Down' 
+				--					END
+				--		END) AS strUpDownNotes
+				--	 , 1
 				INSERT INTO dbo.tblSTCheckoutMarkUpDowns
-				SELECT @intCheckoutId
-					 , IC.intCategoryId
-					 , UOM.intItemUOMId
-					 , ISNULL(CAST(TempChk.SalesQuantity as int),0)
-
-					 -- Sales Price
-					 , (CASE 
-							WHEN @strAllowMarkUpDown = 'I'
-								THEN CASE
-										WHEN TempChk.dblAveragePrice > ISNULL(P.dblSalePrice, 0) 
-											THEN (TempChk.dblAveragePrice)
-										WHEN TempChk.dblAveragePrice < ISNULL(P.dblSalePrice, 0) 
-											THEN (TempChk.dblAveragePrice)
-									END
-							WHEN @strAllowMarkUpDown = 'D'
-								THEN CASE
-										WHEN TempChk.dblAveragePriceWthDiscounts > ISNULL(P.dblSalePrice, 0) 
-											THEN (TempChk.dblAveragePriceWthDiscounts)
-										WHEN TempChk.dblAveragePriceWthDiscounts < ISNULL(P.dblSalePrice, 0) 
-											THEN (TempChk.dblAveragePriceWthDiscounts)
-									END
-						END) AS dblRetailUnit
-
-					 -- Total Amount
-					 , (CASE 
-							WHEN @strAllowMarkUpDown = 'I'
-								THEN CASE
-										WHEN TempChk.dblAveragePrice > ISNULL(P.dblSalePrice, 0) 
-											THEN (TempChk.dblAveragePrice * TempChk.SalesQuantity)
-										WHEN TempChk.dblAveragePrice < ISNULL(P.dblSalePrice, 0) 
-											THEN (TempChk.dblAveragePrice * TempChk.SalesQuantity)
-									END
-							WHEN @strAllowMarkUpDown = 'D'
-								THEN CASE
-										WHEN TempChk.dblAveragePriceWthDiscounts > ISNULL(P.dblSalePrice, 0) 
-											THEN (TempChk.dblAveragePriceWthDiscounts * TempChk.SalesQuantity)
-										WHEN TempChk.dblAveragePriceWthDiscounts < ISNULL(P.dblSalePrice, 0) 
-											THEN (TempChk.dblAveragePriceWthDiscounts * TempChk.SalesQuantity)
-									END
-						END) AS dblAmount
-
-					 , (CASE 
-							WHEN @strAllowMarkUpDown = 'I'
-								THEN CASE
-										WHEN TempChk.dblAveragePrice > ISNULL(P.dblSalePrice, 0) 
-											THEN CAST((TempChk.dblAveragePrice - ISNULL(P.dblSalePrice, 0)) AS DECIMAL(18,6))
-										WHEN TempChk.dblAveragePrice < ISNULL(P.dblSalePrice, 0) 
-											THEN CAST((ISNULL(P.dblSalePrice, 0) - TempChk.dblAveragePrice) AS DECIMAL(18,6))
-									END
-							WHEN @strAllowMarkUpDown = 'D'
-								THEN CASE
-										WHEN TempChk.dblAveragePriceWthDiscounts > ISNULL(P.dblSalePrice, 0) 
-											THEN CAST((TempChk.dblAveragePriceWthDiscounts - ISNULL(P.dblSalePrice, 0)) AS DECIMAL(18,6))
-										WHEN TempChk.dblAveragePriceWthDiscounts < ISNULL(P.dblSalePrice, 0)
-											THEN CAST((ISNULL(P.dblSalePrice, 0) - TempChk.dblAveragePriceWthDiscounts) AS DECIMAL(18,6))
-									END
-						END) AS dblShrink
-					 , (CASE 
-							WHEN @strAllowMarkUpDown = 'I'
-								THEN CASE
-										WHEN TempChk.dblAveragePrice > ISNULL(P.dblSalePrice, 0) THEN 'Mark Up'
-										WHEN TempChk.dblAveragePrice < ISNULL(P.dblSalePrice, 0) THEN 'Mark Down' 
-									END
-							WHEN @strAllowMarkUpDown = 'D'
-								THEN CASE
-										WHEN TempChk.dblAveragePriceWthDiscounts > ISNULL(P.dblSalePrice, 0) THEN 'Mark Up'
-										WHEN TempChk.dblAveragePriceWthDiscounts < ISNULL(P.dblSalePrice, 0) THEN 'Mark Down' 
-									END
-						END) AS strUpDownNotes
-					 , 1
+				(
+					[intCheckoutId],
+				    [intItemMovementId],						--> This will be used to modify MarkU/D when ItemMovement value is changed
+					[intCategoryId],
+					[intItemUOMId],
+					[dblQty],
+					[dblRetailUnit],
+					[dblAmount],
+					[dblShrink],
+					[strUpDownNotes],
+					[intConcurrencyId]
+				)
+				SELECT 
+					[intCheckoutId]			= @intCheckoutId,
+				    [intItemMovementId]		= NULL,				--> This will be used to modify MarkU/D when ItemMovement value is changed
+					[intCategoryId]			= IC.intCategoryId,
+					[intItemUOMId]			= UOM.intItemUOMId,
+					[dblQty]				= ISNULL(CAST(TempChk.SalesQuantity AS INT),0),
+					[dblRetailUnit]			= (CASE 
+												WHEN @strAllowMarkUpDown = 'I'
+													THEN CASE
+															WHEN TempChk.dblAveragePrice > ISNULL(P.dblSalePrice, 0) 
+																THEN (TempChk.dblAveragePrice)
+															WHEN TempChk.dblAveragePrice < ISNULL(P.dblSalePrice, 0) 
+																THEN (TempChk.dblAveragePrice)
+														END
+												WHEN @strAllowMarkUpDown = 'D'
+													THEN CASE
+															WHEN TempChk.dblAveragePriceWthDiscounts > ISNULL(P.dblSalePrice, 0) 
+																THEN (TempChk.dblAveragePriceWthDiscounts)
+															WHEN TempChk.dblAveragePriceWthDiscounts < ISNULL(P.dblSalePrice, 0) 
+																THEN (TempChk.dblAveragePriceWthDiscounts)
+														END
+											END),
+					[dblAmount]				= (CASE 
+												WHEN @strAllowMarkUpDown = 'I'
+													THEN CASE
+															WHEN TempChk.dblAveragePrice > ISNULL(P.dblSalePrice, 0) 
+																THEN (TempChk.dblAveragePrice * TempChk.SalesQuantity)
+															WHEN TempChk.dblAveragePrice < ISNULL(P.dblSalePrice, 0) 
+																THEN (TempChk.dblAveragePrice * TempChk.SalesQuantity)
+														END
+												WHEN @strAllowMarkUpDown = 'D'
+													THEN CASE
+															WHEN TempChk.dblAveragePriceWthDiscounts > ISNULL(P.dblSalePrice, 0) 
+																THEN (TempChk.dblAveragePriceWthDiscounts * TempChk.SalesQuantity)
+															WHEN TempChk.dblAveragePriceWthDiscounts < ISNULL(P.dblSalePrice, 0) 
+																THEN (TempChk.dblAveragePriceWthDiscounts * TempChk.SalesQuantity)
+														END
+											END),
+					[dblShrink]				= (CASE 
+												WHEN @strAllowMarkUpDown = 'I'
+													THEN CASE
+															WHEN TempChk.dblAveragePrice > ISNULL(P.dblSalePrice, 0) 
+																THEN CAST((TempChk.dblAveragePrice - ISNULL(P.dblSalePrice, 0)) AS DECIMAL(18,6))
+															WHEN TempChk.dblAveragePrice < ISNULL(P.dblSalePrice, 0) 
+																THEN CAST((ISNULL(P.dblSalePrice, 0) - TempChk.dblAveragePrice) AS DECIMAL(18,6))
+														END
+												WHEN @strAllowMarkUpDown = 'D'
+													THEN CASE
+															WHEN TempChk.dblAveragePriceWthDiscounts > ISNULL(P.dblSalePrice, 0) 
+																THEN CAST((TempChk.dblAveragePriceWthDiscounts - ISNULL(P.dblSalePrice, 0)) AS DECIMAL(18,6))
+															WHEN TempChk.dblAveragePriceWthDiscounts < ISNULL(P.dblSalePrice, 0)
+																THEN CAST((ISNULL(P.dblSalePrice, 0) - TempChk.dblAveragePriceWthDiscounts) AS DECIMAL(18,6))
+														END
+											END),
+					[strUpDownNotes]		= (CASE 
+												WHEN @strAllowMarkUpDown = 'I'
+													THEN CASE
+															WHEN TempChk.dblAveragePrice > ISNULL(P.dblSalePrice, 0) THEN 'Mark Up'
+															WHEN TempChk.dblAveragePrice < ISNULL(P.dblSalePrice, 0) THEN 'Mark Down' 
+														END
+												WHEN @strAllowMarkUpDown = 'D'
+													THEN CASE
+															WHEN TempChk.dblAveragePriceWthDiscounts > ISNULL(P.dblSalePrice, 0) THEN 'Mark Up'
+															WHEN TempChk.dblAveragePriceWthDiscounts < ISNULL(P.dblSalePrice, 0) THEN 'Mark Down' 
+														END
+											END),
+					[intConcurrencyId]		= 1
 				FROM @tblTempForCalculation TempChk
 				INNER JOIN vyuSTItemUOMPosCodeFormat UOM
 					ON CAST(TempChk.intPOSCode AS BIGINT) = CAST(UOM.intUpcCode AS BIGINT)
