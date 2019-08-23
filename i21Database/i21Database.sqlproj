@@ -8046,4 +8046,7 @@
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\CT\fnCTGetBasisDeliveryAboveR2.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\CT\5_DataFix.sql" />
+  </ItemGroup>
 </Project>
