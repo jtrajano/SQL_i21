@@ -126,7 +126,7 @@ BEGIN
 		,strCPContract
 		,strContractCategoryId			
 		,ysnSigned
-		,ysnPrepaid	
+		--,ysnPrepaid	
 		,ysnPrinted
 		,dtmContractDate
 		,dtmExpirationDate
