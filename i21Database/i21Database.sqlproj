@@ -8030,6 +8030,7 @@
     <Build Include="dbo\Views\vyuTROverrideTaxGroupDetail.sql" />
     <Build Include="dbo\Views\vyuCMRemittanceAdviceReport.sql" />
     <Build Include="dbo\Functions\fnCTGetPrepaidIdsItemContract.sql" />
+    <Build Include="dbo\Views\vyuSTCheckoutItemMovement.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
