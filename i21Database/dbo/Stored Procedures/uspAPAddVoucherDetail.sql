@@ -120,12 +120,12 @@ SELECT TOP 100 PERCENT
 	,dblBasis							=	A.dblBasis
 	,dblFutures							=	A.dblFutures
 	/*Claim info*/						
-	,intPrepayTransactionId				=	prepayTransaction.intBillId
+	,intPrepayTransactionId				=	CASE WHEN A.intTransactionType = 11 THEN prepayRec.intBillId ELSE NULL END
 	,dblNetShippedWeight				=	A.dblNetShippedWeight
 	,dblWeightLoss						=	A.dblWeightLoss
 	,dblFranchiseWeight					=	A.dblFranchiseWeight
 	,dblFranchiseAmount					=	A.dblFranchiseAmount
-	,dblActual							=	A.dblActual
+	,dblActual							=	A.dblActual  
 	,dblDifference						=	A.dblDifference
 	/*Weight info*/						
 	,intWeightUOMId						=	NULLIF(A.intWeightUOMId,0)
@@ -246,9 +246,13 @@ OUTER APPLY (
 	ORDER BY forexDetail.dtmValidFromDate DESC
 ) defaultExchangeRate
 /*Claim join*/
-LEFT JOIN (tblAPBill prepayTransaction 
-				INNER JOIN tblAPBillDetail prepayDetail ON prepayTransaction.intBillId = prepayDetail.intBillId AND prepayTransaction.intTransactionType = 2)
-		ON prepayDetail.intContractDetailId = A.intContractDetailId
+OUTER APPLY (
+	SELECT TOP 1
+		prepayTransaction.intBillId
+	FROM tblAPBill prepayTransaction 
+	INNER JOIN tblAPBillDetail prepayDetail ON prepayTransaction.intBillId = prepayDetail.intBillId AND prepayTransaction.intTransactionType = 2
+	WHERE prepayDetail.intContractDetailId = A.intContractDetailId AND A.intTransactionType = 11
+) prepayRec
 LEFT JOIN vyuPATEntityPatron patron ON A.intEntityVendorId = patron.intEntityId
 LEFT JOIN tblAP1099Category category1099 ON entity.str1099Type = category1099.strCategory
 LEFT JOIN tblICItem item ON A.intItemId = item.intItemId
