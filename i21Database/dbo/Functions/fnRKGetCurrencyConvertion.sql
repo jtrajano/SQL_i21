@@ -11,10 +11,12 @@ BEGIN
 	
 	IF (@intFromCurrencyId<>@intToCurrencyId)
 	BEGIN
-		SELECT @dblRate = dblRate
+		SELECT TOP 1 @dblRate = dblRate
 		FROM tblSMCurrencyExchangeRate er
 		JOIN tblSMCurrencyExchangeRateDetail rd ON er.intCurrencyExchangeRateId = rd.intCurrencyExchangeRateId
 		WHERE intFromCurrencyId = @intFromCurrencyId AND intToCurrencyId = @intToCurrencyId
+			AND dtmValidFromDate <= GETDATE()
+		ORDER BY dtmValidFromDate DESC
 	END
 	ELSE
 	BEGIN
