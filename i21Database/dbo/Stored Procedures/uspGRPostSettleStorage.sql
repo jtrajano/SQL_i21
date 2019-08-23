@@ -1478,7 +1478,7 @@ BEGIN TRY
 															WHEN ReceiptCharge.intEntityVendorId = SS.intEntityId  AND  ISNULL(ReceiptCharge.ysnAccrue, 0) = 0 AND ISNULL(SC.ysnFarmerPaysFreight, 0) = 1 THEN	-ROUND(dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CU.intUnitMeasureId, CS.intUnitMeasureId, SC.dblFreightRate), 20)
 															WHEN ReceiptCharge.intEntityVendorId <> SS.intEntityId AND  ISNULL(ReceiptCharge.ysnAccrue, 0) = 1 AND ISNULL(SC.ysnFarmerPaysFreight, 0) = 1 THEN	-ROUND(dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CU.intUnitMeasureId, CS.intUnitMeasureId, SC.dblFreightRate), 20)
 														END
-						,[intTaxGroupId]				= NULL--ReceiptCharge.intTaxGroupId
+						,[intTaxGroupId]				= NULL
 					FROM tblICInventoryReceiptCharge ReceiptCharge
 					JOIN tblICItem Item 
 						ON Item.intItemId = ReceiptCharge.intChargeId
@@ -1500,6 +1500,8 @@ BEGIN TRY
 					JOIN tblSCScaleSetup ScaleSetup 
 						ON ScaleSetup.intScaleSetupId = SC.intScaleSetupId 
 							AND ScaleSetup.intFreightItemId = ReceiptCharge.[intChargeId]
+					LEFT JOIN tblEMEntityLocation EM 
+						ON EM.intEntityId = ReceiptCharge.intEntityVendorId
 					WHERE SST.intSettleStorageId = @intSettleStorageId
 					AND 
 					(
@@ -1641,7 +1643,17 @@ BEGIN TRY
 					WHERE intBillId = @intCreatedBillId 
 						AND CASE WHEN @ysnDPOwnedType = 1 THEN CASE WHEN intInventoryReceiptChargeId IS NULL THEN 1 ELSE 0 END ELSE 1 END = 1
 
+					UPDATE APD
+					SET APD.intTaxGroupId = dbo.fnGetTaxGroupIdForVendor(APB.intEntityId,@intCompanyLocationId,APD.intItemId,EM.intEntityLocationId,EM.intFreightTermId)
+					FROM tblAPBillDetail APD 
+					INNER JOIN tblAPBill APB
+						ON APD.intBillId = APB.intBillId
+					LEFT JOIN tblEMEntityLocation EM ON EM.intEntityId = APB.intEntityId
+					INNER JOIN @detailCreated ON intBillDetailId = intId
+					WHERE APD.intTaxGroupId IS NULL
+					
 					EXEC [uspAPUpdateVoucherDetailTax] @detailCreated
+
 
 					IF @@ERROR <> 0
 						GOTO SettleStorage_Exit;
