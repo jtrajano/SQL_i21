@@ -48,7 +48,7 @@ BEGIN
 							WHEN @intLotId IS NULL AND dbo.fnGetItemLotType(@intItemId) = 0 THEN 
 								dbo.fnCalculateCostBetweenUOM(ISNULL(@intCostUOMId, @intItemUOMId), @intGrossUOMId, @dblUnitCost) 
 													
-							ELSE 
+							WHEN @intLotId IS NOT NULL AND ISNULL(@dblItemNetWgtVolume, 0) <> ISNULL(@dblLotNetWgtVolume, 0) THEN 
 								/*
 								--------------------------------------------------------------------------------------------------------
 								-- Cleaned weight scenario. 
@@ -68,6 +68,9 @@ BEGIN
 									)
 									,ISNULL(@dblLotNetWgtVolume, 1) 
 								)
+							ELSE
+								dbo.fnCalculateCostBetweenUOM(ISNULL(@intCostUOMId, @intItemUOMId), @intGrossUOMId, @dblUnitCost) 
+
 					END 
 
 				-- If Gross/Net UOM is missing, 
@@ -88,7 +91,8 @@ BEGIN
 	SET @result = 
 		-- Then convert the cost to the sub-currency value. 
 		CASE	WHEN ISNULL(@ysnSubCurrency, 0) = 1 AND ISNULL(@intSubCurrencyCents, 1) NOT IN (0, 1) THEN 
-					@result / @intSubCurrencyCents 
+					--@result / @intSubCurrencyCents 
+					dbo.fnDivide(@result, @intSubCurrencyCents) 
 				ELSE 
 					@result
 		END
