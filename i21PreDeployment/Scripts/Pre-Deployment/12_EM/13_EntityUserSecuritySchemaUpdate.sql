@@ -116,6 +116,13 @@ BEGIN
 		EXEC('delete tblSMUserSecurity where strUserName not in (select strUserName from tblEMEntityCredential) ') 
 
 		print ('*** checking security with no entity ***')
+
+		IF NOT EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE COLUMN_NAME = 'intUserSecurityID' AND TABLE_NAME = 'tblSMUserSecurity')
+		BEGIN
+			ALTER TABLE tblSMUserSecurity
+			ADD intUserSecurityID INT NULL
+		END
+
 		exec('
 			if (object_id(''tempdb..#tmpNullSecurity'')) is not null
 				drop table #tmpNullSecurity
@@ -245,7 +252,7 @@ BEGIN
 			DROP TABLE ##UserSecurityConstraint
 		END
 
-		create table ##XXEntityForTM(id int identity(1,1))
+		create table ##XXEntityForTM(id int identity(1,1), cmd nvarchar(max), xtype int)
 	
 	
 	END

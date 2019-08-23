@@ -89,7 +89,7 @@ BEGIN
 			INSERT INTO @EmployeeConstraint
 			SELECT
 				''ALTER TABLE '' + R.TABLE_NAME + '' DROP CONSTRAINT ['' + R.CONSTRAINT_NAME + '']''
-				+ '' ; UPDATE B SET B.'' + R.COLUMN_NAME + '' = A.intUserSecurityId FROM tblPREmployee A JOIN '' + R.TABLE_NAME + '' B ON A.intEmployeeId = B.'' + R.COLUMN_NAME   + 
+				+ '' ; UPDATE B SET B.'' + R.COLUMN_NAME + '' = A.intUserSecurityId FROM tblPREmployee A JOIN '' + R.TABLE_NAME + '' B ON A.intEntityId = B.'' + R.COLUMN_NAME   + 
 				'' where A.intUserSecurityId is not null'' Stement
 			FROM INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE U
 			INNER JOIN INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS FK
@@ -106,21 +106,21 @@ BEGIN
 
 			UPDATE a set a.strEntityNo = b.strEmployeeId from tblEMEntity a
 			join tblPREmployee b
-				on a.intEntityId = b.intEmployeeId
+				on a.intEntityId = b.intEntityId
 			where a.strEntityNo = '''' or a.strEntityNo is null
 
 
 			update a  set a.ysnDefaultLocation = 1, strLocationName = b.strEmployeeId + '' Location''
 			from tblEMEntityLocation a
 					join tblPREmployee b
-						on a.intEntityId = b.intEmployeeId
-					where b.intEmployeeId not in 
+						on a.intEntityId = b.intEntityId
+					where b.intEntityId not in 
 						(select intEntityId 
 							from  (select intEntityId, count(*) c 
 									from tblEMEntityLocation 
 										where ysnDefaultLocation = 1 
 											and intEntityId in (select 
-																	intEmployeeId 
+																	intEntityId 
 																		from tblPREmployee)  group by intEntityId) a where  c > 0)
 
 				IF OBJECT_ID(''tempdb..#tmp'') IS NOT NULL DROP TABLE #tmp
@@ -138,7 +138,7 @@ BEGIN
 
 			while exists(select top 1 1 from #tmp)
 			begin
-				select top 1 @curInt = intEmployeeId from #tmp
+				select top 1 @curInt = intEntityId from #tmp
 
 				if not exists(select top 1 1 from tblEMEntityToContact where intEntityId = @curInt)
 				begin
@@ -157,7 +157,7 @@ BEGIN
 						@cPhone2 = strEmergencyPhone2,
 						@cRelation = ''Relation: '' + strEmergencyRelation
 
-					from #tmp where intEmployeeId = @curInt
+					from #tmp where intEntityId = @curInt
 
 					insert into tblEMEntity(strName, strContactNumber)
 					values (@mName, '''')
@@ -179,7 +179,7 @@ BEGIN
 				
 				end
 
-				delete from #tmp where intEmployeeId = @curInt
+				delete from #tmp where intEntityId = @curInt
 	
 			end
 
@@ -193,11 +193,12 @@ BEGIN
 				DELETE FROM @EmployeeConstraint WHERE Stement = @CurStatement
 			END
 
-			EXEC(''update tblPREmployee set intEmployeeId = intUserSecurityId, intEntityId = intUserSecurityId where intUserSecurityId is not null'')
+		--	EXEC(''update tblPREmployee set intEmployeeId = intUserSecurityId, intEntityId = intUserSecurityId where intUserSecurityId is not null'')
+	     	EXEC(''update tblPREmployee set intEntityId = intUserSecurityId where intUserSecurityId is not null'')
 
 			INSERT INTO tblEMEntityType(intEntityId,strType, intConcurrencyId)
-		SELECT intEmployeeId,''Employee'', 0 FROM tblPREmployee 
-			where intEmployeeId not in (SELECT intEntityId FROM 
+		SELECT intEntityId,''Employee'', 0 FROM tblPREmployee 
+			where intEntityId not in (SELECT intEntityId FROM 
 											tblEMEntityType where strType = ''Employee'')
 
 

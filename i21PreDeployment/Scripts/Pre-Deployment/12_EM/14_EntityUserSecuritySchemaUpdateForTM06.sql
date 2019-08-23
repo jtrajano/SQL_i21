@@ -27,14 +27,16 @@ BEGIN
 
 	IF NOT EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = '##XXEntityForTM' and [COLUMN_NAME] = 'cmd')
 	BEGIN
-		ALTER TABLE ##XXEntityForTM
-		ADD cmd nvarchar(max)
+	PRINT 'NONE'
+		--ALTER TABLE ##XXEntityForTM
+		--ADD cmd nvarchar(max)
 	END	
 
 	IF NOT EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = '##XXEntityForTM' and [COLUMN_NAME] = 'xtype')
 	BEGIN
-		ALTER TABLE ##XXEntityForTM
-		ADD xtype int
+	PRINT 'NONE'
+		--ALTER TABLE ##XXEntityForTM
+		--ADD xtype int
 	END	
 
 	insert into ##XXEntityForTM(cmd,xtype)
