@@ -789,9 +789,20 @@ WHERE ID.[intInventoryShipmentChargeId] IS NULL
 		)
 	AND ID.[strType] NOT IN ('Card Fueling Transaction','CF Tran','CF Invoice')
     AND ISNULL(ID.[strItemType], '') <> 'Other Charge'
-	AND (ISNULL(RI.[intInvoiceId], 0) = 0 OR (ISNULL(RI.[intInvoiceId], 0) <> 0 AND ID.[intTicketId] IS NOT NULL))
+	AND (ISNULL(RI.[intInvoiceId], 0) = 0 OR (ISNULL(RI.[intInvoiceId], 0) <> 0 AND (ID.intLoadDetailId IS NULL OR ID.[intTicketId] IS NOT NULL)))
 
 EXEC dbo.[uspCTInvoicePosted] @ItemsFromInvoice, @UserId
+
+--UPDATE CONTRACT SCHEDULED QTY FOR RETURN CREDIT MEMO
+WHILE EXISTS (SELECT TOP 1 NULL FROM @ItemsFromInvoice WHERE strTransactionType = 'Credit Memo' AND intLoadDetailId IS NULL)
+	BEGIN
+		DECLARE @intInvoiceContractId INT
+		SELECT TOP 1 @intInvoiceContractId = intInvoiceId FROM @ItemsFromInvoice WHERE strTransactionType = 'Credit Memo' AND intLoadDetailId IS NULL
+
+		EXEC dbo.uspARUpdateContractOnInvoice @intInvoiceContractId, @Post, @UserId, 1
+
+		DELETE FROM @ItemsFromInvoice WHERE intInvoiceId = @intInvoiceContractId
+	END
 
 --UPDATE ITEM CONTRACT BALANCE
 DECLARE @tblItemContracts CTItemContractTable
