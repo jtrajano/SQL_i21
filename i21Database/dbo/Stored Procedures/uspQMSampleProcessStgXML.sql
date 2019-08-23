@@ -546,28 +546,28 @@ BEGIN TRY
 						)
 			END
 
-			IF @intContractDetailRefId IS NULL
-				AND @strPartyName IS NOT NULL
-				AND NOT EXISTS (
-					SELECT 1
-					FROM tblEMEntity t
-					JOIN tblEMEntityType ET ON ET.intEntityId = t.intEntityId
-					WHERE ET.strType IN (
-							'Vendor'
-							,'Customer'
-							)
-						AND t.strName = @strPartyName
-						AND t.strEntityNo <> ''
-					)
-			BEGIN
-				SELECT @strErrorMessage = 'Party ' + @strPartyName + ' is not available.'
+			--IF @intContractDetailRefId IS NULL
+			--	AND @strPartyName IS NOT NULL
+			--	AND NOT EXISTS (
+			--		SELECT 1
+			--		FROM tblEMEntity t
+			--		JOIN tblEMEntityType ET ON ET.intEntityId = t.intEntityId
+			--		WHERE ET.strType IN (
+			--				'Vendor'
+			--				,'Customer'
+			--				)
+			--			AND t.strName = @strPartyName
+			--			AND t.strEntityNo <> ''
+			--		)
+			--BEGIN
+			--	SELECT @strErrorMessage = 'Party ' + @strPartyName + ' is not available.'
 
-				RAISERROR (
-						@strErrorMessage
-						,16
-						,1
-						)
-			END
+			--	RAISERROR (
+			--			@strErrorMessage
+			--			,16
+			--			,1
+			--			)
+			--END
 
 			IF @strTestedByName IS NOT NULL
 				AND NOT EXISTS (
@@ -1100,15 +1100,15 @@ BEGIN TRY
 			FROM tblICLotStatus t
 			WHERE t.strSecondaryStatus = @strLotStatus
 
-			SELECT @intEntityId = t.intEntityId
-			FROM tblEMEntity t
-			JOIN tblEMEntityType ET ON ET.intEntityId = t.intEntityId
-			WHERE ET.strType IN (
-					'Vendor'
-					,'Customer'
-					)
-				AND t.strName = @strPartyName
-				AND t.strEntityNo <> ''
+			--SELECT @intEntityId = t.intEntityId
+			--FROM tblEMEntity t
+			--JOIN tblEMEntityType ET ON ET.intEntityId = t.intEntityId
+			--WHERE ET.strType IN (
+			--		'Vendor'
+			--		,'Customer'
+			--		)
+			--	AND t.strName = @strPartyName
+			--	AND t.strEntityNo <> ''
 
 			SELECT @intTestedById = t.intEntityId
 			FROM tblEMEntity t
