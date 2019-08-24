@@ -8420,4 +8420,7 @@
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\CT\5_DataFix.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="dbo\Stored Procedures\uspCTSyncPriceAndDerivative.sql" />
+  </ItemGroup>
 </Project>
