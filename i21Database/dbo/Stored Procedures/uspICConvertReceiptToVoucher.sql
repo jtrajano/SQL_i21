@@ -233,37 +233,6 @@ BEGIN
 		FROM dbo.fnICGeneratePayablesTaxes(@voucherItems)
 	END
 
-	--IF NOT EXISTS(SELECT TOP 1 1 FROM @voucherItems) AND @intScreenId = @intScreenId_InventoryReceipt
-	--BEGIN
-	--	EXEC uspICRaiseError 80226, @strReceiptNumber;
-	--	RETURN -80226; 	
-	--END
-
-	---- Check if we can convert the IR to Voucher
-	--IF NOT EXISTS (
-	--	SELECT	TOP 1 1 
-	--	FROM	tblICInventoryReceiptItem ri INNER JOIN @voucherItems vi
-	--				ON ri.intInventoryReceiptItemId = vi.intInventoryReceiptItemId
-	--	WHERE	ISNULL(ri.dblOpenReceive, 0) <> ISNULL(ri.dblBillQty, 0)
-	--) AND NOT EXISTS (
-	--	SELECT TOP 1 1 FROM @voucherItems WHERE intInventoryReceiptChargeId IS NOT NULL
-	--)
-	--BEGIN 
-	--	IF @billTypeToUse = @type_Voucher
-	--	BEGIN
-	--		-- Voucher is no longer needed. All items have Voucher. 
-	--		EXEC uspICRaiseError 80111; 
-	--		SET @intReturnValue = -80111;
-	--	END
-	--	ELSE
-	--	BEGIN
-	--		-- Debit Memo is no longer needed. All items have Debit Memo. 
-	--		EXEC uspICRaiseError 80110; 
-	--		SET @intReturnValue = -80110;
-	--	END
-	--	GOTO Post_Exit;
-	--END 
-
 	-- Call the AP sp to convert the IR to Voucher. 
 	BEGIN 
 		DECLARE @throwedError AS NVARCHAR(1000);
@@ -276,26 +245,48 @@ BEGIN
 			,@error = @throwedError OUTPUT
 			,@createdVouchersId = @intBillId OUTPUT
 
+		-- Handle errors thrown by AP
+		IF NULLIF(@throwedError, '') IS NOT NULL
+		BEGIN
+			RAISERROR(@throwedError, 11, 1)
+			RETURN -11
+			GOTO Post_Exit;
+		END
+		
 		IF @intBillId IS NULL AND @intScreenId = @intScreenId_InventoryReceipt
 		BEGIN
-			IF @billTypeToUse = @type_Voucher
+			IF EXISTS(SELECT * 
+				FROM vyuICGetInventoryReceiptVoucher
+				WHERE intInventoryReceiptId = @intReceiptId
+					AND dblQtyToVoucher = dblQtyToReceive
+			)
 			BEGIN
-				RAISERROR('You cannot voucher this receipt.', 11, 1)
-				RETURN -11
+				IF @billTypeToUse = @type_Voucher
+				BEGIN
+					-- Voucher is no longer needed. All items have Voucher. 
+					EXEC uspICRaiseError 80111; 
+					RETURN -80111;
+				END
+				ELSE
+				BEGIN
+					-- Debit Memo is no longer needed. All items have Debit Memo. 
+					EXEC uspICRaiseError 80110; 
+					SET @intReturnValue = -80110;
+				END
 			END
 			ELSE
 			BEGIN
-				-- Debit Memo is no longer needed. All items have Debit Memo. 
-				RAISERROR('You cannot convert this to debit memo.', 11, 1)
-				RETURN -11
+				IF @billTypeToUse = @type_Voucher
+				BEGIN
+					RAISERROR('There are no items to voucher.', 11, 1)
+					RETURN -11
+				END
+				ELSE
+				BEGIN
+					RAISERROR('You cannot convert this to debit memo.', 11, 1)
+					RETURN -11
+				END
 			END
-			GOTO Post_Exit;
-		END
-
-		IF(@throwedError <> '')
-		BEGIN
-			RAISERROR(@throwedError, 16, 1);
-			SET @intReturnValue = -89999;
 			GOTO Post_Exit;
 		END
 	END 
