@@ -23,6 +23,8 @@ BEGIN TRY
 	DECLARE @strVoucher NVARCHAR(20)
 	DECLARE @success AS BIT
 
+	DECLARE @dblOldCost DECIMAL(24, 10)
+
 	DECLARE @SettleStorage AS TABLE 
 	(
 		 intSettleStorageKey INT IDENTITY(1, 1)
@@ -86,7 +88,20 @@ BEGIN TRY
 			SELECT @LocationId = SS.intCompanyLocationId ,@intCommodityStockUomId =SS.intCommodityStockUomId 
 			FROM tblGRSettleStorage SS
 			WHERE SS.intSettleStorageId = @intSettleStorageId
-
+			
+			SELECT TOP 1 @dblOldCost = ISNULL(a.dblLastSettle,0) + ISNULL(e.dblBasis,0)
+			FROM tblRKFutSettlementPriceMarketMap a
+			JOIN tblRKFuturesSettlementPrice b
+				ON b.intFutureSettlementPriceId = a.intFutureSettlementPriceId
+			JOIN tblRKFuturesMonth c
+				ON c.intFutureMonthId = a.intFutureMonthId
+			JOIN tblRKFutureMarket d
+				ON d.intFutureMarketId = b.intFutureMarketId
+			JOIN tblCTContractDetail e
+				ON e.intFutureMarketId = b.intFutureMarketId
+			WHERE e.intContractDetailId = @intBasisContractDetailId
+			ORDER BY b.dtmPriceDate DESC
+			
 				DELETE FROM @voucherDetailStorage
 				------------------------------Insert Inventory Item-------------------------------------
 				INSERT INTO @voucherDetailStorage 
@@ -96,6 +111,7 @@ BEGIN TRY
 					,[intAccountId]
 					,[dblQuantityToBill]
 					,[strMiscDescription]
+					,[dblOldCost]
 					,[dblCost]
 					,[intContractHeaderId]
 					,[intContractDetailId]
@@ -116,6 +132,7 @@ BEGIN TRY
 			,[intAccountId]			= [dbo].[fnGetItemGLAccount](Item.intItemId, ItemLoc.intItemLocationId, 'AP Clearing')
 			,[dblQuantityToBill]	= CASE WHEN SST.dblUnits <= SC.dblUnits THEN ROUND(SST.dblUnits,2) ELSE ROUND(SC.dblUnits,2) END
 			,[strMiscDescription]	= Item.[strItemNo]
+			,[dblOldCost]			= @dblOldCost
 			,[dblCost]				= @dblCashPrice
 			,intContractHeaderId	= @intBasisContractHeaderId
 			,intContractDetailId	= @intBasisContractDetailId
@@ -184,7 +201,7 @@ BEGIN TRY
 			 [intCustomerStorageId]   = SS.[intCustomerStorageId]
 			,[intItemId]			  = SS.[intItemId]
 			,[intAccountId]			  = [dbo].[fnGetItemGLAccount](Item.intItemId, ItemLoc.intItemLocationId, 'AP Clearing')
-			,[dblQuantityToBill]		  = SS.dblStorageUnits
+			,[dblQuantityToBill]	  = SS.dblStorageUnits
 			,[strMiscDescription]	  = Item.[strItemNo]
 			,[dblCost]				  = SS.dblDiscountUnPaid
 			,[intContractHeaderId]	  = @intBasisContractHeaderId
