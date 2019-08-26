@@ -8264,6 +8264,7 @@
     <Build Include="dbo\Stored Procedures\uspAREAImportInvoice.sql" />
     <None Include="Scripts\Post-Deployment\GR\SC_ScaleLVControlIntegration.sql" />
     <Build Include="dbo\Views\vyuARGetPrepaidsAndCreditMemos.sql" />
+    <Build Include="dbo\Functions\fnARCustomerAgingReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
