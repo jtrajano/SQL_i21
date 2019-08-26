@@ -5,6 +5,7 @@
 	[intMeterAccountId] INT NOT NULL,
     [dtmTransaction] DATETIME NOT NULL DEFAULT (GETDATE()), 
 	[strInvoiceComment] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+    [strBatchId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[intInvoiceId] INT NULL,
 	[ysnPosted] BIT NULL DEFAULT((0)),
 	[dtmPostedDate] DATETIME NULL,

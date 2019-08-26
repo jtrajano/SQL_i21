@@ -7671,6 +7671,8 @@
     <Build Include="dbo\Views\vyuCMRemittanceAdviceReport.sql" />
 	<Build Include="dbo\Stored Procedures\uspMBCreateInvoice.sql" />
 	<Build Include="dbo\Tables\tblMBPostResult.sql" />
+	<Build Include="dbo\Stored Procedures\uspMBUpdateMeterReadingInfo.sql" />
+	
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
