@@ -20,6 +20,9 @@ FROM
 	SELECT intId as intResultId, strBatchNumber, intTransactionId, strTransactionId, strMessage, NULL, strTransactionType, NULL
 	FROM tblARPostResult
 	UNION ALL
+	SELECT intResult as intResultId, strBatchId, intTransactionId, strTransactionId, strDescription, dtmDate, strTransactionType, intEntityId
+	FROM tblMBPostResult
+	UNION ALL
 	SELECT ARIILD.intIntegrationLogDetailId as intResultId, ARIILD.strBatchId as strBatchNumber, ARIILD.intInvoiceId as intTransactionId, ARIILD.[strPostedTransactionId] as strTransactionId, ARIILD.strPostingMessage as strMessage, ARIIL.dtmDate as dtmDate, ARIILD.strTransactionType, ARIIL.[intEntityId] as intEntityId
 	FROM tblARInvoiceIntegrationLogDetail ARIILD
 	INNER JOIN
