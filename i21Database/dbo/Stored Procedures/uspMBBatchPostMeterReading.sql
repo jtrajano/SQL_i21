@@ -17,16 +17,25 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-BEGIN
-	
-	DECLARE @UserEntityId INT
-	SET @UserEntityId = ISNULL((SELECT [intEntityId] FROM tblSMUserSecurity WHERE [intEntityId] = @UserId), @UserId)
+DECLARE @ErrorSeverity INT
+DECLARE @ErrorState INT
+DECLARE @ErrorNumber INT
 
-	SELECT DISTINCT RecordKey = intMeterReadingId INTO #tmpMeterReadings FROM vyuMBGetMeterReading WHERE ysnPosted = 0
+BEGIN TRY
+	
+	--DECLARE @UserEntityId INT = NULL
+	DECLARE @intCurrency INT = NULL
+	DECLARE @tmpRecord TABLE (intId INT NOT NULL, strMessage NVARCHAR(MAX))
+	--SET @UserEntityId = ISNULL((SELECT [intEntityId] FROM tblSMUserSecurity WHERE [intEntityId] = @UserId), @UserId)
+	SELECT @intCurrency = ISNULL(intDefaultCurrencyId, 1) FROM tblSMCompanyPreference
+
+
+	INSERT INTO @tmpRecord (intId)
+	SELECT DISTINCT intMeterReadingId FROM vyuMBGetMeterReading WHERE ysnPosted = 0
 
 	IF @TransactionId != 'ALL'
 	BEGIN
-		DELETE FROM #tmpMeterReadings WHERE RecordKey NOT IN (SELECT Item FROM [fnSplitStringWithTrim](@TransactionId,',') )
+		DELETE FROM @tmpRecord WHERE intId NOT IN (SELECT Item FROM [fnSplitStringWithTrim](@TransactionId,',') )
 	END
 
 	DECLARE @intRecordKey INT
@@ -34,189 +43,212 @@ BEGIN
 
 	SET @SuccessfulCount = 0
 
-	WHILE (EXISTS(SELECT TOP 1 1 FROM #tmpMeterReadings))
+	DECLARE @intId INT = NULL
+	--DECLARE @strMessage NVARCHAR(MAX) = NULL
+	DECLARE @CursorTran AS CURSOR
+
+	SET @CursorTran = CURSOR FOR
+	SELECT intId FROM @tmpRecord
+
+	OPEN @CursorTran
+	FETCH NEXT FROM @CursorTran INTO @intId
+	WHILE @@FETCH_STATUS = 0
 	BEGIN
-		SELECT TOP 1 @intRecordKey = RecordKey FROM #tmpMeterReadings
+		
+		DECLARE @ynsValid BIT = 1
+		--DECLARE @strMeterReadingError NVARCHAR(MAX) = NULL
+		
+		EXEC [dbo].[uspMBPostMeterReadingValidation]
+			@intMeterReadingId = @intId
+			,@Post = @Post
+			,@ysnRaiseError = 0
+			,@ynsValid = @ynsValid OUTPUT
+			--,@strError = @strMessage OUTPUT
 
-		INSERT INTO @EntriesForInvoice(
-			[strType]
-			,[strSourceTransaction]
-			,[intSourceId]
-			,[strSourceId]
-			,[intInvoiceId]
-			,[intEntityCustomerId]
-			,[intCompanyLocationId]
-			,[intCurrencyId]
-			,[intTermId]
-			,[dtmDate]
-			,[dtmDueDate]
-			,[dtmShipDate]
-			,[intEntitySalespersonId]
-			,[intFreightTermId]
-			,[intShipViaId]
-			,[intPaymentMethodId]
-			,[strPONumber]
-			,[strBOLNumber]
-			,[strComments]
-			,[intShipToLocationId]
-			,[intBillToLocationId]
-			,[ysnTemplate]
-			,[ysnForgiven]
-			,[ysnCalculated]
-			,[ysnSplitted]
-			,[intPaymentId]
-			,[intSplitId]
-			,[intLoadDistributionHeaderId]
-			,[strActualCostId]
-			,[intShipmentId]
-			,[intTransactionId]
-			,[intEntityId]
-			,[ysnResetDetails]
-			,[ysnPost]
-			,[ysnRecap]
-			,[intInvoiceDetailId]
-			,[intItemId]
-			,[ysnInventory]
-			,[strItemDescription]
-			,[intItemUOMId]
-			,[dblQtyOrdered]
-			,[dblQtyShipped]
-			,[dblDiscount]
-			,[dblPrice]
-			,[ysnRefreshPrice]
-			,[strMaintenanceType]
-			,[strFrequency]
-			,[dtmMaintenanceDate]
-			,[dblMaintenanceAmount]
-			,[dblLicenseAmount]
-			,[intTaxGroupId]
-			,[ysnRecomputeTax]
-			,[intSCInvoiceId]
-			,[strSCInvoiceNumber]
-			,[intInventoryShipmentItemId]
-			,[strShipmentNumber]
-			,[intSalesOrderDetailId]
-			,[strSalesOrderNumber]
-			,[intContractHeaderId]
-			,[intContractDetailId]
-			,[intShipmentPurchaseSalesContractId]
-			,[intTicketId]
-			,[intTicketHoursWorkedId]
-			,[intSiteId]
-			,[strBillingBy]
-			,[dblPercentFull]
-			,[dblNewMeterReading]
-			,[dblPreviousMeterReading]
-			,[dblConversionFactor]
-			,[intPerformerId]
-			,[ysnLeaseBilling]
-			,[ysnVirtualMeterReading]
-			,[ysnClearDetailTaxes]					
-			,[intTempDetailIdForTaxes]
-			,[intMeterReadingId]
-			,[ysnUseOriginIdAsInvoiceNumber]
-			,[strInvoiceOriginId]
-		)
-		SELECT
-			[strType]								= 'Meter Billing'
-			,[strSourceTransaction]					= 'Meter Billing'
-			,[intSourceId]							= MRDetail.intMeterReadingId
-			,[strSourceId]							= MRDetail.strTransactionId
-			,[intInvoiceId]							= MRDetail.intInvoiceId
-			,[intEntityCustomerId]					= MRDetail.intEntityCustomerId
-			,[intCompanyLocationId]					= MRDetail.intCompanyLocationId
-			,[intCurrencyId]						= 1
-			,[intTermId]							= MADetail.intTermId
-			,[dtmDate]								= MRDetail.dtmTransaction
-			,[dtmDueDate]							= NULL
-			,[dtmShipDate]							= MRDetail.dtmTransaction
-			,[intEntitySalespersonId]				= Customer.intSalespersonId
-			,[intFreightTermId]						= NULL 
-			,[intShipViaId]							= NULL 
-			,[intPaymentMethodId]					= NULL
-			,[strPONumber]							= NULL
-			,[strBOLNumber]							= ''
-			,[strComments]							= ''
-			,[intShipToLocationId]					= MRDetail.intEntityLocationId
-			,[intBillToLocationId]					= NULL
-			,[ysnTemplate]							= 0
-			,[ysnForgiven]							= 0
-			,[ysnCalculated]						= 0  --0 OS
-			,[ysnSplitted]							= 0
-			,[intPaymentId]							= NULL
-			,[intSplitId]							= NULL
-			,[intLoadDistributionHeaderId]			= NULL
-			,[strActualCostId]						= ''
-			,[intShipmentId]						= NULL
-			,[intTransactionId]						= NULL
-			,[intEntityId]							= @UserEntityId
-			,[ysnResetDetails]						= 0
-			,[ysnPost]								= @Post
-			,[ysnRecap]								= @Recap
-	
-			,[intInvoiceDetailId]					= NULL
-			,[intItemId]							= MRDetail.intItemId
-			,[ysnInventory]							= 1
-			,[strItemDescription]					= MRDetail.strItemDescription
-			,[intItemUOMId]							= MRDetail.intItemUOMId
-			,[dblQtyOrdered]						= 0
-			,[dblQtyShipped]						= SUM(MRDetail.dblQuantitySold)
-			,[dblDiscount]							= 0
-			,[dblPrice]								= MIN(MRDetail.dblNetPrice)
-			,[ysnRefreshPrice]						= 0
-			,[strMaintenanceType]					= ''
-			,[strFrequency]							= ''
-			,[dtmMaintenanceDate]					= NULL
-			,[dblMaintenanceAmount]					= NULL
-			,[dblLicenseAmount]						= NULL
-			,[intTaxGroupId]						= NULL
-			,[ysnRecomputeTax]						= 1
-			,[intSCInvoiceId]						= NULL
-			,[strSCInvoiceNumber]					= ''
-			,[intInventoryShipmentItemId]			= NULL
-			,[strShipmentNumber]					= ''
-			,[intSalesOrderDetailId]				= NULL
-			,[strSalesOrderNumber]					= ''
-			,[intContractHeaderId]					= NULL
-			,[intContractDetailId]					= NULL
-			,[intShipmentPurchaseSalesContractId]	= NULL
-			,[intTicketId]							= NULL
-			,[intTicketHoursWorkedId]				= NULL
-			,[intSiteId]							= NULL
-			,[strBillingBy]							= ''
-			,[dblPercentFull]						= NULL
-			,[dblNewMeterReading]					= NULL
-			,[dblPreviousMeterReading]				= NULL
-			,[dblConversionFactor]					= NULL
-			,[intPerformerId]						= NULL
-			,[ysnLeaseBilling]						= NULL
-			,[ysnVirtualMeterReading]				= NULL
-			,[ysnClearDetailTaxes]					= 1
-			,[intTempDetailIdForTaxes]				= @intRecordKey
-			,[intMeterReadingId]					= @intRecordKey
-			,[ysnUseOriginIdAsInvoiceNumber]		= 1
-			,[strInvoiceOriginId]					= MRDetail.strTransactionId
-		FROM vyuMBGetMeterReadingDetail MRDetail
-		LEFT JOIN vyuMBGetMeterAccountDetail MADetail ON MADetail.intMeterAccountDetailId = MRDetail.intMeterAccountDetailId
-		LEFT JOIN vyuARCustomer Customer ON Customer.[intEntityId] = MRDetail.intEntityCustomerId
-		WHERE MRDetail.intMeterReadingId = @intRecordKey
-		GROUP BY MRDetail.intMeterReadingId
-			, MRDetail.strTransactionId
-			, MRDetail.intEntityCustomerId
-			, MRDetail.intEntityLocationId
-			, MRDetail.intCompanyLocationId
-			, MRDetail.intItemId
-			, MRDetail.strItemDescription
-			, MRDetail.intItemUOMId
-			, MADetail.intTermId
-			, MRDetail.dtmTransaction
-			, Customer.intSalespersonId
-			, MRDetail.intInvoiceId
+		IF(@ynsValid = 1)
+		BEGIN 
+			INSERT INTO @EntriesForInvoice(
+				[strType]
+				,[strSourceTransaction]
+				,[intSourceId]
+				,[strSourceId]
+				,[intInvoiceId]
+				,[intEntityCustomerId]
+				,[intCompanyLocationId]
+				,[intCurrencyId]
+				,[intTermId]
+				,[dtmDate]
+				,[dtmDueDate]
+				,[dtmShipDate]
+				,[intEntitySalespersonId]
+				,[intFreightTermId]
+				,[intShipViaId]
+				,[intPaymentMethodId]
+				,[strPONumber]
+				,[strBOLNumber]
+				,[strComments]
+				,[intShipToLocationId]
+				,[intBillToLocationId]
+				,[ysnTemplate]
+				,[ysnForgiven]
+				,[ysnCalculated]
+				,[ysnSplitted]
+				,[intPaymentId]
+				,[intSplitId]
+				,[intLoadDistributionHeaderId]
+				,[strActualCostId]
+				,[intShipmentId]
+				,[intTransactionId]
+				,[intEntityId]
+				,[ysnResetDetails]
+				,[ysnPost]
+				,[intInvoiceDetailId]
+				,[intItemId]
+				,[ysnInventory]
+				,[strItemDescription]
+				,[intItemUOMId]
+				,[dblQtyOrdered]
+				,[dblQtyShipped]
+				,[dblDiscount]
+				,[dblPrice]
+				,[ysnRefreshPrice]
+				,[strMaintenanceType]
+				,[strFrequency]
+				,[dtmMaintenanceDate]
+				,[dblMaintenanceAmount]
+				,[dblLicenseAmount]
+				,[intTaxGroupId]
+				,[ysnRecomputeTax]
+				,[intSCInvoiceId]
+				,[strSCInvoiceNumber]
+				,[intInventoryShipmentItemId]
+				,[strShipmentNumber]
+				,[intSalesOrderDetailId]
+				,[strSalesOrderNumber]
+				,[intContractHeaderId]
+				,[intContractDetailId]
+				,[intShipmentPurchaseSalesContractId]
+				,[intTicketId]
+				,[intTicketHoursWorkedId]
+				,[intSiteId]
+				,[strBillingBy]
+				,[dblPercentFull]
+				,[dblNewMeterReading]
+				,[dblPreviousMeterReading]
+				,[dblConversionFactor]
+				,[intPerformerId]
+				,[ysnLeaseBilling]
+				,[ysnVirtualMeterReading]
+				,[ysnClearDetailTaxes]					
+				,[intTempDetailIdForTaxes]
+				,[intMeterReadingId]
+				,[ysnUseOriginIdAsInvoiceNumber]
+				,[strInvoiceOriginId]
+			)
+			SELECT
+				[strType]								= 'Meter Billing'
+				,[strSourceTransaction]					= 'Meter Billing'
+				,[intSourceId]							= MRDetail.intMeterReadingId
+				,[strSourceId]							= MRDetail.strTransactionId
+				,[intInvoiceId]							= NULL --NULL Value will create new invoice
+				,[intEntityCustomerId]					= MRDetail.intEntityCustomerId
+				,[intCompanyLocationId]					= MRDetail.intCompanyLocationId
+				,[intCurrencyId]						= @intCurrency
+				,[intTermId]							= MADetail.intTermId
+				,[dtmDate]								= MRDetail.dtmTransaction
+				,[dtmDueDate]							= NULL
+				,[dtmShipDate]							= MRDetail.dtmTransaction
+				,[intEntitySalespersonId]				= Customer.intSalespersonId
+				,[intFreightTermId]						= NULL 
+				,[intShipViaId]							= NULL 
+				,[intPaymentMethodId]					= NULL
+				,[strPONumber]							= NULL
+				,[strBOLNumber]							= ''
+				,[strComments]							= MRDetail.strInvoiceComment
+				,[intShipToLocationId]					= MRDetail.intEntityLocationId
+				,[intBillToLocationId]					= NULL
+				,[ysnTemplate]							= 0
+				,[ysnForgiven]							= 0
+				,[ysnCalculated]						= 0  --0 OS
+				,[ysnSplitted]							= 0
+				,[intPaymentId]							= NULL
+				,[intSplitId]							= NULL
+				,[intLoadDistributionHeaderId]			= NULL
+				,[strActualCostId]						= ''
+				,[intShipmentId]						= NULL
+				,[intTransactionId]						= NULL
+				,[intEntityId]							= @UserId
+				,[ysnResetDetails]						= 1
+				,[ysnPost]								= @Post
+				,[intInvoiceDetailId]					= NULL
+				,[intItemId]							= MRDetail.intItemId
+				,[ysnInventory]							= 1
+				,[strItemDescription]					= MRDetail.strItemDescription
+				,[intItemUOMId]							= MRDetail.intItemUOMId
+				,[dblQtyOrdered]						= 0
+				,[dblQtyShipped]						= SUM(MRDetail.dblQuantitySold)
+				,[dblDiscount]							= 0
+				,[dblPrice]								= MIN(MRDetail.dblNetPrice)
+				,[ysnRefreshPrice]						= 0
+				,[strMaintenanceType]					= ''
+				,[strFrequency]							= ''
+				,[dtmMaintenanceDate]					= NULL
+				,[dblMaintenanceAmount]					= NULL
+				,[dblLicenseAmount]						= NULL
+				,[intTaxGroupId]						= EntityLocation.intTaxGroupId
+				,[ysnRecomputeTax]						= 1
+				,[intSCInvoiceId]						= NULL
+				,[strSCInvoiceNumber]					= ''
+				,[intInventoryShipmentItemId]			= NULL
+				,[strShipmentNumber]					= ''
+				,[intSalesOrderDetailId]				= NULL
+				,[strSalesOrderNumber]					= ''
+				,[intContractHeaderId]					= NULL
+				,[intContractDetailId]					= NULL
+				,[intShipmentPurchaseSalesContractId]	= NULL
+				,[intTicketId]							= NULL
+				,[intTicketHoursWorkedId]				= NULL
+				,[intSiteId]							= NULL
+				,[strBillingBy]							= ''
+				,[dblPercentFull]						= NULL
+				,[dblNewMeterReading]					= NULL
+				,[dblPreviousMeterReading]				= NULL
+				,[dblConversionFactor]					= NULL
+				,[intPerformerId]						= NULL
+				,[ysnLeaseBilling]						= NULL
+				,[ysnVirtualMeterReading]				= NULL
+				,[ysnClearDetailTaxes]					= 1
+				,[intTempDetailIdForTaxes]				= @intId
+				,[intMeterReadingId]					= @intId
+				,[ysnUseOriginIdAsInvoiceNumber]		= 1
+				,[strInvoiceOriginId]					= MRDetail.strTransactionId
+			FROM vyuMBGetMeterReadingDetail MRDetail
+			LEFT JOIN vyuMBGetMeterAccountDetail MADetail ON MADetail.intMeterAccountDetailId = MRDetail.intMeterAccountDetailId
+			LEFT JOIN vyuARCustomer Customer ON Customer.[intEntityId] = MRDetail.intEntityCustomerId
+			LEFT JOIN tblEMEntityLocation EntityLocation ON EntityLocation.intEntityLocationId = MRDetail.intEntityLocationId AND MRDetail.intEntityCustomerId = EntityLocation.intEntityId
+			WHERE MRDetail.intMeterReadingId = @intId
+			AND MRDetail.dblQuantitySold > 0
+			GROUP BY MRDetail.intMeterReadingId
+				, MRDetail.strTransactionId
+				, MRDetail.intEntityCustomerId
+				, MRDetail.intEntityLocationId
+				, MRDetail.intCompanyLocationId
+				, MRDetail.intItemId
+				, MRDetail.strItemDescription
+				, MRDetail.intItemUOMId
+				, MADetail.intTermId
+				, MRDetail.dtmTransaction
+				, Customer.intSalespersonId
+				, MRDetail.strInvoiceComment
+				, EntityLocation.intTaxGroupId
+		END
+		--ELSE
+		--BEGIN
+		--	UPDATE @tmpRecord SET strMessage = @strMessage WHERE intId = @intId
+		--END
 
-		DELETE FROM #tmpMeterReadings WHERE RecordKey = @intRecordKey
+		FETCH NEXT FROM @CursorTran INTO @intId
 	END
-
-	DROP TABLE #tmpMeterReadings
 
 	BEGIN TRANSACTION
 
@@ -309,7 +341,25 @@ BEGIN
 	END
 	ELSE
 	BEGIN
-		ROLLBACK TRANSACTION
+		IF(@@TRANCOUNT > 0)
+		BEGIN
+			ROLLBACK TRANSACTION
+		END
 	END
 
-END
+END TRY
+BEGIN CATCH
+		
+	IF(@@TRANCOUNT > 0)
+	BEGIN
+		ROLLBACK TRANSACTION
+	END
+	
+	SET @ErrorMessage = ERROR_MESSAGE()
+		--SET @ErrorMessage = ERROR_MESSAGE()
+	SET @ErrorSeverity = ERROR_SEVERITY()
+	SET @ErrorState = ERROR_STATE()
+	SET @ErrorNumber   = ERROR_NUMBER()
+		
+	RAISERROR (@ErrorMessage , @ErrorSeverity, @ErrorState ,@ErrorNumber)
+END CATCH
