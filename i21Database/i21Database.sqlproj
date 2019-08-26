@@ -8034,7 +8034,7 @@
 	<Build Include="dbo\Stored Procedures\uspMBCreateInvoice.sql" />
     <Build Include="dbo\Tables\tblMBPostResult.sql" />
     <Build Include="dbo\Stored Procedures\uspMBUpdateMeterReadingInfo.sql" />
-
+    <Build Include="dbo\Stored Procedures\uspGRCalculateSettleStorageFeeForContract.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
