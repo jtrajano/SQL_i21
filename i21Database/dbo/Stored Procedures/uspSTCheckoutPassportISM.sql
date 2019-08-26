@@ -330,18 +330,15 @@ BEGIN
 			  , intConcurrencyId	= 1
 			  , intCalculationId	= TempChk.intCalculationId
 			FROM @tblTempForCalculation TempChk
-			WHERE CAST(TempChk.intPOSCode AS BIGINT) NOT IN
+			WHERE TempChk.intPOSCode NOT IN
 			(
 				SELECT DISTINCT
-					CAST(UOM.intUpcCode AS BIGINT) AS intUpcCode
-				FROM @tblTemp Chk
-				INNER JOIN vyuSTItemUOMPosCodeFormat UOM
-					ON CAST(Chk.intRegisterUpcCode AS BIGINT) = CAST(UOM.intUpcCode AS BIGINT)
+					UOM.intUpcCode AS intPOSCode
+				FROM tblICItemUOM UOM
 				INNER JOIN dbo.tblICItem I 
 					ON I.intItemId = UOM.intItemId
 				INNER JOIN dbo.tblICItemLocation IL 
 					ON IL.intItemId = I.intItemId
-					AND UOM.intLocationId = IL.intLocationId
 				LEFT JOIN dbo.tblICItemPricing P 
 					ON IL.intItemLocationId = P.intItemLocationId 
 					AND I.intItemId = P.intItemId
@@ -350,7 +347,8 @@ BEGIN
 				INNER JOIN dbo.tblSTStore S 
 					ON S.intCompanyLocationId = CL.intCompanyLocationId
 				WHERE S.intStoreId = @intStoreId
-					AND ISNULL(Chk.strItemCodePOSCode, '') != ''
+					AND UOM.strLongUPCCode IS NOT NULL
+					AND UOM.intUpcCode IS NOT NULL
 			)
 			AND ISNULL(TempChk.POSCode, '') != ''
 		-- ==================================================================================================================
@@ -400,13 +398,12 @@ BEGIN
 			  , intConcurrencyId	= 1
 			  , intCalculationId	= TempChk.intCalculationId
 			FROM @tblTempForCalculation TempChk
-			INNER JOIN vyuSTItemUOMPosCodeFormat UOM
-				ON CAST(TempChk.intPOSCode AS BIGINT) = CAST(UOM.intUpcCode AS BIGINT)
+			INNER JOIN tblICItemUOM UOM
+				ON TempChk.intPOSCode = UOM.intUpcCode
 			INNER JOIN dbo.tblICItem I 
 				ON I.intItemId = UOM.intItemId
 			INNER JOIN dbo.tblICItemLocation IL 
 				ON IL.intItemId = I.intItemId
-				AND UOM.intLocationId = IL.intLocationId
 			LEFT JOIN dbo.tblICItemPricing P 
 				ON IL.intItemLocationId = P.intItemLocationId 
 				AND I.intItemId = P.intItemId
@@ -459,13 +456,12 @@ BEGIN
 			  , intConcurrencyId	= 1
 			  , intCalculationId	= TempChk.intCalculationId
 			FROM @tblTempForCalculation TempChk
-			INNER JOIN vyuSTItemUOMPosCodeFormat UOM
-				ON CAST(TempChk.intPOSCode AS BIGINT) = CAST(UOM.intUpcCode AS BIGINT)
+			INNER JOIN tblICItemUOM UOM
+				ON TempChk.intPOSCode = UOM.intUpcCode
 			INNER JOIN dbo.tblICItem I 
 				ON I.intItemId = UOM.intItemId
 			INNER JOIN dbo.tblICItemLocation IL 
 				ON IL.intItemId = I.intItemId
-				AND UOM.intLocationId = IL.intLocationId
 			LEFT JOIN dbo.tblICItemPricing P 
 				ON IL.intItemLocationId = P.intItemLocationId 
 				AND I.intItemId = P.intItemId
@@ -645,13 +641,12 @@ BEGIN
 				INNER JOIN tblSTCheckoutItemMovements im
 					ON TempChk.intCalculationId = im.intCalculationId
 					AND TempChk.intCheckoutId = im.intCheckoutId
-				INNER JOIN vyuSTItemUOMPosCodeFormat UOM
-					ON CAST(TempChk.intPOSCode AS BIGINT) = CAST(UOM.intUpcCode AS BIGINT)
+				INNER JOIN tblICItemUOM UOM
+					ON TempChk.intPOSCode = UOM.intUpcCode
 				INNER JOIN dbo.tblICItem I 
 					ON I.intItemId = UOM.intItemId
 				INNER JOIN dbo.tblICItemLocation IL 
 					ON IL.intItemId = I.intItemId
-					AND UOM.intLocationId = IL.intLocationId
 				LEFT JOIN dbo.tblICItemPricing P 
 					ON IL.intItemLocationId = P.intItemLocationId 
 					AND I.intItemId = P.intItemId

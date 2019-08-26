@@ -620,7 +620,6 @@ BEGIN
 					ON I.intItemId = UOM.intItemId
 				INNER JOIN dbo.tblICItemLocation IL 
 					ON IL.intItemId = I.intItemId
-					AND UOM.intLocationId = IL.intLocationId
 				LEFT JOIN dbo.tblICItemPricing P 
 					ON IL.intItemLocationId = P.intItemLocationId 
 					AND I.intItemId = P.intItemId
