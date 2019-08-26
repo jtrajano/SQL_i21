@@ -7669,6 +7669,8 @@
     <Build Include="dbo\Stored Procedures\uspCFGenerateTransactionExportToThirdPartyCSV.sql" />
     <Build Include="dbo\Tables\tblCFExportFactorEventSequenceNumber.sql" />
     <Build Include="dbo\Views\vyuCMRemittanceAdviceReport.sql" />
+	<Build Include="dbo\Stored Procedures\uspMBCreateInvoice.sql" />
+	<Build Include="dbo\Tables\tblMBPostResult.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
