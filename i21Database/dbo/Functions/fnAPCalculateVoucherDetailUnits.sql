@@ -2,7 +2,7 @@
 (
 	@billDetailId INT
 )
-RETURNS @returnTable TABLE(dblTotalUnits DECIMAL(18,6))
+RETURNS @returnTable TABLE(dblTotalUnits DECIMAL(38,15))
 AS
 BEGIN
 

@@ -7,7 +7,7 @@
 CREATE FUNCTION [dbo].[fnAPValidatePODetailQtyToReceive]
 (
 	@poDetailId INT,
-	@quantity DECIMAL(18,6)
+	@quantity DECIMAL(38,15)
 )
 RETURNS DECIMAL(18,6)
 AS
