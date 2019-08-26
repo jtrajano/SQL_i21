@@ -70,12 +70,12 @@ BEGIN
 					, intConcurrencyId
 				)
 				SELECT DISTINCT
-					'NO MATCHING TAG' as strErrorType
-					, 'No Matching Register Tax Code' as strErrorMessage
-					, 'taxrateBase sysid' as strRegisterTag
-					, ISNULL(Chk.taxrateBasesysid, '') AS strRegisterTagValue
-					, @intCheckoutId
-					, 1
+					strErrorType			= 'NO MATCHING TAG'
+					, strErrorMessage		= 'No Matching Register Tax Code'
+					, strRegisterTag		= 'taxrateBase sysid'
+					, strRegisterTagValue	= ISNULL(Chk.taxrateBasesysid, '')
+					, intCheckoutId			= @intCheckoutId
+					, intConcurrencyId		= 1
 				FROM #tempCheckoutInsert Chk
 				WHERE ISNULL(Chk.taxrateBasesysid, '') NOT IN
 				(
@@ -89,70 +89,18 @@ BEGIN
 						JOIN tblSTCheckoutSalesTaxTotals STT
 							ON ISNULL(Chk.taxrateBasesysid, '') COLLATE DATABASE_DEFAULT = STT.strTaxNo
 						WHERE STT.intCheckoutId = @intCheckoutId
-						AND ISNULL(Chk.taxrateBasesysid, '') != ''
+							AND ISNULL(Chk.taxrateBasesysid, '') != ''
+							AND CAST(ISNULL(Chk.taxrateBasetaxRate, 0) AS DECIMAL(18,6)) != 0.000000
 					) AS tbl
 				)
-				AND ISNULL(Chk.taxrateBasesysid, '') != ''
+					AND ISNULL(Chk.taxrateBasesysid, '') != ''
+					AND CAST(ISNULL(Chk.taxrateBasetaxRate, 0) AS DECIMAL(18,6)) != 0.000000
 				-- ------------------------------------------------------------------------------------------------------------------  
 				-- END Get Error logs. Check Register XML that is not configured in i21.  
 				-- ==================================================================================================================
 
 			  
 
-			  ------ Most probably this is not neccesary because sales tax totals is already preloaded
-     --         IF NOT EXISTS(SELECT 1 FROM dbo.tblSTCheckoutSalesTaxTotals WHERE intCheckoutId = @intCheckoutId)
-     --         BEGIN
-     --                      DECLARE @tbl TABLE
-     --                      (
-     --                             intCnt INT,
-     --                             intAccountId INT,
-     --                             strAccountId nvarchar(100),
-     --                             intItemId INT,
-     --                             strItemNo NVARCHAR(100),
-     --                             strItemDescription NVARCHAR(100)
-     --                      )
-     --                      INSERT INTO @tbl
-     --                      EXEC uspSTGetSalesTaxTotalsPreload @intStoreId
-     --                      INSERT INTO dbo.tblSTCheckoutSalesTaxTotals
-     --                      (
-     --                             intCheckoutId
-     --                             , strTaxNo
-     --                             , dblTotalTax
-     --                             , dblTaxableSales
-     --                             , dblTaxExemptSales
-     --                             , intSalesTaxAccount
-     --                             , intConcurrencyId
-     --                      )
-     --                      SELECT
-     --                             @intCheckoutId
-     --                             , intCnt
-     --                             , NULL
-     --                             , NULL
-     --                             , NULL
-     --                             , intAccountId
-     --                             , 0
-     --                      FROM @tbl
-     --         END
-      
-			  ---- Tax FILE
-     --         UPDATE STT
-     --         SET dblTotalTax = (
-     --                             SELECT CAST(ISNULL(taxInfosalesTax, 0) AS DECIMAL(18,6))
-     --                             FROM #tempCheckoutInsert
-     --                             WHERE ISNULL(taxrateBasesysid, '') COLLATE DATABASE_DEFAULT = STT.strTaxNo
-     --                           ) 
-			  --, dblTaxableSales =  (
-     --                                   SELECT CAST(ISNULL(taxInfotaxableSales, 0) AS DECIMAL(18,6))
-     --                                   FROM #tempCheckoutInsert
-     --                                   WHERE ISNULL(taxrateBasesysid, '') COLLATE DATABASE_DEFAULT = STT.strTaxNo
-     --                                )          
-			  --, dblTaxExemptSales = (
-					--					SELECT CAST(ISNULL(taxInfotaxExemptSales, 0) AS DECIMAL(18,6))
-					--					FROM #tempCheckoutInsert
-					--					WHERE ISNULL(taxrateBasesysid, '') COLLATE DATABASE_DEFAULT = STT.strTaxNo
-					--				)  
-     --         FROM dbo.tblSTCheckoutSalesTaxTotals STT
-     --         WHERE STT.intCheckoutId = @intCheckoutId
 
 				-- Tax FILE
 				  UPDATE STT
@@ -163,6 +111,7 @@ BEGIN
 				  INNER JOIN dbo.tblSTCheckoutSalesTaxTotals STT
 					ON ISNULL(Chk.taxrateBasesysid, '') COLLATE DATABASE_DEFAULT = STT.strTaxNo
 				  WHERE STT.intCheckoutId = @intCheckoutId
+					AND CAST(ISNULL(Chk.taxrateBasetaxRate, 0) AS DECIMAL(18,6)) != 0.000000
 
               -- Difference between Passport and Radiant
               -- 1. Passport does not have 'TenderTransactionsCount' tag in MSM register file

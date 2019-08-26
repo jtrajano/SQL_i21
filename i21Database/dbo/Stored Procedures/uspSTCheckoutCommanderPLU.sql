@@ -159,25 +159,22 @@ BEGIN
 			, intConcurrencyId
 		)
 		SELECT DISTINCT
-			'NO MATCHING TAG' as strErrorType
-			, 'No Matching UPC/Item in Inventory' as strErrorMessage
-			, 'upc' as strRegisterTag
-			, ISNULL(Chk.strpluBaseupc, '') AS strRegisterTagValue
-			, @intCheckoutId
-			, 1
+			strErrorType			= 'NO MATCHING TAG'
+			, strErrorMessage		= 'No Matching UPC/Item in Inventory'
+			, strRegisterTag		= 'upc'
+			, strRegisterTagValue	= LEFT(Chk.strpluBaseupc, LEN (Chk.strpluBaseupc)-1) -- Remove Check digit on last character
+			, intCheckoutId			= @intCheckoutId
+			, intConcurrencyId		= 1
 		FROM @tblTemp Chk
-		WHERE CAST(Chk.intRegisterUpcCode AS BIGINT) NOT IN
+		WHERE Chk.intRegisterUpcCode NOT IN
 		(
 			SELECT DISTINCT
-				CAST(UOM.intUpcCode AS BIGINT) AS intUpcCode
-			FROM @tblTemp Chk
-			INNER JOIN vyuSTItemUOMPosCodeFormat UOM
-				ON CAST(Chk.intRegisterUpcCode AS BIGINT) = CAST(UOM.intUpcCode AS BIGINT)
+				UOM.intUpcCode AS intRegisterUpcCode
+			FROM tblICItemUOM UOM
 			INNER JOIN dbo.tblICItem I 
 				ON I.intItemId = UOM.intItemId
 			INNER JOIN dbo.tblICItemLocation IL 
 				ON IL.intItemId = I.intItemId
-				AND UOM.intLocationId = IL.intLocationId
 			LEFT JOIN dbo.tblICItemPricing P 
 				ON IL.intItemLocationId = P.intItemLocationId 
 				AND I.intItemId = P.intItemId
@@ -186,7 +183,8 @@ BEGIN
 			INNER JOIN dbo.tblSTStore S 
 				ON S.intCompanyLocationId = CL.intCompanyLocationId
 			WHERE S.intStoreId = @intStoreId
-				AND ISNULL(Chk.strpluBaseupc, '') != ''
+				AND UOM.strLongUPCCode IS NOT NULL
+				AND UOM.intUpcCode IS NOT NULL
 		)
 			AND ISNULL(Chk.strpluBaseupc, '') != ''
 
@@ -302,18 +300,15 @@ BEGIN
 			  , intConcurrencyId	= 1
 			  , intCalculationId	= TempChk.intCalculationId
 			FROM @tblTempForCalculation TempChk
-			WHERE CAST(TempChk.intPOSCode AS BIGINT) NOT IN
+			WHERE TempChk.intPOSCode NOT IN
 			(
 				SELECT DISTINCT
-					CAST(UOM.intUpcCode AS BIGINT) AS intUpcCode
-				FROM @tblTemp Chk
-				INNER JOIN vyuSTItemUOMPosCodeFormat UOM
-					ON CAST(Chk.intRegisterUpcCode AS BIGINT) = CAST(UOM.intUpcCode AS BIGINT)
+					UOM.intUpcCode AS intPOSCode
+				FROM tblICItemUOM UOM
 				INNER JOIN dbo.tblICItem I 
 					ON I.intItemId = UOM.intItemId
 				INNER JOIN dbo.tblICItemLocation IL 
 					ON IL.intItemId = I.intItemId
-					AND UOM.intLocationId = IL.intLocationId
 				LEFT JOIN dbo.tblICItemPricing P 
 					ON IL.intItemLocationId = P.intItemLocationId 
 					AND I.intItemId = P.intItemId
@@ -322,7 +317,8 @@ BEGIN
 				INNER JOIN dbo.tblSTStore S 
 					ON S.intCompanyLocationId = CL.intCompanyLocationId
 				WHERE S.intStoreId = @intStoreId
-					AND ISNULL(Chk.strpluBaseupc, '') != ''
+					AND UOM.strLongUPCCode IS NOT NULL
+					AND UOM.intUpcCode IS NOT NULL
 			)
 				AND ISNULL(TempChk.POSCode, '') != ''
 
@@ -373,22 +369,22 @@ BEGIN
 			  , intConcurrencyId	= 1
 			  , intCalculationId	= TempChk.intCalculationId
 			FROM @tblTempForCalculation TempChk
-			INNER JOIN vyuSTItemUOMPosCodeFormat UOM
-				ON CAST(TempChk.intPOSCode AS BIGINT) = CAST(UOM.intUpcCode AS BIGINT)
+			INNER JOIN tblICItemUOM UOM
+				ON TempChk.intPOSCode = UOM.intUpcCode
 			INNER JOIN dbo.tblICItem I 
 				ON I.intItemId = UOM.intItemId
 			INNER JOIN dbo.tblICItemLocation IL 
 				ON IL.intItemId = I.intItemId
-				AND UOM.intLocationId = IL.intLocationId
-			LEFT JOIN dbo.tblICItemPricing P 
-				ON IL.intItemLocationId = P.intItemLocationId 
-				AND I.intItemId = P.intItemId
 			INNER JOIN dbo.tblSMCompanyLocation CL 
 				ON CL.intCompanyLocationId = IL.intLocationId
 			INNER JOIN dbo.tblSTStore S 
 				ON S.intCompanyLocationId = CL.intCompanyLocationId
+			LEFT JOIN dbo.tblICItemPricing P 
+				ON IL.intItemLocationId = P.intItemLocationId 
+				AND I.intItemId = P.intItemId
 			WHERE S.intStoreId = @intStoreId
 				AND ISNULL(TempChk.POSCode, '') != ''
+
 		-- ==================================================================================================================
 		-- End: All Item Movement
 		-- ==================================================================================================================
@@ -432,23 +428,23 @@ BEGIN
 			  , intConcurrencyId	= 1
 			  , intCalculationId	=TempChk.intCalculationId
 			FROM @tblTempForCalculation TempChk
-			INNER JOIN vyuSTItemUOMPosCodeFormat UOM
-				ON CAST(TempChk.intPOSCode AS BIGINT) = CAST(UOM.intUpcCode AS BIGINT)
+			INNER JOIN tblICItemUOM UOM
+				ON TempChk.intPOSCode = UOM.intUpcCode
 			INNER JOIN dbo.tblICItem I 
 				ON I.intItemId = UOM.intItemId
 			INNER JOIN dbo.tblICItemLocation IL 
-				ON IL.intItemId = I.intItemId
-				AND UOM.intLocationId = IL.intLocationId
-			LEFT JOIN dbo.tblICItemPricing P 
-				ON IL.intItemLocationId = P.intItemLocationId 
-				AND I.intItemId = P.intItemId
+				ON IL.intItemId = I.intItemId	
 			INNER JOIN dbo.tblSMCompanyLocation CL 
 				ON CL.intCompanyLocationId = IL.intLocationId
 			INNER JOIN dbo.tblSTStore S 
 				ON S.intCompanyLocationId = CL.intCompanyLocationId
+			LEFT JOIN dbo.tblICItemPricing P 
+				ON IL.intItemLocationId = P.intItemLocationId 
+				AND I.intItemId = P.intItemId
 			WHERE S.intStoreId = @intStoreId
 				AND TempChk.RefundCount > 0 -- Only Items with REFUND
 				AND ISNULL(TempChk.POSCode, '') != ''
+
 		-- ==================================================================================================================
 		-- End: Item Movement Add extra line for refund
 		-- ==================================================================================================================
@@ -618,8 +614,8 @@ BEGIN
 				INNER JOIN tblSTCheckoutItemMovements im
 					ON TempChk.intCalculationId = im.intCalculationId
 					AND TempChk.intCheckoutId = im.intCheckoutId
-				INNER JOIN vyuSTItemUOMPosCodeFormat UOM
-					ON CAST(TempChk.intPOSCode AS BIGINT) = CAST(UOM.intUpcCode AS BIGINT)
+				INNER JOIN tblICItemUOM UOM
+					ON TempChk.intPOSCode = UOM.intUpcCode
 				INNER JOIN dbo.tblICItem I 
 					ON I.intItemId = UOM.intItemId
 				INNER JOIN dbo.tblICItemLocation IL 
