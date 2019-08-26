@@ -9,6 +9,7 @@ BEGIN TRY
 	DECLARE @ErrMsg NVARCHAR(MAX)
 	DECLARE @SettleStorageKey INT
 	DECLARE @intSettleStorageId INT
+	DECLARE @intParentSettleStorageId INT
 	DECLARE @intBasisContractHeaderId INT
 	DECLARE @EntityId INT
 	DECLARE @intCommodityStockUomId INT
@@ -27,6 +28,7 @@ BEGIN TRY
 	(
 		 intSettleStorageKey INT IDENTITY(1, 1)
 		,intSettleStorageId INT
+		,intParentSettleStorageId INT NULL
 		,TicketNo  NVARCHAR(20)
 	)
 	
@@ -60,8 +62,8 @@ BEGIN TRY
 	WHERE       C1.ysnStockUnit=1 AND CD.intContractDetailId = @intBasisContractDetailId
 
 
-	INSERT INTO @SettleStorage(intSettleStorageId,TicketNo)
-	SELECT SC.intSettleStorageId,SS.strStorageTicket 
+	INSERT INTO @SettleStorage(intSettleStorageId,intParentSettleStorageId,TicketNo)
+	SELECT SC.intSettleStorageId,SS.intParentSettleStorageId,SS.strStorageTicket 
 	FROM tblGRSettleContract SC
 	JOIN tblGRSettleStorage SS ON SS.intSettleStorageId = SC.intSettleStorageId
 	WHERE SC.intContractDetailId = @intBasisContractDetailId
@@ -75,11 +77,12 @@ BEGIN TRY
 	BEGIN
 	
 			SET    @intSettleStorageId     = NULL
+			SET	   @intParentSettleStorageId	= NULL
 			SET    @TicketNo		       = NULL
 			SET    @LocationId		       = NULL
 			SET    @intCommodityStockUomId = NULL
 
-			SELECT @intSettleStorageId =intSettleStorageId ,@TicketNo = TicketNo  
+			SELECT @intSettleStorageId = intSettleStorageId, @intParentSettleStorageId = intParentSettleStorageId, @TicketNo = TicketNo  
 			FROM @SettleStorage  
 			WHERE intSettleStorageKey = @SettleStorageKey
 			
@@ -187,9 +190,29 @@ BEGIN TRY
 			JOIN tblICItem Item ON Item.intItemId = SS.intItemId
 			JOIN tblGRSettleStorageTicket SST ON SST.intSettleStorageTicketId = SS.intSettleStorageTicketId
 			WHERE intContractDetailId = @intBasisContractDetailId AND SST.intSettleStorageId = @intSettleStorageId
+
+			INSERT INTO @voucherDetailStorage 
+			(
+				 [intCustomerStorageId]
+				,[intItemId]
+				,[intAccountId]
+				,[dblQtyReceived]
+				,[strMiscDescription]
+				,[dblCost]
+				,[intContractHeaderId]
+				,[intContractDetailId]
+				,[intUnitOfMeasureId]
+				,[intCostUOMId]
+				,[dblWeightUnitQty]
+				,[dblCostUnitQty]
+				,[dblUnitQty]
+				,[dblNetWeight]
+			)
+			EXEC [uspGRCalculateSettleStorageFeeForContract]  @intParentSettleStorageId
 			
 			UPDATE @voucherDetailStorage SET dblQtyReceived = dblQtyReceived* -1 WHERE ISNULL(dblCost,0) < 0
 			UPDATE @voucherDetailStorage SET dblCost = dblCost* -1 WHERE ISNULL(dblCost,0) < 0
+			UPDATE @voucherDetailStorage SET intContractHeaderId = @intBasisContractHeaderId, intContractDetailId = @intBasisContractDetailId
 			
 			EXEC [dbo].[uspAPCreateBillData] 
 			 @userId = @intCreatedUserId
