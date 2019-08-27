@@ -9,7 +9,7 @@
 */
 
 CREATE FUNCTION [dbo].[fnGetDebitFunctional] (
-	@value AS NUMERIC(18,6)
+	@value AS NUMERIC(38,20)
 	,@intCurrencyId AS INT
 	,@intFunctionalCurrencyId AS INT 
 	,@forexRate AS NUMERIC(38, 20)

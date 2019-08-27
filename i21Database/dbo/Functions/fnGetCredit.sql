@@ -8,7 +8,7 @@
 */
 
 CREATE FUNCTION [dbo].[fnGetCredit] (
-	@value AS NUMERIC(18,6)
+	@value AS NUMERIC(38,20)
 )
 RETURNS TABLE 
 AS 
