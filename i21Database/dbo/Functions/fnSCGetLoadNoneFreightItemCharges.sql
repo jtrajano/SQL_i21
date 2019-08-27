@@ -30,6 +30,8 @@ RETURNS @OtherCharges TABLE(
 	,[ysnPrice] BIT NULL 
 	,[strChargesLink] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL
 	,[ysnAllowVoucher] BIT NULL
+	,[intLoadShipmentId] INT NULL
+	,[intLoadShipmentCostId] INT NULL
 )
 
 BEGIN
@@ -60,6 +62,8 @@ BEGIN
 			,[ysnPrice]
 			,[strChargesLink]
 			,[ysnAllowVoucher]
+			,[intLoadShipmentId]			
+			,[intLoadShipmentCostId]	
 		)
 		SELECT	
 		[intEntityVendorId]					= RE.intEntityVendorId
@@ -91,6 +95,8 @@ BEGIN
 		,[ysnPrice]							= CASE WHEN RE.ysnIsStorage = 0 THEN LoadCost.ysnPrice ELSE 0 END
 		,[strChargesLink]					= RE.strChargesLink
 		,[ysnAllowVoucher]				= RE.ysnAllowVoucher
+		,[intLoadShipmentId]			= RE.intLoadShipmentId 
+		,[intLoadShipmentCostId]		= RE.intLoadShipmentDetailId
 		FROM @ReceiptStagingTable RE 
 		INNER JOIN tblLGLoadDetail LoadDetail
 			ON RE.intContractDetailId = LoadDetail.intPContractDetailId
@@ -133,6 +139,8 @@ BEGIN
 			,[ysnPrice]
 			,[strChargesLink]
 			,[ysnAllowVoucher]
+			,[intLoadShipmentId]			
+			,[intLoadShipmentCostId]		
 		)
 		SELECT	
 		[intEntityVendorId]					= RE.intEntityVendorId
@@ -168,6 +176,8 @@ BEGIN
 		,[ysnPrice]							= CASE WHEN RE.ysnIsStorage = 0 THEN ContractCost.ysnPrice ELSE 0 END
 		,[strChargesLink]					= RE.strChargesLink
 		,[ysnAllowVoucher]				= RE.ysnAllowVoucher
+		,[intLoadShipmentId]			= RE.intLoadShipmentId 
+		,[intLoadShipmentCostId]		= RE.intLoadShipmentDetailId
 		FROM @ReceiptStagingTable RE 
 		INNER JOIN tblCTContractCost ContractCost 
 			ON RE.intContractDetailId = ContractCost.intContractDetailId
