@@ -151,6 +151,8 @@
     [ysnSummaryByDriverPin]        BIT             NULL,
     [strDetailDisplay]             NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [ysnMPGCalculation]		       BIT             NULL,
+	[strDetailDisplayValue]		   NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+	[strDetailDisplayLabel]		   NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     CONSTRAINT [InvoiceHistoryUserAndTransactionId] UNIQUE NONCLUSTERED ([intTransactionId] ASC, [strUserId] ASC) WITH (FILLFACTOR = 70),
 	CONSTRAINT [PK_tblCFInvoiceHistoryStagingTable] PRIMARY KEY CLUSTERED ([intInvoiceHistoryStagingId] ASC)
 );
