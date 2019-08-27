@@ -6,6 +6,7 @@
 AS
 BEGIN
 	DECLARE @voucherPayable VoucherPayable
+	DECLARE @DefaultCurrencyId INT = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
 
 	IF (@intLoadId IS NOT NULL)
 	BEGIN
@@ -90,7 +91,7 @@ BEGIN
 			,[intCostCurrencyId] = AD.intSeqCurrencyId
 			,[dblTax] = ISNULL(receiptItem.dblTax, 0)
 			,[dblDiscount] = 0
-			,[dblExchangeRate] = 1
+			,[dblExchangeRate] = CASE WHEN (L.intCurrencyId <> @DefaultCurrencyId) THEN ISNULL(LD.dblForexRate, 0) ELSE 1 END
 			,[ysnSubCurrency] =	AD.ysnSeqSubCurrency
 			,[intSubCurrencyCents] = CY.intCent
 			,[intAccountId] = apClearing.intAccountId
@@ -161,7 +162,7 @@ BEGIN
 			,[intCostCurrencyId] = A.intCurrencyId
 			,[dblTax] = 0
 			,[dblDiscount] = 0
-			,[dblExchangeRate] = 1
+			,[dblExchangeRate] = CASE WHEN (A.intCurrencyId <> @DefaultCurrencyId) THEN 0 ELSE 1 END
 			,[ysnSubCurrency] =	CC.ysnSubCurrency
 			,[intSubCurrencyCents] = ISNULL(CC.intCent,0)
 			,[intAccountId] = apClearing.intAccountId
