@@ -69,6 +69,10 @@ LEFT JOIN tblICItem ITEM ON I.strItemNo = ITEM.strItemNo
 LEFT JOIN tblICUnitMeasure UOM ON I.intUnitMeasureId = UOM.intUnitMeasureId
 LEFT JOIN tblICItemUOM IUOM ON ITEM.intItemId = IUOM.intItemId AND I.intUnitMeasureId = IUOM.intUnitMeasureId
 
+DELETE IE
+FROM @InvoiceEntries IE
+INNER JOIN tblARInvoice I ON IE.strInvoiceOriginId = I.strInvoiceOriginId
+
 IF EXISTS (SELECT TOP 1 NULL FROM @InvoiceEntries)
 	EXEC uspARProcessInvoicesByBatch @InvoiceEntries, @LineItemTaxEntries, @intUserId, 12, 1
 ELSE

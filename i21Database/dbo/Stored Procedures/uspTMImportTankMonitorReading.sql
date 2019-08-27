@@ -12,6 +12,8 @@
 		@tx_lnoxmit BIT = 1,
 		@ts_tankserialnum NVARCHAR(50) = '', --19 tank Serial
 		@userID INT = NULL,
+		@is_wesroc BIT = 1,
+		@qty_in_tank  NUMERIC(18,6) = NULL,
 		@resultLog NVARCHAR(4000)= '' OUTPUT
 	AS  
 	BEGIN 
@@ -41,6 +43,7 @@
 		DECLARE @TotalItemTax	NUMERIC(18,6) = 0.00 	
         DECLARE @SiteTaxable    BIT
 		DECLARE @CustomerEntityId INT
+		DECLARE @ExceptionValue NVARCHAR(50)
 	
 		SET @rpt_date_ti = @str_rpt_date_ti
  
@@ -50,25 +53,33 @@
 		--	RETURN 
 		--END
 	
-		SET @resultLog = @resultLog +  'passed customerid validation' + char(10)
+		SET @resultLog = @resultLog +  case when @is_wesroc = 1 then 'passed customerid validation' + char(10) else '' end
 	
 		--IF(ISNULL(@ts_cat_1,'') = '')BEGIN
 		--	SET @resultLog = @resultLog +  'Failed Tank Monitor Serial validation' + char(10)
 		--	RETURN
 		--END
 	
-		SET @resultLog = @resultLog + 'passed Tank Monitor Serial validation' + char(10)
+		SET @resultLog = @resultLog + case when @is_wesroc = 1 then 'passed Tank Monitor Serial validation' + char(10) else '' end
 	
 		--IF(ISNULL(@ts_tankserialnum,'') = '')
 		--BEGIN 
 		--	SET @resultLog = @resultLog + 'Failed Tank Serial validation' + char(10)
 		--	RETURN 
 		--END
-		SET @resultLog = @resultLog +  'passed Tank Serial validation' + char(10)
+		SET @resultLog = @resultLog +  case when @is_wesroc = 1 then 'passed Tank Serial validation' + char(10) else '' end
 	
 		IF(@tx_nosensor <> 0) RETURN 10
 		IF(@tx_lnoxmit <> 0) RETURN 10
 	
+		SET @ExceptionValue = 'Exception';
+
+		if (@is_wesroc = 0)
+		begin
+			SET @resultLog = @resultLog +   'ESN = ' + ISNULL(@tx_serialnum,'') + char(10)
+			SET @ExceptionValue = 'Status';
+		end
+
 		SET @resultLog = @resultLog +   'Customer Number = ' + ISNULL(@ts_cat_1,'') + char(10)
 		print 'Customer Number = ' + ISNULL(@ts_cat_1,'')
 		--Check by customer and Tank monitor serial number
@@ -110,7 +121,7 @@
 		END
 		IF(@siteId IS NULL)
 		BEGIN 
-			SET @resultLog = @resultLog + 'Exception: Not matching Customer Number and Tank Serial.' + char(10)
+			SET @resultLog = @resultLog + @ExceptionValue + ': Not Matching.' + char(10)
 			RETURN 
 		END 
 		SET @resultLog = @resultLog + 'Site ID = ' + CAST(ISNULL(@siteId,'') AS NVARCHAR(10)) + char(10) 
@@ -137,7 +148,7 @@
 		IF EXISTS(SELECT TOP 1 1 FROM tblTMEvent WHERE (intEventTypeID = @TankMonitorEventID AND dtmTankMonitorReading = @rpt_date_ti AND intSiteID = @siteId ))	
 		BEGIN
 			SET @resultLog = @resultLog + 'Duplicate Reading' + char(10)
-			SET @resultLog = @resultLog + 'Exception: Duplicate Reading' + char(10)
+			SET @resultLog = @resultLog + @ExceptionValue + ': Duplicate Reading' + char(10)
 			RETURN
 		END
 		IF EXISTS(SELECT TOP 1 1 FROM tblTMEvent 
@@ -176,9 +187,12 @@
 								,@siteId
 								,'Consumption Site'
 								,@rpt_date_ti
-								,('Tank Serial Number: ' + ISNULL(@ts_tankserialnum,'') + CHAR(10) + 'Monitor Serial Number: ' + ISNULL(@tx_serialnum,'') + CHAR(10) 
-									+ 'Date: ' + CAST (@rpt_date_ti AS NVARCHAR(25)) + CHAR(10) + 'Percent Full: ' + CAST(ISNULL(@tk_level,0.0) AS NVARCHAR(10)) + CHAR(10) 
-									+ 'Inside Temperature: ' + CAST(ISNULL(@base_temp,'') AS NVARCHAR(20)) + CHAR(10))
+								,(	  'Tank Serial Number: ' + ISNULL(@ts_tankserialnum,'') + CHAR(10)
+									+ 'Monitor Serial Number: ' + ISNULL(@tx_serialnum,'') + CHAR(10) 
+									+ 'Date: ' + CAST (@rpt_date_ti AS NVARCHAR(25)) + CHAR(10)
+									+ 'Percent Full: ' + CAST(ISNULL(@tk_level,0.0) AS NVARCHAR(10)) + CHAR(10) 
+									+ (case when @is_wesroc = 1 then 'Inside Temperature: ' + CAST(ISNULL(@base_temp,'') AS NVARCHAR(20)) + CHAR(10) else '' end)
+								)
 								,0
 								,0	
 								)		 
@@ -251,7 +265,7 @@
 			--update Estimated % left and Gals left
 			UPDATE tblTMSite
 			SET dblEstimatedPercentLeft = @tk_level
-				,dblEstimatedGallonsLeft = (@tk_level * dblTotalCapacity) / 100
+				,dblEstimatedGallonsLeft = (case when @is_wesroc = 1 then ((@tk_level * dblTotalCapacity) / 100) else @qty_in_tank end)
 				,dtmLastReadingUpdate = DATEADD(dd, DATEDIFF(dd, 0, @rpt_date_ti), 0)
 			WHERE intSiteID = @siteId
 
@@ -277,6 +291,9 @@
 		
 			RETURN
 			CREATECALLENTRY:
+			
+			if (@is_wesroc = 0) return;
+
 			IF EXISTS(SELECT TOP 1 1 FROM tblTMDispatch WHERE intSiteID = @siteId) 
 			BEGIN
 				SET @resultLog = @resultLog +  'Already have call entry' + CHAR(10)

@@ -110,6 +110,7 @@ WHERE	F.intBankAccountId = @intBankAccountId
 		AND F.intBankTransactionTypeId IN (@MISC_CHECKS, @AP_PAYMENT, @PAYCHECK)
 		AND F.ysnPosted = 1
 		AND F.ysnClr = 0
+		AND F.dblAmount <> 0
 		AND F.dtmCheckPrinted IS NULL
 		AND F.ysnCheckToBePrinted = 1
 		AND F.intBankTransactionTypeId = @intTransactionType

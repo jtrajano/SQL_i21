@@ -11,6 +11,42 @@ SET ANSI_WARNINGS OFF
 
 BEGIN TRY
 
+	declare @intScreenId int = 0;
+	declare @intContractHeaderId int = 0;
+	declare @intContractDetailId int = 0;
+
+	if (@remove = 0)
+	begin
+		if (@type = 'header')
+		begin
+			set @intContractHeaderId = @id;
+		end
+		if (@type = 'detail')
+		begin
+			set @intContractDetailId = @id;
+			set @intContractHeaderId = (select top 1 intContractHeaderId from tblCTContractDetail where intContractDetailId = @intContractDetailId);
+		end
+		if (@type = 'cost')
+		begin
+			set @intContractDetailId = (select top 1 intContractDetailId from tblCTContractCost where intContractCostId = @id);
+			set @intContractHeaderId = (select top 1 intContractHeaderId from tblCTContractDetail where intContractDetailId = @intContractDetailId);
+		end
+
+		if (@intContractHeaderId is not null and @intContractHeaderId > 0)
+		begin
+			set @intScreenId = (select top 1 intScreenId from tblSMScreen where strModule = 'Contract Management' and strNamespace = 'ContractManagement.view.Contract');
+			if not exists (select * from tblSMTransaction a where a.intRecordId = @intContractHeaderId and a.intScreenId = @intScreenId and a.strApprovalStatus in ('Approved', 'No Need for Approval'))
+			begin
+				/*Don't add to Payables if the contract is not yet approved.*/
+				return;
+			end
+		end
+		else
+		begin
+			return;
+		end
+	end
+
 DECLARE @voucherPayables AS VoucherPayable;
 DECLARE @voucherPayableTax AS VoucherDetailTax;
 

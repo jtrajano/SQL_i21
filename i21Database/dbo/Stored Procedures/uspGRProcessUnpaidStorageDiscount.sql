@@ -83,7 +83,7 @@ BEGIN TRY
 		,dblDiscountUnpaid
 		,dblDiscountTotal
 		,0
-	FROM @BillDiscounts
+	FROM @BillDiscount
 
 	SELECT @intBillDiscountKey = MIN(intBillDiscountKey)
 	FROM @BillDiscounts

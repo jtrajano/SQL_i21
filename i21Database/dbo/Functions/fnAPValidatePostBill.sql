@@ -52,7 +52,8 @@ BEGIN
 		FROM tblAPBill A 
 		INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
 		WHERE  A.[intBillId] IN (SELECT [intBillId] FROM @tmpBills)
-		AND A.intCurrencyId ! = (SELECT TOP 1 intDefaultCurrencyId  FROM dbo.tblSMCompanyPreference) AND dblRate = 0
+		AND A.intCurrencyId ! = (SELECT TOP 1 intDefaultCurrencyId  FROM dbo.tblSMCompanyPreference) 
+		AND ISNULL(NULLIF(dblRate,0),1) = 1 --if foreign, rate should not be 1
 
 		--You cannot post recurring transaction.
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)

@@ -83,6 +83,7 @@ FROM
 		INNER JOIN tblCTSubBook ctsubbook ON bookEntity.intSubBookId = ctsubbook.intSubBookId
 		WHERE bookEntity.intEntityId = A.intEntityId
 	) ctBookEntities
+
 GO
 
 

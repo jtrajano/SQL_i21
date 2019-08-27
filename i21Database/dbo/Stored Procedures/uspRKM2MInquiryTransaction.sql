@@ -2718,8 +2718,11 @@ SELECT intRowNum = CONVERT(INT,ROW_NUMBER() OVER(ORDER BY intFutureMarketId DESC
 									WHEN strPricingType = 'Basis' then 0
 									ELSE ((ISNULL(dblFuturePrice, 0) - ISNULL(dblActualFutures, 0) + (CASE WHEN ysnExpired = 1 THEN ISNULL(dblSpread, 0) ELSE 0 END)) * dblOpenQty)
 									END
-	, dblResultRatio = (CASE WHEN dblContractRatio <> 0 AND dblMarketRatio  <> 0 THEN ((dblMarketPrice - dblContractPrice) * dblOpenQty)
-								- ((dblFuturePrice - dblActualFutures) * dblOpenQty) - dblResultBasis
+	, dblResultRatio = (CASE WHEN dblContractRatio <> 0 AND dblMarketRatio  <> 0 THEN ((dblMarketPrice - dblAdjustedContractPrice) * dblOpenQty)
+								- (CASE WHEN strContractOrInventoryType = 'Inventory' THEN 0
+										WHEN strPricingType = 'Basis' then 0
+										ELSE ((ISNULL(dblFuturePrice, 0) - ISNULL(dblActualFutures, 0) + (CASE WHEN ysnExpired = 1 THEN ISNULL(dblSpread, 0) ELSE 0 END)) * dblOpenQty) END)
+								- dblResultBasis
 							WHEN strContractOrInventoryType = 'Inventory' THEN
 								0
 							ELSE 0 END)

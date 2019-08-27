@@ -8,7 +8,7 @@ SELECT intItemContractHeaderId		= ICH.intItemContractHeaderId
 	 , intCompanyLocationId			= ICH.intCompanyLocationId
 	 , dtmContractDate				= ICH.dtmContractDate
      , dtmExpirationDate            = ICH.dtmExpirationDate
-	 , ysnPrepaid					= ICH.ysnPrepaid
+	 , ysnPrepaid					= NULL
 FROM dbo.tblCTItemContractHeader ICH
 INNER JOIN (
 	SELECT intItemContractHeaderId

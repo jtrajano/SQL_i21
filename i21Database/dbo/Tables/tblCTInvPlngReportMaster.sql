@@ -1,6 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblCTInvPlngReportMaster]
 (
 	[intInvPlngReportMasterID] INT NOT NULL IDENTITY, 
+	intConcurrencyId INT NULL CONSTRAINT [DF_tblCTInvPlngReportMaster_intConcurrencyId] DEFAULT 1,
 	[strInvPlngReportName] NVARCHAR(150) COLLATE Latin1_General_CI_AS NOT NULL, 
 	[intReportMasterID] INT NOT NULL,
 	[intNoOfMonths] INT NOT NULL,

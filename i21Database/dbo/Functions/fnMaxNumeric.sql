@@ -1,9 +1,9 @@
 ﻿CREATE FUNCTION [dbo].[fnMaxNumeric]
 (
-	@dblValue1 NUMERIC,
-	@dblValue2 NUMERIC
+	@dblValue1 NUMERIC(38, 20),
+	@dblValue2 NUMERIC(38, 20)
 )
-RETURNS NUMERIC
+RETURNS NUMERIC(38, 20)
 AS
 BEGIN
 	IF @dblValue1 > @dblValue2

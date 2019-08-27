@@ -29,7 +29,7 @@ BEGIN
 		[intFreightTermId]					[int] NULL,	
 		[intCountryId]						[int] NULL, 
 		[intTermId]							[int] NULL,
-		[ysnPrepaid]						[bit] NULL, 
+		--[ysnPrepaid]						[bit] NULL, 
 
 		[strContractNumber]					[nvarchar](50) COLLATE Latin1_General_CI_AS NOT NULL,
 		[intSalespersonId]					[int] NOT NULL,
@@ -63,7 +63,7 @@ BEGIN
 		,strCPContract
 		,strContractCategoryId			
 		,ysnSigned
-		,ysnPrepaid	
+		--,ysnPrepaid	
 		,ysnPrinted
 		,dtmContractDate
 		,dtmExpirationDate
@@ -89,7 +89,7 @@ BEGIN
 		,strCPContract
 		,strContractCategoryId			
 		,ysnSigned
-		,ysnPrepaid	
+		--,ysnPrepaid	
 		,ysnPrinted
 		,dtmContractDate
 		,dtmExpirationDate
@@ -126,7 +126,7 @@ BEGIN
 		,strCPContract
 		,strContractCategoryId			
 		,ysnSigned
-		,ysnPrepaid	
+		--,ysnPrepaid	
 		,ysnPrinted
 		,dtmContractDate
 		,dtmExpirationDate
@@ -151,7 +151,7 @@ BEGIN
 		,strCPContract
 		,strContractCategoryId			
 		,ysnSigned
-		,ysnPrepaid	
+		--,ysnPrepaid	
 		,ysnPrinted
 		,dtmContractDate
 		,dtmExpirationDate

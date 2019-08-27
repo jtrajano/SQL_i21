@@ -1,0 +1,13 @@
+﻿
+PRINT N'INSERT DEFAULT - TRANSPORT OVERRIDE TAX GROUP'
+GO
+
+IF NOT EXISTS (SELECT TOP 1 1 FROM tblTROverrideTaxGroup)
+BEGIN
+		SET IDENTITY_INSERT tblTROverrideTaxGroup ON
+
+		INSERT INTO tblTROverrideTaxGroup (intOverrideTaxGroupId,strName, dtmDateCreated) VALUES(1,'Lassus', GETDATE())
+		
+		SET IDENTITY_INSERT tblTROverrideTaxGroup OFF
+END
+GO

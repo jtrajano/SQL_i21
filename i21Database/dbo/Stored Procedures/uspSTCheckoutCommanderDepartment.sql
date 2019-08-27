@@ -65,12 +65,12 @@ BEGIN
 			, intConcurrencyId
 		)
 		SELECT DISTINCT
-			'NO MATCHING TAG' as strErrorType
-			, 'No Matching Register Department Setup in Category' as strErrorMessage
-			, 'deptBase sysid' as strRegisterTag
-			, ISNULL(Chk.deptBasesysid, '') AS strRegisterTagValue
-			, @intCheckoutId
-			, 1
+			strErrorType			= 'NO MATCHING TAG'
+			, strErrorMessage		= 'No Matching Register Department Setup in Category'
+			, strRegisterTag		= 'deptBase sysid'
+			, strRegisterTagValue	= ISNULL(Chk.deptBasesysid, '')
+			, intCheckoutId			= @intCheckoutId
+			, intConcurrencyId		= 1
 		FROM #tempCheckoutInsert Chk
 		WHERE ISNULL(Chk.deptBasesysid, '') NOT IN
 		(
@@ -92,10 +92,15 @@ BEGIN
 				JOIN dbo.tblSTStore S 
 					ON S.intCompanyLocationId = CL.intCompanyLocationId
 				WHERE S.intStoreId = @intStoreId
-				AND ISNULL(Chk.deptBasesysid, '') != ''
+					AND ISNULL(Chk.deptBasesysid, '') != ''
+					AND CAST(ISNULL(Chk.netSalescount, 0) AS INT) != 0
+					AND CAST(ISNULL(Chk.netSalesamount, 0) AS DECIMAL(18, 6)) != 0.000000
 			) AS tbl
 		)
-		AND ISNULL(Chk.deptBasesysid, '') != ''
+			AND ISNULL(Chk.deptBasesysid, '') != ''
+			AND CAST(ISNULL(Chk.netSalescount, 0) AS INT) != 0
+			AND CAST(ISNULL(Chk.netSalesamount, 0) AS DECIMAL(18, 6)) != 0.000000
+
 		-- ------------------------------------------------------------------------------------------------------------------  
 		-- END Get Error logs. Check Register XML that is not configured in i21.  
 		-- ==================================================================================================================
@@ -152,6 +157,8 @@ BEGIN
 				JOIN dbo.tblSTStore S 
 					ON S.intCompanyLocationId = CL.intCompanyLocationId
 				WHERE S.intStoreId = @intStoreId
+					AND CAST(ISNULL(Chk.netSalescount, 0) AS INT) != 0
+					AND CAST(ISNULL(Chk.netSalesamount, 0) AS DECIMAL(18, 6)) != 0.000000
 
 			END
 		ELSE
@@ -195,14 +202,16 @@ BEGIN
 				JOIN dbo.tblSTStore S 
 					ON S.intCompanyLocationId = CL.intCompanyLocationId
 				WHERE DT.intCheckoutId = @intCheckoutId 
-				AND S.intStoreId = @intStoreId
+					AND S.intStoreId = @intStoreId
+					AND CAST(ISNULL(Chk.netSalescount, 0) AS INT) != 0
+					AND CAST(ISNULL(Chk.netSalesamount, 0) AS DECIMAL(18, 6)) != 0.000000
 
 			END
 
 		-- Update Register Amount
 		UPDATE dbo.tblSTCheckoutDepartmetTotals 
 		SET dblRegisterSalesAmountComputed = dblTotalSalesAmountComputed
-		Where intCheckoutId = @intCheckoutId
+		WHERE intCheckoutId = @intCheckoutId
 
 		SET @intCountRows = 1
 		SET @strStatusMsg = 'Success'

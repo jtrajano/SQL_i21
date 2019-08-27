@@ -35,6 +35,12 @@ FROM
 		ON StorageLocation.intStorageLocationId = StockUOM.intStorageLocationId
 	LEFT JOIN tblSMCompanyLocation CompLocation 
 		ON CompLocation.intCompanyLocationId = StorageLocation.intLocationId
+	OUTER APPLY (
+		SELECT Scat.*
+		FROM tblICStorageLocationCategory Scat
+		WHERE Scat.intStorageLocationId = StorageLocation.intStorageLocationId
+		AND Item.intCategoryId = Scat.intCategoryId
+	) AllowedCategory
 	LEFT JOIN tblSMCompanyLocationSubLocation SubLocation 
 		ON SubLocation.intCompanyLocationSubLocationId = StorageLocation.intSubLocationId
 	OUTER APPLY (
@@ -47,3 +53,8 @@ FROM
 			ItemLoc.intItemId = Item.intItemId
 			AND ItemLoc.intLocationId = StorageLocation.intLocationId	
 	) ItemPricing
+	WHERE AllowedCategory.intCategoryId = Item.intCategoryId OR 
+		NOT EXISTS(SELECT Scat.*
+			FROM tblICStorageLocationCategory Scat
+			WHERE Scat.intStorageLocationId = StorageLocation.intStorageLocationId
+		)

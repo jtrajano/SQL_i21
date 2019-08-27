@@ -194,10 +194,10 @@ BEGIN
 			,[ysnInventoryCost] 
 			,[intCostCurrencyId] 
 			,[dblRate] 
+			,[dblAmount] 
 			,[intCostUOMId] 
 			,[intOtherChargeEntityVendorId] 
 			,[strCostMethod] 
-			,[dblAmount] 
 			,[ysnAccrue] 
 			,[ysnPrice] 
 			,[intContractHeaderId] 
@@ -206,7 +206,7 @@ BEGIN
 			,[intTaxGroupId] 
 	)
 	SELECT 
-		    [strReceiptType]					= @ReceiptType_PurchaseOrder          
+		    [strReceiptType]					= @ReceiptType_PurchaseOrderContract          
 			,[intEntityVendorId]				= PO.intEntityVendorId
 			,[intLocationId]					= PO.intShipToId			
 			,[intShipFromId]					= PO.intShipFromId
@@ -215,22 +215,23 @@ BEGIN
 															 THEN (SELECT ISNULL(intMainCurrencyId,0) FROM dbo.tblSMCurrency WHERE intCurrencyID = ISNULL(CC.intCurrencyId,0))
 															 ELSE  ISNULL(CC.intCurrencyId,ISNULL(CU.intMainCurrencyId,CD.intCurrencyId))
 														END	
-			,[ysnInventoryCost]					= 0
+			,[ysnInventoryCost]					= CC.ysnInventoryCost
 			,[intCostCurrencyId]				= ISNULL(CC.intCurrencyId,ISNULL(CU.intMainCurrencyId,CD.intCurrencyId))	
-			,[dblRate]							= CC.dblRate
+			,[dblRate]							= CASE WHEN CC.strCostMethod = 'Amount' THEN CC.dblRate ELSE 0 END
+			,[dblAmount]						= CASE WHEN CC.strCostMethod = 'Amount' THEN 0 ELSE CC.dblRate END
 			,[intCostUOMId]						= PD.intUnitOfMeasureId
 			,[intOtherChargeEntityVendorId]		= CC.intVendorId
 			,[strCostMethod]					= CC.strCostMethod
-			,[dblAmount]						= CASE	WHEN	CC.strCostMethod = 'Percentage' THEN
-																		dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intPriceItemUOMId,CD.dblQuantity) * CD.dblCashPrice * (CC.dblRate / 100) *
-																		CASE WHEN CC.intCurrencyId = CD.intCurrencyId THEN 1 ELSE ISNULL(CC.dblFX,1) END
-																ELSE	ISNULL(CC.dblRate,0) 
-														END
+			-- ,[dblAmount]						= CASE	WHEN	CC.strCostMethod = 'Percentage' THEN
+			-- 															dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intPriceItemUOMId,CD.dblQuantity) * CD.dblCashPrice * (CC.dblRate / 100) *
+			-- 															CASE WHEN CC.intCurrencyId = CD.intCurrencyId THEN 1 ELSE ISNULL(CC.dblFX,1) END
+			-- 													ELSE	ISNULL(CC.dblRate,0) 
+			-- 											END
 			,[ysnAccrue]						= CC.ysnAccrue
 			,[ysnPrice]							= CC.ysnPrice
 			,[intContractHeaderId]				= CD.intContractHeaderId
 			,[intContractDetailId]				= CC.intContractDetailId
-			,[ysnSubCurrency]					= 0
+			,[ysnSubCurrency]					= CY.ysnSubCurrency
 			,[intTaxGroupId]					= NULL
 	FROM vyuCTContractCostView CC
 	JOIN tblCTContractDetail CD	

@@ -201,7 +201,7 @@ BEGIN TRY
 		BEGIN
 			SELECT @strTransactionId		=	B.strInvoiceNumber,
 				   @intTransactionId		=	A.intInvoiceId,
-				   @dtmNewLastDeliveryDate	=	CASE WHEN @intNewContractStatusId = 5 THEN B.dtmShipDate ELSE NULL END
+				   @dtmNewLastDeliveryDate	=	CASE WHEN B.ysnPosted = 1 THEN B.dtmShipDate ELSE NULL END
 				FROM tblARInvoiceDetail A
 				LEFT JOIN tblARInvoice B ON A.intInvoiceId = B.intInvoiceId
 					WHERE A.intInvoiceDetailId = @intTransactionDetailId

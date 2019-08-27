@@ -6,6 +6,11 @@ BEGIN TRY
 
 	DECLARE @ErrMsg NVARCHAR(MAX)
 
+	DELETE
+	FROM tblQMSamplePreStage
+	WHERE ISNULL(strFeedStatus, '') = ''
+		AND intSampleId = @intSampleId
+
 	INSERT INTO tblQMSamplePreStage (
 		intSampleId
 		,strRowState

@@ -690,7 +690,7 @@ BEGIN
 			,strTransactionId			
 			,strTransactionType			
 			,strInvoiceReportNumber		
-			,strTempInvoiceReportNumber	
+			,strInvoiceReportNumber	
 			,strMiscellaneous			
 			,strPrintTimeStamp			
 			,strPrimarySortOptions		
@@ -769,44 +769,49 @@ BEGIN
 		FROM vyuCFInvoiceReport
 		WHERE intTransactionId IN (SELECT intTransactionId FROM @tblCFTransactionIds)
 		
-		INSERT INTO  @tblCFAccountIds (intAccountId)
-		SELECT DISTINCT ISNULL(intAccountId,0) FROM @tblCFTempInvoiceReport
 
-		-----------CREATE ID WITH INVOICE NUMBER--------
-		DECLARE @intTempAccountCounter INT
-		DECLARE @intTempAccountId	INT
-		DECLARE @CFID NVARCHAR(MAX)
-		WHILE (EXISTS(SELECT 1 FROM @tblCFAccountIds))
-		BEGIN
+		IF(ISNULL(@ysnReprintInvoice,0) = 0 OR ISNULL(@ysnIncludePrintedTransaction,0) = 1) 
+		BEGIN 
+			-----------CREATE ID WITH INVOICE NUMBER--------
 
-			SELECT TOP 1 @intTempAccountCounter = [intAccountId] , @intTempAccountId = [intAccountId]  FROM @tblCFAccountIds
+			INSERT INTO  @tblCFAccountIds (intAccountId)
+			SELECT DISTINCT ISNULL(intAccountId,0) FROM @tblCFTempInvoiceReport
 
-			EXEC uspSMGetStartingNumber 53, @CFID OUT
+			DECLARE @intTempAccountCounter INT
+			DECLARE @intTempAccountId	INT
+			DECLARE @CFID NVARCHAR(MAX)
+			WHILE (EXISTS(SELECT 1 FROM @tblCFAccountIds))
+			BEGIN
 
-			INSERT INTO @tblCFInvoiceNumbers (
-				 [intAccountId]
-				,[strInvoiceNumber]
-			)
-			VALUES(
-				 @intTempAccountId
-				,@CFID
-			)
+				SELECT TOP 1 @intTempAccountCounter = [intAccountId] , @intTempAccountId = [intAccountId]  FROM @tblCFAccountIds
 
-			DELETE FROM @tblCFAccountIds WHERE [intAccountId] = @intTempAccountId
+				EXEC uspSMGetStartingNumber 53, @CFID OUT
 
+				INSERT INTO @tblCFInvoiceNumbers (
+					 [intAccountId]
+					,[strInvoiceNumber]
+				)
+				VALUES(
+					 @intTempAccountId
+					,@CFID
+				)
+
+				DELETE FROM @tblCFAccountIds WHERE [intAccountId] = @intTempAccountId
+
+			END
+			-----------CREATE ID WITH INVOICE NUMBER--------
+
+		
+			--UPDATE INVOICE NUMBER
+			UPDATE @tblCFTempInvoiceReport 
+			SET 
+				 strPrintTimeStamp = @strPrintTimeStamp 
+				,dtmInvoiceDate = @dtmInvoiceDate
+				,strTempInvoiceReportNumber = tblCFInvoiceNumbers.strInvoiceNumber
+				FROM @tblCFInvoiceNumbers AS tblCFInvoiceNumbers
+				WHERE [@tblCFTempInvoiceReport].intAccountId = tblCFInvoiceNumbers.intAccountId
 		END
-		-----------CREATE ID WITH INVOICE NUMBER--------
-
-
-		--UPDATE INVOICE NUMBER
-		UPDATE @tblCFTempInvoiceReport 
-		SET 
-		 strPrintTimeStamp = @strPrintTimeStamp 
-		,dtmInvoiceDate = @dtmInvoiceDate
-		,strTempInvoiceReportNumber = tblCFInvoiceNumbers.strInvoiceNumber
-		FROM @tblCFInvoiceNumbers AS tblCFInvoiceNumbers
-		WHERE [@tblCFTempInvoiceReport].intAccountId = tblCFInvoiceNumbers.intAccountId
-
+		
 		---------GET DISTINCT TRANSACTION ID FOR LOOPING---------
 		
 		INSERT INTO tblCFInvoiceReportTempTable (

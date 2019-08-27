@@ -259,6 +259,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AR\DefaultData\34_UpdateUnitPriceUOM.sql
 :r .\AR\DefaultData\35_UpdateInvoiceFromProvisional.sql
 :r .\AR\DefaultData\36_UpdateTaxDetailInvalidSetup.sql
+:r .\AR\DefaultData\37_UpdatePOSNewFields.sql
 :r .\AR\DefaultData\99_ReCreateTriggers.sql
 
 --Accounts Payable
@@ -362,6 +363,7 @@ print 'BEGIN POST DEPLOYMENT'
 :R .\CT\fnCTGetBasisDeliveryAboveR2.sql
 :R .\CT\PariallyToPartially.sql
 :R .\CT\TitleToCode.sql
+:R .\CT\5_DataFix.sql
 
 --Notes Receivable
 :R .\NR\1_NoteTransType.sql
@@ -377,6 +379,7 @@ print 'BEGIN POST DEPLOYMENT'
 :R .\GR\GR_InsertReadingRanges.sql
 :R .\GR\GR_FarmField.sql
 :R .\GR\ContractPrice.sql
+:R .\GR\SC_ScaleLVControlIntegration.sql
 
 --Manufacturing
 :R .\MF\1_MasterTables.sql
@@ -591,7 +594,7 @@ print 'BEGIN POST DEPLOYMENT'
 
 --SM - this should always be the last to execute
 	-- REMINDER: DO NOT ADD ANY SQL FILE AFTER THIS
-:r .\SM\1830_ReIndexTables.sql
+--:r .\SM\1830_ReIndexTables.sql
 :r .\SM\1830_CreateReIndexMaintenancePlan.sql
 :r .\SM\1910_CreateAuditLogMigrationPlan.sql
 

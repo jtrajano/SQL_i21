@@ -67,7 +67,8 @@ BEGIN
 				strStoreContactEmail nvarchar(100) COLLATE Latin1_General_CI_AS NULL,
 				strProductGroupingCode nvarchar(10) COLLATE Latin1_General_CI_AS NULL,
 				strProductGroupingName nvarchar(20) COLLATE Latin1_General_CI_AS NULL,
-				strLoyaltyIDRewardsNumber nvarchar(20) COLLATE Latin1_General_CI_AS NULL
+				strLoyaltyIDRewardsNumber nvarchar(20) COLLATE Latin1_General_CI_AS NULL,
+				[strDepartment] NVARCHAR(150) COLLATE Latin1_General_CI_AS NULL
 		)
 
 
@@ -106,7 +107,8 @@ BEGIN
 				[dblManufacturerBuydownAmount] decimal(18, 6) NULL,
 				[strManufacturerMultiPackDescription] nvarchar(100) COLLATE Latin1_General_CI_AS NULL,
 				[strAccountLoyaltyIDNumber] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
-				[strCouponDescription] nvarchar(50) COLLATE Latin1_General_CI_AS NULL
+				[strCouponDescription] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
+				[strDepartment] NVARCHAR(150) COLLATE Latin1_General_CI_AS NULL
 		)
 
 
@@ -219,6 +221,11 @@ BEGIN
 								, '' strProductGroupingCode
 								, '' strProductGroupingName
 								, '' strLoyaltyIDRewardsNumber
+								, [strDepartment] = CASE
+														WHEN uom.intItemUOMId IS NOT NULL
+															THEN category.strCategoryCode
+														ELSE ''
+													END
 				FROM 
 				(
 					SELECT * FROM
@@ -235,11 +242,21 @@ BEGIN
 														THEN TRR.ysnPMMSubmitted
 												END
 				) TR
-				JOIN tblSTStore ST ON ST.intStoreId = TR.intStoreId
-				JOIN tblEMEntity EM ON EM.intEntityId = @intVendorId
-				JOIN tblAPVendor APV ON APV.intEntityId = EM.intEntityId
-				LEFT JOIN vyuSTCigaretteRebatePrograms CRP ON TR.strTrlUPC = CRP.strLongUPCCode 
-						AND (CAST(TR.dtmDate AS DATE) BETWEEN CRP.dtmStartDate AND CRP.dtmEndDate)
+				JOIN tblSTStore ST 
+					ON ST.intStoreId = TR.intStoreId
+				JOIN tblEMEntity EM 
+					ON EM.intEntityId = @intVendorId
+				JOIN tblAPVendor APV 
+					ON APV.intEntityId = EM.intEntityId
+				LEFT JOIN tblICItemUOM uom
+					ON TR.strTrlUPCwithoutCheckDigit = uom.strLongUPCCode
+				LEFT JOIN tblICItem item
+					ON uom.intItemId = item.intItemId
+				LEFT JOIN tblICCategory category
+					ON item.intCategoryId = category.intCategoryId
+				LEFT JOIN vyuSTCigaretteRebatePrograms CRP 
+					ON TR.strTrlUPCwithoutCheckDigit = CRP.strLongUPCCode 
+					AND (CAST(TR.dtmDate AS DATE) BETWEEN CRP.dtmStartDate AND CRP.dtmEndDate)
 				LEFT JOIN
 				(
 					SELECT [intID] 
@@ -261,7 +278,8 @@ BEGIN
 					, CAST(PM.strTransactionIdCode AS INT) AS intTermMsgSN
 					, PM.intQuantitySold AS dblQty
 					, PM.dblFinalSalesPrice AS dblPrice
-					, PM.strCategory AS strDepartment
+					--, PM.strCategory AS strDepartment
+					, PM.strDepartment AS strDepartment
 					, PM.strUpcCode AS strUpc
 					, PM.strSkuUpcDescription AS strDescription
 				FROM @tblTempPMM PM
@@ -404,6 +422,11 @@ BEGIN
 								, '' as strManufacturerMultiPackDescription
 								, TR.strTrLoyaltyProgramTrloAccount as strAccountLoyaltyIDNumber
 								, '' as strCouponDescription
+								, [strDepartment] = CASE
+														WHEN uom.intItemUOMId IS NOT NULL
+															THEN category.strCategoryCode
+														ELSE ''
+													END
 					FROM 
 					(   
 						SELECT * FROM
@@ -412,16 +435,24 @@ BEGIN
 							FROM tblSTTranslogRebates
 						) TRR 
 						WHERE TRR.rn = 1		
-						AND CAST(TRR.dtmDate AS DATE) BETWEEN @dtmBeginningDate AND @dtmEndingDate	
-						AND TRR.ysnRJRSubmitted = CASE
-													WHEN @ysnResubmit = CAST(0 AS BIT)
-														THEN CAST(0 AS BIT)
-													WHEN @ysnResubmit = CAST(1 AS BIT)
-														THEN TRR.ysnRJRSubmitted
-												END
+							AND CAST(TRR.dtmDate AS DATE) BETWEEN @dtmBeginningDate AND @dtmEndingDate	
+							AND TRR.ysnRJRSubmitted = CASE
+														WHEN @ysnResubmit = CAST(0 AS BIT)
+															THEN CAST(0 AS BIT)
+														WHEN @ysnResubmit = CAST(1 AS BIT)
+															THEN TRR.ysnRJRSubmitted
+													END
 					) TR
-					JOIN tblSTStore ST ON ST.intStoreId = TR.intStoreId
-					LEFT JOIN vyuSTCigaretteRebatePrograms CRP ON TR.strTrlUPC = CRP.strLongUPCCode 
+					INNER JOIN tblSTStore ST 
+						ON ST.intStoreId = TR.intStoreId
+					LEFT JOIN tblICItemUOM uom
+						ON TR.strTrlUPCwithoutCheckDigit = uom.strLongUPCCode
+					LEFT JOIN tblICItem item
+						ON uom.intItemId = item.intItemId
+					LEFT JOIN tblICCategory category
+						ON item.intCategoryId = category.intCategoryId
+					LEFT JOIN vyuSTCigaretteRebatePrograms CRP 
+						ON TR.strTrlUPCwithoutCheckDigit = CRP.strLongUPCCode 
 						AND (CAST(TR.dtmDate AS DATE) BETWEEN CRP.dtmStartDate AND CRP.dtmEndDate)
 					LEFT JOIN
 					(
@@ -443,7 +474,7 @@ BEGIN
 					, CAST(RJ.strMarketBasketTransactionId AS INT) AS intTermMsgSN
 					, RJ.intQuantity AS dblQty
 					, RJ.dblPrice AS dblPrice
-					, '' AS strDepartment
+					, RJ.strDepartment AS strDepartment
 					, RJ.strUpcCode AS strUpc
 					, RJ.strUpcDescription AS strDescription
 				FROM @tblTempRJR RJ

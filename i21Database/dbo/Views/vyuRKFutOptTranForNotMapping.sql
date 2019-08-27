@@ -1,78 +1,80 @@
-﻿CREATE View vyuRKFutOptTranForNotMapping
+﻿CREATE VIEW vyuRKFutOptTranForNotMapping
 
 AS  
 
-SELECT ft.intFutOptTransactionId
-	, fom.dblContractSize
+SELECT DE.intFutOptTransactionId
+	, FMarket.dblContractSize
 	, strCurrencyExchangeRateType
 	, strBook
 	, strSubBook
-	, fm.dtmFirstNoticeDate
-	, fm.dtmLastTradingDate
-	, fom.strFutMarketName
-	, fom.ysnOptions
+	, FMonth.dtmFirstNoticeDate
+	, FMonth.dtmLastTradingDate
+	, FMarket.strFutMarketName
+	, FMarket.ysnOptions
 	, strAccountNumber
 	, e.strName
-	, e1.strName as strSalespersonId
-	, CASE WHEN ft.intInstrumentTypeId = 1 then 'Futures'
-			WHEN ft.intInstrumentTypeId = 2 then 'Options'
-			WHEN ft.intInstrumentTypeId = 3 then 'Currency Contract' end COLLATE Latin1_General_CI_AS AS strInstrumentType
-	, CASE WHEN strBuySell = 'Sell' then -dblNoOfContract else dblNoOfContract end dblGetNoOfContract
-	, case when strBuySell = 'Sell' then -(fot.dblContractSize * (select sum(dblOpenContract) from vyuRKGetOpenContract f where f.intFutOptTransactionId=ft.intFutOptTransactionId))
-			else (fot.dblContractSize * (select sum(dblOpenContract) from vyuRKGetOpenContract f where f.intFutOptTransactionId=ft.intFutOptTransactionId)) end dblHedgeQty
+	, strSalespersonId = Trader.strName
+	, strInstrumentType = CASE WHEN DE.intInstrumentTypeId = 1 THEN 'Futures'
+						WHEN DE.intInstrumentTypeId = 2 THEN 'Options'
+						WHEN DE.intInstrumentTypeId = 3 THEN 'Currency Contract' END COLLATE Latin1_General_CI_AS
+	, dblGetNoOfContract = CASE WHEN strBuySell = 'Sell' THEN - dblNoOfContract ELSE dblNoOfContract END
+	, dblHedgeQty = CASE WHEN strBuySell = 'Sell' THEN - (FMarket.dblContractSize * GOC.dblSumOpenContract)
+						ELSE (FMarket.dblContractSize * GOC.dblSumOpenContract) END
 	, strUnitMeasure
 	, strCommodityCode
 	, strLocationName
-	, bc.strCurrency
-	, (substring(fm.strFutureMonth,0,4) + '(' +fm.strSymbol+')'+convert(nvarchar,fm.intYear)) COLLATE Latin1_General_CI_AS strFutureMonthYear
-	, fm.strFutureMonth strFutureMonthYearWOSymbol
-	, (substring(om.strOptionMonth,0,4) + '(' +fom.strOptSymbol+')'+convert(nvarchar,om.intYear)) COLLATE Latin1_General_CI_AS strOptionMonthYear
-	, strOptionMonth strOptionMonthYearWOSymbol
-	, ((SELECT TOP 1 chn.strContractNumber FROM tblCTContractHeader chn where chn.intContractHeaderId = cd.intContractHeaderId)  + ' - ' + CONVERT(varchar,cd.intContractSeq)) COLLATE Latin1_General_CI_AS as strContractSeq
-	, ch.strContractNumber strContractNumber
-	, frm.strFutureMonth strRollingMonth
-	, ft.intRollingMonthId
-	, CASE WHEN ISNULL(intSelectedInstrumentTypeId,1) =1  then 'Exchange Traded' 
-			WHEN intSelectedInstrumentTypeId = 2 THEN 'OTC'
-										ELSE 'OTC - Others' END COLLATE Latin1_General_CI_AS as strSelectedInstrumentType
-	, cs.dblAssignedLots as dblAssignedLots
-	, b.strBankName
-	, ba.strBankAccountNo
-	, ISNULL(ft.dblNoOfContract - GOC.dblOpenContract,0.0) as dblUsedContract
-	, CAST(ISNULL((SELECT TOP 1 1 FROM tblRKFutOptTransaction 
-				WHERE 
-				(intFutOptTransactionId IN (SELECT intLFutOptTransactionId FROM tblRKMatchFuturesPSDetail) 
-				OR 
-				intFutOptTransactionId IN (SELECT intSFutOptTransactionId FROM tblRKMatchFuturesPSDetail)
-				OR
-				intFutOptTransactionId IN (SELECT intLFutOptTransactionId FROM tblRKOptionsMatchPnS) 
-				OR 
-				intFutOptTransactionId IN (SELECT intSFutOptTransactionId FROM tblRKOptionsMatchPnS)
-				) 
-				AND 
-				intFutOptTransactionId = ft.intFutOptTransactionId),0)AS BIT) as ysnLocked
-FROM [tblRKFutOptTransaction] AS ft
-LEFT OUTER JOIN [dbo].[vyuRKGetAssignedLots] AS al ON ft.[intFutOptTransactionId] = al.[intFutOptTransactionId]
-LEFT OUTER JOIN [dbo].tblEMEntity AS e ON ft.[intEntityId] = e.[intEntityId]
-LEFT OUTER JOIN [dbo].tblEMEntity AS e1 ON ft.[intTraderId] = e1.[intEntityId]
-LEFT OUTER JOIN [dbo].[tblRKFuturesMonth] AS fm ON ft.[intFutureMonthId] = fm.[intFutureMonthId]
-LEFT OUTER JOIN [dbo].[tblRKFuturesMonth] AS frm ON ft.[intRollingMonthId] = frm.[intFutureMonthId]
-LEFT OUTER JOIN [dbo].[tblRKOptionsMonth] AS om ON ft.[intOptionMonthId] = om.[intOptionMonthId]
-LEFT OUTER JOIN [dbo].[tblCTBook] AS sb ON ft.[intBookId] = sb.[intBookId]
-LEFT OUTER JOIN [dbo].[tblCTSubBook] AS ssb ON ft.[intSubBookId] = ssb.[intSubBookId]
-LEFT OUTER JOIN [dbo].[tblRKFutureMarket] AS fom ON ft.[intFutureMarketId] = fom.[intFutureMarketId]
-LEFT OUTER JOIN [dbo].[tblRKBrokerageAccount] AS acc ON ft.[intBrokerageAccountId] = acc.[intBrokerageAccountId]
-LEFT OUTER JOIN [dbo].[tblRKFutureMarket] AS [fot] ON ft.[intFutureMarketId] = [fot].[intFutureMarketId]
-LEFT OUTER JOIN [dbo].[tblICUnitMeasure] AS um ON [fot].[intUnitMeasureId] = um.[intUnitMeasureId]
-LEFT OUTER JOIN [dbo].[tblICCommodity] AS sc ON ft.[intCommodityId] = sc.[intCommodityId]
-LEFT OUTER JOIN [dbo].[tblSMCompanyLocation] AS cl ON ft.[intLocationId] = cl.[intCompanyLocationId]
-LEFT OUTER JOIN [dbo].[tblCMBank] AS b ON ft.[intBankId] = b.[intBankId]
-LEFT OUTER JOIN [dbo].[vyuCMBankAccount] AS ba ON ft.[intBankAccountId] = ba.[intBankAccountId]
-LEFT OUTER JOIN [dbo].[tblSMCurrency] AS bc ON ft.[intCurrencyId] = bc.[intCurrencyID]
-LEFT OUTER JOIN [dbo].[tblSMCurrencyExchangeRateType] AS ce ON ft.[intCurrencyExchangeRateTypeId] = ce.[intCurrencyExchangeRateTypeId]
-LEFT OUTER JOIN [dbo].[tblRKAssignFuturesToContractSummary] AS cs ON cs.[intFutOptAssignedId] = ft.[intFutOptTransactionId]
-LEFT OUTER JOIN [dbo].[tblCTContractHeader] AS ch ON ch.[intContractHeaderId] = cs.[intContractHeaderId]
-LEFT OUTER JOIN [dbo].[tblCTContractDetail] AS cd ON cd.[intContractDetailId] = cs.[intContractDetailId]
+	, Curr.strCurrency
+	, strFutureMonthYear = (SUBSTRING(FMonth.strFutureMonth, 0, 4) + '(' + FMonth.strSymbol + ')' + CONVERT(NVARCHAR, FMonth.intYear)) COLLATE Latin1_General_CI_AS
+	, strFutureMonthYearWOSymbol = FMonth.strFutureMonth
+	, strOptionMonthYear = (SUBSTRING(OMonth.strOptionMonth, 0, 4) + '(' + OMonth.strOptMonthSymbol + ')' + CONVERT(NVARCHAR, OMonth.intYear)) COLLATE Latin1_General_CI_AS
+	, strOptionMonthYearWOSymbol = strOptionMonth
+	, strContractSeq = (ch.strContractNumber + ' - ' + CAST(cd.intContractSeq AS NVARCHAR(10))) COLLATE Latin1_General_CI_AS
+	, strContractNumber = ch.strContractNumber
+	, strRollingMonth = RMonth.strFutureMonth
+	, DE.intRollingMonthId
+	, strSelectedInstrumentType = CASE WHEN ISNULL(intSelectedInstrumentTypeId,1) =1  THEN 'Exchange Traded'
+										WHEN intSelectedInstrumentTypeId = 2 THEN 'OTC'
+										ELSE 'OTC - Others' END COLLATE Latin1_General_CI_AS
+	, dblAssignedLots = AD.dblAssignedLots
+	, Bank.strBankName
+	, BankAcct.strBankAccountNo
+	, dblUsedContract = ISNULL(DE.dblNoOfContract - GOC.dblMaxOpenContract, 0.00)
+	, ysnLocked = CAST(ISNULL((SELECT TOP 1 1 FROM tblRKFutOptTransaction 
+								WHERE (intFutOptTransactionId IN (SELECT intLFutOptTransactionId FROM tblRKMatchFuturesPSDetail)
+										OR intFutOptTransactionId IN (SELECT intSFutOptTransactionId FROM tblRKMatchFuturesPSDetail)
+										OR intFutOptTransactionId IN (SELECT intLFutOptTransactionId FROM tblRKOptionsMatchPnS)
+										OR intFutOptTransactionId IN (SELECT intSFutOptTransactionId FROM tblRKOptionsMatchPnS)) 
+									AND intFutOptTransactionId = DE.intFutOptTransactionId), 0) AS BIT)
+	, intHedgeContractId = PFD.intPriceFixationId
+	, strHedgeContract = PriceHeader.strContractNumber + '-' + CAST(PriceDetail.intContractSeq AS NVARCHAR(10))
+FROM tblRKFutOptTransaction DE
+LEFT JOIN tblEMEntity AS e ON DE.intEntityId = e.intEntityId
+LEFT JOIN tblEMEntity AS Trader ON DE.intTraderId = Trader.intEntityId
+LEFT JOIN tblRKFuturesMonth AS FMonth ON DE.intFutureMonthId = FMonth.intFutureMonthId
+LEFT JOIN tblRKFuturesMonth AS RMonth ON DE.intRollingMonthId = RMonth.intFutureMonthId
+LEFT JOIN tblRKOptionsMonth AS OMonth ON DE.intOptionMonthId = OMonth.intOptionMonthId
+LEFT JOIN tblCTBook AS book ON DE.intBookId = book.intBookId
+LEFT JOIN tblCTSubBook AS subBook ON DE.intSubBookId = subBook.intSubBookId
+LEFT JOIN tblRKBrokerageAccount AS BA ON DE.intBrokerageAccountId = BA.intBrokerageAccountId
+LEFT JOIN tblRKFutureMarket AS FMarket ON DE.intFutureMarketId = FMarket.intFutureMarketId
+LEFT JOIN tblICUnitMeasure AS UOM ON FMarket.intUnitMeasureId = UOM.intUnitMeasureId
+LEFT JOIN tblICCommodity AS Com ON DE.intCommodityId = Com.intCommodityId
+LEFT JOIN tblSMCompanyLocation AS Loc ON DE.intLocationId = Loc.intCompanyLocationId
+LEFT JOIN tblCMBank AS Bank ON DE.intBankId = Bank.intBankId
+LEFT JOIN vyuCMBankAccount AS BankAcct ON DE.intBankAccountId = BankAcct.intBankAccountId
+LEFT JOIN tblSMCurrency AS Curr ON DE.intCurrencyId = Curr.intCurrencyID
+LEFT JOIN tblSMCurrencyExchangeRateType AS CurEx ON DE.intCurrencyExchangeRateTypeId = CurEx.intCurrencyExchangeRateTypeId
+LEFT JOIN tblRKAssignFuturesToContractSummary AS AD ON AD.intFutOptAssignedId = DE.intFutOptTransactionId
+LEFT JOIN tblCTContractHeader AS ch ON ch.intContractHeaderId = AD.intContractHeaderId
+LEFT JOIN tblCTContractDetail AS cd ON cd.intContractDetailId = AD.intContractDetailId
+LEFT JOIN tblCTPriceFixationDetail PFD ON PFD.intFutOptTransactionId = DE.intFutOptTransactionId
+LEFT JOIN tblCTPriceFixation PF ON PF.intPriceFixationId = PFD.intPriceFixationId
+LEFT JOIN tblCTContractDetail PriceDetail ON PriceDetail.intContractDetailId = PF.intContractDetailId
+LEFT JOIN tblCTContractHeader PriceHeader ON PriceHeader.intContractHeaderId = PF.intContractHeaderId
 LEFT JOIN (
-	select intFutOptTransactionId, max(dblOpenContract) as dblOpenContract from vyuRKGetOpenContract group by intFutOptTransactionId
-) GOC ON ft.intFutOptTransactionId = GOC.intFutOptTransactionId
+	SELECT intFutOptTransactionId
+		, dblMaxOpenContract = MAX(dblOpenContract)
+		, dblSumOpenContract = SUM(dblOpenContract)
+	FROM vyuRKGetOpenContract
+	GROUP BY intFutOptTransactionId
+) GOC ON DE.intFutOptTransactionId = GOC.intFutOptTransactionId
