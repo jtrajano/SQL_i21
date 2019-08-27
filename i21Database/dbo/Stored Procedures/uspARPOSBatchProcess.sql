@@ -99,7 +99,11 @@ SELECT TOP 1 @intDiscountAccountId = intDiscountAccountId FROM tblARCompanyPrefe
 SELECT TOP 1 @intCashPaymentMethodId = intPaymentMethodID FROM dbo.tblSMPaymentMethod WITH (NOLOCK) WHERE UPPER(strPaymentMethod) = 'CASH'
 SELECT TOP 1 @intDebitMemoPaymentMethodId = intPaymentMethodID FROM dbo.tblSMPaymentMethod WITH (NOLOCK) WHERE UPPER(strPaymentMethod) = 'DEBIT MEMOS AND PAYMENTS'
 
+
+
 --TEMP TABLES
+
+
 IF(OBJECT_ID('tempdb..#POSTRANSACTIONS') IS NOT NULL)
 BEGIN
 	DROP TABLE #POSTRANSACTIONS
@@ -109,6 +113,8 @@ IF(OBJECT_ID('tempdb..#POSPAYMENTS') IS NOT NULL)
 BEGIN
 	DROP TABLE #POSPAYMENTS
 END
+
+
 
 CREATE TABLE #POSTRANSACTIONS (
 	  intPOSId			INT
@@ -551,8 +557,23 @@ IF EXISTS (SELECT TOP 1 NULL FROM #POSTRANSACTIONS)
 			WHERE ISNULL(dblDiscountPercent, 0) > 0
 			  AND RT.strPOSType = 'Mixed'
 
+
 			--PROCESS TO INVOICE
-			EXEC dbo.uspARProcessInvoicesByBatch @InvoiceEntries		= @EntriesForInvoice
+			IF(OBJECT_ID('tempdb..#POSTRANSACTIONSERRORS') IS NOT NULL)
+			BEGIN
+				DROP TABLE #POSTRANSACTIONSERRORS
+			END
+			ELSE 
+			BEGIN
+				CREATE TABLE #POSTRANSACTIONSERRORS (
+					 intPOSId  INT
+					, strDescription	NVARCHAR(100)	
+					 , ysnSuccess	BIT
+					 , dtmDateProcessed	 DATE
+				)
+			END
+
+			 EXEC dbo.uspARProcessInvoicesByBatch @InvoiceEntries		= @EntriesForInvoice
 											   , @LineItemTaxEntries	= @TaxDetails
 											   , @UserId				= @intEntityUserId
 											   , @GroupingOption		= 11
@@ -560,7 +581,24 @@ IF EXISTS (SELECT TOP 1 NULL FROM #POSTRANSACTIONS)
 											   , @ErrorMessage			= @strErrorMsg OUT
 											   , @LogId					= @intInvoiceLogId OUT
 
+
+
+			
+
 			--UPDATE POS BATCH LOG
+			INSERT INTO tblARPOSBatchProcessLog (
+				   intPOSId
+				 , strDescription
+				 , ysnSuccess
+				 , dtmDateProcessed
+			) SELECT 
+				   intPOSId
+				 , strDescription
+				 , ysnSuccess
+				 , dtmDateProcessed
+		    FROM #POSTRANSACTIONSERRORS
+
+
 			INSERT INTO tblARPOSBatchProcessLog (
 				   intPOSId
 				 , strDescription
