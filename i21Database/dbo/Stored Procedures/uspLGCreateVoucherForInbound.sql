@@ -17,6 +17,7 @@ BEGIN TRY
 	DECLARE @intAPClearingAccountId INT
 	DECLARE @intShipTo INT
 	DECLARE @intCurrencyId INT
+	DECLARE @DefaultCurrencyId INT = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
 
 	DECLARE @distinctVendor TABLE 
 		(intRecordId INT Identity(1, 1)
@@ -155,7 +156,7 @@ BEGIN TRY
 		,[intCostCurrencyId] = (CASE WHEN intPurchaseSale = 3 THEN ISNULL(AD.intSeqCurrencyId, 0) ELSE LD.intPriceCurrencyId END)
 		,[dblTax] = ISNULL(receiptItem.dblTax, 0)
 		,[dblDiscount] = 0
-		,[dblExchangeRate] = 1
+		,[dblExchangeRate] = CASE WHEN (@DefaultCurrencyId <> L.intCurrencyId) THEN ISNULL(LD.dblForexRate, 0) ELSE 1 END
 		,[ysnSubCurrency] =	AD.ysnSeqSubCurrency
 		,[intSubCurrencyCents] = CY.intCent
 		,[intAccountId] = apClearing.intAccountId
@@ -224,7 +225,7 @@ BEGIN TRY
 		,[intCostCurrencyId] = A.intCurrencyId
 		,[dblTax] = 0
 		,[dblDiscount] = 0
-		,[dblExchangeRate] = 1
+		,[dblExchangeRate] = CASE WHEN (A.intCurrencyId <> @DefaultCurrencyId) THEN 0 ELSE 1 END
 		,[ysnSubCurrency] =	CC.ysnSubCurrency
 		,[intSubCurrencyCents] = ISNULL(CC.intCent,0)
 		,[intAccountId] = apClearing.intAccountId
