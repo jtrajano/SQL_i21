@@ -267,7 +267,7 @@ DECLARE
 		,[intSourceId]							= @intLoadId
 		,[strSourceId]							= ARSI.strLoadNumber
 		,[intInvoiceId]							= NULL
-		,[intEntityCustomerId]					= @EntityCustomerId 
+		,[intEntityCustomerId]					= ARSI.intEntityCustomerId 
 		,[intCompanyLocationId]					= @CompanyLocationId 
 		,[intCurrencyId]						= ARSI.intCurrencyId 
 		,[intTermId]							= @TermId 
