@@ -26,6 +26,8 @@ BEGIN
 				SAVE TRANSACTION @Savepoint
 			END
 
+		DECLARE @intSuccessPostCount INT = 0
+		DECLARE @intFailedPostCount  INT = 0
 
 		SET @ysnSuccess = CAST(1 AS BIT)
 		SET @strMessage = ''
@@ -199,7 +201,10 @@ BEGIN
 									-- Check if Successfull
 									IF EXISTS(SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_ItemPricingAuditLog WHERE intItemPricingId = @intItemPricingId)
 										BEGIN 
-										
+
+											--SET @ysnSuccess = CAST(1 AS BIT)
+											SET @intSuccessPostCount = @intSuccessPostCount + 1
+
 											IF(@ysnOneTimeUse = CAST(1 AS BIT))
 												BEGIN
 
@@ -210,10 +215,15 @@ BEGIN
 												END
 										
 										END
+									ELSE
+										BEGIN
+											SET @intFailedPostCount = @intFailedPostCount + 1
+										END
 
 								END TRY
 								BEGIN CATCH
 									SET @ysnSuccess = CAST(0 AS BIT)
+
 									SET @strMessage = 'uspICUpdateItemPricingForCStore: ' + ERROR_MESSAGE()
 
 									GOTO ExitWithRollback
@@ -225,13 +235,24 @@ BEGIN
 							END
 
 						
-						-- UPDATE tblRetailPriceAdjustment
-						UPDATE rpa
-							SET rpa.dtmPostedDate	= GETUTCDATE(),
-							    rpa.intEntityId		= @intCurrentUserId,
-								rpa.ysnPosted		= CAST(1 AS BIT)
-						FROM tblSTRetailPriceAdjustment rpa
-						WHERE rpa.intRetailPriceAdjustmentId = @intRetailPriceAdjustmentId 
+						IF(@intSuccessPostCount > 0)
+							BEGIN
+								
+								SET @ysnSuccess = CAST(1 AS BIT)
+
+								-- UPDATE tblRetailPriceAdjustment
+								UPDATE rpa
+									SET rpa.dtmPostedDate	= GETUTCDATE(),
+										rpa.intEntityId		= @intCurrentUserId,
+										rpa.ysnPosted		= CAST(1 AS BIT)
+								FROM tblSTRetailPriceAdjustment rpa
+								WHERE rpa.intRetailPriceAdjustmentId = @intRetailPriceAdjustmentId 
+							END
+						ELSE IF(@intFailedPostCount > 0 AND @intSuccessPostCount <= 0)
+							BEGIN
+								SET @ysnSuccess = CAST(0 AS BIT)
+							END
+						
 
 					END
 				ELSE

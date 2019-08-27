@@ -17,13 +17,15 @@ SET ANSI_WARNINGS ON
 
 BEGIN
 	
-	DECLARE @UserEntityId		INT = NULL
-	DECLARE @intId				INT = NULL
-	DECLARE @ysnSuccess			BIT = CAST(1 AS BIT)
-	DECLARE @strMessage			NVARCHAR(1000)
+	DECLARE @UserEntityId							INT = NULL
+	DECLARE @intId									INT = NULL
+	DECLARE @strRetailPriceAdjustmentBatchId		NVARCHAR(50)
+	DECLARE @ysnSuccess								BIT = CAST(1 AS BIT)
+	DECLARE @strMessage								NVARCHAR(1000)
 
 	DECLARE @tmpData TABLE (
-		intId INT NOT NULL,
+		intId							INT			NOT NULL,
+		strRetailPriceAdjustmentBatchId	NVARCHAR(50)
 		PRIMARY KEY CLUSTERED (intId)
 	)
 
@@ -34,10 +36,12 @@ BEGIN
 		BEGIN
 			INSERT INTO @tmpData 
 			(
-				intId
+				intId,
+				strRetailPriceAdjustmentBatchId
 			)
 			SELECT DISTINCT 
-				intId	= vrpa.intTransactionId
+				intId								= vrpa.intTransactionId,
+				strRetailPriceAdjustmentBatchId		= rpa.strRetailPriceAdjustmentNumber
 			FROM vyuSTBatchPostingRetailPriceAdjustment vrpa
 			INNER JOIN tblSTRetailPriceAdjustment rpa
 				ON vrpa.intTransactionId = rpa.intRetailPriceAdjustmentId
@@ -48,10 +52,12 @@ BEGIN
 		BEGIN
 			INSERT INTO @tmpData 
 			(
-				intId
+				intId,
+				strRetailPriceAdjustmentBatchId
 			)
 			SELECT DISTINCT 
-				intId	= vrpa.intTransactionId
+				intId								= vrpa.intTransactionId,
+				strRetailPriceAdjustmentBatchId		= rpa.strRetailPriceAdjustmentNumber
 			FROM vyuSTBatchPostingRetailPriceAdjustment vrpa
 			INNER JOIN tblSTRetailPriceAdjustment rpa
 				ON vrpa.intTransactionId = rpa.intRetailPriceAdjustmentId
@@ -68,7 +74,8 @@ BEGIN
 		BEGIN 
 
 			SELECT TOP 1 
-				@intId = intId 
+				@intId							 = intId,
+				@strRetailPriceAdjustmentBatchId = strRetailPriceAdjustmentBatchId
 			FROM @tmpData
 
 
@@ -83,10 +90,54 @@ BEGIN
 			IF(@ysnSuccess = 1)
 				BEGIN
 					SET @SuccessfulCount = @SuccessfulCount + 1;
+
+					INSERT INTO tblSTPostResult
+					(
+						[strBatchId],
+						[intTransactionId],
+						[strTransactionId],
+						[strDescription],
+						[dtmDate],
+						[strTransactionType],
+						[intUserId],
+						[intEntityId]
+					)
+					SELECT 
+						[strBatchId]		= @BatchId,
+						[intTransactionId]	= @intId,
+						[strTransactionId]	= @strRetailPriceAdjustmentBatchId,
+						[strDescription]	= 'Transaction successfully posted.',
+						[dtmDate]			= GETUTCDATE(),
+						[strTransactionType]= 'Retail Price Adjustment',
+						[intUserId]			= @UserId,
+						[intEntityId]		= @UserId
+
 				END
 			ELSE
 				BEGIN
 					SET @ErrorMessage = @strMessage
+						
+					INSERT INTO tblSTPostResult
+					(
+						[strBatchId],
+						[intTransactionId],
+						[strTransactionId],
+						[strDescription],
+						[dtmDate],
+						[strTransactionType],
+						[intUserId],
+						[intEntityId]
+					)
+					SELECT 
+						[strBatchId]		= @BatchId,
+						[intTransactionId]	= @intId,
+						[strTransactionId]	= @strRetailPriceAdjustmentBatchId,
+						[strDescription]	= 'Unable to Post. ' + @strMessage,
+						[dtmDate]			= GETUTCDATE(),
+						[strTransactionType]= 'Retail Price Adjustment',
+						[intUserId]			= @UserId,
+						[intEntityId]		= @UserId
+
 					RETURN
 				END
 			
