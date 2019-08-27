@@ -72,6 +72,8 @@
 	
 	-- Fields for Internal Use Only
 	intHeaderId INT NULL,
-	intShipmentId INT NULL
+	intShipmentId INT NULL,
+	intLoadShipmentId INT NULL,
+	intLoadShipmentDetailId INT NULL
 	--UNIQUE (intItemLotGroup, intOrderType, intSourceType, intEntityCustomerId, dtmShipDate, intShipFromLocationId, intShipToLocationId, intFreightTermId)
 )
