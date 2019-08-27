@@ -194,7 +194,7 @@ BEGIN TRY
 		INSERT	INTO	#tmpExtracted
 		(	intContractTypeId,intEntityId,dtmContractDate,intCommodityId,intCommodityUOMId,dblHeaderQuantity,intSalespersonId,ysnSigned,strContractNumber,ysnPrinted,
 			intItemId,intItemUOMId,intContractSeq,intStorageScheduleRuleId,dtmEndDate,intCompanyLocationId,dblQuantity,intContractStatusId,dblBalance,dtmStartDate,
-			intPricingTypeId,dtmCreated,intConcurrencyId,intCreatedById,intUnitMeasureId
+			intPricingTypeId,dtmCreated,intConcurrencyId,intCreatedById,intUnitMeasureId,dtmM2MDate
 		)
 		SELECT	intContractTypeId	= 1, --Purchase
 				intEntityId			= @intEntityId, 
@@ -225,7 +225,8 @@ BEGIN TRY
 				dtmCreated			=	GETDATE(),
 				intConcurrencyId	=	1,
 				intCreatedById		=	1,
-				intUnitMeasureId	=	ItemUOM.intUnitMeasureId 
+				intUnitMeasureId	=	ItemUOM.intUnitMeasureId,
+				dtmM2MDate = GETDATE()
 
 		FROM	tblGRTransferStorageSplit	TSS
 		JOIN	tblGRTransferStorage		TS		ON  TS.intTransferStorageId =	TSS.intTransferStorageId
