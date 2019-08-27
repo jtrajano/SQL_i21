@@ -627,24 +627,24 @@ BEGIN TRY
 							)
 				END
 
-				IF @strCreatedBy IS NOT NULL
-					AND NOT EXISTS (
-						SELECT 1
-						FROM tblEMEntity CE
-						JOIN tblEMEntityType ET1 ON ET1.intEntityId = CE.intEntityId
-						WHERE ET1.strType = 'User'
-							AND CE.strName = @strCreatedBy
-							AND CE.strEntityNo <> ''
-						)
-				BEGIN
-					SELECT @strErrorMessage = 'User ' + @strCreatedBy + ' is not available.'
+				--IF @strCreatedBy IS NOT NULL
+				--	AND NOT EXISTS (
+				--		SELECT 1
+				--		FROM tblEMEntity CE
+				--		JOIN tblEMEntityType ET1 ON ET1.intEntityId = CE.intEntityId
+				--		WHERE ET1.strType = 'User'
+				--			AND CE.strName = @strCreatedBy
+				--			AND CE.strEntityNo <> ''
+				--		)
+				--BEGIN
+				--	SELECT @strErrorMessage = 'User ' + @strCreatedBy + ' is not available.'
 
-					RAISERROR (
-							@strErrorMessage
-							,16
-							,1
-							)
-				END
+				--	RAISERROR (
+				--			@strErrorMessage
+				--			,16
+				--			,1
+				--			)
+				--END
 
 				IF @strFreightTerm IS NOT NULL
 					AND NOT EXISTS (
@@ -832,6 +832,21 @@ BEGIN TRY
 				WHERE ET1.strType = 'User'
 					AND CE.strName = @strCreatedBy
 					AND CE.strEntityNo <> ''
+
+				IF @intUserId IS NULL
+				BEGIN
+					IF EXISTS (
+							SELECT 1
+							FROM tblSMUserSecurity
+							WHERE strUserName = 'irelyadmin'
+							)
+						SELECT TOP 1 @intUserId = intEntityId
+						FROM tblSMUserSecurity
+						WHERE strUserName = 'irelyadmin'
+					ELSE
+						SELECT TOP 1 @intUserId = intEntityId
+						FROM tblSMUserSecurity
+				END
 
 				SELECT @intFreightTermId = intFreightTermId
 				FROM tblSMFreightTerms FT
