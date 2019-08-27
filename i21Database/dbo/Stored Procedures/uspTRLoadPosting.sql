@@ -22,6 +22,8 @@ BEGIN TRY
 	FROM	tblSMUserSecurity 
 	WHERE	intEntityId = @intUserId --this also
 
+	BEGIN TRANSACTION
+
 	IF @ysnPostOrUnPost = 0 AND @ysnRecap = 0
 	BEGIN
 		EXEC uspSMAuditLog 
@@ -40,12 +42,14 @@ BEGIN TRY
 	BEGIN
 		IF @ysnPostOrUnPost = 1
 		BEGIN
+			DECLARE @strChangeDesc NVARCHAR(100) = NULL
+			SET @strChangeDesc = CASE WHEN @BatchId IS NOT NULL THEN 'Posted - ' + @BatchId ELSE 'Posted' END
 			EXEC uspSMAuditLog 
 				@keyValue = @intLoadHeaderId,                          -- Primary Key Value
 				@screenName = 'Transports.view.TransportLoads',        -- Screen Namespace
 				@entityId = @intEntityId,                              -- Entity Id.
 				@actionType = 'Processed',                             -- Action Type
-				@changeDescription = 'Posted',                         -- Description
+				@changeDescription = @strChangeDesc,                         -- Description
 				@fromValue = '',                                       -- Previous Value
 				@toValue = ''                                          -- New Value
 		END
@@ -61,13 +65,22 @@ BEGIN TRY
 	   EXEC uspTRLoadProcessTransportLoad @intLoadHeaderId,@ysnPostOrUnPost
 	END
 
+	IF(@@TRANCOUNT > 0)
+	BEGIN
+		COMMIT TRANSACTION
+	END
+
 END TRY
 BEGIN CATCH
 	SELECT 
 		@ErrorMessage = ERROR_MESSAGE(),
 		@ErrorSeverity = ERROR_SEVERITY(),
 		@ErrorState = ERROR_STATE();
-
+	
+	IF(@@TRANCOUNT > 0)
+	BEGIN
+		ROLLBACK TRANSACTION
+	END
 	-- Use RAISERROR inside the CATCH block to return error
 	-- information about the original error that caused
 	-- execution to jump to the CATCH block.

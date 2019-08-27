@@ -17,47 +17,79 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-BEGIN
-	
-	DECLARE @UserEntityId INT = NULL
+DECLARE @ErrorSeverity INT
+DECLARE @ErrorState INT
+
+BEGIN TRY
+
+	SET @SuccessfulCount = 0
+		
 	DECLARE @intId INT = NULL
 	DECLARE @tmpData TABLE (
-		intId INT NOT NULL,
-		PRIMARY KEY CLUSTERED (intId)
+		intId INT NOT NULL
 	)
-
-	SET @UserEntityId = ISNULL((SELECT intEntityId FROM tblSMUserSecurity WHERE intEntityId = @UserId), @UserId)
 
 	IF @TransactionId != 'ALL'
 	BEGIN
-		INSERT INTO @tmpData 
-		SELECT DISTINCT intLoadHeaderId FROM tblTRLoadHeader WHERE ysnPosted = 0
-		AND intLoadHeaderId IN (SELECT Item FROM [fnSplitStringWithTrim](@TransactionId,',') )
+		INSERT INTO @tmpData (intId)
+		SELECT Item FROM [fnSplitStringWithTrim](@TransactionId,',')
+	END
+	ELSE
+	BEGIN
+		INSERT INTO @tmpData (intId)
+		SELECT intLoadHeaderId FROM tblTRLoadHeader WHERE ysnPosted = 0
 	END
 
 	DECLARE CursorTran CURSOR FOR
-	SELECT intLoadHeaderId
-		FROM tblTRLoadHeader  
-		WHERE ysnPosted = 0	AND 1=1
-	
-	SET @SuccessfulCount = 0
+	SELECT intId FROM @tmpData 
 
 	OPEN CursorTran 
 	FETCH NEXT FROM CursorTran INTO @intId  
-
 	WHILE @@FETCH_STATUS = 0
 	BEGIN
-		EXEC [uspTRLoadPosting]
-			 @intLoadHeaderId = @intId
-			,@intUserId = @UserId
-			,@ysnRecap = @Recap
-			,@ysnPostOrUnPost = @Post
+		
+		DECLARE @strTransaction NVARCHAR(50) = NULL
+		DECLARE @Message NVARCHAR(MAX)	= NULL
 
-		SET @SuccessfulCount = @SuccessfulCount + 1;
+		BEGIN TRY
 
-		FETCH NEXT FROM CursorTran INTO @intId  
+			SELECT @strTransaction = strTransaction FROM tblTRLoadHeader WHERE intLoadHeaderId = @intId
+
+			EXEC [uspTRLoadPosting]
+				@intLoadHeaderId = @intId
+				,@intUserId = @UserId
+				,@ysnRecap = @Recap
+				,@ysnPostOrUnPost = @Post
+				,@BatchId = @BatchId
+
+			SET @SuccessfulCount = @SuccessfulCount + 1
+			SET @Message = 'Transport Load Posted Successfully'
+
+		END TRY
+		BEGIN CATCH	
+			SET @Message = ERROR_MESSAGE()
+		END CATCH
+
+		-- CREATE TO BATCH POST LOG
+		INSERT INTO tblTRPostResult (strBatchId, intTransactionId, strTransactionId, strDescription, dtmDate, strTransactionType, intUserId)
+		VALUES(@BatchId, @intId, @strTransaction , @Message, GETDATE(), 'Transport Load', @UserId)
+
+		FETCH NEXT FROM CursorTran INTO @intId
 	END
 	CLOSE CursorTran
 	DEALLOCATE CursorTran
 
-END
+END TRY
+BEGIN CATCH
+
+	SELECT 
+		@ErrorMessage = ERROR_MESSAGE(),
+		@ErrorSeverity = ERROR_SEVERITY(),
+		@ErrorState = ERROR_STATE()
+
+	RAISERROR (
+		@ErrorMessage, -- Message text.
+		@ErrorSeverity, -- Severity.
+		@ErrorState -- State.
+	)
+END CATCH
