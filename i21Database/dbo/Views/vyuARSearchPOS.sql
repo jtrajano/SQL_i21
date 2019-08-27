@@ -11,6 +11,8 @@ SELECT intPOSId					= POS.intPOSId
 	 , strCustomerName			= CUSTOMER.strName
 	 , strUserName				= USERNAME.strName
 	 , strPONumber				= POS.strPONumber
+	 , strInvoiceNumber			= POS.strInvoiceNumber
+	 , strCreditMemoNumber 		= POS.strCreditMemoNumber
 	 , strComment				= POS.strComment
 	 , strBillToLocationName	= CUSTOMER.strBillToLocationName
 	 , strBillToAddress			= CUSTOMER.strBillToAddress
@@ -24,6 +26,7 @@ SELECT intPOSId					= POS.intPOSId
 	 , ysnHold					= POS.ysnHold
 	 , ysnReturn				= POS.ysnReturn
 	 , ysnPaid					= POS.ysnPaid
+	 , ysnMixed					= POS.ysnMixed
 	 , ysnTaxExempt				= ISNULL(POS.ysnTaxExempt,0)
 FROM dbo.tblARPOS POS WITH (NOLOCK)
 INNER JOIN (
