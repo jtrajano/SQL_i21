@@ -148,17 +148,16 @@ BEGIN TRY
 			,@ysnPost = @Post
 			,@intInvoiceId = @intCreatedInvoiceId
 
-		IF (@Post = 0)
-		BEGIN
-			-- DELETE INVOICE WHEN ALL LINE ITEMS ARE ZERO QTY
-			IF NOT EXISTS(SELECT TOP 1 1 FROM @EntriesForInvoice)
-			BEGIN			
-				UPDATE tblMBMeterReading SET intInvoiceId = NULL WHERE intMeterReadingId = @TransactionId
-				EXEC [dbo].[uspARDeleteInvoice] 
-					@InvoiceId = @InvoiceId,
-					@UserId = @UserId
-			END
+
+		-- DELETE INVOICE WHEN ALL LINE ITEMS ARE ZERO QTY
+		IF NOT EXISTS(SELECT TOP 1 1 FROM @EntriesForInvoice)
+		BEGIN			
+			--UPDATE tblMBMeterReading SET intInvoiceId = NULL WHERE intMeterReadingId = @TransactionId
+			EXEC [dbo].[uspARDeleteInvoice] 
+				@InvoiceId = @InvoiceId,
+				@UserId = @UserId
 		END
+
 
 		IF(@@TRANCOUNT > 0)
 		BEGIN

@@ -49,7 +49,11 @@ BEGIN TRY
 		END
 		RETURN
 	END
-
+	ELSE IF NOT EXISTS(SELECT TOP 1 1 FROM tblMBMeterReadingDetail WHERE intMeterReadingId = @intMeterReadingId AND dblCurrentReading > dblLastReading)
+	BEGIN
+		RAISERROR('"Total Quantity Sold" should be greater than 0.', 16, 1)
+	END
+	
 	-- Posting and Unposting of Meter Reading should be by sequence
 	IF (@Post = 1)
 	BEGIN
