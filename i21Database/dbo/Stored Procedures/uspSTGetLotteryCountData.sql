@@ -2,17 +2,47 @@
 	@date DATETIME,
 	@storeId INT
 AS
+SELECT 
+intBeginCount = CASE WHEN ISNULL(intPriorCheckoutCount,0) != 0 
+THEN intPriorCheckoutCount 
+ELSE 
+	CASE WHEN strCountDirection = 'Low to High' THEN intPriorCheckoutCount ELSE CAST(dblQuantityRemaining AS INT) END
+END
+,dtmSoldDate	
+,strStatus	
+,intStoreId	
+,intLotteryBookId	
+,intBinNumber	
+,strGame	
+,intLotteryGameId	
+,strBookNumber	
+,strCountDirection	
+,strSoldOut	
+,intStartingNumber	
+,dblTicketValue	
+,intTicketPerPack	
+,intConcurrencyId	
+,intItemId	
+,strItemDescription	
+,strItemNo	
+,strLongUPCCode	
+,intCategoryId	
+,strCategoryCode	
+,strCategoryDescription	
+,intItemUOMId
+FROM (
 
 SELECT 
-	intBeginCount = ISNULL((
-		SELECT TOP 1 ISNULL(tblSTCheckoutLotteryCount.intEndingCount,0) FROM tblSTCheckoutHeader 
+	intPriorCheckoutCount = ISNULL((
+	SELECT TOP 1 ISNULL(tblSTCheckoutLotteryCount.intEndingCount,0) FROM tblSTCheckoutHeader 
 		INNER JOIN tblSTCheckoutLotteryCount 
 		ON tblSTCheckoutHeader.intCheckoutId = tblSTCheckoutLotteryCount.intCheckoutId
 		WHERE tblSTCheckoutHeader.intStoreId = @storeId
-		AND tblSTCheckoutHeader.dtmCheckoutDate < @date
 		AND tblSTCheckoutLotteryCount.intLotteryBookId = tblSTLotteryBook.intLotteryBookId
-		ORDER BY dtmCheckoutDate DESC
+		AND ( (tblSTCheckoutHeader.dtmCheckoutDate < @date) OR (tblSTCheckoutHeader.dtmCheckoutDate = @date))
+		ORDER BY tblSTCheckoutHeader.intCheckoutId DESC
 	),0),
+	tblSTLotteryBook.dblQuantityRemaining,
 	tblSTLotteryBook.dtmSoldDate,
 	tblSTLotteryBook.strStatus,
     tblSTLotteryBook.intStoreId,
@@ -44,8 +74,8 @@ SELECT
 	OR ( ('sold' = LOWER(strStatus)) AND (dtmSoldDate = @date)) 
 	OR 'returned' = LOWER(strStatus)) 
 	AND tblSTLotteryBook.intStoreId = @storeId
-	ORDER BY 
-    tblSTLotteryBook.intBinNumber ASC
+	
 
-
-
+) as tblSTCompileData
+ORDER BY 
+intBinNumber ASC
