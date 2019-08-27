@@ -4798,7 +4798,9 @@ IF(@ysnDebug = 1)
 
 
 				UPDATE tblSTLotteryBook 
-				SET strStatus = CASE WHEN (ISNULL(tblSTLotteryBook.dblQuantityRemaining,0) = 0) THEN 'Sold'ELSE tblSTLotteryBook.strStatus END
+				SET 
+				strStatus = CASE WHEN (ISNULL(tblSTLotteryBook.dblQuantityRemaining,0) = 0) THEN 'Sold'ELSE tblSTLotteryBook.strStatus END
+				,dtmSoldDate = CASE WHEN (ISNULL(tblSTLotteryBook.dblQuantityRemaining,0) = 0) THEN @dtmCheckoutDate ELSE NULL END
 				FROM tblSTCheckoutLotteryCount 
 				WHERE tblSTCheckoutLotteryCount.intLotteryBookId = tblSTLotteryBook.intLotteryBookId 
 				AND tblSTCheckoutLotteryCount.intCheckoutId = @intCheckoutId
@@ -5420,6 +5422,7 @@ IF(@ysnDebug = 1)
 
 				UPDATE tblSTLotteryBook 
 				SET strStatus = CASE WHEN (ISNULL(tblSTLotteryBook.dblQuantityRemaining,0) != 0) THEN 'Active'ELSE tblSTLotteryBook.strStatus END
+				, dtmSoldDate = CASE WHEN (ISNULL(tblSTLotteryBook.dblQuantityRemaining,0) != 0) THEN  NULL ELSE tblSTLotteryBook.dtmSoldDate END
 				FROM tblSTCheckoutLotteryCount 
 				WHERE tblSTCheckoutLotteryCount.intLotteryBookId = tblSTLotteryBook.intLotteryBookId 
 				AND tblSTCheckoutLotteryCount.intCheckoutId = @intCheckoutId
