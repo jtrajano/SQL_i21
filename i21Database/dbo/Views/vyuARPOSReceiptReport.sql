@@ -7,7 +7,7 @@ SELECT intPOSId				= POS.intPOSId
 	 , strCustomerAddress   = [dbo].fnARFormatCustomerAddress(NULL, NULL, NULL, CUSTOMER.strAddress, CUSTOMER.strCity, CUSTOMER.strState, CUSTOMER.strZipCode, NULL, NULL, NULL) COLLATE Latin1_General_CI_AS
 	 , strItemDescription	= POSD.strItemDescription
 	 , strItemUOM			= POSD.strItemUOM
-	 , strInvoiceNumber		= INVOICE.strInvoiceNumber
+	 , strInvoiceNumber		= POS.strInvoiceNumber
 	 , dblQuantity			= CASE WHEN POS.ysnReturn = 1 AND POSD.dblPrice < 0 THEN POSD.dblQuantity * -1 ELSE POSD.dblQuantity END
      , dblPrice				= POSD.dblPrice
 	 , dblExtendedPrice		= POSD.dblExtendedPrice
