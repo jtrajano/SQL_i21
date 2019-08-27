@@ -38,6 +38,7 @@ BEGIN
 			ON B.intBillId = C.intBillId
 	WHERE A.intPaymentId IN (SELECT intId FROM @paymentIds)
 	AND 1 = CASE WHEN C.intTransactionType IN (2, 13) AND B.ysnOffset = 0 THEN 0 ELSE 1 END --DO NOTHING IF PREPAID/BASIS IS NOT AN OFFSET
+	AND B.dblPayment != 0
 END
 ELSE IF @post = 1
 BEGIN
@@ -61,4 +62,5 @@ BEGIN
 			ON B.intBillId = C.intBillId
 	WHERE A.intPaymentId IN (SELECT intId FROM @paymentIds)
 	AND 1 = CASE WHEN C.intTransactionType IN (2, 13) AND B.ysnOffset = 0 THEN 0 ELSE 1 END
+	AND B.dblPayment != 0
 END
