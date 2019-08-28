@@ -100,18 +100,18 @@ SELECT CD.intContractDetailId
 	,BO.strBook
 	,CD.intSubBookId
 	,SB.strSubBook
-	,CASE WHEN ISNULL(CD.ysnUseFXPrice,0) = 1 THEN CD.dblCashPrice ELSE AD.dblSeqPrice END AS dblSeqPrice
+	,CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 THEN CD.dblCashPrice ELSE AD.dblSeqPrice END AS dblSeqPrice
 	,PT.strPricingType
-	,CASE WHEN ISNULL(CD.ysnUseFXPrice,0) = 1 THEN CD.intCurrencyId ELSE AD.intSeqCurrencyId END AS intSeqCurrencyId
-	,CASE WHEN ISNULL(CD.ysnUseFXPrice,0) = 1 THEN CPCU.strCurrency ELSE AD.strSeqCurrency END AS strSeqCurrency
-	,AD.intSeqPriceUOMId
-	,AD.strSeqPriceUOM
-	,CASE WHEN ISNULL(CD.ysnUseFXPrice,0) = 1 THEN CPCU.ysnSubCurrency ELSE PCU.ysnSubCurrency END AS ysnSubCurrency
-	,CD.intRateTypeId
-	,CD.dblRate
-	,CD.intInvoiceCurrencyId
-	,FXC.strCurrency AS strInvoiceCurrency
-	,CET.strCurrencyExchangeRateType
+	,CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 THEN CD.intCurrencyId ELSE AD.intSeqCurrencyId END AS intSeqCurrencyId
+	,CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 THEN CPCU.strCurrency ELSE AD.strSeqCurrency END AS strSeqCurrency
+	,CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 THEN CD.intPriceItemUOMId ELSE AD.intSeqPriceUOMId END AS intSeqPriceUOMId
+	,CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 THEN U3.strUnitMeasure ELSE AD.strSeqPriceUOM END AS strSeqPriceUOM 
+	,CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 THEN CPCU.ysnSubCurrency ELSE PCU.ysnSubCurrency END AS ysnSubCurrency
+	,CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 THEN CD.intRateTypeId ELSE NULL END AS intRateTypeId
+	,CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 THEN CD.dblRate ELSE NULL END AS dblRate
+	,CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 THEN CD.intInvoiceCurrencyId ELSE NULL END AS intInvoiceCurrencyId
+	,CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 THEN FXC.strCurrency ELSE NULL END AS strInvoiceCurrency
+	,CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 THEN CET.strCurrencyExchangeRateType ELSE NULL END AS strCurrencyExchangeRateType
 	,CD.intFreightTermId
 	,FT.strFreightTerm
 	,CD.intShipToId
@@ -130,6 +130,8 @@ LEFT JOIN tblICItemUOM IU ON IU.intItemUOMId = CD.intItemUOMId
 LEFT JOIN tblICUnitMeasure U1 ON U1.intUnitMeasureId = IU.intUnitMeasureId
 LEFT JOIN tblICItemUOM WIU ON WIU.intItemUOMId = CD.intNetWeightUOMId
 LEFT JOIN tblICUnitMeasure U2 ON U2.intUnitMeasureId = WIU.intUnitMeasureId
+LEFT JOIN tblICItemUOM PIU ON PIU.intItemUOMId = CD.intPriceItemUOMId
+LEFT JOIN tblICUnitMeasure U3 ON U3.intUnitMeasureId = PIU.intUnitMeasureId
 LEFT JOIN tblSMCity LoadingPort ON LoadingPort.intCityId = CD.intLoadingPortId
 LEFT JOIN tblSMCity DestPort ON DestPort.intCityId = CD.intDestinationPortId
 LEFT JOIN tblSMCity DestCity ON DestCity.intCityId = CD.intDestinationCityId
@@ -279,18 +281,18 @@ SELECT CD.intContractDetailId
 	,BO.strBook
 	,CD.intSubBookId
 	,SB.strSubBook
-	,CASE WHEN ISNULL(CD.ysnUseFXPrice,0) = 1 THEN CD.dblCashPrice ELSE AD.dblSeqPrice END AS dblSeqPrice
+	,CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 THEN CD.dblCashPrice ELSE AD.dblSeqPrice END AS dblSeqPrice
 	,PT.strPricingType
-	,CASE WHEN ISNULL(CD.ysnUseFXPrice,0) = 1 THEN CD.intCurrencyId ELSE AD.intSeqCurrencyId END AS intSeqCurrencyId
-	,CASE WHEN ISNULL(CD.ysnUseFXPrice,0) = 1 THEN CPCU.strCurrency ELSE AD.strSeqCurrency END AS strSeqCurrency
-	,AD.intSeqPriceUOMId
-	,AD.strSeqPriceUOM
-	,CASE WHEN ISNULL(CD.ysnUseFXPrice,0) = 1 THEN CPCU.ysnSubCurrency ELSE PCU.ysnSubCurrency END AS ysnSubCurrency
-	,CD.intRateTypeId
-	,CD.dblRate
-	,CD.intInvoiceCurrencyId
-	,FXC.strCurrency AS strInvoiceCurrency
-	,CET.strCurrencyExchangeRateType
+	,CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 THEN CD.intCurrencyId ELSE AD.intSeqCurrencyId END AS intSeqCurrencyId
+	,CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 THEN CPCU.strCurrency ELSE AD.strSeqCurrency END AS strSeqCurrency
+	,CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 THEN U3.strUnitMeasure ELSE AD.strSeqPriceUOM END AS strSeqPriceUOM 
+	,CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 THEN CPCU.ysnSubCurrency ELSE PCU.ysnSubCurrency END AS ysnSubCurrency
+	,CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 THEN CPCU.ysnSubCurrency ELSE PCU.ysnSubCurrency END AS ysnSubCurrency
+	,CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 THEN CD.intRateTypeId ELSE NULL END AS intRateTypeId
+	,CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 THEN CD.dblRate ELSE NULL END AS dblRate
+	,CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 THEN CD.intInvoiceCurrencyId ELSE NULL END AS intInvoiceCurrencyId
+	,CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 THEN FXC.strCurrency ELSE NULL END AS strInvoiceCurrency
+	,CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 THEN CET.strCurrencyExchangeRateType ELSE NULL END AS strCurrencyExchangeRateType
 	,CD.intFreightTermId
 	,FT.strFreightTerm
 	,CD.intShipToId
@@ -309,6 +311,8 @@ LEFT JOIN tblICItemUOM IU ON IU.intItemUOMId = CD.intItemUOMId
 LEFT JOIN tblICUnitMeasure U1 ON U1.intUnitMeasureId = IU.intUnitMeasureId
 LEFT JOIN tblICItemUOM WIU ON WIU.intItemUOMId = CD.intNetWeightUOMId
 LEFT JOIN tblICUnitMeasure U2 ON U2.intUnitMeasureId = WIU.intUnitMeasureId
+LEFT JOIN tblICItemUOM PIU ON PIU.intItemUOMId = CD.intPriceItemUOMId
+LEFT JOIN tblICUnitMeasure U3 ON U3.intUnitMeasureId = PIU.intUnitMeasureId
 LEFT JOIN tblSMCity LoadingPort ON LoadingPort.intCityId = CD.intLoadingPortId
 LEFT JOIN tblSMCity DestPort ON DestPort.intCityId = CD.intDestinationPortId
 LEFT JOIN tblSMCity DestCity ON DestCity.intCityId = CD.intDestinationCityId
@@ -367,6 +371,7 @@ GROUP BY CD.intContractDetailId
 	,CD.intNetWeightUOMId
 	,U2.intUnitMeasureId
 	,U2.strUnitMeasure
+	,U3.strUnitMeasure
 	,CD.intCompanyLocationId
 	,CL.strLocationName
 	,CD.dblBalance
@@ -445,4 +450,4 @@ GROUP BY CD.intContractDetailId
 	,CD.intCurrencyId
 	,CPCU.strCurrency
 	,CPCU.ysnSubCurrency
-	,CD.ysnUseFXPrice
+	,AD.ysnValidFX
