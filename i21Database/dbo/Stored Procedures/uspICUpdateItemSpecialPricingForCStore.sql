@@ -237,49 +237,49 @@ BEGIN
 			,strDescription = 'C-Store updates the Begin Date in Promotional Pricing and Exemptions Grid'
 			,strOld = dtmBeginDate_Original
 			,strNew = dtmBeginDate_New
-	FROM	#tmpUpdateItemForCStore_itemAuditLog auditLog
+	FROM	#tmpUpdateItemSpecialPricingForCStore_AuditLog auditLog
 	WHERE	ISNULL(dtmBeginDate_Original, 0) <> ISNULL(dtmBeginDate_New, 0)
 	UNION ALL
 	SELECT	intItemId
 			,strDescription = 'C-Store updates the End Date in Promotional Pricing and Exemptions Grid'
 			,strOld = dtmEndDate_Original
 			,strNew = dtmEndDate_New
-	FROM	#tmpUpdateItemForCStore_itemAuditLog auditLog
+	FROM	#tmpUpdateItemSpecialPricingForCStore_AuditLog auditLog
 	WHERE	ISNULL(dtmEndDate_Original, 0) <> ISNULL(dtmEndDate_New, 0)
 	UNION ALL
 	SELECT	intItemId
 			,strDescription = 'C-Store updates the Discount Amount/Percent in Promotional Pricing and Exemptions Grid'
 			,strOld = dblDiscount_Original
 			,strNew = dblDiscount_New
-	FROM	#tmpUpdateItemForCStore_itemAuditLog auditLog
+	FROM	#tmpUpdateItemSpecialPricingForCStore_AuditLog auditLog
 	WHERE	ISNULL(dblDiscount_Original, 0) <> ISNULL(dblDiscount_New, 0)
 	UNION ALL
 	SELECT	intItemId
 			,strDescription = 'C-Store updates the Accumulated Amount in Promotional Pricing and Exemptions Grid'
 			,strOld = dblAccumulatedAmount_Original
 			,strNew = dblAccumulatedAmount_New
-	FROM	#tmpUpdateItemForCStore_itemAuditLog auditLog
+	FROM	#tmpUpdateItemSpecialPricingForCStore_AuditLog auditLog
 	WHERE	ISNULL(dblAccumulatedAmount_Original, 0) <> ISNULL(dblAccumulatedAmount_New, 0)
 	UNION ALL
 	SELECT	intItemId
 			,strDescription = 'C-Store updates the Accumulated Qty in Promotional Pricing and Exemptions Grid'
 			,strOld = dblAccumulatedQty_Original
 			,strNew = dblAccumulatedQty_New
-	FROM	#tmpUpdateItemForCStore_itemAuditLog auditLog
+	FROM	#tmpUpdateItemSpecialPricingForCStore_AuditLog auditLog
 	WHERE	ISNULL(dblAccumulatedQty_Original, 0) <> ISNULL(dblAccumulatedQty_New, 0)
 	UNION ALL
 	SELECT	intItemId
 			,strDescription = 'C-Store updates the Discount thru Amount in Promotional Pricing and Exemptions Grid'
 			,strOld = dblDiscountThruAmount_Original
 			,strNew = dblDiscountThruAmount_New
-	FROM	#tmpUpdateItemForCStore_itemAuditLog auditLog
+	FROM	#tmpUpdateItemSpecialPricingForCStore_AuditLog auditLog
 	WHERE	ISNULL(dblDiscountThruAmount_Original, 0) <> ISNULL(dblDiscountThruAmount_New, 0)
 	UNION ALL
 	SELECT	intItemId
 			,strDescription = 'C-Store updates the Discount thru Qty in Promotional Pricing and Exemptions Grid'
 			,strOld = dblDiscountThruQty_Original
 			,strNew = dblDiscountThruQty_New
-	FROM	#tmpUpdateItemForCStore_itemAuditLog auditLog
+	FROM	#tmpUpdateItemSpecialPricingForCStore_AuditLog auditLog
 	WHERE	ISNULL(dblDiscountThruQty_Original, 0) <> ISNULL(dblDiscountThruQty_New, 0)
 
 	OPEN loopAuditLog;
