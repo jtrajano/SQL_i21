@@ -26,6 +26,11 @@ Type the overview for the table here.
 		CONSTRAINT [FK_tblICUnitMeasureConversion_tblICUnitMeasure] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]) ON DELETE CASCADE,
 		CONSTRAINT [FK_tblICUnitMeasureConversion_StockUnitMeasure] FOREIGN KEY ([intStockUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]) 
 	)
+	--GO
+	
+	-- See #17_Inventory_Constraints for UC_tblICUnitMeasureConversion
+	--CREATE UNIQUE NONCLUSTERED INDEX [UC_tblICUnitMeasureConversion]
+	--ON tblICUnitMeasureConversion([intUnitMeasureId], [intStockUnitMeasureId]);
 
 	GO
 	EXEC sp_addextendedproperty @name = N'MS_Description',

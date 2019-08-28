@@ -11,6 +11,31 @@ BEGIN
 	);
 
 END
+GO 
+
+-- Add a UNIQUE CONSTRAINT for tblICUnitMeasureConversion
+IF NOT EXISTS(SELECT TOP 1 1 FROM sys.objects WHERE name = 'UC_tblICUnitMeasureConversion' AND type = 'UQ' AND parent_object_id = OBJECT_ID('tblICUnitMeasureConversion', 'U'))
+BEGIN
+	-- Remove the duplicate conversions
+	EXEC('
+		WITH CTE AS (
+			SELECT	intUnitMeasureConversionId
+					,intUnitMeasureId
+					,rn = ROW_NUMBER() OVER (PARTITION BY intUnitMeasureId, intStockUnitMeasureId ORDER BY intUnitMeasureConversionId)
+			FROM	tblICUnitMeasureConversion	 
+		)
+		DELETE FROM CTE WHERE rn > 1
+	')
+
+	-- Add the unique constraint 
+	EXEC('
+		ALTER TABLE tblICUnitMeasureConversion
+		ADD CONSTRAINT UC_tblICUnitMeasureConversion UNIQUE (intUnitMeasureId, intStockUnitMeasureId);
+		'
+	);
+
+END
+GO
 
 PRINT N'END - IC Add Constraint'
 GO
