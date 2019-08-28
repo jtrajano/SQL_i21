@@ -676,21 +676,63 @@ FROM tblICItem item
 WHERE a.agitm_rest_chem_rpt_yn = 'Y'
 
 -- Update Medication & Ingredient tags
-INSERT INTO tblICTag(strTagNumber, strType)
-SELECT DISTINCT LTRIM(RTRIM(o.agitm_med_tag)) COLLATE Latin1_General_CI_AS, 'Medication Tag'
+-- Get tags
+DECLARE @Tags TABLE (intId INT IDENTITY(1, 1), strTagNo NVARCHAR(10), strDescription NVARCHAR(30), strComment NVARCHAR(70), intSequenceNo SMALLINT PRIMARY KEY(intId))
+INSERT INTO @Tags
+SELECT agtag_tag_no = LTRIM(RTRIM(agtag_tag_no)), LTRIM(RTRIM(agtag_desc)) agtag_desc, agtag_comment, agtag_seq_no
+FROM agtagmst
+WHERE agtag_hazmat_yn = 'N'
+GROUP BY agtag_tag_no, agtag_comment, agtag_desc, agtag_seq_no
+
+DECLARE @NormalizedTags TABLE (intId INT IDENTITY(1, 1), strTagNo NVARCHAR(10), strDescription NVARCHAR(30), strComment NVARCHAR(MAX) PRIMARY KEY(intId))
+INSERT INTO @NormalizedTags
+SELECT t.strTagNo, t.strDescription, strComment =
+	STUFF((SELECT '' + x.strComment + CHAR(13) + CHAR(10)
+		FROM @Tags x
+		WHERE x.strTagNo = t.strTagNo
+			AND x.strComment IS NOT NULL
+		FOR XML PATH(''), TYPE).value('.', 'NVARCHAR(MAX)'), 1,0,'')
+FROM @Tags t
+WHERE t.strComment IS NOT NULL
+GROUP BY t.strTagNo, t.strDescription
+
+-- Insert known medication tags
+INSERT INTO tblICTag(strTagNumber, strType, strDescription, strMessage, dtmDateCreated, intCreatedByUserId, intConcurrencyId)
+SELECT DISTINCT LTRIM(RTRIM(o.agitm_med_tag)) COLLATE Latin1_General_CI_AS, 'Medication Tag', nt.strDescription, nt.strComment, GETUTCDATE(), 1, 1
 FROM agitmmst o
+	LEFT OUTER JOIN @NormalizedTags nt ON nt.strTagNo COLLATE Latin1_General_CI_AS =  LTRIM(RTRIM(o.agitm_med_tag))
 WHERE NULLIF(LTRIM(RTRIM(o.agitm_med_tag)) COLLATE Latin1_General_CI_AS, '') IS NOT NULL
 AND NOT EXISTS(
     SELECT * FROM tblICTag WHERE strTagNumber = LTRIM(RTRIM(o.agitm_med_tag)) COLLATE Latin1_General_CI_AS
 )
 
-INSERT INTO tblICTag(strTagNumber, strType)
-SELECT DISTINCT LTRIM(RTRIM(o.agitm_invc_tag)) COLLATE Latin1_General_CI_AS, 'Ingredient Tag'
+-- Insert known ingredient tags
+INSERT INTO tblICTag(strTagNumber, strType, strDescription, strMessage, dtmDateCreated, intCreatedByUserId, intConcurrencyId)
+SELECT DISTINCT LTRIM(RTRIM(o.agitm_invc_tag)) COLLATE Latin1_General_CI_AS, 'Ingredient Tag', nt.strDescription, nt.strComment, GETUTCDATE(), 1, 1
 FROM agitmmst o
+	LEFT OUTER JOIN @NormalizedTags nt ON nt.strTagNo COLLATE Latin1_General_CI_AS =  LTRIM(RTRIM(o.agitm_invc_tag))
 WHERE NULLIF(LTRIM(RTRIM(o.agitm_invc_tag)) COLLATE Latin1_General_CI_AS, '') IS NOT NULL
 AND NOT EXISTS(
     SELECT * FROM tblICTag WHERE strTagNumber = LTRIM(RTRIM(o.agitm_invc_tag)) COLLATE Latin1_General_CI_AS
 )
+
+-- Insert unknown tags
+INSERT INTO tblICTag(strTagNumber, strType, strDescription, strMessage, dtmDateCreated, intCreatedByUserId, intConcurrencyId)
+SELECT DISTINCT LTRIM(RTRIM(o.strTagNo)) COLLATE Latin1_General_CI_AS, NULL, o.strDescription, o.strComment, GETUTCDATE(), 1, 1
+FROM @NormalizedTags o
+WHERE NOT EXISTS(
+    SELECT * FROM tblICTag WHERE strTagNumber = LTRIM(RTRIM(o.strTagNo)) COLLATE Latin1_General_CI_AS
+)
+
+-- Update existing tags
+UPDATE t
+SET t.strDescription = o.strDescription,
+	t.strMessage = o.strComment,
+	t.dtmDateCreated = GETUTCDATE(),
+	t.intCreatedByUserId = 1,
+	t.intConcurrencyId = 1
+FROM tblICTag t
+	INNER JOIN @NormalizedTags o ON o.strTagNo COLLATE Latin1_General_CI_AS  = t.strTagNumber COLLATE Latin1_General_CI_AS
 
 UPDATE i
 SET i.intMedicationTag = med.intTagId
