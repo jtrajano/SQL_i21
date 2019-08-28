@@ -7,6 +7,7 @@ SELECT
 	itemPricing.intItemPricingId,
 	itemPricing.dblSalePrice,
     im.intItemUPCId,
+	uom.intItemUOMId,
 
     --im.strInvalidUPCCode,
 	CASE
