@@ -7669,10 +7669,11 @@
     <Build Include="dbo\Stored Procedures\uspCFGenerateTransactionExportToThirdPartyCSV.sql" />
     <Build Include="dbo\Tables\tblCFExportFactorEventSequenceNumber.sql" />
     <Build Include="dbo\Views\vyuCMRemittanceAdviceReport.sql" />
-	<Build Include="dbo\Stored Procedures\uspMBCreateInvoice.sql" />
-	<Build Include="dbo\Tables\tblMBPostResult.sql" />
-	<Build Include="dbo\Stored Procedures\uspMBUpdateMeterReadingInfo.sql" />	
+    <Build Include="dbo\Stored Procedures\uspMBCreateInvoice.sql" />
+    <Build Include="dbo\Tables\tblMBPostResult.sql" />
+    <Build Include="dbo\Stored Procedures\uspMBUpdateMeterReadingInfo.sql" />
     <Build Include="dbo\Stored Procedures\uspGRCalculateSettleStorageFeeForContract.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKProcessDerivativeEntry.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
