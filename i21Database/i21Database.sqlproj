@@ -8035,6 +8035,7 @@
     <Build Include="dbo\Tables\tblMBPostResult.sql" />
     <Build Include="dbo\Stored Procedures\uspMBUpdateMeterReadingInfo.sql" />
     <Build Include="dbo\Stored Procedures\uspGRCalculateSettleStorageFeeForContract.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKProcessDerivativeEntry.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
