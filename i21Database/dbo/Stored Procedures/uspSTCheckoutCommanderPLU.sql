@@ -33,6 +33,7 @@ BEGIN
 			intpluPdsite										INT,
 			dblpluInfosalePrice									DECIMAL(18, 6),
 			dblpluInfooriginalPrice								DECIMAL(18, 6),
+			strpluInforeasonCode								NVARCHAR(150),
 			dblpluInfopercentOfSales							DECIMAL(18, 6),
 			strpluBaseupc										NVARCHAR(20),
 			intpluBasemodifier									INT,
@@ -40,6 +41,7 @@ BEGIN
 			intnetSalescount									INT,
 			dblnetSalesamount									NVARCHAR(150),
 			dblnetSalesitemCount								DECIMAL(18, 6),
+			dblDiscount											DECIMAL(18, 6),
 			intRegisterUpcCode									BIGINT
 		)
 
@@ -58,6 +60,7 @@ BEGIN
 				intpluPdsite,
 				dblpluInfosalePrice,
 				dblpluInfooriginalPrice,
+				strpluInforeasonCode,
 				dblpluInfopercentOfSales,
 				strpluBaseupc,
 				intpluBasemodifier,
@@ -65,6 +68,7 @@ BEGIN
 				intnetSalescount,
 				dblnetSalesamount,
 				dblnetSalesitemCount,
+				dblDiscount,
 				intRegisterUpcCode
 			)
 			SELECT 
@@ -79,13 +83,24 @@ BEGIN
 				intpluPdsite				= CAST(temp.pluPdsite AS INT),
 				dblpluInfosalePrice			= CAST(temp.pluInfosalePrice AS DECIMAL(18, 6)),
 				dblpluInfooriginalPrice		= CAST(temp.pluInfooriginalPrice AS DECIMAL(18, 6)),
+				strpluInforeasonCode		= ISNULL(temp.pluInforeasonCode, ''),
 				dblpluInfopercentOfSales	= CAST(temp.pluInfopercentOfSales AS DECIMAL(18, 6)),
 				strpluBaseupc				= ISNULL(temp.pluBaseupc, ''),
 				intpluBasemodifier			= CAST(temp.pluBasemodifier AS INT),
 				strpluBasename				= ISNULL(temp.pluBasename, ''),
 				intnetSalescount			= CAST(temp.netSalescount AS INT),
-				dblnetSalesamount			= CAST(temp.netSalesamount AS DECIMAL(18, 6)),
+				--dblnetSalesamount			= CAST(temp.netSalesamount AS DECIMAL(18, 6)),
+				dblnetSalesamount			= CASE
+												WHEN (ISNULL(temp.pluInforeasonCode, '')  =  'DISCOUNT_SALE')
+													THEN (CAST(temp.pluInfooriginalPrice AS DECIMAL(18, 6))  *  CAST(temp.netSalesitemCount AS DECIMAL(18, 6)))
+												ELSE CAST(temp.netSalesamount AS DECIMAL(18, 6))
+											END,
 				dblnetSalesitemCount		= CAST(temp.netSalesitemCount AS DECIMAL(18, 6)),
+				dblDiscount					= CASE
+												WHEN ISNULL(temp.pluInforeasonCode, '')  =  'DISCOUNT_SALE'
+													THEN -(CAST(temp.pluInfooriginalPrice AS DECIMAL(18, 6))   -   CAST(temp.pluInfosalePrice AS DECIMAL(18, 6))) -- Convert to Negative since COMMANDER has a discount of positive
+												ELSE 0
+											END,
 				intRegisterUpcCode			= CONVERT(NUMERIC(32, 0),CAST(temp.pluBaseupc AS FLOAT)) -- Remove Leading Zeros on COMMANDER xml,
 			FROM #tempCheckoutInsert temp
 
@@ -232,8 +247,9 @@ BEGIN
 		SELECT 
 			intCheckoutId					= @intCheckoutId,
 			SalesQuantity					= CAST(ISNULL(CAST(dblnetSalesitemCount AS DECIMAL(18, 6)) ,0) AS INT),
-			DiscountAmount					= 0, -- Commander has No Discount in PLU xml //CAST(DiscountAmount AS DECIMAL(18,6)),
-			PromotionAmount					= 0, -- Commander has No Promotion in PLU xml //CAST(PromotionAmount AS DECIMAL(18,6)),
+			--DiscountAmount					= 0, -- Commander has No Discount in PLU xml //CAST(DiscountAmount AS DECIMAL(18,6)),
+			DiscountAmount					= dblDiscount,
+			PromotionAmount					= 0, -- Commander has Promotion in PLU xml with example of <reasonCode>MATCH_SALE</reasonCode>
 			SalesAmount						= CAST(dblnetSalesamount AS DECIMAL(18,6)),
 			RefundAmount					= 0, -- Commander has No Refund in PLU xml //CAST(ISNULL(RefundAmount, 0) AS DECIMAL(18,6)),
 			RefundCount						= 0, -- Commander has No Refund in PLU xml //CAST(ISNULL(RefundCount, 0) AS INT),

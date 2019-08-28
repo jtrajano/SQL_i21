@@ -16,7 +16,7 @@ SELECT @intImportFileHeaderId = intImportFileHeaderId FROM dbo.tblSMImportFileHe
        ,[strXMLType] = 'Inbound'
        ,[strXMLInitiater] = NULL
        ,[ysnActive] = 1
-       ,[intConcurrencyId] = 3
+       ,[intConcurrencyId] = 5
   WHERE intImportFileHeaderId = @intImportFileHeaderId
 
 ----DELETE FROM dbo.tblSMXMLTagAttribute
@@ -34,7 +34,7 @@ BEGIN
   INSERT INTO [dbo].[tblSMImportFileHeader]
       ([strLayoutTitle],[strFileType],[strFieldDelimiter],[strXMLType],[strXMLInitiater],[ysnActive],[intConcurrencyId])
   VALUES 
-      ('Commander PLU','XML',NULL,'Inbound',NULL,1,3)
+      ('Commander PLU','XML',NULL,'Inbound',NULL,1,5)
 END
 --END CHECK HEADER
 
@@ -343,7 +343,7 @@ BEGIN
   INSERT INTO [dbo].[tblSMImportFileColumnDetail]
       ([intImportFileHeaderId],[intImportFileRecordMarkerId],[intLevel],[intPosition],[strXMLTag],[strTable],[strColumnName],[strDataType],[intLength],[strDefaultValue],[ysnActive],[intConcurrencyId])
   VALUES 
-      (@intImportFileHeaderId,NULL,12,4,'netSales',NULL,NULL,'Header',5,NULL,1,1)
+      (@intImportFileHeaderId,NULL,12,4,'reasonCode',NULL,NULL,NULL,5,NULL,1,1)
 END
 ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intLevel = 12 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
@@ -353,10 +353,10 @@ SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSM
        ,[intImportFileRecordMarkerId] = NULL
        ,[intLevel] = 12
        ,[intPosition] = 4
-       ,[strXMLTag] = 'netSales'
+       ,[strXMLTag] = 'reasonCode'
        ,[strTable] = NULL
        ,[strColumnName] = NULL
-       ,[strDataType] = 'Header'
+       ,[strDataType] = NULL
        ,[intLength] = 5
        ,[strDefaultValue] = NULL
        ,[ysnActive] = 1
@@ -370,7 +370,7 @@ BEGIN
   INSERT INTO [dbo].[tblSMImportFileColumnDetail]
       ([intImportFileHeaderId],[intImportFileRecordMarkerId],[intLevel],[intPosition],[strXMLTag],[strTable],[strColumnName],[strDataType],[intLength],[strDefaultValue],[ysnActive],[intConcurrencyId])
   VALUES 
-      (@intImportFileHeaderId,NULL,13,1,'count',NULL,NULL,NULL,12,NULL,1,1)
+      (@intImportFileHeaderId,NULL,13,5,'netSales',NULL,NULL,'Header',5,NULL,1,1)
 END
 ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intLevel = 13 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
@@ -379,12 +379,12 @@ SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSM
   SET [intImportFileHeaderId] = @intImportFileHeaderId
        ,[intImportFileRecordMarkerId] = NULL
        ,[intLevel] = 13
-       ,[intPosition] = 1
-       ,[strXMLTag] = 'count'
+       ,[intPosition] = 5
+       ,[strXMLTag] = 'netSales'
        ,[strTable] = NULL
        ,[strColumnName] = NULL
-       ,[strDataType] = NULL
-       ,[intLength] = 12
+       ,[strDataType] = 'Header'
+       ,[intLength] = 5
        ,[strDefaultValue] = NULL
        ,[ysnActive] = 1
        ,[intConcurrencyId] = 1
@@ -397,7 +397,7 @@ BEGIN
   INSERT INTO [dbo].[tblSMImportFileColumnDetail]
       ([intImportFileHeaderId],[intImportFileRecordMarkerId],[intLevel],[intPosition],[strXMLTag],[strTable],[strColumnName],[strDataType],[intLength],[strDefaultValue],[ysnActive],[intConcurrencyId])
   VALUES 
-      (@intImportFileHeaderId,NULL,14,2,'amount',NULL,NULL,NULL,12,NULL,1,1)
+      (@intImportFileHeaderId,NULL,14,1,'count',NULL,NULL,NULL,13,NULL,1,1)
 END
 ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intLevel = 14 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
@@ -406,12 +406,12 @@ SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSM
   SET [intImportFileHeaderId] = @intImportFileHeaderId
        ,[intImportFileRecordMarkerId] = NULL
        ,[intLevel] = 14
-       ,[intPosition] = 2
-       ,[strXMLTag] = 'amount'
+       ,[intPosition] = 1
+       ,[strXMLTag] = 'count'
        ,[strTable] = NULL
        ,[strColumnName] = NULL
        ,[strDataType] = NULL
-       ,[intLength] = 12
+       ,[intLength] = 13
        ,[strDefaultValue] = NULL
        ,[ysnActive] = 1
        ,[intConcurrencyId] = 1
@@ -424,7 +424,7 @@ BEGIN
   INSERT INTO [dbo].[tblSMImportFileColumnDetail]
       ([intImportFileHeaderId],[intImportFileRecordMarkerId],[intLevel],[intPosition],[strXMLTag],[strTable],[strColumnName],[strDataType],[intLength],[strDefaultValue],[ysnActive],[intConcurrencyId])
   VALUES 
-      (@intImportFileHeaderId,NULL,15,3,'itemCount',NULL,NULL,NULL,12,NULL,1,1)
+      (@intImportFileHeaderId,NULL,15,2,'amount',NULL,NULL,NULL,13,NULL,1,1)
 END
 ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intLevel = 15 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
@@ -433,12 +433,12 @@ SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSM
   SET [intImportFileHeaderId] = @intImportFileHeaderId
        ,[intImportFileRecordMarkerId] = NULL
        ,[intLevel] = 15
-       ,[intPosition] = 3
-       ,[strXMLTag] = 'itemCount'
+       ,[intPosition] = 2
+       ,[strXMLTag] = 'amount'
        ,[strTable] = NULL
        ,[strColumnName] = NULL
        ,[strDataType] = NULL
-       ,[intLength] = 12
+       ,[intLength] = 13
        ,[strDefaultValue] = NULL
        ,[ysnActive] = 1
        ,[intConcurrencyId] = 1
@@ -451,7 +451,7 @@ BEGIN
   INSERT INTO [dbo].[tblSMImportFileColumnDetail]
       ([intImportFileHeaderId],[intImportFileRecordMarkerId],[intLevel],[intPosition],[strXMLTag],[strTable],[strColumnName],[strDataType],[intLength],[strDefaultValue],[ysnActive],[intConcurrencyId])
   VALUES 
-      (@intImportFileHeaderId,NULL,16,5,'percentOfSales',NULL,NULL,NULL,5,NULL,1,1)
+      (@intImportFileHeaderId,NULL,16,3,'itemCount',NULL,NULL,NULL,13,NULL,1,1)
 END
 ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intLevel = 16 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
@@ -460,7 +460,34 @@ SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSM
   SET [intImportFileHeaderId] = @intImportFileHeaderId
        ,[intImportFileRecordMarkerId] = NULL
        ,[intLevel] = 16
-       ,[intPosition] = 5
+       ,[intPosition] = 3
+       ,[strXMLTag] = 'itemCount'
+       ,[strTable] = NULL
+       ,[strColumnName] = NULL
+       ,[strDataType] = NULL
+       ,[intLength] = 13
+       ,[strDefaultValue] = NULL
+       ,[ysnActive] = 1
+       ,[intConcurrencyId] = 1
+  WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId
+END
+
+--LEVEL 17
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intLevel = 17 AND intImportFileHeaderId = @intImportFileHeaderId)
+BEGIN
+  INSERT INTO [dbo].[tblSMImportFileColumnDetail]
+      ([intImportFileHeaderId],[intImportFileRecordMarkerId],[intLevel],[intPosition],[strXMLTag],[strTable],[strColumnName],[strDataType],[intLength],[strDefaultValue],[ysnActive],[intConcurrencyId])
+  VALUES 
+      (@intImportFileHeaderId,NULL,17,6,'percentOfSales',NULL,NULL,NULL,5,NULL,1,1)
+END
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intLevel = 17 AND intImportFileHeaderId = @intImportFileHeaderId)
+BEGIN
+SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 17
+  UPDATE [dbo].[tblSMImportFileColumnDetail]
+  SET [intImportFileHeaderId] = @intImportFileHeaderId
+       ,[intImportFileRecordMarkerId] = NULL
+       ,[intLevel] = 17
+       ,[intPosition] = 6
        ,[strXMLTag] = 'percentOfSales'
        ,[strTable] = NULL
        ,[strColumnName] = NULL
@@ -473,7 +500,7 @@ SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSM
 END
 
 --Delete Rows Not Included
-DELETE FROM tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel NOT IN (1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16)
+DELETE FROM tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel NOT IN (1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17)
 
 
 

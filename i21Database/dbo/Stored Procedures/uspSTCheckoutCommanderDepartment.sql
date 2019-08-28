@@ -115,22 +115,36 @@ BEGIN
 					, Cat.intCategoryId [intCategoryId]
 					, ISNULL(Chk.netSalesamount, 0) [dblTotalSalesAmountRaw]
 					, ISNULL(Chk.netSalesamount, 0) [dblRegisterSalesAmountRaw]
-					, (
-						CASE 
-							WHEN (S.strReportDepartmentAtGrossOrNet) = 'G' -- Gross
-								THEN ISNULL(CAST(Chk.netSalesamount AS DECIMAL(18,6)),0)
-							WHEN (S.strReportDepartmentAtGrossOrNet) = 'N' -- Net
-								THEN ISNULL(CAST(Chk.netSalesamount AS DECIMAL(18,6)),0) + ISNULL(CAST(Chk.totalamount AS DECIMAL(18,6)),0) -- totalamount = Discount Amount
-																					  + ISNULL(CAST(Chk.promotionsamount AS DECIMAL(18,6)),0) 
-																					  + ISNULL(CAST(Chk.refundsamount AS DECIMAL(18,6)),0)
-					    END
-					  ) [dblTotalSalesAmountComputed]
+					--, (
+					--	CASE 
+					--		WHEN (S.strReportDepartmentAtGrossOrNet) = 'G' -- Gross
+					--			THEN ISNULL(CAST(Chk.netSalesamount AS DECIMAL(18,6)),0)
+					--		WHEN (S.strReportDepartmentAtGrossOrNet) = 'N' -- Net
+					--			THEN ISNULL(CAST(Chk.netSalesamount AS DECIMAL(18,6)),0) + ISNULL(CAST(Chk.totalamount AS DECIMAL(18,6)),0) -- totalamount = Discount Amount
+					--																  + ISNULL(CAST(Chk.promotionsamount AS DECIMAL(18,6)),0) 
+					--																  + ISNULL(CAST(Chk.refundsamount AS DECIMAL(18,6)),0)
+					--    END
+					--  ) [dblTotalSalesAmountComputed]
+					, [dblTotalSalesAmountComputed] = (
+														CASE 
+															WHEN (S.strReportDepartmentAtGrossOrNet) = 'G' -- Gross
+																THEN CAST(ISNULL(Chk.deptInfogrossSales, 0) AS DECIMAL(18,6))
+															WHEN (S.strReportDepartmentAtGrossOrNet) = 'N' -- Net
+																THEN ISNULL(CAST(Chk.netSalesamount AS DECIMAL(18,6)),0)
+																										  
+														END
+													  )
 					, 0 [dblRegisterSalesAmountComputed]
 					, '' [strDepartmentTotalsComment]
 					, CAST(Chk.promotionscount AS INT) [intPromotionalDiscountsCount]
 					, CAST(Chk.promotionsamount AS DECIMAL(18,6)) [dblPromotionalDiscountAmount]
 					, CAST(Chk.totalcount AS INT) [intManagerDiscountCount]
-					, CAST(Chk.totalamount AS DECIMAL(18,6)) [dblManagerDiscountAmount]
+					--, CAST(Chk.totalamount AS DECIMAL(18,6)) [dblManagerDiscountAmount]
+					, [dblManagerDiscountAmount] = CASE
+														WHEN (ISNULL(CAST(Chk.totalamount AS DECIMAL(18,6)), 0))  >  0
+															THEN -(ISNULL(CAST(Chk.totalamount AS DECIMAL(18,6)), 0))
+														ELSE 0
+												END
 					, CAST(Chk.refundscount AS INT) [intRefundCount]
 					, CAST(Chk.refundsamount AS DECIMAL(18,6)) [dblRefundAmount]
 					, CAST(CAST(Chk.netSalesitemCount AS DECIMAL) AS INT) [intItemsSold]
@@ -164,28 +178,35 @@ BEGIN
 		ELSE
 			BEGIN
 				UPDATE DT  
-				SET	[dblTotalSalesAmountRaw] = ISNULL(Chk.netSalesamount, 0)
-					, [dblRegisterSalesAmountRaw] = ISNULL(Chk.netSalesamount, 0)
+				SET	[dblTotalSalesAmountRaw]		= ISNULL(Chk.netSalesamount, 0)
+					, [dblRegisterSalesAmountRaw]	= ISNULL(Chk.netSalesamount, 0)
 					, [dblTotalSalesAmountComputed] = (
-											CASE 
-												WHEN (S.strReportDepartmentAtGrossOrNet) = 'G' -- Gross
-													THEN ISNULL(CAST(Chk.netSalesamount AS DECIMAL(18,6)),0)
-												WHEN (S.strReportDepartmentAtGrossOrNet) = 'N' -- Net
-													THEN ISNULL(CAST(Chk.netSalesamount AS DECIMAL(18,6)),0) + ( ISNULL(CAST(Chk.totalamount AS DECIMAL(18,6)),0) -- totalamount = Discount Amount
-																									      + ISNULL(CAST(Chk.promotionsamount AS DECIMAL(18,6)),0) 
-																										  + ISNULL(CAST(Chk.refundsamount AS DECIMAL(18,6)),0) )
+														CASE 
+															WHEN (S.strReportDepartmentAtGrossOrNet) = 'G' -- Gross
+																--THEN ISNULL(CAST(Chk.netSalesamount AS DECIMAL(18,6)),0)
+																THEN CAST(ISNULL(Chk.deptInfogrossSales, 0) AS DECIMAL(18,6))
+															WHEN (S.strReportDepartmentAtGrossOrNet) = 'N' -- Net
+																THEN ISNULL(CAST(Chk.netSalesamount AS DECIMAL(18,6)),0)
+																--THEN ISNULL(CAST(Chk.netSalesamount AS DECIMAL(18,6)),0) + ( ISNULL(CAST(Chk.totalamount AS DECIMAL(18,6)),0) -- totalamount = Discount Amount
+																--												         + ISNULL(CAST(Chk.promotionsamount AS DECIMAL(18,6)),0) 
+																--													     + ISNULL(CAST(Chk.refundsamount AS DECIMAL(18,6)),0) )
 																										  
-											END
-										  )
+														END
+													  )
 					, [intPromotionalDiscountsCount] = ISNULL(CAST(Chk.promotionscount AS INT),0) 
 					, [dblPromotionalDiscountAmount] = ISNULL(CAST(Chk.promotionsamount AS DECIMAL(18,6)),0) 
-					, [intManagerDiscountCount] = ISNULL(CAST(Chk.totalcount AS INT),0) 
-					, [dblManagerDiscountAmount] = ISNULL(CAST(Chk.totalamount AS DECIMAL(18,6)), 0) 
-					, [intRefundCount] = ISNULL(CAST(Chk.refundscount AS INT), 0) 
-					, [dblRefundAmount] = ISNULL(CAST(Chk.refundsamount AS DECIMAL(18,6)), 0) 
-					, [intItemsSold] = ISNULL(CAST(CAST(Chk.netSalesitemCount AS DECIMAL) AS INT), 0) 
-					, [intTotalSalesCount] = ISNULL(CAST(Chk.netSalescount AS INT), 0) 
-					, [intItemId] = I.intItemId
+					, [intManagerDiscountCount]		 = ISNULL(CAST(Chk.totalcount AS INT),0) 
+					--, [dblManagerDiscountAmount] = ISNULL(CAST(Chk.totalamount AS DECIMAL(18,6)), 0) 
+					, [dblManagerDiscountAmount]	= CASE
+														WHEN (ISNULL(CAST(Chk.totalamount AS DECIMAL(18,6)), 0))  >  0
+															THEN -(ISNULL(CAST(Chk.totalamount AS DECIMAL(18,6)), 0))
+														ELSE 0
+													END
+					, [intRefundCount]				= ISNULL(CAST(Chk.refundscount AS INT), 0) 
+					, [dblRefundAmount]				= ISNULL(CAST(Chk.refundsamount AS DECIMAL(18,6)), 0) 
+					, [intItemsSold]				= ISNULL(CAST(CAST(Chk.netSalesitemCount AS DECIMAL) AS INT), 0) 
+					, [intTotalSalesCount]			= ISNULL(CAST(Chk.netSalescount AS INT), 0) 
+					, [intItemId]					= I.intItemId
 				FROM tblSTCheckoutDepartmetTotals DT
 				JOIN tblICCategory Cat 
 					ON DT.intCategoryId = Cat.intCategoryId
