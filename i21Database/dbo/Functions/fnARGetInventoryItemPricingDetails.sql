@@ -153,21 +153,16 @@ BEGIN
 		IF EXISTS(SELECT NULL FROM tblARCustomer WHERE [intEntityId] = @CustomerId)
 			BEGIN
 				SELECT TOP 1 
-					--@Price			= @UOMQuantity * PL.dblUnitPrice
-					@Price			= PL.dblUnitPrice
-					,@PriceBasis	= PL.dblUnitPrice		
-					,@Deviation		= @ZeroDecimal		
-					,@Pricing		= 'Inventory - Pricing Level'		
-				FROM
-					tblICItemPricingLevel PL																														
-				INNER JOIN vyuICGetItemStock VIS
-						ON PL.intItemId = VIS.intItemId
-						AND PL.intItemLocationId = VIS.intItemLocationId															
-				WHERE
-					PL.strPriceLevel = @PriceLevel	
+					 @Price			= dbo.fnCalculateCostBetweenUOM(PL.intItemUnitMeasureId, @ItemUOMId, PL.dblUnitPrice)
+					,@PriceBasis	= dbo.fnCalculateCostBetweenUOM(PL.intItemUnitMeasureId, @ItemUOMId, PL.dblUnitPrice)
+					,@Deviation		= @ZeroDecimal
+					,@Pricing		= 'Inventory - Pricing Level'
+				FROM tblICItemPricingLevel PL
+				INNER JOIN vyuICGetItemStock VIS ON PL.intItemId = VIS.intItemId
+											    AND PL.intItemLocationId = VIS.intItemLocationId															
+				WHERE PL.strPriceLevel = @PriceLevel	
 					AND PL.intItemId = @ItemId
 					AND PL.intItemLocationId = @ItemLocationId
-					AND PL.intItemUnitMeasureId = @ItemUOMId
 					AND ISNULL(PL.intCurrencyId, @FunctionalCurrencyId) = @CurrencyId
 					AND ((@Quantity BETWEEN ISNULL(PL.dblMin, 0) AND ISNULL(NULLIF(PL.dblMax, 0), 999999999999)) OR ( ISNULL(PL.dblMin, 0) = 0 AND ISNULL(PL.dblMax, 0) = 0))
 					AND CAST(@TransactionDate AS DATE) BETWEEN CAST(ISNULL(PL.dtmEffectiveDate, @TransactionDate) AS DATE) AND CAST('12/31/2999' AS DATE)
