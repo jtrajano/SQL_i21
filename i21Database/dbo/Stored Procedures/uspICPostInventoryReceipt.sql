@@ -1313,25 +1313,11 @@ BEGIN
 			SELECT
 					t.[intItemId] 
 					,t.[intItemLocationId] 
-					,iu.intItemUOMId 
+					,t.intItemUOMId
 					,r.[dtmReceiptDate] 
 					,dblQty = 
-						-- Load Shipment is increasing the In-Transit by Packing Unit and not by Weight. 
-						-- IR should reduce the In-Transit in the same way. 
-						-ri.dblOpenReceive  
-						--CASE		
-						--	-- If there is a Gross/Net UOM and Gross and Net are not equal, then convert the Net to Receive UOM> 
-						--	WHEN ri.intWeightUOMId IS NOT NULL AND ri.dblGross <> ri.dblNet THEN
-						--		-dbo.fnCalculateQtyBetweenUOM(
-						--			ri.intWeightUOMId
-						--			, ri.intUnitMeasureId
-						--			, ri.dblNet
-						--		)
-
-						--	-- If Gross/Net UOM is missing, then get the item/lot qty. 
-						--	ELSE 
-						--		-ri.dblOpenReceive  
-						--END							
+						-- Reduce the in-transit qty based on how it was increased by Load Schedule. 
+						-t.dblQty 
 					,t.[dblUOMQty] 
 					,t.[dblCost] 
 					,t.[dblValue] 
