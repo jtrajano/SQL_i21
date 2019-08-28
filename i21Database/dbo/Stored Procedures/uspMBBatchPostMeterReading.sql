@@ -59,18 +59,25 @@ BEGIN TRY
 		SELECT @strTransactionId = strTransactionId, @intInvoiceId = intInvoiceId FROM tblMBMeterReading WHERE intMeterReadingId = @intId
 
 		BEGIN TRY
-			EXEC [dbo].[uspMBPostMeterReading]
-				@TransactionId = @intId
-				,@UserId = @UserId
-				,@Post = @Post
-				,@Recap = @Recap
-				,@InvoiceId = @intInvoiceId
-				,@ErrorMessage = @ErrorMessage
-				,@CreatedInvoices = @CreatedInvoices
-				,@UpdatedInvoices = @UpdatedInvoices
+			IF (@Recap = 0)
+			BEGIN
+				EXEC [dbo].[uspMBPostMeterReading]
+					@TransactionId = @intId
+					,@UserId = @UserId
+					,@Post = @Post
+					,@Recap = @Recap
+					,@InvoiceId = @intInvoiceId
+					,@ErrorMessage = @ErrorMessage
+					,@CreatedInvoices = @CreatedInvoices
+					,@UpdatedInvoices = @UpdatedInvoices
 
-			SET @strMeterReadingError = 'Meter Reading successfully posted'
-			SET @SuccessfulCount = @SuccessfulCount + 1
+				SET @strMeterReadingError = 'Meter Reading successfully posted'
+				SET @SuccessfulCount = @SuccessfulCount + 1
+			END
+			ELSE
+			BEGIN
+				SET @strMeterReadingError = 'Post Preview is not applicable'
+			END
 		END TRY
 		BEGIN CATCH
 			SET @strMeterReadingError = ERROR_MESSAGE()	
