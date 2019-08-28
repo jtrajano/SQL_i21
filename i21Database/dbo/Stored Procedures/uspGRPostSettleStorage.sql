@@ -1713,6 +1713,10 @@ BEGIN TRY
 				BEGIN 
 						EXEC uspAPCreateVoucher @voucherPayable, @voucherPayableTax, @intCreatedUserId, 1, @ErrMsg, @createdVouchersId OUTPUT	
 				END
+				ELSE
+				BEGIN
+					RAISERROR('Total Voucher will be negative',16,1)
+				END
 
 				
 
