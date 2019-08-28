@@ -8,7 +8,6 @@
 	, @ErrorMessage			NVARCHAR(250)	= NULL	OUTPUT
 	, @CreatedInvoices		NVARCHAR(MAX)	= NULL	OUTPUT
 	, @UpdatedInvoices		NVARCHAR(MAX)	= NULL	OUTPUT
-
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -22,235 +21,73 @@ DECLARE @ErrorState INT
 DECLARE @ErrorNumber INT
 
 BEGIN TRY
-
-	BEGIN TRANSACTION
-
+	
 	DECLARE @intCurrency INT = NULL
-	DECLARE @tmpRecord TABLE (intId INT NOT NULL, strMessage NVARCHAR(MAX))
-	SELECT @intCurrency = ISNULL(intDefaultCurrencyId, 1) FROM tblSMCompanyPreference
-
-	INSERT INTO @tmpRecord (intId)
-	SELECT DISTINCT intMeterReadingId FROM vyuMBGetMeterReading WHERE ysnPosted = 0
-
-	IF @TransactionId != 'ALL'
-	BEGIN
-		DELETE FROM @tmpRecord WHERE intId NOT IN (SELECT CONVERT(INT,Item) FROM [fnSplitStringWithTrim](@TransactionId,',') )
-	END
-
-	DECLARE @intRecordKey INT
-	DECLARE @EntriesForInvoice AS InvoiceIntegrationStagingTable
-
-	SET @SuccessfulCount = 0
-
+	DECLARE @tmpRecord TABLE (intId INT NOT NULL, UNIQUE (intId))
 	DECLARE @intId INT = NULL
 	DECLARE @CursorTran AS CURSOR
 
+	SELECT @intCurrency = ISNULL(intDefaultCurrencyId, 1) FROM tblSMCompanyPreference
+
+	IF @TransactionId != 'ALL'
+	BEGIN
+		INSERT INTO @tmpRecord(intId)
+		SELECT CONVERT(INT,Item) FROM [fnSplitStringWithTrim](@TransactionId,',')
+	END
+	ELSE
+	BEGIN
+		INSERT INTO @tmpRecord(intId)
+		SELECT DISTINCT intMeterReadingId FROM vyuMBGetMeterReading WHERE ysnPosted = 0
+	END
+	
+	SET @SuccessfulCount = 0
+
+
 	SET @CursorTran = CURSOR FOR
-	SELECT intId FROM @tmpRecord
+	SELECT intId FROM @tmpRecord ORDER BY intId
 
 	OPEN @CursorTran
 	FETCH NEXT FROM @CursorTran INTO @intId
 	WHILE @@FETCH_STATUS = 0
 	BEGIN
-		
-		DECLARE @ynsValid BIT = 1
+
+		DECLARE @EntriesForInvoice AS InvoiceIntegrationStagingTable
 		DECLARE @strMeterReadingError NVARCHAR(MAX) = NULL
-		DECLARE @intMeterReadingInvoiceId INT = NULL
-		
-		EXEC [dbo].[uspMBPostMeterReadingValidation]
-			@intMeterReadingId = @intId
-			,@Post = @Post
-			,@ysnRaiseError = 0
-			,@ynsValid = @ynsValid OUTPUT
-			,@strError = @strMeterReadingError OUTPUT
+		DECLARE @strTransactionId NVARCHAR(30) = NULL
+		DECLARE @intInvoiceId INT = NULL
 
-		IF(@ynsValid = 1)
-		BEGIN
+		SELECT @strTransactionId = strTransactionId, @intInvoiceId = intInvoiceId FROM tblMBMeterReading WHERE intMeterReadingId = @intId
 
-			SELECT @intMeterReadingInvoiceId = intInvoiceId FROM tblMBMeterReading WHERE intMeterReadingId = @intId
-
-			INSERT INTO @EntriesForInvoice(
-				[strType]
-				,[strSourceTransaction]
-				,[intSourceId]
-				,[strSourceId]
-				,[intInvoiceId]
-				,[intEntityCustomerId]
-				,[intCompanyLocationId]
-				,[intCurrencyId]
-				,[intTermId]
-				,[dtmDate]
-				,[dtmDueDate]
-				,[dtmShipDate]
-				,[intEntitySalespersonId]
-				,[intFreightTermId]
-				,[intShipViaId]
-				,[intPaymentMethodId]
-				,[strPONumber]
-				,[strBOLNumber]
-				,[strComments]
-				,[intShipToLocationId]
-				,[intBillToLocationId]
-				,[ysnTemplate]
-				,[ysnForgiven]
-				,[ysnCalculated]
-				,[ysnSplitted]
-				,[intPaymentId]
-				,[intSplitId]
-				,[intLoadDistributionHeaderId]
-				,[strActualCostId]
-				,[intShipmentId]
-				,[intTransactionId]
-				,[intEntityId]
-				,[ysnResetDetails]
-				,[ysnPost]
-				,[intInvoiceDetailId]
-				,[intItemId]
-				,[ysnInventory]
-				,[strItemDescription]
-				,[intItemUOMId]
-				,[dblQtyOrdered]
-				,[dblQtyShipped]
-				,[dblDiscount]
-				,[dblPrice]
-				,[ysnRefreshPrice]
-				,[strMaintenanceType]
-				,[strFrequency]
-				,[dtmMaintenanceDate]
-				,[dblMaintenanceAmount]
-				,[dblLicenseAmount]
-				,[intTaxGroupId]
-				,[ysnRecomputeTax]
-				,[intSCInvoiceId]
-				,[strSCInvoiceNumber]
-				,[intInventoryShipmentItemId]
-				,[strShipmentNumber]
-				,[intSalesOrderDetailId]
-				,[strSalesOrderNumber]
-				,[intContractHeaderId]
-				,[intContractDetailId]
-				,[intShipmentPurchaseSalesContractId]
-				,[intTicketId]
-				,[intTicketHoursWorkedId]
-				,[intSiteId]
-				,[strBillingBy]
-				,[dblPercentFull]
-				,[dblNewMeterReading]
-				,[dblPreviousMeterReading]
-				,[dblConversionFactor]
-				,[intPerformerId]
-				,[ysnLeaseBilling]
-				,[ysnVirtualMeterReading]
-				,[ysnClearDetailTaxes]					
-				,[intTempDetailIdForTaxes]
-				,[intMeterReadingId]
-				,[ysnUseOriginIdAsInvoiceNumber]
-				,[strInvoiceOriginId]
-			)
-			EXEC [dbo].[uspMBCreateInvoice] 
-				@intMeterReadingId = @intId
-				,@intUserEntityId  = @UserId 
-				,@intCurrency = @intCurrency
+		BEGIN TRY
+			EXEC [dbo].[uspMBPostMeterReading]
+				@TransactionId = @intId
+				,@UserId = @UserId
 				,@Post = @Post
-				,@intInvoiceId = @intMeterReadingInvoiceId
-		END
-		ELSE
-		BEGIN
-			DECLARE @strTransactionId NVARCHAR(30) = NULL
-			SELECT @strTransactionId = strTransactionId FROM tblMBMeterReading WHERE intMeterReadingId = @intId
+				,@Recap = @Recap
+				,@InvoiceId = @intInvoiceId
+				,@ErrorMessage = @ErrorMessage
+				,@CreatedInvoices = @CreatedInvoices
+				,@UpdatedInvoices = @UpdatedInvoices
 
-			-- Add to Batch Post Log for invalid Meter Reading
-			INSERT INTO tblMBPostResult (strBatchId, intTransactionId, strTransactionId, strDescription, dtmDate, strTransactionType, intUserId)
-			VALUES(@BatchId, @intId, @strTransactionId, @strMeterReadingError, GETDATE(), 'Meter Reading', @UserId)
-		END		
+			SET @strMeterReadingError = 'Meter Reading successfully posted'
+			SET @SuccessfulCount = @SuccessfulCount + 1
+		END TRY
+		BEGIN CATCH
+			SET @strMeterReadingError = ERROR_MESSAGE()	
+		END CATCH
+
+		--Add to Batch Post Log for invalid Meter Reading
+		INSERT INTO tblMBPostResult (strBatchId, intTransactionId, strTransactionId, strDescription, dtmDate, strTransactionType, intUserId)
+		VALUES(@BatchId, @intId, @strTransactionId, @strMeterReadingError, GETDATE(), 'Meter Reading', @UserId)
 
 		FETCH NEXT FROM @CursorTran INTO @intId
 	END
 	CLOSE @CursorTran
 	DEALLOCATE @CursorTran
 
-
-	EXEC [dbo].[uspARProcessInvoices]
-		@InvoiceEntries	= @EntriesForInvoice
-		,@UserId					= @UserId
-		,@GroupingOption			= 11
-		,@RaiseError				= 1
-		,@ErrorMessage				= @ErrorMessage OUTPUT
-		,@CreatedIvoices			= @CreatedInvoices OUTPUT
-		,@UpdatedIvoices			= @UpdatedInvoices OUTPUT
-		,@BatchIdForNewPost			= @BatchId OUTPUT
-		,@BatchIdForExistingPost	= @BatchId OUTPUT
-		,@BatchIdForNewPostRecap	= @BatchId OUTPUT
-		,@BatchIdForExistingRecap	= @BatchId OUTPUT
-
-
-	IF (@ErrorMessage IS NULL)
-	BEGIN
-
-		DECLARE @intInvoiceId int = NULL
-		DECLARE @tblInvoice TABLE (strInvoiceId NVARCHAR(50) NOT NULL)
-
-		IF (@CreatedInvoices IS NOT NULL)
-		BEGIN
-			INSERT INTO @tblInvoice (strInvoiceId)
-			SELECT Item FROM [fnSplitStringWithTrim](@CreatedInvoices,',') 
-		END
-
-		IF(@UpdatedInvoices IS NOT NULL)
-		BEGIN
-			INSERT INTO @tblInvoice (strInvoiceId)
-			SELECT Item FROM [fnSplitStringWithTrim](@UpdatedInvoices,',') 
-		END
-
-		DECLARE @CursorCreatedInvoice AS CURSOR
-		SET @CursorCreatedInvoice = CURSOR FOR
-		SELECT CONVERT(INT,strInvoiceId) FROM @tblInvoice
-
-		SELECT @SuccessfulCount = @SuccessfulCount + COUNT(*) 
-		FROM @tblInvoice
-
-		OPEN @CursorCreatedInvoice
-		FETCH NEXT FROM @CursorCreatedInvoice INTO @intInvoiceId
-		WHILE @@FETCH_STATUS = 0
-		BEGIN
-
-			DECLARE @intMeterReadingId INT = NULL
-
-			SELECT @intMeterReadingId = MR.intMeterReadingId  FROM tblARInvoice I
-			INNER JOIN tblMBMeterReading MR ON MR.strTransactionId = I.strInvoiceNumber
-			WHERE I.intInvoiceId = @intInvoiceId
-
-			EXEC [dbo].[uspMBUpdateMeterReadingInfo]
-				@intMeterReadingId = @intMeterReadingId
-				,@intUserId = @UserId
-				,@ysnPost = @Post
-				,@intInvoiceId = @intInvoiceId
-	
-			FETCH NEXT FROM @CursorCreatedInvoice INTO @intInvoiceId	
-		END
-		CLOSE @CursorCreatedInvoice
-		DEALLOCATE @CursorCreatedInvoice
-
-		COMMIT TRANSACTION
-	END
-	ELSE
-	BEGIN
-		IF(@@TRANCOUNT > 0)
-		BEGIN
-			ROLLBACK TRANSACTION
-		END
-	END
-
 END TRY
 BEGIN CATCH
-		
-	IF(@@TRANCOUNT > 0)
-	BEGIN
-		ROLLBACK TRANSACTION
-	END
-	
 	SET @ErrorMessage = ERROR_MESSAGE()
-		--SET @ErrorMessage = ERROR_MESSAGE()
 	SET @ErrorSeverity = ERROR_SEVERITY()
 	SET @ErrorState = ERROR_STATE()
 	SET @ErrorNumber   = ERROR_NUMBER()
