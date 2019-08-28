@@ -114,6 +114,40 @@ BEGIN
 				-- ==================================================================================================================
 
 
+				-- ======================================================================================================================
+				-- [START] - Create list of excluded MOP Id
+				-- ======================================================================================================================
+				DECLARE @tempExcludedMOPid TABLE
+				(
+					intPaymentOptionId INT
+				)
+
+				INSERT INTO @tempExcludedMOPid
+				(
+					intPaymentOptionId
+				)
+				SELECT 
+					stpo.intPaymentOptionId
+				FROM tblSTStore st
+				INNER JOIN tblSTPaymentOption stpo
+					ON st.intStoreId = stpo.intStoreId
+					AND stpo.intPaymentOptionId IN (st.intCashTransctionMopId, st.intCustomerChargeMopId)
+				WHERE st.intStoreId = @intStoreId
+				-- ======================================================================================================================
+				-- [END] - Create list of excluded MOP Id
+				-- ======================================================================================================================
+			
+
+
+				-- ======================================================================================================================
+				-- [START] - DELETE Payment Option that is not included
+				-- ======================================================================================================================
+				DELETE FROM dbo.tblSTCheckoutPaymentOptions
+				WHERE intCheckoutId = @intCheckoutId
+					AND intPaymentOptionId IN (SELECT DISTINCT intPaymentOptionId FROM @tempExcludedMOPid)
+				-- ======================================================================================================================
+				-- [END] - DELETE Payment Option that is not included
+				-- ======================================================================================================================
               
       
 				----Update tblSTCheckoutPaymentOptions
@@ -133,7 +167,21 @@ BEGIN
 					AND chk.MiscellaneousSummaryCodesMiscellaneousSummaryCode = 'sales' 
 					AND chk.MiscellaneousSummaryCodesMiscellaneousSummarySubCode = 'MOP'
 					AND intCheckoutId = @intCheckoutId
-
+					AND (
+							(
+									(EXISTS((SELECT TOP 1 1 FROM @tempExcludedMOPid)))
+									AND
+									(
+										PO.intPaymentOptionId NOT IN (SELECT DISTINCT intPaymentOptionId FROM @tempExcludedMOPid)
+									)
+									OR
+									(NOT EXISTS((SELECT TOP 1 1 FROM @tempExcludedMOPid)))
+									AND
+									(
+										1=1
+									)
+							)
+						)
 
 			   -------------------------------------------------------------------------------------------------------------
 			   ---------------------------------------- CUSTOMER COUNT -----------------------------------------------------

@@ -115,26 +115,75 @@ BEGIN
 				-- [END] Get Error logs. Check Register XML that is not configured in i21.  
 				-- ==================================================================================================================
 
+			-- ======================================================================================================================
+			-- [START] - Create list of excluded MOP Id
+			-- ======================================================================================================================
+			DECLARE @tempExcludedMOPid TABLE
+			(
+				intPaymentOptionId INT
+			)
 
-              
-      
-              ----Update tblSTCheckoutPaymentOptions
-              Update dbo.tblSTCheckoutPaymentOptions
-              SET dblRegisterAmount = ISNULL(chk.mopInfoamount, 0)
-                     , intRegisterCount = ISNULL(chk.mopInfocount, 0)
-                     , dblAmount = ISNULL(chk.mopInfoamount, 0)
-              FROM #tempCheckoutInsert chk
-              JOIN tblSTPaymentOption PO 
+			INSERT INTO @tempExcludedMOPid
+			(
+				intPaymentOptionId
+			)
+			SELECT 
+				stpo.intPaymentOptionId
+			FROM tblSTStore st
+			INNER JOIN tblSTPaymentOption stpo
+				ON st.intStoreId = stpo.intStoreId
+				AND stpo.intPaymentOptionId IN (st.intCashTransctionMopId, st.intCustomerChargeMopId)
+			WHERE st.intStoreId = @intStoreId
+            -- ======================================================================================================================
+			-- [END] - Create list of excluded MOP Id
+			-- ======================================================================================================================
+			
+
+
+			-- ======================================================================================================================
+			-- [START] - DELETE Payment Option that is not included
+			-- ======================================================================================================================
+			DELETE FROM dbo.tblSTCheckoutPaymentOptions
+			WHERE intCheckoutId = @intCheckoutId
+				AND intPaymentOptionId IN (SELECT DISTINCT intPaymentOptionId FROM @tempExcludedMOPid)
+			-- ======================================================================================================================
+			-- [END] - DELETE Payment Option that is not included
+			-- ======================================================================================================================
+
+
+
+
+            ----Update tblSTCheckoutPaymentOptions
+			UPDATE dbo.tblSTCheckoutPaymentOptions
+				SET dblRegisterAmount		= ISNULL(chk.mopInfoamount, 0)
+                     , intRegisterCount		= ISNULL(chk.mopInfocount, 0)
+                     , dblAmount			= ISNULL(chk.mopInfoamount, 0)
+            FROM #tempCheckoutInsert chk
+            INNER JOIN tblSTPaymentOption PO 
 				ON ISNULL(chk.mopInfosysid, '') COLLATE DATABASE_DEFAULT = PO.strRegisterMop
-				-- ON PO.strRegisterMop COLLATE DATABASE_DEFAULT = ISNULL(chk.MiscellaneousSummarySubCodeModifier, '')
-              JOIN tblSTStore Store 
+            INNER JOIN tblSTStore Store 
 				ON Store.intStoreId = PO.intStoreId
-              JOIN tblSTCheckoutPaymentOptions CPO 
+            INNER JOIN tblSTCheckoutPaymentOptions CPO 
 				ON CPO.intPaymentOptionId = PO.intPaymentOptionId
-              WHERE Store.intStoreId = @intStoreId
-				  --AND chk.MiscellaneousSummaryCode = 'sales' 
-				  --AND chk.MiscellaneousSummarySubCode = 'MOP'
-				  AND intCheckoutId = @intCheckoutId
+            WHERE Store.intStoreId = @intStoreId
+				AND CPO.intCheckoutId = @intCheckoutId
+				--AND PO.strRegisterMop NOT IN (SELECT DISTINCT strRegisterMop FROM @tempExcludedMOPid)
+				AND (
+						(
+										(EXISTS((SELECT TOP 1 1 FROM @tempExcludedMOPid)))
+										AND
+										(
+											PO.intPaymentOptionId NOT IN (SELECT DISTINCT intPaymentOptionId FROM @tempExcludedMOPid)
+										)
+										OR
+										(NOT EXISTS((SELECT TOP 1 1 FROM @tempExcludedMOPid)))
+										AND
+										(
+											1=1
+										)
+						)
+					)
+
 
       
 		  -------------------------------------------------------------------------------------------------------------
