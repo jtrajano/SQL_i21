@@ -759,3 +759,25 @@ GO
 	PRINT N'END UPDATE'
 GO
 
+
+--=====================================================================================================================================
+-- 	UPDATE DEFAULT ITEM CONTRACT MENU SCREEN STATUS
+---------------------------------------------------------------------------------------------------------------------------------------
+
+GO
+	PRINT N'BEGIN UPDATE'
+GO
+
+IF EXISTS(SELECT TOP 1 1 FROM tblCTCompanyPreference WHERE ysnEnableItemContracts = 1)
+	BEGIN
+		EXEC uspSMSetMenuAvailability 'Item Contracts', 'Contract Management', 1
+	END
+ELSE
+	BEGIN
+		EXEC uspSMSetMenuAvailability 'Item Contracts', 'Contract Management', 0
+	END
+GO
+
+GO
+	PRINT N'END UPDATE'
+GO
