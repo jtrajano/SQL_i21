@@ -81,6 +81,9 @@ SELECT
 	    THEN ((A.dblTotal + A.dblTax) / B.dblTotal  * ISNULL(B2.dblPayment,A.dbl1099))
 			* (CASE WHEN B.intTransactionType = 3 THEN -1 ELSE 1 END)
      ELSE 0 END
+	, dbl1099K = CASE WHEN A.int1099Form = 6--1099 K
+	    THEN (A.dblTotal + A.dblTax) / B.dblTotal  * ISNULL(B2.dblPayment,A.dbl1099)
+     ELSE 0 END
 	, dblDividends = CASE WHEN A.int1099Form = 4  AND A.int1099Category = 1
 	    THEN (CASE WHEN patRef.intBillId IS NULL THEN (A.dblTotal + A.dblTax) ELSE A.dbl1099 END)
 		* (CASE WHEN B.intTransactionType = 3 THEN -1 ELSE 1 END)
@@ -189,6 +192,7 @@ SELECT
 	, dblStateNEC = CASE WHEN A.int1099Form = 7 AND A.int1099Category = 15--'State Tax Withheld'     
 		THEN ((A.dblTotal + A.dblTax) / B.dblTotal * ISNULL(B2.dblPayment, B3.dbl1099)) * (CASE WHEN B.intTransactionType = 3 THEN -1 ELSE 1 END)
      ELSE 0 END   
+	, B2.dtmDatePaid AS dtmDate
 FROM tblAPBillDetail A
 INNER JOIN tblAPBill B
     ON B.intBillId = A.intBillId

@@ -7850,6 +7850,8 @@
     <Build Include="dbo\Stored Procedures\uspAPAccountReportVSGLSummary.sql" />
     <Build Include="dbo\Stored Procedures\uspAPCompareBalance.sql" />
     <Build Include="dbo\Tables\tblGRSettleStorageBillDetail.sql" />
+    <Build Include="dbo\Views\vyuAP1099K.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRpt1099K.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
