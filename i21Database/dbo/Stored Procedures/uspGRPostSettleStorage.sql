@@ -1622,6 +1622,10 @@ BEGIN TRY
 						,@voucherDate = @dtmDate
 						,@billId = @intCreatedBillId OUTPUT
 				END
+				ELSE
+				BEGIN
+					RAISERROR('Total Voucher will be negative',16,1)
+				END
 
 				IF @intCreatedBillId IS NOT NULL
 				BEGIN
