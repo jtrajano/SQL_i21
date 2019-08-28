@@ -142,7 +142,7 @@ BEGIN
 					--, CAST(Chk.totalamount AS DECIMAL(18,6)) [dblManagerDiscountAmount]
 					, [dblManagerDiscountAmount] = CASE
 														WHEN (ISNULL(CAST(Chk.totalamount AS DECIMAL(18,6)), 0))  >  0
-															THEN -(ISNULL(CAST(Chk.totalamount AS DECIMAL(18,6)), 0))
+															THEN (ISNULL(CAST(Chk.totalamount AS DECIMAL(18,6)), 0)) * -1
 														ELSE 0
 												END
 					, CAST(Chk.refundscount AS INT) [intRefundCount]
@@ -199,7 +199,7 @@ BEGIN
 					--, [dblManagerDiscountAmount] = ISNULL(CAST(Chk.totalamount AS DECIMAL(18,6)), 0) 
 					, [dblManagerDiscountAmount]	= CASE
 														WHEN (ISNULL(CAST(Chk.totalamount AS DECIMAL(18,6)), 0))  >  0
-															THEN -(ISNULL(CAST(Chk.totalamount AS DECIMAL(18,6)), 0))
+															THEN (ISNULL(CAST(Chk.totalamount AS DECIMAL(18,6)), 0)) * -1
 														ELSE 0
 													END
 					, [intRefundCount]				= ISNULL(CAST(Chk.refundscount AS INT), 0) 
