@@ -110,12 +110,7 @@ SELECT
 		,strCurrency = (SELECT strCurrency FROM tblSMCurrency WHERE intCurrencyID = CHK.intCurrencyId)
 		
 		-- Bank and company info related fields
-		,strCompanyName = CASE
-							WHEN ISNULL([dbo].fnCMGetBankAccountMICR(CHK.intBankAccountId,CHK.strReferenceNo),'') <> '' THEN 
-								COMPANY.strCompanyName
-							ELSE
-								NULL
-							END
+		,strCompanyName = COMPANY.strCompanyName 
 		,strCompanyAddress = CASE	
 									WHEN ISNULL(dbo.fnConvertToFullAddress( COMPANY.strAddress,  COMPANY.strCity, COMPANY.strState,  COMPANY.strZip), '') <> '' AND ISNULL([dbo].fnCMGetBankAccountMICR(CHK.intBankAccountId,CHK.strReferenceNo),'') <> ''  THEN 
 										dbo.fnConvertToFullAddress(COMPANY.strAddress, COMPANY.strCity, COMPANY.strState, COMPANY.strZip)
