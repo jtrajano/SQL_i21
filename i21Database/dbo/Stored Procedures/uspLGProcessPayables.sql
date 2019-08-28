@@ -60,7 +60,7 @@ BEGIN
 			[intEntityVendorId] = D1.intEntityId
 			,[intTransactionType] = 1
 			,[intLocationId] = IsNull(L.intCompanyLocationId, CT.intCompanyLocationId)
-			,[intCurrencyId] = L.intCurrencyId
+			,[intCurrencyId] = ISNULL(AD.intSeqCurrencyId, L.intCurrencyId)
 			,[dtmDate] = L.dtmPostedDate
 			,[strVendorOrderNumber] = ''
 			,[strReference] = ''
@@ -82,16 +82,16 @@ BEGIN
 			,[dblQuantityToBill] = LD.dblQuantity
 			,[dblQtyToBillUnitQty] = ISNULL(ItemUOM.dblUnitQty,1)
 			,[intQtyToBillUOMId] = LD.intItemUOMId
-			,[dblCost] = ISNULL(AD.dblSeqPrice, 0)
+			,[dblCost] = (CASE WHEN intPurchaseSale = 3 THEN ISNULL(AD.dblSeqPrice, 0) ELSE LD.dblUnitPrice END)
 			,[dblCostUnitQty] = CAST(ISNULL(ItemCostUOM.dblUnitQty,1) AS DECIMAL(38,20))
-			,[intCostUOMId] = AD.intSeqPriceUOMId
+			,[intCostUOMId] = (CASE WHEN intPurchaseSale = 3 THEN ISNULL(AD.intSeqPriceUOMId, 0) ELSE ISNULL(LD.intPriceUOMId, AD.intSeqPriceUOMId) END) 
 			,[dblNetWeight] = ISNULL(LD.dblNet,0)
 			,[dblWeightUnitQty] = ISNULL(ItemWeightUOM.dblUnitQty,1)
 			,[intWeightUOMId] = ItemWeightUOM.intItemUOMId
-			,[intCostCurrencyId] = AD.intSeqCurrencyId
+			,[intCostCurrencyId] = (CASE WHEN intPurchaseSale = 3 THEN ISNULL(AD.intSeqCurrencyId, 0) ELSE ISNULL(LD.intPriceCurrencyId, AD.intSeqCurrencyId) END)
 			,[dblTax] = ISNULL(receiptItem.dblTax, 0)
 			,[dblDiscount] = 0
-			,[dblExchangeRate] = CASE WHEN (L.intCurrencyId <> @DefaultCurrencyId) THEN ISNULL(LD.dblForexRate, 0) ELSE 1 END
+			,[dblExchangeRate] = CASE WHEN (ISNULL(AD.intSeqCurrencyId, L.intCurrencyId) <> @DefaultCurrencyId) THEN ISNULL(LD.dblForexRate, 0) ELSE 1 END
 			,[ysnSubCurrency] =	AD.ysnSeqSubCurrency
 			,[intSubCurrencyCents] = CY.intCent
 			,[intAccountId] = apClearing.intAccountId
