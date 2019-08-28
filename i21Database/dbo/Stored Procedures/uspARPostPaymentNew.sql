@@ -832,6 +832,7 @@ IF(OBJECT_ID('tempdb..#ARPaymentGLEntries') IS NOT NULL)
 			,ILD.[strPostingMessage]        = PID.[strText]
 			,ILD.[strBatchId]               = ARPH.[strBatchId]
 			,ILD.[strPostedTransactionId]   = PID.[strTransactionId] 
+			,ILD.[ysnSuccess]				= 0
 		FROM
 			tblARPaymentIntegrationLogDetail ILD WITH (NOLOCK)
 		INNER JOIN

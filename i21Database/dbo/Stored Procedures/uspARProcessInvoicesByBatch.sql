@@ -1893,46 +1893,6 @@ BEGIN TRY
 			,@TransType			= N'all'
 			,@RaiseError		= @RaiseError
 
-
-	
-
-			
-
-			IF EXISTS (SELECT NULL FROM tblARInvoiceIntegrationLogDetail
-			WHERE intIntegrationLogId = @LogId AND ISNULL(ysnPost, 0) = 1 AND ISNULL(ysnPosted, 0) = 0) 
-		    BEGIN 
-			    DECLARE @POSTRANSACTIONSERRORS TABLE(
-					 intPOSId  INT
-					, strDescription	NVARCHAR(100)	
-					 , ysnSuccess	BIT
-					 , dtmDateProcessed	 DATE
-				)
-				
-			
-				INSERT INTO @POSTRANSACTIONSERRORS
-				SELECT intPOSId				= POS.intPOSId
-				 , strDescription			=  I.strPostingMessage 
-				 , ysnSuccess			= 0
-				 , dtmDateProcessed		= GETDATE()
-				FROM tblARPOS POS
-				INNER JOIN tblARInvoiceIntegrationLogDetail I ON POS.intPOSId = I.intSourceId AND POS.strReceiptNumber = I.strSourceId
-				WHERE intIntegrationLogId = @LogId
-			  AND ISNULL(ysnHeader, 0) = 1
-
-				
-				ROLLBACK TRAN @Savepoint
-				
-				INSERT INTO #POSTRANSACTIONSERRORS
-				SELECT intPOSId				
-				 , strDescription			
-				 , ysnSuccess			
-				 , dtmDateProcessed
-				FROM @POSTRANSACTIONSERRORS
-				
-			
-
-			END	
-			
 END TRY
 BEGIN CATCH
 	IF ISNULL(@RaiseError,0) = 0

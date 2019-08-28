@@ -17,6 +17,14 @@ DECLARE @intDiscountAccountId			INT = NULL
 	  , @intDebitMemoPaymentMethodId	INT = NULL
 	  , @dblCashReceipt					NUMERIC(18, 6) = 0
 	  , @dblCashReturn					NUMERIC(18, 6) = 0
+	  , @intProcessLogId                    NUMERIC(18, 6) = 0
+
+DECLARE @PROCESSLOGS TABLE  (
+		     intPOSId  INT
+			, strDescription	NVARCHAR(100)	
+			, ysnSuccess	BIT
+			, dtmDateProcessed	 DATE
+		)
 
 --CREATE DEFAULT PAYMENT METHODS IF DOES NOT EXISTS
 IF NOT EXISTS (SELECT TOP 1 NULL FROM dbo.tblSMPaymentMethod WITH (NOLOCK) WHERE UPPER(strPaymentMethod) = 'CASH')
@@ -559,20 +567,9 @@ IF EXISTS (SELECT TOP 1 NULL FROM #POSTRANSACTIONS)
 
 
 			--PROCESS TO INVOICE
-			IF(OBJECT_ID('tempdb..#POSTRANSACTIONSERRORS') IS NOT NULL)
-			BEGIN
-				DROP TABLE #POSTRANSACTIONSERRORS
-			END
-			ELSE 
-			BEGIN
-				CREATE TABLE #POSTRANSACTIONSERRORS (
-					 intPOSId  INT
-					, strDescription	NVARCHAR(100)	
-					 , ysnSuccess	BIT
-					 , dtmDateProcessed	 DATE
-				)
-			END
+		
 
+		
 			 EXEC dbo.uspARProcessInvoicesByBatch @InvoiceEntries		= @EntriesForInvoice
 											   , @LineItemTaxEntries	= @TaxDetails
 											   , @UserId				= @intEntityUserId
@@ -583,20 +580,12 @@ IF EXISTS (SELECT TOP 1 NULL FROM #POSTRANSACTIONS)
 
 
 
-			
-
 			--UPDATE POS BATCH LOG
-			INSERT INTO tblARPOSBatchProcessLog (
-				   intPOSId
-				 , strDescription
-				 , ysnSuccess
-				 , dtmDateProcessed
-			) SELECT 
-				   intPOSId
-				 , strDescription
-				 , ysnSuccess
-				 , dtmDateProcessed
-		    FROM #POSTRANSACTIONSERRORS
+			IF EXISTS(SELECT TOP 1 NULL FROM tblARInvoiceIntegrationLogDetail WHERE intIntegrationLogId = @intInvoiceLogId AND ysnSuccess = 0)
+			BEGIN				
+				SET @intProcessLogId = @intInvoiceLogId
+				GOTO Exit_With_Rollback_ProcessInvoices
+			END
 
 
 			INSERT INTO tblARPOSBatchProcessLog (
@@ -606,12 +595,12 @@ IF EXISTS (SELECT TOP 1 NULL FROM #POSTRANSACTIONS)
 				 , dtmDateProcessed
 			) 
 			SELECT intPOSId				= POS.intPOSId
-				 , strMessage			= CASE WHEN ISNULL(ysnSuccess, 0) = 1 THEN 'Successfully Processed.' ELSE I.strMessage END
+				 , strMessage			= 'Successfully Processed.'
 				 , ysnSuccess			= ISNULL(ysnSuccess, 0)
 				 , dtmDateProcessed		= GETDATE()
 			FROM tblARPOS POS
 			INNER JOIN tblARInvoiceIntegrationLogDetail I ON POS.intPOSId = I.intSourceId AND POS.strReceiptNumber = I.strSourceId
-			WHERE intIntegrationLogId = @intInvoiceLogId
+			WHERE intIntegrationLogId = @intInvoiceLogId AND ysnSuccess = 1
 			  AND ISNULL(ysnHeader, 0) = 1
 
 			--UPDATE INVOICE REFERENCE TO POS
@@ -887,14 +876,21 @@ IF EXISTS (SELECT TOP 1 NULL FROM #POSTRANSACTIONS)
 			  AND CM.dblAmountDue <> INV.dblAmountDue 
 			  AND RT.strPOSType = 'Mixed'
 
+			
 			--PROCESS TO RCV
 			EXEC [dbo].[uspARProcessPayments] @PaymentEntries	= @EntriesForPayment
 											, @UserId			= @intEntityUserId
 											, @GroupingOption	= 7
-											, @RaiseError		= 1
+											, @RaiseError		= 0
 											, @ErrorMessage		= @strErrorMsg OUTPUT
 											, @LogId			= @intPaymentLogId OUTPUT
 
+			IF EXISTS(SELECT TOP 1 NULL FROM tblARPaymentIntegrationLogDetail WHERE intIntegrationLogId = @intPaymentLogId AND ysnSuccess = 0)
+			BEGIN				
+				SET @intProcessLogId = @intPaymentLogId
+				GOTO Exit_With_Rollback_ProcessPayment
+			END
+		
 			--UPDATE PAYMENT REFERENCE TO POS PAYMENTS
 			UPDATE POSPAYMENT
 			SET intPaymentId = IP.intPaymentId
@@ -935,3 +931,71 @@ IF EXISTS (SELECT TOP 1 NULL FROM #POSTRANSACTIONS)
 					ROLLBACK TRANSACTION @Savepoint
 		END CATCH
 	END
+
+	Exit_With_Rollback_ProcessInvoices:
+	BEGIN 
+		
+		    INSERT INTO @PROCESSLOGS
+			SELECT intPOSId				= POS.intPOSId
+				, strDescription			=  I.strPostingMessage 
+				, ysnSuccess			= 0
+				, dtmDateProcessed		= GETDATE()
+			FROM tblARPOS POS
+			INNER JOIN tblARInvoiceIntegrationLogDetail I ON POS.intPOSId = I.intSourceId AND POS.strReceiptNumber = I.strSourceId
+			WHERE intIntegrationLogId = @intProcessLogId AND ysnSuccess = 0
+			AND ISNULL(ysnHeader, 0) = 1
+
+			
+			IF @InitTranCount = 0
+				ROLLBACK TRANSACTION
+			ELSE
+				ROLLBACK TRANSACTION @Savepoint
+
+			INSERT INTO tblARPOSBatchProcessLog (
+					   intPOSId
+					 , strDescription
+					 , ysnSuccess
+					 , dtmDateProcessed
+				) SELECT 
+					   intPOSId
+					 , strDescription
+					 , ysnSuccess
+					 , dtmDateProcessed
+			FROM @PROCESSLOGS
+		
+		GOTO PROCESS_EXIT
+	END
+
+	Exit_With_Rollback_ProcessPayment:
+	BEGIN 
+			
+			DELETE FROM @PROCESSLOGS
+			INSERT INTO @PROCESSLOGS
+			SELECT intPOSId				= POS.intPOSId
+				, strDescription		= I.strPostingMessage 
+				, ysnSuccess			= 0
+				, dtmDateProcessed		= GETDATE()
+			FROM tblARPOS POS
+			INNER JOIN tblARInvoice INV ON POS.intPOSId = INV.intSourceId
+			INNER JOIN tblARPaymentIntegrationLogDetail I ON INV.intInvoiceId = I.intSourceId 
+			WHERE intIntegrationLogId = @intProcessLogId AND ysnSuccess = 0
+			AND ISNULL(ysnHeader, 0) = 1
+
+
+			IF @InitTranCount = 0
+				ROLLBACK TRANSACTION
+			ELSE
+				ROLLBACK TRANSACTION @Savepoint
+	
+		
+			INSERT INTO tblARPOSBatchProcessLog
+			SELECT 
+					   intPOSId 
+					 , strDescription 
+					 , ysnSuccess 
+					 , dtmDateProcessed 
+			FROM @PROCESSLOGS 
+			
+	END
+
+	PROCESS_EXIT:

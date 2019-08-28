@@ -605,6 +605,7 @@ IF(@totalInvalid > 0)
 			,ILD.[strPostingMessage]		= PID.[strPostingError]
 			,ILD.[strBatchId]				= PID.[strBatchId]
 			,ILD.[strPostedTransactionId] = PID.[strInvoiceNumber] 
+			,ILD.[ysnSuccess] = 0
 		FROM
 			tblARInvoiceIntegrationLogDetail ILD
 		INNER JOIN
