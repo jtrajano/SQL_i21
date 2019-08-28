@@ -171,7 +171,7 @@ BEGIN TRY
 			---UPDATE Feed Status in Acknowledgement
 			UPDATE tblCTPriceContractAcknowledgementStage
 			SET strFeedStatus = 'Ack Processed'
-			WHERE intPriceContractAcknowledgementStageId = intPriceContractAcknowledgementStageId
+			WHERE intPriceContractAcknowledgementStageId = @intPriceContractAcknowledgementStageId
 		END
 
 		SELECT @intPriceContractAcknowledgementStageId = MIN(intPriceContractAcknowledgementStageId)

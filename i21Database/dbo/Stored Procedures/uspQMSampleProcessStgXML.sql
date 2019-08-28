@@ -1006,43 +1006,43 @@ BEGIN TRY
 						)
 			END
 
-			IF @strCreatedUser IS NOT NULL
-				AND NOT EXISTS (
-					SELECT 1
-					FROM tblEMEntity t
-					JOIN tblEMEntityType ET ON ET.intEntityId = t.intEntityId
-					WHERE ET.strType = 'User'
-						AND t.strName = @strCreatedUser
-						AND t.strEntityNo <> ''
-					)
-			BEGIN
-				SELECT @strErrorMessage = 'Created By ' + @strCreatedUser + ' is not available.'
+			--IF @strCreatedUser IS NOT NULL
+			--	AND NOT EXISTS (
+			--		SELECT 1
+			--		FROM tblEMEntity t
+			--		JOIN tblEMEntityType ET ON ET.intEntityId = t.intEntityId
+			--		WHERE ET.strType = 'User'
+			--			AND t.strName = @strCreatedUser
+			--			AND t.strEntityNo <> ''
+			--		)
+			--BEGIN
+			--	SELECT @strErrorMessage = 'Created By ' + @strCreatedUser + ' is not available.'
 
-				RAISERROR (
-						@strErrorMessage
-						,16
-						,1
-						)
-			END
+			--	RAISERROR (
+			--			@strErrorMessage
+			--			,16
+			--			,1
+			--			)
+			--END
 
-			IF @strLastModifiedUser IS NOT NULL
-				AND NOT EXISTS (
-					SELECT 1
-					FROM tblEMEntity t
-					JOIN tblEMEntityType ET ON ET.intEntityId = t.intEntityId
-					WHERE ET.strType = 'User'
-						AND t.strName = @strLastModifiedUser
-						AND t.strEntityNo <> ''
-					)
-			BEGIN
-				SELECT @strErrorMessage = 'Last Modified By ' + @strLastModifiedUser + ' is not available.'
+			--IF @strLastModifiedUser IS NOT NULL
+			--	AND NOT EXISTS (
+			--		SELECT 1
+			--		FROM tblEMEntity t
+			--		JOIN tblEMEntityType ET ON ET.intEntityId = t.intEntityId
+			--		WHERE ET.strType = 'User'
+			--			AND t.strName = @strLastModifiedUser
+			--			AND t.strEntityNo <> ''
+			--		)
+			--BEGIN
+			--	SELECT @strErrorMessage = 'Last Modified By ' + @strLastModifiedUser + ' is not available.'
 
-				RAISERROR (
-						@strErrorMessage
-						,16
-						,1
-						)
-			END
+			--	RAISERROR (
+			--			@strErrorMessage
+			--			,16
+			--			,1
+			--			)
+			--END
 
 			SELECT @intSampleTypeId = NULL
 				,@intProductValueId = NULL
@@ -1315,12 +1315,42 @@ BEGIN TRY
 				AND t.strName = @strCreatedUser
 				AND t.strEntityNo <> ''
 
+			IF @intCreatedUserId IS NULL
+			BEGIN
+				IF EXISTS (
+						SELECT 1
+						FROM tblSMUserSecurity
+						WHERE strUserName = 'irelyadmin'
+						)
+					SELECT TOP 1 @intCreatedUserId = intEntityId
+					FROM tblSMUserSecurity
+					WHERE strUserName = 'irelyadmin'
+				ELSE
+					SELECT TOP 1 @intCreatedUserId = intEntityId
+					FROM tblSMUserSecurity
+			END
+
 			SELECT @intLastModifiedUserId = t.intEntityId
 			FROM tblEMEntity t
 			JOIN tblEMEntityType ET ON ET.intEntityId = t.intEntityId
 			WHERE ET.strType = 'User'
 				AND t.strName = @strLastModifiedUser
 				AND t.strEntityNo <> ''
+
+			IF @intLastModifiedUserId IS NULL
+			BEGIN
+				IF EXISTS (
+						SELECT 1
+						FROM tblSMUserSecurity
+						WHERE strUserName = 'irelyadmin'
+						)
+					SELECT TOP 1 @intLastModifiedUserId = intEntityId
+					FROM tblSMUserSecurity
+					WHERE strUserName = 'irelyadmin'
+				ELSE
+					SELECT TOP 1 @intLastModifiedUserId = intEntityId
+					FROM tblSMUserSecurity
+			END
 
 			IF @strRowState <> 'Delete'
 			BEGIN

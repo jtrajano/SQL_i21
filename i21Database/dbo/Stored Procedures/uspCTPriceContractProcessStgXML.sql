@@ -377,6 +377,8 @@ BEGIN TRY
 				,TradeNo NVARCHAR(20)
 				)
 
+			EXEC sp_xml_removedocument @idoc
+
 			EXEC sp_xml_preparedocument @idoc OUTPUT
 				,@strPriceFixationDetailXML
 
@@ -484,6 +486,8 @@ BEGIN TRY
 			UPDATE tblCTPriceContractStage
 			SET strFeedStatus = 'Processed'
 			WHERE intPriceContractStageId = @intPriceContractStageId
+
+			EXEC sp_xml_removedocument @idoc
 		END
 
 		IF @strTransactionType = 'Purchase Price Fixation'
@@ -591,12 +595,42 @@ BEGIN TRY
 				WHERE EY.strName = @strCreatedBy
 					AND EY.strEntityNo <> ''
 
+				IF @intCreatedById IS NULL
+				BEGIN
+					IF EXISTS (
+							SELECT 1
+							FROM tblSMUserSecurity
+							WHERE strUserName = 'irelyadmin'
+							)
+						SELECT TOP 1 @intCreatedById = intEntityId
+						FROM tblSMUserSecurity
+						WHERE strUserName = 'irelyadmin'
+					ELSE
+						SELECT TOP 1 @intCreatedById = intEntityId
+						FROM tblSMUserSecurity
+				END
+
 				SELECT @intLastModifiedById = EY.intEntityId
 				FROM tblEMEntity EY
 				JOIN tblEMEntityType ET ON ET.intEntityId = EY.intEntityId
 					AND ET.strType = 'User'
 				WHERE EY.strName = @strLastModifiedBy
 					AND EY.strEntityNo <> ''
+
+				IF @intLastModifiedById IS NULL
+				BEGIN
+					IF EXISTS (
+							SELECT 1
+							FROM tblSMUserSecurity
+							WHERE strUserName = 'irelyadmin'
+							)
+						SELECT TOP 1 @intLastModifiedById = intEntityId
+						FROM tblSMUserSecurity
+						WHERE strUserName = 'irelyadmin'
+					ELSE
+						SELECT TOP 1 @intLastModifiedById = intEntityId
+						FROM tblSMUserSecurity
+				END
 
 				SELECT @intNewPriceContractId = NULL
 

@@ -2,4 +2,5 @@
 AS
 SELECT intPriceFixationId
 	,intPriceFixationRefId
+	,intPriceContractId
 FROM tblCTPriceFixation
