@@ -8036,6 +8036,7 @@
     <Build Include="dbo\Stored Procedures\uspMBUpdateMeterReadingInfo.sql" />
     <Build Include="dbo\Stored Procedures\uspGRCalculateSettleStorageFeeForContract.sql" />
     <Build Include="dbo\Stored Procedures\uspRKProcessDerivativeEntry.sql" />
+    <Build Include="dbo\Views\vyuSTSTPaymentOptionCheckoutPreload.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
