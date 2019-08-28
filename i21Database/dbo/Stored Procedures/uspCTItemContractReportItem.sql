@@ -31,9 +31,11 @@ BEGIN TRY
 		,dtmLineDeliveryDate				NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 		,strLineItemNo						NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 		,strLineItemDescription				NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
+		,dblLineItemQytSold					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 		,dblLineItemQytShipped				NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 		,strLineUnitMeasure					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
-		,strLineSymbol						NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
+		,strLineSymbolSold					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
+		,strLineSymbolShipped				NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 		,dblLinePrice						NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 		,dblLineTotal						NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL		
 		,strContractNumber					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL		
@@ -62,9 +64,11 @@ BEGIN TRY
 		,dtmLineDeliveryDate		
 		,strLineItemNo				
 		,strLineItemDescription		
+		,dblLineItemQytSold
 		,dblLineItemQytShipped
 		,strLineUnitMeasure			
-		,strLineSymbol							
+		,strLineSymbolSold
+		,strLineSymbolShipped							
 		,dblLinePrice				
 		,dblLineTotal
 		,strContractNumber
@@ -90,11 +94,13 @@ BEGIN TRY
 			CONVERT(VARCHAR(10), F.dtmDeliveryDate, 101) as dtmLineDeliveryDate,
 			UPPER(F.strItemNo) as strLineItemNo,
 			UPPER(F.strItemDescription) as strLineItemDescription,
-			F.dblContracted as dblLineItemQytShipped,
+			F.dblContracted as dblLineItemQytSold,
+			CAST(E.dblQtyShipped as NUMERIC(36,6)) as dblLineItemQytShipped,
 			UPPER(F.strUnitMeasure) as strLineUnitMeasure,
-			UPPER(G.strSymbol) as strLineSymbol,
-			F.dblPrice as dblLinePrice,
-			CAST(ROUND(F.dblTotal,2) as NUMERIC(36,2)) as dblLineTotal,
+			UPPER(GA.strSymbol) as strLineSymbolSold,
+			UPPER(G.strSymbol) as strLineSymbolShipped,
+			E.dblPrice as dblLinePrice,
+			CAST(ROUND(E.dblTotal,2) as NUMERIC(36,2)) as dblLineTotal,
 			UPPER(F.strContractNumber) as strContractNumber,
 			F.intItemContractHeaderId,
 			F.intItemContractDetailId
@@ -105,7 +111,10 @@ BEGIN TRY
 					LEFT JOIN tblARCustomer D ON A.intEntityId = D.intEntityId
 					LEFT JOIN tblARInvoiceDetail E ON A.intItemContractHeaderId = E.intItemContractHeaderId
 					LEFT JOIN vyuCTItemContractDetail F ON E.intItemContractDetailId = F.intItemContractDetailId
-					LEFT JOIN tblICUnitMeasure G ON E.intItemUOMId = G.intUnitMeasureId
+					LEFT JOIN tblICItemUOM IU ON IU.intItemUOMId = E.intItemUOMId
+					LEFT JOIN tblICUnitMeasure G ON IU.intUnitMeasureId = G.intUnitMeasureId
+					LEFT JOIN tblICItemUOM IUA ON IUA.intItemUOMId = F.intItemUOMId
+					LEFT JOIN tblICUnitMeasure GA ON IUA.intUnitMeasureId = GA.intUnitMeasureId
 			,(SELECT TOP 1
 					strCompanyName
 					,strAddress AS strCompanyAddress
@@ -128,9 +137,11 @@ BEGIN TRY
 	(
 		strLineItemNo				
 		,strLineItemDescription		
+		,dblLineItemQytSold
 		,dblLineItemQytShipped
 		,strLineUnitMeasure			
-		,strLineSymbol					
+		,strLineSymbolSold					
+		,strLineSymbolShipped
 		,dblLinePrice				
 		,dblLineTotal
 		,strContractNumber
@@ -139,9 +150,11 @@ BEGIN TRY
 	)
 	SELECT	UPPER(G.strItemNo) as strLineItemNo,
 			UPPER(E.strTaxCode) as strLineItemDescription,
-			G.dblContracted as dblLineItemQytShipped,
+			G.dblContracted as dblLineItemQytSold,			
+			CAST(A.dblQtyShipped as NUMERIC(36,6)) as dblLineItemQytShipped,
 			UPPER(C.strUnitMeasure) as strLineUnitMeasure,
-			UPPER(C.strSymbol) as strLineSymbol,
+			UPPER(UM.strSymbol) as strLineSymbolSold,
+			UPPER(C.strSymbol) as strLineSymbolShipped,			
 			UPPER(B.dblRate) as dblLinePrice,
 			CAST(ROUND(ISNULL(B.dblAdjustedTax,0),2) as NUMERIC(36,2))  as dblLineTotal,
 			UPPER(G.strContractNumber) as strContractNumber,
@@ -150,13 +163,16 @@ BEGIN TRY
 
 			FROM tblARInvoiceDetail A 
 					LEFT JOIN tblARInvoiceDetailTax B ON A.intInvoiceDetailId = B.intInvoiceDetailId
-					LEFT JOIN tblICUnitMeasure C ON A.intItemUOMId = C.intUnitMeasureId
+					LEFT JOIN tblICUnitMeasure C ON B.intUnitMeasureId = C.intUnitMeasureId
 					LEFT JOIN tblSMTaxCode E ON B.intTaxCodeId = E.intTaxCodeId
 					LEFT JOIN vyuCTItemContractDetail G ON A.intItemContractDetailId = G.intItemContractDetailId
+					LEFT JOIN tblICItemUOM IU ON IU.intItemUOMId = G.intItemUOMId
+					LEFT JOIN tblICUnitMeasure UM ON IU.intUnitMeasureId = UM.intUnitMeasureId
+
 		WHERE A.intItemContractHeaderId = @intItemContractHeaderId		
 
 
-	SELECT * FROM @ItemContractItems ORDER BY intItemContractKey
+	SELECT * FROM @ItemContractItems ORDER BY intItemContractDetailId, intItemContractKey
 
 END TRY
 
