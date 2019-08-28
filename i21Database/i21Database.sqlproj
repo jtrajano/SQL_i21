@@ -8051,6 +8051,8 @@
     <Build Include="dbo\Stored Procedures\uspRKPositionReconciliationReportInventoryActivity.sql" />
     <Build Include="dbo\Views\vyuICGetRetailCategoryCount.sql" />
     <Build Include="dbo\Stored Procedures\uspRKProcessReconciliationBrokerStatement.sql" />
+    <Build Include="dbo\Views\vyuAP1099K.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRpt1099K.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -55,6 +55,9 @@ SELECT
 	, dbl1099B = CASE WHEN A.int1099Form = 3--1099 B
 	    THEN (A.dblTotal + A.dblTax) / B.dblTotal  * ISNULL(B2.dblPayment,A.dbl1099)
      ELSE 0 END
+	, dbl1099K = CASE WHEN A.int1099Form = 6--1099 K
+	    THEN (A.dblTotal + A.dblTax) / B.dblTotal  * ISNULL(B2.dblPayment,A.dbl1099)
+     ELSE 0 END
 	, dblDividends = CASE WHEN A.int1099Form = 4  AND A.int1099Category = 1
 	    THEN (A.dblTotal + A.dblTax) 
      ELSE 0 END 
@@ -140,6 +143,7 @@ SELECT
     , intYear = YEAR(ISNULL(B2.dtmDatePaid, B.dtmDate))
 	, A.int1099Form
 	, A.int1099Category
+	, B2.dtmDatePaid AS dtmDate
 FROM tblAPBillDetail A
 INNER JOIN tblAPBill B
     ON B.intBillId = A.intBillId
