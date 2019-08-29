@@ -55,7 +55,7 @@ BEGIN TRY
 				, strMarketZone
 				, strPeriodTo
 				, strErrMessage)
-			SELECT strFutMarketName
+			SELECT DISTINCT strFutMarketName
 				, strCommodityCode
 				, strItemNo
 				, strCurrency
@@ -83,7 +83,7 @@ BEGIN TRY
 					, strMarketZone
 					, strPeriodTo
 					, strErrMessage)
-				SELECT strFutMarketName
+				SELECT DISTINCT strFutMarketName
 					, strCommodityCode
 					, strItemNo
 					, strCurrency
@@ -112,7 +112,7 @@ BEGIN TRY
 					, strMarketZone
 					, strPeriodTo
 					, strErrMessage)
-				SELECT strFutMarketName
+				SELECT DISTINCT strFutMarketName
 					, strCommodityCode
 					, strItemNo
 					, strCurrency
@@ -141,7 +141,7 @@ BEGIN TRY
 					, strMarketZone
 					, strPeriodTo
 					, strErrMessage)
-				SELECT strFutMarketName
+				SELECT DISTINCT strFutMarketName
 					, strCommodityCode
 					, strItemNo
 					, strCurrency
@@ -163,6 +163,7 @@ BEGIN TRY
 				UPDATE tblRKM2MBasisImport_ErrLog
 				SET strErrMessage = @PreviousErrMsg + 'Invalid commodity.'
 				WHERE strCommodityCode = @strCommodityCode AND strFutMarketName = @strFutMarketName
+					AND strErrMessage NOT LIKE '%' + 'Invalid commodity.' + '%'
 			END
 		END
 		
@@ -180,7 +181,7 @@ BEGIN TRY
 					, strMarketZone
 					, strPeriodTo
 					, strErrMessage)
-				SELECT strFutMarketName
+				SELECT DISTINCT strFutMarketName
 					, strCommodityCode
 					, strItemNo
 					, strCurrency
@@ -202,6 +203,7 @@ BEGIN TRY
 				UPDATE tblRKM2MBasisImport_ErrLog
 				SET strErrMessage = @PreviousErrMsg + 'Invalid Item.'
 				WHERE strItemNo = @strItemNo AND strFutMarketName = @strFutMarketName
+					AND strErrMessage NOT LIKE '%' + 'Invalid Item.' + '%'
 			END
 		END
 		
@@ -219,7 +221,7 @@ BEGIN TRY
 					, strMarketZone
 					, strPeriodTo
 					, strErrMessage)
-				SELECT strFutMarketName
+				SELECT DISTINCT strFutMarketName
 					, strCommodityCode
 					, strItemNo
 					, strCurrency
@@ -241,6 +243,7 @@ BEGIN TRY
 				UPDATE tblRKM2MBasisImport_ErrLog
 				SET strErrMessage = @PreviousErrMsg + 'Invalid currency.'
 				WHERE strCurrency = @strCurrency AND strFutMarketName = @strFutMarketName
+					AND strErrMessage NOT LIKE '%' + 'Invalid currency.' + '%'
 			END
 		END
 		
@@ -258,7 +261,7 @@ BEGIN TRY
 					, strMarketZone
 					, strPeriodTo
 					, strErrMessage)
-				SELECT strFutMarketName
+				SELECT DISTINCT strFutMarketName
 					, strCommodityCode
 					, strItemNo
 					, strCurrency
@@ -276,10 +279,11 @@ BEGIN TRY
 				SELECT @PreviousErrMsg = strErrMessage
 				FROM tblRKM2MBasisImport_ErrLog
 				WHERE strUnitMeasure = @strUnitMeasure
-				
+
 				UPDATE tblRKM2MBasisImport_ErrLog
 				SET strErrMessage = @PreviousErrMsg + 'Invalid UOM.'
 				WHERE strUnitMeasure = @strUnitMeasure AND strFutMarketName = @strFutMarketName
+					AND strErrMessage NOT LIKE '%' + 'Invalid UOM.' + '%'
 			END
 		END
 		
@@ -299,7 +303,7 @@ BEGIN TRY
 					, strMarketZone
 					, strPeriodTo
 					, strErrMessage)
-				SELECT strFutMarketName
+				SELECT DISTINCT strFutMarketName
 					, strCommodityCode
 					, strItemNo
 					, strCurrency
@@ -318,10 +322,11 @@ BEGIN TRY
 				FROM tblRKM2MBasisImport_ErrLog
 				WHERE strItemNo = @strItemNo
 					AND strCommodityCode = @strCommodityCode
-				
+
 				UPDATE tblRKM2MBasisImport_ErrLog
 				SET strErrMessage = @PreviousErrMsg + 'Item (' + strItemNo + ') not configure the commodity (' + strCommodityCode + ').'
 				WHERE strItemNo = @strItemNo AND strCommodityCode = @strCommodityCode
+					AND strErrMessage NOT LIKE '%' + 'Item (' + strItemNo + ') not configure the commodity (' + strCommodityCode + ').' + '%'
 			END
 		END
 
@@ -342,7 +347,7 @@ BEGIN TRY
 					, strMarketZone
 					, strPeriodTo
 					, strErrMessage)
-				SELECT strFutMarketName
+				SELECT DISTINCT strFutMarketName
 					, strCommodityCode
 					, strItemNo
 					, strCurrency
@@ -365,13 +370,14 @@ BEGIN TRY
 				UPDATE tblRKM2MBasisImport_ErrLog
 				SET strErrMessage = @PreviousErrMsg + 'Future Market (' + strItemNo + ') is not configured for commodity (' + strCommodityCode + ').'
 				WHERE strCommodityCode = @strCommodityCode AND strFutMarketName = @strFutMarketName
+					AND strErrMessage NOT LIKE '%' + 'Future Market (' + strItemNo + ') is not configured for commodity (' + strCommodityCode + ').' + '%'
 			END
 		END
 		
 		SELECT @mRowNumber = MIN(intM2MBasisImportId) FROM tblRKM2MBasisImport WHERE intM2MBasisImportId > @mRowNumber
 	END
 	
-	SELECT intBasisImportErrId
+	SELECT DISTINCT intBasisImportErrId
 		, 0 as intConcurrencyId
 		, strFutMarketName
 		, strCommodityCode
