@@ -373,7 +373,10 @@ BEGIN
 				END
 				<> 0 
 		)
-		AND ISNULL(NULLIF(Header.strCountBy, ''), 'Item') = 'Item'
+		AND (
+			ISNULL(NULLIF(Header.strCountBy, ''), 'Item') = 'Item'
+			OR (ISNULL(NULLIF(Header.strCountBy, ''), 'Item') = 'Retail Count' AND Detail.intItemId IS NOT NULL)
+		)
 		AND Detail.dblPhysicalCount IS NOT NULL
 
 	-----------------------------------
@@ -446,10 +449,11 @@ BEGIN
 	-----------------------------------
 	--  Post the 'Pack Count'
 	-----------------------------------	
-	IF @strCountBy = 'Item Group'
+	IF @strCountBy = 'Retail Count'
 	BEGIN 
 		INSERT INTO tblICInventoryShiftPhysicalHistory (
 			intCountGroupId
+			,intItemId
 			,strShiftNo
 			,intLocationId
 			,intSubLocationId
@@ -469,6 +473,7 @@ BEGIN
 		)
 		SELECT 
 			intCountGroupId = cd.intCountGroupId
+			,intItemId = cd.intItemId
 			,strShiftNo = c.strShiftNo
 			,intLocationId = c.intLocationId
 			,intSubLocationId = cd.intSubLocationId
@@ -491,7 +496,7 @@ BEGIN
 		WHERE
 			c.strCountNo = @strTransactionId
 			AND cd.intCountGroupId IS NOT NULL 
-			AND cd.intItemId IS NULL 
+			--AND cd.intItemId IS NULL 
 			AND cd.dblPhysicalCount IS NOT NULL 
 	END 
 
@@ -552,7 +557,7 @@ BEGIN
 	-----------------------------------
 	--  Unpost the 'Pack Count'
 	-----------------------------------
-	IF @strCountBy = 'Item Group'
+	IF @strCountBy = 'Retail Count'
 	BEGIN 
 		UPDATE tblICInventoryShiftPhysicalHistory
 		SET ysnIsUnposted = 1
@@ -583,7 +588,7 @@ BEGIN
 			@GLEntries
 			,@intEntityUserSecurityId
 	END 
-	ELSE IF @strCountBy <> 'Item Group'
+	ELSE IF @strCountBy <> 'Retail Count'
 	BEGIN 
 		-- Post preview is not available. Financials are only booked for company-owned stocks.
 		EXEC uspICRaiseError 80185; 

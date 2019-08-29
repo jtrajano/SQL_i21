@@ -4,6 +4,7 @@ AS
 SELECT 
 	s.intInventoryShiftPhysicalCountId
 	,c.strCountGroup
+	,i.strItemNo
 	,s.dtmDate
 	,dblBegin = s.dblSystemCount
 	,dblQtyReceived = s.dblQtyReceived
@@ -26,7 +27,9 @@ FROM
 		ON s.intTransactionId = cnt.intInventoryCountId AND s.strTransactionId = cnt.strCountNo
 	LEFT JOIN tblICCountGroup c
 		ON s.intCountGroupId = c.intCountGroupId
+	LEFT JOIN tblICItem i 
+		ON i.intItemId = s.intItemId
 WHERE
 	s.ysnIsUnposted = 0 
 	AND s.dblPhysicalCount IS NOT NULL 
-	AND cnt.strCountBy = 'Item Group'
+	AND cnt.strCountBy = 'Retail Count'

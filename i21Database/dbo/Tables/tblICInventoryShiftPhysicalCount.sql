@@ -7,6 +7,7 @@ CREATE TABLE [dbo].[tblICInventoryShiftPhysicalHistory]
 (
 	[intInventoryShiftPhysicalCountId] INT NOT NULL IDENTITY, 	
 	[intCountGroupId] INT NULL,
+	[intItemId] INT NULL,
 	[strShiftNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[intLocationId] INT NOT NULL,	
 	[intSubLocationId] INT NULL,
