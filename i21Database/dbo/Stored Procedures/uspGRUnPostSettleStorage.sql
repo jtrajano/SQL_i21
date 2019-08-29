@@ -399,6 +399,7 @@ BEGIN TRY
 					,[dblForeignRate]
 					,[strRateType]
 					,[intSourceEntityId]
+					,[intCommodityId]--MOD
 				)
 				 EXEC	
 				 @intReturnValue = dbo.uspICUnpostCosting
