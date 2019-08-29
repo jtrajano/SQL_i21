@@ -7676,7 +7676,10 @@
     <Build Include="dbo\Stored Procedures\uspMBUpdateMeterReadingInfo.sql" />
     <Build Include="dbo\Stored Procedures\uspGRCalculateSettleStorageFeeForContract.sql" />
     <Build Include="dbo\Stored Procedures\uspRKProcessDerivativeEntry.sql" />
-	<Build Include="dbo\Stored Procedures\uspTRValidateQuote.sql" />
+    <Build Include="dbo\Stored Procedures\uspTRValidateQuote.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKPositionReconciliationReportCompanyTitled.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKPositionReconciliationReportInventoryActivity.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKPositionReconciliationReportContractBalance.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

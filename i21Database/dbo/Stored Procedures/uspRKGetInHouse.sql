@@ -379,6 +379,7 @@ BEGIN
 				, strTransactionId NVARCHAR(50)
 				, intTransactionId INT
 				, strDistribution NVARCHAR(10)
+				, strTransactionType NVARCHAR(50)
 				)
 
 			
@@ -441,13 +442,15 @@ BEGIN
 				, dblInvIn
 				, strTransactionId
 				, intTransactionId
-				, strDistribution)
+				, strDistribution
+				, strTransactionType)
 			SELECT 
 				  dtmDate
 				, dblTotal
 				, strTransactionId
 				, intTransactionId
 				, strDistribution 
+				, strTransactionType
 			FROM (
 				SELECT
 					dtmDate 
@@ -455,6 +458,7 @@ BEGIN
 					, strTransactionId
 					, intTransactionId
 					, strDistribution
+					, strTransactionType
 				FROM @tblResult
 				WHERE strTransactionType IN ('Inventory Receipt')
 				GROUP By
@@ -462,6 +466,7 @@ BEGIN
 					, strTransactionId
 					, intTransactionId
 					, strDistribution 
+					, strTransactionType
 			) t 
 			WHERE dblTotal <> 0
 
@@ -471,6 +476,7 @@ BEGIN
 				, strTransactionId
 				, intTransactionId
 				, strDistribution 
+				, strTransactionType
 			)
 			SELECT 
 				dtmDate
@@ -478,6 +484,7 @@ BEGIN
 				, strTransactionId
 				, intTransactionId
 				, strDistribution 
+				, strTransactionType
 			FROM (
 				SELECT
 					dtmDate 
@@ -485,6 +492,7 @@ BEGIN
 					, strTransactionId
 					, intTransactionId
 					, strDistribution 
+					, strTransactionType
 				FROM @tblResult
 				WHERE strTransactionType IN ('Storage Settlement')
 				GROUP By
@@ -492,6 +500,7 @@ BEGIN
 					, strTransactionId
 					, intTransactionId
 					, strDistribution 
+					, strTransactionType
 			) t 
 			
 			INSERT INTO @tblResultInventory(
@@ -500,6 +509,7 @@ BEGIN
 				, strTransactionId
 				, intTransactionId
 				, strDistribution 
+				, strTransactionType
 			)
 			SELECT 
 				dtmDate
@@ -507,6 +517,7 @@ BEGIN
 				, strTransactionId
 				, intTransactionId
 				, strDistribution 
+				, strTransactionType
 			FROM (
 				SELECT
 					dtmDate 
@@ -514,6 +525,7 @@ BEGIN
 					, strTransactionId
 					, intTransactionId
 					, strDistribution 
+					, strTransactionType
 				FROM @tblResult
 				WHERE strTransactionType IN ('Credit Memo')
 				GROUP By
@@ -521,6 +533,7 @@ BEGIN
 					, strTransactionId
 					, intTransactionId
 					, strDistribution 
+					, strTransactionType
 			) t 
 		
 		
@@ -530,6 +543,7 @@ BEGIN
 				, strTransactionId
 				, intTransactionId
 				, strDistribution 
+				, strTransactionType
 			)
 			SELECT 
 				dtmDate
@@ -537,6 +551,7 @@ BEGIN
 				, strTransactionId
 				, intTransactionId
 				, strDistribution 
+				, strTransactionType
 			FROM (
 				SELECT
 					dtmDate 
@@ -544,6 +559,7 @@ BEGIN
 					, strTransactionId
 					, intTransactionId
 					, strDistribution 
+					, strTransactionType
 				FROM @tblResult
 				WHERE strTransactionType IN ('Inventory Transfer')
 				AND dblTotal > 0
@@ -552,6 +568,7 @@ BEGIN
 					, strTransactionId
 					, intTransactionId
 					, strDistribution 
+					, strTransactionType
 			) t
 
 			INSERT INTO @tblResultInventory(
@@ -560,6 +577,7 @@ BEGIN
 				, strTransactionId
 				, intTransactionId
 				, strDistribution 	
+				, strTransactionType
 			)
 			SELECT 
 				dtmDate
@@ -567,6 +585,7 @@ BEGIN
 				, strTransactionId
 				, intTransactionId
 				, strDistribution 
+				, strTransactionType
 			FROM (
 				SELECT
 					dtmDate 
@@ -574,6 +593,7 @@ BEGIN
 					, strTransactionId
 					, intTransactionId
 					, strDistribution 
+					, strTransactionType
 				FROM @tblResult
 				WHERE strTransactionType IN ('Inventory Transfer')
 				AND dblTotal < 0
@@ -582,6 +602,7 @@ BEGIN
 					, strTransactionId
 					, intTransactionId
 					, strDistribution 
+					, strTransactionType
 			) t
 
 			INSERT INTO @tblResultInventory(
@@ -590,6 +611,7 @@ BEGIN
 				, strTransactionId
 				, intTransactionId
 				, strDistribution 
+				, strTransactionType
 			)
 			SELECT 
 				dtmDate
@@ -597,6 +619,7 @@ BEGIN
 				, strTransactionId
 				, intTransactionId
 				, strDistribution 
+				, strTransactionType
 			FROM (
 				SELECT
 					 dtmDate  
@@ -604,6 +627,7 @@ BEGIN
 					, strTransactionId
 					, intTransactionId
 					, strDistribution 
+					, strTransactionType
 				FROM @tblResult
 				WHERE strTransactionType = 'On Hold'
 				AND dblTotal  > 0
@@ -612,6 +636,7 @@ BEGIN
 					, strTransactionId
 					, intTransactionId
 					, strDistribution 
+					, strTransactionType
 			) t
 
 			INSERT INTO @tblResultInventory(
@@ -620,6 +645,7 @@ BEGIN
 				, strTransactionId
 				, intTransactionId
 				, strDistribution 
+				, strTransactionType
 			)
 			SELECT 
 				dtmDate
@@ -627,6 +653,7 @@ BEGIN
 				, strTransactionId
 				, intTransactionId
 				, strDistribution 
+				, strTransactionType
 			FROM (
 				SELECT
 					dtmDate 
@@ -634,6 +661,7 @@ BEGIN
 					, strTransactionId
 					, intTransactionId
 					, strDistribution ='PRDC' 
+					, strTransactionType
 				FROM @tblResult
 				WHERE strTransactionType IN ('Produce')
 				GROUP By
@@ -641,6 +669,7 @@ BEGIN
 					, strTransactionId
 					, intTransactionId
 					, strDistribution 
+					, strTransactionType
 			) t 
 
 
@@ -650,6 +679,7 @@ BEGIN
 				, strTransactionId
 				, intTransactionId
 				, strDistribution 
+				, strTransactionType
 			)
 			SELECT 
 				dtmDate
@@ -657,6 +687,7 @@ BEGIN
 				, strTransactionId
 				, intTransactionId
 				, strDistribution 
+				, strTransactionType
 			FROM (
 				SELECT
 					 dtmDate 
@@ -664,6 +695,7 @@ BEGIN
 					, strTransactionId
 					, intTransactionId
 					, strDistribution 
+					, strTransactionType
 				FROM @tblResult
 				WHERE strTransactionType = 'On Hold' 
 				AND dblTotal < 0
@@ -672,6 +704,7 @@ BEGIN
 					, strTransactionId
 					, intTransactionId
 					, strDistribution 
+					, strTransactionType
 			) t
 
 
@@ -681,6 +714,7 @@ BEGIN
 				, strTransactionId
 				, intTransactionId
 				, strDistribution 
+				, strTransactionType
 			)
 			SELECT 
 				dtmDate
@@ -688,6 +722,7 @@ BEGIN
 				, strTransactionId
 				, intTransactionId
 				, strDistribution 
+				, strTransactionType
 			FROM (
 				SELECT
 					dtmDate 
@@ -695,6 +730,7 @@ BEGIN
 					, strTransactionId
 					, intTransactionId
 					, strDistribution 
+					, strTransactionType
 				FROM @tblResult
 				WHERE strTransactionType IN ('Inventory Shipment')
 				GROUP By
@@ -702,6 +738,7 @@ BEGIN
 					, strTransactionId
 					, intTransactionId
 					, strDistribution 
+					, strTransactionType
 			) t
 			WHERE dblTotal <> 0
 
@@ -711,6 +748,7 @@ BEGIN
 				, strTransactionId
 				, intTransactionId
 				, strDistribution 
+				, strTransactionType
 			)
 			SELECT 
 				dtmDate
@@ -718,6 +756,7 @@ BEGIN
 				, strTransactionId
 				, intTransactionId
 				, strDistribution 
+				, strTransactionType
 			FROM (
 				SELECT
 					dtmDate 
@@ -725,6 +764,7 @@ BEGIN
 					, strTransactionId
 					, intTransactionId
 					, strDistribution  = 'CNSM'
+					, strTransactionType
 				FROM @tblResult
 				WHERE strTransactionType IN ('Consume')
 				GROUP By
@@ -732,6 +772,7 @@ BEGIN
 					, strTransactionId
 					, intTransactionId
 					, strDistribution 
+					, strTransactionType
 			) t
 			WHERE dblTotal <> 0
 
@@ -741,6 +782,7 @@ BEGIN
 				, strTransactionId
 				, intTransactionId
 				, strDistribution 
+				, strTransactionType
 			)
 			SELECT 
 				dtmDate
@@ -748,6 +790,7 @@ BEGIN
 				, strTransactionId
 				, intTransactionId
 				, strDistribution 
+				, strTransactionType
 			FROM (
 				SELECT
 					dtmDate 
@@ -755,6 +798,7 @@ BEGIN
 					, strTransactionId
 					, intTransactionId
 					, strDistribution 
+					, strTransactionType
 				FROM @tblResult
 				WHERE strTransactionType IN ('Invoice', 'Cash')
 				AND dblTotal < 0
@@ -763,6 +807,7 @@ BEGIN
 					, strTransactionId
 					, intTransactionId
 					, strDistribution 
+					, strTransactionType
 			) t
 
 
@@ -772,6 +817,7 @@ BEGIN
 				, strTransactionId
 				, intTransactionId
 				, strDistribution 
+				, strTransactionType
 			)
 			SELECT 
 				dtmDate
@@ -779,6 +825,7 @@ BEGIN
 				, strTransactionId
 				, intTransactionId
 				, strDistribution 
+				, strTransactionType
 			FROM (
 				SELECT
 					dtmDate 
@@ -786,6 +833,7 @@ BEGIN
 					, strTransactionId
 					, intTransactionId
 					, strDistribution  = CASE WHEN ISNULL(strDistribution,'') <> '' THEN strDistribution ELSE 'ADJ' END
+					, strTransactionType = 'Inventory Adjustment'
 				FROM @tblResult
 				WHERE strTransactionType LIKE 'Inventory Adjustment -%'
 				GROUP By
@@ -801,6 +849,7 @@ BEGIN
 				, strTransactionId
 				, intTransactionId
 				, strDistribution 
+				, strTransactionType
 			)
 			SELECT 
 				dtmDate
@@ -808,6 +857,7 @@ BEGIN
 				, strTransactionId
 				, intTransactionId
 				, strDistribution 
+				, strTransactionType
 			FROM (
 				SELECT
 					dtmDate 
@@ -815,6 +865,7 @@ BEGIN
 					, strTransactionId
 					, intTransactionId
 					, strDistribution 
+					, strTransactionType
 				FROM @tblResult
 				WHERE strTransactionType IN('Inventory Count')
 				GROUP By
@@ -822,6 +873,7 @@ BEGIN
 					, strTransactionId
 					, intTransactionId
 					, strDistribution 
+					, strTransactionType
 			) t
 
 
@@ -831,6 +883,7 @@ BEGIN
 				, strTransactionId
 				, intTransactionId
 				, strDistribution 
+				, strTransactionType
 			)
 			SELECT 
 				dtmDate
@@ -838,6 +891,7 @@ BEGIN
 				, strTransactionId
 				, intTransactionId
 				, strDistribution 
+				, strTransactionType
 			FROM (
 				SELECT 
 					dtmDate 
@@ -845,6 +899,7 @@ BEGIN
 					, strTransactionId
 					, intTransactionId
 					, strDistribution 
+					, strTransactionType = 'Customer/Maintain Storage'
 				FROM @tblResult s
 				WHERE strTransactionType IN ( 'Scale Storage','Customer/Maintain Storage', 'Settle Storage', 'Transfer Storage')
 					AND dblTotal > 0
@@ -862,6 +917,7 @@ BEGIN
 				, strTransactionId
 				, intTransactionId
 				, strDistribution 
+				, strTransactionType
 			)
 			SELECT 
 				dtmDate
@@ -869,6 +925,7 @@ BEGIN
 				, strTransactionId
 				, intTransactionId
 				, strDistribution
+				, strTransactionType
 			FROM (
 				SELECT 
 					dtmDate 
@@ -876,6 +933,7 @@ BEGIN
 					, strTransactionId
 					, intTransactionId
 					, strDistribution 
+					, strTransactionType = 'Customer/Maintain Storage'
 				FROM @tblResult s
 				WHERE strTransactionType IN ( 'Scale Storage','Customer/Maintain Storage', 'Settle Storage', 'Transfer Storage')
 					AND dblTotal < 0
@@ -893,6 +951,7 @@ BEGIN
 				, strTransactionId
 				, intTransactionId
 				, strDistribution 
+				, strTransactionType
 			)
 			SELECT 
 				dtmDate
@@ -900,6 +959,7 @@ BEGIN
 				, strTransactionId
 				, intTransactionId
 				, strDistribution 
+				, strTransactionType
 			FROM (
 				SELECT 
 					dtmDate 
@@ -907,6 +967,7 @@ BEGIN
 					, strTransactionId
 					, intTransactionId
 					, strDistribution 
+					, strTransactionType
 				FROM @tblResult s
 				WHERE strTransactionType IN ( 'Storage Adjustment')
 			) t
@@ -927,6 +988,7 @@ BEGIN
 				, ri.strDistribution
 				, r.dblBalanceInv 
 				, r.dblSalesInTransit
+				, ri.strTransactionType
 			FROM @tblResultInventory ri
 			FULL join @tblBalanceInvByDate r on ri.dtmDate = r.dtmDate
 			
@@ -936,6 +998,7 @@ BEGIN
 				NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,
 				sum(dblTotal)
 				,NULL 
+				,NULL
 			FROM @tblResult WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110) <= CONVERT(DATETIME, DATEADD(day,-1,@dtmFromTransactionDate))
 			) t
 			WHERE dblBalanceInv IS NOT NULL 
