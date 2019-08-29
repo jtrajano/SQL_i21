@@ -179,6 +179,7 @@ BEGIN TRY
 			,GETDATE()
 			,[intLastModifiedUserId]
 			,GETDATE()
+			,intMainItemId
 		FROM OPENXML(@idoc, 'root/InvPlngReportAttributeValue/InvPlngReportAttributeValueRow', 2) WITH (
 				intReportAttributeID INT
 				,intItemId INT
@@ -186,6 +187,7 @@ BEGIN TRY
 				,strValue NVARCHAR(100)
 				,intCreatedUserId INT
 				,intLastModifiedUserId INT
+				,intMainItemId int
 				)
 	END
 	ELSE
@@ -287,6 +289,7 @@ BEGIN TRY
 			,GETDATE()
 			,[intLastModifiedUserId]
 			,GETDATE()
+			,intMainItemId
 		FROM OPENXML(@idoc, 'root/InvPlngReportAttributeValue/InvPlngReportAttributeValueRow', 2) WITH (
 				intReportAttributeID INT
 				,intItemId INT
@@ -294,6 +297,7 @@ BEGIN TRY
 				,strValue NVARCHAR(100)
 				,intCreatedUserId INT
 				,intLastModifiedUserId INT
+				,intMainItemId int
 				)
 	END
 

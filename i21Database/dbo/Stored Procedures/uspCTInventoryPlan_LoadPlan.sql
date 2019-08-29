@@ -128,7 +128,7 @@ BEGIN
 
 	SET @SQL = @SQL + ' FROM (
 					Select * from (
-					select	intInvPlngReportMasterID,intReportAttributeID,intItemId,strFieldName,strValue
+					select	intInvPlngReportMasterID,intReportAttributeID,intItemId,strFieldName,strValue,intMainItemId
 					from	tblCTInvPlngReportAttributeValue s
 					 ) as st
 						pivot
