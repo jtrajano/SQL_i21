@@ -582,7 +582,7 @@ BEGIN TRY
 													  	  ELSE NULL END
 													  END 
 			,strDetailAmendedColumns				= @strDetailAmendedColumns
-		    ,strINCOTermWithWeight					=	dbo.fnCTGetTranslation('ContractManagement.view.INCOShipTerm',CB.intContractBasisId,@intLaguageId,'Contract Basis',CB.strContractBasis) + ISNULL(', ' + dbo.fnCTGetTranslation('ContractManagement.view.WeightGrades',W1.intWeightGradeId,@intLaguageId,'Name',W1.strWeightGradeDesc),'')
+		    ,strINCOTermWithWeight					=	dbo.fnCTGetTranslation('ContractManagement.view.INCOShipTerm',CB.intFreightTermId,@intLaguageId,'Contract Basis',CB.strContractBasis) + ISNULL(', ' + dbo.fnCTGetTranslation('ContractManagement.view.WeightGrades',W1.intWeightGradeId,@intLaguageId,'Name',W1.strWeightGradeDesc),'')
 			,strQuantityWithUOM						=	dbo.fnRemoveTrailingZeroes(CH.dblQuantity) + ' ' + dbo.fnCTGetTranslation('Inventory.view.ReportTranslation',UM.intUnitMeasureId,@intLaguageId,'Name',UM.strUnitMeasure) + ' ' + ISNULL(SQ.strNoOfContainerAndType, '')
 			,strItemDescWithSpec					=	SQ.strItemDescWithSpec
 			,strStartAndEndDate						=	SQ.strStartAndEndDate
@@ -660,7 +660,7 @@ BEGIN TRY
 		INNER JOIN tblICUnitMeasure e ON e.intUnitMeasureId = c.intUnitMeasureId
 	)										EB ON EB.intContractHeaderId = CH.intContractHeaderId											
 	LEFT JOIN	tblCTCropYear				CY	WITH (NOLOCK) ON	CY.intCropYearId				=	CH.intCropYearId			
-	LEFT JOIN	tblCTContractBasis			CB	WITH (NOLOCK) ON	CB.intContractBasisId			=	CH.intContractBasisId		
+	LEFT JOIN	tblSMFreightTerms			CB	WITH (NOLOCK) ON	CB.intFreightTermId				=	CH.intFreightTermId
 	LEFT JOIN	tblCTWeightGrade			W1	WITH (NOLOCK) ON	W1.intWeightGradeId				=	CH.intWeightId				
 	LEFT JOIN	tblCTWeightGrade			W2	WITH (NOLOCK) ON	W2.intWeightGradeId				=	CH.intGradeId				
 	LEFT JOIN	tblCTContractText			TX	WITH (NOLOCK) ON	TX.intContractTextId			=	CH.intContractTextId		
