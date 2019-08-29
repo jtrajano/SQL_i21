@@ -285,8 +285,8 @@ SELECT CD.intContractDetailId
 	,PT.strPricingType
 	,CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 THEN CD.intCurrencyId ELSE AD.intSeqCurrencyId END AS intSeqCurrencyId
 	,CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 THEN CPCU.strCurrency ELSE AD.strSeqCurrency END AS strSeqCurrency
+	,CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 THEN CD.intPriceItemUOMId ELSE AD.intSeqPriceUOMId END AS intSeqPriceUOMId
 	,CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 THEN U3.strUnitMeasure ELSE AD.strSeqPriceUOM END AS strSeqPriceUOM 
-	,CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 THEN CPCU.ysnSubCurrency ELSE PCU.ysnSubCurrency END AS ysnSubCurrency
 	,CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 THEN CPCU.ysnSubCurrency ELSE PCU.ysnSubCurrency END AS ysnSubCurrency
 	,CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 THEN CD.intRateTypeId ELSE NULL END AS intRateTypeId
 	,CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 THEN CD.dblRate ELSE NULL END AS dblRate
@@ -367,6 +367,7 @@ GROUP BY CD.intContractDetailId
 	,CD.dblQuantity
 	,CD.intUnitMeasureId
 	,CD.intItemUOMId
+	,CD.intPriceItemUOMId
 	,U1.strUnitMeasure
 	,CD.intNetWeightUOMId
 	,U2.intUnitMeasureId
