@@ -321,7 +321,7 @@ BEGIN
 		EXEC dbo.[uspARUpdateCommitted] @InvoiceIDP, 1, @UserId, 1
 
 		--IN TRANSIT OUTBOUND QTY
-		EXEC dbo.[uspARUpdateInTransit] @InvoiceIDP, 1, 0
+		EXEC dbo.[uspARUpdateInTransit] @InvoiceIDP, 1
 
 		--IN TRANSIT DIRECT QTY
 		EXEC dbo.[uspARUpdateInTransitDirect] @InvoiceIDP, 1
@@ -643,7 +643,7 @@ BEGIN
 		EXEC dbo.[uspARUpdateCommitted] @InvoiceIDU, 1, @UserId, 1
 
 		--IN TRANSIT OUTBOUND QTY
-		EXEC dbo.[uspARUpdateInTransit] @InvoiceIDU, 0, 0
+		EXEC dbo.[uspARUpdateInTransit] @InvoiceIDU, 0
 
 		--IN TRANSIT DIRECT QTY
 		EXEC dbo.[uspARUpdateInTransitDirect] @InvoiceIDU, 0

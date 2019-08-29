@@ -52,7 +52,6 @@ BEGIN
 	DECLARE @ysnAllowUserSelfPost AS BIT
 	DECLARE @ysnTransactionPostedFlag AS BIT
 	DECLARE @ysnDirectShip BIT;
-	DECLARE @ysnIsReturn BIT = 0
 	DECLARE @strFOBPoint NVARCHAR(50)
 	DECLARE @intFOBPointId INT
 	DECLARE @ItemsToPost ItemInTransitCostingTableType
@@ -760,13 +759,7 @@ SELECT @ysnDirectShip = CASE
 FROM tblLGLoad S
 WHERE intLoadId = @intTransactionId
 
-SELECT @ysnIsReturn = CASE WHEN EXISTS (SELECT TOP 1 1
-	FROM tblLGLoad L JOIN tblARInvoice I ON L.intLoadId = I.intLoadId
-	WHERE L.intLoadId = @intTransactionId
-	AND I.strTransactionType = 'Credit Memo'
-	AND I.ysnPosted = 1) THEN 1 ELSE 0 END
-
-IF (@ysnDirectShip <> 1 AND @ysnIsReturn <> 1)
+IF @ysnDirectShip <> 1
 BEGIN
 	EXEC dbo.uspICIncreaseInTransitOutBoundQty @ItemsToIncreaseInTransitOutBound;
 END
