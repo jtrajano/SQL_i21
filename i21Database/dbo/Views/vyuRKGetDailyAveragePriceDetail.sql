@@ -23,7 +23,7 @@ SELECT Detail.intDailyAveragePriceDetailId
     , Detail.dblOptionsPL
     , Detail.dblNetLongAvg
     , Detail.intBrokerId
-	, Broker.strBrokerName
+	, strBrokerName = Broker.strName
     , Detail.intConcurrencyId
 	, Month.ysnExpired
 FROM tblRKDailyAveragePriceDetail Detail
@@ -31,4 +31,4 @@ LEFT JOIN vyuRKGetDailyAveragePrice Header ON Header.intDailyAveragePriceId = De
 LEFT JOIN tblRKFutureMarket Market ON Market.intFutureMarketId = Detail.intFutureMarketId
 LEFT JOIN tblRKFuturesMonth Month ON Month.intFutureMonthId = Detail.intFutureMonthId
 LEFT JOIN tblICCommodity Commodity ON Commodity.intCommodityId = Detail.intCommodityId
-LEFT JOIN tblRKBroker Broker ON Broker.intBrokerId = Detail.intBrokerId
+LEFT JOIN tblEMEntity Broker ON Broker.intEntityId = Detail.intBrokerId
