@@ -757,7 +757,7 @@ BEGIN
 					,strTransactionId = It.strTransactionId
 					,Inv.intTransactionId 
 				from @InventoryStock Inv
-				inner join tblICInventoryTransaction It on It.intTransactionId = Inv.intTransactionId
+				inner join tblICInventoryTransaction It on It.intTransactionId = Inv.intTransactionId and It.intTransactionTypeId = 9
 				where Inv.strTransactionType = 'Produce'
 						
 			) t
