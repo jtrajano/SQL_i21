@@ -27,9 +27,9 @@ AS
 						CU.strName					AS	strCounterParty,
 
 						AN.strName					AS	strAssociationName,
-						CB.strContractBasis,						
-						CB.strDescription			AS	strContractBasisDescription,		
-						CB.strINCOLocationType,						
+						FT.strContractBasis,						
+						FT.strDescription			AS	strContractBasisDescription,		
+						FT.strINCOLocationType,						
 						CM.intUnitMeasureId,						
 						CO.strCountry,						
 						CP.strContractPlan,						
@@ -90,7 +90,7 @@ AS
 				JOIN	tblCTWeightGrade					W1	ON	W1.intWeightGradeId					=		CH.intGradeId						LEFT
 				JOIN	tblCTWeightGrade					W2	ON	W2.intWeightGradeId					=		CH.intWeightId						LEFT
 				JOIN	tblSMTerm							TM	ON	TM.intTermID						=		CH.intTermId						LEFT
-				JOIN	tblCTContractBasis					CB	ON	CB.intContractBasisId				=		CH.intContractBasisId				LEFT
+				--JOIN	tblCTContractBasis					CB	ON	CB.intContractBasisId				=		CH.intContractBasisId				LEFT
 				JOIN	tblCTContractType					TP	ON	TP.intContractTypeId				=		CH.intContractTypeId				LEFT
 				JOIN	tblCTAssociation					AN	ON	AN.intAssociationId					=		CH.intAssociationId					LEFT
 				JOIN	tblCTContractText					TX	ON	TX.intContractTextId				=		CH.intContractTextId				LEFT
