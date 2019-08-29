@@ -8044,6 +8044,7 @@
     <Build Include="dbo\Views\vyuICGetInventoryCountByCategoryDetail.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryCountByCategory.sql" />
     <Build Include="dbo\Stored Procedures\uspICPopulateRetailValuationByLocation.sql" />
+	<Build Include="dbo\Stored Procedures\uspTRValidateQuote.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
