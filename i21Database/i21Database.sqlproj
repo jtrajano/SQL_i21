@@ -713,6 +713,7 @@
     <Build Include="dbo\User Defined Types\ItemCostingTableType.sql" />
     <Build Include="dbo\Tables\tblICInventoryTransactionType.sql" />
     <None Include="Scripts\Post-Deployment\IC\01_InventoryTransactionTypes.sql" />
+    <None Include="Scripts\Post-Deployment\IC\100_Fix_Missing_Pricing_Data.sql" />
     <Build Include="dbo\Tables\tblPREmployeeDeductionTax.sql" />
     <Build Include="dbo\Tables\tblPREmployeeEarningTax.sql" />
     <Build Include="dbo\Stored Procedures\uspICValidateCostingOnPost.sql" />
@@ -753,6 +754,7 @@
     <Build Include="dbo\Tables\tblICInventoryReceiptInspection.sql" />
     <Build Include="dbo\Tables\tblICInventoryReceiptItemTax.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostCosting.sql" />
+    <Build Include="dbo\Stored Procedures\uspICSyncItemLocationPricing.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdateDetailsForRecount.sql" />
     <Build Include="dbo\Functions\fnGetCostingMethod.sql" />
     <Build Include="dbo\Functions\fnGetItemGLAccount.sql" />
