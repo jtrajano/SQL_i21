@@ -7676,6 +7676,7 @@
     <Build Include="dbo\Stored Procedures\uspMBUpdateMeterReadingInfo.sql" />
     <Build Include="dbo\Stored Procedures\uspGRCalculateSettleStorageFeeForContract.sql" />
     <Build Include="dbo\Stored Procedures\uspRKProcessDerivativeEntry.sql" />
+	<Build Include="dbo\Stored Procedures\uspTRValidateQuote.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
