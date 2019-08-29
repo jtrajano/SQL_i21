@@ -100,7 +100,7 @@ BEGIN
 	WHERE intInvPlngReportMasterID = @intInvPlngReportMasterID
 
 	SET @SQL = ''
-	SET @SQL = @SQL + 'DECLARE @Table table(intItemId Int, strItemNo nvarchar(200), StdUOM varchar(20), BaseUOM varchar(20), AttributeId int, strAttributeName nvarchar(50), OpeningInv nvarchar(35), PastDue nvarchar(35)'
+	SET @SQL = @SQL + 'DECLARE @Table table(intItemId Int, strItemNo nvarchar(200), StdUOM varchar(20), BaseUOM varchar(20), AttributeId int, strAttributeName nvarchar(50), OpeningInv nvarchar(35), PastDue nvarchar(35),intMainItemId Int'
 
 	WHILE @Cnt <= @intNoOfMonths
 	BEGIN
@@ -117,7 +117,8 @@ BEGIN
 						, Ext.intReportAttributeID [AttributeId]
 						, RA.strAttributeName 
 						, Ext.OpeningInv
-						, Ext.PastDue'
+						, Ext.PastDue
+						, Ext.intMainItemId'
 	SET @Cnt = 1
 
 	WHILE @Cnt <= @intNoOfMonths
