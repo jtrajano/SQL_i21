@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+﻿﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -720,6 +720,7 @@
     <Build Include="dbo\Stored Procedures\uspICValidateCostingOnPost.sql" />
     <Build Include="dbo\Stored Procedures\uspICValidateCostingOnUnpost.sql" />
     <Build Include="dbo\Stored Procedures\uspICUnpostCosting.sql" />
+    <Build Include="dbo\Stored Procedures\uspICSyncItemLocationPricing.sql" />
     <None Include="Scripts\Post-Deployment\Optional Run\Reports\1_ReportDisableConstraints.sql" />
     <None Include="Scripts\Post-Deployment\Optional Run\Reports\2_ReportDeleteOldData.sql" />
     <None Include="Scripts\Post-Deployment\Optional Run\Reports\3_ReportEnableConstraints.sql" />
@@ -7595,6 +7596,7 @@
     <Build Include="dbo\Views\vyuICGenerateStockMovement.sql" />
     <Build Include="dbo\Views\vyuSTLocationItems.sql" />
     <None Include="Scripts\Post-Deployment\IC\17_Inventory_Constraints.sql" />
+    <None Include="Scripts\Post-Deployment\IC\100_Fix_Missing_Pricing_Data.sql" />
     <Build Include="dbo\Functions\fnCTGenerateReceiptDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspICCreateReceiptGLEntriesForInTransit.sql" />
     <Build Include="dbo\Functions\fnICGetAddToCostTaxFromInventoryReceipt.sql" />
