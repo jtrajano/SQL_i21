@@ -229,6 +229,54 @@ BEGIN
 	GOTO With_Rollback_Exit  
 END
 
+
+-- Validate for unposted Receipt or unposted Shipment before posting the Retail Count.
+IF @strCountBy = 'Retail Count' AND @ysnPost = 1
+BEGIN 
+	DECLARE @strReceiptNumber AS NVARCHAR(50) 
+			,@strShipmentNumber AS NVARCHAR(50) 
+
+	SELECT TOP 1
+		@strReceiptNumber = r.strReceiptNumber
+	FROM 
+		tblICInventoryCount c INNER JOIN tblICInventoryCountDetail cd
+			ON c.intInventoryCountId = cd.intInventoryCountId
+		INNER JOIN tblICInventoryReceiptItem ri
+			ON ri.intItemId = cd.intItemId
+		INNER JOIN tblICInventoryReceipt r
+			ON r.intInventoryReceiptId = ri.intInventoryReceiptId
+			AND dbo.fnDateEquals(r.dtmReceiptDate, c.dtmCountDate) = 1 
+	WHERE
+		ISNULL(r.ysnPosted, 0) = 0 
+
+	IF @strReceiptNumber IS NOT NULL 
+	BEGIN 
+		-- 'Inventory Receipt, {Receipt Number}, needs to be posted first before you can post the Inventory Count.'
+		EXEC uspICRaiseError 80237, @strReceiptNumber;
+		GOTO With_Rollback_Exit  
+	END 
+
+	SELECT TOP 1
+		@strShipmentNumber = s.strShipmentNumber
+	FROM 
+		tblICInventoryCount c INNER JOIN tblICInventoryCountDetail cd
+			ON c.intInventoryCountId = cd.intInventoryCountId
+		INNER JOIN tblICInventoryShipmentItem si
+			ON si.intItemId = cd.intItemId
+		INNER JOIN tblICInventoryShipment s
+			ON s.intInventoryShipmentId = si.intInventoryShipmentId
+			AND dbo.fnDateEquals(s.dtmShipDate, c.dtmCountDate) = 1
+	WHERE
+		ISNULL(s.ysnPosted, 0) = 0 
+
+	IF @strShipmentNumber IS NOT NULL 
+	BEGIN 
+		-- 'Inventory Shipment, {Shipment Number}, needs to be posted first before you can post the Inventory Count.'
+		EXEC uspICRaiseError 80238, @strShipmentNumber;
+		GOTO With_Rollback_Exit  
+	END
+END 
+
 -- Get the next batch number
 EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT, @intLocationId
 IF @@ERROR <> 0 GOTO With_Rollback_Exit    
@@ -267,6 +315,8 @@ BEGIN
 			,intItemLocationId		= ItemLocation.intItemLocationId
 			,intItemUOMId			= 
 					CASE 
+						WHEN Header.strCountBy = 'Retail Count' THEN 
+							Detail.intItemUOMId						
 						-- If Physical count is a whole number, use it. 
 						WHEN Item.strLotTracking <> 'No' 
 							 AND ROUND((ISNULL(Detail.dblPhysicalCount, 0) - ISNULL(Detail.dblSystemCount, 0)) % 1, 6) = 0 
@@ -279,6 +329,14 @@ BEGIN
 			,dtmDate				= Header.dtmCountDate
 			,dblQty					= 
 					CASE 
+						WHEN Header.strCountBy = 'Retail Count' THEN 
+							ISNULL(Detail.dblPhysicalCount, 0) 
+							- (
+								ISNULL(Detail.dblSystemCount, 0) 
+								+ ISNULL(Detail.dblQtyReceived, 0)
+								- ISNULL(Detail.dblQtySold, 0) 
+							)
+
 						-- If Physical count is a whole number, use it. 
 						WHEN Item.strLotTracking <> 'No' 
 							 AND ROUND((ISNULL(Detail.dblPhysicalCount, 0) - ISNULL(Detail.dblSystemCount, 0)) % 1, 6) = 0 
@@ -288,7 +346,12 @@ BEGIN
 						WHEN Detail.intWeightUOMId IS NULL THEN 
 							ISNULL(Detail.dblPhysicalCount, 0) - ISNULL(Detail.dblSystemCount, 0) 
 						ELSE 
-							CASE WHEN Item.strLotTracking <> 'No' THEN ISNULL(Detail.dblNetQty, 0) - ISNULL(Detail.dblWeightQty, 0) ELSE ISNULL(Detail.dblPhysicalCount, 0) - ISNULL(Detail.dblSystemCount, 0) END
+							CASE 
+								WHEN Item.strLotTracking <> 'No' THEN 
+									ISNULL(Detail.dblNetQty, 0) - ISNULL(Detail.dblWeightQty, 0) 
+								ELSE 
+									ISNULL(Detail.dblPhysicalCount, 0) - ISNULL(Detail.dblSystemCount, 0) 
+							END
 					END
 			,dblUOMQty				= 
 					CASE 
@@ -305,14 +368,15 @@ BEGIN
 							CASE WHEN Detail.intLotId IS NOT NULL THEN LotWeightUOM.dblUnitQty ELSE WeightUOM.dblUnitQty END
 					END
 			,dblCost				= 
-					COALESCE
-						(
-						case when (Detail.dblPhysicalCount > Detail.dblSystemCount and isnull(Detail.dblNewCost,0) > 0) 
-                            then Detail.dblNewCost 
-                        else NULL end,
-
-						Detail.dblLastCost
-						, dbo.fnCalculateCostBetweenUOM(
+					COALESCE (
+						CASE 
+							WHEN (Detail.dblPhysicalCount > Detail.dblSystemCount AND ISNULL(Detail.dblNewCost,0) > 0) THEN 
+								Detail.dblNewCost 
+							ELSE 
+								NULL 
+						END
+						,Detail.dblLastCost
+						,dbo.fnCalculateCostBetweenUOM(
 							StockUOM.intItemUOMId
 							,CASE 
 								-- If Physical count is a whole number, use it. 
@@ -366,6 +430,14 @@ BEGIN
 		Header.intInventoryCountId = @intTransactionId
 		AND (
 				CASE 
+					WHEN Header.strCountBy = 'Retail Count' THEN 
+						ISNULL(Detail.dblPhysicalCount, 0) 
+						- (
+							ISNULL(Detail.dblSystemCount, 0) 
+							+ ISNULL(Detail.dblQtyReceived, 0)
+							- ISNULL(Detail.dblQtySold, 0) 
+						)					
+					
 					WHEN Detail.intWeightUOMId IS NULL THEN 
 						ISNULL(Detail.dblPhysicalCount, 0) - ISNULL(Detail.dblSystemCount, 0) 
 					ELSE 
@@ -450,7 +522,7 @@ BEGIN
 	--  Post the 'Pack Count'
 	-----------------------------------	
 	IF @strCountBy = 'Retail Count'
-	BEGIN 
+	BEGIN
 		INSERT INTO tblICInventoryShiftPhysicalHistory (
 			intCountGroupId
 			,intItemId

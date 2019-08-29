@@ -250,6 +250,8 @@ BEGIN
 		WHEN @msgId = 80234 THEN 'The non-inventory item <b>%s</b> at location <b>%s</b> is missing a setup for <b>%s</b> or <b>%s</b> GL accounts. (1) Verify if these accounts are properly set up in the <i>item</i> or <i>category</i> screen. (2) Make sure these accounts exist in the GL chart of accounts.'
 		WHEN @msgId = 80235 THEN 'The cost for %s is more than the vendor cost of %f. Unable to post.'
 		WHEN @msgId = 80236 THEN 'Negative stock quantity is not allowed for %s at %s.<p><br>On Hand is %f<br>Reserved is %f<br>Available is %f.</p>'
+		WHEN @msgId = 80237 THEN 'Inventory Receipt, %s, needs to be posted first before you can post the Inventory Count.'
+		WHEN @msgId = 80238 THEN 'Inventory Shipment, %s, needs to be posted first before you can post the Inventory Count.'
 	END 
 
 	RETURN @msg

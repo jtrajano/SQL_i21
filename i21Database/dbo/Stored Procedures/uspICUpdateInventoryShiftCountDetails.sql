@@ -153,7 +153,7 @@ FROM (
 						WHERE
 							t.intItemId = i.intItemId
 							AND t.intItemLocationId = il.intItemLocationId
-							AND dbo.fnDateLessThanEquals(t.dtmDate, c.dtmCountDate) = 1	
+							AND dbo.fnDateLessThan(t.dtmDate, c.dtmCountDate) = 1	
 					) t
 				WHERE
 					c.intInventoryCountId = @intInventoryCountId
@@ -173,7 +173,7 @@ FROM (
 						WHERE
 							t.intItemId = i.intItemId
 							AND t.intItemLocationId = il.intItemLocationId
-							AND dbo.fnDateLessThanEquals(t.dtmDate, c.dtmCountDate) = 1	
+							AND dbo.fnDateLessThan(t.dtmDate, c.dtmCountDate) = 1	
 						ORDER BY
 							t.intInventoryTransactionId DESC 
 					) lastCost

@@ -94,7 +94,10 @@ FROM
 				((CASE WHEN cd.intSubLocationId = nonLotted.intSubLocationId AND cd.intStorageLocationId = nonLotted.intStorageLocationId THEN 0 ELSE 1 END) = 0) OR
 				((CASE WHEN cd.intSubLocationId IS NOT NULL AND cd.intStorageLocationId IS NULL AND cd.intSubLocationId = nonLotted.intSubLocationId THEN 0 ELSE 1 END) = 0)
 			)
-			AND dbo.fnDateLessThanEquals(nonLotted.dtmDate, c.dtmCountDate) = 1
+			AND (
+				(c.strCountBy = 'Item' AND dbo.fnDateLessThanEquals(nonLotted.dtmDate, c.dtmCountDate) = 1)
+				OR (c.strCountBy = 'Retail Count' AND dbo.fnDateLessThan(nonLotted.dtmDate, c.dtmCountDate) = 1) 
+			)
 			AND Item.strLotTracking = 'No'
 		OUTER APPLY(
 			SELECT TOP 1
