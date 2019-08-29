@@ -23,5 +23,5 @@
 	[strBook] nvarchar(100) COLLATE Latin1_General_CI_AS NULL,
 	[strSubBook] nvarchar(100) COLLATE Latin1_General_CI_AS NULL,
 	[intConcurrencyId] int,
-	[dtmCreateDateTime] nvarchar(50) COLLATE Latin1_General_CI_AS NULL
+	[strCreateDateTime] nvarchar(50) COLLATE Latin1_General_CI_AS NULL
 )

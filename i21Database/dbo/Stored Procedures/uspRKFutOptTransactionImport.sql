@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE uspRKFutOptTransactionImport
-	@intEntityUserId VARCHAR (100) = NULL
+	@intEntityUserId NVARCHAR(100) = NULL
 
 AS
 
@@ -24,16 +24,17 @@ BEGIN TRY
 	
 	IF NOT EXISTS(SELECT intFutOptTransactionId FROM tblRKFutOptTransactionImport_ErrLog)
 	BEGIN
-		declare @intInstrument int
-		declare @strInstrument nvarchar(30)
-		SELECT top 1 @strInstrument=case when isnull(ysnOTCOthers,1)=0 then 'Exchange Traded' else 'OTC - Others' end,
-					 @intInstrument=case when isnull(ysnOTCOthers,1)=0 then 1 else 3 end	
-		 FROM(
-		SELECT DISTINCT (isnull(ysnOTCOthers,0)) ysnOTCOthers from tblRKFutOptTransactionImport i
-		join tblRKBrokerageAccount b on b.strAccountNumber=i.strAccountNumber
-		join tblEMEntity e on i.strName=e.strName)t
-
-
+		DECLARE @intInstrument INT
+			, @strInstrument NVARCHAR(30)
+			
+		SELECT TOP 1 @strInstrument = CASE WHEN ISNULL(ysnOTCOthers, 1) = 0 THEN 'Exchange Traded' ELSE 'OTC - Others' END
+			, @intInstrument = CASE WHEN ISNULL(ysnOTCOthers, 1) = 0 THEN 1 ELSE 3 END
+		FROM (
+			SELECT DISTINCT ysnOTCOthers = ISNULL(ysnOTCOthers, 0)
+			FROM tblRKFutOptTransactionImport i
+			JOIN tblRKBrokerageAccount b ON b.strAccountNumber = i.strAccountNumber
+		) t
+		
 		INSERT INTO tblRKFutOptTransactionHeader (intConcurrencyId, dtmTransactionDate, intSelectedInstrumentTypeId, strSelectedInstrumentType)
 		VALUES (1, GETDATE(), @intInstrument, @strInstrument)
 		
@@ -66,7 +67,7 @@ BEGIN TRY
 				, CONVERT(DATETIME, ti.strFilledDate, @ConvertYear) dtmFilledDate
 				, b.intBookId
 				, sb.intSubBookId
-				, CONVERT(DATETIME, dtmCreateDateTime, @ConvertYear) dtmCreateDateTime
+				, CONVERT(DATETIME, strCreateDateTime, @ConvertYear) dtmCreateDateTime
 			FROM tblRKFutOptTransactionImport ti
 			JOIN tblRKFutureMarket fm ON fm.strFutMarketName = ti.strFutMarketName
 			JOIN tblRKBrokerageAccount ba ON ba.strAccountNumber = ti.strAccountNumber

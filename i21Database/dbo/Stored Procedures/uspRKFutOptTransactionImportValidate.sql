@@ -24,7 +24,7 @@ DECLARE @dtmFilledDate NVARCHAR(100)
 DECLARE @strBook NVARCHAR(100)
 DECLARE @strSubBook NVARCHAR(100)
 DECLARE @PreviousErrMsg nvarchar(max)
-DECLARE @dtmCreateDateTime NVARCHAR(100)
+DECLARE @strCreateDateTime NVARCHAR(100)
 DECLARE @strDateTimeFormat nvarchar(50)
 DECLARE @ConvertYear int
 DECLARE @dblPrice DECIMAL(24, 10) = NULL
@@ -94,7 +94,7 @@ WHILE @mRowNumber > 0
 		SET @dtmFilledDate =NULL
 		SET @strBook =NULL
 		SET @strSubBook =NULL
-		SET @dtmCreateDateTime = NULL
+		SET @strCreateDateTime = NULL
 		SET @strBrokerTradeNo = NULL
 		SET @dblPrice = NULL
 		SET @dblStrike = NULL
@@ -119,7 +119,7 @@ WHILE @mRowNumber > 0
 			@dtmFilledDate = strFilledDate,
 			@strBook = strBook,
 			@strSubBook = strSubBook,
-			@dtmCreateDateTime = dtmCreateDateTime,
+			@strCreateDateTime = strCreateDateTime,
 			@dblPrice = dblPrice,
 			@dblStrike = dblStrike
 		FROM tblRKFutOptTransactionImport 
@@ -501,8 +501,7 @@ WHILE @mRowNumber > 0
 
 		DECLARE @isValidmCreateDateTime BIT = 0
 		BEGIN
-			DECLARE @strCreateDateTime NVARCHAR(100)
-			SELECT  @strCreateDateTime = dtmCreateDateTime 
+			SELECT @strCreateDateTime = strCreateDateTime 
 			FROM tblRKFutOptTransactionImport WHERE intFutOptTransactionId = @mRowNumber
 
 			EXEC uspRKStringDateValidate @strCreateDateTime, @isValidmCreateDateTime OUTPUT
@@ -510,7 +509,7 @@ WHILE @mRowNumber > 0
 			IF(@isValidmCreateDateTime = 0)
 			BEGIN
 				SET @ErrMsg = @ErrMsg + ' Invalid Create Date Time, format should be in ' + @strDateTimeFormat + '.'
-				SET @dtmCreateDateTime = NULL
+				SET @strCreateDateTime = NULL
 			END
 		END
 	END
@@ -578,7 +577,7 @@ WHILE @mRowNumber > 0
 			   ,[strSubBook]
 			   ,[intConcurrencyId]
 			   ,'Error at Line No. '  + Convert(nvarchar(50),@counter) + '. ' + @ErrMsg
-			   ,[dtmCreateDateTime]	 
+			   ,[strCreateDateTime]	 
 		FROM tblRKFutOptTransactionImport 
 		WHERE intFutOptTransactionId = @mRowNumber
 	END

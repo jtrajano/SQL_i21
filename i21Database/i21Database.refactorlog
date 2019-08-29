@@ -7413,4 +7413,11 @@
     <Property Name="ParentElementType" Value="SqlSchema" />
     <Property Name="NewName" Value="uspRKM2MValidateInquiryTransaction" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="18831095-269d-43a2-85fe-a6a02ab316a8" ChangeDateTime="08/29/2019 01:39:49">
+    <Property Name="ElementName" Value="[dbo].[tblRKFutOptTransactionImport].[dtmCreateDateTime]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblRKFutOptTransactionImport]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strCreateDateTime" />
+  </Operation>
 </Operations>
