@@ -88,5 +88,7 @@
 	intContainerTypeId INT,
 	ysnCalculateNoOfContainerByBagQty BIT CONSTRAINT [DF_tblMFCompanyPreference_ysnCalculateNoOfContainerByBagQty] DEFAULT 0,
 	dblDemandGrowthPerc NUMERIC(18,6),
+	ysnComputeDemandUsingRecipe BIT,
+	ysnDisplayDemandWithItemNoAndDescription BIT,
 	CONSTRAINT [PK_tblMFCompanyPreference_intCompanyPreferenceId] PRIMARY KEY ([intCompanyPreferenceId]) 
 )

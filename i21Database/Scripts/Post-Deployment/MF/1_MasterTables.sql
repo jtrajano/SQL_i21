@@ -3890,3 +3890,11 @@ UPDATE tblMFCompanyPreference
 SET intNoofWeekstoCalculateSupplyTargetbyAverage = 13
 Where intNoofWeekstoCalculateSupplyTargetbyAverage IS NULL
 GO
+UPDATE tblMFCompanyPreference
+SET ysnComputeDemandUsingRecipe = 1
+Where ysnComputeDemandUsingRecipe IS NULL
+GO
+UPDATE tblMFCompanyPreference
+SET ysnDisplayDemandWithItemNoAndDescription = 0
+Where ysnDisplayDemandWithItemNoAndDescription IS NULL
+GO
