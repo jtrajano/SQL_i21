@@ -648,7 +648,7 @@ BEGIN
 				,strTaxState			= @strSiteState
 				,strSiteAddress			= @strSiteAddress	
 				,strSiteCity			= @strSiteCity	
-				,intPPHostId			= @intPPHostId	
+				,intPPHostId			= @intSellingHost	
 				,strPPSiteType			= (CASE @strPPSiteType 
 											WHEN 'N' 
 												THEN 'Network'
