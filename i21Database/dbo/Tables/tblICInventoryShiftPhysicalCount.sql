@@ -17,6 +17,7 @@ CREATE TABLE [dbo].[tblICInventoryShiftPhysicalHistory]
 	[dblQtyReceived] NUMERIC(38, 20) NOT NULL DEFAULT 0, 
 	[dblQtySold] NUMERIC(38, 20) NOT NULL DEFAULT 0, 	
 	[dblPhysicalCount] NUMERIC(38, 20) NOT NULL DEFAULT 0, 	
+	[dblSalesPrice] NUMERIC(38, 20) NULL DEFAULT 0, 	
 	[intTransactionId] INT NOT NULL, 
 	[strTransactionId] NVARCHAR(40) COLLATE Latin1_General_CI_AS NOT NULL, 
 	[intTransactionDetailId] INT NULL, 

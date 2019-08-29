@@ -538,6 +538,7 @@ BEGIN
 			,intTransactionId
 			,strTransactionId
 			,intTransactionDetailId
+			,dblSalesPrice 
 			,ysnIsUnposted
 			,dtmCreated
 			,intCreatedEntityId
@@ -558,6 +559,7 @@ BEGIN
 			,intTransactionId = c.intInventoryCountId
 			,strTransactionId = c.strCountNo
 			,intTransactionDetailId = cd.intInventoryCountDetailId
+			,dblSalesPrice = dbo.fnCalculateCostBetweenUOM(itemPricing.intItemUOMId, cd.intItemUOMId, itemPricing.dblSalePrice) 
 			,ysnIsUnposted = 0 
 			,dtmCreated = GETDATE()
 			,intCreatedEntityId = @intEntityUserSecurityId
@@ -565,6 +567,20 @@ BEGIN
 		FROM 
 			tblICInventoryCount c INNER JOIN tblICInventoryCountDetail cd
 				ON c.intInventoryCountId = cd.intInventoryCountId
+			OUTER APPLY (
+				SELECT TOP 1 
+					p.dblSalePrice
+					,stockUOM.intItemUOMId
+				FROM 
+					tblICItemPricing p INNER JOIN tblICItemLocation il
+						ON p.intItemLocationId = il.intItemLocationId
+					INNER JOIN tblICItemUOM stockUOM
+						ON stockUOM.intItemId = p.intItemId
+						AND stockUOM.ysnStockUnit = 1
+				WHERE
+					p.intItemId = cd.intItemId
+					AND il.intLocationId = c.intLocationId			
+			) itemPricing
 		WHERE
 			c.strCountNo = @strTransactionId
 			AND cd.intCountGroupId IS NOT NULL 

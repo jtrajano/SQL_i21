@@ -19,8 +19,20 @@ SELECT
 		+ ISNULL(s.dblQtyReceived, 0) 
 		- ISNULL(s.dblQtySold, 0)
 		- ISNULL(s.dblPhysicalCount, 0)
-	,dblPrice = CAST(0 AS NUMERIC(18, 6))
-	,dblValue =  CAST(0 AS NUMERIC(18, 6))
+	,dblPrice = s.dblSalesPrice 
+	,dblValue =  
+		ROUND(
+			dbo.fnMultiply(
+				(
+					ISNULL(s.dblSystemCount, 0) 
+					+ ISNULL(s.dblQtyReceived, 0) 
+					- ISNULL(s.dblQtySold, 0)
+					- ISNULL(s.dblPhysicalCount, 0)		
+				)
+				,s.dblSalesPrice
+			)
+			,2
+		)
 	,cnt.strCountBy
 FROM 
 	tblICInventoryShiftPhysicalHistory s INNER JOIN tblICInventoryCount cnt
