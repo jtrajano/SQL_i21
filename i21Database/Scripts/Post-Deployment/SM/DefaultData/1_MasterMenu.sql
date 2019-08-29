@@ -23,7 +23,7 @@ GO
 	--IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Contract vs Market Differential Analysis' AND strModuleName = 'Logistics' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Contract vs Market Differential Analysis' AND strModuleName = 'Logistics') AND strCommand = N'Logistics.view.ContractVsMarketDifferential') 
 	--IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Blend Demand' AND strModuleName = 'Manufacturing' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Blend Demand' AND strModuleName = 'Contract Management') AND strCommand = N'ContractManagement.view.ItemContract?showSearch=true') 
 	--IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Comment Maintenance' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Comment Maintenance' AND strModuleName = 'Accounts Receivable') AND strCommand = N'AccountsReceivable.view.StatementFooterMessage') 
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Batch Posting' AND strModuleName = 'Transports' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Batch Posting' AND strModuleName = 'Transports') AND strCommand = N'i21.view.BatchPosting?module=Transports') 
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Retail Inventory' AND strModuleName = 'Inventory' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Retail Inventory' AND strModuleName = 'Inventory') AND strCommand = N'Inventory.view.RetailInventoryReport') 
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 		
@@ -1508,6 +1508,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Inventory
 ELSE 
 	UPDATE tblSMMasterMenu SET strCommand = N'Inventory.view.InventoryReceipt?showSearch=true', intSort = 0 WHERE strMenuName = 'Inventory Receipts' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryActivitiesParentMenuId
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Inventory Count By Category' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryActivitiesParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Inventory Count By Category', N'Inventory', @InventoryActivitiesParentMenuId, N'Inventory Count By Category', N'Activity', N'Screen', N'Inventory.view.InventoryCountByCategory', N'small-menu-activity', 1, 1, 0, 1, 0, 0)
+ELSE
+	UPDATE tblSMMasterMenu SET strCommand = N'Inventory.view.InventoryCountByCategory', intSort = 0 WHERE strMenuName = 'Inventory Count By Category ' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryActivitiesParentMenuId
+
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Inventory Shipments' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryActivitiesParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
 	VALUES (N'Inventory Shipments', N'Inventory', @InventoryActivitiesParentMenuId, N'Inventory Shipments', N'Activity', N'Screen', N'Inventory.view.InventoryShipment?showSearch=true', N'small-menu-activity', 1, 1, 0, 1, 1, 0)
@@ -1530,13 +1536,20 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Inventory
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
 	VALUES (N'Inventory Count', N'Inventory', @InventoryActivitiesParentMenuId, N'Inventory Count', N'Activity', N'Screen', N'Inventory.view.InventoryCount?showSearch=true', N'small-menu-activity', 1, 1, 0, 1, 4, 0)
 ELSE
-	UPDATE tblSMMasterMenu SET strCommand = N'Inventory.view.InventoryCount?showSearch=true', intSort = 5 WHERE strMenuName = 'Inventory Count' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryActivitiesParentMenuId
+	UPDATE tblSMMasterMenu SET strCommand = N'Inventory.view.InventoryCount?showSearch=true', intSort = 4 WHERE strMenuName = 'Inventory Count' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryActivitiesParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Retail Inventory' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryActivitiesParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Retail Inventory', N'Inventory', @InventoryActivitiesParentMenuId, N'Retail Inventory', N'Activity', N'Screen', N'Inventory.view.RetailInventoryReport', N'small-menu-activity', 1, 1, 0, 1, 5, 0)
+ELSE
+	UPDATE tblSMMasterMenu SET strCommand = N'Inventory.view.RetailInventoryReport', intSort = 5 WHERE strMenuName = 'Retail Inventory' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryActivitiesParentMenuId
+
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Storage Measurement Reading' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryActivitiesParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-	VALUES (N'Storage Measurement Reading', N'Inventory', @InventoryActivitiesParentMenuId, N'Storage Measurement Reading', N'Activity', N'Screen', N'Inventory.view.StorageMeasurementReading?showSearch=true', N'small-menu-activity', 1, 1, 0, 1, 5, 0)
+	VALUES (N'Storage Measurement Reading', N'Inventory', @InventoryActivitiesParentMenuId, N'Storage Measurement Reading', N'Activity', N'Screen', N'Inventory.view.StorageMeasurementReading?showSearch=true', N'small-menu-activity', 1, 1, 0, 1, 6, 0)
 ELSE
-	UPDATE tblSMMasterMenu SET strCommand = N'Inventory.view.StorageMeasurementReading?showSearch=true', intSort = 5 WHERE strMenuName = 'Storage Measurement Reading' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryActivitiesParentMenuId
+	UPDATE tblSMMasterMenu SET strCommand = N'Inventory.view.StorageMeasurementReading?showSearch=true', intSort = 6 WHERE strMenuName = 'Storage Measurement Reading' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryActivitiesParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Blend Production' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryActivitiesParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
