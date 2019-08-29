@@ -14,10 +14,11 @@ SELECT DISTINCT
 	,dblCashPrice				= CASE 
 									WHEN ISNULL(_dblCashPrice.dblCashPrice,0) > 0 THEN _dblCashPrice.dblCashPrice
 									ELSE
-										CASE 
-											WHEN SS.intParentSettleStorageId IS NOT NULL THEN SS.dblCashPrice
-											ELSE 0
-										END
+										SS.dblCashPrice
+										-- CASE 
+										-- 	WHEN SS.intParentSettleStorageId IS NOT NULL THEN SS.dblCashPrice
+										-- 	ELSE 0
+										-- END
 								END
 	,strStorageAdjustment		= SS.strStorageAdjustment
 	,dtmCalculateStorageThrough = SS.dtmCalculateStorageThrough
@@ -151,6 +152,5 @@ OUTER APPLY (
 			AND SC.intSettleStorageId = SS.intSettleStorageId
 	INNER JOIN tblCTContractHeader CH
 		ON CH.intContractHeaderId = CD.intContractHeaderId
-	WHERE SS.intParentSettleStorageId IS NOT NULL
-		AND CD.intPricingTypeId <> 2
+	WHERE CD.intPricingTypeId <> 2
 ) AS _dblCashPrice
