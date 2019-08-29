@@ -8,5 +8,6 @@ CREATE TYPE [dbo].[ScaleTransactionTableType] AS TABLE
 	[dblUnitsDistributed] NUMERIC(38, 20) NULL,
 	[dblUnitsRemaining] NUMERIC(38, 20) NULL,
 	[dblCost] NUMERIC(38, 20) NULL,
-	[intCurrencyId] INT NULL
+	[intCurrencyId] INT NULL,
+	[intLoadDetailId] INT NULL
 )

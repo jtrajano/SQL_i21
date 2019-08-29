@@ -86,6 +86,10 @@ DECLARE @intInventoryReceiptItemId AS INT
 		,@shipFromEntityId INT
 		,@intFarmFieldId INT
 		,@intLoadDetailId INT;
+DECLARE @intLoadContractDetailId INT
+DECLARE @intLoopLoadDetailId INT
+DECLARE @dblLoadScheduleQty NUMERIC(18, 6)
+DECLARE @intLoopLoadItemUOMId INT
 
     SELECT TOP 1 @intLoadId = ST.intLoadId
 	, @dblTicketFreightRate = ST.dblFreightRate
@@ -122,102 +126,194 @@ BEGIN TRY
 
 		IF @strDistributionOption = 'CNT' OR @strDistributionOption = 'LOD'
 		BEGIN
-			INSERT INTO @LineItems (
-			intContractDetailId,
-			dblUnitsDistributed,
-			dblUnitsRemaining,
-			dblCost,
-			intCurrencyId)
-			EXEC dbo.uspCTUpdationFromTicketDistribution 
-			 @intTicketId
-			,@intEntityId
-			,@dblNetUnits
-			,@intContractId
-			,@intUserId
-			,0
-		IF @strDistributionOption = 'CNT'
-		BEGIN
-			DECLARE @intLoopContractId INT;
-			DECLARE @dblLoopContractUnits NUMERIC(38,20);
-			DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
-			FOR
-			SELECT intContractDetailId, dblUnitsDistributed
-			FROM @LineItems;
-
-			OPEN intListCursor;
-
-			-- Initial fetch attempt
-			FETCH NEXT FROM intListCursor INTO @intLoopContractId, @dblLoopContractUnits;
-
-			WHILE @@FETCH_STATUS = 0
-			BEGIN
-				-- Here we do some kind of action that requires us to 
-				-- process the table variable row-by-row. This example simply
-				-- uses a PRINT statement as that action (not a very good
-				-- example).
-				IF ISNULL(@intLoopContractId,0) != 0
-				EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoopContractId, @dblLoopContractUnits, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId
-				EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intLoopContractId, @dblLoopContractUnits, @intEntityId;
-				-- Attempt to fetch next row from cursor
-				FETCH NEXT FROM intListCursor INTO @intLoopContractId, @dblLoopContractUnits;
-			END;
-
-			CLOSE intListCursor;
-			DEALLOCATE intListCursor;
-		END
-		ELSE IF @strDistributionOption = 'LOD'
-		BEGIN
-			DECLARE @intLoadContractId INT;
-			DECLARE @dblLoadContractUnits NUMERIC(38,20);
-			DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
-			FOR
-			SELECT intContractDetailId, dblUnitsDistributed
-			FROM @LineItems;
-
-			OPEN intListCursor;
-
-			-- Initial fetch attempt
-			FETCH NEXT FROM intListCursor INTO @intLoadContractId, @dblLoadContractUnits;
-
-			WHILE @@FETCH_STATUS = 0
-			BEGIN
-				IF ISNULL(@intLoadContractId,0) != 0
-				BEGIN
-					SELECT @intContractDetailId = intContractDetailId FROM tblCTContractDetail WHERE intContractDetailId = @intLoadContractId
-					IF @intContractDetailId != @intContractId
-					BEGIN
-						EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoadContractId, @dblLoadContractUnits, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId
-						EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intLoadContractId, @dblLoadContractUnits, @intEntityId;
-						
-					END
-					ELSE
-					BEGIN
-						EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intLoadContractId, @dblLoadContractUnits, @intEntityId,1;
-					END
-				END
-
-				IF(ISNULL(@intLoadDetailId,0) > 0)
-				BEGIN 
-					EXEC dbo.uspSCUpdateTicketLoadUsed @intTicketId, @intLoadDetailId, @dblLoadContractUnits, @intEntityId;	
-				END
-
-				-- Attempt to fetch next row from cursor
-				FETCH NEXT FROM intListCursor INTO @intLoadContractId, @dblLoadContractUnits;
-			END;
-			CLOSE intListCursor;
-			DEALLOCATE intListCursor;
-
-
 			
-		END
+			IF @strDistributionOption = 'CNT'
+			BEGIN
 
-		SELECT TOP 1 @dblRemainingUnits = LI.dblUnitsRemaining FROM @LineItems LI
-		IF(@dblRemainingUnits IS NULL)
-		BEGIN
-		SET @dblRemainingUnits = @dblNetUnits
-		END
-		IF(@dblRemainingUnits > 0)
-		BEGIN
+				INSERT INTO @LineItems (
+					intContractDetailId,
+					dblUnitsDistributed,
+					dblUnitsRemaining,
+					dblCost,
+					intCurrencyId)
+				EXEC dbo.uspCTUpdationFromTicketDistribution 
+				@intTicketId
+				,@intEntityId
+				,@dblNetUnits
+				,@intContractId
+				,@intUserId
+				,0
+
+				DECLARE @intLoopContractId INT;
+				DECLARE @dblLoopContractUnits NUMERIC(38,20);
+				DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
+				FOR
+				SELECT intContractDetailId, dblUnitsDistributed
+				FROM @LineItems;
+
+				OPEN intListCursor;
+
+				-- Initial fetch attempt
+				FETCH NEXT FROM intListCursor INTO @intLoopContractId, @dblLoopContractUnits;
+
+				WHILE @@FETCH_STATUS = 0
+				BEGIN
+					-- Here we do some kind of action that requires us to 
+					-- process the table variable row-by-row. This example simply
+					-- uses a PRINT statement as that action (not a very good
+					-- example).
+					IF ISNULL(@intLoopContractId,0) != 0
+					EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoopContractId, @dblLoopContractUnits, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId
+					EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intLoopContractId, @dblLoopContractUnits, @intEntityId;
+					-- Attempt to fetch next row from cursor
+					FETCH NEXT FROM intListCursor INTO @intLoopContractId, @dblLoopContractUnits;
+				END;
+
+				CLOSE intListCursor;
+				DEALLOCATE intListCursor;
+			END
+			ELSE IF @strDistributionOption = 'LOD'
+			BEGIN
+				INSERT INTO @LineItems (  
+					intTicketId,  
+					intContractDetailId,  
+					dblUnitsDistributed,  
+					dblUnitsRemaining,  
+					dblCost,  
+					intCurrencyId
+					,intLoadDetailId)  
+				EXEC [uspSCGetLoadContractsAndAllocate]  
+				@intTicketId  
+				,@intLoadDetailId  
+				,@dblNetUnits  
+				,'I'  
+
+
+				DECLARE @intLoadContractId INT;
+				DECLARE @dblLoadContractUnits NUMERIC(38,20);
+				DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
+				FOR
+				SELECT intContractDetailId, dblUnitsDistributed,intLoadDetailId
+				FROM @LineItems;
+
+				OPEN intListCursor;
+
+				-- Initial fetch attempt
+				FETCH NEXT FROM intListCursor INTO @intLoadContractId, @dblLoadContractUnits,@intLoopLoadDetailId;
+
+				WHILE @@FETCH_STATUS = 0
+				BEGIN
+					IF ISNULL(@intLoadContractId,0) != 0
+					BEGIN
+
+						--get contract Detail Id of the load detail  
+						SELECT @intLoadContractDetailId = intPContractDetailId FROM tblLGLoadDetail WHERE intLoadDetailId = @intLoopLoadDetailId  
+							
+						-- remove schedule quantity of the load schedule  					
+						SELECT TOP 1 @dblLoadScheduleQty = dblQuantity,@intLoopLoadItemUOMId = intItemUOMId FROM tblLGLoadDetail WHERE intLoadDetailId = @intLoopLoadDetailId  
+						SET @dblLoadScheduleQty  = @dblLoadScheduleQty * -1  
+						EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoadContractDetailId, @dblLoadScheduleQty , @intUserId, @intTicketId, 'Scale', @intLoopLoadItemUOMId  
+								
+						-- add schedule quantity of the ticket  
+						EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoadContractDetailId, @dblLoadContractUnits, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId  
+
+						SELECT @intContractDetailId = intContractDetailId FROM tblCTContractDetail WHERE intContractDetailId = @intLoadContractId
+						IF @intContractDetailId != @intContractId
+						BEGIN
+							--EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoadContractId, @dblLoadContractUnits, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId
+							EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intLoadContractId, @dblLoadContractUnits, @intEntityId;
+							
+						END
+						ELSE
+						BEGIN
+							EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intLoadContractId, @dblLoadContractUnits, @intEntityId,1;
+						END
+					END
+
+					IF(ISNULL(@intLoadDetailId,0) > 0)
+					BEGIN 
+						EXEC dbo.uspSCUpdateTicketLoadUsed @intTicketId, @intLoadDetailId, @dblLoadContractUnits, @intEntityId;	
+					END
+
+					-- Attempt to fetch next row from cursor
+					FETCH NEXT FROM intListCursor INTO @intLoadContractId, @dblLoadContractUnits,@intLoopLoadDetailId
+				END;
+				CLOSE intListCursor;
+				DEALLOCATE intListCursor;
+
+
+				
+			END
+
+			SELECT TOP 1 @dblRemainingUnits = LI.dblUnitsRemaining FROM @LineItems LI
+			IF(@dblRemainingUnits IS NULL)
+			BEGIN
+			SET @dblRemainingUnits = @dblNetUnits
+			END
+			IF(@dblRemainingUnits > 0)
+			BEGIN
+				INSERT INTO @ItemsForItemReceipt (
+					intItemId
+					,intItemLocationId
+					,intItemUOMId
+					,dtmDate
+					,dblQty
+					,dblUOMQty
+					,dblCost
+					,dblSalesPrice
+					,intCurrencyId
+					,dblExchangeRate
+					,intTransactionId
+					,intTransactionDetailId
+					,strTransactionId
+					,intTransactionTypeId
+					,intLotId
+					,intSubLocationId
+					,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
+					,ysnIsStorage
+					,strSourceTransactionId  
+				)
+				EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblRemainingUnits , @intEntityId, @strDistributionOption, NULL
+				SELECT TOP 1 @dblRemainingQuantity = dblQty FROM @ItemsForItemReceipt
+				IF(@dblRemainingUnits > ISNULL(@dblRemainingQuantity,0))
+				BEGIN
+					INSERT INTO @ItemsForItemReceipt (
+						intItemId
+						,intItemLocationId
+						,intItemUOMId
+						,dtmDate
+						,dblQty
+						,dblUOMQty
+						,dblCost
+						,dblSalesPrice
+						,intCurrencyId
+						,dblExchangeRate
+						,intTransactionId
+						,intTransactionDetailId
+						,strTransactionId
+						,intTransactionTypeId
+						,intLotId
+						,intSubLocationId
+						,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
+						,ysnIsStorage 
+						,strSourceTransactionId 
+						,intStorageScheduleTypeId
+						,ysnAllowVoucher
+					)
+					EXEC dbo.uspSCGetScaleItemForItemReceipt 
+						@intTicketId
+						,@intUserId
+						,@dblRemainingUnits
+						,0
+						,@intEntityId
+						,@intContractId
+						,'SPT'
+						,@LineItems
+				END
+			END
+			
+			UPDATE @LineItems set intTicketId = @intTicketId
+			-- Get the items to process
 			INSERT INTO @ItemsForItemReceipt (
 				intItemId
 				,intItemLocationId
@@ -238,87 +334,25 @@ BEGIN TRY
 				,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
 				,ysnIsStorage
 				,strSourceTransactionId  
+				,intStorageScheduleTypeId
+				,ysnAllowVoucher
 			)
-			EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblRemainingUnits , @intEntityId, @strDistributionOption, NULL
-			SELECT TOP 1 @dblRemainingQuantity = dblQty FROM @ItemsForItemReceipt
-			IF(@dblRemainingUnits > ISNULL(@dblRemainingQuantity,0))
-			BEGIN
-				INSERT INTO @ItemsForItemReceipt (
-					intItemId
-					,intItemLocationId
-					,intItemUOMId
-					,dtmDate
-					,dblQty
-					,dblUOMQty
-					,dblCost
-					,dblSalesPrice
-					,intCurrencyId
-					,dblExchangeRate
-					,intTransactionId
-					,intTransactionDetailId
-					,strTransactionId
-					,intTransactionTypeId
-					,intLotId
-					,intSubLocationId
-					,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
-					,ysnIsStorage 
-					,strSourceTransactionId 
-					,intStorageScheduleTypeId
-					,ysnAllowVoucher
-				)
-				EXEC dbo.uspSCGetScaleItemForItemReceipt 
-					 @intTicketId
-					,@intUserId
-					,@dblRemainingUnits
-					,0
-					,@intEntityId
-					,@intContractId
-					,'SPT'
-					,@LineItems
-			END
-		END
-		
-		UPDATE @LineItems set intTicketId = @intTicketId
-		-- Get the items to process
-		INSERT INTO @ItemsForItemReceipt (
-			intItemId
-			,intItemLocationId
-			,intItemUOMId
-			,dtmDate
-			,dblQty
-			,dblUOMQty
-			,dblCost
-			,dblSalesPrice
-			,intCurrencyId
-			,dblExchangeRate
-			,intTransactionId
-			,intTransactionDetailId
-			,strTransactionId
-			,intTransactionTypeId
-			,intLotId
-			,intSubLocationId
-			,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
-			,ysnIsStorage
-			,strSourceTransactionId  
-			,intStorageScheduleTypeId
-			,ysnAllowVoucher
-		)
-		EXEC dbo.uspSCGetScaleItemForItemReceipt 
-			@intTicketId
-			,@intUserId
-			,@dblNetUnits
-			,@dblCost
-			,@intEntityId
-			,@intContractId
-			,@strDistributionOption
-			,@LineItems
+			EXEC dbo.uspSCGetScaleItemForItemReceipt 
+				@intTicketId
+				,@intUserId
+				,@dblNetUnits
+				,@dblCost
+				,@intEntityId
+				,@intContractId
+				,@strDistributionOption
+				,@LineItems
 
-		-- Validate the items to receive 
-		EXEC dbo.uspICValidateProcessToItemReceipt @ItemsForItemReceipt; 
+			-- Validate the items to receive 
+			EXEC dbo.uspICValidateProcessToItemReceipt @ItemsForItemReceipt; 
 
-		SELECT @total = COUNT(*) FROM @ItemsForItemReceipt;
-		IF (@total = 0)
-			RETURN;
+			SELECT @total = COUNT(*) FROM @ItemsForItemReceipt;
+			IF (@total = 0)
+				RETURN;
 		END
 	ELSE
 	BEGIN
