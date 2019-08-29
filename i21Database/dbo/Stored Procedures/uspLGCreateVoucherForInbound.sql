@@ -151,11 +151,11 @@ BEGIN TRY
 		,[intQtyToBillUOMId] = LD.intItemUOMId
 		,[dblCost] = (CASE WHEN intPurchaseSale = 3 THEN ISNULL(AD.dblSeqPrice, 0) ELSE LD.dblUnitPrice END)
 		,[dblCostUnitQty] = CAST(ISNULL(ItemCostUOM.dblUnitQty,1) AS DECIMAL(38,20))
-		,[intCostUOMId] = (CASE WHEN intPurchaseSale = 3 THEN ISNULL(AD.intSeqPriceUOMId, 0) ELSE ISNULL(LD.intPriceUOMId, AD.intSeqPriceUOMId) END) 
+		,[intCostUOMId] = (CASE WHEN intPurchaseSale = 3 THEN ISNULL(AD.intSeqPriceUOMId, 0) ELSE ISNULL(AD.intSeqPriceUOMId, LD.intPriceUOMId) END) 
 		,[dblNetWeight] = ISNULL(LD.dblNet,0)
 		,[dblWeightUnitQty] = ISNULL(ItemWeightUOM.dblUnitQty,1)
 		,[intWeightUOMId] = ItemWeightUOM.intItemUOMId
-		,[intCostCurrencyId] = (CASE WHEN intPurchaseSale = 3 THEN ISNULL(AD.intSeqCurrencyId, 0) ELSE ISNULL(LD.intPriceCurrencyId, AD.intSeqCurrencyId) END)
+		,[intCostCurrencyId] = (CASE WHEN intPurchaseSale = 3 THEN ISNULL(AD.intSeqCurrencyId, 0) ELSE ISNULL(AD.intSeqCurrencyId, LD.intPriceCurrencyId) END)
 		,[dblTax] = ISNULL(receiptItem.dblTax, 0)
 		,[dblDiscount] = 0
 		,[dblExchangeRate] = CASE WHEN (ISNULL(AD.intSeqCurrencyId, L.intCurrencyId) <> @DefaultCurrencyId) THEN ISNULL(LD.dblForexRate, 0) ELSE 1 END
