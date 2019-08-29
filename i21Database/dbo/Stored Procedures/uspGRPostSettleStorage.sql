@@ -2,7 +2,10 @@
 	 @intSettleStorageId INT
 	,@ysnPosted BIT
 AS
+
 BEGIN TRY
+
+
 	SET NOCOUNT ON
 
 	DECLARE @ErrMsg NVARCHAR(MAX)
@@ -1163,6 +1166,8 @@ BEGIN TRY
 								,[dblReportingRate]	
 								,[dblForeignRate]
 								,[strRateType]
+								,[intSourceEntityId] --MOD
+								,[intCommodityId]--MOD
 							)
 							EXEC @intReturnValue = dbo.uspICPostCosting  
 								@ItemsToPost  
@@ -1209,8 +1214,8 @@ BEGIN TRY
 							,[dblReportingRate]	
 							,[dblForeignRate]
 							,[strRateType]
-							,[intSourceEntityId]
-							,[intCommodityId]
+							--,[intSourceEntityId] --MOD
+							--,[intCommodityId] --MOD
 							)
 							EXEC dbo.uspGRCreateItemGLEntries
 								@strBatchId
