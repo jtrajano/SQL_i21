@@ -231,32 +231,41 @@ EXEC('
 					@dblNewBurnRate = dblBurnRate
 				FROM dbo.fnTMComputeNewBurnRateZeroDeliveryTable(@siteId,@intClockReadingId,@intLastClockReadingId,@tk_level,@intLastMonitorReadingEvent)
 
-				SET @resultLog = @resultLog + ''UPDATING burn rate'' + char(10) 
-				UPDATE tblTMSite
-				SET dblBurnRate = @dblNewBurnRate
-				WHERE intSiteID = @siteId
-			END
-		
-			--update runout and forecasted date
-			UPDATE tblTMSite
-			SET dtmRunOutDate = DATEADD(dd, DATEDIFF(dd, 0, @rpt_date_ti),  CAST((dblTotalCapacity * @tk_level / 100 / @tk_w_dau) AS INT)) 
-				,dtmForecastedDelivery = DATEADD(dd, DATEDIFF(dd, 0, @rpt_date_ti),  CAST((((dblTotalCapacity * @tk_level / 100) - ISNULL(dblTotalReserve,0)) / @tk_w_dau) AS INT)) 
-			WHERE intSiteID = @siteId
-		
-			--update DD Between Delivery
-			UPDATE tblTMSite
-			SET dblDegreeDayBetweenDelivery = dblBurnRate * ((dblTotalCapacity * @tk_level / 100) - dblTotalReserve)
-			WHERE intSiteID = @siteId
-		
-			--update next degree day Delivery
-			UPDATE tblTMSite
-			SET intNextDeliveryDegreeDay = CAST( (ISNULL((SELECT TOP 1 dblAccumulatedDegreeDay 
-												   FROM tblTMDegreeDayReading 
-												   WHERE intClockID = @SiteClockId 
-														AND dtmDate = DATEADD(dd, DATEDIFF(dd, 0, @rpt_date_ti), 0)),0.0)
-											+ dblDegreeDayBetweenDelivery) AS INT)
-			WHERE intSiteID = @siteId
 
+				-- do not update bun rate if eco green importing
+				if (@is_wesroc = 1)
+				begin
+					SET @resultLog = @resultLog + ''UPDATING burn rate'' + char(10) 
+					UPDATE tblTMSite
+					SET dblBurnRate = @dblNewBurnRate
+					WHERE intSiteID = @siteId
+				end
+			END
+
+			if (@is_wesroc = 1)
+			begin
+		
+				--update runout and forecasted date
+				UPDATE tblTMSite
+				SET dtmRunOutDate = DATEADD(dd, DATEDIFF(dd, 0, @rpt_date_ti),  CAST((dblTotalCapacity * @tk_level / 100 / @tk_w_dau) AS INT)) 
+					,dtmForecastedDelivery = DATEADD(dd, DATEDIFF(dd, 0, @rpt_date_ti),  CAST((((dblTotalCapacity * @tk_level / 100) - ISNULL(dblTotalReserve,0)) / @tk_w_dau) AS INT)) 
+				WHERE intSiteID = @siteId
+		
+				--update DD Between Delivery
+				UPDATE tblTMSite
+				SET dblDegreeDayBetweenDelivery = dblBurnRate * ((dblTotalCapacity * @tk_level / 100) - dblTotalReserve)
+				WHERE intSiteID = @siteId
+		
+				--update next degree day Delivery
+				UPDATE tblTMSite
+				SET intNextDeliveryDegreeDay = CAST( (ISNULL((SELECT TOP 1 dblAccumulatedDegreeDay 
+													   FROM tblTMDegreeDayReading 
+													   WHERE intClockID = @SiteClockId 
+															AND dtmDate = DATEADD(dd, DATEDIFF(dd, 0, @rpt_date_ti), 0)),0.0)
+												+ dblDegreeDayBetweenDelivery) AS INT)
+				WHERE intSiteID = @siteId
+
+			end
 
 			--update Estimated % left and Gals left
 			UPDATE tblTMSite
