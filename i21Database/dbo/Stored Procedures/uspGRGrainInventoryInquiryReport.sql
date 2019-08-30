@@ -949,7 +949,7 @@ BEGIN
 	SET dblUnits = dblQuantity
 	FROM (
 		SELECT SUM(dblQuantity) dblQuantity
-		FROM @tblStorageQuantities
+		FROM @tblStorageQuantities where dtmTransactionDate is null
 	) A
 	WHERE strCommodityCode = @strCommodityCode
 		AND strLabel = @strStorageTypeDescription + ' BALANCE'
