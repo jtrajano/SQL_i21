@@ -7852,6 +7852,7 @@
     <Build Include="dbo\Tables\tblGRSettleStorageBillDetail.sql" />
     <Build Include="dbo\Views\vyuAP1099K.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRpt1099K.sql" />
+    <Build Include="dbo\Views\vyuAP1099KYear.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
