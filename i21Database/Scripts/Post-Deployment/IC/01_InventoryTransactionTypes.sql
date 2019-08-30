@@ -230,6 +230,10 @@ USING	(
 		SELECT id = 55
 				,name = 'Maintain Storage'
 				,form = 'Maintain Storage'
+		UNION ALL
+		SELECT id = 56
+				,name = 'Transfer Storage'
+				,form = 'Transfer Storage'
 
 		/****************************************************************************************************
 		IMPORTANT! When adding a new transaction type, create a new jira to include it in the Stock Rebuild. 
