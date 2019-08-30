@@ -27,6 +27,7 @@ BEGIN TRY
 	DECLARE @dblBillQty NUMERIC(18, 6)
 	DECLARE @dblPContractDetailQty NUMERIC(18, 6)
 	DECLARE @strLotCondition NVARCHAR(50)
+	DECLARE @DefaultCurrencyId AS INT = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
 	DECLARE @tblLoadDetail TABLE (
 		intRecordId INT Identity(1, 1)
 		,intLoadDetailId INT
@@ -490,7 +491,7 @@ BEGIN TRY
 			,ISNULL(LDCL.dblLinkGrossWt, ISNULL(LC.dblGrossWt, LD.dblGross))
 			,ISNULL(LDCL.dblLinkTareWt, ISNULL(LC.dblTareWt, LD.dblTare))
 			,LC.strContainerNumber
-			,LC.intLoadContainerId
+			,ISNULL(LC.intLoadContainerId,0)
 			,LC.strMarks
 			,@strLotCondition
 			,LD.intVendorEntityId
@@ -671,7 +672,7 @@ BEGIN TRY
 				,dblNet = ISNULL(LDCL.dblLinkNetWt, LD.dblNet) --
 				,dblCost = ISNULL(AD.dblSeqPrice, ISNULL(LD.dblUnitPrice,0)) --
 				,intCostUOMId = ISNULL(AD.intSeqPriceUOMId,LD.intPriceUOMId)  --
-				,intCurrencyId = CASE WHEN LD.strPriceStatus <> 'Priced' THEN ISNULL(LSC.intMainCurrencyId, LD.intPriceCurrencyId) ELSE ISNULL(SC.intMainCurrencyId, AD.intSeqCurrencyId) END
+				,intCurrencyId = ISNULL(SeqCUR.intMainCurrencyId, SeqCUR.intCurrencyID)
 				,intSubCurrencyCents = ISNULL(SubCurrency.intCent, 1)
 				,dblExchangeRate = 1
 				,intLotId = NULL
@@ -683,8 +684,12 @@ BEGIN TRY
 				,strSourceId = L.strLoadNumber --
 				,strSourceScreenName = 'Contract'
 				,ysnSubCurrency = SubCurrency.ysnSubCurrency
-				,intForexRateTypeId = CD.intRateTypeId
-				,dblForexRate = CD.dblRate
+				,intForexRateTypeId = CASE WHEN AD.ysnValidFX = 1 THEN ISNULL(CD.intRateTypeId,LD.intForexRateTypeId)
+									   WHEN (@DefaultCurrencyId <> ISNULL(SeqCUR.intMainCurrencyId, SeqCUR.intCurrencyID)) THEN FX.intForexRateTypeId
+									   ELSE LD.intForexRateTypeId END
+				,dblForexRate = CASE WHEN AD.ysnValidFX = 1 THEN ISNULL(CD.dblRate,LD.dblForexRate)
+								 WHEN (@DefaultCurrencyId <> ISNULL(SeqCUR.intMainCurrencyId, SeqCUR.intCurrencyID)) THEN ISNULL(FX.dblFXRate, 1)
+								 ELSE ISNULL(LD.dblForexRate,1) END
 				,ISNULL(LC.intLoadContainerId, - 1) --
 				,L.intFreightTermId
 				,L.intBookId
@@ -713,8 +718,20 @@ BEGIN TRY
 						THEN CD.intCurrencyId
 					ELSE NULL
 					END
+			LEFT JOIN tblSMCurrency SeqCUR ON SeqCUR.intCurrencyID = AD.intSeqCurrencyId
 			LEFT JOIN tblLGLoadWarehouseContainer LWC ON LWC.intLoadContainerId = LC.intLoadContainerId
 			LEFT JOIN tblLGLoadWarehouse LW ON LW.intLoadWarehouseId = LWC.intLoadWarehouseId
+			OUTER APPLY (SELECT	TOP 1  
+						intForexRateTypeId = RD.intRateTypeId
+						,dblFXRate = CASE WHEN ER.intFromCurrencyId = @DefaultCurrencyId  
+									THEN 1/RD.[dblRate] 
+									ELSE RD.[dblRate] END 
+						FROM tblSMCurrencyExchangeRate ER
+						JOIN tblSMCurrencyExchangeRateDetail RD ON RD.intCurrencyExchangeRateId = ER.intCurrencyExchangeRateId
+						WHERE @DefaultCurrencyId <> ISNULL(SeqCUR.intMainCurrencyId, SeqCUR.intCurrencyID)
+							AND ((ER.intFromCurrencyId = ISNULL(SeqCUR.intMainCurrencyId, SeqCUR.intCurrencyID) AND ER.intToCurrencyId = @DefaultCurrencyId) 
+								OR (ER.intFromCurrencyId = @DefaultCurrencyId AND ER.intToCurrencyId = ISNULL(SeqCUR.intMainCurrencyId, SeqCUR.intCurrencyID)))
+						ORDER BY RD.dtmValidFromDate DESC) FX
 			WHERE CAST((
 						CASE 
 							WHEN ISNULL(LDCL.dblReceivedQty, 0) = 0
@@ -798,8 +815,11 @@ BEGIN TRY
 				,strSourceId = L.strLoadNumber --
 				,strSourceScreenName = 'Contract'
 				,ysnSubCurrency = SubCurrency.ysnSubCurrency
-				,intForexRateTypeId = CD.intRateTypeId
-				,dblForexRate = CD.dblRate
+				,intForexRateTypeId = CASE WHEN (CASE WHEN LD.strPriceStatus <> 'Priced' THEN ISNULL(LSC.intMainCurrencyId, LD.intPriceCurrencyId) ELSE ISNULL(SC.intMainCurrencyId, AD.intSeqCurrencyId) END <> @DefaultCurrencyId)
+										THEN ISNULL(LD.intForexRateTypeId, FX.intForexRateTypeId) ELSE NULL END
+				,dblForexRate = CASE WHEN (CASE WHEN LD.strPriceStatus <> 'Priced' THEN ISNULL(LSC.intMainCurrencyId, LD.intPriceCurrencyId) ELSE ISNULL(SC.intMainCurrencyId, AD.intSeqCurrencyId) END <> @DefaultCurrencyId)
+										THEN CASE WHEN LD.intForexRateTypeId IS NOT NULL AND LD.dblForexRate > 0 THEN LD.dblForexRate ELSE FX.dblFXRate END
+										ELSE 1 END
 				,- 1 --
 				,L.intFreightTermId
 				,L.intBookId
@@ -826,6 +846,17 @@ BEGIN TRY
 						THEN CD.intCurrencyId
 					ELSE NULL
 					END
+			OUTER APPLY (SELECT	TOP 1  
+				intForexRateTypeId = RD.intRateTypeId
+				,dblFXRate = CASE WHEN ER.intFromCurrencyId = @DefaultCurrencyId  
+							THEN 1/RD.[dblRate] 
+							ELSE RD.[dblRate] END 
+				FROM tblSMCurrencyExchangeRate ER
+				JOIN tblSMCurrencyExchangeRateDetail RD ON RD.intCurrencyExchangeRateId = ER.intCurrencyExchangeRateId
+				WHERE @DefaultCurrencyId <> L.intCurrencyId
+					AND ((ER.intFromCurrencyId = L.intCurrencyId AND ER.intToCurrencyId = @DefaultCurrencyId) 
+						OR (ER.intFromCurrencyId = @DefaultCurrencyId AND ER.intToCurrencyId = L.intCurrencyId))
+				ORDER BY RD.dtmValidFromDate DESC) FX
 			WHERE L.intLoadId = @intLoadId
 				AND LD.dblQuantity-ISNULL(LD.dblDeliveredQuantity,0) > 0
 		END
@@ -1036,7 +1067,7 @@ BEGIN TRY
 			,ISNULL(LDCL.dblLinkGrossWt, ISNULL(LC.dblGrossWt, LD.dblGross))
 			,ISNULL(LDCL.dblLinkTareWt, ISNULL(LC.dblTareWt, LD.dblTare))
 			,LC.strContainerNumber
-			,LC.intLoadContainerId
+			,ISNULL(LC.intLoadContainerId,0)
 			,LC.strMarks
 			,@strLotCondition
 			,LD.intVendorEntityId

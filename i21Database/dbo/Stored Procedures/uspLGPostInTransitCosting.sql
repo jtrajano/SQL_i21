@@ -90,7 +90,9 @@ BEGIN TRY
 								LD.intPriceUOMId
 								, ISNULL(LD.intWeightItemUOMId, LD.intItemUOMId) 
 								, (LD.dblUnitPrice / CASE WHEN (CUR.ysnSubCurrency = 1) THEN CUR.intCent ELSE 1 END)
-							) 
+							) * CASE WHEN AD.ysnValidFX = 1 THEN ISNULL(CD.dblRate,LD.dblForexRate)
+								 WHEN (@DefaultCurrencyId <> ISNULL(SeqCUR.intMainCurrencyId, SeqCUR.intCurrencyID)) THEN ISNULL(FX.dblFXRate, 1)
+								 ELSE ISNULL(LD.dblForexRate,1) END
 							, (
 								
 								CASE 
@@ -107,28 +109,14 @@ BEGIN TRY
 										/ CASE WHEN (AD.ysnSeqSubCurrency = 1) THEN 100 ELSE 1 END
 								END
 								* AD.dblQtyToPriceUOMConvFactor
-								* CASE 
-									WHEN (@DefaultCurrencyId <> LD.intForexCurrencyId AND LD.intForexRateTypeId IS NOT NULL AND LD.dblForexRate IS NOT NULL) THEN ISNULL(LD.dblForexRate, 1) --FX on LS detail level
-									WHEN (@DefaultCurrencyId <> ISNULL(SeqCUR.intMainCurrencyId, SeqCUR.intCurrencyID)) THEN ISNULL(CTFX.dblFXRate, 1) --FX on CT level
-									WHEN (@DefaultCurrencyId <> L.intCurrencyId) THEN ISNULL(FX.dblFXRate, 1) --FX on LS header level
-									ELSE 1 
-								END
+								* CASE WHEN AD.ysnValidFX = 1 THEN ISNULL(CD.dblRate,LD.dblForexRate)
+								 WHEN (@DefaultCurrencyId <> ISNULL(SeqCUR.intMainCurrencyId, SeqCUR.intCurrencyID)) THEN ISNULL(FX.dblFXRate, 1)
+								 ELSE ISNULL(LD.dblForexRate,1) END
 							) 
 						)
-			,dblValue = CASE WHEN (AD.dblSeqPrice IS NULL) THEN
-							CASE WHEN (LD.dblUnitPrice > 0) 
-								THEN LD.dblUnitPrice / CASE WHEN (CUR.ysnSubCurrency = 1) THEN CUR.intCent ELSE 1 END
-								ELSE dbo.fnCTGetSequencePrice(CD.intContractDetailId,NULL) END
-							ELSE AD.dblSeqPrice / CASE WHEN (AD.ysnSeqSubCurrency = 1) THEN 100 ELSE 1 END
-						END
-						* AD.dblQtyToPriceUOMConvFactor 
-						* CASE WHEN (@DefaultCurrencyId <> LD.intForexCurrencyId AND LD.intForexRateTypeId IS NOT NULL AND LD.dblForexRate IS NOT NULL) THEN ISNULL(LD.dblForexRate, 1) --FX on LS detail level
-							   WHEN (@DefaultCurrencyId <> ISNULL(SeqCUR.intMainCurrencyId, SeqCUR.intCurrencyID)) THEN ISNULL(CTFX.dblFXRate, 1) --FX on CT level
-							   WHEN (@DefaultCurrencyId <> L.intCurrencyId) THEN ISNULL(FX.dblFXRate, 1) --FX on LS header level
-							   ELSE 1 END
-						* LD.dblQuantity 
+			,dblValue = 0
 			,dblSalesPrice = 0.0
-			,intCurrencyId = @DefaultCurrencyId 
+			,intCurrencyId = ISNULL(SeqCUR.intMainCurrencyId, SeqCUR.intCurrencyID)
 			,dblExchangeRate = ISNULL(AD.dblNetWtToPriceUOMConvFactor,0)
 			,intTransactionId = L.intLoadId
 			,intTransactionDetailId = LD.intLoadDetailId
@@ -140,13 +128,11 @@ BEGIN TRY
 			,intSourceTransactionDetailId = LD.intLoadDetailId
 			,intFobPointId = CASE WHEN L.intPurchaseSale = 3 THEN @intDestinationFOBPointId ELSE FP.intFobPointId END
 			,intInTransitSourceLocationId = IL.intItemLocationId
-			,intForexRateTypeId = CASE WHEN CD.ysnUseFXPrice = 1 THEN ISNULL(CD.intRateTypeId,LD.intForexRateTypeId)
-									   WHEN (@DefaultCurrencyId <> ISNULL(SeqCUR.intMainCurrencyId, SeqCUR.intCurrencyID)) THEN CTFX.intForexRateTypeId 
-									   WHEN (@DefaultCurrencyId <> L.intCurrencyId) THEN FX.intForexRateTypeId
+			,intForexRateTypeId = CASE WHEN AD.ysnValidFX = 1 THEN ISNULL(CD.intRateTypeId,LD.intForexRateTypeId)
+									   WHEN (@DefaultCurrencyId <> ISNULL(SeqCUR.intMainCurrencyId, SeqCUR.intCurrencyID)) THEN FX.intForexRateTypeId
 									   ELSE LD.intForexRateTypeId END
-			,dblForexRate = CASE WHEN CD.ysnUseFXPrice = 1 THEN ISNULL(CD.dblRate,LD.dblForexRate) 
-								 WHEN (@DefaultCurrencyId <> ISNULL(SeqCUR.intMainCurrencyId, SeqCUR.intCurrencyID)) THEN ISNULL(CTFX.dblFXRate, 1)
-								 WHEN (@DefaultCurrencyId <> L.intCurrencyId) THEN ISNULL(FX.dblFXRate, 1)
+			,dblForexRate = CASE WHEN AD.ysnValidFX = 1 THEN ISNULL(CD.dblRate,LD.dblForexRate)
+								 WHEN (@DefaultCurrencyId <> ISNULL(SeqCUR.intMainCurrencyId, SeqCUR.intCurrencyID)) THEN ISNULL(FX.dblFXRate, 1)
 								 ELSE ISNULL(LD.dblForexRate,1) END
 		FROM tblLGLoad L
 		JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
@@ -168,9 +154,9 @@ BEGIN TRY
 									ELSE RD.[dblRate] END 
 						FROM tblSMCurrencyExchangeRate ER
 						JOIN tblSMCurrencyExchangeRateDetail RD ON RD.intCurrencyExchangeRateId = ER.intCurrencyExchangeRateId
-						WHERE @DefaultCurrencyId <> L.intCurrencyId
-							AND ((ER.intFromCurrencyId = L.intCurrencyId AND ER.intToCurrencyId = @DefaultCurrencyId) 
-								OR (ER.intFromCurrencyId = @DefaultCurrencyId AND ER.intToCurrencyId = L.intCurrencyId))
+						WHERE @DefaultCurrencyId <> ISNULL(SeqCUR.intMainCurrencyId, SeqCUR.intCurrencyID)
+							AND ((ER.intFromCurrencyId = ISNULL(SeqCUR.intMainCurrencyId, SeqCUR.intCurrencyID) AND ER.intToCurrencyId = @DefaultCurrencyId) 
+								OR (ER.intFromCurrencyId = @DefaultCurrencyId AND ER.intToCurrencyId = ISNULL(SeqCUR.intMainCurrencyId, SeqCUR.intCurrencyID)))
 						ORDER BY RD.dtmValidFromDate DESC) FX
 		OUTER APPLY (SELECT	TOP 1  
 				intForexRateTypeId = RD.intRateTypeId
@@ -203,7 +189,7 @@ BEGIN TRY
 			,CD.intContractDetailId
 			,CD.intRateTypeId
 			,CD.dblRate
-			,CD.ysnUseFXPrice
+			,AD.ysnValidFX
 			,LD.strPriceStatus
 			,LD.intWeightItemUOMId
 			,LD.intPriceUOMId
