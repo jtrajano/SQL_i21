@@ -14,7 +14,8 @@
 		@userID INT = NULL,
 		@is_wesroc BIT = 1,
 		@qty_in_tank  NUMERIC(18,6) = NULL,
-		@resultLog NVARCHAR(4000)= '' OUTPUT
+		@resultLog NVARCHAR(4000)= '' OUTPUT,
+		@resultSavingStatus int = 3 output
 	AS  
 	BEGIN 
 
@@ -48,6 +49,7 @@
 		SET @rpt_date_ti = @str_rpt_date_ti
  
 		SET @resultLog = ''
+
 		--IF(ISNULL(@customerid,'') = '')BEGIN
 		--	SET @resultLog = @resultLog +  'Failed customerid validation' + char(10)
 		--	RETURN 
@@ -137,7 +139,8 @@
 		IF NOT EXISTS(SELECT TOP 1 1 FROM tblTMDegreeDayReading WHERE dtmDate = DATEADD(dd, DATEDIFF(dd, 0, @rpt_date_ti), 0) AND intClockID = @SiteClockId) 
 		BEGIN
 			--PRINT 'No clock Reading'
-			SET @resultLog = @resultLog + 'No clock Reading' + char(10)
+			SET @resultLog = @resultLog + 'No clock Reading' + char(10);
+			set @resultSavingStatus = 1;
 			RETURN
 		END
 		print 'get event id'
@@ -149,12 +152,14 @@
 		BEGIN
 			SET @resultLog = @resultLog + 'Duplicate Reading' + char(10)
 			SET @resultLog = @resultLog + @ExceptionValue + ': Duplicate Reading' + char(10)
+			set @resultSavingStatus = 1;
 			RETURN
 		END
 		IF EXISTS(SELECT TOP 1 1 FROM tblTMEvent 
 					WHERE ((intEventTypeID = @TankMonitorEventID AND dtmTankMonitorReading > @rpt_date_ti)) AND intSiteID = @siteId)	
 		BEGIN
 			SET @resultLog = @resultLog + 'Reading date is less than the current reading' + char(10)
+			set @resultSavingStatus = 1;
 			RETURN 
 		END
 		
@@ -297,6 +302,7 @@
 			IF EXISTS(SELECT TOP 1 1 FROM tblTMDispatch WHERE intSiteID = @siteId) 
 			BEGIN
 				SET @resultLog = @resultLog +  'Already have call entry' + CHAR(10)
+				set @resultSavingStatus = 1;
 				RETURN
 			END	
 		
