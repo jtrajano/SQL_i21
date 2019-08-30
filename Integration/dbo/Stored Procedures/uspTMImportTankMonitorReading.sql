@@ -25,7 +25,8 @@ EXEC('
 		@tx_lnoxmit BIT = 1,
 		@ts_tankserialnum NVARCHAR(50) = '''', --19 tank Serial
 		@userID INT = NULL,
-		@resultLog NVARCHAR(4000)= '''' OUTPUT
+		@resultLog NVARCHAR(4000)= '''' OUTPUT,
+		@resultSavingStatus int = 3 output
 	AS  
 	BEGIN 
 
@@ -48,7 +49,9 @@ EXEC('
 	
 		SET @rpt_date_ti = @str_rpt_date_ti
  
-		SET @resultLog = ''''
+		SET @resultLog = '''';
+		SET @resultSavingStatus = 3;
+
 		--IF(ISNULL(@customerid,'''') = '''')BEGIN
 		--	SET @resultLog = @resultLog +  ''Failed customerid validation'' + char(10)
 		--	RETURN 
@@ -131,6 +134,7 @@ EXEC('
 		BEGIN
 			--PRINT ''No clock Reading''
 			SET @resultLog = @resultLog + ''No clock Reading'' + char(10)
+			set @resultSavingStatus = 1;
 			RETURN
 		END
 		print ''get event id''
@@ -142,12 +146,14 @@ EXEC('
 		BEGIN
 			SET @resultLog = @resultLog + ''Duplicate Reading'' + char(10)
 			SET @resultLog = @resultLog + ''Exception: Duplicate Reading'' + char(10)
+			set @resultSavingStatus = 1;
 			RETURN
 		END
 		IF EXISTS(SELECT TOP 1 1 FROM tblTMEvent 
 					WHERE ((intEventTypeID = @TankMonitorEventID AND dtmTankMonitorReading > @rpt_date_ti)) AND intSiteID = @siteId)	
 		BEGIN
 			SET @resultLog = @resultLog + ''Reading date is less than the current reading'' + char(10)
+			set @resultSavingStatus = 1;
 			RETURN 
 		END
 		
@@ -284,6 +290,7 @@ EXEC('
 			IF EXISTS(SELECT TOP 1 1 FROM tblTMDispatch WHERE intSiteID = @siteId) 
 			BEGIN
 				SET @resultLog = @resultLog +  ''Already have call entry'' + CHAR(10)
+				set @resultSavingStatus = 1;
 				RETURN
 			END	
 		
