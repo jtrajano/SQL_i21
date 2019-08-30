@@ -193,6 +193,7 @@ SELECT
 		THEN ((A.dblTotal + A.dblTax) / B.dblTotal * ISNULL(B2.dblPayment, B3.dbl1099)) * (CASE WHEN B.intTransactionType = 3 THEN -1 ELSE 1 END)
      ELSE 0 END   
 	, B2.dtmDatePaid AS dtmDate
+	, CASE WHEN B.intTransactionType = 9 THEN B.dtmDate ELSE B2.dtmDatePaid END AS dtmDate
 FROM tblAPBillDetail A
 INNER JOIN tblAPBill B
     ON B.intBillId = A.intBillId
