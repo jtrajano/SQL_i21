@@ -23,6 +23,7 @@
     [ysnCheckToBePrinted]      BIT              DEFAULT 0 NOT NULL,
     [ysnCheckVoid]             BIT              DEFAULT 0 NOT NULL,
     [ysnPosted]                BIT              DEFAULT 0 NOT NULL,
+    [ysnProcessPayment]        BIT              DEFAULT 0 NULL,
     [strLink]                  NVARCHAR (50)    COLLATE Latin1_General_CI_AS NULL,
     [ysnClr]                   BIT              DEFAULT 0 NOT NULL,
 	[ysnEmailSent]			   BIT				NULL,
