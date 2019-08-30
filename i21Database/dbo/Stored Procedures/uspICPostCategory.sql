@@ -51,6 +51,7 @@ DECLARE @AdjustTypeCategorySales AS INT = 1
 		,@AdjustTypeCategoryCreditMemo AS INT = 3
 		,@AdjustTypeCategoryMarkupOrMarkDown AS INT --= 3
 		,@AdjustTypeCategoryWriteOff AS INT --= 4
+		,@AdjustTypeInventoryCountByCategory AS INT
 
 SELECT	TOP 1 @AdjustTypeCategorySales = intTransactionTypeId
 FROM	tblICInventoryTransactionType 
@@ -75,6 +76,10 @@ WHERE	strName = 'Retail Mark Ups/Downs'
 SELECT	TOP 1 @AdjustTypeCategoryWriteOff = intTransactionTypeId
 FROM	tblICInventoryTransactionType 
 WHERE	strName = 'Retail Write Offs'
+
+SELECT	TOP 1 @AdjustTypeInventoryCountByCategory = intTransactionTypeId
+FROM	tblICInventoryTransactionType 
+WHERE	strName = 'Inventory Count By Category'
 
 
 -- Create the variables for the internal transaction types used by costing. 
@@ -174,7 +179,9 @@ END
 
 -- If Qty is unknown and it will only adjust the retail value, then do it here. 
 -- It will compute the cost using the Average Margin. 
-IF ISNULL(@dblAdjustRetailValue, 0) <> 0 AND ISNULL(@dblAdjustCostValue, 0) = 0 AND @intTransactionTypeId NOT IN (@AdjustTypeCategorySales, @AdjustTypeCategoryCreditMemo)
+IF	ISNULL(@dblAdjustRetailValue, 0) <> 0 
+	AND ISNULL(@dblAdjustCostValue, 0) = 0 
+	AND @intTransactionTypeId NOT IN (@AdjustTypeCategorySales, @AdjustTypeCategoryCreditMemo)
 BEGIN 
 	-- Compute the Cost Value 
 	SET	@dblCostValue = 
@@ -197,7 +204,9 @@ END
 
 -- Write-Off transaction. 
 -- It will adjust both the Cost Value and Retail Value
-IF ISNULL(@dblAdjustRetailValue, 0) <> 0 AND ISNULL(@dblAdjustCostValue, 0) <> 0  AND @intTransactionTypeId = @AdjustTypeCategoryWriteOff
+IF	ISNULL(@dblAdjustRetailValue, 0) <> 0 
+	AND ISNULL(@dblAdjustCostValue, 0) <> 0  
+	AND @intTransactionTypeId IN (@AdjustTypeCategoryWriteOff, @AdjustTypeInventoryCountByCategory) 
 BEGIN 
 	SET	@dblCostValue = @dblAdjustCostValue
 	SET @dblRetailValue = @dblAdjustRetailValue

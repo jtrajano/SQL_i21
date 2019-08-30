@@ -8054,6 +8054,7 @@
     <Build Include="dbo\Views\vyuAP1099K.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRpt1099K.sql" />
     <Build Include="dbo\Views\vyuAP1099KYear.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostInventoryCountByCategory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
