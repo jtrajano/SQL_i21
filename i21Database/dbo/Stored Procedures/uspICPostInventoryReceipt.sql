@@ -1316,8 +1316,19 @@ BEGIN
 					,t.intItemUOMId
 					,r.[dtmReceiptDate] 
 					,dblQty = 
-						-- Reduce the in-transit qty based on how it was increased by Load Schedule. 
-						-t.dblQty 
+						CASE WHEN (loadShipmentLookup.strContainerNumber IS NULL) THEN
+							-- If there are no containers, reduce the in-transit qty based on how it was increased by Load Schedule. 
+							-t.dblQty 
+							ELSE
+								CASE		
+									-- If Gross/Net UOM is specified, use Net Weight as qty
+									WHEN ri.intWeightUOMId IS NOT NULL THEN
+										-ri.dblNet
+									-- If Gross/Net UOM is missing, then get the item/lot qty. 
+									ELSE 
+										-ri.dblOpenReceive  
+								END	
+							END
 					,t.[dblUOMQty] 
 					,t.[dblCost] 
 					,t.[dblValue] 
