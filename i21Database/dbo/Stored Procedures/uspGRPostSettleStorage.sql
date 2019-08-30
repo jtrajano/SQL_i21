@@ -1632,7 +1632,10 @@ BEGIN TRY
 				END
 				ELSE
 				BEGIN
+					IF(EXISTS(SELECT NULL FROM @voucherDetailStorage DS INNER JOIN tblICItem I on I.intItemId = DS.intItemId WHERE I.strType = 'Inventory'))
+					BEGIN
 					RAISERROR('Total Voucher will be negative',16,1)
+					END
 				END
 
 				IF @intCreatedBillId IS NOT NULL
