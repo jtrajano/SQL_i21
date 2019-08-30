@@ -53,20 +53,6 @@ AS
 	voucherDetail.intBillDetailId
 	,intInventoryReceiptItemId = NULL
 	,intPurchaseDetailId = NULL
-	,strSourceNumber = ticket.strTicketNumber
-	FROM tblAPBillDetail voucherDetail
-	OUTER APPLY (
-		SELECT TOP 1
-			ticket.strTicketNumber
-		FROM dbo.tblHDTicket ticket
-		WHERE ticket.intTicketId = voucherDetail.intTicketId
-	) ticket
-	WHERE voucherDetail.intTicketId is not null and voucherDetail.intTicketId > 0
-	UNION ALL
-	SELECT
-	voucherDetail.intBillDetailId
-	,intInventoryReceiptItemId = NULL
-	,intPurchaseDetailId = NULL
 	,strSourceNumber = storage.strStorageTicket
 	FROM tblAPBillDetail voucherDetail
 	OUTER APPLY (
