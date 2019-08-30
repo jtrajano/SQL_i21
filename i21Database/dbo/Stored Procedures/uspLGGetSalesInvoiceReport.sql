@@ -194,7 +194,7 @@ BEGIN
 		,dblNetWt = ROUND(InvDet.dblShipmentNetWt, 2) 
 		,strNetUOM = isnull(rtWUOMTranslation.strTranslation, WUOM.strUnitMeasure) 
 		,strNetWtInfo = LTRIM(dbo.fnRemoveTrailingZeroes(ROUND(InvDet.dblShipmentNetWt, 2))) + ' ' + isnull(rtWUOMTranslation.strTranslation,WUOM.strUnitMeasure) 
-		,strPriceInfo = LTRIM(CAST(ROUND(InvDet.dblPrice, 2) AS NUMERIC(18, 2))) + ' ' + PriceCur.strCurrency + ' '+@per+' ' + isnull(rtPriceUOMTranslation.strTranslation,PriceUOM.strUnitMeasure)
+		,strPriceInfo = LTRIM(CAST(ROUND(InvDet.dblPrice, 2) AS NUMERIC(18, 2))) + ' ' + InvDetPriceCur.strCurrency + ' '+@per+' ' + isnull(rtPriceUOMTranslation.strTranslation,InvDetPriceUOM.strUnitMeasure)
 		,InvDet.dblTotal
 		,strQtyOrderedInfo = LTRIM(dbo.fnRemoveTrailingZeroes(ROUND(InvDet.dblQtyOrdered, 2))) + ' ' + isnull(rtOUOMTranslation.strTranslation,OUOM.strUnitMeasure)
 		,strQtyShippedInfo = LTRIM(dbo.fnRemoveTrailingZeroes(ROUND(InvDet.dblQtyShipped, 2))) + ' ' + isnull(rtSUOMTranslation.strTranslation,SUOM.strUnitMeasure)
@@ -254,6 +254,7 @@ BEGIN
 	LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = InvDet.intContractDetailId
 	LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 	LEFT JOIN tblSMCurrency PriceCur ON PriceCur.intCurrencyID = CD.intCurrencyId
+	LEFT JOIN tblSMCurrency InvDetPriceCur ON InvDetPriceCur.intCurrencyID = InvDet.intSubCurrencyId 
 	LEFT JOIN tblICItemUOM OIM ON OIM.intItemUOMId = InvDet.intOrderUOMId
 	LEFT JOIN tblICUnitMeasure OUOM ON OUOM.intUnitMeasureId = OIM.intUnitMeasureId
 	LEFT JOIN tblICItemUOM SIM ON SIM.intItemUOMId = InvDet.intItemUOMId
@@ -262,6 +263,8 @@ BEGIN
 	LEFT JOIN tblICUnitMeasure WUOM ON WUOM.intUnitMeasureId = WIM.intUnitMeasureId
 	LEFT JOIN tblICItemUOM PriceItemUOM ON PriceItemUOM.intItemUOMId = CD.intPriceItemUOMId
 	LEFT JOIN tblICUnitMeasure PriceUOM ON PriceUOM.intUnitMeasureId = PriceItemUOM.intUnitMeasureId
+	LEFT JOIN tblICItemUOM InvDetPriceItemUOM ON InvDetPriceItemUOM.intItemUOMId = InvDet.intPriceUOMId
+	LEFT JOIN tblICUnitMeasure InvDetPriceUOM ON InvDetPriceUOM.intUnitMeasureId = InvDetPriceItemUOM.intUnitMeasureId 
 	LEFT JOIN tblICItemUOM WtItemUOM ON WtItemUOM.intItemUOMId = InvDet.intItemWeightUOMId
 	LEFT JOIN tblICUnitMeasure WtUOM ON WtUOM.intUnitMeasureId = WtItemUOM.intUnitMeasureId
 	LEFT JOIN tblLGLoad L ON L.intLoadId = Inv.intLoadId
