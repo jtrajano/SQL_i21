@@ -160,7 +160,7 @@ FROM	@tblICRetailValuation rv OUTER APPLY (
 						ON ty.intTransactionTypeId = t.intTransactionTypeId
 			WHERE	rv.intCategoryId = i.intCategoryId 					
 					AND il.intLocationId = rv.intLocationId		
-					AND ty.strName = 'Retail Mark Ups/Downs'
+					AND ty.strName IN ('Retail Mark Ups/Downs', 'Inventory Count By Category') 
 					AND dbo.fnDateGreaterThanEquals(t.dtmDate, ISNULL(@dtmDateFrom, 0)) = 1
 					AND dbo.fnDateLessThanEquals(t.dtmDate, ISNULL(@dtmDateTo, ISNULL(@dtmDateFrom, 0))) = 1
 		) transactions

@@ -228,7 +228,7 @@ FROM	tblICRetailValuation rv
 			FROM	#tmpRetailValuationDetail d 
 			WHERE	d.intCategoryId = rv.intCategoryId 
 					AND d.intLocationId = rv.intLocationId
-					AND d.strTransactionType = 'Retail Mark Ups/Downs'
+					AND d.strTransactionType IN ('Retail Mark Ups/Downs', 'Inventory Count By Category') 
 					AND dbo.fnDateGreaterThanEquals(d.dtmDate, ISNULL(rv.dtmDateFrom, 0)) = 1
 					AND dbo.fnDateLessThanEquals(d.dtmDate, ISNULL(rv.dtmDateTo, ISNULL(rv.dtmDateFrom, 0))) = 1
 		) detailTrans
