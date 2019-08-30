@@ -49,7 +49,9 @@ BEGIN TRY
 			@dblRecipientQty				NUMERIC(18,6),
 			@dblDonorQty					NUMERIC(18,6),
 			@dblDonorNoOfLots				NUMERIC(18,6),
-			@ysnMultiplePriceFixation		BIT
+			@ysnMultiplePriceFixation		BIT,
+			@dblDeductedLots				NUMERIC(18,6),
+			@intDeductedFutOptTransactionId		INT
 
 	SELECT @intContractTypeId = intContractTypeId FROM tblCTReassign WHERE intReassignId = @intReassignId
 
@@ -174,6 +176,7 @@ BEGIN TRY
 	---------------------------------------Pircing------------------------------
 	UPDATE	FD
 	SET		FD.[dblNoOfLots]	=	FD.[dblNoOfLots] - PR.dblReassign,
+			FD.[dblHedgeNoOfLots]	=	FD.[dblHedgeNoOfLots] - PR.dblReassign,
 			FD.dblQuantity		=	(@dblDonorQty / @dblDonorNoOfLots) * (FD.dblNoOfLots - PR.dblReassign)
 	FROM	tblCTPriceFixationDetail	FD
 	JOIN	@tblPricing					PR	ON	PR.intPriceFixationDetailId = FD.intPriceFixationDetailId
@@ -307,6 +310,27 @@ BEGIN TRY
 				EXEC uspRKAutoHedge @strXML,@intNewFutOptTransactionId OUTPUT
 
 				UPDATE tblCTPriceFixationDetail SET intFutOptTransactionId = @intNewFutOptTransactionId WHERE intPriceFixationDetailId = @intNewPriceFixationDetailId
+
+				/*CT-3724*/
+
+				select @dblDeductedLots = dblNoOfContract - @dblReassignPricing from tblRKFutOptTransaction where intFutOptTransactionId = @intFutOptTransactionId;
+
+				SELECT	@strCondition = 'intFutOptTransactionId = ' + LTRIM(@intFutOptTransactionId)
+				EXEC	uspCTGetTableDataInXML 'tblRKFutOptTransaction', @strCondition,@strXML OUTPUT
+				SELECT	@XML = @strXML
+				SET		@XML.modify('replace value of (/tblRKFutOptTransactions/tblRKFutOptTransaction/dtmTransactionDate/text())[1] with sql:variable("@dtmCurrentDate")')
+				SET		@XML.modify('replace value of (/tblRKFutOptTransactions/tblRKFutOptTransaction/dtmFilledDate/text())[1] with sql:variable("@dtmCurrentDate")')
+				SET		@XML.modify('replace value of (/tblRKFutOptTransactions/tblRKFutOptTransaction/dblNoOfContract/text())[1] with sql:variable("@dblDeductedLots")')
+
+				SELECT	@strXML = CAST(@XML AS NVARCHAR(MAX))
+					
+				SELECT @strXML = REPLACE(@strXML,'<tblRKFutOptTransactions>','')
+				SELECT @strXML = REPLACE(@strXML,'</tblRKFutOptTransactions>','')
+				SELECT @strXML = REPLACE(@strXML,'tblRKFutOptTransaction','root')
+
+				EXEC uspRKAutoHedge @strXML,@intDeductedFutOptTransactionId OUTPUT
+
+				/*End of CT-3724*/
 			END
 		END
 
