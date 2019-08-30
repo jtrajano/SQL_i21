@@ -74,7 +74,7 @@ FROM @InvoiceEntries IE
 INNER JOIN tblARInvoice I ON IE.strInvoiceOriginId = I.strInvoiceOriginId
 
 IF EXISTS (SELECT TOP 1 NULL FROM @InvoiceEntries)
-	EXEC uspARProcessInvoicesByBatch @InvoiceEntries, @LineItemTaxEntries, @intUserId, 12, 1
+	EXEC uspARProcessInvoicesByBatch @InvoiceEntries, @LineItemTaxEntries, @intUserId, 15, 1
 ELSE
 	RAISERROR('No Invoices to import', 16, 1)
 
