@@ -92,7 +92,8 @@ BEGIN TRY
 			@dblPriceFixationLoadApplied	NUMERIC(18, 6),
 			@dblInventoryItemLoadApplied	NUMERIC(18, 6),
 			@dblInventoryShipmentItemLoadApplied	NUMERIC(18, 6),
-			@intShipmentInvoiceDetailId		INT
+			@intShipmentInvoiceDetailId		INT,
+			@dtmFixationDate				DATE
 
 	SELECT	@dblCashPrice			=	dblCashPrice, 
 			@intPricingTypeId		=	intPricingTypeId, 
@@ -178,7 +179,8 @@ BEGIN TRY
 				--@intInvoiceDetailId =	FD.intInvoiceDetailId, 
 				@dblFinalPrice		=	[dbo].[fnCTConvertToSeqFXCurrency](PF.intContractDetailId,PC.intFinalCurrencyId,IU.intItemUOMId,FD.dblFinalPrice),
 				@dblPriceLoadQty	=	FD.dblLoadPriced,
-				@dblPriceFixationLoadApplied =	ISNULL(FD.dblLoadApplied, 0)
+				@dblPriceFixationLoadApplied =	ISNULL(FD.dblLoadApplied, 0),
+				@dtmFixationDate	=	dtmFixationDate 
 		FROM	tblCTPriceFixationDetail	FD
 		JOIN	tblCTPriceFixation			PF	ON	PF.intPriceFixationId			=	FD.intPriceFixationId
 		JOIN	tblCTPriceContract			PC	ON	PC.intPriceContractId			=	PF.intPriceContractId
@@ -457,7 +459,7 @@ BEGIN TRY
 												
 						EXEC	uspICConvertReceiptToVoucher @intInventoryReceiptId,@intUserId, @intNewBillId OUTPUT
 						
-						UPDATE	tblAPBill SET strVendorOrderNumber = @strVendorOrderNumber WHERE intBillId = @intNewBillId
+						UPDATE	tblAPBill SET strVendorOrderNumber = @strVendorOrderNumber, dtmDate = @dtmFixationDate, dtmDueDate = @dtmFixationDate, dtmBillDate = @dtmFixationDate WHERE intBillId = @intNewBillId
 						
 						DECLARE @total DECIMAL(18,6)
 						SELECT	@intBillDetailId = intBillDetailId, @total = dblQtyReceived FROM tblAPBillDetail WHERE intBillId = @intNewBillId AND intInventoryReceiptChargeId IS NULL
