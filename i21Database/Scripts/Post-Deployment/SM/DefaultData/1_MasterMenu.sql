@@ -23,7 +23,7 @@ GO
 	--IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Contract vs Market Differential Analysis' AND strModuleName = 'Logistics' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Contract vs Market Differential Analysis' AND strModuleName = 'Logistics') AND strCommand = N'Logistics.view.ContractVsMarketDifferential') 
 	--IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Blend Demand' AND strModuleName = 'Manufacturing' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Blend Demand' AND strModuleName = 'Contract Management') AND strCommand = N'ContractManagement.view.ItemContract?showSearch=true') 
 	--IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Comment Maintenance' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Comment Maintenance' AND strModuleName = 'Accounts Receivable') AND strCommand = N'AccountsReceivable.view.StatementFooterMessage') 
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Retail Inventory' AND strModuleName = 'Inventory' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Retail Inventory' AND strModuleName = 'Inventory') AND strCommand = N'Inventory.view.RetailInventoryReport') 
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'DPR Reconciliation Report' AND strModuleName = 'Risk Management' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Report' AND strModuleName = 'Risk Management') AND strCommand = N'RiskManagement.view.PositionReconciliationReport') 
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 		
@@ -3451,6 +3451,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Consolida
 	VALUES (N'Consolidated Profit/Loss', N'Risk Management', @RiskManagementReportParentMenuId, N'Consolidated Profit/Loss', N'Report', N'Screen', N'RiskManagement.view.ConsolidatedPNL', N'small-menu-report', 0, 0, 0, 1, 0, 1)
 ELSE 
 	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'RiskManagement.view.ConsolidatedPNL' WHERE strMenuName = 'Consolidated Profit/Loss' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementReportParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'DPR Reconciliation Report' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementReportParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'DPR Reconciliation Report', N'Risk Management', @RiskManagementReportParentMenuId, N'DPR Reconciliation Report', N'Report', N'Screen', N'RiskManagement.view.PositionReconciliationReport', N'small-menu-report', 0, 0, 0, 1, 1, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET intSort = 1, strCommand = N'RiskManagement.view.PositionReconciliationReport' WHERE strMenuName = 'DPR Reconciliation Report' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementReportParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Periodic Futures Clearing House Statement' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementReportParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
