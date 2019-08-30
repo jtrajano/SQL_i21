@@ -8055,6 +8055,7 @@
     <Build Include="dbo\Stored Procedures\uspAPRpt1099K.sql" />
     <Build Include="dbo\Views\vyuAP1099KYear.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostInventoryCountByCategory.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCUpdateTicketStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

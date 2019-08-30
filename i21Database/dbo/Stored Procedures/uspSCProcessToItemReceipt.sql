@@ -230,9 +230,9 @@ BEGIN TRY
 						END
 					END
 
-					IF(ISNULL(@intLoadDetailId,0) > 0)
+					IF(ISNULL(@intLoopLoadDetailId,0) > 0)
 					BEGIN 
-						EXEC dbo.uspSCUpdateTicketLoadUsed @intTicketId, @intLoadDetailId, @dblLoadContractUnits, @intEntityId;	
+						EXEC dbo.uspSCUpdateTicketLoadUsed @intTicketId,@intLoopLoadDetailId, @dblLoadContractUnits, @intEntityId;	
 					END
 
 					-- Attempt to fetch next row from cursor
@@ -245,7 +245,7 @@ BEGIN TRY
 				
 			END
 
-			SELECT TOP 1 @dblRemainingUnits = LI.dblUnitsRemaining FROM @LineItems LI
+			SELECT TOP 1 @dblRemainingUnits = MIN(LI.dblUnitsRemaining) FROM @LineItems LI
 			IF(@dblRemainingUnits IS NULL)
 			BEGIN
 			SET @dblRemainingUnits = @dblNetUnits

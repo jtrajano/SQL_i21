@@ -59,8 +59,25 @@ DECLARE @InventoryReceiptId INT
 		,@dblMatchLoadScheduledUnits NUMERIC(38,20)
 		,@strMatchTicketStatus NVARCHAR(40)
 		,@intTicketType INT;
+DECLARE @intTicketLoadDetailId INT
+DECLARE @intLoopLoadDetailId INT
+DECLARE @intTicketItemUOMId INT
+DECLARE @strDistributionOption NVARCHAR(20)
+
+
+DECLARE @intLoopContractDetailId INT
+DECLARE @intLoopId INT
+DECLARE @dblLoopScheduleQty NUMERIC(18,6)
+DECLARE @intLoopCurrentId INT
+
 
 BEGIN TRY
+		SELECT TOP 1
+			@intTicketItemUOMId = SC.intItemUOMIdTo
+			,@strDistributionOption = SC.strDistributionOption
+		FROM tblSCTicket SC
+		WHERE intTicketId = @intTicketId
+
 		IF ISNULL(@ysnDeliverySheet, 0) = 0
 		BEGIN
 			SELECT @intLoadId = LGLD.intLoadId ,@intLoadDetailId = LGLD.intLoadDetailId
@@ -211,35 +228,45 @@ BEGIN TRY
 								EXEC [dbo].[uspICPostInventoryReceipt] 0, 0, @strTransactionId, @intUserId
 							EXEC [dbo].[uspGRReverseOnReceiptDelete] @InventoryReceiptId
 							EXEC [dbo].[uspICDeleteInventoryReceipt] @InventoryReceiptId, @intUserId
+						END
+						CLOSE intListCursor  
+						DEALLOCATE intListCursor 
 
+						-----UPDATE Contract scehdule and balances
+						IF(@strDistributionOption = 'SPL')
+						BEGIN
 							/* CURSOR for Split Contract*/
 							DECLARE @intEntityVendorId AS INT
-							DECLARE @strDistributionOption AS VARCHAR(MAX)
+							DECLARE @cursor_strDistributionOption AS VARCHAR(MAX)
 							DECLARE @cursor_intContractDetailId INT
 							DECLARE @cursor_dblScheduleQty DECIMAL(18,6)
 							DECLARE @cursor_intInventoryReceiptId INT
 							
 							DECLARE splitCursor CURSOR LOCAL FAST_FORWARD
 							FOR
-							SELECT SCC.intContractDetailId ,SCC.intEntityId,SCC.dblScheduleQty,SPL.strDistributionOption FROM tblSCTicketSplit SPL
+							SELECT SCC.intContractDetailId ,SCC.intEntityId,SCC.dblScheduleQty,SC.strDistributionOption
+							FROM tblSCTicketSplit SPL
 							INNER JOIN tblSCTicketContractUsed SCC 
 								ON SCC.intTicketId = SCC.intTicketId
+							INNER JOIN tblSCTicket SC
+								ON SPL.intTicketId = SC.intTicketId
 							WHERE SPL.intTicketId = @intTicketId and SCC.intTicketId = @intTicketId and SPL.intCustomerId = SCC.intEntityId and SPL.intCustomerId = @_intIRVendorId
+
+						
 
 							OPEN splitCursor;
 
-							FETCH NEXT FROM splitCursor INTO @cursor_intContractDetailId, @intEntityVendorId, @cursor_dblScheduleQty, @strDistributionOption;
+							FETCH NEXT FROM splitCursor INTO @cursor_intContractDetailId, @intEntityVendorId, @cursor_dblScheduleQty, @cursor_strDistributionOption;
 							WHILE @@FETCH_STATUS = 0
 							BEGIN
-								IF(@strDistributionOption = 'CNT')
-									BEGIN		
+								IF(@cursor_strDistributionOption = 'CNT')
+								BEGIN		
 
 									SET @cursor_dblScheduleQty = @cursor_dblScheduleQty *-1
 									EXEC uspCTUpdateScheduleQuantity @intContractDetailId=@cursor_intContractDetailId,@dblQuantityToUpdate=@cursor_dblScheduleQty,@intUserId=@intUserId,@intExternalId=@intTicketId, @strScreenName= 'Scale'	
 										
-									END
-
-								FETCH NEXT FROM splitCursor INTO @cursor_intContractDetailId, @intEntityVendorId, @cursor_dblScheduleQty, @strDistributionOption;
+								END
+								FETCH NEXT FROM splitCursor INTO @cursor_intContractDetailId, @intEntityVendorId, @cursor_dblScheduleQty, @cursor_strDistributionOption;
 							END
 
 							CLOSE splitCursor  
@@ -249,9 +276,100 @@ BEGIN TRY
 
 							FETCH NEXT FROM intListCursor INTO @InventoryReceiptId , @strTransactionId, @ysnIRPosted;
 						END
-						CLOSE intListCursor  
-						DEALLOCATE intListCursor 
-						EXEC [dbo].[uspSCUpdateStatus] @intTicketId, 1;
+						ELSE
+						BEGIN
+							IF(@strDistributionOption = 'LOD')
+							BEGIN
+
+								--Remove contract scheduled by IR
+								BEGIN
+									SELECT 
+										SCC.intContractDetailId 
+										,intLoopId = SCC.intTicketContractUsed
+										,SCC.dblScheduleQty
+									INTO #tmpTicketContractUsed
+									FROM tblSCTicket SC
+									INNER JOIN tblSCTicketContractUsed SCC 
+										ON SC.intTicketId = SCC.intTicketId
+									WHERE SC.intTicketId = @intTicketId 
+									ORDER BY SCC.intTicketContractUsed
+
+									SET @intLoopId = NULL
+									
+									SELECT TOP 1 
+										@intLoopContractDetailId = intContractDetailId
+										,@intLoopId = intLoopId
+										,@dblLoopScheduleQty = dblScheduleQty
+									FROM #tmpTicketContractUsed
+									ORDER BY intLoopId ASC
+
+									WHILE @intLoopId IS NOT NULL
+									BEGIN
+										SET @intLoopCurrentId = @intLoopId
+
+										SET @dblLoopScheduleQty = @dblLoopScheduleQty * -1
+
+										-- remove the schedule quantity on contract
+										EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoopContractDetailId, @dblLoopScheduleQty, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId  
+
+										SET @intLoopId = NULL
+										SELECT TOP 1 
+											@intLoopContractDetailId = intContractDetailId
+											,@intLoopId = intLoopId
+											,@dblLoopScheduleQty = dblScheduleQty
+										FROM #tmpTicketContractUsed 
+										WHERE intLoopId > @intLoopCurrentId
+										ORDER BY intLoopId ASC
+									END
+								END
+
+								--Reschedule the Quantity Used by loadshipments
+								BEGIN
+									SELECT
+										intContractDetailId = CASE WHEN @strInOutFlag = 'I' THEN LD.intPContractDetailId ELSE LD.intSContractDetailId  END
+										,intLoopId = TL.intTicketLoadUsedId
+										,dblScheduleQty = LD.dblQuantity
+									INTO #tmpTicketLoadUsed
+									FROM tblSCTicket SC
+									INNER JOIN tblSCTicketLoadUsed TL			
+										ON SC.intTicketId = TL.intTicketId
+									INNER JOIN tblLGLoadDetail LD
+										ON TL.intLoadDetailId = LD.intLoadDetailId
+									WHERE SC.intTicketId = @intTicketId 
+									ORDER BY TL.intLoadDetailId ASC
+
+
+									SET @intLoopId = NULL
+									
+									SELECT TOP 1 
+										@intLoopContractDetailId = intContractDetailId
+										,@intLoopId = intLoopId
+										,@dblLoopScheduleQty = dblScheduleQty
+									FROM #tmpTicketLoadUsed
+									ORDER BY intLoopId ASC
+
+									WHILE @intLoopId IS NOT NULL
+									BEGIN
+										SET @intLoopCurrentId = @intLoopId
+
+										-- Add the load shipment quantity to contract schedule
+										EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoopContractDetailId, @dblLoopScheduleQty, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId  
+
+										SET @intLoopId = NULL
+										SELECT TOP 1 
+											@intLoopContractDetailId = intContractDetailId
+											,@intLoopId = intLoopId
+											,@dblLoopScheduleQty = dblScheduleQty
+										FROM #tmpTicketLoadUsed
+										WHERE intLoopId > @intLoopCurrentId
+										ORDER BY intLoopId ASC
+									END
+								END
+
+							END
+						END
+
+						EXEC [dbo].[uspSCUpdateTicketStatus] @intTicketId, 1;
 					END
 					ELSE
 					BEGIN
@@ -388,7 +506,7 @@ BEGIN TRY
 						WHERE SC.intTicketId = @intTicketId
 						EXEC uspICIncreaseInTransitDirectQty @ItemsToIncreaseInTransitDirect;
 
-						EXEC [dbo].[uspSCUpdateStatus] @intTicketId, 1;
+						EXEC [dbo].[uspSCUpdateTicketStatus] @intTicketId, 1;
 					END
 				END
 			ELSE
@@ -426,7 +544,7 @@ BEGIN TRY
 						END
 						IF ISNULL(@intInvoiceId, 0) > 0
 							EXEC [dbo].[uspARDeleteInvoice] @intInvoiceId, @intUserId
-						EXEC [dbo].[uspSCUpdateStatus] @intTicketId, 1;
+						EXEC [dbo].[uspSCUpdateTicketStatus] @intTicketId, 1;
 					END
 					IF ISNULL(@ysnDirectShip,0) = 1
 					BEGIN 
@@ -495,7 +613,7 @@ BEGIN TRY
 							END
 						END
 
-						EXEC [dbo].[uspSCUpdateStatus] @intTicketId, 1;
+						EXEC [dbo].[uspSCUpdateTicketStatus] @intTicketId, 1;
 					END 
 					ELSE
 					BEGIN
@@ -516,7 +634,7 @@ BEGIN TRY
 								EXEC [dbo].[uspICPostInventoryTransfer] 0, 0, @strTransactionId, @intUserId;	
 								EXEC [dbo].[uspICDeleteInventoryTransfer] @intInventoryTransferId, @intUserId	
 
-							EXEC [dbo].[uspSCUpdateStatus] @intTicketId, 1;
+							EXEC [dbo].[uspSCUpdateTicketStatus] @intTicketId, 1;
 						END
 				
 						IF @intEntityId > 0
@@ -612,7 +730,7 @@ BEGIN TRY
 							END
 							CLOSE intListCursor  
 							DEALLOCATE intListCursor 
-							EXEC [dbo].[uspSCUpdateStatus] @intTicketId, 1;
+							EXEC [dbo].[uspSCUpdateTicketStatus] @intTicketId, 1;
 						END
 					END
 				END
@@ -781,7 +899,7 @@ BEGIN TRY
 				FROM tblSCDeliverySheet SCD
 				WHERE intDeliverySheetId = @intDeliverySheetId
 
-				EXEC [dbo].[uspSCUpdateStatus] @intTicketId, 1;
+				EXEC [dbo].[uspSCUpdateTicketStatus] @intTicketId, 1;
 
 				UPDATE GRC SET dtmDeliveryDate = SC.dtmTicketDateTime
 				FROM tblGRCustomerStorage GRC

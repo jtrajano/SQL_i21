@@ -194,7 +194,7 @@ BEGIN TRY
 			BEGIN
 				EXEC [dbo].[uspARDeleteInvoice] @intInvoiceId, @intUserId
 
-				EXEC [dbo].[uspSCUpdateStatus] @intTicketId, 1;
+				EXEC [dbo].[uspSCUpdateTicketStatus] @intTicketId, 1;
 				
 				EXEC dbo.uspSMAuditLog 
 					@keyValue			= @intTicketId						-- Primary Key Value of the Ticket. 
