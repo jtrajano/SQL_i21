@@ -90,28 +90,28 @@ BEGIN TRY
 		IF OBJECT_ID('tempdb..#tmpUpdateItemSpecialPricingForCStore_Vendor') IS NULL 
 			BEGIN
 				CREATE TABLE #tmpUpdateItemSpecialPricingForCStore_Vendor (
-					intLocationId INT 
+					intVendorId INT 
 				)
 			END
 
 		IF OBJECT_ID('tempdb..#tmpUpdateItemSpecialPricingForCStore_Category') IS NULL 
 			BEGIN
 				CREATE TABLE #tmpUpdateItemSpecialPricingForCStore_Category (
-					intLocationId INT 
+					intCategoryId INT 
 				)
 			END
 
 		IF OBJECT_ID('tempdb..#tmpUpdateItemSpecialPricingForCStore_Family') IS NULL 
 			BEGIN
 				CREATE TABLE #tmpUpdateItemSpecialPricingForCStore_Family (
-					intLocationId INT 
+					intFamilyId INT 
 				)
 			END
 
 		IF OBJECT_ID('tempdb..#tmpUpdateItemSpecialPricingForCStore_Class') IS NULL 
 			BEGIN
 				CREATE TABLE #tmpUpdateItemSpecialPricingForCStore_Class (
-					intLocationId INT 
+					intClassId INT 
 				)
 			END
 
