@@ -8050,6 +8050,7 @@
     <Build Include="dbo\Stored Procedures\uspRKPositionReconciliationReportContractBalance.sql" />
     <Build Include="dbo\Stored Procedures\uspRKPositionReconciliationReportInventoryActivity.sql" />
     <Build Include="dbo\Views\vyuICGetRetailCategoryCount.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKProcessReconciliationBrokerStatement.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
