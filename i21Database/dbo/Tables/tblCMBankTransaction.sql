@@ -39,6 +39,7 @@
     [dtmLastModified]          DATETIME         NULL,
 	[ysnRecurring]			   BIT              DEFAULT 0 NOT NULL,
 	[ysnHold]				   BIT				DEFAULT 0 NOT NULL,
+    [ysnProcessPayment]        BIT              DEFAULT 0 NULL, -- DISPLAY 0 AMOUNT FOR FRINGE BENEFITS
 	[strHoldReason]			   NVARCHAR (250)	COLLATE Latin1_General_CI_AS NULL,
 	[ysnDelete]				   BIT              NULL,
 	[dtmDateDeleted]		   DATETIME	        NULL,
