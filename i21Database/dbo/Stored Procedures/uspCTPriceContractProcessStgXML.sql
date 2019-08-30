@@ -399,7 +399,7 @@ BEGIN TRY
 					EXEC uspCTInsertINTOTableFromXML 'tblCTPriceFixationDetail',@strPriceFixationDetailXML,@NewPriceFixationDetailId OUTPUT,@strFixationDetailXml
 
 					----------------------------------Hedge----------------------------------									
-						EXEC uspCTSavePriceContract @NewPriceContractId,@strHedgeXML
+						EXEC uspCTSavePriceContract @NewPriceContractId,@NewPriceFixationDetailId,@strHedgeXML
 					
 					
 					-----------------------------Acknowledgement-------------------------
