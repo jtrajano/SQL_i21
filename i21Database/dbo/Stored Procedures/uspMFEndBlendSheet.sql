@@ -55,7 +55,7 @@ BEGIN TRY
 	If @intManufacturingProcessId=0
 			Select TOP 1 @intManufacturingProcessId=intManufacturingProcessId From tblMFWorkOrderRecipe Where intWorkOrderId=@intWorkOrderId
 
-	if(@intStatusId<>10)
+	if(@intStatusId<>10 AND @intStatusId <> 12)
 		Begin
 			Set @strErrMsg='Blend Sheet ' + @strWONo + ' is either not started or already ended. Please reload the blend sheet.'
 			RaisError(@strErrMsg,16,1)
