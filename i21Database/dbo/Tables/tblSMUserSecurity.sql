@@ -28,7 +28,7 @@
 	[ysnLockedOut]					BIT NOT NULL DEFAULT 0,
 	[dtmLockOutTime]				DATETIME NULL,
 	[strEmployeeOriginId]			NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL,
-	[ysnStoreManager]				BIT NOT NULL DEFAULT(0), 
+	[ysnStoreManager]				BIT NOT NULL DEFAULT(0),
 
 	[dtmScaleDate]					DATE NULL,
 	[intEntityScaleOperatorId]		INT  NULL,
@@ -39,13 +39,14 @@
 	[intUserSecurityIdOld]			INT NULL,
 	[ysnSecurityPolicyUpdated]		BIT DEFAULT ((0)) NOT NULL,
 	[ysnOverrideDistribution]		BIT DEFAULT ((0)) NOT NULL,
-    [ysnActiveDirectory] BIT NOT NULL DEFAULT 0, 
+    [strActiveDirectorySID]         NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+    [ysnActiveDirectory]            BIT NOT NULL DEFAULT 0,
     CONSTRAINT [PK_User] PRIMARY KEY CLUSTERED ([intEntityId] ASC),
     CONSTRAINT [FK_UserSecurity_tblSMSecurityPolicy] FOREIGN KEY ([intSecurityPolicyId]) REFERENCES [dbo].[tblSMSecurityPolicy] ([intSecurityPolicyId]),
     CONSTRAINT [FK_UserSecurity_UserRole] FOREIGN KEY ([intUserRoleID]) REFERENCES [dbo].[tblSMUserRole] ([intUserRoleID]),
 	CONSTRAINT [FK_UserSecurity_Entity] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].tblEMEntity ([intEntityId]) ON DELETE CASCADE,
-	CONSTRAINT [FK_UserSecurity_CompanyLocation] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [dbo].[tblSMCompanyLocation] ([intCompanyLocationId]), 
-    CONSTRAINT [AK_tblSMUserSecurity_strUserName] UNIQUE ([strUserName]) --this use in an sp named uspEMMergeEntity, any change in name should also be applied there MCG 
+	CONSTRAINT [FK_UserSecurity_CompanyLocation] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [dbo].[tblSMCompanyLocation] ([intCompanyLocationId]),
+    CONSTRAINT [AK_tblSMUserSecurity_strUserName] UNIQUE ([strUserName]) --this use in an sp named uspEMMergeEntity, any change in name should also be applied there MCG
 );
 
 
