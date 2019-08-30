@@ -926,6 +926,8 @@ IF EXISTS (SELECT TOP 1 NULL FROM #POSTRANSACTIONS)
 			  , dblCashReturn			 = ISNULL(dblCashReturn, 0) + ISNULL(@dblCashReturn, 0)
 			WHERE intPOSEndOfDayId = @intPOSEndOfDayId
 
+
+			GOTO PROCESS_EXIT
 		END TRY
 		BEGIN CATCH
 			SELECT @strErrorMsg = ERROR_MESSAGE()					
