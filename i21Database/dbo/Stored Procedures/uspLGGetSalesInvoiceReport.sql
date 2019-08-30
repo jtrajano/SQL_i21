@@ -167,7 +167,7 @@ BEGIN
 		,InvDet.dblPrice
 		,strPrice2Decimals = LTRIM(CAST(ROUND(InvDet.dblPrice, 2) AS NUMERIC(18, 2)))
 		,strPrice4Decimals = LTRIM(CAST(ROUND(InvDet.dblPrice, 4) AS NUMERIC(18, 4)))
-		,strCurrencyText = CASE WHEN (ISNULL(PriceCur.strDescription, '') <> '') THEN PriceCur.strDescription ELSE PriceCur.strCurrency END + '.'
+		,strCurrencyText = CASE WHEN (ISNULL(InvCur.strDescription, '') <> '') THEN InvCur.strDescription ELSE InvCur.strCurrency END + '.'
 		,InvDet.dblQtyShipped
 		,InvDet.dblShipmentGrossWt
 		,InvDet.dblShipmentTareWt
