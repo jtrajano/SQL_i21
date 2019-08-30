@@ -182,20 +182,21 @@ BEGIN TRY
 			)
 		AND IB.intBundleItemId IS NOT NULL
 
-	--INSERT INTO @tblMFItemDetail (
-	--	intItemId
-	--	,intMainItemId
-	--	,ysnSpecificItemDescription
-	--	)
-	--SELECT intItemId
-	--	,intItemId
-	--	,0
-	--FROM @tblMFItem I
-	--WHERE NOT EXISTS (
-	--		SELECT *
-	--		FROM @tblMFItemDetail FI
-	--		WHERE FI.intItemId = I.intItemId
-	--		)
+	INSERT INTO @tblMFItemDetail (
+		intItemId
+		,intMainItemId
+		,ysnSpecificItemDescription
+		)
+	SELECT intItemId
+		,intItemId
+		,0
+	FROM @tblMFItem I
+	WHERE NOT EXISTS (
+			SELECT *
+			FROM @tblMFItemDetail ID
+			WHERE ID.intItemId = I.intItemId
+			)
+
 	UPDATE I
 	SET I.intMainItemId = ID.intMainItemId
 	FROM @tblMFItem I
@@ -304,7 +305,7 @@ BEGIN TRY
 
 	CREATE TABLE #tblMFDemandList (
 		intItemId INT
-		,dblQty NUMERIC(18, 6)
+		,dblQty NVARCHAR(50)
 		,intAttributeId INT
 		,intMonthId INT
 		,intMainItemId INT
@@ -1193,6 +1194,120 @@ BEGIN TRY
 			,12
 			)
 
+	--CREATE TABLE #Header (
+	--	intItemId INT
+	--	,strItemNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
+	--	,AttributeId INT
+	--	,strAttributeName NVARCHAR(50) COLLATE Latin1_General_CI_AS
+	--	,OpeningInv NVARCHAR(50) COLLATE Latin1_General_CI_AS
+	--	,PastDue NVARCHAR(50) COLLATE Latin1_General_CI_AS
+	--	,strMonth1 NVARCHAR(50) COLLATE Latin1_General_CI_AS
+	--	,strMonth2 NVARCHAR(50) COLLATE Latin1_General_CI_AS
+	--	,strMonth3 NVARCHAR(50) COLLATE Latin1_General_CI_AS
+	--	,strMonth4 NVARCHAR(50) COLLATE Latin1_General_CI_AS
+	--	,strMonth5 NVARCHAR(50) COLLATE Latin1_General_CI_AS
+	--	,strMonth6 NVARCHAR(50) COLLATE Latin1_General_CI_AS
+	--	,strMonth7 NVARCHAR(50) COLLATE Latin1_General_CI_AS
+	--	,strMonth8 NVARCHAR(50) COLLATE Latin1_General_CI_AS
+	--	,strMonth9 NVARCHAR(50) COLLATE Latin1_General_CI_AS
+	--	,strMonth10 NVARCHAR(50) COLLATE Latin1_General_CI_AS
+	--	,strMonth11 NVARCHAR(50) COLLATE Latin1_General_CI_AS
+	--	,strMonth12 NVARCHAR(50) COLLATE Latin1_General_CI_AS
+	--	,strMonth13 NVARCHAR(50) COLLATE Latin1_General_CI_AS
+	--	,strMonth14 NVARCHAR(50) COLLATE Latin1_General_CI_AS
+	--	,strMonth15 NVARCHAR(50) COLLATE Latin1_General_CI_AS
+	--	,strMonth16 NVARCHAR(50) COLLATE Latin1_General_CI_AS
+	--	,strMonth17 NVARCHAR(50) COLLATE Latin1_General_CI_AS
+	--	,strMonth18 NVARCHAR(50) COLLATE Latin1_General_CI_AS
+	--	,strMonth19 NVARCHAR(50) COLLATE Latin1_General_CI_AS
+	--	,strMonth20 NVARCHAR(50) COLLATE Latin1_General_CI_AS
+	--	,strMonth21 NVARCHAR(50) COLLATE Latin1_General_CI_AS
+	--	,strMonth22 NVARCHAR(50) COLLATE Latin1_General_CI_AS
+	--	,strMonth23 NVARCHAR(50) COLLATE Latin1_General_CI_AS
+	--	,strMonth24 NVARCHAR(50) COLLATE Latin1_General_CI_AS
+	--	,intMainItemId INT
+	--	)
+
+	DECLARE @intNoOfMonth INT
+
+	SELECT @intNoOfMonth = DATEDIFF(mm, 0, GETDATE()) + 24;
+
+	WITH tblMFGenerateMonth (
+		intPositionId
+		,intMonthId
+		)
+	AS (
+		SELECT DATEDIFF(mm, 0, GETDATE()) + 1 AS intPositionId
+			,1 AS intMonthId
+		
+		UNION ALL
+		
+		SELECT intPositionId + 1
+			,intMonthId + 1
+		FROM tblMFGenerateMonth
+		WHERE intPositionId + 1 <= @intNoOfMonth
+		)
+
+	SELECT [1] AS strMonth1
+		,[2] AS strMonth2
+		,[3] AS strMonth3
+		,[4] AS strMonth4
+		,[5] AS strMonth5
+		,[6] AS strMonth6
+		,[7] AS strMonth7
+		,[8] AS strMonth8
+		,[9] AS strMonth9
+		,[10] AS strMonth10
+		,[11] AS strMonth11
+		,[12] AS strMonth12
+		,[13] AS strMonth13
+		,[14] AS strMonth14
+		,[15] AS strMonth15
+		,[16] AS strMonth16
+		,[17] AS strMonth17
+		,[18] AS strMonth18
+		,[19] AS strMonth19
+		,[20] AS strMonth20
+		,[21] AS strMonth21
+		,[22] AS strMonth22
+		,[23] AS strMonth23
+		,[24] AS strMonth24
+		,0 AS intMainItemId
+	FROM (
+		SELECT intMonthId
+			,FORMAT(DateAdd(month, intPositionId, - 1), 'MMM') + ' ' + FORMAT(DateAdd(month, intPositionId, - 1), 'yy') AS strMonth
+		FROM tblMFGenerateMonth
+		) src
+	PIVOT(MAX(src.strMonth) FOR src.intMonthId IN (
+				[-1]
+				,[0]
+				,[1]
+				,[2]
+				,[3]
+				,[4]
+				,[5]
+				,[6]
+				,[7]
+				,[8]
+				,[9]
+				,[10]
+				,[11]
+				,[12]
+				,[13]
+				,[14]
+				,[15]
+				,[16]
+				,[17]
+				,[18]
+				,[19]
+				,[20]
+				,[21]
+				,[22]
+				,[23]
+				,[24]
+				)) AS pvt
+
+
 	SELECT intItemId
 		,strItemNo
 		,intReportAttributeID AS AttributeId
@@ -1241,7 +1356,7 @@ BEGIN TRY
 							)
 				ELSE (
 						CASE 
-							WHEN MI.intItemId is null
+							WHEN MI.intItemId IS NULL
 								THEN I.strItemNo
 							ELSE I.strItemNo + ' [ ' + MI.strItemNo + ' ]'
 							END
@@ -1318,9 +1433,10 @@ BEGIN TRY
 				,[23]
 				,[24]
 				)) AS pvt
-	ORDER BY pvt.intMainItemId
-		,pvt.strItemNo
-		,pvt.intDisplayOrder;
+	
+	ORDER BY intMainItemId
+		,strItemNo
+		,intDisplayOrder;
 END TRY
 
 BEGIN CATCH
