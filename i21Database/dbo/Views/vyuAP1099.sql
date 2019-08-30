@@ -143,7 +143,7 @@ SELECT
     , intYear = YEAR(ISNULL(B2.dtmDatePaid, B.dtmDate))
 	, A.int1099Form
 	, A.int1099Category
-	, B2.dtmDatePaid AS dtmDate
+	, CASE WHEN B.intTransactionType = 9 THEN B.dtmDate ELSE B2.dtmDatePaid END AS dtmDate
 FROM tblAPBillDetail A
 INNER JOIN tblAPBill B
     ON B.intBillId = A.intBillId
