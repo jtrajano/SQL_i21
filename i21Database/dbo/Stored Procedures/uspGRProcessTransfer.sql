@@ -38,6 +38,8 @@ BEGIN
 		,dblSplitPercent NUMERIC(38,20)
 		,dtmProcessDate DATETIME NOT NULL DEFAULT(GETDATE())
 	)
+	SELECT @intDecimalPrecision = intCurrencyDecimal FROM tblSMCompanyPreference
+	DECLARE @intTransferStorageReferenceId INT
 
 	---START---TRANSACTIONS FOR THE SOURCE-----	
 	IF EXISTS(SELECT TOP 1 1 
@@ -366,7 +368,290 @@ BEGIN
 
 		INSERT INTO tblGRTransferStorageReference
 		SELECT intSourceCustomerStorageId,intToCustomerStorageId,intTransferStorageSplitId,@intTransferStorageId,dblUnitQty,dblSplitPercent,dtmProcessDate FROM @newCustomerStorageIds
-		
+		SET @intTransferStorageReferenceId = @@ROWCOUNT
+
+		--
+		IF(ISNULL(@intTransferStorageReferenceId,0) > 0)
+		BEGIN
+				DECLARE @ItemsToPost AS ItemCostingTableType
+				INSERT INTO @ItemsToPost 
+				(
+						intItemId
+					,intItemLocationId
+					,intItemUOMId
+					,dtmDate
+					,dblQty
+					,dblUOMQty
+					,dblCost
+					,dblSalesPrice
+					,intCurrencyId
+					,dblExchangeRate
+					,intTransactionId
+					,intTransactionDetailId
+					,strTransactionId
+					,intTransactionTypeId
+					,intLotId
+					,intSubLocationId
+					,intStorageLocationId
+					,ysnIsStorage
+					,intStorageScheduleTypeId
+				)
+				SELECT 
+						ToStorage.intItemId				
+					,IL.intItemLocationId 
+					,ToStorage.intItemUOMId
+					,dtmTransferStorageDate
+					,SUM(dbo.fnCTConvertQuantityToTargetItemUOM(ToStorage.intItemId, IU.intUnitMeasureId, ToStorage.intUnitMeasureId, SR.dblUnitQty) * CASE WHEN (FromType.strStorageTypeDescription = 'OPEN STORAGE' AND ToType.strStorageTypeDescription = 'DELAYED PRICING') THEN -1 ELSE 1 END)
+					,IU.dblUnitQty
+					,0
+					,dblSalesPrice = 0
+					, ToStorage.intCurrencyId
+					,dblExchangeRate = 1
+					,intTransactionId = SR.intTransferStorageId
+					,intTransactionDetailId = SR.intTransferStorageId
+					,strTransactionId = TS.strTransferStorageTicket
+					,intTransactionTypeId = 56
+					,intLotId = NULL
+					,intSubLocationId = ToStorage.intCompanyLocationSubLocationId
+					,intStorageLocationId = ToStorage.intStorageLocationId
+					,ysnIsStorage = CASE WHEN (FromType.strStorageTypeDescription = 'OPEN STORAGE' AND ToType.strStorageTypeDescription = 'DELAYED PRICING') THEN 1 ELSE 0 END
+					,ToStorage.intStorageTypeId
+				FROM tblGRTransferStorageReference SR
+				INNER JOIN tblGRCustomerStorage FromStorage
+					ON FromStorage.intCustomerStorageId = SR.intSourceCustomerStorageId
+				INNER JOIN tblGRStorageType FromType
+					ON FromType.intStorageScheduleTypeId = FromStorage.intStorageTypeId
+				INNER JOIN tblGRCustomerStorage ToStorage
+					ON ToStorage.intCustomerStorageId = SR.intToCustomerStorageId
+				INNER JOIN tblGRStorageType ToType
+					ON ToType.intStorageScheduleTypeId = ToStorage.intStorageTypeId
+				JOIN tblICItemUOM IU
+					ON IU.intItemId = ToStorage.intItemId
+						AND IU.ysnStockUnit = 1
+				INNER JOIN tblICItemLocation IL
+					ON IL.intItemId = ToStorage.intItemId AND IL.intLocationId = ToStorage.intCompanyLocationId
+				INNER JOIN tblGRTransferStorage TS
+					ON SR.intTransferStorageId = TS.intTransferStorageId
+				WHERE  (FromType.strStorageTypeDescription = 'OPEN STORAGE' AND ToType.strStorageTypeDescription = 'DELAYED PRICING') OR (FromType.strStorageTypeDescription = 'DELAYED PRICING' AND ToType.strStorageTypeDescription = 'OPEN STORAGE')
+				GROUP BY ToStorage.intItemId				
+					,IL.intItemLocationId 
+					,ToStorage.intItemUOMId
+					,dtmTransferStorageDate
+					,IU.dblUnitQty
+					,ToStorage.intCurrencyId
+					,SR.intTransferStorageId
+					,TS.strTransferStorageTicket
+					,ToStorage.intCompanyLocationSubLocationId
+					,ToStorage.intStorageLocationId
+					,FromType.strStorageTypeDescription
+					,ToType.strStorageTypeDescription
+					,ToStorage.intStorageTypeId
+				ORDER BY dtmTransferStorageDate
+
+
+				DECLARE @cursorId INT
+
+				DECLARE _CURSOR CURSOR
+				FOR
+				SELECT intId FROM @ItemsToPost
+	
+				OPEN _CURSOR
+				FETCH NEXT FROM _CURSOR INTO @cursorId
+				WHILE @@FETCH_STATUS = 0
+				BEGIN		
+
+			
+						DECLARE @GLEntries AS RecapTableType;
+						DECLARE @Entry as ItemCostingTableType;
+						DECLARE @dblCost AS DECIMAL(24,10);
+						DECLARE @strBatchId AS NVARCHAR(40);
+						IF OBJECT_ID('tempdb..#tblICItemRunningStock') IS NOT NULL DROP TABLE  #tblICItemRunningStock
+						CREATE TABLE #tblICItemRunningStock(
+							intKey INT
+						, intItemId INT
+						, strItemNo VARCHAR(MAX)
+						, intItemUOMId INT
+						, strItemUOM VARCHAR(MAX)
+						, strItemUOMType VARCHAR(MAX)
+						, ysnStockUnit BIT
+						, dblUnitQty DECIMAL(32,20)
+						, strCostingMethod VARCHAR(MAX)
+						, intCostingMethodId INT
+						, intLocationId INT
+						, strLocationName	VARCHAR(MAX)
+						, intSubLocationId INT
+						, strSubLocationName VARCHAR(MAX)
+						, intStorageLocationId INT
+						, strStorageLocationName VARCHAR(MAX)
+						, intOwnershipType INT
+						, strOwnershipType VARCHAR(MAX)
+						, dblRunningAvailableQty DECIMAL(32,20)
+						, dblStorageAvailableQty DECIMAL(32,20)
+						, dblCost DECIMAL(32,20)
+						)
+			
+						EXEC uspSMGetStartingNumber 3, @strBatchId OUT
+
+						DECLARE @intItemId INT
+								,@intLocationId INT
+								,@intSubLocationId INT
+								,@intStorageLocationId INT
+								,@dtmDate DATETIME
+								,@intOwnerShipId INT;
+
+
+						SELECT @intItemId = ITP.intItemId,@intLocationId = IL.intLocationId,@intSubLocationId = ITP.intSubLocationId, @intStorageLocationId = ITP.intStorageLocationId, @dtmDate = ITP.dtmDate, @intOwnerShipId = CASE WHEN ITP.ysnIsStorage = 1 THEN 2 ELSE 1 END
+						FROM @ItemsToPost ITP
+						INNER JOIN tblICItem I
+							ON ITP.intItemId = I.intItemId
+						INNER JOIN tblICCommodity ICC
+							ON ICC.intCommodityId = I.intCommodityId
+						INNER JOIN tblICItemLocation IL
+							ON IL.intItemLocationId = ITP.intItemLocationId
+						WHERE intId = @cursorId
+			
+						INSERT INTO #tblICItemRunningStock
+						EXEC [dbo].[uspICGetItemRunningStock] @intItemId = @intItemId, @intLocationId = @intLocationId, @intSubLocationId = @intSubLocationId, @intStorageLocationId = @intStorageLocationId, @dtmDate = @dtmDate, @intOwnershipType = @intOwnerShipId
+
+			
+						SELECT @dblCost = dblCost FROM #tblICItemRunningStock
+						DELETE FROM @Entry
+						DELETE FROM @GLEntries
+						INSERT INTO @Entry 
+						(
+								intItemId
+							,intItemLocationId
+							,intItemUOMId
+							,dtmDate
+							,dblQty
+							,dblUOMQty
+							,dblCost
+							,dblSalesPrice
+							,intCurrencyId
+							,dblExchangeRate
+							,intTransactionId
+							,intTransactionDetailId
+							,strTransactionId
+							,intTransactionTypeId
+							,intLotId
+							,intSubLocationId
+							,intStorageLocationId
+							,ysnIsStorage
+							,intStorageScheduleTypeId
+						)
+						SELECT intItemId,intItemLocationId,intItemUOMId,dtmDate,dblQty,dblUOMQty,@dblCost,dblSalesPrice,intCurrencyId,dblExchangeRate,intTransactionId,intTransactionDetailId,strTransactionId,intTransactionTypeId,intLotId,intSubLocationId,intStorageLocationId,ysnIsStorage,intStorageScheduleTypeId 
+						FROM @ItemsToPost WHERE intId = @cursorId
+
+						IF(SELECT dblQty FROM @Entry) > 0
+						BEGIN
+							UPDATE @Entry
+							SET dblQty = dblQty*-1
+
+							INSERT INTO @GLEntries 
+							(
+								[dtmDate] 
+							,[strBatchId]
+							,[intAccountId]
+							,[dblDebit]
+							,[dblCredit]
+							,[dblDebitUnit]
+							,[dblCreditUnit]
+							,[strDescription]
+							,[strCode]
+							,[strReference]
+							,[intCurrencyId]
+							,[dblExchangeRate]
+							,[dtmDateEntered]
+							,[dtmTransactionDate]
+							,[strJournalLineDescription]
+							,[intJournalLineNo]
+							,[ysnIsUnposted]
+							,[intUserId]
+							,[intEntityId]
+							,[strTransactionId]
+							,[intTransactionId]
+							,[strTransactionType]
+							,[strTransactionForm]
+							,[strModuleName]
+							,[intConcurrencyId]
+							,[dblDebitForeign]	
+							,[dblDebitReport]	
+							,[dblCreditForeign]	
+							,[dblCreditReport]	
+							,[dblReportingRate]	
+							,[dblForeignRate]
+							,[strRateType]
+							)
+							EXEC	dbo.uspICPostCosting @Entry,@strBatchId,'Cost of Goods',1
+
+							IF EXISTS (SELECT TOP 1 1 FROM @GLEntries)
+							BEGIN 
+									EXEC dbo.uspGLBookEntries @GLEntries, 1 
+							END
+				
+							UPDATE @Entry
+							SET dblQty = dblQty*-1
+
+							EXEC	dbo.uspICPostStorage @Entry,@strBatchId,1
+
+						END
+						ELSE
+						BEGIN
+							EXEC	dbo.uspICPostStorage @Entry,@strBatchId,1
+
+							UPDATE @Entry
+							SET dblQty = dblQty*-1
+
+							INSERT INTO @GLEntries 
+							(
+								[dtmDate] 
+							,[strBatchId]
+							,[intAccountId]
+							,[dblDebit]
+							,[dblCredit]
+							,[dblDebitUnit]
+							,[dblCreditUnit]
+							,[strDescription]
+							,[strCode]
+							,[strReference]
+							,[intCurrencyId]
+							,[dblExchangeRate]
+							,[dtmDateEntered]
+							,[dtmTransactionDate]
+							,[strJournalLineDescription]
+							,[intJournalLineNo]
+							,[ysnIsUnposted]
+							,[intUserId]
+							,[intEntityId]
+							,[strTransactionId]
+							,[intTransactionId]
+							,[strTransactionType]
+							,[strTransactionForm]
+							,[strModuleName]
+							,[intConcurrencyId]
+							,[dblDebitForeign]	
+							,[dblDebitReport]	
+							,[dblCreditForeign]	
+							,[dblCreditReport]	
+							,[dblReportingRate]	
+							,[dblForeignRate]
+							,[strRateType]
+							)
+							EXEC	dbo.uspICPostCosting @Entry,@strBatchId,'Cost of Goods',1
+
+							IF EXISTS (SELECT TOP 1 1 FROM @GLEntries)
+							BEGIN 
+									EXEC dbo.uspGLBookEntries @GLEntries, 1 
+							END
+						END
+
+			
+				FETCH NEXT FROM _CURSOR INTO @cursorId
+				END
+				CLOSE _CURSOR;
+				DEALLOCATE _CURSOR;
+		END
+
 		--(intToCustomerStorageId INT, intTransferStorageSplitId INT, intSourceCustomerStorageId INT,dblUnitQty NUMERIC(38,20),dblSplitPercent NUMERIC(38,20),dtmProcessDate DATETIME NOT NULL DEFAULT(GETDATE()))
 
 		--update tblGRTransferStorageSplit's intCustomerStorageId
