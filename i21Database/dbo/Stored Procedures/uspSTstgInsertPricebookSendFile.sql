@@ -321,6 +321,12 @@ BEGIN
 										(
 											Cat.intCategoryId = Cat.intCategoryId
 										)
+										OR 
+										(@ysnExportEntirePricebookFile = CAST(1 AS BIT))
+										AND
+										(
+											1=1
+										)
 									)
 								)
 								
