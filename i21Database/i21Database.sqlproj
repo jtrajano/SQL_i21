@@ -8049,6 +8049,7 @@
     <Build Include="dbo\Stored Procedures\uspRKPositionReconciliationReportCompanyTitled.sql" />
     <Build Include="dbo\Stored Procedures\uspRKPositionReconciliationReportContractBalance.sql" />
     <Build Include="dbo\Stored Procedures\uspRKPositionReconciliationReportInventoryActivity.sql" />
+    <Build Include="dbo\Views\vyuICGetRetailCategoryCount.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
