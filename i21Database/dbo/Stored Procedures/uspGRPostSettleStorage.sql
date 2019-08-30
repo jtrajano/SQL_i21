@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspGRPostSettleStorage]
 	 @intSettleStorageId INT
 	,@ysnPosted BIT
+	,@ysnFromPriceBasisContract BIT = 0
 AS
 BEGIN TRY
 	SET NOCOUNT ON
@@ -173,11 +174,12 @@ BEGIN TRY
 	
 	/* create child settle storage (with voucher) 
 	NOTE: parent settle storage doesn't have a voucher associated in it */
-	EXEC uspGRCreateSettleStorage @intSettleStorageId
+	IF(@ysnFromPriceBasisContract = 0)
+		EXEC uspGRCreateSettleStorage @intSettleStorageId
 
 	SELECT @intSettleStorageId = MIN(intSettleStorageId)
 	FROM tblGRSettleStorage
-	WHERE intParentSettleStorageId = @intParentSettleStorageId
+	WHERE CASE WHEN @ysnFromPriceBasisContract = 1 THEN CASE WHEN intSettleStorageId = @intSettleStorageId THEN 1 ELSE 0 END ELSE CASE WHEN intParentSettleStorageId = @intParentSettleStorageId THEN 1 ELSE 0 END END = 1
 
 	WHILE @intSettleStorageId > 0
 	BEGIN		
@@ -1102,7 +1104,8 @@ BEGIN TRY
 						ON SC2.intSettleContractId = SC1.intSettleContractId
 				END
 
-				--Reduce the On-Storage Quantity		
+				--Reduce the On-Storage Quantity
+				IF(@ysnFromPriceBasisContract = 0)		
 				BEGIN
 					EXEC uspICPostStorage 
 						 @ItemsToStorage
@@ -1123,7 +1126,7 @@ BEGIN TRY
 					  FROM tblICInventoryReceiptItem WHERE intInventoryReceiptId = @intReceiptId
 
 				END
-				
+				IF(@ysnFromPriceBasisContract = 0)	
 				BEGIN
 									
 						IF @strOwnedPhysicalStock ='Customer' 
@@ -1548,7 +1551,7 @@ BEGIN TRY
 					,[dblNetWeight] 				= 0
 					,[dblWeightUnitQty] 			= 1
 					,[intWeightUOMId]				= NULL
-					,[intPurchaseTaxGroupId]		= CASE WHEN @ysnDPOwnedType = 0 THEN NULL ELSE ReceiptCharge.intTaxGroupId END
+					,[intPurchaseTaxGroupId]		= NULL--CASE WHEN @ysnDPOwnedType = 0 THEN NULL ELSE ReceiptCharge.intTaxGroupId END
 				FROM tblICInventoryReceiptCharge ReceiptCharge
 				JOIN tblICItem Item 
 					ON Item.intItemId = ReceiptCharge.intChargeId
@@ -1726,6 +1729,30 @@ BEGIN TRY
 					FROM tblAPBill
 					WHERE intBillId = CAST(@createdVouchersId AS INT)
 
+
+					DELETE FROM @detailCreated
+
+					INSERT INTO @detailCreated
+					SELECT intBillDetailId
+					FROM tblAPBillDetail
+					WHERE intBillId = CAST(@createdVouchersId AS INT)
+						AND (CASE 
+								WHEN @ysnDPOwnedType = 1 THEN 
+									CASE WHEN intInventoryReceiptChargeId IS NULL THEN 1 ELSE 0 END 
+								ELSE 1 
+							END = 1)
+
+					UPDATE APD
+					SET APD.intTaxGroupId = dbo.fnGetTaxGroupIdForVendor(APB.intEntityId,@intCompanyLocationId,APD.intItemId,EM.intEntityLocationId,EM.intFreightTermId)
+					FROM tblAPBillDetail APD 
+					INNER JOIN tblAPBill APB
+						ON APD.intBillId = APB.intBillId
+					LEFT JOIN tblEMEntityLocation EM ON EM.intEntityId = APB.intEntityId
+					INNER JOIN @detailCreated ON intBillDetailId = intId
+					WHERE APD.intTaxGroupId IS NULL AND CASE WHEN @ysnDPOwnedType = 1 THEN CASE WHEN intInventoryReceiptChargeId IS NULL THEN 1 ELSE 0 END ELSE 1 END = 1
+					
+					EXEC [uspAPUpdateVoucherDetailTax] @detailCreated
+
 					--DELETE FROM @detailCreated
 
 					--INSERT INTO @detailCreated
@@ -1801,6 +1828,7 @@ BEGIN TRY
 
 			-------------------------xxxxxxxxxxxxxxxxxx------------------------------
 			---6.DP Contract Depletion, Purchase Contract Depletion,Storage Ticket Depletion
+			IF(@ysnFromPriceBasisContract = 0)	
 			BEGIN
 
 				SELECT @intDepletionKey = MIN(intDepletionKey)
@@ -1875,6 +1903,7 @@ BEGIN TRY
 			END
 
 			--7. HiStory Creation
+			IF(@ysnFromPriceBasisContract = 0)	
 			BEGIN
 				INSERT INTO [dbo].[tblGRStorageHistory] 
 				(
