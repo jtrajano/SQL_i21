@@ -351,6 +351,7 @@ BEGIN
 		, intTransactionId INT
 		, strDistribution NVARCHAR(10)
 		, dblSalesInTransit NUMERIC(24,10)
+		, strTransactionType NVARCHAR(50)
 	)
 
 
@@ -392,6 +393,7 @@ BEGIN
 		, strDistribution
 		, dblBalanceInv
 		, dblSalesInTransit
+		, strTransactionType
 		)
 	EXEC uspRKGetInHouse @dtmFromTransactionDate = @dtmFromTransactionDate
 		, @dtmToTransactionDate = @dtmToTransactionDate
