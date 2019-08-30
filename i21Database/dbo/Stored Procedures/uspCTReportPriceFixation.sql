@@ -34,7 +34,9 @@ BEGIN TRY
 			@intPriceContractId			INT,
 			@FirstApprovalId			INT,
 			@FirstApprovalSign			VARBINARY(MAX),
-			@InterCompApprovalSign		VARBINARY(MAX)
+			@InterCompApprovalSign		VARBINARY(MAX),
+			@intScreenId				INT,
+			@intTransactionId			INT			
 
 	IF	LTRIM(RTRIM(@xmlParam)) = ''   
 		SET @xmlParam = NULL   
@@ -127,9 +129,18 @@ BEGIN TRY
 			@intReportLogoWidth = intReportLogoWidth 
 	FROM	tblLGCompanyPreference
 
+	SELECT @intScreenId = intScreenId
+	FROM tblSMScreen 
+	WHERE strNamespace = 'ContractManagement.view.PriceContracts'
+
+	SELECT @intTransactionId = intTransactionId
+	FROM tblSMTransaction
+	WHERE intScreenId = @intScreenId
+	AND intRecordId = @intPriceContractId 
+
 	SELECT	TOP 1 @FirstApprovalId=intApproverId 
 	FROM	tblSMApproval 
-	WHERE	intTransactionId=@intPriceContractId 
+	WHERE	intTransactionId=@intTransactionId
 	AND		strStatus='Approved' 
 	ORDER 
 	BY		intApprovalId
