@@ -7,7 +7,7 @@
 RETURNS TABLE AS RETURN
 (
 	SELECT	DISTINCT
-		[intEntityVendorId]							=	entity.intEntityId
+		[intEntityVendorId]							=	ISNULL(entity.intEntityId, payable.intEntityVendorId)
 		,[intTransactionType]						=	1 --voucher
 		,[intLocationId]							=	NULL --Contract doesn't have location
 		,[intShipToId]								=	NULL --?
@@ -65,7 +65,7 @@ RETURNS TABLE AS RETURN
 	CROSS APPLY ( select ysnMultiplePriceFixation from tblCTCompanyPreference ) CPT
 	JOIN tblCTContractDetail CD	ON CD.intContractDetailId = CC.intContractDetailId AND (CC.ysnPrice = 1 AND CD.intPricingTypeId IN (1,6) 
 			OR CC.ysnAccrue = CASE 
-				WHEN ISNULL(CPT.ysnMultiplePriceFixation,0) = 0 THEN 1 
+				WHEN ISNULL(CPT.ysnMultiplePriceFixation,0) = 0 AND @accrue = 1 THEN 1 
 				ELSE CC.ysnAccrue 
 			END
 		) AND CC.intConcurrencyId <> ISNULL(CC.intPrevConcurrencyId,0)
@@ -125,16 +125,17 @@ RETURNS TABLE AS RETURN
 			ELSE 0
 		END = 1
 	) payable
-	INNER JOIN
+	LEFT JOIN
 	(
 		SELECT intEntityId 
 		FROM tblEMEntity
-	) entity ON entity.intEntityId = CH.intEntityId OR entity.intEntityId = CC.intVendorId
+	) entity ON entity.intEntityId = CC.intVendorId OR entity.intEntityId = (CASE WHEN CC.ysnPrice = 1 AND CH.intContractTypeId = 1 THEN CH.intEntityId ELSE CC.intVendorId END)
 	WHERE RC.intInventoryReceiptChargeId IS NULL AND CC.ysnAccrue = @accrue AND --CC.ysnBasis = 0 AND
 	NOT EXISTS(SELECT 1 FROM tblICInventoryShipmentCharge WHERE intContractDetailId = CD.intContractDetailId AND intChargeId = CC.intItemId) AND
 	CASE 
 		WHEN @type = 'header' AND CH.intContractHeaderId = @id THEN 1
 		WHEN @type = 'detail' AND CD.intContractDetailId = @id THEN 1
 		WHEN @type = 'cost' AND CC.intContractCostId = @id THEN 1
-	END = 1
+	END = 1 
+	AND CASE WHEN @accrue = 0 AND payable.intEntityVendorId IS NOT NULL THEN 1 ELSE @accrue END = 1
 )
