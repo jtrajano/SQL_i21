@@ -22,5 +22,8 @@
 	[strContactPhone] NVARCHAR(30) COLLATE Latin1_General_CI_AS NULL,
 	[strContactEmail] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
     [strTransmitterCode] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+    [strFilerType] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+    [strTransactionType] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+    [strMerchantCode] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
     [intConcurrencyId] INT NOT NULL DEFAULT 0
 )
