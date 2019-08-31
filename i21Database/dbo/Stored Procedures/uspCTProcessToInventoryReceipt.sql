@@ -81,7 +81,8 @@ AS
 				intFreightTermId,
 				intBookId,
 				intSubBookId,
-				intLoadReceive
+				intLoadReceive,
+				dblUnitRetail
 		)	
 		SELECT	strReceiptType				=	'Purchase Contract',
 				intEntityVendorId			=	CH.intEntityId,
@@ -121,7 +122,8 @@ AS
 				intFreightTermId			=	CD.intFreightTermId,
 				intBookId					=	CD.intBookId,
 				intSubBookId				=	CD.intSubBookId,
-				intLoadReceive				=	ISNULL(CD.dblBalanceLoad,0)		-	ISNULL(CD.dblScheduleLoad,0)
+				intLoadReceive				=	ISNULL(CD.dblBalanceLoad,0)		-	ISNULL(CD.dblScheduleLoad,0),
+				dblUnitRetail				=	CD.dblCashPrice
 
 		FROM	tblCTContractDetail			CD	
 		JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId
