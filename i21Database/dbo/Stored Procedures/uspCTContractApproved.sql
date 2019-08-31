@@ -124,7 +124,11 @@ BEGIN TRY
 	BEGIN
 		EXEC uspCTProcessApprovedContractToFeed @intApprovedContractId
 		
-		EXEC uspCTManagePayable @intContractHeaderId, 'header', 0
+		-- Add Payables if Create Other Cost Payable on Save Contract set to true
+		IF EXISTS(SELECT TOP 1 1 FROM tblCTCompanyPreference WHERE ysnCreateOtherCostPayable = 1)
+		BEGIN
+			EXEC uspCTManagePayable @intContractHeaderId, 'header', 0
+		END
 		
 		SELECT @intApprovedContractId = MIN(intApprovedContractId) FROM @SCOPE_IDENTITY WHERE intApprovedContractId > @intApprovedContractId
 	END
