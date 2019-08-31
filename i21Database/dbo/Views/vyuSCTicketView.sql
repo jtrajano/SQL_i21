@@ -167,6 +167,7 @@ AS
 	   --,EMDriver.strName AS strDriverName
      ,SCT.dtmImportedDate
 	 ,tblSMShipViaTrailer.strTrailerLicenseNumber
+	 ,ContractsApplied.strContractsApplied
   from tblSCTicket SCT
 	LEFT JOIN tblEMEntity EMEntity on EMEntity.intEntityId = SCT.intEntityId
 	LEFT JOIN tblEMEntitySplit EMSplit on [EMSplit].intSplitId = SCT.intSplitId
@@ -189,4 +190,15 @@ AS
 	--LEFT JOIN tblEMEntity EMDriver ON EMDriver.intEntityId = SCT.intEntityContactId
 	LEFT JOIN tblSMShipViaTrailer on SCT.intEntityShipViaTrailerId = tblSMShipViaTrailer.intEntityShipViaTrailerId
 	LEFT JOIN tblCTContractDetail CTD ON SCT.intContractId = CTD.intContractDetailId
-	LEFT JOIN tblCTContractHeader CTH ON CTH.intContractHeaderId = CTD.intContractHeaderId 
+	LEFT JOIN tblCTContractHeader CTH ON CTH.intContractHeaderId = CTD.intContractHeaderId
+	OUTER APPLY(
+		SELECT strContractsApplied =LEFT(strContractsApplied, LEN(strContractsApplied) - 1) FROM (
+		SELECT ContractHeader.strContractNumber +'-'+ CAST(ContractDetail.intContractSeq AS VARCHAR(20)) + ', ' FROM tblSCTicketContractUsed ContractUsed
+		INNER JOIN tblCTContractDetail ContractDetail
+			ON ContractDetail.intContractDetailId = ContractUsed.intContractDetailId
+		INNER JOIN tblCTContractHeader ContractHeader
+			ON ContractDetail.intContractHeaderId = ContractHeader.intContractHeaderId
+		WHERE ContractUsed.intTicketId = SCT.intTicketId
+		FOR XML PATH ('')
+	) ContractsApplied(strContractsApplied)
+	) ContractsApplied
