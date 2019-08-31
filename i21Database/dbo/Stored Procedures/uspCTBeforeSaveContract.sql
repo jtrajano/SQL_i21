@@ -39,8 +39,11 @@ BEGIN TRY
 		SET @Condition = 'intContractHeaderId = ' + STR(@intContractHeaderId)
 		EXEC [dbo].[uspCTGetTableDataInXML] 'tblCTContractDetail', @Condition, @strXML OUTPUT,null,'intContractDetailId,''Delete'' AS strRowState'
 
-		-- DELETE ALL PAYABLES
-		EXEC uspCTManagePayable @intContractHeaderId, 'header', 1
+		-- DELETE ALL PAYABLES IF CREATE OTHER COST PAYABLE ON SAVE CONTRACT SET TO TRUE
+		IF EXISTS(SELECT TOP 1 1 FROM tblCTCompanyPreference WHERE ysnCreateOtherCostPayable = 1)
+		BEGIN
+			EXEC uspCTManagePayable @intContractHeaderId, 'header', 1
+		END		
 		
 		-- DELETE DERIVATIVES
 		EXEC uspCTManageDerivatives @intContractHeaderId, 'header', 1
@@ -101,8 +104,11 @@ BEGIN TRY
 
 			UPDATE tblCTContractDetail SET intParentDetailId = NULL WHERE intParentDetailId = @intContractDetailId
 
-			-- DELETE ALL PAYABLES UNDER DELETED DETAILS
-			EXEC uspCTManagePayable @intContractDetailId, 'detail', 1
+			-- DELETE ALL PAYABLES UNDER DELETED DETAILS IF CREATE OTHER COST PAYABLE ON SAVE CONTRACT SET TO TRUE
+			IF EXISTS(SELECT TOP 1 1 FROM tblCTCompanyPreference WHERE ysnCreateOtherCostPayable = 1)
+			BEGIN
+				EXEC uspCTManagePayable @intContractDetailId, 'detail', 1
+			END	
 			
 			-- DELETE DERIVATIVES
 			EXEC uspCTManageDerivatives @intContractDetailId, 'detail', 1
@@ -144,8 +150,11 @@ BEGIN TRY
 				WHERE	intCostUniqueId = @intCostUniqueId
 				AND		intContractDetailId = @intContractDetailId
 			
-				-- DELETE SPECIFIC PAYABLES
-				EXEC uspCTManagePayable @intContractCostId, 'cost', 1
+				-- DELETE SPECIFIC PAYABLES IF CREATE OTHER COST PAYABLE ON SAVE CONTRACT SET TO TRUE
+				IF EXISTS(SELECT TOP 1 1 FROM tblCTCompanyPreference WHERE ysnCreateOtherCostPayable = 1)
+				BEGIN
+					EXEC uspCTManagePayable @intContractCostId, 'cost', 1
+				END	
 
 				SELECT @intCostUniqueId = MIN(intCostUniqueId) FROM #ProcessCost WHERE intCostUniqueId > @intCostUniqueId
 			END
