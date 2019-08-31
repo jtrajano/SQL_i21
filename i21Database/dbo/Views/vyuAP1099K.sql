@@ -28,6 +28,9 @@ WITH K1099 (
 	,dblNovember
 	,dblDecember
 	,intEntityVendorId
+	,strFilerType
+	,strTransactionType
+	,strMerchantCode
 )
 AS
 (
@@ -66,6 +69,9 @@ AS
 		, CASE WHEN MONTH(A.dtmDate) = 11 THEN SUM(A.dbl1099K) ELSE NULL END AS dblNovember
 		, CASE WHEN MONTH(A.dtmDate) = 12 THEN SUM(A.dbl1099K) ELSE NULL END AS dblDecember
 		, A.[intEntityId]
+		, C.strFilerType
+		, C.strTransactionType
+		, C.strMerchantCode
 	FROM vyuAP1099 A
 	CROSS JOIN tblSMCompanySetup B
 	CROSS JOIN tblAP1099Threshold C
@@ -81,12 +87,33 @@ AS
 	, A.strCity
 	, A.strState
 	, A.strZipState
+	, C.strFilerType
+	, C.strTransactionType
+	, C.strMerchantCode
 	, MONTH(A.dtmDate)
+),
+grossThirdParty (
+	intEntityVendorId,
+	dblGrossThirdParty,
+	dblCardNotPresent
+)
+AS 
+(
+	SELECT
+		A.intEntityId AS intEntityVendorId,
+		CASE WHEN A.int1099Category = 1 THEN SUM(dbl1099) ELSE NULL END AS dblCardNotPresent,
+		CASE WHEN A.int1099Category = 2 THEN SUM(dbl1099) ELSE NULL END AS dblGrossThirdParty
+	FROM vyuAP1099 A
+	WHERE A.int1099Form = 6
+	GROUP BY A.intEntityId, A.int1099Category
 )
 
 SELECT
-	*
-	,SUM(ISNULL(dblJanuary,0)
+	A.*,
+	SUM(B.dblCardNotPresent) AS dblCardNotPresent,
+	SUM(B.dblGrossThirdParty) AS dblGrossThirdParty,
+	0 AS dblFederalIncomeTax,
+	SUM(ISNULL(dblJanuary,0)
 		+ ISNULL(dblFebruary,0)
 		+ ISNULL(dblMarch,0)
 		+ ISNULL(dblApril,0)
@@ -99,7 +126,8 @@ SELECT
 		+ ISNULL(dblNovember,0)
 		+ ISNULL(dblDecember,0)) AS dblTotalPayment
 FROM K1099 A
-GROUP BY intEntityVendorId
+INNER JOIN grossThirdParty B ON A.intEntityVendorId = B.intEntityVendorId
+GROUP BY A.intEntityVendorId
 	,strEmployerAddress
 	,strCompanyName
 	,strEIN
@@ -112,6 +140,9 @@ GROUP BY intEntityVendorId
 	,strCity
 	,strState
 	,strZipState
+	,strFilerType
+	,strTransactionType
+	,strMerchantCode
 	,intYear
 	,dblJanuary
 	,dblFebruary

@@ -7853,10 +7853,12 @@
     <Build Include="dbo\Views\vyuAP1099K.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRpt1099K.sql" />
     <Build Include="dbo\Views\vyuAP1099KYear.sql" />
-  </ItemGroup>
+    <Build Include="dbo\Stored Procedures\uspAPCreate1099KFile.sql" />
+    <Build Include="dbo\Functions\fnAP1099EFileKPayee.sql" />
+    <Build Include="dbo\Functions\fnAP1099EFileEndOfK.sql" />
+</ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
-  </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Views\vyuARCustomer.sql" />
   </ItemGroup>
@@ -8263,5 +8265,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\TF\DefaultData\MO_Missouri.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="dbo\Stored Procedures\uspCTSyncPriceAndDerivative.sql" />
   </ItemGroup>
 </Project>

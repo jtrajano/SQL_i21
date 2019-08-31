@@ -119,13 +119,44 @@ BEGIN
 		SELECT @amountCodes = COALESCE(@amountCodes,'') + strAmountCodes 
 		FROM (
 			SELECT 
-					CASE WHEN SUM(A.dblNonemployeeCompensationNEC) > 0 THEN '1' ELSE '' END +
-					CASE WHEN SUM(A.dblFederalIncomeNEC) > 0 THEN '4' ELSE '' END AS strAmountCodes
-				FROM dbo.vyuAP1099NEC A
+				CASE WHEN SUM(A.dblNonemployeeCompensationNEC) > 0 THEN '1' ELSE '' END +
+				CASE WHEN SUM(A.dblFederalIncomeNEC) > 0 THEN '4' ELSE '' END AS strAmountCodes
+			FROM dbo.vyuAP1099NEC A
+			WHERE 1 = (CASE WHEN @vendorFrom IS NOT NULL THEN  
+			(CASE WHEN A.strVendorId BETWEEN @vendorFrom AND @vendorTo THEN 1 ELSE 0 END)  
+			ELSE 1 END)  
+			AND A.intYear = @year  
+		) tblAmountCodes  
+	END
+	ELSE IF @form1099 = 6
+	BEGIN
+		SELECT @amountCodes = COALESCE(@amountCodes,'') + strAmountCodes FROM (
+			SELECT DISTINCT(strAmountCodes) strAmountCodes 
+			FROM (
+				SELECT 
+					CASE 
+						WHEN A.dblGrossThirdParty > 0 THEN '1' --PAGE 53
+						WHEN A.dblCardNotPresent > 0 THEN '2' --ELSE '' END,
+						WHEN A.dblFederalIncomeTax > 0 THEN '4' --ELSE '' END,
+						WHEN A.dblJanuary > 0 THEN '5' --ELSE '' END,
+						WHEN A.dblFebruary > 0 THEN '6' --ELSE '' END,
+						WHEN A.dblMarch > 0 THEN '7' --ELSE '' END,
+						WHEN A.dblApril > 0 THEN '8' --ELSE '' END, 
+						WHEN A.dblMay > 0 THEN '9' --ELSE '' END,
+						WHEN A.dblJune > 0 THEN 'A' --ELSE '' END,
+						WHEN A.dblJuly > 0 THEN 'B' --ELSE '' END,
+						WHEN A.dblAugust > 0 THEN 'C' --ELSE '' END,
+						WHEN A.dblSeptember > 0 THEN 'D' --ELSE '' END,
+						WHEN A.dblOctober > 0 THEN 'E' --ELSE '' END,
+						WHEN A.dblNovember > 0 THEN 'F' --ELSE '' END,
+						WHEN A.dblDecember > 0 THEN 'G' --ELSE '' END,
+					ELSE '' END AS strAmountCodes
+				FROM dbo.vyuAP1099K A
 				WHERE 1 = (CASE WHEN @vendorFrom IS NOT NULL THEN
 							(CASE WHEN A.strVendorId BETWEEN @vendorFrom AND @vendorTo THEN 1 ELSE 0 END)
 						ELSE 1 END)
 				AND A.intYear = @year
+			) tmpAmountCodes
 		) tblAmountCodes
 	END
 
@@ -144,6 +175,7 @@ BEGIN
 			WHEN 4 THEN '7 ' --1099 PATR
 			WHEN 5 THEN '1 ' --1099 DIV
 			WHEN 7 THEN 'NE' --1099 NEC
+			WHEN 6 THEN 'MC' --1099 K
 			ELSE SPACE(2) END --Type of return/1099 --Position 26-27
 		+ @amountCodes + SPACE(16 - LEN(@amountCodes))
 			--CASE @form1099 
