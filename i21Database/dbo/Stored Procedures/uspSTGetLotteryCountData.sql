@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspSTGetLotteryCountData]
 	@date DATETIME,
-	@storeId INT
+	@storeId INT,
+	@checkoutId INT
 AS
 SELECT 
 intBeginCount = CASE WHEN ISNULL(intPriorCheckoutCount,0) != 0 
@@ -39,7 +40,7 @@ SELECT
 		ON tblSTCheckoutHeader.intCheckoutId = tblSTCheckoutLotteryCount.intCheckoutId
 		WHERE tblSTCheckoutHeader.intStoreId = @storeId
 		AND tblSTCheckoutLotteryCount.intLotteryBookId = tblSTLotteryBook.intLotteryBookId
-		AND ( (tblSTCheckoutHeader.dtmCheckoutDate < @date) OR (tblSTCheckoutHeader.dtmCheckoutDate = @date))
+		AND ( (tblSTCheckoutHeader.dtmCheckoutDate < @date) OR (tblSTCheckoutHeader.dtmCheckoutDate = @date AND tblSTCheckoutHeader.intCheckoutId != @checkoutId))
 		ORDER BY tblSTCheckoutHeader.intCheckoutId DESC
 	),0),
 	tblSTLotteryBook.dblQuantityRemaining,
