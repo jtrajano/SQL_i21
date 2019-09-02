@@ -101,7 +101,9 @@ BEGIN TRY
 	  AND intInvoiceId <> @InvoiceId
 
 	--GET OPEN PREPAIDS
-	SELECT intInvoiceId
+	SELECT intInvoiceId			= OP.intInvoiceId
+		 , strContractApplyTo	= ISNULL(OP.strContractApplyTo, 'Any')
+		 , ysnFromItemContract	= ISNULL(OP.ysnFromItemContract, 0)
 	INTO #OPENPREPAIDS
 	FROM tblARInvoice OP
 	INNER JOIN tblARPayment PAYMENT ON OP.intPaymentId = PAYMENT.intPaymentId
@@ -121,6 +123,7 @@ BEGIN TRY
 	FROM #OPENPREPAIDS OP
 	INNER JOIN tblARInvoiceDetail OPD ON OP.intInvoiceId = OPD.intInvoiceId
 	WHERE OPD.ysnRestricted = 0
+	  AND OP.ysnFromItemContract = 0
 	
 	--GET RESTRICTED ITEMS
 	SELECT intInvoiceId			= OP.intInvoiceId
@@ -133,6 +136,7 @@ BEGIN TRY
 	  AND OPD.intContractDetailId IS NULL
 	  AND OPD.intItemContractDetailId IS NULL
 	  AND OPD.intItemCategoryId IS NULL
+	  AND OP.ysnFromItemContract = 0
 
 	--GET RESTRICTED CONTRACTS
 	SELECT intInvoiceId			= OP.intInvoiceId
@@ -146,28 +150,32 @@ BEGIN TRY
 	  AND OPD.intItemContractDetailId IS NULL
 	  AND OPD.intItemCategoryId IS NULL
 
-	--GET RESTRICTED ITEM CONTRACT
+	--GET UN/RESTRICTED ITEM CONTRACT
 	SELECT intInvoiceId				= OP.intInvoiceId
 		 , intInvoiceDetailId		= OPD.intInvoiceDetailId
 		 , intItemContractDetailId	= OPD.intItemContractDetailId
+		 , intItemId				= OPD.intItemId
+		 , ysnRestricted			= ISNULL(OPD.ysnRestricted, 0)
 	INTO #RESTRICTEDITEMCONTRACTS
 	FROM #OPENPREPAIDS OP
 	INNER JOIN tblARInvoiceDetail OPD ON OP.intInvoiceId = OPD.intInvoiceId
-	WHERE OPD.ysnRestricted = 1
-	  AND OPD.intContractDetailId IS NULL
-	  AND OPD.intItemContractDetailId IS NOT NULL
+	WHERE OPD.intContractDetailId IS NULL
 	  AND OPD.intItemCategoryId IS NULL
+	  AND ((OP.strContractApplyTo = 'Contract' AND OPD.intItemContractDetailId IS NOT NULL)
+		OR (OP.strContractApplyTo = 'Any' AND OPD.intItemContractDetailId IS NULL))
 
-	--GET RESTRICTED CATEGORY
-	SELECT intInvoiceId			= OP.intInvoiceId
-		 , intInvoiceDetailId	= OPD.intInvoiceDetailId
-		 , intItemCategoryId	= OPD.intItemCategoryId
-		 , intCategoryId		= OPD.intCategoryId
+	--GET UN/RESTRICTED CATEGORY
+	SELECT intInvoiceId				= OP.intInvoiceId
+		 , intInvoiceDetailId		= OPD.intInvoiceDetailId
+		 , intItemCategoryId		= OPD.intItemCategoryId
+		 , intCategoryId			= OPD.intCategoryId
+		 , intItemContractHeaderId	= OPD.intItemContractHeaderId
+		 , ysnRestricted			= ISNULL(OPD.ysnRestricted, 0)
 	INTO #RESTRICTEDITEMCATEGORY
 	FROM #OPENPREPAIDS OP
 	INNER JOIN tblARInvoiceDetail OPD ON OP.intInvoiceId = OPD.intInvoiceId
-	WHERE OPD.ysnRestricted = 1
-	  AND OPD.intContractDetailId IS NULL
+	WHERE OPD.intContractDetailId IS NULL
+	  AND OPD.intItemCategoryId IS NOT NULL
 	  AND OPD.intItemContractHeaderId IS NOT NULL
 	  AND OPD.intItemCategoryId IS NOT NULL
 	  AND OPD.intCategoryId IS NOT NULL
@@ -261,7 +269,11 @@ BEGIN TRY
 		SELECT intInvoiceId			= RIC.intInvoiceId
 			 , intInvoiceDetailId	= RIC.intInvoiceDetailId
 		FROM tblARInvoiceDetail ID
-		INNER JOIN #RESTRICTEDITEMCONTRACTS RIC ON ID.intItemContractDetailId = RIC.intItemContractDetailId
+		INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId
+		INNER JOIN #RESTRICTEDITEMCONTRACTS RIC ON ((I.strContractApplyTo = 'Contract' AND RIC.ysnRestricted = 1 AND ID.intItemContractDetailId = RIC.intItemContractDetailId AND ID.intItemId = RIC.intItemId)
+												 OR (I.strContractApplyTo = 'Contract' AND RIC.ysnRestricted = 0 AND ID.intItemContractDetailId = RIC.intItemContractDetailId)
+												 OR (I.strContractApplyTo = 'Any' AND RIC.ysnRestricted = 1 AND ID.intItemContractDetailId IS NULL AND ID.intItemId = RIC.intItemId)
+												 OR (I.strContractApplyTo = 'Any' AND RIC.ysnRestricted = 0 AND RIC.intItemId IS NOT NULL))
 		WHERE ID.intInvoiceId = @InvoiceId
 		
 		UNION ALL
@@ -269,8 +281,12 @@ BEGIN TRY
 		SELECT intInvoiceId			= RCAT.intInvoiceId
 			 , intInvoiceDetailId	= RCAT.intInvoiceDetailId
 		FROM tblARInvoiceDetail ID
+		INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId
 		INNER JOIN tblICItem ITEM ON ID.intItemId = ITEM.intItemId 
-		INNER JOIN #RESTRICTEDITEMCATEGORY RCAT ON ITEM.intCategoryId = RCAT.intCategoryId
+		INNER JOIN #RESTRICTEDITEMCATEGORY RCAT ON ((I.strContractApplyTo = 'Contract' AND RCAT.ysnRestricted = 1 AND ID.intItemContractHeaderId = RCAT.intItemContractHeaderId AND ITEM.intCategoryId = RCAT.intCategoryId)
+												 OR (I.strContractApplyTo = 'Contract' AND RCAT.ysnRestricted = 0 AND ID.intItemContractHeaderId = RCAT.intItemContractHeaderId)
+												 OR (I.strContractApplyTo = 'Any' AND RCAT.ysnRestricted = 1 AND ID.intItemContractHeaderId IS NULL AND ITEM.intCategoryId = RCAT.intCategoryId)
+												 OR (I.strContractApplyTo = 'Any' AND RCAT.ysnRestricted = 0 AND RCAT.intCategoryId IS NOT NULL))
 		WHERE ID.intInvoiceId = @InvoiceId
 
 		UNION ALL
