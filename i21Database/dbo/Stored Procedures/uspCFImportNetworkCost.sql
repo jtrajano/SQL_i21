@@ -24,6 +24,18 @@ BEGIN
 	DELETE FROM tblCFImportNetworkCostResult
 	WHERE intEntityId = @intEntityId 
 
+	DELETE tblCFNetworkCostStaging 
+	FROM (
+	SELECT 
+	strSiteNumber,dtmDate,strItemNumber,intEntityId, MAX(intRecordNo) intLastRecord
+	FROM tblCFNetworkCostStaging GROUP BY strSiteNumber,dtmDate,strItemNumber,intEntityId HAVING COUNT(1) > 1) as tblGroupData
+	WHERE 
+	tblCFNetworkCostStaging.strSiteNumber = tblGroupData.strSiteNumber
+	AND tblCFNetworkCostStaging.dtmDate = tblGroupData.dtmDate
+	AND tblCFNetworkCostStaging.strItemNumber = tblGroupData.strItemNumber
+	AND tblCFNetworkCostStaging.intEntityId = tblGroupData.intEntityId
+	AND tblCFNetworkCostStaging.intRecordNo != tblGroupData.intLastRecord
+
 
 
 	--Select Records to Process
