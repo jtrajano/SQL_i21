@@ -23,23 +23,27 @@ BEGIN
 		DROP TABLE #tmpTransferCustomerStorage
 	CREATE TABLE #tmpTransferCustomerStorage (
 		[intCustomerStorageId] INT PRIMARY KEY,
+		[intToCustomerStorage] INT,
 		[dblUnits] DECIMAL(18,6),
 		UNIQUE ([intCustomerStorageId])
 	);
 	INSERT INTO #tmpTransferCustomerStorage
 	SELECT 
-		 ISNULL(intToCustomerStorageId,intTransferToCustomerStorageId)
+		 TSR.intSourceCustomerStorageId		 
+		 ,ISNULL(intToCustomerStorageId,intTransferToCustomerStorageId)
 		,ISNULL(TSR.dblUnitQty,TSS.dblUnits)
 	FROM tblGRTransferStorageSplit TSS
 	LEFT JOIN tblGRTransferStorageReference TSR
 	ON TSR.intTransferStorageSplitId = TSS.intTransferStorageSplitId
 	WHERE TSS.intTransferStorageId = @intTransferStorageId   AND (CASE WHEN (TSR.intTransferStorageId IS NULL) THEN 1 ELSE CASE WHEN TSR.intTransferStorageId = @intTransferStorageId THEN 1 ELSE 0 END END) = 1
 
+
+
 	IF EXISTS(SELECT TOP 1 1 
 			FROM tblGRCustomerStorage A 
 			INNER JOIN #tmpTransferCustomerStorage B 
 				ON B.intCustomerStorageId = A.intCustomerStorageId 
-			WHERE B.dblUnits <> A.dblOpenBalance
+			WHERE B.dblUnits <> A.dblOriginalBalance
 	)
 	BEGIN
 		SET @ErrMsg = 'Unable to reverse this transaction. The open balance of one or more customer storage/s no longer match its original balance.'
@@ -117,9 +121,9 @@ BEGIN
 		
 		--DELETE HISTORY
 		DELETE FROM tblGRStorageHistory WHERE intTransferStorageId = @intTransferStorageId
-		DELETE FROM tblGRStorageHistory WHERE intCustomerStorageId IN (SELECT intCustomerStorageId FROM #tmpTransferCustomerStorage)
+		DELETE FROM tblGRStorageHistory WHERE intCustomerStorageId IN (SELECT [intToCustomerStorage] FROM #tmpTransferCustomerStorage)
 		--DELETE DISCOUNTS
-		DELETE FROM tblQMTicketDiscount WHERE intTicketFileId IN (SELECT intCustomerStorageId FROM #tmpTransferCustomerStorage) AND strSourceType = 'Storage'
+		DELETE FROM tblQMTicketDiscount WHERE intTicketFileId IN (SELECT [intToCustomerStorage] FROM #tmpTransferCustomerStorage) AND strSourceType = 'Storage'
 
 		--integration to IC
 		SET @cnt = 0
@@ -199,8 +203,8 @@ BEGIN
 		--WHERE B.intTransferStorageId = @intTransferStorageId AND ISNULL(TSR.intTransferStorageId, @intTransferStorageId) = @intTransferStorageId
 
 		DELETE FROM tblGRTransferStorage WHERE intTransferStorageId = @intTransferStorageId
-		DELETE FROM tblGRCustomerStorage WHERE intCustomerStorageId IN (SELECT intCustomerStorageId FROM #tmpTransferCustomerStorage)
-		DELETE FROM tblGRTransferStorageReference WHERE intToCustomerStorageId IN (SELECT intCustomerStorageId FROM #tmpTransferCustomerStorage)
+		DELETE FROM tblGRCustomerStorage WHERE intCustomerStorageId IN (SELECT [intToCustomerStorage] FROM #tmpTransferCustomerStorage)
+		DELETE FROM tblGRTransferStorageReference WHERE intToCustomerStorageId IN (SELECT [intToCustomerStorage] FROM #tmpTransferCustomerStorage)
 
 		DONE:
 		IF @transCount = 0 COMMIT TRANSACTION
