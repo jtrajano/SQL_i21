@@ -273,6 +273,7 @@ BEGIN TRY
 			UPDATE	tblCTPriceFixationDetail
 			SET		intPriceFixationId	=	@intNewPriceFixationId,
 					dblNoOfLots			=	@dblReassignPricing,
+					dblHedgeNoOfLots	=	@dblReassignPricing,
 					dblQuantity			=	(@dblRecipientQty / @dblRecipientNoOfLots) * @dblReassignPricing
 			WHERE	intPriceFixationDetailId = @intNewPriceFixationDetailId
 			
