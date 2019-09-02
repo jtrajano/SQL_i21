@@ -316,7 +316,7 @@ BEGIN
 						AND cb.intItemUOMId = @intItemUOMId
 						AND cb.intSubLocationId = @intSubLocationId 
 						AND cb.intItemLocationId = @intItemLocationId 						
-				ORDER BY cb.dtmCreated ASC
+				ORDER BY cb.dtmCreated DESC
 
 				IF @intStorageLocationId IS NULL
 				BEGIN
