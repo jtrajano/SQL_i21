@@ -26,5 +26,6 @@
     CONSTRAINT [FK_tblTRCrossReferenceBol_tblARSalesperson_intDriverId] FOREIGN KEY ([intDriverId]) REFERENCES [tblARSalesperson](intEntityId),
     CONSTRAINT [FK_tblTRCrossReferenceBol_tblSCTruckDriverReference_intTruckId] FOREIGN KEY ([intTruckId]) REFERENCES [tblSCTruckDriverReference](intTruckDriverReferenceId),
     CONSTRAINT [FK_tblTRCrossReferenceBol_tblSMShipViaTrailer_intTrailerId] FOREIGN KEY ([intTrailerId]) REFERENCES [tblSMShipViaTrailer](intEntityShipViaTrailerId),
-    CONSTRAINT [FK_tblTRCrossReferenceBol_tblSMShipVia_intCarrierId] FOREIGN KEY ([intCarrierId]) REFERENCES [tblSMShipVia](intEntityId)
+    CONSTRAINT [FK_tblTRCrossReferenceBol_tblSMShipVia_intCarrierId] FOREIGN KEY ([intCarrierId]) REFERENCES [tblSMShipVia](intEntityId),
+    CONSTRAINT [UK_tblTRCrossReferenceBol_strType_strImportValue] UNIQUE ([strType], [strImportValue]) 
 )

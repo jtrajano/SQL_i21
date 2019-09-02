@@ -75,7 +75,8 @@ BEGIN
 				SUM(LD.dblDropGross) dblDropGross, 
 				SUM(LD.dblDropNet) dblDropNet,
 				LD.strBillOfLading
-			FROM tblTRImportLoadDetail LD WHERE LD.ysnValid = 1 AND LD.intLoadHeaderId = @intLoadHeaderId
+			FROM tblTRImportLoadDetail LD 
+			WHERE LD.ysnValid = 1 AND LD.intLoadHeaderId = @intLoadHeaderId
 			GROUP BY LD.intVendorId, LD.intSupplyPointId, LD.intVendorCompanyLocationId, LD.intPullProductId, LD.strBillOfLading
 
 			DECLARE @intVendorId INT = NULL,
@@ -100,7 +101,8 @@ BEGIN
 
 				SELECT @intReceiptTaxGroupId = EL.intTaxGroupId, @strReceiptZipCode = EL.strZipCode, @strGrossNet = ISNULL(SP.strGrossOrNet, 'Gross') FROM tblTRSupplyPoint SP
 				INNER JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = SP.intEntityLocationId 
-				WHERE SP.intSupplyPointId = @intSupplyPointId AND EL.intEntityId = @intVendorId
+				WHERE ISNULL(SP.intSupplyPointId, 0) = ISNULL(@intSupplyPointId, 0) 
+				AND ISNULL(EL.intEntityId, 0) = ISNULL(@intVendorId, 0)
 
 				-- RECEIPT COUNTER
 				SET @intReceiptCounter = @intReceiptCounter + 1
@@ -158,9 +160,9 @@ BEGIN
 					strReceiptZipCode = @strReceiptZipCode,
 					strGrossNet = @strGrossNet
 				WHERE intImportLoadId = @intImportLoadId
-				AND intVendorId = @intVendorId
-				AND intSupplyPointId = @intSupplyPointId
-				AND intVendorCompanyLocationId = @intVendorCompanyLocationId
+				AND ISNULL(intVendorId, 0) = ISNULL(@intVendorId, 0)
+				AND ISNULL(intSupplyPointId, 0) = ISNULL(@intSupplyPointId, 0)
+				AND ISNULL(intVendorCompanyLocationId, 0) = ISNULL(@intVendorCompanyLocationId, 0)
 				AND intPullProductId = @intPullProductId
 				AND strBillOfLading = @strBillOfLading
 				AND ysnValid = 1
@@ -178,22 +180,21 @@ BEGIN
 				LD.intCustomerId, 
 				LD.intShipToId, 
 				LD.intCustomerCompanyLocationId,
-				LD.intDropProductId,
-				LD.dtmInvoiceDate
-			FROM tblTRImportLoadDetail LD WHERE LD.ysnValid = 1 AND LD.intLoadHeaderId = @intLoadHeaderId
+				LD.intDropProductId
+			FROM tblTRImportLoadDetail LD WHERE LD.ysnValid = 1 
+			AND LD.intLoadHeaderId = @intLoadHeaderId
 
 			DECLARE @intCustomerId INT = NULL,
 				@intShipToId INT = NULL,
 				@intCustomerCompanyLocationId INT = NULL,		
 				@intDropProductId INT = NULL,
-				@dtmInvoiceDate DATETIME = NULL,
 				@intLoadDistributionHeaderId INT = NULL,
 				@strDestination NVARCHAR(20) = NULL,
 				@intSalePerson INT = NULL
 
 
 			OPEN @CursorDistributionTran
-			FETCH NEXT FROM @CursorDistributionTran INTO @intCustomerId, @intShipToId, @intCustomerCompanyLocationId, @intDropProductId, @dtmInvoiceDate
+			FETCH NEXT FROM @CursorDistributionTran INTO @intCustomerId, @intShipToId, @intCustomerCompanyLocationId, @intDropProductId
 			WHILE @@FETCH_STATUS = 0
 			BEGIN
 
@@ -217,17 +218,18 @@ BEGIN
 					@intShipToId,
 					@intCustomerCompanyLocationId,
 					@intSalePerson,
-					@dtmInvoiceDate,
+					@dtmPullDate,
 					1)
 
 				SET @intLoadDistributionHeaderId = @@identity
 						
 				UPDATE tblTRImportLoadDetail SET intLoadDistributionHeaderId = @intLoadDistributionHeaderId
-				WHERE intImportLoadId = @intImportLoadId AND intCustomerId = @intCustomerId 
-				AND intShipToId = @intShipToId 
-				AND intCustomerCompanyLocationId = @intCustomerCompanyLocationId 
-				AND intDropProductId = @intDropProductId 
-				AND dtmInvoiceDate = @dtmInvoiceDate
+				WHERE intImportLoadId = @intImportLoadId 
+				AND ISNULL(intCustomerId, 0) = ISNULL(@intCustomerId, 0) 
+				AND ISNULL(intShipToId, 0) = ISNULL(@intShipToId, 0) 
+				AND ISNULL(intCustomerCompanyLocationId, 0) = ISNULL(@intCustomerCompanyLocationId, 0) 
+				AND ISNULL(intDropProductId, 0) = ISNULL(@intDropProductId, 0) 
+				AND dtmPullDate = @dtmPullDate
 				AND ysnValid = 1
 
 				-- DISTRIBUTION DETAIL - BLENDING - START
@@ -239,7 +241,8 @@ BEGIN
 					SUM(LD.dblDropNet) dblDropNet,
 					LD.strBillOfLading,
 					LD.strGrossNet
-				FROM tblTRImportLoadDetail LD WHERE LD.ysnValid = 1 AND LD.intLoadHeaderId = @intLoadHeaderId 
+				FROM tblTRImportLoadDetail LD WHERE LD.ysnValid = 1 
+				AND LD.intLoadHeaderId = @intLoadHeaderId 
 				AND LD.intLoadDistributionHeaderId = @intLoadDistributionHeaderId
 				AND LD.intPullProductId <> LD.intDropProductId
 				GROUP BY LD.intPullProductId, LD.intDropProductId, LD.strBillOfLading, LD.strGrossNet
@@ -287,7 +290,8 @@ BEGIN
 						SET @intLoadDistributionDetailId = @@identity
 
 						UPDATE tblTRImportLoadDetail SET intLoadDistributionDetailId = @intLoadDistributionDetailId
-						WHERE intImportLoadId = @intImportLoadId AND intLoadDistributionHeaderId = @intLoadDistributionHeaderId
+						WHERE intImportLoadId = @intImportLoadId 
+						AND intLoadDistributionHeaderId = @intLoadDistributionHeaderId
 						AND intDropProductId = @intDDDropProductId
 						AND ysnValid = 1
 
@@ -350,7 +354,9 @@ BEGIN
 					LD.strReceiptLink,
 					LD.strReceiptZipCode,
 					LD.strGrossNet
-				FROM tblTRImportLoadDetail LD WHERE LD.ysnValid = 1 AND LD.intLoadHeaderId = @intLoadHeaderId 
+				FROM tblTRImportLoadDetail LD 
+				WHERE LD.ysnValid = 1 
+				AND LD.intLoadHeaderId = @intLoadHeaderId 
 				AND LD.intLoadDistributionHeaderId = @intLoadDistributionHeaderId
 				AND LD.intPullProductId = LD.intDropProductId
 				GROUP BY LD.intPullProductId, LD.intDropProductId, LD.strBillOfLading, LD.strReceiptLink, LD.strReceiptZipCode, LD.strGrossNet
@@ -371,8 +377,16 @@ BEGIN
 				WHILE @@FETCH_STATUS = 0
 				BEGIN
 					-- GET TAX GROUP 
-					SELECT @intNonBlendTaxGroupId = EL.intTaxGroupId FROM tblEMEntityLocation EL
-					WHERE EL.intEntityLocationId = @intShipToId
+					IF(@intShipToId IS NOT NULL)
+					BEGIN
+						SELECT @intNonBlendTaxGroupId = EL.intTaxGroupId FROM tblEMEntityLocation EL
+						WHERE EL.intEntityLocationId = @intShipToId
+					END
+					ELSE
+					BEGIN
+						SELECT @intNonBlendTaxGroupId = intTaxGroupId FROM tblSMCompanyLocation 
+						WHERE intCompanyLocationId = @intCustomerCompanyLocationId 
+					END
 
 					-- FREIGHT RATE & SURCHARGE - RECEIPT
 					DECLARE @dblReceiptGallon DECIMAL(18,6) = NULL,
@@ -409,7 +423,7 @@ BEGIN
 							,@dblReceiptGallon
 							,@dblReceiptGallon
 							,@dtmPullDate
-							,@dtmInvoiceDate
+							,@dtmPullDate
 							,@ysnToBulkPlant
 							,@dblFreightRateDistribution OUTPUT
 							,@dblFreightRateReceipt OUTPUT
@@ -449,7 +463,8 @@ BEGIN
 					SET @intNonBlendLoadDistributionDetailId = @@identity
 
 					UPDATE tblTRImportLoadDetail SET intLoadDistributionDetailId = @intNonBlendLoadDistributionDetailId
-					WHERE intImportLoadId = @intImportLoadId AND intLoadDistributionHeaderId = @intLoadDistributionHeaderId
+					WHERE intImportLoadId = @intImportLoadId 
+					AND intLoadDistributionHeaderId = @intLoadDistributionHeaderId
 					AND intDropProductId = @intNonBlendDropProductId
 					AND ysnValid = 1
 
@@ -459,7 +474,7 @@ BEGIN
 				DEALLOCATE @CursorDistributionDetailNonBlendTran
 				-- DISTRIBUTION DETAIL - NON BLENDING - END
 
-				FETCH NEXT FROM @CursorDistributionTran INTO @intCustomerId, @intShipToId, @intCustomerCompanyLocationId, @intDropProductId, @dtmInvoiceDate
+				FETCH NEXT FROM @CursorDistributionTran INTO @intCustomerId, @intShipToId, @intCustomerCompanyLocationId, @intDropProductId
 			END
 			CLOSE @CursorDistributionTran
 			DEALLOCATE @CursorDistributionTran
@@ -507,14 +522,6 @@ BEGIN
 		BEGIN
 					
 			SELECT TOP 1 @intOVReceiptTaxGroupId = OTGD.intReceiptTaxGroupId, @intOVDistributionTaxGroupId = OTGD.intDistributionTaxGroupId FROM tblTROverrideTaxGroupDetail OTGD
-			WHERE OTGD.intSupplierId = @intOVTerminalId
-				AND OTGD.intSupplyPointId = @intOVSupplyPointId
-				AND OTGD.strReceiptState = @strOVReceiptState
-				AND OTGD.intCustomerId = @intOVEntityCustomerId
-				AND OTGD.intCustomerShipToId = @intOVShipToLocationId
-				AND OTGD.strDistributionState = @strOVDistributionState
-				AND OTGD.intBulkLocationId = @intOVBulkLocationId
-				AND OTGD.intShipViaId = @intShipViaId
 			ORDER BY intOverrideTaxGroupDetailId
 
 			IF(@intOVReceiptTaxGroupId IS NOT NULL)
