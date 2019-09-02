@@ -30,7 +30,9 @@ BEGIN
 			@strPullProduct NVARCHAR(100) = NULL,
 			@strDropProduct NVARCHAR(100) = NULL,
 		    @ysnValid BIT = NULL,
-			@strMessage NVARCHAR(MAX) = NULL
+			@strMessage NVARCHAR(MAX) = NULL,
+			@strBillOfLading NVARCHAR(200) = NULL,
+			@dtmPullDate DATETIME = NULL
 	
 		DECLARE @CursorTran AS CURSOR
 
@@ -47,6 +49,8 @@ BEGIN
 			, D.strDropProduct 
 			, D.ysnValid
 			, D.strMessage
+			, D.strBillOfLading
+			, D.dtmPullDate
 		FROM tblTRImportLoad L 
 		INNER JOIN tblTRImportLoadDetail D ON D.intImportLoadId = L.intImportLoadId
 		WHERE L.guidImportIdentifier = @guidImportIdentifier AND D.ysnValid = 1 
@@ -54,9 +58,17 @@ BEGIN
 		BEGIN TRANSACTION
 
 		OPEN @CursorTran
-		FETCH NEXT FROM @CursorTran INTO @intImportLoadDetailId, @strTruck, @strTerminal, @strCarrier, @strDriver, @strTrailer, @strSupplier, @strDestination, @strPullProduct, @strDropProduct, @ysnValid, @strMessage
+		FETCH NEXT FROM @CursorTran INTO @intImportLoadDetailId, @strTruck, @strTerminal, @strCarrier, @strDriver, @strTrailer, @strSupplier, @strDestination, @strPullProduct, @strDropProduct, @ysnValid, @strMessage, @strBillOfLading, @dtmPullDate 
 		WHILE @@FETCH_STATUS = 0
 		BEGIN	
+
+			-- BOL AND LOAD DATETIME
+			IF EXISTS(SELECT TOP 1 1 FROM tblTRLoadHeader LH INNER JOIN tblTRLoadReceipt LR ON LR.intLoadHeaderId = LH.intLoadHeaderId
+			WHERE LH.dtmLoadDateTime = @dtmPullDate
+			AND LR.strBillOfLading = @strBillOfLading)
+			BEGIN
+				SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, 'Load has already been imported')
+			END
 
 			-- SHIP VIA / CARRIER
 			DECLARE @intCarrierId INT = NULL
@@ -215,7 +227,7 @@ BEGIN
 				UPDATE tblTRImportLoadDetail SET strMessage = @strMessage, ysnValid = 0 WHERE intImportLoadDetailId = @intImportLoadDetailId
 			END
 
-			FETCH NEXT FROM @CursorTran INTO @intImportLoadDetailId, @strTruck, @strTerminal, @strCarrier, @strDriver, @strTrailer, @strSupplier, @strDestination, @strPullProduct, @strDropProduct, @ysnValid, @strMessage
+			FETCH NEXT FROM @CursorTran INTO @intImportLoadDetailId, @strTruck, @strTerminal, @strCarrier, @strDriver, @strTrailer, @strSupplier, @strDestination, @strPullProduct, @strDropProduct, @ysnValid, @strMessage, @strBillOfLading, @dtmPullDate
 		END
 		CLOSE @CursorTran
 		DEALLOCATE @CursorTran
