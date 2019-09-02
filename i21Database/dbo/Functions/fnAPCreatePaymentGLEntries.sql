@@ -187,15 +187,15 @@ BEGIN
 			A.dblExchangeRate
 			) AS tmpSummaryPayment
 			GROUP BY tmpSummaryPayment.intPaymentId
-			UNION ALL
-			SELECT		DISTINCT
-					[intPaymentId]					=	A.intPaymentId,
-					[dblCredit]	 					=	CAST(paymentDetail.dblPayment * ISNULL(NULLIF(A.dblExchangeRate,0),1) AS DECIMAL(18,6)),
-					[dblCreditForeign]				=	paymentDetail.dblPayment
-			FROM	[dbo].tblAPPayment A 
-			INNER JOIN tblAPPaymentDetail paymentDetail ON A.intPaymentId = paymentDetail.intPaymentId
-			WHERE	A.intPaymentId IN (SELECT intId FROM @paymentIds)
-			AND paymentDetail.dblPayment != 0 AND paymentDetail.intInvoiceId > 0
+			-- UNION ALL
+			-- SELECT		DISTINCT
+			-- 		[intPaymentId]					=	A.intPaymentId,
+			-- 		[dblCredit]	 					=	CAST(paymentDetail.dblPayment * ISNULL(NULLIF(A.dblExchangeRate,0),1) AS DECIMAL(18,6)),
+			-- 		[dblCreditForeign]				=	paymentDetail.dblPayment
+			-- FROM	[dbo].tblAPPayment A 
+			-- INNER JOIN tblAPPaymentDetail paymentDetail ON A.intPaymentId = paymentDetail.intPaymentId
+			-- WHERE	A.intPaymentId IN (SELECT intId FROM @paymentIds)
+			-- AND paymentDetail.dblPayment != 0 AND paymentDetail.intInvoiceId > 0
 
 			UNION ALL
 			SELECT		DISTINCT
