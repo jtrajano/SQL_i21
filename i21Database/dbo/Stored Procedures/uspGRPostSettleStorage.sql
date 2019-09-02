@@ -1273,6 +1273,7 @@ BEGIN TRY
 								,[dblForeignRate]
 								,[strRateType]
 							)
+
 							EXEC uspGRCreateGLEntries 
 							 'Storage Settlement'
 							,'OtherCharges'
@@ -1280,6 +1281,8 @@ BEGIN TRY
 							,@strBatchId
 							,@intCreatedUserId
 							,@ysnPosted
+																					
+						
 
 							IF EXISTS (SELECT TOP 1 1 FROM @GLEntries) 
 							BEGIN 
@@ -1718,9 +1721,21 @@ BEGIN TRY
 				UPDATE @voucherPayable SET dblQuantityToBill = dblQuantityToBill * -1 WHERE ISNULL(dblCost,0) < 0
 				UPDATE @voucherPayable SET dblCost = dblCost * -1 WHERE ISNULL(dblCost,0) < 0
 				
-				IF EXISTS(SELECT * FROM @voucherPayable vp INNER JOIN tblICItem I ON I.intItemId = vp.intItemId WHERE I.strType = 'Inventory')
-				BEGIN 
+				DECLARE @dblVoucherTotal DECIMAL(18,6)
+
+				SELECT
+					@dblVoucherTotal = SUM(dblQtyReceived * dblCost)
+				FROM @voucherDetailStorage
+				
+				IF @dblVoucherTotal > 0 AND EXISTS(SELECT NULL FROM @voucherDetailStorage DS INNER JOIN tblICItem I on I.intItemId = DS.intItemId WHERE I.strType = 'Inventory')
+				BEGIN
 				EXEC uspAPCreateVoucher @voucherPayable, @voucherPayableTax, @intCreatedUserId, 1, @ErrMsg, @createdVouchersId OUTPUT
+				END
+				IF(EXISTS(SELECT NULL FROM @voucherDetailStorage DS INNER JOIN tblICItem I on I.intItemId = DS.intItemId WHERE I.strType = 'Inventory'))
+				BEGIN
+					BEGIN
+					RAISERROR('Total Voucher will be negative',16,1)
+					END
 				END
 
 				IF @createdVouchersId IS NOT NULL
