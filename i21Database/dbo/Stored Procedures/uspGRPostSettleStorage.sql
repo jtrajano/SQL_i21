@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspGRPostSettleStorage]
 	 @intSettleStorageId INT
 	,@ysnPosted BIT
+	,@ysnFromPriceBasisContract BIT = 0
 AS
 BEGIN TRY
 	SET NOCOUNT ON
@@ -189,11 +190,12 @@ BEGIN TRY
 	
 	/* create child settle storage (with voucher) 
 	NOTE: parent settle storage doesn't have a voucher associated in it */
-	EXEC uspGRCreateSettleStorage @intSettleStorageId
+	IF(@ysnFromPriceBasisContract = 0)
+		EXEC uspGRCreateSettleStorage @intSettleStorageId
 
 	SELECT @intSettleStorageId = MIN(intSettleStorageId)
 	FROM tblGRSettleStorage
-	WHERE intParentSettleStorageId = @intParentSettleStorageId
+	WHERE CASE WHEN @ysnFromPriceBasisContract = 1 THEN CASE WHEN intSettleStorageId = @intSettleStorageId THEN 1 ELSE 0 END ELSE CASE WHEN intParentSettleStorageId = @intParentSettleStorageId THEN 1 ELSE 0 END END = 1
 
 	WHILE @intSettleStorageId > 0
 	BEGIN		
@@ -1081,7 +1083,8 @@ BEGIN TRY
 					AND CU.ysnStockUnit = 1
 				WHERE SV.intItemType = 1
 
-				--Reduce the On-Storage Quantity		
+				--Reduce the On-Storage Quantity
+				IF(@ysnFromPriceBasisContract = 0)		
 				BEGIN
 					EXEC uspICPostStorage 
 						 @ItemsToStorage
@@ -1102,7 +1105,7 @@ BEGIN TRY
 					  FROM tblICInventoryReceiptItem WHERE intInventoryReceiptId = @intReceiptId
 
 				END
-				
+				IF(@ysnFromPriceBasisContract = 0)	
 				BEGIN
 									
 						IF @strOwnedPhysicalStock ='Customer' 
@@ -1612,7 +1615,7 @@ BEGIN TRY
 					@dblVoucherTotal = SUM(dblQtyReceived * dblCost)
 				FROM @voucherDetailStorage
 
-				IF @dblVoucherTotal > 0
+				IF @dblVoucherTotal > 0 AND EXISTS(SELECT NULL FROM @voucherDetailStorage DS INNER JOIN tblICItem I on I.intItemId = DS.intItemId WHERE I.strType = 'Inventory')
 				BEGIN
 					EXEC [dbo].[uspAPCreateBillData] 
 						@userId = @intCreatedUserId
@@ -1629,7 +1632,10 @@ BEGIN TRY
 				END
 				ELSE
 				BEGIN
+					IF(EXISTS(SELECT NULL FROM @voucherDetailStorage DS INNER JOIN tblICItem I on I.intItemId = DS.intItemId WHERE I.strType = 'Inventory'))
+					BEGIN
 					RAISERROR('Total Voucher will be negative',16,1)
+					END
 				END
 
 				IF @intCreatedBillId IS NOT NULL
@@ -1713,6 +1719,7 @@ BEGIN TRY
 
 			-------------------------xxxxxxxxxxxxxxxxxx------------------------------
 			---6.DP Contract Depletion, Purchase Contract Depletion,Storage Ticket Depletion
+			IF(@ysnFromPriceBasisContract = 0)	
 			BEGIN
 
 				SELECT @intDepletionKey = MIN(intDepletionKey)
@@ -1784,6 +1791,7 @@ BEGIN TRY
 			END
 
 			--7. HiStory Creation
+			IF(@ysnFromPriceBasisContract = 0)	
 			BEGIN
 				INSERT INTO [dbo].[tblGRStorageHistory] 
 				(
@@ -1828,13 +1836,15 @@ BEGIN TRY
 				WHERE SV.intItemType = 1
 			END
 
-			UPDATE tblGRSettleStorage
-			SET ysnPosted = 1
-				,intBillId = CASE 
-								WHEN @intCreatedBillId = 0 THEN NULL 
-								ELSE @intCreatedBillId 
-							END
-			WHERE intSettleStorageId = @intSettleStorageId
+			BEGIN
+				UPDATE tblGRSettleStorage
+				SET ysnPosted = 1
+					,intBillId = CASE 
+									WHEN @intCreatedBillId = 0 THEN NULL 
+									ELSE @intCreatedBillId 
+								END
+				WHERE intSettleStorageId = @intSettleStorageId
+			END
 		END
 
 	SELECT @intSettleStorageId = MIN(intSettleStorageId)
