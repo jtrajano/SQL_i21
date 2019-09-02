@@ -120,9 +120,9 @@ GO
 
 	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'AccountsReceivable.view.Quote') 
 		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [ysnApproval], [ysnActivity], [intConcurrencyId], [strGroupName]) 
-		VALUES (N'Quote', N'Quote', N'AccountsReceivable.view.Quote', N'Accounts Receivable', N'tblSOSalesOrder',  1,  1,  0, N'Transaction')
+		VALUES (N'Quote', N'Quote', N'AccountsReceivable.view.Quote', N'Accounts Receivable', N'tblSOSalesOrder',  0,  1,  0, N'Transaction')
 	ELSE
-		UPDATE tblSMScreen SET strTableName = 'tblSOSalesOrder', ysnApproval = 1, ysnActivity = 1, strGroupName = 'Transaction' WHERE strNamespace = 'AccountsReceivable.view.Quote'
+		UPDATE tblSMScreen SET strTableName = 'tblSOSalesOrder', ysnApproval = 0, ysnActivity = 1, strGroupName = 'Transaction' WHERE strNamespace = 'AccountsReceivable.view.Quote'
 
 	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'AccountsReceivable.view.SalesOrder') 
 		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [ysnApproval], [ysnActivity], [intConcurrencyId], [strGroupName]) 
@@ -155,13 +155,13 @@ GO
 	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'RiskManagement.view.FuturesOptionsTransactions') 
 		BEGIN
 			INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [ysnApproval], [ysnActivity], [intConcurrencyId], [strGroupName]) 
-			VALUES (N'Futures Options Transactions', N'Futures Options Transactions', N'RiskManagement.view.FuturesOptionsTransactions', N'Risk Management', N'tblRKFutOptTransaction', 1,  1,  0, N'Risk Management')
+			VALUES (N'Futures Options Transactions', N'Futures Options Transactions', N'RiskManagement.view.FuturesOptionsTransactions', N'Risk Management', N'tblRKFutOptTransaction', 0,  1,  0, N'Risk Management')
 		END
 	ELSE
 		BEGIN
 			UPDATE tblSMScreen
 			SET strTableName = 'tblRKFutOptTransaction',
-				ysnApproval = 1,
+				ysnApproval = 0,
 				ysnActivity = 1,
 				strGroupName = 'Risk Management'
 			WHERE strNamespace = 'RiskManagement.view.FuturesOptionsTransactions'
@@ -218,13 +218,13 @@ GO
 	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Manufacturing.view.WorkOrder') 
 		BEGIN
 			INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [ysnApproval], [ysnCustomTab], [ysnActivity], [intConcurrencyId], [strGroupName]) 
-			VALUES (N'WorkOrder', N'Work Order', N'Manufacturing.view.WorkOrder', N'Manufacturing', N'tblMFWorkOrder', 1, 1, 1, 0, N'Manufacturing')
+			VALUES (N'WorkOrder', N'Work Order', N'Manufacturing.view.WorkOrder', N'Manufacturing', N'tblMFWorkOrder', 0, 1, 1, 0, N'Manufacturing')
 		END
 	ELSE
 		BEGIN
 			UPDATE tblSMScreen
 			SET strTableName = N'tblMFWorkOrder',
-				ysnApproval = 1, 
+				ysnApproval = 0, 
 				ysnCustomTab = 1,
 				ysnActivity = 1,
 				strGroupName = N'Manufacturing'
@@ -234,13 +234,13 @@ GO
 	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Manufacturing.view.ProcessProductionConsume') 
 		BEGIN
 			INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [ysnApproval], [ysnCustomTab], [ysnActivity], [intConcurrencyId], [strGroupName]) 
-			VALUES (N'ProcessProductionConsume', N'Process Production Consume', N'Manufacturing.view.ProcessProductionConsume', N'Manufacturing', N'tblMFWorkOrderInputLot', 1, 1, 1, 0, N'Manufacturing')
+			VALUES (N'ProcessProductionConsume', N'Process Production Consume', N'Manufacturing.view.ProcessProductionConsume', N'Manufacturing', N'tblMFWorkOrderInputLot', 0, 1, 1, 0, N'Manufacturing')
 		END
 	ELSE
 		BEGIN
 			UPDATE tblSMScreen
 			SET strTableName = N'tblMFWorkOrderInputLot',
-				ysnApproval = 1, 
+				ysnApproval = 0, 
 				ysnCustomTab = 1,
 				ysnActivity = 1,
 				strGroupName = N'Manufacturing'
@@ -250,13 +250,13 @@ GO
 	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Manufacturing.view.ProcessProductionProduce') 
 	BEGIN
 		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [ysnApproval], [ysnCustomTab], [ysnActivity], [intConcurrencyId], [strGroupName]) 
-		VALUES (N'ProcessProductionProduce', N'Process Production Produce', N'Manufacturing.view.ProcessProductionProduce', N'Manufacturing', N'tblMFWorkOrderProducedLot', 1, 1, 1, 0, N'Manufacturing')
+		VALUES (N'ProcessProductionProduce', N'Process Production Produce', N'Manufacturing.view.ProcessProductionProduce', N'Manufacturing', N'tblMFWorkOrderProducedLot', 0, 1, 1, 0, N'Manufacturing')
 	END
 	ELSE
 	BEGIN
 		UPDATE tblSMScreen
 		SET strTableName = N'tblMFWorkOrderProducedLot',
-			ysnApproval = 1, 
+			ysnApproval = 0, 
 			ysnCustomTab = 1,
 			ysnActivity = 1,
 			strGroupName = N'Manufacturing'
@@ -284,14 +284,14 @@ GO
 	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Inventory.view.InventoryReceipt')
     BEGIN
         INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [ysnCustomTab], [ysnApproval], [ysnActivity], [intConcurrencyId], [strGroupName])
-            VALUES (N'InventoryReceipt', N'Inventory Receipt', N'Inventory.view.InventoryReceipt', N'Inventory', N'tblICInventoryReceipt', 1, 1, 1, 0, N'Inventory')
+            VALUES (N'InventoryReceipt', N'Inventory Receipt', N'Inventory.view.InventoryReceipt', N'Inventory', N'tblICInventoryReceipt', 1, 0, 1, 0, N'Inventory')
         END
 	ELSE
 		BEGIN
 			UPDATE tblSMScreen
 			SET strTableName = N'tblICInventoryReceipt',
 				strScreenId = N'InventoryReceipt',
-				ysnApproval = 1, 
+				ysnApproval = 0, 
 				ysnCustomTab = 1,
 				ysnActivity = 1,
 				strGroupName = N'Inventory'
@@ -301,14 +301,14 @@ GO
 	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Inventory.view.InventoryShipment')
     BEGIN
         INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [ysnCustomTab], [ysnApproval], [ysnActivity], [intConcurrencyId], [strGroupName])
-            VALUES (N'InventoryShipment', N'Inventory Shipment', N'Inventory.view.InventoryShipment', N'Inventory', N'tblICInventoryShipment', 1, 1, 1, 0, N'Inventory')
+            VALUES (N'InventoryShipment', N'Inventory Shipment', N'Inventory.view.InventoryShipment', N'Inventory', N'tblICInventoryShipment', 1, 0, 1, 0, N'Inventory')
         END
 	ELSE
 		BEGIN
 			UPDATE tblSMScreen
 			SET strTableName = N'tblICInventoryShipment',
 				strScreenId = N'InventoryShipment',
-				ysnApproval = 1, 
+				ysnApproval = 0, 
 				ysnCustomTab = 1,
 				ysnActivity = 1,
 				strGroupName = N'Inventory'
@@ -318,14 +318,14 @@ GO
 	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Inventory.view.Item')
     BEGIN
         INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [ysnCustomTab], [ysnApproval], [ysnActivity], [intConcurrencyId], [strGroupName])
-            VALUES (N'Item', N'Item', N'Inventory.view.Item', N'Inventory', N'tblICItem', 1, 1, 1, 0, N'Inventory')
+            VALUES (N'Item', N'Item', N'Inventory.view.Item', N'Inventory', N'tblICItem', 1, 0, 0, 0, N'Inventory')
         END
 	ELSE
 		BEGIN
 			UPDATE tblSMScreen
 			SET strTableName = N'tblICItem',
 				strScreenId = N'Item',
-				ysnApproval = 1, 
+				ysnApproval = 0, 
 				ysnCustomTab = 1,
 				ysnActivity = 1,
 				strGroupName = N'Inventory'
