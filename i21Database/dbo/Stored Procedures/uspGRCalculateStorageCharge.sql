@@ -641,7 +641,10 @@ BEGIN TRY
 				   
 				   IF @FlatFeeCalculatioFromDate IS NULL
 				   BEGIN
+						IF(@dtmDEffectiveDate <= @dtmDeliveryDate and @dtmEndingDate >= @dtmDeliveryDate)
+						BEGIN
 						SET @dblFlatFeeTotal		=  ISNULL(@dblFlatFeeTotal, 0) + @dblFeeRate
+						END
                    END
 				   ELSE
 				   BEGIN
@@ -1016,8 +1019,11 @@ BEGIN TRY
 			BEGIN
 			       IF @FlatFeeCalculatioFromDate IS NULL
 				   BEGIN
+						IF(@dtmDEffectiveDate <= @dtmDeliveryDate and @dtmEndingDate >= @dtmDeliveryDate)
+						BEGIN
 						SET @dblFlatFeeTotal		=  ISNULL(@dblFlatFeeTotal, 0) + @dblFeeRate
-			       END
+						END
+                   END
 				   ELSE
 				   BEGIN
 			
