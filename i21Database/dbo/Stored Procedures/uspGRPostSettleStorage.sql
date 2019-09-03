@@ -5,7 +5,7 @@
 AS
 BEGIN TRY
 	SET NOCOUNT ON
-
+	
 	DECLARE @ErrMsg NVARCHAR(MAX)
 	DECLARE @adjustCostOfDelayedPricingStock AS [ItemCostAdjustmentTableType]
 	DECLARE @voucherDetailStorage AS [VoucherDetailStorage]
@@ -141,6 +141,7 @@ BEGIN TRY
 		,intContractUOMId INT
 		,dblCostUnitQty DECIMAL(24, 10)
 		,strPricingType NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
+		,intFuturesMonthId int null
 	)
 	
 	DECLARE @tblDepletion AS TABLE 
@@ -222,6 +223,7 @@ BEGIN TRY
 		
 		IF @intFutureMarketId > 0
 		BEGIN
+			
 			SELECT TOP 1 
 				@dblFutureMarkePrice = ISNULL(a.dblLastSettle,0)
 			FROM tblRKFutSettlementPriceMarketMap a 
@@ -233,6 +235,7 @@ BEGIN TRY
 				ON d.intFutureMarketId = b.intFutureMarketId
 			WHERE b.intFutureMarketId = @intFutureMarketId 
 			ORDER by b.dtmPriceDate DESC
+			
 		END
 
 		SET @intCurrencyId = ISNULL(
@@ -309,6 +312,7 @@ BEGIN TRY
 				,intContractUOMId
 				,dblCostUnitQty
 				,strPricingType
+				,intFuturesMonthId
 			)
 			SELECT 
 				 intSettleContractId 	= SSC.intSettleContractId 
@@ -321,13 +325,14 @@ BEGIN TRY
 				,intContractUOMId	 	= CD.intContractUOMId
 				,dblCostUnitQty		 	= CD.dblCostUnitQty
 				,strPricingType			= CD.strPricingType
+				,intFuturesMonthId		= CD.intGetContractDetailFutureMonthId
 			FROM tblGRSettleContract SSC
 			JOIN vyuGRGetContracts CD 
 				ON CD.intContractDetailId = SSC.intContractDetailId
 			WHERE intSettleStorageId = @intSettleStorageId 
 				AND SSC.dblUnits > 0
 			ORDER BY SSC.intSettleContractId
-
+			
 			IF EXISTS(SELECT TOP 1 1 FROM @SettleContract WHERE strPricingType = 'Basis')
 			BEGIN
 				IF @intFutureMarketId = 0 AND @ysnExchangeTraded = 1
@@ -336,6 +341,22 @@ BEGIN TRY
 					RAISERROR(@ErrMsg,16,1,1)
 					RETURN;
 				END
+				
+				declare @intFuturesMonthId int 
+
+				select @intFuturesMonthId = intFuturesMonthId from @SettleContract where intFuturesMonthId is not null
+
+				if @intFuturesMonthId is not null
+				begin
+					select top 1 @dblFutureMarkePrice = a.dblLastSettle  FROM tblRKFutSettlementPriceMarketMap a 
+					JOIN tblRKFuturesSettlementPrice b 
+						ON b.intFutureSettlementPriceId = a.intFutureSettlementPriceId			
+					WHERE b.intFutureMarketId = @intFutureMarketId 
+						and a.intFutureMonthId = @intFuturesMonthId
+					ORDER by b.dtmPriceDate DESC
+				end
+
+
 
 				IF @dblFutureMarkePrice <= 0
 				BEGIN
@@ -1986,3 +2007,4 @@ BEGIN CATCH
 	SET @ErrMsg = ERROR_MESSAGE()
 	RAISERROR (@ErrMsg,16,1,'WITH NOWAIT')
 END CATCH
+
