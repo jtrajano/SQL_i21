@@ -132,6 +132,7 @@ BEGIN TRY
 	SELECT @intScreenId = intScreenId
 	FROM tblSMScreen 
 	WHERE strNamespace = 'ContractManagement.view.PriceContracts'
+	AND ysnApproval = 1
 
 	SELECT @intTransactionId = intTransactionId
 	FROM tblSMTransaction
