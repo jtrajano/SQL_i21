@@ -49,7 +49,7 @@ IF @ForDelete = 1
 				WHERE intInvoiceId = @intInvoiceId
 				  AND intItemContractHeaderId IS NOT NULL
 
-				--UPDATE tblCTItemContractHeader SET ysnPrepaid = 0 WHERE intItemContractHeaderId = @intItemContractHeaderId
+				--UPDATE tblCTItemContractHeader SET ysnPrepaid = 0 WHERE intItemContractHeaderId = @intItemContractHeaderId 
 			END
 	END
 	

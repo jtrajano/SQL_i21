@@ -166,7 +166,6 @@
     <None Include="Scripts\Pre-Deployment\26_LG\0_DataCleanup.sql" />
     <None Include="Scripts\Pre-Deployment\22_PAT\7_VolumeConstraintFix.sql" />
     <None Include="Scripts\Pre-Deployment\22_PAT\6_VolumeSchemaFix.sql" />
-    <None Include="Scripts\Pre-Deployment\14_CT\1920_ItemContracts.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\DeleteScripts.sql" />
@@ -386,5 +385,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\6_GL\6_1910.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <Build Include="Scripts\Pre-Deployment\14_CT\1920_ItemContracts.sql" />
   </ItemGroup>
 </Project>
