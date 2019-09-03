@@ -1275,8 +1275,7 @@ BEGIN TRY
 		,0 AS intMainItemId
 	FROM (
 		SELECT intMonthId
-			--,FORMAT(DateAdd(month, intPositionId, - 1), 'MMM') + ' ' + FORMAT(DateAdd(month, intPositionId, - 1), 'yy') AS strMonth
-			,'' As strMonth
+			,LEFT(DATENAME(month,DateAdd(month, intPositionId, - 1)), 3) + ' ' + Right(DATENAME(Year,DateAdd(month, intPositionId, - 1)),  2) AS strMonth
 		FROM tblMFGenerateMonth
 		) src
 	PIVOT(MAX(src.strMonth) FOR src.intMonthId IN (
