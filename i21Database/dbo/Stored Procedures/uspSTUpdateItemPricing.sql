@@ -35,14 +35,10 @@ BEGIN TRY
 			@SalesEndDate   	NVARCHAR(50),
 			@ysnPreview			NVARCHAR(1),
 			@currentUserId		INT
-		
---TEST
-PRINT '01'
+	
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT, @XML 
 
---TEST
-PRINT '02'
 
 	SELECT	
 			@Location		 =	 Location,
@@ -87,15 +83,10 @@ PRINT '02'
     -- Insert statements for procedure here
 
 
---TEST
-PRINT '03'
 
 
 	-- Create the filter tables
 	BEGIN
-		--CREATE TABLE #tmpUpdateItemPricingForCStore_Location (
-		--	intLocationId INT 
-		--)
 		IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_Location') IS NULL 
 			BEGIN
 				CREATE TABLE #tmpUpdateItemPricingForCStore_Location (
@@ -103,10 +94,6 @@ PRINT '03'
 				)
 			END
 
-
-		--CREATE TABLE #tmpUpdateItemPricingForCStore_Vendor (
-		--	intVendorId INT 
-		--)
 		IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_Vendor') IS NULL 
 			BEGIN
 				CREATE TABLE #tmpUpdateItemPricingForCStore_Vendor (
@@ -114,10 +101,6 @@ PRINT '03'
 				)
 			END
 
-
-		--CREATE TABLE #tmpUpdateItemPricingForCStore_Category (
-		--	intCategoryId INT 
-		--)
 		IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_Category') IS NULL 
 			BEGIN
 				CREATE TABLE #tmpUpdateItemPricingForCStore_Category (
@@ -125,10 +108,6 @@ PRINT '03'
 				)
 			END
 
-
-		--CREATE TABLE #tmpUpdateItemPricingForCStore_Family (
-		--	intFamilyId INT 
-		--)
 		IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_Family') IS NULL 
 			BEGIN
 				CREATE TABLE #tmpUpdateItemPricingForCStore_Family (
@@ -136,10 +115,6 @@ PRINT '03'
 				)
 			END
 
-
-		--CREATE TABLE #tmpUpdateItemPricingForCStore_Class (
-		--	intClassId INT 
-		--)
 		IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_Class') IS NULL 
 			BEGIN
 				CREATE TABLE #tmpUpdateItemPricingForCStore_Class (
@@ -148,8 +123,6 @@ PRINT '03'
 			END
 
 
---TEST
-PRINT '04'
 
 
 		-- Create the temp table for the audit log. 
@@ -183,8 +156,6 @@ PRINT '04'
 
 
 
---TEST
-PRINT '05'
 
 
 
@@ -195,7 +166,6 @@ PRINT '05'
 				INSERT INTO #tmpUpdateItemPricingForCStore_Location (
 					intLocationId
 				)
-				--SELECT intLocationId = 2
 				SELECT [intID] AS intLocationId
 				FROM [dbo].[fnGetRowsFromDelimitedValues](@Location)
 			END
@@ -205,7 +175,6 @@ PRINT '05'
 				INSERT INTO #tmpUpdateItemPricingForCStore_Vendor (
 					intVendorId
 				)
-				--SELECT intVendorId = CAST(@Vendor AS INT)
 				SELECT [intID] AS intVendorId
 				FROM [dbo].[fnGetRowsFromDelimitedValues](@Vendor)
 			END
@@ -215,7 +184,6 @@ PRINT '05'
 				INSERT INTO #tmpUpdateItemPricingForCStore_Category (
 					intCategoryId
 				)
-				--SELECT intCategoryId = CAST(@Category AS INT)
 				SELECT [intID] AS intCategoryId
 				FROM [dbo].[fnGetRowsFromDelimitedValues](@Category)
 			END
@@ -225,7 +193,6 @@ PRINT '05'
 				INSERT INTO #tmpUpdateItemPricingForCStore_Family (
 					intFamilyId
 				)
-				--SELECT intFamilyId = CAST(@Family AS INT)
 				SELECT [intID] AS intFamilyId
 				FROM [dbo].[fnGetRowsFromDelimitedValues](@Family)
 			END
@@ -235,7 +202,6 @@ PRINT '05'
 				INSERT INTO #tmpUpdateItemPricingForCStore_Class (
 					intClassId
 				)
-				--SELECT intClassId = CAST(@Class AS INT)
 				SELECT [intID] AS intClassId
 				FROM [dbo].[fnGetRowsFromDelimitedValues](@Class)
 			END
@@ -243,8 +209,32 @@ PRINT '05'
 
 
 
---TEST
-PRINT '06'
+
+
+	-- SELECT strDistrict, strRegion, strState, * FROM tblSTStore
+	-- ==========================================================================================
+	-- [START] - IF (@Location=EMPTY OR IS NULL) (strDistrict and strRegion and strState are nulls)
+	-- ==========================================================================================
+	IF(@Location IS NULL AND @Region IS NOT NULL AND @District IS NOT NULL AND @State IS NOT NULL)
+		BEGIN
+			
+			INSERT INTO #tmpUpdateItemPricingForCStore_Location 
+			(
+				intLocationId
+			)
+			SELECT 
+				intLocationId = intCompanyLocationId
+			FROM tblSTStore
+			WHERE strRegion		= @Region
+				AND strDistrict = @District
+				AND strState	= @State
+
+		END
+	-- ==========================================================================================
+	-- [END] - IF (@Location=EMPTY OR IS NULL) (strDistrict and strRegion and strState are nulls)
+	-- ==========================================================================================
+
+
 
 
 
@@ -268,19 +258,17 @@ PRINT '06'
 
 
 
---TEST
-PRINT '07'
 
 
 	BEGIN TRY
 		-- ITEM PRICING
 		EXEC [uspICUpdateItemPricingForCStore]
-			  @strUpcCode = @strUpcCode
-			, @strDescription = @Description -- NOTE: Description cannot be '' or empty string, it should be NULL value instead of empty string
-			, @intItemId = NULL
-			, @dblStandardCost = @dblStandardCostConv
-			, @dblRetailPrice = @dblRetailPriceConv
-			, @intEntityUserSecurityId = @intCurrentUserIdConv
+			  @strUpcCode				= @strUpcCode
+			, @strDescription			= @Description -- NOTE: Description cannot be '' or empty string, it should be NULL value instead of empty string
+			, @intItemId				= NULL
+			, @dblStandardCost			= @dblStandardCostConv
+			, @dblRetailPrice			= @dblRetailPriceConv
+			, @intEntityUserSecurityId	= @intCurrentUserIdConv
 	END TRY
 	BEGIN CATCH
 		SELECT 'uspICUpdateItemPricingForCStore', ERROR_MESSAGE()
@@ -291,8 +279,6 @@ PRINT '07'
 
 
 
---TEST
-PRINT '08'
 
 
 
@@ -303,10 +289,10 @@ PRINT '08'
 	BEGIN TRY
 		-- ITEM SPECIAL PRICING
 		EXEC [dbo].[uspICUpdateItemPromotionalPricingForCStore]
-			 @dblPromotionalSalesPrice = @dblSalesPriceConv 
-			,@dtmBeginDate = @dtmSalesStartingDateConv
-			,@dtmEndDate = @dtmSalesEndingDateConv 
-			,@intEntityUserSecurityId = @intCurrentUserIdConv
+			 @dblPromotionalSalesPrice		= @dblSalesPriceConv 
+			,@dtmBeginDate					= @dtmSalesStartingDateConv
+			,@dtmEndDate					= @dtmSalesEndingDateConv 
+			,@intEntityUserSecurityId		= @intCurrentUserIdConv
 	END TRY
 	BEGIN CATCH
 		SELECT 'uspICUpdateItemPromotionalPricingForCStore', ERROR_MESSAGE()
@@ -316,8 +302,6 @@ PRINT '08'
 	END CATCH
 
 
---TEST
-PRINT '09'
 
 
 
