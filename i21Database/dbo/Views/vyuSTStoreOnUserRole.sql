@@ -8,7 +8,22 @@ SELECT DISTINCT
 	 , Store.strDescription  
 	 , Store.intLastShiftNo
 	 , Store.dtmLastShiftOpenDate
-	 , Store.intNumberOfShifts
+	 , intNumberOfShifts			= ISNULL(Store.intNumberOfShifts, 0)
+
+	 -- Will be used to load Beg Balance in checkout
+	 , dblEndingBalanceATMFund		= (
+										ISNULL((SELECT TOP 1 dblATMEndBalanceCalculated
+										FROM tblSTCheckoutHeader
+										WHERE intStoreId = Store.intStoreId
+										ORDER BY intCheckoutId DESC), 0)
+									)
+	 -- Will be used to load Beg Balance in checkout
+	 , dblEndingBalanceChangeFund	= (
+										ISNULL((SELECT TOP 1 dblChangeFundIncreaseDecrease
+										FROM tblSTCheckoutHeader
+										WHERE intStoreId = Store.intStoreId
+										ORDER BY intCheckoutId DESC), 0)
+								    )
 
 	 , Store.strRegisterCheckoutDataEntry
 	 , HS.intHandheldScannerId
