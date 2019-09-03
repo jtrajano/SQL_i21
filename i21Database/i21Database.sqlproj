@@ -8061,6 +8061,7 @@
     <Build Include="dbo\Functions\fnAP1099EFileKPayee.sql" />
     <Build Include="dbo\Functions\fnAP1099EFileEndOfK.sql" />
     <Build Include="dbo\Functions\fnCTGetPrepaidIdsItemContract.sql" />
+	<Build Include="dbo\Stored Procedures\uspTROverrideTax.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
