@@ -19,7 +19,7 @@ SELECT DISTINCT
 									)
 	 -- Will be used to load Beg Balance in checkout
 	 , dblEndingBalanceChangeFund	= (
-										ISNULL((SELECT TOP 1 dblChangeFundIncreaseDecrease
+										ISNULL((SELECT TOP 1 dblChangeFundEndBalance
 										FROM tblSTCheckoutHeader
 										WHERE intStoreId = Store.intStoreId
 										ORDER BY intCheckoutId DESC), 0)
