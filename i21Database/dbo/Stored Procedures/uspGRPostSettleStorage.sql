@@ -180,7 +180,7 @@ BEGIN TRY
 	SELECT @intSettleStorageId = MIN(intSettleStorageId)
 	FROM tblGRSettleStorage
 	WHERE CASE WHEN @ysnFromPriceBasisContract = 1 THEN CASE WHEN intSettleStorageId = @intSettleStorageId THEN 1 ELSE 0 END ELSE CASE WHEN intParentSettleStorageId = @intParentSettleStorageId THEN 1 ELSE 0 END END = 1
-
+		
 	WHILE @intSettleStorageId > 0
 	BEGIN		
 		DELETE FROM @SettleStorage
@@ -1276,7 +1276,6 @@ BEGIN TRY
 							,@ysnPosted
 																					
 						
-
 							IF EXISTS (SELECT TOP 1 1 FROM @GLEntries) 
 							BEGIN 
 								EXEC dbo.uspGLBookEntries @GLEntries, @ysnPosted 
@@ -1330,7 +1329,7 @@ BEGIN TRY
 					ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
 				WHERE SST.intSettleStorageId = @intSettleStorageId
 
-
+				
 			 IF EXISTS(SELECT 1 FROM @SettleVoucherCreate WHERE ISNULL(dblCashPrice,0) <> 0 AND ISNULL(dblUnits,0) <> 0 )
 			 BEGIN
 				--Inventory Item and Discounts
@@ -1483,7 +1482,8 @@ BEGIN TRY
 				AND CASE WHEN (a.intPricingTypeId = 2) THEN 0 ELSE 1 END = 1
 				ORDER BY SST.intSettleStorageTicketId
 					,a.intItemType	
-				 
+				 				 
+
 				INSERT INTO @voucherPayable
 				(
 					[intEntityVendorId]
@@ -1718,22 +1718,22 @@ BEGIN TRY
 				DECLARE @dblVoucherTotal DECIMAL(18,6)
 
 				SELECT
-					@dblVoucherTotal = SUM(dblQtyReceived * dblCost)
-				FROM @voucherDetailStorage
+					@dblVoucherTotal = SUM(dblOrderQty * dblCost)
+				FROM @voucherPayable
+
 				
-				IF @dblVoucherTotal > 0 AND EXISTS(SELECT NULL FROM @voucherDetailStorage DS INNER JOIN tblICItem I on I.intItemId = DS.intItemId WHERE I.strType = 'Inventory')
+				IF @dblVoucherTotal > 0 AND EXISTS(SELECT NULL FROM @voucherPayable DS INNER JOIN tblICItem I on I.intItemId = DS.intItemId WHERE I.strType = 'Inventory')
 				BEGIN
 						EXEC uspAPCreateVoucher @voucherPayable, @voucherPayableTax, @intCreatedUserId, 1, @ErrMsg, @createdVouchersId OUTPUT	
 				END
-				IF(EXISTS(SELECT NULL FROM @voucherDetailStorage DS INNER JOIN tblICItem I on I.intItemId = DS.intItemId WHERE I.strType = 'Inventory'))
-				BEGIN
+				ELSE 
+					IF(EXISTS(SELECT NULL FROM @voucherPayable DS INNER JOIN tblICItem I on I.intItemId = DS.intItemId WHERE I.strType = 'Inventory'))
 					BEGIN
-					RAISERROR('Total Voucher will be negative',16,1)
+						BEGIN
+						RAISERROR('Total Voucher will be negative',16,1)
+						END
 					END
-				END
-
-				
-
+									
 				IF @createdVouchersId IS NOT NULL
 				BEGIN
 					SELECT @strVoucher = strBillId
