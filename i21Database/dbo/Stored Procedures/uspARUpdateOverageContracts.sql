@@ -438,6 +438,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILSTOADD)
 			, dblCurrencyExchangeRate
 			, strAddonDetailKey
 			, ysnAddonParent
+			, intInventoryShipmentItemId
 			, intStorageLocationId
 			, intSubLocationId
 			, intCompanyLocationSubLocationId
@@ -468,6 +469,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILSTOADD)
 			, dblCurrencyExchangeRate			= ID.dblCurrencyExchangeRate
 			, strAddonDetailKey					= CASE WHEN ISNULL(ID.ysnAddonParent, 0) = 1 THEN @strAddOnKey ELSE NULL END
 			, ysnAddonParent					= ISNULL(ID.ysnAddonParent, 0)
+			, intInventoryShipmentItemId		= @intInventoryShipmentItemId
 			, intStorageLocationId				= ID.intStorageLocationId
 			, intSubLocationId					= ID.intSubLocationId
 			, intCompanyLocationSubLocationId	= ID.intCompanyLocationSubLocationId
@@ -514,6 +516,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILSTOADD)
 			, dblCurrencyExchangeRate			= ID.dblCurrencyExchangeRate
 			, strAddonDetailKey					= @strAddOnKey
 			, ysnAddonParent					= CAST(0 AS BIT)
+			, intInventoryShipmentItemId		= NULL
 			, intStorageLocationId				= NULL
 			, intSubLocationId					= NULL
 			, intCompanyLocationSubLocationId	= NULL
