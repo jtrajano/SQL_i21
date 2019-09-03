@@ -172,6 +172,7 @@
 :r .\14_CT\CleanCostDataCorrection.sql
 :r .\14_CT\1910_ContractCostPaidByToParty.sql
 :r .\14_CT\1910_BasisComponent.sql
+:r .\14_CT\1920_ItemContracts.sql
 
 --GR
 :r .\15_GR\1_ConstraintDropQuery.sql
