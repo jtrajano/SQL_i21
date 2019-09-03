@@ -305,7 +305,7 @@ BEGIN TRY
 
 	CREATE TABLE #tblMFDemandList (
 		intItemId INT
-		,dblQty NVARCHAR(50)
+		,dblQty NUMERIC(18, 6)
 		,intAttributeId INT
 		,intMonthId INT
 		,intMainItemId INT
@@ -767,7 +767,7 @@ BEGIN TRY
 		,intMonthId
 		)
 	SELECT intItemId
-		,NULL
+		,0
 		,5 AS intAttributeId --Planned Purchases
 		,intMonthId
 	FROM #tblMFDemand
@@ -1275,7 +1275,8 @@ BEGIN TRY
 		,0 AS intMainItemId
 	FROM (
 		SELECT intMonthId
-			,FORMAT(DateAdd(month, intPositionId, - 1), 'MMM') + ' ' + FORMAT(DateAdd(month, intPositionId, - 1), 'yy') AS strMonth
+			--,FORMAT(DateAdd(month, intPositionId, - 1), 'MMM') + ' ' + FORMAT(DateAdd(month, intPositionId, - 1), 'yy') AS strMonth
+			,'' As strMonth
 		FROM tblMFGenerateMonth
 		) src
 	PIVOT(MAX(src.strMonth) FOR src.intMonthId IN (
@@ -1377,13 +1378,14 @@ BEGIN TRY
 						WHEN A.intReportAttributeID = 5
 							AND @intContainerTypeId IS NOT NULL
 							AND @ysnCalculateNoOfContainerByBagQty = 1
-							THEN (D.dblQty * IsNULL(UMCByBulk.dblConversionToStock, 1)) / CTCQ.dblWeight
+							THEN IsNULL((D.dblQty * IsNULL(UMCByBulk.dblConversionToStock, 1)) / CTCQ.dblWeight,0)
 						WHEN A.intReportAttributeID = 5
 							AND @intContainerTypeId IS NOT NULL
 							AND @ysnCalculateNoOfContainerByBagQty = 0
 							AND CTCQ.dblBulkQuantity > 0
-							THEN D.dblQty * IsNULL(UMCByWeight.dblConversionToStock, 1) / CTCQ.dblBulkQuantity
-						ELSE D.dblQty
+							THEN IsNULL(D.dblQty * IsNULL(UMCByWeight.dblConversionToStock, 1) / CTCQ.dblBulkQuantity,0)
+						WHEN DL.intMonthId in (-1,0) Then D.dblQty
+						ELSE IsNULL(D.dblQty,0)
 						END
 					)) AS dblQty
 			,DL.intMonthId
