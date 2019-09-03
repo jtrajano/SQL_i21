@@ -250,7 +250,7 @@ BEGIN
 			, dblStandardQty = dblBalanceQty * ISNULL(dblStandardRatio, 1)
 			, intItemId
 			, dblStandardPrice
-			, dblPPVBasis = ISNULL(dblPPVBasis, 0)
+			, dblPPVBasis = ISNULL(dblBasis, 0) - ISNULL(dblPPVBasis, 0)
 			, dblNewPPVPrice = ((CASE WHEN ISNULL(dblFuturesPrice, 0) = 0 THEN dblSettlementPrice ELSE dblFuturesPrice END 
 									* ISNULL(dblRatio, 1)) + ISNULL(dblBasis, 0)) - (dblBasis - ISNULL(dblRate, 0))
 			, strLocationName
