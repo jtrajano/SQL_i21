@@ -1648,6 +1648,15 @@ BEGIN TRY
 					WHERE intBillId = @intCreatedBillId 
 						AND CASE WHEN @ysnDPOwnedType = 1 THEN CASE WHEN intInventoryReceiptChargeId IS NULL THEN 1 ELSE 0 END ELSE 1 END = 1
 
+					UPDATE APD
+					   SET APD.intTaxGroupId = dbo.fnGetTaxGroupIdForVendor(APB.intEntityId,@intCompanyLocationId,APD.intItemId,EM.intEntityLocationId,EM.intFreightTermId)
+					FROM tblAPBillDetail APD 
+					INNER JOIN tblAPBill APB
+					ON APD.intBillId = APB.intBillId
+					LEFT JOIN tblEMEntityLocation EM ON EM.intEntityId = APB.intEntityId
+					INNER JOIN @detailCreated ON intBillDetailId = intId
+					WHERE APD.intTaxGroupId IS NULL		
+
 					EXEC [uspAPUpdateVoucherDetailTax] @detailCreated
 
 					IF @@ERROR <> 0
