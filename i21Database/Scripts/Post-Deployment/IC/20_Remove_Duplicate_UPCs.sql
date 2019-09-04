@@ -3,7 +3,7 @@ GO
 -- Remove the old check constraint. 
 IF EXISTS(SELECT TOP 1 1 FROM sys.objects WHERE name = 'CK_tblICItemUOM_intUpcCode' AND type = 'C' AND parent_object_id = OBJECT_ID('tblICItemUOM', 'U'))
 BEGIN 
-	EXEC ('DROP INDEX [IX_tblICItemUOM_intUpcCode] ON [tblICItemUOM]')
+	EXEC ('ALTER TABLE [tblICItemUOM] DROP CONSTRAINT CK_tblICItemUOM_intUpcCode')
 END 
 GO 
 -- Add the CHECK CONSTRAINTS in tblICItemUOM
