@@ -174,14 +174,21 @@ BEGIN TRY
 					ON SC.intContractId = CT.intContractDetailId
 				WHERE  SC.intTicketId = @intTicketId
 
-				IF(@dblPricedContractQty > 0 OR (NOT EXISTS (SELECT TOP 1 1 FROM vyuCTPriceContractFixationDetail CTP
-				INNER JOIN tblCTPriceFixation CPX
-					ON CPX.intPriceFixationId = CTP.intPriceFixationId
-				INNER JOIN tblCTContractDetail CT
-					ON CPX.intContractDetailId = CT.intContractDetailId
-				INNER JOIN tblSCTicket SC
-					ON SC.intContractId = CT.intContractDetailId
-				WHERE  SC.intTicketId = @intTicketId) AND (SELECT intPricingTypeId FROM tblCTContractDetail CD INNER JOIN tblSCTicket SC ON SC.intContractId = CD.intContractDetailId WHERE intTicketId = @intTicketId) != 2))
+				IF ISNULL(@intContractDetailId,0) != 0
+				BEGIN
+					IF(@dblPricedContractQty > 0 OR (NOT EXISTS (SELECT TOP 1 1 FROM vyuCTPriceContractFixationDetail CTP
+					INNER JOIN tblCTPriceFixation CPX
+						ON CPX.intPriceFixationId = CTP.intPriceFixationId
+					INNER JOIN tblCTContractDetail CT
+						ON CPX.intContractDetailId = CT.intContractDetailId
+					INNER JOIN tblSCTicket SC
+						ON SC.intContractId = CT.intContractDetailId
+					WHERE  SC.intTicketId = @intTicketId) AND (SELECT intPricingTypeId FROM tblCTContractDetail CD INNER JOIN tblSCTicket SC ON SC.intContractId = CD.intContractDetailId WHERE intTicketId = @intTicketId) != 2))
+					BEGIN
+						EXEC uspSCDirectCreateInvoice @intTicketId,@intEntityId,@intLocationId,@intUserId
+					END
+				END
+				ELSE
 				BEGIN
 					EXEC uspSCDirectCreateInvoice @intTicketId,@intEntityId,@intLocationId,@intUserId
 				END
