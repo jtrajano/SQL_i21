@@ -499,7 +499,8 @@ BEGIN
 				@userID INT = NULL,
 				@is_wesroc BIT = 1,
 				@qty_in_tank  NUMERIC(18,6) = NULL,
-				@resultLog NVARCHAR(4000)= '''' OUTPUT
+				@resultLog NVARCHAR(4000)= '''' OUTPUT,
+				@resultSavingStatus int = 3 output -- should include in build (9/4/2019)
 			AS  
 			BEGIN 
 
@@ -532,7 +533,9 @@ BEGIN
 	
 				SET @rpt_date_ti = @str_rpt_date_ti
  
-				SET @resultLog = ''''
+				SET @resultLog = '''';
+				SET @resultSavingStatus = 3;
+				
 				--IF(ISNULL(@customerid,'''') = '''')BEGIN
 				--	SET @resultLog = @resultLog +  ''Failed customerid validation'' + char(10)
 				--	RETURN 
@@ -611,6 +614,7 @@ BEGIN
 				BEGIN 
 					--SET @resultLog = @resultLog + ''Exception: Not Matching'' + char(10)
 					SET @resultLog = @resultLog + @ExceptionValue + '': Not Matching.'' + char(10)
+					set @resultSavingStatus = 1;
 					RETURN 
 				END 
 				SET @resultLog = @resultLog + ''Site ID = '' + CAST(ISNULL(@siteId,'''') AS NVARCHAR(10)) + char(10) 
@@ -627,6 +631,7 @@ BEGIN
 				BEGIN
 					--PRINT ''No clock Reading''
 					SET @resultLog = @resultLog + ''No clock Reading'' + char(10)
+					set @resultSavingStatus = 1;
 					RETURN
 				END
 				print ''get event id''
@@ -639,12 +644,14 @@ BEGIN
 					SET @resultLog = @resultLog + ''Duplicate Reading'' + char(10)
 					--SET @resultLog = @resultLog + ''Exception: Duplicate Reading'' + char(10)
 					SET @resultLog = @resultLog + @ExceptionValue + '': Duplicate Reading'' + char(10)
+					set @resultSavingStatus = 1;
 					RETURN
 				END
 				IF EXISTS(SELECT TOP 1 1 FROM tblTMEvent 
 							WHERE ((intEventTypeID = @TankMonitorEventID AND dtmTankMonitorReading > @rpt_date_ti)) AND intSiteID = @siteId)	
 				BEGIN
 					SET @resultLog = @resultLog + ''Reading date is less than the current reading'' + char(10)
+					set @resultSavingStatus = 1;
 					RETURN 
 				END
 		
@@ -725,31 +732,46 @@ BEGIN
 							@dblNewBurnRate = dblBurnRate
 						FROM dbo.fnTMComputeNewBurnRateZeroDeliveryTable(@siteId,@intClockReadingId,@intLastClockReadingId,@tk_level,@intLastMonitorReadingEvent)
 
+						/*
 						SET @resultLog = @resultLog + ''UPDATING burn rate'' + char(10) 
 						UPDATE tblTMSite
 						SET dblBurnRate = @dblNewBurnRate
 						WHERE intSiteID = @siteId
+						*/
+
+						-- do not update bun rate if eco green importing
+						if (@is_wesroc = 1)
+						begin
+							SET @resultLog = @resultLog + ''UPDATING burn rate'' + char(10) 
+							UPDATE tblTMSite
+							SET dblBurnRate = @dblNewBurnRate
+							WHERE intSiteID = @siteId
+						end
+
 					END
 		
-					--update runout and forecasted date
-					UPDATE tblTMSite
-					SET dtmRunOutDate = DATEADD(dd, DATEDIFF(dd, 0, @rpt_date_ti),  CAST((dblTotalCapacity * @tk_level / 100 / @tk_w_dau) AS INT)) 
-						,dtmForecastedDelivery = DATEADD(dd, DATEDIFF(dd, 0, @rpt_date_ti),  CAST((((dblTotalCapacity * @tk_level / 100) - ISNULL(dblTotalReserve,0)) / @tk_w_dau) AS INT)) 
-					WHERE intSiteID = @siteId
+					if (@is_wesroc = 1)
+					begin
+						--update runout and forecasted date
+						UPDATE tblTMSite
+						SET dtmRunOutDate = DATEADD(dd, DATEDIFF(dd, 0, @rpt_date_ti),  CAST((dblTotalCapacity * @tk_level / 100 / @tk_w_dau) AS INT)) 
+							,dtmForecastedDelivery = DATEADD(dd, DATEDIFF(dd, 0, @rpt_date_ti),  CAST((((dblTotalCapacity * @tk_level / 100) - ISNULL(dblTotalReserve,0)) / @tk_w_dau) AS INT)) 
+						WHERE intSiteID = @siteId
 		
-					--update DD Between Delivery
-					UPDATE tblTMSite
-					SET dblDegreeDayBetweenDelivery = dblBurnRate * ((dblTotalCapacity * @tk_level / 100) - dblTotalReserve)
-					WHERE intSiteID = @siteId
+						--update DD Between Delivery
+						UPDATE tblTMSite
+						SET dblDegreeDayBetweenDelivery = dblBurnRate * ((dblTotalCapacity * @tk_level / 100) - dblTotalReserve)
+						WHERE intSiteID = @siteId
 		
-					--update next degree day Delivery
-					UPDATE tblTMSite
-					SET intNextDeliveryDegreeDay = CAST( (ISNULL((SELECT TOP 1 dblAccumulatedDegreeDay 
-														   FROM tblTMDegreeDayReading 
-														   WHERE intClockID = @SiteClockId 
-																AND dtmDate = DATEADD(dd, DATEDIFF(dd, 0, @rpt_date_ti), 0)),0.0)
-													+ dblDegreeDayBetweenDelivery) AS INT)
-					WHERE intSiteID = @siteId
+						--update next degree day Delivery
+						UPDATE tblTMSite
+						SET intNextDeliveryDegreeDay = CAST( (ISNULL((SELECT TOP 1 dblAccumulatedDegreeDay 
+															   FROM tblTMDegreeDayReading 
+															   WHERE intClockID = @SiteClockId 
+																	AND dtmDate = DATEADD(dd, DATEDIFF(dd, 0, @rpt_date_ti), 0)),0.0)
+														+ dblDegreeDayBetweenDelivery) AS INT)
+						WHERE intSiteID = @siteId
+					end
 
 
 					--update Estimated % left and Gals left
@@ -765,6 +787,12 @@ BEGIN
 					SET intConcurrencyId = ISNULL(intConcurrencyId,0) + 1
 					WHERE intSiteID = @siteId
 
+					--prevent eco green from creating order since @ta_ltankcrit is not supplied from API and run out date is not calculated due to lack of requirement to calculate
+					if (@is_wesroc = 0)
+					begin
+						SET @resultLog = @resultLog + ''Import successful'';
+						return;
+					end
 			
 		
 					PRINT @ta_ltankcrit
@@ -783,11 +811,10 @@ BEGIN
 					RETURN
 					CREATECALLENTRY:
 			
-					if (@is_wesroc = 0) return;
-			
 					IF EXISTS(SELECT TOP 1 1 FROM tblTMDispatch WHERE intSiteID = @siteId) 
 					BEGIN
 						SET @resultLog = @resultLog +  ''Already have call entry'' + CHAR(10)
+						set @resultSavingStatus = 1;
 						RETURN
 					END	
 		
