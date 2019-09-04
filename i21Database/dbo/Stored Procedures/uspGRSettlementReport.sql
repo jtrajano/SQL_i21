@@ -150,8 +150,8 @@ FROM OPENXML(@xmlDocumentId, 'xmlparam/filters/filter', 2) WITH
 (
 	[fieldname] NVARCHAR(50)
 	,condition NVARCHAR(20)
-	,[from] NVARCHAR(50)
-	,[to] NVARCHAR(50)
+	,[from] NVARCHAR(4000)
+	,[to] NVARCHAR(4000)
 	,[join] NVARCHAR(10)
 	,[begingroup] NVARCHAR(50)
 	,[endgroup] NVARCHAR(50)
