@@ -15,7 +15,7 @@
 		@is_wesroc BIT = 1,
 		@qty_in_tank  NUMERIC(18,6) = NULL,
 		@resultLog NVARCHAR(4000)= '' OUTPUT,
-		@resultSavingStatus int = 3 output
+		@resultSavingStatus int = 3 output -- should include in build (9/4/2019)
 	AS  
 	BEGIN 
 
