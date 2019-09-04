@@ -20,13 +20,14 @@
 			CONVERT(VARCHAR(10), A.dtmContractDate, 101) as dtmLineShipDate,
 			CONVERT(VARCHAR(10), A.dtmExpirationDate, 101) as dtmLineDueDate,
 			UPPER(E.strCategoryCode + ' CATEGORY') as strLineCategoryCode,
-			UPPER('0.00') as strLineTotalAmount,
+			CAST(ROUND(F.dblTotal,2) as NUMERIC(36,2)) as dblLineTotal,
 			E.* 
 			FROM vyuCTItemContractHeader A 
 					LEFT JOIN tblEMEntity B ON A.intEntityId = B.intEntityId
 					LEFT JOIN tblEMEntityLocation C ON A.intEntityId = C.intEntityId
 					LEFT JOIN tblARCustomer D ON A.intEntityId = D.intEntityId
 					LEFT JOIN vyuCTItemContractHeaderCategory E ON A.intItemContractHeaderId = E.intItemContractHeaderId
+					LEFT JOIN tblARInvoiceDetail F ON E.intItemContractHeaderId = F.intItemContractHeaderId and E.intItemCategoryId = F.intItemCategoryId
 			,(SELECT TOP 1
 					strCompanyName
 					,strAddress AS strCompanyAddress
