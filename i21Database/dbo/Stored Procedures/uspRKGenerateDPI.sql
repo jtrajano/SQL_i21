@@ -586,7 +586,10 @@ BEGIN
 		, dblUnpaidBalance = ISNULL(dblUnpaidBalance, 0)
 	FROM (
 		SELECT DISTINCT intRowNum
-			, list.dtmDate dtmDate
+			, dtmDate = CASE WHEN ISNULL(ct.dblUnpaidBalance, 0) = 0
+									AND ISNULL(ct.dblUnpaidIncrease, 0) = 0
+									AND ISNULL(ct.dblUnpaidDecrease, 0) = 0
+									AND ISNULL(ct.dblPaidBalance, 0) = 0 THEN list.dtmDate ELSE ct.dtmDate END
 			, dblInvIn
 			, dblInvOut
 			, dblAdjustments
