@@ -869,7 +869,7 @@ BEGIN TRY
 												THEN FX.intForexRateTypeId --foreign price to foreign FX, use master FX rate
 											ELSE LD.intForexRateTypeId END
 									 ELSE  --if contract FX tab is not setup
-										CASE WHEN (@DefaultCurrencyId <> ISNULL(SeqCUR.intMainCurrencyId, SeqCUR.intCurrencyID)) 
+										CASE WHEN (@DefaultCurrencyId <> ISNULL(SC.intMainCurrencyId, SC.intCurrencyID)) 
 											THEN FX.intForexRateTypeId
 											ELSE LD.intForexRateTypeId END
 									 END
@@ -883,7 +883,7 @@ BEGIN TRY
 												THEN ISNULL(FX.dblFXRate, 1) --foreign price to foreign FX, use master FX rate
 											ELSE ISNULL(LD.dblForexRate,1) END
 									 ELSE  --if contract FX tab is not setup
-										CASE WHEN (@DefaultCurrencyId <> ISNULL(SeqCUR.intMainCurrencyId, SeqCUR.intCurrencyID)) 
+										CASE WHEN (@DefaultCurrencyId <> ISNULL(SC.intMainCurrencyId, SC.intCurrencyID)) 
 											THEN ISNULL(FX.dblFXRate, 1)
 											ELSE ISNULL(LD.dblForexRate,1) END
 									 END
