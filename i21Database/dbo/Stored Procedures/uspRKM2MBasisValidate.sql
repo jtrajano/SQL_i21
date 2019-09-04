@@ -15,7 +15,6 @@ BEGIN TRY
 		, @strMarketZone NVARCHAR(50)
 		, @strPeriodTo NVARCHAR(50)
 		, @strUnitMeasure NVARCHAR(50)
-		, @strErrMessage NVARCHAR(50)
 
 	SELECT @mRowNumber = MIN(intM2MBasisImportId) FROM tblRKM2MBasisImport
 	WHILE @mRowNumber > 0
@@ -45,56 +44,14 @@ BEGIN TRY
 		
 		IF NOT EXISTS(SELECT TOP 1 1 FROM tblRKFutureMarket WHERE strFutMarketName = @strFutMarketName)
 		BEGIN
-			INSERT INTO tblRKM2MBasisImport_ErrLog(strFutMarketName
-				, strCommodityCode
-				, strItemNo
-				, strCurrency
-				, dblBasis
-				, strUnitMeasure
-				, strLocationName
-				, strMarketZone
-				, strPeriodTo
-				, strErrMessage)
-			SELECT DISTINCT strFutMarketName
-				, strCommodityCode
-				, strItemNo
-				, strCurrency
-				, dblBasis
-				, strUnitMeasure
-				, strLocationName
-				, strMarketZone
-				, strPeriodTo
-				, 'Invalid Futures Market.'
-			FROM tblRKM2MBasisImport
-			WHERE strFutMarketName = @strFutMarketName
+			SET @PreviousErrMsg = 'Invalid Futures Market.'
 		END
 
 		IF (ISNULL(@strLocationName, '') <> '')
 		BEGIN
 			IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMCompanyLocation WHERE strLocationName = @strLocationName)
 			BEGIN
-				INSERT INTO tblRKM2MBasisImport_ErrLog (strFutMarketName
-					, strCommodityCode
-					, strItemNo
-					, strCurrency
-					, dblBasis
-					, strUnitMeasure
-					, strLocationName
-					, strMarketZone
-					, strPeriodTo
-					, strErrMessage)
-				SELECT DISTINCT strFutMarketName
-					, strCommodityCode
-					, strItemNo
-					, strCurrency
-					, dblBasis
-					, strUnitMeasure
-					, strLocationName
-					, strMarketZone
-					, strPeriodTo
-					, 'Invalid Location.'
-				FROM tblRKM2MBasisImport
-				WHERE strLocationName = @strLocationName
+				SET @PreviousErrMsg += ' Invalid Location.'
 			END
 		END
 
@@ -102,232 +59,35 @@ BEGIN TRY
 		BEGIN
 			IF NOT EXISTS(SELECT TOP 1 1 FROM tblARMarketZone WHERE strMarketZoneCode = @strMarketZone)
 			BEGIN
-				INSERT INTO tblRKM2MBasisImport_ErrLog (strFutMarketName
-					, strCommodityCode
-					, strItemNo
-					, strCurrency
-					, dblBasis
-					, strUnitMeasure
-					, strLocationName
-					, strMarketZone
-					, strPeriodTo
-					, strErrMessage)
-				SELECT DISTINCT strFutMarketName
-					, strCommodityCode
-					, strItemNo
-					, strCurrency
-					, dblBasis
-					, strUnitMeasure
-					, strLocationName
-					, strMarketZone
-					, strPeriodTo
-					, 'Invalid Market Zone.'
-				FROM tblRKM2MBasisImport
-				WHERE strMarketZone = @strMarketZone
+				SET @PreviousErrMsg += ' Invalid Market Zone.'
 			END
 		END
 		
 		IF NOT EXISTS(SELECT TOP 1 1 FROM tblICCommodity WHERE strCommodityCode = @strCommodityCode)
 		BEGIN
-			IF NOT EXISTS(SELECT TOP 1 1 FROM tblRKM2MBasisImport_ErrLog WHERE strCommodityCode = @strCommodityCode AND strFutMarketName = @strFutMarketName)
-			BEGIN
-				INSERT INTO tblRKM2MBasisImport_ErrLog (strFutMarketName
-					, strCommodityCode
-					, strItemNo
-					, strCurrency
-					, dblBasis
-					, strUnitMeasure
-					, strLocationName
-					, strMarketZone
-					, strPeriodTo
-					, strErrMessage)
-				SELECT DISTINCT strFutMarketName
-					, strCommodityCode
-					, strItemNo
-					, strCurrency
-					, dblBasis
-					, strUnitMeasure
-					, strLocationName
-					, strMarketZone
-					, strPeriodTo
-					, 'Invalid commodity.'
-				FROM tblRKM2MBasisImport
-				WHERE strCommodityCode = @strCommodityCode AND strFutMarketName = @strFutMarketName
-			END
-			ELSE
-			BEGIN
-				SELECT @PreviousErrMsg = strErrMessage
-				FROM tblRKM2MBasisImport_ErrLog
-				WHERE strCommodityCode = @strCommodityCode
-				
-				UPDATE tblRKM2MBasisImport_ErrLog
-				SET strErrMessage = @PreviousErrMsg + 'Invalid commodity.'
-				WHERE strCommodityCode = @strCommodityCode AND strFutMarketName = @strFutMarketName
-					AND strErrMessage NOT LIKE '%' + 'Invalid commodity.' + '%'
-			END
+			SET @PreviousErrMsg += 'Invalid commodity.'
 		END
 		
 		IF NOT EXISTS(SELECT TOP 1 1 FROM tblICItem WHERE strItemNo = @strItemNo)
 		BEGIN
-			IF NOT EXISTS(SELECT TOP 1 1 FROM tblRKM2MBasisImport_ErrLog WHERE strItemNo = @strItemNo AND strFutMarketName = @strFutMarketName)
-			BEGIN
-				INSERT INTO tblRKM2MBasisImport_ErrLog (strFutMarketName
-					, strCommodityCode
-					, strItemNo
-					, strCurrency
-					, dblBasis
-					, strUnitMeasure
-					, strLocationName
-					, strMarketZone
-					, strPeriodTo
-					, strErrMessage)
-				SELECT DISTINCT strFutMarketName
-					, strCommodityCode
-					, strItemNo
-					, strCurrency
-					, dblBasis
-					, strUnitMeasure
-					, strLocationName
-					, strMarketZone
-					, strPeriodTo
-					, 'Invalid Item.'
-				FROM tblRKM2MBasisImport
-				WHERE strItemNo = @strItemNo AND strFutMarketName = @strFutMarketName
-			END
-			ELSE
-			BEGIN
-				SELECT @PreviousErrMsg = strErrMessage
-				FROM tblRKM2MBasisImport_ErrLog
-				WHERE strItemNo = @strItemNo
-				
-				UPDATE tblRKM2MBasisImport_ErrLog
-				SET strErrMessage = @PreviousErrMsg + 'Invalid Item.'
-				WHERE strItemNo = @strItemNo AND strFutMarketName = @strFutMarketName
-					AND strErrMessage NOT LIKE '%' + 'Invalid Item.' + '%'
-			END
+			SET @PreviousErrMsg += ' Invalid Item.'
 		END
 		
 		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMCurrency WHERE strCurrency = @strCurrency)
 		BEGIN
-			IF NOT EXISTS(SELECT TOP 1 1 FROM tblRKM2MBasisImport_ErrLog WHERE strCurrency = @strCurrency AND strFutMarketName = @strFutMarketName)
-			BEGIN
-				INSERT INTO tblRKM2MBasisImport_ErrLog (strFutMarketName
-					, strCommodityCode
-					, strItemNo
-					, strCurrency
-					, dblBasis
-					, strUnitMeasure
-					, strLocationName
-					, strMarketZone
-					, strPeriodTo
-					, strErrMessage)
-				SELECT DISTINCT strFutMarketName
-					, strCommodityCode
-					, strItemNo
-					, strCurrency
-					, dblBasis
-					, strUnitMeasure
-					, strLocationName
-					, strMarketZone
-					, strPeriodTo
-					, 'Invalid currency.'
-				FROM tblRKM2MBasisImport
-				WHERE strCurrency = @strCurrency AND strFutMarketName = @strFutMarketName
-			END
-			ELSE
-			BEGIN
-				SELECT @PreviousErrMsg = strErrMessage
-				FROM tblRKM2MBasisImport_ErrLog
-				WHERE strCurrency = @strCurrency
-				
-				UPDATE tblRKM2MBasisImport_ErrLog
-				SET strErrMessage = @PreviousErrMsg + 'Invalid currency.'
-				WHERE strCurrency = @strCurrency AND strFutMarketName = @strFutMarketName
-					AND strErrMessage NOT LIKE '%' + 'Invalid currency.' + '%'
-			END
+			SET @PreviousErrMsg += ' Invalid currency.'
 		END
 		
 		IF NOT EXISTS(SELECT TOP 1 1 FROM tblICUnitMeasure WHERE strUnitMeasure = @strUnitMeasure)
 		BEGIN
-			IF NOT EXISTS(SELECT TOP 1 1 FROM tblRKM2MBasisImport_ErrLog WHERE strUnitMeasure = @strUnitMeasure AND strUnitMeasure = @strUnitMeasure)
-			BEGIN
-				INSERT INTO tblRKM2MBasisImport_ErrLog (strFutMarketName
-					, strCommodityCode
-					, strItemNo
-					, strCurrency
-					, dblBasis
-					, strUnitMeasure
-					, strLocationName
-					, strMarketZone
-					, strPeriodTo
-					, strErrMessage)
-				SELECT DISTINCT strFutMarketName
-					, strCommodityCode
-					, strItemNo
-					, strCurrency
-					, dblBasis
-					, strUnitMeasure
-					, strLocationName
-					, strMarketZone
-					, strPeriodTo
-					, 'Invalid UOM.'
-				FROM tblRKM2MBasisImport
-				WHERE strUnitMeasure = @strUnitMeasure AND strFutMarketName = @strFutMarketName
-			END
-			ELSE
-			BEGIN
-				SELECT @PreviousErrMsg = strErrMessage
-				FROM tblRKM2MBasisImport_ErrLog
-				WHERE strUnitMeasure = @strUnitMeasure
-
-				UPDATE tblRKM2MBasisImport_ErrLog
-				SET strErrMessage = @PreviousErrMsg + 'Invalid UOM.'
-				WHERE strUnitMeasure = @strUnitMeasure AND strFutMarketName = @strFutMarketName
-					AND strErrMessage NOT LIKE '%' + 'Invalid UOM.' + '%'
-			END
+			SET @PreviousErrMsg += ' Invalid UOM.'
 		END
 		
 		IF NOT EXISTS(SELECT TOP 1 1 FROM tblICItem i
 					JOIN tblICCommodity c ON i.intCommodityId = c.intCommodityId
 					WHERE strItemNo = @strItemNo AND strCommodityCode = @strCommodityCode)
 		BEGIN
-			IF NOT EXISTS(SELECT TOP 1 1 FROM tblRKM2MBasisImport_ErrLog WHERE strItemNo = @strItemNo AND strCommodityCode = @strCommodityCode)
-			BEGIN
-				INSERT INTO tblRKM2MBasisImport_ErrLog (strFutMarketName
-					, strCommodityCode
-					, strItemNo
-					, strCurrency
-					, dblBasis
-					, strUnitMeasure
-					, strLocationName
-					, strMarketZone
-					, strPeriodTo
-					, strErrMessage)
-				SELECT DISTINCT strFutMarketName
-					, strCommodityCode
-					, strItemNo
-					, strCurrency
-					, dblBasis
-					, strUnitMeasure
-					, strLocationName
-					, strMarketZone
-					, strPeriodTo
-					, 'Item (' + strItemNo + ') not configure the commodity (' + strCommodityCode + ').'
-				FROM tblRKM2MBasisImport
-				WHERE strItemNo = @strItemNo AND strCommodityCode = @strCommodityCode
-			END
-			ELSE
-			BEGIN
-				SELECT @PreviousErrMsg = strErrMessage
-				FROM tblRKM2MBasisImport_ErrLog
-				WHERE strItemNo = @strItemNo
-					AND strCommodityCode = @strCommodityCode
-
-				UPDATE tblRKM2MBasisImport_ErrLog
-				SET strErrMessage = @PreviousErrMsg + 'Item (' + strItemNo + ') not configure the commodity (' + strCommodityCode + ').'
-				WHERE strItemNo = @strItemNo AND strCommodityCode = @strCommodityCode
-					AND strErrMessage NOT LIKE '%' + 'Item (' + strItemNo + ') not configure the commodity (' + strCommodityCode + ').' + '%'
-			END
+			SET @PreviousErrMsg += ' Item (' + @strItemNo + ') not configure the commodity (' + @strCommodityCode + ').'
 		END
 
 		IF NOT EXISTS(SELECT TOP 1 1 FROM tblRKCommodityMarketMapping MC
@@ -335,44 +95,29 @@ BEGIN TRY
 					JOIN tblICCommodity C ON C.intCommodityId = MC.intCommodityId
 					WHERE FM.strFutMarketName = @strFutMarketName AND C.strCommodityCode = @strCommodityCode)
 		BEGIN
-			IF NOT EXISTS(SELECT TOP 1 1 FROM tblRKM2MBasisImport_ErrLog WHERE strFutMarketName = @strFutMarketName AND strCommodityCode = @strCommodityCode)
-			BEGIN
-				INSERT INTO tblRKM2MBasisImport_ErrLog (strFutMarketName
-					, strCommodityCode
-					, strItemNo
-					, strCurrency
-					, dblBasis
-					, strUnitMeasure
-					, strLocationName
-					, strMarketZone
-					, strPeriodTo
-					, strErrMessage)
-				SELECT DISTINCT strFutMarketName
-					, strCommodityCode
-					, strItemNo
-					, strCurrency
-					, dblBasis
-					, strUnitMeasure
-					, strLocationName
-					, strMarketZone
-					, strPeriodTo
-					, 'Future Market (' + strItemNo + ') is not configured for commodity (' + strCommodityCode + ').'
-				FROM tblRKM2MBasisImport
-				WHERE strItemNo = @strItemNo AND strCommodityCode = @strCommodityCode
-			END
-			ELSE
-			BEGIN
-				SELECT @PreviousErrMsg = strErrMessage
-				FROM tblRKM2MBasisImport_ErrLog
-				WHERE strCommodityCode = @strCommodityCode
-					AND strFutMarketName = @strFutMarketName
-				
-				UPDATE tblRKM2MBasisImport_ErrLog
-				SET strErrMessage = @PreviousErrMsg + 'Future Market (' + strItemNo + ') is not configured for commodity (' + strCommodityCode + ').'
-				WHERE strCommodityCode = @strCommodityCode AND strFutMarketName = @strFutMarketName
-					AND strErrMessage NOT LIKE '%' + 'Future Market (' + strItemNo + ') is not configured for commodity (' + strCommodityCode + ').' + '%'
-			END
+			SET @PreviousErrMsg += ' Future Market (' + @strItemNo + ') is not configured for commodity (' + @strCommodityCode + ').'
 		END
+
+		INSERT INTO tblRKM2MBasisImport_ErrLog (strFutMarketName
+			, strCommodityCode
+			, strItemNo
+			, strCurrency
+			, dblBasis
+			, strUnitMeasure
+			, strLocationName
+			, strMarketZone
+			, strPeriodTo
+			, strErrMessage)
+		VALUES (@strFutMarketName
+			, @strCommodityCode
+			, @strItemNo
+			, @strCurrency
+			, @dblBasis
+			, @strUnitMeasure
+			, @strLocationName
+			, @strMarketZone
+			, @strPeriodTo
+			, @PreviousErrMsg)
 		
 		SELECT @mRowNumber = MIN(intM2MBasisImportId) FROM tblRKM2MBasisImport WHERE intM2MBasisImportId > @mRowNumber
 	END
