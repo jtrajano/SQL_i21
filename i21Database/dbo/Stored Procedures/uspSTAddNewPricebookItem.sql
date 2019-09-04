@@ -21,6 +21,7 @@
 	, @intNewItemId						INT				OUTPUT
 	, @ysnResultSuccess					BIT				OUTPUT
 	, @strResultMessage					NVARCHAR(1000)	OUTPUT
+	, @intUniqueId						INT				OUTPUT
 AS
 BEGIN
 
@@ -278,6 +279,7 @@ BEGIN
 
 									IF NOT EXISTS(SELECT TOP 1 1 FROM tblICItem WHERE intItemId = @intNewItemId)
 										BEGIN
+
 											SET @strResultMessage	= 'Item is not created successfully'  
 
 											GOTO ExitWithRollback
@@ -350,6 +352,41 @@ BEGIN
 													SET @strResultMessage = 'Item UOM is not created successfully'  
 
 													GOTO ExitWithRollback
+												END
+											ELSE
+												BEGIN
+													
+--TEST
+IF(@ysnDebug = 1)
+	BEGIN
+		SELECT 'New Item', *  FROM tblICItem WHERE intItemId = @intNewItemId
+		SELECT 'New Item OUM', * FROM tblICItemUOM WHERE intItemId = @intNewItemId AND ysnStockUnit = 1
+	END
+
+
+													IF(@strUpcCode IS NOT NULL OR @strUpcCode != '')
+														BEGIN
+													
+															DECLARE @intItemUOMId INT = (SELECT TOP 1 intItemUOMId FROM tblICItemUOM WHERE intItemUOMId = @intNewItemUOMId)
+
+															EXEC [dbo].[uspICUpdateItemForCStore]
+																-- filter params	
+																@strDescription				= NULL 
+																,@dblRetailPriceFrom		= NULL  
+																,@dblRetailPriceTo			= NULL 
+																,@intItemId					= @intNewItemId 
+																,@intItemUOMId				= @intItemUOMId 
+																-- update params
+																,@intCategoryId				= NULL
+																,@strCountCode				= NULL
+																,@strItemDescription		= NULL 	
+																,@strItemNo					= NULL
+																,@strShortName				= NULL 
+																,@strUpcCode				= @strUpcCode 
+																,@strLongUpcCode			= NULL 
+																,@intEntityUserSecurityId	= @intEntityId
+
+														END
 												END
 
 										END TRY
@@ -581,6 +618,12 @@ BEGIN
 												SET @strResultMessage = 'Item Location is not created successfully'  
 
 												GOTO ExitWithRollback
+											END
+										ELSE
+											BEGIN
+												
+												-- Fill @intUniqueId to return to client side
+												SET @intUniqueId = @intNewItemLocationId
 											END
 
 										IF(@intVendorId IS NOT NULL AND @intNewItemId IS NOT NULL AND @intNewItemLocationId IS NOT NULL)
