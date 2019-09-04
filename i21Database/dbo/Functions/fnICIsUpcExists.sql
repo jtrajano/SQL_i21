@@ -1,37 +1,42 @@
-CREATE FUNCTION dbo.fnICIsUpcExists(@Upc NVARCHAR(100))
+CREATE FUNCTION dbo.fnICIsUpcExists(
+	@strLongUPCCode AS NVARCHAR(50)
+	,@intItemUOMId AS INT 
+)
 RETURNS BIT
 AS
 BEGIN
-DECLARE @ValidUPC TABLE(intItemUOMId INT, intUPC BIGINT)
+	DECLARE @ysnExists BIT = 0
 
-;WITH CTE
-AS
-(
-	SELECT intItemUOMId, strLongUPCCode, CAST(RTRIM(LTRIM(strLongUPCCode)) AS BIGINT) intUnique, ROW_NUMBER() OVER (PARTITION BY strLongUPCCode ORDER BY strLongUPCCode) AS rc
-	FROM tblICItemUOM
-	WHERE strLongUPCCode IS NOT NULL
-		AND ISNUMERIC(RTRIM(LTRIM(strLongUPCCode))) = 1 AND NOT (strLongUPCCode LIKE '%.%' OR strLongUPCCode LIKE '%e%' OR strLongUPCCode LIKE '%E%')
-)
-INSERT INTO @ValidUPC(intItemUOMId, intUPC)
-SELECT intItemUOMId, intUnique FROM CTE;
+	IF  (@strLongUPCCode IS NULL OR LTRIM(RTRIM(@strLongUPCCode)) = '') 
+		OR @intItemUOMId IS NULL 
+	BEGIN 
+		RETURN @ysnExists;
+	END
 
+	IF EXISTS (
+		SELECT TOP 1 1 
+		FROM tblICItemUOM 
+		WHERE 
+			(
+				strLongUPCCode = @strLongUPCCode 
+				OR intUpcCode = 
+					CASE 
+						WHEN 
+							@strLongUPCCode IS NOT NULL 
+							AND ISNUMERIC(RTRIM(LTRIM(@strLongUPCCode))) = 1 
+							AND NOT (@strLongUPCCode LIKE '%.%' OR @strLongUPCCode LIKE '%e%' OR @strLongUPCCode LIKE '%E%') 
+						THEN 				
+							CAST(RTRIM(LTRIM(@strLongUPCCode)) AS BIGINT) 
+						ELSE 
+							CAST(NULL AS BIGINT) 
+					END
+			)
+			AND intItemUOMId <> @intItemUOMId
+			AND strLongUPCCode IS NOT NULL 
+	)
+	BEGIN 
+		SET @ysnExists = 1
+	END 
 
-;WITH GTE
-AS
-(
-	SELECT intItemUOMId, intUPC, ROW_NUMBER() OVER (PARTITION BY intUPC ORDER BY intUPC) AS RC
-	FROM @ValidUPC
-)
-DELETE GTE WHERE RC <= 1;
-
-DECLARE @ReturnValue BIT
-
-IF EXISTS(SELECT * FROM @ValidUPC WHERE ISNUMERIC(RTRIM(LTRIM(@Upc))) = 1 AND NOT (@Upc LIKE '%.%' OR @Upc LIKE '%e%' OR @Upc LIKE '%E%') AND CAST(RTRIM(LTRIM(@Upc)) AS BIGINT) = intUPC)
-	SET @ReturnValue = 1
-ELSE
-	SET @ReturnValue = 0
-
-RETURN @ReturnValue
-END
-
-GO
+	RETURN @ysnExists; 	
+END 

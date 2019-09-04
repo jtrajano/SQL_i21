@@ -1,8 +1,13 @@
 PRINT N'START- IC Remove Duplicate UPCs'
 GO
-
+-- Remove the old check constraint. 
+IF EXISTS(SELECT TOP 1 1 FROM sys.objects WHERE name = 'CK_tblICItemUOM_intUpcCode' AND type = 'C' AND parent_object_id = OBJECT_ID('tblICItemUOM', 'U'))
+BEGIN 
+	EXEC ('DROP INDEX [IX_tblICItemUOM_intUpcCode] ON [tblICItemUOM]')
+END 
+GO 
 -- Add the CHECK CONSTRAINTS in tblICItemUOM
-IF NOT EXISTS(SELECT TOP 1 1 FROM sys.objects WHERE name = 'CK_tblICItemUOM_intUpcCode' AND type = 'C' AND parent_object_id = OBJECT_ID('tblICItemUOM', 'U'))
+IF NOT EXISTS(SELECT TOP 1 1 FROM sys.objects WHERE name = 'CK_tblICItemUOM_intUpcCode2' AND type = 'C' AND parent_object_id = OBJECT_ID('tblICItemUOM', 'U'))
 BEGIN
     ;WITH CTE
     AS
@@ -13,7 +18,7 @@ BEGIN
     )
     UPDATE CTE SET strLongUPCCode = NULL WHERE rc > 1;
     
-	EXEC('ALTER TABLE tblICItemUOM ADD CONSTRAINT CK_tblICItemUOM_intUpcCode CHECK(dbo.fnICIsUpcExists(RTRIM(LTRIM(intUpcCode))) = 0)');
+	EXEC('ALTER TABLE tblICItemUOM ADD CONSTRAINT CK_tblICItemUOM_intUpcCode2 CHECK(dbo.fnICIsUpcExists(strLongUPCCode, intItemUOMId) = 0)');
 END
 
 PRINT N'END - IC Add Remove Duplicate UPCs'
