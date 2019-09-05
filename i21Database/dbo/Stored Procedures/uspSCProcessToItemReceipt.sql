@@ -595,6 +595,47 @@ BEGIN TRY
 		END
 		IF ISNULL(@intBillId , 0) != 0 AND ISNULL(@postVoucher, 0) = 1
 		BEGIN
+
+			--Add contract prepayment to voucher
+			BEGIN
+				IF OBJECT_ID (N'tempdb.dbo.#tmpContractPrepay') IS NOT NULL
+					DROP TABLE #tmpContractPrepay
+
+				CREATE TABLE #tmpContractPrepay (
+					[intPrepayId] INT
+				);
+				DECLARE @Ids as Id
+			
+				INSERT INTO @Ids(intId)
+				SELECT CT.intContractHeaderId 
+				FROM tblICInventoryReceiptItem A 
+				INNER JOIN tblCTContractDetail CT 
+					ON CT.intContractDetailId = A.intContractDetailId
+				WHERE A.dblUnitCost > 0
+					AND A.intInventoryReceiptId = @InventoryReceiptId
+				GROUP BY CT.intContractHeaderId 
+				
+				
+
+				INSERT INTO #tmpContractPrepay(
+					[intPrepayId]
+				) 
+				SELECT intTransactionId FROM dbo.fnSCGetPrepaidIds(@Ids)
+			
+				SELECT @total = COUNT(intPrepayId) FROM #tmpContractPrepay where intPrepayId > 0;
+				IF (@total > 0)
+				BEGIN
+					INSERT INTO @prePayId(
+						[intId]
+					)
+					SELECT [intId] = intPrepayId
+					FROM #tmpContractPrepay where intPrepayId > 0
+				
+					EXEC uspAPApplyPrepaid @intBillId, @prePayId
+					update tblAPBillDetail set intScaleTicketId = @intTicketId WHERE intBillId = @intBillId
+				END
+			END
+
 			SELECT @dblTotal = SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = @intBillId
 
 			EXEC [dbo].[uspSMTransactionCheckIfRequiredApproval]
