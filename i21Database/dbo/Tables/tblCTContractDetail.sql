@@ -7,6 +7,7 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	intConcurrencyId int NOT NULL,
 	intContractHeaderId int NOT NULL,
 	intContractStatusId int NULL,
+	strFinancialStatus nvarchar(30) COLLATE Latin1_General_CI_AS NULL,
 	intContractSeq int NOT NULL,
 	intCompanyLocationId int NOT NULL,
 	intShipToId INT,
