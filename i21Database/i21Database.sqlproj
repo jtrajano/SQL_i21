@@ -8063,7 +8063,6 @@
     <Build Include="dbo\Functions\fnCTGetPrepaidIdsItemContract.sql" />
     <Build Include="dbo\Stored Procedures\uspTROverrideTax.sql" />
     <Build Include="dbo\Functions\fnAPAllowEditCost.sql" />
-    <None Include="Scripts\Post-Deployment\GR\UpdateDeliverySheetDate.sql" />
     <Build Include="dbo\Stored Procedures\uspCTUpdateFinancialStatus.sql" />
   </ItemGroup>
   <ItemGroup>
