@@ -704,7 +704,7 @@ BEGIN TRY
 			,strItemDescription						=	strItemDescription
 			,strStraussQuantity						=	dbo.fnRemoveTrailingZeroes(CH.dblQuantity) + ' ' + dbo.fnCTGetTranslation('Inventory.view.ReportTranslation',UM.intUnitMeasureId,@intLaguageId,'Name',UM.strUnitMeasure) + ' ' + ISNULL(SQ.strPackingDescription, '')
 			,strItemBundleNo						=	SQ.strItemBundleNo
-			,strStraussPrice						=	CASE WHEN SQ.intPricingTypeId = 2 THEN 
+			,strStraussPrice						=	CASE WHEN CH.intPricingTypeId = 2 THEN 
 															'Price to be fixed basis ' + strFutMarketName + ' ' + 
 															strFutureMonthYear + CASE WHEN SQ.dblBasis < 0 THEN ' '+@rtMinus+' ' ELSE ' '+@rtPlus+' ' END +
 															SQ.strBasisCurrency + ' ' + dbo.fnCTChangeNumericScale(abs(SQ.dblBasis),2) + '/'+ SQ.strBasisUnitMeasure +' at '+ SQ.strFixationBy+'''s option prior to first notice day of '+strFutureMonthYear+' or on presentation of documents,whichever is earlier.'
