@@ -130,6 +130,7 @@ BEGIN
 			@post = @post
 			,@recap = @recap
 			,@isBatch = 0
+			,@transactionType = 'Credit Card'
 			,@param = @createdVouchersId
 			,@userId = @userId
 			,@success = @success OUTPUT
@@ -275,6 +276,7 @@ BEGIN
 					,@recap = 0
 					,@isBatch = 0
 					,@param = @intBillId
+					,@transactionType = 'Credit Card'
 					,@userId = @userId
 					,@success = @success OUTPUT
 			END
