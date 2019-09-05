@@ -56,6 +56,7 @@ BEGIN TRY
 		intItemId INT
 		,intMainItemId INT
 		,ysnSpecificItemDescription BIT
+		,dblRatio NUMERIC(18, 6)
 		)
 
 	SELECT @intContainerTypeId = intContainerTypeId
@@ -163,10 +164,18 @@ BEGIN TRY
 			intItemId
 			,intMainItemId
 			,ysnSpecificItemDescription
+			,dblRatio
 			)
 		SELECT DISTINCT R.intItemId
 			,RI.intItemId
 			,0
+			,RI.dblCalculatedQuantity / (
+				CASE 
+					WHEN R.intRecipeTypeId = 1
+						THEN R.dblQuantity
+					ELSE 1
+					END
+				)
 		FROM @tblMFItem I
 		JOIN tblMFRecipeItem RI ON RI.intItemId = I.intItemId
 			AND RI.intRecipeItemTypeId = 1
@@ -179,6 +188,26 @@ BEGIN TRY
 					ELSE @intCompanyLocationId
 					END
 				)
+
+		IF EXISTS (
+				SELECT *
+				FROM @tblMFItem I
+				WHERE NOT EXISTS (
+						SELECT *
+						FROM @tblMFItemDetail ID
+						WHERE ID.intItemId = I.intItemId
+						)
+				)
+		BEGIN
+			RAISERROR (
+					'There is no matching recipe found.'
+					,16
+					,1
+					,'WITH NOWAIT'
+					)
+
+			RETURN
+		END
 	END
 	ELSE
 	BEGIN
@@ -186,9 +215,11 @@ BEGIN TRY
 			intItemId
 			,intMainItemId
 			,ysnSpecificItemDescription
+			,dblRatio
 			)
 		SELECT DISTINCT DD.intSubstituteItemId
 			,DD.intItemId
+			,1
 			,1
 		FROM @tblMFItem I
 		JOIN tblMFDemandDetail DD ON I.intItemId = DD.intSubstituteItemId
@@ -198,10 +229,12 @@ BEGIN TRY
 			intItemId
 			,intMainItemId
 			,ysnSpecificItemDescription
+			,dblRatio
 			)
 		SELECT IB.intBundleItemId
 			,IB.intItemId
 			,0
+			,1
 		FROM @tblMFItem I
 		LEFT JOIN tblICItemBundle IB ON IB.intItemId = I.intItemId
 		WHERE NOT EXISTS (
@@ -215,10 +248,12 @@ BEGIN TRY
 			intItemId
 			,intMainItemId
 			,ysnSpecificItemDescription
+			,dblRatio
 			)
 		SELECT intItemId
 			,intItemId
 			,0
+			,1
 		FROM @tblMFItem I
 		WHERE NOT EXISTS (
 				SELECT *
@@ -288,7 +323,7 @@ BEGIN TRY
 			)
 		SELECT [intItemId]
 			,Replace(Replace([Name], 'strMonth', ''), 'PastDue', '0') AS [Name]
-			,[Value]
+			,-[Value]
 		FROM OPENXML(@idoc, 'root/FC', 2) WITH (
 				[intItemId] INT
 				,[Name] NVARCHAR(50)
@@ -360,7 +395,7 @@ BEGIN TRY
 						THEN I.intItemId
 					ELSE I.intMainItemId
 					END AS intItemId
-				,sum(dbo.fnCTConvertQuantityToTargetItemUOM(L.intItemId, IU.intUnitMeasureId, @intUnitMeasureId, L.dblQty)) AS dblIntrasitQty
+				,sum(dbo.fnCTConvertQuantityToTargetItemUOM(L.intItemId, IU.intUnitMeasureId, @intUnitMeasureId, L.dblQty) * I.dblRatio) AS dblIntrasitQty
 				,2 AS intAttributeId --Opening Inventory
 				,- 1 AS intMonthId
 			FROM @tblMFItemDetail I
@@ -423,7 +458,7 @@ BEGIN TRY
 				)
 			AS (
 				SELECT RI.intItemId
-					,Convert(NUMERIC(18, 6), (RI.dblQuantity / R.dblQuantity) * DD.dblQuantity)
+					,Convert(NUMERIC(18, 6), (RI.dblCalculatedQuantity / R.dblQuantity) * dbo.fnMFConvertQuantityToTargetItemUOM(DD.intItemUOMId,IU.intItemUOMId, DD.dblQuantity))
 					,8 AS intAttributeId --Forecasted Consumption
 					,DD.dtmDemandDate
 					,0 AS intLevel
@@ -440,6 +475,7 @@ BEGIN TRY
 							END
 						)
 				JOIN tblMFRecipeItem RI ON RI.intRecipeId = R.intRecipeId
+				JOIN tblICItemUOM IU on IU.intItemId=DD.intItemId and IU.intUnitMeasureId=@intUnitMeasureId
 				WHERE intRecipeItemTypeId = 1
 					AND (
 						(
@@ -458,7 +494,7 @@ BEGIN TRY
 				UNION ALL
 				
 				SELECT RI.intItemId
-					,Convert(NUMERIC(18, 6), (RI.dblQuantity / R.dblQuantity) * RII.dblQuantity)
+					,Convert(NUMERIC(18, 6), (RI.dblCalculatedQuantity / R.dblQuantity) * RII.dblQuantity)
 					,8 AS intAttributeId --Forecasted Consumption
 					,RII.dtmDemandDate
 					,RII.intLevel + 1
@@ -510,12 +546,13 @@ BEGIN TRY
 				,intMonthId
 				)
 			SELECT IsNULL(DD.intSubstituteItemId, DD.intItemId)
-				,- DD.dblQuantity
+				,- dbo.fnMFConvertQuantityToTargetItemUOM(DD.intItemUOMId,IU.intItemUOMId, DD.dblQuantity)
 				,8 AS intAttributeId --Forecasted Consumption
 				,DATEDIFF(mm, 0, DD.dtmDemandDate) + 1 - @intCurrentMonth AS intMonthId
 			FROM @tblMFItem I
 			JOIN tblMFDemandDetail DD ON IsNULL(DD.intSubstituteItemId, DD.intItemId) = I.intItemId
 				AND DD.intDemandHeaderId = @intDemandHeaderId
+				JOIN tblICItemUOM IU on IU.intItemId=DD.intItemId and IU.intUnitMeasureId=@intUnitMeasureId
 			WHERE DD.dtmDemandDate >= @dtmStartOfMonth
 		END
 	END
@@ -569,7 +606,7 @@ BEGIN TRY
 						THEN I.intItemId
 					ELSE I.intMainItemId
 					END AS intItemId
-				,sum(dbo.fnCTConvertQuantityToTargetItemUOM(SS.intItemId, IU.intUnitMeasureId, @intUnitMeasureId, SS.dblBalance)) AS dblIntrasitQty
+				,sum(dbo.fnCTConvertQuantityToTargetItemUOM(SS.intItemId, IU.intUnitMeasureId, @intUnitMeasureId, SS.dblBalance)* I.dblRatio) AS dblIntrasitQty
 				,13 AS intAttributeId --Open Purchases
 				,0 AS intMonthId
 			FROM @tblMFItemDetail I
@@ -599,7 +636,7 @@ BEGIN TRY
 						THEN I.intItemId
 					ELSE I.intMainItemId
 					END AS intItemId
-				,sum(dbo.fnCTConvertQuantityToTargetItemUOM(SS.intItemId, IU.intUnitMeasureId, @intUnitMeasureId, SS.dblBalance)) AS dblIntrasitQty
+				,sum(dbo.fnCTConvertQuantityToTargetItemUOM(SS.intItemId, IU.intUnitMeasureId, @intUnitMeasureId, SS.dblBalance)* I.dblRatio) AS dblIntrasitQty
 				,13 AS intAttributeId --Open Purchases
 				,DATEDIFF(mm, 0, SS.dtmUpdatedAvailabilityDate) + 1 - @intCurrentMonth AS intMonthId
 			FROM @tblMFItemDetail I
@@ -669,7 +706,7 @@ BEGIN TRY
 							THEN ISNULL(LDCL.dblReceivedQty, 0)
 						ELSE LD.dblDeliveredQuantity
 						END
-					))) AS dblIntrasitQty
+					))* I.dblRatio) AS dblIntrasitQty
 		,14 AS intAttributeId --In-transit Purchases
 		,0 AS intMonthId
 	FROM tblLGLoad L
@@ -717,7 +754,7 @@ BEGIN TRY
 							THEN ISNULL(LDCL.dblReceivedQty, 0)
 						ELSE LD.dblDeliveredQuantity
 						END
-					))) AS dblIntrasitQty
+					))* I.dblRatio) AS dblIntrasitQty
 		,14 AS intAttributeId --In-transit Purchases
 		,DATEDIFF(mm, 0, SS.dtmUpdatedAvailabilityDate) + 1 - @intCurrentMonth AS intMonthId
 	FROM tblLGLoad L
@@ -1112,7 +1149,13 @@ BEGIN TRY
 						AND D2.intAttributeId = 10
 						AND D2.intMonthId = Demand.intMonthId
 					) = 0
-				THEN NULL
+				THEN (
+						SELECT dblQty
+						FROM #tblMFDemand D1
+						WHERE D1.intItemId = Demand.intItemId
+							AND D1.intAttributeId = 9 --Ending Inventory
+							AND D1.intMonthId = Demand.intMonthId
+						)
 			ELSE (
 					(
 						SELECT dblQty
@@ -1415,6 +1458,7 @@ BEGIN TRY
 								,0
 								)
 							THEN D.dblQty
+						When A.intReportAttributeID = 8 Then ABS(D.dblQty)
 						ELSE IsNULL(D.dblQty, 0)
 						END
 					)) AS dblQty
