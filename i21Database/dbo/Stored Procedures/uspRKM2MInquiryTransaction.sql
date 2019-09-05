@@ -746,7 +746,7 @@ SELECT intContractHeaderId
 	, dblDummyContractBasis
 	, dblCash
 	, dblFuturesClosingPrice1
-	, dblFutures 
+	, dblFutures = dblFutures / CASE WHEN ysnSubCurrency = 1 THEN 100 ELSE 1 END
 	, dblMarketRatio
 	, CASE WHEN intPricingTypeId = 6 THEN 0 ELSE dblMarketBasis1 END dblMarketBasis1
 	, intMarketBasisUOM
