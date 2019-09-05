@@ -43,7 +43,7 @@ RETURNS TABLE AS RETURN
 		,[dblQuantityToBill]						=	1
 		,[dblQtyToBillUnitQty]						=	1
 		,[intQtyToBillUOMId]						=	ISNULL(CostUOM.intItemUOMId,CD.intItemUOMId)
-		,[dblCost]									=	CC.dblAmount
+		,[dblCost]									=	ISNULL(CC.dblAmount,0)
 		,[dblCostUnitQty]							=	1
 		,[intCostUOMId]								=	ISNULL(CostUOM.intItemUOMId,CD.intItemUOMId)
 		,[dblNetWeight]								=	1--ISNULL(CD.dblNetWeight,0)      
