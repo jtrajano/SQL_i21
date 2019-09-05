@@ -235,7 +235,7 @@ BEGIN
 			AND Transactions.intSubLocationId = Lot.intSubLocationId
 			AND Transactions.intStorageLocationId = Lot.intStorageLocationId
 			AND Transactions.intLotId = Lot.intLotId
-			AND Transactions.intItemUOMId = Lot.intItemUOMId
+			AND Transactions.intItemUOMId = COALESCE(Lot.intWeightUOMId, Lot.intItemUOMId)
 		LEFT OUTER JOIN @CategoryIds categoryFilter ON categoryFilter.intCategoryId = Item.intCategoryId
 		LEFT OUTER JOIN @CommodityIds commodityFilter ON commodityFilter.intCommodityId = Item.intCommodityId
 		LEFT OUTER JOIN @StorageLocationIds storageLocationFilter ON storageLocationFilter.intStorageLocationId = Lot.intSubLocationId
