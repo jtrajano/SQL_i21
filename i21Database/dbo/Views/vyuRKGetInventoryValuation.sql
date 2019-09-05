@@ -86,6 +86,7 @@ SELECT	intInventoryValuationKeyId  = ISNULL(t.intInventoryTransactionId, 0)
 		,dblQuantity				= ISNULL(dbo.fnCalculateQtyBetweenUOM(t.intItemUOMId, iuStock.intItemUOMId, t.dblQty), 0)
 		,t.strBatchId	
 		,strUOM						= umTransUOM.strUnitMeasure
+		,t.intItemUOMId
 		,strEntity					= e.strName			
 		,intEntityId				= e.intEntityId							
 		,strLotNumber				= l.strLotNumber

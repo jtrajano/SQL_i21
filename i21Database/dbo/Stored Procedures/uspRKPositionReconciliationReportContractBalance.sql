@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE uspRKPositionReconciliationReportContractBalance
-	@intCommodityId INT 
+	@strCommodityId NVARCHAR(100) 
 	,@intContractTypeId INT --1 = Purchase, 2 = Sale
 	,@dtmFromTransactionDate DATE 
 	,@dtmToTransactionDate DATE
@@ -7,17 +7,9 @@
 
 AS
 
-----Test Param (Remove it once push to repo)
---DECLARE @intCommodityId INT = 9
---		,@intContractTypeId INT = 2 --1 = Purchase, 2 = Sale
---		,@dtmFromTransactionDate DATE = '08/01/2019'
---		,@dtmToTransactionDate DATE = '08/30/2019'
-
 BEGIN
 
-
-
-DECLARE @dtmContractBeginBalance DATE
+	DECLARE @dtmContractBeginBalance DATE
 		,@strContractType NVARCHAR(50) = ''
 
 		IF @intContractTypeId = 1
@@ -31,22 +23,32 @@ DECLARE @dtmContractBeginBalance DATE
 
 		select @dtmContractBeginBalance = DATEADD(day, -1, convert(date, @dtmFromTransactionDate))
 
---EXEC [dbo].[uspCTGetContractBalance]
---   	@intContractTypeId		  = @intContractTypeId
---   ,@intEntityId			  = NULL
---   ,@IntCommodityId			  = @intCommodityId  
---   ,@dtmEndDate				 = @dtmContractBeginBalance
---   ,@intCompanyLocationId     = NULL
---   ,@IntFutureMarketId        = NULL
---   ,@IntFutureMonthId         = NULL
---   ,@strPositionIncludes    = NULL
---   ,@strCallingApp			 = 'DPR'
---   ,@strPrintOption			 = NULL
+	EXEC [dbo].[uspCTGetContractBalance]
+   		@intContractTypeId		  = @intContractTypeId
+	   ,@intEntityId			  = NULL
+	   ,@IntCommodityId			  = NULL  
+	   ,@dtmEndDate				 = @dtmContractBeginBalance
+	   ,@intCompanyLocationId     = NULL
+	   ,@IntFutureMarketId        = NULL
+	   ,@IntFutureMonthId         = NULL
+	   ,@strPositionIncludes    = NULL
+	   ,@strCallingApp			 = 'DPR'
+	   ,@strPrintOption			 = NULL
+
+
+	DECLARE @Commodity AS TABLE (intCommodityIdentity INT IDENTITY PRIMARY KEY
+		, intCommodityId INT)
+		
+	
+	INSERT INTO @Commodity(intCommodityId)
+	SELECT Item Collate Latin1_General_CI_AS FROM [dbo].[fnSplitString](@strCommodityId, ',')
+
 
 
 SELECT
 	strHeaderType = @strContractType + ' Contract Balance' 
 	,dtmTransactionDate 
+	,C.strCommodityCode
 	,t.intContractHeaderId
 	,t.intContractDetailId
 	,CH.strContractNumber
@@ -114,10 +116,11 @@ FROM(
 ) t
 INNER JOIN tblCTContractHeader CH on CH.intContractHeaderId = t.intContractHeaderId 
 INNER JOIN tblCTContractDetail CD on CD.intContractDetailId = t.intContractDetailId
+INNER JOIN tblICCommodity C  on C.intCommodityId = CH.intCommodityId
 WHERE Row_Num = 1
 AND dtmTransactionDate between @dtmFromTransactionDate and @dtmToTransactionDate
 AND CH.intContractTypeId = @intContractTypeId --1 = Purchase, 2 = Sale
-AND CH.intCommodityId  = @intCommodityId
+AND CH.intCommodityId  IN (SELECT com.intCommodityId FROM @Commodity com)
 ORDER BY dtmTransactionDate
 
 
@@ -128,6 +131,7 @@ FROM (
 	SELECT 
 			 intRowNum = CONVERT(INT, ROW_NUMBER() OVER (ORDER BY dtmTransactionDate ASC))
 			,dtmTransactionDate
+			,strCommodityCode
 			,dblBasisIncrease =  CASE WHEN strPricingType = 'Basis' THEN dblIncrease ELSE 0 END
 			,dblBasisDecrease =  CASE WHEN strPricingType = 'Basis' THEN dblDecrease ELSE 0 END
 			,dblPricedIncrease =  CASE WHEN strPricingType = 'Priced' THEN dblIncrease ELSE 0 END
@@ -149,113 +153,208 @@ ORDER BY dtmTransactionDate
 
 
 
-SELECT	intRowNum 
+SELECT	intRowNum, dtmTransactionDate
 INTO #tempDateRange
 FROM	#tblFinalContractBalance AS d
 
 declare @tblRunningBalance as table (
 	intRowNum  INT  NULL
-	,dblBasisBalance  NUMERIC(18,6)
-	,dblPricedBalance  NUMERIC(18,6)
-	,dblDPBalance  NUMERIC(18,6)
-	,dblCashBalance  NUMERIC(18,6)
+	,dtmDate DATE
+	,dblBasisBegBalance  NUMERIC(18,6)
+	,dblBasisEndBalance  NUMERIC(18,6)
+	,dblPricedBegBalance  NUMERIC(18,6)
+	,dblPricedEndBalance  NUMERIC(18,6)
+	,dblDPBegBalance  NUMERIC(18,6)
+	,dblDPEndBalance  NUMERIC(18,6)
+	,dblCashBegBalance  NUMERIC(18,6)
+	,dblCashEndBalance  NUMERIC(18,6)
+	,dblBasisBegBalForSummary NUMERIC(18,6)
+	,dblBasisEndBalForSummary NUMERIC(18,6)
+	,dblPricedBegBalForSummary NUMERIC(18,6)
+	,dblPricedEndBalForSummary NUMERIC(18,6)
+	,dblDPBegBalForSummary NUMERIC(18,6)
+	,dblDPEndBalForSummary NUMERIC(18,6)
+	,dblCashBegBalForSummary NUMERIC(18,6)
+	,dblCashEndBalForSummary NUMERIC(18,6)
 )
 
 Declare @intRowNum int
-	,@dblBasisBeginBalance  NUMERIC(18,6)
-	,@dblPricedBeginBalance  NUMERIC(18,6)
-	,@dblDPBeginBalance  NUMERIC(18,6)
-	,@dblCashBeginBalance  NUMERIC(18,6)
+	,@dtmCurDate DATE
+	,@dtmPrevDate DATE
+	,@dblBasisBalanceForward  NUMERIC(18,6)
+	,@dblPricedBalanceForward  NUMERIC(18,6)
+	,@dblDPBalanceForward  NUMERIC(18,6)
+	,@dblCashBalanceForward  NUMERIC(18,6)
+	,@dblBasisBegBalForSummary NUMERIC(18,6)
+	,@dblPricedBegBalForSummary NUMERIC(18,6)
+	,@dblDPBegBalForSummary NUMERIC(18,6)
+	,@dblCashBegBalForSummary NUMERIC(18,6)
 
 
-select @dblBasisBeginBalance = isnull(sum(dblQuantity) ,0)
+select @dblBasisBalanceForward = isnull(sum(dblQuantity) ,0)
 from tblCTContractBalance where dtmEndDate = @dtmContractBeginBalance
-and intCommodityId = @intCommodityId
+and intCommodityId  IN (SELECT intCommodityId FROM @Commodity)
 and intContractTypeId = @intContractTypeId
 and strPricingTypeDesc = 'Basis'
 
-select @dblPricedBeginBalance = isnull(sum(dblQuantity) ,0)
+select @dblPricedBalanceForward = isnull(sum(dblQuantity) ,0)
 from tblCTContractBalance where dtmEndDate = @dtmContractBeginBalance
-and intCommodityId = @intCommodityId
+and intCommodityId  IN (SELECT intCommodityId FROM @Commodity)
 and intContractTypeId = @intContractTypeId
 and strPricingTypeDesc = 'Priced'
 
-select @dblDPBeginBalance = isnull(sum(dblQuantity) ,0)
+select @dblDPBalanceForward = isnull(sum(dblQuantity) ,0)
 from tblCTContractBalance where dtmEndDate = @dtmContractBeginBalance
-and intCommodityId = @intCommodityId
+and intCommodityId  IN (SELECT intCommodityId FROM @Commodity)
 and intContractTypeId = @intContractTypeId
 and strPricingTypeDesc = 'DP (Priced Later)'
 
-select @dblCashBeginBalance = isnull(sum(dblQuantity) ,0)
+select @dblCashBalanceForward = isnull(sum(dblQuantity) ,0)
 from tblCTContractBalance where dtmEndDate = @dtmContractBeginBalance
-and intCommodityId = @intCommodityId
+and intCommodityId  IN (SELECT intCommodityId FROM @Commodity)
 and intContractTypeId = @intContractTypeId
 and strPricingTypeDesc = 'Cash'
 
-insert into @tblRunningBalance(
-		intRowNum
-		,dblBasisBalance
-		,dblPricedBalance
-		,dblDPBalance
-		,dblCashBalance
-	)
-values (
-	null
-	,@dblBasisBeginBalance
-	,@dblPricedBeginBalance
-	,@dblDPBeginBalance
-	,@dblCashBeginBalance
-)
+--insert into @tblRunningBalance(
+--		intRowNum
+--		,dblBasisBalance
+--		,dblPricedBalance
+--		,dblDPBalance
+--		,dblCashBalance
+--	)
+--values (
+--	null
+--	,@dblBasisBeginBalance
+--	,@dblPricedBeginBalance
+--	,@dblDPBeginBalance
+--	,@dblCashBeginBalance
+--)
 
 While (Select Count(*) From #tempDateRange) > 0
 Begin
 
-	Select Top 1 @intRowNum = intRowNum From #tempDateRange
+	Select Top 1 
+		@intRowNum = intRowNum 
+		,@dtmCurDate = dtmTransactionDate
+	From #tempDateRange
 
 	insert into @tblRunningBalance(
 		intRowNum
-		,dblBasisBalance
-		,dblPricedBalance
-		,dblDPBalance
-		,dblCashBalance
+		,dtmDate
+		,dblBasisBegBalance
+		,dblBasisEndBalance
+		,dblPricedBegBalance
+		,dblPricedEndBalance
+		,dblDPBegBalance
+		,dblDPEndBalance
+		,dblCashBegBalance
+		,dblCashEndBalance
 	)
 	select @intRowNum
-		,@dblBasisBeginBalance + ( dblBasisIncrease - dblBasisDecrease)  
-		,@dblPricedBeginBalance + ( dblPricedIncrease - dblPricedDecrease)  
-		,@dblDPBeginBalance + ( dblDPIncrease - dblDPIncrease)  
-		,@dblCashBeginBalance + ( dblCashIncrease - dblCashDecrease)  
+		,dtmTransactionDate
+		,@dblBasisBalanceForward
+		,@dblBasisBalanceForward + ( dblBasisIncrease - dblBasisDecrease)  
+		,@dblPricedBalanceForward
+		,@dblPricedBalanceForward + ( dblPricedIncrease - dblPricedDecrease)  
+		,@dblDPBalanceForward
+		,@dblDPBalanceForward + ( dblDPIncrease - dblDPIncrease)  
+		,@dblCashBalanceForward
+		,@dblCashBalanceForward + ( dblCashIncrease - dblCashDecrease)  
 	from #tblFinalContractBalance 
 	WHERE intRowNum = @intRowNum
 	
 	select 
-		@dblBasisBeginBalance = dblBasisBalance 
-		,@dblPricedBeginBalance = dblPricedBalance 
-		,@dblDPBeginBalance = dblDPBalance
-		,@dblCashBeginBalance = dblCashBalance
+		@dblBasisBalanceForward = dblBasisEndBalance 
+		,@dblPricedBalanceForward = dblPricedEndBalance 
+		,@dblDPBalanceForward = dblDPEndBalance
+		,@dblCashBalanceForward = dblCashEndBalance
 	from @tblRunningBalance where intRowNum = @intRowNum
+	
+	IF @dtmCurDate <> @dtmPrevDate OR @dtmPrevDate IS NULL
+	BEGIN
+		SELECT 
+			@dblBasisBegBalForSummary =  dblBasisBegBalance
+			,@dblPricedBegBalForSummary =  dblPricedBegBalance
+			,@dblDPBegBalForSummary =  dblDPBegBalance
+			,@dblCashBegBalForSummary =  dblCashBegBalance
+		FROM @tblRunningBalance
+		WHERE dtmDate = @dtmCurDate
+			
+		UPDATE @tblRunningBalance 
+		SET dblBasisBegBalForSummary = @dblBasisBegBalForSummary
+			,dblPricedBegBalForSummary = @dblPricedBegBalForSummary
+			,dblDPBegBalForSummary = @dblDPBegBalForSummary
+			,dblCashBegBalForSummary = @dblCashBegBalForSummary
+			--
+			,dblBasisEndBalForSummary = @dblBasisBalanceForward
+			,dblPricedEndBalForSummary = @dblPricedBalanceForward
+			,dblDPEndBalForSummary = @dblDPBalanceForward
+			,dblCashEndBalForSummary = @dblCashBalanceForward
+		WHERE dtmDate = @dtmCurDate
+
+	
+	END
+
+	IF @dtmCurDate = @dtmPrevDate
+	BEGIN
+		UPDATE @tblRunningBalance 
+		SET dblBasisEndBalForSummary = @dblBasisBalanceForward
+			,dblPricedEndBalForSummary = @dblPricedBalanceForward
+			,dblDPEndBalForSummary = @dblDPBalanceForward
+			,dblCashEndBalForSummary = @dblCashBalanceForward
+		WHERE dtmDate = @dtmCurDate
+
+		UPDATE @tblRunningBalance 
+		SET dblBasisBegBalForSummary = @dblBasisBegBalForSummary
+			,dblPricedBegBalForSummary = @dblPricedBegBalForSummary
+			,dblDPBegBalForSummary = @dblDPBegBalForSummary
+			,dblCashBegBalForSummary = @dblCashBegBalForSummary
+		WHERE dtmDate = @dtmCurDate
+		AND dblBasisBegBalForSummary IS NULL
+		AND dblPricedBegBalForSummary IS NULL
+		AND dblDPBegBalForSummary IS NULL
+		AND dblCashBegBalForSummary IS NULL
+	END
+
+	
+	SET @dtmPrevDate = @dtmCurDate
 						
 	Delete #tempDateRange Where intRowNum = @intRowNum
 
 End
 
+
 select 
 	 cb.intRowNum 
 	,dtmTransactionDate
+	,strCommodityCode
+	,dblBasisBegBalance
 	,dblBasisIncrease
 	,dblBasisDecrease
-	,dblBasisBalance
+	,dblBasisEndBalance
+	,dblPricedBegBalance
 	,dblPricedIncrease
 	,dblPricedDecrease
-	,dblPricedBalance
+	,dblPricedEndBalance
+	,dblDPBegBalance
 	,dblDPIncrease
 	,dblDPDecrease
-	,dblDPBalance
+	,dblDPEndBalance
+	,dblCashBegBalance
 	,dblCashIncrease
 	,dblCashDecrease
-	,dblCashBalance
+	,dblCashEndBalance
 	,strContractSeq 
 	,intContractHeaderId
 	,intContractDetailId
+	,dblBasisBegBalForSummary
+	,dblBasisEndBalForSummary
+	,dblPricedBegBalForSummary 
+	,dblPricedEndBalForSummary 
+	,dblDPBegBalForSummary 
+	,dblDPEndBalForSummary
+	,dblCashBegBalForSummary 
+	,dblCashEndBalForSummary
 from #tblFinalContractBalance cb
 full join @tblRunningBalance rb on rb.intRowNum = cb.intRowNum
 order by cb.dtmTransactionDate
