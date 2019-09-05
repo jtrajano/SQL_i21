@@ -1,8 +1,16 @@
 ﻿CREATE PROCEDURE uspEMImportEntitySplitOrigin
 @error_msg nvarchar(max) = N'' output,
-@success bit output 
+@success bit output,
+@duplicate_msg nvarchar(max) = N'' output 
 AS
 BEGIN
+
+
+DECLARE @InitTranCount INT;
+SET @InitTranCount = @@TRANCOUNT
+DECLARE @Savepoint NVARCHAR(32) = SUBSTRING(('uspEMImportEntitySplitOrigin' + CONVERT(VARCHAR, @InitTranCount)), 1, 32)
+
+
 
 IF(OBJECT_ID('tmpsplit') IS NOT NULL)
 DROP TABLE tmpsplit
@@ -52,7 +60,7 @@ SELECT * INTO tmpsplit FROM
  DECLARE @PCT11 NUMERIC(18,6)
  DECLARE @PCT12 NUMERIC(18,6)
 
- begin transaction
+ --begin transaction
 
 IF(OBJECT_ID('tempdb..#splitDetailOrigin') IS NOT NULL) 
 drop table #splitDetailOrigin
@@ -118,10 +126,31 @@ FROM tmpsplit
 SET @EntityId = (select top 1 intEntityId from vyuEMSearch where TRIM(strEntityNo) = @CUSTOMER_BILLTO)
 
 BEGIN TRY
+
+		IF @InitTranCount = 0
+			BEGIN
+				BEGIN TRANSACTION
+			END		
+		ELSE
+			BEGIN
+				SAVE TRANSACTION @Savepoint
+			END
+
 	
 
 	if(exists(select top 1 1 from vyuEMSearch where TRIM(strEntityNo) = @CUSTOMER_BILLTO))
 	begin
+
+	DECLARE @duplicate_entry INT = (SELECT TOP 1 1 from tblEMEntitySplit where strSplitNumber = @SPLIT_NO and intEntityId = @EntityId)
+
+	IF(ISNULL(@duplicate_entry,0) <> 0)
+	BEGIN
+		set @duplicate_msg = @duplicate_msg + CHAR(13) + CAST(@SPLIT_NO AS varchar) + '|' + CAST(@EntityId AS varchar)
+
+		DELETE from tmpsplit where TRIM(ssspl_bill_to_cus) = @CUSTOMER_BILLTO AND ssspl_split_no = @SPLIT_NO
+
+		CONTINUE;
+	END 
 
 	insert into tblEMEntitySplit(intEntityId, strSplitNumber, strDescription, intFarmId, dblAcres, intCategoryId, strSplitType, intConcurrencyId)
 							VALUES(@EntityId, @SPLIT_NO, @DESC, NULL,@ACRES, NULL,@splitType, 1 )
@@ -196,7 +225,10 @@ INSERT INTO #splitDetailOrigin(id, splitId, custNo,splitPercent, strOption, intS
 		 if(ISNULL(@EntityDetailId,0) = 0)
 			begin
 				SET @error_msg = 'Entity ' + @customer + ' does not exists.'
-				raiserror(@error_msg,16,1)
+				SET @success = 0;
+
+				GOTO ExitWithRollback
+				--raiserror(@error_msg,16,1)
 			end
 
 		 --insert detail table
@@ -223,40 +255,54 @@ INSERT INTO #splitDetailOrigin(id, splitId, custNo,splitPercent, strOption, intS
 	end
 	else
 		begin
-			declare @err varchar(max) =  'Entity ' + @CUSTOMER_BILLTO + ' does not exists'
-			raiserror(@err, 16,1)
+			declare @err nvarchar(max) =  'Entity ' + @CUSTOMER_BILLTO + ' does not exists'
+			SET @error_msg = @err;
+
+			GOTO ExitWithRollback
+			--raiserror(@err, 16,1)
 			--break;
 		end
 	--valdiations
 	/**
 	 -Check if split is already imported - UNIQUE(Split# & EntityId)
 	**/
+
 	END TRY
 	BEGIN CATCH
+		
 		SET @success = 0;
 		SET @error_msg = ERROR_MESSAGE();
-		BREAK;
+		
+		GOTO ExitWithRollback
+		
 	END CATCH
 
 END
 
-if(@success = 1)
-	begin
-		if(@@TRANCOUNT > 0)
-		begin
-			commit transaction
-			end
-	end
-else
-	begin
-		if(@@TRANCOUNT > 0)
-		begin
-			rollback transaction;
-			print @error_msg
-		end
+end
+
+
+	
+
+ExitWithRollback:
+
+SET @success = CAST(0 AS bit)
+
+IF @InitTranCount = 0
+BEGIN
+	IF((XACT_STATE()) <> 0 )
+		BEGIN
+			ROLLBACK TRANSACTION
 			
-	end
+		END
+END
+
+ELSE
+	BEGIN
+		IF((XACT_STATE()) <> 0)
+			BEGIN
+				ROLLBACK TRANSACTION @Savepoint
+			END
+	END
 
 
-
-	end
