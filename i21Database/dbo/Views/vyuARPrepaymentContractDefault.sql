@@ -124,7 +124,7 @@ FROM (
 		 , dblAvailableQty			= ICD.dblAvailable
 		 , dblDetailQuantity		= ICD.dblContracted
 		 , dblOrderQuantity			= ICD.dblContracted
-		 , dblShipQuantity			= ICD.dblContracted
+		 , dblShipQuantity			= ICD.dblAvailable
 		 , ysnUnlimitedQuantity		= CAST(0 AS BIT)
 		 , ysnLoad					= CAST(0 AS BIT)
 		 , ysnAllowedToShow			= CAST(1 AS BIT)
