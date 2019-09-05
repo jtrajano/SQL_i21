@@ -815,6 +815,7 @@ BEGIN
 		DECLARE @strTransactionId NVARCHAR(50)
 			, @strContractNumber NVARCHAR(50)
 			, @intContractSeq NVARCHAR(20)
+			, @intTransactionId INT
 			, @intUsedCommoidtyId INT
 			, @intUseCompanyLocationId INT
 			, @strCommodityCode NVARCHAR(100)
@@ -824,6 +825,7 @@ BEGIN
 
 		SELECT TOP 1 @intM2MTransactionId = intM2MTransactionId
 			, @strTransactionId = strTransactionId
+			, @intTransactionId = intTransactionId
 			, @strTransactionType = strTransactionType
 			, @dblAmount = (dblDebit + dblCredit)
 		FROM #tmpPostRecap
@@ -853,7 +855,7 @@ BEGIN
 			FROM tblCTContractHeader H
 			INNER JOIN tblCTContractDetail D ON H.intContractHeaderId = D.intContractHeaderId
 			INNER JOIN tblICCommodity C ON H.intCommodityId = C.intCommodityId
-			WHERE H.strContractNumber = @strContractNumber
+			WHERE H.intContractHeaderId = @intTransactionId
 				AND D.intContractSeq = @intContractSeq
 		END
 		
