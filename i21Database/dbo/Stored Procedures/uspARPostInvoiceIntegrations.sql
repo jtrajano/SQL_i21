@@ -803,6 +803,24 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM @ItemsFromInvoice WHERE strTransactionType 
 		DELETE FROM @ItemsFromInvoice WHERE intInvoiceId = @intInvoiceContractId
 	END
 
+--UPDATE CONTRACTS FINANCIAL STATUS
+DECLARE @tblContractsFinancial AS Id
+
+INSERT INTO @tblContractsFinancial
+SELECT DISTINCT intInvoiceId
+FROM #ARPostInvoiceDetail 
+WHERE intContractDetailId IS NOT NULL
+
+WHILE EXISTS (SELECT TOP 1 NULL FROM @tblContractsFinancial)
+	BEGIN
+		DECLARE @intContractFinancialId INT
+		SELECT TOP 1 @intContractFinancialId = intId FROM @tblContractsFinancial
+
+		EXEC dbo.uspCTUpdateFinancialStatus @intContractFinancialId, 'Invoice'
+
+		DELETE FROM @tblContractsFinancial WHERE intId = @intContractFinancialId
+	END
+
 --UPDATE ITEM CONTRACT BALANCE
 DECLARE @tblItemContracts CTItemContractTable
 
