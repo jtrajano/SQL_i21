@@ -244,6 +244,7 @@ BEGIN
 			, strLocationName nvarchar(100) COLLATE Latin1_General_CI_AS
 			, intCommodityId int
 			, intFromCommodityUnitMeasureId int
+			, intItemUOMId int
 			, strType nvarchar(100) COLLATE Latin1_General_CI_AS
 			, strInventoryType NVARCHAR(100) COLLATE Latin1_General_CI_AS
 			, intPricingTypeId int
@@ -262,6 +263,7 @@ BEGIN
 				, strLocationName
 				, intCommodityId
 				, intFromCommodityUnitMeasureId
+				, intItemUOMId
 				, strInventoryType
 				, dtmDate
 				, strTransactionType
@@ -275,6 +277,7 @@ BEGIN
 				, strLocationName
 				, intCommodityId
 				, intFromCommodityUnitMeasureId
+				, intItemUOMId
 				, strInventoryType
 				, dtmDate
 				, strTransactionType
@@ -289,6 +292,7 @@ BEGIN
 					, strLocationName
 					, intCommodityId = @intCommodityId
 					, intFromCommodityUnitMeasureId = @intCommodityUnitMeasureId
+					, s.intItemUOMId
 					, strInventoryType = 'Company Titled' COLLATE Latin1_General_CI_AS
 					, s.dtmDate
 					, s.strTransactionType
@@ -574,7 +578,7 @@ BEGIN
 			FROM (
 				select distinct
 						dtmDate =  CONVERT(DATETIME, CONVERT(VARCHAR(10),Inv.dtmDate, 110), 110)
-					,dblQtyShipped = ID.dblQtyShipped * -1
+					,dblQtyShipped = ISNULL(dbo.fnCalculateQtyBetweenUOM(ID.intItemUOMId, Inv.intItemUOMId, ID.dblQtyShipped), 0) * -1
 					,I.strInvoiceNumber
 					,I.intInvoiceId
 					,strDistribution = TV.strDistributionOption
@@ -759,6 +763,50 @@ BEGIN
 				from @InventoryStock Inv
 				inner join tblICInventoryTransaction It on It.intTransactionId = Inv.intTransactionId and It.intTransactionTypeId = 9
 				where Inv.strTransactionType = 'Produce'
+						
+			) t
+
+			UNION ALL--CONSUME
+			SELECT
+				dtmDate
+				,dblUnpaidIncrease = 0
+				,dblUnpaidDecrease = 0
+				,dblUnpaidBalance = 0
+				,dblPaidBalance = dblTotal
+				,strTransactionId
+				,intTransactionId
+				,'CNSM'
+			FROM (
+				select
+					dtmDate =  CONVERT(DATETIME, CONVERT(VARCHAR(10),Inv.dtmDate, 110), 110)
+					,Inv.dblTotal
+					,strTransactionId = It.strTransactionId
+					,Inv.intTransactionId 
+				from @InventoryStock Inv
+				inner join tblICInventoryTransaction It on It.intTransactionId = Inv.intTransactionId and It.intTransactionTypeId = 8
+				where Inv.strTransactionType = 'Consume'
+						
+			) t
+
+			UNION ALL--Outbound Shipment
+			SELECT
+				dtmDate
+				,dblUnpaidIncrease = 0
+				,dblUnpaidDecrease = 0
+				,dblUnpaidBalance = 0
+				,dblPaidBalance = dblTotal
+				,strTransactionId
+				,intTransactionId
+				,'LG'
+			FROM (
+				select
+					dtmDate =  CONVERT(DATETIME, CONVERT(VARCHAR(10),Inv.dtmDate, 110), 110)
+					,Inv.dblTotal
+					,strTransactionId = LG.strLoadNumber
+					,Inv.intTransactionId 
+				from @InventoryStock Inv
+				inner join tblLGLoad LG on LG.intLoadId = Inv.intTransactionId
+				where Inv.strTransactionType = 'Outbound Shipment'
 						
 			) t
 
@@ -1050,6 +1098,7 @@ BEGIN
 				,intTransactionId
 				,strDistribution
 				,R.dblCompanyTitled
+				,intCommodityId = @intCommodityId
 			FROM @CompanyTitle CT
 			FULL JOIN @Result R ON CT.dtmDate = R.dtmDate
 			
@@ -1058,6 +1107,7 @@ BEGIN
 			SELECT
 				NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL
 				,sum(dblTotal) 
+				,NULL
 			FROM @InventoryStock 
 			WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110) <= CONVERT(DATETIME, DATEADD(day,-1,@dtmFromTransactionDate))
 			) t

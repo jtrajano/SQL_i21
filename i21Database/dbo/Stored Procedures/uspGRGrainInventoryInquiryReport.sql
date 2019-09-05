@@ -161,7 +161,8 @@ CREATE TABLE #tblInOut
 	strDistribution VARCHAR(MAX),
 	dblBalance DECIMAL(18,6),
 	dblSalesInTransit DECIMAL(18,6),
-	strTransactionType NVARCHAR(50)
+	strTransactionType NVARCHAR(50),
+	intCommodityId INT
 
 )
 
@@ -177,7 +178,8 @@ CREATE TABLE #tblInOutAllLocation
 	strDistribution VARCHAR(MAX),
 	dblBalance DECIMAL(18,6),
 	dblSalesInTransit DECIMAL(18,6),
-	strTransactionType NVARCHAR(50)
+	strTransactionType NVARCHAR(50),
+	intCommodityId INT
 )
 
 CREATE TABLE #tblInTransit
