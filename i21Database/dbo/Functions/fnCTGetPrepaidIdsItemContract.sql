@@ -21,4 +21,4 @@ BEGIN
 	WHERE	intItemContractHeaderId = @intItemContractHeaderId
 
 	RETURN REPLACE(@strIds,' ','');	
-END
+END 

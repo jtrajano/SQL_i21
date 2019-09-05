@@ -43,6 +43,7 @@ BEGIN TRY
 		,@intNoofWeekstoCalculateSupplyTargetbyAverage INT
 		,@ysnComputeDemandUsingRecipe BIT
 		,@ysnDisplayDemandWithItemNoAndDescription BIT
+		,@ysnDemandViewForBlend BIT
 	DECLARE @tblMFItem TABLE (
 		intItemId INT
 		,intMainItemId INT
@@ -66,6 +67,9 @@ BEGIN TRY
 		,@ysnComputeDemandUsingRecipe = ysnComputeDemandUsingRecipe
 		,@ysnDisplayDemandWithItemNoAndDescription = ysnDisplayDemandWithItemNoAndDescription
 	FROM tblMFCompanyPreference
+
+	SELECT @ysnDemandViewForBlend = ysnDemandViewForBlend
+	FROM tblCTCompanyPreference
 
 	IF @intNoofWeekstoCalculateSupplyTargetbyAverage = 0
 		SELECT @intNoofWeekstoCalculateSupplyTargetbyAverage = 13
@@ -153,49 +157,75 @@ BEGIN TRY
 		END
 	END
 
-	INSERT INTO @tblMFItemDetail (
-		intItemId
-		,intMainItemId
-		,ysnSpecificItemDescription
-		)
-	SELECT DISTINCT DD.intSubstituteItemId
-		,DD.intItemId
-		,1
-	FROM @tblMFItem I
-	JOIN tblMFDemandDetail DD ON I.intItemId = DD.intSubstituteItemId
-	WHERE DD.intDemandHeaderId = @intDemandHeaderId
-
-	INSERT INTO @tblMFItemDetail (
-		intItemId
-		,intMainItemId
-		,ysnSpecificItemDescription
-		)
-	SELECT IB.intBundleItemId
-		,IB.intItemId
-		,0
-	FROM @tblMFItem I
-	LEFT JOIN tblICItemBundle IB ON IB.intItemId = I.intItemId
-	WHERE NOT EXISTS (
-			SELECT *
-			FROM @tblMFItemDetail FI
-			WHERE FI.intItemId = IB.intBundleItemId
+	IF @ysnDemandViewForBlend = 1
+	BEGIN
+		INSERT INTO @tblMFItemDetail (
+			intItemId
+			,intMainItemId
+			,ysnSpecificItemDescription
 			)
-		AND IB.intBundleItemId IS NOT NULL
-
-	INSERT INTO @tblMFItemDetail (
-		intItemId
-		,intMainItemId
-		,ysnSpecificItemDescription
-		)
-	SELECT intItemId
-		,intItemId
-		,0
-	FROM @tblMFItem I
-	WHERE NOT EXISTS (
-			SELECT *
-			FROM @tblMFItemDetail ID
-			WHERE ID.intItemId = I.intItemId
+		SELECT DISTINCT R.intItemId
+			,RI.intItemId
+			,0
+		FROM @tblMFItem I
+		JOIN tblMFRecipeItem RI ON RI.intItemId = I.intItemId
+			AND RI.intRecipeItemTypeId = 1
+		JOIN tblMFRecipe R ON R.intRecipeId = RI.intRecipeId
+			AND R.ysnActive = 1
+			AND ISNULL(R.intLocationId, 0) = (
+				CASE 
+					WHEN @intCompanyLocationId = 0
+						THEN ISNULL(R.intLocationId, 0)
+					ELSE @intCompanyLocationId
+					END
+				)
+	END
+	ELSE
+	BEGIN
+		INSERT INTO @tblMFItemDetail (
+			intItemId
+			,intMainItemId
+			,ysnSpecificItemDescription
 			)
+		SELECT DISTINCT DD.intSubstituteItemId
+			,DD.intItemId
+			,1
+		FROM @tblMFItem I
+		JOIN tblMFDemandDetail DD ON I.intItemId = DD.intSubstituteItemId
+		WHERE DD.intDemandHeaderId = @intDemandHeaderId
+
+		INSERT INTO @tblMFItemDetail (
+			intItemId
+			,intMainItemId
+			,ysnSpecificItemDescription
+			)
+		SELECT IB.intBundleItemId
+			,IB.intItemId
+			,0
+		FROM @tblMFItem I
+		LEFT JOIN tblICItemBundle IB ON IB.intItemId = I.intItemId
+		WHERE NOT EXISTS (
+				SELECT *
+				FROM @tblMFItemDetail FI
+				WHERE FI.intItemId = IB.intBundleItemId
+				)
+			AND IB.intBundleItemId IS NOT NULL
+
+		INSERT INTO @tblMFItemDetail (
+			intItemId
+			,intMainItemId
+			,ysnSpecificItemDescription
+			)
+		SELECT intItemId
+			,intItemId
+			,0
+		FROM @tblMFItem I
+		WHERE NOT EXISTS (
+				SELECT *
+				FROM @tblMFItemDetail ID
+				WHERE ID.intItemId = I.intItemId
+				)
+	END
 
 	UPDATE I
 	SET I.intMainItemId = ID.intMainItemId
@@ -213,9 +243,9 @@ BEGIN TRY
 			,[strValue]
 			)
 		SELECT [intItemId]
-			,Replace([Name], 'strMonth', '') AS [Name]
+			,Replace(Replace([Name], 'strMonth', ''), 'PastDue', '0') AS [Name]
 			,[Value]
-		FROM OPENXML(@idoc, 'root/OpenPurchase', 2) WITH (
+		FROM OPENXML(@idoc, 'root/OP', 2) WITH (
 				[intItemId] INT
 				,[Name] NVARCHAR(50)
 				,[Value] DECIMAL(24, 6)
@@ -235,9 +265,9 @@ BEGIN TRY
 			,[strValue]
 			)
 		SELECT [intItemId]
-			,Replace([Name], 'strMonth', '') AS [Name]
+			,Replace(Replace([Name], 'strMonth', ''), 'PastDue', '0') AS [Name]
 			,[Value]
-		FROM OPENXML(@idoc, 'root/PlannedPurchases', 2) WITH (
+		FROM OPENXML(@idoc, 'root/PP', 2) WITH (
 				[intItemId] INT
 				,[Name] NVARCHAR(50)
 				,[Value] DECIMAL(24, 6)
@@ -257,9 +287,9 @@ BEGIN TRY
 			,[strValue]
 			)
 		SELECT [intItemId]
-			,Replace([Name], 'strMonth', '') AS [Name]
+			,Replace(Replace([Name], 'strMonth', ''), 'PastDue', '0') AS [Name]
 			,[Value]
-		FROM OPENXML(@idoc, 'root/ForecastedConsumption', 2) WITH (
+		FROM OPENXML(@idoc, 'root/FC', 2) WITH (
 				[intItemId] INT
 				,[Name] NVARCHAR(50)
 				,[Value] DECIMAL(24, 6)
@@ -279,9 +309,9 @@ BEGIN TRY
 			,[strValue]
 			)
 		SELECT [intItemId]
-			,Replace([Name], 'strMonth', '') AS [Name]
+			,Replace(Replace([Name], 'strMonth', ''), 'PastDue', '0') AS [Name]
 			,[Value]
-		FROM OPENXML(@idoc, 'root/WeeksOfSupplyTarget', 2) WITH (
+		FROM OPENXML(@idoc, 'root/WST', 2) WITH (
 				[intItemId] INT
 				,[Name] NVARCHAR(50)
 				,[Value] DECIMAL(24, 6)
@@ -305,7 +335,7 @@ BEGIN TRY
 
 	CREATE TABLE #tblMFDemandList (
 		intItemId INT
-		,dblQty NVARCHAR(50)
+		,dblQty NUMERIC(18, 6)
 		,intAttributeId INT
 		,intMonthId INT
 		,intMainItemId INT
@@ -767,7 +797,7 @@ BEGIN TRY
 		,intMonthId
 		)
 	SELECT intItemId
-		,NULL
+		,0
 		,5 AS intAttributeId --Planned Purchases
 		,intMonthId
 	FROM #tblMFDemand
@@ -1227,7 +1257,6 @@ BEGIN TRY
 	--	,strMonth24 NVARCHAR(50) COLLATE Latin1_General_CI_AS
 	--	,intMainItemId INT
 	--	)
-
 	DECLARE @intNoOfMonth INT
 
 	SELECT @intNoOfMonth = DATEDIFF(mm, 0, GETDATE()) + 24;
@@ -1247,7 +1276,6 @@ BEGIN TRY
 		FROM tblMFGenerateMonth
 		WHERE intPositionId + 1 <= @intNoOfMonth
 		)
-
 	SELECT [1] AS strMonth1
 		,[2] AS strMonth2
 		,[3] AS strMonth3
@@ -1275,7 +1303,7 @@ BEGIN TRY
 		,0 AS intMainItemId
 	FROM (
 		SELECT intMonthId
-			,FORMAT(DateAdd(month, intPositionId, - 1), 'MMM') + ' ' + FORMAT(DateAdd(month, intPositionId, - 1), 'yy') AS strMonth
+			,LEFT(DATENAME(month, DateAdd(month, intPositionId, - 1)), 3) + ' ' + Right(DATENAME(Year, DateAdd(month, intPositionId, - 1)), 2) AS strMonth
 		FROM tblMFGenerateMonth
 		) src
 	PIVOT(MAX(src.strMonth) FOR src.intMonthId IN (
@@ -1306,7 +1334,6 @@ BEGIN TRY
 				,[23]
 				,[24]
 				)) AS pvt
-
 
 	SELECT intItemId
 		,strItemNo
@@ -1377,13 +1404,18 @@ BEGIN TRY
 						WHEN A.intReportAttributeID = 5
 							AND @intContainerTypeId IS NOT NULL
 							AND @ysnCalculateNoOfContainerByBagQty = 1
-							THEN (D.dblQty * IsNULL(UMCByBulk.dblConversionToStock, 1)) / CTCQ.dblWeight
+							THEN IsNULL((D.dblQty * IsNULL(UMCByBulk.dblConversionToStock, 1)) / CTCQ.dblWeight, 0)
 						WHEN A.intReportAttributeID = 5
 							AND @intContainerTypeId IS NOT NULL
 							AND @ysnCalculateNoOfContainerByBagQty = 0
 							AND CTCQ.dblBulkQuantity > 0
-							THEN D.dblQty * IsNULL(UMCByWeight.dblConversionToStock, 1) / CTCQ.dblBulkQuantity
-						ELSE D.dblQty
+							THEN IsNULL(D.dblQty * IsNULL(UMCByWeight.dblConversionToStock, 1) / CTCQ.dblBulkQuantity, 0)
+						WHEN DL.intMonthId IN (
+								- 1
+								,0
+								)
+							THEN D.dblQty
+						ELSE IsNULL(D.dblQty, 0)
 						END
 					)) AS dblQty
 			,DL.intMonthId
@@ -1433,7 +1465,6 @@ BEGIN TRY
 				,[23]
 				,[24]
 				)) AS pvt
-	
 	ORDER BY intMainItemId
 		,strItemNo
 		,intDisplayOrder;

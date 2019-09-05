@@ -496,22 +496,20 @@ BEGIN
 			@intOVShipToLocationId INT = NULL,
 			@strOVDistributionState NVARCHAR(5) = NULL,
 			@intOVBulkLocationId INT = NULL,
-			@intShipViaId INT = NULL,
-			@intOVReceiptTaxGroupId INT = NULL,
-			@intOVDistributionTaxGroupId INT = NULL
+			@intShipViaId INT = NULL
 
 		SET @CursorOverrideTax = CURSOR FOR
-		SELECT LR.intLoadReceiptId, LDD.intLoadDistributionDetailId, LR.intTerminalId, LR.intSupplyPointId, SPL.strState strReceiptState,
-			LDH.intEntityCustomerId, LDH.intShipToLocationId, CPL.strState strDistributionState,
+		SELECT DISTINCT LR.intLoadReceiptId, LDD.intLoadDistributionDetailId, LR.intTerminalId, LR.intSupplyPointId, RCL.strStateProvince strReceiptState,
+			LDH.intEntityCustomerId, LDH.intShipToLocationId, CASE WHEN LDH.strDestination = 'Location' THEN DCL.strStateProvince ELSE CPL.strState END strDistributionState,
 			LR.intCompanyLocationId, LH.intShipViaId
 		FROM tblTRImportLoadDetail ILD 
 		INNER JOIN tblTRLoadHeader LH ON LH.intLoadHeaderId = ILD.intLoadHeaderId
 		INNER JOIN tblTRLoadReceipt LR ON LR.intLoadReceiptId = ILD.intLoadReceiptId
 		INNER JOIN tblTRLoadDistributionHeader LDH ON LDH.intLoadDistributionHeaderId = ILD.intLoadDistributionHeaderId
 		INNER JOIN tblTRLoadDistributionDetail LDD ON LDD.intLoadDistributionDetailId = ILD.intLoadDistributionDetailId
-		LEFT JOIN tblTRSupplyPoint SP ON SP.intSupplyPointId = LR.intSupplyPointId
-		LEFT JOIN tblEMEntityLocation SPL ON SPL.intEntityLocationId = SP.intEntityLocationId 
+		LEFT JOIN tblSMCompanyLocation RCL ON RCL.intCompanyLocationId = LR.intCompanyLocationId
 		LEFT JOIN tblEMEntityLocation CPL ON CPL.intEntityLocationId = LDH.intShipToLocationId AND CPL.intEntityId = LDH.intEntityCustomerId
+		LEFT JOIN tblSMCompanyLocation DCL ON DCL.intCompanyLocationId = LDH.intCompanyLocationId
 		WHERE ILD.intImportLoadId = @intImportLoadId AND ILD.ysnValid = 1
 
 		OPEN @CursorOverrideTax
@@ -521,8 +519,24 @@ BEGIN
 		WHILE @@FETCH_STATUS = 0
 		BEGIN
 					
-			SELECT TOP 1 @intOVReceiptTaxGroupId = OTGD.intReceiptTaxGroupId, @intOVDistributionTaxGroupId = OTGD.intDistributionTaxGroupId FROM tblTROverrideTaxGroupDetail OTGD
-			ORDER BY intOverrideTaxGroupDetailId
+			DECLARE @intOVReceiptTaxGroupId INT = NULL,
+				@strOVReceiptTaxGroup NVARCHAR(100) = NULL,
+				@intOVDistributionTaxGroupId INT = NULL,
+				@strOVDistributionTaxGroup NVARCHAR(100) = NULL
+			
+			EXEC [dbo].[uspTROverrideTax]
+				@intSupplierId = @intOVTerminalId,
+				@intSupplyPointId = @intOVSupplyPointId,
+				@strReceiptState = @strOVReceiptState,
+				@intCustomerId = @intOVEntityCustomerId,
+				@intCustomerShipToId = @intOVShipToLocationId,
+				@intShipViaId = @intShipViaId,
+				@strDistributionState = @strOVDistributionState,
+				@intDistributionBulkLocationId = @intOVBulkLocationId,
+				@intReceiptTaxGroupId = @intOVReceiptTaxGroupId OUTPUT,
+				@strReceiptTaxGroup = @strOVReceiptTaxGroup OUTPUT,
+				@intDistributionTaxGroupId = @intOVDistributionTaxGroupId OUTPUT,
+				@strDistributionTaxGroup = @strOVDistributionTaxGroup OUTPUT
 
 			IF(@intOVReceiptTaxGroupId IS NOT NULL)
 			BEGIN

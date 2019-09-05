@@ -150,8 +150,8 @@ FROM OPENXML(@xmlDocumentId, 'xmlparam/filters/filter', 2) WITH
 (
 	[fieldname] NVARCHAR(50)
 	,condition NVARCHAR(20)
-	,[from] NVARCHAR(50)
-	,[to] NVARCHAR(50)
+	,[from] NVARCHAR(4000)
+	,[to] NVARCHAR(4000)
 	,[join] NVARCHAR(10)
 	,[begingroup] NVARCHAR(50)
 	,[endgroup] NVARCHAR(50)
@@ -307,10 +307,30 @@ BEGIN
 														isnull(PYMT.strOverridePayee, '')  <> '' then 
 															PYMT.strOverridePayee 
 													else 
-														ENTITY.strName
+														case when 
+														PYMT.ysnLienExists = 1 and 
+														PYMT.ysnOverrideLien = 1 then 
+															BNKTRN.strPayee
+														else 
+															ISNULL(BNKTRN.strPayee + ' ' +(STUFF((SELECT DISTINCT ' and ' + strName
+															FROM tblAPVendorLien LIEN
+															  INNER JOIN tblEMEntity ENT ON LIEN.intEntityLienId = ENT.intEntityId WHERE LIEN.intEntityVendorId = VENDOR.intEntityId AND LIEN.ysnActive = 1 
+															  AND BNKTRN.dtmDate BETWEEN LIEN.dtmStartDate AND LIEN.dtmEndDate
+															  AND LIEN.intCommodityId IN (
+															   SELECT intCommodityId 
+															   FROM tblAPPayment Pay 
+															   INNER JOIN tblAPPaymentDetail PayDtl ON Pay.intPaymentId = PayDtl.intPaymentId
+															   INNER JOIN vyuAPVoucherCommodity VC ON PayDtl.intBillId = VC.intBillId
+															   WHERE strPaymentRecordNum = PYMT.strPaymentRecordNum)FOR XML PATH(''))
+															,1, 1, ''))
+															,BNKTRN.strPayee)
+														end
 													end
 
-				,strVendorAddress				= dbo.fnConvertToFullAddress(EL.strAddress, EL.strCity, EL.strState, EL.strZipCode)
+				,strVendorAddress				= CASE WHEN ISNULL(dbo.fnConvertToFullAddress(BNKTRN.strAddress, BNKTRN.strCity, BNKTRN.strState, BNKTRN.strZipCode), '') <> ''  
+													THEN dbo.fnConvertToFullAddress(BNKTRN.strAddress, BNKTRN.strCity, BNKTRN.strState, BNKTRN.strZipCode)
+													ELSE dbo.fnConvertToFullAddress(EL.strAddress, EL.strCity, EL.strState, EL.strZipCode)
+													END
 				,dtmDeliveryDate		    	= dbo.fnGRConvertDateToReportDateFormat(SC.dtmTicketDateTime)
 				,intTicketId			    	= SC.intTicketId		
 				,strTicketNumber		    	= SC.strTicketNumber 				
@@ -592,15 +612,36 @@ BEGIN
 				,strTime					 	= CONVERT(VARCHAR(8), GETDATE(), 108)
 				,strAccountNumber			 	= dbo.fnAESDecryptASym(EFT.strAccountNumber)
 				,strReferenceNo				 	= BNKTRN.strReferenceNo
-				,strEntityName				 	= case when 
+				,strEntityName			    	= case when 
 														PYMT.ysnOverrideCheckPayee = 1 and 
 														PYMT.ysnOverrideSettlement = 1 and 
 														isnull(PYMT.strOverridePayee, '')  <> '' then 
 															PYMT.strOverridePayee 
 													else 
-														ENTITY.strName
+														case when 
+														PYMT.ysnLienExists = 1 and 
+														PYMT.ysnOverrideLien = 1 then 
+															BNKTRN.strPayee
+														else 
+															ISNULL(BNKTRN.strPayee + ' ' +(STUFF((SELECT DISTINCT ' and ' + strName
+															FROM tblAPVendorLien LIEN
+															  INNER JOIN tblEMEntity ENT ON LIEN.intEntityLienId = ENT.intEntityId WHERE LIEN.intEntityVendorId = VENDOR.intEntityId AND LIEN.ysnActive = 1 
+															  AND BNKTRN.dtmDate BETWEEN LIEN.dtmStartDate AND LIEN.dtmEndDate
+															  AND LIEN.intCommodityId IN (
+															   SELECT intCommodityId 
+															   FROM tblAPPayment Pay 
+															   INNER JOIN tblAPPaymentDetail PayDtl ON Pay.intPaymentId = PayDtl.intPaymentId
+															   INNER JOIN vyuAPVoucherCommodity VC ON PayDtl.intBillId = VC.intBillId
+															   WHERE strPaymentRecordNum = PYMT.strPaymentRecordNum)FOR XML PATH(''))
+															,1, 1, ''))
+															,BNKTRN.strPayee)
+														end
 													end
-				,strVendorAddress			 	= dbo.fnConvertToFullAddress(EL.strAddress, EL.strCity, EL.strState, EL.strZipCode)
+
+				,strVendorAddress				= CASE WHEN ISNULL(dbo.fnConvertToFullAddress(BNKTRN.strAddress, BNKTRN.strCity, BNKTRN.strState, BNKTRN.strZipCode), '') <> ''  
+													THEN dbo.fnConvertToFullAddress(BNKTRN.strAddress, BNKTRN.strCity, BNKTRN.strState, BNKTRN.strZipCode)
+													ELSE dbo.fnConvertToFullAddress(EL.strAddress, EL.strCity, EL.strState, EL.strZipCode)
+													END
 				,dtmDeliveryDate			 	= dbo.fnGRConvertDateToReportDateFormat(SC.dtmTicketDateTime)
 				,intTicketId				 	= SC.intTicketId		
 				,strTicketNumber			 	= SC.strTicketNumber
@@ -872,15 +913,36 @@ BEGIN
 				,strTime						= CONVERT(VARCHAR(8), GETDATE(), 108)
 				,strAccountNumber				= dbo.fnAESDecryptASym(EFT.strAccountNumber)
 				,strReferenceNo					= BNKTRN.strReferenceNo
-				,strEntityName					= case when 
+				,strEntityName			    	= case when 
 														PYMT.ysnOverrideCheckPayee = 1 and 
 														PYMT.ysnOverrideSettlement = 1 and 
 														isnull(PYMT.strOverridePayee, '')  <> '' then 
 															PYMT.strOverridePayee 
 													else 
-														ENTITY.strName
+														case when 
+														PYMT.ysnLienExists = 1 and 
+														PYMT.ysnOverrideLien = 1 then 
+															BNKTRN.strPayee
+														else 
+															ISNULL(BNKTRN.strPayee + ' ' +(STUFF((SELECT DISTINCT ' and ' + strName
+															FROM tblAPVendorLien LIEN
+															  INNER JOIN tblEMEntity ENT ON LIEN.intEntityLienId = ENT.intEntityId WHERE LIEN.intEntityVendorId = VENDOR.intEntityId AND LIEN.ysnActive = 1 
+															  AND BNKTRN.dtmDate BETWEEN LIEN.dtmStartDate AND LIEN.dtmEndDate
+															  AND LIEN.intCommodityId IN (
+															   SELECT intCommodityId 
+															   FROM tblAPPayment Pay 
+															   INNER JOIN tblAPPaymentDetail PayDtl ON Pay.intPaymentId = PayDtl.intPaymentId
+															   INNER JOIN vyuAPVoucherCommodity VC ON PayDtl.intBillId = VC.intBillId
+															   WHERE strPaymentRecordNum = PYMT.strPaymentRecordNum)FOR XML PATH(''))
+															,1, 1, ''))
+															,BNKTRN.strPayee)
+														end
 													end
-				,strVendorAddress				= dbo.fnConvertToFullAddress(EL.strAddress, EL.strCity, EL.strState, EL.strZipCode)
+
+				,strVendorAddress				= CASE WHEN ISNULL(dbo.fnConvertToFullAddress(BNKTRN.strAddress, BNKTRN.strCity, BNKTRN.strState, BNKTRN.strZipCode), '') <> ''  
+													THEN dbo.fnConvertToFullAddress(BNKTRN.strAddress, BNKTRN.strCity, BNKTRN.strState, BNKTRN.strZipCode)
+													ELSE dbo.fnConvertToFullAddress(EL.strAddress, EL.strCity, EL.strState, EL.strZipCode)
+													END
 				,dtmDeliveryDate				= CS.dtmDeliveryDate		
 				,intTicketId					= DS.intDeliverySheetId		
 				,strTicketNumber				= DS.strDeliverySheetNumber COLLATE Latin1_General_CI_AS

@@ -32,7 +32,7 @@ CREATE TABLE [dbo].[tblCTItemContractHeader](
 
 	[ysnMailSent]						[bit] NOT NULL DEFAULT ((0)),
 
-	[intShipToLocationId]				[int] NULL,
+	[intShipToLocationId]				[int] NULL, 
 
 	--[strShipToLocationName]				[nvarchar](50) NULL,
 	--[strShipToAddress]					[nvarchar](MAX) NULL,
@@ -167,7 +167,7 @@ CREATE STATISTICS [CT_STAT_16] ON [dbo].[tblCTItemContractHeader]([dtmContractDa
 go
 
 
-CREATE NONCLUSTERED INDEX [CT_INDEX_2] ON [dbo].[tblCTItemContractHeader]
+CREATE NONCLUSTERED INDEX [CT_INDEX_2] ON [dbo].[tblCTItemContractHeader] 
 (
 	[intContractTypeId] ASC,
 	[intEntityId] ASC,

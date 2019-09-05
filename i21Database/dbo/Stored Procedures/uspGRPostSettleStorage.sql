@@ -8,7 +8,7 @@ BEGIN TRY
 
 
 	SET NOCOUNT ON
-
+	
 	DECLARE @ErrMsg NVARCHAR(MAX)
 	DECLARE @adjustCostOfDelayedPricingStock AS [ItemCostAdjustmentTableType]
 	DECLARE @voucherDetailStorage AS [VoucherDetailStorage]
@@ -144,6 +144,7 @@ BEGIN TRY
 		,intContractUOMId INT
 		,dblCostUnitQty DECIMAL(24, 10)
 		,strPricingType NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
+		,intFuturesMonthId int null
 	)
 	
 	DECLARE @tblDepletion AS TABLE 
@@ -183,7 +184,7 @@ BEGIN TRY
 	SELECT @intSettleStorageId = MIN(intSettleStorageId)
 	FROM tblGRSettleStorage
 	WHERE CASE WHEN @ysnFromPriceBasisContract = 1 THEN CASE WHEN intSettleStorageId = @intSettleStorageId THEN 1 ELSE 0 END ELSE CASE WHEN intParentSettleStorageId = @intParentSettleStorageId THEN 1 ELSE 0 END END = 1
-
+		
 	WHILE @intSettleStorageId > 0
 	BEGIN		
 		DELETE FROM @SettleStorage
@@ -225,6 +226,7 @@ BEGIN TRY
 		
 		IF @intFutureMarketId > 0
 		BEGIN
+			
 			SELECT TOP 1 
 				@dblFutureMarkePrice = ISNULL(a.dblLastSettle,0)
 			FROM tblRKFutSettlementPriceMarketMap a 
@@ -236,6 +238,7 @@ BEGIN TRY
 				ON d.intFutureMarketId = b.intFutureMarketId
 			WHERE b.intFutureMarketId = @intFutureMarketId 
 			ORDER by b.dtmPriceDate DESC
+			
 		END
 
 		SET @intCurrencyId = ISNULL(
@@ -312,6 +315,7 @@ BEGIN TRY
 				,intContractUOMId
 				,dblCostUnitQty
 				,strPricingType
+				,intFuturesMonthId
 			)
 			SELECT 
 				 intSettleContractId 	= SSC.intSettleContractId 
@@ -324,13 +328,14 @@ BEGIN TRY
 				,intContractUOMId	 	= CD.intContractUOMId
 				,dblCostUnitQty		 	= CD.dblCostUnitQty
 				,strPricingType			= CD.strPricingType
+				,intFuturesMonthId		= CD.intGetContractDetailFutureMonthId
 			FROM tblGRSettleContract SSC
 			JOIN vyuGRGetContracts CD 
 				ON CD.intContractDetailId = SSC.intContractDetailId
 			WHERE intSettleStorageId = @intSettleStorageId 
 				AND SSC.dblUnits > 0
 			ORDER BY SSC.intSettleContractId
-
+			
 			IF EXISTS(SELECT TOP 1 1 FROM @SettleContract WHERE strPricingType = 'Basis')
 			BEGIN
 				IF @intFutureMarketId = 0 AND @ysnExchangeTraded = 1
@@ -339,6 +344,22 @@ BEGIN TRY
 					RAISERROR(@ErrMsg,16,1,1)
 					RETURN;
 				END
+				
+				declare @intFuturesMonthId int 
+
+				select @intFuturesMonthId = intFuturesMonthId from @SettleContract where intFuturesMonthId is not null
+
+				if @intFuturesMonthId is not null
+				begin
+					select top 1 @dblFutureMarkePrice = a.dblLastSettle  FROM tblRKFutSettlementPriceMarketMap a 
+					JOIN tblRKFuturesSettlementPrice b 
+						ON b.intFutureSettlementPriceId = a.intFutureSettlementPriceId			
+					WHERE b.intFutureMarketId = @intFutureMarketId 
+						and a.intFutureMonthId = @intFuturesMonthId
+					ORDER by b.dtmPriceDate DESC
+				end
+
+
 
 				IF @dblFutureMarkePrice <= 0
 				BEGIN
@@ -1273,6 +1294,7 @@ BEGIN TRY
 								,[dblForeignRate]
 								,[strRateType]
 							)
+
 							EXEC uspGRCreateGLEntries 
 							 'Storage Settlement'
 							,'OtherCharges'
@@ -1280,7 +1302,8 @@ BEGIN TRY
 							,@strBatchId
 							,@intCreatedUserId
 							,@ysnPosted
-
+																					
+						
 							IF EXISTS (SELECT TOP 1 1 FROM @GLEntries) 
 							BEGIN 
 								EXEC dbo.uspGLBookEntries @GLEntries, @ysnPosted 
@@ -1486,7 +1509,8 @@ BEGIN TRY
 				AND CASE WHEN (a.intPricingTypeId = 2) THEN 0 ELSE 1 END = 1
 				ORDER BY SST.intSettleStorageTicketId
 					,a.intItemType				
-				 
+				 				 
+
 				INSERT INTO @voucherPayable
 				(
 					[intEntityVendorId]
@@ -1718,11 +1742,24 @@ BEGIN TRY
 				UPDATE @voucherPayable SET dblQuantityToBill = dblQuantityToBill * -1 WHERE ISNULL(dblCost,0) < 0
 				UPDATE @voucherPayable SET dblCost = dblCost * -1 WHERE ISNULL(dblCost,0) < 0
 				
-				IF EXISTS(SELECT * FROM @voucherPayable vp INNER JOIN tblICItem I ON I.intItemId = vp.intItemId WHERE I.strType = 'Inventory')
-				BEGIN 
+				DECLARE @dblVoucherTotal DECIMAL(18,6)
+
+				SELECT
+					@dblVoucherTotal = SUM(dblOrderQty * dblCost)
+				FROM @voucherPayable
+
+				
+				IF @dblVoucherTotal > 0 AND EXISTS(SELECT NULL FROM @voucherPayable DS INNER JOIN tblICItem I on I.intItemId = DS.intItemId WHERE I.strType = 'Inventory')
+				BEGIN
 				EXEC uspAPCreateVoucher @voucherPayable, @voucherPayableTax, @intCreatedUserId, 1, @ErrMsg, @createdVouchersId OUTPUT
 				END
-
+				ELSE 
+					IF(EXISTS(SELECT NULL FROM @voucherPayable DS INNER JOIN tblICItem I on I.intItemId = DS.intItemId WHERE I.strType = 'Inventory'))
+					BEGIN
+						BEGIN
+						RAISERROR('Total Voucher will be negative',16,1)
+						END
+					END
 				IF @createdVouchersId IS NOT NULL
 				BEGIN
 					SELECT @strVoucher = strBillId
@@ -1975,3 +2012,4 @@ BEGIN CATCH
 	SET @ErrMsg = ERROR_MESSAGE()
 	RAISERROR (@ErrMsg,16,1,'WITH NOWAIT')
 END CATCH
+

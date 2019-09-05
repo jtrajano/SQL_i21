@@ -28,4 +28,12 @@ BEGIN
 	END
 END
 GO
+
+-- Remove the old check constraint. 
+IF EXISTS(SELECT TOP 1 1 FROM sys.objects WHERE name = 'CK_tblICItemUOM_intUpcCode' AND type = 'C' AND parent_object_id = OBJECT_ID('tblICItemUOM', 'U'))
+BEGIN 
+	EXEC ('ALTER TABLE [tblICItemUOM] DROP CONSTRAINT CK_tblICItemUOM_intUpcCode')
+END 
+
+GO
 PRINT N'END - Clean Short and Long UPC for tblICItemUOM'

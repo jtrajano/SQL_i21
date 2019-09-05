@@ -787,7 +787,6 @@ WHERE ID.[intInventoryShipmentChargeId] IS NULL
 		OR
 		(ID.strTransactionType = 'Credit Memo' AND (ID.[intInventoryShipmentItemId] IS NOT NULL OR ID.[intLoadDetailId] IS NOT NULL OR ISNULL(RI.[intInvoiceId], 0) <> 0))
 		)
-	AND ID.[strType] NOT IN ('Card Fueling Transaction','CF Tran','CF Invoice')
     AND ISNULL(ID.[strItemType], '') <> 'Other Charge'
 	AND (ISNULL(RI.[intInvoiceId], 0) = 0 OR (ISNULL(RI.[intInvoiceId], 0) <> 0 AND (ID.intLoadDetailId IS NULL OR ID.[intTicketId] IS NOT NULL)))
 
@@ -802,6 +801,24 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM @ItemsFromInvoice WHERE strTransactionType 
 		EXEC dbo.uspARUpdateContractOnInvoice @intInvoiceContractId, @Post, @UserId, 1
 
 		DELETE FROM @ItemsFromInvoice WHERE intInvoiceId = @intInvoiceContractId
+	END
+
+--UPDATE CONTRACTS FINANCIAL STATUS
+DECLARE @tblContractsFinancial AS Id
+
+INSERT INTO @tblContractsFinancial
+SELECT DISTINCT intInvoiceId
+FROM #ARPostInvoiceDetail 
+WHERE intContractDetailId IS NOT NULL
+
+WHILE EXISTS (SELECT TOP 1 NULL FROM @tblContractsFinancial)
+	BEGIN
+		DECLARE @intContractFinancialId INT
+		SELECT TOP 1 @intContractFinancialId = intId FROM @tblContractsFinancial
+
+		EXEC dbo.uspCTUpdateFinancialStatus @intContractFinancialId, 'Invoice'
+
+		DELETE FROM @tblContractsFinancial WHERE intId = @intContractFinancialId
 	END
 
 --UPDATE ITEM CONTRACT BALANCE

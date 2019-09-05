@@ -74,6 +74,7 @@ LEFT JOIN
 		ON ID.intContractHeaderId = CH.intContractHeaderId
 WHERE
 	I.[intInvoiceId] = @intInvoiceId
+	AND I.ysnFromProvisional = 0
 	AND (
 			ISNULL(@forContract,0) = 0
 			OR

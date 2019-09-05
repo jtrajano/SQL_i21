@@ -125,6 +125,7 @@
 		IF(@siteId IS NULL)
 		BEGIN 
 			SET @resultLog = @resultLog + @ExceptionValue + ': Not Matching.' + char(10)
+			set @resultSavingStatus = 1;
 			RETURN 
 		END 
 		SET @resultLog = @resultLog + 'Site ID = ' + CAST(ISNULL(@siteId,'') AS NVARCHAR(10)) + char(10) 
@@ -287,7 +288,12 @@
 			SET intConcurrencyId = ISNULL(intConcurrencyId,0) + 1
 			WHERE intSiteID = @siteId
 
-			
+			--prevent eco green from creating order since @ta_ltankcrit is not supplied from API and run out date is not calculated due to lack of requirement to calculate
+			if (@is_wesroc = 0)
+			begin
+				SET @resultLog = @resultLog + 'Import successful';
+				return;
+			end
 		
 			PRINT @ta_ltankcrit
 			IF(@ta_ltankcrit = 1)
@@ -301,11 +307,10 @@
 				GOTO CREATECALLENTRY
 			END 
 		
-		
-			RETURN
-			CREATECALLENTRY:
 			
-			if (@is_wesroc = 0) return;
+		
+			RETURN;
+			CREATECALLENTRY:
 
 			IF EXISTS(SELECT TOP 1 1 FROM tblTMDispatch WHERE intSiteID = @siteId) 
 			BEGIN

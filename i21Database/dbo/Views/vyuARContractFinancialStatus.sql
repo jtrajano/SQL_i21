@@ -9,28 +9,23 @@ SELECT intInvoiceId				= I.intInvoiceId
 	 , strFinalInvoiceNumber	= I.strInvoiceNumber
 	 , strContractNumber		= CHD.strContractNumber
 	 , intContractSeq			= CTD.intContractSeq
-	 , strStatus				= CASE WHEN ISNULL(CTD.dblBalance, 0) = 0 THEN 
-									CASE WHEN I.strType <> 'Provisional' THEN 'Direct Invoiced' 
+	 , strStatus				= CASE WHEN ISNULL(CTD.dblBalance, 0) = 0 OR I.strType = 'Provisional' THEN 
+									CASE WHEN I.strType <> 'Provisional' AND I.ysnFinalized = 0 THEN 'Direct Invoiced' 
 									ELSE 
-										CASE WHEN ISNULL(I.ysnFinalized, 0) = 0 THEN 'Provisionally Invoiced' 
+										CASE WHEN I.ysnFinalized = 0 THEN 'Provisionally Invoiced' 
 										ELSE 'Final Invoiced' END 
 									END
 								  ELSE NULL END
 FROM (
 	SELECT intInvoiceId				= I.intInvoiceId
-		 , intFinalInvoiceId		= FI.intInvoiceId
+		 , intFinalInvoiceId		= NULL
 		 , strInvoiceNumber			= I.strInvoiceNumber
-		 , strFinalInvoiceNumber	= FI.strInvoiceNumber
+		 , strFinalInvoiceNumber	= NULL
 		 , strType					= I.strType
-		 , ysnFinalized				= CASE WHEN ISNULL(FI.intInvoiceId, 0) = 0 THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END
+		 , ysnFinalized				= CAST(0 AS BIT)
 	FROM tblARInvoice I
-	LEFT JOIN tblARInvoice FI ON I.intInvoiceId = FI.intOriginalInvoiceId
-							 AND I.strInvoiceNumber = FI.strInvoiceOriginId
-							 AND FI.strTransactionType IN ('Invoice', 'Credit Memo')
-							 AND FI.ysnPosted = 1
-							 AND FI.ysnFromProvisional = 1
 	WHERE I.strType = 'Provisional'
-	  AND I.ysnPosted = 1
+	  AND I.ysnProcessed = 1
 
 	UNION ALL
 
@@ -39,11 +34,10 @@ FROM (
 		 , strInvoiceNumber			= I.strInvoiceNumber
 		 , strFinalInvoiceNumber	= NULL
 		 , strType					= I.strType
-		 , ysnFinalized				= CAST(0 AS BIT)
+		 , ysnFinalized				= ISNULL(I.ysnFromProvisional, 0)
 	FROM tblARInvoice I
 	WHERE I.strType <> 'Provisional'
 	  AND I.ysnPosted = 1
-	  AND I.ysnFromProvisional = 0
 ) I
 INNER JOIN tblARInvoiceDetail ID ON I.intInvoiceId = ID.intInvoiceId
 INNER JOIN tblCTContractDetail CTD ON ID.intContractDetailId = CTD.intContractDetailId

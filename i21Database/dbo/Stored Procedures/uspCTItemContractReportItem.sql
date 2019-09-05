@@ -3,7 +3,7 @@ CREATE PROCEDURE uspCTItemContractReportItem
 	@intItemContractHeaderId	INT
 	
 AS
-
+ 
 BEGIN TRY
 	
 	DECLARE @ErrMsg						NVARCHAR(MAX),

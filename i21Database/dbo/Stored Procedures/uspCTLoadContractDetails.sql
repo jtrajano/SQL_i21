@@ -122,7 +122,7 @@ OUTER	APPLY	dbo.fnCTGetSeqWashoutInfo(CD.intContractDetailId)					WO
 CROSS	APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId)	AD
 	)
 
-	SELECT	*,
+	SELECT	DISTINCT *,
 			 dblAppliedLoadQty = CASE 
 										WHEN dblShipmentQuantity > 0  THEN dblShipmentQuantity
 										WHEN dblBillQty			 > 0  THEN dblBillQty
@@ -130,7 +130,154 @@ CROSS	APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId)	AD
                                  END
 	FROM
 	(
-		SELECT	 CD.*
+		SELECT
+				--CD.*
+
+CD.intContractDetailId,
+			CD.intSplitFromId,
+			CD.intParentDetailId,
+			CD.ysnSlice,
+			CD.intConcurrencyId,
+			CD.intContractHeaderId,
+			CD.intContractStatusId,
+			CD.intContractSeq,
+			CD.intCompanyLocationId,
+			CD.intShipToId,
+			CD.dtmStartDate,
+			CD.dtmEndDate,
+			CD.intFreightTermId,
+			CD.intShipViaId,
+			CD.intItemContractId,
+			CD.intItemBundleId,
+			CD.intItemId,
+			CD.strItemSpecification,
+			CD.intCategoryId,
+			CD.dblQuantity,
+			CD.intItemUOMId,
+			CD.dblOriginalQty,
+			CD.dblBalance,
+			CD.dblIntransitQty,
+			CD.dblScheduleQty,
+			CD.dblBalanceLoad,
+			CD.dblScheduleLoad,
+			CD.dblShippingInstructionQty,
+			CD.dblNetWeight,
+			CD.intNetWeightUOMId,
+			CD.intUnitMeasureId,
+			CD.intCategoryUOMId,
+			CD.intNoOfLoad,
+			CD.dblQuantityPerLoad,
+			CD.intIndexId,
+			CD.dblAdjustment,
+			CD.intAdjItemUOMId,
+			intPricingTypeId = (case when AP.strApprovalStatus = 'Approved' or AP.strApprovalStatus = 'No Need for Approval' then CD.intPricingTypeId else CH.intPricingTypeId end),
+			CD.intFutureMarketId,
+			CD.intFutureMonthId,
+			dblFutures = (case when AP.strApprovalStatus = 'Approved' or AP.strApprovalStatus = 'No Need for Approval' then CD.dblFutures else null end),
+			CD.dblBasis,
+			CD.dblOriginalBasis,
+			CD.dblConvertedBasis,
+			CD.intBasisCurrencyId,
+			CD.intBasisUOMId,
+			CD.dblFreightBasisBase,
+			CD.intFreightBasisBaseUOMId,
+			CD.dblFreightBasis,
+			CD.intFreightBasisUOMId,
+			CD.dblRatio,
+			CD.dblCashPrice,
+			CD.dblTotalCost,
+			CD.intCurrencyId,
+			CD.intPriceItemUOMId,
+			CD.dblNoOfLots,
+			CD.dtmLCDate,
+			CD.dtmLastPricingDate,
+			CD.dblConvertedPrice,
+			CD.intConvPriceCurrencyId,
+			CD.intConvPriceUOMId,
+			CD.intMarketZoneId,
+			CD.intDiscountTypeId,
+			CD.intDiscountId,
+			CD.intDiscountScheduleId,
+			CD.intDiscountScheduleCodeId,
+			CD.intStorageScheduleRuleId,
+			CD.intContractOptHeaderId,
+			CD.strBuyerSeller,
+			CD.intBillTo,
+			CD.intFreightRateId,
+			CD.strFobBasis,
+			CD.intRailGradeId,
+			CD.strRailRemark,
+			CD.strLoadingPointType,
+			CD.intLoadingPortId,
+			CD.strDestinationPointType,
+			CD.intDestinationPortId,
+			CD.strShippingTerm,
+			CD.intShippingLineId,
+			CD.strVessel,
+			CD.intDestinationCityId,
+			CD.intShipperId,
+			CD.strRemark,
+			CD.intSubLocationId,
+			CD.intStorageLocationId,
+			CD.intPurchasingGroupId,
+			CD.intFarmFieldId,
+			CD.intSplitId,
+			CD.strGrade,
+			CD.strGarden,
+			CD.strVendorLotID,
+			CD.strInvoiceNo,
+			CD.strReference,
+			CD.strERPPONumber,
+			CD.strERPItemNumber,
+			CD.strERPBatchNumber,
+			CD.intUnitsPerLayer,
+			CD.intLayersPerPallet,
+			CD.dtmEventStartDate,
+			CD.dtmPlannedAvailabilityDate,
+			CD.dtmUpdatedAvailabilityDate,
+			CD.dtmM2MDate,
+			CD.intBookId,
+			CD.intSubBookId,
+			CD.intContainerTypeId,
+			CD.intNumberOfContainers,
+			CD.intInvoiceCurrencyId,
+			CD.dtmFXValidFrom,
+			CD.dtmFXValidTo,
+			CD.dblRate,
+			CD.dblFXPrice,
+			CD.ysnUseFXPrice,
+			CD.intFXPriceUOMId,
+			CD.strFXRemarks,
+			CD.dblAssumedFX,
+			CD.strFixationBy,
+			CD.strPackingDescription,
+			CD.dblYield,
+			CD.intCurrencyExchangeRateId,
+			CD.intRateTypeId,
+			CD.intCreatedById,
+			CD.dtmCreated,
+			CD.intLastModifiedById,
+			CD.dtmLastModified,
+			CD.ysnInvoice,
+			CD.ysnProvisionalInvoice,
+			CD.ysnQuantityFinal,
+			CD.intProducerId,
+			CD.ysnClaimsToProducer,
+			CD.ysnRiskToProducer,
+			CD.ysnBackToBack,
+			CD.dblAllocatedQty,
+			CD.dblReservedQty,
+			CD.dblAllocationAdjQty,
+			CD.dblInvoicedQty,
+			CD.ysnPriceChanged,
+			CD.intContractDetailRefId,
+			CD.ysnStockSale,
+			CD.strCertifications,
+			CD.ysnSplit,
+			CD.ysnProvisionalPNL,
+			CD.ysnFinalPNL,
+			CD.dtmProvisionalPNL,
+			CD.dtmFinalPNL
 
 				,CD.dblBalance - ISNULL(CD.dblScheduleQty, 0) dblAvailableQty
 				,CD.dblBalanceLoad - ISNULL(CD.dblScheduleLoad, 0) dblAvailableLoad
@@ -148,7 +295,8 @@ CROSS	APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId)	AD
 				,CU.ysnSubCurrency
 				,dbo.[fnCTGetSeqDisplayField](CD.intFreightRateId,'tblCTFreightRate') strOriginDest--FR.strOrigin + FR.strDest strOriginDest
 				,dbo.[fnCTGetSeqDisplayField](CD.intRailGradeId,'tblCTRailGrade') strRailGrade--RG.strRailGrade
-				,PT.strPricingType
+				--,PT.strPricingType
+				,strPricingType = (case when AP.strApprovalStatus = 'Approved' or AP.strApprovalStatus = 'No Need for Approval' then PT.strPricingType else PTH.strPricingType end)
 				,NULL AS strContractOptDesc --Screen not in use
 				,dbo.[fnCTGetSeqDisplayField](CD.intDiscountTypeId,'tblCTDiscountType') strDiscountType
 				,dbo.[fnCTGetSeqDisplayField](CD.intDiscountId,'tblGRDiscountId') strDiscountId
@@ -167,7 +315,7 @@ CROSS	APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId)	AD
 							WHEN CD.ysnProvisionalPNL = 1 THEN 'Provisional P&L Created'
 							ELSE CASE WHEN BD.intContractDetailId IS NOT NULL THEN 'Purchase Invoice Received' END
 						END
-					ELSE FS.strFinancialStatus
+					ELSE CD.strFinancialStatus --FS.strFinancialStatus
 				END AS strFinancialStatus
 				,MA.strFutMarketName AS strFutureMarket
 				,REPLACE(MO.strFutureMonth, ' ', '(' + MO.strSymbol + ') ') strFutureMonth
@@ -273,6 +421,7 @@ CROSS	APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId)	AD
 				JOIN	tblCTContractHeader				CH	ON	CH.intContractHeaderId				=		CD.intContractHeaderId	
 		LEFT    JOIN	tblCTContractStatus				CS	ON	CS.intContractStatusId				=		CD.intContractStatusId		--strContractStatus
 		LEFT    JOIN	tblCTPricingType				PT	ON	PT.intPricingTypeId					=		CD.intPricingTypeId			--strPricingType
+		LEFT    JOIN	tblCTPricingType				PTH ON	PTH.intPricingTypeId				=		CH.intPricingTypeId   --strPricingType  
 		LEFT    JOIN	tblICItem						IM	ON	IM.intItemId						=		CD.intItemId				--strItemNo
 		LEFT    JOIN	tblICItemContract				IC	ON	IC.intItemContractId				=		CD.intItemContractId		--strContractItemName
 		LEFT    JOIN	tblICItem						IB	ON	IB.intItemId						=		CD.intItemBundleId			--strBundleItemNo
@@ -304,7 +453,7 @@ CROSS	APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId)	AD
 		LEFT   JOIN     @tblBill						Bill ON Bill.intContractDetailId			=       CD.intContractDetailId
 		LEFT   JOIN     @OpenLoad						OL	ON OL.intContractDetailId				=       CD.intContractDetailId
 		OUTER	APPLY	dbo.fnCTGetShipmentStatus(CD.intContractDetailId) LD
-		OUTER	APPLY	dbo.fnCTGetFinancialStatus(CD.intContractDetailId) FS
+		--OUTER	APPLY	dbo.fnCTGetFinancialStatus(CD.intContractDetailId) FS
 		LEFT	JOIN	tblAPBillDetail					BD	ON	BD.intContractDetailId				=		CD.intContractDetailId
 		LEFT	JOIN	tblLGAllocationDetail			AD	ON AD.intSContractDetailId = CD.intContractDetailId	
 	
@@ -312,6 +461,19 @@ CROSS	APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId)	AD
 		LEFT	JOIN	tblICUnitMeasure				FBUM	ON FBUM.intUnitMeasureId	=	FB.intUnitMeasureId			
 		LEFT	JOIN	tblICItemUOM					FBB	ON	FBB.intItemUOMId			=	CD.intFreightBasisBaseUOMId	
 		LEFT	JOIN	tblICUnitMeasure				FBBUM	ON FBBUM.intUnitMeasureId	=	FBB.intUnitMeasureId
+		  LEFT    JOIN	(
+								SELECT * FROM 
+								(
+									SELECT	ROW_NUMBER() OVER (PARTITION BY TR.intRecordId ORDER BY AP.intApprovalId DESC) intRowNum,
+											TR.intRecordId, AP.strStatus AS strApprovalStatus 
+									FROM	tblSMApproval		AP
+									JOIN	tblSMTransaction	TR	ON	TR.intTransactionId =	AP.intTransactionId
+									JOIN	tblSMScreen			SC	ON	SC.intScreenId		=	TR.intScreenId
+									WHERE	SC.strNamespace IN( 'ContractManagement.view.Contract',
+																'ContractManagement.view.Amendments')
+								) t
+								WHERE intRowNum = 1
+							)								AP	ON	AP.intRecordId						=		CD.intContractHeaderId
 
 	)t ORDER BY intContractSeq
 
