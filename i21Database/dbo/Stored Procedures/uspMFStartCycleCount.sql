@@ -1327,8 +1327,11 @@ BEGIN TRY
 		AND SR.intTransactionId <> @intWorkOrderId
 		AND SR.strTransactionId <> @strWorkOrderNo
 		AND ISNULL(ysnPosted, 0) = 0
-		AND SR.intInventoryTransactionType = 8
-		AND I.intStorageLocationId = SR.intStorageLocationId
+		AND SR.intInventoryTransactionType IN (
+			8
+			,9
+			)
+		AND I.intStorageLocationId = IsNULL(SR.intStorageLocationId,I.intStorageLocationId)
 	GROUP BY I.intItemId
 		,I.intItemUOMId
 		,I.intStorageLocationId
