@@ -17,7 +17,7 @@ GO
 	--    EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Note Description' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'Accounts Receivable') AND strCommand = N'AccountsReceivable.view.NoteDescription') OR
 	--    EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Calculate Monthly Interest' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Activities' AND strModuleName = 'Accounts Receivable') AND strCommand = N'AccountsReceivable.view.NoteCalculateMonthlyInterest') OR
 	--    EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Comment Maintenance' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'Accounts Receivable') AND strCommand = N'AccountsReceivable.view.StatementFooterMessage') 
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'DPR Reconciliation Report' AND strModuleName = 'Risk Management' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'DPR Reconciliation Report' AND strModuleName = 'Risk Management') AND strCommand = N'RiskManagement.view.PositionReconciliationReport')
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Daily Position Report' AND strModuleName = 'Risk Management' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Daily Position Report' AND strModuleName = 'Risk Management') AND strCommand = N'RiskManagement.view.PositionReport?isReport=true')
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 		
@@ -3437,6 +3437,13 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Realized 
 	VALUES (N'Realized Profit/Loss', N'Risk Management', @RiskManagementReportParentMenuId, N'Realized Profit/Loss', N'Report', N'Screen', N'RiskManagement.view.RealizedPNL', N'small-menu-report', 0, 0, 0, 1, 3, 1)
 ELSE 
 	UPDATE tblSMMasterMenu SET intSort = 3, strCommand = N'RiskManagement.view.RealizedPNL' WHERE strMenuName = 'Realized Profit/Loss' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementReportParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Daily Position Report' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementReportParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Daily Position Report', N'Risk Management', @RiskManagementReportParentMenuId, N'Daily Position Report', N'Report', N'Screen', N'RiskManagement.view.PositionReport?isReport=true', N'small-menu-report', 0, 0, 0, 1, 1, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET intSort = 1, strCommand = N'RiskManagement.view.PositionReport?isReport=true' WHERE strMenuName = 'Daily Position Report' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementReportParentMenuId
+
 
 /* START OF DELETE */
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Futures/Options Settlement Prices' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementMaintenanceParentMenuId
