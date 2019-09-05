@@ -5,6 +5,8 @@ AS
 
 BEGIN TRY
 	
+	/*Test modification to see if it reflects to the next build*/
+
 	DECLARE	@ErrMsg	NVARCHAR(MAX),
 			@dblPrice numeric(18,6);
 
