@@ -254,7 +254,7 @@ AS
 						WHEN CD.ysnProvisionalPNL = 1 THEN 'Provisional P&L Created'
 						ELSE CASE WHEN BD.intContractDetailId IS NOT NULL THEN 'Purchase Invoice Received' END
 					END
-				ELSE FS.strFinancialStatus
+				ELSE CD.strFinancialStatus --FS.strFinancialStatus
 			END AS strFinancialStatus,
 			strFreightBasisUOM = FBUM.strUnitMeasure,
 			strFreightBasisBaseUOM = FBBUM.strUnitMeasure			
@@ -391,6 +391,6 @@ AS
 				)LG ON LG.intRowNum = 1 AND LG.intContractDetailId = CD.intContractDetailId
 	OUTER	APPLY	dbo.fnCTGetSampleDetail(CD.intContractDetailId)	QA
 	OUTER	APPLY	dbo.fnCTGetShipmentStatus(CD.intContractDetailId) LD
-	OUTER	APPLY	dbo.fnCTGetFinancialStatus(CD.intContractDetailId) FS
+	--OUTER	APPLY	dbo.fnCTGetFinancialStatus(CD.intContractDetailId) FS
 	LEFT	JOIN	tblAPBillDetail						BD ON	BD.intContractDetailId = CD.intContractDetailId
 	LEFT	JOIN	tblLGAllocationDetail		AD		ON AD.intPContractDetailId = CD.intContractDetailId
