@@ -786,6 +786,40 @@ BEGIN
 			)
 			SELECT 
 				dtmDate
+				, ABS(dblTotal)
+				, strTransactionId
+				, intTransactionId
+				, strDistribution 
+				, strTransactionType
+			FROM (
+				SELECT
+					dtmDate 
+					, dblTotal = SUM(ISNULL(dblTotal, 0))
+					, strTransactionId
+					, intTransactionId
+					, strDistribution  = ''
+					, strTransactionType
+				FROM @tblResult
+				WHERE strTransactionType IN ('Outbound Shipment')
+				GROUP By
+					dtmDate
+					, strTransactionId
+					, intTransactionId
+					, strDistribution 
+					, strTransactionType
+			) t
+			WHERE dblTotal <> 0
+
+			INSERT INTO @tblResultInventory(
+				dtmDate
+				, dblInvOut
+				, strTransactionId
+				, intTransactionId
+				, strDistribution 
+				, strTransactionType
+			)
+			SELECT 
+				dtmDate
 				, dblTotal 
 				, strTransactionId
 				, intTransactionId
@@ -989,6 +1023,7 @@ BEGIN
 				, r.dblBalanceInv 
 				, r.dblSalesInTransit
 				, ri.strTransactionType
+				, intCommodityId = @intCommodityId
 			FROM @tblResultInventory ri
 			FULL join @tblBalanceInvByDate r on ri.dtmDate = r.dtmDate
 			
@@ -998,6 +1033,7 @@ BEGIN
 				NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,
 				sum(dblTotal)
 				,NULL 
+				,NULL
 				,NULL
 			FROM @tblResult WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110) <= CONVERT(DATETIME, DATEADD(day,-1,@dtmFromTransactionDate))
 			) t

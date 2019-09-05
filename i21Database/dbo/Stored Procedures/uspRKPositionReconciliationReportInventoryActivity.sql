@@ -1,19 +1,20 @@
-﻿CREATE PROCEDURE uspRKPositionReconciliationReportInventoryActivity
-	@intCommodityId INT 
+﻿CREATE PROCEDURE [dbo].[uspRKPositionReconciliationReportInventoryActivity]
+	@strCommodityId NVARCHAR(100)  
 	,@dtmFromTransactionDate DATE 
 	,@dtmToTransactionDate DATE
 	,@intQtyUOMId INT = NULL
 
 AS
 
---DECLARE
---@intCommodityId INT  = 1
---	,@dtmFromTransactionDate DATE  = '07/01/2019'
---	,@dtmToTransactionDate DATE = '07/31/2019'
---	,@intQtyUOMId INT = NULL
-
-
 BEGIN
+
+		DECLARE @Commodity AS TABLE (
+		 intCommodityId INT)
+		
+	
+	INSERT INTO @Commodity(intCommodityId)
+	SELECT Item Collate Latin1_General_CI_AS FROM [dbo].[fnSplitString](@strCommodityId, ',')
+
 
 	DECLARE @InHouse TABLE (Id INT identity(1,1)
 		, dtmDate datetime
@@ -27,27 +28,52 @@ BEGIN
 		, strDistribution NVARCHAR(10)
 		, dblSalesInTransit NUMERIC(24,10)
 		, strTransactionType NVARCHAR(50)
+		, intCommodityId INT
+		, strCommodityCode NVARCHAR(100)
 	)
 
-	INSERT INTO @InHouse (dtmDate
-		, dblInvIn
-		, dblInvOut
-		, dblAdjustments
-		, dblInventoryCount
-		, strTransactionId
-		, intTransactionId
-		, strDistribution
-		, dblBalanceInv
-		, dblSalesInTransit
-		, strTransactionType
-	)
-	EXEC uspRKGetInHouse
-		 @dtmFromTransactionDate  = @dtmFromTransactionDate
-		, @dtmToTransactionDate  = @dtmToTransactionDate
-		, @intCommodityId  = @intCommodityId
-		, @intItemId  = null
-		, @strPositionIncludes  = NULL
-		, @intLocationId  = NULL
+	DECLARE @intCommodityId INT
+			,@strCommodityCode NVARCHAR(100)
+
+	SELECT DISTINCT com.intCommodityId, strCommodityCode
+	INTO #tempCommodity
+	FROM @Commodity com
+	INNER JOIN tblICCommodity iccom on iccom.intCommodityId = com.intCommodityId
+	WHERE ISNULL(com.intCommodityId, '') <> ''
+
+	WHILE EXISTS(SELECT TOP 1 1 FROM #tempCommodity)
+	BEGIN
+		
+		SELECT TOP 1 
+			@intCommodityId = intCommodityId
+			,@strCommodityCode = strCommodityCode
+		FROM #tempCommodity
+		
+		INSERT INTO @InHouse (dtmDate
+			, dblInvIn
+			, dblInvOut
+			, dblAdjustments
+			, dblInventoryCount
+			, strTransactionId
+			, intTransactionId
+			, strDistribution
+			, dblBalanceInv
+			, dblSalesInTransit
+			, strTransactionType
+			, intCommodityId
+		)
+		EXEC uspRKGetInHouse
+			 @dtmFromTransactionDate  = @dtmFromTransactionDate
+			, @dtmToTransactionDate  = @dtmToTransactionDate
+			, @intCommodityId  = @intCommodityId
+			, @intItemId  = null
+			, @strPositionIncludes  = NULL
+			, @intLocationId  = NULL
+
+		UPDATE @InHouse SET strCommodityCode = @strCommodityCode WHERE intCommodityId = @intCommodityId
+
+		DELETE FROM #tempCommodity WHERE intCommodityId = @intCommodityId
+	END 
 
 	SELECT  
 		intRowNum = CONVERT(INT, ROW_NUMBER() OVER (ORDER BY dtmDate, Id ASC))
@@ -62,15 +88,16 @@ BEGIN
 					END
 		,dblInvOut = CASE 
 						WHEN dblAdjustments IS NOT NULL AND dblAdjustments < 0 THEN 
-							dblAdjustments 
+							ABS(dblAdjustments)
 						WHEN dblInventoryCount IS NOT NULL AND dblInventoryCount < 0 THEN 
-							dblInventoryCount 
+							ABS(dblInventoryCount)
 						ELSE
 							ISNULL(dblInvOut,0)
 					END
 		,strTransactionType
 		,strTransactionId
 		,intTransactionId
+		,strCommodityCode
 	INTO #tmpInventoryActivity
 	FROM @InHouse
 	WHERE (dtmDate IS NOT NULL
@@ -83,46 +110,82 @@ BEGIN
 		OR strDistribution IS NOT NULL)
 
 
-	SELECT	intRowNum 
+	SELECT	intRowNum, dtmTransactionDate 
 	INTO #tempDateRange
 	FROM #tmpInventoryActivity AS d
 
 	declare @tblRunningBalance as table (
 		intRowNum  INT  NULL
-		,dblInvBalance  NUMERIC(18,6)
+		,dtmDate DATE
+		,dblInvBegBalance  NUMERIC(18,6)
+		,dblInvEndBalance  NUMERIC(18,6)
+		,dblInvBegBalForSummary NUMERIC(18,6)
+		,dblInvEndBalForSummary NUMERIC(18,6)
 	)
 
 	Declare @intRowNum int
-			,@dblInvBeginBalance  NUMERIC(18,6)
+			,@dtmCurDate DATE
+			,@dtmPrevDate DATE
+			,@dblInvBalanceForward  NUMERIC(18,6)
+			,@dblInvBegBalForSummary NUMERIC(18,6)
 
-	SELECT @dblInvBeginBalance =  dblBalanceInv
+	SELECT @dblInvBalanceForward =  SUM(dblBalanceInv)
 	FROM @InHouse
 	WHERE dtmDate IS NULL
-
-	insert into @tblRunningBalance(
-		intRowNum
-		,dblInvBalance
-	)
-	values(null,@dblInvBeginBalance)
 	
+
 
 	While (Select Count(*) From #tempDateRange) > 0
 	Begin
 
-		Select Top 1 @intRowNum = intRowNum From #tempDateRange
+		Select Top 1 
+			@intRowNum = intRowNum 
+			,@dtmCurDate = dtmTransactionDate
+		From #tempDateRange
 
 		insert into @tblRunningBalance(
 			intRowNum
-			,dblInvBalance
+			,dtmDate
+			,dblInvBegBalance
+			,dblInvEndBalance
 		)
 		select @intRowNum
-			,@dblInvBeginBalance + ( dblInvIn - dblInvOut)  
+			,dtmTransactionDate
+			,@dblInvBalanceForward
+			,@dblInvBalanceForward + ( dblInvIn - dblInvOut)  
 		from #tmpInventoryActivity 
 		WHERE intRowNum = @intRowNum
 	
 		select 
-			@dblInvBeginBalance = dblInvBalance 
+			@dblInvBalanceForward = dblInvEndBalance 
 		from @tblRunningBalance where intRowNum = @intRowNum
+
+		IF @dtmCurDate <> @dtmPrevDate OR @dtmPrevDate IS NULL
+		BEGIN
+			SELECT @dblInvBegBalForSummary =  dblInvBegBalance
+			FROM @tblRunningBalance
+			WHERE dtmDate = @dtmCurDate
+			
+			UPDATE @tblRunningBalance 
+			SET dblInvBegBalForSummary = @dblInvBegBalForSummary
+				,dblInvEndBalForSummary = @dblInvBalanceForward
+			WHERE dtmDate = @dtmCurDate
+
+		END
+
+		IF @dtmCurDate = @dtmPrevDate
+		BEGIN
+			UPDATE @tblRunningBalance 
+			SET dblInvEndBalForSummary = @dblInvBalanceForward
+			WHERE dtmDate = @dtmCurDate
+
+			UPDATE @tblRunningBalance 
+			SET dblInvBegBalForSummary = @dblInvBegBalForSummary
+			WHERE dtmDate = @dtmCurDate
+			AND dblInvBegBalForSummary IS NULL
+		END
+
+		SET @dtmPrevDate = @dtmCurDate
 						
 		Delete #tempDateRange Where intRowNum = @intRowNum
 
@@ -131,12 +194,16 @@ BEGIN
 	SELECT
 		IA.intRowNum
 		,dtmTransactionDate
+		,dblInvBegBalance
 		,dblInvIn
 		,dblInvOut
-		,dblInvBalance
+		,dblInvEndBalance
 		,strTransactionType
 		,strTransactionId
 		,intTransactionId
+		,strCommodityCode
+		,dblInvBegBalForSummary
+		,dblInvEndBalForSummary
 	FROM #tmpInventoryActivity IA
 	FULL JOIN @tblRunningBalance RB on RB.intRowNum = IA.intRowNum
 	ORDER BY IA.dtmTransactionDate
@@ -144,5 +211,6 @@ BEGIN
 
 	DROP TABLE #tmpInventoryActivity
 	DROP TABLE #tempDateRange
+	DROP TABLE #tempCommodity
 
 END

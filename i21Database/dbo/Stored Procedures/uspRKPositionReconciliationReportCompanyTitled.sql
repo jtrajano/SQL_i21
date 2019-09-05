@@ -1,18 +1,20 @@
 CREATE PROCEDURE uspRKPositionReconciliationReportCompanyTitled
-	@intCommodityId INT 
+	@strCommodityId NVARCHAR(100)  
 	,@dtmFromTransactionDate DATE 
 	,@dtmToTransactionDate DATE
 	,@intQtyUOMId INT = NULL
 
 AS
 
-
---declare
---	 @dtmFromTransactionDate date = '06/01/2019'
---	, @dtmToTransactionDate date = '07/31/2019'
---	, @intCommodityId  int= 2
-
 BEGIN
+
+	DECLARE @Commodity AS TABLE (
+		 intCommodityId INT)
+		
+	
+	INSERT INTO @Commodity(intCommodityId)
+	SELECT Item Collate Latin1_General_CI_AS FROM [dbo].[fnSplitString](@strCommodityId, ',')
+
 
 	DECLARE @CompanyTitle AS TABLE (
 		dtmDate  DATE  NULL
@@ -24,81 +26,142 @@ BEGIN
 		,intTransactionId INT
 		,strDistribution NVARCHAR(10)
 		,dblCompanyTitled NUMERIC(18,6)
+		,intCommodityId INT
+		,strCommodityCode NVARCHAR(100)
 	)
-		
-	INSERT INTO @CompanyTitle(
-		dtmDate
-		,dblUnpaidIncrease 
-		,dblUnpaidDecrease 
-		,dblUnpaidBalance  
-		,dblPaidBalance  
-		,strTransactionId
-		,intTransactionId 
-		,strDistribution
-		,dblCompanyTitled
-	)
-	EXEC uspRKGetCompanyTitled @dtmFromTransactionDate = @dtmFromTransactionDate
-		, @dtmToTransactionDate = @dtmToTransactionDate
-		, @intCommodityId = @intCommodityId
-		, @intItemId = null
-		, @strPositionIncludes = null
-		, @intLocationId = null
+	
+	
+	DECLARE @intCommodityId INT
+		,@strCommodityCode NVARCHAR(100)
 
+	SELECT DISTINCT com.intCommodityId, strCommodityCode
+	INTO #tempCommodity
+	FROM @Commodity com
+	INNER JOIN tblICCommodity iccom on iccom.intCommodityId = com.intCommodityId
+	WHERE ISNULL(com.intCommodityId, '') <> ''
+
+	WHILE EXISTS(SELECT TOP 1 1 FROM #tempCommodity)
+	BEGIN
+
+		SELECT TOP 1 
+			@intCommodityId = intCommodityId
+			,@strCommodityCode = strCommodityCode
+		FROM #tempCommodity
+		
+		INSERT INTO @CompanyTitle(
+			dtmDate
+			,dblUnpaidIncrease 
+			,dblUnpaidDecrease 
+			,dblUnpaidBalance  
+			,dblPaidBalance  
+			,strTransactionId
+			,intTransactionId 
+			,strDistribution
+			,dblCompanyTitled
+			,intCommodityId
+		)
+		EXEC uspRKGetCompanyTitled @dtmFromTransactionDate = @dtmFromTransactionDate
+			, @dtmToTransactionDate = @dtmToTransactionDate
+			, @intCommodityId = @intCommodityId
+			, @intItemId = null
+			, @strPositionIncludes = null
+			, @intLocationId = null
+	
+		UPDATE @CompanyTitle SET strCommodityCode = @strCommodityCode WHERE intCommodityId = @intCommodityId
+
+		DELETE FROM #tempCommodity WHERE intCommodityId = @intCommodityId
+	END 
 
 	SELECT 
 		intRowNum = CONVERT(INT, ROW_NUMBER() OVER (ORDER BY dtmDate ASC))
 		,dtmTransactionDate = dtmDate
-		,dblIn = CASE WHEN strDistribution IN('ADJ','IC','CM','DP', 'IT','IS', 'CLT', 'PRDC') AND  dblPaidBalance > 0 THEN dblPaidBalance ELSE dblUnpaidIncrease END
+		,dblIn = CASE WHEN strDistribution IN('ADJ','IC','CM','DP', 'IT','IS', 'CLT', 'PRDC', 'CNSM','LG') AND  dblPaidBalance > 0 THEN dblPaidBalance ELSE dblUnpaidIncrease END
 		,dblOut = CASE WHEN dblPaidBalance < 0 THEN ABS(dblPaidBalance) ELSE dblUnpaidDecrease END
 		,strTransactionId
 		,intTransactionId
+		,strCommodityCode
 	INTO #tmpCompanyTitled
 	FROM @CompanyTitle
 	WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110) BETWEEN CONVERT(DATETIME, @dtmFromTransactionDate) AND CONVERT(DATETIME, @dtmToTransactionDate)
 		AND intTransactionId IS NOT NULL
 	ORDER BY dtmDate 
 
-	SELECT	intRowNum 
+	SELECT	intRowNum, dtmTransactionDate 
 	INTO #tempDateRange
 	FROM #tmpCompanyTitled AS d
 
 	declare @tblRunningBalance as table (
 		intRowNum  INT  NULL
-		,dblCompanyTitled  NUMERIC(18,6)
+		,dtmDate DATE
+		,dblCompTitledBegBalance  NUMERIC(18,6)
+		,dblCompTitledEndBalance  NUMERIC(18,6)
+		,dblCompTitledBegBalForSummary NUMERIC(18,6)
+		,dblCompTitledEndBalForSummary NUMERIC(18,6)
 	)
 
 	Declare @intRowNum int
-			,@dblCTBeginBalance  NUMERIC(18,6)
+			,@dtmCurDate DATE
+			,@dtmPrevDate DATE
+			,@dblCTBalanceForward  NUMERIC(18,6)
+			,@dblCompTitledBegBalForSummary NUMERIC(18,6)
 
-	SELECT @dblCTBeginBalance =  dblCompanyTitled
+	SELECT @dblCTBalanceForward =  SUM(dblCompanyTitled)
 	FROM @CompanyTitle
 	WHERE dtmDate IS NULL
 
-	insert into @tblRunningBalance(
-		intRowNum
-		,dblCompanyTitled
-	)
-	values(null,@dblCTBeginBalance)
-	
 
 	While (Select Count(*) From #tempDateRange) > 0
 	Begin
 
-		Select Top 1 @intRowNum = intRowNum From #tempDateRange
+		Select Top 1 
+			@intRowNum = intRowNum 
+			,@dtmCurDate = dtmTransactionDate
+		From #tempDateRange
 
 		insert into @tblRunningBalance(
 			intRowNum
-			,dblCompanyTitled
+			,dtmDate
+			,dblCompTitledBegBalance
+			,dblCompTitledEndBalance
 		)
 		select @intRowNum
-			,@dblCTBeginBalance + ( dblIn - dblOut)  
+			,dtmTransactionDate
+			,@dblCTBalanceForward
+			,@dblCTBalanceForward + ( dblIn - dblOut)  
 		from #tmpCompanyTitled 
 		WHERE intRowNum = @intRowNum
 	
 		select 
-			@dblCTBeginBalance = dblCompanyTitled 
+			@dblCTBalanceForward = dblCompTitledEndBalance 
 		from @tblRunningBalance where intRowNum = @intRowNum
-						
+		
+		IF @dtmCurDate <> @dtmPrevDate OR @dtmPrevDate IS NULL
+		BEGIN
+			SELECT @dblCompTitledBegBalForSummary =  dblCompTitledBegBalance
+			FROM @tblRunningBalance
+			WHERE dtmDate = @dtmCurDate
+			
+			UPDATE @tblRunningBalance 
+			SET dblCompTitledBegBalForSummary = @dblCompTitledBegBalForSummary
+				,dblCompTitledEndBalForSummary = @dblCTBalanceForward
+			WHERE dtmDate = @dtmCurDate
+
+		END
+
+		IF @dtmCurDate = @dtmPrevDate
+		BEGIN
+			UPDATE @tblRunningBalance 
+			SET dblCompTitledEndBalForSummary = @dblCTBalanceForward
+			WHERE dtmDate = @dtmCurDate
+
+			UPDATE @tblRunningBalance 
+			SET dblCompTitledBegBalForSummary = @dblCompTitledBegBalForSummary
+			WHERE dtmDate = @dtmCurDate
+			AND dblCompTitledBegBalForSummary IS NULL
+		END
+
+		SET @dtmPrevDate = @dtmCurDate
+		
 		Delete #tempDateRange Where intRowNum = @intRowNum
 
 	End
@@ -106,11 +169,15 @@ BEGIN
 	SELECT
 		CT.intRowNum
 		,dtmTransactionDate
+		,dblCompTitledBegBalance
 		,dblIn
 		,dblOut
-		,dblCompanyTitled
+		,dblCompTitledEndBalance
 		,strTransactionId
 		,intTransactionId
+		,strCommodityCode
+		,dblCompTitledBegBalForSummary
+		,dblCompTitledEndBalForSummary
 	FROM #tmpCompanyTitled CT
 	FULL JOIN @tblRunningBalance RB on RB.intRowNum = CT.intRowNum
 	ORDER BY CT.dtmTransactionDate
@@ -118,4 +185,5 @@ BEGIN
 
 	DROP TABLE #tmpCompanyTitled
 	DROP TABLE #tempDateRange
+	DROP TABLE #tempCommodity
 END
