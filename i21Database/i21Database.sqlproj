@@ -7680,6 +7680,7 @@
     <Build Include="dbo\Stored Procedures\uspRKPositionReconciliationReportCompanyTitled.sql" />
     <Build Include="dbo\Stored Procedures\uspRKPositionReconciliationReportInventoryActivity.sql" />
     <Build Include="dbo\Stored Procedures\uspRKPositionReconciliationReportContractBalance.sql" />
+    <None Include="Scripts\Post-Deployment\GR\UpdateDeliverySheetDate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
