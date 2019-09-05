@@ -283,6 +283,7 @@ BEGIN TRY
 		AND (ISNULL(Header.intDistributionHeaderId, 0) = 0 AND ISNULL(Header.intLoadDistributionHeaderId, 0) = 0)
 		-- AND ISNULL(Detail.intLoadDetailId, 0) = 0 FOR AR-8652
 		AND ISNULL(Header.intTransactionId, 0) = 0
+		AND Header.ysnFromProvisional = 0
 
 	UNION ALL
 
