@@ -8066,6 +8066,7 @@
     <Build Include="dbo\Stored Procedures\uspCTUpdateFinancialStatus.sql" />
     <Build Include="dbo\Stored Procedures\uspGRHandleSettleVoucherCreateReferenceTable.sql" />
     <Build Include="dbo\Tables\tblGRSettleVoucherCreateReferenceTable.sql" />
+	<Build Include="dbo\Views\vyuTRLoadBlendIngredient.sql" /> 
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
