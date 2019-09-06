@@ -274,7 +274,6 @@ BEGIN TRY
 
 							/* END CURSOR for Split Contract*/
 
-							FETCH NEXT FROM intListCursor INTO @InventoryReceiptId , @strTransactionId, @ysnIRPosted;
 						END
 						ELSE
 						BEGIN
