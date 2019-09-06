@@ -6416,6 +6416,29 @@ BEGIN
 
 		END
 	END
+	ELSE IF (LOWER(@strPriceMethod) = 'contracts')
+		BEGIN
+
+		DECLARE @dblContractGrossPrice NUMERIC(18,6)
+		SET @dblContractGrossPrice = Round((@dblPrice + @dblAdjustments + ROUND((@totalCalculatedTax / @dblQuantity),6)),6)
+
+		DECLARE @dblContractGrossPriceZeroQty NUMERIC(18,6)
+		SET @dblContractGrossPriceZeroQty = Round((@dblPrice + @dblAdjustments + ROUND((@totalCalculatedTaxZeroQuantity / @dblZeroQuantity),6)  ),6)
+
+
+		SET @dblCalculatedGrossPrice	 = 	 @dblContractGrossPriceZeroQty
+		SET @dblOriginalGrossPrice		 = 	 @dblOriginalPrice
+		SET @dblCalculatedNetPrice		 = 	 @dblContractGrossPrice
+		SET @dblOriginalNetPrice		 = 	 Round((Round(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax ) / @dblQuantity, 6) 
+		SET @dblCalculatedTotalPrice	 = 	 ROUND((@dblContractGrossPrice * @dblQuantity),2)
+		SET @dblOriginalTotalPrice		 = 	 ROUND(@dblOriginalPrice * @dblQuantity,2)
+
+
+		SET @dblQuoteGrossPrice			 = @dblCalculatedGrossPrice
+		SET @dblQuoteNetPrice			 =  Round((Round((@dblQuoteGrossPrice * @dblZeroQuantity),2) -  (ISNULL(@totalCalculatedTaxZeroQuantity,0))) / @dblZeroQuantity,6)
+
+		
+	END
 	ELSE
 		BEGIN
 			IF(@strPriceMethod = 'Price Profile' AND ISNULL(@ysnForceRounding,0) = 1) 
