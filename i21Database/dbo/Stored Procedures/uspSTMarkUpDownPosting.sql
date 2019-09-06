@@ -15,6 +15,7 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF 
 
 BEGIN TRY
+
 	--------------------------------------------------------------------------------------------  
 	-- Create Save Point.  
 	--------------------------------------------------------------------------------------------    
@@ -232,7 +233,7 @@ BEGIN TRY
 						)
 						-- Query all the MarkUp/Down for Item & Category managed
 						SELECT		
-								intItemId				= Item.intItemId --ISNULL(i.intItemId, CategoryItem.intItemId)
+								intItemId				= Item.intItemId--ISNULL(i.intItemId, CategoryItem.intItemId)
 								,intItemLocationId		= ItemLocation.intItemLocationId --ISNULL(il.intItemLocationId, CategoryItem.intItemLocationId)
 								,intItemUOMId			= ItemUOM.intItemUOMId --ISNULL(iu.intItemUOMId, CategoryItem.intItemUOMId)
 								,dtmDate				= MU.dtmMarkUpDownDate
@@ -388,18 +389,36 @@ BEGIN TRY
 						) ON i.intItemId = MUD.intItemId
 					
 						--Category Managed. Since item Ids are required, we'll fill those fields. This is just a temporary fix
+						--OUTER APPLY ( 
+						--	SELECT TOP 1	Item.intItemId,
+						--					ItemLocation.intItemLocationId,
+						--					ItemUOM.intItemUOMId
+						--	FROM tblICCategoryPricing CategoryPricing
+						--	INNER JOIN tblICItem Item
+						--		ON CategoryPricing.intCategoryId = MUD.intCategoryId AND CategoryPricing.dblTotalCostValue > 0
+						--	INNER JOIN tblICItemLocation ItemLocation
+						--		ON ItemLocation.intItemId = Item.intItemId AND ItemLocation.intLocationId = @intLocationId AND ItemLocation.intCostingMethod = 6 -- Category Costing Method = 6
+						--	INNER JOIN tblICItemUOM ItemUOM
+						--		ON ItemUOM.intItemUOMId = ItemLocation.intIssueUOMId
+						--	WHERE Item.intCategoryId = MUD.intCategoryId
+						--) CategoryItem
 						OUTER APPLY ( 
-							SELECT TOP 1	Item.intItemId,
-											ItemLocation.intItemLocationId,
-											ItemUOM.intItemUOMId
-							FROM tblICCategoryPricing CategoryPricing
-							INNER JOIN tblICItem Item
-								ON CategoryPricing.intCategoryId = MUD.intCategoryId AND CategoryPricing.dblTotalCostValue > 0
+							SELECT TOP 1
+								item.intItemId,
+								ItemLocation.intItemLocationId,
+								ItemUOM.intItemUOMId
+							FROM tblICCategoryLocation catLoc
+							INNER JOIN tblICCategory cat
+								ON catLoc.intCategoryId = cat.intCategoryId
+							INNER JOIN tblICItem item
+								ON catLoc.intGeneralItemId = item.intItemId
 							INNER JOIN tblICItemLocation ItemLocation
-								ON ItemLocation.intItemId = Item.intItemId AND ItemLocation.intLocationId = @intLocationId AND ItemLocation.intCostingMethod = 6 -- Category Costing Method = 6
+								ON ItemLocation.intItemId = item.intItemId 
+								AND ItemLocation.intLocationId = @intLocationId  
+								AND ItemLocation.intCostingMethod = 6 -- Category Costing Method = 6
 							INNER JOIN tblICItemUOM ItemUOM
 								ON ItemUOM.intItemUOMId = ItemLocation.intIssueUOMId
-							WHERE Item.intCategoryId = MUD.intCategoryId
+							WHERE item.intCategoryId = MUD.intCategoryId
 						) CategoryItem
 						WHERE MU.intMarkUpDownId = @intMarkUpDownId
 				END
@@ -514,8 +533,9 @@ BEGIN TRY
 			---- Generate New Batch Id
 			EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT, @intLocationId 
 
-			-- UnPost
-			INSERT INTO @GLEntries (
+
+			    -- UnPost
+			    INSERT INTO @GLEntries (
 						[dtmDate] 
 						,[strBatchId]
 						,[intAccountId]
@@ -549,6 +569,7 @@ BEGIN TRY
 						,[dblForeignRate]
 						,[strRateType]
 						,[intSourceEntityId]
+						,[intCommodityId]
 				)
 				EXEC @intReturnValue = dbo.uspICUnpostCosting  
 						@intMarkUpDownId  
