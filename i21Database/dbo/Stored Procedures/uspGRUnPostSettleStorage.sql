@@ -511,6 +511,7 @@ BEGIN TRY
 			DELETE FROM tblGRSettleStorage WHERE intSettleStorageId = @intSettleStorageId
 
 			--5. Removing Voucher
+			IF @BillId is not null
 			BEGIN
 				EXEC uspAPDeleteVoucher 
 					 @BillId
