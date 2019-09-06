@@ -115,22 +115,31 @@ BEGIN TRY
 	FROM tblCTReportMaster
 	WHERE strReportName = 'Inventory Planning Report'
 
-	IF @intInvPlngReportMasterID IS NOT NULL
+	IF @intInvPlngReportMasterID>0
 	BEGIN
 		SELECT @dtmDate = dtmDate
 		FROM tblCTInvPlngReportMaster
 		WHERE intInvPlngReportMasterID = @intInvPlngReportMasterID
+
+		SELECT @dtmStartOfMonth = DATEADD(month, DATEDIFF(month, 0, @dtmDate), 0)
+
+		SELECT @intCurrentMonth = DATEDIFF(mm, 0, @dtmDate)
 	END
 	ELSE
 	BEGIN
 		SELECT @dtmDate = GETDATE()
+
+		SELECT @dtmStartOfMonth = DATEADD(month, DATEDIFF(month, 0, @dtmDate), 0)
+
+		SELECT @intCurrentMonth = DATEDIFF(mm, 0, @dtmDate)
 	END
 
 	--To get a previously saved demand view
 	SELECT TOP 1 @intPrevInvPlngReportMasterID = intInvPlngReportMasterID
 	FROM tblCTInvPlngReportMaster
-	WHERE dtmDate < @dtmDate
-		AND ysnPost = 1
+	WHERE ysnPost = 1
+	AND dtmDate<=@dtmDate 
+	And intInvPlngReportMasterID <> @intInvPlngReportMasterID
 	ORDER BY intInvPlngReportMasterID DESC
 
 	IF @intCompanyLocationId IS NULL
@@ -323,7 +332,7 @@ BEGIN TRY
 			)
 		SELECT [intItemId]
 			,Replace(Replace([Name], 'strMonth', ''), 'PastDue', '0') AS [Name]
-			,-[Value]
+			,- [Value]
 		FROM OPENXML(@idoc, 'root/FC', 2) WITH (
 				[intItemId] INT
 				,[Name] NVARCHAR(50)
@@ -376,10 +385,6 @@ BEGIN TRY
 		,intMainItemId INT
 		)
 
-	SELECT @dtmStartOfMonth = DATEADD(month, DATEDIFF(month, 0, Getdate()), 0)
-
-	SELECT @intCurrentMonth = DATEDIFF(mm, 0, GETDATE())
-
 	IF @ysnIncludeInventory = 1
 	BEGIN
 		IF @ysnRefreshStock = 1
@@ -421,8 +426,8 @@ BEGIN TRY
 				,intMonthId
 				)
 			SELECT intItemId
-				,strValue --Opening Inventory
-				,6
+				,Case When strValue='' Then NULL else strValue End --Opening Inventory
+				,2
 				,Replace(Replace(Replace(strFieldName, 'strMonth', ''), 'OpeningInv', '-1'), 'PastDue', '0') intMonthId
 			FROM tblCTInvPlngReportAttributeValue
 			WHERE intReportAttributeID = 2 --Opening Inventory
@@ -458,7 +463,7 @@ BEGIN TRY
 				)
 			AS (
 				SELECT RI.intItemId
-					,Convert(NUMERIC(18, 6), (RI.dblCalculatedQuantity / R.dblQuantity) * dbo.fnMFConvertQuantityToTargetItemUOM(DD.intItemUOMId,IU.intItemUOMId, DD.dblQuantity))
+					,Convert(NUMERIC(18, 6), (RI.dblCalculatedQuantity / R.dblQuantity) * dbo.fnMFConvertQuantityToTargetItemUOM(DD.intItemUOMId, IU.intItemUOMId, DD.dblQuantity))
 					,8 AS intAttributeId --Forecasted Consumption
 					,DD.dtmDemandDate
 					,0 AS intLevel
@@ -475,7 +480,8 @@ BEGIN TRY
 							END
 						)
 				JOIN tblMFRecipeItem RI ON RI.intRecipeId = R.intRecipeId
-				JOIN tblICItemUOM IU on IU.intItemId=DD.intItemId and IU.intUnitMeasureId=@intUnitMeasureId
+				JOIN tblICItemUOM IU ON IU.intItemId = DD.intItemId
+					AND IU.intUnitMeasureId = @intUnitMeasureId
 				WHERE intRecipeItemTypeId = 1
 					AND (
 						(
@@ -546,13 +552,14 @@ BEGIN TRY
 				,intMonthId
 				)
 			SELECT IsNULL(DD.intSubstituteItemId, DD.intItemId)
-				,- dbo.fnMFConvertQuantityToTargetItemUOM(DD.intItemUOMId,IU.intItemUOMId, DD.dblQuantity)
+				,- dbo.fnMFConvertQuantityToTargetItemUOM(DD.intItemUOMId, IU.intItemUOMId, DD.dblQuantity)
 				,8 AS intAttributeId --Forecasted Consumption
 				,DATEDIFF(mm, 0, DD.dtmDemandDate) + 1 - @intCurrentMonth AS intMonthId
 			FROM @tblMFItem I
 			JOIN tblMFDemandDetail DD ON IsNULL(DD.intSubstituteItemId, DD.intItemId) = I.intItemId
 				AND DD.intDemandHeaderId = @intDemandHeaderId
-				JOIN tblICItemUOM IU on IU.intItemId=DD.intItemId and IU.intUnitMeasureId=@intUnitMeasureId
+			JOIN tblICItemUOM IU ON IU.intItemId = DD.intItemId
+				AND IU.intUnitMeasureId = @intUnitMeasureId
 			WHERE DD.dtmDemandDate >= @dtmStartOfMonth
 		END
 	END
@@ -606,7 +613,7 @@ BEGIN TRY
 						THEN I.intItemId
 					ELSE I.intMainItemId
 					END AS intItemId
-				,sum(dbo.fnCTConvertQuantityToTargetItemUOM(SS.intItemId, IU.intUnitMeasureId, @intUnitMeasureId, SS.dblBalance)* I.dblRatio) AS dblIntrasitQty
+				,sum(dbo.fnCTConvertQuantityToTargetItemUOM(SS.intItemId, IU.intUnitMeasureId, @intUnitMeasureId, SS.dblBalance) * I.dblRatio) AS dblIntrasitQty
 				,13 AS intAttributeId --Open Purchases
 				,0 AS intMonthId
 			FROM @tblMFItemDetail I
@@ -636,7 +643,7 @@ BEGIN TRY
 						THEN I.intItemId
 					ELSE I.intMainItemId
 					END AS intItemId
-				,sum(dbo.fnCTConvertQuantityToTargetItemUOM(SS.intItemId, IU.intUnitMeasureId, @intUnitMeasureId, SS.dblBalance)* I.dblRatio) AS dblIntrasitQty
+				,sum(dbo.fnCTConvertQuantityToTargetItemUOM(SS.intItemId, IU.intUnitMeasureId, @intUnitMeasureId, SS.dblBalance) * I.dblRatio) AS dblIntrasitQty
 				,13 AS intAttributeId --Open Purchases
 				,DATEDIFF(mm, 0, SS.dtmUpdatedAvailabilityDate) + 1 - @intCurrentMonth AS intMonthId
 			FROM @tblMFItemDetail I
@@ -666,12 +673,12 @@ BEGIN TRY
 				,intMonthId
 				)
 			SELECT intItemId
-				,strValue
+				,Case When strValue='' Then NULL else strValue End
 				,13 --Open Purchases 
 				,Replace(Replace(Replace(strFieldName, 'strMonth', ''), 'OpeningInv', '-1'), 'PastDue', '0') intMonthId
 			FROM tblCTInvPlngReportAttributeValue
 			WHERE intReportAttributeID = 13 --Open Purchases 
-				AND intInvPlngReportMasterID = @intPrevInvPlngReportMasterID
+				AND intInvPlngReportMasterID = @intInvPlngReportMasterID
 		END
 	END
 	ELSE
@@ -706,7 +713,7 @@ BEGIN TRY
 							THEN ISNULL(LDCL.dblReceivedQty, 0)
 						ELSE LD.dblDeliveredQuantity
 						END
-					))* I.dblRatio) AS dblIntrasitQty
+					)) * I.dblRatio) AS dblIntrasitQty
 		,14 AS intAttributeId --In-transit Purchases
 		,0 AS intMonthId
 	FROM tblLGLoad L
@@ -754,7 +761,7 @@ BEGIN TRY
 							THEN ISNULL(LDCL.dblReceivedQty, 0)
 						ELSE LD.dblDeliveredQuantity
 						END
-					))* I.dblRatio) AS dblIntrasitQty
+					)) * I.dblRatio) AS dblIntrasitQty
 		,14 AS intAttributeId --In-transit Purchases
 		,DATEDIFF(mm, 0, SS.dtmUpdatedAvailabilityDate) + 1 - @intCurrentMonth AS intMonthId
 	FROM tblLGLoad L
@@ -888,11 +895,11 @@ BEGIN TRY
 		,intMonthId
 		)
 	SELECT intItemId
-		,strValue --Previous Planned Purchases
+		,Case When strValue='' Then NULL else strValue End --Previous Planned Purchases
 		,6
 		,Replace(Replace(Replace(strFieldName, 'strMonth', ''), 'OpeningInv', '-1'), 'PastDue', '0') intMonthId
 	FROM tblCTInvPlngReportAttributeValue
-	WHERE intReportAttributeID = 6 --Previous Planned Purchases
+	WHERE intReportAttributeID = 5 --Planned Purchases
 		AND intInvPlngReportMasterID = @intPrevInvPlngReportMasterID
 
 	WHILE @intMonthId <= 24
@@ -969,37 +976,20 @@ BEGIN TRY
 		FROM @tblMFEndInventory
 
 		UPDATE D
-		SET dblQty = CASE 
-				WHEN (
-						SELECT sum(OpenInv.dblQty)
-						FROM #tblMFDemand OpenInv
-						WHERE OpenInv.intItemId = D.intItemId
-							AND OpenInv.intMonthId = @intMonthId
-							AND (
-								intAttributeId IN (
-									2
-									,4
-									,5
-									,8
-									) --Opening Inventory,Existing Purchases,Planned Purchases - ,Forecasted Consumption
-								)
-						) > 0
-					THEN (
-							SELECT sum(OpenInv.dblQty)
-							FROM #tblMFDemand OpenInv
-							WHERE OpenInv.intItemId = D.intItemId
-								AND OpenInv.intMonthId = @intMonthId
-								AND (
-									intAttributeId IN (
-										2
-										,4
-										,5
-										,8
-										) --Opening Inventory,Existing Purchases,Planned Purchases - ,Forecasted Consumption
-									)
-							)
-				ELSE 0
-				END
+		SET dblQty = (
+				SELECT sum(OpenInv.dblQty)
+				FROM #tblMFDemand OpenInv
+				WHERE OpenInv.intItemId = D.intItemId
+					AND OpenInv.intMonthId = @intMonthId
+					AND (
+						intAttributeId IN (
+							2
+							,4
+							,5
+							,8
+							) --Opening Inventory,Existing Purchases,Planned Purchases - ,Forecasted Consumption
+						)
+				)
 		OUTPUT inserted.intItemId
 			,inserted.dblQty
 		INTO @tblMFEndInventory
@@ -1107,8 +1097,18 @@ BEGIN TRY
 						FROM #tblMFDemand D
 						WHERE D.intItemId = Demand.intItemId
 							AND D.intAttributeId = 8
-							AND D.intMonthId BETWEEN Demand.intMonthId + 1
-								AND Demand.intMonthId + @intNoofWeeksorMonthstoCalculateSupplyTarget
+							AND (
+								(
+									Demand.intMonthId <= @intMonthsToView - @intNoofWeeksorMonthstoCalculateSupplyTarget
+									AND D.intMonthId BETWEEN Demand.intMonthId + 1
+										AND Demand.intMonthId + @intNoofWeeksorMonthstoCalculateSupplyTarget
+									)
+								OR (
+									Demand.intMonthId > @intMonthsToView - @intNoofWeeksorMonthstoCalculateSupplyTarget
+									AND D.intMonthId BETWEEN @intMonthsToView + 1 - @intNoofWeeksorMonthstoCalculateSupplyTarget
+										AND @intMonthsToView
+									)
+								)
 						) > 0
 					THEN (
 							SELECT dblQty
@@ -1122,8 +1122,18 @@ BEGIN TRY
 								FROM #tblMFDemand D
 								WHERE D.intItemId = Demand.intItemId
 									AND D.intAttributeId = 8
-									AND D.intMonthId BETWEEN Demand.intMonthId + 1
-										AND Demand.intMonthId + @intNoofWeeksorMonthstoCalculateSupplyTarget
+									AND (
+										(
+											Demand.intMonthId <= @intMonthsToView - @intNoofWeeksorMonthstoCalculateSupplyTarget
+											AND D.intMonthId BETWEEN Demand.intMonthId + 1
+												AND Demand.intMonthId + @intNoofWeeksorMonthstoCalculateSupplyTarget
+											)
+										OR (
+											Demand.intMonthId > @intMonthsToView - @intNoofWeeksorMonthstoCalculateSupplyTarget
+											AND D.intMonthId BETWEEN @intMonthsToView + 1 - @intNoofWeeksorMonthstoCalculateSupplyTarget
+												AND @intMonthsToView
+											)
+										)
 								) / @intNoofWeekstoCalculateSupplyTargetbyAverage
 							)
 				ELSE 0
@@ -1458,7 +1468,8 @@ BEGIN TRY
 								,0
 								)
 							THEN D.dblQty
-						When A.intReportAttributeID = 8 Then ABS(D.dblQty)
+						WHEN A.intReportAttributeID = 8
+							THEN ABS(IsNULL(D.dblQty, 0))
 						ELSE IsNULL(D.dblQty, 0)
 						END
 					)) AS dblQty
