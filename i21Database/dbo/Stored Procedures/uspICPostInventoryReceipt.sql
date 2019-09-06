@@ -2386,12 +2386,21 @@ BEGIN
 	END 
 	ELSE 
 	BEGIN 
-		-- Post preview is not available. Financials are only booked for company-owned stocks.
-		EXEC uspICRaiseError 80185; 
+		IF @ysnPost = 1 
+		BEGIN 
+			-- Post preview is not available. Financials are only booked for company-owned stocks.
+			EXEC uspICRaiseError 80185; 		
+		END 
+			
+		IF @ysnPost = 0 AND ISNULL(@strUnpostMode, 'Default') = 'Default' 
+		BEGIN 
+			-- Post preview is not available. Financials are only booked for company-owned stocks.
+			EXEC uspICRaiseError 80185; 			
+		END 
 	END 
 
 	COMMIT TRAN @TransactionName
-END 
+END  
 
 --------------------------------------------------------------------------------------------  
 -- If RECAP is FALSE,
