@@ -461,19 +461,14 @@ CD.intContractDetailId,
 		LEFT	JOIN	tblICUnitMeasure				FBUM	ON FBUM.intUnitMeasureId	=	FB.intUnitMeasureId			
 		LEFT	JOIN	tblICItemUOM					FBB	ON	FBB.intItemUOMId			=	CD.intFreightBasisBaseUOMId	
 		LEFT	JOIN	tblICUnitMeasure				FBBUM	ON FBBUM.intUnitMeasureId	=	FBB.intUnitMeasureId
-		  LEFT    JOIN	(
-								SELECT * FROM 
-								(
-									SELECT	ROW_NUMBER() OVER (PARTITION BY TR.intRecordId ORDER BY AP.intApprovalId DESC) intRowNum,
-											TR.intRecordId, AP.strStatus AS strApprovalStatus 
-									FROM	tblSMApproval		AP
-									JOIN	tblSMTransaction	TR	ON	TR.intTransactionId =	AP.intTransactionId
-									JOIN	tblSMScreen			SC	ON	SC.intScreenId		=	TR.intScreenId
-									WHERE	SC.strNamespace IN( 'ContractManagement.view.Contract',
-																'ContractManagement.view.Amendments')
-								) t
-								WHERE intRowNum = 1
-							)								AP	ON	AP.intRecordId						=		CD.intContractHeaderId
+		LEFT    JOIN	(
+							select * from (
+							select ROW_NUMBER() OVER (PARTITION BY b.intRecordId ORDER BY b.intTransactionId DESC) intRowNum, a.intContractHeaderId, a.intContractDetailId, b.strApprovalStatus
+							from tblCTPriceFixation a
+							left join tblSMTransaction b on b.intRecordId = a.intPriceContractId and b.strApprovalStatus is not null
+							left join tblSMScreen c on c.strNamespace = 'ContractManagement.view.PriceContracts' and c.intScreenId = b.intScreenId
+							) as tt where tt.intRowNum = 1
+						) AP ON AP.intContractHeaderId = CD.intContractHeaderId and AP.intContractDetailId = CD.intContractDetailId
 
 	)t ORDER BY intContractSeq
 
