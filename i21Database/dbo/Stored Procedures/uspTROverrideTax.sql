@@ -56,60 +56,117 @@ BEGIN TRY
 
 		-- RECEIPT SIDE
 		DECLARE @ysnReceipt BIT = 0
-		IF(@intSetupSupplierId IS NOT NULL AND @intSetupSupplyPointId IS NOT NULL)
+		IF(@intSupplierId IS NOT NULL AND @intSupplyPointId IS NOT NULL)
 		BEGIN
 			IF(@intSetupSupplierId = @intSupplierId AND @intSetupSupplyPointId = @intSupplyPointId)
 			BEGIN
-					SET @ysnReceipt = 1
+				SET @ysnReceipt = 1
 			END
-		END
-		
-		IF (ISNULL(@strSetupReceiptState, '') != '' AND @ysnReceipt = 0)
+		END	
+
+		IF (ISNULL(@strReceiptState, '') != '' AND @ysnReceipt = 0)
 		BEGIN
 			IF(ISNULL(@strSetupReceiptState, '') = ISNULL(@strReceiptState, ''))
 			BEGIN
 				SET @ysnReceipt = 1
 			END
 		END
+
+
+		--DECLARE @ysnReceipt BIT = 0
+		--IF(@intSupplierId IS NOT NULL AND @intSupplyPointId IS NOT NULL)
+		--BEGIN
+		--	IF(@intSetupSupplierId = @intSupplierId AND @intSetupSupplyPointId = @intSupplyPointId)
+		--	BEGIN
+		--		SET @ysnReceipt = 1
+		--	END
+		--END	
+		--ELSE IF (ISNULL(@strReceiptState, '') != '' AND @ysnReceipt = 0)
+		--BEGIN
+		--	IF(ISNULL(@strSetupReceiptState, '') = ISNULL(@strReceiptState, ''))
+		--	BEGIN
+		--		SET @ysnReceipt = 1
+		--	END
+		--END
 		
 
 		-- DISTRIBUTION SIDE
 		DECLARE @ysnDistribution BIT = 0
 
-		IF(@intSetupCustomerId IS NOT NULL AND @intSetupCustomerShipToId IS NOT NULL)
+		IF(@intCustomerId IS NOT NULL AND @intCustomerShipToId IS NOT NULL)
 		BEGIN
 			IF(@intSetupCustomerId = @intCustomerId AND @intSetupCustomerShipToId = @intCustomerShipToId)
 			BEGIN
 				SET @ysnDistribution = 1
 			END
-		END
-	
-		IF (ISNULL(@strSetupDistributionState, '') != '' AND @ysnDistribution = 0)
-		BEGIN
-			IF(ISNULL(@strSetupDistributionState, '') = ISNULL(@strDistributionState, ''))
+			ELSE IF (ISNULL(@strSetupDistributionState, '') = ISNULL(@strDistributionState, ''))
 			BEGIN
 				SET @ysnDistribution = 1
 			END
 		END
 
-		IF (@intSetupBulkLocationId IS NOT NULL AND @ysnDistribution = 0)
+		--IF (ISNULL(@strDistributionState, '') != '' AND @ysnDistribution = 0)
+		--BEGIN
+		--	IF(ISNULL(@strSetupDistributionState, '') = ISNULL(@strDistributionState, ''))
+		--	BEGIN
+		--		SET @ysnDistribution = 1
+		--	END
+		--END
+
+		ELSE IF (@intDistributionBulkLocationId IS NOT NULL)
 		BEGIN
 			IF(@intSetupBulkLocationId = @intDistributionBulkLocationId)
 			BEGIN
 				SET @ysnDistribution = 1
 			END
+			ELSE IF (ISNULL(@strSetupDistributionState, '') = ISNULL(@strDistributionState, ''))
+			BEGIN
+				SET @ysnDistribution = 1
+			END
 		END
 
 
+
+		--ELSE IF (ISNULL(@strDistributionState, '') != '')
+		--BEGIN
+		--	IF (@intDistributionBulkLocationId IS NOT NULL)
+		--	BEGIN
+		--		IF(@intSetupBulkLocationId = @intDistributionBulkLocationId)
+		--		BEGIN
+		--			SET @ysnDistribution = 1
+		--		END
+		--	END
+		--	ELSE IF(ISNULL(@strSetupDistributionState, '') = ISNULL(@strDistributionState, ''))
+		--	BEGIN
+		--		SET @ysnDistribution = 1
+		--	END
+		--END
+
+
+		--IF(@intSetupCustomerId IS NOT NULL AND @intSetupCustomerShipToId IS NOT NULL)
+		--BEGIN
+		--	IF(@intSetupCustomerId = @intCustomerId AND @intSetupCustomerShipToId = @intCustomerShipToId)
+		--	BEGIN
+		--		SET @ysnDistribution = 1
+		--	END
+		--END
+		--ELSE IF (ISNULL(@strSetupDistributionState, '') != '' AND @ysnDistribution = 0)
+		--BEGIN
+		--	IF(ISNULL(@strSetupDistributionState, '') = ISNULL(@strDistributionState, ''))
+		--	BEGIN
+		--		SET @ysnDistribution = 1
+		--	END
+		--END
+
+		
 		DECLARE @ysnShipVia BIT = 1
-		IF(@intSetupShipViaId IS NOT NULL)
+		IF(@intShipViaId IS NOT NULL)
 		BEGIN
 			IF(@intSetupShipViaId != @intShipViaId)
 			BEGIN
 				SET @ysnShipVia = 0
 			END
 		END
-
 
 		IF(@ysnReceipt = 1 AND @ysnDistribution = 1 AND @ysnShipVia = 1)
 		BEGIN
