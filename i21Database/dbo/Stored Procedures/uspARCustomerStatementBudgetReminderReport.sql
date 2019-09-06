@@ -141,14 +141,15 @@ CREATE TABLE #STATEMENTREPORT (
 --CUSTOMER FILTER
 IF @strCustomerNumberLocal IS NOT NULL
 	BEGIN
-		INSERT INTO #CUSTOMERS (intEntityCustomerId, strCustomerNumber, strCustomerName, strStatementFormat, dblCreditLimit, dblCreditAvailable, dblARBalance)
-		SELECT TOP 1 intEntityCustomerId	= C.intEntityId 
-			       , strCustomerNumber		= C.strCustomerNumber
-				   , strCustomerName		= EC.strName
-				   , strStatementFormat		= C.strStatementFormat
-				   , dblCreditLimit			= C.dblCreditLimit
-				   , dblCreditAvailable		= CASE WHEN ISNULL(C.dblCreditLimit, 0) = 0 THEN 0 ELSE C.dblCreditLimit - ISNULL(C.dblARBalance, 0) END
-				   , dblARBalance			= C.dblARBalance		
+		INSERT INTO #CUSTOMERS (intEntityCustomerId, strCustomerNumber, strCustomerName, strStatementFormat, dblCreditLimit, dblCreditAvailable, dblARBalance, ysnStatementCreditLimit)
+		SELECT TOP 1 intEntityCustomerId		= C.intEntityId 
+			       , strCustomerNumber			= C.strCustomerNumber
+				   , strCustomerName			= EC.strName
+				   , strStatementFormat			= C.strStatementFormat
+				   , dblCreditLimit				= C.dblCreditLimit
+				   , dblCreditAvailable			= CASE WHEN ISNULL(C.dblCreditLimit, 0) = 0 THEN 0 ELSE C.dblCreditLimit - ISNULL(C.dblARBalance, 0) END
+				   , dblARBalance				= C.dblARBalance
+				   , ysnStatementCreditLimit	= C.ysnStatementCreditLimit
 		FROM tblARCustomer C WITH (NOLOCK)
 		INNER JOIN (
 			SELECT intEntityId
@@ -161,14 +162,15 @@ IF @strCustomerNumberLocal IS NOT NULL
 	END
 ELSE IF @strCustomerIdsLocal IS NOT NULL
 	BEGIN
-		INSERT INTO #CUSTOMERS (intEntityCustomerId, strCustomerNumber, strCustomerName, strStatementFormat, dblCreditLimit, dblCreditAvailable, dblARBalance)
-		SELECT intEntityCustomerId	= C.intEntityId 
-			 , strCustomerNumber	= C.strCustomerNumber
-			 , strCustomerName      = EC.strName
-			 , strStatementFormat	= C.strStatementFormat
-			 , dblCreditLimit       = C.dblCreditLimit
-			 , dblCreditAvailable	= CASE WHEN ISNULL(C.dblCreditLimit, 0) = 0 THEN 0 ELSE C.dblCreditLimit - ISNULL(C.dblARBalance, 0) END
-			 , dblARBalance			= C.dblARBalance        
+		INSERT INTO #CUSTOMERS (intEntityCustomerId, strCustomerNumber, strCustomerName, strStatementFormat, dblCreditLimit, dblCreditAvailable, dblARBalance, ysnStatementCreditLimit)
+		SELECT intEntityCustomerId		= C.intEntityId 
+			 , strCustomerNumber		= C.strCustomerNumber
+			 , strCustomerName      	= EC.strName
+			 , strStatementFormat		= C.strStatementFormat
+			 , dblCreditLimit       	= C.dblCreditLimit
+			 , dblCreditAvailable		= CASE WHEN ISNULL(C.dblCreditLimit, 0) = 0 THEN 0 ELSE C.dblCreditLimit - ISNULL(C.dblARBalance, 0) END
+			 , dblARBalance				= C.dblARBalance        
+			 , ysnStatementCreditLimit	= C.ysnStatementCreditLimit
 		FROM tblARCustomer C WITH (NOLOCK)
 		INNER JOIN (
 			SELECT intID
@@ -184,14 +186,15 @@ ELSE IF @strCustomerIdsLocal IS NOT NULL
 	END
 ELSE
 	BEGIN
-		INSERT INTO #CUSTOMERS (intEntityCustomerId, strCustomerNumber, strCustomerName, strStatementFormat, dblCreditLimit, dblCreditAvailable, dblARBalance)
-		SELECT intEntityCustomerId	= C.intEntityId 
-			 , strCustomerNumber	= C.strCustomerNumber
-			 , strCustomerName		= EC.strName
-			 , strStatementFormat	= C.strStatementFormat
-			 , dblCreditLimit		= C.dblCreditLimit
-			 , dblCreditAvailable	= CASE WHEN ISNULL(C.dblCreditLimit, 0) = 0 THEN 0 ELSE C.dblCreditLimit - ISNULL(C.dblARBalance, 0) END
-			 , dblARBalance			= C.dblARBalance
+		INSERT INTO #CUSTOMERS (intEntityCustomerId, strCustomerNumber, strCustomerName, strStatementFormat, dblCreditLimit, dblCreditAvailable, dblARBalance, ysnStatementCreditLimit)
+		SELECT intEntityCustomerId		= C.intEntityId 
+			 , strCustomerNumber		= C.strCustomerNumber
+			 , strCustomerName			= EC.strName
+			 , strStatementFormat		= C.strStatementFormat
+			 , dblCreditLimit			= C.dblCreditLimit
+			 , dblCreditAvailable		= CASE WHEN ISNULL(C.dblCreditLimit, 0) = 0 THEN 0 ELSE C.dblCreditLimit - ISNULL(C.dblARBalance, 0) END
+			 , dblARBalance				= C.dblARBalance
+			 , ysnStatementCreditLimit	= C.ysnStatementCreditLimit
 		FROM tblARCustomer C WITH (NOLOCK)
 		INNER JOIN (
 			SELECT intEntityId
@@ -250,7 +253,6 @@ IF @strLocationNameLocal IS NOT NULL
 UPDATE C 
 SET strStatementFooterComment	= dbo.fnARGetDefaultComment(NULL, C.intEntityCustomerId, 'Statement Report', NULL, 'Footer', NULL, 1)
   , strFullAddress				= dbo.fnARFormatCustomerAddress(NULL, NULL, NULL, CS.strBillToAddress, CS.strBillToCity, CS.strBillToState, CS.strBillToZipCode, CS.strBillToCountry, NULL, NULL)
-  , ysnStatementCreditLimit		= CS.ysnStatementCreditLimit
 FROM #CUSTOMERS C
 INNER JOIN vyuARCustomerSearch CS ON C.intEntityCustomerId = CS.intEntityCustomerId
 
@@ -552,6 +554,8 @@ INSERT INTO #STATEMENTREPORT (
 	 , dblPayment
 	 , dblCreditLimit
 	 , dblCreditAvailable
+	 , dblARBalance
+	 , ysnStatementCreditLimit
 )
 SELECT intEntityCustomerId			= C.intEntityCustomerId
 	 , strCustomerNumber			= C.strCustomerNumber
@@ -566,6 +570,8 @@ SELECT intEntityCustomerId			= C.intEntityCustomerId
 	 , dblPayment					= 0
 	 , dblCreditLimit				= C.dblCreditLimit
 	 , dblCreditAvailable			= C.dblCreditAvailable
+	 , dblARBalance					= C.dblARBalance
+	 , ysnStatementCreditLimit		= C.ysnStatementCreditLimit
 FROM #CUSTOMERS C
 LEFT JOIN #BALANCEFORWARDAGING BFA ON C.intEntityCustomerId = BFA.intEntityCustomerId
 
