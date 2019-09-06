@@ -148,6 +148,7 @@ BEGIN TRY
 
 	SELECT	@FirstApprovalSign =  Sig.blbDetail 
 	FROM	tblSMSignature Sig  WITH (NOLOCK)
+	JOIN    tblEMEntitySignature ES ON Sig.intSignatureId = ES.intElectronicSignatureId
 	WHERE	Sig.intEntityId=@FirstApprovalId
 
 	SELECT	@LastModifiedUserSign = Sig.blbDetail 
@@ -159,6 +160,7 @@ BEGIN TRY
 	FROM	tblCTIntrCompApproval	IA
 	JOIN	tblSMUserSecurity		US	ON	US.strUserName	=	IA.strUserName	
 	JOIN	tblSMSignature			Sig	ON	US.intEntityId	=	Sig.intEntityId
+	JOIN    tblEMEntitySignature	ES	ON	Sig.intSignatureId = ES.intElectronicSignatureId
 	WHERE	IA.intContractHeaderId	=	@intContractHeaderId
 	AND		IA.strScreen	=	'Price Contract'
 
