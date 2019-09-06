@@ -144,8 +144,8 @@ BEGIN
 															dbo.fnAPGetPaymentAmountFactor((Details.dblTotal 
 																- (CASE WHEN paymentDetail.dblWithheld > 0 THEN (Details.dblTotal * ISNULL(withHoldData.dblWithholdPercent,1)) ELSE 0 END)), 
 																paymentDetail.dblPayment, voucher.dblTotal) * ISNULL(NULLIF(A.dblExchangeRate,0),1) 
-															AS DECIMAL(18,6)) 
-																* (CASE WHEN paymentDetail.ysnOffset = 1 THEN -1 ELSE 1 END),
+															AS DECIMAL(18,6)), 
+																--* (CASE WHEN paymentDetail.ysnOffset = 1 THEN -1 ELSE 1 END),
 															-- ELSE
 															-- 	CAST(A.dblAmountPaid AS DECIMAL(18,2)) END,
 						[dblCreditForeign]				=	--CASE WHEN A.dblExchangeRate != 1 THEN 
@@ -153,7 +153,8 @@ BEGIN
 															dbo.fnAPGetPaymentAmountFactor((Details.dblTotal 
 																- (CASE WHEN paymentDetail.dblWithheld > 0 THEN (Details.dblTotal * ISNULL(withHoldData.dblWithholdPercent,1)) ELSE 0 END)), 
 																paymentDetail.dblPayment, voucher.dblTotal)
-															AS DECIMAL(18,6)) * (CASE WHEN paymentDetail.ysnOffset = 1 THEN -1 ELSE 1 END)
+															AS DECIMAL(18,6)) 
+															--* (CASE WHEN paymentDetail.ysnOffset = 1 THEN -1 ELSE 1 END)
 															-- ELSE
 															-- 	CAST(A.dblAmountPaid AS DECIMAL(18,2)) END												
 					
@@ -425,6 +426,8 @@ BEGIN
 																CASE WHEN (voucher.intTransactionType NOT IN (1,2,13,14) AND A.ysnPrepay = 0)
 																			OR
 																		  (voucher.intTransactionType IN (2, 13) AND voucher.ysnPrepayHasPayment = 1)
+																		  OR 
+																		  (B.ysnOffset = 1)
 																		 THEN -1 
 																		 ELSE 1 END),
 		[dblCredit]						=	0,
@@ -465,6 +468,8 @@ BEGIN
 												CASE WHEN (voucher.intTransactionType NOT IN (1,2,13, 14) AND A.ysnPrepay = 0)
 															OR
 															(voucher.intTransactionType IN (2,13) AND voucher.ysnPrepayHasPayment = 1)
+															OR 
+																		  (B.ysnOffset = 1)
 															THEN -1 
 															ELSE 1 END),      
 		[dblDebitReport]				=	0,
@@ -493,6 +498,7 @@ BEGIN
 	--voucherDetail.dblRate,
 	voucherRate.dblExchangeRate,
 	B.intBillId,
+	B.ysnOffset,
 	D.strVendorId,
 	A.dtmDatePaid,
 	A.ysnPrepay,
