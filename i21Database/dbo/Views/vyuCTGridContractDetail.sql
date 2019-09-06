@@ -39,10 +39,10 @@ AS
 			CD.intIndexId,
 			CD.dblAdjustment,
 			CD.intAdjItemUOMId,
-			intPricingTypeId = (case when AP.strApprovalStatus = 'Approved' or AP.strApprovalStatus = 'No Need for Approval' then CD.intPricingTypeId else CH.intPricingTypeId end),
+			CD.intPricingTypeId,
 			CD.intFutureMarketId,
 			CD.intFutureMonthId,
-			dblFutures = (case when AP.strApprovalStatus = 'Approved' or AP.strApprovalStatus = 'No Need for Approval' then CD.dblFutures else null end),
+			CD.dblFutures,
 			CD.dblBasis,
 			CD.dblOriginalBasis,
 			CD.dblConvertedBasis,
@@ -161,7 +161,7 @@ AS
 			CU.ysnSubCurrency,
 			FR.strOrigin + FR.strDest strOriginDest,
 			RG.strRailGrade,
-			strPricingType = (case when AP.strApprovalStatus = 'Approved' or AP.strApprovalStatus = 'No Need for Approval' then PT.strPricingType else PTH.strPricingType end),
+			PT.strPricingType,
 			OH.strContractOptDesc,
 			DT.strDiscountType,
 			DC.strDiscountId,
@@ -269,7 +269,6 @@ AS
 	LEFT    JOIN	tblCTFreightRate				FR	ON	FR.intFreightRateId					=		CD.intFreightRateId			--strOriginDest
 	LEFT    JOIN	tblCTIndex						IX	ON	IX.intIndexId						=		CD.intIndexId				--strIndex
 	LEFT    JOIN	tblCTPricingType				PT	ON	PT.intPricingTypeId					=		CD.intPricingTypeId			--strPricingType
-	LEFT    JOIN	tblCTPricingType				PTH	ON	PTH.intPricingTypeId				=		CH.intPricingTypeId			--strPricingType
 	LEFT    JOIN	tblCTRailGrade					RG	ON	RG.intRailGradeId					=		CD.intRailGradeId
 	LEFT	JOIN	tblCTSubBook					SK	ON	SK.intSubBookId						=		CD.intSubBookId				--strSubBook
 	
