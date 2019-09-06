@@ -2,6 +2,7 @@
 (
 	[intTankMonitorInterfaceId] INT IDENTITY (1, 1) NOT NULL,
 	[intInterfaceTypeId] INT NOT NULL,
+	[ysnDefault] bit null,
 	[strAPIUrl] NVARCHAR(2000) COLLATE Latin1_General_CI_AS NULL,
 	[strVendorName] NVARCHAR(255) COLLATE Latin1_General_CI_AS NULL,
 	[strCustomerName] NVARCHAR(255) COLLATE Latin1_General_CI_AS NULL,
