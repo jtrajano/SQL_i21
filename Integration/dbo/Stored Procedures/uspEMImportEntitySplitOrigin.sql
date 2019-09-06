@@ -1,17 +1,19 @@
 ﻿CREATE PROCEDURE uspEMImportEntitySplitOrigin
-@error_msg nvarchar(max) = N'' output,
+@@error_msg nvarchar(max) = N'' OUTPUT,
 @success bit output,
-@duplicate_msg nvarchar(max) = N'' output 
+@duplicate_msg nvarchar(max) = N'' OUTPUT
 AS
 BEGIN
 
+
+SET @success = CAST(1 AS BIT)
+SET @duplicate_msg = N'';
 
 DECLARE @InitTranCount INT;
 SET @InitTranCount = @@TRANCOUNT
 DECLARE @Savepoint NVARCHAR(32) = SUBSTRING(('uspEMImportEntitySplitOrigin' + CONVERT(VARCHAR, @InitTranCount)), 1, 32)
 
-
-
+ 
 IF(OBJECT_ID('tmpsplit') IS NOT NULL)
 DROP TABLE tmpsplit
 
@@ -80,8 +82,16 @@ create table #splitDetailOrigin
 
  --DECLARE @success BIT = 1;
 
+IF @InitTranCount = 0
+	BEGIN
+		BEGIN TRANSACTION
+	END		
+ELSE
+	BEGIN
+		SAVE TRANSACTION @Savepoint
+	END
 
-while exists(select top 1 1 from tmpsplit)
+WHILE exists(select top 1 1 from tmpsplit)
 BEGIN
 DECLARE @EntityId INT
 	
@@ -127,14 +137,14 @@ SET @EntityId = (select top 1 intEntityId from vyuEMSearch where TRIM(strEntityN
 
 BEGIN TRY
 
-		IF @InitTranCount = 0
-			BEGIN
-				BEGIN TRANSACTION
-			END		
-		ELSE
-			BEGIN
-				SAVE TRANSACTION @Savepoint
-			END
+		--IF @InitTranCount = 0
+		--	BEGIN
+		--		BEGIN TRANSACTION
+		--	END		
+		--ELSE
+		--	BEGIN
+		--		SAVE TRANSACTION @Savepoint
+		--	END
 
 	
 
@@ -145,9 +155,11 @@ BEGIN TRY
 
 	IF(ISNULL(@duplicate_entry,0) <> 0)
 	BEGIN
-		set @duplicate_msg = @duplicate_msg + CHAR(13) + CAST(@SPLIT_NO AS varchar) + '|' + CAST(@EntityId AS varchar)
+		SET @duplicate_msg = @duplicate_msg + CHAR(13) + CAST(@SPLIT_NO AS varchar) + '|' + CAST(@EntityId AS varchar)
 
 		DELETE from tmpsplit where TRIM(ssspl_bill_to_cus) = @CUSTOMER_BILLTO AND ssspl_split_no = @SPLIT_NO
+		
+		INSERT INTO tblEMImportedSplit(customerNumber, splitNo, remarks) VALUES (@CUSTOMER_BILLTO, @SPLIT_NO, 'Skipped. Split already exists')
 
 		CONTINUE;
 	END 
@@ -225,7 +237,7 @@ INSERT INTO #splitDetailOrigin(id, splitId, custNo,splitPercent, strOption, intS
 		 if(ISNULL(@EntityDetailId,0) = 0)
 			begin
 				SET @error_msg = 'Entity ' + @customer + ' does not exists.'
-				SET @success = 0;
+				SET @success = CAST(0 AS bit);
 
 				GOTO ExitWithRollback
 				--raiserror(@error_msg,16,1)
@@ -244,13 +256,14 @@ INSERT INTO #splitDetailOrigin(id, splitId, custNo,splitPercent, strOption, intS
 		
 		DELETE FROM #splitDetailOrigin WHERE id = @id
 
-		
 	end
 		 
 
-	INSERT INTO tblEMImportedSplit(customerNumber, splitNo) VALUES (@CUSTOMER_BILLTO, @SPLIT_NO)
+	INSERT INTO tblEMImportedSplit(customerNumber, splitNo, remarks) VALUES (@CUSTOMER_BILLTO, @SPLIT_NO, 'Success')
 
 	DELETE from tmpsplit where TRIM(ssspl_bill_to_cus) = @CUSTOMER_BILLTO AND ssspl_split_no = @SPLIT_NO
+
+	--COMMIT TRANSACTION
 
 	end
 	else
@@ -270,7 +283,7 @@ INSERT INTO #splitDetailOrigin(id, splitId, custNo,splitPercent, strOption, intS
 	END TRY
 	BEGIN CATCH
 		
-		SET @success = 0;
+		SET @success = CAST(0 AS bit);
 		SET @error_msg = ERROR_MESSAGE();
 		
 		GOTO ExitWithRollback
@@ -281,8 +294,17 @@ END
 
 end
 
+--GraceExit:
+--return;
 
-	
+ExitWithCommit:
+IF @InitTranCount = 0
+	BEGIN
+		COMMIT TRANSACTION
+	END
+
+GOTO GraceExit
+
 
 ExitWithRollback:
 
@@ -306,3 +328,5 @@ ELSE
 	END
 
 
+
+GraceExit:
