@@ -98,7 +98,7 @@ INSERT INTO @voucherPayables(
 	,[dblFranchiseWeight]                
 	,[dblFranchiseAmount]                
 	,[dblActual]                        
-	,[dblDifference]                    
+	,[dblDifference]  
 )
 SELECT
 	[intBillId]
