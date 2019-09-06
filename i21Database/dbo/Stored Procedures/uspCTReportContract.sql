@@ -171,18 +171,21 @@ BEGIN TRY
     SELECT TOP 1 @FirstApprovalId=intApproverId,@intApproverGroupId = intApproverGroupId FROM tblSMApproval WHERE intTransactionId=@intTransactionId AND strStatus='Approved' ORDER BY intApprovalId
 	SELECT TOP 1 @SecondApprovalId=intApproverId FROM tblSMApproval WHERE intTransactionId=@intTransactionId AND strStatus='Approved' AND intApproverId <> @FirstApprovalId AND ISNULL(intApproverGroupId,0) <> @intApproverGroupId ORDER BY intApprovalId
 
-	SELECT	@FirstApprovalSign =  Sig.blbDetail 
-	FROM	tblSMSignature Sig  WITH (NOLOCK)
+	SELECT	@FirstApprovalSign = Sig.blbDetail
+	FROM	tblSMSignature Sig WITH (NOLOCK)
+	JOIN	tblEMEntitySignature ES ON Sig.intSignatureId = ES.intElectronicSignatureId
 	WHERE	Sig.intEntityId=@FirstApprovalId
 
-	SELECT	@SecondApprovalSign =Sig.blbDetail 
+	SELECT	@SecondApprovalSign = Sig.blbDetail 
 	FROM	tblSMSignature Sig  WITH (NOLOCK)
+	JOIN	tblEMEntitySignature ES ON Sig.intSignatureId = ES.intElectronicSignatureId
 	WHERE	Sig.intEntityId=@SecondApprovalId
 
 	SELECT	@InterCompApprovalSign =Sig.blbDetail 
 	FROM	tblCTIntrCompApproval	IA
-	JOIN	tblSMUserSecurity		US	ON	US.strUserName	=	IA.strUserName	
-	JOIN	tblSMSignature			Sig	ON	US.intEntityId	=	Sig.intEntityId
+	JOIN	tblSMUserSecurity		US	ON	US.strUserName		=	IA.strUserName	
+	JOIN	tblSMSignature			Sig	ON	US.intEntityId		=	Sig.intEntityId
+	JOIN	tblEMEntitySignature	ES	ON	Sig.intSignatureId	=	ES.intElectronicSignatureId
 	WHERE	IA.intContractHeaderId	=	@intContractHeaderId
 	AND		IA.strScreen	=	'Contract'
 
