@@ -107,6 +107,7 @@ END
 		,strChargesLink				= MIN(TR.strReceiptLine)
 		,strDestinationType			= ISNULL(MIN(TLD.strDestination), MIN(BID.strDestination))
 		,strFreightBilledBy			= MIN(ShipVia.strFreightBilledBy)
+		,intGrossNetUOMId			= MIN(IC.intStockUOMId)
 	INTO #tmpReceipts
 	FROM tblTRLoadHeader TL
 	LEFT JOIN tblTRLoadReceipt TR ON TR.intLoadHeaderId = TL.intLoadHeaderId			
@@ -169,6 +170,7 @@ END
 			,strSourceScreenName
 			,intPaymentOn
 			,strChargesLink
+			,intGrossNetUOMId
 	)	
 	SELECT strReceiptType		= strReceiptType
 		,intEntityVendorId		= intEntityVendorId
@@ -205,19 +207,40 @@ END
 		,strSourceScreenName	= strSourceScreenName
 		,intPaymentOn			= intPaymentOn
 		,strChargesLink			= strChargesLink
+		,intGrossNetUOMId		= intGrossNetUOMId
 	FROM #tmpReceipts
 
 	--SELECT TOP 1 @intFreightItemId = intItemForFreightId FROM tblTRCompanyPreference
 	SELECT TOP 1 @intFreightItemId = intFreightItemId FROM tblTRLoadHeader WHERE intLoadHeaderId = @intLoadHeaderId 
 	SELECT TOP 1 @intSurchargeItemId = intItemId FROM vyuICGetOtherCharges WHERE intOnCostTypeId = @intFreightItemId
 
+
+	-- GET COST METHOD - FREIGHT
+	DECLARE @strCostMethodFreight NVARCHAR(30) = NULL
+	SELECT @strCostMethodFreight = strCostMethod FROM tblICItem WHERE intItemId = @intFreightItemId
+	IF(ISNULL(@strCostMethodFreight,'') = '')
+	BEGIN
+		RAISERROR('Cost Method for Freight item cannot be null', 16 ,1)
+	END
+
+	-- GET COST METHOD - FREIGHT
+	DECLARE @strCostMethodSurcharge NVARCHAR(30) = NULL
+	SELECT @strCostMethodSurcharge = strCostMethod FROM tblICItem WHERE intItemId = @intSurchargeItemId
+	IF(ISNULL(@strCostMethodSurcharge,'') = '' AND @intSurchargeItemId IS NOT NULL)
+	BEGIN
+		RAISERROR('Cost Method for Surcharge item cannot be null', 16 ,1)
+	END
+
 	SELECT TOP 1 @FreightUOMId = intCostUOMId FROM tblICItem WHERE intItemId = @intFreightItemId
 	IF (@FreightUOMId IS NULL)
 		SELECT TOP 1 @FreightUOMId = intItemUOMId FROM tblICItemUOM WHERE intItemId = @intFreightItemId AND ysnStockUnit = 1
 	
-	SELECT TOP 1 @SurchargeUOMId = intCostUOMId FROM tblICItem WHERE intItemId = @intSurchargeItemId
-	IF (@SurchargeUOMId IS NULL)
-		SELECT TOP 1 @SurchargeUOMId = intItemUOMId FROM tblICItemUOM WHERE intItemId = @intSurchargeItemId AND ysnStockUnit = 1
+
+	SELECT @SurchargeUOMId = dbo.fnGetMatchingItemUOMId(@intSurchargeItemId, @FreightUOMId)
+
+	-- SELECT TOP 1 @SurchargeUOMId = intCostUOMId FROM tblICItem WHERE intItemId = @intSurchargeItemId
+	-- IF (@SurchargeUOMId IS NULL)
+	-- 	SELECT TOP 1 @SurchargeUOMId = intItemUOMId FROM tblICItemUOM WHERE intItemId = @intSurchargeItemId AND ysnStockUnit = 1
 
 	-- Get Freight Cost Allocation Method from Company Preferences
 	SELECT TOP 1 @FreightCostAllocationMethod = intFreightCostAllocationMethod FROM tblTRCompanyPreference
@@ -257,7 +280,7 @@ END
 													WHEN @FreightCostAllocationMethod = 3 THEN CAST (0 AS BIT)
 													ELSE (CASE WHEN RE.strDestinationType = 'Location' THEN CAST(1 AS BIT)
 																ELSE CAST(0 AS BIT) END) END)
-			,[strCostMethod]				= 'Per Unit'
+			,[strCostMethod]				= @strCostMethodFreight
 			,[dblRate]						= RE.dblFreightRate
 			,[intCostUOMId]					= @FreightUOMId
 			,[intOtherChargeEntityVendorId]	= CASE	WHEN RE.strFreightBilledBy = 'Vendor' THEN RE.intEntityVendorId
@@ -290,7 +313,7 @@ END
 													WHEN @FreightCostAllocationMethod = 3 THEN CAST (0 AS BIT)
 													ELSE (CASE WHEN RE.strDestinationType = 'Location' THEN CAST(1 AS BIT)
 																ELSE CAST(0 AS BIT) END) END)
-			,[strCostMethod]				= 'Percentage'
+			,[strCostMethod]				= @strCostMethodSurcharge
 			,[dblRate]						= RE.dblSurcharge
 			,[intCostUOMId]					= @SurchargeUOMId
 			,[intOtherChargeEntityVendorId]	= CASE WHEN RE.strFreightBilledBy = 'Vendor' THEN RE.intEntityVendorId
