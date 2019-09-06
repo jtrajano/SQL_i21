@@ -427,7 +427,15 @@ BEGIN TRY
 			--COMMIT TRANSACTION @SavedPointTransaction
 
 			-- Generate New Batch Id
-			EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT, @intLocationId 
+			IF(@ysnRecap = CAST(1 AS BIT))
+				BEGIN
+					SET @strBatchId = CAST(NEWID() AS NVARCHAR(100))
+				END
+			ELSE
+				BEGIN
+					EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT, @intLocationId 
+				END
+			
 
 
 			-- Process Adjustments
@@ -530,8 +538,16 @@ BEGIN TRY
 		BEGIN
 			--UNPOST
 
-			---- Generate New Batch Id
-			EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT, @intLocationId 
+
+			-- Generate New Batch Id
+			IF(@ysnRecap = CAST(1 AS BIT))
+				BEGIN
+					SET @strBatchId = CAST(NEWID() AS NVARCHAR(100))
+				END
+			ELSE
+				BEGIN
+					EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT, @intLocationId 
+				END
 
 
 			    -- UnPost
