@@ -4,7 +4,8 @@ CREATE PROCEDURE [dbo].[uspGRCreateItemGLEntries]
 	,@AccountCategory_ContraInventory AS NVARCHAR(255) = 'Cost of Goods'
 	,@intEntityUserSecurityId AS INT
 	,@strGLDescription AS NVARCHAR(255) = NULL 	
-	,@intContraInventory_ItemLocationId AS INT = NULL 	
+	,@intContraInventory_ItemLocationId AS INT = NULL
+	,@ysnForRebuild as BIT = 0 	
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -198,6 +199,12 @@ BEGIN
 END 
 ;
 
+
+if @ysnForRebuild = 0
+	exec uspGRHandleSettleVoucherCreateReferenceTable  @strBatchId, @SettleVoucherCreate
+
+;
+
 -- Generate the G/L Entries here: 
 WITH ForGLEntries_CTE (
 	dtmDate
@@ -254,11 +261,11 @@ AS
 	OUTER APPLY (
 		SELECT 
 			ISNULL(SUM((ROUND(SV.dblCashPrice * CASE WHEN ISNULL(SV.dblSettleContractUnits,0) > 0 THEN SV.dblSettleContractUnits ELSE SV.dblUnits END,2)) / SV.dblUnits),0)  AS dblTotalDiscountCost
-		FROM @SettleVoucherCreate SV
+		FROM tblGRSettleVoucherCreateReferenceTable SV
 		INNER JOIN tblICItem IC
 			ON IC.intItemId = SV.intItemId
 				AND IC.ysnInventoryCost = 1
-		WHERE intItemType = 3 --DISCOUNTS
+		WHERE intItemType = 3 and SV.strBatchId = @strBatchId --DISCOUNTS
 	) DiscountCost
 	WHERE t.strBatchId = @strBatchId
 		AND t.intInTransitSourceLocationId IS NULL -- If there is a value in intInTransitSourceLocationId, then it is for In-Transit costing. Use uspICCreateGLEntriesForInTransitCosting instead of this sp.
