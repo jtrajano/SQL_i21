@@ -7681,6 +7681,7 @@
     <Build Include="dbo\Stored Procedures\uspRKPositionReconciliationReportInventoryActivity.sql" />
     <Build Include="dbo\Stored Procedures\uspRKPositionReconciliationReportContractBalance.sql" />
     <Build Include="dbo\Tables\tblGRSettleVoucherCreateReferenceTable.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRHandleSettleVoucherCreateReferenceTable.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
