@@ -21,6 +21,7 @@ SELECT TL.intLoadHeaderId
 	, strReceiptCompanyLocation = Location.strLocationName
 	, Item.intItemId
 	, strItem = Item.strItemNo
+	, strCostMethodFreight = Item.strCostMethod
 	, dblQuantity = CASE WHEN SP.strGrossOrNet = 'Gross' THEN TR.dblGross
 						WHEN SP.strGrossOrNet = 'Net' THEN TR.dblNet
 						ELSE TR.dblGross END
@@ -81,6 +82,7 @@ SELECT TL.intLoadHeaderId
 	, Receipts.strReceiptCompanyLocation
 	, Item.intItemId
 	, strItem = Item.strItemNo
+	, strCostMethodFreight = Item.strCostMethod
 	, dblQuantity = DD.dblUnits
 	, dblPrice = DD.dblPrice
 	, dblCost = Receipts.dblUnitCost

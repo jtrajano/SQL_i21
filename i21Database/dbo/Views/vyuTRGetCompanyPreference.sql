@@ -4,6 +4,7 @@
 SELECT CP.intCompanyPreferenceId
 	, CP.intItemForFreightId
 	, strItemForFreight = FreightItem.strItemNo
+	, strCostMethodFreight = FreightItem.strCostMethod
 	, CP.intSurchargeItemId
 	, strSurchargeItem = SurchargeItem.strItemNo
 	, CP.intShipViaId
