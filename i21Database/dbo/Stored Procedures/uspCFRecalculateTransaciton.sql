@@ -403,6 +403,36 @@ BEGIN
 
 	--GET ITEM PRICE--
 	--if @ysnCreditCardUsed is true then pricing should always from import file
+
+	
+
+	
+
+	--ADJUST CONTRACT SCHEDULED QTY IF TRANSACTION ALREADY HAVE CONTRACT--
+	DECLARE @transactionContractDetailId	INT
+	DECLARE @transactionCurrentQty NUMERIC(18,6)
+
+	SELECT TOP 1
+	 @transactionContractDetailId = ISNULL(intContractDetailId,0)
+	,@transactionCurrentQty = ISNULL(dblQuantity,0)
+	FROM tblCFTransaction
+	WHERE intTransactionId = @intTransactionId
+
+	IF(@transactionContractDetailId > 0)
+	BEGIN 
+
+		SET @transactionCurrentQty = @transactionCurrentQty * -1
+		EXEC uspCTUpdateScheduleQuantity 
+			 @intContractDetailId = @transactionContractDetailId
+			,@dblQuantityToUpdate = @transactionCurrentQty
+			,@intUserId = 1
+			,@intExternalId = @intTransactionId
+			,@strScreenName = 'Card Fueling Transaction Screen'
+
+	END
+
+	----------------------------------------------------------------------
+
 	EXEC dbo.uspCFGetItemPrice 
 	@CFItemId					=	@intItemId,
 	@CFCustomerId				=	@intCustomerId,
@@ -432,6 +462,20 @@ BEGIN
 	@CFSiteGroupId				= 	@intSiteGroupId,				
 	@CFPriceRuleGroup			=	@intPriceRuleGroup,
 	@CFAdjustmentRate			=	@dblAdjustmentRate			output
+
+	
+	IF(@transactionContractDetailId > 0)
+	BEGIN 
+
+		SET @transactionCurrentQty = @transactionCurrentQty * -1
+		EXEC uspCTUpdateScheduleQuantity 
+			 @intContractDetailId = @transactionContractDetailId
+			,@dblQuantityToUpdate = @transactionCurrentQty
+			,@intUserId = 1
+			,@intExternalId = @intTransactionId
+			,@strScreenName = 'Card Fueling Transaction Screen'
+
+	END
 
 	
 	IF(LOWER(@strPriceMethod) = 'network cost' OR LOWER(@strPriceBasis) = 'transfer cost')
