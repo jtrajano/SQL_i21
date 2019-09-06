@@ -293,7 +293,26 @@ EXEC [dbo].[uspARCreateCustomerInvoice]
 	      
 		  
 SET @NewInvoiceId = @NewId		                 
-           
+      
+	--AUDIT LOG
+	DECLARE @strInvoiceId NVARCHAR(50) = ''
+	SELECT @strInvoiceId = strTransactionNumber   FROM tblARPayment  RCV
+	INNER JOIN tblARPaymentDetail RCVD
+	ON RCV.intPaymentId = RCVD.intPaymentId
+	WHERE RCV.intPaymentId =  @PaymentId
+
+
+DECLARE @details NVARCHAR(max) = '{"change": "tblARInvoice","iconCls": "small-tree-grid","changeDescription": "Cash Refund on" , "to":"'+@strInvoiceId+'"}';
+
+	EXEC uspSMAuditLog
+			@screenName = 'AccountsReceivable.view.Invoice',
+			@entityId = @UserId,
+			@actionType = 'Processed',
+			@keyValue = @NewId,
+			@details = @details,
+			@changeDescription = 'Processed On'
+	  
+	       
 RETURN @NewId
 
 END
