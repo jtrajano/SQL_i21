@@ -64,10 +64,11 @@ SELECT
 	intPriorCheckoutCount = ISNULL((
 	SELECT TOP 1 COUNT(1) FROM tblSTCheckoutHeader 
 			INNER JOIN tblSTCheckoutLotteryCount 
-			ON tblSTCheckoutHeader.intCheckoutId = tblSTCheckoutLotteryCount.intCheckoutId
-			WHERE tblSTCheckoutHeader.intStoreId = 5
-			AND tblSTCheckoutLotteryCount.intLotteryBookId = 3
-			AND ( (tblSTCheckoutHeader.dtmCheckoutDate < '2019-07-15 00:00:00.000') OR (tblSTCheckoutHeader.dtmCheckoutDate = '2019-07-15 00:00:00.000' AND tblSTCheckoutHeader.intCheckoutId != 0))
+		ON tblSTCheckoutHeader.intCheckoutId = tblSTCheckoutLotteryCount.intCheckoutId
+		WHERE tblSTCheckoutHeader.intStoreId = @storeId
+		AND tblSTCheckoutLotteryCount.intLotteryBookId = tblSTLotteryBook.intLotteryBookId
+		AND ( (tblSTCheckoutHeader.dtmCheckoutDate < @date) OR (tblSTCheckoutHeader.dtmCheckoutDate = @date AND tblSTCheckoutHeader.intCheckoutId != @checkoutId))
+		
 		),0),
 	tblSTLotteryBook.dblQuantityRemaining,
 	tblSTLotteryBook.dtmSoldDate,
