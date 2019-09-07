@@ -1,13 +1,30 @@
-﻿CREATE PROCEDURE [dbo].[uspSTGetLotteryCountData]
+﻿
+CREATE PROCEDURE [dbo].[uspSTGetLotteryCountData]
 	@date DATETIME,
 	@storeId INT,
 	@checkoutId INT
 AS
+
+SELECT 
+*
+,strSoldOut = CASE 
+			WHEN strCountDirection = 'Low to High' 
+				THEN 
+				CASE WHEN intEndingNumber =  intBeginCount
+					THEN 'Yes' ELSE 'No'
+				END
+			ELSE 
+				CASE WHEN intStartingNumber = intBeginCount
+					THEN 'Yes' ELSE 'No'
+				END
+		END
+FROM
+(
 SELECT 
 intBeginCount = CASE WHEN ISNULL(intPriorCheckoutCount,0) != 0 
-THEN intPriorCheckoutCount 
+THEN intPriorCheckoutBeginCount 
 ELSE 
-	CASE WHEN strCountDirection = 'Low to High' THEN intPriorCheckoutCount ELSE CAST(dblQuantityRemaining AS INT) END
+	CASE WHEN strCountDirection = 'Low to High' THEN intStartingNumber ELSE CAST(intEndingNumber AS INT) END
 END
 ,dtmSoldDate	
 ,strStatus	
@@ -18,10 +35,10 @@ END
 ,intLotteryGameId	
 ,strBookNumber	
 ,strCountDirection	
-,strSoldOut	
 ,intStartingNumber	
 ,dblTicketValue	
 ,intTicketPerPack	
+,intEndingNumber
 ,intConcurrencyId	
 ,intItemId	
 ,strItemDescription	
@@ -34,7 +51,7 @@ END
 FROM (
 
 SELECT 
-	intPriorCheckoutCount = ISNULL((
+	intPriorCheckoutBeginCount = ISNULL((
 	SELECT TOP 1 ISNULL(tblSTCheckoutLotteryCount.intEndingCount,0) FROM tblSTCheckoutHeader 
 		INNER JOIN tblSTCheckoutLotteryCount 
 		ON tblSTCheckoutHeader.intCheckoutId = tblSTCheckoutLotteryCount.intCheckoutId
@@ -43,21 +60,30 @@ SELECT
 		AND ( (tblSTCheckoutHeader.dtmCheckoutDate < @date) OR (tblSTCheckoutHeader.dtmCheckoutDate = @date AND tblSTCheckoutHeader.intCheckoutId != @checkoutId))
 		ORDER BY tblSTCheckoutHeader.intCheckoutId DESC
 	),0),
+	
+	intPriorCheckoutCount = ISNULL((
+	SELECT TOP 1 COUNT(1) FROM tblSTCheckoutHeader 
+			INNER JOIN tblSTCheckoutLotteryCount 
+			ON tblSTCheckoutHeader.intCheckoutId = tblSTCheckoutLotteryCount.intCheckoutId
+			WHERE tblSTCheckoutHeader.intStoreId = 5
+			AND tblSTCheckoutLotteryCount.intLotteryBookId = 3
+			AND ( (tblSTCheckoutHeader.dtmCheckoutDate < '2019-07-15 00:00:00.000') OR (tblSTCheckoutHeader.dtmCheckoutDate = '2019-07-15 00:00:00.000' AND tblSTCheckoutHeader.intCheckoutId != 0))
+		),0),
 	tblSTLotteryBook.dblQuantityRemaining,
 	tblSTLotteryBook.dtmSoldDate,
 	tblSTLotteryBook.strStatus,
-    tblSTLotteryBook.intStoreId,
-    tblSTLotteryBook.intLotteryBookId, 
-    tblSTLotteryBook.intBinNumber, 
-    tblSTLotteryGame.strGame, 
+	tblSTLotteryBook.intStoreId,
+	tblSTLotteryBook.intLotteryBookId, 
+	tblSTLotteryBook.intBinNumber, 
+	tblSTLotteryGame.strGame, 
 	tblSTLotteryGame.intLotteryGameId,
-    tblSTLotteryBook.strBookNumber, 
-    tblSTLotteryBook.strCountDirection, 
-    CASE WHEN (N'sold' = (LOWER(strStatus))) THEN N'Yes' ELSE N'No' END AS strSoldOut, 
-    intStartingNumber, 
-    tblSTLotteryGame.dblTicketValue, 
-    intTicketPerPack, 
-    tblSTLotteryBook.intConcurrencyId,
+	tblSTLotteryBook.strBookNumber, 
+	tblSTLotteryBook.strCountDirection, 
+	tblSTLotteryGame.dblTicketValue, 
+	tblSTLotteryGame.intTicketPerPack, 
+	tblSTLotteryGame.intStartingNumber,
+	tblSTLotteryGame.intEndingNumber,
+	tblSTLotteryBook.intConcurrencyId,
 	tblSTLotteryGame.intItemId,
 	vyuSTItemPricingOnFirstLocation.strItemDescription,
 	vyuSTItemPricingOnFirstLocation.strItemNo,
@@ -66,17 +92,18 @@ SELECT
 	vyuSTItemPricingOnFirstLocation.strCategoryCode,
 	vyuSTItemPricingOnFirstLocation.strCategoryDescription,
 	vyuSTItemPricingOnFirstLocation.intItemUOMId
-    FROM tblSTLotteryBook
-    INNER JOIN tblSTLotteryGame 
+	FROM tblSTLotteryBook
+	INNER JOIN tblSTLotteryGame 
 	ON tblSTLotteryGame.intLotteryGameId = tblSTLotteryBook.intLotteryGameId
 	INNER JOIN vyuSTItemPricingOnFirstLocation 
 	ON vyuSTItemPricingOnFirstLocation.intItemId = tblSTLotteryGame.intItemId
-    WHERE ('active' = LOWER(strStatus)
+	WHERE ('active' = LOWER(strStatus)
 	OR ( ('sold' = LOWER(strStatus)) AND (dtmSoldDate = @date)) 
 	OR 'returned' = LOWER(strStatus)) 
 	AND tblSTLotteryBook.intStoreId = @storeId
 	
 
 ) as tblSTCompileData
+) as tblSTCompileData1
 ORDER BY 
 intBinNumber ASC
