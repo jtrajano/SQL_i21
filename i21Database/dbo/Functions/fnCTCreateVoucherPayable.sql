@@ -53,7 +53,7 @@ RETURNS TABLE AS RETURN
 		,[dblTax]									=	0
 		,[dblDiscount]								=	0
 		,[intCurrencyExchangeRateTypeId]			=	CC.intRateTypeId
-		,[dblExchangeRate]							=	0
+		,[dblExchangeRate]							=	CC.dblFX
 		,[ysnSubCurrency]							=	ISNULL(CY.ysnSubCurrency,0)
 		,[intSubCurrencyCents]						=	CASE WHEN CY.ysnSubCurrency > 0 THEN CY.intCent ELSE 1 END
 		,[intAccountId]								=	apClearing.intAccountId
