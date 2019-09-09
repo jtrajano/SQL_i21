@@ -101,8 +101,8 @@ WITH Invoices AS(
 	--Include Invoice
 	UNION ALL SELECT
 			intTransactionId = F.intTransactionId
-			,strBillId = INV.strInvoiceNumber
-			,strInvoice = ''
+			,strBillId = ''
+			,strInvoice = INV.strInvoiceNumber
 			,dtmDueDate = INV.dtmDueDate
 			,dtmDate = INV.dtmDate
 			,intTermsId = INV.intTermId
