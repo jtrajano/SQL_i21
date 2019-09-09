@@ -195,7 +195,10 @@ SELECT CD.intContractDetailId
 	,U2.strUnitMeasure AS strNetWeightUnitMeasure
 	,CD.intCompanyLocationId
 	,CL.strLocationName AS strLocationName
-	,ISNULL(CD.dblQuantity, 0) - (CASE WHEN ISNULL(CD.dblShippingInstructionQty,0)<=0 THEN 0 ELSE ISNULL(CD.dblShippingInstructionQty,0) END) AS dblUnLoadedQuantity
+	,dblUnLoadedQuantity = ISNULL(CD.dblBalance, 0) - 
+			CASE WHEN ((CASE WHEN ISNULL(CD.dblScheduleQty, 0) > ISNULL(CD.dblShippingInstructionQty,0) THEN ISNULL(CD.dblScheduleQty, 0) ELSE ISNULL(CD.dblShippingInstructionQty, 0) END <=0)) THEN 0 
+				ELSE CASE WHEN ISNULL(CD.dblScheduleQty, 0) > ISNULL(CD.dblShippingInstructionQty,0) THEN ISNULL(CD.dblScheduleQty, 0) ELSE ISNULL(CD.dblShippingInstructionQty, 0) END 
+				END
 	,CH.intContractTypeId intPurchaseSale
 	,CH.intEntityId
 	,CH.strContractNumber
@@ -224,7 +227,9 @@ SELECT CD.intContractDetailId
 							)
 						AND (
 							(
-								ISNULL(CD.dblQuantity, 0) - ISNULL(CD.dblShippingInstructionQty, 0) > 0
+								ISNULL(CD.dblBalance, 0) - (CASE WHEN ((CASE WHEN ISNULL(CD.dblScheduleQty, 0) > ISNULL(CD.dblShippingInstructionQty,0) THEN ISNULL(CD.dblScheduleQty, 0) ELSE ISNULL(CD.dblShippingInstructionQty, 0) END <=0)) THEN 0 
+															ELSE CASE WHEN ISNULL(CD.dblScheduleQty, 0) > ISNULL(CD.dblShippingInstructionQty,0) THEN ISNULL(CD.dblScheduleQty, 0) ELSE ISNULL(CD.dblShippingInstructionQty, 0) END 
+															END) > 0
 								)
 							OR (CH.ysnUnlimitedQuantity = 1)
 							)
