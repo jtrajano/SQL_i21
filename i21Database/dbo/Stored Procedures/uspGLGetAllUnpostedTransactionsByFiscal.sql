@@ -122,18 +122,64 @@ BEGIN
 	;WITH Transactions(intTransactionId, strTransactionId, strDescription, strTransactionType,strUserName,intEntityId, dtmDate, strModule)
 		AS
 		(
-			SELECT intJournalId,  strJournalId COLLATE DATABASE_DEFAULT AS strTransactionId,strDescription,  strTransactionType COLLATE DATABASE_DEFAULT AS strTransactionType,
-			strUserName = (select strName from tblEMEntity where intEntityId = j.intEntityId ),
-			intEntityId,
-			dtmDate,'GL' FROM tblGLJournal j
-				 WHERE ysnPosted = 0 and (strTransactionType = 'General Journal' OR strTransactionType = 'Audit Adjustment')-- GL
-			UNION ALL
-				SELECT intTransactionId, strTransactionId,strDescription,strTransactionType,strUserName,intEntityId,  dtmDate,'AP' from [vyuAPUnpostedTransaction] --AP
-			
-			UNION ALL
-				SELECT intTransactionId, strTransactionId, strDescription, strTransactionType,strUserName, intEntityId, dtmDate,'AR' from [vyuARUnpostedTransactions] --AR
-			UNION ALL
-				SELECT intTransactionId, strTransactionId, strDescription, strTransactionType,strUserName, intEntityId, dtmDate, 'CM' FROM vyuCMUnpostedTransaction --CM
+			SELECT 
+				intJournalId,  strJournalId COLLATE DATABASE_DEFAULT AS 
+				strTransactionId,
+				strDescription,  
+				strTransactionType COLLATE DATABASE_DEFAULT AS strTransactionType,
+				strUserName = (select strName from tblEMEntity where intEntityId = j.intEntityId ),
+				intEntityId,
+				dtmDate,
+				'GL' 
+			FROM tblGLJournal j
+			WHERE ysnPosted = 0 and
+				 (strTransactionType = 'General Journal' OR strTransactionType = 'Audit Adjustment')
+			UNION ALL SELECT 
+				intBillId intTransactionId, 
+				strBillId strTransactionId,
+				strReference strDescription,
+				strTransactionType,
+				SM.strUserName,
+				AP.intEntityId,  
+				dtmDate,
+				'AP' 
+				FROM [vyuAPBatchPostTransaction] AP
+				INNER JOIN tblSMUserSecurity SM on 
+				SM.intEntityId = AP.intEntityId
+			UNION ALL SELECT 
+				intTransactionId, 
+				strTransactionId, 
+				strDescription, 
+				strTransactionType,
+				SM.strUserName, 
+				AR.intEntityId, 
+				dtmDate,
+				'AR' 
+				FROM [vyuARBatchPosting] AR
+				INNER JOIN tblSMUserSecurity SM ON 
+				SM.intEntityId = AR.intEntityId
+			UNION ALL SELECT 
+				intTransactionId, 
+				strTransactionId, 
+				strDescription, 
+				'Card Fueling',
+				SM.strUserName,
+				CF.intEntityId, 
+				dtmTransactionDate dtmDate,
+				'CF'
+				FROM vyuCFBatchPostTransactions CF
+				INNER JOIN tblSMUserSecurity SM ON 
+				SM.intEntityId = CF.intEntityId
+			UNION ALL SELECT 
+				intTransactionId, 
+				strTransactionId, 
+				strDescription, 
+				strTransactionType,
+				strUserName, 
+				intEntityId, 
+				dtmDate, 
+				'CM' 
+				FROM vyuCMUnpostedTransaction --CM
 		)
 		INSERT INTO @tblTransactions(intTransactionId, strTransactionId, strDescription, strTransactionType,strUserName,intEntityId, dtmDate, strModule)
 		SELECT intTransactionId, strTransactionId, strDescription, strTransactionType,strUserName,intEntityId, dtmDate,T.strModule from Transactions T
