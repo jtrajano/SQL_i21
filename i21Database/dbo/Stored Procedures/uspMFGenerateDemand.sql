@@ -115,7 +115,7 @@ BEGIN TRY
 	FROM tblCTReportMaster
 	WHERE strReportName = 'Inventory Planning Report'
 
-	IF @intInvPlngReportMasterID>0
+	IF @intInvPlngReportMasterID > 0
 	BEGIN
 		SELECT @dtmDate = dtmDate
 		FROM tblCTInvPlngReportMaster
@@ -138,8 +138,8 @@ BEGIN TRY
 	SELECT TOP 1 @intPrevInvPlngReportMasterID = intInvPlngReportMasterID
 	FROM tblCTInvPlngReportMaster
 	WHERE ysnPost = 1
-	AND dtmDate<=@dtmDate 
-	And intInvPlngReportMasterID <> @intInvPlngReportMasterID
+		AND dtmDate <= @dtmDate
+		AND intInvPlngReportMasterID <> @intInvPlngReportMasterID
 	ORDER BY intInvPlngReportMasterID DESC
 
 	IF @intCompanyLocationId IS NULL
@@ -426,7 +426,11 @@ BEGIN TRY
 				,intMonthId
 				)
 			SELECT intItemId
-				,Case When strValue='' Then NULL else strValue End --Opening Inventory
+				,CASE 
+					WHEN strValue = ''
+						THEN NULL
+					ELSE strValue
+					END --Opening Inventory
 				,2
 				,Replace(Replace(Replace(strFieldName, 'strMonth', ''), 'OpeningInv', '-1'), 'PastDue', '0') intMonthId
 			FROM tblCTInvPlngReportAttributeValue
@@ -673,7 +677,11 @@ BEGIN TRY
 				,intMonthId
 				)
 			SELECT intItemId
-				,Case When strValue='' Then NULL else strValue End
+				,CASE 
+					WHEN strValue = ''
+						THEN NULL
+					ELSE strValue
+					END
 				,13 --Open Purchases 
 				,Replace(Replace(Replace(strFieldName, 'strMonth', ''), 'OpeningInv', '-1'), 'PastDue', '0') intMonthId
 			FROM tblCTInvPlngReportAttributeValue
@@ -830,9 +838,15 @@ BEGIN TRY
 	SELECT I.intItemId
 		,NULL
 		,2 --Opening Inventory
-		,intMonthId
-	FROM tblMFGenerateInventoryRow
+		,M.intMonthId
+	FROM tblMFGenerateInventoryRow M
 		,@tblMFItem I
+	WHERE NOT EXISTS (
+			SELECT *
+			FROM #tblMFDemand D
+			WHERE D.intItemId = I.intItemId
+				AND D.intMonthId = M.intMonthId
+			)
 
 	INSERT INTO #tblMFDemand (
 		intItemId
@@ -895,7 +909,11 @@ BEGIN TRY
 		,intMonthId
 		)
 	SELECT intItemId
-		,Case When strValue='' Then NULL else strValue End --Previous Planned Purchases
+		,CASE 
+			WHEN strValue = ''
+				THEN NULL
+			ELSE strValue
+			END --Previous Planned Purchases
 		,6
 		,Replace(Replace(Replace(strFieldName, 'strMonth', ''), 'OpeningInv', '-1'), 'PastDue', '0') intMonthId
 	FROM tblCTInvPlngReportAttributeValue
