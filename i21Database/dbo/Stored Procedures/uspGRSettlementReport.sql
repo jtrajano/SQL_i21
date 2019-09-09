@@ -301,8 +301,7 @@ BEGIN
 				,strTime				    	= CONVERT(VARCHAR(8), GETDATE(), 108)
 				,strAccountNumber		    	= dbo.fnAESDecryptASym(EFT.strAccountNumber)
 				,strReferenceNo			    	= BNKTRN.strReferenceNo
-				,strEntityName			    	= case when 
-														PYMT.ysnOverrideCheckPayee = 1 and 
+				,strEntityName			    	= case when 														
 														PYMT.ysnOverrideSettlement = 1 and 
 														isnull(PYMT.strOverridePayee, '')  <> '' then 
 															PYMT.strOverridePayee 
@@ -327,10 +326,16 @@ BEGIN
 														end
 													end
 
-				,strVendorAddress				= CASE WHEN ISNULL(dbo.fnConvertToFullAddress(BNKTRN.strAddress, BNKTRN.strCity, BNKTRN.strState, BNKTRN.strZipCode), '') <> ''  
-													THEN dbo.fnConvertToFullAddress(BNKTRN.strAddress, BNKTRN.strCity, BNKTRN.strState, BNKTRN.strZipCode)
-													ELSE dbo.fnConvertToFullAddress(EL.strAddress, EL.strCity, EL.strState, EL.strZipCode)
-													END
+				,strVendorAddress				= 	case when 														
+														PYMT.ysnOverrideSettlement = 1 and 
+														isnull(PYMT.strOverridePayee, '')  <> ''
+														then ''
+													else
+														CASE WHEN ISNULL(dbo.fnConvertToFullAddress(BNKTRN.strAddress, BNKTRN.strCity, BNKTRN.strState, BNKTRN.strZipCode), '') <> ''  
+														THEN dbo.fnConvertToFullAddress(BNKTRN.strAddress, BNKTRN.strCity, BNKTRN.strState, BNKTRN.strZipCode)
+														ELSE dbo.fnConvertToFullAddress(EL.strAddress, EL.strCity, EL.strState, EL.strZipCode)
+														END
+													end
 				,dtmDeliveryDate		    	= dbo.fnGRConvertDateToReportDateFormat(SC.dtmTicketDateTime)
 				,intTicketId			    	= SC.intTicketId		
 				,strTicketNumber		    	= SC.strTicketNumber 				
