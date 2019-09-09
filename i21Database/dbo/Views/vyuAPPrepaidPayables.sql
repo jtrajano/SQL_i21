@@ -213,12 +213,12 @@ SELECT
 	  A.dtmDatePaid AS dtmDate 
 	, B.intBillId  
 	, C.strBillId
-	, CAST(B.dblPayment * prepaidDetail.dblRate AS DECIMAL(18,2)) * -1 AS dblAmountPaid     
+	, CAST(B.dblPayment * prepaidDetail.dblRate AS DECIMAL(18,2)) AS dblAmountPaid     
 	, dblTotal = 0 
 	, dblAmountDue = 0 
 	, dblWithheld = B.dblWithheld
-	, CAST(B.dblDiscount * prepaidDetail.dblRate AS DECIMAL(18,2)) * -1 AS dblDiscount
-	, CAST(B.dblInterest * prepaidDetail.dblRate AS DECIMAL(18,2)) * -1 AS dblInterest
+	, CAST(B.dblDiscount * prepaidDetail.dblRate AS DECIMAL(18,2)) AS dblDiscount
+	, CAST(B.dblInterest * prepaidDetail.dblRate AS DECIMAL(18,2)) AS dblInterest
 	, dblPrepaidAmount = 0   
 	, D.strVendorId 
 	, isnull(D.strVendorId,'') + ' - ' + isnull(D2.strName,'') as strVendorIdName 
