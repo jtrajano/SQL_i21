@@ -12,6 +12,29 @@
 AS
 BEGIN
 	BEGIN TRY
+
+		-- =========================================================================================================
+		-- [START] - CREATE TRANSACTION
+		-- =========================================================================================================
+		DECLARE @InitTranCount INT;
+		SET @InitTranCount = @@TRANCOUNT
+		DECLARE @Savepoint NVARCHAR(150) = 'uspSTstgInsertMixMatchFile' + CAST(NEWID() AS NVARCHAR(100)); 
+
+		IF @InitTranCount = 0
+			BEGIN
+				BEGIN TRANSACTION
+			END		
+		ELSE
+			BEGIN
+				SAVE TRANSACTION @Savepoint
+			END
+		-- =========================================================================================================
+		-- [START] - CREATE TRANSACTION
+		-- =========================================================================================================
+
+
+
+
 		SET @ysnSuccessResult = CAST(1 AS BIT) -- Set to true
 		SET @strMessageResult = ''
 		
@@ -397,119 +420,129 @@ BEGIN
 
 
 								IF EXISTS(SELECT TOP 1 1 FROM @tblTempPassportMixMatch)
-								BEGIN
-									--DECLARE @xml XML = N''
+									BEGIN
+										--DECLARE @xml XML = N''
 
-									SELECT @xml = 
-									(
-										SELECT
-											trans.StoreLocationID		AS 'TransmissionHeader/StoreLocationID',
-											trans.VendorName 			AS 'TransmissionHeader/VendorName',
-											trans.VendorModelVersion 	AS 'TransmissionHeader/VendorModelVersion',
-											(
-												SELECT
-												   MixMatchMaintenance.TableActionType			AS [TableAction/@type]
-													,  MixMatchMaintenance.RecordActionType		AS [RecordAction/@type]
-													, (
-														SELECT
-															MMTDetail.MMTDetailRecordActionType	AS [RecordAction/@type]
-															, MMTDetail.PromotionID				AS [Promotion/PromotionID]
-															, MMTDetail.PromotionReason			AS [Promotion/PromotionReason]		
-															, MMTDetail.MixMatchDescription		AS [MixMatchDescription]
-															, MMTDetail.TransactionLimit		AS [TransactionLimit]
-															, MMTDetail.ItemListId				AS [ItemListId]
-															, MMTDetail.StartDate				AS [StartDate]
-															, MMTDetail.StartTime				AS [StartTime]
-															, MMTDetail.StopDate				AS [StopDate]
-															, MMTDetail.StopTime				AS [StopTime]
-
-															, (
-																SELECT
-																	--wda.strStartTime			AS [@startTime],
-																	wda.strWeekDay				AS [@weekday],
-																	wda.strAvailable			AS [@available]
-																	--wda.strEndTime				AS [@stopTime]
-																FROM 
-																(
-																	SELECT DISTINCT
-																		wda.intSort
-																		, wda.strAvailable
-																		, wda.strStartTime
-																		, wda.strEndTime
-																		, wda.strWeekDay
-																	FROM @tblTempWeekDayAvailability wda
-																	WHERE wda.intPromoSalesListId = MMTDetail.intPromoSalesListId
-																) wda
-																ORDER BY wda.intSort ASC
-																FOR XML PATH('WeekdayAvailability'), TYPE
-
-															)
-
-															, MMTDetail.MixMatchUnits			AS [MixMatchEntry/MixMatchUnits]
-															, MMTDetail.MixMatchPrice			AS [MixMatchEntry/MixMatchPrice]
-														FROM
-														(
-															SELECT DISTINCT
-																mixDetail.intPromoSalesListId
-																, mixDetail.PromotionID
-																, mixDetail.MMTDetailRecordActionType
-																, mixDetail.PromotionReason
-																, mixDetail.MixMatchDescription
-																, mixDetail.TransactionLimit
-																, mixDetail.ItemListId
-																, mixDetail.StartDate
-																, mixDetail.StartTime
-																, mixDetail.StopDate
-																, mixDetail.StopTime
-																, mixDetail.MixMatchUnits
-																, mixDetail.MixMatchPrice
-															FROM @tblTempPassportMixMatch mixDetail
-															WHERE MixMatchMaintenance.PromotionID = mixDetail.PromotionID
-														) MMTDetail
-														FOR XML PATH('MMTDetail'), TYPE
-													)
-												FROM 
-												(
-													SELECT DISTINCT	
-														PromotionID
-														, TableActionType
-														,  RecordActionType
-														FROM @tblTempPassportMixMatch
-													--ORDER BY PromotionID ASC
-												) MixMatchMaintenance
-												FOR XML PATH('MixMatchMaintenance'), TYPE
-											)
-										FROM 
+										SELECT @xml = 
 										(
-											SELECT DISTINCT
-												StoreLocationID, 
-												VendorName, 
-												VendorModelVersion
-											FROM @tblTempPassportMixMatch
-										) trans
-										FOR XML PATH('NAXML-MaintenanceRequest'), TYPE
-									);
+											SELECT
+												trans.StoreLocationID		AS 'TransmissionHeader/StoreLocationID',
+												trans.VendorName 			AS 'TransmissionHeader/VendorName',
+												trans.VendorModelVersion 	AS 'TransmissionHeader/VendorModelVersion',
+												(
+													SELECT
+													   MixMatchMaintenance.TableActionType			AS [TableAction/@type]
+														,  MixMatchMaintenance.RecordActionType		AS [RecordAction/@type]
+														, (
+															SELECT
+																MMTDetail.MMTDetailRecordActionType	AS [RecordAction/@type]
+																, MMTDetail.PromotionID				AS [Promotion/PromotionID]
+																, MMTDetail.PromotionReason			AS [Promotion/PromotionReason]		
+																, MMTDetail.MixMatchDescription		AS [MixMatchDescription]
+																, MMTDetail.TransactionLimit		AS [TransactionLimit]
+																, MMTDetail.ItemListId				AS [ItemListId]
+																, MMTDetail.StartDate				AS [StartDate]
+																, MMTDetail.StartTime				AS [StartTime]
+																, MMTDetail.StopDate				AS [StopDate]
+																, MMTDetail.StopTime				AS [StopTime]
+
+																, (
+																	SELECT
+																		--wda.strStartTime			AS [@startTime],
+																		wda.strWeekDay				AS [@weekday],
+																		wda.strAvailable			AS [@available]
+																		--wda.strEndTime				AS [@stopTime]
+																	FROM 
+																	(
+																		SELECT DISTINCT
+																			wda.intSort
+																			, wda.strAvailable
+																			, wda.strStartTime
+																			, wda.strEndTime
+																			, wda.strWeekDay
+																		FROM @tblTempWeekDayAvailability wda
+																		WHERE wda.intPromoSalesListId = MMTDetail.intPromoSalesListId
+																	) wda
+																	ORDER BY wda.intSort ASC
+																	FOR XML PATH('WeekdayAvailability'), TYPE
+
+																)
+
+																, MMTDetail.MixMatchUnits			AS [MixMatchEntry/MixMatchUnits]
+																, MMTDetail.MixMatchPrice			AS [MixMatchEntry/MixMatchPrice]
+															FROM
+															(
+																SELECT DISTINCT
+																	mixDetail.intPromoSalesListId
+																	, mixDetail.PromotionID
+																	, mixDetail.MMTDetailRecordActionType
+																	, mixDetail.PromotionReason
+																	, mixDetail.MixMatchDescription
+																	, mixDetail.TransactionLimit
+																	, mixDetail.ItemListId
+																	, mixDetail.StartDate
+																	, mixDetail.StartTime
+																	, mixDetail.StopDate
+																	, mixDetail.StopTime
+																	, mixDetail.MixMatchUnits
+																	, mixDetail.MixMatchPrice
+																FROM @tblTempPassportMixMatch mixDetail
+																WHERE MixMatchMaintenance.PromotionID = mixDetail.PromotionID
+															) MMTDetail
+															FOR XML PATH('MMTDetail'), TYPE
+														)
+													FROM 
+													(
+														SELECT DISTINCT	
+															PromotionID
+															, TableActionType
+															,  RecordActionType
+															FROM @tblTempPassportMixMatch
+														--ORDER BY PromotionID ASC
+													) MixMatchMaintenance
+													FOR XML PATH('MixMatchMaintenance'), TYPE
+												)
+											FROM 
+											(
+												SELECT DISTINCT
+													StoreLocationID, 
+													VendorName, 
+													VendorModelVersion
+												FROM @tblTempPassportMixMatch
+											) trans
+											FOR XML PATH('NAXML-MaintenanceRequest'), TYPE
+										);
 
 						
 						
-									SET @strVersion = N'3.4'
+										SET @strVersion = N'3.4'
 						
-									-- INSERT Attributes 'page' and 'ofpages' to Root header
-									SET @xml.modify('insert 
-												   (
-														attribute version { 
-																				sql:variable("@strVersion")
-																		  }		   
-													) into (/*:NAXML-MaintenanceRequest)[1]');
+										-- INSERT Attributes 'page' and 'ofpages' to Root header
+										SET @xml.modify('insert 
+													   (
+															attribute version { 
+																					sql:variable("@strVersion")
+																			  }		   
+														) into (/*:NAXML-MaintenanceRequest)[1]');
 						
-									--SET @strXML = REPLACE(@strXML, '<NAXML-MaintenanceRequest', '<NAXML-MaintenanceRequest xmlns="http://www.naxml.org/POSBO/Vocabulary/2003-10-16"')
-									-- SELECT @xml
+										--SET @strXML = REPLACE(@strXML, '<NAXML-MaintenanceRequest', '<NAXML-MaintenanceRequest xmlns="http://www.naxml.org/POSBO/Vocabulary/2003-10-16"')
+										-- SELECT @xml
 
-									SET @strXML = CAST(@xml AS NVARCHAR(MAX))
-									SET @strGeneratedXML = REPLACE(@strXML, '><', '>' + CHAR(13) + '<')
+										SET @strXML = CAST(@xml AS NVARCHAR(MAX))
+										SET @strGeneratedXML = REPLACE(@strXML, '><', '>' + CHAR(13) + '<')
 
-									--EXEC CopierDB.dbo.LongPrint @strGeneratedXML
-								END
+										--EXEC CopierDB.dbo.LongPrint @strGeneratedXML
+									END
+								ELSE
+									BEGIN
+
+										SET @strGeneratedXML		= ''
+										SET @intImportFileHeaderId	= 0
+										SET @ysnSuccessResult		= CAST(0 AS BIT)
+										SET @strMessageResult		= 'No result found to generate MixMatch - ' + @strFilePrefix + ' Outbound file'
+
+										GOTO ExitWithRollback
+									END
 							END
 							
 					END
@@ -946,15 +979,72 @@ BEGIN
 					END
 				ELSE 
 					BEGIN
-						SET @ysnSuccessResult = CAST(0 AS BIT)
-						SET @strMessageResult = 'No result found to generate MixMatch - ' + @strFilePrefix + ' Outbound file'
+						SET @strGeneratedXML		= ''
+						SET @intImportFileHeaderId	= 0
+						SET @ysnSuccessResult		= CAST(0 AS BIT)
+						SET @strMessageResult		= 'No result found to generate MixMatch - ' + @strFilePrefix + ' Outbound file'
+
+						GOTO ExitWithRollback
+
 					END
 			END
 
 	END TRY
 
 	BEGIN CATCH
+		SET @strGeneratedXML		= ''
+		SET @intImportFileHeaderId	= 0
 		SET @ysnSuccessResult = CAST(0 AS BIT)
 		SET @strMessageResult = ERROR_MESSAGE()
+
+		GOTO ExitWithRollback
 	END CATCH
 END
+
+
+
+
+
+ExitWithCommit:
+	IF @InitTranCount = 0
+		BEGIN
+			COMMIT TRANSACTION
+		END
+
+	GOTO ExitPost
+	
+
+
+
+
+
+ExitWithRollback:
+		SET @ysnSuccessResult			= CAST(0 AS BIT)
+
+		IF @InitTranCount = 0
+			BEGIN
+				IF ((XACT_STATE()) <> 0)
+				BEGIN
+					SET @strMessageResult = @strMessageResult + ' Will Rollback Transaction.'
+
+					ROLLBACK TRANSACTION
+				END
+			END
+			
+		ELSE
+			BEGIN
+				IF ((XACT_STATE()) <> 0)
+					BEGIN
+						SET @strMessageResult = @strMessageResult + ' Will Rollback to Save point.'
+
+						ROLLBACK TRANSACTION @Savepoint
+					END
+			END
+			
+				
+		
+		
+	
+
+		
+ExitPost:
