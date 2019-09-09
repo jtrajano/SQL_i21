@@ -67,7 +67,7 @@ FROM tblCTContractDetail CD
 	JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
 	JOIN tblSMCurrency Curr ON Curr.intCurrencyID = CD.intCurrencyId
 	JOIN tblCTPricingType PT ON PT.intPricingTypeId = CD.intPricingTypeId
-	JOIN tblSMFreightTerms CB ON CB.intFreightTermId = CH.intFreightTermId
+	LEFT JOIN tblSMFreightTerms CB ON CB.intFreightTermId = CH.intFreightTermId
 	LEFT JOIN tblICItem BundleItem ON BundleItem.intItemId = CD.intItemBundleId
 	LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = Item.intOriginId
 	LEFT JOIN tblSMCountry Country ON Country.intCountryID = CA.intCountryID
