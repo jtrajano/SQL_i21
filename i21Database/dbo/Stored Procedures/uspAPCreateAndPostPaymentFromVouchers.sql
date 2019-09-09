@@ -395,10 +395,13 @@ BEGIN
 			[intAccountId]		=	CASE WHEN vouchers.ysnPrepayHasPayment = 0 AND vouchers.intTransactionType IN (2, 13) THEN details.intAccountId ELSE vouchers.intAccountId END,
 			[dblDiscount]		=	ISNULL(paySched.dblDiscount, vouchers.dblTempDiscount),
 			[dblWithheld]		=	vouchers.dblTempWithheld,
-			[dblAmountDue]		=	ISNULL(paySched.dblPayment,vouchers.dblAmountDue),
-			[dblPayment]		=	ISNULL(paySched.dblPayment - paySched.dblDiscount, vouchers.dblTempPayment),
+			[dblAmountDue]		=	ISNULL(paySched.dblPayment,vouchers.dblAmountDue)
+									* (CASE WHEN vouchers.intTransactionType IN (3) OR (vouchers.intTransactionType IN (2, 13) AND vouchers.ysnPrepayHasPayment = 1) THEN -1 ELSE 1 END),
+			[dblPayment]		=	ISNULL(paySched.dblPayment - paySched.dblDiscount, vouchers.dblTempPayment)
+									* (CASE WHEN vouchers.intTransactionType IN (3) OR (vouchers.intTransactionType IN (2, 13) AND vouchers.ysnPrepayHasPayment = 1) THEN -1 ELSE 1 END),
 			[dblInterest]		=	vouchers.dblTempInterest,
-			[dblTotal]			=	ISNULL(paySched.dblPayment, vouchers.dblTotal),
+			[dblTotal]			=	ISNULL(paySched.dblPayment, vouchers.dblTotal)
+									* (CASE WHEN vouchers.intTransactionType IN (3) OR (vouchers.intTransactionType IN (2, 13) AND vouchers.ysnPrepayHasPayment = 1) THEN -1 ELSE 1 END),
 			[ysnOffset]			=	CASE WHEN vouchers.intTransactionType IN (1, 14) THEN 0
 									ELSE
 										(
