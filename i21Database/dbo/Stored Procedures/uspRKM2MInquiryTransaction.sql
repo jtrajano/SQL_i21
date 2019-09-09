@@ -949,11 +949,9 @@ FROM (
 		, Com.strCommodityCode
 		, Inv.strEntity
 		, Inv.intEntityId
-		, SI.dblPrice
 		, strTransactionId = InTran.strTransactionId
 		, InTran.intTransactionDetailId
-		, intUnitMeasureId
-		, SI.intCurrencyId
+		, UOM.intUnitMeasureId
 		, strContractEndMonth = RIGHT(CONVERT(VARCHAR(11), Inv.dtmDate, 106), 8)
 		, Inv.intLocationId
 		, Inv.strLocationName
@@ -963,7 +961,8 @@ FROM (
 				INNER JOIN tblICItem Itm ON InTran.intItemId = Itm.intItemId
 				INNER JOIN tblICCommodity Com ON Itm.intCommodityId = Com.intCommodityId
 				INNER JOIN tblICCategory Cat ON Itm.intCategoryId = Cat.intCategoryId
-				LEFT JOIN vyuICGetInventoryShipmentItem SI ON InTran.intTransactionDetailId = SI.intInventoryShipmentItemId
+				INNER JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = InTran.intItemUOMId
+				INNER JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
 	WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), Inv.dtmDate, 110), 110) <= CONVERT(DATETIME,@dtmTransactionDateUpTo)
 	GROUP BY
 		 InTran.intItemId
@@ -973,11 +972,9 @@ FROM (
 		, Com.strCommodityCode
 		, Inv.strEntity
 		, Inv.intEntityId
-		, SI.dblPrice
 		, InTran.strTransactionId
 		, InTran.intTransactionDetailId
-		, intUnitMeasureId
-		, SI.intCurrencyId
+		, UOM.intUnitMeasureId
 		, Inv.dtmDate
 		, Inv.intLocationId
 		, Inv.strLocationName
@@ -1456,8 +1453,8 @@ FROM (
 				, dblRate = NULL
 				, intCommodityUnitMeasureId = NULL
 				, intQuantityUOMId = NULL
-				, intPriceUOMId = it.intUnitMeasureId
-				, it.intCurrencyId
+				, intPriceUOMId = NULL
+				, intCurrencyId = NULL
 				, PriceSourceUOMId = NULL
 				, dblCosts = 0
 				, ysnSubCurrency = NULL
