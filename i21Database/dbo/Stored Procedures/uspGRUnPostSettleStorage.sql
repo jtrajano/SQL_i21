@@ -499,6 +499,14 @@ BEGIN TRY
 				DELETE FROM tblGRSettleStorageTicket WHERE intSettleStorageId = @intParentSettleStorageId AND intCustomerStorageId = @intCustomerStorageId
 			END
 
+			IF(EXISTS(SELECT NULL FROM tblGRSettleStorageTicket WHERE intCustomerStorageId = @intCustomerStorageId AND intSettleStorageId = (SELECT intParentSettleStorageId FROM tblGRSettleStorage WHERE intSettleStorageId = @intSettleStorageId)))
+			BEGIN
+				DECLARE @intDeliverySheetId AS INT
+				SELECT @intDeliverySheetId = intDeliverySheetId FROM tblGRCustomerStorage WHERE intCustomerStorageId = @intCustomerStorageId
+
+				DELETE FROM tblGRSettleStorageTicket WHERE intCustomerStorageId = @intCustomerStorageId AND intSettleStorageId = (SELECT intParentSettleStorageId FROM tblGRSettleStorage WHERE intSettleStorageId = @intSettleStorageId)				
+			END
+
 			DELETE FROM tblGRSettleStorage WHERE intSettleStorageId = @intSettleStorageId
 
 			--5. Removing Voucher
