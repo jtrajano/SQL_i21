@@ -12,40 +12,31 @@
 AS
 BEGIN
 	BEGIN TRY
+
+		-- =========================================================================================================
+		-- [START] - CREATE TRANSACTION
+		-- =========================================================================================================
+		DECLARE @InitTranCount INT;
+		SET @InitTranCount = @@TRANCOUNT
+		DECLARE @Savepoint NVARCHAR(150) = 'uspSTstgInsertPromotionItemListSend' + CAST(NEWID() AS NVARCHAR(100)); 
+
+		IF @InitTranCount = 0
+			BEGIN
+				BEGIN TRANSACTION
+			END		
+		ELSE
+			BEGIN
+				SAVE TRANSACTION @Savepoint
+			END
+		-- =========================================================================================================
+		-- [START] - CREATE TRANSACTION
+		-- =========================================================================================================
+
+
+
+
 		SET @ysnSuccessResult = CAST(1 AS BIT) -- Set to true
 		SET @strMessageResult = ''
-
-		-- DECLARE @strFilePrefix AS NVARCHAR(10) = 'ILT'
-
-		---- =========================================================================================================
-		---- CONVERT DATE's to UTC
-		---- =========================================================================================================
-		--DECLARE @dtmBeginningChangeDateUTC AS DATETIME = dbo.fnSTConvertDateToUTC(@dtmBeginningChangeDate)
-		--DECLARE @dtmEndingChangeDateUTC AS DATETIME = dbo.fnSTConvertDateToUTC(@dtmEndingChangeDate)
-		---- =========================================================================================================
-		---- END CONVERT DATE's to UTC
-		---- =========================================================================================================
-
-		---- Use table to get the list of items modified during change date range
-		--DECLARE @Tab_UpdatedItems TABLE(intItemId int)
-
-		---- Get those Item using given date range
-		--INSERT INTO @Tab_UpdatedItems
-		--SELECT DISTINCT ITR.intItemId
-		--FROM vyuSTItemsToRegister ITR
-		--WHERE (
-		--		ITR.dtmDateModified BETWEEN @dtmBeginningChangeDateUTC AND @dtmEndingChangeDateUTC
-		--		OR 
-		--		ITR.dtmDateCreated BETWEEN @dtmEndingChangeDateUTC AND @dtmEndingChangeDateUTC
-		--	  )
-		--	AND intCompanyLocationId = 
-		--	(
-		--		SELECT TOP (1) intCompanyLocationId 
-		--		FROM tblSTStore
-		--		WHERE intStoreId = @intStoreId
-		--	)
-
-		---- =========================================================================================================
 
 		-- Check if register has intImportFileHeaderId
 		DECLARE @strRegisterName nvarchar(200)
@@ -479,10 +470,64 @@ BEGIN
 					END
 			END
 
+		-- COMMIT
+		GOTO ExitWithCommit
+
 	END TRY
 
 	BEGIN CATCH
-		SET @ysnSuccessResult = CAST(0 AS BIT)
-		SET @strMessageResult = ERROR_MESSAGE()
+		SET @strGeneratedXML		= ''
+		SET @intImportFileHeaderId	= 0
+		SET @ysnSuccessResult		= CAST(0 AS BIT)
+		SET @strMessageResult		= ERROR_MESSAGE()
+
+		GOTO ExitWithRollback
 	END CATCH
 END
+
+
+
+
+ExitWithCommit:
+	IF @InitTranCount = 0
+		BEGIN
+			COMMIT TRANSACTION
+		END
+
+	GOTO ExitPost
+	
+
+
+
+
+
+ExitWithRollback:
+		SET @ysnSuccessResult			= CAST(0 AS BIT)
+
+		IF @InitTranCount = 0
+			BEGIN
+				IF ((XACT_STATE()) <> 0)
+				BEGIN
+					SET @strMessageResult = @strMessageResult + ' Will Rollback Transaction.'
+
+					ROLLBACK TRANSACTION
+				END
+			END
+			
+		ELSE
+			BEGIN
+				IF ((XACT_STATE()) <> 0)
+					BEGIN
+						SET @strMessageResult = @strMessageResult + ' Will Rollback to Save point.'
+
+						ROLLBACK TRANSACTION @Savepoint
+					END
+			END
+			
+				
+		
+		
+	
+
+		
+ExitPost:
