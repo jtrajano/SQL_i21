@@ -45,6 +45,7 @@
         DECLARE @SiteTaxable    BIT
 		DECLARE @CustomerEntityId INT
 		DECLARE @ExceptionValue NVARCHAR(50)
+		DECLARE @dblTankReserve NUMERIC(18,6) = 0.00
 	
 		SET @rpt_date_ti = @str_rpt_date_ti
  
@@ -291,8 +292,16 @@
 			--prevent eco green from creating order since @ta_ltankcrit is not supplied from API and run out date is not calculated due to lack of requirement to calculate
 			if (@is_wesroc = 0)
 			begin
-				SET @resultLog = @resultLog + 'Import successful';
-				return;
+				set @dblTankReserve = (select dblTankReserve = sum(isnull(c.dblTankReserve,0.00)) from tblTMSiteDevice b, tblTMDevice c where b.intSiteID = @siteId and c.intDeviceId = b.intDeviceId and isnull(c.ysnAppliance,0) = 0);
+				if (@qty_in_tank >= @dblTankReserve)
+				begin
+					SET @resultLog = @resultLog + 'Import successful';
+					return;
+				end
+				else
+				begin
+					GOTO CREATECALLENTRY;
+				end
 			end
 		
 			PRINT @ta_ltankcrit
