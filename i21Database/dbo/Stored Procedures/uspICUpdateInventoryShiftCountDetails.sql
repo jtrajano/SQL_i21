@@ -258,3 +258,168 @@ FROM (
 			AND il.intCountGroupId = @intCountGroupId 
 			AND dbo.fnIsStockTrackingItem(i.intItemId) = 1
 ) CountGroupItems
+
+
+DECLARE @intSort AS INT 
+SELECT @intSort = MAX(intSort)
+FROM 
+	tblICInventoryCountDetail
+WHERE 
+	intInventoryCountId = @intInventoryCountId
+
+SET @intSort = ISNULL(@intSort, 0) 
+
+-- Insert the Count Group
+INSERT INTO tblICInventoryCountDetail(
+	intInventoryCountId
+	, intItemId
+	, intCountGroupId
+	, intItemLocationId
+	, intSubLocationId
+	, intStorageLocationId
+	, intLotId
+	, dblSystemCount
+	, dblLastCost
+	, strCountLine
+	, intItemUOMId
+	, ysnRecount
+	, ysnFetched
+	, intEntityUserSecurityId
+	, intConcurrencyId
+	, intSort
+	, dblPhysicalCount
+	, dblQtyReceived
+	, dblQtySold
+)
+SELECT 
+	@intInventoryCountId
+	,intItemId = NULL
+	,CountGroup.intCountGroupId
+	,intItemLocationId = NULL 
+	,intSubLocationId = NULL 
+	,intStorageLocationId = NULL
+	,intLotId = NULL
+	,dblSystemCount = ISNULL(CountGroup.dblQty, 0) 
+	,dblLastCost = 0
+	,strCountLine = @strHeaderNo + '-' + CAST(@intSort + CountGroup.intRank AS NVARCHAR(50))
+	,intItemUOMId = NULL 
+	,ysnRecount = 0 
+	,ysnFetched = 1
+	,intEntityUserSecurityId = @intEntityUserSecurityId
+	,intConcurrencyId = 1
+	,intSort = CountGroup.intRank 
+	,dblPhysicalCount = NULL
+	,dblQtyReceived = ISNULL(CountGroup.dblQtyReceived, 0)
+	,dblQtySold = ISNULL(CountGroup.dblQtySold, 0) 
+
+FROM (
+	SELECT 
+			countGroup.intCountGroupId
+			,stockAsOfDate.dblQty			
+			,dblQtyReceived = qtyReceived.dblQty
+			,dblQtySold = qtySold.dblQty
+			,intRank = ROW_NUMBER() OVER( PARTITION BY countGroup.intCountGroupId ORDER BY countGroup.intCountGroupId DESC) 
+		FROM 
+			vyuICGetCountGroup countGroup
+			OUTER APPLY (
+				SELECT 					
+					t.* 
+				FROM 
+					tblICInventoryCount c
+					OUTER APPLY (						
+						SELECT TOP 1 
+							dblQty = t.dblPhysicalCount
+						FROM 
+							tblICInventoryShiftPhysicalHistory t
+						WHERE
+							t.intCountGroupId = countGroup.intCountGroupId
+							AND t.intLocationId = c.intLocationId
+							AND dbo.fnDateLessThan(t.dtmDate, c.dtmCountDate) = 1	
+						ORDER BY
+							t.dtmDate DESC, t.intInventoryShiftPhysicalCountId DESC 
+					) t
+				WHERE
+					c.intInventoryCountId = @intInventoryCountId		
+			) stockAsOfDate
+
+			OUTER APPLY (
+				SELECT 
+					receipt.* 
+				FROM 
+					tblICInventoryCount c
+					OUTER APPLY (
+						SELECT 
+							dblQty = SUM (
+								dbo.fnCalculateQtyBetweenUOM(
+									ISNULL(ri.intWeightUOMId, ri.intUnitMeasureId)
+									, sUOM.intItemUOMId
+									, CASE WHEN ri.intWeightUOMId IS NOT NULL THEN ri.dblNet ELSE ri.dblOpenReceive END 
+								) 
+							) 
+						FROM
+							tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptItem ri
+								ON r.intInventoryReceiptId = ri.intInventoryReceiptId
+							INNER JOIN tblICItem i 
+								ON i.intItemId = ri.intItemId
+							INNER JOIN tblICItemLocation il
+								ON il.intItemId = i.intItemId								
+								AND r.intLocationId = il.intLocationId
+							CROSS APPLY (
+								SELECT TOP 1 
+									sUOM.intItemUOMId
+								FROM 
+									tblICItemUOM sUOM
+								WHERE
+									sUOM.intItemId = ri.intItemId
+									AND sUOM.ysnStockUnit = 1				
+							) sUOM	
+						WHERE
+							il.intCountGroupId = countGroup.intCountGroupId														
+							AND dbo.fnDateEquals(r.dtmReceiptDate, c.dtmCountDate) = 1
+
+					) receipt
+				WHERE
+					c.intInventoryCountId = @intInventoryCountId		
+			) qtyReceived
+			OUTER APPLY (
+				SELECT 
+					shipment.* 
+				FROM 
+					tblICInventoryCount c
+					OUTER APPLY (
+						SELECT 
+							dblQty = SUM (
+								dbo.fnCalculateQtyBetweenUOM(
+									si.intItemUOMId
+									, sUOM.intItemUOMId
+									, si.dblQuantity
+								) 
+							) 
+						FROM
+							tblICInventoryShipment s INNER JOIN tblICInventoryShipmentItem si
+								ON s.intInventoryShipmentId = si.intInventoryShipmentId
+							INNER JOIN tblICItem i 
+								ON i.intItemId = si.intItemId
+							INNER JOIN tblICItemLocation il
+								ON il.intItemId = i.intItemId								
+								AND s.intShipFromLocationId = il.intLocationId
+							CROSS APPLY (
+								SELECT TOP 1 
+									sUOM.intItemUOMId
+								FROM 
+									tblICItemUOM sUOM
+								WHERE
+									sUOM.intItemId = si.intItemId
+									AND sUOM.ysnStockUnit = 1				
+							) sUOM	
+						WHERE
+							il.intCountGroupId = countGroup.intCountGroupId							
+							AND dbo.fnDateEquals(s.dtmShipDate, c.dtmCountDate) = 1
+					) shipment
+				WHERE
+					c.intInventoryCountId = @intInventoryCountId		
+			) qtySold
+		
+		WHERE 
+			countGroup.intCountWithGroupId = @intCountGroupId			
+) CountGroup

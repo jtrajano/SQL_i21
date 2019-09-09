@@ -21,6 +21,7 @@ Type the overview for the table here.
 		[ysnCountByPallets] BIT NOT NULL DEFAULT ((0)),
 		[ysnRecountMismatch] BIT NOT NULL DEFAULT ((0)),
 		[ysnExternal] BIT NOT NULL DEFAULT ((0)),
+		[intCountWithGroupId] INT NULL, 
 		[intSort] INT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		[dtmDateCreated] DATETIME NULL,
