@@ -1,31 +1,35 @@
-﻿CREATE PROCEDURE [dbo].[uspLGInterCompanyTransaction]
-	@intLoadId INT,
-	@strRowState NVARCHAR(100)
+﻿CREATE PROCEDURE [dbo].[uspLGInterCompanyTransaction] @intLoadId INT
+	,@strRowState NVARCHAR(100)
 AS
 BEGIN TRY
 	SET NOCOUNT ON
 
-	DECLARE @ErrMsg					NVARCHAR(MAX)
-	DECLARE @strFromTransactionType	NVARCHAR(100)
-	DECLARE @intFromCompanyId		INT
-	DECLARE @intFromProfitCenterId	INT
-	DECLARE @strToTransactionType	NVARCHAR(100)
-	DECLARE @intToCompanyId			INT
-	DECLARE @intToProfitCenterId	INT
-	DECLARE @intToEntityId			INT
-	DECLARE @strInsert				NVARCHAR(100)
-	DECLARE @strUpdate			    NVARCHAR(100)
-	DECLARE @intScreenId			INT
-	DECLARE @intShipmentType		INT
-	DECLARE @strShipmentType		NVARCHAR(200)
-	DECLARE @intPurchaseSale		INT
-	DECLARE @strPurchaseSale		NVARCHAR(200)
-	DECLARE @strTransactionType		NVARCHAR(100)
-	DECLARE @intToCompanyLocationId	INT
-	DECLARE @intToBookId			INT
-	DECLARE @intToSubBookId			INT
+	DECLARE @ErrMsg NVARCHAR(MAX)
+	DECLARE @strFromTransactionType NVARCHAR(100)
+	DECLARE @intFromCompanyId INT
+	DECLARE @intFromProfitCenterId INT
+	DECLARE @strToTransactionType NVARCHAR(100)
+	DECLARE @intToCompanyId INT
+	DECLARE @intToProfitCenterId INT
+	DECLARE @intToEntityId INT
+	DECLARE @strInsert NVARCHAR(100)
+	DECLARE @strUpdate NVARCHAR(100)
+	DECLARE @intScreenId INT
+	DECLARE @intShipmentType INT
+	DECLARE @strShipmentType NVARCHAR(200)
+	DECLARE @intPurchaseSale INT
+	DECLARE @strPurchaseSale NVARCHAR(200)
+	DECLARE @strTransactionType NVARCHAR(100)
+	DECLARE @intToCompanyLocationId INT
+	DECLARE @intToBookId INT
+	DECLARE @intToSubBookId INT
+		,@ysnReplicationEnabled BIT
 
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblLGLoad WHERE intLoadId = @intLoadId)
+	IF NOT EXISTS (
+			SELECT TOP 1 1
+			FROM tblLGLoad
+			WHERE intLoadId = @intLoadId
+			)
 	BEGIN
 		RETURN;
 	END
@@ -54,6 +58,9 @@ BEGIN TRY
 
 	SET @strTransactionType = @strPurchaseSale + ' ' + @strShipmentType
 
+	SELECT @ysnReplicationEnabled = IsNULL(ysnReplicationEnabled, 1)
+	FROM tblIPCompanyPreference
+
 	IF EXISTS (
 			SELECT 1
 			FROM tblSMInterCompanyTransactionConfiguration CTC
@@ -62,9 +69,7 @@ BEGIN TRY
 			WHERE CTTF.strTransactionType = @strTransactionType
 			)
 	BEGIN
-
-		SELECT 
-			@strFromTransactionType = CTTF.strTransactionType --strFromTransactionType
+		SELECT @strFromTransactionType = CTTF.strTransactionType --strFromTransactionType
 			,@intFromCompanyId = intFromCompanyId
 			,@intFromProfitCenterId = intFromBookId
 			,@strToTransactionType = CTTT.strTransactionType
@@ -80,7 +85,7 @@ BEGIN TRY
 		JOIN [tblSMInterCompanyTransactionType] CTTT ON CTC.[intToTransactionTypeId] = CTTT.intInterCompanyTransactionTypeId -- WHERE strFromTransactionType = @strTransactionType
 		WHERE CTTF.strTransactionType = @strTransactionType
 
-	 --    SELECT 
+		--    SELECT 
 		-- @strFromTransactionType = strFromTransactionType 
 		--,@intFromCompanyId		 = intFromCompanyId		 
 		--,@intFromProfitCenterId	 = intFromProfitCenterId	 
@@ -91,35 +96,64 @@ BEGIN TRY
 		--,@strInsert				 = strInsert				 
 		--,@strUpdate			   	 = strUpdate
 		--FROM tblSMInterCompanyTransactionConfiguration WHERE strFromTransactionType = @strTransactionType
-		
-		IF @strInsert = 'Insert' AND @strRowState = 'Added'
+		IF @strInsert = 'Insert'
+			AND @strRowState = 'Added'
 		BEGIN
-			IF EXISTS(SELECT 1 FROM tblLGLoad WHERE intLoadId = @intLoadId AND intConcurrencyId =1)
+			IF EXISTS (
+					SELECT 1
+					FROM tblLGLoad
+					WHERE intLoadId = @intLoadId
+						AND intConcurrencyId = 1
+					)
 			BEGIN
-			      EXEC uspLGPopulateLoadXML @intLoadId,
-											@strToTransactionType,
-											@intToCompanyId,
-											@strRowState,
-											@intToCompanyLocationId,
-											@intToBookId
+				EXEC uspLGPopulateLoadXML @intLoadId
+					,@strToTransactionType
+					,@intToCompanyId
+					,@strRowState
+					,@intToCompanyLocationId
+					,@intToBookId
+					,@ysnReplicationEnabled
 			END
 		END
-		
-		IF @strUpdate = 'Update' AND @strRowState = 'Modified'
+
+		IF @strUpdate = 'Update'
+			AND @strRowState = 'Modified'
 		BEGIN
-			IF EXISTS(SELECT 1 FROM tblLGLoad WHERE intLoadId = @intLoadId)
+			IF @ysnReplicationEnabled = 1
 			BEGIN
-			      EXEC uspLGPopulateLoadUpdateXML @intLoadId,
-												  @strToTransactionType,
-												  @intToCompanyId,
-												  @strRowState
+				IF EXISTS (
+						SELECT 1
+						FROM tblLGLoad
+						WHERE intLoadId = @intLoadId
+						)
+				BEGIN
+					EXEC uspLGPopulateLoadUpdateXML @intLoadId
+						,@strToTransactionType
+						,@intToCompanyId
+						,@strRowState
+				END
+			END
+			ELSE
+			BEGIN
+				EXEC uspLGPopulateLoadXML @intLoadId
+					,@strToTransactionType
+					,@intToCompanyId
+					,@strRowState
+					,@intToCompanyLocationId
+					,@intToBookId
+					,@ysnReplicationEnabled
 			END
 		END
 	END
-
 END TRY
 
 BEGIN CATCH
 	SET @ErrMsg = ERROR_MESSAGE()
-	RAISERROR (@ErrMsg,16,1,'WITH NOWAIT')
+
+	RAISERROR (
+			@ErrMsg
+			,16
+			,1
+			,'WITH NOWAIT'
+			)
 END CATCH

@@ -8068,6 +8068,7 @@
     <Build Include="dbo\Tables\tblGRSettleVoucherCreateReferenceTable.sql" />
     <Build Include="dbo\Views\vyuTRLoadBlendIngredient.sql" />
     <Build Include="dbo\Views\vyuICGetCountGroup.sql" />
+    <Build Include="dbo\Views\vyuIPLoadDocumentTrackingSummary.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

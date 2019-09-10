@@ -119,7 +119,7 @@ BEGIN TRY
 	IF @ysnReplication = 1
 		SELECT @strObjectName = 'tblLGLoadDocuments'
 	ELSE
-		SELECT @strObjectName = 'vyuLGLoadDocumentTrackingSummary'
+		SELECT @strObjectName = 'vyuIPLoadDocumentTrackingSummary'
 
 	EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
 		,@strLoadDocumentCondition
