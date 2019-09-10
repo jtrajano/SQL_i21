@@ -171,10 +171,20 @@ CD.intContractDetailId,
 			CD.intIndexId,
 			CD.dblAdjustment,
 			CD.intAdjItemUOMId,
-			intPricingTypeId = (case when AP.strApprovalStatus = 'Approved' or AP.strApprovalStatus = 'No Need for Approval' then CD.intPricingTypeId else CH.intPricingTypeId end),
+			--intPricingTypeId = (case when AP.strApprovalStatus = 'Approved' or AP.strApprovalStatus = 'No Need for Approval' then CD.intPricingTypeId else CH.intPricingTypeId end),
+			intPricingTypeId = (case
+								when CH.intPricingTypeId = 1 and CD.intPricingTypeId = 1
+								then (case when APH.strApprovalStatus = 'Approved' or APH.strApprovalStatus = 'No Need for Approval' then CD.intPricingTypeId else CH.intPricingTypeId end)
+								else (case when AP.strApprovalStatus = 'Approved' or AP.strApprovalStatus = 'No Need for Approval' then CD.intPricingTypeId else CH.intPricingTypeId end)
+							end),
 			CD.intFutureMarketId,
 			CD.intFutureMonthId,
-			dblFutures = (case when AP.strApprovalStatus = 'Approved' or AP.strApprovalStatus = 'No Need for Approval' then CD.dblFutures else null end),
+			--dblFutures = (case when AP.strApprovalStatus = 'Approved' or AP.strApprovalStatus = 'No Need for Approval' then CD.dblFutures else null end),
+			dblFutures = (case
+								when CH.intPricingTypeId = 1 and CD.intPricingTypeId = 1
+								then (case when APH.strApprovalStatus = 'Approved' or APH.strApprovalStatus = 'No Need for Approval' then CD.dblFutures else null end)
+								else (case when AP.strApprovalStatus = 'Approved' or AP.strApprovalStatus = 'No Need for Approval' then CD.dblFutures else null end)
+							end),
 			CD.dblBasis,
 			CD.dblOriginalBasis,
 			CD.dblConvertedBasis,
@@ -297,7 +307,11 @@ CD.intContractDetailId,
 				,dbo.[fnCTGetSeqDisplayField](CD.intFreightRateId,'tblCTFreightRate') strOriginDest--FR.strOrigin + FR.strDest strOriginDest
 				,dbo.[fnCTGetSeqDisplayField](CD.intRailGradeId,'tblCTRailGrade') strRailGrade--RG.strRailGrade
 				--,PT.strPricingType
-				,strPricingType = (case when AP.strApprovalStatus = 'Approved' or AP.strApprovalStatus = 'No Need for Approval' then PT.strPricingType else PTH.strPricingType end)
+				,strPricingType = (case
+										when CH.intPricingTypeId = 1 and CD.intPricingTypeId = 1
+										then (case when APH.strApprovalStatus = 'Approved' or APH.strApprovalStatus = 'No Need for Approval' then PT.strPricingType else PTH.strPricingType end)
+										else (case when AP.strApprovalStatus = 'Approved' or AP.strApprovalStatus = 'No Need for Approval' then PT.strPricingType else PTH.strPricingType end)
+									end)
 				,NULL AS strContractOptDesc --Screen not in use
 				,dbo.[fnCTGetSeqDisplayField](CD.intDiscountTypeId,'tblCTDiscountType') strDiscountType
 				,dbo.[fnCTGetSeqDisplayField](CD.intDiscountId,'tblGRDiscountId') strDiscountId
@@ -470,6 +484,14 @@ CD.intContractDetailId,
 							left join tblSMScreen c on c.strNamespace = 'ContractManagement.view.PriceContracts' and c.intScreenId = b.intScreenId
 							) as tt where tt.intRowNum = 1
 						) AP ON AP.intContractHeaderId = CD.intContractHeaderId and AP.intContractDetailId = CD.intContractDetailId
+		LEFT    JOIN	(
+							select * from (
+							select ROW_NUMBER() OVER (PARTITION BY b.intRecordId ORDER BY b.intTransactionId DESC) intRowNum, a.intContractHeaderId, a.intContractDetailId, b.strApprovalStatus
+							from tblCTContractDetail a
+							left join tblSMTransaction b on b.intRecordId = a.intContractHeaderId and b.strApprovalStatus is not null
+							left join tblSMScreen c on c.strNamespace = 'ContractManagement.view.Contract' and c.intScreenId = b.intScreenId
+							) as tt where tt.intRowNum = 1
+						) APH ON APH.intContractHeaderId = CD.intContractHeaderId and APH.intContractDetailId = CD.intContractDetailId
 
 	)t ORDER BY intContractSeq
 
