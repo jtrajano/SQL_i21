@@ -434,6 +434,9 @@ AND (
 	OR ISNULL(NULLIF(rc.dblForexRate,0),1) <> B.dblRate
 )
 AND A.intTransactionReversed IS NULL
+
+-- Remove zero cost adjustments. 
+DELETE FROM @ChargesToAdjust WHERE ROUND(dblNewValue, 2) = 0 
 -- SELECT 
 -- 	[intInventoryReceiptChargeId]	= rc.intInventoryReceiptChargeId
 -- 	,[dblNewValue]					= B.dblCost - B.dblOldCost
