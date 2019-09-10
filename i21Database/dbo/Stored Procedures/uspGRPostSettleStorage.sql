@@ -1889,15 +1889,19 @@ BEGIN TRY
 
 					IF @intPricingTypeId = 5
 					BEGIN
-						EXEC uspCTUpdateSequenceQuantityUsingUOM 
-							 @intContractDetailId = @intContractDetailId
-							,@dblQuantityToUpdate = @dblUnits
-							,@intUserId = @intCreatedUserId
-							,@intExternalId = @intSettleStorageTicketId
-							,@strScreenName = 'Settle Storage'
-							,@intSourceItemUOMId = @CommodityStockUomId
+						IF NOT EXISTS(SELECT * FROM tblICItemUOM UM
+								JOIN tblCTContractDetail CD ON CD.intItemId = UM.intItemId AND UM.intItemUOMId = ISNULL(@CommodityStockUomId,0))
+							BEGIN
+								RAISERROR('Invalid UOM detected.',16,1)
+							END
+						ELSE
+							BEGIN
+								SELECT	@dblUnits = dbo.fnCTConvertQtyToTargetItemUOM(@CommodityStockUomId,intItemUOMId,@dblUnits) 
+								FROM	tblCTContractDetail 
+								WHERE	intContractDetailId = @intContractDetailId
+							END
 					END
-					ELSE
+					
 					BEGIN
 						EXEC uspCTUpdateSequenceBalance 
 							 @intContractDetailId = @intContractDetailId
