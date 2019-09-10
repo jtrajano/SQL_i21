@@ -90,6 +90,66 @@
 					intTimeE				BIGINT
 				)
 
+			-- SETTLEMENT STORAGE
+			INSERT INTO @TemporaryTable
+			(
+				intContractHeaderId	
+				,intContractDetailId	
+				,intTransactionId
+				,strTransactionId	
+				,strContractType		
+				,strContractNumber	
+				,intContractSeq	
+				,intEntityId
+				,strEntityName		
+				,strCommodityCode
+				,intCommodityId	
+				,dtmDate				
+				,dblQuantity			
+				,strTransactionType
+				,intTimeE				
+			)
+			SELECT 
+				CH.intContractHeaderId
+				,CD.intContractDetailId
+				,SS.intSettleStorageId
+				,SS.strStorageTicket
+				,CT.strContractType
+				,CH.strContractNumber
+				,CD.intContractSeq
+				,E.intEntityId
+				,E.strName
+				,C.strCommodityCode
+				,C.intCommodityId
+				,SS.dtmCreated
+				,dblQuantity = SUM(SC.dblUnits)
+				,''Settle Storage''
+				,(CAST(replace(convert(varchar, SS.dtmCreated,101),''/'','''') + replace(convert(varchar, SS.dtmCreated,108),'':'','''')AS BIGINT)	+ CAST(SS.intSettleStorageId AS bigint))
+			FROM tblGRSettleContract SC
+			JOIN tblGRSettleStorage SS ON SS.intSettleStorageId = SC.intSettleStorageId
+			JOIN tblCTContractDetail CD ON SC.intContractDetailId = CD.intContractDetailId
+			JOIN tblCTContractHeader CH ON CD.intContractHeaderId = CH.intContractHeaderId AND CH.intContractTypeId = 1 AND CH.intPricingTypeId = 2
+			JOIN @OpenBasisContract OC ON CD.intContractDetailId = OC.intContractDetailId and CD.intContractHeaderId = OC.intContractHeaderId
+			JOIN tblCTContractType CT ON CT.intContractTypeId = CH.intContractTypeId
+			JOIN tblEMEntity E ON E.intEntityId = CH.intEntityId
+			JOIN tblICCommodity C ON C.intCommodityId = CH.intCommodityId
+			WHERE
+				SS.ysnPosted = 1
+				AND SS.intParentSettleStorageId IS NOT NULL
+			GROUP BY
+				CH.intContractHeaderId
+				,CD.intContractDetailId
+				,SS.intSettleStorageId
+				,SS.strStorageTicket
+				,CT.strContractType
+				,CH.strContractNumber
+				,CD.intContractSeq
+				,E.intEntityId
+				,E.strName
+				,C.strCommodityCode
+				,C.intCommodityId
+				,SS.dtmCreated
+
 				-- INVENTORY RECEIPT
 				INSERT INTO @TemporaryTable
 				(
