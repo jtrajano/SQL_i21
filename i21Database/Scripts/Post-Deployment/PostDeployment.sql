@@ -288,7 +288,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AP\MigrateVouchersForApproval.sql
 :r .\AP\MigratePOForApprovals.sql
 :r .\AP\UpdateVoucherDetail1099.sql
-:r .\AP\UpdateAmountSign.sql
+-- :r .\AP\UpdateAmountSign.sql
 :r .\AP\DefaultDataBalance.sql
 :r .\AP\UpdatePrepayVoucherStatus.sql
 :r .\AP\UpdateTaxGroupId.sql
