@@ -109,6 +109,12 @@ DECLARE @transCount INT = @@TRANCOUNT;
 IF @transCount = 0 BEGIN TRANSACTION
 ELSE SAVE TRAN @SavePoint
 
+IF NOT EXISTS(SELECT 1 FROM @voucherPayables)
+BEGIN
+    RAISERROR('No valid selected record to process.', 16, 1);
+    RETURN;
+END
+
 EXEC uspAPCreateVoucher @voucherPayables = @voucherPayables, @userId = @userId, @throwError = 1, @createdVouchersId = @createdBasisAdvance OUT
 
 INSERT INTO @vouchers SELECT [intID] FROM [dbo].fnGetRowsFromDelimitedValues(@createdBasisAdvance)
@@ -514,9 +520,9 @@ BEGIN CATCH
     SET @ErrorState    = ERROR_STATE()
     SET @ErrorLine     = ERROR_LINE()
     SET @ErrorProc     = ERROR_PROCEDURE()
-    SET @ErrorMessage  = 'Problem creating basis advance.' + CHAR(13) + 
-			'SQL Server Error Message is: ' + CAST(@ErrorNumber AS VARCHAR(10)) + 
-			' in procedure: ' + @ErrorProc + ' Line: ' + CAST(@ErrorLine AS VARCHAR(10)) + ' Error text: ' + @ErrorMessage
+    -- SET @ErrorMessage  = 'Problem creating basis advance.' + CHAR(13) + 
+	-- 		'SQL Server Error Message is: ' + CAST(@ErrorNumber AS VARCHAR(10)) + 
+	-- 		' in procedure: ' + @ErrorProc + ' Line: ' + CAST(@ErrorLine AS VARCHAR(10)) + ' Error text: ' + @ErrorMessage
     -- Not all errors generate an error state, to set to 1 if it's zero
     IF @ErrorState  = 0
     SET @ErrorState = 1
