@@ -73,4 +73,4 @@ FROM vyuICItemStockUOM sm
 	LEFT OUTER JOIN tblGRDiscountId grd ON grd.intDiscountId = mrc.intDiscountSchedule
 WHERE 
 	i.strType IN (N'Inventory',N'Finished Good',N'Raw Material')
-	AND sl.intStorageLocationId IS NOT NULL
+	--AND sl.intStorageLocationId IS NOT NULL
