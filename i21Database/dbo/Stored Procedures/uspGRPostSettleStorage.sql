@@ -1448,7 +1448,7 @@ BEGIN TRY
 													-- 	ELSE a.dblUnits 
 													-- END
 													CASE
-														WHEN a.intItemType = 1 AND ST.ysnDPOwnedType = 1 THEN RI.dblOpenReceive
+														WHEN a.intItemType = 1 AND ST.ysnDPOwnedType = 1 AND CS.intDeliverySheetId IS NOT NULL THEN RI.dblOpenReceive
 														ELSE
 																CASE 
 																		WHEN @origdblSpotUnits > 0 THEN ROUND(dbo.fnCalculateQtyBetweenUOM(b.intItemUOMId,@intCashPriceUOMId,a.dblUnits),6)
