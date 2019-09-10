@@ -366,12 +366,17 @@ BEGIN
 
 	--Update dblAmountDue, dtmDatePaid and ysnPaid on tblAPBill
 	UPDATE C
-		SET C.dblAmountDue = B.dblAmountDue,
+		SET C.dblAmountDue = ABS(B.dblAmountDue),
 			C.ysnPaid = 0,
 			C.dtmDatePaid = NULL,
 			C.dblWithheld = 0,
-			C.dblPayment = CASE WHEN (C.dblPayment - B.dblPayment) < 0 THEN 0 ELSE (C.dblPayment - B.dblPayment) END,
-			C.ysnPrepayHasPayment = CASE WHEN B.ysnOffset = 0 AND C.intTransactionType IN (2,13) THEN 0 ELSE 1 END
+			C.dblPayment = CASE WHEN (C.dblPayment - ABS(B.dblPayment)) < 0 THEN 0 ELSE (C.dblPayment - ABS(B.dblPayment)) END,
+			C.ysnPrepayHasPayment = CASE WHEN C.intTransactionType IN (2,13)
+										THEN (
+											CASE WHEN B.ysnOffset = 0
+											THEN 0 ELSE 1 END
+										)
+										ELSE 0 END
 			--C.ysnPosted = CASE WHEN A.ysnPrepay = 1 THEN 0 ELSE 1 END
 	FROM tblAPPayment A
 				INNER JOIN tblAPPaymentDetail B 
