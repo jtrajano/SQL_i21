@@ -15,8 +15,8 @@ ROW_NUMBER() OVER (ORDER BY A.intReportId asc) rowId,
     A.strReportName,
     C.strName strRoleName,
     CASE 
-        WHEN R.ysnRestriction = 0 THEN 'No Access' 
-        WHEN R.ysnRestriction = 1 THEN 'Read-Only' 
+        WHEN R.ysnRestriction = 1 THEN 'No Access' 
+        WHEN R.ysnRestriction = 0 THEN 'Read-Only' 
         ELSE '' 
     END strRestriction,
 	ISNULL(R.intConcurrencyId,0) intConcurrencyId,
