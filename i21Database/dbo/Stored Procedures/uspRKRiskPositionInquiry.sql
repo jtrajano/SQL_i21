@@ -1676,52 +1676,53 @@ BEGIN
 		SET intOrderByHeading = 13
 		WHERE Selection IN ('Switch position', 'Futures required')
 		
-		INSERT INTO @List(Selection
-			, PriceStatus
-			, strFutureMonth
-			, strAccountNumber
-			, dblNoOfContract
-			, strTradeNo
-			, TransactionDate
-			, TranType
-			, CustVendor
-			, dblNoOfLot
-			, dblQuantity
-			, intContractHeaderId
-			, intFutOptTransactionHeaderId
-			, intOrderByHeading
-			, strProductType
-			, strProductLine
-			, strShipmentPeriod
-			, strLocation
-			, strOrigin
-			, intItemId
-			, strItemNo
-			, strItemDescription)
-		SELECT DISTINCT 'Physical position / Basis risk'
-			, 'a. Unpriced - (Balance to be Priced)'
-			, strFutureMonth
-			, NULL
-			, NULL
-			, NULL
-			, GETDATE()
-			, NULL
-			, NULL
-			, NULL
-			, NULL
-			, NULL
-			, NULL
-			, 1
-			, strProductType
-			, strProductLine
-			, strShipmentPeriod
-			, strLocation
-			, strOrigin
-			, intItemId
-			, strItemNo
-			, strItemDescription
-		FROM @List WHERE strFutureMonth
-		NOT IN (SELECT DISTINCT strFutureMonth FROM @List WHERE Selection = 'Physical position / Basis risk' AND PriceStatus = 'a. Unpriced - (Balance to be Priced)')
+		-- Commented for RM-3281
+		--INSERT INTO @List(Selection
+		--	, PriceStatus
+		--	, strFutureMonth
+		--	, strAccountNumber
+		--	, dblNoOfContract
+		--	, strTradeNo
+		--	, TransactionDate
+		--	, TranType
+		--	, CustVendor
+		--	, dblNoOfLot
+		--	, dblQuantity
+		--	, intContractHeaderId
+		--	, intFutOptTransactionHeaderId
+		--	, intOrderByHeading
+		--	, strProductType
+		--	, strProductLine
+		--	, strShipmentPeriod
+		--	, strLocation
+		--	, strOrigin
+		--	, intItemId
+		--	, strItemNo
+		--	, strItemDescription)
+		--SELECT DISTINCT 'Physical position / Basis risk'
+		--	, 'a. Unpriced - (Balance to be Priced)'
+		--	, strFutureMonth
+		--	, NULL
+		--	, NULL
+		--	, NULL
+		--	, GETDATE()
+		--	, NULL
+		--	, NULL
+		--	, NULL
+		--	, NULL
+		--	, NULL
+		--	, NULL
+		--	, 1
+		--	, strProductType
+		--	, strProductLine
+		--	, strShipmentPeriod
+		--	, strLocation
+		--	, strOrigin
+		--	, intItemId
+		--	, strItemNo
+		--	, strItemDescription
+		--FROM @List WHERE strFutureMonth
+		--NOT IN (SELECT DISTINCT strFutureMonth FROM @List WHERE Selection = 'Physical position / Basis risk' AND PriceStatus = 'a. Unpriced - (Balance to be Priced)')
 		
 		SELECT intRowNumber
 			, Selection
