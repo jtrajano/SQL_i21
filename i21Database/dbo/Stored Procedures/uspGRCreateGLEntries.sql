@@ -769,8 +769,8 @@ BEGIN
 		CROSS APPLY dbo.fnGetDebit(NonInventoryCostCharges.dblCost) DebitForeign
 		CROSS APPLY dbo.fnGetCredit(NonInventoryCostCharges.dblCost) CreditForeign
 		WHERE ISNULL(NonInventoryCostCharges.ysnAccrue, 0) = 0
-			AND ISNULL(NonInventoryCostCharges.ysnInventoryCost, 0) = 0
-			AND ISNULL(NonInventoryCostCharges.ysnPrice, 0) = 0
+			AND ISNULL(NonInventoryCostCharges.ysnInventoryCost, 0) = 1
+			--AND ISNULL(NonInventoryCostCharges.ysnPrice, 0) = 0
 
 		UNION ALL 
 		
@@ -827,8 +827,8 @@ BEGIN
 		CROSS APPLY dbo.fnGetDebit(NonInventoryCostCharges.dblCost) DebitForeign
 		CROSS APPLY dbo.fnGetCredit(NonInventoryCostCharges.dblCost) CreditForeign
 		WHERE ISNULL(NonInventoryCostCharges.ysnAccrue, 0) = 0
-			AND ISNULL(NonInventoryCostCharges.ysnInventoryCost, 0) = 0
-			AND ISNULL(NonInventoryCostCharges.ysnPrice, 0) = 0
+			AND ISNULL(NonInventoryCostCharges.ysnInventoryCost, 0) = 1
+			--AND ISNULL(NonInventoryCostCharges.ysnPrice, 0) = 0
 
 		-------------------------------------------------------------------------------------------
 		-- Accrue Other Charge to Vendor 
