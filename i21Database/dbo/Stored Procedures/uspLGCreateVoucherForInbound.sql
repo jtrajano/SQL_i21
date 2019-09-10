@@ -128,7 +128,7 @@ BEGIN TRY
 		[intEntityVendorId] = D1.intEntityId
 		,[intTransactionType] = 1
 		,[intLocationId] = IsNull(L.intCompanyLocationId, CT.intCompanyLocationId)
-		,[intCurrencyId] = ISNULL(AD.intSeqCurrencyId, L.intCurrencyId)
+		,[intCurrencyId] = COALESCE(CY.intMainCurrencyId, CY.intCurrencyID, L.intCurrencyId)
 		,[dtmDate] = L.dtmPostedDate
 		,[strVendorOrderNumber] = ''
 		,[strReference] = ''
@@ -158,7 +158,7 @@ BEGIN TRY
 		,[intCostCurrencyId] = (CASE WHEN intPurchaseSale = 3 THEN ISNULL(AD.intSeqCurrencyId, 0) ELSE ISNULL(AD.intSeqCurrencyId, LD.intPriceCurrencyId) END)
 		,[dblTax] = ISNULL(receiptItem.dblTax, 0)
 		,[dblDiscount] = 0
-		,[dblExchangeRate] = CASE WHEN (ISNULL(AD.intSeqCurrencyId, L.intCurrencyId) <> @DefaultCurrencyId) THEN ISNULL(LD.dblForexRate, 0) ELSE 1 END
+		,[dblExchangeRate] = CASE WHEN (COALESCE(CY.intMainCurrencyId, CY.intCurrencyID, L.intCurrencyId) <> @DefaultCurrencyId) THEN ISNULL(LD.dblForexRate, 0) ELSE 1 END
 		,[ysnSubCurrency] =	AD.ysnSeqSubCurrency
 		,[intSubCurrencyCents] = CY.intCent
 		,[intAccountId] = apClearing.intAccountId
