@@ -71,6 +71,7 @@ BEGIN
 		,ysnForApprovalSubmitted = 0
 		,dtmApprovalDate = NULL
 		,ysnForApproval = @isVendorContact
+		,ysnPrepayHasPayment = 0
 		,dtmDateCreated = GETDATE()
 		,dtmDate = GETDATE()
 		,dtmBillDate = GETDATE()
