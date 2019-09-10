@@ -16,7 +16,7 @@ SELECT @intImportFileHeaderId = intImportFileHeaderId FROM dbo.tblSMImportFileHe
        ,[strXMLType] = 'Inbound'
        ,[strXMLInitiater] = NULL
        ,[ysnActive] = 1
-       ,[intConcurrencyId] = 61
+       ,[intConcurrencyId] = 62
   WHERE intImportFileHeaderId = @intImportFileHeaderId
 
 ----DELETE FROM dbo.tblSMXMLTagAttribute
@@ -34,7 +34,7 @@ BEGIN
   INSERT INTO [dbo].[tblSMImportFileHeader]
       ([strLayoutTitle],[strFileType],[strFieldDelimiter],[strXMLType],[strXMLInitiater],[ysnActive],[intConcurrencyId])
   VALUES 
-      ('Commander - Transaction Log Rebate','XML',NULL,'Inbound',NULL,1,61)
+      ('Commander - Transaction Log Rebate','XML',NULL,'Inbound',NULL,1,62)
 END
 --END CHECK HEADER
 
@@ -1531,7 +1531,7 @@ BEGIN
   INSERT INTO [dbo].[tblSMImportFileColumnDetail]
       ([intImportFileHeaderId],[intImportFileRecordMarkerId],[intLevel],[intPosition],[strXMLTag],[strTable],[strColumnName],[strDataType],[intLength],[strDefaultValue],[ysnActive],[intConcurrencyId])
   VALUES 
-      (@intImportFileHeaderId,NULL,58,9,'CustDOB',NULL,NULL,NULL,28,NULL,1,2)
+      (@intImportFileHeaderId,NULL,58,9,'custDOB',NULL,NULL,NULL,28,NULL,1,3)
 END
 ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intLevel = 58 AND intImportFileHeaderId = @intImportFileHeaderId)
 BEGIN
@@ -1541,14 +1541,14 @@ SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSM
        ,[intImportFileRecordMarkerId] = NULL
        ,[intLevel] = 58
        ,[intPosition] = 9
-       ,[strXMLTag] = 'CustDOB'
+       ,[strXMLTag] = 'custDOB'
        ,[strTable] = NULL
        ,[strColumnName] = NULL
        ,[strDataType] = NULL
        ,[intLength] = 28
        ,[strDefaultValue] = NULL
        ,[ysnActive] = 1
-       ,[intConcurrencyId] = 2
+       ,[intConcurrencyId] = 3
   WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId
 END
 
@@ -3321,6 +3321,34 @@ END
 DELETE FROM tblSMXMLTagAttribute WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId AND intSequence NOT IN (1,2)
 
 
+--LEVEL 17   Attributes(1x)
+SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 17 AND strXMLTag = 'trUniqueSN'
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  INSERT INTO [dbo].[tblSMXMLTagAttribute]
+      ([intImportFileColumnDetailId],[intSequence],[strTagAttribute],[strTable],[strColumnName],[strDefaultValue],[ysnActive],[intConcurrencyId])
+  VALUES 
+      (@intImportFileColumnDetailId,1,'transType','tblSTTranslogRebates','dblInsideGrand',NULL,1,1)
+END
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  SELECT @intTagAttributeId = intTagAttributeId FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId
+  UPDATE[dbo].[tblSMXMLTagAttribute]
+  SET [intImportFileColumnDetailId] = @intImportFileColumnDetailId
+       ,[intSequence] = 1
+       ,[strTagAttribute] = 'transType'
+       ,[strTable] = 'tblSTTranslogRebates'
+       ,[strColumnName] = 'dblInsideGrand'
+       ,[strDefaultValue] = NULL
+       ,[ysnActive] = 1
+       ,[intConcurrencyId] = 1
+  WHERE intTagAttributeId = @intTagAttributeId
+END
+
+--Delete Rows Not Included in LEVEL 17   Attributes(1x)
+DELETE FROM tblSMXMLTagAttribute WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId AND intSequence NOT IN (1)
+
+
 --LEVEL 18   Attributes(3x)
 SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 18 AND strXMLTag = 'period'
 IF NOT EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
@@ -3391,6 +3419,122 @@ END
 
 --Delete Rows Not Included in LEVEL 18   Attributes(3x)
 DELETE FROM tblSMXMLTagAttribute WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId AND intSequence NOT IN (1,2,3)
+
+
+--LEVEL 21   Attributes(5x)
+SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 21 AND strXMLTag = 'till'
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  INSERT INTO [dbo].[tblSMXMLTagAttribute]
+      ([intImportFileColumnDetailId],[intSequence],[strTagAttribute],[strTable],[strColumnName],[strDefaultValue],[ysnActive],[intConcurrencyId])
+  VALUES 
+      (@intImportFileColumnDetailId,1,'sysid',NULL,NULL,NULL,1,1)
+END
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  SELECT @intTagAttributeId = intTagAttributeId FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId
+  UPDATE[dbo].[tblSMXMLTagAttribute]
+  SET [intImportFileColumnDetailId] = @intImportFileColumnDetailId
+       ,[intSequence] = 1
+       ,[strTagAttribute] = 'sysid'
+       ,[strTable] = NULL
+       ,[strColumnName] = NULL
+       ,[strDefaultValue] = NULL
+       ,[ysnActive] = 1
+       ,[intConcurrencyId] = 1
+  WHERE intTagAttributeId = @intTagAttributeId
+END
+
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 2 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  INSERT INTO [dbo].[tblSMXMLTagAttribute]
+      ([intImportFileColumnDetailId],[intSequence],[strTagAttribute],[strTable],[strColumnName],[strDefaultValue],[ysnActive],[intConcurrencyId])
+  VALUES 
+      (@intImportFileColumnDetailId,2,'empNum',NULL,NULL,NULL,1,1)
+END
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 2 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  SELECT @intTagAttributeId = intTagAttributeId FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 2 AND intImportFileColumnDetailId = @intImportFileColumnDetailId
+  UPDATE[dbo].[tblSMXMLTagAttribute]
+  SET [intImportFileColumnDetailId] = @intImportFileColumnDetailId
+       ,[intSequence] = 2
+       ,[strTagAttribute] = 'empNum'
+       ,[strTable] = NULL
+       ,[strColumnName] = NULL
+       ,[strDefaultValue] = NULL
+       ,[ysnActive] = 1
+       ,[intConcurrencyId] = 1
+  WHERE intTagAttributeId = @intTagAttributeId
+END
+
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 3 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  INSERT INTO [dbo].[tblSMXMLTagAttribute]
+      ([intImportFileColumnDetailId],[intSequence],[strTagAttribute],[strTable],[strColumnName],[strDefaultValue],[ysnActive],[intConcurrencyId])
+  VALUES 
+      (@intImportFileColumnDetailId,3,'posNum',NULL,NULL,NULL,1,1)
+END
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 3 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  SELECT @intTagAttributeId = intTagAttributeId FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 3 AND intImportFileColumnDetailId = @intImportFileColumnDetailId
+  UPDATE[dbo].[tblSMXMLTagAttribute]
+  SET [intImportFileColumnDetailId] = @intImportFileColumnDetailId
+       ,[intSequence] = 3
+       ,[strTagAttribute] = 'posNum'
+       ,[strTable] = NULL
+       ,[strColumnName] = NULL
+       ,[strDefaultValue] = NULL
+       ,[ysnActive] = 1
+       ,[intConcurrencyId] = 1
+  WHERE intTagAttributeId = @intTagAttributeId
+END
+
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 4 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  INSERT INTO [dbo].[tblSMXMLTagAttribute]
+      ([intImportFileColumnDetailId],[intSequence],[strTagAttribute],[strTable],[strColumnName],[strDefaultValue],[ysnActive],[intConcurrencyId])
+  VALUES 
+      (@intImportFileColumnDetailId,4,'period',NULL,NULL,NULL,1,1)
+END
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 4 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  SELECT @intTagAttributeId = intTagAttributeId FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 4 AND intImportFileColumnDetailId = @intImportFileColumnDetailId
+  UPDATE[dbo].[tblSMXMLTagAttribute]
+  SET [intImportFileColumnDetailId] = @intImportFileColumnDetailId
+       ,[intSequence] = 4
+       ,[strTagAttribute] = 'period'
+       ,[strTable] = NULL
+       ,[strColumnName] = NULL
+       ,[strDefaultValue] = NULL
+       ,[ysnActive] = 1
+       ,[intConcurrencyId] = 1
+  WHERE intTagAttributeId = @intTagAttributeId
+END
+
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 5 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  INSERT INTO [dbo].[tblSMXMLTagAttribute]
+      ([intImportFileColumnDetailId],[intSequence],[strTagAttribute],[strTable],[strColumnName],[strDefaultValue],[ysnActive],[intConcurrencyId])
+  VALUES 
+      (@intImportFileColumnDetailId,5,'drawer',NULL,NULL,NULL,1,1)
+END
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 5 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  SELECT @intTagAttributeId = intTagAttributeId FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 5 AND intImportFileColumnDetailId = @intImportFileColumnDetailId
+  UPDATE[dbo].[tblSMXMLTagAttribute]
+  SET [intImportFileColumnDetailId] = @intImportFileColumnDetailId
+       ,[intSequence] = 5
+       ,[strTagAttribute] = 'drawer'
+       ,[strTable] = NULL
+       ,[strColumnName] = NULL
+       ,[strDefaultValue] = NULL
+       ,[ysnActive] = 1
+       ,[intConcurrencyId] = 1
+  WHERE intTagAttributeId = @intTagAttributeId
+END
+
+--Delete Rows Not Included in LEVEL 21   Attributes(5x)
+DELETE FROM tblSMXMLTagAttribute WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId AND intSequence NOT IN (1,2,3,4,5)
 
 
 --LEVEL 22   Attributes(5x)
@@ -3625,6 +3769,294 @@ END
 DELETE FROM tblSMXMLTagAttribute WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId AND intSequence NOT IN (1,2,3,4,5)
 
 
+--LEVEL 27   Attributes(5x)
+SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 27 AND strXMLTag = 'coinDispensed'
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  INSERT INTO [dbo].[tblSMXMLTagAttribute]
+      ([intImportFileColumnDetailId],[intSequence],[strTagAttribute],[strTable],[strColumnName],[strDefaultValue],[ysnActive],[intConcurrencyId])
+  VALUES 
+      (@intImportFileColumnDetailId,1,'sysid','tblSTTranslogRebates','intCashierSysId',NULL,1,2)
+END
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  SELECT @intTagAttributeId = intTagAttributeId FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId
+  UPDATE[dbo].[tblSMXMLTagAttribute]
+  SET [intImportFileColumnDetailId] = @intImportFileColumnDetailId
+       ,[intSequence] = 1
+       ,[strTagAttribute] = 'sysid'
+       ,[strTable] = 'tblSTTranslogRebates'
+       ,[strColumnName] = 'intCashierSysId'
+       ,[strDefaultValue] = NULL
+       ,[ysnActive] = 1
+       ,[intConcurrencyId] = 2
+  WHERE intTagAttributeId = @intTagAttributeId
+END
+
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 2 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  INSERT INTO [dbo].[tblSMXMLTagAttribute]
+      ([intImportFileColumnDetailId],[intSequence],[strTagAttribute],[strTable],[strColumnName],[strDefaultValue],[ysnActive],[intConcurrencyId])
+  VALUES 
+      (@intImportFileColumnDetailId,2,'empNum','tblSTTranslogRebates','intCashierEmpNum',NULL,1,2)
+END
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 2 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  SELECT @intTagAttributeId = intTagAttributeId FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 2 AND intImportFileColumnDetailId = @intImportFileColumnDetailId
+  UPDATE[dbo].[tblSMXMLTagAttribute]
+  SET [intImportFileColumnDetailId] = @intImportFileColumnDetailId
+       ,[intSequence] = 2
+       ,[strTagAttribute] = 'empNum'
+       ,[strTable] = 'tblSTTranslogRebates'
+       ,[strColumnName] = 'intCashierEmpNum'
+       ,[strDefaultValue] = NULL
+       ,[ysnActive] = 1
+       ,[intConcurrencyId] = 2
+  WHERE intTagAttributeId = @intTagAttributeId
+END
+
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 3 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  INSERT INTO [dbo].[tblSMXMLTagAttribute]
+      ([intImportFileColumnDetailId],[intSequence],[strTagAttribute],[strTable],[strColumnName],[strDefaultValue],[ysnActive],[intConcurrencyId])
+  VALUES 
+      (@intImportFileColumnDetailId,3,'posNum','tblSTTranslogRebates','intCashierPosNum',NULL,1,2)
+END
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 3 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  SELECT @intTagAttributeId = intTagAttributeId FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 3 AND intImportFileColumnDetailId = @intImportFileColumnDetailId
+  UPDATE[dbo].[tblSMXMLTagAttribute]
+  SET [intImportFileColumnDetailId] = @intImportFileColumnDetailId
+       ,[intSequence] = 3
+       ,[strTagAttribute] = 'posNum'
+       ,[strTable] = 'tblSTTranslogRebates'
+       ,[strColumnName] = 'intCashierPosNum'
+       ,[strDefaultValue] = NULL
+       ,[ysnActive] = 1
+       ,[intConcurrencyId] = 2
+  WHERE intTagAttributeId = @intTagAttributeId
+END
+
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 4 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  INSERT INTO [dbo].[tblSMXMLTagAttribute]
+      ([intImportFileColumnDetailId],[intSequence],[strTagAttribute],[strTable],[strColumnName],[strDefaultValue],[ysnActive],[intConcurrencyId])
+  VALUES 
+      (@intImportFileColumnDetailId,4,'period','tblSTTranslogRebates','intCashierPeriod',NULL,1,2)
+END
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 4 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  SELECT @intTagAttributeId = intTagAttributeId FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 4 AND intImportFileColumnDetailId = @intImportFileColumnDetailId
+  UPDATE[dbo].[tblSMXMLTagAttribute]
+  SET [intImportFileColumnDetailId] = @intImportFileColumnDetailId
+       ,[intSequence] = 4
+       ,[strTagAttribute] = 'period'
+       ,[strTable] = 'tblSTTranslogRebates'
+       ,[strColumnName] = 'intCashierPeriod'
+       ,[strDefaultValue] = NULL
+       ,[ysnActive] = 1
+       ,[intConcurrencyId] = 2
+  WHERE intTagAttributeId = @intTagAttributeId
+END
+
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 5 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  INSERT INTO [dbo].[tblSMXMLTagAttribute]
+      ([intImportFileColumnDetailId],[intSequence],[strTagAttribute],[strTable],[strColumnName],[strDefaultValue],[ysnActive],[intConcurrencyId])
+  VALUES 
+      (@intImportFileColumnDetailId,5,'drawer','tblSTTranslogRebates','intCashierDrawer',NULL,1,2)
+END
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 5 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  SELECT @intTagAttributeId = intTagAttributeId FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 5 AND intImportFileColumnDetailId = @intImportFileColumnDetailId
+  UPDATE[dbo].[tblSMXMLTagAttribute]
+  SET [intImportFileColumnDetailId] = @intImportFileColumnDetailId
+       ,[intSequence] = 5
+       ,[strTagAttribute] = 'drawer'
+       ,[strTable] = 'tblSTTranslogRebates'
+       ,[strColumnName] = 'intCashierDrawer'
+       ,[strDefaultValue] = NULL
+       ,[ysnActive] = 1
+       ,[intConcurrencyId] = 2
+  WHERE intTagAttributeId = @intTagAttributeId
+END
+
+--Delete Rows Not Included in LEVEL 27   Attributes(5x)
+DELETE FROM tblSMXMLTagAttribute WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId AND intSequence NOT IN (1,2,3,4,5)
+
+
+--LEVEL 28   Attributes(5x)
+SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 28 AND strXMLTag = 'trValue'
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  INSERT INTO [dbo].[tblSMXMLTagAttribute]
+      ([intImportFileColumnDetailId],[intSequence],[strTagAttribute],[strTable],[strColumnName],[strDefaultValue],[ysnActive],[intConcurrencyId])
+  VALUES 
+      (@intImportFileColumnDetailId,1,'sysid','tblSTTranslogRebates','intOriginalCashierSysid',NULL,1,2)
+END
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  SELECT @intTagAttributeId = intTagAttributeId FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId
+  UPDATE[dbo].[tblSMXMLTagAttribute]
+  SET [intImportFileColumnDetailId] = @intImportFileColumnDetailId
+       ,[intSequence] = 1
+       ,[strTagAttribute] = 'sysid'
+       ,[strTable] = 'tblSTTranslogRebates'
+       ,[strColumnName] = 'intOriginalCashierSysid'
+       ,[strDefaultValue] = NULL
+       ,[ysnActive] = 1
+       ,[intConcurrencyId] = 2
+  WHERE intTagAttributeId = @intTagAttributeId
+END
+
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 2 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  INSERT INTO [dbo].[tblSMXMLTagAttribute]
+      ([intImportFileColumnDetailId],[intSequence],[strTagAttribute],[strTable],[strColumnName],[strDefaultValue],[ysnActive],[intConcurrencyId])
+  VALUES 
+      (@intImportFileColumnDetailId,2,'empNum','tblSTTranslogRebates','intOriginalCashierEmpNum',NULL,1,2)
+END
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 2 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  SELECT @intTagAttributeId = intTagAttributeId FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 2 AND intImportFileColumnDetailId = @intImportFileColumnDetailId
+  UPDATE[dbo].[tblSMXMLTagAttribute]
+  SET [intImportFileColumnDetailId] = @intImportFileColumnDetailId
+       ,[intSequence] = 2
+       ,[strTagAttribute] = 'empNum'
+       ,[strTable] = 'tblSTTranslogRebates'
+       ,[strColumnName] = 'intOriginalCashierEmpNum'
+       ,[strDefaultValue] = NULL
+       ,[ysnActive] = 1
+       ,[intConcurrencyId] = 2
+  WHERE intTagAttributeId = @intTagAttributeId
+END
+
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 3 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  INSERT INTO [dbo].[tblSMXMLTagAttribute]
+      ([intImportFileColumnDetailId],[intSequence],[strTagAttribute],[strTable],[strColumnName],[strDefaultValue],[ysnActive],[intConcurrencyId])
+  VALUES 
+      (@intImportFileColumnDetailId,3,'posNum','tblSTTranslogRebates','intOriginalCashierPosNum',NULL,1,2)
+END
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 3 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  SELECT @intTagAttributeId = intTagAttributeId FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 3 AND intImportFileColumnDetailId = @intImportFileColumnDetailId
+  UPDATE[dbo].[tblSMXMLTagAttribute]
+  SET [intImportFileColumnDetailId] = @intImportFileColumnDetailId
+       ,[intSequence] = 3
+       ,[strTagAttribute] = 'posNum'
+       ,[strTable] = 'tblSTTranslogRebates'
+       ,[strColumnName] = 'intOriginalCashierPosNum'
+       ,[strDefaultValue] = NULL
+       ,[ysnActive] = 1
+       ,[intConcurrencyId] = 2
+  WHERE intTagAttributeId = @intTagAttributeId
+END
+
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 4 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  INSERT INTO [dbo].[tblSMXMLTagAttribute]
+      ([intImportFileColumnDetailId],[intSequence],[strTagAttribute],[strTable],[strColumnName],[strDefaultValue],[ysnActive],[intConcurrencyId])
+  VALUES 
+      (@intImportFileColumnDetailId,4,'period','tblSTTranslogRebates','intOriginalCashierPeriod',NULL,1,2)
+END
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 4 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  SELECT @intTagAttributeId = intTagAttributeId FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 4 AND intImportFileColumnDetailId = @intImportFileColumnDetailId
+  UPDATE[dbo].[tblSMXMLTagAttribute]
+  SET [intImportFileColumnDetailId] = @intImportFileColumnDetailId
+       ,[intSequence] = 4
+       ,[strTagAttribute] = 'period'
+       ,[strTable] = 'tblSTTranslogRebates'
+       ,[strColumnName] = 'intOriginalCashierPeriod'
+       ,[strDefaultValue] = NULL
+       ,[ysnActive] = 1
+       ,[intConcurrencyId] = 2
+  WHERE intTagAttributeId = @intTagAttributeId
+END
+
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 5 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  INSERT INTO [dbo].[tblSMXMLTagAttribute]
+      ([intImportFileColumnDetailId],[intSequence],[strTagAttribute],[strTable],[strColumnName],[strDefaultValue],[ysnActive],[intConcurrencyId])
+  VALUES 
+      (@intImportFileColumnDetailId,5,'drawer','tblSTTranslogRebates','intOriginalCashierDrawer',NULL,1,2)
+END
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 5 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  SELECT @intTagAttributeId = intTagAttributeId FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 5 AND intImportFileColumnDetailId = @intImportFileColumnDetailId
+  UPDATE[dbo].[tblSMXMLTagAttribute]
+  SET [intImportFileColumnDetailId] = @intImportFileColumnDetailId
+       ,[intSequence] = 5
+       ,[strTagAttribute] = 'drawer'
+       ,[strTable] = 'tblSTTranslogRebates'
+       ,[strColumnName] = 'intOriginalCashierDrawer'
+       ,[strDefaultValue] = NULL
+       ,[ysnActive] = 1
+       ,[intConcurrencyId] = 2
+  WHERE intTagAttributeId = @intTagAttributeId
+END
+
+--Delete Rows Not Included in LEVEL 28   Attributes(5x)
+DELETE FROM tblSMXMLTagAttribute WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId AND intSequence NOT IN (1,2,3,4,5)
+
+
+--LEVEL 29   Attributes(1x)
+SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 29 AND strXMLTag = 'trTotNoTax'
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  INSERT INTO [dbo].[tblSMXMLTagAttribute]
+      ([intImportFileColumnDetailId],[intSequence],[strTagAttribute],[strTable],[strColumnName],[strDefaultValue],[ysnActive],[intConcurrencyId])
+  VALUES 
+      (@intImportFileColumnDetailId,1,'locale',NULL,NULL,NULL,1,1)
+END
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  SELECT @intTagAttributeId = intTagAttributeId FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId
+  UPDATE[dbo].[tblSMXMLTagAttribute]
+  SET [intImportFileColumnDetailId] = @intImportFileColumnDetailId
+       ,[intSequence] = 1
+       ,[strTagAttribute] = 'locale'
+       ,[strTable] = NULL
+       ,[strColumnName] = NULL
+       ,[strDefaultValue] = NULL
+       ,[ysnActive] = 1
+       ,[intConcurrencyId] = 1
+  WHERE intTagAttributeId = @intTagAttributeId
+END
+
+--Delete Rows Not Included in LEVEL 29   Attributes(1x)
+DELETE FROM tblSMXMLTagAttribute WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId AND intSequence NOT IN (1)
+
+
+--LEVEL 33   Attributes(1x)
+SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 33 AND strXMLTag = 'taxAmts'
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  INSERT INTO [dbo].[tblSMXMLTagAttribute]
+      ([intImportFileColumnDetailId],[intSequence],[strTagAttribute],[strTable],[strColumnName],[strDefaultValue],[ysnActive],[intConcurrencyId])
+  VALUES 
+      (@intImportFileColumnDetailId,1,'type',NULL,NULL,NULL,1,1)
+END
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  SELECT @intTagAttributeId = intTagAttributeId FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId
+  UPDATE[dbo].[tblSMXMLTagAttribute]
+  SET [intImportFileColumnDetailId] = @intImportFileColumnDetailId
+       ,[intSequence] = 1
+       ,[strTagAttribute] = 'type'
+       ,[strTable] = NULL
+       ,[strColumnName] = NULL
+       ,[strDefaultValue] = NULL
+       ,[ysnActive] = 1
+       ,[intConcurrencyId] = 1
+  WHERE intTagAttributeId = @intTagAttributeId
+END
+
+--Delete Rows Not Included in LEVEL 33   Attributes(1x)
+DELETE FROM tblSMXMLTagAttribute WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId AND intSequence NOT IN (1)
+
+
 --LEVEL 34   Attributes(2x)
 SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 34 AND strXMLTag = 'taxAmt'
 IF NOT EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
@@ -3853,6 +4285,234 @@ END
 DELETE FROM tblSMXMLTagAttribute WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId AND intSequence NOT IN (1)
 
 
+--LEVEL 39   Attributes(2x)
+SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 39 AND strXMLTag = 'trSTotalizer'
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  INSERT INTO [dbo].[tblSMXMLTagAttribute]
+      ([intImportFileColumnDetailId],[intSequence],[strTagAttribute],[strTable],[strColumnName],[strDefaultValue],[ysnActive],[intConcurrencyId])
+  VALUES 
+      (@intImportFileColumnDetailId,1,'sysid','tblSTTranslogRebates','dblOverallGrand',NULL,1,1)
+END
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  SELECT @intTagAttributeId = intTagAttributeId FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId
+  UPDATE[dbo].[tblSMXMLTagAttribute]
+  SET [intImportFileColumnDetailId] = @intImportFileColumnDetailId
+       ,[intSequence] = 1
+       ,[strTagAttribute] = 'sysid'
+       ,[strTable] = 'tblSTTranslogRebates'
+       ,[strColumnName] = 'dblOverallGrand'
+       ,[strDefaultValue] = NULL
+       ,[ysnActive] = 1
+       ,[intConcurrencyId] = 1
+  WHERE intTagAttributeId = @intTagAttributeId
+END
+
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 2 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  INSERT INTO [dbo].[tblSMXMLTagAttribute]
+      ([intImportFileColumnDetailId],[intSequence],[strTagAttribute],[strTable],[strColumnName],[strDefaultValue],[ysnActive],[intConcurrencyId])
+  VALUES 
+      (@intImportFileColumnDetailId,2,'cat','tblSTTranslogRebates','dblInsideSales',NULL,1,1)
+END
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 2 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  SELECT @intTagAttributeId = intTagAttributeId FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 2 AND intImportFileColumnDetailId = @intImportFileColumnDetailId
+  UPDATE[dbo].[tblSMXMLTagAttribute]
+  SET [intImportFileColumnDetailId] = @intImportFileColumnDetailId
+       ,[intSequence] = 2
+       ,[strTagAttribute] = 'cat'
+       ,[strTable] = 'tblSTTranslogRebates'
+       ,[strColumnName] = 'dblInsideSales'
+       ,[strDefaultValue] = NULL
+       ,[ysnActive] = 1
+       ,[intConcurrencyId] = 1
+  WHERE intTagAttributeId = @intTagAttributeId
+END
+
+--Delete Rows Not Included in LEVEL 39   Attributes(2x)
+DELETE FROM tblSMXMLTagAttribute WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId AND intSequence NOT IN (1,2)
+
+
+--LEVEL 40   Attributes(2x)
+SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 40 AND strXMLTag = 'trGTotalizer'
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  INSERT INTO [dbo].[tblSMXMLTagAttribute]
+      ([intImportFileColumnDetailId],[intSequence],[strTagAttribute],[strTable],[strColumnName],[strDefaultValue],[ysnActive],[intConcurrencyId])
+  VALUES 
+      (@intImportFileColumnDetailId,1,'sysid','tblSTTranslogRebates','intTaxAmtsTaxRateSysid',NULL,1,2)
+END
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  SELECT @intTagAttributeId = intTagAttributeId FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId
+  UPDATE[dbo].[tblSMXMLTagAttribute]
+  SET [intImportFileColumnDetailId] = @intImportFileColumnDetailId
+       ,[intSequence] = 1
+       ,[strTagAttribute] = 'sysid'
+       ,[strTable] = 'tblSTTranslogRebates'
+       ,[strColumnName] = 'intTaxAmtsTaxRateSysid'
+       ,[strDefaultValue] = NULL
+       ,[ysnActive] = 1
+       ,[intConcurrencyId] = 2
+  WHERE intTagAttributeId = @intTagAttributeId
+END
+
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 2 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  INSERT INTO [dbo].[tblSMXMLTagAttribute]
+      ([intImportFileColumnDetailId],[intSequence],[strTagAttribute],[strTable],[strColumnName],[strDefaultValue],[ysnActive],[intConcurrencyId])
+  VALUES 
+      (@intImportFileColumnDetailId,2,'cat','tblSTTranslogRebates','strTaxAmtsTaxRateCat',NULL,1,2)
+END
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 2 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  SELECT @intTagAttributeId = intTagAttributeId FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 2 AND intImportFileColumnDetailId = @intImportFileColumnDetailId
+  UPDATE[dbo].[tblSMXMLTagAttribute]
+  SET [intImportFileColumnDetailId] = @intImportFileColumnDetailId
+       ,[intSequence] = 2
+       ,[strTagAttribute] = 'cat'
+       ,[strTable] = 'tblSTTranslogRebates'
+       ,[strColumnName] = 'strTaxAmtsTaxRateCat'
+       ,[strDefaultValue] = NULL
+       ,[ysnActive] = 1
+       ,[intConcurrencyId] = 2
+  WHERE intTagAttributeId = @intTagAttributeId
+END
+
+--Delete Rows Not Included in LEVEL 40   Attributes(2x)
+DELETE FROM tblSMXMLTagAttribute WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId AND intSequence NOT IN (1,2)
+
+
+--LEVEL 41   Attributes(2x)
+SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 41 AND strXMLTag = 'trFstmp'
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  INSERT INTO [dbo].[tblSMXMLTagAttribute]
+      ([intImportFileColumnDetailId],[intSequence],[strTagAttribute],[strTable],[strColumnName],[strDefaultValue],[ysnActive],[intConcurrencyId])
+  VALUES 
+      (@intImportFileColumnDetailId,1,'sysid','tblSTTranslogRebates','dblInsideGrand',NULL,1,1)
+END
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  SELECT @intTagAttributeId = intTagAttributeId FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId
+  UPDATE[dbo].[tblSMXMLTagAttribute]
+  SET [intImportFileColumnDetailId] = @intImportFileColumnDetailId
+       ,[intSequence] = 1
+       ,[strTagAttribute] = 'sysid'
+       ,[strTable] = 'tblSTTranslogRebates'
+       ,[strColumnName] = 'dblInsideGrand'
+       ,[strDefaultValue] = NULL
+       ,[ysnActive] = 1
+       ,[intConcurrencyId] = 1
+  WHERE intTagAttributeId = @intTagAttributeId
+END
+
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 2 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  INSERT INTO [dbo].[tblSMXMLTagAttribute]
+      ([intImportFileColumnDetailId],[intSequence],[strTagAttribute],[strTable],[strColumnName],[strDefaultValue],[ysnActive],[intConcurrencyId])
+  VALUES 
+      (@intImportFileColumnDetailId,2,'cat','tblSTTranslogRebates','dblInsideSales',NULL,1,1)
+END
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 2 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  SELECT @intTagAttributeId = intTagAttributeId FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 2 AND intImportFileColumnDetailId = @intImportFileColumnDetailId
+  UPDATE[dbo].[tblSMXMLTagAttribute]
+  SET [intImportFileColumnDetailId] = @intImportFileColumnDetailId
+       ,[intSequence] = 2
+       ,[strTagAttribute] = 'cat'
+       ,[strTable] = 'tblSTTranslogRebates'
+       ,[strColumnName] = 'dblInsideSales'
+       ,[strDefaultValue] = NULL
+       ,[ysnActive] = 1
+       ,[intConcurrencyId] = 1
+  WHERE intTagAttributeId = @intTagAttributeId
+END
+
+--Delete Rows Not Included in LEVEL 41   Attributes(2x)
+DELETE FROM tblSMXMLTagAttribute WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId AND intSequence NOT IN (1,2)
+
+
+--LEVEL 42   Attributes(2x)
+SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 42 AND strXMLTag = 'trFstmpTot'
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  INSERT INTO [dbo].[tblSMXMLTagAttribute]
+      ([intImportFileColumnDetailId],[intSequence],[strTagAttribute],[strTable],[strColumnName],[strDefaultValue],[ysnActive],[intConcurrencyId])
+  VALUES 
+      (@intImportFileColumnDetailId,1,'sysid','tblSTTranslogRebates','intTaxAmtsTaxAttributeSysid',NULL,1,2)
+END
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  SELECT @intTagAttributeId = intTagAttributeId FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId
+  UPDATE[dbo].[tblSMXMLTagAttribute]
+  SET [intImportFileColumnDetailId] = @intImportFileColumnDetailId
+       ,[intSequence] = 1
+       ,[strTagAttribute] = 'sysid'
+       ,[strTable] = 'tblSTTranslogRebates'
+       ,[strColumnName] = 'intTaxAmtsTaxAttributeSysid'
+       ,[strDefaultValue] = NULL
+       ,[ysnActive] = 1
+       ,[intConcurrencyId] = 2
+  WHERE intTagAttributeId = @intTagAttributeId
+END
+
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 2 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  INSERT INTO [dbo].[tblSMXMLTagAttribute]
+      ([intImportFileColumnDetailId],[intSequence],[strTagAttribute],[strTable],[strColumnName],[strDefaultValue],[ysnActive],[intConcurrencyId])
+  VALUES 
+      (@intImportFileColumnDetailId,2,'cat','tblSTTranslogRebates','strTaxAmtsTaxAttributeCat',NULL,1,2)
+END
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 2 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  SELECT @intTagAttributeId = intTagAttributeId FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 2 AND intImportFileColumnDetailId = @intImportFileColumnDetailId
+  UPDATE[dbo].[tblSMXMLTagAttribute]
+  SET [intImportFileColumnDetailId] = @intImportFileColumnDetailId
+       ,[intSequence] = 2
+       ,[strTagAttribute] = 'cat'
+       ,[strTable] = 'tblSTTranslogRebates'
+       ,[strColumnName] = 'strTaxAmtsTaxAttributeCat'
+       ,[strDefaultValue] = NULL
+       ,[ysnActive] = 1
+       ,[intConcurrencyId] = 2
+  WHERE intTagAttributeId = @intTagAttributeId
+END
+
+--Delete Rows Not Included in LEVEL 42   Attributes(2x)
+DELETE FROM tblSMXMLTagAttribute WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId AND intSequence NOT IN (1,2)
+
+
+--LEVEL 43   Attributes(1x)
+SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 43 AND strXMLTag = 'trFstmpTax'
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  INSERT INTO [dbo].[tblSMXMLTagAttribute]
+      ([intImportFileColumnDetailId],[intSequence],[strTagAttribute],[strTable],[strColumnName],[strDefaultValue],[ysnActive],[intConcurrencyId])
+  VALUES 
+      (@intImportFileColumnDetailId,1,'locale','tblSTTranslogRebates','strTrCurrTotLocale',NULL,1,2)
+END
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  SELECT @intTagAttributeId = intTagAttributeId FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId
+  UPDATE[dbo].[tblSMXMLTagAttribute]
+  SET [intImportFileColumnDetailId] = @intImportFileColumnDetailId
+       ,[intSequence] = 1
+       ,[strTagAttribute] = 'locale'
+       ,[strTable] = 'tblSTTranslogRebates'
+       ,[strColumnName] = 'strTrCurrTotLocale'
+       ,[strDefaultValue] = NULL
+       ,[ysnActive] = 1
+       ,[intConcurrencyId] = 2
+  WHERE intTagAttributeId = @intTagAttributeId
+END
+
+--Delete Rows Not Included in LEVEL 43   Attributes(1x)
+DELETE FROM tblSMXMLTagAttribute WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId AND intSequence NOT IN (1)
+
+
 --LEVEL 47   Attributes(1x)
 SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 47 AND strXMLTag = 'trLoyaltyProgram'
 IF NOT EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
@@ -3879,6 +4539,222 @@ END
 
 --Delete Rows Not Included in LEVEL 47   Attributes(1x)
 DELETE FROM tblSMXMLTagAttribute WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId AND intSequence NOT IN (1)
+
+
+--LEVEL 50   Attributes(3x)
+SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 50 AND strXMLTag = 'trloSubTotal'
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  INSERT INTO [dbo].[tblSMXMLTagAttribute]
+      ([intImportFileColumnDetailId],[intSequence],[strTagAttribute],[strTable],[strColumnName],[strDefaultValue],[ysnActive],[intConcurrencyId])
+  VALUES 
+      (@intImportFileColumnDetailId,1,'type',NULL,NULL,NULL,1,1)
+END
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  SELECT @intTagAttributeId = intTagAttributeId FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId
+  UPDATE[dbo].[tblSMXMLTagAttribute]
+  SET [intImportFileColumnDetailId] = @intImportFileColumnDetailId
+       ,[intSequence] = 1
+       ,[strTagAttribute] = 'type'
+       ,[strTable] = NULL
+       ,[strColumnName] = NULL
+       ,[strDefaultValue] = NULL
+       ,[ysnActive] = 1
+       ,[intConcurrencyId] = 1
+  WHERE intTagAttributeId = @intTagAttributeId
+END
+
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 2 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  INSERT INTO [dbo].[tblSMXMLTagAttribute]
+      ([intImportFileColumnDetailId],[intSequence],[strTagAttribute],[strTable],[strColumnName],[strDefaultValue],[ysnActive],[intConcurrencyId])
+  VALUES 
+      (@intImportFileColumnDetailId,2,'sysid',NULL,NULL,NULL,1,1)
+END
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 2 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  SELECT @intTagAttributeId = intTagAttributeId FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 2 AND intImportFileColumnDetailId = @intImportFileColumnDetailId
+  UPDATE[dbo].[tblSMXMLTagAttribute]
+  SET [intImportFileColumnDetailId] = @intImportFileColumnDetailId
+       ,[intSequence] = 2
+       ,[strTagAttribute] = 'sysid'
+       ,[strTable] = NULL
+       ,[strColumnName] = NULL
+       ,[strDefaultValue] = NULL
+       ,[ysnActive] = 1
+       ,[intConcurrencyId] = 1
+  WHERE intTagAttributeId = @intTagAttributeId
+END
+
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 3 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  INSERT INTO [dbo].[tblSMXMLTagAttribute]
+      ([intImportFileColumnDetailId],[intSequence],[strTagAttribute],[strTable],[strColumnName],[strDefaultValue],[ysnActive],[intConcurrencyId])
+  VALUES 
+      (@intImportFileColumnDetailId,3,'locale',NULL,NULL,NULL,1,1)
+END
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 3 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  SELECT @intTagAttributeId = intTagAttributeId FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 3 AND intImportFileColumnDetailId = @intImportFileColumnDetailId
+  UPDATE[dbo].[tblSMXMLTagAttribute]
+  SET [intImportFileColumnDetailId] = @intImportFileColumnDetailId
+       ,[intSequence] = 3
+       ,[strTagAttribute] = 'locale'
+       ,[strTable] = NULL
+       ,[strColumnName] = NULL
+       ,[strDefaultValue] = NULL
+       ,[ysnActive] = 1
+       ,[intConcurrencyId] = 1
+  WHERE intTagAttributeId = @intTagAttributeId
+END
+
+--Delete Rows Not Included in LEVEL 50   Attributes(3x)
+DELETE FROM tblSMXMLTagAttribute WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId AND intSequence NOT IN (1,2,3)
+
+
+--LEVEL 51   Attributes(4x)
+SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 51 AND strXMLTag = 'trloAutoDisc'
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  INSERT INTO [dbo].[tblSMXMLTagAttribute]
+      ([intImportFileColumnDetailId],[intSequence],[strTagAttribute],[strTable],[strColumnName],[strDefaultValue],[ysnActive],[intConcurrencyId])
+  VALUES 
+      (@intImportFileColumnDetailId,1,'mop',NULL,NULL,NULL,1,1)
+END
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  SELECT @intTagAttributeId = intTagAttributeId FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId
+  UPDATE[dbo].[tblSMXMLTagAttribute]
+  SET [intImportFileColumnDetailId] = @intImportFileColumnDetailId
+       ,[intSequence] = 1
+       ,[strTagAttribute] = 'mop'
+       ,[strTable] = NULL
+       ,[strColumnName] = NULL
+       ,[strDefaultValue] = NULL
+       ,[ysnActive] = 1
+       ,[intConcurrencyId] = 1
+  WHERE intTagAttributeId = @intTagAttributeId
+END
+
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 2 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  INSERT INTO [dbo].[tblSMXMLTagAttribute]
+      ([intImportFileColumnDetailId],[intSequence],[strTagAttribute],[strTable],[strColumnName],[strDefaultValue],[ysnActive],[intConcurrencyId])
+  VALUES 
+      (@intImportFileColumnDetailId,2,'cat',NULL,NULL,NULL,1,1)
+END
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 2 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  SELECT @intTagAttributeId = intTagAttributeId FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 2 AND intImportFileColumnDetailId = @intImportFileColumnDetailId
+  UPDATE[dbo].[tblSMXMLTagAttribute]
+  SET [intImportFileColumnDetailId] = @intImportFileColumnDetailId
+       ,[intSequence] = 2
+       ,[strTagAttribute] = 'cat'
+       ,[strTable] = NULL
+       ,[strColumnName] = NULL
+       ,[strDefaultValue] = NULL
+       ,[ysnActive] = 1
+       ,[intConcurrencyId] = 1
+  WHERE intTagAttributeId = @intTagAttributeId
+END
+
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 3 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  INSERT INTO [dbo].[tblSMXMLTagAttribute]
+      ([intImportFileColumnDetailId],[intSequence],[strTagAttribute],[strTable],[strColumnName],[strDefaultValue],[ysnActive],[intConcurrencyId])
+  VALUES 
+      (@intImportFileColumnDetailId,3,'nacstendercode',NULL,NULL,NULL,1,1)
+END
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 3 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  SELECT @intTagAttributeId = intTagAttributeId FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 3 AND intImportFileColumnDetailId = @intImportFileColumnDetailId
+  UPDATE[dbo].[tblSMXMLTagAttribute]
+  SET [intImportFileColumnDetailId] = @intImportFileColumnDetailId
+       ,[intSequence] = 3
+       ,[strTagAttribute] = 'nacstendercode'
+       ,[strTable] = NULL
+       ,[strColumnName] = NULL
+       ,[strDefaultValue] = NULL
+       ,[ysnActive] = 1
+       ,[intConcurrencyId] = 1
+  WHERE intTagAttributeId = @intTagAttributeId
+END
+
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 4 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  INSERT INTO [dbo].[tblSMXMLTagAttribute]
+      ([intImportFileColumnDetailId],[intSequence],[strTagAttribute],[strTable],[strColumnName],[strDefaultValue],[ysnActive],[intConcurrencyId])
+  VALUES 
+      (@intImportFileColumnDetailId,4,'nacstendersubcode',NULL,NULL,NULL,1,1)
+END
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 4 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  SELECT @intTagAttributeId = intTagAttributeId FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 4 AND intImportFileColumnDetailId = @intImportFileColumnDetailId
+  UPDATE[dbo].[tblSMXMLTagAttribute]
+  SET [intImportFileColumnDetailId] = @intImportFileColumnDetailId
+       ,[intSequence] = 4
+       ,[strTagAttribute] = 'nacstendersubcode'
+       ,[strTable] = NULL
+       ,[strColumnName] = NULL
+       ,[strDefaultValue] = NULL
+       ,[ysnActive] = 1
+       ,[intConcurrencyId] = 1
+  WHERE intTagAttributeId = @intTagAttributeId
+END
+
+--Delete Rows Not Included in LEVEL 51   Attributes(4x)
+DELETE FROM tblSMXMLTagAttribute WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId AND intSequence NOT IN (1,2,3,4)
+
+
+--LEVEL 54   Attributes(2x)
+SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 54 AND strXMLTag = 'trloEntryMeth'
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  INSERT INTO [dbo].[tblSMXMLTagAttribute]
+      ([intImportFileColumnDetailId],[intSequence],[strTagAttribute],[strTable],[strColumnName],[strDefaultValue],[ysnActive],[intConcurrencyId])
+  VALUES 
+      (@intImportFileColumnDetailId,1,'mop','tblSTTranslogRebates','dblTrCshBkAmtMop',NULL,1,2)
+END
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  SELECT @intTagAttributeId = intTagAttributeId FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId
+  UPDATE[dbo].[tblSMXMLTagAttribute]
+  SET [intImportFileColumnDetailId] = @intImportFileColumnDetailId
+       ,[intSequence] = 1
+       ,[strTagAttribute] = 'mop'
+       ,[strTable] = 'tblSTTranslogRebates'
+       ,[strColumnName] = 'dblTrCshBkAmtMop'
+       ,[strDefaultValue] = NULL
+       ,[ysnActive] = 1
+       ,[intConcurrencyId] = 2
+  WHERE intTagAttributeId = @intTagAttributeId
+END
+
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 2 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  INSERT INTO [dbo].[tblSMXMLTagAttribute]
+      ([intImportFileColumnDetailId],[intSequence],[strTagAttribute],[strTable],[strColumnName],[strDefaultValue],[ysnActive],[intConcurrencyId])
+  VALUES 
+      (@intImportFileColumnDetailId,2,'cat','tblSTTranslogRebates','dblTrCshBkAmtCat',NULL,1,2)
+END
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 2 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  SELECT @intTagAttributeId = intTagAttributeId FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 2 AND intImportFileColumnDetailId = @intImportFileColumnDetailId
+  UPDATE[dbo].[tblSMXMLTagAttribute]
+  SET [intImportFileColumnDetailId] = @intImportFileColumnDetailId
+       ,[intSequence] = 2
+       ,[strTagAttribute] = 'cat'
+       ,[strTable] = 'tblSTTranslogRebates'
+       ,[strColumnName] = 'dblTrCshBkAmtCat'
+       ,[strDefaultValue] = NULL
+       ,[ysnActive] = 1
+       ,[intConcurrencyId] = 2
+  WHERE intTagAttributeId = @intTagAttributeId
+END
+
+--Delete Rows Not Included in LEVEL 54   Attributes(2x)
+DELETE FROM tblSMXMLTagAttribute WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId AND intSequence NOT IN (1,2)
 
 
 --LEVEL 57   Attributes(2x)
@@ -3929,6 +4805,34 @@ END
 
 --Delete Rows Not Included in LEVEL 57   Attributes(2x)
 DELETE FROM tblSMXMLTagAttribute WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId AND intSequence NOT IN (1,2)
+
+
+--LEVEL 61   Attributes(1x)
+SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 61 AND strXMLTag = 'trExNetProd'
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  INSERT INTO [dbo].[tblSMXMLTagAttribute]
+      ([intImportFileColumnDetailId],[intSequence],[strTagAttribute],[strTable],[strColumnName],[strDefaultValue],[ysnActive],[intConcurrencyId])
+  VALUES 
+      (@intImportFileColumnDetailId,1,'programID','tblSTTranslogRebates','strTrLoyaltyProgramProgramID',NULL,1,2)
+END
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  SELECT @intTagAttributeId = intTagAttributeId FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId
+  UPDATE[dbo].[tblSMXMLTagAttribute]
+  SET [intImportFileColumnDetailId] = @intImportFileColumnDetailId
+       ,[intSequence] = 1
+       ,[strTagAttribute] = 'programID'
+       ,[strTable] = 'tblSTTranslogRebates'
+       ,[strColumnName] = 'strTrLoyaltyProgramProgramID'
+       ,[strDefaultValue] = NULL
+       ,[ysnActive] = 1
+       ,[intConcurrencyId] = 2
+  WHERE intTagAttributeId = @intTagAttributeId
+END
+
+--Delete Rows Not Included in LEVEL 61   Attributes(1x)
+DELETE FROM tblSMXMLTagAttribute WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId AND intSequence NOT IN (1)
 
 
 --LEVEL 66   Attributes(3x)
@@ -4125,6 +5029,128 @@ END
 DELETE FROM tblSMXMLTagAttribute WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId AND intSequence NOT IN (1,2)
 
 
+--LEVEL 71   Attributes(3x)
+SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 71 AND strXMLTag = 'trlBdayVerif'
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  INSERT INTO [dbo].[tblSMXMLTagAttribute]
+      ([intImportFileColumnDetailId],[intSequence],[strTagAttribute],[strTable],[strColumnName],[strDefaultValue],[ysnActive],[intConcurrencyId])
+  VALUES 
+      (@intImportFileColumnDetailId,1,'sysid','tblSTTranslogRebates','intTrlTaxesTrlTaxSysid',NULL,1,2)
+END
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  SELECT @intTagAttributeId = intTagAttributeId FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId
+  UPDATE[dbo].[tblSMXMLTagAttribute]
+  SET [intImportFileColumnDetailId] = @intImportFileColumnDetailId
+       ,[intSequence] = 1
+       ,[strTagAttribute] = 'sysid'
+       ,[strTable] = 'tblSTTranslogRebates'
+       ,[strColumnName] = 'intTrlTaxesTrlTaxSysid'
+       ,[strDefaultValue] = NULL
+       ,[ysnActive] = 1
+       ,[intConcurrencyId] = 2
+  WHERE intTagAttributeId = @intTagAttributeId
+END
+
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 2 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  INSERT INTO [dbo].[tblSMXMLTagAttribute]
+      ([intImportFileColumnDetailId],[intSequence],[strTagAttribute],[strTable],[strColumnName],[strDefaultValue],[ysnActive],[intConcurrencyId])
+  VALUES 
+      (@intImportFileColumnDetailId,2,'cat','tblSTTranslogRebates','strTrlTaxesTrlTaxCat',NULL,1,2)
+END
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 2 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  SELECT @intTagAttributeId = intTagAttributeId FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 2 AND intImportFileColumnDetailId = @intImportFileColumnDetailId
+  UPDATE[dbo].[tblSMXMLTagAttribute]
+  SET [intImportFileColumnDetailId] = @intImportFileColumnDetailId
+       ,[intSequence] = 2
+       ,[strTagAttribute] = 'cat'
+       ,[strTable] = 'tblSTTranslogRebates'
+       ,[strColumnName] = 'strTrlTaxesTrlTaxCat'
+       ,[strDefaultValue] = NULL
+       ,[ysnActive] = 1
+       ,[intConcurrencyId] = 2
+  WHERE intTagAttributeId = @intTagAttributeId
+END
+
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 3 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  INSERT INTO [dbo].[tblSMXMLTagAttribute]
+      ([intImportFileColumnDetailId],[intSequence],[strTagAttribute],[strTable],[strColumnName],[strDefaultValue],[ysnActive],[intConcurrencyId])
+  VALUES 
+      (@intImportFileColumnDetailId,3,'reverse','tblSTTranslogRebates','intTrlTaxesTrlTaxReverse',NULL,1,2)
+END
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 3 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  SELECT @intTagAttributeId = intTagAttributeId FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 3 AND intImportFileColumnDetailId = @intImportFileColumnDetailId
+  UPDATE[dbo].[tblSMXMLTagAttribute]
+  SET [intImportFileColumnDetailId] = @intImportFileColumnDetailId
+       ,[intSequence] = 3
+       ,[strTagAttribute] = 'reverse'
+       ,[strTable] = 'tblSTTranslogRebates'
+       ,[strColumnName] = 'intTrlTaxesTrlTaxReverse'
+       ,[strDefaultValue] = NULL
+       ,[ysnActive] = 1
+       ,[intConcurrencyId] = 2
+  WHERE intTagAttributeId = @intTagAttributeId
+END
+
+--Delete Rows Not Included in LEVEL 71   Attributes(3x)
+DELETE FROM tblSMXMLTagAttribute WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId AND intSequence NOT IN (1,2,3)
+
+
+--LEVEL 72   Attributes(2x)
+SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 72 AND strXMLTag = 'trlPLU'
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  INSERT INTO [dbo].[tblSMXMLTagAttribute]
+      ([intImportFileColumnDetailId],[intSequence],[strTagAttribute],[strTable],[strColumnName],[strDefaultValue],[ysnActive],[intConcurrencyId])
+  VALUES 
+      (@intImportFileColumnDetailId,1,'sysid','tblSTTranslogRebates','intTrlTaxesTrlRateSysid',NULL,1,2)
+END
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  SELECT @intTagAttributeId = intTagAttributeId FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId
+  UPDATE[dbo].[tblSMXMLTagAttribute]
+  SET [intImportFileColumnDetailId] = @intImportFileColumnDetailId
+       ,[intSequence] = 1
+       ,[strTagAttribute] = 'sysid'
+       ,[strTable] = 'tblSTTranslogRebates'
+       ,[strColumnName] = 'intTrlTaxesTrlRateSysid'
+       ,[strDefaultValue] = NULL
+       ,[ysnActive] = 1
+       ,[intConcurrencyId] = 2
+  WHERE intTagAttributeId = @intTagAttributeId
+END
+
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 2 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  INSERT INTO [dbo].[tblSMXMLTagAttribute]
+      ([intImportFileColumnDetailId],[intSequence],[strTagAttribute],[strTable],[strColumnName],[strDefaultValue],[ysnActive],[intConcurrencyId])
+  VALUES 
+      (@intImportFileColumnDetailId,2,'cat','tblSTTranslogRebates','strTrlTaxesTrlRateCat',NULL,1,3)
+END
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 2 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  SELECT @intTagAttributeId = intTagAttributeId FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 2 AND intImportFileColumnDetailId = @intImportFileColumnDetailId
+  UPDATE[dbo].[tblSMXMLTagAttribute]
+  SET [intImportFileColumnDetailId] = @intImportFileColumnDetailId
+       ,[intSequence] = 2
+       ,[strTagAttribute] = 'cat'
+       ,[strTable] = 'tblSTTranslogRebates'
+       ,[strColumnName] = 'strTrlTaxesTrlRateCat'
+       ,[strDefaultValue] = NULL
+       ,[ysnActive] = 1
+       ,[intConcurrencyId] = 3
+  WHERE intTagAttributeId = @intTagAttributeId
+END
+
+--Delete Rows Not Included in LEVEL 72   Attributes(2x)
+DELETE FROM tblSMXMLTagAttribute WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId AND intSequence NOT IN (1,2)
+
+
 --LEVEL 78   Attributes(2x)
 SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 78 AND strXMLTag = 'trlDept'
 IF NOT EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
@@ -4201,6 +5227,56 @@ END
 
 --Delete Rows Not Included in LEVEL 79   Attributes(1x)
 DELETE FROM tblSMXMLTagAttribute WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId AND intSequence NOT IN (1)
+
+
+--LEVEL 81   Attributes(2x)
+SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 81 AND strXMLTag = 'trlQty'
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  INSERT INTO [dbo].[tblSMXMLTagAttribute]
+      ([intImportFileColumnDetailId],[intSequence],[strTagAttribute],[strTable],[strColumnName],[strDefaultValue],[ysnActive],[intConcurrencyId])
+  VALUES 
+      (@intImportFileColumnDetailId,1,'number','tblSTTranslogRebates','intTrlDeptNumber',NULL,1,2)
+END
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  SELECT @intTagAttributeId = intTagAttributeId FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId
+  UPDATE[dbo].[tblSMXMLTagAttribute]
+  SET [intImportFileColumnDetailId] = @intImportFileColumnDetailId
+       ,[intSequence] = 1
+       ,[strTagAttribute] = 'number'
+       ,[strTable] = 'tblSTTranslogRebates'
+       ,[strColumnName] = 'intTrlDeptNumber'
+       ,[strDefaultValue] = NULL
+       ,[ysnActive] = 1
+       ,[intConcurrencyId] = 2
+  WHERE intTagAttributeId = @intTagAttributeId
+END
+
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 2 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  INSERT INTO [dbo].[tblSMXMLTagAttribute]
+      ([intImportFileColumnDetailId],[intSequence],[strTagAttribute],[strTable],[strColumnName],[strDefaultValue],[ysnActive],[intConcurrencyId])
+  VALUES 
+      (@intImportFileColumnDetailId,2,'type','tblSTTranslogRebates','strTrlDeptType',NULL,1,2)
+END
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 2 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  SELECT @intTagAttributeId = intTagAttributeId FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 2 AND intImportFileColumnDetailId = @intImportFileColumnDetailId
+  UPDATE[dbo].[tblSMXMLTagAttribute]
+  SET [intImportFileColumnDetailId] = @intImportFileColumnDetailId
+       ,[intSequence] = 2
+       ,[strTagAttribute] = 'type'
+       ,[strTable] = 'tblSTTranslogRebates'
+       ,[strColumnName] = 'strTrlDeptType'
+       ,[strDefaultValue] = NULL
+       ,[ysnActive] = 1
+       ,[intConcurrencyId] = 2
+  WHERE intTagAttributeId = @intTagAttributeId
+END
+
+--Delete Rows Not Included in LEVEL 81   Attributes(2x)
+DELETE FROM tblSMXMLTagAttribute WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId AND intSequence NOT IN (1,2)
 
 
 --LEVEL 89   Attributes(1x)
@@ -4422,6 +5498,228 @@ BEGIN
 END
 
 --Delete Rows Not Included in LEVEL 96   Attributes(1x)
+DELETE FROM tblSMXMLTagAttribute WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId AND intSequence NOT IN (1)
+
+
+--LEVEL 101   Attributes(1x)
+SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 101 AND strXMLTag = 'trpcEntryMeth'
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  INSERT INTO [dbo].[tblSMXMLTagAttribute]
+      ([intImportFileColumnDetailId],[intSequence],[strTagAttribute],[strTable],[strColumnName],[strDefaultValue],[ysnActive],[intConcurrencyId])
+  VALUES 
+      (@intImportFileColumnDetailId,1,'promotype','tblSTTranslogRebates','strTrlMatchLineTrlPromotionIDPromoType',NULL,1,2)
+END
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  SELECT @intTagAttributeId = intTagAttributeId FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId
+  UPDATE[dbo].[tblSMXMLTagAttribute]
+  SET [intImportFileColumnDetailId] = @intImportFileColumnDetailId
+       ,[intSequence] = 1
+       ,[strTagAttribute] = 'promotype'
+       ,[strTable] = 'tblSTTranslogRebates'
+       ,[strColumnName] = 'strTrlMatchLineTrlPromotionIDPromoType'
+       ,[strDefaultValue] = NULL
+       ,[ysnActive] = 1
+       ,[intConcurrencyId] = 2
+  WHERE intTagAttributeId = @intTagAttributeId
+END
+
+--Delete Rows Not Included in LEVEL 101   Attributes(1x)
+DELETE FROM tblSMXMLTagAttribute WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId AND intSequence NOT IN (1)
+
+
+--LEVEL 103   Attributes(3x)
+SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 103 AND strXMLTag = 'trpcSeqNr'
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  INSERT INTO [dbo].[tblSMXMLTagAttribute]
+      ([intImportFileColumnDetailId],[intSequence],[strTagAttribute],[strTable],[strColumnName],[strDefaultValue],[ysnActive],[intConcurrencyId])
+  VALUES 
+      (@intImportFileColumnDetailId,1,'type','tblSTTranslogRebates','strTrPaylineType',NULL,1,2)
+END
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  SELECT @intTagAttributeId = intTagAttributeId FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId
+  UPDATE[dbo].[tblSMXMLTagAttribute]
+  SET [intImportFileColumnDetailId] = @intImportFileColumnDetailId
+       ,[intSequence] = 1
+       ,[strTagAttribute] = 'type'
+       ,[strTable] = 'tblSTTranslogRebates'
+       ,[strColumnName] = 'strTrPaylineType'
+       ,[strDefaultValue] = NULL
+       ,[ysnActive] = 1
+       ,[intConcurrencyId] = 2
+  WHERE intTagAttributeId = @intTagAttributeId
+END
+
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 2 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  INSERT INTO [dbo].[tblSMXMLTagAttribute]
+      ([intImportFileColumnDetailId],[intSequence],[strTagAttribute],[strTable],[strColumnName],[strDefaultValue],[ysnActive],[intConcurrencyId])
+  VALUES 
+      (@intImportFileColumnDetailId,2,'sysid','tblSTTranslogRebates','intTrPaylineSysid',NULL,1,2)
+END
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 2 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  SELECT @intTagAttributeId = intTagAttributeId FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 2 AND intImportFileColumnDetailId = @intImportFileColumnDetailId
+  UPDATE[dbo].[tblSMXMLTagAttribute]
+  SET [intImportFileColumnDetailId] = @intImportFileColumnDetailId
+       ,[intSequence] = 2
+       ,[strTagAttribute] = 'sysid'
+       ,[strTable] = 'tblSTTranslogRebates'
+       ,[strColumnName] = 'intTrPaylineSysid'
+       ,[strDefaultValue] = NULL
+       ,[ysnActive] = 1
+       ,[intConcurrencyId] = 2
+  WHERE intTagAttributeId = @intTagAttributeId
+END
+
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 3 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  INSERT INTO [dbo].[tblSMXMLTagAttribute]
+      ([intImportFileColumnDetailId],[intSequence],[strTagAttribute],[strTable],[strColumnName],[strDefaultValue],[ysnActive],[intConcurrencyId])
+  VALUES 
+      (@intImportFileColumnDetailId,3,'locale','tblSTTranslogRebates','strTrPaylineLocale',NULL,1,2)
+END
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 3 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  SELECT @intTagAttributeId = intTagAttributeId FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 3 AND intImportFileColumnDetailId = @intImportFileColumnDetailId
+  UPDATE[dbo].[tblSMXMLTagAttribute]
+  SET [intImportFileColumnDetailId] = @intImportFileColumnDetailId
+       ,[intSequence] = 3
+       ,[strTagAttribute] = 'locale'
+       ,[strTable] = 'tblSTTranslogRebates'
+       ,[strColumnName] = 'strTrPaylineLocale'
+       ,[strDefaultValue] = NULL
+       ,[ysnActive] = 1
+       ,[intConcurrencyId] = 2
+  WHERE intTagAttributeId = @intTagAttributeId
+END
+
+--Delete Rows Not Included in LEVEL 103   Attributes(3x)
+DELETE FROM tblSMXMLTagAttribute WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId AND intSequence NOT IN (1,2,3)
+
+
+--LEVEL 104   Attributes(4x)
+SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 104 AND strXMLTag = 'trpcAuthDateTime'
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  INSERT INTO [dbo].[tblSMXMLTagAttribute]
+      ([intImportFileColumnDetailId],[intSequence],[strTagAttribute],[strTable],[strColumnName],[strDefaultValue],[ysnActive],[intConcurrencyId])
+  VALUES 
+      (@intImportFileColumnDetailId,1,'mop','tblSTTranslogRebates','intTrpPaycodeMop',NULL,0,3)
+END
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  SELECT @intTagAttributeId = intTagAttributeId FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId
+  UPDATE[dbo].[tblSMXMLTagAttribute]
+  SET [intImportFileColumnDetailId] = @intImportFileColumnDetailId
+       ,[intSequence] = 1
+       ,[strTagAttribute] = 'mop'
+       ,[strTable] = 'tblSTTranslogRebates'
+       ,[strColumnName] = 'intTrpPaycodeMop'
+       ,[strDefaultValue] = NULL
+       ,[ysnActive] = 0
+       ,[intConcurrencyId] = 3
+  WHERE intTagAttributeId = @intTagAttributeId
+END
+
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 2 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  INSERT INTO [dbo].[tblSMXMLTagAttribute]
+      ([intImportFileColumnDetailId],[intSequence],[strTagAttribute],[strTable],[strColumnName],[strDefaultValue],[ysnActive],[intConcurrencyId])
+  VALUES 
+      (@intImportFileColumnDetailId,2,'cat','tblSTTranslogRebates','intTrpPaycodeCat',NULL,0,3)
+END
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 2 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  SELECT @intTagAttributeId = intTagAttributeId FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 2 AND intImportFileColumnDetailId = @intImportFileColumnDetailId
+  UPDATE[dbo].[tblSMXMLTagAttribute]
+  SET [intImportFileColumnDetailId] = @intImportFileColumnDetailId
+       ,[intSequence] = 2
+       ,[strTagAttribute] = 'cat'
+       ,[strTable] = 'tblSTTranslogRebates'
+       ,[strColumnName] = 'intTrpPaycodeCat'
+       ,[strDefaultValue] = NULL
+       ,[ysnActive] = 0
+       ,[intConcurrencyId] = 3
+  WHERE intTagAttributeId = @intTagAttributeId
+END
+
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 3 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  INSERT INTO [dbo].[tblSMXMLTagAttribute]
+      ([intImportFileColumnDetailId],[intSequence],[strTagAttribute],[strTable],[strColumnName],[strDefaultValue],[ysnActive],[intConcurrencyId])
+  VALUES 
+      (@intImportFileColumnDetailId,3,'nacstendercode','tblSTTranslogRebates','strTrPaylineNacstendercode',NULL,1,2)
+END
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 3 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  SELECT @intTagAttributeId = intTagAttributeId FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 3 AND intImportFileColumnDetailId = @intImportFileColumnDetailId
+  UPDATE[dbo].[tblSMXMLTagAttribute]
+  SET [intImportFileColumnDetailId] = @intImportFileColumnDetailId
+       ,[intSequence] = 3
+       ,[strTagAttribute] = 'nacstendercode'
+       ,[strTable] = 'tblSTTranslogRebates'
+       ,[strColumnName] = 'strTrPaylineNacstendercode'
+       ,[strDefaultValue] = NULL
+       ,[ysnActive] = 1
+       ,[intConcurrencyId] = 2
+  WHERE intTagAttributeId = @intTagAttributeId
+END
+
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 4 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  INSERT INTO [dbo].[tblSMXMLTagAttribute]
+      ([intImportFileColumnDetailId],[intSequence],[strTagAttribute],[strTable],[strColumnName],[strDefaultValue],[ysnActive],[intConcurrencyId])
+  VALUES 
+      (@intImportFileColumnDetailId,4,'nacstendersubcode','tblSTTranslogRebates','strTrPaylineNacstendersubcode',NULL,1,3)
+END
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 4 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  SELECT @intTagAttributeId = intTagAttributeId FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 4 AND intImportFileColumnDetailId = @intImportFileColumnDetailId
+  UPDATE[dbo].[tblSMXMLTagAttribute]
+  SET [intImportFileColumnDetailId] = @intImportFileColumnDetailId
+       ,[intSequence] = 4
+       ,[strTagAttribute] = 'nacstendersubcode'
+       ,[strTable] = 'tblSTTranslogRebates'
+       ,[strColumnName] = 'strTrPaylineNacstendersubcode'
+       ,[strDefaultValue] = NULL
+       ,[ysnActive] = 1
+       ,[intConcurrencyId] = 3
+  WHERE intTagAttributeId = @intTagAttributeId
+END
+
+--Delete Rows Not Included in LEVEL 104   Attributes(4x)
+DELETE FROM tblSMXMLTagAttribute WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId AND intSequence NOT IN (1,2,3,4)
+
+
+--LEVEL 108   Attributes(1x)
+SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 108 AND strXMLTag = 'trpcmTermID'
+IF NOT EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  INSERT INTO [dbo].[tblSMXMLTagAttribute]
+      ([intImportFileColumnDetailId],[intSequence],[strTagAttribute],[strTable],[strColumnName],[strDefaultValue],[ysnActive],[intConcurrencyId])
+  VALUES 
+      (@intImportFileColumnDetailId,1,'prodSysid','tblSTTranslogRebates','intTrpCardInfoTrpcCCNameProdSysid',NULL,1,2)
+END
+ELSE IF EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId)
+BEGIN
+  SELECT @intTagAttributeId = intTagAttributeId FROM dbo.tblSMXMLTagAttribute WHERE intSequence = 1 AND intImportFileColumnDetailId = @intImportFileColumnDetailId
+  UPDATE[dbo].[tblSMXMLTagAttribute]
+  SET [intImportFileColumnDetailId] = @intImportFileColumnDetailId
+       ,[intSequence] = 1
+       ,[strTagAttribute] = 'prodSysid'
+       ,[strTable] = 'tblSTTranslogRebates'
+       ,[strColumnName] = 'intTrpCardInfoTrpcCCNameProdSysid'
+       ,[strDefaultValue] = NULL
+       ,[ysnActive] = 1
+       ,[intConcurrencyId] = 2
+  WHERE intTagAttributeId = @intTagAttributeId
+END
+
+--Delete Rows Not Included in LEVEL 108   Attributes(1x)
 DELETE FROM tblSMXMLTagAttribute WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId AND intSequence NOT IN (1)
 
 
