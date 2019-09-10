@@ -32,6 +32,7 @@ BEGIN TRY
 		,@ysnWeekOfSupply BIT = 0
 		,@ysnCalculateNoOfContainerByBagQty BIT = 0
 		,@intContainerTypeId INT
+		--,@strContainerType NVARCHAR(50) 
 		,@intItemId INT
 		,@dblEndInventory NUMERIC(18, 6)
 		,@intConsumptionMonth INT
@@ -68,6 +69,10 @@ BEGIN TRY
 		,@ysnComputeDemandUsingRecipe = ysnComputeDemandUsingRecipe
 		,@ysnDisplayDemandWithItemNoAndDescription = ysnDisplayDemandWithItemNoAndDescription
 	FROM tblMFCompanyPreference
+
+	--Select @strContainerType=strContainerType
+	--from tblLGContainerType
+	--Where intContainerTypeId=@intContainerTypeId
 
 	SELECT @ysnDemandViewForBlend = ysnDemandViewForBlend
 	FROM tblCTCompanyPreference
@@ -1193,6 +1198,7 @@ BEGIN TRY
 	IF @ysnCalculatePlannedPurchases = 0
 		AND @ysnCalculateEndInventory = 0
 		AND @intContainerTypeId IS NOT NULL
+		and IsNULL(@WeeksOfSupplyTargetXML,'') = ''
 	BEGIN
 		INSERT INTO #tblMFDemand (
 			intItemId
