@@ -414,10 +414,11 @@ BEGIN
 	SET @SQL =
 	N'
 	If(OBJECT_ID(''tempdb..#tempCheckoutInsert'') Is Not Null)
-	Begin
-	    Drop Table #tempCheckoutInsert
-	End
-	Declare @strXML nvarchar(max) 
+		BEGIN
+			DROP TABLE #tempCheckoutInsert
+		END
+
+	DECLARE @strXML NVARCHAR(max) 
 	SET @strXML = @strXMLParam
 	SET @strXML = REPLACE(@strXML, @strXMLinitiatorParam, '''')
 
@@ -427,18 +428,32 @@ BEGIN
 	Declare @xml XML = @strXML 
 	' + @strRootTagNamespace + '
 
-	SELECT ' + CHAR(13)
-	+ ' IDENTITY(int, 1, 1) AS intRowCount,' + CHAR(13)
+
+	 BEGIN TRY
+
+	 SELECT ' + CHAR(13)
+	+ ' IDENTITY(int, 1, 1) AS intRowCount, ' + CHAR(13)
 	+ @SELECTCOLUMNS
 	+ ' INTO #tempCheckoutInsert ' + CHAR(13)
 	+ ' FROM ' + CHAR(13)
 	+ @FROMNODES + CHAR(13)
-	+ ' ORDER BY intRowCount ASC'
-	--+ ' -- SELECT * FROM #tempCheckoutInsert ' +  CHAR(13)
-	+ ' EXEC @strSPNameParam @intCheckoutIdParam, @strStatusMsg OUTPUT, @intCountRows OUTPUT' +  CHAR(13)
-	+ ' DROP TABLE #tempCheckoutInsert ' +  CHAR(13)
+	+ ' ORDER BY intRowCount ASC ' + CHAR(13) + CHAR(13)
 
-	DECLARE @ParmDef nvarchar(max);
+	+ ' END TRY ' + CHAR(13)
+	+ ' BEGIN CATCH ' + CHAR(13)
+
+	+ '		SET @strStatusMsg = ERROR_MESSAGE() ' + CHAR(13)
+	+ '		SET @intCountRows = 0 ' + CHAR(13)
+	+ '		RETURN' + CHAR(13)
+
+	+ ' END CATCH ' + CHAR(13)
+
+
+	--+ ' -- SELECT * FROM #tempCheckoutInsert ' +  CHAR(13)
+	+ ' EXEC @strSPNameParam @intCheckoutIdParam, @strStatusMsg OUTPUT, @intCountRows OUTPUT ' +  CHAR(13)
+	+ ' DROP TABLE #tempCheckoutInsert ' +  CHAR(13)
+	
+	DECLARE @ParmDef NVARCHAR(MAX);
 
 	SET @ParmDef = N'@strXMLParam NVARCHAR(MAX)'
 	             + ', @strXMLinitiatorParam NVARCHAR(MAX)'
