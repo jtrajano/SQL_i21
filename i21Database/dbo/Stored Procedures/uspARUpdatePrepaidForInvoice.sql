@@ -156,6 +156,7 @@ BEGIN TRY
 		 , intItemContractDetailId	= OPD.intItemContractDetailId
 		 , intItemId				= OPD.intItemId
 		 , ysnRestricted			= ISNULL(OPD.ysnRestricted, 0)
+		 , strContractApplyTo		= OP.strContractApplyTo
 	INTO #ITEMCONTRACTS
 	FROM #OPENPREPAIDS OP
 	INNER JOIN tblARInvoiceDetail OPD ON OP.intInvoiceId = OPD.intInvoiceId
@@ -170,6 +171,7 @@ BEGIN TRY
 		 , intCategoryId			= OPD.intCategoryId
 		 , intItemContractHeaderId	= OPD.intItemContractHeaderId
 		 , ysnRestricted			= ISNULL(OPD.ysnRestricted, 0)
+		 , strContractApplyTo		= OP.strContractApplyTo
 	INTO #ITEMCATEGORY
 	FROM #OPENPREPAIDS OP
 	INNER JOIN tblARInvoiceDetail OPD ON OP.intInvoiceId = OPD.intInvoiceId
@@ -269,10 +271,10 @@ BEGIN TRY
 			 , intInvoiceDetailId	= RIC.intInvoiceDetailId
 		FROM tblARInvoiceDetail ID
 		INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId
-		INNER JOIN #ITEMCONTRACTS RIC ON ((I.strContractApplyTo = 'Contract' AND RIC.ysnRestricted = 1 AND ID.intItemContractDetailId IS NOT NULL AND ID.intItemId = RIC.intItemId)
-									   OR (I.strContractApplyTo = 'Contract' AND RIC.ysnRestricted = 0 AND ID.intItemContractDetailId IS NOT NULL)
-									   OR (I.strContractApplyTo = 'Any' AND RIC.ysnRestricted = 1 AND ID.intItemId = RIC.intItemId)
-									   OR (I.strContractApplyTo = 'Any' AND RIC.ysnRestricted = 0 AND RIC.intItemId IS NOT NULL))
+		INNER JOIN #ITEMCONTRACTS RIC ON ((RIC.strContractApplyTo = 'Contract' AND RIC.ysnRestricted = 1 AND ID.intItemContractDetailId IS NOT NULL AND ID.intItemId = RIC.intItemId)
+									   OR (RIC.strContractApplyTo = 'Contract' AND RIC.ysnRestricted = 0 AND ID.intItemContractDetailId IS NOT NULL)
+									   OR (RIC.strContractApplyTo = 'Any' AND RIC.ysnRestricted = 1 AND ID.intItemId = RIC.intItemId)
+									   OR (RIC.strContractApplyTo = 'Any' AND RIC.ysnRestricted = 0 AND RIC.intItemId IS NOT NULL))
 		WHERE ID.intInvoiceId = @InvoiceId
 		
 		UNION ALL
@@ -282,10 +284,10 @@ BEGIN TRY
 		FROM tblARInvoiceDetail ID
 		INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId
 		INNER JOIN tblICItem ITEM ON ID.intItemId = ITEM.intItemId 
-		INNER JOIN #ITEMCATEGORY RCAT ON ((I.strContractApplyTo = 'Contract' AND RCAT.ysnRestricted = 1 AND ID.intItemContractHeaderId IS NOT NULL AND ITEM.intCategoryId = RCAT.intCategoryId)
-									   OR (I.strContractApplyTo = 'Contract' AND RCAT.ysnRestricted = 0 AND ID.intItemContractHeaderId IS NOT NULL)
-									   OR (I.strContractApplyTo = 'Any' AND RCAT.ysnRestricted = 1 AND ITEM.intCategoryId = RCAT.intCategoryId)
-									   OR (I.strContractApplyTo = 'Any' AND RCAT.ysnRestricted = 0 AND RCAT.intCategoryId IS NOT NULL))
+		INNER JOIN #ITEMCATEGORY RCAT ON ((RCAT.strContractApplyTo = 'Contract' AND RCAT.ysnRestricted = 1 AND ID.intItemContractHeaderId IS NOT NULL AND ITEM.intCategoryId = RCAT.intCategoryId)
+									   OR (RCAT.strContractApplyTo = 'Contract' AND RCAT.ysnRestricted = 0 AND ID.intItemContractHeaderId IS NOT NULL)
+									   OR (RCAT.strContractApplyTo = 'Any' AND RCAT.ysnRestricted = 1 AND ITEM.intCategoryId = RCAT.intCategoryId)
+									   OR (RCAT.strContractApplyTo = 'Any' AND RCAT.ysnRestricted = 0 AND RCAT.intCategoryId IS NOT NULL))
 		WHERE ID.intInvoiceId = @InvoiceId
 
 		UNION ALL
