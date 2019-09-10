@@ -65,14 +65,14 @@ BEGIN TRY
 		, [dblQtyOrdered]
 		, [intTicketId]
 	)
-	SELECT I.[intInvoiceDetailId]
-		, I.[intContractDetailId]
-		, I.[intContractHeaderId]
-		, I.[intItemUOMId]
-		, ID.[intOrderUOMId]
-		, I.[dblQtyShipped]
-		, ID.[dblQtyOrdered]
-		, I.[intTicketId]
+	SELECT [intInvoiceDetailId] 	= I.[intInvoiceDetailId]
+		, [intContractDetailId]		= I.[intContractDetailId]
+		, [intContractHeaderId]		= I.[intContractHeaderId]
+		, [intItemUOMId]			= I.[intItemUOMId]
+		, [intOrderUOMId]			= ID.[intOrderUOMId]
+		, [dblQty]					= I.[dblQtyShipped]
+		, [dblQtyOrdered]			= CASE WHEN ID.intSalesOrderDetailId IS NOT NULL OR ID.intTicketId IS NOT NULL THEN ID.[dblQtyOrdered] ELSE 0 END
+		, [intTicketId]				= I.[intTicketId]
 	FROM @ItemsFromInvoice I
 	INNER JOIN tblARInvoiceDetail ID ON I.intInvoiceDetailId = ID.intInvoiceDetailId
 	WHERE I.intContractDetailId IS NOT NULL
