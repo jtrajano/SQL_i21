@@ -23,7 +23,8 @@ BEGIN TRY
 	JOIN	tblLGLoadDetail		LD	ON	LD.intLoadId			=	LO.intLoadId
 	JOIN	tblCTContractDetail	CD	ON	CD.intContractDetailId	=	ISNULL(LD.intSContractDetailId,LD.intPContractDetailId)
 	WHERE	intTicketId IS NULL 
-	AND		LO.intShipmentStatus <> 10
+	AND		LO.intShipmentStatus NOT IN (4, 10)
+	AND		LO.intShipmentType <> 2
 	AND		CD.intContractHeaderId	=	@intContractHeaderId
 
 	SELECT @intLoadId = MIN(intLoadId) FROM @OpenLoad

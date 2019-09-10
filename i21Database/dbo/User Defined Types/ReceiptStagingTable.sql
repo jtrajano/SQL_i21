@@ -48,7 +48,7 @@ CREATE TYPE [dbo].[ReceiptStagingTable] AS TABLE
 	,[ysnSubCurrency] BIT NULL 
 	,[intPaymentOn] INT NULL								-- Reserved for PaymentOn option
 	,[intForexRateTypeId] INT NULL							-- Currency Forex Rate Type Id
-	,[dblForexRate] NUMERIC(18, 6) NULL						-- Forex Rate (Exchange Rate)
+	,[dblForexRate] NUMERIC(38, 20) NULL						-- Forex Rate (Exchange Rate)
 	,[intContainerId] INT NULL								-- Container id. Used by LG Inbound Shipment. 
 	,[strChargesLink] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL 
 	,[intLoadReceive] INT NULL								-- For Load Contracts. Number of Load to Receive

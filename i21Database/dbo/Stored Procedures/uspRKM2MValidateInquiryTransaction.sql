@@ -136,6 +136,47 @@ BEGIN TRY
 			AND rk.intContractDetailId = CD.intContractDetailId
 			AND rk.intFutureMonthId = CD.intFutureMonthId
 			AND ISNULL(rk.intNearByFutureMonthId, 0) = 0
+
+		UNION ALL SELECT CD.intContractDetailId
+			, CH.intContractHeaderId
+			, intFutOptTransactionHeaderId = NULL
+			, CL.strLocationName
+			, CY.strCommodityCode
+			, TP.strContractType strContractType
+			, strContractNumber = CH.strContractNumber + '-' + convert(NVARCHAR(10), CD.intContractSeq)
+			, EY.strName strEntityName
+			, IM.strItemNo
+			, PT.strPricingType
+			, MO.strFutureMonth
+			, FM.strFutMarketName
+			, MO.dtmLastTradingDate
+			, strPhysicalOrFuture = 'Physical'
+			, strErrorMsg = 'No settlement price found'
+		FROM tblCTContractHeader CH
+		JOIN tblICCommodity CY ON CY.intCommodityId = CH.intCommodityId
+		JOIN tblCTContractType TP ON TP.intContractTypeId = CH.intContractTypeId
+		JOIN tblEMEntity EY ON EY.intEntityId = CH.intEntityId
+		JOIN tblCTContractDetail CD ON CH.intContractHeaderId = CD.intContractHeaderId
+		JOIN tblRKFutureMarket FM ON FM.intFutureMarketId = CD.intFutureMarketId
+		JOIN tblRKFuturesMonth MO ON MO.intFutureMonthId = CD.intFutureMonthId
+		JOIN tblICItem IM ON IM.intItemId = CD.intItemId
+		JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CD.intCompanyLocationId AND CL.intCompanyLocationId = CASE WHEN isnull(@intLocationId, 0) = 0 THEN CL.intCompanyLocationId ELSE @intLocationId END
+		JOIN tblCTPricingType PT ON PT.intPricingTypeId = CD.intPricingTypeId
+		CROSS APPLY dbo.fnRKRollToNearby(CD.intContractDetailId, CD.intFutureMarketId, CD.intFutureMonthId, CD.dblFutures) rk
+		WHERE CH.intCommodityId = @intCommodityId
+			AND CD.dblQuantity > ISNULL(CD.dblInvoicedQty, 0)
+			AND CL.intCompanyLocationId = CASE WHEN ISNULL(@intLocationId, 0) = 0 THEN CL.intCompanyLocationId ELSE @intLocationId END
+			AND ISNULL(CD.intMarketZoneId, 0) = CASE WHEN ISNULL(@intMarketZoneId, 0) = 0 THEN ISNULL(CD.intMarketZoneId, 0) ELSE @intMarketZoneId END
+			AND intContractStatusId NOT IN (2, 3, 6, 5)
+			AND dtmContractDate <= @dtmTransactionDateUpTo
+			AND MO.intFutureMonthId IN (SELECT intFutureMonthId
+										FROM tblRKFuturesMonth
+										WHERE ISNULL(ysnExpired, 0) = 1 OR ISNULL(dtmLastTradingDate, GETDATE()) < GETDATE())
+			AND rk.intContractDetailId = CD.intContractDetailId
+			AND rk.intFutureMonthId = CD.intFutureMonthId
+			AND CD.intPricingTypeId IN (1, 3)
+			AND ISNULL(rk.intNearByFutureMonthId, 0) <> 0
+			AND ISNULL(rk.dblNearByFuturePrice, 0) = 0
 	END
 	ELSE
 	BEGIN
