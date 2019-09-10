@@ -3,75 +3,71 @@ AS
 BEGIN TRY
 	SET NOCOUNT ON
 
-	BEGIN TRANSACTION
-
 	DECLARE @ErrMsg NVARCHAR(MAX)
-	DECLARE @intId INT
-	DECLARE @intLoadId INT
-	DECLARE @strLoadNumber NVARCHAR(MAX)
-	DECLARE @strLoad NVARCHAR(MAX)
-	DECLARE @strLoadDetail NVARCHAR(MAX)
-	DECLARE @strLoadDetailLot NVARCHAR(MAX)
-	DECLARE @strLoadDocument NVARCHAR(MAX)
-	DECLARE @strLoadNotifyParty NVARCHAR(MAX)
-	DECLARE @strLoadContainer NVARCHAR(MAX)
-	DECLARE @strLoadDetailContainerLink NVARCHAR(MAX)
-	DECLARE @strLoadWarehouse NVARCHAR(MAX)
-	DECLARE @strLoadWarehouseServices NVARCHAR(MAX)
-	DECLARE @strLoadWarehouseContainer NVARCHAR(MAX)
-	DECLARE @strLoadCost NVARCHAR(MAX)
-	DECLARE @strLoadStorageCost NVARCHAR(MAX)
-	DECLARE @strReference NVARCHAR(MAX)
-	DECLARE @strRowState NVARCHAR(MAX)
-	DECLARE @strFeedStatus NVARCHAR(MAX)
-	DECLARE @dtmFeedDate DATETIME
-	DECLARE @strMessage NVARCHAR(MAX)
-	DECLARE @intMultiCompanyId INT
-	DECLARE @intReferenceId INT
-	DECLARE @intEntityId INT
-	DECLARE @strTransactionType NVARCHAR(MAX)
-	DECLARE @strTagRelaceXML NVARCHAR(MAX)
-	DECLARE @NewLoadId INT
-	DECLARE @NewLoadDetailId INT
-	DECLARE @NewLoadDocumentId INT
-	DECLARE @NewLoadNotifyPartyId INT
-	DECLARE @NewLoadContainerId INT
-	DECLARE @NewLoadDetailContainerLinkId INT
-	DECLARE @NewLoadWarehouseId INT
-	DECLARE @NewLoadWarehouseContainerId INT
-	DECLARE @NewLoadWarehouseServicesId INT
-	DECLARE @NewLoadCostId INT
-	DECLARE @NewLoadStorageCostId INT
-	DECLARE @intPurchaseSale INT
-	DECLARE @strDetailReplaceXml NVARCHAR(max) = ''
-	DECLARE @strDetailReplaceXmlForContainers NVARCHAR(max) = ''
-	DECLARE @intStartingNumberType INT
-	DECLARE @intLogisticsAcknowledgementStageId INT
-	DECLARE @strHeaderCondition NVARCHAR(MAX)
-	DECLARE @strContractDetailAllId NVARCHAR(MAX)
-	DECLARE @strAckLoadXML NVARCHAR(MAX)
-	DECLARE @strAckLoadDetailXML NVARCHAR(MAX)
-	DECLARE @strAckLoadNotifyPartyXML NVARCHAR(MAX)
-	DECLARE @strAckLoadDocumentXML NVARCHAR(MAX)
-	DECLARE @strAckLoadContainerXML NVARCHAR(MAX)
-	DECLARE @strAckLoadDetailContainerLinkXML NVARCHAR(MAX)
-	DECLARE @strAckLoadWarehouseXML NVARCHAR(MAX)
-	DECLARE @strAckLoadWarehouseContainerXML NVARCHAR(MAX)
-	DECLARE @strAckLoadWarehouseServicesXML NVARCHAR(MAX)
-	DECLARE @strAckLoadCostXML NVARCHAR(MAX)
-	DECLARE @strAckLoadStorageCostXML NVARCHAR(MAX)
-	DECLARE @strLoadContainerId NVARCHAR(500)
-	DECLARE @strLoadWarehouseId NVARCHAR(500)
-	DECLARE @strLoadDetailContainerLinkCondition NVARCHAR(MAX)
-	DECLARE @strLoadWarehouseCondition NVARCHAR(MAX)
-	DECLARE @intToBookId INT
+		,@intId INT
+		,@intLoadId INT
+		,@strLoadNumber NVARCHAR(MAX)
+		,@strLoad NVARCHAR(MAX)
+		,@strLoadDetail NVARCHAR(MAX)
+		,@strLoadDetailLot NVARCHAR(MAX)
+		,@strLoadDocument NVARCHAR(MAX)
+		,@strLoadNotifyParty NVARCHAR(MAX)
+		,@strLoadContainer NVARCHAR(MAX)
+		,@strLoadDetailContainerLink NVARCHAR(MAX)
+		,@strLoadWarehouse NVARCHAR(MAX)
+		,@strLoadWarehouseServices NVARCHAR(MAX)
+		,@strLoadWarehouseContainer NVARCHAR(MAX)
+		,@strLoadCost NVARCHAR(MAX)
+		,@strLoadStorageCost NVARCHAR(MAX)
+		,@strReference NVARCHAR(MAX)
+		,@strRowState NVARCHAR(MAX)
+		,@strFeedStatus NVARCHAR(MAX)
+		,@dtmFeedDate DATETIME
+		,@strMessage NVARCHAR(MAX)
+		,@intMultiCompanyId INT
+		,@intReferenceId INT
+		,@intEntityId INT
+		,@strTransactionType NVARCHAR(MAX)
+		,@strTagRelaceXML NVARCHAR(MAX)
+		,@NewLoadId INT
+		,@NewLoadDetailId INT
+		,@NewLoadDocumentId INT
+		,@NewLoadNotifyPartyId INT
+		,@NewLoadContainerId INT
+		,@NewLoadDetailContainerLinkId INT
+		,@NewLoadWarehouseId INT
+		,@NewLoadWarehouseContainerId INT
+		,@NewLoadWarehouseServicesId INT
+		,@NewLoadCostId INT
+		,@NewLoadStorageCostId INT
+		,@intPurchaseSale INT
+		,@strDetailReplaceXml NVARCHAR(max) = ''
+		,@strDetailReplaceXmlForContainers NVARCHAR(max) = ''
+		,@intStartingNumberType INT
+		,@intLogisticsAcknowledgementStageId INT
+		,@strHeaderCondition NVARCHAR(MAX)
+		,@strContractDetailAllId NVARCHAR(MAX)
+		,@strAckLoadXML NVARCHAR(MAX)
+		,@strAckLoadDetailXML NVARCHAR(MAX)
+		,@strAckLoadNotifyPartyXML NVARCHAR(MAX)
+		,@strAckLoadDocumentXML NVARCHAR(MAX)
+		,@strAckLoadContainerXML NVARCHAR(MAX)
+		,@strAckLoadDetailContainerLinkXML NVARCHAR(MAX)
+		,@strAckLoadWarehouseXML NVARCHAR(MAX)
+		,@strAckLoadWarehouseContainerXML NVARCHAR(MAX)
+		,@strAckLoadWarehouseServicesXML NVARCHAR(MAX)
+		,@strAckLoadCostXML NVARCHAR(MAX)
+		,@strAckLoadStorageCostXML NVARCHAR(MAX)
+		,@strLoadContainerId NVARCHAR(500)
+		,@strLoadWarehouseId NVARCHAR(500)
+		,@strLoadDetailContainerLinkCondition NVARCHAR(MAX)
+		,@strLoadWarehouseCondition NVARCHAR(MAX)
+		,@intToBookId INT
 		,@intTransactionCount INT
 		,@intLoadRefId INT
 		,@intCompanyLocationId INT
 		,@strNewLoadNumber NVARCHAR(50)
 		,@intNewLoadId INT
-	--DECLARE @strAckCostXML		NVARCHAR(MAX)
-	--DECLARE @strAckDocumentXML NVARCHAR(MAX)
 	DECLARE @tblLGLoadDetail TABLE (intLoadDetailId INT)
 	DECLARE @strItemNo NVARCHAR(50)
 		,@strItemUOM NVARCHAR(50)
@@ -101,7 +97,6 @@ BEGIN TRY
 		,@intSCompanyLocationId INT
 		,@intCustomerId INT
 		,@intCustomerLocationId INT
-	--,@strLoadDetailLot nvarchar(MAX)
 	DECLARE @tblLGLoadDetailLot TABLE (intLoadDetailLotId INT)
 	DECLARE @strLotNumber NVARCHAR(50)
 		,@strItemUnitMeasure NVARCHAR(50)
@@ -273,14 +268,6 @@ BEGIN TRY
 				------------------Header------------------------------------------------------
 				EXEC sp_xml_preparedocument @idoc OUTPUT
 					,@strLoad
-
-				IF OBJECT_ID('tempdb..#tmpLoad') IS NOT NULL
-					DROP TABLE #tmpLoad
-
-				SELECT *
-				INTO #tmpLoad
-				FROM tblLGLoad
-				WHERE 1 = 2
 
 				SELECT @strHauler = NULL
 					,@strDriver = NULL
@@ -627,428 +614,724 @@ BEGIN TRY
 				FROM tblCTPosition Position
 				WHERE Position.strPosition = strPosition
 
-				EXEC uspSMGetStartingNumber @intStartingNumberType
-					,@strNewLoadNumber OUTPUT
+				SELECT @intNewLoadId = intLoadId
+					,@strNewLoadNumber = strLoadNumber
+				FROM tblLGLoad
+				WHERE intLoadRefId = @intLoadRefId
 
-				INSERT INTO tblLGLoad (
-					intConcurrencyId
-					,strLoadNumber
-					,intCompanyLocationId
-					,intPurchaseSale
-					--,intItemId
-					--,dblQuantity
-					--,intUnitMeasureId
-					,dtmScheduledDate
-					,strCustomerReference
-					,strBookingReference
-					,intEquipmentTypeId
-					,intEntityId
-					,intEntityLocationId
-					,intContractDetailId
-					,strComments
-					,intHaulerEntityId
-					,intTicketId
-					,ysnInProgress
-					,dblDeliveredQuantity
-					,dtmDeliveredDate
-					,intGenerateLoadId
-					,intGenerateSequence
-					,strTruckNo
-					,strTrailerNo1
-					,strTrailerNo2
-					,strTrailerNo3
-					,strCarNumber
-					,strEmbargoNo
-					,strEmbargoPermitNo
-					,intUserSecurityId
-					,strExternalLoadNumber
-					,intTransportLoadId
-					,intDriverEntityId
-					,ysnDispatched
-					,dtmDispatchedDate
-					,intDispatcherId
-					,ysnDispatchMailSent
-					,dtmDispatchMailSent
-					,dtmCancelDispatchMailSent
-					,intLoadHeaderId
-					,intSourceType
-					,intPositionId
-					,intWeightUnitMeasureId
-					,strBLNumber
-					,dtmBLDate
-					,strOriginPort
-					,strDestinationPort
-					,strDestinationCity
-					,intTerminalEntityId
-					,intShippingLineEntityId
-					,strServiceContractNumber
-					,strPackingDescription
-					,strMVessel
-					,strMVoyageNumber
-					,strFVessel
-					,strFVoyageNumber
-					,intForwardingAgentEntityId
-					,strForwardingAgentRef
-					,intInsurerEntityId
-					,strInsurancePolicyRefNo
-					,dblInsuranceValue
-					,dblInsurancePremiumPercentage
-					,intInsuranceCurrencyId
-					,dtmDocsToBroker
-					,strMarks
-					,strMarkingInstructions
-					,strShippingMode
-					,intNumberOfContainers
-					,intContainerTypeId
-					,intBLDraftToBeSentId
-					,strBLDraftToBeSentType
-					,strDocPresentationType
-					,intDocPresentationId
-					,dtmDocsReceivedDate
-					,dtmETAPOL
-					,dtmETSPOL
-					,dtmETAPOD
-					,dtmDeadlineCargo
-					,dtmDeadlineBL
-					,dtmISFReceivedDate
-					,dtmISFFiledDate
-					,dtmStuffingDate
-					,dtmStartDate
-					,dtmEndDate
-					,dtmPlannedAvailabilityDate
-					,dblDemurrage
-					,intDemurrageCurrencyId
-					,dblDespatch
-					,intDespatchCurrencyId
-					,dblLoadingRate
-					,intLoadingUnitMeasureId
-					,strLoadingPerUnit
-					,dblDischargeRate
-					,intDischargeUnitMeasureId
-					,strDischargePerUnit
-					,intTransportationMode
-					,intShipmentStatus
-					,ysnPosted
-					,dtmPostedDate
-					,intTransUsedBy
-					,intShipmentType
-					,intLoadShippingInstructionId
-					,strExternalShipmentNumber
-					,ysn4cRegistration
-					,ysnInvoice
-					,ysnProvisionalInvoice
-					,ysnQuantityFinal
-					,ysnCancelled
-					,intShippingModeId
-					,intETAPOLReasonCodeId
-					,intETSPOLReasonCodeId
-					,intETAPODReasonCodeId
-					,intFreightTermId
-					,intCurrencyId
-					,intCreatedById
-					,dtmCreatedOn
-					,intLastUpdateById
-					,dtmLastUpdateOn
-					,strBatchId
-					,strGenerateLoadEquipmentType
-					,strGenerateLoadHauler
-					,ysnDocumentsReceived
-					,ysnSubCurrency
-					,intCompanyId
-					,intBookId
-					,intSubBookId
-					,intLoadRefId
-					,ysnLoadBased
-					)
-				SELECT 1 AS intConcurrencyId
-					,@strNewLoadNumber
-					,@intCompanyLocationId
-					,@intPurchaseSale
-					--,intItemId
-					--,dblQuantity
-					--,intUnitMeasureId
-					,x.dtmScheduledDate
-					,x.strCustomerReference
-					,x.strBookingReference
-					,@intEquipmentTypeId
-					,NULL intEntityId
-					,NULL intEntityLocationId
-					,(
-						SELECT TOP 1 intContractDetailId
-						FROM tblCTContractDetail CD
-						WHERE intContractDetailRefId = x.intContractDetailId
-						) AS intContractDetailId
-					,strComments
-					,@intHaulerId
-					,NULL intTicketId
-					,ysnInProgress
-					,dblDeliveredQuantity
-					,dtmDeliveredDate
-					,NULL intGenerateLoadId
-					,NULL intGenerateSequence
-					,strTruckNo
-					,strTrailerNo1
-					,strTrailerNo2
-					,strTrailerNo3
-					,strCarNumber
-					,strEmbargoNo
-					,strEmbargoPermitNo
-					,intUserSecurityId
-					,strExternalLoadNumber
-					,NULL intTransportLoadId
-					,@intDriverId
-					,ysnDispatched
-					,dtmDispatchedDate
-					,@intDispatcherId
-					,ysnDispatchMailSent
-					,dtmDispatchMailSent
-					,dtmCancelDispatchMailSent
-					,intLoadHeaderId
-					,intSourceType
-					,@intPositionId
-					,intWeightUnitMeasureId
-					,strBLNumber
-					,dtmBLDate
-					,strOriginPort
-					,strDestinationPort
-					,strDestinationCity
-					,@intTerminalId
-					,@intShippingLineId
-					,strServiceContractNumber
-					,strPackingDescription
-					,strMVessel
-					,strMVoyageNumber
-					,strFVessel
-					,strFVoyageNumber
-					,@intForwardingAgentId
-					,strForwardingAgentRef
-					,@intInsurerId
-					,strInsurancePolicyRefNo
-					,dblInsuranceValue
-					,dblInsurancePremiumPercentage
-					,intInsuranceCurrencyId
-					,dtmDocsToBroker
-					,strMarks
-					,strMarkingInstructions
-					,strShippingMode
-					,intNumberOfContainers
-					,@intContainerTypeId
-					,@intBLDraftToBeSentId
-					,strBLDraftToBeSentType
-					,strDocPresentationType
-					,@intDocPresentationValId
-					,dtmDocsReceivedDate
-					,dtmETAPOL
-					,dtmETSPOL
-					,dtmETAPOD
-					,dtmDeadlineCargo
-					,dtmDeadlineBL
-					,dtmISFReceivedDate
-					,dtmISFFiledDate
-					,dtmStuffingDate
-					,dtmStartDate
-					,dtmEndDate
-					,dtmPlannedAvailabilityDate
-					,dblDemurrage
-					,intDemurrageCurrencyId
-					,dblDespatch
-					,intDespatchCurrencyId
-					,dblLoadingRate
-					,intLoadingUnitMeasureId
-					,strLoadingPerUnit
-					,dblDischargeRate
-					,intDischargeUnitMeasureId
-					,strDischargePerUnit
-					,intTransportationMode
-					,intShipmentStatus
-					,ysnPosted
-					,dtmPostedDate
-					,intTransUsedBy
-					,intShipmentType
-					,intLoadShippingInstructionId
-					,strExternalShipmentNumber
-					,ysn4cRegistration
-					,ysnInvoice
-					,ysnProvisionalInvoice
-					,ysnQuantityFinal
-					,ysnCancelled
-					,intShippingModeId
-					,intETAPOLReasonCodeId
-					,intETSPOLReasonCodeId
-					,intETAPODReasonCodeId
-					,intFreightTermId
-					,@intCurrencyId
-					,intCreatedById
-					,dtmCreatedOn
-					,intLastUpdateById
-					,dtmLastUpdateOn
-					,strBatchId
-					,strGenerateLoadEquipmentType
-					,strGenerateLoadHauler
-					,ysnDocumentsReceived
-					,ysnSubCurrency
-					,intCompanyId
-					,intBookId
-					,intSubBookId
-					,NULL intLoadId
-					,ysnLoadBased
-				FROM OPENXML(@idoc, 'vyuLGLoadViews/vyuLGLoadViews', 2) WITH (
-						strHauler NVARCHAR(100) Collate Latin1_General_CI_AS
-						,strDriver NVARCHAR(100) Collate Latin1_General_CI_AS
-						,strTerminal NVARCHAR(100) Collate Latin1_General_CI_AS
-						,strShippingLine NVARCHAR(100) Collate Latin1_General_CI_AS
-						,strForwardingAgent NVARCHAR(100) Collate Latin1_General_CI_AS
-						,strInsurer NVARCHAR(100) Collate Latin1_General_CI_AS
-						,strBLDraftToBeSent NVARCHAR(100) Collate Latin1_General_CI_AS
-						,strDocPresentationVal NVARCHAR(100) Collate Latin1_General_CI_AS
-						,strInsuranceCurrency NVARCHAR(40) Collate Latin1_General_CI_AS
-						,strContainerType NVARCHAR(50) Collate Latin1_General_CI_AS
-						,strEquipmentType NVARCHAR(100) Collate Latin1_General_CI_AS
-						,strDispatcher NVARCHAR(50) Collate Latin1_General_CI_AS
-						,strPosition NVARCHAR(100) Collate Latin1_General_CI_AS
-						,dtmScheduledDate DATETIME
-						,strCustomerReference NVARCHAR(100) Collate Latin1_General_CI_AS
-						,strBookingReference NVARCHAR(100) Collate Latin1_General_CI_AS
-						,strComments NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
-						,ysnInProgress BIT
-						,dblDeliveredQuantity NUMERIC(18, 6)
-						,dtmDeliveredDate DATETIME
-						,strTruckNo NVARCHAR(100) COLLATE Latin1_General_CI_AS
-						,strTrailerNo1 NVARCHAR(100) COLLATE Latin1_General_CI_AS
-						,strTrailerNo2 NVARCHAR(100) COLLATE Latin1_General_CI_AS
-						,strTrailerNo3 NVARCHAR(100) COLLATE Latin1_General_CI_AS
-						,strCarNumber NVARCHAR(100) COLLATE Latin1_General_CI_AS
-						,strEmbargoNo NVARCHAR(100) COLLATE Latin1_General_CI_AS
-						,strEmbargoPermitNo NVARCHAR(100) COLLATE Latin1_General_CI_AS
-						,intUserSecurityId INT
-						,strExternalLoadNumber NVARCHAR(100) COLLATE Latin1_General_CI_AS
-						,intTransportLoadId INT
-						,intDriverEntityId INT
-						,ysnDispatched BIT
-						,dtmDispatchedDate DATETIME
-						,intDispatcherId INT
-						,ysnDispatchMailSent BIT
-						,dtmDispatchMailSent DATETIME
-						,dtmCancelDispatchMailSent DATETIME
-						,intLoadHeaderId INT
-						,intSourceType INT
-						,intPositionId INT
-						,intWeightUnitMeasureId INT
-						,strBLNumber NVARCHAR(100) COLLATE Latin1_General_CI_AS
-						,dtmBLDate DATETIME
-						,strOriginPort NVARCHAR(200) COLLATE Latin1_General_CI_AS
-						,strDestinationPort NVARCHAR(200) COLLATE Latin1_General_CI_AS
-						,strDestinationCity NVARCHAR(200) COLLATE Latin1_General_CI_AS
-						,intTerminalEntityId INT
-						,intShippingLineEntityId INT
-						,strServiceContractNumber NVARCHAR(100) COLLATE Latin1_General_CI_AS
-						,strPackingDescription NVARCHAR(200) COLLATE Latin1_General_CI_AS
-						,strMVessel NVARCHAR(200) COLLATE Latin1_General_CI_AS
-						,strMVoyageNumber NVARCHAR(100) COLLATE Latin1_General_CI_AS
-						,strFVessel NVARCHAR(200) COLLATE Latin1_General_CI_AS
-						,strFVoyageNumber NVARCHAR(100) COLLATE Latin1_General_CI_AS
-						,intForwardingAgentEntityId INT
-						,strForwardingAgentRef NVARCHAR(100) COLLATE Latin1_General_CI_AS
-						,intInsurerEntityId INT
-						,strInsurancePolicyRefNo NVARCHAR(100) COLLATE Latin1_General_CI_AS
-						,dblInsuranceValue NUMERIC(18, 6)
-						,dblInsurancePremiumPercentage NUMERIC(18, 6)
-						,intInsuranceCurrencyId INT
-						,dtmDocsToBroker DATETIME
-						,strMarks NVARCHAR(100) COLLATE Latin1_General_CI_AS
-						,strMarkingInstructions NVARCHAR(200) COLLATE Latin1_General_CI_AS
-						,strShippingMode NVARCHAR(100) COLLATE Latin1_General_CI_AS
-						,intNumberOfContainers INT
-						,intContainerTypeId INT
-						,intBLDraftToBeSentId INT
-						,strBLDraftToBeSentType NVARCHAR(100) COLLATE Latin1_General_CI_AS
-						,strDocPresentationType NVARCHAR(100) COLLATE Latin1_General_CI_AS
-						,intDocPresentationId INT
-						,dtmDocsReceivedDate DATETIME
-						,dtmETAPOL DATETIME
-						,dtmETSPOL DATETIME
-						,dtmETAPOD DATETIME
-						,dtmDeadlineCargo DATETIME
-						,dtmDeadlineBL DATETIME
-						,dtmISFReceivedDate DATETIME
-						,dtmISFFiledDate DATETIME
-						,dtmStuffingDate DATETIME
-						,dtmStartDate DATETIME
-						,dtmEndDate DATETIME
-						,dtmPlannedAvailabilityDate DATETIME
-						,ysnArrivedInPort BIT
-						,ysnDocumentsApproved BIT
-						,ysnCustomsReleased BIT
-						,dtmArrivedInPort DATETIME
-						,dtmDocumentsApproved DATETIME
-						,dtmCustomsReleased DATETIME
-						,strVessel1 NVARCHAR(200) COLLATE Latin1_General_CI_AS
-						,strOriginPort1 NVARCHAR(200) COLLATE Latin1_General_CI_AS
-						,strDestinationPort1 NVARCHAR(200) COLLATE Latin1_General_CI_AS
-						,dtmETSPOL1 DATETIME
-						,dtmETAPOD1 DATETIME
-						,strVessel2 NVARCHAR(200) COLLATE Latin1_General_CI_AS
-						,strOriginPort2 NVARCHAR(200) COLLATE Latin1_General_CI_AS
-						,strDestinationPort2 NVARCHAR(200) COLLATE Latin1_General_CI_AS
-						,dtmETSPOL2 DATETIME
-						,dtmETAPOD2 DATETIME
-						,strVessel3 NVARCHAR(200) COLLATE Latin1_General_CI_AS
-						,strOriginPort3 NVARCHAR(200) COLLATE Latin1_General_CI_AS
-						,strDestinationPort3 NVARCHAR(200) COLLATE Latin1_General_CI_AS
-						,dtmETSPOL3 DATETIME
-						,dtmETAPOD3 DATETIME
-						,strVessel4 NVARCHAR(200) COLLATE Latin1_General_CI_AS
-						,strOriginPort4 NVARCHAR(200) COLLATE Latin1_General_CI_AS
-						,strDestinationPort4 NVARCHAR(200) COLLATE Latin1_General_CI_AS
-						,dtmETSPOL4 DATETIME
-						,dtmETAPOD4 DATETIME
-						,dblDemurrage NUMERIC(18, 6)
-						,intDemurrageCurrencyId INT
-						,dblDespatch NUMERIC(18, 6)
-						,intDespatchCurrencyId INT
-						,dblLoadingRate NUMERIC(18, 6)
-						,intLoadingUnitMeasureId INT
-						,strLoadingPerUnit NVARCHAR(100) COLLATE Latin1_General_CI_AS
-						,dblDischargeRate NUMERIC(18, 6)
-						,intDischargeUnitMeasureId INT
-						,strDischargePerUnit NVARCHAR(100) COLLATE Latin1_General_CI_AS
-						,intTransportationMode INT
-						,intShipmentStatus INT
-						,ysnPosted BIT
-						,dtmPostedDate DATETIME
-						,intTransUsedBy INT
-						,intShipmentType INT
-						,intLoadShippingInstructionId INT
-						,strExternalShipmentNumber NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
-						,ysn4cRegistration BIT
-						,ysnInvoice BIT
-						,ysnProvisionalInvoice BIT
-						,ysnQuantityFinal BIT
-						,ysnCancelled BIT
-						,intShippingModeId INT
-						,intETAPOLReasonCodeId INT
-						,intETSPOLReasonCodeId INT
-						,intETAPODReasonCodeId INT
-						,intFreightTermId INT
-						,intCurrencyId INT
-						,intCreatedById INT
-						,dtmCreatedOn DATETIME
-						,intLastUpdateById INT
-						,dtmLastUpdateOn DATETIME
-						,strBatchId NVARCHAR(20) COLLATE Latin1_General_CI_AS
-						,strGenerateLoadEquipmentType NVARCHAR(100) COLLATE Latin1_General_CI_AS
-						,strGenerateLoadHauler NVARCHAR(100) COLLATE Latin1_General_CI_AS
-						,ysnDocumentsReceived BIT
-						,ysnSubCurrency BIT
-						,intCompanyId INT
-						,intBookId INT
-						,intSubBookId INT
-						,intLoadRefId INT
-						,ysnLoadBased BIT
-						,intContractDetailId INT
-						) x
+				IF @intNewLoadId IS NULL
+				BEGIN
+					EXEC uspSMGetStartingNumber @intStartingNumberType
+						,@strNewLoadNumber OUTPUT
 
-				SELECT @intNewLoadId = SCOPE_IDENTITY()
+					INSERT INTO tblLGLoad (
+						intConcurrencyId
+						,strLoadNumber
+						,intCompanyLocationId
+						,intPurchaseSale
+						--,intItemId
+						--,dblQuantity
+						--,intUnitMeasureId
+						,dtmScheduledDate
+						,strCustomerReference
+						,strBookingReference
+						,intEquipmentTypeId
+						,intEntityId
+						,intEntityLocationId
+						,intContractDetailId
+						,strComments
+						,intHaulerEntityId
+						,intTicketId
+						,ysnInProgress
+						,dblDeliveredQuantity
+						,dtmDeliveredDate
+						,intGenerateLoadId
+						,intGenerateSequence
+						,strTruckNo
+						,strTrailerNo1
+						,strTrailerNo2
+						,strTrailerNo3
+						,strCarNumber
+						,strEmbargoNo
+						,strEmbargoPermitNo
+						,intUserSecurityId
+						,strExternalLoadNumber
+						,intTransportLoadId
+						,intDriverEntityId
+						,ysnDispatched
+						,dtmDispatchedDate
+						,intDispatcherId
+						,ysnDispatchMailSent
+						,dtmDispatchMailSent
+						,dtmCancelDispatchMailSent
+						,intLoadHeaderId
+						,intSourceType
+						,intPositionId
+						,intWeightUnitMeasureId
+						,strBLNumber
+						,dtmBLDate
+						,strOriginPort
+						,strDestinationPort
+						,strDestinationCity
+						,intTerminalEntityId
+						,intShippingLineEntityId
+						,strServiceContractNumber
+						,strPackingDescription
+						,strMVessel
+						,strMVoyageNumber
+						,strFVessel
+						,strFVoyageNumber
+						,intForwardingAgentEntityId
+						,strForwardingAgentRef
+						,intInsurerEntityId
+						,strInsurancePolicyRefNo
+						,dblInsuranceValue
+						,dblInsurancePremiumPercentage
+						,intInsuranceCurrencyId
+						,dtmDocsToBroker
+						,strMarks
+						,strMarkingInstructions
+						,strShippingMode
+						,intNumberOfContainers
+						,intContainerTypeId
+						,intBLDraftToBeSentId
+						,strBLDraftToBeSentType
+						,strDocPresentationType
+						,intDocPresentationId
+						,dtmDocsReceivedDate
+						,dtmETAPOL
+						,dtmETSPOL
+						,dtmETAPOD
+						,dtmDeadlineCargo
+						,dtmDeadlineBL
+						,dtmISFReceivedDate
+						,dtmISFFiledDate
+						,dtmStuffingDate
+						,dtmStartDate
+						,dtmEndDate
+						,dtmPlannedAvailabilityDate
+						,dblDemurrage
+						,intDemurrageCurrencyId
+						,dblDespatch
+						,intDespatchCurrencyId
+						,dblLoadingRate
+						,intLoadingUnitMeasureId
+						,strLoadingPerUnit
+						,dblDischargeRate
+						,intDischargeUnitMeasureId
+						,strDischargePerUnit
+						,intTransportationMode
+						,intShipmentStatus
+						,ysnPosted
+						,dtmPostedDate
+						,intTransUsedBy
+						,intShipmentType
+						,intLoadShippingInstructionId
+						,strExternalShipmentNumber
+						,ysn4cRegistration
+						,ysnInvoice
+						,ysnProvisionalInvoice
+						,ysnQuantityFinal
+						,ysnCancelled
+						,intShippingModeId
+						,intETAPOLReasonCodeId
+						,intETSPOLReasonCodeId
+						,intETAPODReasonCodeId
+						,intFreightTermId
+						,intCurrencyId
+						,intCreatedById
+						,dtmCreatedOn
+						,intLastUpdateById
+						,dtmLastUpdateOn
+						,strBatchId
+						,strGenerateLoadEquipmentType
+						,strGenerateLoadHauler
+						,ysnDocumentsReceived
+						,ysnSubCurrency
+						,intCompanyId
+						,intBookId
+						,intSubBookId
+						,intLoadRefId
+						,ysnLoadBased
+						)
+					SELECT 1 AS intConcurrencyId
+						,@strNewLoadNumber
+						,@intCompanyLocationId
+						,@intPurchaseSale
+						--,intItemId
+						--,dblQuantity
+						--,intUnitMeasureId
+						,x.dtmScheduledDate
+						,x.strCustomerReference
+						,x.strBookingReference
+						,@intEquipmentTypeId
+						,NULL intEntityId
+						,NULL intEntityLocationId
+						,(
+							SELECT TOP 1 intContractDetailId
+							FROM tblCTContractDetail CD
+							WHERE intContractDetailRefId = x.intContractDetailId
+							) AS intContractDetailId
+						,strComments
+						,@intHaulerId
+						,NULL intTicketId
+						,ysnInProgress
+						,dblDeliveredQuantity
+						,dtmDeliveredDate
+						,NULL intGenerateLoadId
+						,NULL intGenerateSequence
+						,strTruckNo
+						,strTrailerNo1
+						,strTrailerNo2
+						,strTrailerNo3
+						,strCarNumber
+						,strEmbargoNo
+						,strEmbargoPermitNo
+						,intUserSecurityId
+						,strExternalLoadNumber
+						,NULL intTransportLoadId
+						,@intDriverId
+						,ysnDispatched
+						,dtmDispatchedDate
+						,@intDispatcherId
+						,ysnDispatchMailSent
+						,dtmDispatchMailSent
+						,dtmCancelDispatchMailSent
+						,intLoadHeaderId
+						,intSourceType
+						,@intPositionId
+						,intWeightUnitMeasureId
+						,strBLNumber
+						,dtmBLDate
+						,strOriginPort
+						,strDestinationPort
+						,strDestinationCity
+						,@intTerminalId
+						,@intShippingLineId
+						,strServiceContractNumber
+						,strPackingDescription
+						,strMVessel
+						,strMVoyageNumber
+						,strFVessel
+						,strFVoyageNumber
+						,@intForwardingAgentId
+						,strForwardingAgentRef
+						,@intInsurerId
+						,strInsurancePolicyRefNo
+						,dblInsuranceValue
+						,dblInsurancePremiumPercentage
+						,intInsuranceCurrencyId
+						,dtmDocsToBroker
+						,strMarks
+						,strMarkingInstructions
+						,strShippingMode
+						,intNumberOfContainers
+						,@intContainerTypeId
+						,@intBLDraftToBeSentId
+						,strBLDraftToBeSentType
+						,strDocPresentationType
+						,@intDocPresentationValId
+						,dtmDocsReceivedDate
+						,dtmETAPOL
+						,dtmETSPOL
+						,dtmETAPOD
+						,dtmDeadlineCargo
+						,dtmDeadlineBL
+						,dtmISFReceivedDate
+						,dtmISFFiledDate
+						,dtmStuffingDate
+						,dtmStartDate
+						,dtmEndDate
+						,dtmPlannedAvailabilityDate
+						,dblDemurrage
+						,intDemurrageCurrencyId
+						,dblDespatch
+						,intDespatchCurrencyId
+						,dblLoadingRate
+						,intLoadingUnitMeasureId
+						,strLoadingPerUnit
+						,dblDischargeRate
+						,intDischargeUnitMeasureId
+						,strDischargePerUnit
+						,intTransportationMode
+						,intShipmentStatus
+						,ysnPosted
+						,dtmPostedDate
+						,intTransUsedBy
+						,intShipmentType
+						,intLoadShippingInstructionId
+						,strExternalShipmentNumber
+						,ysn4cRegistration
+						,ysnInvoice
+						,ysnProvisionalInvoice
+						,ysnQuantityFinal
+						,ysnCancelled
+						,intShippingModeId
+						,intETAPOLReasonCodeId
+						,intETSPOLReasonCodeId
+						,intETAPODReasonCodeId
+						,intFreightTermId
+						,@intCurrencyId
+						,intCreatedById
+						,dtmCreatedOn
+						,intLastUpdateById
+						,dtmLastUpdateOn
+						,strBatchId
+						,strGenerateLoadEquipmentType
+						,strGenerateLoadHauler
+						,ysnDocumentsReceived
+						,ysnSubCurrency
+						,intCompanyId
+						,intBookId
+						,intSubBookId
+						,@intLoadRefId
+						,ysnLoadBased
+					FROM OPENXML(@idoc, 'vyuLGLoadViews/vyuLGLoadView', 2) WITH (
+							strHauler NVARCHAR(100) Collate Latin1_General_CI_AS
+							,strDriver NVARCHAR(100) Collate Latin1_General_CI_AS
+							,strTerminal NVARCHAR(100) Collate Latin1_General_CI_AS
+							,strShippingLine NVARCHAR(100) Collate Latin1_General_CI_AS
+							,strForwardingAgent NVARCHAR(100) Collate Latin1_General_CI_AS
+							,strInsurer NVARCHAR(100) Collate Latin1_General_CI_AS
+							,strBLDraftToBeSent NVARCHAR(100) Collate Latin1_General_CI_AS
+							,strDocPresentationVal NVARCHAR(100) Collate Latin1_General_CI_AS
+							,strInsuranceCurrency NVARCHAR(40) Collate Latin1_General_CI_AS
+							,strContainerType NVARCHAR(50) Collate Latin1_General_CI_AS
+							,strEquipmentType NVARCHAR(100) Collate Latin1_General_CI_AS
+							,strDispatcher NVARCHAR(50) Collate Latin1_General_CI_AS
+							,strPosition NVARCHAR(100) Collate Latin1_General_CI_AS
+							,dtmScheduledDate DATETIME
+							,strCustomerReference NVARCHAR(100) Collate Latin1_General_CI_AS
+							,strBookingReference NVARCHAR(100) Collate Latin1_General_CI_AS
+							,strComments NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
+							,ysnInProgress BIT
+							,dblDeliveredQuantity NUMERIC(18, 6)
+							,dtmDeliveredDate DATETIME
+							,strTruckNo NVARCHAR(100) COLLATE Latin1_General_CI_AS
+							,strTrailerNo1 NVARCHAR(100) COLLATE Latin1_General_CI_AS
+							,strTrailerNo2 NVARCHAR(100) COLLATE Latin1_General_CI_AS
+							,strTrailerNo3 NVARCHAR(100) COLLATE Latin1_General_CI_AS
+							,strCarNumber NVARCHAR(100) COLLATE Latin1_General_CI_AS
+							,strEmbargoNo NVARCHAR(100) COLLATE Latin1_General_CI_AS
+							,strEmbargoPermitNo NVARCHAR(100) COLLATE Latin1_General_CI_AS
+							,intUserSecurityId INT
+							,strExternalLoadNumber NVARCHAR(100) COLLATE Latin1_General_CI_AS
+							,intTransportLoadId INT
+							,intDriverEntityId INT
+							,ysnDispatched BIT
+							,dtmDispatchedDate DATETIME
+							,intDispatcherId INT
+							,ysnDispatchMailSent BIT
+							,dtmDispatchMailSent DATETIME
+							,dtmCancelDispatchMailSent DATETIME
+							,intLoadHeaderId INT
+							,intSourceType INT
+							,intPositionId INT
+							,intWeightUnitMeasureId INT
+							,strBLNumber NVARCHAR(100) COLLATE Latin1_General_CI_AS
+							,dtmBLDate DATETIME
+							,strOriginPort NVARCHAR(200) COLLATE Latin1_General_CI_AS
+							,strDestinationPort NVARCHAR(200) COLLATE Latin1_General_CI_AS
+							,strDestinationCity NVARCHAR(200) COLLATE Latin1_General_CI_AS
+							,intTerminalEntityId INT
+							,intShippingLineEntityId INT
+							,strServiceContractNumber NVARCHAR(100) COLLATE Latin1_General_CI_AS
+							,strPackingDescription NVARCHAR(200) COLLATE Latin1_General_CI_AS
+							,strMVessel NVARCHAR(200) COLLATE Latin1_General_CI_AS
+							,strMVoyageNumber NVARCHAR(100) COLLATE Latin1_General_CI_AS
+							,strFVessel NVARCHAR(200) COLLATE Latin1_General_CI_AS
+							,strFVoyageNumber NVARCHAR(100) COLLATE Latin1_General_CI_AS
+							,intForwardingAgentEntityId INT
+							,strForwardingAgentRef NVARCHAR(100) COLLATE Latin1_General_CI_AS
+							,intInsurerEntityId INT
+							,strInsurancePolicyRefNo NVARCHAR(100) COLLATE Latin1_General_CI_AS
+							,dblInsuranceValue NUMERIC(18, 6)
+							,dblInsurancePremiumPercentage NUMERIC(18, 6)
+							,intInsuranceCurrencyId INT
+							,dtmDocsToBroker DATETIME
+							,strMarks NVARCHAR(100) COLLATE Latin1_General_CI_AS
+							,strMarkingInstructions NVARCHAR(200) COLLATE Latin1_General_CI_AS
+							,strShippingMode NVARCHAR(100) COLLATE Latin1_General_CI_AS
+							,intNumberOfContainers INT
+							,intContainerTypeId INT
+							,intBLDraftToBeSentId INT
+							,strBLDraftToBeSentType NVARCHAR(100) COLLATE Latin1_General_CI_AS
+							,strDocPresentationType NVARCHAR(100) COLLATE Latin1_General_CI_AS
+							,intDocPresentationId INT
+							,dtmDocsReceivedDate DATETIME
+							,dtmETAPOL DATETIME
+							,dtmETSPOL DATETIME
+							,dtmETAPOD DATETIME
+							,dtmDeadlineCargo DATETIME
+							,dtmDeadlineBL DATETIME
+							,dtmISFReceivedDate DATETIME
+							,dtmISFFiledDate DATETIME
+							,dtmStuffingDate DATETIME
+							,dtmStartDate DATETIME
+							,dtmEndDate DATETIME
+							,dtmPlannedAvailabilityDate DATETIME
+							,ysnArrivedInPort BIT
+							,ysnDocumentsApproved BIT
+							,ysnCustomsReleased BIT
+							,dtmArrivedInPort DATETIME
+							,dtmDocumentsApproved DATETIME
+							,dtmCustomsReleased DATETIME
+							,strVessel1 NVARCHAR(200) COLLATE Latin1_General_CI_AS
+							,strOriginPort1 NVARCHAR(200) COLLATE Latin1_General_CI_AS
+							,strDestinationPort1 NVARCHAR(200) COLLATE Latin1_General_CI_AS
+							,dtmETSPOL1 DATETIME
+							,dtmETAPOD1 DATETIME
+							,strVessel2 NVARCHAR(200) COLLATE Latin1_General_CI_AS
+							,strOriginPort2 NVARCHAR(200) COLLATE Latin1_General_CI_AS
+							,strDestinationPort2 NVARCHAR(200) COLLATE Latin1_General_CI_AS
+							,dtmETSPOL2 DATETIME
+							,dtmETAPOD2 DATETIME
+							,strVessel3 NVARCHAR(200) COLLATE Latin1_General_CI_AS
+							,strOriginPort3 NVARCHAR(200) COLLATE Latin1_General_CI_AS
+							,strDestinationPort3 NVARCHAR(200) COLLATE Latin1_General_CI_AS
+							,dtmETSPOL3 DATETIME
+							,dtmETAPOD3 DATETIME
+							,strVessel4 NVARCHAR(200) COLLATE Latin1_General_CI_AS
+							,strOriginPort4 NVARCHAR(200) COLLATE Latin1_General_CI_AS
+							,strDestinationPort4 NVARCHAR(200) COLLATE Latin1_General_CI_AS
+							,dtmETSPOL4 DATETIME
+							,dtmETAPOD4 DATETIME
+							,dblDemurrage NUMERIC(18, 6)
+							,intDemurrageCurrencyId INT
+							,dblDespatch NUMERIC(18, 6)
+							,intDespatchCurrencyId INT
+							,dblLoadingRate NUMERIC(18, 6)
+							,intLoadingUnitMeasureId INT
+							,strLoadingPerUnit NVARCHAR(100) COLLATE Latin1_General_CI_AS
+							,dblDischargeRate NUMERIC(18, 6)
+							,intDischargeUnitMeasureId INT
+							,strDischargePerUnit NVARCHAR(100) COLLATE Latin1_General_CI_AS
+							,intTransportationMode INT
+							,intShipmentStatus INT
+							,ysnPosted BIT
+							,dtmPostedDate DATETIME
+							,intTransUsedBy INT
+							,intShipmentType INT
+							,intLoadShippingInstructionId INT
+							,strExternalShipmentNumber NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
+							,ysn4cRegistration BIT
+							,ysnInvoice BIT
+							,ysnProvisionalInvoice BIT
+							,ysnQuantityFinal BIT
+							,ysnCancelled BIT
+							,intShippingModeId INT
+							,intETAPOLReasonCodeId INT
+							,intETSPOLReasonCodeId INT
+							,intETAPODReasonCodeId INT
+							,intFreightTermId INT
+							,intCurrencyId INT
+							,intCreatedById INT
+							,dtmCreatedOn DATETIME
+							,intLastUpdateById INT
+							,dtmLastUpdateOn DATETIME
+							,strBatchId NVARCHAR(20) COLLATE Latin1_General_CI_AS
+							,strGenerateLoadEquipmentType NVARCHAR(100) COLLATE Latin1_General_CI_AS
+							,strGenerateLoadHauler NVARCHAR(100) COLLATE Latin1_General_CI_AS
+							,ysnDocumentsReceived BIT
+							,ysnSubCurrency BIT
+							,intCompanyId INT
+							,intBookId INT
+							,intSubBookId INT
+							,intLoadRefId INT
+							,ysnLoadBased BIT
+							,intContractDetailId INT
+							) x
+
+					SELECT @intNewLoadId = SCOPE_IDENTITY()
+				END
+				ELSE
+				BEGIN
+					UPDATE L
+					SET intConcurrencyId = intConcurrencyId + 1
+						,intCompanyLocationId = @intCompanyLocationId
+						,intPurchaseSale = @intPurchaseSale
+						,dtmScheduledDate = x.dtmScheduledDate
+						,strCustomerReference = x.strCustomerReference
+						,strBookingReference = x.strBookingReference
+						,intEquipmentTypeId = @intEquipmentTypeId
+						,intEntityId = NULL
+						,intEntityLocationId = NULL
+						,intContractDetailId = (
+							SELECT TOP 1 intContractDetailId
+							FROM tblCTContractDetail CD
+							WHERE intContractDetailRefId = x.intContractDetailId
+							)
+						,strComments = x.strComments
+						,intHaulerEntityId = @intHaulerId
+						,intTicketId = NULL
+						,ysnInProgress = x.ysnInProgress
+						,dblDeliveredQuantity = x.dblDeliveredQuantity
+						,dtmDeliveredDate = x.dtmDeliveredDate
+						,intGenerateLoadId = NULL
+						,intGenerateSequence = NULL
+						,strTruckNo = x.strTruckNo
+						,strTrailerNo1 = x.strTrailerNo1
+						,strTrailerNo2 = x.strTrailerNo2
+						,strTrailerNo3 = x.strTrailerNo3
+						,strCarNumber = x.strCarNumber
+						,strEmbargoNo = x.strEmbargoNo
+						,strEmbargoPermitNo = x.strEmbargoPermitNo
+						,intUserSecurityId = x.intUserSecurityId
+						,strExternalLoadNumber = x.strExternalLoadNumber
+						,intTransportLoadId = NULL
+						,intDriverEntityId = @intDriverId
+						,ysnDispatched = x.ysnDispatched
+						,dtmDispatchedDate = x.dtmDispatchedDate
+						,intDispatcherId = @intDispatcherId
+						,ysnDispatchMailSent = x.ysnDispatchMailSent
+						,dtmDispatchMailSent = x.dtmDispatchMailSent
+						,dtmCancelDispatchMailSent = x.dtmCancelDispatchMailSent
+						,intLoadHeaderId = x.intLoadHeaderId
+						,intSourceType = x.intSourceType
+						,intPositionId = @intPositionId
+						,intWeightUnitMeasureId = x.intWeightUnitMeasureId
+						,strBLNumber = x.strBLNumber
+						,dtmBLDate = x.dtmBLDate
+						,strOriginPort = x.strOriginPort
+						,strDestinationPort = x.strDestinationPort
+						,strDestinationCity = x.strDestinationCity
+						,intTerminalEntityId = @intTerminalId
+						,intShippingLineEntityId = @intShippingLineId
+						,strServiceContractNumber = x.strServiceContractNumber
+						,strPackingDescription = x.strPackingDescription
+						,strMVessel = x.strMVessel
+						,strMVoyageNumber = x.strMVoyageNumber
+						,strFVessel = x.strFVessel
+						,strFVoyageNumber = x.strFVoyageNumber
+						,intForwardingAgentEntityId = @intForwardingAgentId
+						,strForwardingAgentRef = x.strForwardingAgentRef
+						,intInsurerEntityId = @intInsurerId
+						,strInsurancePolicyRefNo = x.strInsurancePolicyRefNo
+						,dblInsuranceValue = x.dblInsuranceValue
+						,dblInsurancePremiumPercentage = x.dblInsurancePremiumPercentage
+						,intInsuranceCurrencyId = x.intInsuranceCurrencyId
+						,dtmDocsToBroker = x.dtmDocsToBroker
+						,strMarks = x.strMarks
+						,strMarkingInstructions = x.strMarkingInstructions
+						,strShippingMode = x.strShippingMode
+						,intNumberOfContainers = x.intNumberOfContainers
+						,intContainerTypeId = @intContainerTypeId
+						,intBLDraftToBeSentId = @intBLDraftToBeSentId
+						,strBLDraftToBeSentType = x.strBLDraftToBeSentType
+						,strDocPresentationType = x.strDocPresentationType
+						,intDocPresentationId = @intDocPresentationValId
+						,dtmDocsReceivedDate = x.dtmDocsReceivedDate
+						,dtmETAPOL = x.dtmETAPOL
+						,dtmETSPOL = x.dtmETSPOL
+						,dtmETAPOD = x.dtmETAPOD
+						,dtmDeadlineCargo = x.dtmDeadlineCargo
+						,dtmDeadlineBL = x.dtmDeadlineBL
+						,dtmISFReceivedDate = x.dtmISFReceivedDate
+						,dtmISFFiledDate = x.dtmISFFiledDate
+						,dtmStuffingDate = x.dtmStuffingDate
+						,dtmStartDate = x.dtmStartDate
+						,dtmEndDate = x.dtmEndDate
+						,dtmPlannedAvailabilityDate = x.dtmPlannedAvailabilityDate
+						,dblDemurrage = x.dblDemurrage
+						,intDemurrageCurrencyId = x.intDemurrageCurrencyId
+						,dblDespatch = x.dblDespatch
+						,intDespatchCurrencyId = x.intDespatchCurrencyId
+						,dblLoadingRate = x.dblLoadingRate
+						,intLoadingUnitMeasureId = x.intLoadingUnitMeasureId
+						,strLoadingPerUnit = x.strLoadingPerUnit
+						,dblDischargeRate = x.dblDischargeRate
+						,intDischargeUnitMeasureId = x.intDischargeUnitMeasureId
+						,strDischargePerUnit = x.strDischargePerUnit
+						,intTransportationMode = x.intTransportationMode
+						,intShipmentStatus = x.intShipmentStatus
+						,ysnPosted = x.ysnPosted
+						,dtmPostedDate = x.dtmPostedDate
+						,intTransUsedBy = x.intTransUsedBy
+						,intShipmentType = x.intShipmentType
+						,intLoadShippingInstructionId = x.intLoadShippingInstructionId
+						,strExternalShipmentNumber = x.strExternalShipmentNumber
+						,ysn4cRegistration = x.ysn4cRegistration
+						,ysnInvoice = x.ysnInvoice
+						,ysnProvisionalInvoice = x.ysnProvisionalInvoice
+						,ysnQuantityFinal = x.ysnQuantityFinal
+						,ysnCancelled = x.ysnCancelled
+						,intShippingModeId = x.intShippingModeId
+						,intETAPOLReasonCodeId = x.intETAPOLReasonCodeId
+						,intETSPOLReasonCodeId = x.intETSPOLReasonCodeId
+						,intETAPODReasonCodeId = x.intETAPODReasonCodeId
+						,intFreightTermId = x.intFreightTermId
+						,intCurrencyId = @intCurrencyId
+						,intCreatedById = x.intCreatedById
+						,dtmCreatedOn = x.dtmCreatedOn
+						,intLastUpdateById = x.intLastUpdateById
+						,dtmLastUpdateOn = x.dtmLastUpdateOn
+						,strBatchId = x.strBatchId
+						,strGenerateLoadEquipmentType = x.strGenerateLoadEquipmentType
+						,strGenerateLoadHauler = x.strGenerateLoadHauler
+						,ysnDocumentsReceived = x.ysnDocumentsReceived
+						,ysnSubCurrency = x.ysnSubCurrency
+						,intCompanyId = x.intCompanyId
+						,intBookId = x.intBookId
+						,intSubBookId = x.intSubBookId
+						,ysnLoadBased = x.ysnLoadBased
+					FROM OPENXML(@idoc, 'vyuLGLoadViews/vyuLGLoadView', 2) WITH (
+							strHauler NVARCHAR(100) Collate Latin1_General_CI_AS
+							,strDriver NVARCHAR(100) Collate Latin1_General_CI_AS
+							,strTerminal NVARCHAR(100) Collate Latin1_General_CI_AS
+							,strShippingLine NVARCHAR(100) Collate Latin1_General_CI_AS
+							,strForwardingAgent NVARCHAR(100) Collate Latin1_General_CI_AS
+							,strInsurer NVARCHAR(100) Collate Latin1_General_CI_AS
+							,strBLDraftToBeSent NVARCHAR(100) Collate Latin1_General_CI_AS
+							,strDocPresentationVal NVARCHAR(100) Collate Latin1_General_CI_AS
+							,strInsuranceCurrency NVARCHAR(40) Collate Latin1_General_CI_AS
+							,strContainerType NVARCHAR(50) Collate Latin1_General_CI_AS
+							,strEquipmentType NVARCHAR(100) Collate Latin1_General_CI_AS
+							,strDispatcher NVARCHAR(50) Collate Latin1_General_CI_AS
+							,strPosition NVARCHAR(100) Collate Latin1_General_CI_AS
+							,dtmScheduledDate DATETIME
+							,strCustomerReference NVARCHAR(100) Collate Latin1_General_CI_AS
+							,strBookingReference NVARCHAR(100) Collate Latin1_General_CI_AS
+							,strComments NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
+							,ysnInProgress BIT
+							,dblDeliveredQuantity NUMERIC(18, 6)
+							,dtmDeliveredDate DATETIME
+							,strTruckNo NVARCHAR(100) COLLATE Latin1_General_CI_AS
+							,strTrailerNo1 NVARCHAR(100) COLLATE Latin1_General_CI_AS
+							,strTrailerNo2 NVARCHAR(100) COLLATE Latin1_General_CI_AS
+							,strTrailerNo3 NVARCHAR(100) COLLATE Latin1_General_CI_AS
+							,strCarNumber NVARCHAR(100) COLLATE Latin1_General_CI_AS
+							,strEmbargoNo NVARCHAR(100) COLLATE Latin1_General_CI_AS
+							,strEmbargoPermitNo NVARCHAR(100) COLLATE Latin1_General_CI_AS
+							,intUserSecurityId INT
+							,strExternalLoadNumber NVARCHAR(100) COLLATE Latin1_General_CI_AS
+							,intTransportLoadId INT
+							,intDriverEntityId INT
+							,ysnDispatched BIT
+							,dtmDispatchedDate DATETIME
+							,intDispatcherId INT
+							,ysnDispatchMailSent BIT
+							,dtmDispatchMailSent DATETIME
+							,dtmCancelDispatchMailSent DATETIME
+							,intLoadHeaderId INT
+							,intSourceType INT
+							,intPositionId INT
+							,intWeightUnitMeasureId INT
+							,strBLNumber NVARCHAR(100) COLLATE Latin1_General_CI_AS
+							,dtmBLDate DATETIME
+							,strOriginPort NVARCHAR(200) COLLATE Latin1_General_CI_AS
+							,strDestinationPort NVARCHAR(200) COLLATE Latin1_General_CI_AS
+							,strDestinationCity NVARCHAR(200) COLLATE Latin1_General_CI_AS
+							,intTerminalEntityId INT
+							,intShippingLineEntityId INT
+							,strServiceContractNumber NVARCHAR(100) COLLATE Latin1_General_CI_AS
+							,strPackingDescription NVARCHAR(200) COLLATE Latin1_General_CI_AS
+							,strMVessel NVARCHAR(200) COLLATE Latin1_General_CI_AS
+							,strMVoyageNumber NVARCHAR(100) COLLATE Latin1_General_CI_AS
+							,strFVessel NVARCHAR(200) COLLATE Latin1_General_CI_AS
+							,strFVoyageNumber NVARCHAR(100) COLLATE Latin1_General_CI_AS
+							,intForwardingAgentEntityId INT
+							,strForwardingAgentRef NVARCHAR(100) COLLATE Latin1_General_CI_AS
+							,intInsurerEntityId INT
+							,strInsurancePolicyRefNo NVARCHAR(100) COLLATE Latin1_General_CI_AS
+							,dblInsuranceValue NUMERIC(18, 6)
+							,dblInsurancePremiumPercentage NUMERIC(18, 6)
+							,intInsuranceCurrencyId INT
+							,dtmDocsToBroker DATETIME
+							,strMarks NVARCHAR(100) COLLATE Latin1_General_CI_AS
+							,strMarkingInstructions NVARCHAR(200) COLLATE Latin1_General_CI_AS
+							,strShippingMode NVARCHAR(100) COLLATE Latin1_General_CI_AS
+							,intNumberOfContainers INT
+							,intContainerTypeId INT
+							,intBLDraftToBeSentId INT
+							,strBLDraftToBeSentType NVARCHAR(100) COLLATE Latin1_General_CI_AS
+							,strDocPresentationType NVARCHAR(100) COLLATE Latin1_General_CI_AS
+							,intDocPresentationId INT
+							,dtmDocsReceivedDate DATETIME
+							,dtmETAPOL DATETIME
+							,dtmETSPOL DATETIME
+							,dtmETAPOD DATETIME
+							,dtmDeadlineCargo DATETIME
+							,dtmDeadlineBL DATETIME
+							,dtmISFReceivedDate DATETIME
+							,dtmISFFiledDate DATETIME
+							,dtmStuffingDate DATETIME
+							,dtmStartDate DATETIME
+							,dtmEndDate DATETIME
+							,dtmPlannedAvailabilityDate DATETIME
+							,ysnArrivedInPort BIT
+							,ysnDocumentsApproved BIT
+							,ysnCustomsReleased BIT
+							,dtmArrivedInPort DATETIME
+							,dtmDocumentsApproved DATETIME
+							,dtmCustomsReleased DATETIME
+							,strVessel1 NVARCHAR(200) COLLATE Latin1_General_CI_AS
+							,strOriginPort1 NVARCHAR(200) COLLATE Latin1_General_CI_AS
+							,strDestinationPort1 NVARCHAR(200) COLLATE Latin1_General_CI_AS
+							,dtmETSPOL1 DATETIME
+							,dtmETAPOD1 DATETIME
+							,strVessel2 NVARCHAR(200) COLLATE Latin1_General_CI_AS
+							,strOriginPort2 NVARCHAR(200) COLLATE Latin1_General_CI_AS
+							,strDestinationPort2 NVARCHAR(200) COLLATE Latin1_General_CI_AS
+							,dtmETSPOL2 DATETIME
+							,dtmETAPOD2 DATETIME
+							,strVessel3 NVARCHAR(200) COLLATE Latin1_General_CI_AS
+							,strOriginPort3 NVARCHAR(200) COLLATE Latin1_General_CI_AS
+							,strDestinationPort3 NVARCHAR(200) COLLATE Latin1_General_CI_AS
+							,dtmETSPOL3 DATETIME
+							,dtmETAPOD3 DATETIME
+							,strVessel4 NVARCHAR(200) COLLATE Latin1_General_CI_AS
+							,strOriginPort4 NVARCHAR(200) COLLATE Latin1_General_CI_AS
+							,strDestinationPort4 NVARCHAR(200) COLLATE Latin1_General_CI_AS
+							,dtmETSPOL4 DATETIME
+							,dtmETAPOD4 DATETIME
+							,dblDemurrage NUMERIC(18, 6)
+							,intDemurrageCurrencyId INT
+							,dblDespatch NUMERIC(18, 6)
+							,intDespatchCurrencyId INT
+							,dblLoadingRate NUMERIC(18, 6)
+							,intLoadingUnitMeasureId INT
+							,strLoadingPerUnit NVARCHAR(100) COLLATE Latin1_General_CI_AS
+							,dblDischargeRate NUMERIC(18, 6)
+							,intDischargeUnitMeasureId INT
+							,strDischargePerUnit NVARCHAR(100) COLLATE Latin1_General_CI_AS
+							,intTransportationMode INT
+							,intShipmentStatus INT
+							,ysnPosted BIT
+							,dtmPostedDate DATETIME
+							,intTransUsedBy INT
+							,intShipmentType INT
+							,intLoadShippingInstructionId INT
+							,strExternalShipmentNumber NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
+							,ysn4cRegistration BIT
+							,ysnInvoice BIT
+							,ysnProvisionalInvoice BIT
+							,ysnQuantityFinal BIT
+							,ysnCancelled BIT
+							,intShippingModeId INT
+							,intETAPOLReasonCodeId INT
+							,intETSPOLReasonCodeId INT
+							,intETAPODReasonCodeId INT
+							,intFreightTermId INT
+							,intCurrencyId INT
+							,intCreatedById INT
+							,dtmCreatedOn DATETIME
+							,intLastUpdateById INT
+							,dtmLastUpdateOn DATETIME
+							,strBatchId NVARCHAR(20) COLLATE Latin1_General_CI_AS
+							,strGenerateLoadEquipmentType NVARCHAR(100) COLLATE Latin1_General_CI_AS
+							,strGenerateLoadHauler NVARCHAR(100) COLLATE Latin1_General_CI_AS
+							,ysnDocumentsReceived BIT
+							,ysnSubCurrency BIT
+							,intCompanyId INT
+							,intBookId INT
+							,intSubBookId INT
+							,intLoadRefId INT
+							,ysnLoadBased BIT
+							,intContractDetailId INT
+							) x
+					JOIN tblLGLoad L ON L.intLoadRefId = x.intLoadRefId
+					WHERE L.intLoadRefId = @intLoadRefId
+				END
 
 				EXEC sp_xml_removedocument @idoc
 
@@ -1060,7 +1343,7 @@ BEGIN TRY
 
 				INSERT INTO @tblLGLoadDetail (intLoadDetailId)
 				SELECT intLoadDetailId
-				FROM OPENXML(@idoc, 'vyuLGLoadDetailViews/vyuCTLoadDetailView', 2) WITH (intLoadDetailId INT)
+				FROM OPENXML(@idoc, 'vyuLGLoadDetailViews/vyuLGLoadDetailView', 2) WITH (intLoadDetailId INT)
 
 				SELECT @intLoadDetailId = MIN(intLoadDetailId)
 				FROM @tblLGLoadDetail
@@ -2485,8 +2768,8 @@ BEGIN TRY
 							AND LDCL.intLoadDetailContainerLinkRefId = x.intLoadDetailContainerLinkId
 						)
 
-				UPDATE CD
-				SET [intConcurrencyId] = CD.[intConcurrencyId] + 1
+				UPDATE tblLGLoadDetailContainerLink
+				SET [intConcurrencyId] = tblLGLoadDetailContainerLink.intConcurrencyId + 1
 					,[intLoadContainerId] = (
 						SELECT [intLoadContainerId]
 						FROM tblLGLoadContainer
@@ -2495,7 +2778,7 @@ BEGIN TRY
 					,[intLoadDetailId] = (
 						SELECT [intLoadDetailId]
 						FROM tblLGLoadDetail
-						WHERE intLoadDetailRefId = x.intLoadDetailRefId
+						WHERE intLoadDetailRefId = x.intLoadDetailId
 						)
 					,[dblQuantity] = x.[dblQuantity]
 					,[intItemUOMId] = IU.[intItemUOMId]
@@ -3258,7 +3541,7 @@ BEGIN TRY
 		SELECT @intId = MIN(intId)
 		FROM tblLGIntrCompLogisticsStg
 		WHERE intId > @intId
-			AND IsNULL(strFeedStatus,'') =''
+			AND IsNULL(strFeedStatus, '') = ''
 	END
 
 	IF @strTransactionType IN (
@@ -3325,24 +3608,6 @@ BEGIN TRY
 
 	EXEC uspLGUpdateContractQty @intLoadId = @intNewLoadId
 
-	--SELECT *
-	--FROM tblLGLoad
-	--SELECT *
-	--FROM tblLGLoadDetail
-	--SELECT *
-	--FROM tblLGLoadNotifyParties
-	--SELECT *
-	--FROM tblLGLoadDocuments
-	--SELECT *
-	--FROM tblLGLoadContainer
-	--SELECT *
-	--FROM tblLGLoadDetailContainerLink
-	--SELECT *
-	--FROM tblLGLoadWarehouse
-	--SELECT *
-	--FROM tblLGLoadWarehouseContainer
-	--SELECT *
-	--FROM tblLGLoadWarehouseServices
 	COMMIT TRANSACTION
 END TRY
 
