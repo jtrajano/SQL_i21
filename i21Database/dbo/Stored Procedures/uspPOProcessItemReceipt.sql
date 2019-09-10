@@ -217,8 +217,8 @@ BEGIN
 														END	
 			,[ysnInventoryCost]					= CC.ysnInventoryCost
 			,[intCostCurrencyId]				= ISNULL(CC.intCurrencyId,ISNULL(CU.intMainCurrencyId,CD.intCurrencyId))	
-			,[dblRate]							= CASE WHEN CC.strCostMethod = 'Amount' THEN CC.dblRate ELSE 0 END
-			,[dblAmount]						= CASE WHEN CC.strCostMethod = 'Amount' THEN 0 ELSE CC.dblRate END
+			,[dblRate]							= CC.dblRate
+			,[dblAmount]						= CC.dblAmount
 			,[intCostUOMId]						= PD.intUnitOfMeasureId
 			,[intOtherChargeEntityVendorId]		= CC.intVendorId
 			,[strCostMethod]					= CC.strCostMethod
