@@ -203,8 +203,8 @@ BEGIN
 		UNION ALL
 		SELECT		DISTINCT
 				[intPaymentId]					=	A.intPaymentId,
-				[dblCredit]	 					=	 CAST(CASE WHEN E.strTransactionType = 'Invoice' THEN -paymentDetail.dblPayment  ELSE paymentDetail.dblPayment END * ISNULL(NULLIF(A.dblExchangeRate,0),1) AS DECIMAL(18,6)),
-				[dblCreditForeign]				=	 CAST(CASE WHEN E.strTransactionType = 'Invoice' THEN -paymentDetail.dblPayment  ELSE paymentDetail.dblPayment END * ISNULL(NULLIF(A.dblExchangeRate,0),1) AS DECIMAL(18,6))
+				[dblCredit]	 					=	 CAST(paymentDetail.dblPayment * ISNULL(NULLIF(A.dblExchangeRate,0),1) AS DECIMAL(18,6)),
+				[dblCreditForeign]				=	 CAST(paymentDetail.dblPayment * ISNULL(NULLIF(A.dblExchangeRate,0),1) AS DECIMAL(18,6))
 		FROM	[dbo].tblAPPayment A 
 		INNER JOIN tblAPPaymentDetail paymentDetail ON A.intPaymentId = paymentDetail.intPaymentId
 		INNER JOIN tblARInvoice E ON E.intInvoiceId = paymentDetail.intInvoiceId
@@ -514,8 +514,7 @@ BEGIN
 		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.[dtmDatePaid]), 0),
 		[strBatchId]					=	@batchId,
 		[intAccountId]					=	B.intAccountId,
-		[dblDebit]						=   CAST(CASE WHEN E.strTransactionType = 'Cash Refund' THEN B.dblPayment
-											ELSE (B.dblPayment * -1) END * A.dblExchangeRate AS DECIMAL(18,2)),
+		[dblDebit]						=   CAST(B.dblPayment * A.dblExchangeRate AS DECIMAL(18,2)),
 		[dblCredit]						=	0,
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,
@@ -538,8 +537,7 @@ BEGIN
 		[strTransactionForm]			=	@SCREEN_NAME,
 		[strModuleName]					=	@MODULE_NAME,
 		[intConcurrencyId]				=	1,
-		[dblDebitForeign]				=	CAST(CASE WHEN E.strTransactionType = 'Cash Refund' THEN B.dblPayment
-											ELSE (B.dblPayment * -1) END AS DECIMAL(18,2)),    
+		[dblDebitForeign]				=	CAST(B.dblPayment AS DECIMAL(18,2)),    
 		[dblDebitReport]				=	0,
 		[dblCreditForeign]				=	0,
 		[dblCreditReport]				=	0,
