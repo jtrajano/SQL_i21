@@ -196,6 +196,7 @@ BEGIN
 		SET @runDate		= @strProcessDate
 	END
 
+
 	 
 	SET @ysnPostedOrigin	= @PostedOrigin
 	SET @ysnPostedCSV		= @PostedCSV	
@@ -213,7 +214,8 @@ BEGIN
 
 	IF (@intTransactionId > 0 AND @IsImporting = 0)
 	BEGIN
-		DELETE tblCFTransactionNote WHERE intTransactionId = @intTransactionId
+		--DELETE tblCFTransactionNote WHERE intTransactionId = @intTransactionId AND intTransactionId = 0
+		UPDATE tblCFTransactionNote SET ysnCurrentError = 0 , strErrorTitle = 'Prior Error' WHERE intTransactionId = @intTransactionId 
 	END
 	ELSE IF(@intTransactionId = 0)
 	BEGIN
@@ -7701,3 +7703,36 @@ BEGIN
 
 	END
 	END
+
+
+
+	DECLARE @transactionErrorCount INT = 0
+	DECLARE @noErrorText NVARCHAR(MAX) = 'No Errors'
+	DECLARE @currentErrorText NVARCHAR(MAX) = 'Current Error'
+
+	DELETE tblCFTransactionNote WHERE intTransactionId = @intTransactionId AND strNote = @noErrorText
+
+	SELECT @transactionErrorCount = COUNT(*) FROM tblCFTransactionNote  WHERE intTransactionId = @intTransactionId  AND strErrorTitle = @currentErrorText
+	IF(@transactionErrorCount = 0)
+	BEGIN
+		INSERT INTO tblCFTransactionNote
+		(
+			 intTransactionId
+			,strProcess
+			,dtmProcessDate
+			,strNote
+			,strGuid
+			,ysnCurrentError
+			,strErrorTitle
+		)
+		SELECT
+			 @intTransactionId
+			,@noErrorText
+			,@runDate
+			,@noErrorText
+			,@guid
+			,1
+			,@currentErrorText
+	END
+
+	
