@@ -232,8 +232,8 @@ SELECT DISTINCT
 	,intShipFromId = A.intShipFromId
 	,intShipFromEntityId = A.intShipFromEntityId 
 	,intPaytoAddressId = payToAddress.intEntityLocationId
-	,[intLoadShipmentId]			 = B.intSourceId
-	,[intLoadShipmentDetailId]	     = LogisticsView.intLoadDetailId
+	,[intLoadShipmentId]			 = ISNULL(B.intLoadShipmentId, B.intSourceId) 
+	,[intLoadShipmentDetailId]	     = ISNULL(B.intLoadShipmentDetailId, LogisticsView.intLoadDetailId) 
 	,[intLoadShipmentCostId]	     = NULL 
 FROM tblICInventoryReceipt A
 	INNER JOIN tblICInventoryReceiptItem B
