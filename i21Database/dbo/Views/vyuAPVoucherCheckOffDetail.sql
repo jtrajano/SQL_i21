@@ -95,6 +95,7 @@ FROM		dbo.tblAPBill APB
 WHERE  
 	  APB.ysnPosted = 1 
 		  AND Payment.ysnPosted = 1 
+		  AND APBDT.dblTax != 0
 		  AND (APBDT.ysnCheckOffTax = 1 --SHOW ONLY ALL THE CHECK OFF TAX REGARDLESS OF SOURCE TRANSACTION
 		  OR APBD.intCustomerStorageId > 0
 		  OR APBD.intScaleTicketId > 0) 
@@ -203,4 +204,5 @@ WHERE
 		   OR APBD.intCustomerStorageId > 0
 		  OR APBD.intScaleTicketId > 0) 
 	 and Payment.dtmDatePaid IS NOT NULL
+	 AND APBDT.dblTax != 0
 GO
