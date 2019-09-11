@@ -33,7 +33,7 @@ UNION ALL
 SELECT A.dtmDatePaid AS dtmDate,   
 	 B.intBillId,   
 	 C.strBillId ,
-	 CASE WHEN C.intTransactionType NOT IN (1,2) AND B.dblPayment > 0
+	 CASE WHEN C.intTransactionType NOT IN (1,2) AND B.dblPayment != 0
 			THEN (CASE WHEN (E.intBankTransactionTypeId <> 19 OR E.intBankTransactionTypeId <> 116 OR E.intBankTransactionTypeId IS NULL)
 						 THEN B.dblPayment * -1 ELSE B.dblPayment END)
 			WHEN C.intTransactionType NOT IN (1,2) AND B.dblPayment < 0 AND (E.intBankTransactionTypeId = 116 OR E.intBankTransactionTypeId = 19)

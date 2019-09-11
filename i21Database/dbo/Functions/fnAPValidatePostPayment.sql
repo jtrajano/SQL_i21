@@ -184,7 +184,7 @@ BEGIN
 		FROM tblAPPayment A 
 		OUTER APPLY (
 			SELECT intPaymentDetailId FROM tblAPPaymentDetail B
-			WHERE B.dblPayment > 0 AND B.intPaymentId = A.intPaymentId
+			WHERE B.dblPayment != 0 AND B.intPaymentId = A.intPaymentId
 		) PaymentDetails
 		WHERE A.[intPaymentId] IN (SELECT intId FROM @paymentIds)
 		AND PaymentDetails.intPaymentDetailId IS NULL
@@ -199,7 +199,7 @@ BEGIN
 		FROM tblAPPayment A 
 		CROSS APPLY (
 			SELECT COUNT(*) intVouchers FROM tblAPPaymentDetail B
-			WHERE B.dblPayment > 0 AND B.intPaymentId = A.intPaymentId
+			WHERE B.dblPayment != 0 AND B.intPaymentId = A.intPaymentId
 			AND B.intPayScheduleId IS NULL
 			GROUP BY B.intBillId, B.intInvoiceId
 		) PaymentDetails
@@ -285,7 +285,7 @@ BEGIN
 				ON B.intInvoiceId = D.intInvoiceId
 		WHERE  A.[intPaymentId] IN (SELECT intId FROM @paymentIds)
 			AND ((B.intBillId > 0 AND C.ysnPaid = 1) OR (B.intInvoiceId IS NOT NULL AND D.ysnPaid = 1))
-			AND B.dblPayment > 0 --Validate all those selected transaction	
+			AND B.dblPayment != 0 --Validate all those selected transaction	
 				
 		--MAKE SURE YOU WILL NOT PAY OVER ON THE AMOUNT DUE
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
@@ -413,7 +413,7 @@ BEGIN
 		INNER JOIN tblAPBillDetail D ON C.intBillId = D.intBillId
 		WHERE A.[intPaymentId] IN (SELECT intId FROM @paymentIds)
 		AND B.ysnOffset = 1
-		AND B.dblPayment > 0 
+		AND B.dblPayment != 0 
 		AND (D.ysnRestricted = 1 
 			AND ((C.intTransactionType = 2 AND D.intContractDetailId > 0) 
 				OR (C.intTransactionType = 13 AND D.intScaleTicketId > 0))
