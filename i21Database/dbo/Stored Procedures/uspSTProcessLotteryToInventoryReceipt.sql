@@ -1,5 +1,4 @@
-﻿
-CREATE PROCEDURE [dbo].[uspSTProcessLotteryToInventoryReceipt]
+﻿CREATE PROCEDURE [dbo].[uspSTProcessLotteryToInventoryReceipt]
 	@Id INT,
 	@UserId INT,
 	@ProcessType INT,
@@ -138,7 +137,7 @@ BEGIN TRANSACTION
 		,ysnIsStorage			= 0
 		,dblFreightRate			= 0
 		,intSourceId			= tblSTReceiveLottery.intReceiveLotteryId
-		,intSourceType		 	= 8
+		,intSourceType		 	= 7
 		,dblGross				= NULL
 		,dblNet					= NULL
 		,intInventoryReceiptId	= tblSTReceiveLottery.intInventoryReceiptId 
@@ -324,7 +323,7 @@ BEGIN TRANSACTION
 		,ysnIsStorage			= 0
 		,dblFreightRate			= 0
 		,intSourceId			= tblSTReturnLottery.intReturnLotteryId
-		,intSourceType		 	= 8
+		,intSourceType		 	= 7
 		,dblGross				= NULL
 		,dblNet					= NULL
 		,intInventoryReceiptId	= tblSTReturnLottery.intInventoryReceiptId 
