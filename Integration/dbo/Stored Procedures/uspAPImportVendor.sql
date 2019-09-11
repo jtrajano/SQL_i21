@@ -742,7 +742,6 @@ BEGIN
 		DELETE FROM #tmpssvndmst WHERE ssvnd_vnd_no = @originVendor
 
 	END
-	DECLARE @Total1 INT
 
 	EXEC uspAPImportVendorContact
 	
