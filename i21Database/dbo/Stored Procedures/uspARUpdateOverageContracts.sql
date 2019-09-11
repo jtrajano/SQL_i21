@@ -12,6 +12,7 @@ DECLARE @intUnitMeasureId			INT
 	  , @intTicketForDiscountId		INT
 	  , @strUnitMeasure				NVARCHAR(100)
 	  , @strInvalidItem				NVARCHAR(500)
+	  , @dblScaleQtyTotal			NUMERIC(18, 6)
 
 --DROP TEMP TABLES
 IF(OBJECT_ID('tempdb..#INVOICEDETAILS') IS NOT NULL)
@@ -33,6 +34,18 @@ IF(OBJECT_ID('tempdb..#SHIPMENTCHARGES') IS NOT NULL)
 BEGIN
     DROP TABLE #SHIPMENTCHARGES
 END
+
+IF ISNULL(@ysnFromSalesOrder, 0) = 1
+	BEGIN
+		SELECT @dblScaleQtyTotal = SUM(SOD.dblQtyOrdered)
+		FROM tblSCTicket T
+		INNER JOIN tblSOSalesOrderDetail SOD ON T.intSalesOrderId = SOD.intSalesOrderId
+		INNER JOIN tblICItem I ON SOD.intItemId = I.intItemId
+		WHERE T.intTicketId = @intTicketId
+		  AND ISNULL(I.ysnUseWeighScales, 0) = 1
+	END
+
+SET @dblScaleQtyTotal = ISNULL(@dblScaleQtyTotal, 1)
 
 CREATE TABLE #INVOICEDETAILSTOADD (
 	  intInvoiceDetailId			INT	NOT NULL
@@ -65,10 +78,12 @@ SELECT intInvoiceId					= ID.intInvoiceId
 	 , intEntityId					= I.intEntityId
 	 , intInventoryShipmentItemId	= ID.intInventoryShipmentItemId
 	 , intTicketId					= ISNULL(ID.intTicketId, @intTicketId)
-	 , strDocumentNumber			= ID.strDocumentNumber			
+	 , strDocumentNumber			= ID.strDocumentNumber
+	 , dblScalePercentage			= CASE WHEN ID.dblQtyOrdered > 0 AND ISNULL(ITEM.ysnUseWeighScales, 0) = 1 THEN ID.dblQtyOrdered / @dblScaleQtyTotal ELSE 1 END
 INTO #INVOICEDETAILS 
 FROM tblARInvoiceDetail ID
 INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId
+LEFT JOIN tblICItem ITEM ON ID.intItemId = ITEM.intItemId
 LEFT JOIN tblCTContractDetail CD ON ID.intContractDetailId = CD.intContractDetailId AND ID.intContractHeaderId = CD.intContractHeaderId
 WHERE I.intInvoiceId = @intInvoiceId
 
@@ -161,6 +176,7 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
 			  , @intContractSeq				INT = NULL
 			  , @intInventoryShipmentItemId	INT = NULL			  
 			  , @dblQtyOverAged				NUMERIC(18, 6) = 0
+			  , @dblScalePercentage			NUMERIC(18, 6) = 0
 			  , @dtmDate					DATETIME = NULL
 			  , @strDocumentNumber			NVARCHAR(100) = NULL
 
@@ -176,6 +192,7 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
 				   , @intTicketId					= intTicketId
 				   , @dtmDate						= dtmDate
 				   , @strDocumentNumber				= strDocumentNumber
+				   , @dblScalePercentage			= dblScalePercentage
 		FROM #INVOICEDETAILS
 
 		--UPDATE INVOICE DETAIL QTY SHIPPED = AVAILABLE CONTRACT QTY
@@ -206,8 +223,8 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
 		ELSE IF ISNULL(@ysnFromSalesOrder, 0) = 1 AND @intContractDetailId IS NULL
 			BEGIN
 				UPDATE ID
-				SET dblQtyShipped	= ISNULL(dbo.fnCalculateQtyBetweenUOM(@intScaleUOMId, ID.intItemUOMId, @dblNetWeight), 0)
-				  , dblUnitQuantity	= ISNULL(dbo.fnCalculateQtyBetweenUOM(@intScaleUOMId, ID.intItemUOMId, @dblNetWeight), 0)
+				SET dblQtyShipped	= ISNULL(dbo.fnCalculateQtyBetweenUOM(@intScaleUOMId, ID.intItemUOMId, dbo.fnRoundBanker((@dblScalePercentage * @dblNetWeight), 6)), 0)
+				  , dblUnitQuantity	= ISNULL(dbo.fnCalculateQtyBetweenUOM(@intScaleUOMId, ID.intItemUOMId, dbo.fnRoundBanker((@dblScalePercentage * @dblNetWeight), 6)), 0)
 				  , intTicketId		= ISNULL(ID.intTicketId, @intTicketId)
 				  , @dblQtyOverAged	= 0
 				FROM tblARInvoiceDetail ID
