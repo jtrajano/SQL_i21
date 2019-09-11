@@ -744,7 +744,7 @@ BEGIN
 	END
 	DECLARE @Total1 INT
 
-	EXEC uspAPImportVendorContact @Update = @Update, @Total = @Total1 OUTPUT
+	EXEC uspAPImportVendorContact
 	
 SET @Total = @@ROWCOUNT
 
