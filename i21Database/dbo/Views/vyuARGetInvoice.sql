@@ -280,6 +280,7 @@ LEFT JOIN (
 ) LG ON INV.intLoadId = LG.intLoadId
 LEFT JOIN (
     SELECT intInvoiceId
+		 , intCreditMemoId
          , strReceiptNumber
          , strEODNo
          , strPOSDrawerName
@@ -289,7 +290,7 @@ LEFT JOIN (
     INNER JOIN dbo.tblARPOSLog POSLOG WITH (NOLOCK) ON POS.intPOSLogId = POSLOG.intPOSLogId
     INNER JOIN dbo.tblARPOSEndOfDay EOD WITH (NOLOCK) ON POSLOG.intPOSEndOfDayId = EOD.intPOSEndOfDayId
 	INNER JOIN dbo.tblSMCompanyLocationPOSDrawer DRAWER WITH (NOLOCK) ON EOD.intCompanyLocationPOSDrawerId = DRAWER.intCompanyLocationPOSDrawerId 
-) POS ON INV.intInvoiceId = POS.intInvoiceId 
+) POS ON (INV.intInvoiceId = POS.intInvoiceId OR INV.intInvoiceId = POS.intCreditMemoId) 
      AND INV.strType = 'POS'
 LEFT OUTER JOIN (
 	SELECT intCreditMemoId
