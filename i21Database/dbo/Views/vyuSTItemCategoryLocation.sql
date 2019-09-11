@@ -1,4 +1,4 @@
-﻿CREATE VIEW vyuSTItemCategoryLocation
+﻿CREATE VIEW [dbo].[vyuSTItemCategoryLocation]
 AS
 SELECT DISTINCT
 		C.intCategoryId
@@ -19,6 +19,9 @@ SELECT DISTINCT
 			ELSE
 				CAST(0 AS BIT)
 	  END AS ysnHasIssuedUOM
+	  , dblAverageMargin	= ISNULL(CategoryPricing.dblAverageMargin, 0)
+	  , dblTotalCostValue	= ISNULL(CategoryPricing.dblTotalCostValue, 0)
+	  , dblTotalRetailValue	= ISNULL(CategoryPricing.dblTotalRetailValue, 0)
 FROM tblICCategory C
 LEFT JOIN tblICCategoryLocation CLOC
 	ON C.intCategoryId = CLOC.intCategoryId
@@ -33,4 +36,4 @@ LEFT JOIN tblSTStore ST
 	ON CL.intCompanyLocationId = ST.intCompanyLocationId
 LEFT JOIN tblICCategoryPricing CategoryPricing
 	ON C.intCategoryId = CategoryPricing.intCategoryId
-	AND ItemLoc.intItemLocationId = CategoryPricing.intItemLocationId
+		AND ItemLoc.intItemLocationId = CategoryPricing.intItemLocationId

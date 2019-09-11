@@ -10,14 +10,11 @@ SELECT
 							THEN 'Mark Up'
 						WHEN (mark.strType = 'Item Level' AND markDetail.dblRetailPerUnit < ISNULL(itemPricing.dblSalePrice, 0))
 							THEN 'Mark Down'
-						WHEN (mark.strType = 'Item Level' AND markDetail.dblRetailPerUnit = ISNULL(itemPricing.dblSalePrice, 0))
-							THEN ''
 						WHEN (mark.strType = 'Department Level' AND markDetail.dblTotalRetailAmount > ISNULL(catPricing.dblTotalRetailValue, 0))
 							THEN 'Mark Up'
 						WHEN (mark.strType = 'Department Level' AND markDetail.dblTotalRetailAmount < ISNULL(catPricing.dblTotalRetailValue, 0))
 							THEN 'Mark Down'
-						WHEN (mark.strType = 'Department Level' AND markDetail.dblTotalRetailAmount = ISNULL(catPricing.dblTotalRetailValue, 0))
-							THEN ''
+						ELSE ''
 						--WHEN (mark.strType = 'Item Level' AND mark.strAdjustmentType = 'Regular' AND markDetail.dblTotalRetailAmount > ISNULL([dbo].[fnICGetRunningBalance](itemValuation.intInventoryTransactionId), 0))
 						--	THEN 'Mark Up'
 						--WHEN (mark.strType = 'Item Level' AND mark.strAdjustmentType = 'Regular' AND markDetail.dblTotalRetailAmount < ISNULL([dbo].[fnICGetRunningBalance](itemValuation.intInventoryTransactionId), 0))
