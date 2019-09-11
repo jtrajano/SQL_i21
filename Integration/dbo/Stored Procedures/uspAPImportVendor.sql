@@ -751,7 +751,7 @@ BEGIN
 	  --WHERE ENT.strEntityNo COLLATE SQL_Latin1_General_CP1_CS_AS IN (SELECT DISTINCT ssvnd_pay_to COLLATE SQL_Latin1_General_CP1_CS_AS from trprcmst
 	  --INNER JOIN ssvndmst on ssvnd_vnd_no = trprc_vnd_no)
 
-		EXEC uspAPImportVendorContact @originVendor
+		
 
 		IF(@@ERROR <> 0) 
 		BEGIN
@@ -764,6 +764,9 @@ BEGIN
 		DELETE FROM #tmpssvndmst WHERE ssvnd_vnd_no = @originVendor
 
 	END
+	DECLARE @Total1 INT
+
+	EXEC uspAPImportVendorContact @Update = @Update, @Total = @Total1 OUTPUT
 	
 SET @Total = @@ROWCOUNT
 
