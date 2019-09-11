@@ -398,7 +398,7 @@ BEGIN
 				LEFT JOIN tblSMCurrencyExchangeRateType rateType ON A.intCurrencyExchangeRateTypeId = rateType.intCurrencyExchangeRateTypeId
 		WHERE	A.intPaymentId IN (SELECT intId FROM @paymentIds)
 		AND 1 = (CASE WHEN B.dblAmountDue = CAST(((B.dblPayment + B.dblDiscount) - B.dblInterest) AS DECIMAL(18,2)) THEN 1 ELSE 0 END)
-		AND B.dblDiscount <> 0 AND B.dblPayment > 0
+		AND B.dblDiscount <> 0 AND B.dblPayment != 0
 		--GROUP BY A.[strPaymentRecordNum],
 		--A.intPaymentId,
 		--C.strVendorId,

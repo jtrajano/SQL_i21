@@ -55,7 +55,7 @@ WITH vouchertransactions AS ( --voucher transactions
 		,CASE WHEN dblAmountDue > 0 THEN dblAmountDue * -1 ELSE dblAmountDue END AS dblAmountDue
 		,CASE WHEN dblInterest > 0 THEN dblInterest * -1 ELSE dblInterest END AS dblInterest
 		,CASE WHEN dblDiscount > 0 THEN dblDiscount * -1 ELSE dblDiscount END AS dblDiscount
-		,CASE WHEN dblPayment > 0 THEN dblPayment * -1 ELSE dblPayment END AS dblPayment
+		,CASE WHEN dblPayment != 0 THEN dblPayment * -1 ELSE dblPayment END AS dblPayment
 		,ysnPaid
 		,ysnOrigin
 		,ysnPosted
