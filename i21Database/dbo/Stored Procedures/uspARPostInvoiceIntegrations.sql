@@ -36,6 +36,7 @@ IF @Post = 1
 BEGIN
     UPDATE ARI						
     SET ARI.ysnPosted					= 1
+	  , ARI.ysnProcessed				= CASE WHEN ARI.strTransactionType = 'Credit Memo' THEN 1 ELSE 0 END
       , ARI.ysnPaid						= (CASE WHEN ARI.dblInvoiceTotal = @ZeroDecimal OR ARI.dblAmountDue = @ZeroDecimal OR ARI.strTransactionType IN ('Cash') OR ARI.dblInvoiceTotal = ARI.dblPayment THEN 1 ELSE 0 END)
       , ARI.dblAmountDue				= (CASE WHEN ARI.strTransactionType IN ('Cash')
 												THEN @ZeroDecimal
@@ -73,6 +74,7 @@ BEGIN
     FROM #ARPostInvoiceHeader PID
     INNER JOIN (
 		SELECT intInvoiceId
+			 , ysnProcessed
 			 , ysnPosted
 			 , ysnPaid
 			 , dblInvoiceTotal
