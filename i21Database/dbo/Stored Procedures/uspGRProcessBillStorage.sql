@@ -189,7 +189,7 @@ BEGIN TRY
 					FROM @BillStorages BD
 					INNER JOIN tblGRCustomerStorage CS 
 						ON BD.intCustomerStorageId = CS.intCustomerStorageId
-					WHERE intEntityId = @intEntityId
+					WHERE BD.intEntityId = @intEntityId
 
 				EXEC [dbo].[uspARProcessInvoices] 
 					 @InvoiceEntries = @EntriesForInvoice
