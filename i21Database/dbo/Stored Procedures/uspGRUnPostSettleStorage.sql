@@ -74,7 +74,7 @@ BEGIN TRY
 
 		SELECT @strBillId = strBillId FROM tblAPBill WHERE intBillId = @BillId
 
-		IF ISNULL(@BillId,0) = 0 AND (@isParentSettleStorage = 1 OR NOT EXISTS(SELECT NULL FROM tblGRSettleStorage WHERE intParentSettleStorageId = @intParentSettleStorageId))
+		IF ISNULL(@BillId,0) = 0 AND (@isParentSettleStorage = 1)
 		BEGIN
 			SELECT @intSettleStorageId = MIN(intSettleStorageId)
 			FROM tblGRSettleStorage
@@ -493,7 +493,6 @@ BEGIN TRY
 				UPDATE tblGRSettleContract SET dblUnits = dblUnits - ABS(@dblUnits) WHERE intSettleStorageId = @intParentSettleStorageId
 			END
 
-			DELETE FROM tblGRSettleStorage WHERE intSettleStorageId = @intSettleStorageId
 			
 			IF NOT EXISTS(SELECT 1 FROM tblGRSettleStorage WHERE intParentSettleStorageId = @intParentSettleStorageId)
 			BEGIN
@@ -505,8 +504,10 @@ BEGIN TRY
 				DELETE FROM tblGRSettleStorageTicket WHERE intCustomerStorageId = @intCustomerStorageId AND intSettleStorageId = (SELECT intParentSettleStorageId FROM tblGRSettleStorage WHERE intSettleStorageId = @intSettleStorageId)
 			END
 
+			DELETE FROM tblGRSettleStorage WHERE intSettleStorageId = @intSettleStorageId
 			--5. Removing Voucher
 			BEGIN
+			IF @BillId IS NOT NULL
 				EXEC uspAPDeleteVoucher 
 					 @BillId
 					,@UserId
