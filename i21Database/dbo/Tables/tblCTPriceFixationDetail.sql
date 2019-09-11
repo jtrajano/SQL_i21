@@ -23,7 +23,6 @@
 	[intPricingUOMId]				INT NOT NULL,
 	[ysnHedge]						BIT,
 	[ysnAA]							BIT,
-	[dblHedgeNoOfLots]				NUMERIC(18,6) NULL,
 	[dblHedgePrice]					NUMERIC(18,6) NULL,
 	[intHedgeFutureMonthId]			INT,
 	[intBrokerId]					INT,
