@@ -267,7 +267,7 @@ BEGIN TRY
 					, @dtmEffectiveDate
 					, NULL
 					, 1
-					, 0			--@IncludeInvalidCodes
+					, 1			--@IncludeInvalidCodes
 					, NULL
 					, NULL
 					, NULL
@@ -315,7 +315,7 @@ BEGIN TRY
 					, ysnCheckoffTax
 					, strTaxCode
 				FROM #tmpTaxes
-				WHERE ISNULL(dblAdjustedTax, 0) <> 0
+				--WHERE ISNULL(dblAdjustedTax, 0) <> 0
 
 				SELECT @Tax = ISNULL(SUM(ISNULL(dblTax, 0)), 0)
 				FROM #tmpTaxes
