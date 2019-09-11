@@ -8069,6 +8069,7 @@
     <Build Include="dbo\Views\vyuTRLoadBlendIngredient.sql" />
     <Build Include="dbo\Views\vyuICGetCountGroup.sql" />
     <Build Include="dbo\Views\vyuIPLoadDocumentTrackingSummary.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGGetShippingInstructionReportWithDocuments.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
