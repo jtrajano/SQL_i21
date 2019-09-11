@@ -17,6 +17,7 @@
     [ysnIncludeInventoryBasis] BIT NULL, 
     [strM2MReportLevel] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [ysnIncludeInventoryM2M] BIT NULL, 
+	[ysnIncludeInTransitM2M] BIT NULL,
     [ysnIncludeBasisDifferentialsInResults] BIT NULL, 
     [ysnEnterSeparateMarketBasisDifferentialsForBuyVsSell] BIT NULL, 
     [ysnEnterForwardCurveForMarketBasisDifferential] BIT NULL, 

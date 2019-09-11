@@ -24,6 +24,7 @@ BEGIN
 	DECLARE @intDefaultCurrencyId int
 	DECLARE @intMarkExpiredMonthPositionId INT
 	DECLARE @ysnIncludeDerivatives BIT
+	DECLARE @ysnIncludeInTransitM2M BIT
 
 SELECT @dtmPriceDate = dtmM2MBasisDate FROM tblRKM2MBasis WHERE intM2MBasisId = @intM2MBasisId
 
@@ -33,6 +34,7 @@ SELECT TOP 1 @ysnIncludeBasisDifferentialsInResults = ysnIncludeBasisDifferentia
 	, @ysnCanadianCustomer = ISNULL(ysnCanadianCustomer, 0)
 	, @intMarkExpiredMonthPositionId = intMarkExpiredMonthPositionId
 	, @ysnIncludeDerivatives = ysnIncludeDerivatives
+	, @ysnIncludeInTransitM2M = ysnIncludeInTransitM2M
 FROM tblRKCompanyPreference
 
 SELECT TOP 1 @dtmSettlemntPriceDate = dtmPriceDate FROM tblRKFuturesSettlementPrice WHERE intFutureSettlementPriceId = @intFutureSettlementPriceId
@@ -59,6 +61,7 @@ DECLARE @tblFinalDetail TABLE (intContractHeaderId int
 	, intCommodityId INT
 	, strItemNo NVARCHAR(200) COLLATE Latin1_General_CI_AS
 	, intItemId INT
+	, intItemLocationId INT
 	, strOrgin NVARCHAR(200) COLLATE Latin1_General_CI_AS
 	, intOriginId INT
 	, strPosition NVARCHAR(200) COLLATE Latin1_General_CI_AS
@@ -996,6 +999,7 @@ INSERT INTO @tblFinalDetail (intContractHeaderId
     , intCommodityId
     , strItemNo 
     , intItemId 
+	, intItemLocationId
     , strOrgin 
     , intOriginId 
     , strPosition 
@@ -1070,6 +1074,7 @@ SELECT intContractHeaderId
 	, intCommodityId
 	, strItemNo
 	, intItemId
+	, intItemLocationId
 	, strOrgin
 	, intOriginId
 	, strPosition
@@ -1160,6 +1165,7 @@ FROM (
                 , ch.intCommodityId
                 , i.strItemNo
                 , cd.intItemId
+				, it.intItemLocationId
                 , strOrgin = NULL --cd.strOrgin
                 , i.intOriginId
                 , strPosition = NULL --cd.strPosition
@@ -1291,6 +1297,7 @@ FROM (
                 , ch.intCommodityId
                 , i.strItemNo
                 , cd.intItemId
+				, it.intItemLocationId
                 , strOrgin = NULL --cd.strOrgin
                 , i.intOriginId
                 , strPosition = NULL --cd.strPosition
@@ -1425,6 +1432,7 @@ FROM (
                 , it.intCommodityId
                 , it.strItemNo
                 , it.intItemId
+				, it.intItemLocationId
                 , strOrgin = NULL --cd.strOrgin
                 , intOriginId = NULL
                 , strPosition = NULL --cd.strPosition
@@ -2582,6 +2590,104 @@ BEGIN
 			,intCurrencyId,dblCashOrFuture
 	)t2 WHERE ISNULL(dblOpenQty,0) <> 0
 END
+
+
+	IF @ysnIncludeInTransitM2M = 1
+	BEGIN
+		INSERT INTO #Temp (strContractOrInventoryType
+			, strContractSeq
+			, strCommodityCode
+			, intCommodityId
+			, strItemNo
+			, intItemId
+			, strLocationName
+			, intCompanyLocationId
+			, strFutureMonth
+			, intFutureMonthId
+			, intFutureMarketId
+			, dblContractRatio
+			, dblFutures
+			, dblCash
+			, dblNotLotTrackedPrice
+			, dblInvFuturePrice
+			, dblInvMarketBasis
+			, dblMarketRatio
+			, dblCosts
+			, dblOpenQty
+			, dblResult
+			, dblCashPrice
+			, intCurrencyId)
+		SELECT * FROM (
+			SELECT strContractOrInventoryType
+				, strContractSeq
+				, strCommodityCode
+				, intCommodityId
+				, strItemNo
+				, intItemId
+				, strLocationName
+				, intCompanyLocationId
+				, @strSpotMonth strFutureMonth
+				, @intSpotMonthId intFutureMonthId
+				, intFutureMarketId
+				, dblContractRatio = 0
+				, dblFutures = 0
+				, dblCash = dblNotLotTrackedPrice
+				, dblNotLotTrackedPrice
+				, dblInvFuturePrice = 0
+				, dblInvMarketBasis = 0
+				, dblMarketRatio = 0
+				, dblCosts = 0
+				, dblOpenQty
+				, dblResult = dblOpenQty
+				, dblCashOrFuture  = dbo.fnCTConvertQuantityToTargetCommodityUOM(PriceSourceUOMId, intMarketBasisUOM, dblCashOrFuture)
+				,intCurrencyId
+			FROM (
+				SELECT 
+					'In-transit(I)' as strContractOrInventoryType
+					, strContractSeq
+					, strLocationName
+					, intCompanyLocationId
+					, strCommodityCode
+					, intCommodityId
+					, strItemNo
+					, intItemId
+					, dblOpenQty = ABS(dblOpenQty)
+					, ISNULL((SELECT TOP 1 intUnitMeasureId FROM tblRKM2MBasisDetail temp
+							WHERE temp.intM2MBasisId = @intM2MBasisId
+								AND ISNULL(temp.intCommodityId,0) = CASE WHEN ISNULL(temp.intCommodityId,0)= 0 THEN 0 ELSE intCommodityId END
+								AND ISNULL(temp.intItemId,0) = CASE WHEN ISNULL(temp.intItemId,0)= 0 THEN 0 ELSE intItemId END
+								AND ISNULL(temp.intCompanyLocationId,0) = CASE WHEN ISNULL(temp.intCompanyLocationId,0)= 0 THEN 0 ELSE ISNULL(intCompanyLocationId,0) END
+								AND temp.strContractInventory = 'Inventory'),0) as PriceSourceUOMId
+					, dblInvMarketBasis = 0
+					,ROUND(ISNULL((SELECT TOP 1 ISNULL(dblCashOrFuture,0) FROM tblRKM2MBasisDetail temp
+							WHERE temp.intM2MBasisId = @intM2MBasisId
+								AND ISNULL(temp.intCommodityId,0) = CASE WHEN ISNULL(temp.intCommodityId,0)= 0 THEN 0 ELSE intCommodityId END
+								AND ISNULL(temp.intItemId,0) = CASE WHEN ISNULL(temp.intItemId,0)= 0 THEN 0 ELSE intItemId END
+								AND ISNULL(temp.intCompanyLocationId,0) = CASE WHEN ISNULL(temp.intCompanyLocationId,0)= 0 THEN 0 ELSE ISNULL(intCompanyLocationId,0) END
+								AND temp.strContractInventory = 'Inventory'),0),4) as dblCashOrFuture
+					,ISNULL((SELECT TOP 1 ISNULL(temp.intUnitMeasureId,0) FROM tblRKM2MBasisDetail temp
+							WHERE temp.intM2MBasisId = @intM2MBasisId
+								AND ISNULL(temp.intCommodityId,0) = CASE WHEN ISNULL(temp.intCommodityId,0)= 0 THEN 0 ELSE intCommodityId END
+								AND ISNULL(temp.intItemId,0) = CASE WHEN ISNULL(temp.intItemId,0)= 0 THEN 0 ELSE intItemId END
+								AND ISNULL(temp.intCompanyLocationId,0) = CASE WHEN ISNULL(temp.intCompanyLocationId,0)= 0 THEN 0 ELSE ISNULL(intCompanyLocationId,0) END
+								AND temp.strContractInventory = 'Inventory'),0) as intMarketBasisUOM
+					,ISNULL((SELECT TOP 1 ISNULL(intCurrencyId,0) FROM tblRKM2MBasisDetail temp
+							WHERE temp.intM2MBasisId = @intM2MBasisId
+								AND ISNULL(temp.intCommodityId,0) = CASE WHEN ISNULL(temp.intCommodityId,0)= 0 THEN 0 ELSE intCommodityId END
+								AND ISNULL(temp.intItemId,0) = CASE WHEN ISNULL(temp.intItemId,0)= 0 THEN 0 ELSE intItemId END
+								AND ISNULL(temp.intCompanyLocationId,0) = CASE WHEN ISNULL(temp.intCompanyLocationId,0)= 0 THEN 0 ELSE ISNULL(intCompanyLocationId,0) END
+								AND temp.strContractInventory = 'Inventory'),0) as intCurrencyId
+					, (SELECT TOP 1 strFutureMonth strFutureMonth FROM tblRKFuturesMonth WHERE ysnExpired = 0 AND  dtmSpotDate <= GETDATE() AND intFutureMarketId =intFutureMarketId  ORDER BY 1 DESC) strFutureMonth
+					, (SELECT TOP 1 intFutureMonthId strFutureMonth FROM tblRKFuturesMonth WHERE ysnExpired = 0 AND  dtmSpotDate <= GETDATE() AND intFutureMarketId =intFutureMarketId  ORDER BY 1 DESC) intFutureMonthId
+					, intFutureMarketId
+					, dblNotLotTrackedPrice =  ISNULL(dbo.fnCalculateValuationAverageCost(intItemId, intItemLocationId, @dtmTransactionDateUpTo), 0)
+				FROM @tblFinalDetail
+				WHERE strContractOrInventoryType = 'In-transit(S)'
+					
+					
+			) t1
+		)t2 WHERE ISNULL(dblOpenQty,0) <> 0
+	END
 
 	--Derivative Entries
 	IF @ysnIncludeDerivatives = 1
