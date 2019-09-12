@@ -287,7 +287,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM #POSTRANSACTIONS)
 				,[intSalesAccountId]					= NULL
 				,[strPONumber]							= POS.strPONumber
 				,[intFreightTermId]						= CASE WHEN ISNULL(POS.ysnTaxExempt,0) = 0 THEN CL.intFreightTermId ELSE NULL END
-				,[strInvoiceOriginId]					= CASE WHEN strPOSType = 'Returned' THEN POS.strCreditMemoNumber ELSE POS.strInvoiceNumber END
+				,[strInvoiceOriginId]					= CASE WHEN strPOSType = 'Returned' THEN ISNULL(POS.strCreditMemoNumber, POS.strInvoiceNumber) ELSE POS.strInvoiceNumber END
 				,[ysnUseOriginIdAsInvoiceNumber]		= CAST(1 AS BIT)
 			FROM tblARPOS POS 
 			INNER JOIN #POSTRANSACTIONS RT ON POS.intPOSId = RT.intPOSId
