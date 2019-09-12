@@ -45,8 +45,15 @@ SELECT DE.intFutOptTransactionId
 										OR intFutOptTransactionId IN (SELECT intLFutOptTransactionId FROM tblRKOptionsMatchPnS)
 										OR intFutOptTransactionId IN (SELECT intSFutOptTransactionId FROM tblRKOptionsMatchPnS)) 
 									AND intFutOptTransactionId = DE.intFutOptTransactionId), 0) AS BIT)
-	, intHedgeContractId = PFD.intPriceFixationId
-	, strHedgeContract = PriceHeader.strContractNumber + '-' + CAST(PriceDetail.intContractSeq AS NVARCHAR(10))
+	, strHedgeType = CASE WHEN PFD.intPriceFixationId IS NOT NULL THEN 'Price Contract'
+							WHEN CF.intContractFuturesId IS NOT NULL THEN 'Contract Futures'
+							ELSE NULL END
+	, intHedgeContractId = CASE WHEN PFD.intPriceFixationId IS NOT NULL THEN PFD.intPriceFixationId
+							WHEN CF.intContractFuturesId IS NOT NULL THEN CFHeader.intContractHeaderId
+							ELSE NULL END
+	, strHedgeContract = CASE WHEN PFD.intPriceFixationId IS NOT NULL THEN PriceHeader.strContractNumber + '-' + CAST(PriceDetail.intContractSeq AS NVARCHAR(10))
+							WHEN CF.intContractFuturesId IS NOT NULL THEN CFHeader.strContractNumber + '-' + CAST(CFDetail.intContractSeq AS NVARCHAR(10))
+							ELSE NULL END
 FROM tblRKFutOptTransaction DE
 LEFT JOIN tblEMEntity AS e ON DE.intEntityId = e.intEntityId
 LEFT JOIN tblEMEntity AS Trader ON DE.intTraderId = Trader.intEntityId
@@ -71,6 +78,9 @@ LEFT JOIN tblCTPriceFixationDetail PFD ON PFD.intFutOptTransactionId = DE.intFut
 LEFT JOIN tblCTPriceFixation PF ON PF.intPriceFixationId = PFD.intPriceFixationId
 LEFT JOIN tblCTContractDetail PriceDetail ON PriceDetail.intContractDetailId = PF.intContractDetailId
 LEFT JOIN tblCTContractHeader PriceHeader ON PriceHeader.intContractHeaderId = PF.intContractHeaderId
+LEFT JOIN tblCTContractFutures CF ON CF.intFutOptTransactionId = DE.intFutOptTransactionId
+LEFT JOIN tblCTContractDetail CFDetail ON CFDetail.intContractDetailId = CF.intContractDetailId
+LEFT JOIN tblCTContractHeader CFHeader ON CFHeader.intContractHeaderId = CFDetail.intContractHeaderId
 LEFT JOIN (
 	SELECT intFutOptTransactionId
 		, dblMaxOpenContract = MAX(dblOpenContract)
