@@ -225,7 +225,7 @@ BEGIN TRY
 						@intExternalId			=	@intInvoiceDetailId,
 						@strScreenName			=	'Invoice' 
 
-				IF ISNULL(@dblRemainingSchedQty, 0) > 0
+				IF ISNULL(@dblRemainingSchedQty, 0) > 0 AND ISNULL(@dblConvertedQtyOrdered, 0) > 0
 					BEGIN
 						SET @dblRemainingSchedQty = -@dblRemainingSchedQty
 

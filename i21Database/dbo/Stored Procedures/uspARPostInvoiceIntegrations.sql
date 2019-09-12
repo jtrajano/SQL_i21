@@ -776,6 +776,7 @@ FROM #ARPostInvoiceDetail ID
 INNER JOIN tblCTContractDetail CD ON ID.[intContractDetailId] = CD.[intContractDetailId]	
 LEFT JOIN tblCTContractHeader CH ON CD.intContractHeaderId = CH.intContractHeaderId
 LEFT JOIN tblICInventoryShipmentItem ISI ON ID.[intInventoryShipmentItemId] = ISI.[intInventoryShipmentItemId]
+LEFT JOIN tblARInvoice PI ON ID.intOriginalInvoiceId = PI.intInvoiceId AND ID.ysnFromProvisional = 1 AND PI.strType = 'Provisional'
 OUTER APPLY (
 	SELECT TOP 1 intInvoiceId 
 	FROM tblARInvoice I
@@ -792,6 +793,7 @@ WHERE ID.[intInventoryShipmentChargeId] IS NULL
 		)
     AND ISNULL(ID.[strItemType], '') <> 'Other Charge'
 	AND (ISNULL(RI.[intInvoiceId], 0) = 0 OR (ISNULL(RI.[intInvoiceId], 0) <> 0 AND (ID.intLoadDetailId IS NULL OR ID.[intTicketId] IS NOT NULL)))
+	AND ((ID.ysnFromProvisional = 1 AND PI.ysnPosted = 0) OR ID.ysnFromProvisional = 0)
 
 EXEC dbo.[uspCTInvoicePosted] @ItemsFromInvoice, @UserId
 
