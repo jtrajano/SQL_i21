@@ -7682,6 +7682,7 @@
     <Build Include="dbo\Stored Procedures\uspRKPositionReconciliationReportContractBalance.sql" />
     <Build Include="dbo\Tables\tblGRSettleVoucherCreateReferenceTable.sql" />
     <Build Include="dbo\Stored Procedures\uspGRHandleSettleVoucherCreateReferenceTable.sql" />
+    <None Include="Scripts\Post-Deployment\SM\1910_DeleteDuplicateUserPreference.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
