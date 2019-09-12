@@ -86,29 +86,30 @@ BEGIN
 	WHERE  
 		I.[ysnRecurring] = @OneBit
 
---   This is being handled by [uspGLValidateGLEntries]
-	--INSERT INTO #ARInvalidInvoiceData
-	--	([intInvoiceId]
-	--	,[strInvoiceNumber]
-	--	,[strTransactionType]
-	--	,[intInvoiceDetailId]
-	--	,[intItemId]
-	--	,[strBatchId]
-	--	,[strPostingError])
-	----Fiscal Year
-	--SELECT
-	--	 [intInvoiceId]			= I.[intInvoiceId]
-	--	,[strInvoiceNumber]		= I.[strInvoiceNumber]		
-	--	,[strTransactionType]	= I.[strTransactionType]
-	--	,[intInvoiceDetailId]	= I.[intInvoiceDetailId] 
-	--	,[intItemId]			= I.[intItemId] 
-	--	,[strBatchId]			= I.[strBatchId]
-	--	,[strPostingError]		= 'Unable to find an open fiscal year period to match the transaction date.'
-	--FROM 					
-	--	#ARPostInvoiceHeader I	
-	--WHERE  
-	--	--ISNULL(dbo.isOpenAccountingDate(ISNULL(I.[dtmPostDate], I.[dtmDate])), 0) = 0
-	--	I.[ysnWithinAccountingDate] = 0
+	INSERT INTO #ARInvalidInvoiceData
+		([intInvoiceId]
+		,[strInvoiceNumber]
+		,[strTransactionType]
+		,[intInvoiceDetailId]
+		,[intItemId]
+		,[strBatchId]
+		,[strPostingError])
+	--Inactive Ship to or Bill to Location
+	SELECT
+		 [intInvoiceId]			= I.[intInvoiceId]
+		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
+		,[strTransactionType]	= I.[strTransactionType]
+		,[intInvoiceDetailId]	= I.[intInvoiceDetailId] 
+		,[intItemId]			= I.[intItemId] 
+		,[strBatchId]			= I.[strBatchId]
+		,[strPostingError]		= CASE WHEN SHIPTO.ysnActive = 0 THEN 'Ship to Location ' + SHIPTO.strLocationName + ' is not active.'
+									   WHEN BILLTO.ysnActive = 0 THEN 'Bill to Location ' + BILLTO.strLocationName + ' is not active.'
+								  END
+	FROM #ARPostInvoiceHeader I
+	INNER JOIN tblARInvoice INV ON I.intInvoiceId = INV.intInvoiceId
+	INNER JOIN tblEMEntityLocation SHIPTO ON INV.intShipToLocationId = SHIPTO.intEntityLocationId
+	INNER JOIN tblEMEntityLocation BILLTO ON INV.intBillToLocationId = BILLTO.intEntityLocationId
+	WHERE SHIPTO.ysnActive = 0 OR BILLTO.ysnActive = 0
 
 	INSERT INTO #ARInvalidInvoiceData
 		([intInvoiceId]

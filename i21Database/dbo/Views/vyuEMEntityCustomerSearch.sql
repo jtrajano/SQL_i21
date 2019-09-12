@@ -81,8 +81,8 @@ LEFT JOIN tblEMEntity entityToSalesperson ON CUSTOMER.intSalespersonId = entityT
 LEFT JOIN tblEMEntityToContact entityToContact ON entityToCustomer.intEntityId = entityToContact.intEntityId AND entityToContact.ysnDefaultContact = 1
 LEFT JOIN tblEMEntity entityContact ON entityContact.intEntityId = entityToContact.intEntityContactId AND entityToContact.ysnDefaultContact = 1
 LEFT JOIN tblEMEntityLocation custLocation ON CUSTOMER.intEntityId = custLocation.intEntityId AND custLocation.ysnDefaultLocation = 1
-LEFT JOIN tblEMEntityLocation shipLocation ON CUSTOMER.intShipToId = shipLocation.intEntityLocationId
-LEFT JOIN tblEMEntityLocation billLocation ON CUSTOMER.intBillToId = billLocation.intEntityLocationId
+LEFT JOIN tblEMEntityLocation shipLocation ON CUSTOMER.intShipToId = shipLocation.intEntityLocationId AND shipLocation.ysnActive = 1
+LEFT JOIN tblEMEntityLocation billLocation ON CUSTOMER.intBillToId = billLocation.intEntityLocationId AND billLocation.ysnActive = 1
 LEFT JOIN tblEMEntityPhoneNumber entityPhone ON entityToContact.intEntityContactId = entityPhone.intEntityId
 LEFT JOIN tblSMTerm entityLocationTerm ON custLocation.intTermsId = entityLocationTerm.intTermID
 LEFT JOIN tblSMCurrency custCurrency ON CUSTOMER.intCurrencyId = custCurrency.intCurrencyID
