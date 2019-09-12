@@ -543,7 +543,7 @@ BEGIN
 				,intSubBookId			= IntegrationData.intSubBookId
 				,dtmDateModified		= GETDATE()
 				,intModifiedByUserId 	= @intUserId
-				,strDataSource			= IntegrationData.strReceiptType
+				,strDataSource			= ISNULL(IntegrationData.strDataSource, IntegrationData.strReceiptType)
 				,intShipFromEntityId	= ISNULL(IntegrationData.intShipFromEntityId, IntegrationData.intEntityVendorId)
 		WHEN NOT MATCHED THEN 
 			INSERT (
@@ -629,7 +629,7 @@ BEGIN
 				/*intSubBookId*/				,IntegrationData.intSubBookId 
 				,GETDATE()
 				,@intUserId
-				/*strDataSource*/				,IntegrationData.strReceiptType
+				/*strDataSource*/				,ISNULL(IntegrationData.strDataSource, IntegrationData.strReceiptType) 
 				/*intShipFromEntityId*/			,ISNULL(IntegrationData.intShipFromEntityId, IntegrationData.intEntityVendorId)
 			)
 		;

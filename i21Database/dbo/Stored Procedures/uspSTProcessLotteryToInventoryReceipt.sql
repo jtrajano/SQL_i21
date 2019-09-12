@@ -112,6 +112,7 @@ BEGIN TRANSACTION
 			,strChargesLink
 			,dblUnitRetail
 			,intSort
+			,strDataSource
 		)	
 		SELECT strReceiptType	= @strReceiptType
 		,strSourceScreenName	= @strSourceScreenName
@@ -151,6 +152,7 @@ BEGIN TRANSACTION
 		,strChargesLink			= NULL
 		,dblUnitRetail			= NULL
 		,intSort				= NULL
+		,strDataSource			= @strSourceScreenName
 		FROM tblSTReceiveLottery
 		INNER JOIN tblSTStore 
 		ON tblSTReceiveLottery.intStoreId = tblSTStore.intStoreId
@@ -298,6 +300,7 @@ BEGIN TRANSACTION
 			,strChargesLink
 			,dblUnitRetail
 			,intSort
+			,strDataSource
 		)	
 		SELECT strReceiptType	= @strReceiptType
 		,strSourceScreenName	= @strSourceScreenName
@@ -337,6 +340,7 @@ BEGIN TRANSACTION
 		,strChargesLink			= NULL
 		,dblUnitRetail			= NULL
 		,intSort				= NULL
+		,strDataSource			= @strSourceScreenName
 		FROM tblSTReturnLottery
 		INNER JOIN tblSTLotteryBook
 		ON tblSTReturnLottery.intLotteryBookId = tblSTLotteryBook.intLotteryBookId
