@@ -1007,9 +1007,12 @@ BEGIN TRY
 					DECLARE	@_intEntityScaleOperatorId INT
 					DECLARE @_dblNetUnits NUMERIC (18,6)
 					DECLARE	@_intItemUOMId INT
+					DECLARE @_dblAvailableQtyInItemStockUOM NUMERIC(18,6)
 
 					WHILE EXISTS (SELECT TOP 1 1 FROM #newTicketWithContract)
 					BEGIN
+						SET @_dblAvailableQtyInItemStockUOM = 0
+
 						SELECT TOP 1
 							@_intTicketId					= intTicketId
 							,@_intContractId				= intContractId
@@ -1017,6 +1020,19 @@ BEGIN TRY
 							,@_dblNetUnits					= dblNetUnits
 							,@_intItemUOMId					= intItemUOMIdTo
 						FROM #newTicketWithContract
+
+						SELECT TOP 1 @_dblAvailableQtyInItemStockUOM = dblAvailableQtyInItemStockUOM
+						FROM vyuCTContractDetailView 
+						WHERE intContractDetailId = @_intContractId
+
+						IF(@_dblNetUnits > @_dblAvailableQtyInItemStockUOM)
+						BEGIN
+							SET @_dblNetUnits  = @_dblAvailableQtyInItemStockUOM
+							
+							UPDATE tblSCTicket
+							SET dblScheduleQty = @_dblNetUnits
+							WHERE intTicketId = @_intTicketId	
+						END
 
 						EXEC uspCTUpdateScheduleQuantityUsingUOM @_intContractId,@_dblNetUnits,@_intEntityScaleOperatorId,@_intTicketId,'Scale',@_intItemUOMId	
 
