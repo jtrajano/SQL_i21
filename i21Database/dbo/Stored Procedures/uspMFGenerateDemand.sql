@@ -1068,7 +1068,7 @@ BEGIN TRY
 
 				SELECT @intConsumptionMonth = @intMonthId + 1
 
-				WHILE @intConsumptionMonth <= 24
+				WHILE @intConsumptionMonth <= @intMonthsToView
 					AND @dblEndInventory > 0
 				BEGIN
 					SELECT @dblConsumptionQty = 0
@@ -1088,7 +1088,7 @@ BEGIN TRY
 
 						SELECT @dblWeeksOfSsupply = @dblWeeksOfSsupply + 1
 
-						IF @intConsumptionMonth = 24
+						IF @intConsumptionMonth = @intMonthsToView
 						BEGIN
 							INSERT INTO #tblMFDemand (
 								intItemId
