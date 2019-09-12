@@ -62,6 +62,7 @@ BEGIN TRY
 		, @ReceiptLink NVARCHAR(50)
 		, @BlendedItem BIT = 0
 		, @dblNonBlendedDistributedQuantity DECIMAL(18, 6) = 0
+		, @strFreightCostMethod NVARCHAR(20) = NULL
 	
 	SELECT @dtmLoadDateTime = TL.dtmLoadDateTime
 		, @intShipVia = TL.intShipViaId
@@ -158,6 +159,12 @@ BEGIN TRY
 			IF (ISNULL(@dblSurcharge, 0) > 0 AND ISNULL(@intSurchargeItemId, '') = '')
 			BEGIN
 				RAISERROR('Transports Load has a Surcharge. You must link the Surcharge Item to the Freight Item (using the On Cost dropdown from the Surcharge Item''s Setup tab > Cost tab), or zero-out the Surcharge amount in both Receipt and Distribution Detail.', 16, 1)
+			END
+
+			SELECT TOP 1 @strFreightCostMethod = strCostMethod FROM tblICItem WHERE intItemId = @intFreightItemId
+			IF(ISNULL(@strFreightCostMethod, '') = '')
+			BEGIN
+				RAISERROR('Cost UOM is invalid. Make sure Item screen > Setup tab > Cost tab > Cost Method field is setup properly.', 16, 1)
 			END
 		END
 		
