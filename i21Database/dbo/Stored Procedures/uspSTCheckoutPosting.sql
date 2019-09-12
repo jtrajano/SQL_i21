@@ -20,6 +20,68 @@ BEGIN
 	SET ANSI_WARNINGS OFF
 
 	BEGIN TRY
+		
+		-- ==================================================================================================================
+		-- [START] - Check Checkout current process using column [intCheckoutCurrentProcess]
+		-- ==================================================================================================================
+
+		DECLARE @ysnSetToReady BIT = CAST(0 AS BIT)
+
+		IF(@strDirection = 'Post' OR @strDirection = 'UnPost')
+			BEGIN
+				-- 0 = Ready
+				-- 1 = Currently being Posted
+				-- 2 = Currently being Un-Posted
+				IF EXISTS (SELECT TOP 1 1 FROM tblSTCheckoutHeader WHERE intCheckoutId = @intCheckoutId AND intCheckoutCurrentProcess != 0)
+					BEGIN
+				
+						DECLARE @strCheckoutCurrentProcess NVARCHAR(150) = ''
+
+						SELECT 
+							@strCheckoutCurrentProcess = CASE
+															WHEN intCheckoutCurrentProcess = 1
+																THEN 'Checkout is currently being Posted.'
+															WHEN intCheckoutCurrentProcess = 2
+																THEN 'Checkout is currently being Unposted.'
+														END
+						FROM tblSTCheckoutHeader 
+						WHERE intCheckoutId = @intCheckoutId 
+
+
+
+						SET @strStatusMsg = @strCheckoutCurrentProcess
+						SET @strNewCheckoutStatus = ''
+						SET @ysnInvoiceStatus = 0
+						SET @ysnCustomerChargesInvoiceStatus = 0
+						SET @strBatchIdForNewPostRecap = ''
+						SET @strErrorCode = 'Err'
+
+						GOTO ExitPost
+
+					END
+				ELSE IF EXISTS (SELECT TOP 1 1 FROM tblSTCheckoutHeader WHERE intCheckoutId = @intCheckoutId AND intCheckoutCurrentProcess = 0)
+					BEGIN
+				
+						UPDATE tblSTCheckoutHeader
+						SET intCheckoutCurrentProcess = CASE 
+															WHEN @strDirection = 'Post'
+																THEN 1
+															WHEN @strDirection = 'UnPost'
+																THEN 2
+														END
+						WHERE intCheckoutId = @intCheckoutId  
+
+						SET @ysnSetToReady = CAST(1 AS BIT)
+
+					END
+			END
+		-- ==================================================================================================================
+		-- [END] - Check Checkout current process using column [intCheckoutCurrentProcess]
+		-- ==================================================================================================================
+
+
+
+
 		BEGIN TRANSACTION 
 
 		-- OUT Params
@@ -5609,3 +5671,16 @@ ExitWithRollback:
 	
 		
 ExitPost:
+	
+	IF(@ysnSetToReady = CAST(1 AS BIT))
+		BEGIN
+			
+			UPDATE tblSTCheckoutHeader
+			SET intCheckoutCurrentProcess = 0
+			WHERE intCheckoutId = @intCheckoutId  
+
+		END
+	ELSE
+		BEGIN
+			SELECT 'ExitPost'
+		END
