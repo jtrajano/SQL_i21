@@ -35,10 +35,7 @@ begin
 	if @ysnGetHeader= 1
 	begin
 		set @top = ' top 1'
-		set @dtmDate = getdate()
-		
-		select intLocationId = 1, Capacity = 0, PercentFull = 0
-		return 
+		set @dtmDate = NULL 		 
 	end
 
 	--Capacity
@@ -46,7 +43,8 @@ begin
 	--' + @location_filter + '
 	SET @sql = 
 	'
-	
+	DECLARE @dtmDate AS DATETIME = ' + ISNULL('''' + CAST(@dtmDate AS NVARCHAR(20)) + '''', 'NULL') + '
+
 	SELECT ' + @top + ' * 
 	FROM (
 			select 
@@ -80,7 +78,9 @@ begin
 						on ItemStockUOM.intItemId = Item.intItemId
 					join tblICItemLocation as il
 						on il.intItemLocationId = ItemStockUOM.intItemLocationId
-					where ItemStockUOM.dtmDate <= ''' + cast(@dtmDate as nvarchar) + ''' AND ItemStockUOM.intStorageLocationId is not null 
+					where 
+						(dbo.fnDateLessThanEquals(ItemStockUOM.dtmDate,  @dtmDate) = 1 OR @dtmDate IS NULL)'  
+						+ ' AND ItemStockUOM.intStorageLocationId is not null 
 						'
 						+
 							case when @strLocationName <> '' then ' and il.intLocationId in ( ' + @strLocationName + ' )'
