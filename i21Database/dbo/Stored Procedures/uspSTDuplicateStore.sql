@@ -422,6 +422,45 @@ BEGIN TRANSACTION
 		FROM tblSTRegister 
 		WHERE intStoreId = @StoreId
 
+
+	DECLARE @intRegisterId INT
+	SET @intRegisterId = SCOPE_IDENTITY()
+
+
+	DECLARE @intOldRegisterId INT
+	SELECT TOP 1 @intOldRegisterId = intRegisterId
+	FROM tblSTRegister 
+	WHERE intStoreId = @StoreId
+
+
+
+	INSERT INTO tblSTRegisterFileConfiguration
+	(
+		 intRegisterId
+		,intImportFileHeaderId
+		,strFileType
+		,strFilePrefix
+		,strFileNamePattern
+		,strFolderPath
+		,strURICommand
+		,strStoredProcedure
+		,intConcurrencyId
+	)
+	SELECT
+		@intRegisterId
+		,intImportFileHeaderId
+		,strFileType
+		,strFilePrefix
+		,strFileNamePattern
+		,strFolderPath
+		,strURICommand
+		,strStoredProcedure
+		,intConcurrencyId
+	FROM 
+	tblSTRegisterFileConfiguration WHERE intRegisterId = @intOldRegisterId
+
+	
+
 	--REBASTES TAB--
 	INSERT INTO tblSTStoreRebates
 	(
