@@ -53,10 +53,12 @@ SELECT Item.intItemId
 						-- GTIN
 						WHEN UOM.dblUPCwthOrwthOutCheckDigit > 9999999999999
 							THEN CASE
-									WHEN LEN(UOM.dblUPCwthOrwthOutCheckDigit) < 14
+									WHEN LEN(UOM.dblUPCwthOrwthOutCheckDigit) <= 14
 										THEN 14
-									ELSE 
-										LEN(UOM.strUPCwthOrwthOutCheckDigit) 
+									WHEN LEN(UOM.dblUPCwthOrwthOutCheckDigit) > 14 
+										THEN LEN(UOM.dblUPCwthOrwthOutCheckDigit)
+									--ELSE 
+									--	LEN(UOM.strUPCwthOrwthOutCheckDigit) 
 							END
 					END
 			ELSE 0
@@ -98,10 +100,11 @@ SELECT Item.intItemId
 						-- GTIN
 						WHEN UOM.dblUPCwthOrwthOutCheckDigit > 9999999999999
 							THEN CASE
-									WHEN LEN(UOM.dblUPCwthOrwthOutCheckDigit) < 14
+									WHEN LEN(UOM.dblUPCwthOrwthOutCheckDigit) <= 14
 										THEN RIGHT(('00000000000000' + CAST(UOM.dblUPCwthOrwthOutCheckDigit AS NVARCHAR(14))), 14)
-									ELSE 
-										CAST(UOM.dblUPCwthOrwthOutCheckDigit AS NVARCHAR(15)) 
+									WHEN LEN(UOM.dblUPCwthOrwthOutCheckDigit) > 14 
+										THEN RIGHT(UOM.dblUPCwthOrwthOutCheckDigit, 14)
+										--CAST(UOM.dblUPCwthOrwthOutCheckDigit AS NVARCHAR(15)) 
 							END
 					END
 			ELSE ''
@@ -196,6 +199,8 @@ INNER JOIN tblICItem Item
 INNER JOIN tblICItemLocation ItemLoc
 	ON Item.intItemId = ItemLoc.intItemId
 WHERE Item.ysnFuelItem = CAST(0 AS BIT) 
-	AND UOM.strLongUPCCode IS NOT NULL
-	AND UOM.strLongUPCCode NOT LIKE '%[^0-9]%'
+	AND UOM.strLongUPCCode	IS NOT NULL
+	AND UOM.strLongUPCCode	NOT LIKE '%[^0-9]%'
+	AND LEN(UOM.strLongUPCCode)		<= 13     -- ST-1366 (Max Upc length is 13 without check digit, we should skip upc that has more than 13 digits)
+	AND UOM.ysnStockUnit = CAST(1 AS BIT)
 	AND ISNULL(SUBSTRING(UOM.strLongUPCCode, PATINDEX('%[^0]%',UOM.strLongUPCCode), LEN(UOM.strLongUPCCode)), 0) NOT IN ('')
