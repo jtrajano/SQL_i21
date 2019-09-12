@@ -8,6 +8,10 @@ BEGIN TRANSACTION
 
 	BEGIN TRY
 
+	DECLARE @newStoreTransactionId INT = 0
+	SELECT @newStoreTransactionId = MAX(intStoreNo) FROM tblSTStore 
+	SET @newStoreTransactionId = @newStoreTransactionId + 1
+
 	DECLARE @NewStoreId INT
 
 	--DETAILS & SETUP TAB--
@@ -131,7 +135,7 @@ BEGIN TRANSACTION
 		,intConcurrencyId
 	)
 	SELECT TOP 1
-		9999
+		@newStoreTransactionId
 		,strDescription
 		,strRegion
 		,strDistrict
@@ -421,7 +425,6 @@ BEGIN TRANSACTION
 		,intConcurrencyId
 		FROM tblSTRegister 
 		WHERE intStoreId = @StoreId
-
 
 	DECLARE @intRegisterId INT
 	SET @intRegisterId = SCOPE_IDENTITY()
