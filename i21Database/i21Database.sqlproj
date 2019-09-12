@@ -8070,6 +8070,7 @@
     <Build Include="dbo\Views\vyuICGetCountGroup.sql" />
     <Build Include="dbo\Views\vyuIPLoadDocumentTrackingSummary.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetShippingInstructionReportWithDocuments.sql" />
+    <None Include="Scripts\Post-Deployment\SM\1910_DeleteDuplicateUserPreference.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -89,6 +89,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\1920_UpdateOtherTaxationPointToNone.sql
 :r .\SM\1910_EntityUserDatafix_Transaction.sql
 :r .\SM\1910_UpdateNoSpaceModuleName.sql
+:r .\SM\1910_DeleteDuplicateUserPreference.sql
 
 
 -- Canned Report
