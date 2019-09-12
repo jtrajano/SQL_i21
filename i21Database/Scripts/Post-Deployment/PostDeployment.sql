@@ -87,6 +87,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\1910_MigrateINCOToFreightTerm.sql
 :r .\SM\1910_UpdateVantivToWorldPay.sql
 :r .\SM\1910_EntityUserDatafix_Transaction.sql
+:r .\SM\1910_UpdateNoSpaceModuleName.sql
 
 -- Canned Report
 :r .\Reports\1_ReportDisableConstraints.sql
