@@ -25,7 +25,7 @@ FROM (
 		 , ysnFinalized				= CAST(0 AS BIT)
 	FROM tblARInvoice I
 	WHERE I.strType = 'Provisional'
-	  AND I.ysnProcessed = 1
+	  AND (I.ysnProcessed = 1 OR I.ysnPosted = 1)
 
 	UNION ALL
 
