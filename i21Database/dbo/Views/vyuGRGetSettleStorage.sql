@@ -11,15 +11,19 @@ SELECT DISTINCT
 	,dblSpotUnits				= SS.dblSpotUnits
 	,dblFuturesPrice			= SS.dblFuturesPrice
 	,dblFuturesBasis			= SS.dblFuturesBasis
-	,dblCashPrice				= CASE 
-									WHEN ISNULL(_dblCashPrice.dblCashPrice,0) > 0 THEN _dblCashPrice.dblCashPrice
-									ELSE
-										SS.dblCashPrice
-										-- CASE 
-										-- 	WHEN SS.intParentSettleStorageId IS NOT NULL THEN SS.dblCashPrice
-										-- 	ELSE 0
-										-- END
-								END
+	,dblCashPrice				= case when SS.intParentSettleStorageId is null then
+										isnull(computed_header.dblCashPrice, 0) / isnull(SS.dblSelectedUnits, 1)
+									else
+										CASE 
+											WHEN ISNULL(_dblCashPrice.dblCashPrice,0) > 0 THEN _dblCashPrice.dblCashPrice
+											ELSE
+												SS.dblCashPrice
+												-- CASE 
+												-- 	WHEN SS.intParentSettleStorageId IS NOT NULL THEN SS.dblCashPrice
+												-- 	ELSE 0
+												-- END
+										END
+									end
 	,strStorageAdjustment		= SS.strStorageAdjustment
 	,dtmCalculateStorageThrough = SS.dtmCalculateStorageThrough
 	,dblAdjustPerUnit			= SS.dblAdjustPerUnit
@@ -158,3 +162,25 @@ OUTER APPLY (
 		ON CH.intContractHeaderId = CD.intContractHeaderId
 	WHERE CD.intPricingTypeId <> 2
 ) AS _dblCashPrice
+OUTER APPLY (
+	select sum(_son.dblCashPrice) as dblCashPrice from (
+		SELECT 
+			SUM(CD.dblCashPrice * SC.dblUnits) AS dblCashPrice
+		FROM tblGRSettleContract SC
+			JOIN tblGRSettleStorage SSS
+				on SC.intSettleStorageId = SSS.intSettleStorageId 
+					and SSS.intParentSettleStorageId = SS.intSettleStorageId
+			JOIN tblCTContractDetail CD
+				ON CD.intContractDetailId = SC.intContractDetailId
+		WHERE CD.intPricingTypeId <> 2
+			and SS.intParentSettleStorageId is null
+		
+		Union all
+		select SUM(TSS.dblSpotUnits * TSS.dblCashPrice) dblCashPrice 
+			from tblGRSettleStorageTicket T
+				join tblGRSettleStorage TSS
+					on T.intSettleStorageId = TSS.intSettleStorageId
+						and TSS.intParentSettleStorageId = SS.intSettleStorageId
+				where SS.intParentSettleStorageId is null 
+	) _son
+) AS computed_header
