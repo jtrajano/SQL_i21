@@ -9,7 +9,7 @@ SELECT Item.intItemId
 	   , UOM.strLongUPCWOLeadingZero
 	   , LEN(UOM.strLongUPCWOLeadingZero) AS intUpcWOLeadingZeroLength
 	   , UOM.dblUPCwthOrwthOutCheckDigit
-	   
+
 	   --, LEN(UOM.strUPCwthOrwthOutCheckDigit) AS intUpcWithCheckDigitLength
 	   , CASE
 			WHEN UOM.dblUPCwthOrwthOutCheckDigit <= 99999

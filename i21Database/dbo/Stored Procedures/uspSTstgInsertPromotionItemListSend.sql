@@ -12,41 +12,35 @@
 AS
 BEGIN
 	BEGIN TRY
+		
 		SET @ysnSuccessResult = CAST(1 AS BIT) -- Set to true
 		SET @strMessageResult = ''
 
-		-- DECLARE @strFilePrefix AS NVARCHAR(10) = 'ILT'
 
-		---- =========================================================================================================
-		---- CONVERT DATE's to UTC
-		---- =========================================================================================================
-		--DECLARE @dtmBeginningChangeDateUTC AS DATETIME = dbo.fnSTConvertDateToUTC(@dtmBeginningChangeDate)
-		--DECLARE @dtmEndingChangeDateUTC AS DATETIME = dbo.fnSTConvertDateToUTC(@dtmEndingChangeDate)
-		---- =========================================================================================================
-		---- END CONVERT DATE's to UTC
-		---- =========================================================================================================
 
-		---- Use table to get the list of items modified during change date range
-		--DECLARE @Tab_UpdatedItems TABLE(intItemId int)
+		-- =======================================================================================================================================================
+		-- [START] - CREATE TRANSACTION
+		-- =======================================================================================================================================================
+		DECLARE @InitTranCount INT;
+		SET @InitTranCount = @@TRANCOUNT
+		DECLARE @Savepoint NVARCHAR(150) = 'uspSTstgInsertPromotionItemListSend' + CAST(NEWID() AS NVARCHAR(100)); 
 
-		---- Get those Item using given date range
-		--INSERT INTO @Tab_UpdatedItems
-		--SELECT DISTINCT ITR.intItemId
-		--FROM vyuSTItemsToRegister ITR
-		--WHERE (
-		--		ITR.dtmDateModified BETWEEN @dtmBeginningChangeDateUTC AND @dtmEndingChangeDateUTC
-		--		OR 
-		--		ITR.dtmDateCreated BETWEEN @dtmEndingChangeDateUTC AND @dtmEndingChangeDateUTC
-		--	  )
-		--	AND intCompanyLocationId = 
-		--	(
-		--		SELECT TOP (1) intCompanyLocationId 
-		--		FROM tblSTStore
-		--		WHERE intStoreId = @intStoreId
-		--	)
+		IF @InitTranCount = 0
+			BEGIN
+				BEGIN TRANSACTION
+			END		
+		ELSE
+			BEGIN
+				SAVE TRANSACTION @Savepoint
+			END
+		-- =======================================================================================================================================================
+		-- [END] - CREATE TRANSACTION
+		-- =======================================================================================================================================================
 
-		---- =========================================================================================================
 
+
+
+		
 		-- Check if register has intImportFileHeaderId
 		DECLARE @strRegisterName nvarchar(200)
 				, @strRegisterClass NVARCHAR(200)
@@ -58,6 +52,13 @@ BEGIN
 		FROM dbo.tblSTRegister 
 		Where intRegisterId = @intRegisterId
 
+
+
+
+
+		-- =======================================================================================================================================================
+		-- [START] - Check if Register has Outbound setup for prefix 'ILT'
+		-- =======================================================================================================================================================
 		IF EXISTS(SELECT intImportFileHeaderId FROM tblSTRegisterFileConfiguration WHERE intRegisterId = @intRegisterId AND strFilePrefix = @strFilePrefix)
 			BEGIN
 				SELECT @intImportFileHeaderId = intImportFileHeaderId 
@@ -70,11 +71,79 @@ BEGIN
 				SET @strGeneratedXML = ''
 				SET @intImportFileHeaderId = 0
 				SET @ysnSuccessResult = CAST(0 AS BIT) -- Set to false
-				SET @strMessageResult = 'Register ' + @strRegisterClass + ' has no Outbound setup for Promotion Item List File (' + @strFilePrefix + ')'
+				SET @strMessageResult = 'Register ' + @strRegisterClass + ' has no Outbound setup for Promotion Item List File (' + @strFilePrefix + '). '
 
 				RETURN
 			END	
-		-- =========================================================================================================
+		-- =======================================================================================================================================================
+		-- [END] - Check if Register has Outbound setup for prefix 'ILT'
+		-- =======================================================================================================================================================
+
+
+
+
+		-- =======================================================================================================================================================
+		-- [START] - Check if has UPC longer than 13 digits
+		-- =======================================================================================================================================================
+		DECLARE @strInvalidUPCs NVARCHAR(MAX)
+
+		DECLARE @tempInvalidUpc AS TABLE
+		(
+			intItemUOMId		INT,
+			strLongUPCCode		NVARCHAR(50),
+			strItemNo			NVARCHAR(50),
+			strItemDescription	NVARCHAR(150)
+		)
+
+		INSERT INTO @tempInvalidUpc
+		(
+			intItemUOMId,
+			strLongUPCCode,
+			strItemNo,
+			strItemDescription
+		)
+		SELECT DISTINCT
+			intItemUOMId		= uom.intItemUOMId,
+			strLongUPCCode		= uom.strLongUPCCode,
+			strItemNo			= item.strItemNo,
+			strItemDescription	= item.strDescription
+		FROM tblICItemUOM uom
+		INNER JOIN tblICItem item	
+			ON uom.intItemId = item.intItemId
+		INNER JOIN tblICItemLocation itemLoc
+			ON item.intItemId = itemLoc.intItemId
+		INNER JOIN tblSTStore store
+			ON itemLoc.intLocationId = store.intCompanyLocationId
+		INNER JOIN tblSTPromotionItemList storeItemList
+			ON store.intStoreId = storeItemList.intStoreId
+		INNER JOIN tblSTPromotionItemListDetail storeItemListDetail
+			ON storeItemList.intPromoItemListId = storeItemListDetail.intPromoItemListId
+				AND uom.intItemUOMId = storeItemListDetail.intItemUOMId
+		WHERE item.ysnFuelItem = CAST(0 AS BIT) 
+			AND store.intStoreId = @intStoreId
+			AND uom.strLongUPCCode IS NOT NULL
+			AND uom.strLongUPCCode <> ''
+			AND uom.strLongUPCCode <> '0'
+			AND uom.strLongUPCCode NOT LIKE '%[^0-9]%'
+			AND uom.ysnStockUnit = CAST(1 AS BIT)
+			AND LEN(uom.strLongUPCCode) > 13
+
+
+
+		IF EXISTS(SELECT TOP 1 1 FROM @tempInvalidUpc)
+			BEGIN
+
+				SELECT @strInvalidUPCs = COALESCE(@strInvalidUPCs + ', ' + strLongUPCCode, strLongUPCCode) 
+				FROM @tempInvalidUpc
+
+				SET @strMessageResult = @strMessageResult + 'Invalid UPC found and were not added to ' + @strFilePrefix + ' file: (' + @strInvalidUPCs + '). ' + CHAR(13)
+
+			END
+		-- =======================================================================================================================================================
+		-- [END] - Check if has UPC longer than 13 digits
+		-- =======================================================================================================================================================
+
+
 
 
 
@@ -94,7 +163,7 @@ BEGIN
 
 						INSERT INTO tblSTstgPassportPricebookItemListILT33
 						(
-							[StoreLocationID] , 
+							[StoreLocationID], 
 							[VendorName], 
 							[VendorModelVersion], 
 							[TableActionType], 
@@ -107,50 +176,28 @@ BEGIN
 							[strUniqueGuid]
 						)
 						SELECT DISTINCT
-							ST.intStoreNo AS [StoreLocationID]
-							, 'iRely' AS [VendorName]  	
-							, (SELECT TOP (1) strVersionNo FROM tblSMBuildNumber ORDER BY intVersionID DESC) AS [VendorModelVersion]
-							, CASE
-									WHEN @ysnClearRegisterPromotion = CAST(1 AS BIT) THEN 'initialize'
-									WHEN @ysnClearRegisterPromotion = CAST(0 AS BIT) THEN 'update'
-							END AS [TableActionType]
-							, 'addchange' AS [RecordActionType] 
-							, CASE PIL.ysnDeleteFromRegister 
-								WHEN 0 
-									THEN 'addchange' 
-								WHEN 1 
-									THEN 'delete' 
-								ELSE 'addchange' 
-							END as [ItemListMaintenanceRecordActionType] 
-							, PIL.intPromoItemListNo AS [ItemListID]
-							, ISNULL(PIL.strPromoItemListDescription, '') AS [ItemListDescription]
-							, PCF.strPosCodeFormat AS [POSCodeFormatFormat]
-							, PCF.strUPCwthOrwthOutCheckDigit AS [POSCode]
-							--, CASE 
-							--		WHEN ISNULL(IUOM.strLongUPCCode,'') != '' AND ISNULL(IUOM.strLongUPCCode,'') NOT LIKE '%[^0-9]%'
-							--			THEN CASE
-							--					WHEN CONVERT(NUMERIC(32, 0),CAST(IUOM.strLongUPCCode AS FLOAT)) > ISNULL(ST.intMaxPlu,0)
-							--						THEN 'upcA'
-							--					ELSE 'plu'
-							--				END
-							--		ELSE 'plu' 
-							--END AS [POSCodeFormatFormat]
-							--, CASE 
-							--		WHEN ISNULL(IUOM.strLongUPCCode,'') != '' AND ISNULL(IUOM.strLongUPCCode,'') NOT LIKE '%[^0-9]%'
-							--			THEN CASE
-							--					WHEN CONVERT(NUMERIC(32, 0),CAST(IUOM.strLongUPCCode AS FLOAT)) > ISNULL(ST.intMaxPlu,0)
-							--							THEN CASE
-							--									WHEN LEN(IUOM.strLongUPCCode) = 6
-							--										THEN RIGHT('00000000000' + ISNULL(dbo.fnSTConvertUPCeToUPCa(IUOM.strLongUPCCode),''), 11) + CAST(dbo.fnSTGenerateCheckDigit(IUOM.strLongUPCCode) AS NVARCHAR(1))
-							--									WHEN LEN(IUOM.strLongUPCCode) > 6	
-							--										THEN RIGHT('00000000000' + ISNULL(IUOM.strLongUPCCode,''), 11) + CAST(dbo.fnSTGenerateCheckDigit(IUOM.strLongUPCCode) AS NVARCHAR(1))
-							--										-- IUOM.strLongUPCCode + CAST(dbo.fnSTGenerateCheckDigit(IUOM.strLongUPCCode) AS NVARCHAR(15)) --RIGHT('0000000000000' + ISNULL(IUOM.strLongUPCCode,''),13)
-							--							END
-							--						ELSE IUOM.strLongUPCCode
-							--				END
-							--		ELSE '0000' 
-							--END [POSCode]
-							, @strUniqueGuid AS [strUniqueGuid]
+							[StoreLocationID]						= ST.intStoreNo, 
+							[VendorName]							= N'iRely', 
+							[VendorModelVersion]					= (SELECT TOP (1) strVersionNo FROM tblSMBuildNumber ORDER BY intVersionID DESC), 
+							[TableActionType]						= CASE
+																			WHEN @ysnClearRegisterPromotion = CAST(1 AS BIT) 
+																				THEN 'initialize'
+																			WHEN @ysnClearRegisterPromotion = CAST(0 AS BIT) 
+																				THEN 'update'
+																	END, 
+							[RecordActionType]						= 'addchange', 
+							[ItemListMaintenanceRecordActionType]	= CASE PIL.ysnDeleteFromRegister 
+																		WHEN 0 
+																			THEN 'addchange' 
+																		WHEN 1 
+																			THEN 'delete' 
+																		ELSE 'addchange' 
+																	END, 
+							[ItemListID]							= PIL.intPromoItemListNo, 
+							[ItemListDescription]					= ISNULL(PIL.strPromoItemListDescription, ''), 
+							[POSCodeFormatFormat]					= PCF.strPosCodeFormat, 
+							[POSCode]								= PCF.strLongUPCCode, -- PASSPORT does not include check digit --PCF.strUPCwthOrwthOutCheckDigit,
+							[strUniqueGuid]							= @strUniqueGuid
 						FROM tblICItem I
 						INNER JOIN tblICItemLocation IL 
 							ON IL.intItemId = I.intItemId
@@ -250,7 +297,7 @@ BEGIN
 						ELSE 
 							BEGIN
 								SET @ysnSuccessResult = CAST(0 AS BIT)
-								SET @strMessageResult = 'No result found to generate Item List - ' + @strFilePrefix + ' Outbound file'
+								SET @strMessageResult = @strMessageResult + 'No result found to generate Item List - ' + @strFilePrefix + ' Outbound file. '
 							END
 					END
 			END
@@ -325,14 +372,68 @@ BEGIN
 				ELSE 
 					BEGIN
 						SET @ysnSuccessResult = CAST(0 AS BIT)
-						SET @strMessageResult = 'No result found to generate Item List - ' + @strFilePrefix + ' Outbound file'
+						SET @strMessageResult = @strMessageResult + 'No result found to generate Item List - ' + @strFilePrefix + ' Outbound file. '
 					END
 			END
+
+		-- COMMIT
+		GOTO ExitWithCommit
 
 	END TRY
 
 	BEGIN CATCH
-		SET @ysnSuccessResult = CAST(0 AS BIT)
-		SET @strMessageResult = ERROR_MESSAGE()
+		SET @strGeneratedXML		= ''
+		SET @intImportFileHeaderId	= 0
+		SET @ysnSuccessResult		= CAST(0 AS BIT)
+		SET @strMessageResult		= @strMessageResult + ERROR_MESSAGE() + '. '
+
+		GOTO ExitWithRollback
 	END CATCH
 END
+
+
+
+
+ExitWithCommit:
+	IF @InitTranCount = 0
+		BEGIN
+			COMMIT TRANSACTION
+		END
+
+	GOTO ExitPost
+	
+
+
+
+
+
+ExitWithRollback:
+		SET @ysnSuccessResult			= CAST(0 AS BIT)
+
+		IF @InitTranCount = 0
+			BEGIN
+				IF ((XACT_STATE()) <> 0)
+				BEGIN
+					SET @strMessageResult = @strMessageResult + 'Will Rollback Transaction. '
+
+					ROLLBACK TRANSACTION
+				END
+			END
+			
+		ELSE
+			BEGIN
+				IF ((XACT_STATE()) <> 0)
+					BEGIN
+						SET @strMessageResult = @strMessageResult + 'Will Rollback to Save point. '
+
+						ROLLBACK TRANSACTION @Savepoint
+					END
+			END
+			
+				
+		
+		
+	
+
+		
+ExitPost:
