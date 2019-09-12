@@ -81,7 +81,7 @@ BEGIN TRY
     SELECT [dtmTransferDate]		= MIN(TL.dtmLoadDateTime)
 		,[strTransferType]          = 'Location to Location'
 		,[intSourceType]            = 3
-		,[strDescription]           = MIN(IC.strDescription)
+		,[strDescription]           = MIN(TL.strTransaction)
 		,[intFromLocationId]        = TR.intCompanyLocationId
 		,[intToLocationId]          = DH.intCompanyLocationId
 		,[ysnShipmentRequired]      = 0
@@ -148,7 +148,7 @@ BEGIN TRY
 	SELECT [dtmTransferDate]		= MIN(TL.dtmLoadDateTime)
 		,[strTransferType]          = 'Location to Location'
 		,[intSourceType]            = 3
-		,[strDescription]           = MIN(IC.strDescription)
+		,[strDescription]           = MIN(TL.strTransaction)
 		,[intFromLocationId]        = TR.intCompanyLocationId
 		,[intToLocationId]          = DH.intCompanyLocationId
 		,[ysnShipmentRequired]      = 0
