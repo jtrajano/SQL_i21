@@ -65,7 +65,7 @@ BEGIN TRY
 	IF @ysnReplication = 1
 		SELECT @strObjectName = 'tblLGLoad'
 	ELSE
-		SELECT @strObjectName = 'vyuLGLoadView'
+		SELECT @strObjectName = 'vyuIPLoadView'
 
 	EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
 		,@strLoadCondition
