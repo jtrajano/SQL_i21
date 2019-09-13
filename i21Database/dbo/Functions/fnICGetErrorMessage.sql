@@ -79,7 +79,7 @@ BEGIN
 		WHEN @msgId = 80063 THEN 'There is a cost adjustment for %s. You need to unpost %s first before you can continue.'
 		WHEN @msgId = 80064 THEN 'The %s is both a payable and deductible to the bill of the same vendor. Please correct the Accrue or Price checkbox.'
 		WHEN @msgId = 80065 THEN 'The %s is shouldered by the receipt vendor and can''t be added to the item cost. Please correct the Price or Inventory Cost checkbox.'
-		WHEN @msgId = 80066 THEN 'Inventory Count is ongoing for Item %s and is locked under Location %s.'
+		WHEN @msgId = 80066 THEN 'Inventory Count is ongoing for item %s and is locked under Location %s.'
 		WHEN @msgId = 80067 THEN 'Inventory Shipment Line Item does not exist.'
 		WHEN @msgId = 80068 THEN 'Item % is not a lot tracked item and cannot ship lots.'
 		WHEN @msgId = 80069 THEN '% has only % available quantity. Cannot ship more than the available qty.'
@@ -252,6 +252,9 @@ BEGIN
 		WHEN @msgId = 80236 THEN 'Negative stock quantity is not allowed for %s at %s.<p><br>On Hand is %f<br>Reserved is %f<br>Available is %f.</p>'
 		WHEN @msgId = 80237 THEN 'Inventory Receipt, %s, needs to be posted first before you can post the Inventory Count.'
 		WHEN @msgId = 80238 THEN 'Inventory Shipment, %s, needs to be posted first before you can post the Inventory Count.'
+		WHEN @msgId = 80239 THEN 'Inventory Count is ongoing and is locked for item %s in storage location %s.'
+		WHEN @msgId = 80240 THEN 'Inventory Count is ongoing and is locked for item %s in storage unit %s.'
+		WHEN @msgId = 80241 THEN 'Inventory Count is ongoing and is locked for item %s in lot number %s.'
 	END 
 
 	RETURN @msg

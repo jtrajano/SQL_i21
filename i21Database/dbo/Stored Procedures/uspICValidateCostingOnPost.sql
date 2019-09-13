@@ -33,6 +33,8 @@ DECLARE @strItemNo AS NVARCHAR(50)
 		,@strTransactionId AS NVARCHAR(50) 
 		,@strCurrencyId NVARCHAR(50)
 		,@strFunctionalCurrencyId NVARCHAR(50)
+		,@intErrorCode AS INT
+		,@strText AS NVARCHAR(2000) 
 
 IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#FoundErrors')) 
 	DROP TABLE #FoundErrors
@@ -216,20 +218,18 @@ END
 -- Check for the locked Items
 SELECT @strItemNo = NULL, @intItemId = NULL
 SELECT TOP 1 
-		@strItemNo = CASE WHEN ISNULL(Item.strItemNo, '') = '' THEN '(Item id: ' + CAST(Item.intItemId AS NVARCHAR(10)) + ')' ELSE Item.strItemNo END,
-		@strLocationName = CASE WHEN ISNULL(Location.strLocationName, '') = '' THEN '(Item Location id: ' + CAST(ItemLocation.intItemLocationId AS NVARCHAR(10)) + ')' ELSE Location.strLocationName END 
-		,@intItemId = Item.intItemId
-FROM	#FoundErrors Errors INNER JOIN tblICItem Item ON Errors.intItemId = Item.intItemId
-		INNER JOIN tblICItemLocation ItemLocation ON Errors.intItemLocationId = ItemLocation.intItemLocationId
-		INNER JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = ItemLocation.intLocationId
-WHERE	intErrorCode = 80066
-	AND Errors.intTransactionTypeId <> 23
+		@intItemId = Errors.intItemId 
+		,@intErrorCode = Errors.intErrorCode
+		,@strText = Errors.strText
+FROM	#FoundErrors Errors 
+WHERE	intErrorCode IN (80066, 80239, 80240, 80241)
+		AND Errors.intTransactionTypeId <> 23
 
 IF @intItemId IS NOT NULL 
 BEGIN 
 	-- 'Inventory Count is ongoing for Item {Item Name} and is locked under Location {Location Name}.'
-	EXEC uspICRaiseError 80066, @strItemNo, @strLocationName;
-	RETURN -80066
+	EXEC uspICRaiseError @strText
+	RETURN -@intErrorCode
 END 
 
 /*

@@ -94,15 +94,9 @@ RETURN (
 		SELECT	intItemId = @intItemId
 				,intItemLocationId = @intItemLocationId
 				,strText = dbo.fnFormatMessage(
-								dbo.fnICGetErrorMessage(80066)
-								,(SELECT strItemNo FROM dbo.tblICItem WHERE intItemId = @intItemId)
-								,(
-									SELECT	tblSMCompanyLocation.strLocationName 
-									FROM	dbo.tblICItemLocation INNER JOIN dbo.tblSMCompanyLocation 
-												ON tblICItemLocation.intLocationId = tblSMCompanyLocation.intCompanyLocationId
-									WHERE	tblICItemLocation.intItemId = @intItemId
-											AND tblICItemLocation.intItemLocationId = @intItemLocationId
-								)
+								dbo.fnICGetErrorMessage(locked.intError)
+								,locked.strItemNo
+								,locked.strText
 								, DEFAULT
 								, DEFAULT
 								, DEFAULT
@@ -112,46 +106,69 @@ RETURN (
 								, DEFAULT
 								, DEFAULT
 							)
-				,intErrorCode = 80066
-		WHERE	EXISTS (
+				,intErrorCode = locked.intError
+		FROM (
 					-- Validate Locked Company Locations
-					SELECT	TOP 1 1
-					FROM	dbo.tblICItem Item INNER JOIN dbo.tblICItemLocation Location
-								ON Item.intItemId = @intItemId
-								AND Location.intItemLocationId = @intItemLocationId
-					WHERE	ysnLockedInventory = 1
+					SELECT	TOP 1
+						intError = 80066
+						,i.strItemNo
+						,strText = cl.strLocationName
+					FROM	
+						dbo.tblICItem i INNER JOIN dbo.tblICItemLocation il
+							ON i.intItemId = il.intItemId
+						INNER JOIN tblSMCompanyLocation cl 
+							ON cl.intCompanyLocationId = il.intLocationId
+					WHERE	
+						ysnLockedInventory = 1
+						AND i.intItemId = @intItemId
+						AND il.intItemLocationId = @intItemLocationId					
 
-					UNION
-					-- Validate Locked Sub Lcoations
-					SELECT TOP 1 1
-					FROM tblICItem i
-						INNER JOIN tblICItemLocation il ON il.intItemId = i.intItemId
-						INNER JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = il.intLocationId
-						INNER JOIN tblSMCompanyLocationSubLocation csl ON csl.intCompanyLocationId = cl.intCompanyLocationId
-						INNER JOIN tblICLockedSubLocation ll ON ll.intSubLocationId = csl.intCompanyLocationSubLocationId
-					WHERE i.intItemId = @intItemId
+					-- Validate Locked Sub Locations
+					UNION ALL 
+					SELECT	TOP 1 
+						intError = 80239
+						,i.strItemNo
+						,strText = csl.strSubLocationName
+					FROM	
+						tblICItem i INNER JOIN (
+							tblICLockedSubLocation ll INNER JOIN tblSMCompanyLocationSubLocation csl 
+								ON csl.intCompanyLocationSubLocationId = ll.intSubLocationId
+						)
+							ON i.intItemId = ll.intItemId 
+					WHERE 
+						i.intItemId = @intItemId
 						AND ll.intSubLocationId = @intSubLocationId
-
-					UNION
+											
 					-- Validate Locked Storage Locations
-					SELECT TOP 1 1
-					FROM tblICItemLocation il
-						INNER JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = il.intLocationId
-						INNER JOIN tblICItem i ON i.intItemId = il.intItemId
-						INNER JOIN tblSMCompanyLocationSubLocation csl ON csl.intCompanyLocationId = cl.intCompanyLocationId
-						INNER JOIN tblICStorageLocation sl ON sl.intSubLocationId = csl.intCompanyLocationSubLocationId
-						INNER JOIN tblICLockedStorageLocation ll ON ll.intStorageLocationId = sl.intStorageLocationId
-					WHERE i.intItemId = @intItemId
-						AND csl.intCompanyLocationSubLocationId = @intSubLocationId
+					UNION ALL 
+					SELECT TOP 1 
+						intError = 80240
+						,i.strItemNo
+						,strText = sl.strName
+					FROM 
+						tblICItem i INNER JOIN (
+							tblICLockedStorageLocation ll INNER JOIN tblICStorageLocation sl 
+								ON sl.intStorageLocationId = ll.intStorageLocationId
+						)
+							ON i.intItemId = ll.intItemId
+					WHERE 
+						i.intItemId = @intItemId
+						AND sl.intSubLocationId = @intSubLocationId
 						AND sl.intStorageLocationId = @intStorageLocationId
-
-					UNION
+					
 					-- Validate Locked Lots
-					SELECT TOP 1 1
-					FROM tblICLot l
-					WHERE l.intLotId = @intLotId
+					UNION ALL 
+					SELECT TOP 1 
+						intError = 80241
+						,i.strItemNo
+						,strText = l.strLotNumber
+					FROM 
+						tblICLot l INNER JOIN tblICItem i 
+							ON l.intItemId = i.intItemId
+					WHERE 
+						l.intLotId = @intLotId
 						AND l.ysnLockedInventory = 1
-				)
+		) locked
 
 	) AS Query		
 )
