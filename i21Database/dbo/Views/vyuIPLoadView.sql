@@ -239,6 +239,7 @@ SELECT -- Load Header
 		,SB.strSubBook 
 		,L.strBookingReference
 		,L.intLoadRefId
+		,US1.strUserName 
 FROM tblLGLoad L
 LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = L.intWeightUnitMeasureId
 LEFT JOIN tblLGGenerateLoad GLoad ON GLoad.intGenerateLoadId = L.intGenerateLoadId
@@ -262,6 +263,7 @@ Left JOIN tblSMCurrency C on C.intCurrencyID =L.intCurrencyId
 Left JOIN tblSMFreightTerms FT on FT.intFreightTermId =L.intFreightTermId 
 Left JOIN tblCTBook B on B.intBookId =L.intBookId 
 Left JOIN tblCTSubBook SB on SB.intSubBookId =L.intSubBookId 
+LEFT JOIN tblSMUserSecurity US1 ON US1.[intEntityId] = L.intUserSecurityId
 OUTER APPLY (SELECT TOP 1 intLeadTime FROM tblSMCity DPort 
 						 WHERE DPort.strCity = L.strDestinationPort AND DPort.ysnPort = 1) DPort
 OUTER APPLY (SELECT TOP 1 strOwner FROM tblLGShippingLineServiceContractDetail SLSCD
