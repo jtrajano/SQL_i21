@@ -5187,7 +5187,7 @@ DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Email Setup' AND strModuleName
 DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Reminder Lists' AND strModuleName = 'Help Desk' AND intParentMenuID = @HelpDeskMaintenanceParentMenuId
 DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Competitors' AND strModuleName = 'Help Desk' AND intParentMenuID = @CRMParentMenuId
 DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Ticket Job Codes' AND strModuleName = N'Help Desk' AND intParentMenuID = @HelpDeskMaintenanceParentMenuId
-DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Export Hours Worked' AND strModuleName = N'Help Desk' AND intParentMenuID = HelpDeskActivitiesParentMenuId
+DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Export Hours Worked' AND strModuleName = N'Help Desk' AND intParentMenuID = @HelpDeskActivitiesParentMenuId
 /* END OF DELETING */
 
 /* DOCUMENT MANAGEMENT */
