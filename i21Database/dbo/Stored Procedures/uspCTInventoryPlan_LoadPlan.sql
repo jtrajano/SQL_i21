@@ -13,9 +13,30 @@ BEGIN
 		,@ysnAllItem BIT
 		,@intCategoryId INT
 		,@ysnDisplayDemandWithItemNoAndDescription BIT
+		,@strSupplyTarget NVARCHAR(50)
+		,@strContainerType NVARCHAR(50)
+		,@intContainerTypeId INT
 
 	SELECT @ysnDisplayDemandWithItemNoAndDescription = ysnDisplayDemandWithItemNoAndDescription
+		,@strSupplyTarget = strSupplyTarget
+		,@intContainerTypeId = intContainerTypeId
 	FROM tblMFCompanyPreference
+
+	IF @ysnDisplayDemandWithItemNoAndDescription IS NULL
+		SELECT @ysnDisplayDemandWithItemNoAndDescription = 0
+
+	IF @intContainerTypeId IS NULL
+		SELECT @intContainerTypeId = 0
+
+	IF @strSupplyTarget IS NULL
+		SELECT @strSupplyTarget = ''
+
+	SELECT @strContainerType = strContainerType
+	FROM tblLGContainerType
+	WHERE intContainerTypeId = @intContainerTypeId
+
+	IF @strContainerType IS NULL
+		SELECT @strContainerType = ''
 
 	IF ISNULL((
 				SELECT 1
@@ -127,7 +148,7 @@ BEGIN
 	WHERE intInvPlngReportMasterID = @intInvPlngReportMasterID
 
 	SET @SQL = ''
-	SET @SQL = @SQL + 'DECLARE @Table table(intItemId Int, strItemNo nvarchar(200), StdUOM varchar(20), BaseUOM varchar(20), AttributeId int, strAttributeName nvarchar(50), OpeningInv nvarchar(35), PastDue nvarchar(35),intMainItemId Int'
+	SET @SQL = @SQL + 'DECLARE @Table table(intItemId Int, strItemNo nvarchar(200), AttributeId int, strAttributeName nvarchar(50), OpeningInv nvarchar(35), PastDue nvarchar(35),intMainItemId Int'
 
 	WHILE @Cnt <= @intNoOfMonths
 	BEGIN
@@ -139,7 +160,7 @@ BEGIN
 	SET @SQL = @SQL + ' INSERT INTO @Table 
 						SELECT Ext.intItemId
 						,CASE 
-						WHEN '+Ltrim(@ysnDisplayDemandWithItemNoAndDescription)+' = 1
+						WHEN ' + Ltrim(@ysnDisplayDemandWithItemNoAndDescription) + ' = 1
 							THEN (
 									CASE 
 										WHEN M.intItemId = IsNULL(MI.intItemId,M.intItemId)
@@ -155,10 +176,22 @@ BEGIN
 									END
 								)
 						END AS strItemNo
-						, UOM.strUnitMeasure [StdUOM]
-						, ISNULL(SUOM.strUnitMeasure, UOM1.strUnitMeasure) [BaseUOM]
 						, Ext.intReportAttributeID [AttributeId]
-						, RA.strAttributeName 
+						, CASE 
+				WHEN RA.intReportAttributeID = 10
+					AND ''' + @strSupplyTarget + ''' = ''Monthly''
+					THEN ''Months of Supply''
+				WHEN RA.intReportAttributeID = 11
+					AND ''' + @strSupplyTarget + 
+		''' = ''Monthly''
+					THEN ''Months of Supply Target''
+				WHEN RA.intReportAttributeID IN (
+						5
+						,6
+						) AND ''' + @strContainerType + ''' <>''''
+					THEN RA.strAttributeName + '' [' + @strContainerType + ']''
+				ELSE RA.strAttributeName
+				END AS strAttributeName
 						, Ext.OpeningInv
 						, Ext.PastDue
 						, Ext.intMainItemId'
@@ -191,43 +224,13 @@ BEGIN
 						) p
 					) Ext
 					JOIN tblCTInvPlngReportMaster RM ON RM.intInvPlngReportMasterID = Ext.intInvPlngReportMasterID
-						AND Ext.intInvPlngReportMasterID = ' + CAST(@intInvPlngReportMasterID AS NVARCHAR(20)) + 
-		'
+						AND Ext.intInvPlngReportMasterID = ' + CAST(@intInvPlngReportMasterID AS NVARCHAR(20)) + '
 					JOIN tblICItem M ON M.intItemId = Ext.intItemId
-					JOIN tblICItemUOM MUOM ON MUOM.intItemId = M.intItemId
-						  AND MUOM.ysnStockUnit = 1
-					JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = MUOM.intUnitMeasureId
-					JOIN tblCTItemDefaultUOM IUOM ON IUOM.intItemId = M.intItemId
-					JOIN tblICUnitMeasure UOM1 ON UOM1.intUnitMeasureId = IUOM.intPurchaseUOMId
 					JOIN dbo.tblCTReportAttribute RA ON RA.intReportAttributeID = Ext.intReportAttributeID
-
-					LEFT JOIN tblICUnitMeasure SUOM ON SUOM.intUnitMeasureId = RM.intUnitMeasureId
-					LEFT JOIN tblICItemUOM MUOM1 ON MUOM1.intItemId = M.intItemId
-						  AND MUOM1.intUnitMeasureId = ISNULL(SUOM.intUnitMeasureId, UOM1.intUnitMeasureId)
-				    LEFT JOIN tblICUnitMeasureConversion UOMCON ON UOMCON.intUnitMeasureId = ISNULL(SUOM.intUnitMeasureId, UOM1.intUnitMeasureId)
-						  AND UOMCON.intStockUnitMeasureId = MUOM.intUnitMeasureId
-					Left JOIN tblICItem MI ON MI.intItemId = Ext.intMainItemId
+					LEFT JOIN tblICItem MI ON MI.intItemId = Ext.intMainItemId
 					order by Ext.intInvPlngReportMasterID,Ext.intItemId, Ext.intReportAttributeID '
 	SET @SQL = CHAR(13) + @SQL + ' SELECT T.* FROM @Table T JOIN tblCTReportAttribute RA ON RA.intReportAttributeID = T.AttributeId ORDER By T.intItemId, RA.intDisplayOrder '
 
-	-- Plan Totals
-	/*SET @SQL = @SQL + ' SELECT AttributeId, strAttributeName
-	,SUM( CASE WHEN ISNUMERIC(OpeningInv)=1 THEN CAST(OpeningInv AS float)  
-                     ELSE 0 END ) [OpeningInv]
-	,SUM( CASE WHEN ISNUMERIC(PastDue)=1 THEN CAST(PastDue AS float)  
-                     ELSE 0 END ) [PastDue]'
-	SET @Cnt = 1
-
-	WHILE @Cnt <= @intNoOfMonths
-	BEGIN
-		SET @SQL = @SQL + ' ,SUM(CASE WHEN ISNUMERIC(strMonth' + RTRIM(CAST(@Cnt AS CHAR(2))) + ')=1 THEN CAST(strMonth' + RTRIM(CAST(@Cnt AS CHAR(2))) + ' AS float)  
-                     ELSE 0 END ) [' + (left(convert(CHAR(12), DATEADD(m, @Cnt - 1, GETDATE()), 107), 3) + ' ' + right(convert(CHAR(12), DATEADD(m, @Cnt - 1, GETDATE()), 107), 2)) + '] '
-		SET @Cnt = @Cnt + 1
-	END
-
-	SET @SQL = @SQL + ' FROM @Table WHERE AttributeId <> 1 
-						Group By AttributeId, strAttributeName 
-						Order By AttributeId'*/
 	--SELECT @SQL		
 	EXEC (@SQL)
 END
