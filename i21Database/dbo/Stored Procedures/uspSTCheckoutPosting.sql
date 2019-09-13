@@ -27,7 +27,7 @@ BEGIN
 
 		DECLARE @ysnSetToReady BIT = CAST(0 AS BIT)
 
-		IF(@strDirection = 'Post' OR @strDirection = 'UnPost')
+		IF(@strDirection IN('Post', 'UnPost') AND @ysnRecap = CAST(0 AS BIT))
 			BEGIN
 				-- 0 = Ready
 				-- 1 = Currently being Posted
