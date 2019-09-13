@@ -557,6 +557,21 @@ IF EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILSTOADD)
 		WHERE ADDON.ysnAutoAdd = 1		  
 		  AND ISNULL(@ysnFromSalesOrder, 0) = 1
 
+		--UPDATE ADD-ON QTY FOR NOT AUTO-ADD
+		UPDATE ID 
+		SET dblQtyShipped 	= ID.dblQtyShipped + dbo.fnRoundBanker((IDTOADD.dblQtyShipped * ADDON.dblQuantity), 6)
+		  , dblUnitQuantity = ID.dblUnitQuantity + dbo.fnRoundBanker((IDTOADD.dblQtyShipped * ADDON.dblQuantity), 6)
+		FROM tblARInvoiceDetail ID 
+		INNER JOIN #INVOICEIDS INV ON ID.intInvoiceId = INV.intInvoiceId
+		INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId
+		INNER JOIN vyuARGetAddOnItems ADDON ON ID.intItemId = ADDON.intComponentItemId
+										   AND I.intCompanyLocationId = ADDON.intCompanyLocationId
+		INNER JOIN #INVOICEDETAILSTOADD IDTOADD ON IDTOADD.intItemId = ADDON.intItemId
+		WHERE ID.strAddonDetailKey IS NOT NULL
+		  AND ISNULL(ID.ysnAddonParent, 0) = 0		  
+		  AND ISNULL(@ysnFromSalesOrder, 0) = 1
+		  AND ADDON.ysnAutoAdd = 0
+		  		
 		EXEC dbo.uspARAddItemToInvoices @InvoiceEntries		= @tblInvoiceDetailEntries
 									  , @IntegrationLogId	= NULL
 									  , @UserId				= @intUserId
