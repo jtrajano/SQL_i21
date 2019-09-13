@@ -8,8 +8,8 @@ RETURN (
 	-- Assuming that there is only one IR per Inbound Shipment, then pick the top inbound shipment id we can retrieve 
 	-- when joining the IR and LG tables. 
 	SELECT	TOP 1 
-			LogisticsView.intLoadDetailId
-			,LogisticsView.strLoadNumber
+			intLoadDetailId = ISNULL(LogisticsView2.intLoadDetailId, LogisticsView.intLoadDetailId) 
+			,strLoadNumber = ISNULL(LogisticsView2.strLoadNumber, LogisticsView.strLoadNumber) 
 	FROM	tblICInventoryReceipt A INNER JOIN tblICInventoryReceiptItem B
 				ON A.intInventoryReceiptId = B.intInventoryReceiptId
 			OUTER APPLY (
@@ -36,10 +36,18 @@ RETURN (
 								AND rtn.strReceiptType = 'Purchase Contract'
 							)
 						)
+						AND B.intSourceId IS NOT NULL 	
 			) LogisticsView
+
+			OUTER APPLY (
+				SELECT	TOP 1 
+						LogisticsView.strLoadNumber
+						,LogisticsView.intLoadDetailId
+				FROM	vyuLGLoadContainerLookup LogisticsView 
+				WHERE	LogisticsView.intLoadDetailId = B.intLoadShipmentDetailId
+			) LogisticsView2
+
 	WHERE	A.intInventoryReceiptId = @intInventoryReceiptId
 			AND A.strReceiptNumber = @strReceiptNumber 
-			AND A.intSourceType = 2 -- Inbound Shipment 
-			AND B.intSourceId IS NOT NULL 				
 
 )	

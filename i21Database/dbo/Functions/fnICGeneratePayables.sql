@@ -168,7 +168,7 @@ SELECT DISTINCT
 	,[intContractCostId]		= 	NULL
 	,[intScaleTicketId]			=	G.intTicketId
 	,[strScaleTicketNumber]		=	CAST(G.strTicketNumber AS NVARCHAR(200))
-	,[strLoadShipmentNumber]	=   ISNULL(LogisticsView.strLoadNumber, '')
+	,[strLoadShipmentNumber]	=   COALESCE(LogisticsView2.strLoadNumber, LogisticsView.strLoadNumber, '')
 	,[intShipmentId]			=	0
 	,[intLoadDetailId]			=	B.intSourceId 
   	,[intUnitMeasureId]			=	CASE WHEN CD.intContractDetailId > 0 THEN CD.intItemUOMId ELSE B.intUnitMeasureId END 
@@ -314,6 +314,13 @@ FROM tblICInventoryReceipt A
 					)
 				)
 	) LogisticsView
+
+	OUTER APPLY (
+		SELECT	TOP 1 
+				LogisticsView.strLoadNumber
+		FROM	vyuLGLoadContainerLookup LogisticsView 
+		WHERE	LogisticsView.intLoadDetailId = B.intLoadShipmentDetailId
+	) LogisticsView2
 
 	LEFT JOIN vyuPODetails po ON 
 		po.intPurchaseId = ISNULL(rtn.intOrderId, B.intOrderId)
