@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE dbo.uspLGProcessShipmentXML
+﻿CREATE PROCEDURE dbo.uspLGProcessShipmentXML(@strInfo1 NVARCHAR(MAX) = '' OUTPUT)
 AS
 BEGIN TRY
 	SET NOCOUNT ON
@@ -72,6 +72,10 @@ BEGIN TRY
 		,@strBook NVARCHAR(50)
 		,@strSubBook NVARCHAR(50)
 		,@intInsuranceCurrencyId INT
+		,@intUserId int
+		,@strUserName nvarchar(50)
+		,@strFinalErrMsg NVARCHAR(MAX) = ''
+
 	DECLARE @tblLGLoadDetail TABLE (intLoadDetailId INT)
 	DECLARE @strItemNo NVARCHAR(50)
 		,@strItemUOM NVARCHAR(50)
@@ -251,6 +255,7 @@ BEGIN TRY
 				,@intFreightTermId = NULL
 				,@intBookId = NULL
 				,@intSubBookId = NULL
+				,@strUserName=NULL
 
 			SELECT @intLoadId = intLoadId
 				,@strLoadNumber = strLoadNumber
@@ -280,6 +285,8 @@ BEGIN TRY
 			FROM tblLGIntrCompLogisticsStg
 			WHERE intId = @intId
 
+			Select @strInfo1=@strInfo1+@strLoadNumber+','
+
 			IF (@strTransactionType LIKE '%Instruction%')
 			BEGIN
 				SET @intStartingNumberType = 106
@@ -299,11 +306,6 @@ BEGIN TRY
 			END
 
 			SELECT @intLoadRefId = @intLoadId
-
-			SELECT @intTransactionCount = @@TRANCOUNT
-
-			IF @intTransactionCount = 0
-				BEGIN TRANSACTION
 
 			------------------Header------------------------------------------------------
 			EXEC sp_xml_preparedocument @idoc OUTPUT
@@ -327,7 +329,8 @@ BEGIN TRY
 				,@strFreightTerm = strFreightTerm
 				,@strBook = strBook
 				,@strSubBook = strSubBook
-			FROM OPENXML(@idoc, 'vyuLGLoadViews/vyuLGLoadView', 2) WITH (
+				,@strUserName=strUserName
+			FROM OPENXML(@idoc, 'vyuIPLoadViews/vyuIPLoadView', 2) WITH (
 					strHauler NVARCHAR(100) Collate Latin1_General_CI_AS
 					,strDriver NVARCHAR(100) Collate Latin1_General_CI_AS
 					,strTerminal NVARCHAR(100) Collate Latin1_General_CI_AS
@@ -346,6 +349,7 @@ BEGIN TRY
 					,strFreightTerm NVARCHAR(50) Collate Latin1_General_CI_AS
 					,strBook NVARCHAR(50) Collate Latin1_General_CI_AS
 					,strSubBook NVARCHAR(50) Collate Latin1_General_CI_AS
+						,strUserName NVARCHAR(50) Collate Latin1_General_CI_AS
 					) x
 
 			SELECT @intSourceType = CASE @strSourceType
@@ -672,6 +676,7 @@ BEGIN TRY
 						,1
 						)
 			END
+
 			SELECT @intCurrencyId = intCurrencyID
 			FROM tblSMCurrency Currency
 			WHERE Currency.strCurrency = @strCurrency
@@ -688,10 +693,37 @@ BEGIN TRY
 						)
 			END
 
+			SELECT @intUserId = CE.intEntityId
+				FROM tblEMEntity CE
+				JOIN tblEMEntityType ET1 ON ET1.intEntityId = CE.intEntityId
+				WHERE ET1.strType = 'User'
+					AND CE.strName = @strUserName
+					AND CE.strEntityNo <> ''
+
+				IF @intUserId IS NULL
+				BEGIN
+					IF EXISTS (
+							SELECT 1
+							FROM tblSMUserSecurity
+							WHERE strUserName = 'irelyadmin'
+							)
+						SELECT TOP 1 @intUserId = intEntityId
+						FROM tblSMUserSecurity
+						WHERE strUserName = 'irelyadmin'
+					ELSE
+						SELECT TOP 1 @intUserId = intEntityId
+						FROM tblSMUserSecurity
+				END
+
 			SELECT @intNewLoadId = intLoadId
 				,@strNewLoadNumber = strLoadNumber
 			FROM tblLGLoad
 			WHERE intLoadRefId = @intLoadRefId
+
+			SELECT @intTransactionCount = @@TRANCOUNT
+
+				IF @intTransactionCount = 0
+					BEGIN TRANSACTION
 
 			IF @intNewLoadId IS NULL
 			BEGIN
@@ -827,7 +859,7 @@ BEGIN TRY
 					,intSubBookId
 					,intLoadRefId
 					,ysnLoadBased
-						)
+					)
 				SELECT 1 AS intConcurrencyId
 					,@strNewLoadNumber
 					,@intCompanyLocationId
@@ -861,7 +893,7 @@ BEGIN TRY
 					,strCarNumber
 					,strEmbargoNo
 					,strEmbargoPermitNo
-					,intUserSecurityId
+					,@intUserId
 					,strExternalLoadNumber
 					,NULL intTransportLoadId
 					,@intDriverId
@@ -1150,7 +1182,7 @@ BEGIN TRY
 					,strCarNumber = x.strCarNumber
 					,strEmbargoNo = x.strEmbargoNo
 					,strEmbargoPermitNo = x.strEmbargoPermitNo
-					,intUserSecurityId = x.intUserSecurityId
+					,intUserSecurityId = @intUserId
 					,strExternalLoadNumber = x.strExternalLoadNumber
 					,intTransportLoadId = NULL
 					,intDriverEntityId = @intDriverId
@@ -1691,12 +1723,10 @@ BEGIN TRY
 				--	AND ET.strType = 'Vendor'
 				--WHERE EY.strName = @strVendor
 				--	AND EY.strEntityNo <> ''
-
 				--SELECT @intVendorLocationId = EL.intEntityLocationId
 				--FROM tblEMEntityLocation EL
 				--WHERE EL.intEntityId = @intVendorId
 				--	AND EL.strLocationName = @strShipFrom
-
 				SELECT @intPCompanyLocationId = intCompanyLocationId
 				FROM tblSMCompanyLocation SubL
 				WHERE SubL.strLocationName = @strPLocationName
@@ -1815,7 +1845,7 @@ BEGIN TRY
 						,x.[strLoadDirectionMsg]
 						,x.[ysnUpdateLoadDirections]
 						,x.[ysnPrintLoadDirections]
-						,PCH.strCustomerContract 
+						,PCH.strCustomerContract
 						,x.[strCustomerReference]
 						--,[intAllocationDetailId]
 						--,[intPickLotDetailId]
@@ -1881,7 +1911,7 @@ BEGIN TRY
 							) x
 					LEFT JOIN tblCTContractDetail PCD ON PCD.intContractDetailRefId = x.intSContractDetailId
 					LEFT JOIN tblCTContractDetail SCD ON SCD.intContractDetailRefId = x.intPContractDetailId
-					Left JOIN tblCTContractHeader PCH on PCH.intContractHeaderId =PCD.intContractHeaderId 
+					LEFT JOIN tblCTContractHeader PCH ON PCH.intContractHeaderId = PCD.intContractHeaderId
 					WHERE x.intLoadDetailId = @intLoadDetailId
 				END
 				ELSE
@@ -1925,7 +1955,7 @@ BEGIN TRY
 						,[strLoadDirectionMsg] = x.[strLoadDirectionMsg]
 						,[ysnUpdateLoadDirections] = x.[ysnUpdateLoadDirections]
 						,[ysnPrintLoadDirections] = x.[ysnPrintLoadDirections]
-						,[strVendorReference] = PCH.strCustomerContract 
+						,[strVendorReference] = PCH.strCustomerContract
 						,[strCustomerReference] = x.[strCustomerReference]
 						--,[intAllocationDetailId]
 						--,[intPickLotDetailId]
@@ -1991,7 +2021,7 @@ BEGIN TRY
 							) x ON x.intLoadDetailId = LD.intLoadDetailRefId
 					LEFT JOIN tblCTContractDetail PCD ON PCD.intContractDetailRefId = x.intSContractDetailId
 					LEFT JOIN tblCTContractDetail SCD ON SCD.intContractDetailRefId = x.intPContractDetailId
-					Left JOIN tblCTContractHeader PCH on PCH.intContractHeaderId =PCD.intContractHeaderId 
+					LEFT JOIN tblCTContractHeader PCH ON PCH.intContractHeaderId = PCD.intContractHeaderId
 					WHERE x.intLoadDetailId = @intLoadDetailId
 				END
 
@@ -3604,14 +3634,32 @@ BEGIN TRY
 				,@strAckLoadWarehouseXML
 				,@strAckLoadWarehouseServicesXML
 				,@strAckLoadContainerXML
+
+			UPDATE tblLGIntrCompLogisticsStg
+			SET strFeedStatus = 'Processed'
+			WHERE intId = @intId
+			IF @intTransactionCount = 0
+					COMMIT TRANSACTION
 		END TRY
 
 		BEGIN CATCH
-		END CATCH
+			SET @ErrMsg = ERROR_MESSAGE()
 
-		UPDATE tblLGIntrCompLogisticsStg
-		SET strFeedStatus = 'Processed'
-		WHERE intId = @intId
+			IF @idoc <> 0
+				EXEC sp_xml_removedocument @idoc
+
+			IF XACT_STATE() != 0
+				AND @intTransactionCount = 0
+				ROLLBACK TRANSACTION
+
+			UPDATE tblLGIntrCompLogisticsStg
+			SET strFeedStatus = 'Failed'
+				,strMessage = @ErrMsg
+			WHERE intId = @intId
+
+			SET @strFinalErrMsg = @strFinalErrMsg + @ErrMsg
+
+		END CATCH
 
 		SELECT @intId = MIN(intId)
 		FROM tblLGIntrCompLogisticsStg
@@ -3646,7 +3694,6 @@ BEGIN TRY
 			)
 	BEGIN
 		--DECLARE @intFreightTermId INT
-
 		SELECT @intFreightTermId = intFreightTermId
 		FROM tblSMFreightTerms
 		WHERE strFreightTerm = 'Pickup'
@@ -3683,11 +3730,19 @@ BEGIN TRY
 
 	EXEC uspLGUpdateContractQty @intLoadId = @intNewLoadId
 
-	COMMIT TRANSACTION
+	IF ISNULL(@strInfo1, '') <> ''
+		SELECT @strInfo1 = LEFT(@strInfo1, LEN(@strInfo1) - 1)
+
+	IF @strFinalErrMsg <> ''
+		RAISERROR (
+				@strFinalErrMsg
+				,16
+				,1
+				)
 END TRY
 
 BEGIN CATCH
-	ROLLBACK TRANSACTION
+	
 
 	SET @ErrMsg = ERROR_MESSAGE()
 
