@@ -3898,3 +3898,17 @@ UPDATE tblMFCompanyPreference
 SET ysnDisplayDemandWithItemNoAndDescription = 0
 Where ysnDisplayDemandWithItemNoAndDescription IS NULL
 GO
+
+GO
+UPDATE tblCTReportAttribute
+SET strAttributeName ='<a>+ Existing Purchases</a>'
+WHERE strAttributeName = 'Existing Purchases'
+
+UPDATE tblCTReportAttribute
+SET strAttributeName ='&emsp;&emsp;Open Purchases'
+WHERE strAttributeName = 'Open Purchases'
+
+UPDATE tblCTReportAttribute
+SET strAttributeName ='&emsp;&emsp;In-transit Purchases'
+WHERE strAttributeName = 'In-transit Purchases'
+GO
