@@ -11,6 +11,11 @@ BEGIN
 		,@intItemIdList VARCHAR(MAX)
 		,@strItemNoList VARCHAR(MAX)
 		,@ysnAllItem BIT
+		,@intCategoryId INT
+		,@ysnDisplayDemandWithItemNoAndDescription BIT
+
+	SELECT @ysnDisplayDemandWithItemNoAndDescription = ysnDisplayDemandWithItemNoAndDescription
+	FROM tblMFCompanyPreference
 
 	IF ISNULL((
 				SELECT 1
@@ -22,6 +27,7 @@ BEGIN
 	END
 
 	SELECT @ysnAllItem = ysnAllItem
+		,@intCategoryId = intCategoryId
 	FROM tblCTInvPlngReportMaster
 	WHERE intInvPlngReportMasterID = @intInvPlngReportMasterID
 
@@ -34,11 +40,11 @@ BEGIN
 					), 0) = 0
 		BEGIN
 			--SELECT NULL
-
 			RETURN
 		END
 
 		SET @Txt1 = ''
+
 		SELECT @Txt1 = @Txt1 + CAST(intItemId AS VARCHAR(20)) + ','
 		FROM tblCTInvPlngReportMaterial
 		WHERE intInvPlngReportMasterID = @intInvPlngReportMasterID
@@ -46,12 +52,33 @@ BEGIN
 		SELECT @intItemIdList = LEFT(@Txt1, LEN(@Txt1) - 1)
 
 		SET @Txt1 = ''
+
 		SELECT @Txt1 = @Txt1 + CAST(I.strItemNo AS VARCHAR(50)) + '^' -- ItemNo can contain ,
 		FROM tblCTInvPlngReportMaterial RM
 		JOIN tblICItem I ON I.intItemId = RM.intItemId
 		WHERE RM.intInvPlngReportMasterID = @intInvPlngReportMasterID
 
 		SELECT @strItemNoList = LEFT(@Txt1, LEN(@Txt1) - 1)
+	END
+	ELSE
+	BEGIN
+		SET @Txt1 = ''
+
+		SELECT @Txt1 = @Txt1 + CAST(intItemId AS VARCHAR(20)) + ','
+		FROM tblICItem
+		WHERE intCategoryId = @intCategoryId
+
+		IF Len(@Txt1) > 0
+			SELECT @intItemIdList = LEFT(@Txt1, LEN(@Txt1) - 1)
+
+		SET @Txt1 = ''
+
+		SELECT @Txt1 = @Txt1 + CAST(I.strItemNo AS VARCHAR(50)) + '^' -- ItemNo can contain ,
+		FROM tblICItem I
+		WHERE intCategoryId = @intCategoryId
+
+		IF Len(@Txt1) > 0
+			SELECT @strItemNoList = LEFT(@Txt1, LEN(@Txt1) - 1)
 	END
 
 	SELECT RM.*
@@ -111,7 +138,23 @@ BEGIN
 	SET @SQL = @SQL + ' ) '
 	SET @SQL = @SQL + ' INSERT INTO @Table 
 						SELECT Ext.intItemId
-						, M.strItemNo + '' ('' + ISNULL(SUOM.strUnitMeasure, UOM1.strUnitMeasure) + '' per '' + UOM.strUnitMeasure + '' --> '' + CAST(CONVERT(DECIMAL(24,6),ISNULL(MUOM1.dblUnitQty,UOMCON.dblConversionToStock)) as nvarchar(30)) + '')'' [strItemNo]
+						,CASE 
+						WHEN '+Ltrim(@ysnDisplayDemandWithItemNoAndDescription)+' = 1
+							THEN (
+									CASE 
+										WHEN M.intItemId = IsNULL(MI.intItemId,M.intItemId)
+											THEN M.strItemNo + '' - '' + M.strDescription
+										ELSE M.strItemNo + '' - '' + M.strDescription + '' [ '' + MI.strItemNo + '' - '' + MI.strDescription + '' ]''
+										END
+									)
+						ELSE (
+								CASE 
+									WHEN M.intItemId = IsNULL(MI.intItemId,M.intItemId)
+										THEN M.strItemNo
+									ELSE M.strItemNo + '' [ '' + MI.strItemNo + '' ]''
+									END
+								)
+						END AS strItemNo
 						, UOM.strUnitMeasure [StdUOM]
 						, ISNULL(SUOM.strUnitMeasure, UOM1.strUnitMeasure) [BaseUOM]
 						, Ext.intReportAttributeID [AttributeId]
@@ -148,7 +191,8 @@ BEGIN
 						) p
 					) Ext
 					JOIN tblCTInvPlngReportMaster RM ON RM.intInvPlngReportMasterID = Ext.intInvPlngReportMasterID
-						AND Ext.intInvPlngReportMasterID = ' + CAST(@intInvPlngReportMasterID AS NVARCHAR(20)) + '
+						AND Ext.intInvPlngReportMasterID = ' + CAST(@intInvPlngReportMasterID AS NVARCHAR(20)) + 
+		'
 					JOIN tblICItem M ON M.intItemId = Ext.intItemId
 					JOIN tblICItemUOM MUOM ON MUOM.intItemId = M.intItemId
 						  AND MUOM.ysnStockUnit = 1
@@ -162,6 +206,7 @@ BEGIN
 						  AND MUOM1.intUnitMeasureId = ISNULL(SUOM.intUnitMeasureId, UOM1.intUnitMeasureId)
 				    LEFT JOIN tblICUnitMeasureConversion UOMCON ON UOMCON.intUnitMeasureId = ISNULL(SUOM.intUnitMeasureId, UOM1.intUnitMeasureId)
 						  AND UOMCON.intStockUnitMeasureId = MUOM.intUnitMeasureId
+					Left JOIN tblICItem MI ON MI.intItemId = Ext.intMainItemId
 					order by Ext.intInvPlngReportMasterID,Ext.intItemId, Ext.intReportAttributeID '
 	SET @SQL = CHAR(13) + @SQL + ' SELECT T.* FROM @Table T JOIN tblCTReportAttribute RA ON RA.intReportAttributeID = T.AttributeId ORDER By T.intItemId, RA.intDisplayOrder '
 
@@ -183,7 +228,6 @@ BEGIN
 	SET @SQL = @SQL + ' FROM @Table WHERE AttributeId <> 1 
 						Group By AttributeId, strAttributeName 
 						Order By AttributeId'*/
-
 	--SELECT @SQL		
 	EXEC (@SQL)
 END
