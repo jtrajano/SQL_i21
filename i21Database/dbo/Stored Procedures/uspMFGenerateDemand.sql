@@ -45,6 +45,7 @@ BEGIN TRY
 		,@ysnComputeDemandUsingRecipe BIT
 		,@ysnDisplayDemandWithItemNoAndDescription BIT
 		,@ysnDemandViewForBlend BIT
+		,@strContainerType NVARCHAR(50)
 	DECLARE @tblMFItem TABLE (
 		intItemId INT
 		,intMainItemId INT
@@ -70,9 +71,10 @@ BEGIN TRY
 		,@ysnDisplayDemandWithItemNoAndDescription = ysnDisplayDemandWithItemNoAndDescription
 	FROM tblMFCompanyPreference
 
-	--Select @strContainerType=strContainerType
-	--from tblLGContainerType
-	--Where intContainerTypeId=@intContainerTypeId
+	SELECT @strContainerType = strContainerType
+	FROM tblLGContainerType
+	WHERE intContainerTypeId = @intContainerTypeId
+
 	SELECT @ysnDemandViewForBlend = ysnDemandViewForBlend
 	FROM tblCTCompanyPreference
 
@@ -866,7 +868,7 @@ BEGIN TRY
 				AND @intContainerTypeId IS NOT NULL
 				AND @ysnCalculateNoOfContainerByBagQty = 1
 				THEN IsNULL(IL.dblMinOrder * CTCQ.dblWeight * IsNULL(UMCByWeight.dblConversionToStock, 1), 0)
-				WHEN @ysnCalculatePlannedPurchases = 0
+			WHEN @ysnCalculatePlannedPurchases = 0
 				AND @ysnCalculateEndInventory = 0
 				AND @intContainerTypeId IS NOT NULL
 				AND @ysnCalculateNoOfContainerByBagQty = 0
@@ -1515,6 +1517,11 @@ BEGIN TRY
 				WHEN A.intReportAttributeID = 11
 					AND @strSupplyTarget = 'Monthly'
 					THEN 'Months of Supply Target'
+				WHEN A.intReportAttributeID IN (
+						5
+						,6
+						)AND @intContainerTypeId IS NOT NULL
+					THEN A.strAttributeName + ' [' + @strContainerType + ']'
 				ELSE A.strAttributeName
 				END AS strAttributeName
 			,(
