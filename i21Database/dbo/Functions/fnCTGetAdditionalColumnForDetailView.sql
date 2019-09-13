@@ -48,10 +48,30 @@ BEGIN
 				@intBasisCurrencyId	INT,
 				@intBasisUOMId		INT,
 				@dblFutures			INT,
-				@dblMainFutures		INT
+				@dblMainFutures		INT,
+				@dblFixationDetailCashPrice numeric(18,6)
 
-	SELECT		@dblCashPrice		=	CD.dblCashPrice,
-				@dblMainCashPrice	=	CD.dblCashPrice / CASE WHEN CY.ysnSubCurrency = 1 THEN CASE WHEN ISNULL(CY.intCent,0) = 0 THEN 1 ELSE CY.intCent END ELSE 1 END,
+	set @dblFixationDetailCashPrice = (
+											select
+												dblCashPrice
+											from
+												(
+													select
+														c.dblCashPrice
+														,intId = convert(int,ROW_NUMBER() over (order by c.intPriceFixationDetailId desc))
+													from
+														tblCTPriceFixation b
+														,tblCTPriceFixationDetail c
+													where
+														b.intContractDetailId = 4143
+														and c.intPriceFixationId = b.intPriceFixationId
+												) as allPriced
+											where
+												intId = 1
+										);
+
+	SELECT		@dblCashPrice		=	isnull(CD.dblCashPrice,@dblFixationDetailCashPrice),
+				@dblMainCashPrice	=	isnull(CD.dblCashPrice,@dblFixationDetailCashPrice) / CASE WHEN CY.ysnSubCurrency = 1 THEN CASE WHEN ISNULL(CY.intCent,0) = 0 THEN 1 ELSE CY.intCent END ELSE 1 END,
 				@intCurrencyId		=	CD.intCurrencyId,
 				@intMainCurrencyId	=	ISNULL(CY.intMainCurrencyId,CD.intCurrencyId),
 				@ysnSubCurrency		=	CY.ysnSubCurrency,
