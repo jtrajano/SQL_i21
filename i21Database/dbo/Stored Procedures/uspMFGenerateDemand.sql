@@ -73,7 +73,6 @@ BEGIN TRY
 	--Select @strContainerType=strContainerType
 	--from tblLGContainerType
 	--Where intContainerTypeId=@intContainerTypeId
-
 	SELECT @ysnDemandViewForBlend = ysnDemandViewForBlend
 	FROM tblCTCompanyPreference
 
@@ -865,7 +864,13 @@ BEGIN TRY
 			WHEN @ysnCalculatePlannedPurchases = 0
 				AND @ysnCalculateEndInventory = 0
 				AND @intContainerTypeId IS NOT NULL
+				AND @ysnCalculateNoOfContainerByBagQty = 1
 				THEN IsNULL(IL.dblMinOrder * CTCQ.dblWeight * IsNULL(UMCByWeight.dblConversionToStock, 1), 0)
+				WHEN @ysnCalculatePlannedPurchases = 0
+				AND @ysnCalculateEndInventory = 0
+				AND @intContainerTypeId IS NOT NULL
+				AND @ysnCalculateNoOfContainerByBagQty = 0
+				THEN IsNULL(IL.dblMinOrder * CTCQ.dblBulkQuantity * IsNULL(UMCByWeight.dblConversionToStock, 1), 0)
 			ELSE 0
 			END
 		,5 AS intAttributeId --Planned Purchases
@@ -902,7 +907,11 @@ BEGIN TRY
 		UPDATE D
 		SET dblQty = CASE 
 				WHEN @intContainerTypeId IS NOT NULL
+					AND @ysnCalculateNoOfContainerByBagQty = 1
 					THEN IsNULL(Purchase.[strValue] * CTCQ.dblWeight * IsNULL(UMCByWeight.dblConversionToStock, 1), 0)
+				WHEN @intContainerTypeId IS NOT NULL
+					AND @ysnCalculateNoOfContainerByBagQty = 0
+					THEN IsNULL(Purchase.[strValue] * CTCQ.dblBulkQuantity * IsNULL(UMCByWeight.dblConversionToStock, 1), 0)
 				ELSE Purchase.[strValue]
 				END
 		FROM #tblMFDemand D
@@ -953,7 +962,7 @@ BEGIN TRY
 	WHERE intReportAttributeID = 5 --Planned Purchases
 		AND intInvPlngReportMasterID = @intPrevInvPlngReportMasterID
 
-	WHILE @intMonthId <= 24
+	WHILE @intMonthId <= @intMonthsToView
 	BEGIN
 		UPDATE D
 		SET dblQty = CASE 
@@ -1068,28 +1077,61 @@ BEGIN TRY
 
 				SELECT @intConsumptionMonth = @intMonthId + 1
 
-				WHILE @intConsumptionMonth <= @intMonthsToView
-					AND @dblEndInventory > 0
+				IF @intMonthId = @intMonthsToView
 				BEGIN
-					SELECT @dblConsumptionQty = 0
-
-					SELECT @dblConsumptionQty = ABS(dblQty)
-					FROM #tblMFDemand
-					WHERE intItemId = @intItemId
-						AND intMonthId = @intConsumptionMonth
-						AND intAttributeId = 8
-
-					IF @dblConsumptionQty IS NULL
+					INSERT INTO #tblMFDemand (
+						intItemId
+						,dblQty
+						,intAttributeId
+						,intMonthId
+						)
+					SELECT @intItemId
+						,1
+						,10 --Weeks of Supply
+						,@intMonthId
+				END
+				ELSE
+				BEGIN
+					WHILE @intConsumptionMonth <= @intMonthsToView
+						AND @dblEndInventory > 0
+					BEGIN
 						SELECT @dblConsumptionQty = 0
 
-					IF @dblEndInventory > @dblConsumptionQty
-					BEGIN
-						SELECT @dblEndInventory = @dblEndInventory - @dblConsumptionQty
+						SELECT @dblConsumptionQty = ABS(dblQty)
+						FROM #tblMFDemand
+						WHERE intItemId = @intItemId
+							AND intMonthId = @intConsumptionMonth
+							AND intAttributeId = 8
 
-						SELECT @dblWeeksOfSsupply = @dblWeeksOfSsupply + 1
+						IF @dblConsumptionQty IS NULL
+							SELECT @dblConsumptionQty = 0
 
-						IF @intConsumptionMonth = @intMonthsToView
+						IF @dblEndInventory > @dblConsumptionQty
 						BEGIN
+							SELECT @dblEndInventory = @dblEndInventory - @dblConsumptionQty
+
+							SELECT @dblWeeksOfSsupply = @dblWeeksOfSsupply + 1
+
+							IF @intConsumptionMonth = @intMonthsToView
+							BEGIN
+								INSERT INTO #tblMFDemand (
+									intItemId
+									,dblQty
+									,intAttributeId
+									,intMonthId
+									)
+								SELECT @intItemId
+									,@dblWeeksOfSsupply
+									,10 --Weeks of Supply
+									,@intMonthId
+							END
+						END
+						ELSE
+						BEGIN
+							SELECT @dblWeeksOfSsupply = @dblWeeksOfSsupply + (@dblEndInventory / @dblConsumptionQty)
+
+							SELECT @dblEndInventory = 0
+
 							INSERT INTO #tblMFDemand (
 								intItemId
 								,dblQty
@@ -1101,26 +1143,9 @@ BEGIN TRY
 								,10 --Weeks of Supply
 								,@intMonthId
 						END
+
+						SELECT @intConsumptionMonth = @intConsumptionMonth + 1
 					END
-					ELSE
-					BEGIN
-						SELECT @dblWeeksOfSsupply = @dblWeeksOfSsupply + (@dblEndInventory / @dblConsumptionQty)
-
-						SELECT @dblEndInventory = 0
-
-						INSERT INTO #tblMFDemand (
-							intItemId
-							,dblQty
-							,intAttributeId
-							,intMonthId
-							)
-						SELECT @intItemId
-							,@dblWeeksOfSsupply
-							,10 --Weeks of Supply
-							,@intMonthId
-					END
-
-					SELECT @intConsumptionMonth = @intConsumptionMonth + 1
 				END
 
 				SELECT @intItemId = min(intItemId)
@@ -1198,7 +1223,7 @@ BEGIN TRY
 	IF @ysnCalculatePlannedPurchases = 0
 		AND @ysnCalculateEndInventory = 0
 		AND @intContainerTypeId IS NOT NULL
-		and IsNULL(@WeeksOfSupplyTargetXML,'') = ''
+		AND IsNULL(@WeeksOfSupplyTargetXML, '') = ''
 	BEGIN
 		INSERT INTO #tblMFDemand (
 			intItemId
@@ -1476,7 +1501,7 @@ BEGIN TRY
 							)
 				ELSE (
 						CASE 
-							WHEN MI.intItemId IS NULL
+							WHEN I.intItemId = MI.intItemId
 								THEN I.strItemNo
 							ELSE I.strItemNo + ' [ ' + MI.strItemNo + ' ]'
 							END
