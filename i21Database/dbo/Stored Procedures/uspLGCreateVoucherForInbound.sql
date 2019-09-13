@@ -37,13 +37,18 @@ BEGIN TRY
 	FROM (
 		SELECT intBillId
 		FROM tblLGLoadCost
-		WHERE intBillId IS NOT NULL
-	
+		WHERE intLoadId = @intLoadId
+			AND intBillId IS NOT NULL
+			AND intBillId NOT IN (SELECT intBillId FROM tblAPBillDetail BD 
+									JOIN tblLGLoadDetail LD ON BD.intLoadDetailId = LD.intLoadDetailId
+									WHERE BD.intLoadShipmentCostId IS NULL)
+
 		UNION
 	
 		SELECT intBillId
 		FROM tblLGLoadWarehouseServices
-		WHERE intBillId IS NOT NULL
+		WHERE intLoadWarehouseId IN (SELECT intLoadWarehouseId FROM tblLGLoadWarehouse WHERE intLoadId = @intLoadId)
+			AND intBillId IS NOT NULL
 		) tbl
 
 	IF EXISTS(SELECT TOP 1 1 FROM tblAPBillDetail BD 
@@ -293,7 +298,9 @@ BEGIN TRY
 
 	IF (@total = 0)
 	BEGIN
-		RAISERROR ('Bill process failure #1',11,1);
+		SET @ErrorMessage = 'Voucher was already created for ' + @strLoadNumber;
+
+		RAISERROR (@ErrorMessage,11,1);
 		RETURN;
 	END
 
