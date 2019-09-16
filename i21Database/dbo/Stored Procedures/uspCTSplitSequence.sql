@@ -51,7 +51,8 @@ SET NOCOUNT ON
 				intContractStatusId =	1,
 				intContractSeq		=	@intNextSequence,
 				intSplitId			=	NULL,
-				intContractHeaderId	=	ISNULL(@intNewContractHeaderid, @intContractHeaderId)
+				intContractHeaderId	=	ISNULL(@intNewContractHeaderid, @intContractHeaderId),
+				intPricingTypeId	=	1
 
 		EXEC	uspCTGetTableDataInXML '#tblCTContractDetail',null,@XML OUTPUT							
 		EXEC	uspCTInsertINTOTableFromXML 'tblCTContractDetail',@XML,@intNewContractDetailId OUTPUT

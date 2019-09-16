@@ -478,7 +478,7 @@ CD.intContractDetailId,
 		LEFT	JOIN	tblICUnitMeasure				FBBUM	ON FBBUM.intUnitMeasureId	=	FBB.intUnitMeasureId
 		LEFT    JOIN	(
 							select * from (
-							select ROW_NUMBER() OVER (PARTITION BY b.intRecordId ORDER BY b.intTransactionId DESC) intRowNum, a.intContractHeaderId, a.intContractDetailId, b.strApprovalStatus
+							select ROW_NUMBER() OVER (PARTITION BY a.intContractDetailId ORDER BY b.intTransactionId DESC) intRowNum, a.intContractHeaderId, a.intContractDetailId, b.strApprovalStatus
 							from tblCTPriceFixation a
 							left join tblSMTransaction b on b.intRecordId = a.intPriceContractId and b.strApprovalStatus is not null
 							left join tblSMScreen c on c.strNamespace = 'ContractManagement.view.PriceContracts' and c.intScreenId = b.intScreenId
