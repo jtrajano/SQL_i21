@@ -4541,6 +4541,11 @@ IF(@ysnDebug = 1)
 								-- Invoice MAIN Checkout
 								SET @intCreatedInvoiceId = (SELECT TOP 1 intInvoiceId FROM @tblTempInvoiceIds WHERE strTransactionType = @strInvoiceTransactionTypeMain)  --(SELECT TOP 1 intInvoiceId FROM #tmpCustomerInvoiceIdList WHERE strTransactionType = @strInvoiceTransactionTypeMain ORDER BY intInvoiceId ASC)
 
+								IF(@ysnDebug = 1)
+									BEGIN 
+										SELECT 'tblARInvoiceDetail', * FROM tblARInvoiceDetail
+										WHERE intInvoiceId = @intCreatedInvoiceId
+									END
 
 								------------------------------------------------------------------------------------------------------
                                 ---- VALIDATE (InvoiceTotalSales) = ((TotalCheckoutDeposits) - (CheckoutCustomerPayments)) -----------
