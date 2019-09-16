@@ -152,7 +152,14 @@ BEGIN
 			END
 			ELSE
 			BEGIN
-				UPDATE tblTRImportLoadDetail SET intVendorId = @intVendorId, intSupplyPointId = @intSupplyPointId, intVendorCompanyLocationId = @intVendorCompanyLocationId WHERE intImportLoadDetailId = @intImportLoadDetailId
+				IF(@intSupplyPointId IS NULL)
+				BEGIN
+					SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, 'Invalid Supply Point')
+				END
+				ELSE
+				BEGIN
+					UPDATE tblTRImportLoadDetail SET intVendorId = @intVendorId, intSupplyPointId = @intSupplyPointId, intVendorCompanyLocationId = @intVendorCompanyLocationId WHERE intImportLoadDetailId = @intImportLoadDetailId
+				END
 			END
 
 			 -- CHECK IF HAS VALID DESTINATION
@@ -178,7 +185,14 @@ BEGIN
 			END
 			ELSE
 			BEGIN
-				UPDATE tblTRImportLoadDetail SET intCustomerId = @intCustomerId, intShipToId = @intShipToId, intCustomerCompanyLocationId = @intCustomerCompanyLocationId WHERE intImportLoadDetailId = @intImportLoadDetailId
+				IF(@intShipToId IS NULL)
+				BEGIN
+					SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, 'Invalid Customer Location')
+				END
+				ELSE
+				BEGIN
+					UPDATE tblTRImportLoadDetail SET intCustomerId = @intCustomerId, intShipToId = @intShipToId, intCustomerCompanyLocationId = @intCustomerCompanyLocationId WHERE intImportLoadDetailId = @intImportLoadDetailId
+				END
 			END
 
 
