@@ -28,7 +28,7 @@ FROM
 		cd.strCountLine,
 		c.strCountNo,
 		c.intInventoryCountId,
-		dblNewOnHand = ISNULL(CASE WHEN Item.strLotTracking = 'No' THEN dbo.fnCalculateQtyBetweenUOM(nonLotted.intItemUOMId, StockUOM.intItemUOMId, nonLotted.dblOnHand) ELSE LotTransactions.dblOnHand END, 0),
+		dblNewOnHand = ISNULL(CASE WHEN Item.strLotTracking = 'No' THEN dbo.fnCalculateQtyBetweenUOM(nonLotted.intItemUOMId, StockUOM.intItemUOMId, nonLotted.dblOnHand) ELSE CASE WHEN cd.intLotId IS NULL THEN cd.dblSystemCount ELSE LotTransactions.dblOnHand END END, 0),
 		dblCountOnHand = cd.dblSystemCount,
 		cd.dblWeightQty,
 		dblNewWeightQty = ISNULL(CASE WHEN Item.strLotTracking = 'No' THEN 0 ELSE lotted.dblWeight END, 0),
