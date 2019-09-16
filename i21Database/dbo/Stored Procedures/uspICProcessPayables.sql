@@ -118,7 +118,7 @@ BEGIN
 			,GP.[intTermId]						
 			,GP.[strBillOfLading]					
 			,GP.[ysnReturn]	 
-		FROM dbo.fnICGeneratePayables (@intReceiptId, @ysnPost) GP
+		FROM dbo.fnICGeneratePayables (@intReceiptId, @ysnPost, DEFAULT) GP
 	END
 	
 	/* Get Shipment Charges */
@@ -407,7 +407,7 @@ BEGIN
 			,GP.[intTermId]						
 			,GP.[strBillOfLading]					
 			,GP.[ysnReturn]	 
-		FROM dbo.fnICGeneratePayables (@intReceiptId, @ysnPost) GP
+		FROM dbo.fnICGeneratePayables (@intReceiptId, @ysnPost, DEFAULT) GP
 		EXEC dbo.uspAPRemoveVoucherPayable @voucherPayableForRemoval
 	END
 END
