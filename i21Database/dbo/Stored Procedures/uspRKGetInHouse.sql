@@ -379,59 +379,59 @@ BEGIN
 				, intTransactionId INT
 				, strDistribution NVARCHAR(10)
 				)
-
-			
-
+				
 			;WITH N1 (N) AS (SELECT 1 FROM (VALUES (1), (1), (1), (1), (1), (1), (1), (1), (1), (1)) n (N)),
 			N2 (N) AS (SELECT 1 FROM N1 AS N1 CROSS JOIN N1 AS N2),
 			N3 (N) AS (SELECT 1 FROM N2 AS N1 CROSS JOIN N2 AS N2),
 			Dates AS
-			(	SELECT TOP (DATEDIFF(DAY,  DATEADD(day,-1,@dtmFromTransactionDate), @dtmToTransactionDate))
-						Date = DATEADD(DAY, ROW_NUMBER() OVER(ORDER BY N), DATEADD(day,-1,@dtmFromTransactionDate))
+			( SELECT TOP (DATEDIFF(DAY,  DATEADD(day,-1,@dtmFromTransactionDate), @dtmToTransactionDate))
+				Date = DATEADD(DAY, ROW_NUMBER() OVER(ORDER BY N), DATEADD(day,-1,@dtmFromTransactionDate))
 				FROM N3
 			)
-
-			SELECT	Date
+			
+			SELECT Date
 			INTO #tempDateRange
-			FROM	Dates AS d
-
-
-			declare @tblBalanceInvByDate as table (
-				dtmDate  DATE  NULL
-				,dblBalanceInv  NUMERIC(18,6)
-				,dblSalesInTransit NUMERIC(18,6)
-			)
+			FROM Dates AS d
 			
-			Declare @date date
-			DECLARE @dblSalesInTransitAsOf  NUMERIC(18,6)
-			
-			While (Select Count(*) From #tempDateRange) > 0
-			Begin
+			SELECT InTran.dtmDate
+				, dblInTransitQty = dbo.fnCTConvertQuantityToTargetCommodityUOM(cum.intCommodityUnitMeasureId, @intCommodityUnitMeasureId, ISNULL((InTran.dblInTransitQty), 0))
+			INTO #InTransitDateRange
+			FROM dbo.fnICOutstandingInTransitAsOf(NULL, @intCommodityId, @dtmToTransactionDate) InTran
+			INNER JOIN vyuICGetInventoryValuation Inv ON InTran.intInventoryTransactionId = Inv.intInventoryTransactionId
+			INNER JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = InTran.intItemUOMId
+			INNER JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
+			JOIN tblICCommodityUnitMeasure cum ON cum.intCommodityId = @intCommodityId AND cum.intUnitMeasureId = UOM.intUnitMeasureId
+			WHERE InTran.intItemId = ISNULL(@intItemId, InTran.intItemId)
+			AND Inv.intLocationId = ISNULL(@intLocationId, Inv.intLocationId)
+			AND Inv.intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 
-				Select Top 1 @date = Date From #tempDateRange
+			DECLARE @tblBalanceInvByDate AS TABLE (dtmDate DATE NULL
+				, dblBalanceInv NUMERIC(18,6)
+				, dblSalesInTransit NUMERIC(18,6))
 
-				insert into @tblBalanceInvByDate(
-					dtmDate
-					,dblBalanceInv
-				)
-				select @date,sum(dblTotal) from @tblResult WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110) <= CONVERT(DATETIME, @date)
-					
-				SELECT 
-				@dblSalesInTransitAsOf = SUM(dblInTransitQty)
-				FROM dbo.fnICOutstandingInTransitAsOf(NULL, @intCommodityId, @date) InTran
-				WHERE InTran.intItemId = ISNULL(@intItemId, InTran.intItemId)	
-				AND InTran.intItemLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
+			DECLARE @date DATE
+				, @dblSalesInTransitAsOf NUMERIC(18,6)
 
-				update @tblBalanceInvByDate
-				set dblSalesInTransit = @dblSalesInTransitAsOf
-				where dtmDate = @date
-			
+			 WHILE EXISTS(SELECT TOP 1 1 FROM #tempDateRange)
+			 BEGIN
+				SELECT TOP 1 @date = Date FROM #tempDateRange
 
-				Delete #tempDateRange Where Date = @date
-
-			End
-
-
+				INSERT INTO @tblBalanceInvByDate(dtmDate
+					, dblBalanceInv)
+				SELECT @date
+					, SUM(dblTotal)
+				FROM @tblResult WHERE CONVERT(DATETIME, CONVERT(NVARCHAR(10), dtmDate, 110), 110) <= CONVERT(DATETIME, @date)
+				
+				SELECT @dblSalesInTransitAsOf = SUM(ISNULL(InTran.dblInTransitQty, 0))
+				FROM #InTransitDateRange InTran
+				WHERE InTran.dtmDate <= @date
+				
+				UPDATE @tblBalanceInvByDate
+				SET dblSalesInTransit = @dblSalesInTransitAsOf
+				WHERE dtmDate = @date
+				
+				DELETE #tempDateRange WHERE Date = @date
+			END
 
 			INSERT INTO @tblResultInventory(
 				 dtmDate

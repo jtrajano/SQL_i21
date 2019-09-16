@@ -402,7 +402,7 @@ BEGIN
 				select
 					 dtmDate =  CONVERT(DATETIME, CONVERT(VARCHAR(10),Inv.dtmDate, 110), 110)
 					,BD.dblQtyReceived
-					,dblPartialPaidQty = (BD.dblQtyReceived / B.dblTotal) * dblPayment 
+					,dblPartialPaidQty = CASE WHEN ISNULL(B.dblTotal, 0) = 0 THEN 0 ELSE (BD.dblQtyReceived / B.dblTotal) * dblPayment END
 					,B.strBillId 
 					,B.intBillId
 					,strDistribution =  ISNULL(ST.strStorageTypeCode,ISNULL(TV.strDistributionOption, 'SPT'))
@@ -487,7 +487,7 @@ BEGIN
 				select
 						dtmDate =  CONVERT(DATETIME, CONVERT(VARCHAR(10), Inv.dtmDate, 110), 110)
 					,BD.dblQtyReceived
-					,dblPartialPaidQty = (BD.dblQtyReceived / B.dblTotal) * dblPayment 
+					,dblPartialPaidQty = CASE WHEN ISNULL(B.dblTotal, 0) = 0 THEN 0 ELSE (BD.dblQtyReceived / B.dblTotal) * dblPayment END
 					,B.strBillId
 					,B.intBillId
 					,strDistribution =  ST.strStorageTypeCode
