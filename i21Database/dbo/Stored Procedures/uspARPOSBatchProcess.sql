@@ -581,7 +581,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM #POSTRANSACTIONS)
 
 
 			--UPDATE POS BATCH LOG
-			IF EXISTS(SELECT TOP 1 NULL FROM tblARInvoiceIntegrationLogDetail WHERE intIntegrationLogId = @intInvoiceLogId AND ysnSuccess = 0)
+			IF EXISTS(SELECT TOP 1 NULL FROM tblARInvoiceIntegrationLogDetail WHERE intIntegrationLogId = @intInvoiceLogId AND ysnSuccess = 0 AND strPostingMessage IS NOT NULL)
 			BEGIN				
 				SET @intProcessLogId = @intInvoiceLogId
 				GOTO Exit_With_Rollback_ProcessInvoices
