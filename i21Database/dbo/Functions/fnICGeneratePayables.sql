@@ -1,4 +1,4 @@
-CREATE FUNCTION dbo.fnICGeneratePayables (@intReceiptId INT, @ysnPosted BIT)
+CREATE FUNCTION dbo.fnICGeneratePayables (@intReceiptId INT, @ysnPosted BIT, @ysnForVoucher BIT = 0)
 RETURNS @table TABLE
 (
   [intEntityVendorId]			    INT NULL 
@@ -160,10 +160,10 @@ SELECT DISTINCT
 	,[strShipVia]				=	E.strShipVia
 	,[strTerm]					=	NULL
 	,[intTermId]				=	NULL
-	,[strContractNumber]		=	F1.strContractNumber
+	,[strContractNumber]		=	CH.strContractNumber
 	,[strBillOfLading]			=	A.strBillOfLading
-	,[intContractHeaderId]		=	F1.intContractHeaderId
-	,[intContractDetailId]		=	CASE WHEN A.strReceiptType IN ('Purchase Contract', 'Inventory Return') THEN B.intLineNo ELSE NULL END
+	,[intContractHeaderId]		=	CH.intContractHeaderId
+	,[intContractDetailId]		=	CASE WHEN A.strReceiptType IN ('Purchase Contract', 'Inventory Return') THEN CD.intContractDetailId ELSE NULL END
 	,[intContractSequence]		=	CASE WHEN A.strReceiptType IN ('Purchase Contract', 'Inventory Return') THEN CD.intContractSeq ELSE NULL END
 	,[intContractCostId]		= 	NULL
 	,[intScaleTicketId]			=	G.intTicketId
@@ -232,8 +232,8 @@ SELECT DISTINCT
 	,intShipFromId = A.intShipFromId
 	,intShipFromEntityId = A.intShipFromEntityId 
 	,intPaytoAddressId = payToAddress.intEntityLocationId
-	,[intLoadShipmentId]			 = ISNULL(B.intLoadShipmentId, B.intSourceId) 
-	,[intLoadShipmentDetailId]	     = ISNULL(B.intLoadShipmentDetailId, LogisticsView.intLoadDetailId) 
+	,[intLoadShipmentId]			 = B.intLoadShipmentId
+	,[intLoadShipmentDetailId]	     = B.intLoadShipmentDetailId
 	,[intLoadShipmentCostId]	     = NULL 
 FROM tblICInventoryReceipt A
 	INNER JOIN tblICInventoryReceiptItem B
@@ -241,17 +241,15 @@ FROM tblICInventoryReceipt A
 	INNER JOIN tblICItem C ON B.intItemId = C.intItemId
 	INNER JOIN tblICItemLocation loc ON C.intItemId = loc.intItemId AND loc.intLocationId = A.intLocationId
 	INNER JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.[intEntityId] = D2.intEntityId) ON A.[intEntityVendorId] = D1.[intEntityId]
-	LEFT JOIN (tblCTContractHeader CH INNER JOIN tblCTContractDetail CD ON CH.intContractHeaderId = CD.intContractHeaderId)  ON CH.intEntityId = A.intEntityVendorId 
-																															AND CH.intContractHeaderId = B.intOrderId 
-																															AND CD.intContractDetailId = B.intLineNo 
+	LEFT JOIN (tblCTContractHeader CH INNER JOIN tblCTContractDetail CD ON CH.intContractHeaderId = CD.intContractHeaderId)  
+		ON CH.intEntityId = A.intEntityVendorId 
+		AND CH.intContractHeaderId = ISNULL(B.intContractHeaderId, B.intOrderId)
+		AND CD.intContractDetailId = ISNULL(B.intContractDetailId, B.intLineNo) 
 	LEFT JOIN tblICItemUOM ItemWeightUOM ON ItemWeightUOM.intItemUOMId = B.intWeightUOMId
 	LEFT JOIN tblICUnitMeasure WeightUOM ON WeightUOM.intUnitMeasureId = ItemWeightUOM.intUnitMeasureId
 	LEFT JOIN tblICItemUOM ItemCostUOM ON ItemCostUOM.intItemUOMId = B.intCostUOMId
 	LEFT JOIN tblICUnitMeasure CostUOM ON CostUOM.intUnitMeasureId = ItemCostUOM.intUnitMeasureId
 	LEFT JOIN tblSMShipVia E ON A.intShipViaId = E.[intEntityId]
-	--FOR REVIEW, JOINING FOR CONTRACT IS ALREADY DEFINED ABOVE
-	LEFT JOIN (tblCTContractHeader F1 INNER JOIN tblCTContractDetail F2 ON F1.intContractHeaderId = F2.intContractHeaderId) 
-		ON F1.intEntityId = A.intEntityVendorId AND B.intItemId = F2.intItemId AND B.intLineNo = ISNULL(F2.intContractDetailId,0)
 	LEFT JOIN tblSCTicket G ON (CASE WHEN A.intSourceType = 1 THEN B.intSourceId ELSE 0 END) = G.intTicketId
 	LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = B.intUnitMeasureId
 	LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
@@ -277,16 +275,6 @@ FROM tblICInventoryReceipt A
 		SELECT SUM(ISNULL(H.dblQtyReceived,0)) AS dblQty FROM tblAPBillDetail H WHERE H.intInventoryReceiptItemId = B.intInventoryReceiptItemId AND H.intInventoryReceiptChargeId IS NULL
 		GROUP BY H.intInventoryReceiptItemId
 	) Billed
-	--OUTER APPLY (
-	--	SELECT 
-	--		K.dblNetWt AS dblNet
-	--	FROM tblLGLoadContainer K
-	--	WHERE K.intLoadContainerId = B.intContainerId
-	--	--WHERE 1 = (CASE WHEN A.strReceiptType = 'Purchase Contract' AND A.intSourceType = 2
-	--	--					AND K.intLoadContainerId = B.intContainerId 
-	--	--				THEN 1
-	--	--				ELSE 0 END)
-	--) Loads
 	OUTER APPLY (
 		SELECT	dblQtyReturned = ri.dblOpenReceive - ISNULL(ri.dblQtyReturned, 0) 
 				,r.strReceiptType
@@ -332,14 +320,6 @@ FROM tblICInventoryReceipt A
 WHERE 
 	A.strReceiptType IN ('Direct','Purchase Contract','Inventory Return','Purchase Order') 
 	AND A.ysnPosted = @ysnPosted 
-	--AND B.dblBillQty != B.dblOpenReceive 
-	--AND 1 = (CASE WHEN A.strReceiptType = 'Purchase Contract' THEN
-	--					CASE WHEN 
-	--							ISNULL(F1.intContractTypeId,1) = 1 
-	--							AND ISNULL(F2.intPricingTypeId, 0) NOT IN (2, 3, 4, 5) --AP-4971
-	--						THEN 1 ELSE 0 END
-	--				ELSE 1 END)
-	--AND B.dblOpenReceive > 0 --EXCLUDE NEGATIVE
 	AND (
 		Billed.dblQty IS NULL
 		OR 1 = 		
@@ -359,9 +339,7 @@ WHERE
 	AND C.strType <> 'Bundle'
 	AND ISNULL(A.strReceiptType, '') <> 'Transfer Order'
 	AND ISNULL(B.ysnAllowVoucher, 1) = 1
-	--AND (A.intSourceType <> 2 OR (A.intSourceType = 2 AND FreightTerms.strFobPoint <> 'Origin')) -- Deprecated
-	ORDER BY B.intInventoryReceiptItemId ASC 
-
+ORDER BY B.intInventoryReceiptItemId ASC 
 
 --RECEIPT OTHER CHARGES
 INSERT INTO @table
@@ -476,7 +454,7 @@ SELECT DISTINCT
 		,intShipFromEntityId						=	NULL 
 		,intPaytoAddressId							=	payToAddress.intEntityLocationId
 		,[intLoadShipmentId]			 			= A.intLoadShipmentId     
-		,[intLoadShipmentDetailId]	     			= A.intLoadDetailId
+		,[intLoadShipmentDetailId]	     			= NULL 
 		,[intLoadShipmentCostId]	     			= A.intLoadShipmentCostId
 FROM [vyuICChargesForBilling] A
 	LEFT JOIN dbo.tblSMCurrency H1 ON H1.intCurrencyID = A.intCurrencyId
@@ -489,7 +467,9 @@ FROM [vyuICChargesForBilling] A
 	LEFT JOIN tblICItem item ON item.intItemId = A.intItemId
 	LEFT JOIN vyuPATEntityPatron patron ON patron.intEntityId = A.intEntityVendorId
 	LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = A.intContractHeaderId
-	LEFT JOIN tblCTContractDetail CD ON CD.intContractHeaderId = A.intContractHeaderId      
+	LEFT JOIN tblCTContractDetail CD 
+		ON CD.intContractHeaderId = A.intContractHeaderId      
+		AND CD.intContractDetailId = A.intContractDetailId
 	LEFT JOIN tblSMTaxGroup TG ON TG.intTaxGroupId = A.intTaxGroupId
 	LEFT OUTER JOIN tblAPVendor payToVendor ON payToVendor.intEntityId = A.intEntityVendorId
 	LEFT OUTER JOIN tblEMEntityLocation payToAddress ON payToAddress.intEntityId = payToVendor.intEntityId
@@ -513,17 +493,41 @@ FROM [vyuICChargesForBilling] A
         WHERE B.intInventoryReceiptChargeId = A.intInventoryReceiptChargeId
     ) J
 WHERE
-	((A.ysnPrice = 1 AND A.intEntityVendorId = IR.intEntityVendorId) OR A.intEntityVendorId = IR.intEntityVendorId OR A.intEntityVendorId IS NOT NULL)
-	AND A.intInventoryReceiptId = @intReceiptId AND (
-		(A.[intEntityVendorId] NOT IN (Billed.intEntityVendorId) AND (A.dblOrderQty != ISNULL(Billed.dblQtyReceived,0)) OR Billed.dblQtyReceived IS NULL)
-		AND 1 =  CASE WHEN CD.intPricingTypeId IS NOT NULL AND CD.intPricingTypeId IN (2) THEN 0 ELSE 1 END  --EXLCUDE ALL BASIS
-		AND 1 = CASE WHEN (A.intEntityVendorId = IR.intEntityVendorId AND CD.intPricingTypeId IS NOT NULL AND CD.intPricingTypeId = 5) THEN 0 ELSE 1 END --EXCLUDE DELAYED PRICING TYPE FOR RECEIPT VENDOR
+	-- This part is used to convert the IR to Voucher. It should not include the 3rd party vendors
+	(
+		@ysnForVoucher = 1 
+		AND A.intInventoryReceiptId = @intReceiptId 
+		AND (A.intEntityVendorId = IR.intEntityVendorId)		
+		AND (
+			(
+				A.[intEntityVendorId] NOT IN (Billed.intEntityVendorId) 
+				AND (A.dblOrderQty <> ISNULL(Billed.dblQtyReceived,0)) 
+				OR Billed.dblQtyReceived IS NULL
+			)
+			AND 1 =  CASE WHEN CD.intPricingTypeId IS NOT NULL AND CD.intPricingTypeId IN (2) THEN 0 ELSE 1 END  --EXLCUDE ALL BASIS
+			AND 1 = CASE WHEN (A.intEntityVendorId = IR.intEntityVendorId AND CD.intPricingTypeId IS NOT NULL AND CD.intPricingTypeId = 5) THEN 0 ELSE 1 END --EXCLUDE DELAYED PRICING TYPE FOR RECEIPT VENDOR
+		)		
 	)
-	/*
-		IC-7556
-		If there's a contract involved and it already generated payables for costs/charges, don't re-generate them during posting but remove all of them during unposting.
-	*/
-	AND (CD.intContractDetailId IS NULL OR 
+	-- This condition is used to insert the other charges, including the 3rd party vendors, to the payable table. 
+	OR (
+		ISNULL(@ysnForVoucher,0) = 0
+		AND A.intInventoryReceiptId = @intReceiptId 
+		AND (A.intEntityVendorId IS NOT NULL)		
+		AND (
+			(
+				A.[intEntityVendorId] NOT IN (Billed.intEntityVendorId) 
+				AND (A.dblOrderQty <> ISNULL(Billed.dblQtyReceived,0)) 
+				OR Billed.dblQtyReceived IS NULL
+			)
+			AND 1 =  CASE WHEN CD.intPricingTypeId IS NOT NULL AND CD.intPricingTypeId IN (2) THEN 0 ELSE 1 END  --EXLCUDE ALL BASIS
+			AND 1 = CASE WHEN (A.intEntityVendorId = IR.intEntityVendorId AND CD.intPricingTypeId IS NOT NULL AND CD.intPricingTypeId = 5) THEN 0 ELSE 1 END --EXCLUDE DELAYED PRICING TYPE FOR RECEIPT VENDOR
+		)
+		/*
+			IC-7556
+			If there's a contract involved and it already generated payables for costs/charges, don't re-generate them during posting but remove all of them during unposting.
+		*/
+		AND (
+			CD.intContractDetailId IS NULL OR 
 			(
 				CASE WHEN CD.intContractDetailId IS NOT NULL AND A.strReceiptType = 'Purchase Contract' 
 					AND EXISTS(
@@ -531,13 +535,14 @@ WHERE
 						FROM tblAPVoucherPayable 
 						WHERE intEntityVendorId = A.intEntityVendorId 
 						AND intContractDetailId = CD.intContractDetailId
-						AND strSourceNumber != A.strSourceNumber
+						AND strSourceNumber <> A.strSourceNumber
 					)
 					THEN 0 ELSE 1 
 				END = 1
 			)
 		)
+	)
 RETURN
-END
 
+END
 GO

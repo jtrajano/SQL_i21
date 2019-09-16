@@ -7363,8 +7363,6 @@
     <Build Include="dbo\Tables\tblCFImportDriverPinResult.sql" />
     <None Include="Scripts\Post-Deployment\ST\25_DataFix.sql" />
     <Build Include="dbo\Functions\fnICGeneratePayables.sql" />
-    <Build Include="dbo\Functions\fnICGeneratePayablesForRemoval.sql" />
-    <Build Include="dbo\Functions\fnICGeneratePayablesForVoucher.sql" />
     <Build Include="dbo\Stored Procedures\uspICProcessPayables.sql" />
     <Build Include="dbo\Views\vyuSTItemUOMPosCodeFormat.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdateInventoryPhysicalCount.sql" />
