@@ -108,7 +108,7 @@ USING (
 				, ib.intItemUOMId
 				, ib.intSubLocationId
 				, ib.intStorageLocationId
-		-- Convert the InTransit-Inbound Qty to the Stock UOM before adding it into tblICItemStockUOM
+		-- Convert the InTransit-Inbound Qty to 'Stock UOM'
 		UNION ALL 
 		SELECT	ib.intItemId
 				,ib.intItemLocationId

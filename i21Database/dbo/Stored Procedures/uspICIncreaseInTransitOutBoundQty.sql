@@ -148,10 +148,6 @@ USING (
 					ON ARI.intInvoiceId = ob.intTransactionId
 					AND ob.intTransactionTypeId = @TransactionType_Invoice
 		WHERE	ob.intItemUOMId <> StockUOM.intItemUOMId
-				--AND ISNULL(ob.intFOBPointId, @FOB_DESTINATION) = @FOB_DESTINATION	-- IF NULL, default to @FOB_DESTINATION so that the other modules using this sp will not be affected. 		
-				--AND ob.intFOBPointId IS NOT NULL
-				--AND ob.intFOBPointId IN (@FOB_ORIGIN, @FOB_DESTINATION)  --ISNULL(ob.intFOBPointId, @FOB_DESTINATION) = @FOB_DESTINATION -- IF NULL, default to @FOB_DESTINATION so that the other modules using this sp will not be affected. 
-
 		GROUP BY ob.intItemId
 				, ob.intItemLocationId
 				, ob.intItemUOMId
@@ -160,7 +156,8 @@ USING (
 				, ob.intTransactionTypeId
 				, ARI.ysnPosted
 				, ob.dtmTransactionDate 
-		-- Convert all the In-Transit Outbound Qty to 'Stock UOM' before doing the aggregrate.
+
+		-- Convert all the In-Transit Outbound Qty to 'Stock UOM' 
 		UNION ALL 
 		SELECT	ob.intItemId
 				,ob.intItemLocationId
@@ -186,7 +183,6 @@ USING (
 				LEFT JOIN tblARInvoice ARI
 					ON ARI.intInvoiceId = ob.intTransactionId
 					AND ob.intTransactionTypeId = @TransactionType_Invoice
-		--WHERE	ISNULL(ob.intFOBPointId, @FOB_DESTINATION) = @FOB_DESTINATION -- IF NULL, default to @FOB_DESTINATION so that the other modules using this sp will not be affected. 
 		GROUP BY ob.intItemId
 				, ob.intItemLocationId
 				, StockUOM.intItemUOMId
@@ -199,9 +195,8 @@ USING (
 	ON ItemStockUOM.intItemId = Source_Query.intItemId
 	AND ItemStockUOM.intItemLocationId = Source_Query.intItemLocationId
 	AND ItemStockUOM.intItemUOMId = Source_Query.intItemUOMId
-	AND (ISNULL(Source_Query.intSubLocationId, 0) = 0 OR Source_Query.intSubLocationId = ItemStockUOM.intSubLocationId)
-	AND (ISNULL(Source_Query.intStorageLocationId, 0) = 0 OR Source_Query.intStorageLocationId = ItemStockUOM.intStorageLocationId)		
-
+	AND ISNULL(ItemStockUOM.intSubLocationId, 0) = ISNULL(Source_Query.intSubLocationId, 0)
+	AND ISNULL(ItemStockUOM.intStorageLocationId, 0) = ISNULL(Source_Query.intStorageLocationId, 0)
 
 -- If matched, update the In-Transit Outbound qty 
 WHEN MATCHED THEN 
