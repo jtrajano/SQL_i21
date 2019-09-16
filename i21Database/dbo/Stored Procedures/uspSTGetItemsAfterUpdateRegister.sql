@@ -1,14 +1,14 @@
 ﻿CREATE PROCEDURE [dbo].[uspSTGetItemsAfterUpdateRegister]
-	@intStoreId INT
-	, @intRegisterId INT
-	, @ysnPricebookFile BIT
-	, @ysnPromotionItemList BIT
-	, @ysnPromotionSalesList BIT
-	, @dtmBeginningChangeDate DATETIME
-	, @dtmEndingChangeDate DATETIME
-	, @strCategoryCode NVARCHAR(MAX)
-	, @ysnExportEntirePricebookFile BIT
-	, @intCurrentUserId INT
+	@intStoreId							INT
+	, @intRegisterId					INT
+	, @ysnPricebookFile					BIT
+	, @ysnPromotionItemList				BIT
+	, @ysnPromotionSalesList			BIT
+	, @dtmBeginningChangeDate			DATETIME		= NULL
+	, @dtmEndingChangeDate				DATETIME		= NULL
+	, @strCategoryCode					NVARCHAR(MAX)
+	, @ysnExportEntirePricebookFile		BIT
+	, @intCurrentUserId					INT
 AS
 
 BEGIN TRY
@@ -18,8 +18,15 @@ BEGIN TRY
 	-- =============================================================================================
 	-- CONVERT DATE's to UTC
 	-- =============================================================================================
-	DECLARE @dtmBeginningChangeDateUTC AS DATETIME = dbo.fnSTConvertDateToUTC(@dtmBeginningChangeDate)
-	DECLARE @dtmEndingChangeDateUTC AS DATETIME = dbo.fnSTConvertDateToUTC(@dtmEndingChangeDate)
+	DECLARE @dtmBeginningChangeDateUTC AS DATETIME = NULL	
+	DECLARE @dtmEndingChangeDateUTC AS DATETIME    = NULL
+
+	IF(@dtmBeginningChangeDate IS NOT NULL  AND  @dtmEndingChangeDate IS NOT NULL)
+		BEGIN
+			SET @dtmBeginningChangeDateUTC = dbo.fnSTConvertDateToUTC(@dtmBeginningChangeDate)
+			SET @dtmEndingChangeDateUTC    = dbo.fnSTConvertDateToUTC(@dtmEndingChangeDate)
+		END
+
 	-- DECLARE @dtmBuildFileThruEndingDateUTC AS DATETIME = dbo.fnSTConvertDateToUTC(@dtmBuildFileThruEndingDate)
 	-- =============================================================================================
 	-- END CONVERT DATE's to UTC
