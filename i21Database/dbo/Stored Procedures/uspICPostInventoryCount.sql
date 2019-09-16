@@ -247,7 +247,8 @@ BEGIN
 			ON r.intInventoryReceiptId = ri.intInventoryReceiptId
 			AND dbo.fnDateEquals(r.dtmReceiptDate, c.dtmCountDate) = 1 
 	WHERE
-		ISNULL(r.ysnPosted, 0) = 0 
+		c.strCountNo = @strTransactionId
+		AND ISNULL(r.ysnPosted, 0) = 0
 
 	IF @strReceiptNumber IS NOT NULL 
 	BEGIN 
@@ -267,7 +268,8 @@ BEGIN
 			ON s.intInventoryShipmentId = si.intInventoryShipmentId
 			AND dbo.fnDateEquals(s.dtmShipDate, c.dtmCountDate) = 1
 	WHERE
-		ISNULL(s.ysnPosted, 0) = 0 
+		c.strCountNo = @strTransactionId
+		AND ISNULL(s.ysnPosted, 0) = 0 
 
 	IF @strShipmentNumber IS NOT NULL 
 	BEGIN 
