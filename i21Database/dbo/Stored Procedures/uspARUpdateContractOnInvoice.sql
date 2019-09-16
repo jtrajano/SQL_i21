@@ -1,7 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspARUpdateContractOnInvoice]  
-	 @TransactionId	INT   
-	,@ForDelete		BIT = 0
-	,@UserId		INT = NULL     
+	  @TransactionId	INT   
+	, @ForDelete		BIT = 0
+	, @UserId			INT = NULL
+	, @InvoiceIds		InvoiceId	READONLY
 AS  
   
 SET QUOTED_IDENTIFIER OFF  
@@ -10,14 +11,12 @@ SET NOCOUNT ON
 SET XACT_ABORT ON  
 SET ANSI_WARNINGS OFF  
 
-
-
 -- Get the details from the invoice 
 BEGIN TRY
 	DECLARE @ItemsFromInvoice AS dbo.[InvoiceItemTableType]
 	INSERT INTO @ItemsFromInvoice 	
-	EXEC dbo.[uspARGetItemsFromInvoice]
-			@intInvoiceId = @TransactionId
+	EXEC dbo.[uspARGetItemsFromInvoice] @intInvoiceId = @TransactionId
+									  , @InvoiceIds	  =	@InvoiceIds
 
 	DECLARE		@intInvoiceDetailId				INT,
 				@intTicketId					INT,
@@ -30,7 +29,6 @@ BEGIN TRY
 				@ErrMsg							NVARCHAR(MAX),
 				@dblSchQuantityToUpdate			NUMERIC(12,4),
 				@intLoadDetailId				INT
-
 
 	DECLARE @tblToProcess TABLE
 	(
@@ -282,6 +280,31 @@ BEGIN TRY
 		AND (ISNULL(Header.intDistributionHeaderId, 0) = 0 AND ISNULL(Header.intLoadDistributionHeaderId, 0) = 0)
 		-- AND ISNULL(Detail.intLoadDetailId, 0) = 0 FOR AR-8652
 		AND ISNULL(Header.intTransactionId, 0) = 0
+
+	UNION ALL
+
+	--Added Item From Batch Invoice
+	SELECT
+		 Detail.intInvoiceDetailId
+		,Detail.[intContractDetailId]
+		,Detail.[intTicketId]
+		,Detail.[intInventoryShipmentItemId]
+		,Detail.[intItemUOMId]
+		,dbo.fnCalculateQtyBetweenUOM(Detail.[intItemUOMId], CD.[intItemUOMId], Detail.[dblQtyShipped]) * CASE WHEN ISNULL(IDS.ysnForDelete, 0) = 0 THEN 1 ELSE -1 END
+		,Detail.[intLoadDetailId]
+	FROM tblARInvoiceDetail Detail
+	INNER JOIN @InvoiceIds IDS ON Detail.intInvoiceId = IDS.intHeaderId
+	INNER JOIN tblICItem ITEM ON Detail.intItemId = ITEM.intItemId AND ITEM.strType <> 'Other Charge'
+	INNER JOIN tblARInvoice Header ON Detail.intInvoiceId = Header.intInvoiceId 
+	INNER JOIN tblCTContractDetail CD ON Detail.intContractDetailId = CD.intContractDetailId
+	WHERE Header.strTransactionType = 'Invoice'
+	  AND Detail.intContractDetailId IS NOT NULL
+	  AND Detail.[intInventoryShipmentItemId] IS NULL
+	  AND Detail.[intSalesOrderDetailId] IS NULL
+	  AND Detail.[intShipmentPurchaseSalesContractId] IS NULL 
+      AND (ISNULL(Header.intDistributionHeaderId, 0) = 0 AND ISNULL(Header.intLoadDistributionHeaderId, 0) = 0)	
+	  AND ISNULL(Header.intTransactionId, 0) = 0
+	  AND @TransactionId IS NULL
 
 
 	SELECT @intUniqueId = MIN(intUniqueId) FROM @tblToProcess
