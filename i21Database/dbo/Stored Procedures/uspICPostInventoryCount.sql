@@ -312,6 +312,7 @@ BEGIN
 			,intSubLocationId
 			,intStorageLocationId
 			,dblForexRate
+			,intCategoryId
 	)  	
 	SELECT 	intItemId				= Detail.intItemId
 			,intItemLocationId		= ItemLocation.intItemLocationId
@@ -405,6 +406,7 @@ BEGIN
 			,intSubLocationId		= Detail.intSubLocationId
 			,intStorageLocationId	= Detail.intStorageLocationId
 			,dblForexRate			= 1
+			,Item.intCategoryId
 	FROM 
 		dbo.tblICInventoryCount Header
 		INNER JOIN dbo.tblICInventoryCountDetail Detail 
