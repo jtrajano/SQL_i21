@@ -17,6 +17,7 @@ DECLARE @intInvoiceId				INT
 	  , @intItemContractHeaderId	INT
 	  , @strTransactionType			NVARCHAR(25)
 	  , @ysnFromItemContract		BIT
+	  , @InvoiceIds					InvoiceId
 	  	  
 SET @intInvoiceId = @InvoiceId
 SET @intUserId = @UserId
@@ -62,13 +63,12 @@ EXEC dbo.[uspARUpdateReservedStock] @intInvoiceId, @ForDelete, @intUserId, 0
 EXEC dbo.[uspARUpdateInboundShipmentOnInvoice] @intInvoiceId, @ForDelete, @intUserId
 EXEC dbo.[uspARUpdateCommitted] @intInvoiceId, @ForDelete, @intUserId, 0
 EXEC dbo.[uspARUpdateGrainOpenBalance] @intInvoiceId, @ForDelete, @intUserId
-EXEC dbo.[uspARUpdateContractOnInvoice] @intInvoiceId, @ForDelete, @intUserId
+EXEC dbo.[uspARUpdateContractOnInvoice] @intInvoiceId, @ForDelete, @intUserId, 0, @InvoiceIds
 EXEC dbo.[uspARUpdateItemContractOnInvoice] @intInvoiceId, @ForDelete, @intUserId
 IF @ForDelete = 1 EXEC dbo.[uspCTBeforeInvoiceDelete] @intInvoiceId, @intUserId
 EXEC dbo.[uspARUpdateReturnedInvoice] @intInvoiceId, @ForDelete, @intUserId 
 EXEC dbo.[uspARUpdateInvoiceAccruals] @intInvoiceId
 
-DECLARE @InvoiceIds InvoiceId
 INSERT INTO @InvoiceIds(intHeaderId) SELECT @intInvoiceId
 EXEC dbo.[uspARUpdateInvoiceTransactionHistory] @InvoiceIds
 IF @ForDelete = 1
