@@ -18,6 +18,7 @@ DECLARE @intDiscountAccountId			INT = NULL
 	  , @dblCashReceipt					NUMERIC(18, 6) = 0
 	  , @dblCashReturn					NUMERIC(18, 6) = 0
 	  , @intProcessLogId                    NUMERIC(18, 6) = 0
+	  , @ErrorMessage					NVARCHAR(max) = ''
 
 DECLARE @PROCESSLOGS TABLE  (
 		     intPOSId  INT
@@ -971,6 +972,9 @@ IF EXISTS (SELECT TOP 1 NULL FROM #POSTRANSACTIONS)
 					 , dtmDateProcessed
 			FROM @PROCESSLOGS
 		
+		SELECT TOP 1 @ErrorMessage = 'Batch process unsuccessful : ' + strDescription from @PROCESSLOGS
+
+		RAISERROR(@ErrorMessage, 16, 1);
 		GOTO PROCESS_EXIT
 	END
 
@@ -1003,6 +1007,11 @@ IF EXISTS (SELECT TOP 1 NULL FROM #POSTRANSACTIONS)
 					 , ysnSuccess 
 					 , dtmDateProcessed 
 			FROM @PROCESSLOGS 
+
+			SELECT TOP 1 @ErrorMessage = 'Batch process unsuccessful : ' + strDescription from @PROCESSLOGS
+
+			RAISERROR(@ErrorMessage, 16, 1);
+			GOTO PROCESS_EXIT
 			
 	END
 

@@ -17,7 +17,7 @@ SELECT
 		, ysnProcessed	
  FROM (
 	SELECT	*   --all columns
-			,ROWNO = ROW_NUMBER() OVER (PARTITION BY strReceiptNumber ORDER BY strInvoiceNumber DESC, strPaymentNumber DESC) 
+			,ROWNO = ROW_NUMBER() OVER (PARTITION BY strReceiptNumber ORDER BY strInvoiceNumber DESC, strPaymentNumber) 
 	FROM
 		(SELECT intPOSLogId			= POSLOG.intPOSLogId
 			 , intPOSEndOfDayId		= EOD.intPOSEndOfDayId
