@@ -260,7 +260,7 @@ BEGIN
 			INNER JOIN tblICInventoryReceipt C2 ON C.intInventoryReceiptId = C2.intInventoryReceiptId
 			INNER JOIN tblICItem D ON B.intItemId = D.intItemId
 		WHERE A.intBillId IN (SELECT [intBillId] FROM @tmpBills)
-		AND DATEADD(dd, DATEDIFF(dd, 0,A.dtmDate)) < DATEADD(dd, DATEDIFF(dd, 0,C2.dtmReceiptDate))
+		AND DATEADD(dd, 0,DATEDIFF(dd, 0,A.dtmDate)) < DATEADD(dd, 0, DATEDIFF(dd, 0,C2.dtmReceiptDate))
 
 		-- --Voucher date should not be greater than receipt date
 		-- INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
