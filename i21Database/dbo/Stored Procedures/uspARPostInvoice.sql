@@ -50,6 +50,7 @@ DECLARE  @InitTranCount				INT
 		,@CurrentTranCount			INT
 		,@Savepoint					NVARCHAR(32)
 		,@CurrentSavepoint			NVARCHAR(32)
+		,@SavepointGLEntries 		NVARCHAR(100)
 
 DECLARE  @totalRecords INT = 0
 		,@totalInvalid INT = 0
@@ -913,6 +914,15 @@ BEGIN TRY
 	intSourceEntityId INT NULL,
 	ysnRebuild BIT NULL)
 	
+	IF @raiseError = 1 
+		BEGIN
+			SET @SavepointGLEntries = 'uspARGenerateGLEntries'	
+			IF @InitTranCount = 0
+				BEGIN TRANSACTION @SavepointGLEntries
+			ELSE
+				SAVE TRANSACTION @SavepointGLEntries
+		END
+
     DECLARE @GLEntries RecapTableType
 	IF @post = 1
 	EXEC dbo.[uspARGenerateEntriesForAccrual] 
@@ -923,7 +933,7 @@ BEGIN TRY
         ,@PostDate = @PostDate
         ,@BatchId  = @batchIdUsed
         ,@UserId   = @userId
-
+	
 	INSERT INTO @GLEntries
 		([dtmDate]
 		,[strBatchId]
@@ -1056,10 +1066,18 @@ BEGIN TRY
         @GLEntries GLE
         ON IGLE.[strTransactionId] = GLE.[strTransactionId]
 
-	IF @raiseError = 1 AND ISNULL(@invalidGLCount, 0) > 0
+	IF @raiseError = 1
 	BEGIN
-		SELECT TOP 1 @ErrorMerssage = [strText] FROM @InvalidGLEntries
-		RAISERROR(@ErrorMerssage, 11, 1)							
+		IF ISNULL(@invalidGLCount, 0) > 0
+			BEGIN
+				SELECT TOP 1 @ErrorMerssage = [strText] FROM @InvalidGLEntries
+				ROLLBACK TRANSACTION @SavepointGLEntries
+				RAISERROR(@ErrorMerssage, 11, 1)
+			END
+		ELSE
+			BEGIN
+				COMMIT TRANSACTION @SavepointGLEntries
+			END							
 	END					
 
     DELETE FROM #ARInvoiceGLEntries
