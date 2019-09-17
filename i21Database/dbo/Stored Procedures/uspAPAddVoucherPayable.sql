@@ -98,6 +98,7 @@ BEGIN
 			,[intItemId]						=	A.intItemId
 			,[strItemNo]						=	item.strItemNo
 			,[intPurchaseTaxGroupId]			=	A.intPurchaseTaxGroupId
+			,[strTaxGroup]						=	taxGroup.strTaxGroup
 			,[strMiscDescription]				=	A.strMiscDescription
 			,[dblOrderQty]						=	CASE 
 													WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1 --Consider contract logic if voucher only
@@ -299,6 +300,7 @@ BEGIN
 		LEFT JOIN tblSMTerm contractTerm ON ctDetail.intTermId = contractTerm.intTermID
 		LEFT JOIN tblICStorageLocation storageLoc ON storageLoc.intStorageLocationId = A.intStorageLocationId
 		LEFT JOIN tblSMCompanyLocationSubLocation subLoc ON subLoc.intCompanyLocationSubLocationId = A.intSubLocationId
+		LEFT JOIN tblSMTaxGroup taxGroup ON taxGroup.intTaxGroupId = A.intPurchaseTaxGroupId
 		WHERE A.ysnStage = 1
 	) AS SourceData
 	 ON (1=0)
@@ -337,7 +339,8 @@ BEGIN
 		,[intCustomerStorageId]	
 		,[intItemId]						
 		,[strItemNo]						
-		,[intPurchaseTaxGroupId]			
+		,[intPurchaseTaxGroupId]		
+		,[strTaxGroup]	
 		,[strMiscDescription]			
 		,[dblOrderQty]					
 		,[dblOrderUnitQty]				
@@ -417,7 +420,8 @@ BEGIN
 		,[intCustomerStorageId]
 		,[intItemId]						
 		,[strItemNo]						
-		,[intPurchaseTaxGroupId]			
+		,[intPurchaseTaxGroupId]		
+		,[strTaxGroup]	
 		,[strMiscDescription]			
 		,[dblOrderQty]					
 		,[dblOrderUnitQty]				
