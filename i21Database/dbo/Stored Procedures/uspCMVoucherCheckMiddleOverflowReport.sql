@@ -9,7 +9,6 @@ SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
-SET ANSI_WARNINGS OFF
 
 DECLARE @BANK_DEPOSIT INT = 1  
   ,@BANK_WITHDRAWAL INT = 2  
@@ -156,6 +155,5 @@ FROM	dbo.tblCMBankTransaction CHK
 		OUTER APPLY( SElECT TOP 1 strCompanyName, strAddress,strCity,strState, strCountry, strCounty, strZip FROM tblSMCompanySetup) COMPANY
 WHERE	CHK.intBankAccountId = @intBankAccountId
 		AND CHK.strTransactionId IN (SELECT strValues COLLATE Latin1_General_CI_AS FROM dbo.fnARGetRowsFromDelimitedValues(@strTransactionId))
-		AND (SELECT COUNT(intPaymentId) FROM tblAPPaymentDetail WHERE intPaymentId = PYMT.intPaymentId) > 10
 		AND CHK.dblAmount <> 0
 ORDER BY CHK.strReferenceNo ASC
