@@ -45,6 +45,16 @@ BEGIN TRY
 
 	IF (ISNULL(@ysnPost, 0) = 1)
 	BEGIN
+
+		/* Update LS Unit Cost for Unpriced Contracts */
+		UPDATE LD 
+		SET dblUnitPrice = dbo.fnCTGetSequencePrice(CD.intContractDetailId,NULL)
+		FROM tblLGLoadDetail LD
+			JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
+			JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+			CROSS APPLY dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
+		WHERE ISNULL(LD.dblUnitPrice, 0) = 0 AND LD.intLoadId = @intLoadId
+
 		INSERT INTO @ItemsToPost (
 			intItemId
 			,intItemLocationId
