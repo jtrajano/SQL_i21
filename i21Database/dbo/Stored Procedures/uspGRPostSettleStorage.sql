@@ -1693,11 +1693,9 @@ BEGIN TRY
 				 LEFT JOIN tblICItemUOM UOM 
 					ON UOM.intItemUOMId = CC.intItemUOMId
 				 LEFT JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemId = CC.[intItemId]
-				 JOIN tblGRCustomerStorage CS
-					ON CS.intCustomerStorageId = SV.intCustomerStorageId
 				 WHERE ItemLocation.intLocationId = @LocationId
 					AND CASE WHEN (SV.intPricingTypeId = 2) THEN 0 ELSE 1 END = 1
-					AND (CASE WHEN CC.intVendorId  = CS.intEntityId
+					AND (CASE WHEN CC.intVendorId IS NOT NULL
 							THEN 1
 							ELSE (CASE WHEN ISNULL(CC.intContractCostId,0) = 0 OR CC.ysnPrice = 1
 									THEN 1
