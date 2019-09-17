@@ -50,6 +50,7 @@ DECLARE  @InitTranCount				INT
 		,@CurrentTranCount			INT
 		,@Savepoint					NVARCHAR(32)
 		,@CurrentSavepoint			NVARCHAR(32)
+		,@SavepointGLEntries 		NVARCHAR(100)
 
 DECLARE  @totalRecords INT = 0
 		,@totalInvalid INT = 0
@@ -913,6 +914,15 @@ BEGIN TRY
 	intSourceEntityId INT NULL,
 	ysnRebuild BIT NULL)
 	
+	IF @raiseError = 1 
+		BEGIN
+			SET @SavepointGLEntries = 'uspARGenerateGLEntries'	
+			IF @InitTranCount = 0
+				BEGIN TRANSACTION @SavepointGLEntries
+			ELSE
+				SAVE TRANSACTION @SavepointGLEntries
+		END
+
     DECLARE @GLEntries RecapTableType
 	IF @post = 1
 	EXEC dbo.[uspARGenerateEntriesForAccrual] 
@@ -923,70 +933,7 @@ BEGIN TRY
         ,@PostDate = @PostDate
         ,@BatchId  = @batchIdUsed
         ,@UserId   = @userId
-
-	--IF @recap = 0
-	--	BEGIN
-	--		BEGIN TRY
-	--			DECLARE @FinalGLEntries AS RecapTableType
-	--			DELETE FROM @FinalGLEntries
-
-	--			IF EXISTS ( SELECT TOP 1 1 FROM @FinalGLEntries)
-
-	--				DECLARE @InvalidGLEntries AS TABLE
-	--				(strTransactionId	NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
-	--				,strText			NVARCHAR(150)  COLLATE Latin1_General_CI_AS NULL
-	--				,intErrorCode		INT
-	--				,strModuleName		NVARCHAR(100)  COLLATE Latin1_General_CI_AS NULL)
-
-	--				INSERT INTO @InvalidGLEntries
-	--					(strTransactionId
-	--					,strText
-	--					,intErrorCode
-	--					,strModuleName)
-	--				SELECT DISTINCT
-	--					strTransactionId
-	--					,strText
-	--					,intErrorCode
-	--					,strModuleName
-	--				FROM
-	--					[dbo].[fnGetGLEntriesErrors](@GLEntries)
-
-	--				SET @invalidCount = @invalidCount + ISNULL((SELECT COUNT(strTransactionId) FROM @InvalidGLEntries), 0)
-
-	--				INSERT INTO 
-	--						tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-	--					SELECT DISTINCT
-	--							strError				= IGLE.strText
-	--						,strTransactionType		= GLE.strTransactionType 
-	--						,strTransactionId		= IGLE.strTransactionId
-	--						,strBatchNumber			= GLE.strBatchId
-	--						,intTransactionId		= GLE.intTransactionId 
-	--					FROM
-	--						@InvalidGLEntries IGLE
-	--					LEFT OUTER JOIN
-	--						@GLEntries GLE
-	--							ON IGLE.strTransactionId = GLE.strTransactionId
-					
-
-	--				DELETE FROM @GLEntries
-	--				WHERE
-	--					strTransactionId IN (SELECT DISTINCT strTransactionId FROM @InvalidGLEntries)
-
-	--				DELETE FROM @PostInvoiceData
-	--				WHERE
-	--					strInvoiceNumber IN (SELECT DISTINCT strTransactionId FROM @InvalidGLEntries)
-
-	--				EXEC	dbo.uspGLBookEntries
-	--								@GLEntries		= @FinalGLEntries
-	--							,@ysnPost		= @post
-	--							,@XACT_ABORT_ON = @raiseError
-	--		END TRY
-	--		BEGIN CATCH
-	--			SELECT @ErrorMerssage = ERROR_MESSAGE()										
-	--			GOTO Do_Rollback
-	--		END CATCH
-	--	END	
-
+	
 	INSERT INTO @GLEntries
 		([dtmDate]
 		,[strBatchId]
@@ -1119,10 +1066,18 @@ BEGIN TRY
         @GLEntries GLE
         ON IGLE.[strTransactionId] = GLE.[strTransactionId]
 
-	IF @raiseError = 1 AND ISNULL(@invalidGLCount, 0) > 0
+	IF @raiseError = 1
 	BEGIN
-		SELECT TOP 1 @ErrorMerssage = [strText] FROM @InvalidGLEntries
-		RAISERROR(@ErrorMerssage, 11, 1)							
+		IF ISNULL(@invalidGLCount, 0) > 0
+			BEGIN
+				SELECT TOP 1 @ErrorMerssage = [strText] FROM @InvalidGLEntries
+				ROLLBACK TRANSACTION @SavepointGLEntries
+				RAISERROR(@ErrorMerssage, 11, 1)
+			END
+		ELSE
+			BEGIN
+				COMMIT TRANSACTION @SavepointGLEntries
+			END							
 	END					
 
     DELETE FROM #ARInvoiceGLEntries
