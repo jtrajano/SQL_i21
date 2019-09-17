@@ -683,9 +683,13 @@ IF EXISTS (SELECT TOP 1 NULL FROM #POSTRANSACTIONS)
 				,strPaymentInfo					= CASE WHEN POSPAYMENTS.strPaymentMethod IN ('Check' ,'Debit Card', 'Manual Credit Card') THEN POSPAYMENTS.strReferenceNo ELSE NULL END
 				,strNotes						= POS.strReceiptNumber
 				,intBankAccountId				= BA.intBankAccountId
-				,dblAmountPaid					= CASE WHEN ISNULL(POSPAYMENTS.dblAmount, 0) <  0 
-													THEN (ISNULL(POSPAYMENTS.dblAmount, 0) * -1) * dbo.fnARGetInvoiceAmountMultiplier(IFP.strTransactionType)
-													ELSE ISNULL(POSPAYMENTS.dblAmount, 0) * dbo.fnARGetInvoiceAmountMultiplier(IFP.strTransactionType)
+				,dblAmountPaid					= CASE WHEN POSPAYMENTS.strPaymentMethod = 'Cash' 
+													THEN IFP.dblAmountDue
+													ELSE
+													  CASE WHEN ISNULL(POSPAYMENTS.dblAmount, 0) <  0 
+													    THEN (ISNULL(POSPAYMENTS.dblAmount, 0) * -1) * dbo.fnARGetInvoiceAmountMultiplier(IFP.strTransactionType)
+													    ELSE ISNULL(POSPAYMENTS.dblAmount, 0) * dbo.fnARGetInvoiceAmountMultiplier(IFP.strTransactionType)
+												      END
 												  END
 				,intEntityId					= @intEntityUserId
 				,intInvoiceId					= IFP.intInvoiceId
@@ -695,9 +699,13 @@ IF EXISTS (SELECT TOP 1 NULL FROM #POSTRANSACTIONS)
 				,intInvoiceAccountId			= IFP.intAccountId
 				,dblInvoiceTotal				= IFP.dblInvoiceTotal * dbo.fnARGetInvoiceAmountMultiplier(IFP.strTransactionType)
 				,dblBaseInvoiceTotal			= IFP.dblBaseInvoiceTotal * dbo.fnARGetInvoiceAmountMultiplier(IFP.strTransactionType)
-				,dblPayment						= CASE WHEN ISNULL(POSPAYMENTS.dblAmount, 0) <  0 
-													THEN (ISNULL(POSPAYMENTS.dblAmount, 0) * -1) * dbo.fnARGetInvoiceAmountMultiplier(IFP.strTransactionType)
-													ELSE ISNULL(POSPAYMENTS.dblAmount, 0) * dbo.fnARGetInvoiceAmountMultiplier(IFP.strTransactionType)
+				,dblPayment						= CASE WHEN POSPAYMENTS.strPaymentMethod = 'Cash' 
+													THEN IFP.dblAmountDue
+													ELSE
+													  CASE WHEN ISNULL(POSPAYMENTS.dblAmount, 0) <  0 
+													    THEN (ISNULL(POSPAYMENTS.dblAmount, 0) * -1) * dbo.fnARGetInvoiceAmountMultiplier(IFP.strTransactionType)
+													    ELSE ISNULL(POSPAYMENTS.dblAmount, 0) * dbo.fnARGetInvoiceAmountMultiplier(IFP.strTransactionType)
+												      END
 												  END
 				,dblAmountDue					= IFP.dblInvoiceTotal * dbo.fnARGetInvoiceAmountMultiplier(IFP.strTransactionType)
 				,dblBaseAmountDue				= IFP.dblInvoiceTotal * dbo.fnARGetInvoiceAmountMultiplier(IFP.strTransactionType)
