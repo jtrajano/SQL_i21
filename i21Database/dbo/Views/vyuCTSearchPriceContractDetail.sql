@@ -35,7 +35,8 @@ AS
 			BA.strAccountNumber,
 			MA.strOptMarketName,
 			REPLACE(MO.strFutureMonth,' ','('+MO.strSymbol+') ') AS strPricingMonth,
-			REPLACE(HO.strFutureMonth,' ','('+HO.strSymbol+') ') AS strHedgeMonth
+			REPLACE(HO.strFutureMonth,' ','('+HO.strSymbol+') ') AS strHedgeMonth,
+			DP.dtmDate				AS dtmAveragePriceDate
 
 	FROM	tblCTPriceFixationDetail	PD
 	JOIN	vyuCTSearchPriceContract	PF	ON	PF.intPriceFixationId			=	PD.intPriceFixationId		LEFT
@@ -47,4 +48,5 @@ AS
 	JOIN	tblRKBrokerageAccount		BA	ON	BA.intBrokerageAccountId		=	PD.intBrokerageAccountId	LEFT
 	JOIN	tblRKFutureMarket			MA	ON	MA.intFutureMarketId			=	PD.intFutureMarketId		LEFT
 	JOIN	tblRKFuturesMonth			MO	ON	MO.intFutureMonthId				=	PD.intFutureMonthId			LEFT
-	JOIN	tblRKFuturesMonth			HO	ON	HO.intFutureMonthId				=	PD.intHedgeFutureMonthId
+	JOIN	tblRKFuturesMonth			HO	ON	HO.intFutureMonthId				=	PD.intHedgeFutureMonthId	LEFT
+	JOIN	vyuRKGetDailyAveragePriceDetail DP ON DP.intDailyAveragePriceDetailId	=	PD.intDailyAveragePriceDetailId
