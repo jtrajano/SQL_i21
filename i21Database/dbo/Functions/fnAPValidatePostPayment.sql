@@ -340,6 +340,7 @@ BEGIN
 				AND payDetail.intInvoiceId = D.intInvoiceId
 			) arPayment
 		WHERE  A.[intPaymentId] IN (SELECT intId FROM @paymentIds)
+		AND B.dblPayment <> 0
 		AND (payment.dblBillPayment > C.dblAmountDue OR arPayment.dblBillPayment > D.dblAmountDue)
 
 
@@ -491,6 +492,8 @@ BEGIN
 				voucher.intTransactionType = 2
 			AND payDetail.intPaymentId = A.intPaymentId
 			AND payDetail.ysnOffset = 1
+			AND
+				payDetail.dblPayment <> 0
 			AND NOT EXISTS
 			(
 				SELECT
@@ -501,6 +504,8 @@ BEGIN
 				INNER JOIN tblCMBankTransaction bankTran
 					ON prepay.strPaymentRecordNum = bankTran.strTransactionId AND bankTran.ysnCheckVoid = 0
 				WHERE prepayDetail.intBillId = voucher.intBillId
+				AND
+					prepayDetail.dblPayment <> 0
 			)
 		) payDetails
 		WHERE  A.[intPaymentId] IN (SELECT intId FROM @paymentIds)
