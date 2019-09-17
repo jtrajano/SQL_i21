@@ -7708,6 +7708,7 @@
     <Build Include="dbo\Stored Procedures\uspCFDeleteEncodeCardData.sql" />
     <Build Include="dbo\Stored Procedures\uspAPForceCompletePayable.sql" />
     <Build Include="dbo\Functions\fnSCGetDPContract.sql" />
+    <Build Include="dbo\Views\vyuAPClearingFilterTransactionNo.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
