@@ -683,7 +683,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM #POSTRANSACTIONS)
 				,strPaymentInfo					= CASE WHEN POSPAYMENTS.strPaymentMethod IN ('Check' ,'Debit Card', 'Manual Credit Card') THEN POSPAYMENTS.strReferenceNo ELSE NULL END
 				,strNotes						= POS.strReceiptNumber
 				,intBankAccountId				= BA.intBankAccountId
-				,dblAmountPaid					= CASE WHEN POSPAYMENTS.strPaymentMethod = 'Cash' 
+				,dblAmountPaid					= CASE WHEN POSPAYMENTS.strPaymentMethod = 'Cash' and II.strTransactionType <> 'Credit Memo'
 													THEN IFP.dblAmountDue
 													ELSE
 													  CASE WHEN ISNULL(POSPAYMENTS.dblAmount, 0) <  0 
@@ -699,7 +699,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM #POSTRANSACTIONS)
 				,intInvoiceAccountId			= IFP.intAccountId
 				,dblInvoiceTotal				= IFP.dblInvoiceTotal * dbo.fnARGetInvoiceAmountMultiplier(IFP.strTransactionType)
 				,dblBaseInvoiceTotal			= IFP.dblBaseInvoiceTotal * dbo.fnARGetInvoiceAmountMultiplier(IFP.strTransactionType)
-				,dblPayment						= CASE WHEN POSPAYMENTS.strPaymentMethod = 'Cash' 
+				,dblPayment						= CASE WHEN POSPAYMENTS.strPaymentMethod = 'Cash' and II.strTransactionType <> 'Credit Memo'
 													THEN IFP.dblAmountDue
 													ELSE
 													  CASE WHEN ISNULL(POSPAYMENTS.dblAmount, 0) <  0 
