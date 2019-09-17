@@ -111,12 +111,7 @@ SELECT
 		
 		-- Bank and company info related fields
 		,strCompanyName = COMPANY.strCompanyName 
-		,strCompanyAddress = CASE	
-									WHEN ISNULL(dbo.fnConvertToFullAddress( COMPANY.strAddress,  COMPANY.strCity, COMPANY.strState,  COMPANY.strZip), '') <> '' AND ISNULL([dbo].fnCMGetBankAccountMICR(CHK.intBankAccountId,CHK.strReferenceNo),'') <> ''  THEN 
-										dbo.fnConvertToFullAddress(COMPANY.strAddress, COMPANY.strCity, COMPANY.strState, COMPANY.strZip)
-									ELSE 
-										NULL
-							END
+		,strCompanyAddress = ''
 		,strBank = CASE
 						WHEN ISNULL([dbo].fnCMGetBankAccountMICR(CHK.intBankAccountId,CHK.strReferenceNo),'') <> '' THEN 
 							BNK.strBankName
@@ -142,7 +137,7 @@ SELECT
 		,blbSecondSignatureDetail = (SELECT TOP 1 blbDetail FROM tblSMSignature WHERE intSignatureId = BNKACCNT.intSecondSignatureId)
 		
 		-- A/P Related fields: 
-		,strVendor = ISNULL(LTRIM(RTRIM(VENDOR.strVendorId)) + ' ', '-- ') + ISNULL(ISNULL(RTRIM(LTRIM(ENTITY.strName)) + ' ', RTRIM(LTRIM(CHK.strPayee))),'-- ') + RTRIM(LTRIM (COMPANY.strCompanyName))
+		,strVendor = ISNULL(LTRIM(RTRIM(VENDOR.strVendorId)) + ' ', '-- ') + ISNULL(ISNULL(RTRIM(LTRIM(ENTITY.strName)) + ' ', RTRIM(LTRIM(CHK.strPayee))),'-- ') --+ RTRIM(LTRIM (COMPANY.strCompanyName))
 		,strVendorAccount = ISNULL(VENDOR.strVendorAccountNum, '--')
 		-- Used to change the sub-report during runtime. 
 		,CHK.intBankTransactionTypeId
@@ -164,7 +159,7 @@ FROM	dbo.tblCMBankTransaction CHK
 			ON VENDOR.[intEntityId] = ENTITY.intEntityId
 		LEFT JOIN [tblEMEntityLocation] LOCATION
 			ON VENDOR.[intEntityId] = LOCATION.intEntityId AND ysnDefaultLocation = 1 
-		LEFT JOIN tblSMCompanySetup COMPANY ON COMPANY.intCompanySetupID = (SElECT TOP 1 intCompanySetupID FROM tblSMCompanySetup)
+		OUTER APPLY( SElECT TOP 1 strCompanyName FROM tblSMCompanySetup) COMPANY
 		OUTER APPLY
 		(
 			SELECT LTRIM(RTRIM(REPLACE(CHK.strAmountInWords, '*', ''))) + REPLICATE(' *', (100 - LEN(LTRIM(RTRIM(REPLACE(CHK.strAmountInWords, '*', '')))))/2) Val

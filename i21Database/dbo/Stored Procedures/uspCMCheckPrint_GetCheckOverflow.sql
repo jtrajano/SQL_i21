@@ -34,10 +34,12 @@ DECLARE @BANK_DEPOSIT INT = 1
 		,@VOID_CHECK AS INT = 19
 		,@AP_ECHECK AS INT = 20
 		,@PAYCHECK AS INT = 21
+		,@ACH AS INT = 22
+		,@DIRECT_DEPOSIT AS INT = 23
 
 --Check if there are any check overflow
-SELECT TOP 1
-@ysnCheckOverflow = 1		
+;WITH QUERY AS(
+SELECT TOP 1 1 ysnCheckOverflow
 FROM	dbo.tblCMBankTransaction CHK
 		LEFT JOIN tblAPPayment PYMT
 			ON CHK.strTransactionId = PYMT.strPaymentRecordNum			
@@ -45,6 +47,49 @@ WHERE	CHK.intBankAccountId = @intBankAccountId
 		AND CHK.strTransactionId IN (SELECT strValues COLLATE Latin1_General_CI_AS FROM dbo.fnARGetRowsFromDelimitedValues(@strTransactionIds))
 		--AND PRINTSPOOL.strBatchId =  PRINTSPOOL.strBatchId
 		AND (SELECT COUNT(intPaymentId) FROM tblAPPaymentDetail WHERE intPaymentId = PYMT.intPaymentId) > 10
-		
+UNION		
+SELECT TOP 1 1
+FROM	[dbo].[tblCMBankTransaction] CM 
+INNER JOIN [dbo].[tblAPPayment] PYMT ON CM.strTransactionId = PYMT.strPaymentRecordNum
+INNER JOIN [dbo].[tblAPPaymentDetail] PYMTDetail ON PYMT.intPaymentId = PYMTDetail.intPaymentId
+INNER JOIN [dbo].[tblAPBill] A ON PYMTDetail.intBillId = A.intBillId
+INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
+INNER JOIN tblSCTicket C ON B.intScaleTicketId = C.intTicketId
+INNER JOIN tblCTContractHeader D ON B.intContractHeaderId = D.intContractHeaderId
+INNER JOIN (tblICInventoryReceipt E INNER JOIN tblICInventoryReceiptItem F ON E.intInventoryReceiptId = F.intInventoryReceiptId)
+ON C.intTicketId = F.intSourceId AND E.intSourceType = 1
+WHERE CM.strTransactionId IN (SELECT strValues COLLATE Latin1_General_CI_AS FROM dbo.fnARGetRowsFromDelimitedValues(@strTransactionIds))
+UNION
+SELECT TOP 1 1 
+FROM	[dbo].[tblCMBankTransaction] CM INNER JOIN [dbo].[tblAPPayment] PYMT
+				ON CM.strTransactionId = PYMT.strPaymentRecordNum
+			INNER JOIN [dbo].[tblAPPaymentDetail] PYMTDetail
+				ON PYMT.intPaymentId = PYMTDetail.intPaymentId
+			INNER JOIN [dbo].[tblAPBill] BILL
+				ON PYMTDetail.intBillId = BILL.intBillId
+			INNER JOIN [dbo].[tblAPBillDetail] BILLDETAIL
+				ON BILL.intBillId = BILLDETAIL.intBillId
+			LEFT JOIN [dbo].[tblCTContractHeader] CONTRACTHEADER
+				ON BILLDETAIL.intContractHeaderId = CONTRACTHEADER.intContractHeaderId
+			LEFT JOIN [dbo].tblICItem ITEM
+				ON BILLDETAIL.intItemId = ITEM.intItemId
+	WHERE CM.strTransactionId IN (SELECT strValues COLLATE Latin1_General_CI_AS FROM dbo.fnARGetRowsFromDelimitedValues(@strTransactionIds))
+			AND CM.intBankTransactionTypeId IN (@AP_PAYMENT, @AP_ECHECK, @ACH, @DIRECT_DEPOSIT)
+UNION SELECT TOP 1 1
+FROM	[dbo].[tblCMBankTransaction] CM INNER JOIN [dbo].[tblAPPayment] PYMT
+				ON CM.strTransactionId = PYMT.strPaymentRecordNum
+			INNER JOIN [dbo].[tblAPPaymentDetail] PYMTDetail
+				ON PYMT.intPaymentId = PYMTDetail.intPaymentId
+			INNER JOIN [dbo].[tblARInvoice] INV
+				ON PYMTDetail.intInvoiceId = INV.intInvoiceId
+			INNER JOIN [dbo].[tblARInvoiceDetail] INVDETAIL
+				ON INV.intInvoiceId = INVDETAIL.intInvoiceId
+			LEFT JOIN [dbo].[tblCTContractHeader] CONTRACTHEADER
+				ON INVDETAIL.intContractHeaderId = CONTRACTHEADER.intContractHeaderId
+			LEFT JOIN [dbo].tblICItem ITEM
+				ON INVDETAIL.intItemId = ITEM.intItemId
+WHERE CM.strTransactionId IN (SELECT strValues COLLATE Latin1_General_CI_AS FROM dbo.fnARGetRowsFromDelimitedValues(@strTransactionIds))
+AND CM.intBankTransactionTypeId IN (@AP_PAYMENT, @AP_ECHECK, @ACH, @DIRECT_DEPOSIT)
+)
 
-SET @ysnCheckOverflow = ISNULL(@ysnCheckOverflow, 0)
+SELECT @ysnCheckOverflow = 1 FROM QUERY
