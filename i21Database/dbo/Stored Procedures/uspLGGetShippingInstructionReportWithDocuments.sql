@@ -533,7 +533,7 @@ BEGIN
 		LEFT JOIN tblICUnitMeasure DisUnit ON DisUnit.intUnitMeasureId = L.intDischargeUnitMeasureId
 		LEFT JOIN tblSMFreightTerms CB ON CB.intFreightTermId = CH.intFreightTermId
 		LEFT JOIN tblSMCity LoadingPort ON LoadingPort.intCityId = CD.intLoadingPortId AND LoadingPort.ysnPort = 1
-		LEFT JOIN tblSMCity DestinationPort ON DestinationPort.intCityId = CD.intLoadingPortId AND DestinationPort.ysnPort = 1
+		LEFT JOIN tblSMCity DestinationPort ON DestinationPort.intCityId = CD.intDestinationPortId AND DestinationPort.ysnPort = 1
 		CROSS APPLY tblLGCompanyPreference CP
 		OUTER APPLY (SELECT TOP 1 strOwner, strFreightClause FROM tblLGShippingLineServiceContractDetail SLSCD
 				 INNER JOIN tblLGShippingLineServiceContract SLSC ON SLSCD.intShippingLineServiceContractId = SLSC.intShippingLineServiceContractId
