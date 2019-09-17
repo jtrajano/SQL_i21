@@ -1,16 +1,16 @@
 ﻿/*  
  This stored procedure is used as data source in the Voucher Check Middle Overflow Report  
 */  
-CREATE PROCEDURE [dbo].[uspCMVoucherCheckMiddleOverflowReport]
+CREATE PROCEDURE uspCMVoucherCheckMiddleOverflowReport
  @xmlParam NVARCHAR(MAX) = NULL  
 AS  
   
-SET QUOTED_IDENTIFIER OFF  
-SET ANSI_NULLS ON  
-SET NOCOUNT ON  
-SET XACT_ABORT ON  
-SET ANSI_WARNINGS OFF  
-  
+SET QUOTED_IDENTIFIER OFF
+SET ANSI_NULLS ON
+SET NOCOUNT ON
+SET XACT_ABORT ON
+SET ANSI_WARNINGS OFF
+
 DECLARE @BANK_DEPOSIT INT = 1  
   ,@BANK_WITHDRAWAL INT = 2  
   ,@MISC_CHECKS INT = 3  
@@ -122,14 +122,19 @@ SELECT	CHK.dtmDate
 		,CHK.intBankAccountId
 		
 		-- Bank and company info related fields
-		,strCompanyName = ''
-		,strCompanyAddress = ''
+		,strCompanyName = COMPANY.strCompanyName
+		,strCompanyAddress = CASE	
+									WHEN ISNULL(dbo.fnConvertToFullAddress( COMPANY.strAddress,  COMPANY.strCity, COMPANY.strState,  COMPANY.strZip), '') <> '' AND ISNULL([dbo].fnCMGetBankAccountMICR(CHK.intBankAccountId,CHK.strReferenceNo),'') <> ''  THEN 
+										dbo.fnConvertToFullAddress(COMPANY.strAddress, COMPANY.strCity, COMPANY.strState, COMPANY.strZip)
+									ELSE 
+										NULL
+							END
 		,strBank = ''
 		,strBankAddress = ''
 		
 		-- A/P Related fields: 
 		,strVendorId = ISNULL(VENDOR.strVendorId, '--')
-		,strVendorName = ISNULL(ENTITY.strName, CHK.strPayee)
+		,strVendorName = ISNULL(LTRIM(RTRIM(VENDOR.strVendorId)) + ' ', '-- ') + ISNULL(ISNULL(RTRIM(LTRIM(ENTITY.strName)) + ' ', RTRIM(LTRIM(CHK.strPayee))),'-- ') --+ RTRIM(LTRIM (COMPANY.strCompanyName))
 		,strVendorAccount = ISNULL(VENDOR.strVendorAccountNum, '--')
 		,strVendorAddress = CASE	
 									WHEN ISNULL(dbo.fnConvertToFullAddress(LOCATION.strAddress, LOCATION.strCity, LOCATION.strState, LOCATION.strZipCode), '') <> ''  THEN 
@@ -148,6 +153,7 @@ FROM	dbo.tblCMBankTransaction CHK
 			ON VENDOR.[intEntityId] = ENTITY.intEntityId
 		LEFT JOIN [tblEMEntityLocation] LOCATION
 			ON VENDOR.[intEntityId] = LOCATION.intEntityId AND ysnDefaultLocation = 1 
+		OUTER APPLY( SElECT TOP 1 strCompanyName, strAddress,strCity,strState, strCountry, strCounty, strZip FROM tblSMCompanySetup) COMPANY
 WHERE	CHK.intBankAccountId = @intBankAccountId
 		AND CHK.strTransactionId IN (SELECT strValues COLLATE Latin1_General_CI_AS FROM dbo.fnARGetRowsFromDelimitedValues(@strTransactionId))
 		AND (SELECT COUNT(intPaymentId) FROM tblAPPaymentDetail WHERE intPaymentId = PYMT.intPaymentId) > 10
