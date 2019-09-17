@@ -174,16 +174,16 @@ CD.intContractDetailId,
 			--intPricingTypeId = (case when AP.strApprovalStatus = 'Approved' or AP.strApprovalStatus = 'No Need for Approval' then CD.intPricingTypeId else CH.intPricingTypeId end),
 			intPricingTypeId = (case
 								when CH.intPricingTypeId = 1 and CD.intPricingTypeId = 1
-								then (case when APH.strApprovalStatus = 'Approved' or APH.strApprovalStatus = 'No Need for Approval' then CD.intPricingTypeId else CH.intPricingTypeId end)
-								else (case when AP.strApprovalStatus = 'Approved' or AP.strApprovalStatus = 'No Need for Approval' then CD.intPricingTypeId else CH.intPricingTypeId end)
+								then (case when APH.strApprovalStatus = 'Approved' or APH.strApprovalStatus = 'No Need for Approval' or APH.strApprovalStatus IS NULL then CD.intPricingTypeId else CH.intPricingTypeId end)
+								else (case when AP.strApprovalStatus = 'Approved' or AP.strApprovalStatus = 'No Need for Approval' or AP.strApprovalStatus IS NULL then CD.intPricingTypeId else CH.intPricingTypeId end)
 							end),
 			CD.intFutureMarketId,
 			CD.intFutureMonthId,
 			--dblFutures = (case when AP.strApprovalStatus = 'Approved' or AP.strApprovalStatus = 'No Need for Approval' then CD.dblFutures else null end),
 			dblFutures = (case
 								when CH.intPricingTypeId = 1 and CD.intPricingTypeId = 1
-								then (case when APH.strApprovalStatus = 'Approved' or APH.strApprovalStatus = 'No Need for Approval' then CD.dblFutures else null end)
-								else (case when AP.strApprovalStatus = 'Approved' or AP.strApprovalStatus = 'No Need for Approval' then CD.dblFutures else null end)
+								then (case when APH.strApprovalStatus = 'Approved' or APH.strApprovalStatus = 'No Need for Approval' or APH.strApprovalStatus IS NULL then CD.dblFutures else null end)
+								else (case when AP.strApprovalStatus = 'Approved' or AP.strApprovalStatus = 'No Need for Approval' or AP.strApprovalStatus IS NULL then CD.dblFutures else null end)
 							end),
 			CD.dblBasis,
 			CD.dblOriginalBasis,
@@ -309,8 +309,8 @@ CD.intContractDetailId,
 				--,PT.strPricingType
 				,strPricingType = (case
 										when CH.intPricingTypeId = 1 and CD.intPricingTypeId = 1
-										then (case when APH.strApprovalStatus = 'Approved' or APH.strApprovalStatus = 'No Need for Approval' then PT.strPricingType else PTH.strPricingType end)
-										else (case when AP.strApprovalStatus = 'Approved' or AP.strApprovalStatus = 'No Need for Approval' then PT.strPricingType else PTH.strPricingType end)
+										then (case when APH.strApprovalStatus = 'Approved' or APH.strApprovalStatus = 'No Need for Approval' or APH.strApprovalStatus IS NULL then PT.strPricingType else PTH.strPricingType end)
+										else (case when AP.strApprovalStatus = 'Approved' or AP.strApprovalStatus = 'No Need for Approval' or AP.strApprovalStatus IS NULL then PT.strPricingType else PTH.strPricingType end)
 									end)
 				,NULL AS strContractOptDesc --Screen not in use
 				,dbo.[fnCTGetSeqDisplayField](CD.intDiscountTypeId,'tblCTDiscountType') strDiscountType
