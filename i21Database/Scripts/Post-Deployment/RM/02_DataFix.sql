@@ -291,4 +291,21 @@ END
 
 GO
 
+IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblRKFutOptTransactionHistory' AND COLUMN_NAME = 'dtmTransactionDate')
+BEGIN
+	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblRKFutOptTransaction' AND COLUMN_NAME = 'dtmTransactionDate')
+	BEGIN
+		UPDATE tblRKFutOptTransactionHistory
+		SET dtmTransactionDate = tblPatch.dtmTransactionDate
+		FROM (
+			SELECT * FROM tblRKFutOptTransaction
+		) tblPatch
+		WHERE tblPatch.intFutOptTransactionId = tblRKFutOptTransactionHistory.intFutOptTransactionId
+		AND strAction = 'ADD'
+		AND tblPatch.dtmTransactionDate != tblRKFutOptTransactionHistory.dtmTransactionDate
+	END
+END
+
+GO
+
 
