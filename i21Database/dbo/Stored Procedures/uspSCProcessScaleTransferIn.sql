@@ -3,7 +3,7 @@
 	,@intMatchTicketId AS INT
 	,@intUserId AS INT
 AS
-	SET QUOTED_IDENTIFIER OFF
+SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
@@ -113,8 +113,11 @@ BEGIN TRY
 			,intContractHeaderId		= NULL
 			,intContractDetailId		= NULL
 			,dtmDate					= SC.dtmTicketDateTime
-			,dblQty						= SC.dblNetUnits
-			,dblCost					= ICTran.dblCost
+			,dblQty						= abs(ICTran.dblQty) --case when abs(ICTran.dblQty) < SC.dblNetUnits then abs(ICTran.dblQty) else SC.dblNetUnits end
+			,dblCost					= ICTran.dblCost + ( (case when abs(ICTran.dblQty) > SC.dblNetUnits then 1 else -1 end)
+																*
+																((ICTran.dblCost) * abs(((SC.dblNetUnits - SCMatch.dblNetUnits)/SC.dblNetUnits))) 
+											)--ICTran.dblCost
 			,dblExchangeRate			= 1 -- Need to check this
 			,intLotId					= SC.intLotId
 			,intSubLocationId			= SC.intSubLocationId
@@ -198,6 +201,14 @@ BEGIN TRY
 			UPDATE CTE
 			SET dblQty = CASE WHEN @_qtyToAdjust < 0 THEN dblQty - (@_qtyToAdjust *-1) ELSE dblQty + @_qtyToAdjust END;			
 	END
+
+
+	declare @dblUnitDifference numeric(38, 20)
+	select @dblUnitDifference = sum(dblNetUnits) from (
+		SELECT SC.dblNetUnits FROM tblSCTicket SC where SC.intTicketId = @intTicketId
+		union all
+		SELECT -SC.dblNetUnits FROM tblSCTicket SC where SC.intTicketId = @intMatchTicketId
+	) a
 
 	--Fuel Freight
 	INSERT INTO @OtherCharges
@@ -378,6 +389,49 @@ _PostOrUnPost:
 		INNER JOIN tblICInventoryReceipt IR ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId AND intSourceType = 1
 		INNER JOIN tblICInventoryReceiptItemLot ICLot ON ICLot.intInventoryReceiptItemId = IRI.intInventoryReceiptItemId
 		WHERE SC.intTicketId = @intTicketId	
+
+
+		/*if @dblUnitDifference <> 0
+		begin
+			declare @intItemIdDifference		int
+				,@dtmDateDifference datetime
+				,@intLocationIdDifference int
+				,@intSubLocationIdDifference int
+				,@intStorageLocationIdDifference int
+				,@strLotNumberDifference NVARCHAR(50)	
+				,@intOwnershipTypeDifference int
+				,@intItemUOMIdDifference int
+				,@intInventoryAdjustmentIdDifference int
+			select 
+				@intItemIdDifference = intItemId,				
+				@dtmDateDifference = dtmTicketDateTime,
+				@intLocationIdDifference = intProcessingLocationId,
+				@intSubLocationIdDifference = intSubLocationId,
+				@intStorageLocationIdDifference = intStorageLocationId,
+				@strLotNumberDifference = 'e',
+				@intOwnershipTypeDifference = 1,
+				@intItemUOMIdDifference = intItemUOMIdTo			
+
+				from tblSCTicket where intTicketId = @intTicketId
+
+			EXEC [dbo].[uspICInventoryAdjustment_CreatePostQtyChange]
+				@intItemIdDifference
+				,@dtmDateDifference
+				,@intLocationIdDifference
+				,@intSubLocationIdDifference
+				,@intStorageLocationIdDifference
+				,@intStorageLocationIdDifference
+				,@intOwnershipTypeDifference
+				,@dblUnitDifference 
+				,0
+				,@intItemUOMId
+				,@ReceiptId
+				,53 --Delivery Sheet inventory transaction id
+				,@intUserId
+				,@intInventoryAdjustmentIdDifference OUTPUT
+				,'andun na daw';
+		end*/
+
 
 		DELETE	FROM #tmpAddItemReceiptResult 
 		WHERE	intInventoryReceiptId = @ReceiptId
