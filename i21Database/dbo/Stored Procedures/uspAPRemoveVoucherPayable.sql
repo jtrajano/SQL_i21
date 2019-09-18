@@ -208,7 +208,7 @@ BEGIN
 			ON A.intVoucherPayableId = B.intVoucherPayableId
 	END
 
-	IF @recordCountToDelete != @recordCountDeleted
+	IF @recordCountDeleted > 0 AND @recordCountToDelete != @recordCountDeleted
 	BEGIN
 		RAISERROR('Record count deleted mismatch.', 16, 1);
 		RETURN;
