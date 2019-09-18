@@ -1975,13 +1975,7 @@ BEGIN
 
 		-- Calculate the tax per line item 
 		UPDATE	ReceiptItem 
-		SET		dblTax = ROUND(
-					dbo.fnDivide(
-						ISNULL(Taxes.dblTaxPerLineItem, 0)
-						,ISNULL(Receipt.intSubCurrencyCents, 1) 
-					)
-				, 2) 
-
+		SET		dblTax = ROUND(ISNULL(Taxes.dblTaxPerLineItem, 0), 2) 
 		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 						ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 				LEFT JOIN (
