@@ -823,7 +823,7 @@ BEGIN
 			ON NonInventoryCostCharges.intChargeId = OtherChargesGLAccounts.intChargeId
 				AND NonInventoryCostCharges.intChargeItemLocation = OtherChargesGLAccounts.intItemLocationId
 		INNER JOIN dbo.tblGLAccount GLAccount
-			ON GLAccount.intAccountId = OtherChargesGLAccounts.intOtherChargeIncome
+			ON GLAccount.intAccountId = OtherChargesGLAccounts.intOtherChargeExpense
 		CROSS APPLY dbo.fnGetDebit(NonInventoryCostCharges.dblCost) DebitForeign
 		CROSS APPLY dbo.fnGetCredit(NonInventoryCostCharges.dblCost) CreditForeign
 		WHERE ISNULL(NonInventoryCostCharges.ysnAccrue, 0) = 0
