@@ -206,6 +206,7 @@ BEGIN
 		, @strBuySell  = NULL
 		, @intBookId  = NULL
 		, @intSubBookId  = NULL
+		, @intSelectedInstrumentTypeId = 1
 	
 	--------- end
 	

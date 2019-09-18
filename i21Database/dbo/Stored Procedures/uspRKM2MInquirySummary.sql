@@ -275,7 +275,10 @@ exec uspRKUnrealizedPnL  @dtmFromDate ='01-01-1900',
 	@intFutureMonthId  = NULL,
 	@strBuySell  = NULL,
 	@intBookId  = NULL,
-	@intSubBookId  = NULL				
+	@intSubBookId  = NULL,
+	@intSelectedInstrumentTypeId = 1
+	
+
 		INSERT INTO @tblFinalDetail (
 		strSummary
 		,intCommodityId
