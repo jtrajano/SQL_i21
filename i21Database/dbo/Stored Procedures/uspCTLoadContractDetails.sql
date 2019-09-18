@@ -175,6 +175,8 @@ CD.intContractDetailId,
 			intPricingTypeId = (case
 								when CH.intPricingTypeId = 1 and CD.intPricingTypeId = 1
 								then (case when APH.strApprovalStatus = 'Approved' or APH.strApprovalStatus = 'No Need for Approval' or APH.strApprovalStatus IS NULL then CD.intPricingTypeId else CH.intPricingTypeId end)
+								when CH.ysnMultiplePriceFixation = 1
+								then (case when APMP.strApprovalStatus = 'Approved' or APMP.strApprovalStatus = 'No Need for Approval' or APMP.strApprovalStatus IS NULL then CD.intPricingTypeId else CH.intPricingTypeId end)
 								else (case when AP.strApprovalStatus = 'Approved' or AP.strApprovalStatus = 'No Need for Approval' or AP.strApprovalStatus IS NULL then CD.intPricingTypeId else CH.intPricingTypeId end)
 							end),
 			CD.intFutureMarketId,
@@ -183,6 +185,8 @@ CD.intContractDetailId,
 			dblFutures = (case
 								when CH.intPricingTypeId = 1 and CD.intPricingTypeId = 1
 								then (case when APH.strApprovalStatus = 'Approved' or APH.strApprovalStatus = 'No Need for Approval' or APH.strApprovalStatus IS NULL then CD.dblFutures else null end)
+								when CH.ysnMultiplePriceFixation = 1
+								then (case when APMP.strApprovalStatus = 'Approved' or APMP.strApprovalStatus = 'No Need for Approval' or APMP.strApprovalStatus IS NULL then CD.dblFutures else null end)
 								else (case when AP.strApprovalStatus = 'Approved' or AP.strApprovalStatus = 'No Need for Approval' or AP.strApprovalStatus IS NULL then CD.dblFutures else null end)
 							end),
 			CD.dblBasis,
@@ -310,6 +314,8 @@ CD.intContractDetailId,
 				,strPricingType = (case
 										when CH.intPricingTypeId = 1 and CD.intPricingTypeId = 1
 										then (case when APH.strApprovalStatus = 'Approved' or APH.strApprovalStatus = 'No Need for Approval' or APH.strApprovalStatus IS NULL then PT.strPricingType else PTH.strPricingType end)
+										when CH.ysnMultiplePriceFixation = 1
+										then (case when APMP.strApprovalStatus = 'Approved' or APMP.strApprovalStatus = 'No Need for Approval' or APMP.strApprovalStatus IS NULL then PT.strPricingType else PTH.strPricingType end)
 										else (case when AP.strApprovalStatus = 'Approved' or AP.strApprovalStatus = 'No Need for Approval' or AP.strApprovalStatus IS NULL then PT.strPricingType else PTH.strPricingType end)
 									end)
 				,NULL AS strContractOptDesc --Screen not in use
@@ -484,6 +490,14 @@ CD.intContractDetailId,
 							left join tblSMScreen c on c.strNamespace = 'ContractManagement.view.PriceContracts' and c.intScreenId = b.intScreenId
 							) as tt where tt.intRowNum = 1
 						) AP ON AP.intContractHeaderId = CD.intContractHeaderId and AP.intContractDetailId = CD.intContractDetailId
+		LEFT    JOIN	(
+							select * from (
+							select ROW_NUMBER() OVER (PARTITION BY a.intContractHeaderId ORDER BY b.intTransactionId DESC) intRowNum, a.intContractHeaderId, b.strApprovalStatus
+							from tblCTPriceFixation a
+							left join tblSMTransaction b on b.intRecordId = a.intPriceContractId and b.strApprovalStatus is not null
+							left join tblSMScreen c on c.strNamespace = 'ContractManagement.view.PriceContracts' and c.intScreenId = b.intScreenId
+							) as tt where tt.intRowNum = 1
+						) APMP ON APMP.intContractHeaderId = CD.intContractHeaderId
 		LEFT    JOIN	(
 							select * from (
 							select ROW_NUMBER() OVER (PARTITION BY b.intRecordId ORDER BY b.intTransactionId DESC) intRowNum, a.intContractHeaderId, a.intContractDetailId, b.strApprovalStatus
