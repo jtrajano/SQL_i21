@@ -19,7 +19,7 @@ BEGIN
 												ELSE isnull(ysnLicensed, 0) END
 
 			DECLARE @intCommodityUnitMeasureId AS INT
-			SELECT f = intCommodityUnitMeasureId
+			SELECT @intCommodityUnitMeasureId = intCommodityUnitMeasureId
 			FROM tblICCommodityUnitMeasure
 			WHERE intCommodityId = @intCommodityId AND ysnDefault = 1
 
