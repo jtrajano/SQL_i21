@@ -90,5 +90,6 @@
 	dblDemandGrowthPerc NUMERIC(18,6),
 	ysnComputeDemandUsingRecipe BIT,
 	ysnDisplayDemandWithItemNoAndDescription BIT,
+	ysnDisplayRestrictedBookInDemandView BIT,
 	CONSTRAINT [PK_tblMFCompanyPreference_intCompanyPreferenceId] PRIMARY KEY ([intCompanyPreferenceId]) 
 )

@@ -46,6 +46,20 @@ BEGIN TRY
 		,@ysnDisplayDemandWithItemNoAndDescription BIT
 		,@ysnDemandViewForBlend BIT
 		,@strContainerType NVARCHAR(50)
+		,@ysnDisplayRestrictedBookInDemandView BIT
+	DECLARE @tblMFContainerWeight TABLE (
+		intItemId INT
+		,dblWeight NUMERIC(18, 6)
+		,intWeightUnitMeasureId INT
+		)
+	DECLARE @tblMFItemBook TABLE (
+		intId INT identity(1, 1)
+		,intItemId INT
+		,strBook NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
+		)
+	DECLARE @intItemBookId INT
+		,@intId INT
+		,@strBook NVARCHAR(MAX)
 	DECLARE @tblMFItem TABLE (
 		intItemId INT
 		,intMainItemId INT
@@ -69,6 +83,7 @@ BEGIN TRY
 		,@intNoofWeekstoCalculateSupplyTargetbyAverage = IsNULL(intNoofWeekstoCalculateSupplyTargetbyAverage, 13)
 		,@ysnComputeDemandUsingRecipe = ysnComputeDemandUsingRecipe
 		,@ysnDisplayDemandWithItemNoAndDescription = ysnDisplayDemandWithItemNoAndDescription
+		,@ysnDisplayRestrictedBookInDemandView = IsNULL(ysnDisplayRestrictedBookInDemandView, 0)
 	FROM tblMFCompanyPreference
 
 	SELECT @strContainerType = strContainerType
@@ -246,6 +261,49 @@ BEGIN TRY
 			,ysnSpecificItemDescription
 			,dblRatio
 			)
+		SELECT DISTINCT DD.intItemId
+			,DD.intItemId
+			,0
+			,1
+		FROM @tblMFItem I
+		JOIN tblMFDemandDetail DD ON I.intItemId = DD.intSubstituteItemId
+		WHERE DD.intDemandHeaderId = @intDemandHeaderId
+			AND NOT EXISTS (
+				SELECT *
+				FROM @tblMFItemDetail FI
+				WHERE FI.intItemId = DD.intItemId
+				)
+
+		INSERT INTO @tblMFItemDetail (
+			intItemId
+			,intMainItemId
+			,ysnSpecificItemDescription
+			,dblRatio
+			)
+		SELECT DISTINCT DD.intSubstituteItemId
+			,DD.intItemId
+			,1
+			,1
+		FROM @tblMFItem I
+		JOIN tblMFDemandDetail DD ON I.intItemId = DD.intItemId
+		WHERE DD.intDemandHeaderId = @intDemandHeaderId
+			AND DD.intSubstituteItemId IS NOT NULL
+
+		INSERT INTO @tblMFItem (intItemId)
+		SELECT ID.intItemId
+		FROM @tblMFItemDetail ID
+		WHERE NOT EXISTS (
+				SELECT *
+				FROM @tblMFItem I
+				WHERE I.intItemId = ID.intItemId
+				)
+
+		INSERT INTO @tblMFItemDetail (
+			intItemId
+			,intMainItemId
+			,ysnSpecificItemDescription
+			,dblRatio
+			)
 		SELECT IB.intBundleItemId
 			,IB.intItemId
 			,0
@@ -275,12 +333,115 @@ BEGIN TRY
 				FROM @tblMFItemDetail ID
 				WHERE ID.intItemId = I.intItemId
 				)
+
+		INSERT INTO @tblMFContainerWeight (
+			intItemId
+			,dblWeight
+			,intWeightUnitMeasureId
+			)
+		SELECT ID.intMainItemId
+			,AVG(CASE 
+					WHEN @ysnCalculateNoOfContainerByBagQty = 1
+						THEN CTCQ.dblWeight
+					ELSE CTCQ.dblBulkQuantity
+					END)
+			,MIN(CASE 
+					WHEN @ysnCalculateNoOfContainerByBagQty = 1
+						THEN CTCQ.intWeightUnitMeasureId
+					ELSE CT.intWeightUnitMeasureId
+					END)
+		FROM @tblMFItemDetail ID
+		JOIN tblICItem I ON I.intItemId = ID.intItemId
+		LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityId = I.intCommodityId
+		LEFT JOIN tblLGContainerTypeCommodityQty CTCQ ON CTCQ.intCommodityAttributeId = I.intOriginId
+			AND CTCQ.intCommodityId = I.intCommodityId
+			AND CTCQ.intContainerTypeId = @intContainerTypeId
+			AND CA.intDefaultPackingUOMId = CTCQ.intUnitMeasureId
+		LEFT JOIN tblLGContainerType CT ON CT.intContainerTypeId = CTCQ.intContainerTypeId
+		WHERE ID.intItemId = IsNULL(ID.intMainItemId, ID.intItemId)
+		GROUP BY ID.intMainItemId
+
+		INSERT INTO @tblMFContainerWeight (
+			intItemId
+			,dblWeight
+			,intWeightUnitMeasureId
+			)
+		SELECT ID.intItemId
+			,(
+				CASE 
+					WHEN @ysnCalculateNoOfContainerByBagQty = 1
+						THEN CTCQ.dblWeight
+					ELSE CTCQ.dblBulkQuantity
+					END
+				)
+			,(
+				CASE 
+					WHEN @ysnCalculateNoOfContainerByBagQty = 1
+						THEN CTCQ.intWeightUnitMeasureId
+					ELSE CT.intWeightUnitMeasureId
+					END
+				)
+		FROM @tblMFItemDetail ID
+		JOIN tblICItem I ON I.intItemId = ID.intItemId
+		LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityId = I.intCommodityId
+		LEFT JOIN tblLGContainerTypeCommodityQty CTCQ ON CTCQ.intCommodityAttributeId = I.intOriginId
+			AND CTCQ.intCommodityId = I.intCommodityId
+			AND CTCQ.intContainerTypeId = @intContainerTypeId
+			AND CA.intDefaultPackingUOMId = CTCQ.intUnitMeasureId
+		LEFT JOIN tblLGContainerType CT ON CT.intContainerTypeId = CTCQ.intContainerTypeId
+		WHERE ID.intItemId <> ID.intMainItemId
 	END
 
 	UPDATE I
 	SET I.intMainItemId = ID.intMainItemId
 	FROM @tblMFItem I
 	JOIN @tblMFItemDetail ID ON ID.intItemId = I.intItemId --and I.intItemId<>ID.intMainItemId
+
+	IF @ysnDisplayRestrictedBookInDemandView = 1
+	BEGIN
+		INSERT INTO @tblMFItemBook (intItemId)
+		SELECT DISTINCT intItemId
+		FROM @tblMFItem
+		WHERE intItemId <> IsNULL(intMainItemId, intItemId)
+
+		SELECT @intId = MIN(intId)
+		FROM @tblMFItemBook
+
+		WHILE @intId IS NOT NULL
+		BEGIN
+			SELECT @intItemBookId = NULL
+				,@strBook = ''
+
+			SELECT @intItemBookId = intItemId
+			FROM @tblMFItemBook
+			WHERE intId = @intId
+
+			SELECT @strBook = @strBook + strBook + ','
+			FROM tblCTBook B
+			WHERE NOT EXISTS (
+					SELECT intBookId
+					FROM tblICItemBook IB
+					WHERE IB.intItemId = @intItemBookId
+						AND IB.intBookId = B.intBookId
+					)
+
+			IF @strBook IS NULL
+				SELECT @strBook = ''
+
+			IF len(@strBook) > 0
+			BEGIN
+				SELECT @strBook = left(@strBook, Len(@strBook) - 1)
+
+				UPDATE @tblMFItemBook
+				SET strBook = @strBook
+				WHERE intId = @intId
+			END
+
+			SELECT @intId = MIN(intId)
+			FROM @tblMFItemBook
+			WHERE intId > @intId
+		END
+	END
 
 	IF @OpenPurchaseXML <> ''
 	BEGIN
@@ -419,9 +580,11 @@ BEGIN TRY
 						ELSE @intCompanyLocationId
 						END
 					)
-			GROUP BY I.ysnSpecificItemDescription
-				,I.intItemId
-				,I.intMainItemId
+			GROUP BY CASE 
+					WHEN I.ysnSpecificItemDescription = 1
+						THEN I.intItemId
+					ELSE I.intMainItemId
+					END
 		END
 		ELSE
 		BEGIN
@@ -638,9 +801,11 @@ BEGIN TRY
 					)
 			WHERE SS.intContractStatusId = 1
 				AND SS.dtmUpdatedAvailabilityDate < @dtmStartOfMonth
-			GROUP BY I.ysnSpecificItemDescription
-				,I.intItemId
-				,I.intMainItemId
+			GROUP BY CASE 
+					WHEN I.ysnSpecificItemDescription = 1
+						THEN I.intItemId
+					ELSE I.intMainItemId
+					END
 
 			INSERT INTO #tblMFDemand (
 				intItemId
@@ -669,9 +834,11 @@ BEGIN TRY
 			WHERE SS.intContractStatusId = 1
 				AND SS.dtmUpdatedAvailabilityDate >= @dtmStartOfMonth
 			GROUP BY datename(m, SS.dtmUpdatedAvailabilityDate) + ' ' + cast(datepart(yyyy, SS.dtmUpdatedAvailabilityDate) AS VARCHAR)
-				,I.ysnSpecificItemDescription
-				,I.intItemId
-				,I.intMainItemId
+				,CASE 
+					WHEN I.ysnSpecificItemDescription = 1
+						THEN I.intItemId
+					ELSE I.intMainItemId
+					END
 				,DATEDIFF(mm, 0, SS.dtmUpdatedAvailabilityDate)
 		END
 		ELSE
@@ -754,9 +921,11 @@ BEGIN TRY
 				END
 			)
 		AND SS.dtmUpdatedAvailabilityDate < @dtmStartOfMonth
-	GROUP BY I.ysnSpecificItemDescription
-		,I.intItemId
-		,I.intMainItemId
+	GROUP BY CASE 
+			WHEN I.ysnSpecificItemDescription = 1
+				THEN I.intItemId
+			ELSE I.intMainItemId
+			END
 
 	INSERT INTO #tblMFDemand (
 		intItemId
@@ -802,9 +971,11 @@ BEGIN TRY
 				END
 			)
 		AND SS.dtmUpdatedAvailabilityDate >= @dtmStartOfMonth
-	GROUP BY I.ysnSpecificItemDescription
-		,I.intItemId
-		,I.intMainItemId
+	GROUP BY CASE 
+			WHEN I.ysnSpecificItemDescription = 1
+				THEN I.intItemId
+			ELSE I.intMainItemId
+			END
 		,DATEDIFF(mm, 0, SS.dtmUpdatedAvailabilityDate)
 
 	INSERT INTO #tblMFDemand (
@@ -866,24 +1037,21 @@ BEGIN TRY
 			WHEN @ysnCalculatePlannedPurchases = 0
 				AND @ysnCalculateEndInventory = 0
 				AND @intContainerTypeId IS NOT NULL
-				AND @ysnCalculateNoOfContainerByBagQty = 1
-				THEN IsNULL(IL.dblMinOrder * CTCQ.dblWeight * IsNULL(UMCByWeight.dblConversionToStock, 1), 0)
-			WHEN @ysnCalculatePlannedPurchases = 0
-				AND @ysnCalculateEndInventory = 0
-				AND @intContainerTypeId IS NOT NULL
-				AND @ysnCalculateNoOfContainerByBagQty = 0
-				THEN IsNULL(IL.dblMinOrder * CTCQ.dblBulkQuantity * IsNULL(UMCByWeight.dblConversionToStock, 1), 0)
+				THEN IsNULL(IL.dblMinOrder * CW.dblWeight * IsNULL(UMCByWeight.dblConversionToStock, 1), 0)
 			ELSE 0
 			END
 		,5 AS intAttributeId --Planned Purchases
 		,D.intMonthId
 	FROM #tblMFDemand D
-	JOIN tblICItem I ON I.intItemId = D.intItemId
-	LEFT JOIN tblLGContainerTypeCommodityQty CTCQ ON CTCQ.intCommodityAttributeId = I.intOriginId
-		AND CTCQ.intCommodityId = I.intCommodityId
-		AND CTCQ.intContainerTypeId = @intContainerTypeId
-	LEFT JOIN tblLGContainerType CT ON CT.intContainerTypeId = CTCQ.intContainerTypeId
-	LEFT JOIN tblICUnitMeasureConversion UMCByWeight ON UMCByWeight.intUnitMeasureId = CTCQ.intWeightUnitMeasureId --From Unit
+	--JOIN tblICItem I ON I.intItemId = D.intItemId
+	--LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityId = I.intCommodityId
+	--LEFT JOIN tblLGContainerTypeCommodityQty CTCQ ON CTCQ.intCommodityAttributeId = I.intOriginId
+	--	AND CTCQ.intCommodityId = I.intCommodityId
+	--	AND CTCQ.intContainerTypeId = @intContainerTypeId
+	--	AND CA.intDefaultPackingUOMId = CTCQ.intUnitMeasureId
+	--LEFT JOIN tblLGContainerType CT ON CT.intContainerTypeId = CTCQ.intContainerTypeId
+	LEFT JOIN @tblMFContainerWeight CW ON CW.intItemId = D.intItemId
+	LEFT JOIN tblICUnitMeasureConversion UMCByWeight ON UMCByWeight.intUnitMeasureId = CW.intWeightUnitMeasureId --From Unit
 		AND UMCByWeight.intStockUnitMeasureId = @intUnitMeasureId -- To Unit
 	LEFT JOIN tblICItemLocation IL ON IL.intItemId = D.intItemId
 		AND IL.intLocationId = @intCompanyLocationId
@@ -909,22 +1077,21 @@ BEGIN TRY
 		UPDATE D
 		SET dblQty = CASE 
 				WHEN @intContainerTypeId IS NOT NULL
-					AND @ysnCalculateNoOfContainerByBagQty = 1
-					THEN IsNULL(Purchase.[strValue] * CTCQ.dblWeight * IsNULL(UMCByWeight.dblConversionToStock, 1), 0)
-				WHEN @intContainerTypeId IS NOT NULL
-					AND @ysnCalculateNoOfContainerByBagQty = 0
-					THEN IsNULL(Purchase.[strValue] * CTCQ.dblBulkQuantity * IsNULL(UMCByWeight.dblConversionToStock, 1), 0)
+					THEN IsNULL(Purchase.[strValue] * CW.dblWeight * IsNULL(UMCByWeight.dblConversionToStock, 1), 0)
 				ELSE Purchase.[strValue]
 				END
 		FROM #tblMFDemand D
 		JOIN #TempPlannedPurchases Purchase ON Purchase.intItemId = D.intItemId
 			AND Purchase.[strName] = D.intMonthId
-		JOIN tblICItem I ON I.intItemId = D.intItemId
-		LEFT JOIN tblLGContainerTypeCommodityQty CTCQ ON CTCQ.intCommodityAttributeId = I.intOriginId
-			AND CTCQ.intCommodityId = I.intCommodityId
-			AND CTCQ.intContainerTypeId = @intContainerTypeId
-		LEFT JOIN tblLGContainerType CT ON CT.intContainerTypeId = CTCQ.intContainerTypeId
-		LEFT JOIN tblICUnitMeasureConversion UMCByWeight ON UMCByWeight.intUnitMeasureId = CTCQ.intWeightUnitMeasureId --From Unit
+		--JOIN tblICItem I ON I.intItemId = D.intItemId
+		--LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityId = I.intCommodityId
+		--LEFT JOIN tblLGContainerTypeCommodityQty CTCQ ON CTCQ.intCommodityAttributeId = I.intOriginId
+		--	AND CTCQ.intCommodityId = I.intCommodityId
+		--	AND CTCQ.intContainerTypeId = @intContainerTypeId
+		--	AND CA.intDefaultPackingUOMId = CTCQ.intUnitMeasureId
+		--LEFT JOIN tblLGContainerType CT ON CT.intContainerTypeId = CTCQ.intContainerTypeId
+		LEFT JOIN @tblMFContainerWeight CW ON CW.intItemId = D.intItemId
+		LEFT JOIN tblICUnitMeasureConversion UMCByWeight ON UMCByWeight.intUnitMeasureId = CW.intWeightUnitMeasureId --From Unit
 			AND UMCByWeight.intStockUnitMeasureId = @intUnitMeasureId -- To Unit
 		LEFT JOIN tblICItemLocation IL ON IL.intItemId = D.intItemId
 		WHERE intAttributeId = 5 --Planned Purchases -
@@ -1493,19 +1660,44 @@ BEGIN TRY
 	FROM (
 		SELECT I.intItemId
 			,CASE 
-				WHEN @ysnDisplayDemandWithItemNoAndDescription = 1
+				WHEN @ysnDisplayRestrictedBookInDemandView = 0
+					AND IsNULL(strBook, '') = ''
 					THEN (
 							CASE 
-								WHEN I.intItemId = MI.intItemId
-									THEN I.strItemNo + ' - ' + I.strDescription
-								ELSE I.strItemNo + ' - ' + I.strDescription + ' [ ' + MI.strItemNo + ' - ' + MI.strDescription + ' ]'
+								WHEN @ysnDisplayDemandWithItemNoAndDescription = 1
+									THEN (
+											CASE 
+												WHEN I.intItemId = MI.intItemId
+													THEN I.strItemNo + ' - ' + I.strDescription
+												ELSE I.strItemNo + ' - ' + I.strDescription + ' [ ' + MI.strItemNo + ' - ' + MI.strDescription + ' ]'
+												END
+											)
+								ELSE (
+										CASE 
+											WHEN I.intItemId = MI.intItemId
+												THEN I.strItemNo
+											ELSE I.strItemNo + ' [ ' + MI.strItemNo + ' ]'
+											END
+										)
 								END
 							)
 				ELSE (
 						CASE 
-							WHEN I.intItemId = MI.intItemId
-								THEN I.strItemNo
-							ELSE I.strItemNo + ' [ ' + MI.strItemNo + ' ]'
+							WHEN @ysnDisplayDemandWithItemNoAndDescription = 1
+								THEN (
+										CASE 
+											WHEN I.intItemId = MI.intItemId
+												THEN I.strItemNo + ' - ' + I.strDescription
+											ELSE I.strItemNo + ' - ' + I.strDescription + ' [ ' + MI.strItemNo + ' - ' + MI.strDescription + ' ] Restricted [' + strBook + ']'
+											END
+										)
+							ELSE (
+									CASE 
+										WHEN I.intItemId = MI.intItemId
+											THEN I.strItemNo
+										ELSE I.strItemNo + ' [ ' + MI.strItemNo + ' ] Restricted [' + strBook + ']'
+										END
+									)
 							END
 						)
 				END AS strItemNo
@@ -1520,7 +1712,8 @@ BEGIN TRY
 				WHEN A.intReportAttributeID IN (
 						5
 						,6
-						)AND @intContainerTypeId IS NOT NULL
+						)
+					AND @intContainerTypeId IS NOT NULL
 					THEN A.strAttributeName + ' [' + @strContainerType + ']'
 				ELSE A.strAttributeName
 				END AS strAttributeName
@@ -1528,13 +1721,8 @@ BEGIN TRY
 				CASE 
 					WHEN A.intReportAttributeID = 5
 						AND @intContainerTypeId IS NOT NULL
-						AND @ysnCalculateNoOfContainerByBagQty = 1
-						THEN IsNULL((D.dblQty * IsNULL(UMCByBulk.dblConversionToStock, 1)) / CTCQ.dblWeight, 0)
-					WHEN A.intReportAttributeID = 5
-						AND @intContainerTypeId IS NOT NULL
-						AND @ysnCalculateNoOfContainerByBagQty = 0
-						AND CTCQ.dblBulkQuantity > 0
-						THEN IsNULL(D.dblQty * IsNULL(UMCByWeight.dblConversionToStock, 1) / CTCQ.dblBulkQuantity, 0)
+						AND IsNULL(CW.dblWeight, 0) > 0
+						THEN IsNULL((D.dblQty * IsNULL(UMC.dblConversionToStock, 1)) / CW.dblWeight, 0)
 					WHEN DL.intMonthId IN (
 							- 1
 							,0
@@ -1562,18 +1750,22 @@ BEGIN TRY
 		FROM #tblMFDemandList DL
 		JOIN tblCTReportAttribute A ON A.intReportAttributeID = DL.intAttributeId
 		JOIN tblICItem I ON I.intItemId = DL.intItemId
-		LEFT JOIN tblLGContainerTypeCommodityQty CTCQ ON CTCQ.intCommodityAttributeId = I.intOriginId
-			AND CTCQ.intCommodityId = I.intCommodityId
-			AND CTCQ.intContainerTypeId = @intContainerTypeId
-		LEFT JOIN tblLGContainerType CT ON CT.intContainerTypeId = CTCQ.intContainerTypeId
-		LEFT JOIN tblICUnitMeasureConversion UMCByWeight ON UMCByWeight.intUnitMeasureId = @intUnitMeasureId --From Unit
-			AND UMCByWeight.intStockUnitMeasureId = CTCQ.intWeightUnitMeasureId -- To Unit
-		LEFT JOIN tblICUnitMeasureConversion UMCByBulk ON UMCByBulk.intUnitMeasureId = @intUnitMeasureId
-			AND UMCByBulk.intStockUnitMeasureId = CT.intWeightUnitMeasureId
+		--LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityId = I.intCommodityId
+		--LEFT JOIN tblLGContainerTypeCommodityQty CTCQ ON CTCQ.intCommodityAttributeId = I.intOriginId
+		--	AND CTCQ.intCommodityId = I.intCommodityId
+		--	AND CTCQ.intContainerTypeId = @intContainerTypeId
+		--	AND CA.intDefaultPackingUOMId = CTCQ.intUnitMeasureId
+		--LEFT JOIN tblLGContainerType CT ON CT.intContainerTypeId = CTCQ.intContainerTypeId
+		--LEFT JOIN tblICUnitMeasureConversion UMCByWeight ON UMCByWeight.intUnitMeasureId = @intUnitMeasureId --From Unit
+		--	AND UMCByWeight.intStockUnitMeasureId = CTCQ.intWeightUnitMeasureId -- To Unit
+		LEFT JOIN @tblMFContainerWeight CW ON CW.intItemId = DL.intItemId
+		LEFT JOIN tblICUnitMeasureConversion UMC ON UMC.intUnitMeasureId = @intUnitMeasureId --From Unit
+			AND UMC.intStockUnitMeasureId = CW.intWeightUnitMeasureId -- To Unit
 		LEFT JOIN #tblMFDemand D ON D.intItemId = DL.intItemId
 			AND D.intMonthId = DL.intMonthId
 			AND D.intAttributeId = DL.intAttributeId
 		LEFT JOIN tblICItem MI ON MI.intItemId = DL.intMainItemId
+		LEFT JOIN @tblMFItemBook IB ON IB.intItemId = DL.intItemId
 		) src
 	PIVOT(MAX(src.dblQty) FOR src.intMonthId IN (
 				[-1]
