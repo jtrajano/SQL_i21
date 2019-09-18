@@ -219,22 +219,24 @@ BEGIN
 
 	BeginBalanceOnly:
 
-	SELECT
-		 intRowNum = 1
-		,dtmTransactionDate = NULL
-		,dblBasisDlvryBegBalance = @dblBasisDlvryBalanceForward
-		,dblIncrease = NULL
-		,dblDecrease = NULL
-		,dblBasisDlvryEndBalance = @dblBasisDlvryBalanceForward
-		,strTransactionType = 'Balance Forward'
-		,strTransactionId = 'Balance Forward'
-		,intTransactionId = NULL
-		,strContractSeq = 'Balance Forward'
-		,intContractHeaderId = NULL
-		,strCommodityCode = @strCommodities
-		,dblBasisDlvryBegBalForSummary = @dblBasisDlvryBalanceForward
-		,dblBasisDlvryEndBalForSummary = @dblBasisDlvryBalanceForward
-
+	IF @dblBasisDlvryBalanceForward IS NOT NULL
+	BEGIN
+		SELECT
+			 intRowNum = 1
+			,dtmTransactionDate = NULL
+			,dblBasisDlvryBegBalance = @dblBasisDlvryBalanceForward
+			,dblIncrease = NULL
+			,dblDecrease = NULL
+			,dblBasisDlvryEndBalance = @dblBasisDlvryBalanceForward
+			,strTransactionType = 'Balance Forward'
+			,strTransactionId = 'Balance Forward'
+			,intTransactionId = NULL
+			,strContractSeq = 'Balance Forward'
+			,intContractHeaderId = NULL
+			,strCommodityCode = @strCommodities
+			,dblBasisDlvryBegBalForSummary = @dblBasisDlvryBalanceForward
+			,dblBasisDlvryEndBalForSummary = @dblBasisDlvryBalanceForward
+	END
 
 
 	ExitRoutine:
