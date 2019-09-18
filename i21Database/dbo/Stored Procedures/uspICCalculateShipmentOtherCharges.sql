@@ -2,6 +2,7 @@
 	@intInventoryShipmentId AS INT
 AS
 BEGIN
+	DECLARE @intReturnValue AS INT
 
 	-- Update the currency fields 
 	UPDATE	ShipmentCharges
@@ -36,14 +37,18 @@ BEGIN
 	-- Calculate the other charges. 
 	BEGIN 
 		-- Calculate the other charges. 
-		EXEC dbo.uspICCalculateInventoryShipmentOtherCharges
+		EXEC @intReturnValue = dbo.uspICCalculateInventoryShipmentOtherCharges
 			@intInventoryShipmentId
+
+		IF @intReturnValue < 0 GOTO _Exit_With_Error
 	END 
 
 	-- Calculate the surcharges
 	BEGIN 
-		EXEC dbo.uspICCalculateInventoryShipmentSurchargeOnOtherCharges
+		EXEC @intReturnValue = dbo.uspICCalculateInventoryShipmentSurchargeOnOtherCharges
 			@intInventoryShipmentId
+
+		IF @intReturnValue < 0 GOTO _Exit_With_Error
 	END
 
 	UPDATE	ShipmentCharge
@@ -70,3 +75,9 @@ BEGIN
 	WHERE	ShipmentCharge.intInventoryShipmentId = @intInventoryShipmentId
 
 END
+
+GOTO _Exit 
+_Exit_With_Error:
+	RETURN @intReturnValue
+
+_Exit:
