@@ -672,8 +672,8 @@ BEGIN TRY
 				,dblNet = ISNULL(LDCL.dblLinkNetWt, LD.dblNet) --
 				,dblCost = ISNULL(AD.dblSeqPrice, ISNULL(LD.dblUnitPrice,0)) --
 				,intCostUOMId = ISNULL(AD.intSeqPriceUOMId,LD.intPriceUOMId)  --
-				,intCurrencyId = ISNULL(SeqCUR.intMainCurrencyId, SeqCUR.intCurrencyID)
-				,intSubCurrencyCents = ISNULL(SubCurrency.intCent, 1)
+				,intCurrencyId = ISNULL(LSC.intMainCurrencyId, LSC.intCurrencyID)
+				,intSubCurrencyCents = ISNULL(LSC.intCent, 1)
 				,dblExchangeRate = 1
 				,intLotId = NULL
 				,intSubLocationId = ISNULL(LW.intSubLocationId, CD.intSubLocationId) --
@@ -689,7 +689,7 @@ BEGIN TRY
 										CASE WHEN (ISNULL(LSC.intMainCurrencyId, LSC.intCurrencyID) = @DefaultCurrencyId AND CD.intInvoiceCurrencyId <> @DefaultCurrencyId) 
 												THEN RCTFX.intForexRateTypeId --functional price to foreign FX, use inverted contract FX rate
 											WHEN (ISNULL(LSC.intMainCurrencyId, LSC.intCurrencyID) <> @DefaultCurrencyId AND CD.intInvoiceCurrencyId = @DefaultCurrencyId)
-												THEN CTFX.intForexRateTypeId --foreign price to functional FX, use contract FX rate
+												THEN NULL --foreign price to functional FX, use null
 											WHEN (ISNULL(LSC.intMainCurrencyId, LSC.intCurrencyID) <> @DefaultCurrencyId AND CD.intInvoiceCurrencyId <> @DefaultCurrencyId)
 												THEN FX.intForexRateTypeId --foreign price to foreign FX, use master FX rate
 											ELSE LD.intForexRateTypeId END
@@ -703,7 +703,7 @@ BEGIN TRY
 										CASE WHEN (ISNULL(LSC.intMainCurrencyId, LSC.intCurrencyID) = @DefaultCurrencyId AND CD.intInvoiceCurrencyId <> @DefaultCurrencyId) 
 												THEN ISNULL(RCTFX.dblFXRate, 1) --functional price to foreign FX, use inverted contract FX rate
 											WHEN (ISNULL(LSC.intMainCurrencyId, LSC.intCurrencyID) <> @DefaultCurrencyId AND CD.intInvoiceCurrencyId = @DefaultCurrencyId)
-												THEN ISNULL(CTFX.dblFXRate, 1) --foreign price to functional FX, use contract FX rate
+												THEN 1 --foreign price to functional FX, use 1
 											WHEN (ISNULL(LSC.intMainCurrencyId, LSC.intCurrencyID) <> @DefaultCurrencyId AND CD.intInvoiceCurrencyId <> @DefaultCurrencyId)
 												THEN ISNULL(FX.dblFXRate, 1) --foreign price to foreign FX, use master FX rate
 											ELSE ISNULL(LD.dblForexRate,1) END
@@ -847,7 +847,7 @@ BEGIN TRY
 				,dblNet = LD.dblNet -ISNULL(LD.dblDeliveredNet,0) --
 				,dblCost = ISNULL(LD.dblUnitPrice,0) --
 				,intCostUOMId = ISNULL(AD.intSeqPriceUOMId,LD.intPriceUOMId)  --
-				,intCurrencyId = CASE WHEN LD.strPriceStatus <> 'Priced' THEN ISNULL(LSC.intMainCurrencyId, LD.intPriceCurrencyId) ELSE ISNULL(SC.intMainCurrencyId, AD.intSeqCurrencyId) END
+				,intCurrencyId = ISNULL(LSC.intMainCurrencyId, LSC.intCurrencyID)
 				,intSubCurrencyCents = ISNULL(SubCurrency.intCent, 1)
 				,dblExchangeRate = 1
 				,intLotId = NULL
@@ -864,7 +864,7 @@ BEGIN TRY
 										CASE WHEN (ISNULL(LSC.intMainCurrencyId, LSC.intCurrencyID) = @DefaultCurrencyId AND CD.intInvoiceCurrencyId <> @DefaultCurrencyId) 
 												THEN RCTFX.intForexRateTypeId --functional price to foreign FX, use inverted contract FX rate
 											WHEN (ISNULL(LSC.intMainCurrencyId, LSC.intCurrencyID) <> @DefaultCurrencyId AND CD.intInvoiceCurrencyId = @DefaultCurrencyId)
-												THEN CTFX.intForexRateTypeId --foreign price to functional FX, use contract FX rate
+												THEN NULL --foreign price to functional FX, use null
 											WHEN (ISNULL(LSC.intMainCurrencyId, LSC.intCurrencyID) <> @DefaultCurrencyId AND CD.intInvoiceCurrencyId <> @DefaultCurrencyId)
 												THEN FX.intForexRateTypeId --foreign price to foreign FX, use master FX rate
 											ELSE LD.intForexRateTypeId END
@@ -878,7 +878,7 @@ BEGIN TRY
 										CASE WHEN (ISNULL(LSC.intMainCurrencyId, LSC.intCurrencyID) = @DefaultCurrencyId AND CD.intInvoiceCurrencyId <> @DefaultCurrencyId) 
 												THEN ISNULL(RCTFX.dblFXRate, 1) --functional price to foreign FX, use inverted contract FX rate
 											WHEN (ISNULL(LSC.intMainCurrencyId, LSC.intCurrencyID) <> @DefaultCurrencyId AND CD.intInvoiceCurrencyId = @DefaultCurrencyId)
-												THEN ISNULL(CTFX.dblFXRate, 1) --foreign price to functional FX, use contract FX rate
+												THEN 1 --foreign price to functional FX, use 1
 											WHEN (ISNULL(LSC.intMainCurrencyId, LSC.intCurrencyID) <> @DefaultCurrencyId AND CD.intInvoiceCurrencyId <> @DefaultCurrencyId)
 												THEN ISNULL(FX.dblFXRate, 1) --foreign price to foreign FX, use master FX rate
 											ELSE ISNULL(LD.dblForexRate,1) END
