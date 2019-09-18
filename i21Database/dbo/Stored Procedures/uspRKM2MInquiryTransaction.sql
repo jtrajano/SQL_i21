@@ -1392,7 +1392,7 @@ FROM (
 				, ysnExpired = CASE WHEN strPricingType = 'Priced' THEN ISNULL(rk.ysnExpired, 0) ELSE NULL END
 			FROM #tempIntransit it
 			JOIN tblLGLoadDetail ld on ld.intLoadDetailId = it.intTransactionDetailId
-			JOIN tblCTContractDetail cd on cd.intContractDetailId = it.intLineNo
+			JOIN tblCTContractDetail cd on cd.intContractDetailId = ld.intSContractDetailId
 			JOIN tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
 			JOIN tblICItem i on cd.intItemId=i.intItemId
 			JOIN tblICItemUOM iuom on i.intItemId=iuom.intItemId and iuom.intItemUOMId = cd.intBasisUOMId
