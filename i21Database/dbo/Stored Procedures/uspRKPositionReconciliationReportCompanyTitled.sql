@@ -194,20 +194,21 @@ BEGIN
 
 	BeginBalanceOnly:
 
-	
-	SELECT
-		intRowNum =1
-		,dtmTransactionDate = NULL
-		,dblCompTitledBegBalance = @dblCTBalanceForward
-		,dblIn = NULL
-		,dblOut = NULL
-		,dblCompTitledEndBalance = @dblCTBalanceForward
-		,strTransactionId = 'Balance Forward'
-		,intTransactionId = NULL
-		,strCommodityCode = @strCommodities
-		,dblCompTitledBegBalForSummary = @dblCTBalanceForward
-		,dblCompTitledEndBalForSummary = @dblCTBalanceForward
-
+	IF @dblCTBalanceForward IS NOT NULL
+	BEGIN
+		SELECT
+			intRowNum =1
+			,dtmTransactionDate = NULL
+			,dblCompTitledBegBalance = @dblCTBalanceForward
+			,dblIn = NULL
+			,dblOut = NULL
+			,dblCompTitledEndBalance = @dblCTBalanceForward
+			,strTransactionId = 'Balance Forward'
+			,intTransactionId = NULL
+			,strCommodityCode = @strCommodities
+			,dblCompTitledBegBalForSummary = @dblCTBalanceForward
+			,dblCompTitledEndBalForSummary = @dblCTBalanceForward
+	END
 
 	ExitRoutine:
 	DROP TABLE #tmpCompanyTitled

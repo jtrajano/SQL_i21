@@ -219,20 +219,22 @@ BEGIN
 
 	BeginBalanceOnly:
 
-	SELECT
-		 intRowNum = 1
-		,dtmTransactionDate = NULL
-		,dblInvBegBalance = @dblInvBalanceForward
-		,dblInvIn = NULL
-		,dblInvOut = NULL
-		,dblInvEndBalance = @dblInvBalanceForward
-		,strTransactionType = 'Balance Forward'
-		,strTransactionId = 'Balance Forward'
-		,intTransactionId = NULL
-		,strCommodityCode = @strCommodities
-		,dblInvBegBalForSummary = @dblInvBalanceForward
-		,dblInvEndBalForSummary = @dblInvBalanceForward
-
+	IF @dblInvBalanceForward IS NOT NULL
+	BEGIN
+		SELECT
+			 intRowNum = 1
+			,dtmTransactionDate = NULL
+			,dblInvBegBalance = @dblInvBalanceForward
+			,dblInvIn = NULL
+			,dblInvOut = NULL
+			,dblInvEndBalance = @dblInvBalanceForward
+			,strTransactionType = 'Balance Forward'
+			,strTransactionId = 'Balance Forward'
+			,intTransactionId = NULL
+			,strCommodityCode = @strCommodities
+			,dblInvBegBalForSummary = @dblInvBalanceForward
+			,dblInvEndBalForSummary = @dblInvBalanceForward
+	END
 
 	ExitRoutine:
 	DROP TABLE #tmpInventoryActivity

@@ -295,26 +295,28 @@ BEGIN
 
 	BeginBalanceOnly:
 
-	
+	IF @dblFutBalanceForward IS NOT NULL OR @dblCruBalanceForward IS NOT NULL
+	BEGIN
 		SELECT
 			 intRowNum = 1
 			,dtmTransactionDate = NULL
-			,dblFutBegBalance = @dblFutBalanceForward
+			,dblFutBegBalance = ISNULL(@dblFutBalanceForward,0)
 			,dblFuturesBuy = NULL
 			,dblFuturesSell = NULL
-			,dblFutEndBalance = @dblFutBalanceForward
-			,dblCruBegBalance = @dblCruBalanceForward
+			,dblFutEndBalance = ISNULL(@dblFutBalanceForward,0)
+			,dblCruBegBalance = ISNULL(@dblCruBalanceForward,0)
 			,dblCrushBuy = NULL
 			,dblCrushSell = NULL
-			,dblCurEndBalance = @dblCruBalanceForward
+			,dblCurEndBalance = ISNULL(@dblCruBalanceForward,0)
 			,strTransactionId = 'Balance Forward'
 			,intTransactionId = NULL
 			,intFutOptTransactionHeaderId = NULL
 			,strCommodityCode = @strCommodities
-			,dblFutBegBalForSummary = @dblFutBalanceForward
-			,dblFutEndBalForSummary = @dblFutBalanceForward
-			,dblCruBegBalForSummary = @dblCruBalanceForward
-			,dblCruEndBalForSummary = @dblCruBalanceForward
+			,dblFutBegBalForSummary = ISNULL(@dblFutBalanceForward,0)
+			,dblFutEndBalForSummary = ISNULL(@dblFutBalanceForward,0)
+			,dblCruBegBalForSummary = ISNULL(@dblCruBalanceForward,0)
+			,dblCruEndBalForSummary = ISNULL(@dblCruBalanceForward,0)
+	END
 
 	ExitRoutine:
 	DROP TABLE #tmpDerivativeActivity

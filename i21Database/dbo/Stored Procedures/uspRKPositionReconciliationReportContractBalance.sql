@@ -10,6 +10,7 @@ AS
 BEGIN
 
 	DECLARE @dtmContractBeginBalance DATE
+		,@strCommodities NVARCHAR(MAX)
 		,@strContractType NVARCHAR(50) = ''
 
 		IF @intContractTypeId = 1
@@ -43,6 +44,14 @@ BEGIN
 	INSERT INTO @Commodity(intCommodityId)
 	SELECT Item Collate Latin1_General_CI_AS FROM [dbo].[fnSplitString](@strCommodityId, ',')
 
+	SELECT DISTINCT com.intCommodityId, strCommodityCode
+	INTO #tempCommodity
+	FROM @Commodity com
+	INNER JOIN tblICCommodity iccom on iccom.intCommodityId = com.intCommodityId
+	WHERE ISNULL(com.intCommodityId, '') <> ''
+	
+	--Build concatenated commodities to be used if begin balance only (no record from given date range)
+	SELECT @strCommodities =  COALESCE(@strCommodities + ', ' + strCommodityCode, strCommodityCode) FROM #tempCommodity
 
 
 SELECT
@@ -230,6 +239,11 @@ and strPricingTypeDesc = 'Cash'
 --	,@dblCashBeginBalance
 --)
 
+IF NOT EXISTS (SELECT TOP 1 * FROM #tempDateRange)
+BEGIN
+	GOTO BeginBalanceOnly
+END
+
 While (Select Count(*) From #tempDateRange) > 0
 Begin
 
@@ -359,11 +373,52 @@ from #tblFinalContractBalance cb
 full join @tblRunningBalance rb on rb.intRowNum = cb.intRowNum
 order by cb.dtmTransactionDate
 
+GOTO ExitRoutine
 
+BeginBalanceOnly:
 
+IF @dblBasisBalanceForward <> 0 OR @dblPricedBalanceForward <> 0
+	OR @dblDPBalanceForward <> 0 OR @dblCashBalanceForward <> 0
+BEGIN
+	select 
+		 intRowNum  = 1
+		,dtmTransactionDate = NULL
+		,strCommodityCode = @strCommodities
+		,dblBasisBegBalance = @dblBasisBalanceForward
+		,dblBasisIncrease  = NULL
+		,dblBasisDecrease  = NULL
+		,dblBasisEndBalance = @dblBasisBalanceForward
+		,dblPricedBegBalance = @dblPricedBalanceForward
+		,dblPricedIncrease  = NULL
+		,dblPricedDecrease  = NULL
+		,dblPricedEndBalance = @dblPricedBalanceForward
+		,dblDPBegBalance = @dblDPBalanceForward
+		,dblDPIncrease  = NULL
+		,dblDPDecrease  = NULL
+		,dblDPEndBalance = @dblDPBalanceForward
+		,dblCashBegBalance = @dblCashBalanceForward
+		,dblCashIncrease  = NULL
+		,dblCashDecrease  = NULL
+		,dblCashEndBalance = @dblCashBalanceForward
+		,strContractSeq  = 'Balance Forward'
+		,intContractHeaderId  = NULL
+		,intContractDetailId  = NULL
+		,dblBasisBegBalForSummary = @dblBasisBalanceForward
+		,dblBasisEndBalForSummary = @dblBasisBalanceForward
+		,dblPricedBegBalForSummary = @dblPricedBalanceForward
+		,dblPricedEndBalForSummary = @dblPricedBalanceForward
+		,dblDPBegBalForSummary  = @dblDPBalanceForward
+		,dblDPEndBalForSummary = @dblDPBalanceForward
+		,dblCashBegBalForSummary = @dblCashBalanceForward
+		,dblCashEndBalForSummary = @dblCashBalanceForward
+
+END
+
+ExitRoutine:
 DROP TABLE #tblContractBalance
 DROP TABLE #tblFinalContractBalance 
 DROP TABLE #tempDateRange
+DROP TABLE #tempCommodity
 
 
 END
