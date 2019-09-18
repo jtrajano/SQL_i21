@@ -101,7 +101,7 @@ BEGIN TRY
 					ON Item.intItemId = SC.intItemId
 				LEFT JOIN tblICInventoryReceiptItem IRI
 					ON IRI.intSourceId = SC.intTicketId and IRI.intItemId = Item.intItemId
-				LEFT JOIN tblIRInventoryReceipt IR
+				LEFT JOIN tblICInventoryReceipt IR
 					ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
 				WHERE SpotTicket.intUnPricedId = @intUnPricedId
 					AND SpotTicket.intEntityId = @intEntityId
