@@ -19,7 +19,7 @@ BEGIN
 												ELSE isnull(ysnLicensed, 0) END
 
 			DECLARE @intCommodityUnitMeasureId AS INT
-			SELECT @intCommodityUnitMeasureId = intCommodityUnitMeasureId
+			SELECT f = intCommodityUnitMeasureId
 			FROM tblICCommodityUnitMeasure
 			WHERE intCommodityId = @intCommodityId AND ysnDefault = 1
 
@@ -761,7 +761,7 @@ BEGIN
 					,strTransactionId = It.strTransactionId
 					,Inv.intTransactionId 
 				from @InventoryStock Inv
-				inner join tblICInventoryTransaction It on It.intTransactionId = Inv.intTransactionId and It.intTransactionTypeId = 9
+				inner join tblICInventoryTransaction It on It.intTransactionId = Inv.intTransactionId and It.intTransactionDetailId = Inv.intTransactionDetailId and It.intTransactionTypeId = 9
 				where Inv.strTransactionType = 'Produce'
 						
 			) t
@@ -783,7 +783,7 @@ BEGIN
 					,strTransactionId = It.strTransactionId
 					,Inv.intTransactionId 
 				from @InventoryStock Inv
-				inner join tblICInventoryTransaction It on It.intTransactionId = Inv.intTransactionId and It.intTransactionTypeId = 8
+				inner join tblICInventoryTransaction It on It.intTransactionId = Inv.intTransactionId and It.intTransactionDetailId = Inv.intTransactionDetailId and It.intTransactionTypeId = 8
 				where Inv.strTransactionType = 'Consume'
 						
 			) t

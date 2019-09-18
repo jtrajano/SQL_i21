@@ -8073,6 +8073,8 @@
     <None Include="Scripts\Post-Deployment\SM\1910_DeleteDuplicateUserPreference.sql" />
     <Build Include="dbo\Views\vyuIPLoadView.sql" />
     <Build Include="dbo\Views\vyuAPClearingFilterTransactionNo.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKPositionReconciliationReportBasisDeliveries.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKPositionReconciliationReportDerivativeActivity.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
