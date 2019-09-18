@@ -1,7 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspCTManagePayable]
 	@id INT,
 	@type NVARCHAR(10),
-	@remove BIT = 0
+	@remove BIT = 0,
+	@userId INT = 0
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -11,41 +12,57 @@ SET ANSI_WARNINGS OFF
 
 BEGIN TRY
 
-	declare @intScreenId int = 0;
-	declare @intContractHeaderId int = 0;
-	declare @intContractDetailId int = 0;
+	DECLARE @intScreenId			INT = 0,
+			@intContractHeaderId	INT = 0,
+			@intContractDetailId	INT = 0,
+			@requireApproval		BIT = 0,
+			@entityId				INT			
 
-	if (@remove = 0)
-	begin
-		if (@type = 'header')
-		begin
-			set @intContractHeaderId = @id;
-		end
-		if (@type = 'detail')
-		begin
-			set @intContractDetailId = @id;
-			set @intContractHeaderId = (select top 1 intContractHeaderId from tblCTContractDetail where intContractDetailId = @intContractDetailId);
-		end
-		if (@type = 'cost')
-		begin
-			set @intContractDetailId = (select top 1 intContractDetailId from tblCTContractCost where intContractCostId = @id);
-			set @intContractHeaderId = (select top 1 intContractHeaderId from tblCTContractDetail where intContractDetailId = @intContractDetailId);
-		end
+	IF (@remove = 0)
+	BEGIN
+		IF (@type = 'header')
+		BEGIN
+			SET @intContractHeaderId = @id
+			
+			SELECT @entityId = intEntityId FROM tblCTContractHeader WHERE intContractHeaderId = @id
 
-		if (@intContractHeaderId is not null and @intContractHeaderId > 0)
-		begin
-			set @intScreenId = (select top 1 intScreenId from tblSMScreen where strModule = 'Contract Management' and strNamespace = 'ContractManagement.view.Contract');
-			if not exists (select * from tblSMTransaction a where a.intRecordId = @intContractHeaderId and a.intScreenId = @intScreenId and a.strApprovalStatus in ('Approved', 'No Need for Approval'))
-			begin
-				/*Don't add to Payables if the contract is not yet approved.*/
-				return;
-			end
-		end
-		else
-		begin
-			return;
-		end
-	end
+			EXEC [dbo].[uspSMTransactionCheckIfRequiredApproval]
+			@type = N'ContractManagement.view.Contract',
+			@transactionEntityId = @entityId,
+			@currentUserEntityId = @userId,
+			@locationId = 0,
+			@amount = 0,
+			@requireApproval = @requireApproval OUTPUT
+
+		END
+		ELSE IF (@type = 'detail')
+		BEGIN
+			SET @intContractDetailId = @id
+			SET @intContractHeaderId = (SELECT TOP 1 intContractHeaderId FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId);
+		END
+		ELSE IF (@type = 'cost')
+		BEGIN
+			SET @intContractDetailId = (SELECT TOP 1 intContractDetailId FROM tblCTContractCost WHERE intContractCostId = @id);
+			SET @intContractHeaderId = (SELECT TOP 1 intContractHeaderId FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId);
+		END
+
+		IF @requireApproval = 1
+		BEGIN
+			IF (@intContractHeaderId IS NOT NULL AND @intContractHeaderId > 0)
+			BEGIN
+				SET @intScreenId = (SELECT TOP 1 intScreenId FROM tblSMScreen WHERE strModule = 'Contract Management' AND strNamespace = 'ContractManagement.view.Contract');
+				IF NOT EXISTS (SELECT * FROM tblSMTransaction a WHERE a.intRecordId = @intContractHeaderId AND a.intScreenId = @intScreenId AND a.strApprovalStatus IN ('Approved', 'No Need for Approval'))
+				BEGIN
+					/*Don't add to Payables IF the contract is NOT yet approved.*/
+					RETURN
+				END
+			END
+			ELSE
+			BEGIN
+				RETURN
+			END
+		END		
+	END
 
 DECLARE @voucherPayables AS VoucherPayable;
 DECLARE @voucherPayableTax AS VoucherDetailTax;

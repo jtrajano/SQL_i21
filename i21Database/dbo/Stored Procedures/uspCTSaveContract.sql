@@ -1,7 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspCTSaveContract]
 	
-	@intContractHeaderId int,
-	@strXML	NVARCHAR(MAX)
+	@intContractHeaderId INT,
+	@userId INT,
+	@strXML	NVARCHAR(MAX)	
 	
 AS
 
@@ -396,7 +397,7 @@ BEGIN TRY
 	-- Add Payables if Create Other Cost Payable on Save Contract set to true
 	IF EXISTS(SELECT TOP 1 1 FROM tblCTCompanyPreference WHERE ysnCreateOtherCostPayable = 1)
 	BEGIN
-		EXEC uspCTManagePayable @intContractHeaderId, 'header', 0
+		EXEC uspCTManagePayable @intContractHeaderId, 'header', 0, @userId
 	END
 
 END TRY
