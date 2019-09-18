@@ -240,9 +240,9 @@ BEGIN
 			,strVendorCityStateZip = VEL.strCity  + ' ' + VEL.strState + ' ' + VEL.strZipCode
 			,strCustomer = Customer.strName
 			,strCustomerContact = CETC.strName
-			,strOriginPort = ISNULL(LoadingPort.strCity, L.strOriginPort)
-			,strDestinationPort = ISNULL(DestinationPort.strCity, L.strDestinationPort) 
-			,strDestinationPortVatNo = (SELECT TOP 1 strVAT FROM tblSMCity WHERE strCity = ISNULL(DestinationPort.strCity, L.strDestinationPort))
+			,strOriginPort = ISNULL(L.strOriginPort, LoadingPort.strCity)
+			,strDestinationPort = ISNULL(L.strDestinationPort, DestinationPort.strCity)
+			,strDestinationPortVatNo = (SELECT TOP 1 strVAT FROM tblSMCity WHERE strCity = ISNULL(L.strDestinationPort, DestinationPort.strCity))
 			,strShippingLine = SLEntity.strName
 			,L.strServiceContractNumber
 			,strServiceContractOwner = SLSC.strOwner
