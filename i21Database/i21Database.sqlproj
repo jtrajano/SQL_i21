@@ -7683,6 +7683,8 @@
     <Build Include="dbo\Tables\tblGRSettleVoucherCreateReferenceTable.sql" />
     <Build Include="dbo\Stored Procedures\uspGRHandleSettleVoucherCreateReferenceTable.sql" />
     <None Include="Scripts\Post-Deployment\SM\1910_DeleteDuplicateUserPreference.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKPositionReconciliationReportDerivativeActivity.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKPositionReconciliationReportBasisDeliveries.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

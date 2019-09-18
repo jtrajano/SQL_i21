@@ -23,17 +23,17 @@ BEGIN
 
 		select @dtmContractBeginBalance = DATEADD(day, -1, convert(date, @dtmFromTransactionDate))
 
-	EXEC [dbo].[uspCTGetContractBalance]
-   		@intContractTypeId		  = @intContractTypeId
-	   ,@intEntityId			  = NULL
-	   ,@IntCommodityId			  = NULL  
-	   ,@dtmEndDate				 = @dtmContractBeginBalance
-	   ,@intCompanyLocationId     = NULL
-	   ,@IntFutureMarketId        = NULL
-	   ,@IntFutureMonthId         = NULL
-	   ,@strPositionIncludes    = NULL
-	   ,@strCallingApp			 = 'DPR'
-	   ,@strPrintOption			 = NULL
+		--EXEC [dbo].[uspCTGetContractBalance]
+		--@intContractTypeId		  = @intContractTypeId
+		--,@intEntityId			  = NULL
+		--,@IntCommodityId			  = NULL  
+		--,@dtmEndDate				 = @dtmContractBeginBalance
+		--,@intCompanyLocationId     = NULL
+		--,@IntFutureMarketId        = NULL
+		--,@IntFutureMonthId         = NULL
+		--,@strPositionIncludes    = NULL
+		--,@strCallingApp			 = 'DPR'
+		--,@strPrintOption			 = NULL
 
 
 	DECLARE @Commodity AS TABLE (intCommodityIdentity INT IDENTITY PRIMARY KEY
@@ -60,7 +60,7 @@ INTO #tblContractBalance
 FROM(
 	select  
 		1 AS Row_Num
-		, dtmTransactionDate = dbo.fnRemoveTimeOnDate(dtmTransactionDate)
+		, dtmTransactionDate = dbo.fnRemoveTimeOnDate(dtmScreenDate)
 		, sh.intContractHeaderId
 		, sh.intContractDetailId
 		, dblQty = case when isnull(cd.intNoOfLoad,0) = 0 then sh.dblTransactionQuantity 

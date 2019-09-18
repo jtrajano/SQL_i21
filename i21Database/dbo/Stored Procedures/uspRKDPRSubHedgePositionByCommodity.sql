@@ -489,6 +489,7 @@ BEGIN
 	DECLARE @strDescription NVARCHAR(200)
 	declare @intOneCommodityId int
 	declare @intCommodityUnitMeasureId int
+			,@intCommodityStockUOMId INT
 	DECLARE @ysnExchangeTraded bit
 	
 	SELECT @mRowNumber = MIN(intCommodityIdentity) FROM @Commodity
@@ -497,7 +498,7 @@ BEGIN
 	BEGIN
 		SELECT @intCommodityId = intCommodity FROM @Commodity WHERE intCommodityIdentity = @mRowNumber
 		SELECT @strDescription = strCommodityCode, @ysnExchangeTraded = ysnExchangeTraded FROM tblICCommodity	WHERE intCommodityId = @intCommodityId
-		SELECT @intCommodityUnitMeasureId=intCommodityUnitMeasureId from tblICCommodityUnitMeasure where intCommodityId=@intCommodityId AND ysnDefault=1
+		SELECT @intCommodityUnitMeasureId=intCommodityUnitMeasureId, @intCommodityStockUOMId = intUnitMeasureId from tblICCommodityUnitMeasure where intCommodityId=@intCommodityId AND ysnDefault=1
 		
 		IF  @intCommodityId >0 --AND @ysnExchangeTraded = 1
 		BEGIN
@@ -1077,10 +1078,10 @@ BEGIN
                     , strLocationName
                     , strCurrency
                 FROM (
-                    SELECT DISTINCT dblTotal = dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull(ri.dblQuantity, 0))
+                    SELECT DISTINCT dblTotal = dbo.fnCTConvertQuantityToTargetItemUOM(cd.intItemId,iuom.intUnitMeasureId,@intCommodityStockUOMId,isnull(ri.dblQuantity, 0))
                             , r.intInventoryShipmentId
                             , r.strShipmentNumber
-                            , ium.intCommodityUnitMeasureId
+                            , intCommodityUnitMeasureId = @intCommodityUnitMeasureId
                             , i.intCommodityId
                             , cl.strLocationName
                             , cl.intCompanyLocationId
@@ -1098,10 +1099,10 @@ BEGIN
                     INNER JOIN tblCTContractDetail cd ON cd.intContractDetailId = ri.intLineNo AND cd.intPricingTypeId = 2 AND cd.intContractStatusId <> 3
                     INNER JOIN tblCTContractHeader ch ON cd.intContractHeaderId = ch.intContractHeaderId  AND ch.intContractTypeId = 2
                     INNER JOIN tblICItem i on cd.intItemId = i.intItemId
+					INNER JOIN tblICItemUOM iuom on iuom.intItemId = i.intItemId and iuom.intItemUOMId = ri.intItemUOMId
                     INNER JOIN tblICCategory cat on i.intCategoryId = cat.intCategoryId
                     INNER JOIN tblRKFutureMarket fm on cd.intFutureMarketId = fm.intFutureMarketId
                     INNER JOIN tblRKFuturesMonth mnt on cd.intFutureMonthId = mnt.intFutureMonthId
-                    JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = ch.intCommodityId AND cd.intUnitMeasureId = ium.intUnitMeasureId
                     INNER JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = cd.intCompanyLocationId
                     LEFT JOIN tblARInvoiceDetail invD ON ri.intInventoryShipmentItemId = invD.intInventoryShipmentItemId
                     LEFT JOIN tblARInvoice inv ON invD.intInvoiceId = inv.intInvoiceId

@@ -32,6 +32,7 @@ BEGIN
 	
 	
 	DECLARE @intCommodityId INT
+		,@strCommodities NVARCHAR(MAX)
 		,@strCommodityCode NVARCHAR(100)
 
 	SELECT DISTINCT com.intCommodityId, strCommodityCode
@@ -39,6 +40,9 @@ BEGIN
 	FROM @Commodity com
 	INNER JOIN tblICCommodity iccom on iccom.intCommodityId = com.intCommodityId
 	WHERE ISNULL(com.intCommodityId, '') <> ''
+
+	--Build concatenated commodities to be used if begin balance only (no record from given date range)
+	SELECT @strCommodities =  COALESCE(@strCommodities + ', ' + strCommodityCode, strCommodityCode) FROM #tempCommodity
 
 	WHILE EXISTS(SELECT TOP 1 1 FROM #tempCommodity)
 	BEGIN
@@ -109,6 +113,10 @@ BEGIN
 	FROM @CompanyTitle
 	WHERE dtmDate IS NULL
 
+	IF NOT EXISTS (SELECT TOP 1 * FROM #tempDateRange)
+	BEGIN
+		GOTO BeginBalanceOnly
+	END
 
 	While (Select Count(*) From #tempDateRange) > 0
 	Begin
@@ -182,7 +190,26 @@ BEGIN
 	FULL JOIN @tblRunningBalance RB on RB.intRowNum = CT.intRowNum
 	ORDER BY CT.dtmTransactionDate
 
+	GOTO ExitRoutine
 
+	BeginBalanceOnly:
+
+	
+	SELECT
+		intRowNum =1
+		,dtmTransactionDate = NULL
+		,dblCompTitledBegBalance = @dblCTBalanceForward
+		,dblIn = NULL
+		,dblOut = NULL
+		,dblCompTitledEndBalance = @dblCTBalanceForward
+		,strTransactionId = 'Balance Forward'
+		,intTransactionId = NULL
+		,strCommodityCode = @strCommodities
+		,dblCompTitledBegBalForSummary = @dblCTBalanceForward
+		,dblCompTitledEndBalForSummary = @dblCTBalanceForward
+
+
+	ExitRoutine:
 	DROP TABLE #tmpCompanyTitled
 	DROP TABLE #tempDateRange
 	DROP TABLE #tempCommodity
