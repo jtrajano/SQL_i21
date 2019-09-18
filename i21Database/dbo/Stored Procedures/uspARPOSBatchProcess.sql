@@ -776,8 +776,8 @@ IF EXISTS (SELECT TOP 1 NULL FROM #POSTRANSACTIONS)
 				 , dtmDatePaid						= DATEADD(dd, DATEDIFF(dd, 0, POS.dtmDate), 0)
 				 , intPaymentMethodId				= @intDebitMemoPaymentMethodId
 				 , strPaymentMethod					= 'Debit Memos and Payments'
-				 , strPaymentInfo					= 'POS Exchange Item Transaction'
-				 , strNotes							= POS.strReceiptNumber
+				 , strPaymentInfo					= NULL--'POS Exchange Item Transaction'
+				 , strNotes							= 'POS Exchange Item Transaction'--POS.strReceiptNumber
 				 , intBankAccountId					= BA.intBankAccountId
 				 , dblAmountPaid					= 0.00
 				 , intEntityId						= @intEntityUserId
@@ -818,8 +818,8 @@ IF EXISTS (SELECT TOP 1 NULL FROM #POSTRANSACTIONS)
 				 , dtmDatePaid						= DATEADD(dd, DATEDIFF(dd, 0, POS.dtmDate), 0)
 				 , intPaymentMethodId				= @intDebitMemoPaymentMethodId
 				 , strPaymentMethod					= 'Debit Memos and Payments'
-				 , strPaymentInfo					= 'POS Exchange Item Transaction'
-				 , strNotes							= POS.strReceiptNumber
+				 , strPaymentInfo					= NULL--'POS Exchange Item Transaction'
+				 , strNotes							= 'POS Exchange Item Transaction'--POS.strReceiptNumber
 				 , intBankAccountId					= BA.intBankAccountId
 				 , dblAmountPaid					= 0.00
 				 , intEntityId						= @intEntityUserId
@@ -860,8 +860,8 @@ IF EXISTS (SELECT TOP 1 NULL FROM #POSTRANSACTIONS)
 				 , dtmDatePaid						= DATEADD(dd, DATEDIFF(dd, 0, POS.dtmDate), 0)
 				 , intPaymentMethodId				= @intCashPaymentMethodId
 				 , strPaymentMethod					= 'Cash'
-				 , strPaymentInfo					= 'POS Settle Amount Due of Exchange Transaction'
-				 , strNotes							= POS.strReceiptNumber
+				 , strPaymentInfo					= NULL
+				 , strNotes							= 'POS Settle Amount Due of Exchange Transaction' --POS.strReceiptNumber
 				 , intBankAccountId					= BA.intBankAccountId
 				 , dblAmountPaid					= INV.dblAmountDue - CM.dblAmountDue
 				 , intEntityId						= @intEntityUserId
