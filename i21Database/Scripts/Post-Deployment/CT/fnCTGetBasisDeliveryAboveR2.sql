@@ -150,6 +150,70 @@
 				,C.intCommodityId
 				,SS.dtmCreated
 
+			--INVENTORY RECEIPT from SETTLEMENT STORAGE
+			INSERT INTO @TemporaryTable
+			(
+				intContractHeaderId	
+				,intContractDetailId	
+				,intTransactionId
+				,strTransactionId	
+				,strContractType		
+				,strContractNumber	
+				,intContractSeq	
+				,intEntityId
+				,strEntityName		
+				,strCommodityCode
+				,intCommodityId	
+				,dtmDate				
+				,dblQuantity			
+				,strTransactionType
+				,intTimeE				
+			)
+			select
+				a.intContractHeaderId
+				,b.intContractDetailId
+				,g.intInventoryReceiptId
+				,g.strReceiptNumber
+				,k.strContractType
+				,a.strContractNumber
+				,b.intContractSeq
+				,l.intEntityId
+				,l.strEntityName
+				,j.strCommodityCode
+				,j.intCommodityId
+				,i.dtmDate
+				,dlQuantity = SUM(f.dblOpenReceive)
+				,strTransaction = ''Inventory Receipt''
+				,dblPassPhrase = (CAST(replace(convert(varchar, i.dtmDate,101),''/'','''') + replace(convert(varchar, i.dtmDate,108),'':'','''')as bigint)	+ CAST(g.intInventoryReceiptId as bigint))
+			from
+			tblCTContractHeader a
+			join tblCTContractDetail b on b.intContractHeaderId = a.intContractHeaderId
+			JOIN @OpenBasisContract x on b.intContractDetailId = x.intContractDetailId and b.intContractHeaderId = x.intContractHeaderId
+			join tblGRSettleContract c on c.intContractDetailId = b.intContractDetailId
+			join tblGRSettleStorageTicket d on d.intSettleStorageId = c.intSettleStorageId
+			join tblGRSettleStorage h on h.intSettleStorageId = d.intSettleStorageId and h.intParentSettleStorageId is not null
+			join tblGRCustomerStorage e on e.intCustomerStorageId = d.intCustomerStorageId
+			join tblICInventoryReceiptItem f on f.intSourceId = e.intTicketId
+			join tblICInventoryReceipt g on g.intInventoryReceiptId = f.intInventoryReceiptId and g.intSourceType = 1 and g.strReceiptType = ''Direct''
+			INNER JOIN tblICInventoryTransaction i on h.intSettleStorageId = i.intTransactionId
+				AND i.strTransactionForm = ''Storage Settlement''
+				AND i.intTransactionTypeId = 44
+			INNER JOIN tblICCommodity j on a.intCommodityId = j.intCommodityId
+			INNER JOIN tblCTContractType k on a.intContractTypeId = k.intContractTypeId
+			INNER JOIN vyuCTEntity l on l.intEntityId = a.intEntityId and l.strEntityType = (case when a.intContractTypeId = 1 then ''Vendor'' else ''Customer'' end)
+			GROUP BY a.intContractHeaderId
+			,b.intContractDetailId
+			,g.intInventoryReceiptId
+			,g.strReceiptNumber
+			,k.strContractType
+			,a.strContractNumber
+			,b.intContractSeq
+			,l.intEntityId
+			,l.strEntityName
+			,j.strCommodityCode
+			,j.intCommodityId
+			,i.dtmDate
+
 				-- INVENTORY RECEIPT
 				INSERT INTO @TemporaryTable
 				(
@@ -252,7 +316,7 @@
 					AND CH.intContractTypeId = 1
 				JOIN @OpenBasisContract OC
 					ON CD.intContractDetailId = OC.intContractDetailId and CD.intContractHeaderId = OC.intContractHeaderId
-				INNER JOIN tblAPBillDetail BD ON BD.intContractDetailId  = CD.intContractDetailId AND BD.intContractSeq IS NOT NULL  and BD.intInventoryReceiptItemId is not null
+				INNER JOIN tblAPBillDetail BD ON BD.intContractDetailId  = CD.intContractDetailId AND BD.intContractSeq IS NOT NULL--  and BD.intInventoryReceiptItemId is not null
 					AND BD.intItemId = CD.intItemId
 				INNER JOIN tblAPBill B ON B.intBillId = BD.intBillId
 				INNER JOIN tblICCommodity C ON CH.intCommodityId = C.intCommodityId
