@@ -1594,19 +1594,22 @@ BEGIN
 			,[strSourceId]					= ARIILD.[strSourceId]
 			,[intHeaderId]					= ARIILD.[intInvoiceId]
 			,[dtmDate]						= ISNULL(IFI.[dtmDate], @DateNow)
-		FROM
-			@LineItemTaxEntries  LITE
-		INNER JOIN
-			(SELECT [intInvoiceId], [intInvoiceDetailId], [intTemporaryDetailIdForTax], [ysnHeader], [ysnSuccess], [intId], [strTransactionType], [strType], [strSourceTransaction], [intIntegrationLogId], [intSourceId], [strSourceId], [ysnInsert] FROM tblARInvoiceIntegrationLogDetail WITH (NOLOCK) WHERE [intIntegrationLogId] = @IntegrationLogId) ARIILD
-				ON LITE.[intTempDetailIdForTaxes] = ARIILD.[intTemporaryDetailIdForTax]
+		FROM @LineItemTaxEntries  LITE
+		INNER JOIN (
+			SELECT [intInvoiceId], [intInvoiceDetailId], [intTemporaryDetailIdForTax], [ysnHeader], [ysnSuccess], [intId], [strTransactionType], [strType], [strSourceTransaction], [intIntegrationLogId], [intSourceId], [strSourceId], [ysnInsert] 
+			FROM tblARInvoiceIntegrationLogDetail WITH (NOLOCK) WHERE [intIntegrationLogId] = @IntegrationLogId
+		) ARIILD ON LITE.[intTempDetailIdForTaxes] = ARIILD.[intTemporaryDetailIdForTax]
 				AND ISNULL(ARIILD.[ysnHeader], 0) = 0
 				AND ISNULL(ARIILD.[ysnSuccess], 0) = 1
 				AND ISNULL(ARIILD.[intInvoiceDetailId], 0) <> 0
 				AND ISNULL(ARIILD.[ysnInsert], 0) = 0
-		INNER JOIN
-			(SELECT [intId], [ysnClearDetailTaxes], [dtmDate], [dblCurrencyExchangeRate] FROM @InvoicesForUpdate) IFI
-				ON IFI. [intId] = ARIILD.[intId]
-
+		INNER JOIN (
+			SELECT [intId], [ysnClearDetailTaxes], [dtmDate], [dblCurrencyExchangeRate], [intInvoiceDetailId], [intTempDetailIdForTaxes] 
+			FROM @InvoicesForUpdate
+			GROUP BY [intId], [ysnClearDetailTaxes], [dtmDate], [dblCurrencyExchangeRate], [intInvoiceDetailId], [intTempDetailIdForTaxes]
+		) IFI ON IFI.[intId] = ARIILD.[intId]
+			 AND IFI.[intInvoiceDetailId] = ARIILD.[intInvoiceDetailId]
+			 AND IFI.[intTempDetailIdForTaxes] = ARIILD.[intTemporaryDetailIdForTax]
 
 		EXEC	[dbo].[uspARProcessTaxDetailsForLineItems]
 					 @TaxDetails			= @TaxDetails
