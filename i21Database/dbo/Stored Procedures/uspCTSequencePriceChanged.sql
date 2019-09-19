@@ -92,8 +92,7 @@ BEGIN TRY
 		END
 	END
 	
-	--IF 	@intPricingTypeId NOT IN (1,6) OR @ysnAllowChangePricing = 1
-	IF 	@ysnAllowChangePricing = 1
+	IF 	@intPricingTypeId NOT IN (1,6) OR @ysnAllowChangePricing = 1
 		RETURN
 
 	IF NOT EXISTS(SELECT * FROM tblAPBillDetail WHERE intContractDetailId = @intContractDetailId AND intContractCostId IS NULL AND intInventoryReceiptChargeId IS NULL)
