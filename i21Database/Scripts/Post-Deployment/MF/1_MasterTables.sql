@@ -3912,3 +3912,8 @@ UPDATE tblCTReportAttribute
 SET strAttributeName ='&emsp;&emsp;In-transit Purchases'
 WHERE strAttributeName = 'In-transit Purchases'
 GO
+
+UPDATE tblMFCompanyPreference
+SET ysnDisplayRestrictedBookInDemandView = 0
+Where ysnDisplayRestrictedBookInDemandView IS NULL
+GO
