@@ -26,13 +26,13 @@ RetailPriceAdjustmentDetail.strPriceMethod,
 RetailPriceAdjustmentDetail.dblFactor,
 RetailPriceAdjustmentDetail.dblPrice,
 RetailPriceAdjustmentDetail.dblLastCost,
-RetailPriceAdjustmentDetail.ysnActive,
-RetailPriceAdjustmentDetail.ysnOneTimeuse,
+--RetailPriceAdjustmentDetail.ysnActive,
+--RetailPriceAdjustmentDetail.ysnOneTimeuse,
 RetailPriceAdjustmentDetail.ysnChangeCost,
 RetailPriceAdjustmentDetail.dblCost,
 RetailPriceAdjustmentDetail.dtmSalesStartDate,
 RetailPriceAdjustmentDetail.dtmSalesEndDate,
-RetailPriceAdjustmentDetail.ysnPosted,
+--RetailPriceAdjustmentDetail.ysnPosted,
 RetailPriceAdjustmentDetail.strPriceType
 
 FROM tblSTRetailPriceAdjustmentDetail RetailPriceAdjustmentDetail

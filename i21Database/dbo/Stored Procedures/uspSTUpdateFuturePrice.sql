@@ -71,7 +71,7 @@ BEGIN
 		adj1.strPriceMethod, adj1.intRetailPriceAdjustmentDetailId
 		from tblSTRetailPriceAdjustmentDetail adj1 inner join tblSTRetailPriceAdjustment adj2
 	    on adj1.intRetailPriceAdjustmentId = adj2.intRetailPriceAdjustmentId where 
-	    adj2.dtmEffectiveDate = @TodaysDate and adj1.ysnPosted = 0 
+	    adj2.dtmEffectiveDate = @TodaysDate and adj2.ysnPosted = 0 
 	
 	    Declare @DataKey int
 
@@ -275,8 +275,9 @@ BEGIN
 			   EXEC (@SQL1)
 			   select (@@ROWCOUNT)
 
-		       update tblSTRetailPriceAdjustmentDetail set ysnPosted = 1 
-			   where intRetailPriceAdjustmentDetailId = @DetailID
+		    --   update tblSTRetailPriceAdjustmentDetail 
+			   --set ysnPosted = 1 
+			   --where intRetailPriceAdjustmentDetailId = @DetailID
 
      		   SELECT @DataKey = MIN(DataKey)
 		       FROM @UPCData
