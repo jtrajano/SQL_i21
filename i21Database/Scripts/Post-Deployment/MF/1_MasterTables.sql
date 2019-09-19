@@ -3738,8 +3738,6 @@ GO
 GO
 UPDATE tblMFItemChangeMap SET intConcurrencyId = 1 WHERE intConcurrencyId IS NULL
 GO
-GO
-
 IF NOT EXISTS (
 		SELECT *
 		FROM tblMFLotTransactionType
@@ -3748,6 +3746,15 @@ IF NOT EXISTS (
 BEGIN
 	INSERT INTO tblMFLotTransactionType
 	SELECT 105
+END
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFLotTransactionType
+		WHERE intTransactionTypeId = 106
+		) --Vendor Ref No
+BEGIN
+	INSERT INTO tblMFLotTransactionType
+	SELECT 106
 		,0
 		,0
 END
@@ -3916,4 +3923,41 @@ GO
 UPDATE tblMFCompanyPreference
 SET ysnDisplayRestrictedBookInDemandView = 0
 Where ysnDisplayRestrictedBookInDemandView IS NULL
+Go
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFLotTransactionType
+		WHERE intTransactionTypeId = 107
+		) --Parent Lot Number
+BEGIN
+	INSERT INTO tblMFLotTransactionType
+	SELECT 107
+		,0
+		,0
+END
+GO
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFLotTransactionType
+		WHERE intTransactionTypeId = 108
+		) --Warehouse Ref No
+BEGIN
+	INSERT INTO tblMFLotTransactionType
+	SELECT 108
+		,0
+		,0
+END
+GO
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFLotTransactionType
+		WHERE intTransactionTypeId = 109
+		) --Container No
+BEGIN
+	INSERT INTO tblMFLotTransactionType
+	SELECT 109
+		,0
+		,0
+END
+
 GO
