@@ -38,7 +38,9 @@
 				dtmDate					DATE,
 				dblQuantity				NUMERIC(38,20),
 				dblRunningBalance		NUMERIC(38,20),
-				ysnOpenGetBasisDelivery	bit DEFAULT(0)
+				ysnOpenGetBasisDelivery	bit DEFAULT(0),
+				dblQtyInCommodityStockUOM NUMERIC(38,20),
+				dblRunningBalanceInCommodityStockUOM NUMERIC(38,20)
 			)
 			AS
 			BEGIN
@@ -87,7 +89,9 @@
 					dtmDate					DATETIME,
 					dblQuantity				NUMERIC(38,20),
 					strTransactionType		NVARCHAR(20),
-					intTimeE				BIGINT
+					intTimeE				BIGINT,
+					intCommodityUOMId			INT,
+					intUnitMeasureId			INT
 				)
 
 			-- SETTLEMENT STORAGE
@@ -107,7 +111,9 @@
 				,dtmDate				
 				,dblQuantity			
 				,strTransactionType
-				,intTimeE				
+				,intTimeE
+				,intCommodityUOMId
+				,intUnitMeasureId				
 			)
 			SELECT 
 				CH.intContractHeaderId
@@ -125,6 +131,8 @@
 				,dblQuantity = SUM(SC.dblUnits)
 				,''Settle Storage''
 				,(CAST(replace(convert(varchar, SS.dtmCreated,101),''/'','''') + replace(convert(varchar, SS.dtmCreated,108),'':'','''')AS BIGINT)	+ CAST(SS.intSettleStorageId AS bigint))
+				,CH.intCommodityUOMId
+				,m.intUnitMeasureId
 			FROM tblGRSettleContract SC
 			JOIN tblGRSettleStorage SS ON SS.intSettleStorageId = SC.intSettleStorageId
 			JOIN tblCTContractDetail CD ON SC.intContractDetailId = CD.intContractDetailId
@@ -133,6 +141,7 @@
 			JOIN tblCTContractType CT ON CT.intContractTypeId = CH.intContractTypeId
 			JOIN tblEMEntity E ON E.intEntityId = CH.intEntityId
 			JOIN tblICCommodity C ON C.intCommodityId = CH.intCommodityId
+			join tblICCommodityUnitMeasure m on m.intCommodityId = CH.intCommodityId and m.ysnStockUnit=1
 			WHERE
 				SS.ysnPosted = 1
 				AND SS.intParentSettleStorageId IS NOT NULL
@@ -149,6 +158,8 @@
 				,C.strCommodityCode
 				,C.intCommodityId
 				,SS.dtmCreated
+				,CH.intCommodityUOMId
+				,m.intUnitMeasureId
 
 			--INVENTORY RECEIPT from SETTLEMENT STORAGE
 			INSERT INTO @TemporaryTable
@@ -168,6 +179,8 @@
 				,dblQuantity			
 				,strTransactionType
 				,intTimeE				
+				,intCommodityUOMId
+				,intUnitMeasureId				
 			)
 			select
 				a.intContractHeaderId
@@ -185,6 +198,8 @@
 				,dlQuantity = SUM(f.dblOpenReceive)
 				,strTransaction = ''Inventory Receipt''
 				,dblPassPhrase = (CAST(replace(convert(varchar, i.dtmDate,101),''/'','''') + replace(convert(varchar, i.dtmDate,108),'':'','''')as bigint)	+ CAST(g.intInventoryReceiptId as bigint))
+				,a.intCommodityUOMId
+				,m.intUnitMeasureId
 			from
 			tblCTContractHeader a
 			join tblCTContractDetail b on b.intContractHeaderId = a.intContractHeaderId
@@ -201,6 +216,7 @@
 			INNER JOIN tblICCommodity j on a.intCommodityId = j.intCommodityId
 			INNER JOIN tblCTContractType k on a.intContractTypeId = k.intContractTypeId
 			INNER JOIN vyuCTEntity l on l.intEntityId = a.intEntityId and l.strEntityType = (case when a.intContractTypeId = 1 then ''Vendor'' else ''Customer'' end)
+			inner join tblICCommodityUnitMeasure m on m.intCommodityId = a.intCommodityId and m.ysnStockUnit=1
 			GROUP BY a.intContractHeaderId
 			,b.intContractDetailId
 			,g.intInventoryReceiptId
@@ -213,6 +229,8 @@
 			,j.strCommodityCode
 			,j.intCommodityId
 			,i.dtmDate
+			,a.intCommodityUOMId
+			,m.intUnitMeasureId
 
 				-- INVENTORY RECEIPT
 				INSERT INTO @TemporaryTable
@@ -231,7 +249,9 @@
 					 ,dtmDate      
 					 ,dblQuantity     
 					 ,strTransactionType  
-					 ,intTimeE      		
+					 ,intTimeE
+					,intCommodityUOMId
+					,intUnitMeasureId				      		
 				)
 				SELECT CH.intContractHeaderId
 				,CD.intContractDetailId
@@ -248,6 +268,8 @@
 				,SUM(ReceiptItem.dblOpenReceive)
 				,''Inventory Receipt''
 				,(CAST(replace(convert(varchar, InvTran.dtmDate,101),''/'','''') + replace(convert(varchar, InvTran.dtmDate,108),'':'','''')AS BIGINT)	+ CAST(Receipt.intInventoryReceiptId AS bigint))
+				,CH.intCommodityUOMId
+				,m.intUnitMeasureId
 				FROM tblCTContractDetail CD
 				INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 					AND CH.intContractTypeId = 1
@@ -264,6 +286,7 @@
 				INNER JOIN tblICCommodity C ON CH.intCommodityId = C.intCommodityId
 				INNER JOIN tblCTContractType CT ON CH.intContractTypeId = CT.intContractTypeId
 				INNER JOIN vyuCTEntity E ON E.intEntityId = CH.intEntityId and E.strEntityType = (CASE WHEN CH.intContractTypeId = 1 THEN ''Vendor'' ELSE ''Customer'' END)
+				inner join tblICCommodityUnitMeasure m on m.intCommodityId = CH.intCommodityId and m.ysnStockUnit=1
 				GROUP BY CH.intContractHeaderId
 				,CD.intContractDetailId
 				,Receipt.intInventoryReceiptId
@@ -276,6 +299,8 @@
 				,C.strCommodityCode
 				,C.intCommodityId
 				,InvTran.dtmDate
+				,CH.intCommodityUOMId
+				,m.intUnitMeasureId
 
 				-- VOUCHER
 				INSERT INTO @TemporaryTable
@@ -294,7 +319,9 @@
 					,dtmDate				
 					,dblQuantity			
 					,strTransactionType
-					,intTimeE				
+					,intTimeE
+					,intCommodityUOMId
+					,intUnitMeasureId								
 				)
 				SELECT CH.intContractHeaderId
 				,CD.intContractDetailId
@@ -311,6 +338,8 @@
 				,SUM(BD.dblQtyReceived) * -1
 				,''Voucher''
 				,CAST(replace(convert(varchar, B.dtmDateCreated,101),''/'','''') + replace(convert(varchar, B.dtmDateCreated,108),'':'','''') AS BIGINT)	+  CAST(BD.intBillDetailId AS BIGINT)
+				,CH.intCommodityUOMId
+				,m.intUnitMeasureId
 				FROM tblCTContractDetail CD
 				INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 					AND CH.intContractTypeId = 1
@@ -322,6 +351,7 @@
 				INNER JOIN tblICCommodity C ON CH.intCommodityId = C.intCommodityId
 				INNER JOIN tblCTContractType CT ON CH.intContractTypeId = CT.intContractTypeId
 				INNER JOIN vyuCTEntity E ON E.intEntityId = CH.intEntityId and E.strEntityType = (CASE WHEN CH.intContractTypeId = 1 THEN ''Vendor'' ELSE ''Customer'' END)
+				inner join tblICCommodityUnitMeasure m on m.intCommodityId = CH.intCommodityId and m.ysnStockUnit=1
 				WHERE B.ysnPosted = 1
 				GROUP BY CH.intContractHeaderId
 				,CD.intContractDetailId
@@ -335,6 +365,8 @@
 				,C.strCommodityCode
 				,C.intCommodityId
 				,B.dtmDateCreated
+				,CH.intCommodityUOMId
+				,m.intUnitMeasureId
 
 				-- INVENTORY SHIPMENT
 				INSERT INTO @TemporaryTable
@@ -354,6 +386,8 @@
 					,dblQuantity			
 					,strTransactionType				
 					,intTimeE
+					,intCommodityUOMId
+					,intUnitMeasureId				
 				)	
 				SELECT CH.intContractHeaderId
 				,CD.intContractDetailId
@@ -370,6 +404,8 @@
 				,dblQuantity = SUM(ISNULL(ABS(dbo.fnICConvertUOMtoStockUnit( InvTran.intItemId, InvTran.intItemUOMId, isnull(InvTran.dblQty,0))     ),0)) --dblQuantity = SUM(ISNULL(ABS(InvTran.dblQty),0))
 				,''Inventory Shipment''
 				,CAST(replace(convert(varchar, InvTran.dtmDate,101),''/'','''') + replace(convert(varchar, InvTran.dtmDate,108),'':'','''')	 AS BIGINT) + CAST( Shipment.intInventoryShipmentId AS BIGINT)
+				,CH.intCommodityUOMId
+				,m.intUnitMeasureId
 				FROM tblCTContractDetail CD
 				INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId 
 					AND intContractTypeId = 2
@@ -388,6 +424,7 @@
 				INNER JOIN tblICCommodity C ON CH.intCommodityId = C.intCommodityId
 				INNER JOIN tblCTContractType CT ON CH.intContractTypeId = CT.intContractTypeId
 				INNER JOIN vyuCTEntity E ON E.intEntityId = CH.intEntityId and E.strEntityType = (CASE WHEN CH.intContractTypeId = 1 THEN ''Vendor'' ELSE ''Customer'' END)
+				inner join tblICCommodityUnitMeasure m on m.intCommodityId = CH.intCommodityId and m.ysnStockUnit=1
 				GROUP BY CH.intContractHeaderId
 				,CD.intContractDetailId
 				,Shipment.intInventoryShipmentId
@@ -400,6 +437,8 @@
 				,C.strCommodityCode
 				,C.intCommodityId
 				,InvTran.dtmDate
+				,CH.intCommodityUOMId
+				,m.intUnitMeasureId
 
 				-- INVOICE
 				INSERT INTO @TemporaryTable
@@ -419,6 +458,8 @@
 					,dblQuantity			
 					,strTransactionType				
 					,intTimeE
+					,intCommodityUOMId
+					,intUnitMeasureId				
 				)	
 				SELECT CH.intContractHeaderId
 				,CD.intContractDetailId
@@ -435,6 +476,8 @@
 				,SUM(dbo.fnICConvertUOMtoStockUnit( ID.intItemId, ID.intItemUOMId, ID.dblQtyShipped )    ) * -1 --SUM(ID.dblQtyShipped) * -1
 				,''Invoice''
 				,CAST(replace(convert(varchar, I.dtmDate,101),''/'','''') + replace(convert(varchar, I.dtmDate,108),'':'','''')	AS BIGINT) + CAST(ID.intInvoiceDetailId AS BIGINT)
+				,CH.intCommodityUOMId
+				,m.intUnitMeasureId
 				FROM tblCTContractDetail CD
 				INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 					AND CH.intContractTypeId = 2
@@ -446,6 +489,7 @@
 				INNER JOIN tblICCommodity C ON CH.intCommodityId = C.intCommodityId
 				INNER JOIN tblCTContractType CT ON CH.intContractTypeId = CT.intContractTypeId
 				INNER JOIN vyuCTEntity E ON E.intEntityId = CH.intEntityId and E.strEntityType = (CASE WHEN CH.intContractTypeId = 1 THEN ''Vendor'' ELSE ''Customer'' END)
+				inner join tblICCommodityUnitMeasure m on m.intCommodityId = CH.intCommodityId and m.ysnStockUnit=1
 				--WHERE I.ysnPosted = 1
 				GROUP BY CH.intContractHeaderId
 				,CD.intContractDetailId
@@ -459,6 +503,8 @@
 				,C.strCommodityCode
 				,C.intCommodityId
 				,I.dtmDate
+				,CH.intCommodityUOMId
+				,m.intUnitMeasureId
 
 				-- RESULT TABLE
 				INSERT INTO @Transaction
@@ -486,6 +532,8 @@
 					,dtmDate
 					,dblQuantity
 					,dblRunningBalance
+					,dblQtyInCommodityStockUOM
+					,dblRunningBalanceInCommodityStockUOM	
 				)
 				SELECT 	
 				T.intContractHeaderId
@@ -529,6 +577,8 @@
 				--								AND TIR.intContractDetailId = CD.intContractDetailId
 				--								AND TIR.strTransactionType = ''Inventory Receipt'')
 				--						END
+				,dblQtyInCommodityStockUOM = dbo.fnCTConvertQtyToTargetCommodityUOM(T.intCommodityId,dbo.fnCTGetCommodityUnitMeasure(T.intCommodityUOMId),T.intUnitMeasureId,T.dblQuantity)	
+				,dblRunningBalanceInCommodityStockUOM = dbo.fnCTConvertQtyToTargetCommodityUOM(T.intCommodityId,dbo.fnCTGetCommodityUnitMeasure(T.intCommodityUOMId),T.intUnitMeasureId,SUM(isnull(T.dblQuantity,0)) OVER (PARTITION BY T.intContractDetailId, T.strContractType ORDER BY T.intTimeE ASC))		
 				FROM tblCTContractDetail CD
 				INNER JOIN @TemporaryTable T ON CD.intContractDetailId = T.intContractDetailId
 				INNER JOIN tblICItem I ON I.intItemId = CD.intItemId
