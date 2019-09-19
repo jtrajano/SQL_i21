@@ -32,6 +32,7 @@ DECLARE @CustomerStorageStagingTable AS CustomerStorageStagingTable
 		,@strFreightCostMethod		NVARCHAR(40)
 		,@strFeesCostMethod			NVARCHAR(40)
 		,@intBillId					INT
+DECLARE @dblInitialSplitQty			NUMERIC (38,20)
 
 BEGIN TRY
 	-- SELECT @currencyDecimal = intCurrencyDecimal from tblSMCompanyPreference
@@ -179,7 +180,8 @@ BEGIN TRY
 		FETCH NEXT FROM splitCursor INTO @intSplitEntityId, @dblSplitPercent, @strDistributionOption, @intStorageScheduleId;  
 		WHILE @@FETCH_STATUS = 0  
 		BEGIN
-			SET @dblFinalSplitQty =  ROUND((@dblNetUnits * @dblSplitPercent) / 100, @currencyDecimal);
+			SET @dblInitialSplitQty	= @dblNetUnits * @dblSplitPercent
+			SET @dblFinalSplitQty =  ROUND(@dblInitialSplitQty / 100, @currencyDecimal);
 			IF @dblTempSplitQty > @dblFinalSplitQty
 				SET @dblTempSplitQty = @dblTempSplitQty - @dblFinalSplitQty;
 			ELSE
