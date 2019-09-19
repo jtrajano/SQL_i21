@@ -526,7 +526,7 @@ SELECT * FROM @tmpForeignTransactionId
 					,[ysnLeaseBilling]						= NULL
 					,[ysnVirtualMeterReading]				= NULL
 					,[ysnClearDetailTaxes]					= 0
-					,[intTempDetailIdForTaxes]				= cfTrans.intTransactionId + 1
+					,[intTempDetailIdForTaxes]				= 0
 					,[strType]								= 'CF Tran'
 					,[dtmPostDate]							= cfTrans.dtmPostedDate
 					,[ysnImpactInventory]					= 
