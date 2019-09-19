@@ -91,21 +91,21 @@ LEFT JOIN tblAPVendor Vendor ON Vendor.[intEntityId] = receiptItemLot.intEntityV
 LEFT JOIN tblSMCountry Origin ON Origin.intCountryID = receiptItemLot.intOriginId
 LEFT JOIN tblICCommodityAttribute Grade ON Grade.intCommodityAttributeId = receiptItemLot.intGradeId
 LEFT JOIN tblEMEntity Producer ON Producer.intEntityId = receiptItemLot.intProducerId
-INNER JOIN (
+	CROSS APPLY (
 		SELECT ec.intEntityId, ec.intEntityContactId
 		FROM tblEMEntityToContact ec
 			INNER JOIN tblEMEntity e ON e.intEntityId = ec.intEntityContactId
 			INNER JOIN tblEMEntityLocation el ON el.intEntityLocationId = ec.intEntityLocationId
 				AND el.intEntityId = ec.intEntityId
 		WHERE ec.ysnPortalAccess = 1
-	) permission ON permission.intEntityId = Receipt.intEntityVendorId
+	) permission
 	CROSS APPLY (
 		SELECT TOP 1 sl.intCompanyLocationSubLocationId
 		FROM tblSMCompanyLocationSubLocation sl
 			INNER JOIN tblICInventoryReceiptItem ri ON ri.intSubLocationId = sl.intCompanyLocationSubLocationId
 				AND ri.intInventoryReceiptId = Receipt.intInventoryReceiptId
-		WHERE sl.intVendorId = Receipt.intEntityVendorId
-			AND sl.intCompanyLocationId = Receipt.intLocationId
+		WHERE sl.intCompanyLocationId = Receipt.intLocationId
+			AND sl.intVendorId = permission.intEntityId
 	) accessibleReceipts
 WHERE Receipt.strReceiptType = 'Purchase Contract'
 	AND Receipt.intSourceType = 2
