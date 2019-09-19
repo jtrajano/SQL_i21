@@ -191,6 +191,7 @@ DECLARE @tblGetOpenContractDetail TABLE (intRowNum INT
 	, dblFutures NUMERIC(24,10)
 	, dblBasis NUMERIC(24,10)
 	, dblCash NUMERIC(24,10)
+	, dblAmount NUMERIC(24,10)
 	, intUnitMeasureId INT
 	, intPricingTypeId INT
 	, intContractTypeId INT
@@ -223,6 +224,7 @@ INSERT INTO @tblGetOpenContractDetail (intRowNum
 	, dblFutures
 	, dblBasis
 	, dblCash
+	, dblAmount
 	, intUnitMeasureId
 	, intPricingTypeId
 	, intContractTypeId
@@ -255,6 +257,7 @@ SELECT
 	,dblFutures
 	,dblBasis
 	,dblCashPrice
+	,dblAmount
 	,intUnitMeasureId
 	,intPricingTypeId
 	,intContractTypeId
@@ -447,7 +450,7 @@ SELECT DISTINCT CH.intCommodityUOMId intCommodityUnitMeasureId
 	--, ISNULL(CASE WHEN CD.intPricingTypeId<>1 and PF.intPriceFixationId IS NOT NULL THEN ISNULL(CD.dblQuantity,0)-ISNULL(PF.dblQuantity ,0)
 	--			WHEN CD.intPricingTypeId<>1 and PF.intPriceFixationId IS NULL then ISNULL(CD.dblQuantity,0)
 	--			ELSE 0 end,0) dblUnPricedQty
-	, dblPricedAmount = NULL --ISNULL(CASE WHEN CD.intPricingTypeId =1 and PF.intPriceFixationId is NULL then CD.dblCashPrice else PF.dblFinalPrice end,0) dblPricedAmount
+	, dblPricedAmount = OCD.dblAmount --ISNULL(CASE WHEN CD.intPricingTypeId =1 and PF.intPriceFixationId is NULL then CD.dblCashPrice else PF.dblFinalPrice end,0) dblPricedAmount
 	, MZ.strMarketZoneCode
 FROM tblCTContractHeader CH
 INNER JOIN tblICCommodity CY ON CY.intCommodityId = CH.intCommodityId
@@ -898,7 +901,7 @@ FROM (
 		, cd.dblInvoicedQuantity
 		, dblPricedQty
 		, dblUnPricedQty
-		, dblPricedAmount
+		, cd.dblPricedAmount
 		, strMarketZoneCode
 		, strLocationName
 		, cd.dblNoOfLots
