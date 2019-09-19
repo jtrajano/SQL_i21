@@ -103,13 +103,13 @@ BEGIN
 		dblFactor,
 		dblPrice,
 		dblLastCost,
-		ysnActive,
-		ysnOneTimeuse,
+		-- ysnActive,
+		-- ysnOneTimeuse,
 		ysnChangeCost,
 		dblCost,
 		dtmSalesStartDate,
 		dtmSalesEndDate,
-		ysnPosted,
+		-- ysnPosted,
 		strPriceType,
 		intConcurrencyId
 	)
@@ -131,13 +131,13 @@ BEGIN
 		dblFactor,
 		dblPrice,
 		dblLastCost,
-		ysnActive,
-		ysnOneTimeuse,
+		-- ysnActive,
+		-- ysnOneTimeuse,
 		ysnChangeCost,
 		dblCost,
 		dtmSalesStartDate,
 		dtmSalesEndDate,
-		0,
+		-- 0,
 		strPriceType,
 		1
 	FROM tblSTRetailPriceAdjustmentDetail
