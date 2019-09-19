@@ -33,7 +33,7 @@ DECLARE @intEntityVendorId AS INT
 		,@intShipFromEntity AS INT
 
 		,@intShipFrom_DebitMemo AS INT
-		,@intReturnValue AS INT
+		,@intReturnValue AS INT = 0
 
 
 DECLARE @ReceiptType INT = 4;

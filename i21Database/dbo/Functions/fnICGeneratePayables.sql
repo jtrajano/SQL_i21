@@ -379,7 +379,8 @@ FROM tblICInventoryReceipt A
 			OR rtn.strReceiptType = 'Purchase Order'
 		)
 WHERE 
-	A.strReceiptType IN ('Direct','Purchase Contract','Inventory Return','Purchase Order') 
+	A.intInventoryReceiptId = @intReceiptId
+	AND A.strReceiptType IN ('Direct','Purchase Contract','Inventory Return','Purchase Order') 
 	AND A.ysnPosted = @ysnPosted 
 	AND (
 		Billed.dblQty IS NULL
@@ -392,15 +393,22 @@ WHERE
 			END 
 		) 
 	)
-	AND (CD.dblCashPrice != 0 OR CD.dblCashPrice IS NULL) --EXCLUDE ALL THE BASIS CONTRACT WITH 0 CASH PRICE
-	AND B.dblUnitCost != 0 --EXCLUDE ZERO RECEIPT COST 
+	AND (CD.dblCashPrice <> 0 OR CD.dblCashPrice IS NULL) --EXCLUDE ALL THE BASIS CONTRACT WITH 0 CASH PRICE
+	AND B.dblUnitCost <> 0 --EXCLUDE ZERO RECEIPT COST 
 	AND ISNULL(A.ysnOrigin, 0) = 0
-	AND B.intOwnershipType != 2
-	AND A.intInventoryReceiptId = @intReceiptId
+	AND B.intOwnershipType <> 2	
 	AND C.strType <> 'Bundle'
 	AND ISNULL(A.strReceiptType, '') <> 'Transfer Order'
 	AND ISNULL(B.ysnAllowVoucher, 1) = 1
-ORDER BY B.intInventoryReceiptItemId ASC 
+	-- Check if the item is "Basis" priced and futures price is not blank. If future price is zero or blank, do not add it to the payable.
+	AND NOT (
+		A.strReceiptType = 'Purchase Contract'
+		AND CD.intPricingTypeId = 2 -- 2 is Basis. 
+		AND ISNULL(CD.dblFutures, 0) = 0
+		AND ISNULL(B.ysnAllowVoucher, 1) = 1
+	)
+ORDER BY 
+	B.intInventoryReceiptItemId ASC 
 
 --RECEIPT OTHER CHARGES
 INSERT INTO @table
@@ -433,7 +441,7 @@ SELECT DISTINCT
 														THEN CASE WHEN A.ysnSubCurrency > 0 THEN CAST(A.dblUnitCost AS DECIMAL(38,20)) / ISNULL(A.intSubCurrencyCents,100) ELSE CAST(A.dblUnitCost AS DECIMAL(38,20))  END
 														ELSE CAST(A.dblUnitCost AS DECIMAL(38,20)) END
 		,[dblDiscount]								=	0
-		,[dblTax]									=	ISNULL((CASE WHEN ISNULL(A.intEntityVendorId, IR.intEntityVendorId) != IR.intEntityVendorId
+		,[dblTax]									=	ISNULL((CASE WHEN ISNULL(A.intEntityVendorId, IR.intEntityVendorId) <> IR.intEntityVendorId
 																		THEN (CASE WHEN IRCT.ysnCheckoffTax = 0 THEN ABS(A.dblTax) 
 																				ELSE A.dblTax END) --THIRD PARTY TAX SHOULD RETAIN NEGATIVE IF CHECK OFF
 																	 ELSE (CASE WHEN A.ysnPrice = 1 AND IRCT.ysnCheckoffTax = 1 THEN A.dblTax * -1 
