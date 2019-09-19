@@ -203,11 +203,12 @@ SELECT * FROM @tmpForeignTransactionId
 					,[ysnImpactInventory]
 				)
 				SELECT
-					[intId]						= TI.intTransactionId
-					,[strTransactionType]		= (case
-												when (cfTrans.dblQuantity < 0 OR cfTrans.dblCalculatedNetPrice < 0)  then 'Credit Memo'
-												else 'Invoice'
-											  end)
+					 [intId]								= ROW_NUMBER() OVER(ORDER BY (SELECT NULL) ASC)
+					--  CAST(cfTrans.intTransactionId AS NVARCHAR(MAX)) + CAST(ROW_NUMBER() OVER(ORDER BY cfTrans.intTransactionId ASC) AS NVARCHAR(MAX))
+					,[strTransactionType]					= (case
+																when (cfTrans.dblQuantity < 0 OR cfTrans.dblCalculatedNetPrice < 0)  then 'Credit Memo'
+																else 'Invoice'
+															end)
 					,[strSourceTransaction]					= 'CF Tran'
 					,[intSourceId]							= cfTrans.intTransactionId
 					,[strSourceId]							= cfTrans.strTransactionId
@@ -431,7 +432,8 @@ SELECT * FROM @tmpForeignTransactionId
 					,[ysnImpactInventory]
 				)
 				SELECT
-					 [intId]						= TI.intTransactionId
+					[intId]						= ROW_NUMBER() OVER(ORDER BY (SELECT NULL) ASC)
+					-- CAST(TI.intTransactionId AS NVARCHAR(MAX)) + CAST(ROW_NUMBER() OVER(ORDER BY TI.intTransactionId ASC) AS NVARCHAR(MAX))
 					,[strTransactionType]		= (case
 												when (cfTrans.dblQuantity < 0 OR cfTrans.dblCalculatedNetPrice < 0)  then 'Credit Memo'
 												else 'Invoice'
@@ -441,9 +443,9 @@ SELECT * FROM @tmpForeignTransactionId
 					,[strSourceId]							= cfTrans.strTransactionId
 					,[intInvoiceId]							= I.intInvoiceId --cfTrans.intInvoiceId --NULL Value will create new invoice
 					,[intEntityCustomerId]					= (case
-												when RTRIM(LTRIM(cfTrans.strTransactionType)) = 'Foreign Sale' then cfNetwork.intCustomerId
-												else cfCardAccount.intCustomerId
-											  end)
+																when RTRIM(LTRIM(cfTrans.strTransactionType)) = 'Foreign Sale' then cfNetwork.intCustomerId
+																else cfCardAccount.intCustomerId
+															end)
 					,[intCompanyLocationId]					= cfTrans.intARLocationId
 					,[intCurrencyId]						= I.intCurrencyId
 					,[intTermId]							= @companyConfigTermId
@@ -526,7 +528,7 @@ SELECT * FROM @tmpForeignTransactionId
 					,[ysnLeaseBilling]						= NULL
 					,[ysnVirtualMeterReading]				= NULL
 					,[ysnClearDetailTaxes]					= 0
-					,[intTempDetailIdForTaxes]				= cfTrans.intTransactionId + 1
+					,[intTempDetailIdForTaxes]				= 0
 					,[strType]								= 'CF Tran'
 					,[dtmPostDate]							= cfTrans.dtmPostedDate
 					,[ysnImpactInventory]					= 
@@ -570,7 +572,8 @@ SELECT * FROM @tmpForeignTransactionId
 				
 				INSERT INTO @TaxDetails
 					(
-					[intDetailId] 
+					 [intId]
+					,[intDetailId] 
 					,[intTaxGroupId]
 					,[intTaxCodeId]
 					,[intTaxClassId]
@@ -589,7 +592,9 @@ SELECT * FROM @tmpForeignTransactionId
 					,[intTempDetailIdForTaxes]
 					,[ysnClearExisting])
 				SELECT
-				[intDetailId]				= ISNULL((SELECT TOP 1 intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = cfTransaction.intInvoiceId ORDER BY dblQtyShipped DESC),TI.intTransactionId)
+				 [intId]					= ROW_NUMBER() OVER(ORDER BY (SELECT NULL) ASC)
+				--  CAST(cfTransaction.intTransactionId AS NVARCHAR(MAX)) + CAST(ROW_NUMBER() OVER(ORDER BY cfTransaction.intTransactionId ASC) AS NVARCHAR(MAX))
+				,[intDetailId]				= ISNULL((SELECT TOP 1 intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = cfTransaction.intInvoiceId ORDER BY dblQtyShipped DESC),TI.intTransactionId)
 				,[intTaxGroupId]			= NULL
 				,[intTaxCodeId]				= cfTaxCode.intTaxCodeId
 				,[intTaxClassId]			= cfTaxCode.intTaxClassId
