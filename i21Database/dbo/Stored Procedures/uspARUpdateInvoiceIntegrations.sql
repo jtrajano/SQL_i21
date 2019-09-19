@@ -9,7 +9,8 @@ SET ANSI_NULLS ON
 SET NOCOUNT ON  
 SET XACT_ABORT ON  
 SET ANSI_WARNINGS OFF
-  
+
+DECLARE @intTranCount	 			INT
 DECLARE @intInvoiceId				INT	  
 	  , @intUserId					INT
 	  , @intOriginalInvoiceId		INT
@@ -18,62 +19,85 @@ DECLARE @intInvoiceId				INT
 	  , @strTransactionType			NVARCHAR(25)
 	  , @ysnFromItemContract		BIT
 	  , @InvoiceIds					InvoiceId
-	  	  
-SET @intInvoiceId = @InvoiceId
-SET @intUserId = @UserId
 
-SELECT TOP 1 @intOriginalInvoiceId = intOriginalInvoiceId
-		   , @intSalesOrderId = intSalesOrderId
-		   , @strTransactionType = strTransactionType
-		   , @ysnFromItemContract = ISNULL(ysnFromItemContract, 0)
-FROM tblARInvoice 
-WHERE intInvoiceId = @InvoiceId
+SET @intTranCount = @@trancount;
 
-IF @strTransactionType = 'Proforma Invoice'
-	RETURN
+BEGIN TRY
+	IF @intTranCount = 0
+		BEGIN TRANSACTION
+	ELSE
+		SAVE TRANSACTION uspARUpdateInvoiceIntegrations
 
-EXEC dbo.[uspARUpdateProvisionalOnStandardInvoice] @intInvoiceId, @ForDelete, @intUserId
+	SET @intInvoiceId = @InvoiceId
+	SET @intUserId = @UserId
 
-IF @ForDelete = 1
-	BEGIN
-		IF @strTransactionType IN ('Credit Memo', 'Credit Note') AND @intOriginalInvoiceId IS NOT NULL
-			UPDATE tblARInvoice SET ysnCancelled = 0 WHERE intInvoiceId = @intOriginalInvoiceId
+	SELECT TOP 1 @intOriginalInvoiceId = intOriginalInvoiceId
+			, @intSalesOrderId = intSalesOrderId
+			, @strTransactionType = strTransactionType
+			, @ysnFromItemContract = ISNULL(ysnFromItemContract, 0)
+	FROM tblARInvoice 
+	WHERE intInvoiceId = @InvoiceId
 
-		IF ISNULL(@intSalesOrderId, 0) <> 0
-			EXEC dbo.uspSOUpdateReservedStock @intSalesOrderId, 0
+	IF @strTransactionType = 'Proforma Invoice'
+		RETURN
 
-		--UPDATE PREPAID ITEM CONTRACT
-		IF ISNULL(@ysnFromItemContract, 0) <> 0
-			BEGIN
-				SELECT TOP 1 @intItemContractHeaderId = intItemContractHeaderId
-				FROM tblARInvoiceDetail
-				WHERE intInvoiceId = @intInvoiceId
-				  AND intItemContractHeaderId IS NOT NULL
+	EXEC dbo.[uspARUpdateProvisionalOnStandardInvoice] @intInvoiceId, @ForDelete, @intUserId
 
-				--UPDATE tblCTItemContractHeader SET ysnPrepaid = 0 WHERE intItemContractHeaderId = @intItemContractHeaderId  
-			END
-	END
-	
-EXEC dbo.[uspARUpdatePricingHistory] 2, @intInvoiceId, @intUserId
-EXEC dbo.[uspSOUpdateOrderShipmentStatus] @intInvoiceId, 'Invoice', @ForDelete
-IF @ForDelete = 0 EXEC dbo.[uspARUpdateRemoveSalesOrderStatus] @intInvoiceId
-EXEC dbo.[uspARUpdateItemComponent] @intInvoiceId, @ForDelete
-EXEC dbo.[uspARUpdateLineItemLotDetail] @intInvoiceId
-EXEC dbo.[uspARUpdateReservedStock] @intInvoiceId, @ForDelete, @intUserId, 0
-EXEC dbo.[uspARUpdateInboundShipmentOnInvoice] @intInvoiceId, @ForDelete, @intUserId
-EXEC dbo.[uspARUpdateCommitted] @intInvoiceId, @ForDelete, @intUserId, 0
-EXEC dbo.[uspARUpdateGrainOpenBalance] @intInvoiceId, @ForDelete, @intUserId
-EXEC dbo.[uspARUpdateContractOnInvoice] @intInvoiceId, @ForDelete, @intUserId, 0, @InvoiceIds
-EXEC dbo.[uspARUpdateItemContractOnInvoice] @intInvoiceId, @ForDelete, @intUserId
-IF @ForDelete = 1 EXEC dbo.[uspCTBeforeInvoiceDelete] @intInvoiceId, @intUserId
-EXEC dbo.[uspARUpdateReturnedInvoice] @intInvoiceId, @ForDelete, @intUserId 
-EXEC dbo.[uspARUpdateInvoiceAccruals] @intInvoiceId
+	IF @ForDelete = 1
+		BEGIN
+			IF @strTransactionType IN ('Credit Memo', 'Credit Note') AND @intOriginalInvoiceId IS NOT NULL
+				UPDATE tblARInvoice SET ysnCancelled = 0 WHERE intInvoiceId = @intOriginalInvoiceId
 
-INSERT INTO @InvoiceIds(intHeaderId) SELECT @intInvoiceId
-EXEC dbo.[uspARUpdateInvoiceTransactionHistory] @InvoiceIds
-IF @ForDelete = 1
-EXEC [dbo].[uspGRDeleteStorageHistory] 'Invoice',@InvoiceId
+			IF ISNULL(@intSalesOrderId, 0) <> 0
+				EXEC dbo.uspSOUpdateReservedStock @intSalesOrderId, 0
 
-DELETE FROM [tblARTransactionDetail] WHERE [intTransactionId] = @intInvoiceId AND [strTransactionType] = (SELECT TOP 1 [strTransactionType] FROM tblARInvoice WHERE intInvoiceId = @intInvoiceId)
+			--UPDATE PREPAID ITEM CONTRACT
+			IF ISNULL(@ysnFromItemContract, 0) <> 0
+				BEGIN
+					SELECT TOP 1 @intItemContractHeaderId = intItemContractHeaderId
+					FROM tblARInvoiceDetail
+					WHERE intInvoiceId = @intInvoiceId
+					AND intItemContractHeaderId IS NOT NULL
+				END
+		END
+		
+	EXEC dbo.[uspARUpdatePricingHistory] 2, @intInvoiceId, @intUserId
+	EXEC dbo.[uspSOUpdateOrderShipmentStatus] @intInvoiceId, 'Invoice', @ForDelete
+	IF @ForDelete = 0 EXEC dbo.[uspARUpdateRemoveSalesOrderStatus] @intInvoiceId
+	EXEC dbo.[uspARUpdateItemComponent] @intInvoiceId, @ForDelete
+	EXEC dbo.[uspARUpdateLineItemLotDetail] @intInvoiceId
+	EXEC dbo.[uspARUpdateReservedStock] @intInvoiceId, @ForDelete, @intUserId, 0
+	EXEC dbo.[uspARUpdateInboundShipmentOnInvoice] @intInvoiceId, @ForDelete, @intUserId
+	EXEC dbo.[uspARUpdateCommitted] @intInvoiceId, @ForDelete, @intUserId, 0
+	EXEC dbo.[uspARUpdateGrainOpenBalance] @intInvoiceId, @ForDelete, @intUserId
+	EXEC dbo.[uspARUpdateContractOnInvoice] @intInvoiceId, @ForDelete, @intUserId, 0--, @InvoiceIds
+	EXEC dbo.[uspARUpdateItemContractOnInvoice] @intInvoiceId, @ForDelete, @intUserId
+	IF @ForDelete = 1 EXEC dbo.[uspCTBeforeInvoiceDelete] @intInvoiceId, @intUserId
+	EXEC dbo.[uspARUpdateReturnedInvoice] @intInvoiceId, @ForDelete, @intUserId 
+	EXEC dbo.[uspARUpdateInvoiceAccruals] @intInvoiceId
+
+	INSERT INTO @InvoiceIds(intHeaderId) SELECT @intInvoiceId
+	EXEC dbo.[uspARUpdateInvoiceTransactionHistory] @InvoiceIds
+	IF @ForDelete = 1
+	EXEC [dbo].[uspGRDeleteStorageHistory] 'Invoice',@InvoiceId
+
+	DELETE FROM [tblARTransactionDetail] WHERE [intTransactionId] = @intInvoiceId AND [strTransactionType] = (SELECT TOP 1 [strTransactionType] FROM tblARInvoice WHERE intInvoiceId = @intInvoiceId)
+
+	IF @intTranCount = 0
+		COMMIT;
+END TRY
+BEGIN CATCH
+	DECLARE @strErrorMsg varchar(4000) = ERROR_MESSAGE()
+
+	IF XACT_STATE() = -1
+		ROLLBACK;
+	IF XACT_STATE() = 1 AND @intTranCount = 0
+		ROLLBACK
+	IF XACT_STATE() = 1 AND @intTranCount > 0
+		ROLLBACK TRANSACTION uspARUpdateInvoiceIntegrations;
+
+	THROW 51000, @strErrorMsg, 1
+
+END CATCH
 
 GO
