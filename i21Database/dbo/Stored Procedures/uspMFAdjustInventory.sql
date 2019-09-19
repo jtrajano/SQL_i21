@@ -18,18 +18,27 @@
 	,@intInventoryAdjustmentId INT
 	,@intOldItemOwnerId INT = NULL
 	,@intNewItemOwnerId INT = NULL
-	,@strOldLotAlias nvarchar(50)= NULL
-	,@strNewLotAlias nvarchar(50)= NULL
-	,@strOldVendorLotNumber nvarchar(50)= NULL
-	,@strNewVendorLotNumber nvarchar(50)= NULL
-	,@dtmOldDueDate DATETIME= NULL
-	,@dtmNewDueDate DATETIME= NULL
+	,@strOldLotAlias NVARCHAR(50) = NULL
+	,@strNewLotAlias NVARCHAR(50) = NULL
+	,@strOldVendorLotNumber NVARCHAR(50) = NULL
+	,@strNewVendorLotNumber NVARCHAR(50) = NULL
+	,@dtmOldDueDate DATETIME = NULL
+	,@dtmNewDueDate DATETIME = NULL
 	,@intStorageLocationId INT = NULL
 	,@intDestinationStorageLocationId INT = NULL
 	,@intWorkOrderInputLotId INT = NULL
 	,@intWorkOrderProducedLotId INT = NULL
 	,@intWorkOrderId INT = NULL
-	,@intWorkOrderConsumedLotId INT=NULL
+	,@intWorkOrderConsumedLotId INT = NULL
+	,@strOldVendorRefNo NVARCHAR(50) = NULL
+	,@strNewVendorRefNo NVARCHAR(50) = NULL
+	,@strOldParentLotNumber NVARCHAR(50) = NULL
+	,@strNewParentLotNumber NVARCHAR(50) = NULL
+	,@strOldWarehouseRefNo NVARCHAR(50) = NULL
+	,@strNewWarehouseRefNo NVARCHAR(50) = NULL
+	,@strOldContainerNo NVARCHAR(50) = NULL
+	,@strNewContainerNo NVARCHAR(50) = NULL
+
 	)
 AS
 BEGIN TRY
@@ -80,16 +89,24 @@ BEGIN TRY
 		,intInventoryAdjustmentId
 		,intOldItemOwnerId
 		,intNewItemOwnerId
-		,strOldLotAlias 
-		,strNewLotAlias 
-		,strOldVendorLotNumber 
-		,strNewVendorLotNumber 
-		,dtmOldDueDate 
+		,strOldLotAlias
+		,strNewLotAlias
+		,strOldVendorLotNumber
+		,strNewVendorLotNumber
+		,dtmOldDueDate
 		,dtmNewDueDate
 		,intWorkOrderInputLotId
 		,intWorkOrderProducedLotId
 		,intWorkOrderId
 		,intWorkOrderConsumedLotId
+		,strOldVendorRefNo
+		,strNewVendorRefNo
+		,strOldParentLotNumber
+		,strNewParentLotNumber
+		,strOldWarehouseRefNo
+		,strNewWarehouseRefNo
+		,strOldContainerNo
+		,strNewContainerNo
 		)
 	SELECT @dtmDate
 		,@intTransactionTypeId
@@ -114,26 +131,34 @@ BEGIN TRY
 		,@intInventoryAdjustmentId
 		,@intOldItemOwnerId
 		,@intNewItemOwnerId
-		,@strOldLotAlias 
-		,@strNewLotAlias 
-		,@strOldVendorLotNumber 
-		,@strNewVendorLotNumber 
-		,@dtmOldDueDate 
-		,@dtmNewDueDate 
+		,@strOldLotAlias
+		,@strNewLotAlias
+		,@strOldVendorLotNumber
+		,@strNewVendorLotNumber
+		,@dtmOldDueDate
+		,@dtmNewDueDate
 		,@intWorkOrderInputLotId
 		,@intWorkOrderProducedLotId
 		,@intWorkOrderId
 		,@intWorkOrderConsumedLotId
+		,@strOldVendorRefNo
+		,@strNewVendorRefNo
+		,@strOldParentLotNumber
+		,@strNewParentLotNumber
+		,@strOldWarehouseRefNo
+		,@strNewWarehouseRefNo
+		,@strOldContainerNo
+		,@strNewContainerNo
 
-	Update tblMFLotInventory
-	Set dtmLastMoveDate =@dtmDate
-	WHERE intLotId =@intSourceLotId
 
-	if @intDestinationLotId is not null
-	Update tblMFLotInventory
-	Set dtmLastMoveDate =@dtmDate
-	WHERE intLotId =@intDestinationLotId
+	UPDATE tblMFLotInventory
+	SET dtmLastMoveDate = @dtmDate
+	WHERE intLotId = @intSourceLotId
 
+	IF @intDestinationLotId IS NOT NULL
+		UPDATE tblMFLotInventory
+		SET dtmLastMoveDate = @dtmDate
+		WHERE intLotId = @intDestinationLotId
 END TRY
 
 BEGIN CATCH

@@ -35,6 +35,16 @@
 	,intWorkOrderId INT 
 	,intWorkOrderConsumedLotId INT
 	,dtmDateCreated Datetime CONSTRAINT DF_tblMFInventoryAdjustment_dtmDateCreated Default (GETDATE())
+	,strOldVendorRefNo NVARCHAR(50) 
+	,strNewVendorRefNo NVARCHAR(50) 
+	,strOldParentLotNumber NVARCHAR(50) 
+	,strNewParentLotNumber NVARCHAR(50) 
+	,strOldWarehouseRefNo NVARCHAR(50) 
+	,strNewWarehouseRefNo NVARCHAR(50)
+	,strOldContainerNo NVARCHAR(50) 
+	,strNewContainerNo NVARCHAR(50) 
+	,strOldRemarks NVARCHAR(MAX) 
+	,strNewRemarks NVARCHAR(MAX) 
 	,CONSTRAINT PK_tblMFInventoryAdjustment PRIMARY KEY (intAdjustmentId)
 	,CONSTRAINT FK_tblMFInventoryAdjustment_tblICItem_intItemId FOREIGN KEY (intItemId) REFERENCES tblICItem(intItemId)
 	,CONSTRAINT FK_tblMFInventoryAdjustment_tblICItem_intOldItemId FOREIGN KEY (intOldItemId) REFERENCES tblICItem(intItemId)
