@@ -55,6 +55,13 @@ BEGIN TRY
 			CROSS APPLY dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
 		WHERE ISNULL(LD.dblUnitPrice, 0) = 0 AND LD.intLoadId = @intLoadId
 
+		IF EXISTS(SELECT TOP 1 1 FROM tblLGLoadDetail LD
+			INNER JOIN tblLGLoad L ON LD.intLoadId = L.intLoadId
+			WHERE L.intPurchaseSale <> 3 AND LD.intLoadId = @intLoadId AND ISNULL(LD.dblUnitPrice, 0) = 0)
+		BEGIN
+			RAISERROR('One or more contracts is not yet priced. Please price the contracts or provide a provisional price to proceed.', 16, 1);
+		END
+
 		INSERT INTO @ItemsToPost (
 			intItemId
 			,intItemLocationId
