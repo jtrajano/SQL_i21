@@ -192,7 +192,7 @@ BEGIN TRY
 				
 		END
 
-		SELECT @dblSchQuantityToUpdate = - @dblConvertedQty
+		SELECT @dblSchQuantityToUpdate = CASE WHEN ABS(@dblQtyOrdered) > 0 AND ABS(@dblQty) > ABS(@dblQtyOrdered) THEN -@dblConvertedQtyOrdered ELSE -@dblConvertedQty END
 		SELECT @dblRemainingSchedQty = @dblConvertedQtyOrdered - @dblConvertedQty
 
 		IF	ISNULL(@ysnDestWtGrd,0) = 0 AND
