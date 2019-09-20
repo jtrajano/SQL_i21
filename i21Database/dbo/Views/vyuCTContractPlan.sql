@@ -38,8 +38,8 @@ AS
 			TX.strTextCode,	
 			YR.strCropYear,
 			AN.strName					AS	strAssociationName,
-			CB.strContractBasis,
-			CB.strINCOLocationType,
+			strContractBasis = CB.strFreightTerm,
+			strINCOLocationType = CB.strINCOLocationType,
 			IM.strItemNo,
 			CL.strLocationName
 
@@ -50,7 +50,7 @@ AS
 	JOIN	tblCTWeightGrade		W1	ON	W1.intWeightGradeId			=		CP.intGradeId						LEFT
 	JOIN	tblCTWeightGrade		W2	ON	W2.intWeightGradeId			=		CP.intWeightId						LEFT
 	JOIN	tblSMTerm				TM	ON	TM.intTermID				=		CP.intTermId						LEFT
-	JOIN	tblCTContractBasis		CB	ON	CB.intContractBasisId		=		CP.intContractBasisId				LEFT
+	JOIN	tblSMFreightTerms		CB	ON	CB.intFreightTermId		=			CP.intContractBasisId				LEFT
 	JOIN	tblCTContractType		TP	ON	TP.intContractTypeId		=		CP.intContractTypeId				LEFT
 	JOIN	tblCTAssociation		AN	ON	AN.intAssociationId			=		CP.intAssociationId					LEFT
 	JOIN	tblCTContractText		TX	ON	TX.intContractTextId		=		CP.intContractTextId				LEFT
