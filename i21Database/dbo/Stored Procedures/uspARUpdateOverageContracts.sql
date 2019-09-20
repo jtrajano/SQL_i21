@@ -272,10 +272,10 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
 				END
 
 				--GET NEXT AVAILABLE CONTRACT WITHIN CONTRACT
-				SELECT CD.intContractDetailId
-					 , CD.intContractSeq
-					 , CD.dblBalance
-					 , CD.dblCashPrice
+				SELECT intContractDetailId	= CD.intContractDetailId
+					 , intContractSeq		= CD.intContractSeq
+					 , dblBalance			= CD.dblBalance - ISNULL(CD.dblScheduleQty, 0)
+					 , dblCashPrice			= CD.dblCashPrice
 				INTO #AVAILABLECONTRACTS
 				FROM tblCTContractDetail CD
 				INNER JOIN tblCTContractHeader C ON CD.intContractHeaderId = C.intContractHeaderId
@@ -285,7 +285,7 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
 				  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), @dtmDate))) BETWEEN CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), CD.dtmStartDate))) AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), CD.dtmEndDate))) 
 				  AND C.intEntityId = @intEntityCustomerId
 				  AND CD.intCompanyLocationId = @intCompanyLocationId
-				  AND CD.dblBalance > 0
+				  AND CD.dblBalance - ISNULL(CD.dblScheduleQty, 0) > 0
 				ORDER BY CD.intContractSeq
 
 				WHILE EXISTS (SELECT TOP 1 NULL FROM #AVAILABLECONTRACTS)
@@ -333,10 +333,10 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
 				--GET NEXT AVAILABLE CONTRACT BY CUSTOMER
 				IF @dblQtyOverAged > 0
 					BEGIN
-						SELECT CD.intContractDetailId
-							 , CD.intContractHeaderId
-							 , CD.dblBalance
-							 , CD.dblCashPrice
+						SELECT intContractDetailId	= CD.intContractDetailId
+							 , intContractHeaderId	= CD.intContractHeaderId
+							 , dblBalance			= CD.dblBalance - ISNULL(CD.dblScheduleQty, 0)
+							 , dblCashPrice			= CD.dblCashPrice
 						INTO #AVAILABLECONTRACTSBYCUSTOMER
 						FROM tblCTContractDetail CD
 						INNER JOIN tblCTContractHeader C ON CD.intContractHeaderId = C.intContractHeaderId
@@ -344,7 +344,7 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
 						  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), @dtmDate))) BETWEEN CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), CD.dtmStartDate))) AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), CD.dtmEndDate)))
 						  AND C.intEntityId = @intEntityCustomerId
 						  AND CD.intCompanyLocationId = @intCompanyLocationId
-						  AND CD.dblBalance > 0
+						  AND CD.dblBalance - ISNULL(CD.dblScheduleQty, 0) > 0
 						  AND C.intContractHeaderId > @intContractHeaderId
 						ORDER BY C.intContractHeaderId
 
