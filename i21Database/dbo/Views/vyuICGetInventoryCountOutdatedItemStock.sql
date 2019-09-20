@@ -28,10 +28,17 @@ FROM
 		cd.strCountLine,
 		c.strCountNo,
 		c.intInventoryCountId,
-		dblNewOnHand = ISNULL(CASE WHEN Item.strLotTracking = 'No' THEN dbo.fnCalculateQtyBetweenUOM(nonLotted.intItemUOMId, StockUOM.intItemUOMId, nonLotted.dblOnHand) ELSE CASE WHEN cd.intLotId IS NULL THEN cd.dblSystemCount ELSE LotTransactions.dblOnHand END END, 0),
+		dblNewOnHand = 
+			ISNULL(
+				CASE 
+					WHEN Item.strLotTracking = 'No' THEN dbo.fnCalculateQtyBetweenUOM(nonLotted.intItemUOMId, StockUOM.intItemUOMId, nonLotted.dblOnHand) 
+					ELSE LotTransactions.dblQty 
+				END
+				, 0
+			),
 		dblCountOnHand = cd.dblSystemCount,
 		cd.dblWeightQty,
-		dblNewWeightQty = ISNULL(CASE WHEN Item.strLotTracking = 'No' THEN 0 ELSE lotted.dblWeight END, 0),
+		dblNewWeightQty = ISNULL(CASE WHEN Item.strLotTracking = 'No' THEN 0 ELSE LotTransactions.dblWeight END, 0),
 		dblNewCost = ISNULL(CASE WHEN c.strDataSource = 'Import CSV' THEN cd.dblLastCost ELSE CASE 
 								WHEN ItemLocation.intCostingMethod = 1 AND Item.strLotTracking = 'No'  THEN -- AVG
 									dbo.fnGetItemAverageCost(
@@ -110,45 +117,32 @@ FROM
 				AND dbo.fnDateLessThanEquals(dtmDate, c.dtmCountDate) = 1
 			ORDER BY dtmDate ASC
 		) FIFO 
-		LEFT OUTER JOIN (
-			SELECT
-				Lot.strLotNumber,
-				ISNULL(Lot.dblQty, 0) dblOnHand,
-				ISNULL(Lot.dblWeight, 0) dblWeight,
-				Lot.intItemLocationId,
-				Lot.intItemId,
-				Lot.intItemUOMId,
-				Lot.intWeightUOMId,
-				Lot.intStorageLocationId,
-				Lot.intSubLocationId,
-				Lot.intLotId
-			FROM tblICLot Lot
-				INNER JOIN tblICItem Item ON Item.intItemId = Lot.intItemId
-			WHERE Item.strLotTracking <> 'No'
-		) lotted ON lotted.intItemId = cd.intItemId
-			AND lotted.intItemLocationId = cd.intItemLocationId
-			AND lotted.intItemUOMId = cd.intItemUOMId
-			AND lotted.intSubLocationId = cd.intSubLocationId
-			AND lotted.intStorageLocationId = cd.intStorageLocationId
-			AND lotted.strLotNumber = cd.strLotNo
-		LEFT OUTER JOIN (
-			SELECT t.intItemId
-				, t.intItemLocationId
-				, t.intSubLocationId
-				, t.intStorageLocationId
-				, t.intItemUOMId
-				, t.intLotId
-				, dtmDate = CAST(CONVERT(VARCHAR(10), t.dtmDate,112) AS DATETIME)
-				, dblOnHand = SUM(t.dblQty)
-			FROM tblICInventoryTransaction t
-			GROUP BY t.intItemId, t.intItemLocationId, t.intSubLocationId, t.intStorageLocationId, t.intItemUOMId, t.intLotId, CONVERT(VARCHAR(10), t.dtmDate,112)
-		) LotTransactions ON LotTransactions.intItemId = Item.intItemId
-			AND LotTransactions.intItemLocationId = ItemLocation.intItemLocationId
-			AND LotTransactions.intSubLocationId = lotted.intSubLocationId
-			AND LotTransactions.intStorageLocationId = lotted.intStorageLocationId
-			AND LotTransactions.intLotId = lotted.intLotId
-			AND LotTransactions.intItemUOMId = lotted.intItemUOMId
-			AND dbo.fnDateLessThanEquals(LotTransactions.dtmDate, c.dtmCountDate) = 1
+		OUTER APPLY (
+			SELECT 
+				dblQty = SUM(dbo.fnCalculateQtyBetweenUOM(t.intItemUOMId, l.intItemUOMId, t.dblQty)) 
+				, dblWeight = 
+					SUM(
+						CASE 
+							WHEN l.intWeightUOMId IS NOT NULL THEN 
+								CASE 
+									WHEN t.intItemUOMId = l.intWeightUOMId THEN t.dblQty 
+									WHEN t.intItemUOMId = t.intItemUOMId THEN dbo.fnMultiply(t.dblQty, ISNULL(l.dblWeightPerQty, 0)) 
+									ELSE 0
+								END 
+							ELSE 
+								0
+						END 
+					)
+			FROM tblICInventoryTransaction t INNER JOIN tblICLot l
+					ON t.intLotId = l.intLotId
+			WHERE
+				t.intItemId = Item.intItemId
+				AND t.intItemLocationId = ItemLocation.intItemLocationId
+				AND t.intSubLocationId = cd.intSubLocationId
+				AND t.intStorageLocationId = cd.intStorageLocationId
+				AND t.intLotId = cd.intLotId
+				AND dbo.fnDateLessThanEquals(t.dtmDate, c.dtmCountDate) = 1
+		) LotTransactions 
 	WHERE c.ysnPosted != 1
 ) x
 --WHERE ((ROUND(x.dblNewOnHand - x.dblCountOnHand, 6) != 0) OR (ROUND(x.dblNewCost - x.dblCost, 6) != 0))
