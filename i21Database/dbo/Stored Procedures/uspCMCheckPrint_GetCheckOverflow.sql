@@ -41,7 +41,7 @@ DECLARE @BANK_DEPOSIT INT = 1
 ;WITH QUERY AS(
 SELECT TOP 1 1 ysnCheckOverflow
 FROM	dbo.tblCMBankTransaction CHK
-		LEFT JOIN tblAPPayment PYMT
+		INNER JOIN tblAPPayment PYMT
 			ON CHK.strTransactionId = PYMT.strPaymentRecordNum			
 WHERE	CHK.intBankAccountId = @intBankAccountId
 		AND CHK.strTransactionId IN (SELECT strValues COLLATE Latin1_General_CI_AS FROM dbo.fnARGetRowsFromDelimitedValues(@strTransactionIds))
@@ -69,7 +69,7 @@ FROM	[dbo].[tblCMBankTransaction] CM INNER JOIN [dbo].[tblAPPayment] PYMT
 				ON PYMTDetail.intBillId = BILL.intBillId
 			INNER JOIN [dbo].[tblAPBillDetail] BILLDETAIL
 				ON BILL.intBillId = BILLDETAIL.intBillId
-			LEFT JOIN [dbo].[tblCTContractHeader] CONTRACTHEADER
+			INNER JOIN [dbo].[tblCTContractHeader] CONTRACTHEADER
 				ON BILLDETAIL.intContractHeaderId = CONTRACTHEADER.intContractHeaderId
 			LEFT JOIN [dbo].tblICItem ITEM
 				ON BILLDETAIL.intItemId = ITEM.intItemId
@@ -84,7 +84,7 @@ FROM	[dbo].[tblCMBankTransaction] CM INNER JOIN [dbo].[tblAPPayment] PYMT
 				ON PYMTDetail.intInvoiceId = INV.intInvoiceId
 			INNER JOIN [dbo].[tblARInvoiceDetail] INVDETAIL
 				ON INV.intInvoiceId = INVDETAIL.intInvoiceId
-			LEFT JOIN [dbo].[tblCTContractHeader] CONTRACTHEADER
+			INNER JOIN [dbo].[tblCTContractHeader] CONTRACTHEADER
 				ON INVDETAIL.intContractHeaderId = CONTRACTHEADER.intContractHeaderId
 			LEFT JOIN [dbo].tblICItem ITEM
 				ON INVDETAIL.intItemId = ITEM.intItemId
