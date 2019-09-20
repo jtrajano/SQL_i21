@@ -2524,7 +2524,7 @@ BEGIN TRY
 				,[strMarks]
 				,[strOtherMarks]
 				,[ysnRejected]
-				--,[dtmUnloading]
+				,[dtmUnloading]
 				,[dtmCustoms]
 				,[ysnCustomsHold]
 				,[strCustomsComments]
@@ -2570,7 +2570,7 @@ BEGIN TRY
 				,x.[strMarks]
 				,x.[strOtherMarks]
 				,x.[ysnRejected]
-				--,x.[dtmUnloading]
+				,x.[dtmUnloading]
 				,x.[dtmCustoms]
 				,x.[ysnCustomsHold]
 				,x.[strCustomsComments]
@@ -2599,7 +2599,7 @@ BEGIN TRY
 				,x.[dblAmount]
 				,ACU.intCurrencyID
 				,x.[strRemarks]
-				,x.[intLoadContainerRefId]
+				,x.[intLoadContainerId]
 			FROM OPENXML(@idoc, 'vyuLGLoadContainerViews/vyuLGLoadContainerView', 2) WITH (
 					[strContainerNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS
 					,[dblQuantity] NUMERIC(18, 6)
@@ -2676,7 +2676,7 @@ BEGIN TRY
 				,[strMarks] = x.[strMarks]
 				,[strOtherMarks] = x.[strOtherMarks]
 				,[ysnRejected] = x.[ysnRejected]
-				--,[dtmUnloading] = x.[dtmUnloading]
+				,[dtmUnloading] = x.[dtmUnloading]
 				,[dtmCustoms] = x.[dtmCustoms]
 				,[ysnCustomsHold] = x.[ysnCustomsHold]
 				,[strCustomsComments] = x.[strCustomsComments]
@@ -2814,6 +2814,7 @@ BEGIN TRY
 				,[dtmExportedDate]
 				,[dtmIntegrationOrderDate]
 				,[intLoadDetailContainerLinkRefId]
+				,strIntegrationNumber
 				)
 			SELECT 1 AS [intConcurrencyId]
 				,@intNewLoadId
@@ -2841,6 +2842,7 @@ BEGIN TRY
 				,x.[dtmExportedDate]
 				,x.[dtmIntegrationOrderDate]
 				,x.[intLoadDetailContainerLinkId]
+				,x.strIntegrationNumber
 			FROM OPENXML(@idoc, 'vyuLGLoadDetailContainerLinkViews/vyuLGLoadDetailContainerLinkView', 2) WITH (
 					[intLoadContainerId] INT
 					,[intLoadDetailId] INT
@@ -2862,6 +2864,7 @@ BEGIN TRY
 					,strItemNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
 					,intLoadDetailContainerLinkId INT
 					--,intLoadDetailId INT
+					,[strIntegrationNumber] NVARCHAR(300) COLLATE Latin1_General_CI_AS
 					) x
 			LEFT JOIN tblICUnitMeasure UM ON UM.strUnitMeasure = x.strItemUOM
 			LEFT JOIN tblICItem I ON I.strItemNo = x.strItemNo
@@ -2899,6 +2902,7 @@ BEGIN TRY
 				,[ysnExported] = x.[ysnExported]
 				,[dtmExportedDate] = x.[dtmExportedDate]
 				,[dtmIntegrationOrderDate] = x.[dtmIntegrationOrderDate]
+				,strIntegrationNumber=x.strIntegrationNumber
 			FROM OPENXML(@idoc, 'vyuLGLoadDetailContainerLinkViews/vyuLGLoadDetailContainerLinkView', 2) WITH (
 					[intLoadContainerId] INT
 					,[intLoadDetailId] INT
@@ -2919,6 +2923,7 @@ BEGIN TRY
 					,strItemUOM NVARCHAR(50) COLLATE Latin1_General_CI_AS
 					,strItemNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
 					,[intLoadDetailContainerLinkId] INT
+					,[strIntegrationNumber] NVARCHAR(300) COLLATE Latin1_General_CI_AS
 					) x
 			LEFT JOIN tblICUnitMeasure UM ON UM.strUnitMeasure = x.strItemUOM
 			LEFT JOIN tblICItem I ON I.strItemNo = x.strItemNo
@@ -2937,7 +2942,7 @@ BEGIN TRY
 				AND NOT EXISTS (
 					SELECT *
 					FROM OPENXML(@idoc, 'vyuLGLoadDetailContainerLinkViews/vyuLGLoadDetailContainerLinkView', 2) WITH ([intLoadDetailContainerLinkId] INT) x
-					WHERE LDCL.intLoadDetailContainerLinkId = x.intLoadDetailContainerLinkId
+					WHERE LDCL.intLoadDetailContainerLinkRefId = x.intLoadDetailContainerLinkId
 					)
 
 			EXEC sp_xml_removedocument @idoc

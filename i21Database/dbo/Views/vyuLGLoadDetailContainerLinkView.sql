@@ -19,6 +19,7 @@ SELECT LDCL.[intLoadContainerId]
 	,UM.strUnitMeasure AS strItemUOM
 	,I.strItemNo
 	,LDCL.intLoadDetailContainerLinkId
+	,LDCL.[strIntegrationNumber]
 FROM dbo.tblLGLoadDetailContainerLink LDCL
 Left JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = LDCL.intItemUOMId
 Left JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
