@@ -483,8 +483,59 @@ BEGIN
 		LEFT JOIN tblCTContractDetail CD
 			ON CD.intContractDetailId = TransferStorageSplit.intContractDetailId
 		
-		EXEC uspGRInsertStorageHistoryRecord @StorageHistoryStagingTable, @intStorageHistoryId
+		INSERT INTO @StorageHistoryStagingTable
+		(
+			[intCustomerStorageId]
+			,[intTransferStorageId]
+			,[intContractHeaderId]
+			,[dblUnits]
+			,[dtmHistoryDate]
+			,[intUserId]
+			,[ysnPost]
+			,[intTransactionTypeId]
+			,[strPaidDescription]
+			,[strType]
+			,[intInventoryReceiptId]
+		)
+		SELECT DISTINCT	
+		     [intCustomerStorageId]	= SR.intToCustomerStorageId
+			,[intTransferStorageId]	= SR.intTransferStorageId
+			,[intContractHeaderId]	= CD.intContractHeaderId
+			,[dblUnits]				= SR.dblUnitQty
+			,[dtmHistoryDate]		= GETDATE()
+			,[intUserId]			= @intUserId
+			,[ysnPost]				= 1
+			,[intTransactionTypeId]	= 3
+			,[strPaidDescription]	= 'Generated from Transfer Storage'
+			,[strType]				= 'From Transfer'
+			,[intInventoryReceiptId] = SourceHistory.intInventoryReceiptId
+		FROM tblGRTransferStorageReference SR
+		INNER JOIN tblGRCustomerStorage FromStorage
+			ON FromStorage.intCustomerStorageId = SR.intSourceCustomerStorageId
+		INNER JOIN tblGRStorageType FromType
+			ON FromType.intStorageScheduleTypeId = FromStorage.intStorageTypeId
+		INNER JOIN tblGRCustomerStorage ToStorage
+			ON ToStorage.intCustomerStorageId = SR.intToCustomerStorageId
+		INNER JOIN tblGRStorageType ToType
+			ON ToType.intStorageScheduleTypeId = ToStorage.intStorageTypeId
+		JOIN tblICItemUOM IU
+			ON IU.intItemId = ToStorage.intItemId
+				AND IU.ysnStockUnit = 1
+		INNER JOIN tblICItemLocation IL
+			ON IL.intItemId = ToStorage.intItemId AND IL.intLocationId = ToStorage.intCompanyLocationId
+		INNER JOIN tblGRTransferStorage TS
+			ON SR.intTransferStorageId = TS.intTransferStorageId
+		INNER JOIN tblGRStorageHistory SourceHistory
+			ON SourceHistory.intCustomerStorageId = FromStorage.intCustomerStorageId AND SourceHistory.intInventoryReceiptId IS NOT NULL
+		INNER JOIN tblGRTransferStorageSplit TSS
+			ON TSS.intTransferStorageSplitId = SR.intTransferStorageSplitId
+		LEFT JOIN tblCTContractDetail CD
+			ON CD.intContractDetailId = TSS.intContractDetailId
+		WHERE  FromType.strStorageTypeDescription = 'DELAYED PRICING' AND ToType.strStorageTypeDescription = 'DELAYED PRICING'
+		AND SR.intTransferStorageId = @intTransferStorageId
 
+		EXEC uspGRInsertStorageHistoryRecord @StorageHistoryStagingTable, @intStorageHistoryId
+		--integration to IC
 		SET @cnt = 0
 		SET @cnt = (SELECT COUNT(*) FROM tblGRTransferStorageSplit WHERE intTransferStorageId = @intTransferStorageId AND intContractDetailId IS NOT NULL)
 
