@@ -16,6 +16,7 @@ BEGIN TRY
 		  , @intFromItemOrderedUOMId		INT
 		  , @intToItemUOMId					INT
 		  , @intUniqueId					INT
+		  , @intLoadDetailId				INT = NULL
 		  , @intTicketId					INT = NULL
 		  , @intTicketTypeId				INT = NULL
 		  , @intTicketType					INT = NULL
@@ -48,6 +49,7 @@ BEGIN TRY
 		, intItemUOMId				INT
 		, intOrderUOMId				INT
 		, intTicketId				INT
+		, intLoadDetailId			INT
 		, dblQty					NUMERIC(18,6)
 		, dblQtyOrdered				NUMERIC(18,6)
 		, ysnDestWtGrd				BIT
@@ -64,6 +66,7 @@ BEGIN TRY
 		, [dblQty]
 		, [dblQtyOrdered]
 		, [intTicketId]
+		, [intLoadDetailId]
 	)
 	SELECT [intInvoiceDetailId] 	= I.[intInvoiceDetailId]
 		, [intContractDetailId]		= I.[intContractDetailId]
@@ -73,11 +76,18 @@ BEGIN TRY
 		, [dblQty]					= I.[dblQtyShipped]
 		, [dblQtyOrdered]			= CASE WHEN ID.intSalesOrderDetailId IS NOT NULL OR ID.intTicketId IS NOT NULL THEN ID.[dblQtyOrdered] ELSE 0 END
 		, [intTicketId]				= I.[intTicketId]
+		, [intLoadDetailId]			= ID.[intLoadDetailId]
 	FROM @ItemsFromInvoice I
 	INNER JOIN tblARInvoiceDetail ID ON I.intInvoiceDetailId = ID.intInvoiceDetailId
+	LEFT JOIN (
+		SELECT intLoadDetailId
+			, intPurchaseSale 
+		FROM tblLGLoadDetail LGD 
+		INNER JOIN tblLGLoad LG ON LG.intLoadId = LGD.intLoadId	
+	) LG ON I.intLoadDetailId = LG.intLoadDetailId
 	WHERE I.intContractDetailId IS NOT NULL
 		AND	(
-			(I.strTransactionType <> 'Credit Memo' AND I.[intInventoryShipmentItemId] IS NULL AND I.[intShipmentPurchaseSalesContractId] IS NULL AND I.[intLoadDetailId] IS  NULL)
+			(I.strTransactionType <> 'Credit Memo' AND I.[intInventoryShipmentItemId] IS NULL AND I.[intShipmentPurchaseSalesContractId] IS NULL AND (I.[intLoadDetailId] IS NULL OR (I.intLoadDetailId IS NOT NULL AND LG.intPurchaseSale = 3)))
 			OR
 			(I.strTransactionType = 'Credit Memo' AND (I.[intInventoryShipmentItemId] IS NOT NULL OR I.[intShipmentPurchaseSalesContractId] IS NOT NULL OR I.[intLoadDetailId] IS NOT NULL))
 			)
@@ -139,7 +149,8 @@ BEGIN TRY
 				@ysnDestWtGrd					=	NULL,
 				@dblShippedQty					=	NULL,
 				@intShippedQtyUOMId				=	NULL,
-				@dblRemainingSchedQty			=	NULL
+				@dblRemainingSchedQty			=	NULL,
+				@intLoadDetailId				=	NULL
 
 		SELECT	@intContractDetailId			=	P.[intContractDetailId],
 				@intFromItemUOMId				=	P.[intItemUOMId],
@@ -150,6 +161,7 @@ BEGIN TRY
 				@ysnDestWtGrd					=	P.[ysnDestWtGrd],
 				@dblShippedQty					=	P.[dblShippedQty],
 				@intShippedQtyUOMId				=	P.[intShippedQtyUOMId],
+				@intLoadDetailId				=	P.[intLoadDetailId],
 
 				@intTicketId					=   T.[intTicketId],
 				@intTicketTypeId				=   T.[intTicketTypeId], --SELECT * FROM tblSCListTicketTypes
@@ -218,14 +230,17 @@ BEGIN TRY
 							@ysnFromInvoice 		= 	1  	 
 				END
 				
-				EXEC	uspCTUpdateScheduleQuantity
-						@intContractDetailId	=	@intContractDetailId,
-						@dblQuantityToUpdate	=	@dblSchQuantityToUpdate,
-						@intUserId				=	@intUserId,
-						@intExternalId			=	@intInvoiceDetailId,
-						@strScreenName			=	'Invoice' 
-
-				IF ISNULL(@dblRemainingSchedQty, 0) > 0 AND ISNULL(@dblConvertedQtyOrdered, 0) > 0
+				IF ISNULL(@intLoadDetailId, 0) = 0
+				BEGIN
+					EXEC	uspCTUpdateScheduleQuantity
+							@intContractDetailId	=	@intContractDetailId,
+							@dblQuantityToUpdate	=	@dblSchQuantityToUpdate,
+							@intUserId				=	@intUserId,
+							@intExternalId			=	@intInvoiceDetailId,
+							@strScreenName			=	'Invoice' 
+				END
+				
+				IF ISNULL(@dblRemainingSchedQty, 0) > 0 AND ISNULL(@dblConvertedQtyOrdered, 0) > 0 AND ISNULL(@intLoadDetailId, 0) = 0
 					BEGIN
 						SET @dblRemainingSchedQty = -@dblRemainingSchedQty
 

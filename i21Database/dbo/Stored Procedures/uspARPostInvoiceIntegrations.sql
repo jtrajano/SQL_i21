@@ -777,6 +777,12 @@ INNER JOIN tblCTContractDetail CD ON ID.[intContractDetailId] = CD.[intContractD
 LEFT JOIN tblCTContractHeader CH ON CD.intContractHeaderId = CH.intContractHeaderId
 LEFT JOIN tblICInventoryShipmentItem ISI ON ID.[intInventoryShipmentItemId] = ISI.[intInventoryShipmentItemId]
 LEFT JOIN tblARInvoice PI ON ID.intOriginalInvoiceId = PI.intInvoiceId AND ID.ysnFromProvisional = 1 AND PI.strType = 'Provisional'
+LEFT JOIN (
+	SELECT intLoadDetailId
+		 , intPurchaseSale 
+	FROM tblLGLoadDetail LGD 
+	INNER JOIN tblLGLoad LG ON LG.intLoadId = LGD.intLoadId	
+) LG ON ID.intLoadDetailId = LG.intLoadDetailId
 OUTER APPLY (
 	SELECT TOP 1 intInvoiceId 
 	FROM tblARInvoice I
@@ -787,7 +793,7 @@ OUTER APPLY (
 ) RI
 WHERE ID.[intInventoryShipmentChargeId] IS NULL
 	AND	(
-		(ID.strTransactionType <> 'Credit Memo' AND ((ID.[intInventoryShipmentItemId] IS NULL AND ID.[intLoadDetailId] IS NULL) OR (ISI.[intDestinationGradeId] IS NOT NULL AND ISI.[intDestinationWeightId] IS NOT NULL)))
+		(ID.strTransactionType <> 'Credit Memo' AND ((ID.[intInventoryShipmentItemId] IS NULL AND (ID.[intLoadDetailId] IS NULL OR (ID.intLoadDetailId IS NOT NULL AND LG.intPurchaseSale = 3))) OR (ISI.[intDestinationGradeId] IS NOT NULL AND ISI.[intDestinationWeightId] IS NOT NULL)))
 		OR
 		(ID.strTransactionType = 'Credit Memo' AND (ID.[intInventoryShipmentItemId] IS NOT NULL OR ID.[intLoadDetailId] IS NOT NULL OR ISNULL(RI.[intInvoiceId], 0) <> 0))
 		)
