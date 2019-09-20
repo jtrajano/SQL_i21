@@ -7685,6 +7685,7 @@
     <None Include="Scripts\Post-Deployment\SM\1910_DeleteDuplicateUserPreference.sql" />
     <Build Include="dbo\Stored Procedures\uspRKPositionReconciliationReportDerivativeActivity.sql" />
     <Build Include="dbo\Stored Procedures\uspRKPositionReconciliationReportBasisDeliveries.sql" />
+    <Build Include="dbo\Views\vyuMFGetSalesOrderDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
