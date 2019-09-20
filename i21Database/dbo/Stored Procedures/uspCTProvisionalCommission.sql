@@ -132,10 +132,10 @@ BEGIN TRY
 			strSellerRef,
 			strSeller,
 			dbo.fnRemoveTrailingZeroes(BD.dblQuantity) + ' (' + isnull(rtrt2.strTranslation,BD.strItemUOM) + ')' AS strQuantity,
-			dbo.fnRemoveTrailingZeroes(BD.dblRate) + ' ' + BD.strCurrency + '/' + isnull(rtrt3.strTranslation,BD.strRateUOM) AS strRate,
+			CAST(CAST(ROUND(ISNULL(BD.dblRate,0),2) as NUMERIC(36,2)) as NVARCHAR(50)) + ' ' + BD.strCurrency + '/' + BD.strSymbol AS strRate,
 			ISNULL(isnull(rtrt4.strTranslation,IG.strCountry),isnull(rtrt5.strTranslation,OG.strCountry))	AS	strOrigin,
 			strCurrency,
-			dblReqstdAmount,
+			CAST(ROUND(ISNULL(dblReqstdAmount,0),2) as NUMERIC(36,2)) as dblReqstdAmount,
 			@strBankTransferText AS strBankTransferText,
 			ISNULL(@intReportLogoHeight,0) AS intReportLogoHeight,
 			ISNULL(@intReportLogoWidth,0) AS intReportLogoWidth

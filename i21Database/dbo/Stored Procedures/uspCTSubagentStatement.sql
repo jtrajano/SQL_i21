@@ -91,10 +91,10 @@ BEGIN TRY
 			strSeller,
 			strBuyer,
 			dbo.fnRemoveTrailingZeroes(BD.dblQuantity) + ' (' + BD.strItemUOM + ')' AS strQuantity,
-			dbo.fnRemoveTrailingZeroes(BD.dblRate) + ' ' + BD.strCurrency + '/' + BD.strSymbol AS strRate,
+			CAST(CAST(ROUND(ISNULL(BD.dblRate,0),2) as NUMERIC(36,2)) as NVARCHAR(50)) + ' ' + BD.strCurrency + '/' + BD.strSymbol AS strRate,
 			strItemNo,
 			strCurrency,
-			dblReqstdAmount,
+			CAST(ROUND(ISNULL(dblReqstdAmount,0),2) as NUMERIC(36,2)) as dblReqstdAmount,
 			ISNULL(@intReportLogoHeight,0) AS intReportLogoHeight,
 			ISNULL(@intReportLogoWidth,0) AS intReportLogoWidth
 
