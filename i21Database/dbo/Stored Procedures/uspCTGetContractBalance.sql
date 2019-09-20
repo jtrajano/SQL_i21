@@ -263,7 +263,7 @@ BEGIN TRY
 	  ,CD.intContractDetailId
 	  ,InvTran.dtmDate	  
 	  ,@dtmEndDate AS dtmEndDate
-	  ,dblQuantity = ISNULL(dbo.fnMFConvertCostToTargetItemUOM(CD.intPriceItemUOMId,ShipmentItem.intPriceUOMId,
+	  ,dblQuantity = ISNULL(dbo.fnMFConvertCostToTargetItemUOM(CD.intItemUOMId,ShipmentItem.intPriceUOMId,
 					 CASE
 			 			WHEN ISNULL(INV.ysnPosted, 0) = 1 AND ShipmentItem.dblDestinationNet IS NOT NULL
 							THEN MAX(ShipmentItem.dblDestinationNet * 1)
@@ -301,7 +301,7 @@ BEGIN TRY
 		,Shipment.intInventoryShipmentId
 		,INV.ysnPosted
 		,ShipmentItem.dblDestinationNet
-		,CD.intPriceItemUOMId
+		,CD.intItemUOMId
 		,ShipmentItem.intPriceUOMId
 		
 	INSERT INTO @Shipment
