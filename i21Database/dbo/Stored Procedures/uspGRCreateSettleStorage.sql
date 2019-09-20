@@ -44,6 +44,9 @@ BEGIN TRY
 	DECLARE @NewSettleStorageId INT
 	DECLARE @Counter INT
 	DECLARE @intItemUOMId INT
+	DECLARE @strCalcMethod VARCHAR(MAX)
+	DECLARE @dblGrossQuantity DECIMAL(24,10)
+	DECLARE @dblOpenBalance DECIMAL(24,10)
 
 	SET @Counter = 1 
 
@@ -356,6 +359,16 @@ BEGIN TRY
 		SELECT @dblDiscountUnpaid = dblDiscountUnPaid
 		FROM vyuGRGetStorageTickets
 		WHERE intCustomerStorageId = @intCustomerStorageId
+		
+		SELECT @strCalcMethod = TD.strCalcMethod,
+				@dblGrossQuantity = CS.dblGrossQuantity,
+				@dblOpenBalance = CS.dblOpenBalance						
+		FROM tblGRCustomerStorage CS
+		INNER JOIN vyuGRTicketDiscount TD
+			ON TD.intTicketFileId = CS.intCustomerStorageId
+				AND TD.strSourceType = 'Storage'
+		WHERE CS.intCustomerStorageId = @intCustomerStorageId
+			AND TD.dblDiscountDue > 0
 
 		IF @strOrderType = 'Direct'
 		BEGIN
@@ -438,8 +451,14 @@ BEGIN TRY
 				,dblSelectedUnits			= @dblUnits
 				,dblUnpaidUnits				= 0
 				,dblSettleUnits				= @dblUnits
-				,dblDiscountsDue			= @dblDiscountUnpaid * @dblUnits
-				,dblNetSettlement			= (@dblUnits * dblCashPrice) - (@dblTicketStorageDue*@dblUnits) - (@dblDiscountUnpaid * @dblUnits)-ISNULL(@dblFlatFeeTotal,0)
+				,dblDiscountsDue			= CASE WHEN @strCalcMethod = 3 
+												   THEN @dblDiscountUnpaid * (@dblGrossQuantity * (@dblStorageUnits / @dblOpenBalance)) 
+												   ELSE @dblDiscountUnpaid * (@dblUnitsByOrderType - @dblUnpaidUnits)
+											  END 
+				,dblNetSettlement			= (@dblUnits * dblCashPrice) - (@dblTicketStorageDue*@dblUnits) - (CASE WHEN @strCalcMethod = 3 
+												   THEN @dblDiscountUnpaid * (@dblGrossQuantity * (@dblStorageUnits / @dblOpenBalance)) 
+												   ELSE @dblDiscountUnpaid * (@dblUnitsByOrderType - @dblUnpaidUnits)
+											  END )-ISNULL(@dblFlatFeeTotal,0)
 				,ysnPosted					= 0
 				,intCommodityId				= intCommodityId
 				,intCommodityStockUomId		= intCommodityStockUomId
@@ -561,8 +580,16 @@ BEGIN TRY
 				,dblSelectedUnits				= @dblUnitsByOrderType
 				,dblUnpaidUnits					= @dblUnpaidUnits
 				,dblSettleUnits					= @dblUnitsByOrderType - @dblUnpaidUnits
-				,dblDiscountsDue				= @dblDiscountUnpaid * (@dblUnitsByOrderType - @dblUnpaidUnits)
-				,dblNetSettlement				= @dblContractAmount - (@dblTicketStorageDue*@dblUnitsByOrderType) - (@dblDiscountUnpaid * (@dblUnitsByOrderType - @dblUnpaidUnits)) - ISNULL(@dblFlatFeeTotal,0)
+				,dblDiscountsDue				= CASE WHEN @strCalcMethod = 3 
+														THEN @dblDiscountUnpaid * (@dblGrossQuantity * (@dblStorageUnits / @dblOpenBalance)) 
+														ELSE @dblDiscountUnpaid * (@dblUnitsByOrderType - @dblUnpaidUnits)
+												  END
+				,dblNetSettlement				= @dblContractAmount - (@dblTicketStorageDue*@dblUnitsByOrderType) - (
+														CASE WHEN @strCalcMethod = 3 
+															 THEN @dblDiscountUnpaid * (@dblGrossQuantity * (@dblStorageUnits / @dblOpenBalance)) 
+															 ELSE @dblDiscountUnpaid * (@dblUnitsByOrderType - @dblUnpaidUnits)
+														END 
+												  ) - ISNULL(@dblFlatFeeTotal,0)
 				,ysnPosted						= 0
 				,intCommodityId					= intCommodityId
 				,intCommodityStockUomId			= intCommodityStockUomId
