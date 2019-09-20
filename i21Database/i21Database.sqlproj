@@ -8074,6 +8074,7 @@
     <Build Include="dbo\Stored Procedures\uspRKPositionReconciliationReportBasisDeliveries.sql" />
     <Build Include="dbo\Stored Procedures\uspRKPositionReconciliationReportDerivativeActivity.sql" />
     <Build Include="dbo\Views\vyuCTSearchContractDetail2.sql" />
+    <Build Include="dbo\Views\vyuMFGetSalesOrderDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
