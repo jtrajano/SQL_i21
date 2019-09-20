@@ -292,10 +292,14 @@ BEGIN
 	FROM tblGRSettleStorage SS
 	JOIN tblICItem IC 
 		ON 1 = 1
+	LEFT JOIN tblGRSettleContract SC
+		ON SC.intSettleStorageId = SS.intSettleStorageId
+	LEFT JOIN tblCTContractDetail CD
+		ON CD.intContractDetailId = SC.intContractDetailId
 	WHERE SS.intSettleStorageId = @intSettleStorageId 
 		AND ISNULL(SS.dblStorageDue,0) > 0 
 		AND IC.intItemId = @intStorageChargeItemId 	
-	
+		AND (CD.intContractDetailId is null or ( CD.intContractDetailId is not null and CD.intPricingTypeId <> 2))
 	DECLARE @tblItem AS TABLE 
 	(
 		 intItemId			INT
