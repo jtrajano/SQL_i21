@@ -49,6 +49,7 @@ SELECT LG.intLoadId
 	, intShipViaId = LG.intHaulerEntityId
 	, Config.intSellerId
 	, intDriverId = LG.intDriverEntityId
+	, strDriver = LG.strDriver
 	, strTractor = LG.strTruckNo
 	, strTrailer = LG.strTrailerNo1
 	, strShipVia = LG.strHauler
