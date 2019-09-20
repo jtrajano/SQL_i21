@@ -6168,21 +6168,24 @@ BEGIN
 	END
 	ELSE IF @strPriceMethod = 'Network Cost'
 		BEGIN
-		DECLARE @dblNetworkCostGrossPrice NUMERIC(18,6)
-		SET @dblNetworkCostGrossPrice = ISNULL(@TransferCost,0)
-		SET @dblImportFileGrossPrice = @dblNetworkCostGrossPrice --ROUND((ISNULL(@TransferCost,0) - (ISNULL(@totalOriginalTax,0) / @dblQuantity)) + ISNULL(@dblAdjustments,0) + (ISNULL(@totalCalculatedTax,0) / @dblQuantity) , 6)
- 
+		IF(@ysnReRunCalcTax = 0)
+		BEGIN
+			DECLARE @dblNetworkCostGrossPrice NUMERIC(18,6)
+			SET @dblPrice = ISNULL(@TransferCost,0)
+			SET @ysnReRunCalcTax = 1
+			GOTO TAXCOMPUTATION
+		END
 		IF(ISNULL(@ysnForceRounding,0) = 1) 
 		BEGIN
-			SELECT @dblImportFileGrossPrice = dbo.fnCFForceRounding(@dblImportFileGrossPrice)
+			SELECT @dblPrice = dbo.fnCFForceRounding(@dblPrice)
 		END
 
-		SET @dblCalculatedGrossPrice	 = 	 @dblImportFileGrossPrice
-		SET @dblOriginalGrossPrice		 = 	 @dblNetworkCostGrossPrice
-		SET @dblCalculatedNetPrice		 = 	 ROUND(((ROUND((@dblImportFileGrossPrice * @dblQuantity),2) - (ISNULL(@totalCalculatedTax,0))) / @dblQuantity),6)
-		SET @dblOriginalNetPrice		 = 	 ROUND(((ROUND((@dblNetworkCostGrossPrice * @dblQuantity),2) - (ISNULL(@totalOriginalTax,0))) / @dblQuantity),6)
-		SET @dblCalculatedTotalPrice	 = 	 ROUND((@dblImportFileGrossPrice * @dblQuantity),2)
-		SET @dblOriginalTotalPrice		 = 	 ROUND(@dblNetworkCostGrossPrice * @dblQuantity,2)
+		SET @dblCalculatedGrossPrice	 = 	 @dblPrice
+		SET @dblOriginalGrossPrice		 = 	 @dblPrice
+		SET @dblCalculatedNetPrice		 = 	 ROUND(((ROUND((@dblPrice * @dblQuantity),2) - (ISNULL(@totalCalculatedTax,0))) / @dblQuantity),6)
+		SET @dblOriginalNetPrice		 = 	 ROUND(((ROUND((@dblPrice * @dblQuantity),2) - (ISNULL(@totalOriginalTax,0))) / @dblQuantity),6)
+		SET @dblCalculatedTotalPrice	 = 	 ROUND((@dblPrice * @dblQuantity),2)
+		SET @dblOriginalTotalPrice		 = 	 ROUND(@dblPrice * @dblQuantity,2)
 
 		SET @dblQuoteGrossPrice			 = @dblCalculatedGrossPrice
 		SET @dblQuoteNetPrice			 = ROUND(((ROUND((@dblQuoteGrossPrice * @dblQuantity),2) - (ISNULL(@totalCalculatedTax,0))) / @dblQuantity),6)
