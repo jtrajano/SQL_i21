@@ -6430,7 +6430,7 @@ BEGIN
 
 		SET @dblCalculatedGrossPrice	 = 	 @dblContractGrossPriceZeroQty
 		SET @dblOriginalGrossPrice		 = 	 @dblOriginalPrice
-		SET @dblCalculatedNetPrice		 = 	 @dblContractGrossPrice
+		SET @dblCalculatedNetPrice		 = 	 @dblPrice
 		SET @dblOriginalNetPrice		 = 	 Round((Round(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax ) / @dblQuantity, 6) 
 		SET @dblCalculatedTotalPrice	 = 	 ROUND((@dblContractGrossPrice * @dblQuantity),2)
 		SET @dblOriginalTotalPrice		 = 	 ROUND(@dblOriginalPrice * @dblQuantity,2)
