@@ -368,13 +368,16 @@ BEGIN
 	INSERT INTO @Result (strContractType
 		, dblQty
 		, dblUSD
+		, dblBasis
 		, dblPriceVariation)
 	SELECT 'Futures Impact - USD'
 		, @dblQty
 		, dblUSD = SUM((ISNULL(dblLatestSettlementPrice, 0) - ISNULL(dblPrice, 0)) * (ISNULL(dblNoOfLots, 0) * ISNULL(dblContractSize, 0))
 					/ CASE WHEN ysnSubCurrency = 1 THEN 100 ELSE 1 END)
+		, dblBasis = SUM((ISNULL(dblLatestSettlementPrice, 0) - ISNULL(dblPrice, 0)) * (ISNULL(dblNoOfLots, 0) * ISNULL(dblContractSize, 0))
+					/ CASE WHEN ysnSubCurrency = 1 THEN 100 ELSE 1 END)
 		, dblInvoicePrice = SUM((ISNULL(dblLatestSettlementPrice, 0) - ISNULL(dblPrice, 0)) * (ISNULL(dblNoOfLots, 0) * ISNULL(dblContractSize, 0))
-							/ CASE WHEN ysnSubCurrency = 1 THEN 100 ELSE 1 END)
+					/ CASE WHEN ysnSubCurrency = 1 THEN 100 ELSE 1 END)
 	FROM (
 		SELECT DISTINCT TP.strContractType
 			, strContractNumber = CH.strContractNumber + ' - ' + CONVERT(NVARCHAR(100), CD.intContractSeq)
@@ -507,9 +510,11 @@ BEGIN
 		WHERE intSContractDetailId = @intSContractDetailId
 	) t
 
+	DECLARE @dblFutureImpact NUMERIC(18, 6)
 	SELECT @dblBasis = ISNULL(dblBasis, 0) FROM @Result WHERE strContractType = 'Physical Profit - Rate'
+	SELECT @dblFutureImpact = ISNULL(dblBasis, 0) FROM @Result WHERE strContractType = 'Futures Impact - USD'
 	SELECT @FinalAllocatedQty = ISNULL(SUM(dblAllocatedQty), 0) FROM @Result WHERE strContractType ='PO Costs'
-	
+
 	---- Profit
 	INSERT INTO @Result (strContractType	
 		, dblBasis
@@ -539,7 +544,7 @@ BEGIN
 		, ISNULL(dblBasis, 0) + ISNULL(dblUSD, 0)
 	FROM (
 		SELECT DISTINCT strContractType = 'Net SO Profit - USD'
-			, dblBasis = ISNULL(dblBasis, 0)
+			, dblBasis = ISNULL(dblBasis, 0) + @dblFutureImpact
 			, dblQty = @dblQty
 			, dblUSD = ISNULL(dblUSD, 0) + ISNULL((select SUM(dblUSD) FROM @Result WHERE strContractType='Futures Impact - USD'), 0)
 		FROM @Result
