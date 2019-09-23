@@ -91,5 +91,6 @@ FROM	[dbo].[tblCMBankTransaction] CM INNER JOIN [dbo].[tblAPPayment] PYMT
 WHERE CM.strTransactionId IN (SELECT strValues COLLATE Latin1_General_CI_AS FROM dbo.fnARGetRowsFromDelimitedValues(@strTransactionIds))
 AND CM.intBankTransactionTypeId IN (@AP_PAYMENT, @AP_ECHECK, @ACH, @DIRECT_DEPOSIT)
 )
-
 SELECT @ysnCheckOverflow = 1 FROM QUERY
+
+SELECT @ysnCheckOverflow = ISNULL(@ysnCheckOverflow, 0)
