@@ -1,6 +1,12 @@
 ﻿GO
 	PRINT N'BEGIN INSERT DEFAULT COUNTRIES'
 GO
+
+DECLARE @ysnFreightTermUpdated INT = (SELECT TOP 1 [ysnFreightTermUpdated] FROM tblSMCompanySetup)
+
+IF(ISNULL(@ysnFreightTermUpdated,0) = 0 OR @ysnFreightTermUpdated != 1)
+BEGIN
+
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMFreightTerms WHERE strFreightTerm = N'Truck') 
 	BEGIN 
 		INSERT [dbo].tblSMFreightTerms ([strFreightTerm], [strFobPoint], [ysnActive], [intConcurrencyId], [strContractBasis], [strDescription]) 
@@ -80,5 +86,9 @@ GO
 	BEGIN
 		UPDATE tblSMFreightTerms SET [strFobPoint] = N'Origin' WHERE strFreightTerm = N'FOB'
 	END
+
+	UPDATE tblSMCompanySetup SET ysnFreightTermUpdated = 1 
+
+END
 GO
 	PRINT N'END INSERT DEFAULT COUNTRIES'
