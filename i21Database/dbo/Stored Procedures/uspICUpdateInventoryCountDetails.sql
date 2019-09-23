@@ -284,7 +284,7 @@ BEGIN
 			-- If multi-filter is enabled
 			(@ysnIsMultiFilter = 1 AND storageUnitFilter.intStorageUnitId = Lot.intStorageLocationId OR @StorageUnitFilterCount = 0))
 		AND Item.strLotTracking <> 'No'
-		AND ((LotTransactions.dblQty > 0 AND @ysnIncludeZeroOnHand = 0) OR (@ysnIncludeZeroOnHand = 1))
+		AND ((LotTransactions.dblQty <> 0 AND @ysnIncludeZeroOnHand = 0) OR (@ysnIncludeZeroOnHand = 1))
 		AND Item.strType IN ('Inventory', 'Raw Material', 'Finished Good')
 		AND (ItemLocation.intCountGroupId = @intCountGroupId OR ISNULL(@intCountGroupId, 0) = 0)
 END
@@ -411,7 +411,7 @@ BEGIN
 		LEFT OUTER JOIN @StorageLocationIds storageLocationFilter ON storageLocationFilter.intStorageLocationId = stock.intSubLocationId
 		LEFT OUTER JOIN @StorageUnitIds storageUnitFilter ON storageUnitFilter.intStorageUnitId = stock.intStorageLocationId
 	WHERE il.intLocationId = @intLocationId
-		AND ((stock.dblOnHand > 0 AND @ysnIncludeZeroOnHand = 0) OR (@ysnIncludeZeroOnHand = 1))
+		AND ((stock.dblOnHand <> 0 AND @ysnIncludeZeroOnHand = 0) OR (@ysnIncludeZeroOnHand = 1))
 		AND ((@ysnIsMultiFilter = 0 AND (i.intCategoryId = @intCategoryId OR ISNULL(@intCategoryId, 0) = 0)) OR
 			-- If multi-filter is enabled
 			(@ysnIsMultiFilter = 1 AND categoryFilter.intCategoryId = i.intCategoryId OR @CategoryFilterCount = 0))
