@@ -226,7 +226,7 @@ BEGIN
 			,[ysnIsStorage] 					=	0
 			,[strActualCostId] 					=	NULL
 			,[intSourceTransactionId] 			=	C3.intSettleStorageId
-			,[intSourceTransactionDetailId] 	=	C3.intSettleStorageId
+			,[intSourceTransactionDetailId] 	=	C2.intSettleStorageTicketId
 			,[strSourceTransactionId] 			=	C3.strStorageTicket
 			,[intFobPointId]					=	NULL
 			,[intInTransitSourceLocationId]		=	NULL
