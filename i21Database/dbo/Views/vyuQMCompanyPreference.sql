@@ -1,6 +1,23 @@
 ﻿CREATE VIEW vyuQMCompanyPreference
 AS
-SELECT CP.*
+SELECT CP.intCompanyPreferenceId
+	,CP.intConcurrencyId
+	,CP.intNumberofDecimalPlaces
+	,CP.ysnEnableParentLot
+	,CP.ysnIsSamplePrintEnable
+	,CP.intApproveLotStatus
+	,CP.intRejectLotStatus
+	,CP.ysnAllowReversalSampleEntry
+	,CP.ysnChangeLotStatusOnApproveforPreSanitizeLot
+	,CP.ysnRejectLGContainer
+	,CP.intUserSampleApproval
+	,CP.ysnFilterContractByERPPONumber
+	,CP.ysnEnableSampleTypeByUserRole
+	,CP.ysnShowSampleFromAllLocation
+	,CP.ysnValidateMultipleValuesInTestResult
+	,CP.strTestReportComments
+	,CP.strSampleImportDateTimeFormat
+	,CP.ysnCaptureItemInProperty
 	,LS.strSecondaryStatus AS strApprovalLotStatus
 	,LS1.strSecondaryStatus AS strRejectionLotStatus
 FROM tblQMCompanyPreference CP
