@@ -177,14 +177,14 @@ AS
 					(CASE WHEN A.strVendorId BETWEEN @vendorFromParam AND @vendorToParam THEN 1 ELSE 0 END)
 				ELSE 1 END)
 	AND A.intYear = @yearParam
-	AND 1 = (
-		CASE WHEN  ISNULL(@correctedParam,0) = 1 THEN 1 
-				ELSE 
-					(CASE WHEN History.ysnPrinted IS NOT NULL AND History.ysnPrinted = 1 AND @reprintParam = 1 THEN 1 
-						WHEN History.ysnPrinted IS NULL THEN 1
-						WHEN History.ysnPrinted IS NOT NULL AND History.ysnPrinted = 0 THEN 1
-					ELSE 0 END)
-		END)
+	-- AND 1 = (
+	-- 	CASE WHEN  ISNULL(@correctedParam,0) = 1 THEN 1 
+	-- 			ELSE 
+	-- 				(CASE WHEN History.ysnPrinted IS NOT NULL AND History.ysnPrinted = 1 AND @reprintParam = 1 THEN 1 
+	-- 					WHEN History.ysnPrinted IS NULL THEN 1
+	-- 					WHEN History.ysnPrinted IS NOT NULL AND History.ysnPrinted = 0 THEN 1
+	-- 				ELSE 0 END)
+	-- 	END)
 )
 
 SELECT
