@@ -99,7 +99,7 @@ BEGIN TRY
 
 	SELECT @strLoadDetailLotCondition = 'intLoadDetailId IN (' + LTRIM(@strLoadDetailId) + ')'
 
-		IF @ysnReplication = 1
+	IF @ysnReplication = 1
 		SELECT @strObjectName = 'tblLGLoadDetailLot'
 	ELSE
 		SELECT @strObjectName = 'vyuLGLoadDetailLotsView'
@@ -119,7 +119,7 @@ BEGIN TRY
 	IF @ysnReplication = 1
 		SELECT @strObjectName = 'tblLGLoadDocuments'
 	ELSE
-		SELECT @strObjectName = 'vyuIPLoadDocumentTrackingSummary'
+		SELECT @strObjectName = 'vyuLGLoadDocumentView'
 
 	EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
 		,@strLoadDocumentCondition

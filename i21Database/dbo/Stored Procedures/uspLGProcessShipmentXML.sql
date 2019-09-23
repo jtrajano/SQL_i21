@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE dbo.uspLGProcessShipmentXML(@strInfo1 NVARCHAR(MAX) = '' OUTPUT)
+﻿CREATE PROCEDURE dbo.uspLGProcessShipmentXML (@strInfo1 NVARCHAR(MAX) = '' OUTPUT)
 AS
 BEGIN TRY
 	SET NOCOUNT ON
@@ -72,10 +72,9 @@ BEGIN TRY
 		,@strBook NVARCHAR(50)
 		,@strSubBook NVARCHAR(50)
 		,@intInsuranceCurrencyId INT
-		,@intUserId int
-		,@strUserName nvarchar(50)
+		,@intUserId INT
+		,@strUserName NVARCHAR(50)
 		,@strFinalErrMsg NVARCHAR(MAX) = ''
-
 	DECLARE @tblLGLoadDetail TABLE (intLoadDetailId INT)
 	DECLARE @strItemNo NVARCHAR(50)
 		,@strItemUOM NVARCHAR(50)
@@ -255,7 +254,7 @@ BEGIN TRY
 				,@intFreightTermId = NULL
 				,@intBookId = NULL
 				,@intSubBookId = NULL
-				,@strUserName=NULL
+				,@strUserName = NULL
 
 			SELECT @intLoadId = intLoadId
 				,@strLoadNumber = strLoadNumber
@@ -285,7 +284,7 @@ BEGIN TRY
 			FROM tblLGIntrCompLogisticsStg
 			WHERE intId = @intId
 
-			Select @strInfo1=@strInfo1+@strLoadNumber+','
+			SELECT @strInfo1 = @strInfo1 + @strLoadNumber + ','
 
 			IF (@strTransactionType LIKE '%Instruction%')
 			BEGIN
@@ -329,7 +328,7 @@ BEGIN TRY
 				,@strFreightTerm = strFreightTerm
 				,@strBook = strBook
 				,@strSubBook = strSubBook
-				,@strUserName=strUserName
+				,@strUserName = strUserName
 			FROM OPENXML(@idoc, 'vyuIPLoadViews/vyuIPLoadView', 2) WITH (
 					strHauler NVARCHAR(100) Collate Latin1_General_CI_AS
 					,strDriver NVARCHAR(100) Collate Latin1_General_CI_AS
@@ -349,7 +348,7 @@ BEGIN TRY
 					,strFreightTerm NVARCHAR(50) Collate Latin1_General_CI_AS
 					,strBook NVARCHAR(50) Collate Latin1_General_CI_AS
 					,strSubBook NVARCHAR(50) Collate Latin1_General_CI_AS
-						,strUserName NVARCHAR(50) Collate Latin1_General_CI_AS
+					,strUserName NVARCHAR(50) Collate Latin1_General_CI_AS
 					) x
 
 			SELECT @intSourceType = CASE @strSourceType
@@ -694,26 +693,26 @@ BEGIN TRY
 			END
 
 			SELECT @intUserId = CE.intEntityId
-				FROM tblEMEntity CE
-				JOIN tblEMEntityType ET1 ON ET1.intEntityId = CE.intEntityId
-				WHERE ET1.strType = 'User'
-					AND CE.strName = @strUserName
-					AND CE.strEntityNo <> ''
+			FROM tblEMEntity CE
+			JOIN tblEMEntityType ET1 ON ET1.intEntityId = CE.intEntityId
+			WHERE ET1.strType = 'User'
+				AND CE.strName = @strUserName
+				AND CE.strEntityNo <> ''
 
-				IF @intUserId IS NULL
-				BEGIN
-					IF EXISTS (
-							SELECT 1
-							FROM tblSMUserSecurity
-							WHERE strUserName = 'irelyadmin'
-							)
-						SELECT TOP 1 @intUserId = intEntityId
+			IF @intUserId IS NULL
+			BEGIN
+				IF EXISTS (
+						SELECT 1
 						FROM tblSMUserSecurity
 						WHERE strUserName = 'irelyadmin'
-					ELSE
-						SELECT TOP 1 @intUserId = intEntityId
-						FROM tblSMUserSecurity
-				END
+						)
+					SELECT TOP 1 @intUserId = intEntityId
+					FROM tblSMUserSecurity
+					WHERE strUserName = 'irelyadmin'
+				ELSE
+					SELECT TOP 1 @intUserId = intEntityId
+					FROM tblSMUserSecurity
+			END
 
 			SELECT @intNewLoadId = intLoadId
 				,@strNewLoadNumber = strLoadNumber
@@ -722,8 +721,8 @@ BEGIN TRY
 
 			SELECT @intTransactionCount = @@TRANCOUNT
 
-				IF @intTransactionCount = 0
-					BEGIN TRANSACTION
+			IF @intTransactionCount = 0
+				BEGIN TRANSACTION
 
 			IF @intNewLoadId IS NULL
 			BEGIN
@@ -859,6 +858,26 @@ BEGIN TRY
 					,intSubBookId
 					,intLoadRefId
 					,ysnLoadBased
+					,[strVessel1]
+					,[strOriginPort1]
+					,[strDestinationPort1]
+					,[dtmETSPOL1]
+					,[dtmETAPOD1]
+					,[strVessel2]
+					,[strOriginPort2]
+					,[strDestinationPort2]
+					,[dtmETSPOL2]
+					,[dtmETAPOD2]
+					,[strVessel3]
+					,[strOriginPort3]
+					,[strDestinationPort3]
+					,[dtmETSPOL3]
+					,[dtmETAPOD3]
+					,[strVessel4]
+					,[strOriginPort4]
+					,[strDestinationPort4]
+					,[dtmETSPOL4]
+					,[dtmETAPOD4]
 					)
 				SELECT 1 AS intConcurrencyId
 					,@strNewLoadNumber
@@ -992,6 +1011,26 @@ BEGIN TRY
 					,@intSubBookId
 					,@intLoadRefId
 					,ysnLoadBased
+					,[strVessel1]
+					,[strOriginPort1]
+					,[strDestinationPort1]
+					,[dtmETSPOL1]
+					,[dtmETAPOD1]
+					,[strVessel2]
+					,[strOriginPort2]
+					,[strDestinationPort2]
+					,[dtmETSPOL2]
+					,[dtmETAPOD2]
+					,[strVessel3]
+					,[strOriginPort3]
+					,[strDestinationPort3]
+					,[dtmETSPOL3]
+					,[dtmETAPOD3]
+					,[strVessel4]
+					,[strOriginPort4]
+					,[strDestinationPort4]
+					,[dtmETSPOL4]
+					,[dtmETAPOD4]
 				FROM OPENXML(@idoc, 'vyuIPLoadViews/vyuIPLoadView', 2) WITH (
 						strHauler NVARCHAR(100) Collate Latin1_General_CI_AS
 						,strDriver NVARCHAR(100) Collate Latin1_General_CI_AS
@@ -1280,6 +1319,26 @@ BEGIN TRY
 					,intBookId = @intBookId
 					,intSubBookId = @intSubBookId
 					,ysnLoadBased = x.ysnLoadBased
+					,[strVessel1]=x.[strVessel1]
+					,[strOriginPort1]=x.[strOriginPort1]
+					,[strDestinationPort1]=x.[strDestinationPort1]
+					,[dtmETSPOL1]=x.[dtmETSPOL1]
+					,[dtmETAPOD1]=x.[dtmETAPOD1]
+					,[strVessel2]=x.[strVessel2]
+					,[strOriginPort2]=x.[strOriginPort2]
+					,[strDestinationPort2]=x.[strDestinationPort2]
+					,[dtmETSPOL2]=x.[dtmETSPOL2]
+					,[dtmETAPOD2]=x.[dtmETAPOD2]
+					,[strVessel3]=x.[strVessel3]
+					,[strOriginPort3]=x.[strOriginPort3]
+					,[strDestinationPort3]=x.[strDestinationPort3]
+					,[dtmETSPOL3]=x.[dtmETSPOL3]
+					,[dtmETAPOD3]=x.[dtmETAPOD3]
+					,[strVessel4]=x.[strVessel4]
+					,[strOriginPort4]=x.[strOriginPort4]
+					,[strDestinationPort4]=x.[strDestinationPort4]
+					,[dtmETSPOL4]=x.[dtmETSPOL4]
+					,[dtmETAPOD4]=x.[dtmETAPOD4]
 				FROM OPENXML(@idoc, 'vyuIPLoadViews/vyuIPLoadView', 2) WITH (
 						strHauler NVARCHAR(100) Collate Latin1_General_CI_AS
 						,strDriver NVARCHAR(100) Collate Latin1_General_CI_AS
@@ -1434,8 +1493,9 @@ BEGIN TRY
 						,intLoadRefId INT
 						,ysnLoadBased BIT
 						,intContractDetailId INT
+						,intLoadId int
 						) x
-				JOIN tblLGLoad L ON L.intLoadId = x.intLoadRefId
+				JOIN tblLGLoad L ON L.intLoadRefId = x.intLoadId
 				WHERE L.intLoadRefId = @intLoadRefId
 			END
 
@@ -2279,18 +2339,20 @@ BEGIN TRY
 				,[intEntityLocationId]
 				,[intCompanyLocationId]
 				,[strText]
+				,intLoadNotifyPartyRefId
 				)
 			SELECT 1 AS [intConcurrencyId]
 				,@intNewLoadId
 				,x.[strNotifyOrConsignee]
 				,x.[strType]
-				,E.intEntityId
+				,NULL
 				,C.[intCompanySetupID]
 				,B.[intBankId]
-				,EL.[intEntityLocationId]
+				,NULL [intEntityLocationId]
 				,CL.[intCompanyLocationId]
 				,x.[strText]
-			FROM OPENXML(@idoc, 'vyuLGLoadNotifyPartiesViews/vyuLGLoadNotifyPartiesView', 2) WITH (
+				,x.intLoadNotifyPartyId
+			FROM OPENXML(@idoc, 'vyuLGLoadNotifyPartiesNotMappeds/vyuLGLoadNotifyPartiesNotMapped', 2) WITH (
 					[intLoadNotifyPartyId] INT
 					,[intConcurrencyId] INT
 					,[intLoadId] INT
@@ -2305,15 +2367,15 @@ BEGIN TRY
 					,strParty NVARCHAR(100) COLLATE Latin1_General_CI_AS
 					,strPartyLocation NVARCHAR(50) COLLATE Latin1_General_CI_AS
 					) x
-			LEFT JOIN tblEMEntity E ON E.strName = x.strParty
-			JOIN tblEMEntityType ET1 ON ET1.intEntityId = E.intEntityId
-				AND ET1.strType = x.[strType]
+			--LEFT JOIN tblEMEntity E ON E.strName = x.strParty
+			--LEFT JOIN tblEMEntityType ET1 ON ET1.intEntityId = E.intEntityId
+			--	AND ET1.strType = x.[strType]
 			LEFT JOIN tblSMCompanySetup C ON C.strCompanyName = x.strParty
 				AND x.strType = 'Company'
 			LEFT JOIN tblCMBank B ON B.strBankName = x.strParty
 				AND x.strType = 'Bank'
-			LEFT JOIN tblEMEntityLocation EL ON EL.strLocationName = x.strPartyLocation
-				AND EL.intEntityId = E.intEntityId
+			--LEFT JOIN tblEMEntityLocation EL ON EL.strLocationName = x.strPartyLocation
+			--	AND EL.intEntityId = E.intEntityId
 			LEFT JOIN tblSMCompanyLocation CL ON CL.strLocationName = x.strPartyLocation
 				AND x.strType = 'Company'
 			WHERE NOT EXISTS (
@@ -2327,13 +2389,13 @@ BEGIN TRY
 			SET [intConcurrencyId] = NP.[intConcurrencyId] + 1
 				,[strNotifyOrConsignee] = NP.[strNotifyOrConsignee]
 				,[strType] = NP.[strType]
-				,[intEntityId] = E.[intEntityId]
+				--,[intEntityId] = E.[intEntityId]
 				,[intCompanySetupID] = C.[intCompanySetupID]
 				,[intBankId] = B.[intBankId]
-				,[intEntityLocationId] = EL.[intEntityLocationId]
+				,[intEntityLocationId] = NULL
 				,[intCompanyLocationId] = CL.[intCompanyLocationId]
 				,[strText] = x.[strText]
-			FROM OPENXML(@idoc, 'vyuLGLoadNotifyPartiesViews/vyuLGLoadNotifyPartiesView', 2) WITH (
+			FROM OPENXML(@idoc, 'vyuLGLoadNotifyPartiesNotMappeds/vyuLGLoadNotifyPartiesNotMapped', 2) WITH (
 					[intLoadNotifyPartyId] INT
 					,[intConcurrencyId] INT
 					,[intLoadId] INT
@@ -2348,15 +2410,15 @@ BEGIN TRY
 					,strParty NVARCHAR(100) COLLATE Latin1_General_CI_AS
 					,strPartyLocation NVARCHAR(50) COLLATE Latin1_General_CI_AS
 					) x
-			LEFT JOIN tblEMEntity E ON E.strName = x.strParty
-			JOIN tblEMEntityType ET1 ON ET1.intEntityId = E.intEntityId
-				AND ET1.strType = x.[strType]
+			--LEFT JOIN tblEMEntity E ON E.strName = x.strParty
+			--JOIN tblEMEntityType ET1 ON ET1.intEntityId = E.intEntityId
+			--	AND ET1.strType = x.[strType]
 			LEFT JOIN tblSMCompanySetup C ON C.strCompanyName = x.strParty
 				AND x.strType = 'Company'
 			LEFT JOIN tblCMBank B ON B.strBankName = x.strParty
 				AND x.strType = 'Bank'
-			LEFT JOIN tblEMEntityLocation EL ON EL.strLocationName = x.strPartyLocation
-				AND EL.intEntityId = E.intEntityId
+			--LEFT JOIN tblEMEntityLocation EL ON EL.strLocationName = x.strPartyLocation
+			--	AND EL.intEntityId = E.intEntityId
 			LEFT JOIN tblSMCompanyLocation CL ON CL.strLocationName = x.strPartyLocation
 				AND x.strType = 'Company'
 			JOIN tblLGLoadNotifyParties NP ON NP.intLoadId = @intNewLoadId
@@ -2367,7 +2429,7 @@ BEGIN TRY
 			WHERE NP.intLoadId = @intNewLoadId
 				AND NOT EXISTS (
 					SELECT *
-					FROM OPENXML(@idoc, 'vyuLGLoadNotifyPartiesViews/vyuLGLoadNotifyPartiesView', 2) WITH (intLoadNotifyPartyId INT) x
+					FROM OPENXML(@idoc, 'vyuLGLoadNotifyPartiesNotMappeds/vyuLGLoadNotifyPartiesNotMapped', 2) WITH (intLoadNotifyPartyId INT) x
 					WHERE NP.intLoadNotifyPartyRefId = x.intLoadNotifyPartyId
 					)
 
@@ -2415,6 +2477,8 @@ BEGIN TRY
 				,ysnReceived
 				,dtmReceivedDate
 				,intLoadDocumentRefId
+				,[ysnReceivedCopy] 
+,[dtmCopyReceivedDate]
 				)
 			SELECT 1 AS intConcurrencyId
 				,@intNewLoadId
@@ -2428,6 +2492,8 @@ BEGIN TRY
 				,x.ysnReceived
 				,x.dtmReceivedDate
 				,x.intLoadDocumentId
+				,x.[ysnReceivedCopy] 
+,x.[dtmCopyReceivedDate]
 			FROM OPENXML(@idoc, 'vyuLGLoadDocumentViews/vyuLGLoadDocumentView', 2) WITH (
 					[intConcurrencyId] INT
 					,[intLoadId] INT
@@ -2455,9 +2521,29 @@ BEGIN TRY
 
 			UPDATE LD
 			SET intDocumentId = D.intDocumentId
+				,strDocumentType=x.strDocumentType
+				,strDocumentNo=x.strDocumentNo
+				,intOriginal=x.intOriginal
+				,intCopies=x.intCopies
+				,ysnSent=x.ysnSent
+				,dtmSentDate=x.dtmSentDate
+				,ysnReceived=x.ysnReceived
+				,dtmReceivedDate=x.dtmReceivedDate
+				,[ysnReceivedCopy] =x.[ysnReceivedCopy]
+				,[dtmCopyReceivedDate]=x.[dtmCopyReceivedDate]
 			FROM OPENXML(@idoc, 'vyuLGLoadDocumentViews/vyuLGLoadDocumentView', 2) WITH (
 					intLoadDocumentId INT
-					,strDocumentName NVARCHAR(50) Collate Latin1_General_CI_AS
+						,[strDocumentType] NVARCHAR(100) COLLATE Latin1_General_CI_AS
+					,[strDocumentNo] NVARCHAR(100) COLLATE Latin1_General_CI_AS
+					,[intOriginal] INT
+					,[intCopies] INT
+					,[ysnSent] BIT
+					,[dtmSentDate] DATETIME
+					,[ysnReceived] BIT
+					,[dtmReceivedDate] DATETIME
+					,[ysnReceivedCopy] BIT
+					,[dtmCopyReceivedDate] DATETIME
+					,strDocumentName NVARCHAR(50) COLLATE Latin1_General_CI_AS
 					) x
 			JOIN tblICDocument D ON D.strDocumentName = x.strDocumentName
 			JOIN tblLGLoadDocuments LD ON LD.intLoadId = @intNewLoadId
@@ -2902,7 +2988,7 @@ BEGIN TRY
 				,[ysnExported] = x.[ysnExported]
 				,[dtmExportedDate] = x.[dtmExportedDate]
 				,[dtmIntegrationOrderDate] = x.[dtmIntegrationOrderDate]
-				,strIntegrationNumber=x.strIntegrationNumber
+				,strIntegrationNumber = x.strIntegrationNumber
 			FROM OPENXML(@idoc, 'vyuLGLoadDetailContainerLinkViews/vyuLGLoadDetailContainerLinkView', 2) WITH (
 					[intLoadContainerId] INT
 					,[intLoadDetailId] INT
@@ -3643,8 +3729,9 @@ BEGIN TRY
 			UPDATE tblLGIntrCompLogisticsStg
 			SET strFeedStatus = 'Processed'
 			WHERE intId = @intId
+
 			IF @intTransactionCount = 0
-					COMMIT TRANSACTION
+				COMMIT TRANSACTION
 		END TRY
 
 		BEGIN CATCH
@@ -3663,7 +3750,6 @@ BEGIN TRY
 			WHERE intId = @intId
 
 			SET @strFinalErrMsg = @strFinalErrMsg + @ErrMsg
-
 		END CATCH
 
 		SELECT @intId = MIN(intId)
@@ -3747,8 +3833,6 @@ BEGIN TRY
 END TRY
 
 BEGIN CATCH
-	
-
 	SET @ErrMsg = ERROR_MESSAGE()
 
 	RAISERROR (

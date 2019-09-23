@@ -25,6 +25,19 @@ BEGIN TRY
 	DECLARE @intToSubBookId INT
 		,@ysnReplicationEnabled BIT
 
+	IF @strRowState = 'Delete'
+	BEGIN
+		-- LOAD HEADER TABLE
+		INSERT INTO tblLGIntrCompLogisticsStg (
+			intLoadId
+			,strRowState
+			)
+		SELECT @intLoadId
+			,@strRowState
+
+		RETURN
+	END
+
 	IF NOT EXISTS (
 			SELECT TOP 1 1
 			FROM tblLGLoad
@@ -143,6 +156,18 @@ BEGIN TRY
 					,@intToBookId
 					,@ysnReplicationEnabled
 			END
+		END
+
+		IF @strUpdate = 'Delete'
+			AND @strRowState = 'Delete'
+		BEGIN
+			EXEC uspLGPopulateLoadXML @intLoadId
+				,@strToTransactionType
+				,@intToCompanyId
+				,@strRowState
+				,@intToCompanyLocationId
+				,@intToBookId
+				,@ysnReplicationEnabled
 		END
 	END
 END TRY
