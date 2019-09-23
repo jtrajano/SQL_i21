@@ -261,6 +261,7 @@ BEGIN
 					CASE 
 						WHEN gd.strTransactionType = 'Cost Adjustment' AND ac.strAccountCategory IN ('Inventory') THEN 1 
 						WHEN gd.strTransactionType <> 'Cost Adjustment' AND ac.strAccountCategory IN ('Inventory', 'Work In Progress') THEN 1 
+						WHEN gd.strTransactionType = 'Storage Settlement' AND ac.strAccountCategory IN ('Inventory') THEN 1 
 						ELSE 0 
 					END 
 			GROUP BY 				
@@ -279,8 +280,7 @@ BEGIN
 		WHEN MATCHED THEN 
 			UPDATE 
 			SET 
-				dblGLAmount = glResult.[dblGLAmount]
-				,strAccountDescription = glResult.[strAccountDescription]
+				dblGLAmount = ISNULL(result.dblGLAmount, 0) + ISNULL(glResult.[dblGLAmount], 0)
 
 		WHEN NOT MATCHED THEN
 			INSERT (
@@ -327,6 +327,7 @@ BEGIN
 					CASE 
 						WHEN gd.strTransactionType = 'Cost Adjustment' AND ac.strAccountCategory IN ('Inventory') THEN 1 
 						WHEN gd.strTransactionType <> 'Cost Adjustment' AND ac.strAccountCategory IN ('Inventory', 'Work In Progress') THEN 1 
+						WHEN gd.strTransactionType = 'Storage Settlement' AND ac.strAccountCategory IN ('Inventory') THEN 1 
 						ELSE 0 
 					END 
 			GROUP BY 				
@@ -345,8 +346,7 @@ BEGIN
 		WHEN MATCHED THEN 
 			UPDATE 
 			SET 
-				dblGLAmount = glResult.[dblGLAmount]
-				,strAccountDescription = glResult.[strAccountDescription]
+				dblGLAmount = ISNULL(result.dblGLAmount, 0) + ISNULL(glResult.[dblGLAmount], 0)
 
 		WHEN NOT MATCHED THEN
 			INSERT (
@@ -393,6 +393,7 @@ BEGIN
 					CASE 
 						WHEN gd.strTransactionType = 'Cost Adjustment' AND ac.strAccountCategory IN ('Inventory') THEN 1 
 						WHEN gd.strTransactionType <> 'Cost Adjustment' AND ac.strAccountCategory IN ('Inventory', 'Work In Progress') THEN 1 
+						WHEN gd.strTransactionType = 'Storage Settlement' AND ac.strAccountCategory IN ('Inventory') THEN 1 
 						ELSE 0 
 					END 
 
@@ -415,8 +416,7 @@ BEGIN
 		WHEN MATCHED THEN 
 			UPDATE 
 			SET 
-				dblGLAmount = glResult.[dblGLAmount]
-				,strAccountDescription = glResult.[strAccountDescription]
+				dblGLAmount = ISNULL(result.dblGLAmount, 0) + ISNULL(glResult.[dblGLAmount], 0)
 
 		WHEN NOT MATCHED THEN
 			INSERT (
@@ -434,7 +434,7 @@ BEGIN
 		;
 	END 
 	ELSE 
-	BEGIN
+	BEGIN	
 		MERGE INTO @result 
 		AS result
 		USING (
@@ -460,6 +460,7 @@ BEGIN
 					CASE 
 						WHEN gd.strTransactionType = 'Cost Adjustment' AND ac.strAccountCategory IN ('Inventory') THEN 1 
 						WHEN gd.strTransactionType <> 'Cost Adjustment' AND ac.strAccountCategory IN ('Inventory', 'Work In Progress') THEN 1 
+						WHEN gd.strTransactionType = 'Storage Settlement' AND ac.strAccountCategory IN ('Inventory') THEN 1 
 						ELSE 0 
 					END 
 
@@ -469,7 +470,8 @@ BEGIN
 			ON result.strTransactionType = glResult.strTransactionType
 		WHEN MATCHED THEN 
 			UPDATE 
-			SET dblGLAmount = glResult.[dblGLAmount]
+			SET 
+				dblGLAmount = ISNULL(result.dblGLAmount, 0) + ISNULL(glResult.[dblGLAmount], 0)			
 		WHEN NOT MATCHED THEN
 			INSERT (
 				strTransactionType 
