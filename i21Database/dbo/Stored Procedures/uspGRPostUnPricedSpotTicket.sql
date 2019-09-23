@@ -36,6 +36,7 @@ BEGIN TRY
 	DECLARE @intItemUOMId INT
 		   ,@voucherItems AS VoucherPayable
 		   ,@voucherItemsTax AS VoucherDetailTax
+		   ,@intTicketId as INT
 
 	SET @dtmDate = GETDATE()
 
@@ -92,8 +93,9 @@ BEGIN TRY
 				DECLARE @intInventoryReceiptId AS INT
 
 				--Inventory Item
-				SELECT @intInventoryReceiptId = IRI.intInventoryReceiptItemId,
-					   @intItemId = IRI.intItemId
+				SELECT @intInventoryReceiptId = IRI.intInventoryReceiptId,
+					   @intItemId = IRI.intItemId,
+					   @intTicketId = SpotTicket.intTicketId
 				FROM tblGRUnPricedSpotTicket SpotTicket
 				JOIN tblSCTicket SC 
 					ON SC.intTicketId = SpotTicket.intTicketId
@@ -107,6 +109,12 @@ BEGIN TRY
 					AND SpotTicket.intEntityId = @intEntityId
 				DELETE FROM @voucherItems
 				DELETE FROM @voucherItemsTax
+
+				UPDATE tblICInventoryReceiptItem
+				SET ysnAllowVoucher = CASE WHEN ISNULL(ysnAllowVoucher,0) = 0 THEN CASE WHEN @dblCashPrice > 0 THEN 1 ELSE 0 END ELSE ysnAllowVoucher END
+				WHERE intInventoryReceiptId = @intInventoryReceiptId
+				
+
 				BEGIN /* BUILD VOUCHER DETAIL AND PAYABLE */
 					BEGIN
 					INSERT INTO @voucherItems(
@@ -260,7 +268,7 @@ BEGIN TRY
 								,[ysnTaxOnly]	
 						FROM dbo.fnICGeneratePayablesTaxes(@voucherItems)
 					END
-					
+
 					EXEC [dbo].[uspAPCreateVoucher]
 								@voucherPayables = @voucherItems
 								,@voucherPayableTax = @voucherItemsTax
