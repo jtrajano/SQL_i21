@@ -166,7 +166,7 @@ BEGIN TRY
 	FROM	vyuCTContractCostView	CC
 	JOIN	vyuCTContractSequence	CD	ON CD.intContractDetailId	=	CC.intContractDetailId
 	WHERE	NOT EXISTS(SELECT * FROM tblICItemUOM WHERE intItemId = CC.intItemId AND intUnitMeasureId = CD.intUnitMeasureId)
-	AND		CD.intContractHeaderId	=	@intContractHeaderId
+	AND		CD.intContractHeaderId	=	@intContractHeaderId AND strCostMethod NOT IN ('Amount','Percentage')
 
 	SELECT @ErrMsg = REPLACE(REPLACE(REPLACE(REPLACE(@ErrMsg,'#','Cost item '),'@',' of sequence '),'^',' don''t have '),'.',' UOM configured for it. Configure the UOM to the cost item to proceed with save.')
 
