@@ -1376,6 +1376,7 @@ BEGIN TRY
 					,[dblQuantityToBill]
 					,[intQtyToBillUOMId]
 					,[dblCost]
+					,[dblOldCost]
 					,[dblCostUnitQty]
 					,[intCostUOMId]
 					,[dblNetWeight]
@@ -1458,6 +1459,11 @@ BEGIN TRY
 																WHEN a.[intContractHeaderId] IS NOT NULL THEN dbo.fnCTConvertQtyToTargetItemUOM(a.intContractUOMId,b.intItemUOMId,a.dblCashPrice)
 																ELSE a.dblCashPrice
 															END
+					,[dblOldCost]					= case when @ysnFromPriceBasisContract = 0 then null 
+														else 
+															case WHEN a.[intContractHeaderId] IS NOT NULL AND @ysnFromPriceBasisContract = 1 THEN IT.dblCost--RI.dblUnitCost --dbo.fnCTConvertQtyToTargetItemUOM(a.intContractUOMId,RI.intCostUOMId, RI.dblUnitCost)
+															else null end
+														end									
 					,[dblCostUnitQty]				= ISNULL(a.dblCostUnitQty,1)
 					,[intCostUOMId]					= CASE
 														WHEN @origdblSpotUnits > 0 THEN @intCashPriceUOMId 
@@ -1498,6 +1504,10 @@ BEGIN TRY
 								AND a.intItemType = 1
 				LEFT JOIN tblCTContractDetail CD
 					ON CD.intContractDetailId = a.intContractDetailId
+				left join tblICInventoryTransaction IT
+					on IT.intTransactionId = SST.intSettleStorageId 
+						and IT.intTransactionTypeId = 44
+						and IT.intItemId = a.intItemId	
 				WHERE a.dblCashPrice <> 0 
 					AND a.dblUnits <> 0 
 					AND SST.intSettleStorageId = @intSettleStorageId
@@ -1836,6 +1846,37 @@ BEGIN TRY
 					BEGIN
 							DECLARE @intVoucherId INT
 							SET @intVoucherId = CAST(@createdVouchersId AS INT)
+
+
+
+							if @ysnFromPriceBasisContract = 1
+							begin
+							
+								UPDATE tblGRSettleStorage
+									SET intBillId = @createdVouchersId
+										WHERE intSettleStorageId = @intSettleStorageId 
+
+								update a
+									set dblPaidAmount = b.dblOldCost
+										from tblGRStorageHistory a
+											join @voucherPayable b 
+												on a.intContractHeaderId = b.intContractHeaderId
+												and a.intCustomerStorageId = b.intCustomerStorageId
+											-- join tblGRSettleStorageTicket d 
+											-- 	on d.intCustomerStorageId = b.intCustomerStorageId
+											-- join tblICInventoryTransaction c
+											-- 	on c.strTransactionId = b.strVendorOrderNumber
+											-- 		and c.intItemId = b.intItemId 
+											-- 		and c.intTransactionId = d.intSettleStorageId
+											-- 		and c.intTransactionDetailId = d.intSettleStorageTicketId													
+										where strType = 'Settlement'								
+							
+								--select 'vcp',* from tblGRStorageHistory order by intStorageHistoryId desc 
+							
+							end
+
+
+
 
 							EXEC [dbo].[uspAPPostBill] 
 								 @post = 1
