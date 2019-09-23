@@ -6,6 +6,8 @@ CREATE PROCEDURE [dbo].[uspGRCreateItemGLEntries]
 	,@strGLDescription AS NVARCHAR(255) = NULL 	
 	,@intContraInventory_ItemLocationId AS INT = NULL
 	,@ysnForRebuild as BIT = 0 	
+	,@intRebuildItemId AS INT = NULL -- This is only used when rebuilding the stocks. 
+	,@intRebuildCategoryId AS INT = NULL -- This is only used when rebuilding the stocks. 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -58,6 +60,8 @@ FROM (
 	INNER JOIN tblICItem i
 		ON t.intItemId = i.intItemId 
 	WHERE t.strBatchId = @strBatchId
+		AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId) 
+		AND ISNULL(i.intCategoryId, 0) = COALESCE(@intRebuildCategoryId, i.intCategoryId, 0) 
 		AND i.strType <> 'Non-Inventory'
 ) Query
 
@@ -189,7 +193,10 @@ INNER JOIN @GLAccounts GLAccounts
 		AND t.intTransactionTypeId = GLAccounts.intTransactionTypeId
 INNER JOIN dbo.tblGLAccount
 	ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
-WHERE t.strBatchId = @strBatchId
+WHERE 
+	t.strBatchId = @strBatchId
+	AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId) 
+	AND ISNULL(i.intCategoryId, 0) = COALESCE(@intRebuildCategoryId, i.intCategoryId, 0) 
 ;
 
 -- Get the functional currency
@@ -268,6 +275,8 @@ AS
 		WHERE intItemType = 3 and SV.strBatchId = @strBatchId --DISCOUNTS
 	) DiscountCost
 	WHERE t.strBatchId = @strBatchId
+		AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId) 
+		AND ISNULL(i.intCategoryId, 0) = COALESCE(@intRebuildCategoryId, i.intCategoryId, 0) 
 		AND t.intInTransitSourceLocationId IS NULL -- If there is a value in intInTransitSourceLocationId, then it is for In-Transit costing. Use uspICCreateGLEntriesForInTransitCosting instead of this sp.
 )
 -------------------------------------------------------------------------------------------

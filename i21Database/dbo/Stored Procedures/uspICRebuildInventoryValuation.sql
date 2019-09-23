@@ -4939,6 +4939,207 @@ BEGIN
 					IF @intReturnValue <> 0 GOTO _EXIT_WITH_ERROR
 			END 
 
+			-- Settle Storage 
+			ELSE IF EXISTS (SELECT 1 WHERE @strTransactionForm IN ('Settle Storage', 'Storage Settlement')) 
+			BEGIN
+				INSERT INTO @ItemsToPost (
+						intItemId  
+						,intItemLocationId 
+						,intItemUOMId  
+						,dtmDate  
+						,dblQty  
+						,dblUOMQty  
+						,dblCost  
+						,dblSalesPrice  
+						,intCurrencyId  
+						,dblExchangeRate  
+						,intTransactionId  
+						,intTransactionDetailId  
+						,strTransactionId  
+						,intTransactionTypeId  
+						,intLotId 
+						,intSubLocationId
+						,intStorageLocationId	
+						,strActualCostId 
+						,intForexRateTypeId
+						,dblForexRate
+						,intCategoryId
+						,dblUnitRetail
+						,dblAdjustCostValue
+						,dblAdjustRetailValue
+						,intCostingMethod
+				)
+				SELECT 	RebuildInvTrans.intItemId  
+						,RebuildInvTrans.intItemLocationId 
+						,RebuildInvTrans.intItemUOMId  
+						,RebuildInvTrans.dtmDate  
+						,RebuildInvTrans.dblQty  
+						,ISNULL(ItemUOM.dblUnitQty, RebuildInvTrans.dblUOMQty) 
+						,dblCost  = CASE 
+										WHEN RebuildInvTrans.dblQty < 0 THEN 
+											CASE	
+												WHEN Adj.intAdjustmentType = @AdjustmentTypeOpeningInventory THEN 
+													ISNULL(AdjDetail.dblNewCost, RebuildInvTrans.dblCost) 
+												WHEN dbo.fnGetCostingMethod(RebuildInvTrans.intItemId, RebuildInvTrans.intItemLocationId) = @AVERAGECOST THEN 
+													dbo.fnGetItemAverageCost(
+														RebuildInvTrans.intItemId
+														, RebuildInvTrans.intItemLocationId
+														, RebuildInvTrans.intItemUOMId
+													) 
+												ELSE
+													COALESCE(
+														dbo.fnCalculateCostBetweenUOM ( 
+															COALESCE(StockUnit.intItemUOMId, ItemUOM.intItemUOMId)
+															,ItemUOM.intItemUOMId
+															,COALESCE(lot.dblLastCost, itemPricing.dblLastCost) 
+														)
+														,RebuildInvTrans.dblCost
+													)
+											END 
+											
+										WHEN (RebuildInvTrans.dblQty > 0 AND ISNULL(Adj.intInventoryAdjustmentId, 0) <> 0) THEN 
+											CASE	WHEN Adj.intAdjustmentType = @AdjustmentTypeLotMerge THEN 
+														RebuildInvTrans.dblCost
+													ELSE 
+														dbo.fnCalculateCostBetweenUOM( 
+															COALESCE(AdjNewCostUOM.intItemUOMId, ItemUOM.intItemUOMId)
+															,ItemUOM.intItemUOMId
+															,COALESCE(AdjDetail.dblNewCost, AdjDetail.dblCost, RebuildInvTrans.dblCost) 
+														)
+											END
+										 ELSE 
+											RebuildInvTrans.dblCost
+									END 
+						,RebuildInvTrans.dblSalesPrice  
+						,RebuildInvTrans.intCurrencyId  
+						,RebuildInvTrans.dblExchangeRate  
+						,RebuildInvTrans.intTransactionId  
+						,RebuildInvTrans.intTransactionDetailId  
+						,RebuildInvTrans.strTransactionId  
+						,RebuildInvTrans.intTransactionTypeId  
+						,RebuildInvTrans.intLotId 
+						,RebuildInvTrans.intSubLocationId
+						,RebuildInvTrans.intStorageLocationId
+						,RebuildInvTrans.strActualCostId
+						,RebuildInvTrans.intForexRateTypeId
+						,RebuildInvTrans.dblForexRate
+						,intCategoryId = RebuildInvTrans.intCategoryId 
+						,dblUnitRetail = RebuildInvTrans.dblUnitRetail
+						,dblAdjustCostValue = RebuildInvTrans.dblCategoryCostValue
+						,dblAdjustRetailValue = RebuildInvTrans.dblCategoryRetailValue
+						,RebuildInvTrans.intCostingMethod
+				FROM	#tmpICInventoryTransaction RebuildInvTrans INNER JOIN tblICItemLocation ItemLocation 
+							ON RebuildInvTrans.intItemLocationId = ItemLocation.intItemLocationId 
+						LEFT JOIN dbo.tblICInventoryReceipt Receipt
+							ON Receipt.intInventoryReceiptId = RebuildInvTrans.intTransactionId
+							AND Receipt.strReceiptNumber = RebuildInvTrans.strTransactionId			
+						LEFT JOIN (
+							dbo.tblICInventoryReceiptItem ReceiptItem INNER JOIN tblICItem i1
+								ON i1.intItemId = ReceiptItem.intItemId
+						)
+							ON ReceiptItem.intInventoryReceiptId = Receipt.intInventoryReceiptId
+							AND ReceiptItem.intInventoryReceiptItemId = RebuildInvTrans.intTransactionDetailId 
+							AND ReceiptItem.intItemId = ISNULL(@intItemId, ReceiptItem.intItemId)
+							AND ISNULL(i1.intCategoryId, 0) = COALESCE(@intCategoryId, i1.intCategoryId, 0)
+						LEFT JOIN dbo.tblICInventoryReceiptItemLot ReceiptItemLot
+							ON ReceiptItemLot.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
+							AND ReceiptItemLot.intLotId = RebuildInvTrans.intLotId 
+						LEFT JOIN dbo.tblICInventoryAdjustment Adj
+							ON Adj.strAdjustmentNo = RebuildInvTrans.strTransactionId
+							AND Adj.intInventoryAdjustmentId = RebuildInvTrans.intTransactionId
+						LEFT JOIN (
+							dbo.tblICInventoryAdjustmentDetail AdjDetail INNER JOIN tblICItem i2
+								ON i2.intItemId = AdjDetail.intItemId 
+						)
+							ON AdjDetail.intInventoryAdjustmentId = Adj.intInventoryAdjustmentId
+							AND AdjDetail.intInventoryAdjustmentDetailId = RebuildInvTrans.intTransactionDetailId 
+							AND AdjDetail.intItemId = ISNULL(@intItemId, AdjDetail.intItemId)
+							AND ISNULL(i2.intCategoryId, 0) = COALESCE(@intCategoryId, i2.intCategoryId, 0)
+						LEFT JOIN dbo.tblICItemUOM AdjItemUOM
+							ON AdjItemUOM.intItemId = AdjDetail.intItemId
+							AND AdjItemUOM.intItemUOMId = ISNULL(AdjDetail.intItemUOMId, AdjDetail.intNewItemUOMId) 
+						LEFT JOIN dbo.tblICItemUOM ItemUOM
+							ON RebuildInvTrans.intItemId = ItemUOM.intItemId
+							AND RebuildInvTrans.intItemUOMId = ItemUOM.intItemUOMId
+						LEFT JOIN dbo.tblICItemUOM AdjNewCostUOM
+							ON AdjNewCostUOM.intItemId = AdjDetail.intItemId
+							AND AdjNewCostUOM.intItemUOMId = ISNULL(AdjDetail.intNewItemUOMId, AdjDetail.intItemUOMId) 
+						LEFT JOIN dbo.tblICItemUOM StockUnit
+							ON StockUnit.intItemId = AdjDetail.intItemId
+							AND ISNULL(StockUnit.ysnStockUnit, 0) = 1
+						LEFT JOIN dbo.tblICLot lot
+							ON lot.intLotId = RebuildInvTrans.intLotId 
+						OUTER APPLY (
+							SELECT TOP 1 
+									dblLastCost 
+							FROM	tblICItemPricing 
+							WHERE	intItemId = RebuildInvTrans.intItemId 
+									AND intItemLocationId = RebuildInvTrans.intItemLocationId
+						) itemPricing
+				WHERE	RebuildInvTrans.strBatchId = @strBatchId
+						AND RebuildInvTrans.intTransactionId = @intTransactionId
+						AND ItemLocation.intLocationId IS NOT NULL 
+
+				EXEC @intReturnValue = dbo.uspICRepostCosting
+					@strBatchId
+					,@strAccountToCounterInventory
+					,@intEntityUserSecurityId
+					,@strGLDescription
+					,@ItemsToPost
+					,@strTransactionId
+
+				IF @intReturnValue <> 0 GOTO _EXIT_WITH_ERROR
+
+				DECLARE @SettleVoucherCreate AS SettleVoucherCreate
+				SET @intReturnValue = NULL 
+				INSERT INTO @GLEntries (
+						[dtmDate] 
+						,[strBatchId]
+						,[intAccountId]
+						,[dblDebit]
+						,[dblCredit]
+						,[dblDebitUnit]
+						,[dblCreditUnit]
+						,[strDescription]
+						,[strCode]
+						,[strReference]
+						,[intCurrencyId]
+						,[dblExchangeRate]
+						,[dtmDateEntered]
+						,[dtmTransactionDate]
+						,[strJournalLineDescription]
+						,[intJournalLineNo]
+						,[ysnIsUnposted]
+						,[intUserId]
+						,[intEntityId]
+						,[strTransactionId]					
+						,[intTransactionId]
+						,[strTransactionType]
+						,[strTransactionForm] 
+						,[strModuleName]
+						,[intConcurrencyId]
+						,[dblDebitForeign]
+						,[dblDebitReport]
+						,[dblCreditForeign]
+						,[dblCreditReport]
+						,[dblReportingRate]
+						,[dblForeignRate]
+						,[strRateType]
+				)						
+				EXEC dbo.uspGRCreateItemGLEntries
+					@strBatchId =  @strBatchId
+					,@SettleVoucherCreate = @SettleVoucherCreate 
+					,@AccountCategory_ContraInventory = 'AP Clearing'
+					,@intEntityUserSecurityId = @intEntityUserSecurityId
+					,@ysnForRebuild = 1
+
+				IF @intReturnValue <> 0 
+				BEGIN 
+					--PRINT 'Error found in uspICCreateGLEntries'
+					GOTO _EXIT_WITH_ERROR
+				END 
+			END 
+
 			ELSE 
 			BEGIN 								
 				-- Update the cost used in the adjustment 
@@ -5137,6 +5338,7 @@ BEGIN
 							, 'Inventory Transfer with Shipment'
 							, 'Outbound Shipment'
 							, 'Inventory Adjustment - Opening Inventory'
+							, 'Storage Settlement'
 						)
 			) AND @strAccountToCounterInventory IS NOT NULL 
 			BEGIN 
