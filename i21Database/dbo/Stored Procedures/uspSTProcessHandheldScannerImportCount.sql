@@ -24,6 +24,16 @@ BEGIN TRY
 	
 	BEGIN TRANSACTION
 
+
+	DECLARE @intCompanyLocationId INT = (
+											SELECT 
+												st.intCompanyLocationId 
+											FROM tblSTStore st
+											INNER JOIN tblSTHandheldScanner hs
+												ON st.intStoreId = hs.intStoreId
+											WHERE hs.intHandheldScannerId = @HandheldScannerId
+										)
+
 	--------------------------------------------------------------------------------------
 	-------------------- Start Validate if has record to Process -------------------------
 	--------------------------------------------------------------------------------------
@@ -37,6 +47,52 @@ BEGIN TRY
 		END
 	--------------------------------------------------------------------------------------
 	-------------------- End Validate if has record to Process ---------------------------
+	--------------------------------------------------------------------------------------
+
+
+	--------------------------------------------------------------------------------------
+	------------ Start Validate if All Items have the same Store Location ----------------
+	--------------------------------------------------------------------------------------
+	IF EXISTS(
+				SELECT TOP 1 1 
+				FROM vyuSTGetHandheldScannerImportCountWithRecipe IR
+				INNER JOIN tblSTHandheldScanner HS
+					ON IR.intHandheldScannerId = HS.intHandheldScannerId
+				INNER JOIN tblSTStore ST
+					ON HS.intStoreId = ST.intStoreId
+				INNER JOIN tblICItem Item
+					ON IR.intItemId = Item.intItemId
+				LEFT JOIN tblICItemLocation ItemLoc
+					ON Item.intItemId = ItemLoc.intItemId
+						AND ST.intCompanyLocationId = ItemLoc.intLocationId
+				WHERE IR.intHandheldScannerId = @HandheldScannerId
+					AND (ST.intCompanyLocationId != @intCompanyLocationId OR ItemLoc.intItemLocationId IS NULL)
+			 )
+		BEGIN
+			DECLARE @strItemNoLocationSameAsStore AS NVARCHAR(MAX)
+
+			SELECT 
+				@strItemNoLocationSameAsStore = COALESCE(@strItemNoLocationSameAsStore + ', ', '') + Item.strItemNo
+			FROM vyuSTGetHandheldScannerImportCountWithRecipe IR
+			INNER JOIN tblSTHandheldScanner HS
+				ON IR.intHandheldScannerId = HS.intHandheldScannerId
+			INNER JOIN tblSTStore ST
+				ON HS.intStoreId = ST.intStoreId
+			INNER JOIN tblICItem Item
+				ON IR.intItemId = Item.intItemId
+			LEFT JOIN tblICItemLocation ItemLoc
+				ON Item.intItemId = ItemLoc.intItemId
+					AND ST.intCompanyLocationId = ItemLoc.intLocationId
+			WHERE IR.intHandheldScannerId = @HandheldScannerId
+				AND (ST.intCompanyLocationId != @intCompanyLocationId OR ItemLoc.intItemLocationId IS NULL)
+
+			-- Flag Failed
+			SET @ysnSuccess = CAST(0 AS BIT)
+			SET @strStatusMsg = 'Selected Item/s  ' + @strItemNoLocationSameAsStore + '  has no location setup same as location of selected Store.'
+			RETURN
+		END
+	--------------------------------------------------------------------------------------
+	------------- End Validate if All Items have the same Store Location -----------------
 	--------------------------------------------------------------------------------------
 
 	--SELECT *
@@ -156,7 +212,7 @@ BEGIN TRY
 					, @dblCountQty DECIMAL(18, 6)
 					, @intItemId INT
 					, @intItemLocationId INT
-					, @intCompanyLocationId INT
+					--, @intCompanyLocationId INT
 					, @intItemUOMId INT
 					, @ysnUpdatedOutdatedStock BIT
 
@@ -180,7 +236,7 @@ BEGIN TRY
 						@intItemId = Imports.intItemId
 						, @intItemUOMId = Imports.intItemUOMId
 						, @intItemLocationId = IL.intItemLocationId
-						, @intCompanyLocationId = Store.intCompanyLocationId
+						--, @intCompanyLocationId = Store.intCompanyLocationId
 						, @dblCountQty = Imports.dblComputedCount
 					FROM #ImportCounts Imports
 					INNER JOIN tblSTStore Store

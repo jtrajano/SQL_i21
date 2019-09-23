@@ -26,6 +26,16 @@ BEGIN TRY
 	)
 
 
+	DECLARE @intCompanyLocationId INT = (
+											SELECT 
+												st.intCompanyLocationId 
+											FROM tblSTStore st
+											INNER JOIN tblSTHandheldScanner hs
+												ON st.intStoreId = hs.intStoreId
+											WHERE hs.intHandheldScannerId = @HandheldScannerId
+										)
+
+
 	-- Insert to table
 	INSERT INTO @tblTempItems
 	(
@@ -69,14 +79,15 @@ BEGIN TRY
 					ON IR.intItemId = Item.intItemId
 				LEFT JOIN tblICItemLocation ItemLoc
 					ON Item.intItemId = ItemLoc.intItemId
-					AND ST.intCompanyLocationId = ItemLoc.intLocationId
+						AND ST.intCompanyLocationId = ItemLoc.intLocationId
 				WHERE IR.intHandheldScannerId = @HandheldScannerId
-				AND ItemLoc.intItemLocationId IS NULL
+					AND (ST.intCompanyLocationId != @intCompanyLocationId OR ItemLoc.intItemLocationId IS NULL)
 			 )
 		BEGIN
 			DECLARE @strItemNoLocationSameAsStore AS NVARCHAR(MAX)
 
-			SELECT @strItemNoLocationSameAsStore = COALESCE(@strItemNoLocationSameAsStore + ', ', '') + strItemNo
+			SELECT 
+				@strItemNoLocationSameAsStore = COALESCE(@strItemNoLocationSameAsStore + ', ', '') + Item.strItemNo
 			FROM tblSTHandheldScannerImportReceipt IR
 			INNER JOIN tblSTHandheldScanner HS
 				ON IR.intHandheldScannerId = HS.intHandheldScannerId
@@ -86,9 +97,9 @@ BEGIN TRY
 				ON IR.intItemId = Item.intItemId
 			LEFT JOIN tblICItemLocation ItemLoc
 				ON Item.intItemId = ItemLoc.intItemId
-				AND ST.intCompanyLocationId = ItemLoc.intLocationId
+					AND ST.intCompanyLocationId = ItemLoc.intLocationId
 			WHERE IR.intHandheldScannerId = @HandheldScannerId
-			AND ItemLoc.intItemLocationId IS NULL
+				AND (ST.intCompanyLocationId != @intCompanyLocationId OR ItemLoc.intItemLocationId IS NULL)
 
 			-- Flag Failed
 			SET @ysnSuccess = CAST(0 AS BIT)
