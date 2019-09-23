@@ -10,7 +10,8 @@ BEGIN TRY
 			@dblNoOfContract numeric(18,6),
 			@intFutureMonthId int,
 			@intBrokerageAccountId int,
-			@dblNoOfLots numeric(18,6);
+			@dblNoOfLots numeric(18,6),
+			@intBrokerEntityId int;
 
 	if (@strAction = 'Update')
 	begin
@@ -20,6 +21,7 @@ BEGIN TRY
 			,@dblNoOfContract = dblNoOfContract
 			,@intFutureMonthId = intFutureMonthId
 			,@intBrokerageAccountId = intBrokerageAccountId
+			,@intBrokerEntityId = intEntityId
 		from
 			tblRKFutOptTransaction
 		where
@@ -41,6 +43,7 @@ BEGIN TRY
 				,dblHedgeNoOfLots = @dblNoOfContract
 				,intHedgeFutureMonthId = @intFutureMonthId
 				,intBrokerageAccountId = @intBrokerageAccountId
+				,intBrokerId = @intBrokerEntityId
 			where
 				intFutOptTransactionId = @intFutOptTransactionId;
 		end
