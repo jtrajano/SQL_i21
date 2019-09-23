@@ -51,6 +51,8 @@ LEFT JOIN tblICItemLocation IL
 	AND Store.intCompanyLocationId = IL.intLocationId
 LEFT JOIN tblICItemUOM ItemUOM 
 	ON ItemUOM.intItemId = Item.intItemId 
-	AND ItemUOM.strLongUPCCode = IC.strUPCNo
+		AND CAST(ItemUOM.intUpcCode AS FLOAT) = CONVERT(NUMERIC(32, 0),CAST(IC.strUPCNo AS FLOAT))
+		-- Note: http://jira.irelyserver.com/browse/ST-1538
+		--AND ItemUOM.strLongUPCCode = IC.strUPCNo
 LEFT JOIN tblICUnitMeasure UOM 
 	ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
