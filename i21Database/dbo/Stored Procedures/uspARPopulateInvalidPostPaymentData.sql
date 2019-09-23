@@ -891,7 +891,7 @@ INSERT INTO #ARInvalidPaymentData
                 ORDER BY DI.intTransactionId ASC
             
                 --DELETE FROM INVALID LISTS IF PAYMENT IS VALID
-                IF @dblAmountDue > @dblPayment
+                IF @dblAmountDue >= @dblPayment
                     BEGIN
                         SET @dblAmountDue = @dblAmountDue - @dblPayment
 
