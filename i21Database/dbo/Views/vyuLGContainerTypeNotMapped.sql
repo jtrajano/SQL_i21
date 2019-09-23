@@ -23,5 +23,5 @@ SELECT CT.intContainerTypeId
 FROM tblLGContainerType CT
 LEFT JOIN tblLGContainerTypeCommodityQty CTCQ ON CT.intContainerTypeId = CTCQ.intContainerTypeId
 LEFT JOIN tblICCommodity C ON C.intCommodityId = CTCQ.intCommodityId
-LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = CT.intWeightUnitMeasureId
+LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = CTCQ.intUnitMeasureId
 LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = CTCQ.intCommodityAttributeId
