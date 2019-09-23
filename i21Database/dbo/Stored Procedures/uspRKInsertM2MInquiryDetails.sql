@@ -382,10 +382,10 @@ BEGIN
 	--================================================================
 	DECLARE @dtmPriceDate DATETIME
 		, @strFutureMonthIds NVARCHAR(MAX)
-		, @ysnM2MAllowExpiredMonth BIT = 0
+		, @intMarkExpiredMonthPositionId INT
 	
 	SELECT @dtmPriceDate = dtmPriceDate FROM tblRKFuturesSettlementPrice WHERE intFutureSettlementPriceId = @intFutureSettlementPriceId
-	SELECT @ysnM2MAllowExpiredMonth = ysnM2MAllowExpiredMonth FROM tblRKCompanyPreference
+	SELECT @intMarkExpiredMonthPositionId = ISNULL(intMarkExpiredMonthPositionId, 1) FROM tblRKCompanyPreference
 	
 	
 	SELECT @strFutureMonthIds = COALESCE(@strFutureMonthIds + ',', '') + ISNULL(intFutureMonthId, '')
@@ -402,7 +402,7 @@ BEGIN
 		, intFutSettlementPriceMonthId INT
 		, intConcurrencyId INT)
 	
-	IF @ysnM2MAllowExpiredMonth = 1 --Removed filter of future month
+	IF (@intMarkExpiredMonthPositionId = 2 OR @intMarkExpiredMonthPositionId = 3) --Removed filter of future month
 	BEGIN
 		INSERT INTO @#tempInquirySettlementPriceDetail
 		SELECT CONVERT(INT,intRowNum) as intRowNum
