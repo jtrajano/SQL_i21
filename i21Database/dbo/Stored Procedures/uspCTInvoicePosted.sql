@@ -1,124 +1,124 @@
 ﻿CREATE PROCEDURE [dbo].[uspCTInvoicePosted]
-	@ItemsFromInvoice InvoiceItemTableType READONLY
-	,@intUserId  INT
+	  @ItemsFromInvoice InvoiceItemTableType READONLY
+	, @intUserId  INT
 AS
 
 BEGIN TRY
-
 	SET QUOTED_IDENTIFIER OFF
 	SET ANSI_NULLS ON
 	SET NOCOUNT ON
 	SET XACT_ABORT ON
 	SET ANSI_WARNINGS OFF
 
-	DECLARE		@intInvoiceDetailId				INT,
-				@intContractDetailId			INT,
-				@intFromItemUOMId				INT,
-				@intToItemUOMId					INT,
-				@intUniqueId					INT,
-				@intTicketId					INT = NULL,
-				@intTicketTypeId				INT = NULL,
-			    @intTicketType					INT = NULL,
-			    @strInOutFlag					NVARCHAR(MAX) = NULL,
-				@strTransactionType				NVARCHAR(100) = NULL,
-				@dblQty							NUMERIC(18,6),
-				@dblConvertedQty				NUMERIC(18,6),
-				@ErrMsg							NVARCHAR(MAX),
-				@dblSchQuantityToUpdate			NUMERIC(18,6),
-				@intContractHeaderId			INT,
-				@intItemId						INT,
-				@intCompanyLocationId			INT,
-				@intEntityId					INT,
-				@intPriceItemUOMId				INT,
-				@ysnBestPriceOnly				BIT,
-				@dblLowestPrice					NUMERIC(18,6),
-				@dblCashPrice					NUMERIC(18,6),
-				@ReduceBalance					BIT	=	1,
-				@ysnDestWtGrd					BIT,
-				@dblShippedQty					NUMERIC(18,6),
-				@intShippedQtyUOMId				INT
+	DECLARE @intInvoiceDetailId				INT
+		  , @intContractDetailId			INT
+		  , @intFromItemUOMId				INT
+		  , @intFromItemOrderedUOMId		INT
+		  , @intToItemUOMId					INT
+		  , @intUniqueId					INT
+		  , @intTicketId					INT = NULL
+		  , @intTicketTypeId				INT = NULL
+		  , @intTicketType					INT = NULL
+		  , @strInOutFlag					NVARCHAR(MAX) = NULL
+		  , @dblQty							NUMERIC(18,6)
+		  , @dblQtyOrdered					NUMERIC(18,6)
+		  , @dblConvertedQty				NUMERIC(18,6)
+		  , @dblConvertedQtyOrdered			NUMERIC(18,6)
+		  , @ErrMsg							NVARCHAR(MAX)
+		  , @dblSchQuantityToUpdate			NUMERIC(18,6)
+		  , @dblRemainingSchedQty			NUMERIC(18,6)
+		  , @intContractHeaderId			INT
+		  , @intItemId						INT
+		  , @intCompanyLocationId			INT
+		  , @intEntityId					INT
+		  , @intPriceItemUOMId				INT
+		  , @ysnBestPriceOnly				BIT
+		  , @dblLowestPrice					NUMERIC(18,6)
+		  , @dblCashPrice					NUMERIC(18,6)
+		  , @ReduceBalance					BIT	=	1
+		  , @ysnDestWtGrd					BIT
+		  , @dblShippedQty					NUMERIC(18,6)
+		  , @intShippedQtyUOMId				INT
 
-	--SELECT @strReceiptType = strReceiptType FROM @ItemsFromInvoice
-
-	--IF(@strReceiptType <> 'Purchase Contract' AND @strReceiptType <> 'Purchase Order')
-	--	RETURN
-
-	DECLARE @tblToProcess TABLE
-	(
-		intUniqueId					INT IDENTITY,
-		intInvoiceDetailId			INT,
-		intContractDetailId			INT,
-		intContractHeaderId			INT,
-		intItemUOMId				INT,
-		intTicketId					INT,
-		dblQty						NUMERIC(18,6),
-		ysnDestWtGrd				BIT,
-		dblShippedQty				NUMERIC(18,6),
-		intShippedQtyUOMId			INT,
-		strTransactionType			NVARCHAR(100) COLLATE Latin1_General_CI_AS    NULL
+	DECLARE @tblToProcess TABLE (
+		  intUniqueId				INT IDENTITY
+		, intInvoiceDetailId		INT
+		, intContractDetailId		INT
+		, intContractHeaderId		INT
+		, intItemUOMId				INT
+		, intOrderUOMId				INT
+		, intTicketId				INT
+		, dblQty					NUMERIC(18,6)
+		, dblQtyOrdered				NUMERIC(18,6)
+		, ysnDestWtGrd				BIT
+		, dblShippedQty				NUMERIC(18,6)
+		, intShippedQtyUOMId		INT	
 	)
 
-	INSERT INTO @tblToProcess(
-		 [intInvoiceDetailId]
-		,[intContractDetailId]
-		,[intContractHeaderId]
-		,[intItemUOMId]
-		,[dblQty]
-		,[intTicketId]
-		,[strTransactionType])
-	SELECT
-		 I.[intInvoiceDetailId]
-		,I.[intContractDetailId]
-		,I.[intContractHeaderId]
-		,I.[intItemUOMId]
-		,I.[dblQtyShipped]
-		,I.[intTicketId]
-		,I.[strTransactionType]
-	FROM
-		@ItemsFromInvoice I
-	WHERE
-		I.intContractDetailId IS NOT NULL		
+	INSERT INTO @tblToProcess (
+		  [intInvoiceDetailId]
+		, [intContractDetailId]
+		, [intContractHeaderId]
+		, [intItemUOMId]
+		, [intOrderUOMId]
+		, [dblQty]
+		, [dblQtyOrdered]
+		, [intTicketId]
+	)
+	SELECT [intInvoiceDetailId] 	= I.[intInvoiceDetailId]
+		, [intContractDetailId]		= I.[intContractDetailId]
+		, [intContractHeaderId]		= I.[intContractHeaderId]
+		, [intItemUOMId]			= I.[intItemUOMId]
+		, [intOrderUOMId]			= ID.[intOrderUOMId]
+		, [dblQty]					= I.[dblQtyShipped]
+		, [dblQtyOrdered]			= CASE WHEN ID.intSalesOrderDetailId IS NOT NULL OR ID.intTicketId IS NOT NULL THEN ID.[dblQtyOrdered] ELSE 0 END
+		, [intTicketId]				= I.[intTicketId]
+	FROM @ItemsFromInvoice I
+	INNER JOIN tblARInvoiceDetail ID ON I.intInvoiceDetailId = ID.intInvoiceDetailId
+	WHERE I.intContractDetailId IS NOT NULL
+		AND	(
+			(I.strTransactionType <> 'Credit Memo' AND I.[intInventoryShipmentItemId] IS NULL AND I.[intShipmentPurchaseSalesContractId] IS NULL AND I.[intLoadDetailId] IS  NULL)
+			OR
+			(I.strTransactionType = 'Credit Memo' AND (I.[intInventoryShipmentItemId] IS NOT NULL OR I.[intShipmentPurchaseSalesContractId] IS NOT NULL OR I.[intLoadDetailId] IS NOT NULL))
+			)
 		AND ISNULL(I.[intTransactionId],0) = 0
-		AND intTicketId IS NULL
+		AND I.intTicketId IS NULL
 
 	IF NOT EXISTS(SELECT * FROM @tblToProcess)
 	BEGIN
-		INSERT INTO @tblToProcess
-		(
-				 [intInvoiceDetailId]
-				,[intContractDetailId]
-				,[intContractHeaderId]
-				,[intItemUOMId]
-				,[dblQty]
-				,[intTicketId]
-				,[ysnDestWtGrd]
-				,[dblShippedQty]
-				,[intShippedQtyUOMId]
-				,[strTransactionType]
+		INSERT INTO @tblToProcess (
+			  [intInvoiceDetailId]
+			, [intContractDetailId]
+			, [intContractHeaderId]
+			, [intItemUOMId]
+			, [dblQty]
+			, [intTicketId]
+			, [ysnDestWtGrd]
+			, [dblShippedQty]
+			, [intShippedQtyUOMId]
 		)
-		SELECT	 I.[intInvoiceDetailId]
-				,I.[intContractDetailId]
-				,I.[intContractHeaderId]
-				,I.[intItemUOMId]
-				,I.[dblQtyShipped]
-				,I.[intTicketId]
-				,1
-				,S.[dblQuantity]
-				,S.[intItemUOMId]
-				,I.[strTransactionType]
-		FROM	@ItemsFromInvoice	I
-		JOIN	tblSCTicket					T	ON	T.intTicketId		=	I.intTicketId
-		JOIN	tblCTWeightGrade			W	ON	W.intWeightGradeId	=	T.intWeightId
-		JOIN	tblCTWeightGrade			G	ON	G.intWeightGradeId	=	T.intGradeId
-		JOIN	tblICInventoryShipmentItem	S	ON	S.intSourceId		=	I.intTicketId
-												AND S.intLineNo IS NOT NULL
-												AND I.intContractDetailId	=	S.intLineNo
-		WHERE	I.intTicketId IS NOT NULL AND (W.strWhereFinalized	= 'Destination' 
+		SELECT I.[intInvoiceDetailId]
+			, I.[intContractDetailId]
+			, I.[intContractHeaderId]
+			, I.[intItemUOMId]
+			, I.[dblQtyShipped]
+			, I.[intTicketId]
+			, 1
+			, S.dblQuantity
+			, S.intItemUOMId
+		FROM @ItemsFromInvoice	I
+		JOIN tblSCTicket T ON T.intTicketId	= I.intTicketId
+		JOIN tblCTWeightGrade W	ON W.intWeightGradeId =	T.intWeightId
+		JOIN tblCTWeightGrade G	ON G.intWeightGradeId =	T.intGradeId
+		JOIN tblICInventoryShipmentItem	S ON S.intSourceId =	I.intTicketId
+										 AND S.intLineNo IS NOT NULL
+										 AND I.intContractDetailId =	S.intLineNo
+		WHERE I.intTicketId IS NOT NULL AND (W.strWhereFinalized	= 'Destination' 
 											OR G.strWhereFinalized	= 'Destination')
-		AND		I.intContractDetailId IS NOT NULL
-		AND		I.[intShipmentPurchaseSalesContractId] IS NULL
-		AND		ISNULL(I.[intLoadDetailId],0) = 0
-		AND		ISNULL(I.[intTransactionId],0) = 0
+		AND	I.intContractDetailId IS NOT NULL
+		AND	I.[intShipmentPurchaseSalesContractId] IS NULL
+		AND	ISNULL(I.[intLoadDetailId],0) = 0
+		AND	ISNULL(I.[intTransactionId],0) = 0
 	END
 
 	SELECT @intUniqueId = MIN(intUniqueId) FROM @tblToProcess
@@ -127,25 +127,29 @@ BEGIN TRY
 	BEGIN
 		SELECT	@intContractDetailId			=	NULL,
 				@intFromItemUOMId				=	NULL,
+				@intFromItemOrderedUOMId		=	NULL,
 				@dblQty							=	NULL,
+				@dblQtyOrdered					=	NULL,
+				@dblConvertedQtyOrdered			=	NULL,
 				@intInvoiceDetailId				=	NULL,
 				@intTicketId					=   NULL,
 				@intTicketTypeId				=	NULL,
 				@intTicketType					=   NULL,
 				@strInOutFlag					=   NULL,
-				@strTransactionType				=	NULL,
 				@ysnDestWtGrd					=	NULL,
 				@dblShippedQty					=	NULL,
-				@intShippedQtyUOMId				=	NULL
+				@intShippedQtyUOMId				=	NULL,
+				@dblRemainingSchedQty			=	NULL
 
 		SELECT	@intContractDetailId			=	P.[intContractDetailId],
 				@intFromItemUOMId				=	P.[intItemUOMId],
+				@intFromItemOrderedUOMId		=	P.[intOrderUOMId],
 				@dblQty							=	P.[dblQty],
+				@dblQtyOrdered					=	P.[dblQtyOrdered],
 				@intInvoiceDetailId				=	P.[intInvoiceDetailId],
 				@ysnDestWtGrd					=	P.[ysnDestWtGrd],
 				@dblShippedQty					=	P.[dblShippedQty],
 				@intShippedQtyUOMId				=	P.[intShippedQtyUOMId],
-				@strTransactionType				=   P.[strTransactionType],
 
 				@intTicketId					=   T.[intTicketId],
 				@intTicketTypeId				=   T.[intTicketTypeId], --SELECT * FROM tblSCListTicketTypes
@@ -171,9 +175,13 @@ BEGIN TRY
 			RAISERROR('Contract does not exist.',16,1)
 		END
 
-		SELECT @intToItemUOMId	=	intItemUOMId FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId
+		IF @dblQty < 0
+			SET @dblQtyOrdered = -@dblQtyOrdered
 
-		SELECT @dblConvertedQty =	dbo.fnCalculateQtyBetweenUOM(@intFromItemUOMId,@intToItemUOMId,@dblQty)
+		SELECT @intToItemUOMId	= intItemUOMId FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId
+
+		SELECT @dblConvertedQty = dbo.fnCalculateQtyBetweenUOM(@intFromItemUOMId, @intToItemUOMId, @dblQty)
+		SELECT @dblConvertedQtyOrdered = dbo.fnCalculateQtyBetweenUOM(@intFromItemOrderedUOMId, @intToItemUOMId, @dblQtyOrdered)
 
 		IF @ysnBestPriceOnly = 1
 		BEGIN
@@ -183,9 +191,10 @@ BEGIN TRY
 				SET	@ReduceBalance	=	0
 				
 		END
-		
-		SELECT	@dblSchQuantityToUpdate = - @dblConvertedQty
-					
+
+		SELECT @dblSchQuantityToUpdate = CASE WHEN ABS(@dblQtyOrdered) > 0 AND ABS(@dblQty) > ABS(@dblQtyOrdered) THEN -@dblConvertedQtyOrdered ELSE -@dblConvertedQty END
+		SELECT @dblRemainingSchedQty = @dblConvertedQtyOrdered - @dblConvertedQty
+
 		IF	ISNULL(@ysnDestWtGrd,0) = 0 AND
 			(
 				(
@@ -206,30 +215,26 @@ BEGIN TRY
 							@intUserId				=	@intUserId,
 							@intExternalId			=	@intInvoiceDetailId,
 							@strScreenName			=	'Invoice',
-							@ysnFromInvoice = 1 
-
-					EXEC	uspCTUpdateScheduleQuantity
-							@intContractDetailId	=	@intContractDetailId,
-							@dblQuantityToUpdate	=	@dblSchQuantityToUpdate,
-							@intUserId				=	@intUserId,
-							@intExternalId			=	@intInvoiceDetailId,
-							@strScreenName			=	'Invoice' 
-
+							@ysnFromInvoice 		= 	1  	 
 				END
 				
+				EXEC	uspCTUpdateScheduleQuantity
+						@intContractDetailId	=	@intContractDetailId,
+						@dblQuantityToUpdate	=	@dblSchQuantityToUpdate,
+						@intUserId				=	@intUserId,
+						@intExternalId			=	@intInvoiceDetailId,
+						@strScreenName			=	'Invoice' 
 
+				IF ISNULL(@dblRemainingSchedQty, 0) > 0
+					BEGIN
+						SET @dblRemainingSchedQty = -@dblRemainingSchedQty
 
-				/*
-				IF ISNULL(@strTransactionType, '') <> 'Credit Memo'
-				BEGIN
-					EXEC	uspCTUpdateScheduleQuantity
-							@intContractDetailId	=	@intContractDetailId,
-							@dblQuantityToUpdate	=	@dblSchQuantityToUpdate,
-							@intUserId				=	@intUserId,
-							@intExternalId			=	@intInvoiceDetailId,
-							@strScreenName			=	'Invoice' 
+						EXEC uspCTUpdateScheduleQuantity @intContractDetailId	= @intContractDetailId
+													   , @dblQuantityToUpdate	= @dblRemainingSchedQty
+													   , @intUserId				= @intUserId
+													   , @intExternalId			= @intInvoiceDetailId
+													   , @strScreenName			= 'Invoice' 
 					END
-					*/
 		END
 
 		IF @ysnDestWtGrd = 1
@@ -244,7 +249,7 @@ BEGIN TRY
 						@intUserId				=	@intUserId,
 						@intExternalId			=	@intInvoiceDetailId,
 						@strScreenName			=	'Invoice',
-							@ysnFromInvoice = 1  
+						@ysnFromInvoice 		= 	1  	 
 
 				SELECT @dblConvertedQty =	dbo.fnCalculateQtyBetweenUOM(@intFromItemUOMId,@intToItemUOMId,@dblQty)
 
@@ -254,7 +259,7 @@ BEGIN TRY
 						@intUserId				=	@intUserId,
 						@intExternalId			=	@intInvoiceDetailId,
 						@strScreenName			=	'Invoice',
-							@ysnFromInvoice = 1  
+						@ysnFromInvoice 		= 	1  	
 			END
 			ELSE --Unpost
 			BEGIN
@@ -266,7 +271,7 @@ BEGIN TRY
 						@intUserId				=	@intUserId,
 						@intExternalId			=	@intInvoiceDetailId,
 						@strScreenName			=	'Invoice',
-							@ysnFromInvoice = 1 
+						@ysnFromInvoice 		= 	1  	
 						
 				SELECT @dblConvertedQty =	dbo.fnCalculateQtyBetweenUOM(@intShippedQtyUOMId,@intToItemUOMId,@dblShippedQty) 	
 
@@ -276,7 +281,7 @@ BEGIN TRY
 						@intUserId				=	@intUserId,
 						@intExternalId			=	@intInvoiceDetailId,
 						@strScreenName			=	'Invoice',
-							@ysnFromInvoice = 1   	
+						@ysnFromInvoice 		= 	1  	
 			END
 		END
 

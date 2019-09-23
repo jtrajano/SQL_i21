@@ -898,7 +898,7 @@ BEGIN TRY
 		,[intLoadDistributionHeaderId]			= TR.intLoadDistributionHeaderId
 		,intTruckDriverId						= TR.intTruckDriverId
 		,intTruckDriverReferenceId				= TR.intTruckDriverReferenceId
-		,ysnImpactInventory						= TR.ysnImpactInventory
+		,ysnImpactInventory                     = ISNULL(TR.ysnImpactInventory, 0)
 		,strBOLNumberDetail						= TR.strBOLNumberDetail
 	FROM #tmpSourceTableFinal TR
 	ORDER BY TR.intLoadDistributionDetailId, intId DESC
@@ -1204,7 +1204,7 @@ BEGIN TRY
 		,[ysnClearDetailTaxes]					= IE.ysnClearDetailTaxes
 		,[intTempDetailIdForTaxes]				= IE.intTempDetailIdForTaxes
 		,[intLoadDistributionHeaderId]			= IE.intLoadDistributionHeaderId
-		,[ysnImpactInventory]					= IE.ysnImpactInventory
+		,[ysnImpactInventory]                   = ISNULL(IE.ysnImpactInventory,0)
 		,[strBOLNumberDetail]					= IE.strBOLNumberDetail
 	FROM @FreightSurchargeEntries IE
 	GROUP BY [strSourceTransaction]

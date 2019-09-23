@@ -6,7 +6,7 @@ GO
 CREATE PROCEDURE [dbo].[uspAPImportVendorContact]
 	@Checking BIT = 0,
 	@Total INT = 0 OUTPUT
-AS 
+AS
 
 BEGIN
 
@@ -31,25 +31,25 @@ DECLARE @Contacts TABLE
 	, sscon_fax_ext NVARCHAR(max)
 )
 
-SELECT ED.coefd_contact_id, ED.coefd_cus_no,
-       STUFF(ISNULL((SELECT ',' + CASE WHEN x.coefd_eform_type = 'INV' THEN 'Invoices,Credit Memo,Debit Memo,Cash Refund,Cash,Sales Order'
-								   WHEN x.coefd_eform_type = 'STM' OR x.coefd_eform_type = 'GST' THEN 'Statements'									
-								   WHEN x.coefd_eform_type = 'GTX' THEN 'Scale'
-								   WHEN x.coefd_eform_type = 'GCO' OR x.coefd_eform_type = 'ACO' THEN 'Contracts'
-								   WHEN x.coefd_eform_type = 'RPQ' THEN 'Transport Quote'
-								   WHEN x.coefd_eform_type = 'CFI' THEN 'CF Invoice'
-								   WHEN x.coefd_eform_type = 'EFT' THEN 'AP Remittance'
-								   WHEN x.coefd_eform_type = 'CCR' THEN 'Dealer CC Notification'
-								   WHEN x.coefd_eform_type = 'GSE' THEN 'Settlement'
-								   WHEN x.coefd_eform_type = 'POR' THEN 'Purchase Order'
-								   END
-                FROM coefdmst x
-               WHERE x.coefd_contact_id = ED.coefd_contact_id AND x.coefd_cus_no = ED.coefd_cus_no
-            GROUP BY x.coefd_eform_type
-             FOR XML PATH (''), TYPE).value('.','VARCHAR(max)'), ''), 1, 1, '') as Form_type
-  INTO #tmpcoefd
-  FROM coefdmst ED WHERE ED.coefd_by_email = 'Y'  --AND ED.coefd_cus_no = 'AIRTEX'
-  GROUP BY ED.coefd_contact_id, ED.coefd_cus_no, ED.coefd_eform_type
+-- SELECT ED.coefd_contact_id, ED.coefd_cus_no,
+--        STUFF(ISNULL((SELECT ',' + CASE WHEN x.coefd_eform_type = 'INV' THEN 'Invoices,Credit Memo,Debit Memo,Cash Refund,Cash,Sales Order'
+-- 								   WHEN x.coefd_eform_type = 'STM' OR x.coefd_eform_type = 'GST' THEN 'Statements'
+-- 								   WHEN x.coefd_eform_type = 'GTX' THEN 'Scale'
+-- 								   WHEN x.coefd_eform_type = 'GCO' OR x.coefd_eform_type = 'ACO' THEN 'Contracts'
+-- 								   WHEN x.coefd_eform_type = 'RPQ' THEN 'Transport Quote'
+-- 								   WHEN x.coefd_eform_type = 'CFI' THEN 'CF Invoice'
+-- 								   WHEN x.coefd_eform_type = 'EFT' THEN 'AP Remittance'
+-- 								   WHEN x.coefd_eform_type = 'CCR' THEN 'Dealer CC Notification'
+-- 								   WHEN x.coefd_eform_type = 'GSE' THEN 'Settlement'
+-- 								   WHEN x.coefd_eform_type = 'POR' THEN 'Purchase Order'
+-- 								   END
+--                 FROM coefdmst x
+--                WHERE x.coefd_contact_id = ED.coefd_contact_id AND x.coefd_cus_no = ED.coefd_cus_no
+--             GROUP BY x.coefd_eform_type
+--              FOR XML PATH (''), TYPE).value('.','VARCHAR(max)'), ''), 1, 1, '') as Form_type
+--   INTO #tmpcoefd
+--   FROM coefdmst ED WHERE ED.coefd_by_email = 'Y'  --AND ED.coefd_cus_no = 'AIRTEX'
+--   GROUP BY ED.coefd_contact_id, ED.coefd_cus_no, ED.coefd_eform_type
 
 	DECLARE @sscon_vnd_no NVARCHAR(200)
 	BEGIN -- Get Customers to be imported to #tmpContacts
@@ -62,14 +62,14 @@ SELECT ED.coefd_contact_id, ED.coefd_cus_no,
 			, sscon_first_name 
 			, sscon_last_name 
 			, sscon_suffix
-			, sscon_work_no 
+			, sscon_work_no
 			, sscon_work_ext 
 			, sscon_cell_no 
 			, sscon_cell_ext 
 			, sscon_fax_no
 			, sscon_fax_ext
 		)
-		SELECT 
+		SELECT
 			isnull(sscon_contact_id, '')
 			, isnull(sscon_vnd_no, '')
 			, isnull(sscon_contact_title, '')
@@ -94,7 +94,7 @@ SELECT ED.coefd_contact_id, ED.coefd_cus_no,
 			DECLARE @id INT
 			DECLARE @sscon_contact_id NVARCHAR(20)
 
-			SELECT TOP 1 @id = id, 
+			SELECT TOP 1 @id = id,
 							@sscon_vnd_no = sscon_vnd_no,
 							@sscon_contact_id = sscon_contact_id
 			FROM @Contacts
@@ -107,11 +107,11 @@ SELECT ED.coefd_contact_id, ED.coefd_cus_no,
 			
 			END
 
-			IF EXISTS(SELECT TOP 1  1 FROM tblEMEntity A 
-						JOIN tblEMEntityToContact B ON A.intEntityId = B.intEntityId 
+			IF EXISTS(SELECT TOP 1  1 FROM tblEMEntity A
+						JOIN tblEMEntityToContact B ON A.intEntityId = B.intEntityId
 						JOIN tblEMEntity C ON B.intEntityContactId = C.intEntityId
-							WHERE A.intEntityId = @intEntityId AND 
-								C.strContactNumber = @sscon_contact_id 
+							WHERE A.intEntityId = @intEntityId AND
+								C.strContactNumber = @sscon_contact_id
 					)
 			BEGIN
 				GOTO ContinueLoop;
@@ -138,9 +138,9 @@ SELECT ED.coefd_contact_id, ED.coefd_cus_no,
 				INSERT INTO tblEMEntity(strName, strContactNumber, strTitle, strEmail)
 				SELECT @Name, @ContactNumber, @Title, @Email
 
-				
+
 				DECLARE @intContactId INT
-				
+
 				SET @intContactId = @@IDENTITY
 				print @intContactId
 				IF @CP <> ''
@@ -148,7 +148,7 @@ SELECT ED.coefd_contact_id, ED.coefd_cus_no,
 					IF EXISTS(SELECT TOP 1 1 FROM tblEMContactDetailType WHERE strType = 'Phone' AND strField = 'Home')
 					BEGIN
 						INSERT INTO tblEMContactDetail (intEntityId, strValue, intContactDetailTypeId)
-						SELECT TOP 1 @intContactId, @CP, intContactDetailTypeId FROM tblEMContactDetailType WHERE strType = 'Phone' AND strField = 'Home' 
+						SELECT TOP 1 @intContactId, @CP, intContactDetailTypeId FROM tblEMContactDetailType WHERE strType = 'Phone' AND strField = 'Home'
 					END
 
 					INSERT INTO tblEMEntityPhoneNumber(intEntityId, strPhone)
@@ -160,7 +160,7 @@ SELECT ED.coefd_contact_id, ED.coefd_cus_no,
 					IF EXISTS(SELECT TOP 1 1 FROM tblEMContactDetailType WHERE strType = 'Phone' AND strField = 'Work')
 					BEGIN
 						INSERT INTO tblEMContactDetail (intEntityId, strValue, intContactDetailTypeId)
-						SELECT TOP 1 @intContactId, @WorkPhone, intContactDetailTypeId FROM tblEMContactDetailType WHERE strType = 'Phone' AND strField = 'Work' 
+						SELECT TOP 1 @intContactId, @WorkPhone, intContactDetailTypeId FROM tblEMContactDetailType WHERE strType = 'Phone' AND strField = 'Work'
 					END
 				END
 
@@ -169,7 +169,7 @@ SELECT ED.coefd_contact_id, ED.coefd_cus_no,
 					IF EXISTS(SELECT TOP 1 1 FROM tblEMContactDetailType WHERE strType = 'Phone' AND strField = 'Fax')
 					BEGIN
 						INSERT INTO tblEMContactDetail (intEntityId, strValue, intContactDetailTypeId)
-						SELECT TOP 1 @intContactId, @Fax, intContactDetailTypeId FROM tblEMContactDetailType WHERE strType = 'Phone' AND strField = 'Fax' 
+						SELECT TOP 1 @intContactId, @Fax, intContactDetailTypeId FROM tblEMContactDetailType WHERE strType = 'Phone' AND strField = 'Fax'
 					END
 				END
 
@@ -178,10 +178,10 @@ SELECT ED.coefd_contact_id, ED.coefd_cus_no,
 					IF EXISTS(SELECT TOP 1 1 FROM tblEMContactDetailType WHERE strType = 'Email' AND strField = 'Alt Email')
 					BEGIN
 						INSERT INTO tblEMContactDetail (intEntityId, strValue, intContactDetailTypeId)
-						SELECT TOP 1 @intContactId, @Email, intContactDetailTypeId FROM tblEMContactDetailType WHERE strType = 'Email' AND strField = 'Alt Email' 
+						SELECT TOP 1 @intContactId, @Email, intContactDetailTypeId FROM tblEMContactDetailType WHERE strType = 'Email' AND strField = 'Alt Email'
 					END
 				END
-					
+
 					--exec [uspEntityCreateEntityContact] @EntityContact, @intContactId OUT
 			END
 			BEGIN --LOCATION
@@ -192,7 +192,7 @@ SELECT ED.coefd_contact_id, ED.coefd_cus_no,
 				SET @LoopCounter = 1
 				WHILE EXISTS(SELECT TOP 1 1 FROM tblEMEntityLocation WHERE strLocationName = @EntityLocationName)
 				BEGIN
-					SET @EntityLocationName = CAST(@LoopCounter AS NVARCHAR) + @EntityLocationName					
+					SET @EntityLocationName = CAST(@LoopCounter AS NVARCHAR) + @EntityLocationName
 					SET @LoopCounter = @LoopCounter + 1
 				END
 				INSERT INTO tblEMEntityLocation(intEntityId, strLocationName, ysnDefaultLocation)
@@ -203,42 +203,42 @@ SELECT ED.coefd_contact_id, ED.coefd_cus_no,
 				DECLARE @CustomerNo NVARCHAR(max), @intEntityCustomerId INT
 
 				SELECT TOP 1 @CustomerNo = sscon_vnd_no FROM @Contacts WHERE id = @id
-				SELECT TOP 1 @intEntityCustomerId = intEntityId FROM tblAPVendor WHERE strVendorId = @CustomerNo 
+				SELECT TOP 1 @intEntityCustomerId = intEntityId FROM tblAPVendor WHERE strVendorId = @CustomerNo
 
 				INSERT INTO tblEMEntityToContact(intEntityId, intEntityContactId, ysnDefaultContact, ysnPortalAccess)
 				SELECT @intEntityId, @intContactId, 0, 0
 
 
 			END
-			
+
 
 			ContinueLoop:
 			--UPDATE E-DISTRIBUTION FORM TYPEs
 
-			UPDATE ENT SET ENT.strEmailDistributionOption = 
-			CASE WHEN (isnull(ENT.strName,'') LIKE '% REMITTANCE%'   
+			UPDATE ENT SET ENT.strEmailDistributionOption =
+			CASE WHEN (isnull(ENT.strName,'') LIKE '% REMITTANCE%'
 			OR isnull(ENT.strName,'') LIKE '%EFT%'   )
 			OR isnull(ENT.strEmail,'') <> ''
 			THEN
-			
+
 			CASE
 				WHEN CHARINDEX('AP Remittance', isnull(ENT.strEmailDistributionOption,'')) = 0
 
 			THEN
 				CASE WHEN   len(ltrim(rtrim(isnull(ENT.strEmailDistributionOption,'')))) = 0
-					 then 'AP Remittance' 
+					 then 'AP Remittance'
 				ELSE
 					',AP Remittance'
 				END
 			 ELSE
-				ENT.strEmailDistributionOption 
+				ENT.strEmailDistributionOption
 
 			 END
-			  
-			 
+
+
 			 ELSE ENT.strEmailDistributionOption END
-			--ED.Form_type 
-			FROM tblEMEntityToContact ETC 
+			--ED.Form_type
+			FROM tblEMEntityToContact ETC
 			JOIN tblEMEntity ENT ON ENT.intEntityId = ETC.intEntityContactId
 			JOIN tblEMEntity ENT1 ON ENT1.intEntityId = ETC.intEntityId
 
@@ -253,19 +253,19 @@ END
 
 IF(@Checking = 1)
 BEGIN
-	SELECT 
-	--@Total = 
-	 count(sscon_contact_id) 
+	SELECT
+	--@Total =
+	 count(sscon_contact_id)
 	FROM ssconmst
-	LEFT JOIN tblEMEntity Ent 
+	LEFT JOIN tblEMEntity Ent
 		ON ssconmst.sscon_contact_id COLLATE Latin1_General_CI_AS = Ent.strContactNumber COLLATE Latin1_General_CI_AS
 	WHERE Ent.strContactNumber IS NULL AND ssconmst.sscon_contact_id  = UPPER(ssconmst.sscon_contact_id ) COLLATE Latin1_General_CS_AS
-		AND sscon_vnd_no LIKE '%[a-z0-9]%'			
+		AND sscon_vnd_no LIKE '%[a-z0-9]%'
 		AND sscon_vnd_no IN (SELECT strVendorId collate SQL_Latin1_General_CP1_CS_AS FROM tblAPVendor)
-			
+
 END
 END
-	
+
 	
 
 	

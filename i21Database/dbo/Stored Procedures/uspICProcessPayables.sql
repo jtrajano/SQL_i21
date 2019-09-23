@@ -8,8 +8,6 @@ BEGIN
 	-- Generate Payables
 	DECLARE @voucherPayable VoucherPayable
 	DECLARE @voucherPayableTax VoucherDetailTax
-	DECLARE @ysnCreateOtherCostPayable BIT
-	SELECT @ysnCreateOtherCostPayable = ysnCreateOtherCostPayable FROM tblCTCompanyPreference
 
 	IF(@intReceiptId IS NOT NULL)
 	BEGIN
@@ -36,7 +34,8 @@ BEGIN
 			,[intInventoryShipmentItemId]		
 			,[intInventoryShipmentChargeId]		
 			,[intLoadShipmentId]				
-			,[intLoadShipmentDetailId]			
+			,[intLoadShipmentDetailId]	
+			,[intLoadShipmentCostId]		
 			,[intItemId]						
 			,[intPurchaseTaxGroupId]			
 			,[strMiscDescription]				
@@ -87,8 +86,9 @@ BEGIN
 			,GP.[intInventoryReceiptChargeId]		
 			,GP.[intInventoryShipmentItemId]		
 			,GP.[intInventoryShipmentChargeId]		
-			,[intLoadShipmentId] = NULL				
-			,[intLoadShipmentDetailId] = NULL			
+			,[intLoadShipmentId] = GP.intLoadShipmentId			
+			,[intLoadShipmentDetailId] = GP.intLoadShipmentDetailId
+			,[intLoadShipmentCostId] = GP.intLoadShipmentCostId
 			,GP.[intItemId]						
 			,GP.[intPurchaseTaxGroupId]			
 			,GP.[strMiscDescription]				
@@ -237,7 +237,21 @@ BEGIN
 				AND ItemLocation.intLocationId = ShipmentCharges.intLocationId
 			WHERE Shipment.intInventoryShipmentId = @intShipmentId
 				AND Shipment.ysnPosted = 1
-				AND (ShipmentCharges.intContractHeaderId IS NOT NULL AND @ysnCreateOtherCostPayable = 1 OR ShipmentCharges.intContractHeaderId IS NULL)
+				AND (ShipmentCharges.intContractDetailId IS NULL OR 
+					(
+						CASE WHEN ShipmentCharges.intContractDetailId IS NOT NULL 
+							AND EXISTS(
+								SELECT TOP 1 1 
+								FROM tblAPVoucherPayable 
+								WHERE intEntityVendorId = ShipmentCharges.intEntityVendorId 
+								AND intContractDetailId = ShipmentCharges.intContractDetailId
+								AND strSourceNumber != ShipmentCharges.strSourceNumber
+							)
+							THEN 0 ELSE 1 
+						END = 1
+					)
+				)
+
 	END
 
 
@@ -305,7 +319,8 @@ BEGIN
 			,[intInventoryShipmentItemId]		
 			,[intInventoryShipmentChargeId]		
 			,[intLoadShipmentId]				
-			,[intLoadShipmentDetailId]			
+			,[intLoadShipmentDetailId]		
+			,[intLoadShipmentCostId]		
 			,[intItemId]						
 			,[intPurchaseTaxGroupId]			
 			,[strMiscDescription]				
@@ -356,8 +371,9 @@ BEGIN
 			,GP.[intInventoryReceiptChargeId]		
 			,GP.[intInventoryShipmentItemId]		
 			,GP.[intInventoryShipmentChargeId]		
-			,[intLoadShipmentId] = NULL				
-			,[intLoadShipmentDetailId] = NULL			
+			,GP.[intLoadShipmentId]				
+			,GP.[intLoadShipmentDetailId]	
+			,GP.[intLoadShipmentCostId]			
 			,GP.[intItemId]						
 			,GP.[intPurchaseTaxGroupId]			
 			,GP.[strMiscDescription]				

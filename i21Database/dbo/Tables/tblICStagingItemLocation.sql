@@ -11,6 +11,12 @@ CREATE TABLE [dbo].[tblICStagingItemLocation] (
 	, ysnRequireStorageUnit BIT NULL
 	, dblReorderPoint NUMERIC(18, 6) NULL
 	, dblLeadTime NUMERIC(18, 6) NULL
+	, intDefaultGrossUomId INT NULL
+	, intDefaultPurchaseUomId INT NULL
+	, intDefaultSaleUomId INT NULL
+	, intDefaultGrossUnitMeasureId INT NULL
+	, intDefaultPurchaseUnitMeasureId INT NULL
+	, intDefaultSaleUnitMeasureId INT NULL
 	, intReorderPoint AS CAST(ROUND(dblReorderPoint, 2) AS INT)
 	, intLeadTime AS CAST(ROUND(dblLeadTime, 2) AS INT)
 	, strDefaultVendorNo NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL

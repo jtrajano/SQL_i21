@@ -196,6 +196,7 @@ BEGIN
 		SET @runDate		= @strProcessDate
 	END
 
+
 	 
 	SET @ysnPostedOrigin	= @PostedOrigin
 	SET @ysnPostedCSV		= @PostedCSV	
@@ -213,7 +214,8 @@ BEGIN
 
 	IF (@intTransactionId > 0 AND @IsImporting = 0)
 	BEGIN
-		DELETE tblCFTransactionNote WHERE intTransactionId = @intTransactionId
+		--DELETE tblCFTransactionNote WHERE intTransactionId = @intTransactionId AND intTransactionId = 0
+		UPDATE tblCFTransactionNote SET ysnCurrentError = 0 , strErrorTitle = 'Prior Error' WHERE intTransactionId = @intTransactionId 
 	END
 	ELSE IF(@intTransactionId = 0)
 	BEGIN
@@ -6166,21 +6168,24 @@ BEGIN
 	END
 	ELSE IF @strPriceMethod = 'Network Cost'
 		BEGIN
-		DECLARE @dblNetworkCostGrossPrice NUMERIC(18,6)
-		SET @dblNetworkCostGrossPrice = ISNULL(@TransferCost,0)
-		SET @dblImportFileGrossPrice = @dblNetworkCostGrossPrice --ROUND((ISNULL(@TransferCost,0) - (ISNULL(@totalOriginalTax,0) / @dblQuantity)) + ISNULL(@dblAdjustments,0) + (ISNULL(@totalCalculatedTax,0) / @dblQuantity) , 6)
- 
+		IF(@ysnReRunCalcTax = 0)
+		BEGIN
+			DECLARE @dblNetworkCostGrossPrice NUMERIC(18,6)
+			SET @dblPrice = ISNULL(@TransferCost,0)
+			SET @ysnReRunCalcTax = 1
+			GOTO TAXCOMPUTATION
+		END
 		IF(ISNULL(@ysnForceRounding,0) = 1) 
 		BEGIN
-			SELECT @dblImportFileGrossPrice = dbo.fnCFForceRounding(@dblImportFileGrossPrice)
+			SELECT @dblPrice = dbo.fnCFForceRounding(@dblPrice)
 		END
 
-		SET @dblCalculatedGrossPrice	 = 	 @dblImportFileGrossPrice
-		SET @dblOriginalGrossPrice		 = 	 @dblNetworkCostGrossPrice
-		SET @dblCalculatedNetPrice		 = 	 ROUND(((ROUND((@dblImportFileGrossPrice * @dblQuantity),2) - (ISNULL(@totalCalculatedTax,0))) / @dblQuantity),6)
-		SET @dblOriginalNetPrice		 = 	 ROUND(((ROUND((@dblNetworkCostGrossPrice * @dblQuantity),2) - (ISNULL(@totalOriginalTax,0))) / @dblQuantity),6)
-		SET @dblCalculatedTotalPrice	 = 	 ROUND((@dblImportFileGrossPrice * @dblQuantity),2)
-		SET @dblOriginalTotalPrice		 = 	 ROUND(@dblNetworkCostGrossPrice * @dblQuantity,2)
+		SET @dblCalculatedGrossPrice	 = 	 @dblPrice
+		SET @dblOriginalGrossPrice		 = 	 @dblPrice
+		SET @dblCalculatedNetPrice		 = 	 ROUND(((ROUND((@dblPrice * @dblQuantity),2) - (ISNULL(@totalCalculatedTax,0))) / @dblQuantity),6)
+		SET @dblOriginalNetPrice		 = 	 ROUND(((ROUND((@dblPrice * @dblQuantity),2) - (ISNULL(@totalOriginalTax,0))) / @dblQuantity),6)
+		SET @dblCalculatedTotalPrice	 = 	 ROUND((@dblPrice * @dblQuantity),2)
+		SET @dblOriginalTotalPrice		 = 	 ROUND(@dblPrice * @dblQuantity,2)
 
 		SET @dblQuoteGrossPrice			 = @dblCalculatedGrossPrice
 		SET @dblQuoteNetPrice			 = ROUND(((ROUND((@dblQuoteGrossPrice * @dblQuantity),2) - (ISNULL(@totalCalculatedTax,0))) / @dblQuantity),6)
@@ -7634,3 +7639,36 @@ BEGIN
 
 	END
 	END
+
+
+
+	DECLARE @transactionErrorCount INT = 0
+	DECLARE @noErrorText NVARCHAR(MAX) = 'No Errors'
+	DECLARE @currentErrorText NVARCHAR(MAX) = 'Current Error'
+
+	DELETE tblCFTransactionNote WHERE intTransactionId = @intTransactionId AND strNote = @noErrorText
+
+	SELECT @transactionErrorCount = COUNT(*) FROM tblCFTransactionNote  WHERE intTransactionId = @intTransactionId  AND strErrorTitle = @currentErrorText
+	IF(@transactionErrorCount = 0)
+	BEGIN
+		INSERT INTO tblCFTransactionNote
+		(
+			 intTransactionId
+			,strProcess
+			,dtmProcessDate
+			,strNote
+			,strGuid
+			,ysnCurrentError
+			,strErrorTitle
+		)
+		SELECT
+			 @intTransactionId
+			,@noErrorText
+			,@runDate
+			,@noErrorText
+			,@guid
+			,1
+			,@currentErrorText
+	END
+
+	

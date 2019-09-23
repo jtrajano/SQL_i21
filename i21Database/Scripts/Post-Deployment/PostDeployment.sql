@@ -87,6 +87,8 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\1910_MigrateINCOToFreightTerm.sql
 :r .\SM\1910_UpdateVantivToWorldPay.sql
 :r .\SM\1910_EntityUserDatafix_Transaction.sql
+:r .\SM\1910_UpdateNoSpaceModuleName.sql
+:r .\SM\1910_DeleteDuplicateUserPreference.sql
 
 -- Canned Report
 :r .\Reports\1_ReportDisableConstraints.sql
@@ -256,6 +258,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AR\DefaultData\34_UpdateUnitPriceUOM.sql
 :r .\AR\DefaultData\35_UpdateInvoiceFromProvisional.sql
 :r .\AR\DefaultData\36_UpdateTaxDetailInvalidSetup.sql
+:r .\AR\DefaultData\37_UpdatePOSNewFields.sql
 :r .\AR\DefaultData\99_ReCreateTriggers.sql
 
 --Accounts Payable
@@ -287,7 +290,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AP\MigrateVouchersForApproval.sql
 :r .\AP\MigratePOForApprovals.sql
 :r .\AP\UpdateVoucherDetail1099.sql
-:r .\AP\UpdateAmountSign.sql
+-- :r .\AP\UpdateAmountSign.sql
 :r .\AP\DefaultDataBalance.sql
 :r .\AP\UpdatePrepayVoucherStatus.sql
 :r .\AP\UpdateTaxGroupId.sql
@@ -345,6 +348,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\PAT\3_UpdateIssueStockNo.sql
 :r .\PAT\4_UpdateRetiredStockNo.sql
 :r .\PAT\5_UpdatePayoutType.sql
+:r .\PAT\6_UpdateVolumeLogPostDate.sql
 
 --Contract Management
 :R .\CT\1_MasterTables.sql
@@ -353,6 +357,7 @@ print 'BEGIN POST DEPLOYMENT'
 :R .\CT\ExcelAndTableColumnMap.sql
 :R .\CT\fnCTGetBasisDeliveryAboveR2.sql
 :R .\CT\PariallyToPartially.sql
+:R .\CT\5_DataFix.sql
 
 --Notes Receivable
 :R .\NR\1_NoteTransType.sql

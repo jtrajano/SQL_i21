@@ -11,33 +11,33 @@ SELECT
 	, CS.intStorageScheduleId
 	, CS.strDPARecieptNumber
 	, CS.strCustomerReference
-	, CS.dblOriginalBalance
-	, CS.dblOpenBalance
+	, dblOriginalBalance					= ISNULL(CS.dblOriginalBalance,0)
+	, dblOpenBalance						= ISNULL(CS.dblOpenBalance,0)
 	, CS.dtmDeliveryDate
 	, CS.strDiscountComment
-	, CS.dblInsuranceRate
-	, CS.dblStorageDue
-	, CS.dblStoragePaid
-	, CS.dblFeesDue
-	, CS.dblFeesPaid
-	, CS.dblDiscountsDue
-	, CS.dblDiscountsPaid
+	, dblInsuranceRate						= ISNULL(CS.dblInsuranceRate,0)
+	, dblStorageDue							= ISNULL(CS.dblStorageDue,0)
+	, dblStoragePaid						= ISNULL(CS.dblStoragePaid,0)
+	, dblFeesDue							= ISNULL(CS.dblFeesDue,0)
+	, dblFeesPaid							= ISNULL(CS.dblFeesPaid,0)
+	, dblDiscountsDue						= ISNULL(CS.dblDiscountsDue,0)
+	, dblDiscountsPaid						= ISNULL(CS.dblDiscountsPaid,0)
 	, CS.intDiscountScheduleId
 	, CS.intCurrencyId
 	, CS.intItemId
 	, CS.intCompanyLocationSubLocationId
 	, CS.intStorageLocationId
-	, CS.dblTotalPriceShrink
-	, CS.dblTotalWeightShrink
+	, dblTotalPriceShrink					= ISNULL(CS.dblTotalPriceShrink,0)
+	, dblTotalWeightShrink					= ISNULL(CS.dblTotalWeightShrink,0)
 	, CS.dtmZeroBalanceDate
 	, CS.dtmLastStorageAccrueDate
 	, CS.strOriginState
 	, CS.strInsuranceState
-	, CS.dblFreightDueRate
+	, dblFreightDueRate						= ISNULL(CS.dblFreightDueRate,0)
 	, CS.intUnitMeasureId
 	, CS.intItemUOMId
 	, CS.ysnPrinted
-	, CS.dblCurrencyRate
+	, dblCurrencyRate						= ISNULL(CS.dblCurrencyRate,0)
 	, CS.intConcurrencyId
 	, EM.strName
 	, ST.strStorageTypeDescription

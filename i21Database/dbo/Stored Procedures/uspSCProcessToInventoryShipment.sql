@@ -543,19 +543,6 @@ BEGIN TRY
     JOIN tblICInventoryShipmentItem si ON si.intInventoryShipmentId = s.intInventoryShipmentId
     WHERE si.intInventoryShipmentId = @InventoryShipmentId AND s.intOrderType = 1
  
-    WHILE ISNULL(@intContractDetailId,0) > 0
-    BEGIN
-        IF EXISTS(SELECT TOP 1 1 FROM tblCTPriceFixation WHERE intContractDetailId = @intContractDetailId)
-        BEGIN
-			SET @ysnPriceFixation = 1;
-            EXEC uspCTCreateVoucherInvoiceForPartialPricing @intContractDetailId, @intUserId
-        END
-        SELECT @intContractDetailId = MIN(si.intLineNo)
-        FROM tblICInventoryShipment s 
-        JOIN tblICInventoryShipmentItem si ON si.intInventoryShipmentId = s.intInventoryShipmentId
-        WHERE si.intInventoryShipmentId = @InventoryShipmentId AND s.intOrderType = 1 AND si.intLineNo > @intContractDetailId
-    END
-			
 	--INVOICE intergration
 	SELECT @intPricingTypeId = CTD.intPricingTypeId FROM tblICInventoryShipmentItem ISI 
 	LEFT JOIN tblCTContractDetail CTD ON CTD.intContractDetailId = ISI.intLineNo

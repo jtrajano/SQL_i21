@@ -38,7 +38,9 @@ SELECT
 	intBookId,
 	strBook,
 	intSubBookId,
-	strSubBook
+	strSubBook,
+	B.intShipFromId,
+	SF.strLocationName as strShipFromName
 FROM
 		dbo.tblEMEntity A
 	INNER JOIN dbo.tblAPVendor B
@@ -54,6 +56,8 @@ FROM
 		ON G.intEntityContactId = D.[intEntityId] AND G.ysnDefaultContact = 1
 	LEFT JOIN dbo.tblEMEntityLocation C2
 		ON B.intBillToId = C2.intEntityLocationId
+	LEFT JOIN dbo.tblEMEntityLocation SF
+		ON B.intShipFromId = SF.intEntityLocationId
 	LEFT JOIN dbo.tblSMCurrency E1 ON C.intDefaultCurrencyId = E1.intCurrencyID
 	LEFT JOIN dbo.tblSMCurrency E
 		ON B.intCurrencyId = E.intCurrencyID

@@ -594,9 +594,6 @@ CREATE TABLE #ARItemsForStorageCosting
 	,[dblAdjustCostValue] NUMERIC(38, 20) NULL
 	,[dblAdjustRetailValue] NUMERIC(38, 20) NULL)
 
-
-	
-
 	EXEC [dbo].[uspARPopulateInvalidPostInvoiceData]
          @Post     = @post
         ,@Recap    = @recap
@@ -607,48 +604,42 @@ SELECT @totalInvalid = COUNT(DISTINCT [intInvoiceId]) FROM #ARInvalidInvoiceData
 
 IF(@totalInvalid > 0)
 	BEGIN
+		IF @raiseError = 1 AND @recap = 1
+			SELECT TOP 1 @ErrorMerssage = strPostingError FROM #ARInvalidInvoiceData
+
 		--Insert Invalid Post transaction result
 		INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-		SELECT 	
-			 [strPostingError]
-			,[strTransactionType]
-			,[strInvoiceNumber]
-			,[strBatchId]
-			,[intInvoiceId]
-		FROM
-			#ARInvalidInvoiceData
+		SELECT [strPostingError]
+			 , [strTransactionType]
+			 , [strInvoiceNumber]
+			 , [strBatchId]
+			 , [intInvoiceId]
+		FROM #ARInvalidInvoiceData
 
 		SET @invalidCount = @totalInvalid
-		SELECT TOP 1 @ErrorMerssage = [strPostingError] FROM #ARInvalidInvoiceData
 
 		--DELETE Invalid Transaction From temp table
 		DELETE A
 		FROM #ARPostInvoiceHeader A
-		INNER JOIN #ARInvalidInvoiceData B
-			ON A.intInvoiceId = B.intInvoiceId
+		INNER JOIN #ARInvalidInvoiceData B ON A.intInvoiceId = B.intInvoiceId
 
 		DELETE A
-			FROM #ARPostInvoiceDetail A
-		INNER JOIN #ARInvalidInvoiceData B
-					ON A.intInvoiceId = B.intInvoiceId
+		FROM #ARPostInvoiceDetail A
+		INNER JOIN #ARInvalidInvoiceData B ON A.intInvoiceId = B.intInvoiceId
 
 		DELETE A
 		FROM #ARItemsForCosting A
-		INNER JOIN #ARInvalidInvoiceData B
-			ON A.[intTransactionId] = B.[intInvoiceId]
+		INNER JOIN #ARInvalidInvoiceData B ON A.[intTransactionId] = B.[intInvoiceId]
 
 		DELETE A
-			FROM #ARItemsForInTransitCosting A
-				INNER JOIN #ARInvalidInvoiceData B
-					ON A.[intTransactionId] = B.[intInvoiceId]
+		FROM #ARItemsForInTransitCosting A
+		INNER JOIN #ARInvalidInvoiceData B ON A.[intTransactionId] = B.[intInvoiceId]
 
 		DELETE A
 		FROM #ARItemsForStorageCosting A
-		INNER JOIN #ARInvalidInvoiceData B
-			ON A.[intTransactionId] = B.[intInvoiceId]		
+		INNER JOIN #ARInvalidInvoiceData B ON A.[intTransactionId] = B.[intInvoiceId]		
 
         DELETE FROM #ARInvalidInvoiceData
-
 	END
 
 SELECT @totalRecords = COUNT([intInvoiceId]) FROM #ARPostInvoiceHeader
@@ -673,27 +664,23 @@ IF(@totalInvalid >= 1 AND @totalRecords <= 0)
 				END	
 
 			INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-			SELECT 	
-				[strPostingError]
-				,[strTransactionType]
-				,[strInvoiceNumber]
-				,[strBatchId]
-				,[intInvoiceId]
-			FROM
-				#ARInvalidInvoiceData 			
+			SELECT [strPostingError]
+				 , [strTransactionType]
+				 , [strInvoiceNumber]
+				 , [strBatchId]
+				 , [intInvoiceId]
+			FROM #ARInvalidInvoiceData 			
 		END
 
 		IF @raiseError = 1
 			BEGIN
-				IF ISNULL(@batchIdUsed, '') <> ''
+				IF ISNULL(@ErrorMerssage, '') = ''
 					SELECT TOP 1 @ErrorMerssage = [strMessage] FROM tblARPostResult WHERE [strBatchNumber] = @batchIdUsed
 
 				RAISERROR(@ErrorMerssage, 11, 1)							
 			END				
 		GOTO Post_Exit	
 	END
-
-	
 
 BEGIN TRY
 

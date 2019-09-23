@@ -13,11 +13,21 @@ FROM tblAPBill A
 
 --FIX VOUCHER DETAIL AMOUNT
 UPDATE A
-	SET A.dblTotal = CASE WHEN A.dblQtyReceived > 0 THEN ABS(A.dblTotal) ELSE A.dblTotal END
-	,A.dbl1099 = CASE WHEN A.dblQtyReceived > 0 THEN ABS(A.dbl1099) ELSE A.dbl1099 END
+	SET 
+	--UPDATE THE TOTAL ONLY IF SUM IS NOT CORRECT
+	A.dblTotal = CASE WHEN A.dblQtyReceived > 0 AND B.dblTotal != details.dblTotal THEN ABS(A.dblTotal) ELSE A.dblTotal END
+	,A.dbl1099 = CASE WHEN A.dblQtyReceived > 0 AND B.dblTotal != details.dblTotal THEN ABS(A.dbl1099) ELSE A.dbl1099 END
+	--IF QTY IS POSITIVE BUT TOTAL IS NEGATIVE,
+	,A.dblQtyReceived = A.dblQtyReceived
+			* CASE WHEN A.dblQtyReceived > 0 AND A.dblTotal < 0 AND B.dblTotal = details.dblTotal THEN -1 ELSE 1 END
+	,A.dblQtyOrdered = A.dblQtyOrdered
+			* CASE WHEN A.dblQtyOrdered > 0 AND A.dblTotal < 0 AND B.dblTotal = details.dblTotal THEN -1 ELSE 1 END
 FROM tblAPBillDetail A
 INNER JOIN tblAPBill B
 	ON A.intBillId = B.intBillId
+CROSS APPLY (
+	SELECT SUM(dblTotal) dblTotal FROM tblAPBillDetail A2 WHERE A2.intBillId = A.intBillId
+) details
 --WHERE B.ysnOrigin = 0
 
 --FIX PAYMENT AMOUNT

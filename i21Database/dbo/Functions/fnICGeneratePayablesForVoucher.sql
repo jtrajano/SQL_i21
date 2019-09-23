@@ -91,6 +91,9 @@ RETURNS @table TABLE
 , intShipFromId						INT NULL
 , intShipFromEntityId				INT NULL
 , intPayToAddressId					INT NULL
+, intLoadShipmentId					INT NULL
+, intLoadShipmentDetailId			INT NULL
+, intLoadShipmentCostId				INT NULL
 )
 AS
 BEGIN
@@ -232,6 +235,9 @@ SELECT DISTINCT
 	,intShipFromId = A.intShipFromId
 	,intShipFromEntityId = A.intShipFromEntityId 
 	,intPaytoAddressId = payToAddress.intEntityLocationId
+	,intLoadShipmentId					= B.intLoadShipmentId
+	,intLoadShipmentDetailId			= B.intLoadShipmentDetailId
+	,intLoadShipmentCostId				= NULL
 FROM tblICInventoryReceipt A
 	INNER JOIN tblICInventoryReceiptItem B
 		ON A.intInventoryReceiptId = B.intInventoryReceiptId
@@ -310,7 +316,7 @@ WHERE
 		) 
 	)
 	AND (CD.dblCashPrice != 0 OR CD.dblCashPrice IS NULL) --EXCLUDE ALL THE BASIS CONTRACT WITH 0 CASH PRICE
-	--AND B.dblUnitCost != 0 --EXCLUDE ZERO RECEIPT COST 
+	AND B.dblUnitCost != 0 --EXCLUDE ZERO RECEIPT COST 
 	AND ISNULL(A.ysnOrigin, 0) = 0
 	AND B.intOwnershipType != 2
 	AND A.intInventoryReceiptId = @intReceiptId
@@ -318,7 +324,6 @@ WHERE
 	AND ISNULL(A.strReceiptType, '') <> 'Transfer Order'
 	AND ISNULL(B.ysnAllowVoucher, 1) = 1
 	-- AND (A.intSourceType <> 2 OR (A.intSourceType = 2 AND FreightTerms.strFobPoint <> 'Origin')) -- Deprecated
-	AND (F1.intContractHeaderId IS NOT NULL AND @ysnCreateOtherCostPayable = 1 OR F1.intContractHeaderId IS NULL)
 	ORDER BY B.intInventoryReceiptItemId ASC 
 
 
@@ -432,6 +437,9 @@ SELECT DISTINCT
 		,intShipFromId								=	NULL 
 		,intShipFromEntityId						=	NULL 
 		,intPaytoAddressId							=	payToAddress.intEntityLocationId
+		,intLoadShipmentId							= A.intLoadShipmentId
+		,intLoadShipmentDetailId					= NULL
+		,intLoadShipmentCostId						= A.intLoadShipmentCostId
 FROM [vyuICChargesForBilling] A
 	LEFT JOIN dbo.tblSMCurrency H1 ON H1.intCurrencyID = A.intCurrencyId
 	LEFT JOIN dbo.tblSMCurrency SubCurrency ON SubCurrency.intMainCurrencyId = A.intCurrencyId 
@@ -473,7 +481,6 @@ WHERE
 		AND 1 =  CASE WHEN CD.intPricingTypeId IS NOT NULL AND CD.intPricingTypeId IN (2) THEN 0 ELSE 1 END  --EXLCUDE ALL BASIS
 		AND 1 = CASE WHEN (A.intEntityVendorId = IR.intEntityVendorId AND CD.intPricingTypeId IS NOT NULL AND CD.intPricingTypeId = 5) THEN 0 ELSE 1 END --EXCLUDE DELAYED PRICING TYPE FOR RECEIPT VENDOR
 	)
-	AND (CH.intContractHeaderId IS NOT NULL AND @ysnCreateOtherCostPayable = 1 OR CH.intContractHeaderId IS NULL)
 RETURN
 END
 

@@ -1,7 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblEMEntityEFTInformation] (
     [intEntityEFTInfoId]       INT            IDENTITY (1, 1) NOT NULL,
     [intEntityId]              INT            NOT NULL,
-    [intBankId]                INT            NOT NULL,
+    [intBankId]                INT            NULL,
     [strBankName]              NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
     [strAccountNumber]         NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [strAccountType]           NVARCHAR (10)  COLLATE Latin1_General_CI_AS NULL,
@@ -18,6 +18,7 @@
 	[intOrder]				   INT			  NULL, 
 	[strEFTType]				NVARCHAR (200)  COLLATE Latin1_General_CI_AS NULL,
     [intConcurrencyId]         INT            NOT NULL,
-    CONSTRAINT [PK_tblEMEntityEFTInformation] PRIMARY KEY CLUSTERED ([intEntityEFTInfoId] ASC)
+    CONSTRAINT [PK_tblEMEntityEFTInformation] PRIMARY KEY CLUSTERED ([intEntityEFTInfoId] ASC),
+	CONSTRAINT [FK_tblEMEntityEFTInformation_tblCMBank] FOREIGN KEY ([intBankId]) REFERENCES [tblCMBank]([intBankId])
 );
 

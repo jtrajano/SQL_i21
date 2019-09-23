@@ -33,13 +33,14 @@ DECLARE @intEntityId INT
 		,@intDeliverySheetSplitId INT
 		,@ysnPost BIT
 		,@NetUnits AS NUMERIC(38,6)
+		,@strEntityNo NVARCHAR(50)
 
 IF OBJECT_ID (N'tempdb.dbo.#temp') IS NOT NULL
    DROP TABLE #temp
 
 DECLARE @temp TABLE (fields NVARCHAR(50))
 INSERT INTO @temp (fields)
-VALUES ('Id') ,('Contract') ,('Cash') ,('Storage') ,('DP') ,('Basis'),('WHGB') ,('Hold'),('SplitPercentage')
+VALUES ('Id') ,('EntityNo'),('Contract') ,('Cash') ,('Storage') ,('DP') ,('Basis'),('WHGB') ,('Hold'),('SplitPercentage')
 
 SELECT *
 INTO #temp
@@ -52,7 +53,7 @@ src
 PIVOT 
 (
     MAX(a) 
-    FOR fields IN (Id, Contract, Cash, Storage, DP, Basis, WHGB, Hold)
+    FOR fields IN (Id,EntityNo, Contract, Cash, Storage, DP, Basis, WHGB, Hold)
 ) unpvt
 
 --------------------------------------------------------------------------------------------------------
@@ -63,7 +64,13 @@ ALTER TABLE #temp
 DROP COLUMN Id
 
 ALTER TABLE #temp
-ADD Id INT  
+ADD Id INT 
+
+ALTER TABLE #temp
+DROP COLUMN EntityNo
+
+ALTER TABLE #temp
+ADD EntityNo  NVARCHAR(50) 
 
 ALTER TABLE #temp
 ADD EntityId INT
@@ -100,7 +107,7 @@ WHERE SCD.intDeliverySheetId = @intDeliverySheetId
 DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
 FOR
 
-SELECT SCDS.intEntityId, EM.strName, SCDS.intStorageScheduleTypeId,dblSplitPercent 
+SELECT SCDS.intEntityId, EM.strEntityNo, EM.strName, SCDS.intStorageScheduleTypeId,dblSplitPercent 
 FROM tblSCDeliverySheetSplit SCDS 
 INNER JOIN tblEMEntity EM ON EM.intEntityId = SCDS.intEntityId
 WHERE SCDS.intDeliverySheetId = @intDeliverySheetId
@@ -110,7 +117,7 @@ SET @counter = 1
 OPEN intListCursor;
 
 -- Initial fetch attempt
-FETCH NEXT FROM intListCursor INTO @intEntityId, @strName, @intStorageScheduleTypeId,@SplitAverage
+FETCH NEXT FROM intListCursor INTO @intEntityId,@strEntityNo, @strName, @intStorageScheduleTypeId,@SplitAverage
 
 --SPLIT
 WHILE @@FETCH_STATUS = 0
@@ -138,7 +145,7 @@ BEGIN
 		AND IR.intSourceType = 5 AND CTD.intPricingTypeId = 6),0)
 
 		--For Storage
-		SET @Storage = ISNULL((SELECT dblOriginalBalance FROM tblGRCustomerStorage GRS
+		SET @Storage = ISNULL((SELECT sum(dblOriginalBalance) FROM tblGRCustomerStorage GRS
 		LEFT JOIN tblGRStorageType GR ON GR.intStorageScheduleTypeId = GRS.intStorageTypeId AND GR.intStorageScheduleTypeId > 0
 		WHERE GR.ysnReceiptedStorage = 0 AND GR.ysnDPOwnedType = 0 AND GR.ysnGrainBankType = 0 AND GR.ysnCustomerStorage = 0
 		AND GRS.intEntityId = @intEntityId AND GRS.intItemId = @intItemId 
@@ -147,7 +154,7 @@ BEGIN
 		AND GRS.ysnTransferStorage = 0), 0)
 		
 		--For DP contract
-		SET @DP = ISNULL((SELECT dblOriginalBalance FROM tblGRCustomerStorage GRS
+		SET @DP = ISNULL((SELECT sum(dblOriginalBalance) FROM tblGRCustomerStorage GRS
 		LEFT JOIN tblGRStorageType GR ON GR.intStorageScheduleTypeId = GRS.intStorageTypeId AND GR.intStorageScheduleTypeId > 0
 		WHERE GRS.intEntityId = @intEntityId AND GRS.intItemId = @intItemId
 		AND GR.ysnDPOwnedType = 1 AND GR.ysnCustomerStorage = 0
@@ -166,7 +173,7 @@ BEGIN
 		AND IR.intSourceType = 5 AND CTD.intPricingTypeId = 2), 0)
 		
 		--For WHGB
-		SET @WHGB = ISNULL((SELECT dblOriginalBalance FROM tblGRCustomerStorage GRS
+		SET @WHGB = ISNULL((SELECT sum(dblOriginalBalance) FROM tblGRCustomerStorage GRS
 		LEFT JOIN tblGRStorageType GR ON GR.intStorageScheduleTypeId = GRS.intStorageTypeId AND GR.intStorageScheduleTypeId > 0
 		WHERE (GR.ysnReceiptedStorage = 1 OR GR.ysnGrainBankType = 1) AND GR.ysnDPOwnedType = 0 AND GR.ysnCustomerStorage = 0 
 		AND GRS.intDeliverySheetId = @intDeliverySheetId AND GRS.intEntityId = @intEntityId 
@@ -179,14 +186,14 @@ BEGIN
 		
 	END
 	
-	INSERT INTO #temp (Id, Contract, Cash, Storage, DP, Basis, WHGB, Hold,SplitPercentage) 
-	VALUES(@counter, @Contract, @Cash, @Storage, @DP, @Basis, @WHGB, @Hold,@SplitAverage)
+	INSERT INTO #temp (Id, EntityNo, Contract, Cash, Storage, DP, Basis, WHGB, Hold,SplitPercentage) 
+	VALUES(@counter, @strEntityNo,@Contract, @Cash, @Storage, @DP, @Basis, @WHGB, @Hold,@SplitAverage)
 
 	update #temp SET EntityId = @intEntityId, EntityName = @strName WHERE Id = @counter
 
 	SET @counter = @counter+1
 
-	FETCH NEXT FROM intListCursor INTO  @intEntityId, @strName, @intStorageScheduleTypeId,@SplitAverage
+	FETCH NEXT FROM intListCursor INTO  @intEntityId, @strEntityNo,@strName, @intStorageScheduleTypeId,@SplitAverage
 END
 
 CLOSE intListCursor;

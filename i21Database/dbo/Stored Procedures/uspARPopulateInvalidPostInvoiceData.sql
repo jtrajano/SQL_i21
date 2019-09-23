@@ -754,35 +754,6 @@ BEGIN
 		I.[intPeriodsToAccrue] > 1
 		AND I.[strItemType] NOT IN ('Non-Inventory','Service','Other Charge','Software','Comment')
 
-
-	--INSERT INTO @returntable(
-	--	 [intInvoiceId]
-	--	,[strInvoiceNumber]
-	--	,[strTransactionType]
-	--	,[intInvoiceDetailId]
-	--	,[intItemId]
-	--	,[strBatchId]
-	--	,[strPostingError])
-	----Invoice for accrual with Inventory Items
-	--SELECT
-	--	 [intInvoiceId]			= I.[intInvoiceId]
-	--	,[strInvoiceNumber]		= I.[strInvoiceNumber]		
-	--	,[strTransactionType]	= I.[strTransactionType]
-	--	,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
-	--	,[intItemId]			= I.[intItemId]
-	--	,[strBatchId]			= I.[strBatchId]
-	--	,[strPostingError]		= 'Invoice : ' + I.[strInvoiceNumber] + ' is for accrual and must not include an inventory item : ' + I.[strItemNo] + '.'
-	--FROM 
-	--	#ARPostInvoiceData I
-	--INNER JOIN tblARInvoiceDetail ARID
-	--		ON I.[intInvoiceId] = ARID.[intInvoiceId]
-	--INNER JOIN tblICItem ICI
-	--		ON ARID.[intItemId] = ICI.[intItemId]	 				
-	--WHERE
-	--	ISNULL(I.[intPeriodsToAccrue],0) > 1
-	--	AND ISNULL(I.[strItemType],'') NOT IN ('Non-Inventory','Service','Other Charge','Software','Comment')
-
-
 	INSERT INTO #ARInvalidInvoiceData
 		([intInvoiceId]
 		,[strInvoiceNumber]
@@ -800,12 +771,36 @@ BEGIN
 		,[intItemId]			= I.[intItemId]
 		,[strBatchId]			= I.[strBatchId]
 		,[strPostingError]		= 'Posting Provisional Invoice is disabled in Company Configuration.'
-	FROM 
-		#ARPostInvoiceHeader I					
-	WHERE
-		I.[strType] = 'Provisional'
-		AND I.[ysnProvisionalWithGL] = @ZeroBit
+	FROM #ARPostInvoiceHeader I					
+	WHERE I.[strType] = 'Provisional'
+	  AND I.[ysnProvisionalWithGL] = @ZeroBit
 
+	INSERT INTO #ARInvalidInvoiceData
+		([intInvoiceId]
+		,[strInvoiceNumber]
+		,[strTransactionType]
+		,[intInvoiceDetailId]
+		,[intItemId]
+		,[strBatchId]
+		,[strPostingError])
+	--General Account
+	SELECT
+		 [intInvoiceId]			= I.[intInvoiceId]
+		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
+		,[strTransactionType]	= I.[strTransactionType]
+		,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
+		,[intItemId]			= I.[intItemId]
+		,[strBatchId]			= I.[strBatchId]
+		,[strPostingError]		= CASE WHEN GLA.[intAccountId] IS NULL THEN 'The Sales Account of item - ' + I.[strItemNo] + ' is not valid.' ELSE 'The Sales Account of item - ' + I.[strItemNo] + ' was not specified.' END
+	FROM #ARPostInvoiceDetail I
+	LEFT OUTER JOIN #ARInvoiceItemAccount Acct ON I.[intCompanyLocationId] = Acct.[intLocationId]
+											  AND I.[intItemId] = Acct.[intItemId] 		
+	LEFT OUTER JOIN tblGLAccount GLA ON Acct.[intSalesAccountId] = GLA.[intAccountId]
+	LEFT OUTER JOIN tblGLAccount GLAGA ON Acct.[intGeneralAccountId] = GLAGA.[intAccountId]
+	WHERE I.[strItemType] = 'Non-Inventory'
+	  AND I.[strItemType] <> 'Comment'
+	  AND (ISNULL(Acct.[intSalesAccountId],0) = 0 OR GLA.[intAccountId] IS NULL)
+	  AND (ISNULL(Acct.[intGeneralAccountId],0) = 0 OR GLAGA.[intAccountId] IS NULL)
 
 	INSERT INTO #ARInvalidInvoiceData
 		([intInvoiceId]
@@ -824,32 +819,13 @@ BEGIN
 		,[intItemId]			= I.[intItemId]
 		,[strBatchId]			= I.[strBatchId]
 		,[strPostingError]		= CASE WHEN GLA.[intAccountId] IS NULL THEN 'The General Account of item - ' + I.[strItemNo] + ' is not valid.' ELSE 'The General Account of item - ' + I.[strItemNo] + ' was not specified.' END
-	FROM 
-		#ARPostInvoiceDetail I
-	--INNER JOIN tblARInvoiceDetail ARID
-	--		ON I.[intInvoiceId] = ARID.[intInvoiceId]
-	--INNER JOIN tblICItem  ICI
-	--		ON ARID.[intItemId] = ICI.[intItemId]
-	--LEFT OUTER JOIN #ARInvoiceItemAccount Acct
-	--		ON I.[intCompanyLocationId] = Acct.[intLocationId]
-	--		AND ARID.[intItemId] = Acct.[intItemId] 		
-	--LEFT OUTER JOIN tblGLAccount GLA
-	--		ON Acct.[intGeneralAccountId] = GLA.[intAccountId]
-	--WHERE
-	--	(ISNULL(Acct.[intGeneralAccountId],0) = 0 OR GLA.[intAccountId] IS NULL)
-	--	AND ISNULL(I.[strItemType],'') IN ('Non-Inventory','Service')
-	--	AND ISNULL(I.[strItemType],'') <> 'Comment'
-	LEFT OUTER JOIN #ARInvoiceItemAccount Acct
-			ON I.[intCompanyLocationId] = Acct.[intLocationId]
-			AND I.[intItemId] = Acct.[intItemId] 		
-	LEFT OUTER JOIN tblGLAccount GLA
-			ON Acct.[intGeneralAccountId] = GLA.[intAccountId]
-	WHERE
-		I.[strItemType] IN ('Non-Inventory','Service')
-		AND I.[strItemType] <> 'Comment'
-		AND (ISNULL(Acct.[intGeneralAccountId],0) = 0 OR GLA.[intAccountId] IS NULL)
-			
-
+	FROM #ARPostInvoiceDetail I
+	LEFT OUTER JOIN #ARInvoiceItemAccount Acct ON I.[intCompanyLocationId] = Acct.[intLocationId]
+											  AND I.[intItemId] = Acct.[intItemId] 		
+	LEFT OUTER JOIN tblGLAccount GLA ON Acct.[intGeneralAccountId] = GLA.[intAccountId]
+	WHERE I.[strItemType] = 'Service'
+	  AND I.[strItemType] <> 'Comment'
+	  AND (ISNULL(Acct.[intGeneralAccountId],0) = 0 OR GLA.[intAccountId] IS NULL)
 
 	INSERT INTO #ARInvalidInvoiceData
 		([intInvoiceId]

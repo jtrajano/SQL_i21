@@ -69,6 +69,8 @@ Type the overview for the table here.
 		[intPurchaseDetailId] INT NULL, -- Purchase Order Detail Id
 		[intContractHeaderId] INT NULL, -- Contract Header Id
 		[intContractDetailId] INT NULL, -- Contract Detail Id
+		[intLoadShipmentId] INT NULL,
+		[intLoadShipmentDetailId] INT NULL,
 		[ysnAllowVoucher] BIT NULL,
 		[strActualCostId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 		CONSTRAINT [PK_tblICInventoryReceiptItem] PRIMARY KEY ([intInventoryReceiptItemId]), 

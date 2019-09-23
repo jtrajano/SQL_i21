@@ -91,7 +91,7 @@ BEGIN
 						AND dbo.fnDateLessThanEquals(cb.dtmDate, @dtmDate) = 1						
 						AND ISNULL(cbAvailable.dblAvailable, 0) >=  ROUND(@dblQty, 6)
 						AND (@strActualCostId IS NULL OR cb.strTransactionId = @strActualCostId)
-				ORDER BY cb.dtmDate ASC
+				ORDER BY cb.dtmDate ASC, cb.intInventoryLotId
 			) cb
 
 	IF @CostBucketId IS NULL AND ISNULL(@AllowNegativeInventory, @ALLOW_NEGATIVE_NO) = @ALLOW_NEGATIVE_NO
@@ -126,8 +126,9 @@ BEGIN
 				AND ISNULL(cb.intSubLocationId, 0) = ISNULL(@intSubLocationId, 0)
 				AND ISNULL(cb.intStorageLocationId, 0) = ISNULL(@intStorageLocationId, 0)
 				AND ROUND((cb.dblStockIn - cb.dblStockOut), 6) <> 0 
+				AND (@strActualCostId IS NULL OR cb.strTransactionId = @strActualCostId)
 		ORDER BY 
-			cb.dtmDate ASC 
+			cb.dtmDate ASC, cb.intInventoryLotId
 
 		OPEN findBestDateToPost;
 		FETCH NEXT FROM findBestDateToPost INTO @dblCostBucketQty, @dtmCostBucketDate
@@ -152,7 +153,7 @@ BEGIN
 		BEGIN 
 			--'Stock is not available for {Item} at {Location} as of {Transaction Date}. Use the nearest stock available date of {Cost Bucket Date} or later.'
 			DECLARE @strDate AS VARCHAR(20) = CONVERT(NVARCHAR(20), @dtmDate, 101) 
-
+			
 			SET @strLocationName = dbo.fnFormatMsg80003(@intItemLocationId, @intSubLocationId, @intStorageLocationId)
 			EXEC uspICRaiseError 80096, @strItemNo, @strLocationName, @strDate, @strCostBucketDate;
 			RETURN -80096;

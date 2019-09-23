@@ -3,7 +3,7 @@
 	@vendorId INT,
 	@currency INT,
 	@unitMeasureId INT,
-	@quantity DECIMAL(18,2),
+	@quantity DECIMAL(38,15),
 	@paymentId INT
 )
 RETURNS @returnTable TABLE(

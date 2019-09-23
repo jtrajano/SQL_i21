@@ -14,10 +14,38 @@
 AS
 BEGIN
 	BEGIN TRY
+		
 		SET @ysnSuccessResult = CAST(1 AS BIT) -- Set to true
 		SET @strMessageResult = ''
 
 		-- DECLARE @strFilePrefix AS NVARCHAR(10) = 'ITT'
+		DECLARE @xml XML = N''
+		DECLARE @strXML AS NVARCHAR(MAX)
+
+
+
+
+		-- =========================================================================================================
+		-- [START] - CREATE TRANSACTION
+		-- =========================================================================================================
+		DECLARE @InitTranCount INT;
+		SET @InitTranCount = @@TRANCOUNT
+		DECLARE @Savepoint NVARCHAR(150) = 'uspSTstgInsertPricebookSendFile' + CAST(NEWID() AS NVARCHAR(100)); 
+
+		IF @InitTranCount = 0
+			BEGIN
+				BEGIN TRANSACTION
+			END		
+		ELSE
+			BEGIN
+				SAVE TRANSACTION @Savepoint
+			END
+		-- =========================================================================================================
+		-- [START] - CREATE TRANSACTION
+		-- =========================================================================================================
+
+
+
 
 		-- =========================================================================================================
 		-- CONVERT DATE's to UTC
@@ -32,7 +60,7 @@ BEGIN
 
 
 		-- =========================================================================================================
-		-- Check if register has intImportFileHeaderId
+		-- Get Register Values
 		DECLARE @strRegisterName NVARCHAR(200)
 				, @strRegisterClass NVARCHAR(200)
 				, @strXmlVersion NVARCHAR(10)
@@ -42,53 +70,33 @@ BEGIN
 			   , @strXmlVersion = strXmlVersion
 		FROM dbo.tblSTRegister 
 		WHERE intRegisterId = @intRegisterId
-
-		IF(UPPER(@strRegisterClass) = UPPER('SAPPHIRE') or UPPER(@strRegisterClass) = UPPER('COMMANDER'))
-			BEGIN
-				IF EXISTS(SELECT IFH.intImportFileHeaderId 
-						  FROM dbo.tblSMImportFileHeader IFH
-						  JOIN dbo.tblSTRegisterFileConfiguration FC 
-							ON FC.intImportFileHeaderId = IFH.intImportFileHeaderId
-						  WHERE IFH.strLayoutTitle = 'Pricebook Send Sapphire' 
-						  AND IFH.strFileType = 'XML' 
-						  AND FC.intRegisterId = @intRegisterId)
-					BEGIN
-						SELECT @intImportFileHeaderId = IFH.intImportFileHeaderId 
-						FROM dbo.tblSMImportFileHeader IFH
-						JOIN dbo.tblSTRegisterFileConfiguration FC 
-							ON FC.intImportFileHeaderId = IFH.intImportFileHeaderId
-						WHERE IFH.strLayoutTitle = 'Pricebook Send Sapphire' 
-						AND IFH.strFileType = 'XML' 
-						AND FC.intRegisterId = @intRegisterId
-					END
-				ELSE
-					BEGIN
-						SET @intImportFileHeaderId = 0
-					END	
-		
-			END
-		ELSE
-			BEGIN
-				IF EXISTS(SELECT * FROM tblSTRegisterFileConfiguration WHERE intRegisterId = @intRegisterId AND strFilePrefix = @strFilePrefix)
-					BEGIN
-						SELECT @intImportFileHeaderId = intImportFileHeaderId 
-						FROM tblSTRegisterFileConfiguration 
-						WHERE intRegisterId = @intRegisterId 
-						AND strFilePrefix = @strFilePrefix
-					END
-				ELSE
-					BEGIN
-						SET @ysnSuccessResult = CAST(0 AS BIT) -- Set to false
-						SET @strGeneratedXML = ''
-						SET @intImportFileHeaderId = 0
-						SET @strMessageResult = 'Register ' + @strRegisterClass + ' has no Outbound setup for Pricebook File (' + @strFilePrefix + ')'
-
-						RETURN
-					END	
-			END
 		-- =========================================================================================================
 
 
+
+
+		-- ================================================================================================================================================
+		-- [START] - GET 'intImportFileHeaderId'
+		-- ================================================================================================================================================
+		IF EXISTS(SELECT TOP 1 1 FROM tblSTRegisterFileConfiguration WHERE intRegisterId = @intRegisterId AND strFilePrefix = @strFilePrefix)
+			BEGIN
+				SELECT @intImportFileHeaderId = intImportFileHeaderId
+				FROM tblSTRegisterFileConfiguration 
+				WHERE intRegisterId = @intRegisterId 
+				AND strFilePrefix = @strFilePrefix
+			END
+		ELSE
+			BEGIN
+				SET @ysnSuccessResult = CAST(0 AS BIT) -- Set to false
+				SET @strGeneratedXML = ''
+				SET @intImportFileHeaderId = 0
+				SET @strMessageResult = 'Register ' + @strRegisterClass + ' has no Outbound setup for Pricebook File (' + @strFilePrefix + '). '
+
+				RETURN
+			END
+		-- ================================================================================================================================================
+		-- [END] - GET 'intImportFileHeaderId'
+		-- ================================================================================================================================================
 
 
 		DECLARE @XMLGatewayVersion nvarchar(100)
@@ -136,15 +144,124 @@ BEGIN
 			OR 
 			dtmDateCreated BETWEEN @dtmBeginningChangeDateUTC AND @dtmEndingChangeDateUTC
 		)
-		AND intCompanyLocationId = 
-		(
-			SELECT TOP (1) intCompanyLocationId 
-			FROM tblSTStore
-			WHERE intStoreId = @intStoreId
-		)
+		AND intCompanyLocationId = (
+										SELECT intCompanyLocationId 
+										FROM tblSTStore
+										WHERE intStoreId = @intStoreId
+								   )
 		--------------------------------------------------------------------------------------------------------------
 		----------------- End Get Inventory Items that has modified/added date between date range --------------------
 		--------------------------------------------------------------------------------------------------------------
+
+----TEST
+--SELECT * FROM @tempTableItems
+--SELECT '@strRegisterClass: ', @strRegisterClass
+		
+
+
+
+		-- ===========================================================================================================
+		-- [START] - Validate if @tblTempPassportITT has record/s
+		-- ===========================================================================================================
+		IF NOT EXISTS(SELECT TOP 1 1 FROM @tempTableItems)
+			BEGIN
+										
+					SET @strGeneratedXML		= N''
+					SET @intImportFileHeaderId	= 0
+					SET @ysnSuccessResult		= CAST(0 AS BIT)
+					SET @strMessageResult		= 'No Item to Generate based on Store Location, Beginning and Ending date range. '
+
+					GOTO ExitWithRollback
+			END
+		-- ===========================================================================================================
+		-- [END] - Validate if @tblTempPassportITT has record/s
+		-- ===========================================================================================================
+
+
+
+
+
+		-- =======================================================================================================================================================
+		-- [START] - Check if has UPC longer than 13 digits
+		-- =======================================================================================================================================================
+		DECLARE @strInvalidUPCs NVARCHAR(MAX)
+
+		DECLARE @tempInvalidUpc AS TABLE
+		(
+			intItemUOMId		INT,
+			strLongUPCCode		NVARCHAR(50),
+			strItemNo			NVARCHAR(50),
+			strItemDescription	NVARCHAR(150)
+		)
+
+		INSERT INTO @tempInvalidUpc
+		(
+			intItemUOMId,
+			strLongUPCCode,
+			strItemNo,
+			strItemDescription
+		)
+		SELECT DISTINCT
+			intItemUOMId		= uom.intItemUOMId,
+			strLongUPCCode		= uom.strLongUPCCode,
+			strItemNo			= item.strItemNo,
+			strItemDescription	= item.strDescription
+		FROM tblICItemUOM uom
+		INNER JOIN tblICItem item	
+			ON uom.intItemId = item.intItemId
+		INNER JOIN tblICCategory category
+			ON item.intCategoryId = category.intCategoryId
+		INNER JOIN tblICItemLocation itemLoc
+			ON item.intItemId = itemLoc.intItemId
+		INNER JOIN tblSTStore store
+			ON itemLoc.intLocationId = store.intCompanyLocationId
+		INNER JOIN @tempTableItems temp
+			ON item.intItemId = temp.intItemId
+		WHERE item.ysnFuelItem = CAST(0 AS BIT) 
+			AND store.intStoreId = @intStoreId
+			AND uom.strLongUPCCode IS NOT NULL
+			AND uom.strLongUPCCode <> ''
+			AND uom.strLongUPCCode <> '0'
+			AND uom.strLongUPCCode NOT LIKE '%[^0-9]%'
+			AND uom.ysnStockUnit = CAST(1 AS BIT)
+			AND LEN(uom.strLongUPCCode) > 13
+			AND (
+					(
+							(@ysnExportEntirePricebookFile = CAST(0 AS BIT)  AND  @strCategoryCode <> 'whitespaces')
+							AND
+							(
+								category.intCategoryId IN(SELECT * FROM dbo.fnSplitString(@strCategoryCode,','))
+							)
+							OR
+							(@ysnExportEntirePricebookFile = CAST(0 AS BIT)  AND  @strCategoryCode = 'whitespaces')
+							AND
+							(
+								category.intCategoryId = category.intCategoryId
+							)
+							OR 
+							(@ysnExportEntirePricebookFile = CAST(1 AS BIT))
+							AND
+							(
+								1=1
+							)
+					)
+				)
+
+
+
+		IF EXISTS(SELECT TOP 1 1 FROM @tempInvalidUpc)
+			BEGIN
+
+				SELECT @strInvalidUPCs = COALESCE(@strInvalidUPCs + ', ' + strLongUPCCode, strLongUPCCode) 
+				FROM @tempInvalidUpc
+
+				SET @strMessageResult = @strMessageResult + 'Invalid UPC found and were not added to ' + @strFilePrefix + ' file: (' + @strInvalidUPCs + '). ' + CHAR(13)
+
+			END
+		-- =======================================================================================================================================================
+		-- [END] - Check if has UPC longer than 13 digits
+		-- =======================================================================================================================================================
+
 
 
 
@@ -152,608 +269,406 @@ BEGIN
 		-- PASSPORT
 		IF(@strRegisterClass = 'PASSPORT')
 			BEGIN
-				-- Create Unique Identifier
-				-- Handles multiple Update of registers by different Stores
-				DECLARE @strUniqueGuid AS NVARCHAR(50) = NEWID()
-
-				-- Table and Condition
-				DECLARE @strTableAndCondition AS NVARCHAR(250) = 'tblSTstgPassportPricebookITT33~strUniqueGuid=''' + @strUniqueGuid + ''''
-
-
-
 				IF(@strXmlVersion = '3.4')
 					BEGIN
-						--Insert data into Procebook staging table	
-						IF(@ysnExportEntirePricebookFile = CAST(1 AS BIT))
-							BEGIN
-								INSERT INTO tblSTstgPassportPricebookITT33
-								(
-									[StoreLocationID], 
-									[VendorName], 
-									[VendorModelVersion], 
-									[TableActionType], 
-									[RecordActionType], 
-									[RecordActionEffectiveDate], 
-									[ITTDetailRecordActionType], 
-									[POSCodeFormatFormat], 
-									[POSCode], 
-									[POSCodeModifier],
-									[ActiveFlagValue], 
-									[InventoryValuePrice],
-									[MerchandiseCode], 
-									[RegularSellPrice], 
-									[Description],
-									[PaymentSystemsProductCode],
-									[SellingUnits],
-									[TaxStrategyID],
-									[PriceMethodCode],
-									[ReceiptDescription],
-									[FoodStampableFlg],
-									[QuantityRequiredFlg],
-									[strUniqueGuid]
-								)
-								SELECT DISTINCT
-									ST.intStoreNo AS [StoreLocationID], 
-									'iRely' AS [VendorName], 
-									--'Rel. 13.2.0' AS [VendorModelVersion], 
-									(SELECT TOP (1) strVersionNo FROM tblSMBuildNumber ORDER BY intVersionID DESC) AS [VendorModelVersion],
-									'update' AS [TableActionType], 
-									'addchange' AS [RecordActionType], 
-									CONVERT(NVARCHAR(10), GETDATE(), 21) AS [RecordActionEffectiveDate], 
-									CASE 
-										WHEN I.strStatus = 'Active' 
-											THEN 'addchange' 
-										WHEN I.strStatus = 'Phased Out' 
-											THEN 'delete' 
-										ELSE 'addchange' 
-									END AS [ITTDetailRecordActionType], 
-									PCF.strPosCodeFormat AS [POSCodeFormatFormat],
-									PCF.strUPCwthOrwthOutCheckDigit AS [POSCode],
-									--CASE 
-										
-									--	WHEN ISNULL(IUOM.strLongUPCCode,'') != '' AND ISNULL(IUOM.strLongUPCCode,'') NOT LIKE '%[^0-9]%'
-									--		THEN CASE
-									--				WHEN CONVERT(NUMERIC(32, 0),CAST(IUOM.strLongUPCCode AS FLOAT)) <= 89999 -- ISNULL(ST.intMaxPlu,0)
-									--					THEN 'plu'
+						-- Create Temp Table
+						DECLARE @tblTempPassportITT TABLE 
+						(
+							[intTHPassportITTId]					INT IDENTITY (1, 1)							NOT NULL, 
+							[strTHRegisterVersion]					NVARCHAR(5) COLLATE Latin1_General_CI_AS	NULL,
 
-									--				WHEN CONVERT(NUMERIC(32, 0),CAST(IUOM.strLongUPCCode AS FLOAT)) > 89999 --ISNULL(ST.intMaxPlu,0)
-									--					THEN CASE
-									--							-- UPC-A
-									--							WHEN LEN(IUOM.strLongUPCWOLeadingZero) = 6 
-									--								THEN 'upcA'
-									--							WHEN IUOM.strUPCwithCheckDigit > 89999 AND IUOM.strUPCwithCheckDigit <= 99999999999
-									--								THEN 'upcA'
-																
-									--							-- EAN13
-									--							WHEN IUOM.strUPCwithCheckDigit > 99999999999 AND IUOM.strUPCwithCheckDigit <= 999999999999
-									--								THEN 'ean13'
+							[strTHStoreLocationID]					NVARCHAR(50) COLLATE Latin1_General_CI_AS	NULL,
+							[strTHVendorName]						NVARCHAR(50) COLLATE Latin1_General_CI_AS	NULL,
+							[strTHVendorModelVersion]				NVARCHAR(50) COLLATE Latin1_General_CI_AS	NULL,
 
-									--							-- GTIN
-									--							WHEN IUOM.strUPCwithCheckDigit > 999999999999
-									--								THEN 'gtin'
-									--					END
-									--				ELSE ''
-									--			 END
-									--	ELSE 'plu' 
-									--END AS [POSCodeFormatFormat], 
-									--CASE 
-									--	WHEN ISNULL(IUOM.strLongUPCCode,'') != '' AND ISNULL(IUOM.strLongUPCCode,'') NOT LIKE '%[^0-9]%'
-									--		THEN CASE
-									--				WHEN CONVERT(NUMERIC(32, 0),CAST(IUOM.strLongUPCCode AS FLOAT)) <= 89999 -- ISNULL(ST.intMaxPlu,0)
-									--					THEN IUOM.strLongUPCCode -- (plu)
+							[strIMTableAction]						NVARCHAR(20) COLLATE Latin1_General_CI_AS	NULL,
+							[strIMRecordAction]						NVARCHAR(20) COLLATE Latin1_General_CI_AS	NULL,
 
-									--				WHEN CONVERT(NUMERIC(32, 0),CAST(IUOM.strLongUPCCode AS FLOAT)) > 89999 --ISNULL(ST.intMaxPlu,0)
-									--					THEN CASE
-									--							-- UPC-A
-									--							WHEN LEN(IUOM.strLongUPCWOLeadingZero) = 6 
-									--								-- Convert to UPC-E + Check Digit
-									--								THEN RIGHT('00000000000' + ISNULL(dbo.fnSTConvertUPCeToUPCa(IUOM.strLongUPCCode),''), 11) + CAST(dbo.fnSTGenerateCheckDigit(IUOM.strLongUPCCode) AS NVARCHAR(1))
-									--							WHEN IUOM.strUPCwithCheckDigit > 89999 AND IUOM.strUPCwithCheckDigit <= 99999999999
-									--								THEN RIGHT('000000000000' + IUOM.strUPCwithCheckDigit, 12)
-																
-									--							-- EAN13
-									--							WHEN IUOM.strUPCwithCheckDigit > 99999999999 AND IUOM.strUPCwithCheckDigit <= 999999999999
-									--								THEN RIGHT('0000000000000' + IUOM.strUPCwithCheckDigit, 13)
+							[strITTDetailRecordActionType]			NVARCHAR(20) COLLATE Latin1_General_CI_AS	NULL,
+	
+							[strICPOSCodeFormatFormat]				NVARCHAR(10) COLLATE Latin1_General_CI_AS	NULL,
+							[strICPOSCode]							NVARCHAR(20) COLLATE Latin1_General_CI_AS	NULL,
+							[strICPOSCodeModifier]					NVARCHAR(5) COLLATE Latin1_General_CI_AS	NULL,
 
-									--							-- GTIN
-									--							WHEN IUOM.strUPCwithCheckDigit > 999999999999
-									--								THEN IUOM.strUPCwithCheckDigit
-									--					END
-									--				ELSE IUOM.strLongUPCCode
-									--			 END
-									--	ELSE '0000' 
-									--END [POSCode], 
-									'0' AS [PosCodeModifier],
-									CASE 
-										WHEN I.strStatus = 'Active' 
-											THEN 'yes' 
-										ELSE 'no' 
-									END as [ActiveFlagValue], 
-									Prc.dblSalePrice AS [InventoryValuePrice],
-									--Cat.strCategoryCode AS [MerchandiseCode],
-									CatLoc.intRegisterDepartmentId AS [MerchandiseCode],  
-									CASE 
-										WHEN GETDATE() between SplPrc.dtmBeginDate AND SplPrc.dtmEndDate 
-											THEN SplPrc.dblUnitAfterDiscount 
-										ELSE Prc.dblSalePrice 
-									END AS [RegularSellPrice], 
-									I.strDescription AS [Description],
-									CASE 
-										WHEN R.strRegisterClass = 'PASSPORT' 
-											THEN 
-												CASE 
-													WHEN ISNULL(SubCat.strRegProdCode, '') = '' OR SubCat.strRegProdCode = '0'
-														THEN '7' 
-													ELSE SubCat.strRegProdCode 
-												END 
-											ELSE  ISNULL(SubCat.strRegProdCode, '40') 
-									END AS [PaymentSystemsProductCode],
-									CAST(IUOM.dblUnitQty AS NUMERIC(18,2)) AS [SellingUnits],
-									CASE	
-										WHEN IL.ysnTaxFlag1 = 1 
-											THEN R.intTaxStrategyIdForTax1 
-										WHEN IL.ysnTaxFlag2 = 1 
-											THEN R.intTaxStrategyIdForTax2 
-										WHEN IL.ysnTaxFlag3 = 1 
-											THEN R.intTaxStrategyIdForTax3 
-										WHEN IL.ysnTaxFlag4 = 1 
-											THEN R.intTaxStrategyIdForTax4
-										ELSE R.intNonTaxableStrategyId
-									END AS [TaxStrategyID],
-									0 AS [PriceMethodCode],
-									--IL.strDescription AS [ReceiptDescription],
-									CASE
-										WHEN ISNULL(I.strShortName, '') != ''
-											THEN I.strShortName
-										ELSE I.strDescription
-									END AS [ReceiptDescription],
-									IL.ysnFoodStampable AS [FoodStampableFlg],
-									IL.ysnQuantityRequired AS [QuantityRequiredFlg],
-									@strUniqueGuid AS [strUniqueGuid]
-								FROM tblICItem I
-								INNER JOIN tblICCategory Cat 
-									ON Cat.intCategoryId = I.intCategoryId
-								INNER JOIN dbo.tblICCategoryLocation AS CatLoc 
-									ON CatLoc.intCategoryId = Cat.intCategoryId 
-								INNER JOIN 
-								(
-									SELECT DISTINCT intItemId FROM @tempTableItems 
-								) AS tmpItem 
-									ON tmpItem.intItemId = I.intItemId 
-								INNER JOIN tblICItemLocation IL 
-									ON IL.intItemId = I.intItemId
-								LEFT JOIN tblSTSubcategoryRegProd SubCat 
-									ON SubCat.intRegProdId = IL.intProductCodeId
-								INNER JOIN tblSTStore ST 
-									ON ST.intStoreId = SubCat.intStoreId
-									AND IL.intLocationId = ST.intCompanyLocationId
-									AND CatLoc.intLocationId = ST.intCompanyLocationId
-								INNER JOIN tblSMCompanyLocation L 
-									ON L.intCompanyLocationId = ST.intCompanyLocationId
-								INNER JOIN tblICItemUOM AS IUOM 
-									ON IUOM.intItemId = I.intItemId 
-								INNER JOIN vyuSTItemUOMPosCodeFormat PCF
-									ON IUOM.intItemUOMId = PCF.intItemUOMId
-								INNER JOIN tblICUnitMeasure IUM 
-									ON IUM.intUnitMeasureId = IUOM.intUnitMeasureId 
-								INNER JOIN tblSTRegister R 
-									ON R.intRegisterId = ST.intRegisterId
-								INNER JOIN tblICItemPricing Prc 
-									ON Prc.intItemLocationId = IL.intItemLocationId
-								LEFT JOIN tblICItemSpecialPricing SplPrc 
-									ON SplPrc.intItemId = I.intItemId
-								WHERE I.ysnFuelItem = CAST(0 AS BIT) 
-									AND ST.intStoreId = @intStoreId
-									AND IUOM.strLongUPCCode IS NOT NULL
-									--AND IUOM.strLongUPCCode <> ''
-									--AND IUOM.strLongUPCCode <> '0'
-									AND IUOM.strLongUPCCode NOT LIKE '%[^0-9]%'
-									AND ISNULL(SUBSTRING(IUOM.strLongUPCCode, PATINDEX('%[^0]%',IUOM.strLongUPCCode), LEN(IUOM.strLongUPCCode)), 0) NOT IN ('') -- NOT IN ('0', '')
+							[strITTDataActiveFlgValue]				NVARCHAR(5) COLLATE Latin1_General_CI_AS	NULL,
+							[dblITTDataInventoryValuePrice]			NUMERIC(18, 2)								NULL,
+							[intITTDataMerchandiseCode]				INT											NULL,
+							[dblITTDataRegularSellPrice]			NUMERIC(18, 2)								NULL,
+							[strITTDataDescription]					NVARCHAR(150) COLLATE Latin1_General_CI_AS	NULL,
+							[strITTDataLinkCode]					NVARCHAR(20) COLLATE Latin1_General_CI_AS	NULL,
+							[strITTDataPaymentSystemsProductCode]	NVARCHAR(10) COLLATE Latin1_General_CI_AS	NULL,
+							[dblITTDataSellingUnits]				DECIMAL(18, 2),
+							[intITTDataTaxStrategyId]				INT											NULL,
+							[intITTDataPriceMethodCode]				INT											NULL,
+							[strITTDataReceiptDescription]			NVARCHAR(100) COLLATE Latin1_General_CI_AS	NULL,
+							[ysnITTDataFoodStampableFlg]			BIT											NULL,
+							[ysnITTDataQuantityRequiredFlg]			BIT											NULL
+						)
 
 
+						INSERT INTO @tblTempPassportITT 
+						( 
+							[strTHRegisterVersion],
 
-								-- INSERT TO UPDATE REGISTER PREVIEW TABLE
-								INSERT INTO tblSTUpdateRegisterItemReport
-								(
-									strGuid, 
-									strActionType,
-									strUpcCode,
-									strDescription,
-									dblSalePrice,
-									ysnSalesTaxed,
-									ysnIdRequiredLiquor,
-									ysnIdRequiredCigarette,
-									strRegProdCode,
-									intItemId,
-									intConcurrencyId
-								)
-								SELECT 
-									strGuid = @strGuid,
-									strActionType = t1.strActionType,
-									strUpcCode = t1.strUpcCode,
-									strDescription = t1.strDescription,
-									dblSalePrice = t1.dblSalePrice,
-									ysnSalesTaxed = t1.ysnSalesTaxed,
-									ysnIdRequiredLiquor = t1.ysnIdRequiredLiquor,
-									ysnIdRequiredCigarette = t1.ysnIdRequiredCigarette,
-									strRegProdCode = t1.strRegProdCode,
-									intItemId = t1.intItemId,
-									intConcurrencyId = 1
-								FROM  
-								(
-								SELECT *,
-										rn = ROW_NUMBER() OVER(PARTITION BY t.intItemId ORDER BY (SELECT NULL))
-									FROM 
+							[strTHStoreLocationID],
+							[strTHVendorName],
+							[strTHVendorModelVersion],
+
+							[strIMTableAction],
+							[strIMRecordAction],
+
+							[strITTDetailRecordActionType],
+	
+							[strICPOSCodeFormatFormat],
+							[strICPOSCode],
+							[strICPOSCodeModifier],
+
+							[strITTDataActiveFlgValue],
+							[dblITTDataInventoryValuePrice],
+							[intITTDataMerchandiseCode],
+							[dblITTDataRegularSellPrice],
+							[strITTDataDescription],
+							[strITTDataLinkCode],
+							[strITTDataPaymentSystemsProductCode],
+							[dblITTDataSellingUnits],
+							[intITTDataTaxStrategyId],
+							[intITTDataPriceMethodCode],
+							[strITTDataReceiptDescription],
+							[ysnITTDataFoodStampableFlg],
+							[ysnITTDataQuantityRequiredFlg]
+						)
+						SELECT DISTINCT
+							[strTHRegisterVersion]				= register.strXmlVersion,
+
+							[strTHStoreLocationID]				= ST.intStoreNo,
+							[strTHVendorName]					= 'iRely',
+							[strTHVendorModelVersion]			= (SELECT TOP (1) strVersionNo FROM tblSMBuildNumber ORDER BY intVersionID DESC),
+
+							[strIMTableAction]					= 'update',
+							[strIMRecordAction]					= 'addchange',
+
+							[strITTDetailRecordActionType]		= CASE
+																	WHEN item.strStatus = 'Active' 
+																		THEN 'addchange' 
+																	WHEN item.strStatus = 'Phased Out' 
+																		THEN 'delete' 
+																	ELSE 'addchange' 
+																END,
+	
+							[strICPOSCodeFormatFormat]			= PCF.strPosCodeFormat,
+							[strICPOSCode]						= IUOM.strLongUPCCode, -- IF PASSPORT DO NOT include check digit
+							[strICPOSCodeModifier]				= '0',
+
+							[strITTDataActiveFlgValue]			= CASE 
+																	WHEN item.strStatus = 'Active' 
+																		THEN 'yes' 
+																	ELSE 'no' 
+																END,
+							[dblITTDataInventoryValuePrice]		= Prc.dblSalePrice,
+							[intITTDataMerchandiseCode]			= CatLoc.intRegisterDepartmentId,
+							[dblITTDataRegularSellPrice]		= CASE 
+																	WHEN (GETDATE() BETWEEN SplPrc.dtmBeginDate AND SplPrc.dtmEndDate)
+																		THEN SplPrc.dblUnitAfterDiscount 
+																	ELSE Prc.dblSalePrice 
+																END,
+							[strITTDataDescription]				= item.strDescription,
+							[strITTDataLinkCode]				= CASE
+																	WHEN uomDepositPlu.intItemUOMId IS NOT NULL
+																		THEN uomDepositPlu.strLongUPCCode
+																	ELSE NULL
+																END,
+							[strITTDataPaymentSystemsProductCode] = CASE 
+																		WHEN ISNULL(SubCat.strRegProdCode, '') = '' OR SubCat.strRegProdCode = '0'
+																			THEN '7' 
+																		ELSE SubCat.strRegProdCode 
+																	END,
+							[dblITTDataSellingUnits]			= CAST(IUOM.dblUnitQty AS NUMERIC(18,2)),
+							[intITTDataTaxStrategyId]			= CASE	
+																	WHEN IL.ysnTaxFlag1 = 1 
+																		THEN register.intTaxStrategyIdForTax1 
+																	WHEN IL.ysnTaxFlag2 = 1 
+																		THEN register.intTaxStrategyIdForTax2 
+																	WHEN IL.ysnTaxFlag3 = 1 
+																		THEN register.intTaxStrategyIdForTax3 
+																	WHEN IL.ysnTaxFlag4 = 1 
+																		THEN register.intTaxStrategyIdForTax4
+																	ELSE register.intNonTaxableStrategyId
+																END,
+							[intITTDataPriceMethodCode]			= 0,
+							[strITTDataReceiptDescription]		= CASE
+																	WHEN ISNULL(item.strShortName, '') != ''
+																		THEN item.strShortName
+																	ELSE item.strDescription
+																END,
+							[ysnITTDataFoodStampableFlg]		= ISNULL(IL.ysnFoodStampable, 0),
+							[ysnITTDataQuantityRequiredFlg]		= ISNULL(IL.ysnQuantityRequired, 0)
+						FROM tblICItem item
+						INNER JOIN tblICCategory Cat 
+							ON Cat.intCategoryId = item.intCategoryId
+						INNER JOIN dbo.tblICCategoryLocation AS CatLoc 
+							ON CatLoc.intCategoryId = Cat.intCategoryId 
+						INNER JOIN 
+						(
+							SELECT DISTINCT intItemId FROM @tempTableItems 
+						) AS tmpItem 
+							ON tmpItem.intItemId = item.intItemId 
+						INNER JOIN tblICItemLocation IL 
+							ON IL.intItemId = item.intItemId
+						LEFT JOIN tblSTSubcategoryRegProd SubCat 
+							ON SubCat.intRegProdId = IL.intProductCodeId
+						INNER JOIN tblSTStore ST 
+							ON ST.intStoreId = SubCat.intStoreId
+							AND IL.intLocationId = ST.intCompanyLocationId
+							AND CatLoc.intLocationId = ST.intCompanyLocationId
+						INNER JOIN tblSMCompanyLocation L 
+							ON L.intCompanyLocationId = ST.intCompanyLocationId
+						INNER JOIN tblICItemUOM AS IUOM 
+							ON IUOM.intItemId = item.intItemId 
+						INNER JOIN vyuSTItemUOMPosCodeFormat PCF
+							ON IUOM.intItemUOMId = PCF.intItemUOMId
+						INNER JOIN tblICUnitMeasure IUM 
+							ON IUM.intUnitMeasureId = IUOM.intUnitMeasureId 
+						INNER JOIN tblSTRegister	register 
+							ON register.intRegisterId = ST.intRegisterId
+						INNER JOIN tblICItemPricing Prc 
+							ON Prc.intItemLocationId = IL.intItemLocationId
+						LEFT JOIN tblICItemSpecialPricing SplPrc 
+							ON SplPrc.intItemId = item.intItemId
+						LEFT JOIN tblICItemUOM uomDepositPlu
+							ON IL.intDepositPLUId = uomDepositPlu.intItemUOMId
+						WHERE item.ysnFuelItem = CAST(0 AS BIT) 
+							AND ST.intStoreId = @intStoreId
+							AND IUOM.strLongUPCCode IS NOT NULL
+							AND IUOM.strLongUPCCode NOT LIKE '%[^0-9]%'
+							AND ISNULL(SUBSTRING(IUOM.strLongUPCCode, PATINDEX('%[^0]%',IUOM.strLongUPCCode), LEN(IUOM.strLongUPCCode)), 0) NOT IN ('')
+							AND (
+									(
+										(@ysnExportEntirePricebookFile = CAST(0 AS BIT)  AND  @strCategoryCode <> 'whitespaces')
+										AND
 										(
-											SELECT DISTINCT
-												CASE WHEN tmpItem.strActionType = 'Created' THEN 'ADD' ELSE 'CHG' END AS strActionType
-												, IUOM.strLongUPCCode AS strUpcCode
-												, I.strDescription AS strDescription
-												, Prc.dblSalePrice AS dblSalePrice
-												, IL.ysnTaxFlag1 AS ysnSalesTaxed
-												, IL.ysnIdRequiredLiquor AS ysnIdRequiredLiquor
-												, IL.ysnIdRequiredCigarette AS ysnIdRequiredCigarette
-												, SubCat.strRegProdCode AS strRegProdCode
-												, I.intItemId AS intItemId
-											FROM tblICItem I
-											JOIN tblICCategory Cat 
-												ON Cat.intCategoryId = I.intCategoryId
-											JOIN @tempTableItems tmpItem 
-												ON tmpItem.intItemId = I.intItemId
-											JOIN tblICItemLocation IL 
-												ON IL.intItemId = I.intItemId
-											LEFT JOIN tblSTSubcategoryRegProd SubCat 
-												ON SubCat.intRegProdId = IL.intProductCodeId
-											JOIN tblSTStore ST 
-												ON ST.intStoreId = SubCat.intStoreId
-												AND IL.intLocationId = ST.intCompanyLocationId
-											JOIN tblSMCompanyLocation L 
-												ON L.intCompanyLocationId = IL.intLocationId
-											JOIN tblICItemUOM IUOM 
-												ON IUOM.intItemId = I.intItemId
-											JOIN tblICUnitMeasure IUM 
-												ON IUM.intUnitMeasureId = IUOM.intUnitMeasureId
-											JOIN tblSTRegister R 
-												ON R.intStoreId = ST.intStoreId
-											JOIN tblICItemPricing Prc 
-												ON Prc.intItemLocationId = IL.intItemLocationId
-											LEFT JOIN tblICItemSpecialPricing SplPrc 
-												ON SplPrc.intItemId = I.intItemId
-											WHERE I.ysnFuelItem = CAST(0 AS BIT) 
-												AND ST.intStoreId = @intStoreId
-												AND IUOM.strLongUPCCode IS NOT NULL
-												--AND IUOM.strLongUPCCode <> ''
-												--AND IUOM.strLongUPCCode <> '0'
-												AND IUOM.strLongUPCCode NOT LIKE '%[^0-9]%'
-												AND ISNULL(SUBSTRING(IUOM.strLongUPCCode, PATINDEX('%[^0]%',IUOM.strLongUPCCode), LEN(IUOM.strLongUPCCode)), 0) NOT IN ('') -- NOT IN ('0', '')
-										) as t
-								) t1
-								WHERE rn = 1
-							END
-
-
-						ELSE IF(@ysnExportEntirePricebookFile = CAST(0 AS BIT))
-							BEGIN
-								INSERT INTO tblSTstgPassportPricebookITT33
-								(
-									[StoreLocationID], 
-									[VendorName], 
-									[VendorModelVersion], 
-									[TableActionType], 
-									[RecordActionType], 
-									[RecordActionEffectiveDate], 
-									[ITTDetailRecordActionType], 
-									[POSCodeFormatFormat], 
-									[POSCode], 
-									[POSCodeModifier],
-									[ActiveFlagValue], 
-									[InventoryValuePrice],
-									[MerchandiseCode], 
-									[RegularSellPrice], 
-									[Description],
-									[PaymentSystemsProductCode],
-									[SellingUnits],
-									[TaxStrategyID],
-									[PriceMethodCode],
-									[ReceiptDescription],
-									[FoodStampableFlg],
-									[QuantityRequiredFlg],
-									[strUniqueGuid]
-								)
-								SELECT DISTINCT
-									ST.intStoreNo AS [StoreLocationID], 
-									'iRely' AS [VendorName], 
-									--'Rel. 13.2.0' AS [VendorModelVersion], 
-									(SELECT TOP (1) strVersionNo FROM tblSMBuildNumber ORDER BY intVersionID DESC) AS [VendorModelVersion],
-									'update' AS [TableActionType], 
-									'addchange' AS [RecordActionType], 
-									CONVERT(NVARCHAR(10), GETDATE(), 21) AS [RecordActionEffectiveDate], 
-									CASE 
-										WHEN I.strStatus = 'Active' 
-											THEN 'addchange' 
-										WHEN I.strStatus = 'Phased Out' 
-											THEN 'delete' 
-										ELSE 'addchange' 
-									END AS [ITTDetailRecordActionType], 
-									PCF.strPosCodeFormat AS [POSCodeFormatFormat],
-									PCF.strUPCwthOrwthOutCheckDigit AS [POSCode],
-									--CASE 
-										
-									--	WHEN ISNULL(IUOM.strLongUPCCode,'') != '' AND ISNULL(IUOM.strLongUPCCode,'') NOT LIKE '%[^0-9]%'
-									--		THEN CASE
-									--				WHEN CONVERT(NUMERIC(32, 0),CAST(IUOM.strLongUPCCode AS FLOAT)) <= 89999 -- ISNULL(ST.intMaxPlu,0)
-									--					THEN 'plu'
-
-									--				WHEN CONVERT(NUMERIC(32, 0),CAST(IUOM.strLongUPCCode AS FLOAT)) > 89999 --ISNULL(ST.intMaxPlu,0)
-									--					THEN CASE
-									--							-- UPC-A
-									--							WHEN LEN(IUOM.strLongUPCWOLeadingZero) = 6 
-									--								THEN 'upcA'
-									--							WHEN IUOM.strUPCwithCheckDigit > 89999 AND IUOM.strUPCwithCheckDigit <= 99999999999
-									--								THEN 'upcA'
-																
-									--							-- EAN13
-									--							WHEN IUOM.strUPCwithCheckDigit > 99999999999 AND IUOM.strUPCwithCheckDigit <= 999999999999
-									--								THEN 'ean13'
-
-									--							-- GTIN
-									--							WHEN IUOM.strUPCwithCheckDigit > 999999999999
-									--								THEN 'gtin'
-									--					END
-									--				ELSE ''
-									--			 END
-									--	ELSE 'plu' 
-									--END AS [POSCodeFormatFormat], 
-									--CASE 
-									--	WHEN ISNULL(IUOM.strLongUPCCode,'') != '' AND ISNULL(IUOM.strLongUPCCode,'') NOT LIKE '%[^0-9]%'
-									--		THEN CASE
-									--				WHEN CONVERT(NUMERIC(32, 0),CAST(IUOM.strLongUPCCode AS FLOAT)) <= 89999 -- ISNULL(ST.intMaxPlu,0)
-									--					THEN IUOM.strLongUPCCode -- (plu)
-
-									--				WHEN CONVERT(NUMERIC(32, 0),CAST(IUOM.strLongUPCCode AS FLOAT)) > 89999 --ISNULL(ST.intMaxPlu,0)
-									--					THEN CASE
-									--							-- UPC-A
-									--							WHEN LEN(IUOM.strLongUPCWOLeadingZero) = 6 
-									--								-- Convert to UPC-E + Check Digit
-									--								THEN RIGHT('00000000000' + ISNULL(dbo.fnSTConvertUPCeToUPCa(IUOM.strLongUPCCode),''), 11) + CAST(dbo.fnSTGenerateCheckDigit(IUOM.strLongUPCCode) AS NVARCHAR(1))
-									--							WHEN IUOM.strUPCwithCheckDigit > 89999 AND IUOM.strUPCwithCheckDigit <= 99999999999
-									--								THEN RIGHT('000000000000' + IUOM.strUPCwithCheckDigit, 12)
-																
-									--							-- EAN13
-									--							WHEN IUOM.strUPCwithCheckDigit > 99999999999 AND IUOM.strUPCwithCheckDigit <= 999999999999
-									--								THEN RIGHT('0000000000000' + IUOM.strUPCwithCheckDigit, 13)
-
-									--							-- GTIN
-									--							WHEN IUOM.strUPCwithCheckDigit > 999999999999
-									--								THEN IUOM.strUPCwithCheckDigit
-									--					END
-									--				ELSE IUOM.strLongUPCCode
-									--			 END
-									--	ELSE '0000' 
-									--END [POSCode], 
-									'0' AS [PosCodeModifier],
-									CASE 
-										WHEN I.strStatus = 'Active' 
-											THEN 'yes' 
-										ELSE 'no' 
-									END as [ActiveFlagValue], 
-									Prc.dblSalePrice AS [InventoryValuePrice],
-									--Cat.strCategoryCode AS [MerchandiseCode],
-									CatLoc.intRegisterDepartmentId AS [MerchandiseCode],  
-									CASE 
-										WHEN GETDATE() between SplPrc.dtmBeginDate AND SplPrc.dtmEndDate 
-											THEN SplPrc.dblUnitAfterDiscount 
-										ELSE Prc.dblSalePrice 
-									END AS [RegularSellPrice], 
-									I.strDescription AS [Description],
-									CASE 
-										WHEN R.strRegisterClass = 'PASSPORT' 
-											THEN 
-												CASE 
-													WHEN ISNULL(SubCat.strRegProdCode, '') = '' OR SubCat.strRegProdCode = '0'
-														THEN '7' 
-													ELSE SubCat.strRegProdCode 
-												END 
-											ELSE  ISNULL(SubCat.strRegProdCode, '40') 
-									END AS [PaymentSystemsProductCode],
-									CAST(IUOM.dblUnitQty AS NUMERIC(18,2)) AS [SellingUnits],
-									CASE	
-										WHEN IL.ysnTaxFlag1 = 1 
-											THEN R.intTaxStrategyIdForTax1 
-										WHEN IL.ysnTaxFlag2 = 1 
-											THEN R.intTaxStrategyIdForTax2 
-										WHEN IL.ysnTaxFlag3 = 1 
-											THEN R.intTaxStrategyIdForTax3 
-										WHEN IL.ysnTaxFlag4 = 1 
-											THEN R.intTaxStrategyIdForTax4
-										ELSE R.intNonTaxableStrategyId
-									END AS [TaxStrategyID],
-									0 AS [PriceMethodCode],
-									--IL.strDescription AS [ReceiptDescription],
-									CASE
-										WHEN ISNULL(I.strShortName, '') != ''
-											THEN I.strShortName
-										ELSE I.strDescription
-									END AS [ReceiptDescription],
-									IL.ysnFoodStampable AS [FoodStampableFlg],
-									IL.ysnQuantityRequired AS [QuantityRequiredFlg],
-									@strUniqueGuid AS [strUniqueGuid]
-								FROM tblICItem I
-								INNER JOIN tblICCategory Cat 
-									ON Cat.intCategoryId = I.intCategoryId
-								INNER JOIN dbo.tblICCategoryLocation AS CatLoc 
-									ON CatLoc.intCategoryId = Cat.intCategoryId 
-								INNER JOIN 
-								(
-									SELECT DISTINCT intItemId FROM @tempTableItems 
-								) AS tmpItem 
-									ON tmpItem.intItemId = I.intItemId 
-								INNER JOIN tblICItemLocation IL 
-									ON IL.intItemId = I.intItemId
-								LEFT JOIN tblSTSubcategoryRegProd SubCat 
-									ON SubCat.intRegProdId = IL.intProductCodeId
-								INNER JOIN tblSTStore ST 
-									ON ST.intStoreId = SubCat.intStoreId
-									AND IL.intLocationId = ST.intCompanyLocationId
-									AND CatLoc.intLocationId = ST.intCompanyLocationId
-								INNER JOIN tblSMCompanyLocation L 
-									ON L.intCompanyLocationId = ST.intCompanyLocationId
-								INNER JOIN tblICItemUOM AS IUOM 
-									ON IUOM.intItemId = I.intItemId 
-								INNER JOIN vyuSTItemUOMPosCodeFormat PCF
-									ON IUOM.intItemUOMId = PCF.intItemUOMId
-								INNER JOIN tblICUnitMeasure IUM 
-									ON IUM.intUnitMeasureId = IUOM.intUnitMeasureId 
-								INNER JOIN tblSTRegister R 
-									ON R.intRegisterId = ST.intRegisterId
-								INNER JOIN tblICItemPricing Prc 
-									ON Prc.intItemLocationId = IL.intItemLocationId
-								LEFT JOIN tblICItemSpecialPricing SplPrc 
-									ON SplPrc.intItemId = I.intItemId
-								WHERE I.ysnFuelItem = CAST(0 AS BIT) 
-									AND ST.intStoreId = @intStoreId
-									AND IUOM.strLongUPCCode IS NOT NULL
-									--AND IUOM.strLongUPCCode <> ''
-									--AND IUOM.strLongUPCCode <> '0'
-									AND IUOM.strLongUPCCode NOT LIKE '%[^0-9]%'
-									AND ISNULL(SUBSTRING(IUOM.strLongUPCCode, PATINDEX('%[^0]%',IUOM.strLongUPCCode), LEN(IUOM.strLongUPCCode)), 0) NOT IN ('') -- NOT IN ('0', '')
-
-								AND (
-										(
-											@strCategoryCode <>'whitespaces' 
-											AND 
-											Cat.intCategoryId IN(
-																	SELECT * 
-																	FROM dbo.fnSplitString(@strCategoryCode,',')
-																)
+											Cat.intCategoryId IN(SELECT * FROM dbo.fnSplitString(@strCategoryCode,','))
 										)
-										OR 
+										OR
+										(@ysnExportEntirePricebookFile = CAST(0 AS BIT)  AND  @strCategoryCode = 'whitespaces')
+										AND
 										(
-											@strCategoryCode ='whitespaces'  
-											AND 
 											Cat.intCategoryId = Cat.intCategoryId
 										)
-								)
-
-								-- INSERT TO UPDATE REGISTER PREVIEW TABLE
-								INSERT INTO tblSTUpdateRegisterItemReport
-								(
-									strGuid, 
-									strActionType,
-									strUpcCode,
-									strDescription,
-									dblSalePrice,
-									ysnSalesTaxed,
-									ysnIdRequiredLiquor,
-									ysnIdRequiredCigarette,
-									strRegProdCode,
-									intItemId,
-									intConcurrencyId
-								)
-								SELECT 
-									strGuid = @strGuid,
-									strActionType = t1.strActionType,
-									strUpcCode = t1.strUpcCode,
-									strDescription = t1.strDescription,
-									dblSalePrice = t1.dblSalePrice,
-									ysnSalesTaxed = t1.ysnSalesTaxed,
-									ysnIdRequiredLiquor = t1.ysnIdRequiredLiquor,
-									ysnIdRequiredCigarette = t1.ysnIdRequiredCigarette,
-									strRegProdCode = t1.strRegProdCode,
-									intItemId = t1.intItemId,
-									intConcurrencyId = 1
-								FROM  
-								(
-								SELECT *,
-										rn = ROW_NUMBER() OVER(PARTITION BY t.intItemId ORDER BY (SELECT NULL))
-									FROM 
+										OR 
+										(@ysnExportEntirePricebookFile = CAST(1 AS BIT))
+										AND
 										(
-											SELECT DISTINCT
-												CASE WHEN tmpItem.strActionType = 'Created' THEN 'ADD' ELSE 'CHG' END AS strActionType
-												, IUOM.strLongUPCCode AS strUpcCode
-												, I.strDescription AS strDescription
-												, Prc.dblSalePrice AS dblSalePrice
-												, IL.ysnTaxFlag1 AS ysnSalesTaxed
-												, IL.ysnIdRequiredLiquor AS ysnIdRequiredLiquor
-												, IL.ysnIdRequiredCigarette AS ysnIdRequiredCigarette
-												, SubCat.strRegProdCode AS strRegProdCode
-												, I.intItemId AS intItemId
-											FROM tblICItem I
-											JOIN tblICCategory Cat 
-												ON Cat.intCategoryId = I.intCategoryId
-											JOIN @tempTableItems tmpItem 
-												ON tmpItem.intItemId = I.intItemId
-											JOIN tblICItemLocation IL 
-												ON IL.intItemId = I.intItemId
-											LEFT JOIN tblSTSubcategoryRegProd SubCat 
-												ON SubCat.intRegProdId = IL.intProductCodeId
-											JOIN tblSTStore ST 
-												ON ST.intStoreId = SubCat.intStoreId
-												AND IL.intLocationId = ST.intCompanyLocationId
-											JOIN tblSMCompanyLocation L 
-												ON L.intCompanyLocationId = IL.intLocationId
-											JOIN tblICItemUOM IUOM 
-												ON IUOM.intItemId = I.intItemId
-											JOIN tblICUnitMeasure IUM 
-												ON IUM.intUnitMeasureId = IUOM.intUnitMeasureId
-											JOIN tblSTRegister R 
-												ON R.intStoreId = ST.intStoreId
-											JOIN tblICItemPricing Prc 
-												ON Prc.intItemLocationId = IL.intItemLocationId
-											LEFT JOIN tblICItemSpecialPricing SplPrc 
-												ON SplPrc.intItemId = I.intItemId
-											WHERE I.ysnFuelItem = CAST(0 AS BIT) 
-												AND ST.intStoreId = @intStoreId
-												AND IUOM.strLongUPCCode IS NOT NULL
-												--AND IUOM.strLongUPCCode <> ''
-												--AND IUOM.strLongUPCCode <> '0'
-												AND IUOM.strLongUPCCode NOT LIKE '%[^0-9]%'
-												AND ISNULL(SUBSTRING(IUOM.strLongUPCCode, PATINDEX('%[^0]%',IUOM.strLongUPCCode), LEN(IUOM.strLongUPCCode)), 0) NOT IN ('') -- NOT IN ('0', '')
+											1=1
+										)
+									)
+								)
+								
 
-											AND (
-													(
-														@strCategoryCode <>'whitespaces' 
-														AND 
-														Cat.intCategoryId IN(
-																				SELECT * 
-																				FROM dbo.fnSplitString(@strCategoryCode,',')
-																			)
-													)
-													OR 
-													(
-														@strCategoryCode ='whitespaces'  
-														AND 
-														Cat.intCategoryId = Cat.intCategoryId
-													)
-											)
-										) as t
-								) t1
-								WHERE rn = 1
-							END
 
-						IF EXISTS(SELECT StoreLocationID FROM tblSTstgPassportPricebookITT33 WHERE strUniqueGuid = @strUniqueGuid)
-							BEGIN
-								-- Generate XML for the pricebook data availavle in staging table
-								Exec dbo.uspSMGenerateDynamicXML @intImportFileHeaderId, @strTableAndCondition, 0, @strGeneratedXML OUTPUT
+----TEST 
+--SELECT '@tblTempPassportITT', * FROM @tblTempPassportITT								
+								
 
-								--Once XML is generated delete the data from pricebook  staging table.
-								DELETE 
-								FROM dbo.tblSTstgPassportPricebookITT33
-								WHERE strUniqueGuid = @strUniqueGuid
-							END
-						ELSE 
-							BEGIN
-								-- Posible fix for (ITT) if has no result
-								-- 1. Go to Store -> Register Product -> Product Code
-								--     Make sure that there is Product Code setup and Location Code
-								--    Now go to Item -> Item Location -> Product Code
-								--     Make sure that there is Location Code setup same to Store
-								--      and there is Product Code setup same to Store
-								-- 2. Does not have Newly added items or modified items on selected date range
+								IF EXISTS(SELECT TOP 1 1 FROM @tblTempPassportITT)
+									BEGIN
+										
+										SELECT @xml =
+										(
+											SELECT 
+												itt.strTHStoreLocationID			AS 'TransmissionHeader/StoreLocationID',
+												itt.strTHVendorName					AS 'TransmissionHeader/VendorName',
+												itt.strTHVendorModelVersion			AS 'TransmissionHeader/VendorModelVersion',
+												(
+													SELECT
+														'update'					AS 'TableAction/@type',
+														'addchange'					AS 'RecordAction/@type',
+														(	
+															SELECT
+																ITTDetail.strITTDetailRecordActionType			AS [RecordAction/@type],
+																(
+																	SELECT
+																		ItemCode.strICPOSCodeFormatFormat		AS [POSCodeFormat/@format],
+																		ItemCode.strICPOSCode					AS [POSCode],
+																		ItemCode.strICPOSCodeModifier			AS [POSCodeModifier]
+																	FROM 
+																	(
+																		SELECT DISTINCT
+																			[strICPOSCodeFormatFormat],
+																			[strICPOSCode],
+																			[strICPOSCodeModifier]
+																		FROM @tblTempPassportITT
+																	) ItemCode
+																	WHERE ItemCode.strICPOSCode = ITTDetail.strICPOSCode
+																	FOR XML PATH('ItemCode'), TYPE
+																),
+																(
+																	SELECT
+																		ITTData.strITTDataActiveFlgValue			AS [ActiveFlg/@value],
+																		ITTData.dblITTDataInventoryValuePrice		AS [InventoryValuePrice],
+																		ITTData.intITTDataMerchandiseCode			AS [MerchandiseCode],
+																		ITTData.dblITTDataRegularSellPrice			AS [RegularSellPrice],
+																		ITTData.strITTDataDescription				AS [Description],
+																		ITTData.strITTDataLinkCode					AS [LinkCode],
+																		ITTData.strITTDataPaymentSystemsProductCode	AS [PaymentSystemsProductCode],
+																		ITTData.dblITTDataSellingUnits				AS [SellingUnits],
+																		ITTData.intITTDataTaxStrategyId				AS [TaxStrategyId],
+																		ITTData.intITTDataPriceMethodCode			AS [PriceMethodCode],
+																		ITTData.strITTDataReceiptDescription		AS [ReceiptDescription],
+																		ITTData.ysnITTDataFoodStampableFlg			AS [FoodStampableFlg],
+																		ITTData.ysnITTDataQuantityRequiredFlg		AS [QuantityRequiredFlg]
+																	FROM 
+																	(
+																		SELECT DISTINCT
+																			[strICPOSCode],
+																			[strITTDataActiveFlgValue],
+																			[dblITTDataInventoryValuePrice],
+																			[intITTDataMerchandiseCode],
+																			[dblITTDataRegularSellPrice],
+																			[strITTDataDescription],
+																			[strITTDataLinkCode],
+																			[strITTDataPaymentSystemsProductCode],
+																			[dblITTDataSellingUnits],
+																			[intITTDataTaxStrategyId],
+																			[intITTDataPriceMethodCode],
+																			[strITTDataReceiptDescription],
+																			[ysnITTDataFoodStampableFlg],
+																			[ysnITTDataQuantityRequiredFlg]
+																		FROM @tblTempPassportITT
+																	) ITTData
+																	WHERE ITTData.strICPOSCode = ITTDetail.strICPOSCode
+																	FOR XML PATH('ITTData'), TYPE
+																)
+															FROM 
+															(
+																SELECT DISTINCT
+																	[strITTDetailRecordActionType],
+																	[strICPOSCode]
+																FROM @tblTempPassportITT
+															) ITTDetail
+															ORDER BY ITTDetail.strICPOSCode ASC
+															FOR XML PATH('ITTDetail'), TYPE
+														)
+													FOR XML PATH('ItemListMaintenance'), TYPE
+												)
+											FROM 
+											(
+												SELECT DISTINCT
+													[strTHStoreLocationID],
+													[strTHVendorName],
+													[strTHVendorModelVersion]
+												FROM @tblTempPassportITT
+											) itt
+											FOR XML PATH('NAXML-MaintenanceRequest'), TYPE
+										);
 
-								SET @ysnSuccessResult = CAST(0 AS BIT)
-								SET @strMessageResult = 'No result found to generate Pricebook - ' + @strFilePrefix + ' Outbound file'
-							END
+										DECLARE @strVersion NVARCHAR(50) = '3.4'
+
+										-- INSERT Attributes 'page' and 'ofpages' to Root header
+										SET @xml.modify('insert 
+														(
+															attribute version { 
+																				sql:variable("@strVersion")
+																			  }		   
+														) into (/*:NAXML-MaintenanceRequest)[1]');
+
+
+										SET @strXML = CAST(@xml AS NVARCHAR(MAX))
+										SET @strGeneratedXML = REPLACE(@strXML, '><', '>' + CHAR(13) + '<')
+										SET @ysnSuccessResult = CAST(1 AS BIT)
+
+
+
+
+										-- INSERT TO UPDATE REGISTER PREVIEW TABLE
+										INSERT INTO tblSTUpdateRegisterItemReport
+										(
+											strGuid, 
+											strActionType,
+											strUpcCode,
+											strDescription,
+											dblSalePrice,
+											ysnSalesTaxed,
+											ysnIdRequiredLiquor,
+											ysnIdRequiredCigarette,
+											strRegProdCode,
+											intItemId,
+											intConcurrencyId
+										)
+										SELECT 
+											strGuid = @strGuid,
+											strActionType = t1.strActionType,
+											strUpcCode = t1.strUpcCode,
+											strDescription = t1.strDescription,
+											dblSalePrice = t1.dblSalePrice,
+											ysnSalesTaxed = t1.ysnSalesTaxed,
+											ysnIdRequiredLiquor = t1.ysnIdRequiredLiquor,
+											ysnIdRequiredCigarette = t1.ysnIdRequiredCigarette,
+											strRegProdCode = t1.strRegProdCode,
+											intItemId = t1.intItemId,
+											intConcurrencyId = 1
+										FROM  
+										(
+										SELECT *,
+												rn = ROW_NUMBER() OVER(PARTITION BY t.intItemId ORDER BY (SELECT NULL))
+											FROM 
+												(
+													SELECT DISTINCT
+														CASE WHEN tmpItem.strActionType = 'Created' THEN 'ADD' ELSE 'CHG' END AS strActionType
+														, IUOM.strLongUPCCode AS strUpcCode
+														, I.strDescription AS strDescription
+														, Prc.dblSalePrice AS dblSalePrice
+														, IL.ysnTaxFlag1 AS ysnSalesTaxed
+														, IL.ysnIdRequiredLiquor AS ysnIdRequiredLiquor
+														, IL.ysnIdRequiredCigarette AS ysnIdRequiredCigarette
+														, SubCat.strRegProdCode AS strRegProdCode
+														, I.intItemId AS intItemId
+													FROM tblICItem I
+													JOIN tblICCategory Cat 
+														ON Cat.intCategoryId = I.intCategoryId
+													JOIN @tempTableItems tmpItem 
+														ON tmpItem.intItemId = I.intItemId
+													JOIN tblICItemLocation IL 
+														ON IL.intItemId = I.intItemId
+													LEFT JOIN tblSTSubcategoryRegProd SubCat 
+														ON SubCat.intRegProdId = IL.intProductCodeId
+													JOIN tblSTStore ST 
+														ON ST.intStoreId = SubCat.intStoreId
+														AND IL.intLocationId = ST.intCompanyLocationId
+													JOIN tblSMCompanyLocation L 
+														ON L.intCompanyLocationId = IL.intLocationId
+													JOIN tblICItemUOM IUOM 
+														ON IUOM.intItemId = I.intItemId
+													JOIN tblICUnitMeasure IUM 
+														ON IUM.intUnitMeasureId = IUOM.intUnitMeasureId
+													JOIN tblSTRegister R 
+														ON R.intStoreId = ST.intStoreId
+													JOIN tblICItemPricing Prc 
+														ON Prc.intItemLocationId = IL.intItemLocationId
+													LEFT JOIN tblICItemSpecialPricing SplPrc 
+														ON SplPrc.intItemId = I.intItemId
+													WHERE I.ysnFuelItem = CAST(0 AS BIT) 
+														AND ST.intStoreId = @intStoreId
+														AND IUOM.strLongUPCCode IS NOT NULL
+														AND IUOM.strLongUPCCode NOT LIKE '%[^0-9]%'
+														AND ISNULL(SUBSTRING(IUOM.strLongUPCCode, PATINDEX('%[^0]%',IUOM.strLongUPCCode), LEN(IUOM.strLongUPCCode)), 0) NOT IN ('') -- NOT IN ('0', '')
+												) as t
+										) t1
+										WHERE rn = 1
+
+									END
+								ELSE
+									BEGIN
+										SET @strGeneratedXML = ''
+										SET @ysnSuccessResult = CAST(0 AS BIT)
+										SET @strMessageResult = @strMessageResult + 'No result found to generate Pricebook - ' + @strFilePrefix + ' Outbound file. '
+
+										GOTO ExitWithRollback
+									END
+
+
+
+
+								
 					END
 			END
 		ELSE IF(@strRegisterClass = 'RADIANT')
@@ -1056,11 +971,65 @@ BEGIN
 							SET @strMessageResult = 'No result found to generate Pricebook - ' + @strFilePrefix + ' Outbound file'
 					END	
 			END
+
+		-- COMMIT
+		GOTO ExitWithCommit
+
 	END TRY
 
 	BEGIN CATCH
 		SET @ysnSuccessResult = CAST(0 AS BIT)
-		SET @strMessageResult = ERROR_MESSAGE()
+		SET @strMessageResult = @strMessageResult + ERROR_MESSAGE() + '. '
+
+		GOTO ExitWithRollback
 	END CATCH
 	
 END
+
+
+
+
+
+ExitWithCommit:
+	IF @InitTranCount = 0
+		BEGIN
+			COMMIT TRANSACTION
+		END
+
+	GOTO ExitPost
+	
+
+
+
+
+
+ExitWithRollback:
+		SET @ysnSuccessResult			= CAST(0 AS BIT)
+
+		IF @InitTranCount = 0
+			BEGIN
+				IF ((XACT_STATE()) <> 0)
+				BEGIN
+					SET @strMessageResult = @strMessageResult + 'Will Rollback Transaction. '
+
+					ROLLBACK TRANSACTION
+				END
+			END
+			
+		ELSE
+			BEGIN
+				IF ((XACT_STATE()) <> 0)
+					BEGIN
+						SET @strMessageResult = @strMessageResult + 'Will Rollback to Save point. '
+
+						ROLLBACK TRANSACTION @Savepoint
+					END
+			END
+			
+				
+		
+		
+	
+
+		
+ExitPost:

@@ -720,6 +720,7 @@
     <Build Include="dbo\Stored Procedures\uspICValidateCostingOnPost.sql" />
     <Build Include="dbo\Stored Procedures\uspICValidateCostingOnUnpost.sql" />
     <Build Include="dbo\Stored Procedures\uspICUnpostCosting.sql" />
+    <Build Include="dbo\Stored Procedures\uspICSyncItemLocationPricing.sql" />
     <None Include="Scripts\Post-Deployment\Optional Run\Reports\1_ReportDisableConstraints.sql" />
     <None Include="Scripts\Post-Deployment\Optional Run\Reports\2_ReportDeleteOldData.sql" />
     <None Include="Scripts\Post-Deployment\Optional Run\Reports\3_ReportEnableConstraints.sql" />
@@ -754,6 +755,7 @@
     <Build Include="dbo\Tables\tblICInventoryReceiptInspection.sql" />
     <Build Include="dbo\Tables\tblICInventoryReceiptItemTax.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostCosting.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUpdateItemTransactionStockUnits.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdateDetailsForRecount.sql" />
     <Build Include="dbo\Functions\fnGetCostingMethod.sql" />
     <Build Include="dbo\Functions\fnGetItemGLAccount.sql" />
@@ -1529,8 +1531,6 @@
     <Build Include="dbo\Stored Procedures\uspAPReverseGLEntriesFromTransaction.sql" />
     <Build Include="dbo\Functions\fnAPReverseGLEntries.sql" />
     <Build Include="dbo\Functions\fnAPCreateBillGLEntries.sql" />
-    <Build Include="dbo\Index\IX_tblGLDetail_intAccountId_ysnIsUnposted.sql" />
-    <Build Include="dbo\Index\IX_tblGLDetail_ysnIsUnposted.sql" />
     <Build Include="dbo\Index\IX_tblGLJournalDetail_intJournalId.sql" />
     <Build Include="dbo\Stored Procedures\uspAPVoidPayment.sql" />
     <Build Include="dbo\Stored Procedures\uspAPDuplicateRecord.sql" />
@@ -3056,7 +3056,6 @@
     <Build Include="dbo\Stored Procedures\uspMFShiftActivity_Create.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetWorkOrdersFromSalesOrder.sql" />
     <Build Include="dbo\Tables\tblICInventoryActualCostAdjustmentLog.sql" />
-    <Build Include="dbo\Index\IX_tblGLDetail_dtmDate.sql" />
     <Build Include="dbo\Functions\fnEMGetCustomerGroupMember.sql" />
     <Build Include="dbo\Views\vyuEMCustomerGroupWithDetail.sql" />
     <Build Include="dbo\Views\vyuICGetItemStockUOMSummary.sql" />
@@ -3115,7 +3114,6 @@
     <Build Include="dbo\Stored Procedures\uspPATPostRefund.sql" />
     <Build Include="dbo\Views\vyuSMAccountDetail.sql" />
     <Build Include="dbo\Functions\fnTRLinkedReceipt.sql" />
-    <Build Include="dbo\Index\IX_tblGLDetail_strTransactionId.sql" />
     <Build Include="dbo\Views\vyuARCustomerGroup.sql" />
     <Build Include="dbo\Functions\fnAP1099EFileTransmitter.sql" />
     <Build Include="dbo\Functions\fnAP1099EFilePayer.sql" />
@@ -7125,8 +7123,6 @@
     <Build Include="dbo\Tables\tblARPaymentBudget.sql" />
     <Build Include="dbo\Stored Procedures\uspLGRecalculateLoadCosts.sql" />
     <Build Include="dbo\Views\vyuARServiceChargeInvoice.sql" />
-    <Build Include="dbo\Tables\tblSTRegisterSetup.sql" />
-    <Build Include="dbo\Tables\tblSTRegisterSetupDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetStockAsOfDate.sql" />
     <Build Include="dbo\Stored Procedures\uspHDCreateTicket.sql" />
     <Build Include="dbo\Tables\tblHDCallDetailNested.sql" />
@@ -7600,6 +7596,7 @@
     <Build Include="dbo\Views\vyuICGenerateStockMovement.sql" />
     <Build Include="dbo\Views\vyuSTLocationItems.sql" />
     <None Include="Scripts\Post-Deployment\IC\17_Inventory_Constraints.sql" />
+    <None Include="Scripts\Post-Deployment\IC\100_Fix_Missing_Pricing_Data.sql" />
     <Build Include="dbo\Functions\fnCTGenerateReceiptDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspICCreateReceiptGLEntriesForInTransit.sql" />
     <Build Include="dbo\Functions\fnICGetAddToCostTaxFromInventoryReceipt.sql" />
@@ -7673,6 +7670,23 @@
     <Build Include="dbo\Stored Procedures\uspCFGenerateTransactionExportToThirdPartyCSV.sql" />
     <Build Include="dbo\Tables\tblCFExportFactorEventSequenceNumber.sql" />
 	<Build Include="dbo\Stored Procedures\uspMBPostMeterReadingValidation.sql" />
+    <None Include="Scripts\Post-Deployment\SM\1910_UpdateNoSpaceModuleName.sql" />
+    <Build Include="dbo\Views\vyuCMRemittanceAdviceReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspMBCreateInvoice.sql" />
+    <Build Include="dbo\Tables\tblMBPostResult.sql" />
+    <Build Include="dbo\Stored Procedures\uspMBUpdateMeterReadingInfo.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRCalculateSettleStorageFeeForContract.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKProcessDerivativeEntry.sql" />
+    <Build Include="dbo\Stored Procedures\uspTRValidateQuote.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKPositionReconciliationReportCompanyTitled.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKPositionReconciliationReportInventoryActivity.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKPositionReconciliationReportContractBalance.sql" />
+    <Build Include="dbo\Tables\tblGRSettleVoucherCreateReferenceTable.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRHandleSettleVoucherCreateReferenceTable.sql" />
+    <None Include="Scripts\Post-Deployment\SM\1910_DeleteDuplicateUserPreference.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKPositionReconciliationReportDerivativeActivity.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKPositionReconciliationReportBasisDeliveries.sql" />
+    <Build Include="dbo\Views\vyuMFGetSalesOrderDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -7900,6 +7914,9 @@
     <Build Include="dbo\User Defined Types\InvoiceEAStagingTable.sql" />
     <Build Include="dbo\Stored Procedures\uspAREAImportInvoice.sql" />
     <None Include="Scripts\Post-Deployment\GR\SC_ScaleLVControlIntegration.sql" />
+    <Build Include="dbo\Stored Procedures\uspARCustomerInquiryReport.sql" />
+    <Build Include="dbo\Functions\fnARCustomerAgingReport.sql" />
+    <None Include="Scripts\Post-Deployment\AR\DefaultData\37_UpdatePOSNewFields.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
@@ -8048,5 +8065,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\CT\fnCTGetBasisDeliveryAboveR2.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\CT\5_DataFix.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <Build Include="dbo\Stored Procedures\uspCTSyncPriceAndDerivative.sql" />
   </ItemGroup>
 </Project>

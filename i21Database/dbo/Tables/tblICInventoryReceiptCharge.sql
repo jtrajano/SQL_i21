@@ -31,6 +31,8 @@
 	[dblQuantityBilled] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 	[dblQuantityPriced] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 	[strChargesLink] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL,
+	[intLoadShipmentId] INT NULL,
+	[intLoadShipmentCostId] INT NULL,
 	[dtmDateCreated] DATETIME NULL,
 	[dtmDateModified] DATETIME NULL,
 	[intCreatedByUserId] INT NULL,

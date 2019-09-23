@@ -126,6 +126,7 @@ BEGIN TRY
 					,@recap = 0
 					,@isBatch = 0
 					,@param = @BillId
+					,@transactionType = 'Settle Storage'
 					,@userId = @UserId
 					,@success = @success OUTPUT
 			END
@@ -494,6 +495,7 @@ BEGIN TRY
 			END
 
 			
+
 			IF NOT EXISTS(SELECT 1 FROM tblGRSettleStorage WHERE intParentSettleStorageId = @intParentSettleStorageId)
 			BEGIN
 				DELETE FROM tblGRSettleStorage WHERE intSettleStorageId = @intParentSettleStorageId

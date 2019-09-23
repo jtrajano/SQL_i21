@@ -8,9 +8,11 @@ BEGIN TRY
 		,@intAttributeId INT
 		,@intManufacturingProcessId INT
 		,@intLocationId INT
+		,@intCountStatusId INT
 
 	SELECT @intManufacturingProcessId = intManufacturingProcessId
 		,@intLocationId = intLocationId
+		,@intCountStatusId = intCountStatusId
 	FROM dbo.tblMFWorkOrder
 	WHERE intWorkOrderId = @intWorkOrderId
 
@@ -23,6 +25,15 @@ BEGIN TRY
 	WHERE intManufacturingProcessId = @intManufacturingProcessId
 		AND intLocationId = @intLocationId
 		AND intAttributeId = @intAttributeId
+
+	IF @intCountStatusId = 13
+	BEGIN
+		RAISERROR (
+				'You cannot undo the cycle count since the data is already updated by another user. Please refresh.'
+				,16
+				,1
+				)
+	END
 
 	BEGIN TRAN
 

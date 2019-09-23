@@ -58,6 +58,7 @@ SELECT
 												END 
 												AS BIT
 											)
+	,intGetContractDetailFutureMonthId = CD.intFutureMonthId
 FROM tblCTContractDetail CD
 CROSS JOIN tblCTCompanyPreference CP	
 JOIN tblSMCompanyLocation CL 

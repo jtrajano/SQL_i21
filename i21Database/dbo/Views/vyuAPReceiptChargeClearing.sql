@@ -227,3 +227,4 @@ OUTER APPLY (
 ) APClearing  
 WHERE     
     billDetail.intInventoryReceiptChargeId IS NOT NULL    
+AND bill.ysnPosted = 1

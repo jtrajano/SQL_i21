@@ -38,4 +38,6 @@ CREATE TYPE [dbo].[ReceiptOtherChargesTableType] AS TABLE
 	,[dblForexRate] NUMERIC(18, 6) NULL														-- Forex Rate (Exchange Rate)
 	,[strChargesLink] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL 
 	,[ysnAllowVoucher] BIT NULL
+	,[intLoadShipmentId] INT NULL
+	,[intLoadShipmentCostId] INT NULL
 )

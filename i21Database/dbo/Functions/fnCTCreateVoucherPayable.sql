@@ -5,11 +5,8 @@
 )
 RETURNS TABLE AS RETURN
 (
-	SELECT	DISTINCT
-		[intEntityVendorId]							=	CASE  
-															WHEN CC.ysnPrice = 1 AND CD.intPricingTypeId IN (1,6) THEN CH.intEntityId
-															WHEN CC.ysnAccrue = 1 THEN CC.intVendorId
-														END
+SELECT	DISTINCT
+		[intEntityVendorId]							= entity.intEntityId
 		,[intTransactionType]						=	1 --voucher
 		,[intLocationId]							=	NULL --Contract doesn't have location
 		,[intShipToId]								=	NULL --?
@@ -85,7 +82,24 @@ RETURNS TABLE AS RETURN
 	LEFT JOIN tblSMCurrencyExchangeRateType rtype ON rtype.intCurrencyExchangeRateTypeId = CC.intRateTypeId
 	LEFT JOIN tblSMTerm term ON term.intTermID =  CC.intTermId
 	--OUTER APPLY dbo.fnGetItemGLAccountAsTable(CC.intItemId, ItemLoc.intItemLocationId, 'AP Clearing') itemAccnt
-	OUTER APPLY dbo.fnGetItemGLAccountAsTable(CC.intItemId, ItemLoc.intItemLocationId, case when CC.strCostType = 'Other Charges' then 'Other Charge Expense' else 'AP Clearing' end) itemAccnt
+	--OUTER APPLY dbo.fnGetItemGLAccountAsTable(CC.intItemId, ItemLoc.intItemLocationId, case when CC.strCostType = 'Other Charges' then 'Other Charge Expense' else 'AP Clearing' end) itemAccnt
+	OUTER APPLY dbo.fnGetItemGLAccountAsTable(CC.intItemId, ItemLoc.intItemLocationId,  case
+																						when CC.strCostType = 'Other Charges'
+																						or (
+																								select
+																									count(*)
+																								from
+																									tblICInventoryReceiptItem a
+																									,tblICInventoryReceipt b
+																								where
+																									a.intContractHeaderId = CD.intContractHeaderId
+																									and a.intContractDetailId = CD.intContractDetailId
+																									and b.intInventoryReceiptId = a.intInventoryReceiptId
+																							) = 0
+																						then 'Other Charge Expense'
+																						else 'AP Clearing' 
+																						end
+											) itemAccnt
 	LEFT JOIN dbo.tblGLAccount apClearing ON apClearing.intAccountId = itemAccnt.intAccountId
 	OUTER APPLY 
 	(
@@ -94,6 +108,11 @@ RETURNS TABLE AS RETURN
 		ORDER BY G1.dtmValidFromDate DESC
 	) rate
 	CROSS JOIN  dbo.fnSplitString('0,1',',') RT
+	INNER JOIN
+	(
+		SELECT intEntityId 
+		FROM tblEMEntity
+	) entity ON entity.intEntityId = CH.intEntityId OR entity.intEntityId = CC.intVendorId
 	WHERE RC.intInventoryReceiptChargeId IS NULL AND CC.ysnBasis = 0 AND
 	NOT EXISTS(SELECT 1 FROM tblICInventoryShipmentCharge WHERE intContractDetailId = CD.intContractDetailId AND intChargeId = CC.intItemId) AND
 	CASE 

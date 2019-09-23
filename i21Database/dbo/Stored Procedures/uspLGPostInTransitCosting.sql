@@ -77,19 +77,38 @@ BEGIN TRY
 			,dtmDate = GETDATE()
 			,dblQty = LD.dblQuantity
 			,dblUOMQty = IU.dblUnitQty
-			,dblCost = ISNULL(LD.dblAmount/LD.dblQuantity ,
-									CASE WHEN (AD.dblSeqPrice IS NULL) THEN
-										CASE WHEN (LD.dblUnitPrice > 0) 
-											THEN LD.dblUnitPrice / CASE WHEN (CUR.ysnSubCurrency = 1) THEN CUR.intCent ELSE 1 END
-											ELSE dbo.fnCTGetSequencePrice(CD.intContractDetailId,NULL) END
-										ELSE AD.dblSeqPrice / CASE WHEN (AD.ysnSeqSubCurrency = 1) THEN 100 ELSE 1 END
-									END
-									* AD.dblQtyToPriceUOMConvFactor
-									* CASE WHEN (@DefaultCurrencyId <> LD.intForexCurrencyId AND LD.intForexRateTypeId IS NOT NULL AND LD.dblForexRate IS NOT NULL) THEN ISNULL(LD.dblForexRate, 1) --FX on LS detail level
-											WHEN (@DefaultCurrencyId <> ISNULL(SeqCUR.intMainCurrencyId, SeqCUR.intCurrencyID)) THEN ISNULL(CTFX.dblFXRate, 1) --FX on CT level
-											WHEN (@DefaultCurrencyId <> L.intCurrencyId) THEN ISNULL(FX.dblFXRate, 1) --FX on LS header level
-											ELSE 1 END
-							   )
+			,dblCost = 
+						ISNULL(
+							--LD.dblAmount/LD.dblQuantity 
+							dbo.fnCalculateCostBetweenUOM(
+								LD.intPriceUOMId
+								, LD.intItemUOMId
+								, (LD.dblUnitPrice / CASE WHEN (CUR.ysnSubCurrency = 1) THEN CUR.intCent ELSE 1 END)
+							) 
+							, (
+								
+								CASE 
+									WHEN (AD.dblSeqPrice IS NULL) THEN
+										CASE 
+											WHEN (LD.dblUnitPrice > 0) THEN 
+												LD.dblUnitPrice 
+												/ CASE WHEN (CUR.ysnSubCurrency = 1) THEN CUR.intCent ELSE 1 END
+											ELSE 
+												dbo.fnCTGetSequencePrice(CD.intContractDetailId,NULL) 
+										END
+									ELSE 
+										AD.dblSeqPrice 
+										/ CASE WHEN (AD.ysnSeqSubCurrency = 1) THEN 100 ELSE 1 END
+								END
+								* AD.dblQtyToPriceUOMConvFactor
+								* CASE 
+									WHEN (@DefaultCurrencyId <> LD.intForexCurrencyId AND LD.intForexRateTypeId IS NOT NULL AND LD.dblForexRate IS NOT NULL) THEN ISNULL(LD.dblForexRate, 1) --FX on LS detail level
+									WHEN (@DefaultCurrencyId <> ISNULL(SeqCUR.intMainCurrencyId, SeqCUR.intCurrencyID)) THEN ISNULL(CTFX.dblFXRate, 1) --FX on CT level
+									WHEN (@DefaultCurrencyId <> L.intCurrencyId) THEN ISNULL(FX.dblFXRate, 1) --FX on LS header level
+									ELSE 1 
+								END
+							) 
+						)
 			,dblValue = CASE WHEN (AD.dblSeqPrice IS NULL) THEN
 							CASE WHEN (LD.dblUnitPrice > 0) 
 								THEN LD.dblUnitPrice / CASE WHEN (CUR.ysnSubCurrency = 1) THEN CUR.intCent ELSE 1 END

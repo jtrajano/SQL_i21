@@ -50,15 +50,21 @@ FROM
 												END
 											)
 		,InboundDiscount				= CASE 
-											WHEN BillDtl.intCustomerStorageId IS NOT NULL AND BillDtl.intInventoryReceiptItemId IS NOT NULL THEN ISNULL(tblOtherCharge.dblTotal,0) 
-											ELSE ISNULL(BillByReceipt.dblTotal, 0) 
+											WHEN BillDtl.intInventoryReceiptItemId IS NOT NULL THEN ISNULL(tblOtherCharge.dblTotal,0) 
+											ELSE ISNULL(BillByReceipt.dblTotal, 0)
 										END
 		,InboundNetDue					= SUM(
 												CASE 
 													WHEN BillDtl.intInventoryReceiptItemId IS NULL AND BillDtl.intInventoryReceiptChargeId IS NULL THEN 0 
 													ELSE BillDtl.dblTotal + BillDtl.dblTax 
 												END
-											) + ISNULL(BillByReceipt.dblTotal, 0)
+											) +
+											( 
+												CASE 
+													WHEN BillDtl.intInventoryReceiptItemId IS NOT NULL THEN ISNULL(tblOtherCharge.dblTotal,0) 
+													ELSE ISNULL(BillByReceipt.dblTotal, 0) --+ ISNULL(BillByReceiptManuallyAdded.dblTotal, 0)
+												END
+											)
 		,OutboundNetWeight				= 0
 		,OutboundGrossDollars			= 0
 		,OutboundTax					= 0
@@ -103,15 +109,23 @@ FROM
 		ON Item.intItemId = BillDtl.intItemId
 	LEFT JOIN (
 		SELECT 
-			A.intBillId
-			,SUM(dblTotal) dblTotal
-		FROM tblAPBillDetail A
-		JOIN tblICItem B 
-			ON A.intItemId = B.intItemId 
-				AND B.strType = 'Other Charge'
-		GROUP BY A.intBillId
-	) tblOtherCharge 
-		ON tblOtherCharge.intBillId = Bill.intBillId
+			SUM(dblAmount) dblTotal
+			,strId
+		FROM vyuGRSettlementSubReport
+		GROUP BY strId
+	) tblOtherCharge
+		ON tblOtherCharge.strId = Bill.strBillId
+	-- LEFT JOIN (
+	-- 	SELECT 
+	-- 		A.intBillId
+	-- 		,SUM(dblTotal) dblTotal
+	-- 	FROM tblAPBillDetail A
+	-- 	JOIN tblICItem B 
+	-- 		ON A.intItemId = B.intItemId 
+	-- 			AND B.strType = 'Other Charge'
+	-- 	GROUP BY A.intBillId
+	-- ) tblOtherCharge 
+	-- 	ON tblOtherCharge.intBillId = Bill.intBillId
 	LEFT JOIN (
 		SELECT 
 			intBillId
@@ -253,17 +267,25 @@ FROM
 		ON Bill.intBillId = BillDtl.intBillId 
 			AND BillDtl.intInventoryReceiptChargeId IS NULL
 	LEFT JOIN tblICItem Item 
-		ON Item.intItemId = BillDtl.intItemId 			
+		ON Item.intItemId = BillDtl.intItemId
 	LEFT JOIN (
 		SELECT 
-			A.intBillId
-			,SUM(dblTotal) dblTotal
-		FROM tblAPBillDetail A
-		JOIN tblICItem B 
-			ON A.intItemId = B.intItemId 
-				AND B.strType = 'Other Charge'
-		GROUP BY A.intBillId
-	) tblOtherCharge ON tblOtherCharge.intBillId = Bill.intBillId			
+			SUM(dblAmount) dblTotal
+			,strId
+		FROM vyuGRSettlementSubReport
+		GROUP BY strId
+	) tblOtherCharge
+		ON tblOtherCharge.strId = Bill.strBillId
+	-- LEFT JOIN (
+	-- 	SELECT 
+	-- 		A.intBillId
+	-- 		,SUM(dblTotal) dblTotal
+	-- 	FROM tblAPBillDetail A
+	-- 	JOIN tblICItem B 
+	-- 		ON A.intItemId = B.intItemId 
+	-- 			AND B.strType = 'Other Charge'
+	-- 	GROUP BY A.intBillId
+	-- ) tblOtherCharge ON tblOtherCharge.intBillId = Bill.intBillId			
 	JOIN (
 		SELECT 
 			A.intBillId

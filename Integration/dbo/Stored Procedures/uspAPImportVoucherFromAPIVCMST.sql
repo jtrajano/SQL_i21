@@ -391,7 +391,16 @@ SELECT
 									--(CASE WHEN ISNULL(C.aphgl_gl_un,0) <= 0 THEN 1 ELSE C.aphgl_gl_un END) 
 									ISNULL(NULLIF(C.aphgl_gl_un,0),1)
 									* 
-									 (CASE WHEN ISNULL(C.aphgl_gl_amt, C2.apivc_net_amt) > 0 THEN (-1) ELSE 1 END) --make it negative if detail of debit memo is positive
+									(CASE WHEN C2.apivc_trans_type = 'C' 
+												AND C2.apivc_comment = 'CCD Reconciliation' 
+												AND originDetails.dblTotal > 0 --if total is postive do not reverse the sign
+									THEN
+										--follow the sign of amount for qty
+										CASE WHEN ISNULL(C.aphgl_gl_amt, C2.apivc_net_amt) > 0 THEN 1 ELSE -1 END
+									ELSE 
+										(CASE WHEN ISNULL(C.aphgl_gl_amt, C2.apivc_net_amt) > 0 
+											THEN (-1) ELSE 1 END) --make it negative if detail of debit memo is positive
+									END)
 								ELSE --('I')
 									--(CASE WHEN ISNULL(C.aphgl_gl_un,0) <= 0 THEN 1 ELSE C.aphgl_gl_un END)
 									ISNULL(NULLIF(C.aphgl_gl_un,0),1)
@@ -399,14 +408,22 @@ SELECT
 									(CASE 
 										WHEN ISNULL(C.aphgl_gl_amt, C2.apivc_net_amt) < 0 -- make the quantity negative if amount is negative 
 										THEN 
-											(CASE WHEN C2.apivc_net_amt = 0 AND C.aphgl_gl_un < 0 THEN 1 ELSE -1 END) --If total of voucher is 0, retain the qty as negative
+											(CASE WHEN C2.apivc_net_amt = 0 OR ISNULL(NULLIF(C.aphgl_gl_un,0),1) < 0 THEN 1 ELSE -1 END) --If total of voucher is 0, retain the qty as negative
 										ELSE 1 END) 
 								END),
 	[dblQtyReceived]		=	(CASE WHEN C2.apivc_trans_type IN ('C','A') THEN
 									ISNULL(NULLIF(C.aphgl_gl_un,0),1)
 									--(CASE WHEN ISNULL(C.aphgl_gl_un,0) <= 0 THEN 1 ELSE C.aphgl_gl_un END) 
 									* 
-									 (CASE WHEN ISNULL(C.aphgl_gl_amt, C2.apivc_net_amt) > 0 THEN (-1) ELSE 1 END) --make it negative if detail of debit memo is positive
+									(CASE WHEN C2.apivc_trans_type = 'C' 
+											AND C2.apivc_comment = 'CCD Reconciliation' 
+											AND originDetails.dblTotal > 0 --if total is postive do not reverse the sign
+									THEN
+									 	--follow the sign of amount for qty
+										CASE WHEN ISNULL(C.aphgl_gl_amt, C2.apivc_net_amt) > 0 THEN 1 ELSE -1 END
+									ELSE 
+										(CASE WHEN ISNULL(C.aphgl_gl_amt, C2.apivc_net_amt) > 0 THEN (-1) ELSE 1 END) --make it negative if detail of debit memo is positive
+									END)
 								ELSE 
 									--(CASE WHEN ISNULL(C.aphgl_gl_un,0) <= 0 THEN 1 ELSE C.aphgl_gl_un END)
 									ISNULL(NULLIF(C.aphgl_gl_un,0),1)
@@ -414,12 +431,16 @@ SELECT
 									(CASE 
 										WHEN ISNULL(C.aphgl_gl_amt, C2.apivc_net_amt) < 0 -- make the quantity negative if amount is negative 
 										THEN 
-											(CASE WHEN C2.apivc_net_amt = 0 AND ISNULL(NULLIF(C.aphgl_gl_un,0),1) < 0 THEN 1 ELSE -1 END) --If total of voucher is 0, retain the qty as negative
+											(CASE WHEN C2.apivc_net_amt = 0 OR ISNULL(NULLIF(C.aphgl_gl_un,0),1) < 0 THEN 1 ELSE -1 END) --If total of voucher is 0, retain the qty as negative
 										ELSE 1 END) 
 								END),
 	[intAccountId]			=	ISNULL((SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = CAST(C.aphgl_gl_acct AS NVARCHAR(MAX))), B.intGLAccountExpenseId),
-	[dblTotal]				=	CASE WHEN C2.apivc_trans_type IN ('C','A') --always reverse the amount of detail if type is C or A
-											THEN ISNULL(C.aphgl_gl_amt, C2.apivc_net_amt) * -1 --make this positive as this is from a debit memo or prepayment
+	[dblTotal]				=	CASE WHEN C2.apivc_trans_type IN ('C','A') --always reverse the amount of detail if type is C or A, except for positive total and CCD
+										THEN 
+											(CASE WHEN C2.apivc_trans_type = 'C' AND C2.apivc_comment = 'CCD Reconciliation' AND originDetails.dblTotal < 0
+												THEN ISNULL(C.aphgl_gl_amt, C2.apivc_net_amt) * -1 --make this positive as this is from a debit memo or prepayment
+												ELSE ISNULL(C.aphgl_gl_amt, C2.apivc_net_amt)
+											END)
 										--WHEN C.aphgl_gl_amt < 0 AND C2.apivc_trans_type = 'I' THEN C.aphgl_gl_amt * -1 --reverse the amount of detail if type is I and amount is negative
 										ELSE ISNULL(C.aphgl_gl_amt, C2.apivc_net_amt) END, --IF 'I' the amount sign is correct
 	[dblCost]				=	ABS((CASE WHEN C2.apivc_trans_type IN ('C','A','I') 
@@ -436,10 +457,17 @@ SELECT
 									(CASE WHEN 
 										 (
 											 CASE WHEN C2.apivc_trans_type IN ('C','A') 
-												THEN ISNULL(C.aphgl_gl_amt, C2.apivc_net_amt) * -1
+												THEN ISNULL(C.aphgl_gl_amt, C2.apivc_net_amt) 
+													* (CASE WHEN C2.apivc_trans_type = 'C' AND C2.apivc_comment = 'CCD Reconciliation' AND originDetails.dblTotal > 0 THEN 1 ELSE -1 END)
 											ELSE ISNULL(C.aphgl_gl_amt, C2.apivc_net_amt) END
 										 ) < 0
-										THEN -(ABS(ISNULL(NULLIF(C.aphgl_gl_un,0),1))) --when line total is negative, get the cost by dividing to negative as well
+										THEN CASE WHEN C2.apivc_trans_type IN ('I') THEN (ABS(ISNULL(NULLIF(C.aphgl_gl_un,0),1))) --reverse the cost to possitive since we do not allow negative cost
+											 ELSE 
+											 	(CASE WHEN C2.apivc_trans_type = 'C' AND C2.apivc_comment = 'CCD Reconciliation' AND originDetails.dblTotal > 0
+												 THEN (CASE WHEN C.aphgl_gl_amt > 0 THEN 1 ELSE -1 END)
+											 			ELSE -(ABS(ISNULL(NULLIF(C.aphgl_gl_un,0),1))) --when line total is negative, get the cost by dividing to negative as well
+													END
+												) END 
 										ELSE ISNULL(NULLIF(C.aphgl_gl_un,0),1)
 									END)),
 	[dbl1099]				=	(CASE WHEN (A.dblTotal > 0 AND C2.apivc_1099_amt > 0)
@@ -465,6 +493,11 @@ INNER JOIN (tmp_apivcmstImport C2 INNER JOIN tmp_aphglmstImport C
 			AND C2.apivc_vnd_no = C.aphgl_vnd_no)
 ON A.strVendorOrderNumber COLLATE Latin1_General_CS_AS = C2.apivc_ivc_no
 	AND B.strVendorId COLLATE Latin1_General_CS_AS = C2.apivc_vnd_no
+OUTER APPLY(
+	SELECT SUM(aphgl_gl_amt) dblTotal FROM aphglmst C3
+	WHERE C2.apivc_ivc_no = C3.aphgl_ivc_no 
+			AND C2.apivc_vnd_no = C3.aphgl_vnd_no
+) originDetails --TODO: move this total to back up for performance
 WHERE A.intTransactionType != 2
 ) tmp
 ORDER BY intLineNo

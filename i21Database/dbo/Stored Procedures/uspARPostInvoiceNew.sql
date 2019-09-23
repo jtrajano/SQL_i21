@@ -742,17 +742,14 @@ BEGIN CATCH
 				SAVE TRANSACTION @CurrentSavepoint
 									
 			UPDATE ILD
-			SET
-				 ILD.[ysnPosted]				= CASE WHEN ILD.[ysnPost] = 1 THEN 0 ELSE ILD.[ysnPosted] END
-				,ILD.[ysnUnPosted]				= CASE WHEN ILD.[ysnPost] = 1 THEN ILD.[ysnUnPosted] ELSE 0 END
-				,ILD.[strPostingMessage]		= @ErrorMerssage
-				,ILD.[strBatchId]				= @BatchId
-				,ILD.[strPostedTransactionId]	= ''
-			FROM
-				tblARInvoiceIntegrationLogDetail ILD
-			WHERE
-				ILD.[intIntegrationLogId] = @IntegrationLogId
-				AND ILD.[ysnPost] IS NOT NULL
+			SET ILD.[ysnPosted]				= CASE WHEN ILD.[ysnPost] = 1 THEN 0 ELSE ILD.[ysnPosted] END
+			  , ILD.[ysnUnPosted]			= CASE WHEN ILD.[ysnPost] = 1 THEN ILD.[ysnUnPosted] ELSE 0 END
+			  , ILD.[strPostingMessage]		= @ErrorMerssage
+			  , ILD.[strBatchId]			= @BatchId
+			  ,ILD.[strPostedTransactionId]	= ''
+			FROM tblARInvoiceIntegrationLogDetail ILD
+			WHERE ILD.[intIntegrationLogId] = @IntegrationLogId
+			  AND ILD.[ysnPost] IS NOT NULL
 
 			IF @CurrentTranCount = 0
 				BEGIN
@@ -982,7 +979,25 @@ BEGIN TRY
     LEFT OUTER JOIN
         @GLEntries GLE
         ON IGLE.[strTransactionId] = GLE.[strTransactionId]
-					
+
+	IF @invalidGLCount > 0
+		BEGIN
+			UPDATE ILD
+			SET ILD.[ysnPosted]					= 0
+			  , ILD.[ysnUnPosted]				= 0
+			  , ILD.[strPostingMessage]			= GL.strText
+			  , ILD.[strBatchId]				= @BatchIdUsed
+			  , ILD.[strPostedTransactionId]	= PID.[strInvoiceNumber] 
+			FROM tblARInvoiceIntegrationLogDetail ILD
+			INNER JOIN #ARPostInvoiceHeader PID ON ILD.[intInvoiceId] = PID.[intInvoiceId]
+			CROSS APPLY (
+				SELECT TOP 1 strText
+				FROM @InvalidGLEntries IGL
+				WHERE IGL.strTransactionId = PID.strInvoiceNumber
+			) GL
+			WHERE ILD.[intIntegrationLogId] = @IntegrationLogId
+			AND ILD.[ysnPost] IS NOT NULL
+	  	END
 
     DELETE FROM #ARInvoiceGLEntries
     WHERE
@@ -1008,20 +1023,15 @@ BEGIN TRY
 		   ,@IntegrationLogId = @IntegrationLogId
 
 	UPDATE ILD
-	SET
-		 ILD.[ysnPosted]				= CASE WHEN ILD.[ysnPost] = 1 THEN 1 ELSE ILD.[ysnPosted] END
-		,ILD.[ysnUnPosted]				= CASE WHEN ILD.[ysnPost] = 1 THEN ILD.[ysnUnPosted] ELSE 1 END
-		,ILD.[strPostingMessage]		= CASE WHEN ILD.[ysnPost] = 1 THEN 'Transaction successfully posted.' ELSE 'Transaction successfully unposted.' END
-		,ILD.[strBatchId]				= @BatchId
-		,ILD.[strPostedTransactionId]	= PID.[strInvoiceNumber] 
-	FROM
-		tblARInvoiceIntegrationLogDetail ILD
-	INNER JOIN
-		#ARPostInvoiceHeader PID
-			ON ILD.[intInvoiceId] = PID.[intInvoiceId]
-	WHERE
-		ILD.[intIntegrationLogId] = @IntegrationLogId
-		AND ILD.[ysnPost] IS NOT NULL
+	SET ILD.[ysnPosted]					= CASE WHEN ILD.[ysnPost] = 1 THEN 1 ELSE ILD.[ysnPosted] END
+	  , ILD.[ysnUnPosted]				= CASE WHEN ILD.[ysnPost] = 1 THEN ILD.[ysnUnPosted] ELSE 1 END
+	  , ILD.[strPostingMessage]			= CASE WHEN ILD.[ysnPost] = 1 THEN 'Transaction successfully posted.' ELSE 'Transaction successfully unposted.' END
+	  , ILD.[strBatchId]				= @BatchId
+	  , ILD.[strPostedTransactionId]	= PID.[strInvoiceNumber] 
+	FROM tblARInvoiceIntegrationLogDetail ILD
+	INNER JOIN #ARPostInvoiceHeader PID ON ILD.[intInvoiceId] = PID.[intInvoiceId]
+	WHERE ILD.[intIntegrationLogId] = @IntegrationLogId
+	  AND ILD.[ysnPost] IS NOT NULL
 
 END TRY
 BEGIN CATCH

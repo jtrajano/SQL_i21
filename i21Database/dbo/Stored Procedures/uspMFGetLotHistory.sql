@@ -45,6 +45,14 @@ BEGIN
 		,strNewOwnerName NVARCHAR(100)
 		,dtmNewDueDate DATETIME
 		,dtmOldDueDate DATETIME
+		,strNewVendorRefNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		,strOldVendorRefNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		,strNewParentLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		,strOldParentLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		,strNewWarehouseRefNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		,strOldWarehouseRefNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		,strNewContainerNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		,strOldContainerNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
 		)
 
 	CREATE TABLE #tempLotHistoryFinal (
@@ -85,6 +93,14 @@ BEGIN
 		,strNewOwnerName NVARCHAR(100)
 		,dtmNewDueDate DATETIME
 		,dtmOldDueDate DATETIME
+		,strNewVendorRefNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		,strOldVendorRefNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		,strNewParentLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		,strOldParentLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		,strNewWarehouseRefNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		,strOldWarehouseRefNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		,strNewContainerNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		,strOldContainerNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
 		)
 
 	DECLARE @dblPrimaryQty NUMERIC(38, 20)
@@ -195,8 +211,16 @@ BEGIN
 		,ilt.dtmDate AS dtmTransactionDate
 		,NULL AS strOldOwnerName
 		,NULL AS strNewOwnerName
-		,NULL AS dtmNewDueDate 
+		,NULL AS dtmNewDueDate
 		,NULL AS dtmOldDueDate
+		,NULL AS strNewVendorRefNo
+		,NULL AS strOldVendorRefNo
+		,NULL AS strNewParentLotNumber
+		,NULL AS strOldParentLotNumber
+		,NULL AS strNewWarehouseRefNo
+		,NULL AS strOldWarehouseRefNo
+		,NULL AS strNewContainerNo
+		,NULL AS strOldContainerNo
 	FROM tblICLot l
 	JOIN tblICInventoryTransaction ilt ON ilt.intLotId = l.intLotId
 	JOIN tblICInventoryTransactionType itt ON itt.intTransactionTypeId = ilt.intTransactionTypeId
@@ -224,7 +248,7 @@ BEGIN
 	LEFT JOIN dbo.tblICLot L1 ON L1.intLotId = iad.intLotId
 	LEFT JOIN tblICItem i1 ON i1.intItemId = iad.intNewItemId
 	WHERE l.intLotId = @intLotId
-	and ilt.intTransactionTypeId<>26
+		AND ilt.intTransactionTypeId <> 26
 
 	INSERT INTO #tempLotHistory
 	SELECT ilt.dtmCreated AS dtmDateTime
@@ -314,8 +338,16 @@ BEGIN
 		,ilt.dtmDate AS dtmTransactionDate
 		,NULL AS strOldOwnerName
 		,NULL AS strNewOwnerName
-		,NULL As dtmNewDueDate
-		,NULL As dtmOldDueDate
+		,NULL AS dtmNewDueDate
+		,NULL AS dtmOldDueDate
+		,NULL AS strNewVendorRefNo
+		,NULL AS strOldVendorRefNo
+		,NULL AS strNewParentLotNumber
+		,NULL AS strOldParentLotNumber
+		,NULL AS strNewWarehouseRefNo
+		,NULL AS strOldWarehouseRefNo
+		,NULL AS strNewContainerNo
+		,NULL AS strOldContainerNo
 	FROM tblICLot l
 	JOIN tblICInventoryTransactionStorage ilt ON ilt.intLotId = l.intLotId
 	JOIN tblICInventoryTransactionType itt ON itt.intTransactionTypeId = ilt.intTransactionTypeId
@@ -482,8 +514,16 @@ BEGIN
 			,ilt.dtmDate AS dtmTransactionDate
 			,NULL AS strOldOwnerName
 			,NULL AS strNewOwnerName
-			,NULL As dtmNewDueDate
-			,NULL As dtmOldDueDate
+			,NULL AS dtmNewDueDate
+			,NULL AS dtmOldDueDate
+			,NULL AS strNewVendorRefNo
+			,NULL AS strOldVendorRefNo
+			,NULL AS strNewParentLotNumber
+			,NULL AS strOldParentLotNumber
+			,NULL AS strNewWarehouseRefNo
+			,NULL AS strOldWarehouseRefNo
+			,NULL AS strNewContainerNo
+			,NULL AS strOldContainerNo
 		FROM tblICLot l
 		JOIN tblICInventoryTransaction ilt ON ilt.intLotId = l.intLotId
 		JOIN tblICInventoryTransactionType itt ON itt.intTransactionTypeId = ilt.intTransactionTypeId
@@ -511,7 +551,7 @@ BEGIN
 		LEFT JOIN dbo.tblICLot L1 ON L1.intLotId = iad.intLotId
 		LEFT JOIN tblICItem i1 ON i1.intItemId = iad.intNewItemId
 		WHERE l.intLotId = @intLotId1
-		and ilt.intTransactionTypeId<>26
+			AND ilt.intTransactionTypeId <> 26
 			AND ilt.intInventoryTransactionId < @intInventoryTransactionId
 
 		SELECT @intSplitFromLotId = NULL
@@ -572,8 +612,16 @@ BEGIN
 		,ia.dtmAdjustmentDate AS dtmTransactionDate
 		,e1.strEntityNo + ' - ' + e1.strName AS strOldOwnerName
 		,e2.strEntityNo + ' - ' + e2.strName AS strNewOwnerName
-		,NULL As dtmNewDueDate
-		,NULL As dtmOldDueDate
+		,NULL AS dtmNewDueDate
+		,NULL AS dtmOldDueDate
+		,NULL AS strNewVendorRefNo
+		,NULL AS strOldVendorRefNo
+		,NULL AS strNewParentLotNumber
+		,NULL AS strOldParentLotNumber
+		,NULL AS strNewWarehouseRefNo
+		,NULL AS strOldWarehouseRefNo
+		,NULL AS strNewContainerNo
+		,NULL AS strOldContainerNo
 	FROM tblICInventoryAdjustment ia
 	LEFT JOIN tblICInventoryAdjustmentDetail iad ON ia.intInventoryAdjustmentId = iad.intInventoryAdjustmentId
 	LEFT JOIN tblICLot l ON l.intLotId = iad.intLotId
@@ -617,6 +665,14 @@ BEGIN
 				THEN 'Inventory Adjustment - Vendor Lot Number Change'
 			WHEN IA.intTransactionTypeId = 103
 				THEN 'Inventory Adjustment - Due Date'
+			WHEN IA.intTransactionTypeId = 106
+				THEN 'Inventory Adjustment - Vendor Ref No'
+			WHEN IA.intTransactionTypeId = 107
+				THEN 'Inventory Adjustment - Parent Lot Number'
+			WHEN IA.intTransactionTypeId = 108
+				THEN 'Inventory Adjustment - Warehouse Ref No'
+			WHEN IA.intTransactionTypeId = 109
+				THEN 'Inventory Adjustment - Container No'
 			END AS strTransaction
 		,CONVERT(NUMERIC(38, 20), 0.0) AS dblWeight
 		,CONVERT(NUMERIC(38, 20), ISNULL(IA.dblQty, 0)) * L.dblWeightPerQty AS dblTransactionWeight
@@ -644,8 +700,16 @@ BEGIN
 		,IA.dtmDate AS dtmTransactionDate
 		,NULL AS strOldOwnerName
 		,NULL AS strNewOwnerName
-		,IA.dtmNewDueDate As dtmNewDueDate
-		,IA.dtmOldDueDate As dtmOldDueDate
+		,IA.dtmNewDueDate AS dtmNewDueDate
+		,IA.dtmOldDueDate AS dtmOldDueDate
+		,IA.strNewVendorRefNo
+		,IA.strOldVendorRefNo
+		,IA.strNewParentLotNumber
+		,IA.strOldParentLotNumber
+		,IA.strNewWarehouseRefNo
+		,IA.strOldWarehouseRefNo
+		,IA.strNewContainerNo
+		,IA.strOldContainerNo
 	FROM tblMFInventoryAdjustment IA
 	JOIN tblICLot L ON L.intLotId = IA.intSourceLotId
 	JOIN tblICItem I ON I.intItemId = L.intItemId
@@ -659,11 +723,19 @@ BEGIN
 	LEFT JOIN tblSMUserSecurity US ON US.[intEntityId] = IA.intUserId
 	WHERE L.intLotId = @intLotId
 		AND (
-			IA.intTransactionTypeId = 101
-			OR IA.intTransactionTypeId = 102
-			OR IA.intTransactionTypeId = 103
+			IA.intTransactionTypeId IN (
+				101
+				,102
+				,103
+				,106
+				,107
+				,108
+				,108
+				,109
+				)
 			)
 
+			Order by IA.intAdjustmentId 
 	INSERT INTO #tempLotHistoryFinal (
 		dtmDateTime
 		,strLotNo
@@ -701,6 +773,14 @@ BEGIN
 		,strNewOwnerName
 		,dtmNewDueDate
 		,dtmOldDueDate
+		,strNewVendorRefNo
+		,strOldVendorRefNo
+		,strNewParentLotNumber
+		,strOldParentLotNumber
+		,strNewWarehouseRefNo
+		,strOldWarehouseRefNo
+		,strNewContainerNo
+		,strOldContainerNo
 		)
 	SELECT dtmDateTime
 		,strLotNo
@@ -738,6 +818,14 @@ BEGIN
 		,strNewOwnerName
 		,dtmNewDueDate
 		,dtmOldDueDate
+		,strNewVendorRefNo
+		,strOldVendorRefNo
+		,strNewParentLotNumber
+		,strOldParentLotNumber
+		,strNewWarehouseRefNo
+		,strOldWarehouseRefNo
+		,strNewContainerNo
+		,strOldContainerNo
 	FROM #tempLotHistory LH
 	ORDER BY LH.dtmDateTime ASC
 

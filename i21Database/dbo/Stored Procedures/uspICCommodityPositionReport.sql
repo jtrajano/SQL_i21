@@ -1,5 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspICCommodityPositionReport]
-	
+CREATE PROCEDURE [dbo].[uspICCommodityPositionReport]	
 	@ysnGetHeader	bit  = 0,
 	@dtmDate		date = null,
 	@strLocationName nvarchar(max) = '',
@@ -39,25 +38,26 @@ begin
 
 	set @top = ''
 	set @dtmDate = isnull(@dtmDate, getdate())
-
-	
-	if @ysnGetHeader= 1
+		
+	if @ysnGetHeader = 1
 	begin
 		set @top = ' top 1'
-		set @dtmDate = getdate()
+		set @dtmDate = NULL 
 		set @licensed_filter = ''
 	end
+
 	SET @sql = 
 	'
-	
+	DECLARE @dtmDate AS DATETIME = ' + ISNULL('''' + CAST(@dtmDate AS NVARCHAR(20)) + '''', 'NULL') + '
+
 	SELECT ' + @top + ' * 
 	FROM (
-		SELECT 
+		SELECT ' + @top + '
 			com.strCommodityCode
 			,cl.intCompanyLocationId
 			,cl.strLocationName 
 			, dblQty = ROUND(dbo.fnICConvertUOMtoStockUnit(t.intItemId, t.intItemUOMId, t.dblQty), ISNULL(com.intDecimalDPR,2))
-			, dtmDate = ''' + cast(@dtmDate as nvarchar) + '''
+			, dtmDate = @dtmDate
 			, ysnLicensed = cl.ysnLicensed
 		FROM 
 			tblICItem i inner join tblICItemLocation il
@@ -75,7 +75,9 @@ begin
 				 t
 				on t.intItemId = i.intItemId
 				and t.intItemLocationId = il.intItemLocationId 
-		WHERE t.dtmDate <= ''' + cast(@dtmDate as nvarchar) + ''''  + @location_filter + '
+		WHERE 
+			(dbo.fnDateLessThanEquals(t.dtmDate,  @dtmDate) = 1 OR @dtmDate IS NULL)'  
+			+ @location_filter + '
 
 	) AS s	
 	/*outer apply (
@@ -119,6 +121,5 @@ begin
 	--	[Canola] IS NOT NULL 	
 	ORDER BY strLocationName 
 	'	
-	EXEC(@sql) 
-	
+	EXEC(@sql) 	
 end

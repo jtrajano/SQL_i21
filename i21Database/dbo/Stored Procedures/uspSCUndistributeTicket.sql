@@ -540,33 +540,69 @@ BEGIN TRY
 
 							WHILE @@FETCH_STATUS = 0
 							BEGIN
-								SELECT @intInventoryShipmentItemId = intInventoryShipmentItemId FROM tblICInventoryShipmentItem WHERE intInventoryShipmentId = @InventoryShipmentId
-								SELECT @intInvoiceId = intInvoiceId FROM tblARInvoiceDetail WHERE intInventoryShipmentItemId = @intInventoryShipmentItemId;
-								SELECT @ysnPosted = ysnPosted FROM tblARInvoice WHERE intInvoiceId = @intInvoiceId;
-								IF @ysnPosted = 1
+								SELECT DISTINCT
+									ARID.intInvoiceId
+								INTO #invoiceIdTable
+								FROM tblARInvoiceDetail ARID 
+								INNER JOIN tblARInvoice ARI 
+									ON ARID.[intInvoiceId] = ARI.[intInvoiceId]
+								INNER JOIN tblICInventoryShipmentItem ICISI
+									ON ARID.[intInventoryShipmentItemId] = ICISI.[intInventoryShipmentItemId]
+								WHERE ICISI.[intInventoryShipmentId] = @InventoryShipmentId
+								ORDER BY ARID.intInvoiceId ASC
+
+								SELECT @intInvoiceId = MIN(intInvoiceId) 
+								FROM #invoiceIdTable
+
+								WHILE (ISNULL(@intInvoiceId,0) > 0)
 								BEGIN
-									EXEC [dbo].[uspARPostInvoice]
-										@batchId			= NULL,
-										@post				= 0,
-										@recap				= 0,
-										@param				= @intInvoiceId,
-										@userId				= @intUserId,
-										@beginDate			= NULL,
-										@endDate			= NULL,
-										@beginTransaction	= NULL,
-										@endTransaction		= NULL,
-										@exclude			= NULL,
-										@successfulCount	= @successfulCount OUTPUT,
-										@invalidCount		= @invalidCount OUTPUT,
-										@success			= @success OUTPUT,
-										@batchIdUsed		= @batchIdUsed OUTPUT,
-										@recapId			= @recapId OUTPUT,
-										@transType			= N'all',
-										@accrueLicense		= 0,
-										@raiseError			= 1
+									SELECT @ysnPosted = ysnPosted FROM tblARInvoice WHERE intInvoiceId = @intInvoiceId;
+
+									-- unpost invoice
+									IF @ysnPosted = 1
+									BEGIN
+										EXEC [dbo].[uspARPostInvoice]
+											@batchId			= NULL,
+											@post				= 0,
+											@recap				= 0,
+											@param				= @intInvoiceId,
+											@userId				= @intUserId,
+											@beginDate			= NULL,
+											@endDate			= NULL,
+											@beginTransaction	= NULL,
+											@endTransaction		= NULL,
+											@exclude			= NULL,
+											@successfulCount	= @successfulCount OUTPUT,
+											@invalidCount		= @invalidCount OUTPUT,
+											@success			= @success OUTPUT,
+											@batchIdUsed		= @batchIdUsed OUTPUT,
+											@recapId			= @recapId OUTPUT,
+											@transType			= N'all',
+											@accrueLicense		= 0,
+											@raiseError			= 1
+									END
+
+									--Delete Invoice
+									IF ISNULL(@intInvoiceId, 0) > 0
+									BEGIN
+										EXEC [dbo].[uspARDeleteInvoice] @intInvoiceId, @intUserId
+									END
+
+									
+									IF EXISTS(SELECT TOP 1 1 FROM #invoiceIdTable WHERE intInvoiceId > @intInvoiceId)
+									BEGIN
+										SELECT TOP 1 @intInvoiceId = intInvoiceId 
+										FROM #invoiceIdTable
+										WHERE intInvoiceId > @intInvoiceId
+										ORDER BY intInvoiceId ASC
+									END
+									ELSE
+									BEGIN
+										SET @intInvoiceId = 0
+									END
+									
 								END
-								IF ISNULL(@intInvoiceId, 0) > 0
-									EXEC [dbo].[uspARDeleteInvoice] @intInvoiceId, @intUserId
+								
 								EXEC [dbo].[uspICPostInventoryShipment] 0, 0, @strTransactionId, @intUserId;
 								EXEC [dbo].[uspGRDeleteStorageHistory] @strSourceType = 'InventoryShipment' ,@IntSourceKey = @InventoryShipmentId
 								EXEC [dbo].[uspGRReverseTicketOpenBalance] 'InventoryShipment' , @InventoryShipmentId ,@intUserId;

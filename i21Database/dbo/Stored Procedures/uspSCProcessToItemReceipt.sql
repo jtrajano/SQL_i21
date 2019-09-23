@@ -51,6 +51,7 @@ DECLARE @ysnDeductFreightFarmer AS BIT
 DECLARE @total AS INT
 DECLARE @ysnDPStorage AS BIT
 DECLARE @strLotTracking AS NVARCHAR(100)
+DECLARE @intIRContractPricingType AS INT
 DECLARE @intInventoryReceiptItemId AS INT
 		,@intOrderId INT
 		,@intOwnershipType INT
@@ -469,20 +470,35 @@ BEGIN TRY
 	WHERE SC.intTicketId = @intTicketId
 
 	SELECT @intContractDetailId = MIN(ri.intLineNo)
+			,@intIRContractPricingType = MIN(CD.intPricingTypeId)
 	FROM tblICInventoryReceipt r 
 	JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptId = r.intInventoryReceiptId
-	WHERE ri.intInventoryReceiptId = @InventoryReceiptId AND r.strReceiptType = 'Purchase Contract' 
+	LEFT JOIN tblCTContractDetail CD 
+		ON ri.intContractDetailId = CD.intContractDetailId
+	WHERE ri.intInventoryReceiptId = @InventoryReceiptId AND r.strReceiptType = 'Purchase Contract'
  
-	WHILE ISNULL(@intContractDetailId,0) > 0
+	WHILE ISNULL(@intContractDetailId,0) > 0 AND @intIRContractPricingType = 2
 	BEGIN
 		IF EXISTS(SELECT TOP 1 1 FROM tblCTPriceFixation WHERE intContractDetailId = @intContractDetailId)
 		BEGIN
-		EXEC uspCTCreateVoucherInvoiceForPartialPricing @intContractDetailId, @intUserId
+			EXEC uspCTCreateVoucherInvoiceForPartialPricing @intContractDetailId, @intUserId
 		END
+
 		SELECT @intContractDetailId = MIN(ri.intLineNo)
+				,@intIRContractPricingType = MIN(CD.intPricingTypeId)
 		FROM tblICInventoryReceipt r 
 		JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptId = r.intInventoryReceiptId
+		LEFT JOIN tblCTContractDetail CD 
+			ON ri.intContractDetailId = CD.intContractDetailId
 		WHERE ri.intInventoryReceiptId = @InventoryReceiptId AND r.strReceiptType = 'Purchase Contract' AND ri.intLineNo > @intContractDetailId
+
+		select @intBillId = intBillId from tblAPBillDetail where intInventoryReceiptItemId in (
+			select ri.intInventoryReceiptItemId
+			FROM tblICInventoryReceipt r 
+				JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptId = r.intInventoryReceiptId					
+					WHERE ri.intInventoryReceiptId = @InventoryReceiptId 
+		) and intInventoryReceiptChargeId is null
+		
 	END
 
 	SELECT @intLotType = dbo.fnGetItemLotType(@intItemId)
@@ -556,8 +572,16 @@ BEGIN TRY
 					END
 					SELECT @intContractDetailId = MIN(ri.intLineNo)
 					FROM tblICInventoryReceipt r 
-					JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptId = r.intInventoryReceiptId
+					JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptId = r.intInventoryReceiptId					
 					WHERE ri.intInventoryReceiptId = @InventoryReceiptId AND r.strReceiptType = 'Purchase Contract' AND ri.intLineNo > @intContractDetailId
+					
+					
+					select @intBillId = intBillId from tblAPBillDetail where intInventoryReceiptItemId in (
+						select ri.intInventoryReceiptItemId
+						FROM tblICInventoryReceipt r 
+							JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptId = r.intInventoryReceiptId					
+								WHERE ri.intInventoryReceiptId = @InventoryReceiptId 
+					) and intInventoryReceiptChargeId is null
 				END
 		END
 
@@ -571,6 +595,47 @@ BEGIN TRY
 		END
 		IF ISNULL(@intBillId , 0) != 0 AND ISNULL(@postVoucher, 0) = 1
 		BEGIN
+
+			--Add contract prepayment to voucher
+			BEGIN
+				IF OBJECT_ID (N'tempdb.dbo.#tmpContractPrepay') IS NOT NULL
+					DROP TABLE #tmpContractPrepay
+
+				CREATE TABLE #tmpContractPrepay (
+					[intPrepayId] INT
+				);
+				DECLARE @Ids as Id
+			
+				INSERT INTO @Ids(intId)
+				SELECT CT.intContractHeaderId 
+				FROM tblICInventoryReceiptItem A 
+				INNER JOIN tblCTContractDetail CT 
+					ON CT.intContractDetailId = A.intContractDetailId
+				WHERE A.dblUnitCost > 0
+					AND A.intInventoryReceiptId = @InventoryReceiptId
+				GROUP BY CT.intContractHeaderId 
+				
+				
+
+				INSERT INTO #tmpContractPrepay(
+					[intPrepayId]
+				) 
+				SELECT intTransactionId FROM dbo.fnSCGetPrepaidIds(@Ids)
+			
+				SELECT @total = COUNT(intPrepayId) FROM #tmpContractPrepay where intPrepayId > 0;
+				IF (@total > 0)
+				BEGIN
+					INSERT INTO @prePayId(
+						[intId]
+					)
+					SELECT [intId] = intPrepayId
+					FROM #tmpContractPrepay where intPrepayId > 0
+				
+					EXEC uspAPApplyPrepaid @intBillId, @prePayId
+					update tblAPBillDetail set intScaleTicketId = @intTicketId WHERE intBillId = @intBillId
+				END
+			END
+
 			SELECT @dblTotal = SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = @intBillId
 
 			EXEC [dbo].[uspSMTransactionCheckIfRequiredApproval]

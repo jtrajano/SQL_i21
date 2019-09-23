@@ -11,7 +11,7 @@
 	, @intMarketZoneId INT = NULL
 
 AS
-				       
+
 DECLARE @ysnIncludeBasisDifferentialsInResults BIT
 DECLARE @dtmPriceDate DATETIME    
 DECLARE @dtmSettlemntPriceDate DATETIME  
@@ -191,6 +191,7 @@ DECLARE @tblGetOpenContractDetail TABLE (intRowNum INT
 	, dblFutures NUMERIC(24,10)
 	, dblBasis NUMERIC(24,10)
 	, dblCash NUMERIC(24,10)
+	, dblAmount NUMERIC(24,10)
 	, intUnitMeasureId INT
 	, intPricingTypeId INT
 	, intContractTypeId INT
@@ -223,6 +224,7 @@ INSERT INTO @tblGetOpenContractDetail (intRowNum
 	, dblFutures
 	, dblBasis
 	, dblCash
+	, dblAmount
 	, intUnitMeasureId
 	, intPricingTypeId
 	, intContractTypeId
@@ -255,6 +257,7 @@ SELECT
 	,dblFutures
 	,dblBasis
 	,dblCashPrice
+	,dblAmount
 	,intUnitMeasureId
 	,intPricingTypeId
 	,intContractTypeId
@@ -447,7 +450,7 @@ SELECT DISTINCT CH.intCommodityUOMId intCommodityUnitMeasureId
 	--, ISNULL(CASE WHEN CD.intPricingTypeId<>1 and PF.intPriceFixationId IS NOT NULL THEN ISNULL(CD.dblQuantity,0)-ISNULL(PF.dblQuantity ,0)
 	--			WHEN CD.intPricingTypeId<>1 and PF.intPriceFixationId IS NULL then ISNULL(CD.dblQuantity,0)
 	--			ELSE 0 end,0) dblUnPricedQty
-	, dblPricedAmount = NULL --ISNULL(CASE WHEN CD.intPricingTypeId =1 and PF.intPriceFixationId is NULL then CD.dblCashPrice else PF.dblFinalPrice end,0) dblPricedAmount
+	, dblPricedAmount = OCD.dblAmount --ISNULL(CASE WHEN CD.intPricingTypeId =1 and PF.intPriceFixationId is NULL then CD.dblCashPrice else PF.dblFinalPrice end,0) dblPricedAmount
 	, MZ.strMarketZoneCode
 FROM tblCTContractHeader CH
 INNER JOIN tblICCommodity CY ON CY.intCommodityId = CH.intCommodityId
@@ -746,7 +749,7 @@ SELECT intContractHeaderId
 	, dblDummyContractBasis
 	, dblCash
 	, dblFuturesClosingPrice1
-	, dblFutures 
+	, dblFutures = dblFutures / CASE WHEN ysnSubCurrency = 1 THEN 100 ELSE 1 END
 	, dblMarketRatio
 	, CASE WHEN intPricingTypeId = 6 THEN 0 ELSE dblMarketBasis1 END dblMarketBasis1
 	, intMarketBasisUOM
@@ -898,7 +901,7 @@ FROM (
 		, cd.dblInvoicedQuantity
 		, dblPricedQty
 		, dblUnPricedQty
-		, dblPricedAmount
+		, cd.dblPricedAmount
 		, strMarketZoneCode
 		, strLocationName
 		, cd.dblNoOfLots
@@ -928,11 +931,9 @@ FROM (
 		, Com.strCommodityCode
 		, Inv.strEntity
 		, Inv.intEntityId
-		, SI.dblPrice
 		, strTransactionId = InTran.strTransactionId
 		, InTran.intTransactionDetailId
-		, intUnitMeasureId
-		, SI.intCurrencyId
+		, UOM.intUnitMeasureId
 		, strContractEndMonth = RIGHT(CONVERT(VARCHAR(11), Inv.dtmDate, 106), 8)
 		, Inv.intLocationId
 		, Inv.strLocationName
@@ -942,7 +943,8 @@ FROM (
 				INNER JOIN tblICItem Itm ON InTran.intItemId = Itm.intItemId
 				INNER JOIN tblICCommodity Com ON Itm.intCommodityId = Com.intCommodityId
 				INNER JOIN tblICCategory Cat ON Itm.intCategoryId = Cat.intCategoryId
-				LEFT JOIN vyuICGetInventoryShipmentItem SI ON InTran.intTransactionDetailId = SI.intInventoryShipmentItemId
+				INNER JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = InTran.intItemUOMId
+				INNER JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
 	WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), Inv.dtmDate, 110), 110) <= CONVERT(DATETIME,@dtmTransactionDateUpTo)
 	GROUP BY
 		 InTran.intItemId
@@ -952,11 +954,9 @@ FROM (
 		, Com.strCommodityCode
 		, Inv.strEntity
 		, Inv.intEntityId
-		, SI.dblPrice
 		, InTran.strTransactionId
 		, InTran.intTransactionDetailId
-		, intUnitMeasureId
-		, SI.intCurrencyId
+		, UOM.intUnitMeasureId
 		, Inv.dtmDate
 		, Inv.intLocationId
 		, Inv.strLocationName
@@ -1399,8 +1399,8 @@ FROM (
 				, dblRate = NULL
 				, intCommodityUnitMeasureId = NULL
 				, intQuantityUOMId = NULL
-				, intPriceUOMId = it.intUnitMeasureId
-				, it.intCurrencyId
+				, intPriceUOMId = NULL
+				, intCurrencyId = NULL
 				, PriceSourceUOMId = NULL
 				, dblCosts = 0
 				, ysnSubCurrency = NULL
@@ -2764,3 +2764,14 @@ FROM (
 	WHERE  dblOpenQty <> 0 AND intContractHeaderId IS NULL
 )t 
 ORDER BY intContractHeaderId DESC
+
+
+--SELECT * FROM #Temp WHERE strContractOrInventoryType = 'In-transit(S)'
+
+DROP TABLE #tblPriceFixationDetail
+DROP TABLE #tblContractCost
+DROP TABLE #tblSettlementPrice
+DROP TABLE #tblContractFuture
+DROP TABLE #tempIntransit
+DROP TABLE #tblPIntransitView
+DROP TABLE #Temp

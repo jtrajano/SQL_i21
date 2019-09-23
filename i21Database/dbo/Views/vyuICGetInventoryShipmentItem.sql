@@ -27,8 +27,10 @@ SELECT ShipmentItem.intInventoryShipmentId
 	, Item.strLotTracking
 	, Item.intCommodityId
 	, strCommodity = Commodity.strCommodityCode
+	, Commodity.strCommodityCode
 	, Item.intCategoryId
 	, strCategory = Category.strCategoryCode
+	, Category.strCategoryCode
 	, ShipmentItem.intSubLocationId
 	, SubLocation.strSubLocationName
 	, ShipmentItem.intStorageLocationId

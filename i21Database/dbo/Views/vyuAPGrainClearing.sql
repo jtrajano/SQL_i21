@@ -49,7 +49,12 @@ SELECT
 	,0 AS dblVoucherTotal
     ,0 AS dblVoucherQty
 	--,CAST((SS.dblNetSettlement + SS.dblStorageDue + SS.dblDiscountsDue) AS DECIMAL(18,2)) AS dblSettleStorageAmount
-	,CASE WHEN SS.dblUnpaidUnits != 0 THEN SS.dblNetSettlement
+	,CASE WHEN SS.dblUnpaidUnits != 0 
+		THEN (
+			CASE WHEN ST.intSettleContractId IS NOT NULL THEN ST.dblUnits * ST.dblPrice
+			ELSE SS.dblNetSettlement
+			END
+		)
 		ELSE CAST((SS.dblNetSettlement + SS.dblStorageDue + SS.dblDiscountsDue) AS DECIMAL(18,2))
 		END AS dblSettleStorageAmount
 	--,SS.dblSettleUnits AS dblSettleStorageQty
@@ -77,9 +82,12 @@ INNER JOIN vyuGLDetail GD
 		AND GD.intTransactionId = SS.intSettleStorageId
 		AND GD.strTransactionType = 'Storage Settlement'
 		AND GD.ysnIsUnposted = 0
-		AND GD.strCode = 'IC' --get only the AP Clearing for item
+		AND GD.strDescription LIKE '%Item: ' + IM.strItemNo + '%'
+		--AND GD.strCode = 'STR' --get only the AP Clearing for item
 INNER JOIN vyuGLAccountDetail AD
 	ON GD.intAccountId = AD.intAccountId AND AD.intAccountCategoryId = 45
+LEFT JOIN tblGRSettleContract ST
+	ON ST.intSettleStorageId = SS.intSettleStorageId
 LEFT JOIN 
 (
     tblICItemUOM itemUOM INNER JOIN tblICUnitMeasure unitMeasure
@@ -99,7 +107,7 @@ SELECT
 	,billDetail.intItemId
 	,CS.intItemUOMId  AS intItemUOMId
     ,unitMeasure.strUnitMeasure AS strUOM 
-	,billDetail.dblTotal + billDetail.dblTax AS dblVoucherTotal
+	,billDetail.dblTotal AS dblVoucherTotal
     ,CASE 
 		WHEN billDetail.intWeightUOMId IS NULL THEN 
 			ISNULL(billDetail.dblQtyReceived, 0) 
@@ -138,6 +146,7 @@ LEFT JOIN
         ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId
 )
     ON itemUOM.intItemUOMId = CS.intItemUOMId
+WHERE bill.ysnPosted = 1
 UNION ALL --Charges
 SELECT 
 	CS.intEntityId AS intEntityVendorId
@@ -201,7 +210,7 @@ SELECT
 	,billDetail.intItemId
 	,CS.intItemUOMId  AS intItemUOMId
     ,unitMeasure.strUnitMeasure AS strUOM 
-	,billDetail.dblTotal + billDetail.dblTax AS dblVoucherTotal
+	,billDetail.dblTotal AS dblVoucherTotal
     ,CASE 
 		WHEN billDetail.intWeightUOMId IS NULL THEN 
 			ISNULL(billDetail.dblQtyReceived, 0) 
@@ -246,6 +255,7 @@ LEFT JOIN
         ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId
 )
     ON itemUOM.intItemUOMId = CS.intItemUOMId
+WHERE bill.ysnPosted = 1
 UNION ALL --DISCOUNTS
 SELECT 
 	CS.intEntityId AS intEntityVendorId
@@ -267,7 +277,7 @@ SELECT
 		WHEN QM.strDiscountChargeType = 'Percent' AND QM.dblDiscountAmount > 0 THEN (QM.dblDiscountAmount * (CASE WHEN ISNULL(SS.dblCashPrice,0) > 0 THEN SS.dblCashPrice ELSE CD.dblCashPrice END))
 		WHEN QM.strDiscountChargeType = 'Dollar' AND QM.dblDiscountAmount < 0 THEN (QM.dblDiscountAmount * -1)
 		WHEN QM.strDiscountChargeType = 'Dollar' AND QM.dblDiscountAmount > 0 THEN QM.dblDiscountAmount
-	END
+	END * SST.dblUnits
 	,CASE WHEN QM.strCalcMethod = 3 
 		THEN (CS.dblGrossQuantity * (SST.dblUnits / CS.dblOriginalBalance))--@dblGrossUnits 
 	ELSE SST.dblUnits END
@@ -333,9 +343,9 @@ SELECT
     ,billDetail.intBillDetailId
 	,billDetail.intCustomerStorageId
 	,billDetail.intItemId
-	,CS.intItemUOMId  AS intItemUOMId
+	,billDetail.intUnitOfMeasureId  AS intItemUOMId
     ,unitMeasure.strUnitMeasure AS strUOM 
-	,billDetail.dblTotal + billDetail.dblTax AS dblVoucherTotal
+	,billDetail.dblTotal AS dblVoucherTotal
     ,CASE 
 		WHEN billDetail.intWeightUOMId IS NULL THEN 
 			ISNULL(billDetail.dblQtyReceived, 0) 
@@ -359,19 +369,14 @@ SELECT
 FROM tblAPBill bill
 INNER JOIN tblAPBillDetail billDetail
 	ON bill.intBillId = billDetail.intBillId
+INNER JOIN tblICItem IM
+	ON billDetail.intItemId = IM.intItemId
 INNER JOIN (tblGRCustomerStorage CS INNER JOIN tblGRSettleStorageTicket SST
 				ON SST.intCustomerStorageId = CS.intCustomerStorageId
 			INNER JOIN tblGRSettleStorage SS
 				ON SST.intSettleStorageId = SS.intSettleStorageId
-					AND SS.intParentSettleStorageId IS NOT NULL
-			INNER JOIN tblQMTicketDiscount QM
-				ON CS.intCustomerStorageId = QM.intTicketFileId
-			INNER JOIN tblGRDiscountScheduleCode DSC
-				ON DSC.intDiscountScheduleCodeId = QM.intDiscountScheduleCodeId
-			INNER JOIN tblICItem IM
-				ON DSC.intItemId = IM.intItemId
-			)
-	ON billDetail.intCustomerStorageId = CS.intCustomerStorageId AND billDetail.intItemId = IM.intItemId
+					AND SS.intParentSettleStorageId IS NOT NULL)
+	ON CS.intCustomerStorageId = billDetail.intCustomerStorageId
 INNER JOIN vyuGLAccountDetail glAccnt
 	ON glAccnt.intAccountId = billDetail.intAccountId
 INNER JOIN tblSMCompanyLocation compLoc
@@ -381,4 +386,13 @@ LEFT JOIN
     tblICItemUOM itemUOM INNER JOIN tblICUnitMeasure unitMeasure
         ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId
 )
-    ON itemUOM.intItemUOMId = CS.intItemUOMId
+    ON itemUOM.intItemUOMId = billDetail.intUnitOfMeasureId
+WHERE bill.ysnPosted = 1
+AND EXISTS (
+	SELECT 1
+	FROM tblQMTicketDiscount QM
+	INNER JOIN tblGRDiscountScheduleCode DSC
+		ON DSC.intDiscountScheduleCodeId = QM.intDiscountScheduleCodeId
+		AND DSC.intItemId = billDetail.intItemId
+		AND billDetail.intCustomerStorageId = QM.intTicketFileId
+)

@@ -82,6 +82,8 @@ SELECT
 	,dblForexRate								= ReceiptCharge.dblForexRate
 	,[ysnPrice]									= ReceiptCharge.ysnPrice
 	,[ysnAccrue]								= ReceiptCharge.ysnAccrue
+	,intLoadShipmentId							= ReceiptCharge.intLoadShipmentId
+	,intLoadShipmentCostId						= ReceiptCharge.intLoadShipmentCostId
 FROM 
 	tblICInventoryReceiptCharge ReceiptCharge  INNER JOIN tblICItem Item 
 		ON ReceiptCharge.intChargeId = Item.intItemId
@@ -256,7 +258,8 @@ SELECT
 	,dblForexRate								= ReceiptCharge.dblForexRate
 	,[ysnPrice]									= ReceiptCharge.ysnPrice
 	,[ysnAccrue]								= ReceiptCharge.ysnAccrue
-
+	,[intLoadShipmentId]						= ReceiptCharge.intLoadShipmentId
+	,[intLoadShipmentCostId]					= ReceiptCharge.intLoadShipmentCostId
 FROM tblICInventoryReceiptCharge ReceiptCharge INNER JOIN tblICItem Item 
 		ON ReceiptCharge.intChargeId = Item.intItemId
 

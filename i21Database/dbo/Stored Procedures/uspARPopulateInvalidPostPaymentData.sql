@@ -827,47 +827,105 @@ INSERT INTO #ARInvalidPaymentData
         AND P.[dblCurrencyExchangeRate] = 1.000000
         AND (P.[dblPayment] <> P.[dblBasePayment] OR P.[dblDiscount] <> P.[dblBaseDiscount] OR P.[dblInterest] <> P.[dblBaseInterest])
 
-	INSERT INTO #ARInvalidPaymentData
-        ([intTransactionId]
-        ,[strTransactionId]
-        ,[strTransactionType]
-        ,[intTransactionDetailId]
-        ,[strBatchId]
-        ,[strError])
-	--Bank Account
-	SELECT
-         [intTransactionId]         = ARPD.[intTransactionId]
-        ,[strTransactionId]         = ARPD.[strTransactionId]
-        ,[strTransactionType]       = @TransType
-        ,[intTransactionDetailId]   = ARPD.[intTransactionDetailId]
-        ,[strBatchId]               = ARPD.[strBatchId]
-        ,[strError]                 = 'Payment on ' + ARI.strInvoiceNumber +  '(' + ARPD.[strTransactionId] + ') will be over the transaction''s amount due' 
-	FROM
-		#ARPostPaymentDetail ARPD
-	INNER JOIN
-		tblARInvoice ARI
-			ON ARPD.[intInvoiceId] = ARI.[intInvoiceId]
-	INNER JOIN
-		(
-		SELECT 
-			 [intInvoiceId] = PD.[intInvoiceId]
-			,[dblPayment]   = SUM(PD.[dblPayment])
-		FROM
-			#ARPostPaymentDetail PD 
-		WHERE
-			PD.[ysnPost] = @OneBit
-			AND PD.[dblPayment] <> 0
-		GROUP BY
-			PD.[intInvoiceId]
-		HAVING
-			COUNT(PD.[intInvoiceId]) > 1
-		) ARI2
-			ON ARI.[intInvoiceId] = ARI2.[intInvoiceId]
-	WHERE
-		ARPD.[ysnPost] = @OneBit
-		AND ARI.[dblAmountDue] < ARI2.[dblPayment]
-	ORDER BY
-		ARI.[intInvoiceId]
+    IF(OBJECT_ID('tempdb..#DUPLICATEINVOICES') IS NOT NULL)
+    BEGIN
+        DROP TABLE #DUPLICATEINVOICES
+    END
+
+    SELECT [intTransactionId]       = ARPD.[intTransactionId]
+        , [strTransactionId]       = ARPD.[strTransactionId]
+        , [intTransactionDetailId] = ARPD.[intTransactionDetailId]
+        , [intInvoiceId]			= ARPD.[intInvoiceId]
+        , [dblAmountDue]			= ARI.[dblAmountDue]
+        , [dblPayment]				= ARPD.[dblPayment]
+        , [ysnProcessed]			= CAST(0 AS BIT)
+        , [strBatchId]				= ARPD.strBatchId
+        , [strInvoiceNumber]		= ARI.strInvoiceNumber
+    INTO #DUPLICATEINVOICES
+    FROM #ARPostPaymentDetail ARPD
+    INNER JOIN tblARInvoice ARI ON ARPD.[intInvoiceId] = ARI.[intInvoiceId]
+    INNER JOIN (
+        SELECT [intInvoiceId] = PD.[intInvoiceId]
+             , [dblPayment]   = ((SUM(PD.[dblPayment]) - SUM(PD.[dblInterest])) + SUM(PD.[dblDiscount]) + SUM(PD.[dblWriteOffAmount]))
+        FROM #ARPostPaymentDetail PD 
+        WHERE PD.[ysnPost] = 1
+        AND PD.[dblPayment] <> 0
+        GROUP BY PD.[intInvoiceId]
+        HAVING COUNT(PD.[intInvoiceId]) > 1
+    ) ARI2 ON ARI.[intInvoiceId] = ARI2.[intInvoiceId]
+    WHERE ARPD.[ysnPost] = 1
+    AND ARI.[dblAmountDue] < ARI2.[dblPayment]
+    AND ARPD.intInvoiceId IS NOT NULL
+    ORDER BY ARI.[intInvoiceId]
+
+    WHILE EXISTS (SELECT TOP 1 NULL FROM #DUPLICATEINVOICES WHERE ysnProcessed = 0)
+    BEGIN
+        DECLARE @dblAmountDue			NUMERIC(18, 6) = 0
+            , @dblPayment				NUMERIC(18, 6) = 0
+            , @intTransactionId		INT = NULL
+            , @intTransactionDetailId INT = NULL
+            , @intInvoiceId			INT = NULL
+
+        --GET INVOICE INFO.
+        SELECT TOP 1 @intInvoiceId	= intInvoiceId 
+                , @dblAmountDue	= dblAmountDue
+        FROM #DUPLICATEINVOICES 
+        GROUP BY intInvoiceId, dblAmountDue
+        HAVING COUNT(intInvoiceId) > 1
+
+        --GET PAYMENTS OF THAT INVOICE
+        WHILE EXISTS (SELECT TOP 1 NULL FROM #DUPLICATEINVOICES WHERE intInvoiceId = @intInvoiceId AND ysnProcessed = 0)
+            BEGIN
+                SET @intTransactionId = NULL
+                SET @intTransactionDetailId = NULL
+                SET @dblPayment = 0
+
+                SELECT TOP 1 @intTransactionId			= DI.intTransactionId
+                        , @intTransactionDetailId	= DI.intTransactionDetailId
+                        , @dblPayment				= PD.dblPayment
+                FROM #DUPLICATEINVOICES DI
+                INNER JOIN #ARPostPaymentDetail PD ON DI.intTransactionId = PD.intTransactionId 
+                                                AND DI.intTransactionDetailId = PD.intTransactionDetailId
+                WHERE DI.intInvoiceId = @intInvoiceId
+                AND DI.ysnProcessed = 0
+                ORDER BY DI.intTransactionId ASC
+            
+                --DELETE FROM INVALID LISTS IF PAYMENT IS VALID
+                IF @dblAmountDue > @dblPayment
+                    BEGIN
+                        SET @dblAmountDue = @dblAmountDue - @dblPayment
+
+                        DELETE FROM #DUPLICATEINVOICES 
+                        WHERE intTransactionId = @intTransactionId 
+                        AND intTransactionDetailId = @intTransactionDetailId 
+                        AND intInvoiceId = @intInvoiceId
+                    END
+                ELSE
+                    BEGIN
+                        UPDATE #DUPLICATEINVOICES 
+                        SET ysnProcessed = 1
+                        WHERE intTransactionId = @intTransactionId 
+                        AND intTransactionDetailId = @intTransactionDetailId 
+                        AND intInvoiceId = @intInvoiceId	
+                    END
+            END
+    END
+
+    INSERT INTO #ARInvalidPaymentData (
+        [intTransactionId]
+        , [strTransactionId]
+        , [strTransactionType]
+        , [intTransactionDetailId]
+        , [strBatchId]
+        , [strError]
+    )
+    SELECT [intTransactionId]		= DI.intTransactionId
+        , [strTransactionId]		= DI.strTransactionId
+        , [strTransactionType]		= @TransType
+        , [intTransactionDetailId]	= DI.intTransactionDetailId
+        , [strBatchId]				= DI.strBatchId
+        , [strError]				= 'Payment on ' + DI.strInvoiceNumber +  '(' + DI.[strTransactionId] + ') will be over the transaction''s amount due' 
+    FROM #DUPLICATEINVOICES DI
 
 END
 

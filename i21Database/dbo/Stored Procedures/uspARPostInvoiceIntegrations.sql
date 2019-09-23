@@ -333,12 +333,18 @@ BEGIN
 														  , @LoadId		= @LoadIDP
 														  , @UserId		= @UserId
 		
-		--CANCEL LOAD SHIPMENT FROM CREDIT MEMO RETURN
+		--UNPOST AND CANCEL LOAD SHIPMENT FROM CREDIT MEMO RETURN
 		IF ISNULL(@ysnFromReturnP, 0) = 1 AND @LoadIDP IS NOT NULL
-			EXEC dbo.[uspLGCancelLoadSchedule] @intLoadId 				 = @LoadIDP
-											 , @ysnCancel				 = 1
-											 , @intEntityUserSecurityId  = @UserId
-											 , @intShipmentType			 = 1
+			BEGIN
+				EXEC dbo.[uspLGPostLoadSchedule] @intLoadId 				= @LoadIDP
+											   , @ysnPost				 	= 0
+											   , @intEntityUserSecurityId  	= @UserId
+
+				EXEC dbo.[uspLGCancelLoadSchedule] @intLoadId 				 = @LoadIDP
+												 , @ysnCancel				 = 1
+												 , @intEntityUserSecurityId  = @UserId
+												 , @intShipmentType			 = 1
+			END
 
 		DELETE FROM @IdsP WHERE [intInvoiceId] = @InvoiceIDP
 	END
@@ -649,12 +655,19 @@ BEGIN
 														  , @LoadId		= @LoadIDU
 														  , @UserId		= @UserId
 
-		--CANCEL LOAD SHIPMENT FROM CREDIT MEMO RETURN
+		--POST AND UN-CANCEL LOAD SHIPMENT FROM CREDIT MEMO RETURN
 		IF ISNULL(@ysnFromReturnU, 0) = 1 AND @LoadIDU IS NOT NULL
-			EXEC dbo.[uspLGCancelLoadSchedule] @intLoadId 				 = @LoadIDU
-											 , @ysnCancel				 = 0
-											 , @intEntityUserSecurityId  = @UserId
-											 , @intShipmentType			 = 1
+			BEGIN
+				EXEC dbo.[uspLGCancelLoadSchedule] @intLoadId 				 = @LoadIDU
+												 , @ysnCancel				 = 0
+												 , @intEntityUserSecurityId  = @UserId
+												 , @intShipmentType			 = 1
+												 
+				EXEC dbo.[uspLGPostLoadSchedule] @intLoadId 				= @LoadIDP
+											   , @ysnPost				 	= 1
+											   , @intEntityUserSecurityId  	= @UserId
+				
+			END	
 
 		DELETE FROM @IdsU WHERE [intInvoiceId] = @InvoiceIDU
 	END
@@ -752,8 +765,7 @@ SELECT
 	,[dblMaintenanceAmount]         = ID.[dblMaintenanceAmount]         
 	,[dblLicenseAmount]             = ID.[dblLicenseAmount]             
 	,[intContractDetailId]			= ID.[intContractDetailId]			
-	--,[intTicketId]					= ID.[intTicketId]
-	,[intTicketId]     = (case when ID.strTransactionType = 'Credit Memo' and @Post = convert(bit,1) then null else ID.[intTicketId] end)
+	,[intTicketId]     				= (CASE WHEN ID.strTransactionType = 'Credit Memo' AND @Post = CONVERT(BIT, 1) THEN NULL ELSE ID.[intTicketId] END)
 	,[intCustomerStorageId]			= ID.[intCustomerStorageId]
 	,[intLoadDetailId]				= ID.[intLoadDetailId]
 	,[ysnLeaseBilling]				= ID.[ysnLeaseBilling]				
@@ -776,6 +788,7 @@ WHERE ID.[intInventoryShipmentChargeId] IS NULL
 		(ID.strTransactionType = 'Credit Memo' AND (ID.[intInventoryShipmentItemId] IS NOT NULL OR ID.[intLoadDetailId] IS NOT NULL OR ISNULL(RI.[intInvoiceId], 0) <> 0))
 		)
     AND ISNULL(ID.[strItemType], '') <> 'Other Charge'
+	AND ISNULL(RI.[intInvoiceId], 0) = 0
 
 EXEC dbo.[uspCTInvoicePosted] @ItemsFromInvoice, @UserId
 

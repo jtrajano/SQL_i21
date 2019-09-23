@@ -12,7 +12,7 @@
 	,@ysnBulkChange BIT = 0
 	,@strNewLotAlias NVARCHAR(50) = NULL
 	,@strNewVendorLotNumber NVARCHAR(50) = NULL
-	,@dtmNewDueDate DATETime=NULL
+	,@dtmNewDueDate DATETIME = NULL
 AS
 BEGIN TRY
 	DECLARE @intItemId INT
@@ -41,7 +41,12 @@ BEGIN TRY
 		,@strDescription NVARCHAR(MAX)
 		,@strLotAlias NVARCHAR(50)
 		,@strVendorLotNumber NVARCHAR(50)
-		,@dtmOldDueDate datetime
+		,@dtmOldDueDate DATETIME
+	DECLARE @tblMFLot TABLE (
+		intId INT identity(1, 1)
+		,intLotId INT
+		)
+	DECLARE @intId INT
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -235,12 +240,40 @@ BEGIN TRY
 				,@intLocationId = @intLocationId
 				,@dtmDate = NULL
 				,@intShiftId = NULL
+
+			EXEC uspMFAdjustInventory @dtmDate = @dtmDate
+				,@intTransactionTypeId = 107
+				,@intItemId = @intItemId
+				,@intSourceLotId = @intLotId
+				,@intDestinationLotId = NULL
+				,@dblQty = NULL
+				,@intItemUOMId = NULL
+				,@intOldItemId = NULL
+				,@dtmOldExpiryDate = NULL
+				,@dtmNewExpiryDate = NULL
+				,@intOldLotStatusId = NULL
+				,@intNewLotStatusId = NULL
+				,@intUserId = @intUserId
+				,@strNote = @strNotes
+				,@strReason = @strReasonCode
+				,@intLocationId = @intLocationId
+				,@intInventoryAdjustmentId = NULL
+				,@intOldItemOwnerId = NULL
+				,@intNewItemOwnerId = NULL
+				,@strOldVendorRefNo = NULL
+				,@strNewVendorRefNo = NULL
+				,@strOldParentLotNumber = @strOldParentLotNumber
+				,@strNewParentLotNumber = @strParentLotNumber
+				,@strOldWarehouseRefNo = NULL
+				,@strNewWarehouseRefNo = NULL
+				,@strOldContainerNo = NULL
+				,@strNewContainerNo = NULL
 		END
 
 		-- Vendor & Warehouse ref no update
 		SELECT @strOldVendorRefNo = strVendorRefNo
 			,@strOldWarehouseRefNo = strWarehouseRefNo
-			,@dtmOldDueDate=dtmDueDate
+			,@dtmOldDueDate = dtmDueDate
 		FROM tblMFLotInventory
 		WHERE intLotId = @intLotId
 
@@ -251,12 +284,80 @@ BEGIN TRY
 				UPDATE tblMFLotInventory
 				SET strVendorRefNo = @strVendorRefNo
 				WHERE intLotId = @intLotId
+
+				EXEC uspMFAdjustInventory @dtmDate = @dtmDate
+					,@intTransactionTypeId = 106
+					,@intItemId = @intItemId
+					,@intSourceLotId = @intLotId
+					,@intDestinationLotId = NULL
+					,@dblQty = NULL
+					,@intItemUOMId = NULL
+					,@intOldItemId = NULL
+					,@dtmOldExpiryDate = NULL
+					,@dtmNewExpiryDate = NULL
+					,@intOldLotStatusId = NULL
+					,@intNewLotStatusId = NULL
+					,@intUserId = @intUserId
+					,@strNote = @strNotes
+					,@strReason = @strReasonCode
+					,@intLocationId = @intLocationId
+					,@intInventoryAdjustmentId = NULL
+					,@intOldItemOwnerId = NULL
+					,@intNewItemOwnerId = NULL
+					,@strOldVendorRefNo = @strOldVendorRefNo
+					,@strNewVendorRefNo = @strVendorRefNo
 			END
 			ELSE
 			BEGIN
 				UPDATE tblMFLotInventory
 				SET strVendorRefNo = @strVendorRefNo
 				WHERE strReceiptNumber = @strReceiptNumber
+
+				DELETE
+				FROM @tblMFLot
+
+				INSERT INTO @tblMFLot
+				SELECT intLotId
+				FROM tblMFLotInventory
+				WHERE strReceiptNumber = @strReceiptNumber
+
+				SELECT @intId = Min(intId)
+				FROM @tblMFLot
+
+				WHILE @intId IS NOT NULL
+				BEGIN
+					SELECT @intLotId = NULL
+
+					SELECT @intLotId = intLotId
+					FROM @tblMFLot
+					WHERE intId = @intId
+
+					EXEC uspMFAdjustInventory @dtmDate = @dtmDate
+						,@intTransactionTypeId = 106
+						,@intItemId = @intItemId
+						,@intSourceLotId = @intLotId
+						,@intDestinationLotId = NULL
+						,@dblQty = NULL
+						,@intItemUOMId = NULL
+						,@intOldItemId = NULL
+						,@dtmOldExpiryDate = NULL
+						,@dtmNewExpiryDate = NULL
+						,@intOldLotStatusId = NULL
+						,@intNewLotStatusId = NULL
+						,@intUserId = @intUserId
+						,@strNote = @strNotes
+						,@strReason = @strReasonCode
+						,@intLocationId = @intLocationId
+						,@intInventoryAdjustmentId = NULL
+						,@intOldItemOwnerId = NULL
+						,@intNewItemOwnerId = NULL
+						,@strOldVendorRefNo = @strOldVendorRefNo
+						,@strNewVendorRefNo = @strVendorRefNo
+
+					SELECT @intId = Min(intId)
+					FROM @tblMFLot
+					WHERE intId > @intId
+				END
 			END
 		END
 
@@ -267,12 +368,84 @@ BEGIN TRY
 				UPDATE tblMFLotInventory
 				SET strWarehouseRefNo = @strWarehouseRefNo
 				WHERE intLotId = @intLotId
+
+				EXEC uspMFAdjustInventory @dtmDate = @dtmDate
+					,@intTransactionTypeId = 108
+					,@intItemId = @intItemId
+					,@intSourceLotId = @intLotId
+					,@intDestinationLotId = NULL
+					,@dblQty = NULL
+					,@intItemUOMId = NULL
+					,@intOldItemId = NULL
+					,@dtmOldExpiryDate = NULL
+					,@dtmNewExpiryDate = NULL
+					,@intOldLotStatusId = NULL
+					,@intNewLotStatusId = NULL
+					,@intUserId = @intUserId
+					,@strNote = @strNotes
+					,@strReason = @strReasonCode
+					,@intLocationId = @intLocationId
+					,@intInventoryAdjustmentId = NULL
+					,@intOldItemOwnerId = NULL
+					,@intNewItemOwnerId = NULL
+					,@strOldVendorRefNo = NULL
+					,@strNewVendorRefNo = NULL
+					,@strOldWarehouseRefNo = @strOldWarehouseRefNo
+					,@strNewWarehouseRefNo = @strWarehouseRefNo
 			END
 			ELSE
 			BEGIN
 				UPDATE tblMFLotInventory
 				SET strWarehouseRefNo = @strWarehouseRefNo
 				WHERE strReceiptNumber = @strReceiptNumber
+
+				DELETE
+				FROM @tblMFLot
+
+				INSERT INTO @tblMFLot
+				SELECT intLotId
+				FROM tblMFLotInventory
+				WHERE strReceiptNumber = @strReceiptNumber
+
+				SELECT @intId = Min(intId)
+				FROM @tblMFLot
+
+				WHILE @intId IS NOT NULL
+				BEGIN
+					SELECT @intLotId = NULL
+
+					SELECT @intLotId = intLotId
+					FROM @tblMFLot
+					WHERE intId = @intId
+
+					EXEC uspMFAdjustInventory @dtmDate = @dtmDate
+						,@intTransactionTypeId = 108
+						,@intItemId = @intItemId
+						,@intSourceLotId = @intLotId
+						,@intDestinationLotId = NULL
+						,@dblQty = NULL
+						,@intItemUOMId = NULL
+						,@intOldItemId = NULL
+						,@dtmOldExpiryDate = NULL
+						,@dtmNewExpiryDate = NULL
+						,@intOldLotStatusId = NULL
+						,@intNewLotStatusId = NULL
+						,@intUserId = @intUserId
+						,@strNote = @strNotes
+						,@strReason = @strReasonCode
+						,@intLocationId = @intLocationId
+						,@intInventoryAdjustmentId = NULL
+						,@intOldItemOwnerId = NULL
+						,@intNewItemOwnerId = NULL
+						,@strOldVendorRefNo = NULL
+						,@strNewVendorRefNo = NULL
+						,@strOldWarehouseRefNo = @strOldWarehouseRefNo
+						,@strNewWarehouseRefNo = @strWarehouseRefNo
+
+					SELECT @intId = Min(intId)
+					FROM @tblMFLot
+					WHERE intId > @intId
+				END
 			END
 		END
 
@@ -284,21 +457,44 @@ BEGIN TRY
 
 		IF ISNULL(@strOldNotes, '') <> ISNULL(@strNotes, '')
 		BEGIN
-			EXEC uspICUpdateLotInfo
-				@strField = 'strNotes',
-				@strValue = @strNotes,
-				@intSecurityUserId = @intUserId,
-				@intLotId =@intLotId
+			EXEC uspICUpdateLotInfo @strField = 'strNotes'
+				,@strValue = @strNotes
+				,@intSecurityUserId = @intUserId
+				,@intLotId = @intLotId
 		END
 
 		IF ISNULL(@strOldContainerNo, '') <> ISNULL(@strContainerNo, '')
 		BEGIN
-			EXEC uspICUpdateLotInfo
-				@strField = 'strContainerNo',
-				@strValue = @strContainerNo,
-				@intSecurityUserId = @intUserId,
-				@intLotId = @intLotId
+			EXEC uspICUpdateLotInfo @strField = 'strContainerNo'
+				,@strValue = @strContainerNo
+				,@intSecurityUserId = @intUserId
+				,@intLotId = @intLotId
 
+			EXEC uspMFAdjustInventory @dtmDate = @dtmDate
+				,@intTransactionTypeId = 109
+				,@intItemId = @intItemId
+				,@intSourceLotId = @intLotId
+				,@intDestinationLotId = NULL
+				,@dblQty = NULL
+				,@intItemUOMId = NULL
+				,@intOldItemId = NULL
+				,@dtmOldExpiryDate = NULL
+				,@dtmNewExpiryDate = NULL
+				,@intOldLotStatusId = NULL
+				,@intNewLotStatusId = NULL
+				,@intUserId = @intUserId
+				,@strNote = @strNotes
+				,@strReason = @strReasonCode
+				,@intLocationId = @intLocationId
+				,@intInventoryAdjustmentId = NULL
+				,@intOldItemOwnerId = NULL
+				,@intNewItemOwnerId = NULL
+				,@strOldVendorRefNo = NULL
+				,@strNewVendorRefNo = NULL
+				,@strOldWarehouseRefNo = NULL
+				,@strNewWarehouseRefNo = NULL
+				,@strOldContainerNo = @strOldContainerNo
+				,@strNewContainerNo = @strContainerNo
 		END
 
 		IF IsNULL(@strLotAlias, '') <> IsNULL(@strNewLotAlias, '')
@@ -322,6 +518,7 @@ BEGIN TRY
 				,@dtmDate = NULL
 				,@ysnBulkChange = 0
 		END
+
 		IF IsNULL(@dtmOldDueDate, '1900-01-01') <> IsNULL(@dtmNewDueDate, '1900-01-01')
 		BEGIN
 			EXEC dbo.uspMFSetLotDueDate @intLotId = @intLotId

@@ -123,6 +123,7 @@ BEGIN
 		,intTransactionId INT
 		,strDistribution NVARCHAR(10)
 		,dblCompanyTitled NUMERIC(18,6)
+		,intCommodityId INT
 	)
 		
 	INSERT INTO @CompanyTitle(
@@ -135,6 +136,7 @@ BEGIN
 		,intTransactionId 
 		,strDistribution
 		,dblCompanyTitled
+		,intCommodityId
 	)
 	EXEC uspRKGetCompanyTitled @dtmFromTransactionDate = @dtmOrigFromTransactionDate
 		, @dtmToTransactionDate = @dtmToTransactionDate
@@ -154,7 +156,7 @@ BEGIN
 	SELECT @intDPIHeaderId
 		,dtmDate
 		,strDistribution
-		,dblIn = CASE WHEN strDistribution IN('ADJ','IC','CM','DP', 'IT','IS') AND  dblPaidBalance > 0 THEN dblPaidBalance ELSE dblUnpaidIncrease END
+		,dblIn = CASE WHEN strDistribution IN('ADJ','IC','CM','DP', 'IT','IS', 'CLT', 'PRDC', 'CNSM', 'LG') AND  dblPaidBalance > 0 THEN dblPaidBalance ELSE dblUnpaidIncrease END
 		,dblOut = CASE WHEN dblPaidBalance < 0 THEN ABS(dblPaidBalance) ELSE dblUnpaidDecrease END
 		,strTransactionId
 		,intTransactionId
@@ -351,6 +353,8 @@ BEGIN
 		, intTransactionId INT
 		, strDistribution NVARCHAR(10)
 		, dblSalesInTransit NUMERIC(24,10)
+		, strTransactionType NVARCHAR(50)
+		, intCommodityId INT
 	)
 
 
@@ -392,6 +396,8 @@ BEGIN
 		, strDistribution
 		, dblBalanceInv
 		, dblSalesInTransit
+		, strTransactionType
+		, intCommodityId
 		)
 	EXEC uspRKGetInHouse @dtmFromTransactionDate = @dtmFromTransactionDate
 		, @dtmToTransactionDate = @dtmToTransactionDate

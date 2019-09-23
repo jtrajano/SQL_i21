@@ -187,7 +187,7 @@ BEGIN
 		,intStorageLocationId	= @intStorageLocationId
 		,dblQty					= CAST(0 AS NUMERIC(38, 20)) 
 		,dblUnitStorage			= CAST(0 AS NUMERIC(38, 20)) 
-		,dblCost				= ItemPricing.dblLastCost
+		,dblCost				= COALESCE(NULLIF(ItemPricing.dblLastCost, 0), ItemPricing.dblStandardCost)
 	FROM tblICItem i
 	CROSS APPLY(
 		SELECT	intItemUOMId
@@ -230,11 +230,11 @@ SELECT
 	,strOwnershipType				= dbo.fnICGetOwnershipType(@intOwnershipType)
 	,dblRunningAvailableQty			= t.dblQty
 	,dblStorageAvailableQty			= t.dblUnitStorage
-	,dblCost = CASE 
+	,dblCost = COALESCE(NULLIF(CASE 
 				WHEN CostMethod.intCostingMethodId = 1 THEN dbo.fnGetItemAverageCost(i.intItemId, ItemLocation.intItemLocationId, ItemUOM.intItemUOMId)
 				WHEN CostMethod.intCostingMethodId = 2 THEN dbo.fnCalculateCostBetweenUOM(FIFO.intItemUOMId, StockUOM.intItemUOMId, FIFO.dblCost)
 				ELSE t.dblCost
-			END
+			END, 0), NULLIF(ItemPricing.dblLastCost, 0), ItemPricing.dblStandardCost)
 FROM @tblInventoryTransactionGrouped t 
 LEFT JOIN tblICItem i 
 	ON i.intItemId = t.intItemId
@@ -257,6 +257,8 @@ LEFT JOIN tblICItemUOM StockUOM
 	AND StockUOM.ysnStockUnit = 1
 LEFT JOIN tblICItemLocation ItemLocation 
 	ON ItemLocation.intItemLocationId = t.intItemLocationId
+LEFT JOIN tblICItemPricing ItemPricing ON ItemPricing.intItemLocationId = t.intItemLocationId
+    AND ItemPricing.intItemId = ItemLocation.intItemId
 LEFT JOIN tblICCostingMethod CostMethod
 	ON CostMethod.intCostingMethodId = ItemLocation.intCostingMethod
 LEFT JOIN tblSMCompanyLocation CompanyLocation 

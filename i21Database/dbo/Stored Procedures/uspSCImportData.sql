@@ -19,7 +19,7 @@ BEGIN TRY
 	DECLARE @ysnRemote BIT = 0
 
 	SELECT TOP 1 @ysnRemote = ISNULL(ysnIsRemote,0) FROM tblGRCompanyPreference
-
+	--This is just a comment to trigger rebuild for this file
 	IF LTRIM(RTRIM(@xmlParam1)) = ''
 		SET @xmlParam1 = NULL
 	IF LTRIM(RTRIM(@xmlParam2)) = ''
@@ -28,7 +28,7 @@ BEGIN TRY
 		SET @xmlParam3 = NULL
 	IF LTRIM(RTRIM(@xmlParamDS)) = ''
 		SET @xmlParamDS = NULL
-	IF LTRIM(RTRIM(@xmlParamDS)) = ''
+	IF LTRIM(RTRIM(@xmlParamDSS)) = ''
 		SET @xmlParamDSS = NULL
 	IF  LTRIM(RTRIM(@xmlParamDSXref)) = ''
 		SET @xmlParamDSXref = NULL
@@ -454,7 +454,7 @@ BEGIN TRY
 					[strCountyProducer] NVARCHAR(MAX)
 				)
 
-				-------------Get All Non Existing Delivery Sheets
+				-------------Get All Existing Delivery Sheets
 				DECLARE @existingDeliverySheets TABLE 
 				(
 					intDeliverySheetId INT NOT NULL PRIMARY KEY
@@ -659,7 +659,7 @@ BEGIN TRY
 				FROM @temp_xml_qmdstable_sc QM
 				INNER JOIN @temp_xml_deliverysheet_sc SCD ON SCD.intDeliverySheetId = QM.intTicketFileId
 				INNER JOIN tblSCDeliverySheet DS ON DS.strDeliverySheetNumber = SCD.strDeliverySheetNumber 
-				WHERE NOT EXISTS (SELECT TOP 1 1 FROM @existingDeliverySheets WHERE intDeliverySheetId = DS.intDeliverySheetId)
+				WHERE NOT EXISTS (SELECT TOP 1 1 FROM @existingDeliverySheets WHERE intDeliverySheetId = SCD.intDeliverySheetId)
 
 				INSERT INTO tblSCDeliverySheetSplit(
 					[intDeliverySheetId],
@@ -681,7 +681,7 @@ BEGIN TRY
 				FROM @temp_xml_splitdstable_sc SCDS
 				INNER JOIN @temp_xml_deliverysheet_sc SCD ON SCD.intDeliverySheetId = SCDS.intDeliverySheetId
 				INNER JOIN tblSCDeliverySheet DS ON DS.strDeliverySheetNumber = SCD.strDeliverySheetNumber 
-				WHERE NOT EXISTS (SELECT TOP 1 1 FROM @existingDeliverySheets WHERE intDeliverySheetId = DS.intDeliverySheetId)
+				WHERE NOT EXISTS (SELECT TOP 1 1 FROM @existingDeliverySheets WHERE intDeliverySheetId = SCD.intDeliverySheetId)
 
 			END
 			
@@ -1007,9 +1007,12 @@ BEGIN TRY
 					DECLARE	@_intEntityScaleOperatorId INT
 					DECLARE @_dblNetUnits NUMERIC (18,6)
 					DECLARE	@_intItemUOMId INT
+					DECLARE @_dblAvailableQtyInItemStockUOM NUMERIC(18,6)
 
 					WHILE EXISTS (SELECT TOP 1 1 FROM #newTicketWithContract)
 					BEGIN
+						SET @_dblAvailableQtyInItemStockUOM = 0
+
 						SELECT TOP 1
 							@_intTicketId					= intTicketId
 							,@_intContractId				= intContractId
@@ -1017,6 +1020,19 @@ BEGIN TRY
 							,@_dblNetUnits					= dblNetUnits
 							,@_intItemUOMId					= intItemUOMIdTo
 						FROM #newTicketWithContract
+
+						SELECT TOP 1 @_dblAvailableQtyInItemStockUOM = dblAvailableQtyInItemStockUOM
+						FROM vyuCTContractDetailView 
+						WHERE intContractDetailId = @_intContractId
+
+						IF(@_dblNetUnits > @_dblAvailableQtyInItemStockUOM)
+						BEGIN
+							SET @_dblNetUnits  = @_dblAvailableQtyInItemStockUOM
+							
+							UPDATE tblSCTicket
+							SET dblScheduleQty = @_dblNetUnits
+							WHERE intTicketId = @_intTicketId	
+						END
 
 						EXEC uspCTUpdateScheduleQuantityUsingUOM @_intContractId,@_dblNetUnits,@_intEntityScaleOperatorId,@_intTicketId,'Scale',@_intItemUOMId	
 

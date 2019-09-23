@@ -240,6 +240,8 @@ IF EXISTS (SELECT TOP 1 NULL FROM #POSTRANSACTIONS)
 				,[intSalesAccountId]
 				,[strPONumber]
 				,[intFreightTermId]
+				,[strInvoiceOriginId]
+				,[ysnUseOriginIdAsInvoiceNumber]
 			)
 			SELECT [intId]								= POS.intPOSId
 				,[strTransactionType]					= CASE WHEN strPOSType = 'Returned' THEN 'Credit Memo' ELSE 'Invoice' END
@@ -271,6 +273,8 @@ IF EXISTS (SELECT TOP 1 NULL FROM #POSTRANSACTIONS)
 				,[intSalesAccountId]					= NULL
 				,[strPONumber]							= POS.strPONumber
 				,[intFreightTermId]						= CASE WHEN ISNULL(POS.ysnTaxExempt,0) = 0 THEN CL.intFreightTermId ELSE NULL END
+				,[strInvoiceOriginId]					= CASE WHEN strPOSType = 'Returned' THEN POS.strCreditMemoNumber ELSE POS.strInvoiceNumber END
+				,[ysnUseOriginIdAsInvoiceNumber]		= CAST(1 AS BIT)
 			FROM tblARPOS POS 
 			INNER JOIN #POSTRANSACTIONS RT ON POS.intPOSId = RT.intPOSId
 			INNER JOIN tblARPOSDetail DETAILS ON POS.intPOSId = DETAILS.intPOSId
@@ -309,6 +313,8 @@ IF EXISTS (SELECT TOP 1 NULL FROM #POSTRANSACTIONS)
 				,[intSalesAccountId]					= ISNULL(CL.intSalesDiscounts, @intDiscountAccountId)
 				,[strPONumber]							= POS.strPONumber
 				,[intFreightTermId]						= CASE WHEN ISNULL(POS.ysnTaxExempt,0) = 0 THEN CL.intFreightTermId ELSE NULL END
+				,[strInvoiceOriginId]					= CASE WHEN strPOSType = 'Returned' THEN POS.strCreditMemoNumber ELSE POS.strInvoiceNumber END
+				,[ysnUseOriginIdAsInvoiceNumber]		= CAST(1 AS BIT)
 			FROM tblARPOS POS
 			INNER JOIN #POSTRANSACTIONS RT ON POS.intPOSId = RT.intPOSId
 			INNER JOIN tblSMCompanyLocation CL ON POS.intCompanyLocationId = CL.intCompanyLocationId
@@ -347,6 +353,8 @@ IF EXISTS (SELECT TOP 1 NULL FROM #POSTRANSACTIONS)
 				,[intSalesAccountId]
 				,[strPONumber]
 				,[intFreightTermId]
+				,[strInvoiceOriginId]
+				,[ysnUseOriginIdAsInvoiceNumber]
 			)
 			SELECT [intId]								= POS.intPOSId
 				,[strTransactionType]					= 'Invoice'
@@ -378,6 +386,8 @@ IF EXISTS (SELECT TOP 1 NULL FROM #POSTRANSACTIONS)
 				,[intSalesAccountId]					= NULL
 				,[strPONumber]							= POS.strPONumber
 				,[intFreightTermId]						= CASE WHEN ISNULL(POS.ysnTaxExempt,0) = 0 THEN CL.intFreightTermId ELSE NULL END
+				,[strInvoiceOriginId]					= POS.strInvoiceNumber
+				,[ysnUseOriginIdAsInvoiceNumber]		= CAST(1 AS BIT)
 			FROM tblARPOS POS
 			INNER JOIN tblARPOSDetail DETAILS ON POS.intPOSId = DETAILS.intPOSId
 			INNER JOIN #POSTRANSACTIONS RT ON POS.intPOSId = RT.intPOSId
@@ -418,6 +428,8 @@ IF EXISTS (SELECT TOP 1 NULL FROM #POSTRANSACTIONS)
 				,[intSalesAccountId]					= ISNULL(CL.intSalesDiscounts, @intDiscountAccountId)
 				,[strPONumber]							= POS.strPONumber
 				,[intFreightTermId]						= CASE WHEN ISNULL(POS.ysnTaxExempt,0) = 0 THEN CL.intFreightTermId ELSE NULL END
+				,[strInvoiceOriginId]					= POS.strInvoiceNumber
+				,[ysnUseOriginIdAsInvoiceNumber]		= CAST(1 AS BIT)
 			FROM tblARPOS POS
 			INNER JOIN #POSTRANSACTIONS RT ON POS.intPOSId = RT.intPOSId
 			INNER JOIN tblSMCompanyLocation CL ON POS.intCompanyLocationId = CL.intCompanyLocationId
@@ -456,6 +468,8 @@ IF EXISTS (SELECT TOP 1 NULL FROM #POSTRANSACTIONS)
 				,[intSalesAccountId]
 				,[strPONumber]
 				,[intFreightTermId]
+				,[strInvoiceOriginId]
+				,[ysnUseOriginIdAsInvoiceNumber]
 			)
 			SELECT [intId]								= POS.intPOSId + 10000 --TEMPORARAY FIX
 				,[strTransactionType]					= 'Credit Memo'
@@ -487,6 +501,8 @@ IF EXISTS (SELECT TOP 1 NULL FROM #POSTRANSACTIONS)
 				,[intSalesAccountId]					= NULL
 				,[strPONumber]							= POS.strPONumber
 				,[intFreightTermId]						= CASE WHEN ISNULL(POS.ysnTaxExempt,0) = 0 THEN CL.intFreightTermId ELSE NULL END
+				,[strInvoiceOriginId]					= POS.strCreditMemoNumber
+				,[ysnUseOriginIdAsInvoiceNumber]		= CAST(1 AS BIT)
 			FROM tblARPOS POS 
 			INNER JOIN tblARPOSDetail DETAILS ON POS.intPOSId = DETAILS.intPOSId
 			INNER JOIN #POSTRANSACTIONS RT ON POS.intPOSId = RT.intPOSId
@@ -527,6 +543,8 @@ IF EXISTS (SELECT TOP 1 NULL FROM #POSTRANSACTIONS)
 				,[intSalesAccountId]					= ISNULL(CL.intSalesDiscounts, @intDiscountAccountId)
 				,[strPONumber]							= POS.strPONumber
 				,[intFreightTermId]						= CASE WHEN ISNULL(POS.ysnTaxExempt,0) = 0 THEN CL.intFreightTermId ELSE NULL END
+				,[strInvoiceOriginId]					= POS.strCreditMemoNumber
+				,[ysnUseOriginIdAsInvoiceNumber]		= CAST(1 AS BIT)
 			FROM tblARPOS POS
 			INNER JOIN #POSTRANSACTIONS RT ON POS.intPOSId = RT.intPOSId
 			INNER JOIN tblSMCompanyLocation CL ON POS.intCompanyLocationId = CL.intCompanyLocationId
@@ -550,8 +568,16 @@ IF EXISTS (SELECT TOP 1 NULL FROM #POSTRANSACTIONS)
 				 , dtmDateProcessed
 			) 
 			SELECT intPOSId				= POS.intPOSId
-				 , strMessage			= CASE WHEN ISNULL(ysnSuccess, 0) = 1 THEN 'Successfully Processed.' ELSE I.strMessage END
-				 , ysnSuccess			= ISNULL(ysnSuccess, 0)
+				 , strMessage			= CASE WHEN ISNULL(ysnSuccess, 0) = 1 AND ISNULL(ysnPosted, 0) = 1 
+											   THEN 'Successfully Processed.' 
+											   ELSE 
+													CASE WHEN ISNULL(ysnSuccess, 0) = 0 
+													     THEN I.strMessage
+														 WHEN ISNULL(ysnPosted, 0) = 0
+														 THEN I.strPostingMessage
+													END													 
+										  END
+				 , ysnSuccess			= CASE WHEN ISNULL(ysnSuccess, 0) = 1 AND ISNULL(ysnPosted, 0) = 1 THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
 				 , dtmDateProcessed		= GETDATE()
 			FROM tblARPOS POS
 			INNER JOIN tblARInvoiceIntegrationLogDetail I ON POS.intPOSId = I.intSourceId AND POS.strReceiptNumber = I.strSourceId
@@ -835,7 +861,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM #POSTRANSACTIONS)
 			EXEC [dbo].[uspARProcessPayments] @PaymentEntries	= @EntriesForPayment
 											, @UserId			= @intEntityUserId
 											, @GroupingOption	= 7
-											, @RaiseError		= 1
+											, @RaiseError		= 0
 											, @ErrorMessage		= @strErrorMsg OUTPUT
 											, @LogId			= @intPaymentLogId OUTPUT
 

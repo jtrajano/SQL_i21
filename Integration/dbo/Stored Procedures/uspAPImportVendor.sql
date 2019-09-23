@@ -9,8 +9,7 @@ GO
 IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AP') = 1
 BEGIN
 EXEC(
-'
-CREATE PROCEDURE [dbo].[uspAPImportVendor]
+'CREATE PROCEDURE [dbo].[uspAPImportVendor]
 	@VendorId NVARCHAR(50) = NULL,
 	@Update BIT = 0,
 	@Total INT = 0 OUTPUT
@@ -284,6 +283,24 @@ BEGIN
     DECLARE @dtmLastModified           DATETIME       
     DECLARE @dtmCreated                DATETIME       
     DECLARE @strTaxState				NVARCHAR(50) 
+	DECLARE @tblAPTemp TABLE (
+		[intEntityId] [int] NOT NULL,
+		[strLocationName] [nvarchar](50)  COLLATE Latin1_General_CI_AS NOT NULL,
+		[strCheckPayeeName] NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL,
+		[strAddress] [nvarchar](max)  COLLATE Latin1_General_CI_AS NULL,
+		[strCity] [nvarchar](max)  COLLATE Latin1_General_CI_AS NULL,
+		[strCountry] [nvarchar](max)  COLLATE Latin1_General_CI_AS NULL,
+		[strState] [nvarchar](max)  COLLATE Latin1_General_CI_AS NULL,
+		[strZipCode] [nvarchar](max) COLLATE Latin1_General_CI_AS  NULL,
+		[strNotes] [nvarchar](max)  COLLATE Latin1_General_CI_AS NULL,
+		[intShipViaId] [int] NULL,
+		[intTermsId] [int] NULL,
+		[intWarehouseId] [int] NULL,
+		[ysnDefaultLocation] [bit] NULL
+	)
+	DECLARE @compare_table TABLE(
+		strId nvarchar(100)
+	)
 
 	--Import only those are not yet imported
 	/*SELECT ssvnd_vnd_no INTO #tmpssvndmst 
@@ -305,11 +322,7 @@ BEGIN
 			WHERE B.apivc_vnd_no NOT IN (SELECT ssvnd_vnd_no FROM ssvndmst)
 		)
 		AND apchk_vnd_no COLLATE Latin1_General_CI_AS not in (select strVendorId from tblAPImportedVendors )
-
 	
-	declare @compare_table table(
-		strId nvarchar(100)
-	)
 	insert into @compare_table
 	select distinct trhst_pur_vnd_no from trhstmst
 	union
@@ -317,7 +330,6 @@ BEGIN
 	union
 	select distinct trprc_vnd_no from trprcmst
 	delete from @compare_table where strId is null
-
 
 	WHILE (EXISTS(SELECT 1 FROM #tmpssvndmst))
 	BEGIN
@@ -568,6 +580,7 @@ BEGIN
 		
 		IF NOT EXISTS(SELECT TOP 1 1 FROM tblEMEntityLocation WHERE intEntityId = @EntityId and strLocationName = @strLocationName)
 		BEGIN
+		
 			INSERT [dbo].[tblEMEntityLocation]	([intEntityId], [strLocationName], [strCheckPayeeName], [strAddress], [strCity], [strCountry], [strState], [strZipCode], [strNotes],  [intShipViaId], [intTermsId], [intWarehouseId], [ysnDefaultLocation])
 			VALUES								(@EntityId, @strLocationName, @strLocationName, @strAddress, @strCity, @strCountry, @strState, @strZipCode, @strLocationNotes,  @intLocationShipViaId, @intTermsId, @intWarehouseId, @ysnIsDefault)
 		END
@@ -596,29 +609,19 @@ BEGIN
 		DECLARE @VendorIdentityId INT
 		SET @VendorIdentityId = SCOPE_IDENTITY()		
 		
-		INSERT [dbo].[tblEMEntityToContact] ([intEntityId], [intEntityContactId], [intEntityLocationId],[ysnPortalAccess], ysnDefaultContact)
-		VALUES							  (@EntityId, @EntityContactId, @EntityLocationId, 0, @ysnIsDefault)/**/
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblEMEntityToContact WHERE intEntityId = @EntityId AND intEntityContactId = @EntityContactId)
+		BEGIN
+			INSERT [dbo].[tblEMEntityToContact] ([intEntityId], [intEntityContactId], [intEntityLocationId],[ysnPortalAccess], ysnDefaultContact)
+			VALUES							  (@EntityId, @EntityContactId, @EntityLocationId, 0, @ysnIsDefault)/**/
+		END
 
 		INSERT INTO [dbo].[tblAPImportedVendors]
 			VALUES(@originVendor, 1)
 		
+		
 
-
-		INSERT [dbo].[tblEMEntityLocation]    
-		([intEntityId], 
-		 [strLocationName], 
-		 [strCheckPayeeName],
-		 [strAddress], 
-		 [strCity], 
-		 [strCountry], 
-		 [strState], 
-		 [strZipCode], 
-		 [strNotes],  
-		 [intShipViaId], 
-		 [intTermsId], 
-		 [intWarehouseId], 
-		 [ysnDefaultLocation])
-		select 				
+		INSERT INTO @tblAPTemp
+		SELECT 				
 					--ssvnd_pay_to,
 					@EntityId, 
 					RTRIM(ISNULL(CASE WHEN ssvnd_co_per_ind = ''C'' THEN ssvnd_name
@@ -652,21 +655,8 @@ BEGIN
 	 from ssvndmst  where ssvnd_pay_to is not null and ssvnd_vnd_no <> ssvnd_pay_to and rtrim(ltrim(ssvnd_pay_to)) = @originVendor
 	 	 	 
 	 --INSERT Vendor Location to Origin Pay to Vendor		
-		INSERT [dbo].[tblEMEntityLocation]    
-		([intEntityId], 
-		 [strLocationName], 
-		 [strCheckPayeeName],
-		 [strAddress], 
-		 [strCity], 
-		 [strCountry], 
-		 [strState], 
-		 [strZipCode], 
-		 [strNotes],  
-		 [intShipViaId], 
-		 [intTermsId], 
-		 [intWarehouseId], 
-		 [ysnDefaultLocation])
-		select 				
+		INSERT INTO @tblAPTemp
+		SELECT 				
 					ENT.intEntityId, 
 					SUBSTRING ( 
 						RTRIM(ISNULL(CASE WHEN ssvnd_co_per_ind = ''C'' THEN ssvnd_name
@@ -702,9 +692,44 @@ BEGIN
 					NULL,
 					0
 	 from ssvndmst  
-	 inner join tblEMEntity ENT on ENT.strEntityNo COLLATE SQL_Latin1_General_CP1_CS_AS = ssvnd_pay_to COLLATE SQL_Latin1_General_CP1_CS_AS
+	 INNER JOIN tblEMEntity ENT on ENT.strEntityNo COLLATE Latin1_General_CI_AS = ssvnd_pay_to COLLATE Latin1_General_CI_AS
 	 INNER JOIN tblEMEntityType ETYP ON ETYP.intEntityId = ENT.intEntityId
-	 where ssvnd_vnd_no = @originVendor and ssvnd_pay_to is not null and ssvnd_vnd_no <> ssvnd_pay_to AND ETYP.strType = ''Vendor''
+	 WHERE ssvnd_vnd_no = @originVendor and ssvnd_pay_to is not null and ssvnd_vnd_no <> ssvnd_pay_to AND ETYP.strType = ''Vendor''
+	 
+		
+		INSERT [dbo].[tblEMEntityLocation]    
+		([intEntityId], 
+		 [strLocationName], 
+		 [strCheckPayeeName],
+		 [strAddress], 
+		 [strCity], 
+		 [strCountry], 
+		 [strState], 
+		 [strZipCode], 
+		 [strNotes],  
+		 [intShipViaId], 
+		 [intTermsId], 
+		 [intWarehouseId], 
+		 [ysnDefaultLocation])
+
+		 SELECT
+		 A.[intEntityId], 
+		 A.[strLocationName], 
+		 A.[strCheckPayeeName],
+		 A.[strAddress], 
+		 A.[strCity], 
+		 A.[strCountry], 
+		 A.[strState], 
+		 A.[strZipCode], 
+		 A.[strNotes],  
+		 A.[intShipViaId], 
+		 A.[intTermsId], 
+		 A.[intWarehouseId], 
+		 A.[ysnDefaultLocation]
+		 FROM @tblAPTemp A LEFT JOIN
+		 [tblEMEntityLocation] B ON (A.intEntityId = B.intEntityId AND A.strLocationName = B.strLocationName)
+		 WHERE B.intEntityId IS NULL AND B.strLocationName IS NULL
+
 	 END 
 	 -- Enable ysnTransportTerminal for the Vendors with Transport Terminal
 	 
@@ -726,7 +751,7 @@ BEGIN
 	  --WHERE ENT.strEntityNo COLLATE SQL_Latin1_General_CP1_CS_AS IN (SELECT DISTINCT ssvnd_pay_to COLLATE SQL_Latin1_General_CP1_CS_AS from trprcmst
 	  --INNER JOIN ssvndmst on ssvnd_vnd_no = trprc_vnd_no)
 
-		EXEC uspAPImportVendorContact @originVendor
+		
 
 		IF(@@ERROR <> 0) 
 		BEGIN
@@ -739,9 +764,10 @@ BEGIN
 		DELETE FROM #tmpssvndmst WHERE ssvnd_vnd_no = @originVendor
 
 	END
+
+	EXEC uspAPImportVendorContact
 	
 SET @Total = @@ROWCOUNT
 
-END
-')
+END')
 END

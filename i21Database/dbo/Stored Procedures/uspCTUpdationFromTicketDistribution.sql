@@ -143,7 +143,7 @@ BEGIN TRY
 		AND		CD.intItemId			=	@intItemId
 		AND		CD.intPricingTypeId		=	5
 		AND		CD.ysnAllowedToShow		=	1
-		ORDER BY CD.dtmStartDate, CD.intContractDetailId ASC
+		ORDER BY CD.dtmStartDate DESC
 
 		IF	ISNULL(@intContractDetailId,0) = 0
 		BEGIN

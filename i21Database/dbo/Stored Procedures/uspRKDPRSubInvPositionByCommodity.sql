@@ -571,6 +571,7 @@ BEGIN
 	DECLARE @intCommodityId1 INT
 	DECLARE @strDescription nvarchar(250)
 	DECLARE @intCommodityUnitMeasureId int
+			,@intCommodityStockUOMId INT
 
 	SELECT @mRowNumber = MIN(intCommodityIdentity) FROM @Commodity where intCommodity>0
 
@@ -578,7 +579,7 @@ BEGIN
 	BEGIN
 		SELECT @intCommodityId = intCommodity FROM @Commodity WHERE intCommodityIdentity = @mRowNumber
 		SELECT @strDescription = strCommodityCode FROM tblICCommodity WHERE intCommodityId = @intCommodityId
-		SELECT @intCommodityUnitMeasureId=intCommodityUnitMeasureId FROM tblICCommodityUnitMeasure WHERE intCommodityId=@intCommodityId AND ysnDefault=1
+		SELECT @intCommodityUnitMeasureId=intCommodityUnitMeasureId, @intCommodityStockUOMId = intUnitMeasureId FROM tblICCommodityUnitMeasure WHERE intCommodityId=@intCommodityId AND ysnDefault=1
 
 		IF ISNULL(@intCommodityId, 0) > 0
 		BEGIN
@@ -842,7 +843,7 @@ BEGIN
 					, 'Sales Basis Deliveries' COLLATE Latin1_General_CI_AS strSeqHeader
 					, @strDescription strCommodityCode
 					, 'Sales Basis Deliveries' COLLATE Latin1_General_CI_AS strType
-					, dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,ISNULL(ri.dblQuantity, 0)) AS dblTotal
+					, dbo.fnCTConvertQuantityToTargetItemUOM(cd.intItemId,iuom.intUnitMeasureId,@intCommodityStockUOMId,ISNULL(ri.dblQuantity, 0)) AS dblTotal
 					, cd.intCommodityId
 					, cl.strLocationName
 					, cd.strItemNo
@@ -860,7 +861,8 @@ BEGIN
 				join tblICInventoryShipment r on r.strShipmentNumber=v.strTransactionId
 				inner join tblICInventoryShipmentItem ri ON r.intInventoryShipmentId = ri.intInventoryShipmentId
 				inner join @tblGetOpenContractDetail cd ON cd.intContractDetailId = ri.intLineNo AND cd.intPricingTypeId = 2 AND cd.intContractStatusId <> 3  AND cd.intContractTypeId = 2
-				join tblICCommodityUnitMeasure ium on ium.intCommodityId=cd.intCommodityId AND cd.intUnitMeasureId=ium.intUnitMeasureId
+				inner join tblICItem i on cd.intItemId = i.intItemId
+                inner join tblICItemUOM iuom on iuom.intItemId = i.intItemId and iuom.intItemUOMId = ri.intItemUOMId
 				inner join tblSMCompanyLocation  cl on cl.intCompanyLocationId=cd.intCompanyLocationId
 				left join tblARInvoiceDetail invD ON ri.intInventoryShipmentItemId = invD.intInventoryShipmentItemId
 				left join tblARInvoice inv ON invD.intInvoiceId = inv.intInvoiceId
@@ -1080,7 +1082,7 @@ BEGIN
 						,Itm.strItemNo
 						,strCategory = Cat.strCategoryCode
 						,Cat.intCategoryId
-						,dblBalanceToInvoice = InTran.dblInTransitQty
+						,dblBalanceToInvoice = dbo.fnCTConvertQuantityToTargetCommodityUOM(cum.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull((InTran.dblInTransitQty),0))
 						,strContractEndMonth = RIGHT(CONVERT(VARCHAR(11), InTran.dtmDate, 106), 8) COLLATE Latin1_General_CI_AS
 						,strFutureMonth = (SELECT TOP 1 strFutureMonth FROM tblCTContractDetail cd INNER JOIN tblRKFuturesMonth fmnt ON cd.intFutureMonthId =  fmnt.intFutureMonthId WHERE intContractHeaderId = SI.intLineNo)
 						,strDeliveryDate =  (SELECT TOP 1 dbo.fnRKFormatDate(dtmEndDate, 'MMM yyyy') FROM tblCTContractDetail WHERE intContractHeaderId = SI.intLineNo)
@@ -1090,6 +1092,9 @@ BEGIN
 						INNER JOIN tblICCommodity Com ON Itm.intCommodityId = Com.intCommodityId
 						INNER JOIN tblICCategory Cat ON Itm.intCategoryId = Cat.intCategoryId
 						LEFT JOIN vyuICGetInventoryShipmentItem SI ON InTran.intTransactionDetailId = SI.intInventoryShipmentItemId
+						INNER JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = InTran.intItemUOMId
+						INNER JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
+						JOIN tblICCommodityUnitMeasure cum ON cum.intCommodityId = Com.intCommodityId AND cum.intUnitMeasureId = UOM.intUnitMeasureId
 					WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), Inv.dtmDate, 110), 110) <= CONVERT(DATETIME,@dtmToDate)
 						AND ISNULL(Inv.intEntityId,0) = CASE WHEN ISNULL(@intVendorId,0)=0 THEN ISNULL(Inv.intEntityId,0) ELSE @intVendorId END				
 				)t

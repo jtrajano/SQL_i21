@@ -62,8 +62,18 @@ SELECT
 	, dblConsignedPurchase = ISNULL(stockUOM.dblConsignedPurchase, 0)
 	, dblConsignedSale = ISNULL(stockUOM.dblConsignedSale, 0)
 	, dblUnitReserved = ISNULL(stockUOM.dblUnitReserved, 0)
-	, dblAvailable = ISNULL(stockUOM.dblOnHand, 0) - (ISNULL(stockUOM.dblUnitReserved, 0) + ISNULL(stockUOM.dblConsignedSale, 0))
-	, dblExtended = (ISNULL(stockUOM.dblOnHand, 0) + ISNULL(stockUOM.dblUnitStorage, 0) + ISNULL(stockUOM.dblConsignedPurchase, 0)) * ISNULL(itemPricing.dblAverageCost, 0)
+	, dblAvailable = 
+		ISNULL(stockUOM.dblOnHand, 0) 
+		- ISNULL(stockUOM.dblUnitReserved, 0) 
+		- ISNULL(stockUOM.dblConsignedSale, 0)
+		+ ISNULL(stockUOM.dblUnitStorage, 0)
+	, dblExtended = 
+		(
+			ISNULL(stockUOM.dblOnHand, 0) 
+			+ ISNULL(stockUOM.dblUnitStorage, 0) 
+			+ ISNULL(stockUOM.dblConsignedPurchase, 0)
+		) 
+		* ISNULL(itemPricing.dblAverageCost, 0)
 	, dblMinOrder = ISNULL(itemLocation.dblMinOrder, 0)
 	, dblReorderPoint = ISNULL(itemLocation.dblReorderPoint, 0)
 	, dblNearingReorderBy = CAST(ISNULL(stockUOM.dblOnHand, 0) - ISNULL(itemLocation.dblReorderPoint, 0) AS NUMERIC(38, 7))

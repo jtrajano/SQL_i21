@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspCTSavePriceContract]
 	
 	@intPriceContractId INT,
+	@intPriceFixationDetailId INT,
 	@strXML				NVARCHAR(MAX)
 	
 AS
@@ -16,7 +17,7 @@ BEGIN TRY
 			@intUserId					INT,
 			@strRowState				NVARCHAR(50),
 			@Condition					NVARCHAR(MAX),
-			@intPriceFixationDetailId	INT,
+			--@intPriceFixationDetailId	INT,
 			@intFutOptTransactionId		INT,
 			@intBrokerId				INT,
 			@intBrokerageAccountId		INT,
@@ -37,7 +38,8 @@ BEGIN TRY
 			@dtmFixationDate			DATETIME,
 			@ysnFreezed					BIT,
 			@ysnAA						BIT,
-			@intFutOptTransactionHeaderId INT = NULL
+			@intFutOptTransactionHeaderId INT = NULL,
+			@intMatchedLots				INT
 
 	SELECT @intUserId = ISNULL(intLastModifiedById,intCreatedById) FROM tblCTPriceContract WHERE intPriceContractId = @intPriceContractId
 
@@ -45,11 +47,10 @@ BEGIN TRY
 
 	WHILE ISNULL(@intPriceFixationId,0) > 0
 	BEGIN
-		SELECT	@intPriceFixationDetailId = 0
+		--SELECT	@intPriceFixationDetailId = 0		
+		--SELECT	@intPriceFixationDetailId = MIN(intPriceFixationDetailId)	FROM	tblCTPriceFixationDetail WHERE intPriceFixationId = @intPriceFixationId
 		
-		SELECT	@intPriceFixationDetailId = MIN(intPriceFixationDetailId)	FROM	tblCTPriceFixationDetail WHERE intPriceFixationId = @intPriceFixationId
-		
-		WHILE	ISNULL(@intPriceFixationDetailId,0) > 0
+		IF ISNULL(@intPriceFixationDetailId,0) > 0
 		BEGIN
 		
 			SELECT	@intFutOptTransactionId = 0,@ysnHedge = 0,@ysnFreezed = 0
@@ -90,6 +91,18 @@ BEGIN TRY
 			BEGIN
 				IF ISNULL(@ysnFreezed,0) = 0
 				BEGIN
+					
+					-- MATCHED CHECKING | SKIPPED WHEN MATCHED- BEGIN
+					SELECT @intMatchedLots = ISNULL(SUM(ISNULL(dblLots, 0.00)), 0.00) FROM tblRKOptionsPnSExercisedAssigned WHERE intFutOptTransactionId = @intFutOptTransactionId
+					SELECT @intMatchedLots += ISNULL(SUM(ISNULL(dblMatchQty, 0.00)), 0.00) FROM tblRKMatchFuturesPSDetail WHERE intLFutOptTransactionId = @intFutOptTransactionId OR intSFutOptTransactionId = @intFutOptTransactionId
+
+					IF ((@dblNoOfContract - @intMatchedLots) <= 0)
+					BEGIN
+						RAISERROR('Cannot change number of hedged lots as it is used in Match Futures Purchase and sales.', 16, 1)
+					END	
+					-- MATCHED CHECKING | SKIPPED WHEN MATCHED - END
+
+
 					SET @strXML = '<root>'
 					IF ISNULL(@intFutOptTransactionId,0) > 0
 						SET @strXML = @strXML +  '<intFutOptTransactionId>' + LTRIM(@intFutOptTransactionId) + '</intFutOptTransactionId>'
@@ -146,10 +159,10 @@ BEGIN TRY
 					SELECT @intFutOptTransactionHeaderId = intFutOptTransactionHeaderId FROM tblRKFutOptTransaction WHERE intFutOptTransactionId = @intOutputId
 					EXEC uspRKFutOptTransactionHistory @intOutputId, @intFutOptTransactionHeaderId, 'Price Contracts', @intUserId, 'DELETE'
 					UPDATE tblCTPriceFixationDetail SET intFutOptTransactionId = NULL WHERE intPriceFixationDetailId = @intPriceFixationDetailId
-					EXEC uspRKDeleteAutoHedge @intFutOptTransactionId
+					EXEC uspRKDeleteAutoHedge @intFutOptTransactionId, @intUserId
 				END
 			END 
-			SELECT	@intPriceFixationDetailId = MIN(intPriceFixationDetailId)	FROM	tblCTPriceFixationDetail WHERE intPriceFixationId = @intPriceFixationId AND intPriceFixationDetailId > @intPriceFixationDetailId
+			--SELECT	@intPriceFixationDetailId = MIN(intPriceFixationDetailId)	FROM	tblCTPriceFixationDetail WHERE intPriceFixationId = @intPriceFixationId AND intPriceFixationDetailId > @intPriceFixationDetailId
 		END
 		
 		EXEC uspCTPriceFixationSave @intPriceFixationId,@strRowState,@intUserId

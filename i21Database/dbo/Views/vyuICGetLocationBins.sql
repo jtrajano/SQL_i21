@@ -51,12 +51,17 @@ SELECT
 	,dblConsignedSale = ISNULL(ItemStockUOM.dblConsignedSale, 0.00)
 	,dblUnitReserved = ISNULL(ItemStockUOM.dblUnitReserved, 0.00)
 	,dblAvailable = 
-				ISNULL(ItemStockUOM.dblOnHand, 0.00)  
-				- (
-						ISNULL(ItemStockUOM.dblUnitReserved, 0.00) 
-						+ ISNULL(ItemStockUOM.dblConsignedSale, 0.00)
-				) + ISNULL(ItemStockUOM.dblUnitStorage, 0.00)
-	,dblExtended = (ISNULL(ItemStockUOM.dblOnHand, 0.00) + ISNULL(ItemStockUOM.dblUnitStorage,0.00) + ISNULL(ItemStockUOM.dblConsignedPurchase, 0.00))* ISNULL(ItemPricing.dblAverageCost, 0.00)
+			ISNULL(ItemStockUOM.dblOnHand, 0.00)  
+			- ISNULL(ItemStockUOM.dblUnitReserved, 0.00)
+			- ISNULL(ItemStockUOM.dblConsignedSale, 0.00)
+			+ ISNULL(ItemStockUOM.dblUnitStorage, 0.00)
+	,dblExtended = 
+			(
+				ISNULL(ItemStockUOM.dblOnHand, 0.00) 
+				+ ISNULL(ItemStockUOM.dblUnitStorage,0.00) 
+				+ ISNULL(ItemStockUOM.dblConsignedPurchase, 0.00)
+			) 
+			* ISNULL(ItemPricing.dblAverageCost, 0.00)
 	,dblExtendedRetail = (ISNULL(ItemStockUOM.dblOnHand, 0.00) + ISNULL(ItemStockUOM.dblUnitStorage,0.00) + ISNULL(ItemStockUOM.dblConsignedPurchase, 0.00))* ISNULL(ItemPricing.dblSalePrice, 0.00)
 	,dblMinOrder = ISNULL(ItemLocation.dblMinOrder, 0.00)
 	,dblLeadTime = ISNULL(ItemLocation.dblLeadTime, 0.00)

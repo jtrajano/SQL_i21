@@ -29,11 +29,12 @@ USING
 (
 	SELECT
 		intEntityId				=	entStg.intEntityId,
-		strVendorId				=	vndStg.strVendorId,
-		strDescription			=	entStg.strName,
-		strContact				=	cntcDataStg.strName,
+		strVendorId				=	dbo.fnTrim(vndStg.strVendorId),
+		strDescription			=	dbo.fnTrim(entStg.strName),
+		strContact				=	dbo.fnTrim(cntcDataStg.strName),
 		ysnUserShipperWeight	=	0,
-		intVendorType			=	0
+		intVendorType			=	0,
+		strVendorType			=	'Both'
 	FROM tblEMEntityStaging entStg
 	INNER JOIN tblAPVendorStaging vndStg
 		ON entStg.intEntityId = vndStg.intEntityId
@@ -50,7 +51,8 @@ INSERT
 	strDescription,
 	strContact,
 	ysnUserShipperWeight,
-	intVendorType
+	intVendorType,
+	strVendorType
 )
 VALUES
 (
@@ -58,7 +60,8 @@ VALUES
 	strDescription,
 	strContact,
 	ysnUserShipperWeight,
-	intVendorType
+	intVendorType,
+	strVendorType
 )
 OUTPUT
 	inserted.intVendorStagingId,
@@ -86,15 +89,15 @@ USING
 													ELSE cntcLocDataStg.strAddress END AS VARCHAR(30)),
 		strAddress2			=	CAST(CASE WHEN CHARINDEX(CHAR(10), cntcLocDataStg.strAddress) > 0 
 													THEN SUBSTRING(cntcLocDataStg.strAddress, CHARINDEX(CHAR(10),cntcLocDataStg.strAddress), LEN(cntcLocDataStg.strAddress)) 
-													ELSE NULL END AS VARCHAR(30)),
-		strCity				=	cntcLocDataStg.strCity,
-		strStateProv		=	cntcLocDataStg.strState,
-		strPostalCode		=	cntcLocDataStg.strZipCode,
-		strPhone			=	cntcPhoneDataStg.strPhone,
-		strMobile			=	cntcDataStg.strMobile,
-		strFax				=	cntcDataStg.strFax,
-		strEmail			=	cntcDataStg.strEmail,
-		strWebsite			=	cntcDataStg.strWebsite
+													ELSE '' END AS VARCHAR(30)),
+		strCity				=	ISNULL(cntcLocDataStg.strCity,''),
+		strStateProv		=	ISNULL(cntcLocDataStg.strState,''),
+		strPostalCode		=	ISNULL(cntcLocDataStg.strZipCode,''),
+		strPhone			=	ISNULL(cntcPhoneDataStg.strPhone,''),
+		strMobile			=	ISNULL(cntcDataStg.strMobile,''),
+		strFax				=	ISNULL(cntcDataStg.strFax,''),
+		strEmail			=	ISNULL(cntcDataStg.strEmail,''),
+		strWebsite			=	ISNULL(cntcDataStg.strWebsite,'')
 	FROM @insertedData stg
 	INNER JOIN tblEMEntityStaging entStg
 		ON stg.intEntityId = entStg.intEntityId

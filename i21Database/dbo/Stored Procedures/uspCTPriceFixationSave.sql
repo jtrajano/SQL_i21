@@ -185,7 +185,7 @@ BEGIN TRY
 						SET		intFutOptTransactionId = NULL
 						WHERE	intPriceFixationDetailId = @intPriceFixationDetailId
 
-						EXEC	uspRKDeleteAutoHedge @intFutOptTransactionId
+						EXEC	uspRKDeleteAutoHedge @intFutOptTransactionId, @intUserId
 					END
 
 					SELECT	@intPriceFixationDetailId = MIN(intPriceFixationDetailId) 
@@ -584,6 +584,43 @@ BEGIN TRY
 
 		EXEC	uspCTCreateDetailHistory	@intContractHeaderId,@intContractDetailId
 		
+		/*CT-3569 - this will create amendment for newly added sequence from partial pricing SPLIT function.*/
+		  if (ISNULL(@ysnSplit,0) = 1 )
+		  begin
+				INSERT INTO tblCTSequenceAmendmentLog  
+					(  
+					  intSequenceHistoryId  
+					 ,dtmHistoryCreated   
+					 ,intContractHeaderId   
+					 ,intContractDetailId  
+					 ,intAmendmentApprovalId  
+					 ,strItemChanged    
+					 ,strOldValue       
+					 ,strNewValue  
+					 ,intConcurrencyId      
+					)  
+					  SELECT   
+					  intSequenceHistoryId   = NULL  
+					 ,dtmHistoryCreated   = GETDATE()  
+					 ,intContractHeaderId   = CH.intContractHeaderId  
+					 ,intContractDetailId   = CD.intContractDetailId  
+					 ,intAmendmentApprovalId = 11
+					 ,strItemChanged    = 'Quantity'  
+					 ,strOldValue     =  0  
+					 ,strNewValue        =  CD.dblQuantity  
+					 ,intConcurrencyId    =  1   
+					 FROM   
+					 tblCTContractDetail CD
+					 JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId  
+					 LEFT JOIN tblSMUserSecurityRequireApprovalFor RAF ON RAF.intEntityUserSecurityId = CH.intLastModifiedById  
+					 WHERE (  
+					  ISNULL(CH.ysnPrinted, 0) = 1  
+					  OR ISNULL(CH.ysnSigned, 0) = 1  
+					  )  
+					AND CD.intContractHeaderId = @intContractHeaderId
+					AND CD.intContractDetailId not in (select distinct intContractDetailId from tblCTSequenceAmendmentLog where intContractHeaderId = CD.intContractHeaderId)
+		  end
+		/*End of CT-3569*/
 		
 				INSERT INTO tblCTSequenceAmendmentLog
 				(

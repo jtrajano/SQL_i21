@@ -1,7 +1,7 @@
 ﻿/*  
  This stored procedure is used as data source for "Check Voucher Middle Sub Report AP Basis Advance"
 */  
-CREATE PROCEDURE uspCMVoucherCheckMiddleSubReportAPVendorBasisAdvance
+CREATE PROCEDURE [dbo].[uspCMVoucherCheckMiddleSubReportAPVendorBasisAdvance]
 	@intTransactionId INT = 0
 AS  
 SET QUOTED_IDENTIFIER OFF  
@@ -10,18 +10,23 @@ SET NOCOUNT ON
 SET XACT_ABORT ON  
 SET ANSI_WARNINGS OFF  
 
+;WITH Query AS(
 SELECT DISTINCT
+CM.strTransactionId,
 	A.intBillId
 	,B.intScaleTicketId 
 	,C.strTicketNumber
 	,B.intContractHeaderId
 	,D.strContractNumber
-	,B.dblBasis
-	,B.dblFutures
-	,ISNULL(B.dblBasis,0) + ISNULL(B.dblFutures,0) * B.dblPrepayPercentage subTotal
-	,A.dblTotal AS dblTotalAdvance
+	,ISNULL(B.dblBasis,0) dblBasis
+	,isnull(B.dblFutures,0) dblFutures
+	--,(ISNULL(B.dblBasis,0) + ISNULL(B.dblFutures,0)) * (isnull(B.dblPrepayPercentage,0)/100) subTotal
+
+	--,A.dblTotal       AS dblTotalAdvance
 	,B.dblPrepayPercentage
-	,B.dblUnitQty
+	,case when isnull( B.dblNetWeight,0) = 0    then     isnull(B.dblQtyReceived,0)   else isnull( B.dblNetWeight,0)  end dblUnits
+	, C.dblUnitBasis
+	,C.dblUnitPrice
 	,ISNULL(charges.dblAmount,0) AS dblTotalCharges
 	,ISNULL(discounts.dblAmount,0) AS dblTotalDiscounts
 	,ISNULL(taxes.dblTax,0) AS dblTotalTaxes
@@ -33,7 +38,9 @@ INNER JOIN [dbo].[tblAPBill] A ON PYMTDetail.intBillId = A.intBillId
 INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
 INNER JOIN tblSCTicket C ON B.intScaleTicketId = C.intTicketId
 INNER JOIN tblCTContractHeader D ON B.intContractHeaderId = D.intContractHeaderId
-INNER JOIN (tblICInventoryReceipt E INNER JOIN tblICInventoryReceiptItem F ON E.intInventoryReceiptId = F.intInventoryReceiptId)
+INNER JOIN (tblICInventoryReceipt E INNER JOIN tblICInventoryReceiptItem F ON E.intInventoryReceiptId = F.intInventoryReceiptId
+
+)
 	ON C.intTicketId = F.intSourceId AND E.intSourceType = 1
 	
 OUTER APPLY (
@@ -84,3 +91,27 @@ OUTER APPLY (
     GROUP BY receiptDetail.intInventoryReceiptId
 ) taxes
 WHERE CM.intTransactionId = @intTransactionId
+),
+SubTotal AS (
+SELECT 
+	*,
+	dblUnits * (dblFutures  + dblBasis ) subTotal
+
+FROM Query
+),
+Total as 
+(
+
+	select 
+	*, 
+	subTotal  - dblTotalDiscounts  + dblTotalTaxes total -- dblTotalTaxes has negative sign
+	from SubTotal
+),
+TotalAdvance AS
+(
+	SELECT 
+	*,
+	total * (dblPrepayPercentage/100) dblTotalAdvance
+	FROM Total
+)
+select * from TotalAdvance

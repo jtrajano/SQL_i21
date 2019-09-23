@@ -60,6 +60,7 @@ AS SELECT
 	  ,SM.strLocationName
 	  ,GRD.strDiscountId
 	  ,SCS.strStationShortDescription
+      ,SC.ysnProcessedData   
 FROM tblSCTicketLVStaging SC
 LEFT JOIN tblEMEntity EM ON EM.intEntityId = SC.intEntityId
 LEFT JOIN tblICItem ICI ON ICI.intItemId = SC.intItemId

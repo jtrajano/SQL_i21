@@ -1,7 +1,9 @@
 ﻿CREATE PROCEDURE [dbo].[uspMBPostMeterReadingValidation]
-	 @intMeterReadingId		INT
-	,@Post				BIT	= NULL
+	 @intMeterReadingId	INT
+	,@Post				BIT
+	,@ysnRaiseError		BIT = 1
 	,@ynsValid			BIT = 1 OUTPUT
+	,@strError			NVARCHAR(MAX) = NULL OUTPUT
 AS
 	
 SET QUOTED_IDENTIFIER OFF
@@ -21,10 +23,38 @@ BEGIN TRY
 
 	IF ((SELECT ISNULL(MA.intCompanyLocationId, 0) FROM tblMBMeterReading MR INNER JOIN tblMBMeterAccount MA ON MA.intMeterAccountId = MR.intMeterAccountId where intMeterReadingId = @intMeterReadingId) = 0)
     BEGIN
-		RAISERROR('Company Location is required!', 16, 1)
+		IF(@ysnRaiseError = 1)
+		BEGIN
+			RAISERROR('Company Location is required!', 16, 1)
+		END
+		ELSE
+		BEGIN
+			SET @strError = 'Company Location is required!'
+			SET @ynsValid = 0
+		END
 		RETURN
     END
 
+	-- Meter Reading Qty Sold should be >= 0
+	IF EXISTS(SELECT TOP 1 1 FROM tblMBMeterReadingDetail WHERE intMeterReadingId = @intMeterReadingId AND dblCurrentReading < dblLastReading)
+	BEGIN
+		IF(@ysnRaiseError = 1)
+		BEGIN
+			RAISERROR('"Quantity Sold" should be greater than or equal to 0.', 16, 1)
+		END
+		ELSE
+		BEGIN
+			SET @strError = '"Quantity Sold" should be greater than or equal to 0.'
+			SET @ynsValid = 0
+		END
+		RETURN
+	END
+	ELSE IF NOT EXISTS(SELECT TOP 1 1 FROM tblMBMeterReadingDetail WHERE intMeterReadingId = @intMeterReadingId AND dblCurrentReading > dblLastReading)
+	BEGIN
+		RAISERROR('"Total Quantity Sold" should be greater than 0.', 16, 1)
+	END
+	
+	-- Posting and Unposting of Meter Reading should be by sequence
 	IF (@Post = 1)
 	BEGIN
 		SELECT TOP 1 @strTransactionId = strTransactionId FROM tblMBMeterReading
@@ -36,23 +66,17 @@ BEGIN TRY
 
 		IF(@strTransactionId IS NOT NULL)
 		BEGIN
-			RAISERROR('This transaction cannot be Posted, because it is not the latest Unposted Meter Billing Transaction. To post this transaction, you must first post all transaction for the same Meter Key with an earlier Date.', 16, 1)
+			IF(@ysnRaiseError = 1)
+			BEGIN
+				RAISERROR('This transaction cannot be Posted, because it is not the latest Unposted Meter Billing Transaction. To post this transaction, you must first post all transaction for the same Meter Key with an earlier Date.', 16, 1)
+			END
+			ELSE
+			BEGIN
+				SET @strError = 'This transaction cannot be Posted, because it is not the latest Unposted Meter Billing Transaction. To post this transaction, you must first post all transaction for the same Meter Key with an earlier Date.'
+				SET @ynsValid = 0
+			END
 			RETURN
 		END
-
-
-		-- IF EXISTS(SELECT TOP 1 RD.intMeterAccountDetailId FROM tblMBMeterReadingDetail RD
-		-- 	INNER JOIN tblMBMeterReading MR ON RD.intMeterReadingId = MR.intMeterReadingId
-		-- 	INNER JOIN tblMBMeterAccountDetail AD ON AD.intMeterAccountDetailId = RD.intMeterAccountDetailId
-		-- 	WHERE RD.intMeterReadingId = @intMeterReadingId
-		-- 	AND (RD.dblLastReading <> AD.dblLastMeterReading
-		-- 	OR RD.dblLastDollars <> AD.dblLastTotalSalesDollar)
-		-- )
-		-- BEGIN
-		-- 	RAISERROR('This transaction cannot be Posted. Last reading/dollars is not equal.', 16, 1)
-		-- 	RETURN
-		-- END
-
 	END
 	ELSE IF (@Post = 0)
 	BEGIN
@@ -65,10 +89,17 @@ BEGIN TRY
 
 		IF(@strTransactionId IS NOT NULL)
 		BEGIN
-			RAISERROR('This transaction cannot be Unposted, because it is not the latest Posted Meter Billing Transaction.', 16, 1)
+			IF(@ysnRaiseError = 1)
+			BEGIN
+				RAISERROR('This transaction cannot be Unposted, because it is not the latest Posted Meter Billing Transaction.', 16, 1)
+			END
+			ELSE
+			BEGIN
+				SET @strError = 'This transaction cannot be Unposted, because it is not the latest Posted Meter Billing Transaction.'
+				SET @ynsValid = 0
+			END
 			RETURN
 		END
-
 	END
 
 END TRY

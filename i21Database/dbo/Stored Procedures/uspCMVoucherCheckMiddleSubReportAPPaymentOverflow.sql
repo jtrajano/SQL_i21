@@ -1,7 +1,7 @@
 ﻿/*  
  This stored procedure is used as data source in the Voucher Check Middle AP Sub Report Overflow 
 */  
-CREATE PROCEDURE [dbo].[uspCMVoucherCheckMiddleSubReportAPPaymentOverflow]
+CREATE PROCEDURE uspCMVoucherCheckMiddleSubReportAPPaymentOverflow
   @intTransactionIdFrom INT = 0  
 AS  
   

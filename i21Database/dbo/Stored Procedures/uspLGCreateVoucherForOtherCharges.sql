@@ -276,6 +276,7 @@ BEGIN TRY
 				,[intContractHeaderId]
 				,[intContractDetailId]
 				,[intContractSeqId]
+				,[intContractCostId]
 				,[intInventoryReceiptItemId]
 				,[intLoadShipmentId]
 				,[intLoadShipmentDetailId]
@@ -318,6 +319,7 @@ BEGIN TRY
 				,[intContractHeaderId] = VDD.intContractHeaderId
 				,[intContractDetailId] = VDD.intContractDetailId
 				,[intContractSeqId] = CD.intContractSeq
+				,[intContractCostId] = CTC.intContractCostId
 				,[intInventoryReceiptItemId] = NULL
 				,[intLoadShipmentId] = VDD.intLoadId
 				,[intLoadShipmentDetailId] = VDD.intLoadDetailId
@@ -345,7 +347,7 @@ BEGIN TRY
 				,[intAccountId] = VDD.intAccountId
 				,[strBillOfLading] = L.strBLNumber
 				,[ysnReturn] = CAST(0 AS BIT)
-				,[ysnStage] = CAST(1 AS BIT)
+				,[ysnStage] = CAST(CASE WHEN (COC.ysnCreateOtherCostPayable = 1 AND CTC.intContractCostId IS NOT NULL) THEN 0 ELSE 1 END AS BIT)
 				,[intSubLocationId] = VDD.intSubLocationId
 				,[intStorageLocationId] = VDD.intStorageLocationId
 			FROM @voucherDetailData VDD
@@ -353,6 +355,12 @@ BEGIN TRY
 				INNER JOIN tblLGLoad L on VDD.intLoadId = L.intLoadId
 				INNER JOIN tblICItem I ON I.intItemId = VDD.intItemId
 				LEFT JOIN tblSMCurrency CUR ON VDD.intCurrencyId = CUR.intCurrencyID
+				OUTER APPLY (SELECT TOP 1 ysnCreateOtherCostPayable = ISNULL(ysnCreateOtherCostPayable, 0) FROM tblCTCompanyPreference) COC
+				OUTER APPLY (SELECT TOP 1 CTC.intContractCostId FROM tblCTContractCost CTC
+						WHERE CD.intContractDetailId = CTC.intContractDetailId
+							AND VDD.intItemId = CTC.intItemId
+							AND VDD.intVendorEntityId = CTC.intVendorId
+						) CTC
 			WHERE VDD.intVendorEntityId = @intVendorEntityId
 
 			EXEC uspAPCreateVoucher 
@@ -424,6 +432,7 @@ BEGIN TRY
 					,[intContractHeaderId]
 					,[intContractDetailId]
 					,[intContractSeqId]
+					,[intContractCostId]
 					,[intInventoryReceiptItemId]
 					,[intLoadShipmentId]
 					,[intLoadShipmentDetailId]
@@ -466,6 +475,7 @@ BEGIN TRY
 					,[intContractHeaderId] = VDD.intContractHeaderId
 					,[intContractDetailId] = VDD.intContractDetailId
 					,[intContractSeqId] = CD.intContractSeq
+					,[intContractCostId] = CTC.intContractCostId
 					,[intInventoryReceiptItemId] = NULL
 					,[intLoadShipmentId] = VDD.intLoadId
 					,[intLoadShipmentDetailId] = VDD.intLoadDetailId
@@ -493,7 +503,7 @@ BEGIN TRY
 					,[intAccountId] = VDD.intAccountId
 					,[strBillOfLading] = L.strBLNumber
 					,[ysnReturn] = CAST(0 AS BIT)
-					,[ysnStage] = CAST(1 AS BIT)
+					,[ysnStage] = CAST(CASE WHEN (COC.ysnCreateOtherCostPayable = 1 AND CTC.intContractCostId IS NOT NULL) THEN 0 ELSE 1 END AS BIT)
 					,[intSubLocationId] = VDD.intSubLocationId
 					,[intStorageLocationId] = VDD.intStorageLocationId
 				FROM @voucherDetailData VDD
@@ -501,6 +511,12 @@ BEGIN TRY
 					INNER JOIN tblLGLoad L on VDD.intLoadId = L.intLoadId
 					INNER JOIN tblICItem I ON I.intItemId = VDD.intItemId
 					LEFT JOIN tblSMCurrency CUR ON VDD.intCurrencyId = CUR.intCurrencyID
+					OUTER APPLY (SELECT TOP 1 ysnCreateOtherCostPayable = ISNULL(ysnCreateOtherCostPayable, 0) FROM tblCTCompanyPreference) COC
+					OUTER APPLY (SELECT TOP 1 CTC.intContractCostId FROM tblCTContractCost CTC
+						WHERE CD.intContractDetailId = CTC.intContractDetailId
+							AND VDD.intItemId = CTC.intItemId
+							AND VDD.intVendorEntityId = CTC.intVendorId
+						) CTC
 				WHERE VDD.intVendorEntityId = @intVendorEntityId AND VDD.ysnInventoryCost = 0
 			
 				EXEC uspAPCreateVoucher 
@@ -556,6 +572,7 @@ BEGIN TRY
 					,[intContractHeaderId]
 					,[intContractDetailId]
 					,[intContractSeqId]
+					,[intContractCostId]
 					,[intInventoryReceiptItemId]
 					,[intInventoryReceiptChargeId]
 					,[intLoadShipmentId]
@@ -599,6 +616,7 @@ BEGIN TRY
 					,[intContractHeaderId] = VDD.intContractHeaderId
 					,[intContractDetailId] = VDD.intContractDetailId
 					,[intContractSeqId] = CD.intContractSeq
+					,[intContractCostId] = CTC.intContractCostId
 					,[intInventoryReceiptItemId] = NULL
 					,[intInventoryReceiptChargeId] = IRC.intInventoryReceiptChargeId
 					,[intLoadShipmentId] = VDD.intLoadId
@@ -627,7 +645,7 @@ BEGIN TRY
 					,[intAccountId] = VDD.intAccountId
 					,[strBillOfLading] = L.strBLNumber
 					,[ysnReturn] = CAST(0 AS BIT)
-					,[ysnStage] = CAST(1 AS BIT)
+					,[ysnStage] = CAST(CASE WHEN (COC.ysnCreateOtherCostPayable = 1 AND CTC.intContractCostId IS NOT NULL) THEN 0 ELSE 1 END AS BIT)
 					,[intSubLocationId] = VDD.intSubLocationId
 					,[intStorageLocationId] = VDD.intStorageLocationId
 				FROM @voucherDetailData VDD
@@ -640,6 +658,12 @@ BEGIN TRY
 									WHERE intInventoryReceiptId = @intMinInventoryReceiptId
 										AND ysnInventoryCost = 1
 										AND intChargeId = VDD.intItemId) IRC
+					OUTER APPLY (SELECT TOP 1 ysnCreateOtherCostPayable = ISNULL(ysnCreateOtherCostPayable, 0) FROM tblCTCompanyPreference) COC
+					OUTER APPLY (SELECT TOP 1 CTC.intContractCostId FROM tblCTContractCost CTC
+						WHERE CD.intContractDetailId = CTC.intContractDetailId
+							AND VDD.intItemId = CTC.intItemId
+							AND VDD.intVendorEntityId = CTC.intVendorId
+						) CTC
 				WHERE VDD.intVendorEntityId = @intVendorEntityId AND VDD.ysnInventoryCost = 1
 			
 				EXEC uspAPCreateVoucher 

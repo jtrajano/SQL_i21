@@ -213,6 +213,7 @@ BEGIN TRY
 		A.intLocationId			= B.intStoreLocationId
 		,A.intShipToId			= B.intShipToId
 		,A.intShipFromEntityId	= B.intShipFromEntityId
+		,A.intShipFromId		= ISNULL(A.intShipFromId, B.intShipFromId) --if there is a ship from provided use that, else use the logic from header
 		,A.intPayToAddressId	= B.intPayToAddressId
 		,intCurrencyId			= B.intCurrencyId
 	FROM @voucherPayablesData A

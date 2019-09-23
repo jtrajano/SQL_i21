@@ -50,6 +50,8 @@ SELECT
         ELSE 1
         END
     )
+    +
+    receiptItem.dblTax
     AS dblReceiptTotal
     ,CASE	
         WHEN receiptItem.intWeightUOMId IS NULL THEN 
@@ -168,6 +170,8 @@ SELECT
         ELSE 1
         END
     )
+    +
+    receiptItem.dblTax
     AS dblVoucherTotal
     ,CASE 
         WHEN billDetail.intWeightUOMId IS NULL THEN 
@@ -285,6 +289,7 @@ LEFT JOIN (
 		AND APClearing.intItemId = receiptItem.intItemId
 WHERE 
     billDetail.intInventoryReceiptItemId IS NOT NULL
+AND bill.ysnPosted = 1
 AND billDetail.intInventoryReceiptChargeId IS NULL
 AND 1 = (CASE WHEN receipt.intSourceType = 2 AND ft.intFreightTermId > 0 AND ft.strFobPoint = 'Origin' THEN 0 ELSE 1 END) --Inbound Shipment
 AND receipt.strReceiptType != 'Transfer Order'

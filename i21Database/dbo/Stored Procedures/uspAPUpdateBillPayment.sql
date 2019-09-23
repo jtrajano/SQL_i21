@@ -89,6 +89,7 @@ BEGIN
 	) paySchedDetails
 	WHERE A.intPaymentId IN (SELECT intId FROM @paymentIds)
 	AND 1 = CASE WHEN C.intTransactionType IN (2, 13) AND A2.ysnOffset = 0 THEN 0 ELSE 1 END
+	AND A2.dblPayment != 0
 END
 ELSE IF @post = 1
 BEGIN
@@ -117,7 +118,7 @@ BEGIN
 											(
 												paySchedDetails.dblDiscount,
 												CASE WHEN C.intTransactionType = 1 
-													THEN dbo.fnGetDiscountBasedOnTerm(A.dtmDatePaid, C.dtmDate, C.intTermsId, @amountDue) 
+													THEN dbo.fnGetDiscountBasedOnTerm(A.dtmDatePaid, C.dtmBillDate, C.intTermsId, @amountDue) 
 												ELSE 0 END
 											)
 										END),
@@ -164,5 +165,6 @@ BEGIN
 	) paySchedDetails
 	WHERE A.intPaymentId IN (SELECT intId FROM @paymentIds)
 	AND 1 = CASE WHEN C.intTransactionType IN (2, 13) AND A2.ysnOffset = 0 THEN 0 ELSE 1 END
+	AND A2.dblPayment != 0
 
 END

@@ -72,4 +72,6 @@ CREATE TYPE [dbo].[ReceiptStagingTable] AS TABLE
 	,[intInventoryTransferDetailId] INT NULL				-- Inventory Transfer Detail Id
 	,[intPurchaseId] INT NULL								-- Purchase Order Header Id
 	,[intPurchaseDetailId] INT NULL							-- Purchase Order Detail Id
+	,[intLoadShipmentId] INT NULL
+	,[intLoadShipmentDetailId] INT NULL
 )

@@ -62,6 +62,21 @@ AS
 		WHERE ticket.intTicketId = voucherDetail.intTicketId
 	) ticket
 	WHERE voucherDetail.intTicketId is not null and voucherDetail.intTicketId > 0
+	UNION ALL
+	SELECT
+	voucherDetail.intBillDetailId
+	,intInventoryReceiptItemId = NULL
+	,intPurchaseDetailId = NULL
+	,strSourceNumber = storage.strStorageTicket
+	FROM tblAPBillDetail voucherDetail
+	OUTER APPLY (
+		SELECT TOP 1
+			storage.strStorageTicket
+			  FROM tblGRSettleStorage storage
+		INNER JOIN tblGRSettleStorageTicket ticket ON storage.intSettleStorageId = ticket.intSettleStorageId
+		WHERE storage.intParentSettleStorageId IS NULL AND ticket.intCustomerStorageId = voucherDetail.intCustomerStorageId
+	) storage
+	WHERE voucherDetail.intCustomerStorageId IS NOT NULL AND voucherDetail.intCustomerStorageId > 0
 	--INNER JOIN
 	--(
 	--	--PO Items

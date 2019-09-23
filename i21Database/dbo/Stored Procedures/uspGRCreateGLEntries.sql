@@ -26,11 +26,14 @@ BEGIN
 	,@ysnDeductFeesCusVen		    BIT
 	,@dblFreightRate				DECIMAL(24,10)
 	,@dblUnits						DECIMAL(24,10)
+	,@dblConvertedUnits				DECIMAL(24,10)
 	,@dblGrossUnits					DECIMAL(24,10)
 	,@intContractCostId				INT
 	,@ysnIsStorage					BIT
 	,@IntCommodityId				INT
 	,@intStorageChargeItemId		INT
+	,@intInventoryItemUOMId			INT
+	,@intCSInventoryItemUOMId		INT
 	,@StorageChargeItemDescription  NVARCHAR(100)
 
 	DECLARE 
@@ -78,6 +81,7 @@ BEGIN
 	FROM tblICInventoryTransactionType 
 	WHERE strName = @strTransactionType
 	
+	
 	--Inventory Item
 	SELECT 
 		 @LocationId			= CS.intCompanyLocationId
@@ -86,12 +90,26 @@ BEGIN
 		,@intEntityVendorId		= CS.intEntityId 
 		,@intCurrencyId			= CS.intCurrencyId
 		,@InventoryItemId		= CS.intItemId  
-		,@dblUnits				= SST.dblUnits
+		,@dblUnits				= SST.dblUnits--dbo.fnCalculateQtyBetweenUOM(CS.intItemUOMId, isnull(@intInventoryItemUOMId, CS.intItemUOMId) , SST.dblUnits) 
 		,@dblGrossUnits			= CS.dblGrossQuantity * (SST.dblUnits / CS.dblOriginalBalance)
+		,@intCSInventoryItemUOMId = CS.intItemUOMId
 	FROM tblGRCustomerStorage CS 
 	JOIN tblGRSettleStorageTicket SST 
 		ON  SST.intCustomerStorageId = CS.intCustomerStorageId
 	WHERE SST.intSettleStorageId = @intSettleStorageId
+	
+
+	select  @intInventoryItemUOMId = intItemUOMId 
+		from tblICInventoryTransaction 
+			where intItemId = @InventoryItemId 
+				and strBatchId = @strBatchId
+			
+	
+	if @intInventoryItemUOMId is not null
+		select @dblConvertedUnits = dbo.fnCalculateQtyBetweenUOM(@intCSInventoryItemUOMId, (@intInventoryItemUOMId), @dblUnits) 
+	select @dblConvertedUnits = isnull(@dblConvertedUnits, @dblUnits)
+	
+	
 	
 	--Freight
 	SELECT 
@@ -110,6 +128,7 @@ BEGIN
 	FROM tblICItemLocation 
 	WHERE intItemId = @InventoryItemId 
 		AND intLocationId = @LocationId
+
 
 	IF  @ysnDeductFreightFarmer = 0 AND ISNULL(@intHaulerId,0) != 0
 	BEGIN
@@ -152,6 +171,7 @@ BEGIN
 		,[ysnPrice]						   BIT
 		,[intTicketDiscountId]			   INT
 		,[dblUnits] 					   DECIMAL(24,10)
+		,[dblConvertedUnits] 				DECIMAL(24,10)
 	)
 
 	INSERT INTO @tblOtherCharges
@@ -172,7 +192,8 @@ BEGIN
 		,[ysnAccrue]					
 		,[ysnPrice]
 		,[intTicketDiscountId]
-		,[dblUnits] 	
+		,[dblUnits]
+		,[dblConvertedUnits] 	
 	)
 	--Discounts
 	SELECT
@@ -187,9 +208,18 @@ BEGIN
 		,[ysnInventoryCost]					= IC.ysnInventoryCost
 		,[strCostMethod]					= IC.strCostMethod
 		,[dblRate]							= CASE
-												WHEN QM.strDiscountChargeType = 'Percent' AND QM.dblDiscountAmount < 0 THEN (QM.dblDiscountAmount * (CASE WHEN ISNULL(SS.dblCashPrice,0) > 0 THEN SS.dblCashPrice ELSE CD.dblCashPrice END) * -1)
+												WHEN QM.strDiscountChargeType = 'Percent' AND QM.dblDiscountAmount < 0 THEN (QM.dblDiscountAmount * (CASE WHEN ISNULL(SS.dblCashPrice,0) > 0 THEN SS.dblCashPrice ELSE CD.dblCashPrice END) 												
+												* 
+														case when isnull(IC.strCostType, '') = 'Discount' and QM.dblDiscountAmount < 0 then 1 
+														else  -1 end
+												
+												)
+
 												WHEN QM.strDiscountChargeType = 'Percent' AND QM.dblDiscountAmount > 0 THEN (QM.dblDiscountAmount * (CASE WHEN ISNULL(SS.dblCashPrice,0) > 0 THEN SS.dblCashPrice ELSE CD.dblCashPrice END))
-												WHEN QM.strDiscountChargeType = 'Dollar' AND QM.dblDiscountAmount < 0 THEN (QM.dblDiscountAmount * -1)
+												WHEN QM.strDiscountChargeType = 'Dollar' AND QM.dblDiscountAmount < 0 THEN (QM.dblDiscountAmount * 
+												case when isnull(IC.strCostType, '') = 'Discount' and QM.dblDiscountAmount < 0 then 1 
+														else  -1 end
+												)
 												WHEN QM.strDiscountChargeType = 'Dollar' AND QM.dblDiscountAmount > 0 THEN QM.dblDiscountAmount
 											END
 		,[intOtherChargeEntityVendorId]		= @intEntityVendorId
@@ -201,16 +231,25 @@ BEGIN
 														WHEN @ysnIsStorage = 0 THEN 0												
 													END
 											END
-		,[ysnAccrue]						= CASE
+		,[ysnAccrue]						= case when isnull(IC.strCostType, '') = 'Discount' then
+												0 
+											else
+												CASE
+													WHEN QM.dblDiscountAmount < 0 THEN 1
+													WHEN QM.dblDiscountAmount > 0 THEN 0
+												END
+											end
+											/*CASE
 												WHEN QM.dblDiscountAmount < 0 THEN 1
 												WHEN QM.dblDiscountAmount > 0 THEN 0
-											END
+											END*/
 		,[ysnPrice]							= CASE
 												WHEN QM.dblDiscountAmount < 0 THEN 0
 												WHEN QM.dblDiscountAmount > 0 THEN 1
 											END
 		,[intTicketDiscountId]				= QM.intTicketDiscountId
 		,[dblUnits]							= CASE WHEN QM.strCalcMethod = 3 THEN @dblGrossUnits ELSE @dblUnits END
+		,[dblConvertedUnits]				= CASE WHEN QM.strCalcMethod = 3 THEN @dblGrossUnits ELSE @dblConvertedUnits END
 	FROM tblGRSettleStorageTicket SST
 	JOIN tblGRSettleStorage SS 
 		ON SS.intSettleStorageId = SST.intSettleStorageId
@@ -249,13 +288,18 @@ BEGIN
 		,[ysnPrice]							= 1
 		,[intTicketDiscountId]				= NULL
 		,[dblUnits]							= @dblUnits
+		,[dblConvertedUnits]				= @dblConvertedUnits
 	FROM tblGRSettleStorage SS
 	JOIN tblICItem IC 
 		ON 1 = 1
+	LEFT JOIN tblGRSettleContract SC
+		ON SC.intSettleStorageId = SS.intSettleStorageId
+	LEFT JOIN tblCTContractDetail CD
+		ON CD.intContractDetailId = SC.intContractDetailId
 	WHERE SS.intSettleStorageId = @intSettleStorageId 
 		AND ISNULL(SS.dblStorageDue,0) > 0 
 		AND IC.intItemId = @intStorageChargeItemId 	
-	
+		AND (CD.intContractDetailId is null or ( CD.intContractDetailId is not null and CD.intPricingTypeId <> 2))
 	DECLARE @tblItem AS TABLE 
 	(
 		 intItemId			INT
@@ -289,6 +333,8 @@ BEGIN
 		,strItem							NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
 		,strBundleType						NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
 		,dblUnits 							DECIMAL(24,10)
+		,dblConvertedUnits 					DECIMAL(24,10)
+		,strICCCostType						NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
 	)
 
 	INSERT INTO @InventoryCostCharges
@@ -316,7 +362,9 @@ BEGIN
 		,strCharge						
 		,strItem						
 		,strBundleType
-		,dblUnits					
+		,dblUnits
+		,dblConvertedUnits		
+		,strICCCostType					
 	)
 	SELECT 
 		 dtmDate						 = GETDATE()
@@ -343,6 +391,8 @@ BEGIN
 		,strItem						 = Item.strItemNo
 		,strBundleType					 = ISNULL(Item.strBundleType, '')
 		,dblUnits						 = CS.dblUnits
+		,dblConvertedUnits				 = CS.dblConvertedUnits
+		,strCostType					= Item.strCostType
 	FROM @tblOtherCharges CS
 	JOIN tblICItem Item 
 		ON Item.intItemId = CS.intChargeId
@@ -487,11 +537,11 @@ BEGIN
 		 ,[strBatchId]             
 		 ,[intAccountId]           
 		 ,[dblDebit] = CASE 
-							WHEN ABS(t.dblDebit) > 0 THEN ROUND(ABS(t.dblCost * t.dblUnits),2)
+							WHEN (t.dblDebit) <> 0 THEN ROUND(ABS(t.dblCost * t.dblConvertedUnits),2)
 							ELSE 0 
 						END             
 		 ,[dblCredit] = CASE 
-							WHEN ABS(t.dblCredit) > 0 THEN ROUND(ABS(t.dblCost * t.dblUnits),2)
+							WHEN (t.dblCredit) <> 0 THEN ROUND(ABS(t.dblCost * t.dblConvertedUnits),2)
 							ELSE 0 
 						END             
 		 ,[dblDebitUnit]           
@@ -529,8 +579,20 @@ BEGIN
 			,dtmDate					= InventoryCostCharges.dtmDate
 			,strBatchId					= @strBatchId
 			,intAccountId				= GLAccount.intAccountId
-			,dblDebit					= 0
-			,dblCredit					= InventoryCostCharges.dblCost
+			,dblDebit					= case when InventoryCostCharges.strICCCostType = 'Discount' then 
+											case 
+												when InventoryCostCharges.dblCost < 0 then
+													InventoryCostCharges.dblCost  
+												else 0 end
+											else     0 end
+			,dblCredit					= case when InventoryCostCharges.strICCCostType = 'Discount' then 
+											
+											case when InventoryCostCharges.dblCost < 0 
+												then 0 
+												else InventoryCostCharges.dblCost end
+												 
+											
+											else     InventoryCostCharges.dblCost end
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= InventoryCostCharges.dblUnits
 			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', Charges from ' + InventoryCostCharges.strCharge + ' for ' + InventoryCostCharges.strItem
@@ -566,6 +628,7 @@ BEGIN
 			,strRateType				= InventoryCostCharges.strRateType
 			,dblUnits					= InventoryCostCharges.dblUnits
 			,dblCost				    = InventoryCostCharges.dblCost
+			,InventoryCostCharges.dblConvertedUnits
 		FROM @InventoryCostCharges InventoryCostCharges
 		INNER JOIN @ItemGLAccounts ItemGLAccounts 
 			ON InventoryCostCharges.intItemId = ItemGLAccounts.intItemId
@@ -586,8 +649,16 @@ BEGIN
 			,dtmDate					= InventoryCostCharges.dtmDate
 			,strBatchId					= @strBatchId
 			,intAccountId				= GLAccount.intAccountId
-			,dblDebit					= InventoryCostCharges.dblCost
-			,dblCredit					= 0
+			,dblDebit					= case when InventoryCostCharges.strICCCostType = 'Discount' then 
+											case when InventoryCostCharges.dblCost < 0 
+												then 0 else
+												InventoryCostCharges.dblCost end
+											else     InventoryCostCharges.dblCost end 
+			,dblCredit					= case when InventoryCostCharges.strICCCostType = 'Discount' then 
+											case when InventoryCostCharges.dblCost < 0 then
+												InventoryCostCharges.dblCost 
+												else 0 end
+											else     0 end 
 			,dblDebitUnit				= InventoryCostCharges.dblUnits
 			,dblCreditUnit				= 0
 			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', Charges from ' + InventoryCostCharges.strCharge
@@ -623,6 +694,7 @@ BEGIN
 			,strRateType				= InventoryCostCharges.strRateType
 			,dblUnits					= InventoryCostCharges.dblUnits
 			,dblCost				    = InventoryCostCharges.dblCost
+			,InventoryCostCharges.dblConvertedUnits
 		FROM @InventoryCostCharges InventoryCostCharges
 		--INNER JOIN @OtherChargesGLAccounts OtherChargesGLAccounts 
 		--	ON InventoryCostCharges.intChargeId = OtherChargesGLAccounts.intChargeId
@@ -691,6 +763,7 @@ BEGIN
 				,strRateType				= NonInventoryCostCharges.strRateType
 				,dblUnits					= NonInventoryCostCharges.dblUnits
 				,dblCost				    = NonInventoryCostCharges.dblCost
+				,NonInventoryCostCharges.dblConvertedUnits
 		FROM @InventoryCostCharges NonInventoryCostCharges 
 		INNER JOIN @OtherChargesGLAccounts OtherChargesGLAccounts
 			ON NonInventoryCostCharges.intChargeId = OtherChargesGLAccounts.intChargeId
@@ -700,8 +773,8 @@ BEGIN
 		CROSS APPLY dbo.fnGetDebit(NonInventoryCostCharges.dblCost) DebitForeign
 		CROSS APPLY dbo.fnGetCredit(NonInventoryCostCharges.dblCost) CreditForeign
 		WHERE ISNULL(NonInventoryCostCharges.ysnAccrue, 0) = 0
-			AND ISNULL(NonInventoryCostCharges.ysnInventoryCost, 0) = 0
-			AND ISNULL(NonInventoryCostCharges.ysnPrice, 0) = 0
+			AND ISNULL(NonInventoryCostCharges.ysnInventoryCost, 0) = 1
+			--AND ISNULL(NonInventoryCostCharges.ysnPrice, 0) = 0
 
 		UNION ALL 
 		
@@ -748,17 +821,18 @@ BEGIN
 			,strRateType				= NonInventoryCostCharges.strRateType
 			,dblUnits					= NonInventoryCostCharges.dblUnits
 			,dblCost				    = NonInventoryCostCharges.dblCost
+			,NonInventoryCostCharges.dblConvertedUnits
 		FROM @InventoryCostCharges NonInventoryCostCharges 
 		INNER JOIN @OtherChargesGLAccounts OtherChargesGLAccounts
 			ON NonInventoryCostCharges.intChargeId = OtherChargesGLAccounts.intChargeId
 				AND NonInventoryCostCharges.intChargeItemLocation = OtherChargesGLAccounts.intItemLocationId
 		INNER JOIN dbo.tblGLAccount GLAccount
-			ON GLAccount.intAccountId = OtherChargesGLAccounts.intOtherChargeIncome
+			ON GLAccount.intAccountId = OtherChargesGLAccounts.intOtherChargeExpense
 		CROSS APPLY dbo.fnGetDebit(NonInventoryCostCharges.dblCost) DebitForeign
 		CROSS APPLY dbo.fnGetCredit(NonInventoryCostCharges.dblCost) CreditForeign
 		WHERE ISNULL(NonInventoryCostCharges.ysnAccrue, 0) = 0
-			AND ISNULL(NonInventoryCostCharges.ysnInventoryCost, 0) = 0
-			AND ISNULL(NonInventoryCostCharges.ysnPrice, 0) = 0
+			AND ISNULL(NonInventoryCostCharges.ysnInventoryCost, 0) = 1
+			--AND ISNULL(NonInventoryCostCharges.ysnPrice, 0) = 0
 
 		-------------------------------------------------------------------------------------------
 		-- Accrue Other Charge to Vendor 
@@ -812,6 +886,7 @@ BEGIN
 			,strRateType				= NonInventoryCostCharges.strRateType
 			,dblUnits					= NonInventoryCostCharges.dblUnits
 			,dblCost				    = NonInventoryCostCharges.dblCost
+			,NonInventoryCostCharges.dblConvertedUnits
 		FROM @InventoryCostCharges NonInventoryCostCharges 
 		INNER JOIN @OtherChargesGLAccounts OtherChargesGLAccounts
 			ON NonInventoryCostCharges.intChargeId = OtherChargesGLAccounts.intChargeId
@@ -868,6 +943,7 @@ BEGIN
 			,strRateType				= NonInventoryCostCharges.strRateType
 			,dblUnits					= NonInventoryCostCharges.dblUnits
 			,dblCost				    = NonInventoryCostCharges.dblCost
+			,NonInventoryCostCharges.dblConvertedUnits
 		FROM @InventoryCostCharges NonInventoryCostCharges 
 		INNER JOIN @OtherChargesGLAccounts OtherChargesGLAccounts
 			ON NonInventoryCostCharges.intChargeId = OtherChargesGLAccounts.intChargeId
@@ -931,6 +1007,7 @@ BEGIN
 			,strRateType				= NonInventoryCostCharges.strRateType
 			,dblUnits					= NonInventoryCostCharges.dblUnits
 			,dblCost				    = NonInventoryCostCharges.dblCost
+			,NonInventoryCostCharges.dblConvertedUnits
 		FROM @InventoryCostCharges NonInventoryCostCharges 
 		INNER JOIN @OtherChargesGLAccounts OtherChargesGLAccounts
 			ON NonInventoryCostCharges.intChargeId = OtherChargesGLAccounts.intChargeId
@@ -987,6 +1064,7 @@ BEGIN
 			,strRateType				= NonInventoryCostCharges.strRateType
 			,dblUnits					= NonInventoryCostCharges.dblUnits
 			,dblCost				    = NonInventoryCostCharges.dblCost
+			,NonInventoryCostCharges.dblConvertedUnits
 		FROM @InventoryCostCharges NonInventoryCostCharges 
 		INNER JOIN @OtherChargesGLAccounts OtherChargesGLAccounts
 			ON NonInventoryCostCharges.intChargeId = OtherChargesGLAccounts.intChargeId

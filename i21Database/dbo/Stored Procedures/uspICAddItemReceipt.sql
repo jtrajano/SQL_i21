@@ -7,6 +7,12 @@ Accepted values for ReceiptStagingTable.intGrossNetUOMId:
 	2. NULL means it will use the stock uom of the item as the gross/net uom
 	3. or provide a [valid gross/net uom id]
 	4. If you provided an invalid gross/net uom id, it will use the stock unit of the item. 
+
+Accepted values for ReceiptStagingTable.intTaxGroupId and ReceiptOtherChargesTableType.intTaxGroupId
+	1. -1 (or any negative value) means a NULL tax group. 
+	2. NULL means it will get the tax group from the tax group hierarchy (fnGetTaxGroupIdForVendor) 
+	3. or provide a valid tax group. 
+
 */
 
 CREATE PROCEDURE [dbo].[uspICAddItemReceipt]
@@ -41,6 +47,9 @@ DECLARE @SourceType_NONE AS INT = 0
 		,@SourceType_DELIVERY_SHEET AS INT = 5
 		,@SourceType_PURCHASE_ORDER AS INT = 6
 		,@SourceType_STORE AS INT = 7
+
+DECLARE @PricingType_Basis AS INT = 2
+		,@PricingType_DP_PricedLater AS INT = 5
 
 -- Get the entity id
 SELECT	@intEntityId = [intEntityId]
@@ -564,7 +573,7 @@ BEGIN
 				,dtmDateCreated
 				,intCreatedByUserId
 				,strDataSource
-				,intShipFromEntityId	
+				,intShipFromEntityId
 			)
 			VALUES (
 				/*strReceiptNumber*/			@receiptNumber
@@ -656,6 +665,8 @@ BEGIN
 		FROM	@ReceiptEntries RawData LEFT JOIN tblSMTaxGroup tg
 					ON tg.intTaxGroupId = RawData.intTaxGroupId
 		WHERE	tg.intTaxGroupId IS NULL 
+				AND RawData.intTaxGroupId IS NOT NULL 
+				AND RawData.intTaxGroupId > 0 
 
 		IF @valueTaxGroupId IS NOT NULL 
 		BEGIN
@@ -779,7 +790,8 @@ BEGIN
 		FROM	@ReceiptEntries RawData LEFT JOIN tblICItemUOM iu 
 					ON iu.intItemUOMId = RawData.intGrossNetUOMId
 		WHERE	iu.intItemUOMId IS NULL 
-				AND RawData.intGrossNetUOMId IS NOT NULL 
+				AND RawData.intGrossNetUOMId IS NOT NULL
+				AND RawData.intGrossNetUOMId > 0 
 
 		IF @getItemId IS NOT NULL 
 		BEGIN
@@ -898,6 +910,8 @@ BEGIN
 				,dtmDateCreated
 				,intCreatedByUserId
 				,strActualCostId
+				,intLoadShipmentId
+				,intLoadShipmentDetailId
 		)
 		SELECT	intInventoryReceiptId	= @inventoryReceiptId
 				,intLineNo				= ISNULL(RawData.intContractDetailId, 0)
@@ -964,6 +978,8 @@ BEGIN
 				,ysnSubCurrency			= ISNULL(RawData.ysnSubCurrency, 0)
 				,intTaxGroupId			= 
 										CASE 
+											WHEN ContractView.intPricingTypeId IN (@PricingType_Basis, @PricingType_DP_PricedLater) THEN NULL 
+											WHEN RawData.intTaxGroupId < 0 THEN NULL 
 											WHEN RawData.strReceiptType = 'Transfer Order' THEN NULL 
 											ELSE ISNULL(RawData.intTaxGroupId, taxHierarcy.intTaxGroupId) 
 										END
@@ -991,6 +1007,8 @@ BEGIN
 				,dtmDateCreated = GETDATE()
 				,intCreatedByUserId = @intUserId
 				,strActualCostId				= RawData.strActualCostId
+				,RawData.intLoadShipmentId
+				,RawData.intLoadShipmentDetailId
 		FROM	@ReceiptEntries RawData INNER JOIN @DataForReceiptHeader RawHeaderData 
 					ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(RawData.intEntityVendorId, 0) 
 					AND ISNULL(RawHeaderData.BillOfLadding,0) = ISNULL(RawData.strBillOfLadding,0) 
@@ -999,7 +1017,7 @@ BEGIN
 					AND ISNULL(RawHeaderData.ReceiptType,0) = ISNULL(RawData.strReceiptType,0)
 					AND ISNULL(RawHeaderData.ShipFrom,0) = ISNULL(RawData.intShipFromId,0)
 					AND ISNULL(RawHeaderData.ShipVia,0) = ISNULL(RawData.intShipViaId,0)		   
-					--AND ISNULL(RawHeaderData.strVendorRefNo,0) = ISNULL(RawData.strVendorRefNo,0)
+					AND ISNULL(RawHeaderData.strVendorRefNo,0) = ISNULL(RawData.strVendorRefNo,0)
 					--AND ISNULL(RawHeaderData.ShipFromEntity,0) = ISNULL(RawData.intShipFromEntityId,0)	
 				INNER JOIN tblICItem Item
 					ON Item.intItemId = RawData.intItemId
@@ -1336,8 +1354,9 @@ BEGIN
 				@valueOtherChargeTaxGroupId = RawData.intTaxGroupId	
 		FROM	@OtherCharges RawData LEFT JOIN tblSMTaxGroup tg
 					ON RawData.intTaxGroupId = tg.intTaxGroupId
-		WHERE	RawData.intTaxGroupId IS NOT NULL 
-				AND tg.intTaxGroupId IS NULL 
+		WHERE	tg.intTaxGroupId IS NULL 
+				AND RawData.intTaxGroupId IS NOT NULL 
+				AND RawData.intTaxGroupId > 0 
 		
 		IF @valueOtherChargeTaxGroupId IS NOT NULL
 		BEGIN
@@ -1370,7 +1389,7 @@ BEGIN
 						AND ISNULL(RawHeaderData.ReceiptType,0) = ISNULL(RawData.strReceiptType,0)						
 						AND ISNULL(RawHeaderData.ShipFrom,0) = ISNULL(RawData.intShipFromId,0)
 						AND ISNULL(RawHeaderData.ShipVia,0) = ISNULL(RawData.intShipViaId,0)
-						--AND ISNULL(RawHeaderData.strVendorRefNo,0) = ISNULL(RawData.strVendorRefNo,0)
+						AND ISNULL(RawHeaderData.strVendorRefNo,0) = ISNULL(RawData.strVendorRefNo,0)
 						--AND ISNULL(RawHeaderData.ShipFromEntity,0) = ISNULL(RawData.intShipFromEntityId,0)	
 						
 					LEFT JOIN tblSMCurrency subCurrency
@@ -1415,6 +1434,8 @@ BEGIN
 				,[ysnAllowVoucher]
 				,dtmDateCreated
 				,intCreatedByUserId
+				,intLoadShipmentId
+				,intLoadShipmentCostId
 		)
 		SELECT 
 				[intInventoryReceiptId]		= @inventoryReceiptId
@@ -1438,14 +1459,15 @@ BEGIN
 				,[ysnSubCurrency]			= ISNULL(RawData.ysnSubCurrency, 0) 
 				,[intCurrencyId]			= COALESCE(RawData.intCostCurrencyId, RawData.intCurrencyId, @intFunctionalCurrencyId) 
 				,[intCent]					= CostCurrency.intCent
-				,[intTaxGroupId]			= ISNULL(RawData.intTaxGroupId, taxHierarcy.intTaxGroupId)
+				,[intTaxGroupId]			= CASE WHEN RawData.intTaxGroupId < 0 THEN NULL ELSE ISNULL(RawData.intTaxGroupId, taxHierarcy.intTaxGroupId) END 
 				,[intForexRateTypeId]		= CASE WHEN COALESCE(RawData.intCostCurrencyId, RawData.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(RawData.ysnSubCurrency, 0) = 0 THEN ISNULL(RawData.intForexRateTypeId, @intDefaultForexRateTypeId) ELSE NULL END 						
 				,[dblForexRate]				= CASE WHEN COALESCE(RawData.intCostCurrencyId, RawData.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(RawData.ysnSubCurrency, 0) = 0 THEN ISNULL(RawData.dblForexRate, forexRate.dblRate) ELSE NULL END 			
 				,[strChargesLink]			= RawData.strChargesLink
 				,[ysnAllowVoucher]			= RawData.ysnAllowVoucher
 				,GETDATE()
 				,@intUserId
-
+				,intLoadShipmentId			= RawData.intLoadShipmentId
+				,intLoadShipmentCostId		= RawData.intLoadShipmentCostId
 		FROM	@OtherCharges RawData INNER JOIN @DataForReceiptHeader RawHeaderData 
 					ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(RawData.intEntityVendorId, 0)
 					AND ISNULL(RawHeaderData.BillOfLadding,0) = ISNULL(RawData.strBillOfLadding,0) 
@@ -1935,8 +1957,10 @@ BEGIN
 					AND ISNULL(ReceiptItem.intSort, 1) = ISNULL(ItemLot.intSort, 1)
 				INNER JOIN tblICInventoryReceipt Receipt
 					ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
+				INNER JOIN tblICItem i ON i.intItemId = ItemLot.intItemId
 			WHERE
 				Receipt.intInventoryReceiptId = @inventoryReceiptId
+				AND i.strLotTracking != 'No'
 		END 
 
 		-- Calculate the tax per line item 

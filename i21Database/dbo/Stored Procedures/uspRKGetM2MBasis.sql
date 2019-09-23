@@ -139,11 +139,12 @@ BEGIN TRY
 				, a.dblRatio = b.dblRatio
 			FROM @tempBasis a
 			JOIN tblRKM2MBasisDetail b ON a.intCommodityId = b.intCommodityId
-				AND ISNULL(a.intFutureMarketId, 0) = ISNULL(b.intFutureMarketId, 0)
-				AND ISNULL(a.intMarketZoneId, 0) = ISNULL(b.intMarketZoneId, 0)
+				AND ISNULL(a.intFutureMarketId, 0) = ISNULL(b.intFutureMarketId, 0)				
 				AND ISNULL(a.intCurrencyId, 0) = ISNULL(b.intCurrencyId, 0)
 				AND ISNULL(a.strPeriodTo, 0) = ISNULL(b.strPeriodTo, 0)
 				AND ISNULL(a.intContractTypeId, 0) = ISNULL(b.intContractTypeId, 0)
+				AND ISNULL(a.intMarketZoneId, 0) = (CASE WHEN @strEvaluationByZone = 'Market Zone' THEN ISNULL(b.intMarketZoneId, 0) ELSE ISNULL(a.intMarketZoneId, 0) END)
+				AND ISNULL(a.intCompanyLocationId, 0) = (CASE WHEN @strEvaluationByZone = 'Location' THEN ISNULL(b.intCompanyLocationId, 0) ELSE ISNULL(a.intCompanyLocationId, 0) END)
 			LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = b.intUnitMeasureId
 			WHERE b.intM2MBasisId = @intCopyBasisId
 		END
@@ -233,11 +234,13 @@ BEGIN TRY
 				, a.dblRatio = b.dblRatio
 			FROM @tempBasis a
 			JOIN tblRKM2MBasisDetail b ON a.intCommodityId = b.intCommodityId
+				AND ISNULL(a.intItemId, 0) = ISNULL(b.intItemId, 0)
 				AND ISNULL(a.intFutureMarketId, 0) = ISNULL(b.intFutureMarketId, 0)
-				AND ISNULL(a.intMarketZoneId, 0) = ISNULL(b.intMarketZoneId, 0)
 				AND ISNULL(a.intCurrencyId, 0) = ISNULL(b.intCurrencyId, 0)
 				AND ISNULL(a.strPeriodTo, 0) = ISNULL(b.strPeriodTo, 0)
 				AND ISNULL(a.intContractTypeId, 0) = ISNULL(b.intContractTypeId, 0)
+				AND ISNULL(a.intMarketZoneId, 0) = (CASE WHEN @strEvaluationByZone = 'Market Zone' THEN ISNULL(b.intMarketZoneId, 0) ELSE ISNULL(a.intMarketZoneId, 0) END)
+				AND ISNULL(a.intCompanyLocationId, 0) = (CASE WHEN @strEvaluationByZone = 'Location' THEN ISNULL(b.intCompanyLocationId, 0) ELSE ISNULL(a.intCompanyLocationId, 0) END)
 			LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = b.intUnitMeasureId
 			WHERE b.intM2MBasisId = @intCopyBasisId
 		END

@@ -21,8 +21,6 @@ AS
 BEGIN
 		
 	DECLARE @ItemType_OtherCharge AS NVARCHAR(50) = 'Other Charge';
-	DECLARE @ysnCreateOtherCostPayable BIT
-	SELECT @ysnCreateOtherCostPayable = ysnCreateOtherCostPayable FROM tblCTCompanyPreference
 
 	INSERT INTO @table
 	-- Receipt Item Taxes
@@ -46,7 +44,6 @@ BEGIN
 	LEFT JOIN tblICItem Item ON Item.intItemId = voucherItems.intItemId
 	WHERE voucherItems.dblTax != 0
 		AND voucherItems.intInventoryReceiptChargeId IS NULL
-		AND (voucherItems.intContractHeaderId IS NOT NULL AND @ysnCreateOtherCostPayable = 1 OR voucherItems.intContractHeaderId IS NULL)
 
 	UNION ALL
 	-- Receipt Charges Taxes
@@ -70,7 +67,6 @@ BEGIN
 	LEFT JOIN tblICItem Item ON Item.intItemId = voucherItems.intItemId
 	WHERE Item.strType = @ItemType_OtherCharge COLLATE Latin1_General_CI_AS
 		AND voucherItems.dblTax != 0
-		AND (voucherItems.intContractHeaderId IS NOT NULL AND @ysnCreateOtherCostPayable = 1 OR voucherItems.intContractHeaderId IS NULL)
 
 	UNION ALL
 	-- Shipment Charges Taxes
@@ -94,7 +90,6 @@ BEGIN
 	LEFT JOIN tblICItem Item ON Item.intItemId = voucherItems.intItemId
 	WHERE Item.strType = @ItemType_OtherCharge COLLATE Latin1_General_CI_AS
 		AND voucherItems.dblTax != 0
-		AND (voucherItems.intContractHeaderId IS NOT NULL AND @ysnCreateOtherCostPayable = 1 OR voucherItems.intContractHeaderId IS NULL)
 	
 RETURN
 END

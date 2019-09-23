@@ -1,69 +1,50 @@
 ﻿CREATE VIEW [dbo].[vyuVRRebateExport]
 AS  
-	SELECT 
-		A.strInvoiceNumber
-		,O.intRebateId
-		,J.strCompany1Id
-		,J.strCompany2Id
-		,A.dtmShipDate
-		,A.strBOLNumber
-		,P.strVendorProduct
-		,O.dblQuantity
-		,B.dblPrice
-		,B.intItemUOMId
-		,D.strCategoryCode
-		,strVendorCategory = Q.strVendorDepartment
-		,C.strItemNo
-		,strVendorItemNo = P.strVendorProduct
-		,strVendorUOM = R.strVendorUOM
-		,intProgramId = I.intProgramId
-		,J.intVendorSetupId
-		,A.intInvoiceId
-		,F.strUnitMeasure
-		,I.strProgramDescription
-		,L.strVendorCustomer
-		,O.intConcurrencyId
-		,B.intInvoiceDetailId
-		,strVendorName = S.strName
-	FROM tblARInvoiceDetail B
-	INNER JOIN tblARInvoice A
-		ON A.intInvoiceId = B.intInvoiceId
-	INNER JOIN tblVRRebate O
-		ON B.intInvoiceDetailId = O.intInvoiceDetailId
-	INNER JOIN tblICItem C
-		ON B.intItemId = C.intItemId
-	INNER JOIN tblICCategory D
-		ON C.intCategoryId = D.intCategoryId
-	INNER JOIN tblICItemUOM E
-		ON B.intItemUOMId = E.intItemUOMId
-	INNER JOIN tblICUnitMeasure F
-		ON E.intUnitMeasureId = F.intUnitMeasureId
-	INNER JOIN tblARCustomer G
-		ON A.intEntityCustomerId = G.intEntityId
-	INNER JOIN tblEMEntity H
-		ON G.intEntityId = H.intEntityId
-	INNER JOIN tblVRProgram I
-		ON O.intProgramId = I.intProgramId
-	INNER JOIN tblVRVendorSetup J
-		ON I.intVendorSetupId = J.intVendorSetupId
-	INNER JOIN tblAPVendor K 
-		ON J.intEntityId = K.intEntityId
-	INNER JOIN tblEMEntity S
-		ON K.intEntityId = S.intEntityId
-	INNER JOIN tblVRCustomerXref L
-		ON J.intVendorSetupId = L.intVendorSetupId
-			AND A.intEntityCustomerId = L.intEntityId
-	LEFT JOIN tblICItemVendorXref P
-		ON B.intItemId = P.intItemId
-			AND J.intVendorSetupId = P.intVendorSetupId
-	LEFT JOIN tblICCategoryVendor Q
-		ON C.intCategoryId = Q.intCategoryId
-			AND J.intVendorSetupId = Q.intVendorSetupId
-	LEFT JOIN tblVRUOMXref R
-		ON F.intUnitMeasureId = R.intUnitMeasureId
-			AND J.intVendorSetupId = R.intVendorSetupId
-	WHERE I.ysnActive = 1
-	
-
-GO
-
+SELECT 
+	  invoice.strInvoiceNumber
+	, rebate.intRebateId
+	, vendorSetup.strCompany1Id
+	, vendorSetup.strCompany2Id
+	, invoice.dtmShipDate
+	, invoice.strBOLNumber
+	, vendorXRef.strVendorProduct
+	, rebate.dblQuantity
+	, invoiceDetail.dblPrice
+	, invoiceDetail.intItemUOMId
+	, category.strCategoryCode
+	, strVendorCategory = categoryVendor.strVendorDepartment
+	, item.strItemNo
+	, strVendorItemNo = vendorXRef.strVendorProduct
+	, strVendorUOM = uomXref.strVendorUOM
+	, intProgramId = program.intProgramId
+	, vendorSetup.intVendorSetupId
+	, invoice.intInvoiceId
+	, uom.strUnitMeasure
+	, program.strProgramDescription
+	, customerXref.strVendorCustomer
+	, rebate.intConcurrencyId
+	, invoiceDetail.intInvoiceDetailId
+	, strVendorName = vendorEntity.strName
+FROM tblVRRebate rebate
+INNER JOIN tblARInvoiceDetail invoiceDetail ON invoiceDetail.intInvoiceDetailId = rebate.intInvoiceDetailId
+INNER JOIN tblARInvoice invoice ON invoice.intInvoiceId = invoiceDetail.intInvoiceId
+INNER JOIN tblICItem item ON item.intItemId = invoiceDetail.intItemId
+INNER JOIN tblICCategory category ON category.intCategoryId = item.intCategoryId
+INNER JOIN tblICItemUOM itemUOM ON itemUOM.intItemUOMId = invoiceDetail.intItemUOMId
+INNER JOIN tblICUnitMeasure uom ON uom.intUnitMeasureId = itemUOM.intUnitMeasureId
+INNER JOIN tblARCustomer customer ON customer.intEntityId = invoice.intEntityCustomerId
+INNER JOIN tblEMEntity customerEntity ON customerEntity.intEntityId = customer.intEntityId
+INNER JOIN tblVRProgram program ON program.intProgramId = rebate.intProgramId
+INNER JOIN tblVRVendorSetup vendorSetup ON vendorSetup.intVendorSetupId = program.intVendorSetupId
+INNER JOIN tblAPVendor vendor ON vendor.intEntityId = vendorSetup.intEntityId
+INNER JOIN tblEMEntity vendorEntity ON vendorEntity.intEntityId = vendor.intEntityId
+INNER JOIN tblSMCompanyLocation companyLocation ON companyLocation.intCompanyLocationId = invoice.intCompanyLocationId
+LEFT OUTER JOIN tblICItemVendorXref vendorXRef ON vendorXRef.intItemId = item.intItemId
+    AND vendorXRef.intVendorSetupId = vendorSetup.intVendorSetupId
+LEFT OUTER JOIN tblICCategoryVendor categoryVendor ON categoryVendor.intCategoryId = category.intCategoryId
+    AND categoryVendor.intVendorSetupId = vendorSetup.intVendorSetupId
+LEFT OUTER JOIN tblVRUOMXref uomXref ON uomXref.intUnitMeasureId = uom.intUnitMeasureId
+    AND vendorSetup.intVendorSetupId = uomXref.intVendorSetupId
+LEFT OUTER JOIN tblVRCustomerXref customerXref ON customerXref.intVendorSetupId = vendorSetup.intVendorSetupId
+    AND customerXref.intEntityId = invoice.intEntityCustomerId
+WHERE program.ysnActive = 1

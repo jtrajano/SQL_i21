@@ -84,13 +84,16 @@ BEGIN
 	INSERT INTO tblICStagingItemLocation(intItemId, intItemLocationId, intLocationId, strLocationName, strLocationNo
 		, strCostingMethod, ysnAllowNegativeInventory, intAllowZeroCostTypeId, ysnRequireStorageUnit, strDefaultVendorNo
 		, strDefaultStorageLocation, strDefaultStorageUnit, strDefaultSaleUom, strDefaultPurchaseUom
-		, strDefaultGrossUom, strInventoryCountGroup, dblReorderPoint, dblLeadTime)
+		, strDefaultGrossUom, strInventoryCountGroup, dblReorderPoint, dblLeadTime
+		, intDefaultPurchaseUomId, intDefaultSaleUomId, intDefaultGrossUomId
+		, intDefaultPurchaseUnitMeasureId, intDefaultSaleUnitMeasureId, intDefaultGrossUnitMeasureId)
 	SELECT i.intItemId, il.intItemLocationId, il.intLocationId, c.strLocationName, c.strLocationNumber
 		, cm.strCostingMethod
 		, il.intAllowNegativeInventory, il.intAllowZeroCostTypeId, il.ysnStorageUnitRequired, e.strName AS strDefaultVendorNo
 		, sl.strSubLocationName AS strDefaultStorageLocation, su.strName AS strDefaultStorageUnit
 		, us.strUnitMeasure AS strDefaultSaleUom, up.strUnitMeasure AS strDefaultPurchaseUom
 		, ug.strUnitMeasure AS strDefaultGrossUom, cg.strCountGroup AS strInventoryCountGroup, il.dblReorderPoint, il.dblLeadTime
+		, il.intReceiveUOMId, il.intIssueUOMId, il.intGrossUOMId, up.intUnitMeasureId, us.intUnitMeasureId, ug.intUnitMeasureId
 	FROM @Items i
 		INNER JOIN tblICItemLocation il ON il.intItemId = i.intItemId
 		INNER JOIN tblSMCompanyLocation c ON c.intCompanyLocationId = il.intLocationId

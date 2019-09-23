@@ -66,6 +66,12 @@
 	[strMarkUpDownBatchNo] NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL,
 	[intSalesInvoiceIntegrationLogId] INT NULL,
 	[intReceivePaymentsIntegrationLogId] INT NULL,
+
+	-- 0 = Ready
+	-- 1 = Currently being Posted
+	-- 2 = Currently being Un-Posted
+	[intCheckoutCurrentProcess]	INT NOT NULL DEFAULT(0), 
+
     [intConcurrencyId] INT NULL,
     CONSTRAINT [PK_tblSTCheckoutHeader] PRIMARY KEY CLUSTERED ([intCheckoutId] ASC),
     CONSTRAINT [FK_tblSTCheckoutHeader_tblSTStore] FOREIGN KEY ([intStoreId]) REFERENCES [tblSTStore]([intStoreId]),

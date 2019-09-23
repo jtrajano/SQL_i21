@@ -279,10 +279,12 @@ IF @strFormattingOptions IS NULL OR @strFormattingOptions <> 'Product Recap Tota
 			FOR XML PATH ('')
 		) C (intEntityCustomerId)
 
+		SELECT @strCustomerIds = ISNULL(@strCustomerIds,'0')
 		EXEC dbo.uspARCustomerAgingAsOfDateReport @dtmDateFrom		= @dtmDateFrom
 												, @dtmDateTo		= @dtmDateTo
 												, @strCustomerIds	= @strCustomerIds
 												, @intEntityUserId	= @intEntityUserId
+
 
 		DELETE FROM tblARCustomerActivityStagingTable WHERE intEntityUserId = @intEntityUserId
 		INSERT INTO tblARCustomerActivityStagingTable (

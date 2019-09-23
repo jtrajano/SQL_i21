@@ -88,7 +88,7 @@ BEGIN
 						AND ROUND((cb.dblStockIn - cb.dblStockOut), 6) <> 0  
 						AND dbo.fnDateLessThanEquals(cb.dtmDate, @dtmDate) = 1						
 						AND ISNULL(cbAvailable.dblAvailable, 0) >=  ROUND(@dblQty, 6)
-				ORDER BY cb.dtmDate ASC
+				ORDER BY cb.dtmDate ASC, cb.intInventoryLotId ASC 
 			) cb
 
 

@@ -75,8 +75,8 @@ BEGIN
 			,[ysnComputed]					BIT
 			)
 					
-	IF ISNULL(@TaxGroupId, 0) = 0
-		SELECT @TaxGroupId = [dbo].[fnGetTaxGroupIdForVendor](@VendorId, @CompanyLocationId, @ItemId, @VendorLocationId, @FreightTermId)	
+	-- IF ISNULL(@TaxGroupId, 0) = 0
+	-- 	SELECT @TaxGroupId = [dbo].[fnGetTaxGroupIdForVendor](@VendorId, @CompanyLocationId, @ItemId, @VendorLocationId, @FreightTermId)	
 					
 	INSERT INTO @ItemTaxes (
 		 [intTransactionDetailTaxId] 

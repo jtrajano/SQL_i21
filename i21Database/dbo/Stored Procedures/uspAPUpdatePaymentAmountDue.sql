@@ -21,10 +21,10 @@ BEGIN
 	UPDATE tblAPPaymentDetail
 	SET --compute discount/interest if there is any
 		@discount = CASE WHEN C.intTransactionType = 1 
-						THEN dbo.fnGetDiscountBasedOnTerm(A.dtmDatePaid, C.dtmDate, C.intTermsId, (C.dblAmountDue + B.dblPayment + B.dblDiscount - B.dblInterest))
+						THEN dbo.fnGetDiscountBasedOnTerm(A.dtmDatePaid, C.dtmBillDate, C.intTermsId, (C.dblAmountDue + B.dblPayment + B.dblDiscount - B.dblInterest))
 					ELSE 0 END,
 		@interest = CASE WHEN C.intTransactionType = 1
-						THEN dbo.fnGetInterestBasedOnTerm((C.dblAmountDue + B.dblPayment + B.dblDiscount - B.dblInterest), C.dtmDate, A.dtmDatePaid, NULL, C.intTermsId)
+						THEN dbo.fnGetInterestBasedOnTerm((C.dblAmountDue + B.dblPayment + B.dblDiscount - B.dblInterest), C.dtmBillDate, A.dtmDatePaid, NULL, C.intTermsId)
 					ELSE 0 END,
 		tblAPPaymentDetail.dblAmountDue = (CASE WHEN B.dblAmountDue = 0 
 												THEN CAST((B.dblDiscount + B.dblPayment - B.dblInterest) AS DECIMAL(18,2))
@@ -38,6 +38,7 @@ BEGIN
 			ON B.intBillId = C.intBillId
 	WHERE A.intPaymentId IN (SELECT intId FROM @paymentIds)
 	AND 1 = CASE WHEN C.intTransactionType IN (2, 13) AND B.ysnOffset = 0 THEN 0 ELSE 1 END --DO NOTHING IF PREPAID/BASIS IS NOT AN OFFSET
+	AND B.dblPayment != 0
 END
 ELSE IF @post = 1
 BEGIN
@@ -61,4 +62,5 @@ BEGIN
 			ON B.intBillId = C.intBillId
 	WHERE A.intPaymentId IN (SELECT intId FROM @paymentIds)
 	AND 1 = CASE WHEN C.intTransactionType IN (2, 13) AND B.ysnOffset = 0 THEN 0 ELSE 1 END
+	AND B.dblPayment != 0
 END

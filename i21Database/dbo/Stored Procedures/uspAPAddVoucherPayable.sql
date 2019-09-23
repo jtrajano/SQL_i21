@@ -544,7 +544,7 @@ BEGIN
 									ELSE D.intTaxGroupId END 
 		,intCompanyLocationId		= A.intShipToId
 		,intVendorLocationId		= A.intShipFromId
-		,ysnIncludeExemptedCodes	= 0
+		,ysnIncludeExemptedCodes	= 1
 		,intFreightTermId			= NULL
 		,ysnExcludeCheckOff			= 0
 		,intItemUOMId				= CASE WHEN A.intWeightUOMId > 0 AND A.dblNetWeight > 0

@@ -55,9 +55,20 @@ SELECT
 FROM tblAPPayment pay
 INNER JOIN tblAPPaymentDetail payDetail ON pay.intPaymentId = payDetail.intPaymentId
 INNER JOIN tblCMBankTransaction bankTran ON pay.strPaymentRecordNum = bankTran.strTransactionId
-WHERE payDetail.intBillId = @voucherKey AND pay.ysnPosted = 1 
-AND bankTran.ysnCheckVoid = 0 AND (bankTran.dtmCheckPrinted IS NOT NULL OR bankTran.ysnClr = 1) 
+WHERE 
+	payDetail.intBillId = @voucherKey 
+AND pay.ysnPosted = 1 
+AND bankTran.ysnCheckVoid = 0 
 AND pay.intPaymentId = @paymentRecordId
+AND (
+		(
+			bankTran.dtmCheckPrinted IS NOT NULL 
+			OR 
+			bankTran.ysnClr = 1
+			OR
+			pay.intPaymentMethodId = 10 --CASH PAYMENT
+		) 
+	)
 
 SET @transCount = @@TRANCOUNT;
 IF @transCount = 0 BEGIN TRANSACTION

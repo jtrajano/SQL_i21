@@ -126,6 +126,7 @@ FROM
 	@TaxDetailItems TD
 WHERE
 	EXISTS(SELECT NULL FROM tblSMTaxCode SMTC WITH (NOLOCK) WHERE SMTC.[intTaxCodeId] = TD.[intTaxCodeId] AND UPPER(LTRIM(RTRIM(ISNULL(TD.[strCalculationMethod],'')))) NOT IN (UPPER('Unit'),UPPER('Percentage')))
+	AND ISNULL(TD.[ysnInvalidSetup], 0) = 0
 
 IF ISNULL(@RaiseError,0) = 1 AND EXISTS(SELECT TOP 1 NULL FROM @InvalidRecords)
 BEGIN

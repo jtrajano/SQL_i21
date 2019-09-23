@@ -11,18 +11,20 @@ BEGIN TRY
 	SELECT	FD.*,
 
 			PM.strUnitMeasure	AS strPricingUOM,
-			CY.strCurrency		AS strHedgeCurrency,
-			UM.strUnitMeasure	AS strHedgeUOM,
-			REPLACE(MO.strFutureMonth,' ','('+MO.strSymbol+') ') AS strHedgeMonth,
-			EY.strName			AS strBroker,
-			BA.strAccountNumber AS strBrokerAccount,
+			strHedgeCurrency = case when FD.ysnHedge = 1 then CY.strCurrency else null end,
+			strHedgeUOM = case when FD.ysnHedge = 1 then UM.strUnitMeasure	else null end,
+			strHedgeMonth = case when FD.ysnHedge = 1 then REPLACE(MO.strFutureMonth,' ','('+MO.strSymbol+') ') else null end,
+			strBroker = case when FD.ysnHedge = 1 then EY.strName else  null end,
+			strBrokerAccount = case when FD.ysnHedge = 1 then BA.strAccountNumber else null end,
 			TR.ysnFreezed,
 			CD.dblRatio,
 			dblAppliedQty = CASE
 								WHEN	CH.ysnLoad = 1
 								THEN	ISNULL(CD.intNoOfLoad,0)	-	ISNULL(CD.dblBalanceLoad,0)
 								ELSE	ISNULL(CD.dblQuantity,0)	-	ISNULL(CD.dblBalance,0)												
-							END
+							END,
+			TR.strInternalTradeNo,
+			TR.intFutOptTransactionHeaderId
 
 	FROM	tblCTPriceFixationDetail	FD
 	JOIN	tblCTPriceFixation			PF	ON	PF.intPriceFixationId			=	FD.intPriceFixationId

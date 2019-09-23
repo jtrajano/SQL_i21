@@ -66,7 +66,8 @@ BEGIN TRY
 			@strPricingQuantity			NVARCHAR(100),
 			@dblLotsFixed				NUMERIC(18,6),
 			@dblQtyFixed				NUMERIC(18,6),
-			@dblNewNoOfLots				NUMERIC(18,6)
+			@dblNewNoOfLots				NUMERIC(18,6),
+			@pricedDivided				BIT
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT, @XML 
 	
@@ -97,7 +98,8 @@ BEGIN TRY
 			@intNewShipperId			=	intShipperId,
 			@intNewShippingLineId		=	intShippingLineId,
 			@dtmNewM2MDate				=	dtmM2MDate,
-			@dblNewNoOfLots				=	dblNoOfLots
+			@dblNewNoOfLots				=	dblNoOfLots,
+			@pricedDivided				=	pricedDivided
 
 	FROM	OPENXML(@idoc, 'tblCTContractDetails/tblCTContractDetail',2)
 	WITH
@@ -129,7 +131,8 @@ BEGIN TRY
 			intShipperId				INT,
 			intShippingLineId			INT,
 			dtmM2MDate					DATETIME,
-			dblNoOfLots					NUMERIC(18,6)
+			dblNoOfLots					NUMERIC(18,6),
+			pricedDivided				BIT
 	)  
 
 	SELECT @strPricingQuantity = strPricingQuantity FROM tblCTCompanyPreference
@@ -422,7 +425,7 @@ BEGIN TRY
 			IF @strPricingQuantity = 'By Futures Contracts'
 			BEGIN
 				SELECT @dblLotsFixed = dblLotsFixed FROM tblCTPriceFixation WHERE intContractDetailId = @intContractDetailId
-				IF @dblNewNoOfLots < @dblLotsFixed
+				IF @dblNewNoOfLots < @dblLotsFixed AND ISNULL(@pricedDivided,0) = 0
 				BEGIN
 					SET @ErrMsg = 'Cannot reduce the lots for the Sequence ' + LTRIM(@intContractSeq) + ' to '+dbo.fnRemoveTrailingZeroes(@dblNewNoOfLots)+', as '+dbo.fnRemoveTrailingZeroes(@dblLotsFixed)+' lots are price fixed.'
 					RAISERROR(@ErrMsg,16,1) 
@@ -434,7 +437,7 @@ BEGIN TRY
 				JOIN	tblCTPriceFixationDetail FD ON FD.intPriceFixationId = PF.intPriceFixationId
 				WHERE	intContractDetailId = @intContractDetailId
 
-				IF @dblNewQuantity < @dblQtyFixed
+				IF @dblNewQuantity < @dblQtyFixed AND ISNULL(@pricedDivided,0) = 0
 				BEGIN
 					SET @ErrMsg = 'Cannot reduce the quantity for the Sequence ' + LTRIM(@intContractSeq) + ' to '+dbo.fnRemoveTrailingZeroes(@dblNewQuantity)+', as '+dbo.fnRemoveTrailingZeroes(@dblQtyFixed)+' is price fixed.'
 					RAISERROR(@ErrMsg,16,1) 

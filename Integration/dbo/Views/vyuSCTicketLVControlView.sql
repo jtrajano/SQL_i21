@@ -189,8 +189,8 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 					,[dblTareWeight]				= SC.dblTareWeight
 					,[dtmTareDateTime]				= SC.dtmTareDateTime
 					,[strTicketComment]				= LTRIM(RTRIM(SC.strTicketComment))
-					,[intDiscountId]				= GRDI.intDiscountId
-					,[intDiscountScheduleId]		= GRDS.intDiscountScheduleId
+					,[intDiscountId]				= GRDS.intDiscountScheduleId -- GRDI.intDiscountId (not being used)
+					,[intDiscountScheduleId]		= GRDS.intDiscountScheduleId -- consider review for redundancy. 
 					,[dblFreightRate]				= SC.dblFreightRate
 					,[dblTicketFees]				= SC.dblTicketFees
 					,[ysnFarmerPaysFreight]			= SC.ysnFarmerPaysFreight
@@ -218,7 +218,7 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 					,[dblUnitPrice]					= SC.dblUnitPrice
 					,[dblUnitBasis]					= 0
 					,[ysnProcessedData]				= 0
-					,[intOriginTicketId]			= SC.intTicketId
+					,[intOriginTicketId]			= IR.A4GLIdentity
 					,[dblConvertedUOMQty]			= ICUOM.dblUnitQty
 					,[intItemUOMIdFrom]				= UOM.intItemUOMId
 					,[intItemUOMIdTo]				= ICUOM.intItemUOMId
@@ -227,8 +227,9 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 					,[strDiscountComment]			= SC.strDiscountComment
 					,[strSourceType]				= ''LV Control''
 				FROM vyuSCTicketLVControlView SC 
+				INNER JOIN INSERTED IR ON SC.intTicketId = IR.A4GLIdentity
 				LEFT JOIN tblEMEntity EM ON EM.strEntityNo = SC.strEntityNo
-				LEFT JOIN tblICItem IC ON IC.strItemNo = SC.strItemNo
+				LEFT JOIN tblICItem IC ON IC.strItemNo =  IR.gasct_com_cd COLLATE Latin1_General_CI_AS
 				LEFT JOIN tblICCommodity ICC ON ICC.intCommodityId = IC.intCommodityId
 				LEFT JOIN tblSMCompanyLocation SM ON SM.strLocationNumber = SC.strLocationNumber
 				LEFT JOIN tblGRDiscountId GRDI ON GRDI.strDiscountId = SC.strDiscountId
@@ -242,17 +243,18 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 				LEFT JOIN tblSCListTicketTypes SCL ON SCL.strInOutIndicator = SC.strInOutFlag AND SCL.intTicketType = SC.intTicketType
 				LEFT JOIN tblGRDiscountSchedule GRDS ON GRDS.strDiscountDescription =  (IC.strDescription  + '' Discount'' COLLATE Latin1_General_CI_AS) 
 
-				INSERT INTO tblSCTicketDiscountLVStaging (dblGradeReading, strShrinkWhat, dblShrinkPercent, intDiscountScheduleCodeId, intTicketId, strSourceType, strDiscountChargeType,intOriginTicketDiscountId)	
+				INSERT INTO tblSCTicketDiscountLVStaging (dblGradeReading, strShrinkWhat, dblShrinkPercent, intDiscountScheduleCodeId, intTicketId, strSourceType, strDiscountChargeType,intOriginTicketDiscountId, strCalcMethod)						
 				SELECT 
 				DISTINCT 
 					gasct_reading AS dblGradeReading
 					,gasct_shrk_what AS strShrinkWhat
 					,gasct_shrk_pct AS dblShrinkPercent
-					,intDiscountScheduleCodeId
+					,c.intDiscountScheduleCodeId
 					,intTicketId = k.intTicketLVStagingId
 					,''Scale'' AS strSourceType
 					,''Dollar'' strDiscountChargeType 
 					,b.A4GLIdentity
+					,DCode.intShrinkCalculationOptionId
 				FROM (
 						SELECT	
 							gasct_disc_cd_1		gasct_disc_cd,
@@ -349,7 +351,9 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 				INNER JOIN tblICCommodity ic ON ic.intCommodityId = k.intCommodityId
 				INNER JOIN tblGRDiscountSchedule d ON d.strDiscountDescription =  (ic.strDescription  + '' Discount'' COLLATE Latin1_General_CI_AS) 
 				INNER JOIN tblGRDiscountScheduleCode c ON c.intDiscountScheduleId = d.intDiscountScheduleId AND c.intStorageTypeId = -1
+				INNER JOIN vyuGRDiscountScheduleCodeNotMapped DCode on DCode.intDiscountScheduleCodeId = c.intDiscountScheduleCodeId
 				INNER JOIN tblICItem i on i.intItemId = c.intItemId AND i.strShortName = b.gasct_disc_cd  COLLATE Latin1_General_CI_AS
+				INNER JOIN INSERTED IR  ON k.intOriginTicketId= IR.A4GLIdentity
 				WHERE b.gasct_disc_cd is not null
 			END
 		')

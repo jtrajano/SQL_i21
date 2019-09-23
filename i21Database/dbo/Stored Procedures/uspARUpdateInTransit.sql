@@ -51,9 +51,18 @@ BEGIN
 				ON fp.strFobPoint = ft.strFobPoint
 			LEFT JOIN tblSCTicket TICKET
 				ON TICKET.intTicketId = ID.intTicketId
+			OUTER APPLY (
+				SELECT TOP 1 intInvoiceId 
+				FROM tblARInvoice R
+				WHERE R.strTransactionType = 'Invoice'
+				  AND R.ysnReturned = 1
+				  AND I.strInvoiceOriginId = R.strInvoiceNumber
+				  AND I.intOriginalInvoiceId = R.intInvoiceId
+			) RI
 			WHERE ID.intInvoiceId = @TransactionId 
 			AND (ISNULL(ID.intInventoryShipmentItemId, 0) > 0 OR ISNULL(ID.intLoadDetailId, 0) > 0)
 			AND (ID.intTicketId IS NULL OR (ID.intTicketId IS NOT NULL AND ISNULL(TICKET.strInOutFlag, '') = 'O' AND ISNULL(TICKET.intStorageScheduleTypeId, 0) <> 1))
+			AND ISNULL(RI.[intInvoiceId], 0) = 0
 			AND (
 					(I.[strType] <> 'Provisional' AND I.[ysnProvisionalWithGL] = 0)
 				OR
