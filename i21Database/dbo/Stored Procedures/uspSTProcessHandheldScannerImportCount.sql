@@ -87,6 +87,7 @@ BEGIN TRY
 				AND (ST.intCompanyLocationId != @intCompanyLocationId OR ItemLoc.intItemLocationId IS NULL)
 
 			-- Flag Failed
+			SET @NewInventoryCountId = 0
 			SET @ysnSuccess = CAST(0 AS BIT)
 			SET @strStatusMsg = 'Selected Item/s  ' + @strItemNoLocationSameAsStore + '  has no location setup same as location of selected Store.'
 			RETURN
