@@ -85,6 +85,7 @@ SELECT CP.intCompanyPreferenceId
 	,CP.dblDemandGrowthPerc
 	,CP.ysnComputeDemandUsingRecipe
 	,CP.ysnDisplayDemandWithItemNoAndDescription
+	,CP.ysnDisplayRestrictedBookInDemandView
 	,SL.strName AS strShipmentStagingLocation
 	,SL1.strName AS strShipmentDockDoorLocation
 	,LS.strSecondaryStatus AS strBondLotStatus
