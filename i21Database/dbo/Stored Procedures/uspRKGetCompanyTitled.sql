@@ -250,6 +250,7 @@ BEGIN
 			, intPricingTypeId int
 			, strTransactionType NVARCHAR(50)
 			, intTransactionId INT
+			, strTransactionId NVARCHAR(50)
 			, intTransactionDetailId INT
 			, intSourceId INT
 			, dtmDate DATETIME)
@@ -268,12 +269,13 @@ BEGIN
 				, dtmDate
 				, strTransactionType
 				, intTransactionId
+				, strTransactionId
 				, intTransactionDetailId
 				, intSourceId)
 			SELECT strCommodityCode
 				, strItemNo
 				, strCategoryCode
-				, dblTotal = dblTotal
+				, dblTotal = SUM(dblTotal)
 				, strLocationName
 				, intCommodityId
 				, intFromCommodityUnitMeasureId
@@ -282,6 +284,7 @@ BEGIN
 				, dtmDate
 				, strTransactionType
 				, intTransactionId
+				, strTransactionId
 				, intTransactionDetailId
 				, intSourceId
 			FROM (
@@ -297,6 +300,7 @@ BEGIN
 					, s.dtmDate
 					, s.strTransactionType
 					, s.intTransactionId
+					, s.strTransactionId
 					, s.intTransactionDetailId
 					, s.intSourceId
 				FROM vyuRKGetInventoryValuation s
@@ -313,6 +317,21 @@ BEGIN
 					AND s.intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 					AND strTransactionId NOT IN (SELECT strTransactionId FROM @transfer)
 			) t
+			GROUP BY
+			strCommodityCode
+				, strItemNo
+				, strCategoryCode
+				, strLocationName
+				, intCommodityId
+				, intFromCommodityUnitMeasureId
+				, intItemUOMId
+				, strInventoryType
+				, dtmDate
+				, strTransactionType
+				, intTransactionId
+				, strTransactionId
+				, intTransactionDetailId
+				, intSourceId
 
 			--Collateral
 			INSERT INTO @InventoryStock(strCommodityCode
@@ -361,6 +380,7 @@ BEGIN
 					JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = c.intCommodityId AND c.intUnitMeasureId = ium.intUnitMeasureId
 					JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = c.intLocationId
 					WHERE c.intCommodityId = @intCommodityId 
+						AND c.intItemId = ISNULL(@intItemId, c.intItemId)
 						AND c.intLocationId = ISNULL(@intLocationId, c.intLocationId)
 						AND CONVERT(DATETIME, CONVERT(VARCHAR(10), c.dtmOpenDate, 110), 110) <= CONVERT(DATETIME, @dtmToTransactionDate)
 				) a WHERE a.intRowNum = 1 AND ysnIncludeInPriceRiskAndCompanyTitled = 1
@@ -546,13 +566,14 @@ BEGIN
 				,intTransactionId = intBillId
 				,strDistribution
 			FROM (
-				select
+				select distinct
 						dtmDate =  CONVERT(DATETIME, CONVERT(VARCHAR(10), Inv.dtmDate, 110), 110)
 					,BD.dblQtyReceived
-					,dblPartialPaidQty = (BD.dblQtyReceived / B.dblTotal) * dblPayment 
+					,dblPartialPaidQty = CASE WHEN ISNULL(B.dblTotal, 0) = 0 THEN 0 ELSE (BD.dblQtyReceived / B.dblTotal) * dblPayment END
 					,B.strBillId
 					,B.intBillId
 					,strDistribution =  ST.strStorageTypeCode
+					,BD.intBillDetailId
 				from @InventoryStock Inv
 				inner join tblGRSettleStorage SS ON Inv.intTransactionId = SS.intSettleStorageId
 				inner join tblAPBill B on SS.intBillId = B.intBillId
@@ -581,14 +602,35 @@ BEGIN
 					,I.strInvoiceNumber
 					,I.intInvoiceId
 					,strDistribution = TV.strDistributionOption
+					,Inv.intTransactionDetailId
 				from @InventoryStock Inv
 				inner join tblICInventoryShipment S on Inv.intTransactionId = S.intInventoryShipmentId
+				inner join tblICInventoryShipmentItem ISI ON ISI.intInventoryShipmentId = S.intInventoryShipmentId AND ISI.intInventoryShipmentItemId = Inv.intTransactionDetailId
 				inner join tblARInvoiceDetail ID on Inv.intTransactionDetailId = ID.intInventoryShipmentItemId 
 						AND ID.intInventoryShipmentChargeId IS NULL
 				inner join tblARInvoice I on ID.intInvoiceId = I.intInvoiceId
 				left join vyuSCTicketView TV on ID.intTicketId = TV.intTicketId
 				where Inv.strTransactionType = 'Inventory Shipment'
-					--AND S.intSourceType = 1
+				AND ISI.ysnDestinationWeightsAndGrades = 0
+
+				UNION ALL
+				select distinct
+						dtmDate =  CONVERT(DATETIME, CONVERT(VARCHAR(10),Inv.dtmDate, 110), 110)
+					,dblQtyShipped = ISNULL(dbo.fnCalculateQtyBetweenUOM(ID.intItemUOMId, Inv.intItemUOMId,  Inv.dblTotal), 0) 
+					,I.strInvoiceNumber
+					,I.intInvoiceId
+					,strDistribution = TV.strDistributionOption
+					,Inv.intTransactionDetailId
+				from @InventoryStock Inv
+				inner join tblICInventoryShipment S on Inv.intTransactionId = S.intInventoryShipmentId
+				inner join tblICInventoryShipmentItem ISI ON ISI.intInventoryShipmentId = S.intInventoryShipmentId AND ISI.intInventoryShipmentItemId = Inv.intTransactionDetailId
+				inner join tblARInvoiceDetail ID on Inv.intTransactionDetailId = ID.intInventoryShipmentItemId 
+						AND ID.intInventoryShipmentChargeId IS NULL
+				inner join tblARInvoice I on ID.intInvoiceId = I.intInvoiceId
+				left join vyuSCTicketView TV on ID.intTicketId = TV.intTicketId
+				where Inv.strTransactionType = 'Inventory Shipment'
+				AND ISI.ysnDestinationWeightsAndGrades = 1
+
 						
 			) t
 				
@@ -715,7 +757,7 @@ BEGIN
 				inner join tblICInventoryAdjustment I on ID.intInventoryAdjustmentId = I.intInventoryAdjustmentId
 				where Inv.strTransactionType LIKE 'Inventory Adjustment -%'
 					AND I.ysnPosted = 1
-					AND I.intSourceTransactionTypeId IS NULL
+					AND (I.intSourceTransactionTypeId IS NULL OR I.intSourceTransactionTypeId = 8)
 						
 			) t
 
@@ -757,10 +799,9 @@ BEGIN
 				select
 					dtmDate =  CONVERT(DATETIME, CONVERT(VARCHAR(10),Inv.dtmDate, 110), 110)
 					,Inv.dblTotal
-					,strTransactionId = It.strTransactionId
+					,strTransactionId = Inv.strTransactionId
 					,Inv.intTransactionId 
 				from @InventoryStock Inv
-				inner join tblICInventoryTransaction It on It.intTransactionId = Inv.intTransactionId and It.intTransactionDetailId = Inv.intTransactionDetailId and It.intTransactionTypeId = 9
 				where Inv.strTransactionType = 'Produce'
 						
 			) t
@@ -779,10 +820,9 @@ BEGIN
 				select
 					dtmDate =  CONVERT(DATETIME, CONVERT(VARCHAR(10),Inv.dtmDate, 110), 110)
 					,Inv.dblTotal
-					,strTransactionId = It.strTransactionId
+					,strTransactionId = Inv.strTransactionId
 					,Inv.intTransactionId 
 				from @InventoryStock Inv
-				inner join tblICInventoryTransaction It on It.intTransactionId = Inv.intTransactionId and It.intTransactionDetailId = Inv.intTransactionDetailId and It.intTransactionTypeId = 8
 				where Inv.strTransactionType = 'Consume'
 						
 			) t
