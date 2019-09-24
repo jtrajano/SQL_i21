@@ -427,7 +427,6 @@ BEGIN
 					JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = c.intCommodityId AND c.intUnitMeasureId = ium.intUnitMeasureId
 					JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = c.intLocationId
 					WHERE c.intCommodityId = @intCommodityId 
-						AND c.intItemId = ISNULL(@intItemId, c.intItemId)
 						AND c.intLocationId = ISNULL(@intLocationId, c.intLocationId)
 						AND CONVERT(DATETIME, CONVERT(VARCHAR(10), c.dtmOpenDate, 110), 110) <= CONVERT(DATETIME, @dtmToTransactionDate)
 				) a WHERE a.intRowNum = 1 AND ysnIncludeInPriceRiskAndCompanyTitled = 1
