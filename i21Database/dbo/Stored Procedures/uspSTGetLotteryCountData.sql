@@ -1,5 +1,4 @@
-﻿
-CREATE PROCEDURE [dbo].[uspSTGetLotteryCountData]
+﻿CREATE PROCEDURE [dbo].[uspSTGetLotteryCountData]
 	@date DATETIME,
 	@storeId INT,
 	@checkoutId INT
@@ -7,7 +6,11 @@ AS
 
 SELECT 
 *
-,strSoldOut = CASE 
+,strSoldOut = 
+CASE WHEN LOWER(strStatus) = 'sold' 
+	THEN 'Yes'
+	ELSE
+			CASE 
 			WHEN strCountDirection = 'Low to High' 
 				THEN 
 				CASE WHEN intEndingNumber =  intBeginCount
@@ -18,16 +21,26 @@ SELECT
 					THEN 'Yes' ELSE 'No'
 				END
 		END
+	END
 FROM
 (
 SELECT 
-intBeginCount = CASE WHEN ISNULL(intPriorCheckoutCount,0) != 0 
-THEN intPriorCheckoutBeginCount 
-ELSE 
-	CASE WHEN strCountDirection = 'Low to High' THEN intStartingNumber ELSE CAST(intEndingNumber AS INT) END
-END
+intBeginCount = CASE 
+	WHEN LOWER(strStatus) = 'sold' 
+	THEN 0
+	ELSE
+		CASE WHEN ISNULL(intPriorCheckoutCount,0) != 0 
+		THEN intPriorCheckoutBeginCount 
+		ELSE 
+			CASE WHEN strCountDirection = 'Low to High' THEN intStartingNumber ELSE CAST(intEndingNumber AS INT) END
+		END
+	END
 ,dtmSoldDate	
 ,strStatus	
+,ysnBookSoldOut = CASE WHEN LOWER(strStatus) = 'sold' 
+	THEN CAST(1 AS bit)
+	ELSE CAST(0 AS bit)
+	END
 ,intStoreId	
 ,intLotteryBookId	
 ,intBinNumber	
@@ -94,13 +107,15 @@ SELECT
 	vyuSTItemPricingOnFirstLocation.strCategoryDescription,
 	vyuSTItemPricingOnFirstLocation.intItemUOMId
 	FROM tblSTLotteryBook
-	INNER JOIN tblSTLotteryGame 
+	LEFT JOIN tblSTLotteryGame 
 	ON tblSTLotteryGame.intLotteryGameId = tblSTLotteryBook.intLotteryGameId
 	INNER JOIN vyuSTItemPricingOnFirstLocation 
 	ON vyuSTItemPricingOnFirstLocation.intItemId = tblSTLotteryGame.intItemId
+	LEFT JOIN tblSTReturnLottery
+	ON tblSTReturnLottery.intLotteryBookId = tblSTLotteryBook.intLotteryBookId
 	WHERE ('active' = LOWER(strStatus)
 	OR ( ('sold' = LOWER(strStatus)) AND (dtmSoldDate = @date)) 
-	OR 'returned' = LOWER(strStatus)) 
+	OR 'returned' = LOWER(strStatus) AND ( tblSTReturnLottery.dtmReturnDate = @date)) 
 	AND tblSTLotteryBook.intStoreId = @storeId
 	
 

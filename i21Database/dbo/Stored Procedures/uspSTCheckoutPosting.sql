@@ -4860,7 +4860,7 @@ IF(@ysnDebug = 1)
 				FROM tblSTCheckoutLotteryCount 
 				WHERE tblSTCheckoutLotteryCount.intLotteryBookId = tblSTLotteryBook.intLotteryBookId
 				AND tblSTCheckoutLotteryCount.intCheckoutId = @intCheckoutId
-				AND tblSTCheckoutLotteryCount.strSoldOut = 'Yes'
+				--AND tblSTCheckoutLotteryCount.strSoldOut = 'Yes'
 				AND tblSTLotteryBook.strStatus = 'Active'
 
 
@@ -4871,7 +4871,7 @@ IF(@ysnDebug = 1)
 				FROM tblSTCheckoutLotteryCount 
 				WHERE tblSTCheckoutLotteryCount.intLotteryBookId = tblSTLotteryBook.intLotteryBookId 
 				AND tblSTCheckoutLotteryCount.intCheckoutId = @intCheckoutId
-				AND tblSTCheckoutLotteryCount.strSoldOut = 'Yes'
+				--AND tblSTCheckoutLotteryCount.strSoldOut = 'Yes'
 				AND tblSTLotteryBook.strStatus = 'Active'
 
 				------------------------------------------------------
