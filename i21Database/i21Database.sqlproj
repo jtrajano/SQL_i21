@@ -8076,6 +8076,7 @@
     <Build Include="dbo\Views\vyuCTSearchContractDetail2.sql" />
     <Build Include="dbo\Views\vyuMFGetSalesOrderDetail.sql" />
     <Build Include="dbo\Views\vyuSTItemUOM.sql" />
+    <Build Include="dbo\Views\vyuLGAdditionalColumnForContractDetailView.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

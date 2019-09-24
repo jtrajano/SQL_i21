@@ -118,7 +118,7 @@ SELECT CD.intContractDetailId
 	,strShipTo = SH.strLocationName
 FROM tblCTContractHeader CH
 JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId
-CROSS APPLY dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
+JOIN vyuLGAdditionalColumnForContractDetailView AD ON CD.intContractDetailId = AD.intContractDetailId
 JOIN tblICItem Item ON Item.intItemId = CD.intItemId
 JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CD.intCompanyLocationId
 JOIN tblEMEntity E ON E.intEntityId = CH.intEntityId
@@ -151,30 +151,24 @@ LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = CD.intFreightTermId
 LEFT JOIN tblSMCountry CO ON CO.intCountryID = ICI.intCountryId
 LEFT JOIN tblSMCountry CO2 ON CO2.intCountryID = CA.intCountryID
 LEFT JOIN tblEMEntityLocation SH ON SH.intEntityLocationId = CD.intShipToId
-LEFT JOIN (
-	SELECT *
-	FROM (
-		SELECT ROW_NUMBER() OVER (
-				PARTITION BY S.intContractDetailId ORDER BY S.dtmTestingEndDate DESC, S.intSampleId DESC
-				) intRowNum
-			,S.intContractDetailId
-			,S.strSampleNumber
-			,S.strContainerNumber
-			,ST.strSampleTypeName
-			,SS.strStatus AS strSampleStatus
-			,S.dtmTestingStartDate
-			,S.dtmTestingEndDate
-			,S.intCompanyLocationSubLocationId
-			,CLSL.strSubLocationName
-			,S.dblRepresentingQty
-		FROM tblQMSample S
-		JOIN tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId
-		JOIN tblQMSampleStatus AS SS ON SS.intSampleStatusId = S.intSampleStatusId
-		LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = S.intCompanyLocationSubLocationId
-		WHERE S.intContractDetailId IS NOT NULL
-		) t
-	WHERE intRowNum = 1
-	) S ON S.intContractDetailId = CD.intContractDetailId
+OUTER APPLY (
+	SELECT TOP 1
+		S.intContractDetailId
+		,S.strSampleNumber
+		,S.strContainerNumber
+		,ST.strSampleTypeName
+		,SS.strStatus AS strSampleStatus
+		,S.dtmTestingStartDate
+		,S.dtmTestingEndDate
+		,S.intCompanyLocationSubLocationId
+		,CLSL.strSubLocationName
+		,S.dblRepresentingQty
+	FROM tblQMSample S
+	JOIN tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId
+	JOIN tblQMSampleStatus AS SS ON SS.intSampleStatusId = S.intSampleStatusId
+	LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = S.intCompanyLocationSubLocationId
+	WHERE S.intContractDetailId = CD.intContractDetailId
+	ORDER BY S.dtmTestingEndDate DESC, S.intSampleId DESC) S 
 CROSS APPLY tblLGCompanyPreference CP
 OUTER APPLY (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference) DC
 
@@ -305,7 +299,7 @@ SELECT CD.intContractDetailId
 	,strShipTo = SH.strLocationName
 FROM tblCTContractHeader CH
 JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId
-CROSS APPLY dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
+JOIN vyuLGAdditionalColumnForContractDetailView AD ON CD.intContractDetailId = AD.intContractDetailId
 JOIN tblICItem Item ON Item.intItemId = CD.intItemId
 JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CD.intCompanyLocationId
 JOIN tblEMEntity E ON E.intEntityId = CH.intEntityId
@@ -338,30 +332,24 @@ LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = CD.intFreightTermId
 LEFT JOIN tblSMCountry CO ON CO.intCountryID = ICI.intCountryId
 LEFT JOIN tblSMCountry CO2 ON CO2.intCountryID = CA.intCountryID
 LEFT JOIN tblEMEntityLocation SH ON SH.intEntityLocationId = CD.intShipToId
-LEFT JOIN (
-	SELECT *
-	FROM (
-		SELECT ROW_NUMBER() OVER (
-				PARTITION BY S.intContractDetailId ORDER BY S.dtmTestingEndDate DESC, S.intSampleId DESC
-				) intRowNum
-			,S.intContractDetailId
-			,S.strSampleNumber
-			,S.strContainerNumber
-			,ST.strSampleTypeName
-			,SS.strStatus AS strSampleStatus
-			,S.dtmTestingStartDate
-			,S.dtmTestingEndDate
-			,S.intCompanyLocationSubLocationId
-			,CLSL.strSubLocationName
-			,S.dblRepresentingQty
-		FROM tblQMSample S
-		JOIN tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId
-		JOIN tblQMSampleStatus AS SS ON SS.intSampleStatusId = S.intSampleStatusId
-		LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = S.intCompanyLocationSubLocationId
-		WHERE S.intContractDetailId IS NOT NULL
-		) t
-	WHERE intRowNum = 1
-	) S ON S.intContractDetailId = CD.intContractDetailId
+OUTER APPLY (
+	SELECT TOP 1
+		S.intContractDetailId
+		,S.strSampleNumber
+		,S.strContainerNumber
+		,ST.strSampleTypeName
+		,SS.strStatus AS strSampleStatus
+		,S.dtmTestingStartDate
+		,S.dtmTestingEndDate
+		,S.intCompanyLocationSubLocationId
+		,CLSL.strSubLocationName
+		,S.dblRepresentingQty
+	FROM tblQMSample S
+	JOIN tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId
+	JOIN tblQMSampleStatus AS SS ON SS.intSampleStatusId = S.intSampleStatusId
+	LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = S.intCompanyLocationSubLocationId
+	WHERE S.intContractDetailId = CD.intContractDetailId
+	ORDER BY S.dtmTestingEndDate DESC, S.intSampleId DESC) S 
 CROSS APPLY tblLGCompanyPreference CP
 OUTER APPLY (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference) DC
 GROUP BY CD.intContractDetailId
