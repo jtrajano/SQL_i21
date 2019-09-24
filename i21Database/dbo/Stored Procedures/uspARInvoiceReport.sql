@@ -327,7 +327,7 @@ LEFT JOIN (
 		 , strSealNumber			= SCALE.strSealNumber
 		 , strCustomerReference		= ISNULL(NULLIF(SCALE.strCustomerReference, ''), CONTRACTS.strCustomerContract)
 		 , strSalesReference		= ISNULL(NULLIF(LGLOAD.strCustomerReference, ''), CONTRACTS.strCustomerContract)
-	 	 , strPurchaseReference		= LGLOAD.strExternalLoadNumber
+	 	 , strPurchaseReference		= ISNULL(LGLOAD.strExternalLoadNumber, SCALE.strExternalLoadNumber)
 		 , strLoadNumber			= ISNULL(LGLOAD.strLoadNumber, SCALE.strLoadNumber)
 		 , strTruckName				= SCALE.strTruckName
 		 , dblPercentFull			= ID.dblPercentFull
@@ -398,6 +398,7 @@ LEFT JOIN (
 			 , SC.dtmTicketDateTime
 			 , SVT.strTrailerNumber
 			 , SCN.strSealNumber
+			 , LG.strExternalLoadNumber
 		FROM dbo.tblSCTicket SC WITH (NOLOCK)
 		LEFT JOIN dbo.tblSMShipViaTrailer SVT ON SC.intEntityShipViaTrailerId = SVT.intEntityShipViaTrailerId 
 		LEFT JOIN dbo.tblSCTicketSealNumber TSN ON SC.intTicketId = TSN.intTicketId
