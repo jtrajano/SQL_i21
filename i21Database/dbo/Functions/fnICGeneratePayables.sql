@@ -444,7 +444,9 @@ FROM [vyuICChargesForBilling] A
 	LEFT JOIN tblICItem item ON item.intItemId = A.intItemId
 	LEFT JOIN vyuPATEntityPatron patron ON patron.intEntityId = A.intEntityVendorId
 	LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = A.intContractHeaderId
-	LEFT JOIN tblCTContractDetail CD ON CD.intContractHeaderId = A.intContractHeaderId      
+	LEFT JOIN tblCTContractDetail CD 
+		ON CD.intContractHeaderId = A.intContractHeaderId
+		AND CD.intContractDetailId = A.intContractDetailId
 	LEFT JOIN tblSMTaxGroup TG ON TG.intTaxGroupId = A.intTaxGroupId
 	LEFT OUTER JOIN tblAPVendor payToVendor ON payToVendor.intEntityId = A.intEntityVendorId
 	LEFT OUTER JOIN tblEMEntityLocation payToAddress ON payToAddress.intEntityId = payToVendor.intEntityId
