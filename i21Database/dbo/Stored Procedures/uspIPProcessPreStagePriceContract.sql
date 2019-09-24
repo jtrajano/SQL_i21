@@ -71,9 +71,7 @@ BEGIN TRY
 				SELECT 1
 				FROM tblCTPriceContract
 				WHERE intPriceContractId = @intPriceContractId
-					AND intConcurrencyId > 1
 				)
-			AND @strUpdate = 'Delete'
 		BEGIN
 			EXEC uspCTPriceContractPopulateStgXML @intPriceContractId
 				,@intToEntityId

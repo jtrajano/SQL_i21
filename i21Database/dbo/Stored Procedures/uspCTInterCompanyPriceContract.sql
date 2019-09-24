@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspCTInterCompanyPriceContract] @intPriceContractId INT
-	,@ysnApprove BIT = 0,@strRowState NVARCHAR(50)
+	,@ysnApprove BIT = 0
+	,@strRowState NVARCHAR(50)
 AS
 BEGIN TRY
 	SET NOCOUNT ON
@@ -41,7 +42,7 @@ BEGIN TRY
 					@strUpdate = 'Update'
 					AND @ysnApprove = 0
 					)
-					OR (
+				OR (
 					@strDelete = 'Delete'
 					AND @ysnApprove = 0
 					)
@@ -55,8 +56,17 @@ BEGIN TRY
 					)
 				)
 		BEGIN
-			INSERT INTO dbo.tblCTPriceContractPreStage (intPriceContractId,strRowState)
-			SELECT @intPriceContractId,@strRowState
+			DELETE
+			FROM tblCTPriceContractPreStage
+			WHERE intPriceContractId = @intPriceContractId
+				AND strFeedStatus IS NULL
+
+			INSERT INTO dbo.tblCTPriceContractPreStage (
+				intPriceContractId
+				,strRowState
+				)
+			SELECT @intPriceContractId
+				,@strRowState
 		END
 	END
 END TRY
