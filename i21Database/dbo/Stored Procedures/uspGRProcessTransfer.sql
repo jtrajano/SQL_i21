@@ -78,7 +78,7 @@ BEGIN
 			,intCustomerStorageId
 		) AS (
 			SELECT intTransferContractDetailId	= SourceSplit.intContractDetailId,
-				dblTransferUnits				= -(SourceSplit.dblOriginalUnits - SourceSplit.dblDeductedUnits),
+				dblTransferUnits				= -CASE WHEN (SourceSplit.dblOriginalUnits - SourceSplit.dblDeductedUnits) = 0 THEN SourceSplit.dblOriginalUnits ELSE (SourceSplit.dblOriginalUnits - SourceSplit.dblDeductedUnits) END ,
 				intSourceItemUOMId				= TransferStorage.intItemUOMId,
 				intCustomerStorageId			= SourceSplit.intSourceCustomerStorageId
 			FROM tblGRTransferStorageSourceSplit SourceSplit
