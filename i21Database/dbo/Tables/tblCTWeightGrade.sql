@@ -14,5 +14,8 @@ CREATE TABLE [dbo].[tblCTWeightGrade]
 	CONSTRAINT [UQ_tblCTWeightGrade_strWeightGradeDesc] UNIQUE ([strWeightGradeDesc]),
 	CONSTRAINT [FK_tblCTWeightGrade_tblGLAccount_intAccountId] FOREIGN KEY ([intAccountId]) REFERENCES [tblGLAccount]([intAccountId])
 )
+GO
 
-
+CREATE NONCLUSTERED INDEX [IX_tblCTWeightGrade_intWeightGradeId]
+		ON [dbo].[tblCTWeightGrade]([intWeightGradeId] ASC)
+GO
