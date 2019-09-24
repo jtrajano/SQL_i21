@@ -27,6 +27,7 @@ BEGIN
 	DECLARE @intNewContractHeaderId INT
 	DECLARE @intNewContractDetailId INT
 	DECLARE @intEntityId INT
+	DECLARE @intToEntityId INT
 
 	DECLARE @newCustomerStorageIds AS TABLE 
 	(
@@ -397,10 +398,12 @@ BEGIN
 		WITH storageDetails (
 			intTransferStorageSplitId
 			,intEntityId
+			,intToEntityId
 		) AS (
 			SELECT 
 				intTransferStorageSplitId	= TransferStorageSplit.intTransferStorageSplitId
 				,intEntityId				= CS.intEntityId
+				,intToEntityId				= TransferStorageSplit.intEntityId
 			FROM tblGRTransferStorageSplit TransferStorageSplit
 			INNER JOIN tblGRTransferStorage TransferStorage
 				ON TransferStorage.intTransferStorageId = TransferStorageSplit.intTransferStorageId
@@ -415,17 +418,18 @@ BEGIN
 		SELECT
 			intTransferStorageSplitId
 			,intEntityId
+			,intToEntityId
 		FROM ( SELECT * FROM storageDetails ) params
 		
 		--if there are no contracts and the selected storage is DP
 		--(Transfer to DP) if there is no available contract for the selected entity, location and item, create a new contract
 		OPEN c;
 
-		FETCH c INTO @intTransferStorageSplitId, @intEntityId
+		FETCH c INTO @intTransferStorageSplitId, @intEntityId, @intToEntityId
 
 		WHILE @@FETCH_STATUS = 0 AND @cnt > 0
 		BEGIN
-			SET @XML = '<overrides><intEntityId>' + LTRIM(@intEntityId) + '</intEntityId></overrides>'
+			SET @XML = '<overrides><intEntityId>' + LTRIM(@intToEntityId) + '</intEntityId></overrides>'
 
 			IF @intTransferStorageSplitId IS NOT NULL
 			BEGIN
@@ -447,7 +451,7 @@ BEGIN
 				WHERE intTransferStorageSplitId = @intTransferStorageSplitId
 			END
 
-			FETCH c INTO @intTransferStorageSplitId, @intEntityId
+			FETCH c INTO @intTransferStorageSplitId, @intEntityId, @intToEntityId
 		END
 		CLOSE c; DEALLOCATE c;
 
