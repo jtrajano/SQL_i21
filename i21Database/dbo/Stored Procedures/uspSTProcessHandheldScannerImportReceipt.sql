@@ -1,9 +1,10 @@
 ﻿CREATE PROCEDURE [dbo].[uspSTProcessHandheldScannerImportReceipt]
-	@HandheldScannerId INT,
-	@UserId INT,
-	@strReceiptRefNoList NVARCHAR(MAX),
-	@ysnSuccess BIT OUTPUT,
-	@strStatusMsg NVARCHAR(1000) OUTPUT
+	@HandheldScannerId					INT,
+	@UserId								INT,
+	@strReceiptRefNoList				NVARCHAR(MAX),
+	@ysnSuccess							BIT OUTPUT,
+	@strStatusMsg						NVARCHAR(1000) OUTPUT,
+	@strItemNosWithInvalidLocation		NVARCHAR(MAX) OUTPUT
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -34,6 +35,8 @@ BEGIN TRY
 												ON st.intStoreId = hs.intStoreId
 											WHERE hs.intHandheldScannerId = @HandheldScannerId
 										)
+	
+	SET @strItemNosWithInvalidLocation = NULL
 
 
 	-- Insert to table
@@ -104,6 +107,7 @@ BEGIN TRY
 			-- Flag Failed
 			SET @ysnSuccess = CAST(0 AS BIT)
 			SET @strStatusMsg = 'Selected Item/s  ' + @strItemNoLocationSameAsStore + '  has no location setup same as location of selected Store.'
+			SET @strItemNosWithInvalidLocation = @strItemNoLocationSameAsStore
 			RETURN
 		END
 	--------------------------------------------------------------------------------------

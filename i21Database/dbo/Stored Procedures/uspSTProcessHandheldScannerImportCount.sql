@@ -1,12 +1,13 @@
 ﻿CREATE PROCEDURE [dbo].[uspSTProcessHandheldScannerImportCount]
-	@HandheldScannerId INT,
-	@UserId INT,
-	@dtmCountDate DATETIME,
-	@intProcessType INT,
-	@strCountNo NVARCHAR(100),
-	@NewInventoryCountId INT OUTPUT,
-	@ysnSuccess BIT OUTPUT,
-	@strStatusMsg NVARCHAR(1000) OUTPUT
+	@HandheldScannerId				INT,
+	@UserId							INT,
+	@dtmCountDate					DATETIME,
+	@intProcessType					INT,
+	@strCountNo						NVARCHAR(100),
+	@NewInventoryCountId			INT OUTPUT,
+	@ysnSuccess						BIT OUTPUT,
+	@strStatusMsg					NVARCHAR(1000) OUTPUT,
+	@strItemNosWithInvalidLocation	NVARCHAR(MAX) OUTPUT
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -33,6 +34,8 @@ BEGIN TRY
 												ON st.intStoreId = hs.intStoreId
 											WHERE hs.intHandheldScannerId = @HandheldScannerId
 										)
+	
+	SET @strItemNosWithInvalidLocation = NULL
 
 	--------------------------------------------------------------------------------------
 	-------------------- Start Validate if has record to Process -------------------------
@@ -43,7 +46,9 @@ BEGIN TRY
 			SET @NewInventoryCountId = 0
 			SET @ysnSuccess = CAST(0 AS BIT)
 			SET @strStatusMsg = 'There are no records to process.'
-			RETURN
+			SET @strItemNosWithInvalidLocation	=  NULL
+			
+			GOTO ExitWithRollback
 		END
 	--------------------------------------------------------------------------------------
 	-------------------- End Validate if has record to Process ---------------------------
@@ -55,42 +60,46 @@ BEGIN TRY
 	--------------------------------------------------------------------------------------
 	IF EXISTS(
 				SELECT TOP 1 1 
-				FROM vyuSTGetHandheldScannerImportCountWithRecipe IR
+				FROM tblSTHandheldScannerImportCount importCount
 				INNER JOIN tblSTHandheldScanner HS
-					ON IR.intHandheldScannerId = HS.intHandheldScannerId
+					ON importCount.intHandheldScannerId = HS.intHandheldScannerId
 				INNER JOIN tblSTStore ST
 					ON HS.intStoreId = ST.intStoreId
 				INNER JOIN tblICItem Item
-					ON IR.intItemId = Item.intItemId
+					ON importCount.intItemId = Item.intItemId
 				LEFT JOIN tblICItemLocation ItemLoc
 					ON Item.intItemId = ItemLoc.intItemId
 						AND ST.intCompanyLocationId = ItemLoc.intLocationId
-				WHERE IR.intHandheldScannerId = @HandheldScannerId
+				WHERE importCount.intHandheldScannerId = @HandheldScannerId
 					AND (ST.intCompanyLocationId != @intCompanyLocationId OR ItemLoc.intItemLocationId IS NULL)
 			 )
 		BEGIN
 			DECLARE @strItemNoLocationSameAsStore AS NVARCHAR(MAX)
 
+
 			SELECT 
 				@strItemNoLocationSameAsStore = COALESCE(@strItemNoLocationSameAsStore + ', ', '') + Item.strItemNo
-			FROM vyuSTGetHandheldScannerImportCountWithRecipe IR
+			FROM tblSTHandheldScannerImportCount importCount
 			INNER JOIN tblSTHandheldScanner HS
-				ON IR.intHandheldScannerId = HS.intHandheldScannerId
+				ON importCount.intHandheldScannerId = HS.intHandheldScannerId
 			INNER JOIN tblSTStore ST
 				ON HS.intStoreId = ST.intStoreId
 			INNER JOIN tblICItem Item
-				ON IR.intItemId = Item.intItemId
+				ON importCount.intItemId = Item.intItemId
 			LEFT JOIN tblICItemLocation ItemLoc
 				ON Item.intItemId = ItemLoc.intItemId
 					AND ST.intCompanyLocationId = ItemLoc.intLocationId
-			WHERE IR.intHandheldScannerId = @HandheldScannerId
+			WHERE importCount.intHandheldScannerId = @HandheldScannerId
 				AND (ST.intCompanyLocationId != @intCompanyLocationId OR ItemLoc.intItemLocationId IS NULL)
+
 
 			-- Flag Failed
 			SET @NewInventoryCountId = 0
 			SET @ysnSuccess = CAST(0 AS BIT)
 			SET @strStatusMsg = 'Selected Item/s  ' + @strItemNoLocationSameAsStore + '  has no location setup same as location of selected Store.'
-			RETURN
+			SET @strItemNosWithInvalidLocation	=  @strItemNoLocationSameAsStore
+
+			GOTO ExitWithRollback
 		END
 	--------------------------------------------------------------------------------------
 	------------- End Validate if All Items have the same Store Location -----------------
@@ -153,7 +162,9 @@ BEGIN TRY
 			SET @ysnSuccess = CAST(0 AS BIT)
 			SET @strStatusMsg = 'Selected Item/s ' + @strItemNoHasNoUOM + ' has no default UOM'
 			SET @NewInventoryCountId = 0
-			RETURN
+			SET @strItemNosWithInvalidLocation	=  NULL
+
+			GOTO ExitWithRollback
 		END
 	--------------------------------------------------------------------------------------
 	--------- End Validate if items does not have intItemUOMId ---------------------------
@@ -312,8 +323,9 @@ BEGIN TRY
 	WHERE intHandheldScannerId = @HandheldScannerId
 
 	-- Flag Success
-	SET @ysnSuccess = CAST(1 AS BIT)
-	SET @strStatusMsg = ''
+	SET @ysnSuccess						= CAST(1 AS BIT)
+	SET @strStatusMsg					= ''
+	SET @strItemNosWithInvalidLocation	= NULL
 
 	-- COMMIT
 	GOTO ExitWithCommit
@@ -325,9 +337,10 @@ BEGIN CATCH
 		@ErrorState = ERROR_STATE();
 
 	-- Flag Failed
-	SET @ysnSuccess = CAST(0 AS BIT)
-	SET @strStatusMsg = 'Catch error'
-	SET @NewInventoryCountId = 0
+	SET @ysnSuccess						= CAST(0 AS BIT)
+	SET @strStatusMsg					= 'Catch error'
+	SET @NewInventoryCountId			= 0
+	SET @strItemNosWithInvalidLocation	= NULL
 
 	-- Use RAISERROR inside the CATCH block to return error
 	-- information about the original error that caused
