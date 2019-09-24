@@ -358,7 +358,7 @@ BEGIN TRY
 			AND CTCQ.intContainerTypeId = @intContainerTypeId
 			AND CA.intDefaultPackingUOMId = CTCQ.intUnitMeasureId
 		LEFT JOIN tblLGContainerType CT ON CT.intContainerTypeId = CTCQ.intContainerTypeId
-		WHERE ID.intItemId = IsNULL(ID.intMainItemId, ID.intItemId)
+		WHERE ID.ysnSpecificItemDescription=0
 		GROUP BY ID.intMainItemId
 
 		INSERT INTO @tblMFContainerWeight (
@@ -389,7 +389,7 @@ BEGIN TRY
 			AND CTCQ.intContainerTypeId = @intContainerTypeId
 			AND CA.intDefaultPackingUOMId = CTCQ.intUnitMeasureId
 		LEFT JOIN tblLGContainerType CT ON CT.intContainerTypeId = CTCQ.intContainerTypeId
-		WHERE ID.intItemId <> ID.intMainItemId
+		WHERE ID.ysnSpecificItemDescription=1
 	END
 
 	UPDATE I
