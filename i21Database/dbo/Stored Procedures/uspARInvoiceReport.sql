@@ -325,9 +325,9 @@ LEFT JOIN (
 		 , strTicketNumberDate		= SCALE.strTicketNumber + ' - ' + CONVERT(NVARCHAR(50), SCALE.dtmTicketDateTime, 101) 
 		 , strTrailerNumber			= SCALE.strTrailerNumber
 		 , strSealNumber			= SCALE.strSealNumber
-		 , strCustomerReference		= ISNULL(NULLIF(SCALE.strCustomerReference, ''), CONTRACTS.strCustomerContract)
-		 , strSalesReference		= ISNULL(NULLIF(LGLOAD.strCustomerReference, ''), CONTRACTS.strCustomerContract)
-	 	 , strPurchaseReference		= ISNULL(LGLOAD.strExternalLoadNumber, SCALE.strExternalLoadNumber)
+		 , strCustomerReference		= CONTRACTS.strCustomerContract
+		 , strSalesReference		= ISNULL(NULLIF(LGLOAD.strCustomerReference, ''), SCALE.strCustomerReference)
+	 	 , strPurchaseReference		= ISNULL(NULLIF(LGLOAD.strExternalLoadNumber, ''), SCALE.strExternalLoadNumber)
 		 , strLoadNumber			= ISNULL(LGLOAD.strLoadNumber, SCALE.strLoadNumber)
 		 , strTruckName				= SCALE.strTruckName
 		 , dblPercentFull			= ID.dblPercentFull
@@ -392,7 +392,8 @@ LEFT JOIN (
 	LEFT JOIN (
 		SELECT SC.intTicketId
 			 , SC.strTicketNumber
-			 , SC.strCustomerReference			 
+			 , LG.strCustomerReference
+			 , strScaleCustomerReference = SC.strCustomerReference
 			 , SC.strTruckName
 			 , LG.strLoadNumber
 			 , SC.dtmTicketDateTime
