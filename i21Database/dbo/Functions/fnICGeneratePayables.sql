@@ -476,7 +476,7 @@ FROM [vyuICChargesForBilling] A
 	LEFT JOIN vyuPATEntityPatron patron ON patron.intEntityId = A.intEntityVendorId
 	LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = A.intContractHeaderId
 	LEFT JOIN tblCTContractDetail CD 
-		ON CD.intContractHeaderId = A.intContractHeaderId      
+		ON CD.intContractHeaderId = A.intContractHeaderId
 		AND CD.intContractDetailId = A.intContractDetailId
 	LEFT JOIN tblSMTaxGroup TG ON TG.intTaxGroupId = A.intTaxGroupId
 	LEFT OUTER JOIN tblAPVendor payToVendor ON payToVendor.intEntityId = A.intEntityVendorId
