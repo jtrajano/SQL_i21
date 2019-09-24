@@ -358,7 +358,7 @@ BEGIN TRY
 			AND CTCQ.intContainerTypeId = @intContainerTypeId
 			AND CA.intDefaultPackingUOMId = CTCQ.intUnitMeasureId
 		LEFT JOIN tblLGContainerType CT ON CT.intContainerTypeId = CTCQ.intContainerTypeId
-		WHERE ID.ysnSpecificItemDescription=0
+		WHERE ID.ysnSpecificItemDescription = 0
 		GROUP BY ID.intMainItemId
 
 		INSERT INTO @tblMFContainerWeight (
@@ -389,8 +389,12 @@ BEGIN TRY
 			AND CTCQ.intContainerTypeId = @intContainerTypeId
 			AND CA.intDefaultPackingUOMId = CTCQ.intUnitMeasureId
 		LEFT JOIN tblLGContainerType CT ON CT.intContainerTypeId = CTCQ.intContainerTypeId
-		WHERE ID.ysnSpecificItemDescription=1
+		WHERE ID.ysnSpecificItemDescription = 1
 	END
+
+	DELETE
+	FROM @tblMFContainerWeight
+	WHERE dblWeight IS NULL
 
 	UPDATE I
 	SET I.intMainItemId = ID.intMainItemId
@@ -731,6 +735,7 @@ BEGIN TRY
 			FROM @tblMFItem I
 			JOIN tblMFDemandDetail DD ON IsNULL(DD.intSubstituteItemId, DD.intItemId) = I.intItemId
 				AND DD.intDemandHeaderId = @intDemandHeaderId
+				and IsNULL(DD.intCompanyLocationId,IsNULL(@intCompanyLocationId,0))=IsNULL(@intCompanyLocationId,IsNULL(DD.intCompanyLocationId,0))
 			JOIN tblICItemUOM IU ON IU.intItemId = DD.intItemId
 				AND IU.intUnitMeasureId = @intUnitMeasureId
 			WHERE DD.dtmDemandDate >= @dtmStartOfMonth
