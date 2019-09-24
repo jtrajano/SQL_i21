@@ -360,8 +360,14 @@ BEGIN
 				JOIN tblICCommodity c ON i.intCommodityId = c.intCommodityId
 				JOIN tblICCategory Category ON Category.intCategoryId = i.intCategoryId
 				JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = GTS.intCompanyLocationId
-				WHERE  (FromType.strStorageTypeDescription = 'DELAYED PRICING' AND ToType.strStorageTypeDescription = 'OPEN STORAGE') --OR (FromType.strStorageTypeDescription = 'DELAYED PRICING' AND ToType.strStorageTypeDescription = 'OPEN STORAGE')
-					AND ITS.intTransactionTypeId = 56
+				WHERE c.intCommodityId = @intCommodityId
+                    AND i.intItemId = ISNULL(@intItemId, i.intItemId)
+                    AND GTS.intCompanyLocationId = ISNULL(@intLocationId, GTS.intCompanyLocationId)
+                    AND CONVERT(DATETIME, CONVERT(VARCHAR(10), ITS.dtmDate, 110), 110) <= CONVERT(DATETIME, @dtmToTransactionDate)
+                    AND GTS.intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
+                    AND (FromType.strStorageTypeDescription = 'DELAYED PRICING' AND ToType.strStorageTypeDescription = 'OPEN STORAGE') --OR (FromType.strStorageTypeDescription = 'DELAYED PRICING' AND ToType.strStorageTypeDescription = 'OPEN STORAGE')
+                    AND ITS.intTransactionTypeId = 56
+
 
 			) t
 			GROUP BY
