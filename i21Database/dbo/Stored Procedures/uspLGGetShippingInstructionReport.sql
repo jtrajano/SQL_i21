@@ -18,11 +18,7 @@ BEGIN
 			@strLogisticsCompanyName	NVARCHAR(MAX),
 			@strLogisticsPrintSignOff	NVARCHAR(MAX),
 			@intCompanyLocationId		INT,
-			@strPrintableRemarks		NVARCHAR(MAX),
-			@strContractText			NVARCHAR(MAX),
-			@strBOLInstructionText		NVARCHAR(MAX),
 			@strContainerPackType		NVARCHAR(100),
-			@strPackingDescription		NVARCHAR(100),
 			@strUserPhoneNo				NVARCHAR(100),
 			@strUserEmailId				NVARCHAR(100),
 			@strContainerQtyUOM			NVARCHAR(100),
@@ -84,52 +80,24 @@ BEGIN
 	
 	SELECT @strFullName = E.strName,
 		   @strUserEmailId = ETC.strEmail,
-		   @strUserPhoneNo = EPN.strPhone  FROM tblSMUserSecurity S
+		   @strUserPhoneNo = EPN.strPhone  
+	FROM tblSMUserSecurity S
 	JOIN tblEMEntity E ON E.intEntityId = S.intEntityId
 	JOIN tblEMEntityToContact EC ON EC.intEntityId = E.intEntityId
 	JOIN tblEMEntity ETC ON ETC.intEntityId = EC.intEntityContactId
 	JOIN tblEMEntityPhoneNumber EPN ON EPN.intEntityId = ETC.intEntityId
-	WHERE strUserName = @strUserName
+	WHERE S.strUserName = @strUserName
 	
 	SELECT @strLogisticsCompanyName = strLogisticsCompanyName,
 		   @strLogisticsPrintSignOff = strLogisticsPrintSignOff
 	FROM tblSMCompanyLocation WHERE intCompanyLocationId = @intCompanyLocationId
 
-	SELECT TOP 1 @strPrintableRemarks = CH.strPrintableRemarks
-				,@strContractText = CT.strText
-				,@strContainerPackType = LTRIM(ISNULL(L.intNumberOfContainers,0)) + ' ' + L.strPackingDescription
-				,@strPackingDescription = L.strPackingDescription
-	FROM tblLGLoad L
-	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
-	JOIN tblCTContractDetail CD ON CD.intContractDetailId = CASE 
-			WHEN L.intPurchaseSale = 1
-				THEN LD.intPContractDetailId
-			ELSE LD.intSContractDetailId
-			END
-	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
-	LEFT JOIN tblCTContractText CT ON CT.intContractTextId = CH.intContractTextId
-	WHERE L.intLoadId = @intLoadId
-
-	SELECT TOP 1 @strContainerQtyUOM = LTRIM(dbo.fnRemoveTrailingZeroes(SUM(dblQuantity))) + ' ' + strItemUOM
-	FROM vyuLGLoadDetailViewSearch
+	SELECT TOP 1 @strContainerQtyUOM = LTRIM(dbo.fnRemoveTrailingZeroes(SUM(LD.dblQuantity))) + ' ' + UOM.strUnitMeasure
+	FROM tblLGloadDetail LD
+	LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = LoadDetail.intItemUOMId
+	LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
 	WHERE intLoadId = @intLoadId
 	GROUP BY strItemUOM
-
-	SELECT TOP 1 @strPackingUOM =  CASE UPPER(strPackingDescription)
-			WHEN UPPER('Bulk')
-				THEN strPackingDescription
-			ELSE UM.strUnitMeasure
-			END
-	FROM tblLGLoad L
-	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
-	JOIN tblICItemUOM IU ON IU.intItemUOMId = LD.intItemUOMId
-	JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
-	WHERE L.intLoadId = @intLoadId
-
-	SELECT @strBOLInstructionText = '- All shipment details and purchase contract details as stated above' + CHAR(13) 
-		+ '- Gross-, Net- & Tare Weight' + CHAR(13) 
-		+ '- In the B/L description of goods: "' + @strContainerPackType + ' container(s) equivalent to ' 
-		+ @strContainerQtyUOM + ' each of clean green coffee in '+ @strPackingUOM +' for any limitation of liability purposes."'
 
 SELECT *
 	,strConsigneeInfo = LTRIM(RTRIM(
@@ -176,7 +144,12 @@ SELECT *
 		+ CASE WHEN ISNULL(strThirdNotifyFax, '') = '' THEN '' ELSE 'Fax: ' + strThirdNotifyFax + CHAR(13) END 
 		+ CASE WHEN ISNULL(strThirdNotifyMail, '') = '' THEN '' ELSE 'E-mail: ' + strThirdNotifyMail + CHAR(13) END 
 		+ CASE WHEN ISNULL(strThirdNotifyText, '') = '' THEN '' ELSE strThirdNotifyText END)) 
-	,strBOLInstructionText = @strBOLInstructionText
+	,strBOLInstructionText = '- All shipment details and purchase contract details as stated above' + CHAR(13) 
+							+ '- Gross-, Net- & Tare Weight' + CHAR(13) 
+							+ '- In the B/L description of goods: "' + LTRIM(ISNULL(intNumberOfContainers,0)) + ' ' + strPackingDescription + ' container(s) equivalent to ' 
+							+ @strContainerQtyUOM + ' each of clean green coffee in '
+							+ CASE UPPER(strPackingDescription) WHEN UPPER('Bulk') THEN strPackingDescription ELSE strItemUnitMeasure END 
+							+' for any limitation of liability purposes."'
 	,strContainerTypePackingDescription = strContainerType + ' in ' + strPackingDescription
 	,strQuantityPackingDescription = @strContainerQtyUOM + CASE WHEN (ISNULL(@strPackingUOM, '') <> '') THEN ' in ' + @strPackingUOM ELSE '' END
 	,strFullName = @strFullName
@@ -208,7 +181,8 @@ FROM (
 		,CH.strContractNumber
 		,CH.strCustomerContract
 		,Item.strItemNo
-		,Item.strDescription AS strItemDescription
+		,strItemDescription = Item.strDescription
+		,strItemUnitMeasure = UM.strUnitMeasure
 		,strVendor = CASE 
 			WHEN ISNULL(CD.ysnClaimsToProducer, 0) = 1
 				THEN DProducer.strName
@@ -465,6 +439,8 @@ FROM (
 	FROM tblLGLoad L
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 	JOIN tblICItem Item ON Item.intItemId = LD.intItemId
+	JOIN tblICItemUOM IU ON IU.intItemUOMId = LD.intItemUOMId
+	JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = CASE WHEN L.intPurchaseSale = 1 THEN intPContractDetailId ELSE intSContractDetailId END
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 	LEFT JOIN tblLGLoad SI ON SI.intLoadId = L.intLoadShippingInstructionId
