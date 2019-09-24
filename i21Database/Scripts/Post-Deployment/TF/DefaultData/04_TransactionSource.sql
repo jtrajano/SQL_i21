@@ -14,6 +14,7 @@ UNION ALL SELECT intTransactionSourceId = 4, strTransactionSource = 'CF Tran', i
 UNION ALL SELECT intTransactionSourceId = 5, strTransactionSource = 'CF Invoice', intMasterId = 5
 UNION ALL SELECT intTransactionSourceId = 6, strTransactionSource = 'POS', intMasterId = 6
 UNION ALL SELECT intTransactionSourceId = 7, strTransactionSource = 'Store Checkout', intMasterId = 7
+UNION ALL SELECT intTransactionSourceId = 8, strTransactionSource = 'Meter Billing', intMasterId = 8
 
 SET IDENTITY_INSERT tblTFTransactionSource ON
 
