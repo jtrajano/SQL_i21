@@ -532,7 +532,7 @@ BEGIN
 			ON TSS.intTransferStorageSplitId = SR.intTransferStorageSplitId
 		LEFT JOIN tblCTContractDetail CD
 			ON CD.intContractDetailId = TSS.intContractDetailId
-		WHERE  FromType.strStorageTypeDescription = 'DELAYED PRICING' AND ToType.strStorageTypeDescription = 'DELAYED PRICING'
+		WHERE  FromType.ysnDPOwnedType = 1 AND ToType.ysnDPOwnedType = 1
 		AND SR.intTransferStorageId = @intTransferStorageId
 
 		EXEC uspGRInsertStorageHistoryRecord @StorageHistoryStagingTable, @intStorageHistoryId
