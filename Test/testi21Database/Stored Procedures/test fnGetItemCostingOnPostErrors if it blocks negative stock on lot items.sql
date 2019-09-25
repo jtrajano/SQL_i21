@@ -89,7 +89,7 @@ BEGIN
 		-- Negative stock is not allowed 
 		SELECT	intItemId = @ManualLotGrains
 				,intItemLocationId = @ManualLotGrains_DefaultLocation
-				,strText = FORMATMESSAGE(80003, 'MANUAL LOT GRAINS', 'DEFAULT')
+				,strText = dbo.fnICFormatErrorMessage(80003, 'MANUAL LOT GRAINS', 'DEFAULT', DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT)
 				,intErrorCode = 80003	
 				
 		DECLARE @SubLocation AS INT 
@@ -101,7 +101,21 @@ BEGIN
 	-- Act
 	BEGIN 
 		INSERT INTO actual	
-		SELECT * FROM dbo.fnGetItemCostingOnPostErrors(@ManualLotGrains, @ManualLotGrains_DefaultLocation, @ManualLotGrains_BushelUOMId, @SubLocation, @StorageLocation, @dblQty, @LotId)
+		SELECT * FROM dbo.fnGetItemCostingOnPostErrors(
+			@ManualLotGrains
+			, @ManualLotGrains_DefaultLocation
+			, @ManualLotGrains_BushelUOMId
+			, @SubLocation
+			, @StorageLocation
+			, @dblQty
+			, @LotId
+			, DEFAULT
+			, DEFAULT
+			, DEFAULT
+			, DEFAULT
+			, DEFAULT
+			, DEFAULT
+		)
 	END
 
 	-- Assert

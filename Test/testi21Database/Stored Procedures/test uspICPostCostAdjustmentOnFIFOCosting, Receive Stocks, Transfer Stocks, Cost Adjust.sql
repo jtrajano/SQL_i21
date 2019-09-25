@@ -396,7 +396,7 @@ BEGIN
 			,strSourceTransactionId
 			,intTransactionTypeId
 			,intCurrencyId
-			,dblExchangeRate
+			--,dblExchangeRate
 		)
 		SELECT	
 			@dtmDate
@@ -416,7 +416,7 @@ BEGIN
 			,@strSourceTransactionId
 			,@intTransactionTypeId
 			,@intCurrencyId
-			,@dblExchangeRate
+			--,@dblExchangeRate
 
 		-- Get the g/l entries
 

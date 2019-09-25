@@ -74,7 +74,7 @@ BEGIN
 		DECLARE @intEntityId AS INT = 19945
 
 		INSERT INTO tblSMUserSecurity (
-			intEntityUserSecurityId
+			intEntityId
 		)
 		VALUES (@intEntityId);
 

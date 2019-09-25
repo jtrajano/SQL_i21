@@ -76,7 +76,7 @@ BEGIN
 	BEGIN
 		-- Try to validate an empty @GLEntries
 		INSERT INTO actual
-		SELECT * FROM dbo.fnGetGLEntriesErrors(@GLEntries)
+		SELECT * FROM dbo.fnGetGLEntriesErrors(@GLEntries, 1)
 	END 
 
 	-- Assert

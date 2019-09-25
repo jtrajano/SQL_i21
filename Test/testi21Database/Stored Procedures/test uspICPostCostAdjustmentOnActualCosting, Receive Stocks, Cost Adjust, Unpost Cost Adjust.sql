@@ -400,7 +400,7 @@ BEGIN
 			,strSourceTransactionId
 			,intTransactionTypeId
 			,intCurrencyId
-			,dblExchangeRate
+			--,dblExchangeRate
 			,strActualCostId
 		)
 		SELECT	
@@ -421,7 +421,7 @@ BEGIN
 			,@strSourceTransactionId
 			,@intTransactionTypeId
 			,@intCurrencyId
-			,@dblExchangeRate
+			--,@dblExchangeRate
 			,@strActualCostId
 
 		EXEC dbo.uspICPostCostAdjustment

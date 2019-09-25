@@ -12,8 +12,8 @@ BEGIN
 	EXEC tSQLt.ApplyConstraint 'dbo.tblICItemStockPath','UN_tblICItemStockPath';
 	EXEC tSQLt.ApplyConstraint 'dbo.tblICItemStockPath','FK_tblICItemStockPath_tblICItem';
 	EXEC tSQLt.ApplyConstraint 'dbo.tblICItemStockPath','FK_tblICItemStockPath_tblICItemLocation';
-	EXEC tSQLt.ApplyConstraint 'dbo.tblICItemStockPath','FK_tblICItemStockPath_tblICInventoryTransaction_Ancestor';
-	EXEC tSQLt.ApplyConstraint 'dbo.tblICItemStockPath','FK_tblICItemStockPath_tblICInventoryTransaction_Descendant';
+	--EXEC tSQLt.ApplyConstraint 'dbo.tblICItemStockPath','FK_tblICItemStockPath_tblICInventoryTransaction_Ancestor';
+	--EXEC tSQLt.ApplyConstraint 'dbo.tblICItemStockPath','FK_tblICItemStockPath_tblICInventoryTransaction_Descendant';
 
 	-- Build fake data: inventory transactions
 	/*

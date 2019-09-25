@@ -88,7 +88,7 @@ BEGIN
 	BEGIN
 		-- Debit and credit amounts are not balanced.
 		INSERT INTO actual
-		SELECT * FROM dbo.fnGetGLEntriesErrors(@GLEntries)
+		SELECT * FROM dbo.fnGetGLEntriesErrors(@GLEntries, 1)
 	END 
 
 	-- Assert

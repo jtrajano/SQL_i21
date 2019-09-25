@@ -160,59 +160,59 @@ BEGIN
 		-- 2: Invalid item and valid location
 		SELECT	intItemId = -1
 				,intItemLocationId = @WetGrains_DefaultLocation
-				,strText = FORMATMESSAGE(80001)
+				,strText = dbo.fnICGetErrorMessage(80001)
 				,intErrorCode = 80001
 
 		UNION ALL
 		SELECT	intItemId = -1
 				,intItemLocationId = @WetGrains_DefaultLocation
-				,strText = FORMATMESSAGE(80048)
+				,strText = dbo.fnICGetErrorMessage(80048)
 				,intErrorCode = 80048
 
 		UNION ALL
 		SELECT	intItemId = -1
 				,intItemLocationId = @WetGrains_DefaultLocation
-				,strText = FORMATMESSAGE(80049)
+				,strText = dbo.fnICGetErrorMessage(80049)
 				,intErrorCode = 80049
 
 		UNION ALL
 		SELECT	intItemId = -1
 				,intItemLocationId = @WetGrains_DefaultLocation
-				,strText = FORMATMESSAGE(80002)
+				,strText = dbo.fnICGetErrorMessage(80002)
 				,intErrorCode = 80002
 
 		-- 3: Valid item and invalid location
 		UNION ALL 
 		SELECT	intItemId = @StickyGrains
 				,intItemLocationId = -1
-				,strText = FORMATMESSAGE(80002)
+				,strText = dbo.fnICGetErrorMessage(80002)
 				,intErrorCode = 80002
 
 		-- 4: Invalid item and invalid location
 		UNION ALL		
 		SELECT	intItemId = -1
 				,intItemLocationId = -1
-				,strText = FORMATMESSAGE(80001)
+				,strText = dbo.fnICGetErrorMessage(80001)
 				,intErrorCode = 80001
 
 		UNION ALL		
 		SELECT	intItemId = -1
 				,intItemLocationId = -1
-				,strText = FORMATMESSAGE(80049)
+				,strText = dbo.fnICGetErrorMessage(80049)
 				,intErrorCode = 80049
 
 		-- 4: Invalid item and invalid location
 		UNION ALL		
 		SELECT	intItemId = -1
 				,intItemLocationId = -1
-				,strText = FORMATMESSAGE(80002)
+				,strText = dbo.fnICGetErrorMessage(80002)
 				,intErrorCode = 80002
 
 		-- 6: Negative stock is not allowed 
 		UNION ALL
 		SELECT	intItemId = @WetGrains
 				,intItemLocationId = @WetGrains_BetterHaven
-				,strText = FORMATMESSAGE(80003, 'WET GRAINS', 'BETTER HAVEN')
+				,strText = dbo.fnICFormatErrorMessage(80003, 'WET GRAINS', 'BETTER HAVEN', DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT)
 				,intErrorCode = 80003		
 	END
 
@@ -220,31 +220,129 @@ BEGIN
 	BEGIN 
 		INSERT INTO actual
 		-- 1: Valid item and valid location. 
-		SELECT * FROM dbo.fnGetItemCostingOnPostErrors(@WetGrains, @WetGrains_DefaultLocation, @WetGrains_BushelUOMId, @WetGrains_DefaultLocation_SubLocation, @WetGrains_DefaultLocation_StorageLocation, NULL, @intLotId)
+		SELECT * FROM dbo.fnGetItemCostingOnPostErrors(
+			@WetGrains
+			, @WetGrains_DefaultLocation
+			, @WetGrains_BushelUOMId
+			, @WetGrains_DefaultLocation_SubLocation
+			, @WetGrains_DefaultLocation_StorageLocation
+			, NULL
+			, @intLotId
+			, DEFAULT 
+			, DEFAULT 
+			, DEFAULT 
+			, DEFAULT 
+			, DEFAULT 
+			, DEFAULT 
+		)
 		
 		-- 2: Invalid item and valid location
 		UNION ALL 
-		SELECT * FROM dbo.fnGetItemCostingOnPostErrors(-1, @WetGrains_DefaultLocation, @WetGrains_BushelUOMId, @WetGrains_DefaultLocation_SubLocation, @WetGrains_DefaultLocation_StorageLocation, NULL, @intLotId)
+		SELECT * FROM dbo.fnGetItemCostingOnPostErrors(
+			-1
+			, @WetGrains_DefaultLocation
+			, @WetGrains_BushelUOMId
+			, @WetGrains_DefaultLocation_SubLocation
+			, @WetGrains_DefaultLocation_StorageLocation
+			, NULL
+			, @intLotId
+			, DEFAULT 
+			, DEFAULT 
+			, DEFAULT 
+			, DEFAULT 
+			, DEFAULT 
+			, DEFAULT 
+		)
 
 		-- 3: Valid item and invalid location
 		UNION ALL 
-		SELECT * FROM dbo.fnGetItemCostingOnPostErrors(@StickyGrains, -1, @StickyGrains_BushelUOMId, @WetGrains_DefaultLocation_SubLocation, @WetGrains_DefaultLocation_StorageLocation, NULL, @intLotId)
+		SELECT * FROM dbo.fnGetItemCostingOnPostErrors(
+			@StickyGrains
+			, -1
+			, @StickyGrains_BushelUOMId
+			, @WetGrains_DefaultLocation_SubLocation
+			, @WetGrains_DefaultLocation_StorageLocation
+			, NULL
+			, @intLotId
+			, DEFAULT 
+			, DEFAULT 
+			, DEFAULT 
+			, DEFAULT 
+			, DEFAULT 
+			, DEFAULT 
+		)
 
 		-- 4: Invalid item and invalid location
 		UNION ALL 
-		SELECT * FROM dbo.fnGetItemCostingOnPostErrors(-1, -1, NULL, @WetGrains_DefaultLocation_SubLocation, @WetGrains_DefaultLocation_StorageLocation, NULL, @intLotId)
+		SELECT * FROM dbo.fnGetItemCostingOnPostErrors(
+			-1
+			, -1
+			, NULL
+			, @WetGrains_DefaultLocation_SubLocation
+			, @WetGrains_DefaultLocation_StorageLocation
+			, NULL
+			, @intLotId
+			, DEFAULT 
+			, DEFAULT 
+			, DEFAULT 
+			, DEFAULT 
+			, DEFAULT 
+			, DEFAULT 		
+		)
 
 		-- 5: Postive stock 
 		UNION ALL 
-		SELECT * FROM dbo.fnGetItemCostingOnPostErrors(@WetGrains, @WetGrains_NewHaven, @WetGrains_BushelUOMId, @WetGrains_DefaultLocation_SubLocation, @WetGrains_DefaultLocation_StorageLocation, 10, @intLotId)
+		SELECT * FROM dbo.fnGetItemCostingOnPostErrors(
+			@WetGrains
+			, @WetGrains_NewHaven
+			, @WetGrains_BushelUOMId
+			, @WetGrains_DefaultLocation_SubLocation
+			, @WetGrains_DefaultLocation_StorageLocation
+			, 10
+			, @intLotId
+			, DEFAULT 
+			, DEFAULT 
+			, DEFAULT 
+			, DEFAULT 
+			, DEFAULT 
+			, DEFAULT 		
+		)
 
 		-- 6: Negative stock is not allowed 
 		UNION ALL 
-		SELECT * FROM dbo.fnGetItemCostingOnPostErrors(@WetGrains, @WetGrains_BetterHaven, @WetGrains_BushelUOMId, @WetGrains_DefaultLocation_SubLocation, @WetGrains_DefaultLocation_StorageLocation, -10, @intLotId)
+		SELECT * FROM dbo.fnGetItemCostingOnPostErrors(
+			@WetGrains
+			, @WetGrains_BetterHaven
+			, @WetGrains_BushelUOMId
+			, @WetGrains_DefaultLocation_SubLocation
+			, @WetGrains_DefaultLocation_StorageLocation
+			, -10
+			, @intLotId
+			, DEFAULT 
+			, DEFAULT 
+			, DEFAULT 
+			, DEFAULT 
+			, DEFAULT 
+			, DEFAULT 		
+		)
 		
 		-- 7: Negative stock is allowed
 		UNION ALL 
-		SELECT * FROM dbo.fnGetItemCostingOnPostErrors(@WetGrains, @WetGrains_NewHaven, @WetGrains_BushelUOMId, @WetGrains_DefaultLocation_SubLocation, @WetGrains_DefaultLocation_StorageLocation, -10, @intLotId)					
+		SELECT * FROM dbo.fnGetItemCostingOnPostErrors(
+			@WetGrains
+			, @WetGrains_NewHaven
+			, @WetGrains_BushelUOMId
+			, @WetGrains_DefaultLocation_SubLocation
+			, @WetGrains_DefaultLocation_StorageLocation
+			, -10
+			, @intLotId
+			, DEFAULT 
+			, DEFAULT 
+			, DEFAULT 
+			, DEFAULT 
+			, DEFAULT 
+			, DEFAULT 			
+		)					
 	END
 
 	-- Assert

@@ -92,7 +92,7 @@ BEGIN
 		-- The status of %s is Discontinued.
 		SELECT	intItemId = @ManualLotGrains
 				,intItemLocationId = @ManualLotGrains_DefaultLocation
-				,strText = FORMATMESSAGE(80022)
+				,strText = dbo.fnICGetErrorMessage(80022)
 				,intErrorCode = 80022	
 				
 		DECLARE @SubLocation AS INT 
@@ -105,13 +105,19 @@ BEGIN
 	BEGIN 
 		INSERT INTO actual	
 		SELECT * FROM dbo.fnGetItemCostingOnPostErrors(
-			@ManualLotGrains, 
-			@ManualLotGrains_DefaultLocation, 
-			@ManualLotGrains_BushelUOMId, 
-			@SubLocation, 
-			@StorageLocation, 
-			@dblQty, 
-			@LotId
+			@ManualLotGrains 
+			,@ManualLotGrains_DefaultLocation 
+			,@ManualLotGrains_BushelUOMId 
+			,@SubLocation 
+			,@StorageLocation 
+			,@dblQty 
+			,@LotId
+			,DEFAULT
+			,DEFAULT
+			,DEFAULT
+			,DEFAULT
+			,DEFAULT
+			,DEFAULT
 		)
 	END
 
