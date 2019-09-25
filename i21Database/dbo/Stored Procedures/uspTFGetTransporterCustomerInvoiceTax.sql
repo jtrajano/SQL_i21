@@ -678,20 +678,39 @@ BEGIN TRY
 		
 		IF(NOT EXISTS (SELECT TOP 1 1 FROM @tmpTransaction WHERE intReportingComponentId = @RCId))
 		BEGIN
+		
 			INSERT INTO tblTFTransaction (uniqTransactionGuid
 				, intReportingComponentId
 				, strProductCode
 				, dtmDate
 				, dtmReportingPeriodBegin
 				, dtmReportingPeriodEnd
-				, strTransactionType)
-			VALUES (@Guid
+				, strTransactionType
+				, strEmail
+				, strContactName
+				, strTaxPayerName
+				, strTaxPayerAddress
+				, strCity
+				, strState
+				, strZipCode
+				, strTelephoneNumber)
+			SELECT @Guid
 				, @RCId
 				, 'No record found.'
 				, @DateFrom
 				, @DateFrom
 				, @DateTo
-				, 'Invoice')
+				, 'Invoice'
+				, strContactEmail
+				, strContactName
+				, strCompanyName
+				, strTaxAddress
+				, strCity
+				, strState
+				, strZipCode
+				, strContactPhone
+			FROM tblTFCompanyPreference
+
 		END
 
 		DELETE FROM @tmpTransaction
