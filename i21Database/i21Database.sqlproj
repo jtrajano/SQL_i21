@@ -8077,6 +8077,8 @@
     <Build Include="dbo\Views\vyuMFGetSalesOrderDetail.sql" />
     <Build Include="dbo\Views\vyuSTItemUOM.sql" />
     <Build Include="dbo\Views\vyuLGAdditionalColumnForContractDetailView.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRptWeightClaimJDE.sql" />
+    <Build Include="dbo\Views\vyuAPRptWeightClaimJDE.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
