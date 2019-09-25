@@ -313,8 +313,8 @@ BEGIN TRY
 	SELECT
 		Detail.intInvoiceDetailId
 		,Detail.[intContractDetailId]
-		,Detail.[intTicketId]
-		,Detail.[intInventoryShipmentItemId]
+		,NULL--Detail.[intTicketId]
+		,NULL--Detail.[intInventoryShipmentItemId]
 		,Detail.[intItemUOMId]
 		,dbo.fnCalculateQtyBetweenUOM(Detail.[intItemUOMId], CD.[intItemUOMId], Detail.[dblQtyShipped])
 		,Detail.[intLoadDetailId]
@@ -325,7 +325,6 @@ BEGIN TRY
 	WHERE Detail.intInvoiceId = @TransactionId 
 	  AND Header.strTransactionType = 'Credit Memo'
 	  AND Detail.intContractDetailId IS NOT NULL
-	  AND Detail.[intInventoryShipmentItemId] IS NULL
 	  AND Detail.[intSalesOrderDetailId] IS NULL
 	  AND Detail.[intShipmentPurchaseSalesContractId] IS NULL 
 	  AND Detail.intInvoiceDetailId NOT IN (SELECT intTransactionDetailId FROM tblARTransactionDetail WHERE intTransactionId = @TransactionId)
