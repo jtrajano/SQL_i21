@@ -2501,21 +2501,6 @@ BEGIN
 				, i.strItemNo
 				, i.intItemId
 				, dblOpenQty = SUM(dbo.fnCalculateQtyBetweenUOM(iuomStck.intItemUOMId, iuomTo.intItemUOMId, (ISNULL(s.dblQuantity , 0))))  
-						+ 
-						ISNULL((SELECT dbo.fnCTConvertQuantityToTargetCommodityUOM(col.intUnitMeasureId,@intQuantityUOMId,col.dblOriginalQuantity - ca.dblAdjustmentAmount)
-									* CASE WHEN col.strType = 'Sale' THEN -1 ELSE 1 END
-							FROM tblRKCollateral col
-							LEFT JOIN (
-								SELECT intCollateralId, sum(dblAdjustmentAmount) as dblAdjustmentAmount FROM tblRKCollateralAdjustment 
-								WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmAdjustmentDate, 110), 110) <= CONVERT(DATETIME, @dtmTransactionDateUpTo)
-								GROUP BY intCollateralId
-
-							) ca on col.intCollateralId = ca.intCollateralId
-							WHERE col.intCommodityId = c.intCommodityId
-							AND col.intItemId = i.intItemId
-							AND col.intLocationId = s.intLocationId
-							AND col.ysnIncludeInPriceRiskAndCompanyTitled = 1
-						),0)
 				, ISNULL((SELECT TOP 1 intUnitMeasureId FROM tblRKM2MBasisDetail temp
 						WHERE temp.intM2MBasisId = @intM2MBasisId
 							AND ISNULL(temp.intCommodityId,0) = CASE WHEN ISNULL(temp.intCommodityId,0)= 0 THEN 0 ELSE c.intCommodityId END
@@ -2590,8 +2575,131 @@ BEGIN
 			, dblInvMarketBasis
 			, intMarketBasisUOM
 			, PriceSourceUOMId
-			,intCurrencyId,dblCashOrFuture
+			,intCurrencyId
+			,dblCashOrFuture
 	)t2 WHERE ISNULL(dblOpenQty,0) <> 0
+
+	--Collateral
+	SELECT 
+			col.intCollateralId
+		,strContractOrInventoryType = 'Inventory' 
+		, loc.strLocationName
+		, col.intLocationId
+		, c.strCommodityCode
+		, c.intCommodityId
+		, i.strItemNo
+		, i.intItemId
+		, dblOpenQty = dbo.fnCTConvertQuantityToTargetCommodityUOM(col.intUnitMeasureId,@intQuantityUOMId,col.dblOriginalQuantity - isnull(ca.dblAdjustmentAmount,0))
+							* CASE WHEN col.strType = 'Sale' THEN -1 ELSE 1 END
+		, PriceSourceUOMId = NULL
+		, dblInvMarketBasis = 0
+		, dblCashOrFuture = 0
+		, intMarketBasisUOM = 0
+		, intCurrencyId = 0
+		, strFutureMonth = ''
+		, intFutureMonthId = NULL
+		, c.intFutureMarketId
+		, dblNotLotTrackedPrice = 0
+		, intToPriceUOM =  NULL
+	INTO #tempCollateral
+	FROM tblRKCollateral col
+	INNER JOIN tblICItem i on i.intItemId = col.intItemId
+	INNER JOIN tblICCommodity c on c.intCommodityId = col.intCommodityId
+	JOIN tblICItemUOM iuomStck ON i.intItemId = iuomStck.intItemId AND iuomStck.ysnStockUnit = 1
+	JOIN tblICItemUOM iuomTo ON i.intItemId = iuomTo.intItemId AND iuomTo.intUnitMeasureId = @intQuantityUOMId
+	JOIN tblSMCompanyLocation loc on loc.intCompanyLocationId = col.intLocationId
+	LEFT JOIN (
+		SELECT intCollateralId, sum(isnull(dblAdjustmentAmount,0)) as dblAdjustmentAmount FROM tblRKCollateralAdjustment 
+		WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmAdjustmentDate, 110), 110) <= CONVERT(DATETIME, @dtmTransactionDateUpTo)
+		GROUP BY intCollateralId
+
+	) ca on col.intCollateralId = ca.intCollateralId
+	WHERE col.intCommodityId = @intCommodityId
+	AND col.intLocationId = ISNULL(@intLocationId, col.intLocationId) 
+	AND col.ysnIncludeInPriceRiskAndCompanyTitled = 1
+
+	DECLARE @intCollateralId INT
+			,@intCommodityIdCollateral INT
+			,@intItemIdCollateral INT
+			,@intLocationIdCollateral INT
+			,@dblOpenQtyCollateral NUMERIC(18,6)
+				
+	WHILE (SELECT Count(*) FROM #tempCollateral) > 0
+	BEGIN
+		SELECT 
+			@intCollateralId = intCollateralId 
+			,@intCommodityIdCollateral = intCommodityId
+			,@intItemIdCollateral = intItemId
+			,@intLocationIdCollateral = intLocationId
+			,@dblOpenQtyCollateral = dblOpenQty
+		FROM #tempCollateral
+
+		--Add Collateral Qty if Inventory exist else insert a new entry
+		IF EXISTS (SELECT TOP 1 * FROM #Temp
+						WHERE intCommodityId = @intCommodityIdCollateral
+						AND intItemId = @intItemIdCollateral
+						AND intCompanyLocationId = @intLocationIdCollateral
+		)
+		BEGIN
+			UPDATE #Temp SET dblOpenQty = dblOpenQty + @dblOpenQtyCollateral
+			WHERE intCommodityId = @intCommodityIdCollateral
+				AND intItemId = @intItemIdCollateral
+				AND intCompanyLocationId = @intLocationIdCollateral
+
+		END
+		ELSE
+		BEGIN
+			INSERT INTO #Temp (strContractOrInventoryType
+				, strCommodityCode
+				, intCommodityId
+				, strItemNo
+				, intItemId
+				, strLocationName
+				, intCompanyLocationId
+				, strFutureMonth
+				, intFutureMonthId
+				, intFutureMarketId
+				, dblContractRatio
+				, dblFutures
+				, dblCash
+				, dblNotLotTrackedPrice
+				, dblInvFuturePrice
+				, dblInvMarketBasis
+				, dblMarketRatio
+				, dblCosts
+				, dblOpenQty
+				, dblResult
+				, dblCashPrice
+				, intCurrencyId)
+			SELECT strContractOrInventoryType
+				, strCommodityCode
+				, intCommodityId
+				, strItemNo
+				, intItemId
+				, strLocationName
+				, intLocationId
+				, strFutureMonth
+				, intFutureMonthId
+				, intFutureMarketId
+				, dblContractRatio = 0
+				, dblFutures = 0
+				, dblCash = 0
+				, dblNotLotTrackedPrice
+				, dblInvFuturePrice = 0
+				, dblInvMarketBasis
+				, dblMarketRatio = 0
+				, dblCosts = 0
+				, dblOpenQty
+				, dblResult = 0
+				, dblCashPrice = 0
+				, intCurrencyId
+			FROM #tempCollateral
+			WHERE intCollateralId = @intCollateralId
+				
+		END
+			
+		DELETE FROM #tempCollateral WHERE intCollateralId = @intCollateralId
+	END
 END
 
 
@@ -3100,5 +3208,6 @@ DROP TABLE #tblContractFuture
 DROP TABLE #tempIntransit
 DROP TABLE #tblPIntransitView
 DROP TABLE #Temp
+DROP TABLE #tempCollateral
 
 END
