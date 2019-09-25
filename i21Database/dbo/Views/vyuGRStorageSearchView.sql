@@ -51,21 +51,27 @@ SELECT
 	--,intContractHeaderId          	= CASE WHEN ST.ysnDPOwnedType = 1 THEN CH.intContractHeaderId ELSE NULL END
  --   ,intContractDetailId		  	= CASE WHEN ST.ysnDPOwnedType = 1  THEN SC.intContractId ELSE NULL END
  --   ,strContractNumber			  	= CASE WHEN ST.ysnDPOwnedType = 1  THEN CH.strContractNumber ELSE NULL END
-	,intContractHeaderId            = CASE 
-										WHEN CS.ysnTransferStorage = 0 AND ST.ysnDPOwnedType = 1 THEN CH.intContractHeaderId 
-										WHEN CS.ysnTransferStorage = 1 AND ST.ysnDPOwnedType = 1 THEN CH_Transfer.intContractHeaderId
-										ELSE NULL
-									END
-    ,intContractDetailId			= CASE 
-										WHEN CS.ysnTransferStorage = 0 AND ST.ysnDPOwnedType = 1 THEN SC.intContractId 
-										WHEN CS.ysnTransferStorage = 1 AND ST.ysnDPOwnedType = 1 THEN CD_Transfer.intContractDetailId 
-										ELSE NULL
-									END
-    ,strContractNumber				= CASE 
-										WHEN CS.ysnTransferStorage = 0 AND ST.ysnDPOwnedType = 1 THEN CH.strContractNumber 
-										WHEN CS.ysnTransferStorage = 1 AND ST.ysnDPOwnedType = 1 THEN CH_Transfer.strContractNumber 
-										ELSE NULL
-									END
+	,intContractHeaderId            = case when (CS.intStorageTypeId = 2 and GHistory.intContractHeaderId is not null) then GHistory.intContractHeaderId else
+										CASE 
+											WHEN CS.ysnTransferStorage = 0 AND ST.ysnDPOwnedType = 1 THEN CH.intContractHeaderId 
+											WHEN CS.ysnTransferStorage = 1 AND ST.ysnDPOwnedType = 1 THEN CH_Transfer.intContractHeaderId
+											ELSE NULL
+										END
+									end
+    ,intContractDetailId			= case when (CS.intStorageTypeId = 2 and GHistory.intContractDetailId is not null) then GHistory.intContractDetailId else 
+										CASE 
+											WHEN CS.ysnTransferStorage = 0 AND ST.ysnDPOwnedType = 1 THEN SC.intContractId 
+											WHEN CS.ysnTransferStorage = 1 AND ST.ysnDPOwnedType = 1 THEN CD_Transfer.intContractDetailId 
+											ELSE NULL
+										END
+									end
+    ,strContractNumber				= case when (CS.intStorageTypeId = 2 and GHistory.intContractHeaderId is not null) then GHistory.strContractNumber else 
+										CASE 
+											WHEN CS.ysnTransferStorage = 0 AND ST.ysnDPOwnedType = 1 THEN CH.strContractNumber 
+											WHEN CS.ysnTransferStorage = 1 AND ST.ysnDPOwnedType = 1 THEN CH_Transfer.strContractNumber 
+											ELSE NULL
+										END
+									end
 	,strDeliverySheetNumber		  	= DeliverySheet.strDeliverySheetNumber
 	,dtmLastStorageAccrueDate	  	= CS.dtmLastStorageAccrueDate
 	,dblSplitPercent			  	= CASE WHEN SCTicketSplit.dblSplitPercent IS NULL		
@@ -146,3 +152,14 @@ LEFT JOIN tblCTContractDetail CD_Transfer
 		AND CS.ysnTransferStorage = 1
 LEFT JOIN tblCTContractHeader CH_Transfer
     ON CH_Transfer.intContractHeaderId = CD_Transfer.intContractHeaderId  
+left join 
+    (
+        select GSH.intCustomerStorageId, GCH.intContractHeaderId, GCH.strContractNumber, GCD.intContractDetailId from tblGRStorageHistory GSH
+	join tblCTContractHeader GCH
+		on GCH.intContractHeaderId = GSH.intContractHeaderId
+	join tblCTContractDetail GCD
+		on GCH.intContractHeaderId = GCD.intContractHeaderId
+    
+    )GHistory
+    on GHistory.intCustomerStorageId = CS.intCustomerStorageId 
+        and CS.intStorageTypeId = 2
