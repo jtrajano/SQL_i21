@@ -440,6 +440,9 @@ IF EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILSTOADD)
 			, strAddonDetailKey
 			, ysnAddonParent
 			, intInventoryShipmentItemId
+			, intStorageLocationId
+			, intSubLocationId
+			, intCompanyLocationSubLocationId
 		)
 		SELECT intInvoiceDetailId			= NULL
 		    , strSourceTransaction			= 'Direct'
@@ -468,6 +471,9 @@ IF EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILSTOADD)
 			, strAddonDetailKey				= CASE WHEN ISNULL(ID.ysnAddonParent, 0) = 1 THEN @strAddOnKey ELSE NULL END
 			, ysnAddonParent				= ISNULL(ID.ysnAddonParent, 0)
 			, intInventoryShipmentItemId	= @intInventoryShipmentItemId
+			, intStorageLocationId				= ID.intStorageLocationId
+			, intSubLocationId					= ID.intSubLocationId
+			, intCompanyLocationSubLocationId	= ID.intCompanyLocationSubLocationId
 		FROM #INVOICEDETAILSTOADD IDTOADD
 		CROSS APPLY (
 			SELECT TOP 1 ID.*
@@ -512,6 +518,9 @@ IF EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILSTOADD)
 			, strAddonDetailKey				= @strAddOnKey
 			, ysnAddonParent				= CAST(0 AS BIT)
 			, intInventoryShipmentItemId	= NULL
+			, intStorageLocationId				= ID.intStorageLocationId
+			, intSubLocationId					= ID.intSubLocationId
+			, intCompanyLocationSubLocationId	= ID.intCompanyLocationSubLocationId
 		FROM #INVOICEDETAILSTOADD IDTOADD
 		CROSS APPLY (
 			SELECT TOP 1 ID.*
