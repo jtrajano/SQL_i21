@@ -93,11 +93,11 @@ BEGIN
 	FROM tblSMCompanyLocation WHERE intCompanyLocationId = @intCompanyLocationId
 
 	SELECT TOP 1 @strContainerQtyUOM = LTRIM(dbo.fnRemoveTrailingZeroes(SUM(LD.dblQuantity))) + ' ' + UOM.strUnitMeasure
-	FROM tblLGloadDetail LD
-	LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = LoadDetail.intItemUOMId
+	FROM tblLGLoadDetail LD
+	LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = LD.intItemUOMId
 	LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
 	WHERE intLoadId = @intLoadId
-	GROUP BY strItemUOM
+	GROUP BY UOM.strUnitMeasure
 
 SELECT *
 	,strConsigneeInfo = LTRIM(RTRIM(
