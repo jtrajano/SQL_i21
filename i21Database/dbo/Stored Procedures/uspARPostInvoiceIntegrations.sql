@@ -788,9 +788,22 @@ WHERE ID.[intInventoryShipmentChargeId] IS NULL
 		(ID.strTransactionType = 'Credit Memo' AND (ID.[intInventoryShipmentItemId] IS NOT NULL OR ID.[intLoadDetailId] IS NOT NULL OR ISNULL(RI.[intInvoiceId], 0) <> 0))
 		)
     AND ISNULL(ID.[strItemType], '') <> 'Other Charge'
-	AND ISNULL(RI.[intInvoiceId], 0) = 0
+	AND (ISNULL(RI.[intInvoiceId], 0) = 0 OR (ISNULL(RI.[intInvoiceId], 0) <> 0 AND (ID.intLoadDetailId IS NULL OR ID.[intTicketId] IS NOT NULL)))
 
 EXEC dbo.[uspCTInvoicePosted] @ItemsFromInvoice, @UserId
+
+--UPDATE CONTRACT SCHEDULED QTY FOR RETURN CREDIT MEMO
+DECLARE @InvoiceIdReturn InvoiceId
+
+WHILE EXISTS (SELECT TOP 1 NULL FROM @ItemsFromInvoice WHERE strTransactionType = 'Credit Memo' AND intLoadDetailId IS NULL)
+	BEGIN
+  		DECLARE @intInvoiceContractId INT
+  		SELECT TOP 1 @intInvoiceContractId = intInvoiceId FROM @ItemsFromInvoice WHERE strTransactionType = 'Credit Memo' AND intLoadDetailId IS NULL
+ 
+  		EXEC dbo.uspARUpdateContractOnInvoice @intInvoiceContractId, @Post, @UserId, 1, @InvoiceIdReturn
+ 
+  		DELETE FROM @ItemsFromInvoice WHERE intInvoiceId = @intInvoiceContractId
+ 	END
 
 DELETE A
 FROM tblARPrepaidAndCredit A
