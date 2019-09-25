@@ -7,9 +7,32 @@
 AS
 BEGIN
 
---CLEAN AND INSERT STORE ITEMS--
-DELETE FROM tblSTPurchaseVSSalesVarianceReport
-INSERT INTO tblSTPurchaseVSSalesVarianceReport (
+DECLARE @tblSTPurchaseVSSalesVarianceReportTemp TABLE
+(
+	intPurchaseVSSalesVarianceReportId	int
+	,intStoreId							int
+	,intStoreNo							int
+	,strStoreDescription				nvarchar(max)
+	,intCategoryId						int
+	,strCategoryCode					nvarchar(max)
+	,strCategoryDescription				nvarchar(max)
+	,intItemId							int
+	,strItemNo							nvarchar(max)
+	,strItemDescription					nvarchar(max)
+	,dblSalesQuantity					numeric(18,6)
+	,dblPurchaseQuantity				numeric(18,6)
+	,dblVarianceQuantity				numeric(18,6)
+	,dblVariancePercentage				numeric(18,6)
+	,intInvoiceId						int
+	,dtmCheckoutDate					datetime
+	,intLocationId						int
+	,intItemLocationId					int
+	,intCompanyLocationId				int
+	,intConcurrencyId					int
+)
+
+--INSERT TO TEMP TABLE--
+INSERT INTO @tblSTPurchaseVSSalesVarianceReportTemp (
 	 intStoreId
 	,intStoreNo
 	,strStoreDescription
@@ -24,11 +47,12 @@ INSERT INTO tblSTPurchaseVSSalesVarianceReport (
 	,intItemLocationId
 	,intCompanyLocationId
 )
+
 SELECT 
 	  ST.intStoreId
 	, ST.intStoreNo
 	, ST.strDescription as strStoreDescription
-	, Item.intCategoryId
+	, category.intCategoryId
 	, category.strCategoryCode 
 	, category.strDescription as strCategoryDescription
 	, Item.intItemId
@@ -56,7 +80,7 @@ LEFT JOIN tblICItemLocation ItemLoc
 LEFT JOIN tblICCategory as category 
 ON category.intCategoryId = Item.intCategoryId
 WHERE   (
-				Item.intCategoryId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strCategoryIdList))
+		Item.intCategoryId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strCategoryIdList))
 				OR 1 = CASE 
 							WHEN @strCategoryIdList = ''
 								THEN 1
@@ -72,10 +96,8 @@ WHERE   (
 					   END
 			)
 
-
-
 --UPDATE SALES QTY--
-UPDATE tblSTPurchaseVSSalesVarianceReport 
+UPDATE @tblSTPurchaseVSSalesVarianceReportTemp 
 SET dblSalesQuantity = arInvoice.dblQuantity
 FROM (
 	SELECT invoiceDetail.intInvoiceId
@@ -90,9 +112,55 @@ FROM (
 	invoiceDetail.intItemId,
 	invoice.intCompanyLocationId
 ) as arInvoice
-WHERE arInvoice.intInvoiceId = tblSTPurchaseVSSalesVarianceReport.intInvoiceId 
-AND arInvoice.intItemId = tblSTPurchaseVSSalesVarianceReport.intItemId
-AND arInvoice.intCompanyLocationId =  tblSTPurchaseVSSalesVarianceReport.intCompanyLocationId
+WHERE arInvoice.intInvoiceId = [@tblSTPurchaseVSSalesVarianceReportTemp].intInvoiceId 
+AND arInvoice.intItemId = [@tblSTPurchaseVSSalesVarianceReportTemp].intItemId
+AND arInvoice.intCompanyLocationId =  [@tblSTPurchaseVSSalesVarianceReportTemp].intCompanyLocationId
+
+
+
+--CLEAN AND INSERT STORE ITEMS--
+DELETE FROM tblSTPurchaseVSSalesVarianceReport
+INSERT INTO tblSTPurchaseVSSalesVarianceReport
+(
+	 intStoreId
+	,intStoreNo
+	,strStoreDescription
+	,intCategoryId
+	,strCategoryCode
+	,strCategoryDescription
+	,intItemId
+	,strItemNo
+	,strItemDescription
+	,intItemLocationId
+	,dblSalesQuantity
+	,intCompanyLocationId
+)
+SELECT
+	intStoreId
+	,intStoreNo
+	,strStoreDescription
+	,intCategoryId
+	,strCategoryCode
+	,strCategoryDescription
+	,intItemId
+	,strItemNo
+	,strItemDescription
+	,intItemLocationId
+	,SUM(dblSalesQuantity)
+	,intCompanyLocationId
+FROM @tblSTPurchaseVSSalesVarianceReportTemp
+GROUP BY 
+intStoreId, 
+intStoreNo, 
+strStoreDescription,
+intCategoryId, 
+strCategoryCode, 
+strCategoryDescription, 
+intItemId, 
+strItemNo, 
+strItemDescription,
+intItemLocationId,
+intCompanyLocationId
 
 
 
