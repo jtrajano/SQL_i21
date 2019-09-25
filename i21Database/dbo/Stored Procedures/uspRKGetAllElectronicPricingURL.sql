@@ -53,7 +53,6 @@ BEGIN TRY
 		FROM tblRKFuturesMonth 
 		WHERE intFutureMarketId = @intFutureMarketId 
 			AND ysnExpired = 0 
-			AND dtmLastTradingDate > GETDATE()
 	END
 	ELSE IF ISNULL(@URL,'') <> '' AND @intInterfaceSystem = 2 --AgriCharts
 	BEGIN
@@ -73,7 +72,6 @@ BEGIN TRY
 			FROM tblRKFuturesMonth 
 			WHERE intFutureMarketId = @intFutureMarketId 
 				AND ysnExpired = 0 
-				AND dtmLastTradingDate > GETDATE()
 
 		END
 		ELSE
