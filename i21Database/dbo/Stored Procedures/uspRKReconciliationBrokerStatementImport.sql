@@ -1490,6 +1490,8 @@ BEGIN TRY
 	
 	SELECT @intReconciliationBrokerStatementHeaderIdOut = @intReconciliationBrokerStatementHeaderId
 		, @strStatus = @strStatus
+
+	DELETE FROM tblRKReconciliationBrokerStatementImport
 	
 	COMMIT TRAN
 END TRY
