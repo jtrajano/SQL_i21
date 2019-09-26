@@ -214,7 +214,23 @@ BEGIN
 			,[dblQty] 							=	CASE WHEN B.intWeightUOMId IS NULL THEN B.dblQtyReceived ELSE B.dblNetWeight END 
 			,[dblUOMQty] 						=	F.dblUnitQty
 			,[intCostUOMId]						=	B.intUnitOfMeasureId 
-			,[dblNewValue]						=	B.dblCost - sh.dblPaidAmount
+			,[dblNewValue]						=	CAST(
+													dbo.fnMultiply(
+														--[Voucher Qty]
+														CASE WHEN B.intWeightUOMId IS NULL THEN B.dblQtyReceived ELSE B.dblNetWeight END
+														--[Voucher Cost]
+														,CASE WHEN A.intCurrencyId <> @intFunctionalCurrencyId THEN 														
+																dbo.fnCalculateCostBetweenUOM(voucherCostUOM.intItemUOMId,
+																	COALESCE(B.intWeightUOMId, B.intUnitOfMeasureId),
+																	(B.dblCost - (B.dblCost * (ISNULL(B.dblDiscount,0) / 100)))) * ISNULL(B.dblRate, 0) 
+															ELSE 
+																dbo.fnCalculateCostBetweenUOM(voucherCostUOM.intItemUOMId, 
+																	COALESCE(B.intWeightUOMId, B.intUnitOfMeasureId),
+																	(B.dblCost - (B.dblCost * (ISNULL(B.dblDiscount,0) / 100))))
+														END 													
+													)
+													AS DECIMAL(18,2)) 
+													- sh.dblPaidAmount
 			,[intCurrencyId] 					=	@intFunctionalCurrencyId -- It is always in functional currency. 
 			,[intTransactionId]					=	A.intBillId
 			,[intTransactionDetailId] 			=	B.intBillDetailId
@@ -243,6 +259,8 @@ BEGIN
 		INNER JOIN tblICItemLocation E ON C.intCompanyLocationId = E.intLocationId AND E.intItemId = D.intItemId
 		INNER JOIN tblICItemUOM F ON D.intItemId = F.intItemId AND C.intItemUOMId = F.intItemUOMId
 		INNER JOIN tblSCTicket G ON C.intTicketId = G.intTicketId
+		LEFT JOIN tblICItemUOM voucherCostUOM
+			ON voucherCostUOM.intItemUOMId = ISNULL(B.intCostUOMId, B.intUnitOfMeasureId)
 		WHERE sh.dblPaidAmount != B.dblCost AND B.intCustomerStorageId > 0 AND D.strType = 'Inventory'
 		-- UNION ALL
 		-- --DISCOUNTS
