@@ -35,7 +35,7 @@ CHK.strPayeeBankName,CHK.strPayeeBankAccountNumber
 FROM dbo.vyuCMACHFromCustomer CHK 
 LEFT JOIN tblARPayment PYMT ON CHK.strRecordNo = PYMT.strRecordNumber 
 LEFT JOIN tblARPaymentDetail PYMTDTL ON PYMT.intPaymentId = PYMTDTL.intPaymentId 
-LEFT JOIN tblARInvoice INV ON PYMT.intPaymentId = INV.intPaymentId 
+LEFT JOIN tblARInvoice INV ON PYMTDTL.intInvoiceId = INV.intInvoiceId 
 INNER JOIN tblCMBankAccount BA ON BA.intBankAccountId = CHK.intBankAccountId 
 INNER JOIN tblCMBank Bank ON Bank.intBankId = BA.intBankId 
 LEFT JOIN tblEMEntity ENTITY ON CHK.intEntityId = ENTITY.intEntityId 
