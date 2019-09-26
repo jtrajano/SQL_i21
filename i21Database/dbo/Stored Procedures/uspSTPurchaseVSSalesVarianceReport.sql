@@ -2,14 +2,39 @@
 	@strCategoryIdList AS NVARCHAR(MAX) = '',
 	@dblVarianceQuantity AS NUMERIC(18,6),
 	@dblVariancePercentage AS NUMERIC(18,6) ,
-	@dtmPostedDateFrom AS DATETIME,
-	@dtmPostedDateTo AS DATETIME
+	@dtmCheckoutDateFrom AS DATETIME,
+	@dtmCheckoutDateTo AS DATETIME
 AS
 BEGIN
 
 DECLARE @tblSTPurchaseVSSalesVarianceReportTemp TABLE
 (
-	intPurchaseVSSalesVarianceReportId	int
+	intPurchaseVSSalesVarianceReportId	int				NOT NULL identity(1,1)
+	,intStoreId							int
+	,intStoreNo							int
+	,strStoreDescription				nvarchar(max)
+	,intCategoryId						int
+	,strCategoryCode					nvarchar(max)
+	,strCategoryDescription				nvarchar(max)
+	,intItemId							int
+	,strItemNo							nvarchar(max)
+	,strItemDescription					nvarchar(max)
+	,dblSalesQuantity					numeric(18,6)
+	,dblPurchaseQuantity				numeric(18,6)
+	,dblVarianceQuantity				numeric(18,6)
+	,dblVariancePercentage				numeric(18,6)
+	,intInvoiceId						int
+	,dtmCheckoutDate					datetime
+	,intLocationId						int
+	,intItemLocationId					int
+	,intCompanyLocationId				int
+	,intConcurrencyId					int
+)
+
+
+DECLARE @tblSTPurchaseVSSalesVarianceReportOutput TABLE
+(
+	intPurchaseVSSalesVarianceReportId	int				NOT NULL identity(1,1)
 	,intStoreId							int
 	,intStoreNo							int
 	,strStoreDescription				nvarchar(max)
@@ -88,9 +113,9 @@ WHERE   (
 					   END
 			)
 		AND (
-				CH.dtmCheckoutDate BETWEEN @dtmPostedDateFrom AND @dtmPostedDateTo
+				CH.dtmCheckoutDate BETWEEN @dtmCheckoutDateFrom AND @dtmCheckoutDateTo
 				OR 1 = CASE 
-							WHEN @dtmPostedDateFrom IS NULL AND @dtmPostedDateTo IS NULL
+							WHEN @dtmCheckoutDateFrom IS NULL AND @dtmCheckoutDateTo IS NULL
 								THEN 1
 							ELSE 0
 					   END
@@ -117,10 +142,8 @@ AND arInvoice.intItemId = [@tblSTPurchaseVSSalesVarianceReportTemp].intItemId
 AND arInvoice.intCompanyLocationId =  [@tblSTPurchaseVSSalesVarianceReportTemp].intCompanyLocationId
 
 
-
---CLEAN AND INSERT STORE ITEMS--
-DELETE FROM tblSTPurchaseVSSalesVarianceReport
-INSERT INTO tblSTPurchaseVSSalesVarianceReport
+--INSERT INTO OUTPUT TABLE--
+INSERT INTO @tblSTPurchaseVSSalesVarianceReportOutput
 (
 	 intStoreId
 	,intStoreNo
@@ -165,7 +188,7 @@ intCompanyLocationId
 
 
 --UPDATE PURCHASE QTY--
-UPDATE tblSTPurchaseVSSalesVarianceReport 
+UPDATE @tblSTPurchaseVSSalesVarianceReportOutput
 SET dblPurchaseQuantity = ISNULL(inventory.dblQty,0)
 FROM (
 	SELECT	t.intItemId,
@@ -178,32 +201,32 @@ FROM (
 	WHERE	ty.strName = 'Inventory Receipt'
 	) as inventory
 		WHERE 
-		inventory.intItemId = tblSTPurchaseVSSalesVarianceReport.intItemId
-		AND inventory.intCategoryId = tblSTPurchaseVSSalesVarianceReport.intCategoryId
-		AND inventory.intItemLocationId =  tblSTPurchaseVSSalesVarianceReport.intItemLocationId
+		inventory.intItemId = [@tblSTPurchaseVSSalesVarianceReportOutput].intItemId
+		AND inventory.intCategoryId = [@tblSTPurchaseVSSalesVarianceReportOutput].intCategoryId
+		AND inventory.intItemLocationId =  [@tblSTPurchaseVSSalesVarianceReportOutput].intItemLocationId
 
 
-UPDATE tblSTPurchaseVSSalesVarianceReport
+UPDATE @tblSTPurchaseVSSalesVarianceReportOutput
 SET dblVarianceQuantity = ISNULL(dblSalesQuantity,0) - ISNULL(dblPurchaseQuantity,0)
 WHERE 
-		tblSTPurchaseVSSalesVarianceReport.intItemId = tblSTPurchaseVSSalesVarianceReport.intItemId
-		AND tblSTPurchaseVSSalesVarianceReport.intCategoryId = tblSTPurchaseVSSalesVarianceReport.intCategoryId
-		AND tblSTPurchaseVSSalesVarianceReport.intItemLocationId =  tblSTPurchaseVSSalesVarianceReport.intItemLocationId
-		AND tblSTPurchaseVSSalesVarianceReport.intCompanyLocationId =  tblSTPurchaseVSSalesVarianceReport.intCompanyLocationId
+		[@tblSTPurchaseVSSalesVarianceReportOutput].intItemId = [@tblSTPurchaseVSSalesVarianceReportOutput].intItemId
+		AND [@tblSTPurchaseVSSalesVarianceReportOutput].intCategoryId = [@tblSTPurchaseVSSalesVarianceReportOutput].intCategoryId
+		AND [@tblSTPurchaseVSSalesVarianceReportOutput].intItemLocationId =  [@tblSTPurchaseVSSalesVarianceReportOutput].intItemLocationId
+		AND [@tblSTPurchaseVSSalesVarianceReportOutput].intCompanyLocationId =  [@tblSTPurchaseVSSalesVarianceReportOutput].intCompanyLocationId
 
-UPDATE tblSTPurchaseVSSalesVarianceReport
+UPDATE @tblSTPurchaseVSSalesVarianceReportOutput
 SET dblVariancePercentage = CASE WHEN (dblSalesQuantity IS NULL OR dblSalesQuantity = 0) 
 							THEN 0 
 							ELSE ISNULL(dblVarianceQuantity,0) / ISNULL(dblSalesQuantity,0)
 					      END
 WHERE 
-			tblSTPurchaseVSSalesVarianceReport.intItemId = tblSTPurchaseVSSalesVarianceReport.intItemId
-		AND tblSTPurchaseVSSalesVarianceReport.intCategoryId = tblSTPurchaseVSSalesVarianceReport.intCategoryId
-		AND tblSTPurchaseVSSalesVarianceReport.intItemLocationId =  tblSTPurchaseVSSalesVarianceReport.intItemLocationId
-		AND tblSTPurchaseVSSalesVarianceReport.intCompanyLocationId =  tblSTPurchaseVSSalesVarianceReport.intCompanyLocationId
+			[@tblSTPurchaseVSSalesVarianceReportOutput].intItemId = [@tblSTPurchaseVSSalesVarianceReportOutput].intItemId
+		AND [@tblSTPurchaseVSSalesVarianceReportOutput].intCategoryId = [@tblSTPurchaseVSSalesVarianceReportOutput].intCategoryId
+		AND [@tblSTPurchaseVSSalesVarianceReportOutput].intItemLocationId =  [@tblSTPurchaseVSSalesVarianceReportOutput].intItemLocationId
+		AND [@tblSTPurchaseVSSalesVarianceReportOutput].intCompanyLocationId =  [@tblSTPurchaseVSSalesVarianceReportOutput].intCompanyLocationId
 
 
-SELECT * FROM tblSTPurchaseVSSalesVarianceReport
+SELECT * FROM @tblSTPurchaseVSSalesVarianceReportOutput
 WHERE   (
 		dblVarianceQuantity = @dblVarianceQuantity
 		OR 1 = CASE 
