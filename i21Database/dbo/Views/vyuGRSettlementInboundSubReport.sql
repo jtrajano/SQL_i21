@@ -55,7 +55,7 @@ FROM (
 				) INVRCPTITEM 
 					ON INVRCPTITEM.intInventoryReceiptId =INVRCPT.intInventoryReceiptId 
 						AND INVRCPTITEM.intRowNum =1
-				LEFT JOIN (
+				INNER JOIN (
 							SELECT 
 								QM.intTicketId
 							   ,DCode.intItemId
