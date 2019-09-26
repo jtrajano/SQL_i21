@@ -8078,6 +8078,7 @@
     <Build Include="dbo\Views\vyuLGAdditionalColumnForContractDetailView.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRptWeightClaimJDE.sql" />
     <Build Include="dbo\Views\vyuAPRptWeightClaimJDE.sql" />
+    <Build Include="dbo\Functions\fnCTGetAvailablePriceQuantity.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
