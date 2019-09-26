@@ -207,7 +207,7 @@ BEGIN TRY
 						,GP.[dblQuantityToBill]
 						,GP.[dblQtyToBillUnitQty]				
 						,GP.[intQtyToBillUOMId]				
-						,[dblCost] = CASE WHEN GP.[dblQuantityToBill] < 0 THEN  @dblCashPrice *-1 ELSE @dblCashPrice END						
+						,[dblCost] = CASE WHEN GP.[intInventoryReceiptChargeId] IS NOT NULL THEN GP.dblUnitCost ELSE @dblCashPrice END
 						,GP.[dblCostUnitQty]					
 						,GP.[intCostUOMId]						
 						,GP.[dblNetWeight]						
