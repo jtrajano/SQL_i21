@@ -17,7 +17,7 @@ SELECT
     ,0 AS dblVoucherTotal
     ,0 AS dblVoucherQty
     ,ROUND(
-        CASE	
+        (CASE	
             WHEN receiptItem.intWeightUOMId IS NULL THEN 
                 ISNULL(receiptItem.dblOpenReceive, 0) 
             ELSE 
@@ -39,7 +39,9 @@ SELECT
                 ELSE 
                     1 
             END 
-        )
+        ))
+        +
+        receiptItem.dblTax
         , 2
     ) 
     *
@@ -50,8 +52,6 @@ SELECT
         ELSE 1
         END
     )
-    +
-    receiptItem.dblTax
     AS dblReceiptTotal
     ,CASE	
         WHEN receiptItem.intWeightUOMId IS NULL THEN 
@@ -161,7 +161,8 @@ SELECT
                         THEN CAST((billDetail.dblQtyReceived) *  (receiptItem.dblUnitCost)  * (billDetail.dblUnitQty/ ISNULL(NULLIF(billDetail.dblCostUnitQty,0),1)) AS DECIMAL(18,2))  --Formula With Receipt UOM and Cost UOM
                     ELSE CAST((billDetail.dblQtyReceived) * (receiptItem.dblUnitCost)  AS DECIMAL(18,2))  --Orig Calculation
                 END)
-            END),0)	
+            END)
+            + receiptItem.dblTax,0)	
     *
     (
         CASE 
@@ -170,8 +171,6 @@ SELECT
         ELSE 1
         END
     )
-    +
-    receiptItem.dblTax
     AS dblVoucherTotal
     ,CASE 
         WHEN billDetail.intWeightUOMId IS NULL THEN 
