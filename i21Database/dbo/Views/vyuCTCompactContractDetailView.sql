@@ -7,6 +7,10 @@ AS
 			,U1.strUnitMeasure	AS	strItemUOM
 			,CH.ysnLoad
 			,CD.intNoOfLoad
+			,CD.ysnUseFXPrice
+			,CD.intCurrencyId
+			,AD.intSeqCurrencyId
+			,CU.intMainCurrencyId
 			,CD.dblQuantity AS	dblDetailQuantity
 			,CAST(ISNULL(CD.intNoOfLoad,0) - ISNULL(CD.dblBalanceLoad,0) AS INT) AS	intLoadReceived
 			,CD.dblBalance
@@ -22,7 +26,8 @@ AS
 			,CD.intCompanyLocationId
 			,PT.intPricingTypeId
 	FROM	tblCTContractDetail					CD	
-	CROSS APPLY tblCTCompanyPreference			CP	
+	CROSS APPLY tblCTCompanyPreference			CP
+	CROSS APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
 	LEFT JOIN	tblCTContractHeader			    CH	ON	CH.intContractHeaderId		=	CD.intContractHeaderId				
 	LEFT JOIN	tblCTPricingType				PT	ON	PT.intPricingTypeId			=	CD.intPricingTypeId					
 	LEFT JOIN	tblICItemUOM					IU	ON	IU.intItemUOMId				=	CD.intItemUOMId				
@@ -35,3 +40,5 @@ AS
 	LEFT JOIN	tblSMCountry					OG	ON	OG.intCountryID				=	CA.intCountryID	
 	LEFT JOIN	tblSMPurchasingGroup			PG	ON	PG.intPurchasingGroupId		=	CD.intPurchasingGroupId
 	LEFT JOIN	tblCTContractBasis				CB	ON	CB.intContractBasisId		=	CH.intContractBasisId
+	LEFT JOIN	tblSMCurrency					CU	ON	CU.intCurrencyID			=	CD.intCurrencyId
+	

@@ -19,7 +19,7 @@ BEGIN
 							, dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
 						)
 				END
-	FROM	vyuCTContractDetailView ContractDetail 
+	FROM	vyuCTCompactContractDetailView ContractDetail 
 	WHERE	ContractDetail.intContractDetailId = @contractDetailId
 	
 	RETURN @defaultCurrency
