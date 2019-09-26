@@ -93,3 +93,5 @@ AND CM.intBankTransactionTypeId IN (@AP_PAYMENT, @AP_ECHECK, @ACH, @DIRECT_DEPOS
 )
 
 SELECT @ysnCheckOverflow = 1 FROM QUERY
+
+SELECT @ysnCheckOverflow = ISNULL(@ysnCheckOverflow, 0)
