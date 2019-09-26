@@ -265,8 +265,8 @@ BEGIN TRY
 				END
 			END
 
-			SELECT @dtmMinDemandDate = MIN(dtmDemandDate)
-				,@dtmMaxDemandDate = Max(dtmDemandDate)
+			SELECT @dtmMinDemandDate = MIN(Convert(datetime,dtmDemandDate))
+				,@dtmMaxDemandDate = MAX(Convert(datetime,dtmDemandDate))
 			FROM @tblMFDemandDetailImport
 			WHERE strItemNo = @strItemNo
 				AND IsNULL(strSubstituteItemNo, '') = IsNULL(@strSubstituteItemNo, IsNULL(strSubstituteItemNo, ''))
