@@ -8,6 +8,7 @@ SELECT DISTINCT
 	 , Store.strDescription  
 	 , Store.intLastShiftNo
 	 , Store.dtmLastShiftOpenDate
+	 , Store.intCompanyLocationId
 	 , intNumberOfShifts			= ISNULL(Store.intNumberOfShifts, 0)
 
 	 -- Will be used to load Beg Balance in checkout
