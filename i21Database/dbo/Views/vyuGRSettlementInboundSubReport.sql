@@ -46,7 +46,7 @@ FROM (
 				SELECT intSourceId,intInventoryReceiptId,ROW_NUMBER() OVER (PARTITION BY intInventoryReceiptId ORDER BY intSourceId) intRowNum
 				FROM	tblICInventoryReceiptItem
 			 )  INVRCPTITEM ON INVRCPTITEM.intInventoryReceiptId =INVRCPT.intInventoryReceiptId AND INVRCPTITEM.intRowNum =1
-		LEFT JOIN (
+		INNER JOIN (
 					SELECT 
 					QM.intTicketId
 				   ,DCode.intItemId
