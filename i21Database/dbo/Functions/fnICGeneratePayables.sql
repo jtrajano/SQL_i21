@@ -423,6 +423,25 @@ WHERE
 		AND ISNULL(Contracts.dblFutures, 0) = 0
 		AND ISNULL(B.ysnAllowVoucher, 1) = 1
 	)
+	/*
+		LG-2384
+		If there's a contract involved and it already generated payables for items, don't re-generate them during posting but remove all of them during unposting.
+	*/
+	AND (
+		Contracts.intContractDetailId IS NULL OR 
+		(
+			CASE WHEN Contracts.intContractDetailId IS NOT NULL AND A.strReceiptType = 'Purchase Contract' 
+				AND EXISTS(
+					SELECT TOP 1 1 
+					FROM tblAPVoucherPayable 
+					WHERE intEntityVendorId = A.intEntityVendorId 
+					AND intContractDetailId = Contracts.intContractDetailId
+					AND strSourceNumber <> A.strReceiptNumber
+				)
+				THEN 0 ELSE 1 
+			END = 1
+		)
+)
 ORDER BY 
 	B.intInventoryReceiptItemId ASC 
 
