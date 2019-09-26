@@ -62,7 +62,7 @@
 	[intQtyToBillUOMId]				INT NULL,
 	[strQtyToBillUOM]				NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	[dblQuantityBilled]				DECIMAL(18,6) NOT NULL DEFAULT(0),
-	[dblOldCost]					DECIMAL(38,20) NOT NULL DEFAULT(0),
+	[dblOldCost]					DECIMAL(38,20) NULL,
 	[dblCost]						DECIMAL(38,20) NOT NULL DEFAULT(0),
 	[dblCostUnitQty]				DECIMAL(38,20) NOT NULL DEFAULT(0),
 	[intCostUOMId]					INT NULL,
