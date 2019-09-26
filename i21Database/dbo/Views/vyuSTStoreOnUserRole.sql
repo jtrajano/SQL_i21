@@ -69,11 +69,11 @@ INNER JOIN tblSMUserSecurity USec
 INNER JOIN tblSMUserSecurityCompanyLocationRolePermission Perm
 	ON USec.intEntityId = Perm.intEntityId
 	AND Store.intCompanyLocationId = Perm.intCompanyLocationId
-	OR 1 = CASE
-				WHEN NOT EXISTS(SELECT TOP 1 1 FROM tblSMUserSecurityCompanyLocationRolePermission WHERE intEntityId = USec.intEntityId AND intCompanyLocationId = USec.intCompanyLocationId)
-					THEN 1
-				ELSE 0
-			END
+	--OR 1 = CASE
+	--			WHEN NOT EXISTS(SELECT TOP 1 1 FROM tblSMUserSecurityCompanyLocationRolePermission WHERE intEntityId = USec.intEntityId AND intCompanyLocationId = USec.intCompanyLocationId)
+	--				THEN 1
+	--			ELSE 0
+	--		END
 
 LEFT JOIN tblSTHandheldScanner HS
 	ON Store.intStoreId = HS.intStoreId
