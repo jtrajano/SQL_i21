@@ -122,7 +122,7 @@ AS
 		
 				
 
-				WHERE intPaymentId = 63
+				--WHERE intPaymentId = 63
 			) S3
 			) S4
 GROUP BY intPaymentId
