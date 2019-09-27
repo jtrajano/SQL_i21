@@ -47,7 +47,7 @@ EXEC dbo.[uspARUpdateLineItemsReservedStock] @IIDs
 
 EXEC dbo.[uspARUpdateLineItemsComponent] @IIDs
 
-EXEC dbo.[uspARUpdateContractOnInvoice] NULL, 0, @UserId, 0, @IIDs
+EXEC dbo.[uspARUpdateContractOnInvoice] NULL, 0, @UserId, @IIDs
 
 EXEC dbo.[uspARUpdateInboundShipmentOnInvoices] @IIDs
 
