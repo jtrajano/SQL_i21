@@ -792,19 +792,6 @@ WHERE ID.[intInventoryShipmentChargeId] IS NULL
 
 EXEC dbo.[uspCTInvoicePosted] @ItemsFromInvoice, @UserId
 
---UPDATE CONTRACT SCHEDULED QTY FOR RETURN CREDIT MEMO
-DECLARE @InvoiceIdReturn InvoiceId
-
-WHILE EXISTS (SELECT TOP 1 NULL FROM @ItemsFromInvoice WHERE strTransactionType = 'Credit Memo' AND intLoadDetailId IS NULL)
-	BEGIN
-  		DECLARE @intInvoiceContractId INT
-  		SELECT TOP 1 @intInvoiceContractId = intInvoiceId FROM @ItemsFromInvoice WHERE strTransactionType = 'Credit Memo' AND intLoadDetailId IS NULL
- 
-  		EXEC dbo.uspARUpdateContractOnInvoice @intInvoiceContractId, @Post, @UserId, 1, @InvoiceIdReturn
- 
-  		DELETE FROM @ItemsFromInvoice WHERE intInvoiceId = @intInvoiceContractId
- 	END
-
 DELETE A
 FROM tblARPrepaidAndCredit A
 INNER JOIN #ARPostInvoiceHeader B ON A.intInvoiceId = B.intInvoiceId 
