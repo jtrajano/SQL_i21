@@ -275,98 +275,98 @@ BEGIN TRY
 							/* END CURSOR for Split Contract*/
 
 						END
-						ELSE
-						BEGIN
-							IF(@strDistributionOption = 'LOD')
-							BEGIN
+						--ELSE
+						--BEGIN
+						--	IF(@strDistributionOption = 'LOD')
+						--	BEGIN
 
-								--Remove contract scheduled by IR
-								BEGIN
-									SELECT 
-										SCC.intContractDetailId 
-										,intLoopId = SCC.intTicketContractUsed
-										,SCC.dblScheduleQty
-									INTO #tmpTicketContractUsed
-									FROM tblSCTicket SC
-									INNER JOIN tblSCTicketContractUsed SCC 
-										ON SC.intTicketId = SCC.intTicketId
-									WHERE SC.intTicketId = @intTicketId 
-									ORDER BY SCC.intTicketContractUsed
+						--		--Remove contract scheduled by IR
+						--		BEGIN
+						--			SELECT 
+						--				SCC.intContractDetailId 
+						--				,intLoopId = SCC.intTicketContractUsed
+						--				,SCC.dblScheduleQty
+						--			INTO #tmpTicketContractUsed
+						--			FROM tblSCTicket SC
+						--			INNER JOIN tblSCTicketContractUsed SCC 
+						--				ON SC.intTicketId = SCC.intTicketId
+						--			WHERE SC.intTicketId = @intTicketId 
+						--			ORDER BY SCC.intTicketContractUsed
 
-									SET @intLoopId = NULL
+						--			SET @intLoopId = NULL
 									
-									SELECT TOP 1 
-										@intLoopContractDetailId = intContractDetailId
-										,@intLoopId = intLoopId
-										,@dblLoopScheduleQty = dblScheduleQty
-									FROM #tmpTicketContractUsed
-									ORDER BY intLoopId ASC
+						--			SELECT TOP 1 
+						--				@intLoopContractDetailId = intContractDetailId
+						--				,@intLoopId = intLoopId
+						--				,@dblLoopScheduleQty = dblScheduleQty
+						--			FROM #tmpTicketContractUsed
+						--			ORDER BY intLoopId ASC
 
-									WHILE @intLoopId IS NOT NULL
-									BEGIN
-										SET @intLoopCurrentId = @intLoopId
+						--			WHILE @intLoopId IS NOT NULL
+						--			BEGIN
+						--				SET @intLoopCurrentId = @intLoopId
 
-										SET @dblLoopScheduleQty = @dblLoopScheduleQty * -1
+						--				SET @dblLoopScheduleQty = @dblLoopScheduleQty * -1
 
-										-- remove the schedule quantity on contract
-										EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoopContractDetailId, @dblLoopScheduleQty, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId  
+						--				-- remove the schedule quantity on contract
+						--				EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoopContractDetailId, @dblLoopScheduleQty, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId  
 
-										SET @intLoopId = NULL
-										SELECT TOP 1 
-											@intLoopContractDetailId = intContractDetailId
-											,@intLoopId = intLoopId
-											,@dblLoopScheduleQty = dblScheduleQty
-										FROM #tmpTicketContractUsed 
-										WHERE intLoopId > @intLoopCurrentId
-										ORDER BY intLoopId ASC
-									END
-								END
+						--				SET @intLoopId = NULL
+						--				SELECT TOP 1 
+						--					@intLoopContractDetailId = intContractDetailId
+						--					,@intLoopId = intLoopId
+						--					,@dblLoopScheduleQty = dblScheduleQty
+						--				FROM #tmpTicketContractUsed 
+						--				WHERE intLoopId > @intLoopCurrentId
+						--				ORDER BY intLoopId ASC
+						--			END
+						--		END
 
-								--Reschedule the Quantity Used by loadshipments
-								BEGIN
-									SELECT
-										intContractDetailId = CASE WHEN @strInOutFlag = 'I' THEN LD.intPContractDetailId ELSE LD.intSContractDetailId  END
-										,intLoopId = TL.intTicketLoadUsedId
-										,dblScheduleQty = LD.dblQuantity
-									INTO #tmpTicketLoadUsed
-									FROM tblSCTicket SC
-									INNER JOIN tblSCTicketLoadUsed TL			
-										ON SC.intTicketId = TL.intTicketId
-									INNER JOIN tblLGLoadDetail LD
-										ON TL.intLoadDetailId = LD.intLoadDetailId
-									WHERE SC.intTicketId = @intTicketId 
-									ORDER BY TL.intLoadDetailId ASC
+						--		--Reschedule the Quantity Used by loadshipments
+						--		BEGIN
+						--			SELECT
+						--				intContractDetailId = CASE WHEN @strInOutFlag = 'I' THEN LD.intPContractDetailId ELSE LD.intSContractDetailId  END
+						--				,intLoopId = TL.intTicketLoadUsedId
+						--				,dblScheduleQty = LD.dblQuantity
+						--			INTO #tmpTicketLoadUsed
+						--			FROM tblSCTicket SC
+						--			INNER JOIN tblSCTicketLoadUsed TL			
+						--				ON SC.intTicketId = TL.intTicketId
+						--			INNER JOIN tblLGLoadDetail LD
+						--				ON TL.intLoadDetailId = LD.intLoadDetailId
+						--			WHERE SC.intTicketId = @intTicketId 
+						--			ORDER BY TL.intLoadDetailId ASC
 
 
-									SET @intLoopId = NULL
+						--			SET @intLoopId = NULL
 									
-									SELECT TOP 1 
-										@intLoopContractDetailId = intContractDetailId
-										,@intLoopId = intLoopId
-										,@dblLoopScheduleQty = dblScheduleQty
-									FROM #tmpTicketLoadUsed
-									ORDER BY intLoopId ASC
+						--			SELECT TOP 1 
+						--				@intLoopContractDetailId = intContractDetailId
+						--				,@intLoopId = intLoopId
+						--				,@dblLoopScheduleQty = dblScheduleQty
+						--			FROM #tmpTicketLoadUsed
+						--			ORDER BY intLoopId ASC
 
-									WHILE @intLoopId IS NOT NULL
-									BEGIN
-										SET @intLoopCurrentId = @intLoopId
+						--			WHILE @intLoopId IS NOT NULL
+						--			BEGIN
+						--				SET @intLoopCurrentId = @intLoopId
 
-										-- Add the load shipment quantity to contract schedule
-										EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoopContractDetailId, @dblLoopScheduleQty, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId  
+						--				-- Add the load shipment quantity to contract schedule
+						--				EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoopContractDetailId, @dblLoopScheduleQty, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId  
 
-										SET @intLoopId = NULL
-										SELECT TOP 1 
-											@intLoopContractDetailId = intContractDetailId
-											,@intLoopId = intLoopId
-											,@dblLoopScheduleQty = dblScheduleQty
-										FROM #tmpTicketLoadUsed
-										WHERE intLoopId > @intLoopCurrentId
-										ORDER BY intLoopId ASC
-									END
-								END
+						--				SET @intLoopId = NULL
+						--				SELECT TOP 1 
+						--					@intLoopContractDetailId = intContractDetailId
+						--					,@intLoopId = intLoopId
+						--					,@dblLoopScheduleQty = dblScheduleQty
+						--				FROM #tmpTicketLoadUsed
+						--				WHERE intLoopId > @intLoopCurrentId
+						--				ORDER BY intLoopId ASC
+						--			END
+						--		END
 
-							END
-						END
+						--	END
+						--END
 
 						EXEC [dbo].[uspSCUpdateTicketStatus] @intTicketId, 1;
 					END

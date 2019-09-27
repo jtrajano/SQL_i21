@@ -232,7 +232,7 @@ OPEN intListCursor;
 					dblUnitsDistributed,
 					dblUnitsRemaining,
 					dblCost)
-					EXEC dbo.uspCTUpdationFromTicketDistribution 
+					EXEC dbo.uspSCGetContractsAndAllocate 
 					@intDeliverySheetId
 					,@intEntityId
 					,@dblLoopContractUnits
