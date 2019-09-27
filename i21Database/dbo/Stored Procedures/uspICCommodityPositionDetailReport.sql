@@ -32,7 +32,7 @@ begin
 		set @location_filter = ''
 	end
 
-	if @ysnGetHeader= 1
+	if @ysnGetHeader = 1
 	begin
 		set @top = ' top 1'
 		set @dtmDate = NULL 		 

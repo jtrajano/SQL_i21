@@ -42,17 +42,17 @@ begin
 	if @ysnGetHeader = 1
 	begin
 		set @top = ' top 1'
-		set @dtmDate = NULL 
+		set @dtmDate = NULL
 		set @licensed_filter = ''
 	end
 
 	SET @sql = 
 	'
 	DECLARE @dtmDate AS DATETIME = ' + ISNULL('''' + CAST(@dtmDate AS NVARCHAR(20)) + '''', 'NULL') + '
-
+	
 	SELECT ' + @top + ' * 
 	FROM (
-		SELECT ' + @top + '
+		SELECT 
 			com.strCommodityCode
 			,cl.intCompanyLocationId
 			,cl.strLocationName 
@@ -78,7 +78,6 @@ begin
 		WHERE 
 			(dbo.fnDateLessThanEquals(t.dtmDate,  @dtmDate) = 1 OR @dtmDate IS NULL)'  
 			+ @location_filter + '
-
 	) AS s	
 	/*outer apply (
 			SELECT						
