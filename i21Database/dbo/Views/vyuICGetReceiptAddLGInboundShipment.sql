@@ -1,134 +1,132 @@
-﻿CREATE VIEW [dbo].[vyuICGetReceiptAddLGInboundShipment]
+﻿CREATE VIEW vyuICGetReceiptAddLGInboundShipmentEx
 AS
-
-	SELECT
-		intKey = CAST(ROW_NUMBER() OVER(ORDER BY LogisticsView.intCompanyLocationId, LogisticsView.intEntityVendorId, LogisticsView.intPContractDetailId) AS INT)   
-	, intLocationId				= LogisticsView.intCompanyLocationId
-	, intEntityVendorId			= LogisticsView.intEntityVendorId
-	, strVendorId				= LogisticsView.strVendor
-	, strVendorName				= LogisticsView.strVendor
-	, strReceiptType			= 'Purchase Contract' COLLATE Latin1_General_CI_AS
-	, intLineNo					= LogisticsView.intPContractDetailId
-	, intOrderId				= LogisticsView.intPContractHeaderId
-	, strOrderNumber			= LogisticsView.strPContractNumber
-	, dblOrdered				= LogisticsView.dblQuantity
-	, dblReceived				= LogisticsView.dblDeliveredQuantity
-	, intSourceType				= 2
-	, intSourceId				= LogisticsView.intLoadDetailId
-	, strSourceNumber			= LogisticsView.strLoadNumber
-	, intItemId					= LogisticsView.intItemId
-	, strItemNo					= LogisticsView.strItemNo
-	, strItemDescription		= LogisticsView.strItemDescription
-	, dblQtyToReceive			= LogisticsView.dblQuantity - LogisticsView.dblDeliveredQuantity
-	, intLoadToReceive			= CAST(0 AS INT) 
-	, dblUnitCost				= LogisticsView.dblCost
-	, dblTax					= CAST(0 AS NUMERIC(18, 6)) 
-	, dblLineTotal				= CAST(0 AS NUMERIC(18, 6)) 
-	, strLotTracking			= LogisticsView.strLotTracking
-	, intCommodityId			= LogisticsView.intPCommodityId
-	, intContainerId			= LogisticsView.intLoadContainerId
-	, strContainer				= LogisticsView.strContainerNumber
-	, intSubLocationId			= ISNULL(LogisticsView.intSubLocationId, LogisticsView.intPSubLocationId) 
-	, strSubLocationName		= CASE WHEN LogisticsView.intSubLocationId IS NOT NULL THEN LogisticsView.strSubLocationName ELSE OrdersSubLocation.strSubLocationName END 
-	, intStorageLocationId		= LogisticsView.intStorageLocationId
-	, strStorageLocationName	= LogisticsView.strStorageLocationName 
-	, intOrderUOMId				= ItemUOM.intItemUOMId
-	, strOrderUOM				= ItemUnitMeasure.strUnitMeasure
-	, dblOrderUOMConvFactor		= ItemUOM.dblUnitQty
-	, intItemUOMId				= ItemUOM.intItemUOMId
-	, strUnitMeasure			= ItemUnitMeasure.strUnitMeasure
-	, strUnitType				= ItemUnitMeasure.strUnitType
-	-- Gross/Net UOM -----------
-	, intWeightUOMId			= GrossNetUOM.intItemUOMId
-	, strWeightUOM				= GrossNetUnitMeasure.strUnitMeasure
-	-- Conversion factor -------
-	, dblItemUOMConvFactor		= ItemUOM.dblUnitQty
-	, dblWeightUOMConvFactor	= GrossNetUOM.dblUnitQty
-	-- Cost UOM ----------------
-	, intCostUOMId				= CostUOM.intItemUOMId
-	, strCostUOM				= CostUnitMeasure.strUnitMeasure
-	, dblCostUOMConvFactor		= CostUOM.dblUnitQty
-	, intLifeTime				= LogisticsView.intPLifeTime
-	, strLifeTimeType			= LogisticsView.strPLifeTimeType
-	, ysnLoad					= CAST(0 AS BIT) 
-	, dblAvailableQty			= CAST(0 AS NUMERIC(38, 20))
-	, strBOL					= LogisticsView.strBLNumber
-	, dblFranchise				= LogisticsView.dblFranchise
-	, dblContainerWeightPerQty	= LogisticsView.dblContainerWeightPerQty
-	, ysnSubCurrency			= CAST(LogisticsView.ysnSubCurrency AS BIT)
-	, intCurrencyId				= dbo.fnICGetCurrency(LogisticsView.intPContractDetailId, 0) -- 0 indicates that value is not for Sub Currency
-	, strSubCurrency			= SubCurrency.strCurrency --(SELECT strCurrency from tblSMCurrency where intCurrencyID = dbo.fnICGetCurrency(LogisticsView.intPContractDetailId, 1)) -- 1 indicates that value is for Sub Currency
-	, dblGross					= CAST(LogisticsView.dblGross AS NUMERIC(38, 20))
-	, dblNet					= CAST(LogisticsView.dblNet AS NUMERIC(38, 20))
-	, LC.ysnRejected
-	, intForexRateTypeId		= CASE WHEN dbo.fnSMGetDefaultCurrency('FUNCTIONAL') = dbo.fnICGetCurrency(LogisticsView.intPContractDetailId, 0) THEN NULL ELSE ISNULL(LogisticsView.intForexRateTypeId, CompanyPreferenceForexRateType.intForexRateTypeId) END
-	, strForexRateType			= CASE WHEN dbo.fnSMGetDefaultCurrency('FUNCTIONAL') = dbo.fnICGetCurrency(LogisticsView.intPContractDetailId, 0) THEN NULL ELSE ISNULL(currencyType.strCurrencyExchangeRateType, CompanyPreferenceForexRateType.strCurrencyExchangeRateType) END
-	, dblForexRate				= CASE WHEN dbo.fnSMGetDefaultCurrency('FUNCTIONAL') = dbo.fnICGetCurrency(LogisticsView.intPContractDetailId, 0) THEN NULL ELSE ISNULL(LogisticsView.dblForexRate, defaultForexRate.dblRate) END
-	, ysnBundleItem				= CAST(0 AS BIT)
-	, intBundledItemId			= CAST(NULL AS INT)
-	, strBundledItemNo			= CAST(NULL AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
-	, strBundledItemDescription = CAST(NULL AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
-	, ysnIsBasket = CAST(0 AS BIT)
-	, LogisticsView.intFreightTermId
-	, LogisticsView.strFreightTerm 
-	, strMarkings               = LogisticsView.strMarks
-	, Item.strBundleType 
-	, intContractSeq 			= LogisticsView.intPContractSeq
-	, strLotCondition			= ICPreference.strLotCondition
-	
-	, intLoadDetailContainerLinkId = LogisticsView.intLoadDetailContainerLinkId 
-	FROM vyuLGLoadContainerReceiptContracts LogisticsView
-		LEFT JOIN dbo.tblSMCurrency Currency
-		ON Currency.strCurrency = ISNULL(LogisticsView.strCurrency, LogisticsView.strMainCurrency)
-		LEFT JOIN dbo.tblSMCurrency SubCurrency
-		ON SubCurrency.intCurrencyID = dbo.fnICGetCurrency(LogisticsView.intPContractDetailId, 1)
-		LEFT JOIN tblICItem Item
-		ON Item.intItemId = LogisticsView.intItemId
-		LEFT JOIN dbo.tblICItemUOM ItemUOM
-		ON LogisticsView.intItemUOMId = ItemUOM.intItemUOMId
-		LEFT JOIN dbo.tblICUnitMeasure ItemUnitMeasure
-		ON ItemUnitMeasure.intUnitMeasureId = ItemUOM.intUnitMeasureId
-		LEFT JOIN dbo.tblICItemUOM GrossNetUOM
-		ON LogisticsView.intWeightItemUOMId = GrossNetUOM.intItemUOMId
-		LEFT JOIN dbo.tblICUnitMeasure GrossNetUnitMeasure
-		ON GrossNetUnitMeasure.intUnitMeasureId = GrossNetUOM.intUnitMeasureId
-		LEFT JOIN dbo.tblICItemUOM CostUOM
-		ON CostUOM.intItemUOMId = dbo.fnGetMatchingItemUOMId(LogisticsView.intItemId, LogisticsView.intPCostUOMId)
-		LEFT JOIN dbo.tblICUnitMeasure CostUnitMeasure
-		ON CostUnitMeasure.intUnitMeasureId = CostUOM.intUnitMeasureId
-		LEFT JOIN dbo.tblICItemLocation ItemLocation
-		ON ItemLocation.intItemId = LogisticsView.intItemId AND ItemLocation.intLocationId = LogisticsView.intCompanyLocationId
-		LEFT JOIN tblLGLoadContainer LC
-		ON LC.intLoadContainerId = LogisticsView.intLoadContainerId
-		LEFT JOIN tblSMCompanyLocationSubLocation OrdersSubLocation ON OrdersSubLocation.intCompanyLocationSubLocationId = LogisticsView.intPSubLocationId
-		LEFT JOIN tblSMCurrencyExchangeRateType currencyType ON currencyType.intCurrencyExchangeRateTypeId = LogisticsView.intForexRateTypeId
-		OUTER APPLY (
-			SELECT intForexRateTypeId = MultiCurrencyDefault.intContractRateTypeId
-					, ForexRateType.strCurrencyExchangeRateType
+SELECT
+	  intKey						= CAST(ROW_NUMBER() OVER(ORDER BY LoadDetail.intLoadDetailId) AS INT)   
+	, intLocationId					= Load.intCompanyLocationId
+	, intEntityVendorId				= LoadDetail.intVendorEntityId
+	, strVendorId					= Entity.strName
+	, strVendorName					= Entity.strName
+	, strReceiptType				= 'Purchase Contract' COLLATE Latin1_General_CI_AS
+	, intLineNo						= ContractDetail.intContractDetailId
+	, intOrderId					= Contract.intContractHeaderId
+	, intSourceType					= 2
+	, strOrderNumber				= Contract.strContractNumber
+	, dblOrdered					= LoadContainerLink.dblQuantity
+	, dblReceived					= ISNULL(LoadContainerLink.dblReceivedQty, 0)
+	, intSourceId					= LoadDetail.intLoadDetailId
+	, strSourceNumber				= Load.strLoadNumber
+	, intItemId						= LoadDetail.intItemId
+	, strItemNo						= Item.strItemNo
+	, strItemDescription			= Item.strDescription
+	, dblQtyToReceive				= LoadContainerLink.dblQuantity - ISNULL(LoadContainerLink.dblReceivedQty, 0)
+	, intLoadToReceive				= 0
+	, dblUnitCost					= ContractDetail.dblCashPrice
+	, dblTax						= CAST(0 AS NUMERIC(18, 6)) 
+	, dblLineTotal					= CAST(0 AS NUMERIC(18, 6))
+	, strLotTracking				= Item.strLotTracking
+	, intCommodityId				= Item.intCommodityId
+	, intContainerId				= LoadContainer.intLoadContainerId
+	, strContainer					= LoadContainer.strContainerNumber
+	, intSubLocationId				= ISNULL(LoadWarehouse.intSubLocationId, LoadDetail.intPSubLocationId) 
+	, strSubLocationName			= CASE WHEN LoadWarehouse.intSubLocationId IS NOT NULL THEN LoadWarehouseSubLocation.strSubLocationName ELSE LoadDetailSubLocation.strSubLocationName END
+	, intStorageLocationId			= LoadWarehouse.intStorageLocationId
+	, strStorageLocationName		= LoadWarehouseStorageLocation.strName
+	, intOrderUOMId					= ItemUOM.intItemUOMId
+	, strOrderUOM					= ItemUnitMeasure.strUnitMeasure
+	, dblOrderUOMConvFactor			= ItemUOM.dblUnitQty
+	, intItemUOMId					= ItemUOM.intItemUOMId
+	, strUnitMeasure				= ItemUnitMeasure.strUnitMeasure
+	, strUnitType					= ItemUnitMeasure.strUnitType
+	-- Gross/Net UOM -----------	
+	, intWeightUOMId				= GrossNetUOM.intItemUOMId
+	, strWeightUOM					= GrossNetUnitMeasure.strUnitMeasure
+	-- Conversion factor -------	
+	, dblItemUOMConvFactor			= ItemUOM.dblUnitQty
+	, dblWeightUOMConvFactor		= GrossNetUOM.dblUnitQty
+	-- Cost UOM ----------------	
+	, intCostUOMId					= CostUOM.intItemUOMId
+	, strCostUOM					= CostUnitMeasure.strUnitMeasure
+	, dblCostUOMConvFactor			= CostUOM.dblUnitQty
+	, intLifeTime					= Item.intLifeTime
+	, strLifeTimeType				= Item.strLifeTimeType
+	, ysnLoad						= CAST(0 AS BIT) 
+	, dblAvailableQty				= CAST(0 AS NUMERIC(38, 20))
+	, strBOL						= Load.strBLNumber
+	, dblFranchise					= CASE WHEN WeightGrade.dblFranchise > 0 THEN WeightGrade.dblFranchise / 100 ELSE 0 END
+	, dblContainerWeightPerQty		= (LoadContainer.dblNetWt / CASE WHEN ISNULL(LoadContainer.dblQuantity,0) = 0 THEN 1 ELSE LoadContainer.dblQuantity END)
+	, ysnSubCurrency				= CAST(ContractDetailCurrency.ysnSubCurrency AS BIT)
+	, intCurrencyId					= CASE WHEN ContractDetail.ysnUseFXPrice = 1 THEN ContractDetailExtras.intSeqCurrencyId ELSE ISNULL(ISNULL(ContractDetailCurrency.intMainCurrencyId, ContractDetail.intCurrencyId), dbo.fnSMGetDefaultCurrency('FUNCTIONAL')) END
+	, strSubCurrency				= SubCurrency.strCurrency
+	, dblGross						= (LoadContainer.dblGrossWt / CASE WHEN ISNULL(LoadContainer.dblQuantity,0) = 0 THEN 1 ELSE LoadContainer.dblQuantity END) * LoadContainerLink.dblQuantity
+	, dblNet						= (LoadContainer.dblNetWt / CASE WHEN ISNULL(LoadContainer.dblQuantity,0) = 0 THEN 1 ELSE LoadContainer.dblQuantity END) * LoadContainerLink.dblQuantity
+	, ysnRejected					= LoadContainer.ysnRejected
+	, intForexRateTypeId			= CASE WHEN dbo.fnSMGetDefaultCurrency('FUNCTIONAL') = CASE WHEN ContractDetail.ysnUseFXPrice = 1 THEN ContractDetailExtras.intSeqCurrencyId ELSE ISNULL(ISNULL(ContractDetailCurrency.intMainCurrencyId, ContractDetail.intCurrencyId), dbo.fnSMGetDefaultCurrency('FUNCTIONAL')) END THEN NULL ELSE ISNULL(LoadDetail.intForexRateTypeId, CompanyPreferenceForexRateType.intForexRateTypeId) END
+	, strForexRateType				= CASE WHEN dbo.fnSMGetDefaultCurrency('FUNCTIONAL') = CASE WHEN ContractDetail.ysnUseFXPrice = 1 THEN ContractDetailExtras.intSeqCurrencyId ELSE ISNULL(ISNULL(ContractDetailCurrency.intMainCurrencyId, ContractDetail.intCurrencyId), dbo.fnSMGetDefaultCurrency('FUNCTIONAL')) END THEN NULL ELSE ISNULL(currencyType.strCurrencyExchangeRateType, CompanyPreferenceForexRateType.strCurrencyExchangeRateType) END
+	, dblForexRate					= CASE WHEN dbo.fnSMGetDefaultCurrency('FUNCTIONAL') = CASE WHEN ContractDetail.ysnUseFXPrice = 1 THEN ContractDetailExtras.intSeqCurrencyId ELSE ISNULL(ISNULL(ContractDetailCurrency.intMainCurrencyId, ContractDetail.intCurrencyId), dbo.fnSMGetDefaultCurrency('FUNCTIONAL')) END THEN NULL ELSE ISNULL(LoadDetail.dblForexRate, defaultForexRate.dblRate) END
+	, ysnBundleItem					= CAST(0 AS BIT)
+	, intBundledItemId				= CAST(NULL AS INT)
+	, strBundledItemNo				= CAST(NULL AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
+	, strBundledItemDescription		= CAST(NULL AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
+	, ysnIsBasket					= CAST(0 AS BIT)
+	, intFreightTermId				= Load.intFreightTermId
+	, strFreightTerm				= LoadFreightTerm.strFreightTerm
+	, strMarkings					= LoadContainer.strMarks
+	, strBundleType					= Item.strBundleType
+	, intContractSeq 				= ContractDetail.intContractSeq
+	, strLotCondition				= ICPreference.strLotCondition
+	, intLoadDetailContainerLinkId	= LoadContainerLink.intLoadDetailContainerLinkId 
+FROM tblLGLoad Load
+	INNER JOIN tblLGLoadDetail LoadDetail ON LoadDetail.intLoadId = Load.intLoadId
+	INNER JOIN tblLGLoadDetailContainerLink LoadContainerLink ON LoadDetail.intLoadDetailId = LoadContainerLink.intLoadDetailId
+	LEFT OUTER JOIN tblLGLoadContainer LoadContainer ON LoadContainerLink.intLoadContainerId = LoadContainer.intLoadContainerId
+	LEFT OUTER JOIN tblLGLoadWarehouseContainer LoadWarehouseContainer ON LoadWarehouseContainer.intLoadContainerId = LoadContainer.intLoadContainerId
+	LEFT OUTER JOIN tblLGLoadWarehouse LoadWarehouse ON LoadWarehouse.intLoadWarehouseId = LoadWarehouseContainer.intLoadWarehouseId
+	LEFT OUTER JOIN tblSMCompanyLocationSubLocation LoadWarehouseSubLocation ON LoadWarehouseSubLocation.intCompanyLocationSubLocationId = LoadWarehouse.intSubLocationId
+	LEFT OUTER JOIN tblSMCompanyLocationSubLocation LoadDetailSubLocation ON LoadDetailSubLocation.intCompanyLocationSubLocationId = LoadDetail.intPSubLocationId
+	LEFT OUTER JOIN tblICStorageLocation LoadWarehouseStorageLocation ON LoadWarehouseStorageLocation.intStorageLocationId = LoadWarehouse.intStorageLocationId
+	LEFT OUTER JOIN tblICItemUOM ItemUOM ON LoadDetail.intItemUOMId= ItemUOM.intItemUOMId
+	LEFT OUTER JOIN tblICUnitMeasure ItemUnitMeasure ON ItemUnitMeasure.intUnitMeasureId = ItemUOM.intUnitMeasureId
+	LEFT OUTER JOIN tblICItemUOM GrossNetUOM ON LoadDetail.intWeightItemUOMId = GrossNetUOM.intItemUOMId
+	LEFT OUTER JOIN tblICUnitMeasure GrossNetUnitMeasure ON GrossNetUnitMeasure.intUnitMeasureId = GrossNetUOM.intUnitMeasureId
+	INNER JOIN tblCTContractDetail ContractDetail ON ContractDetail.intContractDetailId = LoadDetail.intPContractDetailId
+	INNER JOIN tblCTContractHeader Contract ON Contract.intContractHeaderId = ContractDetail.intContractHeaderId
+	CROSS APPLY dbo.fnCTGetAdditionalColumnForDetailView(ContractDetail.intContractDetailId) ContractDetailExtras
+	LEFT JOIN dbo.tblICItemUOM CostUOM ON CostUOM.intItemUOMId = dbo.fnGetMatchingItemUOMId(LoadDetail.intItemId, ISNULL(ContractDetail.intPriceItemUOMId, ContractDetail.intAdjItemUOMId))
+	LEFT JOIN dbo.tblICUnitMeasure CostUnitMeasure ON CostUnitMeasure.intUnitMeasureId = CostUOM.intUnitMeasureId
+	INNER JOIN tblICItem Item ON Item.intItemId = LoadDetail.intItemId
+	INNER JOIN tblEMEntity Entity ON Entity.intEntityId = Contract.intEntityId 
+	LEFT OUTER JOIN tblCTWeightGrade WeightGrade ON WeightGrade.intWeightGradeId = Contract.intWeightId
+	LEFT OUTER JOIN tblSMCurrency ContractDetailCurrency ON ContractDetailCurrency.intCurrencyID = ContractDetail.intCurrencyId
+	LEFT OUTER JOIN tblSMFreightTerms LoadFreightTerm ON LoadFreightTerm.intFreightTermId = Load.intFreightTermId
+	OUTER APPLY (
+		SELECT currency.intCurrencyID, currency.strCurrency
+		FROM tblSMCurrency currency
+		WHERE currency.intCurrencyID = CASE WHEN ContractDetail.ysnUseFXPrice = 1 THEN ContractDetailExtras.intSeqCurrencyId ELSE ISNULL(ISNULL(ContractDetail.intCurrencyId, ContractDetailCurrency.intMainCurrencyId), dbo.fnSMGetDefaultCurrency('FUNCTIONAL')) END
+	) SubCurrency
+	OUTER APPLY (
+		SELECT TOP 1 *
+		FROM tblICCompanyPreference			
+	) ICPreference
+	OUTER APPLY (
+		SELECT intForexRateTypeId = MultiCurrencyDefault.intContractRateTypeId, ForexRateType.strCurrencyExchangeRateType
 		FROM tblSMCompanyPreference Company
-			INNER JOIN tblSMMultiCurrency MultiCurrencyDefault
-			ON MultiCurrencyDefault.intMultiCurrencyId = Company.intMultiCurrencyId
-			INNER JOIN tblSMCurrencyExchangeRateType ForexRateType
-			ON ForexRateType.intCurrencyExchangeRateTypeId = MultiCurrencyDefault.intContractRateTypeId
+			INNER JOIN tblSMMultiCurrency MultiCurrencyDefault ON MultiCurrencyDefault.intMultiCurrencyId = Company.intMultiCurrencyId
+			INNER JOIN tblSMCurrencyExchangeRateType ForexRateType ON ForexRateType.intCurrencyExchangeRateTypeId = MultiCurrencyDefault.intContractRateTypeId
 		-- Get the contract default forex rate type
-		WHERE	LogisticsView.intForexRateTypeId IS NULL
-			AND Company.intDefaultCurrencyId <> dbo.fnICGetCurrency(LogisticsView.intPContractDetailId, 0) -- Logistic currency is not the functional currnecy. 
+		WHERE LoadDetail.intForexRateTypeId IS NULL
+			AND Company.intDefaultCurrencyId <> CASE WHEN ContractDetail.ysnUseFXPrice = 1 THEN ContractDetailExtras.intSeqCurrencyId ELSE ISNULL(ISNULL(ContractDetailCurrency.intMainCurrencyId, ContractDetail.intCurrencyId), dbo.fnSMGetDefaultCurrency('FUNCTIONAL')) END -- Logistic currency is not the functional currnecy. 
 		) CompanyPreferenceForexRateType
 		OUTER APPLY dbo.fnSMGetForexRate(
-			dbo.fnICGetCurrency(LogisticsView.intPContractDetailId, 0)
-			,ISNULL(LogisticsView.intForexRateTypeId, CompanyPreferenceForexRateType.intForexRateTypeId)
-			,LogisticsView.dtmScheduledDate
-		) defaultForexRate 
-		OUTER APPLY (
-			SELECT TOP 1
-			*
-		FROM tblICCompanyPreference			
-		) ICPreference
-
-	WHERE LogisticsView.dblBalanceToReceive > 0
-		AND LogisticsView.intSourceType = 2
-		AND LogisticsView.intTransUsedBy = 1
-		AND LogisticsView.intPurchaseSale = 1
-		AND LogisticsView.ysnPosted = 1
-		AND ISNULL(LC.ysnRejected,0) <> 1
-		AND LogisticsView.strType NOT IN ('Software', 'Other Charge', 'Comment', 'Service')
+			CASE WHEN ContractDetail.ysnUseFXPrice = 1 THEN ContractDetailExtras.intSeqCurrencyId ELSE ISNULL(ISNULL(ContractDetailCurrency.intMainCurrencyId, ContractDetail.intCurrencyId), dbo.fnSMGetDefaultCurrency('FUNCTIONAL')) END
+			,ISNULL(LoadDetail.intForexRateTypeId, CompanyPreferenceForexRateType.intForexRateTypeId)
+			,Load.dtmScheduledDate
+		) defaultForexRate
+	LEFT OUTER JOIN tblSMCurrencyExchangeRateType currencyType ON currencyType.intCurrencyExchangeRateTypeId = LoadDetail.intForexRateTypeId
+WHERE Load.ysnPosted = 1
+	AND Load.intTransUsedBy = 1
+	AND Load.intPurchaseSale = 1
+	AND (LoadContainerLink.dblQuantity - ISNULL(LoadContainerLink.dblReceivedQty, 0)) > 0
+	AND ISNULL(LoadContainer.ysnRejected, 0) <> 1
+	AND Item.strType NOT IN('Software', 'Other Charge', 'Comment', 'Service')
+	--AND LoadDetail.intVendorEntityId = 879
+	--AND intCurrencyId = 3
