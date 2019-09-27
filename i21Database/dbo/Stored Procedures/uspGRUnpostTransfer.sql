@@ -22,11 +22,9 @@ BEGIN
 	IF OBJECT_ID (N'tempdb.dbo.#tmpTransferCustomerStorage') IS NOT NULL
 		DROP TABLE #tmpTransferCustomerStorage
 	CREATE TABLE #tmpTransferCustomerStorage (
-		[intCustomerStorageId] INT PRIMARY KEY,
+		[intCustomerStorageId] INT,
 		[intToCustomerStorage] INT,
-		[dblUnits] DECIMAL(18,6),
-		UNIQUE ([intCustomerStorageId])
-	);
+		[dblUnits] DECIMAL(18,6))
 	INSERT INTO #tmpTransferCustomerStorage
 	SELECT 
 		 TSR.intSourceCustomerStorageId		 
@@ -39,12 +37,14 @@ BEGIN
 
 
 
-	IF EXISTS(SELECT TOP 1 1 
+	IF (SELECT TOP 1 A.dblOriginalBalance
 			FROM tblGRCustomerStorage A 
 			INNER JOIN #tmpTransferCustomerStorage B 
-				ON B.intCustomerStorageId = A.intCustomerStorageId 
-			WHERE B.dblUnits <> A.dblOriginalBalance
-	)
+			ON B.intCustomerStorageId = A.intCustomerStorageId) <>	
+		(SELECT  sum(B.dblUnits)
+			FROM tblGRCustomerStorage A 
+			INNER JOIN #tmpTransferCustomerStorage B 
+				ON B.intCustomerStorageId = A.intCustomerStorageId)
 	BEGIN
 		SET @ErrMsg = 'Unable to reverse this transaction. The open balance of one or more customer storage/s no longer match its original balance.'
 		
