@@ -13,7 +13,8 @@ RETURNS TABLE AS RETURN
 		,CAST((D.dblTax) 
 			* (CASE WHEN A.intTransactionType != 1 THEN -1 ELSE 1 END) AS DECIMAL(18,2)) AS dblForeignTotal
 		,0 as dblTotalUnits
-		,CASE WHEN (B.intInventoryReceiptItemId IS NOT NULL AND receiptItem.intOwnershipType <> 2) OR B.intInventoryReceiptChargeId IS NOT NULL OR B.intInventoryShipmentChargeId IS NOT NULL
+		,CASE WHEN (B.intInventoryReceiptItemId IS NOT NULL AND receiptItem.intTaxGroupId > 0)
+				 OR B.intInventoryReceiptChargeId IS NOT NULL OR B.intInventoryShipmentChargeId IS NOT NULL
 			THEN  dbo.[fnGetItemGLAccount](F.intItemId, ISNULL(detailloc.intItemLocationId, loc.intItemLocationId), 'AP Clearing')
 			ELSE D.intAccountId
 		END AS intAccountId
@@ -24,10 +25,10 @@ RETURNS TABLE AS RETURN
 	INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
 	INNER JOIN tblAPBillDetailTax D
 		ON B.intBillDetailId = D.intBillDetailId
+	LEFT JOIN tblICInventoryReceiptItem receiptItem
+		ON B.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
 	LEFT JOIN tblICInventoryReceiptCharge charges
 		ON B.intInventoryReceiptChargeId = charges.intInventoryReceiptChargeId
-	LEFT JOIN tblICInventoryReceiptItem receiptItem
-		ON receiptItem.intInventoryReceiptItemId = B.intInventoryReceiptItemId
 	LEFT JOIN tblICInventoryReceipt receipts
 		ON charges.intInventoryReceiptId = receipts.intInventoryReceiptId
 	LEFT JOIN dbo.tblSMCurrencyExchangeRateType G
