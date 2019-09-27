@@ -1,4 +1,4 @@
-﻿CREATE VIEW vyuICGetReceiptAddLGInboundShipment
+CREATE VIEW vyuICGetReceiptAddLGInboundShipment
 AS
 SELECT
 	  intKey						= CAST(ROW_NUMBER() OVER(ORDER BY LoadDetail.intLoadDetailId) AS INT)   
