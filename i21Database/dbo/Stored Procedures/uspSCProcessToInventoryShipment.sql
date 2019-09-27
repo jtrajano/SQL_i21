@@ -95,7 +95,7 @@ BEGIN TRY
 				dblUnitsRemaining,
 				dblCost,
 				intCurrencyId)
-				EXEC dbo.uspCTUpdationFromTicketDistribution 
+				EXEC dbo.uspSCGetContractsAndAllocate 
 				 @intTicketId
 				,@intEntityId
 				,@dblNetUnits
@@ -321,7 +321,7 @@ BEGIN TRY
 					dblUnitsRemaining,
 					dblCost,
 					intCurrencyId)
-					EXEC dbo.uspCTUpdationFromTicketDistribution 
+					EXEC dbo.uspSCGetContractsAndAllocate 
 					@intTicketId
 					,@intEntityId
 					,@dblNetUnits
@@ -417,7 +417,7 @@ BEGIN TRY
 					dblUnitsRemaining,
 					dblCost,
 					intCurrencyId)
-					EXEC dbo.uspCTUpdationFromTicketDistribution 
+					EXEC dbo.uspSCGetContractsAndAllocate 
 						@intTicketId
 						,@intEntityId
 						,@dblRemainingUnits

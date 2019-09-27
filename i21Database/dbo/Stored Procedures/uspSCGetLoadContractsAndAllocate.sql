@@ -37,10 +37,10 @@ BEGIN
 	WHERE intLoadId = @intLoadId  
   
    
-	IF(@dblTotalLoadQuantity < @dblNetUnits)  
-	BEGIN  
-		RAISERROR ('The entire ticket quantity can not be applied to the load.',16,1,'WITH NOWAIT')   
-	END  
+	-- IF(@dblTotalLoadQuantity < @dblNetUnits)  
+	-- BEGIN  
+	-- 	RAISERROR ('The entire ticket quantity can not be applied to the load.',16,1,'WITH NOWAIT')   
+	-- END  
   
   
    
@@ -79,8 +79,8 @@ BEGIN
 		WHERE intLoadId = @intLoadId  
 			AND intLoadDetailId <> @intLoadDetailId  
 		ORDER BY intLoadDetailId  
-  
-		SET @intLoadDetailId = NULL  
+
+			SET @intLoadDetailId = NULL  
 		SELECT @intLoadDetailId = MIN(intLoadDetailId) FROM #tmpOtherLoadContract  
   
 		WHILE (@intLoadDetailId IS NOT NULL AND @dblUnitsRemaining > 0)  

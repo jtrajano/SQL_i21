@@ -1,9 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspARUpdateContractOnInvoice]  
-	 @TransactionId	INT   
-	,@ForDelete		BIT = 0
-	,@UserId		INT = NULL
-	,@ysnReturn		BIT = 0
-	,@InvoiceIds    InvoiceId    READONLY
+	  @TransactionId	INT   
+	, @ForDelete		BIT = 0
+	, @UserId			INT = NULL	
+	, @InvoiceIds		InvoiceId	READONLY	
 AS  
   
 SET QUOTED_IDENTIFIER OFF  
@@ -11,8 +10,6 @@ SET ANSI_NULLS ON
 SET NOCOUNT ON  
 SET XACT_ABORT ON  
 SET ANSI_WARNINGS OFF  
-
-
 
 -- Get the details from the invoice 
 BEGIN TRY
@@ -310,27 +307,6 @@ BEGIN TRY
       AND (ISNULL(Header.intDistributionHeaderId, 0) = 0 AND ISNULL(Header.intLoadDistributionHeaderId, 0) = 0)    
       AND ISNULL(Header.intTransactionId, 0) = 0
       AND @TransactionId IS NULL
- 
-	--Post CM Return
-	SELECT
-		Detail.intInvoiceDetailId
-		,Detail.[intContractDetailId]
-		,NULL
-		,NULL
-		,Detail.[intItemUOMId]
-		,dbo.fnCalculateQtyBetweenUOM(Detail.[intItemUOMId], CD.[intItemUOMId], Detail.[dblQtyShipped])
-		,Detail.[intLoadDetailId]
-	FROM tblARInvoiceDetail Detail
-	INNER JOIN tblICItem ITEM ON Detail.intItemId = ITEM.intItemId AND ITEM.strType <> 'Other Charge'
-	INNER JOIN tblARInvoice Header ON Detail.intInvoiceId = Header.intInvoiceId 
-	INNER JOIN tblCTContractDetail CD ON Detail.intContractDetailId = CD.intContractDetailId
-	WHERE Detail.intInvoiceId = @TransactionId 
-	  AND Header.strTransactionType = 'Credit Memo'
-	  AND Detail.intContractDetailId IS NOT NULL
-	  AND Detail.[intSalesOrderDetailId] IS NULL
-	  AND Detail.[intShipmentPurchaseSalesContractId] IS NULL 
-	  AND Detail.intInvoiceDetailId NOT IN (SELECT intTransactionDetailId FROM tblARTransactionDetail WHERE intTransactionId = @TransactionId)
-	  AND ISNULL(@ysnReturn, 0) = 1
 
 	SELECT @intUniqueId = MIN(intUniqueId) FROM @tblToProcess
 

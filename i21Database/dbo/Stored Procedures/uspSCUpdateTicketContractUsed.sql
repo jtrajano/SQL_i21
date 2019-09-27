@@ -64,10 +64,11 @@ BEGIN TRY
 						WHERE CTD.intContractDetailId = @intContractDetailId
 					) CT
 					WHERE intTicketId = @intTicketId AND SC.strDistributionOption != 'SPL'
+						AND SC.strDistributionOption != 'LOD'
 				END
 				ELSE
 				BEGIN 
-					UPDATE tblSCTicket SET dblScheduleQty = @dblScheduleQty  WHERE intTicketId = @intTicketId AND ISNULL(intContractId,0) = @intContractDetailId AND strDistributionOption != 'SPL'
+					UPDATE tblSCTicket SET dblScheduleQty = @dblScheduleQty  WHERE intTicketId = @intTicketId AND ISNULL(intContractId,0) = @intContractDetailId AND strDistributionOption != 'SPL' AND strDistributionOption != 'LOD'
 				END
 			END
 		ELSE

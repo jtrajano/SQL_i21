@@ -40,6 +40,7 @@ BEGIN TRY
 		  , @ysnDestWtGrd					BIT
 		  , @dblShippedQty					NUMERIC(18,6)
 		  , @intShippedQtyUOMId				INT
+		  , @ysnFromReturn					BIT = 0
 
 	DECLARE @tblToProcess TABLE (
 		  intUniqueId				INT IDENTITY
@@ -54,7 +55,8 @@ BEGIN TRY
 		, dblQtyOrdered				NUMERIC(18,6)
 		, ysnDestWtGrd				BIT
 		, dblShippedQty				NUMERIC(18,6)
-		, intShippedQtyUOMId		INT	
+		, intShippedQtyUOMId		INT
+		, ysnFromReturn				BIT	
 	)
 
 	INSERT INTO @tblToProcess (
@@ -67,6 +69,7 @@ BEGIN TRY
 		, [dblQtyOrdered]
 		, [intTicketId]
 		, [intLoadDetailId]
+		, [ysnFromReturn]
 	)
 	SELECT [intInvoiceDetailId] 	= I.[intInvoiceDetailId]
 		, [intContractDetailId]		= I.[intContractDetailId]
@@ -75,24 +78,20 @@ BEGIN TRY
 		, [intOrderUOMId]			= ID.[intOrderUOMId]
 		, [dblQty]					= I.[dblQtyShipped]
 		, [dblQtyOrdered]			= CASE WHEN ID.intSalesOrderDetailId IS NOT NULL OR ID.intTicketId IS NOT NULL THEN ID.[dblQtyOrdered] ELSE 0 END
-		, [intTicketId]				= I.[intTicketId]
+		, [intTicketId]				= NULL
 		, [intLoadDetailId]			= ID.[intLoadDetailId]
+		, [ysnFromReturn]			= CASE WHEN ISNULL(RI.intInvoiceId, 0) = 0 THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END
 	FROM @ItemsFromInvoice I
+	INNER JOIN tblARInvoice INV ON I.intInvoiceId = INV.intInvoiceId
 	INNER JOIN tblARInvoiceDetail ID ON I.intInvoiceDetailId = ID.intInvoiceDetailId
-	LEFT JOIN (
-		SELECT intLoadDetailId
-			, intPurchaseSale 
-		FROM tblLGLoadDetail LGD 
-		INNER JOIN tblLGLoad LG ON LG.intLoadId = LGD.intLoadId	
-	) LG ON I.intLoadDetailId = LG.intLoadDetailId
-	WHERE I.intContractDetailId IS NOT NULL
-		AND	(
-			(I.strTransactionType <> 'Credit Memo' AND I.[intInventoryShipmentItemId] IS NULL AND I.[intShipmentPurchaseSalesContractId] IS NULL AND (I.[intLoadDetailId] IS NULL OR (I.intLoadDetailId IS NOT NULL AND LG.intPurchaseSale = 3)))
-			OR
-			(I.strTransactionType = 'Credit Memo' AND (I.[intInventoryShipmentItemId] IS NOT NULL OR I.[intShipmentPurchaseSalesContractId] IS NOT NULL OR I.[intLoadDetailId] IS NOT NULL))
-			)
-		AND ISNULL(I.[intTransactionId],0) = 0
-		AND I.intTicketId IS NULL
+	OUTER APPLY (
+		SELECT TOP 1 intInvoiceId 
+		FROM tblARInvoice I
+		WHERE I.strTransactionType = 'Invoice'
+		AND I.ysnReturned = 1
+		AND INV.strInvoiceOriginId = I.strInvoiceNumber
+		AND INV.intOriginalInvoiceId = I.intInvoiceId
+	) RI
 
 	IF NOT EXISTS(SELECT * FROM @tblToProcess)
 	BEGIN
@@ -150,7 +149,8 @@ BEGIN TRY
 				@dblShippedQty					=	NULL,
 				@intShippedQtyUOMId				=	NULL,
 				@dblRemainingSchedQty			=	NULL,
-				@intLoadDetailId				=	NULL
+				@intLoadDetailId				=	NULL,
+				@ysnFromReturn					=	CAST(0 AS BIT)
 
 		SELECT	@intContractDetailId			=	P.[intContractDetailId],
 				@intFromItemUOMId				=	P.[intItemUOMId],
@@ -162,6 +162,7 @@ BEGIN TRY
 				@dblShippedQty					=	P.[dblShippedQty],
 				@intShippedQtyUOMId				=	P.[intShippedQtyUOMId],
 				@intLoadDetailId				=	P.[intLoadDetailId],
+				@ysnFromReturn					=	P.[ysnFromReturn],
 
 				@intTicketId					=   T.[intTicketId],
 				@intTicketTypeId				=   T.[intTicketTypeId], --SELECT * FROM tblSCListTicketTypes
@@ -230,7 +231,7 @@ BEGIN TRY
 							@ysnFromInvoice 		= 	1  	 
 				END
 				
-				IF ISNULL(@intLoadDetailId, 0) = 0
+				IF ISNULL(@ysnFromReturn, 0) = 0 AND ISNULL(@intLoadDetailId, 0) = 0
 				BEGIN
 					EXEC	uspCTUpdateScheduleQuantity
 							@intContractDetailId	=	@intContractDetailId,
@@ -238,18 +239,18 @@ BEGIN TRY
 							@intUserId				=	@intUserId,
 							@intExternalId			=	@intInvoiceDetailId,
 							@strScreenName			=	'Invoice' 
-				END
 				
-				IF ISNULL(@dblRemainingSchedQty, 0) > 0 AND ISNULL(@dblConvertedQtyOrdered, 0) > 0 AND ISNULL(@intLoadDetailId, 0) = 0
-					BEGIN
-						SET @dblRemainingSchedQty = -@dblRemainingSchedQty
+					IF ISNULL(@dblRemainingSchedQty, 0) > 0 AND ISNULL(@dblConvertedQtyOrdered, 0) > 0 AND ISNULL(@intLoadDetailId, 0) = 0
+						BEGIN
+							SET @dblRemainingSchedQty = -@dblRemainingSchedQty
 
-						EXEC uspCTUpdateScheduleQuantity @intContractDetailId	= @intContractDetailId
-													   , @dblQuantityToUpdate	= @dblRemainingSchedQty
-													   , @intUserId				= @intUserId
-													   , @intExternalId			= @intInvoiceDetailId
-													   , @strScreenName			= 'Invoice' 
-					END
+							EXEC uspCTUpdateScheduleQuantity @intContractDetailId	= @intContractDetailId
+														, @dblQuantityToUpdate		= @dblRemainingSchedQty
+														, @intUserId				= @intUserId
+														, @intExternalId			= @intInvoiceDetailId
+														, @strScreenName			= 'Invoice' 
+						END
+				END
 		END
 
 		IF @ysnDestWtGrd = 1

@@ -33,7 +33,7 @@ BEGIN
 		, strPosition
 		, strFutureMonth
 		, dblPrice
-		, dblValue = (CASE WHEN strBuySell = 'Buy' THEN dblQty * -1 ELSE ABS(dblQty) END) * dblFutures
+		, dblValue = (CASE WHEN strBuySell = 'Buy' THEN dblQty * -1 ELSE ABS(dblQty) END) * dblPriceInQtyUOM
 		, intPriceFixationId
 		, dblFutures
 	INTO #tmpReportDetail
@@ -58,6 +58,7 @@ BEGIN
 			, P.strPosition
 			, FMo.strFutureMonth
 			, dblPrice = ISNULL(dbo.[fnRKConvertUOMCurrency]('ItemUOM', CD.intPriceItemUOMId, PriceUOM.intItemUOMId, 1, CD.intCurrencyId, @intCurrencyId, ISNULL(CD.dblCashPrice, 0), CD.intContractDetailId), 0.00)
+			, dblPriceInQtyUOM = ISNULL(dbo.[fnRKConvertUOMCurrency]('ItemUOM', CD.intPriceItemUOMId, QtyUOM.intItemUOMId, 1, CD.intCurrencyId, @intCurrencyId, ISNULL(CD.dblCashPrice, 0), CD.intContractDetailId), 0.00)
 			, PF.intPriceFixationId
 			, dblFutures = ISNULL(dbo.[fnRKConvertUOMCurrency]('ItemUOM', CD.intPriceItemUOMId, PriceUOM.intItemUOMId, 1, CD.intCurrencyId, @intCurrencyId, ISNULL(CD.dblFutures, 0), CD.intContractDetailId), 0.00)
 		FROM tblCTContractHeader CH
@@ -101,6 +102,7 @@ BEGIN
 			, P.strPosition
 			, FMo.strFutureMonth
 			, dblPrice = ISNULL(dbo.[fnRKConvertUOMCurrency]('ItemUOM', CD.intPriceItemUOMId, PriceUOM.intItemUOMId, 1, CD.intCurrencyId, @intCurrencyId, ISNULL(PFD.dblFinalPrice, 0), CD.intContractDetailId), 0.00)
+			, dblPriceInQtyUOM = ISNULL(dbo.[fnRKConvertUOMCurrency]('ItemUOM', CD.intPriceItemUOMId, QtyUOM.intItemUOMId, 1, CD.intCurrencyId, @intCurrencyId, ISNULL(PFD.dblFinalPrice, 0), CD.intContractDetailId), 0.00)
 			, PF.intPriceFixationId
 			, dblFutures = ISNULL(dbo.[fnRKConvertUOMCurrency]('ItemUOM', CD.intPriceItemUOMId, PriceUOM.intItemUOMId, 1, CD.intCurrencyId, @intCurrencyId, ISNULL(PFD.dblFixationPrice, 0), CD.intContractDetailId), 0.00)
 		FROM tblCTContractHeader CH
@@ -144,6 +146,7 @@ BEGIN
 			, strPosition = '' COLLATE Latin1_General_CI_AS
 			, strFutureMonth = FMonth.strFutureMonth
 			, dblPrice = ISNULL(dbo.[fnRKConvertUOMCurrency]('CommodityUOM', MarketUOM.intCommodityUnitMeasureId, PriceUOM.intCommodityUnitMeasureId, 1, FM.intCurrencyId, @intCurrencyId, ISNULL(DD.dblPrice, 0), NULL), 0.00)
+			, dblPriceInQtyUOM = ISNULL(dbo.[fnRKConvertUOMCurrency]('CommodityUOM', MarketUOM.intCommodityUnitMeasureId, FM.intUnitMeasureId, 1, FM.intCurrencyId, @intCurrencyId, ISNULL(DD.dblPrice, 0), NULL), 0.00)
 			, intPriceFixationId = NULL
 			, dblFutures = ISNULL(dbo.[fnRKConvertUOMCurrency]('CommodityUOM', MarketUOM.intCommodityUnitMeasureId, PriceUOM.intCommodityUnitMeasureId, 1, FM.intCurrencyId, @intCurrencyId, ISNULL(DD.dblPrice, 0), NULL), 0.00)
 		FROM tblRKFutOptTransactionHeader DH

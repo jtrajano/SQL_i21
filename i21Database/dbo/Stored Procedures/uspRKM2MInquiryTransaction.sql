@@ -26,7 +26,7 @@ BEGIN
 	DECLARE @ysnIncludeDerivatives BIT
 	DECLARE @ysnIncludeInTransitM2M BIT
 
-SELECT @dtmPriceDate = dtmM2MBasisDate FROM tblRKM2MBasis WHERE intM2MBasisId = @intM2MBasisId
+SELECT TOP 1 @dtmPriceDate = dtmM2MBasisDate FROM tblRKM2MBasis WHERE intM2MBasisId = @intM2MBasisId
 
 SELECT TOP 1 @ysnIncludeBasisDifferentialsInResults = ysnIncludeBasisDifferentialsInResults
 	, @ysnEnterForwardCurveForMarketBasisDifferential = ysnEnterForwardCurveForMarketBasisDifferential
@@ -1176,9 +1176,9 @@ FROM (
 				, strPeriodTo = SUBSTRING(CONVERT(NVARCHAR(20),cd.dtmEndDate,106),4,8)
 				, strStartDate = CONVERT(NVARCHAR(20), cd.dtmStartDate, 106)
 				, strEndDate = CONVERT(NVARCHAR(20), cd.dtmEndDate, 106)
-				, strPriOrNotPriOrParPriced = ISNULL((select strPricingStatus from @tblGetOpenContractDetail where intContractDetailId = cd.intContractDetailId), pt.strPricingType)
-                , intPricingTypeId = ISNULL((select intPricingTypeId from @tblGetOpenContractDetail where intContractDetailId = cd.intContractDetailId),pt.intPricingTypeId)
-                , strPricingType = ISNULL((select strPricingType from @tblGetOpenContractDetail where intContractDetailId = cd.intContractDetailId), pt.strPricingType)
+				, strPriOrNotPriOrParPriced = ISNULL((select TOP 1 strPricingStatus from @tblGetOpenContractDetail where intContractDetailId = cd.intContractDetailId), pt.strPricingType)
+                , intPricingTypeId = ISNULL((select TOP 1 intPricingTypeId from @tblGetOpenContractDetail where intContractDetailId = cd.intContractDetailId),pt.intPricingTypeId)
+                , strPricingType = ISNULL((select TOP 1 strPricingType from @tblGetOpenContractDetail where intContractDetailId = cd.intContractDetailId), pt.strPricingType)
 				, dblContractRatio = cd.dblRatio
                 , dblContractBasis = cd.dblBasis
 				, dblDummyContractBasis = null
@@ -1308,9 +1308,9 @@ FROM (
 				, strPeriodTo = SUBSTRING(CONVERT(NVARCHAR(20),cd.dtmEndDate,106),4,8)
 				, strStartDate = CONVERT(NVARCHAR(20), cd.dtmStartDate, 106)
 				, strEndDate = CONVERT(NVARCHAR(20), cd.dtmEndDate, 106)
-				, strPriOrNotPriOrParPriced = ISNULL((select strPricingStatus from @tblGetOpenContractDetail where intContractDetailId = cd.intContractDetailId), pt.strPricingType)
-                , intPricingTypeId = ISNULL((select intPricingTypeId from @tblGetOpenContractDetail where intContractDetailId = cd.intContractDetailId),pt.intPricingTypeId)
-                , strPricingType = ISNULL((select strPricingType from @tblGetOpenContractDetail where intContractDetailId = cd.intContractDetailId), pt.strPricingType)
+				, strPriOrNotPriOrParPriced = ISNULL((select TOP 1 strPricingStatus from @tblGetOpenContractDetail where intContractDetailId = cd.intContractDetailId), pt.strPricingType)
+                , intPricingTypeId = ISNULL((select TOP 1 intPricingTypeId from @tblGetOpenContractDetail where intContractDetailId = cd.intContractDetailId),pt.intPricingTypeId)
+                , strPricingType = ISNULL((select TOP 1 strPricingType from @tblGetOpenContractDetail where intContractDetailId = cd.intContractDetailId), pt.strPricingType)
 				, dblContractRatio = cd.dblRatio
                 , dblContractBasis = cd.dblBasis
 				, dblDummyContractBasis = null
@@ -2853,7 +2853,7 @@ END
 DECLARE @strM2MCurrency NVARCHAR(20)
 	, @dblRateConfiguration NUMERIC(18,6)
 
-SELECT @strM2MCurrency = strCurrency FROM tblSMCurrency WHERE intCurrencyID = @intCurrencyUOMId
+SELECT TOP 1 @strM2MCurrency = strCurrency FROM tblSMCurrency WHERE intCurrencyID = @intCurrencyUOMId
 
 SELECT TOP 1 @dblRateConfiguration = dblRate
 FROM vyuSMForex

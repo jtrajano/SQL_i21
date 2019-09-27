@@ -4277,7 +4277,6 @@
     <Build Include="dbo\Stored Procedures\uspRKAutoExpireMonth.sql" />
     <Build Include="dbo\Views\vyuPATCalculateRefundType.sql" />
     <Build Include="dbo\Tables\tblRKSettlementPriceImport.sql" />
-    <Build Include="dbo\Tables\tblRKSettlementPriceImport_ErrLog.sql" />
     <Build Include="dbo\Stored Procedures\uspRKSettlementPriceImport.sql" />
     <Build Include="dbo\Stored Procedures\uspRKSettlementPriceImportValidate.sql" />
     <Build Include="dbo\Stored Procedures\uspICValidateReceiptItemLocations.sql" />
@@ -8079,6 +8078,8 @@
     <Build Include="dbo\Views\vyuLGAdditionalColumnForContractDetailView.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRptWeightClaimJDE.sql" />
     <Build Include="dbo\Views\vyuAPRptWeightClaimJDE.sql" />
+    <Build Include="dbo\Functions\fnCTGetAvailablePriceQuantity.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCGetContractsAndAllocate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

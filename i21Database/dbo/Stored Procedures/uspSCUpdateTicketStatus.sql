@@ -26,11 +26,11 @@ BEGIN
 
 		SELECT @intContractDetailId = intContractId, @intFromItemUOMId = intItemUOMIdTo, @intStorageScheduleTypeId = intStorageScheduleTypeId FROM tblSCTicket where intTicketId = @scId
 
-		IF ISNULL(@intContractDetailId, 0) > 0 AND (@intStorageScheduleTypeId = -2 OR @intStorageScheduleTypeId = -6)
-		BEGIN
-			DELETE FROM tblSCTicketContractUsed WHERE intTicketId = @scId
-			DELETE FROM tblSCTicketLoadUsed WHERE intTicketId = @scId
-		END
+		-- IF ISNULL(@intContractDetailId, 0) > 0 AND (@intStorageScheduleTypeId = -2 OR @intStorageScheduleTypeId = -6)
+		-- BEGIN
+		DELETE FROM tblSCTicketContractUsed WHERE intTicketId = @scId
+		DELETE FROM tblSCTicketLoadUsed WHERE intTicketId = @scId
+		-- END
 	END
 	ELSE
 	BEGIN

@@ -285,7 +285,7 @@ BEGIN TRY
 		END
 
 		EXEC uspLGUpdateLoadItem @intContractDetailId
-		IF NOT EXISTS(SELECT 1 FROM tblCTContractDetail WHERE intParentDetailId = @intContractDetailId AND ysnSlice = 1 ) OR (@ysnSlice <> 1)
+		IF NOT EXISTS(SELECT 1 FROM tblCTContractDetail WITH (NOLOCK) WHERE intParentDetailId = @intContractDetailId AND ysnSlice = 1 ) OR (@ysnSlice <> 1)
 		BEGIN
 			EXEC uspLGUpdateCompanyLocation @intContractDetailId
 			-- Update Shipping Intruction Quantity

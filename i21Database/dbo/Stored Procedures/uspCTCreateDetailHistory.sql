@@ -221,7 +221,7 @@ BEGIN TRY
 	BEGIN
 		SELECT @intPrevHistoryId = NULL
 		SELECT @intContractDetailId = intContractDetailId FROM tblCTSequenceHistory WHERE intSequenceHistoryId = @intSequenceHistoryId
-		SELECT @intPrevHistoryId = intSequenceHistoryId FROM tblCTSequenceHistory WHERE intSequenceHistoryId < @intSequenceHistoryId AND intContractDetailId = @intContractDetailId
+		SELECT @intPrevHistoryId = intSequenceHistoryId FROM tblCTSequenceHistory WITH (NOLOCK) WHERE intSequenceHistoryId < @intSequenceHistoryId AND intContractDetailId = @intContractDetailId
 
 		IF @intPrevHistoryId IS NULL
 		BEGIN

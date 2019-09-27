@@ -370,15 +370,18 @@ BEGIN
 							JOIN tblAPVendor APV 
 								ON APV.intEntityId = EM.intEntityId
 							LEFT JOIN vyuSTCigaretteRebatePrograms CRP 
-								--ON TR.strTrlUPC = CRP.strLongUPCCode 
-								ON TR.strTrlUPCwithoutCheckDigit = CRP.strLongUPCCode -- Always compare UPC without check digit since Inventory UPC has no check digit
+								-- ON TR.strTrlUPCwithoutCheckDigit = CRP.strLongUPCCode
+								ON CONVERT(NUMERIC(32, 0),CAST(TR.strTrlUPCwithoutCheckDigit AS FLOAT)) = CRP.intUpcCode ---->   Always compare UPC without check digit since Inventory UPC has no check digit, use IC intUpcCode
 									AND (CAST(TR.dtmDate AS DATE) BETWEEN CRP.dtmStartDate AND CRP.dtmEndDate)
-							LEFT JOIN
-							(
-								SELECT [intID] 
-								FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreIdList)
-								GROUP BY [intID]
-							) x ON x.intID IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](CRP.strStoreIdList))
+
+							-- http://jira.irelyserver.com/browse/ST-1459
+							--LEFT JOIN
+							--(
+							--	SELECT [intID] 
+							--	FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreIdList)
+							--	GROUP BY [intID]
+							--) x ON x.intID IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](CRP.strStoreIdList))
+
 							WHERE TR.intStoreId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreIdList)) 
 								AND (TR.strTrlUPC != '' AND TR.strTrlUPC IS NOT NULL)
 								AND TR.strTrpPaycode != 'Change' --ST-680
@@ -602,14 +605,15 @@ BEGIN
 								JOIN tblSTStore ST 
 									ON ST.intStoreId = TR.intStoreId
 								LEFT JOIN vyuSTCigaretteRebatePrograms CRP 
-									ON TR.strTrlUPCwithoutCheckDigit = CRP.strLongUPCCode -- Always compare UPC without check digit since Inventory UPC has no check digit
-									AND (CAST(TR.dtmDate AS DATE) BETWEEN CRP.dtmStartDate AND CRP.dtmEndDate)
-								LEFT JOIN
-								(
-									SELECT DISTINCT [intID] 
-									FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreIdList)
-									GROUP BY [intID]
-								) x ON x.intID IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](CRP.strStoreIdList))
+									--ON TR.strTrlUPCwithoutCheckDigit = CRP.strLongUPCCode -- Always compare UPC without check digit since Inventory UPC has no check digit
+									ON CONVERT(NUMERIC(32, 0),CAST(TR.strTrlUPCwithoutCheckDigit AS FLOAT)) = CRP.intUpcCode ---->   Always compare UPC without check digit since Inventory UPC has no check digit, use IC intUpcCode
+										AND (CAST(TR.dtmDate AS DATE) BETWEEN CRP.dtmStartDate AND CRP.dtmEndDate)
+								--LEFT JOIN
+								--(
+								--	SELECT DISTINCT [intID] 
+								--	FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreIdList)
+								--	GROUP BY [intID]
+								--) x ON x.intID IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](CRP.strStoreIdList))
 								WHERE TR.intTrlDeptNumber IN (SELECT DISTINCT intRegisterDepartmentId FROM fnSTRebateDepartment(CAST(ST.intStoreId AS NVARCHAR(10)))) -- ST-1358
 									AND (TR.strTrlUPC != '' AND TR.strTrlUPC IS NOT NULL)
 

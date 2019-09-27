@@ -12,7 +12,7 @@ BEGIN TRY
 	DECLARE @strUpdate NVARCHAR(100)
 	DECLARE @strToTransactionType NVARCHAR(100)
 		,@intToBookId INT
-		,@strDelete nvarchar(50)
+		,@strDelete NVARCHAR(50)
 
 	IF EXISTS (
 			SELECT 1
@@ -147,14 +147,18 @@ BEGIN TRY
 			END
 		END
 
-		IF @strRowState = 'Delete'
+		IF NOT EXISTS (
+				SELECT *
+				FROM tblCTContractHeader
+				WHERE intContractHeaderId = @ContractHeaderId
+				)
 		BEGIN
 			EXEC uspCTContractPopulateStgXML @ContractHeaderId
 				,@intToEntityId
 				,@intCompanyLocationId
 				,@strToTransactionType
 				,@intToCompanyId
-				,'Modified'
+				,'Delete'
 				,0
 				,@intToBookId
 		END
