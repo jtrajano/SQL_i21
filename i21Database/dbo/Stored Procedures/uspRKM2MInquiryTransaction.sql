@@ -1133,9 +1133,9 @@ FROM (
                 , strPosition = NULL --cd.strPosition
 				, strPeriod = RIGHT(CONVERT(VARCHAR(8), cd.dtmStartDate, 3), 5)+'-'+RIGHT(CONVERT(VARCHAR(8), cd.dtmEndDate, 3), 5)
 				, strPeriodTo = SUBSTRING(CONVERT(NVARCHAR(20),cd.dtmEndDate,106),4,8)
-				, strPriOrNotPriOrParPriced = ISNULL((select strPricingStatus from @tblGetOpenContractDetail where intContractDetailId = cd.intContractDetailId), pt.strPricingType)
-                , intPricingTypeId = ISNULL((select intPricingTypeId from @tblGetOpenContractDetail where intContractDetailId = cd.intContractDetailId),pt.intPricingTypeId)
-                , strPricingType = ISNULL((select strPricingType from @tblGetOpenContractDetail where intContractDetailId = cd.intContractDetailId), pt.strPricingType)
+				, strPriOrNotPriOrParPriced = ISNULL((select top 1 strPricingStatus from @tblGetOpenContractDetail where intContractDetailId = cd.intContractDetailId), pt.strPricingType)
+                , intPricingTypeId = ISNULL((select top 1 intPricingTypeId from @tblGetOpenContractDetail where intContractDetailId = cd.intContractDetailId),pt.intPricingTypeId)
+                , strPricingType = ISNULL((select top 1 strPricingType from @tblGetOpenContractDetail where intContractDetailId = cd.intContractDetailId), pt.strPricingType)
 				, dblContractRatio = cd.dblRatio
                 , dblContractBasis = cd.dblBasis
 				, dblDummyContractBasis = null
@@ -1254,9 +1254,9 @@ FROM (
                 , strPosition = NULL --cd.strPosition
 				, strPeriod = RIGHT(CONVERT(VARCHAR(8), cd.dtmStartDate, 3), 5)+'-'+RIGHT(CONVERT(VARCHAR(8), cd.dtmEndDate, 3), 5)
 				, strPeriodTo = SUBSTRING(CONVERT(NVARCHAR(20),cd.dtmEndDate,106),4,8)
-				, strPriOrNotPriOrParPriced = ISNULL((select strPricingStatus from @tblGetOpenContractDetail where intContractDetailId = cd.intContractDetailId), pt.strPricingType)
-                , intPricingTypeId = ISNULL((select intPricingTypeId from @tblGetOpenContractDetail where intContractDetailId = cd.intContractDetailId),pt.intPricingTypeId)
-                , strPricingType = ISNULL((select strPricingType from @tblGetOpenContractDetail where intContractDetailId = cd.intContractDetailId), pt.strPricingType)
+				, strPriOrNotPriOrParPriced = ISNULL((select top 1 strPricingStatus from @tblGetOpenContractDetail where intContractDetailId = cd.intContractDetailId), pt.strPricingType)
+                , intPricingTypeId = ISNULL((select top 1 intPricingTypeId from @tblGetOpenContractDetail where intContractDetailId = cd.intContractDetailId),pt.intPricingTypeId)
+                , strPricingType = ISNULL((select top 1 strPricingType from @tblGetOpenContractDetail where intContractDetailId = cd.intContractDetailId), pt.strPricingType)
 				, dblContractRatio = cd.dblRatio
                 , dblContractBasis = cd.dblBasis
 				, dblDummyContractBasis = null
