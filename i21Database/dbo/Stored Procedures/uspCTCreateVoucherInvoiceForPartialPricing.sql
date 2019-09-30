@@ -1011,7 +1011,7 @@ BEGIN TRY
 
 	IF ISNULL(@strPostedAPAR,'') <> ''
 	BEGIN
-		SET @ErrMsg = 'Cannot Update price as following posted Invoice/Vouchers are available. ' + @strPostedAPAR +'. Unpost those Invoice/Vocuher to continue update the price.'
+		SET @ErrMsg = 'Cannot Update price as following posted Invoice/Vouchers are available. ' + @strPostedAPAR +'. Unpost those Invoice/Voucher to continue update the price.'
 		RAISERROR(@ErrMsg,16,1)
 	END
 
