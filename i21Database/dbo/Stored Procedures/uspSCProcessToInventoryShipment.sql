@@ -94,7 +94,8 @@ BEGIN TRY
 				dblUnitsDistributed,
 				dblUnitsRemaining,
 				dblCost,
-				intCurrencyId)
+				intCurrencyId,
+				intLoadDetailId)
 				EXEC dbo.uspSCGetContractsAndAllocate 
 				 @intTicketId
 				,@intEntityId
@@ -320,7 +321,8 @@ BEGIN TRY
 					dblUnitsDistributed,
 					dblUnitsRemaining,
 					dblCost,
-					intCurrencyId)
+					intCurrencyId,
+					intLoadDetailId)
 					EXEC dbo.uspSCGetContractsAndAllocate 
 					@intTicketId
 					,@intEntityId
@@ -416,7 +418,8 @@ BEGIN TRY
 					dblUnitsDistributed,
 					dblUnitsRemaining,
 					dblCost,
-					intCurrencyId)
+					intCurrencyId,
+					intLoadDetailId)
 					EXEC dbo.uspSCGetContractsAndAllocate 
 						@intTicketId
 						,@intEntityId
