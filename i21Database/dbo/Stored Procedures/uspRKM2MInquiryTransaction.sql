@@ -2843,7 +2843,7 @@ END
 		FROM fnRKGetOpenFutureByDate (@intCommodityId, '1/1/1900',@dtmTransactionDateUpTo, 1) DER
 		LEFT JOIN @tblGetSettlementPrice SP ON SP.intFutureMarketId = DER.intFutureMarketId AND SP.intFutureMonthId = DER.intFutureMonthId
 		WHERE intCommodityId = @intCommodityId 
-			AND ysnPreCrush = 0 
+			AND ISNULL(ysnPreCrush,0) = 0 
 			AND ysnExpired = 0
 			AND intInstrumentTypeId = 1
 			AND dblOpenContract <> 0
