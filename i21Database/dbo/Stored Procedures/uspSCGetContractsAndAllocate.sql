@@ -472,7 +472,7 @@ BEGIN TRY
 			SET @intLoadDetailId = NULL
 
 			SELECT TOP 1  @intLoadDetailId = intLoadDetailId
-				,@intContractDetailId = intcontractDetailId
+				,@intContractDetailId = intContractDetailId
 			FROM @LoadDetailTable
 			ORDER BY intLoadDetailId
 		END	
