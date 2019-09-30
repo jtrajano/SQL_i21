@@ -231,7 +231,9 @@ OPEN intListCursor;
 					intContractDetailId,
 					dblUnitsDistributed,
 					dblUnitsRemaining,
-					dblCost)
+					dblCost,
+					intCurrencyId,
+					intLoadDetailId)
 					EXEC dbo.uspSCGetContractsAndAllocate 
 					@intDeliverySheetId
 					,@intEntityId
