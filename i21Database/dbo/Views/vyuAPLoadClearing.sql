@@ -46,7 +46,7 @@ INNER JOIN
     ON
         GL.intTransactionId = A.intLoadId 
     AND GL.strTransactionId = A.strLoadNumber
-    AND GL.intJournalLineNo = B.intLoadDetailId
+    -- AND GL.intJournalLineNo = B.intLoadDetailId
 LEFT JOIN (tblICInventoryReceiptItem receiptItem INNER JOIN tblICInventoryReceipt receipt
 				ON receipt.intInventoryReceiptId = receiptItem.intInventoryReceiptId AND receipt.intSourceType = 2 AND receipt.ysnPosted = 1)
 	ON receiptItem.intSourceId = B.intLoadDetailId
