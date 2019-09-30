@@ -405,7 +405,7 @@ BEGIN TRY
 	  ,CD.intContractDetailId
 	  ,InvTran.dtmDate
 	  ,@dtmEndDate  AS dtmEndDate
-	  ,MAX(ReceiptItem.dblOpenReceive) dblQuantity
+	  ,dblQuantity = ISNULL(dbo.fnMFConvertCostToTargetItemUOM(CD.intItemUOMId,ReceiptItem.intCostUOMId,MAX(ReceiptItem.dblOpenReceive)),0)
 	  ,0
 	  ,COUNT(DISTINCT Receipt.intInventoryReceiptId)
 	  ,Receipt.intInventoryReceiptId
@@ -425,7 +425,7 @@ BEGIN TRY
 	  	AND intContractTypeId = 1
 	  	AND InvTran.intTransactionTypeId = 4
 	  GROUP BY CH.intContractTypeId,CH.intContractHeaderId
-	  	,CD.intContractDetailId,InvTran.dtmDate,Receipt.intInventoryReceiptId
+	  	,CD.intContractDetailId,InvTran.dtmDate,Receipt.intInventoryReceiptId,CD.intItemUOMId,ReceiptItem.intCostUOMId
 
 	INSERT INTO @Shipment
 	  (
