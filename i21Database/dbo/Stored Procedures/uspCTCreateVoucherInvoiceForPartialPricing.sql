@@ -458,6 +458,9 @@ BEGIN TRY
 						UPDATE	tblICInventoryReceiptItem SET ysnAllowVoucher = 1 WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId
 												
 						EXEC	uspICConvertReceiptToVoucher @intInventoryReceiptId,@intUserId, @intNewBillId OUTPUT
+
+						if (@intNewBillId is not null and @intNewBillId > 0)
+						BEGIN
 						
 						UPDATE	tblAPBill SET strVendorOrderNumber = @strVendorOrderNumber, dtmDate = @dtmFixationDate, dtmDueDate = @dtmFixationDate, dtmBillDate = @dtmFixationDate WHERE intBillId = @intNewBillId
 						
@@ -529,6 +532,8 @@ BEGIN TRY
 								set dblLoadApplied = ISNULL(dblLoadApplied, 0)  + @dblInventoryItemLoadApplied,
 									dblLoadAppliedAndPriced = ISNULL(dblLoadAppliedAndPriced, 0) + @dblInventoryItemLoadApplied
 							WHERE intPriceFixationDetailId = @intPriceFixationDetailId
+						END
+						
 						END
 
 					END
