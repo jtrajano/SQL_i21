@@ -2639,6 +2639,7 @@ BEGIN
 						WHERE intCommodityId = @intCommodityIdCollateral
 						AND intItemId = @intItemIdCollateral
 						AND intCompanyLocationId = @intLocationIdCollateral
+						AND strContractOrInventoryType = 'Inventory'
 		)
 		BEGIN
 			UPDATE #Temp SET dblOpenQty = dblOpenQty + @dblOpenQtyCollateral
