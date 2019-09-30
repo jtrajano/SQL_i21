@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspMFCompleteBlendSheet] (
+﻿Create PROCEDURE [dbo].[uspMFCompleteBlendSheet] (
 	@strXml NVARCHAR(MAX)
 	,@intLotId INT = 0 OUT
 	,@strLotNumber NVARCHAR(50) = '' OUT
@@ -511,6 +511,96 @@ BEGIN TRY
 	BEGIN
 		SET @intLotId = 0
 		SET @strLotNumber = ''
+	END
+
+
+	DECLARE @intId INT
+		,@intConsumedItemId INT
+		,@intConsumedLotId INT
+		,@dblQty NUMERIC(24, 10)
+		,@intConsumedItemUOMId INT
+		--,@intStorageLocationId INT
+		,@intWorkOrderConsumedLotId INT
+			--,@intLocationId INT
+		,@dtmDate DATETIME
+
+	DECLARE @tblMFWorkOrderConsumedLot TABLE (
+		intId INT identity(1, 1)
+		,intWorkOrderConsumedLotId INT
+		,intItemId INT
+		,intLotId INT
+		,dblQty NUMERIC(24, 10)
+		,intItemUOMId INT
+		,intStorageLocationId INT
+		)
+
+	SELECT @dtmDate = GETDATE()
+
+	INSERT INTO @tblMFWorkOrderConsumedLot (
+		intWorkOrderConsumedLotId
+		,intItemId
+		,intLotId
+		,dblQty
+		,intItemUOMId
+		,intStorageLocationId
+		)
+	SELECT intWorkOrderConsumedLotId
+		,intItemId
+		,intLotId
+		,dblQuantity
+		,intItemUOMId
+		,intStorageLocationId
+	FROM tblMFWorkOrderConsumedLot
+	WHERE intWorkOrderId = @intWorkOrderId
+
+	SELECT @intId = MIN(intId)
+	FROM @tblMFWorkOrderConsumedLot
+
+	WHILE @intId IS NOT NULL
+	BEGIN
+		SELECT @intConsumedItemId = NULL
+			,@intConsumedLotId = NULL
+			,@dblQty = NULL
+			,@intConsumedItemUOMId = NULL
+			,@intStorageLocationId = NULL
+			,@intWorkOrderConsumedLotId=NULL
+
+		SELECT @intWorkOrderConsumedLotId = intWorkOrderConsumedLotId
+			,@intConsumedItemId = intItemId
+			,@intConsumedLotId = intLotId
+			,@dblQty = dblQty
+			,@intConsumedItemUOMId = intItemUOMId
+			,@intStorageLocationId = intStorageLocationId
+		FROM @tblMFWorkOrderConsumedLot
+		WHERE intId = @intId
+
+		EXEC dbo.uspMFAdjustInventory @dtmDate = @dtmDate
+			,@intTransactionTypeId = 8
+			,@intItemId = @intConsumedItemId
+			,@intSourceLotId = @intConsumedLotId
+			,@intDestinationLotId = NULL
+			,@dblQty = @dblQty
+			,@intItemUOMId = @intConsumedItemUOMId
+			,@intOldItemId = NULL
+			,@dtmOldExpiryDate = NULL
+			,@dtmNewExpiryDate = NULL
+			,@intOldLotStatusId = NULL
+			,@intNewLotStatusId = NULL
+			,@intUserId = @intUserId
+			,@strNote = NULL
+			,@strReason = NULL
+			,@intLocationId = @intLocationId
+			,@intInventoryAdjustmentId = NULL
+			,@intStorageLocationId = @intStorageLocationId
+			,@intDestinationStorageLocationId = NULL
+			,@intWorkOrderInputLotId = NULL
+			,@intWorkOrderProducedLotId = NULL
+			,@intWorkOrderId = @intWorkOrderId
+			,@intWorkOrderConsumedLotId = @intWorkOrderConsumedLotId
+
+		SELECT @intId = MIN(intId)
+		FROM @tblMFWorkOrderConsumedLot
+		WHERE intId > @intId
 	END
 
 	COMMIT TRANSACTION
