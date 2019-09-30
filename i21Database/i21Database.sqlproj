@@ -1074,6 +1074,7 @@
       <SuppressTSqlWarnings>71005</SuppressTSqlWarnings>
     </Build>
     <Build Include="dbo\Views\vyuICGetReceiptItemSource.sql" />
+    <Build Include="dbo\Views\vyuICLoadContainers.sql" />
     <Build Include="dbo\Tables\tblHDAnnouncementType.sql" />
     <Build Include="dbo\Tables\tblHDAnnouncement.sql" />
     <Build Include="dbo\Tables\tblHDProject.sql" />
