@@ -49,7 +49,7 @@ SELECT
 										WHEN DMDetails.intContractDetailId IS NULL AND DMDetails.intInventoryReceiptItemId IS NULL THEN DMDetails.dblCost
 									ELSE DMDetails.dblCost
 										END
-	,dblTotal				=	DMDetails.dblTotal
+	,dblTotal				=	DMDetails.dblTotal + ISNULL(DMDetails.dblTax,0)
 	,dblNetShippedWeight	=	0 --DMDetails.dblNetShippedWeight
 	,dblWeightLoss			=	0 --dblWeightLoss
 	,dblLandedWeight		=	0 --CASE WHEN DMDetails.intWeightUOMId > 0 THEN DMDetails.dblNetWeight ELSE DMDetails.dblQtyReceived END
