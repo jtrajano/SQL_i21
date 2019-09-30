@@ -1,4 +1,8 @@
-﻿CREATE PROCEDURE uspMFUnpostProducedLot (@strXML NVARCHAR(MAX),@ysnRecap BIT = 0,@strBatchId NVARCHAR(50)='' OUT)
+﻿CREATE PROCEDURE uspMFUnpostProducedLot (
+	@strXML NVARCHAR(MAX)
+	,@ysnRecap BIT = 0
+	,@strBatchId NVARCHAR(50) = '' OUT
+	)
 AS
 BEGIN TRY
 	DECLARE @intWorkOrderId INT
@@ -23,16 +27,21 @@ BEGIN TRY
 		,@intManufacturingProcessId INT
 		,@intAttributeTypeId INT
 		,@STARTING_NUMBER_BATCH AS INT = 3
+		,@intWorkOrderProducedLotId int
+		,@intLocationId int
+		,@dtmTransactionDate datetime
+		,@dblQty2 NUMERIC(38, 20)
+
+	Select @dtmTransactionDate=GETDATE()
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXML
 
 	SELECT @intWorkOrderId = intWorkOrderId
 		,@intLotId = intLotId
-		,@dblQty = dblQty
-		,@intItemUOMId = intItemUOMId
-		,@dblWeight = dblWeight
-		,@intWeightUOMId = intWeightUOMId
+
+		
+
 		,@intBatchId = intBatchId
 		,@intUserId = intUserId
 	FROM OPENXML(@idoc, 'root', 2) WITH (
@@ -51,6 +60,11 @@ BEGIN TRY
 		,@intItemId = intItemId
 		,@intStorageLocationId = intStorageLocationId
 		,@intLotId = intLotId
+		,@intWorkOrderProducedLotId=intWorkOrderProducedLotId
+		,@dblQty = dblPhysicalCount 
+		,@intItemUOMId = intPhysicalItemUOMId 
+				,@dblWeight = dblQuantity
+		,@intWeightUOMId = intItemUOMId
 	FROM dbo.tblMFWorkOrderProducedLot
 	WHERE intLotId = @intLotId
 		OR intWorkOrderId = @intWorkOrderId
@@ -77,6 +91,7 @@ BEGIN TRY
 
 	SELECT @strWorkOrderNo = strWorkOrderNo
 		,@intManufacturingProcessId = intManufacturingProcessId
+		,@intLocationId=intLocationId
 	FROM tblMFWorkOrder
 	WHERE intWorkOrderId = @intWorkOrderId
 
@@ -94,8 +109,10 @@ BEGIN TRY
 		RETURN
 	END
 
-	Set @strBatchId=''
-	EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT 
+	SET @strBatchId = ''
+
+	EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH
+		,@strBatchId OUTPUT
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -144,7 +161,7 @@ BEGIN TRY
 		,@intUserId
 		,0
 
-	If ISNULL(@ysnRecap,0)=0
+	IF ISNULL(@ysnRecap, 0) = 0
 		EXEC dbo.uspGLBookEntries @GLEntries
 			,0
 
@@ -157,62 +174,131 @@ BEGIN TRY
 		UPDATE tblMFWorkOrderProducedLot
 		SET ysnProductionReversed = 1
 		WHERE intWorkOrderId = @intWorkOrderId
+
+		Select @dblQty2=-@dblQty
+
+		EXEC dbo.uspMFAdjustInventory @dtmDate = @dtmTransactionDate
+		,@intTransactionTypeId = 9
+		,@intItemId = @intItemId
+		,@intSourceLotId = @intLotId
+		,@intDestinationLotId = NULL
+		,@dblQty = @dblQty2
+		,@intItemUOMId = @intItemUOMId
+		,@intOldItemId = NULL
+		,@dtmOldExpiryDate = NULL
+		,@dtmNewExpiryDate = NULL
+		,@intOldLotStatusId = NULL
+		,@intNewLotStatusId = NULL
+		,@intUserId = @intUserId
+		,@strNote = NULL
+		,@strReason = NULL
+		,@intLocationId = @intLocationId
+		,@intInventoryAdjustmentId = NULL
+		,@intStorageLocationId = @intStorageLocationId
+		,@intDestinationStorageLocationId = NULL
+		,@intWorkOrderInputLotId = NULL
+		,@intWorkOrderProducedLotId = @intWorkOrderProducedLotId
+		,@intWorkOrderId = @intWorkOrderId
 	END
 
 	IF @dblQty > 0
 	BEGIN
-		DELETE
-		FROM tblMFWorkOrderConsumedLot
-		WHERE intWorkOrderId = @intWorkOrderId
-			AND intBatchId = @intBatchId
+		--DECLARE @tblMFWorkOrderConsumedLot TABLE (intWorkOrderConsumedLotId INT);
 
-		UPDATE dbo.tblMFWorkOrderProducedLot
-		SET dblQuantity = @dblWeight
-			,intItemUOMId = @intWeightUOMId
-			,dblPhysicalCount = @dblQty
-			,intPhysicalItemUOMId = @intItemUOMId
-			,dblWeightPerUnit = @dblWeight / @dblQty
-		WHERE intWorkOrderId = @intWorkOrderId
-			AND intBatchId = @intBatchId
+		--DELETE
+		--FROM tblMFWorkOrderConsumedLot
+		--OUTPUT deleted.intWorkOrderConsumedLotId
+		--INTO @tblMFWorkOrderConsumedLot
+		--WHERE intWorkOrderId = @intWorkOrderId
+		--	AND intBatchId = @intBatchId
 
-		SELECT @dblWeightPerUnit = @dblWeight / @dblQty
+		IF @intAttributeTypeId = 2
+		BEGIN
+			INSERT INTO tblMFInventoryAdjustment (
+				dtmDate
+				,intTransactionTypeId
+				,intItemId
+				,intSourceLotId
+				,dblQty
+				,intItemUOMId
+				,intUserId
+				,intLocationId
+				,intStorageLocationId
+				,intWorkOrderConsumedLotId
+				,dtmBusinessDate
+				,intBusinessShiftId
+				,intWorkOrderId
+				)
+			SELECT dtmDate
+				,intTransactionTypeId
+				,IA.intItemId
+				,intSourceLotId
+				,- dblQty
+				,IA.intItemUOMId
+				,intUserId
+				,intLocationId
+				,IA.intStorageLocationId
+				,IA.intWorkOrderConsumedLotId
+				,dtmBusinessDate
+				,intBusinessShiftId
+				,IA.intWorkOrderId
+			FROM tblMFInventoryAdjustment IA
+			JOIN tblMFWorkOrderConsumedLot WC ON IA.intWorkOrderConsumedLotId = WC.intWorkOrderConsumedLotId
+			Where WC.intWorkOrderId = @intWorkOrderId
+			AND WC.intBatchId = @intBatchId
+		END
 
-		EXEC dbo.uspMFPickWorkOrder @intWorkOrderId = @intWorkOrderId
-			,@dblProduceQty = @dblWeight
-			,@intProduceUOMId = @intWeightUOMId
-			,@intBatchId = @intBatchId
-			,@intUserId = @intUserId
-			,@dblUnitQty = @dblWeightPerUnit
-			,@ysnProducedQtyByWeight = 1
+		--UPDATE dbo.tblMFWorkOrderProducedLot
+		--SET dblQuantity = @dblWeight
+		--	,intItemUOMId = @intWeightUOMId
+		--	,dblPhysicalCount = @dblQty
+		--	,intPhysicalItemUOMId = @intItemUOMId
+		--	,dblWeightPerUnit = @dblWeight / @dblQty
+		--WHERE intWorkOrderId = @intWorkOrderId
+		--	AND intBatchId = @intBatchId
 
-		EXEC [dbo].uspMFPostConsumptionProduction @intWorkOrderId = @intWorkOrderId
-			,@intItemId = @intItemId
-			,@strLotNumber = @strLotNumber
-			,@dblWeight = @dblWeight
-			,@intWeightUOMId = @intWeightUOMId
-			,@dblUnitQty = @dblWeightPerUnit
-			,@dblQty = @dblQty
-			,@intItemUOMId = @intItemUOMId
-			,@intUserId = @intUserId
-			,@intBatchId = @intBatchId
-			,@intLotId = @intLotId OUTPUT
-			,@strLotAlias = @strWorkOrderNo
-			,@strVendorLotNo = NULL
-			,@strParentLotNumber = NULL
-			,@intStorageLocationId = @intStorageLocationId
-			,@dtmProductionDate = @dtmDate
+		--SELECT @dblWeightPerUnit = @dblWeight / @dblQty
+
+		--EXEC dbo.uspMFPickWorkOrder @intWorkOrderId = @intWorkOrderId
+		--	,@dblProduceQty = @dblWeight
+		--	,@intProduceUOMId = @intWeightUOMId
+		--	,@intBatchId = @intBatchId
+		--	,@intUserId = @intUserId
+		--	,@dblUnitQty = @dblWeightPerUnit
+		--	,@ysnProducedQtyByWeight = 1
+
+		--EXEC [dbo].uspMFPostConsumptionProduction @intWorkOrderId = @intWorkOrderId
+		--	,@intItemId = @intItemId
+		--	,@strLotNumber = @strLotNumber
+		--	,@dblWeight = @dblWeight
+		--	,@intWeightUOMId = @intWeightUOMId
+		--	,@dblUnitQty = @dblWeightPerUnit
+		--	,@dblQty = @dblQty
+		--	,@intItemUOMId = @intItemUOMId
+		--	,@intUserId = @intUserId
+		--	,@intBatchId = @intBatchId
+		--	,@intLotId = @intLotId OUTPUT
+		--	,@strLotAlias = @strWorkOrderNo
+		--	,@strVendorLotNo = NULL
+		--	,@strParentLotNumber = NULL
+		--	,@intStorageLocationId = @intStorageLocationId
+		--	,@dtmProductionDate = @dtmDate
 	END
 
-	If ISNULL(@ysnRecap,0)=1
-	Begin
+	IF ISNULL(@ysnRecap, 0) = 1
+	BEGIN
 		--Create Temp Table if not exists, so that insert statement for the temp table will not fail.
 		IF OBJECT_ID('tempdb..#tblRecap') IS NULL
-			Select * into #tblRecap from @GLEntries Where 1=2
+			SELECT *
+			INTO #tblRecap
+			FROM @GLEntries
+			WHERE 1 = 2
 
 		--Insert Recap Data to temp table
-		Insert Into #tblRecap
-		Select * from @GLEntries
-	End
+		INSERT INTO #tblRecap
+		SELECT *
+		FROM @GLEntries
+	END
 
 	IF @intTransactionCount = 0
 		COMMIT TRANSACTION
@@ -238,6 +324,5 @@ BEGIN CATCH
 			)
 END CATCH
 GO
-
 
 
