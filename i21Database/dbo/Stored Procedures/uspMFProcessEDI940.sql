@@ -1591,8 +1591,6 @@ BEGIN TRY
 					WHERE intTabRowId = @intTabRowId
 						AND intCustomTabDetailId = @intCustomTabDetailId3
 				END
-			END
-
 			INSERT dbo.tblSMFieldValue (
 				intTabRowId
 				,intCustomTabDetailId
@@ -1610,6 +1608,8 @@ BEGIN TRY
 					WHERE FV.intTabRowId = @intTabRowId
 						AND FV.intCustomTabDetailId = C.intCustomTabDetailId
 					)
+
+			END
 
 			INSERT INTO tblMFEDI940Archive (
 				intEDI940Id
