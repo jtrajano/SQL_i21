@@ -160,7 +160,7 @@ AS
 	   ,IR.strReceiptNumber
 	   ,ICIS.intInventoryShipmentId
 	   ,ICIS.strShipmentNumber
-	   ,EMEntityFarm.strFarmDescription
+	   ,EMLocation.strLocationName as strFarmDescription
 	   ,ICCA.strDescription AS strGrade
 	   ,SO.strSalesOrderNumber
 	   ,IC.strItemNo AS strItemNumber
@@ -187,6 +187,7 @@ AS
 	LEFT JOIN tblICCommodityAttribute ICCA on ICCA.intCommodityAttributeId = SCT.intCommodityAttributeId
 	LEFT JOIN tblSOSalesOrder SO on SO.intSalesOrderId = SCT.intSalesOrderId
 	LEFT JOIN tblICItem IC ON IC.intItemId = SCT.intItemId
+   LEFT JOIN tblEMEntityLocation EMLocation on EMLocation.intEntityLocationId = SCT.intFarmFieldId
 	--LEFT JOIN tblEMEntity EMDriver ON EMDriver.intEntityId = SCT.intEntityContactId
 	LEFT JOIN tblSMShipViaTrailer on SCT.intEntityShipViaTrailerId = tblSMShipViaTrailer.intEntityShipViaTrailerId
 	LEFT JOIN tblCTContractDetail CTD ON SCT.intContractId = CTD.intContractDetailId
