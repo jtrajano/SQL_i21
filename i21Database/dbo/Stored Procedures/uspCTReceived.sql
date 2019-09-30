@@ -29,7 +29,8 @@ BEGIN TRY
 				@intContainerId					INT,
 				@intSourceId					INT,
 				@strTicketNumber				NVARCHAR(50),
-				@intSequenceUsageHistoryId		INT
+				@intSequenceUsageHistoryId		INT,
+				@ysnMainContract				BIT
 
 	SELECT @strReceiptType = strReceiptType,@intSourceType = intSourceType  FROM @ItemsFromInventoryReceipt
 
@@ -135,17 +136,30 @@ BEGIN TRY
 				3 = 'Transport'
 				4 = 'Settle Storage'
 				5 = 'Delivery Sheet'
-			*/
+			*/			
 
 			IF ((@intSourceType IN (0,1,2,3,5) OR @ysnPO = 1)AND @strReceiptType <> 'Inventory Return') 
 			   -- OR (@intSourceType IN (2) AND @strReceiptType = 'Inventory Return' )
-			BEGIN					
-				EXEC	uspCTUpdateScheduleQuantity
-						@intContractDetailId	=	@intContractDetailId,
-						@dblQuantityToUpdate	=	@dblSchQuantityToUpdate,
-						@intUserId				=	@intUserId,
-						@intExternalId			=	@intInventoryReceiptDetailId,
-						@strScreenName			=	@strScreenName
+			BEGIN
+				SET @ysnMainContract = 1
+
+				IF @intSourceType = 1
+				BEGIN
+					IF NOT EXISTS(SELECT TOP 1 1 FROM tblICInventoryReceiptItem a INNER JOIN tblSCTicket b ON a.intSourceId = b.intTicketId WHERE a.intInventoryReceiptItemId = @intInventoryReceiptDetailId AND b.intContractId = @intContractDetailId)
+					BEGIN 
+						SET @ysnMainContract = 0
+					END
+				END
+
+				IF @ysnMainContract = 1
+				BEGIN
+					EXEC	uspCTUpdateScheduleQuantity
+							@intContractDetailId	=	@intContractDetailId,
+							@dblQuantityToUpdate	=	@dblSchQuantityToUpdate,
+							@intUserId				=	@intUserId,
+							@intExternalId			=	@intInventoryReceiptDetailId,
+							@strScreenName			=	@strScreenName
+				END
 			END
 
 			IF(@intSourceType IN (2) AND @strReceiptType = 'Inventory Return')
