@@ -3685,7 +3685,7 @@ BEGIN TRY
 
 			EXEC dbo.uspCTGetTableDataInXML 'tblLGLoadWarehouseContainer'
 				,@strLoadWarehouseCondition
-				,@strAckLoadContainerXML OUTPUT
+				,@strAckLoadWarehouseContainerXML OUTPUT
 				,NULL
 				,NULL
 
@@ -3724,7 +3724,7 @@ BEGIN TRY
 				,@strAckLoadStorageCostXML
 				,@strAckLoadWarehouseXML
 				,@strAckLoadWarehouseServicesXML
-				,@strAckLoadContainerXML
+				,@strAckLoadWarehouseContainerXML
 
 			UPDATE tblLGIntrCompLogisticsStg
 			SET strFeedStatus = 'Processed'
