@@ -3,7 +3,8 @@ AS
 
 -- Item Should have
 -- 1. UOM
--- 2. Location
+-- 2. Item Location (Location same as Store Location) 
+-- 3. Item Location (Product Code of Store) 
 -- 3. Store (based on Location)
 -- 4. Register (based on Store)
 -- 5. Pricing
@@ -15,7 +16,7 @@ SELECT DISTINCT
 	, I.intItemId
 	, EM.intEntityId
 	, URN.ysnClick
-	, SMUS.intCompanyLocationId
+	, rolePerm.intCompanyLocationId
 	, ST.intStoreId
 FROM tblICItem AS I
 JOIN tblICCategory Cat 
@@ -75,10 +76,10 @@ JOIN
 	 OR dtmDateCreated IS NOT NULL
 ) AS x 
 	ON x.intItemId = I.intItemId 
-JOIN dbo.tblSMUserSecurity AS SMUS 
-	ON SMUS.intCompanyLocationId = IL.intLocationId 
-JOIN dbo.tblEMEntity AS EM 
-	ON EM.intEntityId = SMUS.intEntityId 
+INNER JOIN dbo.tblSMUserSecurityCompanyLocationRolePermission AS rolePerm 
+	ON rolePerm.intCompanyLocationId = IL.intLocationId 
+INNER JOIN dbo.tblEMEntity AS EM 
+	ON EM.intEntityId = rolePerm.intEntityId 
 LEFT OUTER JOIN dbo.tblSTUpdateRegisterNotification AS URN 
 	ON URN.intEntityId = EM.intEntityId
 WHERE (I.ysnFuelItem = 0)
