@@ -203,6 +203,8 @@ BEGIN
 				--AND ISNULL(stockUnit.ysnStockUnit, 0) = 0
 				AND st.intItemLocationId = il.intItemLocationId
 				AND st.intLocationId = il.intLocationId
+				AND ISNULL(st.intStorageLocationId, 0) = ISNULL(stock.intStorageLocationId, 0)
+				AND ISNULL(st.intSubLocationId, 0) = ISNULL(stock.intSubLocationId, 0)
 			GROUP BY 
 					st.intItemId,
 					st.intItemLocationId,
