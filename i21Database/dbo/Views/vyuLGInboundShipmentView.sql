@@ -13,13 +13,14 @@ SELECT
 	strCommodity = CY.strDescription,
 	strPosition = PO.strPosition,
 	intVendorEntityId = LD.intVendorEntityId,
-	strVendor = EY.strEntityName,
+	strVendor = V.strName,
 	intCustomerEntityId = LD.intCustomerEntityId,
 	strCustomer = Customer.strName,
 	intWeightUOMId = L.intWeightUnitMeasureId,
 	strWeightUOM = WTUOM.strUnitMeasure,
-	ysnDirectShipment = CASE WHEN L.intSourceType = 3 THEN CAST (1 as Bit) ELSE CAST (0 as Bit) END,
-	ysnReceived = CASE WHEN (IsNull((SELECT SUM (LD1.dblDeliveredQuantity) FROM tblLGLoadDetail LD1 Group By LD1.intLoadId Having LD1.intLoadId = LD.intLoadId), 0) > 0) THEN CAST (1 as Bit) ELSE CAST (0 as Bit) END,
+	ysnDirectShipment = CAST(CASE WHEN L.intSourceType = 3 THEN 1 ELSE 0 END AS BIT),
+	ysnReceived = CAST(CASE WHEN EXISTS(SELECT TOP 1 LD1.dblDeliveredQuantity FROM tblLGLoadDetail LD1 
+									WHERE LD1.intLoadId = LD.intLoadId AND LD1.dblDeliveredQuantity > 0) THEN 1 ELSE 0 END AS BIT),
 
 	---- Shipment details
 	strOriginPort = L.strOriginPort,
@@ -45,7 +46,7 @@ SELECT
 	strInsuranceCurrency = InsCur.strCurrency,
 	dtmDocsToBroker = L.dtmDocsToBroker,
 	dtmScheduledDate = L.dtmScheduledDate,
-	ysnInventorized = CASE WHEN L.ysnPosted = 1 THEN CAST (1 as Bit) ELSE CAST (0 as Bit) END,
+	ysnInventorized = L.ysnPosted,
 	dtmPostedDate = L.dtmPostedDate,
 	dtmDocsReceivedDate = L.dtmDocsReceivedDate,
 	dtmETAPOL = L.dtmETAPOL,
@@ -140,7 +141,7 @@ SELECT
 	dtmReceiptDate = IR.dtmReceiptDate,
 	strReceiptLocationName = IR.strLocationName,
 
-	---- Container details
+	-- Container details
 	strContainerNumber = LC.strContainerNumber,
 	dblContainerQty = LC.dblQuantity,
 	dblContainerGrossWt = LC.dblGrossWt,
@@ -172,8 +173,8 @@ SELECT
 	dblContainerContractlNetWt = (LC.dblNetWt / CASE WHEN ISNULL(LC.dblQuantity,0) = 0 THEN 1 ELSE LC.dblQuantity END) * LDCL.dblQuantity,	
 	dblContainerWeightPerQty = (LC.dblNetWt / CASE WHEN ISNULL(LC.dblQuantity,0) = 0 THEN 1 ELSE LC.dblQuantity END),
 	dblContainerContractReceivedQty = CASE WHEN (LDCL.intLoadDetailContainerLinkId IS NOT NULL) THEN ISNULL(LDCL.dblReceivedQty, 0) ELSE LD.dblDeliveredQuantity END,
-	dblReceivedGrossWt = IsNull((SELECT sum(ICItem.dblGross) from tblICInventoryReceiptItem ICItem Group by ICItem.intSourceId, ICItem.intContainerId HAVING ICItem.intSourceId=LD.intLoadDetailId AND ICItem.intContainerId=LC.intLoadContainerId), 0),
-	dblReceivedNetWt = IsNull((SELECT sum(ICItem.dblNet) from tblICInventoryReceiptItem ICItem Group by ICItem.intSourceId, ICItem.intContainerId HAVING ICItem.intSourceId=LD.intLoadDetailId AND ICItem.intContainerId=LC.intLoadContainerId), 0), 
+	dblReceivedGrossWt = IsNull(IRW.dblReceivedGrossWt, 0),
+	dblReceivedNetWt = IsNull(IRW.dblReceivedNetWt, 0),
 	
 	dblFutures = PCT.dblFutures, 
 	dblBasis = PCT.dblBasis, 
@@ -189,16 +190,16 @@ SELECT
 	intCropYear = PCH.intCropYearId,
 	strCropYear = CRY.strCropYear,
 	strProducer = PRO.strName,
-	strCertification = (SELECT TOP 1 CER.strCertificationName FROM tblCTContractCertification CC JOIN tblICCertification CER ON CER.intCertificationId = CC.intCertificationId WHERE CC.intContractDetailId = PCT.intContractDetailId), 
+	strCertification = CER.strCertificationName, 
 	strCertificationId = '' COLLATE Latin1_General_CI_AS
 
-FROM tblLGLoad  L  --  tblLGShipmentBLContainerContract SC
-INNER JOIN tblLGLoadDetail LD ON  L.intLoadId = LD.intLoadId AND L.intPurchaseSale=1 --tblLGShipmentContractQty SCQ ON SCQ.intShipmentContractQtyId = SC.intShipmentContractQtyId
+FROM tblLGLoad L
+INNER JOIN tblLGLoadDetail LD ON  L.intLoadId = LD.intLoadId AND L.intPurchaseSale = 1
 INNER JOIN tblCTContractDetail PCT ON PCT.intContractDetailId = LD.intPContractDetailId
 INNER JOIN tblCTContractHeader PCH ON PCH.intContractHeaderId = PCT.intContractHeaderId
 INNER JOIN tblSMCompanyLocation CL ON	CL.intCompanyLocationId	= PCT.intCompanyLocationId
-INNER JOIN vyuCTEntity EY ON EY.intEntityId = PCH.intEntityId AND EY.strEntityType = (CASE WHEN PCH.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END)
-LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LD.intLoadDetailId = LDCL.intLoadDetailId -- tblLGShipment S ON S.intShipmentId = SC.intShipmentId
+INNER JOIN tblEMEntity V ON V.intEntityId = PCH.intEntityId
+LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LD.intLoadDetailId = LDCL.intLoadDetailId
 LEFT JOIN tblICCommodityUnitMeasure CU ON CU.intCommodityUnitMeasureId = PCH.intCommodityUOMId
 LEFT JOIN tblICUnitMeasure U3 ON U3.intUnitMeasureId = CU.intUnitMeasureId
 LEFT JOIN tblICItemUOM PU ON PU.intItemUOMId = PCT.intPriceItemUOMId
@@ -250,9 +251,17 @@ LEFT JOIN tblEMEntity PRO ON PRO.intEntityId = PCT.intProducerId
 LEFT JOIN tblCTCropYear CRY ON CRY.intCropYearId = PCH.intCropYearId
 LEFT JOIN tblCTBook BO ON BO.intBookId = L.intBookId
 LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = L.intSubBookId
-OUTER APPLY (SELECT TOP 1 strReceiptNumber, dtmReceiptDate, strLocationName 
-			FROM vyuICGetInventoryReceiptItem WHERE intSourceId = LD.intLoadDetailId AND intSourceType = 2 
+OUTER APPLY (SELECT TOP 1 CER.strCertificationName 
+				FROM tblCTContractCertification CC JOIN tblICCertification CER ON CER.intCertificationId = CC.intCertificationId 
+				WHERE CC.intContractDetailId = PCT.intContractDetailId) CER
+OUTER APPLY (SELECT TOP 1 R.strReceiptNumber, R.dtmReceiptDate, RL.strLocationName 
+			FROM tblICInventoryReceiptItem RI
+				INNER JOIN tblICInventoryReceipt R ON RI.intInventoryReceiptId = R.intInventoryReceiptId
+				LEFT JOIN tblSMCompanyLocation RL ON RL.intCompanyLocationId = R.intLocationId 
+			WHERE intSourceId = LD.intLoadDetailId AND intSourceType = 2 
 			AND (LDCL.intLoadDetailContainerLinkId IS NULL 
-				OR (LDCL.intLoadDetailContainerLinkId IS NOT NULL AND intContainerId = LC.intLoadContainerId))) IR
+				OR (LDCL.intLoadDetailContainerLinkId IS NOT NULL AND RI.intContainerId = LC.intLoadContainerId))) IR
+OUTER APPLY (SELECT dblReceivedGrossWt = SUM(ICItem.dblGross), dblReceivedNetWt = SUM(ICItem.dblNet) FROM tblICInventoryReceiptItem ICItem 
+			WHERE ICItem.intSourceId=LD.intLoadDetailId AND ICItem.intContainerId=LC.intLoadContainerId) IRW
 
 GO

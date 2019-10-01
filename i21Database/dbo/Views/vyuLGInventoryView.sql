@@ -92,10 +92,9 @@ FROM (
 	LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = Shipment.intContractDetailId
 	LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = CD.intCurrencyId			
 	LEFT JOIN tblSMCurrency	CY ON CY.intCurrencyID = CU.intMainCurrencyId
-	LEFT JOIN tblARInvoice INV ON ISNULL(Shipment.intLoadId,0) = ISNULL(INV.intLoadId,0) 
 	WHERE (Shipment.dblContainerContractQty - IsNull(Shipment.dblContainerContractReceivedQty, 0.0)) > 0.0 
 	   AND Shipment.ysnInventorized = 1
-	   AND INV.intLoadId IS NULL
+	   AND Shipment.intLoadId NOT IN (SELECT intLoadId FROM tblARInvoice)
 
 	UNION ALL
 
@@ -145,7 +144,7 @@ FROM (
 		,strWarehouseRefNo = Spot.strWarehouseRefNo
 		,dtmReceiptDate = Spot.dtmReceiptDate
 		,dblTotalCost = CAST(ISNULL(((dbo.fnCTConvertQtyToTargetItemUOM(Spot.intWeightItemUOMId, 
-												CD.intPriceItemUOMId, Spot.dblNetWeight )
+												Spot.intPriceItemUOMId, Spot.dblNetWeight )
 						) * Spot.dblCashPrice)/ (CASE WHEN CAST(ISNULL(CU.intMainCurrencyId,0) AS BIT) = 0 THEN 1 ELSE 100 END),0) AS NUMERIC(18,6))
 		,dblFutures = Spot.dblFutures
 		,dblCashPrice = Spot.dblCashPrice
@@ -154,10 +153,10 @@ FROM (
 		,strPriceBasis = Spot.strPriceBasis
 		,strINCOTerm = Spot.strContractBasis
 		,strTerm = Spot.strTerm
-		,strExternalShipmentNumber = L.strExternalShipmentNumber
+		,strExternalShipmentNumber = Spot.strExternalShipmentNumber
 		,strERPPONumber = CD.strERPPONumber
 		,strPosition = Spot.strPosition
-		,intLoadId = L.intLoadId
+		,intLoadId = Spot.intLoadId
 		,intCompanyLocationId = CD.intCompanyLocationId
 		,intBookId = Spot.intBookId
 		,strBook = Spot.strBook
@@ -169,7 +168,6 @@ FROM (
 		,strCertification = Spot.strCertification
 		,strCertificationId = Spot.strCertificationId
 	FROM vyuLGPickOpenInventoryLots Spot
-	LEFT JOIN tblLGLoad L ON Spot.strLoadNumber = L.strLoadNumber
 	LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = Spot.intContractDetailId
 	LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = CD.intCurrencyId			
 	LEFT JOIN tblSMCurrency	CY ON CY.intCurrencyID = CU.intMainCurrencyId
@@ -249,13 +247,13 @@ FROM (
 		,intCropYear = PCH.intCropYearId
 		,strCropYear = CRY.strCropYear
 		,strProducer = PRO.strName
-		,strCertification = (SELECT TOP 1 CER.strCertificationName FROM tblCTContractCertification CC JOIN tblICCertification CER ON CER.intCertificationId = CC.intCertificationId WHERE CC.intContractDetailId = PCD.intContractDetailId)
+		,strCertification = CER.strCertificationName
 		,strCertificationId = '' COLLATE Latin1_General_CI_AS
 	FROM tblLGLoadDetail LD
 		INNER JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
 		LEFT JOIN tblICItem I ON I.intItemId = LD.intItemId
 		LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadDetailId = LD.intLoadDetailId
-		OUTER APPLY (SELECT TOP 1 * FROM tblLGLoadContainer WHERE intLoadContainerId = LDCL.intLoadContainerId) LC
+		OUTER APPLY (SELECT TOP 1 strContainerNumber, strMarks, strLotNumber, intWeightUnitMeasureId FROM tblLGLoadContainer WHERE intLoadContainerId = LDCL.intLoadContainerId) LC
 		OUTER APPLY (SELECT TOP 1 intWeightItemUOMId = intItemUOMId FROM tblICItemUOM WHERE intItemId = I.intItemId AND intUnitMeasureId = LC.intWeightUnitMeasureId) LCWUM
 		LEFT JOIN tblICItemUOM LDUOM ON LDUOM.intItemUOMId = LD.intItemUOMId
 		LEFT JOIN tblICUnitMeasure LDUM ON LDUM.intUnitMeasureId = LDUOM.intUnitMeasureId 
@@ -279,10 +277,11 @@ FROM (
 		LEFT JOIN tblCTContractBasis CB ON CB.intContractBasisId = PCH.intContractBasisId
 		LEFT JOIN tblCTCropYear CRY ON CRY.intCropYearId = PCH.intCropYearId
 		LEFT JOIN tblEMEntity PRO ON PRO.intEntityId = PCH.intProducerId
-		LEFT JOIN tblAPBillDetail BD ON BD.intContractDetailId = PCD.intContractDetailId
-		LEFT JOIN tblAPBill B ON B.intBillId = BD.intBillId AND B.intTransactionType = 1
 		LEFT JOIN tblSMTerm Term ON Term.intTermID = PCH.intTermId
 		OUTER APPLY fnCTGetSeqPriceFixationInfo(PCD.intContractDetailId) PF
+		OUTER APPLY (SELECT TOP 1 CER.strCertificationName FROM tblCTContractCertification CC 
+					JOIN tblICCertification CER ON CER.intCertificationId = CC.intCertificationId 
+					WHERE CC.intContractDetailId = PCD.intContractDetailId) CER
 		--Sales
 		INNER JOIN tblCTContractDetail SCD ON SCD.intContractDetailId = LD.intSContractDetailId
 		INNER JOIN tblCTContractHeader SCH ON SCH.intContractHeaderId = SCD.intContractHeaderId
@@ -290,11 +289,6 @@ FROM (
 		LEFT JOIN tblARInvoiceDetail ID ON SCD.intContractDetailId = ID.intContractDetailId AND LD.intLoadDetailId = ID.intLoadDetailId
 		LEFT JOIN tblARInvoice IV ON IV.intInvoiceId = ID.intInvoiceId
 
-		OUTER APPLY (SELECT TOP 1 ID2.intInvoiceId 
-					 FROM tblLGLoadDetail PLD
-					 LEFT JOIN tblLGLoadDetail SLD ON PLD.intPContractDetailId = SLD.intPContractDetailId
-					 LEFT JOIN tblARInvoiceDetail ID2 ON SLD.intSContractDetailId = ID2.intContractDetailId
-					 WHERE PLD.intPContractDetailId = LD.intPContractDetailId AND ID2.intInvoiceId IS NOT NULL) I2
 	WHERE L.intPurchaseSale = 3 AND L.ysnPosted = 1
 		AND IV.strInvoiceNumber IS NULL
 		AND LD.intPickLotDetailId IS NULL

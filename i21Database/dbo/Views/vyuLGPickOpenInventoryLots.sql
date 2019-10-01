@@ -35,8 +35,7 @@ FROM (
        ,strStorageLocation = StorageLocation.strName
        ,dblQty = Lot.dblQty
        ,dblUnPickedQty = CASE WHEN Lot.dblQty > 0.0 THEN 
-							  Lot.dblQty - IsNull((SELECT SUM (SR.dblQty) from tblICStockReservation SR 
-													Group By SR.intLotId, SR.ysnPosted Having Lot.intLotId = SR.intLotId AND SR.ysnPosted != 1), 0) 
+							  Lot.dblQty - IsNull(SR.dblReservedQty, 0) 
 						 ELSE 0.0 END
        ,dblLastCost = Lot.dblLastCost
        ,dtmExpiryDate = Lot.dtmExpiryDate
@@ -96,13 +95,15 @@ FROM (
 	   ,dtmEndDate = CTDetail.dtmEndDate
        ,dblOriginalQty = CTDetail.dblQuantity
 	   ,strOriginalQtyUOM = UOM2.strUnitMeasure
-       ,dblAllocatedQty = IsNull((SELECT SUM(AL.dblPAllocatedQty) FROM tblLGAllocationDetail AL GROUP BY AL.intPContractDetailId HAVING AL.intPContractDetailId = CTDetail.intContractDetailId), 0)
-       ,dblReservedQty = IsNull((SELECT SUM(RS.dblReservedQuantity) FROM tblLGReservation RS GROUP BY RS.intContractDetailId HAVING RS.intContractDetailId = CTDetail.intContractDetailId), 0)
+       ,dblAllocatedQty = ISNULL(AL.dblAllocatedQty, 0)
+       ,dblReservedQty = ISNULL(SR.dblReservedQty, 0) 
 	   ,strContainerNumber = LC.strContainerNumber
        ,strBLNumber = L.strBLNumber
 	   ,dtmBLDate = L.dtmBLDate
        ,strVendor = EY.strName 
+	   ,intLoadId = L.intLoadId
        ,strLoadNumber = L.strLoadNumber
+	   ,strExternalShipmentNumber = L.strExternalShipmentNumber
        ,dtmPostedDate = L.dtmPostedDate
        ,strWarehouseRefNo = ISNULL(Receipt.strWarehouseRefNo,Lot.strWarehouseRefNo)
 	   ,dblFutures = CTDetail.dblFutures
@@ -141,9 +142,7 @@ FROM (
 		LEFT JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = ReceiptItem.intSourceId
 		LEFT JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
 		LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = ReceiptItem.intContainerId AND ISNULL(LC.ysnRejected, 0) <> 1
-		LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadDetailId = LD.intLoadDetailId AND LDCL.intLoadContainerId = LC.intLoadContainerId
-		LEFT JOIN tblEMEntity EY ON EY.intEntityId = CTHeader.intEntityId 
-		LEFT JOIN tblEMEntityType ET ON ET.intEntityId = EY.intEntityId AND ET.strType = (CASE WHEN CTHeader.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END)  
+		LEFT JOIN tblEMEntity EY ON EY.intEntityId = CTHeader.intEntityId   
 		LEFT JOIN tblICItem Item ON Item.intItemId = Lot.intItemId
 		LEFT JOIN tblICCommodity COM ON COM.intCommodityId = Item.intCommodityId
 		LEFT JOIN tblICItem Bundle ON Bundle.intItemId = CTDetail.intItemBundleId
@@ -176,6 +175,10 @@ FROM (
 		LEFT JOIN tblCTContractDetail SCTDetail ON SCTDetail.intContractDetailId = LD.intSContractDetailId
 		LEFT JOIN tblCTContractHeader SCTHeader ON SCTHeader.intContractHeaderId = SCTDetail.intContractHeaderId
 		LEFT JOIN tblEMEntity Customer ON Customer.intEntityId = LD.intCustomerEntityId
+		OUTER APPLY (SELECT dblReservedQty = SUM(SR.dblQty) from tblICStockReservation SR
+					WHERE SR.intLotId = Lot.intLotId AND SR.ysnPosted <> 1) SR
+		OUTER APPLY (SELECT dblAllocatedQty = SUM(AL.dblPAllocatedQty) FROM tblLGAllocationDetail AL 
+					WHERE AL.intPContractDetailId = CTDetail.intContractDetailId) AL
 	WHERE Lot.dblQty > 0 
 	) InvLots
 GO
