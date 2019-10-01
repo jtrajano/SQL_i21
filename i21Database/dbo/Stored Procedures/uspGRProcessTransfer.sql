@@ -401,7 +401,7 @@ BEGIN
 					,IL.intItemLocationId 
 					,ToStorage.intItemUOMId
 					,dtmTransferStorageDate
-					,dbo.fnCTConvertQuantityToTargetItemUOM(ToStorage.intItemId, IU.intUnitMeasureId, ToStorage.intUnitMeasureId, SR.dblUnitQty) * CASE WHEN (FromType.strStorageTypeDescription = 'OPEN STORAGE' AND ToType.strStorageTypeDescription = 'DELAYED PRICING') THEN -1 ELSE 1 END
+					,dbo.fnCTConvertQuantityToTargetItemUOM(ToStorage.intItemId, IU.intUnitMeasureId, ToStorage.intUnitMeasureId, SR.dblUnitQty) * CASE WHEN (FromType.ysnDPOwnedType = 0 AND ToType.ysnDPOwnedType = 1) THEN -1 ELSE 1 END
 					,IU.dblUnitQty
 					,0
 					,dblSalesPrice = 0
@@ -414,7 +414,7 @@ BEGIN
 					,intLotId = NULL
 					,intSubLocationId = ToStorage.intCompanyLocationSubLocationId
 					,intStorageLocationId = ToStorage.intStorageLocationId
-					,ysnIsStorage = CASE WHEN (FromType.strStorageTypeDescription = 'OPEN STORAGE' AND ToType.strStorageTypeDescription = 'DELAYED PRICING') THEN 1 ELSE 0 END
+					,ysnIsStorage = CASE WHEN (FromType.ysnDPOwnedType = 0 AND ToType.ysnDPOwnedType = 1) THEN 1 ELSE 0 END
 					,ToStorage.intStorageTypeId
 				FROM tblGRTransferStorageReference SR
 				INNER JOIN tblGRCustomerStorage FromStorage
@@ -432,7 +432,7 @@ BEGIN
 					ON IL.intItemId = ToStorage.intItemId AND IL.intLocationId = ToStorage.intCompanyLocationId
 				INNER JOIN tblGRTransferStorage TS
 					ON SR.intTransferStorageId = TS.intTransferStorageId
-				WHERE  (FromType.strStorageTypeDescription = 'OPEN STORAGE' AND ToType.strStorageTypeDescription = 'DELAYED PRICING') OR (FromType.strStorageTypeDescription = 'DELAYED PRICING' AND ToType.strStorageTypeDescription = 'OPEN STORAGE')
+				WHERE  ((FromType.ysnDPOwnedType = 0 AND ToType.ysnDPOwnedType = 1) OR (FromType.ysnDPOwnedType = 1 AND ToType.ysnDPOwnedType = 0)) AND SR.intTransferStorageId = @intTransferStorageId
 				ORDER BY dtmTransferStorageDate
 
 

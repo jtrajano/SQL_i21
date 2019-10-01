@@ -365,7 +365,7 @@ BEGIN
                     AND GTS.intCompanyLocationId = ISNULL(@intLocationId, GTS.intCompanyLocationId)
                     AND CONVERT(DATETIME, CONVERT(VARCHAR(10), ITS.dtmDate, 110), 110) <= CONVERT(DATETIME, @dtmToTransactionDate)
                     AND GTS.intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
-                    AND (FromType.strStorageTypeDescription = 'DELAYED PRICING' AND ToType.strStorageTypeDescription = 'OPEN STORAGE') --OR (FromType.strStorageTypeDescription = 'DELAYED PRICING' AND ToType.strStorageTypeDescription = 'OPEN STORAGE')
+                    AND (FromType.ysnDPOwnedType = 1 AND ToType.ysnDPOwnedType = 0) --OR (FromType.strStorageTypeDescription = 'DELAYED PRICING' AND ToType.strStorageTypeDescription = 'OPEN STORAGE')
                     AND ITS.intTransactionTypeId = 56
 
 
