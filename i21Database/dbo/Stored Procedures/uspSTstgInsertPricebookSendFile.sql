@@ -266,6 +266,18 @@ BEGIN
 
 
 
+		-- =======================================================================================================================================================
+		-- Requirements
+		-- 1. User role permision should have same location as Store						( System Manager -> Users -> User tab -> User Roles tab )
+		-- 2. The Item's category should have same location as Store in Category Location   ( Inventory -> Categories -> Point of Sales tab )
+		-- 3. The Item's UPC should have value. This should not be null or empty			( Inventory -> Items -> Unit of Measure panel )
+		-- =======================================================================================================================================================
+
+
+
+
+
+
 		-- PASSPORT
 		IF(@strRegisterClass = 'PASSPORT')
 			BEGIN
