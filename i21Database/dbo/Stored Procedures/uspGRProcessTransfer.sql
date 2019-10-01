@@ -4,12 +4,8 @@
 	@intUserId INT
 )
 AS
-BEGIN
-	SET QUOTED_IDENTIFIER OFF
-	SET ANSI_NULLS ON
+BEGIN TRY
 	SET NOCOUNT ON
-	SET XACT_ABORT ON
-	SET ANSI_WARNINGS OFF	
 
 	DECLARE @ErrMsg AS NVARCHAR(MAX)
 	DECLARE @StorageHistoryStagingTable AS [StorageHistoryStagingTable]
@@ -492,8 +488,6 @@ BEGIN
 			FROM tblQMTicketDiscount Discount
 			WHERE intTicketFileId = @intSourceCustomerStorageId AND Discount.strSourceType = 'Storage'
 
-
-
 			FETCH NEXT FROM c INTO @intCustomerStorageId,@intSourceCustomerStorageId
 		END
 		CLOSE c; DEALLOCATE c;
@@ -502,28 +496,9 @@ BEGIN
 		UPDATE tblGRStorageHistory 
 		SET strTransferTicket = (SELECT strTransferStorageTicket FROM tblGRTransferStorage WHERE intTransferStorageId = @intTransferStorageId) 
 		WHERE intTransferStorageId = @intTransferStorageId
-		
-		DONE:
-		COMMIT TRANSACTION
-	
-	END TRY
-	BEGIN CATCH
-		DECLARE @ErrorSeverity INT,
-				@ErrorNumber   INT,
-				@ErrorMessage nvarchar(4000),
-				@ErrorState INT,
-				@ErrorLine  INT,
-				@ErrorProc nvarchar(200);
-		-- Grab error information from SQL functions
-		SET @ErrorSeverity = ERROR_SEVERITY()
-		SET @ErrorNumber   = ERROR_NUMBER()
-		SET @ErrorMessage  = ERROR_MESSAGE()
-		SET @ErrorState    = ERROR_STATE()
-		SET @ErrorLine     = ERROR_LINE()
-	
-		ROLLBACK TRANSACTION
-	
-		RAISERROR (@ErrorMessage , @ErrorSeverity, @ErrorState, @ErrorNumber)
-	END CATCH	
-	
-END
+END TRY
+
+BEGIN CATCH
+	SET @ErrMsg = ERROR_MESSAGE()
+	RAISERROR (@ErrMsg,16,1,'WITH NOWAIT')
+END CATCH
