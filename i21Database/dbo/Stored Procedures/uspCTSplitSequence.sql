@@ -45,6 +45,7 @@ SET NOCOUNT ON
 
 		UPDATE	#tblCTContractDetail 
 		SET		dblQuantity			=	@dblQuantity,
+				dblNetWeight		=	@dblQuantity,
 				dblBalance			=	@dblQuantity,
 				dblScheduleQty		=	NULL,
 				intConcurrencyId	=	1,
