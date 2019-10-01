@@ -425,7 +425,7 @@ BEGIN TRY
 					ON IL.intItemId = ToStorage.intItemId AND IL.intLocationId = ToStorage.intCompanyLocationId
 				INNER JOIN tblGRTransferStorage TS
 					ON SR.intTransferStorageId = TS.intTransferStorageId
-				WHERE  (FromType.strStorageTypeDescription = 'OPEN STORAGE' AND ToType.strStorageTypeDescription = 'DELAYED PRICING') OR (FromType.strStorageTypeDescription = 'DELAYED PRICING' AND ToType.strStorageTypeDescription = 'OPEN STORAGE')
+				WHERE  (FromType.strStorageTypeDescription = 'OPEN STORAGE' AND ToType.strStorageTypeDescription = 'DELAYED PRICING') OR (FromType.strStorageTypeDescription = 'DELAYED PRICING' AND ToType.strStorageTypeDescription = 'OPEN STORAGE')  AND SR.intTransferStorageId = @intTransferStorageId
 				ORDER BY dtmTransferStorageDate
 
 
