@@ -419,7 +419,7 @@ WHERE
 	-- Check if the item is "Basis" priced and futures price is not blank. If future price is zero or blank, do not add it to the payable.
 	AND NOT (
 		A.strReceiptType = 'Purchase Contract'
-		AND Contracts.intPricingTypeId = 2 -- 2 is Basis. 
+		AND ISNULL(Contracts.intPricingTypeId, 0) = 2 -- 2 is Basis. 
 		AND ISNULL(Contracts.dblFutures, 0) = 0
 		AND ISNULL(B.ysnAllowVoucher, 1) = 1
 	)
