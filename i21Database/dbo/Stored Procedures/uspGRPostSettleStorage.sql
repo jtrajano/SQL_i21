@@ -1404,6 +1404,7 @@ BEGIN TRY
 																				WHEN ((a.intItemType = 3 AND DSC.strDiscountChargeType = 'Dollar') OR a.intItemType = 2) AND @ysnDPOwnedType = 0 THEN 
 																					case when @ysnFromPriceBasisContract = 1 and a.intItemType = 2 then 'Other Charge Expense' else  'AP Clearing' end 
 																				WHEN a.intItemType = 1 THEN 'AP Clearing'
+																				when @ysnDPOwnedType = 1 and a.intItemType = 3 then 'AP Clearing'
 																				ELSE 'Other Charge Expense' 
 																			END
 																				)
