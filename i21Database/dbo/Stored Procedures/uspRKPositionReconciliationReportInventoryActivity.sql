@@ -133,7 +133,7 @@ BEGIN
 			,@dblInvBalanceForward  NUMERIC(18,6)
 			,@dblInvBegBalForSummary NUMERIC(18,6)
 
-	SELECT @dblInvBalanceForward =  SUM(dblBalanceInv)
+	SELECT @dblInvBalanceForward =  SUM(ISNULL(dblBalanceInv,0))
 	FROM @InHouse
 	WHERE dtmDate IS NULL
 	
@@ -158,8 +158,8 @@ BEGIN
 		)
 		select @intRowNum
 			,dtmTransactionDate
-			,@dblInvBalanceForward
-			,@dblInvBalanceForward + ( dblInvIn - dblInvOut)  
+			,ISNULL(@dblInvBalanceForward,0)
+			,ISNULL(@dblInvBalanceForward,0) + ( dblInvIn - dblInvOut)  
 		from #tmpInventoryActivity 
 		WHERE intRowNum = @intRowNum
 	

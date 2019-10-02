@@ -109,7 +109,7 @@ BEGIN
 			,@dblCTBalanceForward  NUMERIC(18,6)
 			,@dblCompTitledBegBalForSummary NUMERIC(18,6)
 
-	SELECT @dblCTBalanceForward =  SUM(dblCompanyTitled)
+	SELECT @dblCTBalanceForward =  SUM(ISNULL(dblCompanyTitled,0))
 	FROM @CompanyTitle
 	WHERE dtmDate IS NULL
 
@@ -134,8 +134,8 @@ BEGIN
 		)
 		select @intRowNum
 			,dtmTransactionDate
-			,@dblCTBalanceForward
-			,@dblCTBalanceForward + ( dblIn - dblOut)  
+			,ISNULL(@dblCTBalanceForward,0)
+			,ISNULL(@dblCTBalanceForward,0) + ( dblIn - dblOut)  
 		from #tmpCompanyTitled 
 		WHERE intRowNum = @intRowNum
 	
