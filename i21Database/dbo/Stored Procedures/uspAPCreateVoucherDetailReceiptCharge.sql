@@ -97,7 +97,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 																	 		WHEN A.ysnPrice = 1 AND IRCT.ysnCheckoffTax = 0 THEN -A.dblTax --negate, inventory receipt will bring postive tax
 																	 		ELSE A.dblTax END ) END),0),
 											--(CASE WHEN A.ysnPrice = 1 THEN ISNULL(A.dblTax,0) * -1 ELSE ISNULL(A.dblTax,0) END), -- RECEIPT VENDOR: WILL NEGATE THE TAX IF PRCE DOWN AND NOT CHECK OFF (OR NEGATIVE AMOUNT)
-		[dblForexRate]					=	ISNULL(A.dblForexRate,1),
+		[dblForexRate]					=	ISNULL(NULLIF(A.dblForexRate,0),1),
 		[intForexRateTypeId]			=   A.intForexRateTypeId,
 		[ysnSubCurrency]				=	ISNULL(A.ysnSubCurrency,0),
 		[intTaxGroupId]					=	charges.intTaxGroupId,
