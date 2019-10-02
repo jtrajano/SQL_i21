@@ -106,7 +106,7 @@ FROM (
 		, ysnPreCrush = CAST(History.ysnPreCrush AS BIT)
 		, strRollingMonth = RollMonth.strFutureMonth
 		, intRollingMonthId
-		, Entity1.intEntityId intTraderId
+		, Trader.intEntityId intTraderId
 		, History.strTrader strSalespersonId
 	FROM tblRKFutOptTransactionHistory History
 	LEFT JOIN tblRKFutOptTransaction Trans ON Trans.intFutOptTransactionId = History.intFutOptTransactionId
@@ -119,10 +119,13 @@ FROM (
 	LEFT JOIN tblCTBook Book ON Book.intBookId = History.intBookId
 	LEFT JOIN tblCTSubBook SubBook ON SubBook.intSubBookId = History.intSubBookId
 	LEFT JOIN tblSMCurrency Currency ON Currency.strCurrency = History.strCurrency
-	LEFT JOIN tblRKBrokerageAccount BrokerAccount ON BrokerAccount.strAccountNumber = History.strBrokerAccount
-	LEFT JOIN tblEMEntity Entity ON Entity.strName = History.strBroker AND Entity.intEntityId = BrokerAccount.intEntityId
-	LEFT JOIN tblEMEntity Entity1 ON Entity1.strName = History.strTrader 
-	LEFT JOIN tblEMEntityType ET1 ON ET1.intEntityId = Entity1.intEntityId
+	LEFT JOIN tblEMEntity Entity ON Entity.strName = History.strBroker
+	LEFT JOIN tblRKBrokerageAccount BrokerAccount ON BrokerAccount.strAccountNumber = History.strBrokerAccount AND BrokerAccount.intEntityId = Entity.intEntityId
+	LEFT JOIN (
+		SELECT DISTINCT E.strName, E.intEntityId
+		FROM tblEMEntity E
+		JOIN tblEMEntityType ET ON ET.intEntityId = E.intEntityId
+		WHERE strType = 'Salesperson'
+	) Trader ON Trader.strName = History.strTrader
 	WHERE ISNULL(History.strAction, '') <> ''
-		AND ET1.strType = 'Salesperson'
 ) t
