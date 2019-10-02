@@ -24,6 +24,7 @@ DECLARE @transCount INT;
 DECLARE @totalInvalid INT = 0;
 DECLARE @totalRecords INT;
 DECLARE @validVoucherPrepay Id;
+DECLARE @ErrorMessage NVARCHAR(4000);
 
 CREATE TABLE #tmpInvalidVoucherPrepayData (
 	[strError] [NVARCHAR](1000),
@@ -66,6 +67,13 @@ IF @totalRecords = 0
 BEGIN
 	SET @invalidCount = @totalInvalid;
 	SET @success = 0;
+	IF @totalInvalid > 0
+	BEGIN
+		SELECT TOP 1
+			@ErrorMessage = strError
+		FROM #tmpInvalidVoucherPrepayData
+		RAISERROR(@ErrorMessage, 16, 1);
+	END
 	RETURN; --EXIT, NO VOUCHER PREPAY TO POST
 END
 
@@ -250,6 +258,14 @@ BEGIN
 	BEGIN
 		SET @invalidCount = @totalInvalid;
 		SET @success = 0;
+		IF @totalInvalid > 0
+		BEGIN
+			SELECT TOP 1
+				@ErrorMessage = strDescription
+			FROM tblGLPostResult A
+			WHERE A.strBatchId = @batchId
+			RAISERROR(@ErrorMessage, 16, 1);
+		END
 		RETURN;
 	END
 
@@ -351,7 +367,6 @@ SET @invalidCount = @totalInvalid;
 SET @success = 1;
 END TRY
 BEGIN CATCH
-	DECLARE @ErrorMessage NVARCHAR(4000);
 	SET @ErrorMessage  = ERROR_MESSAGE()
 	RAISERROR(@ErrorMessage, 16, 1);
 END CATCH
