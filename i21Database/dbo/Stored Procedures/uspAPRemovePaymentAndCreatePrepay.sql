@@ -75,7 +75,7 @@ BEGIN
 	EXEC uspAPDuplicateBill 
 		@billId = @voucherKey,
 		@userId = @userId,
-		@reset = DEFAULT,
+		@reset = DEFAULT, --DO NOT RESET THE DATA OF VOUCHER PREPAY, THE DATE SHOULD NOT BE GREATER THAN THE PAYMENT DATE
 		@type = 2,
 		@billCreatedId  = @prepayCreated OUTPUT;
 
@@ -126,6 +126,7 @@ BEGIN
 	FROM tblAPBill prepay
 	WHERE prepay.intBillId = @prepayCreated
 
+	BEGIN TRY
 	--post the prepayment
 	SET @postPrepayParam = CAST(@prepayCreated AS NVARCHAR(100));
 	EXEC [dbo].[uspAPPostVoucherPrepay]
@@ -137,12 +138,12 @@ BEGIN
 		@success			= @postPrepayResult OUTPUT,
 		@batchIdUsed		= @batchIdUsed OUTPUT
 
-	IF @postPrepayResult = 0
-	BEGIN
-		RAISERROR('Posting prepay failed.', 16, 1);
+	END TRY
+	BEGIN CATCH
+		SET @error = ERROR_MESSAGE()
+		RAISERROR(@error, 16, 1);
 		RETURN;
-	END
-	
+	END CATCH
 	--update original bills associated to payment to unpaid
 	UPDATE origBill
 		SET origBill.ysnPaid = 0
@@ -224,6 +225,12 @@ BEGIN
 
 END
 CLOSE c; DEALLOCATE c;
+
+IF @error IS NOT NULL
+BEGIN
+	RAISERROR(@error, 16, 1);
+	RETURN;
+END
 
 IF @transCount = 0 COMMIT TRANSACTION
 

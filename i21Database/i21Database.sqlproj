@@ -7363,6 +7363,7 @@
     <Build Include="dbo\Views\vyuCMRemittanceAdviceReport.sql" />
     <Build Include="dbo\Functions\fnARCustomerAgingReport.sql" />
     <Build Include="dbo\Stored Procedures\uspGRCalculateSettleStorageFeeForContract.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPConvertPaymentToPrepay.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
