@@ -148,6 +148,7 @@
     [strUberStatusCode] NVARCHAR(3) COLLATE Latin1_General_CI_AS NULL,
     [intEntityShipViaTrailerId] INT NULL, 
     [intLoadDetailId] INT NULL, 
+    [intCropYearId] INT NULL, 
     CONSTRAINT [PK_tblSCTicket_intTicketId] PRIMARY KEY CLUSTERED ([intTicketId] ASC), 
     CONSTRAINT [UK_tblSCTicket_intTicketPoolId_strTicketNumber] UNIQUE ([intTicketPoolId], [intTicketType], [strInOutFlag], [strTicketNumber],[intEntityId],[intProcessingLocationId]),
 	CONSTRAINT [FK_tblSCScaleSetup_tblSMCompanyLocation_intTicketLocationId] FOREIGN KEY ([intTicketLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),
