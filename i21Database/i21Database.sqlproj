@@ -7364,6 +7364,7 @@
     <Build Include="dbo\Stored Procedures\uspAPCreateVoucherForPendingPayable.sql" />
     <Build Include="dbo\Views\vyuAPPendingPayables.sql" />
     <Build Include="dbo\Views\vyuCMRemittanceAdviceReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPConvertPaymentToPrepay.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
