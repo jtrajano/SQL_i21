@@ -8,5 +8,6 @@
 	[strTaxGroup]			 NVARCHAR(MAX)	  COLLATE Latin1_General_CI_AS NULL,
 	[strCalculationMethod]	 NVARCHAR(MAX)	  COLLATE Latin1_General_CI_AS NULL,
 	[ysnTaxExempt]			 BIT			 NULL,
+    [dblTaxCalculatedExemptAmount] NUMERIC (18, 6) NULL
 );
 
