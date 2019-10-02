@@ -25,16 +25,8 @@ BEGIN
 			24
 		FROM tblAPBill voucher
 		INNER JOIN @voucherPrepayIds B ON voucher.intBillId = B.intId
-		OUTER APPLY (
-			select Se.intAccountCategoryId from tblGLAccount A
-			join tblGLAccountSegmentMapping S on A.intAccountId = S.intAccountId
-			join tblGLAccountSegment Se on Se.intAccountSegmentId = S.intAccountSegmentId
-			join tblGLAccountStructure St on St.intAccountStructureId = Se.intAccountStructureId
-			join tblGLAccountCategory Ca on Ca.intAccountCategoryId = Se.intAccountCategoryId
-				where  A.intAccountId = voucher.intAccountId
-				and St.strType = 'Primary'
-		) accountCategory
-		WHERE accountCategory.intAccountCategoryId != 53 --Vendor Prepayments
+		INNER JOIN vyuGLAccount C ON voucher.intAccountId = C.intAccountId
+		WHERE C.intAccountCategoryId != 53 --Vendor Prepayments
 
 		INSERT INTO @returntable
 		SELECT
