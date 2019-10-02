@@ -198,6 +198,40 @@ BEGIN
 			EXEC dbo.uspARCreateRCVForCreditMemo @intInvoiceId = @intInvoiceIdWithPrepaid, @intUserId = @UserId
 		ELSE
 			BEGIN
+
+			    --Insert Audit log to credit memo for cash refund
+				DECLARE @KeyValueId int,
+						@EntityId int,
+						@ScreenName	nvarchar(50) = 'AccountsReceivable.view.Invoice',
+						@ActionType nvarchar(50) = 'Processed',
+						@ToValueChild nvarchar(50)
+
+				SELECT @ToValueChild = strInvoiceNumber from   tblARInvoice WHERE intInvoiceId = @intInvoiceIdWithPrepaid 
+				SELECT TOP 1 @KeyValueId = I.intInvoiceId, @EntityId = I.intEntityId
+				FROM tblARInvoice I
+				INNER JOIN (										
+					SELECT    intPrepaymentId			= intPrepaymentId
+							, dblAppliedInvoiceAmount	= ISNULL(dblAppliedInvoiceDetailAmount, @ZeroDecimal)
+					FROM dbo.tblARPrepaidAndCredit P WITH (NOLOCK)
+					
+					WHERE intInvoiceId = @intInvoiceIdWithPrepaid 
+						AND ysnApplied = 1
+						AND ISNULL(dblAppliedInvoiceDetailAmount, @ZeroDecimal) > @ZeroDecimal
+				) PREPAIDS ON I.intInvoiceId = PREPAIDS.intPrepaymentId
+
+
+
+				EXEC dbo.uspSMAuditLog 
+					 @screenName		 = @ScreenName	                    -- Screen Namespace
+					,@keyValue			 = @KeyValueId						-- Primary Key Value of the Invoice. 
+					,@entityId			 = @EntityId							-- Entity Id.
+					,@actionType	     = @ActionType						-- Action Type
+					,@changeDescription  = 'Cash Refund on'
+					,@fromValue			 = ''
+					,@toValue			 = @ToValueChild
+					,@details			 = ''
+					 
+
 				UPDATE I
 				SET dblAmountDue		= dblAmountDue - ISNULL(dblAppliedInvoiceAmount, @ZeroDecimal)
 				  , dblBaseAmountDue	= dblBaseAmountDue - ISNULL(dblAppliedInvoiceAmount, @ZeroDecimal)
@@ -214,6 +248,9 @@ BEGIN
 					  AND ysnApplied = 1
 					  AND ISNULL(dblAppliedInvoiceDetailAmount, @ZeroDecimal) > @ZeroDecimal
 				) PREPAIDS ON I.intInvoiceId = PREPAIDS.intPrepaymentId
+
+
+
 			END
 								
 		DELETE FROM @InvoicesWithPrepaids WHERE intInvoiceId = @intInvoiceIdWithPrepaid
