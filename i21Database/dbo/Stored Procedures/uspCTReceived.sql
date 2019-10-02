@@ -145,9 +145,18 @@ BEGIN TRY
 
 				IF @intSourceType = 1
 				BEGIN
-					IF NOT EXISTS(SELECT TOP 1 1 FROM tblICInventoryReceiptItem a INNER JOIN tblSCTicket b ON a.intSourceId = b.intTicketId WHERE a.intInventoryReceiptItemId = @intInventoryReceiptDetailId AND b.intContractId = @intContractDetailId)
-					BEGIN 
-						SET @ysnMainContract = 0
+					IF EXISTS(SELECT TOP 1 1 FROM tblSCTicket WHERE intTicketId = @intSourceId AND strTicketStatus = 'C')
+					BEGIN
+						IF NOT EXISTS
+						(
+							SELECT TOP 1 1 FROM tblICInventoryReceiptItem a
+							INNER JOIN tblSCTicket b ON a.intSourceId = b.intTicketId
+							WHERE a.intInventoryReceiptItemId = @intInventoryReceiptDetailId 
+							AND b.intContractId = @intContractDetailId
+						)
+						BEGIN 
+							SET @ysnMainContract = 0
+						END
 					END
 				END
 
