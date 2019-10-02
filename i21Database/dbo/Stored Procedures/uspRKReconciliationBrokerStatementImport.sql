@@ -87,7 +87,7 @@ BEGIN TRY
 		, dblPrice
 		, dtmFilledDate = REPLACE(dtmFilledDate, '-', '/')
 		, NULL
-		, 'Invalid Filled Date'
+		, 'No derivative entries for this filled date '+ CONVERT(VARCHAR(24), CONVERT(DATE,@dtmFilledDate), 113) + ' matched in the file.'
 	FROM tblRKReconciliationBrokerStatementImport
 	WHERE strFutMarketName = @strFutMarketName
 		AND strCommodityCode = @strCommodityCode
