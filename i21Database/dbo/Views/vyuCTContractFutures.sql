@@ -20,6 +20,7 @@ SELECT CF.intContractFuturesId
 ,strBrokerAccount = BA.strAccountNumber
 ,strInternalTradeNo = FT.strInternalTradeNo
 ,CF.intConcurrencyId
+,FT.intFutOptTransactionHeaderId
 FROM tblCTContractFutures CF
 INNER JOIN tblCTContractDetail CD ON CF.intContractDetailId = CD.intContractDetailId
 LEFT JOIN tblRKFutOptTransaction FT ON CF.intFutOptTransactionId = FT.intFutOptTransactionId
