@@ -1745,15 +1745,14 @@ BEGIN TRY
 								  END)
 						END) = 1
 
-				UPDATE @voucherPayable SET dblQuantityToBill = dblQuantityToBill * -1 WHERE ISNULL(dblCost,0) < 0
-				UPDATE @voucherPayable SET dblCost = dblCost * -1 WHERE ISNULL(dblCost,0) < 0
-				
 				DECLARE @dblVoucherTotal DECIMAL(18,6)
 
 				SELECT
 					@dblVoucherTotal = SUM(dblOrderQty * dblCost)
 				FROM @voucherPayable
 
+				UPDATE @voucherPayable SET dblQuantityToBill = dblQuantityToBill * -1 WHERE ISNULL(dblCost,0) < 0
+				UPDATE @voucherPayable SET dblCost = dblCost * -1 WHERE ISNULL(dblCost,0) < 0
 				
 				IF @dblVoucherTotal > 0 AND EXISTS(SELECT NULL FROM @voucherPayable DS INNER JOIN tblICItem I on I.intItemId = DS.intItemId WHERE I.strType = 'Inventory')
 				BEGIN
