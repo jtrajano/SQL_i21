@@ -411,6 +411,7 @@ SELECT
 											(CASE WHEN C2.apivc_net_amt = 0 OR ISNULL(NULLIF(C.aphgl_gl_un,0),1) < 0 THEN 1 ELSE -1 END) --If total of voucher is 0, retain the qty as negative
 										WHEN C2.apivc_comment = 'CCD Reconciliation Reversal'
 											AND originDetails.dblTotal < 0
+											AND C.aphgl_gl_amt > 0 --if amount > 0, qty should be negative
 											THEN -1
 										ELSE 1 END) 
 								END),
@@ -437,6 +438,7 @@ SELECT
 											(CASE WHEN C2.apivc_net_amt = 0 OR ISNULL(NULLIF(C.aphgl_gl_un,0),1) < 0 THEN 1 ELSE -1 END) --If total of voucher is 0, retain the qty as negative
 										WHEN C2.apivc_comment = 'CCD Reconciliation Reversal'
 											AND originDetails.dblTotal < 0
+											AND C.aphgl_gl_amt > 0 --if amount > 0, qty should be negative
 											THEN -1
 										ELSE 1 END) 
 								END),
