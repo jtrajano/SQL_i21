@@ -345,7 +345,7 @@ BEGIN TRY
 	WHILE @intSettleVoucherKey > 0
 	BEGIN
 		DECLARE @_intCustomerStorageId INT
-		SET @@_intCustomerStorageId = NULL
+		SET @_intCustomerStorageId = NULL
 		SET @strOrderType = NULL
 		SET @dblUnits = NULL
 		SET @dblDiscountUnpaid = NULL
