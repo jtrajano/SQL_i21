@@ -125,7 +125,7 @@ WITH Invoices AS(
 	WHERE	F.intTransactionId = ISNULL(@intTransactionIdFrom, F.intTransactionId)
 			AND F.intBankTransactionTypeId IN (@AP_PAYMENT, @AP_ECHECK)
 ) 
-SELECT TOP 10 
+SELECT
 a.*
 ,b.strTerm
 ,c.strCurrency
