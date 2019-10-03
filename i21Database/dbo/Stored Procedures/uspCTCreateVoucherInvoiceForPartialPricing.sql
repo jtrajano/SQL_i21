@@ -546,13 +546,15 @@ BEGIN TRY
 					BEGIN
 						IF EXISTS(SELECT * FROM tblAPBillDetail WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId AND intInventoryReceiptChargeId IS	NULL)
 						BEGIN 
-							SELECT	@intBillId = intBillId, @dblQtyReceived = dblQtyReceived FROM tblAPBillDetail WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId
+							SELECT	@intBillId = intBillId, @dblQtyReceived = dblQtyReceived, @dblVoucherPrice = dblCost FROM tblAPBillDetail WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId
 				    
 							SELECT  @ysnBillPosted = ysnPosted, @ysnBillPaid = ysnPaid FROM tblAPBill WHERE intBillId = @intBillId
 							
 							SELECT	@intReceiptUniqueId = MIN(intReceiptUniqueId) FROM @tblReceipt WHERE intReceiptUniqueId > @intReceiptUniqueId
 
 							IF @ysnBillPaid = 1 CONTINUE
+
+							IF  @dblVoucherPrice <> @dblFinalPrice CONTINUE
 
 							IF ISNULL(@ysnBillPosted,0) = 1
 							BEGIN
