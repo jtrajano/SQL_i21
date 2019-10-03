@@ -75,6 +75,8 @@ BEGIN TRY
 		RAISERROR('Gross, Fees and Net should be equal to ZERO.',16,1)
 	END
 
+	SET @errorMessage = NULL
+
 	-- AP Transaction and Posting
 	EXEC [dbo].[uspCCTransactionToAPBill] 
 		@intSiteHeaderId = @intSiteHeaderId
@@ -88,6 +90,7 @@ BEGIN TRY
 	
 	IF(@success = 1)
 	BEGIN
+		SET @errorMessage = NULL
 		-- AR Transaction and Posting
 		EXEC [dbo].[uspCCTransactionToARInvoice] 
 			@intSiteHeaderId = @intSiteHeaderId
@@ -101,6 +104,7 @@ BEGIN TRY
 
 	IF(@success = 1)
 	BEGIN
+		SET @errorMessage = NULL
 		-- CM Transaction and Posting
 		EXEC [dbo].[uspCCTransactionToCMBankTransaction]
 			@intSiteHeaderId = @intSiteHeaderId
