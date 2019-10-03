@@ -2,11 +2,12 @@
 AS 
 SELECT        
 	I.intItemId
-	, IL.intLocationId
-	, UOM.intItemUOMId
-	, ST.intStoreId
 	, I.ysnFuelItem
 	, I.strDescription
+	, I.strStatus
+	, IL.intLocationId
+	, UOM.intItemUOMId
+	, ST.intStoreId	
 	, IL.intVendorId
 	, IL.intFamilyId
 	, IL.intClassId
@@ -14,7 +15,7 @@ SELECT
 	, UM.strUnitMeasure
 	, UOM.strUpcCode
 	, UOM.strLongUPCCode
-	,  V.strVendorId
+	, V.strVendorId
 	, CL.strLocationName
 FROM dbo.tblICItem AS I 
 INNER JOIN dbo.tblICItemUOM AS UOM 
