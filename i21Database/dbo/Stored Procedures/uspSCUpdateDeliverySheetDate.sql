@@ -39,26 +39,28 @@ AS
 		if @intTicketId is not null
 		begin
 			select 
+				top 1
 				@dtmTicketDate = dtmTicketDateTime 
 			from tblSCTicket 
 				where intDeliverySheetId  = @intDeliverySheetId	
 				and intTicketId <> @intTicketId
 				and strTicketStatus = 'C'
 			order by dtmTicketDateTime desc 
-			offset 0 rows fetch next 1 rows only
+			--offset 0 rows fetch next 1 rows only
 		end
 	end	
 	else
 	begin
 		declare @dtmLargetDate datetime
 		select 
+			top 1
 			@dtmLargetDate = dtmTicketDateTime 
 		from tblSCTicket 
 		
 			where intDeliverySheetId  = @intDeliverySheetId
 				and strTicketStatus = 'C'
 		order by dtmTicketDateTime desc 
-		offset 0 rows fetch next 1 rows only
+		--offset 0 rows fetch next 1 rows only
 
 		if @dtmLargetDate > @dtmTicketDate
 			set @dtmTicketDate = @dtmLargetDate
