@@ -344,13 +344,14 @@ BEGIN TRY
 
 	WHILE @intSettleVoucherKey > 0
 	BEGIN
-		SET @intCustomerStorageId = NULL
+		DECLARE @_intCustomerStorageId INT
+		SET @@_intCustomerStorageId = NULL
 		SET @strOrderType = NULL
 		SET @dblUnits = NULL
 		SET @dblDiscountUnpaid = NULL
 
 		SELECT 
-			 @intCustomerStorageId = intCustomerStorageId
+			 @_intCustomerStorageId = intCustomerStorageId
 			,@strOrderType		   = strOrderType
 			,@dblUnits			   = dblUnits
 		FROM @SettleVoucherCreate
@@ -358,7 +359,7 @@ BEGIN TRY
 
 		SELECT @dblDiscountUnpaid = dblDiscountUnPaid
 		FROM vyuGRGetStorageTickets
-		WHERE intCustomerStorageId = @intCustomerStorageId
+		WHERE intCustomerStorageId = @_intCustomerStorageId
 		
 		SELECT @strCalcMethod = TD.strCalcMethod,
 				@dblGrossQuantity = CS.dblGrossQuantity,
@@ -367,7 +368,7 @@ BEGIN TRY
 		INNER JOIN vyuGRTicketDiscount TD
 			ON TD.intTicketFileId = CS.intCustomerStorageId
 				AND TD.strSourceType = 'Storage'
-		WHERE CS.intCustomerStorageId = @intCustomerStorageId
+		WHERE CS.intCustomerStorageId = @_intCustomerStorageId
 			AND TD.dblDiscountDue > 0
 
 		IF @strOrderType = 'Direct'
@@ -452,11 +453,11 @@ BEGIN TRY
 				,dblUnpaidUnits				= 0
 				,dblSettleUnits				= @dblUnits
 				,dblDiscountsDue			= CASE WHEN @strCalcMethod = 3 
-												   THEN @dblDiscountUnpaid * (@dblGrossQuantity * (@dblStorageUnits / @dblOpenBalance)) 
+												   THEN @dblDiscountUnpaid * (@dblGrossQuantity * (@dblUnits / @dblOpenBalance)) 
 												   ELSE @dblDiscountUnpaid * (@dblUnitsByOrderType - @dblUnpaidUnits)
 											  END 
 				,dblNetSettlement			= (@dblUnits * dblCashPrice) - (@dblTicketStorageDue*@dblUnits) - (CASE WHEN @strCalcMethod = 3 
-												   THEN @dblDiscountUnpaid * (@dblGrossQuantity * (@dblStorageUnits / @dblOpenBalance)) 
+												   THEN @dblDiscountUnpaid * (@dblGrossQuantity * (@dblUnits / @dblOpenBalance)) 
 												   ELSE @dblDiscountUnpaid * (@dblUnitsByOrderType - @dblUnpaidUnits)
 											  END )-ISNULL(@dblFlatFeeTotal,0)
 				,ysnPosted					= 0
@@ -581,12 +582,12 @@ BEGIN TRY
 				,dblUnpaidUnits					= @dblUnpaidUnits
 				,dblSettleUnits					= @dblUnitsByOrderType - @dblUnpaidUnits
 				,dblDiscountsDue				= CASE WHEN @strCalcMethod = 3 
-														THEN @dblDiscountUnpaid * (@dblGrossQuantity * (@dblStorageUnits / @dblOpenBalance)) 
+														THEN @dblDiscountUnpaid * (@dblGrossQuantity * (@dblUnits / @dblOpenBalance)) 
 														ELSE @dblDiscountUnpaid * (@dblUnitsByOrderType - @dblUnpaidUnits)
 												  END
 				,dblNetSettlement				= @dblContractAmount - (@dblTicketStorageDue*@dblUnitsByOrderType) - (
 														CASE WHEN @strCalcMethod = 3 
-															 THEN @dblDiscountUnpaid * (@dblGrossQuantity * (@dblStorageUnits / @dblOpenBalance)) 
+															 THEN @dblDiscountUnpaid * (@dblGrossQuantity * (@dblUnits / @dblOpenBalance)) 
 															 ELSE @dblDiscountUnpaid * (@dblUnitsByOrderType - @dblUnpaidUnits)
 														END 
 												  ) - ISNULL(@dblFlatFeeTotal,0)
