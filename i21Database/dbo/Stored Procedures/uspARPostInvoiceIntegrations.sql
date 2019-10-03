@@ -353,9 +353,6 @@ BEGIN
 				   , @ysnFromReturnP		= [ysnFromReturn]
 		FROM @IdsP 
 		ORDER BY [intInvoiceId]
-		
-        --UPDATE CONTRACT SEQUENCE BALANCE
-		EXEC dbo.[uspARInvoiceUpdateSequenceBalance] @TransactionId = @InvoiceIDP, @ysnDelete = 0, @UserId = @UserId
 
 		--COMMITTED QTY
 		EXEC dbo.[uspARUpdateCommitted] @InvoiceIDP, 1, @UserId, 1
@@ -675,9 +672,6 @@ BEGIN
 				   , @ysnFromReturnU		= [ysnFromReturn]
 		FROM @IdsU 
 		ORDER BY [intInvoiceId]
-		
-        --UPDATE CONTRACT SEQUENCE BALANCE
-		EXEC dbo.[uspARInvoiceUpdateSequenceBalance] @TransactionId = @InvoiceIDP, @ysnDelete = 1, @UserId = @UserId
 		
 		--COMMITTED QTY
 		EXEC dbo.[uspARUpdateCommitted] @InvoiceIDU, 1, @UserId, 1
