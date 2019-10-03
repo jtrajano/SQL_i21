@@ -13,7 +13,7 @@ AS
 			,dblDiscountAmount			= BillDtl.dblCost			
 			,dblAmount					= BillDtl.dblTotal --+ BillDtl.dblTax
 			,dblTax						= BillDtl.dblTax
-			,Net						= PYMTDTL.dblTotal
+			,Net						= ISNULL(PYMTDTL.dblTotal,0)
 			,intCustomerStorageId		= BillDtl.intCustomerStorageId 
 			,intInventoryReceiptChargeId = BillDtl.intInventoryReceiptChargeId
 		FROM tblAPPayment PYMT
@@ -31,8 +31,8 @@ AS
 			intPaymentId
 			,strDiscountCode
 			,strDiscountCodeDescription
-			,WeightedAverageReading	= (SUM(WeightedAverageReading) / SUM(Net))
-			,WeightedAverageShrink	= (SUM(WeightedAverageShrink) / SUM(Net))
+			,WeightedAverageReading	= CASE WHEN ISNULL(SUM(Net),0) = 0 THEN 0 ELSE (SUM(WeightedAverageReading) / SUM(Net)) END
+			,WeightedAverageShrink	= CASE WHEN ISNULL(SUM(Net),0) = 0 THEN 0 ELSE  (SUM(WeightedAverageShrink) / SUM(Net)) END
 			,Discount				= SUM(dblDiscountAmount)
 			,Amount					= SUM(dblAmount)
 			,Tax					= SUM(dblTax)
