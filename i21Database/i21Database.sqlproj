@@ -7038,7 +7038,6 @@
     <Build Include="dbo\Stored Procedures\uspICPostStorageMeasurementReading.sql" />
     <None Include="Scripts\Post-Deployment\EM\041_FixVendorNo.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityLotMergeDetail.sql" />
-    <Build Include="dbo\Stored Procedures\uspARInvoiceUpdateSequenceBalance.sql" />
     <Build Include="dbo\Views\vyuSMCreditCardPaymentHistory.sql" />
     <Build Include="dbo\Stored Procedures\uspARPOSCreateNegativeCashReceipts.sql" />
     <Build Include="dbo\Stored Procedures\uspARBookInvoiceGLEntries.sql" />
