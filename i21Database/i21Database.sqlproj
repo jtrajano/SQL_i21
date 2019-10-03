@@ -9239,6 +9239,7 @@
     <Build Include="dbo\Stored Procedures\uspARPopulateContractDetails.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateContractOnPost.sql" />
     <None Include="Scripts\Post-Deployment\GR\GR_InsertVouchersInSettleStorageBillDetailTable.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCUpdateDeliverySheetDate.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
