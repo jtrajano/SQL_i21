@@ -1470,6 +1470,8 @@ SET		SC.intInventoryShipmentId = addResult.intInventoryShipmentId
 FROM	dbo.tblSCTicket SC INNER JOIN tblICInventoryShipmentItem addResult
 		ON SC.intTicketId = addResult.intSourceId
 
+exec uspSCUpdateDeliverySheetDate @intTicketId = @intTicketId
+
 BEGIN
 	INSERT INTO [dbo].[tblQMTicketDiscount]
        ([intConcurrencyId]     
