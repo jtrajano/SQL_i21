@@ -5,6 +5,7 @@ SELECT DISTINCT
 	 , Perm.intEntityUserSecurityId
      , Store.intStoreId
 	 , Store.intStoreNo
+	 , Store.intRegisterId
 	 , Store.strDescription  
 	 , Store.intLastShiftNo
 	 , Store.dtmLastShiftOpenDate
