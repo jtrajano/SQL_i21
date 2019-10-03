@@ -25,7 +25,7 @@ BEGIN
 			24
 		FROM tblAPBill voucher
 		INNER JOIN @voucherPrepayIds B ON voucher.intBillId = B.intId
-		INNER JOIN vyuGLAccount C ON voucher.intAccountId = C.intAccountId
+		INNER JOIN vyuGLAccountDetail C ON voucher.intAccountId = C.intAccountId
 		WHERE C.intAccountCategoryId != 53 --Vendor Prepayments
 
 		INSERT INTO @returntable

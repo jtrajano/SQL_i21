@@ -152,6 +152,7 @@ BEGIN
 			,LC.dblNetWt AS dblContainerNetWt
 			,LC.dblTareWt AS dblContainerTareWt
 			,LDV.strPContractNumber + '/' + CONVERT(NVARCHAR, LDV.intPContractSeq) AS strContractNumberWithSeq
+			,LDV.strSContractNumber + '/' + CONVERT(NVARCHAR, LDV.intSContractSeq) AS strSContractNumberWithSeq
 			,IC.strCommodityCode
 			,LDCL.dblQuantity AS dblContainerLinkQty
 			,LDCL.dblLinkGrossWt AS dblContainerLinkGrossWt
@@ -212,6 +213,7 @@ BEGIN
 					END
 				) * LDCL.dblQuantity AS dblContainerTareWt
 			,LDV.strPContractNumber + '/' + CONVERT(NVARCHAR, LDV.intPContractSeq) AS strContractNumberWithSeq
+			,LDV.strSContractNumber + '/' + CONVERT(NVARCHAR, LDV.intSContractSeq) AS strSContractNumberWithSeq
 			,IC.strCommodityCode
 		FROM tblLGLoad L
 		JOIN tblLGLoadWarehouse LW ON LW.intLoadId = L.intLoadId

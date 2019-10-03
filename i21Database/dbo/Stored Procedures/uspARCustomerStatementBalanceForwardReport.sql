@@ -578,10 +578,9 @@ FROM vyuARCustomerSearch C
 										   WHEN strTransactionType = ''Customer Prepayment'' THEN 0.00 
 										   ELSE I.dblInvoiceTotal 
 									  END
-			 , dblBalance			= CASE WHEN strTransactionType IN (''Credit Memo'', ''Overpayment'') THEN I.dblInvoiceTotal * -1
-										   WHEN strTransactionType = ''Customer Prepayment'' THEN 0.00
+			 , dblBalance			= CASE WHEN strTransactionType IN (''Credit Memo'', ''Overpayment'', ''Customer Prepayment'') THEN I.dblInvoiceTotal * -1
 										   ELSE I.dblInvoiceTotal 
-									  END - ISNULL(TOTALPAYMENT.dblPayment, 0)
+									  END - CASE WHEN strTransactionType = ''Customer Prepayment'' THEN 0.00 ELSE ISNULL(TOTALPAYMENT.dblPayment, 0) END
 			 , dblPayment			= CASE WHEN strTransactionType = ''Customer Prepayment'' THEN I.dblInvoiceTotal ELSE ' + CASE WHEN @ysnPrintFromCFLocal = 1 THEN '0.00' ELSE 'CASE WHEN dbo.fnARGetInvoiceAmountMultiplier(strTransactionType) * I.dblInvoiceTotal - ISNULL(TOTALPAYMENT.dblPayment, 0) = 0 THEN ISNULL(TOTALPAYMENT.dblPayment, 0) ELSE 0.00 END' END +' END
 			 , dtmDate				= I.dtmDate
 			 , dtmDueDate			= I.dtmDueDate
@@ -799,12 +798,6 @@ IF @ysnPrintFromCFLocal = 1
 ELSE 
 	BEGIN
 		UPDATE @temp_statement_table SET dblBalance = dblPayment * -1 WHERE strTransactionType = 'Payment'
-
-		UPDATE TSS
-		SET dblBalance = I.dblAmountDue
-		FROM @temp_statement_table TSS
-		INNER JOIN tblARInvoice I ON TSS.intInvoiceId = I.intInvoiceId
-		WHERE TSS.strTransactionType = 'Customer Prepayment'
 		
 		UPDATE @temp_statement_table SET dblBalance = dblInvoiceTotal WHERE strTransactionType IN ('Invoice', 'Debit Memo') AND dblBalance <> 0
 	END
