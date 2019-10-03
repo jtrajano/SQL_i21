@@ -398,7 +398,7 @@ BEGIN TRY
 				IF(@strDistributionOption = 'LOD')
 				BEGIN
 				
-					IF(@intContractDetailId = @intTicketContractDetailId)
+					IF(@intContractDetailId = @intTicketContractDetailId OR @intLoadDetailId IS NOT NULl)
 					BEGIN
 						SET @dblInreaseSchBy  = @dblAvailable - @dblScheduleQty
 					END
