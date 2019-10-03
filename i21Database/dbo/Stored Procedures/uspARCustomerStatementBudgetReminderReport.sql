@@ -416,10 +416,9 @@ LEFT JOIN (
 									   WHEN strTransactionType = 'Customer Prepayment' THEN 0.00 
 									   ELSE I.dblInvoiceTotal 
 								  END
-		 , dblBalance			= CASE WHEN strTransactionType IN ('Credit Memo', 'Overpayment') THEN I.dblInvoiceTotal * -1
-									   WHEN strTransactionType = 'Customer Prepayment' THEN 0.00
+		 , dblBalance			= CASE WHEN strTransactionType IN ('Credit Memo', 'Overpayment', 'Customer Prepayment') THEN I.dblInvoiceTotal * -1
 									   ELSE I.dblInvoiceTotal 
-								  END - ISNULL(TOTALPAYMENT.dblPayment, 0)
+								  END - CASE WHEN strTransactionType = 'Customer Prepayment' THEN 0.00 ELSE ISNULL(TOTALPAYMENT.dblPayment, 0) END
 		 , dblPayment			= CASE WHEN strTransactionType = 'Customer Prepayment' THEN I.dblInvoiceTotal 
 									   ELSE 
 											CASE WHEN dbo.fnARGetInvoiceAmountMultiplier(strTransactionType) * I.dblInvoiceTotal - ISNULL(TOTALPAYMENT.dblPayment, 0) = 0 THEN ISNULL(TOTALPAYMENT.dblPayment, 0) 
@@ -465,10 +464,10 @@ LEFT JOIN (
 		     , intInvoiceId		= PD.intInvoiceId
 			 , strInvoiceNumber	= I.strInvoiceNumber
 			 , dblPayment		= SUM(PD.dblPayment) + SUM(PD.dblDiscount) + SUM(PD.dblWriteOffAmount) - SUM(PD.dblInterest) 
-			 , dblInvoiceTotal	= I.dblInvoiceTotal
+			 , dblInvoiceTotal	= CASE WHEN I.dtmDate BETWEEN @dtmDateFrom AND @dtmDateTo THEN I.dblInvoiceTotal ELSE 0 END 
 		FROM #PAYMENTDETAILS PD 
-		INNER JOIN #POSTEDINVOICES I ON PD.intInvoiceId = I.intInvoiceId
-		GROUP BY PD.intPaymentId, PD.intInvoiceId, I.strInvoiceNumber, I.dblInvoiceTotal
+		INNER JOIN tblARInvoice I ON PD.intInvoiceId = I.intInvoiceId
+		GROUP BY PD.intPaymentId, PD.intInvoiceId, I.strInvoiceNumber, I.dblInvoiceTotal, I.dtmDate
 	) DETAILS ON DETAILS.intPaymentId = P.intPaymentId
 	LEFT JOIN (
 		SELECT intInvoiceId
@@ -532,11 +531,7 @@ IF @ysnIncludeBudgetLocal = 1
 	END
 
 UPDATE #STATEMENTREPORT SET dblBalance = dblPayment * -1 WHERE strTransactionType = 'Payment'
-UPDATE TSS
-SET dblBalance = I.dblAmountDue
-FROM #STATEMENTREPORT TSS
-INNER JOIN tblARInvoice I ON TSS.intInvoiceId = I.intInvoiceId
-WHERE TSS.strTransactionType = 'Customer Prepayment'		
+
 UPDATE #STATEMENTREPORT SET dblBalance = dblInvoiceTotal WHERE strTransactionType IN ('Invoice', 'Debit Memo') AND dblBalance <> 0
 
 --BALANCE FORWARD LINE ITEM
