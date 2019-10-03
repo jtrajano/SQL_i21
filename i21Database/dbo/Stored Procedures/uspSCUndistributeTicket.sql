@@ -789,6 +789,9 @@ BEGIN TRY
 					SELECT TOP 1 dtmTicketDateTime FROM tblSCTicket WHERE intDeliverySheetId = GRC.intDeliverySheetId AND strTicketStatus = 'C' ORDER BY dtmTicketDateTime DESC
 				) SC
 				WHERE GRC.intDeliverySheetId = @intDeliverySheetId  
+
+
+				exec uspSCUpdateDeliverySheetDate @intTicketId = @intTicketId, @ysnUndistribute = 1
 		END
 
 		--Audit Log

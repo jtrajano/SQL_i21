@@ -7919,6 +7919,7 @@
     <Build Include="dbo\Stored Procedures\uspARCustomerInquiryReport.sql" />
     <Build Include="dbo\Functions\fnARCustomerAgingReport.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\37_UpdatePOSNewFields.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCUpdateDeliverySheetDate.sql" />
     <Build Include="dbo\Views\vyuARInvoiceSubFormulaReport.sql" />
   </ItemGroup>
   <ItemGroup>
