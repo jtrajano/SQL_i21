@@ -95,8 +95,8 @@ BEGIN
 
 	SET @product = ISNULL(CAST(LEFT(@rawResult, 38) AS NUMERIC(38, 20)), 0) 
 	
-	-- Excel can only handle 15 significant figures. So let's round it at the 12th decimal place. 
-	SET @product = ROUND(@product, 12) 
+	-- Excel can only handle 15 significant figures. So let's round it at the 10th decimal place. 
+	SET @product = ROUND(@product, 10) 
 
 	-- If the native method have a different result than fnMultiply, then use the result from native calculation. 
 	-- Better to have an correct number with lesser decimal values than a wrong value. 
