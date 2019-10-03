@@ -7364,6 +7364,7 @@
     <Build Include="dbo\Functions\fnARCustomerAgingReport.sql" />
     <Build Include="dbo\Stored Procedures\uspGRCalculateSettleStorageFeeForContract.sql" />
     <Build Include="dbo\Stored Procedures\uspAPConvertPaymentToPrepay.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCUpdateDeliverySheetDate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

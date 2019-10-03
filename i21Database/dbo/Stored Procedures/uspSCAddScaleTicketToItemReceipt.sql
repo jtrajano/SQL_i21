@@ -1371,6 +1371,8 @@ SET		SC.intInventoryReceiptId = addResult.intInventoryReceiptId
 FROM	dbo.tblSCTicket SC INNER JOIN #tmpAddItemReceiptResult addResult
 			ON SC.intTicketId = addResult.intSourceId
 
+exec uspSCUpdateDeliverySheetDate @intTicketId = @intTicketId
+
 _PostOrUnPost:
 -- Post the Inventory Receipts                                            
 DECLARE @ReceiptId INT
