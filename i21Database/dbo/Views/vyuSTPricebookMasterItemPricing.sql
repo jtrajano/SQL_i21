@@ -7,7 +7,7 @@ SELECT
 	, Store.intStoreId
 	, Store.intStoreNo
 	, CompanyLoc.strLocationName
-	-- , ItemPricing.dblSalePrice
+	, ItemPricing.dblSalePrice
 	, ItemPricing.dblStandardCost
 	, ItemPricing.dblLastCost
 	, ItemPricing.intConcurrencyId
