@@ -299,7 +299,9 @@ BEGIN
 			, dblShortContracts = SUM(ISNULL(dblShort, 0))
 			, dblShortAvgPrice = SUM(ShortWaitedPrice)
 			, dblNet = SUM(ISNULL(dblLong, 0)) - SUM(ISNULL(dblShort, 0))
-			, dblUnrealized = ISNULL(SUM(dblNetPnL), 0)
+			--RM-3330
+			--, dblUnrealized = ISNULL(SUM(dblNetPnL), 0)
+			, dblUnrealized = ISNULL(SUM(dblGrossPnL), 0)
 			, dblClosing = ISNULL(max(dblClosing), 0)
 			, dblFutCommission = ISNULL(SUM(dblFutCommission), 0)
 			, dblPrice = ISNULL(SUM(dblPrice), 0)
