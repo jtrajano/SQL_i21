@@ -208,25 +208,25 @@ Declare @intRowNum int
 	,@dblCashBegBalForSummary NUMERIC(18,6)
 
 
-select @dblBasisBalanceForward = isnull(sum(dblQuantity) ,0)
+select @dblBasisBalanceForward = isnull(sum(dblQtyinCommodityStockUOM) ,0)
 from tblCTContractBalance where dtmEndDate = @dtmContractBeginBalance
 and intCommodityId  IN (SELECT intCommodityId FROM @Commodity)
 and intContractTypeId = @intContractTypeId
 and strPricingTypeDesc = 'Basis'
 
-select @dblPricedBalanceForward = isnull(sum(dblQuantity) ,0)
+select @dblPricedBalanceForward = isnull(sum(dblQtyinCommodityStockUOM) ,0)
 from tblCTContractBalance where dtmEndDate = @dtmContractBeginBalance
 and intCommodityId  IN (SELECT intCommodityId FROM @Commodity)
 and intContractTypeId = @intContractTypeId
 and strPricingTypeDesc = 'Priced'
 
-select @dblDPBalanceForward = isnull(sum(dblQuantity) ,0)
+select @dblDPBalanceForward = isnull(sum(dblQtyinCommodityStockUOM) ,0)
 from tblCTContractBalance where dtmEndDate = @dtmContractBeginBalance
 and intCommodityId  IN (SELECT intCommodityId FROM @Commodity)
 and intContractTypeId = @intContractTypeId
 and strPricingTypeDesc = 'DP (Priced Later)'
 
-select @dblCashBalanceForward = isnull(sum(dblQuantity) ,0)
+select @dblCashBalanceForward = isnull(sum(dblQtyinCommodityStockUOM) ,0)
 from tblCTContractBalance where dtmEndDate = @dtmContractBeginBalance
 and intCommodityId  IN (SELECT intCommodityId FROM @Commodity)
 and intContractTypeId = @intContractTypeId
