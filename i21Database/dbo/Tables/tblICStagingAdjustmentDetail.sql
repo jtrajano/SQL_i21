@@ -28,5 +28,7 @@ CREATE TABLE tblICStagingAdjustmentDetail (
 	, dtmNewExpiryDate DATETIME NULL
 	-- Lot Owner Change
 	, strNewOwner NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
+	, LineNumber INT NULL
+	, LinePosition INT NULL
 	, CONSTRAINT PK_tblICStagingAdjustmentDetail_intStagingAdjustmentDetailId PRIMARY KEY(intStagingAdjustmentDetailId)
 )
