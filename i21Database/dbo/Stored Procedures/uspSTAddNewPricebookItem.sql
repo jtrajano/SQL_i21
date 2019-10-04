@@ -211,6 +211,7 @@ BEGIN
 					, intItemId					INT
 					, dblStandardCost			NUMERIC(38,20)
 					, dblLastCost				NUMERIC(38,20)
+					, dblSalePrice				NUMERIC(38,20)
 					, intCompanyLocationId		INT
 				)
 			END
@@ -310,21 +311,18 @@ BEGIN
 		
 
 
-			
+
 			-- ============================================================================================================================
 			-- [START] - ADD ITEM UOM
 			-- ============================================================================================================================
 			BEGIN
-
 				IF(@intUnitMeasureId IS NOT NULL AND @intNewItemId IS NOT NULL AND @strLongUpcCode IS NOT NULL)
 					BEGIN		
-
 						IF NOT EXISTS(SELECT TOP 1 1 FROM tblICItemUOM WHERE strLongUPCCode = @strLongUpcCode OR intUpcCode = CONVERT(NUMERIC(32, 0), CAST(@strLongUpcCode AS FLOAT)))
 							BEGIN
-
 								IF NOT EXISTS(SELECT TOP 1 1 FROM tblICItemUOM WHERE strUpcCode = dbo.fnUPCAtoUPCE(@strLongUpcCode_Entry))	
 									BEGIN
-										
+									
 										-- ITEM UOM
 										BEGIN TRY
 
@@ -356,12 +354,12 @@ BEGIN
 											ELSE
 												BEGIN
 													
---TEST
-IF(@ysnDebug = 1)
-	BEGIN
-		SELECT 'New Item', *  FROM tblICItem WHERE intItemId = @intNewItemId
-		SELECT 'New Item OUM', * FROM tblICItemUOM WHERE intItemId = @intNewItemId AND ysnStockUnit = 1
-	END
+											--TEST
+											IF(@ysnDebug = 1)
+												BEGIN
+													SELECT 'New Item', *  FROM tblICItem WHERE intItemId = @intNewItemId
+													SELECT 'New Item OUM', * FROM tblICItemUOM WHERE intItemId = @intNewItemId AND ysnStockUnit = 1
+												END
 
 
 													IF(@strUpcCode IS NOT NULL OR @strUpcCode != '')
@@ -426,56 +424,65 @@ IF(@ysnDebug = 1)
 			-- [START] - ADD ITEM LOCATION
 			-- ============================================================================================================================
 			BEGIN
-					INSERT INTO @tempCStoreLocation
-					(
-						intStoreId,
-						intCompanyLocationId,
+	
+					BEGIN TRY
+						INSERT INTO @tempCStoreLocation
+						(
+							intStoreId,
+							intCompanyLocationId,
 
-						-- Item Location
-						ysnUseTaxFlag1,
-						ysnUseTaxFlag2,
-						ysnUseTaxFlag3,
-						ysnUseTaxFlag4,
-						ysnBlueLaw1,
-						ysnBlueLaw2,
-						ysnFoodStampable,
-						ysnReturnable,
-						ysnSaleable,
-						ysnPrePriced,
-						ysnIdRequiredLiquor,
-						ysnIdRequiredCigarette,
-						intProductCodeId,
-						intFamilyId,
-						intClassId,
-						intMinimumAge
-					)
-					SELECT 
-						intStoreId					= st.intStoreId,
-						intCompanyLocationId		= st.intCompanyLocationId,
+							-- Item Location
+							ysnUseTaxFlag1,
+							ysnUseTaxFlag2,
+							ysnUseTaxFlag3,
+							ysnUseTaxFlag4,
+							ysnBlueLaw1,
+							ysnBlueLaw2,
+							ysnFoodStampable,
+							ysnReturnable,
+							ysnSaleable,
+							ysnPrePriced,
+							ysnIdRequiredLiquor,
+							ysnIdRequiredCigarette,
+							intProductCodeId,
+							intFamilyId,
+							intClassId,
+							intMinimumAge
+						)
+						SELECT 
+							intStoreId					= st.intStoreId,
+							intCompanyLocationId		= st.intCompanyLocationId,
 
-						-- Item Location
-						ysnUseTaxFlag1				= ISNULL(catLoc.ysnUseTaxFlag1, CAST(0 AS BIT)),
-						ysnUseTaxFlag2				= ISNULL(catLoc.ysnUseTaxFlag2, CAST(0 AS BIT)),
-						ysnUseTaxFlag3				= ISNULL(catLoc.ysnUseTaxFlag3, CAST(0 AS BIT)),
-						ysnUseTaxFlag4				= ISNULL(catLoc.ysnUseTaxFlag4, CAST(0 AS BIT)),
-						ysnBlueLaw1					= ISNULL(catLoc.ysnBlueLaw1, CAST(0 AS BIT)),
-						ysnBlueLaw2					= ISNULL(catLoc.ysnBlueLaw2, CAST(0 AS BIT)),
-						ysnFoodStampable			= ISNULL(catLoc.ysnFoodStampable, CAST(0 AS BIT)),
-						ysnReturnable				= ISNULL(catLoc.ysnReturnable, CAST(0 AS BIT)),
-						ysnSaleable					= ISNULL(catLoc.ysnSaleable, CAST(0 AS BIT)),
-						ysnPrePriced				= ISNULL(catLoc.ysnPrePriced, CAST(0 AS BIT)),
-						ysnIdRequiredLiquor			= ISNULL(catLoc.ysnIdRequiredLiquor, CAST(0 AS BIT)),
-						ysnIdRequiredCigarette		= ISNULL(catLoc.ysnIdRequiredCigarette, CAST(0 AS BIT)),
-						intProductCodeId			= catLoc.intProductCodeId,
-						intFamilyId					= ISNULL(@intFamilyId, catLoc.intFamilyId),
-						intClassId					= ISNULL(@intClassId, catLoc.intClassId),
-						intMinimumAge				= catLoc.intMinimumAge
-					FROM tblSTStore st
-					LEFT JOIN tblICCategoryLocation catLoc
-						ON st.intCompanyLocationId = catLoc.intLocationId
-					WHERE st.intCompanyLocationId IS NOT NULL
-						AND catLoc.intCategoryId = @intCategoryId
-					
+							-- Item Location
+							ysnUseTaxFlag1				= ISNULL(catLoc.ysnUseTaxFlag1, CAST(0 AS BIT)),
+							ysnUseTaxFlag2				= ISNULL(catLoc.ysnUseTaxFlag2, CAST(0 AS BIT)),
+							ysnUseTaxFlag3				= ISNULL(catLoc.ysnUseTaxFlag3, CAST(0 AS BIT)),
+							ysnUseTaxFlag4				= ISNULL(catLoc.ysnUseTaxFlag4, CAST(0 AS BIT)),
+							ysnBlueLaw1					= ISNULL(catLoc.ysnBlueLaw1, CAST(0 AS BIT)),
+							ysnBlueLaw2					= ISNULL(catLoc.ysnBlueLaw2, CAST(0 AS BIT)),
+							ysnFoodStampable			= ISNULL(catLoc.ysnFoodStampable, CAST(0 AS BIT)),
+							ysnReturnable				= ISNULL(catLoc.ysnReturnable, CAST(0 AS BIT)),
+							ysnSaleable					= ISNULL(catLoc.ysnSaleable, CAST(0 AS BIT)),
+							ysnPrePriced				= ISNULL(catLoc.ysnPrePriced, CAST(0 AS BIT)),
+							ysnIdRequiredLiquor			= ISNULL(catLoc.ysnIdRequiredLiquor, CAST(0 AS BIT)),
+							ysnIdRequiredCigarette		= ISNULL(catLoc.ysnIdRequiredCigarette, CAST(0 AS BIT)),
+							intProductCodeId			= catLoc.intProductCodeId,
+							intFamilyId					= ISNULL(@intFamilyId, catLoc.intFamilyId),
+							intClassId					= ISNULL(@intClassId, catLoc.intClassId),
+							intMinimumAge				= catLoc.intMinimumAge
+						FROM tblSTStore st
+						LEFT JOIN tblICCategoryLocation catLoc
+							ON st.intCompanyLocationId = catLoc.intLocationId
+						WHERE st.intCompanyLocationId IS NOT NULL
+							AND catLoc.intCategoryId = @intCategoryId
+					END TRY
+					BEGIN CATCH
+						SET @strResultMessage = 'Error creating location table: ' + ERROR_MESSAGE() 
+
+						GOTO ExitWithRollback
+					END CATCH
+
+
 
 
 					INSERT INTO @tblCStoreItemPricing 
@@ -484,6 +491,7 @@ IF(@ysnDebug = 1)
 						, intItemId
 						, dblStandardCost
 						, dblLastCost
+						, dblSalePrice
 						, intCompanyLocationId
 					)
 					SELECT 
@@ -491,10 +499,12 @@ IF(@ysnDebug = 1)
 						, intItemId				= udt.intItemId
 						, dblStandardCost		= udt.dblStandardCost
 						, dblLastCost			= udt.dblLastCost
+						, dblSalePrice			= udt.dblSalePrice
 						, intCompanyLocationId  = st.intCompanyLocationId
 					FROM @UDTItemPricing udt
 					INNER JOIN tblSTStore st
 						ON udt.intStoreId = st.intStoreId
+
 
 
 					-- =================================================================================
@@ -667,7 +677,7 @@ IF(@ysnDebug = 1)
 												SELECT TOP 1
 													@dblStandardCost_New	= dblStandardCost,
 													@dblLastCost_New		= dblLastCost,
-													@dblSalePrice_New		= NULL
+													@dblSalePrice_New		= dblSalePrice
 												FROM @tblCStoreItemPricing 
 												WHERE intCompanyLocationId = @intCompanyLocationId_New
 
@@ -786,6 +796,7 @@ ExitWithCommit:
 ExitWithRollback:
 		SET @intNewItemId		= 0
 		SET @ysnResultSuccess	= 0
+		SET @intUniqueId		= 0
 
 		IF @InitTranCount = 0
 			BEGIN

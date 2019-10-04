@@ -7,5 +7,7 @@ CREATE TABLE tblICStagingAdjustment(
 	, dtmDate DATETIME NOT NULL
 	, intAdjustmentType INT NOT NULL
 	, strDescription NVARCHAR(300) COLLATE Latin1_General_CI_AS NOT NULL
+	, LineNumber INT NULL
+	, LinePosition INT NULL
 	, CONSTRAINT PK_tblICStagingAdjustment_intStagingAdjustmentId PRIMARY KEY(intStagingAdjustmentId)
 )

@@ -1,10 +1,32 @@
 ﻿CREATE PROCEDURE [dbo].[uspGLGenerateAccountRange] 
-	@result NVARCHAR (20 ) OUTPUT
+	@result NVARCHAR (20) OUTPUT
 AS
 	SET NOCOUNT ON;
-	--DECLARE @ysnRangeBuilt BIT = 0
-	--IF EXISTS(SELECT TOP 1   1 FROM tblGLAccountRange)
-		--SET @ysnRangeBuilt = 1
+	
+	DECLARE @tbl Table (
+		strAccountType NVARCHAR(30) COLLATE Latin1_General_CI_AS,  intAccountGroupId INT
+	)
+
+	;WITH accountTypes as
+	(
+		SELECT 'Asset' strAccountType, 'Asset' strAccountGroup	union 
+		SELECT 'Liability'	,'Liability'union 
+		SELECT 'Equity'		,'Equity'	union 
+		SELECT 'Revenue'	,'Revenue'	union 
+		SELECT 'Revenue 2'	,'Revenue'	union 
+		SELECT 'Revenue 3'	,'Revenue'	union 
+		SELECT 'Revenue 4'	,'Revenue'	union 
+		SELECT 'Expense'	,'Expense'	union 
+		SELECT 'Expense 2'	,'Expense'	union 
+		SELECT 'Expense 3'	,'Expense'	union 
+		SELECT 'Expense 4'	,'Expense'	
+	)
+	INSERT INTO @tbl 
+	SELECT A.strAccountType, B.intAccountGroupId from accountTypes A
+	INNER JOIN tblGLAccountGroup B ON B.strAccountGroup = A.strAccountGroup
+	
+	INSERT INTO @tbl SELECT 'All'	,0
+
 		
 	BEGIN TRY
 	MERGE 
@@ -12,19 +34,7 @@ AS
 	WITH	(HOLDLOCK) 
 	AS		RangeTable
 	USING	(
-		SELECT strAccountType = 'All'		, intAccountGroupId = 0 union all
-		SELECT strAccountType = 'Asset'		, intAccountGroupId = 1 union all
-		SELECT strAccountType = 'Liability' , intAccountGroupId = 2 union all
-		SELECT strAccountType = 'Equity'	, intAccountGroupId = 3 union all
-		SELECT strAccountType = 'Revenue'	, intAccountGroupId = 4 union all
-		SELECT strAccountType = 'Revenue 2' , intAccountGroupId = 4 union all
-		SELECT strAccountType = 'Revenue 3' , intAccountGroupId = 4 union all
-		SELECT strAccountType = 'Revenue 4' , intAccountGroupId = 4 union all
-		SELECT strAccountType = 'Expense'	, intAccountGroupId = 5 union all
-		SELECT strAccountType = 'Expense 2' , intAccountGroupId = 5 union all
-		SELECT strAccountType = 'Expense 3' , intAccountGroupId = 5 union all
-		SELECT strAccountType = 'Expense 4' , intAccountGroupId = 5 
-			
+		select * from @tbl
 	) AS RangeHardCodedValues
 		ON  RangeTable.strAccountType = RangeHardCodedValues.strAccountType
 	WHEN MATCHED THEN 
@@ -66,6 +76,3 @@ AS
 	BEGIN CATCH
 		SELECT @result = ERROR_MESSAGE()
 	END CATCH
-	
-GO
-
