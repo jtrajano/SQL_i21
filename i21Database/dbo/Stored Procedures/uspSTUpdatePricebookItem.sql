@@ -282,6 +282,7 @@ BEGIN
 					, intItemId				INT
 					, dblStandardCost		NUMERIC(38,20)
 					, dblLastCost			NUMERIC(38,20)
+					, dblSalePrice			NUMERIC(38,20)
 				)
 			END
 
@@ -865,21 +866,25 @@ BEGIN
 								, intItemId	
 								, dblStandardCost	
 								, dblLastCost
+								, dblSalePrice
+
 							)
 							SELECT 
 								intItemPricingId	= udt.intItemPricingId
 								, intItemId			= udt.intItemId
 								, dblStandardCost	= udt.dblStandardCost
 								, dblLastCost		= udt.dblLastCost
+								, dblSalePrice		= udt.dblSalePrice
 							FROM @UDTItemPricing udt
 
 							--TEST
 							--SET @strResultMessage = @strResultMessage + ', Update Pricing: Inserted to @tblItemPricing'
 
-							DECLARE @intLoopItemPricingId AS INT
-							        , @intLoopItemId AS INT
-									, @dblLoopStandardCost AS NUMERIC(38,20)
-									, @dblLoopLastCost AS NUMERIC(38,20)
+							DECLARE @intLoopItemPricingId	AS INT
+							        , @intLoopItemId		AS INT
+									, @dblLoopStandardCost	AS NUMERIC(38,20)
+									, @dblLoopLastCost		AS NUMERIC(38,20)
+									, @dblLoopSalePrice		AS NUMERIC(38,20)
 
 
 
@@ -892,6 +897,7 @@ BEGIN
 										, @intLoopItemId		= temp.intItemId
 										, @dblLoopStandardCost	= CAST(temp.dblStandardCost AS NUMERIC(38, 20))
 										, @dblLoopLastCost		= CAST(temp.dblLastCost AS NUMERIC(38, 20))
+										, @dblLoopSalePrice		= CAST(temp.dblSalePrice AS NUMERIC(38, 20))
 									FROM @tblItemPricing temp
 
 
@@ -910,6 +916,7 @@ BEGIN
 														, item.strDescription
 														, itemPricing.dblStandardCost
 														, itemPricing.dblLastCost
+														, itemPricing.dblSalePrice
 													FROM tblICItemPricing itemPricing
 													INNER JOIN tblICItem item
 														ON itemPricing.intItemId = item.intItemId
@@ -936,7 +943,7 @@ BEGIN
 
 												-- update params
 												, @dblStandardCost			= @dblLoopStandardCost 
-												, @dblRetailPrice			= NULL 
+												, @dblRetailPrice			= @dblLoopSalePrice 
 												, @dblLastCost				= @dblLoopLastCost
 												, @intEntityUserSecurityId	= @intEntityId
 
@@ -968,6 +975,7 @@ BEGIN
 														, item.strDescription
 														, itemPricing.dblStandardCost
 														, itemPricing.dblLastCost
+														, itemPricing.dblSalePrice
 													FROM tblICItemPricing itemPricing
 													INNER JOIN tblICItem item
 														ON itemPricing.intItemId = item.intItemId
@@ -1012,6 +1020,7 @@ BEGIN
 													,CASE
 														WHEN [Changes].oldColumnName = 'strSalePrice_Original' THEN 'Sale Price'
 														WHEN [Changes].oldColumnName = 'strLastCost_Original' THEN 'Last Cost'
+														WHEN [Changes].oldColumnName = 'strSalePrice_Original' THEN 'Retail Price'
 														WHEN [Changes].oldColumnName = 'strStandardCost_Original' THEN 'Standard Cost'
 													END
 													,[Changes].strOldData
