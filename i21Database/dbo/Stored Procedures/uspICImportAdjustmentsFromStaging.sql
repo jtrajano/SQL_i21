@@ -7,7 +7,7 @@ DECLARE @Adjustments TABLE(strAdjustmentNo NVARCHAR(100) COLLATE Latin1_General_
 INSERT INTO @Adjustments(strAdjustmentNo, intLocationId, intAdjustmentType, dtmAdjustmentDate, strDescription)
 SELECT a.strAdjustmentNo, c.intCompanyLocationId, a.intAdjustmentType, a.dtmDate, a.strDescription
 FROM tblICStagingAdjustment a
-	INNER JOIN tblSMCompanyLocation c ON c.strLocationName = a.strLocationName
+	INNER JOIN tblSMCompanyLocation c ON c.strLocationNumber = a.strLocationName
 
 DECLARE @intLocationId INT
 DECLARE @intAdjustmentType INT
@@ -16,6 +16,15 @@ DECLARE @strDescription NVARCHAR(200)
 DECLARE @strAdjustmentNo NVARCHAR(200)
 DECLARE @strTempAdjustmentNo NVARCHAR(200)
 DECLARE @intAdjustmentId INT
+
+DECLARE @Logs TABLE (strError NVARCHAR(500), strField NVARCHAR(100), strValue NVARCHAR(500), intLineNumber INT, intLinePosition INT, strLogLevel NVARCHAR(50))
+
+-- Log Invalid company locations
+INSERT INTO @Logs(strError, strValue, strField, intLineNumber, intLinePosition, strLogLevel)
+SELECT 'The company location no: ''' + a.strLocationName + ''' does not exists.' strError, a.strLocationName strValue, 'location' strField, a.LineNumber, a.LinePosition, 'Error'
+FROM tblSMCompanyLocation c
+RIGHT OUTER JOIN tblICStagingAdjustment a ON c.strLocationNumber = a.strLocationName
+WHERE c.intCompanyLocationId IS NULL 
 
 DECLARE cur CURSOR LOCAL FAST_FORWARD
 FOR
@@ -66,6 +75,13 @@ BEGIN
 	SET strAdjustmentNo = @strAdjustmentNo
 	WHERE intInventoryAdjustmentId = @intAdjustmentId
 
+	INSERT INTO @Logs(strError, strValue, strField, intLineNumber, intLinePosition, strLogLevel)
+	SELECT 'Can''t find the item number: "' + sad.strItemNo + '"', sad.strItemNo, 'itemNo', sad.LineNumber, sad.LinePosition, 'Warning'
+	FROM tblICItem item
+		RIGHT OUTER JOIN tblICStagingAdjustmentDetail sad ON item.strItemNo = sad.strItemNo
+	WHERE sad.strAdjustmentNo = @strTempAdjustmentNo
+		AND item.intItemId IS NULL
+
 	FETCH NEXT FROM cur INTO @strTempAdjustmentNo, @intLocationId, @intAdjustmentType, @dtmAdjustmentDate, @strDescription
 END
 
@@ -75,5 +91,7 @@ DEALLOCATE cur
 ---- Cleanup staging
 DELETE FROM tblICStagingAdjustment
 DELETE FROM tblICStagingAdjustmentDetail
+
+SELECT * FROM @Logs
 
 END

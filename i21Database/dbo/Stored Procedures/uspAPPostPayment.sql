@@ -136,7 +136,7 @@ INSERT INTO @payments
 SELECT A.intPaymentId 
 FROM #tmpPayablePostData A
 INNER JOIN tblAPPayment B ON A.intPaymentId = B.intPaymentId
-WHERE B.ysnPrepay != 1
+-- WHERE B.ysnPrepay != 1
 
 --=====================================================================================================================================
 -- 	GET ALL INVALID TRANSACTIONS

@@ -104,7 +104,7 @@ BEGIN
 		AND (Lot.intSubLocationId = @intSubLocationId OR ISNULL(@intSubLocationId, 0) = 0)
 		AND (Lot.intStorageLocationId = @intStorageLocationId OR ISNULL(@intStorageLocationId, 0) = 0)	
 		AND Item.strLotTracking <> 'No'
-		AND ((dblQty > 0 AND @ysnIncludeZeroOnHand = 0) OR (@ysnIncludeZeroOnHand = 1))
+		AND ((Transactions.dblOnHand <> 0 AND @ysnIncludeZeroOnHand = 0) OR (@ysnIncludeZeroOnHand = 1))
 END
 ELSE
 BEGIN
@@ -203,6 +203,8 @@ BEGIN
 				--AND ISNULL(stockUnit.ysnStockUnit, 0) = 0
 				AND st.intItemLocationId = il.intItemLocationId
 				AND st.intLocationId = il.intLocationId
+				AND ISNULL(st.intStorageLocationId, 0) = ISNULL(stock.intStorageLocationId, 0)
+				AND ISNULL(st.intSubLocationId, 0) = ISNULL(stock.intSubLocationId, 0)
 			GROUP BY 
 					st.intItemId,
 					st.intItemLocationId,
@@ -227,7 +229,7 @@ BEGIN
 			FROM [dbo].[fnGetItemAverageCostTable](i.intItemId, @AsOfDate)
 		) AVERAGE
 	WHERE il.intLocationId = @intLocationId
-		AND ((stock.dblOnHand > 0 AND @ysnIncludeZeroOnHand = 0) OR (@ysnIncludeZeroOnHand = 1))
+		AND ((stock.dblOnHand <> 0 AND @ysnIncludeZeroOnHand = 0) OR (@ysnIncludeZeroOnHand = 1))
 		AND (i.intCategoryId = @intCategoryId OR ISNULL(@intCategoryId, 0) = 0)
 		AND (i.intCommodityId = @intCommodityId OR ISNULL(@intCommodityId, 0) = 0)
 		AND ((@intSubLocationId IS NULL) OR (stock.intSubLocationId = @intSubLocationId OR ISNULL(@intSubLocationId, 0) = 0))

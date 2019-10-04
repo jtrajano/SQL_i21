@@ -709,6 +709,7 @@ BEGIN
 		,[strTaxExemptReason]				NVARCHAR(MAX)
 		,[dblCalculatedTax]					NUMERIC(18,6)
 		,[dblOriginalTax]					NUMERIC(18,6)
+		,[dblTaxCalculatedExemptAmount]		NUMERIC(18,6)
 	)
 	DECLARE @tblCFBackoutTax						TABLE
 	(
@@ -6086,6 +6087,17 @@ BEGIN
 	WHERE ysnInvalidSetup = 0 OR ysnInvalidSetup IS NULL
 
 
+	UPDATE @tblCFTransactionTax 
+	SET  [@tblCFTransactionTax].dblTaxCalculatedExemptAmount = [dbo].fnRoundBanker(cftx.dblTax,2)
+	FROM @tblCFCalculatedTaxExempt cftx
+	WHERE [@tblCFTransactionTax].intTaxClassId = cftx.intTaxClassId
+	AND  [@tblCFTransactionTax].intTaxCodeId = cftx.intTaxCodeId
+	AND  [@tblCFTransactionTax].ysnTaxExempt = 1 
+	AND ([@tblCFTransactionTax].ysnInvalidSetup = 0 OR  [@tblCFTransactionTax].ysnInvalidSetup IS NULL)
+	
+	
+	--select * from @tblCFTransactionTax
+
 	-------------------ZERO QTY TAX CALC------------------------
 
 	SET @dblGrossTransferCost = ISNULL(@dblTransferCost,0)
@@ -6096,7 +6108,6 @@ BEGIN
 	SET @dblNetTransferCostZeroQuantity = ISNULL(@dblGrossTransferCost,0) - (ISNULL(@totalOriginalTaxZeroQuantity,0) / ISNULL(@dblZeroQuantity,0))
 	
 
-	--select * from @tblCFTransactionTax
 
 	DECLARE @dblCalculatedGrossPrice	 numeric(18,6)
 	DECLARE @dblOriginalGrossPrice		 numeric(18,6)
@@ -6177,14 +6188,18 @@ BEGIN
 		END
 		IF(ISNULL(@ysnForceRounding,0) = 1) 
 		BEGIN
-			SELECT @dblPrice = dbo.fnCFForceRounding(@dblPrice)
+			SELECT @dblNetworkCostGrossPrice = dbo.fnCFForceRounding(@dblPrice)
+		END
+		ELSE
+		BEGIN
+			SET @dblNetworkCostGrossPrice = @dblPrice
 		END
 
-		SET @dblCalculatedGrossPrice	 = 	 @dblPrice
+		SET @dblCalculatedGrossPrice	 = 	 @dblNetworkCostGrossPrice
 		SET @dblOriginalGrossPrice		 = 	 @dblPrice
-		SET @dblCalculatedNetPrice		 = 	 ROUND(((ROUND((@dblPrice * @dblQuantity),2) - (ISNULL(@totalCalculatedTax,0))) / @dblQuantity),6)
+		SET @dblCalculatedNetPrice		 = 	 ROUND(((ROUND((@dblNetworkCostGrossPrice * @dblQuantity),2) - (ISNULL(@totalCalculatedTax,0))) / @dblQuantity),6)
 		SET @dblOriginalNetPrice		 = 	 ROUND(((ROUND((@dblPrice * @dblQuantity),2) - (ISNULL(@totalOriginalTax,0))) / @dblQuantity),6)
-		SET @dblCalculatedTotalPrice	 = 	 ROUND((@dblPrice * @dblQuantity),2)
+		SET @dblCalculatedTotalPrice	 = 	 ROUND((@dblNetworkCostGrossPrice * @dblQuantity),2)
 		SET @dblOriginalTotalPrice		 = 	 ROUND(@dblPrice * @dblQuantity,2)
 
 		SET @dblQuoteGrossPrice			 = @dblCalculatedGrossPrice
@@ -6960,6 +6975,7 @@ BEGIN
 				,dblTaxRate 
 				,intTransactionId
 				,ysnTaxExempt
+				,dblTaxCalculatedExemptAmount
 			)
 			SELECT 
 				dblCalculatedTax AS 'dblTaxCalculatedAmount'
@@ -6968,8 +6984,14 @@ BEGIN
 				,dblRate AS 'dblTaxRate'
 				,intTransactionId = @intTransactionId
 				,ysnTaxExempt
+				,dblTaxCalculatedExemptAmount
 			FROM @tblCFTransactionTax AS T
 			WHERE ysnInvalidSetup = 0 OR ysnInvalidSetup IS NULL
+
+			--UPDATE tblCFTransactionTax 
+			--SET  tblCFTransactionTax.dblTaxCalculatedExemptAmount = [dbo].fnRoundBanker(cftx.dblTax,2)
+			--FROM @tblCFCalculatedTaxExempt cftx
+			--WHERE tblCFTransactionTax.intTaxCodeId = cftx.intTaxCodeId
 			---------------------------------------------------------------------------
 
 			UPDATE tblCFTransaction
@@ -6977,6 +6999,7 @@ BEGIN
 			dblCalculatedTotalTax		= (SELECT SUM(ISNULL(dblCalculatedTax,0)) FROM @tblCFTransactionTax WHERE ysnInvalidSetup = 0 OR ysnInvalidSetup IS NULL)
 			,dblOriginalTotalTax		= (SELECT SUM(ISNULL(dblOriginalTax,0)) FROM @tblCFTransactionTax WHERE ysnInvalidSetup = 0 OR ysnInvalidSetup IS NULL)
 			WHERE tblCFTransaction.intTransactionId = @intTransactionId
+
 
 			--DELETE tblCFTransactionPrice WHERE intTransactionId = @intTransactionId
 
@@ -7164,6 +7187,7 @@ BEGIN
 					,intTaxCodeId
 					,dblTaxRate
 					,ysnTaxExempt
+					,dblTaxCalculatedExemptAmount
 				)
 				SELECT
 					 @overfillId
@@ -7172,9 +7196,15 @@ BEGIN
 					,intTaxCodeId
 					,dblTaxRate
 					,ysnTaxExempt
+					,dblTaxCalculatedExemptAmount
 				FROM
 				tblCFTransactionTax
 				WHERE intTransactionId = @intTransactionId
+
+				--UPDATE tblCFTransactionTax 
+				--SET  tblCFTransactionTax.dblTaxCalculatedExemptAmount = [dbo].fnRoundBanker(cftx.dblTax,2)
+				--FROM @tblCFCalculatedTaxExempt cftx
+				--WHERE tblCFTransactionTax.intTaxCodeId = cftx.intTaxCodeId
 
 
 				UPDATE tblCFTransaction
@@ -7548,6 +7578,7 @@ BEGIN
 				,strTaxGroup
 				,strCalculationMethod
 				,ysnTaxExempt
+				,dblTaxCalculatedExemptAmount
 				)
 				SELECT 
 				 ISNULL(dblCalculatedTax,0) AS 'dblTaxCalculatedAmount'
@@ -7559,6 +7590,7 @@ BEGIN
 				,(SELECT TOP 1 strTaxGroup FROM tblSMTaxGroup WHERE intTaxGroupId = T.intTaxGroupId) as 'strTaxGroup'
 				,strCalculationMethod
 				,ysnTaxExempt
+				,dblTaxCalculatedExemptAmount
 				FROM @tblCFTransactionTax AS T
 				WHERE ysnInvalidSetup = 0 OR ysnInvalidSetup IS NULL
 			END
@@ -7575,6 +7607,7 @@ BEGIN
 				,strTaxGroup
 				,strCalculationMethod
 				,ysnTaxExempt
+				--,dblTaxCalculatedExemptAmount
 				)
 				SELECT 
 				 ISNULL(dblCalculatedTax,0) / @dblZeroQuantity AS 'dblTaxCalculatedAmount'
@@ -7586,6 +7619,7 @@ BEGIN
 				,(SELECT TOP 1 strTaxGroup FROM tblSMTaxGroup WHERE intTaxGroupId = T.intTaxGroupId) as 'strTaxGroup'
 				,strCalculationMethod
 				,ysnTaxExempt
+				--,dblTaxCalculatedExemptAmount
 				FROM @tblCFTransactionTaxZeroQuantity AS T
 				WHERE ISNULL(ysnInvalidSetup,0) = 0 AND ISNULL(ysnTaxExempt,0) = 0
 			END
@@ -7599,6 +7633,7 @@ BEGIN
 			,dblRate AS 'dblTaxRate'
 			,(SELECT TOP 1 strTaxCode FROM tblSMTaxCode WHERE intTaxCodeId = T.intTaxCodeId) AS 'strTaxCode'
 			,ysnTaxExempt
+			,dblTaxCalculatedExemptAmount
 			FROM @tblCFTransactionTax AS T
 			WHERE ysnInvalidSetup = 0 OR ysnInvalidSetup IS NULL
 

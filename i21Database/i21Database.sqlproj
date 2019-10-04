@@ -7687,6 +7687,8 @@
     <Build Include="dbo\Stored Procedures\uspRKPositionReconciliationReportDerivativeActivity.sql" />
     <Build Include="dbo\Stored Procedures\uspRKPositionReconciliationReportBasisDeliveries.sql" />
     <Build Include="dbo\Views\vyuMFGetSalesOrderDetail.sql" />
+    <Build Include="dbo\Functions\fnCTGetAvailablePriceQuantity.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPConvertPaymentToPrepay.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

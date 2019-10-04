@@ -111,28 +111,27 @@ SELECT
 		
 		-- Bank and company info related fields
 		,strCompanyName = COMPANY.strCompanyName 
-		,strCompanyAddress = ''
-		,strBank = CASE
-						WHEN ISNULL([dbo].fnCMGetBankAccountMICR(CHK.intBankAccountId,CHK.strReferenceNo),'') <> '' THEN 
-							BNK.strBankName
-						ELSE
-							NULL
+		,strCompanyAddress =	CASE WHEN COMPANY.strCompanyAddress <> ''
+								THEN COMPANY.strCompanyAddress
+								ELSE NULL
+								END
+		,strBank =	CASE WHEN MICR.strText <> '' 
+					THEN BNK.strBankName 
+					ELSE NULL 
 					END
-		,strBankAddress =  CASE	
-									WHEN ISNULL(dbo.fnConvertToFullAddress(BNK.strAddress, BNK.strCity, BNK.strState, BNK.strZipCode), '') <> '' AND ISNULL([dbo].fnCMGetBankAccountMICR(CHK.intBankAccountId,CHK.strReferenceNo),'') <> ''  THEN 
-										dbo.fnConvertToFullAddress(BNK.strAddress, BNK.strCity, BNK.strState, BNK.strZipCode) + CHAR(13) + BNKACCNT.strFractionalRoutingNumber
-									ELSE 
-										NULL
+		,strBankAddress =	CASE WHEN BANK.strAddress <> '' AND MICR.strText <> ''  
+							THEN BANK.strAddress + CHAR(13) + BNKACCNT.strFractionalRoutingNumber
+							ELSE NULL
 							END
 							
 		--MICR setup					
-		,strMICR = [dbo].fnCMGetBankAccountMICR(CHK.intBankAccountId,CHK.strReferenceNo)
+		,strMICR = MICR.strText
 		,BNKACCNT.strUserDefineMessage
 		,BNKACCNT.strSignatureLineCaption
-		,ysnShowTwoSignatureLine = CONVERT(bit,CASE WHEN BNKACCNT.ysnShowTwoSignatureLine = 1 AND CHK.dblAmount >  BNKACCNT.dblGreaterThanAmount THEN 1 ELSE 0 END)
+		,ysnShowTwoSignatureLine = CONVERT(BIT,CASE WHEN BNKACCNT.ysnShowTwoSignatureLine = 1 AND CHK.dblAmount >  BNKACCNT.dblGreaterThanAmount THEN 1 ELSE 0 END)
 
-		,ysnShowFirstSignature = CONVERT(bit,CASE WHEN BNKACCNT.ysnShowFirstSignature = 1 AND CHK.dblAmount >  BNKACCNT.dblFirstAmountIsOver THEN 1 ELSE 0 END)
-		,ysnShowSecondSignature = CONVERT(bit,CASE WHEN BNKACCNT.ysnShowSecondSignature = 1 AND CHK.dblAmount >  BNKACCNT.dblSecondAmountIsOver THEN 1 ELSE 0 END)
+		,ysnShowFirstSignature = CONVERT(BIT,CASE WHEN BNKACCNT.ysnShowFirstSignature = 1 AND CHK.dblAmount >  BNKACCNT.dblFirstAmountIsOver THEN 1 ELSE 0 END)
+		,ysnShowSecondSignature = CONVERT(BIT,CASE WHEN BNKACCNT.ysnShowSecondSignature = 1 AND CHK.dblAmount >  BNKACCNT.dblSecondAmountIsOver THEN 1 ELSE 0 END)
 		,blbFirstSignatureDetail = (SELECT TOP 1 blbDetail FROM tblSMSignature WHERE intSignatureId = BNKACCNT.intFirstSignatureId)
 		,blbSecondSignatureDetail = (SELECT TOP 1 blbDetail FROM tblSMSignature WHERE intSignatureId = BNKACCNT.intSecondSignatureId)
 		
@@ -147,19 +146,17 @@ SELECT
 		,CHK.ysnCheckVoid
 		,BNKACCNT.intPayToDown
 FROM	dbo.tblCMBankTransaction CHK 
-		INNER JOIN tblCMBankAccount BNKACCNT
-			ON BNKACCNT.intBankAccountId = CHK.intBankAccountId
-		INNER JOIN tblCMBank BNK
-			ON BNK.intBankId = BNKACCNT.intBankId
-		LEFT JOIN tblAPPayment PYMT
-			ON CHK.strTransactionId = PYMT.strPaymentRecordNum
-		LEFT JOIN tblAPVendor VENDOR
-			ON VENDOR.[intEntityId] = ISNULL(PYMT.[intEntityVendorId], CHK.intEntityId)
-		LEFT JOIN tblEMEntity ENTITY
-			ON VENDOR.[intEntityId] = ENTITY.intEntityId
-		LEFT JOIN [tblEMEntityLocation] LOCATION
-			ON VENDOR.[intEntityId] = LOCATION.intEntityId AND ysnDefaultLocation = 1 
-		OUTER APPLY( SElECT TOP 1 strCompanyName FROM tblSMCompanySetup) COMPANY
+		INNER JOIN tblCMBankAccount BNKACCNT ON BNKACCNT.intBankAccountId = CHK.intBankAccountId
+		INNER JOIN tblCMBank BNK ON BNK.intBankId = BNKACCNT.intBankId
+		LEFT JOIN tblAPPayment PYMT ON CHK.strTransactionId = PYMT.strPaymentRecordNum
+		LEFT JOIN tblAPVendor VENDOR ON VENDOR.[intEntityId] = ISNULL(PYMT.[intEntityVendorId], CHK.intEntityId)
+		LEFT JOIN tblEMEntity ENTITY ON VENDOR.[intEntityId] = ENTITY.intEntityId
+		LEFT JOIN [tblEMEntityLocation] LOCATION ON VENDOR.[intEntityId] = LOCATION.intEntityId AND ysnDefaultLocation = 1 
+		OUTER APPLY (SElECT TOP 1 strCompanyName,ISNULL(dbo.fnConvertToFullAddress(strAddress,strCity,strState,strZip),'') strCompanyAddress FROM tblSMCompanySetup) COMPANY
+		OUTER APPLY (SELECT ISNULL(dbo.fnCMGetBankAccountMICR(CHK.intBankAccountId,CHK.strReferenceNo),'') strText) MICR
+		OUTER APPLY (SELECT ISNULL(dbo.fnConvertToFullAddress(BNK.strAddress, BNK.strCity, BNK.strState, BNK.strZipCode), '') strAddress) BANK
+		OUTER APPLY (SELECT ISNULL(dbo.fnConvertToFullAddress(CHK.strAddress, CHK.strCity, CHK.strState, CHK.strZipCode), '') strAddress) CHEK
+		OUTER APPLY (SELECT ISNULL(dbo.fnConvertToFullAddress(LOCATION.strAddress, LOCATION.strCity, LOCATION.strState, LOCATION.strZipCode), '') strAddress) LOC
 		OUTER APPLY
 		(
 			SELECT LTRIM(RTRIM(REPLACE(CHK.strAmountInWords, '*', ''))) + REPLICATE(' *', (100 - LEN(LTRIM(RTRIM(REPLACE(CHK.strAmountInWords, '*', '')))))/2) Val
@@ -196,9 +193,9 @@ FROM	dbo.tblCMBankTransaction CHK
 			SELECT 
 			CASE WHEN ISNULL(PYMT.ysnOverrideCheckPayee, 0) = 0
 				THEN 
-				CASE WHEN ISNULL(dbo.fnConvertToFullAddress(CHK.strAddress, CHK.strCity, CHK.strState, CHK.strZipCode), '') <> ''  
-				THEN dbo.fnConvertToFullAddress(CHK.strAddress, CHK.strCity, CHK.strState, CHK.strZipCode)
-				ELSE dbo.fnConvertToFullAddress(LOCATION.strAddress, LOCATION.strCity, LOCATION.strState, LOCATION.strZipCode)
+				CASE WHEN CHEK.strAddress <> ''  
+				THEN CHEK.strAddress
+				ELSE LOC.strAddress
 				END
 			ELSE
 				''
