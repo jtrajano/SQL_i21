@@ -7957,6 +7957,7 @@
     <Build Include="dbo\Tables\tblICDataSource.sql" />
     <None Include="Scripts\Post-Deployment\IC\19_InventoryDataSource.sql" />
     <None Include="Scripts\Post-Deployment\IC\20_Remove_Duplicate_UPCs.sql" />
+    <None Include="Scripts\Post-Deployment\IC\21_Refresh_IR_Details.sql" />
     <Build Include="dbo\Stored Procedures\uspICAddItemUOMForCStore.sql" />
     <Build Include="dbo\Functions\fnUPCAtoUPCE.sql" />
     <Build Include="dbo\Stored Procedures\uspICAddItemLocationForCStore.sql" />
