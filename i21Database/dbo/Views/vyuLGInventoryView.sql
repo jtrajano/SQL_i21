@@ -1,6 +1,6 @@
 ﻿CREATE VIEW vyuLGInventoryView
 AS 
-SELECT ROW_NUMBER() OVER (ORDER BY intContractDetailId DESC) as intKeyColumn,*  
+SELECT CAST(ROW_NUMBER() OVER (ORDER BY intContractDetailId DESC) AS INT) as intKeyColumn,*  
 FROM (
 	SELECT
 		'In-transit' COLLATE Latin1_General_CI_AS AS strStatus
