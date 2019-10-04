@@ -1931,6 +1931,7 @@ BEGIN TRY
 
 					IF @intPricingTypeId = 5
 					BEGIN
+						IF (SELECT dblDetailQuantity FROM vyuCTContractDetailView WHERE intContractDetailId = @intContractDetailId) > 0
 						EXEC uspCTUpdateSequenceQuantityUsingUOM 
 							 @intContractDetailId = @intContractDetailId
 							,@dblQuantityToUpdate = @dblUnits
