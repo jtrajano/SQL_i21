@@ -1,58 +1,1 @@
-﻿CREATE VIEW [dbo].[vyuSTGetHandheldScannerImportCount]
-AS
-SELECT IC.intHandheldScannerImportCountId
-	, IC.intHandheldScannerId
-	, HS.intStoreId
-	, Store.intStoreNo
-	, Store.intCompanyLocationId
-	, IC.strUPCNo
-	, IC.intItemId
-	, Item.strItemNo
-	, strDescription = CASE 
-							WHEN ISNULL(IC.intItemId, '') != '' 
-								THEN Item.strDescription 
-							ELSE 'UPC Not Found!' 
-					END
-	--, ItemUOM.intItemUOMId
-	, intItemUOMId = CASE
-						WHEN ISNULL(ItemUOM.intItemUOMId, '') != ''
-							THEN ItemUOM.intItemUOMId
-						WHEN ISNULL(IC.intItemId, '') != '' AND ISNULL(ItemUOM.intItemUOMId, '') = ''
-							THEN (SELECT intItemUOMId FROM tblICItemUOM WHERE intItemId = IC.intItemId AND ysnStockUnit = CAST(1 AS BIT))
-						ELSE NULL
-					END
-	--, strUnitMeasure = CASE WHEN ISNULL(ItemUOM.intItemUOMId, '') != '' THEN UOM.strUnitMeasure ELSE 'UPC Not Found!' END
-	, strUnitMeasure = CASE 
-							WHEN ISNULL(ItemUOM.intItemUOMId, '') != '' 
-								THEN UOM.strUnitMeasure 
-							WHEN ISNULL(IC.intItemId, '') != '' AND ISNULL(ItemUOM.intItemUOMId, '') = '' 
-								THEN (
-										SELECT strUnitMeasure 
-										FROM tblICUnitMeasure 
-										WHERE intUnitMeasureId = (
-																	SELECT intUnitMeasureId
-																	FROM tblICItemUOM
-																	WHERE intItemId = IC.intItemId 
-																	AND ysnStockUnit = CAST(1 AS BIT)
-																 )
-									 )
-							ELSE 'UPC Not Found!' END
-	, IC.dblCountQty
-	, IL.intItemLocationId
-FROM tblSTHandheldScannerImportCount IC
-LEFT JOIN tblSTHandheldScanner HS 
-	ON HS.intHandheldScannerId = IC.intHandheldScannerId
-LEFT JOIN tblSTStore Store 
-	ON Store.intStoreId = HS.intStoreId
-LEFT JOIN tblICItem Item 
-	ON Item.intItemId = IC.intItemId
-LEFT JOIN tblICItemLocation IL
-	ON Item.intItemId = IL.intItemId
-	AND Store.intCompanyLocationId = IL.intLocationId
-LEFT JOIN tblICItemUOM ItemUOM 
-	ON ItemUOM.intItemId = Item.intItemId 
-		AND CAST(ItemUOM.intUpcCode AS FLOAT) = CONVERT(NUMERIC(32, 0),CAST(IC.strUPCNo AS FLOAT))
-		-- Note: http://jira.irelyserver.com/browse/ST-1538
-		--AND ItemUOM.strLongUPCCode = IC.strUPCNo
-LEFT JOIN tblICUnitMeasure UOM 
-	ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
+﻿CREATE VIEW [dbo].[vyuSTGetHandheldScannerImportCount]ASSELECT IC.intHandheldScannerImportCountId	, IC.intHandheldScannerId	, HS.intStoreId	, Store.intStoreNo	, Store.intCompanyLocationId	--, IL.intLocationId	, IC.strUPCNo	, IC.intItemId	, Item.strItemNo	--, intUpcCode = CONVERT(NUMERIC(32, 0),CAST(IC.strUPCNo AS FLOAT))	, strDescription = CASE 						WHEN (ISNULL(IC.intItemId, '') != '')							THEN Item.strDescription 						WHEN EXISTS(SELECT TOP 1 1 FROM tblICItemUOM _uom WHERE CAST(_uom.intUpcCode AS FLOAT) = CONVERT(NUMERIC(32, 0),CAST(IC.strUPCNo AS FLOAT)))							THEN 'UPC Not Found on Store Location ' + cl.strLocationName						ELSE 'UPC Not Found!'					END	, intItemUOMId = CASE						WHEN ISNULL(ItemUOM.intItemUOMId, '') != ''							THEN ItemUOM.intItemUOMId						WHEN ISNULL(IC.intItemId, '') != '' AND ISNULL(ItemUOM.intItemUOMId, '') = ''							THEN (SELECT intItemUOMId FROM tblICItemUOM WHERE intItemId = IC.intItemId AND ysnStockUnit = CAST(1 AS BIT))						ELSE NULL					END	--, strUnitMeasure = CASE WHEN ISNULL(ItemUOM.intItemUOMId, '') != '' THEN UOM.strUnitMeasure ELSE 'UPC Not Found!' END	, strUnitMeasure = CASE 							WHEN ISNULL(ItemUOM.intItemUOMId, '') != '' 								THEN UOM.strUnitMeasure 							WHEN ISNULL(IC.intItemId, '') != '' AND ISNULL(ItemUOM.intItemUOMId, '') = '' 								THEN (										SELECT strUnitMeasure 										FROM tblICUnitMeasure 										WHERE intUnitMeasureId = (																	SELECT intUnitMeasureId																	FROM tblICItemUOM																	WHERE intItemId = IC.intItemId 																		AND ysnStockUnit = CAST(1 AS BIT)																)									)							ELSE 'UPC Not Found!' 					END	, IC.dblCountQty	, IL.intItemLocationIdFROM tblSTHandheldScannerImportCount ICINNER JOIN tblSTHandheldScanner HS 	ON HS.intHandheldScannerId = IC.intHandheldScannerIdINNER JOIN tblSTStore Store 	ON Store.intStoreId = HS.intStoreIdINNER JOIN tblSMCompanyLocation cl	ON Store.intCompanyLocationId = cl.intCompanyLocationIdLEFT JOIN tblICItem Item 	ON Item.intItemId = IC.intItemIdLEFT JOIN tblICItemLocation IL	ON Item.intItemId = IL.intItemId		AND Store.intCompanyLocationId = IL.intLocationIdLEFT JOIN tblICItemUOM ItemUOM 	ON ItemUOM.intItemId = Item.intItemId 		AND CAST(ItemUOM.intUpcCode AS FLOAT) = CONVERT(NUMERIC(32, 0),CAST(IC.strUPCNo AS FLOAT))		-- Note: http://jira.irelyserver.com/browse/ST-1538		--AND ItemUOM.strLongUPCCode = IC.strUPCNoLEFT JOIN tblICUnitMeasure UOM 	ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId--SELECT * FROM tblICItemUOM--WHERE intUpcCode IN (89530100118)--DECLARE @strUpc NVARCHAR(50) = '89530100118'--SELECT TOP 1 1 FROM tblICItemUOM _uom WHERE CAST(_uom.intUpcCode AS FLOAT) = CONVERT(NUMERIC(32, 0),CAST(@strUpc AS FLOAT))
