@@ -750,6 +750,7 @@
     <Build Include="dbo\Tables\tblICCommodityAccount.sql" />
     <Build Include="dbo\Tables\tblICInventoryReceipt.sql" />
     <Build Include="dbo\Tables\tblICInventoryReceiptItem.sql" />
+    <Build Include="dbo\Tables\tblICInventoryReceiptDetailSearch.sql" />
     <Build Include="dbo\Tables\tblPOPurchase.sql" />
     <Build Include="dbo\Tables\tblPOPurchaseDetail.sql" />
     <Build Include="dbo\Tables\tblICInventoryReceiptInspection.sql" />
@@ -1074,6 +1075,9 @@
       <SuppressTSqlWarnings>71005</SuppressTSqlWarnings>
     </Build>
     <Build Include="dbo\Views\vyuICGetReceiptItemSource.sql" />
+    <Build Include="dbo\Views\vyuICGetReceiptItemSourceSearch.sql" />
+    <Build Include="dbo\Views\vyuICLoadContainers.sql" />
+    <Build Include="dbo\Views\vyuICLoadContainersSearch.sql" />
     <Build Include="dbo\Tables\tblHDAnnouncementType.sql" />
     <Build Include="dbo\Tables\tblHDAnnouncement.sql" />
     <Build Include="dbo\Tables\tblHDProject.sql" />
@@ -2456,6 +2460,7 @@
     <Build Include="dbo\Tables\tblPREmployeeEarningDistribution.sql" />
     <Build Include="dbo\Stored Procedures\uspICInventoryReceiptAfterSave.sql" />
     <Build Include="dbo\Stored Procedures\uspICInventoryReceiptCalculateTotals.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUpdateInventoryReceiptDetail.sql" />
     <Build Include="dbo\Tables\tblARImportFile.sql" />
     <Build Include="dbo\Tables\tblARImportLog.sql" />
     <Build Include="dbo\Tables\tblARImportLogDetail.sql" />

@@ -2133,6 +2133,9 @@ BEGIN
 	DEALLOCATE loopDataForReceiptHeader;	
 END
 
+-- Update Search Details
+EXEC dbo.uspICUpdateInventoryReceiptDetail @inventoryReceiptId
+
 IF @@TRANCOUNT > 0
 BEGIN 
 	COMMIT TRAN @TransactionName
