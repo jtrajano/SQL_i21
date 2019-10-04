@@ -281,7 +281,7 @@ BEGIN TRY
 											THEN	ISNULL(dblSeqFutures,0)
 											ELSE	ISNULL(CD.dblCashPrice,0)
 									END,
-				@dblAvailable	=	CASE	WHEN	@UseScheduleForAvlCalc = 1 OR @intContractDetailId <> @intTicketContractDetailId
+				@dblAvailable	=	CASE	WHEN	@UseScheduleForAvlCalc = 1 --OR @intContractDetailId <> @intTicketContractDetailId
 											THEN	dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,@intScaleUOMId,ISNULL(CD.dblBalance,0) - ISNULL(CD.dblScheduleQty,0))
 											ELSE	dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,@intScaleUOMId,ISNULL(CD.dblBalance,0))
 									END,
@@ -398,7 +398,7 @@ BEGIN TRY
 				IF(@strDistributionOption = 'LOD')
 				BEGIN
 				
-					IF(@intContractDetailId = @intTicketContractDetailId)
+					IF(@intContractDetailId = @intTicketContractDetailId OR @intLoadDetailId IS NOT NULl)
 					BEGIN
 						SET @dblInreaseSchBy  = @dblAvailable - @dblScheduleQty
 					END
@@ -444,7 +444,8 @@ BEGIN TRY
 
 			INSERT INTO @LoadDetailUsedId
 			SELECT @intLoadDetailId
-
+			WHERE NOT EXISTS(SELECT TOP 1 1 FROM @LoadDetailUsedId WHERE intId = @intLoadDetailId)
+	
 			IF(EXISTS(SELECT TOP 1 1 FROM @LoadDetailTable))
 			BEGIN
 				DELETE FROM @LoadDetailTable
@@ -519,13 +520,13 @@ BEGIN TRY
 	
 	UPDATE	@Processed SET dblUnitsRemaining = @dblNetUnits
 
-	IF(		SELECT	MAX(dblUnitsRemaining) 
-			FROM	@Processed	PR
-			JOIN	tblCTContractDetail	CD	ON	CD.intContractDetailId	=	PR.intContractDetailId
-			WHERE	ISNULL(ysnIgnore,0) <> 1) > 0 AND @ysnAutoDistribution = 1
-	BEGIN
-		RAISERROR ('The entire ticket quantity can not be applied to the contract.',16,1,'WITH NOWAIT') 
-	END
+	-- IF(		SELECT	MAX(dblUnitsRemaining) 
+	-- 		FROM	@Processed	PR
+	-- 		JOIN	tblCTContractDetail	CD	ON	CD.intContractDetailId	=	PR.intContractDetailId
+	-- 		WHERE	ISNULL(ysnIgnore,0) <> 1) > 0 AND @ysnAutoDistribution = 1
+	-- BEGIN
+	-- 	RAISERROR ('The entire ticket quantity can not be applied to the contract.',16,1,'WITH NOWAIT') 
+	-- END
 	
 	SELECT	PR.intContractDetailId,
 			PR.dblUnitsDistributed,
