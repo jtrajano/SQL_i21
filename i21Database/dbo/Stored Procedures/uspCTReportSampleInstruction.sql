@@ -127,7 +127,7 @@ BEGIN TRY
 		FROM	tblCTContractHeader				CH
 		JOIN	vyuCTEntity						EY	WITH (NOLOCK)	ON	EY.intEntityId		=	CH.intEntityId	
 																	AND	EY.strEntityType	=	(CASE WHEN CH.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END)
-LEFT	JOIN	tblCTBookVsEntity				BE	WITH (NOLOCK)	ON	BE.intBookId		=	CH.intBookId
+LEFT	JOIN	tblCTBookVsEntity				BE	WITH (NOLOCK)	ON	BE.intBookId		=	CH.intBookId AND BE.intEntityId = CH.intEntityId
 LEFT	JOIN	vyuCTEntity						EV	WITH (NOLOCK)	ON	EV.intEntityId		=	BE.intEntityId        
 																	AND EV.strEntityType	IN	('Vendor', 'Customer')
 LEFT	JOIN	tblICCommodityUnitMeasure		CU	WITH (NOLOCK)	ON	CU.intCommodityUnitMeasureId	=	CH.intCommodityUOMId		

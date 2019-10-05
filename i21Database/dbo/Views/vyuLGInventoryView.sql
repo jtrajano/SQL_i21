@@ -1,6 +1,6 @@
 ﻿CREATE VIEW vyuLGInventoryView
 AS 
-SELECT TOP 100 percent Convert(int, ROW_NUMBER() OVER (ORDER BY strStatus)) as intKeyColumn,*  
+SELECT CAST(ROW_NUMBER() OVER (ORDER BY intContractDetailId DESC) AS INT) as intKeyColumn,*  
 FROM (
 	SELECT
 		'In-transit' COLLATE Latin1_General_CI_AS AS strStatus
@@ -94,9 +94,9 @@ FROM (
 	LEFT JOIN tblSMCurrency	CY ON CY.intCurrencyID = CU.intMainCurrencyId
 	WHERE (Shipment.dblContainerContractQty - IsNull(Shipment.dblContainerContractReceivedQty, 0.0)) > 0.0 
 	   AND Shipment.ysnInventorized = 1
-	   AND Shipment.intLoadId NOT IN (SELECT intLoadId FROM tblARInvoice)
+	   AND Shipment.intLoadDetailId NOT IN (SELECT intLoadDetailId FROM tblARInvoiceDetail)
 
-	UNION ALL
+	UNION
 
 	SELECT 
 		'Spot' COLLATE Latin1_General_CI_AS AS strStatus
@@ -173,7 +173,7 @@ FROM (
 	LEFT JOIN tblSMCurrency	CY ON CY.intCurrencyID = CU.intMainCurrencyId
 	WHERE Spot.dblQty > 0.0
 
-	UNION ALL
+	UNION
 
 	--Drop Ship
 	SELECT 
