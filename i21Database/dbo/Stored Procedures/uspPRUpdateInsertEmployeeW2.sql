@@ -18,6 +18,22 @@ FROM vyuPRPaycheckDeduction PD INNER JOIN tblPRTypeDeduction TD
 WHERE intEntityEmployeeId = @intEntityEmployeeId AND YEAR(PD.dtmPayDate) = @intYear AND PD.ysnVoid = 0
 GROUP BY PD.intEntityEmployeeId, YEAR(PD.dtmPayDate), TD.strW2Code
 
+DECLARE @tmpPayCheckTax TABLE
+		(
+		 dblTaxableAmount [numeric](18, 6) NULL
+		 ,strCalculationType [nvarchar](50)
+		 ,intPaycheckId INT
+		 ,intTypeTaxStateId INT NULL
+		 ,[strVal1] [nvarchar](75) COLLATE Latin1_General_CI_AS NULL
+		 ,[strVal2] [nvarchar](75) COLLATE Latin1_General_CI_AS NULL
+		 ,[strVal3] [nvarchar](75) COLLATE Latin1_General_CI_AS NULL
+		)		
+
+		INSERT INTO @tmpPayCheckTax(dblTaxableAmount,strCalculationType,intPaycheckId, intTypeTaxStateId,strVal1,strVal2,strVal3 )
+		SELECT MAX(dblTaxableAmount),strCalculationType,intPaycheckId,intTypeTaxStateId,strVal1	,strVal2,strVal3 FROM  vyuPRPaycheckTax 
+		WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND ysnVoid = 0
+		GROUP BY intPaycheckId , strCalculationType,intPaycheckId,intTypeTaxStateId,strVal1,strVal2,strVal3
+
 /* Check if Employee W-2 for the Year exists */
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblPREmployeeW2 WHERE intYear = @intYear AND intEntityEmployeeId = @intEntityEmployeeId)
 BEGIN
@@ -64,7 +80,7 @@ BEGIN
 		@intEntityEmployeeId
 		,@intYear
 		,strControlNumber = ''
-		,dblAdjustedGross = ISNULL(TXBLFIT.dblTotal, 0)
+		,dblAdjustedGross  =  ISNULL(TXBLFIT.dblTotal,0)
 		,dblFIT = ISNULL(FIT.dblTotal, 0)
 		,dblTaxableSS = ISNULL(TXBLSS.dblTotal, 0) - (ISNULL(TXBLSS.dblTotal, 0) * TIPS.dblTipsPercent)
 		,dblTaxableMed = ISNULL(TXBLMED.dblTotal, 0)
@@ -121,17 +137,22 @@ BEGIN
 		,intConcurrencyId = 1
 	FROM 
 		/* Taxable Amount */
-		(SELECT dblTotal = SUM(dblTaxableAmount) FROM vyuPRPaycheckTax WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strPaidBy = 'Employee' AND strCalculationType = 'USA Federal Tax' AND ysnVoid = 0) [TXBLFIT] OUTER APPLY
-		(SELECT dblTotal = SUM(dblTaxableAmount) FROM vyuPRPaycheckTax WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strPaidBy = 'Employee' AND strCalculationType = 'USA Social Security' AND ysnVoid = 0) [TXBLSS] OUTER APPLY
-		(SELECT dblTotal = SUM(dblTaxableAmount) FROM vyuPRPaycheckTax WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strPaidBy = 'Employee' AND strCalculationType = 'USA Medicare' AND ysnVoid = 0) [TXBLMED] OUTER APPLY
-		(SELECT dblTotal = SUM(dblTaxableAmount) FROM vyuPRPaycheckTax WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strPaidBy = 'Employee' AND strCalculationType = 'USA State' AND ysnVoid = 0 
-				AND (intTypeTaxStateId NOT IN (41, 45) OR ((intTypeTaxStateId = 41 AND strVal1 = 'None' AND strVal2 = 'None') OR (intTypeTaxStateId = 45 AND strVal2 = 'None (None)' AND strVal3 = 'None (None)')))) TXBLSTATE OUTER APPLY
-		(SELECT dblTotal = SUM(dblTaxableAmount) FROM vyuPRPaycheckTax WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strPaidBy = 'Employee' AND strCalculationType = 'USA Local' AND ysnVoid = 0) TXBLLOCAL OUTER APPLY
-		(SELECT dblTotal = SUM(dblTaxableAmount) FROM vyuPRPaycheckTax WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strPaidBy = 'Employee' AND (strCalculationType = 'USA State' 
-			AND ((intTypeTaxStateId = 41 AND strVal1 <> 'None') OR (intTypeTaxStateId = 45 AND strVal2 <> 'None (None)'))) AND ysnVoid = 0) TXBLSCHOOL OUTER APPLY
-		(SELECT dblTotal = SUM(dblTaxableAmount) FROM vyuPRPaycheckTax WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strPaidBy = 'Employee' AND (strCalculationType = 'USA State' 
-			AND ((intTypeTaxStateId = 41 AND strVal2 <> 'None') OR (intTypeTaxStateId = 45 AND strVal3 <> 'None (None)'))) AND ysnVoid = 0) TXBLMUNI OUTER APPLY
+		(SELECT dblTotal = SUM(dblTaxableAmount) FROM @tmpPayCheckTax WHERE strCalculationType = 'USA Federal Tax') [TXBLFIT] OUTER APPLY
+		(SELECT dblTotal = SUM(dblTaxableAmount) FROM @tmpPayCheckTax WHERE strCalculationType = 'USA Social Security') [TXBLSS] OUTER APPLY
+		(SELECT dblTotal = SUM(dblTaxableAmount) FROM @tmpPayCheckTax WHERE strCalculationType = 'USA Medicare' ) [TXBLMED] OUTER APPLY
 		
+		(SELECT dblTotal = SUM(dblTaxableAmount) FROM @tmpPayCheckTax WHERE strCalculationType = 'USA State' 
+				AND (intTypeTaxStateId NOT IN (41, 45) OR ((intTypeTaxStateId = 41 AND strVal1 = 'None' AND strVal2 = 'None') 
+					OR (intTypeTaxStateId = 45 AND strVal2 = 'None (None)' AND strVal3 = 'None (None)')))) TXBLSTATE OUTER APPLY
+		
+		(SELECT dblTotal = SUM(dblTaxableAmount) FROM @tmpPayCheckTax WHERE strCalculationType = 'USA Local' ) TXBLLOCAL OUTER APPLY
+		
+		(SELECT dblTotal = SUM(dblTaxableAmount) FROM @tmpPayCheckTax WHERE (strCalculationType = 'USA State' 	AND ((intTypeTaxStateId = 41 AND strVal1 <> 'None') 
+																											OR (intTypeTaxStateId = 45 AND strVal2 <> 'None (None)'))) ) TXBLSCHOOL OUTER APPLY
+		
+		(SELECT dblTotal = SUM(dblTaxableAmount) FROM @tmpPayCheckTax WHERE (strCalculationType = 'USA State' AND ((intTypeTaxStateId = 41 AND strVal2 <> 'None') 
+																											OR (intTypeTaxStateId = 45 AND strVal3 <> 'None (None)'))) ) TXBLMUNI OUTER APPLY
+				
 		/* Tips Percentage */
 		(SELECT dblTipsPercent = CASE WHEN ((ISNULL(E2.dblTotal, 0) - ISNULL(D1.dblTotal, 0)) / (ISNULL(E1.dblTotal, 0) - ISNULL(D1.dblTotal, 0)) > 0)
 										THEN (ISNULL(E2.dblTotal, 0) - ISNULL(D1.dblTotal, 0)) / (ISNULL(E1.dblTotal, 0) - ISNULL(D1.dblTotal, 0)) ELSE 0 END
@@ -141,7 +162,7 @@ BEGIN
 		) [TIPS] OUTER APPLY
 
 		/* Tax Amounts */
-		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckTax WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strCalculationType = 'USA Federal Tax' AND ysnVoid = 0) FIT OUTER APPLY
+		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckTax WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strPaidBy = 'Employee' AND strCalculationType = 'USA Federal Tax' AND ysnVoid = 0) FIT OUTER APPLY
 		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckTax WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strPaidBy = 'Employee' AND strCalculationType = 'USA Social Security' AND ysnVoid = 0) SSTAX OUTER APPLY
 		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckTax WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strPaidBy = 'Employee' AND strCalculationType = 'USA Medicare' AND ysnVoid = 0) MEDTAX OUTER APPLY
 		(SELECT intRank = DENSE_RANK() OVER (ORDER BY st.strCode), strState = st.strCode, strEmployerStateTaxID, dblTotal = SUM(tax.dblTotal) 
@@ -262,16 +283,22 @@ BEGIN
 		,intConcurrencyId = 1
 	FROM 
 		/* Taxable Amount */
-		(SELECT dblTotal = SUM(dblTaxableAmount) FROM vyuPRPaycheckTax WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strPaidBy = 'Employee' AND strCalculationType = 'USA Federal Tax' AND ysnVoid = 0) [TXBLFIT] OUTER APPLY
-		(SELECT dblTotal = SUM(dblTaxableAmount) FROM vyuPRPaycheckTax WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strPaidBy = 'Employee' AND strCalculationType = 'USA Social Security' AND ysnVoid = 0) [TXBLSS] OUTER APPLY
-		(SELECT dblTotal = SUM(dblTaxableAmount) FROM vyuPRPaycheckTax WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strPaidBy = 'Employee' AND strCalculationType = 'USA Medicare' AND ysnVoid = 0) [TXBLMED] OUTER APPLY
-		(SELECT dblTotal = SUM(dblTaxableAmount) FROM vyuPRPaycheckTax WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strPaidBy = 'Employee' AND strCalculationType = 'USA State' AND ysnVoid = 0 
-				AND (intTypeTaxStateId NOT IN (41, 45) OR ((intTypeTaxStateId = 41 AND strVal1 = 'None' AND strVal2 = 'None') OR (intTypeTaxStateId = 45 AND strVal2 = 'None (None)' AND strVal3 = 'None (None)')))) TXBLSTATE OUTER APPLY
-		(SELECT dblTotal = SUM(dblTaxableAmount) FROM vyuPRPaycheckTax WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strPaidBy = 'Employee' AND strCalculationType = 'USA Local' AND ysnVoid = 0) TXBLLOCAL OUTER APPLY
-		(SELECT dblTotal = SUM(dblTaxableAmount) FROM vyuPRPaycheckTax WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strPaidBy = 'Employee' AND (strCalculationType = 'USA State' 
-			AND ((intTypeTaxStateId = 41 AND strVal1 <> 'None') OR (intTypeTaxStateId = 45 AND strVal2 <> 'None (None)'))) AND ysnVoid = 0) TXBLSCHOOL OUTER APPLY
-		(SELECT dblTotal = SUM(dblTaxableAmount) FROM vyuPRPaycheckTax WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strPaidBy = 'Employee' AND (strCalculationType = 'USA State' 
-			AND ((intTypeTaxStateId = 41 AND strVal2 <> 'None') OR (intTypeTaxStateId = 45 AND strVal3 <> 'None (None)'))) AND ysnVoid = 0) TXBLMUNI OUTER APPLY
+		/* Taxable Amount */
+		(SELECT dblTotal = SUM(dblTaxableAmount) FROM @tmpPayCheckTax WHERE strCalculationType = 'USA Federal Tax') [TXBLFIT] OUTER APPLY
+		(SELECT dblTotal = SUM(dblTaxableAmount) FROM @tmpPayCheckTax WHERE strCalculationType = 'USA Social Security') [TXBLSS] OUTER APPLY
+		(SELECT dblTotal = SUM(dblTaxableAmount) FROM @tmpPayCheckTax WHERE strCalculationType = 'USA Medicare' ) [TXBLMED] OUTER APPLY
+		
+		(SELECT dblTotal = SUM(dblTaxableAmount) FROM @tmpPayCheckTax WHERE strCalculationType = 'USA State' 
+				AND (intTypeTaxStateId NOT IN (41, 45) OR ((intTypeTaxStateId = 41 AND strVal1 = 'None' AND strVal2 = 'None') 
+					OR (intTypeTaxStateId = 45 AND strVal2 = 'None (None)' AND strVal3 = 'None (None)')))) TXBLSTATE OUTER APPLY
+		
+		(SELECT dblTotal = SUM(dblTaxableAmount) FROM @tmpPayCheckTax WHERE strCalculationType = 'USA Local' ) TXBLLOCAL OUTER APPLY
+		
+		(SELECT dblTotal = SUM(dblTaxableAmount) FROM @tmpPayCheckTax WHERE (strCalculationType = 'USA State' 	AND ((intTypeTaxStateId = 41 AND strVal1 <> 'None') 
+																											OR (intTypeTaxStateId = 45 AND strVal2 <> 'None (None)'))) ) TXBLSCHOOL OUTER APPLY
+		
+		(SELECT dblTotal = SUM(dblTaxableAmount) FROM @tmpPayCheckTax WHERE (strCalculationType = 'USA State' AND ((intTypeTaxStateId = 41 AND strVal2 <> 'None') 
+																											OR (intTypeTaxStateId = 45 AND strVal3 <> 'None (None)'))) ) TXBLMUNI OUTER APPLY
 		
 		/* Tips Percentage */
 		(SELECT dblTipsPercent = CASE WHEN ((ISNULL(E2.dblTotal, 0) - ISNULL(D1.dblTotal, 0)) / (ISNULL(E1.dblTotal, 0) - ISNULL(D1.dblTotal, 0)) > 0)
@@ -282,7 +309,7 @@ BEGIN
 		) [TIPS] OUTER APPLY
 
 		/* Tax Amounts */
-		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckTax WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strCalculationType = 'USA Federal Tax' AND ysnVoid = 0) FIT OUTER APPLY
+		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckTax WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strPaidBy = 'Employee' AND strCalculationType = 'USA Federal Tax' AND ysnVoid = 0) FIT OUTER APPLY
 		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckTax WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strPaidBy = 'Employee' AND strCalculationType = 'USA Social Security' AND ysnVoid = 0) SSTAX OUTER APPLY
 		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckTax WHERE YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND strPaidBy = 'Employee' AND strCalculationType = 'USA Medicare' AND ysnVoid = 0) MEDTAX OUTER APPLY
 		(SELECT intRank = DENSE_RANK() OVER (ORDER BY st.strCode), strState = st.strCode, strEmployerStateTaxID, dblTotal = SUM(tax.dblTotal) 
