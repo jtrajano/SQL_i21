@@ -10,6 +10,6 @@ BEGIN
 			and exists(select top 1 1 from tblEMEntity where intEntityId = @UserId)
 		begin
 			insert into tblSMActivityEmailResult( intActivityId, strResult, dtmTransactionDate, intEntityUserId)
-			select  @ActivityId, @Result, getdate(), @UserId
+			select  @ActivityId, @Result, getutcdate(), @UserId
 		end
 END
