@@ -548,7 +548,8 @@ BEGIN TRY
 	LEFT JOIN tblCTContractDetail CTD ON CTD.intContractDetailId = ISI.intLineNo
 	WHERE intInventoryShipmentId = @InventoryShipmentId
 
-	IF ISNULL(@InventoryShipmentId, 0) != 0 AND (ISNULL(@intPricingTypeId,0) <= 1 OR ISNULL(@intPricingTypeId,0) = 6) AND ISNULL(@strWhereFinalizedWeight, 'Origin') = 'Origin' AND ISNULL(@strWhereFinalizedGrade, 'Origin') = 'Origin' AND @ysnPriceFixation = 0
+	IF ISNULL(@InventoryShipmentId, 0) != 0 
+	
 	BEGIN
 		EXEC @intInvoiceId = dbo.uspARCreateInvoiceFromShipment @InventoryShipmentId, @intUserId, NULL, 1, 1;
 	END
