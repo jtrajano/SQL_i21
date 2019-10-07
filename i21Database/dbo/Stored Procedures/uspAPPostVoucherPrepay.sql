@@ -6,6 +6,7 @@
 	@batchId			NVARCHAR(20) = NULL,
 	@success			BIT = 0 OUTPUT,
 	@invalidCount		INT = 0 OUTPUT,
+	@successfulCount	INT = 0 OUTPUT,
 	@batchIdUsed		NVARCHAR(50) OUTPUT
 AS
 
@@ -342,6 +343,7 @@ BEGIN
 END
 
 SET @invalidCount = @totalInvalid;
+SET @successfulCount = @totalRecords - @invalidCount
 SET @success = 1;
 END TRY
 BEGIN CATCH
