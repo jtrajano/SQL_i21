@@ -56,7 +56,7 @@ BEGIN
 				SUM (
 					ROUND(dbo.fnMultiply(t.dblQty, t.dblCost) + ISNULL(t.dblValue, 0), 2)
 				)
-			,[intAccountId] = glAccount.intAccountId
+			,[intAccountId] = dbo.fnGetItemGLAccount(t.intItemId, t.intItemLocationId, 'Inventory')
 		FROM	
 			tblICInventoryTransaction t INNER JOIN tblICInventoryTransactionType ty
 				ON t.intTransactionTypeId = ty.intTransactionTypeId			
@@ -71,18 +71,13 @@ BEGIN
 			) gl
 				ON t.strTransactionId = gl.strTransactionId 
 				AND t.strBatchId = gl.strBatchId
-			OUTER APPLY dbo.fnGetItemGLAccountAsTable(
-				t.intItemId
-				,t.intItemLocationId
-				,'Inventory'
-			) glAccount
 		WHERE	
 			t.intInTransitSourceLocationId IS NULL 
 		GROUP BY 
 			ty.strName 
 			,t.strTransactionId
 			,t.strBatchId
-			,glAccount.intAccountId
+			,dbo.fnGetItemGLAccount(t.intItemId, t.intItemLocationId, 'Inventory')
 		-- Get the Consume Inventory Transactions 
 		UNION ALL 
 		SELECT	
@@ -93,7 +88,7 @@ BEGIN
 				SUM (
 					-ROUND(dbo.fnMultiply(t.dblQty, t.dblCost) + ISNULL(t.dblValue, 0), 2)
 				)
-			,[intAccountId] = glAccount.intAccountId
+			,[intAccountId] = dbo.fnGetItemGLAccount(t.intItemId, t.intItemLocationId, 'Work In Progress')
 		FROM	
 			tblICInventoryTransaction t INNER JOIN tblICInventoryTransactionType ty
 				ON t.intTransactionTypeId = ty.intTransactionTypeId			
@@ -108,11 +103,6 @@ BEGIN
 			) gl
 				ON t.strTransactionId = gl.strTransactionId 
 				AND t.strBatchId = gl.strBatchId
-			OUTER APPLY dbo.fnGetItemGLAccountAsTable(
-				t.intItemId
-				,t.intItemLocationId
-				,'Work In Progress'
-			) glAccount
 		WHERE	
 			t.intInTransitSourceLocationId IS NULL 
 			AND ty.strName IN ('Consume')
@@ -120,7 +110,7 @@ BEGIN
 			ty.strName 
 			,t.strTransactionId
 			,t.strBatchId
-			,glAccount.intAccountId
+			,dbo.fnGetItemGLAccount(t.intItemId, t.intItemLocationId, 'Work In Progress')
 		-- Get the Produce Inventory Transactions 
 		UNION ALL 
 		SELECT	
@@ -131,7 +121,7 @@ BEGIN
 				SUM (
 					-ROUND(dbo.fnMultiply(t.dblQty, t.dblCost) + ISNULL(t.dblValue, 0), 2)
 				)
-			,[intAccountId] = glAccount.intAccountId
+			,[intAccountId] = dbo.fnGetItemGLAccount(t.intItemId, t.intItemLocationId, 'Work In Progress')
 		FROM	
 			tblICInventoryTransaction t INNER JOIN tblICInventoryTransactionType ty
 				ON t.intTransactionTypeId = ty.intTransactionTypeId			
@@ -146,11 +136,6 @@ BEGIN
 			) gl
 				ON t.strTransactionId = gl.strTransactionId 
 				AND t.strBatchId = gl.strBatchId
-			OUTER APPLY dbo.fnGetItemGLAccountAsTable(
-				t.intItemId
-				,t.intItemLocationId
-				,'Work In Progress'
-			) glAccount
 		WHERE	
 			t.intInTransitSourceLocationId IS NULL 
 			AND ty.strName IN ('Produce')
@@ -158,7 +143,7 @@ BEGIN
 			ty.strName 
 			,t.strTransactionId
 			,t.strBatchId
-			,glAccount.intAccountId
+			,dbo.fnGetItemGLAccount(t.intItemId, t.intItemLocationId, 'Work In Progress')
 		-- Get the Cost Adjustment from MFG. 
 		--UNION ALL 
 		--SELECT	
