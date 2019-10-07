@@ -126,15 +126,16 @@ UNION ALL
 
 SELECT
 	 [intId]				= IT.[intId]
-	,[strMessage]			= 'The item(' + CAST(IT.[intItemId] AS NVARCHAR(20)) + ') was not set up to be available on the specified location(' + CAST(IT.[intCompanyLocationId] AS NVARCHAR(20)) + ')!'
+	,[strMessage]			= 'The item(' + CAST(ITEM.[strItemNo] AS NVARCHAR(20)) + ') was not set up to be available on the specified location(' + CAST(CL.[strLocationNumber] AS NVARCHAR(20)) + ')!'
 	,[strTransactionType]	= IT.[strTransactionType]
 	,[strType]				= IT.[strType]
 	,[strSourceTransaction]	= IT.[strSourceTransaction]
 	,[intSourceId]			= IT.[intSourceId]
 	,[strSourceId]			= IT.[strSourceId]
 	,[intInvoiceId]			= IT.[intInvoiceId]
-FROM
-	@ItemEntries IT
+FROM @ItemEntries IT
+LEFT JOIN tblICItem ITEM ON IT.intItemId = ITEM.intItemId
+LEFT JOIN tblSMCompanyLocation CL ON IT.intCompanyLocationId = CL.intCompanyLocationId
 WHERE
 	NOT EXISTS(	SELECT NULL 
 				FROM tblICItem IC WITH (NOLOCK) INNER JOIN tblICItemLocation IL WITH (NOLOCK) ON IC.intItemId = IL.intItemId
