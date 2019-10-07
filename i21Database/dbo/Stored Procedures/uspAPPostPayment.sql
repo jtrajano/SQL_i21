@@ -149,6 +149,8 @@ INSERT INTO #tmpPayableInvalidData
 SELECT * FROM [fnAPValidatePostPayment](@payments, @post, @userId)
 UNION ALL
 SELECT * FROM [fnAPValidatePrepay](@prepayIds, @post, @userId)
+UNION ALL
+SELECT * FROM [fnAPValidateVoucherPrepay](@prepayIds, @post)
 
 SET @totalInvalid = (SELECT COUNT(*) FROM #tmpPayableInvalidData)
 
