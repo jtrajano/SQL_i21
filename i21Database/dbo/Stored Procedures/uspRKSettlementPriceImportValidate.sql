@@ -117,7 +117,7 @@ BEGIN TRY
 			SET @ErrMsg = ' Future Market is required.'
 		END
 		
-		IF EXISTS (SELECT DISTINCT (LTRIM(RTRIM(strPriceDate))) dtmPriceDate, COUNT(*) FROM tblRKSettlementPriceImport WHERE strFutureMarket = @strFutureMarket GROUP BY (LTRIM(RTRIM(strPriceDate))) HAVING COUNT(*) > 1)
+		IF (SELECT COUNT(*) FROM (SELECT DISTINCT (LTRIM(RTRIM(strPriceDate))) dtmPriceDate FROM tblRKSettlementPriceImport where strFutureMarket=@strFutureMarket)t) > 1							
 		BEGIN
 			IF NOT EXISTS(SELECT * FROM @ErrLogs where strErrorMsg='There are two or more Date/Time combination for Futures Market: ' + @strFutureMarket)
 			BEGIN
