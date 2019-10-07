@@ -108,7 +108,7 @@ FROM (
        ,strWarehouseRefNo = ISNULL(Receipt.strWarehouseRefNo,Lot.strWarehouseRefNo)
 	   ,dblFutures = CTDetail.dblFutures
 	   ,dblBasis = CTDetail.dblBasis
-	   ,dblCashPrice = dbo.fnCTGetSequencePrice(CTDetail.intContractDetailId,NULL)
+	   ,dblCashPrice = CASE WHEN (CTDetail.dblCashPrice IS NOT NULL) THEN CTDetail.dblCashPrice ELSE dbo.fnCTGetSequencePrice(CTDetail.intContractDetailId,NULL) END
 	   ,intPriceItemUOMId = CTDetail.intPriceItemUOMId
 	   ,strPriceBasis = CAST(BC.strCurrency as VARCHAR(100)) + '/' + CAST(BUM.strUnitMeasure as VARCHAR(100))
 	   ,dblTotalCost = CTDetail.dblTotalCost
