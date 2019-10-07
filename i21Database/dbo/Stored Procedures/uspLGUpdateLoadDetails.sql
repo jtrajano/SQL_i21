@@ -27,12 +27,14 @@ BEGIN TRY
 		UPDATE tblLGLoad SET 
 			intTicketId=@intTicketId
 		WHERE intLoadId=@intLoadId
+			AND intTransUsedBy = 2
 	END
 	IF EXISTS(SELECT 1 FROM tblTRLoadHeader WHERE intLoadHeaderId=@intTicketId)
 	BEGIN
 		UPDATE tblLGLoad SET 
 			intLoadHeaderId=@intTicketId
 		WHERE intLoadId=@intLoadId
+			AND intTransUsedBy = 3
 	END
 
 	UPDATE tblLGLoad SET 
