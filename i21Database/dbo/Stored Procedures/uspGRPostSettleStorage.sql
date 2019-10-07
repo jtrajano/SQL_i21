@@ -1451,7 +1451,17 @@ BEGIN TRY
 													-- 	ELSE a.dblUnits 
 													-- END
 													CASE
-														WHEN a.intItemType = 1 AND ST.ysnDPOwnedType = 1 AND CS.intDeliverySheetId IS NOT NULL THEN RI.dblOpenReceive
+														WHEN a.intItemType = 1 AND ST.ysnDPOwnedType = 1 AND CS.intDeliverySheetId IS NOT NULL 
+														THEN 
+															CASE WHEN ISNULL(CS.ysnTransferStorage,0) = 1 
+															 	THEN
+																	CASE 
+																		WHEN @origdblSpotUnits > 0 THEN ROUND(dbo.fnCalculateQtyBetweenUOM(b.intItemUOMId,@intCashPriceUOMId,a.dblUnits),6)
+																		ELSE a.dblUnits
+																	END
+																ELSE
+																	RI.dblOpenReceive
+															END	
 														ELSE
 																CASE 
 																		WHEN @origdblSpotUnits > 0 THEN ROUND(dbo.fnCalculateQtyBetweenUOM(b.intItemUOMId,@intCashPriceUOMId,a.dblUnits),6)
