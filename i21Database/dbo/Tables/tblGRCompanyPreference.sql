@@ -25,6 +25,8 @@
 	[ysnIsRemote] BIT NOT NULL DEFAULT 0, 
     [ysnSealNumber] BIT NOT NULL DEFAULT 0, 
     [ysnLVControlIntegration] BIT NOT NULL DEFAULT(0), 
+    [ysnDoNotAllowUndistributePostedInvoice] BIT NOT NULL DEFAULT(0), 
+    
     CONSTRAINT [PK_tblGRCompanyPreference_intCompanyPreferenceId] PRIMARY KEY CLUSTERED ([intCompanyPreferenceId] ASC),
 	CONSTRAINT [FK_tblGRCompanyPreference_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
 	CONSTRAINT [FK_tblGRCompanyPreference_tblICUnitMeasure_intUnitMeasureId] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId])
