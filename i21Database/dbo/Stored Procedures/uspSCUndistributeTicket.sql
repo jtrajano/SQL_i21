@@ -69,7 +69,9 @@ DECLARE @intLoopContractDetailId INT
 DECLARE @intLoopId INT
 DECLARE @dblLoopScheduleQty NUMERIC(18,6)
 DECLARE @intLoopCurrentId INT
+DECLARE @UNDISTRIBUTE_NOT_ALLOWED NVARCHAR(100)
 
+SET @UNDISTRIBUTE_NOT_ALLOWED = 'Un-distribute ticket with posted invoice is not allowed.'
 
 BEGIN TRY
 		SELECT TOP 1
@@ -521,6 +523,12 @@ BEGIN TRY
 
 						IF @ysnPosted = 1
 						BEGIN
+							if (exists ( select top 1 1 from tblGRCompanyPreference where ysnDoNotAllowUndistributePostedInvoice = 1 ))
+							begin
+								RAISERROR(@UNDISTRIBUTE_NOT_ALLOWED, 11, 1);
+								RETURN;
+							end
+
 							EXEC [dbo].[uspARPostInvoice]
 									@batchId			= NULL,
 									@post				= 0,
@@ -552,6 +560,11 @@ BEGIN TRY
 						SELECT @ysnPosted = ysnPosted FROM tblARInvoice WHERE intInvoiceId = @intInvoiceId;
 						IF @ysnPosted = 1
 						BEGIN
+							if (exists ( select top 1 1 from tblGRCompanyPreference where ysnDoNotAllowUndistributePostedInvoice = 1 ))
+							begin
+								RAISERROR(@UNDISTRIBUTE_NOT_ALLOWED, 11, 1);
+								RETURN;
+							end
 							EXEC [dbo].[uspARPostInvoice]
 								@batchId			= NULL,
 								@post				= 0,
@@ -678,6 +691,11 @@ BEGIN TRY
 									-- unpost invoice
 									IF @ysnPosted = 1
 									BEGIN
+										if (exists ( select top 1 1 from tblGRCompanyPreference where ysnDoNotAllowUndistributePostedInvoice = 1 ))
+										begin
+											RAISERROR(@UNDISTRIBUTE_NOT_ALLOWED, 11, 1);
+											RETURN;
+										end
 										EXEC [dbo].[uspARPostInvoice]
 											@batchId			= NULL,
 											@post				= 0,
