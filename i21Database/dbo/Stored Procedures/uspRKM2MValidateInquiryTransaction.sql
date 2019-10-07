@@ -136,6 +136,7 @@ BEGIN TRY
 			AND rk.intContractDetailId = CD.intContractDetailId
 			AND rk.intFutureMonthId = CD.intFutureMonthId
 			AND ISNULL(rk.intNearByFutureMonthId, 0) = 0
+			AND MO.ysnExpired = 1
 
 		UNION ALL SELECT CD.intContractDetailId
 			, CH.intContractHeaderId
@@ -177,6 +178,7 @@ BEGIN TRY
 			AND CD.intPricingTypeId IN (1, 3)
 			AND ISNULL(rk.intNearByFutureMonthId, 0) <> 0
 			AND ISNULL(rk.dblNearByFuturePrice, 0) = 0
+			AND MO.ysnExpired = 1
 	END
 	ELSE
 	BEGIN
