@@ -27,7 +27,7 @@ SELECT
 	,dblBasis							= CD.dblBasis
 	,dblBasisInCommodityStockUOM		= dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,C1.intUnitMeasureId,BU.intUnitMeasureId,dblBasis)
 	,intContractUOMId					= AD.intSeqPriceUOMId
-	,dblCostUnitQty						= dbo.fnCTConvertQtyToTargetItemUOM(CD.intPriceItemUOMId, C1.intCommodityUnitMeasureId, 1)
+	,dblCostUnitQty						= dbo.fnCTConvertQtyToTargetItemUOM(CD.intPriceItemUOMId, ItemUOM.intItemUOMId, 1)
 FROM tblCTContractDetail CD
 CROSS JOIN tblCTCompanyPreference CP	
 JOIN tblSMCompanyLocation CL	
@@ -46,6 +46,9 @@ LEFT JOIN tblCTPricingType PT
 	ON PT.intPricingTypeId = CD.intPricingTypeId
 LEFT JOIN tblICItem IM
 	ON IM.intItemId = CD.intItemId
+LEFT JOIN tblICItemUOM ItemUOM
+	ON ItemUOM.intItemId = IM.intItemId
+		AND ItemUOM.ysnStockUnit = 1
 LEFT JOIN tblICItemUOM QU 
 	ON QU.intItemUOMId = CD.intItemUOMId
 LEFT JOIN tblICItemUOM PU
