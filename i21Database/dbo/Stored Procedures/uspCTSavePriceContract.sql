@@ -42,7 +42,8 @@ BEGIN TRY
 			@intFutOptTransactionHeaderId INT = NULL,
 			@intScreenId		INT,
 			@intTransactionId			INT,
-			@ysnOnceApproved			INT = 0
+			@ysnOnceApproved			INT = 0,
+   			@ysnSplit bit = convert(bit,0)
 
 	SELECT @intUserId = ISNULL(intLastModifiedById,intCreatedById) FROM tblCTPriceContract WHERE intPriceContractId = @intPriceContractId
 
@@ -165,8 +166,52 @@ BEGIN TRY
 			END 
 			SELECT	@intPriceFixationDetailId = MIN(intPriceFixationDetailId)	FROM	tblCTPriceFixationDetail WHERE intPriceFixationId = @intPriceFixationId AND intPriceFixationDetailId > @intPriceFixationDetailId
 		END
+
+		set @ysnSplit = (select ysnSplit from tblCTPriceFixation where intPriceFixationId = @intPriceFixationId);
 		
 		EXEC uspCTPriceFixationSave @intPriceFixationId,@strRowState,@intUserId
+
+		if (isnull(@ysnSplit,convert(bit,0)) = convert(bit,1))
+		begin
+			update
+				a
+			set
+				intPricingTypeId = (case when DetailResult.dblContractDetailQuantity = DetailResult.dblPricedQuantity then 1 else DetailResult.intContractHeaderPricingTypeId end)
+				,dblFutures = (case when DetailResult.dblContractDetailQuantity = DetailResult.dblPricedQuantity then DetailResult.dblContractDetailPrice else null end)
+				,dblCashPrice = (case when DetailResult.dblContractDetailQuantity = DetailResult.dblPricedQuantity then DetailResult.dblContractDetailPrice else null end) + a.dblBasis
+			from
+				tblCTContractDetail a
+				join
+				(
+				select
+					cd.intContractHeaderId
+					,cd.intContractDetailId
+					,dblContractDetailQuantity = cd.dblQuantity
+					,intContractDetailPricingTypeId = cd.intPricingTypeId
+					,dblContractDetailFutures = cd.dblFutures
+					,dblPricedQuantity = pfd.dblQuantity
+					,dblPricedFutures = pfd.dblFutures
+					,dblContractDetailPricedQuantity = sum(pfd.dblQuantity)
+					,dblContractDetailPrice = avg(pfd.dblFutures)
+					,intContractHeaderPricingTypeId = ch.intPricingTypeId
+				from
+					tblCTContractDetail cd
+					join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
+					left join tblCTPriceFixation pf on pf.intContractDetailId = cd.intContractDetailId
+					left join tblCTPriceFixationDetail pfd on pfd.intPriceFixationId = pf.intPriceFixationId
+				where
+					cd.intContractHeaderId = @intContractHeaderId
+				group by
+					cd.intContractHeaderId
+					,cd.intContractDetailId
+					,cd.dblQuantity
+					,cd.intPricingTypeId
+					,cd.dblFutures
+					,pfd.dblQuantity
+					,pfd.dblFutures
+					,ch.intPricingTypeId
+				) as DetailResult on DetailResult.intContractDetailId = a.intContractDetailId
+		end
 
 		IF ISNULL(@intContractDetailId,0) > 0 
 		BEGIN
