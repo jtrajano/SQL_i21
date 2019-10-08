@@ -150,6 +150,7 @@ INSERT INTO tblARInvoiceReportStagingTable (
 	 , strInvoiceFormat
 	 , blbSignature
 	 , ysnStretchLogo
+	 , strSubFormula
 )
 SELECT intInvoiceId				= INV.intInvoiceId
 	 , intCompanyLocationId		= INV.intCompanyLocationId
@@ -266,6 +267,7 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , strInvoiceFormat			= SELECTEDINV.strInvoiceFormat
 	 , blbSignature				= INV.blbSignature
 	 , ysnStretchLogo			= ISNULL(SELECTEDINV.ysnStretchLogo, 0)
+	 , strSubFormula			= INVOICEDETAIL.strSubFormula
 FROM dbo.tblARInvoice INV WITH (NOLOCK)
 INNER JOIN @tblInvoiceReport SELECTEDINV ON INV.intInvoiceId = SELECTEDINV.intInvoiceId
 INNER JOIN (
@@ -335,6 +337,7 @@ LEFT JOIN (
 		 , ysnAddonParent			= ID.ysnAddonParent
 		 , strBOLNumberDetail		= ID.strBOLNumberDetail
 		 , strLotNumber				= LOT.strLotNumbers
+		 , strSubFormula			= ID.strSubFormula
 	FROM dbo.tblARInvoiceDetail ID WITH (NOLOCK)
 	LEFT JOIN (
 		SELECT intItemId

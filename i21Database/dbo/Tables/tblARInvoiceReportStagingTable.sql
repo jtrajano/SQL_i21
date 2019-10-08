@@ -78,6 +78,7 @@
 	[strInvoiceFormat]					NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
 	[strBargeNumber]					NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,	
 	[strCommodity]						NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+	[strSubFormula]                     NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
 	[strTrailer]						NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
 	[strSeals]							NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
 	[strLotNumber]						NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
