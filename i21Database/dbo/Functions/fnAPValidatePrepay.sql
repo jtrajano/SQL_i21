@@ -9,7 +9,8 @@ RETURNS @returntable TABLE
 	strError NVARCHAR(1000),
 	strTransactionType NVARCHAR(50),
 	strTransactionId NVARCHAR(50),
-	intTransactionId INT
+	intTransactionId INT,
+	intErrorKey	INT null
 )
 AS
 BEGIN
