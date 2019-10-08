@@ -1290,7 +1290,7 @@ BEGIN TRY
 					-- 							END
 					,[dblQtyReceived]			= 
 												CASE 
-													WHEN a.intItemType = 1 AND ST.ysnDPOwnedType = 1 THEN ISNULL (RI.dblOpenReceive, a.dblUnits)
+													WHEN a.intItemType = 1 AND ST.ysnDPOwnedType = 1 THEN RI.dblOpenReceive
 													ELSE
 														CASE 
 															WHEN @origdblSpotUnits > 0 THEN ROUND(dbo.fnCalculateQtyBetweenUOM(b.intItemUOMId,@intCashPriceUOMId,a.dblUnits),6)
@@ -1371,7 +1371,6 @@ BEGIN TRY
 									AND RI.intContractHeaderId = ISNULL(SH.intContractHeaderId,RI.intContractHeaderId)
 						) 
 							ON SH.intCustomerStorageId = CS.intCustomerStorageId
-							AND a.[intContractHeaderId] = SH.[intContractHeaderId]
 								AND a.intItemType = 1
 				WHERE a.dblCashPrice <> 0 
 					AND a.dblUnits <> 0 
