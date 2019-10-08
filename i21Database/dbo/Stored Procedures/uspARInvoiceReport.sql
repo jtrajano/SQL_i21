@@ -419,7 +419,6 @@ OUTER APPLY (
 	SELECT COUNT(*) AS intInvoiceDetailCount
 	FROM dbo.tblARInvoiceDetail WITH (NOLOCK)
 	WHERE intInvoiceId = INV.intInvoiceId
-	GROUP BY strSubFormula
 ) INVOICEITEMS
 OUTER APPLY (
 	SELECT COUNT(*) AS intEmailSetupCount
