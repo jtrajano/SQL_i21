@@ -90,9 +90,15 @@ BEGIN TRY
 		SELECT 
 			intItemId = LD.intItemId
 			,intItemLocationId = IL.intItemLocationId
-			,intItemUOMId = LD.intItemUOMId
+			,intItemUOMId = ISNULL(LD.intWeightItemUOMId, LD.intItemUOMId) 
 			,dtmDate = GETDATE()
-			,dblQty = LD.dblQuantity
+			,dblQty = 
+				CASE 
+					WHEN LD.intWeightItemUOMId IS NOT NULL THEN 
+						LD.dblNet
+					ELSE 
+						LD.dblQuantity
+				END 
 			,dblUOMQty = IU.dblUnitQty
 			,dblCost = 
 						ISNULL(
@@ -150,7 +156,7 @@ BEGIN TRY
 						)
 			,dblValue = 0
 			,dblSalesPrice = 0.0
-			,intCurrencyId = @DefaultCurrencyId 
+			,intCurrencyId = CASE WHEN AD.ysnValidFX = 1 THEN CD.intInvoiceCurrencyId ELSE ISNULL(SeqCUR.intMainCurrencyId, SeqCUR.intCurrencyID) END
 			,dblExchangeRate = ISNULL(AD.dblNetWtToPriceUOMConvFactor,0)
 			,intTransactionId = L.intLoadId
 			,intTransactionDetailId = LD.intLoadDetailId
@@ -194,7 +200,7 @@ BEGIN TRY
 		JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 		JOIN tblICItemLocation IL ON IL.intItemId = LD.intItemId
 			AND LD.intPCompanyLocationId = IL.intLocationId
-		JOIN tblICItemUOM IU ON IU.intItemUOMId = LD.intItemUOMId
+		JOIN tblICItemUOM IU ON IU.intItemUOMId = ISNULL(LD.intWeightItemUOMId, LD.intItemUOMId) 
 		JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
 		JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 		CROSS APPLY dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
@@ -202,7 +208,7 @@ BEGIN TRY
 		LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = L.intFreightTermId
 		LEFT JOIN tblICFobPoint FP ON FP.strFobPoint = FT.strFobPoint
 		LEFT JOIN tblSMCurrency CUR ON CUR.intCurrencyID = LD.intPriceCurrencyId
-		LEFT JOIN tblSMCurrency SeqCUR ON SeqCUR.intCurrencyID = AD.intSeqCurrencyId
+		LEFT JOIN tblSMCurrency SeqCUR ON SeqCUR.intCurrencyID = CD.intCurrencyId
 		OUTER APPLY (SELECT	TOP 1  
 						intForexRateTypeId = RD.intRateTypeId
 						,dblFXRate = CASE WHEN ER.intFromCurrencyId = @DefaultCurrencyId  
