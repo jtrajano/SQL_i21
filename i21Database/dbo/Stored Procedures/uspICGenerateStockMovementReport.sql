@@ -292,8 +292,6 @@ BEGIN
 		m.*
 	FROM 
 		vyuICGenerateStockMovement m
-			INNER JOIN vyuICUserCompanyLocations permission ON permission.intCompanyLocationId = m.intLocationId
-	WHERE permission.intEntityId = @intUserId
 	ORDER BY
 		 m.intItemId ASC 
 		,m.intLocationId ASC 
@@ -350,8 +348,6 @@ BEGIN
 		m.*
 	FROM 
 		vyuICGenerateStockMovement m
-			INNER JOIN vyuICUserCompanyLocations permission ON permission.intCompanyLocationId = m.intLocationId
-	WHERE permission.intEntityId = @intUserId
 	ORDER BY
 		 m.intCommodityId ASC 
 		,m.intCategoryId ASC 

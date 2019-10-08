@@ -8,7 +8,7 @@ SELECT	t.intInventoryShipmentId
 		,t.dtmShipDate
 		,t.strCustomer
 		,t.strLocationName
-		,ship.intShipFromLocationId intLocationId
+		,ship.intShipFromLocationId
 		,t.strDestination
 		,t.strBOLNumber
 		,t.strOrderType

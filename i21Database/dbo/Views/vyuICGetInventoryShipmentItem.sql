@@ -7,6 +7,7 @@ SELECT ShipmentItem.intInventoryShipmentId
 	, Shipment.strOrderType
 	, Shipment.strSourceType
 	, Shipment.strShipmentNumber
+	, Shipment.intShipFromLocationId
 	, Shipment.strShipFromLocation
 	, Shipment.strShipToLocation
 	, Shipment.strBOLNumber

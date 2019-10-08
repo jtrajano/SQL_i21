@@ -2693,33 +2693,6 @@
     <Build Include="dbo\Views\vyuICGetInventoryReceiptItemLotByEntity.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryReceiptChargeByEntity.sql" />
     <Build Include="dbo\Views\vyuICUserCompanyLocations.sql" />
-    <Build Include="dbo\Views\vyuICGetInventoryReceiptSearchByLocation.sql" />
-    <Build Include="dbo\Views\vyuICGetInventoryReceiptItemByLocation.sql" />
-    <Build Include="dbo\Views\vyuICGetInventoryReceiptItemLotByLocation.sql" />
-    <Build Include="dbo\Views\vyuICGetInventoryReceiptChargeByLocation.sql" />
-    <Build Include="dbo\Views\vyuICGetInventoryShipmentByLocation.sql" />
-    <Build Include="dbo\Views\vyuICGetInventoryShipmentItemByLocation.sql" />
-    <Build Include="dbo\Views\vyuICGetInventoryShipmentItemLotByLocation.sql" />
-    <Build Include="dbo\Views\vyuICShipmentInvoice2ByLocation.sql" />
-    <Build Include="dbo\Views\vyuICGetInventoryTransferByLocation.sql" />
-    <Build Include="dbo\Views\vyuICGetInventoryTransferDetailByLocation.sql" />
-    <Build Include="dbo\Views\vyuICGetInventoryAdjustmentByLocation.sql" />
-    <Build Include="dbo\Views\vyuICGetInventoryAdjustmentDetailByLocation.sql" />
-    <Build Include="dbo\Views\vyuICGetInventoryCountByLocation.sql" />
-    <Build Include="dbo\Views\vyuICGetInventoryCountDetailByLocation.sql" />
-    <Build Include="dbo\Views\vyuICGetStorageMeasurementReadingConversionByLocation.sql" />
-    <Build Include="dbo\Views\vyuICGetStorageUnitByLocation.sql" />
-    <Build Include="dbo\Views\vyuICItemLotByLocation.sql" />
-    <Build Include="dbo\Views\vyuICLotHistoryByLocation.sql" />
-    <Build Include="dbo\Views\vyuICGetLocationBinsByLocation.sql" />
-    <Build Include="dbo\Views\vyuICGetStorageBinDetailsByLocation.sql" />
-    <Build Include="dbo\Views\vyuICGetStorageBinsByLocation.sql" />
-    <Build Include="dbo\Views\vyuICGetSubLocationBinDetailsByLocation.sql" />
-    <Build Include="dbo\Views\vyuICGetSubLocationBinsByLocation.sql" />
-    <Build Include="dbo\Views\vyuICItemUOMDetailByLocation.sql" />
-    <Build Include="dbo\Views\vyuICGetInventoryValuationSummaryByLocation.sql" />
-    <Build Include="dbo\Views\vyuICGetInventoryValuationByLocation.sql" />
-    <Build Include="dbo\Views\vyuICGetRetailValuationByLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspLGDeleteBill.sql" />
     <Build Include="dbo\Stored Procedures\uspWHAutoCheckInSKU.sql" />
     <Build Include="dbo\Stored Procedures\uspWHCheckInSKU.sql" />
@@ -8086,6 +8059,7 @@
     <Build Include="dbo\Functions\fnCTGetAvailablePriceQuantity.sql" />
     <Build Include="dbo\Stored Procedures\uspSCGetContractsAndAllocate.sql" />
     <Build Include="dbo\Stored Procedures\uspAPConvertPaymentToPrepay.sql" />
+    <Build Include="dbo\Views\vyuICGetRetailValuationByLocation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

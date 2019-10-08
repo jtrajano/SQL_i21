@@ -366,73 +366,158 @@ CREATE TABLE #tmpDailyStockPosition
 
 	DELETE FROM tblICStagingDailyStockPosition WHERE (guidSessionId = @guidSessionId OR DATEDIFF(SECOND, dtmDateCreated, GETDATE()) > 10)
 	-----===== READ DAILY STOCK POSITION
-	INSERT INTO tblICStagingDailyStockPosition
-	SELECT	guidSessionId			= @guidSessionId,
-			intKey					= CAST(ROW_NUMBER() OVER(ORDER BY Item.intCommodityId, Item.intItemId) AS INT),
-			intCommodityId			= Item.intCommodityId,
-			strCommodityCode		= ISNULL(Commodity.strCommodityCode, ''),
-			dtmDate					= CAST(CONVERT(VARCHAR(10),@dtmDate,112) AS datetime),
-			intCategoryId			= Item.intCategoryId,
-			strCategoryCode			= ISNULL(Category.strCategoryCode, ''),
-			intLocationId			= tmpDSP.intLocationId,
-			strLocationName			= Loc.strLocationName,
-			intItemId				= Item.intItemId,
-			strItemNo				= Item.strItemNo,
-			strDescription			= Item.strDescription,
-			intItemUOMId			= StockUOM.intItemUOMId,
-			strItemUOM				= sUOM.strUnitMeasure,
-			dblOpeningQty			= ISNULL(tmpDSP.dblOpeningQty, 0),
-			dblReceivedQty			= ISNULL(tmpDSP.dblReceivedQty, 0),
-			dblInvoicedQty			= ISNULL(tmpDSP.dblInvoicedQty, 0),
-			dblAdjustments			= ISNULL(tmpDSP.dblAdjustments, 0),
-			dblTransfersReceived	= ISNULL(tmpDSP.dblTransfersReceived, 0),
-			dblTransfersShipped		= ISNULL(tmpDSP.dblTransfersShipped, 0),
-			dblInTransitInbound		= ISNULL(tmpDSP.dblInTransitInbound, 0),
-			dblInTransitOutbound	= ISNULL(tmpDSP.dblInTransitOutbound, 0),
-			dblConsumed				= ISNULL(tmpDSP.dblConsumedQty, 0),
-			dblProduced				= ISNULL(tmpDSP.dblProduced, 0),
-			dblClosingQty			= 
-										tmpDSP.dblOpeningQty 
-										+ tmpDSP.dblReceivedQty 
-										- tmpDSP.dblInvoicedQty 
-										+ tmpDSP.dblAdjustments 
-										+ tmpDSP.dblTransfersReceived 
-										- tmpDSP.dblTransfersShipped 
-										+ tmpDSP.dblInTransitInbound 
-										- tmpDSP.dblInTransitOutbound 
-										- tmpDSP.dblConsumedQty 
-										+ tmpDSP.dblProduced,
-			intConcurrencyId		= 1,
-			dtmDateModified			= NULL,
-			dtmDateCreated			= GETDATE(),
-			intModifiedByUserId		= NULL,
-			intCreatedByUserId		= NULL
-	FROM tblICItem Item
-		INNER JOIN (tblICItemUOM StockUOM
-			INNER JOIN tblICUnitMeasure sUOM ON StockUOM.intUnitMeasureId = sUOM.intUnitMeasureId
-	) ON StockUOM.intItemId = Item.intItemId
-		AND StockUOM.ysnStockUnit = 1
-	LEFT JOIN (SELECT	intItemId,
-					intLocationId,
-					dblOpeningQty			= SUM(CASE WHEN intSourceType = 1 THEN dblQty ELSE 0 END),
-					dblReceivedQty			= SUM(CASE WHEN intSourceType = 2 THEN dblQty ELSE 0 END),
-					dblInvoicedQty			= SUM(CASE WHEN intSourceType = 3 THEN dblQty ELSE 0 END),
-					dblAdjustments			= SUM(CASE WHEN intSourceType = 4 THEN dblQty ELSE 0 END),
-					dblTransfersReceived	= SUM(CASE WHEN intSourceType = 5 THEN dblQty ELSE 0 END),
-					dblTransfersShipped		= SUM(CASE WHEN intSourceType = 6 THEN dblQty ELSE 0 END),
-					dblInTransitInbound		= SUM(CASE WHEN intSourceType = 7 THEN dblQty ELSE 0 END),
-					dblInTransitOutbound	= SUM(CASE WHEN intSourceType = 8 THEN dblQty ELSE 0 END),
-					dblConsumedQty			= SUM(CASE WHEN intSourceType = 9 THEN dblQty ELSE 0 END),
-					dblProduced				= SUM(CASE WHEN intSourceType = 10 THEN dblQty ELSE 0 END)
-		FROM #tmpDailyStockPosition 
-		GROUP BY intItemId, intLocationId
-	) tmpDSP
-		ON Item.intItemId = tmpDSP.intItemId
-	LEFT JOIN tblICCommodity Commodity
-		ON Commodity.intCommodityId = Item.intCommodityId
-	LEFT JOIN tblICCategory Category
-		ON Category.intCategoryId = Item.intCategoryId
-	INNER JOIN tblSMCompanyLocation Loc 
-		ON Loc.intCompanyLocationId = tmpDSP.intLocationId
-	INNER JOIN vyuICUserCompanyLocations permission ON permission.intCompanyLocationId = Loc.intCompanyLocationId
-	WHERE permission.intEntityId = @intUserId
+
+	IF EXISTS (
+		SELECT TOP 1 1 
+		FROM vyuICUserCompanyLocations
+		WHERE intEntityId = @intUserId
+	)
+	BEGIN 
+		INSERT INTO tblICStagingDailyStockPosition
+		SELECT	guidSessionId			= @guidSessionId,
+				intKey					= CAST(ROW_NUMBER() OVER(ORDER BY Item.intCommodityId, Item.intItemId) AS INT),
+				intCommodityId			= Item.intCommodityId,
+				strCommodityCode		= ISNULL(Commodity.strCommodityCode, ''),
+				dtmDate					= CAST(CONVERT(VARCHAR(10),@dtmDate,112) AS datetime),
+				intCategoryId			= Item.intCategoryId,
+				strCategoryCode			= ISNULL(Category.strCategoryCode, ''),
+				intLocationId			= tmpDSP.intLocationId,
+				strLocationName			= Loc.strLocationName,
+				intItemId				= Item.intItemId,
+				strItemNo				= Item.strItemNo,
+				strDescription			= Item.strDescription,
+				intItemUOMId			= StockUOM.intItemUOMId,
+				strItemUOM				= sUOM.strUnitMeasure,
+				dblOpeningQty			= ISNULL(tmpDSP.dblOpeningQty, 0),
+				dblReceivedQty			= ISNULL(tmpDSP.dblReceivedQty, 0),
+				dblInvoicedQty			= ISNULL(tmpDSP.dblInvoicedQty, 0),
+				dblAdjustments			= ISNULL(tmpDSP.dblAdjustments, 0),
+				dblTransfersReceived	= ISNULL(tmpDSP.dblTransfersReceived, 0),
+				dblTransfersShipped		= ISNULL(tmpDSP.dblTransfersShipped, 0),
+				dblInTransitInbound		= ISNULL(tmpDSP.dblInTransitInbound, 0),
+				dblInTransitOutbound	= ISNULL(tmpDSP.dblInTransitOutbound, 0),
+				dblConsumed				= ISNULL(tmpDSP.dblConsumedQty, 0),
+				dblProduced				= ISNULL(tmpDSP.dblProduced, 0),
+				dblClosingQty			= 
+											tmpDSP.dblOpeningQty 
+											+ tmpDSP.dblReceivedQty 
+											- tmpDSP.dblInvoicedQty 
+											+ tmpDSP.dblAdjustments 
+											+ tmpDSP.dblTransfersReceived 
+											- tmpDSP.dblTransfersShipped 
+											+ tmpDSP.dblInTransitInbound 
+											- tmpDSP.dblInTransitOutbound 
+											- tmpDSP.dblConsumedQty 
+											+ tmpDSP.dblProduced,
+				intConcurrencyId		= 1,
+				dtmDateModified			= NULL,
+				dtmDateCreated			= GETDATE(),
+				intModifiedByUserId		= NULL,
+				intCreatedByUserId		= NULL
+		FROM 
+			tblICItem Item
+				INNER JOIN (tblICItemUOM StockUOM
+					INNER JOIN tblICUnitMeasure sUOM ON StockUOM.intUnitMeasureId = sUOM.intUnitMeasureId
+			) ON StockUOM.intItemId = Item.intItemId
+				AND StockUOM.ysnStockUnit = 1
+			LEFT JOIN (SELECT	intItemId,
+							intLocationId,
+							dblOpeningQty			= SUM(CASE WHEN intSourceType = 1 THEN dblQty ELSE 0 END),
+							dblReceivedQty			= SUM(CASE WHEN intSourceType = 2 THEN dblQty ELSE 0 END),
+							dblInvoicedQty			= SUM(CASE WHEN intSourceType = 3 THEN dblQty ELSE 0 END),
+							dblAdjustments			= SUM(CASE WHEN intSourceType = 4 THEN dblQty ELSE 0 END),
+							dblTransfersReceived	= SUM(CASE WHEN intSourceType = 5 THEN dblQty ELSE 0 END),
+							dblTransfersShipped		= SUM(CASE WHEN intSourceType = 6 THEN dblQty ELSE 0 END),
+							dblInTransitInbound		= SUM(CASE WHEN intSourceType = 7 THEN dblQty ELSE 0 END),
+							dblInTransitOutbound	= SUM(CASE WHEN intSourceType = 8 THEN dblQty ELSE 0 END),
+							dblConsumedQty			= SUM(CASE WHEN intSourceType = 9 THEN dblQty ELSE 0 END),
+							dblProduced				= SUM(CASE WHEN intSourceType = 10 THEN dblQty ELSE 0 END)
+				FROM #tmpDailyStockPosition 
+				GROUP BY intItemId, intLocationId
+			) tmpDSP
+				ON Item.intItemId = tmpDSP.intItemId
+			LEFT JOIN tblICCommodity Commodity
+				ON Commodity.intCommodityId = Item.intCommodityId
+			LEFT JOIN tblICCategory Category
+				ON Category.intCategoryId = Item.intCategoryId
+			INNER JOIN tblSMCompanyLocation Loc 
+				ON Loc.intCompanyLocationId = tmpDSP.intLocationId
+			INNER JOIN vyuICUserCompanyLocations permission 
+				ON permission.intCompanyLocationId = Loc.intCompanyLocationId
+		WHERE 
+			permission.intEntityId = @intUserId
+	END 
+	ELSE
+	BEGIN 
+		INSERT INTO tblICStagingDailyStockPosition
+		SELECT	guidSessionId			= @guidSessionId,
+				intKey					= CAST(ROW_NUMBER() OVER(ORDER BY Item.intCommodityId, Item.intItemId) AS INT),
+				intCommodityId			= Item.intCommodityId,
+				strCommodityCode		= ISNULL(Commodity.strCommodityCode, ''),
+				dtmDate					= CAST(CONVERT(VARCHAR(10),@dtmDate,112) AS datetime),
+				intCategoryId			= Item.intCategoryId,
+				strCategoryCode			= ISNULL(Category.strCategoryCode, ''),
+				intLocationId			= tmpDSP.intLocationId,
+				strLocationName			= Loc.strLocationName,
+				intItemId				= Item.intItemId,
+				strItemNo				= Item.strItemNo,
+				strDescription			= Item.strDescription,
+				intItemUOMId			= StockUOM.intItemUOMId,
+				strItemUOM				= sUOM.strUnitMeasure,
+				dblOpeningQty			= ISNULL(tmpDSP.dblOpeningQty, 0),
+				dblReceivedQty			= ISNULL(tmpDSP.dblReceivedQty, 0),
+				dblInvoicedQty			= ISNULL(tmpDSP.dblInvoicedQty, 0),
+				dblAdjustments			= ISNULL(tmpDSP.dblAdjustments, 0),
+				dblTransfersReceived	= ISNULL(tmpDSP.dblTransfersReceived, 0),
+				dblTransfersShipped		= ISNULL(tmpDSP.dblTransfersShipped, 0),
+				dblInTransitInbound		= ISNULL(tmpDSP.dblInTransitInbound, 0),
+				dblInTransitOutbound	= ISNULL(tmpDSP.dblInTransitOutbound, 0),
+				dblConsumed				= ISNULL(tmpDSP.dblConsumedQty, 0),
+				dblProduced				= ISNULL(tmpDSP.dblProduced, 0),
+				dblClosingQty			= 
+											tmpDSP.dblOpeningQty 
+											+ tmpDSP.dblReceivedQty 
+											- tmpDSP.dblInvoicedQty 
+											+ tmpDSP.dblAdjustments 
+											+ tmpDSP.dblTransfersReceived 
+											- tmpDSP.dblTransfersShipped 
+											+ tmpDSP.dblInTransitInbound 
+											- tmpDSP.dblInTransitOutbound 
+											- tmpDSP.dblConsumedQty 
+											+ tmpDSP.dblProduced,
+				intConcurrencyId		= 1,
+				dtmDateModified			= NULL,
+				dtmDateCreated			= GETDATE(),
+				intModifiedByUserId		= NULL,
+				intCreatedByUserId		= NULL
+		FROM 
+			tblICItem Item
+				INNER JOIN (tblICItemUOM StockUOM
+					INNER JOIN tblICUnitMeasure sUOM ON StockUOM.intUnitMeasureId = sUOM.intUnitMeasureId
+			) ON StockUOM.intItemId = Item.intItemId
+				AND StockUOM.ysnStockUnit = 1
+			LEFT JOIN (SELECT	intItemId,
+							intLocationId,
+							dblOpeningQty			= SUM(CASE WHEN intSourceType = 1 THEN dblQty ELSE 0 END),
+							dblReceivedQty			= SUM(CASE WHEN intSourceType = 2 THEN dblQty ELSE 0 END),
+							dblInvoicedQty			= SUM(CASE WHEN intSourceType = 3 THEN dblQty ELSE 0 END),
+							dblAdjustments			= SUM(CASE WHEN intSourceType = 4 THEN dblQty ELSE 0 END),
+							dblTransfersReceived	= SUM(CASE WHEN intSourceType = 5 THEN dblQty ELSE 0 END),
+							dblTransfersShipped		= SUM(CASE WHEN intSourceType = 6 THEN dblQty ELSE 0 END),
+							dblInTransitInbound		= SUM(CASE WHEN intSourceType = 7 THEN dblQty ELSE 0 END),
+							dblInTransitOutbound	= SUM(CASE WHEN intSourceType = 8 THEN dblQty ELSE 0 END),
+							dblConsumedQty			= SUM(CASE WHEN intSourceType = 9 THEN dblQty ELSE 0 END),
+							dblProduced				= SUM(CASE WHEN intSourceType = 10 THEN dblQty ELSE 0 END)
+				FROM #tmpDailyStockPosition 
+				GROUP BY intItemId, intLocationId
+			) tmpDSP
+				ON Item.intItemId = tmpDSP.intItemId
+			LEFT JOIN tblICCommodity Commodity
+				ON Commodity.intCommodityId = Item.intCommodityId
+			LEFT JOIN tblICCategory Category
+				ON Category.intCategoryId = Item.intCategoryId
+			INNER JOIN tblSMCompanyLocation Loc 
+				ON Loc.intCompanyLocationId = tmpDSP.intLocationId
+	END 
+	
+	

@@ -38,6 +38,7 @@ SELECT Detail.intStorageMeasurementReadingConversionId
 	, Category.strDescription strCategory
 	, Category.intCategoryId
 	, Commodity.intCommodityId
+	, SubLocation.intCompanyLocationId
 FROM tblICStorageMeasurementReadingConversion Detail
 LEFT JOIN tblICStorageMeasurementReading Header ON Header.intStorageMeasurementReadingId = Detail.intStorageMeasurementReadingId
 LEFT JOIN tblICItem Item ON Item.intItemId = Detail.intItemId
