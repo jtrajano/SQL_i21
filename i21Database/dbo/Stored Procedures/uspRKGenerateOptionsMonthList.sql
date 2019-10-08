@@ -212,7 +212,7 @@ BEGIN TRY
 		INSERT INTO @ProjectedOptionMonths(strMonthName,strOptionMonth, strSymbol, strFutureMonth, intFutureMonthId)
 		SELECT @ProjectedMonthName
 			, @ProjectedMonth
-			,(@strOptSymbol + @ProjectedMonthSymbol + RIGHT(CONVERT(NVARCHAR, YEAR(CONVERT(DATETIME,'01 ' + @ProjectedMonth))),2))
+			,@ProjectedMonthSymbol
 			, @ProjectedOptFutureMonth
 			,dbo.fnRKGetFutureMonthId(@FutureMarketId, @ProjectedOptFutureMonth)
 
