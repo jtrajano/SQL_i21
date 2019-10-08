@@ -114,6 +114,7 @@ INSERT INTO tblARInvoiceReportStagingTable (
 	 , strInvoiceFormat
 	 , blbSignature
 	 , ysnStretchLogo
+	 , strSubFormula
 )
 SELECT intInvoiceId				= INV.intInvoiceId
 	 , intCompanyLocationId		= INV.intCompanyLocationId
@@ -230,6 +231,7 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , strInvoiceFormat			= SELECTEDINV.strInvoiceFormat
 	 , blbSignature				= INV.blbSignature
 	 , ysnStretchLogo			= ISNULL(SELECTEDINV.ysnStretchLogo, 0)
+	 , strSubFormula			= INVOICEDETAIL.strSubFormula
 FROM dbo.tblARInvoice INV WITH (NOLOCK)
 INNER JOIN @tblInvoiceReport SELECTEDINV ON INV.intInvoiceId = SELECTEDINV.intInvoiceId
 INNER JOIN (
@@ -291,6 +293,7 @@ LEFT JOIN (
 		 , ID.strAddonDetailKey
 		 , ID.ysnAddonParent
 		 , ID.strBOLNumberDetail
+		 , ID.strSubFormula
 	FROM dbo.tblARInvoiceDetail ID WITH (NOLOCK)
 	LEFT JOIN (
 		SELECT intItemId
@@ -416,6 +419,7 @@ OUTER APPLY (
 	SELECT COUNT(*) AS intInvoiceDetailCount
 	FROM dbo.tblARInvoiceDetail WITH (NOLOCK)
 	WHERE intInvoiceId = INV.intInvoiceId
+	GROUP BY strSubFormula
 ) INVOICEITEMS
 OUTER APPLY (
 	SELECT COUNT(*) AS intEmailSetupCount
