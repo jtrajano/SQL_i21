@@ -1872,7 +1872,7 @@ BEGIN TRY
 										WHERE intSettleStorageId = @intSettleStorageId 
 
 								update a
-									set dblPaidAmount = b.dblOldCost
+									set dblPaidAmount = b.dblOldCost * a.dblUnits
 										from tblGRStorageHistory a
 											join @voucherPayable b 
 												on a.intContractHeaderId = b.intContractHeaderId
