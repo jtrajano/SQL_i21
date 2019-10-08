@@ -127,6 +127,7 @@ DECLARE @strInvoiceReportName			NVARCHAR(100) = NULL
 	  , @strTransportsInvoiceFormat		NVARCHAR(100) = NULL
 	  , @strGrainInvoiceFormat			NVARCHAR(100) = NULL
 	  , @strMeterBillingInvoiceFormat	NVARCHAR(100) = NULL
+	  , @strCreditMemoReportName		NVARCHAR(100) = NULL
 	  , @ysnStretchLogo					BIT = 0
 
 SELECT TOP 1 @strInvoiceReportName			= ISNULL(strInvoiceReportName, 'Standard')
@@ -134,6 +135,7 @@ SELECT TOP 1 @strInvoiceReportName			= ISNULL(strInvoiceReportName, 'Standard')
 		   , @strTransportsInvoiceFormat	= ISNULL(strTransportsInvoiceFormat, ISNULL(strInvoiceReportName, 'Standard'))
 		   , @strGrainInvoiceFormat			= ISNULL(strGrainInvoiceFormat, ISNULL(strInvoiceReportName, 'Standard'))
 		   , @strMeterBillingInvoiceFormat	= ISNULL(strMeterBillingInvoiceFormat, ISNULL(strInvoiceReportName, 'Standard'))
+		   , @strCreditMemoReportName		= ISNULL(strCreditMemoReportName, ISNULL(strInvoiceReportName, 'Standard'))
 		   , @ysnStretchLogo				= ISNULL(ysnStretchLogo, 0)
 FROM dbo.tblARCompanyPreference WITH (NOLOCK)
 
@@ -142,6 +144,7 @@ SET @strTankDeliveryInvoiceFormat = ISNULL(@strTankDeliveryInvoiceFormat, 'Stand
 SET @strTransportsInvoiceFormat = ISNULL(@strTransportsInvoiceFormat, 'Standard')
 SET @strGrainInvoiceFormat = ISNULL(@strGrainInvoiceFormat, 'Standard')
 SET @strMeterBillingInvoiceFormat = ISNULL(@strMeterBillingInvoiceFormat, 'Standard')
+SET @strCreditMemoReportName = ISNULL(@strInvoiceReportName, 'Standard')
 SET @ysnStretchLogo = ISNULL(@ysnStretchLogo, 0)
 
 --GET INVOICES WITH FILTERS
@@ -160,12 +163,7 @@ SELECT intInvoiceId			= INVOICE.intInvoiceId
 	 , ysnStretchLogo		= @ysnStretchLogo
 	 , strInvoiceFormat		= CASE WHEN INVOICE.strType IN ('Software', 'Standard') THEN 
 	 									CASE WHEN ISNULL(TICKET.intTicketId, 0) <> 0 THEN @strGrainInvoiceFormat
-											 ELSE CASE WHEN INVOICE.strTransactionType <> 'Credit Memo' THEN 
-															CASE WHEN @strInvoiceReportName = 'Format 3 - Swink' THEN 'Meter Billing'
-																  ELSE @strInvoiceReportName
-															END
-													   ELSE 'Meter Billing'
-												  END
+											 ELSE @strInvoiceReportName
 										END
 								   WHEN INVOICE.strType IN ('Tank Delivery') THEN @strTankDeliveryInvoiceFormat
 								   WHEN INVOICE.strType IN ('Transport Delivery') THEN @strTransportsInvoiceFormat
@@ -192,13 +190,13 @@ IF ISNULL(@strInvoiceIds, '') <> ''
 	END
 
 INSERT INTO @MCPINVOICES
-SELECT * FROM @INVOICETABLE WHERE strInvoiceFormat = 'Format 1 - MCP' OR (strType = 'Transport Delivery' AND strInvoiceFormat = 'Format 2 - Honstein')
+SELECT * FROM @INVOICETABLE WHERE strInvoiceFormat IN ('Format 1 - MCP', 'Format 5 - Honstein')
 
 IF EXISTS (SELECT TOP 1 NULL FROM @MCPINVOICES)
 	EXEC dbo.[uspARInvoiceMCPReport] @MCPINVOICES, @intEntityUserId, @strRequestId
 
 INSERT INTO @STANDARDINVOICES
-SELECT * FROM @INVOICETABLE WHERE strInvoiceFormat NOT IN ('Format 1 - MCP', 'Format 2 - Honstein')
+SELECT * FROM @INVOICETABLE WHERE strInvoiceFormat NOT IN ('Format 1 - MCP', 'Format 5 - Honstein')
 
 IF EXISTS (SELECT TOP 1 NULL FROM @STANDARDINVOICES)
 	EXEC dbo.[uspARInvoiceReport] @STANDARDINVOICES, @intEntityUserId, @strRequestId
