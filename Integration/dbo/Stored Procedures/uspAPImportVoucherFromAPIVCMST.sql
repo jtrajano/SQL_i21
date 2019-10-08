@@ -406,7 +406,8 @@ SELECT
 									ISNULL(NULLIF(C.aphgl_gl_un,0),1)
 									*
 									(CASE 
-										WHEN ISNULL(C.aphgl_gl_amt, C2.apivc_net_amt) < 0 -- make the quantity negative if amount is negative 
+										WHEN C2.apivc_comment != 'CCD Reconciliation Reversal'
+											AND ISNULL(C.aphgl_gl_amt, C2.apivc_net_amt) < 0 -- make the quantity negative if amount is negative 
 										THEN 
 											(CASE WHEN C2.apivc_net_amt = 0 OR ISNULL(NULLIF(C.aphgl_gl_un,0),1) < 0 THEN 1 ELSE -1 END) --If total of voucher is 0, retain the qty as negative
 										WHEN C2.apivc_comment = 'CCD Reconciliation Reversal'
@@ -433,7 +434,8 @@ SELECT
 									ISNULL(NULLIF(C.aphgl_gl_un,0),1)
 									*
 									(CASE 
-										WHEN ISNULL(C.aphgl_gl_amt, C2.apivc_net_amt) < 0 -- make the quantity negative if amount is negative 
+										WHEN C2.apivc_comment != 'CCD Reconciliation Reversal'
+											AND ISNULL(C.aphgl_gl_amt, C2.apivc_net_amt) < 0 -- make the quantity negative if amount is negative 
 										THEN 
 											(CASE WHEN C2.apivc_net_amt = 0 OR ISNULL(NULLIF(C.aphgl_gl_un,0),1) < 0 THEN 1 ELSE -1 END) --If total of voucher is 0, retain the qty as negative
 										WHEN C2.apivc_comment = 'CCD Reconciliation Reversal'
