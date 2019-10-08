@@ -150,7 +150,10 @@ SELECT * FROM [fnAPValidatePostPayment](@payments, @post, @userId)
 UNION ALL
 SELECT * FROM [fnAPValidatePrepay](@prepayIds, @post, @userId)
 UNION ALL
-SELECT * FROM [fnAPValidateVoucherPrepay](@prepayIds, @post)
+SELECT strError,
+ strTransactionType,
+ strTransactionId,
+ intTransactionId FROM [fnAPValidateVoucherPrepay](@prepayIds, @post)
 
 SET @totalInvalid = (SELECT COUNT(*) FROM #tmpPayableInvalidData)
 
