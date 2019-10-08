@@ -3,7 +3,8 @@
 	@dtmDate		date = null,
 	@strLocationName nvarchar(max) = '',
 	@ysnLocationLicensed bit = null,
-	@intUserId INT = NULL
+	@intUserId INT = NULL,
+	@strPermission nvarchar(max) = ''
 as
 begin
 	DECLARE @Columns VARCHAR(MAX)
@@ -18,34 +19,42 @@ begin
 	
 	DECLARE @sql AS NVARCHAR(MAX)
 	DECLARE @top as nvarchar(20)
-	declare @location_filter as nvarchar(max)
-	declare @licensed_filter as nvarchar(100)
+	DECLARE @location_filter as nvarchar(max)
+	DECLARE @licensed_filter as nvarchar(100)
+	DECLARE @permission_filter as nvarchar(max)
 
-	if isnull(@strLocationName, '') <> ''
-	begin
-		set @location_filter = ' and intCompanyLocationId in ( '  + @strLocationName + ' ) '		
-	end
-	else
-	begin
-		set @location_filter = ''
-	end
+	IF ISNULL(@strLocationName, '') <> ''
+	BEGIN
+		SET @location_filter = ' AND intCompanyLocationId in ( '  + @strLocationName + ' ) '		
+	END
+	ELSE
+	BEGIN
+		SET @location_filter = ''
+	END
 
-	set @licensed_filter = ' '
+	IF ISNULL(@strPermission, '') <> ''
+	BEGIN
+		SET @permission_filter = ' AND intCompanyLocationId in ( '  + @strPermission + ' ) '		
+	END
+	ELSE
+	BEGIN
+		SET @permission_filter = ''
+	END
 
-	if(@ysnLocationLicensed is not null)
-	begin
-		set @licensed_filter = ' and ysnLicensed = ' + cast(@ysnLocationLicensed as nvarchar) + ' '
-	end
+	SET @licensed_filter = ' '
+	IF (@ysnLocationLicensed is not null)
+	BEGIN
+		SET @licensed_filter = ' and ysnLicensed = ' + cast(@ysnLocationLicensed as nvarchar) + ' '
+	END
 
-	set @top = ''
-	--set @dtmDate = isnull(@dtmDate, getdate())
-	
-	if @ysnGetHeader = 1
-	begin
-		set @top = ' top 1'
-		set @dtmDate = NULL 
-		set @licensed_filter = ''
-	end
+	SET @top = ''
+
+	IF @ysnGetHeader = 1
+	BEGIN
+		SET @top = ' top 1'
+		SET @dtmDate = NULL 
+		SET @licensed_filter = ''
+	END
 	SET @sql = 
 	'
 	DECLARE @dtmDate AS DATETIME = ' + ISNULL('''' + CAST(@dtmDate AS NVARCHAR(20)) + '''', 'NULL') + '
@@ -77,7 +86,7 @@ begin
 				and t.intItemLocationId = il.intItemLocationId 
 		WHERE 
 			(dbo.fnDateLessThanEquals(t.dtmDate,  @dtmDate) = 1 OR @dtmDate IS NULL)'  
-			+ @location_filter + '
+			+ @location_filter + @permission_filter + '
 	) AS s	
 	/*outer apply (
 			SELECT						
@@ -115,10 +124,6 @@ begin
 		SUM( dblQty)
 		FOR strCommodityCode IN (' + @Columns + ')
 	) AS PVT
-	INNER JOIN vyuICUserCompanyLocations permission ON permission.intCompanyLocationId = PVT.intCompanyLocationId
-	WHERE permission.intEntityId = ' + CAST(@intUserId AS VARCHAR(50)) + '
-	--WHERE 
-	--	[Canola] IS NOT NULL 	
 	ORDER BY PVT.strLocationName 
 	'	
 	EXEC(@sql) 

@@ -8,6 +8,7 @@ SELECT
 	 , strCustomerName = e.strName
 	 , strOrderType = ot.strOrderType COLLATE Latin1_General_CI_AS
 	 , s.intOrderType
+	 , s.intShipFromLocationId
 	 , strDestination = l.strLocationName
 	 , s.dtmShipDate
 	 , s.strBOLNumber
