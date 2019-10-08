@@ -60,3 +60,6 @@
 	CONSTRAINT [FK_tblCTPriceFixationDetail_tblARInvoice_intInvoiceId] FOREIGN KEY (intInvoiceId) REFERENCES tblARInvoice(intInvoiceId),
 	CONSTRAINT [FK_tblCTPriceFixationDetail_tblARInvoiceDetail_intInvoiceDetailId] FOREIGN KEY (intInvoiceDetailId) REFERENCES tblARInvoiceDetail(intInvoiceDetailId)
 )
+GO
+CREATE NONCLUSTERED INDEX [IX_tblCTPriceFixationDetail_intPriceFixationId] ON [dbo].[tblCTPriceFixationDetail](intPriceFixationId);
+GO
