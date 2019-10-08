@@ -8086,6 +8086,30 @@
     <Build Include="dbo\Functions\fnCTGetAvailablePriceQuantity.sql" />
     <Build Include="dbo\Stored Procedures\uspSCGetContractsAndAllocate.sql" />
     <Build Include="dbo\Stored Procedures\uspAPConvertPaymentToPrepay.sql" />
+    <Build Include="dbo\Tables\tblRKFuturesMonthPreStage.sql" />
+    <Build Include="dbo\Tables\tblRKOptionsMonthPreStage.sql" />
+    <Build Include="dbo\Tables\tblRKFuturesSettlementPricePreStage.sql" />
+    <Build Include="dbo\Tables\tblRKFutOptTransactionHeaderPreStage.sql" />
+    <Build Include="dbo\Tables\tblRKM2MBasisPreStage.sql" />
+    <Build Include="dbo\Tables\tblRKCoverageEntryPreStage.sql" />
+    <Build Include="dbo\Tables\tblRKFuturesMonthStage.sql" />
+    <Build Include="dbo\Tables\tblRKFuturesMonthAckStage.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPInterCompanyPreStageFutureMonth.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPInterCompanyPreStageOptionMonth.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPInterCompanyPreStageSettlementPrice.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPInterCompanyPreStageFutOptTransaction.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPInterCompanyPreStageM2MBasis.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPInterCompanyPreStageCoverageEntry.sql" />
+    <Build Include="dbo\Tables\tblRKOptionsMonthStage.sql" />
+    <Build Include="dbo\Tables\tblRKOptionsMonthAckStage.sql" />
+    <Build Include="dbo\Tables\tblRKFuturesSettlementPriceStage.sql" />
+    <Build Include="dbo\Tables\tblRKFuturesSettlementPriceAckStage.sql" />
+    <Build Include="dbo\Tables\tblRKFutOptTransactionHeaderStage.sql" />
+    <Build Include="dbo\Tables\tblRKFutOptTransactionHeaderAckStage.sql" />
+    <Build Include="dbo\Tables\tblRKM2MBasisStage.sql" />
+    <Build Include="dbo\Tables\tblRKM2MBasisAckStage.sql" />
+    <Build Include="dbo\Tables\tblRKCoverageEntryStage.sql" />
+    <Build Include="dbo\Tables\tblRKCoverageEntryAckStage.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
