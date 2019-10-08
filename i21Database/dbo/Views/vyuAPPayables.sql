@@ -359,7 +359,8 @@ SELECT
 	  A.dtmDatePaid AS dtmDate 
 	, ISNULL(B.intBillId ,B.intOrigBillId) AS intBillId  
 	, C.strBillId
-	, CAST(B.dblPayment * prepaidDetail.dblRate AS DECIMAL(18,2))  AS dblAmountPaid     
+	, CAST(B.dblPayment * prepaidDetail.dblRate AS DECIMAL(18,2))  
+		* (CASE WHEN C.intTransactionType = 3 THEN -1 ELSE 1 END) AS dblAmountPaid     
 	, dblTotal = 0 
 	, dblAmountDue = 0 
 	, dblWithheld = B.dblWithheld
@@ -392,7 +393,7 @@ OUTER APPLY (
 ) prepaidDetail		
  WHERE A.ysnPosted = 1  
 	AND C.ysnPosted = 1
-	AND C.intTransactionType IN (1) --BILL TRANSACTION ONLY
+	AND C.intTransactionType IN (1, 3) --BILL TRANSACTION ONLY
 	AND A.ysnPrepay = 1
 	AND NOT EXISTS (
 		SELECT 1 FROM vyuAPPaidOriginPrepaid originPrepaid WHERE originPrepaid.intBillId = C.intBillId
