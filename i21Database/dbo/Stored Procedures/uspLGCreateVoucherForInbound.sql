@@ -37,13 +37,18 @@ BEGIN TRY
 	FROM (
 		SELECT intBillId
 		FROM tblLGLoadCost
-		WHERE intBillId IS NOT NULL
-	
+		WHERE intLoadId = @intLoadId
+			AND intBillId IS NOT NULL
+			AND intBillId NOT IN (SELECT intBillId FROM tblAPBillDetail BD 
+									JOIN tblLGLoadDetail LD ON BD.intLoadDetailId = LD.intLoadDetailId
+									WHERE BD.intLoadShipmentCostId IS NULL)
+
 		UNION
 	
 		SELECT intBillId
 		FROM tblLGLoadWarehouseServices
-		WHERE intBillId IS NOT NULL
+		WHERE intLoadWarehouseId IN (SELECT intLoadWarehouseId FROM tblLGLoadWarehouse WHERE intLoadId = @intLoadId)
+			AND intBillId IS NOT NULL
 		) tbl
 
 	IF EXISTS(SELECT TOP 1 1 FROM tblAPBillDetail BD 
@@ -93,6 +98,7 @@ BEGIN TRY
 		,[intContractHeaderId]
 		,[intContractDetailId]
 		,[intContractSeqId]
+		,[intContractCostId]
 		,[intInventoryReceiptItemId]
 		,[intLoadShipmentId]
 		,[intLoadShipmentDetailId]
@@ -127,7 +133,7 @@ BEGIN TRY
 		[intEntityVendorId] = D1.intEntityId
 		,[intTransactionType] = 1
 		,[intLocationId] = IsNull(L.intCompanyLocationId, CT.intCompanyLocationId)
-		,[intCurrencyId] = L.intCurrencyId
+		,[intCurrencyId] = COALESCE(CY.intMainCurrencyId, CY.intCurrencyID, L.intCurrencyId)
 		,[dtmDate] = L.dtmPostedDate
 		,[strVendorOrderNumber] = ''
 		,[strReference] = ''
@@ -135,6 +141,7 @@ BEGIN TRY
 		,[intContractHeaderId] = CH.intContractHeaderId
 		,[intContractDetailId] = LD.intPContractDetailId
 		,[intContractSeqId] = CT.intContractSeq
+		,[intContractCostId] = NULL
 		,[intInventoryReceiptItemId] = receiptItem.intInventoryReceiptItemId
 		,[intLoadShipmentId] = L.intLoadId
 		,[intLoadShipmentDetailId] = LD.intLoadDetailId
@@ -147,16 +154,16 @@ BEGIN TRY
 		,[dblQuantityToBill] = LD.dblQuantity
 		,[dblQtyToBillUnitQty] = ISNULL(ItemUOM.dblUnitQty,1)
 		,[intQtyToBillUOMId] = LD.intItemUOMId
-		,[dblCost] = (CASE WHEN intPurchaseSale = 3 THEN ISNULL(AD.dblSeqPrice, 0) ELSE LD.dblUnitPrice END)
+		,[dblCost] = (CASE WHEN intPurchaseSale = 3 THEN ISNULL(AD.dblSeqPrice, 0) ELSE ISNULL(LD.dblUnitPrice, 0) END)
 		,[dblCostUnitQty] = CAST(ISNULL(ItemCostUOM.dblUnitQty,1) AS DECIMAL(38,20))
-		,[intCostUOMId] = (CASE WHEN intPurchaseSale = 3 THEN ISNULL(AD.intSeqPriceUOMId, 0) ELSE LD.intPriceUOMId END)
+		,[intCostUOMId] = (CASE WHEN intPurchaseSale = 3 THEN ISNULL(AD.intSeqPriceUOMId, 0) ELSE ISNULL(AD.intSeqPriceUOMId, LD.intPriceUOMId) END) 
 		,[dblNetWeight] = ISNULL(LD.dblNet,0)
 		,[dblWeightUnitQty] = ISNULL(ItemWeightUOM.dblUnitQty,1)
 		,[intWeightUOMId] = ItemWeightUOM.intItemUOMId
-		,[intCostCurrencyId] = (CASE WHEN intPurchaseSale = 3 THEN ISNULL(AD.intSeqCurrencyId, 0) ELSE LD.intPriceCurrencyId END)
+		,[intCostCurrencyId] = (CASE WHEN intPurchaseSale = 3 THEN ISNULL(AD.intSeqCurrencyId, 0) ELSE ISNULL(AD.intSeqCurrencyId, LD.intPriceCurrencyId) END)
 		,[dblTax] = ISNULL(receiptItem.dblTax, 0)
 		,[dblDiscount] = 0
-		,[dblExchangeRate] = CASE WHEN (@DefaultCurrencyId <> L.intCurrencyId) THEN ISNULL(LD.dblForexRate, 0) ELSE 1 END
+		,[dblExchangeRate] = CASE WHEN (COALESCE(CY.intMainCurrencyId, CY.intCurrencyID, L.intCurrencyId) <> @DefaultCurrencyId) THEN ISNULL(LD.dblForexRate, 0) ELSE 1 END
 		,[ysnSubCurrency] =	AD.ysnSeqSubCurrency
 		,[intSubCurrencyCents] = CY.intCent
 		,[intAccountId] = apClearing.intAccountId
@@ -204,6 +211,7 @@ BEGIN TRY
 		,[intContractHeaderId] = CH.intContractHeaderId
 		,[intContractDetailId] = CT.intContractDetailId
 		,[intContractSeqId] = CT.intContractSeq
+		,[intContractCostId] = CTC.intContractCostId
 		,[intInventoryReceiptItemId] = NULL
 		,[intLoadShipmentId] = A.intLoadId
 		,[intLoadShipmentDetailId] = A.intLoadDetailId
@@ -251,6 +259,11 @@ BEGIN TRY
 		INNER JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.[intEntityId] = D2.intEntityId) ON A.[intEntityVendorId] = D1.[intEntityId]
 		OUTER APPLY dbo.fnGetItemGLAccountAsTable(A.intItemId, ItemLoc.intItemLocationId, 'AP Clearing') itemAccnt
 		LEFT JOIN dbo.tblGLAccount apClearing ON apClearing.intAccountId = itemAccnt.intAccountId
+		OUTER APPLY (SELECT TOP 1 CTC.intContractCostId FROM tblCTContractCost CTC
+						WHERE CT.intContractDetailId = CTC.intContractDetailId
+							AND A.intItemId = CTC.intItemId
+							AND A.intEntityVendorId = CTC.intVendorId
+						) CTC
 	WHERE A.intLoadId = @intLoadId
 		AND A.intLoadDetailId NOT IN 
 			(SELECT IsNull(BD.intLoadDetailId, 0) FROM tblAPBillDetail BD JOIN tblICItem Item ON Item.intItemId = BD.intItemId
@@ -290,7 +303,9 @@ BEGIN TRY
 
 	IF (@total = 0)
 	BEGIN
-		RAISERROR ('Bill process failure #1',11,1);
+		SET @ErrorMessage = 'Voucher was already created for ' + @strLoadNumber;
+
+		RAISERROR (@ErrorMessage,11,1);
 		RETURN;
 	END
 
