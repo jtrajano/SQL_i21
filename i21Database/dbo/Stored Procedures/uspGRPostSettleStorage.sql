@@ -1317,13 +1317,21 @@ BEGIN TRY
 					,[dblCostUnitQty]			= ISNULL(a.dblCostUnitQty,1)
 					,[dblUnitQty]				= 1
 					,[dblNetWeight]				= CASE 
-													WHEN a.[intContractHeaderId] IS NOT NULL THEN a.dblUnits 
-													ELSE 0 
-												END
-					,[intWeightUOMId]			= CASE
-													WHEN a.[intContractHeaderId] IS NOT NULL THEN b.intItemUOMId
-													ELSE NULL
-												END
+													WHEN a.intItemType = 1 AND ST.ysnDPOwnedType = 1 THEN RI.dblOpenReceive
+													ELSE
+														CASE 
+															WHEN @origdblSpotUnits > 0 THEN ROUND(dbo.fnCalculateQtyBetweenUOM(b.intItemUOMId,@intCashPriceUOMId,a.dblUnits),6)
+															ELSE a.dblUnits
+														END														
+												  END
+					,[intWeightUOMId]			= CASE 
+													WHEN a.intItemType = 1 AND ST.ysnDPOwnedType = 1 THEN RI.intUnitMeasureId
+													ELSE
+														CASE 
+															WHEN @origdblSpotUnits > 0 THEN b.intItemUOMId
+															ELSE b.intWeightUOMId
+														END														
+												  END
 					,[intInventoryReceiptItemId] = 
 												--CASE 
 												--	WHEN ST.ysnDPOwnedType = 0 THEN NULL
