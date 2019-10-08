@@ -50,7 +50,8 @@ BEGIN TRY
 			@dblNetUnitsToCompare	NUMERIC(18,6),
 			@intDistributionMethod	INT,
 			@locationId				INT
-		
+
+	DECLARE @dblTicketScheduledQuantity NUMERIC(18,6)
 	DECLARE @intTicketLoadDetailId	INT
 	DECLARE @intLoadId	INT
 	DECLARE @LoadContractsDetailId Id
@@ -97,6 +98,7 @@ BEGIN TRY
 		, @intTicketContractDetailId = intContractId
 		, @UseScheduleForAvlCalc = CASE WHEN intStorageScheduleTypeId = -6 THEN 0 ELSE 1 END 
 		,@intTicketLoadDetailId = intLoadDetailId
+		,@dblTicketScheduledQuantity = dblScheduleQty
 	FROM tblSCTicket 
 	WHERE intTicketId = @intTicketId
 
@@ -326,13 +328,14 @@ BEGIN TRY
 				GOTO CONTINUEISH
 			END
 		END
-		IF NOT @dblAvailable > 0
+		IF NOT (@dblAvailable > 0 OR (@strDistributionOption = 'CNT' AND @intContractDetailId = @intTicketContractDetailId AND (@dblAvailable + ISNULL(@dblTicketScheduledQuantity,0)) > 0 ))
 		BEGIN
 			INSERT	INTO @Processed (intContractDetailId,ysnIgnore) SELECT @intContractDetailId,1
 			GOTO CONTINUEISH
 		END
 
 		IF	@dblNetUnits <= @dblAvailable OR @ysnUnlimitedQuantity = 1
+			OR (@strDistributionOption = 'CNT' AND @intContractDetailId = @intTicketContractDetailId AND @dblNetUnits <= (@dblAvailable + ISNULL(@dblTicketScheduledQuantity,0)) )
 		BEGIN
 			INSERT	INTO @Processed SELECT @intContractDetailId,@dblNetUnits,NULL,@dblCost,0,@intLoadDetailId
 			IF (@ysnAutoIncreaseQty = 1 OR @ysnAutoIncreaseSchQty = 1) AND  @dblScheduleQty < @dblNetUnits AND @intTicketContractDetailId = @intContractDetailId
@@ -359,6 +362,24 @@ BEGIN TRY
 								@intUserId				=	@intUserId,
 								@intExternalId			=	@intTicketId,
 								@strScreenName			=	'Auto - Scale'
+					END
+				END
+				ELSE
+				BEGIN
+					
+					IF(@intContractDetailId = @intTicketContractDetailId)
+					BEGIN
+						-- Adjust the scheduled quantity based on the ticket scheduled and net units
+						SET @dblInreaseSchBy  = @dblNetUnits - ISNULL(@dblTicketScheduledQuantity,0)
+						IF(@dblInreaseSchBy <> 0)
+						BEGIN
+							EXEC	uspCTUpdateScheduleQuantity 
+									@intContractDetailId	=	@intContractDetailId,
+									@dblQuantityToUpdate	=	@dblInreaseSchBy,
+									@intUserId				=	@intUserId,
+									@intExternalId			=	@intTicketId,
+									@strScreenName			=	'Auto - Scale'
+						END
 					END
 				END
 			END
