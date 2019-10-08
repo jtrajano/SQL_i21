@@ -289,9 +289,9 @@ ELSE
           FROM dbo.tblSMCompanyLocation WITH (NOLOCK)
     END
 
---IF(OBJECT_ID('tempdb..#INVOICES') IS NOT NULL)
+--IF(OBJECT_ID('tempdb..#VOUCHERS') IS NOT NULL)
 --BEGIN
---    DROP TABLE #INVOICES
+--    DROP TABLE #VOUCHERS
 --END
 
 DECLARE @TYPES AS TABLE ([strType] NVARCHAR(100) COLLATE Latin1_General_CI_AS PRIMARY KEY)
@@ -317,7 +317,7 @@ ELSE
           FROM [dbo].[fnAPGetVoucherSourceList]()
     END
 
---CREATE TABLE #INVOICES
+--CREATE TABLE #VOUCHERS
 DECLARE @VOUCHERS AS TABLE
     ([intBillId]         INT PRIMARY KEY,
     strBillId      NVARCHAR(25)  COLLATE Latin1_General_CI_AS NOT NULL,
@@ -373,7 +373,7 @@ ELSE IF (@conditionInvoice IS NOT NULL AND ISNULL(@strVoucherNumberFrom, '') <> 
           FROM dbo.tblAPBill I WITH (NOLOCK)
                LEFT OUTER JOIN (
                                SELECT SP.intEntityId, E.strName
-                                 FROM tblARSalesperson SP WITH (NOLOCK)
+                                 FROM tblAPVendor SP WITH (NOLOCK)
                                       INNER JOIN tblEMEntity E
                                                  ON SP.intEntityId = E.intEntityId
                                ) S ON I.intEntityVendorId = S.intEntityId
@@ -402,12 +402,11 @@ ELSE
           FROM dbo.tblAPBill I WITH (NOLOCK)
                LEFT OUTER JOIN (
                                SELECT SP.intEntityId, E.strName
-                                 FROM tblARSalesperson SP WITH (NOLOCK)
+                                 FROM tblAPVendor SP WITH (NOLOCK)
                                       INNER JOIN tblEMEntity E
                                                  ON SP.intEntityId = E.intEntityId
                                ) S ON I.intEntityVendorId = S.intEntityId
-         WHERE I.dtmDate BETWEEN @dtmDateFrom AND @dtmDateTo
-           AND (@strSalespersonName IS NULL OR S.strName LIKE '%' + @strSalespersonName + '%')
+         WHERE (@strSalespersonName IS NULL OR S.strName LIKE '%' + @strSalespersonName + '%')
            --AND I.dblTax <> 0.000000
     END
 
