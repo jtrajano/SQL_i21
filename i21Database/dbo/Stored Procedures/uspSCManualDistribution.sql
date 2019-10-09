@@ -122,21 +122,6 @@ OPEN intListCursor;
 							--get contract Detail Id of the load detail  
 							SELECT @intLoadContractDetailId = intPContractDetailId FROM tblLGLoadDetail WHERE intLoadDetailId = @intLoadDetailId  
 							
-							-- remove schedule quantity of the load schedule  					
-								-- SELECT TOP 1 @dblLoadScheduleQty = dblQuantity,@intLoadItemUOMId = intItemUOMId FROM tblLGLoadDetail WHERE intLoadDetailId = @intLoadDetailId  
-								SET @dblLoadScheduleQty  = @dblLoopContractUnits * -1  
-								-- EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoadContractDetailId, @dblLoadScheduleQty , @intUserId, @intTicketId, 'Scale', @intLoadItemUOMId  
-
-								EXEC	uspCTUpdateScheduleQuantity 
-								@intContractDetailId	=	@intLoopContractId,
-								@dblQuantityToUpdate	=	@dblLoadScheduleQty,
-								@intUserId				=	@intUserId,
-								@intExternalId			=	@intTicketId,
-								@strScreenName			=	'Auto - Scale'
-								
-							-- -- add schedule quantity of the ticket  
-							-- EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoadContractDetailId, @dblLoopContractUnits, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId  
-							
 							IF(@intLoopContractId = @intLoadContractDetailId)  
 							BEGIN   
 
