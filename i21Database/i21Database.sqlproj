@@ -8061,6 +8061,7 @@
     <Build Include="dbo\Stored Procedures\uspAPConvertPaymentToPrepay.sql" />
     <Build Include="dbo\Views\vyuICGetRetailValuationByLocation.sql" />
     <Build Include="dbo\Functions\fnAPIsItemInContract.sql" />
+    <Build Include="dbo\Views\vyuCTShipmentStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
