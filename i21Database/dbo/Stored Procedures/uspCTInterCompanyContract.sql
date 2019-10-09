@@ -104,11 +104,6 @@ BEGIN TRY
 
 		IF @strInsert = 'Insert'
 		BEGIN
-			DELETE
-			FROM tblCTContractStage
-			WHERE IsNULL(strFeedStatus, '') = ''
-				AND intContractHeaderId = @ContractHeaderId
-
 			IF EXISTS (
 					SELECT 1
 					FROM tblCTContractHeader
@@ -116,14 +111,12 @@ BEGIN TRY
 						AND intConcurrencyId = 1
 					)
 			BEGIN
-				EXEC uspCTContractPopulateStgXML @ContractHeaderId
-					,@intToEntityId
-					,@intCompanyLocationId
-					,@strToTransactionType
-					,@intToCompanyId
+				INSERT INTO dbo.tblCTContractPreStage (
+					intContractHeaderId
+					,strRowState
+					)
+				SELECT @ContractHeaderId
 					,'Added'
-					,0
-					,@intToBookId
 			END
 		END
 
@@ -136,14 +129,18 @@ BEGIN TRY
 						AND intConcurrencyId > 1
 					)
 			BEGIN
-				EXEC uspCTContractPopulateStgXML @ContractHeaderId
-					,@intToEntityId
-					,@intCompanyLocationId
-					,@strToTransactionType
-					,@intToCompanyId
+				DELETE
+				FROM tblCTContractPreStage
+				WHERE strFeedStatus IS NULL
+					AND intContractHeaderId = @ContractHeaderId
+					AND strRowState = 'Modified'
+
+				INSERT INTO dbo.tblCTContractPreStage (
+					intContractHeaderId
+					,strRowState
+					)
+				SELECT @ContractHeaderId
 					,'Modified'
-					,0
-					,@intToBookId
 			END
 		END
 
@@ -153,14 +150,12 @@ BEGIN TRY
 				WHERE intContractHeaderId = @ContractHeaderId
 				)
 		BEGIN
-			EXEC uspCTContractPopulateStgXML @ContractHeaderId
-				,@intToEntityId
-				,@intCompanyLocationId
-				,@strToTransactionType
-				,@intToCompanyId
+			INSERT INTO dbo.tblCTContractPreStage (
+				intContractHeaderId
+				,strRowState
+				)
+			SELECT @ContractHeaderId
 				,'Delete'
-				,0
-				,@intToBookId
 		END
 	END
 END TRY
