@@ -4779,14 +4779,15 @@ IF(@ysnDebug = 1)
 												END
 											 WHEN (@strInvoiceTransactionTypeMain = @strCREDITMEMO)
 													THEN CASE
-															WHEN (Inv.dblInvoiceTotal - (Inv.dblTax + Inv.dblBaseTax + CH.dblCustomerPayments)) = ((CH.dblTotalDeposits * -1))
+															WHEN (Inv.dblInvoiceTotal - (Inv.dblTax + Inv.dblBaseTax)) = ((CH.dblTotalDeposits - CH.dblCustomerPayments) * -1)
 															   THEN CAST(1 AS BIT)
-															WHEN (Inv.dblInvoiceTotal - (Inv.dblTax + Inv.dblBaseTax + CH.dblCustomerPayments)) > ((CH.dblTotalDeposits * -1))
+															WHEN (Inv.dblInvoiceTotal - (Inv.dblTax + Inv.dblBaseTax)) > ((CH.dblTotalDeposits - CH.dblCustomerPayments) * -1)
 																THEN CAST(0 AS BIT)
-															WHEN (Inv.dblInvoiceTotal - (Inv.dblTax + Inv.dblBaseTax + CH.dblCustomerPayments)) < ((CH.dblTotalDeposits * -1))
+															WHEN (Inv.dblInvoiceTotal - (Inv.dblTax + Inv.dblBaseTax)) < ((CH.dblTotalDeposits - CH.dblCustomerPayments) * -1)
 																THEN CAST(0 AS BIT)
 												END
                                          END AS ysnEqual
+-- QQ
                                        , CASE
 											WHEN (@strInvoiceTransactionTypeMain = @strCASH)
 													THEN CASE
@@ -4805,16 +4806,16 @@ IF(@ysnDebug = 1)
 												END
 											 WHEN (@strInvoiceTransactionTypeMain = @strCREDITMEMO)
 													THEN CASE
-														WHEN (Inv.dblInvoiceTotal - (Inv.dblTax + Inv.dblBaseTax + CH.dblCustomerPayments)) = ((CH.dblTotalDeposits * -1))
+														WHEN (Inv.dblInvoiceTotal - (Inv.dblTax + Inv.dblBaseTax)) = ((CH.dblTotalDeposits - CH.dblCustomerPayments) * -1)
 															THEN 'Total of Sales Invoice is equal to Total Deposits - Customer Payments'
-														WHEN (Inv.dblInvoiceTotal - (Inv.dblTax + Inv.dblBaseTax +  CH.dblCustomerPayments)) > ((CH.dblTotalDeposits * -1))
+														WHEN (Inv.dblInvoiceTotal - (Inv.dblTax + Inv.dblBaseTax)) > ((CH.dblTotalDeposits - CH.dblCustomerPayments) * -1)
 															THEN 'Total of Sales Invoice is higher than Total Deposits - Customer Payments. Posting will not continue.<br>'
-																			  + 'Total of Sales Invoice: ' + CAST(ISNULL((Inv.dblInvoiceTotal - (Inv.dblTax + Inv.dblBaseTax + CH.dblCustomerPayments)), 0) AS NVARCHAR(50)) + '<br>'
+																			  + 'Total of Sales Invoice: ' + CAST(ISNULL((Inv.dblInvoiceTotal - (Inv.dblTax + Inv.dblBaseTax)), 0) AS NVARCHAR(50)) + '<br>'
 																			  + 'Total Deposits: ' + CAST(ISNULL((CH.dblTotalDeposits * -1), 0) AS NVARCHAR(50)) + '<br>'
 																			  + 'Customer Payments: ' + CAST(ISNULL(CH.dblCustomerPayments, 0) AS NVARCHAR(50)) + '<br>'
-														WHEN (Inv.dblInvoiceTotal - (Inv.dblTax + Inv.dblBaseTax +  CH.dblCustomerPayments)) < ((CH.dblTotalDeposits * -1))
+														WHEN (Inv.dblInvoiceTotal - (Inv.dblTax + Inv.dblBaseTax)) < ((CH.dblTotalDeposits - CH.dblCustomerPayments) * -1)
 															THEN 'Total of Sales Invoice is lower than Total Deposits - Customer Payments. Posting will not continue.<br>'
-																			   + 'Total of Sales Invoice: ' + CAST(ISNULL((Inv.dblInvoiceTotal - (Inv.dblTax + Inv.dblBaseTax + CH.dblCustomerPayments)), 0) AS NVARCHAR(50)) + '<br>'
+																			   + 'Total of Sales Invoice: ' + CAST(ISNULL((Inv.dblInvoiceTotal - (Inv.dblTax + Inv.dblBaseTax)), 0) AS NVARCHAR(50)) + '<br>'
 																			   + 'Total Deposits: ' + CAST(ISNULL((CH.dblTotalDeposits * -1), 0) AS NVARCHAR(50)) + '<br>'
 																			   + 'Customer Payments: ' + CAST(ISNULL(CH.dblCustomerPayments, 0) AS NVARCHAR(50)) + '<br>'
 												END
