@@ -8085,6 +8085,7 @@
     <Build Include="dbo\Views\vyuAPRptWeightClaimJDE.sql" />
     <Build Include="dbo\Functions\fnCTGetAvailablePriceQuantity.sql" />
     <Build Include="dbo\Stored Procedures\uspSCGetContractsAndAllocate.sql" />
+    <Build Include="dbo\Views\vyuCTShipmentStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
