@@ -2640,6 +2640,7 @@ BEGIN TRY
 				,[intAmountCurrencyId]
 				,[strRemarks]
 				,[intLoadContainerRefId]
+				,intSort
 				)
 			SELECT 1 AS [intConcurrencyId]
 				,@intNewLoadId
@@ -2686,6 +2687,7 @@ BEGIN TRY
 				,ACU.intCurrencyID
 				,x.[strRemarks]
 				,x.[intLoadContainerId]
+				,x.intSort
 			FROM OPENXML(@idoc, 'vyuLGLoadContainerViews/vyuLGLoadContainerView', 2) WITH (
 					[strContainerNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS
 					,[dblQuantity] NUMERIC(18, 6)
@@ -2735,6 +2737,7 @@ BEGIN TRY
 					,strStaticValueCurrency NVARCHAR(50) COLLATE Latin1_General_CI_AS
 					,strAmountCurrency NVARCHAR(50) COLLATE Latin1_General_CI_AS
 					,intLoadContainerId INT
+					,intSort int
 					) x
 			LEFT JOIN tblICUnitMeasure UM ON UM.strUnitMeasure = x.strUnitMeasure
 			LEFT JOIN tblICUnitMeasure WUM ON WUM.strUnitMeasure = x.strWeightUnitMeasure
@@ -2745,7 +2748,7 @@ BEGIN TRY
 					FROM tblLGLoadContainer LD
 					WHERE LD.intLoadId = @intNewLoadId
 						AND LD.intLoadContainerRefId = x.intLoadContainerId
-					)
+					) Order by x.intSort
 
 			UPDATE LD
 			SET [intConcurrencyId] = LD.[intConcurrencyId] + 1
@@ -2791,6 +2794,7 @@ BEGIN TRY
 				,[dblAmount] = x.[dblAmount]
 				,[intAmountCurrencyId] = ACU.[intCurrencyID]
 				,[strRemarks] = x.[strRemarks]
+				,intSort=x.intSort
 			FROM OPENXML(@idoc, 'vyuLGLoadContainerViews/vyuLGLoadContainerView', 2) WITH (
 					[strContainerNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS
 					,[dblQuantity] NUMERIC(18, 6)
@@ -2840,6 +2844,7 @@ BEGIN TRY
 					,strWeightUnitMeasure NVARCHAR(50) COLLATE Latin1_General_CI_AS
 					,strStaticValueCurrency NVARCHAR(50) COLLATE Latin1_General_CI_AS
 					,strAmountCurrency NVARCHAR(50) COLLATE Latin1_General_CI_AS
+					,intSort int
 					) x
 			JOIN tblLGLoadContainer LD ON LD.intLoadId = @intNewLoadId
 				AND LD.intLoadContainerRefId = x.intLoadContainerId
