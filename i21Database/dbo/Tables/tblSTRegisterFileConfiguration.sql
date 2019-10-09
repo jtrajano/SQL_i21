@@ -9,7 +9,7 @@
     [strFolderPath]					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
     [strURICommand]					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
 	[strStoredProcedure]			NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL, 
-	-- [ysnActive]						BIT NOT NULL DEFAULT(1),
+	[ysnActive]						BIT NOT NULL DEFAULT(1),
     [intConcurrencyId]				INT NULL, 
     CONSTRAINT [PK_tblSTRegisterFileConfiguration_intRegisterFileConfigId] PRIMARY KEY CLUSTERED ([intRegisterFileConfigId] ASC), 
     CONSTRAINT [FK_tblSTRegisterFileConfiguration_tblSTRegister_intRegisterId] FOREIGN KEY ([intRegisterId]) REFERENCES [tblSTRegister]([intRegisterId]), 
