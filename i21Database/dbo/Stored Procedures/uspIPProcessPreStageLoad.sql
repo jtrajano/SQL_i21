@@ -12,10 +12,43 @@ BEGIN TRY
 		,@intToCompanyId INT
 		,@intToEntityId INT
 		,@strToTransactionType NVARCHAR(100)
+	DECLARE @tblLGIntrCompLogisticsPreStg TABLE (
+		intLoadPreStageId INT
+		,intLoadId INT
+		,strFeedStatus NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		,dtmFeedDate DATETIME
+		,strRowState NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+		,strToTransactionType NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+		,intToCompanyId INT
+		,intToCompanyLocationId INT
+		,intToBookId INT
+		)
 
-	SELECT @intLoadPreStageId = MIN(intLoadPreStageId)
+	INSERT INTO @tblLGIntrCompLogisticsPreStg (
+		intLoadPreStageId
+		,intLoadId
+		,strFeedStatus
+		,dtmFeedDate
+		,strRowState
+		,strToTransactionType
+		,intToCompanyId
+		,intToCompanyLocationId
+		,intToBookId
+		)
+	SELECT intLoadPreStageId
+		,intLoadId
+		,strFeedStatus
+		,dtmFeedDate
+		,strRowState
+		,strToTransactionType
+		,intToCompanyId
+		,intToCompanyLocationId
+		,intToBookId
 	FROM dbo.tblLGIntrCompLogisticsPreStg
 	WHERE strFeedStatus IS NULL
+
+	SELECT @intLoadPreStageId = MIN(intLoadPreStageId)
+	FROM @tblLGIntrCompLogisticsPreStg
 
 	WHILE @intLoadPreStageId IS NOT NULL
 	BEGIN
@@ -32,7 +65,7 @@ BEGIN TRY
 			,@strToTransactionType = strToTransactionType
 			,@intToCompanyLocationId = intToCompanyLocationId
 			,@intToBookId = intToBookId
-		FROM dbo.tblLGIntrCompLogisticsPreStg
+		FROM @tblLGIntrCompLogisticsPreStg
 		WHERE intLoadPreStageId = @intLoadPreStageId
 
 		EXEC dbo.uspLGPopulateLoadXML @intLoadId
@@ -48,9 +81,8 @@ BEGIN TRY
 		WHERE intLoadPreStageId = @intLoadPreStageId
 
 		SELECT @intLoadPreStageId = MIN(intLoadPreStageId)
-		FROM dbo.tblLGIntrCompLogisticsPreStg
-		WHERE strFeedStatus IS NULL
-			AND intLoadPreStageId > @intLoadPreStageId
+		FROM @tblLGIntrCompLogisticsPreStg
+		WHERE intLoadPreStageId > @intLoadPreStageId
 	END
 END TRY
 
