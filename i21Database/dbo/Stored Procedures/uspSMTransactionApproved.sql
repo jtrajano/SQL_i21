@@ -8,7 +8,7 @@ BEGIN
 	DECLARE @strToTransactionType NVARCHAR(100)
 	DECLARE @strInsert NVARCHAR(100)
 	DECLARE @intTransactionApprovedLogId INT
-	,@intToBookId INT
+		,@intToBookId INT
 
 	INSERT INTO [tblCTSMTransactionApprovedLog] (
 		strType
@@ -84,10 +84,7 @@ BEGIN
 					WHERE CH.intContractHeaderId = @recordId
 					)
 			BEGIN
-				IF @strToTransactionType IN (
-						'Purchase Contract'
-						,'Sales Contract'
-						)
+				IF @strToTransactionType = 'Sales Contract'
 					AND @strInsert IN (
 						'Insert on Approval'
 						,'Update on Approval'
@@ -116,6 +113,32 @@ BEGIN
 							,0
 							,@intToBookId
 				END
+
+				IF @strToTransactionType = 'Purchase Contract'
+					AND @strInsert IN (
+						'Insert on Approval'
+						,'Update on Approval'
+						)
+				BEGIN
+					IF NOT EXISTS (
+							SELECT *
+							FROM tblCTContractStage
+							WHERE intContractHeaderId = @recordId
+							)
+						INSERT INTO dbo.tblCTContractPreStage (
+							intContractHeaderId
+							,strRowState
+							)
+						SELECT @recordId
+							,'Added'
+					ELSE
+						INSERT INTO dbo.tblCTContractPreStage (
+							intContractHeaderId
+							,strRowState
+							)
+						SELECT @recordId
+							,'Modified'
+				END
 			END
 		END TRY
 
@@ -131,14 +154,25 @@ BEGIN
 	IF @type = 'ContractManagement.view.PriceContracts'
 	BEGIN
 		BEGIN TRY
-			UPDATE [tblCTSMTransactionApprovedLog] SET ysnOnceApproved = @ysnOnceApproved WHERE intTransactionApprovedLogId = @intTransactionApprovedLogId
-			EXEC uspCTSavePriceContract @intPriceContractId = @recordId,@strXML = '',@ysnApprove = 1
-			UPDATE [tblCTSMTransactionApprovedLog] SET strErrMsg = 'Success' WHERE intTransactionApprovedLogId = @intTransactionApprovedLogId
+			UPDATE [tblCTSMTransactionApprovedLog]
+			SET ysnOnceApproved = @ysnOnceApproved
+			WHERE intTransactionApprovedLogId = @intTransactionApprovedLogId
+
+			EXEC uspCTSavePriceContract @intPriceContractId = @recordId
+				,@strXML = ''
+				,@ysnApprove = 1
+
+			UPDATE [tblCTSMTransactionApprovedLog]
+			SET strErrMsg = 'Success'
+			WHERE intTransactionApprovedLogId = @intTransactionApprovedLogId
 		END TRY
+
 		BEGIN CATCH
-			UPDATE [tblCTSMTransactionApprovedLog] SET strErrMsg = ERROR_MESSAGE() WHERE intTransactionApprovedLogId = @intTransactionApprovedLogId
+			UPDATE [tblCTSMTransactionApprovedLog]
+			SET strErrMsg = ERROR_MESSAGE()
+			WHERE intTransactionApprovedLogId = @intTransactionApprovedLogId
 		END CATCH
+
 		RETURN
 	END
-
 END
