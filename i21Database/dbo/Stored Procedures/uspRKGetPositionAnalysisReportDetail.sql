@@ -33,7 +33,7 @@ BEGIN
 		, strPosition
 		, strFutureMonth
 		, dblPrice
-		, dblValue = (CASE WHEN strBuySell = 'Buy' THEN dblQty * -1 ELSE ABS(dblQty) END) * dblPriceInQtyUOM
+		, dblValue = (CASE WHEN strBuySell = 'Buy' THEN dblQty * -1 ELSE ABS(dblQty) END) * dblFutures
 		, intPriceFixationId
 		, dblFutures
 	INTO #tmpReportDetail

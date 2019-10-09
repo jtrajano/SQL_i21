@@ -318,7 +318,7 @@ END
 --================================================================
 IF @strAction = 'Delete'
 BEGIN
-	DELETE FROM tblARPayment WHERE intPaymentId = @intPaymentId
+	DELETE FROM tblARPayment WHERE intPaymentId = @intPaymentId AND ysnPosted = 0
 	SET @intPaymentIdNew = @intPaymentId
 
 	GOTO Exit_Routine

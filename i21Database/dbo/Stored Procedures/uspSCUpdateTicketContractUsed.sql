@@ -68,7 +68,8 @@ BEGIN TRY
 				END
 				ELSE
 				BEGIN 
-					UPDATE tblSCTicket SET dblScheduleQty = @dblScheduleQty  WHERE intTicketId = @intTicketId AND ISNULL(intContractId,0) = @intContractDetailId AND strDistributionOption != 'SPL' AND strDistributionOption != 'LOD'
+					-- UPDATE tblSCTicket SET dblScheduleQty = @dblScheduleQty  WHERE intTicketId = @intTicketId AND ISNULL(intContractId,0) = @intContractDetailId AND strDistributionOption != 'SPL' AND strDistributionOption != 'LOD'
+					print 'remove update of schedule qty'
 				END
 			END
 		ELSE

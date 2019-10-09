@@ -1,7 +1,7 @@
 ﻿CREATE VIEW [dbo].[vyuSTStoreOnUserRole]
 AS
 SELECT DISTINCT 
-	 CAST(ROW_NUMBER() over(order by Perm.intEntityUserSecurityId desc) AS INT) intId
+	 DENSE_RANK() OVER (ORDER BY Perm.intEntityUserSecurityId, Store.intStoreId, USec.intEntityId) intId
 	 , Perm.intEntityUserSecurityId
      , Store.intStoreId
 	 , Store.intStoreNo
@@ -60,29 +60,30 @@ SELECT DISTINCT
 	 , USec.strDashboardRole
 	 , USec.intEntityId
 	 , Store.strState
-FROM tblSTStore Store
+FROM tblEMEntity em
 INNER JOIN tblSMUserSecurity USec
-	ON Store.intCompanyLocationId = USec.intCompanyLocationId
-	OR 1 = CASE
-				WHEN USec.ysnStoreManager = CAST(0 AS BIT)
-					THEN 1
-				ELSE 0
-			END
-INNER JOIN tblSMUserSecurityCompanyLocationRolePermission Perm
-	ON USec.intEntityId = Perm.intEntityId
-	AND Store.intCompanyLocationId = Perm.intCompanyLocationId
-	--OR 1 = CASE
-	--			WHEN NOT EXISTS(SELECT TOP 1 1 FROM tblSMUserSecurityCompanyLocationRolePermission WHERE intEntityId = USec.intEntityId AND intCompanyLocationId = USec.intCompanyLocationId)
-	--				THEN 1
-	--			ELSE 0
-	--		END
-
+	ON em.intEntityId = USec.intEntityId
+LEFT JOIN tblSMUserSecurityCompanyLocationRolePermission Perm
+	ON em.intEntityId = Perm.intEntityId 
+LEFT JOIN tblSTStore Store
+	ON Store.intCompanyLocationId = CASE
+										WHEN USec.ysnAdmin = 1
+											THEN Store.intCompanyLocationId
+										WHEN USec.ysnStoreManager = 1
+											THEN Perm.intCompanyLocationId
+									END
+INNER JOIN tblSMCompanyLocation CL
+	ON Store.intCompanyLocationId = CL.intCompanyLocationId
 LEFT JOIN tblSTHandheldScanner HS
 	ON Store.intStoreId = HS.intStoreId
 LEFT JOIN tblSTRegister R 
 	ON Store.intRegisterId = R.intRegisterId
-JOIN tblSMCompanyLocation CL
-	ON Store.intCompanyLocationId = CL.intCompanyLocationId
+
+
+
+
+--WHERE USec.intEntityId = 1
+--	AND Perm.intEntityUserSecurityId = 1
 
 
 --WHERE USec.intEntityId = 1

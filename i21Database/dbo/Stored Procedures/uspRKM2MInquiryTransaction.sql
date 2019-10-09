@@ -2766,34 +2766,34 @@ END
 					, dblOpenQty = ABS(dblOpenQty)
 					, ISNULL((SELECT TOP 1 intUnitMeasureId FROM tblRKM2MBasisDetail temp
 							WHERE temp.intM2MBasisId = @intM2MBasisId
-								AND ISNULL(temp.intCommodityId,0) = CASE WHEN ISNULL(temp.intCommodityId,0)= 0 THEN 0 ELSE intCommodityId END
-								AND ISNULL(temp.intItemId,0) = CASE WHEN ISNULL(temp.intItemId,0)= 0 THEN 0 ELSE intItemId END
-								AND ISNULL(temp.intCompanyLocationId,0) = CASE WHEN ISNULL(temp.intCompanyLocationId,0)= 0 THEN 0 ELSE ISNULL(intCompanyLocationId,0) END
+								AND ISNULL(temp.intCommodityId,0) = CASE WHEN ISNULL(temp.intCommodityId,0)= 0 THEN 0 ELSE FD.intCommodityId END
+								AND ISNULL(temp.intItemId,0) = CASE WHEN ISNULL(temp.intItemId,0)= 0 THEN 0 ELSE FD.intItemId END
+								AND ISNULL(temp.intCompanyLocationId,0) = CASE WHEN ISNULL(temp.intCompanyLocationId,0)= 0 THEN 0 ELSE ISNULL(FD.intCompanyLocationId,0) END
 								AND temp.strContractInventory = 'Inventory'),0) as PriceSourceUOMId
 					, dblInvMarketBasis = 0
 					,ROUND(ISNULL((SELECT TOP 1 ISNULL(dblCashOrFuture,0) FROM tblRKM2MBasisDetail temp
 							WHERE temp.intM2MBasisId = @intM2MBasisId
-								AND ISNULL(temp.intCommodityId,0) = CASE WHEN ISNULL(temp.intCommodityId,0)= 0 THEN 0 ELSE intCommodityId END
-								AND ISNULL(temp.intItemId,0) = CASE WHEN ISNULL(temp.intItemId,0)= 0 THEN 0 ELSE intItemId END
-								AND ISNULL(temp.intCompanyLocationId,0) = CASE WHEN ISNULL(temp.intCompanyLocationId,0)= 0 THEN 0 ELSE ISNULL(intCompanyLocationId,0) END
+								AND ISNULL(temp.intCommodityId,0) = CASE WHEN ISNULL(temp.intCommodityId,0)= 0 THEN 0 ELSE FD.intCommodityId END
+								AND ISNULL(temp.intItemId,0) = CASE WHEN ISNULL(temp.intItemId,0)= 0 THEN 0 ELSE FD.intItemId END
+								AND ISNULL(temp.intCompanyLocationId,0) = CASE WHEN ISNULL(temp.intCompanyLocationId,0)= 0 THEN 0 ELSE ISNULL(FD.intCompanyLocationId,0) END
 								AND temp.strContractInventory = 'Inventory'),0),4) as dblCashOrFuture
 					,ISNULL((SELECT TOP 1 ISNULL(temp.intUnitMeasureId,0) FROM tblRKM2MBasisDetail temp
 							WHERE temp.intM2MBasisId = @intM2MBasisId
-								AND ISNULL(temp.intCommodityId,0) = CASE WHEN ISNULL(temp.intCommodityId,0)= 0 THEN 0 ELSE intCommodityId END
-								AND ISNULL(temp.intItemId,0) = CASE WHEN ISNULL(temp.intItemId,0)= 0 THEN 0 ELSE intItemId END
-								AND ISNULL(temp.intCompanyLocationId,0) = CASE WHEN ISNULL(temp.intCompanyLocationId,0)= 0 THEN 0 ELSE ISNULL(intCompanyLocationId,0) END
+								AND ISNULL(temp.intCommodityId,0) = CASE WHEN ISNULL(temp.intCommodityId,0)= 0 THEN 0 ELSE FD.intCommodityId END
+								AND ISNULL(temp.intItemId,0) = CASE WHEN ISNULL(temp.intItemId,0)= 0 THEN 0 ELSE FD.intItemId END
+								AND ISNULL(temp.intCompanyLocationId,0) = CASE WHEN ISNULL(temp.intCompanyLocationId,0)= 0 THEN 0 ELSE ISNULL(FD.intCompanyLocationId,0) END
 								AND temp.strContractInventory = 'Inventory'),0) as intMarketBasisUOM
 					,ISNULL((SELECT TOP 1 ISNULL(intCurrencyId,0) FROM tblRKM2MBasisDetail temp
 							WHERE temp.intM2MBasisId = @intM2MBasisId
-								AND ISNULL(temp.intCommodityId,0) = CASE WHEN ISNULL(temp.intCommodityId,0)= 0 THEN 0 ELSE intCommodityId END
-								AND ISNULL(temp.intItemId,0) = CASE WHEN ISNULL(temp.intItemId,0)= 0 THEN 0 ELSE intItemId END
-								AND ISNULL(temp.intCompanyLocationId,0) = CASE WHEN ISNULL(temp.intCompanyLocationId,0)= 0 THEN 0 ELSE ISNULL(intCompanyLocationId,0) END
+								AND ISNULL(temp.intCommodityId,0) = CASE WHEN ISNULL(temp.intCommodityId,0)= 0 THEN 0 ELSE FD.intCommodityId END
+								AND ISNULL(temp.intItemId,0) = CASE WHEN ISNULL(temp.intItemId,0)= 0 THEN 0 ELSE FD.intItemId END
+								AND ISNULL(temp.intCompanyLocationId,0) = CASE WHEN ISNULL(temp.intCompanyLocationId,0)= 0 THEN 0 ELSE ISNULL(FD.intCompanyLocationId,0) END
 								AND temp.strContractInventory = 'Inventory'),0) as intCurrencyId
 					, (SELECT TOP 1 strFutureMonth strFutureMonth FROM tblRKFuturesMonth WHERE ysnExpired = 0 AND  dtmSpotDate <= GETDATE() AND intFutureMarketId =intFutureMarketId  ORDER BY 1 DESC) strFutureMonth
 					, (SELECT TOP 1 intFutureMonthId strFutureMonth FROM tblRKFuturesMonth WHERE ysnExpired = 0 AND  dtmSpotDate <= GETDATE() AND intFutureMarketId =intFutureMarketId  ORDER BY 1 DESC) intFutureMonthId
 					, intFutureMarketId
 					, dblNotLotTrackedPrice =  ISNULL(dbo.fnCalculateValuationAverageCost(intItemId, intItemLocationId, @dtmTransactionDateUpTo), 0)
-				FROM @tblFinalDetail
+				FROM @tblFinalDetail FD
 				WHERE strContractOrInventoryType = 'In-transit(S)'
 					
 					

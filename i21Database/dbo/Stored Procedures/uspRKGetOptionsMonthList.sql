@@ -50,6 +50,18 @@ BEGIN
 				WHEN strMonth = 'ysnOptOct' THEN 10
 				WHEN strMonth = 'ysnOptNov' THEN 11
 				WHEN strMonth = 'ysnOptDec' THEN 12 END AS intMonthCode
+		, CASE WHEN strMonth = 'ysnOptJan' THEN 'F'
+				WHEN strMonth = 'ysnOptFeb' THEN 'G'
+				WHEN strMonth = 'ysnOptMar' THEN 'H'
+				WHEN strMonth = 'ysnOptApr' THEN 'J'
+				WHEN strMonth = 'ysnOptMay' THEN 'K'
+				WHEN strMonth = 'ysnOptJun' THEN 'M'
+				WHEN strMonth = 'ysnOptJul' THEN 'N'
+				WHEN strMonth = 'ysnOptAug' THEN 'Q'
+				WHEN strMonth = 'ysnOptSep' THEN 'U'
+				WHEN strMonth = 'ysnOptOct' THEN 'V'
+				WHEN strMonth = 'ysnOptNov' THEN 'X'
+				WHEN strMonth = 'ysnOptDec' THEN 'Z' END AS strSymbol
 	INTO ##AllowedMonths
 	FROM (
 		SELECT ysnOptJan
@@ -92,7 +104,8 @@ BEGIN
 	
 	CREATE TABLE ##FinalMonths (intYear INT
 		, strMonth NVARCHAR(10) COLLATE Latin1_General_CI_AS
-		, intMonthCode INT)
+		, intMonthCode INT
+		, strSymbol NVARCHAR(5) COLLATE Latin1_General_CI_AS)
 	
 	WHILE (SELECT  COUNT(*) FROM ##FinalMonths) < @FutMonthsToOpen
 	BEGIN
@@ -104,7 +117,7 @@ BEGIN
 		SET @SQL = 
 		'
 			INSERT	INTO ##FinalMonths 
-			SELECT	TOP '+LTRIM(@Top)+' YEAR(@Date)+@Count,LTRIM(YEAR(@Date)+@Count)+'' - ''+strMonthCode COLLATE Latin1_General_CI_AS,intMonthCode
+			SELECT	TOP '+LTRIM(@Top)+' YEAR(@Date)+@Count,LTRIM(YEAR(@Date)+@Count)+'' - ''+strMonthCode COLLATE Latin1_General_CI_AS,intMonthCode,strSymbol COLLATE Latin1_General_CI_AS
 			FROM	##AllowedMonths
 			WHERE	intMonthCode > CASE WHEN @Count = 0 THEN  @CurrentMonthCode ELSE 0 END
 			ORDER BY intMonthCode
@@ -128,14 +141,15 @@ BEGIN
 					WHEN SUBSTRING(strMonth,LEN(strMonth)-1,LEN(strMonth)-1) = '12' THEN 'Dec' 
 			END COLLATE Latin1_General_CI_AS AS strMonthName
 			,intMonthCode
+			,strSymbol 
 		INTO #Temp	
 			
 	FROM
 	(
-		SELECT strMonth, intMonthCode FROM ##FinalMonths 
+		SELECT strMonth, intMonthCode, strSymbol FROM ##FinalMonths 
 	)t
 	WHERE ISNULL(strMonth,'') <> ''
 	ORDER BY strMonth	
-	SELECT DISTINCT strMonthName, intMonthCode into #temp1 FROM #Temp 
-	SELECT strMonthName as strOptionMonth, intMonthCode FROM #temp1 order by convert(datetime,'01 '+strMonthName+'15') asc
+	SELECT DISTINCT strMonthName, intMonthCode, strSymbol into #temp1 FROM #Temp 
+	SELECT strMonthName as strOptionMonth, intMonthCode, strSymbol FROM #temp1 order by convert(datetime,'01 '+strMonthName+'15') asc
 END
