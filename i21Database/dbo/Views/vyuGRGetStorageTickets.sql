@@ -1,6 +1,6 @@
 CREATE VIEW [dbo].[vyuGRGetStorageTickets]  
 AS  
-SELECT
+SELECT DISTINCT
     intCustomerStorageId				= CS.intCustomerStorageId  
     ,strStorageTicketNumber				= CS.strStorageTicketNumber
     ,intEntityId						= CS.intEntityId  
