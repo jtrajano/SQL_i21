@@ -8060,6 +8060,7 @@
     <Build Include="dbo\Stored Procedures\uspSCGetContractsAndAllocate.sql" />
     <Build Include="dbo\Stored Procedures\uspAPConvertPaymentToPrepay.sql" />
     <Build Include="dbo\Views\vyuICGetRetailValuationByLocation.sql" />
+    <Build Include="dbo\Functions\fnAPIsItemInContract.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
