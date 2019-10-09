@@ -4,18 +4,39 @@ BEGIN TRY
 	SET NOCOUNT ON
 
 	DECLARE @ErrMsg NVARCHAR(MAX)
-	DECLARE @intToCompanyId INT
-	DECLARE @intToEntityId INT
-	DECLARE @strToTransactionType NVARCHAR(100)
+		,@intToCompanyId INT
+		,@intToEntityId INT
+		,@strToTransactionType NVARCHAR(100)
 		,@intContractPreStageId INT
 		,@intContractHeaderId INT
 		,@strRowState NVARCHAR(50)
 		,@intCompanyLocationId INT
 		,@intToBookId INT
+	DECLARE @tblCTContractPreStage TABLE (
+		intContractPreStageId INT
+		,intContractHeaderId INT
+		,strFeedStatus NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		,dtmFeedDate DATETIME
+		,strRowState NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		)
 
-	SELECT @intContractPreStageId = MIN(intContractPreStageId)
+	INSERT INTO @tblCTContractPreStage (
+		intContractPreStageId
+		,intContractHeaderId
+		,strFeedStatus
+		,dtmFeedDate
+		,strRowState
+		)
+	SELECT intContractPreStageId
+		,intContractHeaderId
+		,strFeedStatus
+		,dtmFeedDate
+		,strRowState
 	FROM tblCTContractPreStage
 	WHERE strFeedStatus IS NULL
+
+	SELECT @intContractPreStageId = MIN(intContractPreStageId)
+	FROM @tblCTContractPreStage
 
 	WHILE @intContractPreStageId IS NOT NULL
 	BEGIN
@@ -29,7 +50,7 @@ BEGIN TRY
 
 		SELECT @intContractHeaderId = intContractHeaderId
 			,@strRowState = strRowState
-		FROM tblCTContractPreStage
+		FROM @tblCTContractPreStage
 		WHERE intContractPreStageId = @intContractPreStageId
 
 		SELECT @intToCompanyId = TC.intToCompanyId
@@ -59,9 +80,8 @@ BEGIN TRY
 		WHERE intContractPreStageId = @intContractPreStageId
 
 		SELECT @intContractPreStageId = MIN(intContractPreStageId)
-		FROM tblCTContractPreStage
-		WHERE strFeedStatus IS NULL
-			AND intContractPreStageId > @intContractPreStageId
+		FROM @tblCTContractPreStage
+		WHERE intContractPreStageId > @intContractPreStageId
 	END
 END TRY
 
@@ -75,4 +95,3 @@ BEGIN CATCH
 			,'WITH NOWAIT'
 			)
 END CATCH
-
