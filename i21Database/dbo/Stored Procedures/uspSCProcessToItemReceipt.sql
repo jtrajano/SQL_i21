@@ -82,6 +82,7 @@ DECLARE @intInventoryReceiptItemId AS INT
 		,@intContractDetailId INT
 		,@shipFromEntityId INT
 		,@intFarmFieldId INT;
+DECLARE @intTicketDeliverySheetId INT
 
     SELECT TOP 1 @intLoadId = ST.intLoadId
 	, @dblTicketFreightRate = ST.dblFreightRate
@@ -94,6 +95,7 @@ DECLARE @intInventoryReceiptItemId AS INT
 	, @intTicketItemUOMId = ST.intItemUOMIdTo
 	, @shipFromEntityId = ST.intEntityId
 	, @intFarmFieldId = ST.intFarmFieldId
+	, @intTicketDeliverySheetId  = ST.intDeliverySheetId
 	FROM dbo.tblSCTicket ST WHERE
 	ST.intTicketId = @intTicketId
 
@@ -109,6 +111,19 @@ DECLARE @ErrMsg              NVARCHAR(MAX),
         @strAdjustmentNo     NVARCHAR(50);
 
 BEGIN TRY
+
+		IF ISNULL(@intTicketDeliverySheetId,0) > 0
+		BEGIN
+			IF NOT EXISTS(SELECT TOP 1 1 
+							FROM tblSCDeliverySheet
+							WHERE intEntityId = @shipFromEntityId
+								AND intItemId = @intItemId
+								AND intCompanyLocationId = @intLocationId)
+			BEGIN
+				RAISERROR('Ticket Entity, Item or Location does not match with the selected Delivery sheet, Please check the Delivery sheet and re-select it again.',11,1)
+			END
+		END
+
 		IF @strDistributionOption = 'LOD' AND @intLoadId IS NULL
 		BEGIN
 			RAISERROR('Unable to find load details. Try Again.', 11, 1);
