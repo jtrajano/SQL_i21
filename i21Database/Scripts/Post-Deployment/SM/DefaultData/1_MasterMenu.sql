@@ -404,6 +404,12 @@ UPDATE tblSMMasterMenu SET intSort = 2 WHERE strMenuName = N'System Manager' AND
 DECLARE @SystemManagerParentMenuId INT
 SELECT @SystemManagerParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'System Manager' AND strModuleName = 'System Manager' AND intParentMenuID = 0
 
+/*START CHANGING EMAIL LOG CATEGORY TO Maintenance*/
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Email Log' AND strModuleName = 'System Manager' AND strCategory = 'Activity')
+UPDATE tblSMMasterMenu SET strCategory = 'Maintenance' WHERE  strMenuName = 'Email Log' AND strModuleName = 'System Manager'
+
+/*END*/
+
 /* CHANGE SCREEN CATEGORY 1730 TO 1810 */
 UPDATE tblSMMasterMenu SET strCategory = 'Activity', strIcon = 'small-menu-activity' WHERE strMenuName IN ('Users', 'User Roles', 'Security Policies', 'Company Configuration', 'Locked Records', 'Emails', 'Email History') AND strModuleName = N'System Manager'
 UPDATE tblSMMasterMenu SET strCategory = 'Maintenance', strIcon = 'small-menu-maintenance' WHERE strMenuName IN ('Custom Tab Designer', 'File Field Mapping', 'Languages', 'Letters', 'Modules', 'Report Labels', 'Screen Labels', 'Starting Numbers') AND strModuleName = N'System Manager'
@@ -473,6 +479,7 @@ UPDATE tblSMMasterMenu SET strMenuName = 'Announcements' WHERE strMenuName = 'Ma
 UPDATE tblSMMasterMenu SET strMenuName = 'Imports and Conversions', strDescription = 'Imports and Conversions' WHERE strMenuName = N'Origin Conversions' AND strModuleName = N'System Manager' AND intParentMenuID = @UtilitiesParentMenuId
 UPDATE tblSMMasterMenu SET strMenuName = 'Intercompany Transaction Configuration', strDescription = 'Intercompany Transaction Configuration' WHERE strMenuName = 'Inter-Company Transaction Configuration' AND strModuleName = 'System Manager' AND intParentMenuID = @UtilitiesParentMenuId
 UPDATE tblSMMasterMenu SET strMenuName = 'Email Log', strDescription = 'Email Log' WHERE strMenuName = 'Email History' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerActivitiesParentMenuId
+
 /* END OF RENAMING  */
 
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Users' AND strModuleName = N'System Manager' AND intParentMenuID = @SystemManagerActivitiesParentMenuId)
@@ -510,7 +517,7 @@ ELSE
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Email Log' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerMaintenanceParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Email Log', N'System Manager', @SystemManagerMaintenanceParentMenuId, N'Email Log', N'Activity', N'Screen', N'GlobalComponentEngine.view.EmailHistory?showSearch=true', N'small-menu-activity', 0, 0, 0, 1, 1, 1)
+	VALUES (N'Email Log', N'System Manager', @SystemManagerMaintenanceParentMenuId, N'Email Log', N'Maintenance', N'Screen', N'GlobalComponentEngine.view.EmailHistory?showSearch=true', N'small-menu-maintenance', 0, 0, 0, 1, 1, 1)
 ELSE 
 	UPDATE tblSMMasterMenu SET strCommand = N'GlobalComponentEngine.view.EmailHistory?showSearch=true', intSort = 1 WHERE strMenuName = 'Email Log' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerMaintenanceParentMenuId
 
