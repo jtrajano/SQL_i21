@@ -752,7 +752,7 @@ BEGIN
 				WHEN priorityTransaction.strTransactionId IS NOT NULL THEN 
 					-CAST(REPLACE(strBatchId, 'BATCH-', '') AS INT)
 				ELSE
-					CAST(REPLACE(strBatchId, 'BATCH-', '') AS INT)
+					1
 			END ASC 
 			,CASE 
 				WHEN priorityTransaction.strTransactionId IS NOT NULL THEN 1 
@@ -763,7 +763,13 @@ BEGIN
 				WHEN dblValue <> 0 THEN 6
 				ELSE 7
 			END   
-			ASC 	
+			ASC 
+			,CASE 
+				WHEN priorityTransaction.strTransactionId IS NULL THEN 
+					CAST(REPLACE(strBatchId, 'BATCH-', '') AS INT)
+				ELSE
+					1
+			END ASC 			
 			
 		INSERT INTO #tmpAutoVarianceBatchesForAVGCosting (
 			intItemId
