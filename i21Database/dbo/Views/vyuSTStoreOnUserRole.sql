@@ -55,23 +55,44 @@ SELECT DISTINCT
 			ELSE ''
 	 END AS strSAPPHIRECheckoutPullTimeSet
 
+	 , usec_uRole.strName			AS strDefaultUserRoleName
+	 , usec_uRole.strRoleType		AS strDefaultUserRoleType
 	 , USec.ysnStoreManager AS ysnIsUserStoreManager
 	 , USec.ysnAdmin AS ysnIsUserAdmin
 	 , USec.strDashboardRole
 	 , USec.intEntityId
+	 , perm_uRole.strName			AS strUserRoleName
+	 , perm_uRole.strRoleType		AS strUserRoleType 
 	 , Store.strState
 FROM tblEMEntity em
 INNER JOIN tblSMUserSecurity USec
 	ON em.intEntityId = USec.intEntityId
+INNER JOIN tblSMUserRole usec_uRole
+	ON USec.intUserRoleID = usec_uRole.intUserRoleID
 LEFT JOIN tblSMUserSecurityCompanyLocationRolePermission Perm
 	ON em.intEntityId = Perm.intEntityId 
+LEFT JOIN tblSMUserRole perm_uRole
+	ON Perm.intUserRoleId = perm_uRole.intUserRoleID
 LEFT JOIN tblSTStore Store
 	ON Store.intCompanyLocationId = CASE
-										WHEN USec.ysnAdmin = 1
+										WHEN ((SELECT COUNT(1) FROM tblSMUserSecurityCompanyLocationRolePermission _perm INNER JOIN tblSTStore _st ON _perm.intCompanyLocationId = _st.intCompanyLocationId WHERE _perm.intEntityId = USec.intEntityId) = 0 AND USec.ysnStoreManager = 0)
+											-- Full Access Admin
 											THEN Store.intCompanyLocationId
-										WHEN USec.ysnStoreManager = 1
+										WHEN ((SELECT COUNT(1) FROM tblSMUserSecurityCompanyLocationRolePermission _perm INNER JOIN tblSTStore _st ON _perm.intCompanyLocationId = _st.intCompanyLocationId WHERE _perm.intEntityId = USec.intEntityId) >= 2 AND USec.ysnStoreManager = 0)
+											-- Regional Manager
 											THEN Perm.intCompanyLocationId
+										WHEN (((SELECT COUNT(1) FROM tblSMUserSecurityCompanyLocationRolePermission _perm INNER JOIN tblSTStore _st ON _perm.intCompanyLocationId = _st.intCompanyLocationId WHERE _perm.intEntityId = USec.intEntityId) = 1) AND (USec.ysnStoreManager = 1 AND USec.ysnAdmin = 0))
+											-- Store Manager
+											THEN Perm.intCompanyLocationId
+										ELSE 
+											USec.intCompanyLocationId
 									END
+	--ON Store.intCompanyLocationId = CASE
+	--									WHEN USec.ysnAdmin = 1
+	--										THEN Store.intCompanyLocationId
+	--									WHEN USec.ysnStoreManager = 1
+	--										THEN Perm.intCompanyLocationId
+	--								END
 INNER JOIN tblSMCompanyLocation CL
 	ON Store.intCompanyLocationId = CL.intCompanyLocationId
 LEFT JOIN tblSTHandheldScanner HS
