@@ -307,7 +307,7 @@ BEGIN
 			,dblCruBegBalance = ISNULL(@dblCruBalanceForward,0)
 			,dblCrushBuy = NULL
 			,dblCrushSell = NULL
-			,dblCurEndBalance = ISNULL(@dblCruBalanceForward,0)
+			,dblCruEndBalance = ISNULL(@dblCruBalanceForward,0)
 			,strTransactionId = 'Balance Forward'
 			,intTransactionId = NULL
 			,intFutOptTransactionHeaderId = NULL
