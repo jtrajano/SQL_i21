@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE uspIPInterCompanyPreStageFutureMonth @intFutureMonthId INT
 	,@strRowState NVARCHAR(50) = NULL
+	,@intUserId INT = NULL
 AS
 BEGIN TRY
 	SET NOCOUNT ON
@@ -14,11 +15,13 @@ BEGIN TRY
 	INSERT INTO tblRKFuturesMonthPreStage (
 		intFutureMonthId
 		,strRowState
+		,intUserId
 		,strFeedStatus
 		,strMessage
 		)
 	SELECT @intFutureMonthId
 		,@strRowState
+		,@intUserId
 		,''
 		,''
 END TRY

@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE uspIPInterCompanyPreStageCoverageEntry @intCoverageEntryId INT
 	,@strRowState NVARCHAR(50) = NULL
+	,@intUserId INT = NULL
 AS
 BEGIN TRY
 	SET NOCOUNT ON
@@ -14,11 +15,13 @@ BEGIN TRY
 	INSERT INTO tblRKCoverageEntryPreStage (
 		intCoverageEntryId
 		,strRowState
+		,intUserId
 		,strFeedStatus
 		,strMessage
 		)
 	SELECT @intCoverageEntryId
 		,@strRowState
+		,@intUserId
 		,''
 		,''
 END TRY

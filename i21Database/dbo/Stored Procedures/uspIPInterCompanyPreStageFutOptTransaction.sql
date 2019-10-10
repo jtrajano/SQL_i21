@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE uspIPInterCompanyPreStageFutOptTransaction @intFutOptTransactionHeaderId INT
 	,@strRowState NVARCHAR(50) = NULL
+	,@intUserId INT = NULL
 AS
 BEGIN TRY
 	SET NOCOUNT ON
@@ -14,11 +15,13 @@ BEGIN TRY
 	INSERT INTO tblRKFutOptTransactionHeaderPreStage (
 		intFutOptTransactionHeaderId
 		,strRowState
+		,intUserId
 		,strFeedStatus
 		,strMessage
 		)
 	SELECT @intFutOptTransactionHeaderId
 		,@strRowState
+		,@intUserId
 		,''
 		,''
 END TRY

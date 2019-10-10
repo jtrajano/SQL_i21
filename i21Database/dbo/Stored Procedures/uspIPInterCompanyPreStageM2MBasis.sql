@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE uspIPInterCompanyPreStageM2MBasis @intM2MBasisId INT
 	,@strRowState NVARCHAR(50) = NULL
+	,@intUserId INT = NULL
 AS
 BEGIN TRY
 	SET NOCOUNT ON
@@ -14,11 +15,13 @@ BEGIN TRY
 	INSERT INTO tblRKM2MBasisPreStage (
 		intM2MBasisId
 		,strRowState
+		,intUserId
 		,strFeedStatus
 		,strMessage
 		)
 	SELECT @intM2MBasisId
 		,@strRowState
+		,@intUserId
 		,''
 		,''
 END TRY
