@@ -338,7 +338,7 @@ ELSE
 	LEFT JOIN tblCTContractDetail CTD ON CTD.intContractDetailId = ISI.intLineNo
 	WHERE intInventoryShipmentId = @InventoryShipmentId
 
-	IF ISNULL(@InventoryShipmentId, 0) != 0 and ISNULL(dbo.fnCTGetAvailablePriceQuantity(@intContractDetailId), 0) != 0
+	IF ISNULL(@InventoryShipmentId, 0) != 0 and (ISNULL(dbo.fnCTGetAvailablePriceQuantity(@intContractDetailId), 0) != 0 OR @intPricingTypeId != 2)
 	BEGIN
 		EXEC @intInvoiceId = dbo.uspARCreateInvoiceFromShipment @InventoryShipmentId, @intUserId, NULL, 0, 1;
 		IF @intInvoiceId = 0
