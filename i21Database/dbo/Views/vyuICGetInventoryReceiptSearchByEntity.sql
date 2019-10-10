@@ -32,6 +32,7 @@ SELECT Receipt.intInventoryReceiptId
 	, ShipVia.strShipVia
 	, Receipt.intShipFromId
 	, strShipFrom = ShipFrom.strLocationName
+	, strShipFromEntity = ShipFromEntity.strName
 	, Receipt.intReceiverId
 	, strReceiver = Receiver.strUserName
 	, Receipt.strVessel
@@ -71,6 +72,7 @@ SELECT Receipt.intInventoryReceiptId
 	, permission.intEntityContactId
 FROM tblICInventoryReceipt Receipt
 	LEFT JOIN vyuAPVendor Vendor ON Vendor.[intEntityId] = Receipt.intEntityVendorId
+	LEFT JOIN vyuAPVendor ShipFromEntity ON ShipFromEntity.[intEntityId] = Receipt.intShipFromEntityId
 	LEFT JOIN tblSMCompanyLocation Transferor ON Transferor.intCompanyLocationId = Receipt.intTransferorId
 	LEFT JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = Receipt.intLocationId
 	LEFT JOIN tblSMCurrency Currency ON Currency.intCurrencyID = Receipt.intCurrencyId

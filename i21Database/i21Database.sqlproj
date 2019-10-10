@@ -8062,6 +8062,10 @@
     <Build Include="dbo\Views\vyuICGetRetailValuationByLocation.sql" />
     <Build Include="dbo\Functions\fnAPIsItemInContract.sql" />
     <Build Include="dbo\Views\vyuCTShipmentStatus.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessPreStageContract.sql" />
+    <Build Include="dbo\Tables\tblCTContractPreStage.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessPreStageLoad.sql" />
+    <Build Include="dbo\Tables\tblLGIntrCompLogisticsPreStg.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

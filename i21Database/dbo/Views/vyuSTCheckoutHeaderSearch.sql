@@ -19,9 +19,9 @@ SELECT DISTINCT
 	 , Chk.dblTotalToDeposit
 	 , Chk.dblTotalDeposits
 	 , Chk.dblCashOverShort   
-	 , ST.intCompanyLocationId AS intStoreCompanyLocationId
-	 , USec.ysnStoreManager AS ysnIsUserStoreManager
-	 , USec.ysnAdmin AS ysnIsUserAdmin
+	 , ST.intCompanyLocationId		AS intStoreCompanyLocationId
+	 , USec.ysnStoreManager			AS ysnIsUserStoreManager
+	 , USec.ysnAdmin				AS ysnIsUserAdmin
 	 , USec.strDashboardRole
 	 , USec.intEntityId
 FROM tblEMEntity em
@@ -31,11 +31,24 @@ LEFT JOIN tblSMUserSecurityCompanyLocationRolePermission Perm
 	ON em.intEntityId = Perm.intEntityId 
 LEFT JOIN tblSTStore ST
 	ON ST.intCompanyLocationId = CASE
-										WHEN USec.ysnAdmin = 1
+										WHEN ((SELECT COUNT(1) FROM tblSMUserSecurityCompanyLocationRolePermission _perm INNER JOIN tblSTStore _st ON _perm.intCompanyLocationId = _st.intCompanyLocationId WHERE _perm.intEntityId = USec.intEntityId) = 0 AND USec.ysnStoreManager = 0)
+											-- Full Access Admin
 											THEN ST.intCompanyLocationId
-										WHEN USec.ysnStoreManager = 1
+										WHEN ((SELECT COUNT(1) FROM tblSMUserSecurityCompanyLocationRolePermission _perm INNER JOIN tblSTStore _st ON _perm.intCompanyLocationId = _st.intCompanyLocationId WHERE _perm.intEntityId = USec.intEntityId) >= 2 AND USec.ysnStoreManager = 0)
+											-- Regional Manager
 											THEN Perm.intCompanyLocationId
+										WHEN (((SELECT COUNT(1) FROM tblSMUserSecurityCompanyLocationRolePermission _perm INNER JOIN tblSTStore _st ON _perm.intCompanyLocationId = _st.intCompanyLocationId WHERE _perm.intEntityId = USec.intEntityId) = 1) AND (USec.ysnStoreManager = 1 AND USec.ysnAdmin = 0))
+											-- Store Manager
+											THEN Perm.intCompanyLocationId
+										ELSE 
+											USec.intCompanyLocationId
 									END
+	--ON ST.intCompanyLocationId = CASE
+	--									WHEN USec.ysnAdmin = 1
+	--										THEN ST.intCompanyLocationId
+	--									WHEN USec.ysnStoreManager = 1
+	--										THEN Perm.intCompanyLocationId
+	--								END
 INNER JOIN tblSTCheckoutHeader Chk
 	ON ST.intStoreId = Chk.intStoreId
 LEFT JOIN tblARInvoice Inv

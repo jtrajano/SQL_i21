@@ -307,6 +307,8 @@ GO
 --GO
 
 
+CREATE NONCLUSTERED INDEX [IX_tblCTContractDetail_intContractHeaderId_intContractHeaderId] ON [dbo].[tblCTContractDetail](intContractHeaderId);
+GO
 CREATE STATISTICS [_dta_stat_2133894969_13_1] ON [dbo].[tblCTContractDetail]([intItemId], [intContractDetailId])
 GO
 

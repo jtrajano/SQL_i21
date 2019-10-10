@@ -110,3 +110,5 @@
 GO
 CREATE STATISTICS [_dta_stat_1863273993_4_11_1] ON [dbo].[tblQMSample]([strSampleNumber], [intContractDetailId], [intSampleId])
 GO
+CREATE NONCLUSTERED INDEX [IX_tblQMSample_intProductValueId] ON [dbo].[tblQMSample](intProductValueId);
+GO

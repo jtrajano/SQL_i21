@@ -88,8 +88,8 @@ IF NOT EXISTS(SELECT NULL FROM tblARCustomer WHERE [intEntityId] = @EntityCustom
 
 IF NOT EXISTS(SELECT NULL FROM tblSMPaymentMethod WHERE [intPaymentMethodID] = @PaymentMethodId)
 	BEGIN		
-		IF ISNULL('The payment method Id provided does not exists!',0) = 1
-			RAISERROR(@ErrorMessage, 16, 1);		
+		IF ISNULL(@RaiseError,0) = 1
+			RAISERROR('The payment method Id provided does not exists!', 16, 1);		
 		RETURN 0;
 	END
 

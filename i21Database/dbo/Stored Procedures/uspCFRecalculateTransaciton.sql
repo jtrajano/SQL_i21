@@ -6623,14 +6623,22 @@ BEGIN
 
 	IF(@intDupTransCount > 0 AND ISNULL(@intParentId,0) = 0)
 	BEGIN
-		--SET @ysnInvalid = 1
 		SET @ysnDuplicate = 1
 		IF(@ysnDuplicate = 1)
 		BEGIN
 			--SET @ysnInvalid = 1
 			INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
 			VALUES ('Import',@runDate,@guid, @intTransactionId, 'Duplicate transaction history found.')
+
 		END
+	END
+
+	IF(ISNULL(@intParentId,0) > 1)
+	BEGIN
+			DECLARE @strParentContractTransactionId NVARCHAR(MAX)
+			SELECT TOP 1 @strParentContractTransactionId = strTransactionId FROM tblCFTransaction where intTransactionId = @intParentId
+			INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
+			VALUES ('Import',@runDate,@guid, @intTransactionId, 'Overfill transaction of ' + @strParentContractTransactionId)
 	END
 
 
@@ -7150,7 +7158,7 @@ BEGIN
 				,ysnCreditCardUsed
 				,ysnOriginHistory
 				,ysnPosted
-				,strTransactionId
+				--,strTransactionId
 				,strPrintTimeStamp
 				,strInvoiceReportNumber
 				,strTempInvoiceReportNumber
@@ -7211,7 +7219,7 @@ BEGIN
 				,ysnCreditCardUsed
 				,ysnOriginHistory
 				,ysnPosted
-				,strTransactionId
+				--,strTransactionId
 				,strPrintTimeStamp
 				,strInvoiceReportNumber
 				,strTempInvoiceReportNumber
