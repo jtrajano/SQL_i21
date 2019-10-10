@@ -8110,6 +8110,8 @@
     <Build Include="dbo\Tables\tblRKM2MBasisAckStage.sql" />
     <Build Include="dbo\Tables\tblRKCoverageEntryStage.sql" />
     <Build Include="dbo\Tables\tblRKCoverageEntryAckStage.sql" />
+    <Build Include="dbo\Tables\tblICItemPreStage.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPInterCompanyPreStageItem.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
