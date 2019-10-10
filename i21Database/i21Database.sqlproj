@@ -8053,6 +8053,7 @@
     <Build Include="dbo\Views\vyuIPLoadView.sql" />
     <Build Include="dbo\Views\vyuICGetRetailValuationByLocation.sql" />
     <Build Include="dbo\Views\vyuLGLoadDetailUberScale.sql" />
+    <Build Include="dbo\Stored Procedures\uspICZeroAllStockQtyInCountDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
