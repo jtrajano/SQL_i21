@@ -8,7 +8,7 @@ BEGIN
 
 	DECLARE @dblAvailablePriceQty NUMERIC(18,6) = 0
 
-	SELECT @dblAvailablePriceQty = SUM(ISNULL(b.dblQuantity,0)) - SUM(ISNULL(b.dblQuantityAppliedAndPriced,0))
+	SELECT @dblAvailablePriceQty = SUM(ISNULL(b.dblQuantity,0))-- - SUM(ISNULL(b.dblQuantityAppliedAndPriced,0))
 	FROM tblCTPriceFixation a
 	INNER JOIN tblCTPriceFixationDetail b ON a.intPriceFixationId = b.intPriceFixationId
 	WHERE a.intContractDetailId = @intContractDetailId
