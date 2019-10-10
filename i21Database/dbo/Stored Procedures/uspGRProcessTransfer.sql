@@ -747,62 +747,9 @@ BEGIN
 		--(for new customer storage) insert to storage history table
 		DELETE FROM @StorageHistoryStagingTable
 		
-		INSERT INTO @StorageHistoryStagingTable
-		(
-			[intCustomerStorageId]
-			,[intTransferStorageId]
-			,[intContractHeaderId]
-			,[dblUnits]
-			,[dtmHistoryDate]
-			,[intUserId]
-			,[ysnPost]
-			,[intTransactionTypeId]
-			,[strPaidDescription]
-			,[strType]
-		)
-		SELECT
-			[intCustomerStorageId]	= A.intToCustomerStorageId
-			,[intTransferStorageId]	= TransferStorageSplit.intTransferStorageId
-			,[intContractHeaderId]	= CD.intContractHeaderId
-			,[dblUnits]				= A.dblUnitQty
-			,[dtmHistoryDate]		= GETDATE()
-			,[intUserId]			= @intUserId
-			,[ysnPost]				= 1
-			,[intTransactionTypeId]	= 3
-			,[strPaidDescription]	= 'Generated from Transfer Storage'
-			,[strType]				= 'From Transfer'
-		FROM tblGRTransferStorageSplit TransferStorageSplit
-		INNER JOIN @newCustomerStorageIds A
-			ON A.intTransferStorageSplitId = TransferStorageSplit.intTransferStorageSplitId		
-		LEFT JOIN tblCTContractDetail CD
-			ON CD.intContractDetailId = TransferStorageSplit.intContractDetailId
-		
-		INSERT INTO @StorageHistoryStagingTable
-		(
-			[intCustomerStorageId]
-			,[intTransferStorageId]
-			,[intContractHeaderId]
-			,[dblUnits]
-			,[dtmHistoryDate]
-			,[intUserId]
-			,[ysnPost]
-			,[intTransactionTypeId]
-			,[strPaidDescription]
-			,[strType]
-			,[intInventoryReceiptId]
-		)
-		SELECT DISTINCT	
-		     [intCustomerStorageId]	= SR.intToCustomerStorageId
-			,[intTransferStorageId]	= SR.intTransferStorageId
-			,[intContractHeaderId]	= CD.intContractHeaderId
-			,[dblUnits]				= SR.dblUnitQty
-			,[dtmHistoryDate]		= GETDATE()
-			,[intUserId]			= @intUserId
-			,[ysnPost]				= 1
-			,[intTransactionTypeId]	= 3
-			,[strPaidDescription]	= 'Generated from Transfer Storage'
-			,[strType]				= 'From Transfer'
-			,[intInventoryReceiptId] = SourceHistory.intInventoryReceiptId
+		DECLARE @intIRId INT;
+		SELECT TOP 1	
+		     @intIRId = SourceHistory.intInventoryReceiptId
 		FROM tblGRTransferStorageReference SR
 		INNER JOIN tblGRCustomerStorage FromStorage
 			ON FromStorage.intCustomerStorageId = SR.intSourceCustomerStorageId
@@ -827,6 +774,38 @@ BEGIN
 			ON CD.intContractDetailId = TSS.intContractDetailId
 		WHERE  FromType.ysnDPOwnedType = 1 AND ToType.ysnDPOwnedType = 1
 		AND SR.intTransferStorageId = @intTransferStorageId
+
+		INSERT INTO @StorageHistoryStagingTable
+		(
+			[intCustomerStorageId]
+			,[intTransferStorageId]
+			,[intContractHeaderId]
+			,[dblUnits]
+			,[dtmHistoryDate]
+			,[intUserId]
+			,[ysnPost]
+			,[intTransactionTypeId]
+			,[strPaidDescription]
+			,[strType]
+			,[intInventoryReceiptId]
+		)
+		SELECT
+			[intCustomerStorageId]	= A.intToCustomerStorageId
+			,[intTransferStorageId]	= TransferStorageSplit.intTransferStorageId
+			,[intContractHeaderId]	= CD.intContractHeaderId
+			,[dblUnits]				= A.dblUnitQty
+			,[dtmHistoryDate]		= GETDATE()
+			,[intUserId]			= @intUserId
+			,[ysnPost]				= 1
+			,[intTransactionTypeId]	= 3
+			,[strPaidDescription]	= 'Generated from Transfer Storage'
+			,[strType]				= 'From Transfer'
+			,[intInventoryReceiptId]= @intIRId
+		FROM tblGRTransferStorageSplit TransferStorageSplit
+		INNER JOIN @newCustomerStorageIds A
+			ON A.intTransferStorageSplitId = TransferStorageSplit.intTransferStorageSplitId		
+		LEFT JOIN tblCTContractDetail CD
+			ON CD.intContractDetailId = TransferStorageSplit.intContractDetailId
 
 		EXEC uspGRInsertStorageHistoryRecord @StorageHistoryStagingTable, @intStorageHistoryId
 		--integration to IC
