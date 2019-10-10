@@ -483,11 +483,13 @@ BEGIN
 							,@intStorageLocationId INT
 							,@dtmDate DATETIME
 							,@intOwnerShipId INT				   
-							,@dblBasisCost DECIMAL(18,6);
+							,@dblBasisCost DECIMAL(18,6)
+							,@dblSettlementPrice DECIMAL(18,6)
+							,@strRKError VARCHAR(MAX)
 
 
 						SELECT @intItemId = ITP.intItemId,@intLocationId = IL.intLocationId,@intSubLocationId = ITP.intSubLocationId, @intStorageLocationId = ITP.intStorageLocationId, @dtmDate = ITP.dtmDate, @intOwnerShipId = CASE WHEN ITP.ysnIsStorage = 1 THEN 2 ELSE 1 END
-							,@dblBasisCost = (SELECT dblBasis FROM dbo.fnRKGetFutureAndBasisPrice (1,I.intCommodityId,right(convert(varchar, dtmDate, 106),8),1,NULL,NULL,@intLocationId,NULL,0,I.intItemId,intCurrencyId))
+							
 						FROM @ItemsToPost ITP
 						INNER JOIN tblICItem I
 							ON ITP.intItemId = I.intItemId
@@ -497,11 +499,26 @@ BEGIN
 							ON IL.intItemLocationId = ITP.intItemLocationId
 						WHERE intId = @cursorId
 						
-						INSERT INTO #tblICItemRunningStock
-						EXEC [dbo].[uspICGetItemRunningStock] @intItemId = @intItemId, @intLocationId = @intLocationId, @intSubLocationId = @intSubLocationId, @intStorageLocationId = @intStorageLocationId, @dtmDate = @dtmDate, @intOwnershipType = @intOwnerShipId
+						SELECT @dblBasisCost = (SELECT dblBasis FROM dbo.fnRKGetFutureAndBasisPrice (1,I.intCommodityId,right(convert(varchar, dtmDate, 106),8),1,NULL,NULL,@intLocationId,NULL,0,I.intItemId,intCurrencyId))
+							,@dblSettlementPrice  = (SELECT dblSettlementPrice FROM dbo.fnRKGetFutureAndBasisPrice (1,I.intCommodityId,right(convert(varchar, dtmDate, 106),8),2,NULL,NULL,@intLocationId,NULL,0,I.intItemId,intCurrencyId))
+						FROM @ItemsToPost ITP
+						INNER JOIN tblICItem I
+							ON ITP.intItemId = I.intItemId
+						INNER JOIN tblICCommodity ICC
+							ON ICC.intCommodityId = I.intCommodityId
+						INNER JOIN tblICItemLocation IL
+							ON IL.intItemLocationId = ITP.intItemLocationId
+						WHERE intId = @cursorId
 
-						
-						SELECT @dblCost = dblCost + (ISNULL(@dblBasisCost,0)) FROM #tblICItemRunningStock
+						SELECT @strRKError = CASE WHEN ISNULL(@dblBasisCost,0) = 0 AND ISNULL(@dblSettlementPrice,0) = 0 THEN 'Basis and Settlement Price' WHEN  ISNULL(@dblBasisCost,0) = 0 THEN 'Basis Price' WHEN ISNULL(@dblSettlementPrice,0) = 0 THEN 'Settlement Price' END +  ' in risk management is not available.'
+
+						IF @strRKError IS NOT NULL
+						BEGIN
+							RAISERROR (@strRKError,16,1,'WITH NOWAIT') 
+						END
+
+						SET @dblCost =ISNULL(@dblSettlementPrice,0) + ISNULL(@dblBasisCost,0)
+
 						DELETE FROM @Entry
 						DELETE FROM @GLEntries
 						INSERT INTO @Entry 
