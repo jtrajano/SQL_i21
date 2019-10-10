@@ -62,6 +62,7 @@ DECLARE @strItemNo AS NVARCHAR(50)
 		,@strFunctionalCurrencyId AS NVARCHAR(50)
 		,@strForexRateType AS NVARCHAR(50)
 		,@intEntityVendorId AS INT = NULL 
+		,@strLocation AS NVARCHAR(50) 
 
 -- Get the default currency ID
 DECLARE @intFunctionalCurrencyId AS INT = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
@@ -433,6 +434,39 @@ BEGIN
 		GOTO With_Rollback_Exit 	
 	END
 
+	-- Check if company-owned item and the location that doesn't allow zero cost
+	-- 1 or NULL: No
+	-- 2: Yes
+	-- 3: Yes, with warning message
+	SET @intItemId = NULL
+
+	SELECT	
+		@strItemNo = Item.strItemNo
+		,@intItemId = Item.intItemId
+		,@strLocation = Company.strLocationName
+	FROM
+		tblICInventoryReceipt r 
+		INNER JOIN tblICInventoryReceiptItem ri 
+			ON r.intInventoryReceiptId = ri.intInventoryReceiptId			
+		INNER JOIN tblICItem Item 
+			ON ri.intItemId = Item.intItemId
+		INNER JOIN dbo.tblICItemLocation ItemLocation 
+			ON ItemLocation.intItemId = Item.intItemId
+			AND ItemLocation.intLocationId = r.intLocationId
+		INNER JOIN tblSMCompanyLocation Company 
+			ON Company.intCompanyLocationId = ItemLocation.intLocationId
+	WHERE 		
+		r.strReceiptNumber = @strTransactionId
+		AND ISNULL(ri.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own
+		AND ri.dblUnitCost <= 0						
+		AND ISNULL(ItemLocation.intAllowZeroCostTypeId, 1) = 1
+		
+	IF @intItemId IS NOT NULL
+	BEGIN
+		-- 'Zero cost is not allowed in "%s" location for item "%s".'
+		EXEC uspICRaiseError 80229, @strLocation, @strItemNo
+		GOTO With_Rollback_Exit 	
+	END
 END
 
 -- Check if sub location and storage locations are valid. 
