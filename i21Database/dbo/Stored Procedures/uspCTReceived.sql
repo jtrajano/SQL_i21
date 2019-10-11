@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspCTReceived]
 	@ItemsFromInventoryReceipt ReceiptItemTableType READONLY
 	,@intUserId  INT
+	,@ysnPosted BIT
 AS
 
 BEGIN TRY
@@ -28,9 +29,9 @@ BEGIN TRY
 				@strScreenName					NVARCHAR(50),
 				@intContainerId					INT,
 				@intSourceId					INT,
+				@intInventoryReceiptId			INT,
 				@strTicketNumber				NVARCHAR(50),
-				@intSequenceUsageHistoryId		INT,
-				@ysnMainContract				BIT
+				@intSequenceUsageHistoryId		INT
 
 	SELECT @strReceiptType = strReceiptType,@intSourceType = intSourceType  FROM @ItemsFromInventoryReceipt
 
@@ -91,7 +92,7 @@ BEGIN TRY
 		FROM	@tblToProcess 
 		WHERE	intUniqueId						=	 @intUniqueId
 
-		SELECT @intSourceId = intSourceId FROM tblICInventoryReceiptItem WHERE intInventoryReceiptItemId = @intInventoryReceiptDetailId
+		SELECT @intSourceId = intSourceId, @intInventoryReceiptId = intInventoryReceiptId FROM tblICInventoryReceiptItem WHERE intInventoryReceiptItemId = @intInventoryReceiptDetailId
 		SELECT	@intPricingTypeId = intPricingTypeId FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId
 
 		IF NOT EXISTS(SELECT * FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId)
@@ -128,6 +129,13 @@ BEGIN TRY
 
 			SELECT	@dblSchQuantityToUpdate = -@dblConvertedQty
 
+			-- Ticket Management will handle scheduled quantity when Undistruited
+			IF @intSourceType = 1 AND @ysnPosted = 0
+			BEGIN
+				SELECT @intUniqueId = MIN(intUniqueId) FROM @tblToProcess WHERE intUniqueId > @intUniqueId
+				CONTINUE
+			END
+
 			/*
 				intSourceType: 
 				0 = 'None'
@@ -140,35 +148,13 @@ BEGIN TRY
 
 			IF ((@intSourceType IN (0,1,2,3,5) OR @ysnPO = 1)AND @strReceiptType <> 'Inventory Return') 
 			   -- OR (@intSourceType IN (2) AND @strReceiptType = 'Inventory Return' )
-			BEGIN
-				SET @ysnMainContract = 1
-
-				IF @intSourceType = 1
-				BEGIN
-					IF EXISTS(SELECT TOP 1 1 FROM tblSCTicket WHERE intTicketId = @intSourceId AND strTicketStatus = 'C')
-					BEGIN
-						IF NOT EXISTS
-						(
-							SELECT TOP 1 1 FROM tblICInventoryReceiptItem a
-							INNER JOIN tblSCTicket b ON a.intSourceId = b.intTicketId
-							WHERE a.intInventoryReceiptItemId = @intInventoryReceiptDetailId 
-							AND b.intContractId = @intContractDetailId
-						)
-						BEGIN 
-							SET @ysnMainContract = 0
-						END
-					END
-				END
-
-				IF @ysnMainContract = 1
-				BEGIN
-					EXEC	uspCTUpdateScheduleQuantity
-							@intContractDetailId	=	@intContractDetailId,
-							@dblQuantityToUpdate	=	@dblSchQuantityToUpdate,
-							@intUserId				=	@intUserId,
-							@intExternalId			=	@intInventoryReceiptDetailId,
-							@strScreenName			=	@strScreenName
-				END
+			BEGIN					
+				EXEC	uspCTUpdateScheduleQuantity
+						@intContractDetailId	=	@intContractDetailId,
+						@dblQuantityToUpdate	=	@dblSchQuantityToUpdate,
+						@intUserId				=	@intUserId,
+						@intExternalId			=	@intInventoryReceiptDetailId,
+						@strScreenName			=	@strScreenName
 			END
 
 			IF(@intSourceType IN (2) AND @strReceiptType = 'Inventory Return')
