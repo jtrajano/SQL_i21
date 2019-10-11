@@ -8117,6 +8117,7 @@
     <Build Include="dbo\Stored Procedures\uspIPFutureMonthPopulateStgXML.sql" />
     <Build Include="dbo\Stored Procedures\uspIPFutureMonthProcessPreStage.sql" />
     <Build Include="dbo\Stored Procedures\uspIPFutureMonthTransferStgXML.sql" />
+    <Build Include="dbo\Tables\tblIPMultiCompany.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

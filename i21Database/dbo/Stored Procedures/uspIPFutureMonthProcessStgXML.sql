@@ -1,5 +1,4 @@
 ﻿CREATE PROCEDURE uspIPFutureMonthProcessStgXML
-	--@intToCompanyId INT
 AS
 BEGIN TRY
 	SET NOCOUNT ON

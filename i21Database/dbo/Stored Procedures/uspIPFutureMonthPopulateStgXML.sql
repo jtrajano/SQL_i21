@@ -76,11 +76,13 @@ BEGIN TRY
 		,strHeaderXML = @strHeaderXML
 		,strRowState = @strRowState
 		,strUserName = @strLastModifiedUser
-		,intMultiCompanyId = @intToCompanyId
+		,intMultiCompanyId = intCompanyId
 		,intEntityId = @intToEntityId
 		,intCompanyLocationId = @intCompanyLocationId
 		,strTransactionType = @strToTransactionType
 		,intToBookId = @intToBookId
+	FROM tblIPMultiCompany
+	WHERE ysnParent = 0
 END TRY
 
 BEGIN CATCH
