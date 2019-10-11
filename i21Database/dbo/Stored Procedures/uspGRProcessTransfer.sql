@@ -511,7 +511,84 @@ BEGIN TRY
 						END
 
 						SET @dblCost =ISNULL(@dblSettlementPrice,0) + ISNULL(@dblBasisCost,0)
-
+						
+						DECLARE @OtherChargesDetail AS TABLE(
+							intOtherChargesDetailId INT IDENTITY(1, 1)
+							,strOrderType NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+							,intCustomerStorageId INT
+							,intCompanyLocationId INT
+							,dblUnits DECIMAL(24, 10)
+							,dblCashPrice DECIMAL(24, 10)
+							,intItemId INT NULL
+							,intItemType INT NULL
+							,IsProcessed BIT
+							,intTicketDiscountId INT NULL
+							,ysnDiscountFromGrossWeight BIT NULL
+						)
+						INSERT INTO @OtherChargesDetail
+						(
+							intCustomerStorageId
+							,intCompanyLocationId
+							,dblUnits
+							,dblCashPrice
+							,intItemId
+							,intItemType
+							,IsProcessed
+							,intTicketDiscountId
+							,ysnDiscountFromGrossWeight
+						)
+						SELECT 
+							 intCustomerStorageId		= CS.intCustomerStorageId
+							,intCompanyLocationId		= CS.intCompanyLocationId 
+							,dblUnits					= CASE
+															WHEN DCO.strDiscountCalculationOption = 'Gross Weight' THEN 
+																CASE WHEN CS.dblGrossQuantity IS NULL THEN SR.dblUnitQty
+																ELSE
+																	ROUND((SR.dblUnitQty / CS.dblOriginalBalance) * CS.dblGrossQuantity,10)
+																END
+															ELSE SR.dblUnitQty
+														END
+							,dblCashPrice				= CASE 
+															WHEN QM.strDiscountChargeType = 'Percent'
+																		THEN (dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, IU.intUnitMeasureId, CS.intUnitMeasureId, ISNULL(QM.dblDiscountPaid, 0)) - dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, IU.intUnitMeasureId, CS.intUnitMeasureId, ISNULL(QM.dblDiscountDue, 0)))
+																			*
+																			@dblCost/*@dblCost*/--(CASE WHEN SS.dblCashPrice <> 0 THEN SS.dblCashPrice ELSE SC.dblCashPrice END)
+															ELSE --Dollar
+																dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, IU.intUnitMeasureId, CS.intUnitMeasureId, ISNULL(QM.dblDiscountPaid, 0)) - dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, IU.intUnitMeasureId, CS.intUnitMeasureId, ISNULL(QM.dblDiscountDue, 0))
+														END
+							,intItemId					= DItem.intItemId 
+							,intItemType				= 3 
+							,IsProcessed				= 0
+							,intTicketDiscountId		= QM.intTicketDiscountId
+							,ysnDiscountFromGrossWeight	= CASE
+															WHEN DCO.strDiscountCalculationOption = 'Gross Weight' THEN 1
+															ELSE 0
+														END
+							FROM @ItemsToPost ITP
+							JOIN tblGRTransferStorageReference SR
+							  ON ITP.intTransactionId = SR.intTransferStorageId
+							 AND ITP. intTransactionDetailId = SR.intTransferStorageSplitId
+							JOIN tblGRCustomerStorage CS
+								ON SR.intSourceCustomerStorageId = CS.intCustomerStorageId
+							JOIN tblICItemUOM IU
+							ON IU.intItemId = CS.intItemId
+								AND IU.ysnStockUnit = 1
+							JOIN tblQMTicketDiscount QM 
+							ON QM.intTicketFileId = CS.intCustomerStorageId 
+								AND QM.strSourceType = 'Storage'
+							JOIN tblGRDiscountScheduleCode DSC
+							ON DSC.intDiscountScheduleCodeId = QM.intDiscountScheduleCodeId
+							JOIN tblGRDiscountCalculationOption DCO
+							ON DCO.intDiscountCalculationOptionId = DSC.intDiscountCalculationOptionId
+							JOIN tblICItem DItem 
+							ON DItem.intItemId = DSC.intItemId
+							WHERE (ISNULL(QM.dblDiscountDue, 0) - ISNULL(QM.dblDiscountPaid, 0)) <> 0
+							
+						SELECT @dblCost = @dblCost + ISNULL(SUM(dblCashPrice),0) FROM @OtherChargesDetail OCD 
+						INNER JOIN tblICItem IC
+							ON IC.intItemId = OCD.intItemId
+						WHERE IC.ysnInventoryCost = 1
+						
 						DELETE FROM @Entry
 						DELETE FROM @GLEntries
 						INSERT INTO @Entry 
@@ -579,7 +656,44 @@ BEGIN TRY
 							,[dblForeignRate]
 							,[strRateType]
 							)
-							EXEC	dbo.uspICPostCosting @Entry,@strBatchId,'AP Clearing',1
+							EXEC	dbo.uspICPostCosting @Entry,@strBatchId,'AP Clearing',@intUserId
+
+							INSERT INTO @GLEntries 
+							(
+								 [dtmDate] 
+								,[strBatchId]
+								,[intAccountId]
+								,[dblDebit]
+								,[dblCredit]
+								,[dblDebitUnit]
+								,[dblCreditUnit]
+								,[strDescription]
+								,[strCode]
+								,[strReference]
+								,[intCurrencyId]
+								,[dblExchangeRate]
+								,[dtmDateEntered]
+								,[dtmTransactionDate]
+								,[strJournalLineDescription]
+								,[intJournalLineNo]
+								,[ysnIsUnposted]
+								,[intUserId]
+								,[intEntityId]
+								,[strTransactionId]
+								,[intTransactionId]
+								,[strTransactionType]
+								,[strTransactionForm]
+								,[strModuleName]
+								,[intConcurrencyId]
+								,[dblDebitForeign]	
+								,[dblDebitReport]	
+								,[dblCreditForeign]	
+								,[dblCreditReport]	
+								,[dblReportingRate]	
+								,[dblForeignRate]
+								,[strRateType]
+							)
+							EXEC [dbo].[uspGRCreateGLEntriesForTransferStorage] @intTransferStorageId,@strBatchId,@dblCost,1
 
 							IF EXISTS (SELECT TOP 1 1 FROM @GLEntries)
 							BEGIN 
@@ -588,13 +702,13 @@ BEGIN TRY
 							
 							UPDATE @Entry
 							SET dblQty = dblQty*-1
-
-							EXEC	dbo.uspICPostStorage @Entry,@strBatchId,1
+							
+							EXEC	dbo.uspICPostStorage @Entry,@strBatchId,@intUserId
 
 						END
 						ELSE
 						BEGIN
-							EXEC	dbo.uspICPostStorage @Entry,@strBatchId,1
+							EXEC	dbo.uspICPostStorage @Entry,@strBatchId,@intUserId
 
 							UPDATE @Entry
 							SET dblQty = dblQty*-1
@@ -634,7 +748,44 @@ BEGIN TRY
 							,[dblForeignRate]
 							,[strRateType]
 							)
-							EXEC	dbo.uspICPostCosting @Entry,@strBatchId,'AP Clearing',1
+							EXEC	dbo.uspICPostCosting @Entry,@strBatchId,'AP Clearing',@intUserId
+
+							INSERT INTO @GLEntries 
+							(
+								 [dtmDate] 
+								,[strBatchId]
+								,[intAccountId]
+								,[dblDebit]
+								,[dblCredit]
+								,[dblDebitUnit]
+								,[dblCreditUnit]
+								,[strDescription]
+								,[strCode]
+								,[strReference]
+								,[intCurrencyId]
+								,[dblExchangeRate]
+								,[dtmDateEntered]
+								,[dtmTransactionDate]
+								,[strJournalLineDescription]
+								,[intJournalLineNo]
+								,[ysnIsUnposted]
+								,[intUserId]
+								,[intEntityId]
+								,[strTransactionId]
+								,[intTransactionId]
+								,[strTransactionType]
+								,[strTransactionForm]
+								,[strModuleName]
+								,[intConcurrencyId]
+								,[dblDebitForeign]	
+								,[dblDebitReport]	
+								,[dblCreditForeign]	
+								,[dblCreditReport]	
+								,[dblReportingRate]	
+								,[dblForeignRate]
+								,[strRateType]
+							)
+							EXEC [dbo].[uspGRCreateGLEntriesForTransferStorage] @intTransferStorageId,@strBatchId,@dblCost,1
 
 							IF EXISTS (SELECT TOP 1 1 FROM @GLEntries)
 							BEGIN 
