@@ -112,7 +112,7 @@ WITH Invoices AS(
 			,dtmDueDate = INV.dtmDueDate
 			,dtmDate = INV.dtmDate
 			,intTermsId = INV.intTermId
-			,strComment = SUBSTRING(INV.strComments,1,25)
+			,strComment = INV.strComments
 			,dblAmount = INV.dblInvoiceTotal
 			,dblDiscount = CASE WHEN PYMTDetail.dblDiscount <> 0 
 						THEN PYMTDetail.dblDiscount 
