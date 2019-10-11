@@ -4,7 +4,7 @@
 -- Description:	Update transaction if overflow report is needed to show in process payments
 --              Invoked by uspCMCheckPrint_QueuePrintJobs
 -- =============================================
-CREATE PROCEDURE uspCMUpdateAPOveflowSettings
+CREATE PROCEDURE uspCMUpdateAPOverflowSettings
 	@strTransactionIds nvarchar(max) = NULL
 AS
 DECLARE @BANK_DEPOSIT         INT = 1,
