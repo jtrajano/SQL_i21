@@ -266,7 +266,7 @@ SELECT
 	,[ysnCalculated]						= 0
 	,[ysnSplitted]							= 0
 	,[intPaymentId]							= NULL
-	,[intSplitId]							= SO.intSplitId
+	,[intSplitId]							= (SELECT TOP 1 intSplitId FROM tblSOSalesOrder WHERE intSalesOrderId = ARSI.intSalesOrderId)
 	,[intDistributionHeaderId]				= NULL
 	,[strActualCostId]						= NULL
 	,[intShipmentId]						= NULL
@@ -286,15 +286,8 @@ SELECT
 	,[dblQtyOrdered]						= ARSI.[dblQtyOrdered] 
 	,[intItemUOMId]							= ARSI.[intItemUOMId] 
 	,[intPriceUOMId]						= CASE WHEN ISNULL(@OnlyUseShipmentPrice, 0) = 0 THEN ARSI.[intPriceUOMId] ELSE ARSI.[intItemUOMId] END
-	,[dblQtyShipped]						= CASE WHEN (ISNULL(ARSI.intPricingTypeId, 0) = 2 AND ISNULL(dbo.fnCTGetAvailablePriceQuantity(ARSI.[intContractDetailId]), 0) > ARSI.[dblQtyShipped]) THEN ARSI.[dblQtyShipped] ELSE ISNULL(dbo.fnCTGetAvailablePriceQuantity(ARSI.[intContractDetailId]), 0) END 
-	,[dblContractPriceUOMQty]				= CASE WHEN ISNULL(@OnlyUseShipmentPrice, 0) = 0 
-												   THEN ARSI.[dblPriceUOMQuantity] 
-												   ELSE 
-														CASE WHEN ISNULL(ARSI.intPricingTypeId, 0) = 2 AND ISNULL(dbo.fnCTGetAvailablePriceQuantity(ARSI.[intContractDetailId]), 0) > ARSI.[dblQtyShipped]
-															 THEN ARSI.[dblQtyShipped] 
-															 ELSE ISNULL(dbo.fnCTGetAvailablePriceQuantity(ARSI.[intContractDetailId]), 0) 
-														END 
-											  END 
+	,[dblQtyShipped]						= ARSI.[dblQtyShipped]
+	,[dblContractPriceUOMQty]				= CASE WHEN ISNULL(@OnlyUseShipmentPrice, 0) = 0 THEN ARSI.[dblPriceUOMQuantity] ELSE ARSI.[dblQtyShipped] END 
 	,[dblDiscount]							= ARSI.[dblDiscount] 
 	,[dblItemWeight]						= ARSI.[dblWeight]  
 	,[intItemWeightUOMId]					= ARSI.[intWeightUOMId] 
@@ -357,12 +350,8 @@ SELECT
 	,[dblCurrencyExchangeRate]				= ARSI.[dblCurrencyExchangeRate]
 	,[intSubCurrencyId]						= ARSI.[intSubCurrencyId]
 	,[dblSubCurrencyRate]					= ARSI.[dblSubCurrencyRate]
-FROM vyuARShippedItems ARSI
-OUTER APPLY (
-	SELECT TOP 1 intSplitId 
-	FROM tblSOSalesOrder SO
-	WHERE ARSI.intSalesOrderId = SO.intSalesOrderId
-) SO 
+FROM
+	vyuARShippedItems ARSI
 WHERE
 	ARSI.[strTransactionType] = 'Inventory Shipment'
 	AND ARSI.[intInventoryShipmentId] = @ShipmentId
