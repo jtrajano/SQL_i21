@@ -20,7 +20,7 @@ SET XACT_ABORT ON
 --SET ANSI_WARNINGS OFF // Commented because it is causing CM-579
 
 -- UPDATE TRANSACTION TO SHOW OVERFLOW REPORT IF NEEDED
-EXEC uspCMUpdateAPOveflowSettings @strTransactionIds
+EXEC uspCMUpdateAPOverflowSettings @strTransactionIds
 
 BEGIN TRANSACTION 
 		
