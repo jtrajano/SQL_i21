@@ -301,7 +301,68 @@ FROM tblICInventoryReceipt A
 	) rtn
 
 	OUTER APPLY (
-		SELECT	* 
+		SELECT 
+			CH.intContractHeaderId
+			,CD.intContractDetailId			
+			,CD.intContractSeq
+			,CD.dblCashPrice
+			,CD.intPricingTypeId
+			,CD.dblFutures
+			,CD.dblQuantity
+			,CH.strContractNumber
+			,CD.intItemUOMId
+			,ctUOM.strUnitMeasure
+			,J.dblFranchise
+		FROM 
+			tblCTContractHeader CH INNER JOIN tblCTContractDetail CD 
+				ON CH.intContractHeaderId = CD.intContractHeaderId
+			LEFT JOIN dbo.tblCTWeightGrade J 
+				ON J.intWeightGradeId = CH.intWeightId
+			LEFT JOIN tblICItemUOM ctOrderUOM 
+				ON ctOrderUOM.intItemUOMId = CD.intItemUOMId
+			LEFT JOIN tblICUnitMeasure ctUOM 
+				ON ctUOM.intUnitMeasureId  = ctOrderUOM.intUnitMeasureId
+		WHERE
+			(
+				A.strReceiptType = 'Purchase Contract'
+				OR (
+					A.strReceiptType = 'Inventory Return'
+					AND rtn.strReceiptType = 'Purchase Contract'
+				)
+			)
+			AND CH.intContractHeaderId = ISNULL(B.intContractHeaderId, B.intOrderId)
+			AND CD.intContractDetailId = ISNULL(B.intContractDetailId, B.intLineNo) 
+			--AND CH.intEntityId = A.intEntityVendorId 
+	) Contracts		
+
+	OUTER APPLY (		
+		SELECT 
+			G.intTicketId
+			,G.strTicketNumber 
+		FROM 
+			tblSCTicket G 
+		WHERE 
+			A.intSourceType = 1 
+			AND G.intTicketId = B.intSourceId 
+	) ScaleTicket		
+	
+	OUTER APPLY 
+	(
+		SELECT 
+			SUM(ISNULL(H.dblQtyReceived,0)) AS dblQty 
+		FROM 
+			tblAPBillDetail H 
+		WHERE 
+			H.intInventoryReceiptItemId = B.intInventoryReceiptItemId 
+			AND H.intInventoryReceiptChargeId IS NULL
+		GROUP BY 
+			H.intInventoryReceiptItemId
+	) Billed
+	
+	OUTER APPLY (
+		SELECT	
+				LogisticsView.strLoadNumber
+				,LogisticsView.dblNetWt
 		FROM	vyuLGLoadContainerLookup LogisticsView 
 		WHERE	LogisticsView.intLoadDetailId = B.intSourceId 
 				AND LogisticsView.intLoadContainerId = B.intContainerId
