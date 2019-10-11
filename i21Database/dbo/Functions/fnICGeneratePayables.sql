@@ -327,7 +327,7 @@ FROM tblICInventoryReceipt A INNER JOIN tblICInventoryReceiptItem B
 			)
 			AND CH.intContractHeaderId = ISNULL(B.intContractHeaderId, B.intOrderId)
 			AND CD.intContractDetailId = ISNULL(B.intContractDetailId, B.intLineNo) 
-			AND CH.intEntityId = A.intEntityVendorId 
+			--AND CH.intEntityId = A.intEntityVendorId 
 	) Contracts		
 
 	OUTER APPLY (		
