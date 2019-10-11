@@ -8067,6 +8067,7 @@
     <Build Include="dbo\Stored Procedures\uspIPProcessPreStageLoad.sql" />
     <Build Include="dbo\Tables\tblLGIntrCompLogisticsPreStg.sql" />
     <Build Include="dbo\Stored Procedures\uspICZeroAllStockQtyInCountDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMUpdateAPOverflowSettings.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
