@@ -113,6 +113,7 @@
     [intInventoryTransferId] INT NULL, 
     [intInventoryReceiptId] INT NULL, 
     [intInventoryShipmentId] INT NULL, 
+    [intInventoryAdjustmentId] INT NULL, 
 	[dblScheduleQty] DECIMAL(13, 6) NULL,
 	[dblConvertedUOMQty] NUMERIC(38, 20) NULL,
 	[dblContractCostConvertedUOM] NUMERIC(38, 20) NULL,

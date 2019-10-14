@@ -252,6 +252,31 @@ BEGIN TRY
 						CLOSE intListCursor  
 						DEALLOCATE intListCursor 
 						EXEC [dbo].[uspSCUpdateStatus] @intTicketId, 1;
+
+						declare @intInventoryAdjustmentId int 
+						declare @strAdjustmentNo AS NVARCHAR(40)
+						set @intInventoryAdjustmentId = null
+						select @intInventoryAdjustmentId = intInventoryAdjustmentId from tblSCTicket where intTicketId = @intTicketId
+
+						if( isnull(@intInventoryAdjustmentId, 0) > 0)
+						begin
+							SELECT @strAdjustmentNo = strAdjustmentNo
+							FROM tblICInventoryAdjustment
+							WHERE intInventoryAdjustmentId = @intInventoryAdjustmentId
+							
+							if(isnull(@strAdjustmentNo, '') <> '')
+							begin
+								EXEC dbo.uspICPostInventoryAdjustment
+									@ysnPost = 0
+									,@ysnRecap = 0
+									,@strTransactionId = @strAdjustmentNo
+									,@intEntityUserSecurityId = 1
+								DELETE FROM tblICInventoryAdjustment WHERE strAdjustmentNo = @strAdjustmentNo
+							end
+							
+						end
+
+
 					END
 					ELSE
 					BEGIN
