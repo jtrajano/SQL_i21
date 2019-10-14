@@ -298,7 +298,8 @@ BEGIN
 												* (CASE WHEN @decreaseQty = 0 
 														THEN -1
 													ELSE 1
-													END)
+													END),
+			[intEntityVendorId]				=	B.intEntityVendorId
 		FROM #tmpInventoryReceipt A
 		INNER JOIN tblAPBill B ON A.intBillId = B.intBillId
 
