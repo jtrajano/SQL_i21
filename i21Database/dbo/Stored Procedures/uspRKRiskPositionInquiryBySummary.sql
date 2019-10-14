@@ -904,9 +904,7 @@ AS
 			, strSubBook
 		FROM #PricedContractList cv
 		WHERE cv.intPricingTypeId IN (1, 2, 8) AND ysnDeltaHedge = 0
-			AND intContractDetailId NOT IN (
-				SELECT ISNULL(intContractDetailId, 0)
-				FROM tblCTPriceFixation)
+			AND intContractDetailId NOT IN (SELECT DISTINCT intContractDetailId FROM #tmpLotsQtyByDetail)
 
 		--Parcial Priced
 		UNION ALL SELECT strFutureMonth
