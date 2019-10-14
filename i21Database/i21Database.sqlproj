@@ -1078,6 +1078,7 @@
     <Build Include="dbo\Views\vyuICGetReceiptItemSourceSearch.sql" />
     <Build Include="dbo\Views\vyuICLoadContainers.sql" />
     <Build Include="dbo\Views\vyuICLoadContainersSearch.sql" />
+    <Build Include="dbo\Views\vyuICGetLoadReceipt.sql" />
     <Build Include="dbo\Tables\tblHDAnnouncementType.sql" />
     <Build Include="dbo\Tables\tblHDAnnouncement.sql" />
     <Build Include="dbo\Tables\tblHDProject.sql" />

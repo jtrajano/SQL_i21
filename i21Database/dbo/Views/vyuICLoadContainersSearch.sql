@@ -7,6 +7,11 @@ SELECT
 	, dblDeliveredQuantity = NULL
 	, WeightUOM.strUnitMeasure
 	, dblItemUOMCF = ItemUOM.dblUnitQty
+	, dblQuantity =
+		CASE
+			WHEN ISNULL(ContainerLink.dblQuantity,0) = 0 THEN LoadDetail.dblQuantity 
+			ELSE ContainerLink.dblQuantity 
+		END
 	, intWeightUOMId = LoadDetail.intWeightItemUOMId
 	, dblContainerWeightPerQty = NULL
 	, dblFranchise = NULL
