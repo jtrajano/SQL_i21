@@ -1049,10 +1049,11 @@ BEGIN
 						,dblTotal = Inv.dblTotal - IRI.dblBillQty
 						,IR.strReceiptNumber
 						,Inv.intTransactionId
-						,intBillId = (select top 1 intBillId from vyuICGetInventoryReceiptVoucher where intInventoryReceiptItemId = Inv.intTransactionDetailId )
+						,IRV.intBillId
 					from @InventoryStock Inv
 					inner join tblICInventoryReceipt IR on Inv.intTransactionId = IR.intInventoryReceiptId
 					inner join tblICInventoryReceiptItem IRI on Inv.intTransactionDetailId = IRI.intInventoryReceiptItemId
+					left join vyuICGetInventoryReceiptVoucher IRV on IRV.intInventoryReceiptItemId = Inv.intTransactionDetailId
 					where Inv.strTransactionType = 'Inventory Receipt'
 						AND Inv.dblTotal <> dblBillQty
 						AND IR.intSourceType = 1
