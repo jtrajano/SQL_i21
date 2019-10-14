@@ -22,7 +22,8 @@ BEGIN
 		,@dtmEffectiveDate DATETIME = NULL
 		,@intItemUOMId INT = NULL 
 
-	
+	DECLARE @tmpQuoteTaxDetail TABLE(intTaxCodeId INT NULL, dblTax NUMERIC(18,6) NULL, strType NVARCHAR(10) NULL)
+
 	SELECT  @dtmEffectiveDate = dtmQuoteEffectiveDate, @intCustomerId = intEntityCustomerId
 	FROM tblTRQuoteHeader 
 	WHERE intQuoteHeaderId = @intQuoteHeaderId		
