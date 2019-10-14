@@ -2128,7 +2128,8 @@ BEGIN
 END
 
 -- Update Search Details
-EXEC dbo.uspICUpdateInventoryReceiptDetail @inventoryReceiptId
+-- Temporarily comment this out to resolve IC-7927 but will temporarily remove optimizations in IC-7893
+--EXEC dbo.uspICUpdateInventoryReceiptDetail @inventoryReceiptId
 
 IF @@TRANCOUNT > 0
 BEGIN 
