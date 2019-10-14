@@ -8118,6 +8118,8 @@
     <Build Include="dbo\Stored Procedures\uspIPFutureMonthProcessPreStage.sql" />
     <Build Include="dbo\Stored Procedures\uspIPFutureMonthTransferStgXML.sql" />
     <Build Include="dbo\Tables\tblIPMultiCompany.sql" />
+    <Build Include="dbo\Tables\tblLGFreightRateMatrixPreStage.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPInterCompanyPreStageFreightRateMatrix.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
