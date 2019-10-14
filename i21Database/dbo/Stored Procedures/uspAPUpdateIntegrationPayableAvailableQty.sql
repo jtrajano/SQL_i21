@@ -284,7 +284,8 @@ BEGIN
 			[strSourceTransactionNo],
 			[intItemId],
 			[intToBillUOMId],
-			[dblToBillQty]
+			[dblToBillQty],
+			[intEntityVendorId]
 		)
 		SELECT
 			[intInventoryReceiptItemId]		=	A.intInventoryReceiptItemId,
