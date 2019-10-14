@@ -434,8 +434,8 @@ BEGIN TRY
 															AND		@ysnBasisSubCurrency = 1				THEN 100 
 															ELSE	0.01 
 													END
-												) + 
-												dbo.fnCTConvertQuantityToTargetCommodityUOM(@intPriceCommodityUOMId,@intFinalPriceUOMId,ISNULL(dblRollArb,0)),
+												), -- + 
+												--dbo.fnCTConvertQuantityToTargetCommodityUOM(@intPriceCommodityUOMId,@intFinalPriceUOMId,ISNULL(dblRollArb,0)),
 					CD.intFutureMarketId	=	@intNewFutureMarketId,
 					CD.intFutureMonthId		=	@intNewFutureMonthId,
 					CD.intConcurrencyId		=	CD.intConcurrencyId + 1,

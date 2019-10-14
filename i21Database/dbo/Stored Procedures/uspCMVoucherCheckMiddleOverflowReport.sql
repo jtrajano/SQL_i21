@@ -1,7 +1,7 @@
 ﻿/*  
  This stored procedure is used as data source in the Voucher Check Middle Overflow Report  
 */  
-CREATE PROCEDURE uspCMVoucherCheckMiddleOverflowReport
+CREATE PROCEDURE [dbo].[uspCMVoucherCheckMiddleOverflowReport]
  @xmlParam NVARCHAR(MAX) = NULL  
 AS  
   
@@ -112,7 +112,7 @@ SET @strBatchId = CASE WHEN LTRIM(RTRIM(ISNULL(@strBatchId, ''))) = '' THEN NULL
 -- Report Query:  
 SELECT	CHK.dtmDate
 		,strCheckNumber = CHK.strReferenceNo
-		,CHK.dblAmount
+		,CHK.dblAmount dblTotalAmount
 		,CHK.strPayee
 		,strAmountInWords = LTRIM(RTRIM(REPLACE(CHK.strAmountInWords, '*', ''))) + REPLICATE(' *', 30)
 		,CHK.strMemo
@@ -155,5 +155,6 @@ FROM	dbo.tblCMBankTransaction CHK
 		OUTER APPLY( SElECT TOP 1 strCompanyName, strAddress,strCity,strState, strCountry, strCounty, strZip FROM tblSMCompanySetup) COMPANY
 WHERE	CHK.intBankAccountId = @intBankAccountId
 		AND CHK.strTransactionId IN (SELECT strValues COLLATE Latin1_General_CI_AS FROM dbo.fnARGetRowsFromDelimitedValues(@strTransactionId))
+		AND (CHK.ysnHasDetailOverflow = 1 OR CHK.ysnHasBasisPrepayOverflow = 1)
 		AND CHK.dblAmount <> 0
 ORDER BY CHK.strReferenceNo ASC

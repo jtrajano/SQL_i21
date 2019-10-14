@@ -65,6 +65,8 @@ SELECT
 	,dblIncrease = CASE WHEN t.dblQty > 0 THEN t.dblQty ELSE 0 END
 	,dblDecrease = CASE WHEN t.dblQty < 0 THEN t.dblQty * -1 ELSE 0 END
 	,t.strPricingType
+	,t.intTransactionId
+	,t.strTransactionId
 INTO #tblContractBalance
 FROM(
 	select  
@@ -76,6 +78,8 @@ FROM(
 						else sh.dblTransactionQuantity * cd.dblQuantityPerLoad
 					end)
 		, pt.strPricingType
+		, intTransactionId = sh.intExternalHeaderId
+		, strTransactionId = sh.strNumber
 	from vyuCTSequenceUsageHistory sh
 	inner join tblCTContractDetail cd on cd.intContractDetailId = sh.intContractDetailId
 	inner join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
@@ -91,6 +95,8 @@ FROM(
 		, sh.intContractDetailId
 		, dblQty = dbo.fnCTConvertQtyToTargetCommodityUOM(ch.intCommodityId,dbo.fnCTGetCommodityUnitMeasure(ch.intCommodityUOMId),cum.intUnitMeasureId,sh.dblBalance)
 		, pt.strPricingType
+		, intTransactionId = null
+		, strTransactionId = ''
 	from tblCTSequenceHistory sh
 	inner join tblCTContractDetail cd on cd.intContractDetailId = sh.intContractDetailId
 	inner join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
@@ -106,6 +112,8 @@ FROM(
 		, pf.intContractDetailId
 		, dblQty = dbo.fnCTConvertQtyToTargetCommodityUOM(ch.intCommodityId,dbo.fnCTGetCommodityUnitMeasure(ch.intCommodityUOMId),cum.intUnitMeasureId,fd.dblQuantity * -1)
 		, 'Basis'
+		, intTransactionId = null
+		, strTransactionId = ''
 	FROM	tblCTPriceFixationDetail fd
 	JOIN	tblCTPriceFixation		 pf	ON	pf.intPriceFixationId =	fd.intPriceFixationId
 	JOIN tblCTContractDetail		 cd ON cd.intContractDetailId = pf.intContractDetailId
@@ -121,6 +129,8 @@ FROM(
 		, pf.intContractDetailId
 		, dblQty = dbo.fnCTConvertQtyToTargetCommodityUOM(ch.intCommodityId,dbo.fnCTGetCommodityUnitMeasure(ch.intCommodityUOMId),cum.intUnitMeasureId,fd.dblQuantity)
 		, 'Priced'
+		, intTransactionId = null
+		, strTransactionId = ''
 	FROM	tblCTPriceFixationDetail fd
 	JOIN	tblCTPriceFixation		 pf	ON	pf.intPriceFixationId =	fd.intPriceFixationId
 	JOIN tblCTContractDetail		 cd ON cd.intContractDetailId = pf.intContractDetailId
@@ -160,6 +170,8 @@ FROM (
 			,strContractSeq = strContractNumber + '-' + CONVERT(NVARCHAR(5),intContractSeq)
 			,intContractHeaderId
 			,intContractDetailId
+			,intTransactionId
+			,strTransactionId
 		FROM #tblContractBalance
 		WHERE strPricingType <> 'HTA'
 ) t
@@ -369,6 +381,8 @@ select
 	,strContractSeq 
 	,intContractHeaderId
 	,intContractDetailId
+	,strTransactionId
+	,intTransactionId
 	,dblBasisBegBalForSummary
 	,dblBasisEndBalForSummary
 	,dblPricedBegBalForSummary 
@@ -411,6 +425,8 @@ BEGIN
 		,strContractSeq  = 'Balance Forward'
 		,intContractHeaderId  = NULL
 		,intContractDetailId  = NULL
+		,strTransactionId = ''
+		,intTransactionId = NULL
 		,dblBasisBegBalForSummary = @dblBasisBalanceForward
 		,dblBasisEndBalForSummary = @dblBasisBalanceForward
 		,dblPricedBegBalForSummary = @dblPricedBalanceForward

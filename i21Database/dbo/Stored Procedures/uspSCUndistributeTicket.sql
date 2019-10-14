@@ -63,7 +63,9 @@ DECLARE @intTicketLoadDetailId INT
 DECLARE @intLoopLoadDetailId INT
 DECLARE @intTicketItemUOMId INT
 DECLARE @strDistributionOption NVARCHAR(20)
-
+DECLARE @dblTicketScheduledQty NUMERIC(18,6)
+DECLARE @intTicketContractDetailId INT
+DECLARE @ysnLoadContract BIT
 
 DECLARE @intLoopContractDetailId INT
 DECLARE @intLoopId INT
@@ -75,6 +77,8 @@ BEGIN TRY
 		SELECT TOP 1
 			@intTicketItemUOMId = SC.intItemUOMIdTo
 			,@strDistributionOption = SC.strDistributionOption
+			,@dblTicketScheduledQty = SC.dblScheduleQty
+			,@intTicketContractDetailId = SC.intContractId
 		FROM tblSCTicket SC
 		WHERE intTicketId = @intTicketId
 
@@ -233,48 +237,48 @@ BEGIN TRY
 						DEALLOCATE intListCursor 
 
 						-----UPDATE Contract scehdule and balances
-						IF(@strDistributionOption = 'SPL')
-						BEGIN
-							/* CURSOR for Split Contract*/
-							DECLARE @intEntityVendorId AS INT
-							DECLARE @cursor_strDistributionOption AS VARCHAR(MAX)
-							DECLARE @cursor_intContractDetailId INT
-							DECLARE @cursor_dblScheduleQty DECIMAL(18,6)
-							DECLARE @cursor_intInventoryReceiptId INT
+						--IF(@strDistributionOption = 'SPL')
+						--BEGIN
+						--	/* CURSOR for Split Contract*/
+						--	DECLARE @intEntityVendorId AS INT
+						--	DECLARE @cursor_strDistributionOption AS VARCHAR(MAX)
+						--	DECLARE @cursor_intContractDetailId INT
+						--	DECLARE @cursor_dblScheduleQty DECIMAL(18,6)
+						--	DECLARE @cursor_intInventoryReceiptId INT
 							
-							DECLARE splitCursor CURSOR LOCAL FAST_FORWARD
-							FOR
-							SELECT SCC.intContractDetailId ,SCC.intEntityId,SCC.dblScheduleQty,SC.strDistributionOption
-							FROM tblSCTicketSplit SPL
-							INNER JOIN tblSCTicketContractUsed SCC 
-								ON SCC.intTicketId = SCC.intTicketId
-							INNER JOIN tblSCTicket SC
-								ON SPL.intTicketId = SC.intTicketId
-							WHERE SPL.intTicketId = @intTicketId and SCC.intTicketId = @intTicketId and SPL.intCustomerId = SCC.intEntityId and SPL.intCustomerId = @_intIRVendorId
+						--	DECLARE splitCursor CURSOR LOCAL FAST_FORWARD
+						--	FOR
+						--	SELECT SCC.intContractDetailId ,SCC.intEntityId,SCC.dblScheduleQty,SC.strDistributionOption
+						--	FROM tblSCTicketSplit SPL
+						--	INNER JOIN tblSCTicketContractUsed SCC 
+						--		ON SCC.intTicketId = SCC.intTicketId
+						--	INNER JOIN tblSCTicket SC
+						--		ON SPL.intTicketId = SC.intTicketId
+						--	WHERE SPL.intTicketId = @intTicketId and SCC.intTicketId = @intTicketId and SPL.intCustomerId = SCC.intEntityId and SPL.intCustomerId = @_intIRVendorId
 
 						
 
-							OPEN splitCursor;
+						--	OPEN splitCursor;
 
-							FETCH NEXT FROM splitCursor INTO @cursor_intContractDetailId, @intEntityVendorId, @cursor_dblScheduleQty, @cursor_strDistributionOption;
-							WHILE @@FETCH_STATUS = 0
-							BEGIN
-								IF(@cursor_strDistributionOption = 'CNT')
-								BEGIN		
+						--	FETCH NEXT FROM splitCursor INTO @cursor_intContractDetailId, @intEntityVendorId, @cursor_dblScheduleQty, @cursor_strDistributionOption;
+						--	WHILE @@FETCH_STATUS = 0
+						--	BEGIN
+						--		IF(@cursor_strDistributionOption = 'CNT')
+						--		BEGIN		
 
-									SET @cursor_dblScheduleQty = @cursor_dblScheduleQty *-1
-									EXEC uspCTUpdateScheduleQuantity @intContractDetailId=@cursor_intContractDetailId,@dblQuantityToUpdate=@cursor_dblScheduleQty,@intUserId=@intUserId,@intExternalId=@intTicketId, @strScreenName= 'Scale'	
+						--			SET @cursor_dblScheduleQty = @cursor_dblScheduleQty *-1
+						--			EXEC uspCTUpdateScheduleQuantity @intContractDetailId=@cursor_intContractDetailId,@dblQuantityToUpdate=@cursor_dblScheduleQty,@intUserId=@intUserId,@intExternalId=@intTicketId, @strScreenName= 'Scale'	
 										
-								END
-								FETCH NEXT FROM splitCursor INTO @cursor_intContractDetailId, @intEntityVendorId, @cursor_dblScheduleQty, @cursor_strDistributionOption;
-							END
+						--		END
+						--		FETCH NEXT FROM splitCursor INTO @cursor_intContractDetailId, @intEntityVendorId, @cursor_dblScheduleQty, @cursor_strDistributionOption;
+						--	END
 
-							CLOSE splitCursor  
-							DEALLOCATE splitCursor 
+						--	CLOSE splitCursor  
+						--	DEALLOCATE splitCursor 
 
-							/* END CURSOR for Split Contract*/
+						--	/* END CURSOR for Split Contract*/
 
-						END
+						--END
 						--ELSE
 						--BEGIN
 						--	IF(@strDistributionOption = 'LOD')
@@ -367,6 +371,28 @@ BEGIN TRY
 
 						--	END
 						--END
+
+
+						---- Update contract schedule based on ticket schedule qty							
+
+						IF ISNULL(@intTicketContractDetailId, 0) > 0 AND (@strDistributionOption = 'CNT' OR @strDistributionOption = 'LOD')
+						BEGIN
+							-- For Review
+							SET @ysnLoadContract = 0
+							SELECT TOP 1 
+								@ysnLoadContract = A.ysnLoad
+							FROM tblCTContractHeader A
+							INNER JOIN tblCTContractDetail B
+								ON A.intContractHeaderId = B.intContractHeaderId
+							WHERE B.intContractDetailId = @intTicketContractDetailId
+
+							IF(ISNULL(@ysnLoadContract,0) = 0)
+							BEGIN
+								UPDATE tblCTContractDetail
+								SET dblScheduleQty = ISNULL(dblScheduleQty,0) + @dblTicketScheduledQty
+								WHERE intContractDetailId = @intTicketContractDetailId
+							END
+						END
 
 						EXEC [dbo].[uspSCUpdateTicketStatus] @intTicketId, 1;
 					END
@@ -897,6 +923,9 @@ BEGIN TRY
 				UPDATE SCD SET SCD.dblGross = @finalGrossWeight, SCD.dblShrink = @finalShrinkUnits , SCD.dblNet = (@finalGrossWeight - @finalShrinkUnits)
 				FROM tblSCDeliverySheet SCD
 				WHERE intDeliverySheetId = @intDeliverySheetId
+
+
+		
 
 				EXEC [dbo].[uspSCUpdateTicketStatus] @intTicketId, 1;
 

@@ -88,14 +88,19 @@ BEGIN TRY
 END TRY
 BEGIN CATCH
 	DECLARE @strErrorMsg varchar(4000) = ERROR_MESSAGE()
-	DECLARE @strThrow	 NVARCHAR(MAX) = 'THROW 51000, ''' + @strErrorMsg + ''', 1'
-
-	IF XACT_STATE() = -1
-		ROLLBACK;
-	IF XACT_STATE() = 1 AND @intTranCount = 0
-		ROLLBACK
-	IF XACT_STATE() = 1 AND @intTranCount > 0
-		ROLLBACK TRANSACTION uspARUpdateInvoiceIntegrations;
+	DECLARE @strThrow	 NVARCHAR(MAX) = 'RAISERROR(''' + @strErrorMsg + ''', 11, 1)'
+	
+	IF (@@version NOT LIKE '%2008%')
+	BEGIN
+		SET @strThrow = 'THROW 51000, ''' + @strErrorMsg + ''', 1'
+		
+		IF XACT_STATE() = -1
+			ROLLBACK;
+		IF XACT_STATE() = 1 AND @intTranCount = 0
+			ROLLBACK
+		IF XACT_STATE() = 1 AND @intTranCount > 0
+			ROLLBACK TRANSACTION uspARUpdateInvoiceIntegrations;
+	END
 
 	EXEC sp_executesql @strThrow
 

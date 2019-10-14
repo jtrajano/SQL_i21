@@ -1,7 +1,7 @@
 ﻿/*  
  This stored procedure is used as data source for "Check Voucher Middle Sub Report AP Payment"
 */  
-CREATE PROCEDURE [dbo].[uspCMVoucherCheckMiddleSubReportAPPayment]  
+CREATE  PROCEDURE [dbo].[uspCMVoucherCheckMiddleSubReportAPPayment]  
 	@intTransactionIdFrom INT = 0   
 AS  
   
@@ -57,6 +57,9 @@ WITH Invoices AS(
 			,BILL.intTransactionType
 			,PYMTDetail.intPaymentDetailId
 			,F.intCurrencyId
+			,F.strReferenceNo strCheckNumber
+			,F.dblAmount dblTotalAmount
+			,F.dtmDate dtmCheckDate
 	FROM	[dbo].[tblCMBankTransaction] F INNER JOIN [dbo].[tblAPPayment] PYMT
 				ON F.strTransactionId = PYMT.strPaymentRecordNum
 			INNER JOIN [dbo].[tblAPPaymentDetail] PYMTDetail
@@ -84,6 +87,9 @@ WITH Invoices AS(
 			,preBILL.intTransactionType
 			,PYMTDetail.intPaymentDetailId
 			,F.intCurrencyId
+			,F.strReferenceNo strCheckNumber
+			,F.dblAmount dblTotalAmount
+			,F.dtmDate dtmCheckDate
 	FROM	[dbo].[tblCMBankTransaction] F
 		INNER JOIN [dbo].[tblAPPayment] PYMT
 			ON PYMT.strPaymentRecordNum = F.strTransactionId
@@ -106,7 +112,7 @@ WITH Invoices AS(
 			,dtmDueDate = INV.dtmDueDate
 			,dtmDate = INV.dtmDate
 			,intTermsId = INV.intTermId
-			,strComment = SUBSTRING(INV.strComments,1,25)
+			,strComment = INV.strComments
 			,dblAmount = INV.dblInvoiceTotal
 			,dblDiscount = CASE WHEN PYMTDetail.dblDiscount <> 0 
 						THEN PYMTDetail.dblDiscount 
@@ -116,6 +122,9 @@ WITH Invoices AS(
 			,'' AS intTransactionType
 			,PYMTDetail.intPaymentDetailId
 			,F.intCurrencyId
+			,F.strReferenceNo strCheckNumber
+			,F.dblAmount dblTotalAmount
+			,F.dtmDate dtmCheckDate
 	FROM	[dbo].[tblCMBankTransaction] F INNER JOIN [dbo].[tblAPPayment] PYMT
 				ON F.strTransactionId = PYMT.strPaymentRecordNum
 			INNER JOIN [dbo].[tblAPPaymentDetail] PYMTDetail
@@ -133,4 +142,3 @@ FROM Invoices a
 LEFT JOIN tblSMTerm b on a.intTermsId = b.intTermID
 LEFT JOIN tblSMCurrency c ON a.intCurrencyId = c.intCurrencyID
 order by strInvoice, intPaymentDetailId
-

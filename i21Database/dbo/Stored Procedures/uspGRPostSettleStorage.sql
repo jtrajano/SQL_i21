@@ -1871,8 +1871,15 @@ BEGIN TRY
 									SET intBillId = @createdVouchersId
 										WHERE intSettleStorageId = @intSettleStorageId 
 
+								declare @sum_e DECIMAL(38,20)
+								select @sum_e = sum(abs (dblCost))
+									from @voucherPayable a 
+										join tblICItem b on 
+											a.intItemId = b.intItemId
+									where b.ysnInventoryCost = 1 and strType = 'Other Charge'
+
 								update a
-									set dblPaidAmount = b.dblOldCost * a.dblUnits
+									set dblPaidAmount = (b.dblOldCost + isnull(@sum_e, 0)) * a.dblUnits
 										from tblGRStorageHistory a
 											join @voucherPayable b 
 												on a.intContractHeaderId = b.intContractHeaderId
