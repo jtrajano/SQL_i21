@@ -255,9 +255,57 @@ BEGIN
 		
 		IF @intBillId IS NULL AND @intScreenId = @intScreenId_InventoryReceipt
 		BEGIN
-			IF EXISTS(SELECT * 
-				FROM vyuICGetInventoryReceiptVoucher
-				WHERE intInventoryReceiptId = @intReceiptId
+			-- Check if one of the items is a Contract Basis or DP. 
+			IF EXISTS (
+				SELECT TOP 1
+					A.strReceiptNumber
+				FROM tblICInventoryReceipt A INNER JOIN tblICInventoryReceiptItem B
+						ON A.intInventoryReceiptId = B.intInventoryReceiptId
+					OUTER APPLY (
+						SELECT 
+							CH.intContractHeaderId
+							,CD.intContractDetailId			
+							,CD.intContractSeq
+							,CD.dblCashPrice
+							,CD.intPricingTypeId
+							,CD.dblFutures
+							,CD.dblQuantity
+							,CH.strContractNumber
+							,CD.intItemUOMId
+							,ctUOM.strUnitMeasure
+							,J.dblFranchise
+						FROM 
+							tblCTContractHeader CH INNER JOIN tblCTContractDetail CD 
+								ON CH.intContractHeaderId = CD.intContractHeaderId
+							LEFT JOIN dbo.tblCTWeightGrade J 
+								ON J.intWeightGradeId = CH.intWeightId
+							LEFT JOIN tblICItemUOM ctOrderUOM 
+								ON ctOrderUOM.intItemUOMId = CD.intItemUOMId
+							LEFT JOIN tblICUnitMeasure ctUOM 
+								ON ctUOM.intUnitMeasureId  = ctOrderUOM.intUnitMeasureId
+						WHERE			
+							A.strReceiptType = 'Purchase Contract'			
+							AND CH.intContractHeaderId = ISNULL(B.intContractHeaderId, B.intOrderId)
+							AND CD.intContractDetailId = ISNULL(B.intContractDetailId, B.intLineNo) 
+					) Contracts	
+				WHERE
+					A.strReceiptNumber = @strReceiptNumber
+					AND A.strReceiptType = 'Purchase Contract'
+					AND ISNULL(Contracts.intPricingTypeId, 0) = 2 -- 2 is Basis. 
+					AND ISNULL(Contracts.dblFutures, 0) = 0
+			)				
+			BEGIN
+				-- 'Unable to process. Use Price Contract screen to process Basis Contract vouchers.''
+				EXEC uspICRaiseError 80218, @strReceiptNumber;
+				RETURN -80218; 	
+			END
+
+			IF EXISTS(
+				SELECT TOP 1 1
+				FROM 
+					vyuICGetInventoryReceiptVoucher
+				WHERE 
+					intInventoryReceiptId = @intReceiptId
 					AND dblQtyToVoucher = dblQtyToReceive
 			)
 			BEGIN
