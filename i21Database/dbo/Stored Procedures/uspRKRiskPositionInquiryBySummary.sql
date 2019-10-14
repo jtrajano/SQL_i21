@@ -25,7 +25,7 @@ AS
 --	, @intForecastWeeklyConsumptionUOMId INT = 0
 --	, @intBookId INT = 0
 --	, @intSubBookId INT = 0
---	, @strPositionBy NVARCHAR(100) = 'Product Type'
+--	, @strPositionBy NVARCHAR(100) = 'Vendor/Customer'
 --	, @dtmPositionAsOf DATETIME = '2019-10-14'
 --	, @strUomType NVARCHAR(100) = 'By Quantity'
 
@@ -1143,9 +1143,6 @@ AS
 		, dblNoOfLot
 		, dblQuantity
 		, intOrderByHeading
-		, strProductType
-		, strProductLine
-		, strOrigin
 		, intBookId
 		, strBook
 		, intSubBookId
@@ -1164,15 +1161,12 @@ AS
 		, 0.0
 		, dblQuantity = SUM(dblNoOfLot)
 		, 1
-		, strProductType
-		, strProductLine
-		, strOrigin
 		, intBookId = NULL
 		, strBook = NULL
 		, intSubBookId = NULL
 		, strSubBook = NULL
 	FROM (
-		SELECT DISTINCT strAccountNumber = 'Purchase' + ' - ' + ISNULL(c.strDescription, '') COLLATE Latin1_General_CI_AS
+		SELECT DISTINCT strAccountNumber = 'Purchase' + ' - ' + CASE WHEN @strPositionBy = 'Product Type' THEN ISNULL(c.strDescription, '') ELSE ISNULL(t.strEntity, '') END COLLATE Latin1_General_CI_AS
 			, dblNoOfLot = dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId, @intUOMId, t.dblQuantity)
 			, strProductType = c.strDescription
 			, strProductLine = pl.strDescription
@@ -1193,9 +1187,6 @@ AS
 			AND CONVERT(DATETIME, CONVERT(VARCHAR(10), t.dtmCreated, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
 	) t2
 	GROUP BY strAccountNumber
-		, strProductType
-		, strProductLine
-		, strOrigin
 
 	DROP TABLE #ProductTypes
 
