@@ -89,9 +89,6 @@ OUTER APPLY (
 	AND NOT EXISTS (
 		SELECT 1 FROM vyuAPPaidOriginPrepaid originPrepaid WHERE originPrepaid.intBillId = C.intBillId
 	)
-	--IF PAYMENT DETAIL ACCOUNT ID IS SAME WITH VOUCHER HEADER WHICH IS A PREPAID ACCOUNT, IT MEANS IT IS AN OFFSET
-	--WE DO NOT NEED THIS IN 19.2 AS WE ALREADY IDENTIFY IF PAYMENT DETAIL IS AN OFFSET using ysnOffset
-	AND C.intAccountId != B.intAccountId 
 UNION ALL
 --VENDOR PREPAYMENT PAYMENT TRANSACTION (this will remove the positive part and leave the negative part)
 --HANDLE THOSE ORIGIN PREPAYMENT THAT HAS BEEN IMPORTED UNPAID AND PAID IN i21 BUT DO NOT HAVE PAYMENT TRANSACTION (ysnPrepay = 1)
@@ -250,13 +247,7 @@ OUTER APPLY (
  WHERE A.ysnPosted = 1  
 	AND C.ysnPosted = 1
 	AND C.intTransactionType IN (2, 13)
-	-- AND A.ysnPrepay = 0
-	--INCLUDE ONLY THE ysnPrepay = 1 IF tblAPPaymentDetail.intAccountId = tblAPBill.intAccountId
-	--THIS MEANS IT IS AN OFFSET, USER CAN CREATE THIS USING DELETE PAY
-	AND 1 = CASE WHEN A.ysnPrepay = 0 THEN 1
-			ELSE 
-				CASE WHEN B.intAccountId = C.intAccountId THEN 1 ELSE 0 END
-			END
+	AND A.ysnPrepay = 0
 	AND NOT EXISTS (
 	SELECT 1 FROM vyuAPPaidOriginPrepaid originPrepaid WHERE originPrepaid.intBillId = B.intBillId
 )
