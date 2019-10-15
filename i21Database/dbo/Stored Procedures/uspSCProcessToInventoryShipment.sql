@@ -548,11 +548,23 @@ BEGIN TRY
 	LEFT JOIN tblCTContractDetail CTD ON CTD.intContractDetailId = ISI.intLineNo
 	WHERE intInventoryShipmentId = @InventoryShipmentId
 
-	IF ISNULL(@InventoryShipmentId, 0) != 0 and (ISNULL(dbo.fnCTGetAvailablePriceQuantity(@intContractDetailId), 0) != 0 OR @intPricingTypeId != 2)
-	
-	BEGIN
-		EXEC @intInvoiceId = dbo.uspARCreateInvoiceFromShipment @InventoryShipmentId, @intUserId, NULL, 1, 1;
-	END
+	IF ISNULL(@InventoryShipmentId, 0) != 0 AND (ISNULL(@intPricingTypeId,0) <= 1 OR ISNULL(@intPricingTypeId,0) = 6) AND ISNULL(@strWhereFinalizedWeight, 'Origin') = 'Origin' AND ISNULL(@strWhereFinalizedGrade, 'Origin') = 'Origin' AND @ysnPriceFixation = 0
+		BEGIN
+			EXEC @intInvoiceId = dbo.uspARCreateInvoiceFromShipment @InventoryShipmentId, @intUserId, NULL, 1, 1;
+		END
+	ELSE
+			IF (@intPricingTypeId = 2)
+			BEGIN
+				IF EXISTS(SELECT TOP 1 1 FROM tblCTPriceFixation WHERE intContractDetailId = @intContractDetailId)
+				EXEC uspCTCreateVoucherInvoiceForPartialPricing @intContractDetailId, @intUserId
+			END
+
+			SELECT @intInvoiceId = id.intInvoiceId
+			FROM tblICInventoryShipment s 
+			JOIN tblICInventoryShipmentItem si ON si.intInventoryShipmentId = s.intInventoryShipmentId
+			join tblARInvoiceDetail id on id.intInventoryShipmentItemId = si.intInventoryShipmentItemId
+			WHERE si.intInventoryShipmentId = @InventoryShipmentId AND s.intOrderType = 1
+
 	
 	EXEC dbo.uspSMAuditLog 
 		@keyValue			= @intTicketId				-- Primary Key Value of the Ticket. 
