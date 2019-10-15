@@ -62,6 +62,7 @@ DECLARE @strItemNo AS NVARCHAR(50)
 		,@strFunctionalCurrencyId AS NVARCHAR(50)
 		,@strForexRateType AS NVARCHAR(50)
 		,@intEntityVendorId AS INT = NULL 
+		,@dblStandardCost NUMERIC(18, 6)
 		,@strLocation AS NVARCHAR(50) 
 
 -- Get the default currency ID
@@ -1295,25 +1296,22 @@ BEGIN
 			SELECT
 					t.[intItemId] 
 					,t.[intItemLocationId] 
-					,iu.intItemUOMId 
+					,t.intItemUOMId
 					,r.[dtmReceiptDate] 
 					,dblQty = 
-						-- Load Shipment is increasing the In-Transit by Packing Unit and not by Weight. 
-						-- IR should reduce the In-Transit in the same way. 
-						-ri.dblOpenReceive  
-						--CASE		
-						--	-- If there is a Gross/Net UOM and Gross and Net are not equal, then convert the Net to Receive UOM> 
-						--	WHEN ri.intWeightUOMId IS NOT NULL AND ri.dblGross <> ri.dblNet THEN
-						--		-dbo.fnCalculateQtyBetweenUOM(
-						--			ri.intWeightUOMId
-						--			, ri.intUnitMeasureId
-						--			, ri.dblNet
-						--		)
-
-						--	-- If Gross/Net UOM is missing, then get the item/lot qty. 
-						--	ELSE 
-						--		-ri.dblOpenReceive  
-						--END							
+						CASE WHEN (loadShipmentLookup.strContainerNumber IS NULL) THEN
+							-- If there are no containers, reduce the in-transit qty based on how it was increased by Load Schedule. 
+							-t.dblQty 
+							ELSE
+								CASE		
+									-- If Gross/Net UOM is specified, use Net Weight as qty
+									WHEN ri.intWeightUOMId IS NOT NULL THEN
+										-ri.dblNet
+									-- If Gross/Net UOM is missing, then get the item/lot qty. 
+									ELSE 
+										-ri.dblOpenReceive  
+								END	
+							END
 					,t.[dblUOMQty] 
 					,t.[dblCost] 
 					,t.[dblValue] 
@@ -1450,7 +1448,6 @@ BEGIN
 					,[intInTransitSourceLocationId] = dbo.fnICGetItemLocation(t.intItemId, r.intTransferorId)
 					,[intForexRateTypeId]			= tp.intForexRateTypeId
 					,[dblForexRate]					= tp.dblForexRate
-
 			FROM	@ItemsForPost tp INNER JOIN tblICItem i 
 						ON tp.intItemId = i.intItemId
 					INNER JOIN (
@@ -2064,7 +2061,7 @@ BEGIN
 				,[dblCreditReport]	
 				,[dblReportingRate]	
 				,[dblForeignRate]
-				,[strRateType]
+				,[strRateType]				
 			)	
 			EXEC @intReturnValue = dbo.uspICPostInventoryReceiptOtherCharges 
 				@intTransactionId
@@ -2349,12 +2346,21 @@ BEGIN
 	END 
 	ELSE 
 	BEGIN 
-		-- Post preview is not available. Financials are only booked for company-owned stocks.
-		EXEC uspICRaiseError 80185; 
+		IF @ysnPost = 1 
+		BEGIN 
+			-- Post preview is not available. Financials are only booked for company-owned stocks.
+			EXEC uspICRaiseError 80185; 		
+		END 
+			
+		IF @ysnPost = 0 AND ISNULL(@strUnpostMode, 'Default') = 'Default' 
+		BEGIN 
+			-- Post preview is not available. Financials are only booked for company-owned stocks.
+			EXEC uspICRaiseError 80185; 			
+		END 
 	END 
 
 	COMMIT TRAN @TransactionName
-END 
+END  
 
 --------------------------------------------------------------------------------------------  
 -- If RECAP is FALSE,
@@ -2387,9 +2393,9 @@ BEGIN
 
 	IF @ysnAllowBlankGLEntries = 0 OR EXISTS (SELECT TOP 1 1 FROM @GLEntries)
 	BEGIN 
-		UPDATE @GLEntries
-		SET intEntityId = @intEntityVendorId
-		WHERE intEntityId IS NULL 
+        UPDATE @GLEntries
+        SET intEntityId = @intEntityVendorId
+        WHERE intEntityId IS NULL 
 
 		EXEC dbo.uspGLBookEntries @GLEntries, @ysnPost 
 	END 	
