@@ -1081,7 +1081,7 @@ BEGIN TRY
 														WHEN SV.intPricingTypeId = 1 OR SV.intPricingTypeId = 6 OR SV.intPricingTypeId IS NULL THEN SV.[dblCashPrice]
 														ELSE @dblFutureMarkePrice + ISNULL(SV.dblBasis,0)
 												   END)
-												   + DiscountCost.dblTotalCashPrice
+												   + dbo.fnDivide(DiscountCost.dblTotalCashPrice, SV.dblUnits)
 					,dblSalesPrice				= 0.00
 					,intCurrencyId				= @intCurrencyId
 					,dblExchangeRate			= 1
@@ -1104,7 +1104,7 @@ BEGIN TRY
 						AND IU.ysnStockUnit = 1
 				OUTER APPLY (
 					SELECT 
-						ISNULL(SUM((ROUND(SV.dblCashPrice * CASE WHEN ISNULL(SV.dblSettleContractUnits,0) > 0 THEN SV.dblSettleContractUnits ELSE SV.dblUnits END,2)) / SV.dblUnits),0)  AS dblTotalCashPrice
+						ISNULL(SUM((ROUND(SV.dblCashPrice * CASE WHEN ISNULL(SV.dblSettleContractUnits,0) > 0 THEN SV.dblSettleContractUnits ELSE SV.dblUnits END,2)) ),0)  AS dblTotalCashPrice
 					FROM @SettleVoucherCreate SV
 					INNER JOIN tblICItem I
 						ON I.intItemId = SV.intItemId
