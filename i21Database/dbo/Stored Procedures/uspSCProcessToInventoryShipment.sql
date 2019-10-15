@@ -57,6 +57,7 @@ DECLARE @intInventoryShipmentItemId AS INT
 		,@ysnDPStorage AS BIT
 		,@intContractDetailId INT
 		,@ysnPriceFixation BIT = 0;
+DECLARE @intTicketLoadDetailId INT
 
 SELECT @intLoadId = intLoadId
 	, @dblTicketFreightRate = dblFreightRate
@@ -66,6 +67,7 @@ SELECT @intLoadId = intLoadId
 	, @strWhereFinalizedGrade = strGradeFinalized
 	, @intTicketItemUOMId = intItemUOMIdTo
 	, @intItemId = intItemId
+	,@intTicketLoadDetailId = intLoadDetailId
 FROM vyuSCTicketScreenView where intTicketId = @intTicketId
 
 SELECT	@ysnDPStorage = ST.ysnDPOwnedType 
@@ -103,8 +105,12 @@ BEGIN TRY
 				,@intContractId
 				,@intUserId
 				,0
-			IF @strDistributionOption = 'CNT'
-			BEGIN
+				,0
+				,1
+				,@strDistributionOption
+				,@intTicketLoadDetailId
+			-- IF @strDistributionOption = 'CNT'
+			-- BEGIN
 				DECLARE @intLoopContractId INT;
 				DECLARE @dblLoopContractUnits NUMERIC(38,20);
 				DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
@@ -121,7 +127,7 @@ BEGIN TRY
 				BEGIN
 				   IF ISNULL(@intLoopContractId,0) != 0
 				   BEGIN
-					   EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoopContractId, @dblLoopContractUnits, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId
+					--    EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoopContractId, @dblLoopContractUnits, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId
 					   EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intLoopContractId, @dblLoopContractUnits, @intEntityId;
 				   END
 				   -- Attempt to fetch next row from cursor
@@ -130,39 +136,39 @@ BEGIN TRY
 
 				CLOSE intListCursor;
 				DEALLOCATE intListCursor;
-			END
-			ELSE IF @strDistributionOption = 'LOD'
-			BEGIN
-				DECLARE @intLoadContractId INT;
-				DECLARE @dblLoadContractUnits NUMERIC(38,20);
-				DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
-				FOR
-				SELECT intContractDetailId, dblUnitsDistributed
-				FROM @LineItems;
+			-- END
+			-- ELSE IF @strDistributionOption = 'LOD'
+			-- BEGIN
+			-- 	DECLARE @intLoadContractId INT;
+			-- 	DECLARE @dblLoadContractUnits NUMERIC(38,20);
+			-- 	DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
+			-- 	FOR
+			-- 	SELECT intContractDetailId, dblUnitsDistributed
+			-- 	FROM @LineItems;
 
-				OPEN intListCursor;
+			-- 	OPEN intListCursor;
 
-				-- Initial fetch attempt
-				FETCH NEXT FROM intListCursor INTO @intLoadContractId, @dblLoadContractUnits;
+			-- 	-- Initial fetch attempt
+			-- 	FETCH NEXT FROM intListCursor INTO @intLoadContractId, @dblLoadContractUnits;
 
-				WHILE @@FETCH_STATUS = 0
-				BEGIN
-					IF ISNULL(@intLoadContractId,0) != 0
-					BEGIN
-						SELECT @intContractDetailId = intContractDetailId FROM tblCTContractDetail WHERE intContractDetailId = @intLoadContractId
-						IF @intContractDetailId != @intContractId
-						BEGIN
-							EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoadContractId, @dblLoadContractUnits, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId
-							EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intLoadContractId, @dblLoadContractUnits, @intEntityId;
-							EXEC dbo.uspSCUpdateTicketLoadUsed @intTicketId, @intLoadId, @dblLoopContractUnits, @intEntityId;	
-						END
-					END
-				   -- Attempt to fetch next row from cursor
-				   FETCH NEXT FROM intListCursor INTO @intLoadContractId, @dblLoadContractUnits;
-				END;
-				CLOSE intListCursor;
-				DEALLOCATE intListCursor;
-			END
+			-- 	WHILE @@FETCH_STATUS = 0
+			-- 	BEGIN
+			-- 		IF ISNULL(@intLoadContractId,0) != 0
+			-- 		BEGIN
+			-- 			SELECT @intContractDetailId = intContractDetailId FROM tblCTContractDetail WHERE intContractDetailId = @intLoadContractId
+			-- 			IF @intContractDetailId != @intContractId
+			-- 			BEGIN
+			-- 				EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoadContractId, @dblLoadContractUnits, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId
+			-- 				EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intLoadContractId, @dblLoadContractUnits, @intEntityId;
+			-- 				EXEC dbo.uspSCUpdateTicketLoadUsed @intTicketId, @intLoadId, @dblLoopContractUnits, @intEntityId;	
+			-- 			END
+			-- 		END
+			-- 	   -- Attempt to fetch next row from cursor
+			-- 	   FETCH NEXT FROM intListCursor INTO @intLoadContractId, @dblLoadContractUnits;
+			-- 	END;
+			-- 	CLOSE intListCursor;
+			-- 	DEALLOCATE intListCursor;
+			-- END
 
 		SELECT TOP 1 @dblRemainingUnits = LI.dblUnitsRemaining FROM @LineItems LI
 		IF(@dblRemainingUnits IS NULL)

@@ -159,12 +159,14 @@ OPEN intListCursor;
 									@strScreenName			=	'Auto - Scale'
 								END
 
-								EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intLoopContractId, @dblLoopContractUnits, @intEntityId;  
+								
 							END 
 							ELSE
 							BEGIN
 								EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoopContractId, @dblLoopContractUnits, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId  
 							END 
+
+							EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intLoopContractId, @dblLoopContractUnits, @intEntityId;  
 						END  
 						
 
