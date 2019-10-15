@@ -131,7 +131,7 @@ BEGIN
 			,@dblBasisDlvryBalanceForward  NUMERIC(18,6)
 			,@dblBasisDlvryBegBalForSummary NUMERIC(18,6)
 
-	SELECT @dblBasisDlvryBalanceForward =  SUM(dblQuantity)
+	SELECT @dblBasisDlvryBalanceForward =  SUM(ISNULL(dblQuantity,0))
 	FROM @BasisDeliveries
 	WHERE dtmTransactionDate < @dtmFromTransactionDate 
 	
@@ -156,8 +156,8 @@ BEGIN
 		)
 		select @intRowNum
 			,dtmTransactionDate
-			,@dblBasisDlvryBalanceForward
-			,@dblBasisDlvryBalanceForward + ( dblIncrease - dblDecrease)  
+			,ISNULL(@dblBasisDlvryBalanceForward,0)
+			,ISNULL(@dblBasisDlvryBalanceForward,0) + ( dblIncrease - dblDecrease)  
 		from #tempBasisDeliveries 
 		WHERE intRowNum = @intRowNum
 	

@@ -18,16 +18,16 @@ AS
 --DECLARE @intCommodityId INT = 1
 --	, @intCompanyLocationId INT = 0
 --	, @intFutureMarketId INT = 1
---	, @intFutureMonthId INT = 12
---	, @intUOMId INT = 0
+--	, @intFutureMonthId INT = 41
+--	, @intUOMId INT = 18
 --	, @intDecimal INT = 0
---	, @intForecastWeeklyConsumption INT = 0
+--	, @intForecastWeeklyConsumption INT = 5900
 --	, @intForecastWeeklyConsumptionUOMId INT = 0
 --	, @intBookId INT = 0
 --	, @intSubBookId INT = 0
---	, @strPositionBy NVARCHAR(100) = 'Product Type'
---	, @dtmPositionAsOf DATETIME = '2019-10-04'
---	, @strUomType NVARCHAR(100) = 'By Lot'
+--	, @strPositionBy NVARCHAR(100) = 'Vendor/Customer'
+--	, @dtmPositionAsOf DATETIME = '2019-10-14'
+--	, @strUomType NVARCHAR(100) = 'By Quantity'
 
 	DECLARE @dtmToDate DATETIME
 
@@ -121,7 +121,7 @@ AS
 	---Roll Cost
 	DECLARE @RollCost AS TABLE (strFutMarketName NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		, strCommodityCode NVARCHAR(200) COLLATE Latin1_General_CI_AS
-		, strFutureMonth NVARCHAR(20) COLLATE Latin1_General_CI_AS
+		, strFutureMonth NVARCHAR(20) COLLATE Latin1_General_CI_AS 
 		, intFutureMarketId INT
 		, intCommodityId INT
 		, intFutureMonthId INT
@@ -904,9 +904,7 @@ AS
 			, strSubBook
 		FROM #PricedContractList cv
 		WHERE cv.intPricingTypeId IN (1, 2, 8) AND ysnDeltaHedge = 0
-			AND intContractDetailId NOT IN (
-				SELECT ISNULL(intContractDetailId, 0)
-				FROM tblCTPriceFixation)
+			AND intContractDetailId NOT IN (SELECT DISTINCT intContractDetailId FROM #tmpLotsQtyByDetail)
 
 		--Parcial Priced
 		UNION ALL SELECT strFutureMonth
@@ -1120,6 +1118,15 @@ AS
 		AND intCompanyLocationId = ISNULL(@intCompanyLocationId, intCompanyLocationId)
 		AND ISNULL(dblNoOfContract, 0) <> 0
 
+	DECLARE @strCommodityAttributeId NVARCHAR(200)
+	SELECT TOP 1 @strCommodityAttributeId = strCommodityAttributeId FROM tblRKCommodityMarketMapping
+	WHERE intFutureMarketId = @intFutureMarketId
+		AND intCommodityId = @intCommodityId
+
+	SELECT intCommodityAttributeId = LTRIM(RTRIM(Item)) COLLATE Latin1_General_CI_AS
+	INTO #ProductTypes
+	FROM [dbo].[fnSplitString](@strCommodityAttributeId, ',')
+
 	INSERT INTO @ListFinal (intRowNumber
 		, strGroup
 		, Selection
@@ -1134,14 +1141,6 @@ AS
 		, dblNoOfLot
 		, dblQuantity
 		, intOrderByHeading
-		, strProductType
-		, strProductLine
-		, strShipmentPeriod
-		, strLocation
-		, strOrigin
-		, intItemId
-		, strItemNo
-		, strItemDescription
 		, intBookId
 		, strBook
 		, intSubBookId
@@ -1160,58 +1159,34 @@ AS
 		, 0.0
 		, dblQuantity = SUM(dblNoOfLot)
 		, 1
-		, strProductType
-		, strProductLine
-		, strShipmentPeriod
-		, strLocation
-		, strOrigin
-		, intItemId
-		, strItemNo
-		, strItemDescription
 		, intBookId = NULL
 		, strBook = NULL
 		, intSubBookId = NULL
 		, strSubBook = NULL
 	FROM (
-		SELECT DISTINCT strAccountNumber = 'Purchase' + ' - ' + ISNULL(c.strDescription, '') COLLATE Latin1_General_CI_AS
+		SELECT DISTINCT strAccountNumber = 'Purchase' + ' - ' + CASE WHEN @strPositionBy = 'Product Type' THEN ISNULL(c.strDescription, '') ELSE ISNULL(t.strEntity, '') END COLLATE Latin1_General_CI_AS
 			, dblNoOfLot = dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId, @intUOMId, t.dblQuantity)
 			, strProductType = c.strDescription
 			, strProductLine = pl.strDescription
 			, strShipmentPeriod = RIGHT(CONVERT(VARCHAR(11), t.dtmDate, 106), 8) + ' - ' + RIGHT(CONVERT(VARCHAR(11), t.dtmDate, 106), 8)
-			, strLocation = cl.strLocationName
+			, strLocation = t.strLocationName
 			, strOrigin = origin.strDescription
-			, intItemId = ic.intItemId
-			, strItemNo = ic.strItemNo
-			, strItemDescription = ic.strDescription
+			, intItemId = t.intItemId
+			, strItemNo = t.strItemNo
+			, strItemDescription = t.strItemDescription
 		FROM vyuRKGetInventoryValuation t
-		JOIN tblICItem ic ON t.intItemId = ic.intItemId
-		JOIN tblICCommodityAttribute c ON c.intCommodityAttributeId = ic.intProductTypeId
-		LEFT JOIN tblICCommodityAttribute origin ON origin.intCommodityAttributeId = ic.intOriginId
-		JOIN tblICCommodityProductLine pl ON pl.intCommodityProductLineId = ic.intProductLineId
-		JOIN tblRKCommodityMarketMapping m ON m.intCommodityId = c.intCommodityId
-			AND m.intFutureMarketId = @intFutureMarketId
-			AND ic.intProductTypeId = c.intCommodityAttributeId
-			AND c.intCommodityAttributeId IN (
-				SELECT LTRIM(RTRIM(Item)) COLLATE Latin1_General_CI_AS
-				FROM [dbo].[fnSplitString](m.strCommodityAttributeId, ','))
-		JOIN tblICItemLocation il ON il.intItemId = ic.intItemId
-		JOIN tblICItemUOM i ON il.intItemId = i.intItemId AND i.ysnStockUnit = 1
-		JOIN tblICCommodityUnitMeasure um ON um.intCommodityId = @intCommodityId AND um.intUnitMeasureId = i.intUnitMeasureId
-		JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = il.intLocationId
-		WHERE ic.intCommodityId = @intCommodityId
-			AND m.intFutureMarketId = @intFutureMarketId
-			AND cl.intCompanyLocationId = ISNULL(@intCompanyLocationId, cl.intCompanyLocationId)
+		JOIN tblICCommodityAttribute c ON c.intCommodityAttributeId = t.intProductTypeId
+		LEFT JOIN tblICCommodityAttribute origin ON origin.intCommodityAttributeId = t.intOriginId
+		LEFT JOIN tblICCommodityProductLine pl ON pl.intCommodityProductLineId = t.intProductLineId
+		JOIN #ProductTypes m ON m.intCommodityAttributeId = c.intCommodityAttributeId
+		JOIN tblICCommodityUnitMeasure um ON um.intCommodityId = @intCommodityId AND um.intUnitMeasureId = t.intUnitMeasureId
+		WHERE t.intCommodityId = @intCommodityId
+			AND t.intLocationId = ISNULL(@intCompanyLocationId, t.intLocationId)
 			AND CONVERT(DATETIME, CONVERT(VARCHAR(10), t.dtmCreated, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
 	) t2
 	GROUP BY strAccountNumber
-		, strProductType
-		, strProductLine
-		, strShipmentPeriod
-		, strLocation
-		, strOrigin
-		, intItemId
-		, strItemNo
-		, strItemDescription
+
+	DROP TABLE #ProductTypes
 
 	SELECT * INTO #tmpMatch
 	FROM (
@@ -2252,11 +2227,10 @@ AS
 	DECLARE @FirstRow INT
 	SELECT @FirstRow = MIN(intRowNumber) FROM @MonthOrder
 
-	IF EXISTS (SELECT DISTINCT strFutureMonth FROM @MonthOrder
-				WHERE strFutureMonth NOT IN (
-					SELECT DISTINCT strFutureMonth
-					FROM @ListFinal
-					WHERE intRowNumber = @FirstRow))
+	SELECT DISTINCT strFutureMonth INTO #MissingMonths FROM @MonthOrder
+	SELECT DISTINCT strFutureMonth INTO #MonthList FROM @ListFinal WHERE intRowNumber = @FirstRow
+
+	IF EXISTS (SELECT DISTINCT strFutureMonth FROM #MissingMonths WHERE strFutureMonth NOT IN (SELECT DISTINCT strFutureMonth FROM #MonthList))
 	BEGIN
 		INSERT INTO @MonthOrder (intRowNumber
 			, strGroup
@@ -2317,10 +2291,12 @@ AS
 		FROM @ListFinal a
 		CROSS APPLY (
 			SELECT DISTINCT strFutureMonth
-			FROM @MonthOrder
+			FROM #MissingMonths
 		) b
 		WHERE intRowNumber = @FirstRow
 	END
+	DROP TABLE #MissingMonths
+	DROP TABLE #MonthList
 
 	SELECT intRowNumber1 intRowNumFinal
 		, intRowNumber

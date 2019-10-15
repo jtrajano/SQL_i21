@@ -1,15 +1,15 @@
 ﻿CREATE PROCEDURE [dbo].[uspSTCheckoutPosting]
-	@intCurrentUserId INT,
-	@intCheckoutId INT,
-	@strDirection NVARCHAR(50),
-	@ysnRecap BIT,
-	@strStatusMsg NVARCHAR(1000) OUTPUT,
-	@strNewCheckoutStatus NVARCHAR(100) OUTPUT,
-	@ysnInvoiceStatus BIT OUTPUT,
-	@ysnCustomerChargesInvoiceStatus BIT OUTPUT,
-	@strBatchIdForNewPostRecap NVARCHAR(1000) OUTPUT,
-	@strErrorCode NVARCHAR(50) OUTPUT,
-	@ysnDebug BIT										=	0
+	@intCurrentUserId					INT,
+	@intCheckoutId						INT,
+	@strDirection						NVARCHAR(50),
+	@ysnRecap							BIT,
+	@strStatusMsg						NVARCHAR(1000)	OUTPUT,
+	@strNewCheckoutStatus				NVARCHAR(100)	OUTPUT,
+	@ysnInvoiceStatus					BIT OUTPUT,
+	@ysnCustomerChargesInvoiceStatus	BIT OUTPUT,
+	@strBatchIdForNewPostRecap			NVARCHAR(1000)	OUTPUT,
+	@strErrorCode						NVARCHAR(50)	OUTPUT,
+	@ysnDebug							BIT								=	0
 AS
 BEGIN
 
@@ -150,6 +150,7 @@ BEGIN
 		DECLARE @strCurrentAllInvoiceIdList NVARCHAR(1000)
 		DECLARE @dtmCheckoutDate AS DATETIME
 		DECLARE @dblCheckoutTotalDeposited AS DECIMAL(18,6)
+		DECLARE @dblCheckoutTotalCustomerPayments AS DECIMAL(18,6)
 		DECLARE @dblCheckoutCustomerChargeAmount AS DECIMAL(18,6)
 
 		SELECT @intCurrentInvoiceId = intInvoiceId
@@ -157,6 +158,7 @@ BEGIN
 				, @dtmCheckoutDate = dtmCheckoutDate 
 				, @dblCheckoutTotalDeposited = dblTotalDeposits
 				, @dblCheckoutCustomerChargeAmount = dblTotalDeposits
+				, @dblCheckoutTotalCustomerPayments = dblCustomerPayments
 		FROM tblSTCheckoutHeader 
 		WHERE intCheckoutId = @intCheckoutId
 
@@ -165,7 +167,8 @@ BEGIN
 
 		------------------------------------------------------------------------------
 		-- Set Invoice Type for MAIN
-		IF(@dblCheckoutTotalDeposited >= 0)
+		-- http://jira.irelyserver.com/browse/ST-1352
+		IF((@dblCheckoutTotalDeposited - @dblCheckoutTotalCustomerPayments) >= 0)
 			BEGIN
 				SET @strInvoiceTransactionTypeMain = @strCASH
 			END
@@ -4754,6 +4757,32 @@ IF(@ysnDebug = 1)
 										SELECT 'tblARInvoiceDetail', * FROM tblARInvoiceDetail
 										WHERE intInvoiceId = @intCreatedInvoiceId
 									END
+
+
+
+
+
+-- ============================================================================
+-- [START] - Post Invoice Result
+-- ============================================================================
+IF(@ysnDebug = CAST(1 AS BIT))
+	BEGIN
+		SELECT 'RESULT',
+			dblInvoiceTotal				= Inv.dblInvoiceTotal
+			, dblCheckoutTotalDeposits	= CH.dblTotalDeposits
+			, dblCustomerPayments		= CH.dblCustomerPayments
+		FROM tblARInvoice Inv
+		OUTER APPLY dbo.tblSTCheckoutHeader CH
+		WHERE CH.intCheckoutId = @intCheckoutId
+			AND Inv.intInvoiceId = @intCreatedInvoiceId
+	END
+-- ============================================================================
+-- [END] - Post Invoice Result
+-- ============================================================================
+
+
+
+
 
 								------------------------------------------------------------------------------------------------------
                                 ---- VALIDATE (InvoiceTotalSales) = ((TotalCheckoutDeposits) - (CheckoutCustomerPayments)) -----------

@@ -21,4 +21,5 @@ FROM tblICInventoryReceipt r
 WHERE (@ForceRecalc = 1 OR (r.dtmLastCalculateTotals IS NULL OR r.dtmDateModified > r.dtmLastCalculateTotals))
 	AND (r.intInventoryReceiptId BETWEEN @intMinId AND @intMaxId)
 
-EXEC dbo.uspICUpdateInventoryReceiptDetail @ReceiptId, @ForceRecalc
+-- Temporarily comment this out to resolve IC-7927 but will temporarily remove optimizations in IC-7893
+--EXEC dbo.uspICUpdateInventoryReceiptDetail @ReceiptId, @ForceRecalc

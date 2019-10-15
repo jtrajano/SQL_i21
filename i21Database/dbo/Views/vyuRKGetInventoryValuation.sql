@@ -95,10 +95,16 @@ SELECT	intInventoryValuationKeyId  = ISNULL(t.intInventoryTransactionId, 0)
 		,t.dtmCreated
 		,t.intCurrencyId
 		,cur.strCurrency
+		,i.intProductTypeId
+		,i.intProductLineId
+		,i.intOriginId
+		,i.intCommodityId
+		,iuStock.intUnitMeasureId
 FROM 	tblICItem i 
 		CROSS APPLY (
 			SELECT	TOP 1 
-					intItemUOMId			
+					intItemUOMId
+					,umStock.intUnitMeasureId
 					,umStock.strUnitMeasure
 			FROM	tblICItemUOM iuStock INNER JOIN tblICUnitMeasure umStock
 						ON iuStock.intUnitMeasureId = umStock.intUnitMeasureId
