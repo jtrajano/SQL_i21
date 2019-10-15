@@ -1,15 +1,15 @@
 ﻿CREATE PROCEDURE [dbo].[uspSTCheckoutPosting]
-	@intCurrentUserId INT,
-	@intCheckoutId INT,
-	@strDirection NVARCHAR(50),
-	@ysnRecap BIT,
-	@strStatusMsg NVARCHAR(1000) OUTPUT,
-	@strNewCheckoutStatus NVARCHAR(100) OUTPUT,
-	@ysnInvoiceStatus BIT OUTPUT,
-	@ysnCustomerChargesInvoiceStatus BIT OUTPUT,
-	@strBatchIdForNewPostRecap NVARCHAR(1000) OUTPUT,
-	@strErrorCode NVARCHAR(50) OUTPUT,
-	@ysnDebug BIT										=	0
+	@intCurrentUserId					INT,
+	@intCheckoutId						INT,
+	@strDirection						NVARCHAR(50),
+	@ysnRecap							BIT,
+	@strStatusMsg						NVARCHAR(1000)	OUTPUT,
+	@strNewCheckoutStatus				NVARCHAR(100)	OUTPUT,
+	@ysnInvoiceStatus					BIT OUTPUT,
+	@ysnCustomerChargesInvoiceStatus	BIT OUTPUT,
+	@strBatchIdForNewPostRecap			NVARCHAR(1000)	OUTPUT,
+	@strErrorCode						NVARCHAR(50)	OUTPUT,
+	@ysnDebug							BIT								=	0
 AS
 BEGIN
 
@@ -27,7 +27,7 @@ BEGIN
 
 		DECLARE @ysnSetToReady BIT = CAST(0 AS BIT)
 
-		IF(@strDirection = 'Post' OR @strDirection = 'UnPost')
+		IF(@strDirection IN('Post', 'UnPost') AND @ysnRecap = CAST(0 AS BIT))
 			BEGIN
 				-- 0 = Ready
 				-- 1 = Currently being Posted
@@ -78,6 +78,7 @@ BEGIN
 		-- ==================================================================================================================
 		-- [END] - Check Checkout current process using column [intCheckoutCurrentProcess]
 		-- ==================================================================================================================
+
 
 
 
@@ -149,6 +150,7 @@ BEGIN
 		DECLARE @strCurrentAllInvoiceIdList NVARCHAR(1000)
 		DECLARE @dtmCheckoutDate AS DATETIME
 		DECLARE @dblCheckoutTotalDeposited AS DECIMAL(18,6)
+		DECLARE @dblCheckoutTotalCustomerPayments AS DECIMAL(18,6)
 		DECLARE @dblCheckoutCustomerChargeAmount AS DECIMAL(18,6)
 
 		SELECT @intCurrentInvoiceId = intInvoiceId
@@ -156,19 +158,28 @@ BEGIN
 				, @dtmCheckoutDate = dtmCheckoutDate 
 				, @dblCheckoutTotalDeposited = dblTotalDeposits
 				, @dblCheckoutCustomerChargeAmount = dblTotalDeposits
+				, @dblCheckoutTotalCustomerPayments = dblCustomerPayments
 		FROM tblSTCheckoutHeader 
 		WHERE intCheckoutId = @intCheckoutId
 
+		DECLARE @strCASH NVARCHAR(100) = 'Cash'
+		DECLARE @strCREDITMEMO NVARCHAR(100) = 'Credit Memo'
 
 		------------------------------------------------------------------------------
 		-- Set Invoice Type for MAIN
-		IF(@dblCheckoutTotalDeposited >= 0)
+		-- http://jira.irelyserver.com/browse/ST-1352
+		IF((@dblCheckoutTotalDeposited - @dblCheckoutTotalCustomerPayments) >= 0)
 			BEGIN
-				SET @strInvoiceTransactionTypeMain = 'Cash'
+				SET @strInvoiceTransactionTypeMain = @strCASH
 			END
 		ELSE
 			BEGIN
-				SET @strInvoiceTransactionTypeMain = 'Cash Refund'
+				-- Error if directly creating a Cash Refund (Error: 'Cash Refund amount is not equal to prepaids/credits applied.')
+				-- As per Kelvin the process for @strCREDITMEMO would be
+				-- 1. Process this as transaction type='Credit Memo'   (using uspARProcessInvoicesByBatch)
+				-- 2. After process has finish Process this as @strCREDITMEMO    (using uspARProcessRefund)
+				SET @strInvoiceTransactionTypeMain = @strCREDITMEMO
+				--SET @strInvoiceTransactionTypeMain = @strCREDITMEMO
 			END
 		------------------------------------------------------------------------------
 
@@ -449,6 +460,19 @@ BEGIN
 									,[intTaxAccountId] = TAX.intTaxAccountId
 									,[dblTax] = TAX.dblTax
 									,[dblAdjustedTax] = TAX.dblAdjustedTax
+									--,[dblTax] = CASE
+									--				WHEN @strInvoiceTransactionTypeMain = @strCASH
+									--					THEN TAX.dblTax
+									--				WHEN @strInvoiceTransactionTypeMain = @strCREDITMEMO
+									--					THEN TAX.dblTax * -1
+									--			END
+									--,[dblAdjustedTax] = CASE
+									--						WHEN @strInvoiceTransactionTypeMain = @strCASH
+									--							THEN TAX.dblAdjustedTax
+									--						WHEN @strInvoiceTransactionTypeMain = @strCREDITMEMO
+									--							THEN TAX.dblAdjustedTax * -1
+									--					END
+
 									,[ysnTaxAdjusted] = 1
 									,[ysnSeparateOnInvoice] = 0
 									,[ysnCheckoffTax] = TAX.ysnCheckoffTax
@@ -668,7 +692,24 @@ BEGIN
 										,[intOrderUOMId]			= UOM.intItemUOMId
 										,[dblQtyOrdered]			= 0 -- CPT.dblQuantity --(Select dblQuantity From tblSTCheckoutPumpTotals Where intCheckoutId = @intCheckoutId)
 										,[intItemUOMId]				= UOM.intItemUOMId
-										,[dblQtyShipped]			= ISNULL(CPT.dblQuantity, 0) --(Select dblQuantity From tblSTCheckoutPumpTotals Where intCheckoutId = @intCheckoutId)
+
+										--,[dblQtyShipped]			= ISNULL(CPT.dblQuantity, 0)
+										,[dblQtyShipped]			= CASE
+																		WHEN @strInvoiceTransactionTypeMain = @strCASH
+																			THEN ISNULL(CPT.dblQuantity, 0)
+																		WHEN @strInvoiceTransactionTypeMain = @strCREDITMEMO
+																			THEN CASE
+																					WHEN (ISNULL(CPT.dblQuantity, 0) > 0)
+																						-- Refference:  http://jira.irelyserver.com/browse/ST-1558
+																						-- If Positive flip the sign to negative
+																						THEN (ISNULL(CPT.dblQuantity, 0) * -1)
+																					WHEN (ISNULL(CPT.dblQuantity, 0) < 0)
+																						-- If Negative flip the sign to positive
+																						THEN (ISNULL(CPT.dblQuantity, 0) * 1)
+																				END
+																	END
+																						
+
 										,[dblDiscount]				= 0
 										
 										,[dblPrice]					= (ISNULL(CAST(CPT.dblAmount AS DECIMAL(18,2)), 0) - Tax.[dblAdjustedTax]) / CPT.dblQuantity -- (ISNULL(CAST(CPT.dblAmount AS DECIMAL(18,2)), 0) - Tax.[dblAdjustedTax]) / CPT.dblQuantity
@@ -895,7 +936,16 @@ BEGIN
 										,[intOrderUOMId]			= NULL -- UOM.intItemUOMId http://jira.irelyserver.com/browse/ST-1316
 										,[dblQtyOrdered]			= 0
 										,[intItemUOMId]				= NULL -- UOM.intItemUOMId http://jira.irelyserver.com/browse/ST-1316
-										,[dblQtyShipped]			= -1
+
+										--,[dblQtyShipped]			= -1
+										,[dblQtyShipped]			= CASE
+																		-- Refference:  http://jira.irelyserver.com/browse/ST-1558
+																		WHEN @strInvoiceTransactionTypeMain = @strCASH
+																			THEN -1
+																		WHEN @strInvoiceTransactionTypeMain = @strCREDITMEMO
+																			THEN 1
+																	END
+
 										,[dblDiscount]				= 0
 										
 										, [dblPrice]				= ISNULL(CAST(CPT.dblAmount AS DECIMAL(18,2)), 0)
@@ -1123,7 +1173,23 @@ BEGIN
 											,[intOrderUOMId]			= UOM.intItemUOMId
 											,[dblQtyOrdered]			= 0 -- IM.intQtySold
 											,[intItemUOMId]				= UOM.intItemUOMId
-											,[dblQtyShipped]			= ISNULL(IM.intQtySold, 0)
+
+											--,[dblQtyShipped]			= ISNULL(IM.intQtySold, 0)
+											,[dblQtyShipped]			= CASE
+																		WHEN @strInvoiceTransactionTypeMain = @strCASH
+																			THEN ISNULL(IM.intQtySold, 0)
+																		WHEN @strInvoiceTransactionTypeMain = @strCREDITMEMO
+																			THEN CASE
+																					WHEN (ISNULL(IM.intQtySold, 0) > 0)
+																						-- Refference:  http://jira.irelyserver.com/browse/ST-1558
+																						-- If Positive flip the sign to negative
+																						THEN (ISNULL(IM.intQtySold, 0) * -1)
+																					WHEN (ISNULL(IM.intQtySold, 0) < 0)
+																						-- If Negative flip the sign to positive
+																						THEN (ISNULL(IM.intQtySold, 0) * 1)
+																				END
+																	END
+
 											,[dblDiscount]				= 0 --ISNULL(IM.dblDiscountAmount, 0)
 											,[dblPrice]					= CASE 
 																			WHEN ISNULL(IM.intQtySold, 0) = 0
@@ -1348,7 +1414,23 @@ BEGIN
 											,[intOrderUOMId]			= NULL -- UOM.intItemUOMId http://jira.irelyserver.com/browse/ST-1316
 											,[dblQtyOrdered]			= 0
 											,[intItemUOMId]				= NULL -- UOM.intItemUOMId http://jira.irelyserver.com/browse/ST-1316
-											,[dblQtyShipped]			= DT.dblCalculatedInvoiceQty
+
+											--,[dblQtyShipped]			= DT.dblCalculatedInvoiceQty
+											,[dblQtyShipped]			= CASE
+																			WHEN @strInvoiceTransactionTypeMain = @strCASH
+																				THEN ISNULL(DT.dblCalculatedInvoiceQty, 0)
+																			WHEN @strInvoiceTransactionTypeMain = @strCREDITMEMO
+																				THEN CASE
+																						WHEN (ISNULL(DT.dblCalculatedInvoiceQty, 0) > 0)
+																							-- Refference:  http://jira.irelyserver.com/browse/ST-1558
+																							-- If Positive flip the sign to negative
+																							THEN (ISNULL(DT.dblCalculatedInvoiceQty, 0) * -1)
+																						WHEN (ISNULL(DT.dblCalculatedInvoiceQty, 0) < 0)
+																							-- If Negative flip the sign to positive
+																							THEN (ISNULL(DT.dblCalculatedInvoiceQty, 0) * 1)
+																					END
+																		END
+
 											,[dblDiscount]				= 0
 											,[dblPrice]					= DT.dblCalculatedInvoicePrice
 											,[ysnRefreshPrice]			= 0
@@ -1569,7 +1651,16 @@ BEGIN
 											,[intOrderUOMId]			= NULL -- UOM.intItemUOMId http://jira.irelyserver.com/browse/ST-1316
 											,[dblQtyOrdered]			= 0 -- 1
 											,[intItemUOMId]				= NULL -- UOM.intItemUOMId http://jira.irelyserver.com/browse/ST-1316
-											,[dblQtyShipped]			= 1
+
+											--,[dblQtyShipped]			= 1
+											,[dblQtyShipped]			= CASE
+																		-- Refference: http://jira.irelyserver.com/browse/ST-1558
+																			WHEN @strInvoiceTransactionTypeMain = @strCASH
+																				THEN 1
+																			WHEN @strInvoiceTransactionTypeMain = @strCREDITMEMO
+																				THEN -1
+																		END
+
 											,[dblDiscount]				= 0
 											,[dblPrice]					= ISNULL(STT.dblTotalTax, 0)
 											,[ysnRefreshPrice]			= 0
@@ -1792,21 +1883,28 @@ BEGIN
 											,[dblQtyOrdered]			= 0 -- 1
 											,[intItemUOMId]				= NULL -- UOM.intItemUOMId http://jira.irelyserver.com/browse/ST-1316
 
+											--,[dblQtyShipped]			= CASE
+											--									WHEN ISNULL(CPO.dblAmount, 0) > 0
+											--										THEN -1
+											--									WHEN ISNULL(CPO.dblAmount, 0) < 0 
+											--										THEN 1
+											--							END
 											,[dblQtyShipped]			= CASE
-																				WHEN ISNULL(CPO.dblAmount, 0) > 0
-																					THEN -1
-																				WHEN ISNULL(CPO.dblAmount, 0) < 0 
-																					THEN 1
+																			-- Refference:  http://jira.irelyserver.com/browse/ST-1558
+																			WHEN @strInvoiceTransactionTypeMain = @strCASH
+																				THEN -1
+																			WHEN @strInvoiceTransactionTypeMain = @strCREDITMEMO
+																				THEN 1
 																		END
 
 											,[dblDiscount]				= 0
 
-											,[dblPrice]					= CASE
-																				WHEN ISNULL(CPO.dblAmount, 0) > 0
-																					THEN ISNULL(CPO.dblAmount, 0)
-																				WHEN ISNULL(CPO.dblAmount, 0) < 0 
-																					THEN (ISNULL(CPO.dblAmount, 0) * -1)
-																		END
+											--,[dblPrice]					= CASE
+											--									WHEN ISNULL(CPO.dblAmount, 0) > 0
+											--										THEN ISNULL(CPO.dblAmount, 0)
+											--									WHEN ISNULL(CPO.dblAmount, 0) < 0 
+											--										THEN (ISNULL(CPO.dblAmount, 0) * -1)
+											,[dblPrice]					= ISNULL(CPO.dblAmount, 0)
 
 											,[ysnRefreshPrice]			= 0
 											,[strMaintenanceType]		= NULL
@@ -1933,8 +2031,22 @@ BEGIN
 										,[strCalculationMethod] = FuelTax.strCalculationMethod
 										,[dblRate] = FuelTax.dblRate
 										,[intTaxAccountId] = FuelTax.intTaxAccountId
+
 										,[dblTax] = FuelTax.dblTax
 										,[dblAdjustedTax] = FuelTax.dblAdjustedTax
+										--,[dblTax] = CASE
+										--				WHEN @strInvoiceTransactionTypeMain = @strCASH
+										--					THEN FuelTax.dblTax
+										--				WHEN @strInvoiceTransactionTypeMain = @strCREDITMEMO
+										--					THEN FuelTax.dblTax * -1
+										--			END
+										--,[dblAdjustedTax] = CASE
+										--						WHEN @strInvoiceTransactionTypeMain = @strCASH
+										--							THEN FuelTax.dblAdjustedTax
+										--						WHEN @strInvoiceTransactionTypeMain = @strCREDITMEMO
+										--							THEN FuelTax.dblAdjustedTax * -1
+										--					END
+
 										,[ysnTaxAdjusted] = 1
 										,[ysnSeparateOnInvoice] = 0
 										,[ysnCheckoffTax] = FuelTax.ysnCheckoffTax
@@ -2047,6 +2159,8 @@ BEGIN
 							-- ROLLBACK
 							GOTO ExitWithRollback
 						end catch
+
+
 
 
 						INSERT INTO @EntriesForInvoice(
@@ -2204,28 +2318,62 @@ BEGIN
 																			WHEN (I.intItemId IS NOT NULL AND I.ysnFuelItem = CAST(0 AS BIT))
 																				THEN
 																					CASE
-																						WHEN (CC.dblAmount >= 0 OR CC.dblAmount < 0)
-																							THEN (CC.dblQuantity * -1)
+																						WHEN (CC.dblAmount > 0 OR CC.dblAmount < 0)
+																							--THEN (CC.dblQuantity * -1)
+																							THEN CASE 
+																									WHEN @strInvoiceTransactionTypeMain = @strCASH
+																										THEN (CC.dblQuantity * -1)
+																									WHEN @strInvoiceTransactionTypeMain = @strCREDITMEMO
+																										THEN (CC.dblQuantity * 1)
+																										--THEN CASE
+																										--		WHEN ISNULL(CC.dblQuantity, 0) > 0
+																										--			THEN (CC.dblQuantity * -1)
+																										--		WHEN ISNULL(CC.dblQuantity, 0) < 0
+																										--			THEN (CC.dblQuantity * 1)
+																										--END
+																							END				
 																					END
 
 																			-- IF Item is Fuel
 																			WHEN (I.intItemId IS NOT NULL AND I.ysnFuelItem = CAST(1 AS BIT))
 																				THEN
-																					CASE
-																						WHEN (CC.dblAmount >= 0)
+																					--CASE
+																					--	WHEN (CC.dblAmount >= 0)
+																					--		THEN (CC.dblQuantity * -1)
+																					--	WHEN (CC.dblAmount < 0)
+																					--		THEN (CC.dblQuantity * -1)
+																					--END
+																					CASE 
+																						WHEN @strInvoiceTransactionTypeMain = @strCASH
 																							THEN (CC.dblQuantity * -1)
-																						WHEN (CC.dblAmount < 0)
-																							THEN (CC.dblQuantity * -1)
+																						WHEN @strInvoiceTransactionTypeMain = @strCREDITMEMO
+																							THEN (CC.dblQuantity * 1)
 																					END
 
 																			-- IF Item is BLANK
 																			WHEN (I.intItemId IS NULL)
 																				THEN
-																					CASE
-																						WHEN (CC.dblAmount >= 0)
-																							THEN -1
-																						WHEN (CC.dblAmount < 0)
-																							THEN 1
+																					--CASE
+																					--	WHEN (CC.dblAmount >= 0)
+																					--		THEN -1
+																					--	WHEN (CC.dblAmount < 0)
+																					--		THEN 1
+																					--END
+																					CASE 
+																						WHEN @strInvoiceTransactionTypeMain = @strCASH
+																							THEN CASE
+																									WHEN (CC.dblAmount >= 0)
+																										THEN -1
+																									WHEN (CC.dblAmount < 0)
+																										THEN 1
+																								END
+																						WHEN @strInvoiceTransactionTypeMain = @strCREDITMEMO
+																							THEN CASE
+																									WHEN (CC.dblAmount >= 0)
+																										THEN 1
+																									WHEN (CC.dblAmount < 0)
+																										THEN -1
+																								END
 																					END
 																		END
 
@@ -2237,7 +2385,7 @@ BEGIN
 																			WHEN (I.intItemId IS NOT NULL AND I.ysnFuelItem = CAST(0 AS BIT))
 																				THEN
 																					CASE
-																						WHEN (CC.dblAmount >= 0 OR CC.dblAmount < 0)
+																						WHEN (CC.dblAmount > 0 OR CC.dblAmount < 0)
 																							THEN CC.dblUnitPrice
 																					END
 
@@ -2513,21 +2661,28 @@ BEGIN
 											,[dblQtyOrdered]			= 0 -- 1
 											,[intItemUOMId]				= NULL -- UOM.intItemUOMId
 
+											--,[dblQtyShipped]			= CASE
+											--									WHEN ISNULL(CH.dblCashOverShort,0) > 0
+											--										THEN 1
+											--									WHEN ISNULL(CH.dblCashOverShort,0) < 0
+											--										THEN -1
+											--							END
 											,[dblQtyShipped]			= CASE
-																				WHEN ISNULL(CH.dblCashOverShort,0) > 0
-																					THEN 1
-																				WHEN ISNULL(CH.dblCashOverShort,0) < 0
-																					THEN -1
+																			-- Refference: http://jira.irelyserver.com/browse/ST-1558
+																			WHEN @strInvoiceTransactionTypeMain = @strCASH
+																				THEN 1
+																			WHEN @strInvoiceTransactionTypeMain = @strCREDITMEMO
+																				THEN -1
 																		END
 
 											,[dblDiscount]				= 0
 
-											,[dblPrice]					= CASE
-																				WHEN ISNULL(CH.dblCashOverShort,0) > 0
-																					THEN ISNULL(CH.dblCashOverShort,0)
-																				WHEN ISNULL(CH.dblCashOverShort,0) < 0
-																					THEN ISNULL(CH.dblCashOverShort,0) * -1
-																		END
+											--,[dblPrice]					= CASE
+											--									WHEN ISNULL(CH.dblCashOverShort,0) > 0
+											--										THEN ISNULL(CH.dblCashOverShort, 0)
+											--									WHEN ISNULL(CH.dblCashOverShort,0) < 0
+											--										THEN ISNULL(CH.dblCashOverShort, 0) * -1
+											,[dblPrice]					= ISNULL(CH.dblCashOverShort, 0)
 
 											,[ysnRefreshPrice]			= 0
 											,[strMaintenanceType]		= NULL
@@ -2593,6 +2748,8 @@ BEGIN
 				----------------------------------------------------------------------
 				------------------------- END CASH OVER SHORT ------------------------
 				----------------------------------------------------------------------
+
+
 
 
 
@@ -3536,6 +3693,56 @@ IF(@ysnDebug = 1)
 															-- Populate variable with Invoice Ids
 															SELECT @CreatedIvoices = COALESCE(@CreatedIvoices + ',', '') + CAST(intInvoiceId AS VARCHAR(50))
 															FROM @tblTempInvoiceIds
+
+
+
+
+															-- =========================================================================================================================
+															-- [START] - Proccess 'Credit Memo' as 'Cash Refund'
+															-- =========================================================================================================================
+															-- Error if directly creating a Cash Refund (Error: 'Cash Refund amount is not equal to prepaids/credits applied.')
+															-- As per Kelvin the process for @strCREDITMEMO would be
+															-- 1. Process this as transaction type='Credit Memo'   (using uspARProcessInvoicesByBatch)
+															-- 2. After process has finish Process this as @strCREDITMEMO    (using uspARProcessRefund)
+
+															IF(@strInvoiceTransactionTypeMain = @strCREDITMEMO)
+																BEGIN
+																	DECLARE @intMainInvoiceId_CR AS INT = (SELECT TOP 1 intInvoiceId FROM @tblTempInvoiceIds WHERE strTransactionType = @strInvoiceTransactionTypeMain),
+																	@intNewTransactionId_CR AS INT,
+																	@strErrorMessage_CR AS NVARCHAR(MAX)
+
+																	EXEC [dbo].[uspARProcessRefund]
+																		  @intInvoiceId			= @intMainInvoiceId_CR
+																		, @intUserId			= @intCurrentUserId
+																		, @intNewTransactionId	= @intNewTransactionId_CR OUTPUT
+																		, @strErrorMessage		= @strErrorMessage_CR OUTPUT
+																		
+
+																	IF(@ysnDebug = 1)
+																		BEGIN
+																			--TEST
+																			SELECT 'uspARProcessRefund OUTPUT', @intNewTransactionId_CR, @strErrorMessage_CR
+																			SELECT 'Invoice', * FROM tblARInvoice WHERE intInvoiceId = @intMainInvoiceId_CR
+																		END
+
+
+																	IF(@strErrorMessage_CR IS NOT NULL)
+																		BEGIN
+																			SET @ErrorMessage = @strErrorMessage_CR
+																			SET @strStatusMsg = 'Process To Cash Refund error. ' + ISNULL(@ErrorMessage, '')
+
+																			-- ROLLBACK
+																			GOTO ExitWithRollback
+																		END
+																	
+																END
+															
+															-- =========================================================================================================================
+															-- [END] - Proccess 'Credit Memo' as 'Cash Refund'
+															-- =========================================================================================================================
+
+
+
 														END
 													ELSE
 														BEGIN
@@ -3709,38 +3916,109 @@ IF(@ysnDebug = 1)
 								-- Invoice MAIN Checkout
 								SET @intCreatedInvoiceId = (SELECT TOP 1 intInvoiceId FROM @tblTempInvoiceIds WHERE strTransactionType = @strInvoiceTransactionTypeMain)  --(SELECT TOP 1 intInvoiceId FROM #tmpCustomerInvoiceIdList WHERE strTransactionType = @strInvoiceTransactionTypeMain ORDER BY intInvoiceId ASC)
 
+								IF(@ysnDebug = 1)
+									BEGIN 
+										SELECT 'tblARInvoice', * FROM tblARInvoice
+										WHERE intInvoiceId = @intCreatedInvoiceId
+
+										SELECT 'tblARInvoiceDetail', * FROM tblARInvoiceDetail
+										WHERE intInvoiceId = @intCreatedInvoiceId
+									END
+
+
+
+
+
+-- ============================================================================
+-- [START] - Post Invoice Result
+-- ============================================================================
+IF(@ysnDebug = CAST(1 AS BIT))
+	BEGIN
+		SELECT 'RESULT',
+			dblInvoiceTotal				= Inv.dblInvoiceTotal
+			, dblCheckoutTotalDeposits	= CH.dblTotalDeposits
+			, dblCustomerPayments		= CH.dblCustomerPayments
+			, dblInvoiceTax				= Inv.dblTax
+			, dblInvoiceBaseTax			= Inv.dblBaseTax
+		FROM tblARInvoice Inv
+		OUTER APPLY dbo.tblSTCheckoutHeader CH
+		WHERE CH.intCheckoutId = @intCheckoutId
+			AND Inv.intInvoiceId = @intCreatedInvoiceId
+	END
+-- ============================================================================
+-- [END] - Post Invoice Result
+-- ============================================================================
+
+
+
+
 
 								------------------------------------------------------------------------------------------------------
                                 ---- VALIDATE (InvoiceTotalSales) = ((TotalCheckoutDeposits) - (CheckoutCustomerPayments)) -----------
                                 ------------------------------------------------------------------------------------------------------
                                 DECLARE @ysnEqual AS BIT
                                 DECLARE @strRemark AS NVARCHAR(500)
+
                                 SELECT @ysnEqual = A.ysnEqual
                                        , @strRemark = A.strRemark
+
                                 FROM
                                 (
 									SELECT
                                          CASE
-                                            WHEN Inv.dblInvoiceTotal = (CH.dblTotalDeposits - CH.dblCustomerPayments)
-                                               THEN CAST(1 AS BIT)
-                                            WHEN Inv.dblInvoiceTotal > (CH.dblTotalDeposits - CH.dblCustomerPayments)
-                                                THEN CAST(0 AS BIT)
-                                            WHEN Inv.dblInvoiceTotal < (CH.dblTotalDeposits - CH.dblCustomerPayments)
-                                                THEN CAST(0 AS BIT)
+											WHEN (@strInvoiceTransactionTypeMain = @strCASH)
+													THEN CASE
+														WHEN Inv.dblInvoiceTotal = (CH.dblTotalDeposits - CH.dblCustomerPayments)
+														   THEN CAST(1 AS BIT)
+														WHEN Inv.dblInvoiceTotal > (CH.dblTotalDeposits - CH.dblCustomerPayments)
+															THEN CAST(0 AS BIT)
+														WHEN Inv.dblInvoiceTotal < (CH.dblTotalDeposits - CH.dblCustomerPayments)
+															THEN CAST(0 AS BIT)
+												END
+											 WHEN (@strInvoiceTransactionTypeMain = @strCREDITMEMO)
+													THEN CASE
+															WHEN (Inv.dblInvoiceTotal - (Inv.dblTax + Inv.dblBaseTax)) = ((CH.dblTotalDeposits - CH.dblCustomerPayments) * -1)
+															   THEN CAST(1 AS BIT)
+															WHEN (Inv.dblInvoiceTotal - (Inv.dblTax + Inv.dblBaseTax)) > ((CH.dblTotalDeposits - CH.dblCustomerPayments) * -1)
+																THEN CAST(0 AS BIT)
+															WHEN (Inv.dblInvoiceTotal - (Inv.dblTax + Inv.dblBaseTax)) < ((CH.dblTotalDeposits - CH.dblCustomerPayments) * -1)
+																THEN CAST(0 AS BIT)
+												END
                                          END AS ysnEqual
+-- QQ
                                        , CASE
-                                             WHEN Inv.dblInvoiceTotal = (CH.dblTotalDeposits - CH.dblCustomerPayments)
-                                                 THEN 'Total of Sales Invoice is equal to Total Deposits - Customer Payments'
-                                             WHEN Inv.dblInvoiceTotal > (CH.dblTotalDeposits - CH.dblCustomerPayments)
-                                                 THEN 'Total of Sales Invoice is higher than Total Deposits - Customer Payments. Posting will not continue.<br>'
-                                                              + 'Total of Sales Invoice: ' + CAST(ISNULL(Inv.dblInvoiceTotal, 0) AS NVARCHAR(50)) + '<br>'
-                                                              + 'Total Deposits: ' + CAST(ISNULL(CH.dblTotalDeposits, 0) AS NVARCHAR(50)) + '<br>'
-                                                              + 'Customer Payments: ' + CAST(ISNULL(CH.dblCustomerPayments, 0) AS NVARCHAR(50)) + '<br>'
-                                             WHEN Inv.dblInvoiceTotal < (CH.dblTotalDeposits - CH.dblCustomerPayments)
-                                                 THEN 'Total of Sales Invoice is lower than Total Deposits - Customer Payments. Posting will not continue.<br>'
-                                                               + 'Total of Sales Invoice: ' + CAST(ISNULL(Inv.dblInvoiceTotal, 0) AS NVARCHAR(50)) + '<br>'
-                                                               + 'Total Deposits: ' + CAST(ISNULL(CH.dblTotalDeposits, 0) AS NVARCHAR(50)) + '<br>'
-                                                               + 'Customer Payments: ' + CAST(ISNULL(CH.dblCustomerPayments, 0) AS NVARCHAR(50)) + '<br>'
+											WHEN (@strInvoiceTransactionTypeMain = @strCASH)
+													THEN CASE
+														WHEN Inv.dblInvoiceTotal = (CH.dblTotalDeposits - CH.dblCustomerPayments)
+															THEN 'Total of Sales Invoice is equal to Total Deposits - Customer Payments'
+														WHEN Inv.dblInvoiceTotal > (CH.dblTotalDeposits - CH.dblCustomerPayments)
+															THEN 'Total of Sales Invoice is higher than Total Deposits - Customer Payments. Posting will not continue.<br>'
+																			  + 'Total of Sales Invoice: ' + CAST(ISNULL(Inv.dblInvoiceTotal, 0) AS NVARCHAR(50)) + '<br>'
+																			  + 'Total Deposits: ' + CAST(ISNULL(CH.dblTotalDeposits, 0) AS NVARCHAR(50)) + '<br>'
+																			  + 'Customer Payments: ' + CAST(ISNULL(CH.dblCustomerPayments, 0) AS NVARCHAR(50)) + '<br>'
+														WHEN Inv.dblInvoiceTotal < (CH.dblTotalDeposits - CH.dblCustomerPayments)
+															THEN 'Total of Sales Invoice is lower than Total Deposits - Customer Payments. Posting will not continue.<br>'
+																			   + 'Total of Sales Invoice: ' + CAST(ISNULL(Inv.dblInvoiceTotal, 0) AS NVARCHAR(50)) + '<br>'
+																			   + 'Total Deposits: ' + CAST(ISNULL(CH.dblTotalDeposits, 0) AS NVARCHAR(50)) + '<br>'
+																			   + 'Customer Payments: ' + CAST(ISNULL(CH.dblCustomerPayments, 0) AS NVARCHAR(50)) + '<br>'
+												END
+											 WHEN (@strInvoiceTransactionTypeMain = @strCREDITMEMO)
+													THEN CASE
+														WHEN (Inv.dblInvoiceTotal - (Inv.dblTax + Inv.dblBaseTax)) = ((CH.dblTotalDeposits - CH.dblCustomerPayments) * -1)
+															THEN 'Total of Sales Invoice is equal to Total Deposits - Customer Payments'
+														WHEN (Inv.dblInvoiceTotal - (Inv.dblTax + Inv.dblBaseTax)) > ((CH.dblTotalDeposits - CH.dblCustomerPayments) * -1)
+															THEN 'Total of Sales Invoice is higher than Total Deposits - Customer Payments. Posting will not continue.<br>'
+																			  + 'Total of Sales Invoice: ' + CAST(ISNULL((Inv.dblInvoiceTotal - (Inv.dblTax + Inv.dblBaseTax)), 0) AS NVARCHAR(50)) + '<br>'
+																			  + 'Total Deposits: ' + CAST(ISNULL((CH.dblTotalDeposits * -1), 0) AS NVARCHAR(50)) + '<br>'
+																			  + 'Customer Payments: ' + CAST(ISNULL(CH.dblCustomerPayments, 0) AS NVARCHAR(50)) + '<br>'
+														WHEN (Inv.dblInvoiceTotal - (Inv.dblTax + Inv.dblBaseTax)) < ((CH.dblTotalDeposits - CH.dblCustomerPayments) * -1)
+															THEN 'Total of Sales Invoice is lower than Total Deposits - Customer Payments. Posting will not continue.<br>'
+																			   + 'Total of Sales Invoice: ' + CAST(ISNULL((Inv.dblInvoiceTotal - (Inv.dblTax + Inv.dblBaseTax)), 0) AS NVARCHAR(50)) + '<br>'
+																			   + 'Total Deposits: ' + CAST(ISNULL((CH.dblTotalDeposits * -1), 0) AS NVARCHAR(50)) + '<br>'
+																			   + 'Customer Payments: ' + CAST(ISNULL(CH.dblCustomerPayments, 0) AS NVARCHAR(50)) + '<br>'
+												END
+											
+                                             
                                        END AS strRemark
                                     FROM tblARInvoice Inv
                                     OUTER APPLY dbo.tblSTCheckoutHeader CH
@@ -4013,6 +4291,9 @@ IF(@ysnDebug = 1)
 				----------------------------------------------------------------------
 				----------------- END POST TO AR RECIEVE PAYMENT ---------------------
 				----------------------------------------------------------------------
+
+				
+
 
 			END
 		ELSE IF(@ysnPost = 0)
@@ -4616,8 +4897,6 @@ IF(@ysnDebug = 1)
 
 
 
-
-
 			END
 		----------------------------------------------------------------------
 		----------------------- END POST / UNPOST ----------------------------
@@ -4791,7 +5070,7 @@ ExitWithRollback:
 	
 		
 ExitPost:
-
+	
 	IF(@ysnSetToReady = CAST(1 AS BIT))
 		BEGIN
 			
