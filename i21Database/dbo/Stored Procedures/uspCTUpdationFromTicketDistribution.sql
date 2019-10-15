@@ -49,6 +49,9 @@ BEGIN TRY
 			@dblNetUnitsToCompare	NUMERIC(18,6),
 			@intDistributionMethod	INT,
 			@locationId				INT
+
+	DECLARE @strEntityNo NVARCHAR(200)
+	DECLARE @errorMessage NVARCHAR(500)
 	
 	SET @ErrMsg =	'uspCTUpdationFromTicketDistribution '+ 
 					LTRIM(@intTicketId) +',' + 
@@ -416,6 +419,14 @@ BEGIN TRY
 	BEGIN
 		RAISERROR ('The entire ticket quantity can not be applied to the contract.',16,1,'WITH NOWAIT') 
 	END
+
+	IF NOT EXISTS(SELECT TOP 1 1 FROM @Processed WHERE ISNULL(ysnIgnore,0) <> 1 AND @ysnAutoDistribution = 1)
+	BEGIN
+		SELECT TOP 1 @strEntityNo = strName FROM tblEMEntity WHERE intEntityId = @intEntityId
+		SET @errorMessage = 'No contract available for ' + CAST(ISNULL(@strEntityNo,@intEntityId) AS NVARCHAR(200)) + '.'
+		RAISERROR (@errorMessage,16,1,'WITH NOWAIT') 
+	END
+
 
 	SELECT	PR.intContractDetailId,
 			PR.dblUnitsDistributed,
