@@ -10,6 +10,7 @@ BEGIN
 	DECLARE @intInserted INT
 	DECLARE @intUpdated INT
 	DECLARE @intNoProductSetup INT
+	DECLARE @intNoInvalidData INT
 	DECLARE @intNoSiteSetup INT
 
 	--DECLARE @strGUID NVARCHAR
@@ -38,6 +39,42 @@ BEGIN
 	SELECT @intTotalRead = COUNT(1) FROM #tmpStagingTable
 
 	-----------------------------------------------------------------------------
+	---------------------Start Invalid Issue-------------------------------------
+	-------------------------------------------------------------------------------
+	--SELECt all records that dont have productcode
+	IF OBJECT_ID('tempdb..#tmInvalidData') IS NOT NULL DROP TABLE #tmInvalidData
+	SELECT 
+		*
+	INTO #tmInvalidData
+	FROM #tmpStagingTable A
+	WHERE ISNULL(ysnInvalidData,0) = 1
+
+
+	SELECT @intNoInvalidData = COUNT(1) FROM #tmInvalidData
+
+	--Update ysnProcessed based on product code
+	UPDATE #tmpStagingTable
+	SET ysnProcessed = 1
+	FROM #tmInvalidData A
+	WHERE A.intNetworkCostStagingId = #tmpStagingTable.intNetworkCostStagingId
+
+
+	---Insert into Import result table
+	INSERT INTO tblCFImportNetworkCostResult (
+		intEntityId
+		,strNote
+		,strSiteNumber
+		,strProductNumber
+		,intRecordNo)
+	SELECT
+		intEntityId = A.intEntityId
+		,strNote = 'Invalid Data'
+		,strSiteNumber = A.strSiteNumber
+		,strProductNumber = A.strItemNumber
+		,intRecordNo = A.intRecordNo
+	FROM #tmInvalidData A
+
+	-----------------------------------------------------------------------------
 	---------------------Start Product Code Issue-------------------------------------
 	-------------------------------------------------------------------------------
 	--SELECt all records that dont have productcode
@@ -49,6 +86,7 @@ BEGIN
 	WHERE NOT EXISTS(SELECT TOP 1 1 FROM tblCFItem 
 						WHERE strProductNumber COLLATE Latin1_General_CI_AS = A.strItemNumber COLLATE Latin1_General_CI_AS
 							AND intNetworkId = @intNetworkId)
+							AND ISNULL(ysnInvalidData,0) = 0
 
 	SELECT @intNoProductSetup = COUNT(1) FROM #tmNoProductCodeSetup
 
@@ -95,6 +133,7 @@ BEGIN
 						FROM tblCFSite 
 						WHERE strSiteNumber COLLATE Latin1_General_CI_AS = A.strSiteNumber COLLATE Latin1_General_CI_AS
 							AND intNetworkId = @intNetworkId)
+							AND ISNULL(ysnInvalidData,0) = 0
 
 	SELECT @intNoSiteSetup = COUNT(1) FROM #tmpNoSiteRecords
 	
@@ -283,6 +322,7 @@ BEGIN
 		,intUpdated = @intUpdated
 		,intNoSiteSetup = @intNoSiteSetup
 		,intNoProductSetup = @intNoProductSetup
+		,intNoInvalidData = @intNoInvalidData
 	
 
 	------------------------------------------------------------------------------------
@@ -290,5 +330,3 @@ BEGIN
 	-------------------------------------------------------------------------------
     
 END
-
-
