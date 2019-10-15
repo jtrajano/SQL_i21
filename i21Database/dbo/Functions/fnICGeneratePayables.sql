@@ -1,118 +1,130 @@
 CREATE FUNCTION dbo.fnICGeneratePayables (@intReceiptId INT, @ysnPosted BIT, @ysnForVoucher BIT = 0)
 RETURNS @table TABLE
 (
-  [intEntityVendorId]			    INT NULL 
-, [intTransactionType]				INT NULL
-, [dtmDate]							DATETIME NULL
-, [strReference]					NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
-, [strSourceNumber]					NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
-, [strVendorOrderNumber]			NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
-, [strPurchaseOrderNumber]			NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
-, [intPurchaseDetailId]				INT NULL 
-, [intItemId]						INT NULL 
-, [strMiscDescription]				NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
-, [strItemNo]						NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
-, [strDescription]					NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
-, [intPurchaseTaxGroupId]			INT NULL 
-, [dblOrderQty]						NUMERIC(38, 20) NULL 
-, [dblPOOpenReceive]				NUMERIC(38, 20) NULL 
-, [dblOpenReceive]					NUMERIC(38, 20) NULL 
-, [dblQuantityToBill]				NUMERIC(38, 20) NULL 				
-, [dblQtyToBillUnitQty]				NUMERIC(38, 20) NULL 
-, [intQtyToBillUOMId]				INT NULL
-, [dblQuantityBilled]				NUMERIC(38, 20) NULL 
-, [intLineNo]						INT NULL 
-, [intInventoryReceiptItemId]		INT NULL 
-, [intInventoryReceiptChargeId]		INT NULL 
-, [intContractChargeId]				INT NULL 
-, [dblUnitCost]						NUMERIC(38, 20) NULL 
-, [dblDiscount]						NUMERIC(38, 20) NULL 
-, [dblTax]							NUMERIC(38, 20) NULL 
-, [dblRate]							NUMERIC(38, 20) NULL 
-, [strRateType]						NVARCHAR(200) COLLATE Latin1_General_CI_AS
-, [intCurrencyExchangeRateTypeId]	INT NULL 
-, [ysnSubCurrency]					BIT NULL 
-, [intSubCurrencyCents]				INT NULL 
-, [intAccountId]					INT NULL 
-, [strAccountId]					NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
-, [strAccountDesc]					NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
-, [strName]							NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
-, [strVendorId]						NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
-, [strShipVia]						NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
-, [strTerm]							NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
-, [intTermId]						INT NULL 
-, [strContractNumber]				NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
-, [strBillOfLading]					NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
-, [intContractHeaderId]				INT NULL 
-, [intContractDetailId]				INT NULL 
-, [intContractSequence]				INT NULL 
-, [intContractCostId]				INT NULL 
-, [intScaleTicketId]				INT NULL 
-, [strScaleTicketNumber]			NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
-, [strLoadShipmentNumber]			NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL 
-, [intShipmentId]					INT NULL 
-, [intLoadDetailId]					INT NULL 
-, [intUnitMeasureId]				INT NULL 
-, [strUOM]							NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
-, [intWeightUOMId]					INT NULL 
-, [intCostUOMId]					INT NULL 
-, [dblNetWeight]					NUMERIC(38, 20) NULL 	
-, [strCostUOM]						NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
-, [strgrossNetUOM]					NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
-, [dblWeightUnitQty]				NUMERIC(38, 20) NULL 
-, [dblCostUnitQty]					NUMERIC(38, 20) NULL 
-, [dblUnitQty]						NUMERIC(38, 20) NULL 
-, [intCurrencyId]					INT NULL 
-, [strCurrency]						NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
-, [intCostCurrencyId]				INT NULL 				
-, [strCostCurrency]					NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 		
-, [strVendorLocation]				NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
-, [str1099Form]						NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 			
-, [str1099Type]						NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 				
-, [intSubLocationId]				INT NULL 
-, [strSubLocationName]				NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
-, [intStorageLocationId]			INT NULL 
-, [strStorageLocationName]			NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
-, [dblNetShippedWeight]				NUMERIC(38, 20) NULL 
-, [dblWeightLoss]					NUMERIC(38, 20) NULL 
-, [dblFranchiseWeight]				NUMERIC(38, 20) NULL 
-, [dblClaimAmount]					NUMERIC(38, 20) NULL 			
-, [intLocationId]					INT NULL 
-, [strReceiptLocation]				NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
-, [intInventoryShipmentItemId]		INT NULL 
-, [intInventoryShipmentChargeId]	INT NULL 
-, [intTaxGroupId]					INT NULL 
-, [ysnReturn]						BIT NULL 
-, [strTaxGroup]						NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
-, intShipViaId						INT NULL
-, intShipFromId						INT NULL
-, intShipFromEntityId				INT NULL
-, intPayToAddressId					INT NULL
-, [intLoadShipmentId]				INT NULL	
-, [intLoadShipmentDetailId]			INT NULL	
-, [intLoadShipmentCostId]			INT NULL	
+	  [intEntityVendorId]			    INT NULL 
+	, [intTransactionType]				INT NULL
+	, [dtmDate]							DATETIME NULL
+	, [strReference]					NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
+	, [strSourceNumber]					NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
+	, [strVendorOrderNumber]			NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
+	, [strPurchaseOrderNumber]			NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
+	, [intPurchaseDetailId]				INT NULL 
+	, [intItemId]						INT NULL 
+	, [strMiscDescription]				NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
+	, [strItemNo]						NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
+	, [strDescription]					NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
+	, [intPurchaseTaxGroupId]			INT NULL 
+	, [dblOrderQty]						NUMERIC(38, 20) NULL 
+	, [dblPOOpenReceive]				NUMERIC(38, 20) NULL 
+	, [dblOpenReceive]					NUMERIC(38, 20) NULL 
+	, [dblQuantityToBill]				NUMERIC(38, 20) NULL 				
+	, [dblQtyToBillUnitQty]				NUMERIC(38, 20) NULL 
+	, [intQtyToBillUOMId]				INT NULL
+	, [dblQuantityBilled]				NUMERIC(38, 20) NULL 
+	, [intLineNo]						INT NULL 
+	, [intInventoryReceiptItemId]		INT NULL 
+	, [intInventoryReceiptChargeId]		INT NULL 
+	, [intContractChargeId]				INT NULL 
+	, [dblUnitCost]						NUMERIC(38, 20) NULL 
+	, [dblDiscount]						NUMERIC(38, 20) NULL 
+	, [dblTax]							NUMERIC(38, 20) NULL 
+	, [dblRate]							NUMERIC(38, 20) NULL 
+	, [strRateType]						NVARCHAR(200) COLLATE Latin1_General_CI_AS
+	, [intCurrencyExchangeRateTypeId]	INT NULL 
+	, [ysnSubCurrency]					BIT NULL 
+	, [intSubCurrencyCents]				INT NULL 
+	, [intAccountId]					INT NULL 
+	, [strAccountId]					NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
+	, [strAccountDesc]					NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
+	, [strName]							NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
+	, [strVendorId]						NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
+	, [strShipVia]						NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
+	, [strTerm]							NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
+	, [intTermId]						INT NULL 
+	, [strContractNumber]				NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
+	, [strBillOfLading]					NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
+	, [intContractHeaderId]				INT NULL 
+	, [intContractDetailId]				INT NULL 
+	, [intContractSequence]				INT NULL 
+	, [intContractCostId]				INT NULL 
+	, [intScaleTicketId]				INT NULL 
+	, [strScaleTicketNumber]			NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
+	, [strLoadShipmentNumber]			NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL 
+	, [intShipmentId]					INT NULL 
+	, [intLoadDetailId]					INT NULL 
+	, [intUnitMeasureId]				INT NULL 
+	, [strUOM]							NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
+	, [intWeightUOMId]					INT NULL 
+	, [intCostUOMId]					INT NULL 
+	, [dblNetWeight]					NUMERIC(38, 20) NULL 	
+	, [strCostUOM]						NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
+	, [strgrossNetUOM]					NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
+	, [dblWeightUnitQty]				NUMERIC(38, 20) NULL 
+	, [dblCostUnitQty]					NUMERIC(38, 20) NULL 
+	, [dblUnitQty]						NUMERIC(38, 20) NULL 
+	, [intCurrencyId]					INT NULL 
+	, [strCurrency]						NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
+	, [intCostCurrencyId]				INT NULL 				
+	, [strCostCurrency]					NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 		
+	, [strVendorLocation]				NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
+	, [str1099Form]						NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 			
+	, [str1099Type]						NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 				
+	, [intSubLocationId]				INT NULL 
+	, [strSubLocationName]				NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
+	, [intStorageLocationId]			INT NULL 
+	, [strStorageLocationName]			NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
+	, [dblNetShippedWeight]				NUMERIC(38, 20) NULL 
+	, [dblWeightLoss]					NUMERIC(38, 20) NULL 
+	, [dblFranchiseWeight]				NUMERIC(38, 20) NULL 
+	, [dblClaimAmount]					NUMERIC(38, 20) NULL 			
+	, [intLocationId]					INT NULL 
+	, [strReceiptLocation]				NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
+	, [intInventoryShipmentItemId]		INT NULL 
+	, [intInventoryShipmentChargeId]	INT NULL 
+	, [intTaxGroupId]					INT NULL 
+	, [ysnReturn]						BIT NULL 
+	, [strTaxGroup]						NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
+	, intShipViaId						INT NULL
+	, intShipFromId						INT NULL
+	, intShipFromEntityId				INT NULL
+	, intPayToAddressId					INT NULL
+	, [intLoadShipmentId]				INT NULL	
+	, [intLoadShipmentDetailId]			INT NULL	
+	, [intLoadShipmentCostId]			INT NULL	
 )
 AS
 BEGIN
 
 
-DECLARE 
-		  @SourceType_STORE AS INT = 7		 
-		, @type_Voucher AS INT = 1
-		, @type_DebitMemo AS INT = 3
-		, @billTypeToUse INT
+DECLARE @SourceType_STORE AS INT = 7		 
+	, @type_Voucher AS INT = 1
+	, @type_DebitMemo AS INT = 3
+	, @billTypeToUse INT
+	, @intVoucherInvoiceNoOption TINYINT
+	,	@voucherInvoiceOption_Blank TINYINT = 1 
+	,	@voucherInvoiceOption_BOL TINYINT = 2
+	,	@voucherInvoiceOption_VendorRefNo TINYINT = 3
+	, @intDebitMemoInvoiceNoOption TINYINT
+	,	@debitMemoInvoiceOption_Blank TINYINT = 1
+	,	@debitMemoInvoiceOption_BOL TINYINT = 2
+	,	@debitMemoInvoiceOption_VendorRefNo TINYINT = 3
 
-	SELECT TOP 1 @billTypeToUse = 
+SELECT TOP 1 @billTypeToUse = 
 		CASE 
 			WHEN dbo.fnICGetReceiptTotals(r.intInventoryReceiptId, 6) < 0 AND r.intSourceType = @SourceType_STORE THEN 
 				@type_DebitMemo
 			ELSE 
 				@type_Voucher
 		END 
-	FROM tblICInventoryReceipt r
-		INNER JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptId = r.intInventoryReceiptId
-	WHERE r.ysnPosted = 1
-		AND r.intInventoryReceiptId = @intReceiptId
+FROM tblICInventoryReceipt r
+	INNER JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptId = r.intInventoryReceiptId
+WHERE r.ysnPosted = 1
+	AND r.intInventoryReceiptId = @intReceiptId
+
+SELECT TOP 1 
+	@intVoucherInvoiceNoOption = intVoucherInvoiceNoOption
+	,@intDebitMemoInvoiceNoOption = intDebitMemoInvoiceNoOption
+FROM tblAPCompanyPreference
 
 INSERT INTO @table
 SELECT DISTINCT
@@ -121,7 +133,23 @@ SELECT DISTINCT
 	,[dtmDate]					=	A.dtmReceiptDate
 	,[strReference]				=	A.strVendorRefNo
 	,[strSourceNumber]			=	A.strReceiptNumber
-	,[strVendorOrderNumber]		=	ISNULL(NULLIF(LTRIM(RTRIM(A.strBillOfLading)), ''), A.strVendorRefNo) 
+	,[strVendorOrderNumber]		=	
+				CASE 
+					WHEN A.strReceiptType = 'Inventory Return' THEN 
+						CASE 
+							WHEN @intDebitMemoInvoiceNoOption = @debitMemoInvoiceOption_Blank THEN NULL 
+							WHEN @intDebitMemoInvoiceNoOption = @debitMemoInvoiceOption_BOL THEN A.strBillOfLading 
+							WHEN @intDebitMemoInvoiceNoOption = @debitMemoInvoiceOption_VendorRefNo THEN A.strVendorRefNo 
+							ELSE  ISNULL(NULLIF(LTRIM(RTRIM(A.strBillOfLading)), ''), A.strVendorRefNo)
+						END 
+					ELSE
+						CASE 
+							WHEN @intVoucherInvoiceNoOption = @voucherInvoiceOption_Blank THEN NULL 
+							WHEN @intVoucherInvoiceNoOption = @voucherInvoiceOption_BOL THEN A.strBillOfLading 
+							WHEN @intVoucherInvoiceNoOption = @voucherInvoiceOption_VendorRefNo THEN A.strVendorRefNo 
+							ELSE  ISNULL(NULLIF(LTRIM(RTRIM(A.strBillOfLading)), ''), A.strVendorRefNo)
+						END 						
+				END 
 	,[strPurchaseOrderNumber]	=	PurchaseOrder.strPurchaseOrderNumber
 	,[intPurchaseDetailId]		=	PurchaseOrder.intPurchaseDetailId
 	,[intItemId]				=	B.intItemId
@@ -453,7 +481,23 @@ SELECT DISTINCT
 		,[dtmDate]									=	A.dtmDate
 		,[strReference]								=	A.strReference
 		,[strSourceNumber]							=	A.strSourceNumber
-		,[strVendorOrderNumber]						=	IR.strBillOfLading
+		,[strVendorOrderNumber]						=	
+				CASE 
+					WHEN IR.strReceiptType = 'Inventory Return' THEN 
+						CASE 
+							WHEN @intDebitMemoInvoiceNoOption = @debitMemoInvoiceOption_Blank THEN NULL 
+							WHEN @intDebitMemoInvoiceNoOption = @debitMemoInvoiceOption_BOL THEN IR.strBillOfLading
+							WHEN @intDebitMemoInvoiceNoOption = @debitMemoInvoiceOption_VendorRefNo THEN IR.strVendorRefNo 
+							ELSE  ISNULL(NULLIF(LTRIM(RTRIM(IR.strBillOfLading)), ''), IR.strVendorRefNo)
+						END 
+					ELSE
+						CASE 
+							WHEN @intVoucherInvoiceNoOption = @voucherInvoiceOption_Blank THEN NULL 
+							WHEN @intVoucherInvoiceNoOption = @voucherInvoiceOption_BOL THEN IR.strBillOfLading 
+							WHEN @intVoucherInvoiceNoOption = @voucherInvoiceOption_VendorRefNo THEN IR.strVendorRefNo 
+							ELSE  ISNULL(NULLIF(LTRIM(RTRIM(IR.strBillOfLading)), ''), IR.strVendorRefNo)
+						END 						
+				END 
 		,[strPurchaseOrderNumber]					=	NULL
 		,[intPurchaseDetailId]						=	NULL
 		,[intItemId]								=	A.intItemId
