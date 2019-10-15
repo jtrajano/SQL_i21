@@ -232,6 +232,8 @@ BEGIN TRY
 								EXEC [dbo].[uspICPostInventoryReceipt] 0, 0, @strTransactionId, @intUserId
 							EXEC [dbo].[uspGRReverseOnReceiptDelete] @InventoryReceiptId
 							EXEC [dbo].[uspICDeleteInventoryReceipt] @InventoryReceiptId, @intUserId
+
+							FETCH NEXT FROM intListCursor INTO @InventoryReceiptId, @strTransactionId, @ysnIRPosted;
 						END
 						CLOSE intListCursor  
 						DEALLOCATE intListCursor 
