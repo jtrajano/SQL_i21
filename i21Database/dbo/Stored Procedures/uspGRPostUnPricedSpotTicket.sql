@@ -228,7 +228,7 @@ BEGIN TRY
 						,GP.dtmDate
 						,GP.intStorageLocationId
 						,GP.intSubLocationId
-					FROM dbo.fnICGeneratePayablesForVoucher (@intInventoryReceiptId,1) GP
+					FROM dbo.fnICGeneratePayables (@intInventoryReceiptId, 1, 1) GP
 
 					END 
 

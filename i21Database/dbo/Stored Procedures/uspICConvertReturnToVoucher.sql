@@ -202,7 +202,7 @@ BEGIN
 			,[intTermId]						
 			,[strBillOfLading]					
 			,[ysnReturn]	 
-		FROM dbo.fnICGeneratePayables (@intReceiptId, 1)
+		FROM dbo.fnICGeneratePayables (@intReceiptId, 1, 1)
 
 		END 
 

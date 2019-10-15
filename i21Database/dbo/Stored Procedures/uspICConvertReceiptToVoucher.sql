@@ -33,7 +33,7 @@ DECLARE @intEntityVendorId AS INT
 		,@intShipFromEntity AS INT
 
 		,@intShipFrom_DebitMemo AS INT
-		,@intReturnValue AS INT
+		,@intReturnValue AS INT = 0
 
 
 DECLARE @ReceiptType INT = 4;
@@ -100,7 +100,8 @@ BEGIN
 			,[intInventoryReceiptItemId]		
 			,[intInventoryReceiptChargeId]		
 			,[intInventoryShipmentItemId]		
-			,[intInventoryShipmentChargeId]		
+			,[intInventoryShipmentChargeId]
+			--,[strLoadShipmentNumber]		
 			,[intLoadShipmentId]				
 			,[intLoadShipmentDetailId]	
 			,[intLoadShipmentCostId]			
@@ -157,6 +158,7 @@ BEGIN
 		,GP.[intInventoryReceiptChargeId]		
 		,GP.[intInventoryShipmentItemId]		
 		,GP.[intInventoryShipmentChargeId]		
+		--,GP.strLoadShipmentNumber			
 		,GP.[intLoadShipmentId]				
 		,GP.[intLoadShipmentDetailId]	
 		,GP.[intLoadShipmentCostId]				
@@ -190,7 +192,7 @@ BEGIN
 		,GP.dtmDate
 		,GP.intStorageLocationId
 		,GP.intSubLocationId
-	FROM dbo.fnICGeneratePayablesForVoucher (@intReceiptId,	 1) GP
+	FROM dbo.fnICGeneratePayables (@intReceiptId, 1, 1) GP
 
 	END 
 
@@ -231,37 +233,6 @@ BEGIN
 		FROM dbo.fnICGeneratePayablesTaxes(@voucherItems)
 	END
 
-	--IF NOT EXISTS(SELECT TOP 1 1 FROM @voucherItems) AND @intScreenId = @intScreenId_InventoryReceipt
-	--BEGIN
-	--	EXEC uspICRaiseError 80226, @strReceiptNumber;
-	--	RETURN -80226; 	
-	--END
-
-	---- Check if we can convert the IR to Voucher
-	--IF NOT EXISTS (
-	--	SELECT	TOP 1 1 
-	--	FROM	tblICInventoryReceiptItem ri INNER JOIN @voucherItems vi
-	--				ON ri.intInventoryReceiptItemId = vi.intInventoryReceiptItemId
-	--	WHERE	ISNULL(ri.dblOpenReceive, 0) <> ISNULL(ri.dblBillQty, 0)
-	--) AND NOT EXISTS (
-	--	SELECT TOP 1 1 FROM @voucherItems WHERE intInventoryReceiptChargeId IS NOT NULL
-	--)
-	--BEGIN 
-	--	IF @billTypeToUse = @type_Voucher
-	--	BEGIN
-	--		-- Voucher is no longer needed. All items have Voucher. 
-	--		EXEC uspICRaiseError 80111; 
-	--		SET @intReturnValue = -80111;
-	--	END
-	--	ELSE
-	--	BEGIN
-	--		-- Debit Memo is no longer needed. All items have Debit Memo. 
-	--		EXEC uspICRaiseError 80110; 
-	--		SET @intReturnValue = -80110;
-	--	END
-	--	GOTO Post_Exit;
-	--END 
-
 	-- Call the AP sp to convert the IR to Voucher. 
 	BEGIN 
 		DECLARE @throwedError AS NVARCHAR(1000);
@@ -274,26 +245,96 @@ BEGIN
 			,@error = @throwedError OUTPUT
 			,@createdVouchersId = @intBillId OUTPUT
 
+		-- Handle errors thrown by AP
+		IF NULLIF(@throwedError, '') IS NOT NULL
+		BEGIN
+			RAISERROR(@throwedError, 11, 1)
+			RETURN -11
+			GOTO Post_Exit;
+		END
+		
 		IF @intBillId IS NULL AND @intScreenId = @intScreenId_InventoryReceipt
 		BEGIN
-			IF @billTypeToUse = @type_Voucher
+			-- Check if one of the items is a Contract Basis or DP. 
+			IF EXISTS (
+				SELECT TOP 1
+					A.strReceiptNumber
+				FROM tblICInventoryReceipt A INNER JOIN tblICInventoryReceiptItem B
+						ON A.intInventoryReceiptId = B.intInventoryReceiptId
+					OUTER APPLY (
+						SELECT 
+							CH.intContractHeaderId
+							,CD.intContractDetailId			
+							,CD.intContractSeq
+							,CD.dblCashPrice
+							,CD.intPricingTypeId
+							,CD.dblFutures
+							,CD.dblQuantity
+							,CH.strContractNumber
+							,CD.intItemUOMId
+							,ctUOM.strUnitMeasure
+							,J.dblFranchise
+						FROM 
+							tblCTContractHeader CH INNER JOIN tblCTContractDetail CD 
+								ON CH.intContractHeaderId = CD.intContractHeaderId
+							LEFT JOIN dbo.tblCTWeightGrade J 
+								ON J.intWeightGradeId = CH.intWeightId
+							LEFT JOIN tblICItemUOM ctOrderUOM 
+								ON ctOrderUOM.intItemUOMId = CD.intItemUOMId
+							LEFT JOIN tblICUnitMeasure ctUOM 
+								ON ctUOM.intUnitMeasureId  = ctOrderUOM.intUnitMeasureId
+						WHERE			
+							A.strReceiptType = 'Purchase Contract'			
+							AND CH.intContractHeaderId = ISNULL(B.intContractHeaderId, B.intOrderId)
+							AND CD.intContractDetailId = ISNULL(B.intContractDetailId, B.intLineNo) 
+					) Contracts	
+				WHERE
+					A.strReceiptNumber = @strReceiptNumber
+					AND A.strReceiptType = 'Purchase Contract'
+					AND ISNULL(Contracts.intPricingTypeId, 0) = 2 -- 2 is Basis. 
+					AND ISNULL(Contracts.dblFutures, 0) = 0
+			)				
 			BEGIN
-				RAISERROR('You cannot voucher this receipt.', 11, 1)
-				RETURN -11
+				-- 'Unable to process. Use Price Contract screen to process Basis Contract vouchers.''
+				EXEC uspICRaiseError 80218, @strReceiptNumber;
+				RETURN -80218; 	
+			END
+
+			IF EXISTS(
+				SELECT TOP 1 1
+				FROM 
+					vyuICGetInventoryReceiptVoucher
+				WHERE 
+					intInventoryReceiptId = @intReceiptId
+					AND dblQtyToVoucher = dblQtyToReceive
+			)
+			BEGIN
+				IF @billTypeToUse = @type_Voucher
+				BEGIN
+					-- Voucher is no longer needed. All items have Voucher. 
+					EXEC uspICRaiseError 80111; 
+					RETURN -80111;
+				END
+				ELSE
+				BEGIN
+					-- Debit Memo is no longer needed. All items have Debit Memo. 
+					EXEC uspICRaiseError 80110; 
+					SET @intReturnValue = -80110;
+				END
 			END
 			ELSE
 			BEGIN
-				-- Debit Memo is no longer needed. All items have Debit Memo. 
-				RAISERROR('You cannot convert this to debit memo.', 11, 1)
-				RETURN -11
+				IF @billTypeToUse = @type_Voucher
+				BEGIN
+					RAISERROR('There are no items to voucher.', 11, 1)
+					RETURN -11
+				END
+				ELSE
+				BEGIN
+					RAISERROR('You cannot convert this to debit memo.', 11, 1)
+					RETURN -11
+				END
 			END
-			GOTO Post_Exit;
-		END
-
-		IF(@throwedError <> '')
-		BEGIN
-			RAISERROR(@throwedError, 16, 1);
-			SET @intReturnValue = -89999;
 			GOTO Post_Exit;
 		END
 	END 

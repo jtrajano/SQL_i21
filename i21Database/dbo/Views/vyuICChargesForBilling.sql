@@ -82,6 +82,8 @@ SELECT
 	,dblForexRate								= ReceiptCharge.dblForexRate
 	,[ysnPrice]									= ReceiptCharge.ysnPrice
 	,[ysnAccrue]								= ReceiptCharge.ysnAccrue
+	,LG.strLoadNumber
+	,LG.intLoadDetailId
 	,intLoadShipmentId							= ReceiptCharge.intLoadShipmentId
 	,intLoadShipmentCostId						= ReceiptCharge.intLoadShipmentCostId
 FROM 
@@ -153,6 +155,7 @@ FROM
 	) ComputedChargesLink
 
 	OUTER APPLY dbo.fnICGetScaleTicketIdForReceiptCharge(Receipt.intInventoryReceiptId, Receipt.strReceiptNumber) ScaleTicket
+	OUTER APPLY dbo.fnICGetShipmentScheduleIdForReceiptCharge(Receipt.intInventoryReceiptId, Receipt.strReceiptNumber) LG
 
 WHERE	ReceiptCharge.ysnAccrue = 1 
 		--AND ISNULL(Receipt.ysnPosted, 0) = 1
@@ -258,6 +261,8 @@ SELECT
 	,dblForexRate								= ReceiptCharge.dblForexRate
 	,[ysnPrice]									= ReceiptCharge.ysnPrice
 	,[ysnAccrue]								= ReceiptCharge.ysnAccrue
+	,LG.strLoadNumber
+	,LG.intLoadDetailId
 	,[intLoadShipmentId]						= ReceiptCharge.intLoadShipmentId
 	,[intLoadShipmentCostId]					= ReceiptCharge.intLoadShipmentCostId
 FROM tblICInventoryReceiptCharge ReceiptCharge INNER JOIN tblICItem Item 
@@ -328,6 +333,7 @@ FROM tblICInventoryReceiptCharge ReceiptCharge INNER JOIN tblICItem Item
 	) ComputedChargesLink
 
 	OUTER APPLY dbo.fnICGetScaleTicketIdForReceiptCharge(Receipt.intInventoryReceiptId, Receipt.strReceiptNumber) ScaleTicket
+	OUTER APPLY dbo.fnICGetShipmentScheduleIdForReceiptCharge(Receipt.intInventoryReceiptId, Receipt.strReceiptNumber) LG
 
 WHERE	ReceiptCharge.ysnPrice = 1
 		--AND ISNULL(Receipt.ysnPosted, 0) = 1
