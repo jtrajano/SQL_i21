@@ -88,6 +88,7 @@ AS
 			,CP.intFreightBasisCostItemId
 			,strFreightBasisCostItem = FB.strItemNo
 			,CP.ysnCreateOtherCostPayable
+			,CP.ysnAllowDecimalHedgeLots
 			,CP.ysnForexRatePriceOptionalOnContract
 	FROM	tblCTCompanyPreference		CP LEFT
 	JOIN	tblICUnitMeasure			U1	ON	U1.intUnitMeasureId			=	CP.intCleanCostUOMId		LEFT
