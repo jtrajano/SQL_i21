@@ -180,7 +180,7 @@ BEGIN TRY
 			END
 			IF (@intSupplyPoint IS NULL)
 			BEGIN
-				RAISERROR('Transports Load has a Surcharge. You must link the Surcharge Item to the Freight Item (using the On Cost dropdown from the Surcharge Item''s Setup tab > Cost tab), or zero-out the Surcharge amount in both Receipt and Distribution Detail.', 16, 1)
+				RAISERROR('Cannot find a valid Supply Point. If this TR Load is created from a Load Schedule, check the originating Load Scheudule''s Vendor and Vendor Location.', 16, 1)
 			END
 			IF (@intCompanyLocation IS NULL)
 			BEGIN
