@@ -110,7 +110,7 @@ lgLoad2 as
     WHERE
       LO.intShipmentType = 2
 	  AND LO.intShipmentStatus <> 10
-	  and LD.intPContractDetailId not in (select intContractDetailId from lgLoad1)
+	  --and LD.intPContractDetailId not in (select intContractDetailId from lgLoad1)
     GROUP BY 
       LD.intPContractDetailId
 	  ,LO.strLoadNumber
