@@ -672,8 +672,8 @@ BEGIN TRY
 				,dblNet = ISNULL(LDCL.dblLinkNetWt, LD.dblNet) --
 				,dblCost = ISNULL(AD.dblSeqPrice, ISNULL(LD.dblUnitPrice,0)) --
 				,intCostUOMId = ISNULL(AD.intSeqPriceUOMId,LD.intPriceUOMId)  --
-				,intCurrencyId = ISNULL(LSC.intMainCurrencyId, LSC.intCurrencyID)
-				,intSubCurrencyCents = ISNULL(LSC.intCent, 1)
+				,intCurrencyId = ISNULL(SC.intMainCurrencyId, SC.intCurrencyID)
+				,intSubCurrencyCents = ISNULL(SubCurrency.intCent, 1)
 				,dblExchangeRate = 1
 				,intLotId = NULL
 				,intSubLocationId = ISNULL(LW.intSubLocationId, CD.intSubLocationId) --
@@ -847,7 +847,7 @@ BEGIN TRY
 				,dblNet = LD.dblNet -ISNULL(LD.dblDeliveredNet,0) --
 				,dblCost = ISNULL(LD.dblUnitPrice,0) --
 				,intCostUOMId = ISNULL(AD.intSeqPriceUOMId,LD.intPriceUOMId)  --
-				,intCurrencyId = ISNULL(LSC.intMainCurrencyId, LSC.intCurrencyID)
+				,intCurrencyId = ISNULL(SC.intMainCurrencyId, SC.intCurrencyID)
 				,intSubCurrencyCents = ISNULL(SubCurrency.intCent, 1)
 				,dblExchangeRate = 1
 				,intLotId = NULL
