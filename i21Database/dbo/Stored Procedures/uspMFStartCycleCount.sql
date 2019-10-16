@@ -1243,10 +1243,12 @@ BEGIN TRY
 		FROM @tblICFinalItem I
 		JOIN tblICLot L ON L.intItemId = I.intItemId
 			AND I.strLotTracking <> 'No'
-			AND L.intLotStatusId = 1
+			--AND L.intLotStatusId = 1
 			AND ISNULL(L.dtmExpiryDate, @dtmCurrentDate) >= @dtmCurrentDate
 			AND L.dblQty > 0
 			AND L.intStorageLocationId = I.intStorageLocationId
+			JOIN dbo.tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
+			AND LS.strPrimaryStatus = 'Active'
 			AND NOT EXISTS (
 				SELECT *
 				FROM @tblMFLot L
@@ -1301,10 +1303,12 @@ BEGIN TRY
 		FROM @tblICFinalItem I
 		JOIN tblICLot L ON L.intItemId = I.intItemId
 			AND I.strLotTracking <> 'No'
-			AND L.intLotStatusId = 1
+			--AND L.intLotStatusId = 1
 			AND ISNULL(L.dtmExpiryDate, @dtmCurrentDate) >= @dtmCurrentDate
 			AND L.dblQty > 0
 			AND L.intStorageLocationId = I.intStorageLocationId
+			JOIN dbo.tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
+			AND LS.strPrimaryStatus = 'Active'
 		GROUP BY I.intItemId
 			,I.intItemUOMId
 			,I.intStorageLocationId
