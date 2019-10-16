@@ -1144,7 +1144,7 @@ AS
 		, intSubBookId = NULL
 		, strSubBook = NULL
 	FROM (
-		SELECT DISTINCT strAccountNumber = 'Purchase' + ' - ' + CASE WHEN @strPositionBy = 'Product Type' THEN ISNULL(c.strDescription, '') ELSE ISNULL(t.strEntity, '') END COLLATE Latin1_General_CI_AS
+		SELECT strAccountNumber = 'Purchase' + ' - ' + CASE WHEN @strPositionBy = 'Product Type' THEN ISNULL(c.strDescription, '') ELSE ISNULL(t.strEntity, '') END COLLATE Latin1_General_CI_AS
 			, dblNoOfLot = dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId, @intUOMId, t.dblQuantity)
 			, strProductType = c.strDescription
 			, strProductLine = pl.strDescription
