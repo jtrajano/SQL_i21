@@ -1,4 +1,8 @@
-CREATE FUNCTION dbo.fnICGeneratePayables (@intReceiptId INT, @ysnPosted BIT, @ysnForVoucher BIT = 0)
+CREATE FUNCTION dbo.fnICGeneratePayables (
+	@intReceiptId INT
+	, @ysnPosted BIT
+	, @ysnForVoucher BIT = 0
+)
 RETURNS @table TABLE
 (
   [intEntityVendorId]			    INT NULL 
@@ -308,6 +312,7 @@ FROM tblICInventoryReceipt A INNER JOIN tblICInventoryReceiptItem B
 			,CD.intItemUOMId
 			,ctUOM.strUnitMeasure
 			,J.dblFranchise
+			,CD.intPricingStatus
 		FROM 
 			tblCTContractHeader CH INNER JOIN tblCTContractDetail CD 
 				ON CH.intContractHeaderId = CD.intContractHeaderId
@@ -327,7 +332,6 @@ FROM tblICInventoryReceipt A INNER JOIN tblICInventoryReceiptItem B
 			)
 			AND CH.intContractHeaderId = ISNULL(B.intContractHeaderId, B.intOrderId)
 			AND CD.intContractDetailId = ISNULL(B.intContractDetailId, B.intLineNo) 
-			--AND CH.intEntityId = A.intEntityVendorId 
 	) Contracts		
 
 	OUTER APPLY (		
@@ -409,19 +413,16 @@ WHERE
 			END 
 		) 
 	)
-	AND (Contracts.dblCashPrice <> 0 OR Contracts.dblCashPrice IS NULL) --EXCLUDE ALL THE BASIS CONTRACT WITH 0 CASH PRICE
 	AND B.dblUnitCost <> 0 --EXCLUDE ZERO RECEIPT COST 
 	AND ISNULL(A.ysnOrigin, 0) = 0
 	AND B.intOwnershipType <> 2	
 	AND C.strType <> 'Bundle'
 	AND ISNULL(A.strReceiptType, '') <> 'Transfer Order'
 	AND ISNULL(B.ysnAllowVoucher, 1) = 1
-	-- Check if the item is "Basis" priced and futures price is not blank. If future price is zero or blank, do not add it to the payable.
 	AND NOT (
 		A.strReceiptType = 'Purchase Contract'
-		AND ISNULL(Contracts.intPricingTypeId, 0) = 2 -- 2 is Basis. 
-		AND ISNULL(Contracts.dblFutures, 0) = 0
-		AND ISNULL(B.ysnAllowVoucher, 1) = 1
+		AND ISNULL(Contracts.intPricingTypeId, 0) = 2 -- 2 is Basis. 		
+		AND ISNULL(Contracts.intPricingStatus, 0) = 0 -- NOT IN (1, 2) -- 1 is Partially Priced, 2 is Fully Priced. 
 	)
 	/*
 		LG-2384
