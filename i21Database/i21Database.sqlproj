@@ -7690,6 +7690,7 @@
     <Build Include="dbo\Stored Procedures\uspICZeroAllStockQtyInCountDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspCMUpdateAPOverflowSettings.sql" />
     <Build Include="dbo\Functions\fnICGetShipmentScheduleIdForReceiptCharge.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPDiagnoseClearingData.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
