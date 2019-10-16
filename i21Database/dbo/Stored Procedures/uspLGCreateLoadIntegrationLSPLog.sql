@@ -199,13 +199,13 @@ BEGIN TRY
 					JOIN tblAPVendor A ON A.[intEntityId] = LD.intVendorEntityId
 					WHERE LD.intLoadId = L.intLoadId
 					) strVendorAccountNo
-				--,L.strOriginPort
-				,(
-					SELECT TOP 1 CD.strOrigin
-					FROM vyuCTContractFeed CD
-					JOIN tblLGLoadDetail LD ON LD.intPContractDetailId = CD.intContractDetailId
-					WHERE LD.intLoadId = L.intLoadId
-					) strOriginPort
+				,L.strOriginPort
+				--,(
+				--	SELECT TOP 1 CD.strOrigin
+				--	FROM vyuCTContractFeed CD
+				--	JOIN tblLGLoadDetail LD ON LD.intPContractDetailId = CD.intContractDetailId
+				--	WHERE LD.intLoadId = L.intLoadId
+				--	) strOriginPort
 				,'' strOriginAddress
 				,'' strOriginPostalCode
 				,'' strOriginCity
@@ -625,13 +625,13 @@ BEGIN TRY
 				JOIN tblAPVendor A ON A.[intEntityId] = LD.intVendorEntityId
 				WHERE LD.intLoadId = L.intLoadId
 				) strVendorAccountNo
-			--,L.strOriginPort
-			,(
-				SELECT TOP 1 CD.strOrigin
-				FROM vyuCTContractFeed CD
-				JOIN tblLGLoadDetail LD ON LD.intPContractDetailId = CD.intContractDetailId
-				WHERE LD.intLoadId = L.intLoadId
-				) strOriginPort
+			,L.strOriginPort
+			--,(
+			--	SELECT TOP 1 CD.strOrigin
+			--	FROM vyuCTContractFeed CD
+			--	JOIN tblLGLoadDetail LD ON LD.intPContractDetailId = CD.intContractDetailId
+			--	WHERE LD.intLoadId = L.intLoadId
+			--	) strOriginPort
 			,'' strOriginAddress
 			,'' strOriginPostalCode
 			,'' strOriginCity
