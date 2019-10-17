@@ -22,6 +22,8 @@ BEGIN TRY
 	FROM	tblSMUserSecurity 
 	WHERE	intEntityId = @intUserId --this also
 
+	BEGIN TRANSACTION
+
 	IF @ysnPostOrUnPost = 0 AND @ysnRecap = 0
 	BEGIN
 		EXEC uspSMAuditLog 
@@ -61,6 +63,11 @@ BEGIN TRY
 	   EXEC uspTRLoadProcessTransportLoad @intLoadHeaderId,@ysnPostOrUnPost
 	END
 
+	IF(@@TRANCOUNT > 0)
+	BEGIN
+		COMMIT TRANSACTION
+	END
+
 END TRY
 BEGIN CATCH
 	SELECT 
@@ -68,6 +75,10 @@ BEGIN CATCH
 		@ErrorSeverity = ERROR_SEVERITY(),
 		@ErrorState = ERROR_STATE();
 
+	IF(@@TRANCOUNT > 0)
+	BEGIN
+		ROLLBACK TRANSACTION
+	END
 	-- Use RAISERROR inside the CATCH block to return error
 	-- information about the original error that caused
 	-- execution to jump to the CATCH block.
