@@ -20,6 +20,7 @@ SELECT
 	,Basis =ISNULL(CTBasis.Basis,0)
 	,WHGB =ISNULL(WHGBStorage.WHGB,0)
 	,Hold = 0.00
+	,Offsite = ISNULL(OffSite.dblTotal,0)
 FROM tblSCDeliverySheetSplit SDS
 INNER JOIN tblSCDeliverySheet DS ON DS.intDeliverySheetId = SDS.intDeliverySheetId
 INNER JOIN tblEMEntity EM ON EM.intEntityId = SDS.intEntityId
@@ -77,3 +78,11 @@ OUTER APPLY(
 	AND GRS.intItemId = DS.intItemId AND GR.intStorageScheduleTypeId = SDS.intStorageScheduleTypeId
 	AND GRS.ysnTransferStorage = 0
 )WHGBStorage
+OUTER APPLY(
+	SELECT SUM(ISNULL(dblOriginalBalance,0)) AS dblTotal FROM tblGRCustomerStorage GRS
+	INNER JOIN tblGRStorageType GR ON GR.intStorageScheduleTypeId = GRS.intStorageTypeId AND GR.intStorageScheduleTypeId > 0
+	WHERE GR.ysnReceiptedStorage = 0 AND GR.ysnDPOwnedType = 0 AND GR.ysnGrainBankType = 0 AND GR.ysnCustomerStorage = 1
+	AND GRS.intDeliverySheetId = DS.intDeliverySheetId AND GRS.intEntityId = SDS.intEntityId 
+	AND GRS.intItemId = DS.intItemId AND GR.intStorageScheduleTypeId = SDS.intStorageScheduleTypeId
+	AND GRS.ysnTransferStorage = 0
+)OffSite
