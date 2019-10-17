@@ -194,9 +194,30 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
 		ELSE IF ISNULL(@ysnFromSalesOrder, 0) = 1 AND @intContractDetailId IS NOT NULL
 			BEGIN
 				UPDATE ID
-				SET dblQtyShipped	= CASE WHEN @dblNetWeight > 0 AND ISNULL(dbo.fnCalculateQtyBetweenUOM(@intScaleUOMId, ID.intItemUOMId, @dblNetWeight), 0) > CTD.dblBalance THEN CTD.dblBalance ELSE ISNULL(dbo.fnCalculateQtyBetweenUOM(@intScaleUOMId, ID.intItemUOMId, @dblNetWeight), 0) END
-				  , dblUnitQuantity	= CASE WHEN @dblNetWeight > 0 AND ISNULL(dbo.fnCalculateQtyBetweenUOM(@intScaleUOMId, ID.intItemUOMId, @dblNetWeight), 0) > CTD.dblBalance THEN CTD.dblBalance ELSE ISNULL(dbo.fnCalculateQtyBetweenUOM(@intScaleUOMId, ID.intItemUOMId, @dblNetWeight), 0) END
-				  , @dblQtyOverAged	= CASE WHEN @dblNetWeight > 0 THEN ISNULL(dbo.fnCalculateQtyBetweenUOM(@intScaleUOMId, ID.intItemUOMId, @dblNetWeight), 0) - CTD.dblBalance ELSE ID.dblQtyOrdered - CTD.dblBalance END
+				SET dblQtyShipped	= CASE WHEN @dblNetWeight > 0 AND ISNULL(dbo.fnCalculateQtyBetweenUOM(@intScaleUOMId, ID.intItemUOMId, @dblNetWeight), 0) > CTD.dblBalance 
+										   THEN CTD.dblBalance 
+										   ELSE 
+												CASE WHEN @dblNetWeight > ID.dblQtyOrdered 
+										  	     	 THEN ID.dblQtyOrdered
+												 	 ELSE ISNULL(dbo.fnCalculateQtyBetweenUOM(@intScaleUOMId, ID.intItemUOMId, @dblNetWeight), 0) 
+												END
+									  END
+				  , dblUnitQuantity	= CASE WHEN @dblNetWeight > 0 AND ISNULL(dbo.fnCalculateQtyBetweenUOM(@intScaleUOMId, ID.intItemUOMId, @dblNetWeight), 0) > CTD.dblBalance 
+										   THEN CTD.dblBalance 
+										   ELSE 
+												CASE WHEN @dblNetWeight > ID.dblQtyOrdered 
+										  	     	 THEN ID.dblQtyOrdered
+												 	 ELSE ISNULL(dbo.fnCalculateQtyBetweenUOM(@intScaleUOMId, ID.intItemUOMId, @dblNetWeight), 0) 
+												END
+									  END
+				  , @dblQtyOverAged	= CASE WHEN @dblNetWeight > 0 
+										   THEN ISNULL(dbo.fnCalculateQtyBetweenUOM(@intScaleUOMId, ID.intItemUOMId, @dblNetWeight), 0) - 
+												CASE WHEN CTD.dblBalance = CTD.dblOriginalQty AND CTD.dblScheduleQty = CTD.dblOriginalQty
+													 THEN ID.dblQtyOrdered 
+													 ELSE CTD.dblBalance 
+												END
+											ELSE ID.dblQtyOrdered - CTD.dblBalance 
+									  END
 				FROM tblARInvoiceDetail ID
 				INNER JOIN tblCTContractDetail CTD ON ID.intContractDetailId = CTD.intContractDetailId AND ID.intContractHeaderId = CTD.intContractHeaderId
 				WHERE ID.intInvoiceDetailId = @intInvoiceDetailId				
