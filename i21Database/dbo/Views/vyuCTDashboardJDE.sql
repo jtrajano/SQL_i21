@@ -71,8 +71,6 @@ with lgLoad1 as
 ),
 lgLoad as
 (
-	select * from lgLoad1
-	union all
     SELECT
       LD.intPContractDetailId, 
 	  LO.strLoadNumber,
@@ -112,7 +110,7 @@ lgLoad as
     WHERE
       LO.intShipmentType = 2
 	  AND LO.intShipmentStatus <> 10
-	  and LD.intPContractDetailId not in (select intContractDetailId from lgLoad1)
+	  --and LD.intPContractDetailId not in (select intContractDetailId from lgLoad1)
     GROUP BY 
       LD.intPContractDetailId
 	  ,LO.strLoadNumber
@@ -202,7 +200,6 @@ SELECT
   CASE WHEN ISNULL(CD.ysnProvisionalInvoice, 0) = 0 THEN 'N' ELSE 'Y' END COLLATE Latin1_General_CI_AS AS ysnProvisionalInvoice, 
   CASE WHEN ISNULL(CD.ysnQuantityFinal, 0) = 0 THEN 'N' ELSE 'Y' END COLLATE Latin1_General_CI_AS AS ysnQuantityFinal, 
   CH.strInternalComment, 
-  LG.dblQuantity AS dblShippingInsQty, 
   CASE WHEN ISNULL(CD.ysnRiskToProducer, 0) = 0 THEN 'N' ELSE 'Y' END COLLATE Latin1_General_CI_AS AS ysnRiskToProducer, 
   CASE WHEN ISNULL(CD.ysnClaimsToProducer, 0) = 0 THEN 'N' ELSE 'Y' END COLLATE Latin1_General_CI_AS AS ysnClaimsToProducer, 
   CD.strERPPONumber, 
@@ -216,34 +213,36 @@ SELECT
   strCommodityCode = CO.strCommodityCode, 
   QA.strSampleStatus, 
   QA.dblApprovedQty, 
-  LG.strLoadNumber, 
-  LG.strLoadShippingLine, 
-  LG.strOriginPort, 
-  LG.strDestinationPort, 
-  LG.strMVessel, 
-  LG.strMVoyageNumber, 
-  LG.strFVessel, 
-  LG.strFVoyageNumber, 
-  LG.strBLNumber, 
-  dblLoadQuantity = LG.dblQuantity, 
-  LG.intShipmentType, 
-  LG.strShipmentType, 
-  LG.strContainerNumber, 
-  LG.dtmStuffingDate, 
-  LG.dtmETSPOL, 
-  LG.dtmETAPOL, 
-  LG.dtmETAPOD, 
-  LG.strBookingReference, 
-  LG.intLoadId, 
-  LG.dtmDeadlineCargo, 
-  LG.strETAPOLReasonCode, 
-  LG.strETSPOLReasonCode, 
-  LG.strETAPODReasonCode, 
-  LG.strETAPOLReasonCodeDescription, 
-  LG.strETSPOLReasonCodeDescription, 
-  LG.strETAPODReasonCodeDescription, 
-  CASE WHEN ISNULL(LG.ysnDocsReceived, 0) = 0 THEN 'N' ELSE 'Y' END COLLATE Latin1_General_CI_AS AS ysnDocsReceived, 
-  CD.strVendorLotID, 
+dblShippingInsQty = isnull(LG1.dblQuantity,LG.dblQuantity)
+,strLoadNumber = isnull(LG1.strLoadNumber,LG.strLoadNumber)
+,strLoadShippingLine = isnull(LG1.strLoadShippingLine,LG.strLoadShippingLine)
+,strOriginPort = isnull(LG1.strOriginPort,LG.strOriginPort)
+,strDestinationPort = isnull(LG1.strDestinationPort,LG.strDestinationPort)
+,strMVessel = isnull(LG1.strMVessel,LG.strMVessel)
+,strMVoyageNumber = isnull(LG1.strMVoyageNumber,LG.strMVoyageNumber)
+,strFVessel = isnull(LG1.strFVessel,LG.strFVessel)
+,strFVoyageNumber = isnull(LG1.strFVoyageNumber,LG.strFVoyageNumber)
+,strBLNumber = isnull(LG1.strBLNumber,LG.strBLNumber)
+,dblLoadQuantity = isnull(LG1.dblQuantity,LG.dblQuantity)
+,intShipmentType = isnull(LG1.intShipmentType,LG.intShipmentType)
+,strShipmentType = isnull(LG1.strShipmentType,LG.strShipmentType)
+,strContainerNumber = isnull(LG1.strContainerNumber,LG.strContainerNumber)
+,dtmStuffingDate = isnull(LG1.dtmStuffingDate,LG.dtmStuffingDate)
+,dtmETSPOL = isnull(LG1.dtmETSPOL,LG.dtmETSPOL)
+,dtmETAPOL = isnull(LG1.dtmETAPOL,LG.dtmETAPOL)
+,dtmETAPOD = isnull(LG1.dtmETAPOD,LG.dtmETAPOD)
+,strBookingReference = isnull(LG1.strBookingReference,LG.strBookingReference)
+,intLoadId = isnull(LG1.intLoadId,LG.intLoadId)
+,dtmDeadlineCargo = isnull(LG1.dtmDeadlineCargo,LG.dtmDeadlineCargo)
+,strETAPOLReasonCode = isnull(LG1.strETAPOLReasonCode,LG.strETAPOLReasonCode)
+,strETSPOLReasonCode = isnull(LG1.strETSPOLReasonCode,LG.strETSPOLReasonCode)
+,strETAPODReasonCode = isnull(LG1.strETAPODReasonCode,LG.strETAPODReasonCode)
+,strETAPOLReasonCodeDescription = isnull(LG1.strETAPOLReasonCodeDescription,LG.strETAPOLReasonCodeDescription)
+,strETSPOLReasonCodeDescription = isnull(LG1.strETSPOLReasonCodeDescription,LG.strETSPOLReasonCodeDescription)
+,strETAPODReasonCodeDescription = isnull(LG1.strETAPODReasonCodeDescription,LG.strETAPODReasonCodeDescription)
+,ysnDocsReceived = (CASE WHEN ISNULL(isnull(LG1.ysnDocsReceived,LG.ysnDocsReceived), 0) = 0 THEN 'N' ELSE 'Y' END) COLLATE Latin1_General_CI_AS
+
+  ,CD.strVendorLotID, 
   IC.strContractItemName, 
   IC.strContractItemNo, 
   IC.strGrade AS strQualityApproval, 
@@ -289,6 +288,7 @@ FROM
   LEFT JOIN tblICUnitMeasure U8 WITH (NOLOCK) ON 1 = 1 
   AND U8.strUnitMeasure = 'Ton' 
   LEFT JOIN lgLoad LG ON LG.intPContractDetailId = CD.intContractDetailId 
+  LEFT JOIN lgLoad1 LG1 ON LG1.intPContractDetailId = CD.intContractDetailId 
   LEFT JOIN vyuCTQualityApprovedRejected QA WITH (NOLOCK) ON QA.intContractDetailId = CD.intContractDetailId 
   LEFT JOIN tblICItem BIM WITH (NOLOCK) ON BIM.intItemId = CD.intItemBundleId 
   LEFT JOIN tblICItemUOM QU ON QU.intItemUOMId = CD.intItemUOMId 
