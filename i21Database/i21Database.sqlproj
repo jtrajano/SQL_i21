@@ -8120,6 +8120,11 @@
     <Build Include="dbo\Tables\tblIPMultiCompany.sql" />
     <Build Include="dbo\Tables\tblLGFreightRateMatrixPreStage.sql" />
     <Build Include="dbo\Stored Procedures\uspIPInterCompanyPreStageFreightRateMatrix.sql" />
+    <Build Include="dbo\Tables\tblICItemStage.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPItemProcessPreStage.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPItemTransferStgXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPItemPopulateStgXML.sql" />
+    <Build Include="dbo\Views\vyuIPGetItem.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
