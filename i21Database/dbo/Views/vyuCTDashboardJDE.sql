@@ -69,8 +69,10 @@ with lgLoad1 as
 	  ,PD.strReasonCodeDescription
 	  ,LO.ysnDocumentsReceived
 ),
-lgLoad2 as
+lgLoad as
 (
+	select * from lgLoad1
+	union all
     SELECT
       LD.intPContractDetailId, 
 	  LO.strLoadNumber,
@@ -110,7 +112,7 @@ lgLoad2 as
     WHERE
       LO.intShipmentType = 2
 	  AND LO.intShipmentStatus <> 10
-	  --and LD.intPContractDetailId not in (select intContractDetailId from lgLoad1)
+	  and LD.intPContractDetailId not in (select intContractDetailId from lgLoad1)
     GROUP BY 
       LD.intPContractDetailId
 	  ,LO.strLoadNumber
@@ -138,12 +140,6 @@ lgLoad2 as
 	  ,ES.strReasonCodeDescription
 	  ,PD.strReasonCodeDescription
 	  ,LO.ysnDocumentsReceived
-),
-lgLoad as
-(
-	select * from lgLoad2
-	union all
-	select * from lgLoad1
 )
 SELECT
   CD.intContractDetailId, 
