@@ -60,8 +60,6 @@ BEGIN
     BEGIN
 
 		SET @intItemUOMId = [dbo].[fnGetItemStockUOM](@intItemId)
-			
-		DECLARE @tmpQuoteTaxDetail TABLE(intTaxCodeId INT NULL, dblTax NUMERIC(18,6) NULL, strType NVARCHAR(10) NULL)
 
 		INSERT INTO @tmpQuoteTaxDetail 
 		SELECT DT.intTaxCodeId
