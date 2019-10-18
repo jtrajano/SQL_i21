@@ -113,7 +113,7 @@ OPEN intListCursor;
 			IF ISNULL(@intStorageScheduleTypeId,0) > 0
 				SELECT	@ysnDPStorage = ST.ysnDPOwnedType, @ysnCustomerStorage = ysnCustomerStorage FROM dbo.tblGRStorageType ST WHERE ST.intStorageScheduleTypeId = @intStorageScheduleTypeId
 
-			IF @ysnIsStorage = 0 AND ISNULL(@ysnDPStorage,0) = 0 AND ISNULL(@intStorageScheduleTypeId, 0) <= 0
+			IF @ysnIsStorage = 0 AND (ISNULL(@ysnDPStorage,0) = 0 OR @strDistributionOption = 'SPT') AND ISNULL(@intStorageScheduleTypeId, 0) <= 0
 				BEGIN
 					IF @strDistributionOption = 'CNT' OR @strDistributionOption = 'LOD'  
 					BEGIN  
@@ -159,12 +159,14 @@ OPEN intListCursor;
 									@strScreenName			=	'Auto - Scale'
 								END
 
-								EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intLoopContractId, @dblLoopContractUnits, @intEntityId;  
+								
 							END 
 							ELSE
 							BEGIN
 								EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoopContractId, @dblLoopContractUnits, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId  
 							END 
+
+							EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intLoopContractId, @dblLoopContractUnits, @intEntityId;  
 						END  
 						
 

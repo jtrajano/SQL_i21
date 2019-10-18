@@ -19,6 +19,8 @@ BEGIN
 	FROM dbo.tblICItemUOM ItemUOM 
 	WHERE intUnitMeasureId =  @IntFromUnitMeasureId AND intItemId = @intItemId
 
-	RETURN @dblQty * @dblUnitQtyFrom
+	SET @result = CAST((@dblQty * @dblUnitQtyFrom) AS NUMERIC(26,3))
+
+	RETURN @result
 END
 GO

@@ -15,6 +15,8 @@ BEGIN
 		,[strReportGroupName]
 		,[strClaimReportName]
 		,[intCheckPrintId]
+		,[intVoucherInvoiceNoOption]
+		,[intDebitMemoInvoiceNoOption]
 		,[intConcurrencyId] 
 	)
 	SELECT
@@ -28,6 +30,8 @@ BEGIN
 		,[strReportGroupName]	= ''
 		,[strClaimReportName]	= ''
 		,[intCheckPrintId]		= 1
+		,[intVoucherInvoiceNoOption] = NULL -- Blank
+		,[intDebitMemoInvoiceNoOption] = NULL -- Blank
 		,[intConcurrencyId]		= 1
 
 		--Audit Log          
@@ -63,3 +67,4 @@ BEGIN
 		END		
 	END
 END
+GO

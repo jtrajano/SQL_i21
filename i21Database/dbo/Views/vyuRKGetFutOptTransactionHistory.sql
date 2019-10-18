@@ -31,7 +31,7 @@ SELECT intFutOptTransactionHistoryId
 	, dtmFilledDate
 	, dblOldNoOfLots
 	, dblLotBalance = (ISNULL(dblNewNoOfLots, 0.00) - ISNULL(dblOldNoOfLots, 0.00))
-	, dblContractBalance = dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUOMId, intStockUOMId, ((ISNULL(dblNewNoOfLots, 0.00) - ISNULL(dblOldNoOfLots, 0.00))) * dblContractSize)
+	, dblContractBalance = dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUOMId, intStockUOMId, (ISNULL(dblNewNoOfLots, 0.00) - ISNULL(dblOldNoOfLots, 0.00)) * dblContractSize)
 	, dblNewNoOfLots
 	, strScreenName
 	, strOldBuySell
@@ -122,16 +122,15 @@ FROM (
 	LEFT JOIN tblCTBook Book ON Book.intBookId = History.intBookId
 	LEFT JOIN tblCTSubBook SubBook ON SubBook.intSubBookId = History.intSubBookId
 	LEFT JOIN tblSMCurrency Currency ON Currency.strCurrency = History.strCurrency
-	LEFT JOIN tblEMEntity Entity ON Entity.strName = History.strBroker
-	LEFT JOIN tblRKBrokerageAccount BrokerAccount ON BrokerAccount.strAccountNumber = History.strBrokerAccount AND BrokerAccount.intEntityId = Entity.intEntityId
+	LEFT JOIN tblRKBrokerageAccount BrokerAccount ON BrokerAccount.strAccountNumber = History.strBrokerAccount AND BrokerAccount.strDescription = History.strBroker
 	LEFT JOIN (
 		SELECT DISTINCT E.strName, E.intEntityId
 		FROM tblEMEntity E
 		JOIN tblEMEntityType ET ON ET.intEntityId = E.intEntityId
 		WHERE strType = 'Salesperson'
 	) Trader ON Trader.strName = History.strTrader 
-	LEFT JOIN tblICCommodityUnitMeasure CommodityUOM ON CommodityUOM.intCommodityId = Trans.intCommodityId AND CommodityUOM.intUnitMeasureId = FutMarket.intUnitMeasureId
-	LEFT JOIN tblICCommodityUnitMeasure CommodityStock ON CommodityStock.intCommodityId = Trans.intCommodityId AND CommodityStock.ysnStockUnit = 1
+	LEFT JOIN tblICCommodityUnitMeasure CommodityUOM ON CommodityUOM.intCommodityId = Commodity.intCommodityId AND CommodityUOM.intUnitMeasureId = FutMarket.intUnitMeasureId
+	LEFT JOIN tblICCommodityUnitMeasure CommodityStock ON CommodityStock.intCommodityId = Commodity.intCommodityId AND CommodityStock.ysnStockUnit = 1
 	WHERE ISNULL(History.strAction, '') <> ''
 		AND History.intFutOptTransactionId NOT IN (SELECT DISTINCT intFutOptTransactionId FROM tblRKOptionsPnSExercisedAssigned)
 		AND History.intFutOptTransactionId NOT IN (SELECT DISTINCT intFutOptTransactionId FROM tblRKOptionsPnSExpired)

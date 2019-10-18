@@ -15,6 +15,12 @@ BEGIN
 	INSERT INTO @Commodity(intCommodityId)
 	SELECT Item Collate Latin1_General_CI_AS FROM [dbo].[fnSplitString](@strCommodityId, ',')
 
+	DECLARE @ysnIncludeInTransitInCompanyTitled BIT
+	SELECT TOP 1 
+		@ysnIncludeInTransitInCompanyTitled = ysnIncludeInTransitInCompanyTitled
+	FROM tblRKCompanyPreference
+
+
 
 	DECLARE @CompanyTitle AS TABLE (
 		dtmDate  DATE  NULL
@@ -70,6 +76,34 @@ BEGIN
 			, @intItemId = null
 			, @strPositionIncludes = null
 			, @intLocationId = null
+
+		
+		INSERT INTO @CompanyTitle(
+			dtmDate
+			,dblUnpaidIncrease 
+			,dblUnpaidDecrease 
+			,dblUnpaidBalance  
+			,dblPaidBalance  
+			,strTransactionId
+			,intTransactionId 
+			,strDistribution
+			,dblCompanyTitled
+			,intCommodityId
+		)
+		SELECT 
+			dtmDate
+			,0
+			,dblInTransitQty
+			,0
+			,0
+			,strTransactionId
+			,intTransactionId
+			,''
+			,0
+			,@intCommodityId
+		FROM dbo.fnICOutstandingInTransitAsOf(NULL, @intCommodityId, @dtmToTransactionDate) InTran
+		WHERE @ysnIncludeInTransitInCompanyTitled = 0
+
 	
 		UPDATE @CompanyTitle SET strCommodityCode = @strCommodityCode WHERE intCommodityId = @intCommodityId
 

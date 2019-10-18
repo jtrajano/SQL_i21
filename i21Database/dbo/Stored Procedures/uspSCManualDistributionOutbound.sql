@@ -58,6 +58,12 @@ DECLARE @intStorageScheduleId AS INT
 		,@ysnAllowInvoiceVoucher BIT = 0
 		,@ysnUpdateContractWeightGrade BIT = 0;
 
+DECLARE @intLoadContractDetailId INT  
+DECLARE @intTicketContractDetailId INT  
+DECLARE @dblTicketScheduleQuantity AS NUMERIC(18,6)
+DECLARE @dblLoopAdjustedScheduleQuantity NUMERIC (38,20)  
+DECLARE @strTicketDistributionOption NVARCHAR(3)
+
 SELECT @ysnUpdateContractWeightGrade  = CASE WHEN intContractId IS NULL AND strDistributionOption = 'CNT' AND (intWeightId IS NULL AND intGradeId IS NULL ) THEN 1 ELSE 0 END FROM tblSCTicket WHERE intTicketId = @intTicketId
 IF (@ysnUpdateContractWeightGrade = 1)
 BEGIN
@@ -82,6 +88,9 @@ SELECT @intTicketItemUOMId = intItemUOMIdTo
 	, @strWhereFinalizedGrade = strGradeFinalized
 	, @strInOutFlag = strInOutFlag
 	, @intLoadId = intLoadId
+	,@strTicketDistributionOption  = strDistributionOption
+	, @dblTicketScheduleQuantity = ISNULL(dblScheduleQty,0)
+	, @intTicketContractDetailId = intContractId
 FROM vyuSCTicketScreenView where intTicketId = @intTicketId
 
 BEGIN TRY
@@ -108,14 +117,65 @@ OPEN intListCursor;
 				BEGIN
 					IF @strDistributionOption = 'CNT' OR @strDistributionOption = 'LOD'
 					BEGIN
-						IF ISNULL(@intLoopContractId,0) != 0 AND @strDistributionOption = 'CNT'
-						EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoopContractId, @dblLoopContractUnits, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId
-						EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intLoopContractId, @dblLoopContractUnits, @intEntityId;
+						-- IF ISNULL(@intLoopContractId,0) != 0 AND @strDistributionOption = 'CNT'
+						-- EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoopContractId, @dblLoopContractUnits, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId
+						-- EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intLoopContractId, @dblLoopContractUnits, @intEntityId;
 
-						IF(@strDistributionOption = 'LOD' AND @intLoadDetailId > 0)
-						BEGIN
-							EXEC dbo.uspSCUpdateTicketLoadUsed @intTicketId, @intLoadDetailId, @dblLoopContractUnits, @intEntityId;	
-						END
+						-- IF(@strDistributionOption = 'LOD' AND @intLoadDetailId > 0)
+						-- BEGIN
+						-- 	EXEC dbo.uspSCUpdateTicketLoadUsed @intTicketId, @intLoadDetailId, @dblLoopContractUnits, @intEntityId;	
+						-- END
+
+						IF(@strDistributionOption = 'LOD' AND @intLoadDetailId > 0)  
+						BEGIN  
+							--get contract Detail Id of the load detail  
+							SELECT @intLoadContractDetailId = intPContractDetailId FROM tblLGLoadDetail WHERE intLoadDetailId = @intLoadDetailId  
+							
+							IF(@intLoopContractId = @intLoadContractDetailId)  
+							BEGIN   
+
+								EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intLoopContractId, @dblLoopContractUnits, @intEntityId;  
+							END  
+							
+					
+							EXEC dbo.uspSCUpdateTicketLoadUsed @intTicketId, @intLoadDetailId, @dblLoopContractUnits, @intEntityId;   
+						END  
+						ELSE  
+						BEGIN  
+
+							-- do not schedule if the contract is the same as the ticket contract since this is already scheduled upon saving the ticket
+							IF ISNULL(@intLoopContractId,0) <> 0 AND @strTicketDistributionOption = 'CNT' AND @intTicketContractDetailId = @intLoopContractId  
+							BEGIN  
+								IF(@dblLoopContractUnits > @dblTicketScheduleQuantity )
+								BEGIN
+									SET @dblLoopAdjustedScheduleQuantity = @dblLoopContractUnits - @dblTicketScheduleQuantity
+								END
+								ELSE
+								BEGIN
+									SET @dblLoopAdjustedScheduleQuantity = (@dblTicketScheduleQuantity - @dblLoopContractUnits) * -1
+								END
+								
+
+								IF @dblLoopAdjustedScheduleQuantity <> 0
+								BEGIN
+									EXEC	uspCTUpdateScheduleQuantity 
+									@intContractDetailId	=	@intLoopContractId,
+									@dblQuantityToUpdate	=	@dblLoopAdjustedScheduleQuantity,
+									@intUserId				=	@intUserId,
+									@intExternalId			=	@intTicketId,
+									@strScreenName			=	'Auto - Scale'
+								END
+
+								
+							END 
+							ELSE
+							BEGIN
+								EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoopContractId, @dblLoopContractUnits, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId  
+							END
+
+							EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intLoopContractId, @dblLoopContractUnits, @intEntityId;  
+						END 
+
 
 						INSERT INTO @ItemsForItemShipment (
 								intItemId
@@ -346,11 +406,22 @@ ELSE
 	WHERE intInventoryShipmentId = @InventoryShipmentId
 
 	IF ISNULL(@InventoryShipmentId, 0) != 0 AND (ISNULL(@intPricingTypeId,0) <= 1 OR ISNULL(@intPricingTypeId,0) = 6) AND ISNULL(@strWhereFinalizedWeight, 'Origin') = 'Origin' AND ISNULL(@strWhereFinalizedGrade, 'Origin') = 'Origin' AND @ysnPriceFixation = 0
-	BEGIN
-		EXEC @intInvoiceId = dbo.uspARCreateInvoiceFromShipment @InventoryShipmentId, @intUserId, NULL, 0, 1;
-		IF @intInvoiceId = 0
-			SET @intInvoiceId = NULL
-	END
+		BEGIN
+			EXEC @intInvoiceId = dbo.uspARCreateInvoiceFromShipment @InventoryShipmentId, @intUserId, NULL, 0, 1;
+			IF @intInvoiceId = 0
+				SET @intInvoiceId = NULL
+		END
+	ELSE
+		IF (@intPricingTypeId = 2)
+		BEGIN
+			IF EXISTS(SELECT TOP 1 1 FROM tblCTPriceFixation WHERE intContractDetailId = @intContractDetailId)
+				EXEC uspCTCreateVoucherInvoiceForPartialPricing @intContractDetailId, @intUserId
+		END
+			SELECT @intInvoiceId = id.intInvoiceId
+			FROM tblICInventoryShipment s 
+			JOIN tblICInventoryShipmentItem si ON si.intInventoryShipmentId = s.intInventoryShipmentId
+			join tblARInvoiceDetail id on id.intInventoryShipmentItemId = si.intInventoryShipmentItemId
+			WHERE si.intInventoryShipmentId = @InventoryShipmentId AND s.intOrderType = 1
 
 	EXEC dbo.uspSMAuditLog 
 		@keyValue			= @intTicketId				-- Primary Key Value of the Ticket. 

@@ -52,6 +52,7 @@ BEGIN
 		, intContractHeaderId = ch.intContractHeaderId
 		, strContractNumber = ch.strContractNumber
 		, strFutureMonth = fmnt.strFutureMonth
+		, strOwnership = 'Company Owned'
 	INTO #invQty
 	FROM vyuRKGetInventoryValuation s
 	JOIN tblICItem i ON i.intItemId = s.intItemId
@@ -132,6 +133,7 @@ BEGIN
 			, strContractNumber = ISNULL((SELECT strContractNumber FROM tblCTContractHeader WHERE intContractHeaderId = t.intContractId), '')
 			, intTransactionTypeId
 			, gh.dtmHistoryDate
+			, strOwnership = CASE WHEN b.ysnDPOwnedType = 1 THEN 'Company Owned' ELSE 'Customer Owned' END
 		FROM tblGRStorageHistory gh
 		JOIN tblGRCustomerStorage a ON gh.intCustomerStorageId = a.intCustomerStorageId
 		JOIN tblGRStorageType b ON b.intStorageScheduleTypeId = a.intStorageTypeId
@@ -209,6 +211,7 @@ BEGIN
 			, strContractNumber = ''
 			, intTransactionTypeId
 			, gh.dtmHistoryDate
+			, strOwnership = CASE WHEN b.ysnDPOwnedType = 1 THEN 'Company Owned' ELSE 'Customer Owned' END
 		FROM tblGRStorageHistory gh
 		JOIN tblGRCustomerStorage a ON gh.intCustomerStorageId = a.intCustomerStorageId
 		JOIN tblGRStorageType b ON b.intStorageScheduleTypeId = a.intStorageTypeId
@@ -258,13 +261,15 @@ BEGIN
 			, st.intTicketId
 			, strTicketType = 'Scale Ticket' COLLATE Latin1_General_CI_AS
 			, st.strTicketNumber
+			, strOwnership = CASE WHEN t.ysnDPOwnedType = 1 THEN 'Company Owned' ELSE 'Customer Owned' END
 		FROM tblSCTicket st
 		JOIN tblEMEntity e ON e.intEntityId= st.intEntityId
 		JOIN tblSMCompanyLocation  cl ON cl.intCompanyLocationId=st.intProcessingLocationId and st.strDistributionOption='HLD'
 		JOIN tblICItem i1 ON i1.intItemId=st.intItemId
 		JOIN tblICCategory Category ON Category.intCategoryId = i1.intCategoryId
 		JOIN tblICItemUOM iuom ON i1.intItemId=iuom.intItemId and ysnStockUnit=1
-		JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId=i1.intCommodityId AND iuom.intUnitMeasureId=ium.intUnitMeasureId 
+		JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId=i1.intCommodityId AND iuom.intUnitMeasureId=ium.intUnitMeasureId
+		LEFT JOIN tblGRStorageType t on t.intStorageScheduleTypeId = st.intStorageScheduleTypeId 
 		WHERE i1.intCommodityId  = @intCommodityId 
 			AND i1.intItemId = ISNULL(@intItemId, i1.intItemId)
 			and isnull(st.intDeliverySheetId,0) =0
@@ -281,20 +286,23 @@ BEGIN
 		, strTransactionType NVARCHAR(50)
 		, strTransactionId NVARCHAR(50)
 		, intTransactionId INT
-		, strDistribution NVARCHAR(10))
+		, strDistribution NVARCHAR(10)
+		, strOwnership NVARCHAR(20))
 
 	INSERT INTO @tblResult (dtmDate
 		, dblTotal
 		, strTransactionType
 		, strTransactionId
 		, intTransactionId
-		, strDistribution)
+		, strDistribution
+		, strOwnership)
 	SELECT CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110)
 		, dblTotal
 		, strTransactionType
 		, strTransactionId 
 		, intTransactionId
 		, strDistributionOption 
+		, strOwnership
 	FROM #invQty Inv
 	WHERE Inv.strTransactionType <> 'Storage Settlement'
 			
@@ -304,6 +312,7 @@ BEGIN
 		, strTransactionId 
 		, intTransactionId
 		, ST.strStorageTypeCode 
+		, strOwnership
 	FROM #invQty Inv
 	INNER JOIN vyuGRSettleStorageTicketNotMapped SS ON Inv.intTransactionId = SS.intSettleStorageId
 	LEFT JOIN tblGRStorageType ST ON SS.intStorageTypeId = ST.intStorageScheduleTypeId
@@ -314,7 +323,8 @@ BEGIN
 		, strTransactionType
 		, strTransactionId
 		, intTransactionId
-		, strDistribution)
+		, strDistribution
+		, strOwnership)
 	SELECT CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmHistoryDate, 110), 110)
 		, dblTotal = dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId, @intCommodityUnitMeasureId,dblBalance)
 		, strTicketType
@@ -324,6 +334,7 @@ BEGIN
 		, intTransactionId = CASE WHEN strTicketType IN( 'Scale Storage','Customer/Maintain Storage','Storage Adjustment') THEN ISNULL(intInventoryReceiptId,intInventoryShipmentId)
 								WHEN strTicketType IN( 'Settle Storage', 'Transfer Storage') THEN BD.intTicketId END
 		, ST.strStorageTypeCode 
+		, strOwnership
 	FROM #tblGetStorageDetailByDate BD
 	LEFT JOIN tblGRCustomerStorage CS ON BD.intCustomerStorageId = CS.intCustomerStorageId
 	LEFT JOIN tblGRStorageType ST ON CS.intStorageTypeId = ST.intStorageScheduleTypeId
@@ -337,13 +348,15 @@ BEGIN
 		, strTransactionType
 		, strTransactionId
 		, intTransactionId
-		, strDistribution)
+		, strDistribution
+		, strOwnership)
 	SELECT CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmTicketDateTime, 110), 110)
 		, dblTotal
 		, 'On Hold' 
 		, strTicketNumber
 		, intTicketId
 		, 'HLD'
+		, 'HOLD'
 	FROM #tempOnHold
 			
 	DECLARE @tblResultInventory TABLE (Id INT IDENTITY
@@ -357,7 +370,8 @@ BEGIN
 		, strTransactionId NVARCHAR(50)
 		, intTransactionId INT
 		, strDistribution NVARCHAR(10)
-		, strTransactionType NVARCHAR(50))
+		, strTransactionType NVARCHAR(50)
+		, strOwnership NVARCHAR(20))
 			
 	;WITH N1 (N) AS (SELECT 1 FROM (VALUES (1), (1), (1), (1), (1), (1), (1), (1), (1), (1)) n (N)),
 	N2 (N) AS (SELECT 1 FROM N1 AS N1 CROSS JOIN N1 AS N2),
@@ -385,10 +399,14 @@ BEGIN
 			
 	DECLARE @tblBalanceInvByDate AS TABLE (dtmDate DATE NULL
 		, dblBalanceInv NUMERIC(18,6)
+		, dblBalanceCompanyOwned NUMERIC(18,6)
+		, dblBalanceCustomerOwned NUMERIC(18,6)
 		, dblSalesInTransit NUMERIC(18,6))
-			
+
 	DECLARE @date DATE
 		, @dblSalesInTransitAsOf NUMERIC(18,6)
+		, @dblBalanceCompanyOwned NUMERIC(18,6)
+		, @dblBalanceCustomerOwned NUMERIC(18,6)
 			
 	WHILE EXISTS(SELECT TOP 1 1 FROM #tempDateRange)
 	BEGIN
@@ -399,6 +417,18 @@ BEGIN
 		SELECT @date
 			, SUM(dblTotal)
 		FROM @tblResult WHERE CONVERT(DATETIME, CONVERT(NVARCHAR(10), dtmDate, 110), 110) <= CONVERT(DATETIME, @date)
+		
+		SELECT @dblBalanceCompanyOwned = SUM(dblTotal)
+		FROM @tblResult 
+		WHERE CONVERT(DATETIME, CONVERT(NVARCHAR(10), dtmDate, 110), 110) <= CONVERT(DATETIME, @date)
+		AND strOwnership = 'Company Owned'
+		
+		SELECT @dblBalanceCustomerOwned = SUM(dblTotal)
+		FROM @tblResult 
+		WHERE CONVERT(DATETIME, CONVERT(NVARCHAR(10), dtmDate, 110), 110) <= CONVERT(DATETIME, @date)
+		AND strOwnership = 'Customer Owned'
+
+		
 				
 		SELECT @dblSalesInTransitAsOf = SUM(ISNULL(InTran.dblInTransitQty, 0))
 		FROM #InTransitDateRange InTran
@@ -406,6 +436,8 @@ BEGIN
 
 		UPDATE @tblBalanceInvByDate
 		SET dblSalesInTransit = @dblSalesInTransitAsOf
+			,dblBalanceCompanyOwned = @dblBalanceCompanyOwned
+			,dblBalanceCustomerOwned = @dblBalanceCustomerOwned
 		WHERE dtmDate = @date
 		
 		DELETE #tempDateRange WHERE Date = @date
@@ -416,13 +448,15 @@ BEGIN
 		, strTransactionId
 		, intTransactionId
 		, strDistribution
-		, strTransactionType)
+		, strTransactionType
+		, strOwnership)
 	SELECT dtmDate
 		, dblTotal
 		, strTransactionId
 		, intTransactionId
 		, strDistribution 
 		, strTransactionType
+		, strOwnership
 	FROM (
 		SELECT dtmDate 
 			, dblTotal = SUM(ISNULL(dblTotal, 0))
@@ -430,6 +464,7 @@ BEGIN
 			, intTransactionId
 			, strDistribution
 			, strTransactionType
+			, strOwnership
 		FROM @tblResult
 		WHERE strTransactionType IN ('Inventory Receipt')
 		GROUP BY dtmDate
@@ -437,6 +472,7 @@ BEGIN
 			, intTransactionId
 			, strDistribution 
 			, strTransactionType
+			, strOwnership
 	) t 
 	WHERE dblTotal <> 0
 
@@ -445,13 +481,15 @@ BEGIN
 		, strTransactionId
 		, intTransactionId
 		, strDistribution 
-		, strTransactionType)
+		, strTransactionType
+		, strOwnership)
 	SELECT dtmDate
 		, dblTotal 
 		, strTransactionId
 		, intTransactionId
 		, strDistribution 
 		, strTransactionType
+		, strOwnership
 	FROM (
 		SELECT dtmDate 
 			, dblTotal = SUM(ISNULL(dblTotal, 0))
@@ -459,6 +497,7 @@ BEGIN
 			, intTransactionId
 			, strDistribution 
 			, strTransactionType
+			, strOwnership
 		FROM @tblResult
 		WHERE strTransactionType IN ('Storage Settlement')
 		GROUP BY dtmDate
@@ -466,6 +505,7 @@ BEGIN
 			, intTransactionId
 			, strDistribution 
 			, strTransactionType
+			, strOwnership
 	) t 
 			
 	INSERT INTO @tblResultInventory(dtmDate
@@ -473,13 +513,15 @@ BEGIN
 		, strTransactionId
 		, intTransactionId
 		, strDistribution 
-		, strTransactionType)
+		, strTransactionType
+		, strOwnership)
 	SELECT dtmDate
 		, dblTotal 
 		, strTransactionId
 		, intTransactionId
 		, strDistribution 
 		, strTransactionType
+		, strOwnership
 	FROM (
 		SELECT dtmDate 
 			, dblTotal = SUM(ISNULL(dblTotal, 0))
@@ -487,6 +529,7 @@ BEGIN
 			, intTransactionId
 			, strDistribution 
 			, strTransactionType
+			, strOwnership
 		FROM @tblResult
 		WHERE strTransactionType IN ('Credit Memo')
 		GROUP BY dtmDate
@@ -494,6 +537,7 @@ BEGIN
 			, intTransactionId
 			, strDistribution 
 			, strTransactionType
+			, strOwnership
 	) t
 	
 	INSERT INTO @tblResultInventory(dtmDate
@@ -501,13 +545,15 @@ BEGIN
 		, strTransactionId
 		, intTransactionId
 		, strDistribution 
-		, strTransactionType)
+		, strTransactionType
+		, strOwnership)
 	SELECT dtmDate
 		, dblTotal 
 		, strTransactionId
 		, intTransactionId
 		, strDistribution 
 		, strTransactionType
+		, strOwnership
 	FROM (
 		SELECT dtmDate 
 			, dblTotal = SUM(ISNULL(dblTotal, 0))
@@ -515,6 +561,7 @@ BEGIN
 			, intTransactionId
 			, strDistribution 
 			, strTransactionType
+			, strOwnership
 		FROM @tblResult
 		WHERE strTransactionType IN ('Inventory Transfer')
 		AND dblTotal > 0
@@ -523,6 +570,7 @@ BEGIN
 			, intTransactionId
 			, strDistribution 
 			, strTransactionType
+			, strOwnership
 	) t
 
 	INSERT INTO @tblResultInventory(dtmDate
@@ -530,13 +578,15 @@ BEGIN
 		, strTransactionId
 		, intTransactionId
 		, strDistribution 	
-		, strTransactionType)
+		, strTransactionType
+		, strOwnership)
 	SELECT dtmDate
 		, dblTotal 
 		, strTransactionId
 		, intTransactionId
 		, strDistribution 
 		, strTransactionType
+		, strOwnership
 	FROM (
 		SELECT dtmDate 
 			, dblTotal = SUM(ABS(ISNULL(dblTotal, 0)))
@@ -544,6 +594,7 @@ BEGIN
 			, intTransactionId
 			, strDistribution 
 			, strTransactionType
+			, strOwnership
 		FROM @tblResult
 		WHERE strTransactionType IN ('Inventory Transfer')
 		AND dblTotal < 0
@@ -552,6 +603,7 @@ BEGIN
 			, intTransactionId
 			, strDistribution 
 			, strTransactionType
+			, strOwnership
 	) t
 
 	INSERT INTO @tblResultInventory(dtmDate
@@ -559,13 +611,15 @@ BEGIN
 		, strTransactionId
 		, intTransactionId
 		, strDistribution 
-		, strTransactionType)
+		, strTransactionType
+		, strOwnership)
 	SELECT dtmDate
 		, dblTotal 
 		, strTransactionId
 		, intTransactionId
 		, strDistribution 
 		, strTransactionType
+		, strOwnership
 	FROM (
 		SELECT dtmDate  
 			, dblTotal = SUM(ISNULL(dblTotal, 0))
@@ -573,6 +627,7 @@ BEGIN
 			, intTransactionId
 			, strDistribution 
 			, strTransactionType
+			, strOwnership
 		FROM @tblResult
 		WHERE strTransactionType = 'On Hold'
 		AND dblTotal  > 0
@@ -581,6 +636,7 @@ BEGIN
 			, intTransactionId
 			, strDistribution 
 			, strTransactionType
+			, strOwnership
 	) t
 
 	INSERT INTO @tblResultInventory(dtmDate
@@ -588,13 +644,15 @@ BEGIN
 		, strTransactionId
 		, intTransactionId
 		, strDistribution 
-		, strTransactionType)
+		, strTransactionType
+		, strOwnership)
 	SELECT dtmDate
 		, dblTotal 
 		, strTransactionId
 		, intTransactionId
 		, strDistribution 
 		, strTransactionType
+		, strOwnership
 	FROM (
 		SELECT dtmDate 
 			, dblTotal = SUM(ISNULL(dblTotal, 0))
@@ -602,6 +660,7 @@ BEGIN
 			, intTransactionId
 			, strDistribution ='PRDC' 
 			, strTransactionType
+			, strOwnership
 		FROM @tblResult
 		WHERE strTransactionType IN ('Produce')
 		GROUP BY dtmDate
@@ -609,6 +668,7 @@ BEGIN
 			, intTransactionId
 			, strDistribution 
 			, strTransactionType
+			, strOwnership
 	) t 
 
 
@@ -617,13 +677,15 @@ BEGIN
 		, strTransactionId
 		, intTransactionId
 		, strDistribution 
-		, strTransactionType)
+		, strTransactionType
+		, strOwnership)
 	SELECT dtmDate
 		, dblTotal
 		, strTransactionId
 		, intTransactionId
 		, strDistribution 
 		, strTransactionType
+		, strOwnership
 	FROM (
 		SELECT dtmDate 
 			, dblTotal = SUM(ABS(ISNULL(dblTotal, 0)))
@@ -631,6 +693,7 @@ BEGIN
 			, intTransactionId
 			, strDistribution 
 			, strTransactionType
+			, strOwnership
 		FROM @tblResult
 		WHERE strTransactionType = 'On Hold' 
 		AND dblTotal < 0
@@ -639,6 +702,7 @@ BEGIN
 			, intTransactionId
 			, strDistribution 
 			, strTransactionType
+			, strOwnership
 	) t
 	
 	INSERT INTO @tblResultInventory(dtmDate
@@ -646,13 +710,15 @@ BEGIN
 		, strTransactionId
 		, intTransactionId
 		, strDistribution 
-		, strTransactionType)
+		, strTransactionType
+		, strOwnership)
 	SELECT dtmDate
 		, ABS(dblTotal)
 		, strTransactionId
 		, intTransactionId
 		, strDistribution 
 		, strTransactionType
+		, strOwnership
 	FROM (
 		SELECT dtmDate 
 			, dblTotal = SUM(ISNULL(dblTotal, 0))
@@ -660,6 +726,7 @@ BEGIN
 			, intTransactionId
 			, strDistribution 
 			, strTransactionType
+			, strOwnership
 		FROM @tblResult
 		WHERE strTransactionType IN ('Inventory Shipment')
 		GROUP BY dtmDate
@@ -667,6 +734,7 @@ BEGIN
 			, intTransactionId
 			, strDistribution 
 			, strTransactionType
+			, strOwnership
 	) t
 	WHERE dblTotal <> 0
 
@@ -675,13 +743,15 @@ BEGIN
 		, strTransactionId
 		, intTransactionId
 		, strDistribution 
-		, strTransactionType)
+		, strTransactionType
+		, strOwnership)
 	SELECT dtmDate
 		, ABS(dblTotal)
 		, strTransactionId
 		, intTransactionId
 		, strDistribution 
 		, strTransactionType
+		, strOwnership
 	FROM (
 		SELECT dtmDate 
 			, dblTotal = SUM(ISNULL(dblTotal, 0))
@@ -689,6 +759,7 @@ BEGIN
 			, intTransactionId
 			, strDistribution  = 'CNSM'
 			, strTransactionType
+			, strOwnership
 		FROM @tblResult
 		WHERE strTransactionType IN ('Consume')
 		GROUP BY dtmDate
@@ -696,6 +767,7 @@ BEGIN
 			, intTransactionId
 			, strDistribution 
 			, strTransactionType
+			, strOwnership
 	) t
 	WHERE dblTotal <> 0
 
@@ -704,13 +776,15 @@ BEGIN
 		, strTransactionId
 		, intTransactionId
 		, strDistribution 
-		, strTransactionType)
+		, strTransactionType
+		, strOwnership)
 	SELECT dtmDate
 		, ABS(dblTotal)
 		, strTransactionId
 		, intTransactionId
 		, strDistribution 
 		, strTransactionType
+		, strOwnership
 	FROM (
 		SELECT dtmDate 
 			, dblTotal = SUM(ISNULL(dblTotal, 0))
@@ -718,6 +792,7 @@ BEGIN
 			, intTransactionId
 			, strDistribution  = ''
 			, strTransactionType
+			, strOwnership
 		FROM @tblResult
 		WHERE strTransactionType IN ('Outbound Shipment')
 		GROUP BY dtmDate
@@ -725,6 +800,7 @@ BEGIN
 			, intTransactionId
 			, strDistribution 
 			, strTransactionType
+			, strOwnership
 	) t
 	WHERE dblTotal <> 0
 
@@ -733,13 +809,15 @@ BEGIN
 		, strTransactionId
 		, intTransactionId
 		, strDistribution 
-		, strTransactionType)
+		, strTransactionType
+		, strOwnership)
 	SELECT dtmDate
 		, dblTotal 
 		, strTransactionId
 		, intTransactionId
 		, strDistribution 
 		, strTransactionType
+		, strOwnership
 	FROM (
 		SELECT dtmDate 
 			, dblTotal = SUM(ABS(ISNULL(dblTotal, 0)))
@@ -747,6 +825,7 @@ BEGIN
 			, intTransactionId
 			, strDistribution 
 			, strTransactionType
+			, strOwnership
 		FROM @tblResult
 		WHERE strTransactionType IN ('Invoice', 'Cash')
 		AND dblTotal < 0
@@ -755,6 +834,7 @@ BEGIN
 			, intTransactionId
 			, strDistribution 
 			, strTransactionType
+			, strOwnership
 	) t
 
 
@@ -763,13 +843,15 @@ BEGIN
 		, strTransactionId
 		, intTransactionId
 		, strDistribution 
-		, strTransactionType)
+		, strTransactionType
+		, strOwnership)
 	SELECT dtmDate
 		, dblTotal 
 		, strTransactionId
 		, intTransactionId
 		, strDistribution 
 		, strTransactionType
+		, strOwnership
 	FROM (
 		SELECT dtmDate 
 			, dblTotal = SUM(ISNULL(dblTotal, 0))
@@ -777,12 +859,14 @@ BEGIN
 			, intTransactionId
 			, strDistribution  = CASE WHEN ISNULL(strDistribution,'') <> '' THEN strDistribution ELSE 'ADJ' END
 			, strTransactionType = 'Inventory Adjustment'
+			, strOwnership
 		FROM @tblResult
 		WHERE strTransactionType LIKE 'Inventory Adjustment -%'
 		GROUP BY dtmDate
 			, strTransactionId
 			, intTransactionId
 			, strDistribution 
+			, strOwnership
 	) t
 
 	INSERT INTO @tblResultInventory(dtmDate
@@ -790,13 +874,15 @@ BEGIN
 		, strTransactionId
 		, intTransactionId
 		, strDistribution 
-		, strTransactionType)
+		, strTransactionType
+		, strOwnership)
 	SELECT dtmDate
 		, dblTotal 
 		, strTransactionId
 		, intTransactionId
 		, strDistribution 
 		, strTransactionType
+		, strOwnership
 	FROM (
 		SELECT dtmDate 
 			, dblTotal = SUM(ISNULL(dblTotal, 0))
@@ -804,6 +890,7 @@ BEGIN
 			, intTransactionId
 			, strDistribution 
 			, strTransactionType
+			, strOwnership
 		FROM @tblResult
 		WHERE strTransactionType IN('Inventory Count')
 		GROUP BY dtmDate
@@ -811,6 +898,7 @@ BEGIN
 			, intTransactionId
 			, strDistribution 
 			, strTransactionType
+			, strOwnership
 	) t
 
 
@@ -819,13 +907,15 @@ BEGIN
 		, strTransactionId
 		, intTransactionId
 		, strDistribution 
-		, strTransactionType)
+		, strTransactionType
+		, strOwnership)
 	SELECT dtmDate
 		, dblTotal 
 		, strTransactionId
 		, intTransactionId
 		, strDistribution 
 		, strTransactionType
+		, strOwnership
 	FROM (
 		SELECT dtmDate 
 			, dblTotal =  sum(dblTotal)
@@ -833,6 +923,7 @@ BEGIN
 			, intTransactionId
 			, strDistribution 
 			, strTransactionType = 'Customer/Maintain Storage'
+			, strOwnership
 		FROM @tblResult s
 		WHERE strTransactionType IN ( 'Scale Storage','Customer/Maintain Storage', 'Settle Storage', 'Transfer Storage')
 			AND dblTotal > 0
@@ -840,6 +931,7 @@ BEGIN
 			, strTransactionId
 			, intTransactionId
 			, strDistribution 
+			, strOwnership
 	) t
 	
 	INSERT INTO @tblResultInventory(dtmDate
@@ -847,13 +939,15 @@ BEGIN
 		, strTransactionId
 		, intTransactionId
 		, strDistribution 
-		, strTransactionType)
+		, strTransactionType
+		, strOwnership)
 	SELECT dtmDate
 		, dblTotal 
 		, strTransactionId
 		, intTransactionId
 		, strDistribution
 		, strTransactionType
+		, strOwnership
 	FROM (
 		SELECT dtmDate 
 			, dblTotal =  sum(ABS(dblTotal))
@@ -861,6 +955,7 @@ BEGIN
 			, intTransactionId
 			, strDistribution 
 			, strTransactionType = 'Customer/Maintain Storage'
+			, strOwnership
 		FROM @tblResult s
 		WHERE strTransactionType IN ( 'Scale Storage','Customer/Maintain Storage', 'Settle Storage', 'Transfer Storage')
 			AND dblTotal < 0
@@ -868,6 +963,7 @@ BEGIN
 			, strTransactionId
 			, intTransactionId
 			, strDistribution 
+			, strOwnership
 	) t
 
 
@@ -876,13 +972,15 @@ BEGIN
 		, strTransactionId
 		, intTransactionId
 		, strDistribution 
-		, strTransactionType)
+		, strTransactionType
+		, strOwnership)
 	SELECT dtmDate
 		, dblTotal 
 		, strTransactionId
 		, intTransactionId
 		, strDistribution 
 		, strTransactionType
+		, strOwnership
 	FROM (
 		SELECT dtmDate 
 			, dblTotal =  dblTotal
@@ -890,6 +988,7 @@ BEGIN
 			, intTransactionId
 			, strDistribution 
 			, strTransactionType
+			, strOwnership
 		FROM @tblResult s
 		WHERE strTransactionType IN ( 'Storage Adjustment')
 	) t
@@ -906,15 +1005,18 @@ BEGIN
 			, ri.strTransactionId
 			, ri.intTransactionId
 			, ri.strDistribution
-			, r.dblBalanceInv 
+			, r.dblBalanceInv
+			, r.dblBalanceCompanyOwned
+			, r.dblBalanceCustomerOwned 
 			, r.dblSalesInTransit
 			, ri.strTransactionType
 			, intCommodityId = @intCommodityId
+			, strOwnership
 		FROM @tblResultInventory ri
 		FULL JOIN @tblBalanceInvByDate r ON ri.dtmDate = r.dtmDate
 		
 		--Insert Company Title Beginning Balance
-		UNION ALL SELECT NULL
+		UNION SELECT NULL
 			, NULL
 			, NULL
 			, NULL
@@ -922,12 +1024,25 @@ BEGIN
 			, NULL
 			, NULL
 			, NULL
-			, sum(dblTotal)
+			, (SELECT sum(dblTotal) 
+				FROM @tblResult 
+				WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110) <= CONVERT(DATETIME, DATEADD(DAY, -1, @dtmFromTransactionDate))
+				) --dblBalanceInv
+			, (SELECT sum(dblTotal) 
+				FROM @tblResult 
+				WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110) <= CONVERT(DATETIME, DATEADD(DAY, -1, @dtmFromTransactionDate))
+				AND strOwnership = 'Company Owned'
+				)
+			, (SELECT sum(dblTotal) 
+				FROM @tblResult 
+				WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110) <= CONVERT(DATETIME, DATEADD(DAY, -1, @dtmFromTransactionDate))
+				AND strOwnership = 'Customer Owned'
+				)
 			, NULL
 			, NULL
 			, NULL
-		FROM @tblResult
-		WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110) <= CONVERT(DATETIME, DATEADD(DAY, -1, @dtmFromTransactionDate))
+			, NULL
+		
 	) t
 	WHERE dblBalanceInv IS NOT NULL 
 

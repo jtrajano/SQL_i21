@@ -49,10 +49,16 @@ BEGIN TRY
 		/* Update LS Unit Cost for Unpriced Contracts */
 		UPDATE LD 
 		SET dblUnitPrice = dbo.fnCTGetSequencePrice(CD.intContractDetailId,NULL)
+			,dblAmount = dbo.fnCalculateCostBetweenUOM(
+								LD.intPriceUOMId
+								, ISNULL(LD.intWeightItemUOMId, LD.intItemUOMId) 
+								,(dbo.fnCTGetSequencePrice(CD.intContractDetailId,NULL) / CASE WHEN (CUR.ysnSubCurrency = 1) THEN CUR.intCent ELSE 1 END)
+							) * CASE WHEN (LD.intWeightItemUOMId IS NOT NULL) THEN LD.dblNet ELSE LD.dblQuantity END		
 		FROM tblLGLoadDetail LD
 			JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
 			JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
-			CROSS APPLY dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
+			JOIN vyuLGAdditionalColumnForContractDetailView AD ON CD.intContractDetailId = AD.intContractDetailId
+			LEFT JOIN tblSMCurrency CUR ON CUR.intCurrencyID = LD.intPriceCurrencyId
 		WHERE ISNULL(LD.dblUnitPrice, 0) = 0 AND LD.intLoadId = @intLoadId
 
 		IF EXISTS(SELECT TOP 1 1 FROM tblLGLoadDetail LD

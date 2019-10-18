@@ -192,8 +192,8 @@ BEGIN
 			,@dblCruBegBalForSummary NUMERIC(18,6)
 
 	SELECT 
-		@dblFutBalanceForward =  SUM(CASE WHEN ISNULL(ysnPreCrush,0) = 0 THEN dblOpenContract * dblContractSize END)
-		,@dblCruBalanceForward =  SUM(CASE WHEN ISNULL(ysnPreCrush,0) = 1 THEN dblOpenContract * dblContractSize END)
+		@dblFutBalanceForward =  SUM(ISNULL(CASE WHEN ISNULL(ysnPreCrush,0) = 0 THEN dblOpenContract * dblContractSize END,0))
+		,@dblCruBalanceForward =  SUM(ISNULL(CASE WHEN ISNULL(ysnPreCrush,0) = 1 THEN dblOpenContract * dblContractSize END,0))
 	FROM @tblGetOpenFutureByDate
 	WHERE dtmTransactionDate < @dtmFromTransactionDate
 
@@ -220,10 +220,10 @@ BEGIN
 		)
 		select @intRowNum
 			,dtmTransactionDate
-			,@dblFutBalanceForward
-			,@dblFutBalanceForward + ( dblFuturesBuy + dblFuturesSell)  
-			,@dblCruBalanceForward
-			,@dblCruBalanceForward + ( dblCrushBuy + dblCrushSell)  
+			,ISNULL(@dblFutBalanceForward,0)
+			,ISNULL(@dblFutBalanceForward,0) + ( dblFuturesBuy + dblFuturesSell)  
+			,ISNULL(@dblCruBalanceForward,0)
+			,ISNULL(@dblCruBalanceForward,0) + ( dblCrushBuy + dblCrushSell)  
 		from #tmpDerivativeActivity 
 		WHERE intRowNum = @intRowNum
 	

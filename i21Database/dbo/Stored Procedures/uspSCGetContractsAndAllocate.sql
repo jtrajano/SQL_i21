@@ -56,6 +56,8 @@ BEGIN TRY
 	DECLARE @intLoadId	INT
 	DECLARE @LoadContractsDetailId Id
 	DECLARE @LoadDetailUsedId Id
+	DECLARE @strEntityNo NVARCHAR(200)
+	DECLARE @errorMessage NVARCHAR(500)
 	
 	SET @ErrMsg =	'uspSCGetContractsAndAllocate '+ 
 					LTRIM(@intTicketId) +',' + 
@@ -367,20 +369,32 @@ BEGIN TRY
 				ELSE
 				BEGIN
 					
-					IF(@intContractDetailId = @intTicketContractDetailId)
+					SET @dblInreaseSchBy  = @dblNetUnits - ISNULL(@dblTicketScheduledQuantity,0)
+					IF(@dblInreaseSchBy <> 0)
 					BEGIN
-						-- Adjust the scheduled quantity based on the ticket scheduled and net units
-						SET @dblInreaseSchBy  = @dblNetUnits - ISNULL(@dblTicketScheduledQuantity,0)
-						IF(@dblInreaseSchBy <> 0)
+						IF(@intContractDetailId = @intTicketContractDetailId)
+						BEGIN
+							-- Adjust the scheduled quantity based on the ticket scheduled and net units
+								EXEC	uspCTUpdateScheduleQuantity 
+										@intContractDetailId	=	@intContractDetailId,
+										@dblQuantityToUpdate	=	@dblInreaseSchBy,
+										@intUserId				=	@intUserId,
+										@intExternalId			=	@intTicketId,
+										@strScreenName			=	'Auto - Scale'
+						
+						END
+						ELSE
 						BEGIN
 							EXEC	uspCTUpdateScheduleQuantity 
 									@intContractDetailId	=	@intContractDetailId,
 									@dblQuantityToUpdate	=	@dblInreaseSchBy,
 									@intUserId				=	@intUserId,
 									@intExternalId			=	@intTicketId,
-									@strScreenName			=	'Auto - Scale'
+									@strScreenName			=	'Scale'
+							
 						END
 					END
+					
 				END
 			END
 
@@ -541,13 +555,16 @@ BEGIN TRY
 	
 	UPDATE	@Processed SET dblUnitsRemaining = @dblNetUnits
 
-	IF(		SELECT	MAX(dblUnitsRemaining) 
-			FROM	@Processed	PR
-			JOIN	tblCTContractDetail	CD	ON	CD.intContractDetailId	=	PR.intContractDetailId
-			WHERE	ISNULL(ysnIgnore,0) <> 1) > 0 AND @ysnAutoDistribution = 1
+	IF	((SELECT	MAX(dblUnitsRemaining) 
+		 FROM	@Processed	PR
+		 JOIN	tblCTContractDetail	CD	ON	CD.intContractDetailId	=	PR.intContractDetailId
+		 WHERE	ISNULL(ysnIgnore,0) <> 1) > 0
+		OR NOT EXISTS(SELECT TOP 1 1 FROM @Processed WHERE ISNULL(ysnIgnore,0) <> 1)) 
+		AND @ysnAutoDistribution = 1
 	BEGIN
-		RAISERROR ('The entire ticket quantity can not be applied to the contract.',16,1,'WITH NOWAIT') 
+		RAISERROR ('The entire ticket quantity cannot be applied to the contract.',16,1,'WITH NOWAIT') 
 	END
+
 	
 	SELECT	PR.intContractDetailId,
 			PR.dblUnitsDistributed,

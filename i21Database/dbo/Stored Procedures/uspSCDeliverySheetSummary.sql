@@ -34,13 +34,14 @@ DECLARE @intEntityId INT
 		,@ysnPost BIT
 		,@NetUnits AS NUMERIC(38,6)
 		,@strEntityNo NVARCHAR(50)
+DECLARE @dblOffsite AS NUMERIC(38,6)
 
 IF OBJECT_ID (N'tempdb.dbo.#temp') IS NOT NULL
    DROP TABLE #temp
 
 DECLARE @temp TABLE (fields NVARCHAR(50))
 INSERT INTO @temp (fields)
-VALUES ('Id') ,('EntityNo'),('Contract') ,('Cash') ,('Storage') ,('DP') ,('Basis'),('WHGB') ,('Hold'),('SplitPercentage')
+VALUES ('Id') ,('EntityNo'),('Contract') ,('Cash') ,('Storage') ,('DP') ,('Basis'),('WHGB') ,('Hold'),('SplitPercentage'),('Offsite')
 
 SELECT *
 INTO #temp
@@ -53,7 +54,7 @@ src
 PIVOT 
 (
     MAX(a) 
-    FOR fields IN (Id,EntityNo, Contract, Cash, Storage, DP, Basis, WHGB, Hold)
+    FOR fields IN (Id,EntityNo, Contract, Cash, Storage, DP, Basis, WHGB, Hold, [Offsite])
 ) unpvt
 
 --------------------------------------------------------------------------------------------------------
@@ -183,11 +184,19 @@ BEGIN
 		--For hold
 		SET @Hold = 0;
 		
+		--Off Site
+		SET @dblOffsite = ISNULL((SELECT sum(dblOriginalBalance) FROM tblGRCustomerStorage GRS
+		LEFT JOIN tblGRStorageType GR ON GR.intStorageScheduleTypeId = GRS.intStorageTypeId AND GR.intStorageScheduleTypeId > 0
+		WHERE GR.ysnReceiptedStorage = 0 AND GR.ysnDPOwnedType = 0 AND GR.ysnGrainBankType = 0 AND GR.ysnCustomerStorage = 1
+		AND GRS.intEntityId = @intEntityId AND GRS.intItemId = @intItemId 
+		AND GR.intStorageScheduleTypeId = @intStorageScheduleTypeId 
+		AND GRS.intDeliverySheetId = @intDeliverySheetId 
+		AND GRS.ysnTransferStorage = 0), 0)
 		
 	END
 	
-	INSERT INTO #temp (Id, EntityNo, Contract, Cash, Storage, DP, Basis, WHGB, Hold,SplitPercentage) 
-	VALUES(@counter, @strEntityNo,@Contract, @Cash, @Storage, @DP, @Basis, @WHGB, @Hold,@SplitAverage)
+	INSERT INTO #temp (Id, EntityNo, Contract, Cash, Storage, DP, Basis, WHGB, Hold,SplitPercentage, [Offsite]) 
+	VALUES(@counter, @strEntityNo,@Contract, @Cash, @Storage, @DP, @Basis, @WHGB, @Hold,@SplitAverage,@dblOffsite )
 
 	update #temp SET EntityId = @intEntityId, EntityName = @strName WHERE Id = @counter
 

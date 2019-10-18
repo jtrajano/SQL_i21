@@ -23,6 +23,8 @@ BEGIN
 		, dblAdjustments NUMERIC(24,10)
 		, dblInventoryCount NUMERIC(24,10)
 		, dblBalanceInv NUMERIC(24,10)
+		, dblBalanceCompanyOwned NUMERIC(24,10)
+		, dblBalanceCustomerOwned NUMERIC(24,10)
 		, strTransactionId NVARCHAR(50)
 		, intTransactionId INT
 		, strDistribution NVARCHAR(10)
@@ -30,6 +32,7 @@ BEGIN
 		, strTransactionType NVARCHAR(50)
 		, intCommodityId INT
 		, strCommodityCode NVARCHAR(100)
+		, strOwnership NVARCHAR(20)
 	)
 
 	DECLARE @intCommodityId INT
@@ -62,9 +65,12 @@ BEGIN
 			, intTransactionId
 			, strDistribution
 			, dblBalanceInv
+			, dblBalanceCompanyOwned
+			, dblBalanceCustomerOwned
 			, dblSalesInTransit
 			, strTransactionType
 			, intCommodityId
+			, strOwnership
 		)
 		EXEC uspRKGetInHouse
 			 @dtmFromTransactionDate  = @dtmFromTransactionDate
@@ -102,6 +108,7 @@ BEGIN
 		,strTransactionId
 		,intTransactionId
 		,strCommodityCode
+		,strOwnership
 	INTO #tmpInventoryActivity
 	FROM @InHouse
 	WHERE (dtmDate IS NOT NULL
@@ -125,6 +132,14 @@ BEGIN
 		,dblInvEndBalance  NUMERIC(18,6)
 		,dblInvBegBalForSummary NUMERIC(18,6)
 		,dblInvEndBalForSummary NUMERIC(18,6)
+		,dblCompanyOwnedBegBalance  NUMERIC(18,6)
+		,dblCompanyOwnedEndBalance  NUMERIC(18,6)
+		,dblCompanyOwnedBegBalForSummary NUMERIC(18,6)
+		,dblCompanyOwnedEndBalForSummary NUMERIC(18,6)
+		,dblCustomerOwnedBegBalance  NUMERIC(18,6)
+		,dblCustomerOwnedEndBalance  NUMERIC(18,6)
+		,dblCustomerOwnedBegBalForSummary NUMERIC(18,6)
+		,dblCustomerOwnedEndBalForSummary NUMERIC(18,6)
 	)
 
 	Declare @intRowNum int
@@ -132,8 +147,19 @@ BEGIN
 			,@dtmPrevDate DATE
 			,@dblInvBalanceForward  NUMERIC(18,6)
 			,@dblInvBegBalForSummary NUMERIC(18,6)
+			,@dblCompanyOwnedBalanceForward  NUMERIC(18,6)
+			,@dblCompanyOwnedBegBalForSummary NUMERIC(18,6)
+			,@dblCompanyOwnedBegBalance NUMERIC(18,6)
+			,@dblCompanyOwnedEndBalance NUMERIC(18,6)
+			,@dblCustomerOwnedBalanceForward  NUMERIC(18,6)
+			,@dblCustomerOwnedBegBalForSummary NUMERIC(18,6)
+			,@dblCustomerOwnedBegBalance NUMERIC(18,6)
+			,@dblCustomerOwnedEndBalance NUMERIC(18,6)
 
-	SELECT @dblInvBalanceForward =  SUM(ISNULL(dblBalanceInv,0))
+	SELECT 
+		@dblInvBalanceForward =  SUM(ISNULL(dblBalanceInv,0))
+		,@dblCompanyOwnedBalanceForward = SUM(ISNULL(dblBalanceCompanyOwned,0))
+		,@dblCustomerOwnedBalanceForward = SUM(ISNULL(dblBalanceCustomerOwned,0))
 	FROM @InHouse
 	WHERE dtmDate IS NULL
 	
@@ -155,27 +181,44 @@ BEGIN
 			,dtmDate
 			,dblInvBegBalance
 			,dblInvEndBalance
+			,dblCompanyOwnedBegBalance
+			,dblCompanyOwnedEndBalance
+			,dblCustomerOwnedBegBalance
+			,dblCustomerOwnedEndBalance
 		)
 		select @intRowNum
 			,dtmTransactionDate
 			,ISNULL(@dblInvBalanceForward,0)
 			,ISNULL(@dblInvBalanceForward,0) + ( dblInvIn - dblInvOut)  
+			,ISNULL(@dblCompanyOwnedBalanceForward,0)
+			,ISNULL(@dblCompanyOwnedBalanceForward,0) + (CASE WHEN strOwnership = 'Company Owned' THEN  ( dblInvIn - dblInvOut) ELSE 0 END)
+			,ISNULL(@dblCustomerOwnedBalanceForward,0)
+			,ISNULL(@dblCustomerOwnedBalanceForward,0) + (CASE WHEN strOwnership = 'Customer Owned' THEN  ( dblInvIn - dblInvOut) ELSE 0 END)
 		from #tmpInventoryActivity 
 		WHERE intRowNum = @intRowNum
-	
+
 		select 
 			@dblInvBalanceForward = dblInvEndBalance 
+			,@dblCompanyOwnedBalanceForward = dblCompanyOwnedEndBalance
+			,@dblCustomerOwnedBalanceForward = dblCustomerOwnedEndBalance
 		from @tblRunningBalance where intRowNum = @intRowNum
 
 		IF @dtmCurDate <> @dtmPrevDate OR @dtmPrevDate IS NULL
 		BEGIN
-			SELECT @dblInvBegBalForSummary =  dblInvBegBalance
+			SELECT 
+				@dblInvBegBalForSummary =  dblInvBegBalance
+				,@dblCompanyOwnedBegBalForSummary = dblCompanyOwnedBegBalance
+				,@dblCustomerOwnedBegBalForSummary = dblCustomerOwnedBegBalance
 			FROM @tblRunningBalance
 			WHERE dtmDate = @dtmCurDate
 			
 			UPDATE @tblRunningBalance 
 			SET dblInvBegBalForSummary = @dblInvBegBalForSummary
 				,dblInvEndBalForSummary = @dblInvBalanceForward
+				,dblCompanyOwnedBegBalForSummary = @dblCompanyOwnedBegBalForSummary
+				,dblCompanyOwnedEndBalForSummary = @dblCompanyOwnedBalanceForward
+				,dblCustomerOwnedBegBalForSummary = @dblCustomerOwnedBegBalForSummary
+				,dblCustomerOwnedEndBalForSummary = @dblCustomerOwnedBalanceForward
 			WHERE dtmDate = @dtmCurDate
 
 		END
@@ -184,10 +227,14 @@ BEGIN
 		BEGIN
 			UPDATE @tblRunningBalance 
 			SET dblInvEndBalForSummary = @dblInvBalanceForward
+				,dblCompanyOwnedEndBalForSummary = @dblCompanyOwnedBalanceForward
+				,dblCustomerOwnedEndBalForSummary = @dblCustomerOwnedBalanceForward
 			WHERE dtmDate = @dtmCurDate
 
 			UPDATE @tblRunningBalance 
 			SET dblInvBegBalForSummary = @dblInvBegBalForSummary
+				,dblCompanyOwnedBegBalForSummary = @dblCompanyOwnedBegBalForSummary
+				,dblCustomerOwnedBegBalForSummary = @dblCustomerOwnedBegBalForSummary
 			WHERE dtmDate = @dtmCurDate
 			AND dblInvBegBalForSummary IS NULL
 		END
@@ -201,16 +248,29 @@ BEGIN
 	SELECT
 		IA.intRowNum
 		,dtmTransactionDate
-		,dblInvBegBalance
-		,dblInvIn
-		,dblInvOut
-		,dblInvEndBalance
+		,dblCompanyOwnedBegBalance
+		,dblCompanyOwnedIn = (CASE WHEN strOwnership = 'Company Owned' THEN dblInvIn ELSE 0 END)
+		,dblCompanyOwnedOut = (CASE WHEN strOwnership = 'Company Owned' THEN dblInvOut ELSE 0 END)
+		,dblCompanyOwnedEndBalance
+		,dblCustomerOwnedBegBalance
+		,dblCustomerOwnedIn = (CASE WHEN strOwnership = 'Customer Owned' THEN dblInvIn ELSE 0 END)
+		,dblCustomerOwnedOut = (CASE WHEN strOwnership = 'Customer Owned' THEN dblInvOut ELSE 0 END)
+		,dblCustomerOwnedEndBalance
 		,strTransactionType
 		,strTransactionId
 		,intTransactionId
 		,strCommodityCode
+		,dblInvBegBalance
+		,dblInvIn
+		,dblInvOut
+		,dblInvEndBalance
+		,dblCompanyOwnedBegBalForSummary
+		,dblCompanyOwnedEndBalForSummary
+		,dblCustomerOwnedBegBalForSummary
+		,dblCustomerOwnedEndBalForSummary
 		,dblInvBegBalForSummary
 		,dblInvEndBalForSummary
+		,strOwnership
 	FROM #tmpInventoryActivity IA
 	FULL JOIN @tblRunningBalance RB on RB.intRowNum = IA.intRowNum
 	ORDER BY IA.dtmTransactionDate
@@ -224,16 +284,29 @@ BEGIN
 		SELECT
 			 intRowNum = 1
 			,dtmTransactionDate = NULL
-			,dblInvBegBalance = @dblInvBalanceForward
-			,dblInvIn = NULL
-			,dblInvOut = NULL
-			,dblInvEndBalance = @dblInvBalanceForward
+			,dblCompanyOwnedBegBalance = @dblCompanyOwnedBalanceForward
+			,dblCompanyOwnedIn = NULL
+			,dblCompanyOwnedOut = NULL
+			,dblCompanyOwnedEndBalance = @dblCompanyOwnedBalanceForward
+			,dblCustomerOwnedBegBalance = @dblCustomerOwnedBalanceForward
+			,dblCustomerOwnedIn = NULL
+			,dblCustomerOwnedOut = NULL
+			,dblCustomerOwnedEndBalance = @dblCustomerOwnedBalanceForward
 			,strTransactionType = 'Balance Forward'
 			,strTransactionId = 'Balance Forward'
 			,intTransactionId = NULL
 			,strCommodityCode = @strCommodities
+			,dblInvBegBalance = @dblInvBalanceForward
+			,dblInvIn = NULL
+			,dblInvOut = NULL
+			,dblInvEndBalance = @dblInvBalanceForward
+			,dblCompanyOwnedBegBalForSummary = @dblCompanyOwnedBalanceForward
+			,dblCompanyOwnedEndBalForSummary = @dblCompanyOwnedBalanceForward
+			,dblCustomerOwnedBegBalForSummary = @dblCustomerOwnedBalanceForward
+			,dblCustomerOwnedEndBalForSummary = @dblCustomerOwnedBalanceForward
 			,dblInvBegBalForSummary = @dblInvBalanceForward
 			,dblInvEndBalForSummary = @dblInvBalanceForward
+			,strOwnership = ''
 	END
 
 	ExitRoutine:

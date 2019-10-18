@@ -8069,6 +8069,7 @@
     <Build Include="dbo\Tables\tblLGIntrCompLogisticsPreStg.sql" />
     <Build Include="dbo\Stored Procedures\uspICZeroAllStockQtyInCountDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspCMUpdateAPOverflowSettings.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFValidateInvoiceDataSetup.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
