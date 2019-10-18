@@ -241,7 +241,11 @@ BEGIN
 				,[ysnCheckOffTax]		
 				,[ysnTaxExempt]	
 				,[ysnTaxOnly]	
-		FROM dbo.fnICGeneratePayablesTaxes(@voucherItems)
+		FROM	dbo.fnICGeneratePayablesTaxes(
+					@voucherItems
+					,@intReceiptId
+					,DEFAULT 
+				)
 		END 
 
 		-- Check if we can convert the RTN to Debit Memo
