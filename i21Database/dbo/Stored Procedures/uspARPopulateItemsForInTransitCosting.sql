@@ -576,6 +576,4 @@ FROM #ARItemsForInTransitCosting A
 JOIN tblICInventoryShipmentItem B ON A.intLinkedItem = B.intParentItemLinkId
 WHERE A.intLinkedItem IS NOT NULL
 
-SELECT * FROM #ARItemsForInTransitCosting
-
 RETURN 1
