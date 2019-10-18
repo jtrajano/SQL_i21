@@ -1,13 +1,15 @@
 ﻿CREATE VIEW [dbo].[vyuSTStoreOnUserRole]
 AS
 SELECT DISTINCT 
-	 CAST(ROW_NUMBER() over(order by Perm.intEntityUserSecurityId desc) AS INT) intId
+	 DENSE_RANK() OVER (ORDER BY Perm.intEntityUserSecurityId, Store.intStoreId, USec.intEntityId) intId
 	 , Perm.intEntityUserSecurityId
      , Store.intStoreId
 	 , Store.intStoreNo
+	 , Store.intRegisterId
 	 , Store.strDescription  
 	 , Store.intLastShiftNo
 	 , Store.dtmLastShiftOpenDate
+	 , Store.intCompanyLocationId
 	 , intNumberOfShifts			= ISNULL(Store.intNumberOfShifts, 0)
 
 	 -- Will be used to load Beg Balance in checkout
@@ -53,34 +55,56 @@ SELECT DISTINCT
 			ELSE ''
 	 END AS strSAPPHIRECheckoutPullTimeSet
 
+	 , usec_uRole.strName			AS strDefaultUserRoleName
+	 , usec_uRole.strRoleType		AS strDefaultUserRoleType
 	 , USec.ysnStoreManager AS ysnIsUserStoreManager
 	 , USec.ysnAdmin AS ysnIsUserAdmin
 	 , USec.strDashboardRole
 	 , USec.intEntityId
+	 , perm_uRole.strName			AS strUserRoleName
+	 , perm_uRole.strRoleType		AS strUserRoleType 
 	 , Store.strState
-FROM tblSTStore Store
+FROM tblEMEntity em
 INNER JOIN tblSMUserSecurity USec
-	ON Store.intCompanyLocationId = USec.intCompanyLocationId
-	OR 1 = CASE
-				WHEN USec.ysnStoreManager = CAST(0 AS BIT)
-					THEN 1
-				ELSE 0
-			END
-INNER JOIN tblSMUserSecurityCompanyLocationRolePermission Perm
-	ON USec.intEntityId = Perm.intEntityId
-	AND Store.intCompanyLocationId = Perm.intCompanyLocationId
-	OR 1 = CASE
-				WHEN NOT EXISTS(SELECT TOP 1 1 FROM tblSMUserSecurityCompanyLocationRolePermission WHERE intEntityId = USec.intEntityId AND intCompanyLocationId = USec.intCompanyLocationId)
-					THEN 1
-				ELSE 0
-			END
-
+	ON em.intEntityId = USec.intEntityId
+INNER JOIN tblSMUserRole usec_uRole
+	ON USec.intUserRoleID = usec_uRole.intUserRoleID
+LEFT JOIN tblSMUserSecurityCompanyLocationRolePermission Perm
+	ON em.intEntityId = Perm.intEntityId 
+LEFT JOIN tblSMUserRole perm_uRole
+	ON Perm.intUserRoleId = perm_uRole.intUserRoleID
+LEFT JOIN tblSTStore Store
+	ON Store.intCompanyLocationId = CASE
+										WHEN ((SELECT COUNT(1) FROM tblSMUserSecurityCompanyLocationRolePermission _perm INNER JOIN tblSTStore _st ON _perm.intCompanyLocationId = _st.intCompanyLocationId WHERE _perm.intEntityId = USec.intEntityId) = 0 AND USec.ysnStoreManager = 0)
+											-- Full Access Admin
+											THEN Store.intCompanyLocationId
+										WHEN ((SELECT COUNT(1) FROM tblSMUserSecurityCompanyLocationRolePermission _perm INNER JOIN tblSTStore _st ON _perm.intCompanyLocationId = _st.intCompanyLocationId WHERE _perm.intEntityId = USec.intEntityId) >= 2 AND USec.ysnStoreManager = 0)
+											-- Regional Manager
+											THEN Perm.intCompanyLocationId
+										WHEN (((SELECT COUNT(1) FROM tblSMUserSecurityCompanyLocationRolePermission _perm INNER JOIN tblSTStore _st ON _perm.intCompanyLocationId = _st.intCompanyLocationId WHERE _perm.intEntityId = USec.intEntityId) = 1) AND (USec.ysnStoreManager = 1 AND USec.ysnAdmin = 0))
+											-- Store Manager
+											THEN Perm.intCompanyLocationId
+										ELSE 
+											USec.intCompanyLocationId
+									END
+	--ON Store.intCompanyLocationId = CASE
+	--									WHEN USec.ysnAdmin = 1
+	--										THEN Store.intCompanyLocationId
+	--									WHEN USec.ysnStoreManager = 1
+	--										THEN Perm.intCompanyLocationId
+	--								END
+INNER JOIN tblSMCompanyLocation CL
+	ON Store.intCompanyLocationId = CL.intCompanyLocationId
 LEFT JOIN tblSTHandheldScanner HS
 	ON Store.intStoreId = HS.intStoreId
 LEFT JOIN tblSTRegister R 
 	ON Store.intRegisterId = R.intRegisterId
-JOIN tblSMCompanyLocation CL
-	ON Store.intCompanyLocationId = CL.intCompanyLocationId
+
+
+
+
+--WHERE USec.intEntityId = 1
+--	AND Perm.intEntityUserSecurityId = 1
 
 
 --WHERE USec.intEntityId = 1

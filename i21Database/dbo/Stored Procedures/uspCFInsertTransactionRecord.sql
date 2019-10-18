@@ -1108,13 +1108,13 @@ BEGIN
 					,strVehicleNumber	
 					,intAccountId		
 				FROM tblCFVehicle 
-				WHERE strVehicleNumber not like '%[^0-9]%' and strVehicleNumber != ''
+				WHERE RTRIM(LTRIM(strVehicleNumber)) not like '%[^0-9]%' and LTRIM(RTRIM(strVehicleNumber)) != ''
 				AND intAccountId = @intAccountId
 
 				SET @intVehicleId =
 				(SELECT TOP 1 intVehicleId
 				FROM @tblCFNumericVehicle
-				WHERE CAST(strVehicleNumber AS BIGINT) = CAST(@strVehicleId AS BIGINT))
+				WHERE CAST(LTRIM(RTRIM(strVehicleNumber)) AS BIGINT) = CAST(LTRIM(RTRIM(@strVehicleId)) AS BIGINT))
 
 
 			END
@@ -1130,13 +1130,13 @@ BEGIN
 					 intVehicleId			
 					,strVehicleNumber	
 					,intAccountId		
-				FROM tblCFVehicle WHERE strVehicleNumber like '%[^0-9]%' and strVehicleNumber != ''
+				FROM tblCFVehicle WHERE RTRIM(LTRIM(strVehicleNumber)) like '%[^0-9]%' and RTRIM(LTRIM(strVehicleNumber)) != ''
 				AND intAccountId = @intAccountId
 
 				SET @intVehicleId =
 				(SELECT TOP 1 intVehicleId
 				FROM @tblCFCharVehicle
-				WHERE strVehicleNumber = @strVehicleId)
+				WHERE LTRIM(RTRIM(strVehicleNumber)) = RTRIM(LTRIM(@strVehicleId)))
 
 			END
 		
@@ -1169,7 +1169,7 @@ BEGIN
 	END
 
 
-	IF(ISNULL(@intVehicleId,0) = 0)
+	IF(ISNULL(@intVehicleId,0) = 0 AND ISNULL(@ysnVehicleRequire,0) = 0)
 	BEGIN
 		SELECT TOP 1 @intVehicleId = intDefaultFixVehicleNumber FROM tblCFCard 
 		WHERE intCardId = @intCardId
@@ -1485,8 +1485,8 @@ BEGIN
 
 		IF(ISNULL(@intARItemId,0) = 0)
 		BEGIN
-			INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
-			VALUES ('Import',@strProcessDate,@strGUID, @Pk, 'Unable to find product number ' + @strProductId + ' into i21 item list')
+			-- INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
+			-- VALUES ('Import',@strProcessDate,@strGUID, @Pk, 'Unable to find product number ' + @strProductId + ' into i21 item list')
 
 			INSERT INTO tblCFFailedImportedTransaction (intTransactionId,strFailedReason) VALUES (@Pk, 'Unable to find product number ' + @strProductId + ' into i21 item list')
 		END

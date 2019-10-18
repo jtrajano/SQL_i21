@@ -185,12 +185,11 @@ BEGIN
 			SELECT DISTINCT ' and ' + strName
 			FROM tblAPVendorLien LIEN
 			INNER JOIN tblEMEntity ENT ON LIEN.intEntityLienId = ENT.intEntityId
-			WHERE LIEN.intEntityVendorId = vendor.intEntityId AND LIEN.ysnActive = 1 AND @datePaid BETWEEN LIEN.dtmStartDate AND LIEN.dtmEndDate
-			-- AND LIEN.intCommodityId IN (SELECT intCommodityId FROM
-			-- 							tblAPPayment Pay 
-			-- 							INNER JOIN tblAPPaymentDetail PayDtl ON Pay.intPaymentId = PayDtl.intPaymentId
-			-- 							INNER JOIN vyuAPVoucherCommodity VC ON PayDtl.intBillId = VC.intBillId
-			-- 							WHERE strPaymentRecordNum = PYMT.strPaymentRecordNum)
+			WHERE 
+				LIEN.intEntityVendorId = vendor.intEntityId AND LIEN.ysnActive = 1 AND @datePaid BETWEEN LIEN.dtmStartDate AND LIEN.dtmEndDate
+			AND ISNULL(LIEN.intCommodityId,-1) IN (SELECT ISNULL(intCommodityId,-1) FROM
+										vyuAPVoucherCommodity VC 
+										WHERE voucher.intBillId = VC.intBillId)
 			FOR XML PATH('')), 
 			1, 1, '') AS strPayee
 	) lienInfo

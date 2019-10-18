@@ -231,8 +231,10 @@ OPEN intListCursor;
 					intContractDetailId,
 					dblUnitsDistributed,
 					dblUnitsRemaining,
-					dblCost)
-					EXEC dbo.uspCTUpdationFromTicketDistribution 
+					dblCost,
+					intCurrencyId,
+					intLoadDetailId)
+					EXEC dbo.uspSCGetContractsAndAllocate 
 					@intDeliverySheetId
 					,@intEntityId
 					,@dblLoopContractUnits

@@ -64,7 +64,7 @@ BEGIN
 	BEGIN 
 		-- 'Cyclic situation found. Unable to compute surcharge because {Item X} depends on {Item Y} and vice-versa.'
 		EXEC uspICRaiseError 80051, @strSurchargeItem, @strOtherChargesItem;
-		GOTO _Exit  
+		RETURN -80051
 	END 
 END 
 
@@ -235,7 +235,7 @@ BEGIN
 	BEGIN 
 		-- 'Unable to compute the surcharge for %s. The On Cost for the surcharge could be missing. Also, the Vendor for both the surcharge and On Cost must match.'
 		EXEC uspICRaiseError 80052, @surchargeName;
-		GOTO _Exit
+		RETURN -80052;
 	END 
 END 
 

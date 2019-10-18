@@ -8,6 +8,7 @@ BEGIN
 		@ShipmentEntries ShipmentStagingTable,
 		@ShipmentCharges ShipmentChargeStagingTable,
 		@ShipmentItemLots ShipmentItemLotStagingTable,
+		@ShipmentItemLotsOnlyStagingTable ShipmentItemLotsOnlyStagingTable,
 		
 		@OWNERSHIP_TYPE_Own INT = 1,
 		@OWNERSHIP_TYPE_Storage INT = 2,
@@ -53,5 +54,5 @@ BEGIN
 		intSourceId = NULL,
 		intLineNo = NULL
 
-	EXEC dbo.uspICAddItemShipment @ShipmentEntries, @ShipmentCharges, @ShipmentItemLots, @intUserId
+	EXEC dbo.uspICAddItemShipment @ShipmentEntries, @ShipmentCharges, @ShipmentItemLots, @ShipmentItemLotsOnlyStagingTable, @intUserId
 END

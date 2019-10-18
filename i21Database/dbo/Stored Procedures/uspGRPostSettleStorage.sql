@@ -1382,6 +1382,7 @@ BEGIN TRY
 					,[dblQuantityToBill]
 					,[intQtyToBillUOMId]
 					,[dblCost]
+					,[dblOldCost]
 					,[dblCostUnitQty]
 					,[intCostUOMId]
 					,[dblNetWeight]
@@ -1400,8 +1401,10 @@ BEGIN TRY
 					,[intItemId]					= a.[intItemId]
 					,[intAccountId]					= [dbo].[fnGetItemGLAccount](a.intItemId,@ItemLocationId, 
 																			CASE 
-																				WHEN ((a.intItemType = 3 AND DSC.strDiscountChargeType = 'Dollar') OR a.intItemType = 2) AND @ysnDPOwnedType = 0 THEN 'AP Clearing'
+																				WHEN ((a.intItemType = 3 AND DSC.strDiscountChargeType = 'Dollar') OR a.intItemType = 2) AND @ysnDPOwnedType = 0 THEN 
+																					case when @ysnFromPriceBasisContract = 1 and a.intItemType = 2 then 'Other Charge Expense' else  'AP Clearing' end 
 																				WHEN a.intItemType = 1 THEN 'AP Clearing'
+																				when @ysnDPOwnedType = 1 and a.intItemType = 3 then 'AP Clearing'
 																				ELSE 'Other Charge Expense' 
 																			END
 																				)
@@ -1448,7 +1451,17 @@ BEGIN TRY
 													-- 	ELSE a.dblUnits 
 													-- END
 													CASE
-														WHEN a.intItemType = 1 AND ST.ysnDPOwnedType = 1 AND CS.intDeliverySheetId IS NOT NULL THEN RI.dblOpenReceive
+														WHEN a.intItemType = 1 AND ST.ysnDPOwnedType = 1 AND CS.intDeliverySheetId IS NOT NULL 
+														THEN 
+															CASE WHEN ISNULL(CS.ysnTransferStorage,0) = 1 
+															 	THEN
+																	CASE 
+																		WHEN @origdblSpotUnits > 0 THEN ROUND(dbo.fnCalculateQtyBetweenUOM(b.intItemUOMId,@intCashPriceUOMId,a.dblUnits),6)
+																		ELSE a.dblUnits
+																	END
+																ELSE
+																	RI.dblOpenReceive
+															END	
 														ELSE
 																CASE 
 																		WHEN @origdblSpotUnits > 0 THEN ROUND(dbo.fnCalculateQtyBetweenUOM(b.intItemUOMId,@intCashPriceUOMId,a.dblUnits),6)
@@ -1463,6 +1476,11 @@ BEGIN TRY
 																WHEN a.[intContractHeaderId] IS NOT NULL THEN dbo.fnCTConvertQtyToTargetItemUOM(a.intContractUOMId,b.intItemUOMId,a.dblCashPrice)
 																ELSE a.dblCashPrice
 															END
+					,[dblOldCost]					= case when @ysnFromPriceBasisContract = 0 then null 
+														else 
+															case WHEN a.[intContractHeaderId] IS NOT NULL AND @ysnFromPriceBasisContract = 1 THEN IT.dblCost--RI.dblUnitCost --dbo.fnCTConvertQtyToTargetItemUOM(a.intContractUOMId,RI.intCostUOMId, RI.dblUnitCost)
+															else null end
+														end									
 					,[dblCostUnitQty]				= ISNULL(a.dblCostUnitQty,1)
 					,[intCostUOMId]					= CASE
 														WHEN @origdblSpotUnits > 0 THEN @intCashPriceUOMId 
@@ -1497,12 +1515,16 @@ BEGIN TRY
 						tblICInventoryReceiptItem RI
 						INNER JOIN tblGRStorageHistory SH
 								ON SH.intInventoryReceiptId = RI.intInventoryReceiptId
-										AND RI.intContractHeaderId = ISNULL(SH.intContractHeaderId,RI.intContractHeaderId)
+										AND CASE WHEN (SH.strType = 'From Transfer') THEN 1 ELSE (CASE WHEN RI.intContractHeaderId = ISNULL(SH.intContractHeaderId,RI.intContractHeaderId) THEN 1 ELSE 0 END) END = 1
 				) 
 						ON SH.intCustomerStorageId = CS.intCustomerStorageId
 								AND a.intItemType = 1
 				LEFT JOIN tblCTContractDetail CD
 					ON CD.intContractDetailId = a.intContractDetailId
+				left join tblICInventoryTransaction IT
+					on IT.intTransactionId = SST.intSettleStorageId 
+						and IT.intTransactionTypeId = 44
+						and IT.intItemId = a.intItemId	
 				WHERE a.dblCashPrice <> 0 
 					AND a.dblUnits <> 0 
 					AND SST.intSettleStorageId = @intSettleStorageId
@@ -1729,11 +1751,9 @@ BEGIN TRY
 				 LEFT JOIN tblICItemUOM UOM 
 					ON UOM.intItemUOMId = CC.intItemUOMId
 				 LEFT JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemId = CC.[intItemId]
-				 JOIN tblGRCustomerStorage CS
-					ON CS.intCustomerStorageId = SV.intCustomerStorageId
 				 WHERE ItemLocation.intLocationId = @LocationId
 					AND CASE WHEN (CD.intPricingTypeId = 2 AND (ISNULL(CD.dblTotalCost, 0) = 0)) THEN 0 ELSE 1 END = 1
-					AND (CASE WHEN CC.intVendorId  = CS.intEntityId
+					AND (CASE WHEN CC.intVendorId IS NOT NULL
 							THEN 1
 							ELSE (CASE WHEN ISNULL(CC.intContractCostId,0) = 0 OR CC.ysnPrice = 1
 									THEN 1
@@ -1741,15 +1761,14 @@ BEGIN TRY
 								  END)
 						END) = 1
 
-				UPDATE @voucherPayable SET dblQuantityToBill = dblQuantityToBill * -1 WHERE ISNULL(dblCost,0) < 0
-				UPDATE @voucherPayable SET dblCost = dblCost * -1 WHERE ISNULL(dblCost,0) < 0
-				
 				DECLARE @dblVoucherTotal DECIMAL(18,6)
 
 				SELECT
 					@dblVoucherTotal = SUM(dblOrderQty * dblCost)
 				FROM @voucherPayable
 
+				UPDATE @voucherPayable SET dblQuantityToBill = dblQuantityToBill * -1 WHERE ISNULL(dblCost,0) < 0
+				UPDATE @voucherPayable SET dblCost = dblCost * -1 WHERE ISNULL(dblCost,0) < 0
 				
 				IF @dblVoucherTotal > 0 AND EXISTS(SELECT NULL FROM @voucherPayable DS INNER JOIN tblICItem I on I.intItemId = DS.intItemId WHERE I.strType = 'Inventory')
 				BEGIN
@@ -1843,6 +1862,44 @@ BEGIN TRY
 							DECLARE @intVoucherId INT
 							SET @intVoucherId = CAST(@createdVouchersId AS INT)
 
+
+
+							if @ysnFromPriceBasisContract = 1
+							begin
+							
+								UPDATE tblGRSettleStorage
+									SET intBillId = @createdVouchersId
+										WHERE intSettleStorageId = @intSettleStorageId 
+
+								declare @sum_e DECIMAL(38,20)
+								select @sum_e = sum(abs (dblCost))
+									from @voucherPayable a 
+										join tblICItem b on 
+											a.intItemId = b.intItemId
+									where b.ysnInventoryCost = 1 and strType = 'Other Charge'
+
+								update a
+									set dblPaidAmount = (b.dblOldCost + isnull(@sum_e, 0)) * a.dblUnits
+										from tblGRStorageHistory a
+											join @voucherPayable b 
+												on a.intContractHeaderId = b.intContractHeaderId
+												and a.intCustomerStorageId = b.intCustomerStorageId
+											-- join tblGRSettleStorageTicket d 
+											-- 	on d.intCustomerStorageId = b.intCustomerStorageId
+											-- join tblICInventoryTransaction c
+											-- 	on c.strTransactionId = b.strVendorOrderNumber
+											-- 		and c.intItemId = b.intItemId 
+											-- 		and c.intTransactionId = d.intSettleStorageId
+											-- 		and c.intTransactionDetailId = d.intSettleStorageTicketId													
+										where strType = 'Settlement'								
+							
+								--select 'vcp',* from tblGRStorageHistory order by intStorageHistoryId desc 
+							
+							end
+
+
+
+
 							EXEC [dbo].[uspAPPostBill] 
 								 @post = 1
 								,@recap = 0
@@ -1896,6 +1953,7 @@ BEGIN TRY
 
 					IF @intPricingTypeId = 5
 					BEGIN
+						IF (SELECT dblDetailQuantity FROM vyuCTContractDetailView WHERE intContractDetailId = @intContractDetailId) > 0
 						EXEC uspCTUpdateSequenceQuantityUsingUOM 
 							 @intContractDetailId = @intContractDetailId
 							,@dblQuantityToUpdate = @dblUnits

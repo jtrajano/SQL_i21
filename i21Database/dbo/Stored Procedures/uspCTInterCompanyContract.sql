@@ -12,7 +12,7 @@ BEGIN TRY
 	DECLARE @strUpdate NVARCHAR(100)
 	DECLARE @strToTransactionType NVARCHAR(100)
 		,@intToBookId INT
-		,@strDelete nvarchar(50)
+		,@strDelete NVARCHAR(50)
 
 	IF EXISTS (
 			SELECT 1
@@ -104,11 +104,6 @@ BEGIN TRY
 
 		IF @strInsert = 'Insert'
 		BEGIN
-			DELETE
-			FROM tblCTContractStage
-			WHERE IsNULL(strFeedStatus, '') = ''
-				AND intContractHeaderId = @ContractHeaderId
-
 			IF EXISTS (
 					SELECT 1
 					FROM tblCTContractHeader
@@ -116,14 +111,12 @@ BEGIN TRY
 						AND intConcurrencyId = 1
 					)
 			BEGIN
-				EXEC uspCTContractPopulateStgXML @ContractHeaderId
-					,@intToEntityId
-					,@intCompanyLocationId
-					,@strToTransactionType
-					,@intToCompanyId
+				INSERT INTO dbo.tblCTContractPreStage (
+					intContractHeaderId
+					,strRowState
+					)
+				SELECT @ContractHeaderId
 					,'Added'
-					,0
-					,@intToBookId
 			END
 		END
 
@@ -136,27 +129,33 @@ BEGIN TRY
 						AND intConcurrencyId > 1
 					)
 			BEGIN
-				EXEC uspCTContractPopulateStgXML @ContractHeaderId
-					,@intToEntityId
-					,@intCompanyLocationId
-					,@strToTransactionType
-					,@intToCompanyId
+				DELETE
+				FROM tblCTContractPreStage
+				WHERE strFeedStatus IS NULL
+					AND intContractHeaderId = @ContractHeaderId
+					AND strRowState = 'Modified'
+
+				INSERT INTO dbo.tblCTContractPreStage (
+					intContractHeaderId
+					,strRowState
+					)
+				SELECT @ContractHeaderId
 					,'Modified'
-					,0
-					,@intToBookId
 			END
 		END
 
-		IF @strRowState = 'Delete'
+		IF NOT EXISTS (
+				SELECT *
+				FROM tblCTContractHeader
+				WHERE intContractHeaderId = @ContractHeaderId
+				)
 		BEGIN
-			EXEC uspCTContractPopulateStgXML @ContractHeaderId
-				,@intToEntityId
-				,@intCompanyLocationId
-				,@strToTransactionType
-				,@intToCompanyId
-				,'Modified'
-				,0
-				,@intToBookId
+			INSERT INTO dbo.tblCTContractPreStage (
+				intContractHeaderId
+				,strRowState
+				)
+			SELECT @ContractHeaderId
+				,'Delete'
 		END
 	END
 END TRY

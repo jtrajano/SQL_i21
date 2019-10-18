@@ -36,6 +36,7 @@ BEGIN
 									(
 										ISNULL(paySchedDetails.dblPayment, ABS(payDetails.dblPayment))
 									+ 	ISNULL(paySchedDetails.dblDiscount, ABS(payDetails.dblDiscount))
+									- 	ABS(ISNULL(payDetails.dblInterest, 0))
 									),
 			tblAPBill.dtmDatePaid = NULL,
 			tblAPBill.dblDiscount = ISNULL(paySchedDetails.dblDiscount, ABS(payDetails.dblDiscount)),

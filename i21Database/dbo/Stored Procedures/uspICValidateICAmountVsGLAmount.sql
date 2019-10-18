@@ -56,7 +56,7 @@ BEGIN
 				SUM (
 					ROUND(dbo.fnMultiply(t.dblQty, t.dblCost) + ISNULL(t.dblValue, 0), 2)
 				)
-			,[intAccountId] = glAccount.intAccountId
+			,[intAccountId] = dbo.fnGetItemGLAccount(t.intItemId, t.intItemLocationId, 'Inventory')
 		FROM	
 			tblICInventoryTransaction t INNER JOIN tblICInventoryTransactionType ty
 				ON t.intTransactionTypeId = ty.intTransactionTypeId			
@@ -71,18 +71,13 @@ BEGIN
 			) gl
 				ON t.strTransactionId = gl.strTransactionId 
 				AND t.strBatchId = gl.strBatchId
-			OUTER APPLY dbo.fnGetItemGLAccountAsTable(
-				t.intItemId
-				,t.intItemLocationId
-				,'Inventory'
-			) glAccount
 		WHERE	
 			t.intInTransitSourceLocationId IS NULL 
 		GROUP BY 
 			ty.strName 
 			,t.strTransactionId
 			,t.strBatchId
-			,glAccount.intAccountId
+			,dbo.fnGetItemGLAccount(t.intItemId, t.intItemLocationId, 'Inventory')
 		-- Get the Consume Inventory Transactions 
 		UNION ALL 
 		SELECT	
@@ -93,7 +88,7 @@ BEGIN
 				SUM (
 					-ROUND(dbo.fnMultiply(t.dblQty, t.dblCost) + ISNULL(t.dblValue, 0), 2)
 				)
-			,[intAccountId] = glAccount.intAccountId
+			,[intAccountId] = dbo.fnGetItemGLAccount(t.intItemId, t.intItemLocationId, 'Work In Progress')
 		FROM	
 			tblICInventoryTransaction t INNER JOIN tblICInventoryTransactionType ty
 				ON t.intTransactionTypeId = ty.intTransactionTypeId			
@@ -108,11 +103,6 @@ BEGIN
 			) gl
 				ON t.strTransactionId = gl.strTransactionId 
 				AND t.strBatchId = gl.strBatchId
-			OUTER APPLY dbo.fnGetItemGLAccountAsTable(
-				t.intItemId
-				,t.intItemLocationId
-				,'Work In Progress'
-			) glAccount
 		WHERE	
 			t.intInTransitSourceLocationId IS NULL 
 			AND ty.strName IN ('Consume')
@@ -120,7 +110,7 @@ BEGIN
 			ty.strName 
 			,t.strTransactionId
 			,t.strBatchId
-			,glAccount.intAccountId
+			,dbo.fnGetItemGLAccount(t.intItemId, t.intItemLocationId, 'Work In Progress')
 		-- Get the Produce Inventory Transactions 
 		UNION ALL 
 		SELECT	
@@ -131,7 +121,7 @@ BEGIN
 				SUM (
 					-ROUND(dbo.fnMultiply(t.dblQty, t.dblCost) + ISNULL(t.dblValue, 0), 2)
 				)
-			,[intAccountId] = glAccount.intAccountId
+			,[intAccountId] = dbo.fnGetItemGLAccount(t.intItemId, t.intItemLocationId, 'Work In Progress')
 		FROM	
 			tblICInventoryTransaction t INNER JOIN tblICInventoryTransactionType ty
 				ON t.intTransactionTypeId = ty.intTransactionTypeId			
@@ -146,11 +136,6 @@ BEGIN
 			) gl
 				ON t.strTransactionId = gl.strTransactionId 
 				AND t.strBatchId = gl.strBatchId
-			OUTER APPLY dbo.fnGetItemGLAccountAsTable(
-				t.intItemId
-				,t.intItemLocationId
-				,'Work In Progress'
-			) glAccount
 		WHERE	
 			t.intInTransitSourceLocationId IS NULL 
 			AND ty.strName IN ('Produce')
@@ -158,7 +143,7 @@ BEGIN
 			ty.strName 
 			,t.strTransactionId
 			,t.strBatchId
-			,glAccount.intAccountId
+			,dbo.fnGetItemGLAccount(t.intItemId, t.intItemLocationId, 'Work In Progress')
 		-- Get the Cost Adjustment from MFG. 
 		--UNION ALL 
 		--SELECT	
@@ -261,6 +246,7 @@ BEGIN
 					CASE 
 						WHEN gd.strTransactionType = 'Cost Adjustment' AND ac.strAccountCategory IN ('Inventory') THEN 1 
 						WHEN gd.strTransactionType <> 'Cost Adjustment' AND ac.strAccountCategory IN ('Inventory', 'Work In Progress') THEN 1 
+						WHEN gd.strTransactionType = 'Storage Settlement' AND ac.strAccountCategory IN ('Inventory') THEN 1 
 						ELSE 0 
 					END 
 			GROUP BY 				
@@ -279,8 +265,7 @@ BEGIN
 		WHEN MATCHED THEN 
 			UPDATE 
 			SET 
-				dblGLAmount = glResult.[dblGLAmount]
-				,strAccountDescription = glResult.[strAccountDescription]
+				dblGLAmount = ISNULL(result.dblGLAmount, 0) + ISNULL(glResult.[dblGLAmount], 0)
 
 		WHEN NOT MATCHED THEN
 			INSERT (
@@ -327,6 +312,7 @@ BEGIN
 					CASE 
 						WHEN gd.strTransactionType = 'Cost Adjustment' AND ac.strAccountCategory IN ('Inventory') THEN 1 
 						WHEN gd.strTransactionType <> 'Cost Adjustment' AND ac.strAccountCategory IN ('Inventory', 'Work In Progress') THEN 1 
+						WHEN gd.strTransactionType = 'Storage Settlement' AND ac.strAccountCategory IN ('Inventory') THEN 1 
 						ELSE 0 
 					END 
 			GROUP BY 				
@@ -345,8 +331,7 @@ BEGIN
 		WHEN MATCHED THEN 
 			UPDATE 
 			SET 
-				dblGLAmount = glResult.[dblGLAmount]
-				,strAccountDescription = glResult.[strAccountDescription]
+				dblGLAmount = ISNULL(result.dblGLAmount, 0) + ISNULL(glResult.[dblGLAmount], 0)
 
 		WHEN NOT MATCHED THEN
 			INSERT (
@@ -393,6 +378,7 @@ BEGIN
 					CASE 
 						WHEN gd.strTransactionType = 'Cost Adjustment' AND ac.strAccountCategory IN ('Inventory') THEN 1 
 						WHEN gd.strTransactionType <> 'Cost Adjustment' AND ac.strAccountCategory IN ('Inventory', 'Work In Progress') THEN 1 
+						WHEN gd.strTransactionType = 'Storage Settlement' AND ac.strAccountCategory IN ('Inventory') THEN 1 
 						ELSE 0 
 					END 
 
@@ -415,8 +401,7 @@ BEGIN
 		WHEN MATCHED THEN 
 			UPDATE 
 			SET 
-				dblGLAmount = glResult.[dblGLAmount]
-				,strAccountDescription = glResult.[strAccountDescription]
+				dblGLAmount = ISNULL(result.dblGLAmount, 0) + ISNULL(glResult.[dblGLAmount], 0)
 
 		WHEN NOT MATCHED THEN
 			INSERT (
@@ -434,7 +419,7 @@ BEGIN
 		;
 	END 
 	ELSE 
-	BEGIN
+	BEGIN	
 		MERGE INTO @result 
 		AS result
 		USING (
@@ -460,6 +445,7 @@ BEGIN
 					CASE 
 						WHEN gd.strTransactionType = 'Cost Adjustment' AND ac.strAccountCategory IN ('Inventory') THEN 1 
 						WHEN gd.strTransactionType <> 'Cost Adjustment' AND ac.strAccountCategory IN ('Inventory', 'Work In Progress') THEN 1 
+						WHEN gd.strTransactionType = 'Storage Settlement' AND ac.strAccountCategory IN ('Inventory') THEN 1 
 						ELSE 0 
 					END 
 
@@ -469,7 +455,8 @@ BEGIN
 			ON result.strTransactionType = glResult.strTransactionType
 		WHEN MATCHED THEN 
 			UPDATE 
-			SET dblGLAmount = glResult.[dblGLAmount]
+			SET 
+				dblGLAmount = ISNULL(result.dblGLAmount, 0) + ISNULL(glResult.[dblGLAmount], 0)			
 		WHEN NOT MATCHED THEN
 			INSERT (
 				strTransactionType 

@@ -382,8 +382,11 @@ BEGIN
 	--================================================================
 	DECLARE @dtmPriceDate DATETIME
 		, @strFutureMonthIds NVARCHAR(MAX)
+		, @intMarkExpiredMonthPositionId INT
 	
 	SELECT @dtmPriceDate = dtmPriceDate FROM tblRKFuturesSettlementPrice WHERE intFutureSettlementPriceId = @intFutureSettlementPriceId
+	SELECT @intMarkExpiredMonthPositionId = ISNULL(intMarkExpiredMonthPositionId, 1) FROM tblRKCompanyPreference
+	
 	
 	SELECT @strFutureMonthIds = COALESCE(@strFutureMonthIds + ',', '') + ISNULL(intFutureMonthId, '')
 	FROM (
@@ -399,47 +402,85 @@ BEGIN
 		, intFutSettlementPriceMonthId INT
 		, intConcurrencyId INT)
 	
-	INSERT INTO @#tempInquirySettlementPriceDetail
-	SELECT CONVERT(INT,intRowNum) as intRowNum
-		, intFutureMarketId
-		, strFutMarketName
-		, intFutureMonthId
-		, strFutureMonth
-		, dblClosingPrice
-		, intFutSettlementPriceMonthId
-		, intConcurrencyId
-	FROM (
-		SELECT ROW_NUMBER() OVER(ORDER BY f.intFutureMarketId DESC) AS intRowNum
-			, f.intFutureMarketId
-			, fm.intFutureMonthId
-			, f.strFutMarketName
-			, fm.strFutureMonth
-			, dblClosingPrice = (SELECT TOP 1 dblLastSettle
-								FROM tblRKFuturesSettlementPrice p
-								INNER JOIN tblRKFutSettlementPriceMarketMap pm ON p.intFutureSettlementPriceId = pm.intFutureSettlementPriceId
-								WHERE p.intFutureMarketId = f.intFutureMarketId
-									AND pm.intFutureMonthId = fm.intFutureMonthId
-									AND p.strPricingType = @strPricingType
-									AND p.intFutureSettlementPriceId = @intFutureSettlementPriceId
-								ORDER BY dtmPriceDate DESC)
-			, intFutSettlementPriceMonthId = (SELECT TOP 1 intFutSettlementPriceMonthId
-											FROM tblRKFuturesSettlementPrice p
-											INNER JOIN tblRKFutSettlementPriceMarketMap pm ON p.intFutureSettlementPriceId = pm.intFutureSettlementPriceId
-											WHERE p.intFutureMarketId = f.intFutureMarketId
-												AND pm.intFutureMonthId = fm.intFutureMonthId
-												AND p.strPricingType = @strPricingType
-												AND p.intFutureSettlementPriceId = @intFutureSettlementPriceId
-											ORDER BY dtmPriceDate DESC)
-			, intConcurrencyId = 0
-		FROM tblRKFutureMarket f
-		JOIN tblRKFuturesMonth fm ON f.intFutureMarketId = fm.intFutureMarketId AND fm.ysnExpired = 0
-		JOIN tblRKCommodityMarketMapping mm ON fm.intFutureMarketId = mm.intFutureMarketId
-		WHERE mm.intCommodityId = CASE WHEN ISNULL(@intCommodityId, 0) = 0 THEN mm.intCommodityId ELSE @intCommodityId END
-			AND ISNULL(fm.intFutureMonthId, 0) IN (SELECT CASE WHEN Item = '' THEN 0 ELSE LTRIM(RTRIM(Item)) COLLATE Latin1_General_CI_AS END FROM [dbo].[fnSplitString](@strFutureMonthIds, ',')) --added this be able to filter by zone to (RM-739)
-	) t
-	WHERE dblClosingPrice > 0
-	ORDER BY strFutMarketName
-		, CONVERT(DATETIME, '01 ' + strFutureMonth)
+	IF (@intMarkExpiredMonthPositionId = 2 OR @intMarkExpiredMonthPositionId = 3) --Removed filter of future month
+	BEGIN
+		INSERT INTO @#tempInquirySettlementPriceDetail
+		SELECT CONVERT(INT,intRowNum) as intRowNum
+			, intFutureMarketId
+			, strFutMarketName
+			, intFutureMonthId
+			, strFutureMonth
+			, dblClosingPrice
+			, intFutSettlementPriceMonthId
+			, intConcurrencyId
+		FROM (
+			SELECT ROW_NUMBER() OVER(ORDER BY f.intFutureMarketId DESC) AS intRowNum
+				, f.intFutureMarketId
+				, fm.intFutureMonthId
+				, f.strFutMarketName
+				, fm.strFutureMonth
+				, dblClosingPrice = dbo.fnRKGetLatestClosingPrice(f.intFutureMarketId, fm.intFutureMonthId, @dtmPriceDate)
+				, intFutSettlementPriceMonthId = (SELECT TOP 1 intFutSettlementPriceMonthId
+												FROM tblRKFuturesSettlementPrice p
+												INNER JOIN tblRKFutSettlementPriceMarketMap pm ON p.intFutureSettlementPriceId = pm.intFutureSettlementPriceId
+												WHERE p.intFutureMarketId = f.intFutureMarketId
+													AND pm.intFutureMonthId = fm.intFutureMonthId
+													AND p.strPricingType = @strPricingType
+												ORDER BY dtmPriceDate DESC)
+				, intConcurrencyId = 0
+			FROM tblRKFutureMarket f
+			JOIN tblRKFuturesMonth fm ON f.intFutureMarketId = fm.intFutureMarketId AND fm.ysnExpired = 0
+			JOIN tblRKCommodityMarketMapping mm ON fm.intFutureMarketId = mm.intFutureMarketId
+			WHERE mm.intCommodityId = CASE WHEN ISNULL(@intCommodityId, 0) = 0 THEN mm.intCommodityId ELSE @intCommodityId END
+		) t
+		WHERE dblClosingPrice > 0
+		ORDER BY strFutMarketName
+			, CONVERT(DATETIME, '01 ' + strFutureMonth)
+	END
+	ELSE
+	BEGIN
+		INSERT INTO @#tempInquirySettlementPriceDetail
+		SELECT CONVERT(INT,intRowNum) as intRowNum
+			, intFutureMarketId
+			, strFutMarketName
+			, intFutureMonthId
+			, strFutureMonth
+			, dblClosingPrice
+			, intFutSettlementPriceMonthId
+			, intConcurrencyId
+		FROM (
+			SELECT ROW_NUMBER() OVER(ORDER BY f.intFutureMarketId DESC) AS intRowNum
+				, f.intFutureMarketId
+				, fm.intFutureMonthId
+				, f.strFutMarketName
+				, fm.strFutureMonth
+				, dblClosingPrice = (SELECT TOP 1 dblLastSettle
+									FROM tblRKFuturesSettlementPrice p
+									INNER JOIN tblRKFutSettlementPriceMarketMap pm ON p.intFutureSettlementPriceId = pm.intFutureSettlementPriceId
+									WHERE p.intFutureMarketId = f.intFutureMarketId
+										AND pm.intFutureMonthId = fm.intFutureMonthId
+										AND p.strPricingType = @strPricingType
+										AND p.intFutureSettlementPriceId = @intFutureSettlementPriceId
+									ORDER BY dtmPriceDate DESC)
+				, intFutSettlementPriceMonthId = (SELECT TOP 1 intFutSettlementPriceMonthId
+												FROM tblRKFuturesSettlementPrice p
+												INNER JOIN tblRKFutSettlementPriceMarketMap pm ON p.intFutureSettlementPriceId = pm.intFutureSettlementPriceId
+												WHERE p.intFutureMarketId = f.intFutureMarketId
+													AND pm.intFutureMonthId = fm.intFutureMonthId
+													AND p.strPricingType = @strPricingType
+													AND p.intFutureSettlementPriceId = @intFutureSettlementPriceId
+												ORDER BY dtmPriceDate DESC)
+				, intConcurrencyId = 0
+			FROM tblRKFutureMarket f
+			JOIN tblRKFuturesMonth fm ON f.intFutureMarketId = fm.intFutureMarketId AND fm.ysnExpired = 0
+			JOIN tblRKCommodityMarketMapping mm ON fm.intFutureMarketId = mm.intFutureMarketId
+			WHERE mm.intCommodityId = CASE WHEN ISNULL(@intCommodityId, 0) = 0 THEN mm.intCommodityId ELSE @intCommodityId END
+				AND ISNULL(fm.intFutureMonthId, 0) IN (SELECT CASE WHEN Item = '' THEN 0 ELSE LTRIM(RTRIM(Item)) COLLATE Latin1_General_CI_AS END FROM [dbo].[fnSplitString](@strFutureMonthIds, ',')) --added this be able to filter by zone to (RM-739)
+		) t
+		WHERE dblClosingPrice > 0
+		ORDER BY strFutMarketName
+			, CONVERT(DATETIME, '01 ' + strFutureMonth)
+	END
 	
 	INSERT INTO [dbo].[tblRKM2MInquiryLatestMarketPrice] (intM2MInquiryId
 		, intConcurrencyId

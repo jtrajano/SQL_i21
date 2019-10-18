@@ -923,7 +923,7 @@ BEGIN TRY
         ,@PostDate = @PostDate
         ,@BatchId  = @batchIdUsed
         ,@UserId   = @userId
-
+	
 	INSERT INTO @GLEntries
 		([dtmDate]
 		,[strBatchId]
@@ -1059,8 +1059,8 @@ BEGIN TRY
 	IF @raiseError = 1 AND ISNULL(@invalidGLCount, 0) > 0
 	BEGIN
 		SELECT TOP 1 @ErrorMerssage = [strText] FROM @InvalidGLEntries
-		RAISERROR(@ErrorMerssage, 11, 1)							
-	END					
+		RAISERROR(@ErrorMerssage, 11, 1)
+	END
 
     DELETE FROM #ARInvoiceGLEntries
     WHERE

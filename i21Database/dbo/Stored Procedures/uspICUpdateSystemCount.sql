@@ -168,26 +168,35 @@ WHERE c.intImportFlagInternal = 1
 
 -- Update count numbers
 DECLARE @Id INT
+DECLARE @intLocationId INT
 DECLARE @Prefix NVARCHAR(50)
 DECLARE cur CURSOR FOR
 
-SELECT DISTINCT c.intInventoryCountId
+SELECT DISTINCT c.intInventoryCountId, c.intLocationId
 FROM tblICInventoryCount c
 WHERE c.intImportFlagInternal = 1
 
 OPEN cur
 
-FETCH NEXT FROM cur INTO @Id
+FETCH NEXT FROM cur INTO @Id, @intLocationId
 
 WHILE @@FETCH_STATUS = 0
 BEGIN
-	SELECT @Prefix = strPrefix + CAST(intNumber + 1 AS NVARCHAR(50))
+	-- UPDATE tblSMStartingNumber
+	-- SET intNumber = intNumber + 1
+	-- WHERE strTransactionType = 'Inventory Count'
+
+	SELECT @Prefix = strPrefix + CAST(intNumber AS NVARCHAR(50))
 	FROM tblSMStartingNumber
 	WHERE strTransactionType = 'Inventory Count'
 
 	UPDATE tblICInventoryCount
 	SET strCountNo = @Prefix
 	WHERE intInventoryCountId = @Id
+
+	DECLARE @strTransactionId NVARCHAR(100)
+
+	EXEC dbo.uspSMGetStartingNumber 76, @strTransactionId OUTPUT, @intLocationId
 
 	;WITH
 		rows_num
@@ -206,11 +215,7 @@ BEGIN
 		INNER JOIN rows_num rn ON rn.intInventoryCountDetailId = d.intInventoryCountDetailId
 	WHERE c.intInventoryCountId = @Id
 
-	UPDATE tblSMStartingNumber
-	SET intNumber = intNumber + 1
-	WHERE strTransactionType = 'Inventory Count'
-
-	FETCH NEXT FROM cur	INTO @Id
+	FETCH NEXT FROM cur	INTO @Id, @intLocationId
 END
 
 CLOSE cur

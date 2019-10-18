@@ -43,6 +43,28 @@ BEGIN TRY
 	FROM tblCTContractHeader
 	WHERE intContractHeaderId = @ContractHeaderId
 
+	IF @strRowState = 'Delete'
+	BEGIN
+		INSERT INTO tblCTContractStage (
+			intContractHeaderId
+			,strRowState
+			,intEntityId
+			,intCompanyLocationId
+			,strTransactionType
+			,intMultiCompanyId
+			,intToBookId
+			)
+		SELECT intContractHeaderId = @ContractHeaderId
+			,strRowState = @strRowState
+			,intEntityId = @intToEntityId
+			,intCompanyLocationId = @intCompanyLocationId
+			,strTransactionType = @strToTransactionType
+			,intMultiCompanyId = @intToCompanyId
+			,intToBookId = @intToBookId
+
+		RETURN
+	END
+
 	-------------------------Header-----------------------------------------------------------
 	SELECT @strHeaderCondition = 'intContractHeaderId = ' + LTRIM(@ContractHeaderId)
 
@@ -127,11 +149,14 @@ BEGIN TRY
 	ELSE
 		SELECT @strObjectName = 'vyuCTContractCostView'
 
-	EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
-		,@strCostCondition
-		,@strCostXML OUTPUT
-		,NULL
-		,NULL
+	IF @strCostCondition IS NOT NULL
+	BEGIN
+		EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
+			,@strCostCondition
+			,@strCostXML OUTPUT
+			,NULL
+			,NULL
+	END
 
 	-------------------------------------------------------------Document----------------------------------------
 	SELECT @strDocumentXML = NULL
@@ -187,7 +212,7 @@ BEGIN TRY
 
 	SELECT @strObjectName = 'vyuCTContractApproverView'
 
-	SELECT @strHeaderCondition = 'strContractNumber = ''' + @strContractNumber+''''
+	SELECT @strHeaderCondition = 'strContractNumber = ''' + @strContractNumber + ''''
 
 	EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
 		,@strHeaderCondition

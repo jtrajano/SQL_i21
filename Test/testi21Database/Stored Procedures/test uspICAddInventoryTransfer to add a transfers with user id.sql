@@ -14,11 +14,11 @@ BEGIN
 		UNION ALL SELECT intEntityId = 30
 
 		INSERT INTO tblSMUserSecurity (
-			intEntityUserSecurityId
+			intEntityId
 		)
-		SELECT intEntityUserSecurityId = 10 
-		UNION ALL SELECT intEntityUserSecurityId = 20
-		UNION ALL SELECT intEntityUserSecurityId = 30
+		SELECT intEntityId = 10 
+		UNION ALL SELECT intEntityId = 20
+		UNION ALL SELECT intEntityId = 30
 	END 
 	
 	-- Fake data

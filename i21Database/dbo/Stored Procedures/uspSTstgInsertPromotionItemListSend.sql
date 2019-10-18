@@ -3,8 +3,8 @@
 	, @intStoreId INT
 	, @intRegisterId INT
 	, @ysnClearRegisterPromotion BIT
-	, @dtmBeginningChangeDate DATETIME
-	, @dtmEndingChangeDate DATETIME
+	--, @dtmBeginningChangeDate DATETIME
+	--, @dtmEndingChangeDate DATETIME
 	, @strGeneratedXML VARCHAR(MAX) OUTPUT
 	, @intImportFileHeaderId INT OUTPUT
 	, @ysnSuccessResult BIT OUTPUT

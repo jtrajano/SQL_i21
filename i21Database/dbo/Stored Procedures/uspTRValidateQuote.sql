@@ -18,7 +18,7 @@ BEGIN
 		,@intCustomerId INT = NULL
 		,@intTaxGroupId INT = NULL
 		,@intShipToLocationId INT = NULL
-		,@intQuotePrice NUMERIC(18,6) = 0
+		,@intSpecialPriceId INT = NULL
 		,@dtmEffectiveDate DATETIME = NULL
 		,@intItemUOMId INT = NULL 
 
@@ -55,11 +55,13 @@ BEGIN
 	AND EL.intEntityId = @intCustomerId
 
 	OPEN @CursorQuoteDetail
-    FETCH NEXT FROM @CursorQuoteDetail INTO @intItemId, @intShipToLocationId, @intQuotePrice, @intTaxGroupId
+    FETCH NEXT FROM @CursorQuoteDetail INTO @intItemId, @intShipToLocationId, @intSpecialPriceId, @intTaxGroupId
     WHILE @@FETCH_STATUS = 0
     BEGIN
 
 		SET @intItemUOMId = [dbo].[fnGetItemStockUOM](@intItemId)
+
+		DECLARE @dblQuotePrice NUMERIC(18,6) = NULL
 
 		INSERT INTO @tmpQuoteTaxDetail 
 		SELECT DT.intTaxCodeId
@@ -70,7 +72,17 @@ BEGIN
 		WHERE QD.intQuoteHeaderId = @intQuoteHeaderId
 		AND QD.intItemId = @intItemId
 		AND QD.intShipToLocationId = @intShipToLocationId
-		AND QD.intSpecialPriceId = @intQuotePrice
+		AND QD.intSpecialPriceId = @intSpecialPriceId
+		AND QD.intTaxGroupId = @intTaxGroupId
+
+
+		SELECT @dblQuotePrice = QD.dblQuotePrice
+		FROM tblTRQuoteDetailTax DT
+		INNER JOIN tblTRQuoteDetail QD ON QD.intQuoteDetailId = DT.intQuoteDetailId
+		WHERE QD.intQuoteHeaderId = @intQuoteHeaderId
+		AND QD.intItemId = @intItemId
+		AND QD.intShipToLocationId = @intShipToLocationId
+		AND QD.intSpecialPriceId = @intSpecialPriceId
 		AND QD.intTaxGroupId = @intTaxGroupId
 		
 		INSERT INTO @tmpQuoteTaxDetail 
@@ -79,14 +91,14 @@ BEGIN
 			,'QUOTE' strType
 		FROM dbo.fnConstructLineItemTaxDetail (
 			100000
-			, @intQuotePrice
+			, @dblQuotePrice
 			, @LineItems
 			, 0
 			, @intItemId
 			, @intCustomerId
 			, @intShipToLocationId
 			, @intTaxGroupId
-			, @intQuotePrice
+			, @dblQuotePrice
 			, @dtmEffectiveDate
 			, NULL
 			, 1
@@ -115,14 +127,14 @@ BEGIN
 			SET @ysnValid = 0
 			RETURN
 		END
-		ELSE IF ((SELECT SUM(dblTax) FROM @tmpQuoteTaxDetail WHERE strType = 'QUOTE') = (SELECT SUM(dblTax) FROM @tmpQuoteTaxDetail WHERE strType = 'SETUP'))
+		ELSE IF ((SELECT SUM(dblTax) FROM @tmpQuoteTaxDetail WHERE strType = 'QUOTE') <> (SELECT SUM(dblTax) FROM @tmpQuoteTaxDetail WHERE strType = 'SETUP'))
 		BEGIN
 			RAISERROR('Quote cannot be Confirmed because Customer Location''s current Tax Group has changed since this Quote was created',16,1)
 			SET @ysnValid = 0
 			RETURN
 		END
 
-		FETCH NEXT FROM @CursorQuoteDetail INTO @intItemId, @intShipToLocationId, @intQuotePrice, @intTaxGroupId
+		FETCH NEXT FROM @CursorQuoteDetail INTO @intItemId, @intShipToLocationId, @intSpecialPriceId, @intTaxGroupId
 	END
 	CLOSE @CursorQuoteDetail
     DEALLOCATE @CursorQuoteDetail

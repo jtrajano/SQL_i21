@@ -180,6 +180,8 @@ BEGIN TRY
 	/*Declared variables for translating expression*/
 	declare @strStatus1 nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'This confirms that the above contract has been priced as follows:'), 'This confirms that the above contract has been priced as follows:');
 	declare @strStatus2 nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'This confirms that the above contract has been partially priced as follows:'),'This confirms that the above contract has been partially priced as follows:');
+	declare @strStatus3 nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'This confirms that the above contract has been fully fixed as follows:'), 'This confirms that the above contract has been priced as follows:');
+	declare @strStatus4 nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'This confirms that the above contract has been partially fixed as follows:'),'This confirms that the above contract has been partially priced as follows:');
 	declare @per nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'per'),'per');
 	declare @strSummary nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'All lot(s) are fixed.'),'All lot(s) are fixed.');
 	declare @FinalPrice nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Final Price'),'Final Price');
@@ -191,6 +193,7 @@ BEGIN TRY
 			PF.intContractHeaderId,
 			lblReferenceX = CASE WHEN CH.intContractTypeId = 1 THEN 'Buyers Ref.' ELSE 'Seller Ref.' END,
 			lblReferenceY = CASE WHEN CH.intContractTypeId = 2 THEN 'Buyers Ref.' ELSE 'Seller Ref.' END,
+			strCustomerContractJDE = EY.strEntityNumber,
 			CH.strContractNumber,
 			CH.strContractNumber +'-'+LTRIM(CD.intContractSeq) AS strAtlasContractNumber,
 			CH.strCustomerContract,
@@ -202,6 +205,10 @@ BEGIN TRY
 			strStatus = CASE	WHEN	ISNULL(PF.[dblTotalLots],0) - ISNULL(PF.[dblLotsFixed],0) = 0 
 								THEN	@strStatus1
 								ELSE	@strStatus2
+						END,
+			strStatusJDE = CASE	WHEN	ISNULL(PF.[dblTotalLots],0) - ISNULL(PF.[dblLotsFixed],0) = 0 
+								THEN	@strStatus3
+								ELSE	@strStatus4
 						END,
 			strAtlasStatus = CASE	
 									WHEN	ISNULL(PF.[dblTotalLots],0) - ISNULL(PF.[dblLotsFixed],0) = 0 THEN	'This confirms that the above contract has been Fully fixed as follows:'

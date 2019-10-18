@@ -123,14 +123,14 @@ BEGIN TRY
 			ON D.intContractDetailId = CD.intContractDetailId
 	WHERE
 		D.intContractDetailId IS NOT NULL
-		AND D.intContractDetailId <> TD.intContractDetailId		
+		AND D.intContractDetailId <> ISNULL(TD.intContractDetailId, 0)
 		AND D.intItemId = TD.intItemId		
 		
-	UNION ALL
-
+	 UNION ALL
+ 
 	--Replaced Contract
 	SELECT
-		 I.[intSalesOrderDetailId]
+		I.[intSalesOrderDetailId]
 		,TD.[intContractDetailId]
 		,TD.[intItemUOMId]
 		,dbo.fnCalculateQtyBetweenUOM(TD.[intItemUOMId], CD.[intItemUOMId], (TD.[dblQtyOrdered] * -1))
@@ -138,7 +138,7 @@ BEGIN TRY
 		@ItemsFromSalesOrder I
 	INNER JOIN
 		tblSOSalesOrderDetail D
-			ON	I.[intSalesOrderDetailId] = D.[intSalesOrderDetailId]
+			ON I.[intSalesOrderDetailId] = D.[intSalesOrderDetailId]
 	INNER JOIN
 		tblARTransactionDetail TD
 			ON D.intSalesOrderDetailId = TD.intTransactionDetailId 
@@ -149,9 +149,9 @@ BEGIN TRY
 			ON TD.intContractDetailId = CD.intContractDetailId
 	WHERE
 		D.intContractDetailId IS NOT NULL
-		AND D.intContractDetailId <> TD.intContractDetailId		
+		AND D.intContractDetailId <> TD.intContractDetailId  
 		AND D.intItemId = TD.intItemId
-		
+	
 	UNION ALL
 		
 	--Removed Contract

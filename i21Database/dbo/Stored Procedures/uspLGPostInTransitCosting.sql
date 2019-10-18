@@ -45,15 +45,28 @@ BEGIN TRY
 
 	IF (ISNULL(@ysnPost, 0) = 1)
 	BEGIN
+
 		/* Update LS Unit Cost for Unpriced Contracts */
 		UPDATE LD 
 		SET dblUnitPrice = dbo.fnCTGetSequencePrice(CD.intContractDetailId,NULL)
+			,dblAmount = dbo.fnCalculateCostBetweenUOM(
+								LD.intPriceUOMId
+								, ISNULL(LD.intWeightItemUOMId, LD.intItemUOMId) 
+								,(dbo.fnCTGetSequencePrice(CD.intContractDetailId,NULL) / CASE WHEN (CUR.ysnSubCurrency = 1) THEN CUR.intCent ELSE 1 END)
+							) * CASE WHEN (LD.intWeightItemUOMId IS NOT NULL) THEN LD.dblNet ELSE LD.dblQuantity END		
 		FROM tblLGLoadDetail LD
 			JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
 			JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
-			CROSS APPLY dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
-		WHERE AD.dblSeqPrice IS NULL AND ISNULL(dblUnitPrice, 0) = 0
-			AND LD.intLoadId = @intLoadId
+			JOIN vyuLGAdditionalColumnForContractDetailView AD ON CD.intContractDetailId = AD.intContractDetailId
+			LEFT JOIN tblSMCurrency CUR ON CUR.intCurrencyID = LD.intPriceCurrencyId
+		WHERE ISNULL(LD.dblUnitPrice, 0) = 0 AND LD.intLoadId = @intLoadId
+
+		IF EXISTS(SELECT TOP 1 1 FROM tblLGLoadDetail LD
+			INNER JOIN tblLGLoad L ON LD.intLoadId = L.intLoadId
+			WHERE L.intPurchaseSale <> 3 AND LD.intLoadId = @intLoadId AND ISNULL(LD.dblUnitPrice, 0) = 0)
+		BEGIN
+			RAISERROR('One or more contracts is not yet priced. Please price the contracts or provide a provisional price to proceed.', 16, 1);
+		END
 
 		INSERT INTO @ItemsToPost (
 			intItemId
@@ -93,29 +106,60 @@ BEGIN TRY
 						LD.dblQuantity
 				END 
 			,dblUOMQty = IU.dblUnitQty
-			,dblCost = CASE WHEN L.intPurchaseSale = 3 THEN
-								AD.dblSeqPrice / CASE WHEN (AD.ysnSeqSubCurrency = 1) THEN 100 ELSE 1 END
-							ELSE
-								dbo.fnCalculateCostBetweenUOM(
-										LD.intPriceUOMId
-										, ISNULL(LD.intWeightItemUOMId, LD.intItemUOMId) 
-										, (LD.dblUnitPrice / CASE WHEN (CUR.ysnSubCurrency = 1) THEN CUR.intCent ELSE 1 END)
-									) 
-							END
-						* CASE --if contract FX tab is setup
-							WHEN AD.ysnValidFX = 1 THEN 
-							CASE WHEN (ISNULL(SeqCUR.intMainCurrencyId, SeqCUR.intCurrencyID) = @DefaultCurrencyId AND CD.intInvoiceCurrencyId <> @DefaultCurrencyId) 
-									THEN 1 --functional price to foreign FX, use 1
-								WHEN (ISNULL(SeqCUR.intMainCurrencyId, SeqCUR.intCurrencyID) <> @DefaultCurrencyId AND CD.intInvoiceCurrencyId = @DefaultCurrencyId)
-									THEN ISNULL(CTFX.dblFXRate, 1) --foreign price to functional FX, use contract FX rate
-								WHEN (ISNULL(SeqCUR.intMainCurrencyId, SeqCUR.intCurrencyID) <> @DefaultCurrencyId AND CD.intInvoiceCurrencyId <> @DefaultCurrencyId)
-									THEN ISNULL(FX.dblFXRate, 1) --foreign price to foreign FX, use master FX rate
-								ELSE 1 END
-							ELSE  --if contract FX tab is not setup
-							CASE WHEN (@DefaultCurrencyId <> ISNULL(SeqCUR.intMainCurrencyId, SeqCUR.intCurrencyID)) 
-								THEN ISNULL(FX.dblFXRate, 1)
-								ELSE 1 END
-							END
+			,dblCost = 
+						ISNULL(
+							--LD.dblAmount/LD.dblQuantity 
+							dbo.fnCalculateCostBetweenUOM(
+								LD.intPriceUOMId
+								, ISNULL(LD.intWeightItemUOMId, LD.intItemUOMId) 
+								, (LD.dblUnitPrice / CASE WHEN (CUR.ysnSubCurrency = 1) THEN CUR.intCent ELSE 1 END)
+							) 
+								* CASE --if contract FX tab is setup
+								 WHEN AD.ysnValidFX = 1 THEN 
+									CASE WHEN (ISNULL(SeqCUR.intMainCurrencyId, SeqCUR.intCurrencyID) = @DefaultCurrencyId AND CD.intInvoiceCurrencyId <> @DefaultCurrencyId) 
+											THEN 1 --functional price to foreign FX, use 1
+										WHEN (ISNULL(SeqCUR.intMainCurrencyId, SeqCUR.intCurrencyID) <> @DefaultCurrencyId AND CD.intInvoiceCurrencyId = @DefaultCurrencyId)
+											THEN 1 --foreign price to functional FX, use 1
+										WHEN (ISNULL(SeqCUR.intMainCurrencyId, SeqCUR.intCurrencyID) <> @DefaultCurrencyId AND CD.intInvoiceCurrencyId <> @DefaultCurrencyId)
+											THEN ISNULL(FX.dblFXRate, 1) --foreign price to foreign FX, use master FX rate
+										ELSE 1 END
+								 ELSE  --if contract FX tab is not setup
+									CASE WHEN (@DefaultCurrencyId <> ISNULL(SeqCUR.intMainCurrencyId, SeqCUR.intCurrencyID)) 
+										THEN ISNULL(FX.dblFXRate, 1)
+										ELSE 1 END
+								 END
+							, (
+								
+								CASE 
+									WHEN (AD.dblSeqPrice IS NULL) THEN
+										CASE 
+											WHEN (LD.dblUnitPrice > 0) THEN 
+												LD.dblUnitPrice 
+												/ CASE WHEN (CUR.ysnSubCurrency = 1) THEN CUR.intCent ELSE 1 END
+											ELSE 
+												dbo.fnCTGetSequencePrice(CD.intContractDetailId,NULL) 
+										END
+									ELSE 
+										AD.dblSeqPrice 
+										/ CASE WHEN (AD.ysnSeqSubCurrency = 1) THEN 100 ELSE 1 END
+								END
+								* AD.dblQtyToPriceUOMConvFactor
+								* CASE --if contract FX tab is setup
+									 WHEN AD.ysnValidFX = 1 THEN 
+										CASE WHEN (ISNULL(SeqCUR.intMainCurrencyId, SeqCUR.intCurrencyID) = @DefaultCurrencyId AND CD.intInvoiceCurrencyId <> @DefaultCurrencyId) 
+												THEN 1 --functional price to foreign FX, use 1
+											WHEN (ISNULL(SeqCUR.intMainCurrencyId, SeqCUR.intCurrencyID) <> @DefaultCurrencyId AND CD.intInvoiceCurrencyId = @DefaultCurrencyId)
+												THEN 1 --foreign price to functional FX, use 1
+											WHEN (ISNULL(SeqCUR.intMainCurrencyId, SeqCUR.intCurrencyID) <> @DefaultCurrencyId AND CD.intInvoiceCurrencyId <> @DefaultCurrencyId)
+												THEN ISNULL(FX.dblFXRate, 1) --foreign price to foreign FX, use master FX rate
+											ELSE 1 END
+									 ELSE  --if contract FX tab is not setup
+										CASE WHEN (@DefaultCurrencyId <> ISNULL(SeqCUR.intMainCurrencyId, SeqCUR.intCurrencyID)) 
+											THEN ISNULL(FX.dblFXRate, 1)
+											ELSE 1 END
+									 END
+							) 
+						)
 			,dblValue = 0
 			,dblSalesPrice = 0.0
 			,intCurrencyId = CASE WHEN AD.ysnValidFX = 1 THEN CD.intInvoiceCurrencyId ELSE ISNULL(SeqCUR.intMainCurrencyId, SeqCUR.intCurrencyID) END
@@ -135,7 +179,7 @@ BEGIN TRY
 										CASE WHEN (ISNULL(SeqCUR.intMainCurrencyId, SeqCUR.intCurrencyID) = @DefaultCurrencyId AND CD.intInvoiceCurrencyId <> @DefaultCurrencyId) 
 												THEN RCTFX.intForexRateTypeId --functional price to foreign FX, use inverted contract FX rate
 											WHEN (ISNULL(SeqCUR.intMainCurrencyId, SeqCUR.intCurrencyID) <> @DefaultCurrencyId AND CD.intInvoiceCurrencyId = @DefaultCurrencyId)
-												THEN CTFX.intForexRateTypeId --foreign price to functional FX, use contract FX rate
+												THEN NULL --foreign price to functional FX, use NULL
 											WHEN (ISNULL(SeqCUR.intMainCurrencyId, SeqCUR.intCurrencyID) <> @DefaultCurrencyId AND CD.intInvoiceCurrencyId <> @DefaultCurrencyId)
 												THEN FX.intForexRateTypeId --foreign price to foreign FX, use master FX rate
 											ELSE LD.intForexRateTypeId END
@@ -149,7 +193,7 @@ BEGIN TRY
 										CASE WHEN (ISNULL(SeqCUR.intMainCurrencyId, SeqCUR.intCurrencyID) = @DefaultCurrencyId AND CD.intInvoiceCurrencyId <> @DefaultCurrencyId) 
 												THEN ISNULL(RCTFX.dblFXRate, 1) --functional price to foreign FX, use inverted contract FX rate
 											WHEN (ISNULL(SeqCUR.intMainCurrencyId, SeqCUR.intCurrencyID) <> @DefaultCurrencyId AND CD.intInvoiceCurrencyId = @DefaultCurrencyId)
-												THEN ISNULL(CTFX.dblFXRate, 1) --foreign price to functional FX, use contract FX rate
+												THEN 1 --foreign price to functional FX, use 1
 											WHEN (ISNULL(SeqCUR.intMainCurrencyId, SeqCUR.intCurrencyID) <> @DefaultCurrencyId AND CD.intInvoiceCurrencyId <> @DefaultCurrencyId)
 												THEN ISNULL(FX.dblFXRate, 1) --foreign price to foreign FX, use master FX rate
 											ELSE ISNULL(LD.dblForexRate,1) END

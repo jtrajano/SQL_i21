@@ -147,13 +147,14 @@ UNION ALL
 SELECT  A.dtmDatePaid AS dtmDate,    
 	 C.intBillId,   
 	 C.strBillId ,
-	 CAST(
-		 	(CASE WHEN C.intTransactionType NOT IN (1,2, 14) AND B.dblPayment != 0
-				THEN (CASE WHEN (E.intBankTransactionTypeId <> 19 OR E.intBankTransactionTypeId <> 116 OR E.intBankTransactionTypeId <> 122 OR E.intBankTransactionTypeId IS NULL)
-						 THEN B.dblPayment * -1 ELSE B.dblPayment END)
-				WHEN C.intTransactionType NOT IN (1,2, 14) AND B.dblPayment < 0 AND (E.intBankTransactionTypeId = 116  OR E.intBankTransactionTypeId = 19  OR E.intBankTransactionTypeId = 122)
-					THEN B.dblPayment * -1 --MAKE THE REVERSAL DEBIT MEMO TRANSACTION POSITIVE
-				ELSE B.dblPayment END) * A.dblExchangeRate AS DECIMAL(18,2)) AS dblAmountPaid,     
+	--  CAST(
+	-- 	 	(CASE WHEN C.intTransactionType NOT IN (1, 2, 14) AND B.dblPayment != 0
+	-- 			THEN (CASE WHEN (E.intBankTransactionTypeId <> 19 OR E.intBankTransactionTypeId <> 116 OR E.intBankTransactionTypeId <> 122 OR E.intBankTransactionTypeId IS NULL)
+	-- 					 THEN B.dblPayment * -1 ELSE B.dblPayment END)
+	-- 			WHEN C.intTransactionType NOT IN (1, 2, 14) AND B.dblPayment < 0 AND (E.intBankTransactionTypeId = 116  OR E.intBankTransactionTypeId = 19  OR E.intBankTransactionTypeId = 122)
+	-- 				THEN B.dblPayment * -1 --MAKE THE REVERSAL DEBIT MEMO TRANSACTION POSITIVE
+	-- 			ELSE B.dblPayment END) * A.dblExchangeRate AS DECIMAL(18,2)) AS dblAmountPaid,    
+	CAST(B.dblPayment  * A.dblExchangeRate AS DECIMAL(18,2)) AS dblAmountPaid, 
 	 dblTotal = 0 
 	, dblAmountDue = 0 
 	, dblWithheld = B.dblWithheld
@@ -359,7 +360,8 @@ SELECT
 	  A.dtmDatePaid AS dtmDate 
 	, ISNULL(B.intBillId ,B.intOrigBillId) AS intBillId  
 	, C.strBillId
-	, CAST(B.dblPayment * prepaidDetail.dblRate AS DECIMAL(18,2))  AS dblAmountPaid     
+	, CAST(B.dblPayment * prepaidDetail.dblRate AS DECIMAL(18,2))  
+		* (CASE WHEN C.intTransactionType = 3 THEN -1 ELSE 1 END) AS dblAmountPaid     
 	, dblTotal = 0 
 	, dblAmountDue = 0 
 	, dblWithheld = B.dblWithheld
@@ -392,7 +394,7 @@ OUTER APPLY (
 ) prepaidDetail		
  WHERE A.ysnPosted = 1  
 	AND C.ysnPosted = 1
-	AND C.intTransactionType IN (1) --BILL TRANSACTION ONLY
+	AND C.intTransactionType IN (1, 3) --BILL TRANSACTION ONLY
 	AND A.ysnPrepay = 1
 	AND NOT EXISTS (
 		SELECT 1 FROM vyuAPPaidOriginPrepaid originPrepaid WHERE originPrepaid.intBillId = C.intBillId

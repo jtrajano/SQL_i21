@@ -250,6 +250,7 @@ BEGIN
 			, intPricingTypeId int
 			, strTransactionType NVARCHAR(50)
 			, intTransactionId INT
+			, strTransactionId NVARCHAR(50)
 			, intTransactionDetailId INT
 			, intSourceId INT
 			, dtmDate DATETIME)
@@ -268,12 +269,13 @@ BEGIN
 				, dtmDate
 				, strTransactionType
 				, intTransactionId
+				, strTransactionId
 				, intTransactionDetailId
 				, intSourceId)
 			SELECT strCommodityCode
 				, strItemNo
 				, strCategoryCode
-				, dblTotal = dblTotal
+				, dblTotal = SUM(dblTotal)
 				, strLocationName
 				, intCommodityId
 				, intFromCommodityUnitMeasureId
@@ -282,6 +284,7 @@ BEGIN
 				, dtmDate
 				, strTransactionType
 				, intTransactionId
+				, strTransactionId
 				, intTransactionDetailId
 				, intSourceId
 			FROM (
@@ -297,6 +300,7 @@ BEGIN
 					, s.dtmDate
 					, s.strTransactionType
 					, s.intTransactionId
+					, s.strTransactionId
 					, s.intTransactionDetailId
 					, s.intSourceId
 				FROM vyuRKGetInventoryValuation s
@@ -312,7 +316,75 @@ BEGIN
 					AND CONVERT(DATETIME, CONVERT(VARCHAR(10), s.dtmDate, 110), 110) <= CONVERT(DATETIME, @dtmToTransactionDate)
 					AND s.intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 					AND strTransactionId NOT IN (SELECT strTransactionId FROM @transfer)
+
+				UNION ALL
+				SELECT strCommodityCode 
+					, i.strItemNo
+					, Category.strCategoryCode
+					, dblTotal = dbo.fnCalculateQtyBetweenUOM(iuomStck.intItemUOMId, iuomTo.intItemUOMId, (ISNULL(ITS.dblQty ,0)))
+					, strLocationName
+					, intCommodityId = @intCommodityId
+					, intFromCommodityUnitMeasureId = @intCommodityUnitMeasureId
+					, ITS.intItemUOMId
+					, strInventoryType = 'Company Titled' COLLATE Latin1_General_CI_AS
+					, ITS.dtmDate
+					, strTransactionType = 'Transfer Storage'
+					, ITS.intTransactionId
+					, ITS.strTransactionId
+					, ITS.intTransactionDetailId
+					, TSR.intTransferStorageId
+				FROM tblICInventoryTransaction ITS
+				INNER JOIN tblGRTransferStorageReference TSR
+					ON TSR.intTransferStorageId = ITS.intTransactionId AND TSR.intTransferStorageSplitId = ITS.intTransactionDetailId
+				INNER JOIN tblGRTransferStorage GTS 
+					ON TSR.intTransferStorageId = GTS.intTransferStorageId
+				INNER JOIN tblGRCustomerStorage FromStorage
+					ON FromStorage.intCustomerStorageId = TSR.intSourceCustomerStorageId
+				INNER JOIN tblGRStorageType FromType
+					ON FromType.intStorageScheduleTypeId = FromStorage.intStorageTypeId
+				INNER JOIN tblGRCustomerStorage ToStorage
+					ON ToStorage.intCustomerStorageId = TSR.intToCustomerStorageId
+				INNER JOIN tblGRStorageType ToType
+					ON ToType.intStorageScheduleTypeId = ToStorage.intStorageTypeId
+				JOIN tblICItemUOM IU
+					ON IU.intItemId = ToStorage.intItemId
+						AND IU.ysnStockUnit = 1
+				INNER JOIN tblICItemLocation IL
+					ON IL.intItemId = ToStorage.intItemId AND IL.intLocationId = ToStorage.intCompanyLocationId
+				INNER JOIN tblGRTransferStorage TS
+					ON TSR.intTransferStorageId = TS.intTransferStorageId
+				JOIN tblICItem i ON i.intItemId = ITS.intItemId
+				JOIN tblICCommodityUnitMeasure cuom ON i.intCommodityId = cuom.intCommodityId AND cuom.ysnStockUnit = 1
+				JOIN tblICItemUOM iuomStck ON ITS.intItemId = iuomStck.intItemId AND iuomStck.ysnStockUnit = 1
+				JOIN tblICItemUOM iuomTo ON ITS.intItemId = iuomTo.intItemId AND iuomTo.intUnitMeasureId = cuom.intUnitMeasureId
+				JOIN tblICCommodity c ON i.intCommodityId = c.intCommodityId
+				JOIN tblICCategory Category ON Category.intCategoryId = i.intCategoryId
+				JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = GTS.intCompanyLocationId
+				WHERE c.intCommodityId = @intCommodityId
+                    AND i.intItemId = ISNULL(@intItemId, i.intItemId)
+                    AND GTS.intCompanyLocationId = ISNULL(@intLocationId, GTS.intCompanyLocationId)
+                    AND CONVERT(DATETIME, CONVERT(VARCHAR(10), ITS.dtmDate, 110), 110) <= CONVERT(DATETIME, @dtmToTransactionDate)
+                    AND GTS.intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
+                    AND (FromType.strStorageTypeDescription = 'DELAYED PRICING' AND ToType.strStorageTypeDescription = 'OPEN STORAGE') --OR (FromType.strStorageTypeDescription = 'DELAYED PRICING' AND ToType.strStorageTypeDescription = 'OPEN STORAGE')
+                    AND ITS.intTransactionTypeId = 56
+
+
 			) t
+			GROUP BY
+			strCommodityCode
+				, strItemNo
+				, strCategoryCode
+				, strLocationName
+				, intCommodityId
+				, intFromCommodityUnitMeasureId
+				, intItemUOMId
+				, strInventoryType
+				, dtmDate
+				, strTransactionType
+				, intTransactionId
+				, strTransactionId
+				, intTransactionDetailId
+				, intSourceId
 
 			--Collateral
 			INSERT INTO @InventoryStock(strCommodityCode
@@ -464,11 +536,11 @@ BEGIN
 			FROM (
 				select
 					 dtmDate =  CONVERT(DATETIME, CONVERT(VARCHAR(10),Inv.dtmDate, 110), 110)
-					,BD.dblQtyReceived
-					,dblPartialPaidQty = (BD.dblQtyReceived / B.dblTotal) * dblPayment 
+					,dblQtyReceived = dbo.fnCalculateQtyBetweenUOM(BD.intUnitOfMeasureId, Inv.intItemUOMId, BD.dblQtyReceived)
+					,dblPartialPaidQty = dbo.fnCalculateQtyBetweenUOM(BD.intUnitOfMeasureId, Inv.intItemUOMId,(BD.dblQtyReceived / CASE WHEN B.dblTotal = 0 THEN 1 ELSE B.dblTotal END) * dblPayment )
 					,B.strBillId 
 					,B.intBillId
-					,strDistribution =  ISNULL(ST.strStorageTypeCode,ISNULL(TV.strDistributionOption, 'SPT'))
+					,strDistribution =  ISNULL(ST.strStorageTypeCode,ISNULL(TV.strDistributionOption, ''))
 				from @InventoryStock Inv
 				inner join tblAPBillDetail BD on Inv.intTransactionDetailId = BD.intInventoryReceiptItemId 
 						AND BD.intInventoryReceiptChargeId IS NULL
@@ -547,13 +619,14 @@ BEGIN
 				,intTransactionId = intBillId
 				,strDistribution
 			FROM (
-				select
+				select distinct
 						dtmDate =  CONVERT(DATETIME, CONVERT(VARCHAR(10), Inv.dtmDate, 110), 110)
-					,BD.dblQtyReceived
-					,dblPartialPaidQty = CASE WHEN ISNULL(B.dblTotal, 0) = 0 THEN 0 ELSE (BD.dblQtyReceived / B.dblTotal) * dblPayment END
+					,dblQtyReceived = dbo.fnCalculateQtyBetweenUOM(BD.intUnitOfMeasureId, Inv.intItemUOMId,BD.dblQtyReceived)
+					,dblPartialPaidQty = dbo.fnCalculateQtyBetweenUOM(BD.intUnitOfMeasureId, Inv.intItemUOMId,CASE WHEN ISNULL(B.dblTotal, 0) = 0 THEN 0 ELSE (BD.dblQtyReceived / CASE WHEN B.dblTotal = 0 THEN 1 ELSE B.dblTotal END) * dblPayment END)
 					,B.strBillId
 					,B.intBillId
 					,strDistribution =  ST.strStorageTypeCode
+					,BD.intBillDetailId
 				from @InventoryStock Inv
 				inner join tblGRSettleStorage SS ON Inv.intTransactionId = SS.intSettleStorageId
 				inner join tblAPBill B on SS.intBillId = B.intBillId
@@ -582,14 +655,35 @@ BEGIN
 					,I.strInvoiceNumber
 					,I.intInvoiceId
 					,strDistribution = TV.strDistributionOption
+					,Inv.intTransactionDetailId
 				from @InventoryStock Inv
 				inner join tblICInventoryShipment S on Inv.intTransactionId = S.intInventoryShipmentId
+				inner join tblICInventoryShipmentItem ISI ON ISI.intInventoryShipmentId = S.intInventoryShipmentId AND ISI.intInventoryShipmentItemId = Inv.intTransactionDetailId
 				inner join tblARInvoiceDetail ID on Inv.intTransactionDetailId = ID.intInventoryShipmentItemId 
 						AND ID.intInventoryShipmentChargeId IS NULL
 				inner join tblARInvoice I on ID.intInvoiceId = I.intInvoiceId
 				left join vyuSCTicketView TV on ID.intTicketId = TV.intTicketId
 				where Inv.strTransactionType = 'Inventory Shipment'
-					--AND S.intSourceType = 1
+				AND ISI.ysnDestinationWeightsAndGrades = 0
+
+				UNION ALL
+				select distinct
+						dtmDate =  CONVERT(DATETIME, CONVERT(VARCHAR(10),Inv.dtmDate, 110), 110)
+					,dblQtyShipped = ISNULL(dbo.fnCalculateQtyBetweenUOM(ID.intItemUOMId, Inv.intItemUOMId,  Inv.dblTotal), 0) 
+					,I.strInvoiceNumber
+					,I.intInvoiceId
+					,strDistribution = TV.strDistributionOption
+					,Inv.intTransactionDetailId
+				from @InventoryStock Inv
+				inner join tblICInventoryShipment S on Inv.intTransactionId = S.intInventoryShipmentId
+				inner join tblICInventoryShipmentItem ISI ON ISI.intInventoryShipmentId = S.intInventoryShipmentId AND ISI.intInventoryShipmentItemId = Inv.intTransactionDetailId
+				inner join tblARInvoiceDetail ID on Inv.intTransactionDetailId = ID.intInventoryShipmentItemId 
+						AND ID.intInventoryShipmentChargeId IS NULL
+				inner join tblARInvoice I on ID.intInvoiceId = I.intInvoiceId
+				left join vyuSCTicketView TV on ID.intTicketId = TV.intTicketId
+				where Inv.strTransactionType = 'Inventory Shipment'
+				AND ISI.ysnDestinationWeightsAndGrades = 1
+
 						
 			) t
 				
@@ -716,7 +810,7 @@ BEGIN
 				inner join tblICInventoryAdjustment I on ID.intInventoryAdjustmentId = I.intInventoryAdjustmentId
 				where Inv.strTransactionType LIKE 'Inventory Adjustment -%'
 					AND I.ysnPosted = 1
-					AND I.intSourceTransactionTypeId IS NULL
+					AND (I.intSourceTransactionTypeId IS NULL OR I.intSourceTransactionTypeId = 8)
 						
 			) t
 
@@ -744,6 +838,28 @@ BEGIN
 						
 			) t
 
+			UNION ALL --TRANSFER STORAGE
+			SELECT
+				dtmDate
+				,dblUnpaidIncrease = CASE WHEN dblQtyShipped < 0 THEN 0 ELSE dblQtyShipped END
+				,dblUnpaidDecrease = CASE WHEN dblQtyShipped < 0 THEN ABS(dblQtyShipped) ELSE 0 END
+				,dblUnpaidBalance = 0
+				,dblPaidBalance = 0
+				,strTransactionId = strTransferStorageTicket
+				,intTransactionId
+				,strStorageTypeCode
+			FROM (
+				SELECT DISTINCT dtmDate =  CONVERT(DATETIME, CONVERT(VARCHAR(10),Inv.dtmDate, 110), 110)
+					  ,dblQtyShipped = Inv.dblTotal
+					  ,TS.strTransferStorageTicket
+					  ,Inv.intTransactionId	
+					  ,ST.strStorageTypeCode
+				FROM @InventoryStock Inv
+				INNER JOIN tblGRTransferStorage TS ON Inv.intTransactionId = TS.intTransferStorageId
+				INNER JOIN tblGRTransferStorageSplit TSS ON Inv.intTransactionDetailId = TSS.intTransferStorageSplitId
+				INNER JOIN tblGRStorageType ST ON ST.intStorageScheduleTypeId = TSS.intStorageTypeId
+			) T
+
 			UNION ALL--PRODUCE
 			SELECT
 				dtmDate
@@ -758,10 +874,9 @@ BEGIN
 				select
 					dtmDate =  CONVERT(DATETIME, CONVERT(VARCHAR(10),Inv.dtmDate, 110), 110)
 					,Inv.dblTotal
-					,strTransactionId = It.strTransactionId
+					,strTransactionId = Inv.strTransactionId
 					,Inv.intTransactionId 
 				from @InventoryStock Inv
-				inner join tblICInventoryTransaction It on It.intTransactionId = Inv.intTransactionId and It.intTransactionTypeId = 9
 				where Inv.strTransactionType = 'Produce'
 						
 			) t
@@ -780,10 +895,9 @@ BEGIN
 				select
 					dtmDate =  CONVERT(DATETIME, CONVERT(VARCHAR(10),Inv.dtmDate, 110), 110)
 					,Inv.dblTotal
-					,strTransactionId = It.strTransactionId
+					,strTransactionId = Inv.strTransactionId
 					,Inv.intTransactionId 
 				from @InventoryStock Inv
-				inner join tblICInventoryTransaction It on It.intTransactionId = Inv.intTransactionId and It.intTransactionTypeId = 8
 				where Inv.strTransactionType = 'Consume'
 						
 			) t
@@ -936,10 +1050,11 @@ BEGIN
 						,dblTotal = Inv.dblTotal - IRI.dblBillQty
 						,IR.strReceiptNumber
 						,Inv.intTransactionId
-						,intBillId = (select top 1 intBillId from vyuICGetInventoryReceiptVoucher where intInventoryReceiptItemId = Inv.intTransactionDetailId )
+						,IRV.intBillId
 					from @InventoryStock Inv
 					inner join tblICInventoryReceipt IR on Inv.intTransactionId = IR.intInventoryReceiptId
 					inner join tblICInventoryReceiptItem IRI on Inv.intTransactionDetailId = IRI.intInventoryReceiptItemId
+					left join vyuICGetInventoryReceiptVoucher IRV on IRV.intInventoryReceiptItemId = Inv.intTransactionDetailId
 					where Inv.strTransactionType = 'Inventory Receipt'
 						AND Inv.dblTotal <> dblBillQty
 						AND IR.intSourceType = 1

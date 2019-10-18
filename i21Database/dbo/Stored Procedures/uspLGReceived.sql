@@ -17,6 +17,8 @@ SET ANSI_WARNINGS OFF
 	DECLARE		@ErrMsg							NVARCHAR(MAX),
 				@strReceiptType					NVARCHAR(50),
 				@intSourceType					INT,
+				@intReceiptDetailId				INT,
+				@intItemId						INT,
 				@intLotId						INT,
 				@intSourceId					INT,
 				@intContainerId					INT,
@@ -33,116 +35,157 @@ SET ANSI_WARNINGS OFF
 	IF (@strReceiptType <> 'Purchase Contract' AND @intSourceType <> 2)
 		RETURN
 	
-	SELECT @intLotId = MIN(intLotId) FROM @ItemsFromInventoryReceipt
-	WHILE ISNULL(@intLotId,0) > 0
+	SELECT @intReceiptDetailId = MIN(intInventoryReceiptDetailId) FROM @ItemsFromInventoryReceipt
+	WHILE ISNULL(@intReceiptDetailId, 0) > 0
 	BEGIN
-		SELECT	@intSourceId					=	NULL,
-				@intContainerId					=	NULL,
-				@dblQty							=	NULL,
-				@dblNetWeight					=	NULL,
-				@dblContainerQty				=	NULL
-				
-		SELECT	@intSourceId					=	intSourceId,
-				@intContainerId					=	intContainerId,
-				@dblQty							=	dblQty,
-				@intLotId						=	intLotId,
-				@dblNetWeight					=	dblNetWeight
-		FROM	@ItemsFromInventoryReceipt 
-		WHERE	intLotId						=	 @intLotId
-		
+		SELECT @intItemId = NULL
+				,@intSourceId = NULL
+				,@intContainerId = NULL
+
+		SELECT @intItemId = intItemId
+				,@intSourceId = intSourceId
+				,@intContainerId = intContainerId
+		FROM @ItemsFromInventoryReceipt 
+		WHERE intInventoryReceiptDetailId = @intReceiptDetailId
+
 		IF NOT EXISTS(SELECT * FROM tblLGLoadDetail WHERE intLoadDetailId = @intSourceId)
 		BEGIN
 		SELECT 1, @intSourceId, Cast(@intSourceId as varchar(100))
 			SET @ErrMsg = 'Contract for this shipment does not exist'
 			RAISERROR(@ErrMsg,16,1)
 		END
-		
-		IF ISNULL(@intContainerId,0) <> -1
+
+		IF (ISNULL((SELECT TOP 1 strLotTracking FROM tblICItem WHERE intItemId = @intItemId), 'No') <> 'No')
 		BEGIN
-			IF NOT EXISTS(SELECT * FROM tblLGLoadDetailContainerLink WHERE intLoadDetailId = @intSourceId AND intLoadContainerId = @intContainerId)
-			BEGIN		
-				SET @ErrMsg = 'Container for this shipment does not exist'
-				RAISERROR(@ErrMsg,16,1)
-			END
-
-			SELECT @dblContainerQty = ISNULL(dblReceivedQty,0) 
-			FROM tblLGLoadDetailContainerLink 
-			WHERE intLoadContainerId = @intContainerId 
-				AND intLoadDetailId = @intSourceId
-
-			IF (@dblContainerQty + @dblQty) < 0
-			BEGIN		
-				SET @ErrMsg = 'Negative container quantity is not allowed'
-				RAISERROR(@ErrMsg,16,1)
-			END
-						
-			UPDATE tblLGLoadDetailContainerLink 
-			SET dblReceivedQty = (@dblContainerQty + @dblQty)  
-			WHERE intLoadDetailId = @intSourceId 
-				AND intLoadContainerId = @intContainerId
-		END
+			SELECT @intLotId = MIN(intLotId) FROM @ItemsFromInventoryReceipt WHERE intInventoryReceiptDetailId = @intReceiptDetailId
+			WHILE ISNULL(@intLotId,0) > 0
+			BEGIN
+				SELECT @dblQty							=	NULL,
+						@dblNetWeight					=	NULL,
+						@dblContainerQty				=	NULL
 				
-		SELECT @dblContractQty = ISNULL(dblDeliveredQuantity,0) FROM tblLGLoadDetail WHERE intLoadDetailId = @intSourceId
+				SELECT	@dblQty							=	dblQty,
+						@intLotId						=	intLotId,
+						@dblNetWeight					=	dblNetWeight
+				FROM	@ItemsFromInventoryReceipt 
+				WHERE	intLotId						=	@intLotId
+					AND intInventoryReceiptDetailId		=	@intReceiptDetailId
+		
+				IF ISNULL(@intContainerId,0) <> -1
+				BEGIN
+					IF NOT EXISTS(SELECT * FROM tblLGLoadDetailContainerLink WHERE intLoadDetailId = @intSourceId AND intLoadContainerId = @intContainerId)
+					BEGIN		
+						SET @ErrMsg = 'Container for this shipment does not exist'
+						RAISERROR(@ErrMsg,16,1)
+					END
 
-		IF (@dblContractQty + @dblQty) < 0
-		BEGIN		
-			SET @ErrMsg = 'Negative contract quantity is not allowed'
-			RAISERROR(@ErrMsg,16,1)
-		END
+					SELECT @dblContainerQty = ISNULL(dblReceivedQty,0) 
+					FROM tblLGLoadDetailContainerLink 
+					WHERE intLoadContainerId = @intContainerId 
+						AND intLoadDetailId = @intSourceId
 
-		UPDATE tblLGLoadDetail SET dblDeliveredQuantity = (@dblContractQty + @dblQty), dblDeliveredGross = @dblNetWeight, dblDeliveredNet = @dblNetWeight WHERE intLoadDetailId = @intSourceId
+					IF (@dblContainerQty + @dblQty) < 0
+					BEGIN		
+						SET @ErrMsg = 'Negative container quantity is not allowed'
+						RAISERROR(@ErrMsg,16,1)
+					END
+						
+					UPDATE tblLGLoadDetailContainerLink 
+					SET dblReceivedQty = (@dblContainerQty + @dblQty)  
+					WHERE intLoadDetailId = @intSourceId 
+						AND intLoadContainerId = @intContainerId
+				END
+				
+				SELECT @dblContractQty = ISNULL(dblDeliveredQuantity,0) FROM tblLGLoadDetail WHERE intLoadDetailId = @intSourceId
+
+				IF (@dblContractQty + @dblQty) < 0
+				BEGIN		
+					SET @ErrMsg = 'Negative contract quantity is not allowed'
+					RAISERROR(@ErrMsg,16,1)
+				END
+
+				UPDATE tblLGLoadDetail SET dblDeliveredQuantity = (@dblContractQty + @dblQty), dblDeliveredGross = @dblNetWeight, dblDeliveredNet = @dblNetWeight WHERE intLoadDetailId = @intSourceId
 	
-		SET @ysnReverse = CASE WHEN @dblQty < 0 THEN 1 ELSE 0 END
+				SET @ysnReverse = CASE WHEN @dblQty < 0 THEN 1 ELSE 0 END
 
-		--INSERT into @ItemsToIncreaseInTransitInBound(
-		--	[intItemId] 
-		--	,[intItemLocationId] 
-		--	,[intItemUOMId] 
-		--	,[intLotId] 
-		--	,[intSubLocationId] 
-		--	,[intStorageLocationId] 
-		--	,[dblQty] 
-		--	,[intTransactionId]
-		--	,[strTransactionId]
-		--	,[intTransactionTypeId] 		 	
-		--)	
-		--SELECT 
-		--	LD.intItemId
-		--	,IL.intItemLocationId
-		--	,LD.intItemUOMId
-		--	,NULL
-		--	,LD.intPSubLocationId
-		--	,NULL
-		--	,- @dblQty
-		--	,LD.intLoadId
-		--	,CAST(L.strLoadNumber AS VARCHAR(100))
-		--	,22
-		--FROM tblLGLoadDetail LD	INNER JOIN tblLGLoad L 
-		--		ON L.intLoadId = LD.intLoadId			
-		--	LEFT JOIN vyuCTCompactContractDetailView CT --LEFT JOIN vyuCTContractDetailView CT 
-		--		ON CT.intContractDetailId = LD.intPContractDetailId
-		--	LEFT JOIN tblICItemLocation IL 
-		--		ON IL.intLocationId = CT.intCompanyLocationId 
-		--		AND IL.intItemId = LD.intItemId
-		--WHERE LD.intLoadDetailId = @intSourceId;
+				SELECT @intLoadId = intLoadId FROM tblLGLoadDetail WHERE intLoadDetailId = @intSourceId
 
-		---- Reduce the Inbound In-Transit Qty when posting an IR. 
-		---- Or Increase it back when unposting the IR. 
-		--EXEC dbo.uspICIncreaseInTransitInBoundQty @ItemsToIncreaseInTransitInBound;
+				IF @ysnReverse = 0
+				BEGIN
+					UPDATE tblLGLoad SET intShipmentStatus = 4 WHERE intLoadId = @intLoadId
+				END
+				ELSE 
+				BEGIN
+					UPDATE tblLGLoad SET intShipmentStatus = 3 WHERE intLoadId = @intLoadId
+					UPDATE tblLGLoadDetail SET dblDeliveredGross = dblDeliveredGross-@dblNetWeight, dblDeliveredNet = dblDeliveredGross-@dblNetWeight WHERE intLoadDetailId = @intSourceId
+				END
 
-		SELECT @intLoadId = intLoadId FROM tblLGLoadDetail WHERE intLoadDetailId = @intSourceId
-
-		IF @ysnReverse = 0
-		BEGIN
-			UPDATE tblLGLoad SET intShipmentStatus = 4 WHERE intLoadId = @intLoadId
+				SELECT @intLotId = MIN(intLotId) FROM @ItemsFromInventoryReceipt WHERE intLotId > @intLotId AND intInventoryReceiptDetailId	= @intReceiptDetailId
+			END
 		END
-		ELSE 
+		ELSE
 		BEGIN
-			UPDATE tblLGLoad SET intShipmentStatus = 3 WHERE intLoadId = @intLoadId
-			UPDATE tblLGLoadDetail SET dblDeliveredGross = dblDeliveredGross-@dblNetWeight, dblDeliveredNet = dblDeliveredGross-@dblNetWeight WHERE intLoadDetailId = @intSourceId
+			SELECT @dblQty							=	NULL,
+					@dblNetWeight					=	NULL,
+					@dblContainerQty				=	NULL
+				
+			SELECT	@dblQty							=	dblQty,
+					@intLotId						=	intLotId,
+					@dblNetWeight					=	dblNetWeight
+			FROM	@ItemsFromInventoryReceipt 
+			WHERE	intInventoryReceiptDetailId		=	@intReceiptDetailId
+
+			IF ISNULL(@intContainerId,0) <> -1
+			BEGIN
+				IF NOT EXISTS(SELECT * FROM tblLGLoadDetailContainerLink WHERE intLoadDetailId = @intSourceId AND intLoadContainerId = @intContainerId)
+				BEGIN		
+					SET @ErrMsg = 'Container for this shipment does not exist'
+					RAISERROR(@ErrMsg,16,1)
+				END
+
+				SELECT @dblContainerQty = ISNULL(dblReceivedQty,0) 
+				FROM tblLGLoadDetailContainerLink 
+				WHERE intLoadContainerId = @intContainerId 
+					AND intLoadDetailId = @intSourceId
+
+				IF (@dblContainerQty + @dblQty) < 0
+				BEGIN		
+					SET @ErrMsg = 'Negative container quantity is not allowed'
+					RAISERROR(@ErrMsg,16,1)
+				END
+						
+				UPDATE tblLGLoadDetailContainerLink 
+				SET dblReceivedQty = (@dblContainerQty + @dblQty)  
+				WHERE intLoadDetailId = @intSourceId 
+					AND intLoadContainerId = @intContainerId
+			END
+				
+			SELECT @dblContractQty = ISNULL(dblDeliveredQuantity,0) FROM tblLGLoadDetail WHERE intLoadDetailId = @intSourceId
+
+			IF (@dblContractQty + @dblQty) < 0
+			BEGIN		
+				SET @ErrMsg = 'Negative contract quantity is not allowed'
+				RAISERROR(@ErrMsg,16,1)
+			END
+
+			UPDATE tblLGLoadDetail SET dblDeliveredQuantity = (@dblContractQty + @dblQty), dblDeliveredGross = @dblNetWeight, dblDeliveredNet = @dblNetWeight WHERE intLoadDetailId = @intSourceId
+	
+			SET @ysnReverse = CASE WHEN @dblQty < 0 THEN 1 ELSE 0 END
+
+			SELECT @intLoadId = intLoadId FROM tblLGLoadDetail WHERE intLoadDetailId = @intSourceId
+
+			IF @ysnReverse = 0
+			BEGIN
+				UPDATE tblLGLoad SET intShipmentStatus = 4 WHERE intLoadId = @intLoadId
+			END
+			ELSE 
+			BEGIN
+				UPDATE tblLGLoad SET intShipmentStatus = 3 WHERE intLoadId = @intLoadId
+				UPDATE tblLGLoadDetail SET dblDeliveredGross = dblDeliveredGross-@dblNetWeight, dblDeliveredNet = dblDeliveredGross-@dblNetWeight WHERE intLoadDetailId = @intSourceId
+			END	
 		END
 
-		SELECT @intLotId = MIN(intLotId) FROM @ItemsFromInventoryReceipt WHERE intLotId > @intLotId
+		SELECT @intReceiptDetailId = MIN(intInventoryReceiptDetailId) FROM @ItemsFromInventoryReceipt WHERE intInventoryReceiptDetailId > @intReceiptDetailId
 	END
 	
 	-- Reduce the Inbound In-Transit Qty when posting an IR. 

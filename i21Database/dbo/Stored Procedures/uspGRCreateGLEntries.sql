@@ -292,10 +292,14 @@ BEGIN
 	FROM tblGRSettleStorage SS
 	JOIN tblICItem IC 
 		ON 1 = 1
+	LEFT JOIN tblGRSettleContract SC
+		ON SC.intSettleStorageId = SS.intSettleStorageId
+	LEFT JOIN tblCTContractDetail CD
+		ON CD.intContractDetailId = SC.intContractDetailId
 	WHERE SS.intSettleStorageId = @intSettleStorageId 
 		AND ISNULL(SS.dblStorageDue,0) > 0 
 		AND IC.intItemId = @intStorageChargeItemId 	
-	
+		AND (CD.intContractDetailId is null or ( CD.intContractDetailId is not null and CD.intPricingTypeId <> 2))
 	DECLARE @tblItem AS TABLE 
 	(
 		 intItemId			INT
@@ -600,7 +604,7 @@ BEGIN
 			,dtmTransactionDate			= InventoryCostCharges.dtmDate
 			,strJournalLineDescription	= ''
 			,intJournalLineNo			= InventoryCostCharges.intInventoryReceiptItemId
-			,ysnIsUnposted				= 0
+			,ysnIsUnposted				= CASE WHEN @ysnPost = 1 THEN 0 ELSE 1 END
 			,intUserId					= NULL
 			,intEntityId				= @intEntityUserSecurityId
 			,strTransactionId			= InventoryCostCharges.strTransactionId
@@ -666,7 +670,7 @@ BEGIN
 			,dtmTransactionDate			= InventoryCostCharges.dtmDate
 			,strJournalLineDescription  = ''
 			,intJournalLineNo			= InventoryCostCharges.intInventoryReceiptItemId
-			,ysnIsUnposted				= 0
+			,ysnIsUnposted				= CASE WHEN @ysnPost = 1 THEN 0 ELSE 1 END
 			,intUserId					= NULL
 			,intEntityId				= @intEntityUserSecurityId
 			,strTransactionId			= InventoryCostCharges.strTransactionId
@@ -735,7 +739,7 @@ BEGIN
 				,dtmTransactionDate			= NonInventoryCostCharges.dtmDate
 				,strJournalLineDescription  = '' 
 				,intJournalLineNo			= NULL
-				,ysnIsUnposted				= 0
+				,ysnIsUnposted				= CASE WHEN @ysnPost = 1 THEN 0 ELSE 1 END
 				,intUserId					= NULL 
 				,intEntityId				= @intEntityUserSecurityId 
 				,strTransactionId			= NonInventoryCostCharges.strTransactionId
@@ -769,8 +773,8 @@ BEGIN
 		CROSS APPLY dbo.fnGetDebit(NonInventoryCostCharges.dblCost) DebitForeign
 		CROSS APPLY dbo.fnGetCredit(NonInventoryCostCharges.dblCost) CreditForeign
 		WHERE ISNULL(NonInventoryCostCharges.ysnAccrue, 0) = 0
-			AND ISNULL(NonInventoryCostCharges.ysnInventoryCost, 0) = 0
-			AND ISNULL(NonInventoryCostCharges.ysnPrice, 0) = 0
+			AND ISNULL(NonInventoryCostCharges.ysnInventoryCost, 0) = 1
+			--AND ISNULL(NonInventoryCostCharges.ysnPrice, 0) = 0
 
 		UNION ALL 
 		
@@ -793,7 +797,7 @@ BEGIN
 			,dtmTransactionDate			= NonInventoryCostCharges.dtmDate
 			,strJournalLineDescription  = '' 
 			,intJournalLineNo			= NULL
-			,ysnIsUnposted				= 0
+			,ysnIsUnposted				= CASE WHEN @ysnPost = 1 THEN 0 ELSE 1 END
 			,intUserId					= NULL 
 			,intEntityId				= @intEntityUserSecurityId 
 			,strTransactionId			= NonInventoryCostCharges.strTransactionId
@@ -823,12 +827,12 @@ BEGIN
 			ON NonInventoryCostCharges.intChargeId = OtherChargesGLAccounts.intChargeId
 				AND NonInventoryCostCharges.intChargeItemLocation = OtherChargesGLAccounts.intItemLocationId
 		INNER JOIN dbo.tblGLAccount GLAccount
-			ON GLAccount.intAccountId = OtherChargesGLAccounts.intOtherChargeIncome
+			ON GLAccount.intAccountId = OtherChargesGLAccounts.intOtherChargeExpense
 		CROSS APPLY dbo.fnGetDebit(NonInventoryCostCharges.dblCost) DebitForeign
 		CROSS APPLY dbo.fnGetCredit(NonInventoryCostCharges.dblCost) CreditForeign
 		WHERE ISNULL(NonInventoryCostCharges.ysnAccrue, 0) = 0
-			AND ISNULL(NonInventoryCostCharges.ysnInventoryCost, 0) = 0
-			AND ISNULL(NonInventoryCostCharges.ysnPrice, 0) = 0
+			AND ISNULL(NonInventoryCostCharges.ysnInventoryCost, 0) = 1
+			--AND ISNULL(NonInventoryCostCharges.ysnPrice, 0) = 0
 
 		-------------------------------------------------------------------------------------------
 		-- Accrue Other Charge to Vendor 
@@ -858,7 +862,7 @@ BEGIN
 			,dtmTransactionDate			= NonInventoryCostCharges.dtmDate
 			,strJournalLineDescription  = '' 
 			,intJournalLineNo			= NULL
-			,ysnIsUnposted				= 0
+			,ysnIsUnposted				= CASE WHEN @ysnPost = 1 THEN 0 ELSE 1 END
 			,intUserId					= NULL 
 			,intEntityId				= @intEntityUserSecurityId 
 			,strTransactionId			= NonInventoryCostCharges.strTransactionId
@@ -915,7 +919,7 @@ BEGIN
 			,dtmTransactionDate			= NonInventoryCostCharges.dtmDate
 			,strJournalLineDescription  = '' 
 			,intJournalLineNo			= NULL
-			,ysnIsUnposted				= 0
+			,ysnIsUnposted				= CASE WHEN @ysnPost = 1 THEN 0 ELSE 1 END
 			,intUserId					= NULL 
 			,intEntityId				= @intEntityUserSecurityId 
 			,strTransactionId			= NonInventoryCostCharges.strTransactionId
@@ -979,7 +983,7 @@ BEGIN
 			,dtmTransactionDate			= NonInventoryCostCharges.dtmDate
 			,strJournalLineDescription  = '' 
 			,intJournalLineNo			= NULL
-			,ysnIsUnposted				= 0
+			,ysnIsUnposted				= CASE WHEN @ysnPost = 1 THEN 0 ELSE 1 END
 			,intUserId					= NULL 
 			,intEntityId				= @intEntityUserSecurityId 
 			,strTransactionId			= NonInventoryCostCharges.strTransactionId
@@ -1036,7 +1040,7 @@ BEGIN
 			,dtmTransactionDate			= NonInventoryCostCharges.dtmDate
 			,strJournalLineDescription  = '' 
 			,intJournalLineNo			= NULL
-			,ysnIsUnposted				= 0
+			,ysnIsUnposted				= CASE WHEN @ysnPost = 1 THEN 0 ELSE 1 END
 			,intUserId					= NULL 
 			,intEntityId				= @intEntityUserSecurityId 
 			,strTransactionId			= NonInventoryCostCharges.strTransactionId

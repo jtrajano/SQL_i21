@@ -97,7 +97,7 @@ BEGIN
 				INNER JOIN dbo.tblSTRetailPriceAdjustment rpa
 					ON pad.intRetailPriceAdjustmentId = rpa.intRetailPriceAdjustmentId
 				WHERE pad.intRetailPriceAdjustmentId = @intRetailPriceAdjustmentId
-					AND (pad.ysnPosted = CAST(0 AS BIT) OR pad.ysnPosted IS NULL)
+					AND rpa.ysnPosted = CAST(0 AS BIT) -- (pad.ysnPosted = CAST(0 AS BIT) OR pad.ysnPosted IS NULL)
 
 				--TEST
 				--SELECT '@tblRetailPriceAdjustmentDetailIds', * FROM @tblRetailPriceAdjustmentDetailIds
@@ -205,14 +205,14 @@ BEGIN
 											--SET @ysnSuccess = CAST(1 AS BIT)
 											SET @intSuccessPostCount = @intSuccessPostCount + 1
 
-											IF(@ysnOneTimeUse = CAST(1 AS BIT))
-												BEGIN
+											--IF(@ysnOneTimeUse = CAST(1 AS BIT))
+											--	BEGIN
 
-													UPDATE tblSTRetailPriceAdjustmentDetail
-													SET ysnPosted = 1
-													WHERE intRetailPriceAdjustmentDetailId = @intRetailPriceAdjustmentDetailId
+											--		UPDATE tblSTRetailPriceAdjustmentDetail
+											--		SET ysnPosted = 1
+											--		WHERE intRetailPriceAdjustmentDetailId = @intRetailPriceAdjustmentDetailId
 
-												END
+											--	END
 										
 										END
 									ELSE

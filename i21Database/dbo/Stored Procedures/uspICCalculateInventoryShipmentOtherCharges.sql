@@ -210,7 +210,7 @@ BEGIN
 		BEGIN 
 			-- 'Unable to calculate {Other Charge Item} as {Unit of Measure} is not found in {Item} > UOM setup.'
 			EXEC uspICRaiseError 80050, @strOtherCharge, @strUnitMeasure, @strItemNo;
-			GOTO _Exit
+			RETURN -80050
 		END 
 	END 
 END 
@@ -370,10 +370,10 @@ BEGIN
 				AND ChargePerItem.dblCalculatedAmount IS NULL
 
 		IF @intItemId IS NOT NULL 
-		BEGIN 
+		BEGIN 		
 			-- 'Unable to calculate {Other Charge Item} as {Unit of Measure} is not found in {Item} > UOM setup.'
 			EXEC uspICRaiseError 80050, @strOtherCharge, @strUnitMeasure, @strItemNo;
-			GOTO _Exit
+			RETURN -80050;
 		END 
 	END 
 END 
@@ -560,7 +560,7 @@ BEGIN
 			INNER JOIN dbo.tblICItem Item 
 				ON Item.intItemId = Charge.intChargeId		
 			LEFT JOIN (
-					SELECT	dblAmount = SUM(dblCalculatedAmount)
+					SELECT	dblAmount = SUM(ISNULL(dblCalculatedAmount, 0))
 							,dblQty	= SUM(ISNULL(dblCalculatedQty, 0)) 
 							,intInventoryShipmentChargeId
 					FROM	dbo.tblICInventoryShipmentChargePerItem

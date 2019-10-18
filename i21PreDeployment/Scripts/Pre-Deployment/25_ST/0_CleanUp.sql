@@ -532,33 +532,100 @@ IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = N'tb
 ----------------------------------------------------------------------------------------------------------------------------------
 IF EXISTS(SELECT TOP 1 1 FROM sys.objects WHERE type = 'P' AND name = 'uspSTCStoreSQLScheduler')
 	BEGIN
-		PRINT(N'Drop uspSTCStoreSQLScheduler')
-		EXEC('
-				DROP PROCEDURE [dbo].[uspSTCStoreSQLScheduler]
-			')
+			PRINT(N'Drop uspSTCStoreSQLScheduler')
+			EXEC('
+					DROP PROCEDURE [dbo].[uspSTCStoreSQLScheduler]
+				')
 	END
 ----------------------------------------------------------------------------------------------------------------------------------
 -- End: DROP uspSTCStoreSQLScheduler
 ----------------------------------------------------------------------------------------------------------------------------------
 
 
+
+
 ----------------------------------------------------------------------------------------------------------------------------------
 -- Start: Remove Job Scheduler named 'i21_PostRetailPrice_Maintenance_Job'
 ----------------------------------------------------------------------------------------------------------------------------------
-IF EXISTS (SELECT TOP 1 1 FROM msdb.dbo.sysjobs WHERE name = N'i21_PostRetailPrice_Maintenance_Job')
+PRINT(N'Validate current SQL user before removing Job Scheduler named i21_PostRetailPrice_Maintenance_Job.')
+
+	-- Check if current user has sysadmin/serveradmin role
+	-- Note: http://jira.irelyserver.com/browse/ST-1541
+	DECLARE @isUserHasRole BIT = CAST(0 AS BIT)
+
+
+	IF OBJECT_ID('tempdb..#TempSysAdmin') IS NOT NULL
+		BEGIN
+			DROP TABLE #TempSysAdmin
+		END
+		
+
+	Create TABLE #TempSysAdmin
+	(
+		[ServerRole]	SYSNAME,
+		[MemberName]	SYSNAME,
+		[MemberSID]		VARBINARY(85)
+	)
+
+
+	INSERT INTO #TempSysAdmin EXEC sp_helpsrvrolemember 'sysadmin'
+
+	IF OBJECT_ID('tempdb..#TempServerAdmin') IS NOT NULL
+		BEGIN
+			DROP TABLE #TempServerAdmin
+		END
+		
+
+	Create TABLE #TempServerAdmin
+	(
+		[ServerRole]	sysname,
+		[MemberName]	sysname,
+		[MemberSID]		varbinary(85)
+	)
+
+	INSERT INTO #TempServerAdmin exec sp_helpsrvrolemember 'serveradmin'
+
+	DECLARE @loginUser VARCHAR(250)
+	SET @loginUser = SYSTEM_USER
+
+	SELECT 
+		@isUserHasRole = 1 
+	FROM #TempSysAdmin 
+	WHERE MemberName = @loginUser
+
+	IF ISNULL(@isUserHasRole, 0) = 0
 	BEGIN
-		PRINT(N'Drop i21_PostRetailPrice_Maintenance_Job')
-		EXEC('
-				DECLARE @jobId binary(16)
-
-				SELECT @jobId = job_id FROM msdb.dbo.sysjobs WHERE (name = N''i21_PostRetailPrice_Maintenance_Job'')
-
-				IF (@jobId IS NOT NULL)
-					BEGIN
-						EXEC msdb.dbo.sp_delete_job @jobId
-					END
-			')
+		SELECT @isUserHasRole = 1 FROM #TempServerAdmin WHERE MemberName = @loginUser
 	END
+
+	-- VALIDATE
+	IF ISNULL(@isUserHasRole, 0) = 1
+		BEGIN
+			PRINT(N'Current SQL user has rights to drop maintenenace plan i21_CStore_Daily_Maintenance_Job.')
+
+			IF EXISTS (SELECT TOP 1 1 FROM msdb.dbo.sysjobs WHERE name = N'i21_CStore_Daily_Maintenance_Job')
+				BEGIN
+					PRINT(N'Will Drop i21_PostRetailPrice_Maintenance_Job.')
+
+					EXEC('
+							DECLARE @jobId binary(16)
+
+							SELECT @jobId = job_id FROM msdb.dbo.sysjobs WHERE (name = N''i21_CStore_Daily_Maintenance_Job'')
+
+							IF (@jobId IS NOT NULL)
+								BEGIN
+									EXEC msdb.dbo.sp_delete_job @jobId
+								END
+						')
+
+					PRINT(N'Drop i21_CStore_Daily_Maintenance_Job successfully.')
+				END
+
+		END
+	ELSE
+		BEGIN
+			PRINT N'CURRENT SQL USER IS NOT ALLOWED TO DROP MAINTENANCE PLAN. PLEASE CONTACT YOUR DATABASE ADMINISTRATOR FOR PERMISSION.'
+		END
 ----------------------------------------------------------------------------------------------------------------------------------
 -- End: Remove Job Scheduler named 'i21_PostRetailPrice_Maintenance_Job'
 ----------------------------------------------------------------------------------------------------------------------------------

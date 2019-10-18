@@ -1,5 +1,5 @@
 ﻿CREATE VIEW dbo.vyuMFGetPalletSSCCNo
-	WITH schemabinding
+	--WITH schemabinding
 AS
 SELECT OH.strReferenceNo
 	,L.strLotNumber

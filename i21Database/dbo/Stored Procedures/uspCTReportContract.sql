@@ -612,10 +612,10 @@ BEGIN TRY
 			--,strLocationWithDate					= SQ.strLocationName+', '+CONVERT(CHAR(11),CH.dtmContractDate,13)
 			,strLocationWithDate					= SQ.strLocationName+', '+DATENAME(dd,CH.dtmContractDate) + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,LEFT(DATENAME(MONTH,CH.dtmContractDate),3)), LEFT(DATENAME(MONTH,CH.dtmContractDate),3)) + ' ' + DATENAME(yyyy,CH.dtmContractDate)
 			,strContractText						= ISNULL(TX.strText,'') 
-	        ,strCondition							=	CASE WHEN LEN(LTRIM(RTRIM(@strAmendedColumns))) = 0 THEN
-																@rtStrCondition1 + ' '+ dbo.fnCTGetTranslation('ContractManagement.view.Associations',AN.intAssociationId,@intLaguageId,'Printable Contract Text',AN.strComment) + ' ('+dbo.fnCTGetTranslation('ContractManagement.view.Associations',AN.intAssociationId,@intLaguageId,'Name',AN.strName)+')'+@rtStrCondition2+' .' 
+	        ,strCondition							=	CASE WHEN LEN(LTRIM(RTRIM(ISNULL(@strAmendedColumns,'')))) = 0 THEN
+																@rtStrCondition1 + ' '+ ISNULL(dbo.fnCTGetTranslation('ContractManagement.view.Associations',AN.intAssociationId,@intLaguageId,'Printable Contract Text',AN.strComment),'') + ' ('+ISNULL(dbo.fnCTGetTranslation('ContractManagement.view.Associations',AN.intAssociationId,@intLaguageId,'Name',AN.strName),'')+') '+@rtStrCondition2+'.' 
 														ELSE
-																@rtStrCondition3 + ' '+ CONVERT(NVARCHAR(15),@dtmApproved,106) + CHAR(13) + CHAR(10) + @rtStrCondition4 + '.'
+																@rtStrCondition3 + ' '+ CONVERT(NVARCHAR(15),ISNULL(@dtmApproved,''),106) + CHAR(13) + CHAR(10) + @rtStrCondition4 + '.'
 														END
 			
 			,strPositionWithPackDesc			    = PO.strPosition +ISNULL(' ('+CASE WHEN SQ.strPackingDescription = '' THEN NULL ELSE SQ.strPackingDescription END+') ','')

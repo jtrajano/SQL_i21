@@ -79,6 +79,7 @@ SELECT
 	,strSubBook						= SUBBOOK.strSubBook
 	,blbSignature					= I.blbSignature
 	,intTicketId					= SCALETICKETID.intTicketId
+	,strPOSPayMethods				= PAYMETHODS.strPOSPayMethods
 FROM dbo.tblARInvoice I WITH (NOLOCK)
 INNER JOIN (
 	SELECT intEntityId
@@ -242,5 +243,19 @@ OUTER APPLY (
 	WHERE ID.intInvoiceId = I.intInvoiceId
 	  AND ID.intTicketId IS NOT NULL
 ) SCALETICKETID
+OUTER APPLY
+(
+SELECT strPOSPayMethods = LEFT(strPaymentMethod, LEN(strPaymentMethod) - 1)
+FROM
+	(SELECT DISTINCT CAST(PAYM.strPaymentMethod AS VARCHAR(200))  + ', '  
+		FROM tblARPaymentDetail PAYD
+		INNER JOIN tblARPayment PAY
+		ON PAYD.intPaymentId = PAY.intPaymentId
+		INNER JOIN tblSMPaymentMethod PAYM
+		ON PAY.intPaymentMethodId = PAYM.intPaymentMethodID
+		WHERE PAYD.intInvoiceId = I.intInvoiceId AND I.strType = 'POS'
+		FOR XML PATH ('')
+	) C (strPaymentMethod)
+) PAYMETHODS
 
 GO

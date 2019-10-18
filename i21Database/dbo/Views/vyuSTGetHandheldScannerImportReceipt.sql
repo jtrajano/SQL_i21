@@ -64,6 +64,9 @@ LEFT JOIN tblICItemLocation ItemLoc
 	AND ItemLoc.intLocationId = Store.intCompanyLocationId
 LEFT JOIN tblICItemUOM ItemUOM 
 	ON ItemUOM.intItemId = IR.intItemId 
-	AND ItemUOM.strLongUPCCode = IR.strUPCNo
+		AND CAST(ItemUOM.intUpcCode AS FLOAT) = CONVERT(NUMERIC(32, 0),CAST(IR.strUPCNo AS FLOAT))
+		-- Note: http://jira.irelyserver.com/browse/ST-1538
+		-- AND ItemUOM.strLongUPCCode = IR.strUPCNo 
 LEFT JOIN tblICUnitMeasure UOM 
 	ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
+WHERE IR.strUPCNo NOT LIKE '%[^0-9]%' 

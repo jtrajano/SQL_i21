@@ -98,7 +98,7 @@ SELECT SMTGCE.*, SMTGC.[intTaxCodeId],SMTGC.[intTaxGroupId]
 /******************************************************************************************************************************************************************************/
 SELECT 
 CustomerNumber	
-,ItemNumber		
+,CAST(ItemNumber AS VARCHAR(15)) ItemNumber
 ,State			
 ,Authority1		
 ,Authority2  COLLATE Latin1_General_CI_AS AS Authority2

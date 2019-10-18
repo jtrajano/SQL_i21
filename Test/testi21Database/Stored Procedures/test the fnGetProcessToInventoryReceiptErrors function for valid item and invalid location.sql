@@ -41,7 +41,7 @@ BEGIN
 		---- Valid item and invalid location
 		--SELECT	intItemId = @StickyGrains
 		--		,intItemLocationId = @InvalidLocation
-		--		,strText = FORMATMESSAGE(80002)
+		--		,strText = dbo.fnICGetErrorMessage(80002)
 		--		,intErrorCode = 80002
 
 		-- Create the mock data 

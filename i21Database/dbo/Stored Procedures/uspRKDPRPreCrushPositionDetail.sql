@@ -151,6 +151,7 @@ BEGIN
 	DECLARE @strDescription NVARCHAR(50)
 	DECLARE @intOneCommodityId INT
 	DECLARE @intCommodityUnitMeasureId INT
+		, @intCommodityStockUOMId INT
 		, @ysnExchangeTraded BIT
 
 	SELECT @mRowNumber = MIN(intCommodityIdentity)
@@ -169,6 +170,7 @@ BEGIN
 		WHERE intCommodityId = @intCommodityId
 
 		SELECT @intCommodityUnitMeasureId = intCommodityUnitMeasureId
+				,@intCommodityStockUOMId = intUnitMeasureId
 		FROM tblICCommodityUnitMeasure
 		WHERE intCommodityId = @intCommodityId AND ysnDefault = 1
 
@@ -344,7 +346,8 @@ BEGIN
 				, intFutOptTransactionHeaderId int
 				, ysnPreCrush BIT
 				, strNotes NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
-				, strBrokerTradeNo NVARCHAR(100) COLLATE Latin1_General_CI_AS)
+				, strBrokerTradeNo NVARCHAR(100) COLLATE Latin1_General_CI_AS
+				, intBrokerageAccountId INT)
 	
 			INSERT INTO @tblGetOpenFutureByDate (intFutOptTransactionId
 				, dblOpenContract
@@ -364,7 +367,8 @@ BEGIN
 				, intFutOptTransactionHeaderId
 				, ysnPreCrush
 				, strNotes
-				, strBrokerTradeNo)
+				, strBrokerTradeNo
+				, intBrokerageAccountId)
 			SELECT intFutOptTransactionId
 				, dblOpenContract
 				, strCommodityCode
@@ -384,6 +388,7 @@ BEGIN
 				, ysnPreCrush
 				, strNotes
 				, strBrokerTradeNo
+				, intBrokerageAccountId
 			FROM fnRKGetOpenFutureByDate (@intCommodityId, '1/1/1900', @dtmToDate, @CrushReport)
 
 			INSERT INTO @List (strCommodityCode
@@ -1006,7 +1011,7 @@ BEGIN
 					, v.strLocationName
 					, strContractEndMonth = 'Near By' COLLATE Latin1_General_CI_AS
 					, strContractEndMonthNearBy = 'Near By' COLLATE Latin1_General_CI_AS
-					, dblTotal = dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull(ri.dblQuantity, 0))
+					, dblTotal = dbo.fnCTConvertQuantityToTargetItemUOM(cd.intItemId,iuom.intUnitMeasureId,@intCommodityStockUOMId,isnull(ri.dblQuantity, 0))
 					, intSeqId = 6
 					, um.strUnitMeasure
 					, intFromCommodityUnitMeasureId = @intCommodityUnitMeasureId
@@ -1030,11 +1035,11 @@ BEGIN
 				INNER JOIN tblCTContractHeader ch ON cd.intContractHeaderId = ch.intContractHeaderId  AND ch.intContractTypeId = 2
 				INNER JOIN tblICCommodity com on ch.intCommodityId = com.intCommodityId
 				INNER JOIN tblICItem i on cd.intItemId = i.intItemId
+				INNER JOIN tblICItemUOM iuom on iuom.intItemId = i.intItemId and iuom.intItemUOMId = ri.intItemUOMId
 				INNER JOIN tblICCategory cat on i.intCategoryId = cat.intCategoryId
 				INNER JOIN tblRKFutureMarket fm on cd.intFutureMarketId = fm.intFutureMarketId
 				INNER JOIN tblRKFuturesMonth mnt on cd.intFutureMonthId = mnt.intFutureMonthId
-				JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = ch.intCommodityId AND cd.intUnitMeasureId = ium.intUnitMeasureId
-				JOIN tblICUnitMeasure um ON um.intUnitMeasureId = ium.intUnitMeasureId
+				JOIN tblICUnitMeasure um ON um.intUnitMeasureId = @intCommodityStockUOMId
 				INNER JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = cd.intCompanyLocationId
 				LEFT JOIN tblARInvoiceDetail invD ON ri.intInventoryShipmentItemId = invD.intInventoryShipmentItemId
 				LEFT JOIN tblARInvoice inv ON invD.intInvoiceId = inv.intInvoiceId
@@ -1548,9 +1553,9 @@ FROM (
 								ELSE LEFT(fm.strFutureMonth, 4) + '20' + CONVERT(NVARCHAR(2), intYear) END COLLATE Latin1_General_CI_AS
 		, m.intUnitMeasureId
 		, UOM.strUnitMeasure
-		, (oc.strBroker+ '-' + ba.strAccountNumber) COLLATE Latin1_General_CI_AS strAccountNumber
+		, (oc.strBroker+ '-' + oc.strBrokerAccount) COLLATE Latin1_General_CI_AS strAccountNumber
 		, strTranType = strNewBuySell
-		, ba.intBrokerageAccountId
+		, oc.intBrokerageAccountId
 		, strInstrumentType = oc.strInstrumentType
 		, dblNoOfLot = ISNULL(dblOpenContract, 0)
 		, m.intFutureMarketId
@@ -1565,7 +1570,6 @@ FROM (
 	JOIN tblSMCompanyLocation l ON l.strLocationName = oc.strLocationName
 	JOIN tblRKFutureMarket m ON m.strFutMarketName = oc.strFutureMarket
 	JOIN tblSMCurrency cu ON cu.intCurrencyID = m.intCurrencyId
-	LEFT JOIN tblRKBrokerageAccount ba ON ba.strAccountNumber = oc.strBrokerAccount
 	JOIN tblICCommodityUnitMeasure cuc1 ON cuc1.intCommodityId IN (SELECT DISTINCT intCommodity FROM @Commodity c) AND m.intUnitMeasureId = cuc1.intUnitMeasureId
 	LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = cuc1.intUnitMeasureId
 	INNER JOIN tblRKFuturesMonth fm ON fm.strFutureMonth = oc.strFutureMonth AND fm.intFutureMarketId = m.intFutureMarketId
@@ -1639,9 +1643,9 @@ FROM (
 		, strContractEndMonth = CASE WHEN CONVERT(DATETIME, '01 ' + om.strOptionMonth) < CONVERT(DATETIME, CONVERT(DATETIME, CONVERT(VARCHAR(10), GETDATE(), 110), 110)) THEN 'Near By'
 								ELSE LEFT(om.strOptionMonth, 4) + '20' + CONVERT(NVARCHAR(2), intYear) END COLLATE Latin1_General_CI_AS
 		, m.intUnitMeasureId
-		, oc.strBroker + '-' + ba.strAccountNumber COLLATE Latin1_General_CI_AS strAccountNumber
+		, oc.strBroker + '-' + oc.strBrokerAccount COLLATE Latin1_General_CI_AS strAccountNumber
 		, strTranType = strNewBuySell
-		, ba.intBrokerageAccountId
+		, oc.intBrokerageAccountId
 		, strInstrumentType
 		, dblNoOfLot = CASE WHEN oc.strNewBuySell = 'Buy' THEN ISNULL(dblOpenContract, 0) ELSE ISNULL(dblOpenContract, 0) END
 		, dblDelta = ISNULL((SELECT TOP 1 dblDelta
@@ -1661,7 +1665,6 @@ FROM (
 	JOIN tblICCommodity th ON th.strCommodityCode = oc.strCommodityCode
 	JOIN tblSMCompanyLocation l ON l.strLocationName = oc.strLocationName
 	JOIN tblRKFutureMarket m ON m.strFutMarketName = oc.strFutureMarket
-	LEFT JOIN tblRKBrokerageAccount ba ON ba.strAccountNumber = oc.strBrokerAccount
 	JOIN tblICCommodityUnitMeasure cuc1 ON th.intCommodityId = cuc1.intCommodityId AND m.intUnitMeasureId = cuc1.intUnitMeasureId
 	JOIN tblRKOptionsMonth om ON om.strOptionMonth = oc.strOptionMonth
 	AND intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
@@ -1731,9 +1734,9 @@ BEGIN
 			, case when CONVERT(DATETIME, '01 ' + fm.strFutureMonth) < CONVERT(DATETIME, convert(DATETIME, CONVERT(VARCHAR(10), getdate(), 110), 110)) then 'Near By'
 					else left(fm.strFutureMonth, 4) + '20' + convert(NVARCHAR(2), intYear) end COLLATE Latin1_General_CI_AS strFutureMonth
 			, m.intUnitMeasureId
-			, oc.strBroker + '-' + ba.strAccountNumber COLLATE Latin1_General_CI_AS strAccountNumber
+			, oc.strBroker + '-' + oc.strBrokerAccount COLLATE Latin1_General_CI_AS strAccountNumber
 			, strNewBuySell AS strTranType
-			, ba.intBrokerageAccountId
+			, oc.intBrokerageAccountId
 			, strInstrumentType
 			, CASE WHEN oc.strNewBuySell = 'Buy' THEN ISNULL(dblOpenContract, 0) ELSE ISNULL(dblOpenContract, 0) END dblNoOfLot
 			, m.intFutureMarketId
@@ -1747,7 +1750,6 @@ BEGIN
 		JOIN tblSMCompanyLocation l ON l.strLocationName = oc.strLocationName
 		JOIN tblRKFutureMarket m ON m.strFutMarketName = oc.strFutureMarket
 		JOIN tblSMCurrency cu ON cu.intCurrencyID = m.intCurrencyId
-		LEFT JOIN tblRKBrokerageAccount ba ON ba.strAccountNumber = oc.strBrokerAccount
 		JOIN tblICCommodityUnitMeasure cuc1 ON cuc1.intCommodityId IN (SELECT DISTINCT intCommodity FROM @Commodity c) AND m.intUnitMeasureId = cuc1.intUnitMeasureId
 		LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = cuc1.intUnitMeasureId
 		INNER JOIN tblRKFuturesMonth fm ON fm.strFutureMonth = oc.strFutureMonth AND fm.intFutureMarketId = m.intFutureMarketId

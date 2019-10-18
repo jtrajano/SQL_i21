@@ -1,4 +1,11 @@
-﻿/*
+﻿CREATE PROCEDURE [dbo].[uspICAddItemReceipt]
+	@ReceiptEntries ReceiptStagingTable READONLY
+	,@OtherCharges ReceiptOtherChargesTableType READONLY 
+	,@intUserId AS INT	
+	,@LotEntries ReceiptItemLotStagingTable READONLY
+AS
+
+/*
 
 Important Notes:
 
@@ -14,13 +21,6 @@ Accepted values for ReceiptStagingTable.intTaxGroupId and ReceiptOtherChargesTab
 	3. or provide a valid tax group. 
 
 */
-
-CREATE PROCEDURE [dbo].[uspICAddItemReceipt]
-	@ReceiptEntries ReceiptStagingTable READONLY
-	,@OtherCharges ReceiptOtherChargesTableType READONLY 
-	,@intUserId AS INT	
-	,@LotEntries ReceiptItemLotStagingTable READONLY
-AS
 
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -941,14 +941,14 @@ BEGIN
 																	CASE	WHEN (ContractView.ysnLoad = 1) THEN 
 																				ISNULL(ContractView.intNoOfLoad, 0)
 																			ELSE 
-																				ISNULL(ContractView.dblDetailQuantity, 0) 
+																				ISNULL(ContractView.dblQuantity, 0) 
 																	END
 																--WHEN RawData.intSourceType = 1 THEN -- Scale
 																--	0 
 																WHEN RawData.intSourceType = 2 THEN -- Inbound Shipment
 																	ISNULL(LogisticsView.dblQuantity, 0)
 																WHEN RawData.intSourceType = 3 THEN -- Transport
-																	ISNULL(TransportView.dblOrderedQuantity, 0) 
+																	ISNULL(TransportView.dblOrderedQuantity, 0)
 																WHEN RawData.intSourceType = 5 THEN -- Delivery Sheet
 																	0
 																ELSE 
@@ -1089,9 +1089,18 @@ BEGIN
 					AND RawData.strReceiptType = 'Purchase Order'
 
 				-- 2. Contracts
-				LEFT JOIN vyuCTCompactContractDetailView ContractView
-					ON ContractView.intContractDetailId = ISNULL(RawData.intContractDetailId, 0) -- intLineNo
-					AND RawData.strReceiptType = 'Purchase Contract'
+				OUTER APPLY (
+					SELECT
+						  ContractDetail.intContractDetailId
+						, [ContractHeader].ysnLoad
+						, [ContractHeader].intNoOfLoad
+						, [ContractDetail].dblQuantity
+						, [ContractDetail].intPricingTypeId
+					FROM tblCTContractDetail ContractDetail 
+						INNER JOIN tblCTContractHeader ContractHeader ON ContractHeader.intContractHeaderId = ContractDetail.intContractHeaderId
+					WHERE ContractDetail.intContractDetailId = ISNULL(RawData.intContractDetailId, 0) -- intLineNo
+						AND RawData.strReceiptType = 'Purchase Contract'
+				) ContractView
 
 				-- 3. Inventory Transfer
 				LEFT JOIN vyuICGetInventoryTransferDetail TransferView
@@ -1099,16 +1108,15 @@ BEGIN
 					AND RawData.strReceiptType = 'Transfer Order'
 
 				-- 4. Logistics
-				LEFT JOIN vyuLGLoadContainerLookup LogisticsView --vyuICLoadContainerReceiptContracts LogisticsView
+				LEFT JOIN vyuICLoadContainersSearch LogisticsView --vyuICLoadContainerReceiptContracts LogisticsView
 					ON LogisticsView.intLoadDetailId = RawData.intSourceId
 					AND RawData.strReceiptType = 'Purchase Contract'
 					AND RawData.intSourceType = 2
 					AND RawData.intContainerId = LogisticsView.intLoadContainerId
 
 				-- 5. Transport Loads (New tables)
-				LEFT JOIN vyuTRGetLoadReceipt TransportView 
+				LEFT JOIN vyuICGetLoadReceipt TransportView 
 					ON TransportView.intLoadReceiptId = RawData.intSourceId
-					AND RawData.intSourceType = 3
 
 		WHERE RawHeaderData.intId = @intId
 		ORDER BY RawData.intSort, RawData.intId
@@ -1975,13 +1983,7 @@ BEGIN
 
 		-- Calculate the tax per line item 
 		UPDATE	ReceiptItem 
-		SET		dblTax = ROUND(
-					dbo.fnDivide(
-						ISNULL(Taxes.dblTaxPerLineItem, 0)
-						,ISNULL(Receipt.intSubCurrencyCents, 1) 
-					)
-				, 2) 
-
+		SET		dblTax = ROUND(ISNULL(Taxes.dblTaxPerLineItem, 0), 2) 
 		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 						ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 				LEFT JOIN (
@@ -2134,7 +2136,8 @@ BEGIN
 END
 
 -- Update Search Details
-EXEC dbo.uspICUpdateInventoryReceiptDetail @inventoryReceiptId
+-- Temporarily comment this out to resolve IC-7927 but will temporarily remove optimizations in IC-7893
+--EXEC dbo.uspICUpdateInventoryReceiptDetail @inventoryReceiptId
 
 IF @@TRANCOUNT > 0
 BEGIN 

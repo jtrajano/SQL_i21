@@ -1078,6 +1078,7 @@
     <Build Include="dbo\Views\vyuICGetReceiptItemSourceSearch.sql" />
     <Build Include="dbo\Views\vyuICLoadContainers.sql" />
     <Build Include="dbo\Views\vyuICLoadContainersSearch.sql" />
+    <Build Include="dbo\Views\vyuICGetLoadReceipt.sql" />
     <Build Include="dbo\Tables\tblHDAnnouncementType.sql" />
     <Build Include="dbo\Tables\tblHDAnnouncement.sql" />
     <Build Include="dbo\Tables\tblHDProject.sql" />
@@ -4255,7 +4256,6 @@
     <Build Include="dbo\Stored Procedures\uspRKAutoExpireMonth.sql" />
     <Build Include="dbo\Views\vyuPATCalculateRefundType.sql" />
     <Build Include="dbo\Tables\tblRKSettlementPriceImport.sql" />
-    <Build Include="dbo\Tables\tblRKSettlementPriceImport_ErrLog.sql" />
     <Build Include="dbo\Stored Procedures\uspRKSettlementPriceImport.sql" />
     <Build Include="dbo\Stored Procedures\uspRKSettlementPriceImportValidate.sql" />
     <Build Include="dbo\Stored Procedures\uspICValidateReceiptItemLocations.sql" />
@@ -7016,7 +7016,6 @@
     <Build Include="dbo\Stored Procedures\uspICPostStorageMeasurementReading.sql" />
     <None Include="Scripts\Post-Deployment\EM\041_FixVendorNo.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityLotMergeDetail.sql" />
-    <Build Include="dbo\Stored Procedures\uspARInvoiceUpdateSequenceBalance.sql" />
     <Build Include="dbo\Views\vyuSMCreditCardPaymentHistory.sql" />
     <Build Include="dbo\Stored Procedures\uspARPOSCreateNegativeCashReceipts.sql" />
     <Build Include="dbo\Stored Procedures\uspARBookInvoiceGLEntries.sql" />
@@ -8049,10 +8048,29 @@
     <Build Include="dbo\Stored Procedures\uspLGGetShippingInstructionReportWithDocuments.sql" />
     <None Include="Scripts\Post-Deployment\SM\1910_DeleteDuplicateUserPreference.sql" />
     <Build Include="dbo\Views\vyuIPLoadView.sql" />
+    <Build Include="dbo\Views\vyuAPClearingFilterTransactionNo.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKPositionReconciliationReportBasisDeliveries.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKPositionReconciliationReportDerivativeActivity.sql" />
+    <Build Include="dbo\Views\vyuCTSearchContractDetail2.sql" />
+    <Build Include="dbo\Views\vyuMFGetSalesOrderDetail.sql" />
+    <Build Include="dbo\Views\vyuSTItemUOM.sql" />
+    <Build Include="dbo\Views\vyuLGAdditionalColumnForContractDetailView.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRptWeightClaimJDE.sql" />
+    <Build Include="dbo\Views\vyuAPRptWeightClaimJDE.sql" />
+    <Build Include="dbo\Functions\fnCTGetAvailablePriceQuantity.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCGetContractsAndAllocate.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPConvertPaymentToPrepay.sql" />
     <Build Include="dbo\Views\vyuICGetRetailValuationByLocation.sql" />
-    <Build Include="dbo\Views\vyuLGLoadDetailUberScale.sql" />
+    <Build Include="dbo\Functions\fnAPIsItemInContract.sql" />
+    <Build Include="dbo\Views\vyuCTShipmentStatus.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessPreStageContract.sql" />
+    <Build Include="dbo\Tables\tblCTContractPreStage.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessPreStageLoad.sql" />
+    <Build Include="dbo\Tables\tblLGIntrCompLogisticsPreStg.sql" />
     <Build Include="dbo\Stored Procedures\uspICZeroAllStockQtyInCountDetail.sql" />
-    <Build Include="dbo\User Defined Types\StagingTransactionLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMUpdateAPOverflowSettings.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFValidateInvoiceDataSetup.sql" />
+    <Build Include="dbo\Views\vyuLGLoadDetailUberScale.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -8287,6 +8305,7 @@
     <Build Include="dbo\Functions\fnARCustomerAgingReport.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\37_UpdatePOSNewFields.sql" />
     <None Include="Scripts\Post-Deployment\AP\UpdatePaymentDetailOffset.sql" />
+    <Build Include="dbo\Views\vyuARInvoiceSubFormulaReport.sql" />
     <Build Include="dbo\Views\vyuSCTicketContractUsed.sql" />
   </ItemGroup>
   <ItemGroup>

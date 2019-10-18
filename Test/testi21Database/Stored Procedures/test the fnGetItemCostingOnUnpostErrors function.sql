@@ -89,7 +89,7 @@ BEGIN
 		-- 2: Negative stock is not allowed 
 		SELECT	intItemId = @WetGrains
 				,intItemLocationId = @intItemLocationId_3
-				,strText = FORMATMESSAGE(80003, 'WET GRAINS', 'BETTER HAVEN')
+				,strText = dbo.fnICFormatErrorMessage(80003, 'WET GRAINS', 'BETTER HAVEN', DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT)
 				,intErrorCode = 80003
 	END
 
@@ -97,15 +97,57 @@ BEGIN
 	BEGIN 
 		INSERT INTO actual
 		-- 1: Postive stock 
-		SELECT * FROM dbo.fnGetItemCostingOnPostErrors(@WetGrains, @intItemLocationId_2, @WetGrains_BushelUOMId, @WetGrains_DefaultLocation_SubLocation, @WetGrains_DefaultLocation_StorageLocation, 10, NULL)
+		SELECT * FROM dbo.fnGetItemCostingOnPostErrors(
+			@WetGrains
+			, @intItemLocationId_2
+			, @WetGrains_BushelUOMId
+			, @WetGrains_DefaultLocation_SubLocation
+			, @WetGrains_DefaultLocation_StorageLocation
+			, 10
+			, NULL
+			, DEFAULT 
+			, DEFAULT 
+			, DEFAULT 
+			, DEFAULT 
+			, DEFAULT 
+			, DEFAULT 		
+		)
 
 		-- 2: Negative stock is not allowed 
 		UNION ALL 
-		SELECT * FROM dbo.fnGetItemCostingOnPostErrors(@WetGrains, @intItemLocationId_3, @WetGrains_BushelUOMId, @WetGrains_DefaultLocation_SubLocation, @WetGrains_DefaultLocation_StorageLocation, -10, NULL)
+		SELECT * FROM dbo.fnGetItemCostingOnPostErrors(
+			@WetGrains
+			, @intItemLocationId_3
+			, @WetGrains_BushelUOMId
+			, @WetGrains_DefaultLocation_SubLocation
+			, @WetGrains_DefaultLocation_StorageLocation
+			, -10
+			, NULL
+			, DEFAULT 
+			, DEFAULT 
+			, DEFAULT 
+			, DEFAULT 
+			, DEFAULT 
+			, DEFAULT 			
+		)
 
 		-- 3: Negative stock is allowed
 		UNION ALL 
-		SELECT * FROM dbo.fnGetItemCostingOnPostErrors(@WetGrains, @intItemLocationId_2, @WetGrains_BushelUOMId, @WetGrains_DefaultLocation_SubLocation, @WetGrains_DefaultLocation_StorageLocation, -10, NULL)
+		SELECT * FROM dbo.fnGetItemCostingOnPostErrors(
+			@WetGrains
+			, @intItemLocationId_2
+			, @WetGrains_BushelUOMId
+			, @WetGrains_DefaultLocation_SubLocation
+			, @WetGrains_DefaultLocation_StorageLocation
+			, -10
+			, NULL
+			, DEFAULT 
+			, DEFAULT 
+			, DEFAULT 
+			, DEFAULT 
+			, DEFAULT 
+			, DEFAULT 
+		)
 		
 	END
 

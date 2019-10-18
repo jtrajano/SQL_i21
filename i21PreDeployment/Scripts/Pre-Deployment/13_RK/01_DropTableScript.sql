@@ -325,7 +325,7 @@ END
 
 IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[tblRKM2MConfiguration]') AND type IN (N'U'))
 BEGIN
-	IF EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblRKM2MConfiguration' AND COLUMN_NAME = 'strContractType' AND COLUMN_NAME = 'intFreightTermId')
+	IF EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblRKM2MConfiguration' AND (COLUMN_NAME = 'strContractType' OR COLUMN_NAME = 'intFreightTermId'))
 	BEGIN
 		EXEC('DELETE FROM tblRKM2MConfiguration
 			WHERE intM2MConfigurationId IN (

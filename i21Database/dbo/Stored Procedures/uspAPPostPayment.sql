@@ -136,7 +136,7 @@ INSERT INTO @payments
 SELECT A.intPaymentId 
 FROM #tmpPayablePostData A
 INNER JOIN tblAPPayment B ON A.intPaymentId = B.intPaymentId
-WHERE B.ysnPrepay != 1
+-- WHERE B.ysnPrepay != 1
 
 --=====================================================================================================================================
 -- 	GET ALL INVALID TRANSACTIONS
@@ -149,6 +149,13 @@ INSERT INTO #tmpPayableInvalidData
 SELECT * FROM [fnAPValidatePostPayment](@payments, @post, @userId)
 UNION ALL
 SELECT * FROM [fnAPValidatePrepay](@prepayIds, @post, @userId)
+UNION ALL
+SELECT
+	strError,
+	strTransactionType,
+	strTransactionId,
+	intTransactionId
+FROM [fnAPValidateVoucherPrepay](@prepayIds, @post)
 
 SET @totalInvalid = (SELECT COUNT(*) FROM #tmpPayableInvalidData)
 

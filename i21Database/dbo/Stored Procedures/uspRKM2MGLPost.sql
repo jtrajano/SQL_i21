@@ -138,9 +138,8 @@ BEGIN
 		FROM tblCTContractHeader  H
 			INNER JOIN tblCTContractDetail D ON H.intContractHeaderId = D.intContractHeaderId
 			INNER JOIN tblICCommodity C ON H.intCommodityId = C.intCommodityId
-		WHERE 
-			H.intContractHeaderId = @intTransactionId 
-			AND D.intContractSeq = @intContractSeq
+		WHERE D.intContractDetailId = @intTransactionId 
+			
 
 	END
 

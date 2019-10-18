@@ -89,7 +89,7 @@ BEGIN
 		-- Negative stock is not allowed 
 		SELECT	intItemId = @WetGrains
 				,intItemLocationId = @WetGrains_DefaultLocation
-				,strText = FORMATMESSAGE(80003, 'WET GRAINS', 'DEFAULT')
+				,strText = dbo.fnICFormatErrorMessage(80003, 'WET GRAINS', 'DEFAULT', DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT)
 				,intErrorCode = 80003	
 				
 		DECLARE @SubLocation AS INT 
@@ -134,7 +134,21 @@ BEGIN
 	-- Act
 	BEGIN 
 		INSERT INTO actual	
-		SELECT * FROM dbo.fnGetItemCostingOnPostErrors(@WetGrains, @WetGrains_DefaultLocation, @WetGrains_BushelUOMId, @SubLocation, @StorageLocation, @dblQty, @LotId)
+		SELECT * FROM dbo.fnGetItemCostingOnPostErrors(
+			@WetGrains
+			, @WetGrains_DefaultLocation
+			, @WetGrains_BushelUOMId
+			, @SubLocation
+			, @StorageLocation
+			, @dblQty
+			, @LotId
+			, DEFAULT 
+			, DEFAULT 
+			, DEFAULT 
+			, DEFAULT 
+			, DEFAULT 
+			, DEFAULT 
+		)
 	END
 
 	-- Assert

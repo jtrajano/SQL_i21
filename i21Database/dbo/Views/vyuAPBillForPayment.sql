@@ -13,8 +13,10 @@ FROM (
 		,voucher.dtmDueDate
 		,voucher.dtmDate
 		,voucher.dtmBillDate
-		,CASE WHEN voucher.intTransactionType IN (2, 13) THEN prepaidDetail.intAccountId ELSE voucher.intAccountId END AS intAccountId
-		,CASE WHEN voucher.intTransactionType IN (2, 13) THEN prepaidDetail.strAccountId ELSE glAccount.strAccountId END strAccountId
+		,CASE WHEN voucher.intTransactionType IN (2, 13) AND voucher.ysnPrepayHasPayment = 0 
+			THEN prepaidDetail.intAccountId ELSE voucher.intAccountId END AS intAccountId
+		,CASE WHEN voucher.intTransactionType IN (2, 13) AND voucher.ysnPrepayHasPayment = 0 
+			THEN prepaidDetail.strAccountId ELSE glAccount.strAccountId END strAccountId
 		,voucher.strVendorOrderNumber
 		,voucher.strBillId
 		,CASE WHEN voucher.intTransactionType IN (3,8) AND voucher.dblTotal > 0 THEN voucher.dblTotal * -1

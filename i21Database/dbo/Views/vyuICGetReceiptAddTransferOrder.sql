@@ -256,4 +256,5 @@ FROM (
 		AND (h.intStatusId = 1 OR h.intStatusId = 2)
 		AND ISNULL(t.intInventoryTransactionId, storage.intInventoryTransactionStorageId) IS NOT NULL 
 		AND item.strType NOT IN ('Software', 'Other Charge', 'Comment', 'Service')
+		AND (d.dblQuantity - ISNULL(st.dblReceiptQty, 0)) > 0 
 ) tblAddOrders

@@ -22,14 +22,15 @@
 			UPPER(E.strItemDescription) as strLineItemDescription,
 			UPPER(E.strUnitMeasure) as strLineUnitMeasure,
 			UPPER(E.strTaxGroup) as strLineTaxGroup,
-			UPPER(F.strSymbol) as strSymbol,
+			UPPER(G.strSymbol) as strSymbol,
 			E.* 
 			FROM vyuCTItemContractHeader A 
-					LEFT JOIN tblEMEntity B ON A.intEntityId = B.intEntityId
-					LEFT JOIN tblEMEntityLocation C ON A.intEntityId = C.intEntityId
-					LEFT JOIN tblARCustomer D ON A.intEntityId = D.intEntityId
-					LEFT JOIN vyuCTItemContractDetail E ON A.intItemContractHeaderId = E.intItemContractHeaderId
-					LEFT JOIN tblICUnitMeasure F ON E.intItemUOMId = F.intUnitMeasureId
+					LEFT JOIN tblEMEntity B ON B.intEntityId = A.intEntityId
+					LEFT JOIN tblEMEntityLocation C ON C.intEntityId = A.intEntityId
+					LEFT JOIN tblARCustomer D ON D.intEntityId = A.intEntityId
+					LEFT JOIN vyuCTItemContractDetail E ON E.intItemContractHeaderId = A.intItemContractHeaderId
+					LEFT JOIN tblICItemUOM	F ON F.intItemUOMId = E.intItemUOMId
+					LEFT JOIN tblICUnitMeasure G ON G.intUnitMeasureId = F.intUnitMeasureId
 			,(SELECT TOP 1
 					strCompanyName
 					,strAddress AS strCompanyAddress
@@ -46,6 +47,5 @@
 											THEN C.intEntityLocationId
 										ELSE 0
 									END
-			AND A.strContractCategoryId = 'Prepaid'
 
   GO

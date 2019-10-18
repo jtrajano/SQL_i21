@@ -26,6 +26,24 @@ BEGIN TRY
 	SET @strPriceContractCondition = NULL
 	SET @strPriceFixationXML = NULL
 
+	IF @strRowState = 'Delete'
+	BEGIN
+		INSERT INTO tblCTPriceContractStage (
+			intPriceContractId
+			,strRowState
+			,intEntityId
+			,strTransactionType
+			,intMultiCompanyId
+			)
+		SELECT intPriceContractId = @intPriceContractId
+			,strRowState = @strRowState
+			,intEntityId = @intToEntityId
+			,strTransactionType = @strToTransactionType
+			,intMultiCompanyId = @intToCompanyId
+
+		RETURN
+	END
+
 	SELECT @strPriceContractNo = strPriceContractNo
 	FROM tblCTPriceContract
 	WHERE intPriceContractId = @intPriceContractId

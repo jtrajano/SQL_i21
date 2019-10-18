@@ -582,22 +582,41 @@ BEGIN TRY
 			FROM @TFTransaction Trans
 		END
 
-		IF (NOT EXISTS(SELECT TOP 1 1 FROM @TFTransaction WHERE intReportingComponentId = @RCId ) AND @IsEdi = 0)
+		IF (NOT EXISTS(SELECT TOP 1 1 FROM @TFTransaction WHERE intReportingComponentId = @RCId ))
 		BEGIN
+
 			INSERT INTO tblTFTransaction (uniqTransactionGuid
 				, intReportingComponentId
 				, strProductCode
 				, dtmDate
 				, dtmReportingPeriodBegin
 				, dtmReportingPeriodEnd
-				, strTransactionType)
-			VALUES(@Guid
+				, strTransactionType
+				, strEmail
+				, strContactName
+				, strTaxPayerName
+				, strTaxPayerAddress
+				, strCity
+				, strState
+				, strZipCode
+				, strTelephoneNumber)
+			SELECT @Guid
 				, @RCId
 				, 'No record found.'
 				, @DateFrom
 				, @DateFrom
 				, @DateTo
-				, 'Receipt')
+				, 'Receipt'
+				, strContactEmail
+				, strContactName
+				, strCompanyName
+				, strTaxAddress
+				, strCity
+				, strState
+				, strZipCode
+				, strContactPhone
+			FROM tblTFCompanyPreference
+
 		END
 		
 		DELETE FROM @TFTransaction

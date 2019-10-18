@@ -571,6 +571,7 @@ BEGIN
 	DECLARE @intCommodityId1 INT
 	DECLARE @strDescription nvarchar(250)
 	DECLARE @intCommodityUnitMeasureId int
+			,@intCommodityStockUOMId INT
 
 	SELECT @mRowNumber = MIN(intCommodityIdentity) FROM @Commodity where intCommodity>0
 
@@ -578,7 +579,7 @@ BEGIN
 	BEGIN
 		SELECT @intCommodityId = intCommodity FROM @Commodity WHERE intCommodityIdentity = @mRowNumber
 		SELECT @strDescription = strCommodityCode FROM tblICCommodity WHERE intCommodityId = @intCommodityId
-		SELECT @intCommodityUnitMeasureId=intCommodityUnitMeasureId FROM tblICCommodityUnitMeasure WHERE intCommodityId=@intCommodityId AND ysnDefault=1
+		SELECT @intCommodityUnitMeasureId=intCommodityUnitMeasureId, @intCommodityStockUOMId = intUnitMeasureId FROM tblICCommodityUnitMeasure WHERE intCommodityId=@intCommodityId AND ysnDefault=1
 
 		IF ISNULL(@intCommodityId, 0) > 0
 		BEGIN
@@ -842,7 +843,7 @@ BEGIN
 					, 'Sales Basis Deliveries' COLLATE Latin1_General_CI_AS strSeqHeader
 					, @strDescription strCommodityCode
 					, 'Sales Basis Deliveries' COLLATE Latin1_General_CI_AS strType
-					, dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,ISNULL(ri.dblQuantity, 0)) AS dblTotal
+					, dbo.fnCTConvertQuantityToTargetItemUOM(cd.intItemId,iuom.intUnitMeasureId,@intCommodityStockUOMId,ISNULL(ri.dblQuantity, 0)) AS dblTotal
 					, cd.intCommodityId
 					, cl.strLocationName
 					, cd.strItemNo
@@ -860,7 +861,8 @@ BEGIN
 				join tblICInventoryShipment r on r.strShipmentNumber=v.strTransactionId
 				inner join tblICInventoryShipmentItem ri ON r.intInventoryShipmentId = ri.intInventoryShipmentId
 				inner join @tblGetOpenContractDetail cd ON cd.intContractDetailId = ri.intLineNo AND cd.intPricingTypeId = 2 AND cd.intContractStatusId <> 3  AND cd.intContractTypeId = 2
-				join tblICCommodityUnitMeasure ium on ium.intCommodityId=cd.intCommodityId AND cd.intUnitMeasureId=ium.intUnitMeasureId
+				inner join tblICItem i on cd.intItemId = i.intItemId
+                inner join tblICItemUOM iuom on iuom.intItemId = i.intItemId and iuom.intItemUOMId = ri.intItemUOMId
 				inner join tblSMCompanyLocation  cl on cl.intCompanyLocationId=cd.intCompanyLocationId
 				left join tblARInvoiceDetail invD ON ri.intInventoryShipmentItemId = invD.intInventoryShipmentItemId
 				left join tblARInvoice inv ON invD.intInvoiceId = inv.intInvoiceId

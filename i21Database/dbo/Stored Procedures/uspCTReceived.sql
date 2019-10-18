@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspCTReceived]
 	@ItemsFromInventoryReceipt ReceiptItemTableType READONLY
 	,@intUserId  INT
+	,@ysnPosted BIT
 AS
 
 BEGIN TRY
@@ -28,6 +29,7 @@ BEGIN TRY
 				@strScreenName					NVARCHAR(50),
 				@intContainerId					INT,
 				@intSourceId					INT,
+				@intInventoryReceiptId			INT,
 				@strTicketNumber				NVARCHAR(50),
 				@intSequenceUsageHistoryId		INT
 
@@ -90,7 +92,7 @@ BEGIN TRY
 		FROM	@tblToProcess 
 		WHERE	intUniqueId						=	 @intUniqueId
 
-		SELECT @intSourceId = intSourceId FROM tblICInventoryReceiptItem WHERE intInventoryReceiptItemId = @intInventoryReceiptDetailId
+		SELECT @intSourceId = intSourceId, @intInventoryReceiptId = intInventoryReceiptId FROM tblICInventoryReceiptItem WHERE intInventoryReceiptItemId = @intInventoryReceiptDetailId
 		SELECT	@intPricingTypeId = intPricingTypeId FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId
 
 		IF NOT EXISTS(SELECT * FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId)
@@ -127,6 +129,13 @@ BEGIN TRY
 
 			SELECT	@dblSchQuantityToUpdate = -@dblConvertedQty
 
+			-- Ticket Management will handle scheduled quantity when Undistruited
+			IF @intSourceType = 1 AND @ysnPosted = 0
+			BEGIN
+				SELECT @intUniqueId = MIN(intUniqueId) FROM @tblToProcess WHERE intUniqueId > @intUniqueId
+				CONTINUE
+			END
+
 			/*
 				intSourceType: 
 				0 = 'None'
@@ -135,7 +144,7 @@ BEGIN TRY
 				3 = 'Transport'
 				4 = 'Settle Storage'
 				5 = 'Delivery Sheet'
-			*/
+			*/			
 
 			IF ((@intSourceType IN (0,1,2,3,5) OR @ysnPO = 1)AND @strReceiptType <> 'Inventory Return') 
 			   -- OR (@intSourceType IN (2) AND @strReceiptType = 'Inventory Return' )

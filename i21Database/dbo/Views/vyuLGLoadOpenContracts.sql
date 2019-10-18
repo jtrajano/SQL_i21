@@ -100,25 +100,25 @@ SELECT CD.intContractDetailId
 	,BO.strBook
 	,CD.intSubBookId
 	,SB.strSubBook
-	,CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 THEN CD.dblCashPrice ELSE AD.dblSeqPrice END AS dblSeqPrice
+	,CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 AND AD.intSeqCurrencyId <> DC.intDefaultCurrencyId THEN CD.dblCashPrice ELSE AD.dblSeqPrice END AS dblSeqPrice
 	,PT.strPricingType
-	,CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 THEN CD.intCurrencyId ELSE AD.intSeqCurrencyId END AS intSeqCurrencyId
-	,CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 THEN CPCU.strCurrency ELSE AD.strSeqCurrency END AS strSeqCurrency
-	,CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 THEN CD.intPriceItemUOMId ELSE AD.intSeqPriceUOMId END AS intSeqPriceUOMId
-	,CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 THEN U3.strUnitMeasure ELSE AD.strSeqPriceUOM END AS strSeqPriceUOM 
-	,CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 THEN CPCU.ysnSubCurrency ELSE PCU.ysnSubCurrency END AS ysnSubCurrency
-	,CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 THEN CD.intRateTypeId ELSE NULL END AS intRateTypeId
-	,CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 THEN CD.dblRate ELSE NULL END AS dblRate
-	,CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 THEN CD.intInvoiceCurrencyId ELSE NULL END AS intInvoiceCurrencyId
-	,CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 THEN FXC.strCurrency ELSE NULL END AS strInvoiceCurrency
-	,CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 THEN CET.strCurrencyExchangeRateType ELSE NULL END AS strCurrencyExchangeRateType
+	,CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 AND AD.intSeqCurrencyId <> DC.intDefaultCurrencyId THEN CD.intCurrencyId ELSE AD.intSeqCurrencyId END AS intSeqCurrencyId
+	,CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 AND AD.intSeqCurrencyId <> DC.intDefaultCurrencyId THEN CPCU.strCurrency ELSE AD.strSeqCurrency END AS strSeqCurrency
+	,CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 AND AD.intSeqCurrencyId <> DC.intDefaultCurrencyId THEN CD.intPriceItemUOMId ELSE AD.intSeqPriceUOMId END AS intSeqPriceUOMId
+	,CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 AND AD.intSeqCurrencyId <> DC.intDefaultCurrencyId THEN U3.strUnitMeasure ELSE AD.strSeqPriceUOM END AS strSeqPriceUOM 
+	,CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 AND AD.intSeqCurrencyId <> DC.intDefaultCurrencyId THEN CPCU.ysnSubCurrency ELSE PCU.ysnSubCurrency END AS ysnSubCurrency
+	,CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 AND AD.intSeqCurrencyId <> DC.intDefaultCurrencyId THEN CD.intRateTypeId ELSE NULL END AS intRateTypeId
+	,CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 AND AD.intSeqCurrencyId <> DC.intDefaultCurrencyId THEN CD.dblRate ELSE NULL END AS dblRate
+	,CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 AND AD.intSeqCurrencyId <> DC.intDefaultCurrencyId THEN CD.intInvoiceCurrencyId ELSE NULL END AS intInvoiceCurrencyId
+	,CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 AND AD.intSeqCurrencyId <> DC.intDefaultCurrencyId THEN FXC.strCurrency ELSE NULL END AS strInvoiceCurrency
+	,CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 AND AD.intSeqCurrencyId <> DC.intDefaultCurrencyId THEN CET.strCurrencyExchangeRateType ELSE NULL END AS strCurrencyExchangeRateType
 	,CD.intFreightTermId
 	,FT.strFreightTerm
 	,CD.intShipToId
 	,strShipTo = SH.strLocationName
 FROM tblCTContractHeader CH
 JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId
-CROSS APPLY dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
+JOIN vyuLGAdditionalColumnForContractDetailView AD ON CD.intContractDetailId = AD.intContractDetailId
 JOIN tblICItem Item ON Item.intItemId = CD.intItemId
 JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CD.intCompanyLocationId
 JOIN tblEMEntity E ON E.intEntityId = CH.intEntityId
@@ -151,31 +151,26 @@ LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = CD.intFreightTermId
 LEFT JOIN tblSMCountry CO ON CO.intCountryID = ICI.intCountryId
 LEFT JOIN tblSMCountry CO2 ON CO2.intCountryID = CA.intCountryID
 LEFT JOIN tblEMEntityLocation SH ON SH.intEntityLocationId = CD.intShipToId
-LEFT JOIN (
-	SELECT *
-	FROM (
-		SELECT ROW_NUMBER() OVER (
-				PARTITION BY S.intContractDetailId ORDER BY S.dtmTestingEndDate DESC, S.intSampleId DESC
-				) intRowNum
-			,S.intContractDetailId
-			,S.strSampleNumber
-			,S.strContainerNumber
-			,ST.strSampleTypeName
-			,SS.strStatus AS strSampleStatus
-			,S.dtmTestingStartDate
-			,S.dtmTestingEndDate
-			,S.intCompanyLocationSubLocationId
-			,CLSL.strSubLocationName
-			,S.dblRepresentingQty
-		FROM tblQMSample S
-		JOIN tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId
-		JOIN tblQMSampleStatus AS SS ON SS.intSampleStatusId = S.intSampleStatusId
-		LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = S.intCompanyLocationSubLocationId
-		WHERE S.intContractDetailId IS NOT NULL
-		) t
-	WHERE intRowNum = 1
-	) S ON S.intContractDetailId = CD.intContractDetailId
+OUTER APPLY (
+	SELECT TOP 1
+		S.intContractDetailId
+		,S.strSampleNumber
+		,S.strContainerNumber
+		,ST.strSampleTypeName
+		,SS.strStatus AS strSampleStatus
+		,S.dtmTestingStartDate
+		,S.dtmTestingEndDate
+		,S.intCompanyLocationSubLocationId
+		,CLSL.strSubLocationName
+		,S.dblRepresentingQty
+	FROM tblQMSample S
+	JOIN tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId
+	JOIN tblQMSampleStatus AS SS ON SS.intSampleStatusId = S.intSampleStatusId
+	LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = S.intCompanyLocationSubLocationId
+	WHERE S.intContractDetailId = CD.intContractDetailId
+	ORDER BY S.dtmTestingEndDate DESC, S.intSampleId DESC) S 
 CROSS APPLY tblLGCompanyPreference CP
+OUTER APPLY (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference) DC
 
 UNION
 
@@ -286,25 +281,25 @@ SELECT CD.intContractDetailId
 	,BO.strBook
 	,CD.intSubBookId
 	,SB.strSubBook
-	,CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 THEN CD.dblCashPrice ELSE AD.dblSeqPrice END AS dblSeqPrice
+	,CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 AND AD.intSeqCurrencyId <> DC.intDefaultCurrencyId THEN CD.dblCashPrice ELSE AD.dblSeqPrice END AS dblSeqPrice
 	,PT.strPricingType
-	,CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 THEN CD.intCurrencyId ELSE AD.intSeqCurrencyId END AS intSeqCurrencyId
-	,CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 THEN CPCU.strCurrency ELSE AD.strSeqCurrency END AS strSeqCurrency
-	,CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 THEN CD.intPriceItemUOMId ELSE AD.intSeqPriceUOMId END AS intSeqPriceUOMId
-	,CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 THEN U3.strUnitMeasure ELSE AD.strSeqPriceUOM END AS strSeqPriceUOM 
-	,CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 THEN CPCU.ysnSubCurrency ELSE PCU.ysnSubCurrency END AS ysnSubCurrency
-	,CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 THEN CD.intRateTypeId ELSE NULL END AS intRateTypeId
-	,CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 THEN CD.dblRate ELSE NULL END AS dblRate
-	,CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 THEN CD.intInvoiceCurrencyId ELSE NULL END AS intInvoiceCurrencyId
-	,CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 THEN FXC.strCurrency ELSE NULL END AS strInvoiceCurrency
-	,CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 THEN CET.strCurrencyExchangeRateType ELSE NULL END AS strCurrencyExchangeRateType
+	,CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 AND AD.intSeqCurrencyId <> DC.intDefaultCurrencyId THEN CD.intCurrencyId ELSE AD.intSeqCurrencyId END AS intSeqCurrencyId
+	,CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 AND AD.intSeqCurrencyId <> DC.intDefaultCurrencyId THEN CPCU.strCurrency ELSE AD.strSeqCurrency END AS strSeqCurrency
+	,CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 AND AD.intSeqCurrencyId <> DC.intDefaultCurrencyId THEN CD.intPriceItemUOMId ELSE AD.intSeqPriceUOMId END AS intSeqPriceUOMId
+	,CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 AND AD.intSeqCurrencyId <> DC.intDefaultCurrencyId THEN U3.strUnitMeasure ELSE AD.strSeqPriceUOM END AS strSeqPriceUOM 
+	,CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 AND AD.intSeqCurrencyId <> DC.intDefaultCurrencyId THEN CPCU.ysnSubCurrency ELSE PCU.ysnSubCurrency END AS ysnSubCurrency
+	,CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 AND AD.intSeqCurrencyId <> DC.intDefaultCurrencyId THEN CD.intRateTypeId ELSE NULL END AS intRateTypeId
+	,CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 AND AD.intSeqCurrencyId <> DC.intDefaultCurrencyId THEN CD.dblRate ELSE NULL END AS dblRate
+	,CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 AND AD.intSeqCurrencyId <> DC.intDefaultCurrencyId THEN CD.intInvoiceCurrencyId ELSE NULL END AS intInvoiceCurrencyId
+	,CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 AND AD.intSeqCurrencyId <> DC.intDefaultCurrencyId THEN FXC.strCurrency ELSE NULL END AS strInvoiceCurrency
+	,CASE WHEN ISNULL(AD.ysnValidFX,0) = 1 AND AD.intSeqCurrencyId <> DC.intDefaultCurrencyId THEN CET.strCurrencyExchangeRateType ELSE NULL END AS strCurrencyExchangeRateType
 	,CD.intFreightTermId
 	,FT.strFreightTerm
 	,CD.intShipToId
 	,strShipTo = SH.strLocationName
 FROM tblCTContractHeader CH
 JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId
-CROSS APPLY dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
+JOIN vyuLGAdditionalColumnForContractDetailView AD ON CD.intContractDetailId = AD.intContractDetailId
 JOIN tblICItem Item ON Item.intItemId = CD.intItemId
 JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CD.intCompanyLocationId
 JOIN tblEMEntity E ON E.intEntityId = CH.intEntityId
@@ -337,31 +332,26 @@ LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = CD.intFreightTermId
 LEFT JOIN tblSMCountry CO ON CO.intCountryID = ICI.intCountryId
 LEFT JOIN tblSMCountry CO2 ON CO2.intCountryID = CA.intCountryID
 LEFT JOIN tblEMEntityLocation SH ON SH.intEntityLocationId = CD.intShipToId
-LEFT JOIN (
-	SELECT *
-	FROM (
-		SELECT ROW_NUMBER() OVER (
-				PARTITION BY S.intContractDetailId ORDER BY S.dtmTestingEndDate DESC, S.intSampleId DESC
-				) intRowNum
-			,S.intContractDetailId
-			,S.strSampleNumber
-			,S.strContainerNumber
-			,ST.strSampleTypeName
-			,SS.strStatus AS strSampleStatus
-			,S.dtmTestingStartDate
-			,S.dtmTestingEndDate
-			,S.intCompanyLocationSubLocationId
-			,CLSL.strSubLocationName
-			,S.dblRepresentingQty
-		FROM tblQMSample S
-		JOIN tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId
-		JOIN tblQMSampleStatus AS SS ON SS.intSampleStatusId = S.intSampleStatusId
-		LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = S.intCompanyLocationSubLocationId
-		WHERE S.intContractDetailId IS NOT NULL
-		) t
-	WHERE intRowNum = 1
-	) S ON S.intContractDetailId = CD.intContractDetailId
+OUTER APPLY (
+	SELECT TOP 1
+		S.intContractDetailId
+		,S.strSampleNumber
+		,S.strContainerNumber
+		,ST.strSampleTypeName
+		,SS.strStatus AS strSampleStatus
+		,S.dtmTestingStartDate
+		,S.dtmTestingEndDate
+		,S.intCompanyLocationSubLocationId
+		,CLSL.strSubLocationName
+		,S.dblRepresentingQty
+	FROM tblQMSample S
+	JOIN tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId
+	JOIN tblQMSampleStatus AS SS ON SS.intSampleStatusId = S.intSampleStatusId
+	LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = S.intCompanyLocationSubLocationId
+	WHERE S.intContractDetailId = CD.intContractDetailId
+	ORDER BY S.dtmTestingEndDate DESC, S.intSampleId DESC) S 
 CROSS APPLY tblLGCompanyPreference CP
+OUTER APPLY (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference) DC
 GROUP BY CD.intContractDetailId
 	,CD.intContractHeaderId
 	,CD.intContractSeq
@@ -457,3 +447,4 @@ GROUP BY CD.intContractDetailId
 	,CPCU.strCurrency
 	,CPCU.ysnSubCurrency
 	,AD.ysnValidFX
+	,DC.intDefaultCurrencyId

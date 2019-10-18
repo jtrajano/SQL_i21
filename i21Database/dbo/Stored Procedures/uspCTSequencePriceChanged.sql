@@ -10,6 +10,7 @@ BEGIN TRY
 	
 	DECLARE @ErrMsg							NVARCHAR(MAX),
 			@dblCashPrice					NUMERIC(18,6),
+			@dblPartialCashPrice			NUMERIC(18,6),
 			@ysnPosted						BIT,
 			@strReceiptNumber				NVARCHAR(50),
 			@intLastModifiedById			INT,
@@ -60,7 +61,7 @@ BEGIN TRY
 	FROM	tblCTContractDetail 
 	WHERE	intContractDetailId		=	@intContractDetailId
 	
-	SELECT @dblCashPrice = dblSeqPrice,@intSeqPriceUOMId = intSeqPriceUOMId FROM dbo.fnCTGetAdditionalColumnForDetailView(@intContractDetailId) 
+	SELECT @dblCashPrice = dblSeqPrice,@intSeqPriceUOMId = intSeqPriceUOMId,@dblPartialCashPrice = dblSeqPartialPrice FROM dbo.fnCTGetAdditionalColumnForDetailView(@intContractDetailId) 
 	SELECT @intCommodityId = intCommodityId FROM tblCTContractHeader WHERE intContractHeaderId = @intContractHeaderId
 	SELECT @intStockUOMId = intUnitMeasureId FROM tblICCommodityUnitMeasure WHERE intCommodityId = @intCommodityId AND ysnStockUOM = 1
 	SELECT @intStockUOMId = intItemUOMId FROM tblICItemUOM WHERE intItemId = @intItemId AND intUnitMeasureId = @intStockUOMId
@@ -92,12 +93,19 @@ BEGIN TRY
 		END
 	END
 	
-	IF 	@intPricingTypeId NOT IN (1,6) OR @ysnAllowChangePricing = 1
+	IF 	@intPricingTypeId NOT IN (1,2,6) OR @ysnAllowChangePricing = 1
 		RETURN
 
 	IF NOT EXISTS(SELECT * FROM tblAPBillDetail WHERE intContractDetailId = @intContractDetailId AND intContractCostId IS NULL AND intInventoryReceiptChargeId IS NULL)
 	BEGIN
-		SELECT	@dblCashPrice = dbo.fnCTConvertQtyToTargetItemUOM(@intStockUOMId,@intSeqPriceUOMId,@dblCashPrice)
+		if (@intPricingTypeId = 2)
+		BEGIN
+			SELECT	@dblCashPrice = dbo.fnCTConvertQtyToTargetItemUOM(@intStockUOMId,@intSeqPriceUOMId,@dblPartialCashPrice)
+		END
+		ELSE
+		BEGIN
+			SELECT	@dblCashPrice = dbo.fnCTConvertQtyToTargetItemUOM(@intStockUOMId,@intSeqPriceUOMId,@dblCashPrice)
+		END
 		EXEC uspCTCreateBillForBasisContract @intContractDetailId, @dblCashPrice
 	END
 	/*

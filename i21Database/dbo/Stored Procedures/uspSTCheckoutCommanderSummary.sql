@@ -306,12 +306,15 @@ BEGIN
 		  -------------------------------------------------------------------------------------------------------------
 		  BEGIN
 					-- intRegisterImportFieldId
-					-- 1 = Customer Count
-					-- 2 = Manual
-					-- 3 = No Sales
+					-- 1 = Department Item Sold
+					-- 2 = Fuel Customer Count
+					-- 3 = Inside Customer Count
+					-- 4 = Customer Count
+					-- 5 = Manual
+					-- 6 = No Sales
 					 
-					DECLARE @intCustomerCount	INT = 1
-					       ,@intNoSales			INT = 3
+					DECLARE @intCustomerCount	INT = 4
+					       ,@intNoSales			INT = 6
 
 					-- NO SALES COUNT METRIC
 					IF EXISTS(SELECT TOP 1 1 FROM tblSTCheckoutMetrics WHERE intCheckoutId = @intCheckoutId AND intRegisterImportFieldId = @intNoSales)

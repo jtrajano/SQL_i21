@@ -214,6 +214,7 @@ AS SELECT
 	,(SELECT intCurrencyDecimal FROM tblSMCompanyPreference) AS intDecimalPrecision
 	,tblSCTicketFormat.ysnSuppressCashPrice
 	,strSealNumbers = ISNULL(SUBSTRING(SealNumber.strSealNumbers,3, LEN(SealNumber.strSealNumbers)-2),'')
+	,EMScaleOps.strTimezone
   FROM tblSCTicket SC
   LEFT JOIN tblEMEntity tblEMEntity on tblEMEntity.intEntityId = SC.intEntityId
   LEFT JOIN vyuEMSearchShipVia vyuEMSearchShipVia on vyuEMSearchShipVia.intEntityId = SC.intHaulerId
@@ -242,6 +243,7 @@ AS SELECT
   LEFT JOIN tblSCDeliverySheet SCD ON SCD.intDeliverySheetId = SC.intDeliverySheetId
   LEFT JOIN tblSOSalesOrder SO on SO.intSalesOrderId = SC.intSalesOrderId
   LEFT JOIN tblICLot ICLot ON ICLot.intLotId = SC.intLotId
+  LEFT JOIN tblEMEntityLocation EMScaleOps on EMScaleOps.intEntityId = SC.intEntityScaleOperatorId
   OUTER APPLY(
 		SELECT SCSM.strStationShortDescription
 		,SCM.strTicketNumber

@@ -39,9 +39,9 @@
 	[intLoadReceiptId] INT NULL,
 	[intLoadDistributionHeaderId] INT NULL,
     [intLoadDistributionDetailId] INT NULL,
-    [strReceiptLink] NVARCHAR(50) NULL,
-    [strReceiptZipCode] NVARCHAR(50) NULL,
-    [strGrossNet] NVARCHAR(20) NULL
+    [strReceiptLink] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+    [strReceiptZipCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+    [strGrossNet] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL
     CONSTRAINT [PK_tblTRImportLoadDetail] PRIMARY KEY ([intImportLoadDetailId]),
 	CONSTRAINT [FK_tblTRImportLoadDetail_tblTRImportLoad_intImportLoadId] FOREIGN KEY ([intImportLoadId]) REFERENCES [dbo].[tblTRImportLoad] ([intImportLoadId]) ON DELETE CASCADE
 )

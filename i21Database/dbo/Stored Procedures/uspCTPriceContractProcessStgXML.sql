@@ -498,6 +498,12 @@ BEGIN TRY
 				IF @intTransactionCount = 0
 					BEGIN TRANSACTION
 
+					if @strRowState='Delete'
+					Begin
+						Delete from tblCTPriceContract Where intPriceContractRefId =@intPriceContractId
+						Goto x
+					End
+
 				------------------Header------------------------------------------------------
 				EXEC sp_xml_preparedocument @idoc OUTPUT
 					,@strPriceContractXML
@@ -1473,7 +1479,7 @@ BEGIN TRY
 					,@strPriceFixationDetailXML OUTPUT
 					,NULL
 					,NULL
-
+x:
 				INSERT INTO tblCTPriceContractAcknowledgementStage (
 					intAckPriceContractId
 					,strAckPriceContracNo

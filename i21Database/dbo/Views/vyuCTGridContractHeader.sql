@@ -143,7 +143,16 @@ AS
 			NM.strBroker,
 			NM.strBrokerAccount,
 			CH.ysnReceivedSignedFixationLetter,
-			dbo.[fnCTGetLastApprovalStatus](CH.intContractHeaderId) strApprovalStatus
-
-	FROM	tblCTContractHeader				CH
-	JOIN	vyuCTContractHeaderNotMapped	NM	ON	NM.intContractHeaderId	=	CH.intContractHeaderId
+			AP.strApprovalStatus
+	FROM		tblCTContractHeader				CH
+	JOIN		vyuCTContractHeaderNotMapped	NM	ON	NM.intContractHeaderId	=	CH.intContractHeaderId
+	OUTER APPLY --dbo.[fnCTGetLastApprovalStatus](CH.intContractHeaderId) strApprovalStatus
+	(
+		SELECT	TOP 1 AP.strStatus AS strApprovalStatus 
+		FROM	tblSMApproval		AP
+		JOIN	tblSMTransaction	TR	ON	TR.intTransactionId =	AP.intTransactionId
+										AND	TR.intRecordId		=   CH.intContractHeaderId
+		JOIN	tblSMScreen			SC	ON	SC.intScreenId		=	TR.intScreenId
+		WHERE	SC.strNamespace IN ('ContractManagement.view.Contract','ContractManagement.view.Amendments')
+		ORDER BY AP.intApprovalId DESC
+	) AP

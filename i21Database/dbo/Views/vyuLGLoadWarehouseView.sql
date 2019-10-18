@@ -1,6 +1,6 @@
 ﻿CREATE VIEW vyuLGLoadWarehouseView
 AS
-SELECT DISTINCT 
+SELECT  
 	LW.intLoadWarehouseId
 	,LW.intConcurrencyId
 	,LW.strDeliveryNoticeNumber
@@ -128,9 +128,9 @@ FROM tblLGLoadWarehouse LW
 	LEFT JOIN tblEMEntity ShippingLine ON ShippingLine.intEntityId = L.intShippingLineEntityId
 	LEFT JOIN tblLGWarehouseRateMatrixHeader WRMH ON WRMH.intWarehouseRateMatrixHeaderId = LW.intWarehouseRateMatrixHeaderId
 	LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = LW.intStorageLocationId
-	LEFT JOIN tblLGLoadWarehouseServices LWS ON LWS.intLoadWarehouseId = LW.intLoadWarehouseId
-	LEFT JOIN tblAPBill BI ON BI.intBillId = LWS.intBillId
 	LEFT JOIN tblLGLoad LSI ON LSI.intLoadId = L.intLoadShippingInstructionId
+	OUTER APPLY (SELECT TOP 1 BI.strBillId FROM tblLGLoadWarehouseServices LWS LEFT JOIN tblAPBill BI ON BI.intBillId = LWS.intBillId
+				WHERE LWS.intLoadWarehouseId = LW.intLoadWarehouseId AND LWS.intBillId IS NOT NULL) BI
 	OUTER APPLY (SELECT TOP 1 ysnShowReceivedLoadsInWarehouseTab = ISNULL(ysnShowReceivedLoadsInWarehouseTab,0) FROM tblLGCompanyPreference) CP
 WHERE 
 	(CP.ysnShowReceivedLoadsInWarehouseTab = 0 AND L.intShipmentStatus NOT IN (4, 10) AND L.intShipmentType = 1)

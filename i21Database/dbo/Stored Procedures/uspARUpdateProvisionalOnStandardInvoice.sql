@@ -48,11 +48,11 @@ WHERE [intInvoiceId] IN (SELECT [intInvoiceId] FROM @InvoiceIds)
   )
 	
 UPDATE ARI	
-SET ARI.[dblProvisionalAmount]		= CASE WHEN ISNULL(@ysnExcludeFromPayment,0) = 0 THEN PRO.[dblPayment] ELSE PRO.[dblInvoiceTotal] END
-	,ARI.[dblBaseProvisionalAmount]	= CASE WHEN ISNULL(@ysnExcludeFromPayment,0) = 0 THEN PRO.[dblBasePayment] ELSE PRO.[dblBaseInvoiceTotal] END
-	,ARI.[strTransactionType]		= CASE WHEN (CASE WHEN ISNULL(@ysnExcludeFromPayment,0) = 0 THEN PRO.[dblPayment] ELSE PRO.[dblInvoiceTotal] END) > ARI.[dblInvoiceTotal] THEN 'Credit Memo' ELSE ARI.[strTransactionType] END
-	,ARI.[ysnExcludeFromPayment]	= ISNULL(@ysnExcludeFromPayment, 0)
-	,ARI.[ysnProvisionalWithGL]     = PRO.[ysnProvisionalWithGL]
+SET ARI.[dblProvisionalAmount]		= PRO.[dblInvoiceTotal]
+  , ARI.[dblBaseProvisionalAmount]	= PRO.[dblBaseInvoiceTotal]
+  , ARI.[strTransactionType]		= CASE WHEN PRO.[dblInvoiceTotal] > ARI.[dblInvoiceTotal] THEN 'Credit Memo' ELSE ARI.[strTransactionType] END
+  , ARI.[ysnExcludeFromPayment]		= ISNULL(@ysnExcludeFromPayment, 0)
+  , ARI.[ysnProvisionalWithGL]     	= PRO.[ysnProvisionalWithGL]
 FROM tblARInvoice ARI
 INNER JOIN tblARInvoice PRO ON ARI.[intOriginalInvoiceId] = PRO.[intInvoiceId] AND PRO.[strType] = 'Provisional'
 WHERE ARI.[intInvoiceId] = @InvoiceId

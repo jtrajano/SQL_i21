@@ -91,7 +91,7 @@ BEGIN
 		-- Item id is invalid or missing.
 		SELECT	intItemId = NULL
 				,intItemLocationId = NULL
-				,strText = FORMATMESSAGE(80001)
+				,strText = dbo.fnICGetErrorMessage(80001)
 				,intErrorCode = 80001
 	END
 

@@ -18,6 +18,7 @@ DECLARE @intDiscountAccountId			INT = NULL
 	  , @dblCashReceipt					NUMERIC(18, 6) = 0
 	  , @dblCashReturn					NUMERIC(18, 6) = 0
 	  , @intProcessLogId                    NUMERIC(18, 6) = 0
+	  , @ErrorMessage					NVARCHAR(max) = ''
 
 DECLARE @PROCESSLOGS TABLE  (
 		     intPOSId  INT
@@ -581,7 +582,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM #POSTRANSACTIONS)
 
 
 			--UPDATE POS BATCH LOG
-			IF EXISTS(SELECT TOP 1 NULL FROM tblARInvoiceIntegrationLogDetail WHERE intIntegrationLogId = @intInvoiceLogId AND ysnSuccess = 0)
+			IF EXISTS(SELECT TOP 1 NULL FROM tblARInvoiceIntegrationLogDetail WHERE intIntegrationLogId = @intInvoiceLogId AND ysnSuccess = 0 AND strPostingMessage IS NOT NULL)
 			BEGIN				
 				SET @intProcessLogId = @intInvoiceLogId
 				GOTO Exit_With_Rollback_ProcessInvoices
@@ -682,9 +683,13 @@ IF EXISTS (SELECT TOP 1 NULL FROM #POSTRANSACTIONS)
 				,strPaymentInfo					= CASE WHEN POSPAYMENTS.strPaymentMethod IN ('Check' ,'Debit Card', 'Manual Credit Card') THEN POSPAYMENTS.strReferenceNo ELSE NULL END
 				,strNotes						= POS.strReceiptNumber
 				,intBankAccountId				= BA.intBankAccountId
-				,dblAmountPaid					= CASE WHEN ISNULL(POSPAYMENTS.dblAmount, 0) <  0 
-													THEN (ISNULL(POSPAYMENTS.dblAmount, 0) * -1) * dbo.fnARGetInvoiceAmountMultiplier(IFP.strTransactionType)
-													ELSE ISNULL(POSPAYMENTS.dblAmount, 0) * dbo.fnARGetInvoiceAmountMultiplier(IFP.strTransactionType)
+				,dblAmountPaid					= CASE WHEN POSPAYMENTS.strPaymentMethod = 'Cash' and II.strTransactionType <> 'Credit Memo'
+													THEN IFP.dblAmountDue
+													ELSE
+													  CASE WHEN ISNULL(POSPAYMENTS.dblAmount, 0) <  0 
+													    THEN (ISNULL(POSPAYMENTS.dblAmount, 0) * -1) * dbo.fnARGetInvoiceAmountMultiplier(IFP.strTransactionType)
+													    ELSE ISNULL(POSPAYMENTS.dblAmount, 0) * dbo.fnARGetInvoiceAmountMultiplier(IFP.strTransactionType)
+												      END
 												  END
 				,intEntityId					= @intEntityUserId
 				,intInvoiceId					= IFP.intInvoiceId
@@ -694,9 +699,13 @@ IF EXISTS (SELECT TOP 1 NULL FROM #POSTRANSACTIONS)
 				,intInvoiceAccountId			= IFP.intAccountId
 				,dblInvoiceTotal				= IFP.dblInvoiceTotal * dbo.fnARGetInvoiceAmountMultiplier(IFP.strTransactionType)
 				,dblBaseInvoiceTotal			= IFP.dblBaseInvoiceTotal * dbo.fnARGetInvoiceAmountMultiplier(IFP.strTransactionType)
-				,dblPayment						= CASE WHEN ISNULL(POSPAYMENTS.dblAmount, 0) <  0 
-													THEN (ISNULL(POSPAYMENTS.dblAmount, 0) * -1) * dbo.fnARGetInvoiceAmountMultiplier(IFP.strTransactionType)
-													ELSE ISNULL(POSPAYMENTS.dblAmount, 0) * dbo.fnARGetInvoiceAmountMultiplier(IFP.strTransactionType)
+				,dblPayment						= CASE WHEN POSPAYMENTS.strPaymentMethod = 'Cash' and II.strTransactionType <> 'Credit Memo'
+													THEN IFP.dblAmountDue
+													ELSE
+													  CASE WHEN ISNULL(POSPAYMENTS.dblAmount, 0) <  0 
+													    THEN (ISNULL(POSPAYMENTS.dblAmount, 0) * -1) * dbo.fnARGetInvoiceAmountMultiplier(IFP.strTransactionType)
+													    ELSE ISNULL(POSPAYMENTS.dblAmount, 0) * dbo.fnARGetInvoiceAmountMultiplier(IFP.strTransactionType)
+												      END
 												  END
 				,dblAmountDue					= IFP.dblInvoiceTotal * dbo.fnARGetInvoiceAmountMultiplier(IFP.strTransactionType)
 				,dblBaseAmountDue				= IFP.dblInvoiceTotal * dbo.fnARGetInvoiceAmountMultiplier(IFP.strTransactionType)
@@ -767,8 +776,8 @@ IF EXISTS (SELECT TOP 1 NULL FROM #POSTRANSACTIONS)
 				 , dtmDatePaid						= DATEADD(dd, DATEDIFF(dd, 0, POS.dtmDate), 0)
 				 , intPaymentMethodId				= @intDebitMemoPaymentMethodId
 				 , strPaymentMethod					= 'Debit Memos and Payments'
-				 , strPaymentInfo					= 'POS Exchange Item Transaction'
-				 , strNotes							= POS.strReceiptNumber
+				 , strPaymentInfo					= NULL--'POS Exchange Item Transaction'
+				 , strNotes							= 'POS Exchange Item Transaction'--POS.strReceiptNumber
 				 , intBankAccountId					= BA.intBankAccountId
 				 , dblAmountPaid					= 0.00
 				 , intEntityId						= @intEntityUserId
@@ -809,8 +818,8 @@ IF EXISTS (SELECT TOP 1 NULL FROM #POSTRANSACTIONS)
 				 , dtmDatePaid						= DATEADD(dd, DATEDIFF(dd, 0, POS.dtmDate), 0)
 				 , intPaymentMethodId				= @intDebitMemoPaymentMethodId
 				 , strPaymentMethod					= 'Debit Memos and Payments'
-				 , strPaymentInfo					= 'POS Exchange Item Transaction'
-				 , strNotes							= POS.strReceiptNumber
+				 , strPaymentInfo					= NULL--'POS Exchange Item Transaction'
+				 , strNotes							= 'POS Exchange Item Transaction'--POS.strReceiptNumber
 				 , intBankAccountId					= BA.intBankAccountId
 				 , dblAmountPaid					= 0.00
 				 , intEntityId						= @intEntityUserId
@@ -851,8 +860,8 @@ IF EXISTS (SELECT TOP 1 NULL FROM #POSTRANSACTIONS)
 				 , dtmDatePaid						= DATEADD(dd, DATEDIFF(dd, 0, POS.dtmDate), 0)
 				 , intPaymentMethodId				= @intCashPaymentMethodId
 				 , strPaymentMethod					= 'Cash'
-				 , strPaymentInfo					= 'POS Settle Amount Due of Exchange Transaction'
-				 , strNotes							= POS.strReceiptNumber
+				 , strPaymentInfo					= NULL
+				 , strNotes							= 'POS Settle Amount Due of Exchange Transaction' --POS.strReceiptNumber
 				 , intBankAccountId					= BA.intBankAccountId
 				 , dblAmountPaid					= INV.dblAmountDue - CM.dblAmountDue
 				 , intEntityId						= @intEntityUserId
@@ -971,6 +980,9 @@ IF EXISTS (SELECT TOP 1 NULL FROM #POSTRANSACTIONS)
 					 , dtmDateProcessed
 			FROM @PROCESSLOGS
 		
+		SELECT TOP 1 @ErrorMessage = 'Batch process unsuccessful : ' + strDescription from @PROCESSLOGS
+
+		RAISERROR(@ErrorMessage, 16, 1);
 		GOTO PROCESS_EXIT
 	END
 
@@ -1003,6 +1015,11 @@ IF EXISTS (SELECT TOP 1 NULL FROM #POSTRANSACTIONS)
 					 , ysnSuccess 
 					 , dtmDateProcessed 
 			FROM @PROCESSLOGS 
+
+			SELECT TOP 1 @ErrorMessage = 'Batch process unsuccessful : ' + strDescription from @PROCESSLOGS
+
+			RAISERROR(@ErrorMessage, 16, 1);
+			GOTO PROCESS_EXIT
 			
 	END
 

@@ -189,6 +189,7 @@ BEGIN TRY
 					FROM @BillStorages BD
 					INNER JOIN tblGRCustomerStorage CS 
 						ON BD.intCustomerStorageId = CS.intCustomerStorageId
+						and BD.intBillStorageKey = @intBillStorageKey 
 
 				EXEC [dbo].[uspARProcessInvoices] 
 					 @InvoiceEntries = @EntriesForInvoice

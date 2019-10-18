@@ -15,7 +15,7 @@ BEGIN
 	DECLARE @startDate DATETIME = '1/1/' + @lastYear
 	DECLARE @endDate DATETIME = '12/31/' + @lastYear;
 
-	WITH result
+	WITH dataResult
 	(
 		intEntityVendorId,
 		dblTotal

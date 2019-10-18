@@ -90,7 +90,22 @@ BEGIN
 	-- Act
 	BEGIN 
 		INSERT INTO actual	
-		SELECT * FROM dbo.fnGetItemCostingOnPostErrors(@WetGrains, @WetGrains_DefaultLocation, @WetGrains_BushelUOMId, @SubLocation, @StorageLocation, @dblQty, @LotId)
+		SELECT * 
+		FROM dbo.fnGetItemCostingOnPostErrors(
+			@WetGrains
+			, @WetGrains_DefaultLocation
+			, @WetGrains_BushelUOMId
+			, @SubLocation
+			, @StorageLocation
+			, @dblQty
+			, @LotId
+			, DEFAULT 
+			, DEFAULT 
+			, DEFAULT 
+			, DEFAULT 
+			, DEFAULT 
+			, DEFAULT 
+		)
 	END
 
 	-- Assert

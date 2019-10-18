@@ -419,7 +419,7 @@ BEGIN
 			,strSourceTransactionId
 			,intTransactionTypeId
 			,intCurrencyId
-			,dblExchangeRate
+			--,dblExchangeRate
 		)
 		SELECT	
 			@dtmDate
@@ -439,7 +439,7 @@ BEGIN
 			,@strSourceTransactionId
 			,@intTransactionTypeId
 			,@intCurrencyId
-			,@dblExchangeRate
+			--,@dblExchangeRate
 
 		EXEC dbo.uspICPostCostAdjustment
 			@ItemsToAdjust

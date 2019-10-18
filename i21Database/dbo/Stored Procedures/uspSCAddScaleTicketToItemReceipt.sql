@@ -125,6 +125,7 @@ INSERT INTO @ReceiptStagingTable(
 		,intShipFromEntityId
 		,[intLoadShipmentId] 
 		,[intLoadShipmentDetailId] 
+		,intTaxGroupId
 )	
 SELECT 
 		strReceiptType				= CASE 
@@ -235,6 +236,7 @@ SELECT
 		,intShipFromEntityId		= SC.intEntityId
 		,[intLoadShipmentId] 		= SC.intLoadId
 		,[intLoadShipmentDetailId] 	= SC.intLoadDetailId
+		,intTaxGroupId				= CASE WHEN LI.strSourceTransactionId = 'DP' THEN -1 ELSE NULL END
 FROM	@Items LI INNER JOIN dbo.tblSCTicket SC ON SC.intTicketId = LI.intTransactionId 
 LEFT JOIN (
 	SELECT CTD.intContractHeaderId
@@ -317,6 +319,7 @@ END
 		,[ysnAllowVoucher]
 		,[intLoadShipmentId] 
 		,[intLoadShipmentCostId] 
+		,intTaxGroupId
 	)
 	SELECT	
 	[intEntityVendorId]					= RE.intEntityVendorId
@@ -380,6 +383,7 @@ END
 	,[ysnAllowVoucher]				= RE.ysnAllowVoucher
 	,[intLoadShipmentId] 			= RE.intLoadShipmentId
 	,[intLoadShipmentCostId] 		= RE.intLoadShipmentDetailId
+	,intTaxGroupId = RE.intTaxGroupId
 	FROM @ReceiptStagingTable RE
 	LEFT JOIN tblQMTicketDiscount QM ON QM.intTicketId = RE.intSourceId
 	LEFT JOIN tblGRDiscountScheduleCode GR ON QM.intDiscountScheduleCodeId = GR.intDiscountScheduleCodeId
@@ -420,7 +424,8 @@ END
 		,[strChargesLink]
 		,ysnAllowVoucher
 		,[intLoadShipmentId] 			
-		,[intLoadShipmentCostId] 		
+		,[intLoadShipmentCostId] 	
+		,intTaxGroupId	
 	)
 	SELECT	
 	[intEntityVendorId]					= RE.intEntityVendorId
@@ -457,6 +462,7 @@ END
 	,[ysnAllowVoucher]				= RE.ysnAllowVoucher
 	,[intLoadShipmentId] 			= RE.intLoadShipmentId
 	,[intLoadShipmentCostId] 		= RE.intLoadShipmentDetailId
+	,intTaxGroupId = RE.intTaxGroupId
 	FROM @ReceiptStagingTable RE
 	INNER JOIN tblSCTicket SC ON SC.intTicketId = RE.intSourceId
 	INNER JOIN tblSCScaleSetup SCSetup ON SCSetup.intScaleSetupId = SC.intScaleSetupId
@@ -938,7 +944,8 @@ IF ISNULL(@intFreightItemId,0) = 0
 									,[strChargesLink]
 									,[ysnAllowVoucher]
 									,[intLoadShipmentId] 			
-									,[intLoadShipmentCostId] 		
+									,[intLoadShipmentCostId] 
+									,intTaxGroupId		
 								)
 								SELECT	
 									[intEntityVendorId]					
@@ -965,7 +972,8 @@ IF ISNULL(@intFreightItemId,0) = 0
 									,[strChargesLink]					
 									,[ysnAllowVoucher]	
 									,[intLoadShipmentId] 			
-									,[intLoadShipmentCostId] 			
+									,[intLoadShipmentCostId] 	
+									,intTaxGroupId
 								FROM [dbo].[fnSCGetLoadFreightItemCharges](@ReceiptStagingTable,@ysnPrice,@ysnAccrue,@intFreightItemId,@intLoadCostId)
 					END
 					-- non freight
@@ -996,6 +1004,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 						,[ysnAllowVoucher]
 						,[intLoadShipmentId]	
 						,[intLoadShipmentCostId]
+						,intTaxGroupId
 					)
 					SELECT	
 						[intEntityVendorId]				
@@ -1022,7 +1031,8 @@ IF ISNULL(@intFreightItemId,0) = 0
 						,[strChargesLink]				
 						,[ysnAllowVoucher]
 						,[intLoadShipmentId] 			
-						,[intLoadShipmentCostId]				
+						,[intLoadShipmentCostId]	
+						,intTaxGroupId			
 					FROM dbo.[fnSCGetLoadNoneFreightItemCharges](@ReceiptStagingTable,@ysnPrice,@ysnAccrue,@intFreightItemId,@intLoadCostId)
 				END	
 			END
@@ -1056,7 +1066,8 @@ IF ISNULL(@intFreightItemId,0) = 0
 						,[strChargesLink]
 						,ysnAllowVoucher
 						,[intLoadShipmentId]			 
-						,[intLoadShipmentCostId]		
+						,[intLoadShipmentCostId]
+						,intTaxGroupId		
 					) 
 					SELECT	
 						[intEntityVendorId]					= RE.intEntityVendorId
@@ -1093,6 +1104,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 						,[ysnAllowVoucher]				= RE.ysnAllowVoucher
 						,[intLoadShipmentId]			= RE.intLoadShipmentId 
 						,[intLoadShipmentCostId]		= RE.intLoadShipmentDetailId
+						,intTaxGroupId = RE.intTaxGroupId
 						FROM @ReceiptStagingTable RE 						
 						-- JOIN tblICItem ICI on RE.intItemId = @intFreightItemId
 						LEFT JOIN tblSCTicket SC ON SC.intTicketId = RE.intSourceId
@@ -1131,6 +1143,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 								,[ysnAllowVoucher]
 								,[intLoadShipmentId]		
 								,[intLoadShipmentCostId]	
+								,intTaxGroupId
 							)
 							SELECT	
 							[intEntityVendorId]					= RE.intEntityVendorId
@@ -1177,6 +1190,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 							,[ysnAllowVoucher]				= RE.ysnAllowVoucher
 							,[intLoadShipmentId]			= RE.intLoadShipmentId 
 							,[intLoadShipmentCostId]		= RE.intLoadShipmentDetailId
+							,intTaxGroupId = RE.intTaxGroupId
 							FROM @ReceiptStagingTable RE
 							LEFT JOIN tblSCTicket SC ON SC.intTicketId = RE.intSourceId
 							LEFT JOIN tblSCScaleSetup SCS ON SC.intScaleSetupId = SCS.intScaleSetupId
@@ -1216,7 +1230,8 @@ IF ISNULL(@intFreightItemId,0) = 0
 								,[strChargesLink]
 								,[ysnAllowVoucher]
 								,[intLoadShipmentId]			
-								,[intLoadShipmentCostId]		
+								,[intLoadShipmentCostId]
+								,intTaxGroupId		
 							)
 							SELECT	
 							[intEntityVendorId]					= RE.intEntityVendorId
@@ -1250,6 +1265,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 							,[ysnAllowVoucher]				= RE.ysnAllowVoucher
 							,[intLoadShipmentId]			= RE.intLoadShipmentId 
 							,[intLoadShipmentCostId]		= RE.intLoadShipmentDetailId
+							,intTaxGroupId = RE.intTaxGroupId
 							FROM tblCTContractCost ContractCost
 							LEFT JOIN @ReceiptStagingTable RE ON RE.intContractDetailId = ContractCost.intContractDetailId
 							LEFT JOIN tblSCTicket SC ON SC.intTicketId = RE.intSourceId
@@ -1283,7 +1299,8 @@ IF ISNULL(@intFreightItemId,0) = 0
 								,[strChargesLink]
 								,[ysnAllowVoucher]
 								,[intLoadShipmentId]			 
-								,[intLoadShipmentCostId]		
+								,[intLoadShipmentCostId]	
+								,intTaxGroupId	
 							) 
 							SELECT	
 								[intEntityVendorId]					= RE.intEntityVendorId
@@ -1320,6 +1337,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 								,[ysnAllowVoucher]				= RE.ysnAllowVoucher
 								,[intLoadShipmentId]			= RE.intLoadShipmentId 
 								,[intLoadShipmentCostId]		= RE.intLoadShipmentDetailId
+								,intTaxGroupId = RE.intTaxGroupId
 								FROM @ReceiptStagingTable RE 
 								LEFT JOIN tblSCTicket SC ON SC.intTicketId = RE.intSourceId
 								LEFT JOIN tblSCScaleSetup SCS ON SC.intScaleSetupId = SCS.intScaleSetupId
@@ -1355,6 +1373,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 					,[ysnAllowVoucher]
 					,[intLoadShipmentId]	
 					,[intLoadShipmentCostId]
+					,intTaxGroupId
 				)
 				SELECT	
 				[intEntityVendorId]					= RE.intEntityVendorId
@@ -1388,6 +1407,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 				,[ysnAllowVoucher]				= RE.ysnAllowVoucher
 				,[intLoadShipmentId]			= RE.intLoadShipmentId 
 				,[intLoadShipmentCostId]		= RE.intLoadShipmentDetailId
+				,intTaxGroupId = RE.intTaxGroupId
 				FROM tblCTContractCost ContractCost
 				LEFT JOIN @ReceiptStagingTable RE ON RE.intContractDetailId = ContractCost.intContractDetailId
 				LEFT JOIN tblSCTicket SC ON SC.intTicketId = RE.intSourceId
@@ -1403,11 +1423,11 @@ BEGIN
 	UPDATE @OtherCharges SET strReceiptType = 'Purchase Contract'
 END
 
-IF @strReceiptType = 'Delayed Price' 
-BEGIN
-	UPDATE @ReceiptStagingTable SET intTaxGroupId = -1
-	UPDATE @OtherCharges SET intTaxGroupId = -1
-END
+-- IF @strReceiptType = 'Delayed Price' 
+-- BEGIN
+-- 	UPDATE @ReceiptStagingTable SET intTaxGroupId = -1
+-- 	UPDATE @OtherCharges SET intTaxGroupId = -1
+-- END
 
 SELECT @total = COUNT(*) FROM @ReceiptStagingTable;
 IF (@total = 0)

@@ -1,5 +1,5 @@
 ﻿CREATE VIEW [dbo].[vyuSTMarkUpDownDetail]
-AS
+	AS
 SELECT 
 	markDetail.intMarkUpDownDetailId,
 	markDetail.intMarkUpDownId,
@@ -10,19 +10,17 @@ SELECT
 							THEN 'Mark Up'
 						WHEN (mark.strType = 'Item Level' AND markDetail.dblRetailPerUnit < ISNULL(itemPricing.dblSalePrice, 0))
 							THEN 'Mark Down'
-						WHEN (mark.strType = 'Department Level' AND markDetail.dblTotalRetailAmount > ISNULL(catPricing.dblTotalRetailValue, 0))
+
+						-- Note: Please see comment here http://jira.irelyserver.com/browse/ST-1014
+						WHEN (mark.strType = 'Department Level' AND markDetail.dblTotalRetailAmount > 0)
 							THEN 'Mark Up'
-						WHEN (mark.strType = 'Department Level' AND markDetail.dblTotalRetailAmount < ISNULL(catPricing.dblTotalRetailValue, 0))
+						WHEN (mark.strType = 'Department Level' AND markDetail.dblTotalRetailAmount < 0)
 							THEN 'Mark Down'
-						ELSE ''
-						--WHEN (mark.strType = 'Item Level' AND mark.strAdjustmentType = 'Regular' AND markDetail.dblTotalRetailAmount > ISNULL([dbo].[fnICGetRunningBalance](itemValuation.intInventoryTransactionId), 0))
+						--WHEN (mark.strType = 'Department Level' AND markDetail.dblTotalRetailAmount > ISNULL(catPricing.dblTotalRetailValue, 0))
 						--	THEN 'Mark Up'
-						--WHEN (mark.strType = 'Item Level' AND mark.strAdjustmentType = 'Regular' AND markDetail.dblTotalRetailAmount < ISNULL([dbo].[fnICGetRunningBalance](itemValuation.intInventoryTransactionId), 0))
+						--WHEN (mark.strType = 'Department Level' AND markDetail.dblTotalRetailAmount < ISNULL(catPricing.dblTotalRetailValue, 0))
 						--	THEN 'Mark Down'
-						--WHEN (mark.strType = 'Item Level' AND mark.strAdjustmentType = 'Regular'  AND markDetail.dblTotalRetailAmount = ISNULL([dbo].[fnICGetRunningBalance](itemValuation.intInventoryTransactionId), 0))
-						--	THEN ''
-						--WHEN (mark.strType = 'Department Level')
-						--	THEN markDetail.strMarkUpOrDown
+						ELSE ''
 					END,
 	markDetail.strRetailShrinkRS,
 	markDetail.intQty, 

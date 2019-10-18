@@ -56,9 +56,7 @@ BEGIN
 
     INSERT INTO @CCRItemToARItem VALUES (@intSiteHeaderId, @intDealerSiteCreditItem, 'Dealer Site Credits');
     INSERT INTO @CCRItemToARItem VALUES (@intSiteHeaderId, @intDealerSiteFeeItem, 'Dealer Site Fees');
-
-    SET @success = 0
-    
+ 
     INSERT INTO @EntriesForInvoice(
         [strTransactionType]
         ,[strSourceTransaction]
@@ -139,6 +137,13 @@ BEGIN
 	SET @CursorTran = CURSOR FOR
 	SELECT intId FROM @EntriesForInvoice
 	OPEN @CursorTran
+
+		
+	IF (@@CURSOR_ROWS = 0)
+	BEGIN
+		SET @success = 1
+	END
+
 	FETCH NEXT FROM @CursorTran INTO @intId
 	WHILE @@FETCH_STATUS = 0
 	BEGIN

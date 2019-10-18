@@ -27,6 +27,7 @@ BEGIN
 	DECLARE @intNewContractHeaderId INT
 	DECLARE @intNewContractDetailId INT
 	DECLARE @intEntityId INT
+	DECLARE @intToEntityId INT
 
 	DECLARE @newCustomerStorageIds AS TABLE 
 	(
@@ -78,7 +79,7 @@ BEGIN
 			,intCustomerStorageId
 		) AS (
 			SELECT intTransferContractDetailId	= SourceSplit.intContractDetailId,
-				dblTransferUnits				= -(SourceSplit.dblOriginalUnits - SourceSplit.dblDeductedUnits),
+				dblTransferUnits				= -CASE WHEN (SourceSplit.dblOriginalUnits - SourceSplit.dblDeductedUnits) = 0 THEN SourceSplit.dblOriginalUnits ELSE (SourceSplit.dblOriginalUnits - SourceSplit.dblDeductedUnits) END ,
 				intSourceItemUOMId				= TransferStorage.intItemUOMId,
 				intCustomerStorageId			= SourceSplit.intSourceCustomerStorageId
 			FROM tblGRTransferStorageSourceSplit SourceSplit
@@ -397,10 +398,12 @@ BEGIN
 		WITH storageDetails (
 			intTransferStorageSplitId
 			,intEntityId
+			,intToEntityId
 		) AS (
 			SELECT 
 				intTransferStorageSplitId	= TransferStorageSplit.intTransferStorageSplitId
 				,intEntityId				= CS.intEntityId
+				,intToEntityId				= TransferStorageSplit.intEntityId
 			FROM tblGRTransferStorageSplit TransferStorageSplit
 			INNER JOIN tblGRTransferStorage TransferStorage
 				ON TransferStorage.intTransferStorageId = TransferStorageSplit.intTransferStorageId
@@ -415,17 +418,18 @@ BEGIN
 		SELECT
 			intTransferStorageSplitId
 			,intEntityId
+			,intToEntityId
 		FROM ( SELECT * FROM storageDetails ) params
 		
 		--if there are no contracts and the selected storage is DP
 		--(Transfer to DP) if there is no available contract for the selected entity, location and item, create a new contract
 		OPEN c;
 
-		FETCH c INTO @intTransferStorageSplitId, @intEntityId
+		FETCH c INTO @intTransferStorageSplitId, @intEntityId, @intToEntityId
 
 		WHILE @@FETCH_STATUS = 0 AND @cnt > 0
 		BEGIN
-			SET @XML = '<overrides><intEntityId>' + LTRIM(@intEntityId) + '</intEntityId></overrides>'
+			SET @XML = '<overrides><intEntityId>' + LTRIM(@intToEntityId) + '</intEntityId></overrides>'
 
 			IF @intTransferStorageSplitId IS NOT NULL
 			BEGIN
@@ -446,7 +450,7 @@ BEGIN
 				) CD
 			END
 
-			FETCH c INTO @intTransferStorageSplitId, @intEntityId
+			FETCH c INTO @intTransferStorageSplitId, @intEntityId, @intToEntityId
 		END
 		CLOSE c; DEALLOCATE c;
 
@@ -483,8 +487,59 @@ BEGIN
 		LEFT JOIN tblCTContractDetail CD
 			ON CD.intContractDetailId = TransferStorageSplit.intContractDetailId
 		
-		EXEC uspGRInsertStorageHistoryRecord @StorageHistoryStagingTable, @intStorageHistoryId
+		INSERT INTO @StorageHistoryStagingTable
+		(
+			[intCustomerStorageId]
+			,[intTransferStorageId]
+			,[intContractHeaderId]
+			,[dblUnits]
+			,[dtmHistoryDate]
+			,[intUserId]
+			,[ysnPost]
+			,[intTransactionTypeId]
+			,[strPaidDescription]
+			,[strType]
+			,[intInventoryReceiptId]
+		)
+		SELECT DISTINCT	
+		     [intCustomerStorageId]	= SR.intToCustomerStorageId
+			,[intTransferStorageId]	= SR.intTransferStorageId
+			,[intContractHeaderId]	= CD.intContractHeaderId
+			,[dblUnits]				= SR.dblUnitQty
+			,[dtmHistoryDate]		= GETDATE()
+			,[intUserId]			= @intUserId
+			,[ysnPost]				= 1
+			,[intTransactionTypeId]	= 3
+			,[strPaidDescription]	= 'Generated from Transfer Storage'
+			,[strType]				= 'From Transfer'
+			,[intInventoryReceiptId] = SourceHistory.intInventoryReceiptId
+		FROM tblGRTransferStorageReference SR
+		INNER JOIN tblGRCustomerStorage FromStorage
+			ON FromStorage.intCustomerStorageId = SR.intSourceCustomerStorageId
+		INNER JOIN tblGRStorageType FromType
+			ON FromType.intStorageScheduleTypeId = FromStorage.intStorageTypeId
+		INNER JOIN tblGRCustomerStorage ToStorage
+			ON ToStorage.intCustomerStorageId = SR.intToCustomerStorageId
+		INNER JOIN tblGRStorageType ToType
+			ON ToType.intStorageScheduleTypeId = ToStorage.intStorageTypeId
+		JOIN tblICItemUOM IU
+			ON IU.intItemId = ToStorage.intItemId
+				AND IU.ysnStockUnit = 1
+		INNER JOIN tblICItemLocation IL
+			ON IL.intItemId = ToStorage.intItemId AND IL.intLocationId = ToStorage.intCompanyLocationId
+		INNER JOIN tblGRTransferStorage TS
+			ON SR.intTransferStorageId = TS.intTransferStorageId
+		INNER JOIN tblGRStorageHistory SourceHistory
+			ON SourceHistory.intCustomerStorageId = FromStorage.intCustomerStorageId AND SourceHistory.intInventoryReceiptId IS NOT NULL
+		INNER JOIN tblGRTransferStorageSplit TSS
+			ON TSS.intTransferStorageSplitId = SR.intTransferStorageSplitId
+		LEFT JOIN tblCTContractDetail CD
+			ON CD.intContractDetailId = TSS.intContractDetailId
+		WHERE  FromType.ysnDPOwnedType = 1 AND ToType.ysnDPOwnedType = 1
+		AND SR.intTransferStorageId = @intTransferStorageId
 
+		EXEC uspGRInsertStorageHistoryRecord @StorageHistoryStagingTable, @intStorageHistoryId
+		--integration to IC
 		SET @cnt = 0
 		SET @cnt = (SELECT COUNT(*) FROM tblGRTransferStorageSplit WHERE intTransferStorageId = @intTransferStorageId AND intContractDetailId IS NOT NULL)
 

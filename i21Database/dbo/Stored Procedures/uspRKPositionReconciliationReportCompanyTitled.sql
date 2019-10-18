@@ -15,6 +15,12 @@ BEGIN
 	INSERT INTO @Commodity(intCommodityId)
 	SELECT Item Collate Latin1_General_CI_AS FROM [dbo].[fnSplitString](@strCommodityId, ',')
 
+	DECLARE @ysnIncludeInTransitInCompanyTitled BIT
+	SELECT TOP 1 
+		@ysnIncludeInTransitInCompanyTitled = ysnIncludeInTransitInCompanyTitled
+	FROM tblRKCompanyPreference
+
+
 
 	DECLARE @CompanyTitle AS TABLE (
 		dtmDate  DATE  NULL
@@ -32,6 +38,7 @@ BEGIN
 	
 	
 	DECLARE @intCommodityId INT
+		,@strCommodities NVARCHAR(MAX)
 		,@strCommodityCode NVARCHAR(100)
 
 	SELECT DISTINCT com.intCommodityId, strCommodityCode
@@ -39,6 +46,9 @@ BEGIN
 	FROM @Commodity com
 	INNER JOIN tblICCommodity iccom on iccom.intCommodityId = com.intCommodityId
 	WHERE ISNULL(com.intCommodityId, '') <> ''
+
+	--Build concatenated commodities to be used if begin balance only (no record from given date range)
+	SELECT @strCommodities =  COALESCE(@strCommodities + ', ' + strCommodityCode, strCommodityCode) FROM #tempCommodity
 
 	WHILE EXISTS(SELECT TOP 1 1 FROM #tempCommodity)
 	BEGIN
@@ -66,6 +76,34 @@ BEGIN
 			, @intItemId = null
 			, @strPositionIncludes = null
 			, @intLocationId = null
+
+		
+		INSERT INTO @CompanyTitle(
+			dtmDate
+			,dblUnpaidIncrease 
+			,dblUnpaidDecrease 
+			,dblUnpaidBalance  
+			,dblPaidBalance  
+			,strTransactionId
+			,intTransactionId 
+			,strDistribution
+			,dblCompanyTitled
+			,intCommodityId
+		)
+		SELECT 
+			dtmDate
+			,0
+			,dblInTransitQty
+			,0
+			,0
+			,strTransactionId
+			,intTransactionId
+			,''
+			,0
+			,@intCommodityId
+		FROM dbo.fnICOutstandingInTransitAsOf(NULL, @intCommodityId, @dtmToTransactionDate) InTran
+		WHERE @ysnIncludeInTransitInCompanyTitled = 0
+
 	
 		UPDATE @CompanyTitle SET strCommodityCode = @strCommodityCode WHERE intCommodityId = @intCommodityId
 
@@ -105,10 +143,14 @@ BEGIN
 			,@dblCTBalanceForward  NUMERIC(18,6)
 			,@dblCompTitledBegBalForSummary NUMERIC(18,6)
 
-	SELECT @dblCTBalanceForward =  SUM(dblCompanyTitled)
+	SELECT @dblCTBalanceForward =  SUM(ISNULL(dblCompanyTitled,0))
 	FROM @CompanyTitle
 	WHERE dtmDate IS NULL
 
+	IF NOT EXISTS (SELECT TOP 1 * FROM #tempDateRange)
+	BEGIN
+		GOTO BeginBalanceOnly
+	END
 
 	While (Select Count(*) From #tempDateRange) > 0
 	Begin
@@ -126,8 +168,8 @@ BEGIN
 		)
 		select @intRowNum
 			,dtmTransactionDate
-			,@dblCTBalanceForward
-			,@dblCTBalanceForward + ( dblIn - dblOut)  
+			,ISNULL(@dblCTBalanceForward,0)
+			,ISNULL(@dblCTBalanceForward,0) + ( dblIn - dblOut)  
 		from #tmpCompanyTitled 
 		WHERE intRowNum = @intRowNum
 	
@@ -182,7 +224,27 @@ BEGIN
 	FULL JOIN @tblRunningBalance RB on RB.intRowNum = CT.intRowNum
 	ORDER BY CT.dtmTransactionDate
 
+	GOTO ExitRoutine
 
+	BeginBalanceOnly:
+
+	IF @dblCTBalanceForward IS NOT NULL
+	BEGIN
+		SELECT
+			intRowNum =1
+			,dtmTransactionDate = NULL
+			,dblCompTitledBegBalance = @dblCTBalanceForward
+			,dblIn = NULL
+			,dblOut = NULL
+			,dblCompTitledEndBalance = @dblCTBalanceForward
+			,strTransactionId = 'Balance Forward'
+			,intTransactionId = NULL
+			,strCommodityCode = @strCommodities
+			,dblCompTitledBegBalForSummary = @dblCTBalanceForward
+			,dblCompTitledEndBalForSummary = @dblCTBalanceForward
+	END
+
+	ExitRoutine:
 	DROP TABLE #tmpCompanyTitled
 	DROP TABLE #tempDateRange
 	DROP TABLE #tempCommodity

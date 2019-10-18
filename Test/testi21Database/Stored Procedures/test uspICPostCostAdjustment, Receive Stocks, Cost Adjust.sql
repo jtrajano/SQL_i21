@@ -379,7 +379,7 @@ BEGIN
 				,[intCostUOMId]
 				,[dblVoucherCost] 
 				,[intCurrencyId] 
-				,[dblExchangeRate] 
+				--,[dblExchangeRate] 
 				,[intTransactionId] 
 				,[intTransactionDetailId] 
 				,[strTransactionId] 
@@ -402,7 +402,7 @@ BEGIN
 				,[intCostUOMId]				= @WetGrains_BushelUOM
 				,[dblVoucherCost]			= 37.261
 				,[intCurrencyId]			= 1
-				,[dblExchangeRate]			= 1
+				--,[dblExchangeRate]		= 1
 				,[intTransactionId]			= 1
 				,[intTransactionDetailId]	= 1
 				,[strTransactionId]			= 'BL-10001'

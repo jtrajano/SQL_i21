@@ -15,11 +15,12 @@ BEGIN
 		,@ysnDisplayDemandWithItemNoAndDescription BIT
 		,@strSupplyTarget NVARCHAR(50)
 		,@strContainerType NVARCHAR(50)
-		,@intContainerTypeId INT
+		,@intContainerTypeId INT,@ysnDisplayRestrictedBookInDemandView bit
 
 	SELECT @ysnDisplayDemandWithItemNoAndDescription = ysnDisplayDemandWithItemNoAndDescription
 		,@strSupplyTarget = strSupplyTarget
 		,@intContainerTypeId = intContainerTypeId
+		,@ysnDisplayRestrictedBookInDemandView=IsNULL(ysnDisplayRestrictedBookInDemandView,0)
 	FROM tblMFCompanyPreference
 
 	IF @ysnDisplayDemandWithItemNoAndDescription IS NULL
@@ -46,6 +47,69 @@ BEGIN
 	BEGIN
 		RETURN
 	END
+
+	IF OBJECT_ID('tempdb..#tblMFItemBook') IS NOT NULL
+		DROP TABLE #tblMFItemBook
+
+	CREATE TABLE #tblMFItemBook (
+		intId INT identity(1, 1)
+		,intItemId INT
+		,strBook NVARCHAR(MAX)
+		)
+
+		if @ysnDisplayRestrictedBookInDemandView=1
+	Begin
+
+	DECLARE @intItemId INT
+		,@intItemBookId INT
+		,@intId int
+		,@strBook nvarchar(MAX)
+
+	INSERT INTO #tblMFItemBook (intItemId)
+	SELECT distinct intItemId
+	FROM tblCTInvPlngReportAttributeValue
+	WHERE intItemId <> IsNULL(intMainItemId, intItemId)
+	and intInvPlngReportMasterID=@intInvPlngReportMasterID
+
+	SELECT @intId = MIN(intId)
+	FROM #tblMFItemBook
+
+	WHILE @intId IS NOT NULL
+	BEGIN
+		SELECT @intItemBookId = NULL
+			,@strBook = ''
+
+		SELECT @intItemBookId = intItemId
+		FROM #tblMFItemBook
+		WHERE intId = @intId
+
+		SELECT @strBook = @strBook + strBook + ','
+		FROM tblCTBook B
+		WHERE NOT EXISTS (
+				SELECT intBookId
+				FROM tblICItemBook IB
+				WHERE IB.intItemId = @intItemBookId
+					AND IB.intBookId = B.intBookId
+				)
+
+		IF @strBook IS NULL
+			SELECT @strBook = ''
+
+		IF len(@strBook) > 0
+		BEGIN
+			SELECT @strBook = left(@strBook, Len(@strBook) - 1)
+
+			UPDATE #tblMFItemBook
+			SET strBook = @strBook
+			WHERE intId = @intId
+		END
+
+		SELECT @intId = MIN(intId)
+		FROM #tblMFItemBook
+		WHERE intId > @intId
+	END
+
+	End
 
 	SELECT @ysnAllItem = ysnAllItem
 		,@intCategoryId = intCategoryId
@@ -160,6 +224,8 @@ BEGIN
 	SET @SQL = @SQL + ' INSERT INTO @Table 
 						SELECT Ext.intItemId
 						,CASE 
+				WHEN '+Ltrim(@ysnDisplayRestrictedBookInDemandView) +'= 0 and IsNULL(strBook,'''')=''''
+					THEN (CASE 
 						WHEN ' + Ltrim(@ysnDisplayDemandWithItemNoAndDescription) + ' = 1
 							THEN (
 									CASE 
@@ -175,7 +241,27 @@ BEGIN
 									ELSE M.strItemNo + '' [ '' + MI.strItemNo + '' ]''
 									END
 								)
-						END AS strItemNo
+						END )
+				ELSE (
+						CASE 
+							WHEN '+Ltrim(@ysnDisplayDemandWithItemNoAndDescription)+' = 1
+								THEN (
+										CASE 
+											WHEN M.intItemId = IsNULL(MI.intItemId,M.intItemId)
+												THEN M.strItemNo + '' - '' + M.strDescription
+											ELSE M.strItemNo + '' - '' + M.strDescription + '' [ '' + MI.strItemNo + '' - '' + MI.strDescription + '' ] Restricted [''+strBook+'']''
+											END
+										)
+							ELSE (
+									CASE 
+										WHEN M.intItemId = IsNULL(MI.intItemId,M.intItemId)
+											THEN M.strItemNo
+										ELSE M.strItemNo + '' [ '' + MI.strItemNo + '' ] Restricted [''+strBook+'']''
+										END
+									)
+							END
+						)
+				END AS strItemNo
 						, Ext.intReportAttributeID [AttributeId]
 						, CASE 
 				WHEN RA.intReportAttributeID = 10
@@ -228,6 +314,7 @@ BEGIN
 					JOIN tblICItem M ON M.intItemId = Ext.intItemId
 					JOIN dbo.tblCTReportAttribute RA ON RA.intReportAttributeID = Ext.intReportAttributeID
 					LEFT JOIN tblICItem MI ON MI.intItemId = Ext.intMainItemId
+					Left JOIN #tblMFItemBook IB on IB.intItemId=Ext.intItemId
 					order by Ext.intInvPlngReportMasterID,Ext.intItemId, Ext.intReportAttributeID '
 	SET @SQL = CHAR(13) + @SQL + ' SELECT T.* FROM @Table T JOIN tblCTReportAttribute RA ON RA.intReportAttributeID = T.AttributeId ORDER By T.intItemId, RA.intDisplayOrder '
 

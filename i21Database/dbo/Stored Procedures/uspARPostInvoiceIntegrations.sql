@@ -198,6 +198,40 @@ BEGIN
 			EXEC dbo.uspARCreateRCVForCreditMemo @intInvoiceId = @intInvoiceIdWithPrepaid, @intUserId = @UserId
 		ELSE
 			BEGIN
+
+			    --Insert Audit log to credit memo for cash refund
+				DECLARE @KeyValueId int,
+						@EntityId int,
+						@ScreenName	nvarchar(50) = 'AccountsReceivable.view.Invoice',
+						@ActionType nvarchar(50) = 'Processed',
+						@ToValueChild nvarchar(50)
+
+				SELECT @ToValueChild = strInvoiceNumber from   tblARInvoice WHERE intInvoiceId = @intInvoiceIdWithPrepaid 
+				SELECT TOP 1 @KeyValueId = I.intInvoiceId, @EntityId = I.intEntityId
+				FROM tblARInvoice I
+				INNER JOIN (										
+					SELECT    intPrepaymentId			= intPrepaymentId
+							, dblAppliedInvoiceAmount	= ISNULL(dblAppliedInvoiceDetailAmount, @ZeroDecimal)
+					FROM dbo.tblARPrepaidAndCredit P WITH (NOLOCK)
+					
+					WHERE intInvoiceId = @intInvoiceIdWithPrepaid 
+						AND ysnApplied = 1
+						AND ISNULL(dblAppliedInvoiceDetailAmount, @ZeroDecimal) > @ZeroDecimal
+				) PREPAIDS ON I.intInvoiceId = PREPAIDS.intPrepaymentId
+
+
+
+				EXEC dbo.uspSMAuditLog 
+					 @screenName		 = @ScreenName	                    -- Screen Namespace
+					,@keyValue			 = @KeyValueId						-- Primary Key Value of the Invoice. 
+					,@entityId			 = @EntityId							-- Entity Id.
+					,@actionType	     = @ActionType						-- Action Type
+					,@changeDescription  = 'Cash Refund on'
+					,@fromValue			 = ''
+					,@toValue			 = @ToValueChild
+					,@details			 = ''
+					 
+
 				UPDATE I
 				SET dblAmountDue		= dblAmountDue - ISNULL(dblAppliedInvoiceAmount, @ZeroDecimal)
 				  , dblBaseAmountDue	= dblBaseAmountDue - ISNULL(dblAppliedInvoiceAmount, @ZeroDecimal)
@@ -214,6 +248,9 @@ BEGIN
 					  AND ysnApplied = 1
 					  AND ISNULL(dblAppliedInvoiceDetailAmount, @ZeroDecimal) > @ZeroDecimal
 				) PREPAIDS ON I.intInvoiceId = PREPAIDS.intPrepaymentId
+
+
+
 			END
 								
 		DELETE FROM @InvoicesWithPrepaids WHERE intInvoiceId = @intInvoiceIdWithPrepaid
@@ -316,9 +353,6 @@ BEGIN
 				   , @ysnFromReturnP		= [ysnFromReturn]
 		FROM @IdsP 
 		ORDER BY [intInvoiceId]
-		
-        --UPDATE CONTRACT SEQUENCE BALANCE
-		EXEC dbo.[uspARInvoiceUpdateSequenceBalance] @TransactionId = @InvoiceIDP, @ysnDelete = 0, @UserId = @UserId
 
 		--COMMITTED QTY
 		EXEC dbo.[uspARUpdateCommitted] @InvoiceIDP, 1, @UserId, 1
@@ -639,9 +673,6 @@ BEGIN
 		FROM @IdsU 
 		ORDER BY [intInvoiceId]
 		
-        --UPDATE CONTRACT SEQUENCE BALANCE
-		EXEC dbo.[uspARInvoiceUpdateSequenceBalance] @TransactionId = @InvoiceIDP, @ysnDelete = 1, @UserId = @UserId
-		
 		--COMMITTED QTY
 		EXEC dbo.[uspARUpdateCommitted] @InvoiceIDU, 1, @UserId, 1
 
@@ -777,6 +808,12 @@ INNER JOIN tblCTContractDetail CD ON ID.[intContractDetailId] = CD.[intContractD
 LEFT JOIN tblCTContractHeader CH ON CD.intContractHeaderId = CH.intContractHeaderId
 LEFT JOIN tblICInventoryShipmentItem ISI ON ID.[intInventoryShipmentItemId] = ISI.[intInventoryShipmentItemId]
 LEFT JOIN tblARInvoice PI ON ID.intOriginalInvoiceId = PI.intInvoiceId AND ID.ysnFromProvisional = 1 AND PI.strType = 'Provisional'
+LEFT JOIN (
+	SELECT intLoadDetailId
+		 , intPurchaseSale 
+	FROM tblLGLoadDetail LGD 
+	INNER JOIN tblLGLoad LG ON LG.intLoadId = LGD.intLoadId	
+) LG ON ID.intLoadDetailId = LG.intLoadDetailId
 OUTER APPLY (
 	SELECT TOP 1 intInvoiceId 
 	FROM tblARInvoice I
@@ -787,7 +824,7 @@ OUTER APPLY (
 ) RI
 WHERE ID.[intInventoryShipmentChargeId] IS NULL
 	AND	(
-		(ID.strTransactionType <> 'Credit Memo' AND ((ID.[intInventoryShipmentItemId] IS NULL AND ID.[intLoadDetailId] IS NULL) OR (ISI.[intDestinationGradeId] IS NOT NULL AND ISI.[intDestinationWeightId] IS NOT NULL)))
+		(ID.strTransactionType <> 'Credit Memo' AND ((ID.[intInventoryShipmentItemId] IS NULL AND (ID.[intLoadDetailId] IS NULL OR (ID.intLoadDetailId IS NOT NULL AND LG.intPurchaseSale = 3))) OR (ISI.[intDestinationGradeId] IS NOT NULL AND ISI.[intDestinationWeightId] IS NOT NULL)))
 		OR
 		(ID.strTransactionType = 'Credit Memo' AND (ID.[intInventoryShipmentItemId] IS NOT NULL OR ID.[intLoadDetailId] IS NOT NULL OR ISNULL(RI.[intInvoiceId], 0) <> 0))
 		)
@@ -796,17 +833,6 @@ WHERE ID.[intInventoryShipmentChargeId] IS NULL
 	AND ((ID.ysnFromProvisional = 1 AND PI.ysnPosted = 0) OR ID.ysnFromProvisional = 0)
 
 EXEC dbo.[uspCTInvoicePosted] @ItemsFromInvoice, @UserId
-
---UPDATE CONTRACT SCHEDULED QTY FOR RETURN CREDIT MEMO
-WHILE EXISTS (SELECT TOP 1 NULL FROM @ItemsFromInvoice WHERE strTransactionType = 'Credit Memo' AND intLoadDetailId IS NULL)
-	BEGIN
-		DECLARE @intInvoiceContractId INT
-		SELECT TOP 1 @intInvoiceContractId = intInvoiceId FROM @ItemsFromInvoice WHERE strTransactionType = 'Credit Memo' AND intLoadDetailId IS NULL
-
-		EXEC dbo.uspARUpdateContractOnInvoice @intInvoiceContractId, @Post, @UserId, 1
-
-		DELETE FROM @ItemsFromInvoice WHERE intInvoiceId = @intInvoiceContractId
-	END
 
 --UPDATE CONTRACTS FINANCIAL STATUS
 DECLARE @tblContractsFinancial AS Id

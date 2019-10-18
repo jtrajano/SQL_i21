@@ -58,7 +58,7 @@ BEGIN
 	) RI
 	WHERE ID.intInvoiceId = @TransactionId 
 	AND (ID.intInventoryShipmentItemId IS NOT NULL OR ID.intLoadDetailId IS NOT NULL)
-	AND (ID.intTicketId IS NULL OR (ID.intTicketId IS NOT NULL AND ISNULL(TICKET.strInOutFlag, '') = 'O' AND ISNULL(TICKET.intStorageScheduleTypeId, 0) <> 1))
+	AND (ID.intTicketId IS NULL OR (ID.intTicketId IS NOT NULL AND ISNULL(TICKET.strInOutFlag, '') = 'O'))
 	AND RI.[intInvoiceId] IS NULL
 	AND (
 			(I.[strType] <> 'Provisional' AND I.[ysnProvisionalWithGL] = 0)

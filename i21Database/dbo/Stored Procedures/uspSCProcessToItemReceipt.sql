@@ -90,19 +90,21 @@ DECLARE @intLoadContractDetailId INT
 DECLARE @intLoopLoadDetailId INT
 DECLARE @dblLoadScheduleQty NUMERIC(18, 6)
 DECLARE @intLoopLoadItemUOMId INT
+DECLARE @intTicketContractDetailId INT
 
     SELECT TOP 1 @intLoadId = ST.intLoadId
-	, @dblTicketFreightRate = ST.dblFreightRate
-	, @intScaleStationId = ST.intScaleSetupId
-	, @ysnDeductFreightFarmer = ST.ysnFarmerPaysFreight
-	, @intLocationId = ST.intProcessingLocationId
-	, @dblGrossUnits = ST.dblGrossUnits
-	, @dblTicketNetUnits = ST.dblNetUnits
-	, @intItemId = ST.intItemId
-	, @intTicketItemUOMId = ST.intItemUOMIdTo
-	, @shipFromEntityId = ST.intEntityId
-	, @intFarmFieldId = ST.intFarmFieldId
-	, @intLoadDetailId = ST.intLoadDetailId
+		, @dblTicketFreightRate = ST.dblFreightRate
+		, @intScaleStationId = ST.intScaleSetupId
+		, @ysnDeductFreightFarmer = ST.ysnFarmerPaysFreight
+		, @intLocationId = ST.intProcessingLocationId
+		, @dblGrossUnits = ST.dblGrossUnits
+		, @dblTicketNetUnits = ST.dblNetUnits
+		, @intItemId = ST.intItemId
+		, @intTicketItemUOMId = ST.intItemUOMIdTo
+		, @shipFromEntityId = ST.intEntityId
+		, @intFarmFieldId = ST.intFarmFieldId
+		, @intLoadDetailId = ST.intLoadDetailId
+		, @intTicketContractDetailId = intContractId
 	FROM dbo.tblSCTicket ST WHERE
 	ST.intTicketId = @intTicketId
 
@@ -127,123 +129,141 @@ BEGIN TRY
 		IF @strDistributionOption = 'CNT' OR @strDistributionOption = 'LOD'
 		BEGIN
 			
-			IF @strDistributionOption = 'CNT'
-			BEGIN
+			--IF @strDistributionOption = 'CNT'
+			--BEGIN
 
 				INSERT INTO @LineItems (
 					intContractDetailId,
 					dblUnitsDistributed,
 					dblUnitsRemaining,
 					dblCost,
-					intCurrencyId)
-				EXEC dbo.uspCTUpdationFromTicketDistribution 
+					intCurrencyId,
+					intLoadDetailId)
+				EXEC dbo.uspSCGetContractsAndAllocate 
 				@intTicketId
 				,@intEntityId
 				,@dblNetUnits
 				,@intContractId
 				,@intUserId
 				,0
+				,0
+				,1
+				,@strDistributionOption
+				,@intLoadDetailId
+
+				UPDATE @LineItems SET intTicketId = @intTicketId
 
 				DECLARE @intLoopContractId INT;
 				DECLARE @dblLoopContractUnits NUMERIC(38,20);
 				DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
 				FOR
-				SELECT intContractDetailId, dblUnitsDistributed
-				FROM @LineItems;
-
-				OPEN intListCursor;
-
-				-- Initial fetch attempt
-				FETCH NEXT FROM intListCursor INTO @intLoopContractId, @dblLoopContractUnits;
-
-				WHILE @@FETCH_STATUS = 0
-				BEGIN
-					-- Here we do some kind of action that requires us to 
-					-- process the table variable row-by-row. This example simply
-					-- uses a PRINT statement as that action (not a very good
-					-- example).
-					IF ISNULL(@intLoopContractId,0) != 0
-					EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoopContractId, @dblLoopContractUnits, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId
-					EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intLoopContractId, @dblLoopContractUnits, @intEntityId;
-					-- Attempt to fetch next row from cursor
-					FETCH NEXT FROM intListCursor INTO @intLoopContractId, @dblLoopContractUnits;
-				END;
-
-				CLOSE intListCursor;
-				DEALLOCATE intListCursor;
-			END
-			ELSE IF @strDistributionOption = 'LOD'
-			BEGIN
-				INSERT INTO @LineItems (  
-					intTicketId,  
-					intContractDetailId,  
-					dblUnitsDistributed,  
-					dblUnitsRemaining,  
-					dblCost,  
-					intCurrencyId
-					,intLoadDetailId)  
-				EXEC [uspSCGetLoadContractsAndAllocate]  
-				@intTicketId  
-				,@intLoadDetailId  
-				,@dblNetUnits  
-				,'I'  
-
-
-				DECLARE @intLoadContractId INT;
-				DECLARE @dblLoadContractUnits NUMERIC(38,20);
-				DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
-				FOR
 				SELECT intContractDetailId, dblUnitsDistributed,intLoadDetailId
 				FROM @LineItems;
 
+				
 				OPEN intListCursor;
 
-				-- Initial fetch attempt
-				FETCH NEXT FROM intListCursor INTO @intLoadContractId, @dblLoadContractUnits,@intLoopLoadDetailId;
+				FETCH NEXT FROM intListCursor INTO @intLoopContractId, @dblLoopContractUnits,@intLoopLoadDetailId;
 
 				WHILE @@FETCH_STATUS = 0
 				BEGIN
-					IF ISNULL(@intLoadContractId,0) != 0
+				
+					IF ISNULL(@intLoopContractId,0) != 0
 					BEGIN
-
-						--get contract Detail Id of the load detail  
-						SELECT @intLoadContractDetailId = intPContractDetailId FROM tblLGLoadDetail WHERE intLoadDetailId = @intLoopLoadDetailId  
-							
-						-- remove schedule quantity of the load schedule  					
-						SELECT TOP 1 @dblLoadScheduleQty = dblQuantity,@intLoopLoadItemUOMId = intItemUOMId FROM tblLGLoadDetail WHERE intLoadDetailId = @intLoopLoadDetailId  
-						SET @dblLoadScheduleQty  = @dblLoadScheduleQty * -1  
-						EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoadContractDetailId, @dblLoadScheduleQty , @intUserId, @intTicketId, 'Scale', @intLoopLoadItemUOMId  
-								
-						-- add schedule quantity of the ticket  
-						EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoadContractDetailId, @dblLoadContractUnits, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId  
-
-						SELECT @intContractDetailId = intContractDetailId FROM tblCTContractDetail WHERE intContractDetailId = @intLoadContractId
-						IF @intContractDetailId != @intContractId
-						BEGIN
-							--EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoadContractId, @dblLoadContractUnits, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId
-							EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intLoadContractId, @dblLoadContractUnits, @intEntityId;
-							
-						END
-						ELSE
-						BEGIN
-							EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intLoadContractId, @dblLoadContractUnits, @intEntityId,1;
-						END
+						--SChedule the quantity against the contract if it's a different contract than the ticket used
+						-- IF(@intLoopContractId != @intTicketContractDetailId)
+						-- BEGIN
+						-- 	EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoopContractId, @dblLoopContractUnits, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId
+						-- END
+						EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intLoopContractId, @dblLoopContractUnits, @intEntityId;
 					END
 
-					IF(ISNULL(@intLoopLoadDetailId,0) > 0)
-					BEGIN 
-						EXEC dbo.uspSCUpdateTicketLoadUsed @intTicketId,@intLoopLoadDetailId, @dblLoadContractUnits, @intEntityId;	
+					--Insert to the load used table
+					IF ISNULL(@intLoopLoadDetailId,0) != 0 AND @strDistributionOption = 'LOD'
+					BEGIN
+						EXEC dbo.uspSCUpdateTicketLoadUsed @intTicketId,@intLoopLoadDetailId, 0, @intEntityId;	
 					END
+				
+					FETCH NEXT FROM intListCursor INTO @intLoopContractId, @dblLoopContractUnits,@intLoopLoadDetailId;
 
-					-- Attempt to fetch next row from cursor
-					FETCH NEXT FROM intListCursor INTO @intLoadContractId, @dblLoadContractUnits,@intLoopLoadDetailId
+					
 				END;
+
 				CLOSE intListCursor;
 				DEALLOCATE intListCursor;
+			--END
+			--ELSE IF @strDistributionOption = 'LOD'
+			--BEGIN
+			--	INSERT INTO @LineItems (  
+			--		intTicketId,  
+			--		intContractDetailId,  
+			--		dblUnitsDistributed,  
+			--		dblUnitsRemaining,  
+			--		dblCost,  
+			--		intCurrencyId
+			--		,intLoadDetailId)  
+			--	EXEC [uspSCGetLoadContractsAndAllocate]  
+			--	@intTicketId  
+			--	,@intLoadDetailId  
+			--	,@dblNetUnits  
+			--	,'I'  
+
+
+			--	DECLARE @intLoadContractId INT;
+			--	DECLARE @dblLoadContractUnits NUMERIC(38,20);
+			--	DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
+			--	FOR
+			--	SELECT intContractDetailId, dblUnitsDistributed,intLoadDetailId
+			--	FROM @LineItems;
+
+			--	OPEN intListCursor;
+
+			--	-- Initial fetch attempt
+			--	FETCH NEXT FROM intListCursor INTO @intLoadContractId, @dblLoadContractUnits,@intLoopLoadDetailId;
+
+			--	WHILE @@FETCH_STATUS = 0
+			--	BEGIN
+			--		IF ISNULL(@intLoadContractId,0) != 0
+			--		BEGIN
+
+			--			--get contract Detail Id of the load detail  
+			--			SELECT @intLoadContractDetailId = intPContractDetailId FROM tblLGLoadDetail WHERE intLoadDetailId = @intLoopLoadDetailId  
+							
+			--			-- remove schedule quantity of the load schedule  					
+			--			SELECT TOP 1 @dblLoadScheduleQty = dblQuantity,@intLoopLoadItemUOMId = intItemUOMId FROM tblLGLoadDetail WHERE intLoadDetailId = @intLoopLoadDetailId  
+			--			SET @dblLoadScheduleQty  = @dblLoadScheduleQty * -1  
+			--			EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoadContractDetailId, @dblLoadScheduleQty , @intUserId, @intTicketId, 'Scale', @intLoopLoadItemUOMId  
+								
+			--			-- add schedule quantity of the ticket  
+			--			EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoadContractDetailId, @dblLoadContractUnits, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId  
+
+			--			SELECT @intContractDetailId = intContractDetailId FROM tblCTContractDetail WHERE intContractDetailId = @intLoadContractId
+			--			IF @intContractDetailId != @intContractId
+			--			BEGIN
+			--				--EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoadContractId, @dblLoadContractUnits, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId
+			--				EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intLoadContractId, @dblLoadContractUnits, @intEntityId;
+							
+			--			END
+			--			ELSE
+			--			BEGIN
+			--				EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intLoadContractId, @dblLoadContractUnits, @intEntityId,1;
+			--			END
+			--		END
+
+			--		IF(ISNULL(@intLoopLoadDetailId,0) > 0)
+			--		BEGIN 
+			--			EXEC dbo.uspSCUpdateTicketLoadUsed @intTicketId,@intLoopLoadDetailId, @dblLoadContractUnits, @intEntityId;	
+			--		END
+
+			--		-- Attempt to fetch next row from cursor
+			--		FETCH NEXT FROM intListCursor INTO @intLoadContractId, @dblLoadContractUnits,@intLoopLoadDetailId
+			--	END;
+			--	CLOSE intListCursor;
+			--	DEALLOCATE intListCursor;
 
 
 				
-			END
+			--END
 
 			SELECT TOP 1 @dblRemainingUnits = MIN(LI.dblUnitsRemaining) FROM @LineItems LI
 			IF(@dblRemainingUnits IS NULL)
@@ -271,9 +291,11 @@ BEGIN TRY
 					,intSubLocationId
 					,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
 					,ysnIsStorage
-					,strSourceTransactionId  
+					,strSourceTransactionId 
+					,ysnAllowVoucher 
 				)
 				EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblRemainingUnits , @intEntityId, @strDistributionOption, NULL
+
 				SELECT TOP 1 @dblRemainingQuantity = dblQty FROM @ItemsForItemReceipt
 				IF(@dblRemainingUnits > ISNULL(@dblRemainingQuantity,0))
 				BEGIN
@@ -407,8 +429,9 @@ BEGIN TRY
 					dblUnitsDistributed,
 					dblUnitsRemaining,
 					dblCost,
-					intCurrencyId)
-					EXEC dbo.uspCTUpdationFromTicketDistribution 
+					intCurrencyId,
+					intLoadDetailId)
+					EXEC dbo.uspSCGetContractsAndAllocate 
 					@intTicketId
 					,@intEntityId
 					,@dblNetUnits

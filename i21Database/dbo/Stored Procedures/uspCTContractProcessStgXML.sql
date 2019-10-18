@@ -403,6 +403,12 @@ BEGIN TRY
 				IF @intTransactionCount = 0
 					BEGIN TRANSACTION
 
+					If @strRowState='Delete'
+					Begin
+						Delete from tblCTContractHeader Where intContractHeaderRefId=@intContractHeaderId
+						Goto x
+					End
+
 				------------------Header------------------------------------------------------
 				EXEC sp_xml_preparedocument @idoc OUTPUT
 					,@strHeaderXML
@@ -2300,6 +2306,8 @@ BEGIN TRY
 					,ysnStockSale
 					,strCertifications
 					,ysnSplit
+											,ysnProvisionalPNL
+						,ysnFinalPNL
 					)
 				SELECT intContractDetailId
 					,intSplitFromId
@@ -2437,6 +2445,8 @@ BEGIN TRY
 					,ysnStockSale
 					,strCertifications
 					,ysnSplit
+											,ysnProvisionalPNL
+						,ysnFinalPNL
 				FROM tblCTContractDetail CD
 				WHERE CD.intContractHeaderId = @intNewContractHeaderId
 					AND NOT EXISTS (
@@ -3259,7 +3269,7 @@ BEGIN TRY
 				EXEC uspCTGetTableDataInXML 'tblCTContractCondition'
 					,@strHeaderCondition
 					,@strAckConditionXML OUTPUT
-
+x:
 				INSERT INTO tblCTContractAcknowledgementStage (
 					intContractHeaderId
 					,strContractAckNumber

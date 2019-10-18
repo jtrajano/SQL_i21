@@ -291,10 +291,10 @@ BEGIN TRY
 			RAISERROR(@ErrMsg,16,1)
 		END
 
-		IF	@intContractBasisId IS NOT NULL AND NOT EXISTS(SELECT * FROM tblCTContractBasis WHERE intContractBasisId = @intContractBasisId AND ysnActive = 1)
+		IF	@intContractBasisId IS NOT NULL AND NOT EXISTS(SELECT * FROM tblSMFreightTerms WHERE intFreightTermId = @intContractBasisId AND ysnActive = 1)
 		BEGIN
-			SELECT @ErrMsg = strContractBasis FROM tblCTContractBasis WHERE intContractBasisId = @intContractBasisId
-			SET @ErrMsg = 'INCO/Ship Term ' + ISNULL(@ErrMsg,'selected') + ' is inactive.'
+			SELECT @ErrMsg = strFreightTerm FROM tblSMFreightTerms WHERE intFreightTermId = @intContractBasisId
+			SET @ErrMsg = 'Freight Term ' + ISNULL(@ErrMsg,'selected') + ' is inactive.'
 			RAISERROR(@ErrMsg,16,1)
 		END
 

@@ -678,7 +678,7 @@ BEGIN
 		, @intLocationId intLocationId
 		, @intUnitMeasureId intUnitMeasureId
 	FROM tblRKM2MInquiryTransaction
-	WHERE intM2MInquiryId=@intM2MInquiryId AND strContractOrInventoryType in('Inventory')
+	WHERE intM2MInquiryId=@intM2MInquiryId AND strContractOrInventoryType in('Inventory','In-transit(I)')
 		AND ISNULL(dblResultCash,0) <> 0
 	
 	--Inventory Cash Offset	
@@ -708,7 +708,7 @@ BEGIN
 		, @intLocationId intLocationId
 		, @intUnitMeasureId intUnitMeasureId
 	FROM tblRKM2MInquiryTransaction
-	WHERE intM2MInquiryId = @intM2MInquiryId AND strContractOrInventoryType in('Inventory')
+	WHERE intM2MInquiryId = @intM2MInquiryId AND strContractOrInventoryType in('Inventory','In-transit(I)')
 		AND ISNULL(dblResultCash,0) <> 0
 
 
@@ -855,8 +855,8 @@ BEGIN
 			FROM tblCTContractHeader H
 			INNER JOIN tblCTContractDetail D ON H.intContractHeaderId = D.intContractHeaderId
 			INNER JOIN tblICCommodity C ON H.intCommodityId = C.intCommodityId
-			WHERE H.intContractHeaderId = @intTransactionId
-				AND D.intContractSeq = @intContractSeq
+			WHERE D.intContractDetailId = @intTransactionId
+
 		END
 		
 		DECLARE @strPrimaryAccountCode NVARCHAR(50)

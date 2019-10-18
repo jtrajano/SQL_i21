@@ -173,7 +173,30 @@ DECLARE
 	,@Interest			NUMERIC(18,6)	= 0.000000	
 
 BEGIN TRY
-	SET @PaymentMethodId = (SELECT TOP 1 [intPaymentMethodID] FROM tblSMPaymentMethod WHERE [strPaymentMethod] = 'Prepay' AND [ysnActive] = 1)
+	IF NOT EXISTS (SELECT TOP 1 NULL FROM dbo.tblSMPaymentMethod WITH (NOLOCK) WHERE UPPER(strPaymentMethod) = 'PREPAY')
+		BEGIN
+			INSERT INTO tblSMPaymentMethod (
+				strPaymentMethod
+				, intNumber
+				, ysnActive
+				, intSort
+				, intConcurrencyId
+			)
+			SELECT strPaymentMethod = 'Prepay'
+				, intNumber		 	= 1
+				, ysnActive			= 1
+				, intSort			= 0
+				, intConcurrencyId	= 1
+		END
+	
+	SET @PaymentMethodId = (SELECT TOP 1 [intPaymentMethodID] FROM tblSMPaymentMethod WHERE [strPaymentMethod] = 'Prepay')
+	
+	IF EXISTS (SELECT TOP 1 NULL FROM dbo.tblSMPaymentMethod WITH (NOLOCK) WHERE intPaymentMethodID = @PaymentMethodId AND ysnActive = 0)
+		BEGIN
+			IF ISNULL(@RaiseError,0) = 1
+				RAISERROR('Payment Method: Prepay is not active!', 16, 1);
+			RETURN 0;
+		END
 
 	SELECT TOP 1
 		 @EntityCustomerId	= ARI.[intEntityCustomerId]

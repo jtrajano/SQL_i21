@@ -41,7 +41,7 @@ BEGIN
 		-- Invalid item and valid location
 		SELECT	intItemId = @InvalidItem
 				,intItemLocationId = @Default_Location
-				,strText = FORMATMESSAGE(80001)
+				,strText = dbo.fnICGetErrorMessage(80001)
 				,intErrorCode = 80001
 
 		-- Create the mock data 

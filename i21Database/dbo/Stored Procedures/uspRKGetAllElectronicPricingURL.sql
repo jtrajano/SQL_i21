@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspRKGetAllElectronicPricingURL]
-	@FutureMarketId INT
-	, @intUserId INT
+    @intFutureMarketId INT
+    ,@strInstrumentType NVARCHAR(10)
+    , @intUserId INT
 
 AS
 
@@ -17,14 +18,16 @@ BEGIN TRY
 	DECLARE @Commoditycode NVARCHAR(10)
 	DECLARE @URL NVARCHAR(1000)
 	DECLARE @SymbolPrefix NVARCHAR(5)
+	DECLARE @OptSymbol NVARCHAR(10)
 	DECLARE @intInterfaceSystem int
 	declare @dblConversionRate numeric(16,10)
 
 	SELECT @Commoditycode = strFutSymbol
 		, @SymbolPrefix = strSymbolPrefix
+		, @OptSymbol = strOptSymbol
 		, @dblConversionRate = isnull(dblConversionRate,1)
 	FROM tblRKFutureMarket
-	WHERE intFutureMarketId = @FutureMarketId		
+	WHERE intFutureMarketId = @intFutureMarketId		
 
 	select 
 		@intInterfaceSystem = intInterfaceSystemId  --1 = DTN, 2 = AgriCharts
@@ -48,27 +51,45 @@ BEGIN TRY
 			, @dblConversionRate as dblConversionRate
 			, 'DTN' as strInterfaceSystem
 		FROM tblRKFuturesMonth 
-		WHERE intFutureMarketId=@FutureMarketId 
+		WHERE intFutureMarketId = @intFutureMarketId 
 			AND ysnExpired = 0 
-			AND dtmLastTradingDate > GETDATE()
 	END
 	ELSE IF ISNULL(@URL,'') <> '' AND @intInterfaceSystem = 2 --AgriCharts
 	BEGIN
 
-		SELECT (@URL + 'apikey=' + @strAPIKey + '&symbols='+@SymbolPrefix+@Commoditycode + strSymbol+RIGHT(intYear,1)) COLLATE Latin1_General_CI_AS as URL
-			, strFutureMonth strFutureMonthYearWOSymbol
-			, intFutureMonthId as intFutureMonthId
-			, 'open' as strOpen
-			, 'high' as strHigh
-			, 'low' as strLow
-			, 'lastPrice' as strLastSettle
-			, '' as strLastElement
-			, @dblConversionRate as dblConversionRate
-			, 'AgriCharts' as strInterfaceSystem
-		FROM tblRKFuturesMonth 
-		WHERE intFutureMarketId=@FutureMarketId 
-			AND ysnExpired = 0 
-			AND dtmLastTradingDate > GETDATE()
+		IF @strInstrumentType = 'Futures'
+		BEGIN
+			SELECT (@URL + 'apikey=' + @strAPIKey + '&symbols='+@SymbolPrefix+@Commoditycode + strSymbol+RIGHT(intYear,1)) COLLATE Latin1_General_CI_AS as URL
+				, strFutureMonth strFutureMonthYearWOSymbol
+				, intFutureMonthId as intFutureMonthId
+				, 'open' as strOpen
+				, 'high' as strHigh
+				, 'low' as strLow
+				, 'lastPrice' as strLastSettle
+				, '' as strLastElement
+				, @dblConversionRate as dblConversionRate
+				, 'AgriCharts' as strInterfaceSystem
+			FROM tblRKFuturesMonth 
+			WHERE intFutureMarketId = @intFutureMarketId 
+				AND ysnExpired = 0 
+
+		END
+		ELSE
+			SELECT
+				(REPLACE(@URL,'getQuote.xml','getFuturesOptions.xml') + 'apikey=' + @strAPIKey + '&symbols='+ @OptSymbol  + OM.strOptMonthSymbol + REPLACE(CONVERT(NUMERIC(18,2),dblStrike),'.','') + LEFT(strOptionType,1)) COLLATE Latin1_General_CI_AS as URL 
+				,DER.strOptionMonth strOptionsMonthYearWOSymbol
+				,DER.intOptionMonthId
+				,intTypeId = CASE WHEN strOptionType = 'Put' THEN 1 ELSE 2 END
+				,strOptionType
+				, 'strike' as strStrike
+				, 'delta' as strDelta
+				, 'last' as strLast
+				, 'AgriCharts' as strInterfaceSystem
+			FROM  dbo.fnRKGetOpenFutureByDate(1,'01-01-1900', GETDATE(), 1) DER
+			INNER JOIN tblRKOptionsMonth OM ON DER.intOptionMonthId = OM.intOptionMonthId
+			WHERE strInstrumentType = 'Options'
+				AND DER.intFutureMarketId = @intFutureMarketId
+				AND DER.dblOpenContract <> 0
 	END
 	ELSE
 	BEGIN

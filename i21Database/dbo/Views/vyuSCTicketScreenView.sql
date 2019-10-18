@@ -299,7 +299,7 @@
 				,LD.intItemId
 				,LD.intItemUOMId
 				,LD.dblGross
-				,LD.dblTare
+				,LD.dblTare	
 				,LD.dblNet
 				,VEL.intEntityLocationId AS intVendorLocationId
 				,VEL.strLocationName AS strShipFrom
@@ -311,7 +311,7 @@
 			INNER JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId 
 			LEFT JOIN tblEMEntityLocation VEL ON VEL.intEntityLocationId = LD.intVendorEntityLocationId
 			LEFT JOIN tblEMEntityLocation CEL ON CEL.intEntityLocationId = LD.intCustomerEntityLocationId
-	) LGD on LGD.intLoadId = SCT.intLoadId
+	) LGD on LGD.intLoadId = SCT.intLoadId AND  LGD.intLoadDetailId = SCT.intLoadDetailId
 	LEFT JOIN tblSOSalesOrder SO on SO.intSalesOrderId = SCT.intSalesOrderId
 	--LEFT JOIN tblEMEntity EMDriver ON EMDriver.intEntityId = SCT.intEntityContactId
 	LEFT JOIN (

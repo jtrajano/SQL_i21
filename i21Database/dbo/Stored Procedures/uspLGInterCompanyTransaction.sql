@@ -24,6 +24,20 @@ BEGIN TRY
 	DECLARE @intToBookId INT
 	DECLARE @intToSubBookId INT
 		,@ysnReplicationEnabled BIT
+		,@strDelete nvarchar(50)
+
+	IF @strRowState = 'Delete'
+	BEGIN
+		-- LOAD HEADER TABLE
+		INSERT INTO tblLGIntrCompLogisticsStg (
+			intLoadId
+			,strRowState
+			)
+		SELECT @intLoadId
+			,@strRowState
+
+		RETURN
+	END
 
 	IF NOT EXISTS (
 			SELECT TOP 1 1
@@ -77,6 +91,7 @@ BEGIN TRY
 			,@intToProfitCenterId = intToBookId
 			,@strInsert = strInsert
 			,@strUpdate = strUpdate
+			,@strDelete=strDelete
 			,@intToCompanyLocationId = intCompanyLocationId
 			,@intToBookId = intToBookId
 			,@intToSubBookId = @intToSubBookId
@@ -85,17 +100,6 @@ BEGIN TRY
 		JOIN [tblSMInterCompanyTransactionType] CTTT ON CTC.[intToTransactionTypeId] = CTTT.intInterCompanyTransactionTypeId -- WHERE strFromTransactionType = @strTransactionType
 		WHERE CTTF.strTransactionType = @strTransactionType
 
-		--    SELECT 
-		-- @strFromTransactionType = strFromTransactionType 
-		--,@intFromCompanyId		 = intFromCompanyId		 
-		--,@intFromProfitCenterId	 = intFromProfitCenterId	 
-		--,@strToTransactionType	 = strToTransactionType	 
-		--,@intToCompanyId		 = intToCompanyId		 
-		--,@intToProfitCenterId	 = intToProfitCenterId	 
-		--,@intToEntityId			 = intToEntityId			 
-		--,@strInsert				 = strInsert				 
-		--,@strUpdate			   	 = strUpdate
-		--FROM tblSMInterCompanyTransactionConfiguration WHERE strFromTransactionType = @strTransactionType
 		IF @strInsert = 'Insert'
 			AND @strRowState = 'Added'
 		BEGIN
@@ -106,13 +110,33 @@ BEGIN TRY
 						AND intConcurrencyId = 1
 					)
 			BEGIN
-				EXEC uspLGPopulateLoadXML @intLoadId
-					,@strToTransactionType
-					,@intToCompanyId
-					,@strRowState
-					,@intToCompanyLocationId
-					,@intToBookId
-					,@ysnReplicationEnabled
+				IF @ysnReplicationEnabled = 1
+				BEGIN
+					EXEC uspLGPopulateLoadXML @intLoadId
+						,@strToTransactionType
+						,@intToCompanyId
+						,@strRowState
+						,@intToCompanyLocationId
+						,@intToBookId
+						,@ysnReplicationEnabled
+				END
+				ELSE
+				BEGIN
+					INSERT INTO tblLGIntrCompLogisticsPreStg (
+						intLoadId
+						,strRowState
+						,strToTransactionType
+						,intToCompanyId
+						,intToCompanyLocationId
+						,intToBookId
+						)
+					SELECT @intLoadId
+						,@strRowState
+						,@strToTransactionType
+						,@intToCompanyId
+						,@intToCompanyLocationId
+						,@intToBookId
+				END
 			END
 		END
 
@@ -135,14 +159,33 @@ BEGIN TRY
 			END
 			ELSE
 			BEGIN
-				EXEC uspLGPopulateLoadXML @intLoadId
-					,@strToTransactionType
-					,@intToCompanyId
-					,@strRowState
-					,@intToCompanyLocationId
-					,@intToBookId
-					,@ysnReplicationEnabled
+				INSERT INTO tblLGIntrCompLogisticsPreStg (
+						intLoadId
+						,strRowState
+						,strToTransactionType
+						,intToCompanyId
+						,intToCompanyLocationId
+						,intToBookId
+						)
+					SELECT @intLoadId
+						,@strRowState
+						,@strToTransactionType
+						,@intToCompanyId
+						,@intToCompanyLocationId
+						,@intToBookId
 			END
+		END
+
+		IF @strDelete = 'Delete'
+			AND @strRowState = 'Delete'
+		BEGIN
+			EXEC uspLGPopulateLoadXML @intLoadId
+				,@strToTransactionType
+				,@intToCompanyId
+				,@strRowState
+				,@intToCompanyLocationId
+				,@intToBookId
+				,@ysnReplicationEnabled
 		END
 	END
 END TRY

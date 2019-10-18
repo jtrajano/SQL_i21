@@ -241,8 +241,8 @@ BEGIN
 			,strCustomer = Customer.strName
 			,strCustomerContact = CETC.strName
 			,strOriginPort = ISNULL(L.strOriginPort, LoadingPort.strCity)
-			,strDestinationPort = ISNULL(L.strDestinationPort, DestinationPort.strCity) 
-			,strDestinationPortVatNo = (SELECT TOP 1 strVAT FROM tblSMCity WHERE strCity = L.strDestinationPort)
+			,strDestinationPort = ISNULL(L.strDestinationPort, DestinationPort.strCity)
+			,strDestinationPortVatNo = (SELECT TOP 1 strVAT FROM tblSMCity WHERE strCity = ISNULL(L.strDestinationPort, DestinationPort.strCity))
 			,strShippingLine = SLEntity.strName
 			,L.strServiceContractNumber
 			,strServiceContractOwner = SLSC.strOwner
@@ -533,7 +533,7 @@ BEGIN
 		LEFT JOIN tblICUnitMeasure DisUnit ON DisUnit.intUnitMeasureId = L.intDischargeUnitMeasureId
 		LEFT JOIN tblSMFreightTerms CB ON CB.intFreightTermId = CH.intFreightTermId
 		LEFT JOIN tblSMCity LoadingPort ON LoadingPort.intCityId = CD.intLoadingPortId AND LoadingPort.ysnPort = 1
-		LEFT JOIN tblSMCity DestinationPort ON DestinationPort.intCityId = CD.intLoadingPortId AND DestinationPort.ysnPort = 1
+		LEFT JOIN tblSMCity DestinationPort ON DestinationPort.intCityId = CD.intDestinationPortId AND DestinationPort.ysnPort = 1
 		CROSS APPLY tblLGCompanyPreference CP
 		OUTER APPLY (SELECT TOP 1 strOwner, strFreightClause FROM tblLGShippingLineServiceContractDetail SLSCD
 				 INNER JOIN tblLGShippingLineServiceContract SLSC ON SLSCD.intShippingLineServiceContractId = SLSC.intShippingLineServiceContractId

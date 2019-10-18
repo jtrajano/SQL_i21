@@ -13,7 +13,7 @@ BEGIN
 	DECLARE @ytd DECIMAL(18,2);
 	DECLARE @startDate DATETIME = '1/1/' + CAST(YEAR(GETDATE()) AS NVARCHAR);
 
-	WITH result
+	WITH dataResult
 	(
 		intEntityVendorId,
 		dblTotal

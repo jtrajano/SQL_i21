@@ -347,7 +347,7 @@ BEGIN
 			) SELECT [intTaxClassId],
 				REPLACE(REPLACE(REPLACE(REPLACE([strTaxCode],'&', ' '),'/',' '),'(',' '),')',' '),
 				REPLACE(REPLACE(REPLACE(REPLACE([strDescription],'&', ' '),'/',' '),'(',' '),')',' '),
-				[strTaxableByOtherTaxes] = CASE WHEN [strTaxableByOtherTaxes] = 'N' THEN '0' ELSE '1' END,
+			    [strTaxableByOtherTaxes] = CASE WHEN [strTaxableByOtherTaxes] = 'N' THEN '0' ELSE '1' END,
 				[strState],
 				[strCountry],
 				[intSalesTaxAccountId],

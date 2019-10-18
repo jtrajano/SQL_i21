@@ -30,7 +30,8 @@ BEGIN
 												THEN CAST((B.dblDiscount + B.dblPayment - B.dblInterest) AS DECIMAL(18,2))
 											ELSE (B.dblAmountDue + B.dblPayment - B.dblInterest) END),
 		tblAPPaymentDetail.dblDiscount = CASE WHEN C.ysnDiscountOverride = 1 THEN C.dblDiscount ELSE @discount END,
-		tblAPPaymentDetail.dblInterest = @interest
+		--if there is no calculated interest but there is amount on interest, probably edited by the user, use that instead.
+		tblAPPaymentDetail.dblInterest = CASE WHEN @interest = 0 THEN B.dblInterest ELSE @interest END 
 	FROM tblAPPayment A
 		LEFT JOIN tblAPPaymentDetail B
 			ON A.intPaymentId = B.intPaymentId

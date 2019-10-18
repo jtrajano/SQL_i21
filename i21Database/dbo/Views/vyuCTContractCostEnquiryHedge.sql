@@ -56,9 +56,9 @@ AS
 						CASE WHEN FT.strBuySell = 'Sell' THEN -1 ELSE 1 END intProffitLoss,
 						dbo.fnCTCalculateAmountBetweenCurrency(FT.intCurrencyId,null,1,1)									AS	dblDefaultCurrencyFactor,
 						ISNULL(CY.intCent,1) AS intCent
-				FROM	dbo.tblRKAssignFuturesToContractSummary SY
-				JOIN	dbo.tblCTContractDetail					CD	ON	CD.intContractHeaderId		=	ISNULL(SY.intContractHeaderId,CD.intContractHeaderId)
-																	AND CD.intContractDetailId		=	ISNULL(SY.intContractDetailId,CD.intContractDetailId)
+				FROM	dbo.tblCTContractDetail CD
+				LEFT JOIN	dbo.tblRKAssignFuturesToContractSummary					SY	ON	SY.intContractHeaderId		=	CD.intContractHeaderId
+																	AND SY.intContractDetailId		=	CD.intContractDetailId
 				JOIN	dbo.tblRKFutOptTransaction				FT	ON	FT.intFutOptTransactionId	=	SY.intFutOptTransactionId
 				JOIN	dbo.tblRKFutureMarket					MA	ON	MA.intFutureMarketId		=	FT.intFutureMarketId
 				JOIN	dbo.tblRKFuturesMonth					MO	ON	MO.intFutureMonthId			=	FT.intFutureMonthId

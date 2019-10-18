@@ -303,40 +303,16 @@ BEGIN
 				,strTime				    	= CONVERT(VARCHAR(8), GETDATE(), 108)
 				,strAccountNumber		    	= dbo.fnAESDecryptASym(EFT.strAccountNumber)
 				,strReferenceNo			    	= BNKTRN.strReferenceNo
-				,strEntityName			    	= case when 														
-														PYMT.ysnOverrideSettlement = 1 and 
-														isnull(PYMT.strOverridePayee, '')  <> '' then 
-															PYMT.strOverridePayee 
-													else 
-														case when 
-														PYMT.ysnLienExists = 1 and 
-														PYMT.ysnOverrideLien = 1 then 
-															BNKTRN.strPayee
-														else 
-															ISNULL(BNKTRN.strPayee + ' ' +(STUFF((SELECT DISTINCT ' and ' + strName
-															FROM tblAPVendorLien LIEN
-															  INNER JOIN tblEMEntity ENT ON LIEN.intEntityLienId = ENT.intEntityId WHERE LIEN.intEntityVendorId = VENDOR.intEntityId AND LIEN.ysnActive = 1 
-															  AND BNKTRN.dtmDate BETWEEN LIEN.dtmStartDate AND LIEN.dtmEndDate
-															  AND LIEN.intCommodityId IN (
-															   SELECT intCommodityId 
-															   FROM tblAPPayment Pay 
-															   INNER JOIN tblAPPaymentDetail PayDtl ON Pay.intPaymentId = PayDtl.intPaymentId
-															   INNER JOIN vyuAPVoucherCommodity VC ON PayDtl.intBillId = VC.intBillId
-															   WHERE strPaymentRecordNum = PYMT.strPaymentRecordNum)FOR XML PATH(''))
-															,1, 1, ''))
-															,BNKTRN.strPayee)
-														end
+				,strEntityName			    	= case when PYMT.ysnOverrideSettlement = 0 then ENTITY.strName
+													ELSE
+																PYMT.strOverridePayee 
 													end
-
 				,strVendorAddress				= 	case when 														
 														PYMT.ysnOverrideSettlement = 1 and 
 														isnull(PYMT.strOverridePayee, '')  <> ''
 														then ''
 													else
-														CASE WHEN ISNULL(dbo.fnConvertToFullAddress(BNKTRN.strAddress, BNKTRN.strCity, BNKTRN.strState, BNKTRN.strZipCode), '') <> ''  
-														THEN dbo.fnConvertToFullAddress(BNKTRN.strAddress, BNKTRN.strCity, BNKTRN.strState, BNKTRN.strZipCode)
-														ELSE dbo.fnConvertToFullAddress(EL.strAddress, EL.strCity, EL.strState, EL.strZipCode)
-														END
+														 dbo.fnConvertToFullAddress(EL.strAddress, EL.strCity, EL.strState, EL.strZipCode)
 													end
 				,dtmDeliveryDate		    	= dbo.fnGRConvertDateToReportDateFormat(SC.dtmTicketDateTime)
 				,intTicketId			    	= SC.intTicketId		
@@ -620,36 +596,17 @@ BEGIN
 				,strTime					 	= CONVERT(VARCHAR(8), GETDATE(), 108)
 				,strAccountNumber			 	= dbo.fnAESDecryptASym(EFT.strAccountNumber)
 				,strReferenceNo				 	= BNKTRN.strReferenceNo
-				,strEntityName			    	= case when 
-														PYMT.ysnOverrideCheckPayee = 1 and 
-														PYMT.ysnOverrideSettlement = 1 and 
-														isnull(PYMT.strOverridePayee, '')  <> '' then 
-															PYMT.strOverridePayee 
-													else 
-														case when 
-														PYMT.ysnLienExists = 1 and 
-														PYMT.ysnOverrideLien = 1 then 
-															BNKTRN.strPayee
-														else 
-															ISNULL(BNKTRN.strPayee + ' ' +(STUFF((SELECT DISTINCT ' and ' + strName
-															FROM tblAPVendorLien LIEN
-															  INNER JOIN tblEMEntity ENT ON LIEN.intEntityLienId = ENT.intEntityId WHERE LIEN.intEntityVendorId = VENDOR.intEntityId AND LIEN.ysnActive = 1 
-															  AND BNKTRN.dtmDate BETWEEN LIEN.dtmStartDate AND LIEN.dtmEndDate
-															  AND LIEN.intCommodityId IN (
-															   SELECT intCommodityId 
-															   FROM tblAPPayment Pay 
-															   INNER JOIN tblAPPaymentDetail PayDtl ON Pay.intPaymentId = PayDtl.intPaymentId
-															   INNER JOIN vyuAPVoucherCommodity VC ON PayDtl.intBillId = VC.intBillId
-															   WHERE strPaymentRecordNum = PYMT.strPaymentRecordNum)FOR XML PATH(''))
-															,1, 1, ''))
-															,BNKTRN.strPayee)
-														end
+				,strEntityName			    	= case when PYMT.ysnOverrideSettlement = 0 then ENTITY.strName
+													ELSE
+																PYMT.strOverridePayee 
 													end
-
-				,strVendorAddress				= CASE WHEN ISNULL(dbo.fnConvertToFullAddress(BNKTRN.strAddress, BNKTRN.strCity, BNKTRN.strState, BNKTRN.strZipCode), '') <> ''  
-													THEN dbo.fnConvertToFullAddress(BNKTRN.strAddress, BNKTRN.strCity, BNKTRN.strState, BNKTRN.strZipCode)
-													ELSE dbo.fnConvertToFullAddress(EL.strAddress, EL.strCity, EL.strState, EL.strZipCode)
-													END
+				,strVendorAddress				= 	case when 														
+														PYMT.ysnOverrideSettlement = 1 and 
+														isnull(PYMT.strOverridePayee, '')  <> ''
+														then ''
+													else
+														 dbo.fnConvertToFullAddress(EL.strAddress, EL.strCity, EL.strState, EL.strZipCode)
+													end
 				,dtmDeliveryDate			 	= dbo.fnGRConvertDateToReportDateFormat(SC.dtmTicketDateTime)
 				,intTicketId				 	= SC.intTicketId		
 				,strTicketNumber			 	= SC.strTicketNumber
@@ -922,36 +879,17 @@ BEGIN
 				,strTime						= CONVERT(VARCHAR(8), GETDATE(), 108)
 				,strAccountNumber				= dbo.fnAESDecryptASym(EFT.strAccountNumber)
 				,strReferenceNo					= BNKTRN.strReferenceNo
-				,strEntityName			    	= case when 
-														PYMT.ysnOverrideCheckPayee = 1 and 
-														PYMT.ysnOverrideSettlement = 1 and 
-														isnull(PYMT.strOverridePayee, '')  <> '' then 
-															PYMT.strOverridePayee 
-													else 
-														case when 
-														PYMT.ysnLienExists = 1 and 
-														PYMT.ysnOverrideLien = 1 then 
-															BNKTRN.strPayee
-														else 
-															ISNULL(BNKTRN.strPayee + ' ' +(STUFF((SELECT DISTINCT ' and ' + strName
-															FROM tblAPVendorLien LIEN
-															  INNER JOIN tblEMEntity ENT ON LIEN.intEntityLienId = ENT.intEntityId WHERE LIEN.intEntityVendorId = VENDOR.intEntityId AND LIEN.ysnActive = 1 
-															  AND BNKTRN.dtmDate BETWEEN LIEN.dtmStartDate AND LIEN.dtmEndDate
-															  AND LIEN.intCommodityId IN (
-															   SELECT intCommodityId 
-															   FROM tblAPPayment Pay 
-															   INNER JOIN tblAPPaymentDetail PayDtl ON Pay.intPaymentId = PayDtl.intPaymentId
-															   INNER JOIN vyuAPVoucherCommodity VC ON PayDtl.intBillId = VC.intBillId
-															   WHERE strPaymentRecordNum = PYMT.strPaymentRecordNum)FOR XML PATH(''))
-															,1, 1, ''))
-															,BNKTRN.strPayee)
-														end
+				,strEntityName			    	= case when PYMT.ysnOverrideSettlement = 0 then ENTITY.strName
+													ELSE
+																PYMT.strOverridePayee 
 													end
-
-				,strVendorAddress				= CASE WHEN ISNULL(dbo.fnConvertToFullAddress(BNKTRN.strAddress, BNKTRN.strCity, BNKTRN.strState, BNKTRN.strZipCode), '') <> ''  
-													THEN dbo.fnConvertToFullAddress(BNKTRN.strAddress, BNKTRN.strCity, BNKTRN.strState, BNKTRN.strZipCode)
-													ELSE dbo.fnConvertToFullAddress(EL.strAddress, EL.strCity, EL.strState, EL.strZipCode)
-													END
+				,strVendorAddress				= 	case when 														
+														PYMT.ysnOverrideSettlement = 1 and 
+														isnull(PYMT.strOverridePayee, '')  <> ''
+														then ''
+													else
+														 dbo.fnConvertToFullAddress(EL.strAddress, EL.strCity, EL.strState, EL.strZipCode)
+													end
 				,dtmDeliveryDate				= CS.dtmDeliveryDate		
 				,intTicketId					= DS.intDeliverySheetId		
 				,strTicketNumber				= DS.strDeliverySheetNumber COLLATE Latin1_General_CI_AS

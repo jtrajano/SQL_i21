@@ -126,3 +126,22 @@ GO
 GO
 	print 'End fixing Price Contract Quantity/Load Applied and Priced.';
 GO
+
+
+
+GO
+	print 'BEGIN - UPDATE INCO/Ship Term to Freight Term';
+GO
+
+
+	UPDATE tblSMGridLayout 
+	SET strGridLayoutFields = REPLACE(strGridLayoutFields,
+								'{"strFieldName":"strContractBasis","strDataType":"string","strDisplayName":"INCO/Ship Term","strControlType":"gridcolumn"',
+								'{"strFieldName":"strFreightTerm","strDataType":"string","strDisplayName":"Freight Term","strControlType":"gridcolumn"')
+	WHERE strScreen = 'ContractManagement.view.Contract' 
+		AND strGridLayoutFields LIKE '%INCO/Ship Term%'
+
+
+GO
+	print 'END - UPDATE INCO/Ship Term to Freight Term';
+GO

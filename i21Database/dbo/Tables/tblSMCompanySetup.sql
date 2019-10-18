@@ -19,6 +19,7 @@
     [strFederalTaxID]   NVARCHAR (50)  COLLATE Latin1_General_CI_AS NULL,
     [strStateTaxID]     NVARCHAR (50)  COLLATE Latin1_General_CI_AS NULL,
     [strBusinessType]   NVARCHAR (15)  COLLATE Latin1_General_CI_AS NULL,
+	[ysnFreightTermUpdated] BIT DEFAULT(0) NULL ,
     [ysnScreenControlListingUpdated] BIT NULL,
 	[ysnScreenLabelListingUpdated] BIT NULL, 
 	[ysnAuditBatchMigrated] BIT DEFAULT 1 NULL,

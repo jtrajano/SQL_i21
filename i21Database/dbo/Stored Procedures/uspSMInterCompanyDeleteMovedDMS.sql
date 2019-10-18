@@ -35,6 +35,11 @@ DECLARE @sql NVARCHAR(MAX) = N'';
 
    --on other db
    DECLARE @otherDB nvarchar(20) = (select strDatabaseName from tblSMInterCompany where intInterCompanyId = @intReferenceCompanyId)
+   
+   if(isnull(@otherDB, '') = '')
+   begin
+	SET @otherDB = DB_NAME()
+   end
 
    declare @docId INT
    declare @sourceDocId INT

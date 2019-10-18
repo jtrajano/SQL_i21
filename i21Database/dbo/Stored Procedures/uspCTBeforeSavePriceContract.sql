@@ -28,6 +28,10 @@ BEGIN TRY
 		SET	@strAction = @strXML
 		SET @Condition = 'intPriceContractId = ' + LTRIM(@intPriceContractId)
 		EXEC [dbo].[uspCTGetTableDataInXML] 'tblCTPriceFixation', @Condition, @strXML OUTPUT,null,'intPriceFixationId,intContractHeaderId,intContractDetailId,''Delete'' AS strRowState'
+		
+		EXEC [dbo].[uspCTInterCompanyPriceContract] @intPriceContractId = @intPriceContractId
+													,@ysnApprove = 0
+													,@strRowState = 'Delete'
 	END
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT, @strXML

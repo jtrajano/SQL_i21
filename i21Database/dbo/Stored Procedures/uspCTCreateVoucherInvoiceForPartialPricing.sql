@@ -458,6 +458,9 @@ BEGIN TRY
 						UPDATE	tblICInventoryReceiptItem SET ysnAllowVoucher = 1 WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId
 												
 						EXEC	uspICConvertReceiptToVoucher @intInventoryReceiptId,@intUserId, @intNewBillId OUTPUT
+
+						if (@intNewBillId is not null and @intNewBillId > 0)
+						BEGIN
 						
 						UPDATE	tblAPBill SET strVendorOrderNumber = @strVendorOrderNumber, dtmDate = @dtmFixationDate, dtmDueDate = @dtmFixationDate, dtmBillDate = @dtmFixationDate WHERE intBillId = @intNewBillId
 						
@@ -530,6 +533,8 @@ BEGIN TRY
 									dblLoadAppliedAndPriced = ISNULL(dblLoadAppliedAndPriced, 0) + @dblInventoryItemLoadApplied
 							WHERE intPriceFixationDetailId = @intPriceFixationDetailId
 						END
+						
+						END
 
 					END
 
@@ -541,13 +546,15 @@ BEGIN TRY
 					BEGIN
 						IF EXISTS(SELECT * FROM tblAPBillDetail WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId AND intInventoryReceiptChargeId IS	NULL)
 						BEGIN 
-							SELECT	@intBillId = intBillId, @dblQtyReceived = dblQtyReceived FROM tblAPBillDetail WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId
+							SELECT	@intBillId = intBillId, @dblQtyReceived = dblQtyReceived, @dblVoucherPrice = dblCost FROM tblAPBillDetail WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId
 				    
 							SELECT  @ysnBillPosted = ysnPosted, @ysnBillPaid = ysnPaid FROM tblAPBill WHERE intBillId = @intBillId
 							
 							SELECT	@intReceiptUniqueId = MIN(intReceiptUniqueId) FROM @tblReceipt WHERE intReceiptUniqueId > @intReceiptUniqueId
 
 							IF @ysnBillPaid = 1 CONTINUE
+
+							IF  @dblVoucherPrice <> @dblFinalPrice CONTINUE
 
 							IF ISNULL(@ysnBillPosted,0) = 1
 							BEGIN
@@ -1006,7 +1013,7 @@ BEGIN TRY
 
 	IF ISNULL(@strPostedAPAR,'') <> ''
 	BEGIN
-		SET @ErrMsg = 'Cannot Update price as following posted Invoice/Vouchers are available. ' + @strPostedAPAR +'. Unpost those Invoice/Vocuher to continue update the price.'
+		SET @ErrMsg = 'Cannot Update price as following posted Invoice/Vouchers are available. ' + @strPostedAPAR +'. Unpost those Invoice/Voucher to continue update the price.'
 		RAISERROR(@ErrMsg,16,1)
 	END
 

@@ -218,7 +218,7 @@ BEGIN TRY
 	END
 	ELSE
 	BEGIN
-		UPDATE tblCFAccount SET dtmLastBillingCycleDate = @dtmInvoiceDate WHERE intAccountId IN (SELECT intAccountId FROM #tblCFInvoice)
+		UPDATE tblCFAccount SET dtmLastBillingCycleDate = @dtmInvoiceDate WHERE intAccountId IN (SELECT intAccountId FROM tblCFInvoiceStagingTable where strUserId = @username)
 		IF (@@TRANCOUNT > 0) COMMIT TRANSACTION
 	END
 

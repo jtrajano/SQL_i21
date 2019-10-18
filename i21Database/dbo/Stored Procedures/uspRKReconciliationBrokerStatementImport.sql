@@ -64,6 +64,52 @@ BEGIN TRY
 		, dblPrice NUMERIC(24, 20)
 		, dtmFilledDate NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 		, strStatus NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL)
+
+	--Invalid Filled Date
+	INSERT INTO @tblFinalRec (strName
+		, strAccountNumber
+		, strFutMarketName
+		, strCommodityCode
+		, strBuySell
+		, dblNoOfContract
+		, strFutureMonth
+		, dblPrice
+		, dtmFilledDate
+		, ImportId
+		, strStatus)
+	SELECT strName
+		, strAccountNumber
+		, strFutMarketName
+		, strCommodityCode
+		, strBuySell
+		, dblNoOfContract = SUM(dblNoOfContract)
+		, strFutureMonth = REPLACE(strFutureMonth, '-', ' ')
+		, dblPrice
+		, dtmFilledDate = REPLACE(dtmFilledDate, '-', '/')
+		, NULL
+		, 'No derivative entries for this filled date '+ CONVERT(VARCHAR(24), CONVERT(DATE,@dtmFilledDate), 113) + ' matched in the file.'
+	FROM tblRKReconciliationBrokerStatementImport
+	WHERE strFutMarketName = @strFutMarketName
+		AND strCommodityCode = @strCommodityCode
+		AND strName = @strName
+		AND strAccountNumber = CASE WHEN ISNULL(@strAccountNumber, '') = '' THEN strAccountNumber ELSE @strAccountNumber END
+		AND CONVERT(DATETIME, (CONVERT(NVARCHAR, REPLACE(dtmFilledDate, '-' , '/'), @ConvertYear)), @ConvertYear) <> CONVERT(DATETIME, (CONVERT(NVARCHAR, REPLACE(@dtmFilledDate, '-', '/'), @ConvertYear)), @ConvertYear)
+	GROUP BY strName
+		, strAccountNumber
+		, strFutMarketName
+		, strCommodityCode
+		, strBuySell
+		, strFutureMonth
+		, dblPrice
+		, dtmFilledDate
+	ORDER BY strName
+		, strAccountNumber
+		, strFutMarketName
+		, strCommodityCode
+		, strBuySell
+		, strFutureMonth
+		, dblPrice
+		, dtmFilledDate
 	
 	INSERT INTO @ImportedRec (strName
 		, strAccountNumber
@@ -1490,6 +1536,8 @@ BEGIN TRY
 	
 	SELECT @intReconciliationBrokerStatementHeaderIdOut = @intReconciliationBrokerStatementHeaderId
 		, @strStatus = @strStatus
+
+	DELETE FROM tblRKReconciliationBrokerStatementImport
 	
 	COMMIT TRAN
 END TRY

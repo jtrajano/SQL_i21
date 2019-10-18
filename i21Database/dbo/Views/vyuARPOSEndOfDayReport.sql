@@ -16,7 +16,7 @@ SELECT DISTINCT intPOSEndOfDayId		= EOD.intPOSEndOfDayId
 			  , Tax						= ISNULL(POS.dblTax, 0)
 			  , Total					= ISNULL(POS.dblTotal, 0)
 			  , NumberOfSales			= ISNULL(POS.intTotalSales, 0)
-			  , dblEndingBalance		= ISNULL(EOD.dblFinalEndingBalance, 0)
+			  , dblEndingBalance		= ISNULL(EOD.dblOpeningBalance, 0) + (ISNULL(PAYMENT.dblCashAmount, 0) + ISNULL(PAYMENT.dblCheckAmount, 0)) + ISNULL(EOD.dblCashPaymentReceived, 0) + ISNULL(EOD.dblCashReturn,0)
 			  , dblOpeningBalance		= ISNULL(EOD.dblOpeningBalance, 0)
 			  , Cash					= ISNULL(PAYMENT.dblCashAmount, 0)
 			  , CashCount				= ISNULL(PAYMENT.intCashCount, 0)
@@ -32,7 +32,7 @@ SELECT DISTINCT intPOSEndOfDayId		= EOD.intPOSEndOfDayId
 			  , dblCashSales			= ISNULL(PAYMENT.dblCashAmount, 0) + ISNULL(PAYMENT.dblCheckAmount, 0)
 			  , intReturnCount			= ISNULL(CASHRETURN.intReturnCount,0)
 			  , dblCashPaymentReceived	= ISNULL(EOD.dblCashPaymentReceived, 0)
-			  , dblDrawerBalance		= ISNULL(EOD.dblExpectedEndingBalance, 0) + ISNULL(EOD.dblCashPaymentReceived, 0)
+			  , dblDrawerBalance		= ISNULL(EOD.dblFinalEndingBalance, 0) --ISNULL(EOD.dblExpectedEndingBalance, 0) + ISNULL(EOD.dblCashPaymentReceived, 0)
 FROM tblARPOSEndOfDay EOD WITH (NOLOCK)
 INNER JOIN (
 	SELECT 

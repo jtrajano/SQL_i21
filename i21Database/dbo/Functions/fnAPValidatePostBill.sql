@@ -260,23 +260,23 @@ BEGIN
 			INNER JOIN tblICInventoryReceipt C2 ON C.intInventoryReceiptId = C2.intInventoryReceiptId
 			INNER JOIN tblICItem D ON B.intItemId = D.intItemId
 		WHERE A.intBillId IN (SELECT [intBillId] FROM @tmpBills)
-		AND A.dtmDate < C2.dtmReceiptDate
+		AND DATEADD(dd, 0,DATEDIFF(dd, 0,A.dtmDate)) < DATEADD(dd, 0, DATEDIFF(dd, 0,C2.dtmReceiptDate))
 
-		--Voucher date should not be greater than receipt date
-		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
-		SELECT
-			'Voucher date should not be earlier than ' + C2.strReceiptNumber + ' for item ' + D.strItemNo + '.',
-			'Bill',
-			A.strBillId,
-			A.intBillId,
-			13
-		FROM tblAPBill A 
-			INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
-			INNER JOIN tblICInventoryReceiptItem C ON C.intInventoryReceiptItemId = B.[intInventoryReceiptItemId]
-			INNER JOIN tblICInventoryReceipt C2 ON C.intInventoryReceiptId = C2.intInventoryReceiptId
-			INNER JOIN tblICItem D ON B.intItemId = D.intItemId
-		WHERE A.intBillId IN (SELECT [intBillId] FROM @tmpBills)
-		AND A.dtmDate < C2.dtmReceiptDate
+		-- --Voucher date should not be greater than receipt date
+		-- INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
+		-- SELECT
+		-- 	'Voucher date should not be earlier than ' + C2.strReceiptNumber + ' for item ' + D.strItemNo + '.',
+		-- 	'Bill',
+		-- 	A.strBillId,
+		-- 	A.intBillId,
+		-- 	13
+		-- FROM tblAPBill A 
+		-- 	INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
+		-- 	INNER JOIN tblICInventoryReceiptItem C ON C.intInventoryReceiptItemId = B.[intInventoryReceiptItemId]
+		-- 	INNER JOIN tblICInventoryReceipt C2 ON C.intInventoryReceiptId = C2.intInventoryReceiptId
+		-- 	INNER JOIN tblICItem D ON B.intItemId = D.intItemId
+		-- WHERE A.intBillId IN (SELECT [intBillId] FROM @tmpBills)
+		-- AND A.dtmDate < C2.dtmReceiptDate
 		-- INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
 		-- SELECT
 		-- 	'You cannot over bill the item "' + D.strItemNo + '" on this transaction.',

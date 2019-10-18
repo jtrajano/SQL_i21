@@ -10,6 +10,7 @@
     [dblTicketValue]            NUMERIC (18, 6) NULL,
     [dblQuantitySold]           NUMERIC (18, 6) NULL,
     [dblTotalAmount]            NUMERIC (18, 6) NULL,
+	[ysnBookSoldOut]			BIT				NULL,
     CONSTRAINT [PK_tblSTCheckoutLotteryCount] PRIMARY KEY CLUSTERED ([intCheckoutLotteryCountId] ASC),
     CONSTRAINT [FK_tblSTCheckoutLotteryCount_tblSTCheckoutHeader] FOREIGN KEY ([intCheckoutId]) REFERENCES [dbo].[tblSTCheckoutHeader] ([intCheckoutId]) ON DELETE CASCADE,
     CONSTRAINT [FK_tblSTCheckoutLotteryCount_tblSTLotteryBook] FOREIGN KEY ([intLotteryBookId]) REFERENCES [dbo].[tblSTLotteryBook] ([intLotteryBookId]) ON DELETE SET NULL

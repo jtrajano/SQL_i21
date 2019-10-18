@@ -21,7 +21,7 @@ BEGIN
 	
 	SELECT @dblQuantity = dblQuantity, @intUnitMeasureId = intUnitMeasureId ,@intItemId = intItemId FROM tblCTContractDetail WHERE  intContractDetailId = @intContractDetailId
 
-	IF EXISTS(SELECT * FROM tblQMSample WHERE intContractDetailId = @intContractDetailId AND intSampleStatusId = 3)
+	IF EXISTS(SELECT TOP 1 1 FROM tblQMSample WHERE intContractDetailId = @intContractDetailId AND intSampleStatusId = 3)
 	BEGIN
 		SELECT @dblRepresentingQty = SUM(dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId,intRepresentingUOMId,@intUnitMeasureId, dblRepresentingQty)) FROM tblQMSample WHERE intContractDetailId = @intContractDetailId AND intSampleStatusId = 3
 		IF @dblRepresentingQty >= @dblQuantity
@@ -29,7 +29,7 @@ BEGIN
 		ELSE
 			SET @strSampleStatus = 'Partially Approved'
 	END		
-	ELSE IF EXISTS(SELECT * FROM tblQMSample WHERE intContractDetailId = @intContractDetailId AND intSampleStatusId = 4)
+	ELSE IF EXISTS(SELECT TOP 1 1 FROM tblQMSample WHERE intContractDetailId = @intContractDetailId AND intSampleStatusId = 4)
 	BEGIN
 		SELECT @dblRepresentingQty = SUM(dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId,intRepresentingUOMId,@intUnitMeasureId, dblRepresentingQty)) FROM tblQMSample WHERE intContractDetailId = @intContractDetailId AND intSampleStatusId = 4
 		IF @dblRepresentingQty >= @dblQuantity
@@ -38,26 +38,18 @@ BEGIN
 			SET @strSampleStatus = 'Partially Rejected'
 		SET @dblRepresentingQty = NULL
 	END
-
+	
 	INSERT	INTO @returntable
-	SELECT	strSampleNumber,
-			strContainerNumber,
-			strSampleTypeName ,
+	SELECT	TOP 1 SA.strSampleNumber,
+			SA.strContainerNumber,
+			ST.strSampleTypeName,
 			@strSampleStatus,
-			dtmTestingEndDate,
+			SA.dtmTestingEndDate,
 			@dblRepresentingQty	
-	FROM 
-	(
-		SELECT	ROW_NUMBER() OVER (PARTITION BY SA.intContractDetailId ORDER BY SA.intSampleId DESC) intRowNum,
-				SA.strSampleNumber,
-				SA.strContainerNumber,
-				ST.strSampleTypeName,
-				SS.strStatus AS strSampleStatus,
-				SA.dtmTestingEndDate
-		FROM	tblQMSample			SA
-		JOIN	tblQMSampleType		ST  ON ST.intSampleTypeId	= SA.intSampleTypeId AND SA.intContractDetailId = @intContractDetailId
-		JOIN	tblQMSampleStatus	SS  ON SS.intSampleStatusId = SA.intSampleStatusId
-	) t WHERE intRowNum = 1
-		
+	FROM	tblQMSample			SA
+	JOIN	tblQMSampleType		ST  ON ST.intSampleTypeId	= SA.intSampleTypeId AND SA.intContractDetailId = @intContractDetailId
+	JOIN	tblQMSampleStatus	SS  ON SS.intSampleStatusId = SA.intSampleStatusId
+	ORDER BY SA.intSampleId DESC
+
 	RETURN;
 END

@@ -14,6 +14,7 @@ BEGIN
 		@ShipmentEntries ShipmentStagingTable,
 		@ShipmentCharges ShipmentChargeStagingTable,
 		@ShipmentItemLots ShipmentItemLotStagingTable,
+		@ShipmentItemLotsOnlyStagingTable ShipmentItemLotsOnlyStagingTable,
 		
 		@OWNERSHIP_TYPE_Own INT = 1,
 		@OWNERSHIP_TYPE_Storage INT = 2,
@@ -99,7 +100,7 @@ BEGIN
 		dblWeightPerQty = 62.2,
 		strWareHouseCargoNumber = 'CwN-0001'
 		 
-	EXEC dbo.uspICAddItemShipment @ShipmentEntries, @ShipmentCharges, @ShipmentItemLots, @intUserId
+	EXEC dbo.uspICAddItemShipment @ShipmentEntries, @ShipmentCharges, @ShipmentItemLots, @ShipmentItemLotsOnlyStagingTable, @intUserId
 
 	SELECT TOP 1 @ActualShipmentNumber = strShipmentNumber
 	FROM tblICInventoryShipment

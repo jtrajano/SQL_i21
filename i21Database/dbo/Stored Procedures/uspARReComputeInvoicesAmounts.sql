@@ -287,16 +287,16 @@ SET
 	,ARI.[dblAmountDue]			= CASE WHEN ARI.intSourceId = 2 AND ARI.intOriginalInvoiceId IS NOT NULL
 									THEN 
 										CASE WHEN ARI.strTransactionType = 'Credit Memo'
-												THEN ISNULL(ARI.dblProvisionalAmount, @ZeroDecimal) - (ISNULL(ARI.[dblInvoiceSubtotal] + ARI.[dblTax] + ARI.[dblShipping] + ARI.[dblInterest], @ZeroDecimal) - ISNULL(ARI.dblPayment + ARI.[dblDiscount], @ZeroDecimal))
-												ELSE (ISNULL(ARI.[dblInvoiceSubtotal] + ARI.[dblTax] + ARI.[dblShipping] + ARI.[dblInterest], @ZeroDecimal) - ISNULL(ARI.dblPayment + ARI.[dblDiscount], @ZeroDecimal)) - ISNULL(ARI.dblProvisionalAmount, @ZeroDecimal)
+												THEN (CASE WHEN ISNULL(ARI.ysnExcludeFromPayment, 0) = 1 THEN ISNULL(ARI.dblProvisionalAmount, @ZeroDecimal) ELSE @ZeroDecimal END) - (ISNULL(ARI.[dblInvoiceSubtotal] + ARI.[dblTax] + ARI.[dblShipping] + ARI.[dblInterest], @ZeroDecimal) - ISNULL(ARI.dblPayment + ARI.[dblDiscount], @ZeroDecimal))
+												ELSE (ISNULL(ARI.[dblInvoiceSubtotal] + ARI.[dblTax] + ARI.[dblShipping] + ARI.[dblInterest], @ZeroDecimal) - ISNULL(ARI.dblPayment + ARI.[dblDiscount], @ZeroDecimal)) - (CASE WHEN ISNULL(ARI.ysnExcludeFromPayment, 0) = 1 THEN ISNULL(ARI.dblProvisionalAmount, @ZeroDecimal) ELSE @ZeroDecimal END)
 										END
 									ELSE (ISNULL(ARI.[dblInvoiceSubtotal] + ARI.[dblTax] + ARI.[dblShipping] + ARI.[dblInterest], @ZeroDecimal) - ISNULL(ARI.dblPayment + ARI.[dblDiscount], @ZeroDecimal))
 								  END
 	,ARI.[dblBaseAmountDue]		= CASE WHEN ARI.intSourceId = 2 AND ARI.intOriginalInvoiceId IS NOT NULL
 									THEN 
 										CASE WHEN ARI.strTransactionType = 'Credit Memo'
-												THEN ISNULL(ARI.dblBaseProvisionalAmount, @ZeroDecimal) - (ISNULL(ARI.[dblBaseInvoiceSubtotal] + ARI.[dblBaseTax] + ARI.[dblBaseShipping] + ARI.[dblBaseInterest], @ZeroDecimal) - ISNULL(ARI.dblBasePayment + ARI.[dblBaseDiscount], @ZeroDecimal))
-												ELSE (ISNULL(ARI.[dblBaseInvoiceSubtotal] + ARI.[dblBaseTax] + ARI.[dblBaseShipping] + ARI.[dblBaseInterest], @ZeroDecimal) - ISNULL(ARI.dblBasePayment + ARI.[dblBaseDiscount], @ZeroDecimal)) - ISNULL(ARI.dblBaseProvisionalAmount, @ZeroDecimal)
+												THEN (CASE WHEN ISNULL(ARI.ysnExcludeFromPayment, 0) = 1 THEN ISNULL(ARI.dblBaseProvisionalAmount, @ZeroDecimal) ELSE @ZeroDecimal END) - (ISNULL(ARI.[dblBaseInvoiceSubtotal] + ARI.[dblBaseTax] + ARI.[dblBaseShipping] + ARI.[dblBaseInterest], @ZeroDecimal) - ISNULL(ARI.dblBasePayment + ARI.[dblBaseDiscount], @ZeroDecimal))
+												ELSE (ISNULL(ARI.[dblBaseInvoiceSubtotal] + ARI.[dblBaseTax] + ARI.[dblBaseShipping] + ARI.[dblBaseInterest], @ZeroDecimal) - ISNULL(ARI.dblBasePayment + ARI.[dblBaseDiscount], @ZeroDecimal)) - (CASE WHEN ISNULL(ARI.ysnExcludeFromPayment, 0) = 1 THEN ISNULL(ARI.dblBaseProvisionalAmount, @ZeroDecimal) ELSE @ZeroDecimal END)
 										END
 									ELSE (ISNULL(ARI.[dblBaseInvoiceSubtotal] + ARI.[dblBaseTax] + ARI.[dblBaseShipping] + ARI.[dblBaseInterest], @ZeroDecimal) - ISNULL(ARI.dblBasePayment + ARI.[dblBaseDiscount], @ZeroDecimal))
 								  END

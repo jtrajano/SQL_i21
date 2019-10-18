@@ -50,6 +50,7 @@
 	[dblQtyToBillUnitQty]			DECIMAL(38,20),	
 	[intQtyToBillUOMId]				INT NULL,
 	[strQtyToBillUOM]				NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
+	[dblOldCost]					DECIMAL(38,20) NULL,
 	[dblCost]						DECIMAL(38,20),
 	[dblCostUnitQty]				DECIMAL(38,20),
 	[intCostUOMId]					INT NULL,

@@ -55,7 +55,7 @@ FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 
 SET @blbStretchedLogo = ISNULL(@blbStretchedLogo, @blbLogo)
 
-DELETE FROM tblARInvoiceReportStagingTable WHERE intEntityUserId = @intEntityUserId AND strRequestId = @strRequestId AND strInvoiceFormat <> 'Format 1 - MCP'
+DELETE FROM tblARInvoiceReportStagingTable WHERE intEntityUserId = @intEntityUserId AND strRequestId = @strRequestId AND strInvoiceFormat NOT IN ('Format 1 - MCP', 'Format 5 - Honstein')
 INSERT INTO tblARInvoiceReportStagingTable (
 	   intInvoiceId
 	 , intCompanyLocationId
@@ -150,6 +150,7 @@ INSERT INTO tblARInvoiceReportStagingTable (
 	 , strInvoiceFormat
 	 , blbSignature
 	 , ysnStretchLogo
+	 , strSubFormula
 )
 SELECT intInvoiceId				= INV.intInvoiceId
 	 , intCompanyLocationId		= INV.intCompanyLocationId
@@ -266,6 +267,7 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , strInvoiceFormat			= SELECTEDINV.strInvoiceFormat
 	 , blbSignature				= INV.blbSignature
 	 , ysnStretchLogo			= ISNULL(SELECTEDINV.ysnStretchLogo, 0)
+	 , strSubFormula			= INVOICEDETAIL.strSubFormula
 FROM dbo.tblARInvoice INV WITH (NOLOCK)
 INNER JOIN @tblInvoiceReport SELECTEDINV ON INV.intInvoiceId = SELECTEDINV.intInvoiceId
 INNER JOIN (
@@ -325,9 +327,9 @@ LEFT JOIN (
 		 , strTicketNumberDate		= SCALE.strTicketNumber + ' - ' + CONVERT(NVARCHAR(50), SCALE.dtmTicketDateTime, 101) 
 		 , strTrailerNumber			= SCALE.strTrailerNumber
 		 , strSealNumber			= SCALE.strSealNumber
-		 , strCustomerReference		= ISNULL(NULLIF(SCALE.strCustomerReference, ''), CONTRACTS.strCustomerContract)
-		 , strSalesReference		= ISNULL(NULLIF(LGLOAD.strCustomerReference, ''), CONTRACTS.strCustomerContract)
-	 	 , strPurchaseReference		= LGLOAD.strExternalLoadNumber
+		 , strCustomerReference		= CONTRACTS.strCustomerContract
+		 , strSalesReference		= ISNULL(NULLIF(LGLOAD.strCustomerReference, ''), SCALE.strCustomerReference)
+	 	 , strPurchaseReference		= ISNULL(NULLIF(LGLOAD.strExternalLoadNumber, ''), SCALE.strExternalLoadNumber)
 		 , strLoadNumber			= ISNULL(LGLOAD.strLoadNumber, SCALE.strLoadNumber)
 		 , strTruckName				= SCALE.strTruckName
 		 , dblPercentFull			= ID.dblPercentFull
@@ -335,6 +337,7 @@ LEFT JOIN (
 		 , ysnAddonParent			= ID.ysnAddonParent
 		 , strBOLNumberDetail		= ID.strBOLNumberDetail
 		 , strLotNumber				= LOT.strLotNumbers
+		 , strSubFormula			= ID.strSubFormula
 	FROM dbo.tblARInvoiceDetail ID WITH (NOLOCK)
 	LEFT JOIN (
 		SELECT intItemId
@@ -392,12 +395,14 @@ LEFT JOIN (
 	LEFT JOIN (
 		SELECT SC.intTicketId
 			 , SC.strTicketNumber
-			 , SC.strCustomerReference			 
+			 , LG.strCustomerReference
+			 , strScaleCustomerReference = SC.strCustomerReference
 			 , SC.strTruckName
 			 , LG.strLoadNumber
 			 , SC.dtmTicketDateTime
 			 , SVT.strTrailerNumber
 			 , SCN.strSealNumber
+			 , LG.strExternalLoadNumber
 		FROM dbo.tblSCTicket SC WITH (NOLOCK)
 		LEFT JOIN dbo.tblSMShipViaTrailer SVT ON SC.intEntityShipViaTrailerId = SVT.intEntityShipViaTrailerId 
 		LEFT JOIN dbo.tblSCTicketSealNumber TSN ON SC.intTicketId = TSN.intTicketId

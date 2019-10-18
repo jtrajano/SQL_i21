@@ -29,7 +29,7 @@ WHERE  t1.intM2MBasisId= @intM2MBasisId
 
 COMMIT TRAN
 
-SELECT 0 as intCuncurrencyId,* from tblRKSettlementPriceImport_ErrLog
+SELECT 0 as intCuncurrencyId,* from tblRKM2MTransactionImport
 
 DELETE FROM tblRKM2MTransactionImport
 END TRY
