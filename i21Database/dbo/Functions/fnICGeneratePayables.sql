@@ -390,7 +390,7 @@ FROM tblICInventoryReceipt A INNER JOIN tblICInventoryReceiptItem B
 		SELECT	
 				LogisticsView.strLoadNumber
 				,LogisticsView.dblNetWt
-		FROM	vyuLGLoadContainerLookup LogisticsView 
+		FROM	vyuICLoadContainersSearch LogisticsView 
 		WHERE	
 				(
 					A.strReceiptType = 'Purchase Contract'
@@ -408,7 +408,7 @@ FROM tblICInventoryReceipt A INNER JOIN tblICInventoryReceiptItem B
 	OUTER APPLY (
 		SELECT	TOP 1 
 				LogisticsView.strLoadNumber
-		FROM	vyuLGLoadContainerLookup LogisticsView 
+		FROM	vyuICLoadContainersSearch LogisticsView 
 		WHERE	
 			A.intSourceType = 2
 			AND LogisticsView.intLoadDetailId = B.intLoadShipmentDetailId

@@ -257,26 +257,10 @@ BEGIN
 				)
 
 	END
-
-
-	INSERT INTO @voucherPayableTax(
-		[intVoucherPayableId]
-		,[intTaxGroupId]				
-		,[intTaxCodeId]				
-		,[intTaxClassId]				
-		,[strTaxableByOtherTaxes]	
-		,[strCalculationMethod]		
-		,[dblRate]					
-		,[intAccountId]				
-		,[dblTax]					
-		,[dblAdjustedTax]			
-		,[ysnTaxAdjusted]			
-		,[ysnSeparateOnBill]			
-		,[ysnCheckOffTax]		
-		,[ysnTaxExempt]	
-		,[ysnTaxOnly]
-	)
-	SELECT	[intVoucherPayableId]
+	
+	BEGIN 
+		INSERT INTO @voucherPayableTax(
+			[intVoucherPayableId]
 			,[intTaxGroupId]				
 			,[intTaxCodeId]				
 			,[intTaxClassId]				
@@ -291,123 +275,37 @@ BEGIN
 			,[ysnCheckOffTax]		
 			,[ysnTaxExempt]	
 			,[ysnTaxOnly]
-	FROM dbo.fnICGeneratePayablesTaxes(@voucherPayable)
+		)
+		SELECT	[intVoucherPayableId]
+				,[intTaxGroupId]				
+				,[intTaxCodeId]				
+				,[intTaxClassId]				
+				,[strTaxableByOtherTaxes]	
+				,[strCalculationMethod]		
+				,[dblRate]					
+				,[intAccountId]				
+				,[dblTax]					
+				,[dblAdjustedTax]			
+				,[ysnTaxAdjusted]			
+				,[ysnSeparateOnBill]			
+				,[ysnCheckOffTax]		
+				,[ysnTaxExempt]	
+				,[ysnTaxOnly]
+		FROM dbo.fnICGeneratePayablesTaxes(
+			@voucherPayable
+			,@intReceiptId
+			,@intShipmentId
+		)
+	END
 
 	IF @ysnPost = 1
 	BEGIN
 		EXEC dbo.uspAPUpdateVoucherPayableQty @voucherPayable, @voucherPayableTax
 	END
-	ELSE
-	BEGIN
-		DECLARE @voucherPayableForRemoval VoucherPayable
-		INSERT INTO @voucherPayableForRemoval(
-			 [intEntityVendorId]			
-			,[intTransactionType]		
-			,[intLocationId]	
-			,[intShipToId]	
-			,[intShipFromId]			
-			,[intShipFromEntityId]
-			,[intPayToAddressId]
-			,[intCurrencyId]					
-			,[dtmDate]				
-			,[strVendorOrderNumber]			
-			,[strReference]						
-			,[strSourceNumber]					
-			,[intPurchaseDetailId]				
-			,[intContractHeaderId]				
-			,[intContractDetailId]				
-			,[intContractSeqId]					
-			,[intScaleTicketId]					
-			,[intInventoryReceiptItemId]		
-			,[intInventoryReceiptChargeId]		
-			,[intInventoryShipmentItemId]		
-			,[intInventoryShipmentChargeId]		
-			,[strLoadShipmentNumber]
-			,[intLoadShipmentId]				
-			,[intLoadShipmentDetailId]		
-			,[intLoadShipmentCostId]		
-			,[intItemId]						
-			,[intPurchaseTaxGroupId]			
-			,[strMiscDescription]				
-			,[dblOrderQty]						
-			,[dblOrderUnitQty]					
-			,[intOrderUOMId]					
-			,[dblQuantityToBill]				
-			,[dblQtyToBillUnitQty]				
-			,[intQtyToBillUOMId]				
-			,[dblCost]							
-			,[dblCostUnitQty]					
-			,[intCostUOMId]						
-			,[dblNetWeight]						
-			,[dblWeightUnitQty]					
-			,[intWeightUOMId]					
-			,[intCostCurrencyId]
-			,[dblTax]							
-			,[dblDiscount]
-			,[intCurrencyExchangeRateTypeId]	
-			,[dblExchangeRate]					
-			,[ysnSubCurrency]					
-			,[intSubCurrencyCents]				
-			,[intAccountId]						
-			,[intShipViaId]						
-			,[intTermId]						
-			,[strBillOfLading]					
-			,[ysnReturn]		
-		)
-		SELECT 
-			 GP.[intEntityVendorId]			
-			,GP.[intTransactionType]
-			,GP.[intLocationId]	
-			,[intShipToId] = GP.intShipFromId	
-			,[intShipFromId] = GP.intShipFromId	 		
-			,[intShipFromEntityId] = GP.intShipFromEntityId
-			,[intPayToAddressId] = GP.intPayToAddressId
-			,GP.[intCurrencyId]					
-			,GP.[dtmDate]				
-			,GP.[strVendorOrderNumber]		
-			,GP.[strReference]						
-			,GP.[strSourceNumber]					
-			,GP.[intPurchaseDetailId]				
-			,GP.[intContractHeaderId]				
-			,GP.[intContractDetailId]				
-			,[intContractSeqId]	= GP.intContractSequence				
-			,GP.[intScaleTicketId]					
-			,GP.[intInventoryReceiptItemId]		
-			,GP.[intInventoryReceiptChargeId]		
-			,GP.[intInventoryShipmentItemId]		
-			,GP.[intInventoryShipmentChargeId]		
-			,[strLoadShipmentNumber] = NULL 
-			,GP.[intLoadShipmentId]				
-			,GP.[intLoadShipmentDetailId]	
-			,GP.[intLoadShipmentCostId]			
-			,GP.[intItemId]						
-			,GP.[intPurchaseTaxGroupId]			
-			,GP.[strMiscDescription]				
-			,GP.[dblOrderQty]						
-			,[dblOrderUnitQty] = 0.00					
-			,[intOrderUOMId] = NULL	 				
-			,GP.[dblQuantityToBill]				
-			,GP.[dblQtyToBillUnitQty]				
-			,GP.[intQtyToBillUOMId]				
-			,[dblCost] = GP.dblUnitCost							
-			,GP.[dblCostUnitQty]					
-			,GP.[intCostUOMId]						
-			,GP.[dblNetWeight]						
-			,GP.[dblWeightUnitQty]					
-			,GP.[intWeightUOMId]					
-			,GP.[intCostCurrencyId]
-			,GP.[dblTax]							
-			,GP.[dblDiscount]
-			,GP.[intCurrencyExchangeRateTypeId]	
-			,[dblExchangeRate] = GP.dblRate					
-			,GP.[ysnSubCurrency]					
-			,GP.[intSubCurrencyCents]				
-			,GP.[intAccountId]						
-			,GP.[intShipViaId]						
-			,GP.[intTermId]						
-			,GP.[strBillOfLading]					
-			,GP.[ysnReturn]	 
-		FROM dbo.fnICGeneratePayables (@intReceiptId, @ysnPost, DEFAULT) GP
-		EXEC dbo.uspAPRemoveVoucherPayable @voucherPayableForRemoval
+	
+	ELSE IF @ysnPost = 0 
+		AND EXISTS (SELECT TOP 1 1 FROM @voucherPayable) 
+	BEGIN		
+		EXEC dbo.uspAPRemoveVoucherPayable @voucherPayable
 	END
 END
