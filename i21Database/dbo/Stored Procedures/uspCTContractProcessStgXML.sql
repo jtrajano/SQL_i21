@@ -155,14 +155,44 @@ BEGIN TRY
 		--,@strCurrencyExchangeRateType NVARCHAR(50)
 		,@intContractCostId INT
 		,@intVendorId INT
-	--,@intCurrencyExchangeRateTypeId INT
-	,@strCountry nvarchar(100),@intCountryId int
-
+		--,@intCurrencyExchangeRateTypeId INT
+		,@strCountry NVARCHAR(100)
+		,@intCountryId INT
+		,@ysnApproval BIT
+		,@strAmendmentApprovalXML NVARCHAR(MAX)
 	DECLARE @tblCTContractCost TABLE (intContractCostId INT)
 
 	SELECT @intContractStageId = MIN(intContractStageId)
 	FROM tblCTContractStage
 	WHERE ISNULL(strFeedStatus, '') = ''
+
+	DECLARE @tblCTAmendmentApproval TABLE (
+		strDataIndex NVARCHAR(50) Collate Latin1_General_CI_AS
+		,ysnApproval BIT
+		)
+
+	IF @intContractStageId IS NOT NULL
+	BEGIN
+		SELECT TOP 1 @strAmendmentApprovalXML = strAmendmentApprovalXML
+		FROM tblCTContractStage
+		WHERE intContractStageId = @intContractStageId
+
+		EXEC sp_xml_preparedocument @idoc OUTPUT
+			,@strAmendmentApprovalXML
+
+		INSERT INTO @tblCTAmendmentApproval (
+			strDataIndex
+			,ysnApproval
+			)
+		SELECT strDataIndex
+			,ysnApproval
+		FROM OPENXML(@idoc, 'vyuIPAmendmentApprovals/vyuIPAmendmentApproval', 2) WITH (
+				strDataIndex NVARCHAR(50) Collate Latin1_General_CI_AS
+				,ysnApproval BIT
+				) x
+
+		EXEC sp_xml_removedocument @idoc
+	END
 
 	WHILE @intContractStageId > 0
 	BEGIN
@@ -189,7 +219,7 @@ BEGIN TRY
 		SELECT @intContractHeaderId = intContractHeaderId
 			,@strContractNumber = strContractNumber
 			,@strCustomerContract = strContractNumber
-			,@strNewContractNumber=strContractNumber
+			,@strNewContractNumber = strContractNumber
 			,@strHeaderXML = strHeaderXML
 			,@strDetailXML = strDetailXML
 			,@strCostXML = strCostXML
@@ -403,11 +433,14 @@ BEGIN TRY
 				IF @intTransactionCount = 0
 					BEGIN TRANSACTION
 
-					If @strRowState='Delete'
-					Begin
-						Delete from tblCTContractHeader Where intContractHeaderRefId=@intContractHeaderId
-						Goto x
-					End
+				IF @strRowState = 'Delete'
+				BEGIN
+					DELETE
+					FROM tblCTContractHeader
+					WHERE intContractHeaderRefId = @intContractHeaderId
+
+					GOTO x
+				END
 
 				------------------Header------------------------------------------------------
 				EXEC sp_xml_preparedocument @idoc OUTPUT
@@ -498,7 +531,8 @@ BEGIN TRY
 					,@strInvoiceType = NULL
 					,@strArbitration = NULL
 					,@strTextCode = NULL
-					,@strCountry=NULL
+					,@strCountry = NULL
+					,@ysnApproval = NULL
 
 				SELECT @strSalespersonId = strSalespersonId
 					,@strCommodityCode = strCommodityCode
@@ -516,7 +550,8 @@ BEGIN TRY
 					,@strInvoiceType = strInvoiceType
 					,@strArbitration = strArbitration
 					,@strTextCode = strTextCode
-					,@strCountry=strCountry
+					,@strCountry = strCountry
+					,@ysnApproval = ysnApproval
 				FROM OPENXML(@idoc, 'vyuCTContractHeaderViews/vyuCTContractHeaderView', 2) WITH (
 						strSalespersonId NVARCHAR(3) Collate Latin1_General_CI_AS
 						,strCommodityCode NVARCHAR(50) Collate Latin1_General_CI_AS
@@ -535,6 +570,7 @@ BEGIN TRY
 						,strArbitration NVARCHAR(50) Collate Latin1_General_CI_AS
 						,strTextCode NVARCHAR(50) Collate Latin1_General_CI_AS
 						,strCountry NVARCHAR(100) Collate Latin1_General_CI_AS
+						,ysnApproval BIT
 						) x
 
 				IF @strCommodityCode IS NOT NULL
@@ -644,14 +680,12 @@ BEGIN TRY
 				--		)
 				--BEGIN
 				--	SELECT @strErrorMessage = 'User ' + @strCreatedBy + ' is not available.'
-
 				--	RAISERROR (
 				--			@strErrorMessage
 				--			,16
 				--			,1
 				--			)
 				--END
-
 				IF @strFreightTerm IS NOT NULL
 					AND NOT EXISTS (
 						SELECT 1
@@ -747,13 +781,16 @@ BEGIN TRY
 							,1
 							)
 				END
-				SELECT @intCountryId=NULL
-				SELECT @intCountryId=intCountryID
-						FROM tblSMCountry C
-						WHERE C.strCountry = @strCountry
 
-						If @strCountry is not null and @intCountryId is null
-						BEGIN
+				SELECT @intCountryId = NULL
+
+				SELECT @intCountryId = intCountryID
+				FROM tblSMCountry C
+				WHERE C.strCountry = @strCountry
+
+				IF @strCountry IS NOT NULL
+					AND @intCountryId IS NULL
+				BEGIN
 					SELECT @strErrorMessage = 'Country ' + @strCountry + ' is not available.'
 
 					RAISERROR (
@@ -1046,7 +1083,7 @@ BEGIN TRY
 					,@intCountryId
 					,strExternalEntity
 					,strExternalContractNumber
-					,IsNULL(ysnReceivedSignedFixationLetter,0)
+					,IsNULL(ysnReceivedSignedFixationLetter, 0)
 				FROM OPENXML(@idoc, 'vyuCTContractHeaderViews/vyuCTContractHeaderView', 2) WITH (
 						strEntityName NVARCHAR(100) Collate Latin1_General_CI_AS
 						,dtmContractDate DATETIME
@@ -1094,8 +1131,8 @@ BEGIN TRY
 						,strAssociationName NVARCHAR(100) Collate Latin1_General_CI_AS
 						,strInvoiceType NVARCHAR(30) Collate Latin1_General_CI_AS
 						,strArbitration NVARCHAR(50) Collate Latin1_General_CI_AS
-						,strExternalEntity [nvarchar](100) COLLATE Latin1_General_CI_AS 
-						,strExternalContractNumber [nvarchar](50) COLLATE Latin1_General_CI_AS 
+						,strExternalEntity [nvarchar](100) COLLATE Latin1_General_CI_AS
+						,strExternalContractNumber [nvarchar](50) COLLATE Latin1_General_CI_AS
 						,ysnReceivedSignedFixationLetter BIT
 						,strCustomerContract NVARCHAR(30) Collate Latin1_General_CI_AS
 						) x
@@ -1137,18 +1174,68 @@ BEGIN TRY
 						,CH.ysnSigned = CH1.ysnSigned
 						,CH.ysnPrinted = CH1.ysnPrinted
 						,CH.intCropYearId = CH1.intCropYearId
-						,CH.intPositionId = CH1.intPositionId
+						,CH.intPositionId = CASE 
+							WHEN @ysnApproval = 0
+								AND EXISTS (
+									SELECT *
+									FROM @tblCTAmendmentApproval
+									WHERE strDataIndex = 'intPositionId'
+										AND ysnApproval = 1
+									)
+								THEN CH.intPositionId
+							ELSE CH1.intPositionId
+							END
 						,CH.intPricingTypeId = CH1.intPricingTypeId
 						,CH.intCreatedById = CH1.intCreatedById
 						,CH.dtmCreated = CH1.dtmCreated
 						,CH.intConcurrencyId = CH.intConcurrencyId + 1
 						,CH.strCustomerContract = CH1.strCustomerContract
 						,CH.intContractHeaderRefId = CH1.intContractHeaderRefId
-						,CH.intFreightTermId = CH1.intFreightTermId
-						,CH.intTermId = CH1.intTermId
+						,CH.intFreightTermId = CASE 
+							WHEN @ysnApproval = 0
+								AND EXISTS (
+									SELECT *
+									FROM @tblCTAmendmentApproval
+									WHERE strDataIndex = 'intContractBasisId'
+										AND ysnApproval = 1
+									)
+								THEN CH.intFreightTermId
+							ELSE CH1.intFreightTermId
+							END
+						,CH.intTermId = CASE 
+							WHEN @ysnApproval = 0
+								AND EXISTS (
+									SELECT *
+									FROM @tblCTAmendmentApproval
+									WHERE strDataIndex = 'intTermId'
+										AND ysnApproval = 1
+									)
+								THEN CH.intTermId
+							ELSE CH1.intTermId
+							END
 						,CH.intContractTextId = CH1.intContractTextId
-						,CH.intGradeId = CH1.intGradeId
-						,CH.intWeightId = CH1.intWeightId
+						,CH.intGradeId = CASE 
+							WHEN @ysnApproval = 0
+								AND EXISTS (
+									SELECT *
+									FROM @tblCTAmendmentApproval
+									WHERE strDataIndex = 'intGradeId'
+										AND ysnApproval = 1
+									)
+								THEN CH.intGradeId
+							ELSE CH1.intGradeId
+							END
+						,CH.intWeightId = CASE 
+							WHEN @ysnApproval = 0
+								AND EXISTS (
+									SELECT *
+									FROM @tblCTAmendmentApproval
+									WHERE strDataIndex = 'intWeightId'
+										AND ysnApproval = 1
+									)
+								THEN CH.intWeightId
+							ELSE CH1.intWeightId
+							END
 						,CH.intInsuranceById = CH1.intInsuranceById
 						,CH.intBookId = CH1.intBookId
 						,CH.strInternalComment = CH1.strInternalComment
@@ -2079,8 +2166,8 @@ BEGIN TRY
 						,@intProducerId
 						,@intShipViaId
 						,x.strInvoiceNo
-						,IsNULL(ysnProvisionalPNL,0)
-						,IsNULL(ysnFinalPNL,0)
+						,IsNULL(ysnProvisionalPNL, 0)
+						,IsNULL(ysnFinalPNL, 0)
 					FROM OPENXML(@idoc, 'vyuIPContractDetailViews/vyuIPContractDetailView', 2) WITH (
 							strEntityName NVARCHAR(100) Collate Latin1_General_CI_AS
 							,dtmContractDate DATETIME
@@ -2306,8 +2393,8 @@ BEGIN TRY
 					,ysnStockSale
 					,strCertifications
 					,ysnSplit
-											,ysnProvisionalPNL
-						,ysnFinalPNL
+					,ysnProvisionalPNL
+					,ysnFinalPNL
 					)
 				SELECT intContractDetailId
 					,intSplitFromId
@@ -2445,8 +2532,8 @@ BEGIN TRY
 					,ysnStockSale
 					,strCertifications
 					,ysnSplit
-											,ysnProvisionalPNL
-						,ysnFinalPNL
+					,ysnProvisionalPNL
+					,ysnFinalPNL
 				FROM tblCTContractDetail CD
 				WHERE CD.intContractHeaderId = @intNewContractHeaderId
 					AND NOT EXISTS (
@@ -2538,19 +2625,79 @@ BEGIN TRY
 						UPDATE CD
 						SET ysnSlice = CD1.ysnSlice
 							,intConcurrencyId = CD.intConcurrencyId + 1
-							,intContractStatusId = CD1.intContractStatusId
+							,CD.intContractStatusId = CASE 
+								WHEN @ysnApproval = 0
+									AND EXISTS (
+										SELECT *
+										FROM @tblCTAmendmentApproval
+										WHERE strDataIndex = 'intContractStatusId'
+											AND ysnApproval = 1
+										)
+									THEN CD.intContractStatusId
+								ELSE CD1.intContractStatusId
+								END
 							,intCompanyLocationId = CD1.intCompanyLocationId
 							,intShipToId = CD1.intShipToId
-							,dtmStartDate = CD1.dtmStartDate
-							,dtmEndDate = CD1.dtmEndDate
+							,CD.dtmStartDate = CASE 
+								WHEN @ysnApproval = 0
+									AND EXISTS (
+										SELECT *
+										FROM @tblCTAmendmentApproval
+										WHERE strDataIndex = 'dtmStartDate'
+											AND ysnApproval = 1
+										)
+									THEN CD.dtmStartDate
+								ELSE CD1.dtmStartDate
+								END
+							,CD.dtmEndDate = CASE 
+								WHEN @ysnApproval = 0
+									AND EXISTS (
+										SELECT *
+										FROM @tblCTAmendmentApproval
+										WHERE strDataIndex = 'dtmEndDate'
+											AND ysnApproval = 1
+										)
+									THEN CD.dtmEndDate
+								ELSE CD1.dtmEndDate
+								END
 							,intFreightTermId = CD1.intFreightTermId
 							,intShipViaId = CD1.intShipViaId
 							,intItemContractId = CD1.intItemContractId
-							,intItemId = CD1.intItemId
+							,CD.intItemId = CASE 
+								WHEN @ysnApproval = 0
+									AND EXISTS (
+										SELECT *
+										FROM @tblCTAmendmentApproval
+										WHERE strDataIndex = 'intItemId'
+											AND ysnApproval = 1
+										)
+									THEN CD.intItemId
+								ELSE CD1.intItemId
+								END
 							,strItemSpecification = CD1.strItemSpecification
 							,intCategoryId = CD1.intCategoryId
-							,dblQuantity = CD1.dblQuantity
-							,intItemUOMId = CD1.intItemUOMId
+							,CD.dblQuantity = CASE 
+								WHEN @ysnApproval = 0
+									AND EXISTS (
+										SELECT *
+										FROM @tblCTAmendmentApproval
+										WHERE strDataIndex = 'dblQuantity'
+											AND ysnApproval = 1
+										)
+									THEN CD.dblQuantity
+								ELSE CD1.dblQuantity
+								END
+							,CD.intItemUOMId = CASE 
+								WHEN @ysnApproval = 0
+									AND EXISTS (
+										SELECT *
+										FROM @tblCTAmendmentApproval
+										WHERE strDataIndex = 'intItemUOMId'
+											AND ysnApproval = 1
+										)
+									THEN CD.intItemUOMId
+								ELSE CD1.intItemUOMId
+								END
 							,dblOriginalQty = CD1.dblOriginalQty
 							,dblBalance = CD1.dblBalance
 							,dblIntransitQty = CD1.dblIntransitQty
@@ -2568,19 +2715,99 @@ BEGIN TRY
 							,dblAdjustment = CD1.dblAdjustment
 							,intAdjItemUOMId = CD1.intAdjItemUOMId
 							,intPricingTypeId = CD1.intPricingTypeId
-							,intFutureMarketId = CD1.intFutureMarketId
-							,intFutureMonthId = CD1.intFutureMonthId
-							,dblFutures = CD1.dblFutures
-							,dblBasis = CD1.dblBasis
+							,CD.intFutureMarketId = CASE 
+								WHEN @ysnApproval = 0
+									AND EXISTS (
+										SELECT *
+										FROM @tblCTAmendmentApproval
+										WHERE strDataIndex = 'intFutureMarketId'
+											AND ysnApproval = 1
+										)
+									THEN CD.intFutureMarketId
+								ELSE CD1.intFutureMarketId
+								END
+							,CD.intFutureMonthId = CASE 
+								WHEN @ysnApproval = 0
+									AND EXISTS (
+										SELECT *
+										FROM @tblCTAmendmentApproval
+										WHERE strDataIndex = 'intFutureMonthId'
+											AND ysnApproval = 1
+										)
+									THEN CD.intFutureMonthId
+								ELSE CD1.intFutureMonthId
+								END
+							,CD.dblFutures = CASE 
+								WHEN @ysnApproval = 0
+									AND EXISTS (
+										SELECT *
+										FROM @tblCTAmendmentApproval
+										WHERE strDataIndex = 'dblFutures'
+											AND ysnApproval = 1
+										)
+									THEN CD.dblFutures
+								ELSE CD1.dblFutures
+								END
+							,CD.dblBasis = CASE 
+								WHEN @ysnApproval = 0
+									AND EXISTS (
+										SELECT *
+										FROM @tblCTAmendmentApproval
+										WHERE strDataIndex = 'dblBasis'
+											AND ysnApproval = 1
+										)
+									THEN CD.dblBasis
+								ELSE CD1.dblBasis
+								END
 							,dblOriginalBasis = CD1.dblOriginalBasis
 							,dblConvertedBasis = CD1.dblConvertedBasis
 							,intBasisCurrencyId = CD1.intBasisCurrencyId
 							,intBasisUOMId = CD1.intBasisUOMId
-							,dblRatio = CD1.dblRatio
-							,dblCashPrice = CD1.dblCashPrice
+							,CD.dblRatio = CASE 
+								WHEN @ysnApproval = 0
+									AND EXISTS (
+										SELECT *
+										FROM @tblCTAmendmentApproval
+										WHERE strDataIndex = 'dblRatio'
+											AND ysnApproval = 1
+										)
+									THEN CD.dblRatio
+								ELSE CD1.dblRatio
+								END
+							,CD.dblCashPrice = CASE 
+								WHEN @ysnApproval = 0
+									AND EXISTS (
+										SELECT *
+										FROM @tblCTAmendmentApproval
+										WHERE strDataIndex = 'dblCashPrice'
+											AND ysnApproval = 1
+										)
+									THEN CD.dblCashPrice
+								ELSE CD1.dblCashPrice
+								END
 							,dblTotalCost = CD1.dblTotalCost
-							,intCurrencyId = CD1.intCurrencyId
-							,intPriceItemUOMId = CD1.intPriceItemUOMId
+							,CD.intCurrencyId = CASE 
+								WHEN @ysnApproval = 0
+									AND EXISTS (
+										SELECT *
+										FROM @tblCTAmendmentApproval
+										WHERE strDataIndex = 'intCurrencyId'
+											AND ysnApproval = 1
+										)
+									THEN CD.intCurrencyId
+								ELSE CD1.intCurrencyId
+								END
+							,CD.intPriceItemUOMId = CASE 
+								WHEN @ysnApproval = 0
+									AND EXISTS (
+										SELECT *
+										FROM @tblCTAmendmentApproval
+										WHERE strDataIndex = 'intPriceItemUOMId'
+											AND ysnApproval = 1
+										)
+									THEN CD.intPriceItemUOMId
+								ELSE CD1.intPriceItemUOMId
+								END
 							,dblNoOfLots = CD1.dblNoOfLots
 							,dtmLCDate = CD1.dtmLCDate
 							,dtmLastPricingDate = CD1.dtmLastPricingDate
@@ -2626,8 +2853,28 @@ BEGIN TRY
 							,dtmPlannedAvailabilityDate = CD1.dtmPlannedAvailabilityDate
 							,dtmUpdatedAvailabilityDate = CD1.dtmUpdatedAvailabilityDate
 							,dtmM2MDate = CD1.dtmM2MDate
-							,intBookId = CD1.intBookId
-							,intSubBookId = CD1.intSubBookId
+							,CD.intBookId = CASE 
+								WHEN @ysnApproval = 0
+									AND EXISTS (
+										SELECT *
+										FROM @tblCTAmendmentApproval
+										WHERE strDataIndex = 'intBookId'
+											AND ysnApproval = 1
+										)
+									THEN CD.intBookId
+								ELSE CD1.intBookId
+								END
+							,CD.intSubBookId = CASE 
+								WHEN @ysnApproval = 0
+									AND EXISTS (
+										SELECT *
+										FROM @tblCTAmendmentApproval
+										WHERE strDataIndex = 'intSubBookId'
+											AND ysnApproval = 1
+										)
+									THEN CD.intSubBookId
+								ELSE CD1.intSubBookId
+								END
 							,intContainerTypeId = CD1.intContainerTypeId
 							,intNumberOfContainers = CD1.intNumberOfContainers
 							,intInvoiceCurrencyId = CD1.intInvoiceCurrencyId
@@ -3192,7 +3439,6 @@ BEGIN TRY
 							)
 				END
 
-
 				DELETE
 				FROM tblCTContractCondition
 				WHERE intContractHeaderId = @intNewContractHeaderId
@@ -3269,7 +3515,9 @@ BEGIN TRY
 				EXEC uspCTGetTableDataInXML 'tblCTContractCondition'
 					,@strHeaderCondition
 					,@strAckConditionXML OUTPUT
-x:
+
+				x:
+
 				INSERT INTO tblCTContractAcknowledgementStage (
 					intContractHeaderId
 					,strContractAckNumber

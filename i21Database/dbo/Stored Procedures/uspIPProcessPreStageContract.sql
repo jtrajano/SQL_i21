@@ -12,12 +12,14 @@ BEGIN TRY
 		,@strRowState NVARCHAR(50)
 		,@intCompanyLocationId INT
 		,@intToBookId INT
+		,@ysnApproval BIT
 	DECLARE @tblCTContractPreStage TABLE (
 		intContractPreStageId INT
 		,intContractHeaderId INT
 		,strFeedStatus NVARCHAR(50) COLLATE Latin1_General_CI_AS
 		,dtmFeedDate DATETIME
 		,strRowState NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		,ysnApproval BIT
 		)
 
 	INSERT INTO @tblCTContractPreStage (
@@ -26,12 +28,14 @@ BEGIN TRY
 		,strFeedStatus
 		,dtmFeedDate
 		,strRowState
+		,ysnApproval
 		)
 	SELECT intContractPreStageId
 		,intContractHeaderId
 		,strFeedStatus
 		,dtmFeedDate
 		,strRowState
+		,ysnApproval
 	FROM tblCTContractPreStage
 	WHERE strFeedStatus IS NULL
 
@@ -47,9 +51,11 @@ BEGIN TRY
 			,@strToTransactionType = NULL
 			,@intCompanyLocationId = NULL
 			,@intToBookId = NULL
+			,@ysnApproval=NULL
 
 		SELECT @intContractHeaderId = intContractHeaderId
 			,@strRowState = strRowState
+			,@ysnApproval=ysnApproval
 		FROM @tblCTContractPreStage
 		WHERE intContractPreStageId = @intContractPreStageId
 
@@ -74,6 +80,7 @@ BEGIN TRY
 			,@strRowState
 			,0
 			,@intToBookId
+			,@ysnApproval
 
 		UPDATE tblCTContractPreStage
 		SET strFeedStatus = 'Processed'
