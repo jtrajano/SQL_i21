@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspCTContractPopulateStgXML] @ContractHeaderId INT
+﻿Create PROCEDURE [dbo].[uspCTContractPopulateStgXML] @ContractHeaderId INT
 	,@intToEntityId INT
 	,@intCompanyLocationId INT
 	,@strToTransactionType NVARCHAR(100)
@@ -6,6 +6,7 @@
 	,@strRowState NVARCHAR(100)
 	,@ysnReplication BIT = 1
 	,@intToBookId INT = NULL
+	,@ysnApproval BIT=1
 AS
 BEGIN TRY
 	SET NOCOUNT ON
@@ -32,6 +33,7 @@ BEGIN TRY
 		,@strExternalEntity NVARCHAR(100)
 		,@intEntityId INT
 		,@strAdditionalInfo NVARCHAR(MAX)
+		,@strAmendmentApprovalXML NVARCHAR(MAX)
 
 	SET @intContractStageId = NULL
 	SET @strContractNumber = NULL
@@ -79,6 +81,13 @@ BEGIN TRY
 		,NULL
 		,NULL
 
+		SELECT @strAdditionalInfo = '<ysnApproval>' + Ltrim(@ysnApproval) + '</ysnApproval>'
+
+		SELECT @strAdditionalInfo = @strAdditionalInfo + '</vyuCTContractHeaderView></vyuCTContractHeaderViews>'
+
+	SELECT @strHeaderXML = Replace(@strHeaderXML, '</vyuCTContractHeaderView></vyuCTContractHeaderViews>', @strAdditionalInfo)
+	
+
 	SELECT @intPContractDetailId = intPContractDetailId
 	FROM tblLGAllocationDetail
 	WHERE intSContractDetailId IN (
@@ -102,6 +111,7 @@ BEGIN TRY
 
 	IF @strExternalContractNumber IS NOT NULL
 	BEGIN
+		SELECT @strAdditionalInfo = NULL
 		SELECT @strAdditionalInfo = '<strExternalContractNumber>' + @strExternalContractNumber + '</strExternalContractNumber>'
 
 		SELECT @strAdditionalInfo = @strAdditionalInfo + '<strExternalEntity>' + @strExternalEntity + '</strExternalEntity>'
@@ -220,6 +230,18 @@ BEGIN TRY
 		,NULL
 		,NULL
 
+	---------------------------------------------Amendment Approval------------------------------------------
+	SELECT @strAmendmentApprovalXML = NULL
+		,@strObjectName = NULL
+
+	SELECT @strObjectName = 'vyuIPAmendmentApproval'
+
+	EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
+		,NULL
+		,@strAmendmentApprovalXML OUTPUT
+		,NULL
+		,NULL
+
 	INSERT INTO tblCTContractStage (
 		intContractHeaderId
 		,strContractNumber
@@ -236,6 +258,7 @@ BEGIN TRY
 		,intMultiCompanyId
 		,intToBookId
 		,strApproverXML
+		,strAmendmentApprovalXML
 		)
 	SELECT intContractHeaderId = @ContractHeaderId
 		,strContractNumber = @strContractNumber
@@ -252,6 +275,7 @@ BEGIN TRY
 		,intMultiCompanyId = @intToCompanyId
 		,intToBookId = @intToBookId
 		,strApproverXML = @strApproverXML
+		,strAmendmentApprovalXML=@strAmendmentApprovalXML
 END TRY
 
 BEGIN CATCH

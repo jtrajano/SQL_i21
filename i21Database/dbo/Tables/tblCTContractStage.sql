@@ -19,5 +19,6 @@
 	intEntityId				INT,
 	intCompanyLocationId	INT,
 	strTransactionType		NVARCHAR(100) COLLATE Latin1_General_CI_AS, 
-    intToBookId INT NULL
+    intToBookId INT NULL,
+	strAmendmentApprovalXML NVARCHAR(MAX)COLLATE Latin1_General_CI_AS
 )

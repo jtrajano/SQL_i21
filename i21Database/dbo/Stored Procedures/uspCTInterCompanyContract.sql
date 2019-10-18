@@ -114,13 +114,15 @@ BEGIN TRY
 				INSERT INTO dbo.tblCTContractPreStage (
 					intContractHeaderId
 					,strRowState
+					,ysnApproval
 					)
 				SELECT @ContractHeaderId
 					,'Added'
+					,0
 			END
 		END
 
-		IF @strUpdate = 'Update'
+		IF @strUpdate in ('Update','Update on Approval')
 		BEGIN
 			IF EXISTS (
 					SELECT 1
@@ -134,13 +136,16 @@ BEGIN TRY
 				WHERE strFeedStatus IS NULL
 					AND intContractHeaderId = @ContractHeaderId
 					AND strRowState = 'Modified'
+					AND ysnApproval=0
 
 				INSERT INTO dbo.tblCTContractPreStage (
 					intContractHeaderId
 					,strRowState
+					,ysnApproval
 					)
 				SELECT @ContractHeaderId
 					,'Modified'
+					,0
 			END
 		END
 
@@ -153,9 +158,11 @@ BEGIN TRY
 			INSERT INTO dbo.tblCTContractPreStage (
 				intContractHeaderId
 				,strRowState
+				,ysnApproval
 				)
 			SELECT @ContractHeaderId
 				,'Delete'
+				,0
 		END
 	END
 END TRY
