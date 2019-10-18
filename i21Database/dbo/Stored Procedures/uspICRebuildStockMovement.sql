@@ -178,6 +178,7 @@ BEGIN
 						AND ISNULL(t.intLotId, 0) = ISNULL(groupedQty.intLotId, 0) 
 						AND ISNULL(t.intSubLocationId, 0) = ISNULL(groupedQty.intSubLocationId, 0) 
 						AND ISNULL(t.intStorageLocationId, 0) = ISNULL(groupedQty.intStorageLocationId, 0) 
+						AND t.dblQty <> 0 
 				) t
 		UNION ALL 
 		SELECT	
@@ -277,6 +278,7 @@ BEGIN
 						AND ISNULL(t.intLotId, 0) = ISNULL(groupedQty.intLotId, 0) 
 						AND ISNULL(t.intSubLocationId, 0) = ISNULL(groupedQty.intSubLocationId, 0) 
 						AND ISNULL(t.intStorageLocationId, 0) = ISNULL(groupedQty.intStorageLocationId, 0) 
+						AND t.dblQty <> 0 
 				) t
 		) x
 	ORDER BY 
@@ -428,6 +430,7 @@ BEGIN
 						AND ISNULL(t.intLotId, 0) = ISNULL(groupedQty.intLotId, 0) 
 						AND ISNULL(t.intSubLocationId, 0) = ISNULL(groupedQty.intSubLocationId, 0) 
 						AND ISNULL(t.intStorageLocationId, 0) = ISNULL(groupedQty.intStorageLocationId, 0) 
+						AND t.dblQty <> 0 
 				) t
 		UNION ALL 
 		SELECT	
@@ -527,6 +530,7 @@ BEGIN
 						AND ISNULL(t.intLotId, 0) = ISNULL(groupedQty.intLotId, 0) 
 						AND ISNULL(t.intSubLocationId, 0) = ISNULL(groupedQty.intSubLocationId, 0) 
 						AND ISNULL(t.intStorageLocationId, 0) = ISNULL(groupedQty.intStorageLocationId, 0) 
+						AND t.dblQty <> 0 
 				) t
 		) x
 	ORDER BY 
