@@ -386,6 +386,88 @@ IF EXISTS(SELECT TOP 1 1 FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tb
 ----------------------------------------------------------------------------------------------------------------------------------
 
 
+
+----------------------------------------------------------------------------------------------------------------------------------
+-- [START] - Change datatype of tblSTTranslogRebates
+----------------------------------------------------------------------------------------------------------------------------------
+IF EXISTS(SELECT TOP 1 1 FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSTTranslogRebates') 
+	BEGIN
+		IF EXISTS(SELECT TOP 1 1 FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSTTranslogRebates' AND COLUMN_NAME = 'intCashierEmpNum')
+			BEGIN
+		
+				PRINT('Alter tblSTTranslogRebates.intCashierEmpNum datatype to NVARCHAR(200)')
+				EXEC('
+						ALTER TABLE [tblSTTranslogRebates] ALTER COLUMN [intCashierEmpNum] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
+					')
+
+				PRINT('Rename tblSTTranslogRebates.intCashierEmpNum	to tblSTTranslogRebates.strCashierEmpNum')
+				EXEC('
+						EXEC sp_rename ''tblSTTranslogRebates.intCashierEmpNum'' , ''strCashierEmpNum'', ''COLUMN''
+					')
+			END
+
+		IF EXISTS(SELECT TOP 1 1 FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSTTranslogRebates' AND COLUMN_NAME = 'intOriginalCashierEmpNum')
+			BEGIN
+		
+				PRINT('Alter tblSTTranslogRebates.intOriginalCashierEmpNum datatype to NVARCHAR(200)')
+				EXEC('
+						ALTER TABLE [tblSTTranslogRebates] ALTER COLUMN [intOriginalCashierEmpNum] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
+					')
+
+				PRINT('Rename tblSTTranslogRebates.intOriginalCashierEmpNum	to tblSTTranslogRebates.strOriginalCashierEmpNum')
+				EXEC('
+						EXEC sp_rename ''tblSTTranslogRebates.intOriginalCashierEmpNum'' , ''strOriginalCashierEmpNum'', ''COLUMN''
+					')
+			END
+
+		IF EXISTS(SELECT TOP 1 1 FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSTTranslogRebates' AND COLUMN_NAME = 'strTrlCatNumber')
+			BEGIN
+		
+				PRINT('Alter tblSTTranslogRebates.strTrlCatNumber datatype to INT NULL')
+				EXEC('
+						ALTER TABLE [tblSTTranslogRebates] ALTER COLUMN [strTrlCatNumber] INT NULL
+					')
+
+				PRINT('Rename tblSTTranslogRebates.strTrlCatNumber	to tblSTTranslogRebates.intTrlCatNumber')
+				EXEC('
+						EXEC sp_rename ''tblSTTranslogRebates.strTrlCatNumber'' , ''intTrlCatNumber'', ''COLUMN''
+					')
+			END
+
+		IF EXISTS(SELECT TOP 1 1 FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSTTranslogRebates' AND COLUMN_NAME = 'strTrpCardInfoTrpcBatchNr')
+			BEGIN
+		
+				PRINT('Alter tblSTTranslogRebates.strTrpCardInfoTrpcBatchNr datatype to INT NULL')
+				EXEC('
+						ALTER TABLE [tblSTTranslogRebates] ALTER COLUMN [strTrpCardInfoTrpcBatchNr] INT NULL
+					')
+
+				PRINT('Rename tblSTTranslogRebates.strTrpCardInfoTrpcBatchNr to tblSTTranslogRebates.intTrpCardInfoTrpcBatchNr')
+				EXEC('
+						EXEC sp_rename ''tblSTTranslogRebates.strTrpCardInfoTrpcBatchNr'' , ''intTrpCardInfoTrpcBatchNr'', ''COLUMN''
+					')
+			END
+
+		IF EXISTS(SELECT TOP 1 1 FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSTTranslogRebates' AND COLUMN_NAME = 'strTrpCardInfoTrpcSeqNr')
+			BEGIN
+		
+				PRINT('Alter tblSTTranslogRebates.strTrpCardInfoTrpcSeqNr datatype to INT NULL')
+				EXEC('
+						ALTER TABLE [tblSTTranslogRebates] ALTER COLUMN [strTrpCardInfoTrpcSeqNr] INT NULL
+					')
+
+				PRINT('Rename tblSTTranslogRebates.strTrpCardInfoTrpcSeqNr to tblSTTranslogRebates.intTrpCardInfoTrpcSeqNr')
+				EXEC('
+						EXEC sp_rename ''tblSTTranslogRebates.strTrpCardInfoTrpcSeqNr'' , ''intTrpCardInfoTrpcSeqNr'', ''COLUMN''
+					')
+			END
+	END
+----------------------------------------------------------------------------------------------------------------------------------
+-- [END] - Change datatype of tblSTTranslogRebates
+----------------------------------------------------------------------------------------------------------------------------------
+
+
+
 ----------------------------------------------------------------------------------------------------------------------------------
 -- Start: Rename tblSTRegisterSetup.strRegisterName and tblSTRegisterSetup.strXmlGateWayVersion
 ----------------------------------------------------------------------------------------------------------------------------------
