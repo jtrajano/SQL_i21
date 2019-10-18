@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspICConvertReceiptToVoucher]
+﻿ALTER PROCEDURE [dbo].[uspICConvertReceiptToVoucher]
 	@intReceiptId INT,
 	@intEntityUserSecurityId INT,
 	@intBillId INT OUTPUT,
@@ -306,7 +306,7 @@ BEGIN
 					vyuICGetInventoryReceiptVoucher
 				WHERE 
 					intInventoryReceiptId = @intReceiptId
-					AND dblQtyToVoucher = dblQtyToReceive
+					AND dblQtyToVoucher = dblQtyVouchered
 			)
 			BEGIN
 				IF @billTypeToUse = @type_Voucher
@@ -322,19 +322,7 @@ BEGIN
 					SET @intReturnValue = -80110;
 				END
 			END
-			ELSE
-			BEGIN
-				IF @billTypeToUse = @type_Voucher
-				BEGIN
-					RAISERROR('There are no items to voucher.', 11, 1)
-					RETURN -11
-				END
-				ELSE
-				BEGIN
-					RAISERROR('You cannot convert this to debit memo.', 11, 1)
-					RETURN -11
-				END
-			END
+
 			GOTO Post_Exit;
 		END
 	END 
