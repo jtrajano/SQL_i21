@@ -7923,6 +7923,7 @@
     <None Include="Scripts\Post-Deployment\AR\DefaultData\37_UpdatePOSNewFields.sql" />
     <Build Include="dbo\Stored Procedures\uspSCUpdateDeliverySheetDate.sql" />
     <Build Include="dbo\Views\vyuARInvoiceSubFormulaReport.sql" />
+    <Build Include="dbo\Views\vyuCTAvailableQuantityForVoucher.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
