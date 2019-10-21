@@ -4,7 +4,9 @@ CREATE FUNCTION [dbo].[fnCMGetReconGridResult]
 	@dtmStatementDate DATETIME,
 	@ysnPayment BIT,
 	@ysnCheckVoid BIT,
-	@ysnClr BIT
+	@ysnClr BIT,
+	@ysnClrOrig BIT = NULL,
+	@ysnCheckVoidOrig BIT = NULL
 )
 RETURNS  @TBL TABLE
 (
@@ -167,7 +169,9 @@ BEGIN
 	AND isnull(dtmDateReconciled, @dtmStatementDate) >= @dtmStatementDate
 	AND ysnCheckVoid = @ysnCheckVoid
 	AND ysnClr = @ysnClr
-
+	AND ysnClrOrig = ISNULL(@ysnClrOrig,ysnClrOrig)
+	AND ysnCheckVoidOrig = ISNULL(@ysnCheckVoidOrig,ysnCheckVoidOrig)
+	
 	RETURN
 
 END
