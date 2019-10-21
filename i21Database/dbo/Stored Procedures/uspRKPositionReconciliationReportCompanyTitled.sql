@@ -16,6 +16,7 @@ BEGIN
 	SELECT Item Collate Latin1_General_CI_AS FROM [dbo].[fnSplitString](@strCommodityId, ',')
 
 	DECLARE @ysnIncludeInTransitInCompanyTitled BIT
+			,@dblInTransitBegBalance NUMERIC(18,6) = 0
 	SELECT TOP 1 
 		@ysnIncludeInTransitInCompanyTitled = ysnIncludeInTransitInCompanyTitled
 	FROM tblRKCompanyPreference
@@ -30,6 +31,7 @@ BEGIN
 		,dblPaidBalance  NUMERIC(18,6)
 		,strTransactionId NVARCHAR(50)
 		,intTransactionId INT
+		,strTransactionType NVARCHAR(50)
 		,strDistribution NVARCHAR(10)
 		,dblCompanyTitled NUMERIC(18,6)
 		,intCommodityId INT
@@ -67,6 +69,7 @@ BEGIN
 			,dblPaidBalance  
 			,strTransactionId
 			,intTransactionId 
+			,strTransactionType
 			,strDistribution
 			,dblCompanyTitled
 			,intCommodityId
@@ -101,11 +104,16 @@ BEGIN
 			,strTransactionId
 			,intTransactionId
 			,''
-			,0
+			,dblInTransitQty
 			,@intCommodityId
 			,1
 		FROM dbo.fnICOutstandingInTransitAsOf(NULL, @intCommodityId, @dtmToTransactionDate) InTran
 		WHERE @ysnIncludeInTransitInCompanyTitled = 0
+
+		SELECT 
+			@dblInTransitBegBalance = @dblInTransitBegBalance + SUM(dblInTransitQty)
+		FROM dbo.fnICOutstandingInTransitAsOf(NULL, 1, DATEADD(day, -1, convert(date, @dtmFromTransactionDate))) InTran
+		WHERE @ysnIncludeInTransitInCompanyTitled = 1
 
 	
 		UPDATE @CompanyTitle SET strCommodityCode = @strCommodityCode WHERE intCommodityId = @intCommodityId
@@ -113,15 +121,20 @@ BEGIN
 		DELETE FROM #tempCommodity WHERE intCommodityId = @intCommodityId
 	END 
 
+
+	
+		
+
 	SELECT 
 		intRowNum = CONVERT(INT, ROW_NUMBER() OVER (ORDER BY dtmDate ASC))
 		,dtmTransactionDate = dtmDate
 		,dblIn = CASE WHEN strDistribution IN('ADJ','IC','CM','DP', 'IT','IS', 'CLT', 'PRDC', 'CNSM','LG') AND  dblPaidBalance > 0 THEN dblPaidBalance ELSE dblUnpaidIncrease END
-		,dblOut = CASE WHEN dblPaidBalance < 0 THEN ABS(dblPaidBalance) ELSE dblUnpaidDecrease END
+		,dblOut = CASE WHEN strTransactionId LIKE 'BL-%' THEN 0 WHEN dblPaidBalance < 0 THEN ABS(dblPaidBalance) ELSE dblUnpaidDecrease END
 		,strTransactionId
 		,intTransactionId
+		,strTransactionType
 		,strCommodityCode
-		,ysnInTransit
+		,ysnInTransit = ISNULL(ysnInTransit,0)
 	INTO #tmpCompanyTitled
 	FROM @CompanyTitle
 	WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110) BETWEEN CONVERT(DATETIME, @dtmFromTransactionDate) AND CONVERT(DATETIME, @dtmToTransactionDate)
@@ -147,7 +160,7 @@ BEGIN
 			,@dblCTBalanceForward  NUMERIC(18,6)
 			,@dblCompTitledBegBalForSummary NUMERIC(18,6)
 
-	SELECT @dblCTBalanceForward =  SUM(ISNULL(dblCompanyTitled,0))
+	SELECT @dblCTBalanceForward =  SUM(ISNULL(dblCompanyTitled,0)) + ISNULL(@dblInTransitBegBalance,0)
 	FROM @CompanyTitle
 	WHERE dtmDate IS NULL
 
@@ -221,6 +234,7 @@ BEGIN
 		,dblCompTitledEndBalance
 		,strTransactionId
 		,intTransactionId
+		,strTransactionType
 		,strCommodityCode
 		,dblCompTitledBegBalForSummary
 		,dblCompTitledEndBalForSummary
@@ -244,10 +258,10 @@ BEGIN
 			,dblCompTitledEndBalance = @dblCTBalanceForward
 			,strTransactionId = 'Balance Forward'
 			,intTransactionId = NULL
+			,strTransactionType = ''
 			,strCommodityCode = @strCommodities
 			,dblCompTitledBegBalForSummary = @dblCTBalanceForward
 			,dblCompTitledEndBalForSummary = @dblCTBalanceForward
-			,ysnInTransit = 0
 	END
 
 	ExitRoutine:
