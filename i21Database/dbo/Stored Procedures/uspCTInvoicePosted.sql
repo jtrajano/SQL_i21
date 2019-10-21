@@ -65,6 +65,7 @@ BEGIN TRY
 		, [intOrderUOMId]
 		, [dblQty]
 		, [dblQtyOrdered]
+		, [ysnDestWtGrd]
 		, [intTicketId]
 		, [ysnFromReturn]
 	)
@@ -75,6 +76,7 @@ BEGIN TRY
 		, [intOrderUOMId]			= ID.[intOrderUOMId]
 		, [dblQty]					= I.[dblQtyShipped]
 		, [dblQtyOrdered]			= CASE WHEN ID.intSalesOrderDetailId IS NOT NULL OR ID.intTicketId IS NOT NULL THEN ID.[dblQtyOrdered] ELSE 0 END
+		, [ysnDestWtGrd]			= CAST(0 AS BIT)
 		, [intTicketId]				= NULL
 		, [ysnFromReturn]			= CASE WHEN ISNULL(RI.intInvoiceId, 0) = 0 THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END
 	FROM @ItemsFromInvoice I
@@ -88,6 +90,12 @@ BEGIN TRY
 		AND INV.strInvoiceOriginId = I.strInvoiceNumber
 		AND INV.intOriginalInvoiceId = I.intInvoiceId
 	) RI
+	WHERE I.intContractDetailId IS NOT NULL
+	AND (
+		(I.strTransactionType <> 'Credit Memo' AND I.[intInventoryShipmentItemId] IS NULL AND I.[intShipmentPurchaseSalesContractId] IS NULL AND I.[intLoadDetailId] IS  NULL)
+		OR
+		(I.strTransactionType = 'Credit Memo' AND (I.[intInventoryShipmentItemId] IS NOT NULL OR I.[intShipmentPurchaseSalesContractId] IS NOT NULL OR I.[intLoadDetailId] IS NOT NULL))
+	)
 
 	IF NOT EXISTS(SELECT * FROM @tblToProcess)
 	BEGIN
