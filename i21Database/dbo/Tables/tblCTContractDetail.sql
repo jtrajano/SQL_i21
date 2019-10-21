@@ -146,6 +146,7 @@ CREATE TABLE [dbo].[tblCTContractDetail]
     ysnFinalPNL BIT NOT NULL DEFAULT 0, 
     dtmProvisionalPNL DATETIME NULL,
     dtmFinalPNL DATETIME NULL,
+	intPricingStatus INT,
 
     CONSTRAINT [PK_tblCTContractDetail_intContractDetailId] PRIMARY KEY CLUSTERED ([intContractDetailId] ASC),
 	CONSTRAINT [UQ_tblCTContractDetail_intContractHeaderId_intContractSeq] UNIQUE ([intContractHeaderId],[intContractSeq]), 
