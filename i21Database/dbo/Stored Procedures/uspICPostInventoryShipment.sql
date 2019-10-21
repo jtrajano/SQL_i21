@@ -1085,8 +1085,8 @@ BEGIN
 			,intItemLocationId		= il.intItemLocationId
 			,intItemUOMId			= iu.intItemUOMId
 			,intLotId				= NULL 
-			,intSubLocationId		= NULL 
-			,intStorageLocationId	= NULL 
+			,intSubLocationId		= si.intSubLocationId 
+			,intStorageLocationId	= si.intStorageLocationId
 			,dblQty					= -ISNULL(si.dblQuantity, 0) 
 			,intTransactionId		= s.intInventoryShipmentId
 			,strTransactionId		= s.strShipmentNumber

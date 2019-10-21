@@ -8071,6 +8071,7 @@
     <Build Include="dbo\Stored Procedures\uspCMUpdateAPOverflowSettings.sql" />
     <Build Include="dbo\Stored Procedures\uspCFValidateInvoiceDataSetup.sql" />
     <Build Include="dbo\User Defined Types\StagingTransactionLog.sql" />
+    <Build Include="dbo\Views\vyuIPAmendmentApproval.sql" /> 
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
