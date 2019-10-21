@@ -34,6 +34,7 @@ BEGIN
 		,dblCompanyTitled NUMERIC(18,6)
 		,intCommodityId INT
 		,strCommodityCode NVARCHAR(100)
+		,ysnInTransit BIT DEFAULT (0)
 	)
 	
 	
@@ -89,6 +90,7 @@ BEGIN
 			,strDistribution
 			,dblCompanyTitled
 			,intCommodityId
+			,ysnInTransit
 		)
 		SELECT 
 			dtmDate
@@ -101,6 +103,7 @@ BEGIN
 			,''
 			,0
 			,@intCommodityId
+			,1
 		FROM dbo.fnICOutstandingInTransitAsOf(NULL, @intCommodityId, @dtmToTransactionDate) InTran
 		WHERE @ysnIncludeInTransitInCompanyTitled = 0
 
@@ -118,6 +121,7 @@ BEGIN
 		,strTransactionId
 		,intTransactionId
 		,strCommodityCode
+		,ysnInTransit
 	INTO #tmpCompanyTitled
 	FROM @CompanyTitle
 	WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110) BETWEEN CONVERT(DATETIME, @dtmFromTransactionDate) AND CONVERT(DATETIME, @dtmToTransactionDate)
@@ -220,6 +224,7 @@ BEGIN
 		,strCommodityCode
 		,dblCompTitledBegBalForSummary
 		,dblCompTitledEndBalForSummary
+		,ysnInTransit
 	FROM #tmpCompanyTitled CT
 	FULL JOIN @tblRunningBalance RB on RB.intRowNum = CT.intRowNum
 	ORDER BY CT.dtmTransactionDate
@@ -242,6 +247,7 @@ BEGIN
 			,strCommodityCode = @strCommodities
 			,dblCompTitledBegBalForSummary = @dblCTBalanceForward
 			,dblCompTitledEndBalForSummary = @dblCTBalanceForward
+			,ysnInTransit = 0
 	END
 
 	ExitRoutine:
