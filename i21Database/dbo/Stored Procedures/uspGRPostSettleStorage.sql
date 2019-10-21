@@ -1290,7 +1290,7 @@ BEGIN TRY
 					-- 							END
 					,[dblQtyReceived]			= 
 												CASE 
-													WHEN a.intItemType = 1 AND ST.ysnDPOwnedType = 1 THEN RI.dblOpenReceive
+													WHEN a.intItemType = 1 AND ST.ysnDPOwnedType = 1 AND @origdblSpotUnits = 0 THEN RI.dblOpenReceive
 													ELSE
 														CASE 
 															WHEN @origdblSpotUnits > 0 THEN ROUND(dbo.fnCalculateQtyBetweenUOM(b.intItemUOMId,@intCashPriceUOMId,a.dblUnits),6)
@@ -1317,7 +1317,7 @@ BEGIN TRY
 					,[dblCostUnitQty]			= ISNULL(a.dblCostUnitQty,1)
 					,[dblUnitQty]				= 1
 					,[dblNetWeight]				= CASE 
-													WHEN a.intItemType = 1 AND ST.ysnDPOwnedType = 1 THEN RI.dblOpenReceive
+													WHEN a.intItemType = 1 AND ST.ysnDPOwnedType = 1 AND @origdblSpotUnits = 0 THEN RI.dblOpenReceive
 													ELSE
 														CASE 
 															WHEN @origdblSpotUnits > 0 THEN ROUND(dbo.fnCalculateQtyBetweenUOM(b.intItemUOMId,@intCashPriceUOMId,a.dblUnits),6)
