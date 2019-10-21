@@ -4138,7 +4138,6 @@
     <Build Include="dbo\Stored Procedures\uspMFCreateStagingOrderDetail.sql" />
     <Build Include="dbo\User Defined Types\OrderDetailInformation.sql" />
     <Build Include="dbo\User Defined Types\OrderHeaderInformation.sql" />
-    <Build Include="dbo\Functions\fnICIsShrinkableUOM.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateItemComponent.sql" />
     <Build Include="dbo\Stored Procedures\uspSOUpdateItemComponent.sql" />
     <Build Include="dbo\Tables\tblARInvoiceDetailComponent.sql" />
@@ -8086,6 +8085,7 @@
     <Build Include="dbo\Functions\fnCTGetAvailablePriceQuantity.sql" />
     <Build Include="dbo\Stored Procedures\uspSCGetContractsAndAllocate.sql" />
     <Build Include="dbo\Views\vyuCTShipmentStatus.sql" />
+    <Build Include="dbo\Functions\fnICIsShrinkableUOM.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

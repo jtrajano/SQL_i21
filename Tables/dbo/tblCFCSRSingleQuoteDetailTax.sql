@@ -1,0 +1,25 @@
+﻿CREATE TABLE [dbo].[tblCFCSRSingleQuoteDetailTax] (
+    [intCSRSingleQuoteDetailTaxId] INT             IDENTITY (1, 1) NOT NULL,
+    [intCSRSingleQuoteId]          INT             NULL,
+    [intTaxGroupId]                INT             NULL,
+    [intTaxCodeId]                 INT             NULL,
+    [intTaxClassId]                INT             NULL,
+    [strTaxableByOtherTaxes]       NVARCHAR (500) COLLATE Latin1_General_CI_AS NULL,
+    [strCalculationMethod]         NVARCHAR (500) COLLATE Latin1_General_CI_AS NULL,
+    [dblRate]                      NUMERIC (18, 6) NULL,
+    [dblExemptionPercent]          NUMERIC (18, 6) NULL,
+    [dblTax]                       NUMERIC (18, 6) NULL,
+    [dblAdjustedTax]               NUMERIC (18, 6) NULL,
+    [intSalesTaxAccountId]         INT             NULL,
+    [ysnTaxAdjusted]               BIT             NULL,
+    [ysnSeparateOnInvoice]         BIT             NULL,
+    [ysnCheckoffTax]               BIT             NULL,
+    [strTaxCode]                   NVARCHAR (500) COLLATE Latin1_General_CI_AS  NULL,
+    [ysnTaxExempt]                 BIT             NULL,
+    [strTaxGroup]                  NVARCHAR (500) COLLATE Latin1_General_CI_AS NULL,
+    [strNotes]                     NVARCHAR (500) COLLATE Latin1_General_CI_AS NULL,
+    [intConcurrencyId]             INT             CONSTRAINT [DF_tblCFCSRSingleQuoteDetailTax_intConcurrenyId] DEFAULT ((1)) NULL,
+    CONSTRAINT [PK_tblCFCSRSingleQuoteDetailTax] PRIMARY KEY CLUSTERED ([intCSRSingleQuoteDetailTaxId] ASC),
+    CONSTRAINT [FK_tblCFCSRSingleQuoteDetailTax_tblCFCSRSingleQuote] FOREIGN KEY ([intCSRSingleQuoteId]) REFERENCES [dbo].[tblCFCSRSingleQuote] ([intCSRSingleQuoteId]) ON DELETE CASCADE
+);
+

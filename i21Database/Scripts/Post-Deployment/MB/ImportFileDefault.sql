@@ -1,5 +1,5 @@
 ﻿-- DCC File Field Maaping
-
+	PRINT GETDATE()
 DECLARE @LayoutTitle NVARCHAR(100)
 	, @FileHeaderId INT = NULL
 	, @DetailId INT = NULL
@@ -69,6 +69,8 @@ BEGIN
 
 	INSERT INTO tblSMImportFileColumnDetail (intImportFileHeaderId, intImportFileRecordMarkerId, intLevel, strTable, strColumnName, ysnActive, intConcurrencyId)
 	VALUES (@FileHeaderId, @DetailId, 5, 'tblMBImportMeterReadingDetail', 'dblCurrentAmount', 1, 1)
+
+
 
 END
 

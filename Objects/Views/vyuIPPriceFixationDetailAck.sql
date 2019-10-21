@@ -1,0 +1,6 @@
+﻿CREATE VIEW vyuIPPriceFixationDetailAck
+AS
+SELECT intPriceFixationDetailId
+	,intPriceFixationDetailRefId
+	,intPriceFixationId
+FROM tblCTPriceFixationDetail

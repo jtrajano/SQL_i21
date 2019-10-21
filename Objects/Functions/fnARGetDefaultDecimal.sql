@@ -1,0 +1,5 @@
+﻿CREATE FUNCTION [dbo].[fnARGetDefaultDecimal]() RETURNS INT
+AS
+BEGIN
+	RETURN 2
+END

@@ -1,0 +1,5 @@
+﻿CREATE PROCEDURE [dbo].[uspNRGenerateEFTSchedule]
+AS
+BEGIN
+	SELECT 1
+END

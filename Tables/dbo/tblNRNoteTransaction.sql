@@ -1,0 +1,32 @@
+﻿CREATE TABLE [dbo].[tblNRNoteTransaction]
+(
+	[intNoteTransId]			INT				IDENTITY(1,1) NOT NULL,
+    [intNoteId]					INT				NOT NULL,     
+    [intNoteTransTypeId]		INT				NOT NULL, 
+    [intTransDays]				INT				NOT NULL, 
+	[intAdjTypeId]				INT				NULL, 
+    [intEntityId]				INT				NULL,      
+	[dtmNoteTranDate]			DATETIME		NOT NULL, 
+	[dtmInvoiceDate]			DATETIME		NULL, 
+	[dtmAsOfDate]				DATETIME		NULL, 
+    [dblTransAmount]			NUMERIC(18, 6)	NULL DEFAULT 0, 
+    [dblPrincipal]				NUMERIC(18, 6)	NULL DEFAULT 0, 
+    [dblInterestToDate]			NUMERIC(18, 6)	NULL DEFAULT 0, 
+    [dblUnpaidInterest]			NUMERIC(18, 6)	NULL DEFAULT 0, 
+    [dblPayOffBalance]			NUMERIC(18, 6)	NULL DEFAULT 0, 
+    [dblAmtAppToPrincipal]		NUMERIC(18, 6)	NULL DEFAULT 0, 
+    [dblAmtAppToInterest]		NUMERIC(18, 6)	NULL DEFAULT 0, 
+	[strInvoiceNo]				NVARCHAR(50)	COLLATE Latin1_General_CI_AS NULL, 
+	[strInvoiceLocation]		NVARCHAR(50)	COLLATE Latin1_General_CI_AS NULL, 
+    [strLocation]				NVARCHAR(50)	COLLATE Latin1_General_CI_AS NULL, 
+    [strRefNo]					NVARCHAR(50)	COLLATE Latin1_General_CI_AS NULL, 
+    [strBatchNumber]			NVARCHAR(50)	COLLATE Latin1_General_CI_AS NULL, 
+    [strPayType]				NVARCHAR(50)	COLLATE Latin1_General_CI_AS NULL,     
+    [strCheckNumber]			NVARCHAR(50)	COLLATE Latin1_General_CI_AS NULL, 
+    [strTransComments]			NVARCHAR(255)	COLLATE Latin1_General_CI_AS NULL, 
+    [strAdjOnPrincOrInt]		NVARCHAR(50)	COLLATE Latin1_General_CI_AS NULL, 
+    [strAdjAccountAffected]		NVARCHAR(100)	COLLATE Latin1_General_CI_AS NULL, 
+    [intConcurrencyId]			INT				NOT NULL DEFAULT ((0))
+    CONSTRAINT [PK_tblNRNoteTransaction_intNoteTransId] PRIMARY KEY ([intNoteTransId]), 
+   	CONSTRAINT [FK_tblNRNoteTransaction_tblNRNote_intNoteId] FOREIGN KEY ([intNoteId]) REFERENCES [tblNRNote]([intNoteId]) 
+)

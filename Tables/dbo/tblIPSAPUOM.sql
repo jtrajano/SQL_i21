@@ -1,0 +1,7 @@
+﻿CREATE TABLE [dbo].[tblIPSAPUOM]
+(
+	[intUOMId] INT identity(1, 1),
+	[strSAPUOM] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	[stri21UOM] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	CONSTRAINT [PK_tblIPSAPUOM_intUOMId] PRIMARY KEY ([intUOMId]) 
+)
