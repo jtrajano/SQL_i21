@@ -21,6 +21,13 @@ DECLARE @EntriesForInvoice AS InvoiceIntegrationStagingTable
 		,@CreatedInvoices AS NVARCHAR(MAX)
 		,@UpdatedInvoices AS NVARCHAR(MAX);
 
+
+DECLARE @successfulCount INT
+DECLARE @invalidCount INT
+DECLARE @success BIT
+DECLARE @batchIdUsed NVARCHAR(40)
+DECLARE @recapId NVARCHAR(250)
+
 BEGIN TRY
 	IF @ysnPost = 1
 		BEGIN
@@ -109,12 +116,12 @@ BEGIN TRY
 				,[intEntityCustomerId] = @intEntityId
 				,[intCompanyLocationId] = SC.intProcessingLocationId
 				,[intCurrencyId] = SC.intCurrencyId
-				,[intTermId] = (select top 1 intFreightTermId from tblEMEntityLocation where intEntityLocationId = AR.intShipToId)
+				,[intTermId] = NULL 
 				,[dtmDate] = GETDATE()
 				,[dtmDueDate] = NULL
 				,[dtmShipDate] = NULL
 				,[intEntitySalespersonId] = NULL
-				,[intFreightTermId] = NULL
+				,[intFreightTermId] = (select top 1 intFreightTermId from tblEMEntityLocation where intEntityLocationId = AR.intShipToId)
 				,[intShipViaId] = NULL
 				,[intPaymentMethodId] = NULL
 				,[strInvoiceOriginId] = NULL --''
@@ -178,6 +185,7 @@ BEGIN TRY
 				LEFT JOIN tblICItem ICFee ON ICFee.intItemId = SCS.intDefaultFeeItemId		
 				WHERE SC.intTicketId = @intTicketId
 
+
 			EXEC [dbo].[uspARProcessInvoices] 
 				@InvoiceEntries = @EntriesForInvoice
 				,@UserId = @intUserId
@@ -192,6 +200,31 @@ BEGIN TRY
 			SELECT @intInvoiceId = intInvoiceId FROM tblARInvoiceDetail WHERE intTicketId = @intTicketId;
 			IF ISNULL(@intInvoiceId, 0) > 0
 			BEGIN
+				IF(SELECT TOP 1 ysnPosted FROM tblARInvoice WHERE intInvoiceId = @intInvoiceId) = 1
+				BEGIN
+
+					EXEC [dbo].[uspARPostInvoice]
+						@batchId			= NULL,
+						@post				= 0,
+						@recap				= 0,
+						@param				= @intInvoiceId,
+						@userId				= @intUserId,
+						@beginDate			= NULL,
+						@endDate			= NULL,
+						@beginTransaction	= NULL,
+						@endTransaction		= NULL,
+						@exclude			= NULL,
+						@successfulCount	= @successfulCount OUTPUT,
+						@invalidCount		= @invalidCount OUTPUT,
+						@success			= @success OUTPUT,
+						@batchIdUsed		= @batchIdUsed OUTPUT,
+						@recapId			= @recapId OUTPUT,
+						@transType			= N'all',
+						@accrueLicense		= 0,
+						@raiseError			= 1
+					
+				END
+
 				EXEC [dbo].[uspARDeleteInvoice] @intInvoiceId, @intUserId
 
 				EXEC [dbo].[uspSCUpdateStatus] @intTicketId, 1;
