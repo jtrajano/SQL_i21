@@ -67,8 +67,28 @@ SELECT
 	,t.strPricingType
 	,t.intTransactionId
 	,t.strTransactionId
+	,intOrderBy
 INTO #tblContractBalance
 FROM(
+	select 
+		Row_Number() OVER (PARTITION BY sh.intContractDetailId ORDER BY cd.dtmCreated  DESC, sh.intSequenceHistoryId) AS Row_Num
+		, dtmTransactionDate = dbo.fnRemoveTimeOnDate(cd.dtmCreated)
+		, sh.intContractHeaderId
+		, sh.intContractDetailId
+		, dblQty = dbo.fnCTConvertQtyToTargetCommodityUOM(ch.intCommodityId,dbo.fnCTGetCommodityUnitMeasure(ch.intCommodityUOMId),cum.intUnitMeasureId,sh.dblBalance)
+		, pt.strPricingType
+		, intTransactionId = null
+		, strTransactionId = ''
+		, intOrderBy = 1
+	from tblCTSequenceHistory sh
+	inner join tblCTContractDetail cd on cd.intContractDetailId = sh.intContractDetailId
+	inner join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
+	inner join tblCTPricingType pt on pt.intPricingTypeId = cd.intPricingTypeId
+	inner join tblICCommodityUnitMeasure cum on cum.intCommodityId = ch.intCommodityId and cum.ysnDefault = 1
+	where intSequenceUsageHistoryId is null 
+
+	
+	union all
 	select  
 		1 AS Row_Num
 		, dtmTransactionDate = dbo.fnRemoveTimeOnDate(dtmScreenDate)
@@ -80,29 +100,13 @@ FROM(
 		, pt.strPricingType
 		, intTransactionId = sh.intExternalHeaderId
 		, strTransactionId = sh.strNumber
+		, intOrderBy = 2
 	from vyuCTSequenceUsageHistory sh
 	inner join tblCTContractDetail cd on cd.intContractDetailId = sh.intContractDetailId
 	inner join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
 	inner join tblCTPricingType pt on pt.intPricingTypeId = cd.intPricingTypeId
 	inner join tblICCommodityUnitMeasure cum on cum.intCommodityId = ch.intCommodityId and cum.ysnDefault = 1
 	where strFieldName = 'Balance'
-
-	union all
-	select 
-		Row_Number() OVER (PARTITION BY sh.intContractDetailId ORDER BY cd.dtmCreated  DESC) AS Row_Num
-		, dtmTransactionDate = dbo.fnRemoveTimeOnDate(cd.dtmCreated)
-		, sh.intContractHeaderId
-		, sh.intContractDetailId
-		, dblQty = dbo.fnCTConvertQtyToTargetCommodityUOM(ch.intCommodityId,dbo.fnCTGetCommodityUnitMeasure(ch.intCommodityUOMId),cum.intUnitMeasureId,sh.dblBalance)
-		, pt.strPricingType
-		, intTransactionId = null
-		, strTransactionId = ''
-	from tblCTSequenceHistory sh
-	inner join tblCTContractDetail cd on cd.intContractDetailId = sh.intContractDetailId
-	inner join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
-	inner join tblCTPricingType pt on pt.intPricingTypeId = cd.intPricingTypeId
-	inner join tblICCommodityUnitMeasure cum on cum.intCommodityId = ch.intCommodityId and cum.ysnDefault = 1
-	where intSequenceUsageHistoryId is null 
 
 	union all
 	SELECT	
@@ -114,6 +118,7 @@ FROM(
 		, 'Basis'
 		, intTransactionId = null
 		, strTransactionId = ''
+		, intOrderBy = 3
 	FROM	tblCTPriceFixationDetail fd
 	JOIN	tblCTPriceFixation		 pf	ON	pf.intPriceFixationId =	fd.intPriceFixationId
 	JOIN tblCTContractDetail		 cd ON cd.intContractDetailId = pf.intContractDetailId
@@ -131,6 +136,7 @@ FROM(
 		, 'Priced'
 		, intTransactionId = null
 		, strTransactionId = ''
+		, intOrderBy = 4
 	FROM	tblCTPriceFixationDetail fd
 	JOIN	tblCTPriceFixation		 pf	ON	pf.intPriceFixationId =	fd.intPriceFixationId
 	JOIN tblCTContractDetail		 cd ON cd.intContractDetailId = pf.intContractDetailId
@@ -148,7 +154,7 @@ WHERE Row_Num = 1
 AND dtmTransactionDate between @dtmFromTransactionDate and @dtmToTransactionDate
 AND CH.intContractTypeId = @intContractTypeId --1 = Purchase, 2 = Sale
 AND CH.intCommodityId  IN (SELECT com.intCommodityId FROM @Commodity com)
-ORDER BY dtmTransactionDate
+ORDER BY dtmTransactionDate, intOrderBy
 
 
 SELECT *
@@ -156,7 +162,7 @@ INTO #tblFinalContractBalance
 FROM (
 	
 	SELECT 
-			 intRowNum = CONVERT(INT, ROW_NUMBER() OVER (ORDER BY dtmTransactionDate ASC))
+			 intRowNum = CONVERT(INT, ROW_NUMBER() OVER (ORDER BY dtmTransactionDate ASC, intOrderBy ASC, intContractHeaderId ASC, intContractDetailId ASC))
 			,dtmTransactionDate
 			,strCommodityCode
 			,dblBasisIncrease =  CASE WHEN strPricingType = 'Basis' THEN dblIncrease ELSE 0 END
@@ -172,14 +178,11 @@ FROM (
 			,intContractDetailId
 			,intTransactionId
 			,strTransactionId
+			,intOrderBy
 		FROM #tblContractBalance
 		WHERE strPricingType <> 'HTA'
 ) t
-ORDER BY dtmTransactionDate
-
-
-
-
+ORDER BY dtmTransactionDate, intOrderBy
 
 
 SELECT	intRowNum, dtmTransactionDate
@@ -296,6 +299,7 @@ Begin
 		,@dblCashBalanceForward + ( dblCashIncrease - dblCashDecrease)  
 	from #tblFinalContractBalance 
 	WHERE intRowNum = @intRowNum
+	ORDER by dtmTransactionDate, intOrderBy
 	
 	select 
 		@dblBasisBalanceForward = dblBasisEndBalance 
@@ -393,7 +397,7 @@ select
 	,dblCashEndBalForSummary
 from #tblFinalContractBalance cb
 full join @tblRunningBalance rb on rb.intRowNum = cb.intRowNum
-order by cb.dtmTransactionDate
+order by cb.dtmTransactionDate, intOrderBy
 
 GOTO ExitRoutine
 
