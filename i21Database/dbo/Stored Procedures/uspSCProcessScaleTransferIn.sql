@@ -157,6 +157,8 @@ BEGIN TRY
 	--LEFT JOIN tblICInventoryTransaction ICTran ON ICTran.intTransactionId = ICTD.intInventoryTransferId AND ICTran.intTransactionDetailId = ICTD.intInventoryTransferDetailId 
 	--WHERE SC.intTicketId = @intTicketId AND (SC.dblNetUnits != 0 or SC.dblFreightRate != 0) AND ICTran.dblQty >= SC.dblNetUnits AND ICTran.intTransactionTypeId = 13
 
+
+	/*
 	IF((SELECT TOP 1 intAdjustInventoryTransfer FROM tblICItem ICI 
 		INNER JOIN tblICCommodity ICC ON ICC.intCommodityId = ICI.intCommodityId
 		INNER JOIN tblSCTicket SC ON SC.intItemId = ICI.intItemId WHERE intTicketId = @intTicketId) = 1)
@@ -204,6 +206,14 @@ BEGIN TRY
 			UPDATE CTE
 			SET dblQty = CASE WHEN @_qtyToAdjust < 0 THEN dblQty - (@_qtyToAdjust *-1) ELSE dblQty + @_qtyToAdjust END;			
 	END
+
+	*/
+	declare @dblUnitDifference numeric(38, 20)
+	select @dblUnitDifference = sum(dblNetUnits) from (
+		SELECT SC.dblNetUnits FROM tblSCTicket SC where SC.intTicketId = @intTicketId
+		union all
+		SELECT -SC.dblNetUnits FROM tblSCTicket SC where SC.intTicketId = @intMatchTicketId
+	) a
 
 	--Fuel Freight
 	INSERT INTO @OtherCharges
