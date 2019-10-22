@@ -109,7 +109,6 @@ INSERT INTO tblARInvoiceReportStagingTable (
 	 , strPaid
 	 , strPosted
 	 , strTransactionType
-	 , intDetailCount
 	 , intRecipeId
 	 , intOneLinePrintId
 	 , strInvoiceComments
@@ -226,7 +225,6 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , strPaid					= CASE WHEN ysnPaid = 1 THEN 'Yes' ELSE 'No' END
 	 , strPosted				= CASE WHEN INV.ysnPosted = 1 THEN 'Yes' ELSE 'No' END
 	 , strTransactionType		= INV.strTransactionType
-	 , intDetailCount			= ISNULL(INVOICEITEMS.intInvoiceDetailCount, 0)
 	 , intRecipeId				= INVOICEDETAIL.intRecipeId
 	 , intOneLinePrintId		= ISNULL(INVOICEDETAIL.intOneLinePrintId, 1)
 	 , strInvoiceComments		= INVOICEDETAIL.strInvoiceComments
@@ -468,11 +466,6 @@ OUTER APPLY (
 	  AND intTransactionId = INV.intInvoiceId	  
 ) TOTALTAX
 OUTER APPLY (
-	SELECT COUNT(*) AS intInvoiceDetailCount
-	FROM dbo.tblARInvoiceDetail WITH (NOLOCK)
-	WHERE intInvoiceId = INV.intInvoiceId
-) INVOICEITEMS
-OUTER APPLY (
 	SELECT COUNT(*) AS intEmailSetupCount
 	FROM dbo.vyuARCustomerContacts WITH (NOLOCK)
 	WHERE intCustomerEntityId = INV.intEntityCustomerId 
@@ -537,3 +530,24 @@ OUTER APPLY (
 		FOR XML PATH ('')
 	) CC (strMessage)
 ) CUSTOMERCOMMENTS
+
+UPDATE STAGING
+SET intDetailCount 		= ISNULL(REGULARITEMS.intInvoiceDetailCount, 0) + ISNULL(SUBFORMULA.intInvoiceDetailCount, 0)
+  , ysnHasSubFormula	= CASE WHEN ISNULL(SUBFORMULA.intInvoiceDetailCount, 0) > 0 THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
+FROM tblARInvoiceReportStagingTable STAGING 
+OUTER APPLY (
+	SELECT COUNT(*) AS intInvoiceDetailCount
+	FROM dbo.tblARInvoiceDetail WITH (NOLOCK)
+	WHERE intInvoiceId = STAGING.intInvoiceId
+	  AND ISNULL(strSubFormula, '') = ''
+	GROUP BY intInvoiceId
+) REGULARITEMS
+OUTER APPLY (
+	SELECT COUNT(DISTINCT strSubFormula) AS intInvoiceDetailCount
+	FROM dbo.tblARInvoiceDetail WITH (NOLOCK)
+	WHERE intInvoiceId = STAGING.intInvoiceId
+	  AND ISNULL(strSubFormula, '') <> ''
+) SUBFORMULA
+WHERE STAGING.intEntityUserId = @intEntityUserId 
+  AND STAGING.strRequestId = @strRequestId 
+  AND STAGING.strInvoiceFormat <> 'Format 1 - MCP' 
