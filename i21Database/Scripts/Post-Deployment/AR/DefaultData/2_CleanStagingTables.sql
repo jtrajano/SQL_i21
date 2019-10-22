@@ -4,6 +4,7 @@ GO
 -- TRUNCATE TABLE tblARNSFStagingTable
 -- TRUNCATE TABLE tblARNSFStagingTableDetail
 TRUNCATE TABLE tblARInvoiceReportStagingTable
+TRUNCATE TABLE tblARInvoiceTaxReportStagingTable
 TRUNCATE TABLE tblARCustomerStatementStagingTable
 TRUNCATE TABLE tblARCustomerAgingStagingTable
 TRUNCATE TABLE tblARCustomerActivityStagingTable
