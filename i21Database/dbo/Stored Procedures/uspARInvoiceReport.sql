@@ -487,3 +487,5 @@ OUTER APPLY (
 		FOR XML PATH ('')
 	) CC (strMessage)
 ) CUSTOMERCOMMENTS
+
+EXEC dbo.uspARInvoiceDetailTaxReport @intEntityUserId, @strRequestId

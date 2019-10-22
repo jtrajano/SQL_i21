@@ -7341,6 +7341,8 @@
     <Build Include="dbo\Views\vyuARPOSSearchEndOfDay.sql" />
     <Build Include="dbo\Tables\tblICStagingCommodityActivity.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetCommodityActivity.sql" />
+    <Build Include="dbo\Tables\tblARInvoiceTaxReportStagingTable.sql" />
+    <Build Include="dbo\Stored Procedures\uspARInvoiceDetailTaxReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
