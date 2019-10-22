@@ -654,8 +654,8 @@ BEGIN
 														END
 													ELSE CNTRCT.strContractNumber
 												END 
-				,TotalDiscount					= ISNULL(tblOtherCharge.dblTotal, 0) * (BillDtl.dblQtyOrdered / tblInventory.dblTotalQty)
-				,NetDue							= (BillDtl.dblTotal + BillDtl.dblTax) + ((BillDtl.dblQtyOrdered / tblInventory.dblTotalQty) * ISNULL(tblOtherCharge.dblTax, 0)) + (ISNULL(tblOtherCharge.dblTotal, 0) * (BillDtl.dblQtyOrdered / tblInventory.dblTotalQty))
+				,TotalDiscount					= ISNULL(tblOtherCharge.dblTotal, 0) * (BillDtl.dblQtyOrdered / NULLIF(ISNULL(tblInventory.dblTotalQty,1),0))
+				,NetDue							= (BillDtl.dblTotal + BillDtl.dblTax) + ((BillDtl.dblQtyOrdered / NULLIF(ISNULL(tblInventory.dblTotalQty,1),0) ) * ISNULL(tblOtherCharge.dblTax, 0)) + (ISNULL(tblOtherCharge.dblTotal, 0) * (BillDtl.dblQtyOrdered / NULLIF(ISNULL(tblInventory.dblTotalQty,1),0) ))
 				,strId							= Bill.strBillId
 				,intPaymentId					= PYMT.intPaymentId
 				,InboundNetWeight				= BillDtl.dblQtyOrdered
