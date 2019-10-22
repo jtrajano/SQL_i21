@@ -1,8 +1,10 @@
 ﻿CREATE VIEW vyuLGLoadDetailUberScale  
 AS  
 SELECT   
-   Load.intLoadId  
-  ,Load.[strLoadNumber]  
+   DISTINCT    
+   Load.intLoadId    
+  ,Load.[strLoadNumber]    
+  ,Load.[intPurchaseSale]
   ,LoadDetail.intLoadDetailId  
   ,LoadDetail.dblQuantity  
   ,LoadDetail.intVendorEntityId  
