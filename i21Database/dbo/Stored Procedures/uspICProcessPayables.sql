@@ -292,10 +292,10 @@ BEGIN
 				,[ysnTaxExempt]	
 				,[ysnTaxOnly]
 		FROM dbo.fnICGeneratePayablesTaxes(
-			@voucherPayable
-			,@intReceiptId
-			,@intShipmentId
-		)
+				@voucherPayable
+				,@intReceiptId
+				,@intShipmentId
+			)
 	END
 
 	IF @ysnPost = 1
