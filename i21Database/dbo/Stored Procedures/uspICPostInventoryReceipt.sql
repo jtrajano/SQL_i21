@@ -1357,10 +1357,10 @@ BEGIN
 								CASE		
 									-- If Gross/Net UOM is specified, use Net Weight as qty
 									WHEN ri.intWeightUOMId IS NOT NULL THEN
-										-ri.dblNet
+										-dbo.fnCalculateQtyBetweenUOM(ri.intWeightUOMId, t.intItemUOMId, ri.dblNet)
 									-- If Gross/Net UOM is missing, then get the item/lot qty. 
-									ELSE 
-										-ri.dblOpenReceive  
+									ELSE
+										-dbo.fnCalculateQtyBetweenUOM(ri.intUnitMeasureId, t.intItemUOMId, ri.dblOpenReceive)
 								END	
 							END
 					,t.[dblUOMQty] 
