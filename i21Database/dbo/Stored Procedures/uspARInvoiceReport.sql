@@ -499,3 +499,5 @@ OUTER APPLY (
 WHERE STAGING.intEntityUserId = @intEntityUserId 
   AND STAGING.strRequestId = @strRequestId 
   AND STAGING.strInvoiceFormat <> 'Format 1 - MCP' 
+
+EXEC dbo.uspARInvoiceDetailTaxReport @intEntityUserId, @strRequestId

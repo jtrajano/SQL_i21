@@ -7691,6 +7691,8 @@
     <Build Include="dbo\Stored Procedures\uspCMUpdateAPOverflowSettings.sql" />
     <Build Include="dbo\Functions\fnICGetShipmentScheduleIdForReceiptCharge.sql" />
     <Build Include="dbo\Stored Procedures\uspAPDiagnoseClearingData.sql" />
+    <Build Include="dbo\Tables\tblARInvoiceTaxReportStagingTable.sql" />
+    <Build Include="dbo\Stored Procedures\uspARInvoiceDetailTaxReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
