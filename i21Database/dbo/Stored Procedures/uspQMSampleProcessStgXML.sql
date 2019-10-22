@@ -1366,8 +1366,13 @@ BEGIN TRY
 
 			IF @strRowState = 'Delete'
 			BEGIN
-				SELECT @intNewSampleId = @intSampleRefId
-					,@strNewSampleNumber = ''
+				--SELECT @intNewSampleId = @intSampleRefId
+				--	,@strNewSampleNumber = ''
+
+				SELECT @intNewSampleId = intSampleId
+					,@strNewSampleNumber = strSampleNumber
+				FROM tblQMSample
+				WHERE intSampleRefId = @intSampleRefId
 
 				DELETE
 				FROM tblQMSample
@@ -2301,6 +2306,9 @@ BEGIN TRY
 
 			UPDATE tblQMSampleStage
 			SET strFeedStatus = 'Processed'
+				,intNewSampleId = @intNewSampleId
+				,strNewSampleNumber = @strNewSampleNumber
+				,strNewSampleTypeName = @strSampleTypeName
 			WHERE intSampleStageId = @intSampleStageId
 
 			IF (@intNewSampleId > 0)
@@ -2359,6 +2367,9 @@ BEGIN TRY
 			UPDATE tblQMSampleStage
 			SET strFeedStatus = 'Failed'
 				,strMessage = @ErrMsg
+				,intNewSampleId = @intNewSampleId
+				,strNewSampleNumber = @strNewSampleNumber
+				,strNewSampleTypeName = @strSampleTypeName
 			WHERE intSampleStageId = @intSampleStageId
 		END CATCH
 

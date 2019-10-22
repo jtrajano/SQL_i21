@@ -15,5 +15,10 @@
 	intEntityId				INT,
 	intCompanyLocationId	INT,
 	strTransactionType		NVARCHAR(100) COLLATE Latin1_General_CI_AS,
-	intToBookId				INT
+	intToBookId				INT,
+	strFromCompanyName		NVARCHAR(150) COLLATE Latin1_General_CI_AS,
+	intNewSampleId			INT,
+	strNewSampleNumber		NVARCHAR(100) COLLATE Latin1_General_CI_AS,
+	strNewSampleTypeName	NVARCHAR(100) COLLATE Latin1_General_CI_AS,
+	ysnMailSent				BIT CONSTRAINT DF_tblQMSampleStage_ysnMailSent DEFAULT 0
 )

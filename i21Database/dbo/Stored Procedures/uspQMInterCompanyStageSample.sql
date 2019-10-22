@@ -15,6 +15,7 @@ BEGIN TRY
 		,@intSampleId INT
 		,@strRowState NVARCHAR(50) = NULL
 		,@intSamplePreStageId INT
+		,@strFromCompanyName NVARCHAR(150)
 	DECLARE @tblQMSamplePreStage TABLE (intSamplePreStageId INT)
 
 	INSERT INTO @tblQMSamplePreStage (intSamplePreStageId)
@@ -67,6 +68,7 @@ BEGIN TRY
 				,@strToTransactionType = TT1.strTransactionType
 				,@intCompanyLocationId = TC.intCompanyLocationId
 				,@intToBookId = TC.intToBookId
+				,@strFromCompanyName = MC.strCompanyName
 			FROM tblSMInterCompanyTransactionConfiguration TC
 			JOIN tblSMInterCompanyTransactionType TT ON TT.intInterCompanyTransactionTypeId = TC.intFromTransactionTypeId
 			JOIN tblSMInterCompanyTransactionType TT1 ON TT1.intInterCompanyTransactionTypeId = TC.intToTransactionTypeId
@@ -75,6 +77,11 @@ BEGIN TRY
 					WHEN S.ysnParent = 0
 						THEN TC.intFromBookId
 					ELSE TC.intToBookId
+					END
+			JOIN tblSMMultiCompany MC ON MC.intMultiCompanyId = CASE 
+					WHEN S.ysnParent = 0
+						THEN TC.intFromCompanyId
+					ELSE TC.intToCompanyId
 					END
 			WHERE TT.strTransactionType = 'Quality Sample'
 				AND S.intSampleId = @intSampleId
@@ -101,6 +108,7 @@ BEGIN TRY
 						,'Added'
 						,0
 						,@intToBookId
+						,@strFromCompanyName
 				END
 			END
 
@@ -121,6 +129,7 @@ BEGIN TRY
 						,'Modified'
 						,0
 						,@intToBookId
+						,@strFromCompanyName
 				END
 			END
 
@@ -136,6 +145,7 @@ BEGIN TRY
 						,'Delete'
 						,0
 						,@intToBookId
+						,@strFromCompanyName
 				END
 			END
 		END

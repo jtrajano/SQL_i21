@@ -6,6 +6,7 @@
 	,@strRowState NVARCHAR(100)
 	,@ysnReplication BIT = 1
 	,@intToBookId INT = NULL
+	,@strFromCompanyName NVARCHAR(150) = NULL
 AS
 BEGIN TRY
 	SET NOCOUNT ON
@@ -78,6 +79,7 @@ BEGIN TRY
 		,strTransactionType
 		,intMultiCompanyId
 		,intToBookId
+		,strFromCompanyName
 		)
 	SELECT intSampleId = @intSampleId
 		,strSampleNumber = @strSampleNumber
@@ -90,6 +92,7 @@ BEGIN TRY
 		,strTransactionType = @strToTransactionType
 		,intMultiCompanyId = @intToCompanyId
 		,intToBookId = @intToBookId
+		,strFromCompanyName = @strFromCompanyName
 END TRY
 
 BEGIN CATCH
