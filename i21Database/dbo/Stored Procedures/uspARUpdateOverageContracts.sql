@@ -195,7 +195,11 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
 			BEGIN
 				UPDATE ID
 				SET dblQtyShipped	= CASE WHEN @dblNetWeight > 0 AND ISNULL(dbo.fnCalculateQtyBetweenUOM(@intScaleUOMId, ID.intItemUOMId, @dblNetWeight), 0) > CTD.dblBalance 
-										   THEN CTD.dblBalance 
+										   THEN 
+												CASE WHEN CTD.dblBalance = CTD.dblOriginalQty AND CTD.dblScheduleQty = CTD.dblOriginalQty
+													 THEN ID.dblQtyOrdered 
+													 ELSE CTD.dblBalance 
+												END
 										   ELSE 
 												CASE WHEN @dblNetWeight > ID.dblQtyOrdered 
 										  	     	 THEN ID.dblQtyOrdered
@@ -203,7 +207,11 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
 												END
 									  END
 				  , dblUnitQuantity	= CASE WHEN @dblNetWeight > 0 AND ISNULL(dbo.fnCalculateQtyBetweenUOM(@intScaleUOMId, ID.intItemUOMId, @dblNetWeight), 0) > CTD.dblBalance 
-										   THEN CTD.dblBalance 
+										   THEN 
+												CASE WHEN CTD.dblBalance = CTD.dblOriginalQty AND CTD.dblScheduleQty = CTD.dblOriginalQty
+													 THEN ID.dblQtyOrdered 
+													 ELSE CTD.dblBalance 
+												END
 										   ELSE 
 												CASE WHEN @dblNetWeight > ID.dblQtyOrdered 
 										  	     	 THEN ID.dblQtyOrdered
