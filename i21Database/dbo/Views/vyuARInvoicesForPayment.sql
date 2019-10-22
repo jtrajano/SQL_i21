@@ -163,6 +163,7 @@ FROM (
 		) EFT ON CE.intEntityId = EFT.intEntityId
 		LEFT JOIN (
 			SELECT intPaymentId
+				 , ysnInvoicePrepayment
 			FROM dbo.tblARPayment WITH (NOLOCK)
 			WHERE ysnPosted = 1
 			  AND ysnProcessedToNSF = 0
@@ -228,7 +229,7 @@ FROM (
 		) ONACCOUNT
 		WHERE ARI.[ysnPosted] = 1
 			AND ISNULL(ARI.ysnCancelled, 0) = 0
-			AND ISNULL(ARI.ysnRefundProcessed, 0) = 0
+			AND (ISNULL(PREPAY.ysnInvoicePrepayment, 0) = 1 OR (ISNULL(PREPAY.ysnInvoicePrepayment, 0) = 0 AND ISNULL(ARI.ysnRefundProcessed, 0) = 0))
 			AND strTransactionType != 'Credit Note'
 			AND (NOT(ARI.strType = 'Provisional' AND ARI.ysnProcessed = 1) OR ysnExcludeFromPayment = 1)
 	
