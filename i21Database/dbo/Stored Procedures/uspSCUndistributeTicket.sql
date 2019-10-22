@@ -270,7 +270,7 @@ BEGIN TRY
 									@ysnPost = 0
 									,@ysnRecap = 0
 									,@strTransactionId = @strAdjustmentNo
-									,@intEntityUserSecurityId = 1
+									,@intEntityUserSecurityId = @intUserId
 								DELETE FROM tblICInventoryAdjustment WHERE strAdjustmentNo = @strAdjustmentNo
 							end
 							
