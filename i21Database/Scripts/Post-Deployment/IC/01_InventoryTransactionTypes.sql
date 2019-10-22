@@ -232,12 +232,12 @@ USING	(
 				,form = 'Maintain Storage'
 		UNION ALL
 		SELECT id = 56
-				,name = 'Inventory Count By Category'
-				,form = 'Inventory Count By Category'
-		UNION ALL
-		SELECT id = 57
 				,name = 'Transfer Storage'
 				,form = 'Transfer Storage'
+		UNION ALL
+		SELECT id = 57
+				,name = 'Inventory Count By Category'
+				,form = 'Inventory Count By Category'
 
 		/****************************************************************************************************
 		IMPORTANT! When adding a new transaction type, create a new jira to include it in the Stock Rebuild. 

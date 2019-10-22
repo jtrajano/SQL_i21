@@ -410,7 +410,7 @@ BEGIN
 					,intTransactionId = SR.intTransferStorageId
 					,intTransactionDetailId = SR.intTransferStorageSplitId
 					,strTransactionId = TS.strTransferStorageTicket
-					,intTransactionTypeId = 57
+					,intTransactionTypeId = 56
 					,intLotId = NULL
 					,intSubLocationId = ToStorage.intCompanyLocationSubLocationId
 					,intStorageLocationId = ToStorage.intStorageLocationId
