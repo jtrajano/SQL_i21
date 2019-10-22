@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE uspCMBankReconReport
+﻿CREATE PROCEDURE [dbo].[uspCMBankReconReport]
 	@xmlParam NVARCHAR(MAX) = NULL
 AS
 
@@ -99,9 +99,10 @@ IF @dtmStatementDate IS NOT NULL
 ;WITH DEBIT_CREDIT AS(
 	SELECT 
 	strDescription,
-	totalAmount
+	sum(dblAmount) totalAmount
 	FROM 
-	[dbo].[fnCMGetBankReconDebitCreditValues] (@intBankAccountId, @dtmStatementDate, 2)
+	[dbo].[fnCMGetBankReconDebitCreditValues] (@intBankAccountId, @dtmStatementDate, 'All')
+	GROUP BY strDescription
 )
 SELECT	intBankAccountId				= BankAccnt.intBankAccountId
 		,dtmStatementDate				= @dtmStatementDate

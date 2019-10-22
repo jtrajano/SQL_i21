@@ -121,6 +121,7 @@ BEGIN
 		,dblPaidBalance  NUMERIC(18,6)
 		,strTransactionId NVARCHAR(50)
 		,intTransactionId INT
+		,strTransactionType NVARCHAR(50)
 		,strDistribution NVARCHAR(10)
 		,dblCompanyTitled NUMERIC(18,6)
 		,intCommodityId INT
@@ -134,6 +135,7 @@ BEGIN
 		,dblPaidBalance  
 		,strTransactionId
 		,intTransactionId 
+		,strTransactionType
 		,strDistribution
 		,dblCompanyTitled
 		,intCommodityId
