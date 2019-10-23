@@ -167,13 +167,13 @@ FROM
 		,t3.intItemId
 		,t3.strDiscountCode
 		,t3.strDiscountCodeDescription
-		,t3.dblDiscountAmount * (t1.dblQtyOrdered / t2.dblTotalQty) dblDiscountAmount
-		,t3.dblShrinkPercent * (t1.dblQtyOrdered / t2.dblTotalQty) dblShrinkPercent
+		,t3.dblDiscountAmount * (t1.dblQtyOrdered / NULLIF(ISNULL(t2.dblTotalQty,1),0)) dblDiscountAmount
+		,t3.dblShrinkPercent * (t1.dblQtyOrdered / NULLIF(ISNULL(t2.dblTotalQty,1),0)) dblShrinkPercent
 		,t3.dblGradeReading
-		,t3.dblAmount * (t1.dblQtyOrdered / t2.dblTotalQty) dblAmount	
+		,t3.dblAmount * (t1.dblQtyOrdered / NULLIF(ISNULL(t2.dblTotalQty,1),0)) dblAmount		
 		,t3.intContractDetailId
-		,t3.dblTax * (t1.dblQtyOrdered / t2.dblTotalQty) dblTax
-		,t3.dblNetTotal * (t1.dblQtyOrdered / t2.dblTotalQty) dblNetTotal
+		,t3.dblTax * (t1.dblQtyOrdered / NULLIF(ISNULL(t2.dblTotalQty,1),0)) dblTax
+		,t3.dblNetTotal * (t1.dblQtyOrdered / NULLIF(ISNULL(t2.dblTotalQty,1),0)) dblNetTotal
 		,t3.strTaxClass
 	FROM (
 			 SELECT 
