@@ -10,25 +10,24 @@ AS
 ;WITH A
     AS
     (
-        SELECT 'PaymentClearedNotVoid' strDescription, 1 ysnClr, 0 ysnCheckVoid, 1 ysnPayment
+       SELECT 'PaymentClearedNotVoid' strDescription, 1 ysnClr, 0 ysnCheckVoid, 1 ysnPayment, NULL ysnClrOrig, NULL ysnCheckVoidOrig
             WHERE @paymentDeposit = 0 OR @paymentDeposit = 2
         UNION
-            SELECT'PaymentNotClearedNotVoid' strDescription, 0 ysnClr, 0 ysnCheckVoid, 1 ysnPayment
+            SELECT'PaymentNotClearedNotVoid' strDescription, 0 ysnClr, 0 ysnCheckVoid, 1 ysnPayment, NULL ysnClrOrig, NULL ysnCheckVoidOrig
             WHERE @paymentDeposit = 0 OR @paymentDeposit = 2
         UNION
-            SELECT 'PaymentClearedVoid' strDescription, 1 ysnClr, 1 ysnCheckVoid, 1 ysnPayment
+            SELECT 'PaymentClearedVoid' strDescription, 1 ysnClr, 1 ysnCheckVoid, 1 ysnPayment, NULL ysnClrOrig, NULL ysnCheckVoidOrig
             WHERE @paymentDeposit = 0 OR @paymentDeposit = 2
         UNION
-            SELECT 'PaymentUnclearedVoid' strDescription, 0 ysnClr, 1 ysnCheckVoid, 1 ysnPayment
+            SELECT 'PaymentNotClearedNotVoidYet' strDescription, 0 ysnClr, 0 ysnCheckVoid, 1 ysnPayment, 1 ysnClrOrig, 1 ysnCheckVoidOrig 
             WHERE @paymentDeposit = 0 OR @paymentDeposit = 2
 
         UNION
-            SELECT 'DepositNotClearedNotVoid' strDescription, 0 ysnClr, 0 ysnCheckVoid, 0 ysnPayment
+            SELECT 'DepositNotClearedNotVoid' strDescription, 0 ysnClr, 0 ysnCheckVoid, 0 ysnPayment, NULL ysnClrOrig, NULL ysnCheckVoidOrig
             WHERE @paymentDeposit = 1 OR @paymentDeposit = 2
         UNION
-            SELECT 'DepositClearedNotVoid' strDescription, 1 ysnClr, 0 ysnCheckVoid, 0 ysnPayment
+            SELECT 'DepositClearedNotVoid' strDescription, 1 ysnClr, 0 ysnCheckVoid, 0 ysnPayment, NULL ysnClrOrig, NULL ysnCheckVoidOrig
             WHERE @paymentDeposit = 1 OR @paymentDeposit = 2
-
 
     )
 SELECT B.strDescription, totalCount, ISNULL(totalAmount,0) totalAmount
@@ -37,5 +36,5 @@ FROM
  CROSS APPLY 
  (
 	SELECT A.strDescription, count(1) totalCount, sum(abs(dblAmount)) totalAmount
-    FROM dbo.fnCMGetReconGridResult(@intBankAccountId,@dtmStatementDate,A.ysnPayment,A.ysnCheckVoid,A.ysnClr) 
+    FROM dbo.fnCMGetReconGridResult(@intBankAccountId,@dtmStatementDate,A.ysnPayment,A.ysnCheckVoid,A.ysnClr, ysnClrOrig, ysnCheckVoidOrig) 
  )B
