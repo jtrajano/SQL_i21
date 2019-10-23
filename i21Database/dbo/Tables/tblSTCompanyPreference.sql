@@ -4,6 +4,7 @@
     [dtmDateEntered]             DATETIME       NULL,
     [ysnUnlockedLotteryModule]   BIT            NULL,
     [ysnEnableLotteryManagement] BIT            NULL,
+	[strStoreBasePath]			 NVARCHAR (250) NULL,
     [intConcurrencyId]           INT            CONSTRAINT [DF_tblSTCompanyPreference_intConcurrencyId] DEFAULT ((1)) NULL,
     CONSTRAINT [PK_tblSTCompanyPreference] PRIMARY KEY CLUSTERED ([intCompanyPreferenceId] ASC) WITH (FILLFACTOR = 70)
 );
