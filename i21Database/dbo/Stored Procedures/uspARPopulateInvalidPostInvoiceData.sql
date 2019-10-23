@@ -2303,7 +2303,6 @@ BEGIN
 	WHERE @Recap = @ZeroBit
 	  AND ISNULL(INV.ysnServiceChargeCredit, 0) = @OneBit
 	  AND INV.strTransactionType = 'Credit Memo'
-
 	
 	INSERT INTO #ARInvalidInvoiceData
 		([intInvoiceId]
@@ -2321,13 +2320,12 @@ BEGIN
 		,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
 		,[intItemId]			= I.[intItemId]
 		,[strBatchId]			= I.[strBatchId]
-		,[strPostingError]		= 'You cannot unpost this Credit Memo (' + I.strInvoiceNumber + '). Cash Refund(' + INV.strInvoiceNumber + ') created.'
+		,[strPostingError]		= 'You cannot unpost this ' + I.[strTransactionType] + ' (' + I.strInvoiceNumber + '). Cash Refund(' + INV.strInvoiceNumber + ') created.'
 	FROM #ARPostInvoiceHeader I
 	LEFT OUTER JOIN tblARInvoice INV 
          ON I.intInvoiceId = INV.intOriginalInvoiceId
 	WHERE @Recap = @ZeroBit
 	  AND ISNULL(I.[ysnRefundProcessed], 0) = @OneBit
-	  AND I.strTransactionType = 'Credit Memo'
 
 	--TM Sync
 	DELETE FROM @PostInvoiceDataFromIntegration
