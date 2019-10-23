@@ -32,6 +32,7 @@ BEGIN
 	,@intStorageChargeItemId		INT
 	,@intInventoryItemUOMId			INT
 	,@intCSInventoryItemUOMId		INT
+	,@intCustomerStorageId			INT
 	,@StorageChargeItemDescription  NVARCHAR(100)
 
 	DECLARE 
@@ -47,10 +48,29 @@ BEGIN
 
 	SET @intFunctionalCurrencyId = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
 
+	SELECT @IntCommodityId = CS.intCommodityId from tblGRTransferStorage TS
+	left join tblGRTransferStorageReference TSR on TSR.intTransferStorageId = TS.intTransferStorageId
+	left join tblGRCustomerStorage CS on CS.intCustomerStorageId = TSR.intSourceCustomerStorageId where TS.intTransferStorageId = @intTransferStorageId
+
+	SELECT TOP 1 @intStorageChargeItemId = intItemId
+	FROM tblICItem 
+	WHERE strType = 'Other Charge' 
+	  AND strCostType = 'Storage Charge' 
+	  AND intCommodityId = @IntCommodityId
+
+	IF @intStorageChargeItemId IS NULL
+	BEGIN
+		SELECT TOP 1 @intStorageChargeItemId = intItemId
+		FROM tblICItem
+		WHERE strType = 'Other Charge' 
+			AND strCostType = 'Storage Charge' 
+			AND intCommodityId IS NULL
+	END
+
 	--Inventory Item
 	SELECT 
 		 @LocationId			= CS.intCompanyLocationId
-		--,@intCustomerStorageId  = CS.intCustomerStorageId
+		,@intCustomerStorageId  = CS.intCustomerStorageId
 		,@intScaleTicketId		= CS.intTicketId
 		,@intEntityVendorId		= CS.intEntityId 
 		,@intCurrencyId			= CS.intCurrencyId
@@ -79,6 +99,10 @@ BEGIN
 	FROM tblICItemLocation 
 	WHERE intItemId = @InventoryItemId 
 		AND intLocationId = @LocationId
+
+	SELECT @StorageChargeItemDescription = strDescription
+	FROM tblICItem
+	WHERE intItemId = @intStorageChargeItemId
 			
 	DECLARE @tblOtherCharges AS TABLE
 	(
@@ -196,6 +220,38 @@ BEGIN
 	JOIN tblICItem DItem 
 	ON DItem.intItemId = DSC.intItemId
 	WHERE (ISNULL(QM.dblDiscountDue, 0) - ISNULL(QM.dblDiscountPaid, 0)) <> 0 and SR.intTransferStorageId = @intTransferStorageId
+
+
+	UNION
+
+	--Storage Charge
+	SELECT
+		 [intItemId]						= @intStorageChargeItemId
+		,[strItemNo]						= @StorageChargeItemDescription	
+		,[intEntityVendorId]				= NULL	
+		,[intCurrencyId]  					= @intCurrencyId
+		,[intCostCurrencyId]  				= @intCurrencyId
+		,[intChargeId]						= @intStorageChargeItemId
+		,[intForexRateTypeId]				= NULL
+		,[dblForexRate]						= NULL
+		,[ysnInventoryCost]					= IC.ysnInventoryCost
+		,[strCostMethod]					= IC.strCostMethod
+		,[dblRate]							= CS.dblStorageDue / @dblUnits
+		,[intOtherChargeEntityVendorId]		= NULL
+		,[dblAmount]						= CS.dblStorageDue
+		,[ysnAccrue]						= 0
+		,[ysnPrice]							= 1
+		,[intTicketDiscountId]				= NULL
+		,[dblUnits]							= @dblUnits
+		,[dblConvertedUnits]				= @dblUnits
+	FROM tblGRCustomerStorage CS
+	JOIN tblICItem IC 
+		ON 1 = 1
+	WHERE CS.intCustomerStorageId = @intCustomerStorageId 
+		AND ISNULL(CS.dblStorageDue,0) > 0 
+		AND IC.intItemId = @intStorageChargeItemId
+
+
 	
 	DECLARE @InventoryCostCharges AS TABLE
 	(
@@ -342,6 +398,21 @@ BEGIN
 			AND ItemLocation.intLocationId = @LocationId
 	WHERE (ISNULL(QM.dblDiscountDue, 0) - ISNULL(QM.dblDiscountPaid, 0)) <> 0 and SR.intTransferStorageId = @intTransferStorageId
 
+	UNION
+	--Storage Charge
+	SELECT  
+		 intItemId					= @intStorageChargeItemId
+		,intItemLocationId			= ItemLocation.intItemLocationId
+		,intItemType				=  2	
+	FROM tblGRCustomerStorage CS
+	JOIN tblICItem IC ON 1 = 1
+	LEFT JOIN tblICItemLocation ItemLocation
+		ON ItemLocation.intItemId = IC.intItemId
+			AND ItemLocation.intLocationId = @LocationId 
+	WHERE CS.intCustomerStorageId = @intCustomerStorageId 
+	AND   ISNULL(CS.dblStorageDue,0) > 0 
+	AND   IC.intItemId = @intStorageChargeItemId
+
 	DECLARE @ItemGLAccounts			AS dbo.ItemGLAccount;	
 	--Inventory Item
 	INSERT INTO @ItemGLAccounts 
@@ -360,7 +431,11 @@ BEGIN
 		,intTransactionTypeId = 56
 	FROM @tblItem Query 
 	WHERE Query.intItemType = 1	
-		AND EXISTS(SELECT 1 FROM @tblOtherCharges WHERE ysnInventoryCost = 1)	
+		AND EXISTS(SELECT 1 FROM @tblOtherCharges WHERE ysnInventoryCost = 1)
+
+
+
+
 
 	DECLARE @OtherChargesGLAccounts AS dbo.ItemOtherChargesGLAccount;
 	--Charges
@@ -960,7 +1035,6 @@ BEGIN
 		WHERE ISNULL(NonInventoryCostCharges.ysnPrice, 0) = 1
 			AND ISNULL(NonInventoryCostCharges.ysnInventoryCost, 0) = 0
 	)t
-		
 	SELECT 
 		 [dtmDate]                
 		,[strBatchId]             
