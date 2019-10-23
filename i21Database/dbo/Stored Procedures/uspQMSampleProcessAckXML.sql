@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspQMSampleProcessAckXML]
+﻿CREATE PROCEDURE [dbo].[uspQMSampleProcessAckXML] @intToCompanyId INT
 AS
 BEGIN TRY
 	SET NOCOUNT ON
@@ -19,6 +19,7 @@ BEGIN TRY
 	FROM tblQMSampleAcknowledgementStage
 	WHERE strMessage = 'Success'
 		AND ISNULL(strFeedStatus, '') = ''
+		AND intMultiCompanyId = @intToCompanyId
 
 	WHILE @intSampleAcknowledgementStageId > 0
 	BEGIN
@@ -122,6 +123,7 @@ BEGIN TRY
 		WHERE intSampleAcknowledgementStageId > @intSampleAcknowledgementStageId
 			AND strMessage = 'Success'
 			AND ISNULL(strFeedStatus, '') = ''
+			AND intMultiCompanyId = @intToCompanyId
 	END
 END TRY
 

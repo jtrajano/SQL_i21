@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspQMSampleTransferAckXML]
+﻿CREATE PROCEDURE [dbo].[uspQMSampleTransferAckXML] @intToCompanyId INT
 AS
 BEGIN TRY
 	SET NOCOUNT ON
@@ -7,11 +7,13 @@ BEGIN TRY
 
 	SELECT *
 	FROM tblQMSampleAcknowledgementStage
-	WHERE ISNULL(strFeedStatus, '') = '' --intMultiCompanyId = @intToCompanyId
+	WHERE intMultiCompanyId = @intToCompanyId
+		AND ISNULL(strFeedStatus, '') = ''
 
 	UPDATE tblQMSampleAcknowledgementStage
 	SET strFeedStatus = 'Ack Sent'
-	WHERE ISNULL(strFeedStatus, '') = '' --intMultiCompanyId = @intToCompanyId
+	WHERE intMultiCompanyId = @intToCompanyId
+		AND ISNULL(strFeedStatus, '') = ''
 END TRY
 
 BEGIN CATCH

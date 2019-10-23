@@ -1,5 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspQMSampleProcessStgXML]
-	--@intToCompanyId INT
+﻿CREATE PROCEDURE [dbo].[uspQMSampleProcessStgXML] @intToCompanyId INT
 AS
 BEGIN TRY
 	SET NOCOUNT ON
@@ -130,6 +129,7 @@ BEGIN TRY
 	SELECT @intSampleStageId = MIN(intSampleStageId)
 	FROM tblQMSampleStage
 	WHERE ISNULL(strFeedStatus, '') = ''
+		AND intMultiCompanyId = @intToCompanyId
 
 	WHILE @intSampleStageId > 0
 	BEGIN
@@ -2377,6 +2377,7 @@ BEGIN TRY
 		FROM tblQMSampleStage
 		WHERE intSampleStageId > @intSampleStageId
 			AND ISNULL(strFeedStatus, '') = ''
+			AND intMultiCompanyId = @intToCompanyId
 	END
 END TRY
 
