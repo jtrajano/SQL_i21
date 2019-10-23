@@ -297,6 +297,23 @@ BEGIN
 
     UNION
 
+    --Write Off Account Category
+	SELECT
+         [intTransactionId]         = P.[intTransactionId]
+        ,[strTransactionId]         = P.[strTransactionId]
+        ,[strTransactionType]       = @TransType
+        ,[intTransactionDetailId]   = P.[intTransactionDetailId]
+        ,[strBatchId]               = P.[strBatchId]
+        ,[strError]                 = 'The Write Off account selected: ' + GLAD.strAccountId + ' is a non-write-off Account Category.'
+	FROM @Payments P
+    INNER JOIN vyuGLAccountDetail GLAD ON P.intWriteOffAccountId = GLAD.intAccountId
+    WHERE P.[ysnPost] = 1
+      AND P.[intTransactionDetailId] IS NULL
+      AND UPPER(P.[strPaymentMethod]) = UPPER('Write Off')
+      AND ISNULL(GLAD.[strAccountCategory], '') <> 'Write Off'
+
+    UNION
+
     --CF Invoice Account
 	SELECT
          [intTransactionId]         = P.[intTransactionId]
