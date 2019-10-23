@@ -3,7 +3,7 @@
 	,@intMatchTicketId AS INT
 	,@intUserId AS INT
 AS
-	SET QUOTED_IDENTIFIER OFF
+SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
@@ -113,8 +113,14 @@ BEGIN TRY
 			,intContractHeaderId		= NULL
 			,intContractDetailId		= NULL
 			,dtmDate					= SC.dtmTicketDateTime
-			,dblQty						= SC.dblNetUnits
+			,dblQty						= SCMatch.dblNetUnits --abs(ICTran.dblQty) --case when abs(ICTran.dblQty) < SC.dblNetUnits then abs(ICTran.dblQty) else SC.dblNetUnits end
 			,dblCost					= ICTran.dblCost
+											/*
+												 ICTran.dblCost + ( (case when abs(ICTran.dblQty) > SC.dblNetUnits then 1 else -1 end)
+																*
+																((ICTran.dblCost) * abs(((SC.dblNetUnits - SCMatch.dblNetUnits)/SC.dblNetUnits))) 
+											)
+											*/
 			,dblExchangeRate			= 1 -- Need to check this
 			,intLotId					= SC.intLotId
 			,intSubLocationId			= SC.intSubLocationId
@@ -122,12 +128,12 @@ BEGIN TRY
 			,ysnIsStorage				= 0
 			,dblFreightRate				= SC.dblFreightRate
 			,dblGross					=  CASE
-											WHEN IC.ysnLotWeightsRequired = 1 AND @intLotType != 0 THEN (SC.dblGrossWeight - SC.dblTareWeight)
-											ELSE SC.dblGrossUnits
+											WHEN IC.ysnLotWeightsRequired = 1 AND @intLotType != 0 THEN (SCMatch.dblGrossWeight - SCMatch.dblTareWeight)
+											ELSE SCMatch.dblGrossUnits
 										END
 			,dblNet						= CASE
-											WHEN IC.ysnLotWeightsRequired = 1 AND @intLotType != 0 THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo, SC.intItemUOMIdFrom, SC.dblNetUnits)
-											ELSE SC.dblNetUnits 
+											WHEN IC.ysnLotWeightsRequired = 1 AND @intLotType != 0 THEN dbo.fnCalculateQtyBetweenUOM(SCMatch.intItemUOMIdTo, SCMatch.intItemUOMIdFrom, SCMatch.dblNetUnits)
+											ELSE SCMatch.dblNetUnits 
 										END
 			,intSourceId                    = SC.intTicketId
             ,intTicketId                    = SC.intTicketId
@@ -151,6 +157,8 @@ BEGIN TRY
 	--LEFT JOIN tblICInventoryTransaction ICTran ON ICTran.intTransactionId = ICTD.intInventoryTransferId AND ICTran.intTransactionDetailId = ICTD.intInventoryTransferDetailId 
 	--WHERE SC.intTicketId = @intTicketId AND (SC.dblNetUnits != 0 or SC.dblFreightRate != 0) AND ICTran.dblQty >= SC.dblNetUnits AND ICTran.intTransactionTypeId = 13
 
+
+	/*
 	IF((SELECT TOP 1 intAdjustInventoryTransfer FROM tblICItem ICI 
 		INNER JOIN tblICCommodity ICC ON ICC.intCommodityId = ICI.intCommodityId
 		INNER JOIN tblSCTicket SC ON SC.intItemId = ICI.intItemId WHERE intTicketId = @intTicketId) = 1)
@@ -198,6 +206,14 @@ BEGIN TRY
 			UPDATE CTE
 			SET dblQty = CASE WHEN @_qtyToAdjust < 0 THEN dblQty - (@_qtyToAdjust *-1) ELSE dblQty + @_qtyToAdjust END;			
 	END
+
+	*/
+	declare @dblUnitDifference numeric(38, 20)
+	select @dblUnitDifference = sum(dblNetUnits) from (
+		SELECT SC.dblNetUnits FROM tblSCTicket SC where SC.intTicketId = @intTicketId
+		union all
+		SELECT -SC.dblNetUnits FROM tblSCTicket SC where SC.intTicketId = @intMatchTicketId
+	) a
 
 	--Fuel Freight
 	INSERT INTO @OtherCharges
@@ -378,6 +394,58 @@ _PostOrUnPost:
 		INNER JOIN tblICInventoryReceipt IR ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId AND intSourceType = 1
 		INNER JOIN tblICInventoryReceiptItemLot ICLot ON ICLot.intInventoryReceiptItemId = IRI.intInventoryReceiptItemId
 		WHERE SC.intTicketId = @intTicketId	
+
+		
+		if @dblUnitDifference <> 0
+		begin
+			declare @intItemIdDifference		int
+				,@dtmDateDifference datetime
+				,@intLocationIdDifference int
+				,@intSubLocationIdDifference int
+				,@intStorageLocationIdDifference int
+				,@strLotNumberDifference NVARCHAR(50)	
+				,@intOwnershipTypeDifference int
+				,@intItemUOMIdDifference int
+				,@intInventoryAdjustmentIdDifference int
+				,@strTicketNumberIn nvarchar(40)
+				,@strTicketNumberOut nvarchar(40)
+			select 
+				@intItemIdDifference = intItemId,				
+				@dtmDateDifference = dtmTicketDateTime,
+				@intLocationIdDifference = intProcessingLocationId,
+				@intSubLocationIdDifference = intSubLocationId,
+				@intStorageLocationIdDifference = intStorageLocationId,
+				@strLotNumberDifference = 'e',
+				@intOwnershipTypeDifference = 1,
+				@intItemUOMIdDifference = intItemUOMIdTo,
+				@strTicketNumberIn	= strTicketNumber
+				from tblSCTicket where intTicketId = @intTicketId
+
+			select @strTicketNumberOut = strTicketNumber from tblSCTicket where intTicketId = @intMatchTicketId
+			declare @message nvarchar(200)
+			set @message = 'Inventory adjustment for Transfer Out-' +  @strTicketNumberOut + ' and Transfer In-' + @strTicketNumberIn 
+			EXEC [dbo].[uspICInventoryAdjustment_CreatePostQtyChange]
+				@intItemIdDifference
+				,@dtmDateDifference
+				,@intLocationIdDifference
+				,@intSubLocationIdDifference
+				,@intStorageLocationIdDifference
+				,@intStorageLocationIdDifference
+				,@intOwnershipTypeDifference
+				,@dblUnitDifference 
+				,0
+				,@intItemUOMId
+				,@ReceiptId
+				,52
+				,@intUserId
+				,@intInventoryAdjustmentIdDifference OUTPUT
+				,@message;
+
+
+				update tblSCTicket set intInventoryAdjustmentId = @intInventoryAdjustmentIdDifference where intTicketId = @intTicketId 
+				
+		end
+		
 
 		DELETE	FROM #tmpAddItemReceiptResult 
 		WHERE	intInventoryReceiptId = @ReceiptId

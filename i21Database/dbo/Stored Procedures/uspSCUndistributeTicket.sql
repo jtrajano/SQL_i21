@@ -72,6 +72,8 @@ DECLARE @intLoopId INT
 DECLARE @dblLoopScheduleQty NUMERIC(18,6)
 DECLARE @intLoopCurrentId INT
 
+declare @intInventoryAdjustmentId int 
+declare @strAdjustmentNo AS NVARCHAR(40)
 
 BEGIN TRY
 		SELECT TOP 1
@@ -397,6 +399,26 @@ BEGIN TRY
 						END
 
 						EXEC [dbo].[uspSCUpdateTicketStatus] @intTicketId, 1;
+                        set @intInventoryAdjustmentId = null
+                        select @intInventoryAdjustmentId = intInventoryAdjustmentId from tblSCTicket where intTicketId = @intTicketId
+
+                        if( isnull(@intInventoryAdjustmentId, 0) > 0)
+                        begin
+                            SELECT @strAdjustmentNo = strAdjustmentNo
+                            FROM tblICInventoryAdjustment
+                            WHERE intInventoryAdjustmentId = @intInventoryAdjustmentId
+                            
+                            if(isnull(@strAdjustmentNo, '') <> '')
+                            begin
+                                EXEC dbo.uspICPostInventoryAdjustment
+                                    @ysnPost = 0
+                                    ,@ysnRecap = 0
+                                    ,@strTransactionId = @strAdjustmentNo
+                                    ,@intEntityUserSecurityId = @intUserId
+                                DELETE FROM tblICInventoryAdjustment WHERE strAdjustmentNo = @strAdjustmentNo
+                            end
+                            
+                        end
 					END
 					ELSE
 					BEGIN
@@ -534,6 +556,29 @@ BEGIN TRY
 						EXEC uspICIncreaseInTransitDirectQty @ItemsToIncreaseInTransitDirect;
 
 						EXEC [dbo].[uspSCUpdateTicketStatus] @intTicketId, 1;
+						
+						
+                        set @intInventoryAdjustmentId = null
+                        select @intInventoryAdjustmentId = intInventoryAdjustmentId from tblSCTicket where intTicketId = @intTicketId
+
+                        if( isnull(@intInventoryAdjustmentId, 0) > 0)
+                        begin
+                            SELECT @strAdjustmentNo = strAdjustmentNo
+                            FROM tblICInventoryAdjustment
+                            WHERE intInventoryAdjustmentId = @intInventoryAdjustmentId
+                            
+                            if(isnull(@strAdjustmentNo, '') <> '')
+                            begin
+                                EXEC dbo.uspICPostInventoryAdjustment
+                                    @ysnPost = 0
+                                    ,@ysnRecap = 0
+                                    ,@strTransactionId = @strAdjustmentNo
+                                    ,@intEntityUserSecurityId = @intUserId
+                                DELETE FROM tblICInventoryAdjustment WHERE strAdjustmentNo = @strAdjustmentNo
+                            end
+                            
+                        end
+
 					END
 				END
 			ELSE
