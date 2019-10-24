@@ -146,10 +146,10 @@ BEGIN TRY
 				,[strItemDescription] = ICFee.strItemNo
 				,[intOrderUOMId]= NULL
 				,[intItemUOMId] = NULL
-				,[dblQtyOrdered] = SC.dblTicketFees
-				,[dblQtyShipped] = SC.dblTicketFees
+				,[dblQtyOrdered] = 1
+				,[dblQtyShipped] = 1
 				,[dblDiscount] = 0
-				,[dblPrice] = 0
+				,[dblPrice] = SC.dblTicketFees
 				,[ysnRefreshPrice] = 0
 				,[strMaintenanceType] = ''
 				,[strFrequency] = ''
