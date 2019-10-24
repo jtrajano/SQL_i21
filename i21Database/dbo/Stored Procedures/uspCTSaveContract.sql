@@ -247,7 +247,7 @@ BEGIN TRY
 
 		IF @ysnPriceChanged = 1
 		BEGIN
-			EXEC	uspCTSequencePriceChanged @intContractDetailId,null,'Sequence'
+			EXEC	uspCTSequencePriceChanged @intContractDetailId,null,'Sequence',0
 			UPDATE tblCTContractDetail SET ysnPriceChanged = 0 WHERE intContractDetailId = @intContractDetailId
 		END
 		
