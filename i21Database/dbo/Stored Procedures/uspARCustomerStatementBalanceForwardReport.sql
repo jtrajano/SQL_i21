@@ -506,7 +506,7 @@ INNER JOIN (
 			 , dblInvoiceTotal	 = CASE WHEN dtmDate BETWEEN '+ @strDateFrom +' AND '+ @strDateTo +' THEN dblInvoiceTotal ELSE 0 END 
 		FROM dbo.tblARInvoice WITH (NOLOCK)
 		WHERE ysnPosted = 1
-			AND ((strType = ''Service Charge'' AND ysnForgiven = 0) OR ((strType <> ''Service Charge'' AND ysnForgiven = 1) OR (strType <> ''Service Charge'' AND ysnForgiven = 0)))
+			--AND ((strType = ''Service Charge'' AND ysnForgiven = 0) OR ((strType <> ''Service Charge'' AND ysnForgiven = 1) OR (strType <> ''Service Charge'' AND ysnForgiven = 0)))
 			AND strType <> ''CF Tran''
 	) I ON I.intInvoiceId = PD.intInvoiceId	
 	GROUP BY intPaymentId, PD.intInvoiceId, I.strInvoiceNumber, I.dblInvoiceTotal	
@@ -631,7 +631,7 @@ FROM vyuARCustomerSearch C
 			  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) BETWEEN '+ @strDateFrom +' AND '+ @strDateTo +'
 		) PCREDITS ON I.intPaymentId = PCREDITS.intPaymentId
 		WHERE ysnPosted = 1
-			AND ((I.strType = ''Service Charge'' AND I.ysnForgiven = 0) OR ((I.strType <> ''Service Charge'' AND I.ysnForgiven = 1) OR (I.strType <> ''Service Charge'' AND I.ysnForgiven = 0)))		
+			--AND ((I.strType = ''Service Charge'' AND I.ysnForgiven = 0) OR ((I.strType <> ''Service Charge'' AND I.ysnForgiven = 1) OR (I.strType <> ''Service Charge'' AND I.ysnForgiven = 0)))		
 			AND I.dtmDate BETWEEN '+ @strDateFrom +' AND '+ @strDateTo +'
 			AND I.strType <> ''CF Tran''
 			AND (CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) <= '+ @strDateTo +'
