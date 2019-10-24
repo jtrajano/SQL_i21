@@ -185,6 +185,8 @@ BEGIN TRY
 				FROM @SettleContract
 				WHERE intSettleContractKey = @SettleContractKey
 
+
+				
 				IF @dblStorageUnits <= @dblContractUnits
 				BEGIN
 					UPDATE @SettleContract
@@ -194,7 +196,7 @@ BEGIN TRY
 					UPDATE @SettleStorage
 					SET dblRemainingUnits = 0
 					WHERE intSettleStorageKey = @SettleStorageKey
-
+															
 					INSERT INTO @SettleVoucherCreate 
 					(
 						 intCustomerStorageId
@@ -338,9 +340,10 @@ BEGIN TRY
 			BREAK;
 	END
 
+	--select 'settle voucher create', * from @SettleVoucherCreate
 	SELECT @intSettleVoucherKey = MIN(intSettleVoucherKey)
 	FROM @SettleVoucherCreate
-	WHERE IsProcessed = 0
+	WHERE IsProcessed = 0 
 
 	WHILE @intSettleVoucherKey > 0
 	BEGIN
@@ -371,6 +374,7 @@ BEGIN TRY
 		WHERE CS.intCustomerStorageId = @_intCustomerStorageId
 			AND TD.dblDiscountDue > 0
 
+		--select 'order type',@strOrderType, @intSettleVoucherKey
 		IF @strOrderType = 'Direct'
 		BEGIN
 			SET @dblStorageDuePerUnit = 0
@@ -385,7 +389,7 @@ BEGIN TRY
 			EXEC uspGRCalculateStorageCharge 
 				 @strProcessType
 				,@strUpdateType
-				,@intCustomerStorageId
+				,@_intCustomerStorageId
 				,NULL
 				,NULL
 				,@dblUnits
@@ -483,7 +487,7 @@ BEGIN TRY
 			SELECT 
 				 intConcurrencyId		= 1
 				,intSettleStorageId		= @NewSettleStorageId
-				,intCustomerStorageId	= @intCustomerStorageId
+				,intCustomerStorageId	= @_intCustomerStorageId
 				,dblUnits				= @dblUnits
 		END
 		ELSE IF @strOrderType = 'Contract'
@@ -491,15 +495,17 @@ BEGIN TRY
 			
 			SELECT @dblUnitsByOrderType = SUM(dblUnits)
 			FROM @SettleVoucherCreate
-			WHERE intCustomerStorageId = @intCustomerStorageId AND strOrderType = @strOrderType
+			WHERE intCustomerStorageId = @_intCustomerStorageId AND strOrderType = @strOrderType
+
+			--select 'customer storage and units by order type', @_intCustomerStorageId, @dblUnitsByOrderType
 
 			SELECT @dblUnpaidUnits = ISNULL(SUM(dblUnits),0)
 			FROM @SettleVoucherCreate
-			WHERE intCustomerStorageId = @intCustomerStorageId AND strOrderType = @strOrderType AND intPricingTypeId NOT IN (1,6)
+			WHERE intCustomerStorageId = @_intCustomerStorageId AND strOrderType = @strOrderType AND intPricingTypeId NOT IN (1,6)
 
 			SELECT @dblContractAmount = ISNULL(SUM(dblUnits*dblCashPrice),0)
 			FROM @SettleVoucherCreate
-			WHERE intCustomerStorageId = @intCustomerStorageId AND strOrderType = @strOrderType AND  intPricingTypeId IN (1,6)
+			WHERE intCustomerStorageId = @_intCustomerStorageId AND strOrderType = @strOrderType AND  intPricingTypeId IN (1,6)
 			
 
 			SET @dblStorageDuePerUnit = 0
@@ -514,7 +520,7 @@ BEGIN TRY
 			EXEC uspGRCalculateStorageCharge 
 				 @strProcessType
 				,@strUpdateType
-				,@intCustomerStorageId
+				,@_intCustomerStorageId
 				,NULL
 				,NULL
 				,@dblUnitsByOrderType
@@ -614,7 +620,7 @@ BEGIN TRY
 			SELECT 
 				 intConcurrencyId	    = 1
 				,intSettleStorageId		= @NewSettleStorageId
-				,intCustomerStorageId   = @intCustomerStorageId
+				,intCustomerStorageId   = @_intCustomerStorageId
 				,dblUnits				= @dblUnitsByOrderType
 
 			INSERT INTO tblGRSettleContract 
@@ -630,20 +636,27 @@ BEGIN TRY
 				,intContractDetailId	= intContractDetailId
 				,dblUnits				= dblUnits
 			FROM @SettleVoucherCreate
-			WHERE intCustomerStorageId = @intCustomerStorageId AND strOrderType = @strOrderType
+			WHERE intCustomerStorageId = @_intCustomerStorageId AND strOrderType = @strOrderType
 
 		END
 
 		SET @Counter = @Counter + 1 
 		UPDATE @SettleVoucherCreate
 		SET IsProcessed = 1
-		WHERE intCustomerStorageId = @intCustomerStorageId AND strOrderType = @strOrderType
+		WHERE intCustomerStorageId = @_intCustomerStorageId AND strOrderType = @strOrderType
 
+		--select 'loop settle voucher create ', * from @SettleVoucherCreate
 		SELECT @intSettleVoucherKey = MIN(intSettleVoucherKey)
 		FROM @SettleVoucherCreate
-		WHERE intSettleVoucherKey > @intSettleVoucherKey AND IsProcessed = 0
+		WHERE intSettleVoucherKey > @intSettleVoucherKey AND IsProcessed = 0 -- order by intSettleVoucherKey asc
+
+		--select 'loop settle voucher create ', * from @SettleVoucherCreate
 
 	END
+
+	--select 'settle storage ticket', * from tblGRSettleStorageTicket where intCustomerStorageId = @_intCustomerStorageId
+
+
 END TRY
 
 BEGIN CATCH
