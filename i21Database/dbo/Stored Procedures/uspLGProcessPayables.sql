@@ -194,7 +194,8 @@ BEGIN
 							AND A.intEntityVendorId = CTC.intVendorId
 						) CTC
 			WHERE A.intLoadId = @intLoadId
-				AND A.intLoadCostId = ISNULL(NULL, A.intLoadCostId)
+				AND A.intLoadCostId = ISNULL(@intLoadCostId, A.intLoadCostId)
+				AND A.intBillId IS NULL
 				AND A.intLoadDetailId NOT IN 
 					(SELECT IsNull(BD.intLoadDetailId, 0) FROM tblAPBillDetail BD JOIN tblICItem Item ON Item.intItemId = BD.intItemId
 					WHERE BD.intItemId = A.intItemId AND Item.strType = 'Other Charge' AND ISNULL(A.ysnAccrue,0) = 1)
