@@ -76,6 +76,7 @@ DECLARE @UNDISTRIBUTE_NOT_ALLOWED NVARCHAR(100)
 SET @UNDISTRIBUTE_NOT_ALLOWED = 'Un-distribute ticket with posted invoice is not allowed.'
 declare @intInventoryAdjustmentId int 
 declare @strAdjustmentNo AS NVARCHAR(40)
+DECLARE @ysnAllInvoiceHasCreditMemo BIT
 
 BEGIN TRY
 		SELECT TOP 1
@@ -405,7 +406,7 @@ BEGIN TRY
                         select @intInventoryAdjustmentId = intInventoryAdjustmentId from tblSCTicket where intTicketId = @intTicketId
 
                         if( isnull(@intInventoryAdjustmentId, 0) > 0)
-                        begin
+						begin
                             SELECT @strAdjustmentNo = strAdjustmentNo
                             FROM tblICInventoryAdjustment
                             WHERE intInventoryAdjustmentId = @intInventoryAdjustmentId
@@ -575,7 +576,7 @@ BEGIN TRY
                                     @ysnPost = 0
                                     ,@ysnRecap = 0
                                     ,@strTransactionId = @strAdjustmentNo
-                                    ,@intEntityUserSecurityId = @intUserId
+                  ,@intEntityUserSecurityId = @intUserId
                                 DELETE FROM tblICInventoryAdjustment WHERE strAdjustmentNo = @strAdjustmentNo
                             end
                             
@@ -751,7 +752,103 @@ BEGIN TRY
 								UNIQUE ([intInventoryShipmentId])
 							);
 							INSERT INTO #tmpItemShipmentIds(intInventoryShipmentId,strShipmentNumber) SELECT DISTINCT(intInventoryShipmentId),strShipmentNumber from vyuICGetInventoryShipmentItem WHERE intSourceId = @intTicketId AND strSourceType = 'Scale'
-				
+
+							----------------------------------------------------------------------------------------
+							----------------------------------------------------------------------------------------
+							BEGIN
+								---GEt all the invoice Detail Id for the inventory shipment item details
+								CREATE TABLE #tmpShipmentInvoiceDetailIds (
+									intInventoryShipmentItemId INT PRIMARY KEY
+									,[intInvoiceId] [INT]
+									,[intInvoiceDetailId] [INT] 
+									UNIQUE (intInventoryShipmentItemId)
+								);
+								INSERT INTO #tmpShipmentInvoiceDetailIds(
+									intInventoryShipmentItemId
+									,[intInvoiceDetailId]
+									,[intInvoiceId]
+								) 
+								SELECT 
+									DISTINCT (A.intInventoryShipmentItemId)
+									,B.[intInvoiceDetailId]
+									,B.[intInvoiceId] 
+								FROM  tblICInventoryShipmentItem A 
+								LEFT JOIN tblARInvoiceDetail  B
+									ON A.intInventoryShipmentItemId = B.intInventoryShipmentItemId
+								LEFT JOIN tblARInvoice D
+									ON B.intInvoiceId = D.intInvoiceId
+										AND D.strTransactionType = 'Invoice'
+								INNER JOIN #tmpItemShipmentIds C
+									ON A.intInventoryShipmentId = C.intInventoryShipmentId
+							
+
+								---GEt all the invoice Detail Id for the inventory shipment charge details
+								CREATE TABLE #tmpShipmentChargeInvoiceDetailIds (
+									intInventoryShipmentChargeId INT PRIMARY KEY
+									,[intInvoiceId] INT
+									,[intInvoiceDetailId] INT
+									UNIQUE (intInventoryShipmentChargeId)
+								);
+								INSERT INTO #tmpShipmentChargeInvoiceDetailIds(
+									intInventoryShipmentChargeId
+									,[intInvoiceDetailId]
+									,[intInvoiceId]
+								) 
+								SELECT 
+									DISTINCT (A.intInventoryShipmentChargeId)
+									,B.[intInvoiceDetailId]
+									,B.[intInvoiceId] 
+								FROM  tblICInventoryShipmentCharge A 
+								LEFT JOIN tblARInvoiceDetail  B
+									ON A.intInventoryShipmentChargeId = B.intInventoryShipmentChargeId
+								LEFT JOIN tblARInvoice D
+									ON B.intInvoiceId = D.intInvoiceId
+										AND D.strTransactionType = 'Invoice'
+								INNER JOIN #tmpItemShipmentIds C
+									ON A.intInventoryShipmentId = C.intInventoryShipmentId
+
+
+								--Check if all invoice have credit memo
+
+								--ITEM
+								SET @ysnAllInvoiceHasCreditMemo = 1
+								IF EXISTS(	SELECT TOP 1 1 
+											FROM #tmpShipmentInvoiceDetailIds A
+											LEFT JOIN tblARInvoiceDetail B
+												ON A.intInvoiceDetailId = B.intOriginalInvoiceDetailId
+											LEFT JOIN tblARInvoice C
+												ON B.intInvoiceId = C.intInvoiceId
+													AND C.strTransactionType = 'Credit Memo'
+											WHERE A.intInvoiceDetailId IS NOT NULL
+												AND B.intInvoiceDetailId IS NULL )
+
+								BEGIN
+									SET @ysnAllInvoiceHasCreditMemo = 0 
+								END
+
+								--CHARGES
+								IF EXISTS(	SELECT TOP 1 1 
+											FROM #tmpShipmentChargeInvoiceDetailIds A
+											LEFT JOIN tblARInvoiceDetail B
+												ON A.intInvoiceDetailId = B.intOriginalInvoiceDetailId
+											LEFT JOIN tblARInvoice C
+												ON B.intInvoiceId = C.intInvoiceId
+													AND C.strTransactionType = 'Credit Memo'
+											WHERE A.intInvoiceDetailId IS NOT NULL
+												AND B.intInvoiceDetailId IS NULL )
+
+								BEGIN
+									SET @ysnAllInvoiceHasCreditMemo = 0 
+								END
+								ELSE
+								BEGIN
+									SET @ysnAllInvoiceHasCreditMemo = 1
+								END
+							END
+							-------------------------------------------------------------------------------------------
+							-------------------------------------------------------------------------------------------
+
+							
 							DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
 							FOR
 							SELECT intInventoryShipmentId, strShipmentNumber
@@ -764,84 +861,102 @@ BEGIN TRY
 
 							WHILE @@FETCH_STATUS = 0
 							BEGIN
-								SELECT DISTINCT
-									ARID.intInvoiceId
-								INTO #invoiceIdTable
-								FROM tblARInvoiceDetail ARID 
-								INNER JOIN tblARInvoice ARI 
-									ON ARID.[intInvoiceId] = ARI.[intInvoiceId]
-								INNER JOIN tblICInventoryShipmentItem ICISI
-									ON ARID.[intInventoryShipmentItemId] = ICISI.[intInventoryShipmentItemId]
-								WHERE ICISI.[intInventoryShipmentId] = @InventoryShipmentId
-								ORDER BY ARID.intInvoiceId ASC
-
-								SELECT @intInvoiceId = MIN(intInvoiceId) 
-								FROM #invoiceIdTable
-
-								WHILE (ISNULL(@intInvoiceId,0) > 0)
+								IF  @ysnAllInvoiceHasCreditMemo = 0
 								BEGIN
-									SELECT @ysnPosted = ysnPosted FROM tblARInvoice WHERE intInvoiceId = @intInvoiceId;
-
-									-- unpost invoice
-									IF @ysnPosted = 1
-									BEGIN
-										if (exists ( select top 1 1 from tblGRCompanyPreference where ysnDoNotAllowUndistributePostedInvoice = 1 ))
-										begin
-											RAISERROR(@UNDISTRIBUTE_NOT_ALLOWED, 11, 1);
-											RETURN;
-										end
-										EXEC [dbo].[uspARPostInvoice]
-											@batchId			= NULL,
-											@post				= 0,
-											@recap				= 0,
-											@param				= @intInvoiceId,
-											@userId				= @intUserId,
-											@beginDate			= NULL,
-											@endDate			= NULL,
-											@beginTransaction	= NULL,
-											@endTransaction		= NULL,
-											@exclude			= NULL,
-											@successfulCount	= @successfulCount OUTPUT,
-											@invalidCount		= @invalidCount OUTPUT,
-											@success			= @success OUTPUT,
-											@batchIdUsed		= @batchIdUsed OUTPUT,
-											@recapId			= @recapId OUTPUT,
-											@transType			= N'all',
-											@accrueLicense		= 0,
-											@raiseError			= 1
-									END
-
-									--Delete Invoice
-									IF ISNULL(@intInvoiceId, 0) > 0
-									BEGIN
-										EXEC [dbo].[uspARDeleteInvoice] @intInvoiceId, @intUserId
-									END
-
-									
-									IF EXISTS(SELECT TOP 1 1 FROM #invoiceIdTable WHERE intInvoiceId > @intInvoiceId)
-									BEGIN
-										SELECT TOP 1 @intInvoiceId = intInvoiceId 
-										FROM #invoiceIdTable
-										WHERE intInvoiceId > @intInvoiceId
-										ORDER BY intInvoiceId ASC
-									END
-									ELSE
-									BEGIN
-										SET @intInvoiceId = 0
-									END
-									
+									EXEC [dbo].[uspGRDeleteStorageHistory] @strSourceType = 'InventoryShipment' ,@IntSourceKey = @InventoryShipmentId
+									EXEC [dbo].[uspGRReverseTicketOpenBalance] 'InventoryShipment' , @InventoryShipmentId ,@intUserId;
+									DELETE tblQMTicketDiscount WHERE intTicketFileId = @InventoryShipmentId AND strSourceType = 'Inventory Shipment'
 								END
+								ELSE
+								BEGIN
 								
-								EXEC [dbo].[uspICPostInventoryShipment] 0, 0, @strTransactionId, @intUserId;
-								EXEC [dbo].[uspGRDeleteStorageHistory] @strSourceType = 'InventoryShipment' ,@IntSourceKey = @InventoryShipmentId
-								EXEC [dbo].[uspGRReverseTicketOpenBalance] 'InventoryShipment' , @InventoryShipmentId ,@intUserId;
-								EXEC [dbo].[uspICDeleteInventoryShipment] @InventoryShipmentId, @intEntityId;
-								DELETE tblQMTicketDiscount WHERE intTicketFileId = @InventoryShipmentId AND strSourceType = 'Inventory Shipment'
+									SELECT DISTINCT
+										ARID.intInvoiceId
+									INTO #invoiceIdTable
+									FROM tblARInvoiceDetail ARID 
+									INNER JOIN tblARInvoice ARI 
+										ON ARID.[intInvoiceId] = ARI.[intInvoiceId]
+									INNER JOIN tblICInventoryShipmentItem ICISI
+										ON ARID.[intInventoryShipmentItemId] = ICISI.[intInventoryShipmentItemId]
+									WHERE ICISI.[intInventoryShipmentId] = @InventoryShipmentId
+									ORDER BY ARID.intInvoiceId ASC
+
+									SELECT @intInvoiceId = MIN(intInvoiceId) 
+									FROM #invoiceIdTable
+
+									WHILE (ISNULL(@intInvoiceId,0) > 0)
+									BEGIN
+										SELECT @ysnPosted = ysnPosted FROM tblARInvoice WHERE intInvoiceId = @intInvoiceId;
+
+										-- unpost invoice
+										IF @ysnPosted = 1
+										BEGIN
+											if (exists ( select top 1 1 from tblGRCompanyPreference where ysnDoNotAllowUndistributePostedInvoice = 1 ))
+											begin
+												RAISERROR(@UNDISTRIBUTE_NOT_ALLOWED, 11, 1);
+												RETURN;
+											end
+											EXEC [dbo].[uspARPostInvoice]
+												@batchId			= NULL,
+												@post				= 0,
+												@recap				= 0,
+												@param				= @intInvoiceId,
+												@userId				= @intUserId,
+												@beginDate			= NULL,
+												@endDate			= NULL,
+												@beginTransaction	= NULL,
+												@endTransaction		= NULL,
+												@exclude			= NULL,
+												@successfulCount	= @successfulCount OUTPUT,
+												@invalidCount		= @invalidCount OUTPUT,
+												@success			= @success OUTPUT,
+												@batchIdUsed		= @batchIdUsed OUTPUT,
+												@recapId			= @recapId OUTPUT,
+												@transType			= N'all',
+												@accrueLicense		= 0,
+												@raiseError			= 1
+										END
+
+										--Delete Invoice
+										IF ISNULL(@intInvoiceId, 0) > 0
+										BEGIN
+											EXEC [dbo].[uspARDeleteInvoice] @intInvoiceId, @intUserId
+										END
+
+									
+										IF EXISTS(SELECT TOP 1 1 FROM #invoiceIdTable WHERE intInvoiceId > @intInvoiceId)
+										BEGIN
+											SELECT TOP 1 @intInvoiceId = intInvoiceId 
+											FROM #invoiceIdTable
+											WHERE intInvoiceId > @intInvoiceId
+											ORDER BY intInvoiceId ASC
+										END
+										ELSE
+										BEGIN
+											SET @intInvoiceId = 0
+										END
+									
+									END
+								
+									EXEC [dbo].[uspICPostInventoryShipment] 0, 0, @strTransactionId, @intUserId;
+									EXEC [dbo].[uspGRDeleteStorageHistory] @strSourceType = 'InventoryShipment' ,@IntSourceKey = @InventoryShipmentId
+									EXEC [dbo].[uspGRReverseTicketOpenBalance] 'InventoryShipment' , @InventoryShipmentId ,@intUserId;
+									EXEC [dbo].[uspICDeleteInventoryShipment] @InventoryShipmentId, @intEntityId;
+									DELETE tblQMTicketDiscount WHERE intTicketFileId = @InventoryShipmentId AND strSourceType = 'Inventory Shipment'
+								
+								END
+
 								FETCH NEXT FROM intListCursor INTO @InventoryShipmentId, @strTransactionId;
 							END
 							CLOSE intListCursor  
 							DEALLOCATE intListCursor 
+
+							UPDATE tblSCTicket
+							SET intInventoryShipmentId = NULL 
+							WHERE intTicketId = @intTicketId
+
 							EXEC [dbo].[uspSCUpdateTicketStatus] @intTicketId, 1;
+							
 						END
 					END
 				END
@@ -1021,7 +1136,7 @@ BEGIN TRY
 					SELECT TOP 1 dtmTicketDateTime FROM tblSCTicket WHERE intDeliverySheetId = GRC.intDeliverySheetId AND strTicketStatus = 'C' ORDER BY dtmTicketDateTime DESC
 				) SC
 				WHERE GRC.intDeliverySheetId = @intDeliverySheetId  
-		END
+	END
 
 		--Audit Log
 		EXEC dbo.uspSMAuditLog 
