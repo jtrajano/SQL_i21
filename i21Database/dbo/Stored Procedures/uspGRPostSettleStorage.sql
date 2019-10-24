@@ -2028,7 +2028,7 @@ BEGIN TRY
 					,[strSettleTicket]		= @TicketNo
 					,[intTransactionTypeId]	= 4 
 					,[dblPaidAmount]		= SV.dblCashPrice
-					,[intBillId]			= CASE WHEN @intVoucherId = 0 THEN NULL ELSE @intVoucherId END
+					,[intBillId]			= CASE WHEN @intVoucherId = 0 THEN NULL ELSE @createdVouchersId END
 					,intSettleStorageId		= @intSettleStorageId
 					,strVoucher				= @strVoucher
 				FROM @SettleVoucherCreate SV
