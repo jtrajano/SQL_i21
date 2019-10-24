@@ -194,34 +194,34 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
 		ELSE IF ISNULL(@ysnFromSalesOrder, 0) = 1 AND @intContractDetailId IS NOT NULL
 			BEGIN
 				UPDATE ID
-				SET dblQtyShipped	= CASE WHEN @dblNetWeight > 0 AND ISNULL(dbo.fnCalculateQtyBetweenUOM(@intScaleUOMId, ID.intItemUOMId, @dblNetWeight), 0) > CTD.dblBalance 
+				SET dblQtyShipped	= CASE WHEN ISNULL(@dblNetWeight, 0) > CTD.dblBalance 
 										   THEN 
 												CASE WHEN CTD.dblBalance = CTD.dblQuantity AND CTD.dblScheduleQty = CTD.dblQuantity
 													 THEN ID.dblQtyOrdered 
 													 ELSE CTD.dblBalance 
 												END
 										   ELSE 
-												CASE WHEN @dblNetWeight > ID.dblQtyOrdered 
+												CASE WHEN @dblNetWeight > ID.dblQtyOrdered AND ISNULL(SO.intCount, 0) > 1
 										  	     	 THEN ID.dblQtyOrdered
-												 	 ELSE ISNULL(dbo.fnCalculateQtyBetweenUOM(@intScaleUOMId, ID.intItemUOMId, @dblNetWeight), 0) 
+												 	 ELSE ISNULL(@dblNetWeight, 0) 
 												END
 									  END
-				  , dblUnitQuantity	= CASE WHEN @dblNetWeight > 0 AND ISNULL(dbo.fnCalculateQtyBetweenUOM(@intScaleUOMId, ID.intItemUOMId, @dblNetWeight), 0) > CTD.dblBalance 
+				  , dblUnitQuantity	= CASE WHEN ISNULL(@dblNetWeight, 0) > CTD.dblBalance 
 										   THEN 
 												CASE WHEN CTD.dblBalance = CTD.dblQuantity AND CTD.dblScheduleQty = CTD.dblQuantity
 													 THEN ID.dblQtyOrdered 
 													 ELSE CTD.dblBalance 
 												END
 										   ELSE 
-												CASE WHEN @dblNetWeight > ID.dblQtyOrdered 
+												CASE WHEN @dblNetWeight > ID.dblQtyOrdered AND ISNULL(SO.intCount, 0) > 1
 										  	     	 THEN ID.dblQtyOrdered
-												 	 ELSE ISNULL(dbo.fnCalculateQtyBetweenUOM(@intScaleUOMId, ID.intItemUOMId, @dblNetWeight), 0) 
+												 	 ELSE ISNULL(@dblNetWeight, 0) 
 												END
 									  END
 				  , dblQtyOrdered	= CASE WHEN @dblNetWeight = 0 THEN CTD.dblBalance ELSE ID.dblQtyOrdered END
 				  , intTicketId     = ISNULL(ID.intTicketId, @intTicketId)
 				  , @dblQtyOverAged	= CASE WHEN @dblNetWeight > 0 
-										   THEN ISNULL(dbo.fnCalculateQtyBetweenUOM(@intScaleUOMId, ID.intItemUOMId, @dblNetWeight), 0) - 
+										   THEN ISNULL(@dblNetWeight, 0) - 
 												CASE WHEN CTD.dblBalance = CTD.dblQuantity AND CTD.dblScheduleQty = CTD.dblQuantity
 													 THEN ID.dblQtyOrdered 
 													 ELSE CTD.dblBalance 
@@ -230,6 +230,12 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
 									  END					
 				FROM tblARInvoiceDetail ID
 				INNER JOIN tblCTContractDetail CTD ON ID.intContractDetailId = CTD.intContractDetailId AND ID.intContractHeaderId = CTD.intContractHeaderId
+				OUTER APPLY (
+					SELECT intCount = COUNT(*)
+					FROM tblSOSalesOrderDetail SOD
+					WHERE SOD.intContractDetailId = ID.intContractDetailId
+					  AND SOD.intContractDetailId IS NOT NULL
+				) SO
 				WHERE ID.intInvoiceDetailId = @intInvoiceDetailId				
 			END
 		ELSE IF ISNULL(@ysnFromSalesOrder, 0) = 1 AND @intContractDetailId IS NULL
