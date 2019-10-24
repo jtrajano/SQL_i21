@@ -2,7 +2,8 @@
 		
 	@intContractDetailId	INT,
 	@intUserId				INT = NULL,
-	@ScreenName				NVARCHAR(50)
+	@ScreenName				NVARCHAR(50),
+	@ysnDelete				BIT = NULL
 	
 AS
 
@@ -52,6 +53,12 @@ BEGIN TRY
 			@intStockUOMId					INT,
 			@intItemId						INT
 
+
+			declare @AvailableQuantityForVoucher cursor;
+			declare @dblCashPriceForVoucher numeric(18,6);
+			declare @dblAvailableQuantity numeric(18,6);
+			declare @dblProcessQuantity numeric(18,6);
+			
 	SELECT	@dblCashPrice			=	dblCashPrice, 
 			@intPricingTypeId		=	intPricingTypeId, 
 			@intLastModifiedById	=	ISNULL(intLastModifiedById,intCreatedById),
@@ -96,196 +103,60 @@ BEGIN TRY
 	IF 	@intPricingTypeId NOT IN (1,2,6) OR @ysnAllowChangePricing = 1
 		RETURN
 
-	IF NOT EXISTS(SELECT * FROM tblAPBillDetail WHERE intContractDetailId = @intContractDetailId AND intContractCostId IS NULL AND intInventoryReceiptChargeId IS NULL)
+
+	if (@intPricingTypeId = 2 or (@intPricingTypeId = 1 and (SELECT count(*) FROM tblAPBillDetail WHERE intContractDetailId = @intContractDetailId) > 0))
 	BEGIN
-		if (@intPricingTypeId = 2)
+
+		if (@ysnDelete = 1) return;
+
+		set @dblProcessQuantity = 0;
+		SET @AvailableQuantityForVoucher = CURSOR FOR
+
+			select
+				dblCashPrice
+				,dblAvailableQuantity
+			from
+				vyuCTAvailableQuantityForVoucher where intContractDetailId = @intContractDetailId
+
+		OPEN @AvailableQuantityForVoucher
+		FETCH NEXT
+		FROM
+			@AvailableQuantityForVoucher
+		INTO
+			@dblCashPriceForVoucher
+			,@dblAvailableQuantity
+
+		WHILE @@FETCH_STATUS = 0
 		BEGIN
-			SELECT	@dblCashPrice = dbo.fnCTConvertQtyToTargetItemUOM(@intStockUOMId,@intSeqPriceUOMId,@dblPartialCashPrice)
+			print @dblCashPriceForVoucher;
+			print @dblAvailableQuantity
+			
+			set @dblAvailableQuantity = @dblAvailableQuantity - @dblProcessQuantity;
+
+			EXEC uspCTCreateBillForBasisContract @intContractDetailId, @dblCashPriceForVoucher, @dblAvailableQuantity
+
+			set @dblProcessQuantity = @dblProcessQuantity + @dblAvailableQuantity;
+				
+			FETCH NEXT
+			FROM
+				@AvailableQuantityForVoucher
+			INTO
+			@dblCashPriceForVoucher
+			,@dblAvailableQuantity
 		END
-		ELSE
+
+		CLOSE @AvailableQuantityForVoucher;
+		DEALLOCATE @AvailableQuantityForVoucher;
+
+	END
+	ELSE
+	BEGIN
+		IF NOT EXISTS(SELECT * FROM tblAPBillDetail WHERE intContractDetailId = @intContractDetailId AND intContractCostId IS NULL AND intInventoryReceiptChargeId IS NULL)
 		BEGIN
 			SELECT	@dblCashPrice = dbo.fnCTConvertQtyToTargetItemUOM(@intStockUOMId,@intSeqPriceUOMId,@dblCashPrice)
-		END
-		EXEC uspCTCreateBillForBasisContract @intContractDetailId, @dblCashPrice
-	END
-	/*
-	IF @intContractTypeId = 1 
-	BEGIN
-		IF OBJECT_ID('tempdb..#tblReceipt') IS NOT NULL  								
-		DROP TABLE #tblReceipt								
-
-		SELECT	DISTINCT ISNULL(IR.ysnPosted,0) ysnPosted, strReceiptNumber, RI.intInventoryReceiptItemId, RI.intInventoryReceiptId,BD.intBillId,BD.intBillDetailId,ISNULL(BL.ysnPosted,0) AS ysnBillPosted
-		INTO	#tblReceipt
-		FROM	tblICInventoryReceipt		IR
-		JOIN	tblICInventoryReceiptItem	RI	ON	RI.intInventoryReceiptId		=	IR.intInventoryReceiptId
-   LEFT	JOIN	tblAPBillDetail				BD	ON	BD.intInventoryReceiptItemId	=	RI.intInventoryReceiptItemId
-												AND BD.intInventoryReceiptChargeId IS NULL
-   LEFT	JOIN	tblAPBill					BL	ON	BL.intBillId					=	BD.intBillId
-		WHERE	RI.intLineNo = @intContractDetailId AND IR.strReceiptType = 'Purchase Contract'  
-
-		SELECT	@intInventoryReceiptId = MIN(intInventoryReceiptId) FROM #tblReceipt
-
-		WHILE ISNULL(@intInventoryReceiptId,0) > 0
-		BEGIN
-
-			IF EXISTS(	SELECT 1 FROM tblICInventoryReceiptItem RI
-						JOIN tblCTContractDetail CD ON CD.intContractDetailId = RI.intLineNo
-						WHERE intInventoryReceiptId = @intInventoryReceiptId AND intLineNo <> @intContractDetailId AND intLineNo IS NOT NULL AND CD.intPricingTypeId NOT IN (1,6)
-					)
-			BEGIN
-				SELECT	@intInventoryReceiptId = MIN(intInventoryReceiptId) FROM #tblReceipt WHERE intInventoryReceiptId > @intInventoryReceiptId
-				CONTINUE;
-			END
-
-			SELECT	@intBillId = NULL, @intBillDetailId = NULL
-
-			SELECT	@intBillId = intBillId, @intBillDetailId = intBillDetailId,@strVendorOrderNumber = strReceiptNumber,@ysnBillPosted = ysnBillPosted FROM #tblReceipt WHERE intInventoryReceiptId = @intInventoryReceiptId
-
-			IF ISNULL(@intBillId,0) = 0
-			BEGIN
-				SELECT @strVendorOrderNumber = strTicketNumber, @intTicketId = intTicketId FROM tblSCTicket WHERE intInventoryReceiptId = @intInventoryReceiptId
-				SELECT @strVendorOrderNumber = ISNULL(strPrefix,'') + @strVendorOrderNumber FROM tblSMStartingNumber WHERE strTransactionType = 'Ticket Management' AND strModule = 'Ticket Management'
-				 
-				EXEC [uspICProcessToBill] @intInventoryReceiptId,@intUserId, @intNewBillId OUTPUT
-
-				UPDATE tblAPBill SET strVendorOrderNumber = @strVendorOrderNumber WHERE intBillId = @intNewBillId
-
-				SELECT @intBillDetailId = intBillDetailId FROM tblAPBillDetail WHERE intBillId = @intNewBillId AND intInventoryReceiptChargeId IS NULL
-
-				EXEC uspAPUpdateCost @intBillDetailId,@dblCashPrice,1
-
-				DELETE FROM @prePayId
-
-				INSERT	INTO @prePayId([intId])
-				SELECT	DISTINCT BD.intBillId
-				FROM	tblAPBillDetail BD
-				JOIN	tblAPBill		BL	ON BL.intBillId	=	BD.intBillId
-				JOIN	tblSCTicket		TK  ON TK.intTicketId =  BD.intScaleTicketId
-				WHERE	BD.intContractDetailId = @intContractDetailId AND BD.intScaleTicketId = @intTicketId AND BL.intTransactionType IN (2, 13)
-
-				IF EXISTS(SELECT * FROM	@prePayId)
-				BEGIN
-					EXEC uspAPApplyPrepaid @intNewBillId, @prePayId
-				END
-				
-
-				EXEC [dbo].[uspAPPostBill] 
-					 @post = 1
-					,@recap = 0
-					,@isBatch = 0
-					,@param = @intNewBillId
-					,@userId = @intUserId
-					,@success = @ysnSuccess OUTPUT
-			END
-			ELSE
-			BEGIN
-				SELECT @dblTotal = SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = @intBillId
-				EXEC	[dbo].[uspSMTransactionCheckIfRequiredApproval]
-						@type					=	N'AccountsPayable.view.Voucher',
-						@transactionEntityId	=	@intEntityId,
-						@currentUserEntityId	=	@intUserId,
-						@locationId				=	@intCompanyLocationId,
-						@amount					=	@dblTotal,
-						@requireApproval		=	@ysnRequireApproval OUTPUT
-
-				IF  ISNULL(@ysnRequireApproval , 0) = 0
-				BEGIN
-					IF ISNULL(@ysnBillPosted,0) = 1
-					BEGIN
-						EXEC [dbo].[uspAPPostBill] @post = 0,@recap = 0,@isBatch = 0,@param = @intBillId,@userId = @intUserId,@success = @ysnSuccess OUTPUT
-					END
-
-					EXEC uspAPUpdateCost @intBillDetailId,@dblCashPrice,1
-
-					IF ISNULL(@ysnBillPosted,0) = 1
-					BEGIN
-						EXEC [dbo].[uspAPPostBill] @post = 1,@recap = 0,@isBatch = 0,@param = @intBillId,@userId = @intUserId,@success = @ysnSuccess OUTPUT
-					END
-				END
-			END
-
-			SELECT	@intInventoryReceiptId = MIN(intInventoryReceiptId) FROM #tblReceipt WHERE intInventoryReceiptId > @intInventoryReceiptId
-		END
-		
-
-	END
-	IF @intContractTypeId = 2
-	BEGIN
-
-		IF OBJECT_ID('tempdb..#tblShipment') IS NOT NULL  								
-			DROP TABLE #tblShipment
-
-		SELECT	DISTINCT SH.ysnPosted,SH.strShipmentNumber,SI.intInventoryShipmentItemId,SH.intInventoryShipmentId,ISNULL(ID.intInvoiceId ,0) intInvoiceId,ID.intInvoiceDetailId,IV.ysnPosted ysnInvoicePosted
-		INTO	#tblShipment
-		FROM	tblICInventoryShipment		SH 
-		JOIN	tblICInventoryShipmentItem	SI	ON	SI.intInventoryShipmentId		=	SH.intInventoryShipmentId 
-   LEFT	JOIN	tblARInvoiceDetail			ID	ON	ID.intInventoryShipmentItemId	=	SI.intInventoryShipmentItemId
-   LEFT	JOIN	tblARInvoice				IV	ON	IV.intInvoiceId					=	ID.intInvoiceId
-		WHERE	SI.intLineNo	= @intContractDetailId 
-		AND		SH.intOrderType = 1
-		AND		SH.ysnPosted	= 1
-
-		SELECT	@intInventoryShipmentId = MIN(intInventoryShipmentId) FROM #tblShipment
-
-		WHILE ISNULL(@intInventoryShipmentId,0) > 0
-		BEGIN
-
-			SELECT	@intInvoiceId = intInvoiceId,@strShipmentNumber = strShipmentNumber, @intInvoiceDetailId = intInvoiceDetailId, @ysnInvoicePosted = ysnInvoicePosted 
-			FROM	#tblShipment 
-			WHERE	intInventoryShipmentId = @intInventoryShipmentId
-
-			IF	ISNULL(@intInvoiceId,0)	=	0
-			BEGIN
-				EXEC	uspARCreateInvoiceFromShipment 
-						 @ShipmentId		= @intInventoryShipmentId
-						,@UserId			= @intUserId
-						,@NewInvoiceId		= @intNewInvoiceId	OUTPUT
-				
-				SELECT	@intInvoiceDetailId = intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @intNewInvoiceId AND intContractDetailId = @intContractDetailId AND intInventoryShipmentChargeId IS NULL
-
-				EXEC	uspARUpdateInvoicePrice 
-						 @InvoiceId			=	@intNewInvoiceId
-						,@InvoiceDetailId	=	@intInvoiceDetailId
-						,@Price				=	@dblCashPrice
-						,@UserId			=	@intUserId
-
-				EXEC	uspARPostInvoice
-						 @param				= @intNewInvoiceId
-						,@post				= 1
-						,@userId			= @intUserId
-						,@raiseError		= 1
-
-			END
-			ELSE
-			BEGIN
-				IF ISNULL(@ysnInvoicePosted,0) = 1
-				BEGIN
-					EXEC	uspARPostInvoice
-							 @param				= @intInvoiceId
-							,@post				= 0
-							,@userId			= @intUserId
-							,@raiseError		= 1
-				END
-
-				EXEC	uspARUpdateInvoicePrice 
-						 @InvoiceId			=	@intInvoiceId
-						,@InvoiceDetailId	=	@intInvoiceDetailId
-						,@Price				=	@dblCashPrice
-						,@UserId			=	@intUserId
-
-				IF ISNULL(@ysnInvoicePosted,0) = 1
-				BEGIN
-					EXEC	uspARPostInvoice
-							 @param				= @intInvoiceId
-							,@post				= 1
-							,@userId			= @intUserId
-							,@raiseError		= 1
-				END
-			END
-			SELECT	@intInventoryShipmentId = MIN(intInventoryShipmentId) FROM #tblShipment WHERE intInventoryShipmentId > @intInventoryShipmentId
+			EXEC uspCTCreateBillForBasisContract @intContractDetailId, @dblCashPrice, null
 		END
 	END
-	*/
 
 END TRY
 
