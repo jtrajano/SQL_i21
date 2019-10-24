@@ -8075,6 +8075,8 @@
     <Build Include="dbo\Views\vyuIPAmendmentApproval.sql" /> 
     <Build Include="dbo\Tables\tblARInvoiceTaxReportStagingTable.sql" />
     <Build Include="dbo\Stored Procedures\uspARInvoiceDetailTaxReport.sql" />
+    <Build Include="dbo\Tables\tblSTBasketAnalysisStagingTable.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTGenerateBasketAnalysisData.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
