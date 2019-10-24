@@ -2,7 +2,8 @@
 		
 	@intContractDetailId	INT,
 	@intUserId				INT = NULL,
-	@ScreenName				NVARCHAR(50)
+	@ScreenName				NVARCHAR(50),
+	@ysnDelete				BIT = NULL
 	
 AS
 
@@ -52,6 +53,11 @@ BEGIN TRY
 			@intStockUOMId					INT,
 			@intItemId						INT
 
+			declare @AvailableQuantityForVoucher cursor;
+			declare @dblCashPriceForVoucher numeric(18,6);
+			declare @dblAvailableQuantity numeric(18,6);
+			declare @dblProcessQuantity numeric(18,6);
+
 	SELECT	@dblCashPrice			=	dblCashPrice, 
 			@intPricingTypeId		=	intPricingTypeId, 
 			@intLastModifiedById	=	ISNULL(intLastModifiedById,intCreatedById),
@@ -96,17 +102,59 @@ BEGIN TRY
 	IF 	@intPricingTypeId NOT IN (1,2,6) OR @ysnAllowChangePricing = 1
 		RETURN
 
-	IF NOT EXISTS(SELECT * FROM tblAPBillDetail WHERE intContractDetailId = @intContractDetailId AND intContractCostId IS NULL AND intInventoryReceiptChargeId IS NULL)
+
+	if (@intPricingTypeId = 2 or (@intPricingTypeId = 1 and (SELECT count(*) FROM tblAPBillDetail WHERE intContractDetailId = @intContractDetailId) > 0))
 	BEGIN
-		if (@intPricingTypeId = 2)
+
+		if (@ysnDelete = 1) return;
+
+		set @dblProcessQuantity = 0;
+		SET @AvailableQuantityForVoucher = CURSOR FOR
+
+			select
+				dblCashPrice
+				,dblAvailableQuantity
+			from
+				vyuCTAvailableQuantityForVoucher where intContractDetailId = @intContractDetailId
+
+		OPEN @AvailableQuantityForVoucher
+		FETCH NEXT
+		FROM
+			@AvailableQuantityForVoucher
+		INTO
+			@dblCashPriceForVoucher
+			,@dblAvailableQuantity
+
+		WHILE @@FETCH_STATUS = 0
 		BEGIN
-			SELECT	@dblCashPrice = dbo.fnCTConvertQtyToTargetItemUOM(@intStockUOMId,@intSeqPriceUOMId,@dblPartialCashPrice)
+			print @dblCashPriceForVoucher;
+			print @dblAvailableQuantity
+			
+			set @dblAvailableQuantity = @dblAvailableQuantity - @dblProcessQuantity;
+
+			EXEC uspCTCreateBillForBasisContract @intContractDetailId, @dblCashPriceForVoucher, @dblAvailableQuantity
+
+			set @dblProcessQuantity = @dblProcessQuantity + @dblAvailableQuantity;
+				
+			FETCH NEXT
+			FROM
+				@AvailableQuantityForVoucher
+			INTO
+			@dblCashPriceForVoucher
+			,@dblAvailableQuantity
 		END
-		ELSE
+
+		CLOSE @AvailableQuantityForVoucher;
+		DEALLOCATE @AvailableQuantityForVoucher;
+
+	END
+	ELSE
+	BEGIN
+		IF NOT EXISTS(SELECT * FROM tblAPBillDetail WHERE intContractDetailId = @intContractDetailId AND intContractCostId IS NULL AND intInventoryReceiptChargeId IS NULL)
 		BEGIN
 			SELECT	@dblCashPrice = dbo.fnCTConvertQtyToTargetItemUOM(@intStockUOMId,@intSeqPriceUOMId,@dblCashPrice)
+			EXEC uspCTCreateBillForBasisContract @intContractDetailId, @dblCashPrice, null
 		END
-		EXEC uspCTCreateBillForBasisContract @intContractDetailId, @dblCashPrice
 	END
 	/*
 	IF @intContractTypeId = 1 
