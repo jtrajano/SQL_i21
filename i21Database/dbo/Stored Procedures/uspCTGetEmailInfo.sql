@@ -1,7 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspCTGetEmailInfo]
 		@strId			NVARCHAR(MAX),
 		@strMailType	NVARCHAR(100),
-		@strURL	NVARCHAR(MAX)
+		@strURL	NVARCHAR(MAX),
+		@intCurrentUserEntityId int
 AS 
 BEGIN
 	DECLARE @strNumber					NVARCHAR(100),
@@ -43,6 +44,10 @@ BEGIN
 		if (@ysnContractSlspnOnEmail = 1)
 		BEGIN
 			set @strSalespersonName = (select top 1 strName from tblEMEntity where intEntityId in (select distinct intSalespersonId from tblCTContractHeader where intContractHeaderId IN (SELECT * FROM  dbo.fnSplitString(@strId,','))))
+		END
+		ELSE
+		BEGIN
+			set @strSalespersonName = (select top 1 strName from tblEMEntity where intEntityId = @intCurrentUserEntityId)
 		END
 		SET @routeScreen = 'Contract'
 		INSERT INTO @loop
@@ -137,7 +142,7 @@ BEGIN
 	SET @body +=@strThanks+'<br><br>'
 	SET @body +='Sincerely, <br>'
 		
-	if (@ysnContractSlspnOnEmail = 1 and @strMailType = 'Contract')
+	if (@strMailType = 'Contract')
 	BEGIN
 		SET @body +=@strSalespersonName
 	END
