@@ -8371,6 +8371,7 @@
     <None Include="Scripts\Post-Deployment\AR\DefaultData\37_UpdatePOSNewFields.sql" />
     <None Include="Scripts\Post-Deployment\AP\UpdatePaymentDetailOffset.sql" />
     <Build Include="dbo\Views\vyuARInvoiceSubFormulaReport.sql" />
+    <Build Include="dbo\Views\vyuCTAvailableQuantityForVoucher.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
