@@ -8070,6 +8070,12 @@
     <Build Include="dbo\Stored Procedures\uspICZeroAllStockQtyInCountDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspCMUpdateAPOverflowSettings.sql" />
     <Build Include="dbo\Stored Procedures\uspCFValidateInvoiceDataSetup.sql" />
+    <Build Include="dbo\Tables\tblTRImportDtn.sql" />
+    <Build Include="dbo\Tables\tblTRDtnImportSetup.sql" />
+    <Build Include="dbo\Tables\tblTRDtnImportSetupDetail.sql" />
+    <Build Include="dbo\Tables\tblTRImportDtnDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspTRImportDtn.sql" />
+    <Build Include="dbo\Stored Procedures\uspTRProcessImportDtn.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -8468,5 +8474,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\CT\1920_FinancialStatus.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\TR\ImportDtnFileSetup.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\TR\ImportDtnDefaultSetup.sql" />
   </ItemGroup>
 </Project>
