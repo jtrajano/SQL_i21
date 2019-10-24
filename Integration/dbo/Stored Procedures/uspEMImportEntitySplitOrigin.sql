@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE uspEMImportEntitySplitOrigin
-@@error_msg nvarchar(max) = N'' OUTPUT,
+@error_msg nvarchar(max) = N'' OUTPUT,
 @success bit output,
 @duplicate_msg nvarchar(max) = N'' OUTPUT
 AS

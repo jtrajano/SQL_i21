@@ -480,6 +480,6 @@
     <Build Include="dbo\Stored Procedures\uspARImportTaxGroupCustomerLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspGRGrainInventoryInquiryReport.sql" />
     <Build Include="dbo\Tables\tblEMImportedSplit.sql" />
-    <None Include="dbo\Stored Procedures\uspEMImportEntitySplitOrigin.sql" />
+    <Build Include="dbo\Stored Procedures\uspEMImportEntitySplitOrigin.sql" />
   </ItemGroup>
 </Project>
