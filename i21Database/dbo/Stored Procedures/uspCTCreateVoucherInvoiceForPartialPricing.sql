@@ -290,6 +290,12 @@ BEGIN TRY
 						CONTINUE
 					END
 				END
+				
+				IF CHARINDEX('TKT-', @strVendorOrderNumber) = 0
+				BEGIN
+					SELECT	@strVendorOrderNumber = ISNULL(strPrefix,'') + @strVendorOrderNumber FROM tblSMStartingNumber WHERE strTransactionType = 'Ticket Management' AND strModule = 'Ticket Management'
+				END		
+				
 				IF @dblTotalIVForPFQty = @dblPriceFxdQty
 				BEGIN
 					SELECT	@dblRemainingQty = 0
