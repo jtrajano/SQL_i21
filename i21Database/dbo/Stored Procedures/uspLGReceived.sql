@@ -116,8 +116,8 @@ SET ANSI_WARNINGS OFF
 				END
 				ELSE 
 				BEGIN
-					UPDATE tblLGLoad SET intShipmentStatus = 3 WHERE intLoadId = @intLoadId
 					UPDATE tblLGLoadDetail SET dblDeliveredGross = dblDeliveredGross-@dblNetWeight, dblDeliveredNet = dblDeliveredGross-@dblNetWeight WHERE intLoadDetailId = @intSourceId
+					IF ((SELECT SUM(ISNULL(dblDeliveredQuantity, 0)) FROM tblLGLoadDetail WHERE intLoadDetailId = @intSourceId) = 0) UPDATE tblLGLoad SET intShipmentStatus = 3 WHERE intLoadId = @intLoadId
 				END
 
 				SELECT @intLotId = MIN(intLotId) FROM @ItemsFromInventoryReceipt WHERE intLotId > @intLotId AND intInventoryReceiptDetailId	= @intReceiptDetailId
@@ -180,8 +180,9 @@ SET ANSI_WARNINGS OFF
 			END
 			ELSE 
 			BEGIN
-				UPDATE tblLGLoad SET intShipmentStatus = 3 WHERE intLoadId = @intLoadId
 				UPDATE tblLGLoadDetail SET dblDeliveredGross = dblDeliveredGross-@dblNetWeight, dblDeliveredNet = dblDeliveredGross-@dblNetWeight WHERE intLoadDetailId = @intSourceId
+				IF ((SELECT SUM(ISNULL(dblDeliveredQuantity, 0)) FROM tblLGLoadDetail WHERE intLoadDetailId = @intSourceId) = 0) UPDATE tblLGLoad SET intShipmentStatus = 3 WHERE intLoadId = @intLoadId
+
 			END	
 		END
 
