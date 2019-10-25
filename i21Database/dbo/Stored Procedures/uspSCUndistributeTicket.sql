@@ -395,9 +395,10 @@ BEGIN TRY
 
 							IF(ISNULL(@ysnLoadContract,0) = 0)
 							BEGIN
-								UPDATE tblCTContractDetail
-								SET dblScheduleQty = ISNULL(dblScheduleQty,0) + @dblTicketScheduledQty
-								WHERE intContractDetailId = @intTicketContractDetailId
+								-- UPDATE tblCTContractDetail
+								-- SET dblScheduleQty = ISNULL(dblScheduleQty,0) + @dblTicketScheduledQty
+								-- WHERE intContractDetailId = @intTicketContractDetailId
+								EXEC uspCTUpdateScheduleQuantityUsingUOM @intTicketContractDetailId, @dblTicketScheduledQty, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId
 							END
 						END
 
@@ -956,7 +957,26 @@ BEGIN TRY
 							WHERE intTicketId = @intTicketId
 
 							EXEC [dbo].[uspSCUpdateTicketStatus] @intTicketId, 1;
-							
+
+							---- Update contract schedule based on ticket schedule qty							
+
+							IF ISNULL(@intTicketContractDetailId, 0) > 0 AND (@strDistributionOption = 'CNT' OR @strDistributionOption = 'LOD')
+							BEGIN
+								-- For Review
+								SET @ysnLoadContract = 0
+								SELECT TOP 1 
+									@ysnLoadContract = A.ysnLoad
+								FROM tblCTContractHeader A
+								INNER JOIN tblCTContractDetail B
+									ON A.intContractHeaderId = B.intContractHeaderId
+								WHERE B.intContractDetailId = @intTicketContractDetailId
+
+								IF(ISNULL(@ysnLoadContract,0) = 0)
+								BEGIN
+									EXEC uspCTUpdateScheduleQuantityUsingUOM @intTicketContractDetailId, @dblTicketScheduledQty, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId
+								END
+							END
+
 						END
 					END
 				END
