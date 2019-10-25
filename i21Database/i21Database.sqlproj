@@ -8117,6 +8117,8 @@
     <Build Include="dbo\Stored Procedures\uspTRProcessImportDtn.sql" />
     <Build Include="dbo\Tables\tblTRCrossReferenceDtn.sql" />
     <Build Include="dbo\Views\vyuTRCrossReferenceDtn.sql" />
+    <Build Include="dbo\Views\vyuICGetRunningStockQtyByUOM.sql" />
+    <Build Include="dbo\Views\vyuICGetRunningStockQtyByStockUOM.sql" />
     <None Include="Scripts\Post-Deployment\CT\Create_fnCTFormatNumber.sql" />
     <Build Include="dbo\Functions\fnCTFormatNumber.sql" />
     <Build Include="dbo\Tables\tblGROldTransactionMapping.sql" />
@@ -8148,6 +8150,7 @@
     <Build Include="dbo\Stored Procedures\uspIPProcessSAPLSICancel_CA.sql" />
     <Build Include="dbo\Stored Procedures\uspIPStageSAPLSICancel_CA.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateSAPFeedFailureEmailMessage_CA.sql" />
+    <Build Include="dbo\Stored Procedures\uspICFixMissingReceiptGLEntries.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

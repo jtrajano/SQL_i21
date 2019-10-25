@@ -119,6 +119,8 @@ USING (
 				,r.intStorageLocationId
 				,Aggregrate_Qty = SUM(r.dblQty) 
 		FROM	@ItemsToIncreaseReserve r
+				INNER JOIN tblICItem i
+					ON r.intItemId = i.intItemId 
 				CROSS APPLY (
 					SELECT	TOP 1 
 							iUOM.intItemUOMId
@@ -129,6 +131,7 @@ USING (
 				) StockUOM
 		WHERE	r.intLotId IS NULL 
 				AND r.intItemUOMId <> StockUOM.intItemUOMId 
+				AND ISNULL(i.ysnSeparateStockForUOMs, 0) = 0 -- If separate UOMs is not enabled, then don't track the non-stock unit UOM. 
 		GROUP BY r.intItemId
 				, r.intItemLocationId
 				, r.intItemUOMId 

@@ -379,6 +379,7 @@ AS
 					,NULL --AggregrateItemLots.dblTotalNet
 					,ri.ysnSubCurrency
 					,r.intSubCurrencyCents
+					,CASE WHEN ISNULL(i.ysnSeparateStockForUOMs, 0) = 0 THEN stockUOM.intItemUOMId ELSE NULL END
 				)
 		,intSourceEntityId = r.intEntityVendorId
 		,intCommodityId = i.intCommodityId
@@ -395,6 +396,10 @@ AS
 			AND ri.intInventoryReceiptItemId = t.intTransactionDetailId
 		LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType 
 			ON currencyRateType.intCurrencyExchangeRateTypeId = t.intForexRateTypeId
+		OUTER APPLY (
+			SELECT TOP 1 intItemUOMId FROM tblICItemUOM iu WHERE iu.intItemId = i.intItemId AND iu.ysnStockUnit = 1
+		) stockUOM
+
 )
 
 -------------------------------------------------------------------------------------------
