@@ -20,6 +20,12 @@ SET ANSI_WARNINGS OFF
 -- Create a unique transaction name. 
 DECLARE @TransactionName AS VARCHAR(500) = 'InventoryTransfer' + CAST(NEWID() AS NVARCHAR(100));
 
+--------------------------------------------------------------------------------------------  
+-- Begin a transaction and immediately create a save point 
+--------------------------------------------------------------------------------------------  
+BEGIN TRAN @TransactionName
+SAVE TRAN @TransactionName
+
 -- Constants  
 DECLARE @INVENTORY_TRANSFER_TYPE AS INT = 12
 		,@INVENTORY_TRANSFER_WITH_SHIPMENT_TYPE AS INT = 13
@@ -110,6 +116,14 @@ BEGIN
 	EXEC uspICRaiseError 80169; 
 	GOTO Post_Exit  
 END   
+
+IF @ysnRecap = 0 
+BEGIN 
+	UPDATE	dbo.tblICInventoryTransfer  
+	SET		ysnPosted = @ysnPost
+			,intConcurrencyId = ISNULL(intConcurrencyId, 0) + 1
+	WHERE	strTransferNo = @strTransactionId  
+END 
   
 -- Check if the transaction is already posted  
 IF @ysnPost = 0 AND @ysnTransactionPostedFlag = 0  
@@ -221,11 +235,6 @@ BEGIN
 	END  
 END   
 
---------------------------------------------------------------------------------------------  
--- Begin a transaction and immediately create a save point 
---------------------------------------------------------------------------------------------  
-BEGIN TRAN @TransactionName
-SAVE TRAN @TransactionName
 
 -- Create and validate the lot numbers
 IF @ysnPost = 1
@@ -999,12 +1008,6 @@ BEGIN
 	BEGIN 
 		EXEC dbo.uspGLBookEntries @GLEntries, @ysnPost 	
 	END
-
-	UPDATE	dbo.tblICInventoryTransfer  
-	SET		ysnPosted = @ysnPost
-			,intConcurrencyId = ISNULL(intConcurrencyId, 0) + 1
-	WHERE	strTransferNo = @strTransactionId  
-
 	
 	IF @ysnPost = 1
 	BEGIN
