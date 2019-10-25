@@ -2065,6 +2065,10 @@ BEGIN TRY
 	SET ysnPosted = 1
 	WHERE intSettleStorageId = @intParentSettleStorageId
 
+	UPDATE tblGRStorageHistory
+	SET intBillId = @createdVouchersId
+	WHERE intSettleStorageId = @intParentSettleStorageId
+
 	SettleStorage_Exit:
 END TRY
 
