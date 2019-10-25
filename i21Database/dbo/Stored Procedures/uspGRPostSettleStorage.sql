@@ -2464,7 +2464,7 @@ BEGIN TRY
 
 	if @debug_awesome_ness = 1	
 	begin
-		select 'storage history',* from [tblGRStorageHistory] order by intStorageHistoryId desc offset 0 rows fetch next 5 rows only
+		select 'storage history',* from [tblGRStorageHistory] order by intStorageHistoryId desc --offset 0 rows fetch next 5 rows only
 	end
 
 
