@@ -66,6 +66,24 @@ DECLARE @intInventoryActualCostOutId AS INT
 DECLARE @intReturnValue AS INT 
 		,@dtmCreated AS DATETIME 
 
+IF EXISTS (SELECT 1 FROM tblICItem i WHERE i.intItemId = @intItemId AND ISNULL(i.ysnSeparateStockForUOMs, 0) = 0) 
+BEGIN 	
+	-- Replace the UOM to 'Stock Unit'. 
+	-- Convert the Qty, Cost, and Sales Price to stock UOM. 
+	SELECT 
+		@intItemUOMId = iu.intItemUOMId
+		,@dblUOMQty = iu.intItemUOMId
+		,@dblQty = dbo.fnCalculateQtyBetweenUOM(@intItemUOMId, iu.intItemUOMId, @dblQty) 
+		,@dblCost = dbo.fnCalculateCostBetweenUOM(@intItemUOMId, iu.intItemUOMId, @dblCost) 
+		,@dblSalesPrice = dbo.fnCalculateCostBetweenUOM(@intItemUOMId, iu.intItemUOMId, @dblSalesPrice) 		
+	FROM 
+		tblICItemUOM iu 
+	WHERE 
+		iu.intItemId = @intItemId 		
+		AND iu.ysnStockUnit = 1
+		AND iu.intItemUOMId <> @intItemUOMId -- Do not do the conversion if @intItemUOMId is already the stock uom. 
+END 
+
 -------------------------------------------------
 -- 1. Process the Actual Cost buckets
 -------------------------------------------------

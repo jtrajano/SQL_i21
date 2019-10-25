@@ -13,7 +13,8 @@ CREATE FUNCTION [dbo].[fnCalculateReceiptUnitCost](
 	,@intLotUOMId AS INT
 	,@dblLotNetWgtVolume AS NUMERIC(38,20)
 	,@ysnSubCurrency AS BIT
-	,@intSubCurrencyCents AS INT 
+	,@intSubCurrencyCents AS INT 	
+	,@intStockUOMId AS INT
 )
 RETURNS NUMERIC(38,20)
 AS 
@@ -46,7 +47,11 @@ BEGIN
 
 					CASE	-- When item is NOT a Lot, use the unit cost from the line item. 
 							WHEN @intLotId IS NULL AND dbo.fnGetItemLotType(@intItemId) = 0 THEN 
-								dbo.fnCalculateCostBetweenUOM(ISNULL(@intCostUOMId, @intItemUOMId), @intGrossUOMId, @dblUnitCost) 
+								dbo.fnCalculateCostBetweenUOM(
+									ISNULL(@intCostUOMId, @intItemUOMId)
+									, ISNULL(@intStockUOMId, @intGrossUOMId)
+									, @dblUnitCost
+								) 
 													
 							WHEN @intLotId IS NOT NULL AND ISNULL(@dblItemNetWgtVolume, 0) <> ISNULL(@dblLotNetWgtVolume, 0) THEN 
 								/*
@@ -69,7 +74,11 @@ BEGIN
 									,ISNULL(@dblLotNetWgtVolume, 1) 
 								)
 							ELSE
-								dbo.fnCalculateCostBetweenUOM(ISNULL(@intCostUOMId, @intItemUOMId), @intGrossUOMId, @dblUnitCost) 
+								dbo.fnCalculateCostBetweenUOM(
+									ISNULL(@intCostUOMId, @intItemUOMId)
+									, ISNULL(@intStockUOMId, @intGrossUOMId)
+									, @dblUnitCost
+								) 
 
 					END 
 
@@ -79,13 +88,16 @@ BEGIN
 							-- If non-lot, convert the unit cost from Cost UOM to Receive UOM
 							WHEN @intLotId IS NULL AND dbo.fnGetItemLotType(@intItemId) = 0 THEN 
 								-- Convert from Cost UOM to Item UOM. 
-								dbo.fnCalculateCostBetweenUOM(ISNULL(@intCostUOMId, @intItemUOMId), @intItemUOMId, @dblUnitCost) 
+								dbo.fnCalculateCostBetweenUOM(
+									ISNULL(@intCostUOMId, @intItemUOMId)
+									, ISNULL(@intStockUOMId, @intItemUOMId)
+									, @dblUnitCost
+								) 
 													
 							-- If lot, convert from Cost UOM to Lot UOM
 							ELSE 														
 								dbo.fnCalculateCostBetweenUOM(ISNULL(@intCostUOMId, @intItemUOMId), @intLotUOMId, @dblUnitCost) 
 						END 
-
 		END
 
 	SET @result = 

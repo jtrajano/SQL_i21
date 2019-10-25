@@ -3752,6 +3752,7 @@ BEGIN
 															,AggregrateItemLots.dblTotalNet --Lot Net Wgt or Volume
 															,ReceiptItem.ysnSubCurrency
 															,Receipt.intSubCurrencyCents
+															,RebuildInvTrans.intItemUOMId 
 														)
 														--/ Receipt.intSubCurrencyCents 
 
@@ -3794,6 +3795,7 @@ BEGIN
 															,AggregrateItemLots.dblTotalNet
 															,NULL--ReceiptItem.ysnSubCurrency
 															,NULL--Receipt.intSubCurrencyCents
+															,RebuildInvTrans.intItemUOMId 
 														)
 														-- (B) Other Charge
 														+ 
@@ -3850,6 +3852,7 @@ BEGIN
 								,AggregrateItemLots.dblTotalNet --Lot Net Wgt or Volume
 								,NULL--DetailItem.ysnSubCurrency
 								,NULL--Header.intSubCurrencyCents
+								,RebuildInvTrans.intItemUOMId 
 							)
 						,RebuildInvTrans.intCostingMethod
 				FROM	#tmpICInventoryTransaction RebuildInvTrans INNER JOIN tblICItemLocation ItemLocation 
@@ -5180,8 +5183,12 @@ BEGIN
 												-- It item is using Average Costing, then get the Average Cost. 
 												dbo.fnCalculateCostBetweenUOM(StockUnit.intItemUOMId, invCountDetail.intItemUOMId, ISNULL(ItemPricing.dblAverageCost, 0)) 
 											ELSE
-												-- Otherwise, get the item's last cost. 
-												dbo.fnCalculateCostBetweenUOM(StockUnit.intItemUOMId, invCountDetail.intItemUOMId, ISNULL(ItemPricing.dblLastCost, 0))
+												-- Otherwise, get the item's last cost or standard cost. 
+												dbo.fnCalculateCostBetweenUOM(
+													StockUnit.intItemUOMId
+													, invCountDetail.intItemUOMId
+													, COALESCE(NULLIF(ItemPricing.dblLastCost, 0), NULLIF(ItemPricing.dblStandardCost, 0), 0)
+												)
 									END
 				FROM	dbo.tblICInventoryCount invCount INNER JOIN dbo.tblICInventoryCountDetail invCountDetail
 							ON invCount.intInventoryCountId = invCountDetail.intInventoryCountId 
@@ -5279,9 +5286,9 @@ BEGIN
 															,ItemUOM.intItemUOMId
 															,COALESCE(
 																AdjDetail.dblNewCost
-																, AdjDetail.dblCost
+																, nullif(AdjDetail.dblCost, 0) 
 																, invCountDetail.dblNewCost
-																, invCountDetail.dblLastCost
+																, nullif(invCountDetail.dblLastCost, 0)
 																, RebuildInvTrans.dblCost
 															) 
 														)

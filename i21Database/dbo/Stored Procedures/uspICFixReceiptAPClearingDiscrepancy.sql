@@ -186,6 +186,7 @@ AS (
 									,AggregrateItemLots.dblTotalNet
 									,ri.ysnSubCurrency
 									,r.intSubCurrencyCents
+									,CASE WHEN ISNULL(i.ysnSeparateStockForUOMs, 0) = 0 THEN stockUOM.intItemUOMId ELSE NULL END
 								)
 								,2 
 							)
@@ -212,6 +213,9 @@ AS (
 									ON ReceiptItem.intInventoryReceiptItemId = ReceiptItemLot.intInventoryReceiptItemId
 						WHERE	ReceiptItem.intInventoryReceiptItemId = ri.intInventoryReceiptItemId
 					) AggregrateItemLots
+					OUTER APPLY (
+						SELECT TOP 1 intItemUOMId FROM tblICItemUOM iu WHERE iu.intItemId = i.intItemId AND iu.ysnStockUnit = 1
+					) stockUOM
 				WHERE
 					r.strReceiptNumber = @strReceiptNumber
 				GROUP BY

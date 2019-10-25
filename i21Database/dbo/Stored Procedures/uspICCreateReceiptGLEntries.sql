@@ -337,8 +337,9 @@ AS
 							,AggregrateItemLots.dblTotalNet
 							,ri.ysnSubCurrency
 							,r.intSubCurrencyCents
+							,CASE WHEN ISNULL(i.ysnSeparateStockForUOMs, 0) = 0 THEN stockUOM.intItemUOMId ELSE NULL END
 						)
-					)
+					)						
 			--,dblAddOnCostFromOtherCharge = t.dblQty * dbo.fnGetOtherChargesFromInventoryReceipt(ri.intInventoryReceiptItemId)		
 			,t.intSourceEntityId
 			,i.intCommodityId
@@ -357,6 +358,9 @@ AS
 			LEFT JOIN tblICInventoryReceiptItem ri
 				ON ri.intInventoryReceiptId = r.intInventoryReceiptId
 				AND ri.intInventoryReceiptItemId = t.intTransactionDetailId
+			OUTER APPLY (
+				SELECT TOP 1 intItemUOMId FROM tblICItemUOM iu WHERE iu.intItemId = i.intItemId AND iu.ysnStockUnit = 1
+			) stockUOM
 			OUTER APPLY (
 				SELECT  dblTotalNet = SUM(
 							CASE	WHEN  ISNULL(ReceiptItemLot.dblGrossWeight, 0) - ISNULL(ReceiptItemLot.dblTareWeight, 0) = 0 THEN -- If Lot net weight is zero, convert the 'Pack' Qty to the Volume or Weight. 											
@@ -433,6 +437,7 @@ AS
 									,AggregrateItemLots.dblTotalNet
 									,ri.ysnSubCurrency
 									,r.intSubCurrencyCents
+									,CASE WHEN ISNULL(i.ysnSeparateStockForUOMs, 0) = 0 THEN stockUOM.intItemUOMId ELSE NULL END
 								)
 								,2 
 							)
@@ -461,6 +466,9 @@ AS
 									ON ReceiptItem.intInventoryReceiptItemId = ReceiptItemLot.intInventoryReceiptItemId
 						WHERE	ReceiptItem.intInventoryReceiptItemId = ri.intInventoryReceiptItemId
 					) AggregrateItemLots
+					OUTER APPLY (
+						SELECT TOP 1 intItemUOMId FROM tblICItemUOM iu WHERE iu.intItemId = i.intItemId AND iu.ysnStockUnit = 1
+					) stockUOM
 				WHERE
 					t.strBatchId = @strBatchId
 				GROUP BY
@@ -538,6 +546,7 @@ AS
 							,AggregrateItemLots.dblTotalNet
 							,ri.ysnSubCurrency
 							,r.intSubCurrencyCents
+							,CASE WHEN ISNULL(i.ysnSeparateStockForUOMs, 0) = 0 THEN stockUOM.intItemUOMId ELSE NULL END
 						)
 					)
 					,2
@@ -567,6 +576,7 @@ AS
 							,AggregrateItemLots.dblTotalNet
 							,ri.ysnSubCurrency
 							,r.intSubCurrencyCents
+							,CASE WHEN ISNULL(i.ysnSeparateStockForUOMs, 0) = 0 THEN stockUOM.intItemUOMId ELSE NULL END 
 						)	
 						, t.dblCost
 						, (
@@ -591,6 +601,7 @@ AS
 									,AggregrateItemLots.dblTotalNet
 									,ri.ysnSubCurrency
 									,r.intSubCurrencyCents
+									,CASE WHEN ISNULL(i.ysnSeparateStockForUOMs, 0) = 0 THEN stockUOM.intItemUOMId ELSE NULL END 
 								)
 								,2
 							)
@@ -623,6 +634,9 @@ AS
 					ON iu.intUnitMeasureId = u.intUnitMeasureId
 			)
 				ON iu.intItemUOMId = t.intItemUOMId
+			OUTER APPLY (
+				SELECT TOP 1 intItemUOMId FROM tblICItemUOM iu WHERE iu.intItemId = i.intItemId AND iu.ysnStockUnit = 1
+			) stockUOM
 			LEFT JOIN tblICInventoryReceiptItem ri
 				ON  ri.intInventoryReceiptId = r.intInventoryReceiptId
 				AND ri.intInventoryReceiptItemId = t.intTransactionDetailId
@@ -667,6 +681,7 @@ AS
 						,AggregrateItemLots.dblTotalNet
 						,ri.ysnSubCurrency
 						,r.intSubCurrencyCents
+						,CASE WHEN ISNULL(i.ysnSeparateStockForUOMs, 0) = 0 THEN stockUOM.intItemUOMId ELSE NULL END 
 					)
 					,2 
 				)
