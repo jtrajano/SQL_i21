@@ -18,6 +18,12 @@ SET ANSI_WARNINGS OFF
 -- Create a unique transaction name. 
 DECLARE @TransactionName AS VARCHAR(500) = 'InventoryAdjustment' + CAST(NEWID() AS NVARCHAR(100));
 
+--------------------------------------------------------------------------------------------  
+-- Begin a transaction and immediately create a save point 
+--------------------------------------------------------------------------------------------  
+BEGIN TRAN @TransactionName
+SAVE TRAN @TransactionName
+
 -- Constants  
 DECLARE @STARTING_NUMBER_BATCH AS INT = 3  
 DECLARE @ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY AS NVARCHAR(255) = 'Inventory Adjustment'
@@ -100,6 +106,16 @@ BEGIN
 	EXEC uspICRaiseError 80169; 
 	GOTO Post_Exit  
 END   
+
+IF @ysnRecap = 0
+BEGIN 
+	UPDATE	dbo.tblICInventoryAdjustment  
+	SET		ysnPosted = @ysnPost
+			,intConcurrencyId = ISNULL(intConcurrencyId, 0) + 1
+			,dtmPostedDate = CASE WHEN @ysnPost = 1 THEN GETDATE() ELSE dtmPostedDate	END
+			,dtmUnpostedDate = CASE WHEN @ysnPost = 0 THEN GETDATE() ELSE dtmUnpostedDate	END
+	WHERE	strAdjustmentNo = @strTransactionId  
+END 
   
 -- Check if the transaction is already unposted  
 IF @ysnPost = 0 AND @ysnTransactionPostedFlag = 0  
@@ -164,12 +180,6 @@ WHERE 	@adjustmentType IN (
 			, @ADJUSTMENT_TYPE_UOMChange
 			, @ADJUSTMENT_TYPE_ChangeLotWeight
 		)
-
---------------------------------------------------------------------------------------------  
--- Begin a transaction and immediately create a save point 
---------------------------------------------------------------------------------------------  
-BEGIN TRAN @TransactionName
-SAVE TRAN @TransactionName
 
 --------------------------------------------------------------------------------------------  
 -- If POST, call the post routines  
@@ -712,13 +722,6 @@ BEGIN
 			EXEC dbo.uspGLBookEntries @GLEntries, @ysnPost 
 		END
 	END
-
-	UPDATE	dbo.tblICInventoryAdjustment  
-	SET		ysnPosted = @ysnPost
-			,intConcurrencyId = ISNULL(intConcurrencyId, 0) + 1
-			,dtmPostedDate = CASE WHEN @ysnPost = 1 THEN GETDATE() ELSE dtmPostedDate	END
-			,dtmUnpostedDate = CASE WHEN @ysnPost = 0 THEN GETDATE() ELSE dtmUnpostedDate	END
-	WHERE	strAdjustmentNo = @strTransactionId  
 
 	COMMIT TRAN @TransactionName
 END 
