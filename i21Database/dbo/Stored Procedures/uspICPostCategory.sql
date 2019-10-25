@@ -128,6 +128,24 @@ END
 -- It will update the Total Cost Value and Total Retail Value using the supplied item cost and retail price. 
 IF @intTransactionTypeId NOT IN (@TransactionType_InventoryReturn) AND @dblAdjustRetailValue IS NULL 
 BEGIN 
+	IF EXISTS (SELECT 1 FROM tblICItem i WHERE i.intItemId = @intItemId AND ISNULL(i.ysnSeparateStockForUOMs, 0) = 0) 
+	BEGIN 	
+		-- Replace the UOM to 'Stock Unit'. 
+		-- Convert the Qty, Cost, and Sales Price to stock UOM. 
+		SELECT 
+			@dblQty = dbo.fnCalculateQtyBetweenUOM(@intItemUOMId, iu.intItemUOMId, @dblQty) 
+			,@dblCost = dbo.fnCalculateCostBetweenUOM(@intItemUOMId, iu.intItemUOMId, @dblCost) 
+			,@dblSalesPrice = dbo.fnCalculateCostBetweenUOM(@intItemUOMId, iu.intItemUOMId, @dblSalesPrice) 		
+			,@intItemUOMId = iu.intItemUOMId
+			,@dblUOMQty = iu.dblUnitQty
+		FROM 
+			tblICItemUOM iu 
+		WHERE 
+			iu.intItemId = @intItemId 		
+			AND iu.ysnStockUnit = 1
+			AND iu.intItemUOMId <> @intItemUOMId -- Do not do the conversion if @intItemUOMId is already the stock uom. 
+	END 
+
 	-- If Adding stocks, compute the cost value and retail value. 
 	IF @dblQty > 0 
 	BEGIN 

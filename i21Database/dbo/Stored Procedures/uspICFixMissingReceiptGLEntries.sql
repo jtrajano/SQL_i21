@@ -201,6 +201,7 @@ SELECT	intItemId = DetailItem.intItemId
 									,AggregrateItemLots.dblTotalNet --Lot Net Wgt or Volume
 									,DetailItem.ysnSubCurrency
 									,Header.intSubCurrencyCents
+									,CASE WHEN ISNULL(i.ysnSeparateStockForUOMs, 0) = 0 THEN stockUOM.intItemUOMId ELSE NULL END  
 								)
 								--/ Header.intSubCurrencyCents 
 
@@ -243,6 +244,7 @@ SELECT	intItemId = DetailItem.intItemId
 									,AggregrateItemLots.dblTotalNet
 									,NULL--DetailItem.ysnSubCurrency
 									,NULL--Header.intSubCurrencyCents
+									,CASE WHEN ISNULL(i.ysnSeparateStockForUOMs, 0) = 0 THEN stockUOM.intItemUOMId ELSE NULL END  
 								)
 								-- (B) Other Charge
 								+ 
@@ -298,6 +300,7 @@ SELECT	intItemId = DetailItem.intItemId
 				,AggregrateItemLots.dblTotalNet --Lot Net Wgt or Volume
 				,NULL--DetailItem.ysnSubCurrency
 				,NULL--Header.intSubCurrencyCents
+				,CASE WHEN ISNULL(i.ysnSeparateStockForUOMs, 0) = 0 THEN stockUOM.intItemUOMId ELSE NULL END   
 			)
 FROM	dbo.tblICInventoryReceipt Header INNER JOIN dbo.tblICInventoryReceiptItem DetailItem 
 			ON Header.intInventoryReceiptId = DetailItem.intInventoryReceiptId 
@@ -336,7 +339,9 @@ FROM	dbo.tblICInventoryReceipt Header INNER JOIN dbo.tblICInventoryReceiptItem D
 		LEFT JOIN dbo.tblICItemLocation InTransitSourceLocation 
 			ON InTransitSourceLocation.intItemId = DetailItem.intItemId 
 			AND InTransitSourceLocation.intLocationId = Header.intTransferorId
-
+		OUTER APPLY (
+			SELECT TOP 1 intItemUOMId FROM tblICItemUOM iu WHERE iu.intItemId = i.intItemId AND iu.ysnStockUnit = 1
+		) stockUOM
 WHERE	ISNULL(DetailItem.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own
 		AND i.strType = 'Non-Inventory'		
 

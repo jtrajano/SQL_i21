@@ -52,38 +52,54 @@ SELECT
 	, dblAverageCost = ISNULL((itemPricing.dblAverageCost), 0.00)
 	, dblEndMonthCost = ISNULL((itemPricing.dblEndMonthCost), 0.00)
 
-	, dblOnOrder = ISNULL(stockUOM.dblOnOrder, 0)
-	, dblInTransitInbound = ISNULL(stockUOM.dblInTransitInbound, 0)
-	, dblUnitOnHand = ISNULL(stockUOM.dblOnHand, 0)
-	, dblInTransitOutbound = ISNULL(stockUOM.dblInTransitOutbound, 0)
-	, dblBackOrder = ISNULL(stockUOM.dblOnHand, 0)
-	, dblOrderCommitted = ISNULL(stockUOM.dblOrderCommitted, 0)
-	, dblUnitStorage = ISNULL(stockUOM.dblUnitStorage, 0)
-	, dblConsignedPurchase = ISNULL(stockUOM.dblConsignedPurchase, 0)
-	, dblConsignedSale = ISNULL(stockUOM.dblConsignedSale, 0)
-	, dblUnitReserved = ISNULL(stockUOM.dblUnitReserved, 0)
+	, dblOnOrder = COALESCE(stockInStockUOM.dblOnOrder, stockUOM.dblOnOrder, 0)
+	, dblInTransitInbound = COALESCE(stockInStockUOM.dblInTransitInbound, stockUOM.dblInTransitInbound, 0)
+	, dblUnitOnHand = COALESCE(stockInStockUOM.dblUnitOnHand, stockUOM.dblOnHand, 0)
+	, dblInTransitOutbound = COALESCE(stockInStockUOM.dblInTransitOutbound, stockUOM.dblInTransitOutbound, 0)
+	, dblBackOrder = 0 --COALESCE(stockInStockUOM.dblOnUnitOnHand, stockUOM.dblOnHand, 0)
+	, dblOrderCommitted = COALESCE(stockInStockUOM.dblOrderCommitted, stockUOM.dblOrderCommitted, 0)
+	, dblUnitStorage = COALESCE(stockInStockUOM.dblUnitStorage, stockUOM.dblUnitStorage, 0)
+	, dblConsignedPurchase = COALESCE(stockInStockUOM.dblConsignedPurchase, stockUOM.dblConsignedPurchase, 0)
+	, dblConsignedSale = COALESCE(stockInStockUOM.dblConsignedSale, stockUOM.dblConsignedSale, 0)
+	, dblUnitReserved = COALESCE(stockInStockUOM.dblUnitReserved, stockUOM.dblUnitReserved, 0)
 	, dblAvailable = 
-		ISNULL(stockUOM.dblOnHand, 0) 
-		- ISNULL(stockUOM.dblUnitReserved, 0) 
-		- ISNULL(stockUOM.dblConsignedSale, 0)
-		+ ISNULL(stockUOM.dblUnitStorage, 0)
+		COALESCE(stockInStockUOM.dblUnitOnHand, stockUOM.dblOnHand, 0)
+		- COALESCE(stockInStockUOM.dblUnitReserved, stockUOM.dblUnitReserved, 0)
+		- COALESCE(stockInStockUOM.dblConsignedSale, stockUOM.dblConsignedSale, 0)
+		+ COALESCE(stockInStockUOM.dblUnitStorage, stockUOM.dblUnitStorage, 0)
 	, dblExtended = 
 		(
-			ISNULL(stockUOM.dblOnHand, 0) 
-			+ ISNULL(stockUOM.dblUnitStorage, 0) 
-			+ ISNULL(stockUOM.dblConsignedPurchase, 0)
+			COALESCE(stockInStockUOM.dblUnitOnHand, stockUOM.dblOnHand, 0)
+			+ COALESCE(stockInStockUOM.dblUnitStorage, stockUOM.dblUnitStorage, 0)
+			+ COALESCE(stockInStockUOM.dblConsignedPurchase, stockUOM.dblConsignedPurchase, 0)
 		) 
-		* ISNULL(itemPricing.dblAverageCost, 0)
+		* dbo.fnCalculateCostBetweenUOM(
+			intItemStockUOM.intItemUOMId
+			,itemUOM.intItemUOMId
+			,ISNULL(itemPricing.dblAverageCost, 0)
+		)
+		
+		
 	, dblMinOrder = ISNULL(itemLocation.dblMinOrder, 0)
 	, dblReorderPoint = ISNULL(itemLocation.dblReorderPoint, 0)
-	, dblNearingReorderBy = CAST(ISNULL(stockUOM.dblOnHand, 0) - ISNULL(itemLocation.dblReorderPoint, 0) AS NUMERIC(38, 7))
+	, dblNearingReorderBy = 
+		CAST(
+			COALESCE(stockInStockUOM.dblUnitOnHand, stockUOM.dblOnHand, 0)
+			- ISNULL(itemLocation.dblReorderPoint, 0) 
+			AS NUMERIC(38, 7)
+		)
 	, itemUOM.ysnStockUnit
-	, dblInTransitDirect = ISNULL(stockUOM.dblInTransitDirect, 0)
+	, dblInTransitDirect = COALESCE(stockInStockUOM.dblInTransitDirect, stockUOM.dblInTransitDirect, 0)
 FROM
 	tblICItemUOM itemUOM INNER JOIN tblICUnitMeasure unitmeasure
 		ON itemUOM.intUnitMeasureId = unitmeasure.intUnitMeasureId
 	INNER JOIN tblICItem item
 		ON itemUOM.intItemId = item.intItemId
+
+	INNER JOIN tblICItemUOM intItemStockUOM 
+		ON intItemStockUOM.intItemId = item.intItemId
+		AND intItemStockUOM.ysnStockUnit = 1
+
 	INNER JOIN (
 		tblICItemLocation itemLocation INNER JOIN tblSMCompanyLocation companyLocation
 			ON companyLocation.intCompanyLocationId = itemLocation.intLocationId
@@ -117,6 +133,7 @@ FROM
 			stockUOM.intItemId = item.intItemId
 			AND stockUOM.intItemUOMId = itemUOM.intItemUOMId
 			AND stockUOM.intItemLocationId = itemLocation.intItemLocationId	
+			AND (ISNULL(item.ysnSeparateStockForUOMs, 0) = 1 OR item.strLotTracking LIKE 'Yes%') 
 		GROUP BY 
 			stockUOM.intItemStockUOMId
 			,stockUOM.intItemId
@@ -126,6 +143,30 @@ FROM
 			,stockUOM.intSubLocationId
 	) stockUOM
 
+	OUTER APPLY (
+		SELECT 
+			dblUnitOnHand = dbo.fnCalculateQtyBetweenUOM(su.intItemUOMId, itemUOM.intItemUOMId, s.dblUnitOnHand)
+			,dblInTransitInbound = dbo.fnCalculateQtyBetweenUOM(su.intItemUOMId, itemUOM.intItemUOMId, s.dblInTransitInbound) 
+			,dblInTransitOutbound = dbo.fnCalculateQtyBetweenUOM(su.intItemUOMId, itemUOM.intItemUOMId, s.dblInTransitOutbound) 
+			,dblInTransitDirect = dbo.fnCalculateQtyBetweenUOM(su.intItemUOMId, itemUOM.intItemUOMId, s.dblInTransitDirect) 
+			,dblConsignedPurchase = dbo.fnCalculateQtyBetweenUOM(su.intItemUOMId, itemUOM.intItemUOMId, s.dblConsignedPurchase) 
+			,dblConsignedSale = dbo.fnCalculateQtyBetweenUOM(su.intItemUOMId, itemUOM.intItemUOMId, s.dblConsignedSale) 
+			,dblOrderCommitted = dbo.fnCalculateQtyBetweenUOM(su.intItemUOMId, itemUOM.intItemUOMId, s.dblOrderCommitted) 
+			,dblUnitReserved = dbo.fnCalculateQtyBetweenUOM(su.intItemUOMId, itemUOM.intItemUOMId, s.dblUnitReserved) 
+			,dblOnOrder = dbo.fnCalculateQtyBetweenUOM(su.intItemUOMId, itemUOM.intItemUOMId, s.dblOnOrder) 
+			,dblUnitStorage = dbo.fnCalculateQtyBetweenUOM(su.intItemUOMId, itemUOM.intItemUOMId, s.dblUnitStorage) 
+		FROM
+			tblICItemStock s 
+			INNER JOIN tblICItemUOM su
+				ON su.intItemId = s.intItemId
+				AND su.ysnStockUnit = 1
+		WHERE 
+			s.intItemId = item.intItemId			
+			AND s.intItemLocationId = itemLocation.intItemLocationId
+			AND ISNULL(item.ysnSeparateStockForUOMs, 0) = 0			
+
+	) stockInStockUOM
+
 	LEFT JOIN tblICCategory category
 		ON category.intCategoryId = item.intCategoryId
 	LEFT JOIN tblICCommodity commodity 
@@ -134,4 +175,3 @@ FROM
 		ON storageLocation.intStorageLocationId = stockUOM.intStorageLocationId	
 	LEFT JOIN tblSMCompanyLocationSubLocation subLocation 
 		ON subLocation.intCompanyLocationSubLocationId = stockUOM.intSubLocationId
-
