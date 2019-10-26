@@ -193,16 +193,31 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
 			END
 		ELSE IF ISNULL(@ysnFromSalesOrder, 0) = 1 AND @intContractDetailId IS NOT NULL
 			BEGIN
+				DECLARE @intContractCount	INT = 0
+
+				SELECT @intContractCount = COUNT(*)
+				FROM tblSOSalesOrderDetail SOD
+				LEFT JOIN tblARInvoiceDetail ID ON SOD.intSalesOrderDetailId = ID.intSalesOrderDetailId
+				LEFT JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId
+				WHERE SOD.intContractDetailId = @intContractDetailId
+				  AND SOD.intContractDetailId IS NOT NULL
+				  AND ISNULL(I.ysnPosted, 0) = 0
+
+				-- 1. ORDERED = CONTRACT BALANCE
+				--	1.1 TICKET < ORDERED
+				--	1.2 TICKET > ORDERED
+				-- 2. ORDERED < CONTRACT BALANCE
+				-- 3. ORDERED = UNUSED CONTRACT IN #2
 				UPDATE ID
-				SET dblQtyShipped	= CASE WHEN ISNULL(@dblNetWeight, 0) > CTD.dblBalance 
+				SET dblQtyShipped	= CASE WHEN ISNULL(@dblNetWeight, 0) > CTD.dblBalance --SCENARIO 
 										   THEN 
 												CASE WHEN CTD.dblBalance = CTD.dblQuantity AND CTD.dblScheduleQty = CTD.dblQuantity
 													 THEN ID.dblQtyOrdered 
 													 ELSE CTD.dblBalance 
 												END
 										   ELSE 
-												CASE WHEN @dblNetWeight > ID.dblQtyOrdered AND ISNULL(SO.intCount, 0) > 1
-										  	     	 THEN ID.dblQtyOrdered
+												CASE WHEN @dblNetWeight > ID.dblQtyOrdered AND ISNULL(@intContractCount, 0) > 1 --CONTRACT USED ON OTHER S.O. (INVOICE NOT POSTED YET)
+										  	     	 THEN CTD.dblBalance - (CTD.dblScheduleQty - ID.dblQtyOrdered)
 												 	 ELSE ISNULL(@dblNetWeight, 0) 
 												END
 									  END
@@ -213,8 +228,8 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
 													 ELSE CTD.dblBalance 
 												END
 										   ELSE 
-												CASE WHEN @dblNetWeight > ID.dblQtyOrdered AND ISNULL(SO.intCount, 0) > 1
-										  	     	 THEN ID.dblQtyOrdered
+												CASE WHEN @dblNetWeight > ID.dblQtyOrdered AND ISNULL(@intContractCount, 0) > 1
+										  	     	 THEN CTD.dblBalance - (CTD.dblScheduleQty - ID.dblQtyOrdered)
 												 	 ELSE ISNULL(@dblNetWeight, 0) 
 												END
 									  END
@@ -229,14 +244,8 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
 											ELSE ID.dblQtyOrdered - CTD.dblBalance 
 									  END					
 				FROM tblARInvoiceDetail ID
-				INNER JOIN tblCTContractDetail CTD ON ID.intContractDetailId = CTD.intContractDetailId AND ID.intContractHeaderId = CTD.intContractHeaderId
-				OUTER APPLY (
-					SELECT intCount = COUNT(*)
-					FROM tblSOSalesOrderDetail SOD
-					WHERE SOD.intContractDetailId = ID.intContractDetailId
-					  AND SOD.intContractDetailId IS NOT NULL
-				) SO
-				WHERE ID.intInvoiceDetailId = @intInvoiceDetailId				
+				INNER JOIN tblCTContractDetail CTD ON ID.intContractDetailId = CTD.intContractDetailId AND ID.intContractHeaderId = CTD.intContractHeaderId				
+				WHERE ID.intInvoiceDetailId = @intInvoiceDetailId
 			END
 		ELSE IF ISNULL(@ysnFromSalesOrder, 0) = 1 AND @intContractDetailId IS NULL
 			BEGIN
