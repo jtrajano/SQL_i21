@@ -9,7 +9,7 @@ AS
 BEGIN TRY
 
 	SET NOCOUNT ON
-	declare @debug_awesome_ness bit = 1 
+	declare @debug_awesome_ness bit = 0
 	
 	if @debug_awesome_ness = 1	
 	begin
