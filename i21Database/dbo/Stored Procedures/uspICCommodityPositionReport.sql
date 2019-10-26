@@ -52,7 +52,7 @@ begin
 	
 	SELECT ' + @top + ' * 
 	FROM (
-		SELECT 
+		SELECT ' + @top + '
 			com.strCommodityCode
 			,cl.intCompanyLocationId
 			,cl.strLocationName 
