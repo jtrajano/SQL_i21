@@ -9,7 +9,7 @@ AS
 
 BEGIN TRY
 	SET NOCOUNT ON
-	declare @debug_awesome_ness bit = 0
+	declare @debug_awesome_ness bit = 1 
 	
 	if @debug_awesome_ness = 1	
 	begin
@@ -1562,7 +1562,8 @@ BEGIN TRY
 					,[intCustomerStorageId]			= a.[intCustomerStorageId]
 					,[dblOrderQty]					= 
 														case when @doPartialHistory = 1 then
-																	isnull(availableQtyForVoucher.dblQuantity, @dblQtyFromCt)
+																	case when availableQtyForVoucher.dblQuantity >  a.dblUnits then a.dblUnits 
+																else isnull(availableQtyForVoucher.dblQuantity, @dblQtyFromCt) end
 														else
 															CASE 
 																WHEN a.intPricingTypeId = 2 AND ISNULL(@dblCashPriceFromCt,0) != 0 AND (@dblQtyFromCt + @dblTotalVoucheredQuantity) < a.dblUnits
@@ -1597,7 +1598,8 @@ BEGIN TRY
 															END	
 														ELSE
 																case when @doPartialHistory = 1 then
-																	isnull(availableQtyForVoucher.dblQuantity, @dblQtyFromCt)
+																	case when availableQtyForVoucher.dblQuantity >  a.dblUnits then a.dblUnits 
+																		else isnull(availableQtyForVoucher.dblQuantity, @dblQtyFromCt) end
 																else
 
 																	CASE 
@@ -1637,7 +1639,8 @@ BEGIN TRY
 													END
 					,[dblNetWeight]					= 
 														case when @doPartialHistory = 1 then
-																	isnull(availableQtyForVoucher.dblQuantity, @dblQtyFromCt)
+															case when availableQtyForVoucher.dblQuantity >  a.dblUnits then a.dblUnits 
+																else isnull(availableQtyForVoucher.dblQuantity, @dblQtyFromCt) end
 														else
 															CASE 
 																WHEN a.intPricingTypeId = 2 AND ISNULL(@dblCashPriceFromCt,0) != 0 AND (@dblQtyFromCt + @dblTotalVoucheredQuantity) < a.dblUnits
@@ -1710,7 +1713,8 @@ BEGIN TRY
 							a.dblUnits,
 								[dblOrderQty]					= 
 														case when @doPartialHistory = 1 then
-																	isnull(availableQtyForVoucher.dblQuantity, @dblQtyFromCt)
+															case when availableQtyForVoucher.dblQuantity >  a.dblUnits then a.dblUnits 
+																else isnull(availableQtyForVoucher.dblQuantity, @dblQtyFromCt) end
 														else
 															CASE 
 																WHEN a.intPricingTypeId = 2 AND ISNULL(@dblCashPriceFromCt,0) != 0 AND (@dblQtyFromCt + @dblTotalVoucheredQuantity) < a.dblUnits
@@ -1745,7 +1749,8 @@ BEGIN TRY
 															END	
 														ELSE
 																case when @doPartialHistory = 1 then
-																	isnull(availableQtyForVoucher.dblQuantity, @dblQtyFromCt)
+																	case when availableQtyForVoucher.dblQuantity >  a.dblUnits then a.dblUnits 
+																		else isnull(availableQtyForVoucher.dblQuantity, @dblQtyFromCt) end
 																else
 
 																	CASE 
@@ -1764,7 +1769,8 @@ BEGIN TRY
 													END
 					,[dblCost]						= 
 														case when @doPartialHistory = 1 then
-															isnull(availableQtyForVoucher.dblCashPrice, a.dblCashPrice)
+															case when availableQtyForVoucher.dblQuantity >  a.dblUnits then a.dblUnits 
+																else isnull(availableQtyForVoucher.dblQuantity, @dblQtyFromCt) end
 														else
 															CASE
 																WHEN a.[intContractHeaderId] IS NOT NULL THEN dbo.fnCTConvertQtyToTargetItemUOM(a.intContractUOMId,b.intItemUOMId,a.dblCashPrice)
@@ -2495,7 +2501,7 @@ BEGIN TRY
 		END
 
 	SELECT @intSettleStorageId = MIN(intSettleStorageId)
-	FROM tblGRSettleStorage
+	FROM tblGRSettleStorage	
 	WHERE intParentSettleStorageId = @intParentSettleStorageId 
 		AND intSettleStorageId > @intSettleStorageId
 
@@ -2510,7 +2516,7 @@ BEGIN TRY
 
 	UPDATE tblGRSettleStorage
 	SET ysnPosted = 1
-	WHERE intSettleStorageId = @intParentSettleStorageId
+	WHERE intSettleStorageId = @intParentSettleStorageId	
 
 	UPDATE tblGRStorageHistory
 	SET intBillId = @createdVouchersId
