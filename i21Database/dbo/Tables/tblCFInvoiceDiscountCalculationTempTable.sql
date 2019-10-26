@@ -43,6 +43,7 @@
 		,strGroupName						NVARCHAR(MAX)			  COLLATE Latin1_General_CI_AS NULL
 		,strInvoiceNumber					NVARCHAR(MAX)			  COLLATE Latin1_General_CI_AS NULL
 		,strInvoiceReportNumber				NVARCHAR(MAX)			  COLLATE Latin1_General_CI_AS NULL
+		,strTempInvoiceReportNumber			NVARCHAR(MAX)			  COLLATE Latin1_General_CI_AS NULL
 		,strUserId							NVARCHAR(100)			  COLLATE Latin1_General_CI_AS NULL
 		,strDiscountSchedule				NVARCHAR(100)			  COLLATE Latin1_General_CI_AS NULL
 )
