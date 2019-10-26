@@ -14,36 +14,13 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-
-DECLARE  @ZeroDecimal		DECIMAL(18,6)
-		,@DateOnly			DATETIME
-		,@ShipmentNumber	NVARCHAR(100)
-		,@InvoiceId			INT
-		,@InvoiceNumber		NVARCHAR(25) = ''
-		,@strReferenceNumber NVARCHAR(100)
-
-SELECT TOP 1
-	@InvoiceNumber = ARI.[strInvoiceNumber]
-FROM
-	tblARInvoiceDetail ARID 
-INNER JOIN
-	tblARInvoice ARI 
-		ON ARID.[intInvoiceId] = ARI.[intInvoiceId]
-INNER JOIN
-	tblICInventoryShipmentItem ICISI
-		ON ARID.[intInventoryShipmentItemId] = ICISI.[intInventoryShipmentItemId]
-WHERE
-	ICISI.[intInventoryShipmentId] = @ShipmentId
-
-IF (ISNULL(@InvoiceNumber,'') <> '')
-	BEGIN
-		RAISERROR('There is already an existing Invoice(%s) for this shipment!', 16, 1,@InvoiceNumber);
-		RETURN 0;
-	END
-
-SELECT
-	 @ZeroDecimal	= 0.000000	
-	,@DateOnly		= CAST(GETDATE() AS DATE)
+DECLARE @ZeroDecimal			DECIMAL(18,6) = 0 
+	  , @DateOnly				DATETIME = CAST(GETDATE() AS DATE)
+	  , @InvoiceId				INT
+	  , @intExistingInvoiceId	INT
+	  , @ShipmentNumber			NVARCHAR(100)
+	  , @InvoiceNumber			NVARCHAR(25) = ''
+	  , @strReferenceNumber 	NVARCHAR(100)
 
 SELECT TOP 1 @strReferenceNumber = strSalesOrderNumber FROM tblSOSalesOrder ORDER BY intSalesOrderId DESC
 
@@ -94,26 +71,30 @@ SELECT
 	,@ShipToLocationId			= ICIS.intShipToLocationId
 	,@SalesOrderId				= SO.intSalesOrderId
 	,@StorageScheduleTypeId		= @StorageScheduleTypeId
-FROM 
-	[tblICInventoryShipment] ICIS
-INNER JOIN
-	[tblARCustomer] ARC
-		ON ICIS.[intEntityCustomerId] = ARC.[intEntityId] 
-LEFT JOIN
-	[tblICInventoryShipmentItem] ICISITEM
-		ON ICIS.[intInventoryShipmentId] = ICISITEM.[intInventoryShipmentId]
-LEFT JOIN
-	[tblCTContractHeader] CT
-		ON ICISITEM.[intOrderId] = CT.[intContractHeaderId]
-LEFT OUTER JOIN
-	tblSOSalesOrder SO
-		ON SO.strSalesOrderNumber = @strReferenceNumber
-		AND ICIS.strReferenceNumber = @strReferenceNumber
+FROM tblICInventoryShipment ICIS
+INNER JOIN tblARCustomer ARC ON ICIS.[intEntityCustomerId] = ARC.[intEntityId] 
+LEFT JOIN tblICInventoryShipmentItem ICISITEM ON ICIS.[intInventoryShipmentId] = ICISITEM.[intInventoryShipmentId]
+LEFT JOIN tblCTContractHeader CT ON ICISITEM.[intOrderId] = CT.[intContractHeaderId]
+LEFT OUTER JOIN tblSOSalesOrder SO ON SO.strSalesOrderNumber = @strReferenceNumber
+								  AND ICIS.strReferenceNumber = @strReferenceNumber
 WHERE ICIS.intInventoryShipmentId = @ShipmentId
 	AND ((ISNULL(ICISITEM.[ysnAllowInvoice], 1) = 1 AND ICIS.[intSourceType] = 1)
 		OR
 		ICIS.[intSourceType] <> 1
 		)
+
+--VALIDATIONS
+SELECT TOP 1 @InvoiceNumber = ARI.[strInvoiceNumber]
+FROM tblARInvoiceDetail ARID 
+INNER JOIN tblARInvoice ARI ON ARID.[intInvoiceId] = ARI.[intInvoiceId]
+INNER JOIN tblICInventoryShipmentItem ICISI ON ARID.[intInventoryShipmentItemId] = ICISI.[intInventoryShipmentItemId]
+WHERE ICISI.[intInventoryShipmentId] = @ShipmentId
+
+IF ISNULL(@InvoiceNumber,'') <> ''
+	BEGIN
+		RAISERROR('There is already an existing Invoice(%s) for this shipment!', 16, 1,@InvoiceNumber);
+		RETURN 0;
+	END
 
 IF (ISNULL(@SalesOrderId, 0) > 0) AND EXISTS  (SELECT NULL FROM tblSOSalesOrderDetail WHERE intSalesOrderId = @SalesOrderId AND ISNULL(intRecipeId, 0) <> 0)
 	BEGIN
@@ -777,27 +758,117 @@ SELECT
 	,[ysnInvalidSetup]			= SOSODT.[ysnInvalidSetup]
 	,[strNotes]					= SOSODT.[strNotes]
 	,[intTempDetailIdForTaxes]	= EFI.[intTempDetailIdForTaxes]
-FROM
-	@UnsortedEntriesForInvoice  EFI
-INNER JOIN
-	tblSOSalesOrderDetailTax SOSODT
-		ON EFI.[intTempDetailIdForTaxes] = SOSODT.[intSalesOrderDetailId] 
-ORDER BY 
-	 EFI.[intSalesOrderDetailId] ASC
-	,SOSODT.[intSalesOrderDetailTaxId] ASC
+FROM @UnsortedEntriesForInvoice  EFI
+INNER JOIN tblSOSalesOrderDetailTax SOSODT ON EFI.[intTempDetailIdForTaxes] = SOSODT.[intSalesOrderDetailId] 
+ORDER BY EFI.[intSalesOrderDetailId] ASC
+	   , SOSODT.[intSalesOrderDetailTaxId] ASC
 
-EXEC [dbo].[uspARProcessInvoices]
-	 @InvoiceEntries		= @EntriesForInvoice
-	,@LineItemTaxEntries	= @LineItemTaxEntries
-	,@UserId				= @UserId
-	,@GroupingOption		= 11
-	,@RaiseError			= 1
-	,@ErrorMessage			= @CurrentErrorMessage	OUTPUT
-	,@CreatedIvoices		= @CreatedIvoices		OUTPUT
-	,@UpdatedIvoices		= @UpdatedIvoices		OUTPUT
+--GET EXISTING INVOICE FOR BATCH SCALE
+SELECT @intExistingInvoiceId = dbo.fnARGetInvoiceForBatch(@EntityCustomerId)
 
-		
-SELECT TOP 1 @NewInvoiceId = intInvoiceId FROM tblARInvoice WHERE intInvoiceId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@CreatedIvoices))			
+--CREATE INVOICE IF THERE's NONE
+IF ISNULL(@intExistingInvoiceId, 0) = 0
+	BEGIN
+		EXEC [dbo].[uspARProcessInvoices]
+			 @InvoiceEntries		= @EntriesForInvoice
+			,@LineItemTaxEntries	= @LineItemTaxEntries
+			,@UserId				= @UserId
+			,@GroupingOption		= 11
+			,@RaiseError			= 1
+			,@ErrorMessage			= @CurrentErrorMessage	OUTPUT
+			,@CreatedIvoices		= @CreatedIvoices		OUTPUT
+			,@UpdatedIvoices		= @UpdatedIvoices		OUTPUT
+
+		SELECT TOP 1 @NewInvoiceId = intInvoiceId FROM tblARInvoice WHERE intInvoiceId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@CreatedIvoices))
+	END
+ELSE
+--INSERT TO EXISTING INVOICE
+	BEGIN
+		DECLARE @tblInvoiceDetailEntries	InvoiceStagingTable
+
+			INSERT INTO @tblInvoiceDetailEntries (
+				  intInvoiceDetailId
+				, strSourceTransaction
+				, intSourceId
+				, strSourceId
+				, intEntityCustomerId
+				, intCompanyLocationId
+				, dtmDate
+				, strDocumentNumber
+				, strShipmentNumber
+				, intEntityId
+				, intInvoiceId
+				, intItemId
+				, strItemDescription
+				, strPricing
+				, intOrderUOMId
+				, dblQtyOrdered
+				, intItemUOMId
+				, intPriceUOMId
+				, dblQtyShipped
+				, dblPrice
+				, dblUnitPrice
+				, dblContractPriceUOMQty
+				, intItemWeightUOMId
+				, intContractDetailId
+				, intContractHeaderId
+				, intTicketId
+				, intTaxGroupId
+				, dblCurrencyExchangeRate
+				, strAddonDetailKey
+				, ysnAddonParent
+				, intInventoryShipmentItemId
+				, intInventoryShipmentChargeId
+				, intStorageLocationId
+				, intSubLocationId
+				, intCompanyLocationSubLocationId
+			)
+			SELECT intInvoiceDetailId				= NULL
+				, strSourceTransaction				= 'Direct'
+				, intSourceId						= EI.intSourceId
+				, strSourceId						= EI.strSourceId
+				, intEntityCustomerId				= EI.intEntityCustomerId
+				, intCompanyLocationId				= EI.intCompanyLocationId
+				, dtmDate							= EI.dtmDate
+				, strDocumentNumber					= EI.strSourceId
+				, strShipmentNumber					= EI.strShipmentNumber
+				, intEntityId						= EI.intEntityId
+				, intInvoiceId						= @intExistingInvoiceId
+				, intItemId							= EI.intItemId
+				, strItemDescription				= EI.strItemDescription
+				, strPricing						= 'Subsystem - Inventory Shipment'
+				, intOrderUOMId						= EI.intOrderUOMId
+				, dblQtyOrdered						= EI.dblQtyOrdered
+				, intItemUOMId						= EI.intItemUOMId
+				, intPriceUOMId						= EI.intPriceUOMId
+				, dblQtyShipped						= EI.dblQtyShipped
+				, dblPrice							= EI.dblPrice
+				, dblUnitPrice						= EI.dblUnitPrice
+				, dblContractPriceUOMQty			= EI.dblContractPriceUOMQty
+				, intItemWeightUOMId				= EI.intItemWeightUOMId
+				, intContractDetailId				= EI.intContractDetailId
+				, intContractHeaderId				= EI.intContractHeaderId
+				, intTicketId						= EI.intTicketId
+				, intTaxGroupId						= NULL--SOD.intTaxGroupId
+				, dblCurrencyExchangeRate			= EI.dblCurrencyExchangeRate
+				, strAddonDetailKey					= EI.strAddonDetailKey
+				, ysnAddonParent					= EI.ysnAddonParent
+				, intInventoryShipmentItemId		= EI.intInventoryShipmentItemId
+				, intInventoryShipmentChargeId		= EI.intInventoryShipmentChargeId
+				, intStorageLocationId				= EI.intStorageLocationId
+				, intSubLocationId					= EI.intSubLocationId
+				, intCompanyLocationSubLocationId	= EI.intSubLocationId
+			FROM @EntriesForInvoice EI
+
+			EXEC dbo.uspARAddItemToInvoices @InvoiceEntries		= @tblInvoiceDetailEntries
+									  	  , @IntegrationLogId	= NULL
+									  	  , @UserId				= @UserId
+
+			SET @NewInvoiceId = @intExistingInvoiceId
+
+			EXEC dbo.uspARUpdateInvoiceIntegrations @intExistingInvoiceId, 0, @UserId
+			EXEC dbo.uspARReComputeInvoiceTaxes @intExistingInvoiceId
+	END
          
 RETURN @NewInvoiceId
 

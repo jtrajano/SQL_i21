@@ -117,6 +117,7 @@
 	[intSubBookId]						INT												NULL,
 	[intSalesOrderId]					INT												NULL,
 	[dtmForgiveDate]					DATETIME										NULL,
+	[dtmDateCreated]					DATETIME										NULL,
 	[ysnRefundProcessed]				BIT             								NOT NULL	CONSTRAINT [DF_tblARInvoice_ysnRefundProcessed] DEFAULT ((0)),
 	[ysnValidCreditCode]				BIT												NOT NULL	CONSTRAINT [DF_tblARInvoice_ysnValidCreditCode] DEFAULT ((0)),
 	[ysnFromItemContract]				BIT												NOT NULL	CONSTRAINT [DF_tblARInvoice_ysnFromItemContract] DEFAULT ((0)),
@@ -197,6 +198,8 @@ BEGIN
 	SET @intStartingNumberId = 19
 	
 	SELECT TOP 1 @intInvoiceId = intInvoiceId, @strTransactionType = strTransactionType, @strType = strType, @intCompanyLocationId = intCompanyLocationId FROM @inserted
+
+	UPDATE tblARInvoice SET dtmDateCreated = GETDATE()
 
 	SELECT TOP 1 @intStartingNumberId = intStartingNumberId 
 	FROM tblSMStartingNumber 
