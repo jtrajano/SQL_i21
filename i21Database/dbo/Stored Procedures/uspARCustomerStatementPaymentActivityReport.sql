@@ -496,7 +496,11 @@ IF @ysnIncludeBudgetLocal = 1
 
 IF @ysnPrintOnlyPastDueLocal = 1
     BEGIN        
-		DELETE FROM @temp_statement_table WHERE DATEDIFF(DAYOFYEAR, dtmDueDate, @dtmDateToLocal) > 0        
+		DELETE FROM @temp_statement_table WHERE DATEDIFF(DAYOFYEAR, dtmDueDate, @dtmDateToLocal) <= 0
+		UPDATE tblARCustomerAgingStagingTable
+		SET dbl0Days = 0
+		WHERE intEntityUserId = @intEntityUserIdLocal
+		  AND strAgingType = 'Summary'		
     END
 
 IF @ysnPrintZeroBalanceLocal = 0
