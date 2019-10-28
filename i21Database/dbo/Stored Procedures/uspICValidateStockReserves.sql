@@ -34,25 +34,36 @@ SELECT	TOP 1
 		,@dblOnHandQty = ISNULL(StockUOM.dblOnHand, 0)
 		,@dblAvailableQty = ISNULL(StockUOM.dblOnHand, 0) - ISNULL(Reserves.dblQuantity, 0)
 FROM	(
-			SELECT	intItemId
-					,intItemLocationId
-					,intItemUOMId
-					,intSubLocationId
-					,intStorageLocationId
-					,dblQty = SUM(dblQty)
-					,intTransactionId
-					,intTransactionTypeId
-			FROM	@ItemsToValidate	
+			SELECT	v.intItemId
+					,v.intItemLocationId
+					,intItemUOMId = 
+						CASE WHEN ISNULL(i.ysnSeparateStockForUOMs, 0) = 1 THEN v.intItemUOMId ELSE stockUOM.intItemUOMId END
+					,v.intSubLocationId
+					,v.intStorageLocationId
+					,dblQty = SUM(
+							CASE 
+								WHEN ISNULL(i.ysnSeparateStockForUOMs, 0) = 1 THEN v.dblQty
+								ELSE dbo.fnCalculateQtyBetweenUOM(v.intItemUOMId, stockUOM.intItemUOMId, v.dblQty) 
+							END 
+						)
+					,v.intTransactionId
+					,v.intTransactionTypeId
+			FROM	@ItemsToValidate v
+					INNER JOIN tblICItem i
+						ON v.intItemId = i.intItemId
+					INNER JOIN tblICItemUOM stockUOM
+						ON stockUOM.intItemId = i.intItemId
+						AND stockUOM.ysnStockUnit = 1
 			WHERE	ISNULL(intLotId, 0) = 0 
 					AND ISNULL(intOwnershipTypeId, @Ownership_Own) = @Ownership_Own
 			GROUP BY 
-				intItemId
-				,intItemLocationId
-				,intItemUOMId
-				,intSubLocationId
-				,intStorageLocationId
-				,intTransactionId
-				,intTransactionTypeId
+				v.intItemId
+				,v.intItemLocationId
+				,CASE WHEN ISNULL(i.ysnSeparateStockForUOMs, 0) = 1 THEN v.intItemUOMId ELSE stockUOM.intItemUOMId END
+				,v.intSubLocationId
+				,v.intStorageLocationId
+				,v.intTransactionId
+				,v.intTransactionTypeId
 		) ValidateItems INNER JOIN dbo.tblICItemLocation ItemLocation
 			ON ValidateItems.intItemId = ItemLocation.intItemId
 			AND ValidateItems.intItemLocationId = ItemLocation.intItemLocationId

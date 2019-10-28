@@ -94,6 +94,8 @@ USING (
 				,ib.intStorageLocationId
 				,Aggregrate_Qty = SUM(ISNULL(dblQty, 0))
 		FROM	@ItemsToIncreaseInTransitInBound ib 
+				INNER JOIN tblICItem i
+					ON ib.intItemId = i.intItemId 
 				CROSS APPLY (
 					SELECT	TOP 1 
 							intItemUOMId
@@ -103,6 +105,7 @@ USING (
 							AND iUOM.ysnStockUnit = 1 
 				) StockUOM 
 		WHERE	ib.intItemUOMId <> StockUOM.intItemUOMId
+				AND ISNULL(i.ysnSeparateStockForUOMs, 0) = 0 -- If separate UOMs is not enabled, then don't track the non-stock unit UOM. 
 		GROUP BY ib.intItemId
 				, ib.intItemLocationId
 				, ib.intItemUOMId

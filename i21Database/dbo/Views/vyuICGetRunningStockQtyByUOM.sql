@@ -1,4 +1,4 @@
-﻿CREATE VIEW [dbo].[vyuICGetItemStockSummary]
+﻿CREATE VIEW [dbo].[vyuICGetRunningStockQtyByUOM]
 AS 
 
 SELECT
@@ -33,29 +33,28 @@ SELECT
 	, dblConversionFactor = ItemUOM.dblUnitQty
 	, ItemPricing.dblLastCost
 	, dblTotalCost = ItemStock.dblOnHand * ItemUOM.dblUnitQty * ItemPricing.dblLastCost
-FROM
-	
+FROM		
 	(
-		SELECT	intItemId
-				,intItemLocationId
-				, intSubLocationId
-				, intStorageLocationId
-				, intItemUOMId
-				, dtmDate = CAST(CONVERT(VARCHAR(10),dtmDate,112) AS datetime)
-				, dblOnHand = SUM(dblQty)
+		SELECT	t.intItemId
+				,t.intItemLocationId
+				,t.intSubLocationId
+				,t.intStorageLocationId
+				,t.intItemUOMId
+				,dtmDate = CAST(CONVERT(VARCHAR(10),t.dtmDate,112) AS datetime)
+				,dblOnHand = SUM(t.dblQty)				
 		FROM 
-			tblICInventoryTransaction
+			tblICInventoryTransaction t
 		WHERE
-			dblQty <> 0 
+			dblQty <> 0 			
 		GROUP BY 
-			intItemId
-			, intItemLocationId
-			, intSubLocationId
-			, intStorageLocationId
-			, intItemUOMId
-			, CONVERT(VARCHAR(10),dtmDate,112)
-	) ItemStock
-	LEFT JOIN tblICItem Item 
+			t.intItemId
+			, t.intItemLocationId
+			, t.intSubLocationId
+			, t.intStorageLocationId
+			, t.intItemUOMId
+			, CONVERT(VARCHAR(10),t.dtmDate,112)
+	) ItemStock	
+	INNER JOIN tblICItem Item 	
 		ON Item.intItemId = ItemStock.intItemId
 	LEFT JOIN tblICCategory Category 
 		ON Category.intCategoryId = Item.intCategoryId
