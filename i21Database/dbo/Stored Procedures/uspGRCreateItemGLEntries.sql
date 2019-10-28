@@ -245,7 +245,7 @@ AS
 		,t.strTransactionId
 		,t.dblQty
 		,t.dblUOMQty
-		,dblCost = t.dblCost - DiscountCost.dblTotalDiscountCost
+		,dblCost = t.dblCost - dbo.fnDivide(DiscountCost.dblTotalDiscountCost, t.dblQty)
 		,dblItemCost = t.dblCost
 		,t.dblValue
 		,t.intTransactionTypeId
@@ -267,7 +267,7 @@ AS
 		ON currencyRateType.intCurrencyExchangeRateTypeId = t.intForexRateTypeId
 	OUTER APPLY (
 		SELECT 
-			ISNULL(SUM((ROUND(SV.dblCashPrice * CASE WHEN ISNULL(SV.dblSettleContractUnits,0) > 0 THEN SV.dblSettleContractUnits ELSE SV.dblUnits END,2)) / SV.dblUnits),0)  AS dblTotalDiscountCost
+			ISNULL(SUM((ROUND(SV.dblCashPrice * CASE WHEN ISNULL(SV.dblSettleContractUnits,0) > 0 THEN SV.dblSettleContractUnits ELSE SV.dblUnits END, 2)) ),0)  AS dblTotalDiscountCost
 		FROM tblGRSettleVoucherCreateReferenceTable SV
 		INNER JOIN tblICItem IC
 			ON IC.intItemId = SV.intItemId

@@ -16,9 +16,12 @@ BEGIN
 	DECLARE @dblTransferUnits NUMERIC(18,6)
 	DECLARE @intSourceItemUOMId INT
 	DECLARE @intCustomerStorageId INT
-	DECLARE @intDecimalPrecision INT		
+	DECLARE @intDecimalPrecision INT	
+	DECLARE @strTransferStorageId VARCHAR(MAX)	
+	DECLARE @intEntityId INT
 	SELECT @intDecimalPrecision = intCurrencyDecimal FROM tblSMCompanyPreference
 
+	SELECT @strTransferStorageId = strTransferStorageTicket FROM tblGRTransferStorage WHERE intTransferStorageId = @intTransferStorageId
 	IF OBJECT_ID (N'tempdb.dbo.#tmpTransferCustomerStorage') IS NOT NULL
 		DROP TABLE #tmpTransferCustomerStorage
 	CREATE TABLE #tmpTransferCustomerStorage (
@@ -190,6 +193,259 @@ BEGIN
 		WHERE B.intTransferStorageId = @intTransferStorageId AND (CASE WHEN (TSR.intTransferStorageId IS NULL) THEN 1 ELSE CASE WHEN TSR.intTransferStorageId = @intTransferStorageId THEN 1 ELSE 0 END END) = 1
 		GROUP BY  A.intCustomerStorageId,B.intSourceCustomerStorageId, TSS.intTransferStorageId,A.dblOpenBalance) Y
 			ON Y.intCustomerStorageId = X.intCustomerStorageId
+
+		/* REVERSE TRANSACTION POSTED TO Inventory */
+
+				DECLARE @ItemsToPost AS ItemCostingTableType
+				INSERT INTO @ItemsToPost 
+				(
+					 intItemId
+					,intItemLocationId
+					,intItemUOMId
+					,dtmDate
+					,dblQty
+					,dblUOMQty
+					,dblCost
+					,dblSalesPrice
+					,intCurrencyId
+					,dblExchangeRate
+					,intTransactionId
+					,intTransactionDetailId
+					,strTransactionId
+					,intTransactionTypeId
+					,intLotId
+					,intSubLocationId
+					,intStorageLocationId
+					,ysnIsStorage
+					,intStorageScheduleTypeId
+				)
+				SELECT 
+					ToStorage.intItemId				
+					,IL.intItemLocationId 
+					,ToStorage.intItemUOMId
+					,dtmTransferStorageDate
+					,dbo.fnCTConvertQuantityToTargetItemUOM(ToStorage.intItemId, IU.intUnitMeasureId, ToStorage.intUnitMeasureId, SR.dblUnitQty) * CASE WHEN (FromType.ysnDPOwnedType = 0 AND ToType.ysnDPOwnedType = 1) THEN -1 ELSE 1 END
+					,IU.dblUnitQty
+					,0
+					,dblSalesPrice = 0
+					, ToStorage.intCurrencyId
+					,dblExchangeRate = 1
+					,intTransactionId = SR.intTransferStorageId
+					,intTransactionDetailId = SR.intTransferStorageSplitId
+					,strTransactionId = TS.strTransferStorageTicket
+					,intTransactionTypeId = 56
+					,intLotId = NULL
+					,intSubLocationId = ToStorage.intCompanyLocationSubLocationId
+					,intStorageLocationId = ToStorage.intStorageLocationId
+					,ysnIsStorage = CASE WHEN (FromType.ysnDPOwnedType = 0 AND ToType.ysnDPOwnedType = 1) THEN 1 ELSE 0 END
+					,ToStorage.intStorageTypeId
+				FROM tblGRTransferStorageReference SR
+				INNER JOIN tblGRCustomerStorage FromStorage
+					ON FromStorage.intCustomerStorageId = SR.intSourceCustomerStorageId
+				INNER JOIN tblGRStorageType FromType
+					ON FromType.intStorageScheduleTypeId = FromStorage.intStorageTypeId
+				INNER JOIN tblGRCustomerStorage ToStorage
+					ON ToStorage.intCustomerStorageId = SR.intToCustomerStorageId
+				INNER JOIN tblGRStorageType ToType
+					ON ToType.intStorageScheduleTypeId = ToStorage.intStorageTypeId
+				JOIN tblICItemUOM IU
+					ON IU.intItemId = ToStorage.intItemId
+						AND IU.ysnStockUnit = 1
+				INNER JOIN tblICItemLocation IL
+					ON IL.intItemId = ToStorage.intItemId AND IL.intLocationId = ToStorage.intCompanyLocationId
+				INNER JOIN tblGRTransferStorage TS
+					ON SR.intTransferStorageId = TS.intTransferStorageId
+				WHERE  ((FromType.ysnDPOwnedType = 0 AND ToType.ysnDPOwnedType = 1) OR (FromType.ysnDPOwnedType = 1 AND ToType.ysnDPOwnedType = 0)) AND SR.intTransferStorageId = @intTransferStorageId
+				ORDER BY dtmTransferStorageDate
+
+
+				DECLARE @cursorId INT
+
+				DECLARE _CURSOR CURSOR
+				FOR
+				SELECT intId FROM @ItemsToPost
+	
+				OPEN _CURSOR
+				FETCH NEXT FROM _CURSOR INTO @cursorId
+				WHILE @@FETCH_STATUS = 0
+				BEGIN		
+						DECLARE @GLEntries AS RecapTableType;
+						DECLARE @Entry as ItemCostingTableType;
+						DECLARE @dblCost AS DECIMAL(24,10);
+						DECLARE @strBatchId AS NVARCHAR(40);
+
+						IF OBJECT_ID('tempdb..#tblICItemRunningStock') IS NOT NULL DROP TABLE  #tblICItemRunningStock
+						CREATE TABLE #tblICItemRunningStock(
+						intKey INT
+						, intItemId INT
+						, strItemNo VARCHAR(MAX)
+						, intItemUOMId INT
+						, strItemUOM VARCHAR(MAX)
+						, strItemUOMType VARCHAR(MAX)
+						, ysnStockUnit BIT
+						, dblUnitQty DECIMAL(32,20)
+						, strCostingMethod VARCHAR(MAX)
+						, intCostingMethodId INT
+						, intLocationId INT
+						, strLocationName	VARCHAR(MAX)
+						, intSubLocationId INT
+						, strSubLocationName VARCHAR(MAX)
+						, intStorageLocationId INT
+						, strStorageLocationName VARCHAR(MAX)
+						, intOwnershipType INT
+						, strOwnershipType VARCHAR(MAX)
+						, dblRunningAvailableQty DECIMAL(32,20)
+						, dblStorageAvailableQty DECIMAL(32,20)
+						, dblCost DECIMAL(32,20)
+						)
+						
+						EXEC uspSMGetStartingNumber 3, @strBatchId OUT
+
+						DECLARE @intItemId INT
+							,@intLocationId INT
+							,@intSubLocationId INT
+							,@intStorageLocationId INT
+							,@dtmDate DATETIME
+							,@intOwnerShipId INT				   
+							,@dblBasisCost DECIMAL(18,6)
+							,@dblSettlementPrice DECIMAL(18,6)
+							,@strRKError VARCHAR(MAX)
+
+
+						SELECT @intItemId = ITP.intItemId,@intLocationId = IL.intLocationId,@intSubLocationId = ITP.intSubLocationId, @intStorageLocationId = ITP.intStorageLocationId, @dtmDate = ITP.dtmDate, @intOwnerShipId = CASE WHEN ITP.ysnIsStorage = 1 THEN 2 ELSE 1 END
+							
+						FROM @ItemsToPost ITP
+						INNER JOIN tblICItem I
+							ON ITP.intItemId = I.intItemId
+						INNER JOIN tblICCommodity ICC
+							ON ICC.intCommodityId = I.intCommodityId
+						INNER JOIN tblICItemLocation IL
+							ON IL.intItemLocationId = ITP.intItemLocationId
+						WHERE intId = @cursorId
+						
+						
+						DELETE FROM @Entry
+						DELETE FROM @GLEntries
+						INSERT INTO @Entry 
+						(
+							intItemId
+							,intItemLocationId
+							,intItemUOMId
+							,dtmDate
+							,dblQty
+							,dblUOMQty
+							,dblCost
+							,dblSalesPrice
+							,intCurrencyId
+							,dblExchangeRate
+							,intTransactionId
+							,intTransactionDetailId
+							,strTransactionId
+							,intTransactionTypeId
+							,intLotId
+							,intSubLocationId
+							,intStorageLocationId
+							,ysnIsStorage
+							,intStorageScheduleTypeId
+						)
+						SELECT intItemId,intItemLocationId,intItemUOMId,dtmDate,dblQty,dblUOMQty,0,dblSalesPrice,intCurrencyId,dblExchangeRate,intTransactionId,intTransactionDetailId,strTransactionId,intTransactionTypeId,intLotId,intSubLocationId,intStorageLocationId,ysnIsStorage,intStorageScheduleTypeId 
+						FROM @ItemsToPost WHERE intId = @cursorId
+
+						INSERT INTO @GLEntries 
+							(
+								 [dtmDate] 
+								,[strBatchId]
+								,[intAccountId]
+								,[dblDebit]
+								,[dblCredit]
+								,[dblDebitUnit]
+								,[dblCreditUnit]
+								,[strDescription]
+								,[strCode]
+								,[strReference]
+								,[intCurrencyId]
+								,[dblExchangeRate]
+								,[dtmDateEntered]
+								,[dtmTransactionDate]
+								,[strJournalLineDescription]
+								,[intJournalLineNo]
+								,[ysnIsUnposted]
+								,[intUserId]
+								,[intEntityId]
+								,[strTransactionId]
+								,[intTransactionId]
+								,[strTransactionType]
+								,[strTransactionForm]
+								,[strModuleName]
+								,[intConcurrencyId]
+								,[dblDebitForeign]	
+								,[dblDebitReport]	
+								,[dblCreditForeign]	
+								,[dblCreditReport]	
+								,[dblReportingRate]	
+								,[dblForeignRate]
+								,[strRateType]
+							)
+							EXEC [dbo].[uspGRCreateGLEntriesForTransferStorage] @intTransferStorageId,@strBatchId,0,1,@intEntityId
+							UPDATE @GLEntries 
+							SET dblDebit		= dblCredit
+								,dblDebitUnit	= dblCreditUnit
+								,dblCredit		= dblDebit
+									,dblCreditUnit  = dblDebitUnit
+
+							INSERT INTO @GLEntries 
+							(
+								 [dtmDate] 
+								,[strBatchId]
+								,[intAccountId]
+								,[dblDebit]
+								,[dblCredit]
+								,[dblDebitUnit]
+								,[dblCreditUnit]
+								,[strDescription]
+								,[strCode]
+								,[strReference]
+								,[intCurrencyId]
+								,[dblExchangeRate]
+								,[dtmDateEntered]
+								,[dtmTransactionDate]
+								,[strJournalLineDescription]
+								,[intJournalLineNo]
+								,[ysnIsUnposted]
+								,[intUserId]
+								,[intEntityId]
+								,[strTransactionId]
+								,[intTransactionId]
+								,[strTransactionType]
+								,[strTransactionForm]
+								,[strModuleName]
+								,[intConcurrencyId]
+								,[dblDebitForeign]	
+								,[dblDebitReport]	
+								,[dblCreditForeign]	
+								,[dblCreditReport]	
+								,[dblReportingRate]	
+								,[dblForeignRate]
+								,[strRateType]
+							)
+							EXEC dbo.uspICUnpostCosting @intTransferStorageId,@strTransferStorageId,@strBatchId,@intUserId,0	
+							 							
+							EXEC dbo.uspICUnpostStorage @intTransferStorageId,@strTransferStorageId,@strBatchId,@intUserId,0
+							IF EXISTS (SELECT TOP 1 1 FROM @GLEntries)
+							BEGIN 
+									EXEC dbo.uspGLBookEntries @GLEntries, 1 
+							END
+							
+							/*UNPOST STORAGE*/
+
+						
+			
+				FETCH NEXT FROM _CURSOR INTO @cursorId
+				END
+				CLOSE _CURSOR;
+				DEALLOCATE _CURSOR;
+
+		/* END REVERSAL */
 
 		--UPDATE A
 		--SET A.dblOpenBalance 	= ROUND(A.dblOpenBalance + ISNULL(dblUnitQty,B.dblDeductedUnits),@intDecimalPrecision)

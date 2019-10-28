@@ -121,6 +121,7 @@ BEGIN
 		,dblPaidBalance  NUMERIC(18,6)
 		,strTransactionId NVARCHAR(50)
 		,intTransactionId INT
+		,strTransactionType NVARCHAR(50)
 		,strDistribution NVARCHAR(10)
 		,dblCompanyTitled NUMERIC(18,6)
 		,intCommodityId INT
@@ -134,6 +135,7 @@ BEGIN
 		,dblPaidBalance  
 		,strTransactionId
 		,intTransactionId 
+		,strTransactionType
 		,strDistribution
 		,dblCompanyTitled
 		,intCommodityId
@@ -349,12 +351,15 @@ BEGIN
 		, dblAdjustments NUMERIC(24,10)
 		, dblInventoryCount NUMERIC(24,10)
 		, dblBalanceInv NUMERIC(24,10)
+		, dblBalanceCompanyOwned NUMERIC(24,10)
+		, dblBalanceCustomerOwned NUMERIC(24,10)
 		, strTransactionId NVARCHAR(50)
 		, intTransactionId INT
 		, strDistribution NVARCHAR(10)
 		, dblSalesInTransit NUMERIC(24,10)
 		, strTransactionType NVARCHAR(50)
 		, intCommodityId INT
+		, strOwnership NVARCHAR(20)
 	)
 
 
@@ -395,9 +400,12 @@ BEGIN
 		, intTransactionId
 		, strDistribution
 		, dblBalanceInv
+		, dblBalanceCompanyOwned
+		, dblBalanceCustomerOwned
 		, dblSalesInTransit
 		, strTransactionType
 		, intCommodityId
+		, strOwnership
 		)
 	EXEC uspRKGetInHouse @dtmFromTransactionDate = @dtmFromTransactionDate
 		, @dtmToTransactionDate = @dtmToTransactionDate

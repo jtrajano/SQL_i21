@@ -572,7 +572,7 @@ GO
 
 CREATE TRIGGER [dbo].[trgCTContractDetail]
     ON [dbo].[tblCTContractDetail]
-    FOR UPDATE
+    FOR INSERT,UPDATE
     AS
 
 	declare @queryResult cursor;
@@ -589,11 +589,43 @@ CREATE TRIGGER [dbo].[trgCTContractDetail]
 	declare @dblComputedQuantity numeric(18,6) = 0.00;
 	declare @intActivePriceFixationId int = 0;
 	declare @intActiveContractDetailId int = 0;
+	
+	declare @dblPricedQuantity numeric(18,6) = 0.00;
+	declare @dblSequenceQuantity numeric(18,6) = 0.00;
+	declare @intPricingStatus int = 0;
+	declare @intPricingTypeId int = 0;
 
 	begin transaction;
 	begin try
 
-		select @intActiveContractDetailId = i.intContractDetailId from inserted i;
+		select @intActiveContractDetailId = i.intContractDetailId, @intPricingTypeId = i.intPricingTypeId, @dblSequenceQuantity = i.dblQuantity from inserted i;
+
+		if (@intPricingTypeId = 1)
+		begin
+			set @intPricingStatus = 2;
+		end
+		else
+		begin
+			select @dblPricedQuantity = isnull(sum(pfd.dblQuantity),0.00) from tblCTPriceFixation pf, tblCTPriceFixationDetail pfd where pf.intContractDetailId = @intActiveContractDetailId and pfd.intPriceFixationId = pf.intPriceFixationId
+			
+			if (@dblPricedQuantity = 0)
+			begin
+				set @intPricingStatus = 0;
+			end
+			else
+			begin
+				if (@dblSequenceQuantity > @dblPricedQuantity)
+				begin
+					set @intPricingStatus = 1;
+				end
+				else
+				begin
+					set @intPricingStatus = 2;
+				end
+			end
+		end
+
+		update tblCTContractDetail set intPricingStatus = @intPricingStatus where intContractDetailId = @intActiveContractDetailId;
 
 		set @queryResult = cursor for
 			select
@@ -646,7 +678,7 @@ CREATE TRIGGER [dbo].[trgCTContractDetail]
 				set @intActivePriceFixationId = @intPriceFixationId
 			end
 
-			if (@dblDetailQuantityApplied > 0)
+			if (@dblDetailQuantityApplied > 0 and @intPriceFixationDetailId is not null)
 			begin
 
 				if (@ysnLoad = 1)

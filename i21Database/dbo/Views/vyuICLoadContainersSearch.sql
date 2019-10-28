@@ -7,10 +7,16 @@ SELECT
 	, dblDeliveredQuantity = NULL
 	, WeightUOM.strUnitMeasure
 	, dblItemUOMCF = ItemUOM.dblUnitQty
+	, dblQuantity =
+		CASE
+			WHEN ISNULL(ContainerLink.dblQuantity,0) = 0 THEN LoadDetail.dblQuantity 
+			ELSE ContainerLink.dblQuantity 
+		END
 	, intWeightUOMId = LoadDetail.intWeightItemUOMId
 	, dblContainerWeightPerQty = NULL
 	, dblFranchise = NULL
 	, strContainerNumber = LoadContainer.strContainerNumber
+	, LoadContainer.dblNetWt
 FROM tblLGLoad [Load]
 	INNER JOIN tblLGLoadDetail LoadDetail ON [Load].intLoadId = LoadDetail.intLoadId
 	LEFT OUTER JOIN tblLGLoadDetailContainerLink ContainerLink ON ContainerLink.intLoadDetailId = LoadDetail.intLoadDetailId

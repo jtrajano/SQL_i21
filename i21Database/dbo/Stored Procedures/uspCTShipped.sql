@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspCTShipped]
-	@ItemsFromInventoryShipment ShipmentItemTableType READONLY,
-	@intUserId  INT
+	@ItemsFromInventoryShipment ShipmentItemTableType READONLY
+	,@intUserId  INT
+	,@ysnPosted BIT
 AS
 
 BEGIN TRY
@@ -134,6 +135,13 @@ BEGIN TRY
 
 			SELECT	@dblSchQuantityToUpdate = -@dblConvertedQty
 
+			-- Ticket Management will handle scheduled quantity when Undistruited
+			IF @intSourceType = 1 AND @ysnPosted = 0
+			BEGIN
+				SELECT @intUniqueId = MIN(intUniqueId) FROM @tblToProcess WHERE intUniqueId > @intUniqueId				
+				CONTINUE
+			END
+								   
 			IF @intSourceType IN (-1,0,1,2,3,5)
 			BEGIN					
 				EXEC	uspCTUpdateScheduleQuantity

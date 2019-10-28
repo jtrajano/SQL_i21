@@ -236,7 +236,7 @@ SELECT CD.intContractDetailId
 	,CH.ysnUnlimitedQuantity
 	,ISNULL(CH.ysnLoad, 0) AS ysnLoad
 	,CD.dblQuantityPerLoad
-	,CD.intNoOfLoad
+	,intNoOfLoad = CONVERT(INT,((ISNULL(CD.dblBalance, 0) - ISNULL(CD.dblScheduleQty, 0)) / NULLIF(CD.dblQuantityPerLoad, 0))) 
 	,Item.strType AS strItemType
 	,CH.intPositionId
 	,CTP.strPositionType

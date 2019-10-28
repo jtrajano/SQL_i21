@@ -40,6 +40,10 @@ BEGIN
 	BEGIN
 		SET @dblResult = 1/@dblRate
 	END
+	ELSE IF @intCurrencyToConvertId = @intToCurrencyId
+	BEGIN
+		 SET @dblResult = 1
+	END
 	ELSE IF @intCurrencyToConvertId = @intFromCurrencyId AND ISNULL(@dblRate,0) > 0
 	BEGIN
 		SELECT @dblResult = 1/@dblRate

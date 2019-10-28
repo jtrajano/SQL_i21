@@ -232,6 +232,10 @@ USING	(
 				,form = 'Maintain Storage'
 		UNION ALL
 		SELECT id = 56
+				,name = 'Transfer Storage'
+				,form = 'Transfer Storage'
+		UNION ALL
+		SELECT id = 57
 				,name = 'Inventory Count By Category'
 				,form = 'Inventory Count By Category'
 

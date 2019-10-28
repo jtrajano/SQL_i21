@@ -46,20 +46,38 @@ BEGIN TRY
 	IF (ISNULL(@ysnPost, 0) = 1)
 	BEGIN
 
-		/* Update LS Unit Cost for Unpriced Contracts */
-		UPDATE LD 
-		SET dblUnitPrice = dbo.fnCTGetSequencePrice(CD.intContractDetailId,NULL)
-		FROM tblLGLoadDetail LD
-			JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
-			JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
-			CROSS APPLY dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
-		WHERE ISNULL(LD.dblUnitPrice, 0) = 0 AND LD.intLoadId = @intLoadId
-
-		IF EXISTS(SELECT TOP 1 1 FROM tblLGLoadDetail LD
-			INNER JOIN tblLGLoad L ON LD.intLoadId = L.intLoadId
-			WHERE L.intPurchaseSale <> 3 AND LD.intLoadId = @intLoadId AND ISNULL(LD.dblUnitPrice, 0) = 0)
+		IF (@intPurchaseSale = 3) 
 		BEGIN
-			RAISERROR('One or more contracts is not yet priced. Please price the contracts or provide a provisional price to proceed.', 16, 1);
+			IF (EXISTS (SELECT TOP 1 1 FROM tblLGLoadDetail LD 
+					INNER JOIN tblLGLoad L ON LD.intLoadId = L.intLoadId
+					INNER JOIN tblCTContractDetail CD ON CD.intContractDetailId IN (LD.intPContractDetailId, LD.intSContractDetailId)
+					INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+					WHERE L.intLoadId = @intLoadId AND CH.intPricingTypeId = 2 AND ISNULL(dbo.fnCTGetSequencePrice(CD.intContractDetailId,NULL), 0) <= 0))
+				RAISERROR('One or more contracts is not yet priced. Please price the contracts to proceed.', 16, 1);
+		END
+		ELSE
+		BEGIN 
+			/* Update LS Unit Cost for Unpriced Contracts */
+			UPDATE LD 
+			SET dblUnitPrice = dbo.fnCTGetSequencePrice(CD.intContractDetailId,NULL)
+				,dblAmount = dbo.fnCalculateCostBetweenUOM(
+									LD.intPriceUOMId
+									, ISNULL(LD.intWeightItemUOMId, LD.intItemUOMId) 
+									,(dbo.fnCTGetSequencePrice(CD.intContractDetailId,NULL) / CASE WHEN (CUR.ysnSubCurrency = 1) THEN CUR.intCent ELSE 1 END)
+								) * CASE WHEN (LD.intWeightItemUOMId IS NOT NULL) THEN LD.dblNet ELSE LD.dblQuantity END		
+			FROM tblLGLoadDetail LD
+				JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
+				JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+				JOIN vyuLGAdditionalColumnForContractDetailView AD ON CD.intContractDetailId = AD.intContractDetailId
+				LEFT JOIN tblSMCurrency CUR ON CUR.intCurrencyID = LD.intPriceCurrencyId
+			WHERE ISNULL(LD.dblUnitPrice, 0) = 0 AND LD.intLoadId = @intLoadId
+
+			IF EXISTS(SELECT TOP 1 1 FROM tblLGLoadDetail LD
+				INNER JOIN tblLGLoad L ON LD.intLoadId = L.intLoadId
+				WHERE L.intPurchaseSale <> 3 AND LD.intLoadId = @intLoadId AND ISNULL(LD.dblUnitPrice, 0) = 0)
+			BEGIN
+				RAISERROR('One or more contracts is not yet priced. Please price the contracts or provide a provisional price to proceed.', 16, 1);
+			END
 		END
 
 		INSERT INTO @ItemsToPost (
@@ -102,7 +120,6 @@ BEGIN TRY
 			,dblUOMQty = IU.dblUnitQty
 			,dblCost = 
 						ISNULL(
-							--LD.dblAmount/LD.dblQuantity 
 							dbo.fnCalculateCostBetweenUOM(
 								LD.intPriceUOMId
 								, ISNULL(LD.intWeightItemUOMId, LD.intItemUOMId) 

@@ -2,42 +2,29 @@
 	@ysnGetHeader	bit  = 0,
 	@dtmDate		date = null,
 	@strLocationName nvarchar(max) = '',
-	@intUserId INT = NULL
+	@intUserId INT = NULL,
+	@strPermission nvarchar(max) = ''
 AS
 BEGIN
 	DECLARE @Columns VARCHAR(MAX)
 	SELECT @Columns = COALESCE(@Columns + ', ','') + QUOTENAME(strCommodityCode)
-	FROM
-	   (
+	FROM (
 		SELECT DISTINCT strCommodityCode 
 		FROM   tblICCommodity 
-	   ) AS C
-
-	--select @Columns
+	) AS C
 	
 	DECLARE @sql AS NVARCHAR(MAX)
 	DECLARE @top as nvarchar(20)
 	
-	set @top = ''
-	--set @dtmDate = isnull(@dtmDate, getdate())
+	SET @top = ''
+	SET @strLocationName = LTRIM(RTRIM(ISNULL(@strLocationName, '')))
+	SET @strPermission = LTRIM(RTRIM(ISNULL(@strPermission, '')))
 
-	declare @location_filter as nvarchar(max)	
-
-	set @strLocationName = isnull(@strLocationName, '')
-	if isnull(@strLocationName, '') <> ''
-	begin
-		set @location_filter = ' where intLocationId in ( '  + @strLocationName + ' ) '		
-	end
-	else
-	begin
-		set @location_filter = ''
-	end
-
-	if @ysnGetHeader= 1
-	begin
-		set @top = ' top 1'
-		set @dtmDate = NULL 
-	end
+	IF @ysnGetHeader= 1
+	BEGIN
+		SET @top = ' top 1'
+		SET @dtmDate = NULL 
+	END
 
 	SET @sql = 
 	'
@@ -85,7 +72,12 @@ BEGIN
 							else
 									''
 							end
-						+
+						+								
+							case when @strPermission <> '' then ' and il.intLocationId in ( ' + @strPermission + ' )'
+							else
+									''
+							end
+						+						
 						'
 					group by il.intLocationId
 			) as current_stock
@@ -102,16 +94,17 @@ BEGIN
 								''
 						end
 					+
+						case when @strPermission <> '' then ' where sl.intLocationId in ( ' + @strPermission + ' )'
+						else
+								''
+						end
+					+
 					'
 					group by sl.intLocationId
 			) as total_capacity
 				on total_capacity.intLocationId = current_stock.intLocationId
 					and total_capacity.dblTotalCapacityPerLocation <> 0
-			
-
 		) b
-		INNER JOIN vyuICUserCompanyLocations permission ON permission.intCompanyLocationId = b.intLocationId
-		WHERE permission.intEntityId = ' + CAST(@intUserId AS VARCHAR(50)) + '
 	'
 	EXEC(@sql) 
 	

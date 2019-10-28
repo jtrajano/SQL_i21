@@ -117,7 +117,7 @@
 	[guidStoreAppConnectionId] UNIQUEIDENTIFIER NULL, 
 	[strStoreAppMacAddress] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
 	[dtmStoreAppLastDateLog] DATETIME NULL,
-	[strHandheldScannerServerFolderPath] NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL, 
+	--[strHandheldScannerServerFolderPath] NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL, 
 
 	-- ATM
 	[intATMFundBegBalanceItemId]	INT NULL, 
@@ -153,11 +153,11 @@
   );
   GO
 
-  CREATE UNIQUE NONCLUSTERED INDEX [UK_tblSTStore_strHandheldScannerServerFolderPath]
-  ON dbo.tblSTStore
-  (
-	strHandheldScannerServerFolderPath
-  )
-  WHERE strHandheldScannerServerFolderPath IS NOT NULL
-	AND strHandheldScannerServerFolderPath <> ''
+ -- CREATE UNIQUE NONCLUSTERED INDEX [UK_tblSTStore_strHandheldScannerServerFolderPath]
+ -- ON dbo.tblSTStore
+ -- (
+	--strHandheldScannerServerFolderPath
+ -- )
+ -- WHERE strHandheldScannerServerFolderPath IS NOT NULL
+	--AND strHandheldScannerServerFolderPath <> ''
  

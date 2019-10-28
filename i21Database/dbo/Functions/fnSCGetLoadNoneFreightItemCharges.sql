@@ -32,6 +32,7 @@ RETURNS @OtherCharges TABLE(
 	,[ysnAllowVoucher] BIT NULL
 	,[intLoadShipmentId] INT NULL
 	,[intLoadShipmentCostId] INT NULL
+	,intTaxGroupId INT NULL
 )
 
 BEGIN
@@ -64,6 +65,7 @@ BEGIN
 			,[ysnAllowVoucher]
 			,[intLoadShipmentId]			
 			,[intLoadShipmentCostId]	
+			,intTaxGroupId
 		)
 		SELECT	
 		[intEntityVendorId]					= RE.intEntityVendorId
@@ -97,6 +99,7 @@ BEGIN
 		,[ysnAllowVoucher]				= RE.ysnAllowVoucher
 		,[intLoadShipmentId]			= RE.intLoadShipmentId 
 		,[intLoadShipmentCostId]		= RE.intLoadShipmentDetailId
+		,intTaxGroupId = RE.intTaxGroupId
 		FROM @ReceiptStagingTable RE 
 		INNER JOIN tblLGLoadDetail LoadDetail
 			ON RE.intContractDetailId = LoadDetail.intPContractDetailId
@@ -140,7 +143,8 @@ BEGIN
 			,[strChargesLink]
 			,[ysnAllowVoucher]
 			,[intLoadShipmentId]			
-			,[intLoadShipmentCostId]		
+			,[intLoadShipmentCostId]	
+			,intTaxGroupId	
 		)
 		SELECT	
 		[intEntityVendorId]					= RE.intEntityVendorId
@@ -178,6 +182,7 @@ BEGIN
 		,[ysnAllowVoucher]				= RE.ysnAllowVoucher
 		,[intLoadShipmentId]			= RE.intLoadShipmentId 
 		,[intLoadShipmentCostId]		= RE.intLoadShipmentDetailId
+		,intTaxGroupId = RE.intTaxGroupId
 		FROM @ReceiptStagingTable RE 
 		INNER JOIN tblCTContractCost ContractCost 
 			ON RE.intContractDetailId = ContractCost.intContractDetailId

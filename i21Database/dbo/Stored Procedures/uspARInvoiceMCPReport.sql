@@ -27,7 +27,7 @@ WHERE A.strScreen = 'SystemManager.CompanyPreference'
 
 SET @blbStretchedLogo = ISNULL(@blbStretchedLogo, @blbLogo)
 
-DELETE FROM tblARInvoiceReportStagingTable WHERE intEntityUserId = @intEntityUserId AND strRequestId = @strRequestId AND strInvoiceFormat = 'Format 1 - MCP'
+DELETE FROM tblARInvoiceReportStagingTable WHERE intEntityUserId = @intEntityUserId AND strRequestId = @strRequestId AND strInvoiceFormat IN ('Format 1 - MCP', 'Format 5 - Honstein')
 INSERT INTO tblARInvoiceReportStagingTable (
 	   strCompanyName
 	 , strCompanyAddress
@@ -80,6 +80,7 @@ INSERT INTO tblARInvoiceReportStagingTable (
 	 , dtmScaleDate
 	 , strCommodity
 	 , ysnStretchLogo
+	 , blbSignature
 )
 SELECT strCompanyName			= COMPANY.strCompanyName
 	 , strCompanyAddress		= COMPANY.strCompanyAddress
@@ -147,6 +148,7 @@ SELECT strCompanyName			= COMPANY.strCompanyName
 	 , dtmScaleDate				= TICKETDETAILS.dtmScaleDate
 	 , strCommodity				= TICKETDETAILS.strCommodity
 	 , ysnStretchLogo			= ISNULL(SELECTEDINV.ysnStretchLogo, 0)
+	 , blbSignature				= INV.blbSignature
 FROM dbo.tblARInvoice INV WITH (NOLOCK)
 INNER JOIN @tblInvoiceReport SELECTEDINV ON INV.intInvoiceId = SELECTEDINV.intInvoiceId
 LEFT JOIN (

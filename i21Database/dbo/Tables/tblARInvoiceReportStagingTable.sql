@@ -110,6 +110,7 @@
 	[ysnListBundleSeparately]			BIT             NULL,
 	[ysnHasAddOnItem]					BIT             NULL,
 	[ysnStretchLogo]					BIT             NULL,
+	[ysnHasSubFormula]					BIT             NULL,
 	[dtmDate]							DATETIME		NULL,
 	[dtmPostDate]						DATETIME		NULL,
 	[dtmShipDate]						DATETIME		NULL,

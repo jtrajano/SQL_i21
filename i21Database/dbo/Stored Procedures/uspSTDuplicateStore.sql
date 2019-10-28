@@ -131,7 +131,7 @@ BEGIN TRANSACTION
 		,guidStoreAppConnectionId
 		,strStoreAppMacAddress
 		,dtmStoreAppLastDateLog
-		,strHandheldScannerServerFolderPath
+		--,strHandheldScannerServerFolderPath
 		,intConcurrencyId
 	)
 	SELECT TOP 1
@@ -249,7 +249,7 @@ BEGIN TRANSACTION
 		,guidStoreAppConnectionId
 		,strStoreAppMacAddress
 		,dtmStoreAppLastDateLog
-		,''
+		--,''
 		,intConcurrencyId
 	FROM tblSTStore
 	WHERE ISNULL(intStoreId,0) = ISNULL(@StoreId,0)

@@ -329,7 +329,7 @@ BEGIN TRY
 			END
 
 			UPDATE tblLGLoad
-			SET intShipmentStatus = 1
+			SET intShipmentStatus = 7
 				,ysnCancelled = @ysnCancel
 			WHERE intLoadId = @intLoadId
 

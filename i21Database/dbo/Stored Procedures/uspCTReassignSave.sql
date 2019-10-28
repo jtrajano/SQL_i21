@@ -177,7 +177,8 @@ BEGIN TRY
 	UPDATE	FD
 	SET		FD.[dblNoOfLots]	=	FD.[dblNoOfLots] - PR.dblReassign,
 			FD.[dblHedgeNoOfLots]	=	FD.[dblHedgeNoOfLots] - PR.dblReassign,
-			FD.dblQuantity		=	(@dblDonorQty / @dblDonorNoOfLots) * (FD.dblNoOfLots - PR.dblReassign)
+			FD.dblQuantity  = (FD.dblQuantity / FD.[dblNoOfLots]) * (FD.dblNoOfLots - PR.dblReassign)  
+			--FD.dblQuantity		=	(@dblDonorQty / @dblDonorNoOfLots) * (FD.dblNoOfLots - PR.dblReassign)
 	FROM	tblCTPriceFixationDetail	FD
 	JOIN	@tblPricing					PR	ON	PR.intPriceFixationDetailId = FD.intPriceFixationDetailId
 	WHERE	PR.ysnFullyPricingReassign = 0
