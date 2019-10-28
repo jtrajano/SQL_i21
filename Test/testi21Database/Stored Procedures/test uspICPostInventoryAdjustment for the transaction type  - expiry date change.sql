@@ -12,7 +12,7 @@ BEGIN
 
 	-- Arrange 
 	BEGIN 
-		DECLARE @strTransactionTypeName AS NVARCHAR(50) = 'Inventory Adjustment - Expiry Date Change'
+		DECLARE @strTransactionTypeName AS NVARCHAR(50) = 'Inventory Adjustment - Expiry Date'
 				,@intTransactionTypeId AS INT 
 				,@ExpectedTransactionTypeId AS INT = @INVENTORY_ADJUSTMENT_ExpiryDateChange
 	END 

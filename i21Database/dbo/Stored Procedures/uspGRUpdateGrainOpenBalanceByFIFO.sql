@@ -39,7 +39,7 @@ BEGIN TRY
 
 	SELECT @intTransactionTypeId = intTransactionTypeId
 	FROM dbo.tblICInventoryTransactionType
-	WHERE strName = 'Inventory Adjustment - Quantity Change'
+	WHERE strName = 'Inventory Adjustment - Quantity'
 	
 	DECLARE @StorageTicketInfoByFIFO AS TABLE 
 	(

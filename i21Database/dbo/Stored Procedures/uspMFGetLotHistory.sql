@@ -583,11 +583,11 @@ BEGIN
 		,sl.strName AS strStorageLocation
 		,CASE 
 			WHEN ia.intAdjustmentType = 4
-				THEN 'Inventory Adjustment - Lot Status Change'
+				THEN 'Inventory Adjustment - Lot Status'
 			WHEN ia.intAdjustmentType = 6
-				THEN 'Inventory Adjustment - Expiry Date Change'
+				THEN 'Inventory Adjustment - Expiry Date'
 			WHEN ia.intAdjustmentType = 9
-				THEN 'Inventory Adjustment - Owner Change'
+				THEN 'Inventory Adjustment - Owner'
 			ELSE ''
 			END AS strTransaction
 		,CONVERT(NUMERIC(38, 20), 0.0) AS dblWeight

@@ -79,7 +79,7 @@ BEGIN
 							FROM 	tblICCompanyPreference
 						) returnPostMode							
 				WHERE	cbOut.intInventoryLotId = cb.intInventoryLotId 
-						AND ty.strName = 'Inventory Adjustment - Quantity Change'
+						AND ty.strName = 'Inventory Adjustment - Quantity'
 						AND (cbOut.dblQty - ISNULL(cbOut.dblQtyReturned, 0)) > 0
 						AND ISNULL(t.ysnIsUnposted, 0) = 0  
 						AND returnPostMode.strReturnPostMode = 'Allow Return After Qty Change'

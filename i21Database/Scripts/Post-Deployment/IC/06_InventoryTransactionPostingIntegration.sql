@@ -44,28 +44,28 @@ USING	(
 				,intLinkAllowedTransactionTypeId = LinkedTransaction.intTransactionTypeId
 		FROM	dbo.tblICInventoryTransactionType HostTransaction
 				,dbo.tblICInventoryTransactionType LinkedTransaction
-		WHERE	HostTransaction.strName like 'Inventory Adjustment - Quantity Change'
+		WHERE	HostTransaction.strName like 'Inventory Adjustment - Quantity'
 				AND LinkedTransaction.strName = 'Inventory Shipment'
 		UNION ALL 
 		SELECT	intTransactionTypeId = HostTransaction.intTransactionTypeId
 				,intLinkAllowedTransactionTypeId = LinkedTransaction.intTransactionTypeId
 		FROM	dbo.tblICInventoryTransactionType HostTransaction
 				,dbo.tblICInventoryTransactionType LinkedTransaction
-		WHERE	HostTransaction.strName like 'Inventory Adjustment - Quantity Change'
+		WHERE	HostTransaction.strName like 'Inventory Adjustment - Quantity'
 				AND LinkedTransaction.strName = 'Delivery Sheet'
 		UNION ALL 
 		SELECT	intTransactionTypeId = HostTransaction.intTransactionTypeId
 				,intLinkAllowedTransactionTypeId = LinkedTransaction.intTransactionTypeId
 		FROM	dbo.tblICInventoryTransactionType HostTransaction
 				,dbo.tblICInventoryTransactionType LinkedTransaction
-		WHERE	HostTransaction.strName like 'Inventory Adjustment - Quantity Change'
+		WHERE	HostTransaction.strName like 'Inventory Adjustment - Quantity'
 				AND LinkedTransaction.strName = 'Maintain Storage'
 		UNION ALL 
 		SELECT	intTransactionTypeId = HostTransaction.intTransactionTypeId
 				,intLinkAllowedTransactionTypeId = LinkedTransaction.intTransactionTypeId
 		FROM	dbo.tblICInventoryTransactionType HostTransaction
 				,dbo.tblICInventoryTransactionType LinkedTransaction
-		WHERE	HostTransaction.strName like 'Inventory Adjustment - Quantity Change'
+		WHERE	HostTransaction.strName like 'Inventory Adjustment - Quantity'
 				AND LinkedTransaction.strName = 'Scale Ticket'
 ) AS B
 	ON  A.intTransactionTypeId = B.intTransactionTypeId

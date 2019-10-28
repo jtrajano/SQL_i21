@@ -216,7 +216,7 @@ SET @strmessage = 'Invalid Lot.'
 EXEC sp_addmessage 51053,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51054) EXEC sp_dropmessage 51054, 'us_english'	
-SET @strmessage = 'This lot %s was not produced through work order production process; hence this lot cannot be released from this screen. Try changing the lot status using the Lot Status Change screen available in the Inventory view screen.'
+SET @strmessage = 'This lot %s was not produced through work order production process; hence this lot cannot be released from this screen. Try changing the lot status using the Lot Status screen available in the Inventory view screen.'
 EXEC sp_addmessage 51054,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51055) EXEC sp_dropmessage 51055, 'us_english'	

@@ -48,7 +48,7 @@ USING	(
 				,form = 'Produce'
 		UNION ALL 
 		SELECT	id = 10
-				,name = 'Inventory Adjustment - Quantity Change'
+				,name = 'Inventory Adjustment - Quantity'
 				,form = 'Inventory Adjustment'
 		UNION ALL 
 		SELECT	id = 11
@@ -64,15 +64,15 @@ USING	(
 				,form = 'Inventory Transfer'
 		UNION ALL 
 		SELECT	id = 14
-				,name = 'Inventory Adjustment - UOM Change'
+				,name = 'Inventory Adjustment - UOM'
 				,form = 'Inventory Adjustment'
 		UNION ALL 
 		SELECT	id = 15
-				,name = 'Inventory Adjustment - Item Change'
+				,name = 'Inventory Adjustment - Item'
 				,form = 'Inventory Adjustment'
 		UNION ALL 
 		SELECT	id = 16
-				,name = 'Inventory Adjustment - Lot Status Change'
+				,name = 'Inventory Adjustment - Lot Status'
 				,form = 'Inventory Adjustment'
 		UNION ALL 
 		SELECT	id = 17
@@ -80,7 +80,7 @@ USING	(
 				,form = 'Inventory Adjustment'
 		UNION ALL 
 		SELECT	id = 18
-				,name = 'Inventory Adjustment - Expiry Date Change'
+				,name = 'Inventory Adjustment - Expiry Date'
 				,form = 'Inventory Adjustment'
 		UNION ALL 
 		SELECT	id = 19
@@ -152,7 +152,7 @@ USING	(
 				,form = NULL
 		UNION ALL 
 		SELECT	id = 36
-				,name = 'Revalue Item Change'
+				,name = 'Revalue Item'
 				,form = NULL 
 		UNION ALL 
 		SELECT	id = 37
@@ -180,7 +180,7 @@ USING	(
 				,form = 'Inventory Receipt' 
 		UNION ALL 
 		SELECT	id = 43
-				,name = 'Inventory Adjustment - Ownership Change'
+				,name = 'Inventory Adjustment - Ownership'
 				,form = 'Inventory Adjustment'
 		UNION ALL
 		SELECT id = 44
@@ -200,7 +200,7 @@ USING	(
 				,form = 'Inventory Adjustment'
 		UNION ALL
 		SELECT id = 48
-				,name = 'Inventory Adjustment - Change Lot Weight'
+				,name = 'Inventory Adjustment - Lot Weight'
 				,form = 'Inventory Adjustment'
 		UNION ALL
 		SELECT id = 49

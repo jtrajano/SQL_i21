@@ -12,7 +12,7 @@ BEGIN
 
 	-- Arrange 
 	BEGIN 
-		DECLARE @strTransactionTypeName AS NVARCHAR(50) = 'Inventory Adjustment - Quantity Change'
+		DECLARE @strTransactionTypeName AS NVARCHAR(50) = 'Inventory Adjustment - Quantity'
 				,@intTransactionTypeId AS INT 
 				,@ExpectedTransactionTypeId AS INT = @INVENTORY_ADJUSTMENT_QuantityChange
 	END 
