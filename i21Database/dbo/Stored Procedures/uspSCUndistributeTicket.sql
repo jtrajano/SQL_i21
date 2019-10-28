@@ -761,10 +761,10 @@ BEGIN TRY
 							BEGIN
 								---GEt all the invoice Detail Id for the inventory shipment item details
 								CREATE TABLE #tmpShipmentInvoiceDetailIds (
-									intInventoryShipmentItemId INT PRIMARY KEY
-									,[intInvoiceId] [INT]
-									,[intInvoiceDetailId] [INT] 
-									UNIQUE (intInventoryShipmentItemId)
+									intInventoryShipmentItemId INT 
+									,[intInvoiceId] INT
+									,[intInvoiceDetailId] INT 
+									
 								);
 								INSERT INTO #tmpShipmentInvoiceDetailIds(
 									intInventoryShipmentItemId
@@ -787,10 +787,9 @@ BEGIN TRY
 
 								---GEt all the invoice Detail Id for the inventory shipment charge details
 								CREATE TABLE #tmpShipmentChargeInvoiceDetailIds (
-									intInventoryShipmentChargeId INT PRIMARY KEY
+									intInventoryShipmentChargeId INT 
 									,[intInvoiceId] INT
-									,[intInvoiceDetailId] INT
-									UNIQUE (intInventoryShipmentChargeId)
+									,[intInvoiceDetailId] INT 
 								);
 								INSERT INTO #tmpShipmentChargeInvoiceDetailIds(
 									intInventoryShipmentChargeId
@@ -830,24 +829,26 @@ BEGIN TRY
 									SET @ysnAllInvoiceHasCreditMemo = 0 
 								END
 
-								--CHARGES
-								IF EXISTS(	SELECT TOP 1 1 
-											FROM #tmpShipmentChargeInvoiceDetailIds A
-											LEFT JOIN tblARInvoiceDetail B
-												ON A.intInvoiceDetailId = B.intOriginalInvoiceDetailId
-											LEFT JOIN tblARInvoice C
-												ON B.intInvoiceId = C.intInvoiceId
-													AND C.strTransactionType = 'Credit Memo'
-											WHERE A.intInvoiceDetailId IS NOT NULL
-												AND B.intInvoiceDetailId IS NULL )
+								IF(@ysnAllInvoiceHasCreditMemo = 1)
+								BEGIN
+									--CHARGES
+									IF EXISTS(	SELECT TOP 1 1 
+												FROM #tmpShipmentChargeInvoiceDetailIds A
+												LEFT JOIN tblARInvoiceDetail B
+													ON A.intInvoiceDetailId = B.intOriginalInvoiceDetailId
+												LEFT JOIN tblARInvoice C
+													ON B.intInvoiceId = C.intInvoiceId
+														AND C.strTransactionType = 'Credit Memo'
+												WHERE A.intInvoiceDetailId IS NOT NULL
+													AND B.intInvoiceDetailId IS NULL )
 
-								BEGIN
-									SET @ysnAllInvoiceHasCreditMemo = 0 
+									BEGIN
+										SET @ysnAllInvoiceHasCreditMemo = 0 
+									END
 								END
-								ELSE
-								BEGIN
-									SET @ysnAllInvoiceHasCreditMemo = 1
-								END
+
+						
+
 							END
 							-------------------------------------------------------------------------------------------
 							-------------------------------------------------------------------------------------------
@@ -922,16 +923,15 @@ BEGIN TRY
 											-- 	@transType			= N'all',
 											-- 	@accrueLicense		= 0,
 											-- 	@raiseError			= 1
-											if (exists ( select top 1 1 from tblGRCompanyPreference where ysnDoNotAllowUndistributePostedInvoice = 1 ))
-											begin
-												SET @NeedCreditMemoMessage = 'Please create a credit memo for invoice ' + @strInvoiceNumber + ' with document number of ' + @strTransactionId
-												RAISERROR(@NeedCreditMemoMessage, 11, 1);
-												RETURN;
-											end
+										
+											SET @NeedCreditMemoMessage = 'Please create a credit memo for invoice ' + @strInvoiceNumber + ' with document number of ' + @strTransactionId +'.'
+											RAISERROR(@NeedCreditMemoMessage, 11, 1);
+											RETURN;
+										
 
 										END
 
-										--Delete Invoice
+										--Delete/update Invoice
 										IF ISNULL(@intInvoiceId, 0) > 0
 										BEGIN
 
@@ -941,7 +941,10 @@ BEGIN TRY
 												FROM tblARInvoiceDetail 
 												WHERE intInvoiceId = @intInvoiceId) > 1
 											BEGIN
+												--update invoice
 												EXEC uspARDeleteInvoice @intInvoiceId, @intUserId, NULL, @InventoryShipmentId
+												EXEC dbo.uspARUpdateInvoiceIntegrations @intInvoiceId, 0, @intUserId
+												EXEC dbo.uspARReComputeInvoiceTaxes @intInvoiceId
 											END
 											ELSE
 											BEGIN
