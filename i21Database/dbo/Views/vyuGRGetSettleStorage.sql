@@ -12,7 +12,7 @@ SELECT DISTINCT
 	,dblFuturesPrice			= SS.dblFuturesPrice
 	,dblFuturesBasis			= SS.dblFuturesBasis
 	,dblCashPrice				= case when SS.intParentSettleStorageId is null then
-										isnull(computed_header.dblCashPrice, 0) / isnull(SS.dblSelectedUnits, 1)
+										isnull(computed_header.dblCashPrice, 0) / NULLIF(isnull(SS.dblSelectedUnits, 1),0)
 									else
 										CASE 
 											WHEN ISNULL(_dblCashPrice.dblCashPrice,0) > 0 THEN _dblCashPrice.dblCashPrice
