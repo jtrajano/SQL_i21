@@ -188,88 +188,88 @@ BEGIN
 		,OC.intHeaderUnitMeasureId
 		,OC.strHeaderUnitMeasure
 
-			--INVENTORY RECEIPT from SETTLEMENT STORAGE
-	INSERT INTO @TemporaryTable
-	(
-		intContractHeaderId	
-		,intContractDetailId	
-		,intTransactionId
-		,strTransactionId	
-		,strContractType		
-		,strContractNumber	
-		,intContractSeq	
-		,intEntityId
-		,strEntityName		
-		,strCommodityCode
-		,intCommodityId	
-		,dtmDate				
-		,dblQuantity			
-		,strTransactionType
-		,intTimeE	
-		,intCommodityUOMId
-		,intUnitMeasureId
-		,intSequenceUnitMeasureId
-		,strSequenceUnitMeasure
-		,intHeaderUnitMeasureId
-		,strHeaderUnitMeasure
-	)
-	select
-		a.intContractHeaderId
-		,b.intContractDetailId
-		,g.intInventoryReceiptId
-		,g.strReceiptNumber
-		,k.strContractType
-		,a.strContractNumber
-		,b.intContractSeq
-		,l.intEntityId
-		,l.strEntityName
-		,j.strCommodityCode
-		,j.intCommodityId
-		,i.dtmDate
-		,dlQuantity = SUM(f.dblOpenReceive)
-		,strTransaction = 'Inventory Receipt'
-		,dblPassPhrase = (CAST(replace(convert(varchar, i.dtmDate,101),'/','') + replace(convert(varchar, i.dtmDate,108),':','')as bigint)	+ CAST(g.intInventoryReceiptId as bigint))
-		,a.intCommodityUOMId
-		,m.intUnitMeasureId
-		,x.intSequenceUnitMeasureId
-		,x.strSequenceUnitMeasure
-		,x.intHeaderUnitMeasureId
-		,x.strHeaderUnitMeasure
-	from
-	tblCTContractHeader a
-	join tblCTContractDetail b on b.intContractHeaderId = a.intContractHeaderId
-	JOIN @OpenBasisContract x on b.intContractDetailId = x.intContractDetailId and b.intContractHeaderId = x.intContractHeaderId
-	join tblGRSettleContract c on c.intContractDetailId = b.intContractDetailId
-	join tblGRSettleStorageTicket d on d.intSettleStorageId = c.intSettleStorageId
-	join tblGRSettleStorage h on h.intSettleStorageId = d.intSettleStorageId and h.intParentSettleStorageId is not null
-	join tblGRCustomerStorage e on e.intCustomerStorageId = d.intCustomerStorageId
-	join tblICInventoryReceiptItem f on f.intSourceId = e.intTicketId
-	join tblICInventoryReceipt g on g.intInventoryReceiptId = f.intInventoryReceiptId and g.intSourceType = 1 and g.strReceiptType = 'Direct'
-	INNER JOIN tblICInventoryTransaction i on h.intSettleStorageId = i.intTransactionId
-		AND i.strTransactionForm = 'Storage Settlement'
-		AND i.intTransactionTypeId = 44
-	INNER JOIN tblICCommodity j on a.intCommodityId = j.intCommodityId
-	INNER JOIN tblCTContractType k on a.intContractTypeId = k.intContractTypeId
-	INNER JOIN vyuCTEntity l on l.intEntityId = a.intEntityId and l.strEntityType = (case when a.intContractTypeId = 1 then 'Vendor' else 'Customer' end)
-	join tblICCommodityUnitMeasure m on m.intCommodityId = a.intCommodityId and m.ysnStockUnit=1
-	GROUP BY a.intContractHeaderId
-	,b.intContractDetailId
-	,g.intInventoryReceiptId
-	,g.strReceiptNumber
-	,k.strContractType
-	,a.strContractNumber
-	,b.intContractSeq
-	,l.intEntityId
-	,l.strEntityName
-	,j.strCommodityCode
-	,j.intCommodityId
-	,i.dtmDate
-	,a.intCommodityUOMId
-	,m.intUnitMeasureId
-		,x.intSequenceUnitMeasureId
-		,x.strSequenceUnitMeasure
-		,x.intHeaderUnitMeasureId
-		,x.strHeaderUnitMeasure
+	----INVENTORY RECEIPT from SETTLEMENT STORAGE
+	--INSERT INTO @TemporaryTable
+	--(
+	--	intContractHeaderId	
+	--	,intContractDetailId	
+	--	,intTransactionId
+	--	,strTransactionId	
+	--	,strContractType		
+	--	,strContractNumber	
+	--	,intContractSeq	
+	--	,intEntityId
+	--	,strEntityName		
+	--	,strCommodityCode
+	--	,intCommodityId	
+	--	,dtmDate				
+	--	,dblQuantity			
+	--	,strTransactionType
+	--	,intTimeE	
+	--	,intCommodityUOMId
+	--	,intUnitMeasureId
+	--	,intSequenceUnitMeasureId
+	--	,strSequenceUnitMeasure
+	--	,intHeaderUnitMeasureId
+	--	,strHeaderUnitMeasure
+	--)
+	--select
+	--	a.intContractHeaderId
+	--	,b.intContractDetailId
+	--	,g.intInventoryReceiptId
+	--	,g.strReceiptNumber
+	--	,k.strContractType
+	--	,a.strContractNumber
+	--	,b.intContractSeq
+	--	,l.intEntityId
+	--	,l.strEntityName
+	--	,j.strCommodityCode
+	--	,j.intCommodityId
+	--	,i.dtmDate
+	--	,dlQuantity = SUM(f.dblOpenReceive)
+	--	,strTransaction = 'Inventory Receipt'
+	--	,dblPassPhrase = (CAST(replace(convert(varchar, i.dtmDate,101),'/','') + replace(convert(varchar, i.dtmDate,108),':','')as bigint)	+ CAST(g.intInventoryReceiptId as bigint))
+	--	,a.intCommodityUOMId
+	--	,m.intUnitMeasureId
+	--	,x.intSequenceUnitMeasureId
+	--	,x.strSequenceUnitMeasure
+	--	,x.intHeaderUnitMeasureId
+	--	,x.strHeaderUnitMeasure
+	--from
+	--tblCTContractHeader a
+	--join tblCTContractDetail b on b.intContractHeaderId = a.intContractHeaderId
+	--JOIN @OpenBasisContract x on b.intContractDetailId = x.intContractDetailId and b.intContractHeaderId = x.intContractHeaderId
+	--join tblGRSettleContract c on c.intContractDetailId = b.intContractDetailId
+	--join tblGRSettleStorageTicket d on d.intSettleStorageId = c.intSettleStorageId
+	--join tblGRSettleStorage h on h.intSettleStorageId = d.intSettleStorageId and h.intParentSettleStorageId is not null
+	--join tblGRCustomerStorage e on e.intCustomerStorageId = d.intCustomerStorageId
+	--join tblICInventoryReceiptItem f on f.intSourceId = e.intTicketId
+	--join tblICInventoryReceipt g on g.intInventoryReceiptId = f.intInventoryReceiptId and g.intSourceType = 1 and g.strReceiptType = 'Direct'
+	--INNER JOIN tblICInventoryTransaction i on h.intSettleStorageId = i.intTransactionId
+	--	AND i.strTransactionForm = 'Storage Settlement'
+	--	AND i.intTransactionTypeId = 44
+	--INNER JOIN tblICCommodity j on a.intCommodityId = j.intCommodityId
+	--INNER JOIN tblCTContractType k on a.intContractTypeId = k.intContractTypeId
+	--INNER JOIN vyuCTEntity l on l.intEntityId = a.intEntityId and l.strEntityType = (case when a.intContractTypeId = 1 then 'Vendor' else 'Customer' end)
+	--join tblICCommodityUnitMeasure m on m.intCommodityId = a.intCommodityId and m.ysnStockUnit=1
+	--GROUP BY a.intContractHeaderId
+	--,b.intContractDetailId
+	--,g.intInventoryReceiptId
+	--,g.strReceiptNumber
+	--,k.strContractType
+	--,a.strContractNumber
+	--,b.intContractSeq
+	--,l.intEntityId
+	--,l.strEntityName
+	--,j.strCommodityCode
+	--,j.intCommodityId
+	--,i.dtmDate
+	--,a.intCommodityUOMId
+	--,m.intUnitMeasureId
+	--,x.intSequenceUnitMeasureId
+	--,x.strSequenceUnitMeasure
+	--,x.intHeaderUnitMeasureId
+	--,x.strHeaderUnitMeasure
 
 	-- INVENTORY RECEIPT
 	INSERT INTO @TemporaryTable

@@ -8075,6 +8075,7 @@
     <Build Include="dbo\Views\vyuIPAmendmentApproval.sql" /> 
     <Build Include="dbo\Tables\tblARInvoiceTaxReportStagingTable.sql" />
     <Build Include="dbo\Stored Procedures\uspARInvoiceDetailTaxReport.sql" />
+    <Build Include="dbo\Functions\fnGRGetVoucheredUnits.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

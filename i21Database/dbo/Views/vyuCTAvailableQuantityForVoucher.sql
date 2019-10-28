@@ -58,7 +58,7 @@ group by
 availablesummary as
 (
 select
-	intContractDetailId, intPriceFixationId, intPriceFixationDetailId, dblCashPrice, dblAccumulativeQuantity, dblVoucherQtyReceived, dblAvailableQuantity = dblAccumulativeQuantity - dblVoucherQtyReceived
+	intContractDetailId, intPriceFixationId, intPriceFixationDetailId, dblCashPrice, dblQuantity, dblAccumulativeQuantity, dblVoucherQtyReceived, dblAvailableQuantity = dblAccumulativeQuantity - dblVoucherQtyReceived
 from
 	availble
 )

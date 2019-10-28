@@ -1,7 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspCTCreateBillForBasisContract]
 	  @intBasisContractDetailId INT
 	 ,@dblCashPrice DECIMAL(24, 10)
-	 ,@dblUnits DECIMAL(24, 10) = NULL
+	 ,@dblQtyFromCt DECIMAL(24, 10) = NULL
 AS
 BEGIN TRY
 	SET NOCOUNT ON
@@ -54,7 +54,6 @@ BEGIN TRY
 	  @EntityId					= CH.intEntityId
 	 ,@intCreatedUserId			= ISNULL(CH.intLastModifiedById,CH.intCreatedById)  
 	 ,@intBasisContractHeaderId = CH.intContractHeaderId
-	 ,@dblCashPrice				= dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,C1.intUnitMeasureId,PU.intUnitMeasureId,CD.dblCashPrice)
 	FROM		tblCTContractDetail			CD
 	JOIN		tblCTContractHeader         CH  ON  CH.intContractHeaderId = CD.intContractHeaderId
 	LEFT JOIN	tblICItemUOM				PU	ON	PU.intItemUOMId		   = CD.intPriceItemUOMId		
@@ -86,9 +85,10 @@ BEGIN TRY
 			FROM @SettleStorage  
 			WHERE intSettleStorageKey = @SettleStorageKey
 			
+			
 			IF(ISNULL(@intParentSettleStorageId,0) > 0)
 			BEGIN
-				EXEC [dbo].[uspGRPostSettleStorage] @intSettleStorageId = @intSettleStorageId, @ysnPosted = 1, @ysnFromPriceBasisContract = 1
+				EXEC [dbo].[uspGRPostSettleStorage] @intSettleStorageId,1, 1,@dblCashPrice, @dblQtyFromCt
 			END
 			
 			SELECT @SettleStorageKey = MIN(intSettleStorageKey)
