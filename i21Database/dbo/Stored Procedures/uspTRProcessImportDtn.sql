@@ -92,34 +92,35 @@ BEGIN
 					END
 
 					-- POST VOUCHER
-					DECLARE @success BIT = 0
-						,@invalidCount INT = NULL
-						,@successfulCount INT = NULL
-						,@batchIdUsed INT = NULL
+					DECLARE @success BIT = NULL
 
-					-- IF (@intBillId IS NOT NULL)
-					-- BEGIN
-					-- 	BEGIN TRY
-					-- 		EXEC [dbo].[uspAPPostVoucherPrepay] 
-					-- 			@param = @intBillId
-					-- 			,@post = 1
-					-- 			,@recap = 0
-					-- 			,@userId = @intUserId
-					-- 			,@batchId = NULL
-					-- 			,@success = @success OUTPUT
-					-- 			,@invalidCount = @invalidCount OUTPUT
-					-- 			,@successfulCount = @successfulCount OUTPUT
-					-- 			,@batchIdUsed = @batchIdUsed OUTPUT
-					-- 	END TRY
-					-- 	BEGIN CATCH
-					-- 		SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, ERROR_MESSAGE())
-					-- 	END CATCH
+					IF (@intBillId IS NOT NULL)
+					BEGIN
+						BEGIN TRY
 
-					-- 	IF (@success = 0)
-					-- 	BEGIN
-					-- 		SELECT TOP 1 dbo.fnTRMessageConcat(@strMessage,strMessage) FROM tblAPPostResult WHERE intTransactionId = @intBillId ORDER BY intId DESC
-					-- 	END
-					-- END
+							EXEC [dbo].[uspAPPostBill]
+								@post = 1
+								,@recap = 0
+								,@isBatch = 0
+								,@transactionType = 'Transport Load'
+								,@param = @intBillId
+								,@userId = @intUserId
+								,@success = @success OUTPUT
+
+						END TRY
+						BEGIN CATCH
+							SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, ERROR_MESSAGE())
+						END CATCH
+
+						IF (@success = 0)
+						BEGIN
+							SELECT TOP 1 dbo.fnTRMessageConcat(@strMessage,strMessage) FROM tblAPPostResult WHERE intTransactionId = @intBillId ORDER BY intId DESC
+						END
+						ELSE
+						BEGIN
+							SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, 'Voucher successfully posted')
+						END
+					END
 					
 				END
 				ELSE
@@ -159,10 +160,6 @@ BEGIN
 			@ErrorMessage = ERROR_MESSAGE(),
 			@ErrorSeverity = ERROR_SEVERITY(),
 			@ErrorState = ERROR_STATE();
-		--ROLLBACK TRANSACTION --@Main
-		-- Use RAISERROR inside the CATCH block to return error
-		-- information about the original error that caused
-		-- execution to jump to the CATCH block.
 		RAISERROR (
 			@ErrorMessage, -- Message text.
 			@ErrorSeverity, -- Severity.
