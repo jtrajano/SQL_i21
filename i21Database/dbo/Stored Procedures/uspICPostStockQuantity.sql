@@ -77,6 +77,22 @@ BEGIN
 	RETURN; 
 END 
 
+IF EXISTS (SELECT 1 FROM tblICItem i WHERE i.intItemId = @intItemId AND ISNULL(i.ysnSeparateStockForUOMs, 0) = 0) 
+BEGIN 	
+	-- Replace the UOM to 'Stock Unit'. 
+	-- Convert the Qty, Cost, and Sales Price to stock UOM. 
+	SELECT 
+		@dblQty = dbo.fnCalculateQtyBetweenUOM(@intItemUOMId, iu.intItemUOMId, @dblQty)
+		,@intItemUOMId = iu.intItemUOMId
+		,@dblUOMQty = iu.dblUnitQty
+	FROM 
+		tblICItemUOM iu 
+	WHERE 
+		iu.intItemId = @intItemId 		
+		AND iu.ysnStockUnit = 1
+		AND iu.intItemUOMId <> @intItemUOMId -- Do not do the conversion if @intItemUOMId is already the stock uom. 
+END 
+
 -----------------------------------
 -- Update the Item Stock table
 -----------------------------------
@@ -92,6 +108,7 @@ BEGIN
 										ROUND(dbo.fnCalculateStockUnitQty(dbo.fnMultiply(@dblQty, @dblWeightPerQty), @dblWeightUnitQty) , 6)
 									ELSE 
 										ROUND(dbo.fnCalculateStockUnitQty(@dblQty, @dblUOMQty) , 6)
+										
 							END
 					,dtmTransactionDate = CASE 
 											WHEN @ysnPost = 1 
@@ -191,7 +208,8 @@ BEGIN
 							,intItemLocationId = @intItemLocationId					
 							,intSubLocationId = @intSubLocationId 
 							,intStorageLocationId = @intStorageLocationId
-							,Qty = dbo.fnCalculateStockUnitQty(@dblQty, ItemUOM.dblUnitQty) -- Convert the qty to stock unit. 
+							,Qty = --dbo.fnCalculateStockUnitQty(@dblQty, ItemUOM.dblUnitQty) -- Convert the qty to stock unit. 
+									dbo.fnCalculateQtyBetweenUOM(@intItemUOMId, StockUOM.intItemUOMId, @dblQty)
 					FROM	(
 								SELECT	intItemId
 										,intItemUOMId 

@@ -82,11 +82,11 @@ BEGIN
 	-- Replace the UOM to 'Stock Unit'. 
 	-- Convert the Qty, Cost, and Sales Price to stock UOM. 
 	SELECT 
-		@intItemUOMId = iu.intItemUOMId
-		,@dblUOMQty = iu.intItemUOMId
-		,@dblQty = dbo.fnCalculateQtyBetweenUOM(@intItemUOMId, iu.intItemUOMId, @dblQty) 
+		@dblQty = dbo.fnCalculateQtyBetweenUOM(@intItemUOMId, iu.intItemUOMId, @dblQty) 
 		,@dblCost = dbo.fnCalculateCostBetweenUOM(@intItemUOMId, iu.intItemUOMId, @dblCost) 
 		,@dblSalesPrice = dbo.fnCalculateCostBetweenUOM(@intItemUOMId, iu.intItemUOMId, @dblSalesPrice) 		
+		,@intItemUOMId = iu.intItemUOMId
+		,@dblUOMQty = iu.dblUnitQty
 	FROM 
 		tblICItemUOM iu 
 	WHERE 

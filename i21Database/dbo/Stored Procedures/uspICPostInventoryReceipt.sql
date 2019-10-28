@@ -715,6 +715,7 @@ BEGIN
 											,AggregrateItemLots.dblTotalNet --Lot Net Wgt or Volume
 											,DetailItem.ysnSubCurrency
 											,Header.intSubCurrencyCents
+											,DEFAULT 
 										)
 										--/ Header.intSubCurrencyCents 
 
@@ -757,6 +758,7 @@ BEGIN
 											,AggregrateItemLots.dblTotalNet
 											,NULL--DetailItem.ysnSubCurrency
 											,NULL--Header.intSubCurrencyCents
+											,DEFAULT 
 										)
 										-- (B) Other Charge
 										+ 
@@ -812,6 +814,7 @@ BEGIN
 						,AggregrateItemLots.dblTotalNet --Lot Net Wgt or Volume
 						,NULL--DetailItem.ysnSubCurrency
 						,NULL--Header.intSubCurrencyCents
+						,DEFAULT 
 					)
 				,intSourceEntityId = Header.intEntityVendorId
 		FROM	dbo.tblICInventoryReceipt Header INNER JOIN dbo.tblICInventoryReceiptItem DetailItem 
@@ -1769,6 +1772,7 @@ BEGIN
 											,AggregrateItemLots.dblTotalNet --Lot Net Wgt or Volume
 											,DetailItem.ysnSubCurrency
 											,Header.intSubCurrencyCents
+											,DEFAULT 
 										)
 										--/ Header.intSubCurrencyCents 
 
@@ -1799,6 +1803,7 @@ BEGIN
 											,AggregrateItemLots.dblTotalNet
 											,NULL--DetailItem.ysnSubCurrency
 											,NULL--Header.intSubCurrencyCents
+											,DEFAULT 
 										)
 										-- (B) Other Charge
 										+ 

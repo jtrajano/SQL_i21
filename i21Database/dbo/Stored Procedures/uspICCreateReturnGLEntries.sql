@@ -324,6 +324,7 @@ AS
 							,AggregrateItemLots.dblTotalNet
 							,ri.ysnSubCurrency
 							,r.intSubCurrencyCents
+							,CASE WHEN ISNULL(i.ysnSeparateStockForUOMs, 0) = 0 THEN stockUOM.intItemUOMId ELSE NULL END 
 						)
 					)
 			,dblReturnUnitCostInFunctionalCurrency = 
@@ -343,6 +344,7 @@ AS
 									,AggregrateItemLots.dblTotalNet
 									,ri.ysnSubCurrency
 									,r.intSubCurrencyCents
+									,CASE WHEN ISNULL(i.ysnSeparateStockForUOMs, 0) = 0 THEN stockUOM.intItemUOMId ELSE NULL END 
 								)
 							)
 							,ri.dblForexRate
@@ -361,6 +363,7 @@ AS
 								,AggregrateItemLots.dblTotalNet
 								,ri.ysnSubCurrency
 								,r.intSubCurrencyCents
+								,CASE WHEN ISNULL(i.ysnSeparateStockForUOMs, 0) = 0 THEN stockUOM.intItemUOMId ELSE NULL END 
 							)
 						)
 				END 
@@ -439,6 +442,9 @@ AS
 			INNER JOIN tblICItem i
 				ON 
 				i.intItemId = ri.intItemId
+			OUTER APPLY (
+				SELECT TOP 1 intItemUOMId FROM tblICItemUOM iu WHERE iu.intItemId = i.intItemId AND iu.ysnStockUnit = 1
+			) stockUOM
 			OUTER APPLY (
 				SELECT  dblTotalNet = SUM(
 							CASE	WHEN  ISNULL(ReceiptItemLot.dblGrossWeight, 0) - ISNULL(ReceiptItemLot.dblTareWeight, 0) = 0 THEN -- If Lot net weight is zero, convert the 'Pack' Qty to the Volume or Weight. 											
