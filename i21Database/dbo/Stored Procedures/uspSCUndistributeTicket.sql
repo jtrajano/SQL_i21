@@ -934,7 +934,20 @@ BEGIN TRY
 										--Delete Invoice
 										IF ISNULL(@intInvoiceId, 0) > 0
 										BEGIN
-											EXEC [dbo].[uspARDeleteInvoice] @intInvoiceId, @intUserId
+
+											---Check if there are multiple IS on the invoice.
+
+											IF (SELECT COUNT(DISTINCT strDocumentNumber) 
+												FROM tblARInvoiceDetail 
+												WHERE intInvoiceId = @intInvoiceId) > 1
+											BEGIN
+												EXEC uspARDeleteInvoice @intInvoiceId, @intUserId, NULL, @InventoryShipmentId
+											END
+											ELSE
+											BEGIN
+												EXEC [dbo].[uspARDeleteInvoice] @intInvoiceId, @intUserId
+											END
+											
 										END
 
 									
