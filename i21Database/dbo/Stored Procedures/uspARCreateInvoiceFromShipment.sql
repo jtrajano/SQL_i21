@@ -764,7 +764,15 @@ ORDER BY EFI.[intSalesOrderDetailId] ASC
 	   , SOSODT.[intSalesOrderDetailTaxId] ASC
 
 --GET EXISTING INVOICE FOR BATCH SCALE
-SELECT @intExistingInvoiceId = dbo.fnARGetInvoiceForBatch(@EntityCustomerId)
+DECLARE @intContractShipToLocationId	INT
+
+SELECT TOP 1 @intContractShipToLocationId = CD.intShipToId
+FROM @EntriesForInvoice IE
+INNER JOIN tblCTContractDetail CD ON IE.intContractDetailId = CD.intContractDetailId
+WHERE CD.intContractDetailId IS NOT NULL
+  AND CD.intShipToId IS NOT NULL
+
+SELECT @intExistingInvoiceId = dbo.fnARGetInvoiceForBatch(@EntityCustomerId, @intContractShipToLocationId)
 
 --CREATE INVOICE IF THERE's NONE
 IF ISNULL(@intExistingInvoiceId, 0) = 0

@@ -1,12 +1,12 @@
 CREATE FUNCTION [dbo].[fnARGetInvoiceForBatch]
 (
-	 @intEntityCustomerId   INT
+	  @intEntityCustomerId          INT
+    , @intContractShipToLocationId  INT
 )
 RETURNS INT
 AS
 BEGIN
-	DECLARE @intShipToLocationId	INT = NULL
-          , @intInvoiceId			INT = NULL
+	DECLARE @intInvoiceId			INT = NULL
           , @strBatchInvoiceBy		NVARCHAR(MAX)
           , @dtmBatchTimeFrom		TIME = NULL
           , @dtmBatchTimeTo			TIME = NULL
@@ -29,7 +29,7 @@ BEGIN
               AND CAST(dtmDateCreated AS DATE) = CAST(GETDATE() AS DATE)
             ORDER BY dtmDateCreated DESC
         END
-    ELSE IF UPPER(@strBatchInvoiceBy) = UPPER('Per Time and Location') AND ISNULL(@intShipToLocationId, 0) <> 0
+    ELSE IF UPPER(@strBatchInvoiceBy) = UPPER('Per Time and Location') AND ISNULL(@intContractShipToLocationId, 0) <> 0
         BEGIN
             SELECT TOP 1 @intInvoiceId = intInvoiceId
             FROM tblARInvoice
@@ -38,7 +38,7 @@ BEGIN
               AND strType = 'Standard'
               AND intEntityCustomerId = @intEntityCustomerId
               AND CAST(dtmDateCreated AS DATE) = CAST(GETDATE() AS DATE)
-              AND intShipToLocationId = @intShipToLocationId
+              AND intShipToLocationId = @intContractShipToLocationId
             ORDER BY dtmDateCreated DESC
         END
 

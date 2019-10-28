@@ -81,7 +81,16 @@ BEGIN
 		END
 
 	--GET EXISTING INVOICE FOR BATCH SCALE
-	SELECT @intExistingInvoiceId = dbo.fnARGetInvoiceForBatch(@intEntityCustomerId)
+	DECLARE @intContractShipToLocationId	INT
+
+	SELECT TOP 1 @intContractShipToLocationId = CD.intShipToId
+	FROM tblSOSalesOrderDetail SO
+	INNER JOIN tblCTContractDetail CD ON SO.intContractDetailId = CD.intContractDetailId
+	WHERE SO.intSalesOrderId = @intSalesOrderId
+	  AND CD.intContractDetailId IS NOT NULL
+	  AND CD.intShipToId IS NOT NULL
+
+	SELECT @intExistingInvoiceId = dbo.fnARGetInvoiceForBatch(@intEntityCustomerId, @intContractShipToLocationId)
 
 	--CREATE INVOICE IF THERE's NONE
 	IF ISNULL(@intExistingInvoiceId, 0) = 0
