@@ -77,6 +77,8 @@ SET @UNDISTRIBUTE_NOT_ALLOWED = 'Un-distribute ticket with posted invoice is not
 declare @intInventoryAdjustmentId int 
 declare @strAdjustmentNo AS NVARCHAR(40)
 DECLARE @ysnAllInvoiceHasCreditMemo BIT
+DECLARE @strInvoiceNumber AS NVARCHAR(50)
+DECLARE @NeedCreditMemoMessage NVARCHAR(200)
 
 BEGIN TRY
 		SELECT TOP 1
@@ -888,7 +890,7 @@ BEGIN TRY
 
 									WHILE (ISNULL(@intInvoiceId,0) > 0)
 									BEGIN
-										SELECT @ysnPosted = ysnPosted FROM tblARInvoice WHERE intInvoiceId = @intInvoiceId;
+										SELECT @ysnPosted = ysnPosted, @strInvoiceNumber = strInvoiceNumber FROM tblARInvoice WHERE intInvoiceId = @intInvoiceId;
 
 										-- unpost invoice
 										IF @ysnPosted = 1
@@ -898,25 +900,35 @@ BEGIN TRY
 												RAISERROR(@UNDISTRIBUTE_NOT_ALLOWED, 11, 1);
 												RETURN;
 											end
-											EXEC [dbo].[uspARPostInvoice]
-												@batchId			= NULL,
-												@post				= 0,
-												@recap				= 0,
-												@param				= @intInvoiceId,
-												@userId				= @intUserId,
-												@beginDate			= NULL,
-												@endDate			= NULL,
-												@beginTransaction	= NULL,
-												@endTransaction		= NULL,
-												@exclude			= NULL,
-												@successfulCount	= @successfulCount OUTPUT,
-												@invalidCount		= @invalidCount OUTPUT,
-												@success			= @success OUTPUT,
-												@batchIdUsed		= @batchIdUsed OUTPUT,
-												@recapId			= @recapId OUTPUT,
-												@transType			= N'all',
-												@accrueLicense		= 0,
-												@raiseError			= 1
+
+
+
+											-- EXEC [dbo].[uspARPostInvoice]
+											-- 	@batchId			= NULL,
+											-- 	@post				= 0,
+											-- 	@recap				= 0,
+											-- 	@param				= @intInvoiceId,
+											-- 	@userId				= @intUserId,
+											-- 	@beginDate			= NULL,
+											-- 	@endDate			= NULL,
+											-- 	@beginTransaction	= NULL,
+											-- 	@endTransaction		= NULL,
+											-- 	@exclude			= NULL,
+											-- 	@successfulCount	= @successfulCount OUTPUT,
+											-- 	@invalidCount		= @invalidCount OUTPUT,
+											-- 	@success			= @success OUTPUT,
+											-- 	@batchIdUsed		= @batchIdUsed OUTPUT,
+											-- 	@recapId			= @recapId OUTPUT,
+											-- 	@transType			= N'all',
+											-- 	@accrueLicense		= 0,
+											-- 	@raiseError			= 1
+											if (exists ( select top 1 1 from tblGRCompanyPreference where ysnDoNotAllowUndistributePostedInvoice = 1 ))
+											begin
+												SET @NeedCreditMemoMessage = 'Please create a credit memo for invoice ' + @strInvoiceNumber + ' with document number of ' + @strTransactionId
+												RAISERROR(@NeedCreditMemoMessage, 11, 1);
+												RETURN;
+											end
+
 										END
 
 										--Delete Invoice
