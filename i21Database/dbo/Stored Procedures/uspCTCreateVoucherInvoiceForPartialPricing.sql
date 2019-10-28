@@ -279,9 +279,6 @@ BEGIN TRY
 				SELECT	@strVendorOrderNumber = strTicketNumber, @intTicketId = intTicketId 
 					FROM tblSCTicket WHERE intInventoryReceiptId = @intInventoryReceiptId
 
-				SELECT	@strVendorOrderNumber = ISNULL(strPrefix,'') + @strVendorOrderNumber 
-					FROM tblSMStartingNumber WHERE strTransactionType = 'Ticket Management' AND strModule = 'Ticket Management'
-
 				IF @ysnLoad = 1
 				BEGIN
 					IF @dblPriceLoadQty = @dblPriceFixationLoadApplied
