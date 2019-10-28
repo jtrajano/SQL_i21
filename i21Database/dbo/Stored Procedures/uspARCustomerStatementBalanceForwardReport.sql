@@ -848,7 +848,11 @@ VALUES (strCustomerNumber, dtmLastStatementDate, dblLastStatement);
 
 IF @ysnPrintOnlyPastDueLocal = 1
     BEGIN
-        DELETE FROM @temp_statement_table WHERE DATEDIFF(DAYOFYEAR, dtmDueDate, @dtmDateToLocal) > 0 AND strTransactionType <> 'Balance Forward'        
+        DELETE FROM @temp_statement_table WHERE DATEDIFF(DAYOFYEAR, dtmDueDate, @dtmDateToLocal) <= 0 AND strTransactionType <> 'Balance Forward'
+		UPDATE @temp_aging_table
+		SET dblFuture 	= 0
+		  , dbl0Days 	= 0
+		  , dblTotalAR 	= ISNULL(dblTotalAR, 0) - ISNULL(dbl0Days, 0) - ISNULL(dblFuture, 0)
     END
 
 IF @ysnPrintZeroBalanceLocal = 0
