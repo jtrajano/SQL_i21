@@ -327,6 +327,12 @@ BEGIN TRY
 
 						IF @dblRemainingQty <= @dblReceived
 						BEGIN						
+
+							IF (@dblReceived - @dblTotalIVForSHQty) < @dblRemainingQty
+							BEGIN
+								SET @dblRemainingQty = (@dblReceived - @dblTotalIVForSHQty)
+							END
+							
 							INSERT	INTO @tblToProcess
 							SELECT	@intInventoryReceiptId,@intInventoryReceiptItemId,@dblRemainingQty,@intPriceFixationDetailId
 
