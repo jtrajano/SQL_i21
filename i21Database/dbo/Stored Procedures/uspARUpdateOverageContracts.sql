@@ -4,6 +4,7 @@
 	, @intUserId			INT 
 	, @dblNetWeight			NUMERIC(18, 6) = 0
 	, @ysnFromSalesOrder	BIT = 0
+	, @intTicketId   		INT = NULL
 AS
 
 DECLARE @tblInvoiceIds				InvoiceId
@@ -63,7 +64,7 @@ SELECT intInvoiceId					= ID.intInvoiceId
 	 , dblUnitQuantity				= ID.dblUnitQuantity
 	 , intEntityId					= I.intEntityId
 	 , intInventoryShipmentItemId	= ID.intInventoryShipmentItemId
-	 , intTicketId					= ID.intTicketId
+	 , intTicketId     				= ISNULL(ID.intTicketId, @intTicketId)
 	 , strDocumentNumber			= ID.strDocumentNumber			
 INTO #INVOICEDETAILS 
 FROM tblARInvoiceDetail ID
@@ -159,7 +160,6 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
 			  , @intItemUOMId				INT = NULL
 			  , @intContractSeq				INT = NULL
 			  , @intInventoryShipmentItemId	INT = NULL
-			  , @intTicketId				INT = NULL
 			  , @dblQtyOverAged				NUMERIC(18, 6) = 0
 			  , @dtmDate					DATETIME = NULL
 			  , @strDocumentNumber			NVARCHAR(100) = NULL
@@ -184,6 +184,7 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
 				UPDATE ID
 				SET dblQtyShipped	= ISNULL(CASE WHEN ISI.dblDestinationQuantity > CTD.dblOriginalQty THEN CTD.dblOriginalQty ELSE ISI.dblDestinationQuantity END, ISI.dblQuantity)
 				  , dblUnitQuantity	= ISNULL(CASE WHEN ISI.dblDestinationQuantity > CTD.dblOriginalQty THEN CTD.dblOriginalQty ELSE ISI.dblDestinationQuantity END, ISI.dblQuantity)
+				  , intTicketId  	= ISNULL(ID.intTicketId, @intTicketId)
 				  , @dblQtyOverAged	= @dblNetWeight - ISNULL(CASE WHEN ISI.dblDestinationQuantity > CTD.dblOriginalQty THEN CTD.dblOriginalQty ELSE ISI.dblDestinationQuantity END, ISI.dblQuantity)
 				FROM tblARInvoiceDetail ID
 				INNER JOIN tblICInventoryShipmentItem ISI ON ID.intInventoryShipmentItemId = ISI.intInventoryShipmentItemId AND ID.intTicketId = ISI.intSourceId
@@ -192,50 +193,66 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
 			END
 		ELSE IF ISNULL(@ysnFromSalesOrder, 0) = 1 AND @intContractDetailId IS NOT NULL
 			BEGIN
+				DECLARE @intContractCount	INT = 0
+
+				SELECT @intContractCount = COUNT(*)
+				FROM tblSOSalesOrderDetail SOD
+				LEFT JOIN tblARInvoiceDetail ID ON SOD.intSalesOrderDetailId = ID.intSalesOrderDetailId
+				LEFT JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId
+				WHERE SOD.intContractDetailId = @intContractDetailId
+				  AND SOD.intContractDetailId IS NOT NULL
+				  AND ISNULL(I.ysnPosted, 0) = 0
+
+				-- 1. ORDERED = CONTRACT BALANCE
+				--	1.1 TICKET < ORDERED
+				--	1.2 TICKET > ORDERED
+				-- 2. ORDERED < CONTRACT BALANCE
+				-- 3. ORDERED = UNUSED CONTRACT IN #2
 				UPDATE ID
-				SET dblQtyShipped	= CASE WHEN @dblNetWeight > 0 AND ISNULL(dbo.fnCalculateQtyBetweenUOM(@intScaleUOMId, ID.intItemUOMId, @dblNetWeight), 0) > CTD.dblBalance 
+				SET dblQtyShipped	= CASE WHEN ISNULL(@dblNetWeight, 0) > CTD.dblBalance --SCENARIO 
 										   THEN 
-												CASE WHEN CTD.dblBalance = CTD.dblOriginalQty AND CTD.dblScheduleQty = CTD.dblOriginalQty
+												CASE WHEN CTD.dblBalance = CTD.dblQuantity AND CTD.dblScheduleQty = CTD.dblQuantity
 													 THEN ID.dblQtyOrdered 
 													 ELSE CTD.dblBalance 
 												END
 										   ELSE 
-												CASE WHEN @dblNetWeight > ID.dblQtyOrdered 
-										  	     	 THEN ID.dblQtyOrdered
-												 	 ELSE ISNULL(dbo.fnCalculateQtyBetweenUOM(@intScaleUOMId, ID.intItemUOMId, @dblNetWeight), 0) 
+												CASE WHEN @dblNetWeight > ID.dblQtyOrdered AND ISNULL(@intContractCount, 0) > 1 --CONTRACT USED ON OTHER S.O. (INVOICE NOT POSTED YET)
+										  	     	 THEN CTD.dblBalance - (CTD.dblScheduleQty - ID.dblQtyOrdered)
+												 	 ELSE ISNULL(@dblNetWeight, 0) 
 												END
 									  END
-				  , dblUnitQuantity	= CASE WHEN @dblNetWeight > 0 AND ISNULL(dbo.fnCalculateQtyBetweenUOM(@intScaleUOMId, ID.intItemUOMId, @dblNetWeight), 0) > CTD.dblBalance 
+				  , dblUnitQuantity	= CASE WHEN ISNULL(@dblNetWeight, 0) > CTD.dblBalance 
 										   THEN 
-												CASE WHEN CTD.dblBalance = CTD.dblOriginalQty AND CTD.dblScheduleQty = CTD.dblOriginalQty
+												CASE WHEN CTD.dblBalance = CTD.dblQuantity AND CTD.dblScheduleQty = CTD.dblQuantity
 													 THEN ID.dblQtyOrdered 
 													 ELSE CTD.dblBalance 
 												END
 										   ELSE 
-												CASE WHEN @dblNetWeight > ID.dblQtyOrdered 
-										  	     	 THEN ID.dblQtyOrdered
-												 	 ELSE ISNULL(dbo.fnCalculateQtyBetweenUOM(@intScaleUOMId, ID.intItemUOMId, @dblNetWeight), 0) 
+												CASE WHEN @dblNetWeight > ID.dblQtyOrdered AND ISNULL(@intContractCount, 0) > 1
+										  	     	 THEN CTD.dblBalance - (CTD.dblScheduleQty - ID.dblQtyOrdered)
+												 	 ELSE ISNULL(@dblNetWeight, 0) 
 												END
 									  END
 				  , dblQtyOrdered	= CASE WHEN @dblNetWeight = 0 THEN CTD.dblBalance ELSE ID.dblQtyOrdered END
-				  , intTicketId        = ISNULL(ID.intTicketId, @intTicketId)
+				  , intTicketId     = ISNULL(ID.intTicketId, @intTicketId)
 				  , @dblQtyOverAged	= CASE WHEN @dblNetWeight > 0 
-										   THEN ISNULL(dbo.fnCalculateQtyBetweenUOM(@intScaleUOMId, ID.intItemUOMId, @dblNetWeight), 0) - 
-												CASE WHEN CTD.dblBalance = CTD.dblOriginalQty AND CTD.dblScheduleQty = CTD.dblOriginalQty
+										   THEN ISNULL(@dblNetWeight, 0) - 
+												CASE WHEN CTD.dblBalance = CTD.dblQuantity AND CTD.dblScheduleQty = CTD.dblQuantity
 													 THEN ID.dblQtyOrdered 
 													 ELSE CTD.dblBalance 
 												END
 											ELSE ID.dblQtyOrdered - CTD.dblBalance 
 									  END					
 				FROM tblARInvoiceDetail ID
-				INNER JOIN tblCTContractDetail CTD ON ID.intContractDetailId = CTD.intContractDetailId AND ID.intContractHeaderId = CTD.intContractHeaderId
-				WHERE ID.intInvoiceDetailId = @intInvoiceDetailId				
+				INNER JOIN tblCTContractDetail CTD ON ID.intContractDetailId = CTD.intContractDetailId AND ID.intContractHeaderId = CTD.intContractHeaderId				
+				WHERE ID.intInvoiceDetailId = @intInvoiceDetailId
 			END
 		ELSE IF ISNULL(@ysnFromSalesOrder, 0) = 1 AND @intContractDetailId IS NULL
 			BEGIN
 				UPDATE ID
 				SET dblQtyShipped	= ISNULL(dbo.fnCalculateQtyBetweenUOM(@intScaleUOMId, ID.intItemUOMId, @dblNetWeight), 0)
 				  , dblUnitQuantity	= ISNULL(dbo.fnCalculateQtyBetweenUOM(@intScaleUOMId, ID.intItemUOMId, @dblNetWeight), 0)
+				  , intTicketId  	= ISNULL(ID.intTicketId, @intTicketId)
 				  , @dblQtyOverAged	= 0
 				FROM tblARInvoiceDetail ID
 				WHERE ID.intInvoiceDetailId = @intInvoiceDetailId
@@ -247,6 +264,7 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
 				UPDATE ID
 				SET dblQtyShipped	= PARENT.dblQtyShipped * dblAddOnQuantity
 				  , dblUnitQuantity	= PARENT.dblQtyShipped * dblAddOnQuantity
+				  , intTicketId  	= ISNULL(ID.intTicketId, @intTicketId)
 				FROM tblARInvoiceDetail ID
 				CROSS APPLY (
 					SELECT TOP 1 intItemId
@@ -409,7 +427,7 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
 						SELECT intInvoiceDetailId	= @intInvoiceDetailId
 						     , intContractDetailId	= NULL
 							 , intContractHeaderId	= NULL
-							 , intTicketId			= NULL
+							 , intTicketId			= @intTicketId
 							 , intItemId			= @intItemId
 							 , intItemUOMId			= @intItemUOMId
 							 , dblQtyShipped		= @dblQtyOverAged
@@ -420,7 +438,7 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
 						SELECT intInvoiceDetailId	= @intInvoiceDetailId
 						     , intContractDetailId	= NULL
 							 , intContractHeaderId	= NULL
-							 , intTicketId			= NULL
+							 , intTicketId			= @intTicketId
 							 , intItemId			= intItemId
 							 , intItemUOMId			= intItemUOMId
 							 , dblQtyShipped		= 1
@@ -484,7 +502,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILSTOADD)
 			, intItemId							= CASE WHEN ISNULL(IDTOADD.ysnCharge, 0) = 0 THEN ID.intItemId ELSE IDTOADD.intItemId END
 			, strItemDescription				= CASE WHEN ISNULL(IDTOADD.ysnCharge, 0) = 0 THEN ID.strItemDescription ELSE ITEM.strDescription END
 			, intOrderUOMId						= CASE WHEN ISNULL(IDTOADD.ysnCharge, 0) = 0 THEN ID.intOrderUOMId ELSE NULL END
-			, dblQtyOrdered						= CASE WHEN ISNULL(IDTOADD.ysnCharge, 0) = 1 THEN 0 ELSE CASE WHEN IDTOADD.dblPrice <> 0 THEN CTD.dblOriginalQty ELSE IDTOADD.dblQtyShipped END END
+			, dblQtyOrdered						= CASE WHEN ISNULL(IDTOADD.ysnCharge, 0) = 1 THEN 0 ELSE CASE WHEN IDTOADD.dblPrice <> 0 THEN CTD.dblQuantity ELSE IDTOADD.dblQtyShipped END END
 			, intItemUOMId						= CASE WHEN ISNULL(IDTOADD.ysnCharge, 0) = 0 THEN ID.intItemUOMId ELSE IDTOADD.intItemUOMId END
 			, intPriceUOMId						= CASE WHEN ISNULL(IDTOADD.ysnCharge, 0) = 0 THEN ID.intPriceUOMId ELSE IDTOADD.intItemUOMId END
 			, dblQtyShipped						= IDTOADD.dblQtyShipped

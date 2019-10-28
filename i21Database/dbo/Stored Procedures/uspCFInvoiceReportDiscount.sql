@@ -17,18 +17,22 @@ BEGIN
 		-------------VARIABLES------------
 		DECLARE @dblTotalQuantity NUMERIC(18,6)
 		DECLARE @intDistinctDiscountLoop INT
+		DECLARE @strDistinctInvoiceReportNumber NVARCHAR(MAX)
 
 		DECLARE @tblCFGroupVolumeDisctinct TABLE
 		(
-			 intCustomerGroupId INT
+			 intCustomerGroupId INT,
+			 strTempInvoiceReportNumber NVARCHAR(MAX)
 		)
 		DECLARE @tblCFAccountVolumeDisctinct TABLE
 		(
-			 intAccountId INT
+			 intAccountId INT,
+			 strTempInvoiceReportNumber NVARCHAR(MAX)
 		)
 		DECLARE @tblCFMergeVolumeDisctinct TABLE
 		(
-			 intAccountId INT
+			 intAccountId INT,
+			 strTempInvoiceReportNumber NVARCHAR(MAX)
 		)
 
 		DECLARE @tblCFGroupVolumeTemp	TABLE
@@ -69,6 +73,7 @@ BEGIN
 			 ,strGroupName				NVARCHAR(MAX)
 			 ,strInvoiceNumber			NVARCHAR(MAX)
 			 ,strInvoiceReportNumber	NVARCHAR(MAX)
+			 ,strTempInvoiceReportNumber NVARCHAR(MAX)
 			 ,dtmDiscountDate			DATETIME
 			 ,dtmDueDate				DATETIME
 			 ,dtmTransactionDate		DATETIME
@@ -113,6 +118,7 @@ BEGIN
 			 ,strGroupName				NVARCHAR(MAX)
 			 ,strInvoiceNumber			NVARCHAR(MAX)
 			 ,strInvoiceReportNumber	NVARCHAR(MAX)
+			 ,strTempInvoiceReportNumber NVARCHAR(MAX)
 			 ,dtmDiscountDate			DATETIME
 			 ,dtmDueDate				DATETIME
 			 ,dtmTransactionDate		DATETIME
@@ -164,6 +170,7 @@ BEGIN
 			,strInvoiceNumber			NVARCHAR(MAX)
 			,strTransactionType			NVARCHAR(MAX)
 			,strInvoiceReportNumber		NVARCHAR(MAX)
+			,strTempInvoiceReportNumber		NVARCHAR(MAX)
 			,strPrintTimeStamp			NVARCHAR(MAX)
 			,strTermCode				NVARCHAR(MAX)
 		)
@@ -243,69 +250,83 @@ BEGIN
 			,strInvoiceNumber			
 			,strTransactionType			
 			,strInvoiceReportNumber		
+			,strTempInvoiceReportNumber
 			,strPrintTimeStamp			
 			,strTermCode				
 		)
 		
 		SELECT 
-			 intCustomerId				
-			,intTransactionId			
-			,intSalesPersonId			
-			,intInvoiceId				
-			,intAccountId				
-			,intTermID					
-			,intBalanceDue				
-			,intDiscountDay				
-			,intDayofMonthDue			
-			,intDueNextMonth			
-			,intSort					
-			,intConcurrencyId			
-			,intDiscountScheduleId		
-			,intCustomerGroupId			
-			,ysnInvoiced				
-			,ysnAllowEFT				
-			,ysnActive					
-			,ysnEnergyTrac				
-			,ysnShowOnCFInvoice			
-			,dblAPR						
-			,dblDiscountEP				
-			,dblTotalAmount				
-			,dblQuantity				
-			,dtmDiscountDate			
-			,dtmDueDate					
-			,dtmPostedDate				
-			,dtmTransactionDate			
-			,dtmBillingDate				
-			,dtmCreatedDate				
-			,dtmInvoiceDate				
-			,strGroupName				
-			,strEmailDistributionOption	
-			,strEmail					
-			,strDiscountSchedule		
-			,strNetwork					
-			,strInvoiceCycle			
-			,strTerm					
-			,strType					
-			,strCustomerName			
-			,strCustomerNumber			
-			,strInvoiceNumber			
-			,strTransactionType			
-			,strInvoiceReportNumber		
-			,strPrintTimeStamp			
-			,strTermCode				
-		FROM vyuCFInvoiceDiscount 
-		WHERE intTransactionId IN (SELECT intTransactionId FROM tblCFInvoiceReportTempTable WHERE strUserId = @UserId)
+			 vyu.intCustomerId				
+			,vyu.intTransactionId			
+			,vyu.intSalesPersonId			
+			,vyu.intInvoiceId				
+			,ISNULL(vyu.intAccountId,0)						
+			,vyu.intTermID					
+			,vyu.intBalanceDue				
+			,vyu.intDiscountDay				
+			,vyu.intDayofMonthDue			
+			,vyu.intDueNextMonth			
+			,vyu.intSort					
+			,vyu.intConcurrencyId			
+			,vyu.intDiscountScheduleId		
+			,ISNULL(vyu.intCustomerGroupId,0)			
+			,vyu.ysnInvoiced				
+			,vyu.ysnAllowEFT				
+			,vyu.ysnActive					
+			,vyu.ysnEnergyTrac				
+			,vyu.ysnShowOnCFInvoice			
+			,vyu.dblAPR						
+			,vyu.dblDiscountEP				
+			,vyu.dblTotalAmount				
+			,vyu.dblQuantity				
+			,vyu.dtmDiscountDate			
+			,vyu.dtmDueDate					
+			,vyu.dtmPostedDate				
+			,vyu.dtmTransactionDate			
+			,vyu.dtmBillingDate				
+			,vyu.dtmCreatedDate				
+			,vyu.dtmInvoiceDate				
+			,vyu.strGroupName				
+			,vyu.strEmailDistributionOption	
+			,vyu.strEmail					
+			,vyu.strDiscountSchedule		
+			,vyu.strNetwork					
+			,vyu.strInvoiceCycle			
+			,vyu.strTerm					
+			,vyu.strType					
+			,vyu.strCustomerName			
+			,vyu.strCustomerNumber			
+			,vyu.strInvoiceNumber			
+			,vyu.strTransactionType			
+			,vyu.strInvoiceReportNumber		
+			,temp.strTempInvoiceReportNumber
+			,vyu.strPrintTimeStamp			
+			,vyu.strTermCode				
+		FROM vyuCFInvoiceDiscount vyu
+		INNER JOIN tblCFInvoiceReportTempTable temp
+		ON vyu.intTransactionId = temp.intTransactionId
+		WHERE temp.intTransactionId IN (SELECT intTransactionId FROM tblCFInvoiceReportTempTable WHERE strUserId = @UserId)
 		-----------------MAIN QUERY------------------
 
 		
 		-------------GROUP VOLUME DISCOUNT---------------
 		INSERT @tblCFGroupVolumeDisctinct
-		SELECT DISTINCT ISNULL(intCustomerGroupId,0)
+		(
+			intCustomerGroupId,
+			strTempInvoiceReportNumber
+		)
+		SELECT 
+			 intCustomerGroupId
+			,strTempInvoiceReportNumber
 		FROM @tblCFInvoiceDiscount
+		GROUP BY 
+		intCustomerGroupId, 
+		strTempInvoiceReportNumber
+
 		WHILE (EXISTS(SELECT 1 FROM @tblCFGroupVolumeDisctinct))
 		BEGIN
 	
-			SELECT @intDistinctDiscountLoop = intCustomerGroupId FROM @tblCFGroupVolumeDisctinct
+			SELECT @intDistinctDiscountLoop = intCustomerGroupId , @strDistinctInvoiceReportNumber = strTempInvoiceReportNumber FROM @tblCFGroupVolumeDisctinct
 
 			IF(@intDistinctDiscountLoop != 0)
 			BEGIN
@@ -313,7 +334,7 @@ BEGIN
 			SELECT 
 			@dblTotalQuantity = SUM(dblQuantity)	
 			FROM @tblCFInvoiceDiscount as cfInvoice
-			WHERE intCustomerGroupId = @intDistinctDiscountLoop
+			WHERE intCustomerGroupId = @intDistinctDiscountLoop AND strTempInvoiceReportNumber = @strDistinctInvoiceReportNumber
 			GROUP BY intCustomerGroupId
 
 			INSERT @tblCFGroupVolumeTemp(
@@ -350,6 +371,7 @@ BEGIN
 				,strGroupName
 				,strInvoiceNumber
 				,strInvoiceReportNumber
+				,strTempInvoiceReportNumber
 				,dtmDiscountDate	
 				,dtmDueDate		
 				,dtmTransactionDate
@@ -399,6 +421,7 @@ BEGIN
 				,strGroupName
 				,strInvoiceNumber
 				,strInvoiceReportNumber
+				,strTempInvoiceReportNumber
 				,dtmDiscountDate	
 				,dtmDueDate		
 				,dtmTransactionDate
@@ -406,23 +429,31 @@ BEGIN
 				,strDiscountSchedule
 				,ysnShowOnCFInvoice
 			FROM @tblCFInvoiceDiscount as cfInvoice
-			WHERE intCustomerGroupId = @intDistinctDiscountLoop
+			WHERE intCustomerGroupId = @intDistinctDiscountLoop AND strTempInvoiceReportNumber = @strDistinctInvoiceReportNumber
 
 			END
 			
-			DELETE FROM @tblCFGroupVolumeDisctinct WHERE intCustomerGroupId = @intDistinctDiscountLoop
+			DELETE FROM @tblCFGroupVolumeDisctinct WHERE intCustomerGroupId = @intDistinctDiscountLoop AND strTempInvoiceReportNumber = @strDistinctInvoiceReportNumber
 		END
 		-------------GROUP VOLUME DISCOUNT---------------
 
 
 		-------------ACCOUNT VOLUME DISCOUNT---------------
 		INSERT @tblCFAccountVolumeDisctinct
-		SELECT DISTINCT ISNULL(intAccountId,0)
+		(
+			intAccountId,
+			strTempInvoiceReportNumber
+		)
+		SELECT 
+			 intAccountId
+			,strTempInvoiceReportNumber
 		FROM @tblCFInvoiceDiscount
+		GROUP BY intAccountId, strTempInvoiceReportNumber
+
 		WHILE (EXISTS(SELECT 1 FROM @tblCFAccountVolumeDisctinct))
 		BEGIN
 	
-			SELECT @intDistinctDiscountLoop = intAccountId FROM @tblCFAccountVolumeDisctinct
+			SELECT @intDistinctDiscountLoop = intAccountId, @strDistinctInvoiceReportNumber = strTempInvoiceReportNumber  FROM @tblCFAccountVolumeDisctinct
 
 			IF(@intDistinctDiscountLoop != 0)
 			BEGIN
@@ -430,7 +461,7 @@ BEGIN
 			SELECT 
 			@dblTotalQuantity = SUM(dblQuantity)	
 			FROM @tblCFInvoiceDiscount as cfInvoice
-			WHERE intAccountId = @intDistinctDiscountLoop
+			WHERE intAccountId = @intDistinctDiscountLoop AND strTempInvoiceReportNumber = @strDistinctInvoiceReportNumber
 			GROUP BY intAccountId
 
 			INSERT @tblCFAccountVolumeTemp(
@@ -467,6 +498,7 @@ BEGIN
 				,strGroupName
 				,strInvoiceNumber
 				,strInvoiceReportNumber
+				,strTempInvoiceReportNumber
 				,dtmDiscountDate	
 				,dtmDueDate		
 				,dtmTransactionDate
@@ -499,11 +531,11 @@ BEGIN
 					 FROM @tblCFDiscountschedule
 					 WHERE @dblTotalQuantity >= intFromQty AND intDiscountScheduleId = cfInvoice.intDiscountScheduleId
 					 ORDER BY intFromQty DESC), 0)
-				,(ISNULL(
+				,ROUND((ISNULL(
 					(SELECT TOP 1 ISNULL(dblRate, 0)
 					 FROM @tblCFDiscountschedule
 					 WHERE @dblTotalQuantity >= intFromQty AND intDiscountScheduleId = cfInvoice.intDiscountScheduleId
-					 ORDER BY intFromQty DESC), 0) * dblQuantity)
+					 ORDER BY intFromQty DESC), 0) * dblQuantity),2)
 				,dblTotalAmount	
 				,dblDiscountEP		
 				,dblAPR			
@@ -516,6 +548,7 @@ BEGIN
 				,strGroupName
 				,strInvoiceNumber
 				,strInvoiceReportNumber
+				,strTempInvoiceReportNumber
 				,dtmDiscountDate	
 				,dtmDueDate		
 				,dtmTransactionDate
@@ -523,10 +556,10 @@ BEGIN
 				,strDiscountSchedule
 				,ysnShowOnCFInvoice
 			FROM @tblCFInvoiceDiscount as cfInvoice
-			WHERE intAccountId = @intDistinctDiscountLoop AND intCustomerGroupId = 0
+			WHERE intAccountId = @intDistinctDiscountLoop AND intCustomerGroupId = 0 AND strTempInvoiceReportNumber = @strDistinctInvoiceReportNumber
 			END
 			
-			DELETE FROM @tblCFAccountVolumeDisctinct WHERE intAccountId = @intDistinctDiscountLoop
+			DELETE FROM @tblCFAccountVolumeDisctinct WHERE intAccountId = @intDistinctDiscountLoop AND strTempInvoiceReportNumber = @strDistinctInvoiceReportNumber
 		END
 		-------------ACCOUNT VOLUME DISCOUNT---------------
 
@@ -541,12 +574,20 @@ BEGIN
 
 		-------------SET GROUP VOLUME TO OUTPUT---------------
 		INSERT @tblCFMergeVolumeDisctinct
-		SELECT DISTINCT ISNULL(intAccountId,0)
+		(
+		intAccountId,
+		strTempInvoiceReportNumber
+		)
+		SELECT 
+		intAccountId,
+		strTempInvoiceReportNumber
 		FROM @tblCFGroupVolumeTemp
+		GROUP BY strTempInvoiceReportNumber, intAccountId
+
 		WHILE (EXISTS(SELECT 1 FROM @tblCFMergeVolumeDisctinct))
 		BEGIN
 	
-			SELECT @intDistinctDiscountLoop = intAccountId FROM @tblCFMergeVolumeDisctinct
+			SELECT @intDistinctDiscountLoop = intAccountId, @strDistinctInvoiceReportNumber = strTempInvoiceReportNumber FROM @tblCFMergeVolumeDisctinct
 
 			IF(@intDistinctDiscountLoop != 0)
 			BEGIN
@@ -557,7 +598,7 @@ BEGIN
 			,@totalAccountAmountLessDiscount	= ISNULL(ISNULL(SUM(dblTotalAmount),0) - ISNULL(SUM(dblDiscount),0),0)
 			,@totalAccountTotalDiscountQuantity	= ISNULL(SUM(dblQuantity),0)
 			FROM @tblCFGroupVolumeTemp
-			WHERE intAccountId = @intDistinctDiscountLoop
+			WHERE intAccountId = @intDistinctDiscountLoop AND strTempInvoiceReportNumber = @strDistinctInvoiceReportNumber
 
 			INSERT INTO tblCFInvoiceDiscountCalculationTempTable(
 				 intAccountId			
@@ -593,6 +634,7 @@ BEGIN
 				,strGroupName
 				,strInvoiceNumber
 				,strInvoiceReportNumber
+				,strTempInvoiceReportNumber
 				,dtmDiscountDate	
 				,dtmDueDate		
 				,dtmTransactionDate
@@ -639,6 +681,7 @@ BEGIN
 				,strGroupName
 				,strInvoiceNumber
 				,strInvoiceReportNumber
+				,strTempInvoiceReportNumber
 				,dtmDiscountDate	
 				,dtmDueDate		
 				,dtmTransactionDate
@@ -651,23 +694,31 @@ BEGIN
 				,ysnShowOnCFInvoice
 				,@UserId
 			FROM @tblCFGroupVolumeTemp as cfGroupVolumeDiscount
-			WHERE intAccountId = @intDistinctDiscountLoop
+			WHERE intAccountId = @intDistinctDiscountLoop AND strTempInvoiceReportNumber = @strDistinctInvoiceReportNumber
 
 			END
 			
-			DELETE FROM @tblCFMergeVolumeDisctinct WHERE intAccountId = @intDistinctDiscountLoop
+			DELETE FROM @tblCFMergeVolumeDisctinct WHERE intAccountId = @intDistinctDiscountLoop AND strTempInvoiceReportNumber = @strDistinctInvoiceReportNumber
 		END
 		-------------SET GROUP VOLUME TO OUTPUT---------------
 
 
 		-------------SET ACCOUNT VOLUME TO OUTPUT---------------
 		INSERT @tblCFMergeVolumeDisctinct
-		SELECT DISTINCT ISNULL(intAccountId,0)
+		(
+			intAccountId,
+			strTempInvoiceReportNumber
+		)
+		SELECT 
+			 intAccountId
+			,strTempInvoiceReportNumber
 		FROM @tblCFAccountVolumeTemp
+		GROUP BY strTempInvoiceReportNumber,intAccountId
+
 		WHILE (EXISTS(SELECT 1 FROM @tblCFMergeVolumeDisctinct))
 		BEGIN
 	
-			SELECT @intDistinctDiscountLoop = intAccountId FROM @tblCFMergeVolumeDisctinct
+			SELECT @intDistinctDiscountLoop = intAccountId, @strDistinctInvoiceReportNumber = strTempInvoiceReportNumber FROM @tblCFMergeVolumeDisctinct
 
 			IF(@intDistinctDiscountLoop != 0)
 			BEGIN
@@ -678,7 +729,7 @@ BEGIN
 			,@totalAccountAmountLessDiscount	= ISNULL(ISNULL(SUM(dblTotalAmount),0) - ISNULL(SUM(dblDiscount),0),0)
 			,@totalAccountTotalDiscountQuantity	= ISNULL(SUM(dblQuantity),0)
 			FROM @tblCFAccountVolumeTemp
-			WHERE intAccountId = @intDistinctDiscountLoop
+			WHERE intAccountId = @intDistinctDiscountLoop AND strTempInvoiceReportNumber = @strDistinctInvoiceReportNumber
 
 			INSERT INTO tblCFInvoiceDiscountCalculationTempTable(
 				 intAccountId				
@@ -714,6 +765,7 @@ BEGIN
 				,strGroupName
 				,strInvoiceNumber
 				,strInvoiceReportNumber
+				,strTempInvoiceReportNumber
 				,dtmDiscountDate	
 				,dtmDueDate		
 				,dtmTransactionDate
@@ -760,6 +812,7 @@ BEGIN
 				,strGroupName
 				,strInvoiceNumber
 				,strInvoiceReportNumber
+				,strTempInvoiceReportNumber
 				,dtmDiscountDate	
 				,dtmDueDate		
 				,dtmTransactionDate
@@ -772,11 +825,11 @@ BEGIN
 				,ysnShowOnCFInvoice
 				,@UserId
 			FROM @tblCFAccountVolumeTemp as cfAccountVolumeDiscount
-			WHERE intAccountId = @intDistinctDiscountLoop
+			WHERE intAccountId = @intDistinctDiscountLoop AND strTempInvoiceReportNumber = @strDistinctInvoiceReportNumber
 
 			END
 			
-			DELETE FROM @tblCFMergeVolumeDisctinct WHERE intAccountId = @intDistinctDiscountLoop
+			DELETE FROM @tblCFMergeVolumeDisctinct WHERE intAccountId = @intDistinctDiscountLoop AND strTempInvoiceReportNumber = @strDistinctInvoiceReportNumber
 		END
 		-------------SET ACCOUNT VOLUME TO OUTPUT---------------
 

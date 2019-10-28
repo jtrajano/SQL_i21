@@ -43,7 +43,7 @@ BEGIN TRY
 				WHERE intPriceContractId = @intPriceContractId
 					AND intConcurrencyId = 1
 				)
-			AND @strInsert = 'Insert'
+			--AND @strInsert in('Insert','Insert on Approval')
 		BEGIN
 			EXEC uspCTPriceContractPopulateStgXML @intPriceContractId
 				,@intToEntityId
@@ -58,7 +58,7 @@ BEGIN TRY
 				WHERE intPriceContractId = @intPriceContractId
 					AND intConcurrencyId > 1
 				)
-			AND @strUpdate = 'Update'
+			--AND @strUpdate in ('Update','Update on Approval')
 		BEGIN
 			EXEC uspCTPriceContractPopulateStgXML @intPriceContractId
 				,@intToEntityId

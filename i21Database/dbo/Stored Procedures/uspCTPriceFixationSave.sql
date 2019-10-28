@@ -195,7 +195,7 @@ BEGIN TRY
 				
 			END
 
-			EXEC	uspCTSequencePriceChanged @intContractDetailId, @intUserId, 'Price Contract'
+			EXEC	uspCTSequencePriceChanged @intContractDetailId, @intUserId, 'Price Contract', 1
 
 			UPDATE tblCTContractDetail SET intSplitFromId = NULL WHERE intSplitFromId = @intContractDetailId
 
@@ -580,7 +580,7 @@ BEGIN TRY
 
 		SELECT @intPricingTypeId = intPricingTypeId, @dblCashPrice = dblCashPrice FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId
 		
-		EXEC	uspCTSequencePriceChanged @intContractDetailId, @intUserId, 'Price Contract'
+		EXEC	uspCTSequencePriceChanged @intContractDetailId, @intUserId, 'Price Contract', 0
 
 		EXEC	uspCTCreateDetailHistory	@intContractHeaderId,@intContractDetailId
 		

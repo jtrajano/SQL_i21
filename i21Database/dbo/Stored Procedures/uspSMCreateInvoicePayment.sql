@@ -165,7 +165,7 @@ BEGIN
 				, intAccountId					= INVOICE.intAccountId
 				, intBankAccountId				= CASE WHEN ISNULL(@strCreditCardNumber, '') = '' AND ISNULL(@intEntityCardInfoId, 0) = 0 THEN @intBankAccountId ELSE NULL END
 				, dblAmountPaid					= ISNULL(PAYMENTS.dblPayment, 0)
-				, ysnPost						= CASE WHEN ISNULL(@intPaymentMethodId, 0) <> 0 THEN 1 ELSE 0 END
+				, ysnPost						= CASE WHEN ISNULL(@strCreditCardNumber, '') = '' AND ISNULL(@intEntityCardInfoId, 0) = 0 AND ISNULL(@intPaymentMethodId, 0) <> 0 THEN 1 ELSE 0 END
 				, intEntityId					= @intUserId
 				, intInvoiceId					= INVOICE.intInvoiceId
 				, strTransactionType			= INVOICE.strTransactionType
@@ -260,7 +260,7 @@ BEGIN
 			,@ErrorMessage		= @ErrorMessage OUTPUT
 			,@LogId				= @LogId OUTPUT
 
-	SELECT @intPaymentIdNew = ISNULL(intPaymentId,0) FROM tblARPaymentIntegrationLogDetail WHERE intIntegrationLogId = @LogId AND ISNULL(ysnSuccess,0) = 1 AND ysnHeader = 1
+	SELECT TOP 1 @intPaymentIdNew = ISNULL(intPaymentId,0) FROM tblARPaymentIntegrationLogDetail WHERE intIntegrationLogId = @LogId AND ISNULL(ysnSuccess,0) = 1 AND ysnHeader = 1 AND ysnInsert = 1
 	SELECT @strPaymentIdNew = strRecordNumber FROM tblARPayment WHERE intPaymentId = @intPaymentIdNew
 
 	DECLARE @output INT

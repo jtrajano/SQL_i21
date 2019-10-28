@@ -8077,6 +8077,7 @@
     <Build Include="dbo\Stored Procedures\uspARInvoiceDetailTaxReport.sql" />
     <Build Include="dbo\Tables\tblSTBasketAnalysisStagingTable.sql" />
     <Build Include="dbo\Stored Procedures\uspSTGenerateBasketAnalysisData.sql" />
+    <Build Include="dbo\Functions\fnGRGetVoucheredUnits.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

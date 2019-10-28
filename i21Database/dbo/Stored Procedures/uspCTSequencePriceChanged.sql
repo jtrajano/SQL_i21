@@ -2,7 +2,8 @@
 		
 	@intContractDetailId	INT,
 	@intUserId				INT = NULL,
-	@ScreenName				NVARCHAR(50)
+	@ScreenName				NVARCHAR(50),
+	@ysnDelete				BIT = NULL
 	
 AS
 
@@ -56,6 +57,7 @@ BEGIN TRY
 			declare @AvailableQuantityForVoucher cursor;
 			declare @dblCashPriceForVoucher numeric(18,6);
 			declare @dblAvailableQuantity numeric(18,6);
+			declare @dblProcessQuantity numeric(18,6);
 
 	SELECT	@dblCashPrice			=	dblCashPrice, 
 			@intPricingTypeId		=	intPricingTypeId, 
@@ -102,9 +104,12 @@ BEGIN TRY
 		RETURN
 
 
-	if (@intPricingTypeId = 2)
+	if (@intPricingTypeId = 2 or (@intPricingTypeId = 1 and (SELECT count(*) FROM tblAPBillDetail WHERE intContractDetailId = @intContractDetailId) > 0))
 	BEGIN
 
+		if (@ysnDelete = 1) return;
+
+		set @dblProcessQuantity = 0;
 		SET @AvailableQuantityForVoucher = CURSOR FOR
 
 			select
@@ -125,8 +130,12 @@ BEGIN TRY
 		BEGIN
 			print @dblCashPriceForVoucher;
 			print @dblAvailableQuantity
+			
+			set @dblAvailableQuantity = @dblAvailableQuantity - @dblProcessQuantity;
 
 			EXEC uspCTCreateBillForBasisContract @intContractDetailId, @dblCashPriceForVoucher, @dblAvailableQuantity
+
+			set @dblProcessQuantity = @dblProcessQuantity + @dblAvailableQuantity;
 				
 			FETCH NEXT
 			FROM

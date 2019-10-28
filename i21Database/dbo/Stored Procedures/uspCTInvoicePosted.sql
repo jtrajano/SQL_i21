@@ -250,6 +250,15 @@ BEGIN TRY
 				
 					IF ISNULL(@dblRemainingSchedQty, 0) > 0 AND ISNULL(@dblConvertedQtyOrdered, 0) > 0 AND ISNULL(@intLoadDetailId, 0) = 0
 						BEGIN
+							DECLARE @dblScheduleQty	NUMERIC(18, 6) = 0
+
+							SELECT @dblScheduleQty = dblScheduleQty 
+							FROM tblCTContractDetail 
+							WHERE intContractDetailId = @intContractDetailId
+
+							IF @dblRemainingSchedQty > @dblScheduleQty
+								SET @dblRemainingSchedQty = @dblScheduleQty
+								
 							SET @dblRemainingSchedQty = -@dblRemainingSchedQty
 
 							EXEC uspCTUpdateScheduleQuantity @intContractDetailId	= @intContractDetailId

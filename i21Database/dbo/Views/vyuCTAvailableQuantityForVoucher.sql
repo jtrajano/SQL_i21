@@ -39,7 +39,7 @@ select
 	,pfd.dblCashPrice
 	,pfd.dblQuantity
 	,dblAccumulativeQuantity = sum(summ.dblQuantity)
-	,dblVoucherQtyReceived = (select dblQtyReceived from bill where intContractDetailId = pf.intContractDetailId)
+	,dblVoucherQtyReceived = isnull((select dblQtyReceived from bill where intContractDetailId = pf.intContractDetailId),0.00)
 from
 	tblCTPriceFixation pf
 	join tblCTPriceFixationDetail pfd on pfd.intPriceFixationId = pf.intPriceFixationId
@@ -58,7 +58,7 @@ group by
 availablesummary as
 (
 select
-	intContractDetailId, intPriceFixationId, intPriceFixationDetailId, dblCashPrice, dblAccumulativeQuantity, dblVoucherQtyReceived, dblAvailableQuantity = dblAccumulativeQuantity - dblVoucherQtyReceived
+	intContractDetailId, intPriceFixationId, intPriceFixationDetailId, dblCashPrice, dblQuantity, dblAccumulativeQuantity, dblVoucherQtyReceived, dblAvailableQuantity = dblAccumulativeQuantity - dblVoucherQtyReceived
 from
 	availble
 )

@@ -14,6 +14,7 @@ SELECT
 	,intCompanyLocationId				= CD.intCompanyLocationId
 	,strLocationName					= CL.strLocationName
 	,dblCashPrice						= AD.dblSeqPrice
+	,dblPartialCashPrice				= AD.dblSeqPartialPrice
 	,dblCashPriceInItemStockUOM			= dbo.fnCTConvertQtyToTargetItemUOM(ItemUOM.intItemUOMId, CD.intPriceItemUOMId, AD.dblSeqPrice)
 	,dblAvailableQty					= ISNULL(CD.dblBalance,0) - ISNULL(CD.dblScheduleQty,0)
 	,dblAvailableQtyInItemStockUOM		= dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId, ItemUOM.intItemUOMId, (ISNULL(CD.dblBalance,0) - ISNULL(CD.dblScheduleQty,0)))
@@ -83,3 +84,4 @@ LEFT JOIN tblICItemUOM ItemUOM
 LEFT JOIN tblSMFreightTerms FT
 	ON FT.intFreightTermId = ISNULL(CD.intFreightTermId,CH.intFreightTermId)
 CROSS APPLY fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
+

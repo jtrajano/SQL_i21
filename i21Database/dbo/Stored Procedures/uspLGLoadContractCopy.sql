@@ -236,7 +236,7 @@ BEGIN TRY
 		,intDischargeUnitMeasureId
 		,strDischargePerUnit
 		,intTransportationMode
-		,intShipmentStatus
+		,intShipmentStatus = CASE WHEN (intShipmentType = 2) THEN 7 ELSE 1 END 
 		,ysnPosted
 		,dtmPostedDate
 		,intTransUsedBy
