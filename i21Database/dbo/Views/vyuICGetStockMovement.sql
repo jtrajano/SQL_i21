@@ -107,7 +107,7 @@ FROM 	tblICItem i
 			ON subLoc.intCompanyLocationSubLocationId = t.intSubLocationId
 		
 		LEFT JOIN tblICCostingMethod CostingMethod
-			ON CostingMethod.intCostingMethodId = ItemLocation.intCostingMethod
+			ON CostingMethod.intCostingMethodId = t.intCostingMethod --ItemLocation.intCostingMethod
 		LEFT JOIN (
 			tblICItemUOM iuTransUOM INNER JOIN tblICUnitMeasure umTransUOM
 				ON umTransUOM.intUnitMeasureId = iuTransUOM.intUnitMeasureId			

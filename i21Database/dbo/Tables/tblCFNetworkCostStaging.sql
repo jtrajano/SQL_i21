@@ -8,6 +8,8 @@
 	[strGUID] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [intEntityId] INT NULL, 
 	[intRecordNo] INT NULL, 
+	[ysnInvalidData]	BIT NULL,
+	[strInvalidDataReason] NVARCHAR(MAX),
 	[intConcurrencyId] INT CONSTRAINT [DF_tblCFNetworkCostStaging_intConcurrencyId] DEFAULT ((1)) NULL,
     CONSTRAINT [PK_tblCFNetworkCostStaging] PRIMARY KEY CLUSTERED (intNetworkCostStagingId ASC),
  );

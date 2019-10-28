@@ -910,6 +910,7 @@ BEGIN
 
 	EXEC dbo.uspCTShipped @ItemsFromInventoryShipment
 		,@intEntityUserSecurityId
+		,@ysnPost
 
 	-- Mark stock reservation as posted (or unposted)
 	EXEC dbo.uspICPostStockReservation @intTransactionId

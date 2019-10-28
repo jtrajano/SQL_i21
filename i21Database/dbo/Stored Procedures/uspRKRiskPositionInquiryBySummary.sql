@@ -17,17 +17,17 @@ AS
 
 --DECLARE @intCommodityId INT = 1
 --	, @intCompanyLocationId INT = 0
---	, @intFutureMarketId INT = 1
---	, @intFutureMonthId INT = 12
---	, @intUOMId INT = 0
+--	, @intFutureMarketId INT = 2
+--	, @intFutureMonthId INT = 80
+--	, @intUOMId INT = 19
 --	, @intDecimal INT = 0
---	, @intForecastWeeklyConsumption INT = 0
+--	, @intForecastWeeklyConsumption INT = 4700
 --	, @intForecastWeeklyConsumptionUOMId INT = 0
 --	, @intBookId INT = 0
 --	, @intSubBookId INT = 0
 --	, @strPositionBy NVARCHAR(100) = 'Product Type'
---	, @dtmPositionAsOf DATETIME = '2019-10-04'
---	, @strUomType NVARCHAR(100) = 'By Lot'
+--	, @dtmPositionAsOf DATETIME = '2019-10-15'
+--	, @strUomType NVARCHAR(100) = 'By Quantity'
 
 	DECLARE @dtmToDate DATETIME
 
@@ -121,7 +121,7 @@ AS
 	---Roll Cost
 	DECLARE @RollCost AS TABLE (strFutMarketName NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		, strCommodityCode NVARCHAR(200) COLLATE Latin1_General_CI_AS
-		, strFutureMonth NVARCHAR(20) COLLATE Latin1_General_CI_AS
+		, strFutureMonth NVARCHAR(20) COLLATE Latin1_General_CI_AS 
 		, intFutureMarketId INT
 		, intCommodityId INT
 		, intFutureMonthId INT
@@ -486,7 +486,7 @@ AS
 		, intSubBookId INT
 		, strSubBook NVARCHAR(100) COLLATE Latin1_General_CI_AS)
 	
-	SELECT intRowNum
+	SELECT DISTINCT intRowNum
 		, strCommodityCode
 		, intCommodityId
 		, intContractHeaderId
@@ -532,7 +532,7 @@ AS
 				, strCommodityCode = strCommodity
 				, h.intCommodityId
 				, h.intContractHeaderId
-				, strContractNumber= h.strContractNumber + '-' + CONVERT(NVARCHAR, h.intContractSeq)
+				, strContractNumber= h.strContractNumber + '-' + CONVERT(NVARCHAR, h.intContractSeq) COLLATE Latin1_General_CI_AS
 				, strLocationName = strLocation
 				, h.dtmEndDate
 				, h.dblBalance
@@ -547,12 +547,12 @@ AS
 				, h.intContractStatusId
 				, e.intEntityId
 				, h.intCurrencyId
-				, strType = strContractType + ' Priced'
+				, strType = strContractType + ' Priced' COLLATE Latin1_General_CI_AS
 				, i.intItemId
 				, strItemNo
 				, dtmContractDate = GETDATE()
 				, strEntityName = e.strName
-				, strCustomerContract = ''
+				, strCustomerContract = '' COLLATE Latin1_General_CI_AS
 				, h.intFutureMarketId
 				, h.intFutureMonthId
 				, strPricingStatus
@@ -583,7 +583,7 @@ AS
 				, strCommodityCode = strCommodity
 				, h.intCommodityId
 				, h.intContractHeaderId
-				, strContractNumber = h.strContractNumber + '-' + CONVERT(NVARCHAR, h.intContractSeq)
+				, strContractNumber = h.strContractNumber + '-' + CONVERT(NVARCHAR, h.intContractSeq) COLLATE Latin1_General_CI_AS
 				, strLocationName = strLocation
 				, h.dtmEndDate
 				, dblBalance = CASE WHEN strPricingStatus = 'Parially Priced' THEN h.dblQuantity - ISNULL(h.dblQtyPriced + (h.dblQuantity - h.dblBalance), 0)
@@ -599,12 +599,12 @@ AS
 				, h.intContractStatusId
 				, e.intEntityId
 				, h.intCurrencyId
-				, strType = strContractType + ' Basis'
+				, strType = strContractType + ' Basis' COLLATE Latin1_General_CI_AS
 				, i.intItemId
 				, strItemNo
 				, dtmContractDate = GETDATE()
 				, strEntityName = e.strName
-				, strCustomerContract = ''
+				, strCustomerContract = '' COLLATE Latin1_General_CI_AS
 				, h.intFutureMarketId
 				, h.intFutureMonthId
 				, strPricingStatus
@@ -674,7 +674,7 @@ AS
 				, strCommodityCode = strCommodity
 				, h.intCommodityId
 				, h.intContractHeaderId
-				, strContractNumber = h.strContractNumber + '-' + CONVERT(NVARCHAR, h.intContractSeq)
+				, strContractNumber = h.strContractNumber + '-' + CONVERT(NVARCHAR, h.intContractSeq) COLLATE Latin1_General_CI_AS
 				, strLocationName = strLocation
 				, h.dtmEndDate
 				, dblBalance = CASE WHEN h.dblQtyPriced - (h.dblQuantity - h.dblBalance) < 0 THEN 0 ELSE h.dblQtyPriced - (h.dblQuantity - h.dblBalance) END
@@ -689,12 +689,12 @@ AS
 				, h.intContractStatusId
 				, e.intEntityId
 				, h.intCurrencyId
-				, strType = strContractType + ' Priced'
+				, strType = strContractType + ' Priced' COLLATE Latin1_General_CI_AS
 				, i.intItemId
 				, strItemNo
 				, dtmContractDate = GETDATE()
 				, strEntityName = e.strName
-				, strCustomerContract = ''
+				, strCustomerContract = '' COLLATE Latin1_General_CI_AS
 				, h.intFutureMarketId
 				, h.intFutureMonthId
 				, strPricingStatus
@@ -749,7 +749,7 @@ AS
 		, cv.ysnMultiplePriceFixation
 		, strProductType = ca.strDescription
 		, strProductLine = pl.strDescription
-		, strShipmentPeriod = RIGHT(CONVERT(VARCHAR(11), cv.dtmStartDate, 106), 8) + ' - ' + RIGHT(CONVERT(VARCHAR(11), cv.dtmEndDate, 106), 8)
+		, strShipmentPeriod = (RIGHT(CONVERT(VARCHAR(11), cv.dtmStartDate, 106), 8) + ' - ' + RIGHT(CONVERT(VARCHAR(11), cv.dtmEndDate, 106), 8)) COLLATE Latin1_General_CI_AS
 		, strLocation = cv.strLocationName
 		, strOrigin = origin.strDescription
 		, intItemId = ic.intItemId
@@ -796,50 +796,7 @@ AS
 	WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), pd.dtmFixationDate, 110), 110) <= @dtmToDate
 	GROUP BY pf.intContractHeaderId
 
-	SELECT strFutureMonth
-		, strAccountNumber
-		, dblNoOfContract = 0
-		, strTradeNo
-		, TransactionDate
-		, TranType = strContractType
-		, CustVendor
-		, dblNoOfLot
-		, cv.dblQuantity
-		, cv.intContractHeaderId
-		, intFutOptTransactionHeaderId = NULL
-		, cv.intPricingTypeId
-		, cv.strContractType
-		, cv.intCommodityId
-		, cv.intCompanyLocationId
-		, cv.intFutureMarketId
-		, dtmFutureMonthsDate
-		, ysnExpired
-		, dblRatioQty
-		, dblFixedLots = CASE WHEN ISNULL(cv.ysnMultiplePriceFixation, 0) = 0 THEN ISNULL((PCDetail.dblNoOfLots), 0) ELSE ISNULL((PCHeader.dblNoOfLots), 0) END
-		, dblFixedQty = dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId, @intUOMId, CASE WHEN ISNULL(cv.ysnMultiplePriceFixation, 0) = 0 THEN ISNULL((PCDetail.dblQuantity), 0) ELSE ISNULL((PCHeader.dblQuantity), 0) END)
-		, dblDeltaPercent = ISNULL(dblDeltaPercent, 0)
-		, intCommodityUnitMeasureId
-		, dblRatioContractSize
-		, intPricingTypeIdHeader
-		, strProductType
-		, strProductLine
-		, strShipmentPeriod
-		, strLocation
-		, strOrigin
-		, intItemId
-		, strItemNo
-		, strItemDescription
-		, intBookId
-		, strBook
-		, intSubBookId
-		, strSubBook
-	INTO #tmpPriceContractList
-	FROM #PricedContractList cv
-	JOIN #tmpLotsQtyByDetail PCDetail ON PCDetail.intContractDetailId = cv.intContractDetailId AND PCDetail.intContractHeaderId = cv.intContractHeaderId
-	JOIN #tmpLotsQtyByHeader PCHeader ON PCHeader.intContractHeaderId = cv.intContractHeaderId
-	WHERE cv.intContractStatusId <> 3 AND ISNULL(ysnDeltaHedge, 0) = 0
-
-	SELECT strFutureMonth
+	SELECT DISTINCT strFutureMonth
 		, strAccountNumber
 		, dblNoOfContract
 		, strTradeNo
@@ -904,10 +861,8 @@ AS
 			, strSubBook
 		FROM #PricedContractList cv
 		WHERE cv.intPricingTypeId IN (1, 2, 8) AND ysnDeltaHedge = 0
-			AND intContractDetailId NOT IN (
-				SELECT ISNULL(intContractDetailId, 0)
-				FROM tblCTPriceFixation)
-
+			AND intContractDetailId NOT IN (SELECT ISNULL(intContractDetailId, 0) FROM #tmpLotsQtyByDetail)
+			
 		--Parcial Priced
 		UNION ALL SELECT strFutureMonth
 			, strAccountNumber
@@ -916,11 +871,11 @@ AS
 			, TransactionDate
 			, TranType
 			, CustVendor
-			, dblNoOfLot = dblFixedLots
-			, dblFixedQty = CASE WHEN intPricingTypeIdHeader = 8 THEN dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId, @intUOMId, (dblRatioQty / dblNoOfLot) * dblFixedLots) ELSE dblFixedQty END
+			, dblFixedLots dblNoOfLot
+			, CASE WHEN intPricingTypeIdHeader = 8 THEN dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId, @intUOMId, (dblRatioQty / dblNoOfLot) * dblFixedLots) ELSE dblFixedQty END dblFixedQty
 			, intContractHeaderId
 			, intFutOptTransactionHeaderId
-			, intPricingTypeId = 1
+			, 1 intPricingTypeId
 			, strContractType
 			, intCommodityId
 			, intCompanyLocationId
@@ -942,7 +897,7 @@ AS
 		FROM (
 			SELECT strFutureMonth
 				, strAccountNumber
-				, dblNoOfContract
+				, 0 AS dblNoOfContract
 				, strTradeNo
 				, TransactionDate
 				, TranType
@@ -958,8 +913,18 @@ AS
 				, dtmFutureMonthsDate
 				, ysnExpired
 				, dblRatioQty
-				, dblFixedLots
-				, dblFixedQty
+				, ISNULL((
+					SELECT sum(pd.dblNoOfLots) dblNoOfLots
+					FROM tblCTPriceFixation pf
+					JOIN tblCTPriceFixationDetail pd ON pf.intPriceFixationId = pd.intPriceFixationId
+					WHERE pf.intContractHeaderId = cv.intContractHeaderId AND pf.intContractDetailId = CASE WHEN ISNULL(cv.ysnMultiplePriceFixation, 0) = 0 THEN cv.intContractDetailId ELSE pf.intContractDetailId END AND CONVERT(DATETIME, CONVERT(VARCHAR(10), pd.dtmFixationDate, 110), 110) <= @dtmToDate
+					), 0) dblFixedLots
+				, ISNULL((
+					SELECT dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId, @intUOMId, sum(dblQuantity)) dblQuantity
+					FROM tblCTPriceFixation pf
+					JOIN tblCTPriceFixationDetail pd ON pf.intPriceFixationId = pd.intPriceFixationId
+					WHERE pf.intContractHeaderId = cv.intContractHeaderId AND pf.intContractDetailId = CASE WHEN ISNULL(cv.ysnMultiplePriceFixation, 0) = 0 THEN cv.intContractDetailId ELSE pf.intContractDetailId END AND CONVERT(DATETIME, CONVERT(VARCHAR(10), pd.dtmFixationDate, 110), 110) <= @dtmToDate
+					), 0) dblFixedQty
 				, intCommodityUnitMeasureId
 				, dblRatioContractSize
 				, intPricingTypeIdHeader
@@ -975,11 +940,13 @@ AS
 				, strBook
 				, intSubBookId
 				, strSubBook
-			FROM #tmpPriceContractList
+			FROM #PricedContractList cv
+			WHERE cv.intContractStatusId <> 3 AND ISNULL(ysnDeltaHedge, 0) = 0
+				AND intContractDetailId IN (SELECT ISNULL(intContractDetailId, 0) FROM #tmpLotsQtyByDetail)
 		) t
 		WHERE dblFixedLots > 0
-
-		--Parcial UnPriced	
+		
+		--Parcial UnPriced
 		UNION ALL SELECT strFutureMonth
 			, strAccountNumber
 			, dblNoOfContract = CASE WHEN intPricingTypeIdHeader = 8 THEN dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId, @intUOMId, (((dblRatioQty / dblNoOfLot) * ISNULL(dblNoOfLot, 0)))) ELSE dblQuantity - dblFixedQty END
@@ -987,11 +954,11 @@ AS
 			, TransactionDate
 			, TranType
 			, CustVendor
-			, dblNoOfLot = ISNULL(dblNoOfLot, 0) - ISNULL(dblFixedLots, 0)
+			, ISNULL(dblNoOfLot, 0) - ISNULL(dblFixedLots, 0) dblNoOfLot
 			, dblQuantity = CASE WHEN intPricingTypeIdHeader = 8 THEN dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId, @intUOMId, ((dblRatioQty / dblNoOfLot) * ISNULL(dblNoOfLot, 0) - (dblRatioQty / dblNoOfLot) * ISNULL(dblFixedLots, 0))) ELSE dblQuantity - dblFixedQty END
 			, intContractHeaderId
 			, intFutOptTransactionHeaderId
-			, intPricingTypeId = 2
+			, 2 intPricingTypeId
 			, strContractType
 			, intCommodityId
 			, intCompanyLocationId
@@ -1013,26 +980,36 @@ AS
 		FROM (
 			SELECT strFutureMonth
 				, strAccountNumber
-				, dblNoOfContract
+				, 0 AS dblNoOfContract
 				, strTradeNo
 				, TransactionDate
-				, TranType
+				, strContractType AS TranType
 				, CustVendor
 				, dblNoOfLot
 				, dblQuantity
-				, intContractHeaderId
-				, intFutOptTransactionHeaderId
-				, intPricingTypeId
-				, strContractType
-				, intCommodityId
-				, intCompanyLocationId
-				, intFutureMarketId
+				, cv.intContractHeaderId
+				, NULL AS intFutOptTransactionHeaderId
+				, cv.intPricingTypeId
+				, cv.strContractType
+				, cv.intCommodityId
+				, cv.intCompanyLocationId
+				, cv.intFutureMarketId
 				, dtmFutureMonthsDate
 				, ysnExpired
 				, dblRatioQty
-				, dblFixedLots
-				, dblFixedQty
-				, dblDeltaPercent
+				, ISNULL((
+					SELECT sum(pd.dblNoOfLots) dblNoOfLots
+					FROM tblCTPriceFixation pf
+					JOIN tblCTPriceFixationDetail pd ON pf.intPriceFixationId = pd.intPriceFixationId
+					WHERE pf.intContractHeaderId = cv.intContractHeaderId AND pf.intContractDetailId = CASE WHEN ISNULL(cv.ysnMultiplePriceFixation, 0) = 0 THEN cv.intContractDetailId ELSE pf.intContractDetailId END AND CONVERT(DATETIME, CONVERT(VARCHAR(10), pd.dtmFixationDate, 110), 110) <= @dtmToDate
+					), 0) dblFixedLots
+				, ISNULL((
+					SELECT dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId, @intUOMId, sum(pd.dblQuantity)) dblQuantity
+					FROM tblCTPriceFixation pf
+					JOIN tblCTPriceFixationDetail pd ON pf.intPriceFixationId = pd.intPriceFixationId
+					WHERE pf.intContractHeaderId = cv.intContractHeaderId AND pf.intContractDetailId = CASE WHEN ISNULL(cv.ysnMultiplePriceFixation, 0) = 0 THEN cv.intContractDetailId ELSE pf.intContractDetailId END AND CONVERT(DATETIME, CONVERT(VARCHAR(10), pd.dtmFixationDate, 110), 110) <= @dtmToDate
+					), 0) dblFixedQty
+				, ISNULL(dblDeltaPercent, 0) dblDeltaPercent
 				, intCommodityUnitMeasureId
 				, dblRatioContractSize
 				, intPricingTypeIdHeader
@@ -1048,14 +1025,15 @@ AS
 				, strBook
 				, intSubBookId
 				, strSubBook
-			FROM #tmpPriceContractList
+			FROM #PricedContractList cv
+			WHERE cv.intContractStatusId <> 3 AND ISNULL(ysnDeltaHedge, 0) = 0
+				AND intContractDetailId IN (SELECT ISNULL(intContractDetailId, 0) FROM #tmpLotsQtyByDetail)
 		) t
 		WHERE ISNULL(dblNoOfLot, 0) - ISNULL(dblFixedLots, 0) <> 0
 	) t1
 	
 	DROP TABLE #tmpLotsQtyByDetail
 	DROP TABLE #tmpLotsQtyByHeader
-	DROP TABLE #tmpPriceContractList
 	DROP TABLE #tmpContractList
 
 	INSERT INTO @ListFinal (intRowNumber
@@ -1120,6 +1098,15 @@ AS
 		AND intCompanyLocationId = ISNULL(@intCompanyLocationId, intCompanyLocationId)
 		AND ISNULL(dblNoOfContract, 0) <> 0
 
+	DECLARE @strCommodityAttributeId NVARCHAR(200)
+	SELECT TOP 1 @strCommodityAttributeId = strCommodityAttributeId FROM tblRKCommodityMarketMapping
+	WHERE intFutureMarketId = @intFutureMarketId
+		AND intCommodityId = @intCommodityId
+
+	SELECT intCommodityAttributeId = LTRIM(RTRIM(Item)) COLLATE Latin1_General_CI_AS
+	INTO #ProductTypes
+	FROM [dbo].[fnSplitString](@strCommodityAttributeId, ',')
+
 	INSERT INTO @ListFinal (intRowNumber
 		, strGroup
 		, Selection
@@ -1134,14 +1121,6 @@ AS
 		, dblNoOfLot
 		, dblQuantity
 		, intOrderByHeading
-		, strProductType
-		, strProductLine
-		, strShipmentPeriod
-		, strLocation
-		, strOrigin
-		, intItemId
-		, strItemNo
-		, strItemDescription
 		, intBookId
 		, strBook
 		, intSubBookId
@@ -1160,58 +1139,34 @@ AS
 		, 0.0
 		, dblQuantity = SUM(dblNoOfLot)
 		, 1
-		, strProductType
-		, strProductLine
-		, strShipmentPeriod
-		, strLocation
-		, strOrigin
-		, intItemId
-		, strItemNo
-		, strItemDescription
 		, intBookId = NULL
 		, strBook = NULL
 		, intSubBookId = NULL
 		, strSubBook = NULL
 	FROM (
-		SELECT DISTINCT strAccountNumber = 'Purchase' + ' - ' + ISNULL(c.strDescription, '') COLLATE Latin1_General_CI_AS
+		SELECT strAccountNumber = 'Purchase' + ' - ' + CASE WHEN @strPositionBy = 'Product Type' THEN ISNULL(c.strDescription, '') ELSE ISNULL(t.strEntity, '') END COLLATE Latin1_General_CI_AS
 			, dblNoOfLot = dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId, @intUOMId, t.dblQuantity)
 			, strProductType = c.strDescription
 			, strProductLine = pl.strDescription
-			, strShipmentPeriod = RIGHT(CONVERT(VARCHAR(11), t.dtmDate, 106), 8) + ' - ' + RIGHT(CONVERT(VARCHAR(11), t.dtmDate, 106), 8)
-			, strLocation = cl.strLocationName
+			, strShipmentPeriod = (RIGHT(CONVERT(VARCHAR(11), t.dtmDate, 106), 8) + ' - ' + RIGHT(CONVERT(VARCHAR(11), t.dtmDate, 106), 8)) COLLATE Latin1_General_CI_AS
+			, strLocation = t.strLocationName
 			, strOrigin = origin.strDescription
-			, intItemId = ic.intItemId
-			, strItemNo = ic.strItemNo
-			, strItemDescription = ic.strDescription
+			, intItemId = t.intItemId
+			, strItemNo = t.strItemNo
+			, strItemDescription = t.strItemDescription
 		FROM vyuRKGetInventoryValuation t
-		JOIN tblICItem ic ON t.intItemId = ic.intItemId
-		JOIN tblICCommodityAttribute c ON c.intCommodityAttributeId = ic.intProductTypeId
-		LEFT JOIN tblICCommodityAttribute origin ON origin.intCommodityAttributeId = ic.intOriginId
-		JOIN tblICCommodityProductLine pl ON pl.intCommodityProductLineId = ic.intProductLineId
-		JOIN tblRKCommodityMarketMapping m ON m.intCommodityId = c.intCommodityId
-			AND m.intFutureMarketId = @intFutureMarketId
-			AND ic.intProductTypeId = c.intCommodityAttributeId
-			AND c.intCommodityAttributeId IN (
-				SELECT LTRIM(RTRIM(Item)) COLLATE Latin1_General_CI_AS
-				FROM [dbo].[fnSplitString](m.strCommodityAttributeId, ','))
-		JOIN tblICItemLocation il ON il.intItemId = ic.intItemId
-		JOIN tblICItemUOM i ON il.intItemId = i.intItemId AND i.ysnStockUnit = 1
-		JOIN tblICCommodityUnitMeasure um ON um.intCommodityId = @intCommodityId AND um.intUnitMeasureId = i.intUnitMeasureId
-		JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = il.intLocationId
-		WHERE ic.intCommodityId = @intCommodityId
-			AND m.intFutureMarketId = @intFutureMarketId
-			AND cl.intCompanyLocationId = ISNULL(@intCompanyLocationId, cl.intCompanyLocationId)
+		JOIN tblICCommodityAttribute c ON c.intCommodityAttributeId = t.intProductTypeId
+		LEFT JOIN tblICCommodityAttribute origin ON origin.intCommodityAttributeId = t.intOriginId
+		LEFT JOIN tblICCommodityProductLine pl ON pl.intCommodityProductLineId = t.intProductLineId
+		JOIN #ProductTypes m ON m.intCommodityAttributeId = c.intCommodityAttributeId
+		JOIN tblICCommodityUnitMeasure um ON um.intCommodityId = @intCommodityId AND um.intUnitMeasureId = t.intUnitMeasureId
+		WHERE t.intCommodityId = @intCommodityId
+			AND t.intLocationId = ISNULL(@intCompanyLocationId, t.intLocationId)
 			AND CONVERT(DATETIME, CONVERT(VARCHAR(10), t.dtmCreated, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
 	) t2
 	GROUP BY strAccountNumber
-		, strProductType
-		, strProductLine
-		, strShipmentPeriod
-		, strLocation
-		, strOrigin
-		, intItemId
-		, strItemNo
-		, strItemDescription
+
+	DROP TABLE #ProductTypes
 
 	SELECT * INTO #tmpMatch
 	FROM (
@@ -2252,11 +2207,10 @@ AS
 	DECLARE @FirstRow INT
 	SELECT @FirstRow = MIN(intRowNumber) FROM @MonthOrder
 
-	IF EXISTS (SELECT DISTINCT strFutureMonth FROM @MonthOrder
-				WHERE strFutureMonth NOT IN (
-					SELECT DISTINCT strFutureMonth
-					FROM @ListFinal
-					WHERE intRowNumber = @FirstRow))
+	SELECT DISTINCT strFutureMonth INTO #MissingMonths FROM @MonthOrder
+	SELECT DISTINCT strFutureMonth INTO #MonthList FROM @ListFinal WHERE intRowNumber = @FirstRow
+
+	IF EXISTS (SELECT DISTINCT strFutureMonth FROM #MissingMonths WHERE strFutureMonth NOT IN (SELECT DISTINCT strFutureMonth FROM #MonthList))
 	BEGIN
 		INSERT INTO @MonthOrder (intRowNumber
 			, strGroup
@@ -2317,10 +2271,12 @@ AS
 		FROM @ListFinal a
 		CROSS APPLY (
 			SELECT DISTINCT strFutureMonth
-			FROM @MonthOrder
+			FROM #MissingMonths
 		) b
 		WHERE intRowNumber = @FirstRow
 	END
+	DROP TABLE #MissingMonths
+	DROP TABLE #MonthList
 
 	SELECT intRowNumber1 intRowNumFinal
 		, intRowNumber

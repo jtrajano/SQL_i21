@@ -99,7 +99,7 @@ BEGIN
 	-- Update the received quantities back to the Contract Management (Purchase Contract)
 	IF	@ReceiptType = @RECEIPT_TYPE_PURCHASE_CONTRACT 
 	BEGIN 
-		EXEC dbo.uspCTReceived @ItemsFromInventoryReceipt, @intEntityUserSecurityId
+		EXEC dbo.uspCTReceived @ItemsFromInventoryReceipt, @intEntityUserSecurityId, @ysnPost
 	END
 
 	-- Update the received quantities back to the Contract Management (Inventory Return)
@@ -114,7 +114,7 @@ BEGIN
 					AND r.strReceiptType = @RECEIPT_TYPE_PURCHASE_CONTRACT
 		)
 		BEGIN 
-			EXEC dbo.uspCTReceived @ItemsFromInventoryReceipt, @intEntityUserSecurityId
+			EXEC dbo.uspCTReceived @ItemsFromInventoryReceipt, @intEntityUserSecurityId, @ysnPost
 		END 		
 	END
 

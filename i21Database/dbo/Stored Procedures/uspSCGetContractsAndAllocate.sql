@@ -50,11 +50,14 @@ BEGIN TRY
 			@dblNetUnitsToCompare	NUMERIC(18,6),
 			@intDistributionMethod	INT,
 			@locationId				INT
-		
+
+	DECLARE @dblTicketScheduledQuantity NUMERIC(18,6)
 	DECLARE @intTicketLoadDetailId	INT
 	DECLARE @intLoadId	INT
 	DECLARE @LoadContractsDetailId Id
 	DECLARE @LoadDetailUsedId Id
+	DECLARE @strEntityNo NVARCHAR(200)
+	DECLARE @errorMessage NVARCHAR(500)
 	
 	SET @ErrMsg =	'uspSCGetContractsAndAllocate '+ 
 					LTRIM(@intTicketId) +',' + 
@@ -97,6 +100,7 @@ BEGIN TRY
 		, @intTicketContractDetailId = intContractId
 		, @UseScheduleForAvlCalc = CASE WHEN intStorageScheduleTypeId = -6 THEN 0 ELSE 1 END 
 		,@intTicketLoadDetailId = intLoadDetailId
+		,@dblTicketScheduledQuantity = dblScheduleQty
 	FROM tblSCTicket 
 	WHERE intTicketId = @intTicketId
 
@@ -326,13 +330,14 @@ BEGIN TRY
 				GOTO CONTINUEISH
 			END
 		END
-		IF NOT @dblAvailable > 0
+		IF NOT (@dblAvailable > 0 OR (@strDistributionOption = 'CNT' AND @intContractDetailId = @intTicketContractDetailId AND (@dblAvailable + ISNULL(@dblTicketScheduledQuantity,0)) > 0 ))
 		BEGIN
 			INSERT	INTO @Processed (intContractDetailId,ysnIgnore) SELECT @intContractDetailId,1
 			GOTO CONTINUEISH
 		END
 
 		IF	@dblNetUnits <= @dblAvailable OR @ysnUnlimitedQuantity = 1
+			OR (@strDistributionOption = 'CNT' AND @intContractDetailId = @intTicketContractDetailId AND @dblNetUnits <= (@dblAvailable + ISNULL(@dblTicketScheduledQuantity,0)) )
 		BEGIN
 			INSERT	INTO @Processed SELECT @intContractDetailId,@dblNetUnits,NULL,@dblCost,0,@intLoadDetailId
 			IF (@ysnAutoIncreaseQty = 1 OR @ysnAutoIncreaseSchQty = 1) AND  @dblScheduleQty < @dblNetUnits AND @intTicketContractDetailId = @intContractDetailId
@@ -360,6 +365,36 @@ BEGIN TRY
 								@intExternalId			=	@intTicketId,
 								@strScreenName			=	'Auto - Scale'
 					END
+				END
+				ELSE
+				BEGIN
+					
+					SET @dblInreaseSchBy  = @dblNetUnits - ISNULL(@dblTicketScheduledQuantity,0)
+					IF(@dblInreaseSchBy <> 0)
+					BEGIN
+						IF(@intContractDetailId = @intTicketContractDetailId)
+						BEGIN
+							-- Adjust the scheduled quantity based on the ticket scheduled and net units
+								EXEC	uspCTUpdateScheduleQuantity 
+										@intContractDetailId	=	@intContractDetailId,
+										@dblQuantityToUpdate	=	@dblInreaseSchBy,
+										@intUserId				=	@intUserId,
+										@intExternalId			=	@intTicketId,
+										@strScreenName			=	'Auto - Scale'
+						
+						END
+						ELSE
+						BEGIN
+							EXEC	uspCTUpdateScheduleQuantity 
+									@intContractDetailId	=	@intContractDetailId,
+									@dblQuantityToUpdate	=	@dblInreaseSchBy,
+									@intUserId				=	@intUserId,
+									@intExternalId			=	@intTicketId,
+									@strScreenName			=	'Scale'
+							
+						END
+					END
+					
 				END
 			END
 
@@ -520,13 +555,16 @@ BEGIN TRY
 	
 	UPDATE	@Processed SET dblUnitsRemaining = @dblNetUnits
 
-	IF(		SELECT	MAX(dblUnitsRemaining) 
-			FROM	@Processed	PR
-			JOIN	tblCTContractDetail	CD	ON	CD.intContractDetailId	=	PR.intContractDetailId
-			WHERE	ISNULL(ysnIgnore,0) <> 1) > 0 AND @ysnAutoDistribution = 1
+	IF	((SELECT	MAX(dblUnitsRemaining) 
+		 FROM	@Processed	PR
+		 JOIN	tblCTContractDetail	CD	ON	CD.intContractDetailId	=	PR.intContractDetailId
+		 WHERE	ISNULL(ysnIgnore,0) <> 1) > 0
+		OR NOT EXISTS(SELECT TOP 1 1 FROM @Processed WHERE ISNULL(ysnIgnore,0) <> 1)) 
+		AND @ysnAutoDistribution = 1
 	BEGIN
-		RAISERROR ('The entire ticket quantity can not be applied to the contract.',16,1,'WITH NOWAIT') 
+		RAISERROR ('The entire ticket quantity cannot be applied to the contract.',16,1,'WITH NOWAIT') 
 	END
+
 	
 	SELECT	PR.intContractDetailId,
 			PR.dblUnitsDistributed,

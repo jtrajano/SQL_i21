@@ -11,9 +11,11 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
+DECLARE @dtmLastReconciled DATETIME = NULL
 -- Try to get the prior reconciliation and use return it as the opening balance for the current reconciliation. 
 SELECT	TOP 1 
-		@dblBalance = dblStatementEndingBalance
+		@dblBalance = dblStatementEndingBalance,
+		@dtmLastReconciled = dtmDateReconciled
 FROM	[dbo].[tblCMBankReconciliation]
 WHERE	intBankAccountId = @intBankAccountId
 		AND CAST(FLOOR(CAST(dtmDateReconciled AS FLOAT)) AS DATETIME) < CAST(FLOOR(CAST(@dtmDate AS FLOAT)) AS DATETIME)
@@ -31,4 +33,5 @@ WHERE	intBankAccountId = @intBankAccountId
 SET @dblBalance = ISNULL(@dblBalance, 0)
 
 SELECT	intBankAccountId = @intBankAccountId,
-		dblBeginningBalance = ISNULL(@dblBalance, 0)
+		dblBeginningBalance = ISNULL(@dblBalance, 0),
+		dtmLastReconciled = @dtmLastReconciled

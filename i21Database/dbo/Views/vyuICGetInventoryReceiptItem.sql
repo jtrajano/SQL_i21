@@ -1,5 +1,5 @@
 ﻿CREATE VIEW [dbo].[vyuICGetInventoryReceiptItem]
-	AS
+AS
 
 SELECT ReceiptItem.intInventoryReceiptId
 	, ReceiptItem.intInventoryReceiptItemId

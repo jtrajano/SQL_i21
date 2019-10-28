@@ -1,5 +1,5 @@
 ﻿CREATE VIEW [dbo].[vyuICGetInventoryCountDetail]
-	AS 
+AS 
 
 SELECT InvCountDetail.intInventoryCountDetailId,
 	InvCountDetail.intInventoryCountId,
@@ -38,7 +38,8 @@ SELECT InvCountDetail.intInventoryCountDetailId,
     InvCountDetail.dblNewCost,
 
 	InvCountDetail.intItemLocationId,
-	Location.strLocationName,
+	[Location].intCompanyLocationId,
+	[Location].strLocationName,
 	InvCountDetail.intSubLocationId,
 	SubLocation.strSubLocationName,
 	InvCountDetail.intStorageLocationId,
@@ -80,13 +81,13 @@ SELECT InvCountDetail.intInventoryCountDetailId,
 	InvCountDetail.dblQtySold,
 	InvCountDetail.intSort, InvCountDetail.intConcurrencyId,
 	ItemLocation.strStorageUnitNo
-FROM tblICInventoryCountDetail InvCountDetail
-	LEFT JOIN tblICInventoryCount InvCount ON InvCount.intInventoryCountId = InvCountDetail.intInventoryCountId
-	LEFT JOIN tblICCountGroup CountGroup ON CountGroup.intCountGroupId = InvCountDetail.intCountGroupId
-	LEFT JOIN tblICItem Item ON Item.intItemId = InvCountDetail.intItemId
-	LEFT JOIN tblICCategory Category ON Category.intCategoryId = Item.intCategoryId
-	LEFT JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemLocationId = InvCountDetail.intItemLocationId
-	LEFT JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = ItemLocation.intLocationId
+FROM tblICInventoryCountDetail InvCountDetail	
+	INNER JOIN tblICInventoryCount InvCount ON InvCount.intInventoryCountId = InvCountDetail.intInventoryCountId
+	INNER JOIN tblICItem Item ON Item.intItemId = InvCountDetail.intItemId
+	INNER JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemLocationId = InvCountDetail.intItemLocationId
+	INNER JOIN tblSMCompanyLocation [Location] ON [Location].intCompanyLocationId = ItemLocation.intLocationId
+	LEFT JOIN tblICCountGroup CountGroup ON CountGroup.intCountGroupId = InvCountDetail.intCountGroupId	
+	LEFT JOIN tblICCategory Category ON Category.intCategoryId = Item.intCategoryId		
 	LEFT JOIN tblSMCompanyLocationSubLocation SubLocation ON SubLocation.intCompanyLocationSubLocationId = InvCountDetail.intSubLocationId
 	LEFT JOIN tblICStorageLocation StorageLocation ON StorageLocation.intStorageLocationId = InvCountDetail.intStorageLocationId
 	LEFT JOIN tblICLot Lot ON Lot.intLotId = InvCountDetail.intLotId

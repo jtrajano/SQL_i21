@@ -2961,6 +2961,7 @@ BEGIN TRY
 			LEFT JOIN tblICItem I ON I.strItemNo = x.strItemNo
 			LEFT JOIN tblICItemUOM IU ON IU.intItemId = I.intItemId
 				AND IU.intUnitMeasureId = UM.intUnitMeasureId
+			
 			WHERE NOT EXISTS (
 					SELECT *
 					FROM tblLGLoadDetailContainerLink LDCL
@@ -2969,7 +2970,7 @@ BEGIN TRY
 					)
 
 			UPDATE tblLGLoadDetailContainerLink
-			SET [intConcurrencyId] = tblLGLoadDetailContainerLink.intConcurrencyId + 1
+			SET [intConcurrencyId] = LDCL.intConcurrencyId + 1
 				,[intLoadContainerId] = (
 					SELECT [intLoadContainerId]
 					FROM tblLGLoadContainer
@@ -3020,6 +3021,9 @@ BEGIN TRY
 			LEFT JOIN tblICItem I ON I.strItemNo = x.strItemNo
 			LEFT JOIN tblICItemUOM IU ON IU.intItemId = I.intItemId
 				AND IU.intUnitMeasureId = UM.intUnitMeasureId
+				JOIN tblLGLoadDetailContainerLink LDCL
+					On LDCL.intLoadId = @intNewLoadId
+						AND LDCL.intLoadDetailContainerLinkRefId = x.intLoadDetailContainerLinkId
 			WHERE EXISTS (
 					SELECT *
 					FROM tblLGLoadDetailContainerLink LDCL
@@ -3150,7 +3154,7 @@ BEGIN TRY
 					,strItemUOM NVARCHAR(50) COLLATE Latin1_General_CI_AS
 					,strCurrency NVARCHAR(50) COLLATE Latin1_General_CI_AS
 					) x
-			JOIN tblLGLoadCost LC ON LC.intLoadId = x.intLoadId
+			JOIN tblLGLoadCost LC ON LC.intLoadId = @intNewLoadId
 				AND LC.intLoadCostRefId = x.intLoadCostId
 			LEFT JOIN tblICUnitMeasure UM ON UM.strUnitMeasure = x.strItemUOM
 			LEFT JOIN tblICItem I ON I.strItemNo = x.strItemNo

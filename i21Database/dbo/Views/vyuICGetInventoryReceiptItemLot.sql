@@ -8,6 +8,7 @@ SELECT
 	,receiptItem.strReceiptNumber
 	,receiptItem.strReceiptType
 	,receiptItem.strOrderNumber
+	,receiptItem.intLocationId
 	,receiptItem.strLocationName
 	,receiptItem.strSourceType
 	,receiptItem.strSourceNumber 

@@ -110,13 +110,13 @@ BEGIN
 				,@strCity = tblSMCompanySetup.strCity
 				,@strState = tblSMCompanySetup.strState
 				,@strZip = tblSMCompanySetup.strZip
-				,@strCountry = isnull(rtrt9.strTranslation,tblSMCompanySetup.strCountry)
+				,@strCountry = ISNULL(rtrt9.strTranslation,tblSMCompanySetup.strCountry)
 				,@strPhone = tblSMCompanySetup.strPhone
 	FROM tblSMCompanySetup
-	left join tblSMCountry				rtc9 on lower(rtrim(ltrim(rtc9.strCountry))) = lower(rtrim(ltrim(tblSMCompanySetup.strCountry)))
-	left join tblSMScreen				rts9 on rts9.strNamespace = 'i21.view.Country'
-	left join tblSMTransaction			rtt9 on rtt9.intScreenId = rts9.intScreenId and rtt9.intRecordId = rtc9.intCountryID
-	left join tblSMReportTranslation	rtrt9 on rtrt9.intLanguageId = @intLaguageId and rtrt9.intTransactionId = rtt9.intTransactionId and rtrt9.strFieldName = 'Country'
+	LEFT JOIN tblSMCountry				rtc9 ON LOWER(RTRIM(LTRIM(rtc9.strCountry))) = LOWER(RTRIM(LTRIM(tblSMCompanySetup.strCountry)))
+	LEFT JOIN tblSMScreen				rts9 ON rts9.strNamespace = 'i21.view.Country'
+	LEFT JOIN tblSMTransaction			rtt9 ON rtt9.intScreenId = rts9.intScreenId and rtt9.intRecordId = rtc9.intCountryID
+	LEFT JOIN tblSMReportTranslation	rtrt9 ON rtrt9.intLanguageId = @intLaguageId and rtrt9.intTransactionId = rtt9.intTransactionId and rtrt9.strFieldName = 'Country'
 
 	SELECT @strFullName = E.strName,
 		   @strUserEmailId = ETC.strEmail,
@@ -144,9 +144,9 @@ BEGIN
 	WHERE LW.intLoadWarehouseId = @intLoadWarehouseId
 
 	/*Declared variables for translating expression*/
-	declare @strShipmentWeightInfo nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Shipment in'), 'Shipment in');
-	declare @strReleaseOrderText1 nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Attn'), 'Attn');
-	declare @strReleaseOrderText2 nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Please release the cargo in favour of'), 'Please release the cargo in favour of');
+	declare @strShipmentQtyInfo nvarchar(500) = ISNULL(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Shipment in'), 'Shipment in');
+	declare @strReleaseOrderText1 nvarchar(500) = ISNULL(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Attn'), 'Attn');
+	declare @strReleaseOrderText2 nvarchar(500) = ISNULL(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Please release the cargo in favour of'), 'Please release the cargo in favour of');
 
 
 	SELECT @strReleaseOrderText = @strReleaseOrderText1 + ' '+ ISNULL(@strShippingLineName,'') +' : '+@strReleaseOrderText2+' ' + @strWarehouseEntityName
@@ -157,7 +157,7 @@ BEGIN
 
 	BEGIN
 		SELECT TOP 1
-				L.strLoadNumber AS strTrackingNumber,
+				strTrackingNumber = L.strLoadNumber,
 				LW.strDeliveryNoticeNumber, 
 				LW.dtmDeliveryNoticeDate,
 				LW.dtmDeliveryDate,
@@ -176,7 +176,7 @@ BEGIN
 				L.strDestinationCity,
 				L.dtmBLDate,
 				L.dtmScheduledDate,
-				strScheduledDate = datename(dd, L.dtmScheduledDate) + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,LEFT(DATENAME(MONTH,L.dtmScheduledDate),3)),LEFT(DATENAME(MONTH,L.dtmScheduledDate),3)) + ' ' + datename(yyyy, L.dtmScheduledDate),
+				strScheduledDate = DATENAME(dd, L.dtmScheduledDate) + ' ' + ISNULL(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,LEFT(DATENAME(MONTH,L.dtmScheduledDate),3)),LEFT(DATENAME(MONTH,L.dtmScheduledDate),3)) + ' ' + DATENAME(yyyy, L.dtmScheduledDate),
 				L.dtmETAPOL,
 				L.dtmETAPOD,
 				L.dtmETSPOL,
@@ -188,145 +188,146 @@ BEGIN
 				L.intInsuranceCurrencyId,
 				InsuranceCur.strCurrency,
 
-  				Vendor.strName as strVendor,
-				Vendor.strEmail as strVendorEmail,
-				Vendor.strFax as strVendorFax,
-				Vendor.strPhone as strVendorPhone,
-				Vendor.strMobile as strVendorMobile,
-				Vendor.strWebsite as strVendorWebsite,
-				VLocation.strAddress as strVendorAddress,
-				VLocation.strCity as strVendorCity,
-				isnull(rtrt5.strTranslation,VLocation.strCountry) as strVendorCountry,
-				VLocation.strState as strVendorState,
-				VLocation.strZipCode as strVendorZipCode,
+  				strVendor = Vendor.strName,
+				strVendorEmail = Vendor.strEmail,
+				strVendorFax = Vendor.strFax,
+				strVendorPhone = Vendor.strPhone,
+				strVendorMobile = Vendor.strMobile,
+				strVendorWebsite = Vendor.strWebsite,
+				strVendorAddress = VLocation.strAddress,
+				strVendorCity = VLocation.strCity,
+				strVendorCountry = ISNULL(rtrt5.strTranslation,VLocation.strCountry),
+				strVendorState = VLocation.strState,
+				strVendorZipCode = VLocation.strZipCode,
 
-  				Customer.strName as strCustomer,
-				Customer.strEmail as strCustomerEmail,
-				Customer.strFax as strCustomerFax,
-				Customer.strPhone as strCustomerPhone,
-				Customer.strMobile as strCustomerMobile,
-				Customer.strWebsite as strCustomerWebsite,
-				CLocation.strAddress as strCustomerAddress,
-				CLocation.strCity as strCustomerCity,
-				isnull(rtrt4.strTranslation,CLocation.strCountry) as strCustomerCountry,
-				CLocation.strState as strCustomerState,
-				CLocation.strZipCode as strCustomerZipCode,
+  				strCustomer = Customer.strName,
+				strCustomerEmail = Customer.strEmail,
+				strCustomerFax = Customer.strFax,
+				strCustomerPhone = Customer.strPhone,
+				strCustomerMobile = Customer.strMobile,
+				strCustomerWebsite = Customer.strWebsite,
+				strCustomerAddress = CLocation.strAddress,
+				strCustomerCity = CLocation.strCity,
+				strCustomerCountry = ISNULL(rtrt4.strTranslation,CLocation.strCountry),
+				strCustomerState = CLocation.strState,
+				strCustomerZipCode = CLocation.strZipCode,
 				strCustomerCityStateZip = CLocation.strCity + ', ' + CLocation.strState + ', ' + CLocation.strZipCode + ',',
 
-  				SLEntity.strName as strShippingLine,
-				SLEntity.strEmail as strShippingLineEmail,
-				SLEntity.strFax as strShippingLineFax,
-				SLEntity.strPhone as strShippingLinePhone,
-				SLEntity.strMobile as strShippingLineMobile,
-				SLEntity.strWebsite as strShippingLineWebsite,
-				SLLocation.strAddress as strShippingLineAddress,
-				SLLocation.strCity as strShippingLineCity,
-				isnull(rtrt6.strTranslation,SLLocation.strCountry) as strShippingLineCountry,
-				SLLocation.strState as strShippingLineState,
-				SLLocation.strZipCode as strShippingLineZipCode,
-				SLEntity.strName + ', ' + ISNULL(SLLocation.strAddress,'') as strShippingLineWithAddress,
+  				strShippingLine = SLEntity.strName,
+				strShippingLineEmail = SLEntity.strEmail,
+				strShippingLineFax = SLEntity.strFax,
+				strShippingLinePhone = SLEntity.strPhone,
+				strShippingLineMobile = SLEntity.strMobile,
+				strShippingLineWebsite = SLEntity.strWebsite,
+				strShippingLineAddress = SLLocation.strAddress,
+				strShippingLineCity = SLLocation.strCity,
+				strShippingLineCountry = ISNULL(rtrt6.strTranslation,SLLocation.strCountry),
+				strShippingLineState = SLLocation.strState,
+				strShippingLineZipCode = SLLocation.strZipCode,
+				strShippingLineWithAddress = SLEntity.strName + ', ' + ISNULL(SLLocation.strAddress,''),
 
-				TerminalEntity.strName as strTerminal,
-				TerminalEntity.strEmail as strTerminalEmail,
-				TerminalEntity.strFax as strTerminalFax,
-				TerminalEntity.strPhone as strTerminalPhone,
-				TerminalEntity.strMobile as strTerminalMobile,
-				TerminalEntity.strWebsite as strTerminalWebsite,
-				TerminalLocation.strAddress as strTerminalAddress,
-				TerminalLocation.strCity as strTerminalCity,
-				isnull(rtrt7.strTranslation,TerminalLocation.strCountry) as strTerminalCountry,
-				TerminalLocation.strState as strTerminalState,
-				TerminalLocation.strZipCode as strTerminalZipCode,
+				strTerminal = TerminalEntity.strName,
+				strTerminalEmail = TerminalEntity.strEmail,
+				strTerminalFax = TerminalEntity.strFax,
+				strTerminalPhone = TerminalEntity.strPhone,
+				strTerminalMobile = TerminalEntity.strMobile,
+				strTerminalWebsite = TerminalEntity.strWebsite,
+				strTerminalAddress = TerminalLocation.strAddress,
+				strTerminalCity = TerminalLocation.strCity,
+				strTerminalCountry = ISNULL(rtrt7.strTranslation,TerminalLocation.strCountry),
+				strTerminalState = TerminalLocation.strState,
+				strTerminalZipCode = TerminalLocation.strZipCode,
 
-				InsurEntity.strName as strInsurer,
-				InsurEntity.strEmail as strInsurerEmail,
-				InsurEntity.strFax as strInsurerFax,
-				InsurEntity.strPhone as strInsurerPhone,
-				InsurEntity.strMobile as strInsurerMobile,
-				InsurEntity.strWebsite as strInsurerWebsite,
-				InsurLocation.strAddress as strInsurerAddress,
-				InsurLocation.strCity as strInsurerCity,
-				isnull(rtrt8.strTranslation,InsurLocation.strCountry) as strInsurerCountry,
-				InsurLocation.strState as strInsurerState,
-				InsurLocation.strZipCode as strInsurerZipCode,
+				strInsurer = InsurEntity.strName,
+				strInsurerEmail = InsurEntity.strEmail,
+				strInsurerFax = InsurEntity.strFax,
+				strInsurerPhone = InsurEntity.strPhone,
+				strInsurerMobile = InsurEntity.strMobile,
+				strInsurerWebsite = InsurEntity.strWebsite,
+				strInsurerAddress = InsurLocation.strAddress,
+				strInsurerCity = InsurLocation.strCity,
+				strInsurerCountry = ISNULL(rtrt8.strTranslation,InsurLocation.strCountry),
+				strInsurerState = InsurLocation.strState,
+				strInsurerZipCode = InsurLocation.strZipCode,
 
-				WH.strSubLocationName as strWarehouse,
-				WH.strSubLocationDescription as strWarehouseDescription,
-				WH.strAddress as strWarehouseAddress,
-				WH.strCity as strWarehouseCity,
-				WH.strClassification as strWarehouseClassification,
-				WH.strState as strWarehouseState,
-				WH.strZipCode as strWarehouseZipCode,
+				strWarehouse = WH.strSubLocationName,
+				strWarehouseDescription = WH.strSubLocationDescription,
+				strWarehouseAddress = WH.strAddress,
+				strWarehouseCity = WH.strCity,
+				strWarehouseClassification = WH.strClassification,
+				strWarehouseState = WH.strState,
+				strWarehouseZipCode = WH.strZipCode,
 
 				WI.intWarehouseInstructionHeaderId,
 				LW.intLoadWarehouseId,
 				Via.strName strShipVia,
-				dbo.fnSMGetCompanyLogo('Header') AS blbHeaderLogo,
-				dbo.fnSMGetCompanyLogo('Footer') AS blbFooterLogo,
-				ISNULL(CP.intReportLogoHeight,0) AS intReportLogoHeight,
-				ISNULL(CP.intReportLogoWidth,0) AS intReportLogoWidth,
-				@strCompanyName AS strCompanyName,
-				@strCompanyAddress AS strCompanyAddress,
-				@strContactName AS strCompanyContactName ,
-				@strCounty AS strCompanyCounty ,
-				@strCity AS strCompanyCity ,
-				@strState AS strCompanyState ,
-				@strZip AS strCompanyZip ,
-				@strCountry AS strCompanyCountry ,
-				@strPhone AS strCompanyPhone ,
-				@strCity + ', ' + @strState + ', ' + @strZip + ',' AS strCityStateZip,
-				CASE WHEN ISNULL(@strFullName,'') = '' THEN  @strUserName ELSE @strFullName END AS strUserFullName,
-				CD.strERPPONumber AS strExternalPONumber,
-				CONVERT(NVARCHAR,L.intNumberOfContainers) + ' (' + L.strPackingDescription +')' AS strNumberOfContainers,
+				blbHeaderLogo = dbo.fnSMGetCompanyLogo('Header'),
+				blbFooterLogo = dbo.fnSMGetCompanyLogo('Footer'),
+				intReportLogoHeight = ISNULL(CP.intReportLogoHeight,0),
+				intReportLogoWidth = ISNULL(CP.intReportLogoWidth,0),
+
+				strCompanyName = @strCompanyName,
+				strCompanyAddress = @strCompanyAddress,
+				strCompanyContactName = @strContactName ,
+				strCompanyCounty = @strCounty ,
+				strCompanyCity = @strCity ,
+				strCompanyState = @strState ,
+				strCompanyZip = @strZip ,
+				strCompanyCountry = @strCountry ,
+				strCompanyPhone = @strPhone ,
+				strCityStateZip = @strCity + ', ' + @strState + ', ' + @strZip + ',',
+				
+				strUserFullName = CASE WHEN ISNULL(@strFullName,'') = '' THEN  @strUserName ELSE @strFullName END,
+				strExternalPONumber = CD.strERPPONumber,
+				strNumberOfContainers = CONVERT(NVARCHAR,L.intNumberOfContainers) + ' (' + L.strPackingDescription +')',
 				CType.strContainerType,
-				@strLogisticsCompanyName AS strLogisticsCompanyName,
-				@strLogisticsPrintSignOff AS strLogisticsPrintSignOff,
-				CASE WHEN @strInstoreTo = 'Shipping Line' THEN SLETC.strName ELSE WETC.strName END AS strWarehouseContact,
-				@strInstoreTo AS strInstoreTo,
-				CASE WHEN @strInstoreTo = 'Shipping Line' THEN @strReleaseOrderText ELSE NULL END AS strReleaseOrderText,
+				strLogisticsCompanyName = @strLogisticsCompanyName,
+				strLogisticsPrintSignOff = @strLogisticsPrintSignOff,
+				strWarehouseContact = CASE WHEN @strInstoreTo = 'Shipping Line' THEN SLETC.strName ELSE WETC.strName END,
+				strInstoreTo = @strInstoreTo,
+				strReleaseOrderText = CASE WHEN @strInstoreTo = 'Shipping Line' THEN @strReleaseOrderText ELSE NULL END,
 				L.strShippingMode,
 				strCertificationName = (SELECT TOP 1 strCertificationName
 										FROM tblICCertification CER
 										JOIN tblCTContractCertification CTCER ON CTCER.intCertificationId = CER.intCertificationId
 										WHERE CTCER.intContractDetailId = CD.intContractDetailId),
-				dbo.fnSMGetCompanyLogo('FullHeaderLogo') AS blbFullHeaderLogo,
-				dbo.fnSMGetCompanyLogo('FullFooterLogo') AS blbFullFooterLogo,
+				blbFullHeaderLogo = dbo.fnSMGetCompanyLogo('FullHeaderLogo'),
+				blbFullFooterLogo = dbo.fnSMGetCompanyLogo('FullFooterLogo'),
 				CH.strContractNumber,
 				CH.strCustomerContract,
 				L.strBLNumber,
 				I.strItemNo,
-				isnull(rtrt3.strTranslation,I.strDescription) AS strItemDescription,
-				CASE WHEN CP.ysnFullHeaderLogo = 1 THEN 'true' else 'false' END ysnFullHeaderLogo,
-				(SELECT SUM(dblNet) FROM tblLGLoadDetail LOD WHERE LOD.intLoadDetailId = LD.intLoadDetailId) dblLoadWeight,
-				isnull(rtUMTranslation.strTranslation,UM.strUnitMeasure) strLoadWeightUOM,
-				LTRIM(dbo.fnRemoveTrailingZeroes((SELECT SUM(dblNet) FROM tblLGLoadDetail LOD WHERE LOD.intLoadDetailId = LD.intLoadDetailId))) + ' ' + isnull(rtrt2.strTranslation,WUM.strUnitMeasure) + ' ' + '('+@strShipmentWeightInfo+' ' + isnull(rtrt2.strTranslation,WUM.strUnitMeasure) +')' AS strShipmentWeightInfo,
-				LTRIM(dbo.fnRemoveTrailingZeroes((SELECT SUM(dblQuantity) FROM tblLGLoadDetail LOD WHERE LOD.intLoadDetailId = LD.intLoadDetailId))) + ' ' + isnull(rtUMTranslation.strTranslation,UM.strUnitMeasure) AS strShipmentQtyInfo,
+				strItemDescription = ISNULL(rtrt3.strTranslation,I.strDescription),
+				ysnFullHeaderLogo = CASE WHEN CP.ysnFullHeaderLogo = 1 THEN 'true' ELSE 'false' END,
+				dblLoadWeight = LDT.dblNet,
+				strLoadWeightUOM = ISNULL(rtUMTranslation.strTranslation,UM.strUnitMeasure),
+				strShipmentWeightInfo = LTRIM(dbo.fnRemoveTrailingZeroes(LDT.dblNet)) + ' ' + ISNULL(rtrt2.strTranslation,WUM.strUnitMeasure),
+				strShipmentQtyInfo = LTRIM(dbo.fnRemoveTrailingZeroes(LDT.dblQuantity)) + ' ' + ISNULL(rtUMTranslation.strTranslation,UM.strUnitMeasure) + ' ' + '('+@strShipmentQtyInfo+' ' + ISNULL(rtrt2.strTranslation,UM.strUnitMeasure) +')',
 				CD.dtmStartDate,
 				CD.dtmEndDate,
-				strStartDate = datename(dd, CD.dtmStartDate) + '-' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,LEFT(DATENAME(MONTH,CD.dtmStartDate),3)),LEFT(DATENAME(MONTH,CD.dtmStartDate),3)) + '-' + datename(yyyy, CD.dtmStartDate),
-				strEndDate = datename(dd, CD.dtmEndDate) + '-' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,LEFT(DATENAME(MONTH,CD.dtmEndDate),3)),LEFT(DATENAME(MONTH,CD.dtmEndDate),3)) + '-' + datename(yyyy, CD.dtmEndDate),
-				strStartToEndDate = datename(dd, CD.dtmStartDate) + '-' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,LEFT(DATENAME(MONTH,CD.dtmStartDate),3)),LEFT(DATENAME(MONTH,CD.dtmStartDate),3)) + '-' + datename(yyyy, CD.dtmStartDate) + ' - ' + datename(dd, CD.dtmEndDate) + '-' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,LEFT(DATENAME(MONTH,CD.dtmEndDate),3)),LEFT(DATENAME(MONTH,CD.dtmEndDate),3)) + '-' + datename(yyyy, CD.dtmEndDate),
-				(SELECT STUFF((
+				strStartDate = DATENAME(dd, CD.dtmStartDate) + '-' + ISNULL(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,LEFT(DATENAME(MONTH,CD.dtmStartDate),3)),LEFT(DATENAME(MONTH,CD.dtmStartDate),3)) + '-' + DATENAME(yyyy, CD.dtmStartDate),
+				strEndDate = DATENAME(dd, CD.dtmEndDate) + '-' + ISNULL(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,LEFT(DATENAME(MONTH,CD.dtmEndDate),3)),LEFT(DATENAME(MONTH,CD.dtmEndDate),3)) + '-' + DATENAME(yyyy, CD.dtmEndDate),
+				strStartToEndDate = DATENAME(dd, CD.dtmStartDate) + '-' + ISNULL(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,LEFT(DATENAME(MONTH,CD.dtmStartDate),3)),LEFT(DATENAME(MONTH,CD.dtmStartDate),3)) + '-' + DATENAME(yyyy, CD.dtmStartDate) + ' - ' + DATENAME(dd, CD.dtmEndDate) + '-' + ISNULL(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,LEFT(DATENAME(MONTH,CD.dtmEndDate),3)),LEFT(DATENAME(MONTH,CD.dtmEndDate),3)) + '-' + DATENAME(yyyy, CD.dtmEndDate),
+				strMarks = (SELECT STUFF((
 						SELECT ', ' + LTRIM(MRK.strMarks)
 						FROM (
 							SELECT (strMarks ) AS strMarks
 							FROM tblLGLoadContainer LOC
-							WHERE LOC.intLoadId = L.intLoadId --LIKE ('%' + (v.Value) + '%')
+							WHERE LOC.intLoadId = L.intLoadId
 							) MRK
 						FOR XML PATH('')
-						), 1, 2, '')) strMarks
-		FROM		tblLGLoad L
-		JOIN		tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
-		JOIN		tblCTContractDetail CD ON CD.intContractDetailId = CASE WHEN L.intPurchaseSale = 1 THEN LD.intPContractDetailId ELSE LD.intSContractDetailId END
-		JOIN		tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
-		JOIN		tblICItem I ON I.intItemId = CD.intItemId 
-
+						), 1, 2, ''))
+		FROM	tblLGLoad L
+		INNER JOIN	tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
+		INNER JOIN	tblCTContractDetail CD ON CD.intContractDetailId = CASE WHEN L.intPurchaseSale = 1 THEN LD.intPContractDetailId ELSE LD.intSContractDetailId END
+		INNER JOIN	tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+		INNER JOIN	tblICItem I ON I.intItemId = CD.intItemId 
+		
+		OUTER APPLY (SELECT dblNet = SUM(dblNet), dblQuantity = SUM(dblQuantity) FROM tblLGLoadDetail LOD WHERE LOD.intLoadDetailId = LD.intLoadDetailId) LDT
 		LEFT JOIN	tblICItemUOM IU ON IU.intItemUOMId = LD.intItemUOMId
 		LEFT JOIN	tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
-		
 		LEFT JOIN	tblICItemUOM WU ON WU.intItemUOMId = LD.intWeightItemUOMId
 		LEFT JOIN	tblICUnitMeasure WUM ON WUM.intUnitMeasureId = WU.intUnitMeasureId
-
 		LEFT JOIN	tblLGContainerType CType ON CType.intContainerTypeId = L.intContainerTypeId
 		LEFT JOIN	tblEMEntity Vendor ON Vendor.intEntityId = LD.intVendorEntityId
 		LEFT JOIN	[tblEMEntityLocation] VLocation ON VLocation.intEntityId = LD.intVendorEntityId and VLocation.intEntityLocationId = Vendor.intDefaultLocationId
@@ -352,44 +353,43 @@ BEGIN
 		LEFT JOIN	tblLGWarehouseInstructionHeader WI ON WI.intShipmentId = L.intLoadId
 		CROSS APPLY tblLGCompanyPreference CP
 	
-		left join tblSMScreen				rts2 on rts2.strNamespace = 'Inventory.view.ReportTranslation'
-		left join tblSMTransaction			rtt2 on rtt2.intScreenId = rts2.intScreenId and rtt2.intRecordId = WUM.intUnitMeasureId
-		left join tblSMReportTranslation	rtrt2 on rtrt2.intLanguageId = @intLaguageId and rtrt2.intTransactionId = rtt2.intTransactionId and rtrt2.strFieldName = 'Name'
+		LEFT JOIN tblSMScreen				rts2 ON rts2.strNamespace = 'Inventory.view.ReportTranslation'
+		LEFT JOIN tblSMTransaction			rtt2 ON rtt2.intScreenId = rts2.intScreenId and rtt2.intRecordId = WUM.intUnitMeasureId
+		LEFT JOIN tblSMReportTranslation	rtrt2 ON rtrt2.intLanguageId = @intLaguageId and rtrt2.intTransactionId = rtt2.intTransactionId and rtrt2.strFieldName = 'Name'
 	
-		left join tblSMScreen				rts3 on rts3.strNamespace = 'Inventory.view.Item'
-		left join tblSMTransaction			rtt3 on rtt3.intScreenId = rts3.intScreenId and rtt3.intRecordId = I.intItemId
-		left join tblSMReportTranslation	rtrt3 on rtrt3.intLanguageId = @intLaguageId and rtrt3.intTransactionId = rtt3.intTransactionId and rtrt3.strFieldName = 'Description'
+		LEFT JOIN tblSMScreen				rts3 ON rts3.strNamespace = 'Inventory.view.Item'
+		LEFT JOIN tblSMTransaction			rtt3 ON rtt3.intScreenId = rts3.intScreenId and rtt3.intRecordId = I.intItemId
+		LEFT JOIN tblSMReportTranslation	rtrt3 ON rtrt3.intLanguageId = @intLaguageId and rtrt3.intTransactionId = rtt3.intTransactionId and rtrt3.strFieldName = 'Description'
 		
-		left join tblSMCountry				rtc4 on lower(rtrim(ltrim(rtc4.strCountry))) = lower(rtrim(ltrim(CLocation.strCountry)))
-		left join tblSMScreen				rts4 on rts4.strNamespace = 'i21.view.Country'
-		left join tblSMTransaction			rtt4 on rtt4.intScreenId = rts4.intScreenId and rtt4.intRecordId = rtc4.intCountryID
-		left join tblSMReportTranslation	rtrt4 on rtrt4.intLanguageId = @intLaguageId and rtrt4.intTransactionId = rtt4.intTransactionId and rtrt4.strFieldName = 'Country'
+		LEFT JOIN tblSMCountry				rtc4 ON LOWER(RTRIM(LTRIM(rtc4.strCountry))) = LOWER(RTRIM(LTRIM(CLocation.strCountry)))
+		LEFT JOIN tblSMScreen				rts4 ON rts4.strNamespace = 'i21.view.Country'
+		LEFT JOIN tblSMTransaction			rtt4 ON rtt4.intScreenId = rts4.intScreenId and rtt4.intRecordId = rtc4.intCountryID
+		LEFT JOIN tblSMReportTranslation	rtrt4 ON rtrt4.intLanguageId = @intLaguageId and rtrt4.intTransactionId = rtt4.intTransactionId and rtrt4.strFieldName = 'Country'
 		
-		left join tblSMCountry				rtc5 on lower(rtrim(ltrim(rtc5.strCountry))) = lower(rtrim(ltrim(VLocation.strCountry)))
-		left join tblSMScreen				rts5 on rts4.strNamespace = 'i21.view.Country'
-		left join tblSMTransaction			rtt5 on rtt4.intScreenId = rts5.intScreenId and rtt5.intRecordId = rtc5.intCountryID
-		left join tblSMReportTranslation	rtrt5 on rtrt4.intLanguageId = @intLaguageId and rtrt5.intTransactionId = rtt5.intTransactionId and rtrt5.strFieldName = 'Country'
+		LEFT JOIN tblSMCountry				rtc5 ON LOWER(RTRIM(LTRIM(rtc5.strCountry))) = LOWER(RTRIM(LTRIM(VLocation.strCountry)))
+		LEFT JOIN tblSMScreen				rts5 ON rts4.strNamespace = 'i21.view.Country'
+		LEFT JOIN tblSMTransaction			rtt5 ON rtt4.intScreenId = rts5.intScreenId and rtt5.intRecordId = rtc5.intCountryID
+		LEFT JOIN tblSMReportTranslation	rtrt5 ON rtrt4.intLanguageId = @intLaguageId and rtrt5.intTransactionId = rtt5.intTransactionId and rtrt5.strFieldName = 'Country'
 				
-		left join tblSMCountry				rtc6 on lower(rtrim(ltrim(rtc6.strCountry))) = lower(rtrim(ltrim(SLLocation.strCountry)))
-		left join tblSMScreen				rts6 on rts6.strNamespace = 'i21.view.Country'
-		left join tblSMTransaction			rtt6 on rtt6.intScreenId = rts6.intScreenId and rtt6.intRecordId = rtc6.intCountryID
-		left join tblSMReportTranslation	rtrt6 on rtrt6.intLanguageId = @intLaguageId and rtrt6.intTransactionId = rtt6.intTransactionId and rtrt6.strFieldName = 'Country'
+		LEFT JOIN tblSMCountry				rtc6 ON LOWER(RTRIM(LTRIM(rtc6.strCountry))) = LOWER(RTRIM(LTRIM(SLLocation.strCountry)))
+		LEFT JOIN tblSMScreen				rts6 ON rts6.strNamespace = 'i21.view.Country'
+		LEFT JOIN tblSMTransaction			rtt6 ON rtt6.intScreenId = rts6.intScreenId and rtt6.intRecordId = rtc6.intCountryID
+		LEFT JOIN tblSMReportTranslation	rtrt6 ON rtrt6.intLanguageId = @intLaguageId and rtrt6.intTransactionId = rtt6.intTransactionId and rtrt6.strFieldName = 'Country'
 				
-		left join tblSMCountry				rtc7 on lower(rtrim(ltrim(rtc7.strCountry))) = lower(rtrim(ltrim(TerminalLocation.strCountry)))
-		left join tblSMScreen				rts7 on rts7.strNamespace = 'i21.view.Country'
-		left join tblSMTransaction			rtt7 on rtt7.intScreenId = rts7.intScreenId and rtt7.intRecordId = rtc7.intCountryID
-		left join tblSMReportTranslation	rtrt7 on rtrt7.intLanguageId = @intLaguageId and rtrt7.intTransactionId = rtt7.intTransactionId and rtrt7.strFieldName = 'Country'
+		LEFT JOIN tblSMCountry				rtc7 ON LOWER(RTRIM(LTRIM(rtc7.strCountry))) = LOWER(RTRIM(LTRIM(TerminalLocation.strCountry)))
+		LEFT JOIN tblSMScreen				rts7 ON rts7.strNamespace = 'i21.view.Country'
+		LEFT JOIN tblSMTransaction			rtt7 ON rtt7.intScreenId = rts7.intScreenId and rtt7.intRecordId = rtc7.intCountryID
+		LEFT JOIN tblSMReportTranslation	rtrt7 ON rtrt7.intLanguageId = @intLaguageId and rtrt7.intTransactionId = rtt7.intTransactionId and rtrt7.strFieldName = 'Country'
 						
-		left join tblSMCountry				rtc8 on lower(rtrim(ltrim(rtc8.strCountry))) = lower(rtrim(ltrim(InsurLocation.strCountry)))
-		left join tblSMScreen				rts8 on rts8.strNamespace = 'i21.view.Country'
-		left join tblSMTransaction			rtt8 on rtt8.intScreenId = rts8.intScreenId and rtt8.intRecordId = rtc8.intCountryID
-		left join tblSMReportTranslation	rtrt8 on rtrt8.intLanguageId = @intLaguageId and rtrt8.intTransactionId = rtt8.intTransactionId and rtrt8.strFieldName = 'Country'
+		LEFT JOIN tblSMCountry				rtc8 ON LOWER(RTRIM(LTRIM(rtc8.strCountry))) = LOWER(RTRIM(LTRIM(InsurLocation.strCountry)))
+		LEFT JOIN tblSMScreen				rts8 ON rts8.strNamespace = 'i21.view.Country'
+		LEFT JOIN tblSMTransaction			rtt8 ON rtt8.intScreenId = rts8.intScreenId and rtt8.intRecordId = rtc8.intCountryID
+		LEFT JOIN tblSMReportTranslation	rtrt8 ON rtrt8.intLanguageId = @intLaguageId and rtrt8.intTransactionId = rtt8.intTransactionId and rtrt8.strFieldName = 'Country'
 
-		left join tblSMScreen				rtUMScreen on rtUMScreen.strNamespace = 'Inventory.view.ReportTranslation'
-		left join tblSMTransaction			rtUMTransaction on rtUMTransaction.intScreenId = rtUMScreen.intScreenId and rtUMTransaction.intRecordId = UM.intUnitMeasureId
-		left join tblSMReportTranslation	rtUMTranslation on rtUMTranslation.intLanguageId = @intLaguageId and rtUMTranslation.intTransactionId = rtUMTransaction.intTransactionId and rtUMTranslation.strFieldName = 'Name'
+		LEFT JOIN tblSMScreen				rtUMScreen ON rtUMScreen.strNamespace = 'Inventory.view.ReportTranslation'
+		LEFT JOIN tblSMTransaction			rtUMTransaction ON rtUMTransaction.intScreenId = rtUMScreen.intScreenId and rtUMTransaction.intRecordId = UM.intUnitMeasureId
+		LEFT JOIN tblSMReportTranslation	rtUMTranslation ON rtUMTranslation.intLanguageId = @intLaguageId and rtUMTranslation.intTransactionId = rtUMTransaction.intTransactionId and rtUMTranslation.strFieldName = 'Name'
 	
-		--
 		WHERE L.strLoadNumber = @strTrackingNumber
 	END
 END

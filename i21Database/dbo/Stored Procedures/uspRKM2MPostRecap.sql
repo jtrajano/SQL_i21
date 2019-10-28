@@ -678,7 +678,7 @@ BEGIN
 		, @intLocationId intLocationId
 		, @intUnitMeasureId intUnitMeasureId
 	FROM tblRKM2MInquiryTransaction
-	WHERE intM2MInquiryId=@intM2MInquiryId AND strContractOrInventoryType in('Inventory')
+	WHERE intM2MInquiryId=@intM2MInquiryId AND strContractOrInventoryType in('Inventory','In-transit(I)')
 		AND ISNULL(dblResultCash,0) <> 0
 	
 	--Inventory Cash Offset	
@@ -708,7 +708,7 @@ BEGIN
 		, @intLocationId intLocationId
 		, @intUnitMeasureId intUnitMeasureId
 	FROM tblRKM2MInquiryTransaction
-	WHERE intM2MInquiryId = @intM2MInquiryId AND strContractOrInventoryType in('Inventory')
+	WHERE intM2MInquiryId = @intM2MInquiryId AND strContractOrInventoryType in('Inventory','In-transit(I)')
 		AND ISNULL(dblResultCash,0) <> 0
 
 

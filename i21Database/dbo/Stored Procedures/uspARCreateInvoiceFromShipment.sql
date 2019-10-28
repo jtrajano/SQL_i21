@@ -356,7 +356,7 @@ WHERE
 	ARSI.[strTransactionType] = 'Inventory Shipment'
 	AND ARSI.[intInventoryShipmentId] = @ShipmentId
 	AND ARSI.intEntityCustomerId = @EntityCustomerId
-	AND (ISNULL(ARSI.intPricingTypeId, 0) <> 2 OR (ISNULL(ARSI.intPricingTypeId, 0) = 2 AND ISNULL(dbo.fnCTGetAvailablePriceQuantity(ARSI.[intContractDetailId]), 0) > 0))
+	AND (ISNULL(ARSI.intPricingTypeId, 0) <> 2 OR (ISNULL(ARSI.intPricingTypeId, 0) = 2 AND ISNULL(dbo.fnCTGetAvailablePriceQuantity(ARSI.[intContractDetailId],0), 0) > 0))
 
 UNION ALL
 
@@ -628,7 +628,7 @@ IF NOT EXISTS (SELECT TOP 1 NULL FROM @UnsortedEntriesForInvoice)
 			INNER JOIN tblCTContractDetail CTD ON ICISI.intLineNo = CTD.intContractDetailId AND ICISI.intOrderId = CTD.intContractHeaderId 
 			WHERE CTD.intPricingTypeId = 2 
 			  AND ICISI.intInventoryShipmentId = @ShipmentId
-			  AND ISNULL(dbo.fnCTGetAvailablePriceQuantity(ICISI.intLineNo), 0) = 0
+			  AND ISNULL(dbo.fnCTGetAvailablePriceQuantity(ICISI.intLineNo,0), 0) = 0
 		)
 		BEGIN
 			RAISERROR('Unable to process. Use Price Contract screen to process Basis Contract shipments.', 16, 1);

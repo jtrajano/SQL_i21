@@ -59,12 +59,12 @@ BEGIN
 
 	SELECT DER.*
 	INTO #tmpDerivatives
-	FROM dbo.fnRKGetOpenFutureByDate(NULL, '1/1/1900', @dtmDate, 1) DER
+	FROM dbo.fnRKGetOpenFutureByDate(NULL, '1/1/1900', @dtmDate, 0) DER
 	LEFT JOIN tblRKFutureMarket FMarket ON FMarket.intFutureMarketId = DER.intFutureMarketId
 	LEFT JOIN tblRKFuturesMonth FMonth ON FMonth.intFutureMonthId = DER.intFutureMonthId
 	LEFT JOIN tblCTBook Book ON Book.intBookId = DER.intBookId
 	LEFT JOIN tblCTSubBook SubBook ON SubBook.intSubBookId = DER.intSubBookId
-	WHERE intFutOptTransactionId NOT IN (SELECT DISTINCT intFutOptTransactionId FROM tblRKDailyAveragePriceDetailTransaction)
+	WHERE intFutOptTransactionId NOT IN (SELECT DISTINCT intFutOptTransactionId FROM tblRKDailyAveragePriceDetailTransaction WHERE ISNULL(intFutOptTransactionId, '') <> '')
 		AND DER.intFutureMonthId NOT IN (SELECT intFutureMonthId FROM tblRKFuturesMonth WHERE ysnExpired = 1)
 		AND dblOpenContract <> 0
 		AND FMarket.ysnActive = 1

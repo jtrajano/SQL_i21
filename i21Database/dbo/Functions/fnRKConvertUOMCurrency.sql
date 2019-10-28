@@ -62,11 +62,11 @@ BEGIN
 		END
 		ELSE IF (@FromUOMRate < @ToUOMRate)
 		BEGIN
-			SET @FinalValue = @dblValue * @FromUOMRate
+			SET @FinalValue = @dblValue / @FromUOMRate
 		END
 		ELSE IF (@FromUOMRate > @ToUOMRate)
 		BEGIN
-			SET @FinalValue = @dblValue / @FromUOMRate
+			SET @FinalValue = @dblValue * @FromUOMRate
 		END
 
 		IF (@ToUOMRate = @FromUOMRate)
@@ -75,11 +75,11 @@ BEGIN
 		END
 		ELSE IF (@ToUOMRate < @FromUOMRate)
 		BEGIN
-			SET @FinalValue = @FinalValue * @ToUOMRate
+			SET @FinalValue = @FinalValue / @ToUOMRate
 		END
 		ELSE IF (@ToUOMRate > @FromUOMRate)
 		BEGIN
-			SET @FinalValue = @FinalValue / @ToUOMRate
+			SET @FinalValue = @FinalValue * @ToUOMRate
 		END
 	END
 	ELSE
