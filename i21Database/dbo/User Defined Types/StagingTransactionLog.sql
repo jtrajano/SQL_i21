@@ -1,5 +1,6 @@
 ﻿CREATE TYPE StagingTransactionLog AS TABLE
 (
+	[intRowCount] INT NULL,
 	-- transSet
 	[intTransSetPeriodID] INT NULL,
 	[strTransSetPeriodame] nvarchar(100) COLLATE Latin1_General_CI_AS NULL,
