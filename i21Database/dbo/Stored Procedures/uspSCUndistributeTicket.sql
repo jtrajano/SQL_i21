@@ -805,6 +805,7 @@ BEGIN TRY
 								LEFT JOIN tblARInvoice D
 									ON B.intInvoiceId = D.intInvoiceId
 										AND D.strTransactionType = 'Invoice'
+										AND D.ysnPosted = 1
 								INNER JOIN #tmpItemShipmentIds C
 									ON A.intInventoryShipmentId = C.intInventoryShipmentId
 
@@ -862,7 +863,7 @@ BEGIN TRY
 
 							WHILE @@FETCH_STATUS = 0
 							BEGIN
-								IF  @ysnAllInvoiceHasCreditMemo = 0
+								IF  @ysnAllInvoiceHasCreditMemo = 1
 								BEGIN
 									EXEC [dbo].[uspGRDeleteStorageHistory] @strSourceType = 'InventoryShipment' ,@IntSourceKey = @InventoryShipmentId
 									EXEC [dbo].[uspGRReverseTicketOpenBalance] 'InventoryShipment' , @InventoryShipmentId ,@intUserId;
