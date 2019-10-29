@@ -70,7 +70,7 @@ BEGIN
 			,dtmDate				= Header.dtmAdjustmentDate
 			,dblQty					= ISNULL(Detail.dblNewWeight, 0)
 			,dblUOMQty				= ISNULL(WeightUOM.dblUnitQty, 0)
-			,dblCost				= ISNULL(Detail.dblNewCost, ItemPricing.dblLastCost)
+			,dblCost				= ISNULL(ISNULL(Detail.dblNewCost, ItemPricing.dblLastCost), 0)
 			,dblSalesPrice			= 0
 			,intCurrencyId			= NULL 
 			,dblExchangeRate		= 1
@@ -105,11 +105,11 @@ BEGIN
 			,dtmDate				= Header.dtmAdjustmentDate
 			,dblQty					= Detail.dblNewQuantity
 			,dblUOMQty				= ItemUOM.dblUnitQty
-			,dblCost				= dbo.fnCalculateCostBetweenUOM( 
+			,dblCost				= ISNULL(dbo.fnCalculateCostBetweenUOM( 
 										dbo.fnGetItemStockUOM(Detail.intItemId)
 										,Detail.intNewItemUOMId
 										,ISNULL(Detail.dblNewCost, ItemPricing.dblLastCost)
-									)
+									), 0)
 			,dblSalesPrice			= 0
 			,intCurrencyId			= NULL 
 			,dblExchangeRate		= 1
@@ -179,7 +179,7 @@ BEGIN
 			,dtmDate				= Header.dtmAdjustmentDate
 			,dblQty					= Detail.dblNewWeight
 			,dblUOMQty				= WeightUOM.dblUnitQty	
-			,dblCost				= ISNULL(Detail.dblNewCost, ItemPricing.dblLastCost)
+			,dblCost				= ISNULL(ISNULL(Detail.dblNewCost, ItemPricing.dblLastCost), 0)
 			,dblSalesPrice			= 0
 			,intCurrencyId			= NULL 
 			,dblExchangeRate		= 1
@@ -214,11 +214,11 @@ BEGIN
 			,dtmDate				= Header.dtmAdjustmentDate
 			,dblQty					= Detail.dblNewQuantity
 			,dblUOMQty				= ItemUOM.dblUnitQty
-			,dblCost				= dbo.fnCalculateCostBetweenUOM( 
+			,dblCost				= ISNULL(dbo.fnCalculateCostBetweenUOM( 
 										dbo.fnGetItemStockUOM(Detail.intItemId)
 										,Detail.intNewItemUOMId
 										,ISNULL(Detail.dblNewCost, ItemPricing.dblLastCost)
-									)
+									), 0)
 			,dblSalesPrice			= 0
 			,intCurrencyId			= NULL 
 			,dblExchangeRate		= 1

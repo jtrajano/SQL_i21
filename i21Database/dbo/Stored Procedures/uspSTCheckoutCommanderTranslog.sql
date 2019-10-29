@@ -375,7 +375,7 @@ BEGIN
 
 						)
 						SELECT 
-							[intScanTransactionId]				= NULLIF(ROW_NUMBER() OVER(PARTITION BY CAST(intTermMsgSN AS BIGINT), strTrpPaycode ORDER BY CAST(intTermMsgSN AS INT)), ''),
+							[intScanTransactionId]				= NULLIF(ROW_NUMBER() OVER(PARTITION BY CAST(intTermMsgSN AS BIGINT), strTrpPaycode  ORDER BY CAST(intRowCount AS INT)), ''),
 							[strTrlUPCwithoutCheckDigit]		= CASE
 																	WHEN (@strRegisterClass = N'SAPPHIRE/COMMANDER')
 																		THEN CASE 

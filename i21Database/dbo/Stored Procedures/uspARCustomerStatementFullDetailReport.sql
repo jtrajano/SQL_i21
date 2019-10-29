@@ -460,7 +460,11 @@ VALUES (strCustomerNumber, dtmLastStatementDate, dblLastStatement);
 --ADDITIONAL FILTERS
 IF @ysnPrintOnlyPastDueLocal = 1
     BEGIN
-        DELETE FROM #STATEMENTREPORT WHERE DATEDIFF(DAYOFYEAR, dtmDueDate, @dtmDateToLocal) > 0 AND strTransactionType <> 'Balance Forward'        
+        DELETE FROM #STATEMENTREPORT WHERE DATEDIFF(DAYOFYEAR, dtmDueDate, @dtmDateToLocal) <= 0 AND strTransactionType <> 'Beginning Balance'
+		UPDATE #AGINGSUMMARY 
+		SET dblFuture 	= 0
+		  , dbl0Days 	= 0
+		  , dblTotalAR 	= ISNULL(dblTotalAR, 0) - ISNULL(dbl0Days, 0) - ISNULL(dblFuture, 0)
     END
 
 IF @ysnPrintZeroBalanceLocal = 0

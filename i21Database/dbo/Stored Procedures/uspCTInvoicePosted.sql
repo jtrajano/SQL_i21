@@ -41,6 +41,7 @@ BEGIN TRY
 		  , @dblShippedQty					NUMERIC(18,6)
 		  , @intShippedQtyUOMId				INT
 		  , @ysnFromReturn					BIT = 0
+		  , @intPurchaseSale				INT = NULL
 
 	DECLARE @tblToProcess TABLE (
 		  intUniqueId				INT IDENTITY
@@ -86,6 +87,12 @@ BEGIN TRY
 	FROM @ItemsFromInvoice I
 	INNER JOIN tblARInvoice INV ON I.intInvoiceId = INV.intInvoiceId
 	INNER JOIN tblARInvoiceDetail ID ON I.intInvoiceDetailId = ID.intInvoiceDetailId
+	LEFT JOIN (
+		SELECT intLoadDetailId
+			, intPurchaseSale 
+		FROM tblLGLoadDetail LGD 
+		INNER JOIN tblLGLoad LG ON LG.intLoadId = LGD.intLoadId	
+	) LG ON ID.intLoadDetailId = LG.intLoadDetailId
 	OUTER APPLY (
 		SELECT TOP 1 intInvoiceId 
 		FROM tblARInvoice I
@@ -96,7 +103,7 @@ BEGIN TRY
 	) RI
 	WHERE I.intContractDetailId IS NOT NULL
 	AND (
-		(I.strTransactionType <> 'Credit Memo' AND I.[intInventoryShipmentItemId] IS NULL AND I.[intShipmentPurchaseSalesContractId] IS NULL AND I.[intLoadDetailId] IS  NULL)
+		(I.strTransactionType <> 'Credit Memo' AND I.[intInventoryShipmentItemId] IS NULL AND I.[intShipmentPurchaseSalesContractId] IS NULL AND (I.[intLoadDetailId] IS NULL OR (I.intLoadDetailId IS NOT NULL AND ISNULL(LG.intPurchaseSale, 0) = 3)))
 		OR
 		(I.strTransactionType = 'Credit Memo' AND (I.[intInventoryShipmentItemId] IS NOT NULL OR I.[intShipmentPurchaseSalesContractId] IS NOT NULL OR I.[intLoadDetailId] IS NOT NULL))
 	)
@@ -158,6 +165,7 @@ BEGIN TRY
 				@intShippedQtyUOMId				=	NULL,
 				@dblRemainingSchedQty			=	NULL,
 				@intLoadDetailId				=	NULL,
+				@intPurchaseSale				=	NULL,
 				@ysnFromReturn					=	CAST(0 AS BIT)
 
 		SELECT	@intContractDetailId			=	P.[intContractDetailId],
@@ -170,6 +178,7 @@ BEGIN TRY
 				@dblShippedQty					=	P.[dblShippedQty],
 				@intShippedQtyUOMId				=	P.[intShippedQtyUOMId],
 				@intLoadDetailId				=	P.[intLoadDetailId],
+				@intPurchaseSale				=	LG.[intPurchaseSale],
 				@ysnFromReturn					=	P.[ysnFromReturn],
 
 				@intTicketId					=   T.[intTicketId],
@@ -189,6 +198,12 @@ BEGIN TRY
 		JOIN	tblCTContractDetail	CD	ON	CD.intContractDetailId	=	P.intContractDetailId
 		JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId
    LEFT JOIN	tblSCTicket			T	ON	T.intTicketId			=	P.intTicketId
+   LEFT JOIN 	(
+					SELECT intLoadDetailId
+						 , intPurchaseSale 
+					FROM tblLGLoadDetail LGD 
+					INNER JOIN tblLGLoad LG ON LG.intLoadId = LGD.intLoadId	
+				) LG ON P.intLoadDetailId = LG.intLoadDetailId
 		WHERE	[intUniqueId]		=	 @intUniqueId
 
 		IF NOT EXISTS(SELECT * FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId)
@@ -239,7 +254,7 @@ BEGIN TRY
 							@ysnFromInvoice 		= 	1  	 
 				END
 				
-				IF ISNULL(@ysnFromReturn, 0) = 0 AND ISNULL(@intLoadDetailId, 0) = 0
+				IF ISNULL(@ysnFromReturn, 0) = 0 AND (ISNULL(@intLoadDetailId, 0) = 0 OR (ISNULL(@intLoadDetailId, 0) <> 0 AND ISNULL(@intPurchaseSale, 0) = 3))
 				BEGIN
 					EXEC	uspCTUpdateScheduleQuantity
 							@intContractDetailId	=	@intContractDetailId,
@@ -248,7 +263,7 @@ BEGIN TRY
 							@intExternalId			=	@intInvoiceDetailId,
 							@strScreenName			=	'Invoice' 
 				
-					IF ISNULL(@dblRemainingSchedQty, 0) > 0 AND ISNULL(@dblConvertedQtyOrdered, 0) > 0 AND ISNULL(@intLoadDetailId, 0) = 0
+					IF ISNULL(@dblRemainingSchedQty, 0) > 0 AND ISNULL(@dblConvertedQtyOrdered, 0) > 0 AND (ISNULL(@intLoadDetailId, 0) = 0 OR (ISNULL(@intLoadDetailId, 0) <> 0 AND ISNULL(@intPurchaseSale, 0) = 3))
 						BEGIN
 							DECLARE @dblScheduleQty	NUMERIC(18, 6) = 0
 
