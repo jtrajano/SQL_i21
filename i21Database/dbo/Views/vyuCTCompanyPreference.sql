@@ -18,6 +18,7 @@ AS
 			,CP.strDefaultContractReport
 			,CP.ysnShowReportLangaugeSelection
 			,CP.strDefaultAmendmentReport
+			,CP.strDefaultPricingConfirmation
 			,CP.ysnDemandViewForBlend
 			,CP.intEarlyDaysPurchase
 			,CP.intEarlyDaysSales
