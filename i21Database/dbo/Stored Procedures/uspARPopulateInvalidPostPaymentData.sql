@@ -848,6 +848,33 @@ INSERT INTO #ARInvalidPaymentData
         AND P.[dblCurrencyExchangeRate] = 1.000000
         AND (P.[dblPayment] <> P.[dblBasePayment] OR P.[dblDiscount] <> P.[dblBaseDiscount] OR P.[dblInterest] <> P.[dblBaseInterest])
 
+    INSERT INTO #ARInvalidPaymentData
+        ([intTransactionId]
+        ,[strTransactionId]
+        ,[strTransactionType]
+        ,[intTransactionDetailId]
+        ,[strBatchId]
+        ,[strError])
+	--Inactive Customer for Prepayments
+	SELECT
+         [intTransactionId]         = P.[intTransactionId]
+        ,[strTransactionId]         = P.[strTransactionId]
+        ,[strTransactionType]       = @TransType
+        ,[intTransactionDetailId]   = P.[intTransactionDetailId]
+        ,[strBatchId]               = P.[strBatchId]
+        ,[strError]                 = 'The customer provided is not active!'
+	FROM #ARPostPaymentHeader P
+    INNER JOIN tblARCustomer C ON P.intEntityCustomerId = C.intEntityId
+    WHERE P.[ysnPost] = @OneBit
+     AND ISNULL(C.ysnActive, 0) = 0
+     AND (
+         ((P.[dblAmountPaid]) > (SELECT SUM([dblPayment]) FROM #ARPostPaymentDetail WHERE [ysnPost] = @OneBit AND [intTransactionId] = P.[intTransactionId]) -- Overpayment
+		  AND EXISTS(SELECT NULL FROM #ARPostPaymentDetail WHERE [ysnPost] = @OneBit AND [intTransactionId] = P.[intTransactionId] AND [dblPayment] <> @ZeroDecimal))
+     OR ((P.[dblAmountPaid]) <> @ZeroDecimal --Prepayment
+		AND ISNULL((SELECT SUM([dblPayment]) FROM #ARPostPaymentDetail WHERE [ysnPost] = @OneBit AND ([intInvoiceId] IS NOT NULL OR [intBillId] IS NOT NULL) AND [intTransactionId] = P.[intTransactionId]), @ZeroDecimal) = @ZeroDecimal	
+		AND NOT EXISTS(SELECT NULL FROM #ARPostPaymentDetail WHERE [ysnPost] = @OneBit AND ([intInvoiceId] IS NOT NULL OR [intBillId] IS NOT NULL) AND [intTransactionId] = P.[intTransactionId] AND [dblPayment] <> @ZeroDecimal))
+     )	
+
     IF(OBJECT_ID('tempdb..#DUPLICATEINVOICES') IS NOT NULL)
     BEGIN
         DROP TABLE #DUPLICATEINVOICES
