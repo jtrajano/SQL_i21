@@ -70,3 +70,88 @@ GROUP BY
 	intAccountId,
 	strReceiptNumber
 ORDER BY strReceiptNumber
+
+;WITH receiptTotal (
+     dtmReceiptDate,
+	 dblTotal,
+	 strReceiptNumber
+)
+AS (
+	SELECT
+	   A.dtmReceiptDate,
+	   SUM(B.dblLineTotal + B.dblTax) * (CASE WHEN A.strReceiptType = 'Inventory Return' THEN -1 ELSE 1 END) AS dblTotal,
+	   A.strReceiptNumber
+	FROM tblICInventoryReceipt A
+	INNER JOIN tblICInventoryReceiptItem B
+	ON A.intInventoryReceiptId = B.intInventoryReceiptId
+	GROUP BY A.dtmReceiptDate, A.strReceiptNumber, A.strReceiptType
+),
+receiptGLTotal (
+	dtmDate,
+	dblTotal,
+	 strReceiptNumber
+)
+AS (
+	SELECT
+		A.dtmDate,
+		SUM(dblCredit - dblDebit),
+		A.strTransactionId
+	FROM tblGLDetail A
+	INNER JOIN vyuGLAccountDetail B
+	ON A.intAccountId = B.intAccountId
+	WHERE B.intAccountCategoryId = 45
+	AND A.ysnIsUnposted = 0
+	GROUP BY A.strTransactionId, A.dtmDate
+)
+
+SELECT
+	A.strReceiptNumber,
+	A.dtmReceiptDate,
+	A.dblTotal,
+	B.dblTotal AS dblGLTotal
+FROM receiptTotal A
+INNER JOIN receiptGLTotal B ON A.strReceiptNumber = B.strReceiptNumber
+WHERE A.dblTotal != B.dblTotal
+
+;WITH billTotal (
+     dtmBillDate,
+	 dblTotal,
+	 strBillId
+)
+AS (
+	SELECT
+	   A.dtmBillDate,
+	   SUM(B.dblTotal + B.dblTax) * (CASE WHEN A.intTransactionType != 1 THEN -1 ELSE 1 END) AS dblTotal,
+	   A.strBillId
+	FROM tblAPBill A
+	INNER JOIN tblAPBillDetail B
+	ON A.intBillId = B.intBillId AND B.intInventoryReceiptItemId > 0
+	GROUP BY A.dtmBillDate, A.strBillId, A.intTransactionType
+),
+billGLTotal (
+	dtmDate,
+	dblTotal,
+	strBillId
+)
+AS (
+	SELECT
+		A.dtmDate,
+		SUM(dblDebit - dblCredit),
+		A.strTransactionId
+	FROM tblGLDetail A
+	INNER JOIN vyuGLAccountDetail B
+	ON A.intAccountId = B.intAccountId
+	WHERE B.intAccountCategoryId = 45
+	AND A.ysnIsUnposted = 0
+	AND A.strCode != 'ICA'
+	GROUP BY A.strTransactionId, A.dtmDate
+)
+
+SELECT
+	A.strBillId,
+	A.dtmBillDate,
+	A.dblTotal,
+	B.dblTotal AS dblGLTotal
+FROM billTotal A
+INNER JOIN billGLTotal B ON A.strBillId = B.strBillId
+WHERE A.dblTotal != B.dblTotal
