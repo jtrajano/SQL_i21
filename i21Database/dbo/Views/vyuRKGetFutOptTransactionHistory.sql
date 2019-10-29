@@ -85,6 +85,7 @@ FROM (
 								FROM tblRKFutOptTransactionHistory PrevRec
 								WHERE PrevRec.intFutOptTransactionId = History.intFutOptTransactionId
 									AND PrevRec.intFutOptTransactionHistoryId != History.intFutOptTransactionHistoryId
+									AND PrevRec.strCommodity = History.strCommodity
 									AND PrevRec.dtmTransactionDate < History.dtmTransactionDate
 								ORDER BY PrevRec.dtmTransactionDate DESC)
 		, dblNewNoOfLots = CASE WHEN History.strNewBuySell = 'Buy' THEN History.dblNewNoOfContract ELSE - History.dblNewNoOfContract END

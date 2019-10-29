@@ -16,28 +16,17 @@ BEGIN
 	SELECT Item Collate Latin1_General_CI_AS FROM [dbo].[fnSplitString](@strCommodityId, ',')
 
 
-	DECLARE @tblGetOpenFutureByDate TABLE (Id INT identity(1,1)
-		, intFutOptTransactionId INT
-		, dtmTransactionDate DATE
-		, dblOpenContract NUMERIC(18,6)
-		, dblMatchContract NUMERIC(18,6)
-		, strCommodityCode NVARCHAR(100) COLLATE Latin1_General_CI_AS
-		, strInternalTradeNo NVARCHAR(100) COLLATE Latin1_General_CI_AS
-		, strLocationName NVARCHAR(100) COLLATE Latin1_General_CI_AS
-		, dblContractSize NUMERIC(24,10)
-		, strFutureMarket NVARCHAR(100) COLLATE Latin1_General_CI_AS
-		, strFutureMonth NVARCHAR(100) COLLATE Latin1_General_CI_AS
-		, strOptionMonth NVARCHAR(100) COLLATE Latin1_General_CI_AS
-		, dblStrike NUMERIC(24,10)
-		, strOptionType NVARCHAR(100) COLLATE Latin1_General_CI_AS
-		, strInstrumentType NVARCHAR(100) COLLATE Latin1_General_CI_AS
-		, strBrokerAccount NVARCHAR(100) COLLATE Latin1_General_CI_AS
-		, strBroker NVARCHAR(100) COLLATE Latin1_General_CI_AS
-		, strNewBuySell NVARCHAR(100) COLLATE Latin1_General_CI_AS
-		, intFutOptTransactionHeaderId int
-		, ysnPreCrush BIT
-		, strNotes NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
-		, strBrokerTradeNo NVARCHAR(100) COLLATE Latin1_General_CI_AS)
+	DECLARE @tblDerivativeHistory TABLE (Id INT identity(1,1)
+		,dtmTransactionDate DATE
+		,dtmFilledDate DATE
+		,dblBuy  NUMERIC(18,6)
+		,dblSell  NUMERIC(18,6)
+		,strInternalTradeNo NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		,intFutOptTransactionId INT
+		,intFutOptTransactionHeaderId INT
+		,ysnPreCrush BIT
+		,strCommodityCode NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		,strAction NVARCHAR(100) COLLATE Latin1_General_CI_AS)
 	
 	
 	DECLARE @intCommodityId INT
@@ -62,109 +51,113 @@ BEGIN
 			,@strCommodityCode = strCommodityCode
 		FROM #tempCommodity
 		
-		INSERT INTO @tblGetOpenFutureByDate (intFutOptTransactionId
-				, dtmTransactionDate
-				, dblOpenContract
-				, dblMatchContract
-				, strCommodityCode
-				, strInternalTradeNo
-				, strLocationName
-				, dblContractSize
-				, strFutureMarket
-				, strFutureMonth
-				, strOptionMonth
-				, dblStrike
-				, strOptionType
-				, strInstrumentType
-				, strBrokerAccount
-				, strBroker
-				, strNewBuySell
-				, intFutOptTransactionHeaderId
-				, ysnPreCrush
-				, strNotes
-				, strBrokerTradeNo)
-			SELECT intFutOptTransactionId
-				, dtmTransactionDate
-				, dblOpenContract
-				, dblMatchContract
-				, strCommodityCode
-				, strInternalTradeNo
-				, strLocationName
-				, dblContractSize
-				, strFutureMarket
-				, strFutureMonth
-				, strOptionMonth
-				, dblStrike
-				, strOptionType
-				, strInstrumentType
-				, strBrokerAccount
-				, strBroker
-				, strNewBuySell
-				, intFutOptTransactionHeaderId
-				, ysnPreCrush
-				, strNotes
-				, strBrokerTradeNo
-			FROM fnRKGetOpenFutureByDate (@intCommodityId, '01/01/1900', @dtmToTransactionDate, @CrushReport)
-			WHERE intCommodityId = @intCommodityId
+		INSERT INTO @tblDerivativeHistory (dtmTransactionDate 
+			,dtmFilledDate
+			,dblBuy
+			,dblSell
+			,strInternalTradeNo
+			,intFutOptTransactionId
+			,intFutOptTransactionHeaderId
+			,ysnPreCrush
+			,strCommodityCode
+			,strAction)
+		SELECT 
+			dtmTransactionDate 
+			,dtmFilledDate
+			,dblBuy
+			,dblSell
+			,strInternalTradeNo
+			,intFutOptTransactionId
+			,intFutOptTransactionHeaderId
+			,ysnPreCrush
+			,@strCommodityCode
+			,strAction
+		FROM (
+			select
+				Row_Number() OVER (PARTITION BY H.dtmTransactionDate, H.intFutOptTransactionId, H.strAction, strNewBuySell ORDER BY  H.intFutOptTransactionHistoryId ASC, H.dtmTransactionDate ASC ) AS Row_Num 
+				,H.dtmTransactionDate
+				,H.dtmFilledDate
+				,dblBuy = CASE WHEN strNewBuySell = 'Buy' THEN  dblLotBalance * dblContractSize ELSE 0 END
+				,dblSell = CASE WHEN strNewBuySell = 'Sell' THEN dblLotBalance  * dblContractSize ELSE 0 END
+				,H.strInternalTradeNo
+				,H.intFutOptTransactionId
+				,H.intFutOptTransactionHeaderId
+				,H.strAction
+				,ysnPreCrush = ISNULL(T.ysnPreCrush,0)
+			from vyuRKGetFutOptTransactionHistory  H
+				left join tblRKFutOptTransaction T on H.intFutOptTransactionId = T.intFutOptTransactionId
+			where 
+			H.intCommodityId = @intCommodityId
+			and ISNULL(T.intCommodityId,@intCommodityId) = @intCommodityId --There are instance of history change for commodity, we need to do this
+			and H.strInstrumentType = 'Futures'
+			and dblLotBalance <> 0
+
+			--Match Derivatives Buy
+			UNION ALL
+			SELECT
+				1 AS Row_Num 
+				, MD.dtmMatchDate
+				, MD.dtmMatchDate
+				, dblBuy = (ABS(SUM(MD.dblMatchQty)) * -1) * dblContractSize 
+				, dblSell = 0
+				, D.strInternalTradeNo
+				, MD.intLFutOptTransactionId
+				, D.intFutOptTransactionHeaderId
+				, 'MATCH'
+				,ysnPreCrush = ISNULL(D.ysnPreCrush,0)
+			FROM tblRKMatchDerivativesHistory MD
+			LEFT JOIN tblRKFutOptTransaction D ON D.intFutOptTransactionId = MD.intLFutOptTransactionId
+			LEFT JOIN tblRKFutureMarket FM ON FM.intFutureMarketId = D.intFutureMarketId
+			WHERE CAST(FLOOR(CAST(MD.dtmMatchDate AS FLOAT)) AS DATETIME) >= '01-01-1900'
+				AND CAST(FLOOR(CAST(MD.dtmMatchDate AS FLOAT)) AS DATETIME) <= @dtmToTransactionDate
+				AND intCommodityId = @intCommodityId
+			GROUP BY MD.intLFutOptTransactionId, intMatchFuturesPSDetailId, MD.dtmMatchDate, dblContractSize, strInternalTradeNo, intFutOptTransactionHeaderId,ysnPreCrush
+
+			--Match Derivatives Sell
+			UNION ALL
+			SELECT
+				1 AS Row_Num 
+				, MD.dtmMatchDate
+				, MD.dtmMatchDate
+				, dblBuy = 0
+				, dblSell = (ABS(SUM(MD.dblMatchQty))) * dblContractSize 
+				, D.strInternalTradeNo
+				, MD.intSFutOptTransactionId
+				, D.intFutOptTransactionHeaderId
+				, 'MATCH'
+				,ysnPreCrush = ISNULL(D.ysnPreCrush,0)
+			FROM tblRKMatchDerivativesHistory MD
+			LEFT JOIN tblRKFutOptTransaction D ON D.intFutOptTransactionId = MD.intSFutOptTransactionId
+			LEFT JOIN tblRKFutureMarket FM ON FM.intFutureMarketId = D.intFutureMarketId
+			WHERE CAST(FLOOR(CAST(MD.dtmMatchDate AS FLOAT)) AS DATETIME) >= '01-01-1900'
+				AND CAST(FLOOR(CAST(MD.dtmMatchDate AS FLOAT)) AS DATETIME) <= @dtmToTransactionDate
+				AND intCommodityId = @intCommodityId
+			GROUP BY MD.intSFutOptTransactionId, intMatchFuturesPSDetailId, MD.dtmMatchDate, dblContractSize, strInternalTradeNo, intFutOptTransactionHeaderId,ysnPreCrush
+
+		) t
+		WHERE Row_Num = 1
+		ORDER BY  dtmTransactionDate, intFutOptTransactionId
 
 		DELETE FROM #tempCommodity WHERE intCommodityId = @intCommodityId
 	END 
 
+
 	SELECT  
 		intRowNum = CONVERT(INT, ROW_NUMBER() OVER (ORDER BY dtmTransactionDate, Id ASC))
 		,dtmTransactionDate =  dtmTransactionDate
-		,dblFuturesBuy = CASE 
-						WHEN strNewBuySell = 'Buy' AND ISNULL(ysnPreCrush,0) = 0 THEN 
-							dblOpenContract * dblContractSize 
-							--CASE WHEN dblOpenContract <> 0 THEN
-							--		dblOpenContract * dblContractSize 
-							--	ELSE
-							--		dblMatchContract * dblContractSize 
-							--END
-						ELSE 
-							0
-					END
-		,dblFuturesSell = CASE 
-						WHEN strNewBuySell = 'Sell' AND ISNULL(ysnPreCrush,0) = 0 THEN 
-							dblOpenContract * dblContractSize 
-							--CASE WHEN dblOpenContract <> 0 THEN
-							--		dblOpenContract * dblContractSize 
-							--	ELSE
-							--		dblMatchContract * dblContractSize 
-							--END
-						ELSE 
-							0
-					END
-		,dblCrushBuy = CASE 
-						WHEN strNewBuySell = 'Buy' AND ISNULL(ysnPreCrush,0) = 1 THEN 
-							dblOpenContract * dblContractSize 
-							--CASE WHEN dblOpenContract <> 0 THEN
-							--		dblOpenContract * dblContractSize 
-							--	ELSE
-							--		dblMatchContract * dblContractSize 
-							--END
-						ELSE 
-							0
-					END
-		,dblCrushSell = CASE 
-						WHEN strNewBuySell = 'Sell' AND ISNULL(ysnPreCrush,0) =1 THEN 
-							dblOpenContract * dblContractSize 
-							--CASE WHEN dblOpenContract <> 0 THEN
-							--		dblOpenContract * dblContractSize 
-							--	ELSE
-							--		dblMatchContract * dblContractSize 
-							--END
-						ELSE 
-							0
-					END
+		,dblFuturesBuy = CASE WHEN ysnPreCrush = 0 THEN dblBuy ELSE 0 END
+		,dblFuturesSell =  CASE WHEN ysnPreCrush = 0 THEN dblSell ELSE 0 END
+		,dblCrushBuy = CASE WHEN ysnPreCrush = 1 THEN dblBuy ELSE 0 END
+		,dblCrushSell =  CASE WHEN ysnPreCrush = 1 THEN dblSell ELSE 0 END
 		,strTransactionId = strInternalTradeNo
 		,intTransactionId = intFutOptTransactionId
 		,intFutOptTransactionHeaderId
 		,strCommodityCode
+		,strAction
 	INTO #tmpDerivativeActivity
-	FROM @tblGetOpenFutureByDate
+	FROM @tblDerivativeHistory
 	WHERE dtmTransactionDate BETWEEN @dtmFromTransactionDate AND @dtmToTransactionDate
-	
+	AND dtmFilledDate BETWEEN @dtmFromTransactionDate AND @dtmToTransactionDate
 
 	SELECT	intRowNum, dtmTransactionDate 
 	INTO #tempDateRange
@@ -192,10 +185,12 @@ BEGIN
 			,@dblCruBegBalForSummary NUMERIC(18,6)
 
 	SELECT 
-		@dblFutBalanceForward =  SUM(ISNULL(CASE WHEN ISNULL(ysnPreCrush,0) = 0 THEN dblOpenContract * dblContractSize END,0))
-		,@dblCruBalanceForward =  SUM(ISNULL(CASE WHEN ISNULL(ysnPreCrush,0) = 1 THEN dblOpenContract * dblContractSize END,0))
-	FROM @tblGetOpenFutureByDate
+		@dblFutBalanceForward =  SUM(ISNULL(CASE WHEN ysnPreCrush = 0 THEN dblBuy + dblSell END,0))
+		,@dblCruBalanceForward =  SUM(ISNULL(CASE WHEN ysnPreCrush = 1 THEN dblBuy + dblSell END,0))
+	FROM @tblDerivativeHistory
 	WHERE dtmTransactionDate < @dtmFromTransactionDate
+
+
 
 	IF NOT EXISTS (SELECT TOP 1 * FROM #tempDateRange)
 	BEGIN
@@ -287,6 +282,7 @@ BEGIN
 		,dblFutEndBalForSummary
 		,dblCruBegBalForSummary
 		,dblCruEndBalForSummary
+		,strAction
 	FROM #tmpDerivativeActivity IA
 	FULL JOIN @tblRunningBalance RB on RB.intRowNum = IA.intRowNum
 	ORDER BY IA.dtmTransactionDate
