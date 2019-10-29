@@ -868,6 +868,12 @@ BEGIN TRY
 							BEGIN
 								IF  @ysnAllInvoiceHasCreditMemo = 1
 								BEGIN
+									if (exists ( select top 1 1 from tblGRCompanyPreference where ysnDoNotAllowUndistributePostedInvoice = 1 ))
+									begin
+										RAISERROR(@UNDISTRIBUTE_NOT_ALLOWED, 11, 1);
+										RETURN;
+									end
+
 									EXEC [dbo].[uspGRDeleteStorageHistory] @strSourceType = 'InventoryShipment' ,@IntSourceKey = @InventoryShipmentId
 									EXEC [dbo].[uspGRReverseTicketOpenBalance] 'InventoryShipment' , @InventoryShipmentId ,@intUserId;
 									DELETE tblQMTicketDiscount WHERE intTicketFileId = @InventoryShipmentId AND strSourceType = 'Inventory Shipment'
