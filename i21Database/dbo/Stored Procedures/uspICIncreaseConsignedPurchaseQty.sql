@@ -94,6 +94,8 @@ USING (
 				,cp.intStorageLocationId
 				,Aggregrate_Qty = SUM(ISNULL(dblQty, 0))
 		FROM	@ItemsToIncreaseConsignedPurchase cp 
+				INNER JOIN tblICItem i
+					ON cp.intItemId = i.intItemId 
 				CROSS APPLY (
 					SELECT	TOP 1 
 							intItemUOMId
@@ -103,6 +105,7 @@ USING (
 							AND iUOM.ysnStockUnit = 1 
 				) StockUOM 
 		WHERE	cp.intItemUOMId <> StockUOM.intItemUOMId
+				AND ISNULL(i.ysnSeparateStockForUOMs, 0) = 0 -- If separate UOMs is not enabled, then don't track the non-stock unit UOM. 
 		GROUP BY cp.intItemId
 				, cp.intItemLocationId
 				, cp.intItemUOMId

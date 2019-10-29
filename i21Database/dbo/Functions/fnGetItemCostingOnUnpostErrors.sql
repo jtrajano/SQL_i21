@@ -124,7 +124,7 @@ RETURN (
 							INNER JOIN dbo.tblICLot Lot
 								ON Lot.intItemLocationId = Location.intItemLocationId 
 								AND Lot.intWeightUOMId IS NOT NULL
-								AND Lot.intItemUOMId <> Lot.intWeightUOMId 
+								--AND Lot.intItemUOMId <> Lot.intWeightUOMId 
 								AND Lot.intWeightUOMId = @intItemUOMId								 
 								AND ISNULL(Lot.intLotId, 0) = ISNULL(@intLotId, 0)	
 					WHERE	ROUND(ISNULL(@dblQty, 0) + ISNULL(Lot.dblWeight, 0), 6) < 0

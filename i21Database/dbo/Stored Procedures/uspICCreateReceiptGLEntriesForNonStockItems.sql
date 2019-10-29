@@ -379,6 +379,7 @@ AS
 					,NULL --AggregrateItemLots.dblTotalNet
 					,ri.ysnSubCurrency
 					,r.intSubCurrencyCents
+					,DEFAULT 
 				)
 		,intSourceEntityId = r.intEntityVendorId
 		,intCommodityId = i.intCommodityId

@@ -161,3 +161,8 @@ IF EXISTS(SELECT * FROM sys.columns WHERE object_id = object_id('tblICCompanyPre
 BEGIN
 	UPDATE	tblICCompanyPreference SET ysnIsCountSheetMultiFilter = 1
 END
+
+IF EXISTS(SELECT * FROM sys.columns WHERE object_id = object_id('tblICItem') AND name = 'ysnSeparateStockForUOMs')
+BEGIN
+	EXEC ('UPDATE tblICItem SET ysnSeparateStockForUOMs = 1 WHERE ysnSeparateStockForUOMs IS NULL')
+END

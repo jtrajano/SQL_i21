@@ -136,6 +136,8 @@ USING (
 									END
 				,Aggregrate_Qty = SUM(ISNULL(dblQty, 0))
 		FROM	@ItemsToIncreaseInTransitOutBound ob 
+				INNER JOIN tblICItem i
+					ON ob.intItemId = i.intItemId 
 				CROSS APPLY (
 					SELECT	TOP 1 
 							intItemUOMId
@@ -148,6 +150,7 @@ USING (
 					ON ARI.intInvoiceId = ob.intTransactionId
 					AND ob.intTransactionTypeId = @TransactionType_Invoice
 		WHERE	ob.intItemUOMId <> StockUOM.intItemUOMId
+				AND ISNULL(i.ysnSeparateStockForUOMs, 0) = 0 -- If separate UOMs is not enabled, then don't track the non-stock unit UOM. 
 		GROUP BY ob.intItemId
 				, ob.intItemLocationId
 				, ob.intItemUOMId
