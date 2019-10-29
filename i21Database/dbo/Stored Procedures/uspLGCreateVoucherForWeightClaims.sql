@@ -199,15 +199,15 @@ BEGIN TRY
 		,dblWeightLoss = ROUND(ABS(WCOC.dblWeight),2)
 		,dblNetWeight = ROUND(ABS(WCOC.dblWeight),2)
 		,dblFranchiseWeight = 0
-		,dblQtyReceived = WCOC.dblQuantity
-		,dblCost = WCOC.dblRate
-		,dblCostUnitQty = ISNULL(CostUOM.dblUnitQty,1)
-		,dblWeightUnitQty = ISNULL(DamageWeightUOM.dblUnitQty,1)
+		,dblQtyReceived = CASE WHEN (WCOC.strCostMethod = 'Per Unit') THEN WCOC.dblQuantity ELSE 1 END
+		,dblCost = CASE WHEN (WCOC.strCostMethod = 'Per Unit') THEN WCOC.dblRate ELSE WCOC.dblAmount END
+		,dblCostUnitQty = CASE WHEN (WCOC.strCostMethod = 'Per Unit') THEN ISNULL(CostUOM.dblUnitQty,1) ELSE 1 END
+		,dblWeightUnitQty = CASE WHEN (WCOC.strCostMethod = 'Per Unit') THEN ISNULL(DamageWeightUOM.dblUnitQty,1) ELSE 1 END
 		,dblClaimAmount = WCOC.dblAmount
-		,dblUnitQty = ISNULL(ItemUOM.dblUnitQty,1)
-		,intWeightUOMId = DamageWeightUOM.intItemUOMId
+		,dblUnitQty = CASE WHEN (WCOC.strCostMethod = 'Per Unit') THEN ISNULL(ItemUOM.dblUnitQty,1) ELSE 1 END
+		,intWeightUOMId = CASE WHEN (WCOC.strCostMethod = 'Per Unit') THEN DamageWeightUOM.intItemUOMId ELSE NULL END
 		,intUOMId = WCOC.intItemUOMId 
-		,intCostUOMId = WCOC.intRateUOMId
+		,intCostUOMId = CASE WHEN (WCOC.strCostMethod = 'Per Unit') THEN WCOC.intRateUOMId ELSE WCD.intDamageToPriceItemUOMId END
 		,intItemId = WCOC.intItemId
 		,intContractHeaderId = NULL
 		,intInventoryReceiptItemId = NULL 
@@ -230,6 +230,14 @@ BEGIN TRY
 				FROM tblICItemUOM IU
 				WHERE IU.intItemId = WCOC.intItemId
 					AND IU.intUnitMeasureId = WUOM.intUnitMeasureId) DamageWeightUOM
+	OUTER APPLY (SELECT TOP 1
+					intPriceItemUOMId = WCD.intPriceItemUOMId
+					,intDamageToPriceItemUOMId = IU2.intItemUOMId
+				FROM tblLGWeightClaimDetail WCD
+					INNER JOIN tblICItemUOM IU ON IU.intItemUOMId = WCD.intPriceItemUOMId
+					INNER JOIN tblICItemUOM IU2 ON IU.intUnitMeasureId = IU.intUnitMeasureId AND IU2.intItemId = WCOC.intItemId
+				WHERE WCD.intWeightClaimId = WC.intWeightClaimId
+					AND ISNULL(WCD.dblClaimAmount, 0) <> 0) WCD
 	WHERE WC.intWeightClaimId = @intWeightClaimId
 
 	SELECT @intVoucherType = CASE 
