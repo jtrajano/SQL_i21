@@ -88,12 +88,14 @@ BEGIN TRY
 			@ysnCreateNew					BIT = 0,
 			@receiptDetails					InventoryUpdateBillQty,
 			@ysnLoad						BIT,
+			@allowAddDetail					BIT,
 			@dblPriceLoadQty				NUMERIC(18, 6),
 			@dblPriceFixationLoadApplied	NUMERIC(18, 6),
 			@dblInventoryItemLoadApplied	NUMERIC(18, 6),
 			@dblInventoryShipmentItemLoadApplied	NUMERIC(18, 6),
 			@intShipmentInvoiceDetailId		INT,
 			@dtmFixationDate				DATE
+			
 
 	SELECT	@dblCashPrice			=	dblCashPrice, 
 			@intPricingTypeId		=	intPricingTypeId, 
@@ -110,6 +112,11 @@ BEGIN TRY
 		intInventoryItemId			INT,
 		dblQty						NUMERIC(18,6),
 		intPFDetailId				INT
+	)
+
+	DECLARE @tblCreatedTransaction TABLE
+	(
+		intTransactionId			INT
 	)
 
 	DECLARE @tblReceipt TABLE
@@ -363,20 +370,22 @@ BEGIN TRY
 				BEGIN
 					SELECT	@intInventoryReceiptId = intInventoryId, @dblQtyToBill = dblQty, @intInventoryReceiptItemId = intInventoryItemId  FROM @tblToProcess WHERE intUniqueId = @intUniqueId
 
-					-- Check IF need to create new voucher
-					IF @ysnPartialPriced = 1
+					SET @allowAddDetail = 0
+
+					IF EXISTS 
+					(
+						SELECT TOP 1 1 intBillId
+						FROM tblAPBill BL
+						INNER JOIN tblAPBillDetail BD ON BL.intBillId = BD.intBillId
+						LEFT JOIN @tblCreatedTransaction CT ON CT.intTransactionId = BL.intBillId
+						WHERE BD.intInventoryReceiptItemId = @intInventoryReceiptItemId
+						AND (BL.ysnPosted = 0 OR ISNULL(CT.intTransactionId, 0) <> 0)
+					)
 					BEGIN
-						IF EXISTS (SELECT TOP 1 1 FROM tblAPBill WHERE ysnPosted = 1 AND intBillId = (SELECT TOP 1 intBillId FROM tblAPBillDetail WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId) AND @ysnCreateNew = 0)
-						BEGIN
-							SET @ysnCreateNew = 1
-						END
-						ELSE
-						BEGIN
-							SET @ysnCreateNew = 0
-						END
+						SET @allowAddDetail = 1
 					END
 
-					IF EXISTS(SELECT * FROM tblAPBillDetail WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId AND intInventoryReceiptChargeId IS	NULL AND @ysnCreateNew = 0)
+					IF EXISTS(SELECT * FROM tblAPBillDetail WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId AND intInventoryReceiptChargeId IS	NULL AND @allowAddDetail = 1)
 					BEGIN
 						SELECT	@intBillId = intBillId, @dblQtyReceived = dblQtyReceived FROM tblAPBillDetail WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId
 
@@ -461,6 +470,8 @@ BEGIN TRY
 						UPDATE	tblICInventoryReceiptItem SET ysnAllowVoucher = 1 WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId
 												
 						EXEC	uspICConvertReceiptToVoucher @intInventoryReceiptId,@intUserId, @intNewBillId OUTPUT
+
+						INSERT INTO @tblCreatedTransaction VALUES (@intNewBillId)
 
 						if (@intNewBillId is not null and @intNewBillId > 0)
 						BEGIN
