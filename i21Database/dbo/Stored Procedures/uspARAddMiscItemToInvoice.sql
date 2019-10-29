@@ -42,6 +42,7 @@
 	,@ItemAddonParent				BIT				= NULL
 	,@ItemAddOnQuantity				NUMERIC(38,20)	= NULL
 	,@ItemBOLNumber					NVARCHAR(50)	= NULL
+	,@ItemOriginalInvoiceDetailId	INT				= NULL
 AS
 
 BEGIN
@@ -199,7 +200,8 @@ BEGIN TRY
 		,[strAddonDetailKey]
 		,[ysnAddonParent]
 		,[dblAddOnQuantity]
-		,[strBOLNumberDetail])
+		,[strBOLNumberDetail]
+		,[intOriginalInvoiceDetailId])
 	SELECT
 		 [intInvoiceId]						= @InvoiceId
 		,[intItemId]						= @ItemId
@@ -280,6 +282,7 @@ BEGIN TRY
 		,[ysnAddonParent]					= @ItemAddonParent
 		,[dblAddOnQuantity]					= @ItemAddOnQuantity
 		,[strBOLNumberDetail]				= @ItemBOLNumber
+		,[intOriginalInvoiceDetailId] 		= @ItemOriginalInvoiceDetailId
 END TRY
 BEGIN CATCH
 	IF ISNULL(@RaiseError,0) = 0
