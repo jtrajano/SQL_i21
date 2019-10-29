@@ -36,6 +36,7 @@ DECLARE @strInvoiceNumber NVARCHAR(50)
 DECLARE @ysnTicketInvoiceHasCM BIT
 DECLARE @intInvoiceDetailId INT
 DECLARE @EntityCustomerId INT
+DECLARE @NewInvoiceId INT
 
 SET @EntityCustomerId = @intEntityId
 
@@ -233,7 +234,7 @@ BEGIN TRY
 						,@UpdatedIvoices = @UpdatedInvoices OUTPUT
 
 
-					SELECT TOP 1 @NewInvoiceId = intInvoiceId FROM tblARInvoice WHERE intInvoiceId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@CreatedIvoices))
+					SELECT TOP 1 @NewInvoiceId = intInvoiceId FROM tblARInvoice WHERE intInvoiceId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@CreatedInvoices))
 				END
 			ELSE
 				--INSERT TO EXISTING INVOICE
