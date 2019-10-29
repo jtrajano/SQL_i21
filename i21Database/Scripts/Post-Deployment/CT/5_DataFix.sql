@@ -145,3 +145,21 @@ GO
 GO
 	print 'END - UPDATE INCO/Ship Term to Freight Term';
 GO
+
+GO
+	print 'Begin fixing Freight Basis';
+GO
+
+	update
+		tblCTContractDetail
+	set
+		dblFreightBasisBase = dblBasis
+		,intFreightBasisBaseUOMId = intBasisUOMId
+	where
+		dblFreightBasisBase is null
+		and dblFreightBasis is null
+		and dblBasis is not null
+
+GO
+	print 'End fixing Freight Basis';
+GO
