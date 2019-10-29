@@ -246,6 +246,7 @@ SELECT
 	, dblCost = CASE 
 				WHEN CostMethod.intCostingMethodId = 1 THEN dbo.fnGetItemAverageCost(i.intItemId, ItemLocation.intItemLocationId, CASE WHEN ad.intSubLocationId IS NULL OR ad.intStorageLocationId IS NULL THEN stock.intItemUOMId ELSE ItemUOM.intItemUOMId END)
 				WHEN CostMethod.intCostingMethodId = 2 THEN dbo.fnCalculateCostBetweenUOM(FIFO.intItemUOMId, StockUOM.intItemUOMId, FIFO.dblCost)
+				WHEN CostMethod.intCostingMethodId = 3 THEN dbo.fnCalculateCostBetweenUOM(LIFO.intItemUOMId, StockUOM.intItemUOMId, LIFO.dblCost)
 				ELSE t.dblCost
 			END
 	, dblDiffInQty = (CASE WHEN ad.intOwnershipType = 1 THEN t.dblQty - ad.dblQuantity ELSE t.dblUnitStorage - t.dblQty END)
@@ -299,10 +300,26 @@ FROM @tblInventoryTransactionGrouped t
 			tblICInventoryFIFO FIFO
 		WHERE	
 			t.intItemId = FIFO.intItemId
+			AND CostMethod.intCostingMethodId = 2
 			AND t.intItemLocationId = FIFO.intItemLocationId
-			AND dblStockIn- dblStockOut > 0
-		ORDER BY dtmDate ASC
+			AND FIFO.dblStockIn - FIFO.dblStockOut > 0
+			AND dbo.fnDateLessThanEquals(FIFO.dtmDate, a.dtmAdjustmentDate) = 1
+		ORDER BY FIFO.dtmDate ASC
 	) FIFO
+	OUTER APPLY(
+		SELECT TOP 1
+			dblCost
+			, intItemUOMId
+		FROM	
+			tblICInventoryLIFO LIFO
+		WHERE	
+			t.intItemId = LIFO.intItemId
+			AND CostMethod.intCostingMethodId = 3
+			AND t.intItemLocationId = LIFO.intItemLocationId
+			AND LIFO.dblStockIn - LIFO.dblStockOut > 0
+			AND dbo.fnDateLessThanEquals(LIFO.dtmDate, a.dtmAdjustmentDate) = 1
+		ORDER BY LIFO.dtmDate DESC
+	) LIFO
 	LEFT JOIN tblICItemUOM StockUOM
 		ON StockUOM.intItemId = t.intItemId
 		AND StockUOM.ysnStockUnit = 1
