@@ -222,38 +222,43 @@ LEFT JOIN
         ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId
 )
     ON itemUOM.intItemUOMId = COALESCE(receiptItem.intWeightUOMId, receiptItem.intUnitMeasureId)
-LEFT JOIN (
+OUTER APPLY (
 	SELECT 
     TOP 1
-        ga.strAccountId
-        ,ga.intAccountId
+        ad.strAccountId
+        ,ad.intAccountId
         ,t.strTransactionId
         ,t.intTransactionDetailId
         ,t.intTransactionId
         ,t.intItemId
 	FROM 
-		tblICInventoryTransaction t INNER JOIN tblGLDetail gd
+		tblICInventoryTransaction t 
+		--INNER JOIN tblICItem item
+		--	ON t.intItemId = item.intItemId
+		INNER JOIN tblGLDetail gd
 			ON t.strTransactionId = gd.strTransactionId
-			AND t.strBatchId = gd.strBatchId
+			--AND t.strBatchId = gd.strBatchId
 			AND t.intInventoryTransactionId = gd.intJournalLineNo
-		INNER JOIN tblGLAccount ga
-			ON ga.intAccountId = gd.intAccountId
+		--INNER JOIN tblGLAccount ga
+		--	ON ga.intAccountId = gd.intAccountId
 		INNER JOIN vyuGLAccountDetail ad
-			ON ga.intAccountId = ad.intAccountId
+			ON gd.intAccountId = ad.intAccountId
+		--LEFT JOIN tblICItemLocation itemLoc
+		--	ON itemLoc.intItemLocationId = t.intItemLocationId
 	WHERE
-		--t.strTransactionId = receipt.strReceiptNumber
+		t.strTransactionId = receipt.strReceiptNumber
 		--AND t.intTransactionId = receipt.intInventoryReceiptId
 		--AND t.intTransactionDetailId = receiptItem.intInventoryReceiptItemId
-		--AND t.intItemId = receiptItem.intItemId
+		AND t.intItemId = receiptItem.intItemId
 		--AND ag.strAccountType = 'Liability'
 		--AND t.ysnIsUnposted = 0 
-			ad.intAccountCategoryId = 45
+		AND	ad.intAccountCategoryId = 45
 		AND t.ysnIsUnposted = 0 
 ) APClearing
-	ON		APClearing.strTransactionId = receipt.strReceiptNumber
-		AND APClearing.intTransactionId = receipt.intInventoryReceiptId
-		AND APClearing.intTransactionDetailId = receiptItem.intInventoryReceiptItemId
-		AND APClearing.intItemId = receiptItem.intItemId
+	--ON		APClearing.strTransactionId = receipt.strReceiptNumber
+		--AND APClearing.intTransactionId = receipt.intInventoryReceiptId
+		--AND APClearing.intTransactionDetailId = receiptItem.intInventoryReceiptItemId
+		--AND APClearing.intItemId = receiptItem.intItemId
 WHERE 
     receiptItem.dblUnitCost != 0 -- WILL NOT SHOW ALL THE 0 TOTAL IR 
 --DO NOT INCLUDE RECEIPT WHICH USES IN-TRANSIT AS GL
