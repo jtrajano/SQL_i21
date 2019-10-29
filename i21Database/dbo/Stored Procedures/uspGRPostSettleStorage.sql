@@ -9,7 +9,7 @@ AS
 BEGIN TRY
 --return
 	SET NOCOUNT ON
-	declare @debug_awesome_ness bit = 0 
+	declare @debug_awesome_ness bit = 0
 	
 	if @debug_awesome_ness = 1	
 	begin
@@ -200,7 +200,7 @@ BEGIN TRY
 	FROM tblGRSettleStorage
 	WHERE CASE WHEN @ysnFromPriceBasisContract = 1 THEN CASE WHEN intSettleStorageId = @intSettleStorageId THEN 1 ELSE 0 END ELSE CASE WHEN intParentSettleStorageId = @intParentSettleStorageId THEN 1 ELSE 0 END END = 1
 
-	if @debug_awesome_ness = 1	
+	if @debug_awesome_ness = 1	and 1 = 0
 	begin
 		select 'settle storage' , * FROM tblGRSettleStorage
 					WHERE CASE WHEN @ysnFromPriceBasisContract = 1 THEN CASE WHEN intSettleStorageId = @intSettleStorageId THEN 1 ELSE 0 END ELSE CASE WHEN intParentSettleStorageId = @intParentSettleStorageId THEN 1 ELSE 0 END END = 1
@@ -581,7 +581,7 @@ BEGIN TRY
 				WHERE intSettleStorageKey = @SettleStorageKey
 				
 
-				if @debug_awesome_ness = 1
+				if @debug_awesome_ness = 1 	and 1 = 0
 				begin
 					select 'checking dbl storage units', @dblStorageUnits
 				end
@@ -1085,7 +1085,7 @@ BEGIN TRY
 						AND ItemStock.intItemLocationId = @ItemLocationId
 				OUTER APPLY (
 					SELECT 
-						ISNULL(SUM((ROUND(SV.dblCashPrice * CASE WHEN ISNULL(SV.dblSettleContractUnits,0) > 0 THEN SV.dblSettleContractUnits ELSE SV.dblUnits END, 6)) / SV.dblUnits),0)  AS dblTotalCashPrice
+						ISNULL(SUM((ROUND(SV.dblCashPrice * CASE WHEN ISNULL(SV.dblSettleContractUnits,0) > 0 THEN SV.dblSettleContractUnits ELSE SV.dblUnits END, 2)) / SV.dblUnits),0)  AS dblTotalCashPrice
 					FROM @SettleVoucherCreate SV
 					INNER JOIN tblICItem I
 						ON I.intItemId = SV.intItemId
@@ -1128,7 +1128,7 @@ BEGIN TRY
 														WHEN SV.intPricingTypeId = 1 OR SV.intPricingTypeId = 6 OR SV.intPricingTypeId IS NULL THEN SV.[dblCashPrice]
 														ELSE @dblFutureMarkePrice + ISNULL(SV.dblBasis,0)
 												   END)
-												   + dbo.fnDivide(DiscountCost.dblTotalCashPrice, SV.dblUnits)
+												   + round(dbo.fnDivide(DiscountCost.dblTotalCashPrice, @dblSelectedUnits), 2)
 					,dblSalesPrice				= 0.00
 					,intCurrencyId				= @intCurrencyId
 					,dblExchangeRate			= 1
@@ -1151,14 +1151,72 @@ BEGIN TRY
 						AND IU.ysnStockUnit = 1
 				OUTER APPLY (
 					SELECT 
-						ISNULL(SUM((ROUND(SV.dblCashPrice * CASE WHEN ISNULL(SV.dblSettleContractUnits,0) > 0 THEN SV.dblSettleContractUnits ELSE SV.dblUnits END,2)) ),0)  AS dblTotalCashPrice
+						ISNULL(SUM((ROUND(SV.dblCashPrice * CASE WHEN ISNULL(SV.dblSettleContractUnits,0) > 0 THEN SV.dblSettleContractUnits ELSE SV.dblUnits END, 2 )) ),0)  AS dblTotalCashPrice
 					FROM @SettleVoucherCreate SV
 					INNER JOIN tblICItem I
 						ON I.intItemId = SV.intItemId
 							AND I.ysnInventoryCost = 1
+							and SV.intItemType = 3
 				) DiscountCost
 				WHERE SV.intItemType = 1
 
+				IF @debug_awesome_ness = 1
+				begin
+					select 'items to post',* from @ItemsToPost
+					
+					select 'Settle voucher create',* from @SettleVoucherCreate
+					
+					
+					SELECT 
+					'item to post break down'
+					,@dblFutureMarkePrice 
+					,SV.dblBasis
+					,SV.[dblCashPrice]
+					 ,intItemId					= SV.[intItemId]
+					,intItemLocationId			= @ItemLocationId
+					,intItemUOMId				= @intInventoryItemStockUOMId
+					,dtmDate					= GETDATE()
+					,dblQty						= CASE 
+														WHEN @strOwnedPhysicalStock = 'Customer' THEN dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, IU.intUnitMeasureId, CS.intUnitMeasureId, SV.[dblUnits])
+												        ELSE 0
+												  END
+					,dblUOMQty					= @dblUOMQty
+					,dblCost					= (CASE 
+														WHEN SV.intPricingTypeId = 1 OR SV.intPricingTypeId = 6 OR SV.intPricingTypeId IS NULL THEN SV.[dblCashPrice]
+														ELSE @dblFutureMarkePrice + ISNULL(SV.dblBasis,0)
+												   END)
+												   + round(dbo.fnDivide(DiscountCost.dblTotalCashPrice, @dblSelectedUnits), 2)
+					,dblSalesPrice				= 0.00
+					,intCurrencyId				= @intCurrencyId
+					,dblExchangeRate			= 1
+					,intTransactionId			= @intSettleStorageId
+					,intTransactionDetailId		= @intSettleStorageTicketId
+					,strTransactionId			= @TicketNo
+					,intTransactionTypeId		= 44
+					,intLotId					= @intLotId
+					,intSubLocationId			= CS.intCompanyLocationSubLocationId
+					,intStorageLocationId		= CS.intStorageLocationId
+					,ysnIsStorage				= 0
+				FROM @SettleVoucherCreate SV
+				JOIN tblGRCustomerStorage CS 
+					ON CS.intCustomerStorageId = SV.intCustomerStorageId
+				--JOIN tblICCommodityUnitMeasure CU 
+				--	ON CU.intCommodityId = CS.intCommodityId 
+				--	AND CU.ysnStockUnit = 1
+				JOIN tblICItemUOM IU
+					ON IU.intItemId = CS.intItemId
+						AND IU.ysnStockUnit = 1
+				OUTER APPLY (
+					SELECT 
+						ISNULL(SUM((ROUND(SV.dblCashPrice * CASE WHEN ISNULL(SV.dblSettleContractUnits,0) > 0 THEN SV.dblSettleContractUnits ELSE SV.dblUnits END, 2 )) ),0)  AS dblTotalCashPrice
+					FROM @SettleVoucherCreate SV
+					INNER JOIN tblICItem I
+						ON I.intItemId = SV.intItemId
+							AND I.ysnInventoryCost = 1
+							and SV.intItemType = 3
+				) DiscountCost
+				WHERE SV.intItemType = 1
+				end
 				--UPDATE the price in tblGRSettleContract
 				IF EXISTS(SELECT 1 FROM tblGRSettleContract WHERE intSettleStorageId = @intSettleStorageId)
 				BEGIN
@@ -1247,6 +1305,19 @@ BEGIN TRY
 
 							IF @intReturnValue < 0
 								GOTO SettleStorage_Exit;
+							
+							if @debug_awesome_ness = 1	
+							begin
+
+								select 'dummy', * from @DummyGLEntries
+								EXEC dbo.uspGRCreateItemGLEntries
+								@strBatchId
+								,@SettleVoucherCreate
+								,'AP Clearing'
+								,@intCreatedUserId
+								,@dblSelectedUnits = @dblSelectedUnits
+								select 'dummy and created gl entries up'
+							end
 
 							DELETE FROM @GLEntries
 
@@ -1292,7 +1363,7 @@ BEGIN TRY
 								,@SettleVoucherCreate
 								,'AP Clearing'
 								,@intCreatedUserId
-					
+								,@dblSelectedUnits = @dblSelectedUnits
 							IF @intReturnValue < 0
 								GOTO SettleStorage_Exit;
 
@@ -1302,7 +1373,17 @@ BEGIN TRY
 							--END 
 						    
 							--DELETE FROM @GLEntries
-							
+							if @debug_awesome_ness = 1	
+							begin
+								EXEC uspGRCreateGLEntries 
+									 'Storage Settlement'
+									,'OtherCharges'
+									,@intSettleStorageId
+									,@strBatchId
+									,@intCreatedUserId
+									,@ysnPosted
+							end
+
 							INSERT INTO @GLEntries 
 							(
 								 [dtmDate] 
@@ -1392,7 +1473,7 @@ BEGIN TRY
 				WHERE a.intItemType = 3
 				
 
-				if @debug_awesome_ness = 1
+				if @debug_awesome_ness = 1 	and 1 = 0
 				begin
 					select 'settle voucher create', * 
 					FROM @SettleVoucherCreate a
