@@ -400,7 +400,7 @@ BEGIN TRY
 
 
 
-				IF @dblFutureMarkePrice <= 0
+				IF isnull(@dblFutureMarkePrice, 0) <= 0
 				BEGIN
 					SET @ErrMsg = 'There is no <b>Futures Price</b> yet in Risk Management for <b>' + @strCommodityCode + '</b> commodity.'
 					RAISERROR(@ErrMsg,16,1,1)
