@@ -176,9 +176,18 @@ FROM (
 		,strPriceUOM = SUOM.strUnitMeasure
 		,intPriceUnitMeasureId = SItemUOM.intUnitMeasureId
 		,SCurrency.ysnSubCurrency
-		,(ISNULL(AD.dblPAllocatedQty, 0) - ISNULL(LD.dblPShippedQuantity, 0)) AS dblAvailableAllocationQty
+		,dblAvailableAllocationQty = ISNULL(AD.dblPAllocatedQty, 0) - ISNULL(LD.dblPShippedQuantity, 0)
 		,dbo.fnLGGetItemUnitConversion(CDP.intItemId,CDP.intItemUOMId,CDS.intUnitMeasureId) dblQtyConversionFactor
-		,(ISNULL(CDP.dblQuantity,0)-ISNULL(CDP.dblShippingInstructionQty,0)) dblAvailableContractQty
+		,dblAvailableContractQty = ISNULL(CDP.dblQuantity,0) 
+			- (CASE WHEN ((CASE WHEN ISNULL(CDP.dblScheduleQty, 0) > ISNULL(CDP.dblShippingInstructionQty,0) 
+						THEN ISNULL(CDP.dblScheduleQty, 0) 
+						ELSE ISNULL(CDP.dblShippingInstructionQty, 0) END <=0)) THEN 0 
+					ELSE 
+						CASE WHEN (ISNULL(CDP.dblScheduleQty, 0) > ISNULL(CDP.dblShippingInstructionQty,0))
+						THEN ISNULL(CDP.dblScheduleQty, 0) 
+						ELSE ISNULL(CDP.dblShippingInstructionQty, 0) 
+						END 
+				END)
 		,AH.intBookId
 		,BO.strBook
 		,AH.intSubBookId
