@@ -584,7 +584,7 @@ BEGIN TRY
 				WHERE intSettleStorageKey = @SettleStorageKey
 				
 
-				if @debug_awesome_ness = 1 	and 1 = 0
+				if @debug_awesome_ness = 1 	and 1 = 1
 				begin
 					select 'checking dbl storage units', @dblStorageUnits
 				end
@@ -859,7 +859,7 @@ BEGIN TRY
 							)
 							SELECT 
 								 intCustomerStorageId   = @intCustomerStorageId
-								,strOrderType           = 'Purchase Contract'
+								,strOrderType           = 'Purchase Contract' -- do not changes this to Contract! Mon Pogi
 								,intCompanyLocationId   = @intCompanyLocationId
 								,intContractHeaderId    = @intContractHeaderId
 								,intContractDetailId    = @intContractDetailId
@@ -2596,6 +2596,15 @@ BEGIN TRY
 					 ) SH ON SH.intCustomerStorageId = CS.intCustomerStorageId
 			END
 
+
+			if @debug_awesome_ness = 1
+			begin
+				select 'settle voucher create before storage history',* from @SettleVoucherCreate
+				select 'settle storage before storage history',* from @SettleStorage
+				select 'settle contract before storage history',* from @SettleContract
+
+			end
+
 			--7. HiStory Creation
 			IF(@ysnFromPriceBasisContract = 0)	
 			BEGIN
@@ -2621,7 +2630,7 @@ BEGIN TRY
 					 [intConcurrencyId]     = 1 
 					,[intCustomerStorageId] = SV.[intCustomerStorageId]
 					,[intContractHeaderId]  = SV.[intContractHeaderId]
-					,[dblUnits]				= case when @doPartialHistory = 1 then @dblSelectedUnits else  dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId,IU.intUnitMeasureId,CS.intUnitMeasureId,SV.[dblUnits]) end
+					,[dblUnits]				= dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId,IU.intUnitMeasureId,CS.intUnitMeasureId,SV.[dblUnits])--case when @doPartialHistory = 1 then @dblSelectedUnits else  dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId,IU.intUnitMeasureId,CS.intUnitMeasureId,SV.[dblUnits]) end
 					,[dtmHistoryDate]		= GETDATE()
 					,[strType]				= 'Settlement'
 					,[strUserName]			= NULL
