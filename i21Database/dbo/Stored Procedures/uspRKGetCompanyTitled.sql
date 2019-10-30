@@ -544,7 +544,7 @@ BEGIN
 					,B.strBillId 
 					,B.intBillId
 					,strDistribution =  ISNULL(ST.strStorageTypeCode,ISNULL(TV.strDistributionOption, ''))
-					,Inv.strTransactionType
+					,strTransactionType = 'Bill'
 				from @InventoryStock Inv
 				inner join tblAPBillDetail BD on Inv.intTransactionDetailId = BD.intInventoryReceiptItemId 
 						AND BD.intInventoryReceiptChargeId IS NULL
