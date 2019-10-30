@@ -311,11 +311,10 @@ BEGIN
 		, strTransactionType
 		, strTransactionId 
 		, intTransactionId
-		, ST.strStorageTypeCode 
+		, CASE WHEN SC.intContractDetailId IS NULL THEN '' ELSE 'CNT' END
 		, strOwnership
 	FROM #invQty Inv
-	INNER JOIN vyuGRSettleStorageTicketNotMapped SS ON Inv.intTransactionId = SS.intSettleStorageId
-	LEFT JOIN tblGRStorageType ST ON SS.intStorageTypeId = ST.intStorageScheduleTypeId
+	LEFT JOIN tblGRSettleContract SC ON SC.intSettleStorageId = Inv.intTransactionId
 	WHERE Inv.strTransactionType = 'Storage Settlement'
 	
 	INSERT INTO @tblResult (dtmDate
@@ -327,7 +326,11 @@ BEGIN
 		, strOwnership)
 	SELECT CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmHistoryDate, 110), 110)
 		, dblTotal = dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId, @intCommodityUnitMeasureId,dblBalance)
-		, strTicketType
+		, strTicketType  = CASE WHEN strTicketType IN('Scale Storage','Customer/Maintain Storage') THEN 
+										CASE WHEN strReceiptNumber <> '' THEN 'Inventory Receipt' ELSE 'Inventory Shimpment' END
+								ELSE
+									strTicketType
+								END
 		, strTransactionId = CASE WHEN strTicketType IN( 'Scale Storage','Customer/Maintain Storage','Storage Adjustment')
 									THEN CASE WHEN strReceiptNumber <> '' THEN strReceiptNumber ELSE strShipmentNumber END
 								WHEN strTicketType IN( 'Settle Storage', 'Transfer Storage') THEN strTicketNumber END
@@ -917,12 +920,12 @@ BEGIN
 		, strTransactionType
 		, strOwnership
 	FROM (
-		SELECT dtmDate 
+		SELECT distinct dtmDate 
 			, dblTotal =  sum(dblTotal)
 			, strTransactionId
 			, intTransactionId
 			, strDistribution 
-			, strTransactionType = 'Customer/Maintain Storage'
+			, strTransactionType
 			, strOwnership
 		FROM @tblResult s
 		WHERE strTransactionType IN ( 'Scale Storage','Customer/Maintain Storage', 'Settle Storage', 'Transfer Storage')
@@ -931,6 +934,7 @@ BEGIN
 			, strTransactionId
 			, intTransactionId
 			, strDistribution 
+			, strTransactionType
 			, strOwnership
 	) t
 	
@@ -949,12 +953,12 @@ BEGIN
 		, strTransactionType
 		, strOwnership
 	FROM (
-		SELECT dtmDate 
+		SELECT distinct dtmDate 
 			, dblTotal =  sum(ABS(dblTotal))
 			, strTransactionId
 			, intTransactionId
 			, strDistribution 
-			, strTransactionType = 'Customer/Maintain Storage'
+			, strTransactionType
 			, strOwnership
 		FROM @tblResult s
 		WHERE strTransactionType IN ( 'Scale Storage','Customer/Maintain Storage', 'Settle Storage', 'Transfer Storage')
@@ -963,6 +967,7 @@ BEGIN
 			, strTransactionId
 			, intTransactionId
 			, strDistribution 
+			, strTransactionType
 			, strOwnership
 	) t
 
