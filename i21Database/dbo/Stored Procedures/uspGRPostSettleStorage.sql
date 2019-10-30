@@ -7,7 +7,7 @@
 	
 AS
 BEGIN TRY
---return
+	--return
 	SET NOCOUNT ON
 	declare @debug_awesome_ness bit = 0
 	
@@ -218,7 +218,10 @@ BEGIN TRY
 
 	SET @dblTotalVoucheredQuantity = isnull([dbo].[fnGRGetVoucheredUnits](@intSettleStorageId), 0)
 
-
+	if @debug_awesome_ness = 1
+	begin
+		select 'total vouchered quantity', @dblTotalVoucheredQuantity
+	end
 
 
 
@@ -1529,9 +1532,14 @@ BEGIN TRY
 						where intContractDetailId = a.intContractDetailId
 					) availableQtyForVoucher
 					WHERE a.strOrderType = 'Contract' and availableQtyForVoucher.intContractDetailId is not null and availableQtyForVoucher.intPriceFixationDetailId is not null
+				
+				if @debug_awesome_ness = 1
+				begin
+					select 'before updating price contract ', @dblCashPriceFromCt, @dblQtyFromCt, @doPartialHistory
+				end
 
-				select @dblCashPriceFromCt= availableQtyForVoucher.dblCashPrice,
-					@dblQtyFromCt = availableQtyForVoucher.dblAccumulativeQuantity,
+				select @dblCashPriceFromCt = availableQtyForVoucher.dblCashPrice,
+					@dblQtyFromCt = availableQtyForVoucher.dblAvailableQuantity,
 					@doPartialHistory  = 1
 				FROM @SettleVoucherCreate a
 				cross apply(
@@ -1544,6 +1552,12 @@ BEGIN TRY
 				) availableQtyForVoucher
 				WHERE a.strOrderType = 'Contract' and availableQtyForVoucher.intContractDetailId is not null and availableQtyForVoucher.intPriceFixationDetailId is not null
 				and isnull(@dblQtyFromCt, 0) <= 0
+				
+				if @debug_awesome_ness = 1
+				begin
+					select 'after updating price contract ', @dblCashPriceFromCt, @dblQtyFromCt, @doPartialHistory
+				end
+
 				if @debug_awesome_ness = 1
 				begin
 					select 'settle voucher checking updated cash price', *  from @SettleVoucherCreate
@@ -1648,8 +1662,8 @@ BEGIN TRY
 					,[intCustomerStorageId]			= a.[intCustomerStorageId]
 					,[dblOrderQty]					= 
 														case when @doPartialHistory = 1 then
-																	case when availableQtyForVoucher.dblQuantity >  a.dblUnits then a.dblUnits 
-																else isnull(availableQtyForVoucher.dblQuantity, @dblQtyFromCt) end
+																	case when availableQtyForVoucher.dblAvailableQuantity >  a.dblUnits then a.dblUnits 
+																else isnull(availableQtyForVoucher.dblAvailableQuantity, @dblQtyFromCt) end
 														else
 															CASE 
 																WHEN a.intPricingTypeId = 2 AND ISNULL(@dblCashPriceFromCt,0) != 0 AND (@dblQtyFromCt + @dblTotalVoucheredQuantity) < a.dblUnits   and availableQtyForVoucher.intContractDetailId is not null
@@ -1690,8 +1704,8 @@ BEGIN TRY
 															END	
 														ELSE
 																case when @doPartialHistory = 1 then
-																	case when availableQtyForVoucher.dblQuantity >  a.dblUnits then a.dblUnits 
-																		else isnull(availableQtyForVoucher.dblQuantity, @dblQtyFromCt) end
+																	case when availableQtyForVoucher.dblAvailableQuantity >  a.dblUnits then a.dblUnits 
+																		else isnull(availableQtyForVoucher.dblAvailableQuantity, @dblQtyFromCt) end
 																else
 
 																	CASE 
@@ -1745,8 +1759,8 @@ BEGIN TRY
 													END
 					,[dblNetWeight]					= 
 														case when @doPartialHistory = 1 then
-															case when availableQtyForVoucher.dblQuantity >  a.dblUnits then a.dblUnits 
-																else isnull(availableQtyForVoucher.dblQuantity, @dblQtyFromCt) end
+															case when availableQtyForVoucher.dblAvailableQuantity >  a.dblUnits then a.dblUnits 
+																else isnull(availableQtyForVoucher.dblAvailableQuantity, @dblQtyFromCt) end
 														else
 															CASE 
 																WHEN a.intPricingTypeId = 2 AND ISNULL(@dblCashPriceFromCt,0) != 0 AND (@dblQtyFromCt + @dblTotalVoucheredQuantity) < a.dblUnits   and availableQtyForVoucher.intContractDetailId is not null
@@ -1827,20 +1841,22 @@ BEGIN TRY
 							@dblTotalVoucheredQuantity as [total voucher quantity],
 							@origdblSpotUnits as [dbl spot unit],
 							availableQtyForVoucher.intContractDetailId,
+							availableQtyForVoucher.dblQuantity,
 							a.dblUnits,
 								[dblOrderQty]					= 
 														case when @doPartialHistory = 1 then
-															case when availableQtyForVoucher.dblQuantity >  a.dblUnits then a.dblUnits 
-																else isnull(availableQtyForVoucher.dblQuantity, @dblQtyFromCt) end
+															case when availableQtyForVoucher.dblAvailableQuantity >  a.dblUnits then a.dblUnits 
+																else isnull(availableQtyForVoucher.dblAvailableQuantity, @dblQtyFromCt) end
 														else
 															CASE 
 																WHEN a.intPricingTypeId = 2 AND ISNULL(@dblCashPriceFromCt,0) != 0 AND (@dblQtyFromCt + @dblTotalVoucheredQuantity) < a.dblUnits   and availableQtyForVoucher.intContractDetailId is not null
-																THEN @dblQtyFromCt 
+																	THEN @dblQtyFromCt 
 																WHEN a.intPricingTypeId = 2 AND ISNULL(@dblCashPriceFromCt,0) != 0 AND (@dblQtyFromCt + @dblTotalVoucheredQuantity) > a.dblUnits  and availableQtyForVoucher.intContractDetailId is not null
-																THEN a.dblUnits - @dblTotalVoucheredQuantity 
-																WHEN @origdblSpotUnits > 0 THEN ROUND(dbo.fnCalculateQtyBetweenUOM(b.intItemUOMId,@intCashPriceUOMId,a.dblUnits),6) 
-																WHEN a.intPricingTypeId = 1 and @ysnFromPriceBasisContract = 1 then
-																	a.dblUnits - @dblTotalVoucheredQuantity
+																	THEN a.dblUnits - @dblTotalVoucheredQuantity																
+																WHEN @origdblSpotUnits > 0 
+																	THEN ROUND(dbo.fnCalculateQtyBetweenUOM(b.intItemUOMId,@intCashPriceUOMId,a.dblUnits),6) 
+																WHEN a.intPricingTypeId = 1 and @ysnFromPriceBasisContract = 1 
+																	then a.dblUnits - @dblTotalVoucheredQuantity
 																ELSE 
 																		case when @ysnFromPriceBasisContract = 1 and  availableQtyForVoucher.intContractDetailId is null  and c.strType = 'Inventory' then 0
 																		else 
@@ -1872,15 +1888,15 @@ BEGIN TRY
 															END	
 														ELSE
 																case when @doPartialHistory = 1 then
-																	case when availableQtyForVoucher.dblQuantity >  a.dblUnits then a.dblUnits 
-																		else isnull(availableQtyForVoucher.dblQuantity, @dblQtyFromCt) end
+																	case when availableQtyForVoucher.dblAvailableQuantity >  a.dblUnits then a.dblUnits 
+																		else isnull(availableQtyForVoucher.dblAvailableQuantity, @dblQtyFromCt) end
 																else
 
 																	CASE 
 																			WHEN a.intPricingTypeId = 2 AND ISNULL(@dblCashPriceFromCt,0) != 0 AND (@dblQtyFromCt + @dblTotalVoucheredQuantity) < a.dblUnits and availableQtyForVoucher.intContractDetailId is not null
 																			THEN @dblQtyFromCt 
 																			WHEN a.intPricingTypeId = 2 AND ISNULL(@dblCashPriceFromCt,0) != 0 AND (@dblQtyFromCt + @dblTotalVoucheredQuantity) > a.dblUnits  and availableQtyForVoucher.intContractDetailId is not null
-																			THEN a.dblUnits - @dblTotalVoucheredQuantity
+																			THEN a.dblUnits - @dblTotalVoucheredQuantity																			
 																			WHEN @origdblSpotUnits > 0 THEN ROUND(dbo.fnCalculateQtyBetweenUOM(b.intItemUOMId,@intCashPriceUOMId,a.dblUnits),6)
 																			WHEN a.intPricingTypeId = 1 and @ysnFromPriceBasisContract = 1 then
 																				a.dblUnits - @dblTotalVoucheredQuantity
@@ -1898,8 +1914,8 @@ BEGIN TRY
 													END
 					,[dblCost]						= 
 														case when @doPartialHistory = 1 then
-															case when availableQtyForVoucher.dblQuantity >  a.dblUnits then a.dblUnits 
-																else isnull(availableQtyForVoucher.dblQuantity, @dblQtyFromCt) end
+															case when availableQtyForVoucher.dblAvailableQuantity >  a.dblUnits then a.dblUnits 
+																else isnull(availableQtyForVoucher.dblAvailableQuantity, @dblQtyFromCt) end
 														else
 															CASE
 																when availableQtyForVoucher.intContractDetailId is not null and @ysnFromPriceBasisContract = 1 then
@@ -2344,7 +2360,7 @@ BEGIN TRY
 					
 					if @debug_awesome_ness = 1 
 					begin
-						select 'checking if it will create a voucher history ',@dblTotalVoucheredQuantity, @dblSelectedUnits, @createdVouchersId
+						select 'checking if it will create a voucher history ',@dblTotalVoucheredQuantity, @dblSelectedUnits, @createdVouchersId, @dblTotal, @requireApproval
 					end
 
 
