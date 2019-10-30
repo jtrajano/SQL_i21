@@ -10,7 +10,12 @@ SELECT
   ,LoadDetail.intVendorEntityId  
   ,LoadDetail.intCustomerEntityId  
   ,strVendor = VEN.strName  
+  ,strShipFrom = VEL.strAddress  
   ,strShipFromAddress = VEL.strAddress  
+  ,strShipFromCity = VEL.strCity
+  ,strShipFromCountry = VEL.strCountry
+  ,strShipFromState = VEL.strState
+  ,strShipFromZipCode = VEL.strZipCode
   ,strPContractNumber = PHeader.strContractNumber  
   ,strSContractNumber = SHeader.strContractNumber  
   ,Commodity.strCommodityCode AS strCommodity  
