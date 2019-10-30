@@ -29,7 +29,7 @@ SELECT
 							+ ISNULL(dblPackingAdjustmentRate, 0) 
 							+ ISNULL(dblPINCOAdjustmentRate, 0) 
 							+ ISNULL(dblCertificationAdjustmentRate, 0))) 
-						* ISNULL(dblUnitQty, 1))
+						* ISNULL(dblQty, 1)) / dblUnitQty
 FROM
 	(SELECT
 		strMonthYr = SFM.strFutureMonth
