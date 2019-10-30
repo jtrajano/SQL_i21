@@ -44,12 +44,12 @@ BEGIN
 		WHILE @@FETCH_STATUS = 0
 		BEGIN		
 
-			-- Terms
+			-- Vendor
 			DECLARE @intSellerId INT = NULL
-			SELECT @intSellerId = V.intEntityId
-			FROM tblAPVendor V
-			INNER JOIN tblEMEntity E ON E.intEntityId = V.intEntityId 
-			WHERE E.strName = @strSeller
+			SELECT @intSellerId = V.intVendorId
+			FROM vyuTRCrossReferenceDtn V
+			WHERE V.intCrossReferenceId = 2
+			AND V.strImportValue = @strSeller
 
             IF (@intSellerId IS NULL)
 			BEGIN
@@ -61,19 +61,19 @@ BEGIN
 			END
 			
 			-- Terms
-			DECLARE @intTermId INT = NULL
-			SELECT @intTermId  = T.intTermID
-			FROM tblSMTerm T 
-			WHERE T.strTerm = @strTerm
+			-- DECLARE @intTermId INT = NULL
+			-- SELECT @intTermId  = T.intTermID
+			-- FROM tblSMTerm T 
+			-- WHERE T.strTerm = @strTerm
 
-            IF (@intTermId IS NULL)
-			BEGIN
-				SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, 'Invalid Terms')	
-			END
-			ELSE
-			BEGIN
-				UPDATE tblTRImportDtnDetail SET intTermId = @intTermId WHERE intImportDtnDetailId = @intImportDtnDetailId
-			END
+            -- IF (@intTermId IS NULL)
+			-- BEGIN
+			-- 	SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, 'Invalid Terms')	
+			-- END
+			-- ELSE
+			-- BEGIN
+			-- 	UPDATE tblTRImportDtnDetail SET intTermId = @intTermId WHERE intImportDtnDetailId = @intImportDtnDetailId
+			-- END
 
 			IF(ISNULL(@strMessage, '') = '' AND @ysnValid = 1)
 			BEGIN
@@ -93,7 +93,7 @@ BEGIN
 
 				IF (@intInventoryReceiptId IS NULL)
 				BEGIN
-					SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, 'Does not matched to any Inventory Receipt')	
+					SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, 'Does not match to any Inventory Receipt')	
 				END
 				ELSE IF (@intInventoryReceiptId IS NOT NULL AND @ysnInventoryPosted = 0)
 				BEGIN

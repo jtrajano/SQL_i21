@@ -19,14 +19,14 @@ BEGIN
 	IF(@intImportFileHeaderId_Header IS NOT NULL AND @intImportFileHeaderId_Item IS NOT NULL)
 	BEGIN
 		
-		DECLARE @intDtnImportSetupId INT = NULL
+		DECLARE @intDtnImportSetupId INT = 1
 
-		INSERT INTO tblTRDtnImportSetup (strImportSetupName
-		, intConcurrencyId)
-		VALUES (@strImportSetupName
-			, 1)
+		SET IDENTITY_INSERT tblTRDtnImportSetup ON
 
-		SET @intDtnImportSetupId = SCOPE_IDENTITY()
+		INSERT INTO tblTRDtnImportSetup (intDtnImportSetupId, strImportSetupName, intConcurrencyId)
+		VALUES (@intDtnImportSetupId, @strImportSetupName, 1)
+
+		SET IDENTITY_INSERT tblTRDtnImportSetup OFF
 
 		-- DETAIL
 		INSERT INTO tblTRDtnImportSetupDetail (intDtnImportSetupId, strType, intImportFileHeaderId, intConcurrencyId) 

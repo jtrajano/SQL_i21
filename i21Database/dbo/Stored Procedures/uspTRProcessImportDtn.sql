@@ -75,11 +75,7 @@ BEGIN
 							
 						IF(@ysnVoucherSuccess = 1)
 						BEGIN
-							IF (@intBillId IS NOT NULL)
-							BEGIN
-								SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, 'Voucher successfully created')
-							END
-							ELSE
+							IF (@intBillId IS NULL)
 							BEGIN
 								SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, 'No Voucher is created')
 							END
@@ -88,7 +84,7 @@ BEGIN
 					END
 					ELSE
 					BEGIN
-						SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, 'Voucher already exist')
+						SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, 'Voucher already exists')
 					END
 
 					-- POST VOUCHER
@@ -125,7 +121,7 @@ BEGIN
 				END
 				ELSE
 				BEGIN
-					SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, 'Has no valid Inventory Receipt')
+					SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, 'Does not match to any Inventory Receipt')
 				END
 
 				IF(@intBillId IS NOT NULL)
