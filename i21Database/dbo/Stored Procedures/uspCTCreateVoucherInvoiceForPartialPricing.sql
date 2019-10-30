@@ -79,7 +79,8 @@ BEGIN TRY
 			@strBillId						NVARCHAR(100),
 			@strPostedAPAR					NVARCHAR(MAX),
 			@ysnLoad						BIT,
-			@allowAddDetail					BIT
+			@allowAddDetail					BIT,
+			@detailCreated					Id
 
 	SELECT	@dblCashPrice			=	dblCashPrice, 
 			@intPricingTypeId		=	intPricingTypeId, 
@@ -305,6 +306,22 @@ BEGIN TRY
 
 						EXEC	uspAPUpdateCost @intBillDetailId,@dblFinalPrice,1
 
+						-- CT-3983
+						INSERT INTO @detailCreated
+						SELECT @intBillDetailId
+
+						UPDATE APD
+						SET APD.intTaxGroupId = dbo.fnGetTaxGroupIdForVendor(APB.intEntityId,@intCompanyLocationId,APD.intItemId,EM.intEntityLocationId,EM.intFreightTermId)
+						FROM tblAPBillDetail APD 
+						INNER JOIN tblAPBill APB
+							ON APD.intBillId = APB.intBillId
+						LEFT JOIN tblEMEntityLocation EM ON EM.intEntityId = APB.intEntityId
+						INNER JOIN @detailCreated ON intBillDetailId = intId
+						WHERE APD.intTaxGroupId IS NULL AND intInventoryReceiptChargeId IS NULL
+						
+						EXEC [uspAPUpdateVoucherDetailTax] @detailCreated
+						--
+
 						IF ISNULL(@ysnBillPosted,0) = 1
 						BEGIN
 							EXEC [dbo].[uspAPPostBill] @post = 1,@recap = 0,@isBatch = 0,@param = @intBillId,@userId = @intUserId,@success = @ysnSuccess OUTPUT
@@ -349,6 +366,22 @@ BEGIN TRY
 						BEGIN
 							EXEC uspAPApplyPrepaid @intNewBillId, @prePayId
 						END
+
+						-- CT-3983
+						INSERT INTO @detailCreated
+						SELECT @intBillDetailId
+
+						UPDATE APD
+						SET APD.intTaxGroupId = dbo.fnGetTaxGroupIdForVendor(APB.intEntityId,@intCompanyLocationId,APD.intItemId,EM.intEntityLocationId,EM.intFreightTermId)
+						FROM tblAPBillDetail APD 
+						INNER JOIN tblAPBill APB
+							ON APD.intBillId = APB.intBillId
+						LEFT JOIN tblEMEntityLocation EM ON EM.intEntityId = APB.intEntityId
+						INNER JOIN @detailCreated ON intBillDetailId = intId
+						WHERE APD.intTaxGroupId IS NULL AND intInventoryReceiptChargeId IS NULL
+						
+						EXEC [uspAPUpdateVoucherDetailTax] @detailCreated
+						--
 
 						EXEC [dbo].[uspAPPostBill] @post = 1,@recap = 0,@isBatch = 0,@param = @intNewBillId,@userId = @intUserId,@success = @ysnSuccess OUTPUT
 					END
