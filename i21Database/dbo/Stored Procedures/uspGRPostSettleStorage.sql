@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspGRPostSettleStorage]
-@intSettleStorageId INT
+	@intSettleStorageId INT
 	,@ysnPosted BIT
 	,@ysnFromPriceBasisContract BIT = 0
 	,@dblCashPriceFromCt DECIMAL(24, 10) = 0
@@ -1483,8 +1483,7 @@ BEGIN TRY
 					select 'voucher create price check ' , * from @SettleVoucherCreate
 					
 				end
-
-
+								
 				--Inventory Item and Discounts
 				INSERT INTO @voucherPayable
 				(
@@ -1644,7 +1643,13 @@ BEGIN TRY
 															
 					,[dblOldCost]					=  case when @ysnFromPriceBasisContract = 0 then null 
 														else 
-															case WHEN a.[intContractHeaderId] IS NOT NULL AND @ysnFromPriceBasisContract = 1 and (@dblQtyFromCt = @dblSelectedUnits) THEN IT.dblCost--RI.dblUnitCost --dbo.fnCTConvertQtyToTargetItemUOM(a.intContractUOMId,RI.intCostUOMId, RI.dblUnitCost)
+															case WHEN a.[intContractHeaderId] IS NOT NULL AND @ysnFromPriceBasisContract = 1 and (@dblQtyFromCt = @dblSelectedUnits) THEN 															
+																(select dblCost from tblICInventoryTransaction IT
+																	where IT.intTransactionId = @intSettleStorageId
+																		and IT.intTransactionTypeId = 44
+																		and IT.intItemId = a.intItemId
+																)
+																--IT.dblCost--RI.dblUnitCost --dbo.fnCTConvertQtyToTargetItemUOM(a.intContractUOMId,RI.intCostUOMId, RI.dblUnitCost)
 															else null end
 														end									
 					,[dblCostUnitQty]				= ISNULL(a.dblCostUnitQty,1)
@@ -1697,10 +1702,10 @@ BEGIN TRY
 								AND a.intItemType = 1
 				LEFT JOIN tblCTContractDetail CD
 					ON CD.intContractDetailId = a.intContractDetailId
-				left join tblICInventoryTransaction IT
-					on IT.intTransactionId = SST.intSettleStorageId 
-						and IT.intTransactionTypeId = 44
-						and IT.intItemId = a.intItemId
+				--left join tblICInventoryTransaction IT
+				--	on IT.intTransactionId = SST.intSettleStorageId 
+				--		and IT.intTransactionTypeId = 44
+				--		and IT.intItemId = a.intItemId
 				left join (
 					select
 						intContractDetailId,	intPriceFixationId,			intPriceFixationDetailId, 
