@@ -2348,14 +2348,14 @@ BEGIN TRY
 										,[intUserId]		 	= @intCreatedUserId
 										,[intEntityId]			= @EntityId
 										,[strSettleTicket]		= @TicketNo
-										,[intTransactionTypeId]	= 4 
+										,[intTransactionTypeId]	= 10 
 										,[dblPaidAmount]		= SV.dblCost * ( case when (@dblQtyFromCt + @dblTotalVoucheredQuantity) < @dblSelectedUnits then @dblQtyFromCt
 																		when (@dblQtyFromCt + @dblTotalVoucheredQuantity) > @dblSelectedUnits then  @dblSelectedUnits - @dblTotalVoucheredQuantity
 																		else	
 																			@dblSelectedUnits
 																		end )
 										,[intBillId]			= CASE WHEN @intVoucherId = 0 THEN NULL ELSE @intVoucherId END
-										,intSettleStorageId		= @intSettleStorageId
+										,intSettleStorageId		= NULL
 										,strVoucher				= @strVoucher
 									FROM @voucherPayable SV
 									join tblICItem c
