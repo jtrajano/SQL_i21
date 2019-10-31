@@ -93,41 +93,62 @@ BEGIN
 				SELECT 'Register ' + @strRegisterClass + ' is not configured for Shared Drive transaction'
 			END
 
-		-- Check Register has Shared Drive folder path (Inbound)
+
+
+
+
+		-- Check Register has Shared Drive folder path (Inbound and Outbound)
 		ELSE IF NOT EXISTS
 		(
-			SELECT Reg.intRegisterId
-			FROM tblSTRegister Reg
-			JOIN tblSTStore ST
-				ON Reg.intRegisterId = ST.intRegisterId
-			WHERE ST.intStoreNo = @intStoreNo
-			AND (Reg.strRegisterInboxPath != '' AND Reg.strRegisterInboxPath IS NOT NULL)
+			SELECT TOP 1 1 FROM tblSTCompanyPreference
+			WHERE strStoreBasePath IS NOT NULL
+				AND strStoreBasePath <> ''
 		)
 			BEGIN
 				INSERT INTO @tempTableError
 				(
 					[strErrorMessage]
 				)
-				SELECT 'Register ' + ISNULL(@strRegisterClass, '') + ' does not have setup for Shared Drive Inbound'
+				SELECT 'Register ' + ISNULL(@strRegisterClass, '') + ' does not have setup for Base path folder.'
 			END
+		--ELSE IF NOT EXISTS
+		--(
+		--	SELECT Reg.intRegisterId
+		--	FROM tblSTRegister Reg
+		--	JOIN tblSTStore ST
+		--		ON Reg.intRegisterId = ST.intRegisterId
+		--	WHERE ST.intStoreNo = @intStoreNo
+		--	AND (Reg.strRegisterInboxPath != '' AND Reg.strRegisterInboxPath IS NOT NULL)
+		--)
+		--	BEGIN
+		--		INSERT INTO @tempTableError
+		--		(
+		--			[strErrorMessage]
+		--		)
+		--		SELECT 'Register ' + ISNULL(@strRegisterClass, '') + ' does not have setup for Shared Drive Inbound'
+		--	END
 		
 		-- Check Register has Shared Drive folder path (Outbound)
-		ELSE IF NOT EXISTS
-		(
-			SELECT Reg.intRegisterId
-			FROM tblSTRegister Reg
-			JOIN tblSTStore ST
-				ON Reg.intRegisterId = ST.intRegisterId
-			WHERE ST.intStoreNo = @intStoreNo
-			AND (Reg.strRegisterOutboxPath != '' AND Reg.strRegisterOutboxPath IS NOT NULL)
-		)
-			BEGIN
-				INSERT INTO @tempTableError
-				(
-					[strErrorMessage]
-				)
-				SELECT 'Register ' + ISNULL(@strRegisterClass, '') + ' does not have setup for Shared Drive Outbound'
-			END
+		--ELSE IF NOT EXISTS
+		--(
+		--	SELECT Reg.intRegisterId
+		--	FROM tblSTRegister Reg
+		--	JOIN tblSTStore ST
+		--		ON Reg.intRegisterId = ST.intRegisterId
+		--	WHERE ST.intStoreNo = @intStoreNo
+		--	AND (Reg.strRegisterOutboxPath != '' AND Reg.strRegisterOutboxPath IS NOT NULL)
+		--)
+		--	BEGIN
+		--		INSERT INTO @tempTableError
+		--		(
+		--			[strErrorMessage]
+		--		)
+		--		SELECT 'Register ' + ISNULL(@strRegisterClass, '') + ' does not have setup for Shared Drive Outbound'
+		--	END
+
+
+
+
 
 		-- Check Register has xml configuration
 		ELSE IF NOT EXISTS
