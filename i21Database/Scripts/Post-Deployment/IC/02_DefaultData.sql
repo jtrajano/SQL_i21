@@ -179,4 +179,14 @@ UPDATE tblICItem
 SET strType = 'Inventory'
 WHERE strType IN ('Finished Good', 'Raw Material')
 
+
+UPDATE tblICCategory
+SET strInventoryItemType = strInventoryType
+WHERE strInventoryType IN ('Finished Good', 'Raw Material')
+	AND strInventoryItemType IS NULL
+
+UPDATE tblICCategory
+SET strInventoryType = 'Inventory'
+WHERE strInventoryType IN ('Finished Good', 'Raw Material')
+
 print('/*******************  END OF Item Type Migration **************/')
