@@ -75,12 +75,12 @@ BEGIN
 		AND (SC.[intTicketId] IS NULL OR (SC.[intTicketId] IS NOT NULL AND ISNULL(SC.[strTicketType],'') <> 'Direct Out'))
 		AND (
 				(
-					ICI.[strManufactureType] <> 'Finished Good'
+					ICI.[strManufactureType] <> 'Finished Goods'
 					OR
-					(ICI.[strManufactureType] = 'Finished Good' AND (ICI.[ysnAutoBlend] = 0  OR ISNULL(@Negate, 0) = 1))
+					(ICI.[strManufactureType] = 'Finished Goods' AND (ICI.[ysnAutoBlend] = 0  OR ISNULL(@Negate, 0) = 1))
 				)
 			OR 
-				NOT(ICI.[strManufactureType] = 'Finished Good' AND ICI.[ysnAutoBlend] = 1 AND ICGIS.[dblUnitOnHand] < [dbo].[fnICConvertUOMtoStockUnit](ARID.[intItemId], ARID.[intItemUOMId], ARID.[dblQtyShipped]))			
+				NOT(ICI.[strManufactureType] = 'Finished Goods' AND ICI.[ysnAutoBlend] = 1 AND ICGIS.[dblUnitOnHand] < [dbo].[fnICConvertUOMtoStockUnit](ARID.[intItemId], ARID.[intItemUOMId], ARID.[dblQtyShipped]))			
 				
 			)
 	Union ALL
@@ -127,12 +127,12 @@ BEGIN
 		AND (SC.[intTicketId] IS NULL OR (SC.[intTicketId] IS NOT NULL AND ISNULL(SC.[strTicketType],'') <> 'Direct Out'))
 		AND (
 				(
-					ICI.[strManufactureType] <> 'Finished Good'
+					ICI.[strManufactureType] <> 'Finished Goods'
 					OR
-					(ICI.[strManufactureType] = 'Finished Good' AND (ICI.[ysnAutoBlend] = 0  OR ISNULL(@Negate, 0) = 1))
+					(ICI.[strManufactureType] = 'Finished Goods' AND (ICI.[ysnAutoBlend] = 0  OR ISNULL(@Negate, 0) = 1))
 				)
 			OR 
-				NOT(ICI.[strManufactureType] = 'Finished Good' AND ICI.[ysnAutoBlend] = 1 AND ICGIS.[dblUnitOnHand] < [dbo].[fnICConvertUOMtoStockUnit](ARID.[intItemId], ARID.[intItemUOMId], ARID.[dblQtyShipped]))			
+				NOT(ICI.[strManufactureType] = 'Finished Goods' AND ICI.[ysnAutoBlend] = 1 AND ICGIS.[dblUnitOnHand] < [dbo].[fnICConvertUOMtoStockUnit](ARID.[intItemId], ARID.[intItemUOMId], ARID.[dblQtyShipped]))			
 				
 			)
 		and ICGIS.[intComponentItemId] is not null

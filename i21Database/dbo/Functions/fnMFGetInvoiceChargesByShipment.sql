@@ -95,7 +95,7 @@ BEGIN
 		Select r.intRecipeId,dbo.fnICConvertUOMtoStockUnit(sd.intItemId,sd.intItemUOMId,sd.dblQtyOrdered)
 		From tblSOSalesOrderDetail sd Join tblICItem i on sd.intItemId=i.intItemId 
 		Join tblMFRecipe r on i.intItemId=r.intItemId AND r.ysnActive=1
-		Where intSalesOrderId=@intSalesOrderId AND ISNULL(sd.intRecipeId,0)=0 AND i.strManufactureType='Finished Good'
+		Where intSalesOrderId=@intSalesOrderId AND ISNULL(sd.intRecipeId,0)=0 AND i.strManufactureType ='Finished Goods'
 
 		--Get Other Charges
 		INSERT INTO @tblInputItem(intRecipeItemId,intItemId,intItemUOMId,dblPrice,dblLineTotal,dblQuantity)

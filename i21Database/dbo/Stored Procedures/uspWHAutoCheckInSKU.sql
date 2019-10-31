@@ -139,7 +139,7 @@ BEGIN TRANSACTION
 			
 			SELECT @strItemType = strManufactureType FROM tblICItem WHERE intItemId = @intItemId
 			
-			IF (@strItemType <> 'Finished Good')
+			IF (@strItemType <> 'Finished Goods')
 			BEGIN
 				SELECT @strLotAlias = strLotAlias
 				FROM tblWHOrderLineItem
