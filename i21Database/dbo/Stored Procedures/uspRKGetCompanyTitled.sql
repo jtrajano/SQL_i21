@@ -636,7 +636,7 @@ BEGIN
 					,B.intBillId
 					,strDistribution =  ST.strStorageTypeCode
 					,BD.intBillDetailId
-					,Inv.strTransactionType
+					,strTransactionType = 'Bill'
 				from @InventoryStock Inv
 				inner join tblGRSettleStorage SS ON Inv.intTransactionId = SS.intSettleStorageId
 				inner join tblAPBill B on SS.intBillId = B.intBillId
@@ -644,8 +644,84 @@ BEGIN
 						AND BD.intItemId = SS.intItemId
 				left join tblGRCustomerStorage CS ON BD.intCustomerStorageId = CS.intCustomerStorageId
 				left join tblGRStorageType ST ON CS.intStorageTypeId = ST.intStorageScheduleTypeId
+				left join tblGRSettleContract SC ON SC.intSettleStorageId = Inv.intTransactionId
 				where 
 					Inv.strTransactionType = 'Storage Settlement'
+					AND SC.intSettleStorageId IS NULL
+
+				union all
+				select
+					 dtmDate =  CONVERT(DATETIME, CONVERT(VARCHAR(10), Inv.dtmDate, 110), 110)
+					,dblQtyReceived = ISNULL(CS.dblUnits,Inv.dblTotal)
+					,dblPartialPaidQty 
+					,strTransactionId = ISNULL(CS.strVoucher,Inv.strTransactionId)
+					,intTransactionId = ISNULL(CS.intBillId,Inv.intTransactionId)
+					,strDistribution =  'CNT'
+					,intTransactionDetailId = ISNULL(CS.intBillId,Inv.intTransactionDetailId)
+					,strTransactionType =  CASE WHEN CS.intBillId IS NOT NULL THEN 'Bill'  ELSE 'Storage Settlement' END
+				from @InventoryStock Inv
+				outer apply (
+					select 
+						strVoucher
+						,intBillId
+						,dblUnits = sum(dblUnits)
+						,dblPartialPaidQty = sum(dblPartialPaidQty)
+					 from (	
+					select distinct
+							SH.strVoucher
+							, SH.intBillId
+							, dblUnits =  SH.dblUnits
+							, dblPartialPaidQty = dbo.fnCalculateQtyBetweenUOM(BD.intUnitOfMeasureId, Inv.intItemUOMId,CASE WHEN ISNULL(B.dblTotal, 0) = 0 THEN 0 ELSE (BD.dblQtyReceived / CASE WHEN B.dblTotal = 0 THEN 1 ELSE B.dblTotal END) * B.dblPayment END)		
+							, SH.intStorageHistoryId
+						from tblGRSettleStorageTicket ST
+						inner join tblGRStorageHistory SH on  SH.intCustomerStorageId = ST.intCustomerStorageId and SH.intSettleStorageId = ST.intSettleStorageId
+						inner join tblGRCustomerStorage S on S.intCustomerStorageId = SH.intCustomerStorageId
+						inner join tblAPBill B on SH.intBillId = B.intBillId
+									inner join tblAPBillDetail BD on B.intBillId = BD.intBillId 
+											AND BD.intItemId = S.intItemId 
+						where ST.intSettleStorageId = Inv.intTransactionId 
+								AND SH.intTransactionTypeId = 10
+					) t
+					group by strVoucher, intBillId
+	
+				) CS
+				where 
+					Inv.strTransactionType = 'Storage Settlement'
+
+				union all
+				select
+					 dtmDate =  CONVERT(DATETIME, CONVERT(VARCHAR(10), Inv.dtmDate, 110), 110)
+					,dblQtyReceived =  Inv.dblTotal - CS.dblUnits
+					,dblPartialPaidQty 
+					,strTransactionId = Inv.strTransactionId
+					,intTransactionId = Inv.intTransactionId
+					,strDistribution =  'CNT'
+					,intTransactionDetailId = Inv.intTransactionDetailId
+					,strTransactionType = Inv.strTransactionType
+				from @InventoryStock Inv
+				cross apply (
+					select 
+						dblUnits = sum(dblUnits)
+						,dblPartialPaidQty = sum(dblPartialPaidQty)
+					 from (	
+					select distinct
+							 dblUnits =  SH.dblUnits
+							, dblPartialPaidQty = dbo.fnCalculateQtyBetweenUOM(BD.intUnitOfMeasureId, Inv.intItemUOMId,CASE WHEN ISNULL(B.dblTotal, 0) = 0 THEN 0 ELSE (BD.dblQtyReceived / CASE WHEN B.dblTotal = 0 THEN 1 ELSE B.dblTotal END) * B.dblPayment END)		
+							,SH.intStorageHistoryId
+						from tblGRSettleStorageTicket ST
+						inner join tblGRStorageHistory SH on  SH.intCustomerStorageId = ST.intCustomerStorageId and SH.intSettleStorageId = ST.intSettleStorageId
+						inner join tblGRCustomerStorage S on S.intCustomerStorageId = SH.intCustomerStorageId
+						inner join tblAPBill B on SH.intBillId = B.intBillId
+									inner join tblAPBillDetail BD on B.intBillId = BD.intBillId 
+											AND BD.intItemId = S.intItemId 
+						where ST.intSettleStorageId = Inv.intTransactionId 
+								AND SH.intTransactionTypeId = 10
+					) t
+	
+				) CS
+				where 
+					Inv.strTransactionType = 'Storage Settlement'
+					and (Inv.dblTotal - CS.dblUnits) > 0
 			) t
 
 			UNION ALL --INVENTORY SHIPMENT WITH INVOICE
