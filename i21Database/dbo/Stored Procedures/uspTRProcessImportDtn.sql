@@ -50,11 +50,14 @@ BEGIN
 					DECLARE @intBillId INT = NULL
 					DECLARE @strBillId NVARCHAR(MAX) = NULL
 					DECLARE @voucherItem AS VoucherPayable
+					DECLARE @intExistBillId INT = NULL
+
+					SELECT @intExistBillId = intBillId FROM tblAPBillDetail BD 
+						INNER JOIN tblICInventoryReceiptItem RI ON RI.intInventoryReceiptItemId = BD.intInventoryReceiptItemId
+						WHERE RI.intInventoryReceiptId = @intInventoryReceiptId
 
 					-- CREATE VOUCHER		
-					IF NOT EXISTS(SELECT TOP 1 1 FROM tblAPBillDetail BD 
-						INNER JOIN tblICInventoryReceiptItem RI ON RI.intInventoryReceiptItemId = BD.intInventoryReceiptItemId
-						WHERE RI.intInventoryReceiptId = @intInventoryReceiptId)
+					IF (@intExistBillId = NULL)
 					BEGIN			
 						DECLARE @ysnVoucherSuccess BIT = 0
 						BEGIN TRY
@@ -85,6 +88,7 @@ BEGIN
 					END
 					ELSE
 					BEGIN
+						UPDATE tblTRImportDtnDetail SET intBillId = @intExistBillId WHERE intImportDtnDetailId = @intImportDtnDetailId
 						SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, 'Voucher already exists')
 					END
 
