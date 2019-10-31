@@ -4,9 +4,10 @@
 	,@strComparison			NVARCHAR(MAX)
 	,@dtmBeginDate			NVARCHAR(MAX)
 	,@dtmEndDate			NVARCHAR(MAX)
-	,@strDistrict			NVARCHAR(MAX)
-	,@strRegion				NVARCHAR(MAX)
+	,@strDistrict			NVARCHAR(MAX) = ''
+	,@strRegion				NVARCHAR(MAX) = ''
 	,@intCategoryId			NVARCHAR(MAX)
+	,@intBasketCategoryId	NVARCHAR(MAX)
 	,@intUserId				INT
 AS
 
@@ -45,7 +46,7 @@ FROM tblSTTranslogRebates AS trans
 INNER JOIN tblSTStore AS store
 ON trans.intStoreId = store.intStoreId
 INNER JOIN tblICItemUOM uom
-ON CONVERT(NUMERIC(32, 0),CAST(strTrlUPC AS FLOAT)) = uom.intUpcCode
+ON CONVERT(NUMERIC(32, 0),CAST(strTrlUPCwithoutCheckDigit AS FLOAT)) = LEFT(uom.intUpcCode, LEN(uom.intUpcCode) - 1)
 INNER JOIN tblICItem item
 ON uom.intItemId = item.intItemId
 INNER JOIN tblICCategory cat
@@ -55,9 +56,13 @@ ON item.intCategoryId = cat.intCategoryId'
 DECLARE @ValueMinDate NVARCHAR(MAX) = '1000-01-01 12:00:00'
 DECLARE @ValueMaxDate NVARCHAR(MAX) = '9999-12-31 23:59:59'
 
+DECLARE @ValueItem NVARCHAR(MAX) = 'Item' 
+DECLARE @ValueCategory NVARCHAR(MAX) = 'Category' 
+
 --CHARACTHERS--
 DECLARE @CharSpace NVARCHAR(MAX) = ' '
 DECLARE @CharAnd NVARCHAR(MAX) = 'AND'
+DECLARE @CharOr NVARCHAR(MAX) = 'OR'
 DECLARE @CharSQuote NVARCHAR(MAX) = ''''
 DECLARE @CharOPar NVARCHAR(MAX) = '('
 DECLARE @CharCPar NVARCHAR(MAX) = ')'
@@ -84,17 +89,29 @@ DECLARE @FieldDistrict NVARCHAR(MAX) = 'strDistrict'
 
 
 --INT--
-IF(ISNULL(@intItemId,0) != 0)
+IF(@strComparison = @ValueItem)
 BEGIN
-	SET @Where = @Where + @CharSpace + @CharConjunction + @FieldItem + @CharSpace + @CharEquals + @CharSpace  + @intItemId 
-	SET @CharConjunction = @CharAnd
+	IF(ISNULL(@intItemId,0) != 0)
+	BEGIN
+		SET @Where = @Where + @CharSpace + @CharConjunction + @FieldItem + @CharSpace + @CharEquals + @CharSpace  + @intItemId 
+		SET @CharConjunction = @CharAnd
+	END
 END
 
-IF(ISNULL(@intCategoryId,0) != 0)
+IF(@strComparison = @ValueCategory)
 BEGIN
-	SET @Where = @Where + @CharSpace + @CharConjunction + @CharSpace + @FieldCategory + @CharSpace + @CharEquals + @CharSpace  + @intCategoryId 
-	SET @CharConjunction = @CharAnd
+	IF(ISNULL(@intBasketCategoryId,0) != 0)
+	BEGIN
+		SET @Where = @Where + @CharSpace + @CharConjunction + @FieldCategory + @CharSpace + @CharEquals + @CharSpace  + @intBasketCategoryId 
+		SET @CharConjunction = @CharAnd
+	END
 END
+
+--IF(ISNULL(@intCategoryId,0) != 0)
+--BEGIN
+--	SET @Where = @Where + @CharSpace + @CharConjunction + @CharSpace + @FieldCategory + @CharSpace + @CharEquals + @CharSpace  + @intCategoryId 
+--	SET @CharConjunction = @CharAnd
+--END
 
 IF(ISNULL(@intStoreId,0) != 0)
 BEGIN
@@ -152,8 +169,117 @@ INSERT INTO @tblIDs
 EXEC(@BaseQuery)
 
 
+DECLARE @count INT
+SELECT @count = COUNT(1) FROM @tblIDs
+
 
 --[PHASE 3] > Insert data to staging table--
+DECLARE @tblSTGroupByUPC TABLE
+(
+	 intTimeSoldTogether	INT
+	,strTrlDesc 			NVARCHAR(MAX)
+	,strTrlUPC				NVARCHAR(MAX)
+)
+DECLARE @tblSTGroupByBasket TABLE
+(
+	 intTermMsgSN	INT
+	,strTrlDesc 	NVARCHAR(MAX)
+	,strTrlUPC		NVARCHAR(MAX)
+)
+
+
+INSERT INTO @tblSTGroupByBasket
+(
+	 intTermMsgSN	
+	,strTrlDesc 	
+	,strTrlUPC		
+)
+SELECT 
+	intTermMsgSN, 
+	strTrlDesc, 
+	strTrlUPC
+FROM tblSTTranslogRebates
+WHERE intTermMsgSN in (SELECT DISTINCT intId FROM @tblIDs)
+GROUP BY 
+	intTermMsgSN, 
+	strTrlDesc, 
+	strTrlUPC
+
+
+
+INSERT INTO @tblSTGroupByUPC
+(
+	 strTrlDesc 	
+	,strTrlUPC
+	,intTimeSoldTogether		
+)
+SELECT 
+	strTrlDesc, 
+	strTrlUPC,
+	COUNT(*)
+FROM @tblSTGroupByBasket
+GROUP BY 
+	strTrlDesc, 
+	strTrlUPC
+
+
+--FILTER BY CATEGORY--
+IF(ISNULL(@intCategoryId,0) != 0)
+BEGIN
+	IF(@strComparison = @ValueItem)
+	BEGIN
+		--***DEBUG CODE***--
+		--SELECT *
+		--FROM @tblSTGroupByUPC 
+		--INNER JOIN tblICItemUOM uom
+		--	ON CONVERT(NUMERIC(32, 0),CAST(strTrlUPC AS FLOAT)) = uom.intUpcCode
+		--INNER JOIN tblICItem item
+		--	ON uom.intItemId = item.intItemId
+		--INNER JOIN tblICCategory cat
+		--	ON item.intCategoryId = cat.intCategoryId
+		--WHERE cat.intCategoryId != @intCategoryId AND item.intItemId != @intItemId
+		--***DEBUG CODE***--
+
+		DELETE @tblSTGroupByUPC 
+		FROM @tblSTGroupByUPC 
+		INNER JOIN tblICItemUOM uom
+			ON CONVERT(NUMERIC(32, 0),CAST(strTrlUPC AS FLOAT)) = uom.intUpcCode
+		INNER JOIN tblICItem item
+			ON uom.intItemId = item.intItemId
+		INNER JOIN tblICCategory cat
+			ON item.intCategoryId = cat.intCategoryId
+		WHERE cat.intCategoryId != @intCategoryId AND item.intItemId != @intItemId
+	END
+
+	IF(@strComparison = @ValueCategory)
+	BEGIN
+		--***DEBUG CODE***--
+		--SELECT *
+		--FROM @tblSTGroupByUPC 
+		--INNER JOIN tblICItemUOM uom
+		--	ON CONVERT(NUMERIC(32, 0),CAST(strTrlUPC AS FLOAT)) = uom.intUpcCode
+		--INNER JOIN tblICItem item
+		--	ON uom.intItemId = item.intItemId
+		--INNER JOIN tblICCategory cat
+		--	ON item.intCategoryId = cat.intCategoryId
+		--WHERE cat.intCategoryId != @intCategoryId AND item.intCategoryId != @intBasketCategoryId
+		--***DEBUG CODE***--
+
+		DELETE @tblSTGroupByUPC 
+		FROM @tblSTGroupByUPC 
+		INNER JOIN tblICItemUOM uom
+			ON CONVERT(NUMERIC(32, 0),CAST(strTrlUPC AS FLOAT)) = uom.intUpcCode
+		INNER JOIN tblICItem item
+			ON uom.intItemId = item.intItemId
+		INNER JOIN tblICCategory cat
+			ON item.intCategoryId = cat.intCategoryId
+		WHERE cat.intCategoryId != @intCategoryId AND item.intCategoryId != @intBasketCategoryId
+	END
+	
+
+END
+
+	
 DELETE FROM tblSTBasketAnalysisStagingTable WHERE intUserId  = @intUserId
 INSERT INTO tblSTBasketAnalysisStagingTable
 (
@@ -170,67 +296,116 @@ INSERT INTO tblSTBasketAnalysisStagingTable
 	,intCategoryId
 	,strCategoryId
 	,strCategoryDescription
-
 )
 SELECT 
 @intUserId,
 strTrlDesc, 
 strTrlUPC, 
-intRank = DENSE_RANK() OVER (ORDER BY COUNT(*) DESC),
-intBasketTransaction = (SELECT COUNT(*) FROM @tblIDs),
-intTimeSoldTogether = COUNT(*),
-CAST(COUNT(*) AS NUMERIC(18,6)) / CAST((SELECT COUNT(*) FROM @tblIDs) AS NUMERIC(18,6)),
-intItemId,
+intRank = DENSE_RANK() OVER (ORDER BY intTimeSoldTogether DESC),
+intBasketTransaction = @count,
+intTimeSoldTogether,
+(CAST(intTimeSoldTogether AS NUMERIC(18,6)) / CAST(@count AS NUMERIC(18,6))) * 100,
+item.intItemId,
 strItemNo,
-strItemDescription,
-intCategoryId,
+item.strDescription,
+cat.intCategoryId,
 strCategoryCode,
-strCategoryDescription
-FROM (
-	SELECT 
-	intTermMsgSN, 
-	strTrlDesc, 
-	strTrlUPC, 
-	COUNT(*) AS cnt2,
-	item.strItemNo,
-	item.intItemId,
-	item.strDescription as strItemDescription,
-	cat.strCategoryCode,
-	cat.intCategoryId,
-	cat.strDescription as strCategoryDescription
-	FROM tblSTTranslogRebates
-	INNER JOIN tblICItemUOM uom
-		ON CONVERT(NUMERIC(32, 0),CAST(strTrlUPC AS FLOAT)) = uom.intUpcCode
-	INNER JOIN tblICItem item
-		ON uom.intItemId = item.intItemId
-	INNER JOIN tblICCategory cat
-		ON item.intCategoryId = cat.intCategoryId
-	WHERE intTermMsgSN in (SELECT DISTINCT intId FROM @tblIDs)
-	GROUP BY 
-	intTermMsgSN, 
-	strTrlDesc, 
-	strTrlUPC,
-	item.strItemNo,
-	item.intItemId,
-	item.strDescription,
-	cat.strCategoryCode,
-	cat.intCategoryId,
-	cat.strDescription
-	) AS mytable
-GROUP BY 
-strTrlDesc, 
-strTrlUPC,
-strItemNo,
-intItemId,
-strItemDescription,
-strCategoryCode,
-intCategoryId,
-strCategoryDescription
-ORDER BY COUNT(*) DESC
+cat.strDescription
+FROM @tblSTGroupByUPC
+INNER JOIN tblICItemUOM uom
+	ON CONVERT(NUMERIC(32, 0),CAST(strTrlUPC AS FLOAT)) = uom.intUpcCode
+INNER JOIN tblICItem item
+	ON uom.intItemId = item.intItemId
+INNER JOIN tblICCategory cat
+	ON item.intCategoryId = cat.intCategoryId
+
+
+
+
+
+
 
 
 
 --DEBUG CODE--
+
+--code block 1--
+
+--DELETE FROM tblSTBasketAnalysisStagingTable WHERE intUserId  = @intUserId
+--INSERT INTO tblSTBasketAnalysisStagingTable
+--(
+--	 intUserId
+--	,strDescription
+--	,strItemUPC
+--	,intRank
+--	,intTotalBasket
+--	,intTotalItem
+--	,dblBasketAverage
+--	,intItemId
+--	,strItemId
+--	,strItemDescription
+--	,intCategoryId
+--	,strCategoryId
+--	,strCategoryDescription
+
+--)
+--SELECT 
+--@intUserId,
+--strTrlDesc, 
+--strTrlUPC, 
+--intRank = DENSE_RANK() OVER (ORDER BY COUNT(*) DESC),
+--intBasketTransaction = @count,
+--intTimeSoldTogether = COUNT(*),
+--CAST(COUNT(*) AS NUMERIC(18,6)) / CAST(@count AS NUMERIC(18,6)),
+--intItemId,
+--strItemNo,
+--strItemDescription,
+--intCategoryId,
+--strCategoryCode,
+--strCategoryDescription
+--FROM (
+--	SELECT 
+--	intTermMsgSN, 
+--	strTrlDesc, 
+--	strTrlUPC, 
+--	COUNT(*) AS cnt2,
+--	item.strItemNo,
+--	item.intItemId,
+--	item.strDescription as strItemDescription,
+--	cat.strCategoryCode,
+--	cat.intCategoryId,
+--	cat.strDescription as strCategoryDescription
+--	FROM tblSTTranslogRebates
+--	INNER JOIN tblICItemUOM uom
+--		ON CONVERT(NUMERIC(32, 0),CAST(strTrlUPC AS FLOAT)) = uom.intUpcCode
+--	INNER JOIN tblICItem item
+--		ON uom.intItemId = item.intItemId
+--	INNER JOIN tblICCategory cat
+--		ON item.intCategoryId = cat.intCategoryId
+--	WHERE intTermMsgSN in (SELECT DISTINCT intId FROM @tblIDs)
+--	GROUP BY 
+--	intTermMsgSN, 
+--	strTrlDesc, 
+--	strTrlUPC,
+--	item.strItemNo,
+--	item.intItemId,
+--	item.strDescription,
+--	cat.strCategoryCode,
+--	cat.intCategoryId,
+--	cat.strDescription
+--	) AS mytable
+--GROUP BY 
+--strTrlDesc, 
+--strTrlUPC,
+--strItemNo,
+--intItemId,
+--strItemDescription,
+--strCategoryCode,
+--intCategoryId,
+--strCategoryDescription
+--ORDER BY COUNT(*) DESC
+
+-- code block 2 -- 
 
 --SELECT 
 --strTrlDesc, 
