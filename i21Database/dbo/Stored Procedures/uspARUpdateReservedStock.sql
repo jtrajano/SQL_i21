@@ -75,12 +75,12 @@ BEGIN
 		AND (SC.[intTicketId] IS NULL OR (SC.[intTicketId] IS NOT NULL AND ISNULL(SC.[strTicketType],'') <> 'Direct Out'))
 		AND (
 				(
-					ICI.[strType] <> 'Finished Good'
+					ICI.[strManufactureType] <> 'Finished Good'
 					OR
-					(ICI.[strType] = 'Finished Good' AND (ICI.[ysnAutoBlend] = 0  OR ISNULL(@Negate, 0) = 1))
+					(ICI.[strManufactureType] = 'Finished Good' AND (ICI.[ysnAutoBlend] = 0  OR ISNULL(@Negate, 0) = 1))
 				)
 			OR 
-				NOT(ICI.[strType] = 'Finished Good' AND ICI.[ysnAutoBlend] = 1 AND ICGIS.[dblUnitOnHand] < [dbo].[fnICConvertUOMtoStockUnit](ARID.[intItemId], ARID.[intItemUOMId], ARID.[dblQtyShipped]))			
+				NOT(ICI.[strManufactureType] = 'Finished Good' AND ICI.[ysnAutoBlend] = 1 AND ICGIS.[dblUnitOnHand] < [dbo].[fnICConvertUOMtoStockUnit](ARID.[intItemId], ARID.[intItemUOMId], ARID.[dblQtyShipped]))			
 				
 			)
 	Union ALL
@@ -103,7 +103,7 @@ BEGIN
 		(SELECT [intInvoiceId], [strInvoiceNumber], [intCompanyLocationId], [strTransactionType], [strType] FROM tblARInvoice WITH (NOLOCK)) ARI
 			ON ARID.[intInvoiceId] = ARI.[intInvoiceId]
 	INNER JOIN
-		(SELECT [intItemId], [strType], [ysnAutoBlend] FROM tblICItem WITH (NOLOCK)) ICI
+		(SELECT [intItemId], [strType], [strManufactureType], [ysnAutoBlend] FROM tblICItem WITH (NOLOCK)) ICI
 			ON ARID.[intItemId] = ICI.[intItemId]
 	INNER JOIN
 		(SELECT [intItemUOMId] FROM tblICItemUOM WITH (NOLOCK)) ICIUOM 
@@ -127,12 +127,12 @@ BEGIN
 		AND (SC.[intTicketId] IS NULL OR (SC.[intTicketId] IS NOT NULL AND ISNULL(SC.[strTicketType],'') <> 'Direct Out'))
 		AND (
 				(
-					ICI.[strType] <> 'Finished Good'
+					ICI.[strManufactureType] <> 'Finished Good'
 					OR
-					(ICI.[strType] = 'Finished Good' AND (ICI.[ysnAutoBlend] = 0  OR ISNULL(@Negate, 0) = 1))
+					(ICI.[strManufactureType] = 'Finished Good' AND (ICI.[ysnAutoBlend] = 0  OR ISNULL(@Negate, 0) = 1))
 				)
 			OR 
-				NOT(ICI.[strType] = 'Finished Good' AND ICI.[ysnAutoBlend] = 1 AND ICGIS.[dblUnitOnHand] < [dbo].[fnICConvertUOMtoStockUnit](ARID.[intItemId], ARID.[intItemUOMId], ARID.[dblQtyShipped]))			
+				NOT(ICI.[strManufactureType] = 'Finished Good' AND ICI.[ysnAutoBlend] = 1 AND ICGIS.[dblUnitOnHand] < [dbo].[fnICConvertUOMtoStockUnit](ARID.[intItemId], ARID.[intItemUOMId], ARID.[dblQtyShipped]))			
 				
 			)
 		and ICGIS.[intComponentItemId] is not null

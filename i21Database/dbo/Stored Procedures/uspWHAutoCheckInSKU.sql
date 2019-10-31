@@ -137,7 +137,7 @@ BEGIN TRANSACTION
 					END
 			END			 
 			
-			SELECT @strItemType = strType FROM tblICItem WHERE intItemId = @intItemId
+			SELECT @strItemType = strManufactureType FROM tblICItem WHERE intItemId = @intItemId
 			
 			IF (@strItemType <> 'Finished Good')
 			BEGIN

@@ -805,6 +805,7 @@ INSERT #ARPostInvoiceHeader
     ,[intItemId]
     ,[strItemNo]
     ,[strItemType]
+    ,[strItemManufactureType]
     ,[strItemDescription]
     ,[intItemUOMId]
     ,[intItemWeightUOMId]
@@ -955,6 +956,7 @@ SELECT
     ,[intItemId]                        = NULL
     ,[strItemNo]                        = NULL
     ,[strItemType]                      = NULL
+    ,[strItemManufactureType]           = NULL
     ,[strItemDescription]               = NULL
     ,[intItemUOMId]                     = NULL
     ,[intItemWeightUOMId]               = NULL
@@ -1138,6 +1140,7 @@ INSERT #ARPostInvoiceDetail
     ,[intItemId]
     ,[strItemNo]
     ,[strItemType]
+    ,[strItemManufactureType]
     ,[strItemDescription]
     ,[intItemUOMId]
     ,[intItemWeightUOMId]
@@ -1288,6 +1291,7 @@ SELECT
     ,[intItemId]                        = ARID.[intItemId]
     ,[strItemNo]                        = ICI.[strItemNo]
     ,[strItemType]                      = ICI.[strType]
+    ,[strItemManufactureType]           = ICI.[strManufactureType]
     ,[strItemDescription]               = ISNULL(ARID.[strItemDescription], ICI.[strDescription])
     ,[intItemUOMId]                     = ARID.[intItemUOMId]
     ,[intItemWeightUOMId]               = ARID.[intItemWeightUOMId]
@@ -1372,7 +1376,7 @@ INNER JOIN
         ON ARI.[intInvoiceId] = ARID.[intInvoiceId]
 INNER JOIN
     (
-    SELECT [intItemId], [strItemNo], [strType], [strDescription], [ysnAutoBlend], [intCategoryId] FROM tblICItem WITH(NoLock)
+    SELECT [intItemId], [strItemNo], [strType], [strManufactureType], [strDescription], [ysnAutoBlend], [intCategoryId] FROM tblICItem WITH(NoLock)
     ) ICI
         ON ARID.[intItemId] = ICI.[intItemId]
 LEFT OUTER JOIN
@@ -1492,6 +1496,7 @@ INSERT #ARPostInvoiceDetail
     ,[intItemId]
     ,[strItemNo]
     ,[strItemType]
+    ,[strItemManufactureType]
     ,[strItemDescription]
     ,[intItemUOMId]
     ,[intItemWeightUOMId]
@@ -1642,6 +1647,7 @@ SELECT
     ,[intItemId]                        = ARID.[intItemId]
     ,[strItemNo]                        = ICI.[strItemNo]
     ,[strItemType]                      = ICI.[strType]
+    ,[strItemManufactureType]           = ICI.[strManufactureType]
     ,[strItemDescription]               = ISNULL(ARID.[strItemDescription], ICI.[strDescription])
     ,[intItemUOMId]                     = ARID.[intItemUOMId]
     ,[intItemWeightUOMId]               = ARID.[intItemWeightUOMId]
@@ -1785,7 +1791,7 @@ INNER JOIN
         ON ARI.[intInvoiceId] = ARID.[intInvoiceId]
 INNER JOIN
     (
-    SELECT [intItemId], [strItemNo], [strType], [strDescription], [ysnAutoBlend], [intCategoryId] FROM tblICItem WITH(NoLock)
+    SELECT [intItemId], [strItemNo], [strType], [strManufactureType], [strDescription], [ysnAutoBlend], [intCategoryId] FROM tblICItem WITH(NoLock)
     ) ICI
         ON ARID.[intItemId] = ICI.[intItemId]
 LEFT OUTER JOIN
@@ -1899,6 +1905,7 @@ INSERT #ARPostInvoiceDetail
     ,[intItemId]
     ,[strItemNo]
     ,[strItemType]
+    ,[strItemManufactureType]
     ,[strItemDescription]
     ,[intItemUOMId]
     ,[intItemWeightUOMId]
@@ -2045,6 +2052,7 @@ SELECT
     ,[intItemId]                        = NULL
     ,[strItemNo]                        = ''
     ,[strItemType]                      = ''
+    ,[strItemManufactureType]           = ''
     ,[strItemDescription]               = ARID.[strItemDescription]
     ,[intItemUOMId]                     = ARID.[intItemUOMId]
     ,[intItemWeightUOMId]               = ARID.[intItemWeightUOMId]

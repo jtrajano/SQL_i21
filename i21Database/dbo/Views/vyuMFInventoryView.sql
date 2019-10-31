@@ -60,6 +60,7 @@ SELECT l.intLotId
 	,i.strItemNo
 	,i.strDescription strItemDescription
 	,i.strType strItemType
+	,i.strManufactureType strItemManufactureType
 	,ic.strCategoryCode strItemCategory
 	,ic.intCategoryId
 	,e.strName strVendor
