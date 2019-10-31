@@ -695,13 +695,7 @@ BEGIN TRY
 														ISNULL(', '+CASE WHEN LTRIM(RTRIM(EC.strEntityState)) = '' THEN NULL ELSE LTRIM(RTRIM(EC.strEntityState)) END,'') + 
 														ISNULL(', '+CASE WHEN LTRIM(RTRIM(EC.strEntityZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(EC.strEntityZipCode)) END,'') + 
 														ISNULL(', '+CASE WHEN LTRIM(RTRIM(EC.strEntityCountry)) = '' THEN NULL ELSE dbo.fnCTGetTranslation('i21.view.Country',rtc12.intCountryID,@intLaguageId,'Country',rtc12.strCountry) END,'')
-			,striDealPrice							=	(
-															case
-															when pricingType.strPricingType = 'Basis'
-															then strFutMarketName + ' ' + strFutureMonth + ' ' + CONVERT(VARCHAR, CAST(isnull(SQ.dblCashPrice,(dblBasis + isnull(SQ.dblFutures,0.00))) AS MONEY), 1) +' '+ strBasisCurrency + '/' + strBasisUnitMeasure
-															else 'At ' + CONVERT(VARCHAR, CAST(isnull(SQ.dblCashPrice,(dblBasis + isnull(SQ.dblFutures,0.00))) AS MONEY), 1) +' '+ strBasisCurrency + '/' + strBasisUnitMeasure
-															end
-														)
+			,striDealPrice							=	(case when pricingType.strPricingType = 'Basis' then strFutMarketName + ' ' + strFutureMonth + ' ' + CONVERT(VARCHAR, CAST(dblBasis AS MONEY), 1) +' '+ strBasisCurrency + '/' + strBasisUnitMeasure else 'At ' + CONVERT(VARCHAR, CAST(dblBasis AS MONEY), 1) +' '+ strBasisCurrency + '/' + strBasisUnitMeasure end)
 			,lblGABShipDelv							=	CASE WHEN strPosition = 'Spot' THEN dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Delivery') ELSE dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Shipment') END
 			,strIds									=	@strIds
 			,strType								=	@type
