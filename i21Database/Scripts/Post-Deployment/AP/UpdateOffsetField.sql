@@ -6,7 +6,7 @@ FROM tblAPPaymentDetail A
 INNER JOIN tblAPPayment A2
 	ON A.intPaymentId = A2.intPaymentId
 INNER JOIN tblAPBill B
-	ON A.intBillId = B.intBillId
+	ON ISNULL(A.intBillId,A.intOrigBillId) = B.intBillId
 CROSS APPLY 
 (
 	SELECT COUNT(*) intCount FROM tblAPPaymentDetail A3
@@ -28,7 +28,7 @@ FROM tblAPPaymentDetail A
 INNER JOIN tblAPPayment A2
 	ON A.intPaymentId = A2.intPaymentId
 INNER JOIN tblAPBill B
-	ON A.intBillId = B.intBillId
+	ON ISNULL(A.intBillId,A.intOrigBillId) = B.intBillId
 CROSS APPLY 
 (
 	SELECT COUNT(*) intCount FROM tblAPPaymentDetail A3
@@ -37,4 +37,3 @@ CROSS APPLY
 WHERE 
 	B.intTransactionType IN (3)
 AND payDetails.intCount > 1
-
