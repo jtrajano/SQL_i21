@@ -2,7 +2,7 @@ CREATE VIEW [dbo].[vyuGRGetStorageTickets]
 AS  
 SELECT DISTINCT
     intCustomerStorageId				= CS.intCustomerStorageId  
-    ,strStorageTicketNumber				= CS.strStorageTicketNumber
+    ,strStorageTicketNumber				= ISNULL(TS.strTransferStorageTicket,CS.strStorageTicketNumber)
     ,intEntityId						= CS.intEntityId  
     ,strName							= E.strName  
     ,intStorageTypeId					= CS.intStorageTypeId  
@@ -86,4 +86,8 @@ LEFT JOIN tblICInventoryReceipt IR
     ON IR.intInventoryReceiptId = SC.intInventoryReceiptId
 LEFT JOIN tblSCDeliverySheet DS
     ON DS.intDeliverySheetId = CS.intDeliverySheetId
+LEFT JOIN tblGRTransferStorageReference TSR
+	ON TSR.intToCustomerStorageId = CS.intCustomerStorageId
+LEFT JOIN tblGRTransferStorage TS
+	ON TS.intTransferStorageId = TSR.intTransferStorageId
 WHERE CS.dblOpenBalance > 0
