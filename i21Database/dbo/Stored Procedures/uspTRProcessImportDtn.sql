@@ -70,6 +70,7 @@ BEGIN
 
 						END TRY
 						BEGIN CATCH
+							SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, 'Voucher is not created')
 							SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, ERROR_MESSAGE())
 						END CATCH
 							
@@ -77,7 +78,7 @@ BEGIN
 						BEGIN
 							IF (@intBillId IS NULL)
 							BEGIN
-								SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, 'No Voucher is created')
+								SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, 'Voucher is not created')
 							END
 						END
 
@@ -105,11 +106,13 @@ BEGIN
 
 						END TRY
 						BEGIN CATCH
+							SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, 'Voucher cannot be posted')
 							SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, ERROR_MESSAGE())
 						END CATCH
 
 						IF (@success = 0)
 						BEGIN
+							SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, 'Voucher cannot be posted')
 							SELECT TOP 1 dbo.fnTRMessageConcat(@strMessage,strMessage) FROM tblAPPostResult WHERE intTransactionId = @intBillId ORDER BY intId DESC
 						END
 						ELSE
