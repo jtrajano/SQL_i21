@@ -810,8 +810,7 @@ BEGIN TRY
 							BC.strCurrency AS strBasisCurrency,
 							dbo.fnCTGetTranslation('Inventory.view.ReportTranslation',BM.intUnitMeasureId,@intLaguageId,'Name',BM.strUnitMeasure) strBasisUnitMeasure,
 							BI.strItemNo strItemBundleNo,
-							CD.dblCashPrice,
-							CD.dblFutures
+							CD.dblCashPrice
 
 				FROM		tblCTContractDetail		CD  WITH (NOLOCK)
 				JOIN		tblICItem				IM	WITH (NOLOCK) ON	IM.intItemId				=	CD.intItemId
