@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspGRPostSettleStorage]
-@intSettleStorageId INT
+	@intSettleStorageId INT
 	,@ysnPosted BIT
 	,@ysnFromPriceBasisContract BIT = 0
 	,@dblCashPriceFromCt DECIMAL(24, 10) = 0
@@ -1059,7 +1059,7 @@ BEGIN TRY
 														WHEN SV.intPricingTypeId = 1 OR SV.intPricingTypeId = 6 OR SV.intPricingTypeId IS NULL THEN SV.[dblCashPrice]
 														ELSE @dblFutureMarkePrice + ISNULL(SV.dblBasis,0)
 												   END)
-												   + DiscountCost.dblTotalCashPrice
+												   + round(dbo.fnDivide(DiscountCost.dblTotalCashPrice, @dblSelectedUnits), 2) -- + DiscountCost.dblTotalCashPrice
 					,dblSalesPrice				= 0.00
 					,intCurrencyId				= @intCurrencyId
 					,dblExchangeRate			= 1
@@ -1088,7 +1088,8 @@ BEGIN TRY
 						AND ItemStock.intItemLocationId = @ItemLocationId
 				OUTER APPLY (
 					SELECT 
-						ISNULL(SUM((ROUND(SV.dblCashPrice * CASE WHEN ISNULL(SV.dblSettleContractUnits,0) > 0 THEN SV.dblSettleContractUnits ELSE SV.dblUnits END, 2)) / SV.dblUnits),0)  AS dblTotalCashPrice
+						--ISNULL(SUM((ROUND(SV.dblCashPrice * CASE WHEN ISNULL(SV.dblSettleContractUnits,0) > 0 THEN SV.dblSettleContractUnits ELSE SV.dblUnits END, 2)) / SV.dblUnits),0)  AS dblTotalCashPrice
+						ISNULL(SUM((ROUND(SV.dblCashPrice * CASE WHEN ISNULL(SV.dblSettleContractUnits,0) > 0 THEN SV.dblSettleContractUnits ELSE SV.dblUnits END, 2 )) ),0)  AS dblTotalCashPrice
 					FROM @SettleVoucherCreate SV
 					INNER JOIN tblICItem I
 						ON I.intItemId = SV.intItemId
@@ -1160,13 +1161,15 @@ BEGIN TRY
 						ON I.intItemId = SV.intItemId
 							AND I.ysnInventoryCost = 1
 							and SV.intItemType = 3
+							and not(SV.intPricingTypeId = 1 OR SV.intPricingTypeId = 6 OR SV.intPricingTypeId IS NULL)
 				) DiscountCost
 				WHERE SV.intItemType = 1
 
 				IF @debug_awesome_ness = 1
 				begin
 					select 'items to post',* from @ItemsToPost
-					
+					select 'items to storage',* from @ItemsToStorage
+
 					select 'Settle voucher create',* from @SettleVoucherCreate
 					
 					
@@ -1178,6 +1181,12 @@ BEGIN TRY
 					 ,intItemId					= SV.[intItemId]
 					,intItemLocationId			= @ItemLocationId
 					,intItemUOMId				= @intInventoryItemStockUOMId
+					,SV.intPricingTypeId
+					,SV.dblSettleContractUnits
+					,DiscountCost.dblTotalCashPrice
+					,@dblSelectedUnits
+					,round(dbo.fnDivide(DiscountCost.dblTotalCashPrice, @dblSelectedUnits), 2)
+					,dbo.fnDivide(DiscountCost.dblTotalCashPrice, @dblSelectedUnits)
 					,dtmDate					= GETDATE()
 					,dblQty						= CASE 
 														WHEN @strOwnedPhysicalStock = 'Customer' THEN dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, IU.intUnitMeasureId, CS.intUnitMeasureId, SV.[dblUnits])
@@ -1217,6 +1226,7 @@ BEGIN TRY
 						ON I.intItemId = SV.intItemId
 							AND I.ysnInventoryCost = 1
 							and SV.intItemType = 3
+							and not(SV.intPricingTypeId = 1 OR SV.intPricingTypeId = 6 OR SV.intPricingTypeId IS NULL)
 				) DiscountCost
 				WHERE SV.intItemType = 1
 
@@ -1379,6 +1389,10 @@ BEGIN TRY
 							--DELETE FROM @GLEntries
 							if @debug_awesome_ness = 1	
 							begin
+								select top 5 'inventory transaction', * from tblICInventoryTransaction order by intInventoryTransactionId desc
+								
+								select 'generate gl entries'
+								
 								EXEC uspGRCreateGLEntries 
 									 'Storage Settlement'
 									,'OtherCharges'
