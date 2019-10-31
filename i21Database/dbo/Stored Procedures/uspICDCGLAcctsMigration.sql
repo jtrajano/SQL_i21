@@ -33,7 +33,7 @@ Cross Apply
 	INNER JOIN tblGLCOACrossReference AS coa ON coa.strExternalId = itm.agitm_sls_acct 
 	INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.intCrossReferenceId 
 	WHERE coa.strExternalId = itm.agitm_sls_acct
-	and inv.strType in ('Inventory', 'Finished Good', 'Raw Material') 
+	and inv.strType = 'Inventory'
 	and I.intItemId = inv.intItemId) as ac
 
 --cogs account	
@@ -54,7 +54,7 @@ Cross Apply
 	INNER JOIN tblGLCOACrossReference AS coa ON coa.strExternalId = itm.agitm_pur_acct 
 	INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.intCrossReferenceId 
 	WHERE coa.strExternalId = itm.agitm_pur_acct
-	and inv.strType in ('Inventory', 'Finished Good', 'Raw Material') 
+	and inv.strType = 'Inventory'
 	and I.intItemId = inv.intItemId) as ac
 
 -- update accounts for type 'Other Charge' 

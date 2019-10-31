@@ -52,7 +52,7 @@ WHERE
 	AND (Transactions.intLotId = @intLotId OR @intLotId IS NULL)
 	AND (Item.intCategoryId = @intCategoryId OR @intCategoryId IS NULL)
 	AND (Item.intCommodityId = @intCommodityId OR @intCommodityId IS NULL)
-	AND Item.strType IN ('Inventory', 'Raw Material', 'Finished Good')
+	AND Item.strType = 'Inventory'
 	AND (Item.strStatus = 'Active' AND @ysnActiveOnly = 1 OR NULLIF(@ysnActiveOnly, 0) IS NULL)
 GROUP BY Item.intItemId, Item.strItemNo, Item.strType, UOM.strUnitMeasure, Lot.strLotNumber, LotUOM.strUnitMeasure--,  Transactions.dtmDate
 ORDER BY Item.strItemNo

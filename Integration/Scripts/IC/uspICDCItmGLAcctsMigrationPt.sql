@@ -38,7 +38,7 @@ USING
 			INNER JOIN tblGLCOACrossReference AS coa ON coa.strExternalId = itm.ptitm_sls_acct 
 			INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.inti21Id 
 		WHERE coa.strExternalId = itm.ptitm_sls_acct
-			and inv.strType in ('Inventory', 'Finished Good', 'Raw Material') 
+			and inv.strType = 'Inventory'
 			and I.intItemId = inv.intItemId
 	) as ac
 ) AS [Source] (intItemId, intAccountCategoryId, intAccountId, intConcurrencyId)
@@ -68,7 +68,7 @@ USING
 		INNER JOIN tblGLCOACrossReference AS coa ON coa.strExternalId = itm.ptitm_pur_acct 
 		INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.inti21Id 
 		WHERE coa.strExternalId = itm.ptitm_pur_acct
-		and inv.strType in ('Inventory', 'Finished Good', 'Raw Material') 
+		and inv.strType = 'Inventory'
 		and I.intItemId = inv.intItemId
 	) as ac
 ) AS [Source] (intItemId, intAccountCategoryId, intAccountId, intConcurrencyId)
@@ -98,7 +98,7 @@ USING
 		INNER JOIN tblGLCOACrossReference AS coa ON coa.strExternalId = itm.ptitm_pur_acct 
 		INNER JOIN tblGLAccount AS act ON act.intAccountId = coa.inti21Id 
 		WHERE coa.strExternalId = itm.ptitm_pur_acct
-		and inv.strType in ('Inventory', 'Finished Good', 'Raw Material') 
+		and inv.strType = 'Inventory'
 		and I.intItemId = inv.intItemId
 	) as ac
 ) AS [Source] (intItemId, intAccountCategoryId, intAccountId, intConcurrencyId)
@@ -179,6 +179,6 @@ join tblGLAccountSegmentMapping sm on sm.intAccountId = ac.intAccountId
 join tblGLAccountSegment tgs on tgs.intAccountSegmentId = sm.intAccountSegmentId
 join tblGLAccountStructure ast on ast.intAccountStructureId = tgs.intAccountStructureId
 where act.strAccountCategory in ('Inventory', 'Sales Account', 'Inventory In-Transit','Work In Progress','AP Clearing')
-and c.strType in ('Inventory', 'Raw Material', 'Finished Good')
+and c.strType = 'Inventory'
 and ast.strType = 'Primary'
 GO

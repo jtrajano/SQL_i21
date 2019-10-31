@@ -10,12 +10,7 @@ BEGIN
 	--please update fnARIsStockTrackingItem as well	
 	DECLARE @isStockTracking BIT 
 
-	SELECT	@isStockTracking = 
-				CASE	WHEN Item.strType = 'Inventory' THEN 1
-						WHEN Item.strType = 'Finished Good' THEN 1
-						WHEN Item.strType = 'Raw Material' THEN 1
-						ELSE 0 
-				END 
+	SELECT	@isStockTracking = CASE WHEN Item.strType = 'Inventory' THEN 1 ELSE 0 END 
 	FROM	dbo.tblICItem Item
 	WHERE	Item.intItemId = @intItemId
 

@@ -20,4 +20,4 @@ FROM tblICItem item
 	LEFT JOIN tblICTag it ON it.intTagId = item.intIngredientTag
 	LEFT JOIN tblICTag mt ON mt.intTagId = item.intMedicationTag
 	LEFT JOIN tblICTag hm ON hm.intTagId = item.intHazmatTag
-WHERE item.strType IN ('Inventory', 'Raw Material', 'Finished Good', 'Bundle', 'Kit', 'Software')
+WHERE item.strType IN ('Inventory', 'Bundle', 'Kit', 'Software')

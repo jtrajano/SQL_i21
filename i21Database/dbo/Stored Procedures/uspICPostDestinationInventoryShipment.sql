@@ -49,7 +49,7 @@ BEGIN
 			,@strItemType = i.strType 
 	FROM	@DestinationItems d INNER JOIN tblICItem i 
 				ON i.intItemId = d.intItemId
-	WHERE	i.strType NOT IN ('Inventory', 'Finished Good', 'Raw Material', 'Bundle', 'Kit')
+	WHERE	i.strType NOT IN ('Inventory', 'Bundle', 'Kit')
 
 	IF @InvalidItemId IS NOT NULL 
 	BEGIN

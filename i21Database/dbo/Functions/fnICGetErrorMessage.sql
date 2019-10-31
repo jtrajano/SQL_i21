@@ -243,7 +243,7 @@ BEGIN
 		WHEN @msgId = 80227 THEN 'The other charges in %s are not allowed to be converted to Voucher. It could be a DP or Zero Spot Priced.'
 		WHEN @msgId = 80228 THEN 'Billed Qty for %s is already %f. You cannot over bill the transaction'
 		WHEN @msgId = 80229 THEN 'Zero cost is not allowed in "%s" location for item "%s".'
-		WHEN @msgId = 80230 THEN 'Only items of type "Inventory", "Raw Material", "Finished Good" and "Non-Inventory" can be received.'
+		WHEN @msgId = 80230 THEN 'Only items of type "Inventory" and "Non-Inventory" can be received.'
 		WHEN @msgId = 80231 THEN 'There are multiple stock units set up for the item. Only 1 stock unit must be allowed. Go to Inventory -> Items -> Unit of Measure to fix it.'
 		WHEN @msgId = 80232 THEN 'Inventory and GL mismatch in %s. Discrepancy of %f in %s does not match with %s. Cannot %s. See Post Preview for details.'
 		WHEN @msgId = 80233 THEN 'Inventory and GL mismatch for %s. Discrepancy of %f is found for %s. See Post Preview for details.'

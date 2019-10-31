@@ -330,7 +330,7 @@ BEGIN
 	FROM	tblICItem Item INNER JOIN @GLAccounts ItemGLAccount
 				ON Item.intItemId = ItemGLAccount.intItemId
 	WHERE	ItemGLAccount.intContraInventoryId IS NULL 
-			AND ISNULL(Item.strType, '') IN ('Inventory', 'Finished Good', 'Raw Material')
+			AND ISNULL(Item.strType, '') = 'Inventory'
 
 	SELECT	TOP 1 
 			@strLocationName = c.strLocationName

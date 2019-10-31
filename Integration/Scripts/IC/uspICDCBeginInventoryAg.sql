@@ -78,7 +78,7 @@ BEGIN
 					on sl.strName COLLATE Latin1_General_CI_AS = itm.agitm_binloc COLLATE Latin1_General_CI_AS	
 		WHERE	agitm_un_on_hand <> 0 
 		AND agitm_loc_no = @adjLoc
-		AND inv.strType in ('Inventory', 'Finished Good', 'Raw Material')
+		AND inv.strType = 'Inventory'
 	
 		IF @cnt > 0
 		BEGIN
@@ -90,7 +90,7 @@ BEGIN
 							on uom.intItemId = inv.intItemId 
 				WHERE	agitm_un_on_hand <> 0 
 				AND agitm_loc_no = @adjLoc
-				AND inv.strType in ('Inventory', 'Finished Good', 'Raw Material')
+				AND inv.strType = 'Inventory'
 
 			--** Fetching the next adjustment number to be assigned for the adjustment to be created from uspSMGetStartingNumber stored procedure. **
 			EXEC dbo.uspSMGetStartingNumber @StartingNumberId_InventoryAdjustment, @strAdjustmentNo OUTPUT
@@ -175,7 +175,7 @@ BEGIN
 			LEFT JOIN tblICItemLocation il ON il.intItemId = inv.intItemId
 	WHERE	agitm_un_on_hand  <> 0
 	AND agitm_loc_no = @adjLoc
-	AND inv.strType in ('Inventory', 'Finished Good', 'Raw Material')
+	AND inv.strType = 'Inventory'
 
 	UNION ALL	
 	SELECT 
@@ -221,7 +221,7 @@ BEGIN
 	AND agitm_loc_no = @adjLoc
 	AND aglot_loc_no = @adjLoc
 	AND aglot_un_on_hand <> 0
-	AND inv.strType in ('Inventory', 'Finished Good', 'Raw Material')
+	AND inv.strType = 'Inventory'
 	AND rtrim((agitm_lot_yns)) = 'Y'
 
 
@@ -289,7 +289,7 @@ BEGIN
 							on uom.intItemId = inv.intItemId 
 				WHERE	agitm_un_on_hand <> 0 
 				AND agitm_loc_no = @adjLoc
-				AND inv.strType in ('Inventory', 'Finished Good', 'Raw Material')
+				AND inv.strType = 'Inventory'
 
 			---- Tweak the contra-gl account used. 
 			--BEGIN 

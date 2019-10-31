@@ -333,7 +333,7 @@ WHERE NOT EXISTS(SELECT * FROM tblICItemUomUpc u WHERE u.strLongUpcCode = strLon
 update iu set ysnStockUnit = 0
 from tblICItemUOM iu 
 join tblICItem i on i.intItemId = iu.intItemId
-where i.strType not in ('Inventory', 'Raw Material', 'Finished Good')
+where i.strType <> 'Inventory'
 
 --------------------------------------------------------------------------------------------------------------------------------------------
 -- ItemLocation data migration from ptlocmst/agitmmst origin tables to tblICItemLocation i21 table 
