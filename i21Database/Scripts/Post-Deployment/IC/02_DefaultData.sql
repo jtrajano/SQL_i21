@@ -169,26 +169,14 @@ END
 
 print('/*******************  BEGIN Item Type Migration (Merge Raw Materials and Finished Good to Inventory) *******************/')
 
--- 2. Store the origin item type to the temporary field
-UPDATE tblICItem
-SET strItemType = strType
-WHERE strType IN ('Finished Good', 'Raw Material')
-	AND strItemType IS NULL
+UPDATE tblICCategory SET strInventoryItemType = strInventoryType
+WHERE strInventoryType IN ('Finished Good', 'Raw Material') 
+AND strInventoryItemType IS NULL
 
-UPDATE tblICItem
-SET strType = 'Inventory'
-WHERE strType IN ('Finished Good', 'Raw Material')
+UPDATE tblICCategory SET strInventoryType = 'Inventory' WHERE strInventoryType IN ('Finished Good', 'Raw Material')
 
-UPDATE tblICCategory
-SET strInventoryItemType = strInventoryType
-WHERE strInventoryType IN ('Finished Good', 'Raw Material')
-	AND strInventoryItemType IS NULL
-
-UPDATE tblICCategory
-SET strInventoryType = 'Inventory'
-WHERE strInventoryType IN ('Finished Good', 'Raw Material')
-
-UPDATE tblICItem SET strManufactureType = 'Finished Goods' WHERE strItemType = 'Finished Good'
-UPDATE tblICItem SET strManufactureType = 'Raw Material' WHERE strItemType = 'Raw Material'
+UPDATE tblICItem SET strManufactureType = 'Finished Goods' WHERE strType = 'Finished Good'
+UPDATE tblICItem SET strManufactureType = 'Raw Material' WHERE strType = 'Raw Material'
+UPDATE tblICItem SET strType = 'Inventory' WHERE strType IN ('Finished Good', 'Raw Material')
 
 print('/*******************  END OF Item Type Migration **************/')
