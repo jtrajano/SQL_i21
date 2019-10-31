@@ -658,12 +658,12 @@ BEGIN TRY
 														'''s '+@rtStrPricing2+':'+dbo.fnRemoveTrailingZeroes(dblLotsToFix)+').'
 			,strGABPricing							=	(case when pricingType.strPricingType = 'Basis' then 
 														SQ.strFutMarketName + ' ' + SQ.strFutureMonthYear +
-														CASE WHEN isnull(SQ.dblCashPrice,(SQ.dblBasis + isnull(SQ.dblFutures,0.00))) < 0 THEN ' '+@rtMinus+' ' ELSE ' '+@rtPlus+' ' END +  
-														dbo.fnRemoveTrailingZeroes(isnull(SQ.dblCashPrice,(SQ.dblBasis + isnull(SQ.dblFutures,0.00)))) + ' ' + SQ.strPriceCurrencyAndUOM + 
+														CASE WHEN SQ.dblBasis < 0 THEN ' '+@rtMinus+' ' ELSE ' '+@rtPlus+' ' END +  
+														dbo.fnRemoveTrailingZeroes(SQ.dblBasis) + ' ' + SQ.strPriceCurrencyAndUOM + 
 														' '+@rtStrPricing1+' ' + SQ.strFixationBy + CASE WHEN dbo.fnCTGetReportLanguage(@intLaguageId) = 'Italian' THEN ' ' ELSE '''s ' END
 														+@rtStrPricing2+':'+dbo.fnRemoveTrailingZeroes(dblLotsToFix)+').'
 														else
-														dbo.fnRemoveTrailingZeroes(isnull(SQ.dblCashPrice,(SQ.dblBasis + isnull(SQ.dblFutures,0.00)))) + ' ' + SQ.strPriceCurrencyAndUOMForPriced
+														dbo.fnRemoveTrailingZeroes(SQ.dblBasis) + ' ' + SQ.strPriceCurrencyAndUOMForPriced
 														end)
 			,strGABHeader							=	@rtConfirmationOf + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,TP.strContractType), TP.strContractType) + ' ' + CASE WHEN @type = 'MULTIPLE' THEN '' ELSE CH.strContractNumber END --+ISNULL('-' + @ErrMsg , '')		
 			,striDealHeader							=	@rtConfirmationOf + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Sale'), 'Sale') + ' ' + CASE WHEN @type = 'MULTIPLE' THEN '' ELSE CH.strContractNumber END --+ISNULL('-' + @ErrMsg , '')		
