@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspGRPostSettleStorage]
-	@intSettleStorageId INT
+@intSettleStorageId INT
 	,@ysnPosted BIT
 	,@ysnFromPriceBasisContract BIT = 0
 	,@dblCashPriceFromCt DECIMAL(24, 10) = 0
@@ -1219,6 +1219,7 @@ BEGIN TRY
 							and SV.intItemType = 3
 				) DiscountCost
 				WHERE SV.intItemType = 1
+
 				end
 				--UPDATE the price in tblGRSettleContract
 				IF EXISTS(SELECT 1 FROM tblGRSettleContract WHERE intSettleStorageId = @intSettleStorageId)
@@ -1440,6 +1441,56 @@ BEGIN TRY
 				END
 			END
 
+
+			---geting the available price that can be vouchered
+			begin
+				declare @avqty as table
+				(
+					intContractDetailId int,
+					dblAvailableQuantity numeric(18, 6),
+					intPriceFixationDetailId int,
+					dblCashPrice numeric(18, 6),					
+					bb numeric(18, 6),
+					cc numeric(18, 6),
+					dd numeric(18, 6)
+
+				)
+				
+				insert into @avqty
+					( 
+						intContractDetailId, 
+						dblAvailableQuantity, 
+						intPriceFixationDetailId,
+						dblCashPrice
+					)
+				select 
+						a.intContractDetailId, 
+						b.dblAvailableQuantity, 
+						b.intPriceFixationDetailId ,
+						b.dblCashPrice
+				from @SettleContract a
+					join vyuCTAvailableQuantityForVoucher b
+						on b.intContractDetailId = a.intContractDetailId 
+				declare @acd DECIMAL(24,10)
+				set @acd = @dblSelectedUnits
+				update @avqty set bb = @acd - dblAvailableQuantity, cc = @acd, @acd = (@acd - dblAvailableQuantity)
+
+				update @avqty set dd = dblAvailableQuantity + cc where cc < 0
+				update @avqty set dd = case when cc >= 0 
+						then dblAvailableQuantity 
+					when dblAvailableQuantity + cc >= 0 
+						then dblAvailableQuantity + cc 
+					else null end
+				update @avqty set dblAvailableQuantity = dd
+				delete from @avqty where dblAvailableQuantity is null
+
+			end
+
+			if @debug_awesome_ness = 1
+			begin				
+				select 'avqty ',* from @avqty
+			end
+
 			---5.Voucher Creation, Update Bill, Tax Computation, Post Bill
 			BEGIN
 				DELETE FROM @voucherDetailStorage
@@ -1476,37 +1527,6 @@ BEGIN TRY
 				WHERE a.intItemType = 3
 				
 
-				if @debug_awesome_ness = 1 	and 1 = 0
-				begin
-					select 'settle voucher create', * 
-					FROM @SettleVoucherCreate a
-					LEFT JOIN 
-					(
-						SELECT 
-							intCustomerStorageId
-							,SUM(dblUnits) dblSettleUnits 
-						FROM @SettleVoucherCreate 
-						WHERE intItemType = 1 
-							AND (intPricingTypeId = 1 OR intPricingTypeId IS NULL)
-						GROUP BY intCustomerStorageId
-					)b ON b.intCustomerStorageId = a.intCustomerStorageId
-					INNER JOIN tblGRCustomerStorage CS
-						ON CS.intCustomerStorageId = a.intCustomerStorageId
-					outer apply(
-						select top 1 
-							intContractDetailId,	intPriceFixationId,			intPriceFixationDetailId, 
-							dblCashPrice,			dblAccumulativeQuantity,	dblVoucherQtyReceived,
-							dblAvailableQuantity						
-							from vyuCTAvailableQuantityForVoucher 
-						where intContractDetailId = a.intContractDetailId order by intPriceFixationDetailId desc
-					) availableQtyForVoucher
-					--WHERE a.strOrderType = 'Contract' and availableQtyForVoucher.intContractDetailId is not null and availableQtyForVoucher.intPriceFixationDetailId is not null
-
-					
-				end
-
-
-
 				--- this should update the 
 				update a 
 					set dblCashPrice = availableQtyForVoucher.dblCashPrice
@@ -1525,10 +1545,8 @@ BEGIN TRY
 						ON CS.intCustomerStorageId = a.intCustomerStorageId
 					outer apply(
 						select  
-							intContractDetailId,	intPriceFixationId,			intPriceFixationDetailId, 
-							dblCashPrice,			dblAccumulativeQuantity,	dblVoucherQtyReceived,
-							dblAvailableQuantity						
-							from vyuCTAvailableQuantityForVoucher 
+							intContractDetailId,	intPriceFixationDetailId, dblCashPrice, dblAvailableQuantity						
+							from @avqty 
 						where intContractDetailId = a.intContractDetailId
 					) availableQtyForVoucher
 					WHERE a.strOrderType = 'Contract' and availableQtyForVoucher.intContractDetailId is not null and availableQtyForVoucher.intPriceFixationDetailId is not null
@@ -1544,10 +1562,8 @@ BEGIN TRY
 				FROM @SettleVoucherCreate a
 				cross apply(
 					select top 1 
-						intContractDetailId,	intPriceFixationId,			intPriceFixationDetailId, 
-						dblCashPrice,			dblAccumulativeQuantity,	dblVoucherQtyReceived,
-						dblAvailableQuantity						
-						from vyuCTAvailableQuantityForVoucher 
+						intContractDetailId,	intPriceFixationDetailId, dblCashPrice, dblAvailableQuantity						
+						from @avqty  
 					where intContractDetailId = a.intContractDetailId order by intPriceFixationDetailId desc
 				) availableQtyForVoucher
 				WHERE a.strOrderType = 'Contract' and availableQtyForVoucher.intContractDetailId is not null and availableQtyForVoucher.intPriceFixationDetailId is not null
@@ -1667,7 +1683,7 @@ BEGIN TRY
 														else
 															CASE 
 																WHEN a.intPricingTypeId = 2 AND ISNULL(@dblCashPriceFromCt,0) != 0 AND (@dblQtyFromCt + @dblTotalVoucheredQuantity) < a.dblUnits   and availableQtyForVoucher.intContractDetailId is not null
-																THEN @dblQtyFromCt 
+																THEN availableQtyForVoucher.dblAvailableQuantity --@dblQtyFromCt 
 																WHEN a.intPricingTypeId = 2 AND ISNULL(@dblCashPriceFromCt,0) != 0 AND (@dblQtyFromCt + @dblTotalVoucheredQuantity) > a.dblUnits   and availableQtyForVoucher.intContractDetailId is not null
 																THEN a.dblUnits - @dblTotalVoucheredQuantity 
 																WHEN @origdblSpotUnits > 0 THEN ROUND(dbo.fnCalculateQtyBetweenUOM(b.intItemUOMId,@intCashPriceUOMId,a.dblUnits),6) 
@@ -1710,7 +1726,7 @@ BEGIN TRY
 
 																	CASE 
 																			WHEN a.intPricingTypeId = 2 AND ISNULL(@dblCashPriceFromCt,0) != 0 AND (@dblQtyFromCt + @dblTotalVoucheredQuantity) < a.dblUnits   and availableQtyForVoucher.intContractDetailId is not null
-																			THEN @dblQtyFromCt 
+																			THEN availableQtyForVoucher.dblAvailableQuantity --@dblQtyFromCt 
 																			WHEN a.intPricingTypeId = 2 AND ISNULL(@dblCashPriceFromCt,0) != 0 AND (@dblQtyFromCt + @dblTotalVoucheredQuantity) > a.dblUnits   and availableQtyForVoucher.intContractDetailId is not null
 																			THEN a.dblUnits - @dblTotalVoucheredQuantity
 																			WHEN @origdblSpotUnits > 0 THEN ROUND(dbo.fnCalculateQtyBetweenUOM(b.intItemUOMId,@intCashPriceUOMId,a.dblUnits),6)
@@ -1764,7 +1780,7 @@ BEGIN TRY
 														else
 															CASE 
 																WHEN a.intPricingTypeId = 2 AND ISNULL(@dblCashPriceFromCt,0) != 0 AND (@dblQtyFromCt + @dblTotalVoucheredQuantity) < a.dblUnits   and availableQtyForVoucher.intContractDetailId is not null
-																THEN @dblQtyFromCt 
+																THEN availableQtyForVoucher.dblAvailableQuantity --@dblQtyFromCt 
 																WHEN a.intPricingTypeId = 2 AND ISNULL(@dblCashPriceFromCt,0) != 0 AND (@dblQtyFromCt + @dblTotalVoucheredQuantity) > a.dblUnits   and availableQtyForVoucher.intContractDetailId is not null
 																THEN a.dblUnits - @dblTotalVoucheredQuantity
 																WHEN a.[intContractHeaderId] IS NOT NULL THEN a.dblUnits 
@@ -1806,11 +1822,10 @@ BEGIN TRY
 				--		and IT.intTransactionTypeId = 44
 				--		and IT.intItemId = a.intItemId
 				left join (
-					select
-						intContractDetailId,	intPriceFixationId,			intPriceFixationDetailId, 
-						dblCashPrice,			dblAccumulativeQuantity,	dblVoucherQtyReceived,
-						dblAvailableQuantity,	dblQuantity					
-						from vyuCTAvailableQuantityForVoucher 					
+					select						
+						intContractDetailId,	intPriceFixationDetailId, dblCashPrice, dblAvailableQuantity						
+						from @avqty  			
+						--from vyuCTAvailableQuantityForVoucher 					
 				) availableQtyForVoucher
 					on availableQtyForVoucher.intContractDetailId = a.intContractDetailId
 					
@@ -1825,12 +1840,9 @@ BEGIN TRY
 				begin
 									
 					select 'ct available quantity for voucher', @intContractDetailId
-
-					select 'ct available quantity for voucher',
-						intContractDetailId,	intPriceFixationId,			intPriceFixationDetailId, 
-						dblCashPrice,			dblAccumulativeQuantity,	dblVoucherQtyReceived,
-						dblAvailableQuantity,	dblQuantity					
-						from vyuCTAvailableQuantityForVoucher 		
+					select 'depletion', * from @tblDepletion
+					select 'ct available quantity for voucher', *
+						from @avqty
 						where intContractDetailId = @intContractDetailId
 
 					select ' adding to voucher payable',
@@ -1841,7 +1853,7 @@ BEGIN TRY
 							@dblTotalVoucheredQuantity as [total voucher quantity],
 							@origdblSpotUnits as [dbl spot unit],
 							availableQtyForVoucher.intContractDetailId,
-							availableQtyForVoucher.dblQuantity,
+							availableQtyForVoucher.dblAvailableQuantity,
 							a.dblUnits,
 								[dblOrderQty]					= 
 														case when @doPartialHistory = 1 then
@@ -1850,7 +1862,7 @@ BEGIN TRY
 														else
 															CASE 
 																WHEN a.intPricingTypeId = 2 AND ISNULL(@dblCashPriceFromCt,0) != 0 AND (@dblQtyFromCt + @dblTotalVoucheredQuantity) < a.dblUnits   and availableQtyForVoucher.intContractDetailId is not null
-																	THEN @dblQtyFromCt 
+																	THEN availableQtyForVoucher.dblAvailableQuantity -- @dblQtyFromCt 
 																WHEN a.intPricingTypeId = 2 AND ISNULL(@dblCashPriceFromCt,0) != 0 AND (@dblQtyFromCt + @dblTotalVoucheredQuantity) > a.dblUnits  and availableQtyForVoucher.intContractDetailId is not null
 																	THEN a.dblUnits - @dblTotalVoucheredQuantity																
 																WHEN @origdblSpotUnits > 0 
@@ -1894,7 +1906,7 @@ BEGIN TRY
 
 																	CASE 
 																			WHEN a.intPricingTypeId = 2 AND ISNULL(@dblCashPriceFromCt,0) != 0 AND (@dblQtyFromCt + @dblTotalVoucheredQuantity) < a.dblUnits and availableQtyForVoucher.intContractDetailId is not null
-																			THEN @dblQtyFromCt 
+																			THEN availableQtyForVoucher.dblAvailableQuantity --@dblQtyFromCt 
 																			WHEN a.intPricingTypeId = 2 AND ISNULL(@dblCashPriceFromCt,0) != 0 AND (@dblQtyFromCt + @dblTotalVoucheredQuantity) > a.dblUnits  and availableQtyForVoucher.intContractDetailId is not null
 																			THEN a.dblUnits - @dblTotalVoucheredQuantity																			
 																			WHEN @origdblSpotUnits > 0 THEN ROUND(dbo.fnCalculateQtyBetweenUOM(b.intItemUOMId,@intCashPriceUOMId,a.dblUnits),6)
@@ -1956,10 +1968,8 @@ BEGIN TRY
 						and IT.intItemId = a.intItemId
 				left join (
 					select
-						intContractDetailId,	intPriceFixationId,			intPriceFixationDetailId, 
-						dblCashPrice,			dblAccumulativeQuantity,	dblVoucherQtyReceived,
-						dblAvailableQuantity,	dblQuantity					
-						from vyuCTAvailableQuantityForVoucher 					
+						intContractDetailId,	intPriceFixationDetailId, dblCashPrice, dblAvailableQuantity					
+						from @avqty 					
 				) availableQtyForVoucher
 					on availableQtyForVoucher.intContractDetailId = a.intContractDetailId
 					
@@ -2376,7 +2386,7 @@ BEGIN TRY
 							
 								UPDATE tblGRSettleStorage
 									SET intBillId = @createdVouchersId
-										WHERE intSettleStorageId = @intSettleStorageId 
+										WHERE intSettleStorageId = @intSettleStorageId  and @createdVouchersId is not null
 
 								declare @sum_e DECIMAL(38,20)
 								select @sum_e = sum(abs (dblCost))
@@ -2442,12 +2452,12 @@ BEGIN TRY
 										[intConcurrencyId]     = 1 
 										,[intCustomerStorageId] = SV.[intCustomerStorageId]
 										,[intContractHeaderId]  = SV.[intContractHeaderId]
-										,[dblUnits]				= 
-																	case when (@dblQtyFromCt + @dblTotalVoucheredQuantity) < @dblSelectedUnits then @dblQtyFromCt
+										,[dblUnits]				= SV.dblOrderQty
+																	/*case when (@dblQtyFromCt + @dblTotalVoucheredQuantity) < @dblSelectedUnits then @dblQtyFromCt
 																		when (@dblQtyFromCt + @dblTotalVoucheredQuantity) > @dblSelectedUnits then  @dblSelectedUnits - @dblTotalVoucheredQuantity
 																		else	
 																			@dblSelectedUnits
-																		end
+																		end*/
 										,[dtmHistoryDate]		= GETDATE()
 										,[strType]				= 'Partial Pricing'
 										,[strUserName]			= NULL
@@ -2603,6 +2613,8 @@ BEGIN TRY
 				select 'settle storage before storage history',* from @SettleStorage
 				select 'settle contract before storage history',* from @SettleContract
 
+
+				
 			end
 
 			--7. HiStory Creation
@@ -2718,7 +2730,7 @@ BEGIN TRY
 			UPDATE tblGRSettleStorage
 			SET ysnPosted = 1
 				,intBillId = @createdVouchersId
-			WHERE intSettleStorageId = @intSettleStorageId
+			WHERE intSettleStorageId = @intSettleStorageId and @createdVouchersId is not null
 		END
 
 	SELECT @intSettleStorageId = MIN(intSettleStorageId)
@@ -2737,13 +2749,13 @@ BEGIN TRY
 	if @ysnFromPriceBasisContract = 0
 		UPDATE tblGRStorageHistory
 		SET intBillId = @createdVouchersId
-		WHERE intSettleStorageId = @intParentSettleStorageId
+		WHERE intSettleStorageId = @intParentSettleStorageId and @createdVouchersId is not null
 	
 	if @debug_awesome_ness = 1	
 	begin
 		
-		select 'storage history part', @createdVouchersId
-		select 'storage history',* from [tblGRStorageHistory] order by intStorageHistoryId desc --offset 0 rows fetch next 5 rows only
+		select 'storage history part', @createdVouchersId, @ysnFromPriceBasisContract, @intVoucherId
+		select top 10 'storage history',* from [tblGRStorageHistory] order by intStorageHistoryId desc --offset 0 rows fetch next 5 rows only
 
 	end
 
