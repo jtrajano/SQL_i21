@@ -15,28 +15,12 @@ SELECT intTransactionId		= P.intPaymentId
 	 , ysnInvoicePrepayment	= P.ysnInvoicePrepayment
 FROM dbo.tblARPayment P WITH (NOLOCK)
 INNER JOIN dbo.tblEMEntity E WITH (NOLOCK) ON P.intEntityCustomerId = E.intEntityId
-INNER JOIN dbo.tblSMPaymentMethod SM WITH (NOLOCK) ON P.intPaymentMethodId = SM.intPaymentMethodID
 INNER JOIN dbo.tblCMUndepositedFund UF WITH (NOLOCK) ON P.intPaymentId = UF.intSourceTransactionId
 											        AND P.strRecordNumber = UF.strSourceTransactionId
 INNER JOIN dbo.tblCMBankTransactionDetail BTD WITH (NOLOCK) ON UF.intUndepositedFundId = BTD.intUndepositedFundId
-LEFT JOIN (
-	SELECT intPaymentId
-		 , intInvoiceId
-	FROM dbo.tblARInvoice I
-	WHERE I.ysnPosted = 1	  
-	  AND I.strTransactionType IN ('Overpayment', 'Customer Prepayment')
-) CPP ON P.intPaymentId = CPP.intPaymentId 
-OUTER APPLY (
-	SELECT TOP 1 P.intPaymentId
-	FROM dbo.tblARPaymentDetail PD
-	INNER JOIN tblARPayment P ON PD.intPaymentId = P.intPaymentId
-	WHERE PD.intInvoiceId = CPP.intInvoiceId
-	  AND P.ysnInvoicePrepayment = 0
-) PAYMENT
 WHERE P.ysnProcessedToNSF = 0
   AND P.ysnPosted = 1
-    AND SM.strPaymentMethod IN ('Check', 'eCheck', 'ACH', 'Manual Credit Card', 'Credit Card')
-  AND (ISNULL(CPP.intInvoiceId, 0) = 0 OR (ISNULL(CPP.intInvoiceId, 0) <> 0 AND ISNULL(PAYMENT.intPaymentId, 0) = 0))
+  AND P.strPaymentMethod IN ('Check', 'eCheck', 'ACH')
 
 UNION ALL
 
@@ -63,4 +47,4 @@ WHERE I.ysnProcessedToNSF = 0
   AND I.ysnPosted = 1
   AND I.intPaymentMethodId IS NOT NULL
   AND I.strTransactionType = 'Cash'
-  AND SM.strPaymentMethod IN ('Check', 'eCheck', 'ACH', 'Manual Credit Card', 'Credit Card')
+  AND SM.strPaymentMethod IN ('Check', 'eCheck', 'ACH')
