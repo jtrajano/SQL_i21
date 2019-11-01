@@ -7366,6 +7366,7 @@
     <Build Include="dbo\Views\vyuCMRemittanceAdviceReport.sql" />
     <Build Include="dbo\Stored Procedures\uspAPConvertPaymentToPrepay.sql" />
     <Build Include="dbo\Stored Procedures\uspSCUpdateDeliverySheetDate.sql" />
+    <Build Include="dbo\Views\vyuARPaymentForNSF.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
