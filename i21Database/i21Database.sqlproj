@@ -8313,6 +8313,7 @@
     <None Include="Scripts\Post-Deployment\AP\UpdatePaymentDetailOffset.sql" />
     <Build Include="dbo\Views\vyuARInvoiceSubFormulaReport.sql" />
     <Build Include="dbo\Views\vyuCTAvailableQuantityForVoucher.sql" />
+    <Build Include="dbo\Views\vyuARPaymentForNSF.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
