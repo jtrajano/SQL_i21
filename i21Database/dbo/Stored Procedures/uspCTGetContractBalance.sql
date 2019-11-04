@@ -457,7 +457,7 @@ BEGIN TRY
 		JOIN tblCTContractHeader CH ON CD.intContractHeaderId = CH.intContractHeaderId
 		AND CD.intContractHeaderId = CH.intContractHeaderId
 		WHERE SS.ysnPosted = 1
-			AND SS.intParentSettleStorageId IS NOT NULL
+			AND SS.intParentSettleStorageId IS NULL
 			AND dbo.fnRemoveTimeOnDate(SS.dtmCreated) <= CASE WHEN @dtmEndDate IS NOT NULL   THEN @dtmEndDate   ELSE dbo.fnRemoveTimeOnDate(SS.dtmCreated) END
 		GROUP BY CH.intContractTypeId,CH.intContractHeaderId
 			,CD.intContractDetailId,SS.dtmCreated,SS.intSettleStorageId
