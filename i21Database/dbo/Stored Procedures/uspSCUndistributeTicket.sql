@@ -780,9 +780,9 @@ BEGIN TRY
 									ON A.intInventoryShipmentItemId = B.intInventoryShipmentItemId
 								LEFT JOIN tblARInvoice D
 									ON B.intInvoiceId = D.intInvoiceId
-										AND D.strTransactionType = 'Invoice'
 								INNER JOIN #tmpItemShipmentIds C
 									ON A.intInventoryShipmentId = C.intInventoryShipmentId
+									AND D.strTransactionType = 'Invoice'
 							
 
 								---GEt all the invoice Detail Id for the inventory shipment charge details
@@ -805,10 +805,10 @@ BEGIN TRY
 									ON A.intInventoryShipmentChargeId = B.intInventoryShipmentChargeId
 								LEFT JOIN tblARInvoice D
 									ON B.intInvoiceId = D.intInvoiceId
-										AND D.strTransactionType = 'Invoice'
-										AND D.ysnPosted = 1
 								INNER JOIN #tmpItemShipmentIds C
 									ON A.intInventoryShipmentId = C.intInventoryShipmentId
+								WHERE A.strTransactionType = 'Invoice'
+										AND D.ysnPosted = 1
 
 
 								--Check if all invoice have credit memo
@@ -821,9 +821,10 @@ BEGIN TRY
 												ON A.intInvoiceDetailId = B.intOriginalInvoiceDetailId
 											LEFT JOIN tblARInvoice C
 												ON B.intInvoiceId = C.intInvoiceId
-													AND C.strTransactionType = 'Credit Memo'
 											WHERE A.intInvoiceDetailId IS NOT NULL
-												AND B.intInvoiceDetailId IS NULL )
+												AND B.intInvoiceDetailId IS NULL 
+												AND C.strTransactionType = 'Credit Memo'
+												)
 
 								BEGIN
 									SET @ysnAllInvoiceHasCreditMemo = 0 
@@ -838,9 +839,10 @@ BEGIN TRY
 													ON A.intInvoiceDetailId = B.intOriginalInvoiceDetailId
 												LEFT JOIN tblARInvoice C
 													ON B.intInvoiceId = C.intInvoiceId
-														AND C.strTransactionType = 'Credit Memo'
 												WHERE A.intInvoiceDetailId IS NOT NULL
-													AND B.intInvoiceDetailId IS NULL )
+													AND B.intInvoiceDetailId IS NULL 
+													AND C.strTransactionType = 'Credit Memo'
+													)
 
 									BEGIN
 										SET @ysnAllInvoiceHasCreditMemo = 0 
