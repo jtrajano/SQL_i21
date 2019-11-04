@@ -1705,6 +1705,10 @@ BEGIN TRY
 																	a.dblUnits - @dblTotalVoucheredQuantity
 																ELSE 
 																	case when @ysnFromPriceBasisContract = 1 and  availableQtyForVoucher.intContractDetailId is null  and c.strType = 'Inventory' then 0
+																	when @ysnFromPriceBasisContract = 1  AND (@dblQtyFromCt + @dblTotalVoucheredQuantity) > a.dblUnits 
+																		THEN a.dblUnits - @dblTotalVoucheredQuantity
+																	when @ysnFromPriceBasisContract = 1  AND (@dblQtyFromCt + @dblTotalVoucheredQuantity) < a.dblUnits 
+																		THEN @dblQtyFromCt - a.dblUnits
 																	else 
 																		a.dblUnits
 																	end
@@ -1748,6 +1752,10 @@ BEGIN TRY
 																				a.dblUnits - @dblTotalVoucheredQuantity
 																			ELSE 
 																				case when @ysnFromPriceBasisContract = 1 and  availableQtyForVoucher.intContractDetailId is null and c.strType = 'Inventory' then 0
+																				when @ysnFromPriceBasisContract = 1  AND (@dblQtyFromCt + @dblTotalVoucheredQuantity) > a.dblUnits 
+																					THEN a.dblUnits - @dblTotalVoucheredQuantity
+																				when @ysnFromPriceBasisContract = 1  AND (@dblQtyFromCt + @dblTotalVoucheredQuantity) < a.dblUnits 
+																					THEN @dblQtyFromCt - a.dblUnits
 																				else 
 																					a.dblUnits
 																				end
@@ -1797,6 +1805,10 @@ BEGIN TRY
 																THEN availableQtyForVoucher.dblAvailableQuantity --@dblQtyFromCt 
 																WHEN a.intPricingTypeId = 2 AND ISNULL(@dblCashPriceFromCt,0) != 0 AND (@dblQtyFromCt + @dblTotalVoucheredQuantity) > a.dblUnits   and availableQtyForVoucher.intContractDetailId is not null
 																THEN a.dblUnits - @dblTotalVoucheredQuantity
+																when @ysnFromPriceBasisContract = 1  AND (@dblQtyFromCt + @dblTotalVoucheredQuantity) > a.dblUnits 
+																	THEN a.dblUnits - @dblTotalVoucheredQuantity
+																when @ysnFromPriceBasisContract = 1  AND (@dblQtyFromCt + @dblTotalVoucheredQuantity) < a.dblUnits 
+																	THEN @dblQtyFromCt - a.dblUnits
 																WHEN a.[intContractHeaderId] IS NOT NULL THEN a.dblUnits 
 																ELSE 0 
 															END
@@ -1885,6 +1897,10 @@ BEGIN TRY
 																	then a.dblUnits - @dblTotalVoucheredQuantity
 																ELSE 
 																		case when @ysnFromPriceBasisContract = 1 and  availableQtyForVoucher.intContractDetailId is null  and c.strType = 'Inventory' then 0
+																		when @ysnFromPriceBasisContract = 1  AND (@dblQtyFromCt + @dblTotalVoucheredQuantity) > a.dblUnits 
+																			THEN a.dblUnits - @dblTotalVoucheredQuantity
+																		when @ysnFromPriceBasisContract = 1  AND (@dblQtyFromCt + @dblTotalVoucheredQuantity) < a.dblUnits 
+																			THEN @dblQtyFromCt - a.dblUnits
 																		else 
 																			a.dblUnits
 																		end
@@ -1928,6 +1944,10 @@ BEGIN TRY
 																				a.dblUnits - @dblTotalVoucheredQuantity
 																			ELSE 
 																				case when @ysnFromPriceBasisContract = 1 and  availableQtyForVoucher.intContractDetailId is null  and c.strType = 'Inventory' then 0
+																				when @ysnFromPriceBasisContract = 1  AND (@dblQtyFromCt + @dblTotalVoucheredQuantity) > a.dblUnits 
+																					THEN a.dblUnits - @dblTotalVoucheredQuantity
+																				when @ysnFromPriceBasisContract = 1  AND (@dblQtyFromCt + @dblTotalVoucheredQuantity) < a.dblUnits 
+																					THEN @dblQtyFromCt - a.dblUnits
 																				else 
 																					a.dblUnits
 																				end
