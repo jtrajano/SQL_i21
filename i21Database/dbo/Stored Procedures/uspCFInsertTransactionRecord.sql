@@ -923,8 +923,8 @@ BEGIN
 				FROM tblCFCard C
 				INNER JOIN tblCFAccount A
 				ON C.intAccountId = A.intAccountId
-				WHERE C.strCardNumber = @strCardId
-				AND ISNULL(C.ysnActive,0) = 1
+				WHERE C.strCardNumber = @strCardId 
+				AND ( ISNULL(C.ysnActive,0) = 1  OR @ysnPostedCSV = 1)
 			END
 			ELSE
 			BEGIN
@@ -938,7 +938,7 @@ BEGIN
 					INNER JOIN tblCFAccount A
 					ON C.intAccountId = A.intAccountId
 					WHERE C.strCardNumber = @strCardId
-					AND ISNULL(C.ysnActive,0) = 1
+					AND ( ISNULL(C.ysnActive,0) = 1  OR @ysnPostedCSV = 1)
 				END
 				ELSE
 				BEGIN
@@ -948,7 +948,7 @@ BEGIN
 					INNER JOIN tblCFAccount A
 					ON C.intAccountId = A.intAccountId
 					WHERE C.intCardId = @intCardId
-					AND ISNULL(C.ysnActive,0) = 1
+					AND ( ISNULL(C.ysnActive,0) = 1  OR @ysnPostedCSV = 1)
 
 					SET @ysnCreditCardUsed = 1
 
@@ -965,7 +965,7 @@ BEGIN
 				INNER JOIN tblCFAccount A
 				ON C.intAccountId = A.intAccountId
 				WHERE C.strCardNumber = @strCardId
-				AND ISNULL(C.ysnActive,0) = 1
+				AND ( ISNULL(C.ysnActive,0) = 1  OR @ysnPostedCSV = 1)
 			END
 		END
 	END
@@ -979,7 +979,7 @@ BEGIN
 			INNER JOIN tblCFAccount A
 			ON C.intAccountId = A.intAccountId
 			WHERE C.strCardNumber = @strCardId
-			AND ISNULL(C.ysnActive,0) = 1
+			AND ( ISNULL(C.ysnActive,0) = 1  OR @ysnPostedCSV = 1)
 		END
 	END
 
