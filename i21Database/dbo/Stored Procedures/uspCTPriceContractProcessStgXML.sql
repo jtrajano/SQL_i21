@@ -591,7 +591,7 @@ BEGIN TRY
 
 				SELECT @intFinalPriceUOMId = intCommodityUnitMeasureId
 				FROM tblICCommodityUnitMeasure
-				WHERE intCommodityUnitMeasureId = @intUnitMeasureId
+				WHERE intUnitMeasureId = @intUnitMeasureId
 					AND intCommodityId = @intCommodityId
 
 				SELECT @intCreatedById = EY.intEntityId

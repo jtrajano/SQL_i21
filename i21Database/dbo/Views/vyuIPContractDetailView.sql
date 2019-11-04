@@ -357,6 +357,12 @@ SELECT CD.intContractDetailId
 	,CD.ysnClaimsToProducer
 	,CD.ysnRiskToProducer
 	,CD.ysnBackToBack
+	,BI.strItemNo AS strItemBundleNo
+	,BCU.strCurrency AS strBasisCurrency
+	,BUM.strUnitMeasure AS strBasisUnitMeasure
+	,FBUM.strUnitMeasure AS strFreightBasisUnitMeasure
+	,FBBUM.strUnitMeasure AS strFreightBasisBaseUnitMeasure
+	,CPCU.strCurrency AS strConvPriceCurrency
 FROM tblCTContractDetail CD
 CROSS JOIN tblCTCompanyPreference CP
 CROSS APPLY dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
@@ -462,4 +468,12 @@ LEFT JOIN tblSMCurrencyExchangeRate CER ON CER.intCurrencyExchangeRateId = CD.in
 LEFT JOIN tblSMCurrency FC ON FC.intCurrencyID = CER.intFromCurrencyId
 LEFT JOIN tblSMCurrency TC ON TC.intCurrencyID = CER.intToCurrencyId
 LEFT JOIN tblEMEntity Producer ON Producer.intEntityId = CD.intProducerId
-
+LEFT JOIN tblICItem BI ON BI.intItemId = CD.intItemBundleId
+LEFT JOIN tblSMCurrency BCU ON BCU.intCurrencyID = CD.intBasisCurrencyId
+LEFT JOIN tblICItemUOM BIU ON BIU.intItemUOMId = CD.intBasisUOMId
+LEFT JOIN tblICUnitMeasure BUM ON BUM.intUnitMeasureId = BIU.intUnitMeasureId
+LEFT JOIN tblICItemUOM FBIU ON FBIU.intItemUOMId = CD.intFreightBasisUOMId
+LEFT JOIN tblICUnitMeasure FBUM ON FBUM.intUnitMeasureId = FBIU.intUnitMeasureId
+LEFT JOIN tblICItemUOM FBBIU ON FBBIU.intItemUOMId = CD.intFreightBasisBaseUOMId
+LEFT JOIN tblICUnitMeasure FBBUM ON FBBUM.intUnitMeasureId = FBBIU.intUnitMeasureId
+LEFT JOIN tblSMCurrency CPCU ON CPCU.intCurrencyID = CD.intConvPriceCurrencyId
