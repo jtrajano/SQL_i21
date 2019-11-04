@@ -167,7 +167,7 @@ FROM
 		,(
 		CASE 
 		WHEN (min(agitm_tontax_rpt_yn) = 'Y')
-			THEN (SELECT TOP 1 IUOM.intUnitMeasureId FROM tblICUnitMeasure IUOM WHERE UPPER(IUOM.strUnitMeasure) COLLATE SQL_Latin1_General_CP1_CS_AS = MIN(agitm_un_desc) COLLATE SQL_Latin1_General_CP1_CS_AS)
+			THEN (SELECT TOP 1 IUOM.intUnitMeasureId FROM tblICUnitMeasure IUOM WHERE UPPER(IUOM.strUnitMeasure) COLLATE SQL_Latin1_General_CP1_CS_AS = UPPER(MIN(agitm_un_desc)) COLLATE SQL_Latin1_General_CP1_CS_AS)
 		ELSE NULL
 		END
 		) TonnageTaxUOM
@@ -230,7 +230,7 @@ FROM (
 			ON I.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS = rtrim(oi.agitm_no) COLLATE SQL_Latin1_General_CP1_CS_AS 
 			AND agitm_phys_inv_ynbo <> 'O'
 		JOIN tblICUnitMeasure U 
-			ON UPPER(U.strUnitMeasure) COLLATE SQL_Latin1_General_CP1_CS_AS = oi.agitm_un_desc COLLATE SQL_Latin1_General_CP1_CS_AS
+			ON UPPER(U.strUnitMeasure) COLLATE SQL_Latin1_General_CP1_CS_AS = UPPER(oi.agitm_un_desc) COLLATE SQL_Latin1_General_CP1_CS_AS
         LEFT JOIN (
 					 SELECT  rtrim(agitmUPC.agitm_upc_code) AGItemUPC , COUNT(agitmUPC.agitm_upc_code) UpcDupCount
 					 FROM agitmmst agitmUPC
@@ -251,7 +251,7 @@ SELECT distinct intItemId, intUnitMeasureId, dblUnitQty, strUpcCode, ysnStockUni
 FROM (
 		select intItemId, 
 			(select intUnitMeasureId from tblICUnitMeasure where strUnitMeasure = 'LB') intUnitMeasureId, 
-			Case oi.agitm_un_desc When 'BU' then 1/oi.agitm_lbs_per_un When 'TON' then 1/oi.agitm_lbs_per_un When 'CWT' then 1/oi.agitm_lbs_per_un else oi.agitm_lbs_per_un end dblUnitQty, 
+			Case UPPER(oi.agitm_un_desc) When 'BU' then 1/oi.agitm_lbs_per_un When 'TON' then 1/oi.agitm_lbs_per_un When 'CWT' then 1/oi.agitm_lbs_per_un else oi.agitm_lbs_per_un end dblUnitQty, 
 			strUpcCode = NULL, -- causes duplicates upc might already inserted -->>>> NULLIF(oi.strUpcCode,'') , 
 			0 ysnStockUnit,
 			1 ysnAllowPurchase, 
@@ -260,10 +260,10 @@ FROM (
 		FROM tblICItem I 
 		JOIN 
 			(SELECT rtrim(agitm_no) agitm_no, min(upper(rtrim(agitm_un_desc))) agitm_un_desc, min(agitm_lbs_per_un) agitm_lbs_per_un, MIN(RTRIM(agitm_upc_code)) strUpcCode from agitmmst 
-			 WHERE agitm_lbs_per_un not in (1,0) and agitm_un_desc <> 'LB'
+			 WHERE agitm_lbs_per_un not in (1,0) and UPPER(agitm_un_desc) <> 'LB'
 			 GROUP BY rtrim(agitm_no)) as oi 
 		ON I.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS = rtrim(oi.agitm_no) COLLATE SQL_Latin1_General_CP1_CS_AS 
-		JOIN tblICUnitMeasure U on upper(U.strUnitMeasure) COLLATE SQL_Latin1_General_CP1_CS_AS = oi.agitm_un_desc COLLATE SQL_Latin1_General_CP1_CS_AS
+		JOIN tblICUnitMeasure U on upper(U.strUnitMeasure) COLLATE SQL_Latin1_General_CP1_CS_AS = UPPER(oi.agitm_un_desc) COLLATE SQL_Latin1_General_CP1_CS_AS
 	) a
 WHERE NOT EXISTS(SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemId = a.intItemId AND intUnitMeasureId = a.intUnitMeasureId)
 
@@ -285,7 +285,7 @@ FROM (
 		from tblICItem I 
 		JOIN 
 			(SELECT rtrim(agitm_no) agitm_no, min(upper(rtrim(agitm_pak_desc))) agitm_pak_desc, min(agitm_un_per_pak) agitm_un_per_pak , MIN(RTRIM(agitm_upc_code)) strUpcCode from agitmmst 
-			WHERE agitm_un_per_pak not in (1,0) and agitm_un_desc <> agitm_pak_desc
+			WHERE agitm_un_per_pak not in (1,0) and UPPER(agitm_un_desc) <> UPPER(agitm_pak_desc)
 			GROUP BY RTRIM(agitm_no)) as oi 
 		ON I.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS = rtrim(oi.agitm_no) COLLATE SQL_Latin1_General_CP1_CS_AS 
 		JOIN tblICUnitMeasure U on upper(U.strUnitMeasure) COLLATE SQL_Latin1_General_CP1_CS_AS = oi.agitm_pak_desc COLLATE SQL_Latin1_General_CP1_CS_AS
@@ -495,7 +495,7 @@ SELECT inv.intItemId
 	,PL.strPricingLevelName strPricingLevel
 	,(select IU.intItemUOMId from tblICItemUOM IU join tblICUnitMeasure U on U.intUnitMeasureId = IU.intUnitMeasureId
 	where IU.intItemId = inv.intItemId
-	and U.strUnitMeasure COLLATE SQL_Latin1_General_CP1_CS_AS = itm.agitm_un_desc COLLATE SQL_Latin1_General_CP1_CS_AS) uom
+	and UPPER(U.strUnitMeasure) COLLATE SQL_Latin1_General_CP1_CS_AS = UPPER(itm.agitm_un_desc) COLLATE SQL_Latin1_General_CP1_CS_AS) uom
 	,1 dblUnit
 	,Case 
 	when agitm_prc_calc_ind = 'A' then 'Fixed Dollar Amount'
@@ -530,7 +530,7 @@ SELECT inv.intItemId
 	,PL.strPricingLevelName strPricingLevel
 	,(select IU.intItemUOMId from tblICItemUOM IU join tblICUnitMeasure U on U.intUnitMeasureId = IU.intUnitMeasureId
 	where IU.intItemId = inv.intItemId
-	and U.strUnitMeasure COLLATE SQL_Latin1_General_CP1_CS_AS = itm.agitm_un_desc COLLATE SQL_Latin1_General_CP1_CS_AS) uom
+	and UPPER(U.strUnitMeasure) COLLATE SQL_Latin1_General_CP1_CS_AS = UPPER(itm.agitm_un_desc) COLLATE SQL_Latin1_General_CP1_CS_AS) uom
 	,1 dblUnit
 	,Case 
 	when agitm_prc_calc_ind = 'A' then 'Fixed Dollar Amount'
@@ -564,7 +564,7 @@ SELECT inv.intItemId
 	,PL.strPricingLevelName strPricingLevel
 	,(select IU.intItemUOMId from tblICItemUOM IU join tblICUnitMeasure U on U.intUnitMeasureId = IU.intUnitMeasureId
 	where IU.intItemId = inv.intItemId
-	and U.strUnitMeasure COLLATE SQL_Latin1_General_CP1_CS_AS = itm.agitm_un_desc COLLATE SQL_Latin1_General_CP1_CS_AS) uom
+	and UPPER(U.strUnitMeasure) COLLATE SQL_Latin1_General_CP1_CS_AS = UPPER(itm.agitm_un_desc) COLLATE SQL_Latin1_General_CP1_CS_AS) uom
 	,1 dblUnit
 	,Case 
 	when agitm_prc_calc_ind = 'A' then 'Fixed Dollar Amount'
@@ -598,7 +598,7 @@ SELECT inv.intItemId
 	,PL.strPricingLevelName strPricingLevel
 	,(select IU.intItemUOMId from tblICItemUOM IU join tblICUnitMeasure U on U.intUnitMeasureId = IU.intUnitMeasureId
 	where IU.intItemId = inv.intItemId
-	and U.strUnitMeasure COLLATE SQL_Latin1_General_CP1_CS_AS = itm.agitm_un_desc COLLATE SQL_Latin1_General_CP1_CS_AS) uom
+	and UPPER(U.strUnitMeasure) COLLATE SQL_Latin1_General_CP1_CS_AS = UPPER(itm.agitm_un_desc) COLLATE SQL_Latin1_General_CP1_CS_AS) uom
 	,1 dblUnit
 	,Case 
 	when agitm_prc_calc_ind = 'A' then 'Fixed Dollar Amount'
@@ -633,7 +633,7 @@ SELECT inv.intItemId
 	,PL.strPricingLevelName strPricingLevel
 	,(select IU.intItemUOMId from tblICItemUOM IU join tblICUnitMeasure U on U.intUnitMeasureId = IU.intUnitMeasureId
 	where IU.intItemId = inv.intItemId
-	and U.strUnitMeasure COLLATE SQL_Latin1_General_CP1_CS_AS = itm.agitm_un_desc COLLATE SQL_Latin1_General_CP1_CS_AS) uom
+	and UPPER(U.strUnitMeasure) COLLATE SQL_Latin1_General_CP1_CS_AS = UPPER(itm.agitm_un_desc) COLLATE SQL_Latin1_General_CP1_CS_AS) uom
 	,1 dblUnit
 	,Case 
 	when agitm_prc_calc_ind = 'A' then 'Fixed Dollar Amount'
