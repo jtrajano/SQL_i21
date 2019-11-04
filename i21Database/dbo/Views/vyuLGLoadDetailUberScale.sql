@@ -10,6 +10,7 @@ SELECT
   ,LoadDetail.intVendorEntityId    
   ,LoadDetail.intCustomerEntityId    
   ,strVendor = VEN.strName    
+  ,strCustomer = CEN.strName
   ,strShipFrom = VEL.strAddress    
   ,strShipFromAddress = VEL.strAddress    
   ,strShipFromCity = VEL.strCity  
@@ -35,6 +36,7 @@ SELECT
 FROM tblLGLoadDetail LoadDetail    
 JOIN tblLGLoad Load ON Load.intLoadId = LoadDetail.intLoadId     
 LEFT JOIN tblEMEntity VEN ON VEN.intEntityId = LoadDetail.intVendorEntityId    
+LEFT JOIN tblEMEntity CEN ON CEN.intEntityId = LoadDetail.intCustomerEntityId  
 LEFT JOIN tblEMEntityLocation VEL ON VEL.intEntityLocationId = LoadDetail.intVendorEntityLocationId    
 LEFT JOIN tblEMEntityLocation CEL ON CEL.intEntityLocationId = LoadDetail.intCustomerEntityLocationId 
 LEFT JOIN tblCTContractDetail PDetail ON PDetail.intContractDetailId = LoadDetail.intPContractDetailId    
