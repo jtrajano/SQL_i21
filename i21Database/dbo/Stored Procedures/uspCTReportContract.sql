@@ -698,7 +698,7 @@ BEGIN TRY
 														END 
 														+ ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,DATENAME(MONTH,CH.dtmContractDate)), DATENAME(MONTH,CH.dtmContractDate)) + ' ' + LEFT(DATENAME(YEAR,CH.dtmContractDate),4)
 			*/
-			,strGABCompanyCityAndDate				=	ISNULL(@strCity + ', ', '') + LEFT(DATENAME(DAY,CH.dtmContractDate),2)
+			,strCompanyCityAndDate				=	ISNULL(@strCity + ', ', '') + LEFT(DATENAME(DAY,CH.dtmContractDate),2)
 														+ ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,LEFT(DATENAME(MONTH,CH.dtmContractDate),3)), LEFT(DATENAME(MONTH,CH.dtmContractDate),3)) + ' ' + LEFT(DATENAME(YEAR,CH.dtmContractDate),4)
 			
 			,strGABCompanyCityAndDate				=	ISNULL(@strCity + ', ', '') + LEFT(DATENAME(DAY,CH.dtmContractDate),2)
