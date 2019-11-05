@@ -1404,7 +1404,7 @@ BEGIN
 			[strQuery]  		=        N'	SELECT	DISTINCT CH.intContractHeaderId , null as s
 												FROM	tblCTContractHeader CH	CROSS	
 												JOIN	tblCTEvent			EV	
-												JOIN	tblCTAction			AC	ON	AC.intActionId			=	EV.intActionId
+												JOIN	tblCTAction			AC	ON	AC.intActionId			=	EV.intActionId AND AC.strActionName = ''Pre-shipment Sample Notification''
 												JOIN	tblCTEventRecipient ER	ON	ER.intEventId			=	EV.intEventId	LEFT
 												JOIN	tblCTContractDetail CD	ON	CD.intContractHeaderId	=	CH.intContractHeaderId
 												JOIN	tblQMSample as SM
@@ -1424,7 +1424,7 @@ BEGIN
 												SELECT	DISTINCT CH.intContractHeaderId , null as s
 														FROM	tblCTContractHeader CH	CROSS	
 														JOIN	tblCTEvent			EV	
-														JOIN	tblCTAction			AC	ON	AC.intActionId			=	EV.intActionId
+														JOIN	tblCTAction			AC	ON	AC.intActionId			=	EV.intActionId AND AC.strActionName = ''Pre-shipment Sample Notification''
 														JOIN	tblCTEventRecipient ER	ON	ER.intEventId			=	EV.intEventId	LEFT
 														JOIN	tblCTContractDetail CD	ON	CD.intContractHeaderId	=	CH.intContractHeaderId
 														JOIN (
@@ -1458,7 +1458,7 @@ BEGIN
 		[strQuery]  		=        N'	SELECT	DISTINCT CH.intContractHeaderId , null as s
 												FROM	tblCTContractHeader CH	CROSS	
 												JOIN	tblCTEvent			EV	
-												JOIN	tblCTAction			AC	ON	AC.intActionId			=	EV.intActionId
+												JOIN	tblCTAction			AC	ON	AC.intActionId			=	EV.intActionId AND AC.strActionName = ''Pre-shipment Sample Notification''
 												JOIN	tblCTEventRecipient ER	ON	ER.intEventId			=	EV.intEventId	LEFT
 												JOIN	tblCTContractDetail CD	ON	CD.intContractHeaderId	=	CH.intContractHeaderId
 												JOIN	tblQMSample as SM
@@ -1480,7 +1480,7 @@ BEGIN
 												SELECT	DISTINCT CH.intContractHeaderId , null as s
 														FROM	tblCTContractHeader CH	CROSS	
 														JOIN	tblCTEvent			EV	
-														JOIN	tblCTAction			AC	ON	AC.intActionId			=	EV.intActionId
+														JOIN	tblCTAction			AC	ON	AC.intActionId			=	EV.intActionId AND AC.strActionName = ''Pre-shipment Sample Notification''
 														JOIN	tblCTEventRecipient ER	ON	ER.intEventId			=	EV.intEventId	LEFT
 														JOIN	tblCTContractDetail CD	ON	CD.intContractHeaderId	=	CH.intContractHeaderId
 														JOIN (
