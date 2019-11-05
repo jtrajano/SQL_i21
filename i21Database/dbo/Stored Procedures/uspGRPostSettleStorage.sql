@@ -1161,7 +1161,7 @@ BEGIN TRY
 						ON I.intItemId = SV.intItemId
 							AND I.ysnInventoryCost = 1
 							and SV.intItemType = 3
-							and not(SV.intPricingTypeId = 1 OR SV.intPricingTypeId = 6 OR SV.intPricingTypeId IS NULL)
+							--and not(SV.intPricingTypeId = 1 OR SV.intPricingTypeId = 6 OR SV.intPricingTypeId IS NULL)
 				) DiscountCost
 				WHERE SV.intItemType = 1
 
@@ -1226,7 +1226,7 @@ BEGIN TRY
 						ON I.intItemId = SV.intItemId
 							AND I.ysnInventoryCost = 1
 							and SV.intItemType = 3
-							and not(SV.intPricingTypeId = 1 OR SV.intPricingTypeId = 6 OR SV.intPricingTypeId IS NULL)
+							--and not(SV.intPricingTypeId = 1 OR SV.intPricingTypeId = 6 OR SV.intPricingTypeId IS NULL)
 				) DiscountCost
 				WHERE SV.intItemType = 1
 
@@ -1479,12 +1479,18 @@ BEGIN TRY
 					)
 				select 
 						a.intContractDetailId, 
-						b.dblAvailableQuantity, 
+						case when b.dblAvailableQuantity > b.dblQuantity then b.dblQuantity else b.dblAvailableQuantity end,  
 						b.intPriceFixationDetailId ,
 						b.dblCashPrice
 				from @SettleContract a
 					join vyuCTAvailableQuantityForVoucher b
 						on b.intContractDetailId = a.intContractDetailId 
+
+				if @debug_awesome_ness = 1
+				begin				
+					select 'avqty freshly added',* from @avqty					
+				end
+
 				declare @acd DECIMAL(24,10)
 				set @acd = @dblSelectedUnits
 				update @avqty set bb = @acd - dblAvailableQuantity, cc = @acd, @acd = (@acd - dblAvailableQuantity)
