@@ -1290,7 +1290,7 @@ BEGIN TRY
 					-- 							END
 					,[dblQtyReceived]			= 
 												CASE 
-													WHEN a.intItemType = 1 AND ST.ysnDPOwnedType = 1 THEN RI.dblOpenReceive
+													WHEN a.intItemType = 1 AND ST.ysnDPOwnedType = 1 AND @origdblSpotUnits = 0 THEN RI.dblOpenReceive
 													ELSE
 														CASE 
 															WHEN @origdblSpotUnits > 0 THEN ROUND(dbo.fnCalculateQtyBetweenUOM(b.intItemUOMId,@intCashPriceUOMId,a.dblUnits),6)
@@ -1317,7 +1317,7 @@ BEGIN TRY
 					,[dblCostUnitQty]			= ISNULL(a.dblCostUnitQty,1)
 					,[dblUnitQty]				= 1
 					,[dblNetWeight]				= CASE 
-													WHEN a.intItemType = 1 AND ST.ysnDPOwnedType = 1 THEN RI.dblOpenReceive
+													WHEN a.intItemType = 1 AND ST.ysnDPOwnedType = 1 AND @origdblSpotUnits = 0 THEN RI.dblOpenReceive
 													ELSE
 														CASE 
 															WHEN @origdblSpotUnits > 0 THEN ROUND(dbo.fnCalculateQtyBetweenUOM(b.intItemUOMId,@intCashPriceUOMId,a.dblUnits),6)
@@ -1376,7 +1376,7 @@ BEGIN TRY
 							tblICInventoryReceiptItem RI
 							INNER JOIN tblGRStorageHistory SH
 								ON SH.intInventoryReceiptId = RI.intInventoryReceiptId
-									AND RI.intContractHeaderId = ISNULL(SH.intContractHeaderId,RI.intContractHeaderId)
+									AND CASE WHEN (SH.strType = 'From Transfer') THEN 1 ELSE (CASE WHEN RI.intContractHeaderId = ISNULL(SH.intContractHeaderId,RI.intContractHeaderId) THEN 1 ELSE 0 END) END = 1
 						) 
 							ON SH.intCustomerStorageId = CS.intCustomerStorageId
 								AND a.intItemType = 1

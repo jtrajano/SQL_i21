@@ -887,6 +887,34 @@ BEGIN TRY
 		--(for new customer storage) insert to storage history table
 		DELETE FROM @StorageHistoryStagingTable
 		
+		DECLARE @intIRId INT;
+		SELECT TOP 1	
+		     @intIRId = SourceHistory.intInventoryReceiptId
+		FROM tblGRTransferStorageReference SR
+		INNER JOIN tblGRCustomerStorage FromStorage
+			ON FromStorage.intCustomerStorageId = SR.intSourceCustomerStorageId
+		INNER JOIN tblGRStorageType FromType
+			ON FromType.intStorageScheduleTypeId = FromStorage.intStorageTypeId
+		INNER JOIN tblGRCustomerStorage ToStorage
+			ON ToStorage.intCustomerStorageId = SR.intToCustomerStorageId
+		INNER JOIN tblGRStorageType ToType
+			ON ToType.intStorageScheduleTypeId = ToStorage.intStorageTypeId
+		JOIN tblICItemUOM IU
+			ON IU.intItemId = ToStorage.intItemId
+				AND IU.ysnStockUnit = 1
+		INNER JOIN tblICItemLocation IL
+			ON IL.intItemId = ToStorage.intItemId AND IL.intLocationId = ToStorage.intCompanyLocationId
+		INNER JOIN tblGRTransferStorage TS
+			ON SR.intTransferStorageId = TS.intTransferStorageId
+		INNER JOIN tblGRStorageHistory SourceHistory
+			ON SourceHistory.intCustomerStorageId = FromStorage.intCustomerStorageId AND SourceHistory.intInventoryReceiptId IS NOT NULL
+		INNER JOIN tblGRTransferStorageSplit TSS
+			ON TSS.intTransferStorageSplitId = SR.intTransferStorageSplitId
+		LEFT JOIN tblCTContractDetail CD
+			ON CD.intContractDetailId = TSS.intContractDetailId
+		WHERE  FromType.ysnDPOwnedType = 1 AND ToType.ysnDPOwnedType = 1
+		AND SR.intTransferStorageId = @intTransferStorageId
+
 		INSERT INTO @StorageHistoryStagingTable
 		(
 			[intCustomerStorageId]
@@ -899,6 +927,7 @@ BEGIN TRY
 			,[intTransactionTypeId]
 			,[strPaidDescription]
 			,[strType]
+			,[intInventoryReceiptId]
 		)
 		SELECT
 			[intCustomerStorageId]	= A.intToCustomerStorageId
@@ -911,14 +940,15 @@ BEGIN TRY
 			,[intTransactionTypeId]	= 3
 			,[strPaidDescription]	= 'Generated from Transfer Storage'
 			,[strType]				= 'From Transfer'
+			,[intInventoryReceiptId]= @intIRId
 		FROM tblGRTransferStorageSplit TransferStorageSplit
 		INNER JOIN @newCustomerStorageIds A
 			ON A.intTransferStorageSplitId = TransferStorageSplit.intTransferStorageSplitId		
 		LEFT JOIN tblCTContractDetail CD
 			ON CD.intContractDetailId = TransferStorageSplit.intContractDetailId
-		
-		EXEC uspGRInsertStorageHistoryRecord @StorageHistoryStagingTable, @intStorageHistoryId
 
+		EXEC uspGRInsertStorageHistoryRecord @StorageHistoryStagingTable, @intStorageHistoryId
+		--integration to IC
 		SET @cnt = 0
 		SET @cnt = (SELECT COUNT(*) FROM tblGRTransferStorageSplit WHERE intTransferStorageId = @intTransferStorageId AND intContractDetailId IS NOT NULL)
 
