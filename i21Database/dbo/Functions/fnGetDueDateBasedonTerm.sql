@@ -41,7 +41,7 @@ ELSE IF (@strType = 'Date Driven')
 		  
         SET @intInvoiceDate = DAY(@dtmTransactionDate)
 
-        IF @intInvoiceDate > @intDueNextMonth
+        IF @intInvoiceDate >= @intDueNextMonth
 			SET @intMonthToAdd = 1		
 		ELSE
 			SET @intMonthToAdd = 0
