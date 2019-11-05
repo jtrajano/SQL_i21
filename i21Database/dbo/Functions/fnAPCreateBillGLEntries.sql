@@ -812,7 +812,7 @@ BEGIN
 	WHERE	A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
 	AND A.intTransactionType IN (1,3)
 	--AND D.dblTax != 0 --include zero because we load the exempted tax, we expect that it will be adjusted to non zero
-	AND (B.intInventoryReceiptItemId > 0 OR B.intInventoryShipmentChargeId > 0 OR B.intCustomerStorageId > 0) --create tax adjustment only for integration
+	-- AND (B.intInventoryReceiptItemId > 0 OR B.intInventoryShipmentChargeId > 0 OR B.intCustomerStorageId > 0) --create tax adjustment only for integration
 	AND D.ysnTaxAdjusted = 1
 	GROUP BY A.dtmDate
 	,D.ysnTaxAdjusted
