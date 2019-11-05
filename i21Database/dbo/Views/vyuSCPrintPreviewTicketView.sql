@@ -170,7 +170,10 @@ AS SELECT
 		WHEN SC.intSalesOrderId > 0 THEN SOD.strItemNumber
 		ELSE IC.strItemNo
 	END) AS strItemNumber
-	,IC.strDescription AS strItemDescription
+	,(CASE
+		WHEN SC.intSalesOrderId > 0 THEN SOD.strItemDescription
+		ELSE IC.strDescription
+	END) AS strItemDescription
 	,IC.strPickListComments
 	,ICC.strCommodityCode
 	,ICC.strDescription AS strCommodityDescription
@@ -254,6 +257,9 @@ AS SELECT
 	SELECT 
 		strSalesOrderNumber,
 		strItemNumber = STUFF(( SELECT ', ' + IC.strItemNo FROM tblSOSalesOrderDetail SOD
+			INNER JOIN tblICItem IC ON IC.intItemId = SOD.intItemId AND ysnUseWeighScales = 1
+			WHERE intSalesOrderId = x.intSalesOrderId FOR XML PATH(''), TYPE).value('.[1]', 'nvarchar(max)'), 1, 2, ''),
+		strItemDescription = STUFF(( SELECT ', ' + IC.strDescription FROM tblSOSalesOrderDetail SOD
 			INNER JOIN tblICItem IC ON IC.intItemId = SOD.intItemId AND ysnUseWeighScales = 1
 			WHERE intSalesOrderId = x.intSalesOrderId FOR XML PATH(''), TYPE).value('.[1]', 'nvarchar(max)'), 1, 2, ''),
 		strStorageLocation = STUFF(( SELECT ', ' + ICS.strDescription FROM tblSOSalesOrderDetail SOD
