@@ -5,6 +5,11 @@
 		UPDATE [tblSMReminderList] SET [strType] = 'General Journal' WHERE [strReminder] = N'Process' AND [strType] = N'General Journal Recurring'
 	END
 
+	IF EXISTS (SELECT TOP 1 1 FROM [tblSMReminderList] WHERE [strReminder] = N'Approve' AND [strType] = N'Transaction')
+	BEGIN
+		UPDATE [tblSMReminderList] SET [strReminder] = 'Unapproved' WHERE [strReminder] = N'Approve' AND [strType] = N'Transaction'
+	END
+
 GO
 
 	IF NOT EXISTS (SELECT TOP 1 1 FROM [tblSMReminderList] WHERE [strReminder] = N'Process' AND [strType] = N'Invoice')
@@ -227,10 +232,10 @@ GO
 		WHERE [strReminder] = N'Overdue' AND [strType] = N'Scale Ticket' AND [intSort] = 10
 
 
-	IF NOT EXISTS (SELECT TOP 1 1 FROM [tblSMReminderList] WHERE [strReminder] = N'Approve' AND [strType] = N'Transaction')
+	IF NOT EXISTS (SELECT TOP 1 1 FROM [tblSMReminderList] WHERE [strReminder] = N'Unapproved' AND [strType] = N'Transaction')
 	BEGIN
 		INSERT INTO [tblSMReminderList] ([strReminder], [strType], [strMessage], [strQuery], [strNamespace], [intSort])    
-        SELECT	[strReminder]		=        N'Approve',
+        SELECT	[strReminder]		=        N'Unapproved',
 				[strType]			=        N'Transaction',
 				[strMessage]		=        N'{0} {1} {2} unapproved.',
 				[strQuery]			=        N'SELECT intTransactionId               
@@ -251,7 +256,7 @@ GO
 								WHERE  A.ysnCurrent = 1 AND                
 								A.strStatus = ''Waiting for Approval'' and 
 								(A.intApproverId = {0} OR B.intApproverId = {0})'
-		WHERE [strReminder] = N'Approve' AND [strType] = N'Transaction'
+		WHERE [strReminder] = N'Unapproved' AND [strType] = N'Transaction'
 	END
 
 	IF NOT EXISTS (SELECT TOP 1 1 FROM [tblSMReminderList] WHERE [strReminder] = N'Approved' AND [strType] = N'Transaction')
