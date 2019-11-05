@@ -220,6 +220,7 @@ BEGIN TRY
 		,intContractStatusId				INT
 		,intCurrencyId						INT
 		,strCurrency						NVARCHAR(200) COLLATE Latin1_General_CI_AS
+		,intCent							INT
 		,dtmContractDate					DATETIME
 		,dtmSeqEndDate						DATETIME	
 		,strFutMarketName					NVARCHAR(200) COLLATE Latin1_General_CI_AS
@@ -942,7 +943,8 @@ BEGIN TRY
 	,intUnitMeasureId			
 	,intContractStatusId
 	,intCurrencyId		
-	,strCurrency				
+	,strCurrency
+	,intCent		
 	,dtmContractDate
 	,dtmSeqEndDate			
 	,strFutMarketName			
@@ -1036,6 +1038,7 @@ BEGIN TRY
 	,intContractStatusId		= ISNULL(HT.intContractStatusId, CD.intContractStatusId)
 	,intCurrencyId				= CD.intCurrencyId
 	,strCurrency				= Cur.strCurrency
+	,intCent					= Cur.intCent
 	,dtmContractDate			= CH.dtmContractDate
 	,dtmSeqEndDate				= CD.dtmEndDate
 	,strFutMarketName			= FM.strFutMarketName
@@ -1185,8 +1188,8 @@ BEGIN TRY
 		,dblQtyinCommodityStockUOM = SUM(dblQtyinCommodityStockUOM)
 		,strStockUOM
 		,dblAvailableQty = SUM(dblAvailableQty)
-		,dblAmount = [dbo].[fnCTConvertQtyToTargetItemUOM](intItemUOMId, intPriceItemUOMId, SUM(dblQuantity)) * AVG(dblCashPrice) 
-		,dblAmountinCommodityStockUOM = SUM(dblQtyinCommodityStockUOM) * AVG(dblCashPriceinCommodityStockUOM)
+		,dblAmount = [dbo].[fnCTConvertQtyToTargetItemUOM](intItemUOMId, intPriceItemUOMId, SUM(dblQuantity)) * AVG(dblCashPrice) / ISNULL(intCent, 1)
+		,dblAmountinCommodityStockUOM = SUM(dblQtyinCommodityStockUOM) * AVG(dblCashPriceinCommodityStockUOM) / ISNULL(intCent, 1)
 		,intUnitMeasureId
 		,intContractStatusId
 		,intCurrencyId
@@ -1237,6 +1240,7 @@ BEGIN TRY
 		,intContractStatusId
 		,intCurrencyId
 		,strCurrency
+		,intCent
 		,dtmContractDate
 		,dtmSeqEndDate
 		,strFutMarketName
