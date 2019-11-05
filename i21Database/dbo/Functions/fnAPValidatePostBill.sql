@@ -443,7 +443,10 @@ BEGIN
 			26
 		FROM tblAPBill A 
 		WHERE  A.[intBillId] IN (SELECT [intBillId] FROM @tmpBills) 
-		AND EXISTS(SELECT * FROM tblAPBillDetail B WHERE B.intBillId = A.intBillId AND B.dblCost = 0.000000)
+		AND EXISTS(
+			SELECT * FROM tblAPBillDetail B WHERE B.intBillId = A.intBillId AND B.dblCost = 0.000000
+			AND NOT EXISTS(SELECT 1 FROM tblAPBillDetailTax C WHERE C.intBillDetailId = B.intBillDetailId)
+		)
 
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
 		SELECT
