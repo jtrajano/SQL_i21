@@ -436,7 +436,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM #POSTRANSACTIONS)
 			WHERE ISNULL(dblDiscountPercent, 0) > 0
 			  AND RT.strPOSType = 'Mixed'
 
-			--GET INVOICES AND DISCOUNTS (CREDIT MEMO FOR MIXED TRANSACTIONS)
+			--GET INVOICES (CREDIT MEMO FOR MIXED TRANSACTIONS)
 			INSERT INTO @EntriesForInvoice(
 				 [intId]
 				,[strTransactionType]
@@ -508,47 +508,6 @@ IF EXISTS (SELECT TOP 1 NULL FROM #POSTRANSACTIONS)
 			INNER JOIN #POSTRANSACTIONS RT ON POS.intPOSId = RT.intPOSId
 			INNER JOIN tblSMCompanyLocation CL ON POS.intCompanyLocationId = CL.intCompanyLocationId
 			WHERE DETAILS.dblQuantity < 0
-			  AND RT.strPOSType = 'Mixed'
-
-			UNION ALL
-
-			SELECT TOP 1
-				 [intId]								= POS.intPOSId + 10000 --TEMPORARAY FIX
-				,[strTransactionType]					= 'Credit Memo'
-				,[strType]								= 'POS'
-				,[strSourceTransaction]					= 'POS'
-				,[intSourceId]							= POS.intPOSId
-				,[strSourceId]							= POS.strReceiptNumber
-				,[intEntityCustomerId]					= POS.intEntityCustomerId
-				,[intCompanyLocationId]					= POS.intCompanyLocationId
-				,[intCurrencyId]						= POS.intCurrencyId
-				,[dtmDate]								= POS.dtmDate
-				,[dtmShipDate]							= POS.dtmDate
-				,[strComments]							= 'POS Return:' + ISNULL(POS.strComment, '')
-				,[intEntityId]							= POS.intEntityUserId
-				,[ysnPost]								= 1
-				,[intItemId]							= NULL
-				,[ysnInventory]							= 0
-				,[strItemDescription]					= 'POS Discount - ' + CAST(CAST(POS.dblDiscountPercent AS INT) AS VARCHAR(3)) + '%'
-				,[intItemUOMId]							= NULL
-				,[dblQtyShipped]						= 1.000000
-				,[dblDiscount]							= NULL
-				,[dblPrice]								= POS.dblDiscount * -1
-				,[ysnRefreshPrice]						= 0
-				,[ysnRecomputeTax]						= CASE WHEN ISNULL(POS.ysnTaxExempt,0) = 0 THEN 1 ELSE 0 END
-				,[ysnClearDetailTaxes]					= 1
-				,[intTempDetailIdForTaxes]				= POS.intPOSId
-				,[dblCurrencyExchangeRate]				= 1.000000
-				,[dblSubCurrencyRate]					= 1.000000
-				,[intSalesAccountId]					= ISNULL(CL.intSalesDiscounts, @intDiscountAccountId)
-				,[strPONumber]							= POS.strPONumber
-				,[intFreightTermId]						= CASE WHEN ISNULL(POS.ysnTaxExempt,0) = 0 THEN CL.intFreightTermId ELSE NULL END
-				,[strInvoiceOriginId]					= POS.strCreditMemoNumber
-				,[ysnUseOriginIdAsInvoiceNumber]		= CAST(1 AS BIT)
-			FROM tblARPOS POS
-			INNER JOIN #POSTRANSACTIONS RT ON POS.intPOSId = RT.intPOSId
-			INNER JOIN tblSMCompanyLocation CL ON POS.intCompanyLocationId = CL.intCompanyLocationId
-			WHERE ISNULL(dblDiscountPercent, 0) > 0
 			  AND RT.strPOSType = 'Mixed'
 
 			--PROCESS TO INVOICE
