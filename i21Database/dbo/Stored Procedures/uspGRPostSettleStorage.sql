@@ -2546,6 +2546,10 @@ BEGIN TRY
 								select 'selected units', @dblSelectedUnits
 								select 'AP Bill', * from tblAPBill where intBillId = @intVoucherId
 								select 'AP Bill Detail', * from tblAPBillDetail where intBillId = @intVoucherId
+
+									
+
+
 							end
 
 							
@@ -2576,6 +2580,20 @@ BEGIN TRY
 						RAISERROR (@ErrMsg, 16, 1);
 						GOTO SettleStorage_Exit;
 					END
+					else 
+					begin
+						insert into tblCTPriceFixationDetailAPAR(intPriceFixationDetailId, intBillId, intBillDetailId, intConcurrencyId)
+						select b.intPriceFixationDetailId, a.intBillId, a.intBillDetailId, 1 from tblAPBillDetail a 
+							cross apply ( select intPriceFixationDetailId from @avqty ) b											
+							where intBillId = @intVoucherId and a.intContractDetailId is not null and a.intContractHeaderId is not null
+							and b.intPriceFixationDetailId is not null
+						
+						if @debug_awesome_ness = 1 
+						begin
+							select top 5 'contract fixation detail ap ar', * from tblCTPriceFixationDetailAPAR order by intPriceFixationDetailAPARId desc
+						end
+					end
+
 				END
 			
 			END
@@ -2777,6 +2795,9 @@ BEGIN TRY
 						ON IU.intItemId = CS.intItemId
 							AND IU.ysnStockUnit = 1
 					WHERE SV.intTransactionType = 1
+
+				
+
 				end
 				
 									
