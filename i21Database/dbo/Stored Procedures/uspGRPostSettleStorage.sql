@@ -2707,6 +2707,20 @@ BEGIN TRY
 
 				if @doPartialHistory = 1
 				begin
+					if @debug_awesome_ness = 1
+					begin
+						select 'this is where the history will be coming from', SV.*
+						FROM @voucherPayable SV
+						join tblICItem c
+							on SV.intItemId = c.intItemId and c.strType = 'Inventory' 
+						JOIN tblGRCustomerStorage CS 
+							ON CS.intCustomerStorageId = SV.intCustomerStorageId									
+						JOIN tblICItemUOM IU
+							ON IU.intItemId = CS.intItemId
+								AND IU.ysnStockUnit = 1
+						WHERE SV.intTransactionType = 1
+					end
+
 					INSERT INTO [dbo].[tblGRStorageHistory] 
 					(
 						[intConcurrencyId]
@@ -2729,12 +2743,7 @@ BEGIN TRY
 						[intConcurrencyId]     = 1 
 						,[intCustomerStorageId] = SV.[intCustomerStorageId]
 						,[intContractHeaderId]  = SV.[intContractHeaderId]
-						,[dblUnits]				= 
-													case when (@dblQtyFromCt + @dblTotalVoucheredQuantity) < @dblSelectedUnits then @dblQtyFromCt
-														when (@dblQtyFromCt + @dblTotalVoucheredQuantity) > @dblSelectedUnits then  @dblSelectedUnits - @dblTotalVoucheredQuantity
-														else	
-															@dblSelectedUnits
-														end
+						,[dblUnits]				= SV.dblOrderQty 													
 						,[dtmHistoryDate]		= GETDATE()
 						,[strType]				= 'Partial Pricing'
 						,[strUserName]			= NULL
@@ -2742,11 +2751,7 @@ BEGIN TRY
 						,[intEntityId]			= @EntityId
 						,[strSettleTicket]		= @TicketNo
 						,[intTransactionTypeId]	= 10 
-						,[dblPaidAmount]		= SV.dblCost * ( case when (@dblQtyFromCt + @dblTotalVoucheredQuantity) < @dblSelectedUnits then @dblQtyFromCt
-														when (@dblQtyFromCt + @dblTotalVoucheredQuantity) > @dblSelectedUnits then  @dblSelectedUnits - @dblTotalVoucheredQuantity
-														else	
-															@dblSelectedUnits
-														end )
+						,[dblPaidAmount]		= SV.dblCost * SV.dblOrderQty 
 						,[intBillId]			= CASE WHEN @intVoucherId = 0 THEN NULL ELSE @intVoucherId END
 						,intSettleStorageId		= null
 						,strVoucher				= @strVoucher
