@@ -14,8 +14,13 @@ BEGIN TRY
 	if @debug_awesome_ness = 1	
 	begin
 		
-		select 'awesomeness begins here cash price', @dblCashPriceFromCt, @dblQtyFromCt
+		select 'awesomeness begins here cash price', @dblCashPriceFromCt as [cash price from ct], @dblQtyFromCt as [dbl from ct], @intSettleStorageId as [settle storage id]
+
+		select 'settle storage' , dbo.[fnGRGetVoucheredUnits](intSettleStorageId), * FROM tblGRSettleStorage WHERE intSettleStorageId = @intSettleStorageId 
+		
+		--return
 		--set @dblCashPriceFromCt = 9.55
+
 	end
 
 
@@ -200,7 +205,7 @@ BEGIN TRY
 	FROM tblGRSettleStorage
 	WHERE CASE WHEN @ysnFromPriceBasisContract = 1 THEN CASE WHEN intSettleStorageId = @intSettleStorageId THEN 1 ELSE 0 END ELSE CASE WHEN intParentSettleStorageId = @intParentSettleStorageId THEN 1 ELSE 0 END END = 1
 
-	if @debug_awesome_ness = 1	and 1 = 0
+	if @debug_awesome_ness = 1	and 1 = 1
 	begin
 		select 'settle storage' , * FROM tblGRSettleStorage
 					WHERE CASE WHEN @ysnFromPriceBasisContract = 1 THEN CASE WHEN intSettleStorageId = @intSettleStorageId THEN 1 ELSE 0 END ELSE CASE WHEN intParentSettleStorageId = @intParentSettleStorageId THEN 1 ELSE 0 END END = 1
@@ -221,9 +226,14 @@ BEGIN TRY
 	if @debug_awesome_ness = 1
 	begin
 		select 'total vouchered quantity', @dblTotalVoucheredQuantity
+
+		select 'settle storage information ', * 
+		FROM tblGRSettleStorage
+		WHERE intSettleStorageId = @intSettleStorageId
 	end
 
 
+	
 
 
 	WHILE @intSettleStorageId > 0
@@ -252,6 +262,9 @@ BEGIN TRY
 		FROM tblGRSettleStorage
 		WHERE intSettleStorageId = @intSettleStorageId
 	
+		if @dblTotalVoucheredQuantity > = @dblSelectedUnits
+			return 
+
 		SELECT
 			@intFutureMarketId 	= ISNULL(Com.intFutureMarketId,0)
 			,@strItemNo 		= Item.strItemNo
