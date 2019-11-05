@@ -38,6 +38,7 @@ BEGIN
 		,dblSplitPercent NUMERIC(38,20)
 		,dtmProcessDate DATETIME NOT NULL DEFAULT(GETDATE())
 	)
+	DECLARE @GLForItem AS GLForItem
 	SELECT @intDecimalPrecision = intCurrencyDecimal FROM tblSMCompanyPreference
 	DECLARE @intTransferStorageReferenceId INT
 
@@ -447,8 +448,10 @@ BEGIN
 				WHILE @@FETCH_STATUS = 0
 				BEGIN		
 						DECLARE @GLEntries AS RecapTableType;
+						DECLARE @DummyGLEntries AS RecapTableType;
 						DECLARE @Entry as ItemCostingTableType;
 						DECLARE @dblCost AS DECIMAL(24,10);
+						DECLARE @dblDiscountCost AS DECIMAL(24,10);
 						DECLARE @strBatchId AS NVARCHAR(40);
 						IF OBJECT_ID('tempdb..#tblICItemRunningStock') IS NOT NULL DROP TABLE  #tblICItemRunningStock
 						CREATE TABLE #tblICItemRunningStock(
@@ -526,6 +529,7 @@ BEGIN
 							,intCompanyLocationId INT
 							,dblUnits DECIMAL(24, 10)
 							,dblCashPrice DECIMAL(24, 10)
+							,dblExactCashPrice DECIMAL (24,10)
 							,intItemId INT NULL
 							,intItemType INT NULL
 							,IsProcessed BIT
@@ -538,6 +542,7 @@ BEGIN
 							,intCompanyLocationId
 							,dblUnits
 							,dblCashPrice
+							,dblExactCashPrice
 							,intItemId
 							,intItemType
 							,IsProcessed
@@ -559,10 +564,11 @@ BEGIN
 															WHEN QM.strDiscountChargeType = 'Percent'
 																		THEN (dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, IU.intUnitMeasureId, CS.intUnitMeasureId, ISNULL(QM.dblDiscountPaid, 0)) - dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, IU.intUnitMeasureId, CS.intUnitMeasureId, ISNULL(QM.dblDiscountDue, 0)))
 																			*
-																			@dblCost/*@dblCost*/--(CASE WHEN SS.dblCashPrice <> 0 THEN SS.dblCashPrice ELSE SC.dblCashPrice END)
+																			@dblCost
 															ELSE --Dollar
 																dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, IU.intUnitMeasureId, CS.intUnitMeasureId, ISNULL(QM.dblDiscountPaid, 0)) - dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, IU.intUnitMeasureId, CS.intUnitMeasureId, ISNULL(QM.dblDiscountDue, 0))
 														END
+							,dblExactCashPrice			= 0
 							,intItemId					= DItem.intItemId 
 							,intItemType				= 3 
 							,IsProcessed				= 0
@@ -595,7 +601,14 @@ BEGIN
 						INNER JOIN tblICItem IC
 							ON IC.intItemId = OCD.intItemId
 						WHERE IC.ysnInventoryCost = 1
-						
+
+
+						update @OtherChargesDetail set dblExactCashPrice = ROUND(dblUnits*dblCashPrice,2)
+
+						SELECT @dblDiscountCost = ISNULL(SUM(dblExactCashPrice),0) FROM @OtherChargesDetail OCD 
+						INNER JOIN tblICItem IC
+							ON IC.intItemId = OCD.intItemId
+						WHERE IC.ysnInventoryCost = 1
 						DELETE FROM @Entry
 						DELETE FROM @GLEntries
 						INSERT INTO @Entry 
@@ -623,12 +636,36 @@ BEGIN
 						SELECT intItemId,intItemLocationId,intItemUOMId,dtmDate,dblQty,dblUOMQty,@dblCost,dblSalesPrice,intCurrencyId,dblExchangeRate,intTransactionId,intTransactionDetailId,strTransactionId,intTransactionTypeId,intLotId,intSubLocationId,intStorageLocationId,ysnIsStorage,intStorageScheduleTypeId 
 						FROM @ItemsToPost WHERE intId = @cursorId
 
+						INSERT INTO @GLForItem
+						(
+							intItemId
+							,intItemLocationId
+							,intItemUOMId
+							,dtmDate
+							,dblQty
+							,dblUOMQty
+							,dblCost
+							,dblSalesPrice
+							,intCurrencyId
+							,dblExchangeRate
+							,intTransactionId
+							,intTransactionDetailId
+							,strTransactionId
+							,intTransactionTypeId
+							,intLotId
+							,intSubLocationId
+							,intStorageLocationId
+							,ysnIsStorage
+							,intStorageScheduleTypeId
+						)
+						SELECT intItemId,intItemLocationId,intItemUOMId,dtmDate,dblQty,dblUOMQty,@dblDiscountCost,dblSalesPrice,intCurrencyId,dblExchangeRate,intTransactionId,intTransactionDetailId,strTransactionId,intTransactionTypeId,intLotId,intSubLocationId,intStorageLocationId,ysnIsStorage,intStorageScheduleTypeId 
+						FROM @ItemsToPost WHERE intId = @cursorId
 						IF(SELECT dblQty FROM @Entry) > 0
 						BEGIN
 							UPDATE @Entry
 							SET dblQty = dblQty*-1
 
-							INSERT INTO @GLEntries 
+							INSERT INTO @DummyGLEntries 
 							(
 							[dtmDate] 
 							,[strBatchId]
@@ -700,6 +737,47 @@ BEGIN
 								,[dblForeignRate]
 								,[strRateType]
 							)
+							EXEC dbo.uspGRCreateItemGLEntriesTransfer
+								@strBatchId
+								,@GLForItem
+								,'AP Clearing'
+								,1
+
+							INSERT INTO @GLEntries 
+							(
+								 [dtmDate] 
+								,[strBatchId]
+								,[intAccountId]
+								,[dblDebit]
+								,[dblCredit]
+								,[dblDebitUnit]
+								,[dblCreditUnit]
+								,[strDescription]
+								,[strCode]
+								,[strReference]
+								,[intCurrencyId]
+								,[dblExchangeRate]
+								,[dtmDateEntered]
+								,[dtmTransactionDate]
+								,[strJournalLineDescription]
+								,[intJournalLineNo]
+								,[ysnIsUnposted]
+								,[intUserId]
+								,[intEntityId]
+								,[strTransactionId]
+								,[intTransactionId]
+								,[strTransactionType]
+								,[strTransactionForm]
+								,[strModuleName]
+								,[intConcurrencyId]
+								,[dblDebitForeign]	
+								,[dblDebitReport]	
+								,[dblCreditForeign]	
+								,[dblCreditReport]	
+								,[dblReportingRate]	
+								,[dblForeignRate]
+								,[strRateType]
+							)
 							EXEC [dbo].[uspGRCreateGLEntriesForTransferStorage] @intTransferStorageId,@strBatchId,@dblCost,1
 
 							IF EXISTS (SELECT TOP 1 1 FROM @GLEntries)
@@ -720,7 +798,7 @@ BEGIN
 							UPDATE @Entry
 							SET dblQty = dblQty*-1
 
-							INSERT INTO @GLEntries 
+							INSERT INTO @DummyGLEntries 
 							(
 							[dtmDate] 
 							,[strBatchId]
@@ -756,6 +834,47 @@ BEGIN
 							,[strRateType]
 							)
 							EXEC	dbo.uspICPostCosting @Entry,@strBatchId,'AP Clearing',@intUserId
+							--Used total discount cost on @GLForItem to get the correct decimal
+							INSERT INTO @GLEntries 
+							(
+								 [dtmDate] 
+								,[strBatchId]
+								,[intAccountId]
+								,[dblDebit]
+								,[dblCredit]
+								,[dblDebitUnit]
+								,[dblCreditUnit]
+								,[strDescription]
+								,[strCode]
+								,[strReference]
+								,[intCurrencyId]
+								,[dblExchangeRate]
+								,[dtmDateEntered]
+								,[dtmTransactionDate]
+								,[strJournalLineDescription]
+								,[intJournalLineNo]
+								,[ysnIsUnposted]
+								,[intUserId]
+								,[intEntityId]
+								,[strTransactionId]
+								,[intTransactionId]
+								,[strTransactionType]
+								,[strTransactionForm]
+								,[strModuleName]
+								,[intConcurrencyId]
+								,[dblDebitForeign]	
+								,[dblDebitReport]	
+								,[dblCreditForeign]	
+								,[dblCreditReport]	
+								,[dblReportingRate]	
+								,[dblForeignRate]
+								,[strRateType]
+							)
+							EXEC dbo.uspGRCreateItemGLEntriesTransfer
+								@strBatchId
+								,@GLForItem
+								,'AP Clearing'
+								,1
 
 							INSERT INTO @GLEntries 
 							(

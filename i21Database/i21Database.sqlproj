@@ -7694,6 +7694,8 @@
     <Build Include="dbo\Tables\tblARInvoiceTaxReportStagingTable.sql" />
     <Build Include="dbo\Stored Procedures\uspARInvoiceDetailTaxReport.sql" />
     <Build Include="dbo\Functions\fnGRGetVoucheredUnits.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRCreateItemGLEntriesTransfer.sql" />
+    <Build Include="dbo\User Defined Types\GLForItem.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
