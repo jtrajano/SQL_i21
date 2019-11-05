@@ -671,9 +671,81 @@ BEGIN
 			AND ISNULL(InventoryCostCharges.ysnInventoryCost, 0) = 1
 			AND InventoryCostCharges.strBundleType != 'Kit'
 
+		-------------------------------------------------------------------------------------------
+		-- Cost billed by: None
+		-- Add cost to inventory: Yes
+		-- 
+		-- Dr...... AP Clearing
+		-- Cr..................... Item Inventory 
+		-------------------------------------------------------------------------------------------
+		UNION ALL
+		
+		SELECT 
+			 intItemId					= InventoryCostCharges.intChargeId
+			,[strItemNo]				= InventoryCostCharges.strItemNo
+			,dtmDate					= InventoryCostCharges.dtmDate
+			,strBatchId					= @strBatchId
+			,intAccountId				= GLAccount.intAccountId
+			,dblDebit					= case when InventoryCostCharges.strICCCostType = 'Discount' then 
+											case when InventoryCostCharges.dblCost < 0 
+												then 0 else
+												InventoryCostCharges.dblCost end
+											else     InventoryCostCharges.dblCost end 
+			,dblCredit					= case when InventoryCostCharges.strICCCostType = 'Discount' then 
+											case when InventoryCostCharges.dblCost < 0 then
+												InventoryCostCharges.dblCost 
+												else 0 end
+											else     0 end 
+			,dblDebitUnit				= InventoryCostCharges.dblUnits
+			,dblCreditUnit				= 0
+			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', Charges from ' + InventoryCostCharges.strCharge
+			,strCode					= @strCode
+			,strReference				= 'B'
+			,intCurrencyId				= InventoryCostCharges.intCurrencyId
+			,dblExchangeRate			= InventoryCostCharges.dblForexRate
+			,dtmDateEntered				= GETDATE()
+			,dtmTransactionDate			= InventoryCostCharges.dtmDate
+			,strJournalLineDescription  = ''
+			,intJournalLineNo			= InventoryCostCharges.intInventoryReceiptItemId
+			,ysnIsUnposted				= CASE WHEN @ysnPost = 1 THEN 0 ELSE 1 END
+			,intUserId					= NULL
+			,intEntityId				= @intEntityVendorId
+			,strTransactionId			= InventoryCostCharges.strTransactionId
+			,intTransactionId			= InventoryCostCharges.intTransactionId
+			,strTransactionType			= InventoryCostCharges.strInventoryTransactionTypeName
+			,strTransactionForm			= InventoryCostCharges.strTransactionForm
+			,strModuleName				= @ModuleName
+			,intConcurrencyId			= 1
+			,dblDebitForeign			= CASE 
+											WHEN intCurrencyId <> @intFunctionalCurrencyId THEN CreditForeign.Value 
+											ELSE 0 
+										END
+			,dblDebitReport				= NULL
+			,dblCreditForeign			= CASE 
+											WHEN intCurrencyId <> @intFunctionalCurrencyId THEN DebitForeign.Value 
+											ELSE 0 
+										END
+			,dblCreditReport			= NULL
+			,dblReportingRate			= NULL
+			,dblForeignRate				= InventoryCostCharges.dblForexRate
+			,strRateType				= InventoryCostCharges.strRateType
+			,dblUnits					= InventoryCostCharges.dblUnits
+			,dblCost				    = InventoryCostCharges.dblCost
+			,InventoryCostCharges.dblConvertedUnits
+		FROM @InventoryCostCharges InventoryCostCharges
+		INNER JOIN @OtherChargesGLAccounts OtherChargesGLAccounts
+			ON InventoryCostCharges.intChargeId = OtherChargesGLAccounts.intChargeId
+				AND InventoryCostCharges.intChargeItemLocation = OtherChargesGLAccounts.intItemLocationId
+		INNER JOIN dbo.tblGLAccount GLAccount
+			ON GLAccount.intAccountId = OtherChargesGLAccounts.intAPClearing
+		CROSS APPLY dbo.fnGetDebit(InventoryCostCharges.dblCost) DebitForeign
+		CROSS APPLY dbo.fnGetCredit(InventoryCostCharges.dblCost) CreditForeign
+		WHERE ISNULL(InventoryCostCharges.ysnAccrue, 0) = 0
+		AND ISNULL(InventoryCostCharges.ysnInventoryCost, 0) = 1
+		AND InventoryCostCharges.strBundleType != 'Kit'
+
 		UNION ALL
 
-				-- Get the Inventory counter part of the item GL ENTRIES If inventory cost is true
 		SELECT 
 			 intItemId					= InventoryCostCharges.intChargeId
 			,[strItemNo]				= InventoryCostCharges.strItemNo
@@ -696,7 +768,7 @@ BEGIN
 											else     InventoryCostCharges.dblCost end
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= InventoryCostCharges.dblUnits
-			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', Charges from ' + InventoryCostCharges.strCharge
+			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', Charges from ' + InventoryCostCharges.strCharge + ' for ' + InventoryCostCharges.strItem
 			,strCode					= @strCode
 			,strReference				= 'A'
 			,intCurrencyId				= InventoryCostCharges.intCurrencyId
@@ -730,90 +802,17 @@ BEGIN
 			,dblUnits					= InventoryCostCharges.dblUnits
 			,dblCost				    = InventoryCostCharges.dblCost
 			,InventoryCostCharges.dblConvertedUnits
-			FROM @InventoryCostCharges InventoryCostCharges  
-			INNER JOIN @ItemGLAccounts ItemGLAccounts   
-			ON InventoryCostCharges.intItemId = ItemGLAccounts.intItemId  
-				AND InventoryCostCharges.intItemLocationId = ItemGLAccounts.intItemLocationId  
-			INNER JOIN dbo.tblGLAccount GLAccount   
-			ON GLAccount.intAccountId = ItemGLAccounts.intInventoryId  
-			CROSS APPLY dbo.fnGetDebit(InventoryCostCharges.dblCost) DebitForeign  
-			CROSS APPLY dbo.fnGetCredit(InventoryCostCharges.dblCost) CreditForeign  
-			WHERE ISNULL(InventoryCostCharges.ysnAccrue, 0) = 0  
-			AND ISNULL(InventoryCostCharges.ysnInventoryCost, 0) = 1  
-			AND InventoryCostCharges.strBundleType != 'Kit'
-			
-		UNION ALL  
-    
-			SELECT   
-				intItemId     = InventoryCostCharges.intChargeId  
-			,[strItemNo]    = InventoryCostCharges.strItemNo  
-			,dtmDate     = InventoryCostCharges.dtmDate  
-			,strBatchId     = @strBatchId  
-			,intAccountId    = GLAccount.intAccountId  
-			,dblDebit     = case when InventoryCostCharges.strICCCostType = 'Discount' then   
-					case when InventoryCostCharges.dblCost < 0   
-						then 0 else  
-						InventoryCostCharges.dblCost end  
-					else     InventoryCostCharges.dblCost end   
-			,dblCredit     = case when InventoryCostCharges.strICCCostType = 'Discount' then   
-					case when InventoryCostCharges.dblCost < 0 then  
-						InventoryCostCharges.dblCost   
-						else 0 end  
-					else     0 end   
-			,dblDebitUnit    = InventoryCostCharges.dblUnits  
-			,dblCreditUnit    = 0  
-			,strDescription    = ISNULL(GLAccount.strDescription, '') + ', Charges from ' + InventoryCostCharges.strCharge  
-			,strCode     = @strCode  
-			,strReference    = 'B'  
-			,intCurrencyId    = InventoryCostCharges.intCurrencyId  
-			,dblExchangeRate   = InventoryCostCharges.dblForexRate  
-			,dtmDateEntered    = GETDATE()  
-			,dtmTransactionDate   = InventoryCostCharges.dtmDate  
-			,strJournalLineDescription = ''  
-			,intJournalLineNo   = InventoryCostCharges.intInventoryReceiptItemId  
-			,ysnIsUnposted    = CASE WHEN @ysnPost = 1 THEN 0 ELSE 1 END  
-			,intUserId     = NULL  
-			,intEntityId    = @intEntityVendorId  
-			,strTransactionId   = InventoryCostCharges.strTransactionId  
-			,intTransactionId   = InventoryCostCharges.intTransactionId  
-			,strTransactionType   = InventoryCostCharges.strInventoryTransactionTypeName  
-			,strTransactionForm   = InventoryCostCharges.strTransactionForm  
-			,strModuleName    = @ModuleName  
-			,intConcurrencyId   = 1  
-			,dblDebitForeign   = CASE   
-					WHEN intCurrencyId <> @intFunctionalCurrencyId THEN CreditForeign.Value   
-					ELSE 0   
-					END  
-			,dblDebitReport    = NULL  
-			,dblCreditForeign   = CASE   
-					WHEN intCurrencyId <> @intFunctionalCurrencyId THEN DebitForeign.Value   
-					ELSE 0   
-					END  
-			,dblCreditReport   = NULL  
-			,dblReportingRate   = NULL  
-			,dblForeignRate    = InventoryCostCharges.dblForexRate  
-			,strRateType    = InventoryCostCharges.strRateType  
-			,dblUnits     = InventoryCostCharges.dblUnits  
-			,dblCost        = InventoryCostCharges.dblCost  
-			,InventoryCostCharges.dblConvertedUnits  
-			FROM @InventoryCostCharges InventoryCostCharges  
-			--INNER JOIN @OtherChargesGLAccounts OtherChargesGLAccounts   
-			-- ON InventoryCostCharges.intChargeId = OtherChargesGLAccounts.intChargeId  
-			--  AND InventoryCostCharges.intChargeItemLocation = OtherChargesGLAccounts.intItemLocationId  
-			--INNER JOIN dbo.tblGLAccount GLAccount   
-			-- ON GLAccount.intAccountId = OtherChargesGLAccounts.intOtherChargeExpense  
-			INNER JOIN @OtherChargesGLAccounts OtherChargesGLAccounts  
-			ON InventoryCostCharges.intChargeId = OtherChargesGLAccounts.intChargeId  
-				AND InventoryCostCharges.intChargeItemLocation = OtherChargesGLAccounts.intItemLocationId  
-			INNER JOIN dbo.tblGLAccount GLAccount  
-			ON GLAccount.intAccountId = OtherChargesGLAccounts.intOtherChargeExpense  
-			CROSS APPLY dbo.fnGetDebit(InventoryCostCharges.dblCost) DebitForeign  
-			CROSS APPLY dbo.fnGetCredit(InventoryCostCharges.dblCost) CreditForeign  
-			WHERE ISNULL(InventoryCostCharges.ysnAccrue, 0) = 0  
-			AND ISNULL(InventoryCostCharges.ysnInventoryCost, 0) = 1  
-			AND InventoryCostCharges.strBundleType != 'Kit'
-
-		UNION ALL
+			FROM @InventoryCostCharges InventoryCostCharges
+			INNER JOIN @ItemGLAccounts ItemGLAccounts 
+				ON InventoryCostCharges.intItemId = ItemGLAccounts.intItemId
+					AND InventoryCostCharges.intItemLocationId = ItemGLAccounts.intItemLocationId
+			INNER JOIN dbo.tblGLAccount GLAccount 
+				ON GLAccount.intAccountId = ItemGLAccounts.intInventoryId
+			CROSS APPLY dbo.fnGetDebit(InventoryCostCharges.dblCost) DebitForeign
+			CROSS APPLY dbo.fnGetCredit(InventoryCostCharges.dblCost) CreditForeign
+			WHERE ISNULL(InventoryCostCharges.ysnAccrue, 0) = 0
+				AND ISNULL(InventoryCostCharges.ysnInventoryCost, 0) = 1
+				AND InventoryCostCharges.strBundleType != 'Kit'
 		-------------------------------------------------------------------------------------------
 		-- Cost billed by: None
 		-- Add cost to inventory: No
