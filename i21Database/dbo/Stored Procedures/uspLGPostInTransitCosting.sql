@@ -148,6 +148,7 @@ BEGIN TRY
 												/ CASE WHEN (CUR.ysnSubCurrency = 1) THEN CUR.intCent ELSE 1 END
 											ELSE 
 												dbo.fnCTGetSequencePrice(CD.intContractDetailId,NULL) 
+												/ CASE WHEN (AD.ysnSeqSubCurrency = 1) THEN 100 ELSE 1 END
 										END
 									ELSE 
 										AD.dblSeqPrice 
