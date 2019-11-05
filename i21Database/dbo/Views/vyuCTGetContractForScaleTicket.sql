@@ -40,6 +40,13 @@ AS
 			CT.strContractType,					
 			CH.intEntityId,
 			EY.strName AS strEntityName,
+			EL.strAddress AS strEntityAddress,      
+            EL.strCity AS strEntityCity,   
+            EL.strCountry AS strEntityCountry,    
+            EL.strState AS strEntityState,    
+            EL.strZipCode AS strEntityZipCode,   
+            CM.intCommodityId AS intCommodityId,
+            CM.strCommodityCode AS strCommodity,   
 			CH.strContractNumber,
 			CH.ysnUnlimitedQuantity,
 			CD.intContractSeq,
@@ -55,10 +62,12 @@ AS
 	JOIN	tblCTContractStatus				CS	ON	CS.intContractStatusId		=	CD.intContractStatusId		LEFT
 	JOIN	tblCTContractType				CT	ON	CT.intContractTypeId		=	CH.intContractTypeId		LEFT
 	JOIN	tblEMEntity						EY	ON	EY.intEntityId				=	CH.intEntityId				LEFT
+	JOIN    tblEMEntityLocation             EL  ON  EL.intEntityId              =   CH.intEntityId              LEFT
 	JOIN	tblCTPricingType				PT	ON	PT.intPricingTypeId			=	CD.intPricingTypeId			LEFT
 	JOIN	tblICItem						IM	ON	IM.intItemId				=	CD.intItemId				LEFT
 	JOIN	tblICItemUOM					IU	ON	IU.intItemUOMId				=	CD.intItemUOMId				LEFT
 	JOIN	tblICUnitMeasure				U1	ON	U1.intUnitMeasureId			=	IU.intUnitMeasureId			LEFT
+	JOIN    tblICCommodity                  CM	ON  CM.intCommodityId           =   IM.intCommodityId           LEFT
 	JOIN	tblEMEntityFarm					EF	ON	EF.intFarmFieldId			=	CD.intFarmFieldId			LEFT
 	JOIN	(
 					SELECT  intItemUOMId AS intStockUOMId,strUnitMeasure AS strStockUnitMeasure,IU.intItemId,IU.intUnitMeasureId AS intStockUnitMeasureId
