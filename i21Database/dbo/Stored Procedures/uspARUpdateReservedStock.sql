@@ -51,7 +51,7 @@ BEGIN
 		(SELECT [intInvoiceId], [strInvoiceNumber], [intCompanyLocationId], [strTransactionType], [strType] FROM tblARInvoice WITH (NOLOCK)) ARI
 			ON ARID.[intInvoiceId] = ARI.[intInvoiceId]
 	INNER JOIN
-		(SELECT [intItemId], [strType], [ysnAutoBlend] FROM tblICItem WITH (NOLOCK)) ICI
+		(SELECT [intItemId], [strType], [strManufactureType], [ysnAutoBlend] FROM tblICItem WITH (NOLOCK)) ICI
 			ON ARID.[intItemId] = ICI.[intItemId]
 	INNER JOIN
 		(SELECT [intItemUOMId] FROM tblICItemUOM WITH (NOLOCK)) ICIUOM 
