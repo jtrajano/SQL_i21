@@ -268,6 +268,51 @@ BEGIN
 	WHERE POS.intPOSId = @intPOSId
 	AND DETAILS.dblQuantity < 0
 
+	UNION ALL
+
+	SELECT TOP 1
+		 [strTransactionType]					= 'Credit Memo'
+		,[strType]								= 'POS'
+		,[strSourceTransaction]					= 'POS'
+		,[intSourceId]							= @intPOSId
+		,[strSourceId]							= POS.strReceiptNumber
+		,[intEntityCustomerId]					= POS.intEntityCustomerId
+		,[intCompanyLocationId]					= POS.intCompanyLocationId
+		,[intCurrencyId]						= POS.intCurrencyId
+		,[dtmDate]								= POS.dtmDate
+		,[dtmShipDate]							= POS.dtmDate
+		,[strComments]							= 'POS Return:' + ISNULL(POS.strComment, '')
+		,[intEntityId]							= POS.intEntityUserId
+		,[ysnPost]								= 1
+		,[intItemId]							= NULL
+		,[ysnInventory]							= 0
+		,[strItemDescription]					= 'POS Discount - ' + CAST(CAST(POS.dblDiscountPercent AS INT) AS VARCHAR(3)) + '%'
+		,[intItemUOMId]							= NULL
+		,[dblQtyShipped]						= 1.000000
+		,[dblDiscount]							= NULL
+		,[dblPrice]								= POS.dblDiscount * -1
+		,[ysnRefreshPrice]						= 0
+		,[ysnRecomputeTax]						= CASE WHEN ISNULL(POS.ysnTaxExempt,0) = 0 THEN 1 ELSE 0 END
+		,[ysnClearDetailTaxes]					= 1
+		,[intTempDetailIdForTaxes]				= @intPOSId
+		,[dblCurrencyExchangeRate]				= 1.000000
+		,[dblSubCurrencyRate]					= 1.000000
+		,[intSalesAccountId]					= ISNULL(COMPANYLOC.intSalesDiscounts, COMPANYPREF.intDiscountAccountId)
+		,[strPONumber]							= POS.strPONumber
+		,[intFreightTermId]						= CASE WHEN ISNULL(POS.ysnTaxExempt,0) = 0 THEN COMPANYLOC.intFreightTermId ELSE NULL END
+	FROM tblARPOS POS
+	OUTER APPLY (
+		SELECT TOP 1 intDiscountAccountId 
+		FROM tblARCompanyPreference WITH (NOLOCK)
+	) COMPANYPREF
+	LEFT JOIN (
+		SELECT intSalesDiscounts
+			 , intCompanyLocationId
+			 , intFreightTermId
+		FROM tblSMCompanyLocation WITH (NOLOCK)
+	) COMPANYLOC ON POS.intCompanyLocationId = COMPANYLOC.intCompanyLocationId
+	WHERE POS.intPOSId = @intPOSId
+	  AND ISNULL(dblDiscountPercent, 0) > 0
 	--END OF INSERT NEGATIVE TRANSACTION
 
 	EXEC uspARProcessInvoices @InvoiceEntries		= @EntriesForInvoice
