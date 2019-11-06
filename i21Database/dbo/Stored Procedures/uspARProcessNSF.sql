@@ -590,7 +590,7 @@ ELSE
 		     , @intPaymentId = NSFDetail.intTransactionId
 		FROM vyuARPaymentBankTransaction vyu
 		INNER JOIN tblARNSFStagingTableDetail NSFDetail
-			ON vyu.intPaymentId = NSFDetail.intTransactionId AND NSFDetail.strTransactionType = 'Payment'
+			ON vyu.intPaymentId = NSFDetail.intTransactionId
 		WHERE intNSFTransactionId = @intNSFTransactionId
 	END
 
