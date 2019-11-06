@@ -17,6 +17,10 @@ IF @transCount = 0 BEGIN TRANSACTION;
 UPDATE A
 	SET A.strVendorOrderNumber = D.strLocationNumber + SUBSTRING(A.strVendorOrderNumber, CHARINDEX('-', A.strVendorOrderNumber), LEN(A.strVendorOrderNumber))
 						+ CASE WHEN A.dblPayment < 0 THEN 'R' ELSE '' END
+		,A.dblPayment = CASE WHEN B.dblInvoiceAdjPercentage > 0 
+							THEN A.dblPayment - ((B.dblInvoiceAdjPercentage / 100) * A.dblPayment)
+						ELSE A.dblPayment
+						END
 FROM tblAPImportPaidVouchersForPayment A
 INNER JOIN tblAPVendor B
 	ON A.intEntityVendorId = B.intEntityId
