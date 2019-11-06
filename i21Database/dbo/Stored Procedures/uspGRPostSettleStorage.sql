@@ -386,11 +386,30 @@ BEGIN TRY
 				,intFuturesMonthId		= CD.intGetContractDetailFutureMonthId
 			FROM tblGRSettleContract SSC
 			JOIN vyuGRGetContracts CD 
-				ON CD.intContractDetailId = SSC.intContractDetailId
+				ON CD.intContractDetailId = SSC.intContractDetailId				
+			left join vyuCTAvailableQuantityForVoucher b
+				on b.intContractDetailId = SSC.intContractDetailId
 			WHERE intSettleStorageId = @intSettleStorageId 
-				AND SSC.dblUnits > 0
+				AND SSC.dblUnits > 0 
+					and (@ysnFromPriceBasisContract = 0 or SSC.dblUnits > b.dblVoucherQtyReceived)
 			ORDER BY SSC.intSettleContractId
 			
+
+			if @debug_awesome_ness = 1
+			begin
+				select 'settle contract ', * from @SettleContract a
+
+				select * FROM tblGRSettleContract SSC
+				JOIN vyuGRGetContracts CD 
+					ON CD.intContractDetailId = SSC.intContractDetailId				
+				left join vyuCTAvailableQuantityForVoucher b
+					on b.intContractDetailId = SSC.intContractDetailId
+				WHERE intSettleStorageId = @intSettleStorageId 
+					AND SSC.dblUnits > 0 
+						and (@ysnFromPriceBasisContract = 0 or SSC.dblUnits > b.dblVoucherQtyReceived)
+			end
+
+
 			IF EXISTS(SELECT TOP 1 1 FROM @SettleContract WHERE strPricingType = 'Basis')
 			BEGIN
 				IF @intFutureMarketId = 0 AND @ysnExchangeTraded = 1
@@ -753,6 +772,11 @@ BEGIN TRY
 						FROM tblCTContractDetail
 						WHERE intContractDetailId = @intContractDetailId
 
+						if @debug_awesome_ness = 1
+						begin
+							select 'settle contract information inside the loop'
+							select * from @SettleContract
+						end
 						IF @dblStorageUnits <= @dblContractUnits
 						BEGIN
 							UPDATE @SettleContract
@@ -977,6 +1001,15 @@ BEGIN TRY
 					BREAK;
 			END
 
+			begin
+				-- must update the qty for the discounts
+				declare @dblTotalUnits DECIMAL(24, 10)
+				
+				select @dblTotalUnits = sum(dblUnits) from @SettleVoucherCreate where intItemType = 1
+
+				update @SettleVoucherCreate set dblUnits = @dblTotalUnits where intItemType = 2
+
+			end
 			BEGIN
 				EXEC dbo.uspSMGetStartingNumber 
 					 @STARTING_NUMBER_BATCH
@@ -1028,7 +1061,7 @@ BEGIN TRY
 				FROM tblGRStorageHistory
 				WHERE strType = 'FROM Scale' 
 					AND intCustomerStorageId = @intCustomerStorageId
-
+		
 				INSERT INTO @ItemsToStorage 
 				(
 					 intItemId
@@ -1721,7 +1754,7 @@ BEGIN TRY
 																THEN a.dblUnits - @dblTotalVoucheredQuantity 
 																WHEN @origdblSpotUnits > 0 THEN ROUND(dbo.fnCalculateQtyBetweenUOM(b.intItemUOMId,@intCashPriceUOMId,a.dblUnits),6) 
 																WHEN a.intPricingTypeId = 1 and @ysnFromPriceBasisContract = 1 then
-																	a.dblUnits - @dblTotalVoucheredQuantity
+																	a.dblUnits -- @dblTotalVoucheredQuantity
 																ELSE 
 																	case when @ysnFromPriceBasisContract = 1 and  availableQtyForVoucher.intContractDetailId is null  and c.strType = 'Inventory' then 0
 																	when @ysnFromPriceBasisContract = 1  AND (@dblQtyFromCt + @dblTotalVoucheredQuantity) > a.dblUnits 
@@ -1768,7 +1801,7 @@ BEGIN TRY
 																			THEN a.dblUnits - @dblTotalVoucheredQuantity
 																			WHEN @origdblSpotUnits > 0 THEN ROUND(dbo.fnCalculateQtyBetweenUOM(b.intItemUOMId,@intCashPriceUOMId,a.dblUnits),6)
 																			WHEN a.intPricingTypeId = 1 and @ysnFromPriceBasisContract = 1 then
-																				a.dblUnits - @dblTotalVoucheredQuantity
+																				a.dblUnits -- @dblTotalVoucheredQuantity
 																			ELSE 
 																				case when @ysnFromPriceBasisContract = 1 and  availableQtyForVoucher.intContractDetailId is null and c.strType = 'Inventory' then 0
 																				when @ysnFromPriceBasisContract = 1  AND (@dblQtyFromCt + @dblTotalVoucheredQuantity) > a.dblUnits 
@@ -1828,6 +1861,8 @@ BEGIN TRY
 																	THEN a.dblUnits - @dblTotalVoucheredQuantity
 																when @ysnFromPriceBasisContract = 1  AND (@dblQtyFromCt + @dblTotalVoucheredQuantity) < a.dblUnits 
 																	THEN @dblQtyFromCt - a.dblUnits
+																WHEN a.intPricingTypeId = 1 and @ysnFromPriceBasisContract = 1 then
+																				a.dblUnits -- @dblTotalVoucheredQuantity
 																WHEN a.[intContractHeaderId] IS NOT NULL THEN a.dblUnits 
 																ELSE 0 
 															END
@@ -1913,7 +1948,7 @@ BEGIN TRY
 																WHEN @origdblSpotUnits > 0 
 																	THEN ROUND(dbo.fnCalculateQtyBetweenUOM(b.intItemUOMId,@intCashPriceUOMId,a.dblUnits),6) 
 																WHEN a.intPricingTypeId = 1 and @ysnFromPriceBasisContract = 1 
-																	then a.dblUnits - @dblTotalVoucheredQuantity
+																	then a.dblUnits -- @dblTotalVoucheredQuantity
 																ELSE 
 																		case when @ysnFromPriceBasisContract = 1 and  availableQtyForVoucher.intContractDetailId is null  and c.strType = 'Inventory' then 0
 																		when @ysnFromPriceBasisContract = 1  AND (@dblQtyFromCt + @dblTotalVoucheredQuantity) > a.dblUnits 
@@ -1960,7 +1995,7 @@ BEGIN TRY
 																			THEN a.dblUnits - @dblTotalVoucheredQuantity																			
 																			WHEN @origdblSpotUnits > 0 THEN ROUND(dbo.fnCalculateQtyBetweenUOM(b.intItemUOMId,@intCashPriceUOMId,a.dblUnits),6)
 																			WHEN a.intPricingTypeId = 1 and @ysnFromPriceBasisContract = 1 then
-																				a.dblUnits - @dblTotalVoucheredQuantity
+																				a.dblUnits -- @dblTotalVoucheredQuantity
 																			ELSE 
 																				case when @ysnFromPriceBasisContract = 1 and  availableQtyForVoucher.intContractDetailId is null  and c.strType = 'Inventory' then 0
 																				when @ysnFromPriceBasisContract = 1  AND (@dblQtyFromCt + @dblTotalVoucheredQuantity) > a.dblUnits 
@@ -2014,11 +2049,7 @@ BEGIN TRY
 						ON SH.intCustomerStorageId = CS.intCustomerStorageId
 								AND a.intItemType = 1
 				LEFT JOIN tblCTContractDetail CD
-					ON CD.intContractDetailId = a.intContractDetailId
-				left join tblICInventoryTransaction IT
-					on IT.intTransactionId = SST.intSettleStorageId 
-						and IT.intTransactionTypeId = 44
-						and IT.intItemId = a.intItemId
+					ON CD.intContractDetailId = a.intContractDetailId				
 				left join (
 					select
 						intContractDetailId,	intPriceFixationDetailId, dblCashPrice, dblAvailableQuantity					
