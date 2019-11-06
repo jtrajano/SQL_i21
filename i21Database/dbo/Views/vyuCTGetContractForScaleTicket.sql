@@ -13,7 +13,8 @@ AS
 			CD.dblCashPrice,																						
 			CD.intContractStatusId,																			
 			IM.strItemNo,										
-			IM.strDescription				AS	strItemDescription,											
+			IM.strDescription				AS	strItemDescription,			
+			U1.strUnitMeasure				AS  strItemUOM,								
 			PT.strPricingType,																				
 			CL.strLocationName,																					
 			EF.strFieldNumber,																					
@@ -75,4 +76,5 @@ AS
 					JOIN	tblICUnitMeasure	UM	ON	UM.intUnitMeasureId			=	IU.intUnitMeasureId 
 					WHERE	IU.ysnStockUnit = 1
 				)								SK	ON	SK.intItemId				=	CD.intItemId																					
+																	
 
