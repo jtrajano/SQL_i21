@@ -2881,7 +2881,7 @@ BEGIN TRY
 
 	UPDATE tblGRSettleStorage
 	SET ysnPosted = 1
-	WHERE intSettleStorageId = @intParentSettleStorageId	
+	WHERE intSettleStorageId = @intParentSettleStorageId or  intParentSettleStorageId = @intParentSettleStorageId
 
 	if @ysnFromPriceBasisContract = 0
 		UPDATE tblGRStorageHistory
@@ -2893,6 +2893,9 @@ BEGIN TRY
 		
 		select 'storage history part', @createdVouchersId, @ysnFromPriceBasisContract, @intVoucherId
 		select top 10 'storage history',* from [tblGRStorageHistory] order by intStorageHistoryId desc --offset 0 rows fetch next 5 rows only
+
+		select 'settle storage information', * from tblGRSettleStorage 
+	WHERE intSettleStorageId = @intParentSettleStorageId or  intParentSettleStorageId = @intParentSettleStorageId
 
 	end
 
