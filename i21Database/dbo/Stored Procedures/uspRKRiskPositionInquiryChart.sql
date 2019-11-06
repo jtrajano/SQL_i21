@@ -24,8 +24,8 @@ BEGIN
 	SET @intForecastWeeklyConsumptionUOMId = @intUOMId
 END
 
-DECLARE @strRiskView nvarchar(50)
-SELECT @strRiskView = strRiskView FROM tblRKCompanyPreference
+DECLARE @intRiskViewId INT
+SELECT TOP 1 @intRiskViewId = intRiskViewId FROM tblRKCompanyPreference
 
 DECLARE @tblFinalDetail TABLE (intRowNumber INT
 	, strGroup NVARCHAR(500) COLLATE Latin1_General_CI_AS
@@ -50,7 +50,7 @@ DECLARE @tblMonthFinal TABLE (intRowNum INT identity(1, 1)
 	, dblPhysicalPosition DECIMAL(24, 10)
 	, Selection NVARCHAR(500) COLLATE Latin1_General_CI_AS)
 
-IF @strRiskView <> 'Processor'
+IF @intRiskViewId <> 2
 BEGIN
 	DECLARE @RiskPositionInquiryTable AS TABLE (intRowNumber INT
 		, Selection NVARCHAR(200) COLLATE Latin1_General_CI_AS

@@ -14,7 +14,6 @@ DECLARE @strUnitMeasure NVARCHAR(max)
 DECLARE @dtmFutureMonthsDate DATETIME
 DECLARE @dblContractSize INT
 DECLARE @ysnIncludeInventoryHedge BIT
-DECLARE @strRiskView NVARCHAR(max)
 DECLARE @strFutureMonth NVARCHAR(max)
 DECLARE @strParamFutureMonth NVARCHAR(max)
 DECLARE @strMarketSymbol NVARCHAR(max)
@@ -34,10 +33,6 @@ WHERE intCommodityId = @intCommodityId AND intUnitMeasureId = @intUOMId
 
 SELECT @ysnIncludeInventoryHedge = ysnIncludeInventoryHedge
 FROM tblRKCompanyPreference
-
-SELECT @strRiskView = strRiskView
-FROM tblRKCompanyPreference
-
 
 --    Invoice End
 DECLARE @List AS TABLE (

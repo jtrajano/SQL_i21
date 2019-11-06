@@ -1,7 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblRKCoverageEntry]
 (
 	[intCoverageEntryId] INT IDENTITY NOT NULL, 
-    [strBatchName] NVARCHAR(50) NOT NULL, 
+    [strBatchName] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
     [dtmDate] DATETIME NOT NULL, 
     [intUOMId] INT NULL, 
     [intBookId] INT NULL, 

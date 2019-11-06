@@ -157,7 +157,7 @@ FROM (
 	LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemId = i.intItemId AND ItemUOM.ysnStockUnit = 1
 	LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
 	WHERE dblQuantity > 0
-		AND it.strLotTracking = (CASE WHEN (SELECT TOP 1 strRiskView FROM tblRKCompanyPreference) = 'Processor' THEN it.strLotTracking ELSE 'No' END)) iis
+		AND it.strLotTracking = (CASE WHEN (SELECT TOP 1 intRiskViewId FROM tblRKCompanyPreference) = 2 THEN it.strLotTracking ELSE 'No' END)) iis
 LEFT JOIN (
 	SELECT DISTINCT cd.intItemId
 		, cd.intCompanyLocationId

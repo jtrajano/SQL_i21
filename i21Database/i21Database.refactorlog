@@ -7420,4 +7420,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="strCreateDateTime" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="a59819b7-db51-4ae4-b146-d4dc16daf582" ChangeDateTime="10/30/2019 06:46:53">
+    <Property Name="ElementName" Value="[dbo].[tblRKRiskView].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblRKRiskView]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intRiskViewId" />
+  </Operation>
 </Operations>

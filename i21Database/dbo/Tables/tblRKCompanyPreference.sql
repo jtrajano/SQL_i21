@@ -10,7 +10,7 @@
     [ysnIncludeOptionsInRiskInquiryOrCoverage] BIT NULL, 
     [ysnIncludeInventoryHedge] BIT NULL, 
     [ysnIncludeExpiredMonths] BIT NULL, 
-    [strRiskView] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+	[intRiskViewId] INT NULL,
     [strReportLevel] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [strTimingField] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [strReportTerms] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 

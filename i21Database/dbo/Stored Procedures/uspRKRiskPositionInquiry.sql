@@ -41,7 +41,6 @@ BEGIN
 		, @dtmFutureMonthsDate DATETIME
 		, @dblContractSize INT
 		, @ysnIncludeInventoryHedge BIT
-		, @strRiskView NVARCHAR(MAX)
 		, @strFutureMonth NVARCHAR(MAX)
 		, @dblForecastWeeklyConsumption NUMERIC(24, 10)
 		, @strParamFutureMonth NVARCHAR(MAX)
@@ -64,7 +63,6 @@ BEGIN
 	WHERE intCommodityId = @intCommodityId AND intUnitMeasureId = @intUOMId
 
 	SELECT TOP 1 @ysnIncludeInventoryHedge = ysnIncludeInventoryHedge
-		, @strRiskView = strRiskView
 	FROM tblRKCompanyPreference
 
 	DECLARE @intForecastWeeklyConsumptionUOMId1 INT

@@ -70,3 +70,39 @@ BEGIN
 	VALUES('Currency Exposure',1,'','Risk Management',0,0,getdate(),1,1)
 END
 GO
+
+
+IF EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'tblRKRiskView')
+BEGIN
+	SET IDENTITY_INSERT tblRKRiskView ON
+    
+	INSERT INTO tblRKRiskView(intRiskViewId
+		, strRiskView
+		, ysnCustomWork
+		, strCustomer)
+	SELECT * FROM (
+		SELECT intRiskViewId = 1
+			, strRiskView = 'Trader/Elevator'
+			, ysnCustomWork = CAST(0 AS BIT)
+			, strCustomer = NULL
+
+		UNION ALL SELECT 2
+			, 'Processor'
+			, 0
+			, NULL
+
+		UNION ALL SELECT 3
+			, 'Trader 2'
+			, 0
+			, NULL
+
+		UNION ALL SELECT 4
+			, 'Strauss View'
+			, 1
+			, 'Strauss'
+	) t
+	WHERE intRiskViewId NOT IN (SELECT intRiskViewId FROM tblRKRiskView)
+
+	SET IDENTITY_INSERT tblRKRiskView OFF
+END
+GO

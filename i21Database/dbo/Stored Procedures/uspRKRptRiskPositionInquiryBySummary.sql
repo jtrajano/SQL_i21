@@ -194,12 +194,15 @@ DECLARE @temp AS TABLE (
 	strItemNo NVARCHAR(200) COLLATE Latin1_General_CI_AS,
 	strItemDescription NVARCHAR(200) COLLATE Latin1_General_CI_AS
 	)
-DECLARE @strRiskView NVARCHAR(100)
-declare @ysnSubTotalByBook bit
-SELECT TOP 1 @strRiskView = strRiskView FROM tblRKCompanyPreference
-SELECT TOP 1 @ysnSubTotalByBook=ysnSubTotalByBook FROM tblRKCompanyPreference
 
-IF (@strRiskView = 'Trader/Elevator')
+DECLARE @intRiskViewId INT
+	, @ysnSubTotalByBook BIT
+SELECT TOP 1 @intRiskViewId = intRiskViewId
+	, @ysnSubTotalByBook = ysnSubTotalByBook
+FROM tblRKCompanyPreference
+
+
+IF (@intRiskViewId = 1)
 BEGIN
 	INSERT INTO @temp (
 		intRowNumber,

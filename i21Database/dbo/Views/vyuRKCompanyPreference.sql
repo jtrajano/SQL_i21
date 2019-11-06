@@ -36,6 +36,7 @@ SELECT A.*
 	, strMarkExpiredMonthPosition = CASE WHEN intMarkExpiredMonthPositionId = 1 THEN 'Validate Expired'
 								WHEN intMarkExpiredMonthPositionId = 2 THEN 'Spot Month'
 								WHEN intMarkExpiredMonthPositionId = 3 THEN 'Nearby by Roll' END
+	, rv.strRiskView
 FROM tblRKCompanyPreference A
 LEFT JOIN tblRKInterfaceSystem C ON C.intInterfaceSystemId = A.intInterfaceSystemId
 LEFT JOIN tblSMCurrency D ON D.intCurrencyID = A.intCurrencyId
@@ -59,3 +60,4 @@ LEFT JOIN tblGLAccount GL17 ON GL17.intAccountId = A.intUnrealizedGainOnInventor
 LEFT JOIN tblGLAccount GL18 ON GL18.intAccountId = A.intUnrealizedLossOnInventoryRatioIOSId
 LEFT JOIN tblGLAccount GL19 ON GL19.intAccountId = A.intUnrealizedGainOnInventoryIOSId
 LEFT JOIN tblGLAccount GL20 ON GL20.intAccountId = A.intUnrealizedLossOnInventoryIOSId
+LEFT JOIN tblRKRiskView rv ON rv.intRiskViewId = A.intRiskViewId

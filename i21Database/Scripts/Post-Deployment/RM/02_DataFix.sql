@@ -339,5 +339,10 @@ BEGIN
 	WHERE ISNULL(intPostToGLId, 0) = 0
 END
 
+IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblRKCompanyPreference' AND COLUMN_NAME = 'strRiskView')
+BEGIN
+	ALTER TABLE tblRKCompanyPreference DROP COLUMN strRiskView
+END
+
 print('/*******************  END Risk Management Data Fixess *******************/')
 GO

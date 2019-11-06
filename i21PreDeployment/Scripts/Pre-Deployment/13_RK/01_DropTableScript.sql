@@ -360,4 +360,21 @@ BEGIN
 	END
 END
 
+IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[tblRKCompanyPreference]') AND type IN (N'U'))
+BEGIN
+	IF NOT EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblRKCompanyPreference' AND COLUMN_NAME = 'intRiskViewId')
+	BEGIN
+		EXEC('ALTER TABLE tblRKCompanyPreference ADD intRiskViewId INT')
+	END
+
+	IF EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblRKCompanyPreference' AND COLUMN_NAME = 'strRiskView')
+	BEGIN
+		EXEC('UPDATE tblRKCompanyPreference SET intRiskViewId = CASE WHEN strRiskView = ''Trader/Elevator'' THEN 1
+																	WHEN strRiskView = ''Processor'' THEN 2
+																	WHEN strRiskView = ''Trader 2'' THEN 3 END')
+	END
+
+	
+END
+
 GO

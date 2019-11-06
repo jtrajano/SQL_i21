@@ -107,19 +107,24 @@ BEGIN
 		FOR strType IN ([Contracts], [In-Transit], [Stock], [Futures])
 	) tblPivot
 
-	SELECT ComAtt.intCommodityAttributeId
+	SELECT intProductTypeId = ComAtt.intCommodityAttributeId
 		, strProductType = ComAtt.strDescription
 		, Book.intBookId
 		, Book.strBook
 		, SubBook.intSubBookId
 		, SubBook.strSubBook
-		, Balance.dblContracts
+		, dblOpenContract = Balance.dblContracts
 		, Balance.dblInTransit
 		, Balance.dblStock
 		, dblTotalPhysical = Balance.dblContracts + Balance.dblInTransit + Balance.dblStock
-		, Balance.dblFutures
+		, dblOpenFutures = Balance.dblFutures
 		, dblTotalPosition = Balance.dblContracts + Balance.dblInTransit + Balance.dblStock + Balance.dblFutures
-
+		, intMonthsCovered = 0
+		, dblAveragePrice = 0
+		, dblOptionsCovered = 0
+		, dblFuturesM2M = 0
+		, dblM2MPlus10 = 0
+		, dblM2MMinus10 = 0
 	FROM tblICCommodityAttribute ComAtt
 	LEFT JOIN #tmpBalances Balance ON Balance.intCommodityId = ComAtt.intCommodityId
 	LEFT JOIN tblCTBook Book ON Book.intBookId = Balance.intBookId
