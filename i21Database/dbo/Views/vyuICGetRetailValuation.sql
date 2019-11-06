@@ -19,4 +19,5 @@ SELECT	intCategoryId
 		,dtmDateFrom
 		,dtmDateTo
 		,dtmDate = dtmDateFrom
+		,intLocationId
 FROM 	tblICRetailValuation 
