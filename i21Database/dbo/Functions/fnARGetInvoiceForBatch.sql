@@ -27,6 +27,7 @@ BEGIN
               AND strType = 'Standard'
               AND intEntityCustomerId = @intEntityCustomerId
               AND CAST(dtmDateCreated AS DATE) = CAST(GETDATE() AS DATE)
+              AND CAST(GETDATE() AS TIME) BETWEEN @dtmBatchTimeFrom AND @dtmBatchTimeTo
             ORDER BY dtmDateCreated DESC
         END
     ELSE IF UPPER(@strBatchInvoiceBy) = UPPER('Per Time and Location') AND ISNULL(@intContractShipToLocationId, 0) <> 0
@@ -38,6 +39,7 @@ BEGIN
               AND strType = 'Standard'
               AND intEntityCustomerId = @intEntityCustomerId
               AND CAST(dtmDateCreated AS DATE) = CAST(GETDATE() AS DATE)
+              AND CAST(GETDATE() AS TIME) BETWEEN @dtmBatchTimeFrom AND @dtmBatchTimeTo
               AND intShipToLocationId = @intContractShipToLocationId
             ORDER BY dtmDateCreated DESC
         END
