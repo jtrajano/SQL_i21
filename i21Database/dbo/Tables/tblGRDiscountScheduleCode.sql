@@ -20,6 +20,7 @@
 	[intCompanyLocationId] INT NULL,
 	[intUnitMeasureId] INT NULL,
 	[intScalableItemId] INT NULL,  
+    [intDiscountTypeId] INT NULL, 
     CONSTRAINT [PK_tblGRDiscountScheduleCode_intDiscountScheduleCodeId] PRIMARY KEY ([intDiscountScheduleCodeId]), 	
     CONSTRAINT [FK_tblGRDiscountScheduleCode_tblGRDiscountSchedule_intDiscountScheduleId] FOREIGN KEY ([intDiscountScheduleId]) REFERENCES [tblGRDiscountSchedule]([intDiscountScheduleId]), 
     CONSTRAINT [FK_tblGRDiscountScheduleCode_tblGRDiscountCalculationOption_intDiscountCalculationOptionId_intDiscountCalculationOptionId] FOREIGN KEY ([intDiscountCalculationOptionId]) REFERENCES [tblGRDiscountCalculationOption]([intDiscountCalculationOptionId]),

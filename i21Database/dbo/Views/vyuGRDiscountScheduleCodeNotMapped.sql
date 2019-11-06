@@ -15,6 +15,8 @@ SELECT
 ,SCO.strShrinkCalculationOption
 ,Dcode.intScalableItemId
 ,ScaleableItem.strItemNo AS strScaleableItemNo
+,DT.intDiscountTypeId
+,DT.strDiscountType
 FROM tblGRDiscountScheduleCode Dcode
 LEFT JOIN tblICItem Item ON Item.intItemId=Dcode.intItemId
 LEFT JOIN tblICItem ScaleableItem ON ScaleableItem.intItemId=Dcode.intScalableItemId
@@ -23,4 +25,5 @@ LEFT JOIN tblSMCompanyLocation LOC ON LOC.intCompanyLocationId = Dcode.intCompan
 LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = Dcode.intUnitMeasureId
 LEFT JOIN tblGRDiscountCalculationOption DCO ON DCO.intDiscountCalculationOptionId = Dcode.intDiscountCalculationOptionId
 LEFT JOIN tblGRShrinkCalculationOption SCO ON SCO.intShrinkCalculationOptionId = Dcode.intShrinkCalculationOptionId
+LEFT JOIN tblSCDiscountType DT ON DT.intDiscountTypeId = Dcode.intDiscountTypeId
 
