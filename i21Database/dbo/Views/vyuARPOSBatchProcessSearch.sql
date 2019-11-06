@@ -23,7 +23,7 @@ FROM (
 		 , dtmDate				= IPOS.dtmDate
 	FROM tblARPOS IPOS
 	WHERE IPOS.ysnHold = 0
-	  AND ((IPOS.ysnReturn = 1 AND (IPOS.intInvoiceId IS NOT NULL OR IPOS.intCreditMemoId IS NULL)) OR IPOS.ysnReturn = 0)
+	  AND ((IPOS.ysnReturn = 1 AND (IPOS.intInvoiceId IS NOT NULL OR IPOS.intCreditMemoId IS NULL)) OR (IPOS.ysnReturn = 0 AND IPOS.intCreditMemoId IS NULL))
 
 	UNION ALL
 
