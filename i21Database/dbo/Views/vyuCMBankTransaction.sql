@@ -48,7 +48,7 @@ strAccountClassification = ISNULL((
 ),''),
 dblDebit = ISNULL(Detail.dblDebit,0),
 dblCredit = ISNULL(Detail.dblCredit,0),
-A.intAddendaSequenceId
+B.intAddendaSequenceId
 FROM tblCMBankTransaction A
 LEFT JOIN tblCMAddendaSequence B ON B.intTransactionId = A.intTransactionId
 OUTER APPLY (
