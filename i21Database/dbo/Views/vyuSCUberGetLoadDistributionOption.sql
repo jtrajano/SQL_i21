@@ -3,8 +3,7 @@ AS
 	SELECT 
 		DO.intDistributionOptionId
 		, LT.strTicketType
-		, LSS.intEntityId 
-		, LSS.intScaleSetupId
+		, SS.intScaleSetupId
 		, TP.intTicketPoolId
 		, SS.strStationShortDescription
 		, SS.strStationDescription
@@ -13,8 +12,7 @@ AS
 		, DO.ysnDistributionAllowed
 		, DO.ysnDefaultDistribution
 	from 
-		tblSCLastScaleSetup LSS
-		inner join tblSCScaleSetup SS on LSS.intScaleSetupId = SS.intScaleSetupId
+		tblSCScaleSetup SS 
 		inner join tblSCDistributionOption DO on SS.intTicketPoolId = DO.intTicketPoolId
 		inner join tblSCTicketPool TP on DO.intTicketPoolId = TP.intTicketPoolId
 		inner join tblSCTicketType TY on TY.intTicketTypeId = DO.intTicketTypeId 
