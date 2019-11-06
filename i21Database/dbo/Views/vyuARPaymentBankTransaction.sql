@@ -1,13 +1,25 @@
 ﻿CREATE VIEW [dbo].[vyuARPaymentBankTransaction]
 AS
-SELECT DISTINCT intPaymentId	= PAYMENTS.intPaymentId
-	 , strRecordNumber			= PAYMENTS.strRecordNumber
+SELECT DISTINCT intPaymentId	= PAYMENTS.intSourceTransactionId
+	 , strRecordNumber			= PAYMENTS.strSourceTransactionId
 	 , intUndepositedFundId		= UNDEPOSITED.intUndepositedFundId
 	 , strTransactionId 		= STUFF(_BANKTRANSACTIONS.strTransactionIds,1,1,'') COLLATE Latin1_General_CI_AS
 FROM tblCMUndepositedFund UNDEPOSITED
-INNER JOIN tblARPayment PAYMENTS ON UNDEPOSITED.intSourceTransactionId = PAYMENTS.intPaymentId
-							    AND UNDEPOSITED.strSourceTransactionId = PAYMENTS.strRecordNumber
-								AND PAYMENTS.ysnPosted = 1
+INNER JOIN (
+	SELECT intSourceTransactionId	= P.intPaymentId
+		 , strSourceTransactionId	= P.strRecordNumber
+	FROM tblARPayment P
+	WHERE P.ysnPosted = 1
+
+	UNION ALL
+
+	SELECT intSourceTransactionId	= I.intInvoiceId
+		 , strSourceTransactionId	= I.strInvoiceNumber
+	FROM tblARInvoice I WITH (NOLOCK) 
+	WHERE I.ysnPosted = 1
+	  AND I.strTransactionType = 'Cash'
+) PAYMENTS ON UNDEPOSITED.intSourceTransactionId = PAYMENTS.intSourceTransactionId
+		  AND UNDEPOSITED.strSourceTransactionId = PAYMENTS.strSourceTransactionId
 INNER JOIN tblCMBankTransactionDetail BANKTRANSACTIONDETAIL ON BANKTRANSACTIONDETAIL.intUndepositedFundId = UNDEPOSITED.intUndepositedFundId
 CROSS APPLY (
 	SELECT strTransactionIds = (
