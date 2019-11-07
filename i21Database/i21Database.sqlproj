@@ -8134,6 +8134,13 @@
     <Build Include="dbo\Tables\tblTRCrossReferenceDtn.sql" />
     <Build Include="dbo\Views\vyuTRCrossReferenceDtn.sql" />
     <Build Include="dbo\Stored Procedures\uspAPDiagnoseClearingData.sql" />
+    <Build Include="dbo\Tables\tblLGFreightRateMatrixStage.sql" />
+    <Build Include="dbo\Tables\tblLGFreightRateMatrixAckStage.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPFreightRateMatrixProcessPreStage.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPFreightRateMatrixPopulateStgXML.sql" />
+    <Build Include="dbo\Views\vyuIPGetFreightRateMatrix.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPFreightRateMatrixTransferStgXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPFreightRateMatrixProcessStgXML.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
