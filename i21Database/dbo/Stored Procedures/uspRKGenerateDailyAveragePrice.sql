@@ -508,6 +508,7 @@ BEGIN
 			UPDATE tblRKDailyAveragePriceDetail
 			SET dblAverageLongPrice = tblPatch.dblAvgLongPrice
 				, dblNoOfLots = tblPatch.dblNoOfLots
+				, dblNetLongAvg = tblPatch.dblAvgLongPrice
 			FROM (
 				SELECT intDailyAveragePriceDetailId
 					, dblAvgLongPrice = CASE WHEN ISNULL(dblOpenContract, 0) <> 0 THEN dblPrice / dblOpenContract ELSE 0 END
