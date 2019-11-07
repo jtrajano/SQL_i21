@@ -199,7 +199,7 @@ BEGIN
 	
 	SELECT TOP 1 @intInvoiceId = intInvoiceId, @strTransactionType = strTransactionType, @strType = strType, @intCompanyLocationId = intCompanyLocationId FROM @inserted
 
-	UPDATE tblARInvoice SET dtmDateCreated = GETDATE()
+	UPDATE tblARInvoice SET dtmDateCreated = GETDATE() WHERE intInvoiceId = @intInvoiceId
 
 	SELECT TOP 1 @intStartingNumberId = intStartingNumberId 
 	FROM tblSMStartingNumber 
