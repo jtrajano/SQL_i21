@@ -8074,6 +8074,8 @@
     <Build Include="dbo\User Defined Types\StagingTransactionLog.sql" />
     <Build Include="dbo\Tables\tblSCDiscountType.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportPriceConfirmation.sql" />
+    <Build Include="dbo\Functions\udfDateGreaterThanEquals.sql" />
+    <Build Include="dbo\Functions\udfDateLessThanEquals.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
