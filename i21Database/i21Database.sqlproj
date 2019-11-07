@@ -8077,6 +8077,7 @@
     <Build Include="dbo\Stored Procedures\uspARInvoiceDetailTaxReport.sql" />
     <Build Include="dbo\Functions\fnGRGetVoucheredUnits.sql" />
     <Build Include="dbo\Stored Procedures\uspAPDiagnoseClearingData.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTRebuildScheduledQuantity.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
