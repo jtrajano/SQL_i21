@@ -35,15 +35,24 @@ BEGIN TRY
 		FROM tblLGFreightRateMatrixPreStage
 		WHERE intFreightRateMatrixPreStageId = @intFreightRateMatrixPreStageId
 
-		EXEC uspIPFreightRateMatrixPopulateStgXML @intFreightRateMatrixId
-			,@intToEntityId
-			,@intCompanyLocationId
-			,@strToTransactionType
-			,@intToCompanyId
-			,@strRowState
-			,0
-			,@intToBookId
-			,@intUserId
+		-- Check to process only 'General' type
+		IF EXISTS (
+				SELECT 1
+				FROM tblLGFreightRateMatrix t
+				WHERE t.intType = 2
+					AND t.intFreightRateMatrixId = @intFreightRateMatrixId
+				)
+		BEGIN
+			EXEC uspIPFreightRateMatrixPopulateStgXML @intFreightRateMatrixId
+				,@intToEntityId
+				,@intCompanyLocationId
+				,@strToTransactionType
+				,@intToCompanyId
+				,@strRowState
+				,0
+				,@intToBookId
+				,@intUserId
+		END
 
 		UPDATE tblLGFreightRateMatrixPreStage
 		SET strFeedStatus = 'Processed'
