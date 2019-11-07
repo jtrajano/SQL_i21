@@ -7,13 +7,16 @@
 	, @intNewInvoiceId	INT = NULL OUTPUT
 AS
 BEGIN
-	DECLARE @intUnitMeasureId 		INT = NULL
-	DECLARE @intEntityCustomerId	INT = NULL
-	DECLARE @intExistingInvoiceId	INT = NULL
-	DECLARE @strInvalidItem			NVARCHAR(MAX) = ''
-	DECLARE @strUnitMeasure			NVARCHAR(100) = ''
+	DECLARE @intUnitMeasureId 				INT = NULL
+	DECLARE @intEntityCustomerId			INT = NULL	
+	DECLARE @intShipToLocationId			INT = NULL
+	DECLARE @intContractShipToLocationId	INT = NULL
+	DECLARE @intExistingInvoiceId			INT = NULL
+	DECLARE @strInvalidItem					NVARCHAR(MAX) = ''
+	DECLARE @strUnitMeasure					NVARCHAR(100) = ''
 
 	SELECT @intEntityCustomerId = intEntityCustomerId
+		 , @intShipToLocationId	= intShipToLocationId
 	FROM dbo.tblSOSalesOrder WITH (NOLOCK)
 	WHERE intSalesOrderId = @intSalesOrderId
 
@@ -81,8 +84,6 @@ BEGIN
 		END
 
 	--GET EXISTING INVOICE FOR BATCH SCALE
-	DECLARE @intContractShipToLocationId	INT
-
 	SELECT TOP 1 @intContractShipToLocationId = CD.intShipToId
 	FROM tblSOSalesOrderDetail SO
 	INNER JOIN tblCTContractDetail CD ON SO.intContractDetailId = CD.intContractDetailId
@@ -90,7 +91,9 @@ BEGIN
 	  AND CD.intContractDetailId IS NOT NULL
 	  AND CD.intShipToId IS NOT NULL
 
-	SELECT @intExistingInvoiceId = dbo.fnARGetInvoiceForBatch(@intEntityCustomerId, @intContractShipToLocationId)
+	SET @intShipToLocationId = ISNULL(@intContractShipToLocationId, @intShipToLocationId)
+
+	SELECT @intExistingInvoiceId = dbo.fnARGetInvoiceForBatch(@intEntityCustomerId, @intShipToLocationId)
 
 	--CREATE INVOICE IF THERE's NONE
 	IF ISNULL(@intExistingInvoiceId, 0) = 0

@@ -14,13 +14,15 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-DECLARE @ZeroDecimal			DECIMAL(18,6) = 0 
-	  , @DateOnly				DATETIME = CAST(GETDATE() AS DATE)
-	  , @InvoiceId				INT
-	  , @intExistingInvoiceId	INT
-	  , @ShipmentNumber			NVARCHAR(100)
-	  , @InvoiceNumber			NVARCHAR(25) = ''
-	  , @strReferenceNumber 	NVARCHAR(100)
+DECLARE @ZeroDecimal					DECIMAL(18,6) = 0 
+	  , @DateOnly						DATETIME = CAST(GETDATE() AS DATE)
+	  , @InvoiceId						INT = NULL
+	  , @intExistingInvoiceId			INT = NULL
+	  , @intShipToLocationId			INT = NULL
+	  , @intContractShipToLocationId	INT = NULL
+	  , @ShipmentNumber					NVARCHAR(100)
+	  , @InvoiceNumber					NVARCHAR(25) = ''
+	  , @strReferenceNumber 			NVARCHAR(100)
 
 SELECT TOP 1 @strReferenceNumber = strSalesOrderNumber FROM tblSOSalesOrder ORDER BY intSalesOrderId DESC
 
@@ -43,8 +45,7 @@ DECLARE
 	,@BOLNumber					NVARCHAR(50)
 	,@Comments					NVARCHAR(MAX)
 	,@SalesOrderComments		NVARCHAR(MAX)
-	,@InvoiceComments			NVARCHAR(MAX)
-	,@ShipToLocationId			INT
+	,@InvoiceComments			NVARCHAR(MAX)	
 	,@SalesOrderId				INT
 	,@StorageScheduleTypeId		INT
 	
@@ -68,7 +69,7 @@ SELECT
 	,@BOLNumber					= ICIS.[strBOLNumber]
 	,@Comments					= ICIS.[strShipmentNumber] + ' : '	+ ISNULL(ICIS.[strReferenceNumber], '')
 	,@SalesOrderComments		= SO.strComments
-	,@ShipToLocationId			= ICIS.intShipToLocationId
+	,@intShipToLocationId		= ICIS.intShipToLocationId
 	,@SalesOrderId				= SO.intSalesOrderId
 	,@StorageScheduleTypeId		= @StorageScheduleTypeId
 FROM tblICInventoryShipment ICIS
@@ -240,7 +241,7 @@ SELECT
 	,[strPONumber]							= @PONumber 
 	,[strBOLNumber]							= @BOLNumber 
 	,[strComments]							= @Comments 
-	,[intShipToLocationId]					= @ShipToLocationId 
+	,[intShipToLocationId]					= @intShipToLocationId 
 	,[intBillToLocationId]					= NULL
 	,[ysnTemplate]							= 0
 	,[ysnForgiven]							= 0
@@ -362,7 +363,7 @@ SELECT
 	,[strPONumber]							= @PONumber 
 	,[strBOLNumber]							= @BOLNumber 
 	,[strComments]							= @Comments 
-	,[intShipToLocationId]					= @ShipToLocationId 
+	,[intShipToLocationId]					= @intShipToLocationId 
 	,[intBillToLocationId]					= NULL
 	,[ysnTemplate]							= 0
 	,[ysnForgiven]							= 0
@@ -489,7 +490,7 @@ SELECT
 	,[strPONumber]							= @PONumber 
 	,[strBOLNumber]							= @BOLNumber 
 	,[strComments]							= @Comments 
-	,[intShipToLocationId]					= @ShipToLocationId 
+	,[intShipToLocationId]					= @intShipToLocationId 
 	,[intBillToLocationId]					= NULL
 	,[ysnTemplate]							= 0
 	,[ysnForgiven]							= 0
@@ -764,15 +765,15 @@ ORDER BY EFI.[intSalesOrderDetailId] ASC
 	   , SOSODT.[intSalesOrderDetailTaxId] ASC
 
 --GET EXISTING INVOICE FOR BATCH SCALE
-DECLARE @intContractShipToLocationId	INT
-
 SELECT TOP 1 @intContractShipToLocationId = CD.intShipToId
 FROM @EntriesForInvoice IE
 INNER JOIN tblCTContractDetail CD ON IE.intContractDetailId = CD.intContractDetailId
 WHERE CD.intContractDetailId IS NOT NULL
   AND CD.intShipToId IS NOT NULL
 
-SELECT @intExistingInvoiceId = dbo.fnARGetInvoiceForBatch(@EntityCustomerId, @intContractShipToLocationId)
+SET @intShipToLocationId = ISNULL(@intContractShipToLocationId, @intShipToLocationId)
+
+SELECT @intExistingInvoiceId = dbo.fnARGetInvoiceForBatch(@EntityCustomerId, @intShipToLocationId)
 
 --CREATE INVOICE IF THERE's NONE
 IF ISNULL(@intExistingInvoiceId, 0) = 0
