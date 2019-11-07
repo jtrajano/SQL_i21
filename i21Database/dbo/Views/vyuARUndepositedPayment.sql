@@ -37,9 +37,31 @@ FROM (
 	LEFT OUTER JOIN tblCMUndepositedFund CM ON PAYMENT.intPaymentId = CM.intSourceTransactionId 
 										   AND PAYMENT.strRecordNumber = CM.strSourceTransactionId 
 										   AND CM.strSourceSystem = 'AR'
-	LEFT OUTER JOIN tblARPaymentDetail PAYMENTDETAILS ON PAYMENT.intPaymentId = PAYMENTDETAILS.intPaymentId
-	LEFT OUTER JOIN tblARPOS POS ON PAYMENTDETAILS.intInvoiceId = POS.intInvoiceId
-	LEFT OUTER JOIN tblARPOSLog POSLOG ON POS.intPOSLogId = POSLOG.intPOSLogId
+	LEFT OUTER JOIN 
+	(  
+		SELECT intPaymentId, intPOSLogId
+		FROM
+		(SELECT 
+			intPaymentId, 
+			intPOSLogId,
+			intRow =  ROW_NUMBER() OVER (
+			PARTITION BY  intPaymentId
+			ORDER BY intPaymentId ASC
+		)
+		FROM
+		tblARPaymentDetail pd
+		INNER JOIN tblARPOS pos
+		ON pd.intInvoiceId = pos.intInvoiceId
+
+		
+		) DETAILS
+	   WHERE intRow = 1
+	) FROMPOS 
+	ON FROMPOS.intPaymentId = PAYMENT.intPaymentId
+	INNER  JOIN tblARPOSLog POSLOG ON FROMPOS.intPOSLogId = POSLOG.intPOSLogId
+	--LEFT OUTER JOIN tblARPaymentDetail PAYMENTDETAILS ON PAYMENT.intPaymentId = PAYMENTDETAILS.intPaymentId
+	--LEFT OUTER JOIN tblARPOS POS ON PAYMENTDETAILS.intInvoiceId = POS.intInvoiceId
+	--LEFT OUTER JOIN tblARPOSLog POSLOG ON POS.intPOSLogId = POSLOG.intPOSLogId
 	LEFT OUTER JOIN tblARPOSEndOfDay POSEOD ON POSLOG.intPOSEndOfDayId = POSEOD.intPOSEndOfDayId
 	LEFT OUTER JOIN tblSMCompanyLocationPOSDrawer POSDRAWER ON POSEOD.intCompanyLocationPOSDrawerId = POSDRAWER.intCompanyLocationPOSDrawerId
 	WHERE PAYMENT.ysnPosted = 1
