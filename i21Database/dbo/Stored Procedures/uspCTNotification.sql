@@ -209,13 +209,6 @@ BEGIN TRY
 									on b.intWeightId = c.intWeightGradeId and ysnSample = 1
 						) a
 							on CH.intContractHeaderId = a.intContractHeaderId
-				--		LEFT JOIN ( Select intSampleId, intContractHeaderId from tblQMSample as SM			
-				--						JOIN tblQMSampleType as SMT
-				--							on SM.intSampleTypeId = SMT.intSampleTypeId
-				--								and SMT.strSampleTypeName = ''Pre-shipment Sample''			
-				--					) SMC1
-				--			on SMC1.intContractHeaderId = CH.intContractHeaderId
-				--WHERE SMC1.intSampleId is null
 				where CH.intContractHeaderId not in (select intContractHeaderId from tblCTContractDetail where intContractDetailId in (select intContractDetailId from tblQMSample, tblQMSampleStatus
 																			where tblQMSampleStatus.intSampleStatusId = tblQMSample.intSampleStatusId and tblQMSampleStatus.strStatus = ''Approved''))
 		
