@@ -447,7 +447,10 @@ BEGIN
 		WHERE strBatchNumber = @batchIdUsed;
 
 		SET @postError = ISNULL(@postError, @spError)
-		RAISERROR(@postError, 16, 1);
+		IF @recap = 0
+		BEGIN
+			RAISERROR(@postError, 16, 1);
+		END
 		RETURN;
 	END CATCH
 
