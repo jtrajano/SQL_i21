@@ -136,13 +136,13 @@ BEGIN TRY
 			blbHeaderLogo = dbo.fnSMGetCompanyLogo('Header'),
 			blbFooterLogo = dbo.fnSMGetCompanyLogo('Footer'),
 			strBuyerAddress	= CASE 
-								WHEN CH.strReportTo = 'Buyer' THEN --Customer
-									LTRIM(RTRIM(EC.strEntityName)) + ', ' + CHAR(13)+CHAR(10) +
-									ISNULL(LTRIM(RTRIM(EC.strEntityAddress)),'') + ', ' + CHAR(13)+CHAR(10) +
-									ISNULL(LTRIM(RTRIM(EC.strEntityCity)),'') + 
-									ISNULL(', '+CASE WHEN LTRIM(RTRIM(EC.strEntityState)) = '' THEN NULL ELSE LTRIM(RTRIM(EC.strEntityState)) END,'') + 
-									ISNULL(', '+CASE WHEN LTRIM(RTRIM(EC.strEntityZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(EC.strEntityZipCode)) END,'') + 
-									ISNULL(', '+CASE WHEN LTRIM(RTRIM(EC.strEntityCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(EC.strEntityCountry)) END,'')							
+								WHEN CH.intContractTypeId = 2 THEN --Customer
+									LTRIM(RTRIM(EC1.strEntityName)) + ', ' + CHAR(13)+CHAR(10) +
+									ISNULL(LTRIM(RTRIM(EC1.strEntityAddress)),'') + ', ' + CHAR(13)+CHAR(10) +
+									ISNULL(LTRIM(RTRIM(EC1.strEntityCity)),'') + 
+									ISNULL(', '+CASE WHEN LTRIM(RTRIM(EC1.strEntityState)) = '' THEN NULL ELSE LTRIM(RTRIM(EC1.strEntityState)) END,'') + 
+									ISNULL(', '+CASE WHEN LTRIM(RTRIM(EC1.strEntityZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(EC1.strEntityZipCode)) END,'') + 
+									ISNULL(', '+CASE WHEN LTRIM(RTRIM(EC1.strEntityCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(EC1.strEntityCountry)) END,'')							
 								ELSE -- Seller (Vendor)
 									LTRIM(RTRIM(@strCompanyName)) + ', ' + CHAR(13)+CHAR(10) +
 									ISNULL(LTRIM(RTRIM(@strAddress)),'') + ', ' + CHAR(13)+CHAR(10) +
@@ -152,7 +152,7 @@ BEGIN TRY
 									ISNULL(', '+CASE WHEN LTRIM(RTRIM(@strCounty)) = '' THEN NULL ELSE LTRIM(RTRIM(@strCountry)) END,'')
 								END,
 			strSellerAddress = CASE 
-								WHEN CH.strReportTo = 'Buyer' THEN --Customer
+								WHEN CH.intContractTypeId = 2 THEN --Customer
 									LTRIM(RTRIM(@strCompanyName)) + ', ' + CHAR(13)+CHAR(10) +
 									ISNULL(LTRIM(RTRIM(@strAddress)),'') + ', ' + CHAR(13)+CHAR(10) +
 									ISNULL(LTRIM(RTRIM(@strCity)),'') + 
@@ -207,6 +207,7 @@ BEGIN TRY
 												EY.strEntityType				=	(CASE WHEN CH.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END)	LEFT
 	JOIN	vyuCTEntity					EC	ON	EC.intEntityId					=	CH.intCounterPartyId  
 												AND EC.strEntityType				=	'Customer'			LEFT
+	JOIN	vyuCTEntity					EC1	ON	EC1.intEntityId					=	CH.intEntityId			LEFT
 	JOIN	vyuCTEntity					SP	ON	SP.intEntityId					=	CH.intSalespersonId		LEFT
 	JOIN	tblICItem					IM	ON	IM.intItemId					=	CD.intItemId			LEFT
 	JOIN	tblICItemUOM				QM	ON	QM.intItemUOMId					=	CD.intItemUOMId			LEFT
