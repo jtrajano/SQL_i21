@@ -231,6 +231,7 @@ FROM dbo.tblGLDetail GL WITH (NOLOCK)
 INNER JOIN #SELECTEDPAYMENTS P ON GL.intTransactionId = P.intPaymentId
 							  AND GL.strTransactionId = P.strRecordNumber
 WHERE GL.ysnIsUnposted = 0
+  AND GL.strCode = 'AR'
 
 IF EXISTS (SELECT TOP 1 1 FROM @GLEntries)
 	BEGIN
