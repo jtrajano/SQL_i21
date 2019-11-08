@@ -67,9 +67,42 @@ SELECT * FROM (
 			,D.strAccountId
 			,CAST((SUM(A.dblTotal) + SUM(A.dblInterest) - SUM(A.dblAmountPaid) - SUM(A.dblDiscount)) AS DECIMAL(18,2)) AS dblAmountDue
 		FROM vyuAPSalesForPayables A
-		LEFT JOIN dbo.vyuGLAccountDetail D ON  A.intAccountId = D.intAccountId
+		-- LEFT JOIN tblARInvoice B ON A.intInvoiceId = B.intInvoiceId 
+		LEFT JOIN dbo.vyuGLAccountDetail D ON A.intAccountId = D.intAccountId
 		WHERE D.strAccountCategory = 'AP Account' --there are old data where cash refund have been posted to non AP account
 		GROUP BY A.intInvoiceId, A.intAccountId, D.strAccountId
+		UNION ALL
+		SELECT
+			A.intBillId,
+			A.intAccountId,
+			D.strAccountId,
+			tmpAgingSummaryTotal.dblAmountDue
+		FROM  
+		(
+			SELECT 
+				intBillId
+				,SUM(tmpAPPayables.dblTotal) AS dblTotal
+				,SUM(tmpAPPayables.dblAmountPaid) AS dblAmountPaid
+				,SUM(tmpAPPayables.dblDiscount)AS dblDiscount
+				,SUM(tmpAPPayables.dblInterest) AS dblInterest
+				,CAST((SUM(tmpAPPayables.dblTotal) + SUM(tmpAPPayables.dblInterest) - SUM(tmpAPPayables.dblAmountPaid) - SUM(tmpAPPayables.dblDiscount)) AS DECIMAL(18,2)) AS dblAmountDue
+			FROM (
+				SELECT 
+					intBillId
+					,dblTotal
+					,dblAmountDue
+					,dblAmountPaid
+					,dblDiscount
+					,dblInterest
+					,dtmDate
+					,intCount
+				  FROM dbo.vyuAPPayablesAgingDeleted
+			) tmpAPPayables 
+			GROUP BY intBillId
+			HAVING SUM(DISTINCT intCount) > 1 --DO NOT INCLUDE DELETED REPORT IF THAT IS ONLY THE PART OF DELETED DATA
+		) AS tmpAgingSummaryTotal
+		LEFT JOIN dbo.tblAPBillArchive A ON tmpAgingSummaryTotal.intBillId = A.intBillId
+		LEFT JOIN dbo.vyuGLAccountDetail D ON  A.intAccountId = D.intAccountId
 	) SubQuery
 	GROUP BY 
 	strAccountId
