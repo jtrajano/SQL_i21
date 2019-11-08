@@ -807,7 +807,7 @@ BEGIN TRY
 									ON B.intInvoiceId = D.intInvoiceId
 								INNER JOIN #tmpItemShipmentIds C
 									ON A.intInventoryShipmentId = C.intInventoryShipmentId
-								WHERE A.strTransactionType = 'Invoice'
+								WHERE D.strTransactionType = 'Invoice'
 										AND D.ysnPosted = 1
 
 
