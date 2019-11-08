@@ -69,3 +69,18 @@ IF EXISTS(SELECT * FROM sys.indexes WHERE name = 'tblCFFactorTaxGroupXRef_Unique
 BEGIN
 	DROP INDEX tblCFFactorTaxGroupXRef_UniqueCustomerState ON tblCFFactorTaxGroupXRef;
 END
+
+
+PRINT '[CF-2415] STARTED UPDATING INVOICE CYCLE OF INVOICE HISTORY'
+
+UPDATE tblCFInvoiceHistoryStagingTable
+SET intInvoiceCycle = tblCFInvoiceCycle.intInvoiceCycleId
+,strInvoiceCycle = tblCFInvoiceCycle.strInvoiceCycle
+FROM tblCFAccount
+INNER JOIN tblCFInvoiceCycle
+ON tblCFAccount.intInvoiceCycle = tblCFInvoiceCycle.intInvoiceCycleId
+WHERE tblCFAccount.intAccountId = tblCFInvoiceHistoryStagingTable.intAccountId 
+AND ISNULL(tblCFInvoiceHistoryStagingTable.intInvoiceCycle,0) = 0 AND ISNULL(tblCFInvoiceHistoryStagingTable.strInvoiceCycle,'') = ''
+
+
+PRINT '[CF-2415] ENDED UPDATING INVOICE CYCLE OF INVOICE HISTORY'
