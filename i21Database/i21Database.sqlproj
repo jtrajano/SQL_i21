@@ -8149,6 +8149,7 @@
     <Build Include="dbo\Stored Procedures\uspIPInterCompanyPreStageDailyAveragePrice.sql" />
     <Build Include="dbo\Views\vyuIPGetDailyAveragePrice.sql" />
     <Build Include="dbo\Views\vyuIPGetDailyAveragePriceDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTStoreAppUpdateRegisterSappComm.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
