@@ -241,7 +241,7 @@ AS
 		,t.strTransactionId
 		,t.dblQty
 		,t.dblUOMQty
-		,dblCost = t.dblCost - dbo.fnDivide(DiscountCost.dblTotalDiscountCost, t.dblQty)
+		,dblCost = CASE WHEN t.dblQty > 0 THEN t.dblCost -dbo.fnDivide(DiscountCost.dblTotalDiscountCost, t.dblQty) ELSE t.dblCost -dbo.fnDivide(DiscountCost.dblTotalDiscountCost, -t.dblQty) END
 		,dblItemCost = t.dblCost
 		,t.dblValue
 		,t.intTransactionTypeId
@@ -283,7 +283,7 @@ SELECT
 	,dblDebitUnit				= DebitUnit.Value
 	,dblCreditUnit				= CreditUnit.Value 
 	,strDescription				= ISNULL(@strGLDescription, ISNULL(tblGLAccount.strDescription, '')) + ' ' + dbo.[fnICDescribeSoldStock](strItemNo, dblQty, dblItemCost) 
-	,strCode					= 'STR' 
+	,strCode					= 'TRA' 
 	,strReference				= '' 
 	,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 	,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
@@ -347,7 +347,7 @@ SELECT
 	,dblDebitUnit				= CreditUnit.Value
 	,dblCreditUnit				= DebitUnit.Value
 	,strDescription				= ISNULL(@strGLDescription, ISNULL(tblGLAccount.strDescription, '')) + ' ' + dbo.[fnICDescribeSoldStock](strItemNo, dblQty, dblItemCost) 
-	,strCode					= 'STR' 
+	,strCode					= 'TRA' 
 	,strReference				= '' 
 	,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 	,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
