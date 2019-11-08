@@ -66,28 +66,36 @@ AS
 		SELECT 
 			[strTransactionType] = 'Debit Memo'
 			,[strSourceTransaction] = 'Direct'
-			,[intSourceId] = A.intBuybackId
-			,[strSourceId] = A.strReimbursementNo
-			,intEntityCustomerId = A.intEntityId
+			,[intSourceId] = Buyback.intBuybackId
+			,[strSourceId] = Buyback.strReimbursementNo
+			,intEntityCustomerId = Buyback.intEntityId
 			,dtmDate = GETDATE()
 			,intEntityId = @intUserId
-			,intCompanyLocationId = CASE WHEN ISNULL(@CompanyLocation,0) = 0
-										THEN (SELECT TOP 1 intWarehouseId FROM vyuARCustomerSearch WHERE intEntityId = A.intEntityId) 
-									ELSE @CompanyLocation END
+			,intCompanyLocationId = ISNULL(customerLocation.intWarehouseId, @CompanyLocation)
 			,ysnPost = 1
-			,intItemId = CASE WHEN B.strCharge = 'Inventory' THEN B.intItemId ELSE NULL END
-			,[dblQtyShipped] = B.dblBuybackQuantity
-			,[dblPrice] = B.dblBuybackRate
-			,[intSalesAccountId] = ISNULL(@intDetailAccount,[dbo].[fnGetItemGLAccount](	B.intItemId
-																						, (SELECT TOP 1 intItemLocationId FROM tblICItemLocation WHERE intItemId = B.intItemId AND intLocationId = @CompanyLocation)
-																						, 'Sales Account'))
-			,[strItemDescription] = CASE WHEN B.strCharge = 'Inventory' THEN NULL ELSE B.strCharge END
-		FROM tblBBBuybackDetail B
-		INNER JOIN tblBBBuyback A
-			ON B.intBuybackId = A.intBuybackId
-		INNER JOIN tblVRVendorSetup C
-			ON A.intEntityId = C.intEntityId
-		WHERE A.intBuybackId = @intBuyBackId
+			,intItemId = CASE WHEN BuybackDetail.strCharge = 'Inventory' THEN BuybackDetail.intItemId ELSE NULL END
+			,[dblQtyShipped] = BuybackDetail.dblBuybackQuantity
+			,[dblPrice] = BuybackDetail.dblBuybackRate
+			,[intSalesAccountId] = ISNULL(@intDetailAccount, [dbo].[fnGetItemGLAccount](BuybackDetail.intItemId, salesAccount.intItemLocationId, 'Sales Account'))
+			,[strItemDescription] = CASE WHEN BuybackDetail.strCharge = 'Inventory' THEN NULL ELSE BuybackDetail.strCharge END
+		FROM tblBBBuybackDetail BuybackDetail
+		INNER JOIN tblBBBuyback Buyback ON BuybackDetail.intBuybackId = Buyback.intBuybackId
+		INNER JOIN tblVRVendorSetup VendorSetup ON Buyback.intEntityId = VendorSetup.intEntityId
+		OUTER APPLY (
+			--SELECT TOP 1 intWarehouseId
+			--FROM vyuARCustomerSearch
+			--WHERE intEntityId = Buyback.intEntityId
+			SELECT TOP 1 intCompanyLocationId intWarehouseId
+			FROM vyuARInvoiceDetail
+			WHERE intInvoiceDetailId = BuybackDetail.intInvoiceDetailId
+		) customerLocation
+		OUTER APPLY (
+			SELECT TOP 1 intItemLocationId 
+			FROM tblICItemLocation 
+			WHERE intItemId = BuybackDetail.intItemId 
+			AND intLocationId = @CompanyLocation
+		) salesAccount
+		WHERE Buyback.intBuybackId = @intBuyBackId
 
 		EXEC [dbo].[uspARProcessInvoices] @InvoiceEntries = @EntriesForInvoice
 			,@UserId = @intUserId
