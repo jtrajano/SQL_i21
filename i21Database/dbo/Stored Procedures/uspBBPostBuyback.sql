@@ -54,6 +54,8 @@ AS
 			,[strSourceId]
 			,intEntityCustomerId
 			,dtmDate
+			,dtmShipDate
+			,dtmPostDate
 			,intEntityId
 			,intCompanyLocationId
 			,ysnPost
@@ -69,7 +71,9 @@ AS
 			,[intSourceId] = Buyback.intBuybackId
 			,[strSourceId] = Buyback.strReimbursementNo
 			,intEntityCustomerId = Buyback.intEntityId
-			,dtmDate = GETDATE()
+			,dtmDate = Buyback.dtmReimbursementDate
+			,Buyback.dtmReimbursementDate
+			,Buyback.dtmReimbursementDate
 			,intEntityId = @intUserId
 			,intCompanyLocationId = ISNULL(customerLocation.intWarehouseId, @CompanyLocation)
 			,ysnPost = 1
@@ -210,6 +214,7 @@ AS
 	
 
 		SET @APDate = GETDATE()
+
 		EXEC [dbo].[uspAPCreateBillData]
 			@userId	= @intUserId
 			,@vendorId = @intVendorId
