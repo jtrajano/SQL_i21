@@ -9,6 +9,12 @@
 	, @intPeriodNum AS INT OUTPUT
 	, @intSetNum AS INT OUTPUT
 	, @strPullTime AS NVARCHAR(30) OUTPUT
+	
+	, @ysnAutoUpdatePassword AS BIT OUTPUT
+	, @dtmLastPasswordChangeDate AS DATETIME OUTPUT
+	, @strBasePassword AS NVARCHAR(100) OUTPUT
+	, @intPasswordIntervalDays AS INT OUTPUT
+	, @intPasswordIncrementNo AS INT OUTPUT
 AS
 BEGIN
 	BEGIN TRY
@@ -39,6 +45,12 @@ BEGIN
 			, @intPeriodNum = ISNULL(intSAPPHIRECheckoutPullTimePeriodId, 0)
 			, @intSetNum = ISNULL(intSAPPHIRECheckoutPullTimeSetId, 0)
 			, @strPullTime = ISNULL(strSAPPHIRECheckoutPullTime, '')
+
+			, @ysnAutoUpdatePassword = ISNULL(Reg.ysnSAPPHIREAutoUpdatePassword, 0)
+			, @dtmLastPasswordChangeDate = Reg.dtmSAPPHIRELastPasswordChangeDate
+			, @strBasePassword = Reg.strSAPPHIREBasePassword
+			, @intPasswordIntervalDays = Reg.intSAPPHIREPasswordIntervalDays
+			, @intPasswordIncrementNo = Reg.intSAPPHIREPasswordIncrementNo
 		FROM tblSTRegister Reg
 		JOIN tblSTStore ST
 			ON Reg.intRegisterId = ST.intRegisterId
