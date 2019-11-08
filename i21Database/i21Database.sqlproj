@@ -8143,6 +8143,12 @@
     <Build Include="dbo\Stored Procedures\uspIPFreightRateMatrixProcessStgXML.sql" />
     <Build Include="dbo\Functions\udfDateGreaterThanEquals.sql" />
     <Build Include="dbo\Functions\udfDateLessThanEquals.sql" />
+    <Build Include="dbo\Tables\tblRKDailyAveragePricePreStage.sql" />
+    <Build Include="dbo\Tables\tblRKDailyAveragePriceStage.sql" />
+    <Build Include="dbo\Tables\tblRKDailyAveragePriceAckStage.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPInterCompanyPreStageDailyAveragePrice.sql" />
+    <Build Include="dbo\Views\vyuIPGetDailyAveragePrice.sql" />
+    <Build Include="dbo\Views\vyuIPGetDailyAveragePriceDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
