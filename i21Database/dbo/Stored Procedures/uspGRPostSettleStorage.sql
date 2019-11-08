@@ -1766,6 +1766,7 @@ BEGIN TRY
 																END
 					,[intCustomerStorageId]			= a.[intCustomerStorageId]
 					,[dblOrderQty]					= CASE	
+														WHEN CD.intContractDetailId is not null and intItemType = 1 then ROUND(dbo.fnCalculateQtyBetweenUOM(b.intItemUOMId,@intUnitMeasureId, CD.dblQuantity),6) 
 														WHEN ISNULL(availableQtyForVoucher.dblContractUnits,0) > 0 THEN availableQtyForVoucher.dblContractUnits
 														WHEN @origdblSpotUnits > 0 THEN ROUND(dbo.fnCalculateQtyBetweenUOM(b.intItemUOMId,@intCashPriceUOMId,a.dblUnits),6) 
 														ELSE a.dblUnits 
@@ -2530,6 +2531,17 @@ BEGIN TRY
 					if @debug_awesome_ness = 1 and 1 = 1
 					begin
 						select 'checking for success', @success
+
+						--select a.intContractDetailId, dblCost,  * from tblAPBillDetail a
+						--	join tblCTContractHeader b
+						--		on a.intContractHeaderId = b.intContractHeaderId and b.intPricingTypeId = 2
+						--	join tblCTContractDetail c
+						--		on c.intContractDetailId = a.intContractDetailId and c.intPricingTypeId = 1
+						--	join @avqty d
+						--		on d.intContractDetailId = c.intContractDetailId 
+						--	where intBillId = @intVoucherId
+						--select intPriceFixationDetailId, * from @avqty
+
 					end
 					----- DEBUG POINT -----
 
@@ -2765,7 +2777,7 @@ BEGIN TRY
 			UPDATE tblGRSettleStorage
 			SET ysnPosted = 1
 				,intBillId = @createdVouchersId
-			WHERE intSettleStorageId = @intSettleStorageId and @createdVouchersId is not null
+			WHERE (intSettleStorageId = @intSettleStorageId  ) and @createdVouchersId is not null
 		END
 
 	SELECT @intSettleStorageId = MIN(intSettleStorageId)
@@ -2781,13 +2793,13 @@ BEGIN TRY
 	SET ysnPosted = 1
 	WHERE intSettleStorageId = @intParentSettleStorageId or  intParentSettleStorageId = @intParentSettleStorageId
 
-	if @ysnFromPriceBasisContract = 0
-		UPDATE tblGRStorageHistory
+	
+	UPDATE tblGRStorageHistory
 		SET intBillId = @createdVouchersId
 		WHERE intSettleStorageId = @intParentSettleStorageId and @createdVouchersId is not null
 	
 	----- DEBUG POINT -----
-	if @debug_awesome_ness = 1	and 1 = 0
+	if @debug_awesome_ness = 1	and 1 = 1
 	begin
 		
 		select 'storage history part', @createdVouchersId, @ysnFromPriceBasisContract, @intVoucherId
