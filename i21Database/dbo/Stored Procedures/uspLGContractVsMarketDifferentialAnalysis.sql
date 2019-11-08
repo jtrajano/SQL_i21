@@ -23,13 +23,13 @@ SELECT
 					+ ISNULL(dblPINCOAdjustmentRate, 0) 
 					+ ISNULL(dblCertificationAdjustmentRate, 0))
 	/* Basis Amount = Net Basis x Sales Contract Unit Qty (in Absolute Value) */
-	,dblBasisAmount = ABS((ISNULL(dblPBasis, 0)
+	,dblBasisAmount = ABS(((ISNULL(dblPBasis, 0)
 						 - (ISNULL(dblMBasis, 0) 
 							+ ISNULL(dblPaymentTermAdjustmentRate, 0) 
 							+ ISNULL(dblPackingAdjustmentRate, 0) 
-							+ ISNULL(dblPINCOAdjustmentRate, 0) 
+							+ ISNULL(dblPINCOAdjustmentRate, 0)
 							+ ISNULL(dblCertificationAdjustmentRate, 0))) 
-						* ISNULL(dblQty, 1)) / dblUnitQty
+						* ISNULL(dblQty, 1)) / dblUnitQty)				
 FROM
 	(SELECT
 		strMonthYr = SFM.strFutureMonth
@@ -54,9 +54,10 @@ FROM
 		,dblPackingAdjustmentRate = CASE WHEN ISNULL(PKADJ.dblUnitQty, 0) = 0 OR ISNULL(ItemUOM.dblUnitQty, 0) = 0 THEN NULL 			
 						WHEN PKADJ.dblUnitQty = ItemUOM.dblUnitQty THEN ISNULL(PKADJ.dblRate, 0) 					
 						ELSE (ISNULL(PKADJ.dblRate, 0) * PKADJ.dblUnitQty) / ItemUOM.dblUnitQty END / ISNULL(PKADJ.intCent, 1)
-		,dblPINCOAdjustmentRate = CASE WHEN ISNULL(FTADJ.dblUnitQty, 0) = 0 OR ISNULL(ItemUOM.dblUnitQty, 0) = 0 THEN NULL 			
-						WHEN FTADJ.dblUnitQty = ItemUOM.dblUnitQty THEN ISNULL(FTADJ.dblRate, 0) 					
-						ELSE (ISNULL(FTADJ.dblRate, 0) * FTADJ.dblUnitQty) / ItemUOM.dblUnitQty END / ISNULL(FTADJ.intCent, 1)
+		,dblPINCOAdjustmentRate = CASE WHEN (PCH.intFreightTermId = SCH.intFreightTermId) THEN NULL
+						WHEN FTADJ.dblUnitQty = ItemUOM.dblUnitQty THEN ISNULL(FTADJ.dblTotalCostPerContainer, 0) * COALESCE(SCD.intNumberOfContainers, SHPMT.intNumberOfContainers, 1) / FTADJ.dblNetWeight
+						ELSE ((ISNULL(FTADJ.dblTotalCostPerContainer, 0) * COALESCE(SCD.intNumberOfContainers, SHPMT.intNumberOfContainers, 1)  / FTADJ.dblNetWeight) * FTADJ.dblUnitQty) / ItemUOM.dblUnitQty 
+						END / ISNULL(FTADJ.intCent, 1)
 		,dblCertificationAdjustmentRate = CASE WHEN ISNULL(CFADJ.dblUnitQty, 0) = 0 OR ISNULL(ItemUOM.dblUnitQty, 0) = 0 THEN NULL 			
 						WHEN CFADJ.dblUnitQty = ItemUOM.dblUnitQty THEN ISNULL(CFADJ.dblRate, 0) 					
 						ELSE (ISNULL(CFADJ.dblRate, 0) * CFADJ.dblUnitQty) / ItemUOM.dblUnitQty END / ISNULL(CFADJ.intCent, 1)
@@ -85,12 +86,15 @@ FROM
 		INNER JOIN tblCTContractHeader PCH ON PCH.intContractHeaderId = PCD.intContractHeaderId
 		INNER JOIN tblCTContractDetail SCD ON SCD.intContractDetailId = ALD.intSContractDetailId
 		INNER JOIN tblCTContractHeader SCH ON SCH.intContractHeaderId = SCD.intContractHeaderId
+		LEFT JOIN tblSMCity SLP ON SLP.intCityId = SCD.intLoadingPortId
+		LEFT JOIN tblSMCity SDP ON SDP.intCityId = SCD.intDestinationPortId
 		LEFT JOIN tblRKFuturesMonth PFM ON PFM.intFutureMonthId = PCD.intFutureMonthId
 		LEFT JOIN tblRKFuturesMonth SFM ON SFM.intFutureMonthId = SCD.intFutureMonthId
 		LEFT JOIN tblEMEntity VEN ON VEN.intEntityId = PCH.intEntityId
 		LEFT JOIN tblEMEntity CUS ON CUS.intEntityId = SCH.intEntityId
 		LEFT JOIN tblSMFreightTerms PFT ON PFT.intFreightTermId = PCH.intFreightTermId
 		LEFT JOIN tblSMFreightTerms SFT ON SFT.intFreightTermId = SCH.intFreightTermId
+		LEFT JOIN tblSMTerm SPT ON SPT.intTermID = SCH.intTermId
 		LEFT JOIN tblSMCity PLOC ON PCH.intINCOLocationTypeId = PLOC.intCityId
 		LEFT JOIN tblSMCity SLOC ON SCH.intINCOLocationTypeId = SLOC.intCityId
 		LEFT JOIN tblICItem I ON I.intItemId = PCD.intItemId
@@ -104,6 +108,15 @@ FROM
 		LEFT JOIN tblSMCurrency PCUR ON PCUR.intCurrencyID = PCD.intBasisCurrencyId
 		LEFT JOIN tblSMCurrency SCUR ON SCUR.intCurrencyID = SCD.intBasisCurrencyId
 		LEFT JOIN tblSMCurrency SMCUR ON SMCUR.intCurrencyID = SCUR.intMainCurrencyId
+		/* Latest Shipment for the Sales Contract */
+		OUTER APPLY (SELECT TOP 1 L.intLoadId, dtmBLDate, intShippingLineEntityId, strOriginPort, strDestinationPort, 
+						strDestinationCity, intContainerTypeId, L.intNumberOfContainers
+					 FROM tblLGLoad L
+						LEFT JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
+					 WHERE L.intShipmentType = 1
+						AND LD.intSContractDetailId = SCD.intContractDetailId
+					 ORDER BY L.dtmScheduledDate DESC
+					) SHPMT
 		/* Market Basis */
 		OUTER APPLY (SELECT TOP 1 MTMBD.dblBasisOrDiscount, MTMBD.intCurrencyId, MBUOM.intItemUOMId, MBUOM.dblUnitQty, MBCU.intCent
 					 FROM tblRKM2MBasisDetail MTMBD
@@ -113,8 +126,6 @@ FROM
 					 WHERE SCH.intCommodityId = MTMBD.intCommodityId
 						AND SCD.intItemId = MTMBD.intItemId
 						AND SCD.intFutureMarketId = MTMBD.intFutureMarketId
-						AND SCD.intFutureMonthId = MTMBD.intFutureMonthId
-						AND SFM.strFutureMonth = MTMBD.strPeriodTo
 						AND SCH.dtmContractDate >= MTMB.dtmM2MBasisDate
 					 ORDER BY MTMB.dtmM2MBasisDate ASC
 					 ) MB
@@ -123,7 +134,9 @@ FROM
 					 FROM tblLGStandardAdjustment PTSA
 						LEFT JOIN tblICItemUOM PTUOM ON PTUOM.intItemId = I.intItemId AND PTUOM.intUnitMeasureId = PTSA.intUnitMeasureId
 						LEFT JOIN tblSMCurrency PTCU ON PTCU.intCurrencyID = PTSA.intCurrencyId
-					 WHERE PTSA.intAdjustmentType = 1 AND SCH.dtmContractDate BETWEEN PTSA.dtmValidFrom AND PTSA.dtmValidTo
+					 WHERE PTSA.intAdjustmentType = 1 
+						AND PTSA.strMasterRecord IN (SPT.strTerm, SPT.strTermCode)
+						AND SCH.dtmContractDate BETWEEN PTSA.dtmValidFrom AND PTSA.dtmValidTo
 					 ORDER BY PTSA.intStandardAdjustmentId DESC
 					 ) PTADJ 
 		/* Packaging Adjustment Basis */
@@ -143,12 +156,17 @@ FROM
 					 ORDER BY CFSA.intStandardAdjustmentId DESC
 					 ) CFADJ 
 		/* INCO Term Adjustment Basis */
-		OUTER APPLY (SELECT TOP 1 FTSA.strMasterRecord, FTSA.dblRate, FTSA.intCurrencyId, FTUOM.intItemUOMId, FTUOM.dblUnitQty, FTCU.intCent
-					 FROM tblLGStandardAdjustment FTSA
-						LEFT JOIN tblICItemUOM FTUOM ON FTUOM.intItemId = I.intItemId AND FTUOM.intUnitMeasureId = FTSA.intUnitMeasureId
-						LEFT JOIN tblSMCurrency FTCU ON FTCU.intCurrencyID = FTSA.intCurrencyId
-					 WHERE FTSA.intAdjustmentType = 4 AND SCH.dtmContractDate BETWEEN FTSA.dtmValidFrom AND FTSA.dtmValidTo
-					 ORDER BY FTSA.intStandardAdjustmentId DESC
+		OUTER APPLY (SELECT TOP 1 FRMX.dblTotalCostPerContainer, FRMX.intCurrencyId, CTUOM.intItemUOMId, CON.dblNetWeight, CTUOM.dblUnitQty, FRMCU.intCent
+					 FROM tblLGFreightRateMatrix FRMX
+						LEFT JOIN tblSMCurrency FRMCU ON FRMCU.intCurrencyID = FRMX.intCurrencyId
+						LEFT JOIN tblLGContainerType CON ON CON.intContainerTypeId = FRMX.intContainerTypeId
+						LEFT JOIN tblICItemUOM CTUOM ON CTUOM.intItemId = I.intItemId AND CTUOM.intUnitMeasureId = CON.intWeightUnitMeasureId
+					 WHERE FRMX.strOriginPort = SHPMT.strOriginPort
+						AND FRMX.strDestinationCity IN (SHPMT.strDestinationPort, SHPMT.strDestinationCity) 
+						AND FRMX.intEntityId = SHPMT.intShippingLineEntityId
+						AND FRMX.intContainerTypeId = ISNULL(SCD.intContainerTypeId, SHPMT.intContainerTypeId)
+						AND SHPMT.dtmBLDate BETWEEN FRMX.dtmValidFrom AND FRMX.dtmValidTo
+					 ORDER BY FRMX.intFreightRateMatrixId DESC
 					 ) FTADJ 
 		OUTER APPLY (SELECT	TOP 1 intItemUOMId, dblUnitQty FROM	dbo.tblICItemUOM WHERE intItemId = I.intItemId AND intUnitMeasureId = @intUnitMeasureId) ItemUOM
 	WHERE 
@@ -160,3 +178,5 @@ FROM
 	) CVMD
 
 END
+
+GO
