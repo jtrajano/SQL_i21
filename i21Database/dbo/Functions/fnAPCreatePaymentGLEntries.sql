@@ -369,7 +369,7 @@ BEGIN
 			[dtmDateEntered]				=	GETDATE(),
 			[dtmTransactionDate]			=	NULL,
 			[strJournalLineDescription]		=	'Discount',
-			[intJournalLineNo]				=	3,
+			[intJournalLineNo]				=	B.intPaymentDetailId,
 			[ysnIsUnposted]					=	0,
 			[intUserId]						=	@intUserId,
 			[intEntityId]					=	@intUserId,
