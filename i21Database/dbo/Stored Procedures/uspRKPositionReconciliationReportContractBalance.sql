@@ -65,6 +65,7 @@ SELECT
 	,dblIncrease = CASE WHEN t.dblQty > 0 THEN t.dblQty ELSE 0 END
 	,dblDecrease = CASE WHEN t.dblQty < 0 THEN t.dblQty * -1 ELSE 0 END
 	,t.strPricingType
+	,t.strTransactionType
 	,t.intTransactionId
 	,t.strTransactionId
 	,intOrderBy
@@ -77,6 +78,7 @@ FROM(
 		, sh.intContractDetailId
 		, dblQty = dbo.fnCTConvertQtyToTargetCommodityUOM(ch.intCommodityId,dbo.fnCTGetCommodityUnitMeasure(ch.intCommodityUOMId),cum.intUnitMeasureId,sh.dblBalance)
 		, pt.strPricingType
+		, strTransactionType = ''
 		, intTransactionId = null
 		, strTransactionId = ''
 		, intOrderBy = 1
@@ -98,6 +100,7 @@ FROM(
 						else sh.dblTransactionQuantity * cd.dblQuantityPerLoad
 					end)
 		, pt.strPricingType
+		, strTransactionType = strScreenName
 		, intTransactionId = sh.intExternalHeaderId
 		, strTransactionId = sh.strNumber
 		, intOrderBy = 2
@@ -116,6 +119,7 @@ FROM(
 		, pf.intContractDetailId
 		, dblQty = dbo.fnCTConvertQtyToTargetCommodityUOM(ch.intCommodityId,dbo.fnCTGetCommodityUnitMeasure(ch.intCommodityUOMId),cum.intUnitMeasureId,fd.dblQuantity * -1)
 		, 'Basis'
+		, strTransactionType = ''
 		, intTransactionId = null
 		, strTransactionId = ''
 		, intOrderBy = 3
@@ -134,6 +138,7 @@ FROM(
 		, pf.intContractDetailId
 		, dblQty = dbo.fnCTConvertQtyToTargetCommodityUOM(ch.intCommodityId,dbo.fnCTGetCommodityUnitMeasure(ch.intCommodityUOMId),cum.intUnitMeasureId,fd.dblQuantity)
 		, 'Priced'
+		, strTransactionType = ''
 		, intTransactionId = null
 		, strTransactionId = ''
 		, intOrderBy = 4
@@ -178,6 +183,7 @@ FROM (
 			,strContractSeq = strContractNumber + '-' + CONVERT(NVARCHAR(5),intContractSeq)
 			,intContractHeaderId
 			,intContractDetailId
+			,strTransactionType
 			,intTransactionId
 			,strTransactionId
 			,intOrderBy
@@ -413,6 +419,7 @@ select
 	,strContractSeq 
 	,intContractHeaderId
 	,intContractDetailId
+	,strTransactionType
 	,strTransactionId
 	,intTransactionId
 	,dblBasisBegBalForSummary
@@ -463,6 +470,7 @@ BEGIN
 		,strContractSeq  = 'Balance Forward'
 		,intContractHeaderId  = NULL
 		,intContractDetailId  = NULL
+		,strTransactionType = ''
 		,strTransactionId = ''
 		,intTransactionId = NULL
 		,dblBasisBegBalForSummary = @dblBasisBalanceForward

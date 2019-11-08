@@ -274,6 +274,7 @@ BEGIN
 		,dblCrushBuy
 		,dblCrushSell
 		,dblCruEndBalance
+		,strTransactionType = 'Derivative'
 		,strTransactionId
 		,intTransactionId
 		,intFutOptTransactionHeaderId
@@ -305,6 +306,7 @@ BEGIN
 			,dblCrushSell = NULL
 			,dblCruEndBalance = ISNULL(@dblCruBalanceForward,0)
 			,strTransactionId = 'Balance Forward'
+			,strTransactionType = ''
 			,intTransactionId = NULL
 			,intFutOptTransactionHeaderId = NULL
 			,strCommodityCode = @strCommodities
