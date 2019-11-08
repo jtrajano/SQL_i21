@@ -566,6 +566,12 @@ BEGIN
 	VALUES (@pacpridePK, N'Other Sales Tax Percentage Rate Reference', 0, 67, NULL, NULL, 1, NULL, NULL)
 	INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) 
 	VALUES (@pacpridePK, SCOPE_IDENTITY(), 73, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 1)	
+
+	INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) 
+	VALUES (@pacpridePK, N'Billing Date', 0, 30, NULL, NULL, 1, NULL, NULL)
+	INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) 
+	VALUES (@pacpridePK, 74, 40, 0, NULL, N'tblCFTransaction', N'dtmBillingDate', NULL, 0, NULL, 1, 1)
+
 END
 	-----------Pac Pride-------------
 
