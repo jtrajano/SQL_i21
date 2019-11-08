@@ -19,11 +19,11 @@ DROP TABLE tmpsplit
 
 SELECT * INTO tmpsplit FROM
 (
-	SELECT  * FROM
+	SELECT  * FROM 
 	 sssplmst where NOT EXISTS (
 
-	 SELECT 1 FROM tblEMImportedSplit  where TRIM(customerNumber) =  TRIM(ssspl_bill_to_cus) 
-	 AND TRIM(splitNo) = TRIM(ssspl_split_no)
+	 SELECT 1 FROM tblEMImportedSplit  where LTRIM(RTRIM(customerNumber)) =  LTRIM(RTRIM(ssspl_bill_to_cus)) 
+	 AND LTRIM(RTRIM(splitNo)) = LTRIM(RTRIM(ssspl_split_no))
 
 	 )
  ) b
@@ -96,12 +96,12 @@ BEGIN
 DECLARE @EntityId INT
 	
 	select top 1 
-		@CUSTOMER_BILLTO = TRIM(ssspl_bill_to_cus),
+		@CUSTOMER_BILLTO = LTRIM(RTRIM(ssspl_bill_to_cus)),
 		@SPLIT_NO = ssspl_split_no,
 		@DESC = ssspl_desc,
 		@REC_TYPE = ssspl_rec_type,
 		@ACRES = ssspl_acres,
-		@splitType = CASE TRIM(ssspl_rec_type) WHEN 'A' THEN 'Customer'
+		@splitType = CASE LTRIM(RTRIM(ssspl_rec_type)) WHEN 'A' THEN 'Customer'
 					WHEN 'G' THEN 'Vendor'
 					WHEN 'B' THEN 'Both' END,
 		@CUSTNO1 = ssspl_cus_no_1,
@@ -133,7 +133,7 @@ DECLARE @EntityId INT
 FROM tmpsplit
 
 
-SET @EntityId = (select top 1 intEntityId from vyuEMSearch where TRIM(strEntityNo) = @CUSTOMER_BILLTO)
+SET @EntityId = (select top 1 intEntityId from vyuEMSearch where LTRIM(RTRIM(strEntityNo)) = @CUSTOMER_BILLTO)
 
 BEGIN TRY
 
@@ -148,7 +148,7 @@ BEGIN TRY
 
 	
 
-	if(exists(select top 1 1 from vyuEMSearch where TRIM(strEntityNo) = @CUSTOMER_BILLTO))
+	if(exists(select top 1 1 from vyuEMSearch where LTRIM(RTRIM(strEntityNo)) = @CUSTOMER_BILLTO))
 	begin
 
 	DECLARE @duplicate_entry INT = (SELECT TOP 1 1 from tblEMEntitySplit where strSplitNumber = @SPLIT_NO and intEntityId = @EntityId)
@@ -157,7 +157,7 @@ BEGIN TRY
 	BEGIN
 		SET @duplicate_msg = @duplicate_msg + CHAR(13) + CAST(@SPLIT_NO AS varchar) + '|' + CAST(@EntityId AS varchar)
 
-		DELETE from tmpsplit where TRIM(ssspl_bill_to_cus) = @CUSTOMER_BILLTO AND ssspl_split_no = @SPLIT_NO
+		DELETE from tmpsplit where LTRIM(RTRIM(ssspl_bill_to_cus)) = @CUSTOMER_BILLTO AND ssspl_split_no = @SPLIT_NO
 		
 		INSERT INTO tblEMImportedSplit(customerNumber, splitNo, remarks) VALUES (@CUSTOMER_BILLTO, @SPLIT_NO, 'Skipped. Split already exists')
 
@@ -224,7 +224,7 @@ INSERT INTO #splitDetailOrigin(id, splitId, custNo,splitPercent, strOption, intS
 
 		(select top 1 @id = id,
 					 @splitId = splitId,
-					 @customer = TRIM(custNo),
+					 @customer = LTRIM(RTRIM(custNo)),
 					 @option = strOption,
 					 @split_pct = splitPercent,
 					 @storageScheduleId = intStorageScheduleType
@@ -232,7 +232,7 @@ INSERT INTO #splitDetailOrigin(id, splitId, custNo,splitPercent, strOption, intS
 
 
 
-		 set @EntityDetailId = (select intEntityId from vyuEMSearch where TRIM(strEntityNo) = @customer)
+		 set @EntityDetailId = (select intEntityId from vyuEMSearch where LTRIM(RTRIM(strEntityNo)) = @customer)
 		 
 		 if(ISNULL(@EntityDetailId,0) = 0)
 			begin
@@ -261,7 +261,7 @@ INSERT INTO #splitDetailOrigin(id, splitId, custNo,splitPercent, strOption, intS
 
 	INSERT INTO tblEMImportedSplit(customerNumber, splitNo, remarks) VALUES (@CUSTOMER_BILLTO, @SPLIT_NO, 'Success')
 
-	DELETE from tmpsplit where TRIM(ssspl_bill_to_cus) = @CUSTOMER_BILLTO AND ssspl_split_no = @SPLIT_NO
+	DELETE from tmpsplit where LTRIM(RTRIM(ssspl_bill_to_cus)) = @CUSTOMER_BILLTO AND ssspl_split_no = @SPLIT_NO
 
 	--COMMIT TRANSACTION
 
