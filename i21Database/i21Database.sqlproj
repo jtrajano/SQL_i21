@@ -8150,6 +8150,12 @@
     <Build Include="dbo\Views\vyuIPGetDailyAveragePrice.sql" />
     <Build Include="dbo\Views\vyuIPGetDailyAveragePriceDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspSTStoreAppUpdateRegisterSappComm.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPDailyAveragePriceProcessPreStage.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPDailyAveragePricePopulateStgXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPDailyAveragePriceTransferStgXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPDailyAveragePriceProcessStgXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPDailyAveragePriceTransferAckXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPDailyAveragePriceProcessAckXML.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
