@@ -263,7 +263,7 @@ BEGIN TRY
 							@intExternalId			=	@intInvoiceDetailId,
 							@strScreenName			=	'Invoice' 
 				
-					IF ISNULL(@dblRemainingSchedQty, 0) > 0 AND ISNULL(@dblConvertedQtyOrdered, 0) > 0 AND (ISNULL(@intLoadDetailId, 0) = 0 OR (ISNULL(@intLoadDetailId, 0) <> 0 AND ISNULL(@intPurchaseSale, 0) = 3))
+					IF ISNULL(@dblRemainingSchedQty, 0) > 0 AND ISNULL(@dblConvertedQtyOrdered, 0) > 0 AND (ISNULL(@intLoadDetailId, 0) = 0 OR (ISNULL(@intLoadDetailId, 0) <> 0 AND ISNULL(@intPurchaseSale, 0) = 3)) AND @dblQty > 0
 						BEGIN
 							DECLARE @dblScheduleQty	NUMERIC(18, 6) = 0
 
