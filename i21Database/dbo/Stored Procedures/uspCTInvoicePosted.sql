@@ -242,7 +242,7 @@ BEGIN TRY
 							@intExternalId			=	@intInvoiceDetailId,
 							@strScreenName			=	'Invoice' 
 
-					IF ISNULL(@dblRemainingSchedQty, 0) > 0
+					IF ISNULL(@dblRemainingSchedQty, 0) > 0 AND @dblQty > 0
 						BEGIN
 							DECLARE @dblScheduleQty	NUMERIC(18, 6) = 0
 
