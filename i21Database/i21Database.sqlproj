@@ -8156,6 +8156,7 @@
     <Build Include="dbo\Stored Procedures\uspIPDailyAveragePriceProcessStgXML.sql" />
     <Build Include="dbo\Stored Procedures\uspIPDailyAveragePriceTransferAckXML.sql" />
     <Build Include="dbo\Stored Procedures\uspIPDailyAveragePriceProcessAckXML.sql" />
+    <Build Include="dbo\Views\vyuCFSearchAccountNetworkXref.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
