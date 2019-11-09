@@ -38,13 +38,21 @@ ELSE IF (@strType = 'Date Driven')
 		FROM tblSMTermCutoff
 		WHERE intTermId = @intTermId
 		  AND DAY(@dtmTransactionDate) BETWEEN intFromDate AND intToDate
-		  
-        SET @intInvoiceDate = DAY(@dtmTransactionDate)
 
-        IF @intInvoiceDate >= @intDueNextMonth
-			SET @intMonthToAdd = 1		
+		SET @intInvoiceDate = DAY(@dtmTransactionDate)
+
+		IF EXISTS(SELECT TOP 1 NULL FROM tblSMTermCutoff WHERE intTermId = @intTermId) 
+			BEGIN
+				IF @intInvoiceDate >= @intDueNextMonth
+					SET @intMonthToAdd = 1		
+				ELSE
+					SET @intMonthToAdd = 0
+			END
 		ELSE
-			SET @intMonthToAdd = 0
+			BEGIN
+				IF @intInvoiceDate > @intDueNextMonth
+            		SET @intMonthToAdd = 2
+			END
 
         SET @dtmDueDateTemp = DATEADD(MONTH, @intMonthToAdd, @dtmTransactionDate)
         SET @intDaysInDueMonth = [dbo].[fnGetDaysInMonth](@dtmDueDateTemp)
