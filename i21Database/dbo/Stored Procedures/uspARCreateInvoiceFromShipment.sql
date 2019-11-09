@@ -771,7 +771,13 @@ INNER JOIN tblCTContractDetail CD ON IE.intContractDetailId = CD.intContractDeta
 WHERE CD.intContractDetailId IS NOT NULL
   AND CD.intShipToId IS NOT NULL
 
-SET @intShipToLocationId = ISNULL(@intContractShipToLocationId, @intShipToLocationId)
+IF ISNULL(@intContractShipToLocationId, 0) <> 0
+	BEGIN
+		SET @intShipToLocationId = @intContractShipToLocationId
+
+		UPDATE @EntriesForInvoice
+		SET intShipToLocationId = @intContractShipToLocationId		
+	END
 
 SELECT @intExistingInvoiceId = dbo.fnARGetInvoiceForBatch(@EntityCustomerId, @intShipToLocationId)
 
