@@ -763,6 +763,58 @@ IF EXISTS(SELECT TOP 1 1 FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = N't
 ----------------------------------------------------------------------------------------------------------------------------------
 
 
+----------------------------------------------------------------------------------------------------------------------------------
+-- [START] - Encrypt Sapphire Password and Base Password 
+----------------------------------------------------------------------------------------------------------------------------------
+IF EXISTS(SELECT TOP 1 1 FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = N'tblSTRegister' AND COLUMN_NAME = N'strSAPPHIREBasePassword')
+	BEGIN
+		
+		-- Modify Datatype
+		IF EXISTS(
+					SELECT TOP 1 1
+					FROM INFORMATION_SCHEMA.COLUMNS
+					WHERE 
+						 TABLE_NAME = 'tblSTRegister' AND 
+						 COLUMN_NAME = 'strSAPPHIREPassword' AND
+						 DATA_TYPE = 'nvarchar' AND
+						 CHARACTER_MAXIMUM_LENGTH = 100
+				 )
+			BEGIN
+					ALTER TABLE tblSTRegister 
+					ALTER COLUMN strSAPPHIREPassword NVARCHAR(MAX);
+			END
+
+		IF EXISTS(
+					SELECT TOP 1 1
+					FROM INFORMATION_SCHEMA.COLUMNS
+					WHERE 
+						 TABLE_NAME = 'tblSTRegister' AND 
+						 COLUMN_NAME = 'strSAPPHIREBasePassword' AND
+						 DATA_TYPE = 'nvarchar' AND
+						 CHARACTER_MAXIMUM_LENGTH = 100
+				 )
+			BEGIN
+					ALTER TABLE tblSTRegister 
+					ALTER COLUMN strSAPPHIREBasePassword NVARCHAR(MAX);
+			END
+
+
+
+		-- Note: <= 100 in length are the not encrypted passwords
+		--       344 in length are the encrypted passwords
+		UPDATE tblSTRegister
+		SET strSAPPHIREPassword = dbo.fnAESEncryptASym(strSAPPHIREPassword)
+		WHERE LEN(strSAPPHIREPassword) <= 100 
+
+		UPDATE tblSTRegister
+		SET strSAPPHIREBasePassword = dbo.fnAESEncryptASym(strSAPPHIREBasePassword)
+		WHERE LEN(strSAPPHIREBasePassword) <= 100 
+
+	END
+----------------------------------------------------------------------------------------------------------------------------------
+-- [END] - Encrypt Sapphire Password and Base Password 
+----------------------------------------------------------------------------------------------------------------------------------
+
 
 PRINT('*** ST Cleanup - End ***')
 PRINT('')

@@ -41,7 +41,7 @@ BEGIN
 			@strRegisterClass = ISNULL(strRegisterClass, '')
 			, @strRegisterIPAddress = ISNULL(strSapphireIpAddress, '')
 			, @strRegisterUsername = ISNULL(strSAPPHIREUserName, '')
-			, @strRegisterPassword = ISNULL(strSAPPHIREPassword, '')
+			, @strRegisterPassword = ISNULL(dbo.fnAESEncryptASym(strSAPPHIREPassword), '')
 			, @intPeriodNum = ISNULL(intSAPPHIRECheckoutPullTimePeriodId, 0)
 			, @intSetNum = ISNULL(intSAPPHIRECheckoutPullTimeSetId, 0)
 			, @strPullTime = ISNULL(strSAPPHIRECheckoutPullTime, '')

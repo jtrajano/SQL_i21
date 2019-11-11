@@ -57,7 +57,7 @@ BEGIN
 					BEGIN
 						UPDATE Register
 							SET Register.strSAPPHIREUserName = @strRegisterUsername
-							  , Register.strSAPPHIREPassword = @strRegisterPassword
+							  , Register.strSAPPHIREPassword = dbo.fnAESEncryptASym(@strRegisterPassword)
 						FROM tblSTRegister Register
 						JOIN tblSTStore Store
 							ON Register.intRegisterId = Store.intRegisterId
