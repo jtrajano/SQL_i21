@@ -303,6 +303,11 @@ BEGIN TRANSACTION
 		,strSAPPHIREPassword
 		,intSAPPHIRECheckoutPullTimePeriodId
 		,intSAPPHIRECheckoutPullTimeSetId
+		,ysnSAPPHIREAutoUpdatePassword
+		,dtmSAPPHIRELastPasswordChangeDate
+		,strSAPPHIREBasePassword
+		,intSAPPHIREPasswordIntervalDays
+		,intSAPPHIREPasswordIncrementNo
 		,ysnDealTotals
 		,ysnHourlyTotals
 		,ysnTaxTotals
@@ -386,6 +391,11 @@ BEGIN TRANSACTION
 		,strSAPPHIREPassword
 		,intSAPPHIRECheckoutPullTimePeriodId
 		,intSAPPHIRECheckoutPullTimeSetId
+		,ysnSAPPHIREAutoUpdatePassword
+		,dtmSAPPHIRELastPasswordChangeDate
+		,strSAPPHIREBasePassword
+		,intSAPPHIREPasswordIntervalDays
+		,intSAPPHIREPasswordIncrementNo
 		,ysnDealTotals
 		,ysnHourlyTotals
 		,ysnTaxTotals

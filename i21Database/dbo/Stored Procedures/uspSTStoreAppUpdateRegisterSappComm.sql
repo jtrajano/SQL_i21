@@ -20,26 +20,33 @@ BEGIN
 						DECLARE @intRegisterId INT = (SELECT intRegisterId FROM tblSTStore WHERE intStoreNo = @intStoreNo)
 						IF EXISTS(SELECT TOP 1 1 FROM tblSTRegister WHERE intRegisterId = @intRegisterId)
 							BEGIN
-
-								DECLARE @strSQLCommand AS NVARCHAR(1000)
-								SET @strSQLCommand = 
-								N'
+								
 									UPDATE reg
 									SET dtmSAPPHIRELastPasswordChangeDate	= ISNULL(@dtmLastPasswordChange, reg.dtmSAPPHIRELastPasswordChangeDate),
-										strSAPPHIREPassword					= ISNULL(@strPassword, reg.strSAPPHIREPassword),
+										strSAPPHIREPassword					= ISNULL(dbo.fnAESEncryptASym(@strPassword), dbo.fnAESEncryptASym(reg.strSAPPHIREPassword)),
 										intSAPPHIREPasswordIncrementNo		= ISNULL(@intPasswordIncrementNo, reg.intSAPPHIREPasswordIncrementNo)
 									FROM tblSTRegister reg
 									WHERE reg.intRegisterId = @intRegisterId
-								'
 
-								DECLARE @ParmDef NVARCHAR(MAX);
+								--DECLARE @strSQLCommand AS NVARCHAR(1000)
+								--SET @strSQLCommand = 
+								--N'
+								--	UPDATE reg
+								--	SET dtmSAPPHIRELastPasswordChangeDate	= ISNULL(@dtmLastPasswordChange, reg.dtmSAPPHIRELastPasswordChangeDate),
+								--		strSAPPHIREPassword					= ISNULL(@strPassword, reg.strSAPPHIREPassword),
+								--		intSAPPHIREPasswordIncrementNo		= ISNULL(@intPasswordIncrementNo, reg.intSAPPHIREPasswordIncrementNo)
+								--	FROM tblSTRegister reg
+								--	WHERE reg.intRegisterId = @intRegisterId
+								--'
 
-								SET @ParmDef = N'@dtmLastPasswordChange DATETIME'
-											 + ', @strPassword NVARCHAR(100)'
-											 + ', @intPasswordIncrementNo INT'
-											 + ', @intRegisterId INT';
+								--DECLARE @ParmDef NVARCHAR(MAX);
 
-								EXEC sp_executesql @strSQLCommand, @ParmDef, @dtmLastPasswordChange, @strPassword, @intPasswordIncrementNo, @intRegisterId
+								--SET @ParmDef = N'@dtmLastPasswordChange DATETIME'
+								--			 + ', @strPassword NVARCHAR(100)'
+								--			 + ', @intPasswordIncrementNo INT'
+								--			 + ', @intRegisterId INT';
+
+								--EXEC sp_executesql @strSQLCommand, @ParmDef, @dtmLastPasswordChange, @strPassword, @intPasswordIncrementNo, @intRegisterId
 
 							END
 						ELSE
