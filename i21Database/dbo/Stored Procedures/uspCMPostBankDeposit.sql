@@ -53,6 +53,7 @@ DECLARE
 	-- Table Variables
 	,@RecapTable AS RecapTableType
 	,@GLEntries AS  RecapTableType
+	,@ysnForeignTransaction AS BIT
 	
 	-- CREATE THE TEMPORARY TABLE 
 	CREATE TABLE #tmpGLDetail (
@@ -97,6 +98,8 @@ IF @@ERROR <> 0	GOTO Post_Rollback
 ---------------------------------------------------------------------------------------------------------------------------------------
 
 -- Read the header table and populate the variables. 
+SELECT TOP 1 @intDefaultCurrencyId = intDefaultCurrencyId FROM tblSMCompanyPreference 
+
 SELECT	TOP 1 
 		@intTransactionId = intTransactionId
 		,@dtmDate = dtmDate
@@ -109,11 +112,12 @@ SELECT	TOP 1
 		,@intBankAccountId = intBankAccountId
 		,@intCreatedEntityId = intEntityId
 		,@intCurrencyId = intCurrencyId
+		,@ysnForeignTransaction = CASE WHEN @intDefaultCurrencyId <> @intCurrencyId THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
 FROM	[dbo].tblCMBankTransaction 
 WHERE	strTransactionId = @strTransactionId 
 		AND intBankTransactionTypeId = @BANK_TRANSACTION_TYPE_Id
 
-SELECT TOP 1 @intDefaultCurrencyId = intDefaultCurrencyId FROM tblSMCompanyPreference 
+
 IF @@ERROR <> 0	GOTO Post_Rollback				
 
 -- Read the user preference
@@ -325,9 +329,9 @@ BEGIN
 			,[dtmDate]				= @dtmDate
 			,[strBatchId]			= @strBatchId
 			,[intAccountId]			= BankAccnt.intGLAccountId
-			,[dblDebit]				= CASE WHEN ISNULL(A.dblExchangeRate,1) = 1 OR ISNULL(A.dblExchangeRate,0) = 0 THEN A.dblAmount ELSE A.dblAmount * A.dblExchangeRate END 
+			,[dblDebit]				= CASE WHEN @ysnForeignTransaction = 0 THEN A.dblAmount ELSE ROUND(A.dblAmount * A.dblExchangeRate,2) END 
 			,[dblCredit]			= 0
-			,[dblDebitForeign]		= CASE WHEN ISNULL(A.dblExchangeRate,1) = 1 OR ISNULL(A.dblExchangeRate,0) = 0 THEN 0 ELSE A.dblAmount END
+			,[dblDebitForeign]		= CASE WHEN @ysnForeignTransaction = 0 THEN 0 ELSE A.dblAmount END
 			,[dblCreditForeign]		= 0
 			,[dblDebitUnit]			= 0
 			,[dblCreditUnit]		= 0
@@ -362,9 +366,9 @@ BEGIN
 			,[dtmDate]				= @dtmDate
 			,[strBatchId]			= @strBatchId
 			,[intAccountId]			= A.intShortGLAccountId
-			,[dblDebit]				= CASE WHEN ISNULL(A.dblExchangeRate,1) = 1 OR ISNULL(A.dblExchangeRate,0) = 0 THEN A.dblShortAmount ELSE A.dblShortAmount * A.dblExchangeRate END --A.dblShortAmount * ISNULL(A.dblExchangeRate,1)
+			,[dblDebit]				= CASE WHEN @ysnForeignTransaction = 0 THEN A.dblShortAmount ELSE ROUND(A.dblShortAmount * A.dblExchangeRate,2) END --A.dblShortAmount * ISNULL(A.dblExchangeRate,1)
 			,[dblCredit]			= 0
-			,[dblDebitForeign]		= CASE WHEN ISNULL(A.dblExchangeRate,1) = 1 OR ISNULL(A.dblExchangeRate,0) = 0 THEN 0 ELSE A.dblShortAmount  END
+			,[dblDebitForeign]		= CASE WHEN @ysnForeignTransaction = 0 THEN 0 ELSE A.dblShortAmount  END
 			,[dblCreditForeign]		= 0
 			,[dblDebitUnit]			= 0
 			,[dblCreditUnit]		= 0
@@ -399,10 +403,10 @@ BEGIN
 			,[dtmDate]				= @dtmDate
 			,[strBatchId]			= @strBatchId
 			,[intAccountId]			= B.intGLAccountId
-			,[dblDebit]				= CASE WHEN ISNULL(B.dblExchangeRate,1) = 1 OR ISNULL(B.dblExchangeRate,0) = 0 THEN B.dblDebit ELSE B.dblDebit * B.dblExchangeRate END
-			,[dblCredit]			= CASE WHEN ISNULL(B.dblExchangeRate,1) = 1 OR ISNULL(B.dblExchangeRate,0) = 0 THEN B.dblCredit ELSE B.dblCredit * B.dblExchangeRate END
-			,[dblDebitForeign]		= CASE WHEN ISNULL(B.dblExchangeRate,1) = 1 OR ISNULL(B.dblExchangeRate,0) = 0 THEN 0 ELSE B.dblDebit END
-			,[dblCreditForeign]		= CASE WHEN ISNULL(B.dblExchangeRate,1) = 1 OR ISNULL(B.dblExchangeRate,0) = 0 THEN 0 ELSE B.dblCredit END
+			,[dblDebit]				= CASE WHEN @ysnForeignTransaction = 0 THEN B.dblDebit ELSE ROUND(B.dblDebit * B.dblExchangeRate,2) END
+			,[dblCredit]			= CASE WHEN @ysnForeignTransaction = 0 THEN B.dblCredit ELSE ROUND(B.dblCredit * B.dblExchangeRate,2) END
+			,[dblDebitForeign]		= CASE WHEN @ysnForeignTransaction = 0 THEN 0 ELSE B.dblDebit END
+			,[dblCreditForeign]		= CASE WHEN @ysnForeignTransaction = 0 THEN 0 ELSE B.dblCredit END
 			,[dblDebitUnit]			= 0
 			,[dblCreditUnit]		= 0
 			,[strDescription]		= A.strMemo
@@ -410,7 +414,7 @@ BEGIN
 			,[strReference]			= Entity.strEntityNo
 			,[intCurrencyId]		= A.intCurrencyId
 			,[intCurrencyExchangeRateTypeId] =  B.[intCurrencyExchangeRateTypeId]
-			,[dblExchangeRate]		= CASE WHEN ISNULL(B.dblExchangeRate,1) = 1 OR ISNULL(B.dblExchangeRate,0) = 0 THEN 1 ELSE B.dblExchangeRate END
+			,[dblExchangeRate]		= CASE WHEN @ysnForeignTransaction = 0 THEN 1 ELSE B.dblExchangeRate END
 			,[dtmDateEntered]		= GETDATE()
 			,[dtmTransactionDate]	= A.dtmDate
 			,[strJournalLineDescription] = GLAccnt.strDescription
@@ -433,7 +437,7 @@ BEGIN
 	DECLARE @gainLoss DECIMAL (18,6)
 	SELECT @gainLoss = SUM(dblDebit - dblCredit) from #tmpGLDetail WHERE dblExchangeRate <> 1
 
-	if(@gainLoss <> 0  AND @intDefaultCurrencyId <> @intCurrencyId)
+	if(@gainLoss <> 0  AND @ysnForeignTransaction = 1)
 		EXEC [uspCMInsertGainLossBankTransfer] @strDescription = 'Gain / Loss on Multicurrency Bank Deposit'
 	
 	IF @@ERROR <> 0	GOTO Post_Rollback
