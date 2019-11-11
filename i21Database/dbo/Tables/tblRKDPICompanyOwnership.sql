@@ -11,6 +11,7 @@
 	, dblInventoryBalanceCarryForward NUMERIC(18, 6) NULL
 	, strReceiptNumber NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
 	, intReceiptId INT
+	, strTransactionType NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 	, intConcurrencyId INT NULL DEFAULT ((0))
     , CONSTRAINT [PK_tblRKDPICompanyOwnership] PRIMARY KEY ([intDPICompanyOwnershipId])
 	, CONSTRAINT [FK_tblRKDPICompanyOwnership_tblRKDPIHeader] FOREIGN KEY ([intDPIHeaderId]) REFERENCES [tblRKDPIHeader]([intDPIHeaderId]) ON DELETE CASCADE

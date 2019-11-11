@@ -303,6 +303,11 @@ BEGIN TRANSACTION
 		,strSAPPHIREPassword
 		,intSAPPHIRECheckoutPullTimePeriodId
 		,intSAPPHIRECheckoutPullTimeSetId
+		,ysnSAPPHIREAutoUpdatePassword
+		,dtmSAPPHIRELastPasswordChangeDate
+		,strSAPPHIREBasePassword
+		,intSAPPHIREPasswordIntervalDays
+		,intSAPPHIREPasswordIncrementNo
 		,ysnDealTotals
 		,ysnHourlyTotals
 		,ysnTaxTotals
@@ -322,8 +327,8 @@ BEGIN TRANSACTION
 		,strWaynePassWord
 		,intWayneSequenceNo
 		,strXmlVersion
-		,strRegisterInboxPath
-		,strRegisterOutboxPath
+		--,strRegisterInboxPath
+		--,strRegisterOutboxPath
 		,strRegisterStoreId
 		,intTaxStrategyIdForTax1
 		,intTaxStrategyIdForTax2
@@ -337,7 +342,7 @@ BEGIN TRANSACTION
 		,strFTPPath
 		,strFTPUserName
 		,strFTPPassword
-		,strArchivePath
+		--,strArchivePath
 		,intPurgeInterval
 		,intConcurrencyId
 	)
@@ -386,6 +391,11 @@ BEGIN TRANSACTION
 		,strSAPPHIREPassword
 		,intSAPPHIRECheckoutPullTimePeriodId
 		,intSAPPHIRECheckoutPullTimeSetId
+		,ysnSAPPHIREAutoUpdatePassword
+		,dtmSAPPHIRELastPasswordChangeDate
+		,strSAPPHIREBasePassword
+		,intSAPPHIREPasswordIntervalDays
+		,intSAPPHIREPasswordIncrementNo
 		,ysnDealTotals
 		,ysnHourlyTotals
 		,ysnTaxTotals
@@ -405,8 +415,8 @@ BEGIN TRANSACTION
 		,strWaynePassWord
 		,intWayneSequenceNo
 		,strXmlVersion
-		,strRegisterInboxPath
-		,strRegisterOutboxPath
+		--,strRegisterInboxPath
+		--,strRegisterOutboxPath
 		,strRegisterStoreId
 		,intTaxStrategyIdForTax1
 		,intTaxStrategyIdForTax2
@@ -420,7 +430,7 @@ BEGIN TRANSACTION
 		,strFTPPath
 		,strFTPUserName
 		,strFTPPassword
-		,strArchivePath
+		--,strArchivePath
 		,intPurgeInterval
 		,intConcurrencyId
 		FROM tblSTRegister 

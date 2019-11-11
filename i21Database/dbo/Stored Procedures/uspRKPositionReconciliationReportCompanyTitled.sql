@@ -128,8 +128,8 @@ BEGIN
 	SELECT 
 		intRowNum = CONVERT(INT, ROW_NUMBER() OVER (ORDER BY dtmDate ASC))
 		,dtmTransactionDate = dtmDate
-		,dblIn = CASE WHEN strDistribution IN('ADJ','IC','CM','DP', 'IT','IS', 'CLT', 'PRDC', 'CNSM','LG') AND  dblPaidBalance > 0 THEN dblPaidBalance ELSE dblUnpaidIncrease END
-		,dblOut = CASE WHEN strTransactionId LIKE 'BL-%' THEN 0 WHEN dblPaidBalance < 0 THEN ABS(dblPaidBalance) ELSE dblUnpaidDecrease END
+		,dblIn = ISNULL(CASE WHEN strDistribution IN('ADJ','IC','CM','DP', 'IT','IS', 'CLT', 'PRDC', 'CNSM','LG') AND  dblPaidBalance > 0 THEN dblPaidBalance ELSE dblUnpaidIncrease END,0)
+		,dblOut = ISNULL(CASE WHEN strTransactionId LIKE 'BL-%' THEN 0 WHEN dblPaidBalance < 0 THEN ABS(dblPaidBalance) ELSE dblUnpaidDecrease END,0)
 		,strTransactionId
 		,intTransactionId
 		,strTransactionType

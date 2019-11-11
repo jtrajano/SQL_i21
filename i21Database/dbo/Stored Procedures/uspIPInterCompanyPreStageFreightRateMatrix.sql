@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE uspIPInterCompanyPreStageFreightRateMatrix @intFreightRateMatrixId INT
-	,@strRowState NVARCHAR(50)
-	,@intUserId INT
+	,@strRowState NVARCHAR(50) = NULL
+	,@intUserId INT = NULL
 AS
 BEGIN TRY
 	SET NOCOUNT ON
@@ -8,19 +8,22 @@ BEGIN TRY
 	DECLARE @ErrMsg NVARCHAR(MAX)
 
 	DELETE
-	FROM dbo.tblLGFreightRateMatrixPreStage
-	WHERE strFeedStatus IS NULL
+	FROM tblLGFreightRateMatrixPreStage
+	WHERE ISNULL(strFeedStatus, '') = ''
 		AND intFreightRateMatrixId = @intFreightRateMatrixId
 
-	INSERT INTO dbo.tblLGFreightRateMatrixPreStage (
+	INSERT INTO tblLGFreightRateMatrixPreStage (
 		intFreightRateMatrixId
 		,strRowState
 		,intUserId
+		,strFeedStatus
+		,strMessage
 		)
 	SELECT @intFreightRateMatrixId
 		,@strRowState
 		,@intUserId
-
+		,''
+		,''
 END TRY
 
 BEGIN CATCH
@@ -33,5 +36,3 @@ BEGIN CATCH
 			,'WITH NOWAIT'
 			)
 END CATCH
-
-

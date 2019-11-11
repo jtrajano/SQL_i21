@@ -285,7 +285,7 @@ BEGIN
 			(@ysnIsMultiFilter = 1 AND storageUnitFilter.intStorageUnitId = Lot.intStorageLocationId OR @StorageUnitFilterCount = 0))
 		AND Item.strLotTracking <> 'No'
 		AND ((LotTransactions.dblQty <> 0 AND @ysnIncludeZeroOnHand = 0) OR (@ysnIncludeZeroOnHand = 1))
-		AND Item.strType IN ('Inventory', 'Raw Material', 'Finished Good')
+		AND Item.strType = 'Inventory'
 		AND (ItemLocation.intCountGroupId = @intCountGroupId OR ISNULL(@intCountGroupId, 0) = 0)
 END
 ELSE
@@ -427,6 +427,6 @@ BEGIN
 			-- If multi-filter is enabled
 			(@ysnIsMultiFilter = 1 AND storageUnitFilter.intStorageUnitId = stock.intStorageLocationId OR @StorageUnitFilterCount = 0))
 		AND i.strLotTracking = 'No'
-		AND i.strType IN ('Inventory', 'Raw Material', 'Finished Good')
+		AND i.strType = 'Inventory'
 		AND (il.intCountGroupId = @intCountGroupId OR ISNULL(@intCountGroupId, 0) = 0)
 END

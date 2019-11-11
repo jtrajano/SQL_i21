@@ -9,6 +9,12 @@
 	, @intPeriodNum AS INT OUTPUT
 	, @intSetNum AS INT OUTPUT
 	, @strPullTime AS NVARCHAR(30) OUTPUT
+	
+	, @ysnAutoUpdatePassword AS BIT OUTPUT
+	, @dtmLastPasswordChangeDate AS DATETIME OUTPUT
+	, @strBasePassword AS NVARCHAR(100) OUTPUT
+	, @intPasswordIntervalDays AS INT OUTPUT
+	, @intPasswordIncrementNo AS INT OUTPUT
 AS
 BEGIN
 	BEGIN TRY
@@ -35,10 +41,16 @@ BEGIN
 			@strRegisterClass = ISNULL(strRegisterClass, '')
 			, @strRegisterIPAddress = ISNULL(strSapphireIpAddress, '')
 			, @strRegisterUsername = ISNULL(strSAPPHIREUserName, '')
-			, @strRegisterPassword = ISNULL(strSAPPHIREPassword, '')
+			, @strRegisterPassword = ISNULL(dbo.fnAESEncryptASym(strSAPPHIREPassword), '')
 			, @intPeriodNum = ISNULL(intSAPPHIRECheckoutPullTimePeriodId, 0)
 			, @intSetNum = ISNULL(intSAPPHIRECheckoutPullTimeSetId, 0)
 			, @strPullTime = ISNULL(strSAPPHIRECheckoutPullTime, '')
+
+			, @ysnAutoUpdatePassword = ISNULL(Reg.ysnSAPPHIREAutoUpdatePassword, 0)
+			, @dtmLastPasswordChangeDate = Reg.dtmSAPPHIRELastPasswordChangeDate
+			, @strBasePassword = Reg.strSAPPHIREBasePassword
+			, @intPasswordIntervalDays = Reg.intSAPPHIREPasswordIntervalDays
+			, @intPasswordIncrementNo = Reg.intSAPPHIREPasswordIncrementNo
 		FROM tblSTRegister Reg
 		JOIN tblSTStore ST
 			ON Reg.intRegisterId = ST.intRegisterId
@@ -93,41 +105,62 @@ BEGIN
 				SELECT 'Register ' + @strRegisterClass + ' is not configured for Shared Drive transaction'
 			END
 
-		-- Check Register has Shared Drive folder path (Inbound)
+
+
+
+
+		-- Check Register has Shared Drive folder path (Inbound and Outbound)
 		ELSE IF NOT EXISTS
 		(
-			SELECT Reg.intRegisterId
-			FROM tblSTRegister Reg
-			JOIN tblSTStore ST
-				ON Reg.intRegisterId = ST.intRegisterId
-			WHERE ST.intStoreNo = @intStoreNo
-			AND (Reg.strRegisterInboxPath != '' AND Reg.strRegisterInboxPath IS NOT NULL)
+			SELECT TOP 1 1 FROM tblSTCompanyPreference
+			WHERE strStoreBasePath IS NOT NULL
+				AND strStoreBasePath <> ''
 		)
 			BEGIN
 				INSERT INTO @tempTableError
 				(
 					[strErrorMessage]
 				)
-				SELECT 'Register ' + ISNULL(@strRegisterClass, '') + ' does not have setup for Shared Drive Inbound'
+				SELECT 'Register ' + ISNULL(@strRegisterClass, '') + ' does not have setup for Base path folder.'
 			END
+		--ELSE IF NOT EXISTS
+		--(
+		--	SELECT Reg.intRegisterId
+		--	FROM tblSTRegister Reg
+		--	JOIN tblSTStore ST
+		--		ON Reg.intRegisterId = ST.intRegisterId
+		--	WHERE ST.intStoreNo = @intStoreNo
+		--	AND (Reg.strRegisterInboxPath != '' AND Reg.strRegisterInboxPath IS NOT NULL)
+		--)
+		--	BEGIN
+		--		INSERT INTO @tempTableError
+		--		(
+		--			[strErrorMessage]
+		--		)
+		--		SELECT 'Register ' + ISNULL(@strRegisterClass, '') + ' does not have setup for Shared Drive Inbound'
+		--	END
 		
 		-- Check Register has Shared Drive folder path (Outbound)
-		ELSE IF NOT EXISTS
-		(
-			SELECT Reg.intRegisterId
-			FROM tblSTRegister Reg
-			JOIN tblSTStore ST
-				ON Reg.intRegisterId = ST.intRegisterId
-			WHERE ST.intStoreNo = @intStoreNo
-			AND (Reg.strRegisterOutboxPath != '' AND Reg.strRegisterOutboxPath IS NOT NULL)
-		)
-			BEGIN
-				INSERT INTO @tempTableError
-				(
-					[strErrorMessage]
-				)
-				SELECT 'Register ' + ISNULL(@strRegisterClass, '') + ' does not have setup for Shared Drive Outbound'
-			END
+		--ELSE IF NOT EXISTS
+		--(
+		--	SELECT Reg.intRegisterId
+		--	FROM tblSTRegister Reg
+		--	JOIN tblSTStore ST
+		--		ON Reg.intRegisterId = ST.intRegisterId
+		--	WHERE ST.intStoreNo = @intStoreNo
+		--	AND (Reg.strRegisterOutboxPath != '' AND Reg.strRegisterOutboxPath IS NOT NULL)
+		--)
+		--	BEGIN
+		--		INSERT INTO @tempTableError
+		--		(
+		--			[strErrorMessage]
+		--		)
+		--		SELECT 'Register ' + ISNULL(@strRegisterClass, '') + ' does not have setup for Shared Drive Outbound'
+		--	END
+
+
+
+
 
 		-- Check Register has xml configuration
 		ELSE IF NOT EXISTS

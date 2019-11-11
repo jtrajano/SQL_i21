@@ -645,6 +645,7 @@
     <Build Include="dbo\Functions\fnHDDecodeComment.sql" />
     <Build Include="dbo\Tables\tblICItem.sql" />
     <Build Include="dbo\Tables\tblCMBankFileAudit.sql" />
+    <Build Include="dbo\Tables\tblCMAddendaSequence.sql" />
     <Build Include="dbo\Views\vyuFRMColumnDescription.sql" />
     <Build Include="dbo\Stored Procedures\uspFRMColumnDescription.sql" />
     <None Include="i21Database.publish.xml" />
@@ -8124,6 +8125,38 @@
     <Build Include="dbo\Tables\tblSTBasketAnalysisStagingTable.sql" />
     <Build Include="dbo\Stored Procedures\uspSTGenerateBasketAnalysisData.sql" />
     <Build Include="dbo\Functions\fnGRGetVoucheredUnits.sql" />
+    <Build Include="dbo\Tables\tblTRImportDtn.sql" />
+    <Build Include="dbo\Tables\tblTRDtnImportSetup.sql" />
+    <Build Include="dbo\Tables\tblTRDtnImportSetupDetail.sql" />
+    <Build Include="dbo\Tables\tblTRImportDtnDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspTRImportDtn.sql" />
+    <Build Include="dbo\Stored Procedures\uspTRProcessImportDtn.sql" />
+    <Build Include="dbo\Tables\tblTRCrossReferenceDtn.sql" />
+    <Build Include="dbo\Views\vyuTRCrossReferenceDtn.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPDiagnoseClearingData.sql" />
+    <Build Include="dbo\Tables\tblLGFreightRateMatrixStage.sql" />
+    <Build Include="dbo\Tables\tblLGFreightRateMatrixAckStage.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPFreightRateMatrixProcessPreStage.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPFreightRateMatrixPopulateStgXML.sql" />
+    <Build Include="dbo\Views\vyuIPGetFreightRateMatrix.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPFreightRateMatrixTransferStgXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPFreightRateMatrixProcessStgXML.sql" />
+    <Build Include="dbo\Functions\udfDateGreaterThanEquals.sql" />
+    <Build Include="dbo\Functions\udfDateLessThanEquals.sql" />
+    <Build Include="dbo\Tables\tblRKDailyAveragePricePreStage.sql" />
+    <Build Include="dbo\Tables\tblRKDailyAveragePriceStage.sql" />
+    <Build Include="dbo\Tables\tblRKDailyAveragePriceAckStage.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPInterCompanyPreStageDailyAveragePrice.sql" />
+    <Build Include="dbo\Views\vyuIPGetDailyAveragePrice.sql" />
+    <Build Include="dbo\Views\vyuIPGetDailyAveragePriceDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTStoreAppUpdateRegisterSappComm.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPDailyAveragePriceProcessPreStage.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPDailyAveragePricePopulateStgXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPDailyAveragePriceTransferStgXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPDailyAveragePriceProcessStgXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPDailyAveragePriceTransferAckXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPDailyAveragePriceProcessAckXML.sql" />
+    <Build Include="dbo\Views\vyuCFSearchAccountNetworkXref.sql" />
     <Build Include="dbo\Tables\tblRKRiskView.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetConsolidatedCoverageEntryDetail.sql" />
   </ItemGroup>
@@ -8525,5 +8558,14 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\CT\1920_FinancialStatus.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\TR\ImportDtnFileSetup.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\TR\ImportDtnDefaultSetup.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\TR\CrossReferenceDefault.sql" />
   </ItemGroup>
 </Project>

@@ -7,7 +7,7 @@ SELECT DISTINCT
 	   , R.strRegisterClass
 	   , R.strSapphireIpAddress
 	   , R.strSAPPHIREUserName
-	   , R.strSAPPHIREPassword
+	   , strSAPPHIREPassword = dbo.fnAESDecryptASym(R.strSAPPHIREPassword)
 	   , ISNULL(R.intSAPPHIRECheckoutPullTimePeriodId, 0) AS intSAPPHIRECheckoutPullTimePeriodId
 	   , CASE
 			WHEN R.intSAPPHIRECheckoutPullTimePeriodId = 1

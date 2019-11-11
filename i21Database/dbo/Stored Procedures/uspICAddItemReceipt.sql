@@ -875,7 +875,7 @@ BEGIN
 			WHERE intInventoryReceiptId = @inventoryReceiptId
 		END
 
-		IF EXISTS(SELECT TOP 1 1 FROM @ReceiptEntries re INNER JOIN tblICItem i ON i.intItemId = re.intItemId AND i.strType NOT IN ('Inventory', 'Raw Material', 'Finished Good', 'Non-Inventory'))
+		IF EXISTS(SELECT TOP 1 1 FROM @ReceiptEntries re INNER JOIN tblICItem i ON i.intItemId = re.intItemId AND i.strType NOT IN ('Inventory', 'Non-Inventory'))
 		BEGIN
 			EXEC uspICRaiseError 80230;
 			GOTO _Exit_With_Rollback;

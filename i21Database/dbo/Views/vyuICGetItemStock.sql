@@ -6,6 +6,7 @@ SELECT
 	Item.intItemId,
 	Item.strItemNo,
 	Item.strType,
+	Item.strManufactureType,
 	Item.strBundleType,
 	Item.strDescription,
 	Item.strLotTracking,

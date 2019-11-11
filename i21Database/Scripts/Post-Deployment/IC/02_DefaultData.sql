@@ -166,3 +166,17 @@ IF EXISTS(SELECT * FROM sys.columns WHERE object_id = object_id('tblICItem') AND
 BEGIN
 	EXEC ('UPDATE tblICItem SET ysnSeparateStockForUOMs = 1 WHERE ysnSeparateStockForUOMs IS NULL')
 END
+
+print('/*******************  BEGIN Item Type Migration (Merge Raw Materials and Finished Good to Inventory) *******************/')
+
+UPDATE tblICCategory SET strInventoryItemType = strInventoryType
+WHERE strInventoryType IN ('Finished Good', 'Raw Material') 
+AND strInventoryItemType IS NULL
+
+UPDATE tblICCategory SET strInventoryType = 'Inventory' WHERE strInventoryType IN ('Finished Good', 'Raw Material')
+
+UPDATE tblICItem SET strManufactureType = 'Finished Goods' WHERE strType = 'Finished Good'
+UPDATE tblICItem SET strManufactureType = 'Raw Material' WHERE strType = 'Raw Material'
+UPDATE tblICItem SET strType = 'Inventory' WHERE strType IN ('Finished Good', 'Raw Material')
+
+print('/*******************  END OF Item Type Migration **************/')

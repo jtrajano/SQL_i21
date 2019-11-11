@@ -160,6 +160,9 @@ BEGIN TRY
 		,@intCountryId INT
 		,@ysnApproval BIT
 		,@strAmendmentApprovalXML NVARCHAR(MAX)
+		,@strNetWeightUOM NVARCHAR(50)
+		,@intWeightUnitMeasureId INT
+		,@intItemWeightUOMId INT
 	DECLARE @tblCTContractCost TABLE (intContractCostId INT)
 
 	SELECT @intContractStageId = MIN(intContractStageId)
@@ -1284,6 +1287,21 @@ BEGIN TRY
 					,@strDetailXML
 
 				DECLARE @tblCTContractDetail TABLE (intContractSeq INT)
+				DECLARE @strItemBundleNo NVARCHAR(50)
+					,@intItemBundleId INT
+					,@strBasisCurrency NVARCHAR(50)
+					,@intBasisCurrencyId INT
+					,@intBasisUOMId INT
+					,@intBasisItemUOMId INT
+					,@strBasisUnitMeasure NVARCHAR(50)
+					,@intFreightBasisUOMId INT
+					,@intFreightBasisItemUOMId INT
+					,@strFreightBasisUnitMeasure NVARCHAR(50)
+					,@intFreightBasisBaseUOMId INT
+					,@intFreightBasisBaseItemUOMId INT
+					,@strFreightBasisBaseUnitMeasure NVARCHAR(50)
+					,@intConvPriceCurrencyId INT
+					,@strConvPriceCurrency NVARCHAR(50)
 
 				INSERT INTO @tblCTContractDetail (intContractSeq)
 				SELECT intContractSeq
@@ -1324,7 +1342,13 @@ BEGIN TRY
 						,@strCurrencyExchangeRateType = NULL
 						,@strShipVia = NULL
 						,@strProducer = NULL
-
+						,@strItemBundleNo = NULL
+						,@strBasisCurrency = NULL
+						,@strBasisUnitMeasure = NULL
+						,@strFreightBasisUnitMeasure = NULL
+						,@strFreightBasisBaseUnitMeasure = NULL
+						,@strConvPriceCurrency = NULL
+,@strNetWeightUOM = NULL
 					SELECT @strPricingType = strPricingType
 						,@strFutMarketName = strFutMarketName
 						,@strFutureMonth = strFutureMonth
@@ -1355,6 +1379,13 @@ BEGIN TRY
 						,@strCurrencyExchangeRateType = strCurrencyExchangeRateType
 						,@strShipVia = strShipVia
 						,@strProducer = strProducer
+						,@strItemBundleNo = strItemBundleNo
+						,@strBasisCurrency = strBasisCurrency
+						,@strBasisUnitMeasure = strBasisUnitMeasure
+						,@strFreightBasisUnitMeasure = strFreightBasisUnitMeasure
+						,@strFreightBasisBaseUnitMeasure = strFreightBasisBaseUnitMeasure
+						,@strConvPriceCurrency = strConvPriceCurrency
+						,@strNetWeightUOM = strNetWeightUOM
 					FROM OPENXML(@idoc, 'vyuIPContractDetailViews/vyuIPContractDetailView', 2) WITH (
 							strPricingType NVARCHAR(100) Collate Latin1_General_CI_AS
 							,strFutMarketName NVARCHAR(30) Collate Latin1_General_CI_AS
@@ -1387,6 +1418,14 @@ BEGIN TRY
 							,strCurrencyExchangeRateType NVARCHAR(20) Collate Latin1_General_CI_AS
 							,strShipVia NVARCHAR(100) Collate Latin1_General_CI_AS
 							,strProducer NVARCHAR(100) Collate Latin1_General_CI_AS
+							,strItemBundleNo NVARCHAR(50) Collate Latin1_General_CI_AS
+							,strBasisCurrency NVARCHAR(50) Collate Latin1_General_CI_AS
+							,strBasisUnitMeasure NVARCHAR(50) Collate Latin1_General_CI_AS
+							,strFreightBasisUnitMeasure NVARCHAR(50) Collate Latin1_General_CI_AS
+							,strFreightBasisBaseUnitMeasure NVARCHAR(50) Collate Latin1_General_CI_AS
+							,strConvPriceCurrency NVARCHAR(50) Collate Latin1_General_CI_AS
+							,strNetWeightUOM NVARCHAR(50) Collate Latin1_General_CI_AS
+
 							) x
 					WHERE intContractSeq = @intContractSeq
 
@@ -1414,6 +1453,22 @@ BEGIN TRY
 							)
 					BEGIN
 						SELECT @strErrorMessage = 'Unit Measure ' + @strItemNo + ' is not available.'
+
+						RAISERROR (
+								@strErrorMessage
+								,16
+								,1
+								)
+					END
+
+					IF @strNetWeightUOM IS NOT NULL
+						AND NOT EXISTS (
+							SELECT 1
+							FROM tblICUnitMeasure U1
+							WHERE U1.strUnitMeasure = @strNetWeightUOM
+							)
+					BEGIN
+						SELECT @strErrorMessage = 'Net Weight Unit Measure ' + @strNetWeightUOM + ' is not available.'
 
 						RAISERROR (
 								@strErrorMessage
@@ -1875,6 +1930,8 @@ BEGIN TRY
 					SELECT @intShippingLineId = NULL
 
 					SELECT @intShipperId = NULL
+						,@intWeightUnitMeasureId = NULL
+						,@intItemWeightUOMId = NULL
 
 					SELECT @intItemId = intItemId
 					FROM tblICItem I
@@ -1888,6 +1945,15 @@ BEGIN TRY
 					FROM tblICItemUOM IU
 					WHERE IU.intItemId = @intItemId
 						AND IU.intUnitMeasureId = @intUnitMeasureId
+
+					SELECT @intWeightUnitMeasureId = intUnitMeasureId
+					FROM tblICUnitMeasure U1
+					WHERE U1.strUnitMeasure = @strNetWeightUOM
+
+					SELECT @intItemWeightUOMId = intItemUOMId
+					FROM tblICItemUOM IU
+					WHERE IU.intItemId = @intItemId
+						AND IU.intUnitMeasureId = @intWeightUnitMeasureId
 
 					SELECT @intFXPriceUOMId = NULL
 
@@ -2004,8 +2070,138 @@ BEGIN TRY
 							)
 					WHERE Shipper.strName = @strShipper
 
+					SELECT @intItemBundleId = NULL
+
+					SELECT @intItemBundleId = intItemId
+					FROM tblICItem
+					WHERE strItemNo = @strItemBundleNo
+
+					IF @intItemBundleId IS NULL
+						AND @strItemBundleNo IS NOT NULL
+					BEGIN
+						SELECT @strErrorMessage = 'Bundle Item ' + @strItemBundleNo + ' is not available.'
+
+						RAISERROR (
+								@strErrorMessage
+								,16
+								,1
+								)
+					END
+
+					SELECT @intBasisCurrencyId = NULL
+
+					SELECT @intBasisCurrencyId = intCurrencyID
+					FROM tblSMCurrency
+					WHERE strCurrency = @strBasisCurrency
+
+					IF @intBasisCurrencyId IS NULL
+						AND @strBasisCurrency IS NOT NULL
+					BEGIN
+						SELECT @strErrorMessage = 'Basis Currency ' + @strBasisCurrency + ' is not available.'
+
+						RAISERROR (
+								@strErrorMessage
+								,16
+								,1
+								)
+					END
+
+					SELECT @intBasisUOMId = NULL
+
+					SELECT @intBasisUOMId = intUnitMeasureId
+					FROM tblICUnitMeasure
+					WHERE strUnitMeasure = @strBasisUnitMeasure
+
+					SELECT @intBasisItemUOMId = NULL
+
+					SELECT @intBasisItemUOMId = intItemUOMId
+					FROM tblICItemUOM
+					WHERE intItemId = @intItemId
+						AND intUnitMeasureId = @intBasisUOMId
+
+					IF @intBasisItemUOMId IS NULL
+						AND @strBasisUnitMeasure IS NOT NULL
+					BEGIN
+						SELECT @strErrorMessage = 'Basis UOM ' + @strBasisUnitMeasure + ' is not available.'
+
+						RAISERROR (
+								@strErrorMessage
+								,16
+								,1
+								)
+					END
+
+					SELECT @intFreightBasisUOMId = NULL
+
+					SELECT @intFreightBasisUOMId = intUnitMeasureId
+					FROM tblICUnitMeasure
+					WHERE strUnitMeasure = @strFreightBasisUnitMeasure
+
+					SELECT @intFreightBasisItemUOMId = NULL
+
+					SELECT @intFreightBasisItemUOMId = intItemUOMId
+					FROM tblICItemUOM
+					WHERE intItemId = @intItemId
+						AND intUnitMeasureId = @intFreightBasisUOMId
+
+					IF @intFreightBasisItemUOMId IS NULL
+						AND @strFreightBasisUnitMeasure IS NOT NULL
+					BEGIN
+						SELECT @strErrorMessage = 'Freight Basis UOM ' + @strFreightBasisUnitMeasure + ' is not available.'
+
+						RAISERROR (
+								@strErrorMessage
+								,16
+								,1
+								)
+					END
+
+					SELECT @intFreightBasisBaseUOMId = NULL
+
+					SELECT @intFreightBasisBaseUOMId = intUnitMeasureId
+					FROM tblICUnitMeasure
+					WHERE strUnitMeasure = @strFreightBasisBaseUnitMeasure
+
+					SELECT @intFreightBasisBaseItemUOMId = NULL
+
+					SELECT @intFreightBasisBaseItemUOMId = intItemUOMId
+					FROM tblICItemUOM
+					WHERE intItemId = @intItemId
+						AND intUnitMeasureId = @intFreightBasisBaseUOMId
+
+					IF @intFreightBasisBaseItemUOMId IS NULL
+						AND @strFreightBasisBaseUnitMeasure IS NOT NULL
+					BEGIN
+						SELECT @strErrorMessage = 'Freight Basis Base UOM ' + @strFreightBasisBaseUnitMeasure + ' is not available.'
+
+						RAISERROR (
+								@strErrorMessage
+								,16
+								,1
+								)
+					END
+
+					SELECT @intConvPriceCurrencyId = NULL
+
+					SELECT @intConvPriceCurrencyId = intCurrencyID
+					FROM tblSMCurrency
+					WHERE strCurrency = @strConvPriceCurrency
+
+					IF @intConvPriceCurrencyId IS NULL
+						AND @strConvPriceCurrency IS NOT NULL
+					BEGIN
+						SELECT @strErrorMessage = 'Conversion Price Currency ' + @strBasisCurrency + ' is not available.'
+
+						RAISERROR (
+								@strErrorMessage
+								,16
+								,1
+								)
+					END
+
 					INSERT INTO #tmpContractDetail (
 						intContractHeaderId
+						,intItemBundleId
 						,intItemId
 						,intItemUOMId
 						,intContractSeq
@@ -2086,8 +2282,17 @@ BEGIN TRY
 						,strInvoiceNo
 						,ysnProvisionalPNL
 						,ysnFinalPNL
+						,dblOriginalBasis
+						,intBasisCurrencyId
+						,intBasisUOMId
+						,intFreightBasisUOMId
+						,intFreightBasisBaseUOMId
+						,strFixationBy
+						,intConvPriceCurrencyId
+						,dblConvertedBasis
 						)
 					SELECT @intNewContractHeaderId
+						,@intItemBundleId
 						,@intItemId
 						,@intItemUOMId
 						,x.intContractSeq
@@ -2113,7 +2318,7 @@ BEGIN TRY
 						,@intCurrencyID
 						,@intUnitMeasureId
 						,x.dblAvailableNetWeight
-						,@intItemUOMId
+						,@intItemWeightUOMId
 						,GETDATE()
 						,@intCompanyLocationId
 						,intContractDetailId
@@ -2168,6 +2373,14 @@ BEGIN TRY
 						,x.strInvoiceNo
 						,IsNULL(ysnProvisionalPNL, 0)
 						,IsNULL(ysnFinalPNL, 0)
+						,dblOriginalBasis
+						,@intBasisCurrencyId
+						,@intBasisItemUOMId
+						,@intFreightBasisItemUOMId
+						,@intFreightBasisBaseItemUOMId
+						,strFixationBy
+						,@intConvPriceCurrencyId
+						,dblConvertedBasis
 					FROM OPENXML(@idoc, 'vyuIPContractDetailViews/vyuIPContractDetailView', 2) WITH (
 							strEntityName NVARCHAR(100) Collate Latin1_General_CI_AS
 							,dtmContractDate DATETIME
@@ -2246,6 +2459,9 @@ BEGIN TRY
 							,strInvoiceNo NVARCHAR(100) Collate Latin1_General_CI_AS
 							,ysnProvisionalPNL BIT
 							,ysnFinalPNL BIT
+							,dblOriginalBasis NUMERIC(18, 6)
+							,strFixationBy NVARCHAR(50)
+							,dblConvertedBasis NUMERIC(18, 6)
 							) x
 					WHERE intContractSeq = @intContractSeq
 
@@ -2663,6 +2879,7 @@ BEGIN TRY
 							,intFreightTermId = CD1.intFreightTermId
 							,intShipViaId = CD1.intShipViaId
 							,intItemContractId = CD1.intItemContractId
+	,intItemBundleId = CD1.intItemBundleId
 							,CD.intItemId = CASE 
 								WHEN @ysnApproval = 0
 									AND EXISTS (
@@ -2911,6 +3128,13 @@ BEGIN TRY
 							,intShippingLineId = CD1.intShippingLineId
 							,intShipperId = CD1.intShipperId
 							,strShippingTerm = CD1.strShippingTerm
+							--,dblOriginalBasis = CD1.dblOriginalBasis
+							--,intBasisUOMId = CD1.intBasisUOMId
+							--,intBasisCurrencyId = CD1.intBasisCurrencyId
+							,intFreightBasisUOMId = CD1.intFreightBasisUOMId
+							,intFreightBasisBaseUOMId = CD1.intFreightBasisBaseUOMId
+						--,strFixationBy = CD1.strFixationBy
+						--,intConvPriceCurrencyId = CD1.intConvPriceCurrencyId
 						FROM tblCTContractDetail CD
 						JOIN #tmpContractDetail CD1 ON CD.intContractSeq = CD1.intContractSeq
 						WHERE CD.intContractHeaderId = @intNewContractHeaderId

@@ -303,21 +303,23 @@ AS
 			,i.strItemNo
 			,strRateType = currencyRateType.strCurrencyExchangeRateType
 			,dblLineTotal = 
-					t.dblQty *
-					dbo.fnCalculateReceiptUnitCost(
-						ri.intItemId
-						,ri.intUnitMeasureId		
-						,ri.intCostUOMId
-						,ri.intWeightUOMId
-						,ri.dblUnitCost
-						,ri.dblNet
-						,t.intLotId
-						,t.intItemUOMId
-						,AggregrateItemLots.dblTotalNet
-						,ri.ysnSubCurrency
-						,r.intSubCurrencyCents
-						,CASE WHEN ISNULL(i.ysnSeparateStockForUOMs, 0) = 0 THEN stockUOM.intItemUOMId ELSE NULL END 
-					)						
+					dbo.fnMultiply(
+						t.dblQty 
+						,dbo.fnCalculateReceiptUnitCost(
+							ri.intItemId
+							,ri.intUnitMeasureId		
+							,ri.intCostUOMId
+							,ri.intWeightUOMId
+							,ri.dblUnitCost
+							,ri.dblNet
+							,t.intLotId
+							,t.intItemUOMId
+							,AggregrateItemLots.dblTotalNet
+							,ri.ysnSubCurrency
+							,r.intSubCurrencyCents
+							,CASE WHEN ISNULL(i.ysnSeparateStockForUOMs, 0) = 0 THEN stockUOM.intItemUOMId ELSE NULL END 
+						)	
+					)
 			--,dblAddOnCostFromOtherCharge = t.dblQty * dbo.fnGetOtherChargesFromInventoryReceipt(ri.intInventoryReceiptItemId)		
 			,t.intSourceEntityId
 			,i.intCommodityId
@@ -367,26 +369,28 @@ AS
 			,dblValue = 
 				-- Cost Bucket Value
 				ROUND(
-					t.dblQty * t.dblCost 
-					, 2
+					dbo.fnMultiply(t.dblQty, t.dblCost)
+					,2
 				)
 				- 
 				-- Less Return Value
 				ROUND(
-					t.dblQty *
-					dbo.fnCalculateReceiptUnitCost(
-						ri.intItemId
-						,ri.intUnitMeasureId		
-						,ri.intCostUOMId
-						,ri.intWeightUOMId
-						,ri.dblUnitCost
-						,ri.dblNet
-						,t.intLotId
-						,t.intItemUOMId
-						,AggregrateItemLots.dblTotalNet
-						,ri.ysnSubCurrency
-						,r.intSubCurrencyCents
-						,CASE WHEN ISNULL(i.ysnSeparateStockForUOMs, 0) = 0 THEN stockUOM.intItemUOMId ELSE NULL END 
+					dbo.fnMultiply(
+						t.dblQty 
+						,dbo.fnCalculateReceiptUnitCost(
+							ri.intItemId
+							,ri.intUnitMeasureId		
+							,ri.intCostUOMId
+							,ri.intWeightUOMId
+							,ri.dblUnitCost
+							,ri.dblNet
+							,t.intLotId
+							,t.intItemUOMId
+							,AggregrateItemLots.dblTotalNet
+							,ri.ysnSubCurrency
+							,r.intSubCurrencyCents
+							,CASE WHEN ISNULL(i.ysnSeparateStockForUOMs, 0) = 0 THEN stockUOM.intItemUOMId ELSE NULL END 
+						)						
 					)
 					,2
 				)

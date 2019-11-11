@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE uspLGCreateInvoiceForDropShip 
 	 @intLoadId INT
 	,@intUserId INT
+	,@intType INT = 1 /* 1 - Direct, 2 - Provisional, 3 - Proforma */
 	,@Post BIT = NULL
 	,@NewInvoiceId INT = NULL OUTPUT		
 AS
@@ -11,22 +12,41 @@ BEGIN
 	DECLARE @strLoadNumber NVARCHAR(100)
 	DECLARE @ErrorMessage NVARCHAR(250)
 
-	IF EXISTS(SELECT TOP 1 1 FROM tblARInvoice WHERE intLoadId = @intLoadId 
-				AND intInvoiceId NOT IN (SELECT intInvoiceId FROM tblLGWeightClaimDetail WCD 
-										INNER JOIN tblLGWeightClaim WC ON WC.intWeightClaimId = WCD.intWeightClaimId
-										WHERE WC.intLoadId = @intLoadId))
+	IF EXISTS(SELECT TOP 1 1 FROM tblARInvoice ARI
+		JOIN tblARInvoiceDetail ARID ON ARID.intInvoiceId = ARI.intInvoiceId
+		JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = ARID.intLoadDetailId
+		JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
+		WHERE LD.intLoadId = @intLoadId
+		AND ARI.intInvoiceId NOT IN 
+			(SELECT intInvoiceId FROM tblLGWeightClaimDetail WCD 
+			INNER JOIN tblLGWeightClaim WC ON WC.intWeightClaimId = WCD.intWeightClaimId
+			WHERE WC.intLoadId = @intLoadId)
+		AND ((@intType = 1 AND ARI.strTransactionType = 'Invoice' AND ARI.strType = 'Standard')
+			OR (@intType = 2 AND ARI.strTransactionType = 'Invoice' AND ARI.strType = 'Provisional')
+			OR (@intType = 3 AND ARI.strTransactionType = 'Proforma Invoice' AND ARI.strType = 'Standard'))
+	)
 	BEGIN
 		SELECT TOP 1
-			@strInvoiceNumber		= ARI.[strInvoiceNumber]
-		   ,@strLoadNumber			= L.strLoadNumber 
+			@strInvoiceNumber = ARI.[strInvoiceNumber]
+		   ,@strLoadNumber = L.strLoadNumber 
 		FROM tblARInvoice ARI
-		JOIN tblLGLoad L ON L.intLoadId = ARI.intLoadId
-		WHERE ARI.intLoadId = @intLoadId 
-			AND intInvoiceId NOT IN (SELECT intInvoiceId FROM tblLGWeightClaimDetail WCD 
-									 INNER JOIN tblLGWeightClaim WC ON WC.intWeightClaimId = WCD.intWeightClaimId
-									 WHERE WC.intLoadId = @intLoadId)
+		JOIN tblARInvoiceDetail ARID ON ARID.intInvoiceId = ARI.intInvoiceId
+		JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = ARID.intLoadDetailId
+		JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
+		WHERE LD.intLoadId = @intLoadId
+		AND ARI.intInvoiceId NOT IN 
+			(SELECT intInvoiceId FROM tblLGWeightClaimDetail WCD 
+			INNER JOIN tblLGWeightClaim WC ON WC.intWeightClaimId = WCD.intWeightClaimId
+			WHERE WC.intLoadId = @intLoadId)
+		AND ((@intType = 1 AND ARI.strTransactionType = 'Invoice' AND ARI.strType = 'Standard')
+			OR (@intType = 2 AND ARI.strTransactionType = 'Invoice' AND ARI.strType = 'Provisional')
+			OR (@intType = 3 AND ARI.strTransactionType = 'Proforma Invoice' AND ARI.strType = 'Standard'))
 
-		SET @ErrorMessage = 'Invoice(' + @strInvoiceNumber + ') was already created for ' + @strLoadNumber;
+		SET @ErrorMessage = CASE @intType 
+								WHEN 2 THEN 'Provisional '
+								WHEN 3 THEN 'Proforma ' 
+								ELSE '' END +
+							'Invoice (' + @strInvoiceNumber + ') was already created for ' + @strLoadNumber;
 
 		RAISERROR(@ErrorMessage, 16, 1);
 		RETURN 0;
@@ -69,7 +89,7 @@ BEGIN
 
 
 	DECLARE
-	 @TransactionType			NVARCHAR(25)
+	 @TransactionType			NVARCHAR(100)
 	,@Type						NVARCHAR(100)
 	,@EntityCustomerId			INT
 	,@CompanyLocationId			INT
@@ -134,8 +154,8 @@ BEGIN
 
 	SELECT
 		 @strLoadNumber				= L.strLoadNumber
-		,@TransactionType			= 'Invoice'
-		,@Type						= 'Standard'
+		,@TransactionType			= CASE WHEN (@intType = 3) THEN 'Proforma Invoice' ELSE 'Invoice' END
+		,@Type						= CASE WHEN (@intType = 2) THEN 'Provisional' ELSE 'Standard' END 
 		,@EntityCustomerId			= LD.intCustomerEntityId
 		,@CompanyLocationId			= LD.intSCompanyLocationId 	
 		,@AccountId					= NULL
@@ -210,7 +230,9 @@ BEGIN
 	END
 	
 	INSERT INTO @EntriesForInvoice
-		([strSourceTransaction]
+		([strTransactionType]
+		,[strType]
+		,[strSourceTransaction]
 		,[intSourceId]
 		,[strSourceId]
 		,[intInvoiceId]
@@ -309,7 +331,9 @@ BEGIN
 		,[intSubCurrencyId]
 		,[dblSubCurrencyRate])
 	SELECT
-		 [strSourceTransaction]					= 'Load Schedule'
+		 [strTransactionType]					= @TransactionType
+		,[strType]								= @Type
+		,[strSourceTransaction]					= 'Load Schedule'
 		,[intSourceId]							= @intLoadId
 		,[strSourceId]							= ARSI.strLoadNumber
 		,[intInvoiceId]							= NULL

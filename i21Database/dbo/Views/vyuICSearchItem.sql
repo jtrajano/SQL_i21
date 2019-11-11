@@ -55,6 +55,7 @@ SELECT Item.intItemId
 --End: Commodity fields 
 , Item.strBundleType
 , Item.ysnListBundleSeparately
+, Item.strManufactureType
 FROM tblICItem Item
 LEFT JOIN tblICCommodity Commodity ON Commodity.intCommodityId = Item.intCommodityId
 LEFT JOIN tblICCategory Category ON Category.intCategoryId = Item.intCategoryId

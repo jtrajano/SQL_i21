@@ -293,7 +293,7 @@ FROM @tblInventoryTransactionGrouped t
 			, i.ysnStockUnit
 	) stock 
 	LEFT JOIN tblICCostingMethod CostMethod
-		ON CostMethod.intCostingMethodId = t.intCostingMethodId
+		ON CostMethod.intCostingMethodId = t.intCostingMethodId	
 	OUTER APPLY(
 		SELECT TOP 1
 			dblCost
@@ -333,6 +333,7 @@ FROM @tblInventoryTransactionGrouped t
 		ON SubLocation.intCompanyLocationSubLocationId = t.intSubLocationId
 	LEFT JOIN tblICStorageLocation strgLoc
 		ON strgLoc.intStorageLocationId = t.intStorageLocationId
+
 WHERE a.intInventoryAdjustmentId = @intAdjustmentId
 	AND 1 = CAST(CASE WHEN (CASE WHEN (CASE WHEN ad.intOwnershipType = 1 THEN t.dblQty - ad.dblQuantity 
 			ELSE t.dblUnitStorage - t.dblQty END) <> 0 THEN 1 ELSE 0 END) = 0 THEN 

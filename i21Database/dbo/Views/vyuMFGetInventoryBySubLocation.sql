@@ -20,11 +20,7 @@ JOIN tblSMCompanyLocationSubLocation sc ON sc.intCompanyLocationSubLocationId = 
 LEFT OUTER JOIN tblICCommodity cd ON cd.intCommodityId = i.intCommodityId
 INNER JOIN tblSMCompanyLocation c ON c.intCompanyLocationId = il.intLocationId
 LEFT JOIN tblICCommodityAttribute att ON att.intCommodityAttributeId = i.intProductTypeId
-WHERE i.strType IN (
-		N'Inventory'
-		,N'Finished Good'
-		,N'Raw Material'
-		)
+WHERE i.strType = 'Inventory'
 GROUP BY sm.intItemId
 	,sc.strSubLocationName
 	,c.strLocationName

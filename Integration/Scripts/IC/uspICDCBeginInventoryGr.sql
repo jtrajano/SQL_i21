@@ -77,7 +77,7 @@ BEGIN
 					on sl.strName COLLATE Latin1_General_CI_AS = itmGr.gapos_loc_no COLLATE Latin1_General_CI_AS	
 		WHERE	((gapos_in_house + gapos_offsite + + gapos_offsite_dp) <> 0 OR (gapos_stor_1 + gapos_stor_2 + gapos_stor_3 + gapos_stor_4 + gapos_stor_5 + gapos_stor_6 + gapos_stor_7 + gapos_stor_8 <> 0))
 		AND  gapos_loc_no = @adjLoc
-		AND inv.strType in ('Inventory', 'Finished Good', 'Raw Material')
+		AND inv.strType = 'Inventory'
 	
 		IF @cnt > 0
 		BEGIN
@@ -89,7 +89,7 @@ BEGIN
 							on uom.intItemId = inv.intItemId 
 				WHERE	agitm_un_on_hand <> 0 
 				AND agitm_loc_no = @adjLoc
-				AND inv.strType in ('Inventory', 'Finished Good', 'Raw Material')
+				AND inv.strType = 'Inventory'
 
 			--** Fetching the next adjustment number to be assigned for the adjustment to be created from uspSMGetStartingNumber stored procedure. **
 			EXEC dbo.uspSMGetStartingNumber @StartingNumberId_InventoryAdjustment, @strAdjustmentNo OUTPUT
@@ -172,7 +172,7 @@ BEGIN
 					ON inv.strItemNo COLLATE Latin1_General_CI_AS = CCP.gaprc_com_cd
 		WHERE	(gapos_in_house + gapos_offsite + + gapos_offsite_dp) <> 0
 		AND  gapos_loc_no = @adjLoc
-		AND inv.strType in ('Inventory', 'Finished Good', 'Raw Material')
+		AND inv.strType = 'Inventory'
 		-----------------------------------------------------------------------------------------------------------------------------------------------------------
 
 		--Ownership type: Storage ---- >> (gapos_in_house + gapos_offsite + + gapos_offsite_dp) <> 0
@@ -230,7 +230,7 @@ BEGIN
 					ON inv.strItemNo COLLATE Latin1_General_CI_AS = CCP.gaprc_com_cd
 		WHERE	(gapos_stor_1 + gapos_stor_2 + gapos_stor_3 + gapos_stor_4 + gapos_stor_5 + gapos_stor_6 + gapos_stor_7 + gapos_stor_8) <> 0
 		AND  gapos_loc_no = @adjLoc
-		AND inv.strType in ('Inventory', 'Finished Good', 'Raw Material')
+		AND inv.strType = 'Inventory'
 		-----------------------------------------------------------------------------------------------------------------------------------------------------------
 
 	--FROM	tblICItem inv INNER JOIN agitmmst itm 
@@ -247,7 +247,7 @@ BEGIN
 	--AND agitm_loc_no = @adjLoc
 	--AND aglot_loc_no = @adjLoc
 	--AND aglot_un_on_hand <> 0
-	--AND inv.strType in ('Inventory', 'Finished Good', 'Raw Material')
+	--AND inv.strType = 'Inventory'
 		
 	-- Create an Audit Log
 	BEGIN 
@@ -311,7 +311,7 @@ BEGIN
 							on uom.intItemId = inv.intItemId 
 				WHERE	agitm_un_on_hand <> 0 
 				AND agitm_loc_no = @adjLoc
-				AND inv.strType in ('Inventory', 'Finished Good', 'Raw Material')		
+				AND inv.strType = 'Inventory'
 		END
 		FETCH NEXT
 		FROM loc_cursor

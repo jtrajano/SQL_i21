@@ -1,7 +1,8 @@
 ﻿CREATE PROCEDURE uspLGProcessInvoice
-		@intLoadId INT,
-		@intEntityUserSecurityId INT,
-		@intNewInvoiceId INT OUTPUT
+	@intLoadId INT,
+	@intEntityUserSecurityId INT,
+	@intType INT = 1, /* 1 - Direct, 2 - Provisional, 3 - Proforma */
+	@intNewInvoiceId INT OUTPUT
 AS	
 BEGIN TRY
 	DECLARE @intPurchaseSale INT
@@ -18,15 +19,17 @@ BEGIN TRY
 	IF @intPurchaseSale = 2
 	BEGIN
 		EXEC uspLGCreateInvoiceForShipment
-				@intLoadId = @intLoadId ,
-				@intUserId = @intEntityUserSecurityId ,
+				@intLoadId = @intLoadId,
+				@intUserId = @intEntityUserSecurityId,
+				@intType = @intType,
 				@NewInvoiceId = @NewInvoiceId OUTPUT
 	END
 	ELSE IF @intPurchaseSale = 3
 	BEGIN
 		EXEC uspLGCreateInvoiceForDropShip
 				@intLoadId = @intLoadId ,
-				@intUserId = @intEntityUserSecurityId ,
+				@intUserId = @intEntityUserSecurityId,
+				@intType = @intType,
 				@Post = 0,
 				@NewInvoiceId = @NewInvoiceId OUTPUT
 	END

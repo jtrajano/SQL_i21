@@ -5,37 +5,39 @@
 	---------------------------------------------------------
 	
 	--master table--
-	 @strNetworkId						NVARCHAR(MAX)	 =	 ''
-	,@strARLocation						NVARCHAR(MAX)	 =	 ''
-	,@strSiteGroup						NVARCHAR(MAX)	 =	 ''
-	,@strTaxGroup						NVARCHAR(MAX)	 =	 ''
-	,@strARCashCustomer					NVARCHAR(MAX)	 =	 ''
-	,@strImportMapping					NVARCHAR(MAX)	 =	 ''
+	 @strNetworkId									NVARCHAR(MAX)	 =	 ''
+	,@strARLocation									NVARCHAR(MAX)	 =	 ''
+	,@strSiteGroup									NVARCHAR(MAX)	 =	 ''
+	,@strTaxGroup									NVARCHAR(MAX)	 =	 ''
+	,@strARCashCustomer								NVARCHAR(MAX)	 =	 ''
+	,@strImportMapping								NVARCHAR(MAX)	 =	 ''
 
 	--normal input--
-	,@strSiteNumber						NVARCHAR(MAX)	 =	 ''
-	,@strSiteName						NVARCHAR(MAX)	 =	 ''
-	,@strAddress						NVARCHAR(MAX)	 =	 ''
-	,@strCity							NVARCHAR(MAX)	 =	 ''
-	,@strState							NVARCHAR(MAX)	 =	 ''
-	,@strPacPrideHostId					NVARCHAR(MAX)	 =	 ''
-	,@strImportFilePath					NVARCHAR(MAX)	 =	 ''
-	,@strImportFileName					NVARCHAR(MAX)	 =	 ''
+	,@strSiteNumber									NVARCHAR(MAX)	 =	 ''
+	,@strSiteName									NVARCHAR(MAX)	 =	 ''
+	,@strAddress									NVARCHAR(MAX)	 =	 ''
+	,@strCity										NVARCHAR(MAX)	 =	 ''
+	,@strState										NVARCHAR(MAX)	 =	 ''
+	,@strPacPrideHostId								NVARCHAR(MAX)	 =	 ''
+	,@strImportFilePath								NVARCHAR(MAX)	 =	 ''
+	,@strImportFileName								NVARCHAR(MAX)	 =	 ''
+	,@strAllowExemptionsOnExtAndRetailTrans			NVARCHAR(MAX)	 =	 ''
 
 	--predefined--
-	,@strDeliveryPickup					NVARCHAR(MAX)	 =	 ''
-	,@strSiteType						NVARCHAR(MAX)	 =	 ''
-	,@strControllerType					NVARCHAR(MAX)	 =	 ''
-	,@strPPSiteType						NVARCHAR(MAX)	 =	 ''
+	,@strDeliveryPickup								NVARCHAR(MAX)	 =	 ''
+	,@strSiteType									NVARCHAR(MAX)	 =	 ''
+	,@strControllerType								NVARCHAR(MAX)	 =	 ''
+	,@strPPSiteType									NVARCHAR(MAX)	 =	 ''
 
 
 	--boolean--
-	,@strSiteAcceptsCreditCards			NVARCHAR(MAX)	 =	 ''
-	,@strProcessCashSales				NVARCHAR(MAX)	 =	 ''
-	,@strImportTripleEStock				NVARCHAR(MAX)	 =	 ''
-	,@strPumpCalculatesExemptPrice		NVARCHAR(MAX)	 =	 ''
-	,@strRecalculateTaxesOnRemote		NVARCHAR(MAX)	 =	 ''
-	,@strImportContainsMultipleSites	NVARCHAR(MAX)	 =	 ''
+	,@strSiteAcceptsCreditCards						NVARCHAR(MAX)	 =	 ''
+	,@strProcessCashSales							NVARCHAR(MAX)	 =	 ''
+	,@strImportTripleEStock							NVARCHAR(MAX)	 =	 ''
+	,@strPumpCalculatesExemptPrice					NVARCHAR(MAX)	 =	 ''
+	,@strRecalculateTaxesOnRemote					NVARCHAR(MAX)	 =	 ''
+	,@strImportContainsMultipleSites				NVARCHAR(MAX)	 =	 ''
+	,@strCaptiveSite								NVARCHAR(MAX)	 =	 ''
 
 
 AS
@@ -53,6 +55,7 @@ BEGIN
 	DECLARE @ysnPumpCalculatesExemptPrice			  BIT = 0
 	DECLARE @ysnRecalculateTaxesOnRemote			  BIT = 0
 	DECLARE @ysnImportContainsMultipleSites			  BIT = 0
+	DECLARE @ysnCaptiveSite							  BIT = 0
 	---------------------------------------------------------
 	DECLARE @intNetworkId							  INT = 0
 	DECLARE @intARLocation							  INT = 0
@@ -61,8 +64,6 @@ BEGIN
 	DECLARE @intARCashCustomer						  INT = 0
 	DECLARE @intImportMapping						  INT = 0
 	DECLARE @strNetworkType							  NVARCHAR(50)
-	---------------------------------------------------------
-	DECLARE @strAllowExemptionsOnExtAndRetailTrans	  NVARCHAR(50)
 	---------------------------------------------------------
 
 
@@ -365,6 +366,39 @@ BEGIN
 			SET @ysnHasError = 1
 		END
 
+		--CaptiveSite
+	IF (@strCaptiveSite = 'N')
+		BEGIN 
+			SET @ysnCaptiveSite = 0
+		END
+	ELSE IF (@strCaptiveSite = 'Y')
+		BEGIN
+			SET @ysnCaptiveSite = 1	
+		END
+	ELSE
+		BEGIN 
+			SET @ysnCaptiveSite = 0
+		END
+
+
+
+	IF (@strAllowExemptionsOnExtAndRetailTrans = 'N')
+		BEGIN 
+			SET @strAllowExemptionsOnExtAndRetailTrans = 'No'
+		END
+	ELSE IF (@strAllowExemptionsOnExtAndRetailTrans = 'Y')
+		BEGIN
+			SET @strAllowExemptionsOnExtAndRetailTrans = 'Yes'
+		END
+	ELSE
+		BEGIN 
+				SELECT TOP 1 
+				@strAllowExemptionsOnExtAndRetailTrans = strAllowExemptionsOnExtAndRetailTrans
+				FROM tblCFNetwork
+				WHERE intNetworkId = @intNetworkId
+		END
+
+
 
 	---------------------------------------------------------
 
@@ -442,10 +476,10 @@ BEGIN
 	----				    DEFAULT			   			 ----
 	---------------------------------------------------------
 
-	SELECT TOP 1 
-	@strAllowExemptionsOnExtAndRetailTrans = strAllowExemptionsOnExtAndRetailTrans
-	FROM tblCFNetwork
-	WHERE intNetworkId = @intNetworkId
+	--SELECT TOP 1 
+	--@strAllowExemptionsOnExtAndRetailTrans = strAllowExemptionsOnExtAndRetailTrans
+	--FROM tblCFNetwork
+	--WHERE intNetworkId = @intNetworkId
 
 	
 	---------------------------------------------------------
@@ -484,6 +518,7 @@ BEGIN
 				,ysnRecalculateTaxesOnRemote	
 				,ysnMultipleSiteImport
 				,strAllowExemptionsOnExtAndRetailTrans
+				,ysnCaptiveSite
 	        )
 			VALUES
 			(
@@ -512,6 +547,7 @@ BEGIN
 				,@ysnRecalculateTaxesOnRemote	
 				,@ysnImportContainsMultipleSites
 				,@strAllowExemptionsOnExtAndRetailTrans
+				,@ysnCaptiveSite
 			)
 
 			COMMIT TRANSACTION

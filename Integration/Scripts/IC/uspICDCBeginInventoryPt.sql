@@ -75,7 +75,7 @@ BEGIN
 					on sl.strName COLLATE Latin1_General_CI_AS = itm.ptitm_binloc COLLATE Latin1_General_CI_AS	
 		WHERE	ptitm_on_hand <> 0 
 		AND ptitm_loc_no = @adjLoc
-		AND inv.strType in ('Inventory', 'Finished Good', 'Raw Material')
+		AND inv.strType = 'Inventory'
 	
 		IF @cnt > 0
 		BEGIN
@@ -87,7 +87,7 @@ BEGIN
 							on uom.intItemId = inv.intItemId 
 				WHERE	ptitm_on_hand <> 0 
 				AND ptitm_loc_no = @adjLoc
-				AND inv.strType in ('Inventory', 'Finished Good', 'Raw Material')
+				AND inv.strType = 'Inventory'
 
 			--** Fetching the next adjustment number to be assigned for the adjustment to be created from uspSMGetStartingNumber stored procedure. **
 			EXEC dbo.uspSMGetStartingNumber @StartingNumberId_InventoryAdjustment, @strAdjustmentNo OUTPUT
@@ -169,7 +169,7 @@ BEGIN
 					--	on sl.strName COLLATE Latin1_General_CI_AS = itm.ptitm_binloc COLLATE Latin1_General_CI_AS	
 			WHERE ptitm_on_hand <> 0
 			AND ptitm_loc_no = @adjLoc
-			AND inv.strType in ('Inventory', 'Finished Good', 'Raw Material')
+			AND inv.strType = 'Inventory'
 
 
 			-- Create an Audit Log
@@ -236,7 +236,7 @@ BEGIN
 							on uom.intItemId = inv.intItemId 
 				WHERE	ptitm_on_hand <> 0 
 				AND ptitm_loc_no = @adjLoc
-				AND inv.strType in ('Inventory', 'Finished Good', 'Raw Material')
+				AND inv.strType = 'Inventory'
 
 			------ Tweak the contra-gl account used. 
 			----BEGIN 

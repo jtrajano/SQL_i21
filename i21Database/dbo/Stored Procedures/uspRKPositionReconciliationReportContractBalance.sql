@@ -65,6 +65,7 @@ SELECT
 	,dblIncrease = CASE WHEN t.dblQty > 0 THEN t.dblQty ELSE 0 END
 	,dblDecrease = CASE WHEN t.dblQty < 0 THEN t.dblQty * -1 ELSE 0 END
 	,t.strPricingType
+	,t.strTransactionType
 	,t.intTransactionId
 	,t.strTransactionId
 	,intOrderBy
@@ -77,6 +78,7 @@ FROM(
 		, sh.intContractDetailId
 		, dblQty = dbo.fnCTConvertQtyToTargetCommodityUOM(ch.intCommodityId,dbo.fnCTGetCommodityUnitMeasure(ch.intCommodityUOMId),cum.intUnitMeasureId,sh.dblBalance)
 		, pt.strPricingType
+		, strTransactionType = ''
 		, intTransactionId = null
 		, strTransactionId = ''
 		, intOrderBy = 1
@@ -98,6 +100,7 @@ FROM(
 						else sh.dblTransactionQuantity * cd.dblQuantityPerLoad
 					end)
 		, pt.strPricingType
+		, strTransactionType = strScreenName
 		, intTransactionId = sh.intExternalHeaderId
 		, strTransactionId = sh.strNumber
 		, intOrderBy = 2
@@ -116,6 +119,7 @@ FROM(
 		, pf.intContractDetailId
 		, dblQty = dbo.fnCTConvertQtyToTargetCommodityUOM(ch.intCommodityId,dbo.fnCTGetCommodityUnitMeasure(ch.intCommodityUOMId),cum.intUnitMeasureId,fd.dblQuantity * -1)
 		, 'Basis'
+		, strTransactionType = ''
 		, intTransactionId = null
 		, strTransactionId = ''
 		, intOrderBy = 3
@@ -134,6 +138,7 @@ FROM(
 		, pf.intContractDetailId
 		, dblQty = dbo.fnCTConvertQtyToTargetCommodityUOM(ch.intCommodityId,dbo.fnCTGetCommodityUnitMeasure(ch.intCommodityUOMId),cum.intUnitMeasureId,fd.dblQuantity)
 		, 'Priced'
+		, strTransactionType = ''
 		, intTransactionId = null
 		, strTransactionId = ''
 		, intOrderBy = 4
@@ -171,16 +176,18 @@ FROM (
 			,dblPricedDecrease =  CASE WHEN strPricingType = 'Priced' THEN dblDecrease ELSE 0 END
 			,dblDPIncrease =  CASE WHEN strPricingType = 'DP (Priced Later)' THEN dblIncrease ELSE 0 END
 			,dblDPDecrease =  CASE WHEN strPricingType = 'DP (Priced Later)' THEN dblDecrease ELSE 0 END
+			,dblHTAIncrease =  CASE WHEN strPricingType = 'HTA' THEN dblIncrease ELSE 0 END
+			,dblHTADecrease =  CASE WHEN strPricingType = 'HTA' THEN dblDecrease ELSE 0 END
 			,dblCashIncrease =  CASE WHEN strPricingType = 'Cash' THEN dblIncrease ELSE 0 END
 			,dblCashDecrease =  CASE WHEN strPricingType = 'Cash' THEN dblDecrease ELSE 0 END
 			,strContractSeq = strContractNumber + '-' + CONVERT(NVARCHAR(5),intContractSeq)
 			,intContractHeaderId
 			,intContractDetailId
+			,strTransactionType
 			,intTransactionId
 			,strTransactionId
 			,intOrderBy
 		FROM #tblContractBalance
-		WHERE strPricingType <> 'HTA'
 ) t
 ORDER BY dtmTransactionDate, intOrderBy
 
@@ -198,6 +205,8 @@ declare @tblRunningBalance as table (
 	,dblPricedEndBalance  NUMERIC(18,6)
 	,dblDPBegBalance  NUMERIC(18,6)
 	,dblDPEndBalance  NUMERIC(18,6)
+	,dblHTABegBalance  NUMERIC(18,6)
+	,dblHTAEndBalance  NUMERIC(18,6)
 	,dblCashBegBalance  NUMERIC(18,6)
 	,dblCashEndBalance  NUMERIC(18,6)
 	,dblBasisBegBalForSummary NUMERIC(18,6)
@@ -206,6 +215,8 @@ declare @tblRunningBalance as table (
 	,dblPricedEndBalForSummary NUMERIC(18,6)
 	,dblDPBegBalForSummary NUMERIC(18,6)
 	,dblDPEndBalForSummary NUMERIC(18,6)
+	,dblHTABegBalForSummary NUMERIC(18,6)
+	,dblHTAEndBalForSummary NUMERIC(18,6)
 	,dblCashBegBalForSummary NUMERIC(18,6)
 	,dblCashEndBalForSummary NUMERIC(18,6)
 )
@@ -216,10 +227,12 @@ Declare @intRowNum int
 	,@dblBasisBalanceForward  NUMERIC(18,6)
 	,@dblPricedBalanceForward  NUMERIC(18,6)
 	,@dblDPBalanceForward  NUMERIC(18,6)
+	,@dblHTABalanceForward  NUMERIC(18,6)
 	,@dblCashBalanceForward  NUMERIC(18,6)
 	,@dblBasisBegBalForSummary NUMERIC(18,6)
 	,@dblPricedBegBalForSummary NUMERIC(18,6)
 	,@dblDPBegBalForSummary NUMERIC(18,6)
+	,@dblHTABegBalForSummary NUMERIC(18,6)
 	,@dblCashBegBalForSummary NUMERIC(18,6)
 
 
@@ -240,6 +253,12 @@ from tblCTContractBalance where dtmEndDate = @dtmContractBeginBalance
 and intCommodityId  IN (SELECT intCommodityId FROM @Commodity)
 and intContractTypeId = @intContractTypeId
 and strPricingTypeDesc = 'DP (Priced Later)'
+
+select @dblHTABalanceForward = isnull(sum(dblQtyinCommodityStockUOM) ,0)
+from tblCTContractBalance where dtmEndDate = @dtmContractBeginBalance
+and intCommodityId  IN (SELECT intCommodityId FROM @Commodity)
+and intContractTypeId = @intContractTypeId
+and strPricingTypeDesc = 'HTA'
 
 select @dblCashBalanceForward = isnull(sum(dblQtyinCommodityStockUOM) ,0)
 from tblCTContractBalance where dtmEndDate = @dtmContractBeginBalance
@@ -284,6 +303,8 @@ Begin
 		,dblPricedEndBalance
 		,dblDPBegBalance
 		,dblDPEndBalance
+		,dblHTABegBalance
+		,dblHTAEndBalance
 		,dblCashBegBalance
 		,dblCashEndBalance
 	)
@@ -294,7 +315,9 @@ Begin
 		,@dblPricedBalanceForward
 		,@dblPricedBalanceForward + ( dblPricedIncrease - dblPricedDecrease)  
 		,@dblDPBalanceForward
-		,@dblDPBalanceForward + ( dblDPIncrease - dblDPIncrease)  
+		,@dblDPBalanceForward + ( dblDPIncrease - dblDPDecrease)  
+		,@dblHTABalanceForward
+		,@dblHTABalanceForward + ( dblHTAIncrease - dblHTADecrease)  
 		,@dblCashBalanceForward
 		,@dblCashBalanceForward + ( dblCashIncrease - dblCashDecrease)  
 	from #tblFinalContractBalance 
@@ -305,6 +328,7 @@ Begin
 		@dblBasisBalanceForward = dblBasisEndBalance 
 		,@dblPricedBalanceForward = dblPricedEndBalance 
 		,@dblDPBalanceForward = dblDPEndBalance
+		,@dblHTABalanceForward = dblHTAEndBalance
 		,@dblCashBalanceForward = dblCashEndBalance
 	from @tblRunningBalance where intRowNum = @intRowNum
 	
@@ -314,6 +338,7 @@ Begin
 			@dblBasisBegBalForSummary =  dblBasisBegBalance
 			,@dblPricedBegBalForSummary =  dblPricedBegBalance
 			,@dblDPBegBalForSummary =  dblDPBegBalance
+			,@dblHTABegBalForSummary =  dblHTABegBalance
 			,@dblCashBegBalForSummary =  dblCashBegBalance
 		FROM @tblRunningBalance
 		WHERE dtmDate = @dtmCurDate
@@ -322,11 +347,13 @@ Begin
 		SET dblBasisBegBalForSummary = @dblBasisBegBalForSummary
 			,dblPricedBegBalForSummary = @dblPricedBegBalForSummary
 			,dblDPBegBalForSummary = @dblDPBegBalForSummary
+			,dblHTABegBalForSummary = @dblHTABegBalForSummary
 			,dblCashBegBalForSummary = @dblCashBegBalForSummary
 			--
 			,dblBasisEndBalForSummary = @dblBasisBalanceForward
 			,dblPricedEndBalForSummary = @dblPricedBalanceForward
 			,dblDPEndBalForSummary = @dblDPBalanceForward
+			,dblHTAEndBalForSummary = @dblHTABalanceForward
 			,dblCashEndBalForSummary = @dblCashBalanceForward
 		WHERE dtmDate = @dtmCurDate
 
@@ -339,6 +366,7 @@ Begin
 		SET dblBasisEndBalForSummary = @dblBasisBalanceForward
 			,dblPricedEndBalForSummary = @dblPricedBalanceForward
 			,dblDPEndBalForSummary = @dblDPBalanceForward
+			,dblHTAEndBalForSummary = @dblHTABalanceForward
 			,dblCashEndBalForSummary = @dblCashBalanceForward
 		WHERE dtmDate = @dtmCurDate
 
@@ -346,11 +374,13 @@ Begin
 		SET dblBasisBegBalForSummary = @dblBasisBegBalForSummary
 			,dblPricedBegBalForSummary = @dblPricedBegBalForSummary
 			,dblDPBegBalForSummary = @dblDPBegBalForSummary
+			,dblHTABegBalForSummary = @dblHTABegBalForSummary
 			,dblCashBegBalForSummary = @dblCashBegBalForSummary
 		WHERE dtmDate = @dtmCurDate
 		AND dblBasisBegBalForSummary IS NULL
 		AND dblPricedBegBalForSummary IS NULL
 		AND dblDPBegBalForSummary IS NULL
+		AND dblHTABegBalForSummary IS NULL
 		AND dblCashBegBalForSummary IS NULL
 	END
 
@@ -378,6 +408,10 @@ select
 	,dblDPIncrease
 	,dblDPDecrease
 	,dblDPEndBalance
+	,dblHTABegBalance
+	,dblHTAIncrease
+	,dblHTADecrease
+	,dblHTAEndBalance
 	,dblCashBegBalance
 	,dblCashIncrease
 	,dblCashDecrease
@@ -385,6 +419,7 @@ select
 	,strContractSeq 
 	,intContractHeaderId
 	,intContractDetailId
+	,strTransactionType
 	,strTransactionId
 	,intTransactionId
 	,dblBasisBegBalForSummary
@@ -393,6 +428,8 @@ select
 	,dblPricedEndBalForSummary 
 	,dblDPBegBalForSummary 
 	,dblDPEndBalForSummary
+	,dblHTABegBalForSummary 
+	,dblHTAEndBalForSummary
 	,dblCashBegBalForSummary 
 	,dblCashEndBalForSummary
 from #tblFinalContractBalance cb
@@ -404,7 +441,7 @@ GOTO ExitRoutine
 BeginBalanceOnly:
 
 IF @dblBasisBalanceForward <> 0 OR @dblPricedBalanceForward <> 0
-	OR @dblDPBalanceForward <> 0 OR @dblCashBalanceForward <> 0
+	OR @dblDPBalanceForward <> 0 OR @dblHTABalanceForward <> 0 OR @dblCashBalanceForward <> 0
 BEGIN
 	select 
 		 intRowNum  = 1
@@ -422,6 +459,10 @@ BEGIN
 		,dblDPIncrease  = NULL
 		,dblDPDecrease  = NULL
 		,dblDPEndBalance = @dblDPBalanceForward
+		,dblHTABegBalance = @dblHTABalanceForward
+		,dblHTAIncrease  = NULL
+		,dblHTADecrease  = NULL
+		,dblHTAEndBalance = @dblHTABalanceForward
 		,dblCashBegBalance = @dblCashBalanceForward
 		,dblCashIncrease  = NULL
 		,dblCashDecrease  = NULL
@@ -429,6 +470,7 @@ BEGIN
 		,strContractSeq  = 'Balance Forward'
 		,intContractHeaderId  = NULL
 		,intContractDetailId  = NULL
+		,strTransactionType = ''
 		,strTransactionId = ''
 		,intTransactionId = NULL
 		,dblBasisBegBalForSummary = @dblBasisBalanceForward
@@ -437,6 +479,8 @@ BEGIN
 		,dblPricedEndBalForSummary = @dblPricedBalanceForward
 		,dblDPBegBalForSummary  = @dblDPBalanceForward
 		,dblDPEndBalForSummary = @dblDPBalanceForward
+		,dblHTABegBalForSummary  = @dblHTABalanceForward
+		,dblHTAEndBalForSummary = @dblHTABalanceForward
 		,dblCashBegBalForSummary = @dblCashBalanceForward
 		,dblCashEndBalForSummary = @dblCashBalanceForward
 

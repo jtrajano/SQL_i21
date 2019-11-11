@@ -22,9 +22,9 @@ SELECT ST.*
 	   , strATMFundWithdrawalItemId		 = 	  ATMFundWithdrawalItem.strItemNo
 	   , strATMFundEndBalanceItemId		 = 	  ATMFundEndBalanceItem.strItemNo
 	   , strATMFundVarianceItemId		 = 	  ATMFundVarianceItem.strItemNo
-	   , strChangeFundBegBalanceItemId		 = 	  ChangeFundBegBalanceItem.strItemNo
-	   , strChangeFundEndBalanceItemId		 = 	  ChangeFundEndBalanceItem.strItemNo
-	   , strChangeFundReplenishItemId		 = 	  ChangeFundReplenishItem.strItemNo
+	   , strChangeFundBegBalanceItemId	 = 	  ChangeFundBegBalanceItem.strItemNo
+	   , strChangeFundEndBalanceItemId	 = 	  ChangeFundEndBalanceItem.strItemNo
+	   , strChangeFundReplenishItemId	 = 	  ChangeFundReplenishItem.strItemNo
 FROM tblSTStore ST
 LEFT JOIN tblSTPaymentOption PO 
 	ON ST.intDefaultPaidoutId = PO.intPaymentOptionId
