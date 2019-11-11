@@ -51,7 +51,7 @@ BEGIN TRY
 
 			SELECT @intDailyAveragePriceId = intDailyAveragePriceId
 				,@intDailyAveragePriceRefId = intDailyAveragePriceRefId
-			FROM OPENXML(@idoc, 'tblRKDailyAveragePrices/tblRKDailyAveragePrice', 2) WITH (
+			FROM OPENXML(@idoc, 'vyuIPGetDailyAveragePrices/vyuIPGetDailyAveragePrice', 2) WITH (
 					intDailyAveragePriceId INT
 					,intDailyAveragePriceRefId INT
 					)
@@ -69,7 +69,7 @@ BEGIN TRY
 
 			--UPDATE SD
 			--SET SD.intDailyAveragePriceDetailRefId = XMLDetail.intDailyAveragePriceDetailId
-			--FROM OPENXML(@idoc, 'tblRKDailyAveragePriceDetails/tblRKDailyAveragePriceDetail', 2) WITH (
+			--FROM OPENXML(@idoc, 'vyuIPGetDailyAveragePriceDetails/vyuIPGetDailyAveragePriceDetail', 2) WITH (
 			--		intDailyAveragePriceDetailId INT
 			--		,intDailyAveragePriceDetailRefId INT
 			--		) XMLDetail

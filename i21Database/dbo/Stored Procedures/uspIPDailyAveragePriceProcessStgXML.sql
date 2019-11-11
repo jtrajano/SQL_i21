@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE uspIPDailyAveragePriceProcessStgXML
+﻿CREATE PROCEDURE uspIPDailyAveragePriceProcessStgXML @intToCompanyId INT
 AS
 BEGIN TRY
 	SET NOCOUNT ON
@@ -7,43 +7,54 @@ BEGIN TRY
 		,@intTransactionCount INT
 		,@ErrMsg NVARCHAR(MAX)
 		,@strErrorMessage NVARCHAR(MAX)
-	DECLARE @intFutureMonthStageId INT
-		,@intFutureMonthId INT
+	DECLARE @intDailyAveragePriceStageId INT
+		,@intDailyAveragePriceId INT
 		,@strHeaderXML NVARCHAR(MAX)
 		,@strRowState NVARCHAR(MAX)
 		,@intMultiCompanyId INT
 		,@strUserName NVARCHAR(100)
-	DECLARE @strFutMarketName NVARCHAR(30)
-		,@strCommodityCode NVARCHAR(50)
-		,@strFutureMonth NVARCHAR(20)
-	DECLARE @intFutureMarketId INT
-		,@intCommodityMarketId INT
+		,@strTransactionType NVARCHAR(MAX)
+	DECLARE @strBook NVARCHAR(100)
+		,@strSubBook NVARCHAR(100)
+		,@strAverageNo NVARCHAR(50)
+	DECLARE @intBookId INT
+		,@intSubBookId INT
 		,@intLastModifiedUserId INT
-		,@intNewFutureMonthId INT
-		,@intFutureMonthRefId INT
+		,@intNewDailyAveragePriceId INT
+		,@intDailyAveragePriceRefId INT
+	DECLARE @strDetailXML NVARCHAR(MAX)
+		,@intDailyAveragePriceDetailId INT
+	DECLARE @strHeaderCondition NVARCHAR(MAX)
+		,@strAckHeaderXML NVARCHAR(MAX)
+		,@strAckDetailXML NVARCHAR(MAX)
 
-	SELECT @intFutureMonthStageId = MIN(intFutureMonthStageId)
-	FROM tblRKFuturesMonthStage
+	SELECT @intDailyAveragePriceStageId = MIN(intDailyAveragePriceStageId)
+	FROM tblRKDailyAveragePriceStage
 	WHERE ISNULL(strFeedStatus, '') = ''
+		AND intMultiCompanyId = @intToCompanyId
 
-	WHILE @intFutureMonthStageId > 0
+	WHILE @intDailyAveragePriceStageId > 0
 	BEGIN
-		SELECT @intFutureMonthId = NULL
+		SELECT @intDailyAveragePriceId = NULL
 			,@strHeaderXML = NULL
 			,@strRowState = NULL
 			,@intMultiCompanyId = NULL
+			,@strTransactionType = NULL
 			,@strUserName = NULL
+			,@strDetailXML = NULL
 
-		SELECT @intFutureMonthId = intFutureMonthId
+		SELECT @intDailyAveragePriceId = intDailyAveragePriceId
 			,@strHeaderXML = strHeaderXML
+			,@strDetailXML = strDetailXML
 			,@strRowState = strRowState
 			,@intMultiCompanyId = intMultiCompanyId
+			,@strTransactionType = strTransactionType
 			,@strUserName = strUserName
-		FROM tblRKFuturesMonthStage
-		WHERE intFutureMonthStageId = @intFutureMonthStageId
+		FROM tblRKDailyAveragePriceStage
+		WHERE intDailyAveragePriceStageId = @intDailyAveragePriceStageId
 
 		BEGIN TRY
-			SELECT @intFutureMonthRefId = @intFutureMonthId
+			SELECT @intDailyAveragePriceRefId = @intDailyAveragePriceId
 
 			SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -54,28 +65,38 @@ BEGIN TRY
 			EXEC sp_xml_preparedocument @idoc OUTPUT
 				,@strHeaderXML
 
-			SELECT @strFutMarketName = NULL
-				,@strCommodityCode = NULL
-				,@strFutureMonth = NULL
-				,@intFutureMarketId = NULL
+			SELECT @strBook = NULL
+				,@strSubBook = NULL
+				,@strAverageNo = NULL
 
-			SELECT @strFutMarketName = strFutMarketName
-				,@strCommodityCode = strCommodityCode
-				,@strFutureMonth = strFutureMonth
-			FROM OPENXML(@idoc, 'vyuIPGetFutureMonths/vyuIPGetFutureMonth', 2) WITH (
-					strFutMarketName NVARCHAR(30) Collate Latin1_General_CI_AS
-					,strCommodityCode NVARCHAR(50) Collate Latin1_General_CI_AS
-					,strFutureMonth NVARCHAR(20) Collate Latin1_General_CI_AS
+			SELECT @strBook = strBook
+				,@strSubBook = strSubBook
+				,@strAverageNo = strAverageNo
+			FROM OPENXML(@idoc, 'vyuIPGetDailyAveragePrices/vyuIPGetDailyAveragePrice', 2) WITH (
+					strBook NVARCHAR(100) Collate Latin1_General_CI_AS
+					,strSubBook NVARCHAR(100) Collate Latin1_General_CI_AS
+					,strAverageNo NVARCHAR(50) Collate Latin1_General_CI_AS
 					) x
 
-			IF @strFutMarketName IS NOT NULL
+			IF ISNULL(@strBook, '') = ''
+			BEGIN
+				SELECT @strErrorMessage = 'Book ' + @strBook + ' cannot be empty.'
+
+				RAISERROR (
+						@strErrorMessage
+						,16
+						,1
+						)
+			END
+			
+			IF @strBook IS NOT NULL
 				AND NOT EXISTS (
 					SELECT 1
-					FROM tblRKFutureMarket t
-					WHERE t.strFutMarketName = @strFutMarketName
+					FROM tblCTBook t
+					WHERE t.strBook = @strBook
 					)
 			BEGIN
-				SELECT @strErrorMessage = 'Future Market Name ' + @strFutMarketName + ' is not available.'
+				SELECT @strErrorMessage = 'Book ' + @strBook + ' is not available.'
 
 				RAISERROR (
 						@strErrorMessage
@@ -84,18 +105,14 @@ BEGIN TRY
 						)
 			END
 
-			SELECT @intFutureMarketId = t.intFutureMarketId
-			FROM tblRKFutureMarket t
-			WHERE t.strFutMarketName = @strFutMarketName
-
-			IF @strCommodityCode IS NOT NULL
+			IF @strSubBook IS NOT NULL
 				AND NOT EXISTS (
 					SELECT 1
-					FROM tblICCommodity t
-					WHERE t.strCommodityCode = @strCommodityCode
+					FROM tblCTSubBook t
+					WHERE t.strSubBook = @strSubBook
 					)
 			BEGIN
-				SELECT @strErrorMessage = 'Commodity ' + @strCommodityCode + ' is not available.'
+				SELECT @strErrorMessage = 'Sub Book ' + @strSubBook + ' is not available.'
 
 				RAISERROR (
 						@strErrorMessage
@@ -104,38 +121,17 @@ BEGIN TRY
 						)
 			END
 
-			IF @strCommodityCode IS NOT NULL
-				AND @intFutureMarketId IS NOT NULL
-				AND NOT EXISTS (
-					SELECT 1
-					FROM tblICCommodity C
-					JOIN tblRKCommodityMarketMapping CMM ON CMM.intCommodityId = C.intCommodityId
-						AND CMM.intFutureMarketId = @intFutureMarketId
-					WHERE C.strCommodityCode = @strCommodityCode
-					)
-			BEGIN
-				SELECT @strErrorMessage = 'Commodity Market ' + @strCommodityCode + ' is not available.'
-
-				RAISERROR (
-						@strErrorMessage
-						,16
-						,1
-						)
-			END
-
-			SELECT @intFutureMarketId = NULL
-				,@intCommodityMarketId = NULL
+			SELECT @intBookId = NULL
+				,@intSubBookId = NULL
 				,@intLastModifiedUserId = NULL
 
-			SELECT @intFutureMarketId = t.intFutureMarketId
-			FROM tblRKFutureMarket t
-			WHERE t.strFutMarketName = @strFutMarketName
+			SELECT @intBookId = t.intBookId
+			FROM tblCTBook t
+			WHERE t.strBook = @strBook
 
-			SELECT @intCommodityMarketId = CMM.intCommodityMarketId
-			FROM tblICCommodity C
-			JOIN tblRKCommodityMarketMapping CMM ON CMM.intCommodityId = C.intCommodityId
-				AND CMM.intFutureMarketId = @intFutureMarketId
-			WHERE C.strCommodityCode = @strCommodityCode
+			SELECT @intSubBookId = t.intSubBookId
+			FROM tblCTSubBook t
+			WHERE t.strSubBook = @strSubBook
 
 			SELECT @intLastModifiedUserId = t.intEntityId
 			FROM tblEMEntity t
@@ -163,8 +159,8 @@ BEGIN TRY
 			BEGIN
 				IF NOT EXISTS (
 						SELECT 1
-						FROM tblRKFuturesMonth
-						--WHERE intFutureMonthRefId = @intFutureMonthRefId
+						FROM tblRKDailyAveragePrice
+						--WHERE intDailyAveragePriceRefId = @intDailyAveragePriceRefId
 						)
 					SELECT @strRowState = 'Added'
 				ELSE
@@ -173,105 +169,333 @@ BEGIN TRY
 
 			IF @strRowState = 'Delete'
 			BEGIN
-				SELECT @intNewFutureMonthId = @intFutureMonthRefId
-					,@strFutureMonth = ''
+				SELECT @intNewDailyAveragePriceId = intDailyAveragePriceId
+					,@strAverageNo = strAverageNo
+				FROM tblRKDailyAveragePrice
+				--WHERE intDailyAveragePriceRefId = @intDailyAveragePriceRefId
 
 				DELETE
-				FROM tblRKFuturesMonth
-				--WHERE intFutureMonthRefId = @intFutureMonthRefId
+				FROM tblRKDailyAveragePrice
+				--WHERE intDailyAveragePriceRefId = @intDailyAveragePriceRefId
 
 				GOTO ext
 			END
 
 			IF @strRowState = 'Added'
 			BEGIN
-				INSERT INTO tblRKFuturesMonth (
+				INSERT INTO tblRKDailyAveragePrice (
 					intConcurrencyId
-					,strFutureMonth
-					,intFutureMarketId
-					,intCommodityMarketId
-					,dtmFutureMonthsDate
-					,strSymbol
-					,intYear
-					,dtmFirstNoticeDate
-					,dtmLastNoticeDate
-					,dtmLastTradingDate
-					,dtmSpotDate
-					,ysnExpired
-					--,intFutureMonthRefId
+					,strAverageNo
+					,dtmDate
+					,intBookId
+					,intSubBookId
+					,ysnPosted
+					--,intDailyAveragePriceRefId
 					)
 				SELECT 1
-					,strFutureMonth
-					,@intFutureMarketId
-					,@intCommodityMarketId
-					,dtmFutureMonthsDate
-					,strSymbol
-					,intYear
-					,dtmFirstNoticeDate
-					,dtmLastNoticeDate
-					,dtmLastTradingDate
-					,dtmSpotDate
-					,ysnExpired
-					--,@intFutureMonthRefId
-				FROM OPENXML(@idoc, 'vyuIPGetFutureMonths/vyuIPGetFutureMonth', 2) WITH (
-						strFutureMonth NVARCHAR(20)
-						,dtmFutureMonthsDate DATETIME
-						,strSymbol NVARCHAR(4)
-						,intYear INT
-						,dtmFirstNoticeDate DATETIME
-						,dtmLastNoticeDate DATETIME
-						,dtmLastTradingDate DATETIME
-						,dtmSpotDate DATETIME
-						,ysnExpired BIT
+					,strAverageNo
+					,dtmDate
+					,@intBookId
+					,@intSubBookId
+					,ysnPosted
+					--,@intDailyAveragePriceRefId
+				FROM OPENXML(@idoc, 'vyuIPGetDailyAveragePrices/vyuIPGetDailyAveragePrice', 2) WITH (
+						strAverageNo NVARCHAR(50)
+						,dtmDate DATETIME
+						,ysnPosted BIT
 						)
 
-				SELECT @intNewFutureMonthId = SCOPE_IDENTITY()
+				SELECT @intNewDailyAveragePriceId = SCOPE_IDENTITY()
 			END
 
 			IF @strRowState = 'Modified'
 			BEGIN
-				UPDATE tblRKFuturesMonth
+				UPDATE tblRKDailyAveragePrice
 				SET intConcurrencyId = intConcurrencyId + 1
-					,strFutureMonth = x.strFutureMonth
-					,intFutureMarketId = @intFutureMarketId
-					,intCommodityMarketId = @intCommodityMarketId
-					,dtmFutureMonthsDate = x.dtmFutureMonthsDate
-					,strSymbol = x.strSymbol
-					,intYear = x.intYear
-					,dtmFirstNoticeDate = x.dtmFirstNoticeDate
-					,dtmLastNoticeDate = x.dtmLastNoticeDate
-					,dtmLastTradingDate = x.dtmLastTradingDate
-					,dtmSpotDate = x.dtmSpotDate
-					,ysnExpired = x.ysnExpired
-				FROM OPENXML(@idoc, 'vyuIPGetFutureMonths/vyuIPGetFutureMonth', 2) WITH (
-						strFutureMonth NVARCHAR(20)
-						,dtmFutureMonthsDate DATETIME
-						,strSymbol NVARCHAR(4)
-						,intYear INT
-						,dtmFirstNoticeDate DATETIME
-						,dtmLastNoticeDate DATETIME
-						,dtmLastTradingDate DATETIME
-						,dtmSpotDate DATETIME
-						,ysnExpired BIT
+					,strAverageNo = x.strAverageNo
+					,dtmDate = x.dtmDate
+					,intBookId = @intBookId
+					,intSubBookId = @intSubBookId
+					,ysnPosted = x.ysnPosted
+				FROM OPENXML(@idoc, 'vyuIPGetDailyAveragePrices/vyuIPGetDailyAveragePrice', 2) WITH (
+						strAverageNo NVARCHAR(50)
+						,dtmDate DATETIME
+						,ysnPosted BIT
 						) x
-				--WHERE tblRKFuturesMonth.intFutureMonthRefId = @intFutureMonthRefId
+				--WHERE tblRKDailyAveragePrice.intDailyAveragePriceRefId = @intDailyAveragePriceRefId
 
-				SELECT @intNewFutureMonthId = intFutureMonthId
-					,@strFutureMonth = strFutureMonth
-				FROM tblRKFuturesMonth
-				--WHERE intFutureMonthRefId = @intFutureMonthRefId
+				SELECT @intNewDailyAveragePriceId = intDailyAveragePriceId
+					,@strAverageNo = strAverageNo
+				FROM tblRKDailyAveragePrice
+				--WHERE intDailyAveragePriceRefId = @intDailyAveragePriceRefId
 			END
+
+			------------------------------------Detail--------------------------------------------
+			EXEC sp_xml_preparedocument @idoc OUTPUT
+				,@strDetailXML
+
+			DECLARE @tblRKDailyAveragePriceDetail TABLE (intDailyAveragePriceDetailId INT)
+
+			INSERT INTO @tblRKDailyAveragePriceDetail (intDailyAveragePriceDetailId)
+			SELECT intDailyAveragePriceDetailId
+			FROM OPENXML(@idoc, 'vyuIPGetDailyAveragePriceDetails/vyuIPGetDailyAveragePriceDetail', 2) WITH (intDailyAveragePriceDetailId INT)
+
+			SELECT @intDailyAveragePriceDetailId = MIN(intDailyAveragePriceDetailId)
+			FROM @tblRKDailyAveragePriceDetail
+
+			DECLARE @strFutMarketName NVARCHAR(30)
+					,@strFutureMonth NVARCHAR(20)
+					,@strCommodityCode NVARCHAR(50)
+					,@strName NVARCHAR(100)
+					,@intFutureMarketId INT
+					,@intCommodityId INT
+					,@intFutureMonthId INT
+					,@intBrokerId INT
+
+			WHILE @intDailyAveragePriceDetailId IS NOT NULL
+			BEGIN
+				SELECT @strFutMarketName = NULL
+					,@strFutureMonth = NULL
+					,@strCommodityCode = NULL
+					,@strName = NULL
+					,@intFutureMarketId = NULL
+
+				SELECT @strFutMarketName = strFutMarketName
+					,@strFutureMonth = strFutureMonth
+					,@strCommodityCode = strCommodityCode
+					,@strName = strName
+				FROM OPENXML(@idoc, 'vyuIPGetDailyAveragePriceDetails/vyuIPGetDailyAveragePriceDetail', 2) WITH (
+						strFutMarketName NVARCHAR(30) Collate Latin1_General_CI_AS
+						,strFutureMonth NVARCHAR(20) Collate Latin1_General_CI_AS
+						,strCommodityCode NVARCHAR(50) Collate Latin1_General_CI_AS
+						,strName NVARCHAR(100) Collate Latin1_General_CI_AS
+						,intDailyAveragePriceDetailId INT
+						) SD
+				WHERE intDailyAveragePriceDetailId = @intDailyAveragePriceDetailId
+
+				IF @strFutMarketName IS NOT NULL
+					AND NOT EXISTS (
+						SELECT 1
+						FROM tblRKFutureMarket t
+						WHERE t.strFutMarketName = @strFutMarketName
+						)
+				BEGIN
+					SELECT @strErrorMessage = 'Future Market Name ' + @strFutMarketName + ' is not available.'
+
+					RAISERROR (
+							@strErrorMessage
+							,16
+							,1
+							)
+				END
+
+				SELECT @intFutureMarketId = t.intFutureMarketId
+				FROM tblRKFutureMarket t
+				WHERE t.strFutMarketName = @strFutMarketName
+
+				IF @strCommodityCode IS NOT NULL
+					AND NOT EXISTS (
+						SELECT 1
+						FROM tblICCommodity t
+						WHERE t.strCommodityCode = @strCommodityCode
+						)
+				BEGIN
+					SELECT @strErrorMessage = 'Commodity ' + @strCommodityCode + ' is not available.'
+
+					RAISERROR (
+							@strErrorMessage
+							,16
+							,1
+							)
+				END
+
+				IF @strFutureMonth IS NOT NULL
+					AND NOT EXISTS (
+						SELECT 1
+						FROM tblRKFuturesMonth t
+						WHERE t.strFutureMonth = @strFutureMonth
+						)
+				BEGIN
+					SELECT @strErrorMessage = 'Future Month ' + @strFutureMonth + ' is not available.'
+
+					RAISERROR (
+							@strErrorMessage
+							,16
+							,1
+							)
+				END
+
+				IF @strName IS NOT NULL
+					AND NOT EXISTS (
+						SELECT 1
+						FROM tblEMEntity t
+						WHERE t.strName = @strName
+						)
+				BEGIN
+					SELECT @strErrorMessage = 'Broker ' + @strName + ' is not available.'
+
+					RAISERROR (
+							@strErrorMessage
+							,16
+							,1
+							)
+				END
+
+				SELECT @intFutureMarketId = NULL
+					,@intCommodityId = NULL
+					,@intFutureMonthId = NULL
+					,@intBrokerId = NULL
+
+				SELECT @intFutureMarketId = t.intFutureMarketId
+				FROM tblRKFutureMarket t
+				WHERE t.strFutMarketName = @strFutMarketName
+
+				SELECT @intCommodityId = t.intCommodityId
+				FROM tblICCommodity t
+				WHERE t.strCommodityCode = @strCommodityCode
+
+				SELECT @intBrokerId = t.intEntityId
+				FROM tblEMEntity t
+				WHERE t.strName = @strName
+
+				SELECT @intFutureMonthId = t.intFutureMonthId
+				FROM tblRKFuturesMonth t
+				WHERE t.strFutureMonth = @strFutureMonth
+					AND t.intFutureMarketId = @intFutureMarketId
+
+				IF @intFutureMonthId IS NULL
+				BEGIN
+					SELECT @strErrorMessage = 'Future Month ' + @strFutureMonth + ' is not available.'
+
+					RAISERROR (
+							@strErrorMessage
+							,16
+							,1
+							)
+				END
+
+				IF NOT EXISTS (
+						SELECT 1
+						FROM tblRKDailyAveragePriceDetail
+						--WHERE intDailyAveragePriceDetailRefId = @intDailyAveragePriceDetailId
+						)
+				BEGIN
+					INSERT INTO tblRKDailyAveragePriceDetail (
+						intDailyAveragePriceId
+						,intFutureMarketId
+						,intCommodityId
+						,intFutureMonthId
+						,dblNoOfLots
+						,dblAverageLongPrice
+						,dblSwitchPL
+						,dblOptionsPL
+						,dblNetLongAvg
+						,intBrokerId
+						,intConcurrencyId
+						--,intDailyAveragePriceDetailRefId
+						)
+					SELECT @intNewDailyAveragePriceId
+						,@intFutureMarketId
+						,@intCommodityId
+						,@intFutureMonthId
+						,dblNoOfLots
+						,dblAverageLongPrice
+						,dblSwitchPL
+						,dblOptionsPL
+						,dblNetLongAvg
+						,@intBrokerId
+						,1
+						--,@intDailyAveragePriceDetailId
+					FROM OPENXML(@idoc, 'vyuIPGetDailyAveragePriceDetails/vyuIPGetDailyAveragePriceDetail', 2) WITH (
+							dblNoOfLots NUMERIC(18, 6)
+							,dblAverageLongPrice NUMERIC(18, 6)
+							,dblSwitchPL NUMERIC(18, 6)
+							,dblOptionsPL NUMERIC(18, 6)
+							,dblNetLongAvg NUMERIC(18, 6)
+							,intDailyAveragePriceDetailId INT
+							) x
+					WHERE x.intDailyAveragePriceDetailId = @intDailyAveragePriceDetailId
+				END
+				ELSE
+				BEGIN
+					UPDATE tblRKDailyAveragePriceDetail
+					SET intConcurrencyId = intConcurrencyId + 1
+						,intFutureMarketId = @intFutureMarketId
+						,intCommodityId = @intCommodityId
+						,intFutureMonthId = @intFutureMonthId
+						,dblNoOfLots = x.dblNoOfLots
+						,dblAverageLongPrice = x.dblAverageLongPrice
+						,dblSwitchPL = x.dblSwitchPL
+						,dblOptionsPL = x.dblOptionsPL
+						,dblNetLongAvg = x.dblNetLongAvg
+						,intBrokerId = @intBrokerId
+					FROM OPENXML(@idoc, 'vyuIPGetDailyAveragePriceDetails/vyuIPGetDailyAveragePriceDetail', 2) WITH (
+							dblNoOfLots NUMERIC(18, 6)
+							,dblAverageLongPrice NUMERIC(18, 6)
+							,dblSwitchPL NUMERIC(18, 6)
+							,dblOptionsPL NUMERIC(18, 6)
+							,dblNetLongAvg NUMERIC(18, 6)
+							,intDailyAveragePriceDetailId INT
+							) x
+					--JOIN tblRKDailyAveragePriceDetail D ON D.intDailyAveragePriceDetailRefId = x.intDailyAveragePriceDetailId
+					--	AND D.intDailyAveragePriceId = @intNewDailyAveragePriceId
+					WHERE x.intDailyAveragePriceDetailId = @intDailyAveragePriceDetailId
+				END
+
+				SELECT @intDailyAveragePriceDetailId = MIN(intDailyAveragePriceDetailId)
+				FROM @tblRKDailyAveragePriceDetail
+				WHERE intDailyAveragePriceDetailId > @intDailyAveragePriceDetailId
+			END
+
+			DELETE
+			FROM tblRKDailyAveragePriceDetail
+			WHERE intDailyAveragePriceId = @intNewDailyAveragePriceId
+				--AND intDailyAveragePriceDetailRefId NOT IN (
+				--	SELECT intDailyAveragePriceDetailId
+				--	FROM @tblRKDailyAveragePriceDetail
+				--	)
+
+			SELECT @strHeaderCondition = 'intDailyAveragePriceId = ' + LTRIM(@intNewDailyAveragePriceId)
+
+			EXEC uspCTGetTableDataInXML 'vyuIPGetDailyAveragePrice'
+				,@strHeaderCondition
+				,@strAckHeaderXML OUTPUT
+
+			EXEC uspCTGetTableDataInXML 'vyuIPGetDailyAveragePriceDetail'
+				,@strHeaderCondition
+				,@strAckDetailXML OUTPUT
 
 			ext:
 
 			EXEC sp_xml_removedocument @idoc
 
-			UPDATE tblRKFuturesMonthStage
+			INSERT INTO tblRKDailyAveragePriceAckStage (
+				intDailyAveragePriceId
+				,strAckAverageNo
+				,strAckHeaderXML
+				,strAckDetailXML
+				,strRowState
+				,dtmFeedDate
+				,strMessage
+				,intMultiCompanyId
+				,strTransactionType
+				)
+			SELECT @intNewDailyAveragePriceId
+				,@strAverageNo
+				,@strAckHeaderXML
+				,@strAckDetailXML
+				,@strRowState
+				,GETDATE()
+				,'Success'
+				,@intMultiCompanyId
+				,@strTransactionType
+
+			UPDATE tblRKDailyAveragePriceStage
 			SET strFeedStatus = 'Processed'
-			WHERE intFutureMonthStageId = @intFutureMonthStageId
+			WHERE intDailyAveragePriceStageId = @intDailyAveragePriceStageId
 
 			-- Audit Log
-			IF (@intNewFutureMonthId > 0)
+			IF (@intNewDailyAveragePriceId > 0)
 			BEGIN
 				DECLARE @StrDescription AS NVARCHAR(MAX)
 
@@ -279,27 +503,27 @@ BEGIN TRY
 				BEGIN
 					SELECT @StrDescription = 'Created '
 
-					EXEC uspSMAuditLog @keyValue = @intNewFutureMonthId
-						,@screenName = 'RiskManagement.view.FuturesTradingMonths'
+					EXEC uspSMAuditLog @keyValue = @intNewDailyAveragePriceId
+						,@screenName = 'RiskManagement.view.DailyAveragePrice'
 						,@entityId = @intLastModifiedUserId
 						,@actionType = 'Created'
 						,@actionIcon = 'small-new-plus'
 						,@changeDescription = @StrDescription
 						,@fromValue = ''
-						,@toValue = @strFutureMonth
+						,@toValue = @strAverageNo
 				END
 				ELSE IF @strRowState = 'Modified'
 				BEGIN
 					SELECT @StrDescription = 'Updated '
 
-					EXEC uspSMAuditLog @keyValue = @intNewFutureMonthId
-						,@screenName = 'RiskManagement.view.FuturesTradingMonths'
+					EXEC uspSMAuditLog @keyValue = @intNewDailyAveragePriceId
+						,@screenName = 'RiskManagement.view.DailyAveragePrice'
 						,@entityId = @intLastModifiedUserId
 						,@actionType = 'Updated'
 						,@actionIcon = 'small-tree-modified'
 						,@changeDescription = @StrDescription
 						,@fromValue = ''
-						,@toValue = @strFutureMonth
+						,@toValue = @strAverageNo
 				END
 			END
 
@@ -317,16 +541,17 @@ BEGIN TRY
 				AND @intTransactionCount = 0
 				ROLLBACK TRANSACTION
 
-			UPDATE tblRKFuturesMonthStage
+			UPDATE tblRKDailyAveragePriceStage
 			SET strFeedStatus = 'Failed'
 				,strMessage = @ErrMsg
-			WHERE intFutureMonthStageId = @intFutureMonthStageId
+			WHERE intDailyAveragePriceStageId = @intDailyAveragePriceStageId
 		END CATCH
 
-		SELECT @intFutureMonthStageId = MIN(intFutureMonthStageId)
-		FROM tblRKFuturesMonthStage
-		WHERE intFutureMonthStageId > @intFutureMonthStageId
+		SELECT @intDailyAveragePriceStageId = MIN(intDailyAveragePriceStageId)
+		FROM tblRKDailyAveragePriceStage
+		WHERE intDailyAveragePriceStageId > @intDailyAveragePriceStageId
 			AND ISNULL(strFeedStatus, '') = ''
+			AND intMultiCompanyId = @intToCompanyId
 	END
 END TRY
 

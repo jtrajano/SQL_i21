@@ -13,6 +13,7 @@ BEGIN TRY
 		,@strRowState NVARCHAR(50) = NULL
 		,@intUserId INT
 		,@intDailyAveragePricePreStageId INT
+		,@strFromCompanyName NVARCHAR(150)
 	DECLARE @tblRKDailyAveragePricePreStage TABLE (intDailyAveragePricePreStageId INT)
 
 	INSERT INTO @tblRKDailyAveragePricePreStage (intDailyAveragePricePreStageId)
@@ -35,12 +36,17 @@ BEGIN TRY
 		FROM tblRKDailyAveragePricePreStage
 		WHERE intDailyAveragePricePreStageId = @intDailyAveragePricePreStageId
 
+		SELECT TOP 1 @strFromCompanyName = strName
+		FROM tblIPMultiCompany
+		WHERE ysnParent = 1
+
 		-- Process only Posted transaction
 		IF EXISTS (
 				SELECT 1
 				FROM tblRKDailyAveragePrice t
 				WHERE ISNULL(t.ysnPosted, 0) = 1
 					AND t.intDailyAveragePriceId = @intDailyAveragePriceId
+					AND t.intBookId IS NOT NULL
 				)
 		BEGIN
 			EXEC uspIPDailyAveragePricePopulateStgXML @intDailyAveragePriceId
@@ -52,6 +58,7 @@ BEGIN TRY
 				,0
 				,@intToBookId
 				,@intUserId
+				,@strFromCompanyName
 		END
 
 		UPDATE tblRKDailyAveragePricePreStage

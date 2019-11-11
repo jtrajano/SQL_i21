@@ -7,6 +7,7 @@
 	,@ysnReplication BIT = 1
 	,@intToBookId INT = NULL
 	,@intUserId INT = NULL
+	,@strFromCompanyName NVARCHAR(150) = NULL
 AS
 BEGIN TRY
 	SET NOCOUNT ON
@@ -92,6 +93,7 @@ BEGIN TRY
 		,intCompanyLocationId
 		,strTransactionType
 		,intToBookId
+		,strFromCompanyName
 		)
 	SELECT intDailyAveragePriceId = @intDailyAveragePriceId
 		,strAverageNo = @strAverageNo
@@ -104,6 +106,7 @@ BEGIN TRY
 		,intCompanyLocationId = @intCompanyLocationId
 		,strTransactionType = @strToTransactionType
 		,intToBookId = @intToBookId
+		,strFromCompanyName = @strFromCompanyName
 END TRY
 
 BEGIN CATCH
