@@ -52,7 +52,7 @@
 	[dblPrepayPercentage] DECIMAL(18, 6) NOT NULL DEFAULT 0, 
 	[dblWeightUnitQty] DECIMAL(38, 20) NOT NULL DEFAULT 0, 
 	[dblCostUnitQty] DECIMAL(38, 20) NOT NULL DEFAULT 0,
-	[dblUnitQty] DECIMAL(18, 6) NOT NULL DEFAULT 0, 
+	[dblUnitQty] DECIMAL(38, 20) NOT NULL DEFAULT 0, 
 	[dblBundleUnitQty] DECIMAL(18, 6) NOT NULL DEFAULT 0,
 	[dblNetWeight] DECIMAL(38, 20) NOT NULL DEFAULT 0, 
     [dblWeight] DECIMAL(38, 20) NOT NULL DEFAULT 0, 
