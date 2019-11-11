@@ -19,7 +19,7 @@ SET ANSI_WARNINGS OFF
 
 	declare @debug_awesome_ness bit = 0
 	
-	if exists( select top 1 1 from @SettleVoucherCreate where intSettleVoucherKey > 12)
+	if exists( select top 1 1 from @SettleVoucherCreate where intSettleVoucherKey > 7)
 	begin
 		set @debug_awesome_ness = 0
 	end
@@ -230,11 +230,12 @@ if @ysnForRebuild = 0
 
 if @debug_awesome_ness = 1
 begin
-	select 'voucher create reference table ', * from tblGRSettleVoucherCreateReferenceTable
+	select 'voucher create reference table ', * from tblGRSettleVoucherCreateReferenceTable where strBatchId = @strBatchId
 	select 'Settle voucher create', * from @SettleVoucherCreate
 	SELECT	'this is what the data will be the reference for'		
 		,DiscountCost.*
 		,@dblSelectedUnits as [selected units]
+		,dbo.fnDivide(DiscountCost.dblTotalDiscountCost, isnull(@dblSelectedUnits, t.dblQty) )
 		,t.dtmDate
 		,t.intItemId
 		,t.intItemLocationId
@@ -242,7 +243,7 @@ begin
 		,t.strTransactionId
 		,t.dblQty
 		,t.dblUOMQty
-		,dblCost = t.dblCost - dbo.fnDivide(DiscountCost.dblTotalDiscountCost, isnull(@dblSelectedUnits, t.dblQty) )
+		,dblCost = t.dblCost - dbo.fnDivide(DiscountCost.dblTotalDiscountCost, isnull(@dblSelectedUnits, t.dblQty) ) 
 		,DiscountCost.dblTotalDiscountCost
 		, t.dblQty
 		,dblItemCost = t.dblCost
@@ -266,7 +267,7 @@ begin
 		ON currencyRateType.intCurrencyExchangeRateTypeId = t.intForexRateTypeId
 	OUTER APPLY (
 		SELECT 
-			ISNULL(round(SUM(((SV.dblCashPrice * CASE WHEN ISNULL(SV.dblSettleContractUnits,0) > 0 THEN SV.dblSettleContractUnits ELSE SV.dblUnits END)) ),2),0)  AS dblTotalDiscountCost
+			ISNULL(round(SUM(((SV.dblCashPrice * CASE WHEN ISNULL(SV.dblSettleContractUnits,0) > 0 THEN SV.dblSettleContractUnits ELSE SV.dblUnits END)) ), 2),0)  AS dblTotalDiscountCost
 		FROM tblGRSettleVoucherCreateReferenceTable SV
 		INNER JOIN tblICItem IC
 			ON IC.intItemId = SV.intItemId
@@ -277,7 +278,6 @@ begin
 		AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId) 
 		AND ISNULL(i.intCategoryId, 0) = COALESCE(@intRebuildCategoryId, i.intCategoryId, 0) 
 		AND t.intInTransitSourceLocationId IS NULL -- If there is a value in intInTransitSourceLocationId, then it is for In-Transit costing. Use uspICCreateGLEntriesForInTransitCosting instead of this sp.
-
 
 end
 
@@ -315,7 +315,7 @@ AS
 		,t.strTransactionId
 		,t.dblQty
 		,t.dblUOMQty
-		,dblCost = t.dblCost - dbo.fnDivide(DiscountCost.dblTotalDiscountCost, isnull(@dblSelectedUnits, t.dblQty) )
+		,dblCost = t.dblCost - dbo.fnDivide(DiscountCost.dblTotalDiscountCost, isnull(@dblSelectedUnits, t.dblQty) ) 
 		,dblItemCost = t.dblCost
 		,t.dblValue
 		,t.intTransactionTypeId
@@ -337,7 +337,14 @@ AS
 		ON currencyRateType.intCurrencyExchangeRateTypeId = t.intForexRateTypeId
 	OUTER APPLY (
 		SELECT 
-			ISNULL(round(SUM(((SV.dblCashPrice * CASE WHEN ISNULL(SV.dblSettleContractUnits,0) > 0 THEN SV.dblSettleContractUnits ELSE SV.dblUnits END)) ), 2),0)  AS dblTotalDiscountCost
+			ISNULL(
+				SUM(
+					ROUND(
+						SV.dblCashPrice * CASE WHEN ISNULL(SV.dblSettleContractUnits,0) > 0 THEN SV.dblSettleContractUnits ELSE SV.dblUnits END
+					, 2)
+				)
+			,0)  AS dblTotalDiscountCost
+			--ISNULL(round(SUM(((SV.dblCashPrice * CASE WHEN ISNULL(SV.dblSettleContractUnits,0) > 0 THEN SV.dblSettleContractUnits ELSE SV.dblUnits END)) ), 2),0)  AS dblTotalDiscountCost
 		FROM tblGRSettleVoucherCreateReferenceTable SV
 		INNER JOIN tblICItem IC
 			ON IC.intItemId = SV.intItemId
