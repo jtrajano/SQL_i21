@@ -23,7 +23,7 @@ BEGIN
 								
 									UPDATE reg
 									SET dtmSAPPHIRELastPasswordChangeDate	= ISNULL(@dtmLastPasswordChange, reg.dtmSAPPHIRELastPasswordChangeDate),
-										strSAPPHIREPassword					= ISNULL(dbo.fnAESEncryptASym(@strPassword), dbo.fnAESEncryptASym(reg.strSAPPHIREPassword)),
+										strSAPPHIREPassword					= ISNULL(dbo.fnAESEncryptASym(@strPassword), reg.strSAPPHIREPassword),
 										intSAPPHIREPasswordIncrementNo		= ISNULL(@intPasswordIncrementNo, reg.intSAPPHIREPasswordIncrementNo)
 									FROM tblSTRegister reg
 									WHERE reg.intRegisterId = @intRegisterId
