@@ -1714,29 +1714,26 @@ BEGIN
 		I.strTransactionType = 'Cash Refund'
 		AND I.dblInvoiceTotal <> ISNULL(PREPAIDS.dblAppliedInvoiceAmount, 0)
 
-	--Invoice Split
-	--DELETE FROM @PostInvoiceDataFromIntegration
-	--INSERT INTO @PostInvoiceDataFromIntegration
-	--SELECT PID.* FROM #ARPostInvoiceHeader PID WHERE PID.[ysnPost] = 1 AND PID.[ysnSplitted] = 0 AND ISNULL(PID.[intSplitId], 0) > 0
-
-	--INSERT INTO #ARInvalidInvoiceData
-	--	([intInvoiceId]
-	--	,[strInvoiceNumber]
-	--	,[strTransactionType]
-	--	,[intInvoiceDetailId]
-	--	,[intItemId]
-	--	,[strBatchId]
-	--	,[strPostingError])
-	--SELECT
-	--	 [intInvoiceId]
-	--	,[strInvoiceNumber]
-	--	,[strTransactionType]
-	--	,[intInvoiceDetailId]
-	--	,[intItemId]
-	--	,[strBatchId]
-	--	,[strPostingError] -- + '[fnARGetInvalidInvoicesForInvoiceSplits]'
-	--FROM 
-	--	[dbo].[fnARGetInvalidInvoicesForInvoiceSplits](@PostInvoiceDataFromIntegration, 1) ICC
+	INSERT INTO #ARInvalidInvoiceData
+		([intInvoiceId]
+		,[strInvoiceNumber]
+		,[strTransactionType]
+		,[intInvoiceDetailId]
+		,[intItemId]
+		,[strBatchId]
+		,[strPostingError])
+	--FISCAL PERIOD CLOSED
+	SELECT
+		 [intInvoiceId]			= I.[intInvoiceId]
+		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
+		,[strTransactionType]	= I.[strTransactionType]
+		,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
+		,[intItemId]			= I.[intItemId]
+		,[strBatchId]			= I.[strBatchId]
+		,[strPostingError]		= 'Unable to find an open fiscal year period for Accounts Receivable module to match the transaction date.'
+	FROM #ARPostInvoiceHeader I
+	WHERE dbo.isOpenAccountingDateByModule(dtmPostDate, 'Accounts Receivable') = 0  
+       OR dbo.isOpenAccountingDateByModule(dtmPostDate, 'Inventory') = 0
 
 	--TM Sync
 	DELETE FROM @PostInvoiceDataFromIntegration
