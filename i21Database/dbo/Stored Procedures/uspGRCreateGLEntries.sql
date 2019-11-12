@@ -8,6 +8,14 @@
 AS
 BEGIN TRY
 BEGIN
+	declare @debug_awesome_ness bit =0
+	
+	if @debug_awesome_ness = 1	
+	begin
+		
+		select 'awesomeness begins [uspGRCreateGLEntries]'
+		--set @dblCashPriceFromCt = 9.55
+	end
 	DECLARE
 	 @ErrMsg					    NVARCHAR(MAX)
 	,@intFunctionalCurrencyId		INT
@@ -300,6 +308,13 @@ BEGIN
 		AND ISNULL(SS.dblStorageDue,0) > 0 
 		AND IC.intItemId = @intStorageChargeItemId 	
 		AND (CD.intContractDetailId is null or ( CD.intContractDetailId is not null and CD.intPricingTypeId <> 2))
+
+
+	if @debug_awesome_ness = 1
+	begin
+		select 'other charges', * from @tblOtherCharges
+	end
+
 	DECLARE @tblItem AS TABLE 
 	(
 		 intItemId			INT
@@ -496,6 +511,77 @@ BEGIN
 	WHERE intItemType IN (2,3) 	
 		AND intItemLocationId IS NOT NULL
 
+	if @debug_awesome_ness = 1
+	begin
+		SELECT
+			ABS(InventoryCostCharges.dblCost * InventoryCostCharges.dblConvertedUnits)
+			,intItemId					= InventoryCostCharges.intChargeId
+			,[strItemNo]				= InventoryCostCharges.strItemNo
+			,dtmDate					= InventoryCostCharges.dtmDate
+			,strBatchId					= @strBatchId
+			,intAccountId				= GLAccount.intAccountId
+			,dblDebit					= case when InventoryCostCharges.strICCCostType = 'Discount' then 
+											case 
+												when InventoryCostCharges.dblCost < 0 then
+													InventoryCostCharges.dblCost  
+												else 0 end
+											else     0 end
+			,dblCredit					= case when InventoryCostCharges.strICCCostType = 'Discount' then 
+											
+											case when InventoryCostCharges.dblCost < 0 
+												then 0 
+												else InventoryCostCharges.dblCost end
+												 
+											
+											else     InventoryCostCharges.dblCost end
+			,dblDebitUnit				= 0
+			,dblCreditUnit				= InventoryCostCharges.dblUnits
+			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', Charges from ' + InventoryCostCharges.strCharge + ' for ' + InventoryCostCharges.strItem
+			,strCode					= @strCode
+			,strReference				= 'A'
+			,intCurrencyId				= InventoryCostCharges.intCurrencyId
+			,dblExchangeRate			= InventoryCostCharges.dblForexRate
+			,dtmDateEntered				= GETDATE()
+			,dtmTransactionDate			= InventoryCostCharges.dtmDate
+			,strJournalLineDescription	= ''
+			,intJournalLineNo			= InventoryCostCharges.intInventoryReceiptItemId
+			,ysnIsUnposted				= CASE WHEN @ysnPost = 1 THEN 0 ELSE 1 END
+			,intUserId					= NULL
+			,intEntityId				= @intEntityUserSecurityId
+			,strTransactionId			= InventoryCostCharges.strTransactionId
+			,intTransactionId			= InventoryCostCharges.intTransactionId
+			,strTransactionType			= InventoryCostCharges.strInventoryTransactionTypeName
+			,strTransactionForm			= InventoryCostCharges.strTransactionForm
+			,strModuleName				= @ModuleName
+			,intConcurrencyId			= 1
+			,dblDebitForeign			= CASE 
+											WHEN intCurrencyId <> @intFunctionalCurrencyId THEN DebitForeign.Value 
+											ELSE 0 
+										END
+			,dblDebitReport				= NULL
+			,dblCreditForeign			= CASE 
+											WHEN intCurrencyId <> @intFunctionalCurrencyId THEN CreditForeign.Value 
+											ELSE 0 
+										END
+			,dblCreditReport			= NULL
+			,dblReportingRate			= NULL
+			,dblForeignRate				= InventoryCostCharges.dblForexRate
+			,strRateType				= InventoryCostCharges.strRateType
+			,dblUnits					= InventoryCostCharges.dblUnits
+			,dblCost				    = InventoryCostCharges.dblCost
+			,InventoryCostCharges.dblConvertedUnits
+		FROM @InventoryCostCharges InventoryCostCharges
+		INNER JOIN @ItemGLAccounts ItemGLAccounts 
+			ON InventoryCostCharges.intItemId = ItemGLAccounts.intItemId
+				AND InventoryCostCharges.intItemLocationId = ItemGLAccounts.intItemLocationId
+		INNER JOIN dbo.tblGLAccount GLAccount 
+			ON GLAccount.intAccountId = ItemGLAccounts.intInventoryId
+		CROSS APPLY dbo.fnGetDebit(InventoryCostCharges.dblCost) DebitForeign
+		CROSS APPLY dbo.fnGetCredit(InventoryCostCharges.dblCost) CreditForeign
+		WHERE ISNULL(InventoryCostCharges.ysnAccrue, 0) = 0
+			AND ISNULL(InventoryCostCharges.ysnInventoryCost, 0) = 1
+			AND InventoryCostCharges.strBundleType != 'Kit'
+	end
 	INSERT INTO @ChargesGLEntries
 	(
 		 [dtmDate]                
