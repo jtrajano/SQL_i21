@@ -782,7 +782,7 @@ BEGIN TRY
 									ON B.intInvoiceId = D.intInvoiceId
 								INNER JOIN #tmpItemShipmentIds C
 									ON A.intInventoryShipmentId = C.intInventoryShipmentId
-									AND D.strTransactionType = 'Invoice'
+								WHERE D.strTransactionType = 'Invoice'
 							
 
 								---GEt all the invoice Detail Id for the inventory shipment charge details
@@ -823,7 +823,7 @@ BEGIN TRY
 												ON B.intInvoiceId = C.intInvoiceId
 											WHERE A.intInvoiceDetailId IS NOT NULL
 												AND B.intInvoiceDetailId IS NULL 
-												AND C.strTransactionType = 'Credit Memo'
+												-- AND C.strTransactionType = 'Credit Memo'
 												)
 
 								BEGIN
@@ -841,7 +841,7 @@ BEGIN TRY
 													ON B.intInvoiceId = C.intInvoiceId
 												WHERE A.intInvoiceDetailId IS NOT NULL
 													AND B.intInvoiceDetailId IS NULL 
-													AND C.strTransactionType = 'Credit Memo'
+													-- AND C.strTransactionType = 'Credit Memo'
 													)
 
 									BEGIN
