@@ -18,7 +18,7 @@ FROM (
 		, DAP.dblNoOfLots
 		, DAP.dblNetLongAvg
 		, dblUnfixedLots = ISNULL(SalesContracts.dblNoOfLots, 0)
-		, dblNetPosition = DAP.dblNetLongAvg - ISNULL(SalesContracts.dblNoOfLots, 0)
+		, dblNetPosition = DAP.dblNoOfLots - ISNULL(SalesContracts.dblNoOfLots, 0)
 	FROM vyuRKGetDailyAveragePriceDetail DAP
 	LEFT JOIN (
 		SELECT Detail.intBookId
@@ -42,5 +42,5 @@ FROM (
 		AND SalesContracts.intFutureMarketId = DAP.intFutureMarketId
 		AND SalesContracts.intFutureMonthId = DAP.intFutureMonthId
 		AND SalesContracts.intCommodityId = DAP.intCommodityId
-	WHERE DAP.intDailyAveragePriceId = (SELECT TOP 1 intDailyAveragePriceId FROM tblRKFuturesSettlementPrice ORDER BY dtmPriceDate DESC)
+	WHERE DAP.intDailyAveragePriceId = (SELECT TOP 1 intDailyAveragePriceId FROM tblRKDailyAveragePrice ORDER BY dtmDate DESC)
 )t
