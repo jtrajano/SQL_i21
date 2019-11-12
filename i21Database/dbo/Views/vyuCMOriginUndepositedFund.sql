@@ -7,9 +7,18 @@
 CREATE VIEW [dbo].[vyuCMOriginUndepositedFund]
 AS
 WITH AR AS (
-	SELECT intAccountId,  intEntityCustomerId,intCurrencyId, intPaymentId intSourceTransactionId, strRecordNumber strSourceTransactionId, 'Payment' strType FROM tblARPayment UNION
-	SELECT intAccountId,  intEntityCustomerId,intCurrencyId, intInvoiceId intSourceTransactionId, strInvoiceNumber strSourceTransactionId, 'Invoice' strType FROM tblARInvoice UNION
-	SELECT intUndepositedFundsId intAccountId,intEntityId intEntityCustomerId,intCurrencyId, intPOSEndOfDayId intSourceTransactionId, strEODNo strSourceTransactionId, 'EndOfDay' strType FROM tblARPOSEndOfDay
+	SELECT intAccountId,  intEntityCustomerId,intCurrencyId, intPaymentId intSourceTransactionId, strRecordNumber strSourceTransactionId, 'Payment' strType,
+	dblExchangeRate dblWeightRate,
+	intCurrencyExchangeRateTypeId
+	FROM tblARPayment UNION
+	SELECT intAccountId,  intEntityCustomerId,intCurrencyId, intInvoiceId intSourceTransactionId, strInvoiceNumber strSourceTransactionId, 'Invoice' strType 
+	,dblCurrencyExchangeRate dblWeightRate
+	,null intCurrencyExchangeRateTypeId
+	FROM tblARInvoice UNION
+	SELECT intUndepositedFundsId intAccountId,intEntityId intEntityCustomerId,intCurrencyId, intPOSEndOfDayId intSourceTransactionId, strEODNo strSourceTransactionId, 'EndOfDay' strType 
+	,CAST(1 AS NUMERIC(18,6)) dblWeightRate
+	,null intCurrencyExchangeRateTypeId
+	FROM tblARPOSEndOfDay
 ),
 
 C AS (
@@ -23,16 +32,18 @@ C AS (
 		intEntityCustomerId		= ARP.intEntityCustomerId,
 		dtmDate					= CMUF.dtmDate,
 		intCurrencyId			= ARP.intCurrencyId,
-		dblWeightRate			= CASE WHEN strType = 'Payment'
+		dblWeightRate			= 
+		CASE WHEN strType = 'Payment'
 										THEN 
-											CASE WHEN F.dblWeightRate is null THEN 1 ELSE F.dblWeightRate END
+											 CASE WHEN ARP.dblWeightRate IS NULL OR ARP.dblWeightRate = 0 THEN CAST(1 AS NUMERIC(18,6)) ELSE ARP.dblWeightRate END
 								  WHEN strType = 'Invoice'
 										THEN
-											case WHEN G.dblWeightRate is null THEN 1 ELSE G.dblWeightRate END
+											CASE WHEN G.dblWeightRate IS NULL OR G.dblWeightRate = 0 THEN CAST(1 AS NUMERIC(18,6)) ELSE G.dblWeightRate END
+											
 								  ELSE
-										1
+										CAST(1 AS NUMERIC(18,6))
 								  END
-
+		,intCurrencyExchangeRateTypeId
 	FROM
 		tblCMUndepositedFund CMUF
 	INNER JOIN
@@ -41,17 +52,9 @@ C AS (
 			AND CMUF.strSourceTransactionId = ARP.strSourceTransactionId
 	OUTER APPLY(
 		SELECT dblWeightRate = 
-			SUM(CASE WHEN ARPD.dblCurrencyExchangeRate > 0 
-				THEN ARPD.dblCurrencyExchangeRate
-				ELSE 1 END * ARPD.dblPayment )/
-			NULLIF(SUM(ARPD.dblPayment), 0) 
-		FROM tblARPaymentDetail ARPD WHERE ARPD.intPaymentId = ARP.intSourceTransactionId
-	)F
-	OUTER APPLY(
-		SELECT dblWeightRate = 
 			SUM(CASE WHEN ARID.dblCurrencyExchangeRate > 0 
 				THEN ARID.dblCurrencyExchangeRate
-				ELSE 1 END * ARID.dblTotal )/
+				ELSE CAST(1 AS NUMERIC(18,6)) END * ARID.dblTotal )/
 			NULLIF(SUM(ARID.dblTotal), 0)
 		FROM tblARInvoiceDetail ARID WHERE ARID.intInvoiceId = ARP.intSourceTransactionId
 	)G
@@ -68,7 +71,8 @@ SELECT
 	intEntityCustomerId,
 	dtmDate,			
 	intCurrencyId,
-	dblWeightRate
+	dblWeightRate,
+	intCurrencyExchangeRateTypeId
 	FROM C c
 OUTER APPLY(
 	SELECT GL.strDescription FROM tblGLAccount GL WHERE GL.intAccountId = c.intGLAccountId
