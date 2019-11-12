@@ -420,7 +420,7 @@ _PostOrUnPost:
 				@intOwnershipTypeDifference = 1,
 				@intItemUOMIdDifference = intItemUOMIdTo,
 				@strTicketNumberIn	= strTicketNumber
-				from tblSCTicket where intTicketId = @intTicketId
+				from tblSCTicket where intTicketId = @intMatchTicketId
 
 			select @strTicketNumberOut = strTicketNumber from tblSCTicket where intTicketId = @intMatchTicketId
 			declare @message nvarchar(200)
