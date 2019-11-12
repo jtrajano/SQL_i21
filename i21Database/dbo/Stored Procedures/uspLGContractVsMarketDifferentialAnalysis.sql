@@ -29,7 +29,7 @@ SELECT
 							+ ISNULL(dblPackingAdjustmentRate, 0) 
 							+ ISNULL(dblPINCOAdjustmentRate, 0)
 							+ ISNULL(dblCertificationAdjustmentRate, 0))) 
-						* ISNULL(dblQty, 1)) / dblUnitQty)				
+						* ISNULL(dblQty, 1)) * dblUnitQty)				
 FROM
 	(SELECT
 		strMonthYr = SFM.strFutureMonth
@@ -42,37 +42,28 @@ FROM
 		,strItemNo = I.strItemNo
 		,strItemDescription = I.strDescription
 		,strItemOrigin = OG.strDescription
-		,dblPBasis = CASE WHEN ISNULL(PBUOM.dblUnitQty, 0) = 0 OR ISNULL(ItemUOM.dblUnitQty, 0) = 0 THEN NULL 			
-						WHEN PBUOM.dblUnitQty = ItemUOM.dblUnitQty THEN ISNULL(PCD.dblBasis, 0) 					
-						ELSE (ISNULL(PCD.dblBasis, 0) * PBUOM.dblUnitQty) / ItemUOM.dblUnitQty END / ISNULL(PCUR.intCent, 1)
-		,dblMBasis = CASE WHEN ISNULL(MB.dblUnitQty, 0) = 0 OR ISNULL(ItemUOM.dblUnitQty, 0) = 0 THEN NULL 			
-						WHEN MB.dblUnitQty = ItemUOM.dblUnitQty THEN ISNULL(MB.dblBasisOrDiscount, 0) 					
-						ELSE (ISNULL(MB.dblBasisOrDiscount, 0) * MB.dblUnitQty) / ItemUOM.dblUnitQty END / ISNULL(MB.intCent, 1)
-		,dblPaymentTermAdjustmentRate = CASE WHEN ISNULL(PTADJ.dblUnitQty, 0) = 0 OR ISNULL(ItemUOM.dblUnitQty, 0) = 0 THEN NULL 			
-						WHEN PTADJ.dblUnitQty = ItemUOM.dblUnitQty THEN ISNULL(PTADJ.dblRate, 0) 					
-						ELSE (ISNULL(PTADJ.dblRate, 0) * PTADJ.dblUnitQty) / ItemUOM.dblUnitQty END / ISNULL(PTADJ.intCent, 1)
-		,dblPackingAdjustmentRate = CASE WHEN ISNULL(PKADJ.dblUnitQty, 0) = 0 OR ISNULL(ItemUOM.dblUnitQty, 0) = 0 THEN NULL 			
-						WHEN PKADJ.dblUnitQty = ItemUOM.dblUnitQty THEN ISNULL(PKADJ.dblRate, 0) 					
-						ELSE (ISNULL(PKADJ.dblRate, 0) * PKADJ.dblUnitQty) / ItemUOM.dblUnitQty END / ISNULL(PKADJ.intCent, 1)
+		,dblPBasis = CASE WHEN ISNULL(PBUOM.dblUnitQty, 0) = 0 OR ISNULL(ItemUOM.dblUnitQty, 0) = 0 THEN NULL 	
+						ELSE dbo.fnCalculateCostBetweenUOM(PCD.intBasisUOMId, ItemUOM.intItemUOMId, ISNULL(PCD.dblBasis, 0)) / ISNULL(PCUR.intCent, 1) END
+		,dblMBasis = CASE WHEN ISNULL(MB.dblBasisOrDiscount, 0) = 0 OR ISNULL(ItemUOM.dblUnitQty, 0) = 0 THEN NULL 	
+						ELSE dbo.fnCalculateCostBetweenUOM(MB.intItemUOMId, ItemUOM.intItemUOMId, ISNULL(MB.dblBasisOrDiscount, 0)) / ISNULL(MB.intCent, 1) END
+		,dblPaymentTermAdjustmentRate = CASE WHEN ISNULL(PTADJ.dblRate, 0) = 0 OR ISNULL(ItemUOM.dblUnitQty, 0) = 0 THEN NULL 
+						ELSE dbo.fnCalculateCostBetweenUOM(PTADJ.intItemUOMId, ItemUOM.intItemUOMId, ISNULL(PTADJ.dblRate, 0)) / ISNULL(PTADJ.intCent, 1) END
+		,dblPackingAdjustmentRate = CASE WHEN ISNULL(PKADJ.dblRate, 0) = 0 OR ISNULL(ItemUOM.dblUnitQty, 0) = 0 THEN NULL 	
+						ELSE dbo.fnCalculateCostBetweenUOM(PKADJ.intItemUOMId, ItemUOM.intItemUOMId, ISNULL(PKADJ.dblRate, 0)) / ISNULL(PKADJ.intCent, 1) END
 		,dblPINCOAdjustmentRate = CASE WHEN (PCH.intFreightTermId = SCH.intFreightTermId) THEN NULL
-						WHEN FTADJ.dblUnitQty = ItemUOM.dblUnitQty THEN ISNULL(FTADJ.dblTotalCostPerContainer, 0) * COALESCE(SCD.intNumberOfContainers, SHPMT.intNumberOfContainers, 1) / FTADJ.dblNetWeight
-						ELSE ((ISNULL(FTADJ.dblTotalCostPerContainer, 0) * COALESCE(SCD.intNumberOfContainers, SHPMT.intNumberOfContainers, 1)  / FTADJ.dblNetWeight) * FTADJ.dblUnitQty) / ItemUOM.dblUnitQty 
-						END / ISNULL(FTADJ.intCent, 1)
-		,dblCertificationAdjustmentRate = CASE WHEN ISNULL(CFADJ.dblUnitQty, 0) = 0 OR ISNULL(ItemUOM.dblUnitQty, 0) = 0 THEN NULL 			
-						WHEN CFADJ.dblUnitQty = ItemUOM.dblUnitQty THEN ISNULL(CFADJ.dblRate, 0) 					
-						ELSE (ISNULL(CFADJ.dblRate, 0) * CFADJ.dblUnitQty) / ItemUOM.dblUnitQty END / ISNULL(CFADJ.intCent, 1)
+						ELSE dbo.fnCalculateCostBetweenUOM(FTADJ.intItemUOMId, ItemUOM.intItemUOMId, ISNULL(FTADJ.dblTotalCostPerContainer, 0) / ISNULL(FTADJ.dblNetWeight, 1)) / ISNULL(FTADJ.intCent, 1) END
+		,dblCertificationAdjustmentRate = CASE WHEN ISNULL(CFADJ.dblRate, 0) = 0 OR ISNULL(ItemUOM.dblUnitQty, 0) = 0 THEN NULL 			
+						ELSE dbo.fnCalculateCostBetweenUOM(CFADJ.intItemUOMId, ItemUOM.intItemUOMId, ISNULL(CFADJ.dblRate, 0)) / ISNULL(CFADJ.intCent, 1) END
 		,strSContractNumber = SCH.strContractNumber
 		,dtmSContractDate = SCH.dtmContractDate
 		,strCustomer = CUS.strName
 		,dblQty = SCD.dblQuantity
-		,dblUnitQty = CASE WHEN ISNULL(SUOM.dblUnitQty, 0) = 0 OR ISNULL(ItemUOM.dblUnitQty, 0) = 0 THEN NULL 			
-						WHEN SUOM.dblUnitQty = ItemUOM.dblUnitQty THEN ISNULL(SCD.dblQuantity, 0) 					
-						ELSE (ISNULL(SCD.dblQuantity, 0) * SUOM.dblUnitQty) / ItemUOM.dblUnitQty END 
+		,dblUnitQty = CASE WHEN ISNULL(SUOM.dblUnitQty, 0) = 0 OR ISNULL(ItemUOM.dblUnitQty, 0) = 0 THEN NULL 	
+						ELSE dbo.fnCalculateQtyBetweenUOM(SCD.intItemUOMId, ItemUOM.intItemUOMId, 1) END
 		,strUOM = UM.strUnitMeasure
 		,intDays = DATEDIFF(DD, PCH.dtmContractDate, SCH.dtmContractDate)
-		,dblSBasis = CASE WHEN ISNULL(SBUOM.dblUnitQty, 0) = 0 OR ISNULL(ItemUOM.dblUnitQty, 0) = 0 THEN NULL 			
-						WHEN SBUOM.dblUnitQty = ItemUOM.dblUnitQty THEN ISNULL(SCD.dblBasis, 0) 					
-						ELSE (ISNULL(SCD.dblBasis, 0) * SBUOM.dblUnitQty) / ItemUOM.dblUnitQty END 
+		,dblSBasis = CASE WHEN ISNULL(SBUOM.dblUnitQty, 0) = 0 OR ISNULL(ItemUOM.dblUnitQty, 0) = 0 THEN NULL 	
+						ELSE dbo.fnCalculateCostBetweenUOM(SCD.intBasisUOMId, ItemUOM.intItemUOMId, ISNULL(SCD.dblBasis, 0)) / ISNULL(SCUR.intCent, 1) END
 		,intCurrencyId = ISNULL(SCUR.intMainCurrencyId, SCUR.intCurrencyID)
 		,strCurrency = ISNULL(SMCUR.strCurrency, SCUR.strCurrency)
 		,intUnitMeasureId = UM.intUnitMeasureId
@@ -118,7 +109,7 @@ FROM
 					 ORDER BY L.dtmScheduledDate DESC
 					) SHPMT
 		/* Market Basis */
-		OUTER APPLY (SELECT TOP 1 MTMBD.dblBasisOrDiscount, MTMBD.intCurrencyId, MBUOM.intItemUOMId, MBUOM.dblUnitQty, MBCU.intCent
+		OUTER APPLY (SELECT TOP 1 MTMBD.dblBasisOrDiscount, MTMBD.intCurrencyId, MBUOM.intItemUOMId, MBCU.intCent
 					 FROM tblRKM2MBasisDetail MTMBD
 						INNER JOIN tblRKM2MBasis MTMB ON MTMB.intM2MBasisId = MTMBD.intM2MBasisId
 						LEFT JOIN tblICItemUOM MBUOM ON MBUOM.intItemId = MTMBD.intItemId AND MBUOM.intUnitMeasureId = MTMBD.intUnitMeasureId
@@ -130,7 +121,7 @@ FROM
 					 ORDER BY MTMB.dtmM2MBasisDate ASC
 					 ) MB
 		/* Payment Terms Adjustment Basis */
-		OUTER APPLY (SELECT TOP 1 PTSA.strMasterRecord, PTSA.dblRate, PTSA.intCurrencyId, PTUOM.intItemUOMId, PTUOM.dblUnitQty, PTCU.intCent
+		OUTER APPLY (SELECT TOP 1 PTSA.strMasterRecord, PTSA.dblRate, PTSA.intCurrencyId, PTUOM.intItemUOMId, PTCU.intCent
 					 FROM tblLGStandardAdjustment PTSA
 						LEFT JOIN tblICItemUOM PTUOM ON PTUOM.intItemId = I.intItemId AND PTUOM.intUnitMeasureId = PTSA.intUnitMeasureId
 						LEFT JOIN tblSMCurrency PTCU ON PTCU.intCurrencyID = PTSA.intCurrencyId
@@ -140,7 +131,7 @@ FROM
 					 ORDER BY PTSA.intStandardAdjustmentId DESC
 					 ) PTADJ 
 		/* Packaging Adjustment Basis */
-		OUTER APPLY (SELECT TOP 1 PKSA.strMasterRecord, PKSA.dblRate, PKSA.intCurrencyId, PKUOM.intItemUOMId, PKUOM.dblUnitQty, PKCU.intCent
+		OUTER APPLY (SELECT TOP 1 PKSA.strMasterRecord, PKSA.dblRate, PKSA.intCurrencyId, PKUOM.intItemUOMId, PKCU.intCent
 					 FROM tblLGStandardAdjustment PKSA
 						LEFT JOIN tblICItemUOM PKUOM ON PKUOM.intItemId = I.intItemId AND PKUOM.intUnitMeasureId = PKSA.intUnitMeasureId
 						LEFT JOIN tblSMCurrency PKCU ON PKCU.intCurrencyID = PKSA.intCurrencyId
@@ -148,7 +139,7 @@ FROM
 					 ORDER BY PKSA.intStandardAdjustmentId DESC
 					 ) PKADJ
 		/* Certification Adjustment Basis */
-		OUTER APPLY (SELECT TOP 1 CFSA.strMasterRecord, CFSA.dblRate, CFSA.intCurrencyId, CFUOM.intItemUOMId, CFUOM.dblUnitQty, CFCU.intCent
+		OUTER APPLY (SELECT TOP 1 CFSA.strMasterRecord, CFSA.dblRate, CFSA.intCurrencyId, CFUOM.intItemUOMId, CFCU.intCent
 					 FROM tblLGStandardAdjustment CFSA
 						LEFT JOIN tblICItemUOM CFUOM ON CFUOM.intItemId = I.intItemId AND CFUOM.intUnitMeasureId = CFSA.intUnitMeasureId
 						LEFT JOIN tblSMCurrency CFCU ON CFCU.intCurrencyID = CFSA.intCurrencyId
@@ -156,7 +147,7 @@ FROM
 					 ORDER BY CFSA.intStandardAdjustmentId DESC
 					 ) CFADJ 
 		/* INCO Term Adjustment Basis */
-		OUTER APPLY (SELECT TOP 1 FRMX.dblTotalCostPerContainer, FRMX.intCurrencyId, CTUOM.intItemUOMId, CON.dblNetWeight, CTUOM.dblUnitQty, FRMCU.intCent
+		OUTER APPLY (SELECT TOP 1 FRMX.dblTotalCostPerContainer, FRMX.intCurrencyId, CTUOM.intItemUOMId, CON.dblNetWeight, FRMCU.intCent
 					 FROM tblLGFreightRateMatrix FRMX
 						LEFT JOIN tblSMCurrency FRMCU ON FRMCU.intCurrencyID = FRMX.intCurrencyId
 						LEFT JOIN tblLGContainerType CON ON CON.intContainerTypeId = FRMX.intContainerTypeId
