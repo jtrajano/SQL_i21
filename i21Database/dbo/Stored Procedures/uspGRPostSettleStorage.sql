@@ -11,7 +11,7 @@ BEGIN TRY
 	SET NOCOUNT ON
 	declare @debug_awesome_ness bit = 0
 	----- DEBUG POINT -----
-	if @debug_awesome_ness = 1	 AND 1 = 0
+	if @debug_awesome_ness = 1	 AND 1 = 1
 	begin
 		print 'start post settlement'
 		select 'awesomeness begins here cash price', @dblCashPriceFromCt as [cash price from ct], @dblQtyFromCt as [dbl from ct], @intSettleStorageId as [settle storage id]
@@ -1268,13 +1268,14 @@ BEGIN TRY
 
 					if abs(@aa - @ab) < 0.01 
 					begin
-						set @additionalDiscrepancy = @aa - @ab
+						set @additionalDiscrepancy = abs(@aa - @ab) * -1
 					end
 					
 					----- DEBUG POINT -----
 					if @debug_awesome_ness = 1 and 1 = 1
 					begin
 						select ' information about the discrepancy ',@aa, @ab, ( @aa - @ab )
+						
 					end
 					----- DEBUG POINT -----
 				END
@@ -1446,12 +1447,18 @@ BEGIN TRY
 				WHERE SV.intItemType = 1
 
 				----- DEBUG POINT -----
-				IF @debug_awesome_ness = 1 and 1 = 0
+				if @debug_awesome_ness = 1 and 1 = 0
 				begin
+				
 					select 'items to post',* from @ItemsToPost
 					select 'items to storage',* from @ItemsToStorage
 					select 'Settle voucher create',* from @SettleVoucherCreate
 					select ' contract depletion',* from @tblDepletion
+
+				end 
+				IF @debug_awesome_ness = 1 and 1 = 1
+				begin
+					select 'items to post',* from @ItemsToPost
 
 					SELECT 
 						'items to post breack down'
