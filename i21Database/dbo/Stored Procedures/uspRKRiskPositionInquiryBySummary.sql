@@ -1098,75 +1098,149 @@ AS
 		AND intCompanyLocationId = ISNULL(@intCompanyLocationId, intCompanyLocationId)
 		AND ISNULL(dblNoOfContract, 0) <> 0
 
-	DECLARE @strCommodityAttributeId NVARCHAR(200)
-	SELECT TOP 1 @strCommodityAttributeId = strCommodityAttributeId FROM tblRKCommodityMarketMapping
-	WHERE intFutureMarketId = @intFutureMarketId
-		AND intCommodityId = @intCommodityId
+	DECLARE @ICSAPIntegration NVARCHAR(200)
+	SELECT TOP 1 @ICSAPIntegration = strIRUnpostMode FROM tblICCompanyPreference
 
-	SELECT intCommodityAttributeId = LTRIM(RTRIM(Item)) COLLATE Latin1_General_CI_AS
-	INTO #ProductTypes
-	FROM [dbo].[fnSplitString](@strCommodityAttributeId, ',')
+	IF (@ICSAPIntegration = 'Default')
+	BEGIN
+		DECLARE @strCommodityAttributeId NVARCHAR(200)
+		SELECT TOP 1 @strCommodityAttributeId = strCommodityAttributeId FROM tblRKCommodityMarketMapping
+		WHERE intFutureMarketId = @intFutureMarketId
+			AND intCommodityId = @intCommodityId
 
-	INSERT INTO @ListFinal (intRowNumber
-		, strGroup
-		, Selection
-		, PriceStatus
-		, strFutureMonth
-		, strAccountNumber
-		, dblNoOfContract
-		, strTradeNo
-		, TransactionDate
-		, TranType
-		, CustVendor
-		, dblNoOfLot
-		, dblQuantity
-		, intOrderByHeading
-		, intBookId
-		, strBook
-		, intSubBookId
-		, strSubBook)
-	SELECT 1 intRowNumber
-		, '1.Outright Coverage' COLLATE Latin1_General_CI_AS
-		, Selection = 'Outright Coverage' COLLATE Latin1_General_CI_AS
-		, PriceStatus = '1.Priced / Outright - (Outright position)' COLLATE Latin1_General_CI_AS
-		, strFutureMonth = @strParamFutureMonth
-		, strAccountNumber
-		, dblNoOfLot = SUM(dblNoOfLot)
-		, NULL
-		, TransactionDate = GETDATE()
-		, TranType = 'Inventory' COLLATE Latin1_General_CI_AS
-		, NULL
-		, 0.0
-		, dblQuantity = SUM(dblNoOfLot)
-		, 1
-		, intBookId = NULL
-		, strBook = NULL
-		, intSubBookId = NULL
-		, strSubBook = NULL
-	FROM (
-		SELECT strAccountNumber = 'Purchase' + ' - ' + CASE WHEN @strPositionBy = 'Product Type' THEN ISNULL(c.strDescription, '') ELSE ISNULL(t.strEntity, '') END COLLATE Latin1_General_CI_AS
-			, dblNoOfLot = dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId, @intUOMId, t.dblQuantity)
-			, strProductType = c.strDescription
-			, strProductLine = pl.strDescription
-			, strShipmentPeriod = (RIGHT(CONVERT(VARCHAR(11), t.dtmDate, 106), 8) + ' - ' + RIGHT(CONVERT(VARCHAR(11), t.dtmDate, 106), 8)) COLLATE Latin1_General_CI_AS
-			, strLocation = t.strLocationName
-			, strOrigin = origin.strDescription
-			, intItemId = t.intItemId
-			, strItemNo = t.strItemNo
-			, strItemDescription = t.strItemDescription
-		FROM vyuRKGetInventoryValuation t
-		JOIN tblICCommodityAttribute c ON c.intCommodityAttributeId = t.intProductTypeId
-		LEFT JOIN tblICCommodityAttribute origin ON origin.intCommodityAttributeId = t.intOriginId
-		LEFT JOIN tblICCommodityProductLine pl ON pl.intCommodityProductLineId = t.intProductLineId
-		JOIN #ProductTypes m ON m.intCommodityAttributeId = c.intCommodityAttributeId
-		JOIN tblICCommodityUnitMeasure um ON um.intCommodityId = @intCommodityId AND um.intUnitMeasureId = t.intUnitMeasureId
-		WHERE t.intCommodityId = @intCommodityId
-			AND t.intLocationId = ISNULL(@intCompanyLocationId, t.intLocationId)
-			AND CONVERT(DATETIME, CONVERT(VARCHAR(10), t.dtmCreated, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
-	) t2
-	GROUP BY strAccountNumber
+		SELECT intCommodityAttributeId = LTRIM(RTRIM(Item)) COLLATE Latin1_General_CI_AS
+		INTO #ProductTypes
+		FROM [dbo].[fnSplitString](@strCommodityAttributeId, ',')
 
-	DROP TABLE #ProductTypes
+		INSERT INTO @ListFinal (intRowNumber
+			, strGroup
+			, Selection
+			, PriceStatus
+			, strFutureMonth
+			, strAccountNumber
+			, dblNoOfContract
+			, strTradeNo
+			, TransactionDate
+			, TranType
+			, CustVendor
+			, dblNoOfLot
+			, dblQuantity
+			, intOrderByHeading
+			, intBookId
+			, strBook
+			, intSubBookId
+			, strSubBook)
+		SELECT 1 intRowNumber
+			, '1.Outright Coverage' COLLATE Latin1_General_CI_AS
+			, Selection = 'Outright Coverage' COLLATE Latin1_General_CI_AS
+			, PriceStatus = '1.Priced / Outright - (Outright position)' COLLATE Latin1_General_CI_AS
+			, strFutureMonth = @strParamFutureMonth
+			, strAccountNumber
+			, dblNoOfLot = SUM(dblNoOfLot)
+			, NULL
+			, TransactionDate = GETDATE()
+			, TranType = 'Inventory' COLLATE Latin1_General_CI_AS
+			, NULL
+			, 0.0
+			, dblQuantity = SUM(dblNoOfLot)
+			, 1
+			, intBookId = NULL
+			, strBook = NULL
+			, intSubBookId = NULL
+			, strSubBook = NULL
+		FROM (
+			SELECT strAccountNumber = 'Purchase' + ' - ' + CASE WHEN @strPositionBy = 'Product Type' THEN ISNULL(c.strDescription, '') ELSE ISNULL(t.strEntity, '') END COLLATE Latin1_General_CI_AS
+				, dblNoOfLot = dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId, @intUOMId, t.dblQuantity)
+				, strProductType = c.strDescription
+				, strProductLine = pl.strDescription
+				, strShipmentPeriod = (RIGHT(CONVERT(VARCHAR(11), t.dtmDate, 106), 8) + ' - ' + RIGHT(CONVERT(VARCHAR(11), t.dtmDate, 106), 8)) COLLATE Latin1_General_CI_AS
+				, strLocation = t.strLocationName
+				, strOrigin = origin.strDescription
+				, intItemId = t.intItemId
+				, strItemNo = t.strItemNo
+				, strItemDescription = t.strItemDescription
+			FROM vyuRKGetInventoryValuation t
+			JOIN tblICCommodityAttribute c ON c.intCommodityAttributeId = t.intProductTypeId
+			LEFT JOIN tblICCommodityAttribute origin ON origin.intCommodityAttributeId = t.intOriginId
+			LEFT JOIN tblICCommodityProductLine pl ON pl.intCommodityProductLineId = t.intProductLineId
+			JOIN #ProductTypes m ON m.intCommodityAttributeId = c.intCommodityAttributeId
+			JOIN tblICCommodityUnitMeasure um ON um.intCommodityId = @intCommodityId AND um.intUnitMeasureId = t.intUnitMeasureId
+			WHERE t.intCommodityId = @intCommodityId
+				AND t.intLocationId = ISNULL(@intCompanyLocationId, t.intLocationId)
+				AND CONVERT(DATETIME, CONVERT(VARCHAR(10), t.dtmCreated, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
+		) t2
+		GROUP BY strAccountNumber
+
+		DROP TABLE #ProductTypes
+	END
+	ELSE
+	BEGIN
+
+		INSERT INTO @ListFinal (intRowNumber
+			, strGroup
+			, Selection
+			, PriceStatus
+			, strFutureMonth
+			, strAccountNumber
+			, dblNoOfContract
+			, strTradeNo
+			, TransactionDate
+			, TranType
+			, CustVendor
+			, dblNoOfLot
+			, dblQuantity
+			, intOrderByHeading
+			, intBookId
+			, strBook
+			, intSubBookId
+			, strSubBook)
+		SELECT 1 intRowNumber
+			, '1.Outright Coverage' COLLATE Latin1_General_CI_AS
+			, Selection = 'Outright Coverage' COLLATE Latin1_General_CI_AS
+			, PriceStatus = '1.Priced / Outright - (Outright position)' COLLATE Latin1_General_CI_AS
+			, strFutureMonth = @strParamFutureMonth
+			, strAccountNumber
+			, dblNoOfLot = SUM(dblNoOfLot)
+			, NULL
+			, TransactionDate = GETDATE()
+			, TranType = 'Inventory' COLLATE Latin1_General_CI_AS
+			, NULL
+			, 0.0
+			, dblQuantity = SUM(dblNoOfLot)
+			, 1
+			, intBookId = NULL
+			, strBook = NULL
+			, intSubBookId = NULL
+			, strSubBook = NULL
+		FROM (
+			SELECT DISTINCT strAccountNumber = 'Purchase' + ' - ' + ISNULL(c.strDescription, '') COLLATE Latin1_General_CI_AS
+				, dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId, @intUOMId, iis.dblUnitOnHand) dblNoOfLot
+				, strProductType = c.strDescription
+				, strProductLine = pl.strDescription
+				, strShipmentPeriod = NULL
+				, strLocation = cl.strLocationName
+				, strOrigin = origin.strDescription
+				, intItemId = ic.intItemId
+				, strItemNo = ic.strItemNo
+				, strItemDescription = ic.strDescription
+			FROM tblICCommodity co
+			JOIN tblICItem ic ON co.intCommodityId = ic.intCommodityId AND ic.intCommodityId = @intCommodityId
+			JOIN tblICItemStock iis ON iis.intItemId = ic.intItemId AND ic.intCommodityId = @intCommodityId AND ISNULL(iis.dblUnitOnHand, 0) > 0
+			JOIN tblICCommodityAttribute c ON c.intCommodityAttributeId = ic.intProductTypeId
+			LEFT JOIN tblICCommodityAttribute origin ON origin.intCommodityAttributeId = ic.intOriginId
+			LEFT JOIN tblICCommodityProductLine pl ON pl.intCommodityProductLineId = ic.intProductLineId
+			JOIN tblRKCommodityMarketMapping m ON m.intCommodityId=c.intCommodityId AND m.intFutureMarketId = @intFutureMarketId AND ic.intProductTypeId = c.intCommodityAttributeId
+				AND c.intCommodityAttributeId IN (SELECT LTRIM(RTRIM(Item)) COLLATE Latin1_General_CI_AS FROM [dbo].[fnSplitString](m.strCommodityAttributeId, ','))
+			JOIN tblICItemLocation il ON il.intItemId = iis.intItemId
+			JOIN tblICItemUOM i ON il.intItemId = i.intItemId AND i.ysnStockUnit = 1
+			JOIN tblICCommodityUnitMeasure um ON um.intCommodityId = @intCommodityId AND um.intUnitMeasureId = i.intUnitMeasureId
+			JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = il.intLocationId
+			WHERE ic.intCommodityId = @intCommodityId
+				AND m.intFutureMarketId = @intFutureMarketId
+				AND cl.intCompanyLocationId = ISNULL(@intCompanyLocationId, cl.intCompanyLocationId)
+		) t2
+		GROUP BY strAccountNumber
+	END
 
 	SELECT * INTO #tmpMatch
 	FROM (
