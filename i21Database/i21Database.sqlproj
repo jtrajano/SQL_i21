@@ -8080,6 +8080,7 @@
     <Build Include="dbo\Stored Procedures\uspCTRebuildScheduledQuantity.sql" />
     <Build Include="dbo\Functions\udfDateGreaterThanEquals.sql" />
     <Build Include="dbo\Functions\udfDateLessThanEquals.sql" />
+    <Build Include="dbo\Tables\tblGRSettleStorageBillDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -8480,5 +8481,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\CT\1920_FinancialStatus.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\GR\ImportSettleStorageBillDetail.sql" />
   </ItemGroup>
 </Project>
