@@ -8158,6 +8158,7 @@
     <Build Include="dbo\Stored Procedures\uspIPDailyAveragePriceProcessAckXML.sql" />
     <Build Include="dbo\Views\vyuCFSearchAccountNetworkXref.sql" />
     <Build Include="dbo\Views\vyuAPVouchersPaymentInfo.sql" />
+	<Build Include="dbo\Tables\tblGRSettleStorageBillDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -8567,4 +8568,8 @@
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\TR\CrossReferenceDefault.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\GR\ImportSettleStorageBillDetail.sql" />
+  </ItemGroup>
+ 
 </Project>
