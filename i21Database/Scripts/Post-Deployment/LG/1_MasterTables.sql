@@ -190,9 +190,10 @@ BEGIN
 			SET strDestinationPort1 = strDestinationPort
 			WHERE strDestinationPort IS NOT NULL AND strDestinationPort1 IS NULL
 	')
+
 	EXEC ('UPDATE tblLGLoad
-			SET dtmETAPOD1 = dtmETAPOD
-			WHERE dtmETAPOD IS NOT NULL AND dtmETAPOD1 IS NULL
+			SET dtmETSPOL1 = dtmETSPOL
+			WHERE dtmETSPOL IS NOT NULL AND dtmETSPOL1 IS NULL
 	')
 
 	EXEC ('UPDATE tblLGLoad
