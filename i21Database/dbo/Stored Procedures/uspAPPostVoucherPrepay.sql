@@ -26,6 +26,8 @@ DECLARE @totalInvalid INT = 0;
 DECLARE @totalRecords INT;
 DECLARE @validVoucherPrepay Id;
 DECLARE @ErrorMessage NVARCHAR(4000);
+DECLARE @PostSuccessfulMsg NVARCHAR(50) = 'Transaction successfully posted.'
+DECLARE @UnpostSuccessfulMsg NVARCHAR(50) = 'Transaction successfully unposted.'
 
 CREATE TABLE #tmpInvalidVoucherPrepayData (
 	[strError] [NVARCHAR](1000),
@@ -253,6 +255,17 @@ BEGIN
 		,A.intTransactionId
 	FROM tblGLPostResult A
 	WHERE A.strBatchId = @batchId
+	
+	--Insert Successfully unposted transactions.
+	INSERT INTO tblAPPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+	SELECT
+		@PostSuccessfulMsg,
+		'Vendor Prepayment',
+		A.strBillId,
+		@batchId,
+		A.intBillId
+	FROM tblAPBill A
+	WHERE  A.intBillId IN (SELECT intId FROM @validVoucherPrepay)
 
 	--EXIT IF NO RECORD TO POST/UNPOST
 	IF NOT EXISTS(SELECT TOP 1 1 FROM @validVoucherPrepay)
