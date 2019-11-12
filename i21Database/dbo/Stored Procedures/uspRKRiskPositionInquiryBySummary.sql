@@ -15,18 +15,19 @@
 
 AS
 
---DECLARE @intCommodityId INT = 1
---	, @intCompanyLocationId INT = 0
---	, @intFutureMarketId INT = 2
---	, @intFutureMonthId INT = 80
---	, @intUOMId INT = 19
+--DECLARE
+--@intCommodityId INT = 1
+--	, @intCompanyLocationId INT
+--	, @intFutureMarketId INT = 1
+--	, @intFutureMonthId INT = 41
+--	, @intUOMId INT = 18
 --	, @intDecimal INT = 0
---	, @intForecastWeeklyConsumption INT = 4700
+--	, @intForecastWeeklyConsumption INT = 5900
 --	, @intForecastWeeklyConsumptionUOMId INT = 0
---	, @intBookId INT = 0
---	, @intSubBookId INT = 0
+--	, @intBookId INT = NULL
+--	, @intSubBookId INT = NULL
 --	, @strPositionBy NVARCHAR(100) = 'Product Type'
---	, @dtmPositionAsOf DATETIME = '2019-10-15'
+--	, @dtmPositionAsOf DATETIME = '2019-11-12 17:35:01'
 --	, @strUomType NVARCHAR(100) = 'By Quantity'
 
 	DECLARE @dtmToDate DATETIME
@@ -1175,7 +1176,6 @@ AS
 	END
 	ELSE
 	BEGIN
-
 		INSERT INTO @ListFinal (intRowNumber
 			, strGroup
 			, Selection
@@ -1213,31 +1213,56 @@ AS
 			, intSubBookId = NULL
 			, strSubBook = NULL
 		FROM (
-			SELECT DISTINCT strAccountNumber = 'Purchase' + ' - ' + ISNULL(c.strDescription, '') COLLATE Latin1_General_CI_AS
-				, dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId, @intUOMId, iis.dblUnitOnHand) dblNoOfLot
-				, strProductType = c.strDescription
+			--SELECT DISTINCT strAccountNumber = 'Purchase' + ' - ' + ISNULL(c.strDescription, '') COLLATE Latin1_General_CI_AS
+			--	, dbo.fnCTConvertQuantityToTargetCommodityUOM(um.intCommodityUnitMeasureId, @intUOMId, iis.dblUnitOnHand) dblNoOfLot
+			--	, strProductType = c.strDescription
+			--	, strProductLine = pl.strDescription
+			--	, strShipmentPeriod = NULL
+			--	, strLocation = cl.strLocationName
+			--	, strOrigin = origin.strDescription
+			--	, intItemId = ic.intItemId
+			--	, strItemNo = ic.strItemNo
+			--	, strItemDescription = ic.strDescription
+			--FROM tblICCommodity co
+			--JOIN tblICItem ic ON co.intCommodityId = ic.intCommodityId AND ic.intCommodityId = @intCommodityId
+			--JOIN tblICItemStock iis ON iis.intItemId = ic.intItemId AND ic.intCommodityId = @intCommodityId AND ISNULL(iis.dblUnitOnHand, 0) > 0
+			--JOIN tblICCommodityAttribute c ON c.intCommodityAttributeId = ic.intProductTypeId
+			--LEFT JOIN tblICCommodityAttribute origin ON origin.intCommodityAttributeId = ic.intOriginId
+			--LEFT JOIN tblICCommodityProductLine pl ON pl.intCommodityProductLineId = ic.intProductLineId
+			--JOIN tblRKCommodityMarketMapping m ON m.intCommodityId=c.intCommodityId AND m.intFutureMarketId = @intFutureMarketId AND ic.intProductTypeId = c.intCommodityAttributeId
+			--	AND c.intCommodityAttributeId IN (SELECT LTRIM(RTRIM(Item)) COLLATE Latin1_General_CI_AS FROM [dbo].[fnSplitString](m.strCommodityAttributeId, ','))
+			--JOIN tblICItemLocation il ON il.intItemId = iis.intItemId
+			--JOIN tblICItemUOM i ON il.intItemId = i.intItemId AND i.ysnStockUnit = 1
+			--JOIN tblICCommodityUnitMeasure um ON um.intCommodityId = @intCommodityId AND um.intUnitMeasureId = i.intUnitMeasureId
+			--JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = il.intLocationId
+			--WHERE ic.intCommodityId = @intCommodityId
+			--	AND m.intFutureMarketId = @intFutureMarketId
+			--	AND cl.intCompanyLocationId = ISNULL(@intCompanyLocationId, cl.intCompanyLocationId)
+			SELECT strAccountNumber = 'Purchase' + ' - ' + ISNULL(att.strDescription, '') COLLATE Latin1_General_CI_AS
+				, dblNoOfLot = dbo.fnCTConvertQuantityToTargetCommodityUOM(fcuom.intCommodityUnitMeasureId, @intUOMId, lot.dblWeight)
+				, lot.dblWeight
+				, strProductType = att.strDescription
 				, strProductLine = pl.strDescription
 				, strShipmentPeriod = NULL
-				, strLocation = cl.strLocationName
+				, strLocation = loc.strLocationName
 				, strOrigin = origin.strDescription
-				, intItemId = ic.intItemId
-				, strItemNo = ic.strItemNo
-				, strItemDescription = ic.strDescription
-			FROM tblICCommodity co
-			JOIN tblICItem ic ON co.intCommodityId = ic.intCommodityId AND ic.intCommodityId = @intCommodityId
-			JOIN tblICItemStock iis ON iis.intItemId = ic.intItemId AND ic.intCommodityId = @intCommodityId AND ISNULL(iis.dblUnitOnHand, 0) > 0
-			JOIN tblICCommodityAttribute c ON c.intCommodityAttributeId = ic.intProductTypeId
-			LEFT JOIN tblICCommodityAttribute origin ON origin.intCommodityAttributeId = ic.intOriginId
-			LEFT JOIN tblICCommodityProductLine pl ON pl.intCommodityProductLineId = ic.intProductLineId
-			JOIN tblRKCommodityMarketMapping m ON m.intCommodityId=c.intCommodityId AND m.intFutureMarketId = @intFutureMarketId AND ic.intProductTypeId = c.intCommodityAttributeId
-				AND c.intCommodityAttributeId IN (SELECT LTRIM(RTRIM(Item)) COLLATE Latin1_General_CI_AS FROM [dbo].[fnSplitString](m.strCommodityAttributeId, ','))
-			JOIN tblICItemLocation il ON il.intItemId = iis.intItemId
-			JOIN tblICItemUOM i ON il.intItemId = i.intItemId AND i.ysnStockUnit = 1
-			JOIN tblICCommodityUnitMeasure um ON um.intCommodityId = @intCommodityId AND um.intUnitMeasureId = i.intUnitMeasureId
-			JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = il.intLocationId
-			WHERE ic.intCommodityId = @intCommodityId
+				, intItemId = item.intItemId
+				, strItemNo = item.strItemNo
+				, strItemDescription = item.strDescription
+			FROM tblICLot lot
+			INNER JOIN tblICItem item ON item.intItemId = lot.intItemId
+			JOIN tblICCommodity com ON com.intCommodityId = item.intCommodityId
+			LEFT JOIN tblSMCompanyLocation loc ON loc.intCompanyLocationId = lot.intLocationId
+			LEFT JOIN tblICCommodityAttribute att ON att.intCommodityAttributeId = item.intProductTypeId
+			LEFT JOIN tblICCommodityAttribute origin ON origin.intCommodityAttributeId = item.intOriginId
+			LEFT JOIN tblICCommodityProductLine pl ON pl.intCommodityProductLineId = item.intProductLineId
+			JOIN tblRKCommodityMarketMapping m ON m.intCommodityId = item.intCommodityId AND m.intFutureMarketId = @intFutureMarketId AND item.intProductTypeId = att.intCommodityAttributeId
+				AND att.intCommodityAttributeId IN (SELECT LTRIM(RTRIM(Item)) COLLATE Latin1_General_CI_AS FROM [dbo].[fnSplitString](m.strCommodityAttributeId, ','))
+			LEFT JOIN tblICItemUOM iweightUOM ON iweightUOM.intItemUOMId = lot.intWeightUOMId
+			LEFT JOIN tblICCommodityUnitMeasure fcuom ON fcuom.intCommodityId = com.intCommodityId AND fcuom.intUnitMeasureId = iweightUOM.intUnitMeasureId
+			WHERE item.intCommodityId = @intCommodityId
 				AND m.intFutureMarketId = @intFutureMarketId
-				AND cl.intCompanyLocationId = ISNULL(@intCompanyLocationId, cl.intCompanyLocationId)
+				AND loc.intCompanyLocationId = ISNULL(@intCompanyLocationId, loc.intCompanyLocationId)
 		) t2
 		GROUP BY strAccountNumber
 	END
@@ -1860,7 +1885,7 @@ AS
 		, PriceStatus
 		, strFutureMonth
 		, strAccountNumber
-		, dblNoOfContract = (dblQuantity) / SUM(dblNoOfLot) OVER (PARTITION BY strFutureMonth)
+		, dblNoOfContract = CASE WHEN SUM(dblNoOfLot) OVER (PARTITION BY strFutureMonth) = 0 THEN 0 ELSE (dblQuantity) / SUM(dblNoOfLot) OVER (PARTITION BY strFutureMonth) END
 		, strTradeNo
 		, TransactionDate = GETDATE()
 		, NULL
