@@ -277,7 +277,7 @@ select
   a.strERPPONumber, 
   intCustomerVendorEntityId = b.intEntityId, 
   strCustomerVendor = aq.strName, 
-  strCustomerContact = null, 
+  b.strCustomerContract,
   b.ysnExported, 
   b.dtmExported, 
   a.strFXRemarks, 
