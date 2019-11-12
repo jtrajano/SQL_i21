@@ -1396,10 +1396,10 @@ BEGIN TRY
 					,intItemLocationId			= @ItemLocationId
 					,intItemUOMId				= @intInventoryItemStockUOMId
 					,dtmDate					= GETDATE()
-					,dblQty						= round(CASE 
+					,dblQty						= CASE 
 														WHEN @strOwnedPhysicalStock = 'Customer' THEN dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, IU.intUnitMeasureId, CS.intUnitMeasureId, SV.[dblUnits])
 												        ELSE 0
-												  END, 4)
+												  END
 					,dblUOMQty					= @dblUOMQty
 					,dblCost					= (CASE 
 														WHEN SV.intPricingTypeId = 1 OR SV.intPricingTypeId = 6 OR SV.intPricingTypeId IS NULL THEN SV.[dblCashPrice]
