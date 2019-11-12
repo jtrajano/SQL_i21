@@ -10,13 +10,14 @@ BEGIN TRY
 	--return
 	SET NOCOUNT ON
 	declare @debug_awesome_ness bit = 0
-	
-	if @debug_awesome_ness = 1	
+	----- DEBUG POINT -----
+	if @debug_awesome_ness = 1	 AND 1 = 1
 	begin
 		print 'start post settlement'
 		select 'awesomeness begins here cash price', @dblCashPriceFromCt as [cash price from ct], @dblQtyFromCt as [dbl from ct], @intSettleStorageId as [settle storage id]
 		select 'settle storage' , dbo.[fnGRGetVoucheredUnits](intSettleStorageId), * FROM tblGRSettleStorage WHERE intSettleStorageId = @intSettleStorageId 		
 	end
+	----- DEBUG POINT -----
 
 
 	DECLARE @ErrMsg NVARCHAR(MAX)
@@ -201,7 +202,7 @@ BEGIN TRY
 	WHERE CASE WHEN @ysnFromPriceBasisContract = 1 THEN CASE WHEN intSettleStorageId = @intSettleStorageId THEN 1 ELSE 0 END ELSE CASE WHEN intParentSettleStorageId = @intParentSettleStorageId THEN 1 ELSE 0 END END = 1
 
 	----- DEBUG POINT -----
-	if @debug_awesome_ness = 1	and 1 = 1
+	if @debug_awesome_ness = 1	and 1 = 0
 	begin
 		select 'settle storage' , * FROM tblGRSettleStorage
 					WHERE CASE WHEN @ysnFromPriceBasisContract = 1 THEN CASE WHEN intSettleStorageId = @intSettleStorageId THEN 1 ELSE 0 END ELSE CASE WHEN intParentSettleStorageId = @intParentSettleStorageId THEN 1 ELSE 0 END END = 1		
@@ -253,7 +254,8 @@ BEGIN TRY
 		if @dblTotalVoucheredQuantity > = @dblSelectedUnits
 			return 
 		
-		if @debug_awesome_ness = 1
+		----- DEBUG POINT -----
+		if @debug_awesome_ness = 1 AND 1 = 0
 		begin
 			select 'total vouchered quantity', @dblTotalVoucheredQuantity
 
@@ -261,6 +263,7 @@ BEGIN TRY
 			FROM tblGRSettleStorage
 			WHERE intSettleStorageId = @intSettleStorageId
 		end
+		----- DEBUG POINT -----
 
 		SELECT
 			@intFutureMarketId 	= ISNULL(Com.intFutureMarketId,0)
@@ -392,7 +395,8 @@ BEGIN TRY
 			ORDER BY SSC.intSettleContractId
 			
 
-			if @debug_awesome_ness = 1
+			----- DEBUG POINT -----
+			if @debug_awesome_ness = 1 AND 1 = 0
 			begin
 				select 'settle contract ', * from @SettleContract a
 
@@ -405,6 +409,7 @@ BEGIN TRY
 					AND SSC.dblUnits > 0 
 						and (@ysnFromPriceBasisContract = 0 or SSC.dblUnits > b.dblVoucherQtyReceived)
 			end
+			----- DEBUG POINT -----
 
 
 			IF EXISTS(SELECT TOP 1 1 FROM @SettleContract WHERE strPricingType = 'Basis')
@@ -488,7 +493,7 @@ BEGIN TRY
 						on b.intContractDetailId = a.intContractDetailId 
 
 				----- DEBUG POINT -----
-				if @debug_awesome_ness = 1
+				if @debug_awesome_ness = 1 AND 1 = 0
 				begin				
 					select 'avqty freshly added',* from @avqty					
 					select @dblSelectedUnits as [ selected units ], @dblTotalVoucheredQuantity as [ total vouchered quantity]
@@ -606,7 +611,7 @@ BEGIN TRY
 			END
 			
 			----- DEBUG POINT -----
-			if @debug_awesome_ness = 1
+			if @debug_awesome_ness = 1 AND 1 = 0
 			begin
 				select 'after discount add to settle voucher create', * from @SettleVoucherCreate
 
@@ -725,6 +730,13 @@ BEGIN TRY
 				INNER JOIN tblICItem IC 
 					ON IC.intItemId = SCSetup.intDefaultFeeItemId
 			END
+
+
+
+
+
+
+
 
 			SELECT @SettleStorageKey = MIN(intSettleStorageKey)
 			FROM @SettleStorage
@@ -904,7 +916,7 @@ BEGIN TRY
 						WHERE intContractDetailId = @intContractDetailId
 
 						----- DEBUG POINT -----
-						if @debug_awesome_ness = 1
+						if @debug_awesome_ness = 1 AND 1 = 0
 						begin
 							select 'settle contract information inside the loop'
 							select * from @SettleContract
@@ -1135,6 +1147,15 @@ BEGIN TRY
 					BREAK;
 			END
 
+
+			
+			----- DEBUG POINT -----
+			if @debug_awesome_ness = 1  AND 1 = 0
+			begin
+				select 'settle voucher create before updating ', * from @SettleVoucherCreate 
+			end
+			----- DEBUG POINT -----
+
 			BEGIN
 				EXEC dbo.uspSMGetStartingNumber 
 					 @STARTING_NUMBER_BATCH
@@ -1187,6 +1208,78 @@ BEGIN TRY
 				WHERE strType = 'FROM Scale' 
 					AND intCustomerStorageId = @intCustomerStorageId
 		
+				
+				--this code will see the future	if there will be a discrepancy
+				--	
+				BEGIN
+					declare @aa as decimal(36, 20)
+					declare @ab as decimal(36, 20)
+					declare @additionalDiscrepancy as decimal(18, 10)
+					set @additionalDiscrepancy = 0
+
+					select @aa = sum(
+										(
+											CASE 
+												WHEN SV.intPricingTypeId = 1 OR SV.intPricingTypeId = 6 OR SV.intPricingTypeId IS NULL THEN SV.[dblCashPrice]
+													ELSE @dblFutureMarkePrice + ISNULL(SV.dblBasis,0)
+											END
+											+ (dbo.fnDivide(DiscountCost.dblTotalCashPrice, @dblSelectedUnits))
+											
+										) 		 
+										* dblUnits
+										)
+					FROM @SettleVoucherCreate SV
+					JOIN tblGRCustomerStorage CS 
+						ON CS.intCustomerStorageId = SV.intCustomerStorageId					
+					JOIN tblICItemUOM IU
+						ON IU.intItemId = CS.intItemId
+							AND IU.ysnStockUnit = 1
+					OUTER APPLY (
+						SELECT 
+							ISNULL(Round((Sum(SV.dblCashPrice * CASE WHEN ISNULL(SV.dblSettleContractUnits,0) > 0 THEN SV.dblSettleContractUnits ELSE SV.dblUnits END)), 2  ),0)  AS dblTotalCashPrice,
+							sum(CASE WHEN ISNULL(SV.dblSettleContractUnits,0) > 0 THEN SV.dblSettleContractUnits ELSE SV.dblUnits END ) as dblTotalUnits 
+						FROM @SettleVoucherCreate SV
+						INNER JOIN tblICItem I
+							ON I.intItemId = SV.intItemId
+								AND I.ysnInventoryCost = 1
+								and SV.intItemType = 3
+					) DiscountCost
+					WHERE SV.intItemType = 1
+
+
+
+		
+					select  @ab = 
+						sum(
+							isnull(dblSettleContractUnits, dblUnits) * ( (CASE 
+															when intItemType = 3 then SV.dblCashPrice
+															WHEN SV.intPricingTypeId = 1 OR SV.intPricingTypeId = 6 OR SV.intPricingTypeId IS NULL THEN SV.[dblCashPrice]
+															ELSE @dblFutureMarkePrice + ISNULL(SV.dblBasis,0)
+													   END)
+													   ) 	
+						)
+					FROM @SettleVoucherCreate SV
+					JOIN tblGRCustomerStorage CS 
+						ON CS.intCustomerStorageId = SV.intCustomerStorageId
+					JOIN tblICItemUOM IU
+						ON IU.intItemId = CS.intItemId
+							AND IU.ysnStockUnit = 1					
+					WHERE SV.intItemType in ( 1, 3)
+
+					if abs(@aa - @ab) < 0.01 
+					begin
+						set @additionalDiscrepancy = abs(@aa - @ab) * -1
+					end
+					
+					----- DEBUG POINT -----
+					if @debug_awesome_ness = 1 and 1 = 1
+					begin
+						select ' information about the discrepancy ',@aa, @ab, ( @aa - @ab )
+						
+					end
+					----- DEBUG POINT -----
+				END
+
 				INSERT INTO @ItemsToStorage 
 				(
 					 intItemId
@@ -1231,6 +1324,8 @@ BEGIN TRY
 														ELSE @dblFutureMarkePrice + ISNULL(SV.dblBasis,0)
 												   END)
 												   + (dbo.fnDivide(DiscountCost.dblTotalCashPrice, @dblSelectedUnits))-- + DiscountCost.dblTotalCashPrice
+												   
+												   + @additionalDiscrepancy
 					,dblSalesPrice				= 0.00
 					,intCurrencyId				= @intCurrencyId
 					,dblExchangeRate			= 1
@@ -1311,6 +1406,7 @@ BEGIN TRY
 														ELSE @dblFutureMarkePrice + ISNULL(SV.dblBasis,0)
 												   END)
 												   + (dbo.fnDivide(DiscountCost.dblTotalCashPrice, @dblSelectedUnits))
+												   + @additionalDiscrepancy
 					,dblSalesPrice				= 0.00
 					,intCurrencyId				= @intCurrencyId
 					,dblExchangeRate			= 1
@@ -1351,19 +1447,30 @@ BEGIN TRY
 				WHERE SV.intItemType = 1
 
 				----- DEBUG POINT -----
-				IF @debug_awesome_ness = 1 and 1 = 1
+				if @debug_awesome_ness = 1 and 1 = 0
 				begin
-
+				
 					select 'items to post',* from @ItemsToPost
 					select 'items to storage',* from @ItemsToStorage
 					select 'Settle voucher create',* from @SettleVoucherCreate
 					select ' contract depletion',* from @tblDepletion
 
+				end 
+				IF @debug_awesome_ness = 1 and 1 = 1
+				begin
+					select 'items to post',* from @ItemsToPost
+
 					SELECT 
 						'items to post breack down'
-
+						,SV.intPricingTypeId
 						,DiscountCost.*
 						,(dbo.fnDivide(DiscountCost.dblTotalCashPrice, @dblSelectedUnits)) as [ actual cost used ]
+						,@dblSelectedUnits as [selected units]
+						, ((CASE 
+															WHEN SV.intPricingTypeId = 1 OR SV.intPricingTypeId = 6 OR SV.intPricingTypeId IS NULL THEN SV.[dblCashPrice]
+															ELSE @dblFutureMarkePrice + ISNULL(SV.dblBasis,0)
+													   END)
+													   + (dbo.fnDivide(DiscountCost.dblTotalCashPrice, @dblSelectedUnits)))* @dblSelectedUnits
 						,@dblFutureMarkePrice as [market price]
 						,ISNULL(SV.dblBasis,0) as [basis]
 						,SV.[dblCashPrice] as [cash price]
@@ -1376,7 +1483,8 @@ BEGIN TRY
 															WHEN SV.intPricingTypeId = 1 OR SV.intPricingTypeId = 6 OR SV.intPricingTypeId IS NULL THEN SV.[dblCashPrice]
 															ELSE @dblFutureMarkePrice + ISNULL(SV.dblBasis,0)
 													   END)
-													   + round( (dbo.fnDivide(DiscountCost.dblTotalCashPrice, @dblSelectedUnits)) , 8)
+													   + (dbo.fnDivide(DiscountCost.dblTotalCashPrice, @dblSelectedUnits)) 						
+
 						,dblSalesPrice				= 0.00
 						,intCurrencyId				= @intCurrencyId
 						,dblExchangeRate			= 1
@@ -1399,7 +1507,8 @@ BEGIN TRY
 							AND IU.ysnStockUnit = 1
 					OUTER APPLY (
 						SELECT 
-							ISNULL(Round((Sum(SV.dblCashPrice * CASE WHEN ISNULL(SV.dblSettleContractUnits,0) > 0 THEN SV.dblSettleContractUnits ELSE SV.dblUnits END)), 2  ),0)  AS dblTotalCashPrice
+							ISNULL(Round((Sum(SV.dblCashPrice * CASE WHEN ISNULL(SV.dblSettleContractUnits,0) > 0 THEN SV.dblSettleContractUnits ELSE SV.dblUnits END)), 2  ),0)  AS dblTotalCashPrice,
+							sum(CASE WHEN ISNULL(SV.dblSettleContractUnits,0) > 0 THEN SV.dblSettleContractUnits ELSE SV.dblUnits END ) as dblTotalUnits 
 						FROM @SettleVoucherCreate SV
 						INNER JOIN tblICItem I
 							ON I.intItemId = SV.intItemId
@@ -1502,7 +1611,7 @@ BEGIN TRY
 								GOTO SettleStorage_Exit;
 							
 							----- DEBUG POINT -----
-							if @debug_awesome_ness = 1 AND 1 = 1
+							if @debug_awesome_ness = 1 AND 1 = 0
 							begin
 								select 'inventory transaction', * from tblICInventoryTransaction where strBatchId = @strBatchId order by intInventoryTransactionId desc
 								select 'dummy', * from @DummyGLEntries
@@ -1571,11 +1680,11 @@ BEGIN TRY
 						    
 							--DELETE FROM @GLEntries
 							----- DEBUG POINT -----
-							if @debug_awesome_ness = 1 and 1 = 1
+							if @debug_awesome_ness = 1 and 1 = 0
 							begin
 								select top 5 'inventory transaction', * from tblICInventoryTransaction where strBatchId = @strBatchId order by intInventoryTransactionId desc
 								
-								select 'generate gl entries'
+								select 'generate gl entries - uspGRCreateGLEntries'
 								
 								EXEC uspGRCreateGLEntries 
 									 'Storage Settlement'
@@ -1801,7 +1910,7 @@ BEGIN TRY
 						and a.intItemType = 1
 
 					----- DEBUG POINT -----
-					if @debug_awesome_ness = 1
+					if @debug_awesome_ness = 1 AND 1 = 0
 					begin					
 						select ' before settle voucher create after discount update', * from @SettleVoucherCreate
 					end
@@ -1810,7 +1919,7 @@ BEGIN TRY
 					update @SettleVoucherCreate set dblUnits = @dblTotalUnits where intItemType in (2, 3) and dblUnits > @dblTotalUnits
 
 					----- DEBUG POINT -----
-					if @debug_awesome_ness = 1
+					if @debug_awesome_ness = 1 AND 1 = 0
 					begin
 						select 'Total Units for updating the discounts ',@dblTotalUnits
 						select ' settle voucher create after discount update', * from @SettleVoucherCreate
@@ -2044,7 +2153,7 @@ BEGIN TRY
 					,a.intItemType				
 				 
 				----- DEBUG POINT -----				 
-				if @debug_awesome_ness = 1	
+				if @debug_awesome_ness = 1	 AND 1 = 1
 				begin
 									
 					select 'ct available quantity for voucher', @intContractDetailId					
@@ -2448,10 +2557,14 @@ BEGIN TRY
 				UPDATE @voucherPayable SET dblQuantityToBill = dblQuantityToBill * -1 WHERE ISNULL(dblCost,0) < 0
 				UPDATE @voucherPayable SET dblCost = dblCost * -1 WHERE ISNULL(dblCost,0) < 0
 				
+				----- delete voucher payable that does not have quantity to bill -----
+				delete from @voucherPayable where dblQuantityToBill = 0
+				----- -----
+				
 				----- DEBUG POINT -----
 				if @debug_awesome_ness = 1 and 1 = 0
 				begin
-					select 'voucher payable', @dblVoucherTotal
+					select 'voucher total', @dblVoucherTotal
 				end
 				----- DEBUG POINT -----
 
@@ -2634,7 +2747,7 @@ BEGIN TRY
 								@requireApproval = @requireApproval OUTPUT
 					
 					----- DEBUG POINT -----
-					if @debug_awesome_ness = 1  and 1 = 1
+					if @debug_awesome_ness = 1  and 1 = 0
 					begin
 						select 'checking if it will create a voucher history ',@dblTotalVoucheredQuantity, @dblSelectedUnits, @createdVouchersId, @dblTotal, @requireApproval
 						set @requireApproval = 0
@@ -2753,7 +2866,7 @@ BEGIN TRY
 							
 
 							----- DEBUG POINT -----
-							if @debug_awesome_ness = 1	
+							if @debug_awesome_ness = 1	 AND 1 = 1
 							begin
 
 								select 'selected units', @dblSelectedUnits
@@ -2764,7 +2877,7 @@ BEGIN TRY
 							----- DEBUG POINT -----
 
 							----- DEBUG POINT -----
-							if @debug_awesome_ness = 1	
+							if @debug_awesome_ness = 1	 AND 1 = 0
 							begin
 								print 'before post bill'
 							end
@@ -2780,7 +2893,7 @@ BEGIN TRY
 								,@success = @success OUTPUT
 							
 							----- DEBUG POINT -----
-							if @debug_awesome_ness = 1	
+							if @debug_awesome_ness = 1	 AND 1 = 0
 							begin
 								print 'end post bill'
 							end
@@ -2788,7 +2901,7 @@ BEGIN TRY
 
 					END
 					----- DEBUG POINT -----
-					if @debug_awesome_ness = 1 and 1 = 1
+					if @debug_awesome_ness = 1 and 1 = 0
 					begin
 						select 'checking for success', @success
 
@@ -3059,7 +3172,7 @@ BEGIN TRY
 		WHERE intSettleStorageId = @intParentSettleStorageId and @createdVouchersId is not null
 	
 	----- DEBUG POINT -----
-	if @debug_awesome_ness = 1	and 1 = 1
+	if @debug_awesome_ness = 1	and 1 = 0
 	begin
 		
 		select 'storage history part', @createdVouchersId, @ysnFromPriceBasisContract, @intVoucherId
