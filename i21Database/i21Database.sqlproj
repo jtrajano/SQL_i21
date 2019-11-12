@@ -7698,6 +7698,7 @@
     <Build Include="dbo\User Defined Types\GLForItem.sql" />
     <Build Include="dbo\Functions\udfDateGreaterThanEquals.sql" />
     <Build Include="dbo\Functions\udfDateLessThanEquals.sql" />
+    <Build Include="dbo\Views\vyuAPVouchersPaymentInfo.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
