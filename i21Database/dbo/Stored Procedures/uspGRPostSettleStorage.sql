@@ -2682,17 +2682,7 @@ BEGIN TRY
 							update @avqty set ysnApplied = 1 where id = @cur_id
 						end
 
-						select 'updating the cost part'
-						select d.intPriceFixationDetailId, a.intBillId, a.intBillDetailId, a.dblCost, d.*
-							from tblAPBillDetail a 
-								join tblCTContractHeader b
-									on a.intContractHeaderId = b.intContractHeaderId and b.intPricingTypeId = 2
-								join tblCTContractDetail c
-									on c.intContractDetailId = a.intContractDetailId and c.intPricingTypeId = 1
-								cross apply ( select intPriceFixationDetailId, dblCashPrice from @avqty dd where dd.intContractDetailId = a.intContractDetailId and a.dblQtyReceived = dd.dblAvailableQuantity) d
-								where intBillId = CAST(@createdVouchersId AS INT) and a.intContractDetailId is not null and a.intContractHeaderId is not null
-								and d.intPriceFixationDetailId is not null
-
+						
 
 					end
 
