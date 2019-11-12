@@ -135,9 +135,8 @@ SELECT DISTINCT
 	,[intPurchaseTaxGroupId]	=	B.intTaxGroupId
 	,[dblOrderQty]				=	CASE WHEN Contracts.intContractDetailId > 0 THEN ROUND(Contracts.dblQuantity,2) ELSE B.dblOpenReceive END
 	,[dblPOOpenReceive]			=	B.dblReceived
-	,[dblOpenReceive]			=	B.dblOpenReceive --CASE WHEN @billTypeToUse = @type_DebitMemo THEN -B.dblOpenReceive ELSE B.dblOpenReceive END
-	--,[dblQuantityToBill]		=	CAST (CASE WHEN @billTypeToUse = @type_DebitMemo THEN -(B.dblOpenReceive - B.dblBillQty) ELSE (B.dblOpenReceive - B.dblBillQty) END AS DECIMAL(18,6)) 
-	,[dblQuantityToBill]		=	CAST (B.dblOpenReceive - B.dblBillQty AS DECIMAL(18,6))
+	,[dblOpenReceive]			=	B.dblOpenReceive 
+	,[dblQuantityToBill]		=	B.dblOpenReceive - ISNULL(B.dblBillQty, 0) 
 	,[dblQtyToBillUnitQty]		=	ISNULL(ItemUOM.dblUnitQty, 1)
 	,[intQtyToBillUOMId]		=	B.intUnitMeasureId
 	,[dblQuantityBilled]		=	B.dblBillQty
