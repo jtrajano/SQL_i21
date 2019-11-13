@@ -180,6 +180,7 @@ BEGIN
 		, dblLastCost
 		, strCountLine
 		, intItemUOMId
+		, intStockUOMId
 		, intWeightUOMId
 		, ysnRecount
 		, ysnFetched
@@ -208,6 +209,7 @@ BEGIN
 					END 
 			, strCountLine = @strHeaderNo + '-' + CAST(ROW_NUMBER() OVER(ORDER BY Lot.intItemId ASC) AS NVARCHAR(50))
 			, Lot.intItemUOMId
+			, StockUOM.intItemUOMId
 			, Lot.intWeightUOMId
 			, ysnRecount = 0
 			, ysnFetched = 1
@@ -301,6 +303,7 @@ BEGIN
 		, dblLastCost
 		, strCountLine
 		, intItemUOMId
+		, intStockUOMId
 		, ysnRecount
 		, ysnFetched
 		, intEntityUserSecurityId
@@ -335,6 +338,7 @@ BEGIN
 			END, 0)
 		, strCountLine = @strHeaderNo + '-' + CAST(ROW_NUMBER() OVER(ORDER BY il.intItemId ASC, il.intItemLocationId ASC, stockUOM.intItemUOMId ASC) AS NVARCHAR(50))
 		, intItemUOMId = COALESCE(stock.intItemUOMId, stockUOM.intItemUOMId)
+		, stock.intItemUOMId
 		, ysnRecount = 0
 		, ysnFetched = 1
 		, intEntityUserSecurityId = @intEntityUserSecurityId

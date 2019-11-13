@@ -97,6 +97,53 @@ BEGIN
 	END
 END
 
+IF @strMessageType = 'DAP'
+BEGIN
+	SET @strHeader = '<tr>
+						<th>&nbsp;Average No</th>
+						<th>&nbsp;Date</th>
+						<th>&nbsp;From Company</th>
+						<th>&nbsp;Message</th>
+					</tr>'
+
+	IF @strStatus = 'Success'
+	BEGIN
+		SELECT @strDetail = @strDetail + '<tr>
+			   <td>&nbsp;' + ISNULL(S.strAverageNo, '') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(DAP.dtmDate, '') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(S.strFromCompanyName, '') + '</td>' + 
+			   '<td>&nbsp;' + 'Success' + '</td>
+		</tr>'
+		FROM tblRKDailyAveragePriceStage S WITH (NOLOCK)
+		JOIN tblRKDailyAveragePrice DAP ON DAP.intDailyAveragePriceId = S.intDailyAveragePriceId
+		WHERE ISNULL(strFeedStatus, '') = 'Processed'
+			AND ISNULL(ysnMailSent, 0) = 0
+
+		UPDATE tblRKDailyAveragePriceStage
+		SET ysnMailSent = 1
+		WHERE ISNULL(strFeedStatus, '') = 'Processed'
+			AND ISNULL(ysnMailSent, 0) = 0
+	END
+	ELSE
+	BEGIN
+		SELECT @strDetail = @strDetail + '<tr>
+			   <td>&nbsp;' + ISNULL(S.strAverageNo, '') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(DAP.dtmDate, '') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(S.strFromCompanyName, '') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(S.strMessage, '') + '</td>
+		</tr>'
+		FROM tblRKDailyAveragePriceStage S WITH (NOLOCK)
+		JOIN tblRKDailyAveragePrice DAP ON DAP.intDailyAveragePriceId = S.intDailyAveragePriceId
+		WHERE ISNULL(strFeedStatus, '') = 'Failed'
+			AND ISNULL(ysnMailSent, 0) = 0
+
+		UPDATE tblRKDailyAveragePriceStage
+		SET ysnMailSent = 1
+		WHERE ISNULL(strFeedStatus, '') = 'Failed'
+			AND ISNULL(ysnMailSent, 0) = 0
+	END
+END
+
 SET @strHtml = REPLACE(@strHtml, '@header', @strHeader)
 SET @strHtml = REPLACE(@strHtml, '@detail', @strDetail)
 SET @strMessage = @strStyle + @strHtml

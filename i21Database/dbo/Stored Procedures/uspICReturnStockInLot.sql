@@ -133,6 +133,7 @@ BEGIN
 			,strBatchId
 			,intTransactionTypeId 
 			,intTransactionDetailId
+			,dtmCreated
 		)
 		SELECT 
 			intInventoryLotId			= @cbId
@@ -145,6 +146,7 @@ BEGIN
 			,strBatchId					= @strBatchId
 			,intTransactionTypeId		= @intTransactionTypeId
 			,intTransactionDetailId		= @intTransactionDetailId
+			,dtmCreated					= GETDATE()
 	END 
 END 
 

@@ -28,6 +28,7 @@ AS
 				ELSE FIFO.dblCost
 			END
 		, dblUnitQty = iu.dblUnitQty
+		, strInternalCode = res.strInternalCode
 		FROM
 			tblICItem i INNER JOIN tblICItemLocation il
 			ON i.intItemId = il.intItemId
@@ -36,6 +37,7 @@ AS
 			LEFT JOIN tblICStorageLocation sloc
 			ON sloc.intSubLocationId = sl.intCompanyLocationSubLocationId
 				AND sloc.intLocationId = sl.intCompanyLocationId
+			LEFT JOIN tblICRestriction res ON res.intRestrictionId = sloc.intRestrictionId
 			LEFT JOIN vyuICGetItemStockUOMTotals v
 			ON v.intItemId = i.intItemId
 				AND v.intItemLocationId = il.intItemLocationId
