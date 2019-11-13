@@ -17,8 +17,9 @@ BEGIN
 			SELECT DISTINCT SS.intSettleStorageId, SH.intBillId, 1, 1  
 			FROM tblGRSettleStorage SS 
 			INNER JOIN tblGRStorageHistory SH ON SH.intSettleStorageId = SS.intSettleStorageId
+			INNER JOIN tblAPBill B ON B.intBillId = SH.intBillId
 			WHERE SS.intSettleStorageId NOT IN (SELECT DISTINCT intSettleStorageId FROM tblGRSettleStorageBillDetail)
-
+			 
 		END
 
 		INSERT INTO tblSMCleanupLog VALUES('GRN', 'IMPORT-SETTTLE-STORAGE-BILL-DETAIL', GETDATE(), GETUTCDATE(), 1)	
