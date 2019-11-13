@@ -26,7 +26,7 @@ BEGIN TRY
 		INNER JOIN tblCTContractDetail  B ON A.intContractDetailId = B.intContractDetailId
 		INNER JOIN tblCTContractHeader  C ON C.intContractHeaderId = B.intContractHeaderId
 		INNER JOIN tblCTContractStatus    D ON D.intContractStatusId = B.intContractStatusId
-		OUTER APPLY (SELECT TOP 1 CASE WHEN (dblOldValue - dblTransactionQuantity) < 0 AND dblNewValue = 0 THEN 'Unfix' ELSE 'Fixed' END AS strStatus FROM vyuCTSequenceUsageHistory WHERE intContractDetailId = B.intContractDetailId ORDER BY intSequenceUsageHistoryId DESC) E
+		OUTER APPLY (SELECT TOP 1 CASE WHEN (dblOldValue - dblTransactionQuantity) < 0 AND dblNewValue = 0 THEN 'Unfix' ELSE 'Fixed' END AS strStatus FROM vyuCTSequenceUsageHistory WHERE intContractDetailId = B.intContractDetailId AND strFieldName = 'Scheduled Quantity' AND ysnDeleted = 0 ORDER BY intSequenceUsageHistoryId DESC) E
 		WHERE strFieldName ='Scheduled Quantity'
 		AND B.dblScheduleQty <> 0
 		AND D.strContractStatus = 'Open'
@@ -41,7 +41,7 @@ BEGIN TRY
 		INNER JOIN tblCTContractDetail  B ON A.intContractDetailId = B.intContractDetailId
 		INNER JOIN tblCTContractHeader  C ON C.intContractHeaderId = B.intContractHeaderId
 		INNER JOIN tblCTContractStatus    D ON D.intContractStatusId = B.intContractStatusId
-		OUTER APPLY (SELECT TOP 1 CASE WHEN (dblOldValue - dblTransactionQuantity) < 0 AND dblNewValue = 0 THEN 'Unfix' ELSE 'Fixed' END AS strStatus FROM vyuCTSequenceUsageHistory WHERE intContractDetailId = B.intContractDetailId ORDER BY intSequenceUsageHistoryId DESC) E
+		OUTER APPLY (SELECT TOP 1 CASE WHEN (dblOldValue - dblTransactionQuantity) < 0 AND dblNewValue = 0 THEN 'Unfix' ELSE 'Fixed' END AS strStatus FROM vyuCTSequenceUsageHistory WHERE intContractDetailId = B.intContractDetailId AND strFieldName = 'Scheduled Quantity' AND ysnDeleted = 0 ORDER BY intSequenceUsageHistoryId DESC) E
 		WHERE strFieldName ='Scheduled Quantity'
 		AND B.dblScheduleQty = 0
 		AND D.strContractStatus = 'Open'

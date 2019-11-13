@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspLGContractVsMarketDifferentialAnalysis]
-	 @intCommodityId INT
-	,@intUnitMeasureId INT
+	 @intCommodityId INT 
+	,@intUnitMeasureId INT 
 	,@intLocationId INT = NULL
 	,@dtmStartDate DATETIME = NULL
 	,@dtmEndDate DATETIME = NULL
@@ -15,21 +15,18 @@ SELECT
 						+ ISNULL(dblPackingAdjustmentRate, 0) 
 						+ ISNULL(dblPINCOAdjustmentRate, 0) 
 						+ ISNULL(dblCertificationAdjustmentRate, 0)
-	/* Net Basis = P.Contract Basis - Adjusted Basis */
-	,dblNetBasis = ISNULL(dblPBasis, 0)
-				 - (ISNULL(dblMBasis, 0) 
+	/* Net Basis = Adjusted Basis - P.Contract Basis */
+	,dblNetBasis = (ISNULL(dblMBasis, 0) 
 					+ ISNULL(dblPaymentTermAdjustmentRate, 0) 
 					+ ISNULL(dblPackingAdjustmentRate, 0) 
 					+ ISNULL(dblPINCOAdjustmentRate, 0) 
-					+ ISNULL(dblCertificationAdjustmentRate, 0))
-	/* Basis Amount = Net Basis x Sales Contract Unit Qty (in Absolute Value) */
-	,dblBasisAmount = ABS(((ISNULL(dblPBasis, 0)
-						 - (ISNULL(dblMBasis, 0) 
-							+ ISNULL(dblPaymentTermAdjustmentRate, 0) 
-							+ ISNULL(dblPackingAdjustmentRate, 0) 
-							+ ISNULL(dblPINCOAdjustmentRate, 0)
-							+ ISNULL(dblCertificationAdjustmentRate, 0))) 
-						* ISNULL(dblQty, 1)) * dblUnitQty)				
+					+ ISNULL(dblCertificationAdjustmentRate, 0)) - ISNULL(dblPBasis, 0)
+	/* Basis Amount = Net Basis x Sales Contract Unit Qty */
+	,dblBasisAmount = ((ISNULL(dblMBasis, 0) 
+					+ ISNULL(dblPaymentTermAdjustmentRate, 0) 
+					+ ISNULL(dblPackingAdjustmentRate, 0) 
+					+ ISNULL(dblPINCOAdjustmentRate, 0) 
+					+ ISNULL(dblCertificationAdjustmentRate, 0)) - ISNULL(dblPBasis, 0)) * ISNULL(dblQty, 1) * dblUnitQty		
 FROM
 	(SELECT
 		strMonthYr = SFM.strFutureMonth
@@ -85,13 +82,14 @@ FROM
 		LEFT JOIN tblEMEntity CUS ON CUS.intEntityId = SCH.intEntityId
 		LEFT JOIN tblSMFreightTerms PFT ON PFT.intFreightTermId = PCH.intFreightTermId
 		LEFT JOIN tblSMFreightTerms SFT ON SFT.intFreightTermId = SCH.intFreightTermId
-		LEFT JOIN tblSMTerm SPT ON SPT.intTermID = SCH.intTermId
+		LEFT JOIN tblSMTerm PT ON PT.intTermID = PCH.intTermId
 		LEFT JOIN tblSMCity PLOC ON PCH.intINCOLocationTypeId = PLOC.intCityId
 		LEFT JOIN tblSMCity SLOC ON SCH.intINCOLocationTypeId = SLOC.intCityId
 		LEFT JOIN tblICItem I ON I.intItemId = PCD.intItemId
 		LEFT JOIN tblICCommodityAttribute OG ON OG.intCommodityAttributeId = I.intOriginId
 		LEFT JOIN tblICCommodityUnitMeasure CM ON CM.intCommodityUnitMeasureId = SCH.intCommodityUOMId
 		LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = CM.intUnitMeasureId 
+		LEFT JOIN tblICItemUOM PUOM ON PUOM.intItemUOMId = PCD.intItemUOMId
 		LEFT JOIN tblICItemUOM SUOM ON SUOM.intItemUOMId = SCD.intItemUOMId
 		LEFT JOIN tblICItemUOM PBUOM ON PBUOM.intItemUOMId = PCD.intBasisUOMId
 		LEFT JOIN tblICItemUOM SBUOM ON SBUOM.intItemUOMId = SCD.intBasisUOMId
@@ -99,13 +97,16 @@ FROM
 		LEFT JOIN tblSMCurrency PCUR ON PCUR.intCurrencyID = PCD.intBasisCurrencyId
 		LEFT JOIN tblSMCurrency SCUR ON SCUR.intCurrencyID = SCD.intBasisCurrencyId
 		LEFT JOIN tblSMCurrency SMCUR ON SMCUR.intCurrencyID = SCUR.intMainCurrencyId
-		/* Latest Shipment for the Sales Contract */
+		LEFT JOIN tblICUnitMeasure PUM ON PUM.intUnitMeasureId = PUOM.intUnitMeasureId
+		/* Latest Shipment for the Purchase Contract with Freight Term Spot */
 		OUTER APPLY (SELECT TOP 1 L.intLoadId, dtmBLDate, intShippingLineEntityId, strOriginPort, strDestinationPort, 
 						strDestinationCity, intContainerTypeId, L.intNumberOfContainers
 					 FROM tblLGLoad L
 						LEFT JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
 					 WHERE L.intShipmentType = 1
-						AND LD.intSContractDetailId = SCD.intContractDetailId
+						AND LD.intPContractDetailId = PCD.intContractDetailId
+						AND PCH.intFreightTermId IN (SELECT intFreightTermId FROM tblSMFreightTerms FT 
+							JOIN tblCTPosition P ON P.intPositionId = FT.intPositionId AND P.strPositionType = 'Spot')
 					 ORDER BY L.dtmScheduledDate DESC
 					) SHPMT
 		/* Market Basis */
@@ -126,7 +127,7 @@ FROM
 						LEFT JOIN tblICItemUOM PTUOM ON PTUOM.intItemId = I.intItemId AND PTUOM.intUnitMeasureId = PTSA.intUnitMeasureId
 						LEFT JOIN tblSMCurrency PTCU ON PTCU.intCurrencyID = PTSA.intCurrencyId
 					 WHERE PTSA.intAdjustmentType = 1 
-						AND PTSA.strMasterRecord IN (SPT.strTerm, SPT.strTermCode)
+						AND PTSA.strMasterRecord IN (PT.strTerm, PT.strTermCode)
 						AND SCH.dtmContractDate BETWEEN PTSA.dtmValidFrom AND PTSA.dtmValidTo
 					 ORDER BY PTSA.intStandardAdjustmentId DESC
 					 ) PTADJ 
@@ -135,7 +136,9 @@ FROM
 					 FROM tblLGStandardAdjustment PKSA
 						LEFT JOIN tblICItemUOM PKUOM ON PKUOM.intItemId = I.intItemId AND PKUOM.intUnitMeasureId = PKSA.intUnitMeasureId
 						LEFT JOIN tblSMCurrency PKCU ON PKCU.intCurrencyID = PKSA.intCurrencyId
-					 WHERE PKSA.intAdjustmentType = 2 AND SCH.dtmContractDate BETWEEN PKSA.dtmValidFrom AND PKSA.dtmValidTo
+					 WHERE PKSA.intAdjustmentType = 2 
+						AND PKSA.strMasterRecord IN (PUM.strUnitMeasure)
+						AND SCH.dtmContractDate BETWEEN PKSA.dtmValidFrom AND PKSA.dtmValidTo
 					 ORDER BY PKSA.intStandardAdjustmentId DESC
 					 ) PKADJ
 		/* Certification Adjustment Basis */
@@ -143,7 +146,10 @@ FROM
 					 FROM tblLGStandardAdjustment CFSA
 						LEFT JOIN tblICItemUOM CFUOM ON CFUOM.intItemId = I.intItemId AND CFUOM.intUnitMeasureId = CFSA.intUnitMeasureId
 						LEFT JOIN tblSMCurrency CFCU ON CFCU.intCurrencyID = CFSA.intCurrencyId
-					 WHERE CFSA.intAdjustmentType = 3 AND SCH.dtmContractDate BETWEEN CFSA.dtmValidFrom AND CFSA.dtmValidTo
+					 WHERE CFSA.intAdjustmentType = 3 
+					 	AND CFSA.strMasterRecord IN (SELECT C.strCertificationName FROM tblCTContractCertification 
+							CC JOIN tblICCertification C ON C.intCertificationId = CC.intCertificationId WHERE CC.intContractDetailId = PCD.intContractDetailId)
+					 AND SCH.dtmContractDate BETWEEN CFSA.dtmValidFrom AND CFSA.dtmValidTo
 					 ORDER BY CFSA.intStandardAdjustmentId DESC
 					 ) CFADJ 
 		/* INCO Term Adjustment Basis */

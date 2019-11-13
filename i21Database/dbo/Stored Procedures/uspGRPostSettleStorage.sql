@@ -7,11 +7,11 @@
 	
 AS
 BEGIN TRY
-	--return
+--	return
 	SET NOCOUNT ON
-	declare @debug_awesome_ness bit = 0
+	declare @debug_awesome_ness bit = 1
 	----- DEBUG POINT -----
-	if @debug_awesome_ness = 1	 AND 1 = 1
+	if @debug_awesome_ness = 1	 AND 1 = 0
 	begin
 		print 'start post settlement'
 		select 'awesomeness begins here cash price', @dblCashPriceFromCt as [cash price from ct], @dblQtyFromCt as [dbl from ct], @intSettleStorageId as [settle storage id]
@@ -1236,7 +1236,13 @@ BEGIN TRY
 							AND IU.ysnStockUnit = 1
 					OUTER APPLY (
 						SELECT 
-							ISNULL(Round((Sum(SV.dblCashPrice * CASE WHEN ISNULL(SV.dblSettleContractUnits,0) > 0 THEN SV.dblSettleContractUnits ELSE SV.dblUnits END)), 2  ),0)  AS dblTotalCashPrice,
+							ISNULL(
+								SUM(
+									ROUND(
+										SV.dblCashPrice * CASE WHEN ISNULL(SV.dblSettleContractUnits,0) > 0 THEN SV.dblSettleContractUnits ELSE SV.dblUnits END
+									, 2)
+								)
+							,0)  AS dblTotalCashPrice,
 							sum(CASE WHEN ISNULL(SV.dblSettleContractUnits,0) > 0 THEN SV.dblSettleContractUnits ELSE SV.dblUnits END ) as dblTotalUnits 
 						FROM @SettleVoucherCreate SV
 						INNER JOIN tblICItem I
@@ -1268,13 +1274,13 @@ BEGIN TRY
 
 					if abs(@aa - @ab) < 0.01 
 					begin
-						set @additionalDiscrepancy = abs(@aa - @ab) * -1
+						set @additionalDiscrepancy = abs(@aa - @ab) * 1
 					end
 					
 					----- DEBUG POINT -----
 					if @debug_awesome_ness = 1 and 1 = 1
 					begin
-						select ' information about the discrepancy ',@aa, @ab, ( @aa - @ab )
+						select ' information about the discrepancy ',@aa, @ab, ( @aa - @ab ), @additionalDiscrepancy
 						
 					end
 					----- DEBUG POINT -----
@@ -1611,7 +1617,7 @@ BEGIN TRY
 								GOTO SettleStorage_Exit;
 							
 							----- DEBUG POINT -----
-							if @debug_awesome_ness = 1 AND 1 = 0
+							if @debug_awesome_ness = 1 AND 1 = 1
 							begin
 								select 'inventory transaction', * from tblICInventoryTransaction where strBatchId = @strBatchId order by intInventoryTransactionId desc
 								select 'dummy', * from @DummyGLEntries
@@ -2153,7 +2159,7 @@ BEGIN TRY
 					,a.intItemType				
 				 
 				----- DEBUG POINT -----				 
-				if @debug_awesome_ness = 1	 AND 1 = 1
+				if @debug_awesome_ness = 1	 AND 1 = 0
 				begin
 									
 					select 'ct available quantity for voucher', @intContractDetailId					
@@ -2740,15 +2746,16 @@ BEGIN TRY
 					if @debug_awesome_ness = 1  and 1 = 0
 					begin
 						select 'checking if it will create a voucher history ',@dblTotalVoucheredQuantity, @dblSelectedUnits, @createdVouchersId, @dblTotal, @requireApproval
+						select ' approval configuration '  , @EntityId, @intCreatedUserId, @LocationId
 						set @requireApproval = 0
 					end
 					----- DEBUG POINT -----
 
+					DECLARE @intVoucherId INT
+					SET @intVoucherId = CAST(@createdVouchersId AS INT)
 
 					IF ISNULL(@dblTotal,0) > 0 AND ISNULL(@requireApproval , 0) = 0
 					BEGIN
-							DECLARE @intVoucherId INT
-							SET @intVoucherId = CAST(@createdVouchersId AS INT)
 
 
 

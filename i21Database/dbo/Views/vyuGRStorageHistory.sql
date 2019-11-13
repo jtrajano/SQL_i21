@@ -101,7 +101,35 @@ SELECT DISTINCT TOP 100 PERCENT
 											ELSE ISNULL(SH.strPaidDescription,SH.strType) 
 										END
 	,dblCurrencyRate					= SH.dblCurrencyRate
-	,SH.strTransactionId	
+	,SH.strTransactionId
+	,REPLACE(STUFF
+	(
+		(
+			SELECT ', ' + B.strBillId
+			FROM tblGRSettleStorageBillDetail SSB
+				INNER JOIN tblAPBill B ON B.intBillId = SSB.intBillId
+			WHERE SSB.intSettleStorageId = SH.intSettleStorageId
+			GROUP BY SSB.intSettleStorageId, B.strBillId
+			FOR xml path('')
+		)
+	, 1
+	, 1
+	, ''
+	), ' ', '') strVoucherNumbers
+	,REPLACE(STUFF
+	(
+		(
+			SELECT ', ' + CONVERT(NVARCHAR(20), B.intBillId)
+			FROM tblGRSettleStorageBillDetail SSB
+				INNER JOIN tblAPBill B ON B.intBillId = SSB.intBillId
+			WHERE SSB.intSettleStorageId = SH.intSettleStorageId
+			GROUP BY SSB.intSettleStorageId, B.intBillId
+			FOR xml path('')
+		)
+	, 1
+	, 1
+	, ''
+	), ' ', '') strBillIds
 FROM tblGRStorageHistory SH
 JOIN tblGRCustomerStorage CS
 	ON CS.intCustomerStorageId = SH.intCustomerStorageId
