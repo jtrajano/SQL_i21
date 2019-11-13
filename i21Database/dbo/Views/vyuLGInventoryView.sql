@@ -49,8 +49,8 @@ FROM (
 		,strContainerNumber = Shipment.strContainerNumber
 		,strMarks = Shipment.strMarks
 		,strLotNumber = '' COLLATE Latin1_General_CI_AS
-		,strWarehouse = '' COLLATE Latin1_General_CI_AS
-		,strLocationName = '' COLLATE Latin1_General_CI_AS
+		,strWarehouse = Shipment.strSubLocationName
+		,strLocationName = Shipment.strLocationName
 		,strCondition = '' COLLATE Latin1_General_CI_AS
 		,dtmPostedDate = Shipment.dtmPostedDate
 		,dblQtyInStockUOM = (Shipment.dblContainerContractQty - IsNull (Shipment.dblContainerContractReceivedQty, 0.0)) * dbo.fnICConvertUOMtoStockUnit (Shipment.intItemId, Shipment.intItemUOMId, 1)
