@@ -7,7 +7,7 @@
 	
 AS
 BEGIN TRY
-	--return
+--	return
 	SET NOCOUNT ON
 	declare @debug_awesome_ness bit = 1
 	----- DEBUG POINT -----
@@ -1236,7 +1236,13 @@ BEGIN TRY
 							AND IU.ysnStockUnit = 1
 					OUTER APPLY (
 						SELECT 
-							ISNULL(Round((Sum(SV.dblCashPrice * CASE WHEN ISNULL(SV.dblSettleContractUnits,0) > 0 THEN SV.dblSettleContractUnits ELSE SV.dblUnits END)), 2  ),0)  AS dblTotalCashPrice,
+							ISNULL(
+								SUM(
+									ROUND(
+										SV.dblCashPrice * CASE WHEN ISNULL(SV.dblSettleContractUnits,0) > 0 THEN SV.dblSettleContractUnits ELSE SV.dblUnits END
+									, 2)
+								)
+							,0)  AS dblTotalCashPrice,
 							sum(CASE WHEN ISNULL(SV.dblSettleContractUnits,0) > 0 THEN SV.dblSettleContractUnits ELSE SV.dblUnits END ) as dblTotalUnits 
 						FROM @SettleVoucherCreate SV
 						INNER JOIN tblICItem I
@@ -1268,13 +1274,13 @@ BEGIN TRY
 
 					if abs(@aa - @ab) < 0.01 
 					begin
-						set @additionalDiscrepancy = abs(@aa - @ab) * -1
+						set @additionalDiscrepancy = abs(@aa - @ab) * 1
 					end
 					
 					----- DEBUG POINT -----
 					if @debug_awesome_ness = 1 and 1 = 1
 					begin
-						select ' information about the discrepancy ',@aa, @ab, ( @aa - @ab )
+						select ' information about the discrepancy ',@aa, @ab, ( @aa - @ab ), @additionalDiscrepancy
 						
 					end
 					----- DEBUG POINT -----
@@ -1611,7 +1617,7 @@ BEGIN TRY
 								GOTO SettleStorage_Exit;
 							
 							----- DEBUG POINT -----
-							if @debug_awesome_ness = 1 AND 1 = 0
+							if @debug_awesome_ness = 1 AND 1 = 1
 							begin
 								select 'inventory transaction', * from tblICInventoryTransaction where strBatchId = @strBatchId order by intInventoryTransactionId desc
 								select 'dummy', * from @DummyGLEntries
@@ -2151,7 +2157,7 @@ BEGIN TRY
 					,a.intItemType				
 				 
 				----- DEBUG POINT -----				 
-				if @debug_awesome_ness = 1	 AND 1 = 1
+				if @debug_awesome_ness = 1	 AND 1 = 0
 				begin
 									
 					select 'ct available quantity for voucher', @intContractDetailId					
