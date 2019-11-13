@@ -1598,8 +1598,8 @@ BEGIN TRY
 								,[dblReportingRate]	
 								,[dblForeignRate]
 								,[strRateType]
-								,[intSourceEntityId] --MOD
-								,[intCommodityId]--MOD
+								--,[intSourceEntityId] --MOD
+								--,[intCommodityId]--MOD
 							)
 							EXEC @intReturnValue = dbo.uspICPostCosting  
 								@ItemsToPost  
