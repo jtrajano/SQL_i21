@@ -166,10 +166,10 @@ WHERE NOT EXISTS(SELECT TOP 1 1 FROM tblICItemPricing WHERE intItemId = a.intIte
 ----====================================STEP 9======================================
 --Setup a grain discount category for each commodity if grain discounts are setup
 insert into tblICCategory (strCategoryCode, strDescription, strInventoryType, intCostingMethod, strInventoryTracking, intConcurrencyId)
-select distinct rtrim(gacom_com_cd)+'Discount', rtrim(gacom_desc)+' Discount', 'Other Charge' strInventoryType, 1 CostingMethod, 'Item Level' InventoryTracking, 1 intConcurrencyId
+select distinct rtrim(gacom_com_cd)+'GrainDiscount', rtrim(gacom_desc)+' Grain Discount', 'Other Charge' strInventoryType, 1 CostingMethod, 'Item Level' InventoryTracking, 1 intConcurrencyId
 from gacommst oc
 join gacdcmst od on rtrim(oc.gacom_com_cd) COLLATE SQL_Latin1_General_CP1_CS_AS = rtrim(od.gacdc_com_cd) COLLATE SQL_Latin1_General_CP1_CS_AS
-left join tblICCategory C on C.strCategoryCode = rtrim(gacom_com_cd)+'Discount'  COLLATE SQL_Latin1_General_CP1_CS_AS
+left join tblICCategory C on C.strCategoryCode = rtrim(gacom_com_cd)+'GrainDiscount'  COLLATE SQL_Latin1_General_CP1_CS_AS
 where C.intCategoryId is null
 
 
@@ -180,11 +180,11 @@ insert into tblICItem
 (strItemNo, strDescription, strShortName,strType, strInventoryTracking, strLotTracking, intCommodityId, intCategoryId, strStatus,
 intLifeTime, strCostType, strCostMethod,ysnAccrue)
 select rtrim(gacdc_com_cd)+rtrim(oc.gacdc_cd), rtrim(gacdc_com_cd)+' '+rtrim(gacdc_desc), rtrim(oc.gacdc_cd) strShortName,'Other Charge' strInventoryType, 'Item Level' InventoryTracking, 'No' LotTracking,
-ic.intCommodityId, icat.intCategoryId, 'Active' Status, 1 intLifeTime, 'Discount' strCostType
+ic.intCommodityId, icat.intCategoryId, 'Active' Status, 1 intLifeTime, 'Grain Discount' strCostType
 ,'Per Unit' strCostMethod, 1 ysnAccrue
 from gacdcmst oc 
 join tblICCommodity ic on ic.strCommodityCode COLLATE SQL_Latin1_General_CP1_CS_AS = rtrim(oc.gacdc_com_cd) COLLATE SQL_Latin1_General_CP1_CS_AS
-join tblICCategory icat on icat.strCategoryCode COLLATE SQL_Latin1_General_CP1_CS_AS = rtrim(oc.gacdc_com_cd)+'Discount' COLLATE SQL_Latin1_General_CP1_CS_AS
+join tblICCategory icat on icat.strCategoryCode COLLATE SQL_Latin1_General_CP1_CS_AS = rtrim(oc.gacdc_com_cd)+'GrainDiscount' COLLATE SQL_Latin1_General_CP1_CS_AS
 left join tblICItem  I on I.strItemNo = rtrim(gacdc_com_cd)+rtrim(oc.gacdc_cd)  COLLATE SQL_Latin1_General_CP1_CS_AS
 where I.intItemId is null
 
@@ -196,7 +196,7 @@ select I.intItemId, CM.intUnitMeasureId, 1 dblUnitQty, 0 ysnStockUnit,1 AllowPur
 from tblICCommodityUnitMeasure CM
 join tblICCommodity C on C.intCommodityId = CM.intCommodityId
 join tblICItem I on C.intCommodityId = I.intCommodityId
-where I.strCostType = 'Discount'
+where I.strCostType = 'Grain Discount'
 and  NOT EXISTS (select intItemId from tblICItemUOM where intItemId = I.intItemId and intUnitMeasureId = CM.intUnitMeasureId)
 
 
@@ -209,7 +209,7 @@ select I.intItemId, CL.intLocationId, 1 CostingMethod, 0 AllowNegative, 1 Concur
 --,I.strItemNo, I.intCommodityId
 from  
 (select I.intItemId, I.strItemNo, I.intCommodityId from tblICItem I
-where I.strCostType = 'Discount') I
+where I.strCostType = 'Grain Discount') I
 join 
 (select distinct IL.intLocationId, I.intCommodityId
 from tblICItemLocation IL

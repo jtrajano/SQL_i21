@@ -117,7 +117,7 @@ BEGIN
 				(
 					OtherCharge.ysnPrice = 1
 					AND OtherCharge.ysnInventoryCost = 1
-					AND ISNULL(Item.strCostType, '') <> 'Discount' 
+					AND ISNULL(Item.strCostType, '') <> 'Grain Discount' 
 				)
 			)			
 			

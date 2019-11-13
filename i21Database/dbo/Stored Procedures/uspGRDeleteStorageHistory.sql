@@ -22,7 +22,7 @@ BEGIN TRY
 							JOIN tblICItem Item ON Item.intItemId = ARD.intItemId
 							WHERE ARD.intInvoiceId = @IntSourceKey
 							AND ARD.intCustomerStorageId IS NULL
-							AND Item.strCostType <> 'Discount'
+							AND Item.strCostType <> 'Grain Discount'
 							AND Item.strType <> 'Other Charge'
 					      )
 			BEGIN

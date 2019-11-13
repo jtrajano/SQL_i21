@@ -126,7 +126,7 @@ END
 		INNER JOIN tblSCScaleSetup SS ON T.intScaleSetupId = SS.intScaleSetupId
 		WHERE BD.intInventoryReceiptChargeId IS NOT NULL
 			AND Bill.ysnPosted = 1
-			AND Itm.strCostType = 'Discount'
+			AND Itm.strCostType = 'Grain Discount'
 			AND Itm.intItemId <> SS.intDefaultFeeItemId
 			AND CAST(Bill.dtmDate AS date) BETWEEN @dtmFrom AND @dtmTo
 			AND IR.intEntityVendorId = @intEntityId
@@ -172,7 +172,7 @@ END
 		INNER JOIN tblSCScaleSetup SS ON T.intScaleSetupId = SS.intScaleSetupId
 		WHERE BD.intInventoryReceiptChargeId IS NOT NULL
 			AND Bill.ysnPosted = 1
-			AND Itm.strCostType <> 'Discount'
+			AND Itm.strCostType <> 'Grain Discount'
 			AND BD.intItemId <> SS.intDefaultFeeItemId
 			AND CAST(Bill.dtmDate AS date) BETWEEN @dtmFrom AND @dtmTo
 			AND IR.intEntityVendorId = @intEntityId
@@ -367,7 +367,7 @@ END
 		INNER JOIN tblSCScaleSetup SS ON T.intScaleSetupId = SS.intScaleSetupId
 		WHERE ID.intInventoryShipmentChargeId IS NOT NULL
 			AND I.ysnPosted = 1
-			AND Itm.strCostType = 'Discount'
+			AND Itm.strCostType = 'Grain Discount'
 			AND Itm.intItemId <> SS.intDefaultFeeItemId
 			AND CAST(I.dtmDate AS date) BETWEEN @dtmFrom AND @dtmTo
 			AND InvShp.intEntityCustomerId = @intEntityId
@@ -411,7 +411,7 @@ END
 		INNER JOIN tblSCScaleSetup SS ON T.intScaleSetupId = SS.intScaleSetupId
 		WHERE ID.intInventoryShipmentChargeId IS NOT NULL
 			AND I.ysnPosted = 1
-			AND Itm.strCostType <> 'Discount'
+			AND Itm.strCostType <> 'Grain Discount'
 			AND ID.intItemId <> SS.intDefaultFeeItemId
 			AND InvShp.intEntityCustomerId = @intEntityId
 			AND T.intCommodityId IN (SELECT Item from [dbo].[fnSplitString](@intCommodityIds, ','))

@@ -90,7 +90,7 @@ BEGIN
 		,[ysnSpecialCommission] = 0 
 		,[intCommodityId]	    = t.intCommodityId 
 		,[strCostMethod]		= 'Amount'  
-		,strCostType			= 'Discount'
+		,strCostType			= 'Grain Discount'
 		,[ysnAccrue]			= 0
 		,[ysnPrice]				= 0 		
 		,intConcurrencyId		= 1  

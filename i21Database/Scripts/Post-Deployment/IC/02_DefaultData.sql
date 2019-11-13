@@ -180,3 +180,9 @@ UPDATE tblICItem SET strManufactureType = 'Raw Material' WHERE strType = 'Raw Ma
 UPDATE tblICItem SET strType = 'Inventory' WHERE strType IN ('Finished Good', 'Raw Material')
 
 print('/*******************  END OF Item Type Migration **************/')
+
+print('/*******************  BEGIN Other Charge Cost Type Migration (Rename Discount to Grain Discount) *******************/')
+
+UPDATE tblICItem SET strCostType = 'Grain Discount' WHERE strCostType = 'Discount'
+
+print('/*******************  END OF Other Charge Cost Type Migration **************/')

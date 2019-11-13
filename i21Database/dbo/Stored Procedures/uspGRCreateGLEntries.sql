@@ -210,14 +210,14 @@ BEGIN
 		,[dblRate]							= CASE
 												WHEN QM.strDiscountChargeType = 'Percent' AND QM.dblDiscountAmount < 0 THEN (QM.dblDiscountAmount * (CASE WHEN ISNULL(SS.dblCashPrice,0) > 0 THEN SS.dblCashPrice ELSE CD.dblCashPrice END) 												
 												* 
-														case when isnull(IC.strCostType, '') = 'Discount' and QM.dblDiscountAmount < 0 then 1 
+														case when isnull(IC.strCostType, '') = 'Grain Discount' and QM.dblDiscountAmount < 0 then 1 
 														else  -1 end
 												
 												)
 
 												WHEN QM.strDiscountChargeType = 'Percent' AND QM.dblDiscountAmount > 0 THEN (QM.dblDiscountAmount * (CASE WHEN ISNULL(SS.dblCashPrice,0) > 0 THEN SS.dblCashPrice ELSE CD.dblCashPrice END))
 												WHEN QM.strDiscountChargeType = 'Dollar' AND QM.dblDiscountAmount < 0 THEN (QM.dblDiscountAmount * 
-												case when isnull(IC.strCostType, '') = 'Discount' and QM.dblDiscountAmount < 0 then 1 
+												case when isnull(IC.strCostType, '') = 'Grain Discount' and QM.dblDiscountAmount < 0 then 1 
 														else  -1 end
 												)
 												WHEN QM.strDiscountChargeType = 'Dollar' AND QM.dblDiscountAmount > 0 THEN QM.dblDiscountAmount
@@ -231,7 +231,7 @@ BEGIN
 														WHEN @ysnIsStorage = 0 THEN 0												
 													END
 											END
-		,[ysnAccrue]						= case when isnull(IC.strCostType, '') = 'Discount' then
+		,[ysnAccrue]						= case when isnull(IC.strCostType, '') = 'Grain Discount' then
 												0 
 											else
 												CASE
@@ -579,13 +579,13 @@ BEGIN
 			,dtmDate					= InventoryCostCharges.dtmDate
 			,strBatchId					= @strBatchId
 			,intAccountId				= GLAccount.intAccountId
-			,dblDebit					= case when InventoryCostCharges.strICCCostType = 'Discount' then 
+			,dblDebit					= case when InventoryCostCharges.strICCCostType = 'Grain Discount' then 
 											case 
 												when InventoryCostCharges.dblCost < 0 then
 													InventoryCostCharges.dblCost  
 												else 0 end
 											else     0 end
-			,dblCredit					= case when InventoryCostCharges.strICCCostType = 'Discount' then 
+			,dblCredit					= case when InventoryCostCharges.strICCCostType = 'Grain Discount' then 
 											
 											case when InventoryCostCharges.dblCost < 0 
 												then 0 
@@ -649,12 +649,12 @@ BEGIN
 			,dtmDate					= InventoryCostCharges.dtmDate
 			,strBatchId					= @strBatchId
 			,intAccountId				= GLAccount.intAccountId
-			,dblDebit					= case when InventoryCostCharges.strICCCostType = 'Discount' then 
+			,dblDebit					= case when InventoryCostCharges.strICCCostType = 'Grain Discount' then 
 											case when InventoryCostCharges.dblCost < 0 
 												then 0 else
 												InventoryCostCharges.dblCost end
 											else     InventoryCostCharges.dblCost end 
-			,dblCredit					= case when InventoryCostCharges.strICCCostType = 'Discount' then 
+			,dblCredit					= case when InventoryCostCharges.strICCCostType = 'Grain Discount' then 
 											case when InventoryCostCharges.dblCost < 0 then
 												InventoryCostCharges.dblCost 
 												else 0 end
