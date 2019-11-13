@@ -94,7 +94,7 @@ FROM (
 	LEFT JOIN tblSMCurrency	CY ON CY.intCurrencyID = CU.intMainCurrencyId
 	WHERE (Shipment.dblContainerContractQty - IsNull(Shipment.dblContainerContractReceivedQty, 0.0)) > 0.0 
 	   AND Shipment.ysnInventorized = 1
-	   AND Shipment.intLoadId NOT IN (SELECT intLoadId FROM tblARInvoice)
+	   AND Shipment.intLoadId NOT IN (SELECT intLoadId FROM tblARInvoice WHERE intLoadId IS NOT NULL)
 
 	UNION ALL
 
