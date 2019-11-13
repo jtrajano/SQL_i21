@@ -76,7 +76,7 @@ Begin
 
 		Begin Tran
 
-		Update tblLGLoad Set dtmETAPOD=@dtmETA,dtmPlannedAvailabilityDate=@dtmETA,intConcurrencyId=intConcurrencyId+1 Where intLoadId=@intLoadId
+		Update tblLGLoad Set dtmETAPOD=@dtmETA,dtmETAPOD1=@dtmETA,dtmPlannedAvailabilityDate=@dtmETA,intConcurrencyId=intConcurrencyId+1 Where intLoadId=@intLoadId
 
 		-- Set planned availability date and send a feed to SAP
 		DELETE
