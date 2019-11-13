@@ -152,8 +152,24 @@ SELECT 	 SQ.intContractDetailId
 	LEFT JOIN 	tblCTSubBook					 	SK	WITH (NOLOCK) ON	SK.intSubBookId						=	SQ.intSubBookId
 	LEFT JOIN 	tblICItemUOM					 	WU	WITH (NOLOCK) ON	WU.intItemUOMId						=	SQ.intNetWeightUOMId
 	LEFT JOIN 	tblICUnitMeasure				 	U7	WITH (NOLOCK) ON	U7.intUnitMeasureId					=	WU.intUnitMeasureId
-	LEFT JOIN 	tblICUnitMeasure				 	U8	WITH (NOLOCK) ON	1 = 1
-														AND U8.strUnitMeasure					=	'Ton'
+
+	 LEFT JOIN
+		(
+			select intItemId, intUnitMeasureId from
+			(
+				select intFirstPriority = convert(int,1), a1.intItemId, a2.intUnitMeasureId from tblICItemUOM a1, tblICUnitMeasure a2
+				where a2.intUnitMeasureId = a1.intUnitMeasureId and a2.strUnitMeasure = 'Ton'
+				union all
+				select intFirstPriority = convert(int,1), a1.intItemId, a2.intUnitMeasureId from tblICItemUOM a1, tblICUnitMeasure a2
+				where a2.intUnitMeasureId = a1.intUnitMeasureId and a2.strUnitMeasure = 'Metric Ton'
+				and a1.intItemId not in
+					(
+						select a1.intItemId from tblICItemUOM a1, tblICUnitMeasure a2
+						where a2.intUnitMeasureId = a1.intUnitMeasureId and a2.strUnitMeasure = 'Ton'
+					)
+			) as a3
+		) U8 ON U8.intItemId = CD.intItemId
+	
 	LEFT JOIN 	
 	(
 		SELECT 	intPContractDetailId,
