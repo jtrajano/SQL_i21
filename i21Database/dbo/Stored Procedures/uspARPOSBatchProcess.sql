@@ -273,7 +273,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM #POSTRANSACTIONS)
 				,[intSalesAccountId]					= NULL
 				,[strPONumber]							= POS.strPONumber
 				,[intFreightTermId]						= CASE WHEN ISNULL(POS.ysnTaxExempt,0) = 0 THEN CL.intFreightTermId ELSE NULL END
-				,[strInvoiceOriginId]					= CASE WHEN strPOSType = 'Returned' THEN POS.strCreditMemoNumber ELSE POS.strInvoiceNumber END
+				,[strInvoiceOriginId]					= CASE WHEN strPOSType = 'Returned' THEN ISNULL(POS.strCreditMemoNumber, POS.strInvoiceNumber) ELSE POS.strInvoiceNumber END
 				,[ysnUseOriginIdAsInvoiceNumber]		= CAST(1 AS BIT)
 			FROM tblARPOS POS 
 			INNER JOIN #POSTRANSACTIONS RT ON POS.intPOSId = RT.intPOSId
@@ -313,7 +313,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM #POSTRANSACTIONS)
 				,[intSalesAccountId]					= ISNULL(CL.intSalesDiscounts, @intDiscountAccountId)
 				,[strPONumber]							= POS.strPONumber
 				,[intFreightTermId]						= CASE WHEN ISNULL(POS.ysnTaxExempt,0) = 0 THEN CL.intFreightTermId ELSE NULL END
-				,[strInvoiceOriginId]					= CASE WHEN strPOSType = 'Returned' THEN POS.strCreditMemoNumber ELSE POS.strInvoiceNumber END
+				,[strInvoiceOriginId]					= CASE WHEN strPOSType = 'Returned' THEN ISNULL(POS.strCreditMemoNumber, POS.strInvoiceNumber) ELSE POS.strInvoiceNumber END
 				,[ysnUseOriginIdAsInvoiceNumber]		= CAST(1 AS BIT)
 			FROM tblARPOS POS
 			INNER JOIN #POSTRANSACTIONS RT ON POS.intPOSId = RT.intPOSId
@@ -622,7 +622,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM #POSTRANSACTIONS)
 				,strPaymentInfo					= CASE WHEN POSPAYMENTS.strPaymentMethod IN ('Check' ,'Debit Card', 'Manual Credit Card') THEN POSPAYMENTS.strReferenceNo ELSE NULL END
 				,strNotes						= POS.strReceiptNumber
 				,intBankAccountId				= BA.intBankAccountId
-				,dblAmountPaid					= ISNULL(POSPAYMENTS.dblAmount, 0) * dbo.fnARGetInvoiceAmountMultiplier(IFP.strTransactionType)
+				,dblAmountPaid					= ABS(ISNULL(POSPAYMENTS.dblAmount, 0)) * dbo.fnARGetInvoiceAmountMultiplier(IFP.strTransactionType)
 				,intEntityId					= @intEntityUserId
 				,intInvoiceId					= IFP.intInvoiceId
 				,strTransactionType				= IFP.strTransactionType
@@ -631,7 +631,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM #POSTRANSACTIONS)
 				,intInvoiceAccountId			= IFP.intAccountId
 				,dblInvoiceTotal				= IFP.dblInvoiceTotal * dbo.fnARGetInvoiceAmountMultiplier(IFP.strTransactionType)
 				,dblBaseInvoiceTotal			= IFP.dblBaseInvoiceTotal * dbo.fnARGetInvoiceAmountMultiplier(IFP.strTransactionType)
-				,dblPayment						= ISNULL(POSPAYMENTS.dblAmount, 0) * dbo.fnARGetInvoiceAmountMultiplier(IFP.strTransactionType)
+				,dblPayment						= ABS(ISNULL(POSPAYMENTS.dblAmount, 0)) * dbo.fnARGetInvoiceAmountMultiplier(IFP.strTransactionType)
 				,dblAmountDue					= IFP.dblInvoiceTotal * dbo.fnARGetInvoiceAmountMultiplier(IFP.strTransactionType)
 				,dblBaseAmountDue				= IFP.dblInvoiceTotal * dbo.fnARGetInvoiceAmountMultiplier(IFP.strTransactionType)
 				,strInvoiceReportNumber			= IFP.strInvoiceNumber
