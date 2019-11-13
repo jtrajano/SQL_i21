@@ -317,56 +317,56 @@ BEGIN
 					AND s.intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 					AND strTransactionId NOT IN (SELECT strTransactionId FROM @transfer)
 
-				UNION ALL
-				SELECT strCommodityCode 
-					, i.strItemNo
-					, Category.strCategoryCode
-					, dblTotal = dbo.fnCalculateQtyBetweenUOM(iuomStck.intItemUOMId, iuomTo.intItemUOMId, (ISNULL(ITS.dblQty ,0)))
-					, strLocationName
-					, intCommodityId = @intCommodityId
-					, intFromCommodityUnitMeasureId = @intCommodityUnitMeasureId
-					, ITS.intItemUOMId
-					, strInventoryType = 'Company Titled' COLLATE Latin1_General_CI_AS
-					, ITS.dtmDate
-					, strTransactionType = 'Transfer Storage'
-					, ITS.intTransactionId
-					, ITS.strTransactionId
-					, ITS.intTransactionDetailId
-					, TSR.intTransferStorageId
-				FROM tblICInventoryTransaction ITS
-				INNER JOIN tblGRTransferStorageReference TSR
-					ON TSR.intTransferStorageId = ITS.intTransactionId AND TSR.intTransferStorageSplitId = ITS.intTransactionDetailId
-				INNER JOIN tblGRTransferStorage GTS 
-					ON TSR.intTransferStorageId = GTS.intTransferStorageId
-				INNER JOIN tblGRCustomerStorage FromStorage
-					ON FromStorage.intCustomerStorageId = TSR.intSourceCustomerStorageId
-				INNER JOIN tblGRStorageType FromType
-					ON FromType.intStorageScheduleTypeId = FromStorage.intStorageTypeId
-				INNER JOIN tblGRCustomerStorage ToStorage
-					ON ToStorage.intCustomerStorageId = TSR.intToCustomerStorageId
-				INNER JOIN tblGRStorageType ToType
-					ON ToType.intStorageScheduleTypeId = ToStorage.intStorageTypeId
-				JOIN tblICItemUOM IU
-					ON IU.intItemId = ToStorage.intItemId
-						AND IU.ysnStockUnit = 1
-				INNER JOIN tblICItemLocation IL
-					ON IL.intItemId = ToStorage.intItemId AND IL.intLocationId = ToStorage.intCompanyLocationId
-				INNER JOIN tblGRTransferStorage TS
-					ON TSR.intTransferStorageId = TS.intTransferStorageId
-				JOIN tblICItem i ON i.intItemId = ITS.intItemId
-				JOIN tblICCommodityUnitMeasure cuom ON i.intCommodityId = cuom.intCommodityId AND cuom.ysnStockUnit = 1
-				JOIN tblICItemUOM iuomStck ON ITS.intItemId = iuomStck.intItemId AND iuomStck.ysnStockUnit = 1
-				JOIN tblICItemUOM iuomTo ON ITS.intItemId = iuomTo.intItemId AND iuomTo.intUnitMeasureId = cuom.intUnitMeasureId
-				JOIN tblICCommodity c ON i.intCommodityId = c.intCommodityId
-				JOIN tblICCategory Category ON Category.intCategoryId = i.intCategoryId
-				JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = GTS.intCompanyLocationId
-				WHERE c.intCommodityId = @intCommodityId
-                    AND i.intItemId = ISNULL(@intItemId, i.intItemId)
-                    AND GTS.intCompanyLocationId = ISNULL(@intLocationId, GTS.intCompanyLocationId)
-                    AND CONVERT(DATETIME, CONVERT(VARCHAR(10), ITS.dtmDate, 110), 110) <= CONVERT(DATETIME, @dtmToTransactionDate)
-                    AND GTS.intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
-                    AND (FromType.ysnDPOwnedType = 1 AND ToType.ysnDPOwnedType = 0) --OR (FromType.strStorageTypeDescription = 'DELAYED PRICING' AND ToType.strStorageTypeDescription = 'OPEN STORAGE')
-                    AND ITS.intTransactionTypeId = 56
+				--UNION ALL
+				--SELECT strCommodityCode 
+				--	, i.strItemNo
+				--	, Category.strCategoryCode
+				--	, dblTotal = dbo.fnCalculateQtyBetweenUOM(iuomStck.intItemUOMId, iuomTo.intItemUOMId, (ISNULL(ITS.dblQty ,0)))
+				--	, strLocationName
+				--	, intCommodityId = @intCommodityId
+				--	, intFromCommodityUnitMeasureId = @intCommodityUnitMeasureId
+				--	, ITS.intItemUOMId
+				--	, strInventoryType = 'Company Titled' COLLATE Latin1_General_CI_AS
+				--	, ITS.dtmDate
+				--	, strTransactionType = 'Transfer Storage test'
+				--	, ITS.intTransactionId
+				--	, ITS.strTransactionId
+				--	, ITS.intTransactionDetailId
+				--	, TSR.intTransferStorageId
+				--FROM tblICInventoryTransaction ITS
+				--INNER JOIN tblGRTransferStorageReference TSR
+				--	ON TSR.intTransferStorageId = ITS.intTransactionId AND TSR.intTransferStorageSplitId = ITS.intTransactionDetailId
+				--INNER JOIN tblGRTransferStorage GTS 
+				--	ON TSR.intTransferStorageId = GTS.intTransferStorageId
+				--INNER JOIN tblGRCustomerStorage FromStorage
+				--	ON FromStorage.intCustomerStorageId = TSR.intSourceCustomerStorageId
+				--INNER JOIN tblGRStorageType FromType
+				--	ON FromType.intStorageScheduleTypeId = FromStorage.intStorageTypeId
+				--INNER JOIN tblGRCustomerStorage ToStorage
+				--	ON ToStorage.intCustomerStorageId = TSR.intToCustomerStorageId
+				--INNER JOIN tblGRStorageType ToType
+				--	ON ToType.intStorageScheduleTypeId = ToStorage.intStorageTypeId
+				--JOIN tblICItemUOM IU
+				--	ON IU.intItemId = ToStorage.intItemId
+				--		AND IU.ysnStockUnit = 1
+				--INNER JOIN tblICItemLocation IL
+				--	ON IL.intItemId = ToStorage.intItemId AND IL.intLocationId = ToStorage.intCompanyLocationId
+				--INNER JOIN tblGRTransferStorage TS
+				--	ON TSR.intTransferStorageId = TS.intTransferStorageId
+				--JOIN tblICItem i ON i.intItemId = ITS.intItemId
+				--JOIN tblICCommodityUnitMeasure cuom ON i.intCommodityId = cuom.intCommodityId AND cuom.ysnStockUnit = 1
+				--JOIN tblICItemUOM iuomStck ON ITS.intItemId = iuomStck.intItemId AND iuomStck.ysnStockUnit = 1
+				--JOIN tblICItemUOM iuomTo ON ITS.intItemId = iuomTo.intItemId AND iuomTo.intUnitMeasureId = cuom.intUnitMeasureId
+				--JOIN tblICCommodity c ON i.intCommodityId = c.intCommodityId
+				--JOIN tblICCategory Category ON Category.intCategoryId = i.intCategoryId
+				--JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = GTS.intCompanyLocationId
+				--WHERE c.intCommodityId = @intCommodityId
+    --                AND i.intItemId = ISNULL(@intItemId, i.intItemId)
+    --                AND GTS.intCompanyLocationId = ISNULL(@intLocationId, GTS.intCompanyLocationId)
+    --                AND CONVERT(DATETIME, CONVERT(VARCHAR(10), ITS.dtmDate, 110), 110) <= CONVERT(DATETIME, @dtmToTransactionDate)
+    --                AND GTS.intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
+    --                AND (FromType.ysnDPOwnedType = 1 AND ToType.ysnDPOwnedType = 0) --OR (FromType.strStorageTypeDescription = 'DELAYED PRICING' AND ToType.strStorageTypeDescription = 'OPEN STORAGE')
+    --                AND ITS.intTransactionTypeId = 56
 
 
 			) t
@@ -944,7 +944,7 @@ BEGIN
 				dtmDate
 				,dblUnpaidIncrease = CASE WHEN dblQtyShipped < 0 THEN 0 ELSE dblQtyShipped END
 				,dblUnpaidDecrease = CASE WHEN dblQtyShipped < 0 THEN ABS(dblQtyShipped) ELSE 0 END
-				,dblUnpaidBalance = 0
+				,dblUnpaidBalance = dblQtyShipped
 				,dblPaidBalance = 0
 				,strTransactionId = strTransferStorageTicket
 				,intTransactionId
