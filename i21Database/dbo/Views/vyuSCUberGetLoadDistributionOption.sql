@@ -17,5 +17,3 @@ AS
 		inner join tblSCTicketPool TP on DO.intTicketPoolId = TP.intTicketPoolId
 		inner join tblSCTicketType TY on TY.intTicketTypeId = DO.intTicketTypeId 
 		inner join tblSCListTicketTypes LT on LT.intTicketTypeId = TY.intListTicketTypeId
-	where 
-		DO.strDistributionOption = 'LOD'
