@@ -242,6 +242,9 @@ SELECT
 				WHEN CostMethod.intCostingMethodId = 3 THEN dbo.fnCalculateCostBetweenUOM(LIFO.intItemUOMId, StockUOM.intItemUOMId, LIFO.dblCost)
 				ELSE t.dblCost
 			END
+	, intDecimalPlaces = iUOM.intDecimalPlaces
+	, ItemUOM.ysnAllowPurchase
+	, ItemUOM.ysnAllowSale
 FROM @tblInventoryTransactionGrouped t INNER JOIN tblICItem i
 		ON i.intItemId = t.intItemId
 	INNER JOIN (
@@ -320,3 +323,4 @@ FROM @tblInventoryTransactionGrouped t INNER JOIN tblICItem i
 		ON strgLoc.intStorageLocationId = t.intStorageLocationId
 	LEFT JOIN tblICCostingMethod CostMethod
 		ON CostMethod.intCostingMethodId = t.intCostingMethodId
+	ORDER BY iUOM.strUnitMeasure ASC
