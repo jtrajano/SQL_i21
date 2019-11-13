@@ -132,11 +132,20 @@ Begin
 		Set @strGMT = 'GMT' + CASE WHEN DATEDIFF(hh, GETUTCDATE(), GETDATE())>0 THEN '+' ELSE '-' END + CONVERT(varchar,ABS(DATEDIFF(hh, GETUTCDATE(), GETDATE())))
 
 		--Add Audit Trail Record
-		Set @strJson='{"action":"Updated","change":"Updated - Record: ' + CONVERT(VARCHAR,@intLoadId) + '","keyValue":' + CONVERT(VARCHAR,@intLoadId) + 
-		',"iconCls":"small-tree-modified","children":[{"change":"dtmETAPOD","from":"' + case When @dtmOldETA IS NULL THEN '' ELSE  CONVERT(VARCHAR(10),@dtmOldETA,121) END  + ' ' + @strGMT + '","to":"' + CONVERT(VARCHAR(10),@dtmETA,121) + ' ' + @strGMT + '","leaf":true,"iconCls":"small-gear"}]}'
+		--Set @strJson='{"action":"Updated","change":"Updated - Record: ' + CONVERT(VARCHAR,@intLoadId) + '","keyValue":' + CONVERT(VARCHAR,@intLoadId) + 
+		--',"iconCls":"small-tree-modified","children":[{"change":"dtmETAPOD","from":"' + case When @dtmOldETA IS NULL THEN '' ELSE  CONVERT(VARCHAR(10),@dtmOldETA,121) END  + ' ' + @strGMT + '","to":"' + CONVERT(VARCHAR(10),@dtmETA,121) + ' ' + @strGMT + '","leaf":true,"iconCls":"small-gear"}]}'
 
-		Insert Into tblSMAuditLog(strActionType,strTransactionType,strRecordNo,strDescription,strRoute,strJsonData,dtmDate,intEntityId,intConcurrencyId)
-		Values('Updated','Logistics.view.ShipmentSchedule',@intLoadId,'','',@strJson,GETUTCDATE(),@intEntityId,1)
+		--Insert Into tblSMAuditLog(strActionType,strTransactionType,strRecordNo,strDescription,strRoute,strJsonData,dtmDate,intEntityId,intConcurrencyId)
+		--Values('Updated','Logistics.view.ShipmentSchedule',@intLoadId,'','',@strJson,GETUTCDATE(),@intEntityId,1)
+
+		Set @strJson='{"change":"dtmETAPOD","from":"' + case When @dtmOldETA IS NULL THEN '' ELSE  CONVERT(VARCHAR(10),@dtmOldETA,121) END  + ' ' + @strGMT + '","to":"' + CONVERT(VARCHAR(10),@dtmETA,121) + ' ' + @strGMT + '","leaf":true,"iconCls":"small-gear"}'
+
+		EXEC uspSMAuditLog @keyValue = @intLoadId
+				,@screenName = 'Logistics.view.ShipmentSchedule'
+				,@entityId = @intEntityId
+				,@actionType = 'Updated'
+				,@actionIcon = 'small-tree-modified'
+				,@details = @strJson
 
 		Select TOP 1 @intLoadStgId=intLoadStgId From tblLGLoadStg Where intLoadId=@intLoadId Order By intLoadStgId Desc
 

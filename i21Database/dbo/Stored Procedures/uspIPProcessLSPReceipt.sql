@@ -129,15 +129,24 @@ Begin
 			Where ri.intInventoryReceiptId=@intReceiptId
 
 			--Add Audit Trail Record
-			Set @strJson='{"action":"Created","change":"Created - Record: ' + CONVERT(VARCHAR,@intReceiptId) + '","keyValue":' + CONVERT(VARCHAR,@intReceiptId) + ',"iconCls":"small-new-plus","leaf":true}'
+			--Set @strJson='{"action":"Created","change":"Created - Record: ' + CONVERT(VARCHAR,@intReceiptId) + '","keyValue":' + CONVERT(VARCHAR,@intReceiptId) + ',"iconCls":"small-new-plus","leaf":true}'
 	
 			Set @dtmDate =  GETUTCDATE()
 
 			Select TOP 1 @intEntityId=[intEntityId] From tblAPVendor 
 			Where strVendorAccountNum=(Select strWarehouseVendorAccNo From tblIPLSPPartner Where strPartnerNo=@strPartnerNo)
 
-			Insert Into tblSMAuditLog(strActionType,strTransactionType,strRecordNo,strDescription,strRoute,strJsonData,dtmDate,intEntityId,intConcurrencyId)
-			Values('Created','Inventory.view.InventoryReceipt',@intReceiptId,'','',@strJson,@dtmDate,@intEntityId,1)
+			--Insert Into tblSMAuditLog(strActionType,strTransactionType,strRecordNo,strDescription,strRoute,strJsonData,dtmDate,intEntityId,intConcurrencyId)
+			--Values('Created','Inventory.view.InventoryReceipt',@intReceiptId,'','',@strJson,@dtmDate,@intEntityId,1)
+
+			EXEC uspSMAuditLog @keyValue = @intReceiptId
+				,@screenName = 'Inventory.view.InventoryReceipt'
+				,@entityId = @intEntityId
+				,@actionType = 'Created'
+				,@actionIcon = 'small-new-plus'
+				,@changeDescription = 'Receipt Created'
+				,@fromValue = ''
+				,@toValue = @strReceiptNo
 
 			--Post Receipt
 			Exec dbo.uspICPostInventoryReceipt 1,0,@strReceiptNo,@intUserId
