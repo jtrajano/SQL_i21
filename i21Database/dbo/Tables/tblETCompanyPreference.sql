@@ -19,6 +19,6 @@
 	[strDDUploadPath] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
 	[strDDArchivePath] [nvarchar](150) COLLATE Latin1_General_CI_AS NULL, 
 	[strFTPUserName] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL, 
-    [strFTPPassword] [nvarchar](150) COLLATE Latin1_General_CI_AS NULL,
+    [strFTPPassword] [nvarchar](max) COLLATE Latin1_General_CI_AS NULL,
 	[ysnDDEnableIntegration] BIT NULL DEFAULT ((0))
 )
