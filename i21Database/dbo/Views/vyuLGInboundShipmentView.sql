@@ -194,7 +194,7 @@ SELECT
 	strCertificationId = '' COLLATE Latin1_General_CI_AS
 
 FROM tblLGLoad L
-INNER JOIN tblLGLoadDetail LD ON  L.intLoadId = LD.intLoadId AND L.intPurchaseSale = 1
+INNER JOIN tblLGLoadDetail LD ON  L.intLoadId = LD.intLoadId AND L.intPurchaseSale = 1 AND ISNULL(L.ysnCancelled, 0) <> 1
 INNER JOIN tblCTContractDetail PCT ON PCT.intContractDetailId = LD.intPContractDetailId
 INNER JOIN tblCTContractHeader PCH ON PCH.intContractHeaderId = PCT.intContractHeaderId
 INNER JOIN tblSMCompanyLocation CL ON	CL.intCompanyLocationId	= PCT.intCompanyLocationId
