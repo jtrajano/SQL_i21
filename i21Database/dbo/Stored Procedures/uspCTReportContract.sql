@@ -28,6 +28,8 @@ BEGIN TRY
 			@SecondApprovalId       INT,
 			@FirstApprovalSign      VARBINARY(MAX),
 			@SecondApprovalSign     VARBINARY(MAX),
+			@FirstApprovalName		NVARCHAR(MAX),
+			@SecondApprovalName		NVARCHAR(MAX),
 			@InterCompApprovalSign  VARBINARY(MAX),
 			@IsFullApproved         BIT = 0,
 			@ysnFairtrade			BIT = 0,
@@ -171,14 +173,16 @@ BEGIN TRY
     SELECT TOP 1 @FirstApprovalId=intApproverId,@intApproverGroupId = intApproverGroupId FROM tblSMApproval WHERE intTransactionId=@intTransactionId AND strStatus='Approved' ORDER BY intApprovalId
 	SELECT TOP 1 @SecondApprovalId=intApproverId FROM tblSMApproval WHERE intTransactionId=@intTransactionId AND strStatus='Approved' AND (intApproverId <> @FirstApprovalId OR ISNULL(intApproverGroupId,0) <> @intApproverGroupId) ORDER BY intApprovalId
 
-	SELECT	@FirstApprovalSign = Sig.blbDetail
+	SELECT	@FirstApprovalSign = Sig.blbDetail, @FirstApprovalName = fe.strName
 	FROM	tblSMSignature Sig WITH (NOLOCK)
 	JOIN	tblEMEntitySignature ES ON Sig.intSignatureId = ES.intElectronicSignatureId
+	LEFT JOIN tblEMEntity fe on fe.intEntityId = @FirstApprovalId
 	WHERE	Sig.intEntityId=@FirstApprovalId
 
-	SELECT	@SecondApprovalSign = Sig.blbDetail 
+	SELECT	@SecondApprovalSign = Sig.blbDetail, @SecondApprovalName = se.strName
 	FROM	tblSMSignature Sig  WITH (NOLOCK)
 	JOIN	tblEMEntitySignature ES ON Sig.intSignatureId = ES.intElectronicSignatureId
+	LEFT JOIN tblEMEntity se on se.intEntityId = @SecondApprovalId
 	WHERE	Sig.intEntityId=@SecondApprovalId
 
 	SELECT	@InterCompApprovalSign =Sig.blbDetail 
@@ -626,6 +630,8 @@ BEGIN TRY
 			,strApprovalText					    = @strApprovalText
 			,FirstApprovalSign						= CASE WHEN @IsFullApproved=1 AND @strCommodityCode = 'Coffee' THEN @FirstApprovalSign  ELSE NULL END
 			,SecondApprovalSign						= CASE WHEN @IsFullApproved=1 AND @strCommodityCode = 'Coffee' THEN @SecondApprovalSign ELSE NULL END
+			,FirstApprovalName						= CASE WHEN @IsFullApproved=1 AND @strCommodityCode = 'Coffee' THEN @FirstApprovalName ELSE NULL END
+			,SecondApprovalName						= CASE WHEN @IsFullApproved=1 AND @strCommodityCode = 'Coffee' THEN @SecondApprovalName ELSE NULL END
 			,InterCompApprovalSign					= @InterCompApprovalSign
 			,strAmendedColumns						= @strAmendedColumns
 			,lblArbitration							= CASE WHEN ISNULL(AN.strComment,'') <>''	 AND ISNULL(AB.strState,'') <>''		 AND ISNULL(RY.strCountry,'') <>'' THEN @rtArbitration + ':'  ELSE NULL END
