@@ -4,6 +4,7 @@
 	,@dblAmount AS NUMERIC(18, 2) = 0 
 	,@intInventoryReceiptId AS INT = NULL 
 	,@strReceiptNumber AS NVARCHAR(50) = NULL 	
+	,@intInventoryReceiptChargeId AS INT = NULL
 	,@intChargeId AS INT = NULL 
 AS
 
@@ -17,8 +18,7 @@ DECLARE @SourceType_NONE AS INT = 0
 		,@SourceType_STORE AS INT = 7
 		,@SourceType_STORE_LOTTERY_MODULE AS INT = 8
 
-DECLARE @intInventoryReceiptChargeId AS INT 
-		,@inventoryReceiptId AS INT 
+DECLARE @inventoryReceiptId AS INT 
 
 BEGIN 
 	DECLARE @TransactionName AS VARCHAR(500) = 'uspICUpdateReceiptCharge_' + CAST(NEWID() AS NVARCHAR(100));
@@ -43,6 +43,7 @@ WHERE
 	AND (rc.intContractId = @intContractHeaderId OR @intContractHeaderId IS NULL)
 	AND (rc.intContractDetailId = @intContractDetailId OR @intContractDetailId IS NULL) 
 	AND (rc.intChargeId = @intChargeId OR @intChargeId IS NULL) 
+	AND (rc.intInventoryReceiptChargeId = @intInventoryReceiptChargeId OR @intInventoryReceiptChargeId IS NULL)
 	AND ISNULL(r.ysnPosted,0) = 0
 	AND rc.strCostMethod = 'Amount'
 
