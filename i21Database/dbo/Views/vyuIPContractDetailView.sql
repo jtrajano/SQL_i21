@@ -68,6 +68,7 @@ SELECT CD.intContractDetailId
 	,CD.intAdjItemUOMId
 	,CD.intDiscountScheduleCodeId
 	,CD.dblOriginalBasis
+	,CD.dblConvertedBasis 
 	,CD.strLoadingPointType
 	,CD.strDestinationPointType
 	,CD.intItemContractId

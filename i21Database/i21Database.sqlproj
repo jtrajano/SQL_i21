@@ -8158,12 +8158,46 @@
     <Build Include="dbo\Stored Procedures\uspIPDailyAveragePriceProcessAckXML.sql" />
     <Build Include="dbo\Views\vyuCFSearchAccountNetworkXref.sql" />
     <Build Include="dbo\Views\vyuAPVouchersPaymentInfo.sql" />
-	<Build Include="dbo\Tables\tblGRSettleStorageBillDetail.sql" />
+    <Build Include="dbo\Tables\tblGRSettleStorageBillDetail.sql" />
     <Build Include="dbo\Tables\tblRKRiskView.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetConsolidatedCoverageEntryDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspICMonthlyCategoryStockRebuild.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdateReceiptCharge.sql" />
     <Build Include="dbo\Stored Procedures\uspICAddProRatedReceiptChargesToVoucher.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPItemProcessStgXML.sql" />
+    <Build Include="dbo\Views\vyuIPGetItemBook.sql" />
+    <Build Include="dbo\Views\vyuIPGetItemAddOn.sql" />
+    <Build Include="dbo\Views\vyuIPGetItemVendorXref.sql" />
+    <Build Include="dbo\Views\vyuIPGetItemUPC.sql" />
+    <Build Include="dbo\Views\vyuIPGetItemUomUpc.sql" />
+    <Build Include="dbo\Views\vyuIPGetItemUOM.sql" />
+    <Build Include="dbo\Views\vyuIPGetItemItemSubstitutionDetail.sql" />
+    <Build Include="dbo\Views\vyuIPGetItemSubstitution.sql" />
+    <Build Include="dbo\Views\vyuIPGetItemSubstitute.sql" />
+    <Build Include="dbo\Views\vyuIPGetItemSubLocation.sql" />
+    <Build Include="dbo\Views\vyuIPGetItemSpecialPricing.sql" />
+    <Build Include="dbo\Views\vyuIPGetItemPricingLevel.sql" />
+    <Build Include="dbo\Views\vyuIPGetItemPricing.sql" />
+    <Build Include="dbo\Views\vyuIPGetItemPOSSLA.sql" />
+    <Build Include="dbo\Views\vyuIPGetItemPOSCategory.sql" />
+    <Build Include="dbo\Views\vyuIPGetItemOwner.sql" />
+    <Build Include="dbo\Views\vyuIPGetItemManufacturingUOM.sql" />
+    <Build Include="dbo\Views\vyuIPGetItemNote.sql" />
+    <Build Include="dbo\Views\vyuIPGetItemMotorFuelTax.sql" />
+    <Build Include="dbo\Views\vyuIPGetItemLocation.sql" />
+    <Build Include="dbo\Views\vyuIPGetItemLicense.sql" />
+    <Build Include="dbo\Views\vyuIPGetItemKitDetail.sql" />
+    <Build Include="dbo\Views\vyuIPGetItemKit.sql" />
+    <Build Include="dbo\Views\vyuIPGetItemFactoryManufacturingCell.sql" />
+    <Build Include="dbo\Views\vyuIPGetItemFactory.sql" />
+    <Build Include="dbo\Views\vyuIPGetItemCustomerXref.sql" />
+    <Build Include="dbo\Views\vyuIPGetItemContract.sql" />
+    <Build Include="dbo\Views\vyuIPGetItemContractDocument.sql" />
+    <Build Include="dbo\Views\vyuIPGetItemCommodityCost.sql" />
+    <Build Include="dbo\Views\vyuIPGetItemCertification.sql" />
+    <Build Include="dbo\Views\vyuIPGetItemBundle.sql" />
+    <Build Include="dbo\Views\vyuIPGetItemAssembly.sql" />
+    <Build Include="dbo\Views\vyuIPGetItemAccount.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -8576,5 +8610,4 @@
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\GR\ImportSettleStorageBillDetail.sql" />
   </ItemGroup>
- 
 </Project>
