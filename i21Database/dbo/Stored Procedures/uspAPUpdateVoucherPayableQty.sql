@@ -167,7 +167,8 @@ ELSE SAVE TRAN @SavePoint
 		--UPDATE QTY IF THERE ARE STILL QTY LEFT TO BILL	
 		UPDATE B
 			SET B.dblQuantityToBill = (B.dblQuantityToBill - C.dblQuantityToBill),
-				B.dblQuantityBilled = (B.dblQuantityBilled + C.dblQuantityToBill)
+				B.dblQuantityBilled = (B.dblQuantityBilled + C.dblQuantityToBill),
+				B.dblNetWeight = (B.dblNetWeight - C.dblNetWeight)
 		FROM tblAPVoucherPayable B
 		INNER JOIN @payablesKey B2
 			ON B.intVoucherPayableId = B2.intNewPayableId
@@ -577,6 +578,7 @@ ELSE SAVE TRAN @SavePoint
 		--UPDATE QTY FOR PARTIAL
 		UPDATE B
 			SET B.dblQuantityToBill = (B.dblQuantityToBill + C.dblQuantityToBill),
+				B.dblNetWeight = (B.dblNetWeight + C.dblNetWeight),
 				B.dblQuantityBilled = 0 --when returning to tblAPVoucherPayable, we expect that qty to billed is 0
 		FROM tblAPVoucherPayable B
 		INNER JOIN @payablesKeyPartial B2
@@ -952,6 +954,7 @@ ELSE SAVE TRAN @SavePoint
 		--UPDATE QTY IF THERE ARE STILL QTY LEFT TO BILL	
 		UPDATE B
 			SET B.dblQuantityToBill = (B.dblQuantityToBill + C.dblQuantityToBill),
+				B.dblNetWeight = (B.dblNetWeight + C.dblNetWeight),
 				B.dblQuantityBilled = 0 --when returning to tblAPVoucherPayable, we expect that qty to billed is 0
 		FROM tblAPVoucherPayable B
 		INNER JOIN @deleted B2
