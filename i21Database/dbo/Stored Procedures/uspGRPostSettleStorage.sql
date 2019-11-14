@@ -2620,7 +2620,13 @@ BEGIN TRY
 							END = 1)
 
 					UPDATE APD
-					SET APD.intTaxGroupId = dbo.fnGetTaxGroupIdForVendor(APB.intEntityId,@intCompanyLocationId,APD.intItemId,EM.intEntityLocationId,EM.intFreightTermId)
+					SET APD.intTaxGroupId = dbo.fnGetTaxGroupIdForVendor(
+							CASE WHEN APB.intShipFromEntityId != APB.intEntityVendorId THEN APB.intShipFromEntityId ELSE APB.intEntityVendorId END,
+							APB.intShipToId,
+							APD.intItemId,
+							APB.intShipFromId,
+							EM.intFreightTermId
+						)
 					FROM tblAPBillDetail APD 
 					INNER JOIN tblAPBill APB
 						ON APD.intBillId = APB.intBillId
