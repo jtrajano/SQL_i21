@@ -118,23 +118,22 @@ BEGIN
 			SELECT DISTINCT(strAmountCodes) strAmountCodes 
 			FROM (
 				SELECT 
-					CASE 
-						WHEN A.dblGrossThirdParty > 0 THEN '1' --PAGE 53
-						WHEN A.dblCardNotPresent > 0 THEN '2' --ELSE '' END,
-						WHEN A.dblFederalIncomeTax > 0 THEN '4' --ELSE '' END,
-						WHEN A.dblJanuary > 0 THEN '5' --ELSE '' END,
-						WHEN A.dblFebruary > 0 THEN '6' --ELSE '' END,
-						WHEN A.dblMarch > 0 THEN '7' --ELSE '' END,
-						WHEN A.dblApril > 0 THEN '8' --ELSE '' END, 
-						WHEN A.dblMay > 0 THEN '9' --ELSE '' END,
-						WHEN A.dblJune > 0 THEN 'A' --ELSE '' END,
-						WHEN A.dblJuly > 0 THEN 'B' --ELSE '' END,
-						WHEN A.dblAugust > 0 THEN 'C' --ELSE '' END,
-						WHEN A.dblSeptember > 0 THEN 'D' --ELSE '' END,
-						WHEN A.dblOctober > 0 THEN 'E' --ELSE '' END,
-						WHEN A.dblNovember > 0 THEN 'F' --ELSE '' END,
-						WHEN A.dblDecember > 0 THEN 'G' --ELSE '' END,
-					ELSE '' END AS strAmountCodes
+					CASE WHEN SUM(A.dblGrossThirdParty) > 0 THEN '1' ELSE '' END +
+					CASE WHEN SUM(A.dblCardNotPresent) > 0 THEN '2' ELSE '' END +
+					CASE WHEN SUM(A.dblFederalIncomeTax) > 0 THEN '4' ELSE '' END +
+					CASE WHEN SUM(A.dblJanuary) > 0 THEN '5' ELSE '' END +
+					CASE WHEN SUM(A.dblFebruary) > 0 THEN '6' ELSE '' END +
+					CASE WHEN SUM(A.dblMarch) > 0 THEN '7' ELSE '' END +
+					CASE WHEN SUM(A.dblApril) > 0 THEN '8' ELSE '' END + 
+					CASE WHEN SUM(A.dblMay) > 0 THEN '9' ELSE '' END +
+					CASE WHEN SUM(A.dblJune) > 0 THEN 'A' ELSE '' END +
+					CASE WHEN SUM(A.dblJuly) > 0 THEN 'B' ELSE '' END +
+					CASE WHEN SUM(A.dblAugust) > 0 THEN 'C' ELSE '' END +
+					CASE WHEN SUM(A.dblSeptember) > 0 THEN 'D' ELSE '' END +
+					CASE WHEN SUM(A.dblOctober) > 0 THEN 'E' ELSE '' END +
+					CASE WHEN SUM(A.dblNovember) > 0 THEN 'F' ELSE '' END +
+					CASE WHEN SUM(A.dblDecember) > 0 THEN 'G' ELSE '' END
+					AS strAmountCodes
 				FROM dbo.vyuAP1099K A
 				WHERE 1 = (CASE WHEN @vendorFrom IS NOT NULL THEN
 							(CASE WHEN A.strVendorId BETWEEN @vendorFrom AND @vendorTo THEN 1 ELSE 0 END)
