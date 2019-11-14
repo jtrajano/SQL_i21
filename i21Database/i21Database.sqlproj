@@ -8163,6 +8163,7 @@
     <Build Include="dbo\Stored Procedures\uspRKGetConsolidatedCoverageEntryDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspICMonthlyCategoryStockRebuild.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdateReceiptCharge.sql" />
+    <Build Include="dbo\Stored Procedures\uspICAddProRatedReceiptChargesToVoucher.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
