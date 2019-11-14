@@ -237,7 +237,7 @@ FROM dbo.tblAPPayment  A
 LEFT JOIN dbo.tblCMBankTransaction E
 	ON A.strPaymentRecordNum = E.strTransactionId
 LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = D2.intEntityClassId	
-LEFT JOIN dbo.tblGLAccount F ON  A.intAccountId = F.intAccountId
+LEFT JOIN dbo.tblGLAccount F ON B.intAccountId = F.intAccountId
 OUTER APPLY (
 	SELECT TOP 1
 		bd.dblRate
