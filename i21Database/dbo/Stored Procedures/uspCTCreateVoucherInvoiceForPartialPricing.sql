@@ -425,6 +425,8 @@ BEGIN TRY
 						EXEC	uspAPUpdateCost @intBillDetailId,@dblFinalPrice,1
 
 						-- CT-3983
+						DELETE @detailCreated
+
 						INSERT INTO @detailCreated
 						SELECT @intBillDetailId
 
@@ -546,6 +548,8 @@ BEGIN TRY
 						END
 
 						-- CT-3983
+						DELETE @detailCreated
+
 						INSERT INTO @detailCreated
 						SELECT @intBillDetailId
 
