@@ -121,6 +121,7 @@ BEGIN TRY
 	DECLARE @intShipFrom INT
 	DECLARE @shipFromEntityId INT	
 	DECLARE @strCommodityCode NVARCHAR(50)
+    DECLARE @intPayToEntityId INT
 
 	DECLARE @voucherPayable VoucherPayable
 	DECLARE @voucherPayableTax VoucherDetailTax
@@ -315,7 +316,8 @@ BEGIN TRY
 								   WHEN @strStorageAdjustment IN ('No additional','Override') THEN 'Unpaid'
 								   ELSE 'calculate'
 							  END
-
+		
+		select @intPayToEntityId =  intEntityLocationId from tblEMEntityLocation where intEntityId = @EntityId and ysnDefaultLocation = 1
 		SELECT 
 			@intInventoryItemStockUOMId = intItemUOMId
 			,@dblUOMQty					= dblUnitQty
@@ -1940,6 +1942,7 @@ BEGIN TRY
 				INSERT INTO @voucherPayable
 				(
 					[intEntityVendorId]
+					,[intPayToAddressId]
 					,[intTransactionType]
 					,[intLocationId]
 					,[intShipToId]
@@ -1968,6 +1971,7 @@ BEGIN TRY
 				 )
 				SELECT 
 					[intEntityVendorId]				= @EntityId
+					,[intPayToAddressId]			= @intPayToEntityId
 					,[intTransactionType]			= 1
 					,[intLocationId]				= @LocationId
 					,[intShipToId]					= @LocationId
@@ -2330,6 +2334,7 @@ BEGIN TRY
 				INSERT INTO @voucherPayable
 				(
 					[intEntityVendorId]
+					,[intPayToAddressId]
 					,[intTransactionType]
 					,[intLocationId]
 					,[intShipToId]
@@ -2358,6 +2363,7 @@ BEGIN TRY
 				)
 				SELECT 
 					[intEntityVendorId]				= @EntityId
+					,[intPayToAddressId]			= @intPayToEntityId
 					,[intTransactionType]			= 1
 					,[intLocationId]				= @LocationId
 					,[intShipToId]					= @LocationId
@@ -2444,6 +2450,7 @@ BEGIN TRY
 				INSERT INTO @voucherPayable
 				(
 				 	[intEntityVendorId]
+					,[intPayToAddressId]
 					,[intTransactionType]
 					,[intLocationId]
 					,[intShipToId]
@@ -2469,6 +2476,7 @@ BEGIN TRY
 				)
 				SELECT 
 					[intEntityVendorId]		= @EntityId
+					,[intPayToAddressId]	= @intPayToEntityId
 					,[intTransactionType]	= 1
 					,[intLocationId]		= @LocationId
 					,[intShipToId]			= @LocationId
