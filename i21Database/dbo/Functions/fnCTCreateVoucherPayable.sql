@@ -39,16 +39,16 @@ RETURNS TABLE AS RETURN
 		,[strMiscDescription]						=	CC.strItemDescription
 		,[dblOrderQty]								=	CASE WHEN CC.strCostMethod = 'Per Unit' THEN ISNULL(CD.dblQuantity,0) ELSE 1 END
 		,[dblOrderUnitQty]							=	1
-		,[intOrderUOMId]							=	ISNULL(CostUOM.intItemUOMId,CD.intItemUOMId)
+		,[intOrderUOMId]							=	ISNULL(ItemUOM.intItemUOMId,CD.intItemUOMId)
 		,[dblQuantityToBill]						=	CASE WHEN CC.strCostMethod = 'Per Unit' THEN ISNULL(CD.dblQuantity,0) ELSE 1 END
 		,[dblQtyToBillUnitQty]						=	1
 		,[intQtyToBillUOMId]						=	ISNULL(ItemUOM.intItemUOMId,CD.intItemUOMId)
 		,[dblCost]									=	CASE WHEN CC.strCostMethod = 'Per Unit' THEN ISNULL(CC.dblRate,0) ELSE ISNULL(CC.dblAmount,0) END
 		,[dblCostUnitQty]							=	1
 		,[intCostUOMId]								=	ISNULL(CostUOM.intItemUOMId,CD.intItemUOMId)
-		,[dblNetWeight]								=	ISNULL(CD.dblNetWeight,0)
+		,[dblNetWeight]								=	CAST(dbo.fnMFConvertCostToTargetItemUOM(CostUOM.intItemUOMId,WeightUOM.intItemUOMId,CD.dblNetWeight) AS DECIMAL(38,20))
 		,[dblWeightUnitQty]							=	CAST(1 AS DECIMAL(38,20))
-		,[intWeightUOMId]							=	ISNULL(WeightUOM.intItemUOMId,CD.intItemUOMId)
+		,[intWeightUOMId]							=	ISNULL(CostUOM.intItemUOMId,CD.intItemUOMId)
 		,[intCostCurrencyId]						=	ISNULL(CC.intCurrencyId,ISNULL(CU.intMainCurrencyId,CD.intCurrencyId))
 		,[dblTax]									=	0
 		,[dblDiscount]								=	0
