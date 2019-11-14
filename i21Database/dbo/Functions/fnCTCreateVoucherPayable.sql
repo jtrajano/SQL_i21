@@ -8,7 +8,7 @@ RETURNS TABLE AS RETURN
 (
 	SELECT	DISTINCT
 		[intEntityVendorId]							=	ISNULL(entity.intEntityId, payable.intEntityVendorId)
-		,[intTransactionType]						=	1 --voucher
+		,[intTransactionType]						=	CASE WHEN RT.Item = 0 THEN 1 ELSE 3 END --voucher
 		,[intLocationId]							=	NULL --Contract doesn't have location
 		,[intShipToId]								=	NULL --?
 		,[intShipFromId]							=	NULL --?
