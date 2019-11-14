@@ -2608,6 +2608,13 @@ BEGIN TRY
 					FROM tblAPBill
 					WHERE intBillId = CAST(@createdVouchersId AS INT)
 
+					--insert data to the closure table
+					BEGIN
+						insert into tblGRSettleStorageBillDetail(intConcurrencyId, intSettleStorageId, intBillId)
+						select 1, @intSettleStorageId, @createdVouchersId
+					END
+
+
 
 					DELETE FROM @detailCreated
 
