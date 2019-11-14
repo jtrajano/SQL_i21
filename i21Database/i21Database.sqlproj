@@ -8077,6 +8077,7 @@
     <Build Include="dbo\Functions\udfDateGreaterThanEquals.sql" />
     <Build Include="dbo\Functions\udfDateLessThanEquals.sql" />
     <Build Include="dbo\Stored Procedures\uspICMonthlyCategoryStockRebuild.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUpdateReceiptCharge.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
