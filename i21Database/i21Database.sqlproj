@@ -8162,6 +8162,7 @@
     <Build Include="dbo\Tables\tblRKRiskView.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetConsolidatedCoverageEntryDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspICMonthlyCategoryStockRebuild.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUpdateReceiptCharge.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
