@@ -88,6 +88,7 @@ BEGIN TRY
 			@ysnCreateNew					BIT = 0,
 			@receiptDetails					InventoryUpdateBillQty,
 			@ysnLoad						BIT,
+			@allowAddDetail					BIT,
 			@dblPriceLoadQty				NUMERIC(18, 6),
 			@dblPriceFixationLoadApplied	NUMERIC(18, 6),
 			@dblInventoryItemLoadApplied	NUMERIC(18, 6),
@@ -111,6 +112,11 @@ BEGIN TRY
 		intInventoryItemId			INT,
 		dblQty						NUMERIC(18,6),
 		intPFDetailId				INT
+	)
+
+	DECLARE @tblCreatedTransaction TABLE
+	(
+		intTransactionId			INT
 	)
 
 	DECLARE @tblReceipt TABLE
@@ -364,20 +370,22 @@ BEGIN TRY
 				BEGIN
 					SELECT	@intInventoryReceiptId = intInventoryId, @dblQtyToBill = dblQty, @intInventoryReceiptItemId = intInventoryItemId  FROM @tblToProcess WHERE intUniqueId = @intUniqueId
 
-					-- Check IF need to create new voucher
-					IF @ysnPartialPriced = 1
+					SET @allowAddDetail = 0
+
+					IF EXISTS 
+					(
+						SELECT TOP 1 1 intBillId
+						FROM tblAPBill BL
+						INNER JOIN tblAPBillDetail BD ON BL.intBillId = BD.intBillId
+						LEFT JOIN @tblCreatedTransaction CT ON CT.intTransactionId = BL.intBillId
+						WHERE BD.intInventoryReceiptItemId = @intInventoryReceiptItemId
+						AND (BL.ysnPosted = 0 OR ISNULL(CT.intTransactionId, 0) <> 0)
+					)
 					BEGIN
-						IF EXISTS (SELECT TOP 1 1 FROM tblAPBill WHERE ysnPosted = 1 AND intBillId = (SELECT TOP 1 intBillId FROM tblAPBillDetail WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId) AND @ysnCreateNew = 0)
-						BEGIN
-							SET @ysnCreateNew = 1
-						END
-						ELSE
-						BEGIN
-							SET @ysnCreateNew = 0
-						END
+						SET @allowAddDetail = 1
 					END
 
-					IF EXISTS(SELECT * FROM tblAPBillDetail WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId AND intInventoryReceiptChargeId IS	NULL AND @ysnCreateNew = 0)
+					IF EXISTS(SELECT * FROM tblAPBillDetail WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId AND intInventoryReceiptChargeId IS	NULL AND @allowAddDetail = 1)
 					BEGIN
 						SELECT	@intBillId = intBillId, @dblQtyReceived = dblQtyReceived FROM tblAPBillDetail WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId
 
@@ -395,8 +403,23 @@ BEGIN TRY
 				    
 						EXEC	uspAPCreateVoucherDetailReceipt @intBillId,@voucherDetailReceipt
 				    
-						SELECT	@intBillDetailId = intBillDetailId FROM tblAPBillDetail WHERE intBillId = @intBillId AND intContractDetailId = @intContractDetailId AND intInventoryReceiptChargeId IS NULL
+						-- Get the intBillDetailId of the newly inserted voucher item. 
+						SELECT	TOP 1	
+								@intBillDetailId = intBillDetailId 
+						FROM	tblAPBillDetail 
+						WHERE	intBillId = @intBillId 
+								AND intContractDetailId = @intContractDetailId 
+								AND intInventoryReceiptChargeId IS NULL
+						ORDER BY intBillDetailId DESC 
 				    
+						-- Add the 'DP/Basis' other charges into the voucher
+						BEGIN 
+							EXEC uspICAddProRatedReceiptChargesToVoucher
+								@intInventoryReceiptItemId
+								,@intBillId
+								,@intBillDetailId
+						END 
+
 						---- CT-3167: HOLD SINCE THE CURRENT IS STILL WORKING
 						--DECLARE @voucherPayablesData VoucherPayable
 						--DELETE FROM @voucherPayablesData
@@ -475,103 +498,161 @@ BEGIN TRY
 					END
 					ELSE
 					BEGIN
-						UPDATE	tblICInventoryReceiptItem SET ysnAllowVoucher = 1 WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId
+						UPDATE	
+							tblICInventoryReceiptItem 
+						SET 
+							ysnAllowVoucher = 1 
+						WHERE 
+							intInventoryReceiptItemId = @intInventoryReceiptItemId
 												
-						EXEC	uspICConvertReceiptToVoucher @intInventoryReceiptId,@intUserId, @intNewBillId OUTPUT
+						EXEC uspICConvertReceiptToVoucher 
+							@intInventoryReceiptId
+							,@intUserId
+							, @intNewBillId OUTPUT
 
-						if (@intNewBillId is not null and @intNewBillId > 0)
+						INSERT INTO @tblCreatedTransaction VALUES (@intNewBillId)
+
+						IF (@intNewBillId IS NOT NULL AND @intNewBillId > 0)
 						BEGIN
 						
-						UPDATE	tblAPBill SET strVendorOrderNumber = @strVendorOrderNumber, dtmDate = @dtmFixationDate, dtmDueDate = @dtmFixationDate, dtmBillDate = @dtmFixationDate WHERE intBillId = @intNewBillId
+							UPDATE	
+								tblAPBill 
+							SET		
+								strVendorOrderNumber = @strVendorOrderNumber
+								, dtmDate = @dtmFixationDate
+								, dtmDueDate = @dtmFixationDate
+								, dtmBillDate = @dtmFixationDate 
+							WHERE 
+								intBillId = @intNewBillId
 						
-						DECLARE @total DECIMAL(18,6)
-						SELECT	@intBillDetailId = intBillDetailId, @total = dblQtyReceived FROM tblAPBillDetail WHERE intBillId = @intNewBillId AND intInventoryReceiptChargeId IS NULL
+							DECLARE @total DECIMAL(18,6)
+							SELECT TOP 1 
+								@intBillDetailId = intBillDetailId
+								, @total = dblQtyReceived 
+							FROM 
+								tblAPBillDetail 
+							WHERE 
+								intBillId = @intNewBillId 
+								AND intInventoryReceiptChargeId IS NULL
+							ORDER BY intBillDetailId DESC 
 
-						UPDATE	tblAPBillDetail SET dblQtyReceived = @dblQtyToBill, dblNetWeight = dbo.fnCTConvertQtyToTargetItemUOM(@intItemUOMId, intWeightUOMId, @dblQtyToBill) WHERE intBillDetailId = @intBillDetailId
+							UPDATE	
+								tblAPBillDetail 
+							SET 
+								dblQtyReceived = @dblQtyToBill
+								, dblNetWeight = dbo.fnCTConvertQtyToTargetItemUOM(@intItemUOMId, intWeightUOMId, @dblQtyToBill) 
+							WHERE 
+								intBillDetailId = @intBillDetailId
 
-						IF @dblQtyToBill <> @total
-						BEGIN
-							DELETE FROM @receiptDetails
-							INSERT INTO @receiptDetails
-							(
-								[intInventoryReceiptItemId],
-								[intInventoryReceiptChargeId],
-								[intInventoryShipmentChargeId],
-								[intSourceTransactionNoId],
-								[strSourceTransactionNo],
-								[intItemId],
-								[intToBillUOMId],
-								[dblToBillQty]
-							)
-							SELECT * FROM dbo.fnCTGenerateReceiptDetail(@intInventoryReceiptItemId, @intNewBillId, @intBillDetailId, @dblQtyToBill, @total)
+							IF @dblQtyToBill <> @total
+							BEGIN
+								DELETE FROM @receiptDetails
+								INSERT INTO @receiptDetails
+								(
+									[intInventoryReceiptItemId],
+									[intInventoryReceiptChargeId],
+									[intInventoryShipmentChargeId],
+									[intSourceTransactionNoId],
+									[strSourceTransactionNo],
+									[intItemId],
+									[intToBillUOMId],
+									[dblToBillQty]
+								)
+								SELECT * 
+								FROM 
+									dbo.fnCTGenerateReceiptDetail(
+										@intInventoryReceiptItemId
+										, @intNewBillId
+										, @intBillDetailId
+										, @dblQtyToBill
+										, @total
+								)
 							
-							EXEC uspICUpdateBillQty @updateDetails = @receiptDetails
-						END
+								EXEC uspICUpdateBillQty 
+									@updateDetails = @receiptDetails
+							END
 
-						EXEC	uspAPUpdateCost @intBillDetailId,@dblFinalPrice,1
+							-- Add the 'DP/Basis' other charges into the voucher
+							BEGIN 
+								EXEC uspICAddProRatedReceiptChargesToVoucher
+									@intInventoryReceiptItemId
+									,@intNewBillId
+									,@intBillDetailId
+							END 
 
-						INSERT INTO tblCTPriceFixationDetailAPAR(intPriceFixationDetailId,intBillId,intBillDetailId,intConcurrencyId)
-						SELECT @intPriceFixationDetailId,@intNewBillId,@intBillDetailId,1
+							EXEC uspAPUpdateCost @intBillDetailId, @dblFinalPrice, 1
 
-						--UPDATE	tblCTPriceFixationDetail SET intBillId = @intNewBillId,intBillDetailId = @intBillDetailId WHERE intPriceFixationDetailId = @intPriceFixationDetailId
+							INSERT INTO tblCTPriceFixationDetailAPAR(
+								intPriceFixationDetailId
+								,intBillId
+								,intBillDetailId
+								,intConcurrencyId
+							)
+							SELECT 
+								@intPriceFixationDetailId
+								,@intNewBillId
+								,@intBillDetailId
+								,1
 
-						SELECT	@intTicketId = intTicketId FROM tblSCTicket WHERE intInventoryReceiptId = @intInventoryReceiptId
+							--UPDATE	tblCTPriceFixationDetail SET intBillId = @intNewBillId,intBillDetailId = @intBillDetailId WHERE intPriceFixationDetailId = @intPriceFixationDetailId
 
-						DELETE FROM @prePayId
+							SELECT	@intTicketId = intTicketId FROM tblSCTicket WHERE intInventoryReceiptId = @intInventoryReceiptId
 
-						INSERT	INTO @prePayId([intId])
-						SELECT	DISTINCT BD.intBillId
-						FROM	tblAPBillDetail BD
-						JOIN	tblAPBill		BL	ON BL.intBillId	=	BD.intBillId
-						JOIN	tblSCTicket		TK  ON TK.intTicketId =  BD.intScaleTicketId
-						WHERE	BD.intContractDetailId	=	@intContractDetailId 
-						AND		BD.intScaleTicketId		=	@intTicketId 
-						AND		BL.intTransactionType	IN (2, 13)
-						AND		BL.ysnPosted			=	1 
-						AND		BL.ysnPaid				=	0 
+							DELETE FROM @prePayId
 
-						IF EXISTS(SELECT * FROM	@prePayId)
-						BEGIN
-							EXEC uspAPApplyPrepaid @intNewBillId, @prePayId
-						END
+							INSERT	INTO @prePayId([intId])
+							SELECT	DISTINCT BD.intBillId
+							FROM	tblAPBillDetail BD
+							JOIN	tblAPBill		BL	ON BL.intBillId	=	BD.intBillId
+							JOIN	tblSCTicket		TK  ON TK.intTicketId =  BD.intScaleTicketId
+							WHERE	BD.intContractDetailId	=	@intContractDetailId 
+							AND		BD.intScaleTicketId		=	@intTicketId 
+							AND		BL.intTransactionType	IN (2, 13)
+							AND		BL.ysnPosted			=	1 
+							AND		BL.ysnPaid				=	0 
 
-						-- CT-3983
-						INSERT INTO @detailCreated
-						SELECT @intBillDetailId
+							IF EXISTS(SELECT * FROM	@prePayId)
+							BEGIN
+								EXEC uspAPApplyPrepaid @intNewBillId, @prePayId
+							END
 
-						UPDATE APD
-						SET APD.intTaxGroupId = dbo.fnGetTaxGroupIdForVendor(APB.intEntityId,@intCompanyLocationId,APD.intItemId,EM.intEntityLocationId,EM.intFreightTermId)
-						FROM tblAPBillDetail APD 
-						INNER JOIN tblAPBill APB
-							ON APD.intBillId = APB.intBillId
-						LEFT JOIN tblEMEntityLocation EM ON EM.intEntityId = APB.intEntityId
-						INNER JOIN @detailCreated ON intBillDetailId = intId
-						WHERE APD.intTaxGroupId IS NULL AND intInventoryReceiptChargeId IS NULL
+							-- CT-3983
+							DELETE @detailCreated
+
+							INSERT INTO @detailCreated
+							SELECT @intBillDetailId
+
+							UPDATE APD
+							SET APD.intTaxGroupId = dbo.fnGetTaxGroupIdForVendor(APB.intEntityId,@intCompanyLocationId,APD.intItemId,EM.intEntityLocationId,EM.intFreightTermId)
+							FROM tblAPBillDetail APD 
+							INNER JOIN tblAPBill APB
+								ON APD.intBillId = APB.intBillId
+							LEFT JOIN tblEMEntityLocation EM ON EM.intEntityId = APB.intEntityId
+							INNER JOIN @detailCreated ON intBillDetailId = intId
+							WHERE APD.intTaxGroupId IS NULL AND intInventoryReceiptChargeId IS NULL
 						
-						EXEC [uspAPUpdateVoucherDetailTax] @detailCreated
-						--
+							EXEC [uspAPUpdateVoucherDetailTax] @detailCreated
+							--
 
-						EXEC [dbo].[uspAPPostBill] @post = 1,@recap = 0,@isBatch = 0,@param = @intNewBillId,@userId = @intUserId,@success = @ysnSuccess OUTPUT
+							EXEC [dbo].[uspAPPostBill] @post = 1,@recap = 0,@isBatch = 0,@param = @intNewBillId,@userId = @intUserId,@success = @ysnSuccess OUTPUT
 
-						UPDATE	tblICInventoryReceiptItem SET ysnAllowVoucher = 0 WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId
+							UPDATE	tblICInventoryReceiptItem SET ysnAllowVoucher = 0 WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId
 
-						-- -- Reset create new counter for another voucher
-						-- IF @ysnCreateNew = 1
-						-- BEGIN
-						-- 	SET @ysnCreateNew  = 0
-						-- END
+							-- -- Reset create new counter for another voucher
+							-- IF @ysnCreateNew = 1
+							-- BEGIN
+							-- 	SET @ysnCreateNew  = 0
+							-- END
 
-						IF @ysnLoad = 1
-						BEGIN
-							--Update the load applied and priced
-							update tblCTPriceFixationDetail 
-								set dblLoadApplied = ISNULL(dblLoadApplied, 0)  + @dblInventoryItemLoadApplied,
-									dblLoadAppliedAndPriced = ISNULL(dblLoadAppliedAndPriced, 0) + @dblInventoryItemLoadApplied
-							WHERE intPriceFixationDetailId = @intPriceFixationDetailId
+							IF @ysnLoad = 1
+							BEGIN
+								--Update the load applied and priced
+								update tblCTPriceFixationDetail 
+									set dblLoadApplied = ISNULL(dblLoadApplied, 0)  + @dblInventoryItemLoadApplied,
+										dblLoadAppliedAndPriced = ISNULL(dblLoadAppliedAndPriced, 0) + @dblInventoryItemLoadApplied
+								WHERE intPriceFixationDetailId = @intPriceFixationDetailId
+							END						
 						END
-						
-						END
-
 					END
 
 					SELECT @intUniqueId = MIN(intUniqueId)  FROM @tblToProcess WHERE intUniqueId > @intUniqueId
