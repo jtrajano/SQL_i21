@@ -121,6 +121,7 @@ BEGIN TRY
 	DECLARE @intShipFrom INT
 	DECLARE @shipFromEntityId INT	
 	DECLARE @strCommodityCode NVARCHAR(50)
+    DECLARE @intPayToEntityId INT
 
 	DECLARE @voucherPayable VoucherPayable
 	DECLARE @voucherPayableTax VoucherDetailTax
@@ -315,7 +316,8 @@ BEGIN TRY
 								   WHEN @strStorageAdjustment IN ('No additional','Override') THEN 'Unpaid'
 								   ELSE 'calculate'
 							  END
-
+		
+		select @intPayToEntityId =  intEntityLocationId from tblEMEntityLocation where intEntityId = @EntityId and ysnDefaultLocation = 1
 		SELECT 
 			@intInventoryItemStockUOMId = intItemUOMId
 			,@dblUOMQty					= dblUnitQty
@@ -468,7 +470,8 @@ BEGIN TRY
 					cc numeric(18, 6),
 					dd numeric(18, 6),
 					ysnApplied bit null,
-					id int identity(1,1)
+					id int identity(1,1),
+					intBillDetailId int null
 
 				)
 				
@@ -1939,6 +1942,7 @@ BEGIN TRY
 				INSERT INTO @voucherPayable
 				(
 					[intEntityVendorId]
+					,[intPayToAddressId]
 					,[intTransactionType]
 					,[intLocationId]
 					,[intShipToId]
@@ -1967,6 +1971,7 @@ BEGIN TRY
 				 )
 				SELECT 
 					[intEntityVendorId]				= @EntityId
+					,[intPayToAddressId]			= @intPayToEntityId
 					,[intTransactionType]			= 1
 					,[intLocationId]				= @LocationId
 					,[intShipToId]					= @LocationId
@@ -2329,6 +2334,7 @@ BEGIN TRY
 				INSERT INTO @voucherPayable
 				(
 					[intEntityVendorId]
+					,[intPayToAddressId]
 					,[intTransactionType]
 					,[intLocationId]
 					,[intShipToId]
@@ -2357,6 +2363,7 @@ BEGIN TRY
 				)
 				SELECT 
 					[intEntityVendorId]				= @EntityId
+					,[intPayToAddressId]			= @intPayToEntityId
 					,[intTransactionType]			= 1
 					,[intLocationId]				= @LocationId
 					,[intShipToId]					= @LocationId
@@ -2443,6 +2450,7 @@ BEGIN TRY
 				INSERT INTO @voucherPayable
 				(
 				 	[intEntityVendorId]
+					,[intPayToAddressId]
 					,[intTransactionType]
 					,[intLocationId]
 					,[intShipToId]
@@ -2468,6 +2476,7 @@ BEGIN TRY
 				)
 				SELECT 
 					[intEntityVendorId]		= @EntityId
+					,[intPayToAddressId]	= @intPayToEntityId
 					,[intTransactionType]	= 1
 					,[intLocationId]		= @LocationId
 					,[intShipToId]			= @LocationId
@@ -2599,6 +2608,13 @@ BEGIN TRY
 					FROM tblAPBill
 					WHERE intBillId = CAST(@createdVouchersId AS INT)
 
+					--insert data to the closure table
+					BEGIN
+						insert into tblGRSettleStorageBillDetail(intConcurrencyId, intSettleStorageId, intBillId)
+						select 1, @intSettleStorageId, @createdVouchersId
+					END
+
+
 
 					DELETE FROM @detailCreated
 
@@ -2685,7 +2701,7 @@ BEGIN TRY
 							end
 
 
-							update @avqty set ysnApplied = 1 where id = @cur_id
+							update @avqty set ysnApplied = 1, intBillDetailId = @cur_bid where id = @cur_id
 						end
 
 						
@@ -2931,6 +2947,8 @@ BEGIN TRY
 								and b.intPriceFixationDetailId is not null
 						*/
 						
+						insert into tblCTPriceFixationDetailAPAR(intPriceFixationDetailId, intBillId, intBillDetailId, intConcurrencyId)
+						select intPriceFixationDetailId, @intVoucherId, intBillDetailId, 1  from @avqty where intBillDetailId is not null
 						----- DEBUG POINT -----
 						if @debug_awesome_ness = 1 and 1 = 0
 						begin

@@ -281,6 +281,13 @@ BEGIN
 			INNER JOIN tblSMTerm shipFromTerm ON shipFrom.intTermsId = shipFromTerm.intTermID
 			WHERE shipFrom.intEntityLocationId = A.intShipFromId
 			UNION ALL
+			--use contract term
+			SELECT
+				defaultTerm.* 
+			FROM  tblCTContractHeader CH
+			INNER JOIN tblSMTerm defaultTerm ON  defaultTerm.intTermID = CH.intTermId
+			WHERE A.intContractHeaderId = CH.intContractHeaderId  AND A.intContractHeaderId > 0
+			UNION ALL
 			--use vendor default location term
 			SELECT
 				shipFromTerm.*
