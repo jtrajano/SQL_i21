@@ -188,6 +188,7 @@ AS SELECT
 	,SO.strSalesOrderNumber
 
 	,SMCompanySetup.strCompanyName
+	,SetupLocation.strLocationName strScaleLocationName
 	,strAddress = CASE WHEN SetupLocation.strUseLocationAddress = 'No'
 					THEN
 						LTRIM(dbo.fnICFormatTransferAddressFormat2(
