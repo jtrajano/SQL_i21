@@ -8083,6 +8083,7 @@
     <Build Include="dbo\Tables\tblGRSettleStorageBillDetail.sql" />
     <Build Include="dbo\Views\vyuAPVouchersPaymentInfo.sql" />
     <Build Include="dbo\Stored Procedures\uspICMonthlyCategoryStockRebuild.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUpdateReceiptCharge.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
