@@ -84,6 +84,9 @@ DECLARE
 	,@intCurrencyIdFrom INT
 	,@intCurrencyIdTo INT
 	,@intDefaultCurrencyId INT
+	,@ysnFunctionalToForeign BIT
+	,@ysnForeignToFuncational BIT
+	,@ysnForeignToForeign BIT
 	
 	-- Table Variables
 	,@RecapTable AS RecapTableType	
@@ -116,8 +119,11 @@ WHERE	strTransactionId = @strTransactionId
 
 
 SELECT TOP 1 @intDefaultCurrencyId = intDefaultCurrencyId FROM tblSMCompanyPreference 
-IF @intCurrencyIdTo <> @intDefaultCurrencyId AND @intCurrencyIdFrom = @intDefaultCurrencyId
-	SET @dblHistoricRate = @dblRate
+SELECT @ysnForeignToFuncational = CASE WHEN @intDefaultCurrencyId <> @intCurrencyIdFrom AND @intCurrencyIdTo = @intDefaultCurrencyId THEN CAST(1 AS BIT) ELSE CAST (0 AS BIT) END
+SELECT @ysnFunctionalToForeign = CASE WHEN @intDefaultCurrencyId <> @intCurrencyIdTo AND @intCurrencyIdFrom = @intDefaultCurrencyId THEN CAST(1 AS BIT) ELSE CAST (0 AS BIT) END
+SELECT @ysnForeignToForeign = CASE WHEN @intDefaultCurrencyId <> @intCurrencyIdTo AND @intCurrencyIdFrom <> @intDefaultCurrencyId AND  @intCurrencyIdFrom = @intCurrencyIdTo THEN CAST(1 AS BIT) ELSE CAST (0 AS BIT) END
+SELECT @dblHistoricRate = CASE WHEN @ysnFunctionalToForeign = 1 THEN @dblRate ELSE @dblHistoricRate END
+
 		
 
 IF @@ERROR <> 0	GOTO Post_Rollback	
@@ -510,7 +516,6 @@ FROM #tmpGLDetail
 			,strState
 			,strCountry
 			,dblAmount
-			,dblAmountForeign
 			,strAmountInWords
 			,strMemo
 			,strReferenceNo
@@ -533,8 +538,8 @@ FROM #tmpGLDetail
 				,intBankTransactionTypeId	= @BANK_TRANSFER_WD
 				,intBankAccountId			= A.intBankAccountIdFrom
 				,intCurrencyId				= @intCurrencyIdFrom
-				,intCurrencyExchangeRateTypeId =  A.intCurrencyExchangeRateTypeId
-				,dblExchangeRate			= ISNULL(@dblHistoricRate,1)
+				,intCurrencyExchangeRateTypeId =CASE WHEN @ysnForeignToFuncational = 1  OR @ysnForeignToForeign =1 THEN A.intCurrencyExchangeRateTypeId ELSE NULL END  
+				,dblExchangeRate			= CASE WHEN @ysnForeignToFuncational = 1  OR @ysnForeignToForeign =1 THEN ISNULL(@dblHistoricRate,1)  ELSE 1 END 
 				,dtmDate					= A.dtmDate
 				,strPayee					= ''
 				,intPayeeId					= NULL
@@ -543,13 +548,8 @@ FROM #tmpGLDetail
 				,strCity					= ''
 				,strState					= ''
 				,strCountry					= ''
-				,dblAmount					= CASE WHEN @intCurrencyIdFrom <> @intDefaultCurrencyId THEN AmountUSD.Val --CAD TO USD
-												   ELSE A.dblAmount
-											  END
-				,dblAmountForeign			= CASE WHEN @intCurrencyIdFrom <> @intDefaultCurrencyId THEN  A.dblAmount 
-												   WHEN @intCurrencyIdTo <> @intDefaultCurrencyId THEN  AmountForeign.Val
-											  ELSE 0 END 
-				,strAmountInWords			= dbo.fnConvertNumberToWord(AmountUSD.Val)
+				,dblAmount					= A.dblAmount
+				,strAmountInWords			= dbo.fnConvertNumberToWord(A.dblAmount)
 				,strMemo					= CASE WHEN ISNULL(A.strReferenceFrom,'') = '' THEN 
 												A.strDescription 
 												WHEN ISNULL(A.strDescription,'') = '' THEN
@@ -574,12 +574,7 @@ FROM #tmpGLDetail
 					ON A.intGLAccountIdFrom = GLAccnt.intAccountId		
 				INNER JOIN [dbo].tblGLAccountGroup GLAccntGrp
 					ON GLAccnt.intAccountGroupId = GLAccntGrp.intAccountGroupId
-				OUTER APPLY(
-					SELECT ROUND(A.dblAmount * ISNULL(@dblHistoricRate,1),2)Val
-				)AmountUSD
-				OUTER APPLY(
-					SELECT ROUND(A.dblAmount / ISNULL(@dblHistoricRate,1),2)Val
-				)AmountForeign
+				
 
 		WHERE	A.strTransactionId = @strTransactionId
 	
@@ -589,8 +584,9 @@ FROM #tmpGLDetail
 				,intBankTransactionTypeId	= @BANK_TRANSFER_DEP
 				,intBankAccountId			= A.intBankAccountIdTo
 				,intCurrencyId				= @intCurrencyIdTo
-				,intCurrencyExchangeRateTypeId = A.[intCurrencyExchangeRateTypeId]
-				,dblExchangeRate			= ISNULL(@dblRate,1)
+				--,intCurrencyExchangeRateTypeId = A.[intCurrencyExchangeRateTypeId]
+				,intCurrencyExchangeRateTypeId =CASE WHEN @ysnFunctionalToForeign =1 or @ysnForeignToForeign = 1 THEN A.intCurrencyExchangeRateTypeId ELSE NULL END  
+				,dblExchangeRate			=  CASE WHEN @ysnFunctionalToForeign = 1 or @ysnForeignToForeign = 1 THEN  ISNULL(@dblRate,1) ELSE 1 END
 				,dtmDate					= A.dtmDate
 				,strPayee					= ''
 				,intPayeeId					= NULL
@@ -599,13 +595,9 @@ FROM #tmpGLDetail
 				,strCity					= ''
 				,strState					= ''
 				,strCountry					= ''
-				,dblAmount					= CASE WHEN @intCurrencyIdFrom <> @intDefaultCurrencyId THEN AmountUSD.Val --CAD TO USD
-												   ELSE A.dblAmount
-											  END
-				,dblAmountForeign			= CASE WHEN @intCurrencyIdFrom <> @intDefaultCurrencyId THEN  A.dblAmount 
-												   WHEN @intCurrencyIdTo <> @intDefaultCurrencyId THEN  AmountForeign.Val
-											  ELSE 0 END 
-				,strAmountInWords			= dbo.fnConvertNumberToWord(  ROUND(A.dblAmount * ISNULL(@dblRate,1),2))
+				,dblAmount					= Amount.Val
+				
+				,strAmountInWords			= dbo.fnConvertNumberToWord(Amount.Val)
 				,strMemo					= CASE WHEN ISNULL(A.strReferenceTo,'') = '' THEN 
 												A.strDescription 
 												WHEN ISNULL(A.strDescription,'') = '' THEN
@@ -631,11 +623,14 @@ FROM #tmpGLDetail
 				INNER JOIN [dbo].tblGLAccountGroup GLAccntGrp
 					ON GLAccnt.intAccountGroupId = GLAccntGrp.intAccountGroupId
 				OUTER APPLY(
-					SELECT ROUND(A.dblAmount * ISNULL(A.dblRate,1),2)Val
-				)AmountUSD
-				OUTER APPLY(
-					SELECT ROUND(A.dblAmount / ISNULL(A.dblRate,1),2)Val
-				)AmountForeign
+					SELECT CASE WHEN  @ysnForeignToFuncational =1
+											 THEN ROUND(A.dblAmount * ISNULL(@dblRate,1),2)  --CAD TO USD
+											 WHEN @ysnFunctionalToForeign = 1
+											 THEN ROUND(A.dblAmount / ISNULL(@dblRate,1),2)
+												   ELSE A.dblAmount
+											  END Val
+				)Amount
+			
 		WHERE	A.strTransactionId = @strTransactionId	
 	END
 	ELSE
@@ -762,4 +757,3 @@ Audit_Log:
 -- Delete all temporary tables used during the post transaction. 
 Post_Exit:
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpGLDetail')) DROP TABLE #tmpGLDetail
-GO
