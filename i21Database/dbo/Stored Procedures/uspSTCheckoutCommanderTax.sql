@@ -104,7 +104,8 @@ BEGIN
 
 				-- Tax FILE
 				  UPDATE STT
-				  SET dblTotalTax		= CAST(ISNULL(Chk.taxInfosalesTax, 0) AS DECIMAL(18,6))
+				  SET dblTotalTax		= CAST(ISNULL(Chk.taxInfonetTax, 0) AS DECIMAL(18,6))
+				  --SET dblTotalTax		= CAST(ISNULL(Chk.taxInfosalesTax, 0) AS DECIMAL(18,6)) http://jira.irelyserver.com/browse/ST-1587
 					, dblTaxableSales	= CAST(ISNULL(Chk.taxInfotaxableSales, 0) AS DECIMAL(18,6))         
 					, dblTaxExemptSales = CAST(ISNULL(Chk.taxInfotaxExemptSales, 0) AS DECIMAL(18,6))  
 				  FROM #tempCheckoutInsert Chk
