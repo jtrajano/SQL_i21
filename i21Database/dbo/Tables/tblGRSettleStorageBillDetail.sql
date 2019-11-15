@@ -6,6 +6,6 @@
 	[intBillId] INT NOT NULL,
 	[ysnImport] BIT NULL,
 	CONSTRAINT [PK_tblGRSettleStorageBillDetail] PRIMARY KEY CLUSTERED ([intSettleStorageBillDetailId] ASC),
-	CONSTRAINT [FK_tblGRSettleStorageBillDetail_tblGRSettleStorage_intSettleStorageId] FOREIGN KEY ([intSettleStorageId]) REFERENCES [dbo].tblGRSettleStorage ([intSettleStorageId]),
+	CONSTRAINT [FK_tblGRSettleStorageBillDetail_tblGRSettleStorage_intSettleStorageId] FOREIGN KEY ([intSettleStorageId]) REFERENCES [dbo].tblGRSettleStorage ([intSettleStorageId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblGRSettleStorageBillDetail_tblAPBill_intBillId] FOREIGN KEY ([intBillId]) REFERENCES [dbo].[tblAPBill] ([intBillId])
 )
