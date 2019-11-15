@@ -437,6 +437,9 @@ WHERE
 					WHERE intEntityVendorId = A.intEntityVendorId 
 					AND intContractDetailId = Contracts.intContractDetailId
 					AND strSourceNumber <> A.strReceiptNumber
+					AND intInventoryReceiptItemId IS NULL
+					AND intInventoryReceiptChargeId IS NULL 
+					AND intInventoryShipmentChargeId IS NULL
 				)
 				THEN 0 ELSE 1 
 			END = 1
@@ -635,6 +638,9 @@ WHERE
 						WHERE intEntityVendorId = A.intEntityVendorId 
 						AND intContractDetailId = CD.intContractDetailId
 						AND strSourceNumber <> A.strSourceNumber
+						AND intInventoryReceiptItemId IS NULL 
+						AND intInventoryReceiptChargeId IS NULL 
+						AND intInventoryShipmentChargeId IS NULL						
 					)
 					THEN 0 ELSE 1 
 				END = 1

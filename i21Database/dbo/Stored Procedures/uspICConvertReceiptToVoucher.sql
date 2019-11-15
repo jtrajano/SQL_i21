@@ -230,7 +230,11 @@ BEGIN
 				,[ysnCheckOffTax]		
 				,[ysnTaxExempt]	
 				,[ysnTaxOnly]	
-		FROM dbo.fnICGeneratePayablesTaxes(@voucherItems)
+		FROM dbo.fnICGeneratePayablesTaxes(
+				@voucherItems
+				,@intReceiptId
+				,DEFAULT 
+			)
 	END
 
 	-- Call the AP sp to convert the IR to Voucher. 
