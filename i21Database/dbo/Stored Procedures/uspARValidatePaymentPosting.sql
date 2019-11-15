@@ -8,7 +8,34 @@
     ,@Error         AS NVARCHAR(500) = NULL OUTPUT		
 AS	
 
+--INVALID BASE AMOUNTS HEADER
+UPDATE tblARPayment
+SET dblAmountPaid			= [dbo].[fnRoundBanker](dblAmountPaid, 2)
+  , dblBaseAmountPaid		= [dbo].[fnRoundBanker](dblAmountPaid, 2)
+  , dblUnappliedAmount		= [dbo].[fnRoundBanker](dblUnappliedAmount, 2)
+  , dblBaseUnappliedAmount	= [dbo].[fnRoundBanker](dblUnappliedAmount, 2)
+  , dblOverpayment			= [dbo].[fnRoundBanker](dblOverpayment, 2)
+  , dblBaseOverpayment		= [dbo].[fnRoundBanker](dblOverpayment, 2)
+WHERE ysnPosted = 0
+  AND dblExchangeRate = 1.000000
+  AND (dblAmountPaid <> dblBaseAmountPaid OR dblUnappliedAmount <> dblBaseUnappliedAmount)
+  AND intPaymentId = @PaymentId
 
+--INVALID BASE AMOUNTS DETAIL
+UPDATE PD 
+SET dblPayment		= [dbo].[fnRoundBanker](PD.dblPayment, 2)
+  , dblBasePayment	= [dbo].[fnRoundBanker](PD.dblPayment, 2)
+  , dblDiscount		= [dbo].[fnRoundBanker](PD.dblDiscount, 2)
+  , dblBaseDiscount	= [dbo].[fnRoundBanker](PD.dblDiscount, 2)
+  , dblInterest		= [dbo].[fnRoundBanker](PD.dblInterest, 2)
+ , dblBaseInterest	= [dbo].[fnRoundBanker](PD.dblInterest, 2)
+FROM tblARPaymentDetail PD
+INNER JOIN tblARPayment P ON PD.intPaymentId = P.intPaymentId
+WHERE P.ysnPosted = 0
+  AND PD.dblCurrencyExchangeRate = 1.000000
+  AND (PD.dblPayment <> PD.dblBasePayment OR PD.dblDiscount <> PD.dblBaseDiscount OR PD.dblInterest <> PD.dblBaseInterest)
+  AND P.intPaymentId = @PaymentId
+  
 SET @Error = ''
 IF @PostDate IS NULL
     SET @PostDate = GETDATE()
@@ -60,67 +87,39 @@ DECLARE @GLEntries AS RecapTableType
 IF @Post = 1
     BEGIN
         --+overpayment
-        INSERT INTO
-            @Overpayment
-        SELECT
-            A.intPaymentId
-        FROM
-            tblARPayment A 
-        INNER JOIN
-            @PaymentData P
-                ON A.intPaymentId = P.[intTransactionId]				
-        WHERE
-                (A.dblAmountPaid) > (SELECT SUM(dblPayment) FROM tblARPaymentDetail WHERE intPaymentId = A.intPaymentId)
-            AND EXISTS(SELECT NULL FROM tblARPaymentDetail WHERE intPaymentId = A.intPaymentId AND dblPayment <> 0)	
+        INSERT INTO @Overpayment
+        SELECT A.intPaymentId
+        FROM tblARPayment A 
+        INNER JOIN @PaymentData P ON A.intPaymentId = P.[intTransactionId]				
+        WHERE (A.dblAmountPaid) > (SELECT SUM(dblPayment) FROM tblARPaymentDetail WHERE intPaymentId = A.intPaymentId)
+		  AND EXISTS(SELECT NULL FROM tblARPaymentDetail WHERE intPaymentId = A.intPaymentId AND dblPayment <> 0)	
 					
         --+prepayment
-        INSERT INTO
-            @Prepayment
-        SELECT
-            A.intPaymentId
-        FROM
-            tblARPayment A 
-        INNER JOIN
-            @PaymentData P
-		        ON A.intPaymentId = P.[intTransactionId]				
-        WHERE
-            (A.dblAmountPaid) <> 0
+        INSERT INTO @Prepayment
+        SELECT A.intPaymentId
+        FROM tblARPayment A 
+        INNER JOIN @PaymentData P ON A.intPaymentId = P.[intTransactionId]				
+        WHERE (A.dblAmountPaid) <> 0
             AND ISNULL((SELECT SUM(dblPayment) FROM tblARPaymentDetail WHERE intPaymentId = A.intPaymentId AND ([intInvoiceId] IS NOT NULL OR [intBillId] IS NOT NULL)), 0) = 0	
             AND NOT EXISTS(SELECT NULL FROM tblARPaymentDetail WHERE intPaymentId = A.intPaymentId AND dblPayment <> 0 AND ([intInvoiceId] IS NOT NULL OR [intBillId] IS NOT NULL))											
     END
 ELSE	
     BEGIN
         ---overpayment
-        INSERT INTO
-            @Overpayment
-        SELECT
-            A.intPaymentId
-        FROM
-            tblARPayment A 
-        INNER JOIN
-            @PaymentData P
-                ON A.intPaymentId = P.[intTransactionId]
-        INNER JOIN
-            tblARInvoice I
-                ON A.strRecordNumber = I.strComments OR A.intPaymentId = I.intPaymentId 				
-        WHERE
-                I.strTransactionType = 'Overpayment'
+        INSERT INTO @Overpayment
+        SELECT A.intPaymentId
+        FROM tblARPayment A 
+        INNER JOIN @PaymentData P ON A.intPaymentId = P.[intTransactionId]
+        INNER JOIN tblARInvoice I ON A.strRecordNumber = I.strComments OR A.intPaymentId = I.intPaymentId 				
+        WHERE I.strTransactionType = 'Overpayment'
 					
         ---prepayment
-        INSERT INTO
-            @Prepayment
-        SELECT
-            A.intPaymentId
-        FROM
-            tblARPayment A 
-        INNER JOIN
-            @PaymentData P
-                ON A.intPaymentId = P.[intTransactionId]
-        INNER JOIN
-            tblARInvoice I
-                ON A.strRecordNumber = I.strComments OR A.intPaymentId = I.intPaymentId 				
-        WHERE
-                I.strTransactionType = 'Customer Prepayment'
+        INSERT INTO @Prepayment
+        SELECT A.intPaymentId
+        FROM tblARPayment A 
+        INNER JOIN @PaymentData P ON A.intPaymentId = P.[intTransactionId]
+        INNER JOIN tblARInvoice I ON A.strRecordNumber = I.strComments OR A.intPaymentId = I.intPaymentId 				
+        WHERE I.strTransactionType = 'Customer Prepayment'		
     END
 
 IF @Post = 1
