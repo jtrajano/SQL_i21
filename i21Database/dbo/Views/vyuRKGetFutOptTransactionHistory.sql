@@ -123,7 +123,10 @@ FROM (
 	LEFT JOIN tblCTBook Book ON Book.intBookId = History.intBookId
 	LEFT JOIN tblCTSubBook SubBook ON SubBook.intSubBookId = History.intSubBookId
 	LEFT JOIN tblSMCurrency Currency ON Currency.strCurrency = History.strCurrency
-	LEFT JOIN tblRKBrokerageAccount BrokerAccount ON BrokerAccount.strAccountNumber = History.strBrokerAccount	
+	LEFT JOIN (
+		tblRKBrokerageAccount BrokerAccount
+		LEFT JOIN tblEMEntity em ON em.intEntityId = BrokerAccount.intEntityId
+	) ON BrokerAccount.strAccountNumber = History.strBrokerAccount AND em.strName = History.strBroker
 	LEFT JOIN (
 		SELECT DISTINCT E.strName, E.intEntityId
 		FROM tblEMEntity E
