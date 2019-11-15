@@ -8,7 +8,7 @@ BEGIN TRY
 	SELECT 
 		CheckTax.intCheckoutId
 		, CheckTax.strTaxNo
-		, SMTax.strTaxCode
+		, strTaxCode = CheckTax.strTaxNo
 		, CheckTax.dblTotalTax AS TotalTax
 		, CheckTax.dblTaxableSales AS TaxableSales
 		, CheckTax.dblTaxExemptSales AS TaxExemptSales
@@ -21,9 +21,7 @@ BEGIN TRY
 		ON CH.intStoreId = ST.intStoreId
 	INNER JOIN tblSTStoreTaxTotals STTax
 		ON ST.intStoreId = STTax.intStoreId
-	INNER JOIN tblSMTaxCode SMTax
-		ON STTax.intTaxCodeId = SMTax.intTaxCodeId
-		AND CheckTax.strTaxNo = SMTax.strStoreTaxNumber
+		AND CheckTax.strTaxNo = STTax.strTaxCodeNumber
 	LEFT JOIN tblGLAccount GLAccount 
 		ON CheckTax.intSalesTaxAccount = GLAccount.intAccountId
 	WHERE CheckTax.intCheckoutId = @intCheckoutId
