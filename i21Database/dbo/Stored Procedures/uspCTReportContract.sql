@@ -28,9 +28,9 @@ BEGIN TRY
 			@SecondApprovalId       INT,
 			@FirstApprovalSign      VARBINARY(MAX),
 			@SecondApprovalSign     VARBINARY(MAX),
-			@FirstApprovalName		NVARCHAR(MAX),
-			@SecondApprovalName		NVARCHAR(MAX),
 			@InterCompApprovalSign  VARBINARY(MAX),
+			@FirstApprovalName      NVARCHAR(MAX),
+			@SecondApprovalName     NVARCHAR(MAX),
 			@IsFullApproved         BIT = 0,
 			@ysnFairtrade			BIT = 0,
 			@ysnFeedOnApproval		BIT = 0,
@@ -192,6 +192,18 @@ BEGIN TRY
 	JOIN	tblEMEntitySignature	ES	ON	Sig.intSignatureId	=	ES.intElectronicSignatureId
 	WHERE	IA.intContractHeaderId	=	@intContractHeaderId
 	AND		IA.strScreen	=	'Contract'
+
+	SELECT @FirstApprovalSign =  Sig.blbDetail, @FirstApprovalName = ent.strName 
+								 FROM tblSMSignature Sig  WITH (NOLOCK)
+								 --JOIN tblEMEntitySignature ESig ON ESig.intElectronicSignatureId=Sig.intSignatureId
+								 left join tblEMEntity ent on ent.intEntityId = Sig.intEntityId
+								 WHERE Sig.intEntityId=@FirstApprovalId
+
+	SELECT @SecondApprovalSign =Sig.blbDetail, @SecondApprovalName = ent.strName
+								FROM tblSMSignature Sig  WITH (NOLOCK)
+								--JOIN tblEMEntitySignature ESig ON ESig.intElectronicSignatureId=Sig.intSignatureId 
+								 left join tblEMEntity ent on ent.intEntityId = Sig.intEntityId
+								WHERE Sig.intEntityId=@SecondApprovalId
 
 	SELECT	@strCompanyName	=	CASE WHEN LTRIM(RTRIM(tblSMCompanySetup.strCompanyName)) = '' THEN NULL ELSE LTRIM(RTRIM(tblSMCompanySetup.strCompanyName)) END,
 			@strAddress		=	CASE WHEN LTRIM(RTRIM(tblSMCompanySetup.strAddress)) = '' THEN NULL ELSE LTRIM(RTRIM(tblSMCompanySetup.strAddress)) END,
