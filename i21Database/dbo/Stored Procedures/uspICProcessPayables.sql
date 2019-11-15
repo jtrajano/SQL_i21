@@ -5,6 +5,13 @@ CREATE PROCEDURE dbo.uspICProcessPayables
 	@intEntityUserSecurityId INT
 AS
 BEGIN
+
+SET QUOTED_IDENTIFIER OFF  
+SET ANSI_NULLS ON  
+SET NOCOUNT ON  
+SET XACT_ABORT OFF
+SET ANSI_WARNINGS OFF  
+
 	-- Generate Payables
 	DECLARE @voucherPayable VoucherPayable
 	DECLARE @voucherPayableTax VoucherDetailTax
@@ -233,29 +240,32 @@ BEGIN
 				,[intTermId] = NULL 			
 				,[strBillOfLading] = Shipment.strBOLNumber
 				,[ysnReturn] = 0 
-			FROM vyuICShipmentChargesForBilling ShipmentCharges
+			FROM vyuICShipmentChargesPayables ShipmentCharges
 			INNER JOIN tblICInventoryShipment Shipment
 				ON Shipment.intInventoryShipmentId = ShipmentCharges.intInventoryShipmentId
 			INNER JOIN tblICItemLocation ItemLocation 
 				ON ItemLocation.intItemId = ShipmentCharges.intItemId
 				AND ItemLocation.intLocationId = ShipmentCharges.intLocationId
 			WHERE Shipment.intInventoryShipmentId = @intShipmentId
-				AND Shipment.ysnPosted = 1
+				AND Shipment.ysnPosted = @ysnPost
 				AND (ShipmentCharges.intContractDetailId IS NULL OR 
 					(
 						CASE WHEN ShipmentCharges.intContractDetailId IS NOT NULL 
 							AND EXISTS(
 								SELECT TOP 1 1 
 								FROM tblAPVoucherPayable 
-								WHERE intEntityVendorId = ShipmentCharges.intEntityVendorId 
-								AND intContractDetailId = ShipmentCharges.intContractDetailId
-								AND strSourceNumber != ShipmentCharges.strSourceNumber
+								WHERE 
+									intEntityVendorId = ShipmentCharges.intEntityVendorId 
+									AND intContractDetailId = ShipmentCharges.intContractDetailId
+									AND strSourceNumber <> ShipmentCharges.strSourceNumber
+									AND intInventoryReceiptItemId IS NULL 
+									AND intInventoryReceiptChargeId IS NULL 									
+									AND intInventoryShipmentChargeId IS NULL 
 							)
 							THEN 0 ELSE 1 
 						END = 1
 					)
 				)
-
 	END
 	
 	BEGIN 
@@ -305,7 +315,48 @@ BEGIN
 	
 	ELSE IF @ysnPost = 0 
 		AND EXISTS (SELECT TOP 1 1 FROM @voucherPayable) 
-	BEGIN		
-		EXEC dbo.uspAPRemoveVoucherPayable @voucherPayable
+	BEGIN	
+		_Retry: 
+		
+		BEGIN TRY 		
+			EXEC dbo.uspAPRemoveVoucherPayable @voucherPayable
+		END TRY 
+		BEGIN CATCH					
+			DECLARE @error INT, @message VARCHAR(4000), @xstate INT 
+			SELECT @error = ERROR_NUMBER(), @message = ERROR_MESSAGE(), @xstate = XACT_STATE()
+
+			-- Hack this error. 
+			IF @message = 'Record count deleted mismatch.' 
+			BEGIN 
+				-- Regenerate the missing/bad payable record. 
+				IF @intReceiptId IS NOT NULL 
+				BEGIN 
+					DELETE	voucherPayable
+					FROM	tblAPVoucherPayable voucherPayable INNER JOIN tblICInventoryReceipt r
+								ON voucherPayable.strSourceNumber = r.strReceiptNumber 
+					WHERE	r.intInventoryReceiptId = @intReceiptId
+
+					EXEC dbo.uspAPUpdateVoucherPayableQty @voucherPayable, @voucherPayableTax
+					GOTO _Retry 
+				END 
+
+				IF @intShipmentId IS NOT NULL 
+				BEGIN 
+					DELETE	voucherPayable
+					FROM	tblAPVoucherPayable voucherPayable INNER JOIN tblICInventoryShipment s
+								ON voucherPayable.strSourceNumber = s.strShipmentNumber 
+					WHERE	s.intInventoryShipmentId = @intShipmentId
+					
+					EXEC dbo.uspAPUpdateVoucherPayableQty @voucherPayable, @voucherPayableTax
+					GOTO _Retry 
+				END 
+			END
+			-- If it is a different error, re-throw it. 
+			ELSE 
+			BEGIN 
+				SET @message = 'Error in AP Remove Voucher Payable: ' + @message
+				RAISERROR(@message, 16, 1) 
+			END
+		END CATCH 
 	END
 END
