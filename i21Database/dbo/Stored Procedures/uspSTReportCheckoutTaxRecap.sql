@@ -8,7 +8,7 @@ BEGIN TRY
 	SELECT 
 		CheckTax.intCheckoutId
 		, CheckTax.strTaxNo
-		, strTaxCode = CheckTax.strTaxNo
+		, SMTax.strTaxCode
 		, CheckTax.dblTotalTax AS TotalTax
 		, CheckTax.dblTaxableSales AS TaxableSales
 		, CheckTax.dblTaxExemptSales AS TaxExemptSales
@@ -22,11 +22,37 @@ BEGIN TRY
 	INNER JOIN tblSTStoreTaxTotals STTax
 		ON ST.intStoreId = STTax.intStoreId
 		AND CheckTax.strTaxNo = STTax.strTaxCodeNumber
+	INNER JOIN tblSMTaxCode SMTax
+		ON STTax.intTaxCodeId = SMTax.intTaxCodeId
 	LEFT JOIN tblGLAccount GLAccount 
 		ON CheckTax.intSalesTaxAccount = GLAccount.intAccountId
 	WHERE CheckTax.intCheckoutId = @intCheckoutId
 		AND CheckTax.dblTotalTax IS NOT NULL
     
+	--SELECT 
+	--	CheckTax.intCheckoutId
+	--	, CheckTax.strTaxNo
+	--	, SMTax.strTaxCode
+	--	, CheckTax.dblTotalTax AS TotalTax
+	--	, CheckTax.dblTaxableSales AS TaxableSales
+	--	, CheckTax.dblTaxExemptSales AS TaxExemptSales
+	--	, GLAccount.strAccountId
+	--	, GLAccount.strDescription
+	--FROM tblSTCheckoutSalesTaxTotals CheckTax 
+	--INNER JOIN tblSTCheckoutHeader CH
+	--	ON CheckTax.intCheckoutId = CH.intCheckoutId
+	--INNER JOIN tblSTStore ST
+	--	ON CH.intStoreId = ST.intStoreId
+	--INNER JOIN tblSTStoreTaxTotals STTax
+	--	ON ST.intStoreId = STTax.intStoreId
+	--INNER JOIN tblSMTaxCode SMTax
+	--	ON STTax.intTaxCodeId = SMTax.intTaxCodeId
+	--	AND CheckTax.strTaxNo = SMTax.strStoreTaxNumber
+	--LEFT JOIN tblGLAccount GLAccount 
+	--	ON CheckTax.intSalesTaxAccount = GLAccount.intAccountId
+	--WHERE CheckTax.intCheckoutId = @intCheckoutId
+	--	AND CheckTax.dblTotalTax IS NOT NULL
+
 END TRY
 
 BEGIN CATCH
