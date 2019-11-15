@@ -72,7 +72,7 @@ SELECT
 INTO #tblContractBalance
 FROM(
 	select 
-		Row_Number() OVER (PARTITION BY sh.intContractDetailId ORDER BY cd.dtmCreated  DESC, sh.intSequenceHistoryId) AS Row_Num
+		Row_Number() OVER (PARTITION BY sh.intContractDetailId ORDER BY cd.dtmCreated  DESC, sh.intSequenceHistoryId DESC) AS Row_Num
 		, dtmTransactionDate = dbo.fnRemoveTimeOnDate(cd.dtmCreated)
 		, sh.intContractHeaderId
 		, sh.intContractDetailId
@@ -87,7 +87,7 @@ FROM(
 	inner join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
 	inner join tblCTPricingType pt on pt.intPricingTypeId = cd.intPricingTypeId
 	inner join tblICCommodityUnitMeasure cum on cum.intCommodityId = ch.intCommodityId and cum.ysnDefault = 1
-	where intSequenceUsageHistoryId is null 
+	where intSequenceUsageHistoryId is null and strPricingStatus <> 'Partially Priced'
 
 	
 	union all
@@ -113,11 +113,11 @@ FROM(
 
 	union all
 	SELECT	
-		Row_Number() OVER (PARTITION BY pf.intContractDetailId ORDER BY fd.dtmFixationDate  DESC) AS Row_Num
+		Row_Number() OVER (PARTITION BY pf.intContractDetailId, fd.intPriceFixationDetailId ORDER BY fd.dtmFixationDate  DESC) AS Row_Num
 		, dtmTransactionDate = dbo.fnRemoveTimeOnDate(fd.dtmFixationDate)
 		, pf.intContractHeaderId
 		, pf.intContractDetailId
-		, dblQty = dbo.fnCTConvertQtyToTargetCommodityUOM(ch.intCommodityId,dbo.fnCTGetCommodityUnitMeasure(ch.intCommodityUOMId),cum.intUnitMeasureId,fd.dblQuantity * -1)
+		, dblQty = dbo.fnCTConvertQtyToTargetCommodityUOM(ch.intCommodityId,dbo.fnCTGetCommodityUnitMeasure(ch.intCommodityUOMId),cum.intUnitMeasureId,(fd.dblQuantity - fd.dblQuantityAppliedAndPriced) * -1)
 		, 'Basis'
 		, strTransactionType = ''
 		, intTransactionId = null
@@ -128,15 +128,14 @@ FROM(
 	JOIN tblCTContractDetail		 cd ON cd.intContractDetailId = pf.intContractDetailId
 	inner join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
 	inner join tblICCommodityUnitMeasure cum on cum.intCommodityId = ch.intCommodityId and cum.ysnDefault = 1
-	WHERE fd.intPriceFixationDetailId NOT IN (SELECT intPriceFixationDetailId FROM tblCTPriceFixationDetailAPAR)
 
 	union all
 	SELECT	
-		Row_Number() OVER (PARTITION BY pf.intContractDetailId ORDER BY fd.dtmFixationDate  DESC) AS Row_Num
+		Row_Number() OVER (PARTITION BY pf.intContractDetailId, fd.intPriceFixationDetailId ORDER BY fd.dtmFixationDate  DESC) AS Row_Num
 		, dtmTransactionDate = dbo.fnRemoveTimeOnDate(fd.dtmFixationDate)
 		, pf.intContractHeaderId
 		, pf.intContractDetailId
-		, dblQty = dbo.fnCTConvertQtyToTargetCommodityUOM(ch.intCommodityId,dbo.fnCTGetCommodityUnitMeasure(ch.intCommodityUOMId),cum.intUnitMeasureId,fd.dblQuantity)
+		, dblQty = dbo.fnCTConvertQtyToTargetCommodityUOM(ch.intCommodityId,dbo.fnCTGetCommodityUnitMeasure(ch.intCommodityUOMId),cum.intUnitMeasureId,fd.dblQuantity - fd.dblQuantityAppliedAndPriced)
 		, 'Priced'
 		, strTransactionType = ''
 		, intTransactionId = null
@@ -147,7 +146,6 @@ FROM(
 	JOIN tblCTContractDetail		 cd ON cd.intContractDetailId = pf.intContractDetailId
 	inner join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
 	inner join tblICCommodityUnitMeasure cum on cum.intCommodityId = ch.intCommodityId and cum.ysnDefault = 1
-	WHERE fd.intPriceFixationDetailId NOT IN (SELECT intPriceFixationDetailId FROM tblCTPriceFixationDetailAPAR)
 
 
 
