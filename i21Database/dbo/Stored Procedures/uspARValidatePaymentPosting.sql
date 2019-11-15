@@ -22,6 +22,34 @@ SET @BatchId	= ISNULL(@BatchId, 'TestBatchId')
 SET @Post		= (SELECT TOP 1 CASE WHEN ysnPosted = 0 THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END FROM tblARPayment WHERE intPaymentId = @PaymentId)
 SET @Post		= ISNULL(@Post, 1)
 
+--INVALID BASE AMOUNTS HEADER
+UPDATE tblARPayment
+SET dblAmountPaid			= [dbo].[fnRoundBanker](dblAmountPaid, 2)
+  , dblBaseAmountPaid		= [dbo].[fnRoundBanker](dblAmountPaid, 2)
+  , dblUnappliedAmount		= [dbo].[fnRoundBanker](dblUnappliedAmount, 2)
+  , dblBaseUnappliedAmount	= [dbo].[fnRoundBanker](dblUnappliedAmount, 2)
+  , dblOverpayment			= [dbo].[fnRoundBanker](dblOverpayment, 2)
+  , dblBaseOverpayment		= [dbo].[fnRoundBanker](dblOverpayment, 2)
+WHERE ysnPosted = 0
+  AND dblExchangeRate = 1.000000
+  AND (dblAmountPaid <> dblBaseAmountPaid OR dblUnappliedAmount <> dblBaseUnappliedAmount)
+  AND intPaymentId = @PaymentId
+
+--INVALID BASE AMOUNTS DETAIL
+UPDATE PD 
+SET dblPayment		= [dbo].[fnRoundBanker](PD.dblPayment, 2)
+  , dblBasePayment	= [dbo].[fnRoundBanker](PD.dblPayment, 2)
+  , dblDiscount		= [dbo].[fnRoundBanker](PD.dblDiscount, 2)
+  , dblBaseDiscount	= [dbo].[fnRoundBanker](PD.dblDiscount, 2)
+  , dblInterest		= [dbo].[fnRoundBanker](PD.dblInterest, 2)
+ , dblBaseInterest	= [dbo].[fnRoundBanker](PD.dblInterest, 2)
+FROM tblARPaymentDetail PD
+INNER JOIN tblARPayment P ON PD.intPaymentId = P.intPaymentId
+WHERE P.ysnPosted = 0
+  AND PD.dblCurrencyExchangeRate = 1.000000
+  AND (PD.dblPayment <> PD.dblBasePayment OR PD.dblDiscount <> PD.dblBaseDiscount OR PD.dblInterest <> PD.dblBaseInterest)
+  AND P.intPaymentId = @PaymentId
+
 IF(OBJECT_ID('tempdb..#ARPostPaymentHeader') IS NOT NULL)
 BEGIN
     DROP TABLE #ARPostPaymentHeader
