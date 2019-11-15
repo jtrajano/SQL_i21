@@ -2200,6 +2200,7 @@
     <Build Include="dbo\Stored Procedures\uspRKGetGrainBankDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetNetHedgeDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspGRProcessTransfer.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRCreateGLEntriesForTransferStorage.sql" />
     <Build Include="dbo\Views\vyuGRGetTransferStorageSchedule.sql" />
     <Build Include="dbo\Views\vyuGRGetTransferStorageType.sql" />
     <Build Include="dbo\Views\vyuCFCardAccount.sql" />
@@ -8068,16 +8069,26 @@
     <Build Include="dbo\Stored Procedures\uspIPProcessPreStageLoad.sql" />
     <Build Include="dbo\Tables\tblLGIntrCompLogisticsPreStg.sql" />
     <Build Include="dbo\Stored Procedures\uspICZeroAllStockQtyInCountDetail.sql" />
+    <Build Include="dbo\User Defined Types\StagingTransactionLog.sql" />
     <Build Include="dbo\Stored Procedures\uspCMUpdateAPOverflowSettings.sql" />
     <Build Include="dbo\Stored Procedures\uspCFValidateInvoiceDataSetup.sql" />
+    <Build Include="dbo\Views\vyuIPAmendmentApproval.sql" />
+    <Build Include="dbo\Tables\tblARInvoiceTaxReportStagingTable.sql" />
+    <Build Include="dbo\Stored Procedures\uspARInvoiceDetailTaxReport.sql" />
+    <Build Include="dbo\Functions\fnGRGetVoucheredUnits.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPDiagnoseClearingData.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTRebuildScheduledQuantity.sql" />
     <Build Include="dbo\Views\vyuLGLoadDetailUberScale.sql" />
     <Build Include="dbo\User Defined Types\StagingTransactionLog.sql" />
     <Build Include="dbo\Tables\tblSCDiscountType.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportPriceConfirmation.sql" />
     <Build Include="dbo\Functions\udfDateGreaterThanEquals.sql" />
     <Build Include="dbo\Functions\udfDateLessThanEquals.sql" />
+    <Build Include="dbo\Tables\tblGRSettleStorageBillDetail.sql" />
+    <Build Include="dbo\Views\vyuAPVouchersPaymentInfo.sql" />
     <Build Include="dbo\Stored Procedures\uspICMonthlyCategoryStockRebuild.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdateReceiptCharge.sql" />
+    <Build Include="dbo\Stored Procedures\uspICAddProRatedReceiptChargesToVoucher.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -8314,6 +8325,7 @@
     <None Include="Scripts\Post-Deployment\AP\UpdatePaymentDetailOffset.sql" />
     <Build Include="dbo\Views\vyuARInvoiceSubFormulaReport.sql" />
     <Build Include="dbo\Views\vyuCTAvailableQuantityForVoucher.sql" />
+    <Build Include="dbo\Views\vyuARPaymentForNSF.sql" />
     <Build Include="dbo\Views\vyuSCTicketContractUsed.sql" />
     <Build Include="dbo\Functions\fnARGetInvoiceForBatch.sql" />
   </ItemGroup>
@@ -8479,5 +8491,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\CT\1920_FinancialStatus.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\GR\ImportSettleStorageBillDetail.sql" />
   </ItemGroup>
 </Project>

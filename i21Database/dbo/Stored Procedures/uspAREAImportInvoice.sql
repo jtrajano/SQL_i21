@@ -20,6 +20,7 @@ INSERT INTO @InvoiceEntries (
 	, dtmShipDate
 	, dtmPostDate
 	, strInvoiceOriginId
+	, strComments
 	, ysnImpactInventory
 
 	, intItemId
@@ -48,6 +49,7 @@ SELECT intId				= I.intId
 	, dtmShipDate			= ISNULL(I.dtmShipDate, I.dtmDate)
 	, dtmPostDate			= ISNULL(I.dtmPostDate, I.dtmDate)
 	, strInvoiceOriginId	= I.strInvoiceOriginId
+	, strComments			= I.strComments
 	, ysnImpactInventory	= I.ysnImpactInventory
 
 	, intItemId				= ITEM.intItemId

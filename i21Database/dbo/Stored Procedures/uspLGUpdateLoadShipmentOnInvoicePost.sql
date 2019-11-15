@@ -116,11 +116,11 @@ BEGIN TRY
 			SET @dblInvoicedQty = NUll
             IF @intPContractDetailId IS NOT NULL AND @dblLoadDetailQty IS NOT NULL
             BEGIN
-				EXEC uspCTUpdateScheduleQuantity @intContractDetailId = @intPContractDetailId
-					,@dblQuantityToUpdate =  @dblLoadDetailQty
-					,@intUserId = @UserId
-					,@intExternalId = @intInvoiceDetailId
-					,@strScreenName = 'Invoice'
+				--EXEC uspCTUpdateScheduleQuantity @intContractDetailId = @intPContractDetailId
+				--	,@dblQuantityToUpdate =  @dblLoadDetailQty
+				--	,@intUserId = @UserId
+				--	,@intExternalId = @intInvoiceDetailId
+				--	,@strScreenName = 'Invoice'
 				
 				UPDATE tblCTContractDetail
 				SET dblInvoicedQty = ISNULL(dblInvoicedQty, 0) + + (@dblLoadDetailQty * -1)
@@ -137,11 +137,11 @@ BEGIN TRY
 				FROM tblLGLoadDetail
 				WHERE intSContractDetailId = @intSContractDetailId AND intLoadId = @intLoadId
 
-				EXEC uspCTUpdateScheduleQuantity @intContractDetailId = @intSContractDetailId
-					,@dblQuantityToUpdate	=	@dblInvoicedQty
-					,@intUserId				=	@UserId
-					,@intExternalId			=	@intInvoiceDetailId
-					,@strScreenName			=	'Invoice' 
+				--EXEC uspCTUpdateScheduleQuantity @intContractDetailId = @intSContractDetailId
+				--	,@dblQuantityToUpdate	=	@dblInvoicedQty
+				--	,@intUserId				=	@UserId
+				--	,@intExternalId			=	@intInvoiceDetailId
+				--	,@strScreenName			=	'Invoice' 
 
 				UPDATE tblCTContractDetail
 				SET dblInvoicedQty = ISNULL(dblInvoicedQty, 0) + (@dblInvoicedQty * -1)

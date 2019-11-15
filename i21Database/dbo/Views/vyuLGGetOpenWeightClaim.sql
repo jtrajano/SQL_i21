@@ -307,7 +307,7 @@ FROM
 	CROSS APPLY (SELECT intCount = COUNT(*) FROM tblLGLoadDetailContainerLink WHERE intLoadDetailId = LD.intLoadDetailId) CLCT
 	CROSS APPLY (SELECT dblLinkNetWt = SUM(dblLinkNetWt) FROM tblLGLoadDetailContainerLink WHERE intLoadDetailId = LD.intLoadDetailId) CLNW
 	WHERE L.intPurchaseSale IN (2, 3)
-		AND (L.intShipmentStatus = 6 OR (L.intPurchaseSale = 3 AND L.intShipmentStatus = 11))
+		AND L.intShipmentStatus IN (6, 11)
 		AND WC.intWeightClaimId IS NULL
 		AND ISNULL(LD.ysnNoClaim, 0) = 0
 	) t1

@@ -53,6 +53,7 @@ BEGIN TRY
 			@intStockUOMId					INT,
 			@intItemId						INT
 
+
 			declare @AvailableQuantityForVoucher cursor;
 			declare @dblCashPriceForVoucher numeric(18,6);
 			declare @dblAvailableQuantity numeric(18,6);

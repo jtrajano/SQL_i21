@@ -56,11 +56,11 @@ BEGIN
 			SET @ysnHasError = 1
 		END
 
-	IF (@ysnForceRounding = 'N')
+	IF (@ysnForceRounding = 'N' OR @ysnForceRounding IS NULL OR @ysnForceRounding = '')
 		BEGIN 
 			SET @ysnForceRounding = 0
 		END
-	ELSE IF (@ysnForceRounding = 'Y' OR @ysnForceRounding IS NULL OR @ysnForceRounding = '')
+	ELSE IF (@ysnForceRounding = 'Y' )
 		BEGIN
 			SET @ysnForceRounding = 1	
 		END

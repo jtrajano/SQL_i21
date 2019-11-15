@@ -221,7 +221,7 @@ select
   a.dblAdjustment, 
   z.dblAllocatedQty, 
   za.strApprovalBasis, 
-  ysnApproved = convert(bit, 0), 
+  ysnApproved = ISNULL(TR.ysnOnceApproved,0), --convert(bit, 0), 
   dblApprovedQty = aa.dblRepresentingQty, 
   strAssociationName = zb.strName, 
   a.dblAssumedFX, 
@@ -277,7 +277,7 @@ select
   a.strERPPONumber, 
   intCustomerVendorEntityId = b.intEntityId, 
   strCustomerVendor = aq.strName, 
-  strCustomerContact = null, 
+  b.strCustomerContract,
   b.ysnExported, 
   b.dtmExported, 
   a.strFXRemarks, 
@@ -484,3 +484,16 @@ from
   left join tblICItemUOM cm on cm.intItemUOMId = a.intNetWeightUOMId 
   left join tblICUnitMeasure cn on cn.intUnitMeasureId = cm.intUnitMeasureId 
   left join lgallocationS co on co.intSContractDetailId = a.intContractDetailId
+  left join
+  (
+		SELECT * FROM 
+		(
+			SELECT	ROW_NUMBER() OVER (PARTITION BY TR.intRecordId ORDER BY TR.intRecordId ASC) intRowNum,
+					TR.intRecordId, TR.ysnOnceApproved 
+			FROM	tblSMTransaction	TR
+			JOIN	tblSMScreen			SC	ON	SC.intScreenId		=	TR.intScreenId
+			WHERE	SC.strNamespace IN( 'ContractManagement.view.Contract',
+										'ContractManagement.view.Amendments')
+		) t
+		WHERE intRowNum = 1
+  ) TR ON TR.intRecordId = b.intContractHeaderId

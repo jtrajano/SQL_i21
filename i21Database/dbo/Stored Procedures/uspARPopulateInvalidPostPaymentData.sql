@@ -376,6 +376,27 @@ BEGIN
         ,[intTransactionDetailId]
         ,[strBatchId]
         ,[strError])
+	--Write Off Account Category
+	SELECT
+         [intTransactionId]         = P.[intTransactionId]
+        ,[strTransactionId]         = P.[strTransactionId]
+        ,[strTransactionType]       = @TransType
+        ,[intTransactionDetailId]   = P.[intTransactionDetailId]
+        ,[strBatchId]               = P.[strBatchId]
+        ,[strError]                 = 'The Write Off account selected: ' + GLAD.strAccountId + ' is a non-write-off Account Category.'
+	FROM #ARPostPaymentHeader P
+    INNER JOIN vyuGLAccountDetail GLAD ON P.intWriteOffAccountId = GLAD.intAccountId
+    WHERE P.[ysnPost] = @OneBit
+      AND UPPER(P.[strPaymentMethod]) = UPPER('Write Off')
+      AND ISNULL(GLAD.[strAccountCategory], '') <> 'Write Off'
+
+    INSERT INTO #ARInvalidPaymentData
+        ([intTransactionId]
+        ,[strTransactionId]
+        ,[strTransactionType]
+        ,[intTransactionDetailId]
+        ,[strBatchId]
+        ,[strError])
 	--CF Invoice Account
 	SELECT
          [intTransactionId]         = P.[intTransactionId]
@@ -827,6 +848,33 @@ INSERT INTO #ARInvalidPaymentData
         AND P.[dblCurrencyExchangeRate] = 1.000000
         AND (P.[dblPayment] <> P.[dblBasePayment] OR P.[dblDiscount] <> P.[dblBaseDiscount] OR P.[dblInterest] <> P.[dblBaseInterest])
 
+    INSERT INTO #ARInvalidPaymentData
+        ([intTransactionId]
+        ,[strTransactionId]
+        ,[strTransactionType]
+        ,[intTransactionDetailId]
+        ,[strBatchId]
+        ,[strError])
+	--Inactive Customer for Prepayments
+	SELECT
+         [intTransactionId]         = P.[intTransactionId]
+        ,[strTransactionId]         = P.[strTransactionId]
+        ,[strTransactionType]       = @TransType
+        ,[intTransactionDetailId]   = P.[intTransactionDetailId]
+        ,[strBatchId]               = P.[strBatchId]
+        ,[strError]                 = 'The customer provided is not active!'
+	FROM #ARPostPaymentHeader P
+    INNER JOIN tblARCustomer C ON P.intEntityCustomerId = C.intEntityId
+    WHERE P.[ysnPost] = @OneBit
+     AND ISNULL(C.ysnActive, 0) = 0
+     AND (
+         ((P.[dblAmountPaid]) > (SELECT SUM([dblPayment]) FROM #ARPostPaymentDetail WHERE [ysnPost] = @OneBit AND [intTransactionId] = P.[intTransactionId]) -- Overpayment
+		  AND EXISTS(SELECT NULL FROM #ARPostPaymentDetail WHERE [ysnPost] = @OneBit AND [intTransactionId] = P.[intTransactionId] AND [dblPayment] <> @ZeroDecimal))
+     OR ((P.[dblAmountPaid]) <> @ZeroDecimal --Prepayment
+		AND ISNULL((SELECT SUM([dblPayment]) FROM #ARPostPaymentDetail WHERE [ysnPost] = @OneBit AND ([intInvoiceId] IS NOT NULL OR [intBillId] IS NOT NULL) AND [intTransactionId] = P.[intTransactionId]), @ZeroDecimal) = @ZeroDecimal	
+		AND NOT EXISTS(SELECT NULL FROM #ARPostPaymentDetail WHERE [ysnPost] = @OneBit AND ([intInvoiceId] IS NOT NULL OR [intBillId] IS NOT NULL) AND [intTransactionId] = P.[intTransactionId] AND [dblPayment] <> @ZeroDecimal))
+     )	
+
     IF(OBJECT_ID('tempdb..#DUPLICATEINVOICES') IS NOT NULL)
     BEGIN
         DROP TABLE #DUPLICATEINVOICES
@@ -1099,6 +1147,28 @@ BEGIN
     WHERE
             P.[ysnPost] = @ZeroBit
         AND CMBT.[ysnClr] = @OneBit
+
+    INSERT INTO #ARInvalidPaymentData
+        ([intTransactionId]
+        ,[strTransactionId]
+        ,[strTransactionType]
+        ,[intTransactionDetailId]
+        ,[strBatchId]
+        ,[strError])
+	--Prepayment was refunded
+	SELECT
+         [intTransactionId]         = P.[intTransactionId]
+        ,[strTransactionId]         = P.[strTransactionId]
+        ,[strTransactionType]       = @TransType
+        ,[intTransactionDetailId]   = P.[intTransactionDetailId]
+        ,[strBatchId]               = P.[strBatchId]
+        ,[strError]                 = 'You cannot unpost payment that was already refunded.'
+	FROM #ARPostPaymentHeader P
+    INNER JOIN tblARInvoice I ON P.intTransactionId = I.intPaymentId
+    WHERE P.[ysnPost] = @ZeroBit
+      AND P.[ysnInvoicePrepayment] = @OneBit
+      AND I.[strTransactionType] = 'Customer Prepayment'
+      AND I.[ysnRefundProcessed] = @OneBit
 
 	INSERT INTO #ARInvalidPaymentData
         ([intTransactionId]

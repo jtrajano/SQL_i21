@@ -98,26 +98,29 @@ BEGIN TRY
 			SET @PreviousErrMsg += ' Future Market (' + @strItemNo + ') is not configured for commodity (' + @strCommodityCode + ').'
 		END
 
-		INSERT INTO tblRKM2MBasisImport_ErrLog (strFutMarketName
-			, strCommodityCode
-			, strItemNo
-			, strCurrency
-			, dblBasis
-			, strUnitMeasure
-			, strLocationName
-			, strMarketZone
-			, strPeriodTo
-			, strErrMessage)
-		VALUES (@strFutMarketName
-			, @strCommodityCode
-			, @strItemNo
-			, @strCurrency
-			, @dblBasis
-			, @strUnitMeasure
-			, @strLocationName
-			, @strMarketZone
-			, @strPeriodTo
-			, @PreviousErrMsg)
+		IF (ISNULL(LTRIM(@PreviousErrMsg), '') <> '')
+		BEGIN
+			INSERT INTO tblRKM2MBasisImport_ErrLog (strFutMarketName
+				, strCommodityCode
+				, strItemNo
+				, strCurrency
+				, dblBasis
+				, strUnitMeasure
+				, strLocationName
+				, strMarketZone
+				, strPeriodTo
+				, strErrMessage)
+			VALUES (@strFutMarketName
+				, @strCommodityCode
+				, @strItemNo
+				, @strCurrency
+				, @dblBasis
+				, @strUnitMeasure
+				, @strLocationName
+				, @strMarketZone
+				, @strPeriodTo
+				, @PreviousErrMsg)
+		END
 		
 		SELECT @mRowNumber = MIN(intM2MBasisImportId) FROM tblRKM2MBasisImport WHERE intM2MBasisImportId > @mRowNumber
 	END

@@ -52,9 +52,9 @@ BEGIN TRY
 	IF @ysnPost = 1
 		BEGIN
 
-			
 
-			INSERT INTO @EntriesForInvoice 
+
+			INSERT INTO @EntriesForInvoice
 			(
 				[strTransactionType]
 				,[strType]
@@ -139,7 +139,7 @@ BEGIN TRY
 				,[intEntityCustomerId] = @intEntityId
 				,[intCompanyLocationId] = SC.intProcessingLocationId
 				,[intCurrencyId] = SC.intCurrencyId
-				,[intTermId] = NULL 
+				,[intTermId] = NULL
 				,[dtmDate] = GETDATE()
 				,[dtmDueDate] = NULL
 				,[dtmShipDate] = NULL
@@ -169,10 +169,10 @@ BEGIN TRY
 				,[strItemDescription] = ICFee.strItemNo
 				,[intOrderUOMId]= NULL
 				,[intItemUOMId] = NULL
-				,[dblQtyOrdered] = SC.dblTicketFees
-				,[dblQtyShipped] = SC.dblTicketFees
+				,[dblQtyOrdered] = 1
+				,[dblQtyShipped] = 1
 				,[dblDiscount] = 0
-				,[dblPrice] = 0
+				,[dblPrice] = SC.dblTicketFees
 				,[ysnRefreshPrice] = 0
 				,[strMaintenanceType] = ''
 				,[strFrequency] = ''
@@ -209,7 +209,7 @@ BEGIN TRY
 				WHERE SC.intTicketId = @intTicketId
 
 
-			
+
 			--GET EXISTING INVOICE FOR BATCH SCALE
 			DECLARE @intContractShipToLocationId	INT
 
@@ -224,7 +224,7 @@ BEGIN TRY
 			--CREATE INVOICE IF THERE's NONE
 			IF ISNULL(@intExistingInvoiceId, 0) = 0
 				BEGIN
-					EXEC [dbo].[uspARProcessInvoices] 
+					EXEC [dbo].[uspARProcessInvoices]
 						@InvoiceEntries = @EntriesForInvoice
 						,@UserId = @intUserId
 						,@GroupingOption = 11
@@ -331,7 +331,7 @@ BEGIN TRY
 
 			--Check if a credit Memo exists
 			IF EXISTS(
-					SELECT TOP 1 1 
+					SELECT TOP 1 1
 					FROM tblARInvoice C
 					LEFT JOIN tblARInvoiceDetail A
 						ON A.intInvoiceId = C.intInvoiceId
@@ -358,10 +358,10 @@ BEGIN TRY
 						RETURN;
 					end
 
-					
+
 					IF @ysnTicketInvoiceHasCM = 0
 					BEGIN
-						SELECT TOP 1 
+						SELECT TOP 1
 							@strInvoiceNumber = strInvoiceNumber
 						FROM tblARInvoice
 						WHERE intInvoiceId = @intInvoiceId
@@ -389,15 +389,15 @@ BEGIN TRY
 					-- 	@transType			= N'all',
 					-- 	@accrueLicense		= 0,
 					-- 	@raiseError			= 1
-					
+
 				END
 
 				---Check if there are other tickets on the invoice
-				IF (SELECT COUNT(DISTINCT intTicketId) 
-					FROM tblARInvoiceDetail 
+				IF (SELECT COUNT(DISTINCT intTicketId)
+					FROM tblARInvoiceDetail
 					WHERE intInvoiceId = @intInvoiceId) > 1
 				BEGIN
-					SELECT TOP 1 
+					SELECT TOP 1
 						@intInvoiceDetailId = intInvoiceDetailId
 					FROM tblARInvoiceDetail
 					WHERE intInvoiceId = @intInvoiceId

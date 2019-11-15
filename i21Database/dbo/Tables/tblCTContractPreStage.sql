@@ -4,5 +4,6 @@
 	intContractHeaderId	      INT,
 	strFeedStatus		      NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 	dtmFeedDate			      DATETIME Constraint DF_tblCTContractPreStage_dtmFeedDate Default GETDATE(),
-	strRowState				  NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+	strRowState				  NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	ysnApproval					BIT
 )

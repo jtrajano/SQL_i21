@@ -128,16 +128,20 @@ BEGIN
 						INSERT INTO dbo.tblCTContractPreStage (
 							intContractHeaderId
 							,strRowState
+							,ysnApproval
 							)
 						SELECT @recordId
 							,'Added'
+							,1
 					ELSE
 						INSERT INTO dbo.tblCTContractPreStage (
 							intContractHeaderId
 							,strRowState
+							,ysnApproval
 							)
 						SELECT @recordId
 							,'Modified'
+							,1
 				END
 			END
 		END TRY

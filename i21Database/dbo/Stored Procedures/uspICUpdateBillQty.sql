@@ -145,6 +145,7 @@ IF EXISTS(
 		UpdateTbl.intInventoryReceiptChargeId IS NOT NULL 
 		AND UpdateTbl.intInventoryReceiptItemId IS NOT NULL 
 		AND UpdateTbl.dblToBillQty <> 0
+		AND ReceiptCharge.intEntityVendorId = UpdateTbl.intEntityVendorId
 )
 BEGIN
 	-- Validate if the item is over billed for Accrue
@@ -154,19 +155,32 @@ BEGIN
 		@TransactionNo = Receipt.strReceiptNumber
 		,@ItemNo = Item.strItemNo
 		,@ReceiptQty = ReceiptCharge.dblQuantity
-		,@BilledQty = ReceiptCharge.dblQuantityBilled
+		,@BilledQty = --ReceiptCharge.dblQuantityBilled
+			CASE 
+				WHEN ReceiptCharge.strCostMethod IN ('Amount', 'Percentage') THEN ISNULL(ReceiptCharge.dblAmountBilled, 0) 
+				ELSE ISNULL(ReceiptCharge.dblQuantityBilled, 0) 
+			END 
+
 	FROM 
-		@updateDetails UpdateTbl INNER JOIN tblICInventoryReceiptCharge ReceiptCharge
-			ON ReceiptCharge.intInventoryReceiptChargeId = UpdateTbl.intInventoryReceiptChargeId 
-			AND ReceiptCharge.intChargeId = UpdateTbl.intItemId
+		tblICInventoryReceiptCharge ReceiptCharge 
+		INNER JOIN tblICItem Item
+			ON Item.intItemId = ReceiptCharge.intChargeId
 		INNER JOIN tblICInventoryReceipt Receipt
 			ON Receipt.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId
-		INNER JOIN tblICItem Item
-			ON Item.intItemId = UpdateTbl.intItemId
+		INNER JOIN @updateDetails UpdateTbl
+			ON UpdateTbl.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId
+			AND UpdateTbl.intItemId = ReceiptCharge.intChargeId
+		
 	WHERE 
-		(ReceiptCharge.dblQuantityBilled + CASE WHEN ReceiptCharge.ysnPrice = 1 THEN UpdateTbl.dblToBillQty * -1 ELSE UpdateTbl.dblToBillQty END) > ReceiptCharge.dblQuantity -- Throw error if Bill Qty is greater than Receipt Qty
-		AND UpdateTbl.intInventoryReceiptChargeId IS NOT NULL
-		AND UpdateTbl.intEntityVendorId = CASE WHEN ReceiptCharge.ysnPrice = 1  THEN Receipt.intEntityVendorId ELSE ISNULL(ReceiptCharge.intEntityVendorId, Receipt.intEntityVendorId) END
+		UpdateTbl.intInventoryReceiptChargeId IS NOT NULL
+		AND ReceiptCharge.intEntityVendorId = UpdateTbl.intEntityVendorId
+		AND 1 = 
+			CASE 
+				WHEN ReceiptCharge.strCostMethod IN ('Amount', 'Percentage') AND ISNULL(ReceiptCharge.dblAmountBilled, 0) + ISNULL(UpdateTbl.dblAmountToBill, 0) > ISNULL(ReceiptCharge.dblAmount, 0) THEN 1 
+				WHEN ReceiptCharge.strCostMethod IN ('Per Unit') AND ISNULL(ReceiptCharge.dblQuantityBilled, 0) + ISNULL(UpdateTbl.dblToBillQty, 0) > ISNULL(ReceiptCharge.dblQuantity, 0) THEN 1 
+				ELSE 
+					0
+			END 
 
 	IF (ISNULL(@TransactionNo,'') <> '')
 	BEGIN
@@ -177,8 +191,24 @@ BEGIN
 
 	UPDATE ReceiptCharge
 	SET 
-		ReceiptCharge.dblQuantityBilled = ISNULL(ReceiptCharge.dblQuantityBilled, 0) + CASE WHEN ReceiptCharge.ysnPrice = 1 THEN UpdateTbl.dblToBillQty * -1 ELSE UpdateTbl.dblToBillQty END
-		,ReceiptCharge.dblAmountBilled = ISNULL(ReceiptCharge.dblAmountBilled, 0) + (dbo.fnMultiply(CASE WHEN ReceiptCharge.ysnPrice = 1 THEN UpdateTbl.dblToBillQty * -1 ELSE UpdateTbl.dblToBillQty END, BillDetail.dblCost))
+		ReceiptCharge.dblQuantityBilled = 
+			ISNULL(ReceiptCharge.dblQuantityBilled, 0) 
+			+ CASE 
+				WHEN ReceiptCharge.strCostMethod = 'Per Unit' THEN 					
+					ISNULL(UpdateTbl.dblToBillQty, 0) 
+				ELSE 
+					0
+			END 
+
+		,ReceiptCharge.dblAmountBilled = 
+			ISNULL(ReceiptCharge.dblAmountBilled, 0) 
+			+ CASE 
+				WHEN ReceiptCharge.strCostMethod IN ('Amount', 'Percentage') THEN 
+					ISNULL(UpdateTbl.dblAmountToBill, 0)
+				ELSE 
+					0
+			END
+
 	FROM 
 		tblICInventoryReceiptCharge ReceiptCharge INNER JOIN tblICInventoryReceipt Receipt
 			ON Receipt.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId
@@ -191,70 +221,96 @@ BEGIN
 			AND BillDetail.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId
 	WHERE 
 		UpdateTbl.intInventoryReceiptChargeId IS NOT NULL
-		AND UpdateTbl.intEntityVendorId = CASE WHEN ReceiptCharge.ysnPrice = 1 THEN Receipt.intEntityVendorId ELSE ISNULL(ReceiptCharge.intEntityVendorId, Receipt.intEntityVendorId) END
-	
-	-- Validate if the item is over billed for Charge Entity/Price = true
-	IF EXISTS(
-		SELECT TOP 1 1 
-		FROM 
-			@updateDetails UpdateTbl INNER JOIN tblICInventoryReceiptCharge ReceiptCharge 
-				ON ReceiptCharge.intInventoryReceiptChargeId = UpdateTbl.intInventoryReceiptChargeId 
-				AND ReceiptCharge.intChargeId = UpdateTbl.intItemId
-				AND ReceiptCharge.intEntityVendorId = UpdateTbl.intEntityVendorId
-			INNER JOIN tblICItem Item 
-				ON Item.intItemId = UpdateTbl.intItemId
-		WHERE 
-			UpdateTbl.intInventoryReceiptChargeId IS NOT NULL 
-			AND ReceiptCharge.ysnPrice = 1
-	)
+		AND UpdateTbl.intEntityVendorId = ReceiptCharge.intEntityVendorId
+END 
+
+-- Validate if the item is over billed for Charge Entity/Price = true
+IF EXISTS(
+	SELECT TOP 1 1 
+	FROM 
+		tblICInventoryReceipt Receipt 			
+		INNER JOIN tblICInventoryReceiptCharge ReceiptCharge 
+			ON Receipt.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId
+		INNER JOIN @updateDetails UpdateTbl 		
+			ON ReceiptCharge.intInventoryReceiptChargeId = UpdateTbl.intInventoryReceiptChargeId 
+			AND ReceiptCharge.intChargeId = UpdateTbl.intItemId			
+		INNER JOIN tblICItem Item 
+			ON Item.intItemId = UpdateTbl.intItemId
+	WHERE 
+		UpdateTbl.intInventoryReceiptChargeId IS NOT NULL 
+		AND ReceiptCharge.ysnPrice = 1
+		AND Receipt.intEntityVendorId = UpdateTbl.intEntityVendorId		
+)
+BEGIN
+	SET @BilledQty = 0;
+
+	SELECT TOP 1 
+		@TransactionNo = Receipt.strReceiptNumber
+		,@ItemNo = Item.strItemNo
+		,@ReceiptQty = ReceiptCharge.dblQuantity
+		,@BilledQty = --ReceiptCharge.dblQuantityPriced
+			CASE 
+				WHEN ReceiptCharge.strCostMethod IN ('Amount', 'Percentage') THEN ISNULL(ReceiptCharge.dblAmountPriced, 0) 
+				ELSE ISNULL(ReceiptCharge.dblQuantityPriced, 0) 
+			END 
+	FROM 
+		tblICInventoryReceipt Receipt 			
+		INNER JOIN tblICInventoryReceiptCharge ReceiptCharge 
+			ON Receipt.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId
+		INNER JOIN @updateDetails UpdateTbl 		
+			ON ReceiptCharge.intInventoryReceiptChargeId = UpdateTbl.intInventoryReceiptChargeId 
+			AND ReceiptCharge.intChargeId = UpdateTbl.intItemId			
+		INNER JOIN tblICItem Item 
+			ON Item.intItemId = UpdateTbl.intItemId
+	WHERE 
+		UpdateTbl.intInventoryReceiptChargeId IS NOT NULL
+		AND ReceiptCharge.ysnPrice = 1
+		AND Receipt.intEntityVendorId = UpdateTbl.intEntityVendorId
+		AND 1 = 
+			CASE 
+				WHEN ReceiptCharge.strCostMethod IN ('Amount', 'Percentage') AND ISNULL(ReceiptCharge.dblAmountPriced, 0) + ISNULL(UpdateTbl.dblAmountToBill, 0) > ISNULL(ReceiptCharge.dblAmount, 0) THEN 1 
+				WHEN ReceiptCharge.strCostMethod IN ('Per Unit') AND ISNULL(ReceiptCharge.dblQuantityPriced, 0) + ISNULL(UpdateTbl.dblToBillQty, 0) > ISNULL(ReceiptCharge.dblQuantity, 0) THEN 1 
+				ELSE 
+					0
+			END 
+
+	IF (ISNULL(@TransactionNo,'') <> '')
 	BEGIN
-		SET @BilledQty = 0;
-
-		SELECT TOP 1 
-			@TransactionNo = Receipt.strReceiptNumber
-			,@ItemNo = Item.strItemNo
-			,@ReceiptQty = ReceiptCharge.dblQuantity
-			,@BilledQty = ReceiptCharge.dblQuantityPriced
-		FROM 
-			@updateDetails UpdateTbl INNER JOIN tblICInventoryReceiptCharge ReceiptCharge
-				ON ReceiptCharge.intInventoryReceiptChargeId = UpdateTbl.intInventoryReceiptChargeId 
-				AND ReceiptCharge.intChargeId = UpdateTbl.intItemId
-				AND ReceiptCharge.intEntityVendorId = UpdateTbl.intEntityVendorId
-			INNER JOIN tblICInventoryReceipt Receipt
-				ON Receipt.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId
-			INNER JOIN tblICItem Item
-				ON Item.intItemId = ReceiptCharge.intChargeId
-		WHERE 
-			(ReceiptCharge.dblQuantityPriced + UpdateTbl.dblToBillQty) > ReceiptCharge.dblQuantity -- Throw error if Bill Qty is greater than Receipt Qty
-			OR (ReceiptCharge.dblQuantityPriced + UpdateTbl.dblToBillQty) < 0 -- Throw error also if Bill Qty is negative
-			AND UpdateTbl.intInventoryReceiptChargeId IS NOT NULL
-			AND ReceiptCharge.ysnPrice = 1
-
-		IF (ISNULL(@TransactionNo,'') <> '')
-		BEGIN
-			--'Billed Qty for {Item No} is already {Billed Qty}. You cannot over bill the transaction'
-			EXEC uspICRaiseError 80228, @ItemNo, @BilledQty;
-			GOTO Post_Exit;
-		END
-
-		UPDATE ReceiptCharge
-		SET 
-			ReceiptCharge.dblQuantityPriced = ISNULL(ReceiptCharge.dblQuantityPriced, 0) + UpdateTbl.dblToBillQty
-			,ReceiptCharge.dblAmountPriced = ISNULL(ReceiptCharge.dblAmountPriced, 0) + (BillDetail.dblTotal * (UpdateTbl.dblToBillQty/ABS(UpdateTbl.dblToBillQty)))
-		FROM 
-			tblICInventoryReceiptCharge ReceiptCharge INNER JOIN tblICInventoryReceipt Receipt
-				ON Receipt.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId
-			INNER JOIN @updateDetails UpdateTbl
-				ON UpdateTbl.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId
-				AND UpdateTbl.intEntityVendorId = ReceiptCharge.intEntityVendorId
-			INNER JOIN tblAPBillDetail BillDetail
-				ON BillDetail.intBillId = UpdateTbl.intSourceTransactionNoId
-				AND BillDetail.intItemId = ReceiptCharge.intChargeId
-				AND BillDetail.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId
-		WHERE 
-			UpdateTbl.intInventoryReceiptChargeId IS NOT NULL
-			AND ReceiptCharge.ysnPrice = 1
+		--'Billed Qty for {Item No} is already {Billed Qty}. You cannot over bill the transaction'
+		EXEC uspICRaiseError 80228, @ItemNo, @BilledQty;
+		GOTO Post_Exit;
 	END
+
+	UPDATE ReceiptCharge
+	SET 
+		ReceiptCharge.dblQuantityPriced = 
+			ISNULL(ReceiptCharge.dblQuantityPriced, 0) 
+			+ CASE 
+				WHEN ReceiptCharge.strCostMethod = 'Per Unit' THEN 					
+					ISNULL(UpdateTbl.dblToBillQty, 0) 
+				ELSE 
+					0
+			END 
+
+		,ReceiptCharge.dblAmountPriced = 
+			ISNULL(ReceiptCharge.dblAmountPriced, 0) 
+			+ CASE 
+				WHEN ReceiptCharge.strCostMethod IN ('Amount', 'Percentage') THEN 
+					ISNULL(UpdateTbl.dblAmountToBill, 0)
+				ELSE 
+					0
+			END
+	FROM 
+		tblICInventoryReceiptCharge ReceiptCharge INNER JOIN tblICInventoryReceipt Receipt
+			ON Receipt.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId
+		INNER JOIN @updateDetails UpdateTbl
+			ON UpdateTbl.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId
+			AND ReceiptCharge.intChargeId = UpdateTbl.intItemId
+			
+	WHERE 
+		UpdateTbl.intInventoryReceiptChargeId IS NOT NULL
+		AND ReceiptCharge.ysnPrice = 1
+		AND UpdateTbl.intEntityVendorId = Receipt.intEntityVendorId		
 END
 /*
 	END - Update Receipt Charges Bill Qty
@@ -268,31 +324,40 @@ IF EXISTS(
 	FROM 
 		@updateDetails UpdateTbl INNER JOIN tblICInventoryShipmentCharge ShipmentCharge 
 			ON ShipmentCharge.intInventoryShipmentChargeId = UpdateTbl.intInventoryShipmentChargeId 
-			--AND UpdateTbl.intEntityVendorId = ShipmentCharge.intEntityVendorId
-			--INNER JOIN tblICItem Item ON Item.intItemId = UpdateTbl.intItemId
 	WHERE 
 		UpdateTbl.intInventoryShipmentChargeId IS NOT NULL 
-		AND UpdateTbl.dblToBillQty <> 0)
+		AND UpdateTbl.dblToBillQty <> 0
+)
 BEGIN
 	-- Validate if the item is over billed
 	SELECT TOP 1 
 		@TransactionNo = Shipment.strShipmentNumber
 		,@ItemNo = Item.strItemNo
 		,@ReceiptQty = ShipmentCharge.dblQuantity
-		,@BilledQty = ShipmentCharge.dblQuantityBilled
+		,@BilledQty = --ShipmentCharge.dblQuantityBilled
+			CASE 
+				WHEN ShipmentCharge.strCostMethod IN ('Amount', 'Percentage') THEN ISNULL(ShipmentCharge.dblAmountBilled, 0) 
+				ELSE ISNULL(ShipmentCharge.dblQuantityBilled, 0) 
+			END 
 	FROM 
 		@updateDetails UpdateTbl INNER JOIN tblICInventoryShipmentCharge ShipmentCharge
 			ON ShipmentCharge.intInventoryShipmentChargeId = UpdateTbl.intInventoryShipmentChargeId 
 			AND ShipmentCharge.intChargeId = UpdateTbl.intItemId
-			AND ShipmentCharge.intEntityVendorId = UpdateTbl.intEntityVendorId
 		INNER JOIN tblICInventoryShipment Shipment
 			ON Shipment.intInventoryShipmentId = ShipmentCharge.intInventoryShipmentId
 		INNER JOIN tblICItem Item
 			ON Item.intItemId = UpdateTbl.intItemId
 	WHERE 
-		(ShipmentCharge.dblQuantityBilled + UpdateTbl.dblToBillQty) > ShipmentCharge.dblQuantity -- Throw error if Bill Qty is greater than Receipt Qty
-		OR (ShipmentCharge.dblQuantityBilled + UpdateTbl.dblToBillQty) < 0 -- Throw error also if Bill Qty is negative
-		AND UpdateTbl.intInventoryShipmentChargeId IS NOT NULL
+
+		UpdateTbl.intInventoryShipmentChargeId IS NOT NULL
+		AND ShipmentCharge.intEntityVendorId = UpdateTbl.intEntityVendorId
+		AND 1 = 
+			CASE 
+				WHEN ShipmentCharge.strCostMethod IN ('Amount', 'Percentage') AND ISNULL(ShipmentCharge.dblAmountBilled, 0) + ISNULL(UpdateTbl.dblAmountToBill, 0) > ISNULL(ShipmentCharge.dblAmount, 0) THEN 1 
+				WHEN ShipmentCharge.strCostMethod IN ('Per Unit') AND ISNULL(ShipmentCharge.dblQuantityBilled, 0) + ISNULL(UpdateTbl.dblToBillQty, 0) > ISNULL(ShipmentCharge.dblQuantity, 0) THEN 1 
+				ELSE 
+					0
+			END 
 
 	IF (ISNULL(@TransactionNo,'') <> '')
 	BEGIN
@@ -302,17 +367,32 @@ BEGIN
 	END
 
 	UPDATE ShipmentCharge
-	SET ShipmentCharge.dblQuantityBilled = ISNULL(ShipmentCharge.dblQuantityBilled, 0) + UpdateTbl.dblToBillQty
-		,ShipmentCharge.dblAmountBilled = ISNULL(ShipmentCharge.dblAmountBilled, 0) + (BillDetail.dblTotal * (UpdateTbl.dblToBillQty/ABS(UpdateTbl.dblToBillQty)))
-	FROM tblICInventoryShipmentCharge ShipmentCharge
-	INNER JOIN @updateDetails UpdateTbl
-		ON UpdateTbl.intInventoryShipmentChargeId = ShipmentCharge.intInventoryShipmentChargeId
+	SET 
+		ShipmentCharge.dblQuantityBilled = 
+			ISNULL(ShipmentCharge.dblQuantityBilled, 0) 
+			+ CASE 
+				WHEN ShipmentCharge.strCostMethod = 'Per Unit' THEN 					
+					ISNULL(UpdateTbl.dblToBillQty, 0) 
+				ELSE 
+					0
+			END 
+
+		,ShipmentCharge.dblAmountBilled = 
+			ISNULL(ShipmentCharge.dblAmountBilled, 0) 
+			+ CASE 
+				WHEN ShipmentCharge.strCostMethod IN ('Amount', 'Percentage') THEN 
+					ISNULL(UpdateTbl.dblAmountToBill, 0)
+				ELSE 
+					0
+			END
+			
+	FROM 
+		tblICInventoryShipmentCharge ShipmentCharge
+		INNER JOIN @updateDetails UpdateTbl
+			ON UpdateTbl.intInventoryShipmentChargeId = ShipmentCharge.intInventoryShipmentChargeId			
+	WHERE 
+		UpdateTbl.intInventoryShipmentChargeId IS NOT NULL
 		AND ShipmentCharge.intEntityVendorId = UpdateTbl.intEntityVendorId
-	INNER JOIN tblAPBillDetail BillDetail
-			ON BillDetail.intBillId = UpdateTbl.intSourceTransactionNoId
-			AND BillDetail.intItemId = ShipmentCharge.intChargeId
-			AND BillDetail.intInventoryShipmentChargeId = ShipmentCharge.intInventoryShipmentChargeId
-	WHERE UpdateTbl.intInventoryShipmentChargeId IS NOT NULL
 END
 /*
 	END - Update Shipment Charges Bill Qty

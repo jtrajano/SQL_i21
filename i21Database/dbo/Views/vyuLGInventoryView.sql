@@ -49,8 +49,8 @@ FROM (
 		,strContainerNumber = Shipment.strContainerNumber
 		,strMarks = Shipment.strMarks
 		,strLotNumber = '' COLLATE Latin1_General_CI_AS
-		,strWarehouse = '' COLLATE Latin1_General_CI_AS
-		,strLocationName = '' COLLATE Latin1_General_CI_AS
+		,strWarehouse = Shipment.strSubLocationName
+		,strLocationName = Shipment.strLocationName
 		,strCondition = '' COLLATE Latin1_General_CI_AS
 		,dtmPostedDate = Shipment.dtmPostedDate
 		,dblQtyInStockUOM = (Shipment.dblContainerContractQty - IsNull (Shipment.dblContainerContractReceivedQty, 0.0)) * dbo.fnICConvertUOMtoStockUnit (Shipment.intItemId, Shipment.intItemUOMId, 1)
@@ -94,7 +94,7 @@ FROM (
 	LEFT JOIN tblSMCurrency	CY ON CY.intCurrencyID = CU.intMainCurrencyId
 	WHERE (Shipment.dblContainerContractQty - IsNull(Shipment.dblContainerContractReceivedQty, 0.0)) > 0.0 
 	   AND Shipment.ysnInventorized = 1
-	   AND Shipment.intLoadId NOT IN (SELECT intLoadId FROM tblARInvoice)
+	   AND Shipment.intLoadId NOT IN (SELECT intLoadId FROM tblARInvoice WHERE intLoadId IS NOT NULL)
 
 	UNION ALL
 

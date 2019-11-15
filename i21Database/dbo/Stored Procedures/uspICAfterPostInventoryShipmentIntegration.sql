@@ -97,7 +97,7 @@ BEGIN
 	-- Update the shipped quantities back to the Contract Management
 	IF @OrderType = @INT_ORDER_TYPE_SALES_CONTRACT  
 	BEGIN   
-		 EXEC dbo.uspCTShipped @ItemsFromInventoryShipment ,@intEntityUserSecurityId  
+		 EXEC dbo.uspCTShipped @ItemsFromInventoryShipment ,@intEntityUserSecurityId ,@ysnPost
 	END  
 
 	-- Update the shipped quantities back to Account Receivable

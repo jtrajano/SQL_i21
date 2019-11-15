@@ -28,6 +28,8 @@ BEGIN TRY
 			@SecondApprovalId       INT,
 			@FirstApprovalSign      VARBINARY(MAX),
 			@SecondApprovalSign     VARBINARY(MAX),
+			@FirstApprovalName		NVARCHAR(MAX),
+			@SecondApprovalName		NVARCHAR(MAX),
 			@InterCompApprovalSign  VARBINARY(MAX),
 			@IsFullApproved         BIT = 0,
 			@ysnFairtrade			BIT = 0,
@@ -169,16 +171,18 @@ BEGIN TRY
 		SET @strApprovalText = NULL
 
     SELECT TOP 1 @FirstApprovalId=intApproverId,@intApproverGroupId = intApproverGroupId FROM tblSMApproval WHERE intTransactionId=@intTransactionId AND strStatus='Approved' ORDER BY intApprovalId
-	SELECT TOP 1 @SecondApprovalId=intApproverId FROM tblSMApproval WHERE intTransactionId=@intTransactionId AND strStatus='Approved' AND intApproverId <> @FirstApprovalId AND ISNULL(intApproverGroupId,0) <> @intApproverGroupId ORDER BY intApprovalId
+	SELECT TOP 1 @SecondApprovalId=intApproverId FROM tblSMApproval WHERE intTransactionId=@intTransactionId AND strStatus='Approved' AND (intApproverId <> @FirstApprovalId OR ISNULL(intApproverGroupId,0) <> @intApproverGroupId) ORDER BY intApprovalId
 
-	SELECT	@FirstApprovalSign = Sig.blbDetail
+	SELECT	@FirstApprovalSign = Sig.blbDetail, @FirstApprovalName = fe.strName
 	FROM	tblSMSignature Sig WITH (NOLOCK)
 	JOIN	tblEMEntitySignature ES ON Sig.intSignatureId = ES.intElectronicSignatureId
+	LEFT JOIN tblEMEntity fe on fe.intEntityId = @FirstApprovalId
 	WHERE	Sig.intEntityId=@FirstApprovalId
 
-	SELECT	@SecondApprovalSign = Sig.blbDetail 
+	SELECT	@SecondApprovalSign = Sig.blbDetail, @SecondApprovalName = se.strName
 	FROM	tblSMSignature Sig  WITH (NOLOCK)
 	JOIN	tblEMEntitySignature ES ON Sig.intSignatureId = ES.intElectronicSignatureId
+	LEFT JOIN tblEMEntity se on se.intEntityId = @SecondApprovalId
 	WHERE	Sig.intEntityId=@SecondApprovalId
 
 	SELECT	@InterCompApprovalSign =Sig.blbDetail 
@@ -626,6 +630,8 @@ BEGIN TRY
 			,strApprovalText					    = @strApprovalText
 			,FirstApprovalSign						= CASE WHEN @IsFullApproved=1 AND @strCommodityCode = 'Coffee' THEN @FirstApprovalSign  ELSE NULL END
 			,SecondApprovalSign						= CASE WHEN @IsFullApproved=1 AND @strCommodityCode = 'Coffee' THEN @SecondApprovalSign ELSE NULL END
+			,FirstApprovalName						= CASE WHEN @IsFullApproved=1 AND @strCommodityCode = 'Coffee' THEN @FirstApprovalName ELSE NULL END
+			,SecondApprovalName						= CASE WHEN @IsFullApproved=1 AND @strCommodityCode = 'Coffee' THEN @SecondApprovalName ELSE NULL END
 			,InterCompApprovalSign					= @InterCompApprovalSign
 			,strAmendedColumns						= @strAmendedColumns
 			,lblArbitration							= CASE WHEN ISNULL(AN.strComment,'') <>''	 AND ISNULL(AB.strState,'') <>''		 AND ISNULL(RY.strCountry,'') <>'' THEN @rtArbitration + ':'  ELSE NULL END
@@ -656,15 +662,31 @@ BEGIN TRY
 														dbo.fnRemoveTrailingZeroes(SQ.dblBasis) + ' ' + SQ.strPriceCurrencyAndUOM + 
 														' '+@rtStrPricing1+' ' + SQ.strBuyerSeller + 
 														'''s '+@rtStrPricing2+':'+dbo.fnRemoveTrailingZeroes(dblLotsToFix)+').'
-			,strGABPricing							=	(case when pricingType.strPricingType = 'Basis' then 
-														SQ.strFutMarketName + ' ' + SQ.strFutureMonthYear +
-														CASE WHEN SQ.dblBasis < 0 THEN ' '+@rtMinus+' ' ELSE ' '+@rtPlus+' ' END +  
-														dbo.fnRemoveTrailingZeroes(SQ.dblBasis) + ' ' + SQ.strPriceCurrencyAndUOM + 
-														' '+@rtStrPricing1+' ' + SQ.strFixationBy + CASE WHEN dbo.fnCTGetReportLanguage(@intLaguageId) = 'Italian' THEN ' ' ELSE '''s ' END
-														+@rtStrPricing2+':'+dbo.fnRemoveTrailingZeroes(dblLotsToFix)+').'
-														else
-														dbo.fnRemoveTrailingZeroes(SQ.dblBasis) + ' ' + SQ.strPriceCurrencyAndUOMForPriced
-														end)
+			,strGABPricing							=	(
+															case
+															when pricingType.strPricingType = 'Basis'
+															then  SQ.strFutMarketName + ' ' + SQ.strFutureMonthYear
+																+
+																CASE
+																WHEN SQ.dblBasis < 0
+																THEN ' '+@rtMinus+' '
+																ELSE ' '+@rtPlus+' '
+																END
+																+  
+																dbo.fnRemoveTrailingZeroes(SQ.dblBasis) + ' ' + SQ.strPriceCurrencyAndUOM + ' '+@rtStrPricing1+' ' + SQ.strFixationBy
+																+
+																CASE
+																WHEN dbo.fnCTGetReportLanguage(@intLaguageId) = 'Italian'
+																THEN ' '
+																ELSE '''s '
+																END
+																+
+																@rtStrPricing2+':'+dbo.fnRemoveTrailingZeroes(dblLotsToFix)+').'
+															when pricingType.strPricingType = 'Priced'
+															THEN dbo.fnRemoveTrailingZeroes(SQ.dblCashPrice) + ' ' + SQ.strPriceCurrencyAndUOMForPriced
+															ELSE dbo.fnRemoveTrailingZeroes(SQ.dblBasis) + ' ' + SQ.strPriceCurrencyAndUOMForPriced
+															end
+														)
 			,strGABHeader							=	@rtConfirmationOf + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,TP.strContractType), TP.strContractType) + ' ' + CASE WHEN @type = 'MULTIPLE' THEN '' ELSE CH.strContractNumber END --+ISNULL('-' + @ErrMsg , '')		
 			,striDealHeader							=	@rtConfirmationOf + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Sale'), 'Sale') + ' ' + CASE WHEN @type = 'MULTIPLE' THEN '' ELSE CH.strContractNumber END --+ISNULL('-' + @ErrMsg , '')		
 			,strGABAssociation						=	CASE WHEN CH.intContractTypeId = 1 THEN @rtStrGABAssociation1 ELSE @rtStrGABAssociation3 END
@@ -672,14 +694,22 @@ BEGIN TRY
 			,striDealAssociation					=	@rtStriDealAssociation
 														+ ' ' + dbo.fnCTGetTranslation('ContractManagement.view.Associations',AN.intAssociationId,@intLaguageId,'Printable Contract Text',AN.strComment) + ' ('+dbo.fnCTGetTranslation('ContractManagement.view.Associations',AN.intAssociationId,@intLaguageId,'Name',AN.strName)+')'+' '+@rtStrGABAssociation2+'.'
 			,strEQTAssociation						=	@rtStrAssociation1 + ' '+ dbo.fnCTGetTranslation('ContractManagement.view.Associations',AN.intAssociationId,@intLaguageId,'Printable Contract Text',AN.strComment)+' '+@rtStrAssociation2+'.'
+			/*
 			,strCompanyCityAndDate					=	ISNULL(@strCity + ', ', '') + 
-														CASE WHEN DAY(CH.dtmContractDate) In (1,21,31)   THEN LTRIM(RTRIM(STR(DAY(CH.dtmContractDate))  + 'st'))
+														CASE
+														WHEN DAY(CH.dtmContractDate) In (1,21,31)   THEN LTRIM(RTRIM(STR(DAY(CH.dtmContractDate))  + 'st'))
 														WHEN DAY(CH.dtmContractDate) In (2,22)   THEN LTRIM(RTRIM(STR(DAY(CH.dtmContractDate))  + 'nd'))
 														WHEN DAY(CH.dtmContractDate) In (3,23)   THEN LTRIM(RTRIM(STR(DAY(CH.dtmContractDate))  + 'rd'))
 														ELSE LTRIM(RTRIM(STR(DAY(CH.dtmContractDate))  + 'th'))
 														END 
 														+ ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,DATENAME(MONTH,CH.dtmContractDate)), DATENAME(MONTH,CH.dtmContractDate)) + ' ' + LEFT(DATENAME(YEAR,CH.dtmContractDate),4)
-			,strGABCompanyCityAndDate				=	ISNULL(@strCity + ', ', '') + LEFT(DATENAME(DAY,CH.dtmContractDate),2) + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,LEFT(DATENAME(MONTH,CH.dtmContractDate),3)), LEFT(DATENAME(MONTH,CH.dtmContractDate),3)) + ' ' + LEFT(DATENAME(YEAR,CH.dtmContractDate),4)
+			*/
+			,strCompanyCityAndDate				=	ISNULL(@strCity + ', ', '') + LEFT(DATENAME(DAY,CH.dtmContractDate),2)
+														+ ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,LEFT(DATENAME(MONTH,CH.dtmContractDate),3)), LEFT(DATENAME(MONTH,CH.dtmContractDate),3)) + ' ' + LEFT(DATENAME(YEAR,CH.dtmContractDate),4)
+			
+			,strGABCompanyCityAndDate				=	ISNULL(@strCity + ', ', '') + LEFT(DATENAME(DAY,CH.dtmContractDate),2)
+														+ ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,LEFT(DATENAME(MONTH,CH.dtmContractDate),3)), LEFT(DATENAME(MONTH,CH.dtmContractDate),3)) + ' ' + LEFT(DATENAME(YEAR,CH.dtmContractDate),4)
+			
 			,strCompanyName							=	@strCompanyName
 			,striDealShipment						=	ISNULL(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,DATENAME(MONTH, SQ.dtmStartDate)), DATENAME(MONTH, SQ.dtmStartDate)) +'('+ RIGHT(YEAR(SQ.dtmStartDate), 2)+')'
 			,striDealSeller							=   LTRIM(RTRIM(EV.strEntityName)) + ', ' + CHAR(13)+CHAR(10) +
@@ -695,7 +725,15 @@ BEGIN TRY
 														ISNULL(', '+CASE WHEN LTRIM(RTRIM(EC.strEntityState)) = '' THEN NULL ELSE LTRIM(RTRIM(EC.strEntityState)) END,'') + 
 														ISNULL(', '+CASE WHEN LTRIM(RTRIM(EC.strEntityZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(EC.strEntityZipCode)) END,'') + 
 														ISNULL(', '+CASE WHEN LTRIM(RTRIM(EC.strEntityCountry)) = '' THEN NULL ELSE dbo.fnCTGetTranslation('i21.view.Country',rtc12.intCountryID,@intLaguageId,'Country',rtc12.strCountry) END,'')
-			,striDealPrice							=	(case when pricingType.strPricingType = 'Basis' then strFutMarketName + ' ' + strFutureMonth + ' ' + CONVERT(VARCHAR, CAST(dblBasis AS MONEY), 1) +' '+ strBasisCurrency + '/' + strBasisUnitMeasure else 'At ' + CONVERT(VARCHAR, CAST(dblBasis AS MONEY), 1) +' '+ strBasisCurrency + '/' + strBasisUnitMeasure end)
+			,striDealPrice							=	(
+															case
+															when pricingType.strPricingType = 'Basis'
+															then strFutMarketName + ' ' + strFutureMonth + ' ' + CONVERT(VARCHAR, CAST(SQ.dblBasis AS MONEY), 1) +' '+ strBasisCurrency + '/' + strBasisUnitMeasure
+															when pricingType.strPricingType = 'Priced'
+															then 'At ' + CONVERT(VARCHAR, CAST(SQ.dblCashPrice AS MONEY), 1) +' '+ strBasisCurrency + '/' + strBasisUnitMeasure
+															else 'At ' + CONVERT(VARCHAR, CAST(dblBasis AS MONEY), 1) +' '+ strBasisCurrency + '/' + strBasisUnitMeasure
+															end
+														)
 			,lblGABShipDelv							=	CASE WHEN strPosition = 'Spot' THEN dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Delivery') ELSE dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Shipment') END
 			,strIds									=	@strIds
 			,strType								=	@type

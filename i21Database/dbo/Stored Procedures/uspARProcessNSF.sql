@@ -3,9 +3,8 @@
 	, @intUserId			INT
 	, @strCreatedIvoices 	VARCHAR(500) = NULL OUTPUT
 	, @strMessage			VARCHAR(500) = NULL OUTPUT
-
-
 AS
+
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
@@ -61,7 +60,7 @@ BEGIN
 END
 
 CREATE TABLE #SELECTEDPAYMENTS (
-	  intPaymentId			INT				NOT NULL
+	  intTransactionId		INT				NOT NULL
 	, intNSFAccountId		INT				NULL
 	, dtmDate				DATETIME		NOT NULL
 	, dblNSFBankCharge		NUMERIC(18, 6)	NULL
@@ -69,7 +68,8 @@ CREATE TABLE #SELECTEDPAYMENTS (
 	, dblUnappliedAmount	NUMERIC(18, 6)	NULL
 	, ysnInvoiceToCustomer	BIT				NULL
 	, ysnInvoicePrepayment	BIT				NULL
-	, strRecordNumber		NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NOT NULL
+	, strTransactionNumber	NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NOT NULL
+	, strTransactionType	NVARCHAR(50)	COLLATE Latin1_General_CI_AS	NOT NULL
 	, intEntityCustomerId	INT				NOT NULL
 	, intCurrencyId			INT				NOT NULL
 	, intCompanyLocationId	INT				NOT NULL
@@ -78,59 +78,41 @@ CREATE TABLE #SELECTEDPAYMENTS (
 )
 
 INSERT INTO #SELECTEDPAYMENTS
-SELECT NSF.intPaymentId
-	 , NSF.intNSFAccountId
-	 , NSF.dtmDate
-	 , NSF.dblNSFBankCharge
-	 , P.dblAmountPaid
-	 , P.dblUnappliedAmount
-	 , NSF.ysnInvoiceToCustomer
-	 , P.ysnInvoicePrepayment
-	 , P.strRecordNumber
-	 , P.intEntityCustomerId
-	 , P.intCurrencyId
-	 , P.intLocationId
-	 , P.intBankDepositId
-	 , P.intAccountId
+SELECT intTransactionId		= NSF.intTransactionId
+	 , intNSFAccountId		= NSF.intNSFAccountId
+	 , dtmDate				= NSF.dtmDate
+	 , dblNSFBankCharge		= NSF.dblNSFBankCharge
+	 , dblAmountPaid		= PAYMENTS.dblAmountPaid
+	 , dblUnappliedAmount	= PAYMENTS.dblUnappliedAmount
+	 , ysnInvoiceToCustomer	= NSF.ysnInvoiceToCustomer
+	 , ysnInvoicePrepayment	= PAYMENTS.ysnInvoicePrepayment
+	 , strTransactionNumber	= PAYMENTS.strTransactionNumber
+	 , strTransactionType	= NSF.strTransactionType
+	 , intEntityCustomerId	= PAYMENTS.intEntityCustomerId
+	 , intCurrencyId		= PAYMENTS.intCurrencyId
+	 , intCompanyLocationId	= PAYMENTS.intCompanyLocationId
+	 , intBankDepositId		= UF.intBankDepositId
+	 , intAccountId			= PAYMENTS.intAccountId
 FROM dbo.tblARNSFStagingTableDetail NSF WITH (NOLOCK)
-INNER JOIN (
-	SELECT intPaymentId
-		 , intEntityCustomerId
-		 , intCurrencyId
-		 , intLocationId		 
-		 , strRecordNumber
-		 , dblAmountPaid
-		 , dblUnappliedAmount
-		 , ysnInvoicePrepayment
+INNER JOIN vyuARPaymentForNSF PAYMENTS ON NSF.intTransactionId = PAYMENTS.intTransactionId AND NSF.strTransactionType = PAYMENTS.strTransactionType
+LEFT JOIN (
+	SELECT intSourceTransactionId
 		 , intBankDepositId
-		 , intAccountId
-	FROM dbo.tblARPayment P WITH (NOLOCK)
-	INNER JOIN (
-		SELECT intPaymentMethodID
-		FROM dbo.tblSMPaymentMethod WITH (NOLOCK)
-		WHERE strPaymentMethod IN ('Check', 'eCheck', 'ACH')
-	) PM ON P.intPaymentMethodId = PM.intPaymentMethodID
-	LEFT JOIN (
-		SELECT intSourceTransactionId
-			 , intBankDepositId
-			 , intUndepositedFundId
-			 , strSourceTransactionId
-		FROM dbo.tblCMUndepositedFund WITH (NOLOCK)
-	) UF ON UF.intSourceTransactionId = P.intPaymentId
-		AND UF.strSourceTransactionId = P.strRecordNumber
-	WHERE P.ysnPosted = 1
-	  AND P.ysnProcessedToNSF = 0
-) P ON NSF.intPaymentId = P.intPaymentId
+		 , strSourceTransactionId
+	FROM dbo.tblCMUndepositedFund WITH (NOLOCK)
+) UF ON UF.intSourceTransactionId = PAYMENTS.intTransactionId
+	AND UF.strSourceTransactionId = PAYMENTS.strTransactionNumber
 WHERE NSF.ysnProcessed = 0
+  AND NSF.intNSFTransactionId = @intNSFTransactionId
 
-SELECT intPaymentId		= NSF.intPaymentId
+SELECT intPaymentId		= NSF.intTransactionId
 	 , intInvoiceId		= I.intInvoiceId
-     , strRecordNumber	= NSF.strRecordNumber
+     , strRecordNumber	= NSF.strTransactionNumber
 	 , strInvoiceNumber	= I.strInvoiceNumber
      , ysnPaid			= I.ysnPaid
 INTO #NSFWITHOVERPAYMENTS
 FROM #SELECTEDPAYMENTS NSF
-INNER JOIN tblARInvoice I ON NSF.intPaymentId = I.intPaymentId
+INNER JOIN tblARInvoice I ON NSF.intTransactionId = I.intPaymentId AND NSF.strTransactionType = 'Payment'
 WHERE I.strTransactionType = 'Overpayment'
   AND I.ysnPosted = 1
 
@@ -228,15 +210,25 @@ SELECT
 	,[dblReportingRate]			= GL.dblReportingRate
 	,[dblForeignRate]			= GL.dblForeignRate
 FROM dbo.tblGLDetail GL WITH (NOLOCK)
-INNER JOIN #SELECTEDPAYMENTS P ON GL.intTransactionId = P.intPaymentId
-							  AND GL.strTransactionId = P.strRecordNumber
+INNER JOIN #SELECTEDPAYMENTS P ON GL.intTransactionId = P.intTransactionId
+							  AND GL.strTransactionId = P.strTransactionNumber
 WHERE GL.ysnIsUnposted = 0
+  AND GL.strCode = 'AR'
 
 IF EXISTS (SELECT TOP 1 1 FROM @GLEntries)
 	BEGIN
 		EXEC dbo.uspGLBookEntries @GLEntries		= @GLEntries
 								, @ysnPost			= 1
 	END
+
+--UPDATE CASH INVOICE RECORDS
+UPDATE I
+SET ysnProcessedToNSF	= 1
+  , intPaymentMethodId	= @intNSFPaymentMethodId
+  , strComments			= 'NSF Processed: ' + ISNULL(strPaymentInfo, '')  
+FROM tblARInvoice I
+INNER JOIN #SELECTEDPAYMENTS PAYMENTS ON I.intInvoiceId = PAYMENTS.intTransactionId AND PAYMENTS.strTransactionType = 'Cash'
+WHERE ysnPosted = 1
 
 --UPDATE PAYMENT RECORDS
 UPDATE P
@@ -246,13 +238,13 @@ SET ysnProcessedToNSF	= 1
   , strPaymentMethod	= 'NSF'
   , intCurrentStatus 	= 5
 FROM tblARPayment P
-INNER JOIN #SELECTEDPAYMENTS PAYMENTS ON P.intPaymentId = PAYMENTS.intPaymentId
+INNER JOIN #SELECTEDPAYMENTS PAYMENTS ON P.intPaymentId = PAYMENTS.intTransactionId AND PAYMENTS.strTransactionType = 'Payment'
 WHERE ysnPosted = 1
 
 UPDATE P
 SET  intCurrentStatus 	= NULL
 FROM tblARPayment P
-INNER JOIN #SELECTEDPAYMENTS PAYMENTS ON P.intPaymentId = PAYMENTS.intPaymentId
+INNER JOIN #SELECTEDPAYMENTS PAYMENTS ON P.intPaymentId = PAYMENTS.intTransactionId AND PAYMENTS.strTransactionType = 'Payment'
 WHERE ysnPosted = 1
 
 --UPDATE INVOICES
@@ -272,7 +264,7 @@ INNER JOIN (
 		 , PD.dblDiscount
 		 , PD.dblBaseDiscount		 
 	FROM dbo.tblARPaymentDetail PD WITH (NOLOCK)
-	INNER JOIN #SELECTEDPAYMENTS P ON PD.intPaymentId = P.intPaymentId
+	INNER JOIN #SELECTEDPAYMENTS P ON PD.intPaymentId = P.intTransactionId AND P.strTransactionType = 'Payment'
 ) PAYMENTS ON I.intInvoiceId = PAYMENTS.intInvoiceId
 WHERE I.ysnPosted = 1
 
@@ -317,8 +309,8 @@ IF EXISTS (SELECT TOP 1 NULL FROM #SELECTEDPAYMENTS WHERE ysnInvoiceToCustomer =
 		SELECT 'Invoice' 
 			 , 'Standard'
 			 , 'Direct'
-			 , P.intPaymentId
-			 , P.strRecordNumber
+			 , P.intTransactionId
+			 , P.strTransactionNumber
 			 , P.intEntityCustomerId
 			 , P.intCompanyLocationId			 
 			 , P.intCurrencyId
@@ -327,7 +319,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM #SELECTEDPAYMENTS WHERE ysnInvoiceToCustomer =
 			 , P.dtmDate
 			 , P.dtmDate
 			 , P.dtmDate
-			 , 'NFS Payment for: ' + P.strRecordNumber
+			 , 'NSF Payment for: ' + P.strTransactionNumber
 			 , 1
 
 			 --detail
@@ -388,16 +380,16 @@ IF EXISTS (SELECT TOP 1 NULL FROM #SELECTEDPAYMENTS WHERE ISNULL(intBankDepositI
 				,[intBankTransactionTypeId]		= 2
 				,[dtmDate]						= SP.dtmDate
 				,[dblAmount]					= SUM(UF.dblAmount) * -1
-				,[strMemo]						= 'Reversal for ' + SP.strRecordNumber
+				,[strMemo]						= 'Reversal for ' + SP.strTransactionNumber
 				,[intCompanyLocationId]			= UF.intLocationId
 				,[intEntityId]					= @intUserId
 				,[intCreatedUserId]				= @intUserId
 				,[intLastModifiedUserId]		= @intUserId
 			FROM dbo.tblCMUndepositedFund UF WITH (NOLOCK)
-			INNER JOIN #SELECTEDPAYMENTS SP ON UF.intSourceTransactionId = SP.intPaymentId
-	  									   AND UF.strSourceTransactionId = SP.strRecordNumber
+			INNER JOIN #SELECTEDPAYMENTS SP ON UF.intSourceTransactionId = SP.intTransactionId
+	  									   AND UF.strSourceTransactionId = SP.strTransactionNumber
 			WHERE SP.intBankDepositId IS NOT NULL
-			GROUP BY UF.intBankAccountId, SP.intCurrencyId, UF.intLocationId, SP.strRecordNumber, SP.dtmDate
+			GROUP BY UF.intBankAccountId, SP.intCurrencyId, UF.intLocationId, SP.strTransactionNumber, SP.dtmDate
 
 			INSERT INTO @BankTransactionDetail(
 				  [intTransactionId]
@@ -419,8 +411,8 @@ IF EXISTS (SELECT TOP 1 NULL FROM #SELECTEDPAYMENTS WHERE ISNULL(intBankDepositI
 				, [dblCredit]			= 0
 				, [intEntityId]			= SP.intEntityCustomerId
 			FROM dbo.tblCMUndepositedFund UF WITH (NOLOCK)
-			INNER JOIN #SELECTEDPAYMENTS SP ON UF.intSourceTransactionId = SP.intPaymentId
-	  									   AND UF.strSourceTransactionId = SP.strRecordNumber
+			INNER JOIN #SELECTEDPAYMENTS SP ON UF.intSourceTransactionId = SP.intTransactionId
+	  									   AND UF.strSourceTransactionId = SP.strTransactionNumber
 			LEFT JOIN tblGLAccount GL ON SP.intAccountId = GL.intAccountId
 			WHERE SP.intBankDepositId IS NOT NULL
 
@@ -568,7 +560,7 @@ INNER JOIN (
              , intPaymentId
         FROM dbo.tblARPaymentDetail PD
         GROUP BY intPaymentId
-    ) PD ON PD.intPaymentId = P.intPaymentId
+    ) PD ON PD.intPaymentId = P.intTransactionId AND P.strTransactionType = 'Payment'
     GROUP BY intEntityCustomerId
 ) PAYMENT ON CUSTOMER.intEntityId = PAYMENT.intEntityCustomerId
 
@@ -589,17 +581,17 @@ IF ISNULL(@strCreatedIvoices, '') <> ''
 IF EXISTS (SELECT TOP 1 NULL FROM tblARNSFStagingTableDetail WHERE intNSFTransactionId = @intNSFTransactionId AND ysnInvoiceToCustomer = 1)
 	BEGIN
 		SET @strMessage = 'Invoice/s created for NSF Charge : ' + @strInvoiceNumbers
-		SELECT TOP 1 @intPaymentId = intPaymentId 
+		SELECT TOP 1 @intPaymentId = intTransactionId 
 		FROM tblARNSFStagingTableDetail 
 		WHERE intNSFTransactionId = @intNSFTransactionId
 	END
 ELSE
 	BEGIN
-		SELECT @strMessage = 'Bank Deposit: '+ vyu.strTransactionId + ' and Receive Payment: '+  vyu.strRecordNumber+' are reversed'
-		     , @intPaymentId = NSFDetail.intPaymentId
+		SELECT @strMessage = 'Bank Deposit: ' + vyu.strTransactionId + ' and Receive Payment: ' +  vyu.strRecordNumber + ' are reversed'
+		     , @intPaymentId = NSFDetail.intTransactionId
 		FROM vyuARPaymentBankTransaction vyu
 		INNER JOIN tblARNSFStagingTableDetail NSFDetail
-			ON vyu.intPaymentId = NSFDetail.intPaymentId
+			ON vyu.intPaymentId = NSFDetail.intTransactionId
 		WHERE intNSFTransactionId = @intNSFTransactionId
 	END
 

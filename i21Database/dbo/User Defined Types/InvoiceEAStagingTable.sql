@@ -12,6 +12,7 @@ CREATE TYPE [dbo].[InvoiceEAStagingTable] AS TABLE
 	,[dtmShipDate]							DATETIME										NULL		-- Ship Date
 	,[dtmPostDate]							DATETIME										NULL		-- Post Date
 	,[strInvoiceOriginId]					NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL	
+	,[strComments]							NVARCHAR(500)	COLLATE Latin1_General_CI_AS	NULL	
 	,[ysnImpactInventory]					BIT												NULL        -- Default(1) Impact Inventory
 
 	--Detail																																															

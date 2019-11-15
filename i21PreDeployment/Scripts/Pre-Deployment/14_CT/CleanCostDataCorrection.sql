@@ -75,7 +75,13 @@ BEGIN
 	a.intPricingStatus is null
 	'
 	);
-    
+
+	 exec ('
+		update tblCTPriceFixationDetail set intDailyAveragePriceDetailId = null where intDailyAveragePriceDetailId not in (
+			select intDailyAveragePriceDetailId from tblRKDailyAveragePriceDetail
+		)
+	 ');
+
 END
 
 

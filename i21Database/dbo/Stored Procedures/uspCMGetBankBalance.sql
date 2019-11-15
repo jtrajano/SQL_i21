@@ -1,8 +1,7 @@
 ﻿
 CREATE PROCEDURE [dbo].[uspCMGetBankBalance]
 	@intBankAccountId INT = NULL,
-	@dtmDate DATETIME = NULL,
-	@isForeignCurrency BIT = 0
+	@dtmDate DATETIME = NULL
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -13,4 +12,4 @@ SET ANSI_WARNINGS OFF
 
 
 SELECT	intBankAccountId = @intBankAccountId,
-		dblBalance = [dbo].[fnCMGetBankBalance] (@intBankAccountId, @dtmDate, @isForeignCurrency)
+		dblBalance = [dbo].[fnCMGetBankBalance] (@intBankAccountId, @dtmDate)

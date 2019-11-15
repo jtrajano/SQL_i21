@@ -147,9 +147,9 @@ BEGIN
 									-- 	WHEN A.intShipFromId > 0 AND B2.intTermsId > 0 THEN B2.intTermsId --Voucher Payable 'Ship From' data
 									-- 	WHEN B.intTermsId > 0 THEN B.intTermsId --default location
 									-- ELSE vendor.intTermsId END, --vendor
-		[dtmDate]				=	A.dtmDate,
-		[dtmDueDate]			=	dbo.fnGetDueDateBasedOnTerm(A.dtmDate, termData.intTermID),
-		[dtmBillDate]			=	ISNULL(A.dtmVoucherDate, A.dtmDate),
+		[dtmDate]				=	DATEADD(dd, DATEDIFF(dd, 0,A.dtmDate), 0),
+		[dtmDueDate]			=	DATEADD(dd, DATEDIFF(dd, 0,dbo.fnGetDueDateBasedOnTerm(A.dtmDate, termData.intTermID)), 0),
+		[dtmBillDate]			=	ISNULL(DATEADD(dd, DATEDIFF(dd, 0,A.dtmVoucherDate), 0), DATEADD(dd, DATEDIFF(dd, 0,A.dtmDate), 0)),
 		[intAccountId]			=	CASE WHEN A.intAPAccount > 0 THEN A.intAPAccount
 										WHEN A.intTransactionType IN (2, 13)
 											THEN (CASE WHEN A.intLocationId > 0 THEN payableLoc.intPurchaseAdvAccount
@@ -280,6 +280,13 @@ BEGIN
 			FROM tblEMEntityLocation shipFrom
 			INNER JOIN tblSMTerm shipFromTerm ON shipFrom.intTermsId = shipFromTerm.intTermID
 			WHERE shipFrom.intEntityLocationId = A.intShipFromId
+			UNION ALL
+			--use contract term
+			SELECT
+				defaultTerm.* 
+			FROM  tblCTContractHeader CH
+			INNER JOIN tblSMTerm defaultTerm ON  defaultTerm.intTermID = CH.intTermId
+			WHERE A.intContractHeaderId = CH.intContractHeaderId  AND A.intContractHeaderId > 0
 			UNION ALL
 			--use vendor default location term
 			SELECT

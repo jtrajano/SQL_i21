@@ -60,7 +60,7 @@ DECLARE @InventoryReceiptId INT
 		,@strMatchTicketStatus NVARCHAR(40)
 		,@intTicketType INT;
 DECLARE @intTicketLoadDetailId INT
-DECLARE @intLoopLoadDetailId INT	
+DECLARE @intLoopLoadDetailId INT
 DECLARE @intTicketItemUOMId INT
 DECLARE @strDistributionOption NVARCHAR(20)
 DECLARE @dblTicketScheduledQty NUMERIC(18,6)
@@ -74,7 +74,7 @@ DECLARE @intLoopCurrentId INT
 DECLARE @UNDISTRIBUTE_NOT_ALLOWED NVARCHAR(100)
 
 SET @UNDISTRIBUTE_NOT_ALLOWED = 'Un-distribute ticket with posted invoice is not allowed.'
-declare @intInventoryAdjustmentId int 
+declare @intInventoryAdjustmentId int
 declare @strAdjustmentNo AS NVARCHAR(40)
 DECLARE @ysnAllInvoiceHasCreditMemo BIT
 DECLARE @strInvoiceNumber AS NVARCHAR(50)
@@ -421,7 +421,7 @@ BEGIN TRY
                             SELECT @strAdjustmentNo = strAdjustmentNo
                             FROM tblICInventoryAdjustment
                             WHERE intInventoryAdjustmentId = @intInventoryAdjustmentId
-                            
+
                             if(isnull(@strAdjustmentNo, '') <> '')
                             begin
                                 EXEC dbo.uspICPostInventoryAdjustment
@@ -431,7 +431,7 @@ BEGIN TRY
                                     ,@intEntityUserSecurityId = @intUserId
                                 DELETE FROM tblICInventoryAdjustment WHERE strAdjustmentNo = @strAdjustmentNo
                             end
-                            
+
                         end
 					END
 					ELSE
@@ -570,8 +570,8 @@ BEGIN TRY
 						EXEC uspICIncreaseInTransitDirectQty @ItemsToIncreaseInTransitDirect;
 
 						EXEC [dbo].[uspSCUpdateTicketStatus] @intTicketId, 1;
-						
-						
+
+
                         set @intInventoryAdjustmentId = null
                         select @intInventoryAdjustmentId = intInventoryAdjustmentId from tblSCTicket where intTicketId = @intTicketId
 
@@ -580,7 +580,7 @@ BEGIN TRY
                             SELECT @strAdjustmentNo = strAdjustmentNo
                             FROM tblICInventoryAdjustment
                             WHERE intInventoryAdjustmentId = @intInventoryAdjustmentId
-                            
+
                             if(isnull(@strAdjustmentNo, '') <> '')
                             begin
                                 EXEC dbo.uspICPostInventoryAdjustment
@@ -590,7 +590,7 @@ BEGIN TRY
                   ,@intEntityUserSecurityId = @intUserId
                                 DELETE FROM tblICInventoryAdjustment WHERE strAdjustmentNo = @strAdjustmentNo
                             end
-                            
+
                         end
 
 					END
@@ -769,21 +769,21 @@ BEGIN TRY
 							BEGIN
 								---GEt all the invoice Detail Id for the inventory shipment item details
 								CREATE TABLE #tmpShipmentInvoiceDetailIds (
-									intInventoryShipmentItemId INT 
+									intInventoryShipmentItemId INT
 									,[intInvoiceId] INT
-									,[intInvoiceDetailId] INT 
-									
+									,[intInvoiceDetailId] INT
+
 								);
 								INSERT INTO #tmpShipmentInvoiceDetailIds(
 									intInventoryShipmentItemId
 									,[intInvoiceDetailId]
 									,[intInvoiceId]
-								) 
-								SELECT 
+								)
+								SELECT
 									DISTINCT (A.intInventoryShipmentItemId)
 									,B.[intInvoiceDetailId]
-									,B.[intInvoiceId] 
-								FROM  tblICInventoryShipmentItem A 
+									,B.[intInvoiceId]
+								FROM  tblICInventoryShipmentItem A
 								LEFT JOIN tblARInvoiceDetail  B
 									ON A.intInventoryShipmentItemId = B.intInventoryShipmentItemId
 								LEFT JOIN tblARInvoice D
@@ -791,24 +791,24 @@ BEGIN TRY
 								INNER JOIN #tmpItemShipmentIds C
 									ON A.intInventoryShipmentId = C.intInventoryShipmentId
 								WHERE D.strTransactionType = 'Invoice'
-							
+
 
 								---GEt all the invoice Detail Id for the inventory shipment charge details
 								CREATE TABLE #tmpShipmentChargeInvoiceDetailIds (
-									intInventoryShipmentChargeId INT 
+									intInventoryShipmentChargeId INT
 									,[intInvoiceId] INT
-									,[intInvoiceDetailId] INT 
+									,[intInvoiceDetailId] INT
 								);
 								INSERT INTO #tmpShipmentChargeInvoiceDetailIds(
 									intInventoryShipmentChargeId
 									,[intInvoiceDetailId]
 									,[intInvoiceId]
-								) 
-								SELECT 
+								)
+								SELECT
 									DISTINCT (A.intInventoryShipmentChargeId)
 									,B.[intInvoiceDetailId]
-									,B.[intInvoiceId] 
-								FROM  tblICInventoryShipmentCharge A 
+									,B.[intInvoiceId]
+								FROM  tblICInventoryShipmentCharge A
 								LEFT JOIN tblARInvoiceDetail  B
 									ON A.intInventoryShipmentChargeId = B.intInventoryShipmentChargeId
 								LEFT JOIN tblARInvoice D
@@ -823,47 +823,47 @@ BEGIN TRY
 
 								--ITEM
 								SET @ysnAllInvoiceHasCreditMemo = 1
-								IF EXISTS(	SELECT TOP 1 1 
+								IF EXISTS(	SELECT TOP 1 1
 											FROM #tmpShipmentInvoiceDetailIds A
 											LEFT JOIN tblARInvoiceDetail B
 												ON A.intInvoiceDetailId = B.intOriginalInvoiceDetailId
 											LEFT JOIN tblARInvoice C
 												ON B.intInvoiceId = C.intInvoiceId
 											WHERE A.intInvoiceDetailId IS NOT NULL
-												AND B.intInvoiceDetailId IS NULL 
+												AND B.intInvoiceDetailId IS NULL
 												-- AND C.strTransactionType = 'Credit Memo'
 												)
 
 								BEGIN
-									SET @ysnAllInvoiceHasCreditMemo = 0 
+									SET @ysnAllInvoiceHasCreditMemo = 0
 								END
 
 								IF(@ysnAllInvoiceHasCreditMemo = 1)
 								BEGIN
 									--CHARGES
-									IF EXISTS(	SELECT TOP 1 1 
+									IF EXISTS(	SELECT TOP 1 1
 												FROM #tmpShipmentChargeInvoiceDetailIds A
 												LEFT JOIN tblARInvoiceDetail B
 													ON A.intInvoiceDetailId = B.intOriginalInvoiceDetailId
 												LEFT JOIN tblARInvoice C
 													ON B.intInvoiceId = C.intInvoiceId
 												WHERE A.intInvoiceDetailId IS NOT NULL
-													AND B.intInvoiceDetailId IS NULL 
+													AND B.intInvoiceDetailId IS NULL
 													-- AND C.strTransactionType = 'Credit Memo'
 													)
 
 									BEGIN
-										SET @ysnAllInvoiceHasCreditMemo = 0 
+										SET @ysnAllInvoiceHasCreditMemo = 0
 									END
 								END
 
-						
+
 
 							END
 							-------------------------------------------------------------------------------------------
 							-------------------------------------------------------------------------------------------
 
-							
+
 							DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
 							FOR
 							SELECT intInventoryShipmentId, strShipmentNumber
@@ -890,19 +890,19 @@ BEGIN TRY
 								END
 								ELSE
 								BEGIN
-								
+
 									SELECT DISTINCT
 										ARID.intInvoiceId
 									INTO #invoiceIdTable
-									FROM tblARInvoiceDetail ARID 
-									INNER JOIN tblARInvoice ARI 
+									FROM tblARInvoiceDetail ARID
+									INNER JOIN tblARInvoice ARI
 										ON ARID.[intInvoiceId] = ARI.[intInvoiceId]
 									INNER JOIN tblICInventoryShipmentItem ICISI
 										ON ARID.[intInventoryShipmentItemId] = ICISI.[intInventoryShipmentItemId]
 									WHERE ICISI.[intInventoryShipmentId] = @InventoryShipmentId
 									ORDER BY ARID.intInvoiceId ASC
 
-									SELECT @intInvoiceId = MIN(intInvoiceId) 
+									SELECT @intInvoiceId = MIN(intInvoiceId)
 									FROM #invoiceIdTable
 
 									WHILE (ISNULL(@intInvoiceId,0) > 0)
@@ -939,11 +939,11 @@ BEGIN TRY
 											-- 	@transType			= N'all',
 											-- 	@accrueLicense		= 0,
 											-- 	@raiseError			= 1
-										
+
 											SET @NeedCreditMemoMessage = 'Please create a credit memo for invoice ' + @strInvoiceNumber + ' with document number of ' + @strTransactionId +'.'
 											RAISERROR(@NeedCreditMemoMessage, 11, 1);
 											RETURN;
-										
+
 
 										END
 
@@ -953,8 +953,8 @@ BEGIN TRY
 
 											---Check if there are multiple IS on the invoice.
 
-											IF (SELECT COUNT(DISTINCT strDocumentNumber) 
-												FROM tblARInvoiceDetail 
+											IF (SELECT COUNT(DISTINCT strDocumentNumber)
+												FROM tblARInvoiceDetail
 												WHERE intInvoiceId = @intInvoiceId) > 1
 											BEGIN
 												--update invoice
@@ -966,13 +966,13 @@ BEGIN TRY
 											BEGIN
 												EXEC [dbo].[uspARDeleteInvoice] @intInvoiceId, @intUserId
 											END
-											
+
 										END
 
 									
 										IF EXISTS(SELECT TOP 1 1 FROM #invoiceIdTable WHERE intInvoiceId > @intInvoiceId)
 										BEGIN
-											SELECT TOP 1 @intInvoiceId = intInvoiceId 
+											SELECT TOP 1 @intInvoiceId = intInvoiceId
 											FROM #invoiceIdTable
 											WHERE intInvoiceId > @intInvoiceId
 											ORDER BY intInvoiceId ASC
@@ -989,7 +989,7 @@ BEGIN TRY
 									EXEC [dbo].[uspGRReverseTicketOpenBalance] 'InventoryShipment' , @InventoryShipmentId ,@intUserId;
 									EXEC [dbo].[uspICDeleteInventoryShipment] @InventoryShipmentId, @intEntityId;
 									DELETE tblQMTicketDiscount WHERE intTicketFileId = @InventoryShipmentId AND strSourceType = 'Inventory Shipment'
-								
+
 								END
 
 								FETCH NEXT FROM intListCursor INTO @InventoryShipmentId, @strTransactionId;
@@ -998,18 +998,18 @@ BEGIN TRY
 							DEALLOCATE intListCursor 
 
 							UPDATE tblSCTicket
-							SET intInventoryShipmentId = NULL 
+							SET intInventoryShipmentId = NULL
 							WHERE intTicketId = @intTicketId
 
 							EXEC [dbo].[uspSCUpdateTicketStatus] @intTicketId, 1;
 
-							---- Update contract schedule based on ticket schedule qty							
+							---- Update contract schedule based on ticket schedule qty
 
 							IF ISNULL(@intTicketContractDetailId, 0) > 0 AND (@strDistributionOption = 'CNT' OR @strDistributionOption = 'LOD')
 							BEGIN
 								-- For Review
 								SET @ysnLoadContract = 0
-								SELECT TOP 1 
+								SELECT TOP 1
 									@ysnLoadContract = A.ysnLoad
 								FROM tblCTContractHeader A
 								INNER JOIN tblCTContractDetail B

@@ -1,7 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspCTGetEmailInfo]
 		@strId			NVARCHAR(MAX),
 		@strMailType	NVARCHAR(100),
-		@strURL	NVARCHAR(MAX)
+		@strURL	NVARCHAR(MAX),
+		@intCurrentUserEntityId int
 AS 
 BEGIN
 	DECLARE @strNumber					NVARCHAR(100),
@@ -17,9 +18,11 @@ BEGIN
 			@intSalespersonId			INT,
 			@strDefaultContractReport	NVARCHAR(50),
 			@strCustomerContract		NVARCHAR(50),
-			@strThanks					NVARCHAR(MAX) = 'Thank you for your business.'
+			@strThanks					NVARCHAR(MAX) = 'Thank you for your business.',
+			@ysnContractSlspnOnEmail	BIT = 0,
+			@strSalespersonName		NVARCHAR(255) = ''
 
-	SELECT @strDefaultContractReport = strDefaultContractReport FROM tblCTCompanyPreference
+	SELECT @strDefaultContractReport = strDefaultContractReport, @ysnContractSlspnOnEmail = ysnContractSlspnOnEmail FROM tblCTCompanyPreference
 
 	DECLARE @loop TABLE
 	(
@@ -38,6 +41,14 @@ BEGIN
 	END
 	IF @strMailType = 'Contract'
 	BEGIN
+		if (@ysnContractSlspnOnEmail = 1)
+		BEGIN
+			set @strSalespersonName = (select top 1 strName from tblEMEntity where intEntityId in (select distinct intSalespersonId from tblCTContractHeader where intContractHeaderId IN (SELECT * FROM  dbo.fnSplitString(@strId,','))))
+		END
+		ELSE
+		BEGIN
+			set @strSalespersonName = (select top 1 strName from tblEMEntity where intEntityId = @intCurrentUserEntityId)
+		END
 		SET @routeScreen = 'Contract'
 		INSERT INTO @loop
 		SELECT intContractHeaderId,intEntityId,strContractNumber,intSalespersonId FROM tblCTContractHeader WHERE intContractHeaderId IN (SELECT * FROM  dbo.fnSplitString(@strId,','))
@@ -130,7 +141,16 @@ BEGIN
 	SET @body += '<br>'
 	SET @body +=@strThanks+'<br><br>'
 	SET @body +='Sincerely, <br>'
-	SET @body +='#SIGNATURE#'
+		
+	if (@strMailType = 'Contract')
+	BEGIN
+		SET @body +=@strSalespersonName
+	END
+	ELSE
+	BEGIN
+		SET @body +='#SIGNATURE#'
+	END
+
 	SET @body +='<br><strong>Please do not reply to this e-mail, this is sent from an unattended mail box.</strong>'
 	SET @body +='</html>'
 

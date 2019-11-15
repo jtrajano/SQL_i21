@@ -24,6 +24,7 @@
 	, strDeliverySheetNumber NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
 	, intTicketId INT NULL
 	, strTicketNumber NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
+	, strTransactionType NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 	, intConcurrencyId INT NULL DEFAULT ((0))
     , CONSTRAINT [PK_tblRKDPIInventory] PRIMARY KEY ([intDPIInventoryId])
 	, CONSTRAINT [FK_tblRKDPIInventory_tblRKDPIHeader] FOREIGN KEY ([intDPIHeaderId]) REFERENCES [tblRKDPIHeader]([intDPIHeaderId]) ON DELETE CASCADE

@@ -387,14 +387,14 @@ BEGIN TRY
 			ELSE I.strDescription
 			END
 		,[intOrderUOMId] = WCD.intItemUOMId
-		,[dblQtyOrdered] = WCD.dblQuantity
+		,[dblQtyOrdered] = CASE WHEN (WCD.strCostMethod = 'Per Unit') THEN WCD.dblQuantity ELSE 1 END
 		,[intItemUOMId] = WCD.intItemUOMId
-		,[dblQtyShipped] = WCD.dblQuantity
+		,[dblQtyShipped] = CASE WHEN (WCD.strCostMethod = 'Per Unit') THEN WCD.dblQuantity ELSE 1 END
 		,[dblDiscount] = 0 
 		,[dblItemWeight] = WCD.dblQuantity
 		,[intItemWeightUOMId] = WCD.intItemUOMId
-		,[dblPrice] = CASE WHEN CUR.ysnSubCurrency = 1 THEN WCD.dblRate/100 ELSE WCD.dblRate END
-		,[dblUnitPrice] = CASE WHEN CUR.ysnSubCurrency = 1 THEN WCD.dblRate/100 ELSE WCD.dblRate END
+		,[dblPrice] = CASE WHEN (WCD.strCostMethod = 'Per Unit') THEN CASE WHEN CUR.ysnSubCurrency = 1 THEN WCD.dblRate/100 ELSE WCD.dblRate END ELSE WCD.dblAmount END
+		,[dblUnitPrice] = CASE WHEN (WCD.strCostMethod = 'Per Unit') THEN CASE WHEN CUR.ysnSubCurrency = 1 THEN WCD.dblRate/100 ELSE WCD.dblRate END ELSE WCD.dblAmount END
 		,[strPricing] = 'Inventory Shipment Item Price'
 		,[ysnRefreshPrice] = 0
 		,[strMaintenanceType] = NULL
