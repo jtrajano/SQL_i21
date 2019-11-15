@@ -7,7 +7,7 @@
 	
 AS
 BEGIN TRY
---	return
+	--return
 	SET NOCOUNT ON
 	declare @debug_awesome_ness bit = 0
 	----- DEBUG POINT -----
@@ -1217,6 +1217,7 @@ BEGIN TRY
 				BEGIN
 					declare @aa as decimal(36, 20)
 					declare @ab as decimal(36, 20)
+					declare @useUnits bit = 1;
 					declare @additionalDiscrepancy as decimal(18, 10)
 					set @additionalDiscrepancy = 0
 
@@ -1275,9 +1276,15 @@ BEGIN TRY
 							AND IU.ysnStockUnit = 1					
 					WHERE SV.intItemType in ( 1, 3)
 
-					if abs(@aa - @ab) < 0.01 
+					if abs(@aa - @ab) < 0.01 -- and abs(@aa - @ab) > 0.0001
 					begin
-						set @additionalDiscrepancy = abs(@aa - @ab) * 1
+						set @additionalDiscrepancy = abs(@aa - @ab) * case when @aa > @ab then  -1 else 1 end 
+						--if @additionalDiscrepancy < 0.005
+						--	set @additionalDiscrepancy = @additionalDiscrepancy * 2
+						if round(@additionalDiscrepancy, 3) >= 0.005
+						begin
+							set @useUnits = 0
+						end
 					end
 					
 					----- DEBUG POINT -----
@@ -1333,8 +1340,8 @@ BEGIN TRY
 														ELSE @dblFutureMarkePrice + ISNULL(SV.dblBasis,0)
 												   END)
 												   + (dbo.fnDivide(DiscountCost.dblTotalCashPrice, @dblSelectedUnits))-- + DiscountCost.dblTotalCashPrice
-												   
-												   + @additionalDiscrepancy
+												   + (@additionalDiscrepancy /  case when @useUnits = 1 then SV.dblUnits else 1  end )
+												   --+ @additionalDiscrepancy 
 					,dblSalesPrice				= 0.00
 					,intCurrencyId				= @intCurrencyId
 					,dblExchangeRate			= 1
@@ -1366,9 +1373,9 @@ BEGIN TRY
 						ISNULL(
 							SUM(
 								ROUND(
-									SV.dblCashPrice * CASE WHEN ISNULL(SV.dblSettleContractUnits,0) > 0 THEN SV.dblSettleContractUnits ELSE SV.dblUnits END
-								, 2)
-							)
+									(SV.dblCashPrice * CASE WHEN ISNULL(SV.dblSettleContractUnits,0) > 0 THEN SV.dblSettleContractUnits ELSE SV.dblUnits END)									 
+								, 2) 
+							) 
 						,0)  AS dblTotalCashPrice
 						--ISNULL(SUM((ROUND(SV.dblCashPrice * CASE WHEN ISNULL(SV.dblSettleContractUnits,0) > 0 THEN SV.dblSettleContractUnits ELSE SV.dblUnits END, 2)) / SV.dblUnits),0)  AS dblTotalCashPrice
 						--ISNULL(Round((Sum(SV.dblCashPrice * CASE WHEN ISNULL(SV.dblSettleContractUnits,0) > 0 THEN SV.dblSettleContractUnits ELSE SV.dblUnits END)), 2  ),0)  AS dblTotalCashPrice
@@ -1414,8 +1421,8 @@ BEGIN TRY
 														WHEN SV.intPricingTypeId = 1 OR SV.intPricingTypeId = 6 OR SV.intPricingTypeId IS NULL THEN SV.[dblCashPrice]
 														ELSE @dblFutureMarkePrice + ISNULL(SV.dblBasis,0)
 												   END)
-												   + (dbo.fnDivide(DiscountCost.dblTotalCashPrice, @dblSelectedUnits))
-												   + @additionalDiscrepancy
+												   + (dbo.fnDivide(DiscountCost.dblTotalCashPrice, @dblSelectedUnits))												   
+												   + (@additionalDiscrepancy /  case when @useUnits = 1 then SV.dblUnits else 1  end )
 					,dblSalesPrice				= 0.00
 					,intCurrencyId				= @intCurrencyId
 					,dblExchangeRate			= 1
@@ -1441,7 +1448,7 @@ BEGIN TRY
 						ISNULL(
 							SUM(
 								ROUND(
-									SV.dblCashPrice * CASE WHEN ISNULL(SV.dblSettleContractUnits,0) > 0 THEN SV.dblSettleContractUnits ELSE SV.dblUnits END
+									(SV.dblCashPrice * CASE WHEN ISNULL(SV.dblSettleContractUnits,0) > 0 THEN SV.dblSettleContractUnits ELSE SV.dblUnits END)									
 								, 2)
 							)
 						,0)  AS dblTotalCashPrice
@@ -1465,7 +1472,7 @@ BEGIN TRY
 					select ' contract depletion',* from @tblDepletion
 
 				end 
-				IF @debug_awesome_ness = 1 and 1 = 0
+				IF @debug_awesome_ness = 1 and 1 = 1
 				begin
 					select 'items to post',* from @ItemsToPost
 
@@ -1516,7 +1523,13 @@ BEGIN TRY
 							AND IU.ysnStockUnit = 1
 					OUTER APPLY (
 						SELECT 
-							ISNULL(Round((Sum(SV.dblCashPrice * CASE WHEN ISNULL(SV.dblSettleContractUnits,0) > 0 THEN SV.dblSettleContractUnits ELSE SV.dblUnits END)), 2  ),0)  AS dblTotalCashPrice,
+							ISNULL(
+							SUM(
+								ROUND(
+									(SV.dblCashPrice * CASE WHEN ISNULL(SV.dblSettleContractUnits,0) > 0 THEN SV.dblSettleContractUnits ELSE SV.dblUnits END)								
+								, 2)
+							)
+						,0)  AS dblTotalCashPrice,
 							sum(CASE WHEN ISNULL(SV.dblSettleContractUnits,0) > 0 THEN SV.dblSettleContractUnits ELSE SV.dblUnits END ) as dblTotalUnits 
 						FROM @SettleVoucherCreate SV
 						INNER JOIN tblICItem I
