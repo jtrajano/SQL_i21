@@ -3240,6 +3240,7 @@
     <Build Include="dbo\Stored Procedures\uspMFMBSSubReport.sql" />
     <Build Include="dbo\Views\vyuFRDColumnDesign.sql" />
     <Build Include="dbo\Views\vyuFRDRowDesign.sql" />
+    <Build Include="dbo\Views\vyuFRBudgetExport.sql" />
     <Build Include="dbo\Views\vyuICGetItemLocation.sql" />
     <Build Include="dbo\Tables\tblCRMSetting.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateInTransit.sql" />
