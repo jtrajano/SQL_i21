@@ -6453,6 +6453,7 @@
     <Build Include="dbo\Views\vyuMFGetInventoryBySubLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspGRValidateStorageStmtFormNo.sql" />
     <Build Include="dbo\Functions\fnPRRounding.sql" />
+    <Build Include="dbo\Views\vyuFRBudgetExport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
