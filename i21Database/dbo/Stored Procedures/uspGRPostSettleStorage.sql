@@ -11,7 +11,7 @@ BEGIN TRY
 	SET NOCOUNT ON
 	declare @debug_awesome_ness bit = 0
 	----- DEBUG POINT -----
-	if @debug_awesome_ness = 1	 AND 1 = 1
+	if @debug_awesome_ness = 1	 AND 1 = 0
 	begin
 		print 'start post settlement'
 		select 'awesomeness begins here cash price', @dblCashPriceFromCt as [cash price from ct], @dblQtyFromCt as [dbl from ct], @intSettleStorageId as [settle storage id]
@@ -2642,7 +2642,13 @@ BEGIN TRY
 							END = 1)
 
 					UPDATE APD
-					SET APD.intTaxGroupId = dbo.fnGetTaxGroupIdForVendor(APB.intEntityId,@intCompanyLocationId,APD.intItemId,EM.intEntityLocationId,EM.intFreightTermId)
+					SET APD.intTaxGroupId = dbo.fnGetTaxGroupIdForVendor(
+							CASE WHEN APB.intShipFromEntityId != APB.intEntityVendorId THEN APB.intShipFromEntityId ELSE APB.intEntityVendorId END,
+							APB.intShipToId,
+							APD.intItemId,
+							APB.intShipFromId,
+							EM.intFreightTermId
+						)
 					FROM tblAPBillDetail APD 
 					INNER JOIN tblAPBill APB
 						ON APD.intBillId = APB.intBillId
@@ -2778,15 +2784,16 @@ BEGIN TRY
 					if @debug_awesome_ness = 1  and 1 = 0
 					begin
 						select 'checking if it will create a voucher history ',@dblTotalVoucheredQuantity, @dblSelectedUnits, @createdVouchersId, @dblTotal, @requireApproval
+						select ' approval configuration '  , @EntityId, @intCreatedUserId, @LocationId
 						set @requireApproval = 0
 					end
 					----- DEBUG POINT -----
 
+					DECLARE @intVoucherId INT
+					SET @intVoucherId = CAST(@createdVouchersId AS INT)
 
 					IF ISNULL(@dblTotal,0) > 0 AND ISNULL(@requireApproval , 0) = 0
 					BEGIN
-							DECLARE @intVoucherId INT
-							SET @intVoucherId = CAST(@createdVouchersId AS INT)
 
 
 

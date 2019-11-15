@@ -58,7 +58,8 @@
 	CONSTRAINT [FK_tblCTPriceFixationDetail_tblAPBill_intBillId] FOREIGN KEY (intBillId) REFERENCES tblAPBill(intBillId),
 	CONSTRAINT [FK_tblCTPriceFixationDetail_tblAPBillDetail_intBillDetailId] FOREIGN KEY (intBillDetailId) REFERENCES tblAPBillDetail(intBillDetailId),
 	CONSTRAINT [FK_tblCTPriceFixationDetail_tblARInvoice_intInvoiceId] FOREIGN KEY (intInvoiceId) REFERENCES tblARInvoice(intInvoiceId),
-	CONSTRAINT [FK_tblCTPriceFixationDetail_tblARInvoiceDetail_intInvoiceDetailId] FOREIGN KEY (intInvoiceDetailId) REFERENCES tblARInvoiceDetail(intInvoiceDetailId)
+	CONSTRAINT [FK_tblCTPriceFixationDetail_tblARInvoiceDetail_intInvoiceDetailId] FOREIGN KEY (intInvoiceDetailId) REFERENCES tblARInvoiceDetail(intInvoiceDetailId),
+	CONSTRAINT [FK_tblCTPriceFixationDetail_tblRKDailyAveragePriceDetail_intDailyAveragePriceDetailId] FOREIGN KEY (intDailyAveragePriceDetailId) REFERENCES tblRKDailyAveragePriceDetail(intDailyAveragePriceDetailId)
 )
 GO
 CREATE NONCLUSTERED INDEX [IX_tblCTPriceFixationDetail_intPriceFixationId] ON [dbo].[tblCTPriceFixationDetail](intPriceFixationId);

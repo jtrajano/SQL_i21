@@ -85,6 +85,7 @@ FROM (
 								FROM tblRKFutOptTransactionHistory PrevRec
 								WHERE PrevRec.intFutOptTransactionId = History.intFutOptTransactionId
 									AND PrevRec.intFutOptTransactionHistoryId != History.intFutOptTransactionHistoryId
+									AND PrevRec.strCommodity = History.strCommodity
 									AND PrevRec.dtmTransactionDate < History.dtmTransactionDate
 								ORDER BY PrevRec.dtmTransactionDate DESC)
 		, dblNewNoOfLots = CASE WHEN History.strNewBuySell = 'Buy' THEN History.dblNewNoOfContract ELSE - History.dblNewNoOfContract END
@@ -122,7 +123,10 @@ FROM (
 	LEFT JOIN tblCTBook Book ON Book.intBookId = History.intBookId
 	LEFT JOIN tblCTSubBook SubBook ON SubBook.intSubBookId = History.intSubBookId
 	LEFT JOIN tblSMCurrency Currency ON Currency.strCurrency = History.strCurrency
-	LEFT JOIN tblRKBrokerageAccount BrokerAccount ON BrokerAccount.strAccountNumber = History.strBrokerAccount AND BrokerAccount.strDescription = History.strBroker
+	LEFT JOIN (
+		tblRKBrokerageAccount BrokerAccount
+		LEFT JOIN tblEMEntity em ON em.intEntityId = BrokerAccount.intEntityId
+	) ON BrokerAccount.strAccountNumber = History.strBrokerAccount AND em.strName = History.strBroker
 	LEFT JOIN (
 		SELECT DISTINCT E.strName, E.intEntityId
 		FROM tblEMEntity E

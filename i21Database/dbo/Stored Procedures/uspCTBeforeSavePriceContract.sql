@@ -22,6 +22,19 @@ BEGIN TRY
 			@strAction					NVARCHAR(50) = '',
 			@intFutOptTransactionHeaderId INT = NULL
 
+	IF @strXML = 'Delete'
+	BEGIN
+		IF EXISTS(SELECT TOP 1 1 FROM tblAPBill WHERE intBillId IN (SELECT intBillId FROM tblAPBillDetail WHERE intContractDetailId IN (SELECT intContractDetailId FROM tblCTPriceFixation WHERE intPriceContractId = @intPriceContractId)) AND ysnPosted = 1)
+		BEGIN
+
+			DECLARE @TransactionID NVARCHAR(MAX)
+			SELECT @TransactionID = COALESCE(@TransactionID + ', ', '') + strBillId FROM tblAPBill WHERE intBillId IN (SELECT intBillId FROM tblAPBillDetail WHERE intContractDetailId IN (SELECT intContractDetailId FROM tblCTPriceFixation WHERE intPriceContractId = @intPriceContractId)) AND ysnPosted = 1
+			
+			SET @ErrMsg = 'Cannot delete pricing as following Invoice/Vouchers are available. ' + @TransactionID + '. Unpost those Invoice/Voucher to continue delete the price.'
+			RAISERROR(@ErrMsg,16,1)
+		END
+	END
+
 
 	IF @strXML = 'Delete'
 	BEGIN

@@ -558,6 +558,14 @@ END
 GO
 
 GO
+IF NOT EXISTS(SELECT 1 FROM tblCTAction WHERE strActionName = 'Pre-shipment Sample Notification')
+BEGIN
+	INSERT INTO tblCTAction(strActionName, strInternalCode, intConcurrencyId, strRoute)
+	VALUES('Pre-shipment Sample Notification','Pre-shipment Sample Notification',1,'Quality.view.QualitySample?routeId=')
+END
+GO
+
+GO
 IF NOT EXISTS(SELECT * FROM tblCTAmendment)
 BEGIN
     INSERT INTO tblCTAmendment(intConcurrencyId)

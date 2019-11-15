@@ -662,15 +662,31 @@ BEGIN TRY
 														dbo.fnRemoveTrailingZeroes(SQ.dblBasis) + ' ' + SQ.strPriceCurrencyAndUOM + 
 														' '+@rtStrPricing1+' ' + SQ.strBuyerSeller + 
 														'''s '+@rtStrPricing2+':'+dbo.fnRemoveTrailingZeroes(dblLotsToFix)+').'
-			,strGABPricing							=	(case when pricingType.strPricingType = 'Basis' then 
-														SQ.strFutMarketName + ' ' + SQ.strFutureMonthYear +
-														CASE WHEN SQ.dblBasis < 0 THEN ' '+@rtMinus+' ' ELSE ' '+@rtPlus+' ' END +  
-														dbo.fnRemoveTrailingZeroes(SQ.dblBasis) + ' ' + SQ.strPriceCurrencyAndUOM + 
-														' '+@rtStrPricing1+' ' + SQ.strFixationBy + CASE WHEN dbo.fnCTGetReportLanguage(@intLaguageId) = 'Italian' THEN ' ' ELSE '''s ' END
-														+@rtStrPricing2+':'+dbo.fnRemoveTrailingZeroes(dblLotsToFix)+').'
-														else
-														dbo.fnRemoveTrailingZeroes(SQ.dblBasis) + ' ' + SQ.strPriceCurrencyAndUOMForPriced
-														end)
+			,strGABPricing							=	(
+															case
+															when pricingType.strPricingType = 'Basis'
+															then  SQ.strFutMarketName + ' ' + SQ.strFutureMonthYear
+																+
+																CASE
+																WHEN SQ.dblBasis < 0
+																THEN ' '+@rtMinus+' '
+																ELSE ' '+@rtPlus+' '
+																END
+																+  
+																dbo.fnRemoveTrailingZeroes(SQ.dblBasis) + ' ' + SQ.strPriceCurrencyAndUOM + ' '+@rtStrPricing1+' ' + SQ.strFixationBy
+																+
+																CASE
+																WHEN dbo.fnCTGetReportLanguage(@intLaguageId) = 'Italian'
+																THEN ' '
+																ELSE '''s '
+																END
+																+
+																@rtStrPricing2+':'+dbo.fnRemoveTrailingZeroes(dblLotsToFix)+').'
+															when pricingType.strPricingType = 'Priced'
+															THEN dbo.fnRemoveTrailingZeroes(SQ.dblCashPrice) + ' ' + SQ.strPriceCurrencyAndUOMForPriced
+															ELSE dbo.fnRemoveTrailingZeroes(SQ.dblBasis) + ' ' + SQ.strPriceCurrencyAndUOMForPriced
+															end
+														)
 			,strGABHeader							=	@rtConfirmationOf + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,TP.strContractType), TP.strContractType) + ' ' + CASE WHEN @type = 'MULTIPLE' THEN '' ELSE CH.strContractNumber END --+ISNULL('-' + @ErrMsg , '')		
 			,striDealHeader							=	@rtConfirmationOf + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Sale'), 'Sale') + ' ' + CASE WHEN @type = 'MULTIPLE' THEN '' ELSE CH.strContractNumber END --+ISNULL('-' + @ErrMsg , '')		
 			,strGABAssociation						=	CASE WHEN CH.intContractTypeId = 1 THEN @rtStrGABAssociation1 ELSE @rtStrGABAssociation3 END
@@ -709,7 +725,15 @@ BEGIN TRY
 														ISNULL(', '+CASE WHEN LTRIM(RTRIM(EC.strEntityState)) = '' THEN NULL ELSE LTRIM(RTRIM(EC.strEntityState)) END,'') + 
 														ISNULL(', '+CASE WHEN LTRIM(RTRIM(EC.strEntityZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(EC.strEntityZipCode)) END,'') + 
 														ISNULL(', '+CASE WHEN LTRIM(RTRIM(EC.strEntityCountry)) = '' THEN NULL ELSE dbo.fnCTGetTranslation('i21.view.Country',rtc12.intCountryID,@intLaguageId,'Country',rtc12.strCountry) END,'')
-			,striDealPrice							=	(case when pricingType.strPricingType = 'Basis' then strFutMarketName + ' ' + strFutureMonth + ' ' + CONVERT(VARCHAR, CAST(dblBasis AS MONEY), 1) +' '+ strBasisCurrency + '/' + strBasisUnitMeasure else 'At ' + CONVERT(VARCHAR, CAST(dblBasis AS MONEY), 1) +' '+ strBasisCurrency + '/' + strBasisUnitMeasure end)
+			,striDealPrice							=	(
+															case
+															when pricingType.strPricingType = 'Basis'
+															then strFutMarketName + ' ' + strFutureMonth + ' ' + CONVERT(VARCHAR, CAST(SQ.dblBasis AS MONEY), 1) +' '+ strBasisCurrency + '/' + strBasisUnitMeasure
+															when pricingType.strPricingType = 'Priced'
+															then 'At ' + CONVERT(VARCHAR, CAST(SQ.dblCashPrice AS MONEY), 1) +' '+ strBasisCurrency + '/' + strBasisUnitMeasure
+															else 'At ' + CONVERT(VARCHAR, CAST(dblBasis AS MONEY), 1) +' '+ strBasisCurrency + '/' + strBasisUnitMeasure
+															end
+														)
 			,lblGABShipDelv							=	CASE WHEN strPosition = 'Spot' THEN dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Delivery') ELSE dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Shipment') END
 			,strIds									=	@strIds
 			,strType								=	@type

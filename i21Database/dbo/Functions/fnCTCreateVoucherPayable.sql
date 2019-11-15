@@ -8,7 +8,7 @@ RETURNS TABLE AS RETURN
 (
 	SELECT	DISTINCT
 		[intEntityVendorId]							=	ISNULL(entity.intEntityId, payable.intEntityVendorId)
-		,[intTransactionType]						=	1 --voucher
+		,[intTransactionType]						=	CASE WHEN RT.Item = 0 THEN 1 ELSE 3 END --voucher
 		,[intLocationId]							=	NULL --Contract doesn't have location
 		,[intShipToId]								=	NULL --?
 		,[intShipFromId]							=	NULL --?
@@ -39,17 +39,17 @@ RETURNS TABLE AS RETURN
 		,[strMiscDescription]						=	CC.strItemDescription
 		,[dblOrderQty]								=	CASE WHEN CC.strCostMethod = 'Per Unit' THEN ISNULL(CD.dblQuantity,0) ELSE 1 END
 		,[dblOrderUnitQty]							=	1
-		,[intOrderUOMId]							=	ISNULL(CostUOM.intItemUOMId,CD.intItemUOMId)
+		,[intOrderUOMId]							=	ISNULL(ItemUOM.intItemUOMId,CD.intItemUOMId)
 		,[dblQuantityToBill]						=	CASE WHEN CC.strCostMethod = 'Per Unit' THEN ISNULL(CD.dblQuantity,0) ELSE 1 END
 		,[dblQtyToBillUnitQty]						=	1
-		,[intQtyToBillUOMId]						=	ISNULL(CostUOM.intItemUOMId,CD.intItemUOMId)
+		,[intQtyToBillUOMId]						=	ISNULL(ItemUOM.intItemUOMId,CD.intItemUOMId)
 		,[dblCost]									=	CASE WHEN CC.strCostMethod = 'Per Unit' THEN ISNULL(CC.dblRate,0) ELSE ISNULL(CC.dblAmount,0) END
 		,[dblCostUnitQty]							=	1
 		,[intCostUOMId]								=	ISNULL(CostUOM.intItemUOMId,CD.intItemUOMId)
-		,[dblNetWeight]								=	1--ISNULL(CD.dblNetWeight,0)      
-		,[dblWeightUnitQty]							=	CAST(1  AS DECIMAL(38,20))
+		,[dblNetWeight]								=	CAST(dbo.fnMFConvertCostToTargetItemUOM(CostUOM.intItemUOMId,WeightUOM.intItemUOMId,CD.dblNetWeight) AS DECIMAL(38,20))
+		,[dblWeightUnitQty]							=	CAST(1 AS DECIMAL(38,20))
 		,[intWeightUOMId]							=	ISNULL(CostUOM.intItemUOMId,CD.intItemUOMId)
-		,[intCostCurrencyId]						=	ISNULL(CC.intCurrencyId,ISNULL(CU.intMainCurrencyId,CD.intCurrencyId))	
+		,[intCostCurrencyId]						=	ISNULL(CC.intCurrencyId,ISNULL(CU.intMainCurrencyId,CD.intCurrencyId))
 		,[dblTax]									=	0
 		,[dblDiscount]								=	0
 		,[intCurrencyExchangeRateTypeId]			=	CC.intRateTypeId
@@ -79,6 +79,7 @@ RETURNS TABLE AS RETURN
 	LEFT JOIN tblICInventoryReceiptCharge RC ON	RC.intContractId = CC.intContractHeaderId AND RC.intChargeId = CC.intItemId
 	LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = CD.intItemUOMId
 	LEFT JOIN tblICItemUOM CostUOM ON CostUOM.intItemId = CD.intItemId AND CostUOM.intUnitMeasureId = CC.intUnitMeasureId
+	LEFT JOIN tblICItemUOM WeightUOM ON WeightUOM.intItemId = CD.intItemId AND WeightUOM.intItemUOMId = CD.intNetWeightUOMId
 	LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
 	LEFT JOIN tblICStorageLocation SLOC ON SLOC.intStorageLocationId = CD.intStorageLocationId
 	LEFT JOIN tblSMCompanyLocationSubLocation subLoc ON	CD.intSubLocationId = subLoc.intCompanyLocationSubLocationId

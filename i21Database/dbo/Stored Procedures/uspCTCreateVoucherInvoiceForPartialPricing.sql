@@ -372,7 +372,7 @@ BEGIN TRY
 
 					SET @allowAddDetail = 0
 
-					IF EXISTS 
+					IF EXISTS
 					(
 						SELECT TOP 1 1 intBillId
 						FROM tblAPBill BL
@@ -403,22 +403,22 @@ BEGIN TRY
 				    
 						EXEC	uspAPCreateVoucherDetailReceipt @intBillId,@voucherDetailReceipt
 				    
-						-- Get the intBillDetailId of the newly inserted voucher item. 
-						SELECT	TOP 1	
-								@intBillDetailId = intBillDetailId 
-						FROM	tblAPBillDetail 
-						WHERE	intBillId = @intBillId 
-								AND intContractDetailId = @intContractDetailId 
+						-- Get the intBillDetailId of the newly inserted voucher item.
+						SELECT	TOP 1
+								@intBillDetailId = intBillDetailId
+						FROM	tblAPBillDetail
+						WHERE	intBillId = @intBillId
+								AND intContractDetailId = @intContractDetailId
 								AND intInventoryReceiptChargeId IS NULL
-						ORDER BY intBillDetailId DESC 
+						ORDER BY intBillDetailId DESC
 				    
 						-- Add the 'DP/Basis' other charges into the voucher
-						BEGIN 
+						BEGIN
 							EXEC uspICAddProRatedReceiptChargesToVoucher
 								@intInventoryReceiptItemId
 								,@intBillId
 								,@intBillDetailId
-						END 
+						END
 
 						---- CT-3167: HOLD SINCE THE CURRENT IS STILL WORKING
 						--DECLARE @voucherPayablesData VoucherPayable
@@ -437,7 +437,28 @@ BEGIN TRY
 
 						--UPDATE	tblAPBillDetail SET  dblQtyOrdered = @dblQtyToBill, dblQtyReceived = @dblQtyToBill,dblNetWeight = dbo.fnCTConvertQtyToTargetItemUOM(intUnitOfMeasureId, intWeightUOMId, @dblQtyToBill) WHERE intBillDetailId = @intBillDetailId
 
-						EXEC	uspAPUpdateCost @intBillDetailId,@dblFinalPrice,1
+						IF (ISNULL(@intBillDetailId, 0) <> 0)
+						BEGIN
+							EXEC uspAPUpdateCost @intBillDetailId, @dblFinalPrice, 1
+						END
+
+						-- CT-3983
+						DELETE @detailCreated
+
+						INSERT INTO @detailCreated
+						SELECT @intBillDetailId
+
+						UPDATE APD
+						SET APD.intTaxGroupId = dbo.fnGetTaxGroupIdForVendor(APB.intEntityId,@intCompanyLocationId,APD.intItemId,EM.intEntityLocationId,EM.intFreightTermId)
+						FROM tblAPBillDetail APD
+						INNER JOIN tblAPBill APB
+							ON APD.intBillId = APB.intBillId
+						LEFT JOIN tblEMEntityLocation EM ON EM.intEntityId = APB.intEntityId
+						INNER JOIN @detailCreated ON intBillDetailId = intId
+						WHERE APD.intTaxGroupId IS NULL AND intInventoryReceiptChargeId IS NULL
+
+						EXEC [uspAPUpdateVoucherDetailTax] @detailCreated
+						--
 
 						-- CT-3983
 						INSERT INTO @detailCreated
@@ -445,13 +466,13 @@ BEGIN TRY
 
 						UPDATE APD
 						SET APD.intTaxGroupId = dbo.fnGetTaxGroupIdForVendor(APB.intEntityId,@intCompanyLocationId,APD.intItemId,EM.intEntityLocationId,EM.intFreightTermId)
-						FROM tblAPBillDetail APD 
+						FROM tblAPBillDetail APD
 						INNER JOIN tblAPBill APB
 							ON APD.intBillId = APB.intBillId
 						LEFT JOIN tblEMEntityLocation EM ON EM.intEntityId = APB.intEntityId
 						INNER JOIN @detailCreated ON intBillDetailId = intId
 						WHERE APD.intTaxGroupId IS NULL AND intInventoryReceiptChargeId IS NULL
-						
+
 						EXEC [uspAPUpdateVoucherDetailTax] @detailCreated
 						--
 
@@ -498,14 +519,14 @@ BEGIN TRY
 					END
 					ELSE
 					BEGIN
-						UPDATE	
-							tblICInventoryReceiptItem 
-						SET 
-							ysnAllowVoucher = 1 
-						WHERE 
+						UPDATE
+							tblICInventoryReceiptItem
+						SET
+							ysnAllowVoucher = 1
+						WHERE
 							intInventoryReceiptItemId = @intInventoryReceiptItemId
 												
-						EXEC uspICConvertReceiptToVoucher 
+						EXEC uspICConvertReceiptToVoucher
 							@intInventoryReceiptId
 							,@intUserId
 							, @intNewBillId OUTPUT
@@ -515,33 +536,33 @@ BEGIN TRY
 						IF (@intNewBillId IS NOT NULL AND @intNewBillId > 0)
 						BEGIN
 						
-							UPDATE	
-								tblAPBill 
-							SET		
+							UPDATE
+								tblAPBill
+							SET
 								strVendorOrderNumber = @strVendorOrderNumber
 								, dtmDate = @dtmFixationDate
 								, dtmDueDate = @dtmFixationDate
-								, dtmBillDate = @dtmFixationDate 
-							WHERE 
+								, dtmBillDate = @dtmFixationDate
+							WHERE
 								intBillId = @intNewBillId
 						
 							DECLARE @total DECIMAL(18,6)
-							SELECT TOP 1 
+							SELECT TOP 1
 								@intBillDetailId = intBillDetailId
-								, @total = dblQtyReceived 
-							FROM 
-								tblAPBillDetail 
-							WHERE 
-								intBillId = @intNewBillId 
+								, @total = dblQtyReceived
+							FROM
+								tblAPBillDetail
+							WHERE
+								intBillId = @intNewBillId
 								AND intInventoryReceiptChargeId IS NULL
-							ORDER BY intBillDetailId DESC 
+							ORDER BY intBillDetailId DESC
 
-							UPDATE	
-								tblAPBillDetail 
-							SET 
+							UPDATE
+								tblAPBillDetail
+							SET
 								dblQtyReceived = @dblQtyToBill
-								, dblNetWeight = dbo.fnCTConvertQtyToTargetItemUOM(@intItemUOMId, intWeightUOMId, @dblQtyToBill) 
-							WHERE 
+								, dblNetWeight = dbo.fnCTConvertQtyToTargetItemUOM(@intItemUOMId, intWeightUOMId, @dblQtyToBill)
+							WHERE
 								intBillDetailId = @intBillDetailId
 
 							IF @dblQtyToBill <> @total
@@ -558,8 +579,8 @@ BEGIN TRY
 									[intToBillUOMId],
 									[dblToBillQty]
 								)
-								SELECT * 
-								FROM 
+								SELECT *
+								FROM
 									dbo.fnCTGenerateReceiptDetail(
 										@intInventoryReceiptItemId
 										, @intNewBillId
@@ -568,19 +589,22 @@ BEGIN TRY
 										, @total
 								)
 							
-								EXEC uspICUpdateBillQty 
+								EXEC uspICUpdateBillQty
 									@updateDetails = @receiptDetails
 							END
 
 							-- Add the 'DP/Basis' other charges into the voucher
-							BEGIN 
+							BEGIN
 								EXEC uspICAddProRatedReceiptChargesToVoucher
 									@intInventoryReceiptItemId
 									,@intNewBillId
 									,@intBillDetailId
-							END 
+							END
 
-							EXEC uspAPUpdateCost @intBillDetailId, @dblFinalPrice, 1
+							IF (ISNULL(@intBillDetailId, 0) <> 0)
+							BEGIN
+								EXEC uspAPUpdateCost @intBillDetailId, @dblFinalPrice, 1
+							END
 
 							INSERT INTO tblCTPriceFixationDetailAPAR(
 								intPriceFixationDetailId
@@ -588,7 +612,7 @@ BEGIN TRY
 								,intBillDetailId
 								,intConcurrencyId
 							)
-							SELECT 
+							SELECT
 								@intPriceFixationDetailId
 								,@intNewBillId
 								,@intBillDetailId
@@ -605,11 +629,11 @@ BEGIN TRY
 							FROM	tblAPBillDetail BD
 							JOIN	tblAPBill		BL	ON BL.intBillId	=	BD.intBillId
 							JOIN	tblSCTicket		TK  ON TK.intTicketId =  BD.intScaleTicketId
-							WHERE	BD.intContractDetailId	=	@intContractDetailId 
-							AND		BD.intScaleTicketId		=	@intTicketId 
+							WHERE	BD.intContractDetailId	=	@intContractDetailId
+							AND		BD.intScaleTicketId		=	@intTicketId
 							AND		BL.intTransactionType	IN (2, 13)
-							AND		BL.ysnPosted			=	1 
-							AND		BL.ysnPaid				=	0 
+							AND		BL.ysnPosted			=	1
+							AND		BL.ysnPaid				=	0
 
 							IF EXISTS(SELECT * FROM	@prePayId)
 							BEGIN
@@ -624,13 +648,13 @@ BEGIN TRY
 
 							UPDATE APD
 							SET APD.intTaxGroupId = dbo.fnGetTaxGroupIdForVendor(APB.intEntityId,@intCompanyLocationId,APD.intItemId,EM.intEntityLocationId,EM.intFreightTermId)
-							FROM tblAPBillDetail APD 
+							FROM tblAPBillDetail APD
 							INNER JOIN tblAPBill APB
 								ON APD.intBillId = APB.intBillId
 							LEFT JOIN tblEMEntityLocation EM ON EM.intEntityId = APB.intEntityId
 							INNER JOIN @detailCreated ON intBillDetailId = intId
 							WHERE APD.intTaxGroupId IS NULL AND intInventoryReceiptChargeId IS NULL
-						
+
 							EXEC [uspAPUpdateVoucherDetailTax] @detailCreated
 							--
 
@@ -647,11 +671,11 @@ BEGIN TRY
 							IF @ysnLoad = 1
 							BEGIN
 								--Update the load applied and priced
-								update tblCTPriceFixationDetail 
+								update tblCTPriceFixationDetail
 									set dblLoadApplied = ISNULL(dblLoadApplied, 0)  + @dblInventoryItemLoadApplied,
 										dblLoadAppliedAndPriced = ISNULL(dblLoadAppliedAndPriced, 0) + @dblInventoryItemLoadApplied
 								WHERE intPriceFixationDetailId = @intPriceFixationDetailId
-							END						
+							END
 						END
 					END
 
@@ -681,7 +705,10 @@ BEGIN TRY
 				    
 							--UPDATE	tblAPBillDetail SET  dblQtyOrdered = @dblQtyToBill, dblQtyReceived = @dblQtyToBill,dblNetWeight = dbo.fnCTConvertQtyToTargetItemUOM(intUnitOfMeasureId, intWeightUOMId, @dblQtyToBill) WHERE intBillDetailId = @intBillDetailId
 
-							EXEC	uspAPUpdateCost @intBillDetailId,@dblFinalPrice,1
+							IF (ISNULL(@intBillDetailId, 0) <> 0)
+							BEGIN
+								EXEC uspAPUpdateCost @intBillDetailId, @dblFinalPrice, 1
+							END
 
 							IF ISNULL(@ysnBillPosted,0) = 1
 							BEGIN
@@ -750,7 +777,10 @@ BEGIN TRY
 
 							--UPDATE tblAPBillDetail SET dblQtyOrdered = @dblTotalIVForPFQty, dblQtyReceived = @dblTotalIVForPFQty WHERE intBillDetailId = @intBillDetailId
 
-							EXEC uspAPUpdateCost @intBillDetailId,@dblFinalPrice,1
+							IF (ISNULL(@intBillDetailId, 0) <> 0)
+							BEGIN
+								EXEC uspAPUpdateCost @intBillDetailId, @dblFinalPrice, 1
+							END
 
 							IF ISNULL(@ysnBillPosted,0) = 1
 							BEGIN

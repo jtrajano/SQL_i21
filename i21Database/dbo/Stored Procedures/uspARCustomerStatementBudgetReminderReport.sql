@@ -630,6 +630,7 @@ OUTER APPLY (
 	) NEAREST
 	WHERE BUDGET.intEntityCustomerId = SR.intEntityCustomerId
 	AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), BUDGET.dtmBudgetDate))) <= NEAREST.dtmBudgetDate
+	AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), BUDGET.dtmBudgetDate))) < @dtmDateToLocal
 ) BUDGETNOWDUE
 
 DELETE FROM tblARCustomerStatementStagingTable WHERE intEntityUserId = @intEntityUserIdLocal AND strStatementFormat = 'Budget Reminder'

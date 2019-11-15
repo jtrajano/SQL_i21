@@ -170,3 +170,36 @@ BEGIN
 	')
 END
 GO
+
+/*
+* Set default data for Transshipment Port Information
+*/
+IF EXISTS(SELECT * FROM sys.columns WHERE object_id = object_id('tblLGLoad') AND name = 'strVessel1')
+BEGIN
+	EXEC ('UPDATE tblLGLoad
+			SET strVessel1 = strMVessel
+			WHERE strMVessel IS NOT NULL AND strVessel1 IS NULL
+	')
+
+	EXEC ('UPDATE tblLGLoad
+			SET strOriginPort1 = strOriginPort
+			WHERE strOriginPort IS NOT NULL AND strOriginPort1 IS NULL
+	')
+
+	EXEC ('UPDATE tblLGLoad
+			SET strDestinationPort1 = strDestinationPort
+			WHERE strDestinationPort IS NOT NULL AND strDestinationPort1 IS NULL
+	')
+
+	EXEC ('UPDATE tblLGLoad
+			SET dtmETSPOL1 = dtmETSPOL
+			WHERE dtmETSPOL IS NOT NULL AND dtmETSPOL1 IS NULL
+	')
+
+	EXEC ('UPDATE tblLGLoad
+			SET dtmETAPOD1 = dtmETAPOD
+			WHERE dtmETAPOD IS NOT NULL AND dtmETAPOD1 IS NULL
+	')
+
+END
+GO

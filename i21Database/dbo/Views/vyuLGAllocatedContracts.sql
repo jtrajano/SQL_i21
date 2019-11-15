@@ -108,7 +108,7 @@ SELECT
 	,dblSNoOfLots = SCT.dblNoOfLots
 	,ysnDelivered = CONVERT(BIT, CASE WHEN (ALD.dblSAllocatedQty > ISNULL(LS.dblQuantity, 0)) THEN 0 ELSE 1 END)
 	,dblSDeliveredQty = ISNULL(LS.dblQuantity, 0)
-	,dblBalanceToDeliver = ALD.dblSAllocatedQty - ISNULL(LS.dblQuantity, 0)
+	,dblBalanceToDeliver = ALD.dblSAllocatedQty - ISNULL(LSB.dblBatchQuantity, 0)
 	,strInvoiceStatus = CASE WHEN (ISNULL(PCT.dblInvoicedQty, 0) = 0 AND ISNULL(SCT.dblInvoicedQty, 0) = 0) THEN 'Not Invoiced' ELSE 'Partially Invoiced' END COLLATE Latin1_General_CI_AS 
 	
 	--Load Shipment
@@ -143,7 +143,6 @@ LEFT JOIN tblICItemUOM PPU ON PPU.intItemUOMId = PCT.intPriceItemUOMId
 LEFT JOIN tblICUnitMeasure U2 ON U2.intUnitMeasureId = PPU.intUnitMeasureId
 LEFT JOIN tblCTPricingType PPT ON PPT.intPricingTypeId = PCT.intPricingTypeId
 LEFT JOIN tblCTFreightRate PFR ON PFR.intFreightRateId = PCT.intFreightRateId
-
 LEFT JOIN tblCTContractDetail SCT ON SCT.intContractDetailId = ALD.intSContractDetailId
 LEFT JOIN tblCTContractHeader SCH ON SCH.intContractHeaderId = SCT.intContractHeaderId
 LEFT JOIN tblICItemUOM SIU ON SIU.intItemUOMId = SCT.intItemUOMId
@@ -171,3 +170,5 @@ LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = ALH.intSubBookId
 OUTER APPLY (SELECT L.strLoadNumber, L.dtmETAPOD, L.strDestinationCity, dblQuantity = SUM(LD.dblQuantity) FROM tblLGLoadDetail LD JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
 			WHERE LD.intAllocationDetailId = ALD.intAllocationDetailId AND L.ysnPosted = 1 AND L.intPurchaseSale IN (2, 3) AND L.intShipmentType = 1
 			GROUP BY L.strLoadNumber, L.dtmETAPOD, L.strDestinationCity) LS
+OUTER APPLY (SELECT dblBatchQuantity = SUM(LD.dblQuantity) FROM tblLGLoadDetail LD JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
+			WHERE LD.intAllocationDetailId = ALD.intAllocationDetailId AND L.ysnPosted = 1 AND L.intPurchaseSale IN (2, 3) AND L.intShipmentType = 1) LSB
