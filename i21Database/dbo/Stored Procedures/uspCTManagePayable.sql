@@ -120,7 +120,7 @@ INSERT INTO @voucherPayables(
 	,[strBillOfLading]			
 	,[ysnReturn]						
 )
-SELECT * FROM dbo.fnCTCreateVoucherPayable(@id, @type, 1);
+SELECT * FROM dbo.fnCTCreateVoucherPayable(@id, @type, 1, @remove);
 
 IF NOT EXISTS(SELECT * FROM @voucherPayables)
 BEGIN	
@@ -143,6 +143,12 @@ END
 IF @type = 'header' AND @remove = 0
 BEGIN
 	EXEC uspCTDeleteBasisUnAccruedPayable @id
+
+	UPDATE	CC
+	SET		CC.intPrevConcurrencyId = CC.intConcurrencyId
+	FROM	tblCTContractCost	CC
+	JOIN	tblCTContractDetail	CD	ON	CD.intContractDetailId	=	CC.intContractDetailId
+	WHERE	CD.intContractHeaderId	=	@id
 END
 
 END TRY
