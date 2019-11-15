@@ -60,7 +60,7 @@ DECLARE @InventoryReceiptId INT
 		,@strMatchTicketStatus NVARCHAR(40)
 		,@intTicketType INT;
 DECLARE @intTicketLoadDetailId INT
-DECLARE @intLoopLoadDetailId INT
+DECLARE @intLoopLoadDetailId INT	
 DECLARE @intTicketItemUOMId INT
 DECLARE @strDistributionOption NVARCHAR(20)
 DECLARE @dblTicketScheduledQty NUMERIC(18,6)
@@ -79,6 +79,7 @@ declare @strAdjustmentNo AS NVARCHAR(40)
 DECLARE @ysnAllInvoiceHasCreditMemo BIT
 DECLARE @strInvoiceNumber AS NVARCHAR(50)
 DECLARE @NeedCreditMemoMessage NVARCHAR(200)
+DECLARE @ysnTicketHasSpecialDiscount BIT
 
 BEGIN TRY
 		SELECT TOP 1
@@ -86,6 +87,7 @@ BEGIN TRY
 			,@strDistributionOption = SC.strDistributionOption
 			,@dblTicketScheduledQty = SC.dblScheduleQty
 			,@intTicketContractDetailId = SC.intContractId
+			,@ysnTicketHasSpecialDiscount = ysnHasSpecialDiscount
 		FROM tblSCTicket SC
 		WHERE intTicketId = @intTicketId
 
@@ -239,6 +241,12 @@ BEGIN TRY
 								EXEC [dbo].[uspICPostInventoryReceipt] 0, 0, @strTransactionId, @intUserId
 							EXEC [dbo].[uspGRReverseOnReceiptDelete] @InventoryReceiptId
 							EXEC [dbo].[uspICDeleteInventoryReceipt] @InventoryReceiptId, @intUserId
+
+							IF(@ysnTicketHasSpecialDiscount = 1)
+							BEGIN
+								DELETE FROM tblSCInventoryReceiptAllowVoucherTracker
+									WHERE intInventoryReceiptId = @InventoryReceiptId
+							END
 
 							FETCH NEXT FROM intListCursor INTO @InventoryReceiptId, @strTransactionId, @ysnIRPosted;
 						END
