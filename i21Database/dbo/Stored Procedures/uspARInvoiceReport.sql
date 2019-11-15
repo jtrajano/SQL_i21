@@ -221,9 +221,9 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , strLoadNumber			= INVOICEDETAIL.strLoadNumber
 	 , strTruckDriver			= INVOICEDETAIL.strTruckName
 	 , blbLogo					= CASE WHEN ISNULL(SELECTEDINV.ysnStretchLogo, 0) = 1 THEN @blbStretchedLogo ELSE @blbLogo END
-	 , strAddonDetailKey		= INVOICEDETAIL.strAddonDetailKey
+	 , strAddonDetailKey		= NULL--INVOICEDETAIL.strAddonDetailKey
 	 , strBOLNumberDetail		= INVOICEDETAIL.strBOLNumberDetail
-	 , ysnHasAddOnItem			= CASE WHEN (ADDON.strAddonDetailKey) IS NOT NULL THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END
+	 , ysnHasAddOnItem			= CONVERT(BIT, 0)--CASE WHEN (ADDON.strAddonDetailKey) IS NOT NULL THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END
 	 , intEntityUserId			= @intEntityUserId
 	 , strRequestId				= @strRequestId
 	 , strInvoiceFormat			= SELECTEDINV.strInvoiceFormat
@@ -361,7 +361,7 @@ LEFT JOIN (
 		WHERE ysnApplied = 1
 	) PRICING ON ID.intInvoiceId = PRICING.intTransactionId
 			 AND ID.intInvoiceDetailId = PRICING.intTransactionDetailId
-	WHERE ID.ysnAddonParent IS NULL OR ID.ysnAddonParent = 1
+	--WHERE ID.ysnAddonParent IS NULL OR ID.ysnAddonParent = 1
 ) INVOICEDETAIL ON INV.intInvoiceId = INVOICEDETAIL.intInvoiceId
 LEFT JOIN (
 	SELECT intCurrencyID
@@ -463,11 +463,11 @@ OUTER APPLY (
 		FOR XML PATH ('')
 	) INV (strTicketNumber)
 ) SCALETICKETS
-LEFT JOIN(
-	SELECT intInvoiceId, strAddonDetailKey 
-	FROM dbo.tblARInvoiceDetail WITH(NOLOCK)
-	WHERE  ysnAddonParent = 0
-) ADDON ON INV.intInvoiceId = ADDON.intInvoiceId AND ADDON.strAddonDetailKey =  INVOICEDETAIL.strAddonDetailKey
+--LEFT JOIN(
+--	SELECT intInvoiceId, strAddonDetailKey 
+--	FROM dbo.tblARInvoiceDetail WITH(NOLOCK)
+--	WHERE  ysnAddonParent = 0
+--) ADDON ON INV.intInvoiceId = ADDON.intInvoiceId AND ADDON.strAddonDetailKey =  INVOICEDETAIL.strAddonDetailKey
 OUTER APPLY (
 	SELECT strCustomerComments = LEFT(strMessage, LEN(strMessage) - 1)
 	FROM (
