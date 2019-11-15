@@ -1465,7 +1465,7 @@ BEGIN TRY
 					select ' contract depletion',* from @tblDepletion
 
 				end 
-				IF @debug_awesome_ness = 1 and 1 = 1
+				IF @debug_awesome_ness = 1 and 1 = 0
 				begin
 					select 'items to post',* from @ItemsToPost
 
@@ -2649,7 +2649,8 @@ BEGIN TRY
 						declare @cur_cost as numeric(18,6)
 						declare @cur_qty as numeric(18,6)
 
-						if @debug_awesome_ness = 1
+						----- DEBUG POINT -----
+						if @debug_awesome_ness = 1 and 1 = 1
 						begin
 							select 'avq qty check'
 							select * from @avqty
@@ -2657,8 +2658,10 @@ BEGIN TRY
 							select * from tblAPBillDetail 
 									where 
 										intBillId = CAST(@createdVouchersId AS INT)
-
+																
 						end
+						----- DEBUG POINT -----
+
 						declare @used_bill_id table(id int)
 						while exists(select top 1 1 from @avqty where ysnApplied is null)
 						begin
@@ -2670,7 +2673,7 @@ BEGIN TRY
 								@cur_bid = null
 							from @avqty where ysnApplied is null
 							
-							if exists(select top 1 1 from tblCTContractDetail where intContractDetailId = @cur_cid and intPricingTypeId = 1)
+							if exists(select top 1 1 from tblCTContractDetail where intContractDetailId = @cur_cid and intPricingTypeId  in( 1 , 2) )
 							begin
 								if @debug_awesome_ness = 1 
 								begin
@@ -2813,70 +2816,6 @@ BEGIN TRY
 								
 							end
 
-
-
-							if @ysnFromPriceBasisContract = 1
-							begin
-															
-								if @dblTotalVoucheredQuantity <= @dblSelectedUnits
-								begin
-									INSERT INTO [dbo].[tblGRStorageHistory] 
-									(
-										[intConcurrencyId]
-										,[intCustomerStorageId]
-										,[intContractHeaderId]
-										,[dblUnits]
-										,[dtmHistoryDate]
-										,[strType]
-										,[strUserName]
-										,[intUserId]
-										,[intEntityId]
-										,[strSettleTicket]
-										,[intTransactionTypeId]
-										,[dblPaidAmount]
-										,[intBillId]
-										,[intSettleStorageId]
-										,[strVoucher]
-									)
-									SELECT 
-										[intConcurrencyId]     = 1 
-										,[intCustomerStorageId] = SV.[intCustomerStorageId]
-										,[intContractHeaderId]  = SV.[intContractHeaderId]
-										,[dblUnits]				= SV.dblOrderQty
-																	/*case when (@dblQtyFromCt + @dblTotalVoucheredQuantity) < @dblSelectedUnits then @dblQtyFromCt
-																		when (@dblQtyFromCt + @dblTotalVoucheredQuantity) > @dblSelectedUnits then  @dblSelectedUnits - @dblTotalVoucheredQuantity
-																		else	
-																			@dblSelectedUnits
-																		end*/
-										,[dtmHistoryDate]		= GETDATE()
-										,[strType]				= 'Partial Pricing'
-										,[strUserName]			= NULL
-										,[intUserId]		 	= @intCreatedUserId
-										,[intEntityId]			= @EntityId
-										,[strSettleTicket]		= @TicketNo
-										,[intTransactionTypeId]	= 10 
-										,[dblPaidAmount]		= SV.dblCost * ( case when (@dblQtyFromCt + @dblTotalVoucheredQuantity) < @dblSelectedUnits then @dblQtyFromCt
-																		when (@dblQtyFromCt + @dblTotalVoucheredQuantity) > @dblSelectedUnits then  @dblSelectedUnits - @dblTotalVoucheredQuantity
-																		else	
-																			@dblSelectedUnits
-																		end )
-										,[intBillId]			= CASE WHEN @intVoucherId = 0 THEN NULL ELSE @intVoucherId END
-										,intSettleStorageId		= NULL
-										,strVoucher				= @strVoucher
-									FROM @voucherPayable SV
-									join tblICItem c
-										on SV.intItemId = c.intItemId and c.strType = 'Inventory' 
-									JOIN tblGRCustomerStorage CS 
-										ON CS.intCustomerStorageId = SV.intCustomerStorageId									
-									JOIN tblICItemUOM IU
-										ON IU.intItemId = CS.intItemId
-											AND IU.ysnStockUnit = 1
-									WHERE SV.intTransactionType = 1
-									
-								end 
-							end
-							
-
 							----- DEBUG POINT -----
 							if @debug_awesome_ness = 1	 AND 1 = 1
 							begin
@@ -2936,7 +2875,10 @@ BEGIN TRY
 						RAISERROR (@ErrMsg, 16, 1);
 						GOTO SettleStorage_Exit;
 					END
-					else 
+					
+					
+					
+					--Inserting data to price fixation detail 
 					begin
 						/*
 							insert into tblCTPriceFixationDetailAPAR(intPriceFixationDetailId, intBillId, intBillDetailId, intConcurrencyId)
@@ -2949,8 +2891,9 @@ BEGIN TRY
 						insert into tblCTPriceFixationDetailAPAR(intPriceFixationDetailId, intBillId, intBillDetailId, intConcurrencyId)
 						select intPriceFixationDetailId, @intVoucherId, intBillDetailId, 1  from @avqty where intBillDetailId is not null
 						----- DEBUG POINT -----
-						if @debug_awesome_ness = 1 and 1 = 0
+						if @debug_awesome_ness = 1 and 1 = 1
 						begin
+							select 'available qty', * from @avqty
 							select top 5 'contract fixation detail ap ar', * from tblCTPriceFixationDetailAPAR order by intPriceFixationDetailAPARId desc
 						end
 						----- DEBUG POINT -----
@@ -3111,52 +3054,7 @@ BEGIN TRY
 							ON IU.intItemId = CS.intItemId
 								AND IU.ysnStockUnit = 1
 						WHERE SV.intTransactionType = 1
-					end
-
-					INSERT INTO [dbo].[tblGRStorageHistory] 
-					(
-						[intConcurrencyId]
-						,[intCustomerStorageId]
-						,[intContractHeaderId]
-						,[dblUnits]
-						,[dtmHistoryDate]
-						,[strType]
-						,[strUserName]
-						,[intUserId]
-						,[intEntityId]
-						,[strSettleTicket]
-						,[intTransactionTypeId]
-						,[dblPaidAmount]
-						,[intBillId]
-						,[intSettleStorageId]
-						,[strVoucher]
-					)
-					SELECT 
-						[intConcurrencyId]     = 1 
-						,[intCustomerStorageId] = SV.[intCustomerStorageId]
-						,[intContractHeaderId]  = SV.[intContractHeaderId]
-						,[dblUnits]				= SV.dblOrderQty 													
-						,[dtmHistoryDate]		= GETDATE()
-						,[strType]				= 'Partial Pricing'
-						,[strUserName]			= NULL
-						,[intUserId]		 	= @intCreatedUserId
-						,[intEntityId]			= @EntityId
-						,[strSettleTicket]		= @TicketNo
-						,[intTransactionTypeId]	= 10 
-						,[dblPaidAmount]		= SV.dblCost * SV.dblOrderQty 
-						,[intBillId]			= CASE WHEN @intVoucherId = 0 THEN NULL ELSE @intVoucherId END
-						,intSettleStorageId		= null
-						,strVoucher				= @strVoucher
-					FROM @voucherPayable SV
-					join tblICItem c
-						on SV.intItemId = c.intItemId and c.strType = 'Inventory' 
-					JOIN tblGRCustomerStorage CS 
-						ON CS.intCustomerStorageId = SV.intCustomerStorageId									
-					JOIN tblICItemUOM IU
-						ON IU.intItemId = CS.intItemId
-							AND IU.ysnStockUnit = 1
-					WHERE SV.intTransactionType = 1			
-
+					end					
 				end
 
 			END
