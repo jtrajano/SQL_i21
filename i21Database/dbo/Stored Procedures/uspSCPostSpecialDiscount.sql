@@ -22,12 +22,22 @@ BEGIN
 	DECLARE @splitDistribution NVARCHAR(3)
 	DECLARE @intLoopInventoryReceiptChargeId INT
 	DECLARE @_intLoopInventoryReceiptChargeId INT
+	DECLARE @dblChargeAmount NUMERIC(18,6)
+	DECLARE @ysnTicketSpecialGradePosted BIT
+	DECLARE @ysnTicketHasSpecialDiscount BIT
+	
+BEGIN 
+	DECLARE @TransactionName AS VARCHAR(500) = 'uspSCProcessReceiptToVoucher_' + CAST(NEWID() AS NVARCHAR(100));
+	BEGIN TRAN @TransactionName
+	SAVE TRAN @TransactionName
+END
 
-BEGIN TRANSACTION
 	BEGIN TRY
 		SELECT TOP 1
 			@ysnSpecialGradePosted = ysnSpecialGradePosted
 			,@splitDistribution = strDistributionOption
+			,@ysnTicketHasSpecialDiscount = ysnHasSpecialDiscount
+			,@ysnTicketSpecialGradePosted = ysnSpecialGradePosted
 		FROM tblSCTicket
 		WHERE intTicketId = @intTicketId
 
@@ -82,7 +92,7 @@ BEGIN TRANSACTION
 				EXEC [dbo].[uspICPostInventoryReceipt] 0, 0, @strTransactionId, @intUserId
 			END
 
-			--update IR special discount charges amount
+			--GEt/generate charges amount
 			BEGIN
 				DELETE FROM #tmpItemReceiptChargeIds
 			 
@@ -137,10 +147,11 @@ BEGIN TRANSACTION
 					AND GR.ysnSpecialDiscountCode = 1
 				ORDER BY IRC.intInventoryReceiptChargeId ASC
 
-				UPDATE tblICInventoryReceiptCharge
-				SET dblAmount = A.dblAmount
-				FROM #tmpItemReceiptChargeIds A
-				WHERE tblICInventoryReceiptCharge.intInventoryReceiptChargeId = A.intInventoryReceiptChargeId
+				--Updating of charge amount will be on uspICUpdateReceiptCharge
+				----UPDATE tblICInventoryReceiptCharge
+				----SET dblAmount = A.dblAmount
+				----FROM #tmpItemReceiptChargeIds A
+				----WHERE tblICInventoryReceiptCharge.intInventoryReceiptChargeId = A.intInventoryReceiptChargeId
 			END
 
 			--Update the ysnAllowVoucher Of receiptItem
@@ -159,22 +170,35 @@ BEGIN TRANSACTION
 				WHERE tblICInventoryReceiptCharge.intInventoryReceiptChargeId = A.intInventoryReceiptChargeId
 			END
 
-			--Update charges total
+			--Update IR charges 
 			BEGIN
+				SET @dblChargeAmount = NULL
+				SET @intLoopInventoryReceiptChargeId = NULL
+				SET @_intLoopInventoryReceiptChargeId = NULL
+
 				SELECT TOP 1 
 					@intLoopInventoryReceiptChargeId = intInventoryReceiptChargeId
 					,@_intLoopInventoryReceiptChargeId = intInventoryReceiptChargeId
+					,@dblChargeAmount = ISNULL(dblAmount,0)
 				FROM #tmpItemReceiptChargeIds
 
 				WHILE @intLoopInventoryReceiptChargeId IS NOT NULL
 				BEGIN
 					SET @intLoopInventoryReceiptChargeId = NULL
 				
-					EXEC uspICUpdateReceiptCharge @intInventoryReceiptChargeId = 1234
+					EXEC uspICUpdateReceiptCharge 
+						NULL
+						, NULL
+						, @dblChargeAmount
+						, NULL
+						, NULL
+						, @intInventoryReceiptChargeId = @_intLoopInventoryReceiptChargeId
+
 
 					SELECT TOP 1 
 						@intLoopInventoryReceiptChargeId = intInventoryReceiptChargeId
 						,@_intLoopInventoryReceiptChargeId = intInventoryReceiptChargeId
+						,@dblChargeAmount = dblAmount
 					FROM #tmpItemReceiptChargeIds 
 					WHERE intInventoryReceiptChargeId > @_intLoopInventoryReceiptChargeId
 
@@ -183,12 +207,20 @@ BEGIN TRANSACTION
 
 			EXEC [dbo].[uspICPostInventoryReceipt] 1, 0, @strTransactionId, @intUserId
 
+			IF(@ysnTicketHasSpecialDiscount <> 1 OR (@ysnTicketSpecialGradePosted = 1 AND @ysnTicketHasSpecialDiscount = 1))
+			BEGIN
+				EXEC uspSCProcessReceiptToVoucher @intTicketId, @intLoopInventoryReceiptId	,@intUserId
+			END
+
 			SELECT TOP 1 
 				@intInventoryReceiptId =  intInventoryReceiptId 
 				,@strTransactionId = strReceiptNumber
 			FROM #tmpItemReceiptIds
 			WHERE intInventoryReceiptId > @intLoopInventoryReceiptId  
 		END
+
+		IF @@TRANCOUNT > 0  
+    		COMMIT TRANSACTION @TransactionName; 
 
 	END TRY
 	BEGIN CATCH
@@ -200,8 +232,12 @@ BEGIN TRANSACTION
 		-- Use RAISERROR inside the CATCH block to return error
 		-- information about the original error that caused
 		-- execution to jump to the CATCH block.
-		IF @@TRANCOUNT > 0  
-			ROLLBACK TRANSACTION; 
+		IF @@TRANCOUNT > 0 
+		BEGIN
+			ROLLBACK TRANSACTION @TransactionName; 
+			COMMIT TRAN @TransactionName
+		END
+
 		RAISERROR (
 			@ErrorMessage, -- Message text.
 			@ErrorSeverity, -- Severity.
@@ -209,8 +245,6 @@ BEGIN TRANSACTION
 		);
 	END CATCH
 
-IF @@TRANCOUNT > 0  
-    COMMIT TRANSACTION; 
 
 
 END

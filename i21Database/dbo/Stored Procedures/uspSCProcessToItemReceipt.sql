@@ -593,202 +593,52 @@ BEGIN TRY
 	INNER JOIN tblICInventoryReceiptItemLot ICLot ON ICLot.intInventoryReceiptItemId = IRI.intInventoryReceiptItemId
 	WHERE SC.intTicketId = @intTicketId
 
-	SELECT @intContractDetailId = MIN(ri.intLineNo)
-			,@intIRContractPricingType = MIN(CD.intPricingTypeId)
-	FROM tblICInventoryReceipt r 
-	JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptId = r.intInventoryReceiptId
-	LEFT JOIN tblCTContractDetail CD 
-		ON ri.intContractDetailId = CD.intContractDetailId
-	WHERE ri.intInventoryReceiptId = @InventoryReceiptId AND r.strReceiptType = 'Purchase Contract'
 	
-
-	IF(@ysnTicketHasSpecialDiscount <> 1 OR @strInOutFlag <> 'I')
+	SELECT @intLotType = dbo.fnGetItemLotType(@intItemId)
+	IF @intLotType != 0
 	BEGIN
-		--Contract Partial Pricing
+		DECLARE @QualityPropertyValueTable AS QualityPropertyValueTable;
+		INSERT INTO @QualityPropertyValueTable(
+			strPropertyName
+			,strPropertyValue
+			,strComment
+		)
+		SELECT 
+			strPropertyName = IC.strShortName
+			,strPropertyValue = QM.dblGradeReading
+			,strComment = QM.strShrinkWhat 
+		FROM tblQMTicketDiscount QM 
+		INNER JOIN tblGRDiscountScheduleCode GR ON GR.intDiscountScheduleCodeId = QM.intDiscountScheduleCodeId
+		INNER JOIN tblICItem IC ON IC.intItemId = GR.intItemId
+		WHERE QM.intTicketId = @intTicketId AND QM.strSourceType = 'Scale'
 
-		WHILE ISNULL(@intContractDetailId,0) > 0 AND @intIRContractPricingType = 2
+		DECLARE lotCursor CURSOR LOCAL FAST_FORWARD
+		FOR
+		SELECT ICLot.intLotId FROM dbo.tblSCTicket SC 
+		INNER JOIN tblICInventoryReceiptItem IRI ON SC.intTicketId = IRI.intSourceId
+		INNER JOIN tblICInventoryReceipt IR ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId AND intSourceType = 1
+		INNER JOIN tblICInventoryReceiptItemLot ICLot ON ICLot.intInventoryReceiptItemId = IRI.intInventoryReceiptItemId
+		WHERE SC.intTicketId = @intTicketId
+
+		OPEN lotCursor;
+
+		-- Initial fetch attempt
+		FETCH NEXT FROM lotCursor INTO @intLotId
+
+		WHILE @@FETCH_STATUS = 0
 		BEGIN
-			IF EXISTS(SELECT TOP 1 1 FROM tblCTPriceFixation WHERE intContractDetailId = @intContractDetailId)
-			BEGIN
-				EXEC uspCTCreateVoucherInvoiceForPartialPricing @intContractDetailId, @intUserId
-			END
-
-			SELECT @intContractDetailId = MIN(ri.intLineNo)
-					,@intIRContractPricingType = MIN(CD.intPricingTypeId)
-			FROM tblICInventoryReceipt r 
-			JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptId = r.intInventoryReceiptId
-			LEFT JOIN tblCTContractDetail CD 
-				ON ri.intContractDetailId = CD.intContractDetailId
-			WHERE ri.intInventoryReceiptId = @InventoryReceiptId AND r.strReceiptType = 'Purchase Contract' AND ri.intLineNo > @intContractDetailId
-
-			select @intBillId = intBillId from tblAPBillDetail where intInventoryReceiptItemId in (
-				select ri.intInventoryReceiptItemId
-				FROM tblICInventoryReceipt r 
-					JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptId = r.intInventoryReceiptId					
-						WHERE ri.intInventoryReceiptId = @InventoryReceiptId 
-			) and intInventoryReceiptChargeId is null
-			
+			IF    ISNULL(@intLotId,0) != 0
+			EXEC dbo.uspQMSampleCreateForScaleTicket @intItemId,'Inbound Scale Sample', @intLotId, @intUserId, @QualityPropertyValueTable
+			FETCH NEXT FROM lotCursor INTO @intLotId;
 		END
 
-		SELECT @intLotType = dbo.fnGetItemLotType(@intItemId)
-		IF @intLotType != 0
-		BEGIN
-			DECLARE @QualityPropertyValueTable AS QualityPropertyValueTable;
-			INSERT INTO @QualityPropertyValueTable(
-				strPropertyName
-				,strPropertyValue
-				,strComment
-			)
-			SELECT 
-				strPropertyName = IC.strShortName
-				,strPropertyValue = QM.dblGradeReading
-				,strComment = QM.strShrinkWhat 
-			FROM tblQMTicketDiscount QM 
-			INNER JOIN tblGRDiscountScheduleCode GR ON GR.intDiscountScheduleCodeId = QM.intDiscountScheduleCodeId
-			INNER JOIN tblICItem IC ON IC.intItemId = GR.intItemId
-			WHERE QM.intTicketId = @intTicketId AND QM.strSourceType = 'Scale'
+		CLOSE lotCursor;
+		DEALLOCATE lotCursor;
+	END		
 
-			DECLARE lotCursor CURSOR LOCAL FAST_FORWARD
-			FOR
-			SELECT ICLot.intLotId FROM dbo.tblSCTicket SC 
-			INNER JOIN tblICInventoryReceiptItem IRI ON SC.intTicketId = IRI.intSourceId
-			INNER JOIN tblICInventoryReceipt IR ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId AND intSourceType = 1
-			INNER JOIN tblICInventoryReceiptItemLot ICLot ON ICLot.intInventoryReceiptItemId = IRI.intInventoryReceiptItemId
-			WHERE SC.intTicketId = @intTicketId
-
-			OPEN lotCursor;
-
-			-- Initial fetch attempt
-			FETCH NEXT FROM lotCursor INTO @intLotId
-
-			WHILE @@FETCH_STATUS = 0
-			BEGIN
-				IF    ISNULL(@intLotId,0) != 0
-				EXEC dbo.uspQMSampleCreateForScaleTicket @intItemId,'Inbound Scale Sample', @intLotId, @intUserId, @QualityPropertyValueTable
-				FETCH NEXT FROM lotCursor INTO @intLotId;
-			END
-
-			CLOSE lotCursor;
-			DEALLOCATE lotCursor;
-		END			
-
-		-- VOUCHER INTEGRATION
-
-		SELECT @total = COUNT(1)
-				FROM	tblICInventoryReceiptItem ri
-				WHERE	ri.intInventoryReceiptId = @InventoryReceiptId
-						AND ri.intOwnershipType = 1
-						AND ISNULL(ri.ysnAllowVoucher,1) = 1
-
-		DECLARE @ysnHasBasisContract INT = 0
-		SELECT @ysnHasBasisContract = CASE WHEN COUNT(DISTINCT intPricingTypeId) > 0 THEN 1 ELSE 0 END FROM tblICInventoryReceiptItem IRI
-		INNER JOIN tblCTContractDetail CT
-			ON CT.intContractDetailId = IRI.intContractDetailId
-		WHERE intInventoryReceiptId = @InventoryReceiptId and CT.intPricingTypeId = 2
-		GROUP BY intInventoryReceiptId
-		IF(@ysnHasBasisContract = 1)
-		BEGIN
-				SELECT @intContractDetailId = MIN(ri.intLineNo)
-				FROM tblICInventoryReceipt r 
-				JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptId = r.intInventoryReceiptId
-				WHERE ri.intInventoryReceiptId = @InventoryReceiptId AND r.strReceiptType = 'Purchase Contract' 
-			
-				WHILE ISNULL(@intContractDetailId,0) > 0
-				BEGIN
-					IF EXISTS(SELECT TOP 1 1 FROM tblCTPriceFixation WHERE intContractDetailId = @intContractDetailId)
-					BEGIN
-						EXEC uspCTCreateVoucherInvoiceForPartialPricing @intContractDetailId, @intUserId
-					END
-					SELECT @intContractDetailId = MIN(ri.intLineNo)
-					FROM tblICInventoryReceipt r 
-					JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptId = r.intInventoryReceiptId					
-					WHERE ri.intInventoryReceiptId = @InventoryReceiptId AND r.strReceiptType = 'Purchase Contract' AND ri.intLineNo > @intContractDetailId
-					
-					
-					select @intBillId = intBillId from tblAPBillDetail where intInventoryReceiptItemId in (
-						select ri.intInventoryReceiptItemId
-						FROM tblICInventoryReceipt r 
-							JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptId = r.intInventoryReceiptId					
-								WHERE ri.intInventoryReceiptId = @InventoryReceiptId 
-					) and intInventoryReceiptChargeId is null
-				END
-		END
-
-		SELECT @createVoucher = ysnCreateVoucher, @postVoucher = ysnPostVoucher FROM tblAPVendor WHERE intEntityId = @intEntityId
-		IF ISNULL(@createVoucher, 0) = 1 OR ISNULL(@postVoucher, 0) = 1
-		BEGIN
-			--EXEC [dbo].[uspSCProcessTicketPayables] @intTicketId = @intTicketId, @intInventoryReceiptId = @InventoryReceiptId, @intUserId = @intUserId,@ysnAdd = 1, @strErrorMessage = @ErrorMessage OUT, @intBillId = @intBillId OUT
-			IF(@InventoryReceiptId IS NOT NULL and @total > 0 and @ysnHasBasisContract = 0)
-			BEGIN
-				EXEC dbo.uspICProcessToBill @intReceiptId = @InventoryReceiptId, @intUserId = @intUserId, @intBillId = @intBillId OUT
-			END
-			IF ISNULL(@intBillId , 0) != 0 AND ISNULL(@postVoucher, 0) = 1
-			BEGIN
-
-				--Add contract prepayment to voucher
-				BEGIN
-					IF OBJECT_ID (N'tempdb.dbo.#tmpContractPrepay') IS NOT NULL
-						DROP TABLE #tmpContractPrepay
-
-					CREATE TABLE #tmpContractPrepay (
-						[intPrepayId] INT
-					);
-					DECLARE @Ids as Id
-				
-					INSERT INTO @Ids(intId)
-					SELECT CT.intContractHeaderId 
-					FROM tblICInventoryReceiptItem A 
-					INNER JOIN tblCTContractDetail CT 
-						ON CT.intContractDetailId = A.intContractDetailId
-					WHERE A.dblUnitCost > 0
-						AND A.intInventoryReceiptId = @InventoryReceiptId
-					GROUP BY CT.intContractHeaderId 
-					
-					
-
-					INSERT INTO #tmpContractPrepay(
-						[intPrepayId]
-					) 
-					SELECT intTransactionId FROM dbo.fnSCGetPrepaidIds(@Ids)
-				
-					SELECT @total = COUNT(intPrepayId) FROM #tmpContractPrepay where intPrepayId > 0;
-					IF (@total > 0)
-					BEGIN
-						INSERT INTO @prePayId(
-							[intId]
-						)
-						SELECT [intId] = intPrepayId
-						FROM #tmpContractPrepay where intPrepayId > 0
-					
-						EXEC uspAPApplyPrepaid @intBillId, @prePayId
-						update tblAPBillDetail set intScaleTicketId = @intTicketId WHERE intBillId = @intBillId
-					END
-				END
-
-				SELECT @dblTotal = SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = @intBillId
-
-				EXEC [dbo].[uspSMTransactionCheckIfRequiredApproval]
-				@type = N'AccountsPayable.view.Voucher',
-				@transactionEntityId = @intEntityId,
-				@currentUserEntityId = @intUserId,
-				@locationId = @intLocationId,
-				@amount = @dblTotal,
-				@requireApproval = @requireApproval OUTPUT
-
-				IF ISNULL(@dblTotal,0) > 0 AND ISNULL(@requireApproval , 0) = 0
-				BEGIN
-					EXEC [dbo].[uspAPPostBill]
-					@post = 1
-					,@recap = 0
-					,@isBatch = 0
-					,@param = @intBillId
-					,@userId = @intUserId
-					,@success = @success OUTPUT
-				END
-			END
-
-			
-		END
+	IF(@ysnTicketHasSpecialDiscount <> 1 OR (@ysnTicketSpecialGradePosted = 1 AND @ysnTicketHasSpecialDiscount = 1))
+	BEGIN
+		EXEC uspSCProcessReceiptToVoucher @intTicketId, @InventoryReceiptId	,@intUserId
 	END
 
 	EXEC dbo.uspSMAuditLog 

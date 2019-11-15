@@ -8089,6 +8089,8 @@
     <Build Include="dbo\Stored Procedures\uspICMonthlyCategoryStockRebuild.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdateReceiptCharge.sql" />
     <Build Include="dbo\Stored Procedures\uspICAddProRatedReceiptChargesToVoucher.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCPostSpecialDiscount.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCProcessReceiptToVoucher.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -433,6 +433,10 @@ BEGIN TRY
                             end
 
                         end
+
+						UPDATE tblSCTicket
+						SET ysnSpecialGradePosted = 0
+						WHERE intTicketId = @intTicketId
 					END
 					ELSE
 					BEGIN
