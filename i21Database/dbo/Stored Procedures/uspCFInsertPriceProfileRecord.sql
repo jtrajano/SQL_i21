@@ -41,11 +41,11 @@ BEGIN
 	----				    VALIDATION		   			 ----
 	---------------------------------------------------------
 	
-	IF (@ysnGlobalProfile = 'N')
+	IF (@ysnGlobalProfile = 'N' OR @ysnGlobalProfile IS NULL OR @ysnGlobalProfile = '')
 		BEGIN 
 			SET @ysnGlobalProfile = 0
 		END
-	ELSE IF (@ysnGlobalProfile = 'Y' OR @ysnGlobalProfile IS NULL OR @ysnGlobalProfile = '')
+	ELSE IF (@ysnGlobalProfile = 'Y' )
 		BEGIN
 			SET @ysnGlobalProfile = 1	
 		END
