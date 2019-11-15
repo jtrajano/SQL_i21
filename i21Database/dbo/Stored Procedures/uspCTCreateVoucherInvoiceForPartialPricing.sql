@@ -437,7 +437,10 @@ BEGIN TRY
 
 						--UPDATE	tblAPBillDetail SET  dblQtyOrdered = @dblQtyToBill, dblQtyReceived = @dblQtyToBill,dblNetWeight = dbo.fnCTConvertQtyToTargetItemUOM(intUnitOfMeasureId, intWeightUOMId, @dblQtyToBill) WHERE intBillDetailId = @intBillDetailId
 
-						EXEC	uspAPUpdateCost @intBillDetailId,@dblFinalPrice,1
+						IF (ISNULL(@intBillDetailId, 0) <> 0)
+						BEGIN
+							EXEC uspAPUpdateCost @intBillDetailId, @dblFinalPrice, 1
+						END
 
 						-- CT-3983
 						DELETE @detailCreated
@@ -582,7 +585,10 @@ BEGIN TRY
 									,@intBillDetailId
 							END 
 
-							EXEC uspAPUpdateCost @intBillDetailId, @dblFinalPrice, 1
+							IF (ISNULL(@intBillDetailId, 0) <> 0)
+							BEGIN
+								EXEC uspAPUpdateCost @intBillDetailId, @dblFinalPrice, 1
+							END
 
 							INSERT INTO tblCTPriceFixationDetailAPAR(
 								intPriceFixationDetailId
@@ -683,7 +689,10 @@ BEGIN TRY
 				    
 							--UPDATE	tblAPBillDetail SET  dblQtyOrdered = @dblQtyToBill, dblQtyReceived = @dblQtyToBill,dblNetWeight = dbo.fnCTConvertQtyToTargetItemUOM(intUnitOfMeasureId, intWeightUOMId, @dblQtyToBill) WHERE intBillDetailId = @intBillDetailId
 
-							EXEC	uspAPUpdateCost @intBillDetailId,@dblFinalPrice,1
+							IF (ISNULL(@intBillDetailId, 0) <> 0)
+							BEGIN
+								EXEC uspAPUpdateCost @intBillDetailId, @dblFinalPrice, 1
+							END
 
 							IF ISNULL(@ysnBillPosted,0) = 1
 							BEGIN
@@ -752,7 +761,10 @@ BEGIN TRY
 
 							--UPDATE tblAPBillDetail SET dblQtyOrdered = @dblTotalIVForPFQty, dblQtyReceived = @dblTotalIVForPFQty WHERE intBillDetailId = @intBillDetailId
 
-							EXEC uspAPUpdateCost @intBillDetailId,@dblFinalPrice,1
+							IF (ISNULL(@intBillDetailId, 0) <> 0)
+							BEGIN
+								EXEC uspAPUpdateCost @intBillDetailId, @dblFinalPrice, 1
+							END
 
 							IF ISNULL(@ysnBillPosted,0) = 1
 							BEGIN
