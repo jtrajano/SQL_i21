@@ -51,6 +51,8 @@ BEGIN TRY
 	--WILL REVERT FIRST THE APPLIED BILL 
 	UPDATE tblAPAppliedPrepaidAndDebit SET intBillDetailApplied = NULL  WHERE intBillId = @intBillId
 
+	UPDATE tblGRSettleStorageBillDetail SET intBillId = NULL WHERE intBillId = @intBillId
+
 	UPDATE tblGRSettleStorage SET intBillId = NULL WHERE intBillId = @intBillId
 	
 	--clear original transaction if this is a reversal
