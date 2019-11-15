@@ -7362,6 +7362,7 @@
     <Build Include="dbo\Views\vyuAPPendingPayables.sql" />
     <Build Include="dbo\Stored Procedures\uspAPCreateVoucherForPendingPayable.sql" />
     <Build Include="dbo\Views\vyuCMRemittanceAdviceReport.sql" />
+    <Build Include="dbo\Views\vyuFRBudgetExport.sql" />
     <Build Include="dbo\Functions\fnARCustomerAgingReport.sql" />
     <Build Include="dbo\Stored Procedures\uspGRCalculateSettleStorageFeeForContract.sql" />
     <Build Include="dbo\Stored Procedures\uspAPConvertPaymentToPrepay.sql" />
