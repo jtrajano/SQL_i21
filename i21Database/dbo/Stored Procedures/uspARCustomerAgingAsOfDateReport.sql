@@ -175,6 +175,11 @@ BEGIN
 	DROP TABLE #CASHRETURNS
 END
 
+IF(OBJECT_ID('tempdb..#FORGIVENSERVICECHARGE') IS NOT NULL)
+BEGIN
+	DROP TABLE #FORGIVENSERVICECHARGE
+END
+
 --#ARPOSTEDPAYMENT
 SELECT intPaymentId
 	 , dtmDatePaid
@@ -234,6 +239,21 @@ INNER JOIN (
 ) APP ON APPD.intPaymentId = APP.intPaymentId
 WHERE intInvoiceId IS NOT NULL
 
+--#FORGIVENSERVICECHARGE
+SELECT I.intInvoiceId
+	 , I.strInvoiceNumber
+INTO #FORGIVENSERVICECHARGE 
+FROM tblARInvoice I
+INNER JOIN @tblCustomers C ON I.intEntityCustomerId = C.intEntityCustomerId
+INNER JOIN @tblCompanyLocation CL ON I.intCompanyLocationId = CL.intCompanyLocationId
+INNER JOIN tblARInvoice SC ON I.strInvoiceOriginId = SC.strInvoiceNumber
+WHERE I.strInvoiceOriginId IS NOT NULL 
+  AND I.strTransactionType = 'Credit Memo' 
+  AND I.strType = 'Standard'
+  AND SC.strTransactionType = 'Invoice'
+  AND SC.strType = 'Service Charge'
+  AND SC.ysnForgiven = 1
+
 --#POSTEDINVOICES
 SELECT I.intInvoiceId
 	 , I.intPaymentId
@@ -255,10 +275,15 @@ INTO #POSTEDINVOICES
 FROM dbo.tblARInvoice I WITH (NOLOCK)
 INNER JOIN @tblCustomers C ON I.intEntityCustomerId = C.intEntityCustomerId
 INNER JOIN @tblCompanyLocation CL ON I.intCompanyLocationId = CL.intCompanyLocationId
+LEFT JOIN #FORGIVENSERVICECHARGE SC ON I.intInvoiceId = SC.intInvoiceId 
 WHERE ysnPosted = 1
 	AND ysnCancelled = 0	
 	AND strTransactionType <> 'Cash Refund'
-	-- AND ((I.strType = 'Service Charge' AND (@ysnFromBalanceForward = 0 AND @dtmDateToLocal < CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmForgiveDate))))) OR (I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
+	AND ( 
+		(SC.intInvoiceId IS NULL AND ((I.strType = 'Service Charge' AND (@ysnFromBalanceForward = 0 AND @dtmDateToLocal < CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmForgiveDate))))) OR (I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0))))
+		OR 
+		SC.intInvoiceId IS NOT NULL
+	)
 	AND I.intAccountId IN (
 		SELECT A.intAccountId
 		FROM dbo.tblGLAccount A WITH (NOLOCK)
