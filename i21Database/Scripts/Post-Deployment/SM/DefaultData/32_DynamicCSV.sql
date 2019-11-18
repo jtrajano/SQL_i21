@@ -1905,7 +1905,615 @@ UPDATE tblSMCSVDynamicImport SET
 
 --Transport Freight Tab End
 
+--Customer Location Import Begin
+SET @NewHeaderId = 6
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMCSVDynamicImport WHERE intCSVDynamicImportId = @NewHeaderId)
+BEGIN
+	INSERT INTO tblSMCSVDynamicImport(intCSVDynamicImportId, strName, strCommand )
+	SELECT @NewHeaderId, 'Customer Location Import','1'
+END
+
+
+UPDATE tblSMCSVDynamicImport SET
+	strName = 'Customer Location Import',
+	strCommand = '
+		DECLARE @entity_no					NVARCHAR (MAX) 		
+		DECLARE @location_name				NVARCHAR (200) 
+		DECLARE @address					NVARCHAR (MAX) 			
+		DECLARE @city						NVARCHAR (MAX) 
+		DECLARE @country					NVARCHAR (MAX) 			
+
+		DECLARE @county						NVARCHAR (MAX) 
+		DECLARE @state						NVARCHAR (MAX) 		
+		DECLARE @zipcode					NVARCHAR (MAX) 
+		DECLARE @phone						NVARCHAR (MAX) 
+		DECLARE @fax						NVARCHAR (MAX) 
+
+		DECLARE @pricing_level				NVARCHAR (MAX) 
+		DECLARE @notes						NVARCHAR (MAX) 
+		DECLARE @oregon_faclity_number		NVARCHAR (MAX) 
+		DECLARE @shipvia					NVARCHAR (MAX)	
+		DECLARE @terms						NVARCHAR (MAX)
+													
+		DECLARE @warehouse					NVARCHAR (MAX)
+		DECLARE @default_location			NVARCHAR (MAX)		
+		DECLARE @freight_term				NVARCHAR (MAX)	
+		DECLARE @country_tax_code			NVARCHAR (MAX)	
+		DECLARE @tax_group					NVARCHAR (MAX)	 
+				
+		DECLARE @tax_class					NVARCHAR (MAX)						
+		DECLARE @active						NVARCHAR (MAX)		
+		DECLARE @longtitude					NVARCHAR (MAX) 			
+		DECLARE @latitude					NVARCHAR (MAX) 
+		DECLARE @timezone					NVARCHAR (MAX) 
+
+		DECLARE @check_payee_name			NVARCHAR (MAX) 
+		DECLARE @default_currency			NVARCHAR (MAX) 
+		DECLARE @vendor_link				NVARCHAR (MAX) 
+		DECLARE @location_description		NVARCHAR (MAX) 
+		DECLARE @location_type				NVARCHAR (MAX) 
+			
+		DECLARE @farm_field_number			NVARCHAR (MAX) 
+		DECLARE @farm_field_description		NVARCHAR (MAX) 
+		DECLARE @farm_fsa_number			NVARCHAR (MAX) 
+		DECLARE @farm_split_number			NVARCHAR (MAX) 
+		DECLARE @farm_split_type			NVARCHAR (MAX) 
+			
+		DECLARE @farm_acres					NVARCHAR (MAX)  
+		DECLARE @img_field_map_file			VARBINARY (MAX)
+		DECLARE @field_map_file				NVARCHAR (MAX) 
+		DECLARE @print_1099					NVARCHAR (MAX)       
+		DECLARE @1099_name					NVARCHAR (MAX)   
+			
+		DECLARE @1099_form					NVARCHAR (MAX)   			
+		DECLARE @1099_type					NVARCHAR (MAX)   
+		DECLARE @federal_tax				NVARCHAR (MAX)   
+		DECLARE @w9signed					NVARCHAR (MAX)  
+
+
+
+		SELECT 
+			@entity_no						= ''@entity_no@'',		
+			@location_name					= ''@location_name@'',
+			@address						= ''@address@'',				
+			@city							= ''@city@'',
+			@country						= ''@country@'',
+											
+			@county							= ''@county@'',
+			@state							= ''@state@'',
+			@zipcode						= ''@zipcode@'',
+			@phone							= ''@phone@'',
+			@fax							= ''@fax@'',
+											
+			@pricing_level					= ''@pricing_level@'',
+			@notes							= ''@notes@'',
+			@oregon_faclity_number			= ''@oregon_faclity_number@'',
+			@shipvia						= ''@shipvia@'',
+			@terms							= ''@terms@'',
+									
+			@warehouse						= ''@warehouse@'',
+			@default_location				=	0,
+			@freight_term					= ''@freight_term@'',
+			@country_tax_code				= ''@country_tax_code@'',
+			@tax_group						= ''@tax_group@'',
+									
+			@tax_class						= ''@tax_class@'',
+			@active							= ''@active@'',
+			@longtitude						= ''@longtitude@'',
+			@latitude						= ''@latitude@'',
+			@timezone						= ''@timezone@'',
+					
+										
+			@check_payee_name				= ''@check_payee_name@'',
+			@default_currency				= ''@default_currency@'',
+			@vendor_link					= ''@vendor_link@'',
+			@location_description			= ''@location_description@'',
+			@location_type					= '''',
+									
+			@farm_field_number				= ''@farm_field_number@'',
+			@farm_field_description			= ''@farm_field_description@'',
+			@farm_fsa_number				= ''@farm_fsa_number@'',
+			@farm_split_number				= ''@farm_split_number@'',
+			@farm_split_type				= ''@farm_split_type@'',
+											
+			@farm_acres						= ''@farm_acres@'',
+			@img_field_map_file				=	NULL,
+			@field_map_file					= '''',
+			@print_1099						= ''@print_1099@'',
+			@1099_name						= ''@1099_name@'',
+											
+			@1099_form						= ''@1099_form@'',
+			@1099_type						= ''@1099_type@'',
+			@federal_tax					= ''@federal_tax@'',
+			@w9signed						= ''@w9signed@''
+			
+
+			
+
+			DECLARE @entityId INT
+			DECLARE @termsId INT
+			DECLARE @shipviaId INT
+			DECLARE @warehouseId INT
+			DECLARE @defaultlocationId INT
+			DECLARE @freighttermId INT
+			DECLARE @countrytaxcodeId INT
+			DECLARE @taxgroupId INT
+			DECLARE @taxclassId INT
+			DECLARE @isactive BIT
+			DECLARE @longtitudeNo NUMERIC(18,6)
+			DECLARE @latitudeNo NUMERIC(18,6)
+			DECLARE @defaultcurrencyId INT
+			DECLARE @vendorlinkId INT
+			DECLARE @farmacresNo NUMERIC(18,6)
+			DECLARE @isprint1099 BIT
+			DECLARE @w9signedTime DATETIME
+
+			
+
+
+			DECLARE @IsValid INT = 1
+
+			SELECT @IsValid = 1,
+				@ValidationMessage	= ''''
+
+
+
+			IF(TRY_PARSE(@entity_no AS INT) IS NULL)
+			BEGIN
+				SET @IsValid = 0
+				SET @ValidationMessage = @ValidationMessage + '' ''+''Entity No should be numeric''
+			END
+			ELSE 
+			BEGIN
+				SET @entityId = CONVERT(INT,@entity_no)
+				IF NOT EXISTS(Select TOP 1 1 from tblEMEntity Where intEntityId = @entityId)
+				BEGIN
+					SET @IsValid = 0
+					SET @ValidationMessage = @ValidationMessage + '' ''+''Entity No :''+@entityId+'' is not Exist''
+				END
+			END
+
+
+			
+			
+			IF(@terms = '''')
+			BEGIN
+				SET @termsId = NULL
+			END
+			ELSE
+			BEGIN
+				IF(TRY_PARSE(@terms AS INT) IS NULL )
+				BEGIN
+					SET @IsValid = 0
+					SET @ValidationMessage = @ValidationMessage + '' ''+''Terms should be numeric''
+				END
+				ELSE 
+				BEGIN
+					SET @termsId = CONVERT(INT,@terms)
+					IF NOT EXISTS(Select TOP 1 1 from tblSMTerm Where intTermID = @termsId)
+					BEGIN
+						SET @IsValid = 0
+						SET @ValidationMessage = @ValidationMessage + '' ''+''Terms Id :''+@termsId+'' is not Exist''
+					END
+				END
+			END
+
+		
+
+			IF(@shipvia = '''')
+			BEGIN
+				SET @shipviaId = NULL
+			END
+			ELSE
+			BEGIN
+				IF(TRY_PARSE(@shipvia AS INT) IS NULL )
+				BEGIN
+					SET @IsValid = 0
+					SET @ValidationMessage = @ValidationMessage + '' ''+''Ship Via should be numeric''
+				END
+				ELSE 
+				BEGIN
+					SET @shipviaId = CONVERT(INT,@shipvia)
+
+					IF NOT EXISTS(Select TOP 1 1 from tblSMShipVia Where intEntityId = @shipviaId)
+					BEGIN
+						SET @IsValid = 0
+						SET @ValidationMessage = @ValidationMessage + '' ''+''Terms Id :''+@shipviaId+'' is not Exist''
+					END
+				END
+			END
+
+			IF(@warehouse = '''')
+			BEGIN
+				SET @warehouseId = NULL
+			END
+			ELSE
+			BEGIN
+				IF(TRY_PARSE(@shipvia AS INT) IS NULL )
+				BEGIN
+					SET @IsValid = 0
+					SET @ValidationMessage = @ValidationMessage + '' ''+''Ship Via should be numeric''
+				END
+				ELSE 
+				BEGIN
+					SET @warehouseId = CONVERT(INT,@warehouse)
+				END
+			END
+
+
+			IF(@default_location = '''')
+			BEGIN
+				SET @defaultlocationId = NULL
+			END
+			ELSE
+			BEGIN
+				SET @defaultlocationId = CONVERT(BIT,@default_location)
+			END
+
+			IF(@freight_term = '''')
+			BEGIN
+				SET @freighttermId = NULL
+			END
+			ELSE
+			BEGIN
+				IF(TRY_PARSE(@freight_term AS INT) IS NULL )
+				BEGIN
+					SET @IsValid = 0
+					SET @ValidationMessage = @ValidationMessage + '' ''+''Freight Term Id should be numeric''
+				END
+				ELSE 
+				BEGIN
+					SET @freighttermId = CONVERT(INT,@freight_term)
+					IF NOT EXISTS(Select TOP 1 1 from tblSMFreightTerms Where intFreightTermId = @freighttermId )
+					BEGIN
+						SET @IsValid = 0
+						SET @ValidationMessage = @ValidationMessage + '' ''+''Freight Term Id :''+@freighttermId+'' is not Exist''
+					END
+				END
+			END
+
+
+			IF(@country_tax_code = '''')
+			BEGIN
+				SET @countrytaxcodeId = NULL
+			END
+			ELSE
+			BEGIN
+				SET @countrytaxcodeId = CONVERT(INT,@country_tax_code)
+			END
+
+			IF(@tax_group = '''')
+			BEGIN
+				SET @taxgroupId = NULL
+			END
+			ELSE
+			BEGIN
+				IF(TRY_PARSE(@tax_group  AS INT) IS NULL )
+				BEGIN
+					SET @IsValid = 0
+					SET @ValidationMessage = @ValidationMessage + '' ''+''Tax Group Id should be numeric''
+				END
+				ELSE 
+				BEGIN	
+					SET @taxgroupId = CONVERT(INT,@tax_group)
+					IF NOT EXISTS(Select TOP 1 1 from tblSMTaxGroup Where intTaxGroupId = @taxgroupId )
+					BEGIN
+						SET @IsValid = 0
+						SET @ValidationMessage = @ValidationMessage + '' ''+''Tax Group Id :''+@taxgroupId+'' is not Exist''
+					END
+				END
+			END
+
+			IF(@tax_class = '''')
+			BEGIN
+				SET @taxclassId = NULL
+			END
+			ELSE
+			BEGIN
+				IF(TRY_PARSE(@tax_class  AS INT) IS NULL )
+				BEGIN
+					SET @IsValid = 0
+					SET @ValidationMessage = @ValidationMessage + '' ''+''Tax Group Id should be numeric''
+				END
+				ELSE 
+				BEGIN
+					SET @taxclassId = CONVERT(INT,@tax_class)
+					IF NOT EXISTS(Select TOP 1 1 from tblSMTaxClass Where intTaxClassId = @taxclassId )
+					BEGIN
+						SET @IsValid = 0
+						SET @ValidationMessage = @ValidationMessage + '' ''+''Tax Class Id :''+@taxclassId+'' is not Exist''
+					END
+				END
+			END
+
+			IF(@active = '''')
+			BEGIN
+				SET @isactive = NULL
+			END
+			ELSE
+			BEGIN
+				SET @isactive = CONVERT(BIT,@active)
+			END
+
+			SET @longtitudeNo = CAST(@longtitude AS NUMERIC(18,6))
+
+			SET @latitudeNo = CAST(@latitude AS NUMERIC(18,6))
+			
+
+			IF(@default_currency = '''')
+			BEGIN
+				SET @defaultcurrencyId = NULL
+			END
+			ELSE
+			BEGIN
+				IF(TRY_PARSE(@default_currency AS INT) IS NULL )
+				BEGIN
+					SET @IsValid = 0
+					SET @ValidationMessage = @ValidationMessage + '' ''+''Default Currency Id should be numeric''
+				END
+				ELSE 
+				BEGIN
+					SET @defaultcurrencyId = CONVERT(INT,@default_currency)
+					IF NOT EXISTS(Select TOP 1 1 from tblSMCurrency Where intCurrencyID = @defaultcurrencyId )
+					BEGIN
+						SET @IsValid = 0
+						SET @ValidationMessage = @ValidationMessage + '' ''+''Default Currency Id :''+@defaultcurrencyId+'' is not Exist''
+					END
+				END
+			END
+
+			IF(@vendor_link = '''')
+			BEGIN
+				SET @vendorlinkId = NULL
+			END
+			ELSE
+			BEGIN
+				SET @vendorlinkId = CONVERT(INT,@vendor_link)
+			END
+
+			IF(@farm_acres = '''')
+			BEGIN
+				SET @farmacresNo = NULL
+			END
+			ELSE
+			BEGIN
+				SET @farmacresNo = CAST(ISNULL(NULLIF(@farm_acres,''''),''0'') AS NUMERIC(18,6))
+			END
+
+			IF(@print_1099 = '''')
+			BEGIN
+				SET @isprint1099 = NULL
+			END
+			ELSE
+			BEGIN
+				SET @isprint1099 = CONVERT(BIT,@print_1099)
+			END
+
+			IF(@w9signed = '''')
+			BEGIN
+				SET @w9signedTime = NULL
+			END
+			ELSE
+			BEGIN
+				SET @w9signedTime = CONVERT(DATETIME,@w9signed)
+			END
+
+
+			IF @IsValid = 1
+			BEGIN
+		
+			INSERT INTO tblEMEntityLocation(
+				[intEntityId],
+				[strLocationName],
+				[strAddress],
+				[strCity],
+				[strCountry],
+
+				[strCounty],
+				[strState],
+				[strZipCode],
+				[strPhone],
+				[strFax],
+
+				[strPricingLevel],
+				[strNotes],
+				[strOregonFacilityNumber],
+				[intShipViaId],
+				[intTermsId],
+
+				[intWarehouseId],
+				[ysnDefaultLocation],
+				[intFreightTermId],
+				[intCountyTaxCodeId],
+				[intTaxGroupId],
+
+				[intTaxClassId],
+				[ysnActive],
+				[dblLongitude],
+				[dblLatitude],	
+				[strTimezone],
+
+				[strCheckPayeeName],
+				[intDefaultCurrencyId],
+				[intVendorLinkId],
+				[strLocationDescription],
+				[strLocationType],
+				
+				[strFarmFieldNumber],
+				[strFarmFieldDescription],
+				[strFarmFSANumber],
+				[strFarmSplitNumber],    
+				[strFarmSplitType],
+
+				[dblFarmAcres],
+				[imgFieldMapFile], 
+				[strFieldMapFile], 
+				[ysnPrint1099],
+				[str1099Name],
+
+				[str1099Form],
+				[str1099Type],
+				[strFederalTaxId],
+				[dtmW9Signed]
+			)
+			SELECT
+				@entityId,		
+				@location_name,
+				@address,				
+				@city, 
+				@country,				
+
+				@county,
+				@state,					
+				@zipcode,
+				@phone,					
+				@fax,
+
+				@pricing_level,			
+				@notes,
+				@oregon_faclity_number,
+				@shipviaId,				
+				@termsId,
+				
+				@warehouseId,
+				@defaultlocationId,
+				@freighttermId,
+				@countrytaxcodeId,		
+				@taxgroupId,
+
+				@tax_class,				
+				@isactive,
+				@longtitudeNo,
+				@latitudeNo,
+				@timezone,	
+				
+				@check_payee_name,
+				@defaultcurrencyId,
+				@vendorlinkId,
+				@location_description,	
+				@location_type,	
+				
+				@farm_field_number,
+				@farm_field_description,
+				@farm_fsa_number,		
+				@farm_split_number,
+				@farm_split_type,	
+					
+				@farmacresNo,
+				@img_field_map_file,
+				@field_map_file,
+				@isprint1099,
+				@1099_name,
+
+				@1099_form,				
+				@1099_type,
+				@federal_tax,			
+				@w9signedTime
+			END
+		
+	'
+	WHERE intCSVDynamicImportId = @NewHeaderId
+
+
+
+INSERT INTO tblSMCSVDynamicImportParameter(intCSVDynamicImportId, strColumnName, strDisplayName, ysnRequired)
+	
+	
+	SELECT @NewHeaderId, 'entity_no', 'entity_no', 1
+	UNION All
+	SELECT @NewHeaderId, 'location_name', 'location_name', 1
+	Union All
+	SELECT @NewHeaderId, 'address', 'address', 0
+	Union All
+	SELECT @NewHeaderId, 'city', 'city', 0
+	Union All
+	SELECT @NewHeaderId, 'country', 'country', 0
+
+	Union All
+	SELECT @NewHeaderId, 'county', 'county', 0
+	Union All
+	SELECT @NewHeaderId, 'state', 'state', 0
+	Union All
+	SELECT @NewHeaderId, 'zipcode', 'zipcode', 0
+	Union All
+	SELECT @NewHeaderId, 'phone', 'phone', 0
+	Union All
+	SELECT @NewHeaderId, 'fax', 'fax', 0
+
+
+		
+	Union All
+	SELECT @NewHeaderId, 'pricing_level', 'pricing_level', 0
+	Union All
+	SELECT @NewHeaderId, 'notes', 'notes', 0
+	Union All
+	SELECT @NewHeaderId, 'oregon_faclity_number', 'oregon_faclity_number', 0
+	Union All
+	SELECT @NewHeaderId, 'shipvia', 'shipvia', 0
+	Union All
+	SELECT @NewHeaderId, 'terms', 'terms', 0
+
+	Union All
+	SELECT @NewHeaderId, 'warehouse', 'warehouse', 0
+	Union All
+	SELECT @NewHeaderId, 'freight_term', 'freight_term', 0
+	Union All
+	SELECT @NewHeaderId, 'country_tax_code', 'country_tax_code', 0
+	Union All
+	SELECT @NewHeaderId, 'tax_group', 'tax_group', 0
+
+	Union All
+	SELECT @NewHeaderId, 'tax_class', 'tax_class', 0
+	Union All
+	SELECT @NewHeaderId, 'active', 'active', 0
+	Union All
+	SELECT @NewHeaderId, 'longtitude', 'longtitude', 1
+	Union All
+	SELECT @NewHeaderId, 'latitude', 'latitude', 1
+	Union All
+	SELECT @NewHeaderId, 'timezone', 'timezone', 0
+
+	Union All
+	SELECT @NewHeaderId, 'check_payee_name', 'check_payee_name', 0
+	Union All
+	SELECT @NewHeaderId, 'default_currency', 'default_currency', 0
+	Union All
+	SELECT @NewHeaderId, 'vendor_link', 'vendor_link', 0
+	Union All
+	SELECT @NewHeaderId, 'location_description', 'location_description', 0
+
+	Union All
+	SELECT @NewHeaderId, 'farm_field_number', 'farm_field_number', 0
+	Union All
+	SELECT @NewHeaderId, 'farm_field_description', 'farm_field_description', 0
+	Union All
+	SELECT @NewHeaderId, 'farm_fsa_number', 'farm_fsa_number', 0
+	Union All
+	SELECT @NewHeaderId, 'farm_split_number', 'farm_split_number', 0
+	Union All
+	SELECT @NewHeaderId, 'farm_split_type', 'farm_split_type', 0
+
+	Union All
+	SELECT @NewHeaderId, 'farm_acres', 'farm_acres', 0
+	Union All
+	SELECT @NewHeaderId, 'print_1099', 'print_1099', 0
+	Union All
+	SELECT @NewHeaderId, '1099_name', '1099_name', 0
+
+	Union All
+	SELECT @NewHeaderId, '1099_form', '1099_form', 0
+	Union All
+	SELECT @NewHeaderId, '1099_type', '1099_type', 0
+	Union All
+	SELECT @NewHeaderId, 'federal_tax', 'federal_tax', 0
+	Union All
+	SELECT @NewHeaderId, 'w9signed', 'w9signed', 0
+
+
+
+
+--Customer Location Import End
 
 
 
