@@ -469,7 +469,7 @@ BEGIN TRY
 								,[ysnCheckOffTax]		
 								,[ysnTaxExempt]	
 								,[ysnTaxOnly]
-						FROM dbo.fnICGeneratePayablesTaxes(@voucherPayable)
+						FROM dbo.fnICGeneratePayablesTaxes(@voucherPayable,null,null)
 							BEGIN /* Create Voucher */
 								DECLARE @createVoucher BIT = 0
 								DECLARE @postVoucher   BIT = 0
