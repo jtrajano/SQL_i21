@@ -90,11 +90,11 @@ BEGIN
 							ON ISNULL(Chk.taxrateBasesysid, '') COLLATE DATABASE_DEFAULT = STT.strTaxNo
 						WHERE STT.intCheckoutId = @intCheckoutId
 							AND ISNULL(Chk.taxrateBasesysid, '') != ''
-							AND CAST(ISNULL(Chk.taxrateBasetaxRate, 0) AS DECIMAL(18,6)) != 0.000000
+							--AND CAST(ISNULL(Chk.taxrateBasetaxRate, 0) AS DECIMAL(18,6)) != 0.000000
 					) AS tbl
 				)
 					AND ISNULL(Chk.taxrateBasesysid, '') != ''
-					AND CAST(ISNULL(Chk.taxrateBasetaxRate, 0) AS DECIMAL(18,6)) != 0.000000
+					--AND CAST(ISNULL(Chk.taxrateBasetaxRate, 0) AS DECIMAL(18,6)) != 0.000000
 				-- ------------------------------------------------------------------------------------------------------------------  
 				-- END Get Error logs. Check Register XML that is not configured in i21.  
 				-- ==================================================================================================================
