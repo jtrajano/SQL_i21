@@ -91,7 +91,20 @@ BEGIN
 			,[intCostCurrencyId] = (CASE WHEN intPurchaseSale = 3 THEN ISNULL(AD.intSeqCurrencyId, 0) ELSE ISNULL(AD.intSeqCurrencyId, LD.intPriceCurrencyId) END)
 			,[dblTax] = ISNULL(receiptItem.dblTax, 0)
 			,[dblDiscount] = 0
-			,[dblExchangeRate] = CASE WHEN (COALESCE(CY.intMainCurrencyId, CY.intCurrencyID, L.intCurrencyId) <> @DefaultCurrencyId) THEN ISNULL(LD.dblForexRate, 0) ELSE 1 END
+			,[dblExchangeRate] = CASE --if contract FX tab is setup
+									 WHEN AD.ysnValidFX = 1 THEN 
+										CASE WHEN (ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) = @DefaultCurrencyId AND CT.intInvoiceCurrencyId <> @DefaultCurrencyId) 
+												THEN dbo.fnDivide(1, ISNULL(CT.dblRate, 1)) --functional price to foreign FX, use inverted contract FX rate
+											WHEN (ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) <> @DefaultCurrencyId AND CT.intInvoiceCurrencyId = @DefaultCurrencyId)
+												THEN 1 --foreign price to functional FX, use 1
+											WHEN (ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) <> @DefaultCurrencyId AND CT.intInvoiceCurrencyId <> @DefaultCurrencyId)
+												THEN ISNULL(FX.dblFXRate, 1) --foreign price to foreign FX, use master FX rate
+											ELSE ISNULL(LD.dblForexRate,1) END
+									 ELSE  --if contract FX tab is not setup
+										CASE WHEN (@DefaultCurrencyId <> ISNULL(SC.intMainCurrencyId, SC.intCurrencyID)) 
+											THEN ISNULL(FX.dblFXRate, 1)
+											ELSE ISNULL(LD.dblForexRate,1) END
+									 END
 			,[ysnSubCurrency] =	AD.ysnSeqSubCurrency
 			,[intSubCurrencyCents] = CY.intCent
 			,[intAccountId] = apClearing.intAccountId
@@ -120,6 +133,18 @@ BEGIN
 					LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = W.intStorageLocationId
 					LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = W.intSubLocationId
 					WHERE intLoadId = L.intLoadId) LW
+		LEFT JOIN tblSMCurrency SC ON SC.intCurrencyID = CT.intCurrencyId
+		OUTER APPLY (SELECT	TOP 1  
+					intForexRateTypeId = RD.intRateTypeId
+					,dblFXRate = CASE WHEN ER.intFromCurrencyId = @DefaultCurrencyId  
+								THEN 1/RD.[dblRate] 
+								ELSE RD.[dblRate] END 
+					FROM tblSMCurrencyExchangeRate ER
+					JOIN tblSMCurrencyExchangeRateDetail RD ON RD.intCurrencyExchangeRateId = ER.intCurrencyExchangeRateId
+					WHERE @DefaultCurrencyId <> ISNULL(SC.intMainCurrencyId, SC.intCurrencyID)
+						AND ((ER.intFromCurrencyId = ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) AND ER.intToCurrencyId = @DefaultCurrencyId) 
+							OR (ER.intFromCurrencyId = @DefaultCurrencyId AND ER.intToCurrencyId = ISNULL(SC.intMainCurrencyId, SC.intCurrencyID)))
+					ORDER BY RD.dtmValidFromDate DESC) FX
 		LEFT JOIN dbo.tblGLAccount apClearing ON apClearing.intAccountId = itemAccnt.intAccountId
 		WHERE L.intLoadId = @intLoadId
 			AND LD.intLoadDetailId NOT IN (SELECT IsNull(BD.intLoadDetailId, 0) FROM tblAPBillDetail BD JOIN tblICItem Item ON Item.intItemId = BD.intItemId
