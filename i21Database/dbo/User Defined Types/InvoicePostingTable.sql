@@ -74,6 +74,7 @@
     ,[intItemId]                            INT             NULL
     ,[strItemNo]                            NVARCHAR(50)    COLLATE Latin1_General_CI_AS    NULL
     ,[strItemType]                          NVARCHAR(50)    COLLATE Latin1_General_CI_AS    NULL
+    ,[strItemManufactureType]				NVARCHAR(50)    COLLATE Latin1_General_CI_AS    NULL
     ,[strItemDescription]                   NVARCHAR(250)   COLLATE Latin1_General_CI_AS    NULL
     ,[intItemUOMId]                         INT             NULL
     ,[intItemWeightUOMId]                   INT             NULL

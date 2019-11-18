@@ -123,6 +123,7 @@ INSERT #ARPostInvoiceHeader
     ,[intItemId]
     ,[strItemNo]
     ,[strItemType]
+    ,[strItemManufactureType]
     ,[strItemDescription]
     ,[intItemUOMId]
     ,[intItemWeightUOMId]
@@ -273,6 +274,7 @@ SELECT
     ,[intItemId]                        = NULL
     ,[strItemNo]                        = NULL
     ,[strItemType]                      = NULL
+    ,[strItemManufactureType]           = NULL
     ,[strItemDescription]               = NULL
     ,[intItemUOMId]                     = NULL
     ,[intItemWeightUOMId]               = NULL
@@ -471,6 +473,7 @@ INSERT #ARPostInvoiceHeader
     ,[intItemId]
     ,[strItemNo]
     ,[strItemType]
+    ,[strItemManufactureType]
     ,[strItemDescription]
     ,[intItemUOMId]
     ,[intItemWeightUOMId]
@@ -621,6 +624,7 @@ SELECT
     ,[intItemId]                        = NULL
     ,[strItemNo]                        = NULL
     ,[strItemType]                      = NULL
+    ,[strItemManufactureType]           = NULL
     ,[strItemDescription]               = NULL
     ,[intItemUOMId]                     = NULL
     ,[intItemWeightUOMId]               = NULL
