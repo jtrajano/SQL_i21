@@ -8,6 +8,7 @@ CREATE PROCEDURE uspCMPostBankTransaction
 	,@intEntityId			INT		= NULL
 	,@isSuccessful			BIT		= 0 OUTPUT 
 	,@message_id			INT		= 0 OUTPUT 
+	,@outBatchId 			NVARCHAR(40) = NULL OUTPUT
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -105,6 +106,10 @@ DECLARE
 	-- Table Variables
 	,@RecapTable AS RecapTableType
 	,@GLEntries AS RecapTableType	
+	,@intDefaultCurrencyId INT 
+	,@intCurrencyId INT
+	,@dblExchangeRate DECIMAL(18,6)
+	,@ysnForeignTransaction AS BIT = 0 
 	-- Note: Table variables are unaffected by COMMIT or ROLLBACK TRANSACTION.	
 	
 IF @@ERROR <> 0	GOTO Post_Rollback		
@@ -112,7 +117,7 @@ IF @@ERROR <> 0	GOTO Post_Rollback
 --=====================================================================================================================================
 -- 	INITIALIZATION 
 ---------------------------------------------------------------------------------------------------------------------------------------
-
+SELECT TOP 1  @intDefaultCurrencyId= intDefaultCurrencyId FROM tblSMCompanyPreference 
 -- Read the header table and populate the variables. 
 SELECT	TOP 1 
 		@intTransactionId = intTransactionId
@@ -123,9 +128,14 @@ SELECT	TOP 1
 		,@ysnTransactionClearedFlag = ysnClr
 		,@intBankAccountId = intBankAccountId
 		,@intCreatedEntityId = intEntityId
+		,@intCurrencyId = intCurrencyId
 		,@ysnPOS = ysnPOS
+		,@dblExchangeRate = ISNULL(dblExchangeRate,1)
+		,@ysnForeignTransaction = CASE WHEN @intDefaultCurrencyId <> intCurrencyId THEN CAST(1 as bit) ELSE CAST(0 AS BIT) END
 FROM	[dbo].tblCMBankTransaction 
 WHERE	strTransactionId = @strTransactionId 
+
+
 IF @@ERROR <> 0	GOTO Post_Rollback		
 
 -- Read the user preference
@@ -284,9 +294,14 @@ END
 -- Get the batch post id. 
 IF (@strBatchId IS NULL)
 BEGIN
-	EXEC dbo.uspSMGetStartingNumber @STARTING_NUM_TRANSACTION_TYPE_Id, @strBatchId OUTPUT 
+	IF (@ysnRecap = 0)
+		EXEC dbo.uspSMGetStartingNumber @STARTING_NUM_TRANSACTION_TYPE_Id, @strBatchId OUTPUT 
+	ELSE
+		SELECT @strBatchId = NEWID()
+
+	SELECT @outBatchId = @strBatchId
 	IF @@ERROR <> 0	GOTO Post_Rollback
-END
+End
 
 IF @ysnPost = 1
 BEGIN
@@ -300,6 +315,8 @@ BEGIN
 			,[intAccountId]
 			,[dblDebit]
 			,[dblCredit]
+			,[dblDebitForeign]
+			,[dblCreditForeign]
 			,[dblDebitUnit]
 			,[dblCreditUnit]
 			,[strDescription]
@@ -324,8 +341,10 @@ BEGIN
 			,[dtmDate]				= @dtmDate
 			,[strBatchId]			= @strBatchId
 			,[intAccountId]			= BankAccnt.intGLAccountId
-			,[dblDebit]				= @dblAmountDetailTotal
+			,[dblDebit]				= CASE WHEN @ysnForeignTransaction = 0 THEN @dblAmountDetailTotal ELSE ROUND(@dblAmountDetailTotal * @dblExchangeRate,2) END  
 			,[dblCredit]			= 0
+			,[dblDebitForeign]		= CASE WHEN @ysnForeignTransaction = 0 THEN 0 ELSE @dblAmountDetailTotal END
+			,[dblCreditForeign]		= 0
 			,[dblDebitUnit]			= 0
 			,[dblCreditUnit]		= 0
 			,[strDescription]		= A.strMemo
@@ -333,7 +352,7 @@ BEGIN
 			,[strReference]			= NULL
 			,[intCurrencyId]		= A.intCurrencyId
 			,[intCurrencyExchangeRateTypeId] =  A.[intCurrencyExchangeRateTypeId]
-			,[dblExchangeRate]		= 1
+			,[dblExchangeRate]		= @dblExchangeRate
 			,[dtmDateEntered]		= GETDATE()
 			,[dtmTransactionDate]	= A.dtmDate
 			,[strJournalLineDescription] = GLAccnt.strDescription
@@ -357,8 +376,10 @@ BEGIN
 			,[dtmDate]				= @dtmDate
 			,[strBatchId]			= @strBatchId
 			,[intAccountId]			= B.intGLAccountId
-			,[dblDebit]				= B.dblDebit
-			,[dblCredit]			= B.dblCredit
+			,[dblDebit]				= CASE WHEN @ysnForeignTransaction = 0 THEN B.dblDebit ELSE  ROUND(B.dblDebit * @dblExchangeRate, 2) END
+			,[dblCredit]			= CASE WHEN @ysnForeignTransaction = 0 THEN B.dblCredit ELSE ROUND(B.dblCredit * @dblExchangeRate,2) END
+			,[dblDebitForeign]		= CASE WHEN @ysnForeignTransaction = 0 THEN 0 ELSE B.dblDebit END
+			,[dblCreditForeign]		= CASE WHEN @ysnForeignTransaction = 0 THEN 0 ELSE B.dblCredit END
 			,[dblDebitUnit]			= 0
 			,[dblCreditUnit]		= 0
 			,[strDescription]		= A.strMemo
@@ -366,7 +387,7 @@ BEGIN
 			,[strReference]			= NULL
 			,[intCurrencyId]		= A.intCurrencyId
 			,[intCurrencyExchangeRateTypeId] = A.[intCurrencyExchangeRateTypeId]
-			,[dblExchangeRate]		= 1
+			,[dblExchangeRate]		= @dblExchangeRate
 			,[dtmDateEntered]		= GETDATE()
 			,[dtmTransactionDate]	= A.dtmDate
 			,[strJournalLineDescription] = GLAccnt.strDescription
@@ -384,12 +405,12 @@ BEGIN
 	WHERE	A.strTransactionId = @strTransactionId
 	
 	IF @@ERROR <> 0	GOTO Post_Rollback
-	
-	-- Update the posted flag in the transaction table
-	UPDATE tblCMBankTransaction
-	SET		ysnPosted = 1
-			,intConcurrencyId += 1 
-	WHERE	strTransactionId = @strTransactionId
+	DECLARE @gainLoss DECIMAL (18,6)
+	SELECT @gainLoss = SUM(dblDebit - dblCredit) from #tmpGLDetail WHERE dblExchangeRate <> 1
+
+	if(@gainLoss <> 0  AND @intDefaultCurrencyId <> @intCurrencyId)
+		EXEC [uspCMInsertGainLossBankTransfer] @strDescription = 
+		'Gain / Loss on Multicurrency Bank Transaction'
 	
 END --@ysnPost = 1
 ELSE IF @ysnPost = 0
@@ -419,6 +440,8 @@ BEGIN
 				,[dtmTransactionDate]
 				,[dblDebit]
 				,[dblCredit]
+				,[dblDebitForeign]
+				,[dblCreditForeign]
 				,[dblDebitUnit]
 				,[dblCreditUnit]
 				,[dtmDate]
@@ -447,6 +470,8 @@ BEGIN
 				,[dtmTransactionDate]
 				,[dblDebit]
 				,[dblCredit]
+				,[dblDebitForeign]
+				,[dblCreditForeign]
 				,[dblDebitUnit]
 				,[dblCreditUnit]
 				,[dtmDate]
@@ -493,6 +518,8 @@ BEGIN
 			,[intAccountId]
 			,[dblDebit]
 			,[dblCredit]
+			,[dblDebitForeign]	
+			,[dblCreditForeign]
 			,[dblDebitUnit]
 			,[dblCreditUnit]
 			,[strDescription]
@@ -520,6 +547,8 @@ BEGIN
 			,[intAccountId]
 			,CASE WHEN [dblDebit] < 0 THEN 0 ELSE [dblDebit] END 
 			,CASE WHEN [dblDebit] < 0 THEN ABS([dblDebit]) ELSE [dblCredit] END 
+			,CASE WHEN [dblDebitForeign] < 0 THEN 0 ELSE [dblDebitForeign] END 
+			,CASE WHEN [dblDebitForeign] < 0 THEN ABS([dblDebitForeign]) ELSE [dblCreditForeign] END 
 			,[dblDebitUnit]
 			,[dblCreditUnit]
 			,[strDescription]
@@ -566,7 +595,7 @@ Post_Rollback:
 Recap_Rollback: 
 	SET @isSuccessful = 1
 	ROLLBACK TRANSACTION 
-	EXEC dbo.uspCMPostRecap @RecapTable
+	EXEC dbo.uspGLPostRecap  @RecapTable,@intEntityId
 	GOTO Post_Exit
 
 Audit_Log:
