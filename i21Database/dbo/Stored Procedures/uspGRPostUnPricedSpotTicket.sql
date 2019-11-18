@@ -266,7 +266,7 @@ BEGIN TRY
 								,[ysnCheckOffTax]		
 								,[ysnTaxExempt]	
 								,[ysnTaxOnly]	
-						FROM dbo.fnICGeneratePayablesTaxes(@voucherItems)
+						FROM dbo.fnICGeneratePayablesTaxes(@voucherItems,null,null)
 					END
 
 					EXEC [dbo].[uspAPCreateVoucher]
