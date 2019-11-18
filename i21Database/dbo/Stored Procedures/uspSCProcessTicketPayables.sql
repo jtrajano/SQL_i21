@@ -211,7 +211,7 @@ BEGIN
 					,[ysnCheckOffTax]		
 					,[ysnTaxExempt]	
 					,[ysnTaxOnly]
-			FROM dbo.fnICGeneratePayablesTaxes(@voucherPayable,null,null)
+			FROM dbo.fnICGeneratePayablesTaxes(@voucherPayable,@intInventoryReceiptId,null)
 			BEGIN 
 				
 				IF(@ysnAdd = 1) /* Create Voucher */
