@@ -1,6 +1,7 @@
 ﻿CREATE VIEW [dbo].[vyuICGetItemPricingLevel]
 AS
 SELECT	intItemPricingLevelId	= PricingLevel.intItemPricingLevelId
+		, intCompanyLocationPricingLevelId = col.intCompanyLocationPricingLevelId
 		,intItemId				= PricingLevel.intItemId
 		,strItemNo				= Item.strItemNo
 		,strDescription			= Item.strDescription
@@ -38,6 +39,8 @@ INNER JOIN tblICItemLocation ItemLocation
 	ON ItemLocation.intItemLocationId = PricingLevel.intItemLocationId
 INNER JOIN tblSMCompanyLocation CompanyLocation
 	ON CompanyLocation.intCompanyLocationId = ItemLocation.intLocationId
+LEFT OUTER JOIN tblSMCompanyLocationPricingLevel col ON col.intCompanyLocationId =  CompanyLocation.intCompanyLocationId
+	AND LOWER(PricingLevel.strPriceLevel) = LOWER(col.strPricingLevelName)
 LEFT JOIN tblSMCurrency Currency
 	ON Currency.intCurrencyID = PricingLevel.intCurrencyId
 LEFT JOIN (
