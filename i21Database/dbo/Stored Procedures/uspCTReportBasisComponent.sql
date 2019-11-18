@@ -149,7 +149,8 @@ AS
 					U2.strUnitMeasure AS strPriceUOM,
 					PO.strPosition,
 					CA.strDescription  AS strProductType,
-					CB.strContractBasis,
+					--CB.strContractBasis,
+					strContractBasis = CB.strFreightTerm,
 					CS.strContractStatus
 
 			FROM	tblCTContractDetail		CD
@@ -162,7 +163,8 @@ AS
 			JOIN	tblICItem				IM	ON	IM.intItemId				=	CD.intItemId
 			JOIN	tblICUnitMeasure		UM	ON	UM.intUnitMeasureId			=	CD.intUnitMeasureId
 
-	LEFT	JOIN	tblCTContractBasis		CB	ON	CB.intContractBasisId		=	CH.intContractBasisId
+	--LEFT	JOIN	tblCTContractBasis		CB	ON	CB.intContractBasisId		=	CH.intContractBasisId
+	LEFT	JOIN	tblSMFreightTerms		CB	ON	CB.intFreightTermId		=	isnull(CH.intFreightTermId,CD.intFreightTermId)
 	LEFT	JOIN	tblCTPosition			PO	ON	PO.intPositionId			=	CH.intPositionId
 	LEFT	JOIN	tblICItemUOM			WU	ON	WU.intItemUOMId				=	CD.intNetWeightUOMId		
 	LEFT	JOIN	tblICUnitMeasure		U4	ON	U4.intUnitMeasureId			=	WU.intUnitMeasureId	
@@ -174,8 +176,8 @@ AS
 	LEFT	JOIN	tblICUnitMeasure		U2	ON	U2.intUnitMeasureId			=	PU.intUnitMeasureId	
 	LEFT	JOIN	tblICCommodityAttribute	CA	ON	CA.intCommodityAttributeId	=	IM.intProductTypeId
 												AND	CA.strType					=	'ProductType'
-	WHERE	CA.strDescription = ISNULL(@strProductType,CA.strDescription)
-	AND		PO.strPosition = ISNULL(@strPosition,PO.strPosition)
+	WHERE    CA.strDescription = ISNULL(@strProductType,CA.strDescription) 
+	AND 	   PO.strPosition = ISNULL(@strPosition,PO.strPosition) 
 	)
 
 	SELECT	* 
