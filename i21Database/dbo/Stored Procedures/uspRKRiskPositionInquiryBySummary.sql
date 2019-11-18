@@ -376,7 +376,7 @@ AS
 		JOIN tblRKFutureMarket fm ON fm.intFutureMarketId = m.intFutureMarketId
 		WHERE m.intCommodityId = @intCommodityId AND fm.intFutureMarketId = @intFutureMarketId
 			AND d.dtmImportDate = (
-				SELECT TOP 1 dtmImportDate tblRKArchBlendDemand
+				SELECT TOP 1 dtmImportDate FROM tblRKArchBlendDemand
 				WHERE dtmImportDate <= @dtmToDate
 				ORDER BY dtmImportDate DESC)
 	END
