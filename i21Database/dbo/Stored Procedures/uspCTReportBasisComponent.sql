@@ -18,7 +18,9 @@ AS
 			@dtmToContractDate		DATETIME,
 			@strProductType			NVARCHAR(100),
 			@strReportLogId			NVARCHAR(50),
-			@strPosition			NVARCHAR(200)
+			@strPosition			NVARCHAR(200),
+			@EqualStartDate			DATETIME,
+			@EqualEndDate			DATETIME
 
 	IF	LTRIM(RTRIM(@xmlParam)) = ''   
 		SET @xmlParam = NULL   
@@ -113,6 +115,28 @@ AS
 	FROM	@temp_xml_table   
 	WHERE	[fieldname] = 'strReportLogId'
 
+	SELECT	@StartFromDate = [from],
+			@StartToDate = [to]
+	FROM	@temp_xml_table   
+	WHERE	[fieldname] = 'StartDate'
+			AND	condition = 'Between'
+
+	SELECT	@EndFromDate = [from],
+			@EndToDate = [to]
+	FROM	@temp_xml_table   
+	WHERE	[fieldname] = 'EndDate'
+			AND	condition = 'Between'
+
+	SELECT	@EqualStartDate = [from]
+	FROM	@temp_xml_table   
+	WHERE	[fieldname] = 'StartDate'
+			AND	condition = 'Equal To'
+
+	SELECT	@EqualEndDate = [from]
+	FROM	@temp_xml_table   
+	WHERE	[fieldname] = 'EndDate'
+			AND	condition = 'Equal To'
+
 	IF EXISTS(SELECT TOP 1 1 FROM tblSRReportLog WHERE strReportLogId = @strReportLogId)
 	BEGIN	
 		RETURN
@@ -176,8 +200,12 @@ AS
 	LEFT	JOIN	tblICUnitMeasure		U2	ON	U2.intUnitMeasureId			=	PU.intUnitMeasureId	
 	LEFT	JOIN	tblICCommodityAttribute	CA	ON	CA.intCommodityAttributeId	=	IM.intProductTypeId
 												AND	CA.strType					=	'ProductType'
-	WHERE    CA.strDescription = ISNULL(@strProductType,CA.strDescription) 
-	AND 	   PO.strPosition = ISNULL(@strPosition,PO.strPosition) 
+	WHERE CD.dtmStartDate between ISNULL(@StartFromDate,CD.dtmStartDate) and ISNULL(@StartToDate,CD.dtmStartDate)
+	AND convert(date,CD.dtmStartDate) = isnull(@EqualStartDate,convert(date,CD.dtmStartDate))
+	AND CD.dtmEndDate between ISNULL(@EndFromDate,CD.dtmEndDate) and ISNULL(@EndToDate,CD.dtmEndDate)
+	AND convert(date,CD.dtmEndDate) = ISNULL(@EqualEndDate,convert(date,CD.dtmEndDate))
+	AND CA.strDescription = ISNULL(@strProductType,CA.strDescription)
+	AND		PO.strPosition = ISNULL(@strPosition,PO.strPosition)
 	)
 
 	SELECT	* 
