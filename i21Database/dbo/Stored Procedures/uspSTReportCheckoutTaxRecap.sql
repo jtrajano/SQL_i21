@@ -19,10 +19,10 @@ BEGIN TRY
 		ON CheckTax.intCheckoutId = CH.intCheckoutId
 	INNER JOIN tblSTStore ST
 		ON CH.intStoreId = ST.intStoreId
-	INNER JOIN tblSTStoreTaxTotals STTax
+	LEFT JOIN tblSTStoreTaxTotals STTax
 		ON ST.intStoreId = STTax.intStoreId
 		AND CheckTax.strTaxNo = STTax.strTaxCodeNumber
-	INNER JOIN tblSMTaxCode SMTax
+	LEFT JOIN tblSMTaxCode SMTax
 		ON STTax.intTaxCodeId = SMTax.intTaxCodeId
 	LEFT JOIN tblGLAccount GLAccount 
 		ON CheckTax.intSalesTaxAccount = GLAccount.intAccountId
