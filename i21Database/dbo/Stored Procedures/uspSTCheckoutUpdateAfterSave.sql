@@ -12,7 +12,15 @@
 	@intCheckoutId INT,
 	@strRegisterClass NVARCHAR(30),
 	@strRegisterUsername NVARCHAR(200),
-	@strRegisterPassword NVARCHAR(200)
+	@strRegisterPassword NVARCHAR(200),
+
+	@dblATMBegBalance DECIMAL(18, 6),
+	@dblATMEndBalanceCalculated DECIMAL(18, 6),
+	@dblATMVariance DECIMAL(18, 6),
+
+	@dblChangeFundBegBalance DECIMAL(18, 6),
+	@dblChangeFundEndBalance DECIMAL(18, 6),
+	@dblChangeFundIncreaseDecrease DECIMAL(18, 6)
 AS
 BEGIN
 	BEGIN TRY
@@ -39,16 +47,22 @@ BEGIN
 		IF EXISTS(SELECT TOP 1 1 FROM tblSTCheckoutHeader WHERE intCheckoutId = @intCheckoutId)
 			BEGIN
 				UPDATE tblSTCheckoutHeader
-				SET dblTotalSales = @dblTotalSales
-				  , dblCustomerCharges = @dblCustomerCharges
-				  , dblTotalToDeposit = @dblTotalToDeposit
-				  , dblTotalTax = @dblTotalTax
-				  , dblCustomerPayments = @dblCustomerPayments
-				  , dblTotalDeposits = @dblTotalDeposits
-				  , dblTotalPaidOuts = @dblTotalPaidOuts
-				  , dblEnteredPaidOuts = @dblEnteredPaidOuts
-				  , dblCashOverShort = @dblCashOverShort
-				  , strStatus = @strStatus
+				SET dblTotalSales					= @dblTotalSales
+				  , dblCustomerCharges				= @dblCustomerCharges
+				  , dblTotalToDeposit				= @dblTotalToDeposit
+				  , dblTotalTax						= @dblTotalTax
+				  , dblCustomerPayments				= @dblCustomerPayments
+				  , dblTotalDeposits				= @dblTotalDeposits
+				  , dblTotalPaidOuts				= @dblTotalPaidOuts
+				  , dblEnteredPaidOuts				= @dblEnteredPaidOuts
+				  , dblCashOverShort				= @dblCashOverShort
+				  , strStatus						= @strStatus
+				  , dblATMBegBalance				= ISNULL(@dblATMBegBalance, 0)
+				  , dblATMEndBalanceCalculated		= ISNULL(@dblATMEndBalanceCalculated, 0)
+				  , dblATMVariance					= ISNULL(@dblATMVariance, 0)
+				  , dblChangeFundBegBalance			= ISNULL(@dblChangeFundBegBalance, 0)
+				  , dblChangeFundEndBalance			= ISNULL(@dblChangeFundEndBalance, 0)
+				  , dblChangeFundIncreaseDecrease	= ISNULL(dblChangeFundIncreaseDecrease, 0)
 				WHERE intCheckoutId = @intCheckoutId
 
 
@@ -57,7 +71,7 @@ BEGIN
 					BEGIN
 						UPDATE Register
 							SET Register.strSAPPHIREUserName = @strRegisterUsername
-							  , Register.strSAPPHIREPassword = dbo.fnAESEncryptASym(@strRegisterPassword)
+							  , Register.strSAPPHIREPassword = @strRegisterPassword
 						FROM tblSTRegister Register
 						JOIN tblSTStore Store
 							ON Register.intRegisterId = Store.intRegisterId
