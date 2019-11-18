@@ -564,7 +564,7 @@ AS
 				, dblNoOfLot = dblLotsPriced
 				, intHeaderPricingTypeId = ch.intPricingTypeId
 				, h.dblRatio
-				, dtmStartDate = ISNULL(cd.dtmM2MDate, cd.dtmStartDate)
+				, dtmStartDate = cd.dtmStartDate
 				, intPricingTypeIdHeader = ch.intPricingTypeId
 				, ysnMultiplePriceFixation
 			FROM tblCTSequenceHistory h
@@ -574,7 +574,6 @@ AS
 			JOIN tblEMEntity e ON e.intEntityId = h.intEntityId
 			WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmHistoryCreated, 110), 110) <= @dtmToDate
 				AND h.intCommodityId = ISNULL(@intCommodityId, h.intCommodityId)
-				AND CONVERT(DATETIME, CONVERT(VARCHAR(10), cd.dtmM2MDate, 110), 110) <= @dtmToDate
 		) a
 		WHERE a.intRowNum = 1 AND strPricingStatus IN ('Fully Priced') AND intContractStatusId NOT IN (2, 3, 6) AND intPricingTypeId IN (1, 2, 8)
 		
@@ -616,7 +615,7 @@ AS
 				, dblNoOfLot = dblLotsUnpriced
 				, intHeaderPricingTypeId = ch.intPricingTypeId
 				, h.dblRatio
-				, dtmStartDate = ISNULL(cd.dtmM2MDate, cd.dtmStartDate)
+				, dtmStartDate = cd.dtmStartDate
 				, intPricingTypeIdHeader = ch.intPricingTypeId
 				, ysnMultiplePriceFixation
 			FROM tblCTSequenceHistory h
@@ -626,7 +625,6 @@ AS
 			JOIN tblEMEntity e ON e.intEntityId = h.intEntityId
 			WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmHistoryCreated, 110), 110) <= @dtmToDate
 				AND h.intCommodityId = ISNULL(@intCommodityId, h.intCommodityId)
-				AND CONVERT(DATETIME, CONVERT(VARCHAR(10), cd.dtmM2MDate, 110), 110) <= @dtmToDate
 		) a
 		WHERE a.intRowNum = 1 AND intContractStatusId NOT IN (2, 3, 6) AND intPricingTypeId IN(2, 8) AND strPricingStatus IN ('Parially Priced', 'Unpriced')
 		
@@ -706,7 +704,7 @@ AS
 				, dblNoOfLot = dblLotsPriced
 				, intHeaderPricingTypeId = ch.intPricingTypeId
 				, h.dblRatio
-				, dtmStartDate = ISNULL(cd.dtmM2MDate, cd.dtmStartDate)
+				, dtmStartDate = cd.dtmStartDate
 				, intPricingTypeIdHeader = ch.intPricingTypeId
 				, ysnMultiplePriceFixation
 			FROM tblCTSequenceHistory h
@@ -716,7 +714,6 @@ AS
 			JOIN tblEMEntity e ON e.intEntityId = h.intEntityId
 			WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmHistoryCreated, 110), 110) <= @dtmToDate
 				AND h.intCommodityId = ISNULL(@intCommodityId, h.intCommodityId)
-				AND CONVERT(DATETIME, CONVERT(VARCHAR(10), cd.dtmM2MDate, 110), 110) <= @dtmToDate
 		) a
 		WHERE a.intRowNum = 1 AND intContractStatusId NOT IN (2, 3, 6) AND strPricingStatus = 'Parially Priced' AND intPricingTypeId IN (2, 8)
 	)t
