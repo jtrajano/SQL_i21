@@ -27,6 +27,7 @@ SELECT
 ,dblBudget12 = ISNULL(dblBudget12,0)
 ,dblBudget13 = ISNULL(dblBudget13,0)
 ,intAccountId
+,intBudgetCode
 FROM  tblFRBudget Budget LEFT JOIN  tblGLCOACrossReference COA ON inti21Id = Budget.intAccountId
 OUTER APPLY (
 	SELECT  strAccountType,strAccountGroup FROM vyuGLAccountDetail WHERE intAccountId = Budget.intAccountId
