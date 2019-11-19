@@ -75,24 +75,33 @@ LEFT JOIN tblSMUserRole perm_uRole
 	ON Perm.intUserRoleId = perm_uRole.intUserRoleID
 LEFT JOIN tblSTStore Store
 	ON Store.intCompanyLocationId = CASE
-										WHEN ((SELECT COUNT(1) FROM tblSMUserSecurityCompanyLocationRolePermission _perm INNER JOIN tblSTStore _st ON _perm.intCompanyLocationId = _st.intCompanyLocationId WHERE _perm.intEntityId = USec.intEntityId) = 0 AND USec.ysnStoreManager = 0)
+										WHEN ((SELECT COUNT(1) FROM tblSMUserSecurityCompanyLocationRolePermission _perm WHERE _perm.intEntityId = USec.intEntityId) = 0 AND USec.ysnStoreManager = 0)
 											-- Full Access Admin
 											THEN Store.intCompanyLocationId
-										WHEN ((SELECT COUNT(1) FROM tblSMUserSecurityCompanyLocationRolePermission _perm INNER JOIN tblSTStore _st ON _perm.intCompanyLocationId = _st.intCompanyLocationId WHERE _perm.intEntityId = USec.intEntityId) >= 2 AND USec.ysnStoreManager = 0)
+										WHEN ((SELECT COUNT(1) FROM tblSMUserSecurityCompanyLocationRolePermission _perm WHERE _perm.intEntityId = USec.intEntityId) >= 2 AND USec.ysnStoreManager = 0)
 											-- Regional Manager
 											THEN Perm.intCompanyLocationId
-										WHEN (((SELECT COUNT(1) FROM tblSMUserSecurityCompanyLocationRolePermission _perm INNER JOIN tblSTStore _st ON _perm.intCompanyLocationId = _st.intCompanyLocationId WHERE _perm.intEntityId = USec.intEntityId) = 1) AND (USec.ysnStoreManager = 1 AND USec.ysnAdmin = 0))
+										WHEN (((SELECT COUNT(1) FROM tblSMUserSecurityCompanyLocationRolePermission _perm WHERE _perm.intEntityId = USec.intEntityId) = 1) AND (USec.ysnStoreManager = 1 AND USec.ysnAdmin = 0))
 											-- Store Manager
 											THEN Perm.intCompanyLocationId
 										ELSE 
 											USec.intCompanyLocationId
 									END
-	--ON Store.intCompanyLocationId = CASE
-	--									WHEN USec.ysnAdmin = 1
-	--										THEN Store.intCompanyLocationId
-	--									WHEN USec.ysnStoreManager = 1
-	--										THEN Perm.intCompanyLocationId
-	--								END
+--http://jira.irelyserver.com/browse/ST-1580
+--LEFT JOIN tblSTStore Store
+--	ON Store.intCompanyLocationId = CASE
+--										WHEN ((SELECT COUNT(1) FROM tblSMUserSecurityCompanyLocationRolePermission _perm INNER JOIN tblSTStore _st ON _perm.intCompanyLocationId = _st.intCompanyLocationId WHERE _perm.intEntityId = USec.intEntityId) = 0 AND USec.ysnStoreManager = 0)
+--											-- Full Access Admin
+--											THEN Store.intCompanyLocationId
+--										WHEN ((SELECT COUNT(1) FROM tblSMUserSecurityCompanyLocationRolePermission _perm INNER JOIN tblSTStore _st ON _perm.intCompanyLocationId = _st.intCompanyLocationId WHERE _perm.intEntityId = USec.intEntityId) >= 2 AND USec.ysnStoreManager = 0)
+--											-- Regional Manager
+--											THEN Perm.intCompanyLocationId
+--										WHEN (((SELECT COUNT(1) FROM tblSMUserSecurityCompanyLocationRolePermission _perm INNER JOIN tblSTStore _st ON _perm.intCompanyLocationId = _st.intCompanyLocationId WHERE _perm.intEntityId = USec.intEntityId) = 1) AND (USec.ysnStoreManager = 1 AND USec.ysnAdmin = 0))
+--											-- Store Manager
+--											THEN Perm.intCompanyLocationId
+--										ELSE 
+--											USec.intCompanyLocationId
+--									END
 INNER JOIN tblSMCompanyLocation CL
 	ON Store.intCompanyLocationId = CL.intCompanyLocationId
 LEFT JOIN tblSTHandheldScanner HS
