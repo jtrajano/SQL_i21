@@ -1722,7 +1722,7 @@ BEGIN
 		,[intItemId]
 		,[strBatchId]
 		,[strPostingError])
-	--FISCAL PERIOD CLOSED
+	--FISCAL PERIOD CLOSED AR
 	SELECT
 		 [intInvoiceId]			= I.[intInvoiceId]
 		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
@@ -1732,8 +1732,27 @@ BEGIN
 		,[strBatchId]			= I.[strBatchId]
 		,[strPostingError]		= 'Unable to find an open fiscal year period for Accounts Receivable module to match the transaction date.'
 	FROM #ARPostInvoiceHeader I
-	WHERE dbo.isOpenAccountingDateByModule(dtmPostDate, 'Accounts Receivable') = 0  
-       OR dbo.isOpenAccountingDateByModule(dtmPostDate, 'Inventory') = 0
+	WHERE dbo.isOpenAccountingDateByModule(ISNULL(dtmPostDate, dtmDate), 'Accounts Receivable') = 0  
+
+	INSERT INTO #ARInvalidInvoiceData
+		([intInvoiceId]
+		,[strInvoiceNumber]
+		,[strTransactionType]
+		,[intInvoiceDetailId]
+		,[intItemId]
+		,[strBatchId]
+		,[strPostingError])
+	--FISCAL PERIOD CLOSED INVENTORY
+	SELECT
+		 [intInvoiceId]			= I.[intInvoiceId]
+		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
+		,[strTransactionType]	= I.[strTransactionType]
+		,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
+		,[intItemId]			= I.[intItemId]
+		,[strBatchId]			= I.[strBatchId]
+		,[strPostingError]		= 'Unable to find an open fiscal year period for Inventory module to match the transaction date.'
+	FROM #ARPostInvoiceHeader I
+	WHERE dbo.isOpenAccountingDateByModule(ISNULL(dtmPostDate, dtmDate), 'Inventory') = 0
 
 	--TM Sync
 	DELETE FROM @PostInvoiceDataFromIntegration
@@ -2067,29 +2086,6 @@ BEGIN
 			join #ARPostInvoiceHeader c
 				on a.intSCInvoiceId = c.intInvoiceId
 			
---   This is being handled by [uspGLValidateGLEntries]
-	--INSERT INTO #ARInvalidInvoiceData
-	--	([intInvoiceId]
-	--	,[strInvoiceNumber]
-	--	,[strTransactionType]
-	--	,[intInvoiceDetailId]
-	--	,[intItemId]
-	--	,[strBatchId]
-	--	,[strPostingError])
-	----Fiscal Year
-	--SELECT
-	--	 [intInvoiceId]			= I.[intInvoiceId]
-	--	,[strInvoiceNumber]		= I.[strInvoiceNumber]		
-	--	,[strTransactionType]	= I.[strTransactionType]
-	--	,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
-	--	,[intItemId]			= I.[intItemId]
-	--	,[strBatchId]			= I.[strBatchId]
-	--	,[strPostingError]		= 'Unable to find an open fiscal year period to match the transaction date.'
-	--FROM 					
-	--	#ARPostInvoiceHeader I	
-	--WHERE  
-	--	I.[ysnWithinAccountingDate] = 0
-
 	INSERT INTO #ARInvalidInvoiceData
 		([intInvoiceId]
 		,[strInvoiceNumber]
