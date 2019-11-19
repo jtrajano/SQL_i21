@@ -5,12 +5,12 @@ SELECT
 ,[SegmentAccount] = SUBSTRING(strCurrentExternalId,10,20)
 ,AccountType =
 	CASE
-		WHEN vyuGLAccountView.strAccountType = 'Asset' THEN 'A'
-		WHEN vyuGLAccountView.strAccountGroup = 'Cost of Goods Sold' AND vyuGLAccountView.strAccountType ='Expense' THEN 'C'
-		WHEN vyuGLAccountView.strAccountGroup = 'Sales' and vyuGLAccountView.strAccountType = 'Revenue' THEN 'I'
-		WHEN vyuGLAccountView.strAccountType = 'Expense' THEN 'E'
-		WHEN vyuGLAccountView.strAccountType = 'Liability' THEN 'L'
-		WHEN vyuGLAccountView.strAccountType = 'Equity' THEN 'Q'
+		WHEN vyu.strAccountType = 'Asset' THEN 'A'
+		WHEN vyu.strAccountGroup = 'Cost of Goods Sold' AND vyu.strAccountType ='Expense' THEN 'C'
+		WHEN vyu.strAccountGroup = 'Sales' and vyu.strAccountType = 'Revenue' THEN 'I'
+		WHEN vyu.strAccountType = 'Expense' THEN 'E'
+		WHEN vyu.strAccountType = 'Liability' THEN 'L'
+		WHEN vyu.strAccountType = 'Equity' THEN 'Q'
 	ELSE ''
 	END	
 ,dblBudget1  = ISNULL(dblBudget1,0)
@@ -30,5 +30,5 @@ SELECT
 FROM  tblFRBudget Budget LEFT JOIN  tblGLCOACrossReference COA ON inti21Id = Budget.intAccountId
 OUTER APPLY (
 	SELECT  strAccountType,strAccountGroup FROM vyuGLAccountView WHERE intAccountId = Budget.intAccountId
-) vyuGLAccountView
+) vyu
  
