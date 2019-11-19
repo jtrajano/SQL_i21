@@ -68,7 +68,7 @@ BEGIN TRY
 			WHERE bd.intBillId = @intBillId
 		)
 
-		UPDATE tblCTPriceFixationDetailAPAR SET intBillDetailId = NULL , intBillId = NULL WHERE intBillId = @intBillId
+		-- UPDATE tblCTPriceFixationDetailAPAR SET intBillDetailId = NULL , intBillId = NULL WHERE intBillId = @intBillId
 	END
 	--WILL REVERT FIRST THE APPLIED BILL 
 	UPDATE tblAPAppliedPrepaidAndDebit SET intBillDetailApplied = NULL  WHERE intBillId = @intBillId
