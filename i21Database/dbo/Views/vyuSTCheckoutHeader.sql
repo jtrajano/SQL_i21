@@ -1,6 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuSTCheckoutHeader]
 AS
-SELECT DISTINCT
+SELECT
 	  chk.[intCheckoutId]
       ,chk.[intStoreId]
       ,chk.[dtmCheckoutDate]
@@ -24,7 +24,9 @@ SELECT DISTINCT
       ,chk.[dblTotalPaidOuts]
       ,chk.[dblEnteredPaidOuts]
 
-	  ,dblTotalPaidOutsOrig = SUM(po.dblAmount) OVER()
+	  ,dblTotalPaidOutsOrig = (SELECT SUM(ISNULL(po.dblAmount, 0))
+							  FROM tblSTCheckoutPaymentOptions po
+							  WHERE po.intCheckoutId = chk.intCheckoutId)
 
       ,chk.[dblCustomerCharges]
       ,chk.[dblCustomerPayments]
@@ -94,7 +96,7 @@ SELECT DISTINCT
 
       --,chk.[dblChangeFundBegBalance]
 	  ,dblChangeFundBegBalance = (
-									ISNULL((SELECT TOP 1 _chk.dblChangeFundEndBalance
+									ISNULL((SELECT TOP 1 ISNULL(_chk.dblChangeFundEndBalance, 0)
 									FROM tblSTCheckoutHeader _chk
 									WHERE _chk.intStoreId = vst.intStoreId
 										AND _chk.intCheckoutId != chk.intCheckoutId
@@ -102,12 +104,20 @@ SELECT DISTINCT
 								)
 
       --,chk.[dblChangeFundEndBalance]
-      ,dblChangeFundEndBalance = SUM(ISNULL(cf.dblValue, 0)) OVER()
+      ,dblChangeFundEndBalance = (SELECT SUM(ISNULL(cf.dblValue, 0))
+							      FROM tblSTCheckoutChangeFund cf
+							      WHERE cf.intCheckoutId = chk.intCheckoutId)
 	  
 	  ,chk.[dblChangeFundChangeReplenishment]
       
 	  --,chk.[dblChangeFundIncreaseDecrease]
-      ,dblChangeFundIncreaseDecrease = ISNULL(SUM(ISNULL(cf.dblValue, 0)) OVER() - chk.dblChangeFundBegBalance, 0)
+      ,dblChangeFundIncreaseDecrease = ISNULL(
+										(
+							             (SELECT SUM(ISNULL(cf.dblValue, 0)) FROM tblSTCheckoutChangeFund cf WHERE cf.intCheckoutId = chk.intCheckoutId) 
+										 - 
+										 chk.dblChangeFundBegBalance
+									    )
+									,0)
 
 	  ,chk.[intCategoryId]
       ,chk.[intCommodityId]
@@ -182,8 +192,6 @@ INNER JOIN tblSTStore st
 	ON vst.intStoreId = st.intStoreId
 INNER JOIN tblSMCompanyLocation cl
 	ON st.intCompanyLocationId = cl.intCompanyLocationId
-INNER JOIN tblSTCheckoutPaymentOptions po
-	ON chk.intCheckoutId = po.intCheckoutId
 LEFT JOIN tblSMCompanyLocationSubLocation cls
 	ON chk.intCompanyLocationSubLocationId = cls.intCompanyLocationSubLocationId
 LEFT JOIN tblICStorageLocation sl
@@ -192,8 +200,6 @@ LEFT JOIN tblICCategory cat
 	ON chk.intCategoryId = cat.intCategoryId
 LEFT JOIN tblICCommodity comm
 	ON chk.intCommodityId = comm.intCommodityId
-LEFT JOIN tblSTCheckoutChangeFund cf
-	ON chk.intCheckoutId = cf.intCheckoutId
 LEFT JOIN tblARInvoice Inv
 	ON chk.intInvoiceId = Inv.intInvoiceId
 GROUP BY 
@@ -248,7 +254,6 @@ GROUP BY
       ,chk.[strCountNo]
       ,chk.[intStorageLocationId]
       ,chk.[intCompanyLocationSubLocationId]
-      --,chk.[intEntityId]
       ,chk.[strDescription]
       ,chk.[ysnIncludeZeroOnHand]
       ,chk.[ysnIncludeOnHand]
@@ -274,7 +279,6 @@ GROUP BY
       ,chk.[intReceivePaymentsIntegrationLogId]
       ,chk.[intCheckoutCurrentProcess]
       ,chk.[intConcurrencyId]
-	  ,po.[dblAmount]
 	  ,Inv.[ysnPosted]
 	  ,vst.[intStoreId]
 	  ,vst.[intEntityId]
@@ -284,11 +288,11 @@ GROUP BY
 	  ,st.[strReportDepartmentAtGrossOrNet]
 	  ,st.[strAllowRegisterMarkUpDown]
 	  ,st.[intCompanyLocationId]
-	  ,cf.[dblValue]
 	  ,cl.[strLocationName]	  
 	  ,cls.[strSubLocationName]
 	  ,sl.[strName]
 	  ,cat.[strCategoryCode]
 	  ,comm.[strCommodityCode]
 	  ,Inv.[intInvoiceId]
+	  ,chk.intEntityId
 
