@@ -1,6 +1,20 @@
-﻿CREATE PROCEDURE [dbo].[uspAPDeleteVoucher]
+﻿/**
+	@callerModule
+	0 = AP
+	1 = Grain
+	2 = Scale
+	3 = Inventory
+	4 = Contract
+	5 = Patronage
+	6 = Sales
+	7 = LG
+	8 = Payroll
+	9 = Credit Card
+*/
+CREATE PROCEDURE [dbo].[uspAPDeleteVoucher]
 	 @intBillId	INT   
 	,@UserId	INT
+	,@callerModule INT = 0
 AS
 
 BEGIN
@@ -31,28 +45,35 @@ BEGIN TRY
 	IF(EXISTS(SELECT NULL FROM dbo.tblAPBill WHERE intBillId = @intBillId AND ISNULL(ysnPosted,0) = 1))
 		RAISERROR('The transaction is already posted.',16,1)			
 
-	--WILL REVERT ONCE SCALE WITH CONTRACT FIXATION IS RELATED
-	UPDATE tblCTPriceFixationDetail SET intBillDetailId = NULL , intBillId = NULL WHERE intBillId = @intBillId
+	IF EXISTS(SELECT 1 FROM tblCTPriceFixationDetailAPAR WHERE intBillId = @intBillId)
+	BEGIN
+		--Do not allow to delete if details have associated storage and contract
+		IF @callerModule = 0 --AP
+		BEGIN
+			RAISERROR('Unable to delete. Please use pricing screen to delete the voucher.', 16, 1);
+			RETURN;	
+		END
+		--WILL REVERT ONCE SCALE WITH CONTRACT FIXATION IS RELATED
+		UPDATE tblCTPriceFixationDetail SET intBillDetailId = NULL , intBillId = NULL WHERE intBillId = @intBillId
 
-	DELETE FROM tblCTPriceFixationTicket
-	WHERE intPriceFixationTicketId IN 
-	(
-		SELECT pft.intPriceFixationTicketId 
-		FROM tblCTPriceFixationTicket pft 
-		INNER JOIN vyuCTPriceFixationTicket ft ON pft.intInventoryReceiptId = ft.intInventoryReceiptId 
-			AND pft.intPricingId = ft.intPricingId
-		INNER JOIN tblAPBillDetail bd ON ft.intDetailId = bd.intBillDetailId 
-			AND ft.intInventoryShipmentId IS NULL 
-		WHERE bd.intBillId = @intBillId
-	)
+		DELETE FROM tblCTPriceFixationTicket
+		WHERE intPriceFixationTicketId IN 
+		(
+			SELECT pft.intPriceFixationTicketId 
+			FROM tblCTPriceFixationTicket pft 
+			INNER JOIN vyuCTPriceFixationTicket ft ON pft.intInventoryReceiptId = ft.intInventoryReceiptId 
+				AND pft.intPricingId = ft.intPricingId
+			INNER JOIN tblAPBillDetail bd ON ft.intDetailId = bd.intBillDetailId 
+				AND ft.intInventoryShipmentId IS NULL 
+			WHERE bd.intBillId = @intBillId
+		)
 
-	UPDATE tblCTPriceFixationDetailAPAR SET intBillDetailId = NULL , intBillId = NULL WHERE intBillId = @intBillId
-
+		UPDATE tblCTPriceFixationDetailAPAR SET intBillDetailId = NULL , intBillId = NULL WHERE intBillId = @intBillId
+	END
 	--WILL REVERT FIRST THE APPLIED BILL 
 	UPDATE tblAPAppliedPrepaidAndDebit SET intBillDetailApplied = NULL  WHERE intBillId = @intBillId
-
 	UPDATE tblGRSettleStorage SET intBillId = NULL WHERE intBillId = @intBillId
-	
+
 	--clear original transaction if this is a reversal
 	UPDATE A
 		SET A.intTransactionReversed = NULL
