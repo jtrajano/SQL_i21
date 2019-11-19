@@ -29,6 +29,7 @@ SELECT
 	, '' AS 'intItemId'
 	, '' AS 'dblGross'
 	, '' AS 'dblNet'
+	, '' AS 'dblCharges'
 	, '' AS 'dblQtyToReceive'
 	, '' AS 'strUnitMeasure'
 	, '' AS 'strQtyReceived'
@@ -46,6 +47,7 @@ SELECT
 	, '' AS 'strItemType'
 	, '' AS 'strLotTracking'
 	, '' AS 'dblLineTotal'
+	, '' AS 'dblGrandTotal'
 	, '' AS 'strBillOfLading'
 	, '' AS 'strFreightTerm'
 	, '' AS 'strFobPoint'
@@ -109,6 +111,7 @@ SELECT
 	, i.intItemId
 	, dblGross = ri.dblGrossWgt
 	, dblNet = ri.dblNetWgt
+	, dblCharges = r.dblTotalCharges
 	, ri.dblQtyToReceive
 	, strUnitMeasure = ri.strUnitMeasure
 	, strQtyReceived = dbo.fnICFormatNumber(ri.dblQtyToReceive) + ' ' + ri.strUnitMeasure
@@ -118,14 +121,15 @@ SELECT
 	, ri.dblUnitCost
 	, strCostUOM = ri.strCostUOM
 	, strCost = dbo.fnICFormatNumber(ri.dblUnitCost) + ' ' + ri.strCostUOM
-	, strTax = dbo.fnICFormatNumber(ri.dblTax)
-	, dblTax = ri.dblTax
+	, strTax = dbo.fnICFormatNumber(r.dblTotalTax)
+	, dblTax = r.dblTotalTax
 	, strCurrency = c.strCurrency
 	, strStorageLocation = sl.strSubLocationName
 	, strStorageUnit = su.strName
 	, strItemType = i.strType
 	, i.strLotTracking
-	, ri.dblLineTotal
+	, dblLineTotal = ri.dblLineTotal
+	, dblGrandTotal = r.dblGrandTotal
 	, r.strBillOfLading
 	, strFreightTerm = fr.strFreightTerm
 	, strFobPoint = fr.strFobPoint
