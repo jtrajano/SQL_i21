@@ -14,6 +14,7 @@ SELECT intRecipeId				= RECIPE.intRecipeId
 	 , dblAvailableQuantity		= I.dblAvailable	 
 	 , dblPrice					= I.dblStandardCost
 	 , dblNewPrice				= I.dblStandardCost
+	 , dblMaintenanceAmount		= CASE WHEN I.strType = 'Software' AND I.strMaintenanceCalculationMethod = 'Percentage' THEN I.dblStandardCost * (ISNULL(I.dblMaintenanceRate, 0) / 100) ELSE I.dblMaintenanceRate END
 	 , strItemType				= I.strType
 	 , strType					= 'Finished Good' COLLATE Latin1_General_CI_AS
 	 , ysnAllowNegativeStock	= CASE WHEN I.intAllowNegativeInventory = 1 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END	 
@@ -72,6 +73,7 @@ SELECT intRecipeId				= NULL
 	 , dblAvailableQuantity		= I.dblAvailable
 	 , dblPrice					= dbo.fnICConvertUOMtoStockUnit(BUNDLE.intBundleItemId, BUNDLE.intItemUnitMeasureId, 1) * I.dblSalePrice
 	 , dblNewPrice				= dbo.fnICConvertUOMtoStockUnit(BUNDLE.intBundleItemId, BUNDLE.intItemUnitMeasureId, 1) * I.dblSalePrice
+	 , dblMaintenanceAmount		= CAST(0 AS NUMERIC(18, 6))
 	 , strItemType				= 'Inventory'
 	 , strType					= 'Bundle'
 	 , ysnAllowNegativeStock	= CONVERT(BIT, 0)
@@ -138,6 +140,7 @@ SELECT intRecipeId				= NULL
 	 , dblAvailableQuantity		= I.dblAvailable
 	 , dblPrice					= I.dblSalePrice
 	 , dblNewPrice				= I.dblSalePrice
+	 , dblMaintenanceAmount		= CAST(0 AS NUMERIC(18, 6))
 	 , strItemType				= 'Inventory'
 	 , strType					= 'Bundle'
 	 , ysnAllowNegativeStock	= CONVERT(BIT, 0)
