@@ -1474,7 +1474,7 @@ BEGIN
 								 ELSE 
 									NULL
 							END 
-				,[dblAmount]				= RawData.dblAmount
+				,[dblAmount]				= ROUND(RawData.dblAmount, 2) 
 				,[strAllocateCostBy]		= RawData.strAllocateCostBy
 				,[ysnAccrue]				= RawData.ysnAccrue
 				,[ysnPrice]					= RawData.ysnPrice
