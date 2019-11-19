@@ -85,9 +85,9 @@ FROM(
 	from tblCTSequenceHistory sh
 	inner join tblCTContractDetail cd on cd.intContractDetailId = sh.intContractDetailId
 	inner join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
-	inner join tblCTPricingType pt on pt.intPricingTypeId = cd.intPricingTypeId
+	inner join tblCTPricingType pt on pt.intPricingTypeId = sh.intPricingTypeId
 	inner join tblICCommodityUnitMeasure cum on cum.intCommodityId = ch.intCommodityId and cum.ysnDefault = 1
-	where intSequenceUsageHistoryId is null and strPricingStatus <> 'Partially Priced'
+	where intSequenceUsageHistoryId is null and strPricingStatus not in ( 'Partially Priced', 'Fully Priced')
 
 	
 	union all
@@ -96,18 +96,19 @@ FROM(
 		, dtmTransactionDate = dbo.fnRemoveTimeOnDate(dtmScreenDate)
 		, sh.intContractHeaderId
 		, sh.intContractDetailId
-		, dblQty = dbo.fnCTConvertQtyToTargetCommodityUOM(ch.intCommodityId,dbo.fnCTGetCommodityUnitMeasure(ch.intCommodityUOMId),cum.intUnitMeasureId,case when isnull(cd.intNoOfLoad,0) = 0 then sh.dblTransactionQuantity 
-						else sh.dblTransactionQuantity * cd.dblQuantityPerLoad
+		, dblQty = dbo.fnCTConvertQtyToTargetCommodityUOM(ch.intCommodityId,dbo.fnCTGetCommodityUnitMeasure(ch.intCommodityUOMId),cum.intUnitMeasureId,case when isnull(cd.intNoOfLoad,0) = 0 then suh.dblTransactionQuantity 
+						else suh.dblTransactionQuantity * cd.dblQuantityPerLoad
 					end)
 		, pt.strPricingType
 		, strTransactionType = strScreenName
-		, intTransactionId = sh.intExternalHeaderId
-		, strTransactionId = sh.strNumber
+		, intTransactionId = suh.intExternalHeaderId
+		, strTransactionId = suh.strNumber
 		, intOrderBy = 2
-	from vyuCTSequenceUsageHistory sh
+	from vyuCTSequenceUsageHistory suh
+	inner join tblCTSequenceHistory sh on sh.intSequenceUsageHistoryId = suh.intSequenceUsageHistoryId
 	inner join tblCTContractDetail cd on cd.intContractDetailId = sh.intContractDetailId
 	inner join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
-	inner join tblCTPricingType pt on pt.intPricingTypeId = cd.intPricingTypeId
+	inner join tblCTPricingType pt on pt.intPricingTypeId = sh.intPricingTypeId
 	inner join tblICCommodityUnitMeasure cum on cum.intCommodityId = ch.intCommodityId and cum.ysnDefault = 1
 	where strFieldName = 'Balance'
 
@@ -128,6 +129,7 @@ FROM(
 	JOIN tblCTContractDetail		 cd ON cd.intContractDetailId = pf.intContractDetailId
 	inner join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
 	inner join tblICCommodityUnitMeasure cum on cum.intCommodityId = ch.intCommodityId and cum.ysnDefault = 1
+	WHERE (fd.dblQuantity - fd.dblQuantityAppliedAndPriced) <> 0
 
 	union all
 	SELECT	
@@ -146,6 +148,7 @@ FROM(
 	JOIN tblCTContractDetail		 cd ON cd.intContractDetailId = pf.intContractDetailId
 	inner join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
 	inner join tblICCommodityUnitMeasure cum on cum.intCommodityId = ch.intCommodityId and cum.ysnDefault = 1
+	WHERE (fd.dblQuantity - fd.dblQuantityAppliedAndPriced) <> 0
 
 
 
