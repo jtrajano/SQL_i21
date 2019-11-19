@@ -129,7 +129,7 @@ BEGIN
 	ELSE IF @strScreenName = 'Transfer Storage'
 	BEGIN
 		SELECT	@intExternalHeaderId	=	HR.intCustomerStorageId,
-				@strNumber				=	TS.strStorageTicketNumber,
+				@strNumber				=	TS.strTransferStorageTicket,
 				@strHeaderIdColumn		=	'intCustomerStorageId'
 
 		FROM	tblGRCustomerStorage	HR
