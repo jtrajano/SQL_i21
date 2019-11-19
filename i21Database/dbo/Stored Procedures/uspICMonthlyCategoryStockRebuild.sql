@@ -82,21 +82,23 @@ BEGIN TRY
 		END 
 	END 
 
-	-- Exit immediately if the start date is blank. 
-	IF @dtmStartDate IS NULL 
-		RETURN; 
-
-	BEGIN TRANSACTION 
-
-	PRINT 'Rebuilding ' + @strCategoryCode
-	PRINT @dtmStartDate
-
 	-- Get the entity id for irely admin 
 	DECLARE @intUserId AS INT
 	SELECT  TOP 1 
 			@intUserId = intEntityId
 	FROM	tblSMUserSecurity
 	WHERE	strUserName = 'irelyadmin'
+
+	-- Exit immediately if the start date is blank. 
+	IF @dtmStartDate IS NULL 
+	BEGIN 
+		INSERT INTO tblICBackup(dtmDate, intUserId, strOperation, strRemarks, ysnRebuilding, dtmStart, strItemNo, strCategoryCode)
+		SELECT dbo.fnRemoveTimeOnDate(GETDATE()), @intUserId, 'Rebuild Inventory', 'Stock is up to date.', 0, GETDATE(), GETDATE(), @strCategoryCode
+
+		RETURN; 
+	END 
+
+	BEGIN TRANSACTION 
 
 	-- Get all the item locations that allows negative stock. 
 	SELECT	il.intItemLocationId
