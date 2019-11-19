@@ -8199,6 +8199,7 @@
     <Build Include="dbo\Views\vyuIPGetItemBundle.sql" />
     <Build Include="dbo\Views\vyuIPGetItemAssembly.sql" />
     <Build Include="dbo\Views\vyuIPGetItemAccount.sql" />
+    <Build Include="dbo\Tables\tblAPBalanceDifference.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
