@@ -8086,6 +8086,7 @@
     <Build Include="dbo\Stored Procedures\uspICUpdateReceiptCharge.sql" />
     <Build Include="dbo\Stored Procedures\uspICAddProRatedReceiptChargesToVoucher.sql" />
     <Build Include="dbo\Views\vyuSTCheckoutHeader.sql" />
+    <Build Include="dbo\Tables\tblAPBalanceDifference.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
