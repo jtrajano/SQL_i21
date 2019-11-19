@@ -376,10 +376,10 @@ BEGIN
 			,[dtmDate]				= @dtmDate
 			,[strBatchId]			= @strBatchId
 			,[intAccountId]			= B.intGLAccountId
-			,[dblDebit]				= CASE WHEN @ysnForeignTransaction = 0 THEN B.dblDebit ELSE  ROUND(B.dblDebit * @dblExchangeRate, 2) END
-			,[dblCredit]			= CASE WHEN @ysnForeignTransaction = 0 THEN B.dblCredit ELSE ROUND(B.dblCredit * @dblExchangeRate,2) END
-			,[dblDebitForeign]		= CASE WHEN @ysnForeignTransaction = 0 THEN 0 ELSE B.dblDebit END
-			,[dblCreditForeign]		= CASE WHEN @ysnForeignTransaction = 0 THEN 0 ELSE B.dblCredit END
+			,[dblDebit]				= 0
+			,[dblCredit]			= ROUND((ISNULL(B.dblCredit, 0) - ISNULL(B.dblDebit, 0)) * CASE WHEN @ysnForeignTransaction = 0 THEN 1 ELSE @dblExchangeRate END ,2) 
+			,[dblDebitForeign]		= 0
+			,[dblCreditForeign]		= CASE WHEN @ysnForeignTransaction = 0 THEN 0 ELSE ISNULL(B.dblCredit, 0) - ISNULL(B.dblDebit, 0)  END
 			,[dblDebitUnit]			= 0
 			,[dblCreditUnit]		= 0
 			,[strDescription]		= A.strMemo
