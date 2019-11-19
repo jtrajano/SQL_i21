@@ -398,18 +398,9 @@ BEGIN TRY
 			
 
 			----- DEBUG POINT -----
-			if @debug_awesome_ness = 1 AND 1 = 0
+			if @debug_awesome_ness = 1 AND 1 = 1
 			begin
-				select 'settle contract ', * from @SettleContract a
-
-				select * FROM tblGRSettleContract SSC
-				JOIN vyuGRGetContracts CD 
-					ON CD.intContractDetailId = SSC.intContractDetailId				
-				left join vyuCTAvailableQuantityForVoucher b
-					on b.intContractDetailId = SSC.intContractDetailId
-				WHERE intSettleStorageId = @intSettleStorageId 
-					AND SSC.dblUnits > 0 
-						and (@ysnFromPriceBasisContract = 0 or SSC.dblUnits > b.dblVoucherQtyReceived)
+				select 'settle contract ', * from @SettleContract a				
 			end
 			----- DEBUG POINT -----
 
@@ -471,7 +462,8 @@ BEGIN TRY
 					dd numeric(18, 6),
 					ysnApplied bit null,
 					id int identity(1,1),
-					intBillDetailId int null
+					intBillDetailId int null,
+					dblContractUnitGuard DECIMAL(24, 10)
 
 				)
 				
@@ -494,31 +486,101 @@ BEGIN TRY
 				from (select distinct intContractDetailId, ContractEntityId, dblContractUnits from @SettleContract) a
 					join vyuCTAvailableQuantityForVoucher b
 						on b.intContractDetailId = a.intContractDetailId 
+					outer apply (
+						(select sum(dblQtyReceived) as dblTotal
+							from tblAPBillDetail 
+								where intBillId in 
+									(select intBillId from tblAPBill where strVendorOrderNumber = (select strStorageTicket from tblGRSettleStorage where intSettleStorageId = @intSettleStorageId)) 
+								and intContractDetailId = a.intContractDetailId )
+					) total_bill
+					where a.dblContractUnits > isnull(total_bill.dblTotal, 0)
 
-				----- DEBUG POINT -----
-				if @debug_awesome_ness = 1 AND 1 = 0
-				begin				
-					select 'avqty freshly added',* from @avqty					
-					select @dblSelectedUnits as [ selected units ], @dblTotalVoucheredQuantity as [ total vouchered quantity]
-				end
-				----- DEBUG POINT -----
 
 				declare @acd DECIMAL(24,10)
 				set @acd = @dblSelectedUnits - isnull(@dblTotalVoucheredQuantity, 0)
-				update @avqty set bb = @acd - dblAvailableQuantity, cc = @acd, @acd = (@acd - dblAvailableQuantity)
+				----- DEBUG POINT -----
+				if @debug_awesome_ness = 1 AND 1 = 0
+				begin				
+					select 'avqty freshly added',* from @avqty										
+				end
 
-				update @avqty set dd = dblAvailableQuantity + cc where cc < 0
-				update @avqty set dd = case when cc >= 0 
-						then dblAvailableQuantity 
-					when dblAvailableQuantity + cc >= 0 
-						then dblAvailableQuantity + cc 
-					else null end
-				update @avqty set dblAvailableQuantity = dd
-				delete from @avqty where dblAvailableQuantity is null
+
+				declare @cur_contract_id int				
+				declare @cur_contract_max_units DECIMAL(24,10)
+				begin
+					select top 1  @cur_contract_id =  intContractDetailId, @cur_contract_max_units = dblContractUnits from @SettleContract order by intContractDetailId asc
+
+				
+				
+
+					while @cur_contract_id is not null
+					begin
+						
+						 select @cur_contract_max_units = dblContractUnits from @SettleContract where intContractDetailId = @cur_contract_id
+
+						if @debug_awesome_ness = 1 AND 1 = 1
+						begin	
+							select @cur_contract_max_units as [max units], @cur_contract_id as [current contract detail]
+						end
+
+						update @avqty 
+							set dblContractUnitGuard = @cur_contract_max_units, @cur_contract_max_units = @cur_contract_max_units - dblAvailableQuantity
+						where intContractDetailId = @cur_contract_id
+
+
+						
+						select @cur_contract_id =  Min(intContractDetailId) from @SettleContract where intContractDetailId > @cur_contract_id
+						 
+					end					
+
+				end
+
+				
+				----- DEBUG POINT -----
+				if @debug_awesome_ness = 1 AND 1 = 0
+				begin				 
+					select 'avqty freshly added VERSION 2',* from @avqty					
+					select @dblSelectedUnits as [ selected units ], @dblTotalVoucheredQuantity as [ total vouchered quantity], @acd as [quantity reference ]
+					SELECT 'checking contract status', *  FROM tblGRSettleContract WHERE intSettleStorageId = @intSettleStorageId
+					
+				end
+				----- DEBUG POINT -----
+				delete from @avqty where not ( dblAvailableQuantity > abs(dblContractUnitGuard) or dblContractUnitGuard >= 0 )
+				update @avqty set dblAvailableQuantity = case when dblContractUnitGuard >= 0 then dblAvailableQuantity else dblAvailableQuantity + dblContractUnitGuard end
+
+				--update @avqty set bb = @acd - dblAvailableQuantity, cc = @acd, @acd = (@acd - dblAvailableQuantity)
+								
+
+				----- DEBUG POINT -----
+				if @debug_awesome_ness = 1 AND 1 = 1
+				begin				
+					select 'avqty after first update ',* from @avqty
+				end
+				----- DEBUG POINT -----
+
+				--delete from @avqty where cc > dblAvailableQuantity
+				update @avqty set dd = dblAvailableQuantity + cc where cc < 0		
+
+				--update @avqty set dd = 				
+				--	case 
+				--	when cc >= 0 
+				--		then dblAvailableQuantity 
+				--	when dblAvailableQuantity + cc >= 0 
+				--		then dblAvailableQuantity + cc 
+				--	else null end
+
+
+
+				
+				--update @avqty set dblAvailableQuantity = dd
+				--update @avqty set dblAvailableQuantity = dblAvailableQuantity - case when (abs(dblContractUnitGuard))
+
+
+				--delete from @avqty where dblAvailableQuantity is null
 
 			end
 
-			if @debug_awesome_ness = 1
+			if @debug_awesome_ness = 1 and 1 = 1
 			begin				
 				select 'avqty ',* from @avqty
 			end
@@ -1153,7 +1215,7 @@ BEGIN TRY
 
 			
 			----- DEBUG POINT -----
-			if @debug_awesome_ness = 1  AND 1 = 0
+			if @debug_awesome_ness = 1  AND 1 = 1
 			begin
 				select 'settle voucher create before updating ', * from @SettleVoucherCreate 
 			end
@@ -1288,7 +1350,7 @@ BEGIN TRY
 					end
 					
 					----- DEBUG POINT -----
-					if @debug_awesome_ness = 1 and 1 = 1
+					if @debug_awesome_ness = 1 and 1 = 0
 					begin
 						select ' information about the discrepancy ',@aa, @ab, ( @aa - @ab ), @additionalDiscrepancy
 						
@@ -1472,7 +1534,7 @@ BEGIN TRY
 					select ' contract depletion',* from @tblDepletion
 
 				end 
-				IF @debug_awesome_ness = 1 and 1 = 1
+				IF @debug_awesome_ness = 1 and 1 = 0
 				begin
 					select 'items to post',* from @ItemsToPost
 
@@ -1812,29 +1874,27 @@ BEGIN TRY
 				update a 
 					set dblCashPrice = availableQtyForVoucher.dblCashPrice
 				FROM @SettleVoucherCreate a
-					LEFT JOIN 
-					(
-						SELECT 
-							intCustomerStorageId
-							,SUM(dblUnits) dblSettleUnits 
-						FROM @SettleVoucherCreate 
-						WHERE intItemType = 1 
-							AND (intPricingTypeId = 1 OR intPricingTypeId IS NULL)
-						GROUP BY intCustomerStorageId
-					)b ON b.intCustomerStorageId = a.intCustomerStorageId
-					INNER JOIN tblGRCustomerStorage CS
-						ON CS.intCustomerStorageId = a.intCustomerStorageId
 					outer apply(
 						select  
-							intContractDetailId,	intPriceFixationDetailId, dblCashPrice, dblAvailableQuantity						
+							 intContractDetailId,	intPriceFixationDetailId, dblCashPrice, dblAvailableQuantity						
 							from @avqty 
 						where intContractDetailId = a.intContractDetailId
 					) availableQtyForVoucher
-					WHERE a.strOrderType = 'Contract' and availableQtyForVoucher.intContractDetailId is not null and availableQtyForVoucher.intPriceFixationDetailId is not null
+					WHERE availableQtyForVoucher.intContractDetailId is not null and availableQtyForVoucher.intPriceFixationDetailId is not null
 				
 				----- DEBUG POINT -----
-				if @debug_awesome_ness = 1 and 1 = 0
+				if @debug_awesome_ness = 1 and 1 = 1
 				begin
+					select 'checking the update of cash price'
+					select * 
+						FROM @SettleVoucherCreate a														
+							outer apply(
+								select  
+									 intContractDetailId,	intPriceFixationDetailId, dblCashPrice, dblAvailableQuantity						
+									from @avqty 
+								where intContractDetailId = a.intContractDetailId
+							) availableQtyForVoucher
+							WHERE availableQtyForVoucher.intContractDetailId is not null and availableQtyForVoucher.intPriceFixationDetailId is not null
 					select 'before updating price contract ', @dblCashPriceFromCt, @dblQtyFromCt, @doPartialHistory
 				end
 				----- DEBUG POINT -----
@@ -2669,7 +2729,7 @@ BEGIN TRY
 						declare @cur_qty as numeric(18,6)
 
 						----- DEBUG POINT -----
-						if @debug_awesome_ness = 1 and 1 = 1
+						if @debug_awesome_ness = 1 and 1 = 0
 						begin
 							select 'avq qty check'
 							select * from @avqty
@@ -2694,7 +2754,8 @@ BEGIN TRY
 							
 							if exists(select top 1 1 from tblCTContractDetail where intContractDetailId = @cur_cid and intPricingTypeId  in( 1 , 2) )
 							begin
-								if @debug_awesome_ness = 1 
+								----- DEBUG POINT -----
+								if @debug_awesome_ness = 1 and 1 = 0								
 								begin
 									select @createdVouchersId  as [created voucher id], @cur_id as [current id from avq], @cur_qty as [current qty]
 									select top 1 * from tblAPBillDetail 
@@ -2703,7 +2764,9 @@ BEGIN TRY
 										intContractDetailId = @cur_cid and 
 										dblQtyReceived = @cur_qty and 
 										intBillDetailId not in ( select id from @used_bill_id)
-								end
+								end								
+								----- DEBUG POINT -----
+
 
 								select top 1 @cur_bid = intBillDetailId from tblAPBillDetail 
 									where 
@@ -2911,7 +2974,7 @@ BEGIN TRY
 						insert into tblCTPriceFixationDetailAPAR(intPriceFixationDetailId, intBillId, intBillDetailId, intConcurrencyId)
 						select intPriceFixationDetailId, @intVoucherId, intBillDetailId, 1  from @avqty where intBillDetailId is not null
 						----- DEBUG POINT -----
-						if @debug_awesome_ness = 1 and 1 = 1
+						if @debug_awesome_ness = 1 and 1 = 0
 						begin
 							select 'available qty', * from @avqty
 							select top 5 'contract fixation detail ap ar', * from tblCTPriceFixationDetailAPAR order by intPriceFixationDetailAPARId desc
@@ -2924,8 +2987,15 @@ BEGIN TRY
 			END
 
 			END
-
-			-------------------------xxxxxxxxxxxxxxxxxx------------------------------
+	
+			----- DEBUG POINT -----
+			IF @debug_awesome_ness = 1 and 1 = 1
+			begin
+				select 'Contract Depletion Area'
+				select * from @tblDepletion
+			end
+			----- DEBUG POINT -----
+						-------------------------xxxxxxxxxxxxxxxxxx------------------------------
 			---6.DP Contract Depletion, Purchase Contract Depletion,Storage Ticket Depletion
 			IF(@ysnFromPriceBasisContract = 0)	
 			BEGIN
