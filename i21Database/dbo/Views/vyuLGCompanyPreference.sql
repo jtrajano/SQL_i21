@@ -63,6 +63,7 @@ SELECT CP.intCompanyPreferenceId
 	,CP.strShippingInstructionText
 	,CP.strInvoiceText
 	,CP.strBOLText
+	,CP.strReleaseOrderText
 	,CP.dblRouteHours
 	,CP.intShippingMode
 	,SM.strShippingMode
