@@ -86,9 +86,9 @@ BEGIN
 			,@intLifeTime INT
 			,@strLifeTimeType NVARCHAR(50)
 			,@dtmExpiryDate DATETIME
-			,@strRawMaterial NVARCHAR(100)
-			,@strPackingMaterial NVARCHAR(100)
-			,@strPackingMaterial1 NVARCHAR(100)
+			,@strRawMaterial NVARCHAR(MAX)
+			,@strPackingMaterial NVARCHAR(MAX)
+			,@strPackingMaterial1 NVARCHAR(MAX)
 			
 			,@strPalletId1 NVARCHAR(MAX)
 			,@intTaskId INT
