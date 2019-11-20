@@ -304,7 +304,7 @@ BEGIN
 		, strDistributionOption 
 		, strOwnership
 	FROM #invQty Inv
-	WHERE Inv.strTransactionType <> 'Storage Settlement'
+	WHERE Inv.strTransactionType NOT IN ( 'Storage Settlement', 'Transfer Storage')
 			
 	UNION ALL SELECT CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110)
 		, dblTotal
@@ -316,6 +316,18 @@ BEGIN
 	FROM #invQty Inv
 	LEFT JOIN tblGRSettleContract SC ON SC.intSettleStorageId = Inv.intTransactionId
 	WHERE Inv.strTransactionType = 'Storage Settlement'
+
+	UNION ALL
+	SELECT 
+		CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110)
+		,dblTotal
+		,strTransactionType
+		,strTransactionId 
+		,intTransactionId
+		,strStorageTypeCode = CASE WHEN dblTotal < 0 THEN SS.strFromStorageTypeDescription ELSE SS.strToStorageTypeDescription END
+	FROM #invQty Inv
+	inner join vyuGRTransferStorageSearchView SS ON Inv.intTransactionId = SS.intTransferStorageId
+	WHERE Inv.strTransactionType = 'Transfer Storage'
 	
 	INSERT INTO @tblResult (dtmDate
 		, dblTotal
