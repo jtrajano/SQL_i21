@@ -17,5 +17,6 @@
 	 [dblTerminalHandlingCharges] NUMERIC(18, 6),
 	 [dblDestinationDeliveryCharges] NUMERIC(18, 6),
 	 [dblTotalCostPerContainer] NUMERIC(18, 6),
+	 [intFreightRateMatrixRefId] INT NULL,
 	 [intConcurrencyId] INT NOT NULL DEFAULT 0
 	)
