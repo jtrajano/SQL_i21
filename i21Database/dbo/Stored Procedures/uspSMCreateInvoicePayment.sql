@@ -32,6 +32,7 @@ BEGIN
 		  , @intCompanyLocationId	INT = NULL
 		  , @intBankAccountId		INT = NULL
 		  , @strLocationName		NVARCHAR(100) = NULL
+	      , @dblTotalPayment		NUMERIC(18, 6) = 0
 
 	--GET DEFAULT VALUES
 	SELECT TOP 1 @intCompanyLocationId	= CL.intCompanyLocationId
@@ -95,7 +96,7 @@ BEGIN
 			INTO #RAWVALUE  
 			FROM dbo.fnARGetRowsFromDelimitedValues(@strInvoiceAndPayment)
 
-			SELECT strInvoiceNumber	= INVOICENUM.POS
+			SELECT strInvoiceNumber	= INVOICENUM.POS COLLATE Latin1_General_CI_AS
 				, dblPayment		= CONVERT(NUMERIC(18,6), SUBSTRING(strRawValue, PAYMENT.POS + 1, DISCOUNT.POS - PAYMENT.POS - 1))
 				, dblDiscount		= CONVERT(NUMERIC(18,6), SUBSTRING(strRawValue, DISCOUNT.POS + 1, INTEREST.POS - DISCOUNT.POS -1))
 				, dblInterest		= CONVERT(NUMERIC(18,6), SUBSTRING(strRawValue, INTEREST.POS + 1, 100))
@@ -106,6 +107,9 @@ BEGIN
 			CROSS APPLY (SELECT (CHARINDEX('|', strRawValue, PAYMENT.POS+1))) AS DISCOUNT(POS)
 			CROSS APPLY (SELECT (CHARINDEX('|', strRawValue, DISCOUNT.POS+1))) AS INTEREST(POS)
 
+			SELECT @dblTotalPayment = SUM(ISNULL(dblPayment, 0)) 
+			FROM #INVOICEANDPAYMENT
+			
 			INSERT INTO @EntriesForPayment (
 				intId
 				, strSourceTransaction
@@ -164,7 +168,7 @@ BEGIN
 				, strNotes						= NULL
 				, intAccountId					= INVOICE.intAccountId
 				, intBankAccountId				= CASE WHEN ISNULL(@strCreditCardNumber, '') = '' AND ISNULL(@intEntityCardInfoId, 0) = 0 THEN @intBankAccountId ELSE NULL END
-				, dblAmountPaid					= ISNULL(PAYMENTS.dblPayment, 0)
+				, dblAmountPaid					= ISNULL(@dblTotalPayment, 0)
 				, ysnPost						= CASE WHEN ISNULL(@strCreditCardNumber, '') = '' AND ISNULL(@intEntityCardInfoId, 0) = 0 AND ISNULL(@intPaymentMethodId, 0) <> 0 THEN 1 ELSE 0 END
 				, intEntityId					= @intUserId
 				, intInvoiceId					= INVOICE.intInvoiceId
@@ -190,14 +194,8 @@ BEGIN
 				, ysnAllowOverpayment			= 0
 				, ysnFromAP						= 0
 			FROM vyuARInvoicesForPayment INVOICE
-			CROSS APPLY (
-				SELECT TOP 1 dblPayment		= ISNULL(dblPayment, 0)
-						   , dblDiscount	= ISNULL(dblDiscount, 0)
-						   , dblInterest 	= ISNULL(dblInterest, 0)
-				FROM #INVOICEANDPAYMENT 
-				WHERE strInvoiceNumber COLLATE Latin1_General_CI_AS = INVOICE.strInvoiceNumber
-			) PAYMENTS
-			WHERE strInvoiceNumber IN (SELECT strValues COLLATE Latin1_General_CI_AS FROM dbo.fnARGetRowsFromDelimitedValues(@strInvoiceNumber))
+			INNER JOIN #INVOICEANDPAYMENT PAYMENTS ON INVOICE.strInvoiceNumber = PAYMENTS.strInvoiceNumber
+			WHERE INVOICE.strInvoiceNumber IN (SELECT strValues COLLATE Latin1_General_CI_AS FROM dbo.fnARGetRowsFromDelimitedValues(@strInvoiceNumber))
 		END
 	--FOR PREPAYMENTS
 	ELSE
