@@ -7,7 +7,7 @@
 	
 AS
 BEGIN TRY
-	--return
+	
 	SET NOCOUNT ON
 	declare @debug_awesome_ness bit = 0
 	----- DEBUG POINT -----
@@ -499,28 +499,52 @@ BEGIN TRY
 				declare @acd DECIMAL(24,10)
 				set @acd = @dblSelectedUnits - isnull(@dblTotalVoucheredQuantity, 0)
 				----- DEBUG POINT -----
-				if @debug_awesome_ness = 1 AND 1 = 0
+				if @debug_awesome_ness = 1 AND 1 = 1
 				begin				
 					select 'avqty freshly added',* from @avqty										
+
+					select 
+						*
+				from (select distinct intContractDetailId, ContractEntityId, dblContractUnits from @SettleContract) a
+					join vyuCTAvailableQuantityForVoucher b
+						on b.intContractDetailId = a.intContractDetailId 
+					outer apply (
+						(select sum(dblQtyReceived) as dblTotal
+							from tblAPBillDetail 
+								where intBillId in 
+									(select intBillId from tblAPBill where strVendorOrderNumber = (select strStorageTicket from tblGRSettleStorage where intSettleStorageId = @intSettleStorageId)) 
+								and intContractDetailId = a.intContractDetailId )
+					) total_bill
+					where a.dblContractUnits > isnull(total_bill.dblTotal, 0)
+
+
 				end
 
 
 				declare @cur_contract_id int				
 				declare @cur_contract_max_units DECIMAL(24,10)
+				declare @cur_billed_per_contract_id DECIMAL(24,10)
 				begin
 					select top 1  @cur_contract_id =  intContractDetailId, @cur_contract_max_units = dblContractUnits from @SettleContract order by intContractDetailId asc
-
-				
-				
+					
 
 					while @cur_contract_id is not null
 					begin
 						
 						 select @cur_contract_max_units = dblContractUnits from @SettleContract where intContractDetailId = @cur_contract_id
 
+
+						 select @cur_billed_per_contract_id = sum(dblQtyReceived)
+							from tblAPBillDetail 
+								where intBillId in 
+									(select intBillId from tblAPBill where strVendorOrderNumber = (select strStorageTicket from tblGRSettleStorage where intSettleStorageId = @intSettleStorageId)) 
+								and intContractDetailId = @cur_contract_id
+
+						set @cur_contract_max_units = @cur_contract_max_units - isnull(@cur_billed_per_contract_id, 0)
+
 						if @debug_awesome_ness = 1 AND 1 = 1
 						begin	
-							select @cur_contract_max_units as [max units], @cur_contract_id as [current contract detail]
+							select @cur_contract_max_units as [max units], @cur_contract_id as [current contract detail], @cur_billed_per_contract_id as [ billed per contract]
 						end
 
 						update @avqty 
@@ -537,7 +561,7 @@ BEGIN TRY
 
 				
 				----- DEBUG POINT -----
-				if @debug_awesome_ness = 1 AND 1 = 0
+				if @debug_awesome_ness = 1 AND 1 = 1
 				begin				 
 					select 'avqty freshly added VERSION 2',* from @avqty					
 					select @dblSelectedUnits as [ selected units ], @dblTotalVoucheredQuantity as [ total vouchered quantity], @acd as [quantity reference ]
@@ -618,7 +642,7 @@ BEGIN TRY
 					 intCustomerStorageId		= CS.intCustomerStorageId
 					,intCompanyLocationId		= CS.intCompanyLocationId 
 					,intContractHeaderId		= NULL
-					,intContractDetailId		= NULL
+					,intContractDetailId		= SC.intContractDetailId
 					,dblUnits					= CASE													
 													WHEN DCO.strDiscountCalculationOption = 'Gross Weight' THEN 
 														CASE WHEN CS.dblGrossQuantity IS NULL THEN SST.dblUnits
@@ -1836,6 +1860,33 @@ BEGIN TRY
 
 			---5.Voucher Creation, Update Bill, Tax Computation, Post Bill
 			BEGIN
+				begin
+					--the reason for this is to get the linking of the discount to the settlement voucher
+					declare @DiscountSCRelation as table ( id int, intContractDetailId int)
+				
+					insert into @DiscountSCRelation( id, intContractDetailId)
+					select intSettleVoucherKey, a.intContractDetailId
+						from @SettleVoucherCreate a 						
+							join tblCTContractDetail b
+								on a.intContractDetailId = b.intContractDetailId
+							join tblCTContractHeader c
+								on c.intContractHeaderId = b.intContractHeaderId and c.intPricingTypeId = 2
+							left join @avqty d
+								on d.intContractDetailId = a.intContractDetailId
+						where intItemType = 3 and d.id is null
+
+					update @SettleVoucherCreate set intContractDetailId = null where intItemType = 3
+
+				end
+				----- DEBUG POINT -----
+				if @debug_awesome_ness = 1 and 1 = 1 
+				begin
+					select 'discount relation'
+					select * from @DiscountSCRelation
+				end
+				------ END DEBUG POINT -----
+
+
 				DELETE FROM @voucherDetailStorage
 				DELETE FROM @VoucherDetailReceiptCharge
 
@@ -1883,7 +1934,7 @@ BEGIN TRY
 					WHERE availableQtyForVoucher.intContractDetailId is not null and availableQtyForVoucher.intPriceFixationDetailId is not null
 				
 				----- DEBUG POINT -----
-				if @debug_awesome_ness = 1 and 1 = 1
+				if @debug_awesome_ness = 1 and 1 = 0
 				begin
 					select 'checking the update of cash price'
 					select * 
@@ -1992,7 +2043,7 @@ BEGIN TRY
 						and a.intItemType = 1
 
 					----- DEBUG POINT -----
-					if @debug_awesome_ness = 1 AND 1 = 0
+					if @debug_awesome_ness = 1 AND 1 = 1
 					begin					
 						select ' before settle voucher create after discount update', * from @SettleVoucherCreate
 					end
@@ -2001,7 +2052,7 @@ BEGIN TRY
 					update @SettleVoucherCreate set dblUnits = @dblTotalUnits where intItemType in (2, 3) and dblUnits > @dblTotalUnits
 
 					----- DEBUG POINT -----
-					if @debug_awesome_ness = 1 AND 1 = 0
+					if @debug_awesome_ness = 1 AND 1 = 1
 					begin
 						select 'Total Units for updating the discounts ',@dblTotalUnits
 						select ' settle voucher create after discount update', * from @SettleVoucherCreate
@@ -2010,6 +2061,8 @@ BEGIN TRY
 
 				end
 				
+
+				-- we need to delete item in the contract detail
 								
 				--Inventory Item and Discounts
 				INSERT INTO @voucherPayable
@@ -2062,8 +2115,8 @@ BEGIN TRY
 																				ELSE 'Other Charge Expense' 
 																			END
 																				)
-					,[intContractHeaderId]			= a.[intContractHeaderId]
-					,[intContractDetailId]			= a.[intContractDetailId]
+					,[intContractHeaderId]			= case when a.intItemType = 1 then  a.[intContractHeaderId] else null end -- need to set the contract details to null for non item
+					,[intContractDetailId]			= case when a.intItemType = 1 then  a.[intContractDetailId] else null end -- need to set the contract details to null for non item
 					,[intInventoryReceiptItemId] = 
 														--CASE 
 														--    WHEN ST.ysnDPOwnedType = 0 THEN NULL
@@ -2221,6 +2274,8 @@ BEGIN TRY
 								AND a.intItemType = 1
 				LEFT JOIN tblCTContractDetail CD
 					ON CD.intContractDetailId = a.intContractDetailId				
+				LEFT JOIN tblCTContractDetail CH
+					ON CD.intContractHeaderId = CH.intContractHeaderId
 				left join (
 					select						
 						intContractDetailId,	intPriceFixationDetailId, dblCashPrice, dblAvailableQuantity, dblContractUnits						
@@ -2233,11 +2288,31 @@ BEGIN TRY
 					AND a.dblUnits <> 0 
 					AND SST.intSettleStorageId = @intSettleStorageId
 				AND CASE WHEN (a.intPricingTypeId = 2 AND ISNULL(@dblCashPriceFromCt,0) = 0) THEN 0 ELSE 1 END = 1
+				and (	a.intContractDetailId is null or  
+						CH.intPricingTypeId = 1 or
+							(CH.intPricingTypeId = 2 and 
+								a.intContractDetailId is not null 
+								and availableQtyForVoucher.dblAvailableQuantity > 0)
+					)
+				and a.intSettleVoucherKey not in ( select id from @DiscountSCRelation )
 				ORDER BY SST.intSettleStorageTicketId
 					,a.intItemType				
 				 
+
+				 ---we should delete priced contracts that has a voucher already
+					delete from @voucherPayable 
+						where intVoucherPayableId in (
+							select intVoucherPayableId from @voucherPayable a
+								join tblCTContractHeader b 
+									on a.intContractHeaderId = b.intContractHeaderId and b.intPricingTypeId = 1
+								join tblAPBillDetail c
+									on a.intContractHeaderId = c.intContractHeaderId
+										and a.intContractDetailId = c.intContractDetailId
+										and c.intCustomerStorageId = a.intCustomerStorageId
+							)
+				 ---
 				----- DEBUG POINT -----				 
-				if @debug_awesome_ness = 1	 AND 1 = 0
+				if @debug_awesome_ness = 1	 AND 1 = 1
 				begin
 									
 					select 'ct available quantity for voucher', @intContractDetailId					
