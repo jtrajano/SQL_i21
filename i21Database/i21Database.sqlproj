@@ -8078,6 +8078,10 @@
     <Build Include="dbo\Functions\fnGRGetVoucheredUnits.sql" />
     <Build Include="dbo\Stored Procedures\uspAPDiagnoseClearingData.sql" />
     <Build Include="dbo\Stored Procedures\uspCTRebuildScheduledQuantity.sql" />
+    <Build Include="dbo\Views\vyuLGLoadDetailUberScale.sql" />
+    <Build Include="dbo\User Defined Types\StagingTransactionLog.sql" />
+    <Build Include="dbo\Tables\tblSCDiscountType.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTReportPriceConfirmation.sql" />
     <Build Include="dbo\Functions\udfDateGreaterThanEquals.sql" />
     <Build Include="dbo\Functions\udfDateLessThanEquals.sql" />
     <Build Include="dbo\Tables\tblGRSettleStorageBillDetail.sql" />
@@ -8088,6 +8092,8 @@
     <Build Include="dbo\Views\vyuSTCheckoutHeader.sql" />
     <Build Include="dbo\Tables\tblAPBalanceDifference.sql" />
     <None Include="Scripts\Post-Deployment\CT\uspCTRebuildScheduledQuantityAboveR2.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCPostSpecialDiscount.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCProcessReceiptToVoucher.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -8325,6 +8331,8 @@
     <Build Include="dbo\Views\vyuARInvoiceSubFormulaReport.sql" />
     <Build Include="dbo\Views\vyuCTAvailableQuantityForVoucher.sql" />
     <Build Include="dbo\Views\vyuARPaymentForNSF.sql" />
+    <Build Include="dbo\Views\vyuSCTicketContractUsed.sql" />
+    <Build Include="dbo\Functions\fnARGetInvoiceForBatch.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

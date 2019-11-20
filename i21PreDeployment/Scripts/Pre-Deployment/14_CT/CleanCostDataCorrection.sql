@@ -81,7 +81,7 @@ BEGIN
 			select intDailyAveragePriceDetailId from tblRKDailyAveragePriceDetail
 		)
 	 ');
-    
+
 END
 
 

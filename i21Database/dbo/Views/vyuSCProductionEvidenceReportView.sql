@@ -149,6 +149,8 @@
 				),2,1000)
 		END strGradeReading
 		,1 ysnDisplayGradeReading
+		,SC.intCropYearId
+		,CYR.strCropYear
 	FROM tblSCDeliverySheet DS
 	INNER JOIN tblSCDeliverySheetSplit DSS
 		ON DS.intDeliverySheetId = DSS.intDeliverySheetId
@@ -174,6 +176,8 @@
 	LEFT JOIN tblGRDiscountId tblGRDiscountId on tblGRDiscountId.intDiscountId = SC.intDiscountId
 	LEFT JOIN tblGRStorageScheduleRule tblGRStorageScheduleRule on tblGRStorageScheduleRule.intStorageScheduleRuleId = SC.intStorageScheduleId
 	LEFT JOIN tblICStorageLocation tblICStorageLocation on tblICStorageLocation.intStorageLocationId = SC.intStorageLocationId
+	left join tblCTCropYear CYR
+		on CYR.intCropYearId = SC.intCropYearId
 	--LEFT JOIN vyuSCGradeReadingReport QM ON QM.intTicketId = SC.intTicketId AND QM.ysnDryingDiscount = 1
 	OUTER APPLY(
 		SELECT TOP 1 AP.dtmDate from tblAPBillDetail APD 

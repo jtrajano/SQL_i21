@@ -1,8 +1,9 @@
 ﻿CREATE VIEW [dbo].[vyuSCUberGetLoadDistributionOption]
-AS SELECT 
+AS 
+	SELECT 
 		DO.intDistributionOptionId
-		, LSS.intEntityId 
-		, LSS.intScaleSetupId
+		, LT.strTicketType
+		, SS.intScaleSetupId
 		, TP.intTicketPoolId
 		, SS.strStationShortDescription
 		, SS.strStationDescription
@@ -11,9 +12,8 @@ AS SELECT
 		, DO.ysnDistributionAllowed
 		, DO.ysnDefaultDistribution
 	from 
-		tblSCLastScaleSetup LSS
-		inner join tblSCScaleSetup SS on LSS.intScaleSetupId = SS.intScaleSetupId
+		tblSCScaleSetup SS 
 		inner join tblSCDistributionOption DO on SS.intTicketPoolId = DO.intTicketPoolId
 		inner join tblSCTicketPool TP on DO.intTicketPoolId = TP.intTicketPoolId
-	where 
-		DO.strDistributionOption = 'LOD'
+		inner join tblSCTicketType TY on TY.intTicketTypeId = DO.intTicketTypeId 
+		inner join tblSCListTicketTypes LT on LT.intTicketTypeId = TY.intListTicketTypeId

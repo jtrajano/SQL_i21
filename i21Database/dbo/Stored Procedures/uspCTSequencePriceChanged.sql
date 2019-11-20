@@ -157,7 +157,6 @@ BEGIN TRY
 			EXEC uspCTCreateBillForBasisContract @intContractDetailId, @dblCashPrice, null
 		END
 	END
-
 	/*
 	IF @intContractTypeId = 1 
 	BEGIN
