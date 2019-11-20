@@ -12,6 +12,7 @@ BEGIN TRY
 		IF  @strSourceType = 'Voucher'
 		BEGIN
 			DELETE FROM tblGRStorageHistory Where intBillId=@IntSourceKey 
+			DELETE FROM tblGRSettleStorageBillDetail WHERE intBillId = @IntSourceKey 
 		END
 		IF  @strSourceType = 'Invoice'
 		BEGIN
