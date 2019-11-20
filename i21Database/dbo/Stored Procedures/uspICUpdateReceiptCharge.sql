@@ -28,8 +28,7 @@ END
 
 UPDATE TOP (1) rc
 SET 
-	rc.dblAmount = ISNULL(rc.dblAmount, 0) + ISNULL(@dblAmount, 0) 
-	,@intInventoryReceiptChargeId = rc.intInventoryReceiptChargeId
+	rc.dblAmount = ISNULL(@dblAmount, 0) 
 	,@inventoryReceiptId = rc.intInventoryReceiptId
 FROM 
 	tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptCharge rc
@@ -39,6 +38,7 @@ WHERE
 		(r.strReceiptNumber = @strReceiptNumber AND @intInventoryReceiptId IS NULL)
 		OR (r.intInventoryReceiptId = @intInventoryReceiptId AND @strReceiptNumber IS NULL)
 		OR (r.strReceiptNumber = @strReceiptNumber AND r.intInventoryReceiptId = @intInventoryReceiptId) 
+		OR (@intInventoryReceiptId IS NULL AND @strReceiptNumber IS NULL)
 	)
 	AND (rc.intContractId = @intContractHeaderId OR @intContractHeaderId IS NULL)
 	AND (rc.intContractDetailId = @intContractDetailId OR @intContractDetailId IS NULL) 
@@ -48,6 +48,7 @@ WHERE
 	AND rc.strCostMethod = 'Amount'
 
 -- Re-calculate the other charges
+IF @inventoryReceiptId IS NOT NULL 
 BEGIN 			
 	-- Calculate the other charges. 
 	EXEC dbo.uspICCalculateInventoryReceiptOtherCharges

@@ -28,7 +28,7 @@ WHERE intContractDetailId IN
 	FROM tblCTContractDetail
 	WHERE intContractHeaderId = @id
 )
-AND ysnBasis = 1 AND ysnAccrue = 0
+AND ysnAccrue = 0 --AND ysnBasis = 1 
 
 DECLARE @intPayableKey INT
 SELECT @intPayableKey = MIN(intPayableKey) 
@@ -93,7 +93,7 @@ BEGIN
 		,[strBillOfLading]			
 		,[ysnReturn]						
 	)
-	SELECT * FROM dbo.fnCTCreateVoucherPayable(@detailId, 'cost', 0);
+	SELECT * FROM dbo.fnCTCreateVoucherPayable(@detailId, 'cost', 0, 1);
 
 	IF EXISTS(SELECT * FROM @voucherPayables)
 	BEGIN	

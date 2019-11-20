@@ -2,7 +2,8 @@
 (
 	@id INT,
 	@type NVARCHAR(10),
-	@accrue BIT = 1
+	@accrue BIT = 1,
+	@remove BIT = 0
 )
 RETURNS TABLE AS RETURN
 (
@@ -68,7 +69,8 @@ RETURNS TABLE AS RETURN
 				WHEN ISNULL(CPT.ysnMultiplePriceFixation,0) = 0 AND @accrue = 1 THEN 1 
 				ELSE CC.ysnAccrue 
 			END
-		) AND CC.intConcurrencyId <> ISNULL(CC.intPrevConcurrencyId,0)
+		) 
+		AND (CASE WHEN @remove = 0 AND CC.intConcurrencyId <> ISNULL(CC.intPrevConcurrencyId,0) THEN 1 ELSE @remove END = 1)
 	JOIN tblCTContractHeader CH	ON	CH.intContractHeaderId = CD.intContractHeaderId
 	LEFT JOIN (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.[intEntityId] = D2.intEntityId) ON CC.intVendorId = D1.[intEntityId] 
 

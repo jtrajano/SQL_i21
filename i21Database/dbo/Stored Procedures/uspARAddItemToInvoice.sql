@@ -461,6 +461,7 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 				,[intSalesAccountId]
 				,[intTicketId]
 				,[intTicketHoursWorkedId]
+				,[intOriginalInvoiceDetailId]
 				,[strAddonDetailKey]
 				,[ysnAddonParent]
 				,[dblAddOnQuantity])
@@ -549,6 +550,7 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 				,@ItemSalesAccountId
 				,@ItemTicketId
 				,@ItemTicketHoursWorkedId
+				,@ItemOriginalInvoiceDetailId
 				,@ItemAddonDetailKey	
 				,@ItemAddonParent
 				,@ItemAddOnQuantity
@@ -643,6 +645,7 @@ ELSE IF((LEN(RTRIM(LTRIM(@ItemDescription))) > 0 OR ISNULL(@ItemPrice,@ZeroDecim
             ,@ItemAddonParent               = @ItemAddonParent
             ,@ItemAddOnQuantity             = @ItemAddOnQuantity
 			,@ItemBOLNumber					= @ItemBOLNumber
+			,@ItemOriginalInvoiceDetailId	= @ItemOriginalInvoiceDetailId
 			
 			IF LEN(ISNULL(@AddDetailError,'')) > 0
 				BEGIN

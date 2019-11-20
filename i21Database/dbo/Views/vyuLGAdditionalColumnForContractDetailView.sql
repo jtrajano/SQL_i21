@@ -78,11 +78,11 @@ FROM
 		LEFT JOIN	tblSMCurrency		AY	ON	AY.intCurrencyID	= CD.intBasisCurrencyId
 	) AD
 	OUTER APPLY (SELECT TOP 1 intCurrencyId = intFromCurrencyId FROM tblSMCurrencyExchangeRate 
-						WHERE intCurrencyExchangeRateId = AD.intExchangeRateId 
-						AND intFromCurrencyId = AD.intMainCurrencyId) FFX
+					WHERE intCurrencyExchangeRateId = AD.intExchangeRateId 
+					AND intToCurrencyId = AD.intMainCurrencyId) FFX
 	OUTER APPLY (SELECT TOP 1 intCurrencyId = intToCurrencyId FROM tblSMCurrencyExchangeRate 
-				WHERE intCurrencyExchangeRateId =  AD.intExchangeRateId
-				AND intToCurrencyId = AD.intMainCurrencyId) TFX
+					WHERE intCurrencyExchangeRateId = AD.intExchangeRateId
+					AND intFromCurrencyId = AD.intMainCurrencyId) TFX
 	OUTER APPLY (SELECT TOP 1 strCurrency FROM tblSMCurrency 
 				WHERE intCurrencyID = CASE WHEN (AD.ysnValidFX = 1) THEN ISNULL(FFX.intCurrencyId, TFX.intCurrencyId) ELSE AD.intCurrencyId END) FXC
 

@@ -68,7 +68,7 @@ BEGIN TRY
 			EXEC uspICUpdateBillQty @updateDetails = @receiptDetails	
 			-----------------------------------------
 
-			DELETE FROM tblCTPriceFixationDetailAPAR WHERE intBillId = @Id AND intBillDetailId = @DetailId
+			
 			DELETE FROM tblAPBillDetail WHERE intBillDetailId = @DetailId
 
 			INSERT INTO @voucherIds			
@@ -88,9 +88,9 @@ BEGIN TRY
 			@details = @details
 
 			-- DELETE VOUCHER IF ALL TICKETS WHERE DELETED
-			IF NOT EXISTS (SELECT TOP 1 1 FROM tblCTPriceFixationDetailAPAR WHERE intBillId = @Id)
+			IF (SELECT COUNT(*) FROM tblCTPriceFixationDetailAPAR WHERE intBillId = @Id) = 1
 			BEGIN
-				EXEC uspAPDeleteVoucher @Id,@intUserId
+				EXEC uspAPDeleteVoucher @Id,@intUserId,4
 		
 				--Audit Log
 				EXEC uspSMAuditLog
@@ -100,6 +100,9 @@ BEGIN TRY
 				@actionIcon = 'small-tree-deleted',
 				@keyValue = @Id
 			END
+
+			-- CT-4094	
+			DELETE FROM tblCTPriceFixationDetailAPAR WHERE intBillId = @Id AND intBillDetailId = @DetailId
 		END
 		ELSE
 		BEGIN
@@ -138,9 +141,9 @@ BEGIN TRY
 			--END
 			--DELETE FROM @tblItemBillDetail
 
-			----------------------------------------
-			DELETE FROM tblCTPriceFixationDetailAPAR WHERE intBillId = @Id
-			EXEC uspAPDeleteVoucher @Id,@intUserId	
+			----------------------------------------			
+			EXEC uspAPDeleteVoucher @Id,@intUserId,4
+			DELETE FROM tblCTPriceFixationDetailAPAR WHERE intBillId = @Id	
 		END
 
 		SELECT @Id = MIN(Id) FROM #ItemBill WHERE Id > @Id

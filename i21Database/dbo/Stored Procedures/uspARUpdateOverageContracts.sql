@@ -71,29 +71,30 @@ FROM tblARInvoiceDetail ID
 INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId
 LEFT JOIN tblCTContractDetail CD ON ID.intContractDetailId = CD.intContractDetailId AND ID.intContractHeaderId = CD.intContractHeaderId
 WHERE I.intInvoiceId = @intInvoiceId
+  AND (ISNULL(@intTicketId, 0) = 0 OR (ISNULL(@intTicketId, 0) <> 0 AND @intTicketId = ISNULL(ID.intTicketId, 0)))
 
-IF (SELECT COUNT(*) FROM #INVOICEDETAILS WHERE intContractDetailId IS NOT NULL) > 1
-	BEGIN
-		DECLARE @intContractHeaderIdToCompute	INT
+-- IF (SELECT COUNT(*) FROM #INVOICEDETAILS WHERE intContractDetailId IS NOT NULL) > 1
+-- 	BEGIN
+-- 		DECLARE @intContractHeaderIdToCompute	INT
 
-		SELECT TOP 1 @intContractHeaderIdToCompute = intContractHeaderId 
-		FROM #INVOICEDETAILS
-		ORDER BY intContractDetailId ASC
+-- 		SELECT TOP 1 @intContractHeaderIdToCompute = intContractHeaderId 
+-- 		FROM #INVOICEDETAILS
+-- 		ORDER BY intContractDetailId ASC
 
-		DELETE FROM #INVOICEDETAILS
-		WHERE intContractHeaderId <> @intContractHeaderIdToCompute
+-- 		DELETE FROM #INVOICEDETAILS
+-- 		WHERE intContractHeaderId <> @intContractHeaderIdToCompute
 
-		DELETE FROM tblARInvoiceDetail
-		WHERE intContractHeaderId <> @intContractHeaderIdToCompute
-		AND intInvoiceId = @intInvoiceId
+-- 		DELETE FROM tblARInvoiceDetail
+-- 		WHERE intContractHeaderId <> @intContractHeaderIdToCompute
+-- 		AND intInvoiceId = @intInvoiceId
 
-		UPDATE #INVOICEDETAILS
-		SET dblQtyShipped = @dblNetWeight
-		WHERE intContractHeaderId = @intContractHeaderIdToCompute
-		  AND intInventoryShipmentItemId IS NOT NULL
+-- 		UPDATE #INVOICEDETAILS
+-- 		SET dblQtyShipped = @dblNetWeight
+-- 		WHERE intContractHeaderId = @intContractHeaderIdToCompute
+-- 		  AND intInventoryShipmentItemId IS NOT NULL
 
-		EXEC dbo.uspARUpdateInvoiceIntegrations @intInvoiceId, 0, @intUserId
-	END
+-- 		EXEC dbo.uspARUpdateInvoiceIntegrations @intInvoiceId, 0, @intUserId
+-- 	END
 
 INSERT INTO @tblInvoiceIds (intHeaderId)
 SELECT DISTINCT intInvoiceId FROM #INVOICEDETAILS
