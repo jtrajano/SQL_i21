@@ -1,1 +1,0 @@
-﻿CREATE NONCLUSTERED INDEX [IX_tblSMAudit_1] ON [dbo].[tblSMAudit] ([intParentAuditId], [ysnHidden])
