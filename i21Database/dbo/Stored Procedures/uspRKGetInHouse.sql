@@ -311,10 +311,9 @@ BEGIN
 		, strTransactionType
 		, strTransactionId 
 		, intTransactionId
-		, CASE WHEN SC.intContractDetailId IS NULL THEN '' ELSE 'CNT' END
+		, CASE WHEN (SELECT TOP 1 1 FROM tblGRSettleContract WHERE intSettleStorageId = Inv.intTransactionId) = 1 THEN 'CNT' ELSE 'SPT' END
 		, strOwnership
 	FROM #invQty Inv
-	LEFT JOIN tblGRSettleContract SC ON SC.intSettleStorageId = Inv.intTransactionId
 	WHERE Inv.strTransactionType = 'Storage Settlement'
 
 	UNION ALL

@@ -621,7 +621,7 @@ BEGIN
 				dtmDate
 				,dblUnpaidIncrease = dblQtyReceived
 				,dblUnpaidDecrease = dblPartialPaidQty
-				,dblUnpaidBalance = dblQtyReceived - dblPartialPaidQty
+				,dblUnpaidBalance = dblQtyReceived - isnull(dblPartialPaidQty,0)
 				,dblPaidBalance = dblPartialPaidQty
 				,strTransactionId
 				,intTransactionId
@@ -634,7 +634,7 @@ BEGIN
 					,dblPartialPaidQty 
 					,strTransactionId = ISNULL(CS.strVoucher,Inv.strTransactionId)
 					,intTransactionId = ISNULL(CS.intBillId,Inv.intTransactionId)
-					,CS.strDistribution 
+					,strDistribution = CASE WHEN (SELECT TOP 1 1 FROM tblGRSettleContract WHERE intSettleStorageId = Inv.intTransactionId) = 1 THEN 'CNT' ELSE 'SPT' END
 					,intTransactionDetailId = ISNULL(CS.intBillId,Inv.intTransactionDetailId)
 					,strTransactionType =  CASE WHEN CS.intBillId IS NOT NULL THEN 'Bill'  ELSE 'Storage Settlement' END
 				from @InventoryStock Inv
@@ -644,38 +644,33 @@ BEGIN
 						,intBillId
 						,dblUnits = sum(dblUnits)
 						,dblPartialPaidQty = sum(dblPartialPaidQty)
-						,strDistribution
 					 from (	
-					select
+					select 
 							strVoucher = B.strBillId
 							, B.intBillId
 							, dblUnits =  BD.dblQtyReceived
 							, dblPartialPaidQty = dbo.fnCalculateQtyBetweenUOM(BD.intUnitOfMeasureId, Inv.intItemUOMId,CASE WHEN ISNULL(B.dblTotal, 0) = 0 THEN 0 ELSE (BD.dblQtyReceived / CASE WHEN B.dblTotal = 0 THEN 1 ELSE B.dblTotal END) * B.dblPayment END)		
-							, strDistribution = CASE WHEN SC.intSettleContractId IS NOT NULL THEN 'CNT' ELSE ST.strStorageTypeCode END
 						from tblGRSettleStorage S 
-						inner join vyuGRSettleStorageTicketNotMapped SST ON SST.intSettleStorageId = S.intSettleStorageId
 						inner join tblGRSettleStorageBillDetail SBD on SBD.intSettleStorageId = S.intSettleStorageId
 						inner join tblAPBill B on SBD.intBillId = B.intBillId
 									inner join tblAPBillDetail BD on B.intBillId = BD.intBillId 
 											AND BD.intItemId = S.intItemId 
-						left join tblGRSettleContract SC ON SC.intSettleStorageId = S.intSettleStorageId
-						left join tblGRStorageType ST ON SST.intStorageTypeId = ST.intStorageScheduleTypeId
 						where S.intSettleStorageId = Inv.intTransactionId 
 					) t
-					group by strVoucher, intBillId, strDistribution
+					group by strVoucher, intBillId
 	
 				) CS
 				where 
 					Inv.strTransactionType = 'Storage Settlement'
 
 				union all
-				select
+				select 
 					 dtmDate =  CONVERT(DATETIME, CONVERT(VARCHAR(10), Inv.dtmDate, 110), 110)
 					,dblQtyReceived =  Inv.dblTotal - CS.dblUnits
 					,dblPartialPaidQty 
 					,strTransactionId = Inv.strTransactionId
 					,intTransactionId = Inv.intTransactionId
-					,strDistribution
+					,strDistribution = CASE WHEN (SELECT TOP 1 1 FROM tblGRSettleContract WHERE intSettleStorageId = Inv.intTransactionId) = 1 THEN 'CNT' ELSE 'SPT' END
 					,intTransactionDetailId = Inv.intTransactionDetailId
 					,strTransactionType = Inv.strTransactionType
 				from @InventoryStock Inv
@@ -683,23 +678,17 @@ BEGIN
 					select 
 						dblUnits = sum(dblUnits)
 						,dblPartialPaidQty = sum(dblPartialPaidQty)
-						,strDistribution
 					 from (	
-					select
+					select 
 							 dblUnits =  BD.dblQtyReceived
 							, dblPartialPaidQty = dbo.fnCalculateQtyBetweenUOM(BD.intUnitOfMeasureId, Inv.intItemUOMId,CASE WHEN ISNULL(B.dblTotal, 0) = 0 THEN 0 ELSE (BD.dblQtyReceived / CASE WHEN B.dblTotal = 0 THEN 1 ELSE B.dblTotal END) * B.dblPayment END)		
-							, strDistribution = CASE WHEN SC.intSettleContractId IS NOT NULL THEN 'CNT' ELSE ST.strStorageTypeCode END
 						from tblGRSettleStorage S 
-						inner join vyuGRSettleStorageTicketNotMapped SST ON SST.intSettleStorageId = S.intSettleStorageId
 						inner join tblGRSettleStorageBillDetail SBD on SBD.intSettleStorageId = S.intSettleStorageId
 						inner join tblAPBill B on SBD.intBillId = B.intBillId
 									inner join tblAPBillDetail BD on B.intBillId = BD.intBillId 
 											AND BD.intItemId = S.intItemId 
-						left join tblGRSettleContract SC ON SC.intSettleStorageId = S.intSettleStorageId
-						left join tblGRStorageType ST ON SST.intStorageTypeId = ST.intStorageScheduleTypeId
 						where S.intSettleStorageId = Inv.intTransactionId 
 					) t
-					group by strDistribution
 				) CS
 				where 
 					Inv.strTransactionType = 'Storage Settlement'
