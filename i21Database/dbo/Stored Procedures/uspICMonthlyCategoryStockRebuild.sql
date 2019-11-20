@@ -92,8 +92,8 @@ BEGIN TRY
 	-- Exit immediately if the start date is blank. 
 	IF @dtmStartDate IS NULL 
 	BEGIN 
-		INSERT INTO tblICBackup(dtmDate, intUserId, strOperation, strRemarks, ysnRebuilding, dtmStart, strItemNo, strCategoryCode)
-		SELECT dbo.fnRemoveTimeOnDate(GETDATE()), @intUserId, 'Rebuild Inventory', 'Stock is up to date.', 0, GETDATE(), GETDATE(), @strCategoryCode
+		INSERT INTO tblICBackup(dtmDate, intUserId, strOperation, strRemarks, ysnRebuilding, dtmStart, dtmEnd, strItemNo, strCategoryCode)
+		SELECT dbo.fnRemoveTimeOnDate(GETDATE()), @intUserId, 'Rebuild Inventory', 'Stock is up to date.', 0, GETDATE(), GETDATE(), NULL, @strCategoryCode
 
 		RETURN; 
 	END 
