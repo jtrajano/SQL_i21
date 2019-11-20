@@ -2274,7 +2274,7 @@ BEGIN TRY
 								AND a.intItemType = 1
 				LEFT JOIN tblCTContractDetail CD
 					ON CD.intContractDetailId = a.intContractDetailId				
-				LEFT JOIN tblCTContractDetail CH
+				LEFT JOIN tblCTContractHeader CH
 					ON CD.intContractHeaderId = CH.intContractHeaderId
 				left join (
 					select						
@@ -2315,6 +2315,8 @@ BEGIN TRY
 				if @debug_awesome_ness = 1	 AND 1 = 1
 				begin
 									
+					select * from tblCTContractHeader where intContractHeaderId = 673
+
 					select 'ct available quantity for voucher', @intContractDetailId					
 					select 'settle voucher create before adding voucher payable', * from @SettleVoucherCreate
 										
@@ -2323,13 +2325,16 @@ BEGIN TRY
 					select ' adding to voucher payable',
 							@doPartialHistory [partial history],
 							a.intPricingTypeId,
+							CH.intPricingTypeId as [ header pricing type ],
 							@dblCashPriceFromCt as [cash price],
 							@dblQtyFromCt as [qty from ct],
 							@dblTotalVoucheredQuantity as [total voucher quantity],
 							@origdblSpotUnits as [dbl spot unit],
 							@ysnFromPriceBasisContract as [from basis contract], 
 							availableQtyForVoucher.intContractDetailId,
+							a.intContractDetailId as [ intContractDetailId - 2 ],
 							availableQtyForVoucher.dblAvailableQuantity,
+
 							intItemType,
 							a.dblUnits,
 							[dblOrderQty]					= CASE	
@@ -2434,44 +2439,53 @@ BEGIN TRY
 														end	
 
 						FROM @SettleVoucherCreate a
-						JOIN tblICItemUOM b 
-							ON b.intItemId = a.intItemId 
-								AND b.intUnitMeasureId = @intUnitMeasureId--AND b.ysnStockUnit = 1
-						JOIN tblICItem c 
-							ON c.intItemId = a.intItemId
-						JOIN tblGRSettleStorageTicket SST 
-							ON SST.intCustomerStorageId = a.intCustomerStorageId
-						LEFT JOIN tblGRCustomerStorage CS
-							ON CS.intCustomerStorageId = a.intCustomerStorageId
-						LEFT JOIN tblGRDiscountScheduleCode DSC
-							ON DSC.intDiscountScheduleId = CS.intDiscountScheduleId 
-								AND DSC.intItemId = a.intItemId
-						JOIN tblGRStorageType ST
-							ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
-						LEFT JOIN (
-								tblICInventoryReceiptItem RI
-								INNER JOIN tblGRStorageHistory SH
-										ON SH.intInventoryReceiptId = RI.intInventoryReceiptId
-												AND CASE WHEN (SH.strType = 'From Transfer') THEN 1 ELSE (CASE WHEN RI.intContractHeaderId = ISNULL(SH.intContractHeaderId,RI.intContractHeaderId) THEN 1 ELSE 0 END) END = 1
-						) 
-								ON SH.intCustomerStorageId = CS.intCustomerStorageId
-										AND a.intItemType = 1
-						LEFT JOIN tblCTContractDetail CD
-							ON CD.intContractDetailId = a.intContractDetailId				
-						left join (
-							select						
-								intContractDetailId,	intPriceFixationDetailId, dblCashPrice, dblAvailableQuantity, dblContractUnits						
-								from @avqty  			
-								--from vyuCTAvailableQuantityForVoucher 					
-						) availableQtyForVoucher
-							on availableQtyForVoucher.intContractDetailId = a.intContractDetailId
+							JOIN tblICItemUOM b 
+								ON b.intItemId = a.intItemId 
+									AND b.intUnitMeasureId = @intUnitMeasureId--AND b.ysnStockUnit = 1
+							JOIN tblICItem c 
+								ON c.intItemId = a.intItemId
+							JOIN tblGRSettleStorageTicket SST 
+								ON SST.intCustomerStorageId = a.intCustomerStorageId
+							LEFT JOIN tblGRCustomerStorage CS
+								ON CS.intCustomerStorageId = a.intCustomerStorageId
+							LEFT JOIN tblGRDiscountScheduleCode DSC
+								ON DSC.intDiscountScheduleId = CS.intDiscountScheduleId 
+									AND DSC.intItemId = a.intItemId
+							JOIN tblGRStorageType ST
+								ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
+							LEFT JOIN (
+									tblICInventoryReceiptItem RI
+									INNER JOIN tblGRStorageHistory SH
+											ON SH.intInventoryReceiptId = RI.intInventoryReceiptId
+													AND CASE WHEN (SH.strType = 'From Transfer') THEN 1 ELSE (CASE WHEN RI.intContractHeaderId = ISNULL(SH.intContractHeaderId,RI.intContractHeaderId) THEN 1 ELSE 0 END) END = 1
+							) 
+									ON SH.intCustomerStorageId = CS.intCustomerStorageId
+											AND a.intItemType = 1
+							LEFT JOIN tblCTContractDetail CD
+								ON CD.intContractDetailId = a.intContractDetailId				
+							LEFT JOIN tblCTContractHeader CH
+								ON CD.intContractHeaderId = CH.intContractHeaderId
+							left join (
+								select						
+									intContractDetailId,	intPriceFixationDetailId, dblCashPrice, dblAvailableQuantity, dblContractUnits						
+									from @avqty  			
+									--from vyuCTAvailableQuantityForVoucher 					
+							) availableQtyForVoucher
+								on availableQtyForVoucher.intContractDetailId = a.intContractDetailId
 					
-						WHERE a.dblCashPrice <> 0 
-							AND a.dblUnits <> 0 
-							AND SST.intSettleStorageId = @intSettleStorageId
-						AND CASE WHEN (a.intPricingTypeId = 2 AND ISNULL(@dblCashPriceFromCt,0) = 0) THEN 0 ELSE 1 END = 1
-						ORDER BY SST.intSettleStorageTicketId
-							,a.intItemType			
+							WHERE a.dblCashPrice <> 0 
+								AND a.dblUnits <> 0 
+								AND SST.intSettleStorageId = @intSettleStorageId
+							AND CASE WHEN (a.intPricingTypeId = 2 AND ISNULL(@dblCashPriceFromCt,0) = 0) THEN 0 ELSE 1 END = 1
+							and (	a.intContractDetailId is null or  
+									CH.intPricingTypeId = 1 or
+										(CH.intPricingTypeId = 2 and 
+											a.intContractDetailId is not null 
+											and isnull(availableQtyForVoucher.dblAvailableQuantity, 0) > 0)
+								)
+							and a.intSettleVoucherKey not in ( select id from @DiscountSCRelation )
+							ORDER BY SST.intSettleStorageTicketId
+								,a.intItemType				
 
 					
 					select 'checking generated voucher payable '
