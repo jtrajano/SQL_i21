@@ -2254,7 +2254,7 @@ BEGIN TRY
 															END
 														end					
 															
-					,[dblOldCost]					=  case when @ysnFromPriceBasisContract = 0 then null 
+					,[dblOldCost]					=  case when @ysnFromPriceBasisContract = 0 and CS.intStorageTypeId != 2 then null 
 														else 
 															case WHEN a.[intContractHeaderId] IS NOT NULL AND @ysnFromPriceBasisContract = 1 and (@dblQtyFromCt = @dblSelectedUnits) THEN 															
 																(select dblCost from tblICInventoryTransaction IT
@@ -2270,7 +2270,7 @@ BEGIN TRY
 																	where IT.intTransactionTypeId = 56
 																		and IT.intItemId = a.intItemId)
 															else null end
-														end									
+														end								
 					,[dblCostUnitQty]				= ISNULL(a.dblCostUnitQty,1)
 					,[intCostUOMId]					= CASE
 														WHEN @origdblSpotUnits > 0 THEN @intCashPriceUOMId 
@@ -2326,6 +2326,8 @@ BEGIN TRY
 						AND DSC.intItemId = a.intItemId
 				JOIN tblGRStorageType ST
 					ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
+				LEFT JOIN tblGRStorageHistory STH
+					ON STH.intCustomerStorageId = a.intCustomerStorageId
 				LEFT JOIN (
 						tblICInventoryReceiptItem RI
 						INNER JOIN tblGRStorageHistory SH
@@ -3088,6 +3090,13 @@ BEGIN TRY
 					DECLARE @intVoucherId INT
 					SET @intVoucherId = CAST(@createdVouchersId AS INT)
 
+					declare @sum_e DECIMAL(38,20)
+						select @sum_e = sum(abs (dblCost))
+								from @voucherPayable a 
+									join tblICItem b on 
+										a.intItemId = b.intItemId
+									where b.ysnInventoryCost = 1 and strType = 'Other Charge'
+
 					IF ISNULL(@dblTotal,0) > 0 AND ISNULL(@requireApproval , 0) = 0
 					BEGIN
 
@@ -3100,12 +3109,7 @@ BEGIN TRY
 									SET intBillId = @createdVouchersId
 										WHERE intSettleStorageId = @intSettleStorageId  and @createdVouchersId is not null
 
-								declare @sum_e DECIMAL(38,20)
-								select @sum_e = sum(abs (dblCost))
-									from @voucherPayable a 
-										join tblICItem b on 
-											a.intItemId = b.intItemId
-									where b.ysnInventoryCost = 1 and strType = 'Other Charge'
+
 
 								update a
 									set dblPaidAmount = (b.dblOldCost + isnull(@sum_e, 0)) * a.dblUnits
@@ -3340,7 +3344,7 @@ BEGIN TRY
 					 [intConcurrencyId]     = 1 
 					,[intCustomerStorageId] = SV.[intCustomerStorageId]
 					,[intContractHeaderId]  = SV.[intContractHeaderId]
-					,[dblUnits]				= dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId,IU.intUnitMeasureId,CS.intUnitMeasureId,SV.[dblUnits])--case when @doPartialHistory = 1 then @dblSelectedUnits else  dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId,IU.intUnitMeasureId,CS.intUnitMeasureId,SV.[dblUnits]) end
+					,[dblUnits]				= SV.[dblUnits]
 					,[dtmHistoryDate]		= GETDATE()
 					,[strType]				= 'Settlement'
 					,[strUserName]			= NULL
@@ -3348,7 +3352,7 @@ BEGIN TRY
 					,[intEntityId]			= @EntityId
 					,[strSettleTicket]		= @TicketNo
 					,[intTransactionTypeId]	= 4 
-					,[dblPaidAmount]		= SV.dblCashPrice
+					,[dblPaidAmount]		= ISNULL(((select dblOldCost from @voucherPayable where intItemId = CS.intItemId) + isnull(@sum_e, 0)) * SV.[dblUnits],SV.dblCashPrice)
 					,[intBillId]			= CASE WHEN @intVoucherId = 0 THEN NULL ELSE @intVoucherId END
 					,intSettleStorageId		= @intSettleStorageId
 					,strVoucher				= @strVoucher
