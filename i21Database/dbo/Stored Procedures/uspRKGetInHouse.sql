@@ -325,6 +325,7 @@ BEGIN
 		,strTransactionId 
 		,intTransactionId
 		,strStorageTypeCode = CASE WHEN dblTotal < 0 THEN SS.strFromStorageTypeDescription ELSE SS.strToStorageTypeDescription END
+		,strOwnership
 	FROM #invQty Inv
 	inner join vyuGRTransferStorageSearchView SS ON Inv.intTransactionId = SS.intTransferStorageId
 	WHERE Inv.strTransactionType = 'Transfer Storage'
