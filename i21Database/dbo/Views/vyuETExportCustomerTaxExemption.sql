@@ -73,12 +73,12 @@ SELECT SMTGCE.*, SMTGC.[intTaxCodeId],SMTGC.[intTaxGroupId]
 		FROM 
 
 		(
-		SELECT distinct B.strCustomerNumber,A.intEntityCustomerId,B.ysnTaxExempt,C.intItemId, B.intEntityId, C.strItemNo , C.intCategoryId,B.intShipToId
-		from tblARCustomerTaxingTaxException A
-		INNER JOIN tblARCustomer  B ON A.intEntityCustomerId = B.intEntityId
-		INNER JOIN tblICItem C ON (A.intItemId = C.intItemId AND C.intItemId IS NOT NULL) OR (A.intCategoryId  = C.intCategoryId  AND C.intItemId IS NULL )
-		INNER JOIN vyuETExportItem ETItemsByItemOrCategrory  ON (ETItemsByItemOrCategrory.intItemId = A.intItemId AND A.intItemId IS NOT NULL) OR (ETItemsByItemOrCategrory.intCategoryId  = A.intCategoryId  AND A.intItemId IS NULL )
-		LEFT JOIN vyuETExportItem ETItemsAll  ON (A.intItemId IS NULL AND A.intCategoryId IS NULL)
+			SELECT DISTINCT B.strCustomerNumber,A.intEntityCustomerId,B.ysnTaxExempt,ETItemsAll.intItemId, B.intEntityId, ETItemsAll.strItemNo , ETItemsAll.intCategoryId,B.intShipToId  
+			FROM tblARCustomerTaxingTaxException A  
+			INNER JOIN tblARCustomer  B ON A.intEntityCustomerId = B.intEntityId  
+			LEFT JOIN vyuETExportItem ETItemsAll  ON (A.intItemId IS NULL AND A.intCategoryId IS NULL)  
+			LEFT JOIN vyuETExportItem ETItemsAll2 ON  (A.intItemId IS NOT NULL AND A.intItemId = ETItemsAll2.intItemId)  
+			LEFT JOIN vyuETExportItem ETItemsAll3  ON (A.intItemId IS NULL AND A.intCategoryId IS NOT NULL AND A.intCategoryId = ETItemsAll3.intItemId )  
 		)Exemp
 
 		INNER JOIN tblEMEntityLocation EMEL ON Exemp.intEntityId = EMEL.intEntityId AND EMEL.ysnDefaultLocation = 1
