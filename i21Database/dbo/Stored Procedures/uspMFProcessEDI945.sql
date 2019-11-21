@@ -447,12 +447,12 @@ BEGIN
 					HAVING dblTotalUnitsShipped = SUM(dblQtyShipped)
 					)
 				)
-			AND EXISTS (
-				SELECT *
-				FROM @tblMFOrderNo O
-				JOIN tblMFItemOwner Lbl ON O.intEntityCustomerId = Lbl.intOwnerId
-					AND intCustomerLabelTypeId = 2
-				)
+			--AND EXISTS (
+			--	SELECT *
+			--	FROM @tblMFOrderNo O
+			--	JOIN tblMFItemOwner Lbl ON O.intEntityCustomerId = Lbl.intOwnerId
+			--		AND intCustomerLabelTypeId = 2
+			--	)
 		BEGIN
 			INSERT INTO tblMFEDI945Error (
 				strTransactionId
