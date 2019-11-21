@@ -755,7 +755,7 @@ BEGIN TRY
 
 			SELECT @dblAllocatedQty = NULL
 
-			SELECT @dblAllocatedQty = dblQuantityShipped
+			SELECT @dblAllocatedQty = SUM(dblQuantityShipped)
 			FROM tblICInventoryShipmentItemLot
 			WHERE intInventoryShipmentItemId = @intShipmentItemId
 				AND intLotId = @intNewLotId
