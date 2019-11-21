@@ -404,13 +404,12 @@ BEGIN
 		, dblInTransitQty = dbo.fnCTConvertQuantityToTargetCommodityUOM(cum.intCommodityUnitMeasureId, @intCommodityUnitMeasureId, ISNULL((InTran.dblInTransitQty), 0))
 	INTO #InTransitDateRange
 	FROM dbo.fnICOutstandingInTransitAsOf(NULL, @intCommodityId, @dtmToTransactionDate) InTran
-	INNER JOIN vyuICGetInventoryValuation Inv ON InTran.intInventoryTransactionId = Inv.intInventoryTransactionId
 	INNER JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = InTran.intItemUOMId
 	INNER JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
 	JOIN tblICCommodityUnitMeasure cum ON cum.intCommodityId = @intCommodityId AND cum.intUnitMeasureId = UOM.intUnitMeasureId
 	WHERE InTran.intItemId = ISNULL(@intItemId, InTran.intItemId)
-		AND Inv.intLocationId = ISNULL(@intLocationId, Inv.intLocationId)
-		AND Inv.intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
+		AND InTran.intItemLocationId = ISNULL(@intLocationId, InTran.intItemLocationId) 
+		AND InTran.intItemLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 			
 	DECLARE @tblBalanceInvByDate AS TABLE (dtmDate DATE NULL
 		, dblBalanceInv NUMERIC(18,6)
