@@ -60,13 +60,18 @@ SET @jsonData = '{"action":"' + ISNULL(@actionType,'') + '","change":"Updated - 
 INSERT INTO #tmpAuditEntries
 SELECT [intID] FROM fnGetRowsFromDelimitedValues(@keyValue)
 
-declare @output INT;
+--declare @output INT;
 --INSERT on tblSMTransaction
-EXEC uspSMInsertTransaction @intKeyValue = @keyValue , @screenNamespace = @screenName, @output = @output
+--EXEC uspSMInsertTransaction @intKeyValue = @keyValue , @screenNamespace = @screenName, @output = @output
 
 WHILE EXISTS (SELECT TOP (1) 1 FROM #tmpAuditEntries)
 BEGIN
 	SELECT TOP 1 @singleValue = CAST([intId] AS NVARCHAR(50)) FROM #tmpAuditEntries
+
+	DECLARE @singleValueInt INT = (SELECT CAST(@singleValue AS INT));
+	DECLARE @output INT;
+
+	EXEC uspSMInsertTransaction @intKeyValue = @singleValueInt , @screenNamespace = @screenName, @output = @output
 
 	DECLARE @intTransactionID INT = NULL;
 	DECLARE @intScreenId INT = (SELECT intScreenId FROM tblSMScreen WHERE strNamespace = @screenName)
