@@ -1,4 +1,5 @@
-﻿CREATE VIEW [dbo].[vyuCFInvoiceReport]
+﻿
+CREATE VIEW [dbo].[vyuCFInvoiceReport]
 AS
 
 
@@ -57,6 +58,8 @@ SELECT
 ,cfAccount.ysnDepartmentGrouping
 ,cfAccount.ysnSummaryByDriverPin
 ,cfAccount.strDetailDisplay
+,cfAccount.ysnShowVehicleDescriptionOnly	
+,cfAccount.ysnShowDriverPinDescriptionOnly
 ----------------------------------------------
 ,strCustomerName = emEntity.strName
 ,emEntity.strName

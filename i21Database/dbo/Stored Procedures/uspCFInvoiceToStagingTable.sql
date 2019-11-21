@@ -269,6 +269,8 @@ BEGIN TRY
 	,strDetailDisplay
 	,strDetailDisplayValue
 	,strDetailDisplayLabel	
+	,ysnShowVehicleDescriptionOnly	
+	,ysnShowDriverPinDescriptionOnly
 	)
 	SELECT 
 	 intCustomerGroupId
@@ -549,6 +551,8 @@ BEGIN TRY
 								  WHEN LOWER(strDetailDisplay) = 'driverpin' OR LOWER(strDetailDisplay) = 'driver pin' 
 									THEN  'Driver Pin'
 							 END
+	,ysnShowVehicleDescriptionOnly	
+	,ysnShowDriverPinDescriptionOnly
 	FROM tblCFInvoiceReportTempTable AS cfInvRpt
 	INNER JOIN ( SELECT * FROM tblCFInvoiceSummaryTempTable WHERE strUserId = @UserId) AS cfInvRptSum
 	ON cfInvRpt.intTransactionId = cfInvRptSum.intTransactionId 
