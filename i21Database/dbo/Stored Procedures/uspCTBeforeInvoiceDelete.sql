@@ -8,7 +8,14 @@ BEGIN TRY
 	DECLARE	@ErrMsg	NVARCHAR(MAX)
 
 	UPDATE	tblCTPriceFixationDetail SET intInvoiceId = NULL, intInvoiceDetailId = NULL WHERE intInvoiceId = @intInvoiceId
+
+	UPDATE	tblCTPriceFixationDetail SET intInvoiceId = NULL, intInvoiceDetailId = NULL 
+	WHERE intInvoiceDetailId IN (SELECT intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @intInvoiceId)
+
 	DELETE FROM  tblCTPriceFixationDetailAPAR  WHERE intInvoiceId = @intInvoiceId
+
+	DELETE FROM	 tblCTPriceFixationDetailAPAR  
+	WHERE intInvoiceDetailId IN (SELECT intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @intInvoiceId)
 
 END TRY
 
