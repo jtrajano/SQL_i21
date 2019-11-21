@@ -5,6 +5,7 @@ SELECT Item.intItemId
 , Item.strItemNo
 , Item.strType
 , Item.strDescription
+, strItemDescription = Item.strDescription
 , Manufacturer.strManufacturer
 , Brand.strBrandCode
 , Brand.strBrandName
@@ -14,8 +15,10 @@ SELECT Item.intItemId
 , Item.strLotTracking
 , Item.intCommodityId
 , strCommodity = Commodity.strCommodityCode
+, Commodity.strCommodityCode
 , Item.intCategoryId
 , strCategory = Category.strCategoryCode
+, Category.strCategoryCode
 , Item.ysnInventoryCost
 , Item.ysnAccrue
 , Item.ysnMTM
