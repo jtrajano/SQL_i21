@@ -295,10 +295,10 @@ BEGIN
 			[strSourceTransactionNo]		=	B.strBillId,
 			[intItemId]						=	A.intItemId,
 			[intToBillUOMId]				=	A.intQtyToBillUOMId,--CASE WHEN A.intWeightUOMId > 0 THEN A.intWeightUOMId ELSE A.intQtyToBillUOMId END,
-			[dblToBillQty]					=	A.dblQuantityToBill--CASE WHEN A.intWeightUOMId > 0 THEN A.dblNetWeight ELSE A.dblQuantityToBill END
-												* (CASE WHEN @decreaseQty = 0 
-														THEN -1
-													ELSE 1
+			[dblToBillQty]					=	--A.dblQuantityToBill--CASE WHEN A.intWeightUOMId > 0 THEN A.dblNetWeight ELSE A.dblQuantityToBill END
+												 (CASE WHEN @decreaseQty = 0 
+														THEN -A.dblQuantityToBill
+													ELSE A.dblQuantityToBill
 													END),
 			[intEntityVendorId]				=	B.intEntityVendorId
 		FROM #tmpInventoryReceipt A
