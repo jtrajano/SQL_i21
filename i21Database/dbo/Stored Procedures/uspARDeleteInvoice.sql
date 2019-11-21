@@ -1,7 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspARDeleteInvoice]
-	 @InvoiceId	INT
-	,@UserId	INT
-	,@InvoiceDetailId	INT  = NULL
+	 @InvoiceId				INT
+	,@UserId				INT
+	,@InvoiceDetailId		INT = NULL
+	,@InventoryShipmentId	INT = NULL
 AS
 
 BEGIN
@@ -50,9 +51,9 @@ BEGIN TRY
 			DELETE FROM tblARInvoiceDetail 
 			WHERE intInvoiceDetailId = @InvoiceDetailId
 
-			EXEC [dbo].[uspARUpdateInvoiceIntegrations] @InvoiceId = @InvoiceId, @ForDelete = 0, @UserId = @UserEntityID
+			EXEC [dbo].[uspARUpdateInvoiceIntegrations] @InvoiceId = @InvoiceId, @ForDelete = 1, @UserId = @UserEntityID
 
-			--Audit Log
+			--AUDIT LOG
 			DECLARE @details NVARCHAR(max) = '{"change": "tblARInvoiceDetail", "iconCls": "small-tree-grid","changeDescription": "Details", "children": [{"action": "Deleted", "change": "Deleted-Record: '+CAST(@InvoiceDetailId as varchar(15))+'", "keyValue": '+CAST(@InvoiceDetailId as varchar(15))+', "iconCls": "small-new-minus", "leaf": true}]}';
 
 			EXEC uspSMAuditLog
@@ -62,6 +63,49 @@ BEGIN TRY
 			@actionIcon = 'small-tree-modified',
 			@keyValue = @InvoiceId,
 			@details = @details
+		END
+	ELSE IF @InventoryShipmentId IS NOT NULL
+		BEGIN
+			DECLARE @InvoiceDetailIds dbo.Id
+			DECLARE @strShipmentNumber	NVARCHAR(100) = NULL
+
+			SELECT @strShipmentNumber = strShipmentNumber
+			FROM tblICInventoryShipment
+			WHERE intInventoryShipmentId = @InventoryShipmentId
+
+			INSERT INTO @InvoiceDetailIds
+			SELECT intInvoiceDetailId 
+			FROM tblARInvoiceDetail DETAIL
+			WHERE DETAIL.strDocumentNumber = @strShipmentNumber
+
+			DELETE TAX 
+			FROM tblARInvoiceDetailTax TAX
+			INNER JOIN @InvoiceDetailIds DETAIL ON TAX.intInvoiceDetailId = DETAIL.intId
+
+			DELETE DETAIL
+			FROM tblARInvoiceDetail DETAIL
+			INNER JOIN @InvoiceDetailIds SHIP ON DETAIL.intInvoiceDetailId = SHIP.intId
+
+			EXEC [dbo].[uspARUpdateInvoiceIntegrations] @InvoiceId = @InvoiceId, @ForDelete = 1, @UserId = @UserEntityID
+
+			WHILE EXISTS (SELECT TOP 1 NULL FROM @InvoiceDetailIds)
+				BEGIN
+					--AUDIT LOG
+					DECLARE @intInvoiceDetailId INT 
+
+					SELECT TOP 1 @intInvoiceDetailId = intId FROM @InvoiceDetailIds
+
+					DECLARE @auditDetails NVARCHAR(max) = '{"change": "tblARInvoiceDetail", "iconCls": "small-tree-grid","changeDescription": "Details", "children": [{"action": "Deleted", "change": "Deleted-Record: '+CAST(@intInvoiceDetailId as varchar(15))+'", "keyValue": '+CAST(@intInvoiceDetailId as varchar(15))+', "iconCls": "small-new-minus", "leaf": true}]}';
+
+					EXEC dbo.uspSMAuditLog @screenName = 'AccountsReceivable.view.Invoice'
+										 , @entityId = @UserEntityID
+										 , @actionType = 'Updated'
+										 , @actionIcon = 'small-tree-modified'
+										 , @keyValue = @InvoiceId
+										 , @details = @auditDetails
+
+					DELETE FROM @InvoiceDetailIds WHERE intId = @intInvoiceDetailId
+				END
 		END
 	ELSE
 		BEGIN

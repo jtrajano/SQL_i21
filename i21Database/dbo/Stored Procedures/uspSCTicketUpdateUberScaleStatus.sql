@@ -3,9 +3,9 @@
 	@strUberStatusCode nvarchar(3)
 AS
 	
-	if exists(select top 1 1 from tblSCTicket where intTicketId = @intTicketId and isnull(strUberStatusCode, '') <> @strUberStatusCode)
+	if exists(select top 1 1 from tblSCTicket where intTicketId = @intTicketId and isnull(strTicketStatus, '') <> @strUberStatusCode)
 	begin
-		update tblSCTicket set strUberStatusCode = @strUberStatusCode where intTicketId = @intTicketId
+		update tblSCTicket set strTicketStatus = @strUberStatusCode where intTicketId = @intTicketId
 		insert into tblSCTicketUberScaleStatusUpdate(intTicketId, dtmTransactionDate, strUberStatusCode)
 		select @intTicketId, getdate(), @strUberStatusCode
 	end

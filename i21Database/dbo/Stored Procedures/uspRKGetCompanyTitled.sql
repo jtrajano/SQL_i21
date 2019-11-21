@@ -646,7 +646,7 @@ BEGIN
 						,dblPartialPaidQty = sum(dblPartialPaidQty)
 						,strDistribution
 					 from (	
-					select distinct
+					select
 							strVoucher = B.strBillId
 							, B.intBillId
 							, dblUnits =  BD.dblQtyReceived
@@ -685,7 +685,7 @@ BEGIN
 						,dblPartialPaidQty = sum(dblPartialPaidQty)
 						,strDistribution
 					 from (	
-					select distinct
+					select
 							 dblUnits =  BD.dblQtyReceived
 							, dblPartialPaidQty = dbo.fnCalculateQtyBetweenUOM(BD.intUnitOfMeasureId, Inv.intItemUOMId,CASE WHEN ISNULL(B.dblTotal, 0) = 0 THEN 0 ELSE (BD.dblQtyReceived / CASE WHEN B.dblTotal = 0 THEN 1 ELSE B.dblTotal END) * B.dblPayment END)		
 							, strDistribution = CASE WHEN SC.intSettleContractId IS NOT NULL THEN 'CNT' ELSE ST.strStorageTypeCode END

@@ -8203,6 +8203,12 @@
     <Build Include="dbo\Views\vyuIPGetItemAccount.sql" />
     <Build Include="dbo\Tables\tblAPBalanceDifference.sql" />
     <Build Include="dbo\Views\vyuSTCheckoutHeader.sql" />
+    <Build Include="dbo\Views\vyuLGLoadDetailUberScale.sql" />
+    <Build Include="dbo\Tables\tblSCDiscountType.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTReportPriceConfirmation.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCPostSpecialDiscount.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCProcessReceiptToVoucher.sql" />
+    <Build Include="dbo\Index\IX_tblSMAudit.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -8440,6 +8446,8 @@
     <Build Include="dbo\Views\vyuARInvoiceSubFormulaReport.sql" />
     <Build Include="dbo\Views\vyuCTAvailableQuantityForVoucher.sql" />
     <Build Include="dbo\Views\vyuARPaymentForNSF.sql" />
+    <Build Include="dbo\Views\vyuSCTicketContractUsed.sql" />
+    <Build Include="dbo\Functions\fnARGetInvoiceForBatch.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

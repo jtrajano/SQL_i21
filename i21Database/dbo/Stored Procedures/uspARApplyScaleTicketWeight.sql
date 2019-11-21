@@ -7,15 +7,29 @@
 	, @intNewInvoiceId	INT = NULL OUTPUT
 AS
 BEGIN
-	DECLARE @intUnitMeasureId 		INT = NULL
-	DECLARE @strInvalidItem			NVARCHAR(MAX) = ''
-	DECLARE @strUnitMeasure			NVARCHAR(100) = ''
+	DECLARE @intUnitMeasureId 				INT = NULL
+	DECLARE @intEntityCustomerId			INT = NULL	
+	DECLARE @intShipToLocationId			INT = NULL
+	DECLARE @intContractShipToLocationId	INT = NULL
+	DECLARE @intExistingInvoiceId			INT = NULL
+	DECLARE @strInvalidItem					NVARCHAR(MAX) = ''
+	DECLARE @strUnitMeasure					NVARCHAR(100) = ''
+
+	SELECT @intEntityCustomerId = intEntityCustomerId
+		 , @intShipToLocationId	= intShipToLocationId
+	FROM dbo.tblSOSalesOrder WITH (NOLOCK)
+	WHERE intSalesOrderId = @intSalesOrderId
 
 	SELECT @intUnitMeasureId  = IUOM.intUnitMeasureId
 		 , @strUnitMeasure    = UOM.strUnitMeasure
 	FROM dbo.tblICItemUOM IUOM WITH (NOLOCK)
 	INNER JOIN tblICUnitMeasure UOM ON IUOM.intUnitMeasureId = UOM.intUnitMeasureId
 	WHERE IUOM.intItemUOMId = @intScaleUOMId
+
+	SELECT @intScaleUOMId = intItemUOMIdTo
+		 , @dblNetWeight = dblNetUnits
+	FROM vyuSCTicketScreenView 
+	WHERE intTicketId = @intTicketId
 
 	SELECT TOP 1 @strInvalidItem = I.strItemNo + ' - ' + I.strDescription
 	FROM dbo.tblSOSalesOrderDetail SOD WITH (NOLOCK)
@@ -30,6 +44,7 @@ BEGIN
 	) I ON SOD.intItemId = I.intItemId 
 	WHERE intSalesOrderId = @intSalesOrderId
 
+	--VALIDATIONS
 	IF ISNULL(@strInvalidItem, '') <> ''
 		BEGIN
 			DECLARE @strErrorMsg NVARCHAR(MAX) = 'Item ' + @strInvalidItem + ' doesn''t have UOM setup for ' + @strUnitMeasure + '.'
@@ -68,9 +83,111 @@ BEGIN
 			RETURN;
 		END
 
-	EXEC dbo.uspSOProcessToInvoice @SalesOrderId = @intSalesOrderId
-								 , @UserId = @intUserId
-								 , @NewInvoiceId = @intNewInvoiceId OUT
+	--GET EXISTING INVOICE FOR BATCH SCALE
+	SELECT TOP 1 @intContractShipToLocationId = CD.intShipToId
+	FROM tblSOSalesOrderDetail SO
+	INNER JOIN tblCTContractDetail CD ON SO.intContractDetailId = CD.intContractDetailId
+	WHERE SO.intSalesOrderId = @intSalesOrderId
+	  AND CD.intContractDetailId IS NOT NULL
+	  AND CD.intShipToId IS NOT NULL
+
+	SET @intShipToLocationId = ISNULL(@intContractShipToLocationId, @intShipToLocationId)
+
+	SELECT @intExistingInvoiceId = dbo.fnARGetInvoiceForBatch(@intEntityCustomerId, @intShipToLocationId)
+
+	--CREATE INVOICE IF THERE's NONE
+	IF ISNULL(@intExistingInvoiceId, 0) = 0
+		BEGIN
+			EXEC dbo.uspSOProcessToInvoice @SalesOrderId = @intSalesOrderId
+										 , @UserId = @intUserId
+										 , @NewInvoiceId = @intNewInvoiceId OUT
+		END
+	ELSE
+	--INSERT TO EXISTING INVOICE
+		BEGIN
+			DECLARE @tblInvoiceDetailEntries	InvoiceStagingTable
+
+			INSERT INTO @tblInvoiceDetailEntries (
+				  intInvoiceDetailId
+				, strSourceTransaction
+				, strSourceId
+				, intEntityCustomerId
+				, intCompanyLocationId
+				, dtmDate
+				, strDocumentNumber
+				, strSalesOrderNumber
+				, intEntityId
+				, intInvoiceId
+				, intItemId
+				, strItemDescription
+				, intOrderUOMId
+				, dblQtyOrdered
+				, intItemUOMId
+				, intPriceUOMId
+				, dblQtyShipped
+				, dblPrice
+				, dblUnitPrice
+				, dblContractPriceUOMQty
+				, intItemWeightUOMId
+				, intContractDetailId
+				, intContractHeaderId
+				, intTicketId
+				, intTaxGroupId
+				, dblCurrencyExchangeRate
+				, strAddonDetailKey
+				, ysnAddonParent
+				, intInventoryShipmentItemId
+				, intStorageLocationId
+				, intSubLocationId
+				, intCompanyLocationSubLocationId
+				, intSalesOrderDetailId
+			)
+			SELECT intInvoiceDetailId				= NULL
+				, strSourceTransaction				= 'Direct'
+				, strSourceId						= ''
+				, intEntityCustomerId				= SO.intEntityCustomerId
+				, intCompanyLocationId				= SO.intCompanyLocationId
+				, dtmDate							= SO.dtmDate
+				, strDocumentNumber					= SO.strSalesOrderNumber
+				, strSalesOrderNumber				= SO.strSalesOrderNumber
+				, intEntityId						= SO.intEntityId
+				, intInvoiceId						= @intExistingInvoiceId
+				, intItemId							= SOD.intItemId
+				, strItemDescription				= SOD.strItemDescription
+				, intOrderUOMId						= SOD.intItemUOMId
+				, dblQtyOrdered						= SOD.dblQtyOrdered
+				, intItemUOMId						= @intScaleUOMId
+				, intPriceUOMId						= @intScaleUOMId
+				, dblQtyShipped						= SOD.dblQtyShipped
+				, dblPrice							= SOD.dblPrice
+				, dblUnitPrice						= SOD.dblPrice
+				, dblContractPriceUOMQty			= @dblNetWeight
+				, intItemWeightUOMId				= SOD.intItemWeightUOMId
+				, intContractDetailId				= SOD.intContractDetailId
+				, intContractHeaderId				= SOD.intContractHeaderId
+				, intTicketId						= @intTicketId
+				, intTaxGroupId						= SOD.intTaxGroupId
+				, dblCurrencyExchangeRate			= SOD.dblCurrencyExchangeRate
+				, strAddonDetailKey					= SOD.strAddonDetailKey
+				, ysnAddonParent					= SOD.ysnAddonParent
+				, intInventoryShipmentItemId		= NULL
+				, intStorageLocationId				= SOD.intStorageLocationId
+				, intSubLocationId					= SOD.intSubLocationId
+				, intCompanyLocationSubLocationId	= SOD.intSubLocationId
+				, intSalesOrderDetailId				= SOD.intSalesOrderDetailId
+			FROM tblSOSalesOrderDetail SOD
+			INNER JOIN tblSOSalesOrder SO ON SOD.intSalesOrderId = SO.intSalesOrderId
+			WHERE SO.intSalesOrderId = @intSalesOrderId
+
+			EXEC dbo.uspARAddItemToInvoices @InvoiceEntries		= @tblInvoiceDetailEntries
+									  	  , @IntegrationLogId	= NULL
+									  	  , @UserId				= @intUserId
+
+			SET @intNewInvoiceId = @intExistingInvoiceId
+
+			EXEC dbo.uspARUpdateInvoiceIntegrations @intExistingInvoiceId, 0, @intUserId
+			EXEC dbo.uspARReComputeInvoiceTaxes @intExistingInvoiceId
+		END
 
 	IF ISNULL(@intNewInvoiceId, 0) = 0
 		BEGIN
@@ -78,12 +195,8 @@ BEGIN
 			RETURN;
 		END	
 	ELSE
+	--RECOMPUTE OVERAGE CONTRACTS
 		BEGIN
-			SELECT @intScaleUOMId = intItemUOMIdTo
-				 , @dblNetWeight = dblNetUnits
-			FROM vyuSCTicketScreenView 
-			WHERE intTicketId = @intTicketId
-
 			EXEC dbo.uspARUpdateOverageContracts @intInvoiceId 		= @intNewInvoiceId
 											   , @intScaleUOMId		= @intScaleUOMId
 											   , @intUserId			= @intUserId

@@ -16,6 +16,14 @@ BEGIN TRY
 		strContractNumber NVARCHAR(20)
 	)
 
+	DECLARE @temporary TABLE 
+	(  
+		intSequenceUsageHistoryId INT,
+		dblTransactionQuantity NUMERIC(18,6),
+		intContractHeaderId INT,
+		intContractDetailId INT
+	)
+
 	INSERT INTO @Contract
 	SELECT *
 	FROM
@@ -69,11 +77,11 @@ BEGIN TRY
 	
 		SELECT	@strContractNumber = strContractNumber, @dblHistorySchedQuantity = dblHistorySchedQuantity FROM @Contract WHERE intUniqueId = @intUniqueId
 
-		INSERT INTO @history(intSequenceUsageHistoryId, dblOldValue, dblTransactionQuantity, dblNewValue, intContractDetailId)
+		-- INSERT TO TEMPORARY TABLE TO CALCULATE RUNNING BALANCE
+		INSERT @temporary
 		SELECT intSequenceUsageHistoryId,
-		dblOldValue = (dblTransactionQuantity - SUM(dblTransactionQuantity) OVER (PARTITION BY a.intContractHeaderId, a.intContractDetailId ORDER BY a.intContractDetailId, a.intSequenceUsageHistoryId ASC)) *-1,
 		dblTransactionQuantity, 
-		dblNewValue = SUM(dblTransactionQuantity) OVER (PARTITION BY a.intContractHeaderId, a.intContractDetailId ORDER BY a.intContractDetailId, a.intSequenceUsageHistoryId ASC),
+		b.intContractHeaderId,
 		a.intContractDetailId
 		FROM tblCTSequenceUsageHistory a
 		INNER JOIN tblCTContractHeader b ON a.intContractHeaderId = b.intContractHeaderId
@@ -81,6 +89,20 @@ BEGIN TRY
 		WHERE strFieldName = 'Scheduled Quantity'
 		AND c.intContractStatusId = 1
 		AND b.strContractNumber = @strContractNumber
+		ORDER BY intSequenceUsageHistoryId ASC
+
+		INSERT INTO @history(intSequenceUsageHistoryId, dblOldValue, dblTransactionQuantity, dblNewValue, intContractDetailId)
+		SELECT a.intSequenceUsageHistoryId
+		,dblOldVlaue = (a.dblTransactionQuantity - sum(b.dblTransactionQuantity)) *-1
+		,a.dblTransactionQuantity
+		,dblNewValue = sum(b.dblTransactionQuantity)
+		,a.intContractDetailId
+		FROM @temporary a
+		INNER JOIN @temporary b 
+		ON a.intSequenceUsageHistoryId >= b.intSequenceUsageHistoryId
+		AND a.intContractHeaderId = b.intContractHeaderId
+		AND a.intContractDetailId = b.intContractDetailId
+		GROUP BY  a.intSequenceUsageHistoryId,a.dblTransactionQuantity,a.intContractHeaderId,a.intContractDetailId	
 
 		IF @dblHistorySchedQuantity < 0
 		BEGIN
@@ -102,6 +124,7 @@ BEGIN TRY
 		INNER JOIN (SELECT TOP 1 * FROM @history ORDER BY intSequenceUsageHistoryId DESC) b ON a.intContractDetailId = b.intContractDetailId
 
 		DELETE FROM @history
+		DELETE FROM @temporary
 	
 		SELECT @intUniqueId = MIN(intUniqueId) FROM @Contract WHERE intUniqueId > @intUniqueId
 	END

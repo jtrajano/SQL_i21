@@ -69,11 +69,94 @@ DECLARE @AUTO_NEGATIVE AS INT = 1
 DECLARE @returnValue AS INT 
 
 -----------------------------------------------------------------------------------------------------------------------------
+-- Assemble the Stock to Post
+-----------------------------------------------------------------------------------------------------------------------------
+DECLARE @StorageToPost AS ItemCostingTableType 
+INSERT INTO @StorageToPost (
+	[intItemId]
+	,[intItemLocationId]
+	,[intItemUOMId]
+	,[dtmDate]
+    ,[dblQty]
+	,[dblUOMQty]
+    ,[dblCost]
+	,[dblValue]
+	,[dblSalesPrice]
+	,[intCurrencyId]
+	,[dblExchangeRate]
+    ,[intTransactionId]
+	,[intTransactionDetailId]
+	,[strTransactionId]
+	,[intTransactionTypeId]
+	,[intLotId]
+	,[intSubLocationId]
+	,[intStorageLocationId]
+	,[ysnIsStorage]
+	,[strActualCostId]
+    ,[intSourceTransactionId]
+	,[strSourceTransactionId]
+	,[intInTransitSourceLocationId]
+	,[intForexRateTypeId]
+	,[dblForexRate]
+	,[intStorageScheduleTypeId]
+    ,[dblUnitRetail]
+	,[intCategoryId]
+	,[dblAdjustCostValue]
+	,[dblAdjustRetailValue]
+	,[intCostingMethod]
+	,[ysnAllowVoucher]
+	,[intSourceEntityId]
+)
+SELECT
+	[intItemId] = p.intItemId 
+	,[intItemLocationId] = p.intItemLocationId
+	,[intItemUOMId] = CASE WHEN ISNULL(i.ysnSeparateStockForUOMs, 0) = 0 THEN iu.intItemUOMId ELSE p.intItemUOMId END 
+	,[dtmDate] = p.dtmDate
+    ,[dblQty] = CASE WHEN ISNULL(i.ysnSeparateStockForUOMs, 0) = 0 THEN dbo.fnCalculateQtyBetweenUOM(p.intItemUOMId, iu.intItemUOMId, p.dblQty) ELSE p.dblQty END 
+	,[dblUOMQty] = CASE WHEN ISNULL(i.ysnSeparateStockForUOMs, 0) = 0 THEN iu.dblUnitQty ELSE p.dblUOMQty END 
+    ,[dblCost] = CASE WHEN ISNULL(i.ysnSeparateStockForUOMs, 0) = 0 THEN dbo.fnCalculateCostBetweenUOM(p.intItemUOMId, iu.intItemUOMId, p.dblCost) ELSE p.dblCost END 
+	,[dblValue] = p.dblValue 
+	,[dblSalesPrice] = CASE WHEN ISNULL(i.ysnSeparateStockForUOMs, 0) = 0 THEN dbo.fnCalculateCostBetweenUOM(p.intItemUOMId, iu.intItemUOMId, p.dblSalesPrice) ELSE p.dblSalesPrice END 
+	,[intCurrencyId] = p.intCurrencyId
+	,[dblExchangeRate] = p.dblExchangeRate
+    ,[intTransactionId] = p.intTransactionId
+	,[intTransactionDetailId] = p.intTransactionDetailId
+	,[strTransactionId] = p.strTransactionId 
+	,[intTransactionTypeId] = p.intTransactionTypeId
+	,[intLotId] = p.intLotId 
+	,[intSubLocationId] = p.intSubLocationId 
+	,[intStorageLocationId] = p.intStorageLocationId
+	,[ysnIsStorage] = p.ysnIsStorage
+	,[strActualCostId] = p.strActualCostId
+    ,[intSourceTransactionId] = p.intSourceTransactionId
+	,[strSourceTransactionId] = p.strSourceTransactionId
+	,[intInTransitSourceLocationId] = p.intInTransitSourceLocationId
+	,[intForexRateTypeId] = p.intForexRateTypeId
+	,[dblForexRate] = p.dblForexRate
+	,[intStorageScheduleTypeId] = p.intStorageScheduleTypeId
+    ,[dblUnitRetail] = CASE WHEN ISNULL(i.ysnSeparateStockForUOMs, 0) = 0 THEN dbo.fnCalculateCostBetweenUOM(p.intItemUOMId, iu.intItemUOMId, p.dblUnitRetail) ELSE p.dblUnitRetail END 
+	,[intCategoryId] = p.intCategoryId
+	,[dblAdjustCostValue] = p.dblAdjustCostValue
+	,[dblAdjustRetailValue] = p.dblAdjustRetailValue
+	,[intCostingMethod] = p.intCostingMethod
+	,[ysnAllowVoucher] = p.ysnAllowVoucher
+	,[intSourceEntityId] = p.intSourceEntityId 
+FROM 
+	@ItemsToStorage p 
+	INNER JOIN tblICItem i 
+		ON p.intItemId = i.intItemId 
+	LEFT JOIN tblICItemUOM iu
+		ON iu.intItemId = p.intItemId
+		AND iu.ysnStockUnit = 1
+ORDER BY 
+	p.intId
+
+-----------------------------------------------------------------------------------------------------------------------------
 -- Do the Validation
 -----------------------------------------------------------------------------------------------------------------------------
 BEGIN 
 	EXEC @returnValue = dbo.uspICValidateCostingOnPostStorage
-		@ItemsToValidate = @ItemsToStorage
+		@ItemsToValidate = @StorageToPost
 
 	IF @returnValue < 0 RETURN @returnValue;
 END
@@ -108,7 +191,7 @@ SELECT  intId
 		,intForexRateTypeId
 		,dblForexRate
 		,intSourceEntityId
-FROM	@ItemsToStorage
+FROM	@StorageToPost
 
 OPEN loopItems;
 

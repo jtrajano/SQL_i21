@@ -78,6 +78,8 @@ DECLARE @intTicketContractDetailId INT
 DECLARE @dblTicketScheduleQuantity AS NUMERIC(18,6)
 DECLARE @dblLoopAdjustedScheduleQuantity NUMERIC (38,20)  
 DECLARE @strTicketDistributionOption NVARCHAR(3)
+DECLARE @ysnTicketHasSpecialDiscount BIT
+DECLARE @ysnTicketSpecialGradePosted BIT
 
 SELECT	
 	@intTicketItemUOMId = UOM.intItemUOMId
@@ -90,6 +92,8 @@ SELECT
 	, @intTicketContractDetailId = SC.intContractId
 	, @dblTicketScheduleQuantity = ISNULL(SC.dblScheduleQty,0)
 	, @strTicketDistributionOption = SC.strDistributionOption
+	, @ysnTicketHasSpecialDiscount = SC.ysnHasSpecialDiscount
+	, @ysnTicketSpecialGradePosted = SC.ysnSpecialGradePosted
 FROM dbo.tblSCTicket SC JOIN dbo.tblICItemUOM UOM ON SC.intItemId = UOM.intItemId
 WHERE SC.intTicketId = @intTicketId AND UOM.ysnStockUnit = 1		
 
@@ -453,6 +457,7 @@ END
 		DEALLOCATE lotCursor;
 	END
 	
+	/*
 	-- VOUCHER INTEGRATION
 	SELECT @createVoucher = ysnCreateVoucher, @postVoucher = ysnPostVoucher FROM tblAPVendor WHERE intEntityId = @intEntityId
 	
@@ -564,7 +569,7 @@ END
 					)
 				
 		END 
-		/*
+		
 		SELECT @total = COUNT(*) FROM @voucherItems;
 		IF (@total > 0)
 		BEGIN
@@ -656,7 +661,7 @@ END
 				END
 
 		END
-		*/
+		
 
 		SELECT @total = COUNT(1)
 		FROM	tblICInventoryReceiptItem ri
@@ -752,6 +757,13 @@ END
 				,@success = @success OUTPUT
 			END
 		END
+	END
+		*/
+
+		IF(@ysnTicketHasSpecialDiscount <> 1 OR (@ysnTicketSpecialGradePosted = 1 AND @ysnTicketHasSpecialDiscount = 1))
+		BEGIN
+			EXEC uspSCProcessReceiptToVoucher @intTicketId, @InventoryReceiptId	,@intUserId
+		END
 		
 		EXEC dbo.uspSMAuditLog 
 			@keyValue			= @intTicketId				-- Primary Key Value of the Ticket. 
@@ -762,7 +774,7 @@ END
 			,@fromValue			= ''						-- Old Value
 			,@toValue			= @strTransactionId			-- New Value
 			,@details			= '';
-	END
+	
 _Exit:
 	
 END TRY

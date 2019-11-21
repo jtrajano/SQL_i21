@@ -40,10 +40,11 @@ BEGIN TRY
 			@ysnFreezed					BIT,
 			@ysnAA						BIT,
 			@intFutOptTransactionHeaderId INT = NULL,
-			@intScreenId		INT,
+			@intScreenId				INT,
 			@intTransactionId			INT,
 			@ysnOnceApproved			INT = 0,
-   			@ysnSplit bit = convert(bit,0)
+   			@ysnSplit 					BIT = CONVERT(BIT,0),
+			@dblDerivativeNoOfContract	NUMERIC(18,6)
 
 	SELECT @intUserId = ISNULL(intLastModifiedById,intCreatedById) FROM tblCTPriceContract WHERE intPriceContractId = @intPriceContractId
 
@@ -66,7 +67,7 @@ BEGIN TRY
 		WHILE	ISNULL(@intPriceFixationDetailId,0) > 0
 		BEGIN
 		
-			SELECT	@intFutOptTransactionId = 0,@ysnHedge = 0,@ysnFreezed = 0
+			SELECT	@intFutOptTransactionId = 0,@ysnHedge = 0,@ysnFreezed = 0,@dblDerivativeNoOfContract = 0
 
 			SELECT	@intFutOptTransactionId	=	FD.intFutOptTransactionId,	
 					@intBrokerId			=	FD.intBrokerId,
@@ -103,6 +104,14 @@ BEGIN TRY
 			
 			IF @ysnHedge = 1 
 			BEGIN
+				-- CHECK IF THERE IS NO CHANGES WITH dblHedgeNoOfLots
+				SELECT @dblDerivativeNoOfContract = ISNULL(dblNoOfContract,0) FROM tblRKFutOptTransaction WHERE intFutOptTransactionId = @intFutOptTransactionId
+				IF @dblHedgeNoOfLots = @dblDerivativeNoOfContract
+				BEGIN
+					SELECT	@intPriceFixationDetailId = MIN(intPriceFixationDetailId) FROM tblCTPriceFixationDetail WHERE intPriceFixationId = @intPriceFixationId AND intPriceFixationDetailId > @intPriceFixationDetailId
+					CONTINUE
+				END
+
 				IF ISNULL(@ysnFreezed,0) = 0
 				BEGIN
 					SET @strXML = '<root>'

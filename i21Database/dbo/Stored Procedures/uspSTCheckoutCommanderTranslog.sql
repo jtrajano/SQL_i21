@@ -20,7 +20,7 @@ BEGIN
 			BEGIN
 				BEGIN TRANSACTION
 			END
-				
+
 		ELSE
 			BEGIN
 				SAVE TRANSACTION @Savepoint
@@ -67,12 +67,12 @@ BEGIN
 
 		IF(@intTableRowCount > 0)
 			BEGIN
-				
+
 				--Get StoreId
 				DECLARE @intStoreId			INT,
 						@strRegisterClass	NVARCHAR(50)
 
-				SELECT 
+				SELECT
 					@intStoreId			= chk.intStoreId,
 					@strRegisterClass	= r.strRegisterClass
 				FROM tblSTCheckoutHeader chk
@@ -84,16 +84,16 @@ BEGIN
 
 
 
-				-- ================================================================================================================== 
+				-- ==================================================================================================================
 				-- START - Validate if Store has department setup for rebate
-				-- ================================================================================================================== 
+				-- ==================================================================================================================
 				IF EXISTS(SELECT TOP 1 1 FROM tblSTStoreRebates WHERE intStoreId = @intStoreId)
 					BEGIN
 
-						INSERT INTO tblSTCheckoutErrorLogs 
+						INSERT INTO tblSTCheckoutErrorLogs
 						(
 							strErrorType
-							, strErrorMessage 
+							, strErrorMessage
 							, strRegisterTag
 							, strRegisterTagValue
 							, intCheckoutId
@@ -118,25 +118,25 @@ BEGIN
 				IF EXISTS(SELECT COUNT(intTranslogId) FROM tblSTTranslogRebates)
 					BEGIN
 						--Get Number of rows
-						SELECT @intCountRows = COUNT(*) 
+						SELECT @intCountRows = COUNT(*)
 						FROM @UDT_Translog chk
 						JOIN
 						(
 							SELECT c.intTermMsgSN as termMsgSN
 							FROM @UDT_Translog c
-								WHERE (c.strTransType = 'sale' 
+								WHERE (c.strTransType = 'sale'
 								OR c.strTransType = 'network sale')
 								AND c.dtmDate IS NOT NULL
 							GROUP BY c.intTermMsgSN
 						) x ON x.termMsgSN = chk.intTermMsgSN
 						WHERE NOT EXISTS
 						(
-							SELECT * 
+							SELECT *
 								FROM dbo.tblSTTranslogRebates TR
 								WHERE TR.dtmDate = chk.dtmDate --CAST(left(REPLACE(chk.trHeaderdate, 'T', ' '), len(chk.trHeaderdate) - 6) AS DATETIME)
 									AND TR.intTermMsgSNterm = chk.intTermMsgSNterm
-									AND TR.intTermMsgSN = chk.intTermMsgSN 
-									AND TR.intTrTickNumPosNum = chk.intTrTickNumPosNum 
+									AND TR.intTermMsgSN = chk.intTermMsgSN
+									AND TR.intTrTickNumPosNum = chk.intTrTickNumPosNum
 									AND TR.intTrTickNumTrSeq  = chk.intTrTickNumTrSeq
 									AND TR.strTransType COLLATE DATABASE_DEFAULT = chk.strTransType COLLATE DATABASE_DEFAULT
 									AND TR.intStoreNumber = chk.intStoreNumber
@@ -146,8 +146,8 @@ BEGIN
 				ELSE
 					BEGIN
 						SELECT @intCountRows = COUNT(c.intTermMsgSN)
-						FROM @UDT_Translog c 
-							WHERE (c.strTransType = 'sale' 
+						FROM @UDT_Translog c
+							WHERE (c.strTransType = 'sale'
 							OR c.strTransType = 'network sale')
 							AND c.dtmDate IS NOT NULL
 						GROUP BY c.intTermMsgSN
@@ -190,7 +190,7 @@ BEGIN
 							-- trTickNum
 							[intTrTickNumPosNum],
 							[intTrTickNumTrSeq],
-							[intTrUniqueSN], 
+							[intTrUniqueSN],
 							[strPeriodNameHOUR],
 							[intPeriodNameHOURSeq],
 							[intPeriodNameHOURLevel],
@@ -213,10 +213,10 @@ BEGIN
 							[intCashierDrawer],
 							-- originalCashier
 							[strOriginalCashier],
-							[intOriginalCashierSysid], 
+							[intOriginalCashierSysid],
 							[strOriginalCashierEmpNum],
 							[intOriginalCashierPosNum],
-							[intOriginalCashierPeriod], 
+							[intOriginalCashierPeriod],
 							[intOriginalCashierDrawer],
 
 							[intStoreNumber],
@@ -243,7 +243,7 @@ BEGIN
 							[strTaxAmtsTaxAttributeCat],
 
 							[dblTrCurrTot],
-							[strTrCurrTotLocale],	
+							[strTrCurrTotLocale],
 							[dblTrSTotalizer],
 							[dblTrGTotalizer],
 							-- trFstmp
@@ -273,7 +273,7 @@ BEGIN
 							[strTrLoyaltyProgramTrloAuthReply],
 
 							-- trLines
-							[ysnTrLineDuplicate],  
+							[ysnTrLineDuplicate],
 							[strTrLineType],
 							[strTrLineUnsettled],
 							[dblTrlTaxesTrlTax],
@@ -313,7 +313,7 @@ BEGIN
 							-- NEW
 							-- trlFuel
 							[strTrlFuelType],
-							[strTrlFuelSeq],	
+							[strTrlFuelSeq],
 							[strTrlFuelPosition],
 							[strTrlFuelDepst],
 							[strTrlFuelProd],
@@ -351,7 +351,7 @@ BEGIN
 							[dtmTrpCardInfoTrpcAuthDateTime],
 							[strTrpCardInfoTrpcRefNum],
 							[strTrpCardInfoMerchInfoTrpcmMerchID],
-							[strTrpCardInfoMerchInfoTrpcmTermID],	
+							[strTrpCardInfoMerchInfoTrpcmTermID],
 
 							[strTrpCardInfoTrpcAcquirerBatchNr],
 
@@ -374,11 +374,11 @@ BEGIN
 							[intConcurrencyId]
 
 						)
-						SELECT 
-							[intScanTransactionId]				= NULLIF(ROW_NUMBER() OVER(PARTITION BY CAST(intTermMsgSN AS BIGINT), strTrpPaycode  ORDER BY CAST(intRowCount AS INT)), ''),
+						SELECT
+							[intScanTransactionId]				= NULLIF(ROW_NUMBER() OVER(PARTITION BY CAST(intTermMsgSN AS BIGINT), strTrpPaycode ORDER BY CAST(intTermMsgSN AS INT)), ''),
 							[strTrlUPCwithoutCheckDigit]		= CASE
 																	WHEN (@strRegisterClass = N'SAPPHIRE/COMMANDER')
-																		THEN CASE 
+																		THEN CASE
 																				WHEN (strTrlUPC IS NOT NULL AND strTrlUPC != '' AND LEN(strTrlUPC) = 14 AND SUBSTRING(strTrlUPC, 1, 1) = '0')
 																					THEN LEFT (strTrlUPC, LEN (strTrlUPC)-1) -- Remove Check digit on last character
 																				ELSE NULL
@@ -417,7 +417,7 @@ BEGIN
 							-- trTickNum
 							[intTrTickNumPosNum]				= intTrTickNumPosNum,
 							[intTrTickNumTrSeq]					= intTrTickNumTrSeq,
-							[intTrUniqueSN]						= intTrUniqueSN, 
+							[intTrUniqueSN]						= intTrUniqueSN,
 							[strPeriodNameHOUR]					= strPeriodNameHOUR,
 							[intPeriodNameHOURSeq]				= intPeriodNameHOURSeq,
 							[intPeriodNameHOURLevel]			= intPeriodNameHOURLevel,
@@ -433,17 +433,17 @@ BEGIN
 
 							-- cashier
 							[strCashier]						= strCashier,
-							[intCashierSysId]					= intCashierSysId,	
+							[intCashierSysId]					= intCashierSysId,
 							[strCashierEmpNum]					= strCashierEmpNum,
 							[intCashierPosNum]					= intCashierPosNum,
-							[intCashierPeriod]					= intCashierPeriod,	
+							[intCashierPeriod]					= intCashierPeriod,
 							[intCashierDrawer]					= intCashierDrawer,
 							-- originalCashier
 							[strOriginalCashier]				= strOriginalCashier,
-							[intOriginalCashierSysid]			= intOriginalCashierSysid, 
+							[intOriginalCashierSysid]			= intOriginalCashierSysid,
 							[strOriginalCashierEmpNum]			= strOriginalCashierEmpNum,
 							[intOriginalCashierPosNum]			= intOriginalCashierPosNum,
-							[intOriginalCashierPeriod]			= intOriginalCashierPeriod, 
+							[intOriginalCashierPeriod]			= intOriginalCashierPeriod,
 							[intOriginalCashierDrawer]			= intOriginalCashierDrawer,
 
 							[intStoreNumber]					= intStoreNumber,
@@ -470,7 +470,7 @@ BEGIN
 							[strTaxAmtsTaxAttributeCat]			= strTaxAmtsTaxAttributeCat,
 
 							[dblTrCurrTot]						= dblTrCurrTot,
-							[strTrCurrTotLocale]				= strTrCurrTotLocale,	
+							[strTrCurrTotLocale]				= strTrCurrTotLocale,
 							[dblTrSTotalizer]					= dblTrSTotalizer,
 							[dblTrGTotalizer]					= dblTrGTotalizer,
 							-- trFstmp
@@ -500,7 +500,7 @@ BEGIN
 							[strTrLoyaltyProgramTrloAuthReply]	= strTrLoyaltyProgramTrloAuthReply,
 
 							-- trLines
-							[ysnTrLineDuplicate]				= ysnTrLineDuplicate,  
+							[ysnTrLineDuplicate]				= ysnTrLineDuplicate,
 							[strTrLineType]						= strTrLineType,
 							[strTrLineUnsettled]				= strTrLineUnsettled,
 							[dblTrlTaxesTrlTax]					= dblTrlTaxesTrlTax,
@@ -553,7 +553,7 @@ BEGIN
 							-- NEW
 							-- trlFuel
 							[strTrlFuelType]					= strTrlFuelType,
-							[strTrlFuelSeq]						= strTrlFuelSeq,	
+							[strTrlFuelSeq]						= strTrlFuelSeq,
 							[strTrlFuelPosition]				= strTrlFuelPosition,
 							[strTrlFuelDepst]					= strTrlFuelDepst,
 							[strTrlFuelProd]					= strTrlFuelProd,
@@ -591,7 +591,7 @@ BEGIN
 							[dtmTrpCardInfoTrpcAuthDateTime]	= dtmTrpCardInfoTrpcAuthDateTime,
 							[strTrpCardInfoTrpcRefNum]			= strTrpCardInfoTrpcRefNum,
 							[strTrpCardInfoMerchInfoTrpcmMerchID]	= strTrpCardInfoMerchInfoTrpcmMerchID,
-							[strTrpCardInfoMerchInfoTrpcmTermID]	= strTrpCardInfoMerchInfoTrpcmTermID,	
+							[strTrpCardInfoMerchInfoTrpcmTermID]	= strTrpCardInfoMerchInfoTrpcmTermID,
 
 							[strTrpCardInfoTrpcAcquirerBatchNr]		= strTrpCardInfoTrpcAcquirerBatchNr,
 
@@ -618,7 +618,7 @@ BEGIN
 							(
 								SELECT c.intTermMsgSN as termMsgSN
 								FROM @UDT_Translog c
-									WHERE (c.strTransType = 'sale' 
+									WHERE (c.strTransType = 'sale'
 									OR c.strTransType = 'network sale')
 									AND c.dtmDate IS NOT NULL
 								GROUP BY c.intTermMsgSN
@@ -629,8 +629,8 @@ BEGIN
 								FROM dbo.tblSTTranslogRebates TR
 								WHERE TR.dtmDate = chk.dtmDate --CAST(left(REPLACE(chk.trHeaderdate, 'T', ' '), len(chk.trHeaderdate) - 6) AS DATETIME)
 									AND TR.intTermMsgSNterm = chk.intTermMsgSNterm
-									AND TR.intTermMsgSN = chk.intTermMsgSN 
-									AND TR.intTrTickNumPosNum = chk.intTrTickNumPosNum 
+									AND TR.intTermMsgSN = chk.intTermMsgSN
+									AND TR.intTrTickNumPosNum = chk.intTrTickNumPosNum
 									AND TR.intTrTickNumTrSeq  = chk.intTrTickNumTrSeq
 									AND TR.strTransType COLLATE DATABASE_DEFAULT = chk.strTransType COLLATE DATABASE_DEFAULT
 									AND TR.intStoreNumber = chk.intStoreNumber
@@ -647,17 +647,17 @@ BEGIN
 
 					END
 				ELSE IF(@intCountRows = 0)
-					BEGIN 
+					BEGIN
 						SET @ysnSuccess = CAST(0 AS BIT)
 						SET @strMessage = 'Transaction Log file is already been exported.'
 
-							-- ================================================================================================================== 
+							-- ==================================================================================================================
 							-- START - Insert message if Transaction Log is already been exported
-							-- ================================================================================================================== 
-							INSERT INTO tblSTCheckoutErrorLogs 
+							-- ==================================================================================================================
+							INSERT INTO tblSTCheckoutErrorLogs
 							(
 									strErrorType
-									, strErrorMessage 
+									, strErrorMessage
 									, strRegisterTag
 									, strRegisterTagValue
 									, intCheckoutId
@@ -674,7 +674,7 @@ BEGIN
 							)
 
 							GOTO ExitWithCommit
-							-- ==================================================================================================================  
+							-- ==================================================================================================================
 							-- END - Insert message if Transaction Log is already been exported
 							-- ==================================================================================================================
 					END
@@ -687,12 +687,12 @@ BEGIN
 					END
 
 			END
-		
+
 
 	END TRY
 	BEGIN CATCH
 		SET @ysnSuccess = CAST(0 AS BIT)
-		SET @strMessage = 'End script error: ' + ERROR_MESSAGE()  
+		SET @strMessage = 'End script error: ' + ERROR_MESSAGE()
 
 		GOTO ExitWithRollback
 	END CATCH
@@ -711,7 +711,7 @@ ExitWithCommit:
 		END
 
 	GOTO ExitPost
-	
+
 
 
 ExitWithRollback:
@@ -725,7 +725,7 @@ ExitWithRollback:
 					ROLLBACK TRANSACTION
 				END
 			END
-			
+
 		ELSE
 			BEGIN
 				IF ((XACT_STATE()) <> 0)
@@ -735,13 +735,13 @@ ExitWithRollback:
 						ROLLBACK TRANSACTION @Savepoint
 					END
 			END
-			
-				
-		
-		
-	
 
-		
+
+
+
+
+
+
 ExitPost:
 
 --CREATE PROCEDURE [dbo].[uspSTCheckoutCommanderTranslog]
@@ -751,19 +751,19 @@ ExitPost:
 --AS
 --BEGIN
 --	BEGIN TRY
-		
+
 --		BEGIN TRANSACTION
 
---		-- ==================================================================================================================  
---		-- Start Validate if Translog xml file matches the Mapping on i21 
+--		-- ==================================================================================================================
+--		-- Start Validate if Translog xml file matches the Mapping on i21
 --		-- ------------------------------------------------------------------------------------------------------------------
 --		IF NOT EXISTS(SELECT TOP 1 1 FROM #tempCheckoutInsert)
 --			BEGIN
 --						-- Add to error logging
---						INSERT INTO tblSTCheckoutErrorLogs 
+--						INSERT INTO tblSTCheckoutErrorLogs
 --						(
 --							strErrorType
---							, strErrorMessage 
+--							, strErrorMessage
 --							, strRegisterTag
 --							, strRegisterTagValue
 --							, intCheckoutId
@@ -785,7 +785,7 @@ ExitPost:
 --						GOTO ExitWithCommit
 --			END
 --		-- ------------------------------------------------------------------------------------------------------------------
---		-- End Validate if Translog xml file matches the Mapping on i21   
+--		-- End Validate if Translog xml file matches the Mapping on i21
 --		-- ==================================================================================================================
 
 
@@ -807,7 +807,7 @@ ExitPost:
 
 --		DECLARE @intTableRowCount AS INT = 0
 
---		SELECT @intTableRowCount = COUNT(*) 
+--		SELECT @intTableRowCount = COUNT(*)
 --		FROM #tempCheckoutInsert
 
 
@@ -818,7 +818,7 @@ ExitPost:
 --			DECLARE @intStoreId			INT,
 --					@strRegisterClass	NVARCHAR(50)
 
---			SELECT 
+--			SELECT
 --				@intStoreId			= chk.intStoreId,
 --				@strRegisterClass	= r.strRegisterClass
 --			FROM tblSTCheckoutHeader chk
@@ -828,17 +828,17 @@ ExitPost:
 --				ON st.intRegisterId = r.intRegisterId
 --			WHERE chk.intCheckoutId = @intCheckoutId
 
-			
---			-- ================================================================================================================== 
+
+--			-- ==================================================================================================================
 --			-- START - Validate if Store has department setup for rebate
---			-- ================================================================================================================== 
+--			-- ==================================================================================================================
 --			IF EXISTS(SELECT TOP 1 1 FROM tblSTStoreRebates WHERE intStoreId = @intStoreId)
 --				BEGIN
 
---					INSERT INTO tblSTCheckoutErrorLogs 
+--					INSERT INTO tblSTCheckoutErrorLogs
 --					(
 --						strErrorType
---						, strErrorMessage 
+--						, strErrorMessage
 --						, strRegisterTag
 --						, strRegisterTagValue
 --						, intCheckoutId
@@ -861,7 +861,7 @@ ExitPost:
 --			IF EXISTS(SELECT COUNT(intTranslogId) FROM tblSTTranslogRebates)
 --				BEGIN
 --					--Get Number of rows
---					SELECT @intCountRows = COUNT(*) 
+--					SELECT @intCountRows = COUNT(*)
 --					FROM #tempCheckoutInsert chk
 --					JOIN
 --					(
@@ -869,20 +869,20 @@ ExitPost:
 --						FROM #tempCheckoutInsert c
 --						--WHERE c.trLinetrlDept IN (
 --						--							SELECT strDepartment FROM @TempTableDepartments
---						--						 ) 
---							WHERE (c.transtype = 'sale' 
+--						--						 )
+--							WHERE (c.transtype = 'sale'
 --							OR c.transtype = 'network sale')
 --							AND c.trHeaderdate != ''
 --						GROUP BY c.trHeadertermMsgSN
 --					) x ON x.termMsgSN = chk.trHeadertermMsgSN
 --					WHERE NOT EXISTS
 --					(
---						SELECT * 
+--						SELECT *
 --							FROM dbo.tblSTTranslogRebates TR
 --							WHERE TR.dtmDate = CAST(left(REPLACE(chk.trHeaderdate, 'T', ' '), len(chk.trHeaderdate) - 6) AS DATETIME)
 --								AND TR.intTermMsgSNterm = chk.termMsgSNterm
---								AND TR.intTermMsgSN = chk.trHeadertermMsgSN 
---								AND TR.intTrTickNumPosNum = chk.cashierposNum 
+--								AND TR.intTermMsgSN = chk.trHeadertermMsgSN
+--								AND TR.intTrTickNumPosNum = chk.cashierposNum
 --								AND TR.intTrTickNumTrSeq  = chk.trTickNumtrSeq
 --								AND TR.strTransType COLLATE DATABASE_DEFAULT = chk.transtype COLLATE DATABASE_DEFAULT
 --								AND TR.intStoreNumber = chk.trHeaderstoreNumber
@@ -892,11 +892,11 @@ ExitPost:
 --			ELSE
 --				BEGIN
 --					SELECT @intCountRows = COUNT(c.trHeadertermMsgSN)
---					FROM #tempCheckoutInsert c 
+--					FROM #tempCheckoutInsert c
 --					--WHERE c.trLinetrlDept IN (
 --					--							SELECT strDepartment FROM @TempTableDepartments
---					--						 ) 
---						WHERE (c.transtype = 'sale' 
+--					--						 )
+--						WHERE (c.transtype = 'sale'
 --						OR c.transtype = 'network sale')
 --						AND c.trHeaderdate != ''
 --					GROUP BY c.trHeadertermMsgSN
@@ -908,9 +908,9 @@ ExitPost:
 
 --			IF(@intCountRows > 0)
 --				BEGIN
-					
+
 --					BEGIN TRY
---							INSERT INTO dbo.tblSTTranslogRebates 
+--							INSERT INTO dbo.tblSTTranslogRebates
 --							(
 --								[dtmOpenedTime],
 --								[dtmClosedTime],
@@ -933,16 +933,16 @@ ExitPost:
 --								[intTermMsgSNterm],
 --								[intTrTickNumPosNum],
 --								[intTrTickNumTrSeq],
---								[intTrUniqueSN],                        -- NEW 
---								[strPeriodNameHOUR],             		-- Modified 
---								[intPeriodNameHOURSeq],                 -- Modified 
---								[intPeriodNameHOURLevel],	            -- Modified 
---								[strPeriodNameSHIFT],                   -- Modified 
---								[intPeriodNameSHIFTSeq],                -- Modified 
---								[intPeriodNameSHIFTLevel],              -- Modified 
---								[strPeriodNameDAILY],                   -- Modified 
---								[intPeriodNameDAILYSeq],                -- Modified 
---								[intPeriodNameDAILYLevel],              -- Modified 
+--								[intTrUniqueSN],                        -- NEW
+--								[strPeriodNameHOUR],             		-- Modified
+--								[intPeriodNameHOURSeq],                 -- Modified
+--								[intPeriodNameHOURLevel],	            -- Modified
+--								[strPeriodNameSHIFT],                   -- Modified
+--								[intPeriodNameSHIFTSeq],                -- Modified
+--								[intPeriodNameSHIFTLevel],              -- Modified
+--								[strPeriodNameDAILY],                   -- Modified
+--								[intPeriodNameDAILYSeq],                -- Modified
+--								[intPeriodNameDAILYLevel],              -- Modified
 --								[dtmDate],
 --								[intDuration],
 --								[intTill],
@@ -951,7 +951,7 @@ ExitPost:
 --								[intCashierPosNum],
 --								[intCashierEmpNum],
 --								[intCashierSysId],
---								[intCashierDrawer], 
+--								[intCashierDrawer],
 --								[strOriginalCashier],
 --								[intOriginalCashierPeriod],
 --								[intOriginalCashierPosNum],
@@ -978,7 +978,7 @@ ExitPost:
 --								[intTaxAmtsTaxAttributeSysid],
 --								[strTaxAmtsTaxAttributeCat],
 --								[dblTrCurrTot],
---								[strTrCurrTotLocale],	
+--								[strTrCurrTotLocale],
 --								[dblTrSTotalizer],
 --								[dblTrGTotalizer],
 --								[dblTrFstmpTrFstmpTot],
@@ -1056,7 +1056,7 @@ ExitPost:
 --								[dtmTrpCardInfoTrpcAuthDateTime],
 --								[strTrpCardInfoTrpcRefNum],
 --								[strTrpCardInfoMerchInfoTrpcmMerchID],
---								[strTrpCardInfoMerchInfoTrpcmTermID],	
+--								[strTrpCardInfoMerchInfoTrpcmTermID],
 --								[strTrlMatchLineTrlMatchName] ,
 --								[dblTrlMatchLineTrlMatchQuantity],
 --								[dblTrlMatchLineTrlMatchPrice],
@@ -1073,7 +1073,7 @@ ExitPost:
 --								[ysnRJRSubmitted],
 --								[intConcurrencyId]
 --							)
---							SELECT 	
+--							SELECT
 --								-- transSet
 --								[dtmOpenedTime]								= (CASE WHEN chk.transSetopenedTime = '' THEN NULL ELSE left(REPLACE(chk.transSetopenedTime, 'T', ' '), len(chk.transSetopenedTime) - 6) END),
 --								[dtmClosedTime]								= (CASE WHEN chk.transSetclosedTime = '' THEN NULL ELSE left(REPLACE(chk.transSetclosedTime, 'T', ' '), len(chk.transSetclosedTime) - 6) END),
@@ -1099,16 +1099,16 @@ ExitPost:
 --								[intTermMsgSNterm]							= NULLIF(chk.termMsgSNterm, ''),
 --								[intTrTickNumPosNum]						= NULLIF(chk.trTickNumposNum, ''),
 --								[intTrTickNumTrSeq]							= NULLIF(chk.trTickNumtrSeq, ''),
---								[intTrUniqueSN]								= NULLIF(chk.trHeadertrUniqueSN, ''),                   -- NEW 
---								[strPeriodNameHOUR]							= NULLIF(chk.periodname, ''),             				-- Modified 
---								[intPeriodNameHOURSeq]						= NULLIF(chk.periodseq, ''),							-- Modified 
---								[intPeriodNameHOURLevel]					= NULLIF(chk.periodlevel, ''),							-- Modified 
---								[strPeriodNameSHIFT]						= NULL,                   -- Modified 
---								[intPeriodNameSHIFTSeq]						= NULL,                -- Modified 
---								[intPeriodNameSHIFTLevel]					= NULL,              -- Modified 
---								[strPeriodNameDAILY]						= NULL,                  -- Modified 
---								[intPeriodNameDAILYSeq]						= NULL,                -- Modified 
---								[intPeriodNameDAILYLevel]					= NULL,              -- Modified 
+--								[intTrUniqueSN]								= NULLIF(chk.trHeadertrUniqueSN, ''),                   -- NEW
+--								[strPeriodNameHOUR]							= NULLIF(chk.periodname, ''),             				-- Modified
+--								[intPeriodNameHOURSeq]						= NULLIF(chk.periodseq, ''),							-- Modified
+--								[intPeriodNameHOURLevel]					= NULLIF(chk.periodlevel, ''),							-- Modified
+--								[strPeriodNameSHIFT]						= NULL,                   -- Modified
+--								[intPeriodNameSHIFTSeq]						= NULL,                -- Modified
+--								[intPeriodNameSHIFTLevel]					= NULL,              -- Modified
+--								[strPeriodNameDAILY]						= NULL,                  -- Modified
+--								[intPeriodNameDAILYSeq]						= NULL,                -- Modified
+--								[intPeriodNameDAILYLevel]					= NULL,              -- Modified
 --								[dtmDate]									= (CASE WHEN chk.trHeaderdate = '' THEN NULL ELSE left(REPLACE(chk.trHeaderdate, 'T', ' '), len(chk.trHeaderdate) - 6) END),
 --								[intDuration]								= NULLIF(chk.trHeaderduration, ''),
 --								[intTill]									= NULLIF(chk.trHeadertill, ''),
@@ -1117,7 +1117,7 @@ ExitPost:
 --								[intCashierPosNum]							= NULLIF(chk.cashierposNum, ''),
 --								[intCashierEmpNum]							= NULLIF(chk.cashierempNum, ''),
 --								[intCashierSysId]							= NULLIF(chk.cashiersysid, ''),
---								[intCashierDrawer]							= NULLIF(chk.cashierdrawer, ''), 
+--								[intCashierDrawer]							= NULLIF(chk.cashierdrawer, ''),
 --								[strOriginalCashier]						= CONVERT(NVARCHAR(100), ISNULL(NULLIF(chk.trHeaderoriginalCashier, ''), NULL)),
 --								[intOriginalCashierPeriod]					= NULLIF(chk.originalCashierperiod, ''),
 --								[intOriginalCashierPosNum]					= NULLIF(chk.originalCashierposNum, ''),
@@ -1146,7 +1146,7 @@ ExitPost:
 --								[intTaxAmtsTaxAttributeSysid]				= NULLIF(chk.taxAttributesysid, ''),
 --								[strTaxAmtsTaxAttributeCat]					= NULLIF(chk.taxAttributecat, ''),
 --								[dblTrCurrTot]								= NULLIF(chk.trValuetrCurrTot, ''),
---								[strTrCurrTotLocale]						= NULLIF(chk.trCurrTotlocale, ''),	
+--								[strTrCurrTotLocale]						= NULLIF(chk.trCurrTotlocale, ''),
 --								[dblTrSTotalizer]							= NULLIF(chk.trValuetrSTotalizer, ''),
 --								[dblTrGTotalizer]							= NULLIF(chk.trValuetrGTotalizer, ''),
 --								[dblTrFstmpTrFstmpTot]						= NULLIF(chk.trFstmptrFstmpTot, ''),
@@ -1215,7 +1215,7 @@ ExitPost:
 --								--
 --								-- Check Register Class by
 --								--SELECT TOP 1
---								--	r.strRegisterClass 
+--								--	r.strRegisterClass
 --								--FROM tblSTTranslogRebates tlr
 --								--INNER JOIN tblSTCheckoutHeader chk
 --								--	ON tlr.intCheckoutId = chk.intCheckoutId
@@ -1233,7 +1233,7 @@ ExitPost:
 --								--	 THEN INSERT UPC with check digit to column 'strTrlUPC'						(Since COMMANDER is generating UPC with check digit then just use chk.trLinetrlUPC)
 --								--	 THEN INSERT UPC without check digit to column 'strTrlUPCwithoutCheckDigit' (Just remove the last digit of chk.trLinetrlUPC)
 --								--[strTrlUPC]									= NULLIF(chk.trLinetrlUPC, ''),
---								--[strTrlUPCwithoutCheckDigit]				= CASE 
+--								--[strTrlUPCwithoutCheckDigit]				= CASE
 --								--												WHEN (chk.trLinetrlUPC IS NOT NULL AND chk.trLinetrlUPC != '' AND LEN(chk.trLinetrlUPC) = 14 AND SUBSTRING(chk.trLinetrlUPC, 1, 1) = '0')
 --								--													THEN LEFT (chk.trLinetrlUPC, LEN (chk.trLinetrlUPC)-1) -- Remove Check digit on last character
 --								--												ELSE NULL
@@ -1248,7 +1248,7 @@ ExitPost:
 --																			END,
 --								[strTrlUPCwithoutCheckDigit]				= CASE
 --																				WHEN (@strRegisterClass = N'SAPPHIRE/COMMANDER')
---																					THEN CASE 
+--																					THEN CASE
 --																							WHEN (chk.trLinetrlUPC IS NOT NULL AND chk.trLinetrlUPC != '' AND LEN(chk.trLinetrlUPC) = 14 AND SUBSTRING(chk.trLinetrlUPC, 1, 1) = '0')
 --																								THEN LEFT (chk.trLinetrlUPC, LEN (chk.trLinetrlUPC)-1) -- Remove Check digit on last character
 --																							ELSE NULL
@@ -1296,7 +1296,7 @@ ExitPost:
 --								[dblTrlMatchLineTrlPromoAmount] = NULLIF(chk.trlMatchLinetrlPromoAmount, ''),
 --								[strTrlMatchLineTrlPromotionID] = NULLIF(chk.trlMatchLinetrlPromotionID, ''),
 --								[strTrlMatchLineTrlPromotionIDPromoType] = NULLIF(chk.trlPromotionIDpromotype, ''),
---								[intTrlMatchLineTrlMatchNumber] = NULLIF(chk.trlMatchLinetrlMatchNumber, ''),      -- LAST 
+--								[intTrlMatchLineTrlMatchNumber] = NULLIF(chk.trlMatchLinetrlMatchNumber, ''),      -- LAST
 
 --								[intStoreId] = @intStoreId,
 --								[intCheckoutId] = @intCheckoutId,
@@ -1312,19 +1312,19 @@ ExitPost:
 --								--WHERE c.trLinetrlDept IN (
 --								--							SELECT strDepartment FROM @TempTableDepartments
 --								--						 )
---									WHERE (c.transtype = 'sale' 
+--									WHERE (c.transtype = 'sale'
 --									OR c.transtype = 'network sale')
 --									AND c.trHeaderdate != ''
 --								GROUP BY c.trHeadertermMsgSN
 --							) x ON x.termMsgSN = chk.trHeadertermMsgSN
 --							WHERE NOT EXISTS
 --							(
---								SELECT * 
+--								SELECT *
 --								FROM dbo.tblSTTranslogRebates TR
 --								WHERE TR.dtmDate = CAST(left(REPLACE(chk.trHeaderdate, 'T', ' '), len(chk.trHeaderdate) - 6) AS DATETIME)
 --									AND TR.intTermMsgSNterm = chk.termMsgSNterm
---									AND TR.intTermMsgSN = chk.trHeadertermMsgSN 
---									AND TR.intTrTickNumPosNum = chk.cashierposNum 
+--									AND TR.intTermMsgSN = chk.trHeadertermMsgSN
+--									AND TR.intTrTickNumPosNum = chk.cashierposNum
 --									AND TR.intTrTickNumTrSeq  = chk.trTickNumtrSeq
 --									AND TR.strTransType COLLATE DATABASE_DEFAULT = chk.transtype COLLATE DATABASE_DEFAULT
 --									AND TR.intStoreNumber = chk.trHeaderstoreNumber
@@ -1339,20 +1339,20 @@ ExitPost:
 --						SET @strStatusMsg = 'Transaction Log Rebates: ' + ERROR_MESSAGE()
 --						GOTO ExitWithRollback
 --					END CATCH
-						
+
 --				END
 --			ELSE IF(@intCountRows = 0)
 --				BEGIN
 --					SET @strStatusMsg = 'Transaction Log file is already been exported.'
 --					SET @intCountRows = 0
 
---					-- ================================================================================================================== 
+--					-- ==================================================================================================================
 --					-- START - Insert message if Transaction Log is already been exported
---					-- ================================================================================================================== 
---					INSERT INTO tblSTCheckoutErrorLogs 
+--					-- ==================================================================================================================
+--					INSERT INTO tblSTCheckoutErrorLogs
 --					(
 --							strErrorType
---							, strErrorMessage 
+--							, strErrorMessage
 --							, strRegisterTag
 --							, strRegisterTagValue
 --							, intCheckoutId
@@ -1369,7 +1369,7 @@ ExitPost:
 --					)
 
 --					GOTO ExitWithCommit
---					-- ==================================================================================================================  
+--					-- ==================================================================================================================
 --					-- END - Insert message if Transaction Log is already been exported
 --					-- ==================================================================================================================
 

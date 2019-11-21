@@ -80,13 +80,78 @@ DECLARE @AUTO_VARIANCE AS INT = 1
 DECLARE @intReturnValue AS INT 
 
 -----------------------------------------------------------------------------------------------------------------------------
+-- Assemble the Stock to Post
+-----------------------------------------------------------------------------------------------------------------------------
+DECLARE @StockToPost AS ItemInTransitCostingTableType 
+INSERT INTO @StockToPost (	
+	[intItemId]
+	,[intItemLocationId]
+	,[intItemUOMId]
+	,[dtmDate]
+    ,[dblQty]
+	,[dblUOMQty]
+    ,[dblCost]
+	,[dblValue]
+	,[dblSalesPrice]
+	,[intCurrencyId]
+	,[dblExchangeRate]
+    ,[intTransactionId]
+	,[intTransactionDetailId]
+	,[strTransactionId]
+	,[intTransactionTypeId]
+	,[intLotId]
+    ,[intSourceTransactionId]
+	,[strSourceTransactionId]
+    ,[intSourceTransactionDetailId]
+	,[intFobPointId]
+	,[intInTransitSourceLocationId]
+	,[intForexRateTypeId]
+	,[dblForexRate]
+	,[intSourceEntityId]
+)
+SELECT
+	[intItemId] = p.intItemId 
+	,[intItemLocationId] = p.intItemLocationId
+	,[intItemUOMId] = CASE WHEN ISNULL(i.ysnSeparateStockForUOMs, 0) = 0 THEN iu.intItemUOMId ELSE p.intItemUOMId END 
+	,[dtmDate] = p.dtmDate
+    ,[dblQty] = CASE WHEN ISNULL(i.ysnSeparateStockForUOMs, 0) = 0 THEN dbo.fnCalculateQtyBetweenUOM(p.intItemUOMId, iu.intItemUOMId, p.dblQty) ELSE p.dblQty END 
+	,[dblUOMQty] = CASE WHEN ISNULL(i.ysnSeparateStockForUOMs, 0) = 0 THEN iu.dblUnitQty ELSE p.dblUOMQty END 
+    ,[dblCost] = CASE WHEN ISNULL(i.ysnSeparateStockForUOMs, 0) = 0 THEN dbo.fnCalculateCostBetweenUOM(p.intItemUOMId, iu.intItemUOMId, p.dblCost) ELSE p.dblCost END 
+	,[dblValue] = p.dblValue 
+	,[dblSalesPrice] = CASE WHEN ISNULL(i.ysnSeparateStockForUOMs, 0) = 0 THEN dbo.fnCalculateCostBetweenUOM(p.intItemUOMId, iu.intItemUOMId, p.dblSalesPrice) ELSE p.dblSalesPrice END 
+	,[intCurrencyId] = p.intCurrencyId
+	,[dblExchangeRate] = p.dblExchangeRate
+    ,[intTransactionId] = p.intTransactionId
+	,[intTransactionDetailId] = p.intTransactionDetailId
+	,[strTransactionId] = p.strTransactionId 
+	,[intTransactionTypeId] = p.intTransactionTypeId
+	,[intLotId] = p.intLotId 
+    ,[intSourceTransactionId] = p.intSourceTransactionId
+	,[strSourceTransactionId] = p.strSourceTransactionId
+    ,[intSourceTransactionDetailId] = p.intSourceTransactionDetailId
+	,[intFobPointId] = p.intFobPointId
+	,[intInTransitSourceLocationId] = p.intInTransitSourceLocationId
+	,[intForexRateTypeId] = p.intForexRateTypeId
+	,[dblForexRate] = p.dblForexRate
+	,[intSourceEntityId] = p.intSourceEntityId
+FROM 
+	@ItemsToPost p 
+	INNER JOIN tblICItem i 
+		ON p.intItemId = i.intItemId 
+	LEFT JOIN tblICItemUOM iu
+		ON iu.intItemId = p.intItemId
+		AND iu.ysnStockUnit = 1
+ORDER BY 
+	p.intId
+
+-----------------------------------------------------------------------------------------------------------------------------
 -- Do the Validation
 -----------------------------------------------------------------------------------------------------------------------------
 BEGIN 
 	DECLARE @returnValue AS INT 
 
 	EXEC @returnValue = dbo.uspICValidateCostingOnPostInTransit
-		@ItemsToValidate = @ItemsToPost
+		@ItemsToValidate = @StockToPost
 
 	IF @returnValue < 0 RETURN -1;
 END
@@ -123,7 +188,7 @@ SELECT  intId
 		,intForexRateTypeId
 		,dblForexRate
 		,intSourceEntityId
-FROM	@ItemsToPost
+FROM	@StockToPost
 
 OPEN loopItems;
 
@@ -290,7 +355,7 @@ BEGIN
 	SELECT	DISTINCT 
 			i2p.intItemId
 			,i2p.intItemLocationId
-	FROM	@ItemsToPost i2p 
+	FROM	@StockToPost i2p 
 	WHERE	ISNULL(dbo.fnGetCostingMethod(i2p.intItemId, i2p.intItemLocationId), 0) <> @AVERAGECOST
 
 	DELETE	ZeroList
@@ -308,7 +373,7 @@ BEGIN
 			,@intTransactionId			= i2p.intTransactionId
 			,@strTransactionId			= i2p.strTransactionId
 			,@intCurrencyId				= i2p.intCurrencyId
-	FROM	@ItemsToPost i2p 
+	FROM	@StockToPost i2p 
 
 	IF EXISTS (SELECT TOP 1 1 FROM @ItemsWithZeroStock) 
 	BEGIN 

@@ -42,6 +42,11 @@ BEGIN TRY
 	BEGIN
 		IF (@ysnCancel = 1)
 		BEGIN
+			IF EXISTS (SELECT 1 FROM tblLGLoad WHERE intLoadId = @intLoadId AND ysnPosted = 1)
+			BEGIN
+				RAISERROR ('Shipment is already posted. Cannot cancel.',11,1)
+			END
+
 			SELECT @intMinLoadDetailId = MIN(intLoadDetailId)
 			FROM @tblLoadDetail
 

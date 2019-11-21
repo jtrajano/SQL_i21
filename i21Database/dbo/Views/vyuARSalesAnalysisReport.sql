@@ -39,7 +39,11 @@ SELECT strRecordNumber			= SAR.strRecordNumber
 											END <> 0 --AND ISNULL(SAR.dblLineTotal, 0) > 0
 									THEN 
 										CASE WHEN ISNULL(SAR.dblLineTotal, 0) = 0
-											 THEN -100
+											 THEN 
+												CASE WHEN ISNULL(SAR.dblBuybackAmount, 0) <> 0
+												     THEN ((ISNULL(SAR.dblBuybackAmount, 0) - (ISNULL(SAR.dblStandardCost, 0) * ISNULL(SAR.dblQtyShipped, 0))) / ISNULL(SAR.dblBuybackAmount, 0)) * 100
+													 ELSE -100
+												END
 											 ELSE
 												( ( (ISNULL(SAR.dblPrice, 0) - ISNULL(SAR.dblStandardCost, 0)) * 
 												CASE WHEN SAR.strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Cash Refund') 
