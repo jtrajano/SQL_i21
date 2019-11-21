@@ -41,11 +41,11 @@ AS
 			CT.strContractType,					
 			CH.intEntityId,
 			EY.strName AS strEntityName,
-			EL.strAddress AS strEntityAddress,      
-            EL.strCity AS strEntityCity,   
-            EL.strCountry AS strEntityCountry,    
-            EL.strState AS strEntityState,    
-            EL.strZipCode AS strEntityZipCode,   
+			CL.strAddress AS strEntityAddress,      
+            CL.strCity AS strEntityCity,   
+            CL.strCountry AS strEntityCountry,    
+            CL.strStateProvince AS strEntityState,    
+            CL.strZipPostalCode AS strEntityZipCode,   
             CM.intCommodityId AS intCommodityId,
             CM.strCommodityCode AS strCommodity,   
 			CH.strContractNumber,
@@ -62,8 +62,7 @@ AS
 	JOIN	tblCTContractHeader				CH	ON	CH.intContractHeaderId		=	CD.intContractHeaderId		LEFT
 	JOIN	tblCTContractStatus				CS	ON	CS.intContractStatusId		=	CD.intContractStatusId		LEFT
 	JOIN	tblCTContractType				CT	ON	CT.intContractTypeId		=	CH.intContractTypeId		LEFT
-	JOIN	tblEMEntity						EY	ON	EY.intEntityId				=	CH.intEntityId				LEFT
-	JOIN    tblEMEntityLocation             EL  ON  EL.intEntityId              =   CH.intEntityId              LEFT
+	JOIN	tblEMEntity						EY	ON	EY.intEntityId				=	CH.intEntityId				INNER 
 	JOIN	tblCTPricingType				PT	ON	PT.intPricingTypeId			=	CD.intPricingTypeId			LEFT
 	JOIN	tblICItem						IM	ON	IM.intItemId				=	CD.intItemId				LEFT
 	JOIN	tblICItemUOM					IU	ON	IU.intItemUOMId				=	CD.intItemUOMId				LEFT
@@ -75,6 +74,6 @@ AS
 					FROM	tblICItemUOM		IU	 
 					JOIN	tblICUnitMeasure	UM	ON	UM.intUnitMeasureId			=	IU.intUnitMeasureId 
 					WHERE	IU.ysnStockUnit = 1
-				)								SK	ON	SK.intItemId				=	CD.intItemId																					
+				)	SK								ON	SK.intItemId				=	CD.intItemId																			
 																	
 
