@@ -108,8 +108,8 @@ LEFT OUTER JOIN (
 		 , strDescription 
 	FROM dbo.tblSMCurrency WITH (NOLOCK)
 ) SMC ON P.intCurrencyId = SMC.intCurrencyID
-LEFT OUTER JOIN vyuARPaymentBankTransaction ARP
-	ON ARP.intPaymentId = P.intPaymentId
+LEFT OUTER JOIN vyuARPaymentBankTransaction ARP ON ARP.intPaymentId = P.intPaymentId
+											   AND ARP.strRecordNumber = P.strRecordNumber	
 OUTER APPLY (
 	SELECT strTransactionId = LEFT(strTransactionId, LEN(strTransactionId) - 1) COLLATE Latin1_General_CI_AS
 	FROM (
