@@ -56,6 +56,9 @@ BEGIN TRY
 		,dblUnits DECIMAL(24, 10)
 	)
 
+	declare @billList as Id
+	insert into @billList select distinct intBillId from tblGRSettleStorageBillDetail where intSettleStorageId = @intSettleStorageId
+
 	BEGIN
 		--1. Unpost the Voucher
 		
@@ -72,7 +75,7 @@ BEGIN TRY
 		FROM tblGRSettleStorage
 		WHERE intSettleStorageId = @intSettleStorageId
 
-		SELECT @strBillId = strBillId FROM tblAPBill WHERE intBillId = @BillId
+		--SELECT @strBillId = strBillId FROM tblAPBill WHERE intBillId = @BillId
 
 		IF ISNULL(@BillId,0) = 0 AND @isParentSettleStorage = 1
 		BEGIN
@@ -109,34 +112,48 @@ BEGIN TRY
 			WHERE intItemId = @ItemId 
 				AND intLocationId = @LocationId
 
-			--5. NEW REQUIREMENT: include the payment when unposting the settle storage
-			IF EXISTS(SELECT 1 FROM vyuAPBillPayment WHERE intBillId = @BillId)
-			BEGIN
-				EXEC uspAPDeletePayment @BillId, @UserId
-			END
 
-			IF EXISTS (
-						SELECT 1
-						FROM tblAPBill
-						WHERE intBillId = @BillId AND ISNULL(ysnPosted, 0) = 1
-					  )
-			BEGIN
-				EXEC uspAPPostBill 
-					 @post = 0
-					,@recap = 0
-					,@isBatch = 0
-					,@param = @BillId
-					,@transactionType = 'Settle Storage'
-					,@userId = @UserId
-					,@success = @success OUTPUT
-			END
+			if not exists ( select top 1 1 from @billList where intId = @BillId)
+				insert into @billList select @BillId
+			-- this will loop to all the voucher associated in the settlement
+			begin
+				select @BillId = min(intId) from @billList
+				while isnull(@BillId, 0) > 0
+				begin
+					--5. NEW REQUIREMENT: include the payment when unposting the settle storage
+					IF EXISTS(SELECT 1 FROM vyuAPBillPayment WHERE intBillId = @BillId)
+					BEGIN
+						EXEC uspAPDeletePayment @BillId, @UserId
+					END
 
-			IF(@success = 0)
-			BEGIN
-				SELECT TOP 1 @ErrMsg = strMessage FROM tblAPPostResult WHERE intTransactionId = @intSettleStorageId;
-				RAISERROR (@ErrMsg, 16, 1);
-				GOTO SettleStorage_Exit;
-			END
+					IF EXISTS (
+								SELECT 1
+								FROM tblAPBill
+								WHERE intBillId = @BillId AND ISNULL(ysnPosted, 0) = 1
+							)
+					BEGIN
+						EXEC uspAPPostBill 
+							@post = 0
+							,@recap = 0
+							,@isBatch = 0
+							,@param = @BillId
+							,@transactionType = 'Settle Storage'
+							,@userId = @UserId
+							,@success = @success OUTPUT
+					END
+
+					IF(@success = 0)
+					BEGIN
+						SELECT TOP 1 @ErrMsg = strMessage FROM tblAPPostResult WHERE intTransactionId = @intSettleStorageId;
+						RAISERROR (@ErrMsg, 16, 1);
+						GOTO SettleStorage_Exit;
+					END
+
+					select @BillId = min(intId) from @billList where intId > @BillId
+				end
+			end
+
+			
 
 			--2. DP Contract, Purchase Contract and Ticket Balance Increment
 			DELETE FROM @tblContractIncrement
@@ -511,12 +528,19 @@ BEGIN TRY
 			DELETE FROM tblGRSettleStorage WHERE intSettleStorageId = @intSettleStorageId
 
 			--5. Removing Voucher
-			IF @BillId is not null
-			BEGIN
-				EXEC uspAPDeleteVoucher 
-					 @BillId
-					,@UserId
-			END
+			begin
+				select @BillId = min(intId) from @billList
+				while isnull(@BillId, 0) > 0
+				begin
+
+					EXEC uspAPDeleteVoucher 
+						 @BillId
+						,@UserId
+						,@callerModule = 1					
+
+					select @BillId = min(intId) from @billList where intId > @BillId
+				end
+			end
 		
 		END		
 	END
