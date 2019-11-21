@@ -431,15 +431,14 @@ BEGIN
 				select @date,sum(dblTotal) from @tblResult WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110) <= CONVERT(DATETIME, @date)
 					
 				SELECT 
-				@dblSalesInTransitAsOf = SUM(dbo.fnCTConvertQuantityToTargetCommodityUOM(cum.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull((InTran.dblInTransitQty),0)))
+				@dblSalesInTransitAsOf = SUM(ISNULL(dbo.fnCTConvertQuantityToTargetCommodityUOM(cum.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull((InTran.dblInTransitQty),0)),0))
 				FROM dbo.fnICOutstandingInTransitAsOf(NULL, @intCommodityId, @date) InTran
-					INNER JOIN vyuICGetInventoryValuation Inv ON InTran.intInventoryTransactionId = Inv.intInventoryTransactionId
 					INNER JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = InTran.intItemUOMId
 					INNER JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
 					JOIN tblICCommodityUnitMeasure cum ON cum.intCommodityId = @intCommodityId AND cum.intUnitMeasureId = UOM.intUnitMeasureId
 				WHERE InTran.intItemId = ISNULL(@intItemId, InTran.intItemId)	
-					AND Inv.intLocationId = ISNULL(@intLocationId, Inv.intLocationId) 
-					AND Inv.intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
+					AND InTran.intItemLocationId = ISNULL(@intLocationId, InTran.intItemLocationId) 
+					AND InTran.intItemLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 
 				update @tblBalanceInvByDate
 				set dblSalesInTransit = @dblSalesInTransitAsOf
