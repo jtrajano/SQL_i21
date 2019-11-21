@@ -2516,7 +2516,441 @@ INSERT INTO tblSMCSVDynamicImportParameter(intCSVDynamicImportId, strColumnName,
 --Customer Location Import End
 
 
+--Customer Special Pricing Import Begin
+SET @NewHeaderId = 7
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMCSVDynamicImport WHERE intCSVDynamicImportId = @NewHeaderId)
+BEGIN
+	INSERT INTO tblSMCSVDynamicImport(intCSVDynamicImportId, strName, strCommand )
+	SELECT @NewHeaderId, 'Customer Special Pricing Import','1'
+END
+
+
+UPDATE tblSMCSVDynamicImport SET
+	strName = 'Customer Special Pricing Import',
+	strCommand = '
+
+		DECLARE	@id								NVARCHAR(MAX)
+		DECLARE	@customer_id					NVARCHAR(MAX)
+		DECLARE	@customer_location				NVARCHAR(MAX)
+		DECLARE	@price_basis					NVARCHAR(MAX)
+		DECLARE	@cost_to_use					NVARCHAR(MAX)
+		DECLARE	@origin_vendor_no				NVARCHAR(MAX)
+		DECLARE	@origin_vendor_location			NVARCHAR(MAX)
+		DECLARE	@item_no						NVARCHAR(MAX)
+		DECLARE	@item_category					NVARCHAR(MAX)
+		DECLARE	@customer_group					NVARCHAR(MAX)
+		DECLARE	@deviation						NVARCHAR(MAX)
+		DECLARE	@line_note						NVARCHAR(MAX)
+		DECLARE	@begin_date						NVARCHAR(MAX)
+		DECLARE	@end_date						NVARCHAR(MAX)
+		DECLARE	@fixed_rack_vendor_no			NVARCHAR(MAX)
+		DECLARE	@fixed_rack_no					NVARCHAR(MAX)
+		DECLARE	@fixed_rack_vendor_location		NVARCHAR(MAX)
+		DECLARE	@source							NVARCHAR(MAX)
+
+
+		SELECT 
+			@id								= ''@id@'',
+			@customer_id					= ''@customer_id@'',
+			@customer_location				= ''@customer_location@'',
+			@price_basis					= ''@price_basis@'',
+			@cost_to_use					= ''@cost_to_use@'',
+			@origin_vendor_no				= ''@origin_vendor_no@'',
+			@origin_vendor_location			= ''@origin_vendor_location@'',
+			@item_no						= ''@item_no@'',
+			@item_category					= ''@item_category@'',
+			@customer_group					= ''@customer_group@'',
+			@deviation						= ''@deviation@'',
+			@line_note						= ''@line_note@'',
+			@begin_date						= ''@begin_date@'',
+			@end_date						= ''@end_date@'',
+			@fixed_rack_vendor_no			= ''@fixed_rack_vendor_no@'',
+			@fixed_rack_no					= ''@fixed_rack_no@'',
+			@fixed_rack_vendor_location		= ''@fixed_rack_vendor_location@'',
+			@source							= ''@source@''
+
+
+		DECLARE @intSpecialPriceId			INT
+		DECLARE @intEntityCustomerId		INT
+		DECLARE @intCustomerLocationId		INT
+		DECLARE @strPriceBasis				NVARCHAR(MAX)
+		DECLARE @strCostToUse				NVARCHAR(MAX)
+		DECLARE @intEntityVendorId			INT
+		DECLARE @intEntityLocationId		INT
+		DECLARE @intItemId					INT
+		DECLARE @intCategoryId				INT
+		DECLARE @strCustomerGroup			NVARCHAR(MAX)	
+		DECLARE @dblDeviation				NUMERIC(18,6)
+		DECLARE @strLineNote				NVARCHAR(MAX)
+		DECLARE @dtmBeginDate				DATETIME
+		DECLARE @dtmEndDate					DATETIME
+		DECLARE @intRackVendorId			INT
+		DECLARE @intRackItemId				INT
+		DECLARE @intRackLocationId			INT
+		DECLARE @strInvoiceType				NVARCHAR(MAX)
+
+
+		DECLARE @IsValid INT = 1
+
+		SELECT @IsValid = 1,
+			@ValidationMessage	= ''''
+
+
+
+		IF(TRY_PARSE(@id AS INT) IS NULL)
+		BEGIN
+			SET @IsValid = 0
+			SET @ValidationMessage = @ValidationMessage + '' ''+''id No should be numeric''
+		END
+		ELSE 
+		BEGIN
+			SET @intSpecialPriceId = CONVERT(INT,@id)
+		END
+
+		
+		IF(@customer_id = '''')
+		BEGIN
+			SET @intEntityCustomerId = NULL
+		END
+		ELSE
+		BEGIN
+			IF(TRY_PARSE(@customer_id AS INT) IS NULL )
+			BEGIN
+				SET @IsValid = 0
+				SET @ValidationMessage = @ValidationMessage + '' ''+''customer_id should be numeric''
+			END
+			ELSE 
+			BEGIN
+				SET @intEntityCustomerId = CONVERT(INT,@customer_id)
+				IF NOT EXISTS(Select TOP 1 1 from tblARCustomer Where intEntityId = @intEntityCustomerId )
+				BEGIN
+					SET @IsValid = 0
+					SET @ValidationMessage = @ValidationMessage + '' ''+''intEntityCustomerId :''+CAST(@intEntityCustomerId AS NVARCHAR(100))+'' is not Exist''
+				END
+			END
+		END
+
+		IF(@customer_location = '''')
+		BEGIN
+			SET @intCustomerLocationId = NULL
+		END
+		ELSE
+		BEGIN
+			IF(TRY_PARSE(@customer_location AS INT) IS NULL )
+			BEGIN
+				SET @IsValid = 0
+				SET @ValidationMessage = @ValidationMessage + '' ''+''customer_location should be numeric''
+			END
+			ELSE 
+			BEGIN
+				SET @intCustomerLocationId = CONVERT(INT,@customer_location)
+				IF NOT EXISTS(Select TOP 1 1 from tblSMCompanyLocation Where intCompanyLocationId = @intCustomerLocationId )
+				BEGIN
+					SET @IsValid = 0
+					SET @ValidationMessage = @ValidationMessage + '' ''+''customer_location id :''+CAST(@intCustomerLocationId AS NVARCHAR(100) ) +'' is not Exist''
+				END
+			END
+		END
+
+		IF(@origin_vendor_no = '''')
+		BEGIN
+			SET @intEntityVendorId = NULL
+		END
+		ELSE
+		BEGIN
+			IF(TRY_PARSE(@origin_vendor_no AS INT) IS NULL )
+			BEGIN
+				SET @IsValid = 0
+				SET @ValidationMessage = @ValidationMessage + '' ''+''origin_vendor_no should be numeric''
+			END
+			ELSE 
+			BEGIN
+				SET @intEntityVendorId = CONVERT(INT,@origin_vendor_no)
+				IF NOT EXISTS(Select TOP 1 1 from tblAPVendor Where intEntityId = @intEntityVendorId )
+				BEGIN
+					SET @IsValid = 0
+					SET @ValidationMessage = @ValidationMessage + '' ''+''origin_vendor_no  :''+CAST(@intEntityVendorId AS NVARCHAR(100))+'' is not Exist''
+				END
+			END
+		END
+
+		IF(@origin_vendor_location = '''')
+		BEGIN
+			SET @intEntityLocationId = NULL
+		END
+		ELSE
+		BEGIN
+			IF(TRY_PARSE(@origin_vendor_location AS INT) IS NULL )
+			BEGIN
+				SET @IsValid = 0
+				SET @ValidationMessage = @ValidationMessage + '' ''+''origin_vendor_location should be numeric''
+			END
+			ELSE 
+			BEGIN
+				SET @intEntityLocationId = CONVERT(INT,@origin_vendor_location)
+				IF NOT EXISTS(Select TOP 1 1 from tblSMCompanyLocation Where intCompanyLocationId = @intEntityLocationId )
+				BEGIN
+					SET @IsValid = 0
+					SET @ValidationMessage = @ValidationMessage + '' ''+''origin_vendor_location  :''+CAST(@intEntityLocationId AS NVARCHAR(100) )+'' is not Exist''
+				END
+			END
+		END
+
+		IF(@item_no = '''')
+		BEGIN
+			SET @intItemId = NULL
+		END
+		ELSE
+		BEGIN
+			IF(TRY_PARSE(@item_no AS INT) IS NULL )
+			BEGIN
+				SET @IsValid = 0
+				SET @ValidationMessage = @ValidationMessage + '' ''+''item_no should be numeric''
+			END
+			ELSE 
+			BEGIN
+				SET @intItemId = CONVERT(INT,@item_no)
+				IF NOT EXISTS(Select TOP 1 1 from tblICItem Where intItemId = @intItemId )
+				BEGIN
+					SET @IsValid = 0
+					SET @ValidationMessage = @ValidationMessage + '' ''+''item_no  :''+CAST(@intItemId AS NVARCHAR(100) )+'' is not Exist''
+				END
+			END
+		END
+
+		IF(@item_category = '''')
+		BEGIN
+			SET @intCategoryId = NULL
+		END
+		ELSE
+		BEGIN
+			IF(TRY_PARSE(@item_category AS INT) IS NULL )
+			BEGIN
+				SET @IsValid = 0
+				SET @ValidationMessage = @ValidationMessage + '' ''+''item_category should be numeric''
+			END
+			ELSE 
+			BEGIN
+				SET @intCategoryId = CONVERT(INT,@item_category)
+				IF NOT EXISTS(Select TOP 1 1 from tblICCategory Where intCategoryId = @intCategoryId )
+				BEGIN
+					SET @IsValid = 0
+					SET @ValidationMessage = @ValidationMessage + '' ''+''item_no  :''+CAST(@intCategoryId AS NVARCHAR(100))+'' is not Exist''
+				END
+			END
+		END
+
+		IF(@deviation = '''')
+		BEGIN
+			SET @dblDeviation = NULL
+		END
+		ELSE
+		BEGIN
+			IF(TRY_PARSE(@deviation AS NUMERIC(18,6)) IS NULL)
+			BEGIN
+				SET @IsValid = 0
+				SET @ValidationMessage = @ValidationMessage + '' ''+''deviation No should be numeric''
+			END
+			ELSE 
+			BEGIN
+				SET @dblDeviation = CAST(@deviation AS NUMERIC(18,6))
+			END
+		END
+
+
+		IF(@begin_date = '''')
+		BEGIN
+			SET @IsValid = 0
+			SET @ValidationMessage = @ValidationMessage + '' ''+''begin_date should not be Empty''
+		
+		END
+		ELSE
+		BEGIN
+			IF(TRY_PARSE(@begin_date AS DATETIME) IS NULL)
+			BEGIN
+				SET @IsValid = 0
+				SET @ValidationMessage = @ValidationMessage + '' ''+''begin_date  should be a valid date format''
+			END
+			ELSE 
+			BEGIN
+				SET @dtmBeginDate = CAST(@begin_date AS DATETIME)
+			END
+		END
+
+		IF(@end_date = '''')
+		BEGIN
+			SET @IsValid = 0
+			SET @ValidationMessage = @ValidationMessage + '' ''+''end_date should not be Empty''
+		END
+		ELSE
+		BEGIN
+			IF(TRY_PARSE(@end_date AS DATETIME) IS NULL)
+			BEGIN
+				SET @IsValid = 0
+				SET @ValidationMessage = @ValidationMessage + '' ''+''end_date  should be a valid date format''
+			END
+			ELSE 
+			BEGIN
+				SET @dtmEndDate = CAST(@end_date AS DATETIME)
+			END
+		END
+
+		IF(@fixed_rack_vendor_no = '''')
+		BEGIN
+			SET @intRackVendorId = NULL
+		END
+		ELSE
+		BEGIN
+			IF(TRY_PARSE(@fixed_rack_vendor_no AS INT) IS NULL )
+			BEGIN
+				SET @IsValid = 0
+				SET @ValidationMessage = @ValidationMessage + '' ''+''fixed_rack_vendor_no should be numeric''
+			END
+			ELSE 
+			BEGIN
+				SET @intRackVendorId = CONVERT(INT,@fixed_rack_vendor_no)
+				IF NOT EXISTS(Select TOP 1 1 from tblAPVendor Where intEntityId = @intRackVendorId )
+				BEGIN
+					SET @IsValid = 0
+					SET @ValidationMessage = @ValidationMessage + '' ''+''fixed_rack_vendor_no :''+CAST(@intRackVendorId AS NVARCHAR(100))+'' is not Exist''
+				END
+			END
+		END
+
+		IF(@fixed_rack_no = '''')
+		BEGIN
+			SET @intRackItemId = NULL
+		END
+		ELSE
+		BEGIN
+			IF(TRY_PARSE(@fixed_rack_no AS INT) IS NULL )
+			BEGIN
+				SET @IsValid = 0
+				SET @ValidationMessage = @ValidationMessage + '' ''+''fixed_rack_no should be numeric''
+			END
+			ELSE 
+			BEGIN
+				SET @intRackItemId = CONVERT(INT,@fixed_rack_no)
+				IF NOT EXISTS(Select TOP 1 1 from tblICItem Where intItemId = @intRackItemId )
+				BEGIN
+					SET @IsValid = 0
+					SET @ValidationMessage = @ValidationMessage + '' ''+''fixed_rack_no :''+CAST(@intRackItemId AS NVARCHAR(100))+'' is not Exist''
+				END
+			END
+		END
+
+		IF(@fixed_rack_vendor_location = '''')
+		BEGIN
+			SET @intRackLocationId = NULL
+		END
+		ELSE
+		BEGIN
+			IF(TRY_PARSE(@fixed_rack_vendor_location AS INT) IS NULL )
+			BEGIN
+				SET @IsValid = 0
+				SET @ValidationMessage = @ValidationMessage + '' ''+''fixed_rack_vendor_location should be numeric''
+			END
+			ELSE 
+			BEGIN
+				SET @intRackLocationId = CONVERT(INT,@fixed_rack_vendor_location)
+				IF NOT EXISTS(Select TOP 1 1 from tblSMCompanyLocation Where intCompanyLocationId = @intRackLocationId )
+				BEGIN
+					SET @IsValid = 0
+					SET @ValidationMessage = @ValidationMessage + '' ''+''fixed_rack_vendor_location :''+CAST(@intRackLocationId AS NVARCHAR(100))+'' is not Exist''
+				END
+			END
+		END
+
+
+		IF @IsValid = 1
+		BEGIN
+		
+			INSERT INTO tblARCustomerSpecialPrice(
+				[intEntityCustomerId],
+				[intCustomerLocationId],
+				[strPriceBasis],
+				[strCostToUse],
+				[intEntityVendorId],
+				[intEntityLocationId],
+				[intItemId],
+				[intCategoryId],
+				[strCustomerGroup],
+				[dblDeviation],
+				[strLineNote],
+				[dtmBeginDate],
+				[dtmEndDate],
+				[intRackVendorId],
+				[intRackItemId]	,
+				[intRackLocationId]	,
+				[strInvoiceType],
+				[intConcurrencyId]
+			)
+			SELECT
+				@intEntityCustomerId,
+				@intCustomerLocationId,
+				@strPriceBasis,
+				@strCostToUse,
+				@intEntityVendorId,
+				@intEntityLocationId,
+				@intItemId,
+				@intCategoryId,
+				@strCustomerGroup,
+				@dblDeviation,
+				@strLineNote,
+				@dtmBeginDate,
+				@dtmEndDate,
+				@intRackVendorId,
+				@intRackItemId,
+				@intRackLocationId,
+				@strInvoiceType,
+				0			
+		END
+		
+	'
+	WHERE intCSVDynamicImportId = @NewHeaderId
+
+
+
+INSERT INTO tblSMCSVDynamicImportParameter(intCSVDynamicImportId, strColumnName, strDisplayName, ysnRequired)
+						
+	SELECT @NewHeaderId, 'id', 'id', 1
+	UNION All
+	SELECT @NewHeaderId, 'customer_id', 'customer_id', 1
+	Union All
+	SELECT @NewHeaderId, 'customer_location', 'customer_location', 0
+	Union All
+	SELECT @NewHeaderId, 'price_basis', 'price_basis', 0
+	Union All
+	SELECT @NewHeaderId, 'cost_to_use', 'cost_to_use', 0
+	Union All
+	SELECT @NewHeaderId, 'origin_vendor_no', 'origin_vendor_no', 0
+	Union All
+	SELECT @NewHeaderId, 'origin_vendor_location', 'origin_vendor_location', 0
+	Union All
+	SELECT @NewHeaderId, 'item_no', 'item_no', 0
+	Union All
+	SELECT @NewHeaderId, 'item_category', 'item_category', 0
+	Union All
+	SELECT @NewHeaderId, 'customer_group', 'customer_group', 0
+	Union All
+	SELECT @NewHeaderId, 'deviation', 'deviation', 0
+	Union All
+	SELECT @NewHeaderId, 'line_note', 'line_note', 0
+	Union All
+	SELECT @NewHeaderId, 'begin_date', 'begin_date', 0
+	Union All
+	SELECT @NewHeaderId, 'end_date', 'end_date', 0
+	Union All
+	SELECT @NewHeaderId, 'fixed_rack_vendor_no', 'fixed_rack_vendor_no', 0
+	Union All
+	SELECT @NewHeaderId, 'fixed_rack_no', 'fixed_rack_no', 0
+	Union All
+	SELECT @NewHeaderId, 'fixed_rack_vendor_location', 'fixed_rack_vendor_location', 0
+	Union All
+	SELECT @NewHeaderId, 'source', 'source', 0
+
+--Customer Special Pricing Import End
 
 
 PRINT '---------- END DYNAMIC CSV DEFAULT DATA ----------'
