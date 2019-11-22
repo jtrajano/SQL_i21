@@ -105,6 +105,7 @@ AS (
 	WHERE B.intAccountCategoryId = 45
 	AND A.ysnIsUnposted = 0
 	AND DATEADD(dd, DATEDIFF(dd, 0,A.dtmDate), 0) BETWEEN @start AND @end
+	AND A.strDescription NOT LIKE '%Charges from%'
 	GROUP BY A.strTransactionId, A.dtmDate
 )
 
