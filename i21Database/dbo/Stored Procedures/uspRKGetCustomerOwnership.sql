@@ -17,6 +17,13 @@ IF OBJECT_ID('tempdb..#final') IS NOT NULL
 DECLARE @ysnDisplayAllStorage bit
 select @ysnDisplayAllStorage= isnull(ysnDisplayAllStorage,0) from tblRKCompanyPreference
 
+DECLARE @intCommodityUnitMeasureId AS INT
+		, @intCommodityStockUOMId INT
+SELECT @intCommodityUnitMeasureId = intCommodityUnitMeasureId
+		,@intCommodityStockUOMId = intUnitMeasureId
+FROM tblICCommodityUnitMeasure
+WHERE intCommodityId = @intCommodityId AND ysnStockUnit = 1
+
 SELECT  CONVERT(INT,ROW_NUMBER() OVER (ORDER BY strStorageTypeDescription)) intRowNum,dtmDate,strStorageTypeDescription strDistribution,dblIn,dblOut,dblNet,intStorageScheduleTypeId
  into #tempCustomer 
  FROM (
@@ -98,16 +105,16 @@ SELECT  CONVERT(INT,ROW_NUMBER() OVER (ORDER BY strStorageTypeDescription)) intR
 			,CASE WHEN strType = 'From Delivery Sheet' 
 					OR strType = 'From Scale'  
 					OR strType = 'From Transfer' 
-					OR (strType = 'From Inventory Adjustment' AND dblUnits > 0 )THEN
-						dblUnits
+					OR (strType = 'From Inventory Adjustment' AND dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId, @intCommodityUnitMeasureId,dblUnits) > 0 )THEN
+						dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId, @intCommodityUnitMeasureId,dblUnits)
 				ELSE 0 END AS dblInQty
 			,CASE WHEN strType = 'Reduced By Inventory Shipment' 
 					OR strType = 'Settlement' 
 					OR strType = 'Transfer'  
-					OR (strType = 'From Inventory Adjustment' AND dblUnits < 0 )THEN
-						ABS(dblUnits)
+					OR (strType = 'From Inventory Adjustment' AND dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId, @intCommodityUnitMeasureId,dblUnits) < 0 )THEN
+						ABS(dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId, @intCommodityUnitMeasureId,dblUnits))
 				WHEN  strType = 'Reverse Settlement'  THEN
-					ABS(dblUnits) * -1
+					ABS(dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId, @intCommodityUnitMeasureId,dblUnits)) * -1
 				ELSE 0 END AS dblOutQty
 			,S.intStorageScheduleTypeId
 
@@ -115,7 +122,7 @@ SELECT  CONVERT(INT,ROW_NUMBER() OVER (ORDER BY strStorageTypeDescription)) intR
 		tblGRCustomerStorage CS
 		INNER JOIN tblGRStorageHistory SH ON CS.intCustomerStorageId = SH.intCustomerStorageId
 		INNER JOIN tblGRStorageType S ON CS.intStorageTypeId = S.intStorageScheduleTypeId
-
+		JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = CS.intCommodityId AND ium.intUnitMeasureId = CS.intUnitMeasureId
 		WHERE
 		 --convert(datetime,CONVERT(VARCHAR(10),SH.dtmDistributionDate,110),110) BETWEEN
 			--					convert(datetime,CONVERT(VARCHAR(10),@dtmFromTransactionDate,110),110) AND convert(datetime,CONVERT(VARCHAR(10),@dtmToTransactionDate,110),110)
