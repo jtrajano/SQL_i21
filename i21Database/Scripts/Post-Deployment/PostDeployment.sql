@@ -368,6 +368,7 @@ print 'BEGIN POST DEPLOYMENT'
 :R .\CT\PariallyToPartially.sql
 :R .\CT\TitleToCode.sql
 :R .\CT\5_DataFix.sql
+:R .\CT\1920_Add_Accrued_Payables.sql
 
 --Notes Receivable
 :R .\NR\1_NoteTransType.sql
