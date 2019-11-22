@@ -22,7 +22,7 @@ BEGIN
 			SELECT @intCommodityUnitMeasureId = intCommodityUnitMeasureId
 					,@intCommodityStockUOMId = intUnitMeasureId
 			FROM tblICCommodityUnitMeasure
-			WHERE intCommodityId = @intCommodityId AND ysnDefault = 1
+			WHERE intCommodityId = @intCommodityId AND ysnStockUnit = 1
 
 			--=============================
 			-- Inventory Valuation
