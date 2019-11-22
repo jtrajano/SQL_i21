@@ -33,6 +33,7 @@ SELECT compLoc.intCompanyLocationId
 ,compLoc.ysnTrackMFTActivity
 ,compLoc.strOregonFacilityNumber 
 ,compLoc.strVendorRefNoPrefix
+,compLoc.strVatNo
 ,compLoc.strOutOfStockWarning
 ,compLoc.strLotOverdrawnWarning
 ,compLoc.strDefaultCarrier
