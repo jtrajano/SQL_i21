@@ -398,7 +398,7 @@ BEGIN TRY
 			
 
 			----- DEBUG POINT -----
-			if @debug_awesome_ness = 1 AND 1 = 1
+			if @debug_awesome_ness = 1 AND 1 = 10
 			begin
 				select 'settle contract ', * from @SettleContract a				
 			end
@@ -466,7 +466,7 @@ BEGIN TRY
 					dblContractUnitGuard DECIMAL(24, 10)
 
 				)
-				
+				delete from @avqty				
 				insert into @avqty
 					( 
 						intContractDetailId, 
@@ -499,7 +499,7 @@ BEGIN TRY
 				declare @acd DECIMAL(24,10)
 				set @acd = @dblSelectedUnits - isnull(@dblTotalVoucheredQuantity, 0)
 				----- DEBUG POINT -----
-				if @debug_awesome_ness = 1 AND 1 = 1
+				if @debug_awesome_ness = 1 AND 1 = 0
 				begin				
 					select 'avqty freshly added',* from @avqty										
 
@@ -542,7 +542,7 @@ BEGIN TRY
 
 						set @cur_contract_max_units = @cur_contract_max_units - isnull(@cur_billed_per_contract_id, 0)
 
-						if @debug_awesome_ness = 1 AND 1 = 1
+						if @debug_awesome_ness = 1 AND 1 = 10
 						begin	
 							select @cur_contract_max_units as [max units], @cur_contract_id as [current contract detail], @cur_billed_per_contract_id as [ billed per contract]
 						end
@@ -561,7 +561,7 @@ BEGIN TRY
 
 				
 				----- DEBUG POINT -----
-				if @debug_awesome_ness = 1 AND 1 = 1
+				if @debug_awesome_ness = 1 AND 1 = 10
 				begin				 
 					select 'avqty freshly added VERSION 2',* from @avqty					
 					select @dblSelectedUnits as [ selected units ], @dblTotalVoucheredQuantity as [ total vouchered quantity], @acd as [quantity reference ]
@@ -576,7 +576,7 @@ BEGIN TRY
 								
 
 				----- DEBUG POINT -----
-				if @debug_awesome_ness = 1 AND 1 = 1
+				if @debug_awesome_ness = 1 AND 1 = 10
 				begin				
 					select 'avqty after first update ',* from @avqty
 				end
@@ -1239,7 +1239,7 @@ BEGIN TRY
 
 			
 			----- DEBUG POINT -----
-			if @debug_awesome_ness = 1  AND 1 = 1
+			if @debug_awesome_ness = 1  AND 1 = 0
 			begin
 				select 'settle voucher create before updating ', * from @SettleVoucherCreate 
 			end
@@ -1719,7 +1719,7 @@ BEGIN TRY
 								GOTO SettleStorage_Exit;
 							
 							----- DEBUG POINT -----
-							if @debug_awesome_ness = 1 AND 1 = 1
+							if @debug_awesome_ness = 1 AND 1 = 10
 							begin
 								select 'inventory transaction', * from tblICInventoryTransaction where strBatchId = @strBatchId order by intInventoryTransactionId desc
 								select 'dummy', * from @DummyGLEntries
@@ -1879,7 +1879,7 @@ BEGIN TRY
 
 				end
 				----- DEBUG POINT -----
-				if @debug_awesome_ness = 1 and 1 = 1 
+				if @debug_awesome_ness = 1 and 1 = 10
 				begin
 					select 'discount relation'
 					select * from @DiscountSCRelation
@@ -2043,7 +2043,7 @@ BEGIN TRY
 						and a.intItemType = 1
 
 					----- DEBUG POINT -----
-					if @debug_awesome_ness = 1 AND 1 = 1
+					if @debug_awesome_ness = 1 AND 1 = 10
 					begin					
 						select ' before settle voucher create after discount update', * from @SettleVoucherCreate
 					end
@@ -2052,10 +2052,12 @@ BEGIN TRY
 					update @SettleVoucherCreate set dblUnits = @dblTotalUnits where intItemType in (2, 3) and dblUnits > @dblTotalUnits
 
 					----- DEBUG POINT -----
-					if @debug_awesome_ness = 1 AND 1 = 1
+					if @debug_awesome_ness = 1 AND 1 = 0
 					begin
-						select 'Total Units for updating the discounts ',@dblTotalUnits
+
+						select 'Total Units for updating the discounts ',@dblTotalUnits, @origdblSpotUnits
 						select ' settle voucher create after discount update', * from @SettleVoucherCreate
+
 					end
 					----- DEBUG POINT -----
 
@@ -2160,7 +2162,8 @@ BEGIN TRY
 																	then a.dblUnits
 																WHEN (intItemType = 2 or intItemType = 3)
 																	then a.dblUnits
-																when availableQtyForVoucher.dblAvailableQuantity >  a.dblUnits then a.dblUnits 
+																when availableQtyForVoucher.dblAvailableQuantity >  a.dblUnits then a.dblUnits																	
+																WHEN @origdblSpotUnits > 0 THEN ROUND(dbo.fnCalculateQtyBetweenUOM(b.intItemUOMId,@intCashPriceUOMId,a.dblUnits),6) 
 																else isnull(availableQtyForVoucher.dblAvailableQuantity, @dblQtyFromCt) end
 														else
 															CASE 
@@ -2221,7 +2224,8 @@ BEGIN TRY
 																	then a.dblUnits
 																WHEN (intItemType = 2 or intItemType = 3)
 																	then a.dblUnits
-																when availableQtyForVoucher.dblAvailableQuantity >  a.dblUnits then a.dblUnits 
+																when availableQtyForVoucher.dblAvailableQuantity >  a.dblUnits then a.dblUnits 															
+																WHEN @origdblSpotUnits > 0 THEN ROUND(dbo.fnCalculateQtyBetweenUOM(b.intItemUOMId,@intCashPriceUOMId,a.dblUnits),6) 
 																else isnull(availableQtyForVoucher.dblAvailableQuantity, @dblQtyFromCt) end
 														else
 															CASE 
@@ -3078,7 +3082,7 @@ BEGIN TRY
 			END
 	
 			----- DEBUG POINT -----
-			IF @debug_awesome_ness = 1 and 1 = 1
+			IF @debug_awesome_ness = 1 and 1 = 10
 			begin
 				select 'Contract Depletion Area'
 				select * from @tblDepletion
