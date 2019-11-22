@@ -1,4 +1,4 @@
-﻿CREATE VIEW [dbo].[vyuSCTicketView]
+﻿alter VIEW [dbo].[vyuSCTicketView]
 AS 
 	select SCT.intTicketId,
 	   (CASE
@@ -8,6 +8,9 @@ AS
 			WHEN SCT.strTicketStatus = 'C' THEN 'COMPLETED'
 			WHEN SCT.strTicketStatus = 'V' THEN 'VOID'
 			WHEN SCT.strTicketStatus = 'R' THEN 'REOPENED'
+			WHEN SCT.strTicketStatus = 'S' THEN 'STARTED' 
+			WHEN SCT.strTicketStatus = 'I' THEN 'IN TRANSIT'
+			WHEN SCT.strTicketStatus = 'D' THEN 'DELIVERED'  
 			WHEN SCT.strTicketStatus = 'H'  THEN
 			CASE
 				wHEN SCT.ysnDeliverySheetPost = 1 THEN 'COMPLETED' 
