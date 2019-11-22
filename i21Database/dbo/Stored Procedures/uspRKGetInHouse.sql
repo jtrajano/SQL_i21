@@ -1,4 +1,5 @@
-CREATE PROCEDURE [dbo].[uspRKGetInHouse] @dtmFromTransactionDate DATE = NULL
+CREATE PROCEDURE [dbo].[uspRKGetInHouse] 
+	  @dtmFromTransactionDate DATE = NULL
 	, @dtmToTransactionDate DATE = NULL
 	, @intCommodityId INT = NULL
 	, @intItemId INT = NULL
@@ -20,7 +21,7 @@ BEGIN
 	SELECT @intCommodityUnitMeasureId = intCommodityUnitMeasureId
 		, @intCommodityStockUOMId = intUnitMeasureId
 	FROM tblICCommodityUnitMeasure
-	WHERE intCommodityId = @intCommodityId AND ysnDefault = 1
+	WHERE intCommodityId = @intCommodityId AND ysnStockUnit = 1
 
 	--=============================
 	-- Inventory Valuation
