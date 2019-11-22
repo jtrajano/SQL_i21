@@ -4,7 +4,7 @@
     [intBankFileFormatId] INT NOT NULL,
     [intRecordType] INT DEFAULT 1 NOT NULL,
     [intFieldNo] INT DEFAULT 1 NOT NULL,
-    [intSubFieldNo] INT DEFAULT 0 NOT NULL,
+    [intSubFieldNo] INT DEFAULT 0 NULL,
     [intFieldLength] INT DEFAULT 0 NOT NULL,
     [intFieldType] INT DEFAULT 1 NOT NULL,
     [strFieldDescription] NVARCHAR (250) COLLATE Latin1_General_CI_AS NULL,
