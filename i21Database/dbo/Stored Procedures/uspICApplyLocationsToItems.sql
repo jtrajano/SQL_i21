@@ -192,6 +192,7 @@ WHERE i.strItemNo = @strIdentifier
 			AND dtmEffectiveDate = source.dtmEffectiveDate
 			AND intSort = source.intPricingLevel
 	)
+	AND matchedLevel.intPricingLevel IS NOT NULL
 ORDER BY il.intLocationId
 END
 
