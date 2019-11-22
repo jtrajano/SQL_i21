@@ -21,22 +21,20 @@ FROM (
 		, dblNetPosition = DAP.dblNoOfLots - ISNULL(SalesContracts.dblNoOfLots, 0)
 	FROM vyuRKGetDailyAveragePriceDetail DAP
 	LEFT JOIN (
-		SELECT Detail.intBookId
-			, Detail.intSubBookId
-			, Detail.intFutureMarketId
-			, Detail.intFutureMonthId
-			, Header.intCommodityId
-			, dblNoOfLots = SUM(ISNULL(Detail.dblNoOfLots, 0))
-		FROM tblCTContractDetail Detail
-		LEFT JOIN tblCTContractHeader Header ON Header.intContractHeaderId = Detail.intContractHeaderId
-		WHERE Header.intContractTypeId = 2
-			AND Detail.intContractStatusId = 1
-			AND Header.intPricingTypeId IN (2, 3, 5)
-		GROUP BY Detail.intBookId
-			, Detail.intSubBookId
-			, Detail.intFutureMarketId
-			, Detail.intFutureMonthId
-			, Header.intCommodityId
+		SELECT 
+			  intBookId
+			, intSubBookId
+			, intFutureMarketId
+			, intFutureMonthId
+			, intCommodityId
+			, dblNoOfLots = SUM(dblBalanceNoOfLots)
+		FROM vyuCTSearchPriceContract WHERE intContractTypeId = 2 AND dblBalanceNoOfLots > 0 
+		GROUP BY
+			intBookId
+			, intSubBookId
+			, intFutureMarketId
+			, intFutureMonthId
+			, intCommodityId
 	) SalesContracts ON SalesContracts.intBookId = DAP.intBookId
 		AND SalesContracts.intSubBookId = DAP.intSubBookId
 		AND SalesContracts.intFutureMarketId = DAP.intFutureMarketId
