@@ -76,5 +76,17 @@
 		VALUES(11, 'Credit Card', NULL, NULL, NULL, 1, 0)
 	END
 
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMPaymentMethod WHERE strPaymentMethod = 'Bank Transfer')
+	BEGIN
+		INSERT INTO tblSMPaymentMethod([intPaymentMethodID], [strPaymentMethod], [strPaymentMethodCode], [intAccountId], [strPrintOption], [ysnActive], [intSort])
+		VALUES((SELECT IDENT_CURRENT('tblSMPaymentMethod') + 1), 'Bank Transfer', NULL, NULL, NULL, 1, 0)
+	END
+
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMPaymentMethod WHERE strPaymentMethod = 'Deduction')
+	BEGIN
+		INSERT INTO tblSMPaymentMethod([intPaymentMethodID], [strPaymentMethod], [strPaymentMethodCode], [intAccountId], [strPrintOption], [ysnActive], [intSort])
+		VALUES((SELECT IDENT_CURRENT('tblSMPaymentMethod') + 1), 'Deduction', NULL, NULL, NULL, 1,0 )
+	END
+
 	SET IDENTITY_INSERT tblSMPaymentMethod OFF
 GO
