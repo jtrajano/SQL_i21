@@ -302,7 +302,7 @@ BEGIN
 				dblLoadWeight = LDT.dblNet,
 				strLoadWeightUOM = ISNULL(rtUMTranslation.strTranslation,UM.strUnitMeasure),
 				strShipmentWeightInfo = LTRIM(dbo.fnRemoveTrailingZeroes(LDT.dblNet)) + ' ' + ISNULL(rtrt2.strTranslation,WUM.strUnitMeasure),
-				strShipmentQtyInfo = LTRIM(dbo.fnRemoveTrailingZeroes(LDT.dblQuantity)) + ' ' + ISNULL(rtUMTranslation.strTranslation,UM.strUnitMeasure) + ' ' + '('+@strShipmentQtyInfo+' ' + ISNULL(rtrt2.strTranslation,UM.strUnitMeasure) +')',
+				strShipmentQtyInfo = LTRIM(dbo.fnRemoveTrailingZeroes(LDT.dblQuantity)) + ' ' + ISNULL(rtUMTranslation.strTranslation,UM.strUnitMeasure) + ' ' + '('+@strShipmentQtyInfo+' ' + ISNULL(rtUMTranslation.strTranslation,UM.strUnitMeasure) +')',
 				CD.dtmStartDate,
 				CD.dtmEndDate,
 				strStartDate = DATENAME(dd, CD.dtmStartDate) + '-' + ISNULL(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,LEFT(DATENAME(MONTH,CD.dtmStartDate),3)),LEFT(DATENAME(MONTH,CD.dtmStartDate),3)) + '-' + DATENAME(yyyy, CD.dtmStartDate),
