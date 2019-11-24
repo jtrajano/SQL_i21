@@ -57,7 +57,8 @@ BEGIN TRY
 	)
 
 	declare @billList as Id
-	insert into @billList select distinct intBillId from tblGRSettleStorageBillDetail where intSettleStorageId = @intSettleStorageId
+	insert into @billList select distinct intBillId from tblGRSettleStorageBillDetail 
+		where intSettleStorageId = @intSettleStorageId and intBillId is not null
 
 	BEGIN
 		--1. Unpost the Voucher
@@ -113,7 +114,7 @@ BEGIN TRY
 				AND intLocationId = @LocationId
 
 
-			if not exists ( select top 1 1 from @billList where intId = @BillId)
+			if not exists ( select top 1 1 from @billList where intId = @BillId) and @BillId is not null
 				insert into @billList select @BillId
 			-- this will loop to all the voucher associated in the settlement
 			begin
