@@ -14,8 +14,12 @@ UPDATE tblARInvoice
 SET [ysnReturned]	= CASE WHEN @ForDelete = 1 THEN 0 ELSE 1 END	
 WHERE [intInvoiceId] IN (SELECT [intOriginalInvoiceId] FROM tblARInvoice WHERE [intInvoiceId] = @InvoiceId AND [strTransactionType] = 'Credit Memo')
 
-UPDATE tblARInvoiceDetail
-SET [ysnReturned]	= CASE WHEN @ForDelete = 1 THEN 0 ELSE 1 END	
-WHERE [intInvoiceId] IN (SELECT [intOriginalInvoiceId] FROM tblARInvoice WHERE [intInvoiceId] = @InvoiceId AND [strTransactionType] = 'Credit Memo')
+UPDATE ID
+SET [ysnReturned]	= CASE WHEN @ForDelete = 1 THEN 0 ELSE 1 END
+FROM tblARInvoiceDetail ID
+INNER JOIN tblARInvoiceDetail ORIGID ON ID.intInvoiceDetailId = ORIGID.intOriginalInvoiceDetailId
+INNER JOIN tblARInvoice I ON ORIGID.intInvoiceId = I.intInvoiceId
+WHERE I.intInvoiceId = @InvoiceId
+  AND I.strTransactionType = 'Credit Memo'
 
 GO	
