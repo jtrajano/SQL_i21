@@ -5600,7 +5600,22 @@ BEGIN
 END 
 
 -- Rebuild the G/L Summary 
-	EXEC uspGLRebuildSummary
+EXEC uspGLRebuildSummary
+
+-- Rebuild the Inventory Valuation Summary 
+BEGIN 
+	DECLARE @strPeriod AS NVARCHAR(50) 
+	SELECT TOP 1 
+		@strPeriod = strPeriod
+	FROM 
+		tblGLFiscalYearPeriod fyp
+		CROSS APPLY dbo.udfDateGreaterThanEquals(fyp.dtmStartDate, @dtmStartDate) dtmStart	
+	ORDER BY 
+		fyp.dtmStartDate ASC 
+
+	EXEC dbo.[uspICSearchInventoryValuationSummary] @strPeriod
+END
+
 
 -- Restore the created dates
 BEGIN 
