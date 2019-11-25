@@ -243,6 +243,8 @@
 	,CYR.strCropYear
 	,SCT.ysnHasSpecialDiscount
 	,SCT.ysnSpecialGradePosted
+	,SCT.ysnCertOfAnalysisPosted
+	,SCT.ysnExportRailXML
   FROM tblSCTicket SCT
 	LEFT JOIN tblSCTicketPool SCTPool on SCTPool.intTicketPoolId = SCT.intTicketPoolId
 	LEFT JOIN tblSCScaleSetup SCSetup on SCSetup.intScaleSetupId = SCT.intScaleSetupId

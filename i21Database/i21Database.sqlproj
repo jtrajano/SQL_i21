@@ -8095,6 +8095,9 @@
     <None Include="Scripts\Post-Deployment\CT\uspCTRebuildScheduledQuantityAboveR2.sql" />
     <Build Include="dbo\Stored Procedures\uspSCPostSpecialDiscount.sql" />
     <Build Include="dbo\Stored Procedures\uspSCProcessReceiptToVoucher.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCGetTicketShipExpressExport.sql" />
+    <Build Include="dbo\Tables\tblSCCertificateOfAnalysis.sql" />
+    <Build Include="dbo\Tables\tblSCTicketCertificateOfAnalysis.sql" />
     <Build Include="dbo\Tables\tblSCInventoryReceiptAllowVoucherTracker.sql" />
   </ItemGroup>
   <ItemGroup>
