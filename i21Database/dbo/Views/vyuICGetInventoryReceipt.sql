@@ -71,6 +71,7 @@ SELECT Receipt.intInventoryReceiptId
 	, dblGrandTotal =  ISNULL(dbo.fnICGetReceiptTotals(Receipt.intInventoryReceiptId, 6),0)
 	, strShipFromEntityId = ShipFromEntity.strVendorId
 	, strShipFromEntity = ShipFromEntity.strName
+	, Receipt.dtmCreated
 	--, WeightLoss.dblClaimableWt
 FROM tblICInventoryReceipt Receipt
 	LEFT JOIN vyuAPVendor Vendor ON Vendor.[intEntityId] = Receipt.intEntityVendorId
