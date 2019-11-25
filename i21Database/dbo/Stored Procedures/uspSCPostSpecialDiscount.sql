@@ -25,6 +25,11 @@ BEGIN
 	DECLARE @dblChargeAmount NUMERIC(18,6)
 	DECLARE @ysnTicketSpecialGradePosted BIT
 	DECLARE @ysnTicketHasSpecialDiscount BIT
+	DECLARE @ysnLoadContract BIT
+	DECLARE @intTicketContractDetailId INT
+	DECLARE @dblTicketScheduledQty NUMERIC(18,6)
+	DECLARE @intTicketItemUOMId INT
+	DECLARE @dblQuantityToReceive NUMERIC(38,15)
 	
 BEGIN 
 	DECLARE @TransactionName AS VARCHAR(500) = 'uspSCProcessReceiptToVoucher_' + CAST(NEWID() AS NVARCHAR(100));
@@ -38,6 +43,9 @@ END
 			,@splitDistribution = strDistributionOption
 			,@ysnTicketHasSpecialDiscount = ysnHasSpecialDiscount
 			,@ysnTicketSpecialGradePosted = ysnSpecialGradePosted
+			,@intTicketContractDetailId = intContractId
+			,@dblTicketScheduledQty = dblScheduleQty
+			,@intTicketItemUOMId = intItemUOMIdTo
 		FROM tblSCTicket
 		WHERE intTicketId = @intTicketId
 
@@ -54,42 +62,68 @@ END
 			[intInventoryReceiptId] [INT] PRIMARY KEY,
 			[strReceiptNumber] [VARCHAR](100),
 			[ysnPosted] [BIT],
+			[dblQty] NUMERIC(38,15)
 			UNIQUE ([intInventoryReceiptId])
 		);
 	
 		INSERT INTO #tmpItemReceiptIds(
 			intInventoryReceiptId
 			,strReceiptNumber
-			,ysnPosted) 
+			,ysnPosted
+			,dblQty) 
 		SELECT DISTINCT(
 			intInventoryReceiptId)
 			,strReceiptNumber
-			,ysnPosted 
+			,ysnPosted
+			,[dblQty] = dblQtyToReceive 
 		FROM vyuICGetInventoryReceiptItem 
 		WHERE intSourceId = @intTicketId AND strSourceType = 'Scale'
 		ORDER BY intInventoryReceiptId ASC
 
+
+		SET @ysnIRPosted = 0
+		SET @intLoopInventoryReceiptId = NULL
+		SET @intInventoryReceiptId = NULL
+		SET @dblQuantityToReceive = 0
+
 		SELECT TOP 1 
 			@intInventoryReceiptId =  intInventoryReceiptId 
 			,@strTransactionId = strReceiptNumber
+			,@ysnIRPosted = ysnPosted
+			,@dblQuantityToReceive = dblQty
+			,@intLoopInventoryReceiptId = intInventoryReceiptId 
 		FROM #tmpItemReceiptIds  
-	
 
 		WHILE @intInventoryReceiptId IS NOT NULL
 		BEGIN
-			SET @ysnIRPosted = 0
-			SET @intLoopInventoryReceiptId = @intInventoryReceiptId
-			SET @intInventoryReceiptId = NULL
 
-			SELECT 
-				@ysnIRPosted = ysnPosted
-			FROM tblICInventoryReceipt
-			WHERE intInventoryReceiptId = @intLoopInventoryReceiptId
+			SET @intLoopInventoryReceiptId = @intInventoryReceiptId
 
 			IF(@ysnIRPosted = 1)
 			BEGIN
 				--unpost the IR
 				EXEC [dbo].[uspICPostInventoryReceipt] 0, 0, @strTransactionId, @intUserId
+
+				IF ISNULL(@intTicketContractDetailId,0) > 0
+				BEGIN
+					---- Update contract schedule based on ticket schedule qty							
+					IF ISNULL(@intTicketContractDetailId, 0) > 0 AND (@splitDistribution = 'CNT' OR @splitDistribution = 'LOD')
+					BEGIN
+						-- For Review
+						SET @ysnLoadContract = 0
+						SELECT TOP 1 
+							@ysnLoadContract = A.ysnLoad
+						FROM tblCTContractHeader A
+						INNER JOIN tblCTContractDetail B
+							ON A.intContractHeaderId = B.intContractHeaderId
+						WHERE B.intContractDetailId = @intTicketContractDetailId
+
+						IF(ISNULL(@ysnLoadContract,0) = 0)
+						BEGIN
+							EXEC uspCTUpdateScheduleQuantityUsingUOM @intTicketContractDetailId, @dblQuantityToReceive, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId
+						END
+					END
+				END
 			END
 
 			--GEt/generate charges amount
@@ -159,7 +193,7 @@ END
 				UPDATE tblICInventoryReceiptItem
 				SET ysnAllowVoucher = A.ysnAllowVoucher
 				FROM tblSCInventoryReceiptAllowVoucherTracker A
-				WHERE tblICInventoryReceiptItem.intInventoryReceiptItemId = A.intInventoryReceiptItemId
+				WHERE tblICInventoryReceiptItem.intInventoryReceiptItemId = A.intInventoryReceiptItemId AND A.intInventoryReceiptId = @intLoopInventoryReceiptId
 			END
 
 			--Update the ysnAllowVoucher Of receiptCharges
@@ -167,7 +201,7 @@ END
 				UPDATE tblICInventoryReceiptCharge
 				SET ysnAllowVoucher = A.ysnAllowVoucher
 				FROM tblSCInventoryReceiptAllowVoucherTracker A
-				WHERE tblICInventoryReceiptCharge.intInventoryReceiptChargeId = A.intInventoryReceiptChargeId
+				WHERE tblICInventoryReceiptCharge.intInventoryReceiptChargeId = A.intInventoryReceiptChargeId AND A.intInventoryReceiptId = @intLoopInventoryReceiptId
 			END
 
 			--Update IR charges 
@@ -205,6 +239,8 @@ END
 				END
 			END
 
+				
+
 			EXEC [dbo].[uspICPostInventoryReceipt] 1, 0, @strTransactionId, @intUserId
 
 			IF(@ysnTicketHasSpecialDiscount <> 1 OR (@ysnTicketSpecialGradePosted = 1 AND @ysnTicketHasSpecialDiscount = 1))
@@ -212,9 +248,15 @@ END
 				EXEC uspSCProcessReceiptToVoucher @intTicketId, @intLoopInventoryReceiptId	,@intUserId
 			END
 
+			SET @ysnIRPosted = 0
+			SET @intInventoryReceiptId = NULL
+			SET @dblQuantityToReceive = 0
+
 			SELECT TOP 1 
 				@intInventoryReceiptId =  intInventoryReceiptId 
 				,@strTransactionId = strReceiptNumber
+				,@ysnIRPosted = ysnPosted
+				,@dblQuantityToReceive = dblQty
 			FROM #tmpItemReceiptIds
 			WHERE intInventoryReceiptId > @intLoopInventoryReceiptId  
 		END
