@@ -345,7 +345,7 @@ BEGIN
 			,[ysnIsStorage] 					=	0
 			,[strActualCostId] 					=	NULL
 			,[intSourceTransactionId] 			=	TS.intTransferStorageId
-			,[intSourceTransactionDetailId] 	=	TS.intTransferStorageId
+			,[intSourceTransactionDetailId] 	=	TSS.intTransferStorageSplitId
 			,[strSourceTransactionId] 			=	TS.strTransferStorageTicket
 			,[intFobPointId]					=	NULL
 			,[intInTransitSourceLocationId]		=	NULL
@@ -358,6 +358,7 @@ BEGIN
 			ON sh.intCustomerStorageId = C2.intCustomerStorageId AND sh.intSettleStorageId = C3.intSettleStorageId 
 		INNER JOIN tblGRTransferStorageReference TSR ON TSR.intToCustomerStorageId = C.intCustomerStorageId
 		INNER JOIN tblGRTransferStorage TS ON TS.intTransferStorageId = TSR.intTransferStorageId
+		INNER JOIN tblGRTransferStorageSplit TSS on TSS.intTransferStorageId = TS.intTransferStorageId
 		INNER JOIN tblICItem D ON B.intItemId = D.intItemId
 		INNER JOIN tblICItemLocation E ON C.intCompanyLocationId = E.intLocationId AND E.intItemId = D.intItemId
 		INNER JOIN tblICItemUOM F ON D.intItemId = F.intItemId AND C.intItemUOMId = F.intItemUOMId
