@@ -1,4 +1,4 @@
-﻿alter VIEW [dbo].[vyuSCTicketView]
+﻿CREATE VIEW [dbo].[vyuSCTicketView]
 AS 
 	select SCT.intTicketId,
 	   (CASE
