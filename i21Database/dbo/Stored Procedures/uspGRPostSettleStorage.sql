@@ -127,6 +127,7 @@ BEGIN TRY
 	DECLARE @voucherPayableTax VoucherDetailTax
 	DECLARE @createdVouchersId NVARCHAR(MAX)
 	DECLARE @ysnDPOwnedType AS BIT
+	DECLARE @ysnFromTransferStorage AS BIT
 
 	--Get vouchered quantity
 	DECLARE @dblTotalVoucheredQuantity AS DECIMAL(24,10)
@@ -146,6 +147,7 @@ BEGIN TRY
 		,intStorageTypeId INT
 		,intStorageScheduleId INT
 		,intContractHeaderId INT
+		,ysnTransferStorage BIT
 	)
 	
 	DECLARE @SettleContract AS TABLE 
@@ -354,6 +356,7 @@ BEGIN TRY
 				,intStorageTypeId
 				,intStorageScheduleId
 				,intContractHeaderId
+				,ysnTransferStorage
 			)
 			SELECT 
 				 intSettleStorageTicketId = SST.intSettleStorageTicketId
@@ -875,6 +878,7 @@ BEGIN TRY
 													WHEN dblStorageUnits = dblRemainingUnits THEN intContractHeaderId
 													ELSE 0
 												END
+					,@ysnFromTransferStorage	= ysnTransferStorage
 				FROM @SettleStorage
 				WHERE intSettleStorageKey = @SettleStorageKey
 				
@@ -3154,6 +3158,7 @@ BEGIN TRY
 							end
 							----- DEBUG POINT -----
 
+							IF @ysnFromTransferStorage = 0
 							EXEC [dbo].[uspAPPostBill] 
 								 @post = 1
 								,@recap = 0
