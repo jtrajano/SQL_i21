@@ -38,17 +38,17 @@ BEGIN
 
 		-- Get Register Class if exists
 		SELECT 
-			@strRegisterClass = ISNULL(strRegisterClass, '')
-			, @strRegisterIPAddress = ISNULL(strSapphireIpAddress, '')
-			, @strRegisterUsername = ISNULL(strSAPPHIREUserName, '')
-			, @strRegisterPassword = ISNULL(dbo.fnAESDecryptASym(strSAPPHIREPassword), '')
-			, @intPeriodNum = ISNULL(intSAPPHIRECheckoutPullTimePeriodId, 0)
-			, @intSetNum = ISNULL(intSAPPHIRECheckoutPullTimeSetId, 0)
-			, @strPullTime = ISNULL(strSAPPHIRECheckoutPullTime, '')
+			@strRegisterClass = ISNULL(Reg.strRegisterClass, '')
+			, @strRegisterIPAddress = ISNULL(Reg.strSapphireIpAddress, '')
+			, @strRegisterUsername = ISNULL(Reg.strSAPPHIREUserName, '')
+			, @strRegisterPassword = ISNULL(dbo.fnAESDecryptASym(Reg.strSAPPHIREPassword), '')
+			, @intPeriodNum = ISNULL(Reg.intSAPPHIRECheckoutPullTimePeriodId, 0)
+			, @intSetNum = ISNULL(Reg.intSAPPHIRECheckoutPullTimeSetId, 0)
+			, @strPullTime = ISNULL(Reg.strSAPPHIRECheckoutPullTime, '')
 
 			, @ysnAutoUpdatePassword = ISNULL(Reg.ysnSAPPHIREAutoUpdatePassword, 0)
 			, @dtmLastPasswordChangeDate = Reg.dtmSAPPHIRELastPasswordChangeDate
-			, @strBasePassword = Reg.strSAPPHIREBasePassword
+			, @strBasePassword = ISNULL(dbo.fnAESDecryptASym(Reg.strSAPPHIREBasePassword), '') --Reg.strSAPPHIREBasePassword
 			, @intPasswordIntervalDays = Reg.intSAPPHIREPasswordIntervalDays
 			, @intPasswordIncrementNo = Reg.intSAPPHIREPasswordIncrementNo
 		FROM tblSTRegister Reg
