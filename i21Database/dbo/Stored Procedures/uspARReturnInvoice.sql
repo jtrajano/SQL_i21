@@ -403,18 +403,29 @@ END CATCH
 		
 SELECT TOP 1 @intNewInvoiceId = intInvoiceId FROM tblARInvoice WHERE intInvoiceId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@CreatedIvoices))
 
-UPDATE ARI
-SET ysnReturned = 1 
-  , dblDiscountAvailable = @dblZeroDecimal
-  , dblBaseDiscountAvailable = @dblZeroDecimal
-FROM tblARInvoice ARI
-WHERE ARI.intInvoiceId = @intInvoiceId
+IF ISNULL(@strInvoiceDetailIds, '') = ''
+	BEGIN
+		UPDATE ARI
+		SET ysnReturned = 1 
+		  , dblDiscountAvailable = @dblZeroDecimal
+		  , dblBaseDiscountAvailable = @dblZeroDecimal
+		FROM tblARInvoice ARI
+		WHERE ARI.intInvoiceId = @intInvoiceId
+	END
 
 UPDATE ARID 
 SET ysnReturned = 1 
 FROM tblARInvoiceDetail ARID
 INNER JOIN @InvoiceDetails ID ON ARID.intInvoiceDetailId = ID.intInvoiceDetailId
 WHERE ARID.intInvoiceId = @intInvoiceId
+
+IF (SELECT COUNT(*) FROM tblARInvoiceDetail WHERE intInvoiceId = @intInvoiceId) = (SELECT COUNT(*) FROM tblARInvoiceDetail WHERE intInvoiceId = @intInvoiceId AND ysnReturned = 1)
+	BEGIN
+		UPDATE ARI
+		SET ysnReturned = 1 
+		FROM tblARInvoice ARI
+		WHERE ARI.intInvoiceId = @intInvoiceId
+	END
 
 COMMIT TRANSACTION 
 RETURN 1;
