@@ -12,9 +12,9 @@ SELECT intRecipeId				= RECIPE.intRecipeId
 	 , dblQuantity				= RECIPE.dblQuantity
 	 , dblNewQuantity			= RECIPE.dblQuantity
 	 , dblAvailableQuantity		= I.dblAvailable	 
-	 , dblPrice					= I.dblStandardCost
-	 , dblNewPrice				= I.dblStandardCost
-	 , dblMaintenanceAmount		= CASE WHEN I.strType = 'Software' AND I.strMaintenanceCalculationMethod = 'Percentage' THEN I.dblStandardCost * (ISNULL(I.dblMaintenanceRate, 0) / 100) ELSE I.dblMaintenanceRate END
+	 , dblPrice					= I.dblReceiveSalePrice
+	 , dblNewPrice				= I.dblReceiveSalePrice
+	 , dblMaintenanceAmount		= CASE WHEN I.strType = 'Software' AND I.strMaintenanceCalculationMethod = 'Percentage' THEN I.dblReceiveSalePrice * (ISNULL(I.dblMaintenanceRate, 0) / 100) ELSE I.dblMaintenanceRate END
 	 , strItemType				= I.strType
 	 , strType					= 'Finished Good' COLLATE Latin1_General_CI_AS
 	 , ysnAllowNegativeStock	= CASE WHEN I.intAllowNegativeInventory = 1 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END	 
