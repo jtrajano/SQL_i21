@@ -54,10 +54,12 @@ AS
 		SET @strHeader = '<tr>  
 		  <th>&nbsp;Contract No</th>  
 		  <th>&nbsp;Record Id</th>  
+		  <th>&nbsp;Feed Status</th>  
 		 </tr>'
 
 		SELECT @strDetail = @strDetail + '<tr>  
-		 <td>&nbsp;' + ISNULL(TR.strTransactionNo, '') + '</td>' + '<td>&nbsp;' + ISNULL(LTRIM(TR.intRecordId), '') + '</td>
+		 <td>&nbsp;' + ISNULL(TR.strTransactionNo, '') + '</td>' + '<td>&nbsp;' + ISNULL(LTRIM(TR.intRecordId), '') + '</td>'
+		 + '<td>&nbsp;' + ' ' + '</td>
 	 </tr>'
 		FROM tblSMTransaction TR WITH (NOLOCK)
 		LEFT JOIN tblCTContractFeed FD WITH (NOLOCK) ON FD.intContractHeaderId = TR.intRecordId
@@ -66,6 +68,17 @@ AS
 			AND FD.intContractFeedId IS NULL
 			AND TR.strTransactionNo NOT LIKE 'CP%'
 			AND intTransactionId <> 58191
+
+		Select @strDetail=@strDetail + 
+		'<tr>
+			   <td>&nbsp;' + ISNULL(CF.strContractNumber,'') + '</td>'
+			+ '<td>&nbsp;' + ISNULL(LTRIM(CF.intContractHeaderId), '') + '</td>'
+			+ '<td>&nbsp;' + ISNULL(CF.strFeedStatus,'') + '</td>
+		</tr>'
+		FROM tblCTContractFeed CF WITH (NOLOCK)
+		WHERE ISNULL(CF.strFeedStatus, '') = 'Awt Ack'
+			AND CF.strRowState <> 'Delete'
+			AND GETDATE() > DATEADD(MI, 15, CF.dtmFeedCreated)
 	END
 
 	SET @strHtml = REPLACE(@strHtml, '@header', @strHeader)
