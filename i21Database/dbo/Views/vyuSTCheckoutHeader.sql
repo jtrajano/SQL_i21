@@ -53,7 +53,7 @@ SELECT
 							ISNULL((SELECT TOP 1 _chk.dblATMEndBalanceCalculated
 							FROM tblSTCheckoutHeader _chk
 							WHERE _chk.intStoreId = vst.intStoreId
-								AND _chk.intCheckoutId != chk.intCheckoutId
+								AND _chk.intCheckoutId < chk.intCheckoutId
 							ORDER BY _chk.intCheckoutId DESC), 0)
 						)
 	  
@@ -67,7 +67,7 @@ SELECT
 											ISNULL((SELECT TOP 1 _chk.dblATMEndBalanceCalculated
 											FROM tblSTCheckoutHeader _chk
 											WHERE _chk.intStoreId = vst.intStoreId
-												AND _chk.intCheckoutId != chk.intCheckoutId
+												AND _chk.intCheckoutId < chk.intCheckoutId
 											ORDER BY _chk.intCheckoutId DESC), 0) 
 										
 											- 
@@ -85,7 +85,7 @@ SELECT
 																		ISNULL((SELECT TOP 1 _chk.dblATMEndBalanceCalculated
 																		FROM tblSTCheckoutHeader _chk
 																		WHERE _chk.intStoreId = vst.intStoreId
-																			AND _chk.intCheckoutId != chk.intCheckoutId
+																			AND _chk.intCheckoutId < chk.intCheckoutId
 																		ORDER BY _chk.intCheckoutId DESC), 0) 
 										
 																		- 
@@ -99,7 +99,7 @@ SELECT
 									ISNULL((SELECT TOP 1 ISNULL(_chk.dblChangeFundEndBalance, 0)
 									FROM tblSTCheckoutHeader _chk
 									WHERE _chk.intStoreId = vst.intStoreId
-										AND _chk.intCheckoutId != chk.intCheckoutId
+										AND _chk.intCheckoutId < chk.intCheckoutId
 									ORDER BY _chk.intCheckoutId DESC), 0)
 								)
 
