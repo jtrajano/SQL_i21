@@ -36,7 +36,7 @@ AS
 --Settle Storage items
 SELECT 
 	CS.intEntityId AS intEntityVendorId
-	,CS.dtmDeliveryDate AS dtmDate
+	,SS.dtmCreated AS dtmDate
 	,SS.strStorageTicket AS strTransactionNumber
 	,SS.intSettleStorageId
 	,NULL AS intBillId
@@ -88,6 +88,8 @@ INNER JOIN vyuGLAccountDetail AD
 	ON GD.intAccountId = AD.intAccountId AND AD.intAccountCategoryId = 45
 LEFT JOIN tblGRSettleContract ST
 	ON ST.intSettleStorageId = SS.intSettleStorageId
+LEFT JOIN tblCTContractDetail CT
+	ON CT.intContractDetailId = ST.intContractDetailId
 LEFT JOIN 
 (
     tblICItemUOM itemUOM INNER JOIN tblICUnitMeasure unitMeasure
@@ -150,7 +152,7 @@ WHERE bill.ysnPosted = 1
 UNION ALL --Charges
 SELECT 
 	CS.intEntityId AS intEntityVendorId
-	,CS.dtmDeliveryDate
+	,SS.dtmCreated
 	,SS.strStorageTicket
 	,SS.intSettleStorageId
 	,NULL AS intBillId
@@ -259,7 +261,7 @@ WHERE bill.ysnPosted = 1
 UNION ALL --DISCOUNTS
 SELECT 
 	CS.intEntityId AS intEntityVendorId
-	,CS.dtmDeliveryDate
+	,SS.dtmCreated
 	,SS.strStorageTicket
 	,SS.intSettleStorageId
 	,NULL AS intBillId
