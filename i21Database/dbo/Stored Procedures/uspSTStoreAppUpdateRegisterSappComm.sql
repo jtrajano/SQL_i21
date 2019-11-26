@@ -29,6 +29,8 @@ BEGIN
 									FROM tblSTRegister reg
 									WHERE reg.intRegisterId = @intRegisterId
 
+									SET @ysnResultSuccess = CAST(1 AS BIT)
+
 								--DECLARE @strSQLCommand AS NVARCHAR(1000)
 								--SET @strSQLCommand = 
 								--N'
