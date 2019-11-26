@@ -175,7 +175,7 @@ SELECT intEntityCustomerId          = CUSTOMER.intEntityId
 	 , dtmLastStatementDate			= SOA.dtmLastStatementDate
 	 , dtmBudgetMonth				= BUDGETMONTH.dtmBudgetDate	 
 FROM vyuARCustomerSearch CUSTOMER
-LEFT JOIN tblARCustomerAgingStagingTable AGING ON CUSTOMER.intEntityCustomerId = AGING.intEntityCustomerId
+LEFT JOIN tblARCustomerAgingStagingTable AGING ON CUSTOMER.intEntityCustomerId = AGING.intEntityCustomerId AND AGING.intEntityUserId = @intEntityUserId AND AGING.strAgingType = 'Summary'
 LEFT JOIN tblARStatementOfAccount SOA ON SOA.strEntityNo = CUSTOMER.strCustomerNumber
 LEFT JOIN (
 	SELECT intEntityCustomerId
