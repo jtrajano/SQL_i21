@@ -5,16 +5,6 @@ DECLARE @intWeightClaimId INT
 DECLARE @xmlDocumentId INT
 DECLARE @strUserName NVARCHAR(100)
 DECLARE @intLoadId INT
-DECLARE		@strCompanyName				NVARCHAR(100),
-			@strCompanyAddress			NVARCHAR(100),
-			@strContactName				NVARCHAR(50),
-			@strCounty					NVARCHAR(25),
-			@strCity					NVARCHAR(25),
-			@strState					NVARCHAR(50),
-			@strZip						NVARCHAR(12),
-			@strCountry					NVARCHAR(25),
-			@strPhone					NVARCHAR(50),
-			@ysnPrintLogo				BIT
 
 IF LTRIM(RTRIM(@xmlParam)) = ''
 	SET @xmlParam = NULL
@@ -54,65 +44,52 @@ SELECT @intLoadId = intLoadId
 FROM tblLGWeightClaim
 WHERE intWeightClaimId = @intWeightClaimId
 
-SELECT TOP 1 @ysnPrintLogo = ISNULL(ysnPrintLogo,0) FROM tblLGCompanyPreference
-
-SELECT TOP 1 @strCompanyName = strCompanyName
-		,@strCompanyAddress = strAddress
-		,@strContactName = strContactName
-		,@strCounty = strCounty
-		,@strCity = strCity
-		,@strState = strState
-		,@strZip = strZip
-		,@strCountry = strCountry
-		,@strPhone = strPhone
-FROM tblSMCompanySetup
-
 SELECT DISTINCT WC.intWeightClaimId
 	,WC.intLoadId
-	,WC.strReferenceNumber AS strWeightClaimNumber
-	,@strCompanyName AS strCompanyName
-	,@strCompanyAddress AS strCompanyAddress
-	,@strContactName AS strCompanyContactName 
-	,@strCounty AS strCompanyCounty 
-	,@strCity AS strCompanyCity 
-	,@strState AS strCompanyState 
-	,@strZip AS strCompanyZip 
-	,@strCountry AS strCompanyCountry 
-	,@strPhone AS strCompanyPhone
-	,@strCity + ', ' + @strState + ', ' + @strZip + ', ' AS strCityStateZip
+	,strWeightClaimNumber = WC.strReferenceNumber
+	,strCompanyName = CS.strCompanyName
+	,strCompanyAddress = CS.strAddress
+	,strCompanyContactName = CS.strContactName 
+	,strCompanyCounty = CS.strCounty 
+	,strCompanyCity = CS.strCity
+	,strCompanyState = CS.strState
+	,strCompanyZip = CS.strZip
+	,strCompanyCountry = CS.strCountry 
+	,strCompanyPhone = CS.strPhone
+	,strCityStateZip = CS.strCity + ', ' + CS.strState + ', ' + CS.strZip + ', '
 	,L.intLoadId
 	,L.strLoadNumber
 	,E.intEntityId
-	,E.strName AS strCustomerName
+	,strCustomerName = E.strName
 	,EL.strAddress
 	,EL.strZipCode
 	,EL.strCity
 	,EL.strState
 	,EL.strCountry
-	,E.strName + CHAR(13) + 
-	 EL.strAddress + CHAR(13) + 
-	 EL.strZipCode + ' ' + EL.strCity + CHAR(13) + 
-	 EL.strState + ' ' + EL.strCountry AS strVendorAddress
+	,strVendorAddress = E.strName + CHAR(13) + 
+		EL.strAddress + CHAR(13) + 
+		EL.strZipCode + ' ' + EL.strCity + CHAR(13) + 
+		EL.strState + ' ' + EL.strCountry
 	,B.strBillId
-	,'via ' + ShippingLine.strName AS strShippingLine
+	,strShippingLine = 'via ' + ShippingLine.strName
 	,L.strMVessel 
 	,BA.strBankAccountNo
 	,BA.strIBAN
 	,BA.strSWIFT
 	,BA.strBankName
 	,B.strRemarks
-	,ROUND(SUM(WCD.dblClaimAmount),2) dblTotalClaimAmount
-	,ROUND((SELECT SUM(dblAmount) FROM tblLGWeightClaimOtherCharges OC WHERE OC.intWeightClaimId = WC.intWeightClaimId),2) dblTotalOtherChargeAmount
+	,dblTotalClaimAmount = ROUND(SUM(WCD.dblClaimAmount),2)
+	,dblTotalOtherChargeAmount = ROUND((SELECT SUM(dblAmount) FROM tblLGWeightClaimOtherCharges OC WHERE OC.intWeightClaimId = WC.intWeightClaimId),2)
 	,INV.strInvoiceNumber
-	,INV.strComments AS strInvoiceComments
-	,CASE 
-	 WHEN WCD.intBillId IS NOT NULL
-	 	THEN 'Voucher'
-	 WHEN WCD.intInvoiceId IS NOT NULL
-	 	THEN 'Invoice'
-	 END strMemoType
+	,strInvoiceComments = INV.strComments
+	,strMemoType = CASE 
+		 WHEN WCD.intBillId IS NOT NULL
+	 		THEN 'Voucher'
+		 WHEN WCD.intInvoiceId IS NOT NULL
+	 		THEN 'Invoice'
+		 END 
 	,INV.strFooterComments
-	,CASE 
+	,strVoucherBankInfo = CASE 
 		WHEN WCD.intBillId IS NOT NULL
 			THEN 'Net cash against Debit-Note by swift transfer to our account with' + CHAR(13) + 
 			      BA.strBankName + CHAR(13) + 
@@ -120,38 +97,45 @@ SELECT DISTINCT WC.intWeightClaimId
 				  'Swift : ' + ISNULL(BA.strSWIFT, '')
 		WHEN WCD.intInvoiceId IS NOT NULL
 			THEN INV.strFooterComments
-		END AS strVoucherBankInfo
-	,dbo.fnSMGetCompanyLogo('FullHeaderLogo') AS blbFullHeaderLogo
-	,dbo.fnSMGetCompanyLogo('FullFooterLogo') AS blbFullFooterLogo
-	,dbo.fnSMGetCompanyLogo('Header') AS blbHeaderLogo
-	,dbo.fnSMGetCompanyLogo('Footer') AS blbFooterLogo
-	,CASE WHEN @ysnPrintLogo = 1 THEN 'true' else 'false' END AS ysnPrintLogo
-	,CASE WHEN CP.ysnFullHeaderLogo = 1 THEN 'true' else 'false' END ysnFullHeaderLogo	
-	,ISNULL(CP.intReportLogoHeight,0) AS intReportLogoHeight
-	,ISNULL(CP.intReportLogoWidth,0) AS intReportLogoWidth	
+		END
+	,PM.strPaymentMethod
+	,strPaymentComment = PM.strComment
+	,CL.strVatNo
+	,blbFullHeaderLogo = dbo.fnSMGetCompanyLogo('FullHeaderLogo')
+	,blbFullFooterLogo = dbo.fnSMGetCompanyLogo('FullFooterLogo')
+	,blbHeaderLogo = dbo.fnSMGetCompanyLogo('Header')
+	,blbFooterLogo = dbo.fnSMGetCompanyLogo('Footer')
+	,ysnPrintLogo = CASE WHEN ISNULL(CP.ysnPrintLogo,0) = 1 THEN 'true' else 'false' END
+	,ysnFullHeaderLogo = CASE WHEN CP.ysnFullHeaderLogo = 1 THEN 'true' else 'false' END	
+	,intReportLogoHeight = ISNULL(CP.intReportLogoHeight,0)
+	,intReportLogoWidth = ISNULL(CP.intReportLogoWidth,0)	
 FROM tblLGWeightClaim WC
-JOIN tblLGWeightClaimDetail WCD ON WC.intWeightClaimId = WCD.intWeightClaimId
-JOIN tblEMEntity E ON E.intEntityId = WCD.intPartyEntityId
-JOIN tblLGLoad L ON L.intLoadId = WC.intLoadId
-JOIN (
-	SELECT TOP 1 LOD.intPCompanyLocationId
-		,LOD.intVendorEntityId
-		,LOD.intVendorEntityLocationId
-		,LOD.intLoadId
-		,LOD.intCustomerEntityId
-		,LOD.intCustomerEntityLocationId
-	FROM tblLGLoadDetail LOD
-	WHERE LOD.intLoadId = @intLoadId
-	) LD ON ISNULL(LD.intVendorEntityId,LD.intCustomerEntityId) = E.intEntityId
-LEFT JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = ISNULL(ISNULL(LD.intVendorEntityLocationId,LD.intCustomerEntityLocationId), E.intDefaultLocationId)
-LEFT JOIN tblAPBill B ON B.intBillId = WCD.intBillId
-LEFT JOIN tblARInvoice INV ON INV.intInvoiceId = WCD.intInvoiceId
-LEFT JOIN vyuCMBankAccount BA ON BA.intBankAccountId = B.intBankInfoId
-LEFT JOIN tblEMEntity ShippingLine ON ShippingLine.intEntityId = L.intShippingLineEntityId
-CROSS APPLY tblLGCompanyPreference CP
+	JOIN tblLGWeightClaimDetail WCD ON WC.intWeightClaimId = WCD.intWeightClaimId
+	JOIN tblEMEntity E ON E.intEntityId = WCD.intPartyEntityId
+	JOIN tblLGLoad L ON L.intLoadId = WC.intLoadId
+	OUTER APPLY (
+		SELECT TOP 1 LOD.intPCompanyLocationId
+			,LOD.intVendorEntityId
+			,LOD.intVendorEntityLocationId
+			,LOD.intLoadId
+			,LOD.intCustomerEntityId
+			,LOD.intCustomerEntityLocationId
+		FROM tblLGLoadDetail LOD
+		WHERE LOD.intLoadId = WC.intLoadId
+		AND ISNULL(LOD.intVendorEntityId,LOD.intCustomerEntityId) = E.intEntityId) LD
+	LEFT JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = ISNULL(ISNULL(LD.intVendorEntityLocationId,LD.intCustomerEntityLocationId), E.intDefaultLocationId)
+	LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = WCD.intContractDetailId
+	LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CD.intCompanyLocationId
+	LEFT JOIN tblAPBill B ON B.intBillId = WCD.intBillId
+	LEFT JOIN tblARInvoice INV ON INV.intInvoiceId = WCD.intInvoiceId
+	LEFT JOIN vyuCMBankAccount BA ON BA.intBankAccountId = B.intBankInfoId
+	LEFT JOIN tblEMEntity ShippingLine ON ShippingLine.intEntityId = L.intShippingLineEntityId
+	LEFT JOIN tblSMPaymentMethod PM ON PM.intPaymentMethodID = WC.intPaymentMethodId
+	CROSS APPLY tblSMCompanySetup CS
+	CROSS APPLY tblLGCompanyPreference CP
 WHERE WC.intWeightClaimId = @intWeightClaimId
 GROUP BY
-WC.intWeightClaimId
+	WC.intWeightClaimId
 	,WC.intLoadId
 	,WC.strReferenceNumber
 	,L.intLoadId
@@ -176,6 +160,19 @@ WC.intWeightClaimId
 	,WCD.intBillId
 	,WCD.intInvoiceId
 	,INV.strFooterComments
+	,CS.strCompanyName
+	,CS.strAddress
+	,CS.strContactName 
+	,CS.strCounty 
+	,CS.strCity
+	,CS.strState
+	,CS.strZip
+	,CS.strCountry 
+	,CS.strPhone
 	,CP.ysnFullHeaderLogo
 	,CP.intReportLogoHeight
 	,CP.intReportLogoWidth
+	,CP.ysnPrintLogo
+	,PM.strPaymentMethod
+	,PM.strComment
+	,CL.strVatNo
