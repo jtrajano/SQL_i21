@@ -26,6 +26,7 @@ SELECT
 	, strDiscountDescription	= grd.strDiscountDescription
 	, intItemUOMId				= im.intItemUOMId
 	, strUOM					= um.strUnitMeasure
+	, i.strStatus
 FROM vyuICItemStockUOM sm
 	INNER JOIN tblICItemUOM im ON im.intItemUOMId = sm.intItemUOMId
 	INNER JOIN tblICItem i ON i.intItemId = sm.intItemId

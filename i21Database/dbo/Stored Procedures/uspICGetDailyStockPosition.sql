@@ -409,6 +409,7 @@ CREATE TABLE #tmpDailyStockPosition
 											- tmpDSP.dblInTransitOutbound 
 											- tmpDSP.dblConsumedQty 
 											+ tmpDSP.dblProduced,
+				strStatus				= Item.strStatus,
 				intConcurrencyId		= 1,
 				dtmDateModified			= NULL,
 				dtmDateCreated			= GETDATE(),
@@ -485,6 +486,7 @@ CREATE TABLE #tmpDailyStockPosition
 											- tmpDSP.dblInTransitOutbound 
 											- tmpDSP.dblConsumedQty 
 											+ tmpDSP.dblProduced,
+				strStatus				= Item.strStatus,
 				intConcurrencyId		= 1,
 				dtmDateModified			= NULL,
 				dtmDateCreated			= GETDATE(),
