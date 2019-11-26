@@ -434,7 +434,7 @@ BEGIN
 		[dblCreditUnit]					=	0,
 		[strDescription]				=	'Posted Payment',
 		[strCode]						=	'AP',
-		[strReference]					=	A.strNotes,
+		[strReference]					=	ISNULL(NULLIF(A.strNotes,''),D.strVendorId),
 		[intCurrencyId]					=	A.intCurrencyId,
 		[intCurrencyExchangeRateTypeId]=	rateType.intCurrencyExchangeRateTypeId,
 		[dblExchangeRate]				=	voucherRate.dblExchangeRate,
