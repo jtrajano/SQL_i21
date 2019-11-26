@@ -26,9 +26,12 @@ BEGIN TRY
 			@strApprovalText		NVARCHAR(MAX),
 			@FirstApprovalId		INT,
 			@SecondApprovalId       INT,
+			@StraussContractSubmitId       INT,
 			@FirstApprovalSign      VARBINARY(MAX),
 			@SecondApprovalSign     VARBINARY(MAX),
 			@InterCompApprovalSign  VARBINARY(MAX),
+			@StraussContractApproverSignature  VARBINARY(MAX),
+			@StraussContractSubmitSignature  VARBINARY(MAX),
 			@FirstApprovalName      NVARCHAR(MAX),
 			@SecondApprovalName     NVARCHAR(MAX),
 			@IsFullApproved         BIT = 0,
@@ -170,7 +173,7 @@ BEGIN TRY
 	IF @strCommodityCode = 'Tea'
 		SET @strApprovalText = NULL
 
-    SELECT TOP 1 @FirstApprovalId=intApproverId,@intApproverGroupId = intApproverGroupId FROM tblSMApproval WHERE intTransactionId=@intTransactionId AND strStatus='Approved' ORDER BY intApprovalId
+    SELECT TOP 1 @FirstApprovalId=intApproverId,@intApproverGroupId = intApproverGroupId,@StraussContractSubmitId=intSubmittedById FROM tblSMApproval WHERE intTransactionId=@intTransactionId AND strStatus='Approved' ORDER BY intApprovalId
 	SELECT TOP 1 @SecondApprovalId=intApproverId FROM tblSMApproval WHERE intTransactionId=@intTransactionId AND strStatus='Approved' AND (intApproverId <> @FirstApprovalId OR ISNULL(intApproverGroupId,0) <> @intApproverGroupId) ORDER BY intApprovalId
 
 	SELECT	@FirstApprovalSign = Sig.blbDetail, @FirstApprovalName = fe.strName
@@ -203,7 +206,22 @@ BEGIN TRY
 								FROM tblSMSignature Sig  WITH (NOLOCK)
 								--JOIN tblEMEntitySignature ESig ON ESig.intElectronicSignatureId=Sig.intSignatureId 
 								 left join tblEMEntity ent on ent.intEntityId = Sig.intEntityId
-								WHERE Sig.intEntityId=@SecondApprovalId
+								WHERE Sig.intEntityId=@SecondApprovalId	
+
+
+	SELECT @StraussContractApproverSignature =  Sig.blbDetail 
+								 FROM tblSMSignature Sig  WITH (NOLOCK)
+								 JOIN tblEMEntitySignature ESig ON ESig.intElectronicSignatureId=Sig.intSignatureId
+								 left join tblEMEntity ent on ent.intEntityId = Sig.intEntityId
+								 WHERE Sig.intEntityId=@FirstApprovalId
+
+
+	SELECT @StraussContractSubmitSignature =  Sig.blbDetail 
+								 FROM tblSMSignature Sig  WITH (NOLOCK)
+								 JOIN tblEMEntitySignature ESig ON ESig.intElectronicSignatureId=Sig.intSignatureId
+								 left join tblEMEntity ent on ent.intEntityId = Sig.intEntityId
+								 WHERE Sig.intEntityId=@StraussContractSubmitId
+
 
 	SELECT	@strCompanyName	=	CASE WHEN LTRIM(RTRIM(tblSMCompanySetup.strCompanyName)) = '' THEN NULL ELSE LTRIM(RTRIM(tblSMCompanySetup.strCompanyName)) END,
 			@strAddress		=	CASE WHEN LTRIM(RTRIM(tblSMCompanySetup.strAddress)) = '' THEN NULL ELSE LTRIM(RTRIM(tblSMCompanySetup.strAddress)) END,
@@ -644,6 +662,8 @@ BEGIN TRY
 			,SecondApprovalSign						= CASE WHEN @IsFullApproved=1 AND @strCommodityCode = 'Coffee' THEN @SecondApprovalSign ELSE NULL END
 			,FirstApprovalName						= CASE WHEN @IsFullApproved=1 AND @strCommodityCode = 'Coffee' THEN @FirstApprovalName ELSE NULL END
 			,SecondApprovalName						= CASE WHEN @IsFullApproved=1 AND @strCommodityCode = 'Coffee' THEN @SecondApprovalName ELSE NULL END
+			,StraussContractApproverSignature		=  @StraussContractApproverSignature
+			,StraussContractSubmitSignature			=  @StraussContractSubmitSignature
 			,InterCompApprovalSign					= @InterCompApprovalSign
 			,strAmendedColumns						= @strAmendedColumns
 			,lblArbitration							= CASE WHEN ISNULL(AN.strComment,'') <>''	 AND ISNULL(AB.strState,'') <>''		 AND ISNULL(RY.strCountry,'') <>'' THEN @rtArbitration + ':'  ELSE NULL END
