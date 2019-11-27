@@ -76,7 +76,7 @@ FROM(
 		, dtmTransactionDate = dbo.fnRemoveTimeOnDate(cd.dtmCreated)
 		, sh.intContractHeaderId
 		, sh.intContractDetailId
-		, dblQty = dbo.fnCTConvertQtyToTargetCommodityUOM(ch.intCommodityId,dbo.fnCTGetCommodityUnitMeasure(ch.intCommodityUOMId),cum.intUnitMeasureId,sh.dblBalance)
+		, dblQty = dbo.fnCTConvertQtyToTargetCommodityUOM(ch.intCommodityId,dbo.fnCTGetCommodityUnitMeasure(ch.intCommodityUOMId),cum.intUnitMeasureId,sh.dblBalance - isnull(sh.dblOldQuantity,0))
 		, pt.strPricingType
 		, strTransactionType = ''
 		, intTransactionId = null
@@ -89,6 +89,24 @@ FROM(
 	inner join tblICCommodityUnitMeasure cum on cum.intCommodityId = ch.intCommodityId and cum.ysnDefault = 1
 	where intSequenceUsageHistoryId is null and strPricingStatus not in ( 'Partially Priced', 'Fully Priced')
 
+	union
+	select 
+		Row_Number() OVER (PARTITION BY sh.intContractDetailId ORDER BY cd.dtmCreated  DESC, sh.intSequenceHistoryId) AS Row_Num
+		, dtmTransactionDate = dbo.fnRemoveTimeOnDate(cd.dtmCreated)
+		, sh.intContractHeaderId
+		, sh.intContractDetailId
+		, dblQty = dbo.fnCTConvertQtyToTargetCommodityUOM(ch.intCommodityId,dbo.fnCTGetCommodityUnitMeasure(ch.intCommodityUOMId),cum.intUnitMeasureId,sh.dblBalance)
+		, pt.strPricingType
+		, strTransactionType = ''
+		, intTransactionId = null
+		, strTransactionId = ''
+		, intOrderBy = 1
+	from tblCTSequenceHistory sh
+	inner join tblCTContractDetail cd on cd.intContractDetailId = sh.intContractDetailId
+	inner join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
+	inner join tblCTPricingType pt on pt.intPricingTypeId = sh.intPricingTypeId
+	inner join tblICCommodityUnitMeasure cum on cum.intCommodityId = ch.intCommodityId and cum.ysnDefault = 1
+	where intSequenceUsageHistoryId is null 
 	
 	union all
 	select  
