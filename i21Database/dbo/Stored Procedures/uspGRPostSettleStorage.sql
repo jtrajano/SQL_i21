@@ -7,7 +7,7 @@
 	
 AS
 BEGIN TRY
-	
+	--return	
 	SET NOCOUNT ON
 	declare @debug_awesome_ness bit = 0
 	----- DEBUG POINT -----
@@ -398,7 +398,7 @@ BEGIN TRY
 			
 
 			----- DEBUG POINT -----
-			if @debug_awesome_ness = 1 AND 1 = 10
+			if @debug_awesome_ness = 1 AND 1 = 0
 			begin
 				select 'settle contract ', * from @SettleContract a				
 			end
@@ -542,7 +542,7 @@ BEGIN TRY
 
 						set @cur_contract_max_units = @cur_contract_max_units - isnull(@cur_billed_per_contract_id, 0)
 
-						if @debug_awesome_ness = 1 AND 1 = 10
+						if @debug_awesome_ness = 1 AND 1 = 0
 						begin	
 							select @cur_contract_max_units as [max units], @cur_contract_id as [current contract detail], @cur_billed_per_contract_id as [ billed per contract]
 						end
@@ -561,7 +561,7 @@ BEGIN TRY
 
 				
 				----- DEBUG POINT -----
-				if @debug_awesome_ness = 1 AND 1 = 10
+				if @debug_awesome_ness = 1 AND 1 = 0
 				begin				 
 					select 'avqty freshly added VERSION 2',* from @avqty					
 					select @dblSelectedUnits as [ selected units ], @dblTotalVoucheredQuantity as [ total vouchered quantity], @acd as [quantity reference ]
@@ -576,7 +576,7 @@ BEGIN TRY
 								
 
 				----- DEBUG POINT -----
-				if @debug_awesome_ness = 1 AND 1 = 10
+				if @debug_awesome_ness = 1 AND 1 = 0
 				begin				
 					select 'avqty after first update ',* from @avqty
 				end
@@ -604,7 +604,7 @@ BEGIN TRY
 
 			end
 
-			if @debug_awesome_ness = 1 and 1 = 1
+			if @debug_awesome_ness = 1 and 1 = 0
 			begin				
 				select 'avqty ',* from @avqty
 			end
@@ -1432,7 +1432,7 @@ BEGIN TRY
 					,intCurrencyId				= @intCurrencyId
 					,dblExchangeRate			= 1
 					,intTransactionId			= @intSettleStorageId
-					,intTransactionDetailId		= @intSettleStorageTicketId
+					,intTransactionDetailId		=  case when SC.intContractDetailId is not null then SC.intSettleContractId else @intSettleStorageTicketId end
 					,strTransactionId			= @TicketNo
 					,intTransactionTypeId		= 44
 					,intLotId					= @intLotId
@@ -1442,6 +1442,8 @@ BEGIN TRY
 				FROM @SettleVoucherCreate SV
 				JOIN tblGRCustomerStorage CS 
 					ON CS.intCustomerStorageId = SV.intCustomerStorageId
+				left join @SettleContract SC
+					on SV.intContractDetailId = SC.intContractDetailId
 				-- JOIN tblICCommodityUnitMeasure CU 
 				-- 	ON CU.intCommodityId = CS.intCommodityId 
 				-- 		AND CU.ysnStockUnit = 1
@@ -1513,7 +1515,7 @@ BEGIN TRY
 					,intCurrencyId				= @intCurrencyId
 					,dblExchangeRate			= 1
 					,intTransactionId			= @intSettleStorageId
-					,intTransactionDetailId		= @intSettleStorageTicketId
+					,intTransactionDetailId		= case when SC.intContractDetailId is not null then SC.intSettleContractId else @intSettleStorageTicketId end
 					,strTransactionId			= @TicketNo
 					,intTransactionTypeId		= 44
 					,intLotId					= @intLotId
@@ -1523,6 +1525,8 @@ BEGIN TRY
 				FROM @SettleVoucherCreate SV
 				JOIN tblGRCustomerStorage CS 
 					ON CS.intCustomerStorageId = SV.intCustomerStorageId
+				left join @SettleContract SC
+					on SV.intContractDetailId = SC.intContractDetailId
 				--JOIN tblICCommodityUnitMeasure CU 
 				--	ON CU.intCommodityId = CS.intCommodityId 
 				--	AND CU.ysnStockUnit = 1
@@ -1549,7 +1553,7 @@ BEGIN TRY
 				WHERE SV.intItemType = 1
 
 				----- DEBUG POINT -----
-				if @debug_awesome_ness = 1 and 1 = 0
+				if @debug_awesome_ness = 1 and 1 = 1
 				begin
 				
 					select 'items to post',* from @ItemsToPost
@@ -1558,9 +1562,11 @@ BEGIN TRY
 					select ' contract depletion',* from @tblDepletion
 
 				end 
-				IF @debug_awesome_ness = 1 and 1 = 0
+				IF @debug_awesome_ness = 1 and 1 = 1
 				begin
-					select 'items to post',* from @ItemsToPost
+
+					select ' settle voucher create ',* from @SettleVoucherCreate
+					select ' settle contract ', * from @SettleContract
 
 					SELECT 
 						'items to post breack down'
@@ -1719,17 +1725,25 @@ BEGIN TRY
 								GOTO SettleStorage_Exit;
 							
 							----- DEBUG POINT -----
-							if @debug_awesome_ness = 1 AND 1 = 10
+							if @debug_awesome_ness = 1 AND 1 = 1
 							begin
-								select 'inventory transaction', * from tblICInventoryTransaction where strBatchId = @strBatchId order by intInventoryTransactionId desc
-								select 'dummy', * from @DummyGLEntries
-								EXEC dbo.uspGRCreateItemGLEntries
-								@strBatchId
-								,@SettleVoucherCreate
-								,'AP Clearing'
-								,@intCreatedUserId
-								,@dblSelectedUnits = @dblSelectedUnits
-								select 'dummy and created gl entries up'
+								
+								if 1  = 1 
+								begin
+									select 'inventory transaction', * from tblICInventoryTransaction where strBatchId = @strBatchId order by intInventoryTransactionId desc
+								end
+								
+								if 1 = 0
+								begin 
+									select 'dummy', * from @DummyGLEntries
+									EXEC dbo.uspGRCreateItemGLEntries
+									@strBatchId
+									,@SettleVoucherCreate
+									,'AP Clearing'
+									,@intCreatedUserId
+									,@dblSelectedUnits = @dblSelectedUnits
+									select 'dummy and created gl entries up'
+								end
 							end
 							----- DEBUG POINT -----
 
@@ -1879,7 +1893,7 @@ BEGIN TRY
 
 				end
 				----- DEBUG POINT -----
-				if @debug_awesome_ness = 1 and 1 = 10
+				if @debug_awesome_ness = 1 and 1 = 0
 				begin
 					select 'discount relation'
 					select * from @DiscountSCRelation
@@ -2043,9 +2057,14 @@ BEGIN TRY
 						and a.intItemType = 1
 
 					----- DEBUG POINT -----
-					if @debug_awesome_ness = 1 AND 1 = 10
+					if @debug_awesome_ness = 1 AND 1 = 0
 					begin					
+						select @doPartialHistory as [ do partial ] , @ysnFromPriceBasisContract as [from basis contract] 
 						select ' before settle voucher create after discount update', * from @SettleVoucherCreate
+						select						
+								intContractDetailId,	intPriceFixationDetailId, dblCashPrice, dblAvailableQuantity						
+								from @avqty  		
+
 					end
 					----- DEBUG POINT -----
 
@@ -2316,7 +2335,7 @@ BEGIN TRY
 							)
 				 ---
 				----- DEBUG POINT -----				 
-				if @debug_awesome_ness = 1	 AND 1 = 1
+				if @debug_awesome_ness = 1	 AND 1 = 0
 				begin
 									
 					select * from tblCTContractHeader where intContractHeaderId = 673
@@ -2993,7 +3012,7 @@ BEGIN TRY
 							end
 
 							----- DEBUG POINT -----
-							if @debug_awesome_ness = 1	 AND 1 = 1
+							if @debug_awesome_ness = 1	 AND 1 = 0
 							begin
 
 								select 'selected units', @dblSelectedUnits
@@ -3082,7 +3101,7 @@ BEGIN TRY
 			END
 	
 			----- DEBUG POINT -----
-			IF @debug_awesome_ness = 1 and 1 = 10
+			IF @debug_awesome_ness = 1 and 1 = 0
 			begin
 				select 'Contract Depletion Area'
 				select * from @tblDepletion
