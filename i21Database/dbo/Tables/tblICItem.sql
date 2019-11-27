@@ -178,6 +178,7 @@ Type the overview for the table here.
 		[strServiceType] NVARCHAR(50)  COLLATE Latin1_General_CI_AS NULL,
 		[intDataSourceId] TINYINT NULL,
 		[ysnSeparateStockForUOMs] BIT NULL DEFAULT ((1)),
+		[intItemRefId] INT NULL,
 		CONSTRAINT [AK_tblICItem_strItemNo] UNIQUE ([strItemNo]), 
 		CONSTRAINT [PK_tblICItem] PRIMARY KEY ([intItemId]), 
 		CONSTRAINT [FK_tblICItem_tblICManufacturer] FOREIGN KEY ([intManufacturerId]) REFERENCES [tblICManufacturer]([intManufacturerId]), 
