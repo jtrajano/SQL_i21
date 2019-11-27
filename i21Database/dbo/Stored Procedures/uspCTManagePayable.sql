@@ -51,7 +51,7 @@ BEGIN TRY
 			IF (@intContractHeaderId IS NOT NULL AND @intContractHeaderId > 0)
 			BEGIN
 				SET @intScreenId = (SELECT TOP 1 intScreenId FROM tblSMScreen WHERE strModule = 'Contract Management' AND strNamespace = 'ContractManagement.view.Contract');
-				IF NOT EXISTS (SELECT * FROM tblSMTransaction a WHERE a.intRecordId = @intContractHeaderId AND a.intScreenId = @intScreenId AND a.strApprovalStatus IN ('Approved', 'No Need for Approval'))
+				IF NOT EXISTS (SELECT * FROM tblSMTransaction a WHERE a.intRecordId = @intContractHeaderId AND a.intScreenId = @intScreenId AND a.strApprovalStatus IN ('Approved', 'No Need for Approval', 'Approved with Modifications'))
 				BEGIN
 					/*Don't add to Payables IF the contract is NOT yet approved.*/
 					RETURN
