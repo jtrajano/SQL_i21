@@ -568,6 +568,8 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\TR\ImportBolFileSetup.sql
 :r .\TR\CrossReferenceDefault.sql
 :r .\TR\OverrideTaxGroupDefault.sql
+:r .\TR\ImportDtnFileSetup.sql
+:r .\TR\ImportDtnDefaultSetup.sql
 
 --Help Desk
 :R .\HD\DefaultData\1_StatusData.sql
