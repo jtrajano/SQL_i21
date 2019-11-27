@@ -21,12 +21,12 @@ SELECT TOP 100 PERCENT
 											ON B.intPaymentId = C.intPaymentId
 										WHERE C.intOrigBillId = A.intBillId AND C.intOrigBillId IS NOT NULL
 										UNION ALL
-										SELECT TOP 1
+										SELECT 
 										B.strRecordNumber 
 										FROM dbo.tblARPayment B 
 											LEFT JOIN dbo.tblARPaymentDetail C ON B.intPaymentId = C.intPaymentId
 										WHERE C.intBillId > 0 AND C.intBillId = A.intBillId 
-										ORDER BY B.intPaymentId DESC
+										--ORDER BY B.intPaymentId DESC
 									) paymentData
 									FOR XML PATH('')),1,1,''
 								),
@@ -46,12 +46,12 @@ SELECT TOP 100 PERCENT
 											ON B.intPaymentId = C.intPaymentId
 										WHERE C.intOrigBillId = A.intBillId AND C.intOrigBillId IS NOT NULL
 										UNION ALL
-										SELECT TOP 1
+										SELECT
 										B.intPaymentId 
 										FROM dbo.tblARPayment B 
 											LEFT JOIN dbo.tblARPaymentDetail C ON B.intPaymentId = C.intPaymentId
 										WHERE C.intBillId > 0 AND C.intBillId = A.intBillId 
-										ORDER BY B.intPaymentId DESC
+										--ORDER BY B.intPaymentId DESC
 									) paymentData
 									FOR XML PATH('')),1,1,''
 								),

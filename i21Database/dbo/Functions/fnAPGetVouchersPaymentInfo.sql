@@ -18,7 +18,7 @@ RETURNS @returntable TABLE
 AS
 BEGIN
 	INSERT @returntable
-	SELECT 
+	SELECT TOP 100 PERCENT
 		A.intBillId,
 		A.ysnPaid,
 		A.dtmDatePaid,
@@ -39,12 +39,12 @@ BEGIN
 											ON B.intPaymentId = C.intPaymentId
 										WHERE C.intOrigBillId = A.intBillId AND C.intOrigBillId IS NOT NULL
 										UNION ALL
-										SELECT TOP 1
+										SELECT 
 										B.strRecordNumber 
 										FROM dbo.tblARPayment B 
 											LEFT JOIN dbo.tblARPaymentDetail C ON B.intPaymentId = C.intPaymentId
 										WHERE C.intBillId > 0 AND C.intBillId = A.intBillId 
-										ORDER BY B.intPaymentId DESC
+										--ORDER BY B.intPaymentId DESC
 									) paymentData
 									FOR XML PATH('')),1,1,''
 								),
@@ -64,12 +64,12 @@ BEGIN
 											ON B.intPaymentId = C.intPaymentId
 										WHERE C.intOrigBillId = A.intBillId AND C.intOrigBillId IS NOT NULL
 										UNION ALL
-										SELECT TOP 1
+										SELECT 
 										B.intPaymentId 
 										FROM dbo.tblARPayment B 
 											LEFT JOIN dbo.tblARPaymentDetail C ON B.intPaymentId = C.intPaymentId
 										WHERE C.intBillId > 0 AND C.intBillId = A.intBillId 
-										ORDER BY B.intPaymentId DESC
+										--ORDER BY B.intPaymentId DESC
 									) paymentData
 									FOR XML PATH('')),1,1,''
 								),
