@@ -394,7 +394,7 @@ BEGIN
 														--[Voucher Qty]
 														CASE WHEN B.intWeightUOMId IS NULL THEN B.dblQtyReceived ELSE B.dblNetWeight END
 														--[Voucher Cost]
-														,CASE WHEN A.intCurrencyId <> 1 THEN 														
+														,CASE WHEN A.intCurrencyId <> @intFunctionalCurrencyId THEN 														
 																dbo.fnCalculateCostBetweenUOM(voucherCostUOM.intItemUOMId,
 																	COALESCE(B.intWeightUOMId, B.intUnitOfMeasureId),
 																	(B.dblCost - (B.dblCost * (ISNULL(B.dblDiscount,0) / 100)))) * ISNULL(B.dblRate, 0) 
@@ -406,7 +406,7 @@ BEGIN
 													)
 													AS DECIMAL(18,2)) 
 													- sh.dblPaidAmount
-			,[intCurrencyId] 					=	1 -- It is always in functional currency. 
+			,[intCurrencyId] 					=	@intFunctionalCurrencyId -- It is always in functional currency. 
 			,[intTransactionId]					=	A.intBillId
 			,[intTransactionDetailId] 			=	B.intBillDetailId
 			,[strTransactionId] 				=	A.strBillId
@@ -421,7 +421,8 @@ BEGIN
 			,[strSourceTransactionId] 			=	TS.strTransferStorageTicket
 			,[intFobPointId]					=	NULL
 			,[intInTransitSourceLocationId]		=	NULL
-		FROM tblAPBill A 
+		FROM @voucherIds ids
+		INNER JOIN tblAPBill A ON A.intBillId = ids.intId 
 		INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
 		INNER JOIN tblGRSettleStorage C3 ON A.intBillId = C3.intBillId
 		INNER JOIN tblGRSettleStorageTicket C2 ON C3.intSettleStorageId = C2.intSettleStorageId
