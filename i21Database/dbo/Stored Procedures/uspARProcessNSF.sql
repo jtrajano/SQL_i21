@@ -24,6 +24,8 @@ DECLARE @ysnSuccess							BIT = 0
 DECLARE @GLEntries							RecapTableType
 DECLARE @BankTransaction					BankTransactionTable
 DECLARE @BankTransactionDetail				BankTransactionDetailTable
+DECLARE @InvoiceEntries						InvoiceIntegrationStagingTable
+DECLARE @LineItemTaxEntries					LineItemTaxDetailStagingTable
 
 SELECT TOP 1 @intNSFPaymentMethodId = intPaymentMethodID
 FROM dbo.tblSMPaymentMethod 
@@ -295,9 +297,6 @@ INNER JOIN #NSFWITHOVERPAYMENTS NSF ON I.intInvoiceId = NSF.intInvoiceId
 --INVOICE BANK CHARGES TO CUSTOMER
 IF EXISTS (SELECT TOP 1 NULL FROM #SELECTEDPAYMENTS WHERE ysnInvoiceToCustomer = 1)
 	BEGIN
-		DECLARE @InvoiceEntries		InvoiceIntegrationStagingTable
-		DECLARE @LineItemTaxEntries	LineItemTaxDetailStagingTable
-
 		INSERT INTO @InvoiceEntries (
 			  [strTransactionType]
 			, [strType]
@@ -348,16 +347,69 @@ IF EXISTS (SELECT TOP 1 NULL FROM #SELECTEDPAYMENTS WHERE ysnInvoiceToCustomer =
 		WHERE ysnInvoiceToCustomer = 1
 		  AND intNSFAccountId IS NOT NULL
 		  AND dblNSFBankCharge > 0.00
-		
-		IF EXISTS (SELECT TOP 1 NULL FROM @InvoiceEntries)
-			BEGIN
-				EXEC dbo.uspARProcessInvoices @InvoiceEntries		= @InvoiceEntries
-											, @LineItemTaxEntries	= @LineItemTaxEntries
-											, @UserId				= @intUserId
-											, @GroupingOption		= 0
-											, @CreatedIvoices		= @strCreatedIvoices OUT
-			END
 	END
+
+--CREATE NEW INVOICES FOR CASH
+IF EXISTS (SELECT TOP 1 NULL FROM #SELECTEDPAYMENTS WHERE strTransactionType = 'Cash')
+	BEGIN
+		INSERT INTO @InvoiceEntries (
+			  [strTransactionType]
+			, [strType]
+			, [strSourceTransaction]
+			, [intSourceId]
+			, [strSourceId]
+			, [intEntityCustomerId]
+			, [intCompanyLocationId]			
+			, [intCurrencyId]
+			, [intEntityId]
+			, [dtmDate]
+			, [dtmDueDate]
+			, [dtmShipDate]
+			, [dtmPostDate]
+			, [strComments]
+			, [ysnPost]
+			, [intSalesAccountId]
+			, [ysnInventory]
+			, [strItemDescription]
+			, [dblQtyShipped]
+			, [dblPrice]
+			, [intTaxGroupId]
+			, [ysnRecomputeTax]
+		)
+		SELECT [strTransactionType]		= 'Invoice' 
+			 , [strType]				= 'Standard'
+			 , [strSourceTransaction]	= 'Direct'
+			 , [intSourceId]			= P.intTransactionId
+			 , [strSourceId]			= P.strTransactionNumber
+			 , [intEntityCustomerId]	= P.intEntityCustomerId
+			 , [intCompanyLocationId]	= P.intCompanyLocationId			 
+			 , [intCurrencyId]			= P.intCurrencyId
+			 , [intEntityId]			= @intUserId
+			 , [dtmDate]				= P.dtmDate
+			 , [dtmDueDate]				= P.dtmDate
+			 , [dtmShipDate]			= P.dtmDate
+			 , [dtmPostDate]			= P.dtmDate
+			 , [strComments]			= 'NSF Cash Sale from ' + P.strTransactionNumber
+			 , [ysnPost]				= 1
+			 , [intSalesAccountId]		= P.intNSFAccountId
+			 , [ysnInventory]			= 0
+			 , [strItemDescription]		= 'Cash Sale ' + P.strTransactionNumber
+			 , [dblQtyShipped]			= 1
+			 , [dblPrice]				= P.dblAmountPaid
+			 , [intTaxGroupId]			= NULL
+			 , [ysnRecomputeTax]		= 0
+		FROM #SELECTEDPAYMENTS P
+		WHERE strTransactionType = 'Cash'
+	END
+
+IF EXISTS (SELECT TOP 1 NULL FROM @InvoiceEntries)
+BEGIN
+	EXEC dbo.uspARProcessInvoices @InvoiceEntries		= @InvoiceEntries
+								, @LineItemTaxEntries	= @LineItemTaxEntries
+								, @UserId				= @intUserId
+								, @GroupingOption		= 0
+								, @CreatedIvoices		= @strCreatedIvoices OUT
+END
 
 UPDATE tblARNSFStagingTableDetail 
 SET ysnProcessed = 1 

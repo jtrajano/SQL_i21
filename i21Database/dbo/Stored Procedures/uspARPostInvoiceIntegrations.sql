@@ -245,6 +245,7 @@ BEGIN
 				AND CM.strTransactionType = 'Credit Memo'
 				AND IH.strTransactionType = 'Cash Refund'
 		) REFUND
+		WHERE IH.strTransactionType <> 'Cash'
 		GROUP BY [intEntityCustomerId]
 	) INVOICE ON CUSTOMER.intEntityId = INVOICE.[intEntityCustomerId]
 
@@ -567,6 +568,7 @@ BEGIN
 				AND CM.strTransactionType = 'Credit Memo'
 				AND IH.strTransactionType = 'Cash Refund'
 		) REFUND
+		WHERE IH.strTransactionType <> 'Cash'
 		GROUP BY [intEntityCustomerId]
 		) INVOICE ON CUSTOMER.intEntityId = INVOICE.[intEntityCustomerId]
 
