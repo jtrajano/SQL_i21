@@ -594,74 +594,74 @@ BEGIN TRY
 		ELSE
 		BEGIN
 			INSERT INTO @ReceiptStagingTable (
-				strReceiptType
-				,intEntityVendorId
-				,intShipFromId
-				,intLocationId
-				,strBillOfLadding
-				,intItemId
-				,intItemLocationId
-				,intItemUOMId
-				,intContractHeaderId
-				,intContractDetailId
-				,dtmDate
-				,intShipViaId
-				,dblQty
-				,intGrossNetUOMId
-				,dblGross
-				,dblNet
-				,dblCost
-				,intCostUOMId
-				,intCurrencyId
-				,intSubCurrencyCents
-				,dblExchangeRate
-				,intLotId
-				,intSubLocationId
-				,intStorageLocationId
-				,ysnIsStorage
-				,intSourceId
-				,intSourceType
-				,strSourceId
-				,strSourceScreenName
-				,ysnSubCurrency
-				,intForexRateTypeId
-				,dblForexRate
-				,intContainerId
-				,intFreightTermId
-				,intBookId
-				,intSubBookId
-				,intSort
+				[strReceiptType]
+				,[intEntityVendorId]
+				,[intShipFromId]
+				,[intLocationId]
+				,[strBillOfLadding]
+				,[intItemId]
+				,[intItemLocationId]
+				,[intItemUOMId]
+				,[intContractHeaderId]
+				,[intContractDetailId]
+				,[dtmDate]
+				,[intShipViaId]
+				,[dblQty]
+				,[intGrossNetUOMId]
+				,[dblGross]
+				,[dblNet]
+				,[dblCost]
+				,[intCostUOMId]
+				,[intCurrencyId]
+				,[intSubCurrencyCents]
+				,[dblExchangeRate]
+				,[intLotId]
+				,[intSubLocationId]
+				,[intStorageLocationId]
+				,[ysnIsStorage]
+				,[intSourceId]
+				,[intSourceType]
+				,[strSourceId]
+				,[strSourceScreenName]
+				,[ysnSubCurrency]
+				,[intForexRateTypeId]
+				,[dblForexRate]
+				,[intContainerId]
+				,[intFreightTermId]
+				,[intBookId]
+				,[intSubBookId]
+				,[intSort]
 				)
-			SELECT strReceiptType = 'Purchase Contract'
-				,intEntityVendorId = LD.intVendorEntityId --
-				,intShipFromId = EL.intEntityLocationId
-				,intLocationId = CD.intCompanyLocationId
-				,L.strBLNumber --
-				,intItemId = LD.intItemId --
-				,intItemLocationId = CD.intCompanyLocationId
-				,intItemUOMId = LD.intItemUOMId --
-				,intContractHeaderId = CD.intContractHeaderId --
-				,intContractDetailId = LD.intPContractDetailId --
-				,dtmDate = GETDATE()
-				,intShipViaId = CD.intShipViaId
-				,dblQty = LD.dblQuantity-ISNULL(LD.dblDeliveredQuantity,0) --
-				,intGrossNetUOMId = ISNULL(LD.intWeightItemUOMId, CD.intNetWeightUOMId) --
-				,dblGross =  LD.dblGross - ISNULL(LD.dblDeliveredGross,0) --
-				,dblNet = LD.dblNet -ISNULL(LD.dblDeliveredNet,0) --
-				,dblCost = ISNULL(LD.dblUnitPrice,0) --
-				,intCostUOMId = ISNULL(AD.intSeqPriceUOMId,LD.intPriceUOMId)  --
-				,intCurrencyId = ISNULL(LSC.intMainCurrencyId, LSC.intCurrencyID)
-				,intSubCurrencyCents = ISNULL(LSC.intCent, 1)
-				,dblExchangeRate = 1
-				,intLotId = NULL
-				,intSubLocationId = ISNULL(CD.intSubLocationId, LD.intPSubLocationId) --
-				,intStorageLocationId = CD.intStorageLocationId --
-				,ysnIsStorage = 0
-				,intSourceId = LD.intLoadDetailId --
-				,intSourceType = 2
-				,strSourceId = L.strLoadNumber --
-				,strSourceScreenName = 'Contract'
-				,ysnSubCurrency = LSC.ysnSubCurrency
+			SELECT [strReceiptType] = 'Purchase Contract'
+				,[intEntityVendorId] = LD.intVendorEntityId
+				,[intShipFromId] = EL.intEntityLocationId
+				,[intLocationId] = CD.intCompanyLocationId
+				,[strBillOfLadding] = L.strBLNumber
+				,[intItemId] = LD.intItemId
+				,[intItemLocationId] = CD.intCompanyLocationId
+				,[intItemUOMId] = LD.intItemUOMId
+				,[intContractHeaderId] = CD.intContractHeaderId
+				,[intContractDetailId] = LD.intPContractDetailId
+				,[dtmDate] = GETDATE()
+				,[intShipViaId] = CD.intShipViaId
+				,[dblQty] = LD.dblQuantity-ISNULL(LD.dblDeliveredQuantity,0)
+				,[intGrossNetUOMId] = ISNULL(LD.intWeightItemUOMId, CD.intNetWeightUOMId)
+				,[dblGross] = LD.dblGross - ISNULL(LD.dblDeliveredGross,0)
+				,[dblNet] = LD.dblNet -ISNULL(LD.dblDeliveredNet,0)
+				,[dblCost] = ISNULL(AD.dblSeqPrice, ISNULL(LD.dblUnitPrice,0))
+				,[intCostUOMId] = ISNULL(AD.intSeqPriceUOMId,LD.intPriceUOMId)
+				,[intCurrencyId] = CASE WHEN (AD.ysnValidFX = 1) THEN AD.intSeqCurrencyId ELSE ISNULL(LSC.intMainCurrencyId, LSC.intCurrencyID) END
+				,[intSubCurrencyCents] = CASE WHEN (AD.ysnValidFX = 1) THEN SC.intCent ELSE ISNULL(LSC.intCent, 1) END
+				,[dblExchangeRate] = 1
+				,[intLotId] = NULL
+				,[intSubLocationId] = ISNULL(CD.intSubLocationId, LD.intPSubLocationId)
+				,[intStorageLocationId] = CD.intStorageLocationId
+				,[ysnIsStorage] = 0
+				,[intSourceId] = LD.intLoadDetailId
+				,[intSourceType] = 2
+				,[strSourceId] = L.strLoadNumber
+				,[strSourceScreenName] = 'Contract'
+				,[ysnSubCurrency] = CASE WHEN (AD.ysnValidFX = 1) THEN AD.ysnSeqSubCurrency ELSE LSC.ysnSubCurrency END
 				,[intForexRateTypeId] = CASE --if contract FX tab is setup
 									 WHEN AD.ysnValidFX = 1 THEN 
 										CASE WHEN (ISNULL(LSC.intMainCurrencyId, LSC.intCurrencyID) = @DefaultCurrencyId AND CD.intInvoiceCurrencyId <> @DefaultCurrencyId) 
@@ -690,11 +690,11 @@ BEGIN TRY
 											THEN ISNULL(FX.dblFXRate, 1)
 											ELSE ISNULL(LD.dblForexRate,1) END
 									 END
-				,- 1 --
-				,L.intFreightTermId
-				,L.intBookId
-				,L.intSubBookId
-				,NULL
+				,[intContainerId] = -1
+				,[intFreightTermId] = L.intFreightTermId
+				,[intBookId] = L.intBookId
+				,[intSubBookId] = L.intSubBookId
+				,[intSort] = NULL
 			FROM tblLGLoad L
 			JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 			JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId

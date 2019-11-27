@@ -82,7 +82,7 @@ FROM
 		LEFT JOIN tblEMEntity CUS ON CUS.intEntityId = SCH.intEntityId
 		LEFT JOIN tblSMFreightTerms PFT ON PFT.intFreightTermId = PCH.intFreightTermId
 		LEFT JOIN tblSMFreightTerms SFT ON SFT.intFreightTermId = SCH.intFreightTermId
-		LEFT JOIN tblSMTerm PT ON PT.intTermID = PCH.intTermId
+		LEFT JOIN tblSMTerm SPT ON SPT.intTermID = PCH.intTermId
 		LEFT JOIN tblSMCity PLOC ON PCH.intINCOLocationTypeId = PLOC.intCityId
 		LEFT JOIN tblSMCity SLOC ON SCH.intINCOLocationTypeId = SLOC.intCityId
 		LEFT JOIN tblICItem I ON I.intItemId = PCD.intItemId
@@ -98,17 +98,6 @@ FROM
 		LEFT JOIN tblSMCurrency SCUR ON SCUR.intCurrencyID = SCD.intBasisCurrencyId
 		LEFT JOIN tblSMCurrency SMCUR ON SMCUR.intCurrencyID = SCUR.intMainCurrencyId
 		LEFT JOIN tblICUnitMeasure PUM ON PUM.intUnitMeasureId = PUOM.intUnitMeasureId
-		/* Latest Shipment for the Purchase Contract with Freight Term Spot */
-		OUTER APPLY (SELECT TOP 1 L.intLoadId, dtmBLDate, intShippingLineEntityId, strOriginPort, strDestinationPort, 
-						strDestinationCity, intContainerTypeId, L.intNumberOfContainers
-					 FROM tblLGLoad L
-						LEFT JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
-					 WHERE L.intShipmentType = 1
-						AND LD.intPContractDetailId = PCD.intContractDetailId
-						AND PCH.intFreightTermId IN (SELECT intFreightTermId FROM tblSMFreightTerms FT 
-							JOIN tblCTPosition P ON P.intPositionId = FT.intPositionId AND P.strPositionType = 'Spot')
-					 ORDER BY L.dtmScheduledDate DESC
-					) SHPMT
 		/* Market Basis */
 		OUTER APPLY (SELECT TOP 1 MTMBD.dblBasisOrDiscount, MTMBD.intCurrencyId, MBUOM.intItemUOMId, MBCU.intCent
 					 FROM tblRKM2MBasisDetail MTMBD
@@ -127,7 +116,7 @@ FROM
 						LEFT JOIN tblICItemUOM PTUOM ON PTUOM.intItemId = I.intItemId AND PTUOM.intUnitMeasureId = PTSA.intUnitMeasureId
 						LEFT JOIN tblSMCurrency PTCU ON PTCU.intCurrencyID = PTSA.intCurrencyId
 					 WHERE PTSA.intAdjustmentType = 1 
-						AND PTSA.strMasterRecord IN (PT.strTerm, PT.strTermCode)
+						AND PTSA.strMasterRecord IN (SPT.strTerm, SPT.strTermCode)
 						AND SCH.dtmContractDate BETWEEN PTSA.dtmValidFrom AND PTSA.dtmValidTo
 					 ORDER BY PTSA.intStandardAdjustmentId DESC
 					 ) PTADJ 
@@ -158,12 +147,12 @@ FROM
 						LEFT JOIN tblSMCurrency FRMCU ON FRMCU.intCurrencyID = FRMX.intCurrencyId
 						LEFT JOIN tblLGContainerType CON ON CON.intContainerTypeId = FRMX.intContainerTypeId
 						LEFT JOIN tblICItemUOM CTUOM ON CTUOM.intItemId = I.intItemId AND CTUOM.intUnitMeasureId = CON.intWeightUnitMeasureId
-					 WHERE FRMX.strOriginPort = SHPMT.strOriginPort
-						AND FRMX.strDestinationCity IN (SHPMT.strDestinationPort, SHPMT.strDestinationCity) 
-						AND FRMX.intEntityId = SHPMT.intShippingLineEntityId
-						AND FRMX.intContainerTypeId = ISNULL(SCD.intContainerTypeId, SHPMT.intContainerTypeId)
-						AND SHPMT.dtmBLDate BETWEEN FRMX.dtmValidFrom AND FRMX.dtmValidTo
-					 ORDER BY FRMX.intFreightRateMatrixId DESC
+					 WHERE FRMX.strOriginPort = SLOC.strCity
+						AND FRMX.strDestinationCity = PLOC.strCity
+						AND SCD.dtmStartDate BETWEEN FRMX.dtmValidFrom AND FRMX.dtmValidTo
+						AND PCH.intPositionId IN (SELECT intPositionId FROM tblCTPosition P WHERE P.strPositionType = 'Spot')
+						AND SCH.intPositionId IN (SELECT intPositionId FROM tblCTPosition P WHERE P.strPositionType = 'Shipment')
+					 ORDER BY FRMX.dblTotalCostPerContainer ASC
 					 ) FTADJ 
 		OUTER APPLY (SELECT	TOP 1 intItemUOMId, dblUnitQty FROM	dbo.tblICItemUOM WHERE intItemId = I.intItemId AND intUnitMeasureId = @intUnitMeasureId) ItemUOM
 	WHERE 
