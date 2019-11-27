@@ -8211,6 +8211,7 @@
     <Build Include="dbo\Index\IX_tblSMAudit.sql" />
     <Build Include="dbo\Tables\tblICCommodityAccountM2M.sql" />
     <Build Include="dbo\Functions\fnGetCommodityGLAccountM2M.sql" />
+    <Build Include="dbo\Views\vyuAPUnknownPayables.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
