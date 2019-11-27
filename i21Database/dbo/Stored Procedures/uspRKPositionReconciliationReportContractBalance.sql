@@ -54,7 +54,7 @@ BEGIN
 	SELECT @strCommodities =  COALESCE(@strCommodities + ', ' + strCommodityCode, strCommodityCode) FROM #tempCommodity
 
 
-SELECT
+SELECT DISTINCT
 	strHeaderType = @strContractType + ' Contract Balance' 
 	,dtmTransactionDate 
 	,C.strCommodityCode
