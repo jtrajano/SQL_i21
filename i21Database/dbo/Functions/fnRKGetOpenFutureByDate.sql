@@ -56,10 +56,13 @@ BEGIN
 	SET @dtmFromDate = CONVERT(DATETIME, CONVERT(VARCHAR(10), @dtmFromDate, 110), 110)
 
 	DECLARE @strCommodityCode NVARCHAR(MAX)
+		, @ysnDisableHistoricalDerivative BIT = 0
 
 	SELECT TOP 1 @strCommodityCode = strCommodityCode
 	FROM tblICCommodity
 	WHERE intCommodityId = @intCommodityId
+
+	SELECT TOP 1 @ysnDisableHistoricalDerivative = ISNULL(ysnDisableHistoricalDerivative, 0) FROM tblRKCompanyPreference
 
 	;WITH MatchDerivatives (
 		intFutOptTransactionId
@@ -222,8 +225,9 @@ BEGIN
 					LEFT JOIN MatchDerivatives mc ON mc.intFutOptTransactionId = FOT.intFutOptTransactionId
 					WHERE History.intFutOptTransactionId = FOT.intFutOptTransactionId
 						AND ((CAST(FLOOR(CAST(History.dtmTransactionDate AS FLOAT)) AS DATETIME) >= @dtmFromDate
-						AND CAST(FLOOR(CAST(History.dtmTransactionDate AS FLOAT)) AS DATETIME) <= @dtmToDate AND strAction <> 'ADD')
-						OR strAction = 'ADD')
+							AND CAST(FLOOR(CAST(History.dtmTransactionDate AS FLOAT)) AS DATETIME) <= @dtmToDate
+							AND @ysnDisableHistoricalDerivative = 0)
+						OR @ysnDisableHistoricalDerivative = 1)
 				) t WHERE intRowNum = 1
 			) History
 			WHERE FOT.strInstrumentType = 'Futures'
@@ -293,8 +297,9 @@ BEGIN
 					LEFT JOIN MatchDerivatives mc ON mc.intFutOptTransactionId = FOT.intFutOptTransactionId
 					WHERE History.intFutOptTransactionId = FOT.intFutOptTransactionId
 						AND ((CAST(FLOOR(CAST(History.dtmTransactionDate AS FLOAT)) AS DATETIME) >= @dtmFromDate
-						AND CAST(FLOOR(CAST(History.dtmTransactionDate AS FLOAT)) AS DATETIME) <= @dtmToDate AND strAction <> 'ADD')
-						OR strAction = 'ADD')
+							AND CAST(FLOOR(CAST(History.dtmTransactionDate AS FLOAT)) AS DATETIME) <= @dtmToDate
+							AND @ysnDisableHistoricalDerivative = 0)
+						OR @ysnDisableHistoricalDerivative = 1)
 				) t WHERE intRowNum = 1
 			) History
 			WHERE FOT.strInstrumentType = 'Options'
@@ -365,6 +370,7 @@ BEGIN
 						AND CAST(FLOOR(CAST(History.dtmTransactionDate AS FLOAT)) AS DATETIME) >= @dtmFromDate
 						AND CAST(FLOOR(CAST(History.dtmTransactionDate AS FLOAT)) AS DATETIME) <= @dtmToDate
 				) t WHERE intRowNum = 1
+						AND @ysnDisableHistoricalDerivative = 0
 			) History
 			WHERE ISNULL(@ysnCrush, 0) = 1
 				AND strStatus = 'Filled'
