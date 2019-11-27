@@ -1553,7 +1553,7 @@ BEGIN TRY
 				WHERE SV.intItemType = 1
 
 				----- DEBUG POINT -----
-				if @debug_awesome_ness = 1 and 1 = 1
+				if @debug_awesome_ness = 1 and 1 = 0
 				begin
 				
 					select 'items to post',* from @ItemsToPost
@@ -1562,7 +1562,7 @@ BEGIN TRY
 					select ' contract depletion',* from @tblDepletion
 
 				end 
-				IF @debug_awesome_ness = 1 and 1 = 1
+				IF @debug_awesome_ness = 1 and 1 = 0
 				begin
 
 					select ' settle voucher create ',* from @SettleVoucherCreate
@@ -1725,7 +1725,7 @@ BEGIN TRY
 								GOTO SettleStorage_Exit;
 							
 							----- DEBUG POINT -----
-							if @debug_awesome_ness = 1 AND 1 = 1
+							if @debug_awesome_ness = 1 AND 1 = 0
 							begin
 								
 								if 1  = 1 
@@ -2322,6 +2322,7 @@ BEGIN TRY
 					,a.intItemType				
 				 
 
+							 
 				 ---we should delete priced contracts that has a voucher already
 					delete from @voucherPayable 
 						where intVoucherPayableId in (
@@ -2333,7 +2334,31 @@ BEGIN TRY
 										and a.intContractDetailId = c.intContractDetailId
 										and c.intCustomerStorageId = a.intCustomerStorageId
 							)
+
+					if @ysnFromPriceBasisContract = 1
+					begin
+						--this block will reupdate the total unit of the storage depending on the number of quantity of the item for the voucher payable
+										
+						declare @total_units_for_voucher  DECIMAL(24, 10)
+
+						select @total_units_for_voucher  = sum(dblQuantityToBill) from @voucherPayable a
+							JOIN tblICItem b
+									ON b.intItemId = a.intItemId and b.strType = 'Inventory'
+
+
+						update  a set 
+								dblQuantityToBill = isnull(@total_units_for_voucher, dblQuantityToBill), 
+								dblNetWeight = isnull(@total_units_for_voucher, dblNetWeight)
+							from @voucherPayable a
+							join @SettleVoucherCreate b
+								on a.intItemId = b.intItemId
+							where b.intItemType = 2
+					end
+					
 				 ---
+				
+
+				----- DEBUG POINT -----	
 				----- DEBUG POINT -----				 
 				if @debug_awesome_ness = 1	 AND 1 = 0
 				begin
