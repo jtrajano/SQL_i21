@@ -9,7 +9,7 @@ AS
 BEGIN TRY
 	--return	
 	SET NOCOUNT ON
-	declare @debug_awesome_ness bit = 0
+	declare @debug_awesome_ness bit = 1
 	----- DEBUG POINT -----
 	if @debug_awesome_ness = 1	 AND 1 = 0
 	begin
@@ -2348,7 +2348,8 @@ BEGIN TRY
 
 						update  a set 
 								dblQuantityToBill = isnull(@total_units_for_voucher, dblQuantityToBill), 
-								dblNetWeight = isnull(@total_units_for_voucher, dblNetWeight)
+								dblNetWeight = isnull(@total_units_for_voucher, dblNetWeight),
+								dblOrderQty =  isnull(@total_units_for_voucher, dblOrderQty)
 							from @voucherPayable a
 							join @SettleVoucherCreate b
 								on a.intItemId = b.intItemId
