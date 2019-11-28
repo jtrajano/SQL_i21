@@ -548,13 +548,13 @@ Begin
 
 		Update tblMFRecipeItemStage Set strMessage='Success' Where intRecipeItemStageId=@intMinId
 
+		--Mark Recipe as Active if it has Input Items
+		If (Select Count(1) From tblMFRecipeItem Where intRecipeId=@intRecipeId AND intRecipeItemTypeId=1)>1
+			Update tblMFRecipe Set ysnActive=1 Where intRecipeId=@intRecipeId
+
 		NEXT_RECIPEITEM:
 		Select @intMinId=MIN(intRecipeItemStageId) From tblMFRecipeItemStage Where intRecipeItemStageId > @intMinId AND strSessionId=@strSessionId AND ISNULL(strMessage,'')=''	
 	End
-
-	--Mark Recipe as Active if it has Input Items
-	If (Select Count(1) From tblMFRecipeItem Where intRecipeId=@intRecipeId AND intRecipeItemTypeId=1)>1
-		Update tblMFRecipe Set ysnActive=1 Where intRecipeId=@intRecipeId
 
 	Update tblMFRecipeItemStage Set strMessage='Skipped' Where strSessionId=@strSessionId AND ISNULL(strMessage,'')=''	
 End
