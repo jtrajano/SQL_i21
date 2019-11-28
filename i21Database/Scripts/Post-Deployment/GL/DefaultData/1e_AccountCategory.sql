@@ -105,7 +105,8 @@ SET  IDENTITY_INSERT tblGLAccountCategory ON
 			SELECT id = 134, name = 'Unrealized Loss on Futures (Inventory Offset)' UNION ALL
 			SELECT id = 135, name = 'Unrealized Loss on Cash (Inventory Offset)' UNION ALL
 			SELECT id = 136, name = 'Unrealized Loss on Ratio (Inventory Offset)' UNION ALL
-			SELECT id = 137, name = 'Unrealized Loss on Intransit (Inventory Offset)' 
+			SELECT id = 137, name = 'Unrealized Loss on Intransit (Inventory Offset)' UNION ALL
+			SELECT id = 138, name = 'Futures Gain or Loss Realized Offset' 
 
 	) AS CategoryHardCodedValues
 		ON  CategoryTable.intAccountCategoryId = CategoryHardCodedValues.id
@@ -341,6 +342,18 @@ BEGIN -- INVENTORY ACCOUNT CATEGORY GROUPING
 		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory
 	END	
 	SET @strAccountCategory  = 'Unrealized Loss on Intransit (Inventory Offset)'
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG LEFT JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = @strAccountCategory)
+	BEGIN
+		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
+		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory
+	END	
+	SET @strAccountCategory  = 'Futures Gain or Loss Realized'
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG LEFT JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = @strAccountCategory)
+	BEGIN
+		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
+		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory
+	END	
+	SET @strAccountCategory  = 'Futures Gain or Loss Realized Offset'
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG LEFT JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = @strAccountCategory)
 	BEGIN
 		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
