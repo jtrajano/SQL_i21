@@ -7934,6 +7934,7 @@
     <Build Include="dbo\Views\vyuARInvoiceSubFormulaReport.sql" />
     <Build Include="dbo\Views\vyuCTAvailableQuantityForVoucher.sql" />
     <Build Include="dbo\Views\vyuARPaymentForNSF.sql" />
+    <Build Include="dbo\Views\vyuARGetPayment.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
