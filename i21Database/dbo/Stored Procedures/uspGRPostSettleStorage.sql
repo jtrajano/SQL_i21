@@ -2146,7 +2146,7 @@ BEGIN TRY
 				JOIN tblICItem c 
 					ON c.intItemId = a.intItemId
 				JOIN tblGRSettleStorageTicket SST 
-					ON SST.intCustomerStorageId = a.intCustomerStorageId
+					ON SST.intCustomerStorageId = a.intCustomerStorageId and SST.intSettleStorageId = @intSettleStorageId
 				LEFT JOIN tblGRCustomerStorage CS
 					ON CS.intCustomerStorageId = a.intCustomerStorageId
 				LEFT JOIN tblGRDiscountScheduleCode DSC
@@ -2162,6 +2162,7 @@ BEGIN TRY
 				) 
 						ON SH.intCustomerStorageId = CS.intCustomerStorageId
 								AND a.intItemType = 1
+								and (RI.intContractDetailId is null or RI.intContractDetailId = a.intContractDetailId)
 				LEFT JOIN tblCTContractDetail CD
 					ON CD.intContractDetailId = a.intContractDetailId				
 				left join (
@@ -2308,7 +2309,7 @@ BEGIN TRY
 						JOIN tblICItem c 
 							ON c.intItemId = a.intItemId
 						JOIN tblGRSettleStorageTicket SST 
-							ON SST.intCustomerStorageId = a.intCustomerStorageId
+							ON SST.intCustomerStorageId = a.intCustomerStorageId and SST.intSettleStorageId = @intSettleStorageId
 						LEFT JOIN tblGRCustomerStorage CS
 							ON CS.intCustomerStorageId = a.intCustomerStorageId
 						LEFT JOIN tblGRDiscountScheduleCode DSC
@@ -2324,6 +2325,8 @@ BEGIN TRY
 						) 
 								ON SH.intCustomerStorageId = CS.intCustomerStorageId
 										AND a.intItemType = 1
+										and (RI.intContractDetailId is null or RI.intContractDetailId = a.intContractDetailId)
+
 						LEFT JOIN tblCTContractDetail CD
 							ON CD.intContractDetailId = a.intContractDetailId				
 						left join (
