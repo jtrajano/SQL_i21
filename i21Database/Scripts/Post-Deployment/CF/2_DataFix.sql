@@ -84,3 +84,15 @@ AND ISNULL(tblCFInvoiceHistoryStagingTable.intInvoiceCycle,0) = 0 AND ISNULL(tbl
 
 
 PRINT '[CF-2415] ENDED UPDATING INVOICE CYCLE OF INVOICE HISTORY'
+
+--CF-2442
+UPDATE tblCFInvoiceHistoryStagingTable 
+SET 
+ tblCFInvoiceHistoryStagingTable.ysnShowDriverPinDescriptionOnly  = tblCFAccount.ysnShowDriverPinDescriptionOnly
+,tblCFInvoiceHistoryStagingTable.ysnShowVehicleDescriptionOnly  = tblCFAccount.ysnShowVehicleDescriptionOnly
+FROM tblCFInvoiceHistoryStagingTable 
+INNER JOIN tblCFAccount
+ON tblCFInvoiceHistoryStagingTable.intAccountId = tblCFAccount.intAccountId
+WHERE tblCFInvoiceHistoryStagingTable.ysnShowDriverPinDescriptionOnly IS NULL 
+AND tblCFInvoiceHistoryStagingTable.ysnShowVehicleDescriptionOnly IS NULL
+--CF-2442
