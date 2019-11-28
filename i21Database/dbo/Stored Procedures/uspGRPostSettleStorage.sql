@@ -193,6 +193,16 @@ BEGIN TRY
 	SET @dtmDate = GETDATE()
 	SET @intParentSettleStorageId = @intSettleStorageId	
 	
+	----- DEBUG POINT -----
+
+	if @debug_awesome_ness = 1 and 1 = 1
+	begin
+		select 'Settle storaget ticket information'
+		select * from tblGRSettleStorageTicket where intCustomerStorageId in ( 3375 )	
+	end
+	----- DEBUG POINT -----
+
+
 	/* create child settle storage (with voucher) 
 	NOTE: parent settle storage doesn't have a voucher associated in it */
 	IF(@ysnFromPriceBasisContract = 0)
@@ -203,11 +213,14 @@ BEGIN TRY
 	WHERE CASE WHEN @ysnFromPriceBasisContract = 1 THEN CASE WHEN intSettleStorageId = @intSettleStorageId THEN 1 ELSE 0 END ELSE CASE WHEN intParentSettleStorageId = @intParentSettleStorageId THEN 1 ELSE 0 END END = 1
 
 	----- DEBUG POINT -----
-	if @debug_awesome_ness = 1	and 1 = 0
+	if @debug_awesome_ness = 1	and 1 = 1
 	begin
 		select 'settle storage' , * FROM tblGRSettleStorage
 					WHERE CASE WHEN @ysnFromPriceBasisContract = 1 THEN CASE WHEN intSettleStorageId = @intSettleStorageId THEN 1 ELSE 0 END ELSE CASE WHEN intParentSettleStorageId = @intParentSettleStorageId THEN 1 ELSE 0 END END = 1		
-		select 'settle storage', @intSettleStorageId		
+		select 'settle storage', @intSettleStorageId	
+		
+		select 'Settle storage ticket information'
+		select * from tblGRSettleStorageTicket where intCustomerStorageId in ( 3375 )	
 	end
 	----- DEBUG POINT -----
 			
@@ -2295,6 +2308,7 @@ BEGIN TRY
 				) 
 						ON SH.intCustomerStorageId = CS.intCustomerStorageId
 								AND a.intItemType = 1
+								and (RI.intContractDetailId is null or RI.intContractDetailId = a.intContractDetailId)
 				LEFT JOIN tblCTContractDetail CD
 					ON CD.intContractDetailId = a.intContractDetailId				
 				LEFT JOIN tblCTContractHeader CH
@@ -2360,10 +2374,8 @@ BEGIN TRY
 
 				----- DEBUG POINT -----	
 				----- DEBUG POINT -----				 
-				if @debug_awesome_ness = 1	 AND 1 = 0
+				if @debug_awesome_ness = 1	 AND 1 = 1
 				begin
-									
-					select * from tblCTContractHeader where intContractHeaderId = 673
 
 					select 'ct available quantity for voucher', @intContractDetailId					
 					select 'settle voucher create before adding voucher payable', * from @SettleVoucherCreate
@@ -2493,7 +2505,7 @@ BEGIN TRY
 							JOIN tblICItem c 
 								ON c.intItemId = a.intItemId
 							JOIN tblGRSettleStorageTicket SST 
-								ON SST.intCustomerStorageId = a.intCustomerStorageId
+								ON SST.intCustomerStorageId = a.intCustomerStorageId and SST.intSettleStorageId = @intSettleStorageId
 							LEFT JOIN tblGRCustomerStorage CS
 								ON CS.intCustomerStorageId = a.intCustomerStorageId
 							LEFT JOIN tblGRDiscountScheduleCode DSC
@@ -2509,6 +2521,7 @@ BEGIN TRY
 							) 
 									ON SH.intCustomerStorageId = CS.intCustomerStorageId
 											AND a.intItemType = 1
+											and (RI.intContractDetailId is null or RI.intContractDetailId = a.intContractDetailId)
 							LEFT JOIN tblCTContractDetail CD
 								ON CD.intContractDetailId = a.intContractDetailId				
 							LEFT JOIN tblCTContractHeader CH
@@ -2535,9 +2548,65 @@ BEGIN TRY
 							ORDER BY SST.intSettleStorageTicketId
 								,a.intItemType				
 
-					
+					select 'avq before creating voucher payable ', * from @avqty
 					select 'checking generated voucher payable '
 					select 'checking generated voucher payable ',* from @voucherPayable
+
+					if 1 = 0 
+					begin
+						select 'this will check the '
+						select * FROM @SettleVoucherCreate a
+								JOIN tblICItemUOM b 
+									ON b.intItemId = a.intItemId 
+										AND b.intUnitMeasureId = @intUnitMeasureId--AND b.ysnStockUnit = 1
+								JOIN tblICItem c 
+									ON c.intItemId = a.intItemId
+								JOIN tblGRSettleStorageTicket SST 
+									ON SST.intCustomerStorageId = a.intCustomerStorageId and SST.intSettleStorageId = @intSettleStorageId
+								LEFT JOIN tblGRCustomerStorage CS
+									ON CS.intCustomerStorageId = a.intCustomerStorageId
+								LEFT JOIN tblGRDiscountScheduleCode DSC
+									ON DSC.intDiscountScheduleId = CS.intDiscountScheduleId 
+										AND DSC.intItemId = a.intItemId
+								JOIN tblGRStorageType ST
+									ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
+								LEFT JOIN (
+										tblICInventoryReceiptItem RI
+										INNER JOIN tblGRStorageHistory SH
+												ON SH.intInventoryReceiptId = RI.intInventoryReceiptId
+														AND CASE WHEN (SH.strType = 'From Transfer') THEN 1 ELSE (CASE WHEN RI.intContractHeaderId = ISNULL(SH.intContractHeaderId,RI.intContractHeaderId) THEN 1 ELSE 0 END) END = 1
+
+								) 
+										ON SH.intCustomerStorageId = CS.intCustomerStorageId
+												AND a.intItemType = 1
+												and (RI.intContractDetailId is null or RI.intContractDetailId = a.intContractDetailId)
+								LEFT JOIN tblCTContractDetail CD
+									ON CD.intContractDetailId = a.intContractDetailId				
+								LEFT JOIN tblCTContractHeader CH
+									ON CD.intContractHeaderId = CH.intContractHeaderId
+								left join (
+									select						
+										intContractDetailId,	intPriceFixationDetailId, dblCashPrice, dblAvailableQuantity, dblContractUnits						
+										from @avqty  			
+										--from vyuCTAvailableQuantityForVoucher 					
+								) availableQtyForVoucher
+									on availableQtyForVoucher.intContractDetailId = a.intContractDetailId
+					
+								--WHERE a.dblCashPrice <> 0 
+								--	AND a.dblUnits <> 0 
+								--	AND SST.intSettleStorageId = @intSettleStorageId
+								--AND CASE WHEN (a.intPricingTypeId = 2 AND ISNULL(@dblCashPriceFromCt,0) = 0) THEN 0 ELSE 1 END = 1
+								--and (	a.intContractDetailId is null or  
+								--		CH.intPricingTypeId = 1 or
+								--			(CH.intPricingTypeId = 2 and 
+								--				a.intContractDetailId is not null 
+								--				and isnull(availableQtyForVoucher.dblAvailableQuantity, 0) > 0)
+								--	)
+								--and a.intSettleVoucherKey not in ( select id from @DiscountSCRelation )
+								--ORDER BY SST.intSettleStorageTicketId
+								--	,a.intItemType	
+					end
+								
 				end
 				----- DEBUG POINT -----
 
@@ -3037,7 +3106,7 @@ BEGIN TRY
 							end
 
 							----- DEBUG POINT -----
-							if @debug_awesome_ness = 1	 AND 1 = 0
+							if @debug_awesome_ness = 1	 AND 1 = 1
 							begin
 
 								select 'selected units', @dblSelectedUnits
@@ -3210,7 +3279,7 @@ BEGIN TRY
 			END
 
 			----- DEBUG POINT -----
-			if @debug_awesome_ness = 1 and 1 = 0
+			if @debug_awesome_ness = 1 and 1 = 1
 			begin
 
 				select 'settle voucher create before storage history',* from @SettleVoucherCreate
