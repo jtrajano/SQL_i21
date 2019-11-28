@@ -58,7 +58,7 @@ SELECT
 		ELSE CAST((SS.dblNetSettlement + SS.dblStorageDue + SS.dblDiscountsDue) AS DECIMAL(18,2))
 		END AS dblSettleStorageAmount
 	--,SS.dblSettleUnits AS dblSettleStorageQty
-	,CASE WHEN SS.dblUnpaidUnits != 0 THEN SS.dblUnpaidUnits ELSE SS.dblSettleUnits END AS dblSettleStorageQty
+	,CAST(CASE WHEN SS.dblUnpaidUnits != 0 THEN SS.dblUnpaidUnits ELSE SS.dblSettleUnits END AS DECIMAL(18,2)) AS dblSettleStorageQty
 	,CS.intCompanyLocationId AS intLocationId
 	,CL.strLocationName
 	,CAST(0 AS BIT) ysnAllowVoucher
@@ -109,7 +109,16 @@ SELECT
 	,billDetail.intItemId
 	,CS.intItemUOMId  AS intItemUOMId
     ,unitMeasure.strUnitMeasure AS strUOM 
-	,billDetail.dblTotal AS dblVoucherTotal
+	--,billDetail.dblTotal AS dblVoucherTotal
+	--use the cost of settlement for cost adjustment
+	,CASE WHEN SS.dblUnpaidUnits != 0 
+		THEN (
+			CASE WHEN ST.intSettleContractId IS NOT NULL THEN ST.dblUnits * ST.dblPrice
+			ELSE SS.dblNetSettlement
+			END
+		)
+		ELSE CAST((SS.dblNetSettlement + SS.dblStorageDue + SS.dblDiscountsDue) AS DECIMAL(18,2))
+		END dblVoucherTotal
     ,CASE 
 		WHEN billDetail.intWeightUOMId IS NULL THEN 
 			ISNULL(billDetail.dblQtyReceived, 0) 
@@ -148,6 +157,10 @@ LEFT JOIN
         ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId
 )
     ON itemUOM.intItemUOMId = CS.intItemUOMId
+LEFT JOIN tblGRSettleContract ST
+	ON ST.intSettleStorageId = SS.intSettleStorageId
+LEFT JOIN tblCTContractDetail CT
+	ON CT.intContractDetailId = ST.intContractDetailId
 WHERE bill.ysnPosted = 1
 UNION ALL --Charges
 SELECT 
