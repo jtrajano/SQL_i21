@@ -8336,6 +8336,7 @@
     <Build Include="dbo\Views\vyuARPaymentForNSF.sql" />
     <Build Include="dbo\Views\vyuSCTicketContractUsed.sql" />
     <Build Include="dbo\Functions\fnARGetInvoiceForBatch.sql" />
+    <Build Include="dbo\Views\vyuARGetPayment.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
