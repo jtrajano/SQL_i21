@@ -1,5 +1,4 @@
-﻿
-CREATE PROCEDURE [dbo].[uspCFSyncInvoiceFormat]
+﻿CREATE PROCEDURE [dbo].[uspCFSyncInvoiceFormat]
 		@strInvoiceNumber NVARCHAR(MAX),
 		@intCustomerId	  INT  
 		AS 
@@ -24,6 +23,9 @@ BEGIN
 	DECLARE @ysnPrintTimeOnInvoices				BIT
 	DECLARE @ysnPrintTimeOnReports				BIT
 	DECLARE @ysnPrintMiscellaneous				BIT
+	DECLARE @ysnShowDriverPinDescriptionOnly	BIT
+	DECLARE @ysnShowVehicleDescriptionOnly		BIT
+
 
 	--===GET LATEST ACCOUNT INVOICE FORMATTING===--
 	SELECT TOP 1
@@ -46,6 +48,8 @@ BEGIN
 	,@ysnPrintTimeOnReports				 =  ysnPrintTimeOnReports		
 	,@ysnPrintMiscellaneous				 =  ysnPrintMiscellaneous
 	,@strDetailDisplay					 =  strDetailDisplay
+	,@ysnShowDriverPinDescriptionOnly	 =  ysnShowDriverPinDescriptionOnly
+	,@ysnShowVehicleDescriptionOnly		 =  ysnShowVehicleDescriptionOnly
 	FROM tblCFAccount
 	WHERE intCustomerId = @intCustomerId
 	
@@ -71,6 +75,8 @@ BEGIN
 	,ysnPrintTimeOnInvoices			  = 	 @ysnPrintTimeOnInvoices		
 	,ysnPrintTimeOnReports			  = 	 @ysnPrintTimeOnReports			
 	,ysnPrintMiscellaneous			  = 	 @ysnPrintMiscellaneous			
+	,ysnShowDriverPinDescriptionOnly  =		 @ysnShowDriverPinDescriptionOnly
+	,ysnShowVehicleDescriptionOnly	  =		 @ysnShowVehicleDescriptionOnly
 	WHERE strInvoiceNumberHistory = @strInvoiceNumber
 
 	--SELECT @@ROWCOUNT
