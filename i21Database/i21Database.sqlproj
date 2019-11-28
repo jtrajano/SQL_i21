@@ -8212,6 +8212,7 @@
     <Build Include="dbo\Tables\tblICCommodityAccountM2M.sql" />
     <Build Include="dbo\Functions\fnGetCommodityGLAccountM2M.sql" />
     <Build Include="dbo\Views\vyuAPUnknownPayables.sql" />
+    <Build Include="dbo\Views\vyuCTEntityContainer.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
