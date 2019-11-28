@@ -8096,6 +8096,7 @@
     <Build Include="dbo\Stored Procedures\uspSCPostSpecialDiscount.sql" />
     <Build Include="dbo\Stored Procedures\uspSCProcessReceiptToVoucher.sql" />
     <Build Include="dbo\Tables\tblSCInventoryReceiptAllowVoucherTracker.sql" />
+    <Build Include="dbo\Views\vyuCTEntityContainer.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
