@@ -74,6 +74,7 @@
 [ysnMatchBookAllocation] [bit] NULL,
 [intPnLReportReserveACategoryId] INT NULL,
 [intPnLReportReserveBCategoryId] INT NULL,
+[intPurchaseContractBasisItemId] INT NULL,
 
 CONSTRAINT [PK_tblLGCompanyPreference] PRIMARY KEY ([intCompanyPreferenceId]), 
 CONSTRAINT [FK_tblLGCompanyPreference_tblICCommodity_intCommodityId] FOREIGN KEY ([intCommodityId]) REFERENCES [tblICCommodity]([intCommodityId]),
@@ -83,5 +84,6 @@ CONSTRAINT [FK_tblLGCompanyPreference_tblEMEntity_intEntityId] FOREIGN KEY ([int
 CONSTRAINT [FK_tblLGCompanyPreference_tblICItem_intFreighItemId] FOREIGN KEY ([intDefaultFreightItemId]) REFERENCES [tblICItem]([intItemId]),
 CONSTRAINT [FK_tblLGCompanyPreference_tblICItem_intSurchargeItemId] FOREIGN KEY ([intDefaultSurchargeItemId]) REFERENCES [tblICItem]([intItemId]),
 CONSTRAINT [FK_tblLGCompanyPreference_tblICCategory_intPnLReportReserveACategoryId] FOREIGN KEY ([intPnLReportReserveACategoryId]) REFERENCES [tblICCategory]([intCategoryId]),
-CONSTRAINT [FK_tblLGCompanyPreference_tblICCategory_intPnLReportReserveBCategoryId] FOREIGN KEY ([intPnLReportReserveBCategoryId]) REFERENCES [tblICCategory]([intCategoryId])
+CONSTRAINT [FK_tblLGCompanyPreference_tblICCategory_intPnLReportReserveBCategoryId] FOREIGN KEY ([intPnLReportReserveBCategoryId]) REFERENCES [tblICCategory]([intCategoryId]),
+CONSTRAINT [FK_tblLGCompanyPreference_tblICItem_intPurchaseContractBasisItemI] FOREIGN KEY ([intPurchaseContractBasisItemId]) REFERENCES [tblICItem]([intItemId])
 )
