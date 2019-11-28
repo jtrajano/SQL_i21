@@ -3,6 +3,7 @@
 	[intRecipeSubstituteItemStageId] INT NOT NULL IDENTITY(1,1),
 	[strRecipeName] NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL,
 	[strRecipeHeaderItemNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	[strLocationName] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[strVersionNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[strRecipeItemNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[strSubstituteItemNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
