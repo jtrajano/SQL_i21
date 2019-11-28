@@ -7427,4 +7427,18 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intRiskViewId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="95314deb-d8c6-4ce5-b252-d4afe194a80f" ChangeDateTime="11/25/2019 09:00:31">
+    <Property Name="ElementName" Value="[dbo].[tblRKSummaryLog].[intCommodityUOMId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblRKSummaryLog]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intCommodityStockUOMId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="0d6cecf2-9c69-42e1-9540-4ab6b338e6ee" ChangeDateTime="11/25/2019 09:01:23">
+    <Property Name="ElementName" Value="[dbo].[tblRKSummaryLog].[intCommodityStockUOMId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblRKSummaryLog]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intStockUOMId" />
+  </Operation>
 </Operations>

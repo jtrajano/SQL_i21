@@ -344,5 +344,51 @@ BEGIN
 	ALTER TABLE tblRKCompanyPreference DROP COLUMN strRiskView
 END
 
+IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblRKSummaryLog')
+BEGIN
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblRKSummaryLog)
+	BEGIN
+		PRINT 'Populate RK Summary Log - Derivatives'
+		DECLARE @ExistingHistory AS RKSummaryLog
+
+		INSERT INTO @ExistingHistory(strTransactionType
+			, intTransactionRecordId
+			, strTransactionNumber
+			, dtmTransactionDate
+			, intContractDetailId
+			, intContractHeaderId
+			, intCommodityId
+			, intBookId
+			, intSubBookId
+			, intFutureMarketId
+			, intFutureMonthId
+			, dblNoOfLots
+			, dblPrice
+			, intEntityId
+			, intUserId
+			, strNotes)
+		SELECT strTransactionType = 'DERIVATIVES'
+			, intTransactionRecordId = intFutOptTransactionId
+			, strTransactionNumber = strInternalTradeNo
+			, dtmTransactionDate = dtmTransactionDate
+			, intContractDetailId = intContractDetailId
+			, intContractHeaderId = intContractHeaderId
+			, intCommodityId = intCommodityId
+			, intBookId = intBookId
+			, intSubBookId = intSubBookId
+			, intFutureMarketId = intFutureMarketId
+			, intFutureMonthId = intFutureMonthId
+			, dblNoOfLots = dblNewNoOfLots
+			, dblPrice = dblPrice
+			, intEntityId = intEntityId
+			, intUserId = intUserId
+			, strNotes = ''
+		FROM vyuRKGetFutOptTransactionHistory
+
+
+		PRINT 'End Populate RK Summary Log'
+	END
+END
+
 print('/*******************  END Risk Management Data Fixess *******************/')
 GO
