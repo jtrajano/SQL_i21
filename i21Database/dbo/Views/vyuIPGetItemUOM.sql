@@ -29,9 +29,9 @@ SELECT intItemId
 	,US1.strUserName AS strModifiedBy
 FROM tblICItemUOM IU
 JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
-JOIN tblICUnitMeasure WUM ON WUM.intUnitMeasureId = IU.intWeightUOMId
-JOIN tblICUnitMeasure VUM ON VUM.intUnitMeasureId = IU.intVolumeUOMId
-JOIN tblICUnitMeasure DUM ON DUM.intUnitMeasureId = IU.intDimensionUOMId
+LEFT JOIN tblICUnitMeasure WUM ON WUM.intUnitMeasureId = IU.intWeightUOMId
+LEFT JOIN tblICUnitMeasure VUM ON VUM.intUnitMeasureId = IU.intVolumeUOMId
+LEFT JOIN tblICUnitMeasure DUM ON DUM.intUnitMeasureId = IU.intDimensionUOMId
 LEFT JOIN tblSMUserSecurity US ON US.intEntityId = IU.intCreatedByUserId
 LEFT JOIN tblSMUserSecurity US1 ON US1.intEntityId = IU.intModifiedByUserId
 LEFT JOIN tblICDataSource DS ON DS.intDataSourceId = IU.intDataSourceId
