@@ -62,6 +62,7 @@ DECLARE @ZeroDecimal				NUMERIC(18, 6)
 		,@ServiceChargesAccountId	INT
 		,@CurrencyId				INT
 		,@InitTranCount				INT
+		,@strSourceId				NVARCHAR(100)
 		,@Savepoint					NVARCHAR(32)
 
 SET @InitTranCount = @@TRANCOUNT
@@ -82,6 +83,7 @@ SELECT
 	,@CompanyLocationId = [intCompanyLocationId]
 	,@InvoiceDate		= [dtmDate]
 	,@CurrencyId		= [intCurrencyId]
+	,@strSourceId		= [strInvoiceOriginId]
 FROM
 	tblARInvoice
 WHERE
@@ -105,11 +107,12 @@ IF ISNULL(@ItemConversionAccountId,0) <> 0 AND NOT EXISTS(SELECT NULL FROM vyuGL
 		
 	
 SET @ServiceChargesAccountId = (SELECT TOP 1 intServiceChargeAccountId FROM tblARCompanyPreference WHERE intServiceChargeAccountId IS NOT NULL AND intServiceChargeAccountId <> 0)	
---IF ISNULL(@ServiceChargesAccountId,0) = 0
---	BEGIN
---		SET @ErrorMessage = 'The Service Charge account in the Company Preferences was not set.'
---		RETURN 0;
---	END	
+
+IF ISNULL(@ServiceChargesAccountId,0) <> 0
+	BEGIN
+		IF NOT EXISTS(SELECT TOP 1 NULL FROM tblARInvoice WHERE strInvoiceNumber = @strSourceId AND strType = 'Service Charge')
+			SET @ServiceChargesAccountId = NULL
+	END	
 		
 IF ISNULL(@RaiseError,0) = 0	
 BEGIN
@@ -225,7 +228,7 @@ BEGIN TRY
 		,[intAccountId]						= NULL 
 		,[intCOGSAccountId]					= NULL
 		,[intInventoryAccountId]			= NULL
-		,[intServiceChargeAccountId]		= NULL
+		,[intServiceChargeAccountId]		= @ServiceChargesAccountId
 		,[strMaintenanceType]				= NULL
 		,[strFrequency]						= NULL
 		,[dtmMaintenanceDate]				= NULL
