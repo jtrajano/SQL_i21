@@ -430,6 +430,7 @@ Begin
 		Set @strRecipeDetailItemNo=''
 		Set @intRecipeItemId=null
 		Set @intRecipeTypeId=null
+		Select @strLocationName=NULL
 
 		--Margin By
 		Update tblMFRecipeItemStage Set strMarginBy='Amount'
@@ -446,15 +447,16 @@ Begin
 		Where ISNULL([strValidTo],'')=''
 		AND strSessionId=@strSessionId AND ISNULL(strMessage,'')=''	AND intRecipeItemStageId=@intMinId	
 
-		Select @strRecipeName=strRecipeName,@strItemNo=strRecipeHeaderItemNo,@intVersionNo=[strVersionNo],@strRecipeDetailItemNo=strRecipeItemNo
+		Select @strRecipeName=strRecipeName,@strItemNo=strRecipeHeaderItemNo,@intVersionNo=[strVersionNo],@strLocationName=strLocationName,@strRecipeDetailItemNo=strRecipeItemNo
 		From tblMFRecipeItemStage Where intRecipeItemStageId=@intMinId
 		Select @intItemId=intItemId From tblICItem Where strItemNo=@strItemNo
+		Select @intLocationId=intCompanyLocationId From tblSMCompanyLocation Where strLocationName=@strLocationName
 		Select @intRecipeDetailItemId=intItemId From tblICItem Where strItemNo=@strRecipeDetailItemNo
 
 		If ISNULL(@strItemNo,'')<>'' --Production Recipe
-			Select TOP 1 @intRecipeId=intRecipeId,@intRecipeTypeId=intRecipeTypeId,@intLocationId=intLocationId From tblMFRecipe Where intItemId=@intItemId AND intVersionNo=@intVersionNo
+			Select TOP 1 @intRecipeId=intRecipeId,@intRecipeTypeId=intRecipeTypeId,@intLocationId=intLocationId From tblMFRecipe Where intItemId=@intItemId AND intVersionNo=@intVersionNo and intLocationId=@intLocationId
 		Else --Virtual Recipe
-			Select TOP 1 @intRecipeId=intRecipeId,@intRecipeTypeId=intRecipeTypeId,@intLocationId=intLocationId From tblMFRecipe Where strName=@strRecipeName
+			Select TOP 1 @intRecipeId=intRecipeId,@intRecipeTypeId=intRecipeTypeId,@intLocationId=intLocationId From tblMFRecipe Where strName=@strRecipeName and intLocationId=@intLocationId
 
 		If @intRecipeId is null
 		Begin
@@ -616,17 +618,19 @@ Begin
 		Set @dblRecipeDetailCalculatedQty=null
 		Set @dblRecipeDetailUpperTolerance=null
 		Set @dblRecipeDetailLowerTolerance=null
+		Select @strLocationName=NULL
 
-		Select @strRecipeName=strRecipeName,@strItemNo=strRecipeHeaderItemNo,@intVersionNo=[strVersionNo],@strRecipeDetailItemNo=strRecipeItemNo,@strSubstituteItemNo=strSubstituteItemNo
+		Select @strRecipeName=strRecipeName,@strItemNo=strRecipeHeaderItemNo,@intVersionNo=[strVersionNo],@strLocationName=strLocationName,@strRecipeDetailItemNo=strRecipeItemNo,@strSubstituteItemNo=strSubstituteItemNo
 		From tblMFRecipeSubstituteItemStage Where intRecipeSubstituteItemStageId=@intMinId
 		Select @intItemId=intItemId From tblICItem Where strItemNo=@strItemNo
+		Select @intLocationId=intCompanyLocationId From tblSMCompanyLocation Where strLocationName=@strLocationName
 		Select @intRecipeDetailItemId=intItemId From tblICItem Where strItemNo=@strRecipeDetailItemNo
 		Select @intSubstituteItemId=intItemId From tblICItem Where strItemNo=@strSubstituteItemNo
 
 		If ISNULL(@strItemNo,'')<>'' --Production Recipe
-			Select TOP 1 @intRecipeId=intRecipeId,@intRecipeTypeId=intRecipeTypeId,@intLocationId=intLocationId From tblMFRecipe Where intItemId=@intItemId AND intVersionNo=@intVersionNo
+			Select TOP 1 @intRecipeId=intRecipeId,@intRecipeTypeId=intRecipeTypeId,@intLocationId=intLocationId From tblMFRecipe Where intItemId=@intItemId AND intVersionNo=@intVersionNo and intLocationId=@intLocationId
 		Else --Virtual Recipe
-			Select TOP 1 @intRecipeId=intRecipeId,@intRecipeTypeId=intRecipeTypeId,@intLocationId=intLocationId From tblMFRecipe Where strName=@strRecipeName
+			Select TOP 1 @intRecipeId=intRecipeId,@intRecipeTypeId=intRecipeTypeId,@intLocationId=intLocationId From tblMFRecipe Where strName=@strRecipeName and intLocationId=@intLocationId
 
 		If @intRecipeId is null
 		Begin
