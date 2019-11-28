@@ -173,6 +173,8 @@ SELECT CP.intCompanyPreferenceId
 	,strReserveACategory = RA.strCategoryCode
 	,CP.intPnLReportReserveBCategoryId
 	,strReserveBCategory = RB.strCategoryCode
+	,CP.intPurchaseContractBasisItemId
+	,strPurchaseContractBasisItem = PCBI.strItemNo
 FROM tblLGCompanyPreference CP
 LEFT JOIN tblICCommodity CO ON CO.intCommodityId = CP.intCommodityId
 LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = CP.intWeightUOMId
@@ -185,3 +187,4 @@ LEFT JOIN tblICItem FI ON CP.intDefaultFreightItemId = FI.intItemId
 LEFT JOIN tblICItem SI ON CP.intDefaultSurchargeItemId = SI.intItemId
 LEFT JOIN tblICCategory RA ON RA.intCategoryId = CP.intPnLReportReserveACategoryId
 LEFT JOIN tblICCategory RB ON RB.intCategoryId = CP.intPnLReportReserveBCategoryId
+LEFT JOIN tblICItem PCBI ON PCBI.intItemId = CP.intPurchaseContractBasisItemId
