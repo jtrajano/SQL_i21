@@ -184,4 +184,4 @@ LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = CP.intDefaultFreightTerm
 LEFT JOIN tblICItem FI ON CP.intDefaultFreightItemId = FI.intItemId
 LEFT JOIN tblICItem SI ON CP.intDefaultSurchargeItemId = SI.intItemId
 LEFT JOIN tblICCategory RA ON RA.intCategoryId = CP.intPnLReportReserveACategoryId
-LEFT JOIN tblICCategory RB ON RB.intCategoryId = CP.intPnLReportReserveACategoryId
+LEFT JOIN tblICCategory RB ON RB.intCategoryId = CP.intPnLReportReserveBCategoryId
