@@ -2,7 +2,7 @@
 AS
 
 		SELECT	CH.intContractHeaderId,	CH.dtmContractDate,		CT.strContractType,		CO.strCommodityCode,	CH.strContractNumber,
-				CB.strContractBasis,	PO.strPosition,			CR.strCountry,			CH.strCustomerContract,	CH.dblQuantity			AS	dblHdrQuantity,	
+				strContractBasis = CB.strFreightTerm,	PO.strPosition,			CR.strCountry,			CH.strCustomerContract,	CH.dblQuantity			AS	dblHdrQuantity,	
 				CH.intCommodityId,	
 				PT.strPricingType		AS	strHdrPricingType,	
 				UM.strUnitMeasure		AS	strHdrUOM,	
@@ -32,7 +32,7 @@ AS
 		JOIN	tblICUnitMeasure			UM	ON	UM.intUnitMeasureId				=	CU.intUnitMeasureId
 		JOIN	tblICCommodityUnitMeasure	SU	ON	SU.intCommodityId				=	CH.intCommodityId
 												AND	SU.ysnStockUnit					=	1						LEFT
-		JOIN	tblCTContractBasis			CB	ON	CB.intContractBasisId			=	CH.intContractBasisId	LEFT
+		JOIN	tblSMFreightTerms			CB	ON	CB.intFreightTermId				=	CH.intFreightTermId		LEFT
 		JOIN	tblCTPosition				PO	ON	PO.intPositionId				=	CH.intPositionId		LEFT
 		JOIN	tblEMEntity					SP	ON	SP.intEntityId					=	CH.intSalespersonId		LEFT
 		JOIN	tblSMCountry				CR	ON	CR.intCountryID					=	CH.intCountryId			LEFT
