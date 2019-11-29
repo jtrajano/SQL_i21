@@ -23,7 +23,7 @@ GO
 	--IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Contract vs Market Differential Analysis' AND strModuleName = 'Logistics' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Contract vs Market Differential Analysis' AND strModuleName = 'Logistics') AND strCommand = N'Logistics.view.ContractVsMarketDifferential') 
 	--IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Blend Demand' AND strModuleName = 'Manufacturing' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Blend Demand' AND strModuleName = 'Contract Management') AND strCommand = N'ContractManagement.view.ItemContract?showSearch=true') 
 	--IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Comment Maintenance' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Comment Maintenance' AND strModuleName = 'Accounts Receivable') AND strCommand = N'AccountsReceivable.view.StatementFooterMessage') 
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Discount Types' AND strModuleName = 'Ticket Management' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Discount Types' AND strModuleName = 'Ticket Management') AND strCommand = N'Grain.view.DiscountType') 
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Basket Analysis' AND strModuleName = 'Store' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Basket Analysis' AND strModuleName = 'Store') AND strCommand = N'Store.view.BasketAnalysis') 
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 		
@@ -4967,6 +4967,13 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Payment O
 	VALUES (N'Payment Options Summary', N'Store', @StoreReportParentMenuId, N'Payment Options Summary', N'Report', N'Screen', N'Store.view.PaymentOptionSummaryReport', N'small-menu-report', 0, 0, 0, 1, 5, 1)
 ELSE 
 	UPDATE tblSMMasterMenu SET intSort = 5, strCommand = N'Store.view.PaymentOptionSummaryReport' WHERE strMenuName = 'Payment Options Summary' AND strModuleName = 'Store' AND intParentMenuID = @StoreReportParentMenuId
+--basket
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Basket Analysis' AND strModuleName = 'Store' AND intParentMenuID = @StoreReportParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Basket Analysis', N'Store', @StoreReportParentMenuId, N'Basket Analysis', N'Report', N'Screen', N'Store.view.BasketAnalysis', N'small-menu-report', 0, 0, 0, 1, 5, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET intSort = 5, strCommand = N'Store.view.BasketAnalysis' WHERE strMenuName = 'Basket Analysis' AND strModuleName = 'Store' AND intParentMenuID = @StoreReportParentMenuId
+--basket
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Cashier Report' AND strModuleName = 'Store' AND intParentMenuID = @StoreReportParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
