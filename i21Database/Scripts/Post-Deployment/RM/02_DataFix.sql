@@ -385,6 +385,7 @@ BEGIN
 			, strNotes = ''
 		FROM vyuRKGetFutOptTransactionHistory
 
+		EXEC uspRKLogRiskPosition @ExistingHistory, 1
 
 		PRINT 'End Populate RK Summary Log'
 	END

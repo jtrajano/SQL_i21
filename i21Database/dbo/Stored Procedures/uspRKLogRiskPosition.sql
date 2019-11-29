@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspRKLogRiskPosition]
 	@SummaryLogs RKSummaryLog READONLY
-	, @Rebuild BIT
+	, @Rebuild BIT = 0
 	
 AS
 
@@ -12,6 +12,7 @@ SET ANSI_WARNINGS OFF
 
 BEGIN	
 	DECLARE @intId INT
+		, @strBatchId NVARCHAR(100)
 		, @strTransactionType NVARCHAR(100)
 		, @intTransactionRecordId INT
 		, @strTransactionNumber NVARCHAR(100)
@@ -35,38 +36,51 @@ BEGIN
 		, @ysnDelete BIT
 		, @strNotes NVARCHAR(250)
 
-	DECLARE @FinalTable AS TABLE (strTransactionType NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL,
-		intTransactionRecordId INT NOT NULL,
-		strTransactionNumber NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL,
-		dtmTransactionDate DATETIME NOT NULL,
-		intContractDetailId INT NULL,
-		intContractHeaderId INT NULL,
-		intFutureMarketId INT NULL,
-		intFutureMonthId INT NULL,
-		intFutOptTransactionId INT NULL,
-		intCommodityId INT NULL,
-		intItemId INT NULL,
-		intProductTypeId INT NULL,
-		intOrigUOMId INT NULL,
-		intBookId INT NULL,
-		intSubBookId INT NULL,
-		intLocationId INT NULL,
-		strInOut NVARCHAR(20) NULL,
-		dblOrigNoOfLots DECIMAL(24, 10) NULL DEFAULT((0)),
-		dblContractSize DECIMAL(24, 10) NULL DEFAULT((0)),
-		dblOrigQty DECIMAL(24, 10) NULL DEFAULT((0)),
-		dblPrice DECIMAL(24, 10) NULL DEFAULT((0)),
-		intEntityId INT NULL,
-		intTicketId INT NULL,
-		intUserId INT NULL,
-		strNotes NVARCHAR(250) NULL)
+	DECLARE @FinalTable AS TABLE (strBatchId NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL
+		, strTransactionType NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL
+		, intTransactionRecordId INT NOT NULL
+		, strTransactionNumber NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL
+		, dtmTransactionDate DATETIME NOT NULL
+		, intContractDetailId INT NULL
+		, intContractHeaderId INT NULL
+		, intFutureMarketId INT NULL
+		, intFutureMonthId INT NULL
+		, intFutOptTransactionId INT NULL
+		, intCommodityId INT NULL
+		, intItemId INT NULL
+		, intProductTypeId INT NULL
+		, intOrigUOMId INT NULL
+		, intBookId INT NULL
+		, intSubBookId INT NULL
+		, intLocationId INT NULL
+		, strInOut NVARCHAR(20) NULL
+		, dblOrigNoOfLots DECIMAL(24, 10) NULL DEFAULT((0))
+		, dblContractSize DECIMAL(24, 10) NULL DEFAULT((0))
+		, dblOrigQty DECIMAL(24, 10) NULL DEFAULT((0))
+		, dblPrice DECIMAL(24, 10) NULL DEFAULT((0))
+		, intEntityId INT NULL
+		, intTicketId INT NULL
+		, intUserId INT NULL
+		, strNotes NVARCHAR(250) NULL)
 
 	SELECT * INTO #tmpSummaryLogs FROM @SummaryLogs
+
+	-- Validate Batch Id
+	IF EXISTS(SELECT TOP 1 1 FROM #tmpSummaryLogs WHERE ISNULL(strBatchId, '') = '')
+	BEGIN
+		EXEC uspSMGetStartingNumber 148, @strBatchId OUTPUT
+
+		UPDATE tmp
+		SET strBatchId = @strBatchId
+		FROM #tmpSummaryLogs tmp
+		WHERE ISNULL(strBatchId, '') = ''
+	END
 
 	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpSummaryLogs)
 	BEGIN
 		SELECT TOP 1 @intId = intId
-			, @strTransactionType = UPPER(strTransactionType)
+			, @strBatchId = strBatchId
+			, @strTransactionType = strTransactionType
 			, @intTransactionRecordId = intTransactionRecordId
 			, @strTransactionNumber = strTransactionNumber
 			, @dtmTransactionDate = dtmTransactionDate
@@ -96,7 +110,8 @@ BEGIN
 		-- Insert Delete Entry
 		IF (ISNULL(@ysnDelete, 0) = 1)
 		BEGIN
-			INSERT INTO @FinalTable(strTransactionType
+			INSERT INTO @FinalTable(strBatchId
+				, strTransactionType
 				, intTransactionRecordId
 				, strTransactionNumber
 				, dtmTransactionDate
@@ -121,7 +136,8 @@ BEGIN
 				, intTicketId
 				, intUserId
 				, strNotes)
-			SELECT strTransactionType
+			SELECT strBatchId
+				, strTransactionType
 				, intTransactionRecordId
 				, strTransactionNumber
 				, dtmTransactionDate
@@ -173,7 +189,8 @@ BEGIN
 		BEGIN
 			IF EXISTS(SELECT TOP 1 1 FROM #tmpPrevLog)
 			BEGIN
-				INSERT INTO @FinalTable(strTransactionType
+				INSERT INTO @FinalTable(strBatchId
+					, strTransactionType
 					, intTransactionRecordId
 					, strTransactionNumber
 					, dtmTransactionDate
@@ -198,7 +215,8 @@ BEGIN
 					, intTicketId
 					, intUserId
 					, strNotes)
-				SELECT strTransactionType
+				SELECT strBatchId
+					, strTransactionType
 					, intTransactionRecordId
 					, strTransactionNumber
 					, dtmTransactionDate
@@ -232,7 +250,8 @@ BEGIN
 		---------------------------------------
 		IF @strTransactionType = 'DERIVATIVES'
 		BEGIN
-			INSERT INTO @FinalTable(strTransactionType
+			INSERT INTO @FinalTable(strBatchId
+				, strTransactionType
 				, intTransactionRecordId
 				, strTransactionNumber
 				, dtmTransactionDate
@@ -257,7 +276,8 @@ BEGIN
 				, intTicketId
 				, intUserId
 				, strNotes)
-			SELECT TOP 1 @strTransactionType
+			SELECT TOP 1 @strBatchId
+				, @strTransactionType
 				, @intTransactionRecordId
 				, @strTransactionNumber
 				, @dtmTransactionDate
@@ -293,7 +313,8 @@ BEGIN
 		---------------------------------------
 		ELSE IF @strTransactionType = 'COLLATERAL'
 		BEGIN
-			INSERT INTO @FinalTable(strTransactionType
+			INSERT INTO @FinalTable(strBatchId
+				, strTransactionType
 				, intTransactionRecordId
 				, strTransactionNumber
 				, dtmTransactionDate
@@ -318,7 +339,8 @@ BEGIN
 				, intTicketId
 				, intUserId
 				, strNotes)
-			SELECT TOP 1 @strTransactionType
+			SELECT TOP 1 @strBatchId
+				, @strTransactionType
 				, @intTransactionRecordId
 				, @strTransactionNumber
 				, @dtmTransactionDate
@@ -352,7 +374,8 @@ BEGIN
 		---------------------------------------
 		ELSE IF @strTransactionType = 'COLLATERAL ADJUSTMENTS'
 		BEGIN
-			INSERT INTO @FinalTable(strTransactionType
+			INSERT INTO @FinalTable(strBatchId
+				, strTransactionType
 				, intTransactionRecordId
 				, strTransactionNumber
 				, dtmTransactionDate
@@ -377,7 +400,8 @@ BEGIN
 				, intTicketId
 				, intUserId
 				, strNotes)
-			SELECT TOP 1 @strTransactionType
+			SELECT TOP 1 @strBatchId
+				, @strTransactionType
 				, @intTransactionRecordId
 				, @strTransactionNumber
 				, @dtmTransactionDate
@@ -416,11 +440,14 @@ BEGIN
 			PRINT 'END ' + @strTransactionType
 		END
 
+		DROP TABLE #tmpPrevLog
+
 		DELETE FROM #tmpSummaryLogs
 		WHERE intId = @intId
 	END
 
-	INSERT INTO tblRKSummaryLog(dtmCreatedDate
+	INSERT INTO tblRKSummaryLog(strBatchId
+		, dtmCreatedDate
 		, strTransactionType
 		, intTransactionRecordId
 		, strTransactionNumber
@@ -445,7 +472,8 @@ BEGIN
 		, intTicketId
 		, intUserId
 		, strNotes)
-	SELECT GETDATE()
+	SELECT strBatchId
+		, dtmCreatedDate = CASE WHEN @Rebuild = 1 THEN dtmTransactionDate ELSE GETDATE() END
 		, strTransactionType
 		, intTransactionRecordId
 		, strTransactionNumber
@@ -472,6 +500,5 @@ BEGIN
 		, strNotes
 	FROM @FinalTable
 
-	DROP TABLE #tmpPrevLog
 	DROP TABLE #tmpSummaryLogs
 END

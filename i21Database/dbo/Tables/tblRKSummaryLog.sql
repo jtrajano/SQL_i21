@@ -1,6 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblRKSummaryLog]
 (
 	intSummaryLogId INT IDENTITY NOT NULL,
+	strBatchId NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL,
 	dtmCreatedDate DATETIME NULL DEFAULT(GETDATE()),
 	strTransactionType NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL,
 	intTransactionRecordId INT NOT NULL,
