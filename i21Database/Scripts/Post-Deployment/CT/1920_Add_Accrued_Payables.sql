@@ -1,42 +1,92 @@
-﻿CREATE FUNCTION [dbo].[fnCTCreateVoucherPayable]
-(
-	@id INT,
-	@type NVARCHAR(10),
-	@accrue BIT = 1,
-	@remove BIT = 0
-)
-RETURNS TABLE AS RETURN
-(
-	SELECT	DISTINCT
+﻿GO
+	PRINT('CT - 1920_Add_Accrued_Payables Started')
+
+	DECLARE
+	@id			INT = 0,
+	@type		NVARCHAR(10) = 'header',
+	@accrue		BIT = 1,
+	@remove		BIT = 0
+
+	INSERT INTO tblAPVoucherPayable(  
+		[intEntityVendorId]     
+		,[intTransactionType] 
+		,[strVendorId]   
+		,[strName]      
+		,[intLocationId]       
+		,[intCurrencyId]       
+		,[strCurrency]
+		,[dtmDate]        
+		,[strReference]       
+		,[strSourceNumber]      
+		,[intContractHeaderId]     
+		,[intContractDetailId]     
+		,[intContractSeqId]    
+		,[intContractCostId]  
+		,[strContractNumber]     
+		,[strScaleTicketNumber]     
+		,[intItemId]        
+		,[strItemNo]        
+		,[intStorageLocationId]   
+		,[strStorageLocationName]   
+		,[strMiscDescription]     		
+		,[dblOrderQty] 
+		,[dblOrderUnitQty]  
+		,[intOrderUOMId]       
+		,[dblQuantityToBill]      
+		,[dblQtyToBillUnitQty]     
+		,[intQtyToBillUOMId]      
+		,[dblCost]      
+		,[dblCostUnitQty]     
+		,[intCostUOMId]      
+		,[dblNetWeight]    
+		,[dblWeightUnitQty]   
+		,[intWeightUOMId]      
+		,[intCostCurrencyId]
+		,[strCostCurrency]
+		,[dblTax]  
+		,[dblDiscount]  
+		,[intCurrencyExchangeRateTypeId]  
+		,[strRateType]         
+		,[dblExchangeRate] 
+		,[ysnSubCurrency]      
+		,[intSubCurrencyCents]     
+		,[intAccountId]       
+		,[strAccountId]       
+		,[strAccountDesc]    
+		,[intShipViaId]  
+		,[intTermId]        
+		,[strTerm]        
+		,[str1099Form]  
+		,[str1099Type]  
+		,[ysnReturn]  
+	)
+	SELECT	DISTINCT TOP 100 PERCENT
 		[intEntityVendorId]							=	ISNULL(entity.intEntityId, payable.intEntityVendorId)
 		,[intTransactionType]						=	CASE WHEN RT.Item = 0 THEN 1 ELSE 3 END --voucher
+		,[strVendorId]								=	LTRIM(CC.intVendorId)  
+		,[strName]									=	CC.strVendorName  
 		,[intLocationId]							=	NULL --Contract doesn't have location
-		,[intShipToId]								=	NULL --?
-		,[intShipFromId]							=	NULL --?
-		,[intShipFromEntityId]						=	NULL --?
-		,[intPayToAddressId]						=	NULL --?
 		,[intCurrencyId]							=	CASE WHEN CY.ysnSubCurrency > 0 
-														THEN (SELECT ISNULL(intMainCurrencyId,0) FROM dbo.tblSMCurrency WHERE intCurrencyID = ISNULL(CC.intCurrencyId,0))
-														ELSE  ISNULL(CC.intCurrencyId,ISNULL(CU.intMainCurrencyId,CD.intCurrencyId))
+															THEN (SELECT ISNULL(intMainCurrencyId,0) FROM dbo.tblSMCurrency WHERE intCurrencyID = ISNULL(CC.intCurrencyId,0))
+															ELSE  ISNULL(CC.intCurrencyId,ISNULL(CU.intMainCurrencyId,CD.intCurrencyId))
 														END
+		,[strCurrency]								=	CASE WHEN CY.ysnSubCurrency > 0 
+															THEN (SELECT TOP 1 strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID IN (SELECT intMainCurrencyId FROM dbo.tblSMCurrency WHERE intCurrencyID = ISNULL(CC.intCurrencyId,0)))
+															ELSE  ISNULL(CC.strCurrency, ((SELECT TOP 1 strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID = ISNULL(CU.intMainCurrencyId,CD.intCurrencyId))))
+														END	
 		,[dtmDate]									=	CD.dtmStartDate
-		,[strVendorOrderNumber]						=  	'' --? 
 		,[strReference]								=	'' --?
 		,[strSourceNumber]							=	LTRIM(CH.strContractNumber)
-		,[intPurchaseDetailId]						=	NULL
 		,[intContractHeaderId]						=	CD.intContractHeaderId
 		,[intContractDetailId]						=	CD.intContractDetailId
-		,[intContractSequence]						=	CD.intContractSeq
+		,[intContractSeqId]							=	CD.intContractSeq
 		,[intContractCostId]						=	CC.intContractCostId
-		,[intScaleTicketId]							=	NULL
-		,[intInventoryReceiptItemId]				=	NULL
-		,[intInventoryReceiptChargeId]				=	NULL
-		,[intInventoryShipmentItemId]				=   NULL
-		,[intInventoryShipmentChargeId]				=	NULL
-		,[intLoadShipmentId]						=	NULL --?
-		,[intLoadShipmentDetailId]					=	NULL --?
+		,[strContractNumber]						=	CC.strContractNumber
+		,[strScaleTicketNumber]						=	CAST(NULL AS NVARCHAR(50))
 		,[intItemId]								=	CC.intItemId
-		,[intPurchaseTaxGroupId]					=	NULL
+		,[strItemNo]								=	CC.strItemNo
+		,[intStorageLocationId]						=	CD.intStorageLocationId
+		,[strStorageLocationName]					=	SLOC.strName
 		,[strMiscDescription]						=	CC.strItemDescription
 		,[dblOrderQty]								=	CASE WHEN CC.strCostMethod = 'Per Unit' THEN ISNULL(CD.dblQuantity,0) ELSE 1 END
 		,[dblOrderUnitQty]							=	1
@@ -48,7 +98,7 @@ RETURNS TABLE AS RETURN
 		,[dblCostUnitQty]							=	1
 		,[intCostUOMId]								=	ISNULL(CostUOM.intItemUOMId,CD.intItemUOMId)
 		,[dblNetWeight]								=	CASE 
-															WHEN CC.strCostMethod = 'Per Unit' THEN CAST(dbo.fnMFConvertCostToTargetItemUOM(CostUOM.intItemUOMId,WeightUOM.intItemUOMId,CD.dblNetWeight) AS DECIMAL(38,20)) 
+															WHEN CC.strCostMethod = 'Per Unit' THEN CAST(dbo.fnMFConvertCostToTargetItemUOM(CostUOM.intItemUOMId,WeightUOM.intItemUOMId,ISNULL(CD.dblNetWeight,0)) AS DECIMAL(38,20)) 
 															ELSE 
 																CASE WHEN CostUOM.intItemUOMId IS NULL THEN 0
 																ELSE ISNULL(CC.dblAmount,0) 
@@ -57,17 +107,31 @@ RETURNS TABLE AS RETURN
 		,[dblWeightUnitQty]							=	CAST(1 AS DECIMAL(38,20))
 		,[intWeightUOMId]							=	CASE WHEN CC.strCostMethod = 'Per Unit' THEN ISNULL(CostUOM.intItemUOMId,CD.intItemUOMId) ELSE CostUOM.intItemUOMId END
 		,[intCostCurrencyId]						=	ISNULL(CC.intCurrencyId,ISNULL(CU.intMainCurrencyId,CD.intCurrencyId))
+		,[strCostCurrency]							=	ISNULL(CC.strCurrency, ((SELECT TOP 1 strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID = ISNULL(CU.intMainCurrencyId,CD.intCurrencyId))))
 		,[dblTax]									=	0
 		,[dblDiscount]								=	0
 		,[intCurrencyExchangeRateTypeId]			=	CC.intRateTypeId
-		,[dblExchangeRate]							=	CC.dblFX
+		,[strRateType]								=	rtype.strDescription
+		,[dblExchangeRate]							=	ISNULL(CC.dblFX,1)
 		,[ysnSubCurrency]							=	ISNULL(CY.ysnSubCurrency,0)
 		,[intSubCurrencyCents]						=	CASE WHEN CY.ysnSubCurrency > 0 THEN CY.intCent ELSE 1 END
 		,[intAccountId]								=	apClearing.intAccountId
+		,[strAccountId]								=	apClearing.strAccountId
+		,[strAccountDesc]							=	apClearing.strDescription
 		,[intShipViaId]								=	0
 		,[intTermId]								=	CC.intTermId	
-		,[strBillOfLading]							=	NULL
-		,[ysnReturn]								=	CAST(RT.Item AS BIT)	
+		,[strTerm]									=	term.strTerm
+		,[str1099Form]								=	CASE WHEN patron.intEntityId IS NOT NULL 
+															AND item.ysn1099Box3 = 1
+															AND patron.ysnStockStatusQualified = 1 
+															THEN '1099 PATR'
+														ELSE D2.str1099Form	END
+		,[str1099Type]								=	CASE WHEN patron.intEntityId IS NOT NULL 
+															AND item.ysn1099Box3 = 1
+															AND patron.ysnStockStatusQualified = 1 
+															THEN 'Per-unit retain allocations'
+														ELSE D2.str1099Type END
+		,[ysnReturn]								=	CAST(RT.Item AS BIT)
 	FROM vyuCTContractCostView CC	
 	CROSS APPLY ( select ysnMultiplePriceFixation from tblCTCompanyPreference ) CPT
 	JOIN tblCTContractDetail CD	ON CD.intContractDetailId = CC.intContractDetailId AND (CC.ysnPrice = 1 AND CD.intPricingTypeId IN (1,6) 
@@ -139,12 +203,25 @@ RETURNS TABLE AS RETURN
 		SELECT intEntityId 
 		FROM tblEMEntity
 	) entity ON entity.intEntityId = CC.intVendorId OR entity.intEntityId = (CASE WHEN CC.ysnPrice = 1 AND CH.intContractTypeId = 1 THEN CH.intEntityId ELSE CC.intVendorId END)
-	WHERE RC.intInventoryReceiptChargeId IS NULL AND CC.ysnAccrue = @accrue AND --CC.ysnBasis = 0 AND
-	NOT EXISTS(SELECT 1 FROM tblICInventoryShipmentCharge WHERE intContractDetailId = CD.intContractDetailId AND intChargeId = CC.intItemId) AND
-	CASE 
-		WHEN @type = 'header' AND CH.intContractHeaderId = @id THEN 1
-		WHEN @type = 'detail' AND CD.intContractDetailId = @id THEN 1
-		WHEN @type = 'cost' AND CC.intContractCostId = @id THEN 1
-	END = 1 
+	WHERE RC.intInventoryReceiptChargeId IS NULL AND CC.ysnAccrue = @accrue AND
+	NOT EXISTS(SELECT 1 FROM tblICInventoryShipmentCharge WHERE intContractDetailId = CD.intContractDetailId AND intChargeId = CC.intItemId)
+	AND CH.intContractHeaderId in (select intContractHeaderId from tblCTContractHeader)
 	AND CASE WHEN @accrue = 0 AND payable.intEntityVendorId IS NOT NULL THEN 1 ELSE @accrue END = 1
-)
+	AND ISNULL(entity.intEntityId,ISNULL(payable.intEntityVendorId,0)) <> 0
+	AND CC.intContractCostId NOT IN 
+	(
+		SELECT intContractCostId FROM tblAPBillDetail WHERE intContractCostId IS NOT NULL
+		UNION ALL
+		SELECT intContractCostId FROM tblAPVoucherPayable WHERE intContractCostId IS NOT NULL
+	)
+	ORDER BY CD.intContractHeaderId, CD.intContractDetailId, CC.intContractCostId
+
+	UPDATE	CC
+	SET		CC.intPrevConcurrencyId = CC.intConcurrencyId
+	FROM	tblCTContractCost	CC
+	JOIN	tblCTContractDetail	CD	ON	CD.intContractDetailId	=	CC.intContractDetailId
+	WHERE	ISNULL(CC.intPrevConcurrencyId,0) <> ISNULL(CC.intConcurrencyId,0)
+	
+	PRINT('CT - 1920_Add_Accrued_Payables End')
+GO
+

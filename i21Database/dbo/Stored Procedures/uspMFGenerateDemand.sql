@@ -714,7 +714,7 @@ BEGIN TRY
 				,intAttributeId
 				,intMonthId
 				)
-			SELECT intItemId
+			SELECT Distinct intItemId
 				,- dblQuantity
 				,intAttributeId
 				,intMonthId
@@ -1424,13 +1424,13 @@ BEGIN TRY
 		)
 	SELECT Demand.intItemId
 		,CASE 
-			WHEN (
+			WHEN IsNULL((
 					SELECT dblQty
 					FROM #tblMFDemand D2
 					WHERE D2.intItemId = Demand.intItemId
 						AND D2.intAttributeId = 10
 						AND D2.intMonthId = Demand.intMonthId
-					) = 0
+					),0) = 0
 				THEN (
 						SELECT dblQty
 						FROM #tblMFDemand D1

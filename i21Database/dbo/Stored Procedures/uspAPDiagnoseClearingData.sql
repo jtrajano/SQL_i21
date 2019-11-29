@@ -11,9 +11,11 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 DECLARE @start DATETIME = CASE WHEN @dateStart IS NOT NULL THEN @dateStart ELSE '1/1/1900' END
-DECLARE @end DATETIME = CASE WHEN @dateEnd IS NOT NULL THEN @dateStart ELSE GETDATE() END
+DECLARE @end DATETIME = CASE WHEN @dateEnd IS NOT NULL THEN @dateEnd ELSE GETDATE() END
 
+--Result of this should be all 0
 SELECT
+	'' AS [Receipt/Voucher Total Clearing on GL],
 	SUM(dblTotal),
 	intAccountId,
 	strReceiptNumber
@@ -84,6 +86,7 @@ AS (
 	FROM tblICInventoryReceipt A
 	INNER JOIN tblICInventoryReceiptItem B
 	ON A.intInventoryReceiptId = B.intInventoryReceiptId
+	WHERE DATEADD(dd, DATEDIFF(dd, 0,A.dtmReceiptDate), 0) BETWEEN @start AND @end
 	GROUP BY A.dtmReceiptDate, A.strReceiptNumber, A.strReceiptType
 ),
 receiptGLTotal (
@@ -101,10 +104,13 @@ AS (
 	ON A.intAccountId = B.intAccountId
 	WHERE B.intAccountCategoryId = 45
 	AND A.ysnIsUnposted = 0
+	AND DATEADD(dd, DATEDIFF(dd, 0,A.dtmDate), 0) BETWEEN @start AND @end
+	AND A.strDescription NOT LIKE '%Charges from%'
 	GROUP BY A.strTransactionId, A.dtmDate
 )
 
 SELECT
+	'' [Receipt Total Clearing vs GL Total Clearing],
 	A.strReceiptNumber,
 	A.dtmReceiptDate,
 	A.dblTotal,
@@ -126,6 +132,7 @@ AS (
 	FROM tblAPBill A
 	INNER JOIN tblAPBillDetail B
 	ON A.intBillId = B.intBillId AND B.intInventoryReceiptItemId > 0
+	WHERE DATEADD(dd, DATEDIFF(dd, 0,A.dtmDate), 0) BETWEEN @start AND @end
 	GROUP BY A.dtmBillDate, A.strBillId, A.intTransactionType
 ),
 billGLTotal (
@@ -144,10 +151,12 @@ AS (
 	WHERE B.intAccountCategoryId = 45
 	AND A.ysnIsUnposted = 0
 	AND A.strCode != 'ICA'
+	AND DATEADD(dd, DATEDIFF(dd, 0,A.dtmDate), 0) BETWEEN @start AND @end
 	GROUP BY A.strTransactionId, A.dtmDate
 )
 
 SELECT
+	'' [Voucher Total Clearing vs GL Total Clearing],
 	A.strBillId,
 	A.dtmBillDate,
 	A.dblTotal,

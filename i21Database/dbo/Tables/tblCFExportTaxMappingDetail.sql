@@ -4,6 +4,7 @@
     [intTaxClassId]               INT            NOT NULL,
     [strRecordMaker]              NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
     [intPosition]                 INT            NOT NULL,
+    [intLength]					  INT            NOT NULL,
     [strFormat]                   NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
     [intConcurrencyId]            INT            CONSTRAINT [DF_tblCFExportTaxMappingDetail_intConcurrencyId] DEFAULT ((1)) NULL,
     CONSTRAINT [PK_tblCFExportTaxMappingDetail] PRIMARY KEY CLUSTERED ([intExportTaxMappingDetailId] ASC),

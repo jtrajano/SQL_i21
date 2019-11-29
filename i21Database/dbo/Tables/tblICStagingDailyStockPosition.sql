@@ -26,6 +26,7 @@
 	dblConsumed NUMERIC(38, 20) NULL,		
 	dblProduced NUMERIC(38, 20) NULL,			
 	dblClosingQty NUMERIC(38, 20) NULL,
+	strStatus NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,			
 	intConcurrencyId INT NULL,
 	dtmDateModified DATETIME NULL,
 	dtmDateCreated DATETIME NULL,

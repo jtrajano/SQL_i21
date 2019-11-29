@@ -256,3 +256,7 @@ SET ysnPost = 1
 WHERE ysnPost IS NULL
 GO
 
+UPDATE tblIPStep
+SET intDeleteFilesPriorTo = 0
+WHERE intDeleteFilesPriorTo IS NULL
+GO

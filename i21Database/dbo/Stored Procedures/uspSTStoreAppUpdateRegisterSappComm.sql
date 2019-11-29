@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspSTStoreAppUpdateRegisterSappComm]
 	@intStoreNo INT
-	, @strPassword NVARCHAR(100)
+	, @strPassword NVARCHAR(MAX)
 	, @dtmLastPasswordChange DATETIME
 	, @intPasswordIncrementNo INT
 	, @ysnResultSuccess BIT OUTPUT
@@ -23,10 +23,13 @@ BEGIN
 								
 									UPDATE reg
 									SET dtmSAPPHIRELastPasswordChangeDate	= ISNULL(@dtmLastPasswordChange, reg.dtmSAPPHIRELastPasswordChangeDate),
-										strSAPPHIREPassword					= ISNULL(dbo.fnAESEncryptASym(@strPassword), reg.strSAPPHIREPassword),
+										strSAPPHIREPassword					= ISNULL(@strPassword, reg.strSAPPHIREPassword), -- Already been Encrypted in api
+										--strSAPPHIREPassword					= ISNULL(dbo.fnAESEncryptASym(@strPassword), reg.strSAPPHIREPassword),
 										intSAPPHIREPasswordIncrementNo		= ISNULL(@intPasswordIncrementNo, reg.intSAPPHIREPasswordIncrementNo)
 									FROM tblSTRegister reg
 									WHERE reg.intRegisterId = @intRegisterId
+
+									SET @ysnResultSuccess = CAST(1 AS BIT)
 
 								--DECLARE @strSQLCommand AS NVARCHAR(1000)
 								--SET @strSQLCommand = 

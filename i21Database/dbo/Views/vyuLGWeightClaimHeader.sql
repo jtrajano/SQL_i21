@@ -27,7 +27,9 @@ SELECT
 	WC.intBookId, 
 	BO.strBook,
 	WC.intSubBookId, 
-	SB.strSubBook
+	SB.strSubBook,
+	WC.intPaymentMethodId,
+	PM.strPaymentMethod
 FROM tblLGWeightClaim WC
 JOIN tblLGLoad Load ON Load.intLoadId = WC.intLoadId
 JOIN tblICUnitMeasure WUOM ON WUOM.intUnitMeasureId = Load.intWeightUnitMeasureId
@@ -38,3 +40,4 @@ JOIN (SELECT DISTINCT WC.intWeightClaimId
 	  )B ON B.intWeightClaimId = WC.intWeightClaimId
 LEFT JOIN tblCTBook BO ON BO.intBookId = WC.intBookId
 LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = WC.intSubBookId
+LEFT JOIN tblSMPaymentMethod PM ON PM.intPaymentMethodID = WC.intPaymentMethodId

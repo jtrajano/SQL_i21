@@ -92,6 +92,8 @@ SELECT ReceiptItem.intInventoryReceiptId
 	, Category.strCategoryCode
 	, Category.strDescription strCategory
 	, Category.intCategoryId
+	, dblPendingVoucherQty = ISNULL(ReceiptItem.dblOpenReceive, 0) - ISNULL(ReceiptItem.dblBillQty, 0) 
+	, strVoucherNo = voucher.strBillId
 FROM tblICInventoryReceiptItem ReceiptItem
 	LEFT JOIN vyuICGetInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 	LEFT JOIN vyuICGetReceiptItemSource ReceiptItemSource ON ReceiptItemSource.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
@@ -111,3 +113,14 @@ FROM tblICInventoryReceiptItem ReceiptItem
 	LEFT JOIN tblSMCurrency SubCurrency ON SubCurrency.intMainCurrencyId = Receipt.intCurrencyId
 	LEFT JOIN tblICStorageUnitType StorageUnitType ON StorageUnitType.intStorageUnitTypeId = StorageLocation.intStorageUnitTypeId
 	LEFT JOIN tblICItemLocation ItemLocation ON ItemLocation.intLocationId = Receipt.intLocationId AND ReceiptItem.intItemId = ItemLocation.intItemId
+	OUTER APPLY (
+		SELECT TOP 1 
+			b.strBillId
+		FROM 
+			tblAPBill b 
+			INNER JOIN tblAPBillDetail bd
+				ON b.intBillId = bd.intBillId
+		WHERE
+			bd.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
+
+	) voucher

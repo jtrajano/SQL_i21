@@ -19,6 +19,7 @@ SELECT
 									- (ISNULL(sm.dblOnHand, 0) + ISNULL(sm.dblUnitStorage, 0))
 								)
 	, strCommodityCode			= cd.strCommodityCode
+	, i.strStatus
 FROM tblICItemStockUOM sm
 	INNER JOIN tblICItemUOM im ON im.intItemUOMId = sm.intItemUOMId AND im.ysnStockUnit = 1
 	INNER JOIN tblICItem i ON i.intItemId = sm.intItemId
@@ -40,3 +41,4 @@ GROUP BY   sm.intItemId
 		 , i.strDescription
 		 , um.strUnitMeasure
 		 , cd.strCommodityCode
+		 , i.strStatus

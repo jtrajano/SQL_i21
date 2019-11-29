@@ -23,6 +23,7 @@
 	[ysnSuccessFailureStep] BIT NULL DEFAULT 0,
 	[strDestinationFolder] NVARCHAR(256) COLLATE Latin1_General_CI_AS NULL,
 	[ysnDeleteFile] BIT DEFAULT 0,
+	[intDeleteFilesPriorTo] INT DEFAULT 0,
 	[ysnCopyFile] BIT DEFAULT 0,
 	[ysnPrefixTimeStamp] BIT DEFAULT 0,
     [intSourceConnectionId] INT NULL, 

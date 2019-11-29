@@ -36,7 +36,7 @@ AS
 --Settle Storage items
 SELECT 
 	CS.intEntityId AS intEntityVendorId
-	,CS.dtmDeliveryDate AS dtmDate
+	,SS.dtmCreated AS dtmDate
 	,SS.strStorageTicket AS strTransactionNumber
 	,SS.intSettleStorageId
 	,NULL AS intBillId
@@ -58,7 +58,7 @@ SELECT
 		ELSE CAST((SS.dblNetSettlement + SS.dblStorageDue + SS.dblDiscountsDue) AS DECIMAL(18,2))
 		END AS dblSettleStorageAmount
 	--,SS.dblSettleUnits AS dblSettleStorageQty
-	,CASE WHEN SS.dblUnpaidUnits != 0 THEN SS.dblUnpaidUnits ELSE SS.dblSettleUnits END AS dblSettleStorageQty
+	,CAST(CASE WHEN SS.dblUnpaidUnits != 0 THEN SS.dblUnpaidUnits ELSE SS.dblSettleUnits END AS DECIMAL(18,2)) AS dblSettleStorageQty
 	,CS.intCompanyLocationId AS intLocationId
 	,CL.strLocationName
 	,CAST(0 AS BIT) ysnAllowVoucher
@@ -88,6 +88,8 @@ INNER JOIN vyuGLAccountDetail AD
 	ON GD.intAccountId = AD.intAccountId AND AD.intAccountCategoryId = 45
 LEFT JOIN tblGRSettleContract ST
 	ON ST.intSettleStorageId = SS.intSettleStorageId
+LEFT JOIN tblCTContractDetail CT
+	ON CT.intContractDetailId = ST.intContractDetailId
 LEFT JOIN 
 (
     tblICItemUOM itemUOM INNER JOIN tblICUnitMeasure unitMeasure
@@ -107,7 +109,16 @@ SELECT
 	,billDetail.intItemId
 	,CS.intItemUOMId  AS intItemUOMId
     ,unitMeasure.strUnitMeasure AS strUOM 
-	,billDetail.dblTotal AS dblVoucherTotal
+	--,billDetail.dblTotal AS dblVoucherTotal
+	--use the cost of settlement for cost adjustment
+	,CASE WHEN SS.dblUnpaidUnits != 0 
+		THEN (
+			CASE WHEN ST.intSettleContractId IS NOT NULL THEN ST.dblUnits * ST.dblPrice
+			ELSE SS.dblNetSettlement
+			END
+		)
+		ELSE CAST((SS.dblNetSettlement + SS.dblStorageDue + SS.dblDiscountsDue) AS DECIMAL(18,2))
+		END dblVoucherTotal
     ,CASE 
 		WHEN billDetail.intWeightUOMId IS NULL THEN 
 			ISNULL(billDetail.dblQtyReceived, 0) 
@@ -146,11 +157,15 @@ LEFT JOIN
         ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId
 )
     ON itemUOM.intItemUOMId = CS.intItemUOMId
+LEFT JOIN tblGRSettleContract ST
+	ON ST.intSettleStorageId = SS.intSettleStorageId
+LEFT JOIN tblCTContractDetail CT
+	ON CT.intContractDetailId = ST.intContractDetailId
 WHERE bill.ysnPosted = 1
 UNION ALL --Charges
 SELECT 
 	CS.intEntityId AS intEntityVendorId
-	,CS.dtmDeliveryDate
+	,SS.dtmCreated
 	,SS.strStorageTicket
 	,SS.intSettleStorageId
 	,NULL AS intBillId
@@ -259,7 +274,7 @@ WHERE bill.ysnPosted = 1
 UNION ALL --DISCOUNTS
 SELECT 
 	CS.intEntityId AS intEntityVendorId
-	,CS.dtmDeliveryDate
+	,SS.dtmCreated
 	,SS.strStorageTicket
 	,SS.intSettleStorageId
 	,NULL AS intBillId
@@ -271,16 +286,16 @@ SELECT
     ,unitMeasure.strUnitMeasure AS strUOM 
 	,0 AS dblVoucherTotal
     ,0 AS dblVoucherQty
-	,CASE
+	,CAST(CASE
 		WHEN QM.strDiscountChargeType = 'Percent' AND QM.dblDiscountAmount < 0 
 		THEN (QM.dblDiscountAmount * (CASE WHEN ISNULL(SS.dblCashPrice,0) > 0 THEN SS.dblCashPrice ELSE CD.dblCashPrice END) * -1)
-		WHEN QM.strDiscountChargeType = 'Percent' AND QM.dblDiscountAmount > 0 THEN (QM.dblDiscountAmount * (CASE WHEN ISNULL(SS.dblCashPrice,0) > 0 THEN SS.dblCashPrice ELSE CD.dblCashPrice END))
-		WHEN QM.strDiscountChargeType = 'Dollar' AND QM.dblDiscountAmount < 0 THEN (QM.dblDiscountAmount * -1)
-		WHEN QM.strDiscountChargeType = 'Dollar' AND QM.dblDiscountAmount > 0 THEN QM.dblDiscountAmount
-	END * SST.dblUnits
+		WHEN QM.strDiscountChargeType = 'Percent' AND QM.dblDiscountAmount > 0 THEN (QM.dblDiscountAmount * (CASE WHEN ISNULL(SS.dblCashPrice,0) > 0 THEN SS.dblCashPrice ELSE CD.dblCashPrice END)) *  -1
+		WHEN QM.strDiscountChargeType = 'Dollar' AND QM.dblDiscountAmount < 0 THEN (QM.dblDiscountAmount)
+		WHEN QM.strDiscountChargeType = 'Dollar' AND QM.dblDiscountAmount > 0 THEN (QM.dblDiscountAmount * -1)
+	END * (CASE WHEN QM.strCalcMethod = 3 THEN CS.dblGrossQuantity ELSE SST.dblUnits END) AS DECIMAL(18,2))
 	,CASE WHEN QM.strCalcMethod = 3 
 		THEN (CS.dblGrossQuantity * (SST.dblUnits / CS.dblOriginalBalance))--@dblGrossUnits 
-	ELSE SST.dblUnits END
+	ELSE SST.dblUnits END * (CASE WHEN QM.dblDiscountAmount > 0 THEN -1 ELSE 1 END)
 	,CS.intCompanyLocationId
 	,CL.strLocationName
 	,0

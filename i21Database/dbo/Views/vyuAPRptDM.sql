@@ -31,7 +31,7 @@ SELECT
 		,dblDiscount			=	DMDetails.dblDiscount
 		,dblDetailTax			=	DMDetails.dblTax
 		,dblTax					=	DM.dblTax
-		,dblTotal				=	DM.dblTotal
+		,dblTotal				=	DMDetails.dblTotal
 		,dblPayment				=	DM.dblPayment
 		,dblNetShippedWeight	=	0 --DMDetails.dblNetShippedWeight
 		,dblWeightLoss			=	0 --dblWeightLoss

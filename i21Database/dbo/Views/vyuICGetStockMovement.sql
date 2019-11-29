@@ -67,6 +67,7 @@ SELECT	intInventoryValuationKeyId =
 		,subLoc.intStorageLocationSorter
 		,strgLoc.strStorageUnitSorter
 		,strgLoc.intStorageUnitSorter
+		,i.strStatus
 FROM 	tblICItem i 
 		CROSS APPLY (
 			SELECT	TOP 1 

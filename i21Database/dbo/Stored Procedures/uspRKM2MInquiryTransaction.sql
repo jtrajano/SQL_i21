@@ -2554,6 +2554,9 @@ BEGIN
 						,iuomTo.intItemUOMId
 						,iuomStck.intItemUOMId
 						,cu2.intCommodityUnitMeasureId
+						,bd.intUnitMeasureId
+						,bd.dblCashOrFuture
+						,bd.intCurrencyId
 					
 			) t1
 			GROUP BY strContractOrInventoryType

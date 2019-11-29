@@ -92,6 +92,8 @@ SELECT ReceiptItem.intInventoryReceiptId
 	, Category.strDescription strCategory
 	, Category.intCategoryId
 	, permission.intEntityContactId
+	, dblPendingVoucherQty = ISNULL(ReceiptItem.dblOpenReceive, 0) - ISNULL(ReceiptItem.dblBillQty, 0) 
+	, strVoucherNo = voucher.strBillId
 FROM tblICInventoryReceiptItem ReceiptItem
 	LEFT JOIN vyuICGetInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 	LEFT JOIN vyuICGetReceiptItemSource ReceiptItemSource ON ReceiptItemSource.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
@@ -127,5 +129,16 @@ FROM tblICInventoryReceiptItem ReceiptItem
 		WHERE sl.intCompanyLocationId = Receipt.intLocationId
 			AND sl.intVendorId = permission.intEntityId
 	) accessibleReceipts
+	OUTER APPLY (
+		SELECT TOP 1 
+			b.strBillId
+		FROM 
+			tblAPBill b 
+			INNER JOIN tblAPBillDetail bd
+				ON b.intBillId = bd.intBillId
+		WHERE
+			bd.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
+
+	) voucher
 WHERE Receipt.strReceiptType = 'Purchase Contract'
 	AND Receipt.intSourceType = 2

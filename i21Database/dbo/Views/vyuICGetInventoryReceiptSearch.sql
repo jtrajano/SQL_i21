@@ -70,6 +70,7 @@ SELECT Receipt.intInventoryReceiptId
 	, Receipt.dblTotalGross
 	, Receipt.dblTotalNet
 	, Receipt.dblGrandTotal
+	, Receipt.dtmCreated 
 	--, WeightLoss.dblClaimableWt
 FROM tblICInventoryReceipt Receipt
 	LEFT JOIN vyuAPVendor Vendor ON Vendor.[intEntityId] = Receipt.intEntityVendorId

@@ -1860,251 +1860,6 @@ BEGIN
 					, strEntityName
 					, strDeliveryDate
 				
-				INSERT INTO @tempFinal (strCommodityCode
-					, strType
-					, dblTotal
-					, intContractHeaderId
-					, strContractNumber
-					, strLocationName
-					, strTicketNumber
-					, dtmTicketDateTime
-					, strDistributionOption
-					, dblUnitCost
-					, dblQtyReceived
-					, intCommodityId
-					, strCurrency
-					, intBillId
-					, strBillId
-					, strCustomerReference)
-				SELECT @strCommodityCode
-					, strType = 'Net Payable ($)' COLLATE Latin1_General_CI_AS
-					, dblTotal
-					, intContractHeaderId
-					, strContractNumber
-					, strLocationName
-					, strTicketNumber
-					, dtmTicketDateTime
-					, strDistributionOption
-					, dblUnitCost1
-					, dblQtyReceived
-					, intCommodityId
-					, strCurrency
-					, intBillId
-					, strBillId
-					, strCustomerReference
-				FROM (
-					SELECT DISTINCT B.intBillId
-						, strBillId
-						, strLocationName
-						, t.strTicketNumber
-						, t.dtmTicketDateTime
-						, strDistributionOption
-						, dblUnitCost = dblCost
-						, dblQtyReceived = SUM(BD.dblQtyReceived) OVER (PARTITION BY B.intBillId)
-						, dblTotal = SUM(B.dblTotal) OVER (PARTITION BY B.intBillId)
-						, BD.dblCost
-						, dblAmountDue
-						, dblCost dblUnitCost1
-						, c.intCommodityId
-						, intContractHeaderId = NULL
-						, strContractNumber = NULL
-						, Cur.strCurrency
-						, strCustomerReference = strName
-					FROM tblAPBill B
-					JOIN tblAPBillDetail BD ON B.intBillId = BD.intBillId
-					JOIN tblICItem I ON BD.intItemId = I.intItemId AND BD.intInventoryReceiptChargeId IS NULL AND I.strType = 'Inventory'
-					JOIN tblICCommodity c ON I.intCommodityId = c.intCommodityId
-					JOIN tblSMCurrency Cur ON B.intCurrencyId = Cur.intCurrencyID
-					JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = B.intShipToId
-					LEFT JOIN tblSCTicket t ON BD.intScaleTicketId = t.intTicketId
-					LEFT JOIN tblEMEntity e ON t.intEntityId = e.intEntityId
-					WHERE B.ysnPosted = 1 AND c.intCommodityId = @intCommodityId AND ISNULL(strTicketStatus, '') <> 'V'
-						AND cl.intCompanyLocationId = ISNULL(@intLocationId, cl.intCompanyLocationId)
-						AND CONVERT(DATETIME, CONVERT(VARCHAR(10), B.dtmDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
-						AND intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
-				)t WHERE dblTotal <> 0
-				
-				INSERT INTO @tempFinal (strCommodityCode
-					, strType
-					, dblTotal
-					, strLocationName
-					, intContractHeaderId
-					, strContractNumber
-					, strTicketNumber
-					, dtmTicketDateTime
-					, strCustomerReference
-					, strDistributionOption
-					, dblUnitCost
-					, dblQtyReceived
-					, intCommodityId
-					, strCurrency
-					, intInvoiceId
-					, strInvoiceNumber)
-				SELECT @strCommodityCode
-					, strType = 'Net Receivable ($)' COLLATE Latin1_General_CI_AS
-					, I.dblAmountDue
-					, L.strLocationName
-					, CT.intContractHeaderId 
-					, CT.strContractNumber 
-					, T.strTicketNumber
-					, I.dtmDate
-					, E.strName
-					, strDistributionOption = '' COLLATE Latin1_General_CI_AS
-					, dblUCost = null
-					, dblQtyReceived = SUM(ID.dblQtyShipped)
-					, intCommodityId
-					, Cur.strCurrency
-					, I.intInvoiceId
-					, I.strInvoiceNumber
-				FROM tblARInvoice I
-				INNER JOIN tblARInvoiceDetail ID ON I.intInvoiceId = ID.intInvoiceId AND intInventoryShipmentChargeId IS NULL
-				INNER JOIN tblSMCompanyLocation L ON I.intCompanyLocationId = L.intCompanyLocationId
-				INNER JOIN tblSCTicket T ON ID.intTicketId = T.intTicketId
-				INNER JOIN tblEMEntity E ON I.intEntityCustomerId = E.intEntityId
-				INNER JOIN tblSMCurrency Cur ON I.intCurrencyId = Cur.intCurrencyID
-				OUTER APPLY( 
-				    SELECT TOP 1 intTicketId, intItemId, CONTRACT.intContractHeaderId, strContractNumber = TICKET.strContractNumber + '-' + CONVERT(NVARCHAR(100), intContractSequence)  
-					FROM vyuSCTicketView TICKET
-					LEFT JOIN (
-						SELECT intContractHeaderId, strContractNumber FROM tblCTContractHeader
-					)CONTRACT ON TICKET.strContractNumber = CONTRACT.strContractNumber
-					WHERE TICKET.strTicketNumber = T.strTicketNumber
-				) CT 
-				WHERE I.ysnPosted = 1
-					AND CONVERT(DATETIME, CONVERT(VARCHAR(10), I.dtmDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
-					AND dblAmountDue <> 0 AND intCommodityId = @intCommodityId
-					AND L.intCompanyLocationId = ISNULL(@intLocationId, L.intCompanyLocationId)
-					AND L.intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
-				GROUP BY I.dblAmountDue
-					, L.strLocationName
-					, T.strTicketNumber
-					, I.dtmDate
-					, E.strName
-					, intCommodityId
-					, Cur.strCurrency
-					, I.intInvoiceId
-					, I.strInvoiceNumber
-					, CT.intContractHeaderId
-					, CT.strContractNumber
-				
-				INSERT INTO @tempFinal (strCommodityCode
-					, strType
-					, dblTotal
-					, intContractHeaderId
-					, strContractNumber
-					, strLocationName
-					, strTicketNumber
-					, dtmTicketDateTime
-					, strCustomerReference
-					, strDistributionOption
-					, dblUnitCost
-					, dblQtyReceived
-					, intCommodityId
-					, strContractType
-					, intBillId
-					, strBillId
-					, strCurrency
-					, intItemId
-					, strItemNo
-					, intCategoryId
-					, strCategory
-					, intFutureMarketId
-					, strFutMarketName
-					, intFutureMonthId
-					, strFutureMonth
-					, strBrokerTradeNo
-					, strNotes
-					, ysnPreCrush)
-				SELECT strCommodityCode
-					, strType = 'NP Un-Paid Quantity' COLLATE Latin1_General_CI_AS
-					, dblQtyReceived
-					, intContractHeaderId
-					, strContractNumber
-					, strLocationName
-					, strTicketNumber
-					, dtmTicketDateTime
-					, strCustomerReference
-					, strDistributionOption
-					, dblUnitCost
-					, dblQtyReceived
-					, intCommodityId
-					, strContractType
-					, intBillId
-					, strBillId
-					, strCurrency
-					, intItemId
-					, strItemNo
-					, intCategoryId
-					, strCategory
-					, intFutureMarketId
-					, strFutMarketName
-					, intFutureMonthId
-					, strFutureMonth
-					, strBrokerTradeNo
-					, strNotes
-					, ysnPreCrush
-				FROM @tempFinal WHERE strType = 'Net Payable ($)' AND intCommodityId = @intCommodityId
-				
-				INSERT INTO @tempFinal (strCommodityCode
-					, strType
-					, dblTotal
-					, intInventoryReceiptItemId
-					, strLocationName
-					, intContractHeaderId
-					, strContractNumber
-					, strTicketNumber
-					, dtmTicketDateTime
-					, strCustomerReference
-					, strDistributionOption
-					, dblUnitCost
-					, dblQtyReceived
-					, intCommodityId
-					, strContractType
-					, intInvoiceId
-					, strInvoiceNumber
-					, strCurrency
-					, intItemId
-					, strItemNo
-					, intCategoryId
-					, strCategory
-					, intFutureMarketId
-					, strFutMarketName
-					, intFutureMonthId
-					, strFutureMonth
-					, strBrokerTradeNo
-					, strNotes
-					, ysnPreCrush)
-				SELECT @strCommodityCode
-					, strType = 'NR Un-Paid Quantity' COLLATE Latin1_General_CI_AS
-					, dblQtyReceived
-					, intInventoryReceiptItemId
-					, strLocationName
-					, intContractHeaderId
-					, strContractNumber
-					, strTicketNumber
-					, dtmTicketDateTime
-					, strCustomerReference
-					, strDistributionOption
-					, dblUnitCost
-					, dblQtyReceived
-					, intCommodityId
-					, strContractType
-					, intInvoiceId
-					, strInvoiceNumber
-					, strCurrency
-					, intItemId
-					, strItemNo
-					, intCategoryId
-					, strCategory
-					, intFutureMarketId
-					, strFutMarketName
-					, intFutureMonthId
-					, strFutureMonth
-					, strBrokerTradeNo
-					, strNotes
-					, ysnPreCrush
-				FROM @tempFinal WHERE strType = 'Net Receivable ($)' AND intCommodityId = @intCommodityId
-				
 				INSERT INTO @tempFinal(strCommodityCode
 					, strType
 					, strContractType
@@ -2317,112 +2072,8 @@ BEGIN
 				FROM @tempFinal t
 				JOIN tblICCommodityUnitMeasure cuc ON t.intCommodityId = cuc.intCommodityId AND cuc.ysnDefault = 1
 				JOIN tblICUnitMeasure um ON um.intUnitMeasureId = cuc.intUnitMeasureId
-				WHERE t.intCommodityId = @intCommodityId AND strType NOT IN ('Net Payable ($)', 'Net Receivable ($)')
+				WHERE t.intCommodityId = @intCommodityId 
 				
-				INSERT INTO @Final (intCommodityId
-					, strCommodityCode
-					, intContractHeaderId
-					, strContractNumber
-					, intFutOptTransactionHeaderId
-					, strInternalTradeNo
-					, strType
-					, strContractType
-					, strContractEndMonth
-					, dblTotal
-					, strUnitMeasure
-					, intInventoryReceiptItemId
-					, strLocationName
-					, strTicketNumber
-					, dtmTicketDateTime
-					, strCustomerReference
-					, strDistributionOption
-					, dblUnitCost
-					, dblQtyReceived
-					, strAccountNumber
-					, strTranType
-					, dblNoOfLot
-					, dblDelta
-					, intBrokerageAccountId
-					, strInstrumentType
-					, dblNoOfContract
-					, dblContractSize
-					, strCurrency
-					, intInvoiceId
-					, strInvoiceNumber
-					, intBillId
-					, strBillId
-					, intInventoryReceiptId
-					, strReceiptNumber
-					, intTicketId
-					, strShipmentNumber
-					, intInventoryShipmentId
-					, intItemId
-					, strItemNo
-					, intCategoryId
-					, strCategory
-					, intFutureMarketId
-					, strFutMarketName
-					, intFutureMonthId
-					, strFutureMonth
-					, strBrokerTradeNo
-					, strNotes
-					, ysnPreCrush
-					, strEntityName
-					, strDeliveryDate)
-				SELECT t.intCommodityId
-					, strCommodityCode
-					, intContractHeaderId
-					, strContractNumber
-					, intFutOptTransactionHeaderId
-					, strInternalTradeNo
-					, strType
-					, strContractType
-					, strContractEndMonth
-					, dblTotal
-					, um.strUnitMeasure
-					, intInventoryReceiptItemId
-					, strLocationName
-					, strTicketNumber
-					, dtmTicketDateTime
-					, strCustomerReference
-					, strDistributionOption
-					, dblUnitCost
-					, dblQtyReceived
-					, strAccountNumber
-					, strTranType
-					, dblNoOfLot
-					, dblDelta
-					, intBrokerageAccountId
-					, strInstrumentType
-					, dblNoOfContract
-					, dblContractSize
-					, strCurrency
-					, intInvoiceId
-					, strInvoiceNumber
-					, intBillId
-					, strBillId
-					, intInventoryReceiptId
-					, strReceiptNumber
-					, intTicketId
-					, strShipmentNumber
-					, intInventoryShipmentId
-					, intItemId
-					, strItemNo
-					, intCategoryId
-					, strCategory
-					, intFutureMarketId
-					, strFutMarketName
-					, intFutureMonthId
-					, strFutureMonth
-					, strBrokerTradeNo
-					, strNotes
-					, ysnPreCrush
-					, strEntityName
-					, strDeliveryDate
-				FROM @tempFinal t
-				JOIN tblICCommodityUnitMeasure cuc ON t.intCommodityId = cuc.intCommodityId AND cuc.ysnDefault = 1
-				JOIN tblICUnitMeasure um ON um.intUnitMeasureId = cuc.intUnitMeasureId
-				WHERE t.intCommodityId = @intCommodityId AND strType IN ('Net Payable ($)', 'Net Receivable ($)')
 			END
 			ELSE--==================== Specific Customer/Vendor =================================================
 			BEGIN
@@ -2477,264 +2128,6 @@ BEGIN
 						AND cd.intEntityId = @intVendorId
 				) t WHERE intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 				
-				INSERT INTO @tempFinal (strCommodityCode
-					, strType
-					, dblTotal
-					, intContractHeaderId
-					, strContractNumber
-					, strLocationName
-					, strTicketNumber
-					, dtmTicketDateTime
-					, strDistributionOption
-					, dblUnitCost
-					, dblQtyReceived
-					, intCommodityId
-					, strCurrency
-					, intBillId
-					, strBillId
-					, strCustomerReference
-					, intItemId
-					, strItemNo
-					, intCategoryId
-					, strCategory)
-				SELECT @strCommodityCode
-					, strType = 'Net Payable ($)' COLLATE Latin1_General_CI_AS
-					, dblTotal
-					, intContractHeaderId
-					, strContractNumber
-					, strLocationName
-					, strTicketNumber
-					, dtmTicketDateTime
-					, strDistributionOption
-					, dblUnitCost1
-					, dblQtyReceived
-					, intCommodityId
-					, strCurrency
-					, intBillId
-					, strBillId
-					, strCustomerReference
-					, intItemId
-					, strItemNo
-					, intCategoryId
-					, strCategory
-				FROM (
-					SELECT DISTINCT B.intBillId
-						, B.strBillId
-						, strLocationName
-						, t.strTicketNumber
-						, t.dtmTicketDateTime
-						, strDistributionOption
-						, dblUnitCost = dblCost
-						, dblQtyReceived = SUM(BD.dblQtyReceived) OVER (PARTITION BY B.intBillId)
-						, dblTotal = SUM(B.dblTotal) OVER (PARTITION BY B.intBillId)
-						, BD.dblCost
-						, dblAmountDue
-						, dblUnitCost1 = dblCost
-						, c.intCommodityId
-						, intContractHeaderId = NULL
-						, strContractNumber = NULL
-						, Cur.strCurrency
-						, strCustomerReference = strName
-						, I.intItemId
-						, I.strItemNo
-						, Category.intCategoryId
-						, strCategory = Category.strCategoryCode
-					FROM tblAPBill B
-					JOIN tblAPBillDetail BD ON B.intBillId = BD.intBillId
-					JOIN tblICItem I ON BD.intItemId = I.intItemId AND BD.intInventoryReceiptChargeId IS NULL AND I.strType = 'Inventory'
-					JOIN tblICCategory Category ON Category.intCategoryId = I.intCategoryId
-					JOIN tblICCommodity c ON I.intCommodityId = c.intCommodityId
-					JOIN tblSMCurrency Cur ON B.intCurrencyId = Cur.intCurrencyID
-					JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = B.intShipToId
-					LEFT JOIN tblSCTicket t ON BD.intScaleTicketId = t.intTicketId
-					LEFT JOIN tblEMEntity e ON t.intEntityId = e.intEntityId
-					WHERE c.intCommodityId = @intCommodityId AND ISNULL(strTicketStatus,'') <> 'V'
-						AND cl.intCompanyLocationId = ISNULL(@intLocationId, cl.intCompanyLocationId)
-						AND B.intEntityVendorId = @intVendorId
-						AND CONVERT(DATETIME, CONVERT(VARCHAR(10), B.dtmDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
-						AND intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
-				) t WHERE dblTotal <> 0
-				
-				INSERT INTO @tempFinal (strCommodityCode
-					, strType
-					, dblTotal
-					, strLocationName
-					, intContractHeaderId
-					, strContractNumber
-					, strTicketNumber
-					, dtmTicketDateTime
-					, strCustomerReference
-					, strDistributionOption
-					, dblUnitCost
-					, dblQtyReceived
-					, intCommodityId
-					, strCurrency
-					, intInvoiceId
-					, strInvoiceNumber
-					, intItemId
-					, strItemNo
-					, intCategoryId
-					, strCategory)
-				SELECT @strCommodityCode
-					, strType = 'Net Receivable ($)' COLLATE Latin1_General_CI_AS
-					, I.dblAmountDue
-					, L.strLocationName
-					, intContractHeaderId = NULL
-					, strContractNumber = '' COLLATE Latin1_General_CI_AS
-					, T.strTicketNumber
-					, I.dtmDate
-					, E.strName
-					, strDistributionOption = '' COLLATE Latin1_General_CI_AS
-					, dblUCost = NULL
-					, dblQtyReceived = SUM(ID.dblQtyShipped)
-					, T.intCommodityId
-					, Cur.strCurrency
-					, I.intInvoiceId
-					, I.strInvoiceNumber
-					, Item.intItemId
-					, Item.strItemNo
-					, Category.intCategoryId
-					, strCategory = Category.strCategoryCode
-				FROM tblARInvoice I
-				INNER JOIN tblARInvoiceDetail ID ON I.intInvoiceId = ID.intInvoiceId AND intInventoryShipmentChargeId IS NULL
-				INNER JOIN tblICItem Item ON Item.intItemId = ID.intItemId AND Item.strType = 'Inventory'
-				INNER JOIN tblICCategory Category ON Category.intCategoryId = Item.intCategoryId
-				INNER JOIN tblSMCompanyLocation L ON I.intCompanyLocationId = L.intCompanyLocationId
-				INNER JOIN tblSCTicket T ON ID.intTicketId = T.intTicketId
-				INNER JOIN tblEMEntity E ON I.intEntityCustomerId = E.intEntityId
-				INNER JOIN tblSMCurrency Cur ON I.intCurrencyId = Cur.intCurrencyID
-				WHERE I.ysnPosted = 1 AND dblAmountDue <> 0 AND T.intCommodityId = @intCommodityId
-					AND CONVERT(DATETIME, CONVERT(VARCHAR(10), I.dtmDate, 110), 110) <= CONVERT(datetime,@dtmToDate)
-					AND L.intCompanyLocationId = ISNULL(@intLocationId, L.intCompanyLocationId)
-					AND L.intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
-					AND I.intEntityCustomerId = @intVendorId
-				GROUP BY I.dblAmountDue
-					, L.strLocationName
-					, T.strTicketNumber
-					, I.dtmDate
-					, E.strName
-					, T.intCommodityId
-					, Cur.strCurrency
-					, I.intInvoiceId
-					, I.strInvoiceNumber
-					, Item.intItemId
-					, Item.strItemNo
-					, Category.intCategoryId
-					, Category.strCategoryCode
-				
-				INSERT INTO @tempFinal (strCommodityCode
-					, strType
-					, dblTotal
-					, intContractHeaderId
-					, strContractNumber
-					, strLocationName
-					, strTicketNumber
-					, dtmTicketDateTime
-					, strCustomerReference
-					, strDistributionOption
-					, dblUnitCost
-					, dblQtyReceived
-					, intCommodityId
-					, strContractType
-					, intBillId
-					, strBillId
-					, intItemId
-					, strItemNo
-					, intCategoryId
-					, strCategory
-					, intFutureMarketId
-					, strFutMarketName
-					, intFutureMonthId
-					, strFutureMonth
-					, strBrokerTradeNo
-					, strNotes
-					, ysnPreCrush)
-				SELECT strCommodityCode
-					, strType = 'NP Un-Paid Quantity' COLLATE Latin1_General_CI_AS
-					, dblQtyReceived
-					, intContractHeaderId
-					, strContractNumber
-					, strLocationName
-					, strTicketNumber
-					, dtmTicketDateTime
-					, strCustomerReference
-					, strDistributionOption
-					, dblUnitCost
-					, dblQtyReceived
-					, intCommodityId
-					, strContractType
-					, intBillId
-					, strBillId
-					, intItemId
-					, strItemNo
-					, intCategoryId
-					, strCategory
-					, intFutureMarketId
-					, strFutMarketName
-					, intFutureMonthId
-					, strFutureMonth
-					, strBrokerTradeNo
-					, strNotes
-					, ysnPreCrush
-				FROM @tempFinal WHERE strType = 'Net Payable ($)' AND intCommodityId = @intCommodityId
-				
-				INSERT INTO @tempFinal (strCommodityCode
-					, strType
-					, dblTotal
-					, intInventoryReceiptItemId
-					, strLocationName
-					, intContractHeaderId
-					, strContractNumber
-					, strTicketNumber
-					, dtmTicketDateTime
-					, strCustomerReference
-					, strDistributionOption
-					, dblUnitCost
-					, dblQtyReceived
-					, intCommodityId
-					, strContractType
-					, intInvoiceId
-					, strInvoiceNumber
-					, intItemId
-					, strItemNo
-					, intCategoryId
-					, strCategory
-					, intFutureMarketId
-					, strFutMarketName
-					, intFutureMonthId
-					, strFutureMonth
-					, strBrokerTradeNo
-					, strNotes
-					, ysnPreCrush)
-				SELECT @strCommodityCode
-					, strType = 'NR Un-Paid Quantity' COLLATE Latin1_General_CI_AS
-					, dblQtyReceived
-					, intInventoryReceiptItemId
-					, strLocationName
-					, intContractHeaderId
-					, strContractNumber
-					, strTicketNumber
-					, dtmTicketDateTime
-					, strCustomerReference
-					, strDistributionOption
-					, dblUnitCost
-					, dblQtyReceived
-					, intCommodityId
-					, strContractType
-					, intInvoiceId
-					, strInvoiceNumber
-					, intItemId
-					, strItemNo
-					, intCategoryId
-					, strCategory
-					, intFutureMarketId
-					, strFutMarketName
-					, intFutureMonthId
-					, strFutureMonth
-					, strBrokerTradeNo
-					, strNotes
-					, ysnPreCrush
-				FROM @tempFinal WHERE strType = 'Net Receivable ($)' AND intCommodityId = @intCommodityId
 				
 				INSERT INTO @Final (intCommodityId
 					, strCommodityCode 
@@ -2831,7 +2224,7 @@ BEGIN
 				FROM @tempFinal t
 				JOIN tblICCommodityUnitMeasure cuc ON t.intCommodityId = cuc.intCommodityId AND cuc.ysnDefault = 1
 				JOIN tblICUnitMeasure um ON um.intUnitMeasureId = cuc.intUnitMeasureId
-				WHERE t.intCommodityId = @intCommodityId AND strType NOT IN ('Net Payable ($)', 'Net Receivable ($)')
+				WHERE t.intCommodityId = @intCommodityId 
 				
 				UNION ALL
 				SELECT t.intCommodityId
@@ -2883,7 +2276,7 @@ BEGIN
 				FROM @tempFinal t
 				JOIN tblICCommodityUnitMeasure cuc ON t.intCommodityId = cuc.intCommodityId AND cuc.ysnDefault = 1
 				JOIN tblICUnitMeasure um ON um.intUnitMeasureId = cuc.intUnitMeasureId
-				WHERE t.intCommodityId = @intCommodityId AND strType IN ('Net Payable ($)', 'Net Receivable ($)')
+				WHERE t.intCommodityId = @intCommodityId
 			END
 		END
 		SELECT @mRowNumber = MIN(intCommodityIdentity)	FROM @Commodity	WHERE intCommodityIdentity > @mRowNumber
@@ -2895,10 +2288,6 @@ BEGIN
 	UPDATE @Final SET intSeqNo = 4 WHERE strType = 'Crush'
 	UPDATE @Final SET intSeqNo = 5 WHERE strType = 'Price Risk'
 	UPDATE @Final SET intSeqNo = 6 WHERE strType = 'Basis Risk'
-	UPDATE @Final SET intSeqNo = 7 WHERE strType = 'Net Payable ($)'
-	UPDATE @Final SET intSeqNo = 8 WHERE strType = 'NP Un-Paid Quantity'
-	UPDATE @Final SET intSeqNo = 9 WHERE strType = 'Net Receivable ($)'
-	UPDATE @Final SET intSeqNo = 10 WHERE strType = 'NR Un-Paid Quantity'
 	UPDATE @Final SET intSeqNo = 11 WHERE strType = 'Avail for Spot Sale'
 	
 	UPDATE @Final SET strFutureMonth = CASE 
@@ -2933,10 +2322,6 @@ BEGIN
 		FROM @Final f
 		JOIN tblICCommodity c ON c.intCommodityId = f.intCommodityId
 		WHERE dblTotal <> 0
-			AND strType <> CASE WHEN @ysnHideNetPayableAndReceivable = 1 THEN 'Net Payable ($)' ELSE '' END
-			AND strType <> CASE WHEN @ysnHideNetPayableAndReceivable = 1 THEN 'Net Receivable ($)' ELSE '' END
-			AND strType <> CASE WHEN @ysnHideNetPayableAndReceivable = 1 THEN 'NP Un-Paid Quantity' ELSE '' END
-			AND strType <> CASE WHEN @ysnHideNetPayableAndReceivable = 1 THEN 'NR Un-Paid Quantity' ELSE '' END
 		GROUP BY c.strCommodityCode
 			, strUnitMeasure
 			, strType
@@ -2953,10 +2338,6 @@ BEGIN
 		FROM @Final f
 		JOIN tblICCommodity c ON c.intCommodityId = f.intCommodityId
 		WHERE dblTotal <> 0
-			AND strType <> CASE WHEN @ysnHideNetPayableAndReceivable = 1 THEN 'Net Payable ($)' ELSE '' END
-			AND strType <> CASE WHEN @ysnHideNetPayableAndReceivable = 1 THEN 'Net Receivable ($)' ELSE '' END
-			AND strType <> CASE WHEN @ysnHideNetPayableAndReceivable = 1 THEN 'NP Un-Paid Quantity' ELSE '' END
-			AND strType <> CASE WHEN @ysnHideNetPayableAndReceivable = 1 THEN 'NR Un-Paid Quantity' ELSE '' END
 		GROUP BY c.strCommodityCode
 			, strUnitMeasure
 			, strType
@@ -3030,10 +2411,6 @@ BEGIN
 		FROM @Final f
 		JOIN tblICCommodity c ON c.intCommodityId = f.intCommodityId
 		WHERE dblTotal <> 0
-			AND strType <> CASE WHEN @ysnHideNetPayableAndReceivable = 1 THEN 'Net Payable ($)' ELSE '' END
-			AND strType <> CASE WHEN @ysnHideNetPayableAndReceivable = 1 THEN 'Net Receivable ($)' ELSE '' END
-			AND strType <> CASE WHEN @ysnHideNetPayableAndReceivable = 1 THEN 'NP Un-Paid Quantity' ELSE '' END
-			AND strType <> CASE WHEN @ysnHideNetPayableAndReceivable = 1 THEN 'NR Un-Paid Quantity' ELSE '' END
 		ORDER BY intSeqNo
 			, strType ASC
 			, CASE WHEN ISNULL(intContractHeaderId, 0) = 0 THEN intFutOptTransactionHeaderId ELSE intContractHeaderId END DESC
@@ -3104,10 +2481,6 @@ BEGIN
 		FROM @Final f
 		JOIN tblICCommodity c ON c.intCommodityId = f.intCommodityId
 		WHERE dblTotal <> 0 AND strSubType NOT LIKE '%' + @strPurchaseSales + '%'
-			AND strType <> CASE WHEN @ysnHideNetPayableAndReceivable = 1 THEN 'Net Payable ($)' ELSE '' END
-			AND strType <> CASE WHEN @ysnHideNetPayableAndReceivable = 1 THEN 'Net Receivable ($)' ELSE '' END
-			AND strType <> CASE WHEN @ysnHideNetPayableAndReceivable = 1 THEN 'NP Un-Paid Quantity' ELSE '' END
-			AND strType <> CASE WHEN @ysnHideNetPayableAndReceivable = 1 THEN 'NR Un-Paid Quantity' ELSE '' END
 		ORDER BY intSeqNo
 			, strType ASC
 			, CASE WHEN ISNULL(intContractHeaderId, 0) = 0 THEN intFutOptTransactionHeaderId ELSE intContractHeaderId END DESC

@@ -26,11 +26,11 @@ SELECT
 	WD.ysnNoClaim,
 	WD.intContractDetailId,
 	WC.dtmClaimValidTill,
-	Load.strLoadNumber,
-	Load.dtmScheduledDate,
-	Load.strBLNumber,
-	Load.dtmBLDate,
-	Load.intWeightUnitMeasureId,
+	L.strLoadNumber,
+	L.dtmScheduledDate,
+	L.strBLNumber,
+	L.dtmBLDate,
+	L.intWeightUnitMeasureId,
 	strWeightUOM = WUOM.strUnitMeasure,
 	CH.strContractNumber,
 	CD.intContractSeq,
@@ -60,18 +60,19 @@ SELECT
 	CB.strContractBasis,
 	CD.strERPPONumber,
 	CD.strERPItemNumber,
-	(SELECT TOP 1 CLSL.strSubLocationName
+	strSublocation = (SELECT TOP 1 CLSL.strSubLocationName
 			FROM tblLGLoadWarehouse LW
 			JOIN tblSMCompanyLocationSubLocation CLSL ON LW.intSubLocationId = CLSL.intCompanyLocationSubLocationId
-			WHERE LW.intLoadId = Load.intLoadId) strSublocation,
+			WHERE LW.intLoadId = L.intLoadId),
 	CD.intPurchasingGroupId,
-	PG.strName AS strPurchasingGroupName,
-	PG.strDescription AS strPurchasingGroupDesc
-
+	strPurchasingGroupName = PG.strName,
+	strPurchasingGroupDesc = PG.strDescription,
+	WC.intPaymentMethodId,
+	PM.strPaymentMethod
 FROM tblLGWeightClaim WC
 JOIN tblLGWeightClaimDetail WD ON WD.intWeightClaimId = WC.intWeightClaimId
-JOIN tblLGLoad Load ON Load.intLoadId = WC.intLoadId
-JOIN tblICUnitMeasure WUOM ON WUOM.intUnitMeasureId = Load.intWeightUnitMeasureId
+JOIN tblLGLoad L ON L.intLoadId = WC.intLoadId
+JOIN tblICUnitMeasure WUOM ON WUOM.intUnitMeasureId = L.intWeightUnitMeasureId
 JOIN tblCTContractDetail CD ON CD.intContractDetailId = WD.intContractDetailId
 JOIN (SELECT
 			intContractDetailId = CD.intContractDetailId
@@ -121,3 +122,4 @@ LEFT JOIN tblAPBill BILL ON BILL.intBillId = WD.intBillId
 LEFT JOIN tblCTBook BO ON BO.intBookId = WC.intBookId
 LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = WC.intSubBookId
 LEFT JOIN tblSMPurchasingGroup PG ON PG.intPurchasingGroupId = CD.intPurchasingGroupId
+LEFT JOIN tblSMPaymentMethod PM ON PM.intPaymentMethodID = WC.intPaymentMethodId

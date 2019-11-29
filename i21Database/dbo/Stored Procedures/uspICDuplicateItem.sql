@@ -1077,5 +1077,10 @@ BEGIN
 				,@fromValue = @ItemNo							-- Previous Value
 				,@toValue = @NewItemNo						-- New Value
 	END
+
+	EXEC uspIPInterCompanyPreStageItem
+		@intItemId = @NewItemId
+		, @strRowState = 'Add'
+		, @intUserId = @intUserId
 END
 GO

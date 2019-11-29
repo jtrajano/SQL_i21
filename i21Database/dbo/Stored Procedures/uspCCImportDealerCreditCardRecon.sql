@@ -75,6 +75,25 @@ BEGIN
 			WHERE DCC.guidImportIdentifier = @guidImportIdentifier AND DCCD.ysnValid = 1
 		END
 
+		-- SUM the Batches to get the Gross, Net, Fees - Applicable for Conoco Philips Format only
+		IF EXISTS(SELECT TOP 1 1 FROM tblCCImportDealerCreditCardRecon DCC 
+		INNER JOIN tblSMImportFileHeader FH ON FH.intImportFileHeaderId = DCC.intImportFileHeaderId
+		WHERE DCC.guidImportIdentifier = @guidImportIdentifier 
+		AND FH.strLayoutTitle = 'DCC - Conoco Philips Format')
+		BEGIN
+			UPDATE D SET D.dblGross = A.dblGross, D.dblNet = A.dblNet, D.dblFee = A.dblFee  
+			FROM tblCCImportDealerCreditCardReconDetail D INNER JOIN
+			(
+			SELECT DCCD.intImportDealerCreditCardReconId, DCCD.intSiteId, DCCD.dtmTransactionDate, SUM(DCCD.dblBatchGross) dblGross, SUM(DCCD.dblBatchNet) dblNet, SUM(DCCD.dblBatchFee) dblFee
+			FROM tblCCImportDealerCreditCardReconDetail DCCD
+			INNER JOIN tblCCImportDealerCreditCardRecon DCC ON DCC.intImportDealerCreditCardReconId = DCCD.intImportDealerCreditCardReconId
+			WHERE DCC.guidImportIdentifier = @guidImportIdentifier 
+			GROUP BY DCCD.intImportDealerCreditCardReconId, DCCD.intSiteId, DCCD.dtmTransactionDate
+			) A ON A.intImportDealerCreditCardReconId = D.intImportDealerCreditCardReconId
+			AND A.intSiteId = D.intSiteId
+			AND A.dtmTransactionDate = D.dtmTransactionDate
+		END
+
 		COMMIT
 
 		SELECT @return = intImportDealerCreditCardReconId FROM tblCCImportDealerCreditCardRecon WHERE guidImportIdentifier = @guidImportIdentifier

@@ -86,7 +86,27 @@ SET  IDENTITY_INSERT tblGLAccountCategory ON
 			SELECT id = 76,name = 'Futures Trade Equity' UNION ALL --GL-3464
 			SELECT id = 77,name = 'Futures Gain or Loss Realized' UNION ALL --GL-3464
 			SELECT id = 100, name = 'Mark to Market P&L' UNION ALL
-			SELECT id = 101, name = 'Mark to Market Offset'
+			SELECT id = 101, name = 'Mark to Market Offset' UNION ALL
+
+			SELECT id = 120, name = 'Unrealized Gain on Basis' UNION ALL
+			SELECT id = 121, name = 'Unrealized Gain on Futures' UNION ALL
+			SELECT id = 122, name = 'Unrealized Gain on Cash' UNION ALL
+			SELECT id = 123, name = 'Unrealized Gain on Ratio' UNION ALL
+			SELECT id = 124, name = 'Unrealized Loss on Basis' UNION ALL
+			SELECT id = 125, name = 'Unrealized Loss on Futures' UNION ALL
+			SELECT id = 126, name = 'Unrealized Loss on Cash' UNION ALL
+			SELECT id = 127, name = 'Unrealized Loss on Ratio' UNION ALL
+			SELECT id = 128, name = 'Unrealized Gain on Basis (Inventory Offset)' UNION ALL
+			SELECT id = 129, name = 'Unrealized Gain on Futures (Inventory Offset)' UNION ALL
+			SELECT id = 130, name = 'Unrealized Gain on Cash (Inventory Offset)' UNION ALL
+			SELECT id = 131, name = 'Unrealized Gain on Ratio (Inventory Offset)' UNION ALL
+			SELECT id = 132, name = 'Unrealized Gain on Intransit (Inventory Offset)' UNION ALL
+			SELECT id = 133, name = 'Unrealized Loss on Basis (Inventory Offset)' UNION ALL
+			SELECT id = 134, name = 'Unrealized Loss on Futures (Inventory Offset)' UNION ALL
+			SELECT id = 135, name = 'Unrealized Loss on Cash (Inventory Offset)' UNION ALL
+			SELECT id = 136, name = 'Unrealized Loss on Ratio (Inventory Offset)' UNION ALL
+			SELECT id = 137, name = 'Unrealized Loss on Intransit (Inventory Offset)' UNION ALL
+			SELECT id = 138, name = 'Futures Gain or Loss Realized Offset' 
 
 	) AS CategoryHardCodedValues
 		ON  CategoryTable.intAccountCategoryId = CategoryHardCodedValues.id
@@ -216,6 +236,130 @@ BEGIN -- INVENTORY ACCOUNT CATEGORY GROUPING
 		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
 		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = 'Maintenance Sales'
 	END	
+
+	DECLARE @strAccountCategory AS NVARCHAR(50)
+
+	SET @strAccountCategory  = 'Unrealized Gain on Basis'
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG LEFT JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = @strAccountCategory)
+	BEGIN
+		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
+		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory
+	END		
+	SET @strAccountCategory  = 'Unrealized Gain on Futures'
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG LEFT JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = @strAccountCategory)
+	BEGIN
+		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
+		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory
+	END	
+	SET @strAccountCategory  = 'Unrealized Gain on Cash'
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG LEFT JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = @strAccountCategory)
+	BEGIN
+		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
+		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory
+	END	
+	SET @strAccountCategory  = 'Unrealized Gain on Ratio'
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG LEFT JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = @strAccountCategory)
+	BEGIN
+		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
+		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory
+	END	
+	SET @strAccountCategory  = 'Unrealized Loss on Basis'
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG LEFT JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = @strAccountCategory)
+	BEGIN
+		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
+		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory
+	END
+	SET @strAccountCategory  = 'Unrealized Loss on Futures'
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG LEFT JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = @strAccountCategory)
+	BEGIN
+		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
+		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory
+	END	
+	SET @strAccountCategory  = 'Unrealized Loss on Cash'
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG LEFT JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = @strAccountCategory)
+	BEGIN
+		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
+		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory
+	END	
+	SET @strAccountCategory  = 'Unrealized Loss on Ratio'
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG LEFT JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = @strAccountCategory)
+	BEGIN
+		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
+		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory
+	END	
+	SET @strAccountCategory  = 'Unrealized Gain on Basis (Inventory Offset)'
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG LEFT JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = @strAccountCategory)
+	BEGIN
+		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
+		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory
+	END	
+	SET @strAccountCategory  = 'Unrealized Gain on Futures (Inventory Offset)'
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG LEFT JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = @strAccountCategory)
+	BEGIN
+		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
+		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory
+	END	
+	SET @strAccountCategory  = 'Unrealized Gain on Cash (Inventory Offset)'
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG LEFT JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = @strAccountCategory)
+	BEGIN
+		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
+		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory
+	END	
+	SET @strAccountCategory  = 'Unrealized Gain on Ratio (Inventory Offset)'
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG LEFT JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = @strAccountCategory)
+	BEGIN
+		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
+		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory
+	END	
+	SET @strAccountCategory  = 'Unrealized Gain on Intransit (Inventory Offset)'
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG LEFT JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = @strAccountCategory)
+	BEGIN
+		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
+		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory
+	END	
+	SET @strAccountCategory  = 'Unrealized Loss on Basis (Inventory Offset)'
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG LEFT JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = @strAccountCategory)
+	BEGIN
+		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
+		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory
+	END	
+	SET @strAccountCategory  = 'Unrealized Loss on Futures (Inventory Offset)'
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG LEFT JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = @strAccountCategory)
+	BEGIN
+		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
+		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory
+	END	
+	SET @strAccountCategory  = 'Unrealized Loss on Cash (Inventory Offset)'
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG LEFT JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = @strAccountCategory)
+	BEGIN
+		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
+		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory
+	END	
+	SET @strAccountCategory  = 'Unrealized Loss on Ratio (Inventory Offset)'
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG LEFT JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = @strAccountCategory)
+	BEGIN
+		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
+		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory
+	END	
+	SET @strAccountCategory  = 'Unrealized Loss on Intransit (Inventory Offset)'
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG LEFT JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = @strAccountCategory)
+	BEGIN
+		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
+		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory
+	END	
+	SET @strAccountCategory  = 'Futures Gain or Loss Realized'
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG LEFT JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = @strAccountCategory)
+	BEGIN
+		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
+		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory
+	END	
+	SET @strAccountCategory  = 'Futures Gain or Loss Realized Offset'
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG LEFT JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = @strAccountCategory)
+	BEGIN
+		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
+		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory
+	END	
+
 END
 GO
 	PRINT 'Start updating account group category ids'
