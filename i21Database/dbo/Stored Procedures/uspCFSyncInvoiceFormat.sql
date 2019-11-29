@@ -20,6 +20,7 @@ BEGIN
 	DECLARE @ysnSummaryByDepartment				BIT
 	DECLARE @ysnSummaryByDeptCardProd			BIT
 	DECLARE @ysnSummaryByDeptVehicleProd		BIT
+	DECLARE @ysnSummaryByDriverPin				BIT
 	DECLARE @ysnPrintTimeOnInvoices				BIT
 	DECLARE @ysnPrintTimeOnReports				BIT
 	DECLARE @ysnPrintMiscellaneous				BIT
@@ -47,6 +48,7 @@ BEGIN
 	,@ysnPrintTimeOnInvoices			 =  ysnPrintTimeOnInvoices		
 	,@ysnPrintTimeOnReports				 =  ysnPrintTimeOnReports		
 	,@ysnPrintMiscellaneous				 =  ysnPrintMiscellaneous
+	,@ysnSummaryByDriverPin				 =  ysnSummaryByDriverPin
 	,@strDetailDisplay					 =  strDetailDisplay
 	,@ysnShowDriverPinDescriptionOnly	 =  ysnShowDriverPinDescriptionOnly
 	,@ysnShowVehicleDescriptionOnly		 =  ysnShowVehicleDescriptionOnly
@@ -77,6 +79,7 @@ BEGIN
 	,ysnPrintMiscellaneous			  = 	 @ysnPrintMiscellaneous			
 	,ysnShowDriverPinDescriptionOnly  =		 @ysnShowDriverPinDescriptionOnly
 	,ysnShowVehicleDescriptionOnly	  =		 @ysnShowVehicleDescriptionOnly
+	,ysnSummaryByDriverPin			  =		 @ysnSummaryByDriverPin
 	WHERE strInvoiceNumberHistory = @strInvoiceNumber
 
 	--SELECT @@ROWCOUNT
