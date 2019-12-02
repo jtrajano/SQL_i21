@@ -1,5 +1,4 @@
-﻿
-	CREATE PROCEDURE [dbo].[uspCFInvoiceReport](
+﻿CREATE PROCEDURE [dbo].[uspCFInvoiceReport](
 	 @xmlParam NVARCHAR(MAX)=null
 	,@UserId NVARCHAR(MAX)
 )
@@ -545,25 +544,28 @@ BEGIN
 			,dblTotalSST					NUMERIC(18,6)
 			,dblTaxExceptSST				NUMERIC(18,6)
 			----------------------------------------------------
-			,ysnInvalid						BIT
-			,ysnPosted						BIT
-			,ysnPostedCSV					BIT
-			,ysnPrintMiscellaneous			BIT
-			,ysnSummaryByCard				BIT
-			,ysnSummaryByDepartment			BIT
-			,ysnSummaryByMiscellaneous		BIT
-			,ysnSummaryByProduct			BIT
-			,ysnSummaryByVehicle			BIT
-			,ysnSummaryByCardProd			BIT
-			,ysnSummaryByDeptCardProd		BIT
-			,ysnPrintTimeOnInvoices			BIT
-			,ysnPrintTimeOnReports			BIT
-			,ysnSummaryByDeptVehicleProd	BIT
-			,ysnDepartmentGrouping			BIT
-			,ysnPostForeignSales			BIT
-			,ysnExpensed					BIT
-			,ysnSummaryByDriverPin			BIT
-			,ysnMPGCalculation			BIT
+			,ysnInvalid							BIT
+			,ysnPosted							BIT
+			,ysnPostedCSV						BIT
+			,ysnPrintMiscellaneous				BIT
+			,ysnSummaryByCard					BIT
+			,ysnSummaryByDepartment				BIT
+			,ysnSummaryByMiscellaneous			BIT
+			,ysnSummaryByProduct				BIT
+			,ysnSummaryByVehicle				BIT
+			,ysnSummaryByCardProd				BIT
+			,ysnSummaryByDeptCardProd			BIT
+			,ysnPrintTimeOnInvoices				BIT
+			,ysnPrintTimeOnReports				BIT
+			,ysnSummaryByDeptVehicleProd		BIT
+			,ysnDepartmentGrouping				BIT
+			,ysnPostForeignSales				BIT
+			,ysnExpensed						BIT
+			,ysnSummaryByDriverPin				BIT
+			,ysnMPGCalculation					BIT
+			,ysnShowVehicleDescriptionOnly		BIT
+			,ysnShowDriverPinDescriptionOnly	BIT
+			,ysnPageBreakByPrimarySortOrder		BIT
 		)
 		INSERT INTO @tblCFTempInvoiceReport(
 			intCustomerId				
@@ -665,6 +667,9 @@ BEGIN
 			,ysnExpensed				
 			,ysnSummaryByDriverPin		
 			,ysnMPGCalculation
+			,ysnShowVehicleDescriptionOnly	
+			,ysnShowDriverPinDescriptionOnly
+			,ysnPageBreakByPrimarySortOrder
 		)
 		SELECT
 		intCustomerId				
@@ -766,6 +771,9 @@ BEGIN
 			,ysnExpensed				
 			,ysnSummaryByDriverPin		
 			,ysnMPGCalculation
+			,ysnShowVehicleDescriptionOnly	
+			,ysnShowDriverPinDescriptionOnly
+			,ysnPageBreakByPrimarySortOrder
 		FROM vyuCFInvoiceReport
 		WHERE intTransactionId IN (SELECT intTransactionId FROM @tblCFTransactionIds)
 		
@@ -908,6 +916,9 @@ BEGIN
 		,strDriverPinNumber			
 		,strDriverDescription
 		,ysnMPGCalculation
+		,ysnShowVehicleDescriptionOnly	
+		,ysnShowDriverPinDescriptionOnly
+			,ysnPageBreakByPrimarySortOrder
 		)
 		SELECT
 		 intCustomerGroupId			
@@ -1003,6 +1014,9 @@ BEGIN
 		,strDriverPinNumber			
 		,strDriverDescription
 		,ysnMPGCalculation
+		,ysnShowVehicleDescriptionOnly	
+		,ysnShowDriverPinDescriptionOnly
+			,ysnPageBreakByPrimarySortOrder
 		FROM @tblCFTempInvoiceReport
 
 	END

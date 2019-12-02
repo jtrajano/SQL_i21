@@ -1,5 +1,4 @@
-﻿
-CREATE PROCEDURE [dbo].[uspCFSyncInvoiceFormat]
+﻿CREATE PROCEDURE [dbo].[uspCFSyncInvoiceFormat]
 		@strInvoiceNumber NVARCHAR(MAX),
 		@intCustomerId	  INT  
 		AS 
@@ -21,9 +20,15 @@ BEGIN
 	DECLARE @ysnSummaryByDepartment				BIT
 	DECLARE @ysnSummaryByDeptCardProd			BIT
 	DECLARE @ysnSummaryByDeptVehicleProd		BIT
+	DECLARE @ysnSummaryByDriverPin				BIT
 	DECLARE @ysnPrintTimeOnInvoices				BIT
 	DECLARE @ysnPrintTimeOnReports				BIT
 	DECLARE @ysnPrintMiscellaneous				BIT
+	DECLARE @ysnShowDriverPinDescriptionOnly	BIT
+	DECLARE @ysnShowVehicleDescriptionOnly		BIT
+	DECLARE @ysnPageBreakByPrimarySortOrder		BIT
+	
+
 
 	--===GET LATEST ACCOUNT INVOICE FORMATTING===--
 	SELECT TOP 1
@@ -45,7 +50,12 @@ BEGIN
 	,@ysnPrintTimeOnInvoices			 =  ysnPrintTimeOnInvoices		
 	,@ysnPrintTimeOnReports				 =  ysnPrintTimeOnReports		
 	,@ysnPrintMiscellaneous				 =  ysnPrintMiscellaneous
+	,@ysnSummaryByDriverPin				 =  ysnSummaryByDriverPin
 	,@strDetailDisplay					 =  strDetailDisplay
+	,@ysnShowDriverPinDescriptionOnly	 =  ysnShowDriverPinDescriptionOnly
+	,@ysnShowVehicleDescriptionOnly		 =  ysnShowVehicleDescriptionOnly
+	,@ysnPageBreakByPrimarySortOrder	 =  ysnPageBreakByPrimarySortOrder
+	
 	FROM tblCFAccount
 	WHERE intCustomerId = @intCustomerId
 	
@@ -71,6 +81,10 @@ BEGIN
 	,ysnPrintTimeOnInvoices			  = 	 @ysnPrintTimeOnInvoices		
 	,ysnPrintTimeOnReports			  = 	 @ysnPrintTimeOnReports			
 	,ysnPrintMiscellaneous			  = 	 @ysnPrintMiscellaneous			
+	,ysnShowDriverPinDescriptionOnly  =		 @ysnShowDriverPinDescriptionOnly
+	,ysnShowVehicleDescriptionOnly	  =		 @ysnShowVehicleDescriptionOnly
+	,ysnSummaryByDriverPin			  =		 @ysnSummaryByDriverPin
+	,ysnPageBreakByPrimarySortOrder	  =		 @ysnPageBreakByPrimarySortOrder
 	WHERE strInvoiceNumberHistory = @strInvoiceNumber
 
 	--SELECT @@ROWCOUNT
