@@ -12,7 +12,6 @@ WHERE
 
 GO
 
--- Drop the constraint 
 IF NOT EXISTS (
 	SELECT 
 		i.name
@@ -25,19 +24,18 @@ IF NOT EXISTS (
 		AND i.name = 'IX_tblICInventoryTransaction_valuation'
 )
 BEGIN 
+	-- Drop the constraint 
 	ALTER TABLE tblICInventoryTransaction
 	DROP CONSTRAINT PK_tblICInventoryTransaction
+	
+	-- Create a new clustered index. 
+	CREATE CLUSTERED INDEX [IX_tblICInventoryTransaction_valuation]
+		ON [dbo].[tblICInventoryTransaction]([intItemId] ASC, [intCompanyLocationId] ASC, [dtmDate] ASC, [intInventoryTransactionId] ASC);
+	
+	-- Create a new PK Index. 
+	ALTER TABLE tblICInventoryTransaction
+	ADD CONSTRAINT [PK_tblICInventoryTransaction] PRIMARY KEY ([intInventoryTransactionId])
 END 
-
--- Create a new clustered index. 
-CREATE CLUSTERED INDEX [IX_tblICInventoryTransaction_valuation]
-	ON [dbo].[tblICInventoryTransaction]([intItemId] ASC, [intCompanyLocationId] ASC, [dtmDate] ASC, [intInventoryTransactionId] ASC);
-
-GO 
-
--- Create a new PK Index. 
-ALTER TABLE tblICInventoryTransaction
-ADD CONSTRAINT [PK_tblICInventoryTransaction] PRIMARY KEY ([intInventoryTransactionId])
 GO
 
 PRINT N'END - IC Improve Inventory Valuation Performance'
