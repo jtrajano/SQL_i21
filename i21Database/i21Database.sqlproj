@@ -8218,6 +8218,8 @@
     <Build Include="dbo\Functions\fnGetCommodityGLAccountM2M.sql" />
     <Build Include="dbo\Views\vyuAPUnknownPayables.sql" />
     <Build Include="dbo\Views\vyuCTEntityContainer.sql" />
+    <None Include="Scripts\Post-Deployment\IC\22_InventoryValuationPerformance.sql" />
+    <Build Include="dbo\Functions\fnICGetCompanyLocation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

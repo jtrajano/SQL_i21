@@ -410,6 +410,7 @@ BEGIN
 					,[intInTransitSourceLocationId]
 					,[intForexRateTypeId]
 					,[dblForexRate]
+					,[intCompanyLocationId]
 			)			
 		SELECT	
 				[intItemId]								= iWithZeroStock.intItemId
@@ -457,11 +458,13 @@ BEGIN
 				,[intInTransitSourceLocationId]			= @intInTransitSourceLocationId
 				,[intForexRateTypeId]					= @intForexRateTypeId
 				,[dblForexRate]							= @dblForexRate
+				,[intCompanyLocationId]					= [location].intCompanyLocationId
 		FROM	@ItemsWithZeroStock iWithZeroStock INNER JOIN tblICItem i
 					ON i.intItemId = iWithZeroStock.intItemId
 				INNER JOIN tblICItemLocation il
 					ON il.intItemId = iWithZeroStock.intItemId
 					AND il.intItemLocationId = iWithZeroStock.intItemLocationId
+				CROSS APPLY [dbo].[fnICGetCompanyLocation](iWithZeroStock.intItemLocationId, iWithZeroStock.intItemLocationId) [location]
 				OUTER APPLY (
 					SELECT	floatingValue = SUM(
 								ROUND(t.dblQty * t.dblCost + t.dblValue, 2)

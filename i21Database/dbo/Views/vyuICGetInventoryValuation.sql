@@ -10,14 +10,14 @@ SELECT	intInventoryValuationKeyId  = ISNULL(t.intInventoryTransactionId, 0)
 		,strCategory				= c.strCategoryCode
 		,i.intCommodityId
 		,strCommodity				= commodity.strCommodityCode
-		,intLocationId				= ISNULL(InTransitLocation.intCompanyLocationId, [Location].intCompanyLocationId) 
+		,intLocationId				= t.intCompanyLocationId --ISNULL(InTransitLocation.intCompanyLocationId, [Location].intCompanyLocationId) 
 		,t.intItemLocationId
-		,strLocationName			= ISNULL(InTransitLocation.strLocationName, [Location].strLocationName) --ISNULL([Location].strLocationName, InTransitLocation.strLocationName + ' (' + ItemLocation.strDescription + ')') 
+		,strLocationName			= [location].strLocationName --ISNULL(InTransitLocation.strLocationName, [Location].strLocationName) --ISNULL([Location].strLocationName, InTransitLocation.strLocationName + ' (' + ItemLocation.strDescription + ')') 
 		,t.intSubLocationId
 		,subLoc.strSubLocationName
 		,t.intStorageLocationId
 		,strStorageLocationName		= strgLoc.strName
-		,dtmDate					= dbo.fnRemoveTimeOnDate(t.dtmDate)
+		,dtmDate					= t.dtmDate --dbo.fnRemoveTimeOnDate(t.dtmDate)
 		,strSourceType				= CASE
 											WHEN receipt.intInventoryReceiptId IS NOT NULL THEN
 												CASE
@@ -93,9 +93,11 @@ SELECT	intInventoryValuationKeyId  = ISNULL(t.intInventoryTransactionId, 0)
 		,strParentLotNumber			= ParentLot.strParentLotNumber
 		,strLotNumber				= l.strLotNumber
 		,strAdjustedTransaction		= t.strRelatedTransactionId
-		,ysnInTransit				= CAST(CASE WHEN InTransitLocation.intCompanyLocationId IS NOT NULL THEN 1 ELSE 0 END AS BIT) 
+		,ysnInTransit				= CAST(CASE WHEN t.intInTransitSourceLocationId IS NOT NULL THEN 1 ELSE 0 END AS BIT) 
 		,t.dtmCreated
-FROM 	tblICItem i 
+FROM 	tblICInventoryTransaction t 
+		INNER JOIN tblICItem i 
+			ON t.intItemId = i.intItemId
 		CROSS APPLY (
 			SELECT	TOP 1 
 					intItemUOMId			
@@ -103,29 +105,30 @@ FROM 	tblICItem i
 			FROM	tblICItemUOM iuStock INNER JOIN tblICUnitMeasure umStock
 						ON iuStock.intUnitMeasureId = umStock.intUnitMeasureId
 			WHERE	iuStock.intItemId = i.intItemId
-					AND iuStock.ysnStockUnit = 1 -- TODO: In 18.3, change it to use the [Stock UOM] instead of [Stock Unit]. 
-					--AND iuStock.ysnStockUOM = 1
+					AND iuStock.ysnStockUnit = 1 
 		) iuStock
 		LEFT JOIN tblICCategory c 
 			ON c.intCategoryId = i.intCategoryId
 		LEFT JOIN tblICCommodity commodity
-			ON commodity.intCommodityId = i.intCommodityId
-		LEFT JOIN tblICInventoryTransaction t 
-			ON i.intItemId = t.intItemId
+			ON commodity.intCommodityId = i.intCommodityId		
 		LEFT JOIN tblICInventoryTransactionType ty 
 			ON ty.intTransactionTypeId = t.intTransactionTypeId
 		LEFT JOIN tblICStorageLocation strgLoc 
 			ON strgLoc.intStorageLocationId = t.intStorageLocationId
-		LEFT JOIN (
-			tblICItemLocation ItemLocation LEFT JOIN tblSMCompanyLocation [Location] 
-				ON [Location].intCompanyLocationId = ItemLocation.intLocationId		
-		)
-			ON t.intItemLocationId = ItemLocation.intItemLocationId
-		LEFT JOIN (
-			tblICItemLocation InTransitItemLocation INNER JOIN tblSMCompanyLocation InTransitLocation 
-				ON InTransitLocation.intCompanyLocationId = InTransitItemLocation.intLocationId	
-		)
-			ON t.intInTransitSourceLocationId = InTransitItemLocation.intItemLocationId
+
+		LEFT JOIN tblSMCompanyLocation [location]
+			ON [location].intCompanyLocationId = t.intCompanyLocationId
+
+		--LEFT JOIN (
+		--	tblICItemLocation ItemLocation LEFT JOIN tblSMCompanyLocation [Location] 
+		--		ON [Location].intCompanyLocationId = ItemLocation.intLocationId		
+		--)
+		--	ON t.intItemLocationId = ItemLocation.intItemLocationId
+		--LEFT JOIN (
+		--	tblICItemLocation InTransitItemLocation INNER JOIN tblSMCompanyLocation InTransitLocation 
+		--		ON InTransitLocation.intCompanyLocationId = InTransitItemLocation.intLocationId	
+		--)
+		-- ON t.intInTransitSourceLocationId = InTransitItemLocation.intItemLocationId
 		LEFT JOIN tblSMCompanyLocationSubLocation subLoc
 			ON subLoc.intCompanyLocationSubLocationId = t.intSubLocationId
 		LEFT JOIN tblICCostingMethod CostingMethod
@@ -135,14 +138,14 @@ FROM 	tblICItem i
 				ON umTransUOM.intUnitMeasureId = iuTransUOM.intUnitMeasureId			
 		)
 			ON iuTransUOM.intItemUOMId = t.intItemUOMId
+		LEFT JOIN tblICItemPricing ItemPricing
+			ON ItemPricing.intItemId = i.intItemId
+			AND ItemPricing.intItemLocationId = t.intItemLocationId
 		LEFT JOIN tblICLot l
 			ON l.intLotId = t.intLotId
 		LEFT JOIN tblICParentLot ParentLot
 			ON ParentLot.intItemId = l.intItemId
 			AND ParentLot.intParentLotId = l.intParentLotId
-		LEFT JOIN tblICItemPricing ItemPricing
-			ON ItemPricing.intItemId = t.intItemId
-			AND ItemPricing.intItemLocationId = t.intItemLocationId
 
 		LEFT JOIN tblICInventoryReceipt receipt 
 			ON receipt.intInventoryReceiptId = t.intTransactionId
@@ -151,7 +154,6 @@ FROM 	tblICItem i
 		LEFT JOIN tblICInventoryReceiptItem receiptItem
 			ON receiptItem.intInventoryReceiptId = receipt.intInventoryReceiptId
 			AND receiptItem.intInventoryReceiptItemId = t.intTransactionDetailId
-
 		LEFT JOIN tblICInventoryShipment shipment 
 			ON shipment.intInventoryShipmentId = t.intTransactionId
 			AND shipment.strShipmentNumber = t.strTransactionId
@@ -159,8 +161,7 @@ FROM 	tblICItem i
 		LEFT JOIN tblICInventoryShipmentItem shipmentItem
 			ON shipmentItem.intInventoryShipmentId = shipment.intInventoryShipmentId
 			AND shipmentItem.intInventoryShipmentItemId = t.intTransactionDetailId
-			AND shipmentItem.intItemId = i.intItemId
-
+			AND shipmentItem.intItemId = t.intItemId
 		LEFT JOIN tblARInvoice invoice
 			ON invoice.intInvoiceId = t.intTransactionId
 			AND invoice.strInvoiceNumber = t.strTransactionId
@@ -240,7 +241,8 @@ FROM 	tblICItem i
 														WHEN shipmentItem.intInventoryShipmentId IS NOT NULL THEN shipmentItem.intSourceId
 														ELSE NULL
 													END
-			AND (receipt.intSourceType = 5 OR shipment.intSourceType = 4)
+			AND (receipt.intSourceType = 5 OR shipment.intSourceType = 4)	
+
 
 WHERE	i.strType NOT IN (
 			'Other Charge'

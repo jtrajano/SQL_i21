@@ -389,4 +389,7 @@
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\14_CT\1920_ItemContracts.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Pre-Deployment\11_IC\ImproveValuationReport.sql" />
+  </ItemGroup>
 </Project>

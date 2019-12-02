@@ -65,8 +65,9 @@ Outbound (sold) items before the final cost is determined are recomputed to incl
 		[dblCategoryRetailValue] NUMERIC(38, 20) NULL, 
 		[intCategoryId] INT NULL,
 		[intSourceEntityId] INT NULL,
+		[intCompanyLocationId] INT NULL,
 		[intConcurrencyId] INT NOT NULL DEFAULT 1, 		
-		CONSTRAINT [PK_tblICInventoryTransaction] PRIMARY KEY ([intInventoryTransactionId], [dtmCreated]),
+		CONSTRAINT [PK_tblICInventoryTransaction] PRIMARY KEY NONCLUSTERED ([intInventoryTransactionId]),
 		CONSTRAINT [FK_tblICInventoryTransaction_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
 		CONSTRAINT [FK_tblICInventoryTransaction_tblICItemLocation] FOREIGN KEY ([intItemLocationId]) REFERENCES [tblICItemLocation]([intItemLocationId]),
 		CONSTRAINT [FK_tblICInventoryTransaction_tblICInventoryTransactionType] FOREIGN KEY ([intTransactionTypeId]) REFERENCES [tblICInventoryTransactionType]([intTransactionTypeId]),
@@ -77,11 +78,19 @@ Outbound (sold) items before the final cost is determined are recomputed to incl
 	)
 	GO
 
+	CREATE CLUSTERED INDEX [IX_tblICInventoryTransaction_valuation]
+	ON [dbo].[tblICInventoryTransaction]([intItemId] ASC, [intCompanyLocationId] ASC, [dtmDate] ASC, [intInventoryTransactionId] ASC);
+
+	GO
+
 	CREATE NONCLUSTERED INDEX [IX_tblICInventoryTransaction_intItemId]
 		ON [dbo].[tblICInventoryTransaction]([intItemId] ASC);
-
 	GO 
 
+	CREATE NONCLUSTERED INDEX [IX_tblICInventoryTransaction_intItemLocationId]
+		ON [dbo].[tblICInventoryTransaction]([intItemLocationId] ASC);
+
+	GO 
 	CREATE NONCLUSTERED INDEX [IX_tblICInventoryTransaction_intInventoryTransactionId]
 		ON [dbo].[tblICInventoryTransaction]([intInventoryTransactionId] ASC)
 		INCLUDE (intItemId, intItemLocationId, strTransactionId, strBatchId) 
@@ -100,8 +109,3 @@ Outbound (sold) items before the final cost is determined are recomputed to incl
 		ON [dbo].[tblICInventoryTransaction] ([strTransactionId])
 		INCLUDE ([intItemId],[intItemUOMId],[dtmDate],[dblQty],[intTransactionId],[intTransactionDetailId],[intTransactionTypeId],[intInTransitSourceLocationId])
 	GO
-
-	CREATE NONCLUSTERED INDEX [IX_tblICInventoryTransaction_intItemLocationId]
-		ON [dbo].[tblICInventoryTransaction]([intItemLocationId] ASC);
-
-	GO 

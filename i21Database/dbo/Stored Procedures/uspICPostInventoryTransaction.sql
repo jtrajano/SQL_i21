@@ -108,6 +108,7 @@ INSERT INTO dbo.tblICInventoryTransaction (
 		,[dblCategoryRetailValue]
 		,[intCategoryId]
 		,[intSourceEntityId]
+		,[intCompanyLocationId]
 )
 SELECT	[intItemId]							= @intItemId
 		,[intItemLocationId]				= @intItemLocationId
@@ -148,7 +149,9 @@ SELECT	[intItemId]							= @intItemId
 		,[dblCategoryRetailValue]			= @dblCategoryRetailValue 
 		,[intCategoryId]					= i.intCategoryId
 		,[intSourceEntityId]				= @intSourceEntityId
+		,[intCompanyLocationId]				= [location].intCompanyLocationId
 FROM	tblICItem i 
+		CROSS APPLY [dbo].[fnICGetCompanyLocation](@intItemLocationId, @intInTransitSourceLocationId) [location]
 WHERE	i.intItemId = @intItemId
 		AND @intItemId IS NOT NULL
 		AND @intItemLocationId IS NOT NULL

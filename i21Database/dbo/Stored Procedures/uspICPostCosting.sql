@@ -875,6 +875,7 @@ BEGIN
 					,[strDescription]
 					,[intForexRateTypeId]
 					,[dblForexRate]
+					,[intCompanyLocationId]
 			)			
 		SELECT	
 				[intItemId]								= @intItemId
@@ -921,9 +922,11 @@ BEGIN
 														)
 				,[intForexRateTypeId]					= NULL -- @intForexRateTypeId
 				,[dblForexRate]							= 1 -- @dblForexRate
+				,[intCompanyLocationId]					= [location].intCompanyLocationId
 		FROM	dbo.tblICItemPricing AS ItemPricing INNER JOIN dbo.tblICItemStock AS Stock 
 					ON ItemPricing.intItemId = Stock.intItemId
 					AND ItemPricing.intItemLocationId = Stock.intItemLocationId
+				CROSS APPLY [dbo].[fnICGetCompanyLocation](@intItemLocationId, DEFAULT) [location]
 		WHERE	ItemPricing.intItemId = @intItemId
 				AND ItemPricing.intItemLocationId = @intItemLocationId			
 				AND ROUND(dbo.fnMultiply(Stock.dblUnitOnHand, ItemPricing.dblAverageCost) - dbo.fnGetItemTotalValueFromTransactions(@intItemId, @intItemLocationId), 2) <> 0
@@ -999,6 +1002,7 @@ BEGIN
 					,[strDescription]
 					,[intForexRateTypeId]
 					,[dblForexRate]
+					,[intCompanyLocationId]
 			)			
 		SELECT	
 				[intItemId]								= iWithZeroStock.intItemId
@@ -1045,16 +1049,17 @@ BEGIN
 														)
 				,[intForexRateTypeId]					= NULL -- @intForexRateTypeId
 				,[dblForexRate]							= 1 -- @dblForexRate
+				,[intCompanyLocationId]					= cl.intCompanyLocationId
 		FROM	@ItemsWithZeroStock iWithZeroStock INNER JOIN tblICItemStock iStock
 					ON iWithZeroStock.intItemId = iStock.intItemId
 					AND iWithZeroStock.intItemLocationId = iStock.intItemLocationId
 				INNER JOIN tblICItem i
-					ON i.intItemId = iWithZeroStock.intItemId
+					ON i.intItemId = iWithZeroStock.intItemId				
 				INNER JOIN tblICItemLocation il
 					ON il.intItemId = iWithZeroStock.intItemId
 					AND il.intItemLocationId = iWithZeroStock.intItemLocationId
 				INNER JOIN tblSMCompanyLocation cl
-					ON cl.intCompanyLocationId = il.intLocationId
+					ON cl.intCompanyLocationId = il.intLocationId				
 				OUTER APPLY (
 					SELECT	floatingValue = SUM(
 								ROUND(t.dblQty * t.dblCost + t.dblValue, 2)
@@ -1062,7 +1067,7 @@ BEGIN
 					FROM	tblICInventoryTransaction t
 					WHERE	t.intItemId = iWithZeroStock.intItemId
 							AND t.intItemLocationId = iWithZeroStock.intItemLocationId
-				) currentValuation
+				) currentValuation				
 		WHERE	ISNULL(currentValuation.floatingValue, 0) <> 0
 	END 
 END 
