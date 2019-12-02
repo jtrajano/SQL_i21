@@ -1345,7 +1345,7 @@ BEGIN TRY
 														ELSE @dblFutureMarkePrice + ISNULL(SV.dblBasis,0)
 												   END)
 												   + (dbo.fnDivide(DiscountCost.dblTotalCashPrice, @dblSelectedUnits))-- + DiscountCost.dblTotalCashPrice
-												   + (@additionalDiscrepancy /  case when @useUnits = 1 then SV.dblUnits else 1  end )
+												   --+ (@additionalDiscrepancy /  case when @useUnits = 1 then SV.dblUnits else 1  end )
 												   --+ @additionalDiscrepancy 
 					,dblSalesPrice				= 0.00
 					,intCurrencyId				= @intCurrencyId
@@ -1427,7 +1427,7 @@ BEGIN TRY
 														ELSE @dblFutureMarkePrice + ISNULL(SV.dblBasis,0)
 												   END)
 												   + (dbo.fnDivide(DiscountCost.dblTotalCashPrice, @dblSelectedUnits))												   
-												   + (@additionalDiscrepancy /  case when @useUnits = 1 then SV.dblUnits else 1  end )
+												   --+ (@additionalDiscrepancy /  case when @useUnits = 1 then SV.dblUnits else 1  end )
 					,dblSalesPrice				= 0.00
 					,intCurrencyId				= @intCurrencyId
 					,dblExchangeRate			= 1
