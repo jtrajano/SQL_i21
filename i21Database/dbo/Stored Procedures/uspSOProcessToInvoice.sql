@@ -1,7 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspSOProcessToInvoice]
-	@SalesOrderId		INT,
-	@UserId				INT,
-	@NewInvoiceId		INT = NULL OUTPUT
+	@SalesOrderId			INT,
+	@UserId					INT,
+	@intShipToLocationId	INT = NULL,
+	@NewInvoiceId			INT = NULL OUTPUT
 AS
 BEGIN
 
@@ -86,7 +87,12 @@ ELSE
 		EXEC dbo.uspSOUpdateReservedStock @SalesOrderId, 1
 
 		--INSERT TO INVOICE
-		EXEC dbo.uspARInsertToInvoice @SalesOrderId, @UserId, NULL, 0, @NewInvoiceId OUTPUT
+		EXEC dbo.uspARInsertToInvoice @SalesOrderId	     	= @SalesOrderId
+									, @UserId			    = @UserId
+									, @ShipmentId			= NULL
+									, @FromShipping		 	= 0
+									, @intShipToLocationId	= @intShipToLocationId
+									, @NewInvoiceId		 	= @NewInvoiceId OUT
 
 		--UPDATE OVERRAGE CONTRACTS
 		IF EXISTS (SELECT TOP 1 NULL FROM tblSOSalesOrderDetail SOD INNER JOIN tblCTContractDetail CTD ON CTD.intContractDetailId = SOD.intContractDetailId AND SOD.dblQtyOrdered > CTD.dblBalance WHERE SOD.intSalesOrderId = @SalesOrderId)
