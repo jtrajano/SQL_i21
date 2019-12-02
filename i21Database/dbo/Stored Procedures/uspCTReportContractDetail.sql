@@ -37,7 +37,7 @@ BEGIN TRY
 		SELECT @strAmendedColumns = ''
 		SELECT TOP 1 @intLastApprovedContractId =  intApprovedContractId
 		FROM   tblCTApprovedContract WITH (NOLOCK)
-		WHERE  intContractDetailId = @intContractDetailId AND strApprovalType IN ('Contract Amendment ') AND ysnApproved = 1
+		WHERE  intContractDetailId = @intContractDetailId AND strApprovalType IN ('Amendment and Approvals','Contract Amendment ') AND ysnApproved = 1
 		ORDER BY intApprovedContractId DESC
 
 		SELECT TOP 1 @intPrevApprovedContractId =  intApprovedContractId
