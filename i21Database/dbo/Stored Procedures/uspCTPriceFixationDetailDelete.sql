@@ -16,7 +16,8 @@ BEGIN TRY
 			@voucherIds		AS Id,
 			@BillDetailId	INT,
 			@ItemId			INT,
-			@Quantity		NUMERIC(18,6);
+			@Quantity		NUMERIC(18,6),
+			@ysnSuccess		BIT;
 	
 	DECLARE @tblItemBillDetail TABLE
 	(
@@ -26,6 +27,21 @@ BEGIN TRY
 		dblReceived					NUMERIC(26,16)
 	)
 
+	-- UNPOST BILL
+	SELECT intBillId 
+	INTO #ItemBillPosted
+	FROM tblAPBill 
+	WHERE intBillId IN (SELECT intBillId FROM tblAPBillDetail 
+										WHERE intContractDetailId IN (SELECT intContractDetailId FROM tblCTPriceFixation 
+																							WHERE intPriceFixationId = @intPriceFixationId)) AND ysnPosted = 1
+	WHILE EXISTS(SELECT 1 FROM #ItemBillPosted)
+	BEGIN
+		SELECT TOP 1 @Id = intBillId FROM #ItemBillPosted
+		EXEC [dbo].[uspAPPostBill] @post = 0,@recap = 0,@isBatch = 0,@param = @Id,@userId = @intUserId,@success = @ysnSuccess OUTPUT
+		DELETE #ItemBillPosted WHERE intBillId = @Id
+	END	
+
+	-- GET UNPOSTED BILL
 	SELECT  BL.intBillId AS Id, FT.intDetailId AS DetailId, DA.intBillDetailId AS BillDetailId, FD.dblQuantity AS Quantity
 	INTO	#ItemBill
 	FROM	tblCTPriceFixationDetailAPAR	DA	LEFT
@@ -38,6 +54,7 @@ BEGIN TRY
 	-- Perfomance hit
 	AND		ISNULL(FT.intPriceFixationTicketId, 0)	=   CASE WHEN @intPriceFixationTicketId IS NOT NULL THEN @intPriceFixationTicketId ELSE ISNULL(FT.intPriceFixationTicketId,0) END
 	AND		ISNULL(BL.ysnPosted,0) = 0
+
 	
 	SELECT @Id = MIN(Id), @DetailId = MIN(DetailId) FROM #ItemBill
 	WHILE ISNULL(@Id,0) > 0
