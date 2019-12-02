@@ -5,6 +5,11 @@
 )
 AS
 BEGIN
+
+	----- DEBUG POINT -----
+	declare @d_a_v int = 0
+	----- DEBUG POINT -----
+	
 	SET QUOTED_IDENTIFIER OFF
 	SET ANSI_NULLS ON
 	SET NOCOUNT ON
@@ -20,9 +25,30 @@ BEGIN
 	DECLARE @intDecimalPrecision INT	
 	DECLARE @strTransferStorageId VARCHAR(MAX)	
 	DECLARE @intEntityId INT
+	DECLARE @intSourceCustomerStorageId INT
+	DECLARE @dblOriginalStorageUnits NUMERIC(38,20)
+	DECLARE @dblTotalDeductedUnits NUMERIC(38,20)
+
 	SELECT @intDecimalPrecision = intCurrencyDecimal FROM tblSMCompanyPreference
 
 	SELECT @strTransferStorageId = strTransferStorageTicket FROM tblGRTransferStorage WHERE intTransferStorageId = @intTransferStorageId
+	select @intSourceCustomerStorageId = intSourceCustomerStorageId from tblGRTransferStorageSourceSplit where intTransferStorageId = @intTransferStorageId
+	select @dblOriginalStorageUnits = dblOriginalBalance from tblGRCustomerStorage where intCustomerStorageId = @intSourceCustomerStorageId
+
+
+	select @dblTotalDeductedUnits  = sum(dblDeductedUnits) from tblGRTransferStorageSourceSplit where intSourceCustomerStorageId  = @intSourceCustomerStorageId
+
+	----- DEBUG POINT -----
+	if @d_a_v = 1 and 1 = 0
+	begin
+		---select 	
+		
+		select @dblTotalDeductedUnits as [total deducted units], @intSourceCustomerStorageId as [source customer storage], @dblOriginalStorageUnits as [original storage units ]
+
+
+	end
+	----- DEBUG POINT -----
+
 	IF OBJECT_ID (N'tempdb.dbo.#tmpTransferCustomerStorage') IS NOT NULL
 		DROP TABLE #tmpTransferCustomerStorage
 	CREATE TABLE #tmpTransferCustomerStorage (
@@ -40,15 +66,58 @@ BEGIN
 	WHERE TSS.intTransferStorageId = @intTransferStorageId   AND (CASE WHEN (TSR.intTransferStorageId IS NULL) THEN 1 ELSE CASE WHEN TSR.intTransferStorageId = @intTransferStorageId THEN 1 ELSE 0 END END) = 1
 
 
+	----- DEBUG POINT -----
+	IF @d_a_v = 1 and 1 = 0
+	begin
 
-	IF (SELECT TOP 1 A.dblOriginalBalance
+		SELECT 
+		 TSR.intSourceCustomerStorageId		 
+		 ,ISNULL(intToCustomerStorageId,intTransferToCustomerStorageId)
+		,ISNULL(TSR.dblUnitQty,TSS.dblUnits)
+	FROM tblGRTransferStorageSplit TSS
+	LEFT JOIN tblGRTransferStorageReference TSR
+	ON TSR.intTransferStorageSplitId = TSS.intTransferStorageSplitId
+	WHERE TSS.intTransferStorageId = @intTransferStorageId   AND (CASE WHEN (TSR.intTransferStorageId IS NULL) THEN 1 ELSE CASE WHEN TSR.intTransferStorageId = @intTransferStorageId THEN 1 ELSE 0 END END) = 1
+
+
+
+
+		SELECT  B.dblUnits, A.dblOriginalBalance, *
 			FROM tblGRCustomerStorage A 
 			INNER JOIN #tmpTransferCustomerStorage B 
-			ON B.intCustomerStorageId = A.intCustomerStorageId) <>	
-		(SELECT  sum(B.dblUnits)
+				ON B.intCustomerStorageId = A.intCustomerStorageId 
+			--WHERE B.dblUnits <> A.dblOriginalBalance
+
+
+		select 'reference 1'
+		SELECT A.dblOriginalBalance, dblUnits
 			FROM tblGRCustomerStorage A 
 			INNER JOIN #tmpTransferCustomerStorage B 
-				ON B.intCustomerStorageId = A.intCustomerStorageId)
+			ON B.intCustomerStorageId = A.intCustomerStorageId
+
+		select 'reference 2'
+		SELECT  sum(B.dblUnits)
+			FROM tblGRCustomerStorage A 
+			INNER JOIN #tmpTransferCustomerStorage B 
+				ON B.intCustomerStorageId = A.intCustomerStorageId
+
+		select 'temp table reference'
+		select * from #tmpTransferCustomerStorage
+
+	end
+	----- DEBUG POINT -----
+
+
+
+	--IF (SELECT TOP 1 A.dblOriginalBalance
+	--		FROM tblGRCustomerStorage A 
+	--		INNER JOIN #tmpTransferCustomerStorage B 
+	--		ON B.intCustomerStorageId = A.intCustomerStorageId) <>	
+	--	(SELECT  sum(B.dblUnits)
+	--		FROM tblGRCustomerStorage A 
+	--		INNER JOIN #tmpTransferCustomerStorage B 
+	--			ON B.intCustomerStorageId = A.intCustomerStorageId)
+	if @dblOriginalStorageUnits < @dblTotalDeductedUnits
 	BEGIN
 		SET @ErrMsg = 'Unable to reverse this transaction. The open balance of one or more customer storage/s no longer match its original balance.'
 		
