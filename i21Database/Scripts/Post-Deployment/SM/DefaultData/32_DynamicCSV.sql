@@ -2953,7 +2953,648 @@ INSERT INTO tblSMCSVDynamicImportParameter(intCSVDynamicImportId, strColumnName,
 --Customer Special Pricing Import End
 
 
+
+
+--Customer Special Tax Exemption Import Begin
+SET @NewHeaderId = 8
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMCSVDynamicImport WHERE intCSVDynamicImportId = @NewHeaderId)
+BEGIN
+	INSERT INTO tblSMCSVDynamicImport(intCSVDynamicImportId, strName, strCommand )
+	SELECT @NewHeaderId, 'Customer Tax Exemption Import','1'
+END
+
+
+UPDATE tblSMCSVDynamicImport SET
+	strName = 'Customer Tax Exemption Import',
+	strCommand = '
+		DECLARE @id						NVARCHAR(100)
+		DECLARE @customer_id			NVARCHAR(100)
+		DECLARE @customer_location		NVARCHAR(100)
+		DECLARE @item_no				NVARCHAR(100)
+		DECLARE @item_category			NVARCHAR(100)
+		DECLARE @tax_code				NVARCHAR(100)
+		DECLARE @tax_class				NVARCHAR(100)
+		DECLARE @state					NVARCHAR(100)
+		DECLARE @exemption_no			NVARCHAR(100)
+		DECLARE @partial				NVARCHAR(100)
+		DECLARE @start_date				NVARCHAR(100)
+		DECLARE @end_date				NVARCHAR(100)
+		DECLARE @card_no				NVARCHAR(100)
+		DECLARE @vehicle_no				NVARCHAR(100)
+
+
+		SELECT 
+			@id							= ''@id@'',	
+			@customer_id				= ''@customer_id@'',
+			@customer_location			= ''@customer_location@'',
+			@item_no					= ''@item_no@'',
+			@item_category				= ''@item_category@'',
+			@tax_code					= ''@tax_code@'',
+			@tax_class					= ''@tax_class@'',
+			@state						= ''@state@'',
+			@exemption_no				= ''@exemption_no@'',
+			@partial					= ''@partial@'',
+			@start_date					= ''@start_date@'',
+			@end_date					= ''@end_date@'',
+			@card_no					= ''@card_no@'',
+			@vehicle_no					= ''@vehicle_no@''
+
+	
+		DECLARE @intCustomerTaxingTaxExceptionId	INT 
+        DECLARE @intEntityCustomerId				INT
+		DECLARE @intItemId						    INT    
+		DECLARE @intCategoryId						INT
+		DECLARE @intTaxCodeId						INT
+		DECLARE @intTaxClassId						INT
+        DECLARE @strState							NVARCHAR(100)
+        DECLARE @strException						NVARCHAR(100)
+        DECLARE @dtmStartDate						DATETIME
+        DECLARE @dtmEndDate							DATETIME
+        DECLARE @intEntityCustomerLocationId		INT
+        DECLARE @dblPartialTax						NUMERIC(18,6)
+        DECLARE @intCardId							INT
+        DECLARE @intVehicleId						INT
+
+
+		DECLARE @IsValid INT = 1
+
+		SELECT @IsValid = 1,
+			@ValidationMessage	= ''''
+
+		IF(@customer_id = '''')
+		BEGIN
+			SET @intEntityCustomerId = NULL
+		END
+		ELSE
+		BEGIN
+			IF(TRY_PARSE(@customer_id AS INT) IS NULL )
+			BEGIN
+				SET @IsValid = 0
+				SET @ValidationMessage = @ValidationMessage + '' ''+''customer_id should be numeric''
+			END
+			ELSE 
+			BEGIN
+				SET @intEntityCustomerId = CONVERT(INT,@customer_id)
+				IF NOT EXISTS(Select TOP 1 1 from tblARCustomer Where intEntityId = @intEntityCustomerId )
+				BEGIN
+					SET @IsValid = 0
+					SET @ValidationMessage = @ValidationMessage + '' ''+''customer_id :''+CAST(@intEntityCustomerId AS NVARCHAR(100))+'' is not Exist''
+				END
+			END
+		END
+
+		IF(@customer_location = '''')
+		BEGIN
+			SET @intEntityCustomerLocationId = NULL
+		END
+		ELSE
+		BEGIN
+			IF(TRY_PARSE(@customer_location AS INT) IS NULL )
+			BEGIN
+				SET @IsValid = 0
+				SET @ValidationMessage = @ValidationMessage + '' ''+''customer_location should be numeric''
+			END
+			ELSE 
+			BEGIN
+				SET @intEntityCustomerLocationId = CONVERT(INT,@customer_location)
+				IF NOT EXISTS(Select TOP 1 1 from tblSMCompanyLocation Where intCompanyLocationId = @intEntityCustomerLocationId )
+				BEGIN
+					SET @IsValid = 0
+					SET @ValidationMessage = @ValidationMessage + '' ''+''customer_location :''+CAST(@intEntityCustomerLocationId AS NVARCHAR(100))+'' is not Exist''
+				END
+			END
+		END
+
+		IF(@item_no = '''')
+		BEGIN
+			SET @intItemId = NULL
+		END
+		ELSE
+		BEGIN
+			IF(TRY_PARSE(@item_no AS INT) IS NULL )
+			BEGIN
+				SET @IsValid = 0
+				SET @ValidationMessage = @ValidationMessage + '' ''+''item_no should be numeric''
+			END
+			ELSE 
+			BEGIN
+				SET @intItemId = CONVERT(INT,@item_no)
+				IF NOT EXISTS(Select TOP 1 1 from tblICItem Where intItemId = @intItemId )
+				BEGIN
+					SET @IsValid = 0
+					SET @ValidationMessage = @ValidationMessage + '' ''+''item_no :''+CAST(@intItemId AS NVARCHAR(100))+'' is not Exist''
+				END
+			END
+		END
+
+		IF(@item_category = '''')
+		BEGIN
+			SET @intCategoryId = NULL
+		END
+		ELSE
+		BEGIN
+			IF(TRY_PARSE(@item_category AS INT) IS NULL )
+			BEGIN
+				SET @IsValid = 0
+				SET @ValidationMessage = @ValidationMessage + '' ''+''item_category should be numeric''
+			END
+			ELSE 
+			BEGIN
+				SET @intCategoryId = CONVERT(INT,@item_category)
+				IF NOT EXISTS(Select TOP 1 1 from tblICItem Where intCategoryId = @intCategoryId )
+				BEGIN
+					SET @IsValid = 0
+					SET @ValidationMessage = @ValidationMessage + '' ''+''item_category :''+CAST(@intCategoryId AS NVARCHAR(100))+'' is not Exist''
+				END
+			END
+		END
+
+		IF(@tax_code = '''')
+		BEGIN
+			SET @intTaxCodeId = NULL
+		END
+		ELSE
+		BEGIN
+			IF(TRY_PARSE(@tax_code AS INT) IS NULL )
+			BEGIN
+				SET @IsValid = 0
+				SET @ValidationMessage = @ValidationMessage + '' ''+''tax_code should be numeric''
+			END
+			ELSE 
+			BEGIN
+				SET @intTaxCodeId = CONVERT(INT,@tax_code)
+				IF NOT EXISTS(Select TOP 1 1 from tblSMTaxCode Where intTaxCodeId = @intTaxCodeId )
+				BEGIN
+					SET @IsValid = 0
+					SET @ValidationMessage = @ValidationMessage + '' ''+''tax_code :''+CAST(@intTaxCodeId AS NVARCHAR(100))+'' is not Exist''
+				END
+			END
+		END
+
+		IF(@tax_class = '''')
+		BEGIN
+			SET @intTaxClassId = NULL
+		END
+		ELSE
+		BEGIN
+			IF(TRY_PARSE(@tax_class AS INT) IS NULL )
+			BEGIN
+				SET @IsValid = 0
+				SET @ValidationMessage = @ValidationMessage + '' ''+''tax_class should be numeric''
+			END
+			ELSE 
+			BEGIN
+				SET @intTaxClassId = CONVERT(INT,@tax_class)
+				IF NOT EXISTS(Select TOP 1 1 from tblSMTaxClass Where intTaxClassId = @intTaxClassId )
+				BEGIN
+					SET @IsValid = 0
+					SET @ValidationMessage = @ValidationMessage + '' ''+''tax_class :''+CAST(@intTaxClassId AS NVARCHAR(100))+'' is not Exist''
+				END
+			END
+		END
+
+		IF(@state = '''')
+		BEGIN
+			SET @strState = NULL
+		END
+		ELSE
+		BEGIN
+			SET @strState = @state
+		END
+
+		IF(@exemption_no = '''')
+		BEGIN
+			SET @strException = NULL
+		END
+		ELSE
+		BEGIN
+			SET @strException = @exemption_no
+		END
+
+		IF(@partial = '''')
+		BEGIN
+			SET @dblPartialTax = NULL
+		END
+		ELSE
+		BEGIN
+			IF(TRY_PARSE(@partial AS NUMERIC(18,6)) IS NULL)
+			BEGIN
+				SET @IsValid = 0
+				SET @ValidationMessage = @ValidationMessage + '' ''+''partial should be numeric''
+			END
+			ELSE 
+			BEGIN
+				SET @dblPartialTax = CAST(@partial AS NUMERIC(18,6))
+			END
+		END
+		
+		IF(@start_date = '''')
+		BEGIN
+			SET @IsValid = 0
+			SET @ValidationMessage = @ValidationMessage + '' ''+''start_date should not be Empty''
+		
+		END
+		ELSE
+		BEGIN
+			IF(TRY_PARSE(@start_date AS DATETIME) IS NULL)
+			BEGIN
+				SET @IsValid = 0
+				SET @ValidationMessage = @ValidationMessage + '' ''+''start_date  should be a valid date format''
+			END
+			ELSE 
+			BEGIN
+				SET @dtmStartDate = CAST(@start_date AS DATETIME)
+			END
+		END
+
+		IF(@end_date = '''')
+		BEGIN
+			SET @IsValid = 0
+			SET @ValidationMessage = @ValidationMessage + '' ''+''end_date should not be Empty''
+		
+		END
+		ELSE
+		BEGIN
+			IF(TRY_PARSE(@end_date AS DATETIME) IS NULL)
+			BEGIN
+				SET @IsValid = 0
+				SET @ValidationMessage = @ValidationMessage + '' ''+''end_date  should be a valid date format''
+			END
+			ELSE 
+			BEGIN
+				SET @dtmEndDate = CAST(@end_date AS DATETIME)
+			END
+		END
+
+		IF(@card_no = '''')
+		BEGIN
+			SET @intCardId = NULL
+		END
+		ELSE
+		BEGIN
+			IF(TRY_PARSE(@card_no AS INT) IS NULL )
+			BEGIN
+				SET @IsValid = 0
+				SET @ValidationMessage = @ValidationMessage + '' ''+''card_no should be numeric''
+			END
+			ELSE 
+			BEGIN
+				SET @intCardId = CONVERT(INT,@card_no)
+				IF NOT EXISTS(Select TOP 1 1 from tblCFCard Where intCardId = @intCardId )
+				BEGIN
+					SET @IsValid = 0
+					SET @ValidationMessage = @ValidationMessage + '' ''+''card_no :''+CAST(@intCardId AS NVARCHAR(100))+'' is not Exist''
+				END
+			END
+		END
+
+		IF(@vehicle_no = '''')
+		BEGIN
+			SET @intVehicleId = NULL
+		END
+		ELSE
+		BEGIN
+			IF(TRY_PARSE(@vehicle_no AS INT) IS NULL )
+			BEGIN
+				SET @IsValid = 0
+				SET @ValidationMessage = @ValidationMessage + '' ''+''vehicle_no should be numeric''
+			END
+			ELSE 
+			BEGIN
+				SET @intVehicleId = CONVERT(INT,@vehicle_no)
+				IF NOT EXISTS(Select TOP 1 1 from tblCFVehicle Where intVehicleId = @intVehicleId )
+				BEGIN
+					SET @IsValid = 0
+					SET @ValidationMessage = @ValidationMessage + '' ''+''vehicle_no :''+CAST(@intVehicleId AS NVARCHAR(100))+'' is not Exist''
+				END
+			END
+		END
+
+		IF @IsValid = 1
+		BEGIN
+			INSERT INTO [dbo].[tblARCustomerTaxingTaxException]
+			   (
+			    [intEntityCustomerId]
+			   ,[intItemId]
+			   ,[intCategoryId]
+			   ,[intTaxCodeId]
+			   ,[intTaxClassId]
+			   ,[strState]
+			   ,[strException]
+			   ,[dtmStartDate]
+			   ,[dtmEndDate]
+			   ,[intEntityCustomerLocationId]
+			   ,[dblPartialTax]
+			   ,[intCardId]
+			   ,[intVehicleId]
+			   ,[intConcurrencyId]
+			  )
+			 SELECT
+				@intEntityCustomerId,			
+				@intItemId,				
+				@intCategoryId,					
+				@intTaxCodeId,					
+				@intTaxClassId,				
+				@strState,						
+				@strException,					
+				@dtmStartDate,					
+				@dtmEndDate,					
+				@intEntityCustomerLocationId,	
+				@dblPartialTax,					
+				@intCardId,						
+				@intVehicleId,	
+				0				
+		END
+	'
+WHERE intCSVDynamicImportId = @NewHeaderId
+	
+
+	INSERT INTO tblSMCSVDynamicImportParameter(intCSVDynamicImportId, strColumnName, strDisplayName, ysnRequired)
+	SELECT @NewHeaderId, 'id', 'id', 1
+	UNION All
+	SELECT @NewHeaderId, 'customer_id', 'customer_id', 1
+	UNION All
+	SELECT @NewHeaderId, 'customer_location', 'customer_location', 0
+	UNION All
+	SELECT @NewHeaderId, 'item_no', 'item_no', 0
+	UNION All
+	SELECT @NewHeaderId, 'item_category', 'item_category', 0
+	UNION All
+	SELECT @NewHeaderId, 'tax_code', 'tax_code', 0
+	UNION All
+	SELECT @NewHeaderId, 'tax_class', 'tax_class', 0
+	UNION All
+	SELECT @NewHeaderId, 'state', 'state', 0
+	UNION All
+	SELECT @NewHeaderId, 'exemption_no', 'exemption_no', 0
+	UNION All
+	SELECT @NewHeaderId, 'partial', 'partial', 0
+	UNION All
+	SELECT @NewHeaderId, 'start_date', 'start_date', 0
+	UNION All
+	SELECT @NewHeaderId, 'end_date', 'end_date', 0
+	UNION All
+	SELECT @NewHeaderId, 'card_no', 'card_no', 0
+	UNION All
+	SELECT @NewHeaderId, 'vehicle_no', 'vehicle_no', 0			
+
+--Customer Tax Exemption Import End
+
+
+
+
+
+--Customer Entity Split Import Begin
+SET @NewHeaderId = 9
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMCSVDynamicImport WHERE intCSVDynamicImportId = @NewHeaderId)
+BEGIN
+	INSERT INTO tblSMCSVDynamicImport(intCSVDynamicImportId, strName, strCommand )
+	SELECT @NewHeaderId, 'Import_Split','1'
+END
+
+
+UPDATE tblSMCSVDynamicImport SET
+	strName = 'Import_Split',
+	strCommand = '
+		DECLARE @entity_no					NVARCHAR(100)
+		DECLARE @split_number				NVARCHAR(100)
+		DECLARE @exception_categories		NVARCHAR(100)
+		DECLARE @farm						NVARCHAR(100)
+		DECLARE @description				NVARCHAR(100)
+		DECLARE @entity_type				NVARCHAR(100)
+		DECLARE @split_entity_no			NVARCHAR(100)
+		DECLARE @percent					NVARCHAR(100)
+		DECLARE @option						NVARCHAR(100)
+		DECLARE @storage_type_code			NVARCHAR(100)
+
+		SELECT
+			@entity_no				= ''@entity_no@'',									
+			@split_number			= ''@split_number@'',			
+			@exception_categories	= ''@exception_categories@'',	
+			@farm					= ''@farm@'',	
+			@description			= ''@description@'',	
+			@entity_type			= ''@entity_type@'',	
+			@split_entity_no		= ''@split_entity_no@'',	
+			@percent				= ''@percent@'',
+			@option					= ''@option@'',
+			@storage_type_code		= ''@storage_type_code@''
+		
+		DECLARE @intEntityId			INT
+		DECLARE @strSplitNumber			NVARCHAR(100)
+		DECLARE @strDescription			NVARCHAR(100)
+		DECLARE @intFarmId 				INT
+		DECLARE @strSplitType			NVARCHAR(100)
+
+
+		DECLARE @ExpCategoryies			Table(Category NVARCHAR(100))
+
+		DECLARE @dblSplitPercent		NUMERIC(18,6)
+		DECLARE @strOption			    NVARCHAR(100)
+		DECLARE @intStorageId 			INT
+
+
+
+		DECLARE @IsValid INT = 1
+
+		SELECT @IsValid = 1,
+			@ValidationMessage	= ''''
+
+		IF(@entity_no = '''')
+		BEGIN
+			SET @intEntityId = NULL
+		END
+		ELSE
+		BEGIN
+			IF(TRY_PARSE(@entity_no AS INT) IS NULL )
+			BEGIN
+				SET @IsValid = 0
+				SET @ValidationMessage = @ValidationMessage + '' ''+''entity_no should be numeric''
+			END
+			ELSE 
+			BEGIN
+				SET @intEntityId = CONVERT(INT,@entity_no)
+				IF NOT EXISTS(Select TOP 1 1 from tblEMEntity Where intEntityId = @intEntityId )
+				BEGIN
+					SET @IsValid = 0
+					SET @ValidationMessage = @ValidationMessage + '' ''+''entity_no :''+CAST(@intEntityId AS NVARCHAR(100))+'' is not Exist''
+				END
+			END
+		END
+
+		SET @strSplitNumber = @split_number
+		SET @strDescription = @description
+
+
+		IF(@farm = '''')
+		BEGIN
+			SET @intFarmId = NULL
+		END
+		ELSE
+		BEGIN
+			IF(TRY_PARSE(@farm AS INT) IS NULL )
+			BEGIN
+				SET @IsValid = 0
+				SET @ValidationMessage = @ValidationMessage + '' ''+''farm should be numeric''
+			END
+			ELSE 
+			BEGIN
+				SET @intFarmId = CONVERT(INT,@farm)
+			END
+		END
+
+		SET @strSplitType = @entity_type
+
+		INSERT INTO @ExpCategoryies
+		SELECT Item from dbo.fnSplitString(@exception_categories,''.'')
+
+		BEGIN TRY
+			SELECT CONVERT(INT, Category) from @ExpCategoryies
+		END TRY
+		BEGIN CATCH
+			SET @IsValid = 0
+			SET @ValidationMessage = @ValidationMessage + '' ''+@exception_categories +''Categories Id should be numerics''
+		END CATCH
+
+
+
+		IF(@percent = '''')
+		BEGIN
+			SET @dblSplitPercent = NULL
+		END
+		ELSE
+		BEGIN
+			IF(TRY_PARSE(@percent AS NUMERIC(18,6)) IS NULL)
+			BEGIN
+				SET @IsValid = 0
+				SET @ValidationMessage = @ValidationMessage + '' ''+''percent should be numeric''
+			END
+			ELSE 
+			BEGIN
+				SET @dblSplitPercent = CAST(REPLACE(@percent,''%'','''') AS NUMERIC(18,6))
+			END
+		END
+		
+		SET @strOption = @option
+
+		IF(@storage_type_code = '''')
+		BEGIN
+			SET @intStorageId = NULL
+		END
+		ELSE
+		BEGIN
+			IF(TRY_PARSE(@entity_no AS INT) IS NULL )
+			BEGIN
+				SET @IsValid = 0
+				SET @ValidationMessage = @ValidationMessage + '' ''+''storage_type_code should be numeric''
+			END
+			ELSE 
+			BEGIN
+				SET @intStorageId = CONVERT(INT,@entity_no)
+				IF NOT EXISTS(Select TOP 1 1 from tblGRStorageType Where intStorageScheduleTypeId = @intStorageId )
+				BEGIN
+					SET @IsValid = 0
+					SET @ValidationMessage = @ValidationMessage + '' ''+''storage_type_code :''+CAST(@intStorageId AS NVARCHAR(100))+'' is not Exist''
+				END
+			END
+		END
+
+
+		IF(@IsValid = 1)
+		BEGIN
+
+			DECLARE @NewSplitId INT
+
+			IF EXISTS(SELECT TOP 1 NULL FROM tblEMEntitySplit WHERE strSplitNumber = @strSplitNumber)
+			BEGIN
+				SELECT TOP 1 @NewSplitId = intSplitId FROM tblEMEntitySplit WHERE strSplitNumber = @strSplitNumber
+			END
+			ELSE
+			BEGIN
+				INSERT INTO tblEMEntitySplit(
+					intEntityId,
+					strSplitNumber,
+					strDescription,
+					intFarmId,
+					strSplitType,
+					intConcurrencyId
+				)
+				SELECT
+					@intEntityId,	
+					@strSplitNumber,
+					@strDescription,	
+					@intFarmId,		
+					@strSplitType,
+					0	
+			
+				SELECT @NewSplitId = IDENT_CURRENT( ''tblEMEntitySplit'' ) 
+			END
+
+
+			INSERT INTO tblEMEntitySplitExceptionCategory(intSplitId,intCategoryId)
+			SELECT @NewSplitId, CONVERT(INT, TEMP.Category) from @ExpCategoryies TEMP
+			LEFT JOIN tblEMEntitySplitExceptionCategory	CUR
+			ON CUR.intSplitId = @NewSplitId AND CONVERT(INT, TEMP.Category) = intCategoryId
+			WHERE CUR.intCategoryId IS NULL
+
+
+			IF NOT EXISTS(SELECT TOP 1 NULL from tblEMEntitySplitDetail WHERE @NewSplitId = intSplitId AND intEntityId = @intEntityId )
+			BEGIN
+				INSERT INTO tblEMEntitySplitDetail(
+				intSplitId,
+				intEntityId,
+				dblSplitPercent,
+				strOption,
+				intStorageScheduleTypeId,
+				intConcurrencyId
+				)
+				SELECT 
+				@NewSplitId,
+				@intEntityId,
+				@dblSplitPercent,
+				@strOption,
+				@intStorageId,
+				0
+			END
+			
+
+
+		END
+	'
+WHERE intCSVDynamicImportId = @NewHeaderId
+--Customer Entity Split Exemption Import End
+
+
+					
+		
+INSERT INTO tblSMCSVDynamicImportParameter(intCSVDynamicImportId, strColumnName, strDisplayName, ysnRequired)
+	SELECT @NewHeaderId, 'entity_no', 'entity_no', 1
+	UNION All
+	SELECT @NewHeaderId, 'split_number', 'split_number', 1
+	UNION All
+	SELECT @NewHeaderId, 'exception_categories', 'exception_categories', 0
+	UNION All
+	SELECT @NewHeaderId, 'farm', 'farm', 0
+	UNION All
+	SELECT @NewHeaderId, 'description', 'description', 0
+	UNION All
+	SELECT @NewHeaderId, 'entity_type', 'entity_type', 0
+	UNION All
+	SELECT @NewHeaderId, 'split_entity_no', 'split_entity_no', 0
+	UNION All
+	SELECT @NewHeaderId, 'percent', 'percent', 0
+	UNION All
+	SELECT @NewHeaderId, 'exemption_no', 'exemption_no', 0
+	UNION All
+	SELECT @NewHeaderId, 'option', 'option', 0
+	UNION All
+	SELECT @NewHeaderId, 'storage_type_code', 'storage_type_code', 0
+
+
 PRINT '---------- END DYNAMIC CSV DEFAULT DATA ----------'
+
+
 
 
 SET IDENTITY_INSERT tblSMCSVDynamicImport  OFF
