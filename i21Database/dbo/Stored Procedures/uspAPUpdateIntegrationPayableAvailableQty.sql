@@ -312,7 +312,7 @@ BEGIN
 																	,A.intQtyToBillUOMId
 																	,A.dblCost
 																)
-																,A.dblQuantityToBill
+																,ABS(A.dblQuantityToBill)
 															)
 															,2 
 														)														
@@ -324,7 +324,7 @@ BEGIN
 																	,A.intQtyToBillUOMId
 																	,A.dblCost
 																)
-																,A.dblQuantityToBill
+																,ABS(A.dblQuantityToBill)
 															)
 															,2 
 														)
