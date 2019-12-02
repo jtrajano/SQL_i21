@@ -1,5 +1,4 @@
-﻿
-CREATE VIEW [dbo].[vyuCFInvoiceReport]
+﻿CREATE VIEW [dbo].[vyuCFInvoiceReport]
 AS
 
 
@@ -60,6 +59,7 @@ SELECT
 ,cfAccount.strDetailDisplay
 ,cfAccount.ysnShowVehicleDescriptionOnly	
 ,cfAccount.ysnShowDriverPinDescriptionOnly
+,cfAccount.ysnPageBreakByPrimarySortOrder
 ----------------------------------------------
 ,strCustomerName = emEntity.strName
 ,emEntity.strName
@@ -390,6 +390,5 @@ OUTER APPLY (
 WHERE ISNULL(cfTrans.ysnPosted,0) = 1 
 AND ISNULL(cfTrans.ysnInvalid,0) = 0
 GO
-
 
 
