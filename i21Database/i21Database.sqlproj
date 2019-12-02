@@ -8220,6 +8220,9 @@
     <Build Include="dbo\Views\vyuCTEntityContainer.sql" />
     <None Include="Scripts\Post-Deployment\IC\22_InventoryValuationPerformance.sql" />
     <Build Include="dbo\Functions\fnICGetCompanyLocation.sql" />
+    <Build Include="dbo\Stored Procedures\uspEMUpdateEntityGroup.sql" />
+    <Build Include="dbo\Stored Procedures\uspEMUpdateEntityGroupForVendor.sql" />
+    <Build Include="dbo\Triggers\trgAfterUpdatettblEMEntityGroupDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
