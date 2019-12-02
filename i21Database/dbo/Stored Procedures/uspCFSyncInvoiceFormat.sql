@@ -26,6 +26,8 @@ BEGIN
 	DECLARE @ysnPrintMiscellaneous				BIT
 	DECLARE @ysnShowDriverPinDescriptionOnly	BIT
 	DECLARE @ysnShowVehicleDescriptionOnly		BIT
+	DECLARE @ysnPageBreakByPrimarySortOrder		BIT
+	
 
 
 	--===GET LATEST ACCOUNT INVOICE FORMATTING===--
@@ -52,6 +54,8 @@ BEGIN
 	,@strDetailDisplay					 =  strDetailDisplay
 	,@ysnShowDriverPinDescriptionOnly	 =  ysnShowDriverPinDescriptionOnly
 	,@ysnShowVehicleDescriptionOnly		 =  ysnShowVehicleDescriptionOnly
+	,@ysnPageBreakByPrimarySortOrder	 =  ysnPageBreakByPrimarySortOrder
+	
 	FROM tblCFAccount
 	WHERE intCustomerId = @intCustomerId
 	
@@ -80,6 +84,7 @@ BEGIN
 	,ysnShowDriverPinDescriptionOnly  =		 @ysnShowDriverPinDescriptionOnly
 	,ysnShowVehicleDescriptionOnly	  =		 @ysnShowVehicleDescriptionOnly
 	,ysnSummaryByDriverPin			  =		 @ysnSummaryByDriverPin
+	,ysnPageBreakByPrimarySortOrder	  =		 @ysnPageBreakByPrimarySortOrder
 	WHERE strInvoiceNumberHistory = @strInvoiceNumber
 
 	--SELECT @@ROWCOUNT

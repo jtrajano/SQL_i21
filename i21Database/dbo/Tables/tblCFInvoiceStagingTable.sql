@@ -158,6 +158,7 @@
     [ysnMPGCalculation]               BIT             NULL,
     [ysnShowVehicleDescriptionOnly]   BIT             NULL,
     [ysnShowDriverPinDescriptionOnly] BIT             NULL,
+	[ysnPageBreakByPrimarySortOrder]  BIT			  NULL,
     CONSTRAINT [UserAndTransactionIdAndStatementType] UNIQUE NONCLUSTERED ([intTransactionId] ASC, [strUserId] ASC, [strStatementType] ASC) WITH (FILLFACTOR = 70)
 );
 
