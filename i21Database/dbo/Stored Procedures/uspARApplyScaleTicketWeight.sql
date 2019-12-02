@@ -197,6 +197,9 @@ BEGIN
 	ELSE
 	--RECOMPUTE OVERAGE CONTRACTS
 		BEGIN
+			IF ISNULL(@intTicketId, 0) > 0
+				UPDATE tblARInvoiceDetail SET intTicketId = @intTicketId
+				
 			EXEC dbo.uspARUpdateOverageContracts @intInvoiceId 		= @intNewInvoiceId
 											   , @intScaleUOMId		= @intScaleUOMId
 											   , @intUserId			= @intUserId
