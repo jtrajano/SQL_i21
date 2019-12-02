@@ -41,6 +41,8 @@ BEGIN
 	SELECT @intDecimalPrecision = intCurrencyDecimal FROM tblSMCompanyPreference
 	DECLARE @intTransferStorageReferenceId INT
 
+	--return
+
 	---START---TRANSACTIONS FOR THE SOURCE-----	
 	IF EXISTS(SELECT TOP 1 1 
 			FROM tblGRCustomerStorage A 
