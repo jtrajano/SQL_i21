@@ -96,7 +96,8 @@
     [strDetailDisplay]                NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [ysnMPGCalculation]               BIT             NULL,
     [ysnShowVehicleDescriptionOnly]   BIT             NULL,
-    [ysnShowDriverPinDescriptionOnly] BIT             NULL
+    [ysnShowDriverPinDescriptionOnly] BIT             NULL,
+	[ysnPageBreakByPrimarySortOrder]  BIT			  NULL
 );
 
 

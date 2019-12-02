@@ -1,5 +1,4 @@
-﻿
-	CREATE PROCEDURE [dbo].[uspCFInvoiceReport](
+﻿CREATE PROCEDURE [dbo].[uspCFInvoiceReport](
 	 @xmlParam NVARCHAR(MAX)=null
 	,@UserId NVARCHAR(MAX)
 )
@@ -566,6 +565,7 @@ BEGIN
 			,ysnMPGCalculation					BIT
 			,ysnShowVehicleDescriptionOnly		BIT
 			,ysnShowDriverPinDescriptionOnly	BIT
+			,ysnPageBreakByPrimarySortOrder		BIT
 		)
 		INSERT INTO @tblCFTempInvoiceReport(
 			intCustomerId				
@@ -669,6 +669,7 @@ BEGIN
 			,ysnMPGCalculation
 			,ysnShowVehicleDescriptionOnly	
 			,ysnShowDriverPinDescriptionOnly
+			,ysnPageBreakByPrimarySortOrder
 		)
 		SELECT
 		intCustomerId				
@@ -772,6 +773,7 @@ BEGIN
 			,ysnMPGCalculation
 			,ysnShowVehicleDescriptionOnly	
 			,ysnShowDriverPinDescriptionOnly
+			,ysnPageBreakByPrimarySortOrder
 		FROM vyuCFInvoiceReport
 		WHERE intTransactionId IN (SELECT intTransactionId FROM @tblCFTransactionIds)
 		
@@ -916,6 +918,7 @@ BEGIN
 		,ysnMPGCalculation
 		,ysnShowVehicleDescriptionOnly	
 		,ysnShowDriverPinDescriptionOnly
+			,ysnPageBreakByPrimarySortOrder
 		)
 		SELECT
 		 intCustomerGroupId			
@@ -1013,6 +1016,7 @@ BEGIN
 		,ysnMPGCalculation
 		,ysnShowVehicleDescriptionOnly	
 		,ysnShowDriverPinDescriptionOnly
+			,ysnPageBreakByPrimarySortOrder
 		FROM @tblCFTempInvoiceReport
 
 	END

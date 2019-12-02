@@ -58,6 +58,7 @@
     [intDailyTransactionCount]        INT             CONSTRAINT [DF_tblCFAccount_intDailyTransactionCount] DEFAULT ((1)) NULL,
     [ysnShowVehicleDescriptionOnly]   BIT             NULL,
     [ysnShowDriverPinDescriptionOnly] BIT             NULL,
+    [ysnPageBreakByPrimarySortOrder]  BIT             NULL,
     CONSTRAINT [PK_tblCFAccount] PRIMARY KEY CLUSTERED ([intAccountId] ASC) WITH (FILLFACTOR = 70),
     CONSTRAINT [FK_tblCFAccount_tblARAccountStatus] FOREIGN KEY ([intAccountStatusCodeId]) REFERENCES [dbo].[tblARAccountStatus] ([intAccountStatusId]),
     CONSTRAINT [FK_tblCFAccount_tblARCustomer] FOREIGN KEY ([intCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityId]),
