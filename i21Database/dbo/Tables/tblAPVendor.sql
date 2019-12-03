@@ -91,6 +91,51 @@ CREATE NONCLUSTERED INDEX [IX_rptAging_1] ON [dbo].[tblAPVendor]
 )
 INCLUDE ( 	[strVendorId]) WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
 GO
+
+
+CREATE TRIGGER trg_tblAPVendorEntityGroup
+ON dbo.tblAPVendor
+AFTER INSERT, UPDATE, DELETE AS
+BEGIN
+
+	DECLARE @action CHAR(1) = 'I';
+	DECLARE @vendorId INT;
+	DECLARE @oldEntityGroupId INT;
+	DECLARE @newEntityGroupId INT;
+
+	SELECT 
+		@oldEntityGroupId = intEntityGroupId,
+		@vendorId = intEntityId
+	FROM DELETED
+
+	SELECT 
+		@newEntityGroupId = intEntityGroupId,
+		@vendorId = CASE WHEN @vendorId IS NULL THEN intEntityId ELSE @vendorId END --if already provided do nothing.
+	FROM INSERTED
+
+	IF EXISTS(SELECT 1 FROM DELETED)
+	BEGIN
+		SET @action = 
+			CASE WHEN EXISTS(SELECT 1 FROM INSERTED) THEN 'U'
+			ELSE 'D'
+			END
+		
+		EXEC [dbo].[uspEMUpdateEntityGroupForVendor]
+			@entityId = @vendorId,
+			@oldEntityGroupId  = @oldEntityGroupId,
+			@entityGroupId = @newEntityGroupId
+	END
+	ELSE
+	BEGIN
+		IF NOT EXISTS(SELECT 1 FROM INSERTED) RETURN; --Nothing updated or inserted
+
+		EXEC [dbo].[uspEMUpdateEntityGroupForVendor]
+			@entityId = @vendorId,
+			@oldEntityGroupId  = @oldEntityGroupId,
+			@entityGroupId = @newEntityGroupId
+	END
+END
+GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
 			@value = N'Information about the Vendor',
 			@level0type = N'SCHEMA',
