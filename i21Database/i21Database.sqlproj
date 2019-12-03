@@ -8464,6 +8464,7 @@
     <Build Include="dbo\Views\vyuSCTicketContractUsed.sql" />
     <Build Include="dbo\Functions\fnARGetInvoiceForBatch.sql" />
     <Build Include="dbo\Views\vyuARGetPayment.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCallInterCompanyPreStageItem.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
