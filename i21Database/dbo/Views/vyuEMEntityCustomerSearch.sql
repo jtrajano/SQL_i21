@@ -12,7 +12,7 @@ SELECT DISTINCT
 	, strAccountNumber		= ISNULL(CUSTOMER.strAccountNumber,'')
 	, strPhone				= entityPhone.strPhone
 	, strSalesPersonName	= entityToSalesperson.strName
-	, intSalespersonId		= CUSTOMER.intSalespersonId
+	, intSalespersonId		= ISNULL(shipLocation.intSalespersonId, CUSTOMER.intSalespersonId)
 	, strCurrency			= custCurrency.strCurrency
 	, strWarehouse			= entityLocation.strLocationName
 	, intWarehouseId		= ISNULL(entityLocation.intCompanyLocationId, -99)
@@ -70,27 +70,22 @@ SELECT DISTINCT
 	, strCreditCode			= CUSTOMER.strCreditCode
 	, dtmCreditLimitReached = CUSTOMER.dtmCreditLimitReached
 	, intCreditLimitReached = DATEDIFF(DAYOFYEAR, CUSTOMER.dtmCreditLimitReached, GETDATE())
-	, ysnHasPastDueBalances	= CAST(0 AS BIT) /*CASE 
-			WHEN CI.dbl10Days > 0 OR CI.dbl30Days > 0 OR CI.dbl60Days > 0 OR CI.dbl90Days > 0 OR CI.dbl91Days > 0 THEN CAST(1 AS BIT)
-			ELSE CAST(0 AS BIT)
-		END*/
+	, ysnHasPastDueBalances	= CAST(0 AS BIT)
 	, strEntityType = CASE WHEN entityType.Prospect = 1 THEN 'Prospect' ELSE 'Customer' END COLLATE Latin1_General_CI_AS
 FROM tblARCustomer CUSTOMER  WITH (NOLOCK) 
 INNER JOIN tblEMEntity entityToCustomer ON CUSTOMER.intEntityId = entityToCustomer.intEntityId
-LEFT JOIN tblEMEntity entityToSalesperson ON CUSTOMER.intSalespersonId = entityToSalesperson.intEntityId
 LEFT JOIN tblEMEntityToContact entityToContact ON entityToCustomer.intEntityId = entityToContact.intEntityId AND entityToContact.ysnDefaultContact = 1
 LEFT JOIN tblEMEntity entityContact ON entityContact.intEntityId = entityToContact.intEntityContactId AND entityToContact.ysnDefaultContact = 1
 LEFT JOIN tblEMEntityLocation custLocation ON CUSTOMER.intEntityId = custLocation.intEntityId AND custLocation.ysnDefaultLocation = 1
 LEFT JOIN tblEMEntityLocation shipLocation ON CUSTOMER.intShipToId = shipLocation.intEntityLocationId AND shipLocation.ysnActive = 1
 LEFT JOIN tblEMEntityLocation billLocation ON CUSTOMER.intBillToId = billLocation.intEntityLocationId AND billLocation.ysnActive = 1
+LEFT JOIN tblEMEntity entityToSalesperson ON entityToSalesperson.intEntityId = ISNULL(shipLocation.intSalespersonId, CUSTOMER.intSalespersonId)
 LEFT JOIN tblEMEntityPhoneNumber entityPhone ON entityToContact.intEntityContactId = entityPhone.intEntityId
 LEFT JOIN tblSMTerm entityLocationTerm ON custLocation.intTermsId = entityLocationTerm.intTermID
 LEFT JOIN tblSMCurrency custCurrency ON CUSTOMER.intCurrencyId = custCurrency.intCurrencyID
 LEFT JOIN tblSMCompanyLocation entityLocation ON custLocation.intWarehouseId = entityLocation.intCompanyLocationId
 LEFT JOIN vyuEMEntityType entityType ON CUSTOMER.intEntityId = entityType.intEntityId
 LEFT JOIN tblSMCompanyLocationPricingLevel entityLocationPricingLevel ON CUSTOMER.intCompanyLocationPricingLevelId = entityLocationPricingLevel.intCompanyLocationPricingLevelId
---LEFT JOIN tblEMEntityLineOfBusiness entityLOB ON CUSTOMER.intEntityId = entityLOB.intEntityId
---LEFT JOIN tblSMLineOfBusiness LOB ON entityLOB.intLineOfBusinessId = LOB.intLineOfBusinessId
 LEFT JOIN tblEMEntityClass entityClass ON entityToCustomer.intEntityClassId = entityClass.intEntityClassId
 LEFT JOIN tblSMPaymentMethod custPaymentMethod ON CUSTOMER.intPaymentMethodId = custPaymentMethod.intPaymentMethodID
 LEFT JOIN tblSMTerm custTerm ON CUSTOMER.intTermsId = custTerm.intTermID
@@ -120,16 +115,5 @@ OUTER APPLY (
 		FOR XML PATH ('')
 	) INV (intLineOfBusinessId)
 ) LINEOFBUSINESS
--- LEFT JOIN (
--- 	SELECT intEntityCustomerId 
--- 		, dbl10Days
--- 		, dbl30Days
--- 		, dbl60Days
--- 		, dbl90Days
--- 		, dbl91Days
--- 	FROM
--- 	vyuARCustomerInquiry 
--- ) CI
--- on CI.intEntityCustomerId = CUSTOMER.intEntityId
 WHERE (entityType.Customer = 1 OR entityType.Prospect = 1)
 GO
