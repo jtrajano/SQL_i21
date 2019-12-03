@@ -414,7 +414,9 @@ BEGIN TRY
 		,strDetailDisplay
 		,strDetailDisplayLabel
 		,ysnShowVehicleDescriptionOnly	
-		,ysnShowDriverPinDescriptionOnly	
+		,ysnShowDriverPinDescriptionOnly
+		,strDriverPinNumber
+		,strDriverDescription
 	)
 	SELECT 
 		intCustomerGroupId
@@ -568,6 +570,8 @@ BEGIN TRY
 		,strDetailDisplayLabel
 		,ysnShowVehicleDescriptionOnly	
 		,ysnShowDriverPinDescriptionOnly	
+		,strDriverPinNumber
+		,strDriverDescription
 	FROM
 	tblCFInvoiceStagingTable
 	WHERE strUserId = @username
