@@ -158,7 +158,6 @@ BEGIN
 			IF (isnull(@intCurrentMonthInterval,0) = 0)
 			BEGIN
 				-- The Julian Calendar value is zero - No need to update the Next Delivery Date.
-				set @ysnEndCalc = 1;
 				GOTO NoNeedToUpdate;
 			END
 
@@ -199,10 +198,10 @@ BEGIN
 				SET @intDaysBeforeDelivery = @intDaysBeforeDelivery + @intDaysLeftInMonth
 				SET @dtmCurrentCalcDate = DATEADD(MONTH, DATEDIFF(MONTH, 0, @dtmCurrentCalcDate)+ 1, 0) 
 			END
-		END
 
-		-- The Julian Calendar value is zero - No need to update the Next Delivery Date.
-		NoNeedToUpdate:
+			-- The Julian Calendar value is zero - No need to update the Next Delivery Date.
+			NoNeedToUpdate:
+		END
 	END
 END
 GO
