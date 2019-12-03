@@ -1,4 +1,4 @@
-﻿alter PROCEDURE uspICCallInterCompanyPreStageItem 
+﻿CREATE PROCEDURE uspICCallInterCompanyPreStageItem 
 	@strItemNo NVARCHAR(50) 
 	,@strRowState NVARCHAR(50)
 	,@intUserId INT
