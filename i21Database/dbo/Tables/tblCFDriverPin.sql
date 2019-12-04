@@ -7,6 +7,8 @@ CREATE TABLE [dbo].[tblCFDriverPin](
 	[ysnActive]					BIT												NULL,
 	[strComment]				NVARCHAR(MAX)	COLLATE Latin1_General_CI_AS	NULL,
 	[intConcurrencyId]			INT             CONSTRAINT [DF_tblCFDriverPin_intConcurrencyId] DEFAULT ((1)) NULL,
+	[intDepartmentId]			INT												NULL,
+	[ysnCardForOwnUse]			BIT												NULL,
 	CONSTRAINT [PK_tblCFDriverPin] PRIMARY KEY CLUSTERED ([intDriverPinId] ASC),
 ) ON [PRIMARY]
 GO
