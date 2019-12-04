@@ -30,6 +30,7 @@ BEGIN
 	DECLARE @dblTicketScheduledQty NUMERIC(18,6)
 	DECLARE @intTicketItemUOMId INT
 	DECLARE @dblQuantityToReceive NUMERIC(38,15)
+	DECLARE @intBillId INT
 	
 BEGIN 
 	DECLARE @TransactionName AS VARCHAR(500) = 'uspSCProcessReceiptToVoucher_' + CAST(NEWID() AS NVARCHAR(100));
@@ -245,7 +246,7 @@ END
 
 			IF(@ysnTicketHasSpecialDiscount <> 1 OR (@ysnTicketSpecialGradePosted = 1 AND @ysnTicketHasSpecialDiscount = 1))
 			BEGIN
-				EXEC uspSCProcessReceiptToVoucher @intTicketId, @intLoopInventoryReceiptId	,@intUserId
+				EXEC uspSCProcessReceiptToVoucher @intTicketId, @intLoopInventoryReceiptId	,@intUserId, @intBillId OUTPUT
 			END
 
 			SET @ysnIRPosted = 0
