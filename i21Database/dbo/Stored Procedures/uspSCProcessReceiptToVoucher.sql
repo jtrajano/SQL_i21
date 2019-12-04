@@ -2,6 +2,7 @@
     @intTicketId INT
 	,@intInventoryReceiptId INT
 	,@intUserId INT
+	,@intBillId AS INT OUTPUT
 AS
 BEGIN
 
@@ -17,7 +18,6 @@ BEGIN
 
 	DECLARE @intContractDetailId INT
 	DECLARE @intIRContractPricingType INT
-	DECLARE @intBillId INT
 	DECLARE @intLotType INT
 	DECLARE @intItemId INT
 	DECLARE @intLotId INT
