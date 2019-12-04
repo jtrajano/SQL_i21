@@ -44,6 +44,22 @@ BEGIN
 	DECLARE @intAccumulatedDDAfterLastDeliveryBeforeReset INT
 	DECLARE @intCustomerId INT
 	DECLARE @intScreenId INT
+	DECLARE @InvoiceMonth INT = 0;
+	DECLARE @InvoiceMonthInterval INT = 0;
+
+	DECLARE @intGlobalJulianCalendarId INT
+	DECLARE @intJan INT
+	DECLARE @intFeb INT
+	DECLARE @intMar INT
+	DECLARE @intApr INT
+	DECLARE @intMay INT
+	DECLARE @intJun INT
+	DECLARE @intJul INT
+	DECLARE @intAug INT
+	DECLARE @intSep INT
+	DECLARE @intOct INT
+	DECLARE @intNov INT
+	DECLARE @intDec INT
 	
 
 
@@ -439,7 +455,7 @@ BEGIN
 					---- Update forecasted nad estimated % left
 					EXEC uspTMUpdateEstimatedValuesBySite @intSiteId
 					EXEC uspTMUpdateForecastedValuesBySite @intSiteId
-					EXEC uspTMUpdateNextJulianDeliveryBySite @intSiteId
+					EXEC uspTMUpdateNextJulianDeliveryBySite @intSiteId, @InvoiceMonth
 				END
 				ELSE
 				BEGIN
@@ -993,18 +1009,55 @@ BEGIN
 						,dblDegreeDayBetweenDelivery = @dblNewBurnRate * (CASE WHEN (ISNULL(dblLastGalsInTank,0.0) - ISNULL(dblTotalReserve,0.0)) < 0 THEN 0 ELSE (ISNULL(dblLastGalsInTank,0.0) - ISNULL(dblTotalReserve,0.0)) END)
 					WHERE intSiteID = @intSiteId
 
-				
-			
-					----Update Next Julian Calendar Date of the site
-					UPDATE tblTMSite
-					SET dtmNextDeliveryDate = (CASE WHEN intFillMethodId = @intJulianCalendarFillId THEN dbo.fnTMGetNextJulianDeliveryDate(intSiteID) ELSE NULL END)
-						,intConcurrencyId = intConcurrencyId + 1
-					WHERE intSiteID = @intSiteId
+					---GET JULIAN CAlendar details
+					SELECT TOP 1
+						@intGlobalJulianCalendarId = intGlobalJulianCalendarId
+					FROM tblTMSite WHERE intSiteID = @intSiteId
+
+					SELECT 
+						@intJan = intJanuary
+						,@intFeb = intFebruary
+						,@intMar = intMarch
+						,@intApr = intApril
+						,@intMay = intMay
+						,@intJun = intJune
+						,@intJul = intJuly
+						,@intAug = intAugust
+						,@intSep = intSeptember
+						,@intOct = intOctober
+						,@intNov = intNovember
+						,@intDec = intDecember
+					FROM tblTMGlobalJulianCalendar
+					WHERE intGlobalJulianCalendarId = @intGlobalJulianCalendarId
+					
+					set @InvoiceMonth = MONTH(@dtmInvoiceDate);
+
+					IF (@InvoiceMonth = 1) BEGIN SET @InvoiceMonthInterval = @intJan; END
+					IF (@InvoiceMonth = 2) BEGIN SET @InvoiceMonthInterval = @intFeb; END
+					IF (@InvoiceMonth = 3) BEGIN SET @InvoiceMonthInterval = @intMar; END
+					IF (@InvoiceMonth = 4) BEGIN SET @InvoiceMonthInterval = @intApr; END
+					IF (@InvoiceMonth = 5) BEGIN SET @InvoiceMonthInterval = @intMay; END
+					IF (@InvoiceMonth = 6) BEGIN SET @InvoiceMonthInterval = @intJun; END
+					IF (@InvoiceMonth = 7) BEGIN SET @InvoiceMonthInterval = @intJul; END
+					IF (@InvoiceMonth = 8) BEGIN SET @InvoiceMonthInterval = @intAug; END
+					IF (@InvoiceMonth = 9) BEGIN SET @InvoiceMonthInterval = @intSep; END
+					IF (@InvoiceMonth = 10) BEGIN SET @InvoiceMonthInterval = @intOct; END
+					IF (@InvoiceMonth = 11) BEGIN SET @InvoiceMonthInterval = @intNov; END
+					IF (@InvoiceMonth = 12) BEGIN SET @InvoiceMonthInterval = @intDec; END
+
+					IF (@InvoiceMonthInterval > 0)
+					BEGIN
+						----Update Next Julian Calendar Date of the site
+						UPDATE tblTMSite
+						SET dtmNextDeliveryDate = (CASE WHEN intFillMethodId = @intJulianCalendarFillId THEN dbo.fnTMGetNextJulianDeliveryDate(intSiteID) ELSE NULL END)
+							,intConcurrencyId = intConcurrencyId + 1
+						WHERE intSiteID = @intSiteId
+					END
 					
 					---- Update forecasted nad estimated % left
 					EXEC uspTMUpdateEstimatedValuesBySite @intSiteId
 					EXEC uspTMUpdateForecastedValuesBySite @intSiteId
-					EXEC uspTMUpdateNextJulianDeliveryBySite @intSiteId
+					EXEC uspTMUpdateNextJulianDeliveryBySite @intSiteId, @InvoiceMonth
 					
 
 					IF EXISTS(SELECT TOP 1 1 FROM tblTMDispatch WHERE intSiteID = @intSiteId)
@@ -1296,7 +1349,7 @@ BEGIN
 		--	,intConcurrencyId = ISNULL(intConcurrencyId,0) + 1
 		--WHERE intSiteID = @intSiteId
 
-		EXEC uspTMUpdateNextJulianDeliveryBySite @intSiteId
+		EXEC uspTMUpdateNextJulianDeliveryBySite @intSiteId, @InvoiceMonth
 
 		
 		DELETE FROM #tmpVirtualMeterInvoiceDetail WHERE intInvoiceDetailId = @intInvoiceDetailId

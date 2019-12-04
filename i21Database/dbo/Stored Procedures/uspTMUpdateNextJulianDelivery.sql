@@ -1,7 +1,7 @@
 ﻿CREATE PROCEDURE uspTMUpdateNextJulianDelivery 
 AS
 BEGIN
-	DECLARE @intSiteId INT
+	DECLARE @intSiteId INT, @InvoiceMonth INT = 0
 
 	IF OBJECT_ID('tempdb..#tmpSiteTable') IS NOT NULL DROP TABLE #tmpSiteTable
 	SELECT 
@@ -21,7 +21,7 @@ BEGIN
 			@intSiteId = intSiteID
 		FROM #tmpSiteTable
 
-		EXEC uspTMUpdateNextJulianDeliveryBySite @intSiteId
+		EXEC uspTMUpdateNextJulianDeliveryBySite @intSiteId, @InvoiceMonth
 
 		DELETE FROM #tmpSiteTable WHERE intSiteID = @intSiteId
 	END
