@@ -215,21 +215,41 @@ BEGIN
 		,[dblForexRate]						= NULL
 		,[ysnInventoryCost]					= IC.ysnInventoryCost
 		,[strCostMethod]					= IC.strCostMethod
-		,[dblRate]							= CASE
-												WHEN QM.strDiscountChargeType = 'Percent' AND QM.dblDiscountAmount < 0 THEN (QM.dblDiscountAmount * (CASE WHEN ISNULL(SS.dblCashPrice,0) > 0 THEN SS.dblCashPrice ELSE CD.dblCashPrice END) 												
-												* 
-														case when isnull(IC.strCostType, '') = 'Discount' and QM.dblDiscountAmount < 0 then 1 
-														else  -1 end
-												
-												)
+		,[dblRate]							=
+											CASE WHEN CD.intPricingTypeId = 2 THEN --Basis
+											  	CASE
+													WHEN QM.strDiscountChargeType = 'Percent' AND QM.dblDiscountAmount < 0 THEN (QM.dblDiscountAmount * (CD.dblBasis + F.dblFutureMarketPrice) 												
+													* 
+															case when isnull(IC.strCostType, '') = 'Discount' and QM.dblDiscountAmount < 0 then 1 
+															else  -1 end
+													
+													)
 
-												WHEN QM.strDiscountChargeType = 'Percent' AND QM.dblDiscountAmount > 0 THEN (QM.dblDiscountAmount * (CASE WHEN ISNULL(SS.dblCashPrice,0) > 0 THEN SS.dblCashPrice ELSE CD.dblCashPrice END))
-												WHEN QM.strDiscountChargeType = 'Dollar' AND QM.dblDiscountAmount < 0 THEN (QM.dblDiscountAmount * 
-												case when isnull(IC.strCostType, '') = 'Discount' and QM.dblDiscountAmount < 0 then 1 
-														else  -1 end
-												)
-												WHEN QM.strDiscountChargeType = 'Dollar' AND QM.dblDiscountAmount > 0 THEN QM.dblDiscountAmount
+													WHEN QM.strDiscountChargeType = 'Percent' AND QM.dblDiscountAmount > 0 THEN (QM.dblDiscountAmount * (CD.dblBasis + F.dblFutureMarketPrice))
+													WHEN QM.strDiscountChargeType = 'Dollar' AND QM.dblDiscountAmount < 0 THEN (QM.dblDiscountAmount * 
+													case when isnull(IC.strCostType, '') = 'Discount' and QM.dblDiscountAmount < 0 then 1 
+															else  -1 end
+													)
+													WHEN QM.strDiscountChargeType = 'Dollar' AND QM.dblDiscountAmount > 0 THEN QM.dblDiscountAmount
+												END
+											ELSE
+												CASE
+													WHEN QM.strDiscountChargeType = 'Percent' AND QM.dblDiscountAmount < 0 THEN (QM.dblDiscountAmount * (CASE WHEN ISNULL(SS.dblCashPrice,0) > 0 THEN SS.dblCashPrice ELSE CD.dblCashPrice END) 												
+													* 
+															case when isnull(IC.strCostType, '') = 'Discount' and QM.dblDiscountAmount < 0 then 1 
+															else  -1 end
+													
+													)
+
+													WHEN QM.strDiscountChargeType = 'Percent' AND QM.dblDiscountAmount > 0 THEN (QM.dblDiscountAmount * (CASE WHEN ISNULL(SS.dblCashPrice,0) > 0 THEN SS.dblCashPrice ELSE CD.dblCashPrice END))
+													WHEN QM.strDiscountChargeType = 'Dollar' AND QM.dblDiscountAmount < 0 THEN (QM.dblDiscountAmount * 
+													case when isnull(IC.strCostType, '') = 'Discount' and QM.dblDiscountAmount < 0 then 1 
+															else  -1 end
+													)
+													WHEN QM.strDiscountChargeType = 'Dollar' AND QM.dblDiscountAmount > 0 THEN QM.dblDiscountAmount
+												END
 											END
+
 		,[intOtherChargeEntityVendorId]		= @intEntityVendorId
 		,[dblAmount]						= CASE
 												WHEN IC.strCostMethod = 'Per Unit' THEN 0
@@ -272,6 +292,29 @@ BEGIN
 		ON QM.intDiscountScheduleCodeId = GR.intDiscountScheduleCodeId
 	JOIN tblICItem IC 
 		ON IC.intItemId = GR.intItemId
+	OUTER APPLY (
+		SELECT TOP 1 
+			dblFutureMarketPrice = ISNULL(a.dblLastSettle,0)
+		FROM tblRKFutSettlementPriceMarketMap a 
+		JOIN tblRKFuturesSettlementPrice b 
+			ON b.intFutureSettlementPriceId = a.intFutureSettlementPriceId
+		JOIN tblRKFuturesMonth c 
+			ON c.intFutureMonthId = a.intFutureMonthId
+		JOIN tblRKFutureMarket d 
+			ON d.intFutureMarketId = b.intFutureMarketId
+		WHERE b.intFutureMarketId = (
+			SELECT
+				ISNULL(Com.intFutureMarketId,0)
+			FROM tblICItem Item
+			JOIN tblICCommodity Com 
+				ON Com.intCommodityId = Item.intCommodityId
+			LEFT JOIN tblICItemLocation IL
+				ON IL.intItemId = Item.intItemId
+					AND IL.intLocationId = @LocationId
+			WHERE Item.intItemId = @InventoryItemId
+		)
+		ORDER by b.dtmPriceDate DESC
+	) F
 	WHERE SST.intSettleStorageId = @intSettleStorageId 
 		  AND ISNULL(QM.dblDiscountDue,0) <> ISNULL(QM.dblDiscountPaid,0)
 
