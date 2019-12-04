@@ -133,6 +133,7 @@
 :r .\11_IC\Remove_Duplicate_ItemBundles.sql 
 :r .\11_IC\CreateTempBasketColumn.sql 
 :r .\11_IC\AddDtmCreatedColumn.sql 
+:r .\11_IC\FixFKItemPricingLevel.sql 
 
 -- EM
 :r .\12_EM\01_EntitySchemaUpdate.sql

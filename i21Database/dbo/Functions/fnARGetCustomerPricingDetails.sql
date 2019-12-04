@@ -324,7 +324,7 @@ BEGIN
 			(
 				SELECT TOP 1 PL.intItemId, PL.intItemUnitMeasureId AS intItemUOM, PL.dblMin, PL.dblMax, PL.dblUnitPrice, ICL.intLocationId 
 				FROM tblICItemPricingLevel PL	
-				INNER JOIN tblSMCompanyLocationPricingLevel CPL ON PL.strPriceLevel = CPL.strPricingLevelName 		
+				INNER JOIN tblSMCompanyLocationPricingLevel CPL ON PL.intCompanyLocationPricingLevelId = CPL.intCompanyLocationPricingLevelId --PL.strPriceLevel = CPL.strPricingLevelName 		
 				INNER JOIN tblICItemLocation ICL ON PL.intItemLocationId = ICL.intItemLocationId
 				WHERE CPL.intSort = 1
 					AND @Quantity BETWEEN PL.dblMin  AND PL.dblMax
@@ -335,7 +335,7 @@ BEGIN
 			(
 				SELECT TOP 1 PL.intItemId, PL.intItemUnitMeasureId AS intItemUOM, PL.dblMin, PL.dblMax, PL.dblUnitPrice, ICL.intLocationId 
 				FROM tblICItemPricingLevel PL	
-				INNER JOIN tblSMCompanyLocationPricingLevel CPL ON PL.strPriceLevel = CPL.strPricingLevelName 		
+				INNER JOIN tblSMCompanyLocationPricingLevel CPL ON PL.intCompanyLocationPricingLevelId = CPL.intCompanyLocationPricingLevelId --PL.strPriceLevel = CPL.strPricingLevelName 		
 				INNER JOIN tblICItemLocation ICL ON PL.intItemLocationId = ICL.intItemLocationId
 				WHERE CPL.intSort = 2
 					AND @Quantity BETWEEN PL.dblMin  AND PL.dblMax
@@ -346,7 +346,7 @@ BEGIN
 			(
 				SELECT TOP 1 PL.intItemId, PL.intItemUnitMeasureId AS intItemUOM, PL.dblMin, PL.dblMax, PL.dblUnitPrice, ICL.intLocationId 
 				FROM tblICItemPricingLevel PL	
-				INNER JOIN tblSMCompanyLocationPricingLevel CPL ON PL.strPriceLevel = CPL.strPricingLevelName 		
+				INNER JOIN tblSMCompanyLocationPricingLevel CPL ON PL.intCompanyLocationPricingLevelId = CPL.intCompanyLocationPricingLevelId --PL.strPriceLevel = CPL.strPricingLevelName 		
 				INNER JOIN tblICItemLocation ICL ON PL.intItemLocationId = ICL.intItemLocationId
 				WHERE CPL.intSort = 3
 					AND @Quantity BETWEEN PL.dblMin  AND PL.dblMax
