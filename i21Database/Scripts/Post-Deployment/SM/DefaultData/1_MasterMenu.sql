@@ -23,7 +23,7 @@ GO
 	--IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Contract vs Market Differential Analysis' AND strModuleName = 'Logistics' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Contract vs Market Differential Analysis' AND strModuleName = 'Logistics') AND strCommand = N'Logistics.view.ContractVsMarketDifferential') 
 	--IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Blend Demand' AND strModuleName = 'Manufacturing' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Blend Demand' AND strModuleName = 'Contract Management') AND strCommand = N'ContractManagement.view.ItemContract?showSearch=true') 
 	--IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Comment Maintenance' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Comment Maintenance' AND strModuleName = 'Accounts Receivable') AND strCommand = N'AccountsReceivable.view.StatementFooterMessage') 
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Cross Reference – Vendor Invoice Import' AND strModuleName = 'Transports' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'Transports') AND strCommand = N'Cross Reference – Vendor Invoice Import') 
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Units of Measure' AND strModuleName = 'Inventory' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'Inventory') AND strCommand = N'Inventory.view.InventoryUOM') 
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 		
@@ -1503,6 +1503,9 @@ DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Retail Inventory' AND strModule
 /* START OF RENAMING */
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Storage Locations' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryMaintenanceParentMenuId)
 UPDATE tblSMMasterMenu SET strMenuName = N'Storage Units', strDescription = 'Storage Units' WHERE strMenuName = 'Storage Locations' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryMaintenanceParentMenuId
+
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Inventory UOM' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryMaintenanceParentMenuId)
+UPDATE tblSMMasterMenu SET strMenuName = N'Units of Measure', strDescription = 'Units of Measure' WHERE strMenuName = 'Inventory UOM' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryMaintenanceParentMenuId
 /* END OF RENAMING */
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Inventory Receipts' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryActivitiesParentMenuId)
@@ -1573,11 +1576,11 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Fuel Type
 ELSE 
 	UPDATE tblSMMasterMenu SET strCommand = N'Inventory.view.FuelType?showSearch=true', intSort = 2 WHERE strMenuName = 'Fuel Types' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryMaintenanceParentMenuId
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Inventory UOM' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryMaintenanceParentMenuId)
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Units of Measure' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryMaintenanceParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Inventory UOM', N'Inventory', @InventoryMaintenanceParentMenuId, N'Inventory UOM', N'Maintenance', N'Screen', N'Inventory.view.InventoryUOM', N'small-menu-maintenance', 1, 1, 0, 1, 3, 0)
+	VALUES (N'Units of Measure', N'Inventory', @InventoryMaintenanceParentMenuId, N'Units of Measure', N'Maintenance', N'Screen', N'Inventory.view.InventoryUOM', N'small-menu-maintenance', 1, 1, 0, 1, 3, 0)
 ELSE 
-	UPDATE tblSMMasterMenu SET strCommand = N'Inventory.view.InventoryUOM', intSort = 3 WHERE strMenuName = 'Inventory UOM' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryMaintenanceParentMenuId
+	UPDATE tblSMMasterMenu SET strCommand = N'Inventory.view.InventoryUOM', intSort = 3 WHERE strMenuName = 'Units of Measure' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryMaintenanceParentMenuId
 	
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Items' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryMaintenanceParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
