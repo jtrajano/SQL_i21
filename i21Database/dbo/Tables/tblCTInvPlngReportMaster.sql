@@ -23,7 +23,7 @@
 	[dtmCreated] [datetime] NULL CONSTRAINT [DF_tblCTInvPlngReportMaster_dtmCreated] DEFAULT GetDate(),
 	[intLastModifiedUserId] [int] NULL,
 	[dtmLastModified] [datetime] NULL CONSTRAINT [DF_tblCTInvPlngReportMaster_dtmLastModified] DEFAULT GetDate(),
-
+	intInvPlngReportMasterRefID int,
 	CONSTRAINT [PK_tblCTInvPlngReportMaster] PRIMARY KEY ([intInvPlngReportMasterID]),
 	CONSTRAINT [FK_tblCTInvPlngReportMaster_tblCTReportMaster] FOREIGN KEY ([intReportMasterID]) REFERENCES [tblCTReportMaster]([intReportMasterID]),
 	CONSTRAINT [FK_tblCTInvPlngReportMaster_tblMFDemandHeader] FOREIGN KEY (intDemandHeaderId) REFERENCES [tblMFDemandHeader](intDemandHeaderId),

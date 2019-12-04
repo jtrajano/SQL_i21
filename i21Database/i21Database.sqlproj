@@ -8229,6 +8229,13 @@
     <Build Include="dbo\Tables\tblMFInvPlngSummaryDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGenerateDemandSummary.sql" />
     <Build Include="dbo\Stored Procedures\uspMFSaveInvPlngSummary.sql" />
+    <Build Include="dbo\Tables\tblMFDemandStage.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessPreStageDemand.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFDemandPopulateStgXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFDemandProcessStgXML.sql" />
+    <Build Include="dbo\Views\vyuMFInvPlngReportAttributeValue.sql" />
+    <Build Include="dbo\Views\vyuMFInvPlngReportMaster.sql" />
+    <Build Include="dbo\Views\vyuMFInvPlngReportMaterial.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
