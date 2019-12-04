@@ -164,7 +164,13 @@ AS
 				CH.strContractItemNo	
 
 		FROM	Header CH
-		WHERE	CH.strContractNumber NOT IN(SELECT strTransactionNumber FROM tblSMApproval WHERE strStatus='Submitted')  AND 4 <> intAllStatusId & 4
+		WHERE	
+			--CH.strContractNumber 
+			CH.intContractHeaderId
+		NOT IN(
+			--SELECT strTransactionNumber FROM tblSMApproval WHERE strStatus='Submitted'
+			SELECT B.intRecordId FROM tblSMApproval A INNER JOIN tblSMTransaction B ON A.intTransactionId = B.intTransactionId WHERE strStatus='Submitted'
+		)  AND 4 <> intAllStatusId & 4
 		--AND		CH.intContractHeaderId	NOT IN (SELECT intContractHeaderId FROM tblCTContractDetail WHERE intContractStatusId = 2)
 		AND		intContractDetailId IS NOT NULL
 
