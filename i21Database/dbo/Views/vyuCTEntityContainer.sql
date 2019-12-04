@@ -17,7 +17,7 @@ SELECT	E.intEntityId,
 				WHEN Y.strType = 'Salesperson' THEN P.ysnActive
 				ELSE E.ysnActive
 		END	AS	ysnActive,
-		CAST(ISNULL(S.intEntityId,0) AS BIT) ysnShipVia,
+		CAST(ISNULL(S.intEntityId,0) AS BIT) ysnShippingLine,
 		CAST(ISNULL(V.intEntityId,0) AS BIT) ysnVendor,
 		intTermId = TM.intTermID,
 		strTerm = TM.strTerm,
@@ -51,7 +51,7 @@ OUTER APPLY (
 		LEFT JOIN tblLGFreightRateMatrix FRM 
 					ON EY.intEntityId = FRM.intEntityId
 		WHERE	EY.intEntityId = E.intEntityId	
-				AND	ET.strType = 'Ship Via'
+				AND	ET.strType = 'Shipping Line'
 				AND dbo.fnRemoveTimeOnDate(GETDATE()) <= dbo.fnRemoveTimeOnDate(FRM.dtmValidTo)
 	) entityFreight WHERE intRowNum = 1		
 ) S	
