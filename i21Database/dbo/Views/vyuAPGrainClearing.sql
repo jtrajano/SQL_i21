@@ -124,7 +124,7 @@ SELECT
 			CASE WHEN ST.intSettleContractId IS NOT NULL THEN ST.dblUnits * ST.dblPrice
 			ELSE CAST((SS.dblNetSettlement + SS.dblStorageDue + SS.dblDiscountsDue) AS DECIMAL(18,2)) END
 		END AS DECIMAL(18,2)) dblVoucherTotal
-    ,CASE 
+    ,CAST(CASE 
 		WHEN billDetail.intWeightUOMId IS NULL THEN 
 			ISNULL(billDetail.dblQtyReceived, 0) 
 		ELSE 
@@ -134,7 +134,7 @@ SELECT
 			ELSE 
 				ISNULL(billDetail.dblNetWeight, 0) 
 		END
-		END AS dblVoucherQty
+		END AS DECIMAL(18,2)) AS dblVoucherQty
 	,0 AS dblSettleStorageAmount
 	,0 AS dblSettleStorageQty
 	-- ,CAST(SS.dblNetSettlement AS DECIMAL(18,2)) AS dblSettleStorageAmount
@@ -374,6 +374,14 @@ SELECT
 	,billDetail.intUnitOfMeasureId  AS intItemUOMId
     ,unitMeasure.strUnitMeasure AS strUOM 
 	,billDetail.dblTotal AS dblVoucherTotal
+	--use the storage data to  handle cost adjustment
+	-- ,CAST(CASE
+	-- 	WHEN QM.strDiscountChargeType = 'Percent' AND QM.dblDiscountAmount < 0 
+	-- 	THEN (QM.dblDiscountAmount * (CASE WHEN ISNULL(SS.dblCashPrice,0) > 0 THEN SS.dblCashPrice ELSE CD.dblCashPrice END) * -1)
+	-- 	WHEN QM.strDiscountChargeType = 'Percent' AND QM.dblDiscountAmount > 0 THEN (QM.dblDiscountAmount * (CASE WHEN ISNULL(SS.dblCashPrice,0) > 0 THEN SS.dblCashPrice ELSE CD.dblCashPrice END)) *  -1
+	-- 	WHEN QM.strDiscountChargeType = 'Dollar' AND QM.dblDiscountAmount < 0 THEN (QM.dblDiscountAmount)
+	-- 	WHEN QM.strDiscountChargeType = 'Dollar' AND QM.dblDiscountAmount > 0 THEN (QM.dblDiscountAmount * -1)
+	-- END * (CASE WHEN QM.strCalcMethod = 3 THEN CS.dblGrossQuantity ELSE SST.dblUnits END) AS DECIMAL(18,2))
     ,CASE 
 		WHEN billDetail.intWeightUOMId IS NULL THEN 
 			ISNULL(billDetail.dblQtyReceived, 0) 
@@ -403,9 +411,17 @@ INNER JOIN (tblGRCustomerStorage CS INNER JOIN tblGRSettleStorageTicket SST
 				ON SST.intCustomerStorageId = CS.intCustomerStorageId
 			INNER JOIN tblGRSettleStorage SS
 				ON SST.intSettleStorageId = SS.intSettleStorageId
-					AND SS.intParentSettleStorageId IS NOT NULL)
+					AND SS.intParentSettleStorageId IS NOT NULL
+			-- INNER JOIN tblQMTicketDiscount QM
+			-- 	ON QM.intTicketFileId = CS.intCustomerStorageId
+			-- LEFT JOIN tblGRSettleContract SC
+			-- 	ON SC.intSettleStorageId = SS.intSettleStorageId
+			-- LEFT JOIN tblCTContractDetail CD
+			-- 	ON CD.intContractDetailId = SC.intContractDetailId
+			)
 	ON CS.intCustomerStorageId = billDetail.intCustomerStorageId
 	AND SS.intBillId = bill.intBillId
+	-- AND CD.intContractDetailId = billDetail.intContractDetailId
 INNER JOIN vyuGLAccountDetail glAccnt
 	ON glAccnt.intAccountId = billDetail.intAccountId
 INNER JOIN tblSMCompanyLocation compLoc
