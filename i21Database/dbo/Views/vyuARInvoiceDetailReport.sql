@@ -1,32 +1,34 @@
 ﻿CREATE VIEW [dbo].[vyuARInvoiceDetailReport]
 AS
-SELECT I.intInvoiceId
-	 , I.intEntityCustomerId
-	 , I.intCompanyLocationId
-	 , strLocationName = L.strLocationName
-	 , strType				= CASE WHEN ISNULL(I.intOriginalInvoiceId, 0) <> 0 THEN 'Final'
-								   WHEN I.strType = 'Provisional' THEN 'Provisional'
-								   ELSE 'Direct' 
-							  END COLLATE Latin1_General_CI_AS
-	 , I.strInvoiceNumber
-	 , I.dtmDate
-	 , CT.strContractNumber
-	 , CT.intContractSeq
-	 , strCustomerName		= C.strName
-	 , strCustomerNumber	= C.strCustomerNumber	
-	 , strItemNo 			= ITEM.strItemNo 
-	 , strUnitCostCurrency	= ID.strUnitCostCurrency
-	 , strItemDescription	= ITEM.strDescription
-	 , strComments			= I.strComments
-	 , dblQtyShipped		= ISNULL(ID.dblQtyShipped, 0)
-	 , dblItemWeight		= ISNULL(ID.dblItemWeight, 0)
-	 , dblUnitCost			= ISNULL(ID.dblPrice, 0)
-	 , dblCostPerUOM		= ISNULL(ID.dblPrice, 0)
-	 , dblUnitCostCurrency  = ISNULL(ID.dblPrice, 0)
-	 , dblTotalTax			= ISNULL(ID.dblTotalTax, 0)
-	 , dblDiscount			= ISNULL(ID.dblDiscount, 0)
-	 , dblTotal				= ISNULL(ID.dblTotal, 0)
-	 , ysnPosted			= I.ysnPosted
+SELECT intInvoiceId				= I.intInvoiceId
+	 , intEntityCustomerId		= I.intEntityCustomerId
+	 , intCompanyLocationId		= I.intCompanyLocationId
+	 , strLocationName			= L.strLocationName
+	 , strTransactionType		= I.strTransactionType
+	 , strType					= CASE WHEN ISNULL(I.intOriginalInvoiceId, 0) <> 0 THEN 'Final'
+									   WHEN I.strType = 'Provisional' THEN 'Provisional'
+									   ELSE 'Direct' 
+								  END COLLATE Latin1_General_CI_AS
+	 , strInvoiceNumber			= I.strInvoiceNumber
+	 , dtmDate					= I.dtmDate
+	 , strContractNumber		= CT.strContractNumber
+	 , intContractSeq			= CT.intContractSeq
+	 , strCustomerName			= C.strName
+	 , strCustomerNumber		= C.strCustomerNumber	
+	 , strItemNo 				= ITEM.strItemNo 
+	 , strUnitCostCurrency		= ID.strUnitCostCurrency
+	 , strItemDescription		= ITEM.strDescription
+	 , strComments				= I.strComments
+	 , dblQtyShipped			= CASE WHEN (I.strTransactionType  IN ('Invoice', 'Debit Memo', 'Cash', 'Proforma Invoice')) THEN ISNULL(ID.dblQtyShipped, 0) ELSE ISNULL(ID.dblQtyShipped, 0) * -1 END
+	 , dblItemWeight			= CASE WHEN (I.strTransactionType  IN ('Invoice', 'Debit Memo', 'Cash', 'Proforma Invoice')) THEN ISNULL(ID.dblItemWeight, 0) ELSE ISNULL(ID.dblItemWeight, 0) * -1 END
+	 , dblUnitCost				= ISNULL(ID.dblPrice, 0)
+	 , dblCostPerUOM			= ISNULL(ID.dblPrice, 0)
+	 , dblUnitCostCurrency		= ISNULL(ID.dblPrice, 0)
+	 , dblTotalTax				= CASE WHEN (I.strTransactionType  IN ('Invoice', 'Debit Memo', 'Cash', 'Proforma Invoice')) THEN ISNULL(ID.dblTotalTax, 0) ELSE ISNULL(ID.dblTotalTax, 0) * -1 END
+	 , dblDiscount				= CASE WHEN (I.strTransactionType  IN ('Invoice', 'Debit Memo', 'Cash', 'Proforma Invoice')) THEN ISNULL(ID.dblDiscount, 0) ELSE ISNULL(ID.dblDiscount, 0) * -1 END
+	 , dblTotal					= CASE WHEN (I.strTransactionType  IN ('Invoice', 'Debit Memo', 'Cash', 'Proforma Invoice')) THEN ISNULL(ID.dblTotal, 0) ELSE ISNULL(ID.dblTotal, 0) * -1 END
+	 , ysnPosted				= ISNULL(I.ysnPosted, 0)
+	 , ysnImpactInventory		= ISNULL(I.ysnImpactInventory, 0)
 FROM dbo.tblARInvoice I WITH (NOLOCK)
 INNER JOIN (
 	SELECT intInvoiceId
