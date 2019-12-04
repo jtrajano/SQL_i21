@@ -651,11 +651,16 @@ BEGIN TRY
 														END
 													ELSE SST.dblUnits
 												END
-					,dblCashPrice				= CASE 
+					,dblCashPrice				= 
+												CASE 
 													WHEN QM.strDiscountChargeType = 'Percent'
 																THEN (dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, IU.intUnitMeasureId, CS.intUnitMeasureId, ISNULL(QM.dblDiscountPaid, 0)) - dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, IU.intUnitMeasureId, CS.intUnitMeasureId, ISNULL(QM.dblDiscountDue, 0)))
 																	*
-																	(CASE WHEN SS.dblCashPrice <> 0 THEN SS.dblCashPrice ELSE SC.dblCashPrice END)
+																	CASE WHEN SC.strPricingType = 'Basis' THEN
+																		@dblFutureMarkePrice + SC.dblBasis
+																	ELSE
+																		(CASE WHEN SS.dblCashPrice <> 0 THEN SS.dblCashPrice ELSE SC.dblCashPrice END)
+																	END
 													ELSE --Dollar
 														dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, IU.intUnitMeasureId, CS.intUnitMeasureId, ISNULL(QM.dblDiscountPaid, 0)) - dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, IU.intUnitMeasureId, CS.intUnitMeasureId, ISNULL(QM.dblDiscountDue, 0))
 												END
