@@ -34,7 +34,7 @@ OUTER APPLY (
 	WHERE ISNULL(EM.strEmail, '') <> ''
 	  AND ISNULL(EM.strEmailDistributionOption, '') <> ''
 	  AND ETC.intEntityId = I.intEntityCustomerId 
-	  AND EM.strEmailDistributionOption LIKE '%' + I.strTransactionType + '%'
+	  AND REPLACE(EM.strEmailDistributionOption, 'CF Invoice', '') LIKE '%' + I.strTransactionType + '%'
 ) EMAILSETUP
 LEFT JOIN (
 	SELECT intInvoiceId = SMT.intRecordId 
