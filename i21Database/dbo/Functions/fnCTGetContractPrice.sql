@@ -46,12 +46,17 @@ BEGIN
 		END
 		ELSE
 		BEGIN
-			SELECT	@strPricingLevelName	=	strPricingLevelName FROM tblSMCompanyLocationPricingLevel WHERE intCompanyLocationPricingLevelId = @intCompanyLocationPricingLevelId
+			--SELECT	@strPricingLevelName	=	strPricingLevelName FROM tblSMCompanyLocationPricingLevel WHERE intCompanyLocationPricingLevelId = @intCompanyLocationPricingLevelId
 			
-			SELECT	@dblContractPrice = MIN(IP.dblUnitPrice) 
-			FROM	tblICItemPricingLevel	IP
-			JOIN	tblICItemLocation		IL	ON	IL.intItemLocationId = IP.intItemLocationId
-			WHERE	IP.intItemId = @intItemId AND IP.dblUnitPrice > 0 AND IL.intLocationId = @intCompanyLocationId AND IP.strPriceLevel = @strPricingLevelName
+			SELECT	@dblContractPrice = MIN(IPL.dblUnitPrice) 
+			FROM	tblICItemPricingLevel IPL
+					INNER JOIN tblICItemLocation IL	
+						ON IL.intItemLocationId = IPL.intItemLocationId
+			WHERE	
+				IPL.intItemId = @intItemId 
+				AND IPL.dblUnitPrice > 0 
+				AND IL.intLocationId = @intCompanyLocationId 
+				AND IPL.intCompanyLocationPricingLevelId = @intCompanyLocationPricingLevelId
 			
 			IF @dblContractPrice > @dblCashPrice 
 			BEGIN
