@@ -41,7 +41,7 @@ BEGIN TRY
 				FROM tblLGFreightRateMatrix t
 				WHERE t.intType = 2
 					AND t.intFreightRateMatrixId = @intFreightRateMatrixId
-				)
+				) OR @strRowState = 'Delete'
 		BEGIN
 			EXEC uspIPFreightRateMatrixPopulateStgXML @intFreightRateMatrixId
 				,@intToEntityId

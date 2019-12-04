@@ -160,7 +160,7 @@ BEGIN TRY
 				IF NOT EXISTS (
 						SELECT 1
 						FROM tblLGFreightRateMatrix
-						--WHERE intFreightRateMatrixRefId = @intFreightRateMatrixRefId
+						WHERE intFreightRateMatrixRefId = @intFreightRateMatrixRefId
 						)
 					SELECT @strRowState = 'Added'
 				ELSE
@@ -173,7 +173,7 @@ BEGIN TRY
 
 				DELETE
 				FROM tblLGFreightRateMatrix
-				--WHERE intFreightRateMatrixRefId = @intFreightRateMatrixRefId
+				WHERE intFreightRateMatrixRefId = @intFreightRateMatrixRefId
 				
 				GOTO ext
 			END
@@ -199,7 +199,7 @@ BEGIN TRY
 					,dblDestinationDeliveryCharges
 					,dblTotalCostPerContainer
 					,intConcurrencyId
-					--,intFreightRateMatrixRefId
+					,intFreightRateMatrixRefId
 					)
 				SELECT @intEntityId
 					,intType
@@ -219,7 +219,7 @@ BEGIN TRY
 					,dblDestinationDeliveryCharges
 					,dblTotalCostPerContainer
 					,1
-					--,@intFreightRateMatrixRefId
+					,@intFreightRateMatrixRefId
 				FROM OPENXML(@idoc, 'vyuIPGetFreightRateMatrixs/vyuIPGetFreightRateMatrix', 2) WITH (
 						[intType] INT
 						,[strServiceContractNo] NVARCHAR(100)
@@ -277,11 +277,11 @@ BEGIN TRY
 						,[dblDestinationDeliveryCharges] NUMERIC(18, 6)
 						,[dblTotalCostPerContainer] NUMERIC(18, 6)
 						) x
-				--WHERE tblLGFreightRateMatrix.intFreightRateMatrixRefId = @intFreightRateMatrixRefId
+				WHERE tblLGFreightRateMatrix.intFreightRateMatrixRefId = @intFreightRateMatrixRefId
 				
 				SELECT @intNewFreightRateMatrixId = intFreightRateMatrixId
 				FROM tblLGFreightRateMatrix
-				--WHERE intFreightRateMatrixRefId = @intFreightRateMatrixRefId
+				WHERE intFreightRateMatrixRefId = @intFreightRateMatrixRefId
 			END
 
 			ext:
