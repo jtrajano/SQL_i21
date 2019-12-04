@@ -25,6 +25,7 @@ BEGIN
 	DECLARE @dblChargeAmount NUMERIC(18,6)
 	DECLARE @ysnTicketSpecialGradePosted BIT
 	DECLARE @ysnTicketHasSpecialDiscount BIT
+	DECLARE @intBillId INT
 	
 BEGIN 
 	DECLARE @TransactionName AS VARCHAR(500) = 'uspSCProcessReceiptToVoucher_' + CAST(NEWID() AS NVARCHAR(100));
@@ -209,7 +210,7 @@ END
 
 			IF(@ysnTicketHasSpecialDiscount <> 1 OR (@ysnTicketSpecialGradePosted = 1 AND @ysnTicketHasSpecialDiscount = 1))
 			BEGIN
-				EXEC uspSCProcessReceiptToVoucher @intTicketId, @intLoopInventoryReceiptId	,@intUserId
+				EXEC uspSCProcessReceiptToVoucher @intTicketId, @intLoopInventoryReceiptId	,@intUserId, @intBillId OUTPUT
 			END
 
 			SELECT TOP 1 

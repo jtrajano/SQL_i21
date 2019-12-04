@@ -100,6 +100,7 @@ BEGIN
 		BEGIN
 			EXEC dbo.uspSOProcessToInvoice @SalesOrderId = @intSalesOrderId
 										 , @UserId = @intUserId
+										 , @intShipToLocationId = @intContractShipToLocationId
 										 , @NewInvoiceId = @intNewInvoiceId OUT
 		END
 	ELSE

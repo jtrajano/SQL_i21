@@ -366,7 +366,7 @@ BEGIN TRY
 			,dblWeight
 			,intWeightUnitMeasureId
 			)
-		SELECT ID.intItemId
+		SELECT DISTINCT ID.intItemId
 			,(
 				CASE 
 					WHEN @ysnCalculateNoOfContainerByBagQty = 1
@@ -545,6 +545,11 @@ BEGIN TRY
 		,intMonthId INT
 		)
 
+	IF OBJECT_ID('tempdb..#tblMFContractDetail') IS NOT NULL
+		DROP TABLE #tblMFContractDetail
+
+	CREATE TABLE #tblMFContractDetail (intContractDetailId INT)
+
 	IF OBJECT_ID('tempdb..#tblMFDemandList') IS NOT NULL
 		DROP TABLE #tblMFDemandList
 
@@ -714,7 +719,7 @@ BEGIN TRY
 				,intAttributeId
 				,intMonthId
 				)
-			SELECT Distinct intItemId
+			SELECT DISTINCT intItemId
 				,- dblQuantity
 				,intAttributeId
 				,intMonthId
@@ -735,7 +740,7 @@ BEGIN TRY
 			FROM @tblMFItem I
 			JOIN tblMFDemandDetail DD ON IsNULL(DD.intSubstituteItemId, DD.intItemId) = I.intItemId
 				AND DD.intDemandHeaderId = @intDemandHeaderId
-				and IsNULL(DD.intCompanyLocationId,IsNULL(@intCompanyLocationId,0))=IsNULL(@intCompanyLocationId,IsNULL(DD.intCompanyLocationId,0))
+				AND IsNULL(DD.intCompanyLocationId, IsNULL(@intCompanyLocationId, 0)) = IsNULL(@intCompanyLocationId, IsNULL(DD.intCompanyLocationId, 0))
 			JOIN tblICItemUOM IU ON IU.intItemId = DD.intItemId
 				AND IU.intUnitMeasureId = @intUnitMeasureId
 			WHERE DD.dtmDemandDate >= @dtmStartOfMonth
@@ -780,6 +785,32 @@ BEGIN TRY
 	BEGIN
 		IF @ysnRefreshContract = 1
 		BEGIN
+			INSERT INTO #tblMFContractDetail (intContractDetailId)
+			SELECT SS.intContractDetailId
+			FROM tblLGLoad L
+			JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
+				AND L.intPurchaseSale = 1 and L.ysnPosted=1
+			JOIN tblCTContractDetail SS ON SS.intContractDetailId = LD.intPContractDetailId
+			JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = SS.intCompanyLocationId
+			JOIN @tblMFItemDetail I ON I.intItemId = SS.intItemId
+			JOIN tblICItemUOM IU ON IU.intItemUOMId = SS.intItemUOMId
+			LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LD.intLoadDetailId = LDCL.intLoadDetailId
+			WHERE ISNULL(LDCL.dblQuantity, LD.dblQuantity) - (
+					CASE 
+						WHEN (LDCL.intLoadDetailContainerLinkId IS NOT NULL)
+							THEN ISNULL(LDCL.dblReceivedQty, 0)
+						ELSE LD.dblDeliveredQuantity
+						END
+					) > 0
+				AND SS.intContractStatusId = 1
+				AND ISNULL(SS.intCompanyLocationId, 0) = (
+					CASE 
+						WHEN @intCompanyLocationId = 0
+							THEN ISNULL(SS.intCompanyLocationId, 0)
+						ELSE @intCompanyLocationId
+						END
+					)
+
 			INSERT INTO #tblMFDemand (
 				intItemId
 				,dblQty
@@ -806,6 +837,11 @@ BEGIN TRY
 					)
 			WHERE SS.intContractStatusId = 1
 				AND SS.dtmUpdatedAvailabilityDate < @dtmStartOfMonth
+				AND NOT EXISTS (
+					SELECT *
+					FROM #tblMFContractDetail CD
+					WHERE CD.intContractDetailId = SS.intContractDetailId
+					)
 			GROUP BY CASE 
 					WHEN I.ysnSpecificItemDescription = 1
 						THEN I.intItemId
@@ -838,6 +874,11 @@ BEGIN TRY
 					)
 			WHERE SS.intContractStatusId = 1
 				AND SS.dtmUpdatedAvailabilityDate >= @dtmStartOfMonth
+				AND NOT EXISTS (
+					SELECT *
+					FROM #tblMFContractDetail CD
+					WHERE CD.intContractDetailId = SS.intContractDetailId
+					)
 			GROUP BY datename(m, SS.dtmUpdatedAvailabilityDate) + ' ' + cast(datepart(yyyy, SS.dtmUpdatedAvailabilityDate) AS VARCHAR)
 				,CASE 
 					WHEN I.ysnSpecificItemDescription = 1
@@ -904,7 +945,7 @@ BEGIN TRY
 		,0 AS intMonthId
 	FROM tblLGLoad L
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
-		AND L.intPurchaseSale = 1
+		AND L.intPurchaseSale = 1 and L.ysnPosted=1
 	JOIN tblCTContractDetail SS ON SS.intContractDetailId = LD.intPContractDetailId
 	JOIN @tblMFItemDetail I ON I.intItemId = SS.intItemId
 	JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = SS.intCompanyLocationId
@@ -954,7 +995,7 @@ BEGIN TRY
 		,DATEDIFF(mm, 0, SS.dtmUpdatedAvailabilityDate) + 1 - @intCurrentMonth AS intMonthId
 	FROM tblLGLoad L
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
-		AND L.intPurchaseSale = 1
+		AND L.intPurchaseSale = 1 and L.ysnPosted=1
 	JOIN tblCTContractDetail SS ON SS.intContractDetailId = LD.intPContractDetailId
 	JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = SS.intCompanyLocationId
 	JOIN @tblMFItemDetail I ON I.intItemId = SS.intItemId
@@ -1425,12 +1466,12 @@ BEGIN TRY
 	SELECT Demand.intItemId
 		,CASE 
 			WHEN IsNULL((
-					SELECT dblQty
-					FROM #tblMFDemand D2
-					WHERE D2.intItemId = Demand.intItemId
-						AND D2.intAttributeId = 10
-						AND D2.intMonthId = Demand.intMonthId
-					),0) = 0
+						SELECT dblQty
+						FROM #tblMFDemand D2
+						WHERE D2.intItemId = Demand.intItemId
+							AND D2.intAttributeId = 10
+							AND D2.intMonthId = Demand.intMonthId
+						), 0) = 0
 				THEN (
 						SELECT dblQty
 						FROM #tblMFDemand D1
@@ -1693,6 +1734,9 @@ BEGIN TRY
 										CASE 
 											WHEN I.intItemId = MI.intItemId
 												THEN I.strItemNo + ' - ' + I.strDescription
+											WHEN I.intItemId <> MI.intItemId
+												AND strBook IS NULL
+												THEN I.strItemNo + ' - ' + I.strDescription + ' [ ' + MI.strItemNo + ' - ' + MI.strDescription + ' ]'
 											ELSE I.strItemNo + ' - ' + I.strDescription + ' [ ' + MI.strItemNo + ' - ' + MI.strDescription + ' ] Restricted [' + strBook + ']'
 											END
 										)
@@ -1700,6 +1744,9 @@ BEGIN TRY
 									CASE 
 										WHEN I.intItemId = MI.intItemId
 											THEN I.strItemNo
+										WHEN I.intItemId <> MI.intItemId
+											AND strBook IS NULL
+											THEN I.strItemNo + ' [ ' + MI.strItemNo + ' ]'
 										ELSE I.strItemNo + ' [ ' + MI.strItemNo + ' ] Restricted [' + strBook + ']'
 										END
 									)
