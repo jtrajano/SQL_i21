@@ -417,6 +417,7 @@ BEGIN TRY
 		,ysnShowDriverPinDescriptionOnly
 		,strDriverPinNumber
 		,strDriverDescription
+		,ysnSummaryByDriverPin
 	)
 	SELECT 
 		intCustomerGroupId
@@ -572,6 +573,7 @@ BEGIN TRY
 		,ysnShowDriverPinDescriptionOnly	
 		,strDriverPinNumber
 		,strDriverDescription
+		,ysnSummaryByDriverPin
 	FROM
 	tblCFInvoiceStagingTable
 	WHERE strUserId = @username
