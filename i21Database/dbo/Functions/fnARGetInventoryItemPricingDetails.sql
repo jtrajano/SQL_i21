@@ -157,10 +157,15 @@ BEGIN
 					,@PriceBasis	= dbo.fnCalculateCostBetweenUOM(PL.intItemUnitMeasureId, @ItemUOMId, PL.dblUnitPrice)
 					,@Deviation		= @ZeroDecimal
 					,@Pricing		= 'Inventory - Pricing Level'
-				FROM tblICItemPricingLevel PL
-				INNER JOIN vyuICGetItemStock VIS ON PL.intItemId = VIS.intItemId
-											    AND PL.intItemLocationId = VIS.intItemLocationId															
-				WHERE PL.strPriceLevel = @PriceLevel	
+				FROM 
+				tblICItemPricingLevel PL
+				INNER JOIN tblSMCompanyLocationPricingLevel CPL 
+					ON PL.intCompanyLocationPricingLevelId = CPL.intCompanyLocationPricingLevelId
+				INNER JOIN vyuICGetItemStock VIS 
+					ON PL.intItemId = VIS.intItemId
+					AND PL.intItemLocationId = VIS.intItemLocationId															
+				WHERE 
+					CPL.strPricingLevelName = @PriceLevel	
 					AND PL.intItemId = @ItemId
 					AND PL.intItemLocationId = @ItemLocationId
 					AND ISNULL(PL.intCurrencyId, @FunctionalCurrencyId) = @CurrencyId
@@ -191,8 +196,9 @@ BEGIN
 			ON ICPL.intItemId = ICGIS.intItemId
 			AND ICPL.intItemLocationId = ICGIS.intItemLocationId
 	INNER JOIN tblSMCompanyLocationPricingLevel SMPL
-			ON ICGIS.intLocationId = SMPL.intCompanyLocationId 
-			AND ICPL.strPriceLevel = SMPL.strPricingLevelName							
+			ON 
+			ICGIS.intLocationId = SMPL.intCompanyLocationId 
+			AND ICPL.intCompanyLocationPricingLevelId = SMPL.intCompanyLocationPricingLevelId --ICPL.strPriceLevel = SMPL.strPricingLevelName							
 	INNER JOIN
 		tblEMEntityLocation EMEL
 			ON ICGIS.intLocationId = EMEL.intWarehouseId 
