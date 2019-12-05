@@ -425,6 +425,7 @@ BEGIN TRY
 	  	AND dbo.fnRemoveTimeOnDate(InvTran.dtmDate) <= CASE WHEN @dtmEndDate IS NOT NULL   THEN @dtmEndDate   ELSE dbo.fnRemoveTimeOnDate(InvTran.dtmDate) END
 	  	AND intContractTypeId = 1
 	  	AND InvTran.intTransactionTypeId = 4
+		AND CH.intPricingTypeId <> 5
 	  GROUP BY CH.intContractTypeId,CH.intContractHeaderId
 	  	,CD.intContractDetailId,InvTran.dtmDate,Receipt.intInventoryReceiptId,CD.intItemUOMId,ReceiptItem.intCostUOMId
 
