@@ -137,7 +137,7 @@ BEGIN
 			,ROUND(SUM([dblCreditForeign]),2) as [dblCreditForeign]	
 	FROM
 	(
-		SELECT		DISTINCT
+		SELECT		--DISTINCT
 					[intPaymentId]					=	A.intPaymentId,
 					[dblCredit]	 					=	CASE WHEN A.dblExchangeRate != 1 THEN CAST(
 														dbo.fnAPGetPaymentAmountFactor((Details.dblTotal 
@@ -172,19 +172,19 @@ BEGIN
 			-- LEFT JOIN tblSMCurrencyExchangeRateType rateType ON A.intCurrencyExchangeRateTypeId = rateType.intCurrencyExchangeRateTypeId
 			WHERE	A.intPaymentId IN (SELECT intId FROM @paymentIds)
 			AND paymentDetail.dblPayment != 0 AND paymentDetail.intInvoiceId IS NULL
-			GROUP BY 
-			A.intPaymentId, 
-			A.dblAmountPaid,
-			Details.dblTotal, 
-			voucher.dblTotal,
-			withHoldData.dblWithholdPercent,
-			A.ysnPrepay , 
-			A.dblWithheld,
-			paymentDetail.dblPayment, 
-			paymentDetail.dblWithheld,
-			paymentDetail.dblDiscount,
-			intTransactionType , 
-			A.dblExchangeRate
+			-- GROUP BY 
+			-- A.intPaymentId, 
+			-- A.dblAmountPaid,
+			-- Details.dblTotal, 
+			-- voucher.dblTotal,
+			-- withHoldData.dblWithholdPercent,
+			-- A.ysnPrepay , 
+			-- A.dblWithheld,
+			-- paymentDetail.dblPayment, 
+			-- paymentDetail.dblWithheld,
+			-- paymentDetail.dblDiscount,
+			-- intTransactionType , 
+			-- A.dblExchangeRate
 			) AS tmpSummaryPayment
 			GROUP BY tmpSummaryPayment.intPaymentId
 			-- UNION ALL
