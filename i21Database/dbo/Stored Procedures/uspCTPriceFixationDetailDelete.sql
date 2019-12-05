@@ -37,9 +37,9 @@ BEGIN TRY
 	WHILE EXISTS(SELECT 1 FROM #ItemBillPosted)
 	BEGIN
 		SELECT TOP 1 @Id = intBillId FROM #ItemBillPosted
-		EXEC [dbo].[uspAPPostBill] @post = 0,@recap = 0,@isBatch = 0,@param = @Id,@userId = @intUserId,@success = @ysnSuccess OUTPUT
+		EXEC [dbo].[uspAPPostBill] @transactionType = 'Contract', @post = 0,@recap = 0,@isBatch = 0,@param = @Id,@userId = @intUserId,@success = @ysnSuccess OUTPUT
 		DELETE #ItemBillPosted WHERE intBillId = @Id
-	END	
+	END
 
 	-- GET UNPOSTED BILL
 	SELECT  BL.intBillId AS Id, FT.intDetailId AS DetailId, DA.intBillDetailId AS BillDetailId, FD.dblQuantity AS Quantity
