@@ -49,7 +49,6 @@ strAccountClassification = ISNULL((
 dblDebit = ISNULL(Detail.dblDebit,0),
 dblCredit = ISNULL(Detail.dblCredit,0)
 FROM tblCMBankTransaction A
-LEFT JOIN tblCMAddendaSequence B ON B.intTransactionId = A.intTransactionId
 OUTER APPLY (
 	SELECT SUM(ISNULL(dblDebit,0)) dblDebit, SUM(ISNULL(dblCredit,0)) dblCredit FROM tblCMBankTransactionDetail WHERE intTransactionId = A.intTransactionId
 )Detail
