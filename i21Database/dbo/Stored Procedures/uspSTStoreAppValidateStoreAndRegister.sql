@@ -47,8 +47,8 @@ BEGIN
 			, @strPullTime = ISNULL(Reg.strSAPPHIRECheckoutPullTime, '')
 
 			, @ysnAutoUpdatePassword = ISNULL(Reg.ysnSAPPHIREAutoUpdatePassword, 0)
-			, @dtmLastPasswordChangeDate = Reg.dtmSAPPHIRELastPasswordChangeDate
-			, @strBasePassword = ISNULL(dbo.fnAESDecryptASym(Reg.strSAPPHIREBasePassword), '') --Reg.strSAPPHIREBasePassword
+			, @dtmLastPasswordChangeDate = ISNULL(Reg.dtmSAPPHIRELastPasswordChangeDate, GETDATE())
+			, @strBasePassword = ISNULL(dbo.fnAESDecryptASym(Reg.strSAPPHIREBasePassword), '')
 			, @intPasswordIntervalDays = Reg.intSAPPHIREPasswordIntervalDays
 			, @intPasswordIncrementNo = Reg.intSAPPHIREPasswordIncrementNo
 		FROM tblSTRegister Reg
@@ -57,7 +57,11 @@ BEGIN
 		WHERE ST.intStoreNo = @intStoreNo
 
 		-- Convert to TIME, example: '4:00:00 AM'
-		SET @strPullTime = LTRIM(RIGHT(CONVERT(CHAR(20), CAST((@strPullTime) AS DATETIME), 22), 11))
+		IF (@strPullTime != '')
+			BEGIN
+				SET @strPullTime = LTRIM(RIGHT(CONVERT(CHAR(20), CAST((@strPullTime) AS DATETIME), 22), 11))
+			END
+		
 
 		--IF(@strRegisterClass IN ('PASSPORT', 'RADIANT'))
 		--	BEGIN
