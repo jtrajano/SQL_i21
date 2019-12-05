@@ -8236,6 +8236,9 @@
     <Build Include="dbo\Views\vyuMFInvPlngReportAttributeValue.sql" />
     <Build Include="dbo\Views\vyuMFInvPlngReportMaster.sql" />
     <Build Include="dbo\Views\vyuMFInvPlngReportMaterial.sql" />
+    <Build Include="dbo\User Defined Types\StagingTransactionLogPassport.sql" />
+    <Build Include="dbo\Tables\tblSTTranslogRebatesPassport.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTCheckoutPassportTranslog.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
