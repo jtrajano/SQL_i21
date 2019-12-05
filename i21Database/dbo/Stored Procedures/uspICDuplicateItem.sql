@@ -582,7 +582,8 @@ BEGIN
 	----------------------------------------
 	-- Duplicate Item Pricing Level table --
 	----------------------------------------
-	INSERT INTO tblICItemPricingLevel(intItemId,
+	INSERT INTO tblICItemPricingLevel(
+		intItemId,
 		intItemLocationId,
 		strPriceLevel,
 		intItemUnitMeasureId,
@@ -594,7 +595,9 @@ BEGIN
 		dblUnitPrice,
 		strCommissionOn,
 		dblCommissionRate,
-		intSort )
+		intSort,
+		intCompanyLocationPricingLevelId
+	)
 	SELECT @NewItemId,
 		dbo.fnICGetItemLocationIdFromDuplicateItem(intItemLocationId, @NewItemId),
 		strPriceLevel,
@@ -607,7 +610,8 @@ BEGIN
 		dblUnitPrice,
 		strCommissionOn,
 		dblCommissionRate,
-		intSort 
+		intSort, 
+		intCompanyLocationPricingLevelId
 	FROM tblICItemPricingLevel
 	WHERE intItemId = @ItemId
 	-------------------------------------------------
