@@ -43,7 +43,7 @@ BEGIN TRY
 		FROM @tblMFDemandPreStage
 		WHERE intDemandPreStageId = @intDemandPreStageId
 
-		EXEC uspCTDemandPopulateStgXML @intInvPlngReportMasterID
+		EXEC uspMFDemandPopulateStgXML @intInvPlngReportMasterID
 			,@strRowState
 
 		UPDATE tblMFDemandPreStage
