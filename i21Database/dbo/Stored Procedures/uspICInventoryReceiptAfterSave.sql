@@ -25,6 +25,9 @@ DECLARE @SourceType_Scale AS INT = 1
 DECLARE @SourceType_InboundShipment AS INT = 2
 DECLARE @SourceType_Transport AS INT = 3
 DECLARE @SourceType_SettleStorage AS INT = 4
+DECLARE @SourceType_DeliverySheet AS INT = 5
+DECLARE @SourceType_PurchaseOrder AS INT = 6
+DECLARE @SourceType_Store AS INT = 7
 
 DECLARE @ErrMsg NVARCHAR(MAX)
 		,@intReturnValue AS INT 
@@ -207,10 +210,11 @@ END
 -- Call the integration with contracts. 
 -- Conditions: 
 -- 1. Do not proceed if receipt type is NOT a 'Purchase Contract' 
--- 2. Do not proceed if the source type is 'Inbound Shipment' or 'Scale'. Logistics (Inbound Shipment) and Scale (Scale Ticket) will be calling uspCTUpdateScheduleQuantity on their own. 
+-- 2. Do not proceed if the source type is 'Inbound Shipment', 'Scale', or 'Purchase Order. 
+-- Inbound Shipment, Scale Ticket, and Purchase Order will be calling uspCTUpdateScheduleQuantity on their own. 
 IF	@ReceiptType = @ReceiptType_PurchaseContract
 	AND (
-		ISNULL(@SourceType, @SourceType_None) NOT IN (@SourceType_InboundShipment, @SourceType_Scale)
+		ISNULL(@SourceType, @SourceType_None) NOT IN (@SourceType_InboundShipment, @SourceType_Scale, @SourceType_PurchaseOrder)
 	)
 BEGIN 
 	-- Get the deleted, new, or modified data. 
@@ -567,7 +571,7 @@ BEGIN
 	--EXEC dbo.uspICIncreaseOpenPurchaseContractQty @ItemsOpenPurchaseContract
 END
 
-IF (@ReceiptType = @ReceiptType_PurchaseContract AND @SourceType = 6)
+IF (@ReceiptType = @ReceiptType_PurchaseContract AND @SourceType = @SourceType_PurchaseOrder)
 BEGIN
 	BEGIN
 		-- Create temporary table for processing records
