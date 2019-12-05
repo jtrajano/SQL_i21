@@ -47,8 +47,7 @@ strAccountClassification = ISNULL((
 		WHERE EFTInfo.ysnActive = 1 AND intEntityId = intPayeeId ORDER BY dtmEffectiveDate desc
 ),''),
 dblDebit = ISNULL(Detail.dblDebit,0),
-dblCredit = ISNULL(Detail.dblCredit,0),
-B.intAddendaSequenceId
+dblCredit = ISNULL(Detail.dblCredit,0)
 FROM tblCMBankTransaction A
 LEFT JOIN tblCMAddendaSequence B ON B.intTransactionId = A.intTransactionId
 OUTER APPLY (
