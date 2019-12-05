@@ -123,6 +123,7 @@ INSERT INTO tblICItemPricingLevel(
 	  intItemId
 	, intItemLocationId
 	, strPriceLevel
+	, intCompanyLocationPricingLevelId
 	, intItemUnitMeasureId
 	, dblUnit
 	, dtmEffectiveDate
@@ -143,6 +144,7 @@ SELECT
 	  i.intItemId
 	, il.intItemLocationId
 	, strPriceLevel = matchedLevel.strPricingLevelName
+	, intCompanyLocationPricingLevelId = macthedLevel.intCompanyLocationPricingLevelId
 	, intItemUnitMeasureId = source.intItemUnitMeasureId
 	, dblUnit = source.dblUnit
 	, dtmEffectiveDate = source.dtmEffectiveDate
@@ -177,7 +179,8 @@ FROM tblICStagingItem i
 			AND xl.intLocationId <> il.intLocationId
 	) source
 	OUTER APPLY (
-		SELECT MAX(innerLevel.strPricingLevelName) strPricingLevelName, MAX(innerLevel.intSort) intPricingLevel 
+		SELECT MAX(innerLevel.strPricingLevelName) strPricingLevelName, MAX(innerLevel.intSort) intPricingLevel,
+			MAX(innerLevel.intCompanyLocationPricingLevelId) intCompanyLocationPricingLevelId
 		FROM tblSMCompanyLocationPricingLevel innerLevel
 		WHERE innerLevel.intCompanyLocationId = il.intLocationId
 			AND (innerLevel.intSort <= source.intPricingLevel)
