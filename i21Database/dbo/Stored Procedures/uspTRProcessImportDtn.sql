@@ -57,7 +57,7 @@ BEGIN
 						WHERE RI.intInventoryReceiptId = @intInventoryReceiptId
 
 					-- CREATE VOUCHER		
-					IF (@intExistBillId = NULL)
+					IF (@intExistBillId IS NULL)
 					BEGIN			
 						DECLARE @ysnVoucherSuccess BIT = 0
 						BEGIN TRY
