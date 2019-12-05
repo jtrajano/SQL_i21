@@ -73,27 +73,33 @@ SELECT SMTGCE.*, SMTGC.[intTaxCodeId],SMTGC.[intTaxGroupId]
 		FROM 
 
 		(
-			SELECT DISTINCT B.strCustomerNumber,A.intEntityCustomerId,B.ysnTaxExempt,ETItemsAll.intItemId, B.intEntityId, ETItemsAll.strItemNo , ETItemsAll.intCategoryId,B.intShipToId  
+			SELECT DISTINCT B.strCustomerNumber,A.intEntityCustomerId,B.ysnTaxExempt,ETItemsAll.intItemId, B.intEntityId, ETItemsAll.strItemNo , ETItemsAll.intCategoryId,B.intShipToId , ISNULL(TC.intTaxCodeId,TC2.intTaxCodeId)  intTaxCodeId
 			FROM tblARCustomerTaxingTaxException A  
 			INNER JOIN tblARCustomer  B ON A.intEntityCustomerId = B.intEntityId  
 			LEFT JOIN vyuETExportItem ETItemsAll  ON (A.intItemId IS NULL AND A.intCategoryId IS NULL)  
 			LEFT JOIN vyuETExportItem ETItemsAll2 ON  (A.intItemId IS NOT NULL AND A.intItemId = ETItemsAll2.intItemId)  
 			LEFT JOIN vyuETExportItem ETItemsAll3  ON (A.intItemId IS NULL AND A.intCategoryId IS NOT NULL AND A.intCategoryId = ETItemsAll3.intItemId )  
+			LEFT JOIN tblSMTaxCode TC ON (A.intTaxCodeId IS NOT NULL AND A.intTaxCodeId = TC.intTaxCodeId)
+			LEFT JOIN tblSMTaxCode TC2 ON (A.intTaxCodeId IS NULL)
 		)Exemp
 
 		INNER JOIN tblEMEntityLocation EMEL ON Exemp.intEntityId = EMEL.intEntityId AND EMEL.ysnDefaultLocation = 1
 		LEFT OUTER JOIN tblSMCompanyLocation SMCL ON EMEL.intWarehouseId = SMCL.intCompanyLocationId
 
+		INNER JOIN (
+
 		
-		CROSS APPLY(
-			SELECT DISTINCT TGC.intTaxGroupId,TGC.[intTaxCodeId] ,TaxGroup.strTaxGroup, ETTC.strTaxCodeReference ,TaxCode.strState , TaxCode.intTaxClassId, TaxCode.intSalesTaxAccountId FROM tblSMTaxGroupCode TGC 
+		--CROSS APPLY(
+			SELECT DISTINCT TGC.intTaxGroupId,TGC.[intTaxCodeId] ,TaxGroup.strTaxGroup, ETTC.strTaxCodeReference ,TaxCode.strState , TaxCode.intTaxClassId, TaxCode.intSalesTaxAccountId , CatTax.intCategoryId intCategory FROM tblSMTaxGroupCode TGC 
 			INNER JOIN tblSMTaxCode TaxCode ON TGC.intTaxCodeId = TaxCode.intTaxCodeId
-			INNER JOIN tblICCategoryTax CatTax ON TaxCode.intTaxClassId =  CatTax.intTaxClassId AND CatTax.intCategoryId = Exemp.intCategoryId
+			INNER JOIN tblICCategoryTax CatTax ON TaxCode.intTaxClassId =  CatTax.intTaxClassId --AND CatTax.intCategoryId = Exemp.intCategoryId
 			INNER JOIN tblSMTaxGroup TaxGroup ON TGC.intTaxGroupId =  TaxGroup.intTaxGroupId
-			                                     AND TaxGroup.intTaxGroupId =  [dbo].[fnGetTaxGroupIdForCustomer](Exemp.intEntityId, SMCL.intCompanyLocationId, Exemp.intItemId, Exemp.intShipToId, NULL, NULL)  	        
+			                                     --AND TaxGroup.intTaxGroupId =  [dbo].[fnGetTaxGroupIdForCustomer](Exemp.intEntityId, SMCL.intCompanyLocationId, Exemp.intItemId, Exemp.intShipToId, NULL, NULL)  	        
 			INNER JOIN (SELECT DISTINCT intTaxCodeId,strTaxCodeReference FROM tblETExportTaxCodeMapping) ETTC ON TGC.intTaxCodeId = ETTC.intTaxCodeId 
 			INNER JOIN tblETExportFilterTaxGroup ETTG ON TGC.intTaxGroupId = ETTG.intTaxGroupId
-		) ETTaxGroupCode
+		) ETTaxGroupCode  ON intCategoryId = Exemp.intCategoryId
+					AND ETTaxGroupCode.intTaxCodeId = Exemp.intTaxCodeId
+
 	)
 --END OF CTE Construct
 
