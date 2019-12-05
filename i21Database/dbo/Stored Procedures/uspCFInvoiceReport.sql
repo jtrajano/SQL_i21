@@ -566,6 +566,7 @@ BEGIN
 			,ysnShowVehicleDescriptionOnly		BIT
 			,ysnShowDriverPinDescriptionOnly	BIT
 			,ysnPageBreakByPrimarySortOrder		BIT
+			,ysnSummaryByDeptDriverPinProd		BIT
 		)
 		INSERT INTO @tblCFTempInvoiceReport(
 			intCustomerId				
@@ -869,6 +870,7 @@ BEGIN
 		,strVehicleDescription		
 		,strTaxState				
 		,strDepartment				
+		,strDepartmentDescription			
 		,strSiteType				
 		,strState					
 		,strSiteAddress				
@@ -918,7 +920,8 @@ BEGIN
 		,ysnMPGCalculation
 		,ysnShowVehicleDescriptionOnly	
 		,ysnShowDriverPinDescriptionOnly
-			,ysnPageBreakByPrimarySortOrder
+		,ysnPageBreakByPrimarySortOrder
+		,ysnSummaryByDeptDriverPinProd
 		)
 		SELECT
 		 intCustomerGroupId			
@@ -966,7 +969,8 @@ BEGIN
 		,strVehicleNumber			
 		,strVehicleDescription		
 		,strTaxState				
-		,strDepartment				
+		,strDepartment			
+		,strDepartmentDescription				
 		,strSiteType				
 		,strState					
 		,strSiteAddress				
@@ -1016,7 +1020,8 @@ BEGIN
 		,ysnMPGCalculation
 		,ysnShowVehicleDescriptionOnly	
 		,ysnShowDriverPinDescriptionOnly
-			,ysnPageBreakByPrimarySortOrder
+		,ysnPageBreakByPrimarySortOrder
+		,ysnSummaryByDeptDriverPinProd
 		FROM @tblCFTempInvoiceReport
 
 	END

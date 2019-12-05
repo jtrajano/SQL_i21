@@ -27,6 +27,8 @@ BEGIN
 	DECLARE @ysnShowDriverPinDescriptionOnly	BIT
 	DECLARE @ysnShowVehicleDescriptionOnly		BIT
 	DECLARE @ysnPageBreakByPrimarySortOrder		BIT
+	DECLARE @ysnSummaryByDeptDriverPinProd		BIT
+	
 	
 
 
@@ -55,6 +57,7 @@ BEGIN
 	,@ysnShowDriverPinDescriptionOnly	 =  ysnShowDriverPinDescriptionOnly
 	,@ysnShowVehicleDescriptionOnly		 =  ysnShowVehicleDescriptionOnly
 	,@ysnPageBreakByPrimarySortOrder	 =  ysnPageBreakByPrimarySortOrder
+	,@ysnSummaryByDeptDriverPinProd		 =  ysnSummaryByDeptDriverPinProd
 	
 	FROM tblCFAccount
 	WHERE intCustomerId = @intCustomerId
@@ -85,6 +88,7 @@ BEGIN
 	,ysnShowVehicleDescriptionOnly	  =		 @ysnShowVehicleDescriptionOnly
 	,ysnSummaryByDriverPin			  =		 @ysnSummaryByDriverPin
 	,ysnPageBreakByPrimarySortOrder	  =		 @ysnPageBreakByPrimarySortOrder
+	,ysnSummaryByDeptDriverPinProd    =		 @ysnSummaryByDeptDriverPinProd
 	WHERE strInvoiceNumberHistory = @strInvoiceNumber
 
 	UPDATE tblCFInvoiceHistoryStagingTable  

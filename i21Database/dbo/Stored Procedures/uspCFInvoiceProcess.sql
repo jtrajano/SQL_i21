@@ -418,6 +418,8 @@ BEGIN TRY
 		,strDriverPinNumber
 		,strDriverDescription
 		,ysnSummaryByDriverPin
+		,ysnSummaryByDeptDriverPinProd
+		,ysnPageBreakByPrimarySortOrder
 	)
 	SELECT 
 		intCustomerGroupId
@@ -574,6 +576,8 @@ BEGIN TRY
 		,strDriverPinNumber
 		,strDriverDescription
 		,ysnSummaryByDriverPin
+		,ysnSummaryByDeptDriverPinProd
+		,ysnPageBreakByPrimarySortOrder
 	FROM
 	tblCFInvoiceStagingTable
 	WHERE strUserId = @username

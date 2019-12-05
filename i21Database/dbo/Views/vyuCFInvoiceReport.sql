@@ -60,6 +60,7 @@ SELECT
 ,cfAccount.ysnShowVehicleDescriptionOnly	
 ,cfAccount.ysnShowDriverPinDescriptionOnly
 ,cfAccount.ysnPageBreakByPrimarySortOrder
+,cfAccount.ysnSummaryByDeptDriverPinProd
 ----------------------------------------------
 ,strCustomerName = emEntity.strName
 ,emEntity.strName
@@ -135,6 +136,16 @@ SELECT
 									  ELSE 'Unknown' 
                                  END 
                              END 
+						WHEN cfAccount.strPrimaryDepartment = 'Driver Pin' 
+						THEN 
+                        CASE WHEN ISNULL(cfDriverPinDepartment.intDepartmentId, 0) >= 1 
+							 THEN cfDriverPinDepartment.strDepartment 
+                             ELSE 
+                                 CASE WHEN ISNULL(cfVehicleDepartment.intDepartmentId, 0) >= 1 
+									  THEN cfVehicleDepartment.strDepartment 
+									  ELSE 'Unknown' 
+                                 END 
+                        END 
                         ELSE 'Unknown' 
                     END)
 
@@ -159,6 +170,16 @@ SELECT
 									  ELSE 'Unknown' 
                                  END 
                              END 
+						WHEN cfAccount.strPrimaryDepartment = 'Driver Pin' 
+						THEN 
+                        CASE WHEN ISNULL(cfDriverPinDepartment.intDepartmentId, 0) >= 1 
+							 THEN cfDriverPinDepartment.strDepartmentDescription 
+                             ELSE 
+                                 CASE WHEN ISNULL(cfVehicleDepartment.intDepartmentId, 0) >= 1 
+									  THEN cfVehicleDepartment.strDepartmentDescription 
+									  ELSE 'Unknown' 
+                                 END 
+                        END 
                         ELSE 'Unknown' 
                     END)
 
@@ -275,11 +296,17 @@ LEFT JOIN tblCFCard AS cfCard
 LEFT JOIN tblCFCardType AS cfCardType
 	ON cfCard.intCardTypeId = cfCardType.intCardTypeId
 -------------------------------------------------------------
+LEFT JOIN tblCFDriverPin AS cfDriverPin 
+	ON cfDriverPin.intDriverPinId = cfTrans.intDriverPinId 
+-------------------------------------------------------------
 LEFT JOIN tblCFVehicle AS cfVehicle 
 	ON cfVehicle.intVehicleId = cfTrans.intVehicleId 
 -------------------------------------------------------------
 LEFT JOIN tblCFDepartment AS cfCardDepartment
 	ON cfCardDepartment.intDepartmentId = cfCard.intDepartmentId
+-------------------------------------------------------------
+LEFT JOIN tblCFDepartment AS cfDriverPinDepartment
+	ON cfDriverPinDepartment.intDepartmentId = cfDriverPin.intDepartmentId
 -------------------------------------------------------------
 LEFT JOIN tblCFDepartment AS cfVehicleDepartment
 	ON cfVehicleDepartment.intDepartmentId = cfVehicle.intDepartmentId
@@ -292,9 +319,6 @@ LEFT JOIN tblCFItem AS cfItem
 -------------------------------------------------------------
 LEFT JOIN tblICItem AS icItem
 	ON cfItem.intARItemId = icItem.intItemId
--------------------------------------------------------------
-LEFT JOIN tblCFDriverPin AS cfDriverPin 
-	ON cfDriverPin.intDriverPinId = cfTrans.intDriverPinId 
 
 --MOVED TO INSERT PART OF uspCFInsertToStagingTable--
 -------------------------------------------------------------

@@ -374,7 +374,7 @@ BEGIN TRY
 	,strPrintTimeStamp
 	,ISNULL(strEmailDistributionOption,'') 
 	,strEmail
-	,strDepartmentDescription
+	,cfInvRpt.strDepartmentDescription
 	,strShortName
 	,strProductDescription
 	,strItemNumber

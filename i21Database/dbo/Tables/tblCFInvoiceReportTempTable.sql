@@ -44,6 +44,7 @@
     [strVehicleDescription]           NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [strTaxState]                     NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [strDepartment]                   NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+    [strDepartmentDescription]        NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [strSiteType]                     NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [strState]                        NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [strSiteAddress]                  NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
@@ -98,6 +99,7 @@
     [ysnShowVehicleDescriptionOnly]   BIT             NULL,
     [ysnShowDriverPinDescriptionOnly] BIT             NULL,
 	[ysnPageBreakByPrimarySortOrder]  BIT			  NULL
+	[ysnSummaryByDeptDriverPinProd]   BIT			  NULL,
 );
 
 
