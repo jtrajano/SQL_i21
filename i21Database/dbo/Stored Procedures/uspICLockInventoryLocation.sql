@@ -12,9 +12,11 @@ BEGIN
 			ELSE 
 				CASE 
 					@ysnLocked WHEN 1 THEN 
-						CASE WHEN (intStatus + 1) > 4 THEN 4 ELSE intStatus + 1 END 
+						CASE WHEN (intStatus + 1) > 4 THEN 4 ELSE 
+							CASE WHEN intStatus = 1 THEN 3 /*Skip Print Count Sheet and Lock immediately*/
+							ELSE intStatus + 1  END END
 					ELSE 
-						CASE WHEN (intStatus - 1) < 1 THEN 1 ELSE (intStatus - 1) END 
+						CASE WHEN (intStatus - 1) <= 1 THEN 1 ELSE (intStatus - 1) END 
 				END -- CASE stmts are used to get the min/max status
 			END
 	WHERE 
