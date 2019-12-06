@@ -9,10 +9,6 @@ AS
 
 BEGIN
 DECLARE @result DECIMAL(18,6)
-DECLARE @bankBalance decimal(18,6)
-DECLARE @glBalance decimal(18,6)
-DECLARE @intGLAccountId INT
-DECLARE @intCurrencyId INT
 
 SELECT TOP 1 @intGLAccountId =intGLAccountId, @intCurrencyId = intCurrencyId
 FROM tblCMBankAccount where intBankAccountId = @intBankAccountId
