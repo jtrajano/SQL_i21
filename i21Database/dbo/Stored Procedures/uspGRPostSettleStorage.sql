@@ -2107,8 +2107,9 @@ BEGIN TRY
 																--IT.dblCost--RI.dblUnitCost --dbo.fnCTConvertQtyToTargetItemUOM(a.intContractUOMId,RI.intCostUOMId, RI.dblUnitCost)
 																WHEN CS.intStorageTypeId = 2 THEN 
 																(select dblCost from tblICInventoryTransaction IT
-																	where IT.intTransactionId = STH.intTransferStorageId
-																		and IT.intTransactionTypeId = 56
+																inner join tblGRStorageHistory STH
+																	on STH.intTransferStorageId = IT.intTransactionId
+																	where IT.intTransactionTypeId = 56
 																		and IT.intItemId = a.intItemId)
 															else null end
 														end								
@@ -2166,8 +2167,6 @@ BEGIN TRY
 						AND DSC.intItemId = a.intItemId
 				JOIN tblGRStorageType ST
 					ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
-				LEFT JOIN tblGRStorageHistory STH
-					ON STH.intCustomerStorageId = a.intCustomerStorageId
 				LEFT JOIN (
 						tblICInventoryReceiptItem RI
 						INNER JOIN tblGRStorageHistory SH
