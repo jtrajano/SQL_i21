@@ -8244,6 +8244,8 @@
     <Build Include="dbo\Tables\tblRKMatchDerivativesPostRecap.sql" />
     <Build Include="dbo\Stored Procedures\uspRKMatchDerivativesGLDetailPreview.sql" />
     <Build Include="dbo\Stored Procedures\uspRKMatchDerivativesPostRecap.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGPurchaseWisePnLReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGPurchaseWisePnLReportReserves.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
