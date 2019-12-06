@@ -8102,6 +8102,7 @@
     <Build Include="dbo\Tables\tblSTTranslogRebatesPassport.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCheckoutPassportTranslog.sql" />
     <None Include="Scripts\Post-Deployment\ST\37_FileFieldMapping_Passport_CPJR_340.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCCreateInvoiceForPostedDestinationWeightsAndGrades.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
