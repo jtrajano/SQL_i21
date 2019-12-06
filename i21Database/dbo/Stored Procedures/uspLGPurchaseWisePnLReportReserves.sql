@@ -12,8 +12,11 @@ IF (@intUnitMeasureId IS NULL)
 	SELECT @intUnitMeasureId = intSUnitMeasureId 
 	FROM tblLGAllocationDetail WHERE intAllocationDetailId = @intAllocationDetailId
 
-SELECT @strUnitMeasure = strUnitMeasure FROM tblICUnitMeasure WHERE intUnitMeasureId = @intUnitMeasureId
-SELECT @strCurrency = ISNULL(strSymbol, strCurrency) FROM tblSMCurrency WHERE intCurrencyID = @intDefaultCurrencyId
+SELECT @strUnitMeasure = CASE WHEN ISNULL(strSymbol, '') <> '' THEN strSymbol ELSE strUnitMeasure END
+FROM tblICUnitMeasure WHERE intUnitMeasureId = @intUnitMeasureId
+
+SELECT @strCurrency = CASE WHEN ISNULL(strSymbol, '') <> '' THEN strSymbol ELSE strCurrency END
+FROM tblSMCurrency WHERE intCurrencyID = @intDefaultCurrencyId
 
 SELECT
 	I.strItemNo

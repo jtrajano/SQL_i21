@@ -20,6 +20,12 @@ DECLARE @intAllocationDetailId AS INT = NULL
 		,@intDefaultCurrencyId AS INT = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
 		,@strUnitMeasure AS NVARCHAR(200)
 		,@strCurrency AS NVARCHAR(200)
+		,@strCompanyName NVARCHAR(100)
+		,@strCompanyAddress NVARCHAR(100)
+		,@strCity NVARCHAR(25)
+		,@strState NVARCHAR(50)
+		,@strZip NVARCHAR(12)
+		,@strCountry NVARCHAR(25)
   
 -- Declare the variables for the XML parameter  
 DECLARE @xmlDocumentId AS INT  
@@ -96,8 +102,20 @@ IF (@intUnitMeasureId IS NULL)
 	SELECT @intUnitMeasureId = intSUnitMeasureId 
 	FROM tblLGAllocationDetail WHERE intAllocationDetailId = @intAllocationDetailId
 
-SELECT @strUnitMeasure = strUnitMeasure FROM tblICUnitMeasure WHERE intUnitMeasureId = @intUnitMeasureId
-SELECT @strCurrency = ISNULL(strSymbol, strCurrency) FROM tblSMCurrency WHERE intCurrencyID = @intDefaultCurrencyId
+SELECT @strUnitMeasure = CASE WHEN ISNULL(strSymbol, '') <> '' THEN strSymbol ELSE strUnitMeasure END
+FROM tblICUnitMeasure WHERE intUnitMeasureId = @intUnitMeasureId
+
+SELECT @strCurrency = CASE WHEN ISNULL(strSymbol, '') <> '' THEN strSymbol ELSE strCurrency END
+FROM tblSMCurrency WHERE intCurrencyID = @intDefaultCurrencyId
+
+SELECT TOP 1 
+	@strCompanyName = strCompanyName
+	,@strCompanyAddress = strAddress
+	,@strCity = strCity
+	,@strState = strState
+	,@strZip = strZip
+	,@strCountry = strCountry
+FROM tblSMCompanySetup
 
 SELECT 
 	*
@@ -126,6 +144,12 @@ SELECT
 	,strUnitMeasure = @strUnitMeasure
 	,strCurrency = @strCurrency
 	,strUnitCurrency = @strCurrency + '/' + @strUnitMeasure
+	,intAllocationDetailId = @intAllocationDetailId
+	,intUnitMeasureId = @intUnitMeasureId
+	,strCompanyName = @strCompanyName
+	,strCompanyAddress = @strCompanyAddress
+	,strCompanyCountry = @strCountry 
+	,strCityStateZip = @strCity + ', ' + @strState + ', ' + @strZip + ','
 FROM
 	(SELECT 
 		ALD.strAllocationDetailRefNo 
@@ -134,7 +158,11 @@ FROM
 		,strFinancialStatus = SCS.strContractStatus + CASE WHEN ISNULL(SCD.strFinancialStatus, '') <> '' THEN '/' + ISNULL(SCD.strFinancialStatus, '') ELSE '' END
 		,strPContractNumberSeq = PCH.strContractNumber + '/' + CAST(PCD.intContractSeq AS NVARCHAR(10))
 		,strSContractNumberSeq = SCH.strContractNumber + '/' + CAST(SCD.intContractSeq AS NVARCHAR(10))
+		,strItemNo = I.strItemNo
+		,strItemDescription = I.strDescription
+		,strOrigin = OG.strDescription
 		,strProductType = CA.strDescription 
+		,strCommodity = COM.strCommodityCode
 		,strPClient = V.strName
 		,strSClient = C.strName
 		,dblPAllocatedQty = dbo.fnCalculateQtyBetweenUOM (AUOM.intItemUOMId, ToUOM.intItemUOMId, ALD.dblPAllocatedQty)
@@ -171,6 +199,13 @@ FROM
 						- dbo.fnCalculateQtyBetweenUOM (AUOM.intItemUOMId, ToUOM.intItemUOMId, ALD.dblSAllocatedQty)
 		,dblTotalMargin = RB.dblReservesBValueTotal * -1
 		,dblReservesATotalVariance = RA.dblReservesAVarianceTotal
+		,blbHeaderLogo = dbo.fnSMGetCompanyLogo('Header')
+		,blbFooterLogo = dbo.fnSMGetCompanyLogo('Footer')
+		,blbFullHeaderLogo = dbo.fnSMGetCompanyLogo('FullHeaderLogo')
+		,blbFullFooterLogo = dbo.fnSMGetCompanyLogo('FullFooterLogo')
+		,ysnFullHeaderLogo = CASE WHEN CP.ysnFullHeaderLogo = 1 THEN 'true' else 'false' end
+		,intReportLogoHeight = ISNULL(CP.intReportLogoHeight,0)
+		,intReportLogoWidth = ISNULL(CP.intReportLogoWidth,0)
 	FROM tblLGAllocationDetail ALD
 		LEFT JOIN tblCTContractDetail PCD ON ALD.intPContractDetailId = PCD.intContractDetailId
 		LEFT JOIN tblCTContractHeader PCH ON PCH.intContractHeaderId = PCD.intContractHeaderId
@@ -189,6 +224,9 @@ FROM
 		LEFT JOIN tblSMCurrency SCUR ON SCUR.intCurrencyID = SCD.intBasisCurrencyId
 		OUTER APPLY (SELECT	TOP 1 intItemUOMId, dblUnitQty FROM	dbo.tblICItemUOM 
 						WHERE intItemId = I.intItemId AND intUnitMeasureId = @intUnitMeasureId) ToUOM
+		OUTER APPLY (SELECT TOP 1 ysnFullHeaderLogo, intReportLogoHeight, intReportLogoWidth
+							,intPnLReportReserveACategoryId, intPnLReportReserveBCategoryId 
+						FROM tblLGCompanyPreference) CP
 		/* Purchase Value */
 		OUTER APPLY 
 			(SELECT 
@@ -255,7 +293,7 @@ FROM
 						AND IVD.intItemId = I.intItemId 
 						AND IVDI.strType = 'Other Charge'
 					) INVC
-			WHERE I.intCategoryId = (SELECT TOP 1 intPnLReportReserveACategoryId FROM tblLGCompanyPreference)
+			WHERE I.intCategoryId = CP.intPnLReportReserveACategoryId
 		) RA 
 		/* Reserves B */
 		OUTER APPLY 
@@ -278,7 +316,9 @@ FROM
 							LEFT JOIN tblLGAllocationDetail ALD ON CC.intContractDetailId = ALD.intSContractDetailId
 							LEFT JOIN tblSMCurrency CCUR ON CCUR.intCurrencyID = CC.intCurrencyId
 					 WHERE CC.intItemId = I.intItemId AND ALD.intAllocationDetailId = @intAllocationDetailId) CC
-			WHERE I.intCategoryId = (SELECT TOP 1 intPnLReportReserveBCategoryId FROM tblLGCompanyPreference)
+			WHERE I.intCategoryId = CP.intPnLReportReserveBCategoryId
 		) RB 
 	WHERE ALD.strAllocationDetailRefNo IS NOT NULL AND ALD.intAllocationDetailId = @intAllocationDetailId
 ) PNL
+
+GO
