@@ -25,6 +25,8 @@ SELECT A.*
 	, GL18.strAccountId strUnrealizedLossOnInventoryRatioIOSId
 	, GL19.strAccountId strUnrealizedGainOnInventoryIOSId
 	, GL20.strAccountId strUnrealizedLossOnInventoryIOSId
+	, GL21.strAccountId strFuturesGainOrLossRealizedId
+	, GL22.strAccountId strFuturesGainOrLossRealizedOffsetId
 	, strDefaultInstrument = CASE WHEN intDefaultInstrumentId = 1 THEN 'Exchange Traded'
 								WHEN intDefaultInstrumentId = 2 THEN 'OTC'
 								WHEN intDefaultInstrumentId = 3 THEN 'OTC - Others' END
@@ -60,4 +62,6 @@ LEFT JOIN tblGLAccount GL17 ON GL17.intAccountId = A.intUnrealizedGainOnInventor
 LEFT JOIN tblGLAccount GL18 ON GL18.intAccountId = A.intUnrealizedLossOnInventoryRatioIOSId
 LEFT JOIN tblGLAccount GL19 ON GL19.intAccountId = A.intUnrealizedGainOnInventoryIOSId
 LEFT JOIN tblGLAccount GL20 ON GL20.intAccountId = A.intUnrealizedLossOnInventoryIOSId
+LEFT JOIN tblGLAccount GL21 ON GL21.intAccountId = A.intFuturesGainOrLossRealizedId
+LEFT JOIN tblGLAccount GL22 ON GL22.intAccountId = A.intFuturesGainOrLossRealizedOffsetId
 LEFT JOIN tblRKRiskView rv ON rv.intRiskViewId = A.intRiskViewId

@@ -5,6 +5,11 @@ AS
 BEGIN TRY
 	DECLARE @ErrMsg NVARCHAR(Max)
 	DECLARE @intCurrencyId INT
+	DECLARE @intMatchFuturesPSHeaderId INT
+	DECLARE @GLEntries AS RecapTableType
+	DECLARE @strBatchId NVARCHAR(100)
+
+	select top 1 @intMatchFuturesPSHeaderId=intMatchFuturesPSHeaderId from tblRKMatchFuturesPSHeader where intMatchNo=@intMatchNo
 
 BEGIN TRANSACTION
 INSERT INTO tblRKStgMatchPnS(intConcurrencyId,
@@ -64,9 +69,84 @@ strSubBook,
 0
 FROM tblRKStgMatchPnS WHERE intMatchNo = @intMatchNo order by intStgMatchPnSId desc
 
+	--GL Account Validation
+	IF ((SELECT COUNT(intAccountId) FROM tblRKMatchDerivativesPostRecap WHERE intTransactionId = @intMatchFuturesPSHeaderId AND intAccountId IS NULL) > 0)
+	BEGIN
+		RAISERROR('GL Account is not setup.',16,1)
+	END
+
+	IF (@strBatchId IS NULL)
+	BEGIN
+		EXEC uspSMGetStartingNumber 3, @strBatchId OUT
+	END
+
+	INSERT INTO @GLEntries (
+		 [dtmDate]
+		,[strBatchId]
+		,[intAccountId]
+		,[dblDebit]
+		,[dblCredit]
+		,[dblDebitUnit]
+		,[dblCreditUnit]
+		,[strDescription]
+		,[intCurrencyId]
+		,[dtmTransactionDate]
+		,[strTransactionId]
+		,[intTransactionId]
+		,[strTransactionType]
+		,[strTransactionForm]
+		,[strModuleName]
+		,[intConcurrencyId]
+		,[dblExchangeRate]
+		,[dtmDateEntered]
+		,[ysnIsUnposted]
+		,[strCode]
+		,[strReference]  
+		,[intEntityId]
+		,[intUserId]      
+		,[intSourceLocationId]
+		,[intSourceUOMId]
+		,[intCommodityId]
+		)
+	SELECT 
+		dtmPostDate
+		,@strBatchId
+		,intAccountId
+		,ROUND(dblCredit,2)
+		,ROUND(dblDebit,2)
+		,ROUND(dblCreditUnit,2)
+		,ROUND(dblDebitUnit,2)
+		,strAccountDescription
+		,intCurrencyId
+		,dtmTransactionDate
+		,strTransactionId
+		,intTransactionId
+		,strTransactionType
+		,strTransactionForm
+		,strModuleName
+		,intConcurrencyId
+		,dblExchangeRate
+		,dtmDateEntered
+		,ysnIsUnposted
+		,strCode
+		,strReference
+		,intEntityId
+		,intUserId
+		,intSourceLocationId
+		,intSourceUOMId
+		,intCommodityId
+	FROM tblRKMatchDerivativesPostRecap
+	WHERE intTransactionId = @intMatchFuturesPSHeaderId 
+
+	EXEC dbo.uspGLBookEntries @GLEntries,0
+
 	UPDATE tblRKMatchFuturesPSHeader
 	SET ysnPosted = 0
 	WHERE intMatchNo = @intMatchNo
+
+	UPDATE tblRKMatchDerivativesPostRecap
+	SET ysnIsUnposted = 0, strReversalBatchId = @strBatchId
+	WHERE intTransactionId = @intMatchFuturesPSHeaderId
 
 	COMMIT TRAN
 END TRY

@@ -8241,6 +8241,9 @@
     <Build Include="dbo\Stored Procedures\uspSTCheckoutPassportTranslog.sql" />
     <Build Include="dbo\Stored Procedures\uspMFDemandTransferStgXML.sql" />
     <None Include="Scripts\Post-Deployment\ST\37_FileFieldMapping_Passport_CPJR_340.sql" />
+    <Build Include="dbo\Tables\tblRKMatchDerivativesPostRecap.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKMatchDerivativesGLDetailPreview.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKMatchDerivativesPostRecap.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
