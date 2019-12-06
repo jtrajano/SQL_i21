@@ -671,6 +671,7 @@ BEGIN
 			,ysnShowVehicleDescriptionOnly	
 			,ysnShowDriverPinDescriptionOnly
 			,ysnPageBreakByPrimarySortOrder
+			,ysnSummaryByDeptDriverPinProd
 		)
 		SELECT
 		intCustomerId				
@@ -775,6 +776,7 @@ BEGIN
 			,ysnShowVehicleDescriptionOnly	
 			,ysnShowDriverPinDescriptionOnly
 			,ysnPageBreakByPrimarySortOrder
+			,ysnSummaryByDeptDriverPinProd
 		FROM vyuCFInvoiceReport
 		WHERE intTransactionId IN (SELECT intTransactionId FROM @tblCFTransactionIds)
 		

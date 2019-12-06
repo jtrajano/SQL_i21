@@ -272,6 +272,7 @@ BEGIN TRY
 	,ysnShowVehicleDescriptionOnly	
 	,ysnShowDriverPinDescriptionOnly
 	,ysnPageBreakByPrimarySortOrder
+	,ysnSummaryByDeptDriverPinProd
 	)
 	SELECT 
 	 intCustomerGroupId
@@ -559,6 +560,7 @@ BEGIN TRY
 	,ysnShowVehicleDescriptionOnly	
 	,ysnShowDriverPinDescriptionOnly
 	,ysnPageBreakByPrimarySortOrder
+	,ysnSummaryByDeptDriverPinProd
 	FROM tblCFInvoiceReportTempTable AS cfInvRpt
 	INNER JOIN ( SELECT * FROM tblCFInvoiceSummaryTempTable WHERE strUserId = @UserId) AS cfInvRptSum
 	ON cfInvRpt.intTransactionId = cfInvRptSum.intTransactionId 
