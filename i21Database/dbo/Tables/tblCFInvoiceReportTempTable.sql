@@ -98,7 +98,7 @@
     [ysnMPGCalculation]               BIT             NULL,
     [ysnShowVehicleDescriptionOnly]   BIT             NULL,
     [ysnShowDriverPinDescriptionOnly] BIT             NULL,
-	[ysnPageBreakByPrimarySortOrder]  BIT			  NULL
+	[ysnPageBreakByPrimarySortOrder]  BIT			  NULL,
 	[ysnSummaryByDeptDriverPinProd]   BIT			  NULL,
 );
 
