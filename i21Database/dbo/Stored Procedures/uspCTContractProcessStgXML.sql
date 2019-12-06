@@ -163,6 +163,11 @@ BEGIN TRY
 		,@strNetWeightUOM NVARCHAR(50)
 		,@intWeightUnitMeasureId INT
 		,@intItemWeightUOMId INT
+		,@intTransactionId INT
+		,@intCompanyId INT
+		,@intContractScreenId INT
+		,@intTransactionRefId INT
+		,@intCompanyRefId INT
 	DECLARE @tblCTContractCost TABLE (intContractCostId INT)
 
 	SELECT @intContractStageId = MIN(intContractStageId)
@@ -218,6 +223,8 @@ BEGIN TRY
 		SELECT @strConditionXML = NULL
 			,@strCertificationXML = NULL
 			,@intToBookId = NULL
+			,@intTransactionId = NULL
+			,@intCompanyId = NULL
 
 		SELECT @intContractHeaderId = intContractHeaderId
 			,@strContractNumber = strContractNumber
@@ -240,6 +247,8 @@ BEGIN TRY
 			,@intCompanyLocationId = intCompanyLocationId
 			,@strTransactionType = strTransactionType
 			,@intToBookId = intToBookId
+			,@intTransactionId = intTransactionId
+			,@intCompanyId = intCompanyId
 		FROM tblCTContractStage
 		WHERE intContractStageId = @intContractStageId
 
@@ -1348,7 +1357,8 @@ BEGIN TRY
 						,@strFreightBasisUnitMeasure = NULL
 						,@strFreightBasisBaseUnitMeasure = NULL
 						,@strConvPriceCurrency = NULL
-,@strNetWeightUOM = NULL
+						,@strNetWeightUOM = NULL
+
 					SELECT @strPricingType = strPricingType
 						,@strFutMarketName = strFutMarketName
 						,@strFutureMonth = strFutureMonth
@@ -1425,7 +1435,6 @@ BEGIN TRY
 							,strFreightBasisBaseUnitMeasure NVARCHAR(50) Collate Latin1_General_CI_AS
 							,strConvPriceCurrency NVARCHAR(50) Collate Latin1_General_CI_AS
 							,strNetWeightUOM NVARCHAR(50) Collate Latin1_General_CI_AS
-
 							) x
 					WHERE intContractSeq = @intContractSeq
 
@@ -2879,7 +2888,7 @@ BEGIN TRY
 							,intFreightTermId = CD1.intFreightTermId
 							,intShipViaId = CD1.intShipViaId
 							,intItemContractId = CD1.intItemContractId
-	,intItemBundleId = CD1.intItemBundleId
+							,intItemBundleId = CD1.intItemBundleId
 							,CD.intItemId = CASE 
 								WHEN @ysnApproval = 0
 									AND EXISTS (
@@ -3742,39 +3751,15 @@ BEGIN TRY
 
 				x:
 
-				INSERT INTO tblCTContractAcknowledgementStage (
-					intContractHeaderId
-					,strContractAckNumber
-					,dtmFeedDate
-					,strMessage
-					,strTransactionType
-					,intMultiCompanyId
-					,strAckHeaderXML
-					,strAckDetailXML
-					,strAckCostXML
-					,strAckDocumentXML
-					,strAckCertificationXML
-					,strAckConditionXML
-					)
-				SELECT @NewContractHeaderId
-					,@strNewContractNumber
-					,GETDATE()
-					,'Success'
-					,@strTransactionType
-					,@intMultiCompanyId
-					,@strAckHeaderXML
-					,@strAckDetailXML
-					,@strAckCostXML
-					,@strAckDocumentXML
-					,@strAckCertificationXML
-					,@strAckConditionXML
-
-				SELECT @intContractAcknowledgementStageId = SCOPE_IDENTITY();
-
 				----------------------------CALL Stored procedure for APPROVAL -----------------------------------------------------------
+
+
 				SELECT @intCreatedById = intCreatedById
+					,@intCompanyRefId = intCompanyId
 				FROM tblCTContractHeader
 				WHERE intContractHeaderId = @intNewContractHeaderId
+
+
 
 				INSERT INTO @config (
 					strApprovalFor
@@ -3790,6 +3775,54 @@ BEGIN TRY
 					,@currentUserEntityId = @intCreatedById
 					,@amount = 0
 					,@approverConfiguration = @config
+
+									SELECT @intContractScreenId = intScreenId
+				FROM tblSMScreen
+				WHERE strNamespace = 'ContractManagement.view.Contract'
+
+				SELECT @intTransactionRefId = intTransactionId
+				FROM tblSMTransaction
+				WHERE intRecordId = @intNewContractHeaderId
+					AND intScreenId = @intContractScreenId
+
+				INSERT INTO tblCTContractAcknowledgementStage (
+					intContractHeaderId
+					,strContractAckNumber
+					,dtmFeedDate
+					,strMessage
+					,strTransactionType
+					,intMultiCompanyId
+					,strAckHeaderXML
+					,strAckDetailXML
+					,strAckCostXML
+					,strAckDocumentXML
+					,strAckCertificationXML
+					,strAckConditionXML
+					,intTransactionId 
+					,intCompanyId 
+					,intTransactionRefId 
+					,intCompanyRefId 
+					)
+				SELECT @NewContractHeaderId
+					,@strNewContractNumber
+					,GETDATE()
+					,'Success'
+					,@strTransactionType
+					,@intMultiCompanyId
+					,@strAckHeaderXML
+					,@strAckDetailXML
+					,@strAckCostXML
+					,@strAckDocumentXML
+					,@strAckCertificationXML
+					,@strAckConditionXML
+					,@intTransactionId 
+					,@intCompanyId 
+					,@intTransactionRefId 
+					,@intCompanyRefId 
+
+				SELECT @intContractAcknowledgementStageId = SCOPE_IDENTITY();
+
+				EXECUTE dbo.uspSMInterCompanyUpdateMapping @currentTransactionId = @intTransactionRefId, @referenceTransactionId = @intTransactionId,@referenceCompanyId=@intCompanyId
 
 				--------------------------------------------------------------------------------------------------------------------------
 				EXEC sp_xml_removedocument @idoc

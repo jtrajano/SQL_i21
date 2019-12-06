@@ -34,6 +34,9 @@ BEGIN TRY
 		,@intEntityId INT
 		,@strAdditionalInfo NVARCHAR(MAX)
 		,@strAmendmentApprovalXML NVARCHAR(MAX)
+		,@intCompanyId int
+		,@intTransactionId int
+		,@intContractScreenId int
 
 	SET @intContractStageId = NULL
 	SET @strContractNumber = NULL
@@ -41,9 +44,16 @@ BEGIN TRY
 	SET @strHeaderCondition = NULL
 	SET @strDetailXML = NULL
 
-	SELECT @strContractNumber = strContractNumber
+	SELECT @strContractNumber = strContractNumber,@intCompanyId=intCompanyId 
 	FROM tblCTContractHeader
 	WHERE intContractHeaderId = @ContractHeaderId
+
+	SELECT	@intContractScreenId	=	intScreenId FROM tblSMScreen WHERE strNamespace = 'ContractManagement.view.Contract'
+
+	Select @intTransactionId=intTransactionId 
+	from tblSMTransaction
+	Where intRecordId =@ContractHeaderId
+	and intScreenId =@intContractScreenId
 
 	IF @strRowState = 'Delete'
 	BEGIN
@@ -259,6 +269,8 @@ BEGIN TRY
 		,intToBookId
 		,strApproverXML
 		,strAmendmentApprovalXML
+		,intTransactionId 
+		,intCompanyId 
 		)
 	SELECT intContractHeaderId = @ContractHeaderId
 		,strContractNumber = @strContractNumber
@@ -276,6 +288,8 @@ BEGIN TRY
 		,intToBookId = @intToBookId
 		,strApproverXML = @strApproverXML
 		,strAmendmentApprovalXML=@strAmendmentApprovalXML
+		,intTransactionId =@intTransactionId
+		,intCompanyId =@intCompanyId
 END TRY
 
 BEGIN CATCH

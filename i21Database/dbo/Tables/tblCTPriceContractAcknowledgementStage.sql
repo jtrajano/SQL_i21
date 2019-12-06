@@ -13,4 +13,8 @@
 	strMessage												NVARCHAR(MAX) COLLATE Latin1_General_CI_AS,
 	intMultiCompanyId										INT,
 	strTransactionType										NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	,intTransactionId int
+	,intCompanyId int
+	,intTransactionRefId int
+	,intCompanyRefId int
 )

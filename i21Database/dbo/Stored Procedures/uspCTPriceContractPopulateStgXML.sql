@@ -19,6 +19,9 @@ BEGIN TRY
 		,@intPriceContractStageId INT
 		,@intMultiCompanyId INT
 		,@strObjectName NVARCHAR(50)
+		,@intCompanyId int
+		,@intTransactionId int
+		,@intContractScreenId int
 
 	SET @intPriceContractStageId = NULL
 	SET @strPriceContractNo = NULL
@@ -44,9 +47,16 @@ BEGIN TRY
 		RETURN
 	END
 
-	SELECT @strPriceContractNo = strPriceContractNo
+	SELECT @strPriceContractNo = strPriceContractNo,@intCompanyId=intCompanyId 
 	FROM tblCTPriceContract
 	WHERE intPriceContractId = @intPriceContractId
+
+	SELECT	@intContractScreenId	=	intScreenId FROM tblSMScreen WHERE strNamespace = 'ContractManagement.view.PriceContracts'
+
+	Select @intTransactionId=intTransactionId 
+	from tblSMTransaction
+	Where intRecordId =@intPriceContractId
+	and intScreenId =@intContractScreenId
 
 	-------------------------PriceContract-----------------------------------------------------------
 	SELECT @strPriceContractCondition = 'intPriceContractId = ' + LTRIM(@intPriceContractId)
@@ -116,6 +126,8 @@ BEGIN TRY
 		,intEntityId
 		,strTransactionType
 		,intMultiCompanyId
+		,intTransactionId 
+		,intCompanyId 
 		)
 	SELECT intPriceContractId = @intPriceContractId
 		,strPriceContractNo = @strPriceContractNo
@@ -126,6 +138,8 @@ BEGIN TRY
 		,intEntityId = @intToEntityId
 		,strTransactionType = @strToTransactionType
 		,intMultiCompanyId = @intToCompanyId
+		,intTransactionId =@intTransactionId
+		,intCompanyId =@intCompanyId
 END TRY
 
 BEGIN CATCH

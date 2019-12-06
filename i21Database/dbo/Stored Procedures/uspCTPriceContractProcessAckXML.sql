@@ -17,7 +17,10 @@ BEGIN TRY
 	DECLARE @intPriceContractRefId					INT
 	DECLARE @intPriceFixationId						INT
 	DECLARE @intPriceFixationRefId					INT
-
+		,@intTransactionId int
+	,@intCompanyId int
+	,@intTransactionRefId int
+	,@intCompanyRefId int
 	
 
 	SELECT @intPriceContractAcknowledgementStageId = MIN(intPriceContractAcknowledgementStageId)
@@ -31,11 +34,19 @@ BEGIN TRY
 		SET @strAckPriceFixationXML		  = NULL
 		SET @strAckPriceFixationDetailXML = NULL
 		SET @strTransactionType			  = NULL
+				Select @intTransactionId = NULL
+	,@intCompanyId = NULL
+	,@intTransactionRefId = NULL
+	,@intCompanyRefId = NULL
 
 		SELECT @strAckPriceContractXML	    = strAckPriceContractXML
 			,@strAckPriceFixationXML	    = strAckPriceFixationXML
 			,@strAckPriceFixationDetailXML  = strAckPriceFixationDetailXML
 			,@strTransactionType			= strTransactionType
+			,@intTransactionId = intTransactionId
+			,@intCompanyId = intCompanyId
+			,@intTransactionRefId = intTransactionRefId
+			,@intCompanyRefId = intCompanyRefId
 		FROM tblCTPriceContractAcknowledgementStage
 		WHERE intPriceContractAcknowledgementStageId = @intPriceContractAcknowledgementStageId
 
@@ -173,6 +184,8 @@ BEGIN TRY
 			SET strFeedStatus = 'Ack Processed'
 			WHERE intPriceContractAcknowledgementStageId = @intPriceContractAcknowledgementStageId
 		END
+		
+		EXECUTE dbo.uspSMInterCompanyUpdateMapping @currentTransactionId = @intTransactionId, @referenceTransactionId = @intTransactionRefId,@referenceCompanyId=@intCompanyRefId
 
 		SELECT @intPriceContractAcknowledgementStageId = MIN(intPriceContractAcknowledgementStageId)
 		FROM tblCTPriceContractAcknowledgementStage

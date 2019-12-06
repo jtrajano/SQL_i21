@@ -109,6 +109,12 @@ BEGIN TRY
 		,@intFinalPriceUOMId INT
 		,@intCreatedById INT
 		,@intLastModifiedById INT
+		,@intTransactionId INT
+		,@intCompanyId INT
+		,@intContractScreenId INT
+		,@intTransactionRefId INT
+		,@intCompanyRefId INT
+		,@strDescription nvarchar(100)
 
 	SELECT @intPriceContractStageId = MIN(intPriceContractStageId)
 	FROM tblCTPriceContractStage
@@ -129,6 +135,8 @@ BEGIN TRY
 		SET @intMultiCompanyId = NULL
 		SET @intEntityId = NULL
 		SET @strTransactionType = NULL
+		SET @intTransactionId=NULL
+			SET @intCompanyId=NULL
 
 		SELECT @intPriceContractId = intPriceContractId
 			,@strPriceContractNo = strPriceContractNo
@@ -143,6 +151,8 @@ BEGIN TRY
 			,@intMultiCompanyId = intMultiCompanyId
 			,@intEntityId = intEntityId
 			,@strTransactionType = strTransactionType
+			,@intTransactionId=intTransactionId
+			,@intCompanyId=intCompanyId
 		FROM tblCTPriceContractStage
 		WHERE intPriceContractStageId = @intPriceContractStageId
 
@@ -674,6 +684,17 @@ BEGIN TRY
 						,@intPriceContractId
 
 					SELECT @intNewPriceContractId = SCOPE_IDENTITY()
+
+					SELECT @strDescription = 'Created from inter-company : ' + @strNewPriceContractNo
+
+					EXEC uspSMAuditLog @keyValue = @intNewPriceContractId
+						,@screenName = 'Quality.view.QualitySample'
+						,@entityId = @intLastModifiedById
+						,@actionType = 'Created'
+						,@actionIcon = 'small-new-plus'
+						,@changeDescription = @strDescription
+						,@fromValue = ''
+						,@toValue = @strNewPriceContractNo
 				END
 				ELSE
 				BEGIN
@@ -689,6 +710,10 @@ BEGIN TRY
 					WHERE intPriceContractRefId = @intPriceContractId
 						AND intPriceContractId = @intNewPriceContractId
 				END
+
+				SELECT @intCompanyRefId = intCompanyId
+				FROM tblCTPriceContract
+				WHERE intPriceContractId = @intNewPriceContractId
 
 				EXEC sp_xml_removedocument @idoc
 
@@ -1480,6 +1505,15 @@ BEGIN TRY
 					,NULL
 					,NULL
 x:
+				SELECT @intContractScreenId = intScreenId
+				FROM tblSMScreen
+				WHERE strNamespace = 'ContractManagement.view.PriceContracts'
+
+				SELECT @intTransactionRefId = intTransactionId
+				FROM tblSMTransaction
+				WHERE intRecordId = @intNewPriceContractId
+					AND intScreenId = @intContractScreenId
+
 				INSERT INTO tblCTPriceContractAcknowledgementStage (
 					intAckPriceContractId
 					,strAckPriceContracNo
@@ -1490,6 +1524,10 @@ x:
 					,strAckPriceContractXML
 					,strAckPriceFixationXML
 					,strAckPriceFixationDetailXML
+					,intTransactionId 
+					,intCompanyId 
+					,intTransactionRefId 
+					,intCompanyRefId 
 					)
 				SELECT @intNewPriceContractId
 					,@strNewPriceContractNo
@@ -1500,6 +1538,12 @@ x:
 					,@strAckPriceContractXML
 					,@strAckPriceFixationXML
 					,@strAckPriceFixationDetailXML
+					,@intTransactionId 
+					,@intCompanyId 
+					,@intTransactionRefId 
+					,@intCompanyRefId 
+
+				EXECUTE dbo.uspSMInterCompanyUpdateMapping @currentTransactionId = @intTransactionRefId, @referenceTransactionId = @intTransactionId,@referenceCompanyId=@intCompanyId
 
 				UPDATE tblCTPriceContractStage
 				SET strFeedStatus = 'Processed'

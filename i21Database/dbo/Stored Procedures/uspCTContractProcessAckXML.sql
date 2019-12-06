@@ -25,6 +25,10 @@ BEGIN TRY
 	DECLARE @strInsert				NVARCHAR(100)
 	DECLARE @strUpdate			    NVARCHAR(100)
 	DECLARE @strToTransactionType	NVARCHAR(100)
+	,@intTransactionId int
+	,@intCompanyId int
+	,@intTransactionRefId int
+	,@intCompanyRefId int
 
 	
 
@@ -41,6 +45,10 @@ BEGIN TRY
 		SET @strAckDocumentXML   = NULL
 		SET @strTransactionType  = NULL
 		SET @strBookStatus		 = NULL
+		Select @intTransactionId = NULL
+	,@intCompanyId = NULL
+	,@intTransactionRefId = NULL
+	,@intCompanyRefId = NULL
 
 		SELECT @strAckHeaderXML  = strAckHeaderXML
 			,@strAckDetailXML	 = strAckDetailXML
@@ -48,6 +56,10 @@ BEGIN TRY
 			,@strAckDocumentXML  = strAckDocumentXML
 			,@strTransactionType = strTransactionType
 			,@strBookStatus		 = strBookStatus
+			,@intTransactionId = intTransactionId
+			,@intCompanyId = intCompanyId
+			,@intTransactionRefId = intTransactionRefId
+			,@intCompanyRefId = intCompanyRefId
 		FROM tblCTContractAcknowledgementStage
 		WHERE intContractAcknowledgementStageId = @intContractAcknowledgementStageId
 
@@ -177,6 +189,8 @@ BEGIN TRY
 				SET strFeedStatus = 'Ack Processed'
 				WHERE intContractAcknowledgementStageId = @intContractAcknowledgementStageId
 		END
+
+		EXECUTE dbo.uspSMInterCompanyUpdateMapping @currentTransactionId = @intTransactionId, @referenceTransactionId = @intTransactionRefId,@referenceCompanyId=@intCompanyRefId
 
 		SELECT @intContractAcknowledgementStageId = MIN(intContractAcknowledgementStageId)
 		FROM tblCTContractAcknowledgementStage
