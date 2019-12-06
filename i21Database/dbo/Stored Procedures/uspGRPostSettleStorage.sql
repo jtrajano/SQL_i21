@@ -2213,6 +2213,12 @@ BEGIN TRY
 																		and IT.intItemId = a.intItemId
 																)
 																--IT.dblCost--RI.dblUnitCost --dbo.fnCTConvertQtyToTargetItemUOM(a.intContractUOMId,RI.intCostUOMId, RI.dblUnitCost)
+																WHEN CS.intStorageTypeId = 2 THEN 
+																(select dblCost from tblICInventoryTransaction IT
+																inner join tblGRStorageHistory STH
+																	on STH.intTransferStorageId = IT.intTransactionId
+																	where IT.intTransactionTypeId = 56
+																		and IT.intItemId = a.intItemId)
 															else null end
 														end									
 					,[dblCostUnitQty]				= ISNULL(a.dblCostUnitQty,1)
