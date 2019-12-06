@@ -9,18 +9,7 @@ RETURN
 
 SELECT 
 	intCompanyLocationId = ISNULL(inTransit.intCompanyLocationId, itemLocation.intCompanyLocationId) 
-FROM 
-	(
-		SELECT TOP 1 
-			[Location].intCompanyLocationId
-		FROM
-			tblICItemLocation InTransitItemLocation INNER JOIN tblSMCompanyLocation [Location] 
-				ON [Location].intCompanyLocationId = InTransitItemLocation.intLocationId	
-		WHERE 	
-			InTransitItemLocation.intItemLocationId = @intInTransitSourceLocationId
-	) inTransit
-		
-	OUTER APPLY (
+FROM (
 		SELECT TOP 1 
 			[Location].intCompanyLocationId
 		FROM 
@@ -28,4 +17,14 @@ FROM
 				ON [Location].intCompanyLocationId = ItemLocation.intLocationId	
 		WHERE
 			ItemLocation.intItemLocationId = @intItemLocationId
-	) itemLocation
+	) itemLocation 
+	FULL OUTER JOIN (
+		SELECT TOP 1 
+			[Location].intCompanyLocationId
+		FROM
+			tblICItemLocation InTransitItemLocation INNER JOIN tblSMCompanyLocation [Location] 
+				ON [Location].intCompanyLocationId = InTransitItemLocation.intLocationId	
+		WHERE 	
+			InTransitItemLocation.intItemLocationId = @intInTransitSourceLocationId		
+	) inTransit
+		ON 1 = 1
