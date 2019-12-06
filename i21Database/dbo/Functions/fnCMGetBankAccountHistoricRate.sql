@@ -10,8 +10,6 @@ AS
 BEGIN
 DECLARE @result DECIMAL(18,6)
 
-SELECT TOP 1 @intGLAccountId =intGLAccountId, @intCurrencyId = intCurrencyId
-FROM tblCMBankAccount where intBankAccountId = @intBankAccountId
 
 SELECT  @result= AVG(dblExchangeRate) FROM tblCMBankTransaction 
 WHERE intBankAccountId = @intBankAccountId
