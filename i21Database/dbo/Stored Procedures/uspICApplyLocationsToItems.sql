@@ -144,7 +144,7 @@ SELECT
 	  i.intItemId
 	, il.intItemLocationId
 	, strPriceLevel = matchedLevel.strPricingLevelName
-	, intCompanyLocationPricingLevelId = macthedLevel.intCompanyLocationPricingLevelId
+	, intCompanyLocationPricingLevelId = matchedLevel.intCompanyLocationPricingLevelId
 	, intItemUnitMeasureId = source.intItemUnitMeasureId
 	, dblUnit = source.dblUnit
 	, dtmEffectiveDate = source.dtmEffectiveDate
