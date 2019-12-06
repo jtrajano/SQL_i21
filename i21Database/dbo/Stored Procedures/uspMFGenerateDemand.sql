@@ -1774,7 +1774,7 @@ BEGIN TRY
 					WHEN A.intReportAttributeID = 5
 						AND @intContainerTypeId IS NOT NULL
 						AND IsNULL(CW.dblWeight, 0) > 0
-						THEN IsNULL((D.dblQty * IsNULL(UMC.dblConversionToStock, 1)) / CW.dblWeight, 0)
+						THEN Round(IsNULL((D.dblQty * IsNULL(UMC.dblConversionToStock, 1)) / CW.dblWeight, 0),0)
 					WHEN DL.intMonthId IN (
 							- 1
 							,0
