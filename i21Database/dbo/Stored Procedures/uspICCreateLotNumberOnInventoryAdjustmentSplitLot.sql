@@ -161,9 +161,11 @@ BEGIN
 
 			,[intSplitFromLotId]		= SourceLot.intLotId
 			,[dblGrossWeight]			= SourceLot.dblGrossWeight
-			,[dblWeight]				=  CASE	WHEN ISNULL(Detail.dblNewWeight, 0) <> 0 THEN 
-													-- when a new wgt is supplied, then use it. 
+			,[dblWeight]				=  
+											CASE	WHEN ISNULL(Detail.dblNewWeight, 0) <> 0 THEN 
+													-- when a new wgt is supplied, then use it`. 
 													Detail.dblNewWeight
+													
 												WHEN Detail.intNewWeightUOMId IS NOT NULL THEN 
 													-- when there is a new wgt uom, convert the exising wgt to the new Wgt UOM.
 													dbo.fnCalculateQtyBetweenUOM(
@@ -174,6 +176,7 @@ BEGIN
 															,dbo.fnMultiply(-1, (ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0))) 
 														) 
 													)
+													
 												WHEN ISNULL(Detail.dblNewSplitLotQuantity, 0) <> 0 THEN
 													-- when there is a new split lot qty, compute the original weight. 
 													CASE	WHEN Detail.intItemUOMId = SourceLot.intWeightUOMId THEN 
@@ -186,12 +189,20 @@ BEGIN
 																	,dbo.fnMultiply(-1, (ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0))) 
 																) 
 													END 
+													
 												WHEN ISNULL(Detail.intNewItemUOMId, Detail.intItemUOMId) = SourceLot.intWeightUOMId THEN 
 													-- When cutting a bag into weights, then qty becomes wgt. 
 													1 
+													
+												WHEN SourceLot.intWeightUOMId IS NULL AND TargetLot.intWeightUOMId = SourceLot.intItemUOMId THEN 
+													-- When SourceLot.intWeightuOMId is empty but TargetLot.intWeightUOMId equals SourceLot.intItemUOMId,
+													-- then weight and qty must be equal.
+													1
+													
 												ELSE 
 													-- Lot will still use the same qty, then use the same wgt-per-qty. 
 													ISNULL(Detail.dblWeightPerQty, 0) 
+													
 											END
 			,[intWeightUOMId]			= ISNULL(Detail.intNewWeightUOMId, Detail.intWeightUOMId)
 			,[intOriginId]				= SourceLot.intOriginId
@@ -229,7 +240,11 @@ BEGIN
 													)
 												WHEN ISNULL(Detail.intNewItemUOMId, Detail.intItemUOMId) = SourceLot.intWeightUOMId THEN 
 													-- When cutting a bag into wgt, then qty becomes wgt. 
-													1 
+													1
+												WHEN SourceLot.intWeightUOMId IS NULL AND TargetLot.intWeightUOMId = SourceLot.intItemUOMId THEN 
+													-- When SourceLot.intWeightuOMId is empty but TargetLot.intWeightUOMId equals SourceLot.intItemUOMId,
+													-- use the TargetLot.dblWeightPerQty
+													TargetLot.dblWeightPerQty
 												ELSE 
 													-- lot will still use the same qty. the use the same wgt-per-qty. 
 													SourceLot.dblWeightPerQty
