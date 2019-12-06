@@ -4,9 +4,16 @@
 	,@intReserves INT = 1 /* 1= Reserves A, 2 = Reserves B */
 AS
 
+DECLARE @intDefaultCurrencyId AS INT = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
+		,@strUnitMeasure AS NVARCHAR(200)
+		,@strCurrency AS NVARCHAR(200)
+
 IF (@intUnitMeasureId IS NULL)
 	SELECT @intUnitMeasureId = intSUnitMeasureId 
 	FROM tblLGAllocationDetail WHERE intAllocationDetailId = @intAllocationDetailId
+
+SELECT @strUnitMeasure = strUnitMeasure FROM tblICUnitMeasure WHERE intUnitMeasureId = @intUnitMeasureId
+SELECT @strCurrency = ISNULL(strSymbol, strCurrency) FROM tblSMCurrency WHERE intCurrencyID = @intDefaultCurrencyId
 
 SELECT
 	I.strItemNo
@@ -23,6 +30,7 @@ SELECT
 							THEN (ISNULL(VCHR.dblTotal, 0) + ISNULL(INVC.dblTotal, 0)) 
 							ELSE ISNULL(CC.dblAmount, 0) END
 					ELSE ISNULL(CC.dblAmount, 0) * -1 END
+	,strUnitCurrency = @strCurrency + '/' + @strUnitMeasure
 FROM tblICItem I
 	OUTER APPLY (SELECT CC.intContractDetailId
 						,dblRate = ISNULL(dbo.fnCalculateCostBetweenUOM(CC.intItemUOMId,ToUOM.intItemUOMId,CC.dblRate), 0) / ISNULL(CCUR.intCent, 1)
