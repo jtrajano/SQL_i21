@@ -287,16 +287,9 @@ BEGIN TRY
 			IF (
 					@intMonthDiff > @intMaximumDemandMonth
 					OR @intMonthDiff < @intMinimumDemandMonth
-					)
+					) and IsNULL(@strSubstituteItemNo,'')=''
 			BEGIN
-				IF @strSubstituteItemNo <> ''
-				BEGIN
-					SELECT @strDetailErrorMessage = @strDetailErrorMessage + 'Demand date is not between minimum and maximum month for the item ' + @strItemNo + ' and substitute item ' + @strSubstituteItemNo + ' '
-				END
-				ELSE
-				BEGIN
 					SELECT @strDetailErrorMessage = @strDetailErrorMessage + 'Demand date is not between minimum and maximum month for the item ' + @strItemNo + ' '
-				END
 			END
 
 			IF IsNumeric(@dblQuantity) = 0

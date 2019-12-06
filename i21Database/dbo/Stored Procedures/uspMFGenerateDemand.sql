@@ -644,14 +644,14 @@ BEGIN TRY
 				,intMonthId
 				)
 			AS (
-				SELECT RI.intItemId
+				SELECT IsNULL(DD.intSubstituteItemId, DD.intItemId)
 					,Convert(NUMERIC(18, 6), (RI.dblCalculatedQuantity / R.dblQuantity) * dbo.fnMFConvertQuantityToTargetItemUOM(DD.intItemUOMId, IU.intItemUOMId, DD.dblQuantity))
 					,8 AS intAttributeId --Forecasted Consumption
 					,DD.dtmDemandDate
 					,0 AS intLevel
 					,DATEDIFF(mm, 0, DD.dtmDemandDate) + 1 - @intCurrentMonth AS intMonthId
 				FROM tblMFDemandDetail DD
-				JOIN tblMFRecipe R ON R.intItemId = IsNULL(DD.intSubstituteItemId, DD.intItemId)
+				JOIN tblMFRecipe R ON R.intItemId = DD.intItemId
 					AND DD.intDemandHeaderId = @intDemandHeaderId
 					AND R.ysnActive = 1
 					AND ISNULL(R.intLocationId, 0) = (
@@ -1799,6 +1799,7 @@ BEGIN TRY
 			,DL.intMonthId
 			,A.intDisplayOrder
 			,DL.intMainItemId
+			,MI.strItemNo as strMainItemNo
 		FROM #tblMFDemandList DL
 		JOIN tblCTReportAttribute A ON A.intReportAttributeID = DL.intAttributeId
 		JOIN tblICItem I ON I.intItemId = DL.intItemId
@@ -1847,7 +1848,7 @@ BEGIN TRY
 				,[23]
 				,[24]
 				)) AS pvt
-	ORDER BY intMainItemId
+	ORDER BY IsNULL(strMainItemNo,strItemNo)
 		,strItemNo
 		,intDisplayOrder;
 END TRY

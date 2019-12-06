@@ -212,7 +212,7 @@ BEGIN
 	WHERE intInvPlngReportMasterID = @intInvPlngReportMasterID
 
 	SET @SQL = ''
-	SET @SQL = @SQL + 'DECLARE @Table table(intItemId Int, strItemNo nvarchar(200), AttributeId int, strAttributeName nvarchar(50), OpeningInv nvarchar(35), PastDue nvarchar(35),intMainItemId Int'
+	SET @SQL = @SQL + 'DECLARE @Table table(intItemId Int, strItemNo nvarchar(200), AttributeId int, strAttributeName nvarchar(50), OpeningInv nvarchar(35), PastDue nvarchar(35),intMainItemId Int, strMainItemNo nvarchar(50)'
 
 	WHILE @Cnt <= @intNoOfMonths
 	BEGIN
@@ -249,6 +249,8 @@ BEGIN
 										CASE 
 											WHEN M.intItemId = IsNULL(MI.intItemId,M.intItemId)
 												THEN M.strItemNo + '' - '' + M.strDescription
+											WHEN M.intItemId <> IsNULL(MI.intItemId,M.intItemId) and strBook IS NULL
+												Then M.strItemNo + '' - '' + M.strDescription + '' [ '' + MI.strItemNo + '' - '' + MI.strDescription + '' ]''
 											ELSE M.strItemNo + '' - '' + M.strDescription + '' [ '' + MI.strItemNo + '' - '' + MI.strDescription + '' ] Restricted [''+strBook+'']''
 											END
 										)
@@ -256,6 +258,8 @@ BEGIN
 									CASE 
 										WHEN M.intItemId = IsNULL(MI.intItemId,M.intItemId)
 											THEN M.strItemNo
+										WHEN M.intItemId <> IsNULL(MI.intItemId,M.intItemId) and strBook IS NULL
+											Then M.strItemNo + '' [ '' + MI.strItemNo + '' ]'' 
 										ELSE M.strItemNo + '' [ '' + MI.strItemNo + '' ] Restricted [''+strBook+'']''
 										END
 									)
@@ -280,7 +284,8 @@ BEGIN
 				END AS strAttributeName
 						, Ext.OpeningInv
 						, Ext.PastDue
-						, Ext.intMainItemId'
+						, Ext.intMainItemId
+						, MI.strItemNo	'
 	SET @Cnt = 1
 
 	WHILE @Cnt <= @intNoOfMonths
@@ -316,7 +321,7 @@ BEGIN
 					LEFT JOIN tblICItem MI ON MI.intItemId = Ext.intMainItemId
 					Left JOIN #tblMFItemBook IB on IB.intItemId=Ext.intItemId
 					order by Ext.intInvPlngReportMasterID,Ext.intItemId, Ext.intReportAttributeID '
-	SET @SQL = CHAR(13) + @SQL + ' SELECT T.* FROM @Table T JOIN tblCTReportAttribute RA ON RA.intReportAttributeID = T.AttributeId ORDER By T.intItemId, RA.intDisplayOrder '
+	SET @SQL = CHAR(13) + @SQL + ' SELECT T.* FROM @Table T JOIN tblCTReportAttribute RA ON RA.intReportAttributeID = T.AttributeId ORDER By IsNULL(T.strMainItemNo,T.strItemNo), T.strItemNo, RA.intDisplayOrder '
 
 	--SELECT @SQL		
 	EXEC (@SQL)
