@@ -8,5 +8,7 @@
 	,strFeedStatus NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
 	,dtmFeedDate DATETIME CONSTRAINT DF_tblMFDemandStage_dtmFeedDate DEFAULT GETDATE()
 	,strMessage NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
+	,intTransactionId int
+    ,intCompanyId int
 	)
 

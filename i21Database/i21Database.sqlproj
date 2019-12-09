@@ -8246,6 +8246,12 @@
     <Build Include="dbo\Stored Procedures\uspRKMatchDerivativesPostRecap.sql" />
     <Build Include="dbo\Stored Procedures\uspLGPurchaseWisePnLReport.sql" />
     <Build Include="dbo\Stored Procedures\uspLGPurchaseWisePnLReportReserves.sql" />
+    <Build Include="dbo\Tables\tblICItemAcknowledgementStage.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPGetItemAcknowledgementXML.sql" />
+    <Build Include="dbo\Tables\tblMFDemandAcknowledgementStage.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPGetDemandAcknowledgementXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFDemandProcessAckXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPItemProcessAckXML.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -688,7 +688,7 @@ BEGIN TRY
 					SELECT @strDescription = 'Created from inter-company : ' + @strNewPriceContractNo
 
 					EXEC uspSMAuditLog @keyValue = @intNewPriceContractId
-						,@screenName = 'Quality.view.QualitySample'
+						,@screenName = 'ContractManagement.view.PriceContracts'
 						,@entityId = @intLastModifiedById
 						,@actionType = 'Created'
 						,@actionIcon = 'small-new-plus'

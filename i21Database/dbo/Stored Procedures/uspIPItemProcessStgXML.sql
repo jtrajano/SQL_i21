@@ -94,6 +94,13 @@ BEGIN TRY
 		,@strItemBookXML NVARCHAR(MAX)
 		,@intItemId INT
 		,@strBook NVARCHAR(50)
+		,@intTransactionId INT
+		,@intCompanyId INT
+		,@intLoadScreenId INT
+		,@intTransactionRefId INT
+		,@intCompanyRefId INT
+		,@strDescription NVARCHAR(50)
+		,@intItemScreenId int
 
 	SELECT @intItemStageId = MIN(intItemStageId)
 	FROM tblICItemStage
@@ -138,7 +145,9 @@ BEGIN TRY
 			,@strItemSpecialPricingXML = NULL
 			,@strRowState = NULL
 			,@strUserName = NULL
-			,@strItemBookXML=NULL
+			,@strItemBookXML = NULL
+			,@intTransactionId = NULL
+			,@intCompanyId = NULL
 
 		SELECT @intItemId = intItemId
 			,@strItemXML = strItemXML
@@ -174,9 +183,11 @@ BEGIN TRY
 			,@strItemUPCXML = strItemUPCXML
 			,@strItemVendorXrefXML = strItemVendorXrefXML
 			,@strItemSpecialPricingXML = strItemSpecialPricingXML
-			,@strItemBookXML=strItemBookXML
+			,@strItemBookXML = strItemBookXML
 			,@strRowState = strRowState
 			,@strUserName = strUserName
+			,@intTransactionId = intTransactionId
+			,@intCompanyId = intCompanyId
 		FROM tblICItemStage
 		WHERE intItemStageId = @intItemStageId
 
@@ -211,6 +222,7 @@ BEGIN TRY
 				,@strM2MComputation = NULL
 				,@strTonnageTaxUOM = NULL
 				,@strSourceName = NULL
+				,@strItemNo = NULL
 
 			SELECT @strManufacturer = strManufacturer
 				,@strBrandCode = strBrandCode
@@ -233,6 +245,7 @@ BEGIN TRY
 				,@strM2MComputation = strM2MComputation
 				,@strTonnageTaxUOM = strTonnageTaxUOM
 				,@strSourceName = strSourceName
+				,@strItemNo = strItemNo
 			FROM OPENXML(@idoc, 'vyuIPGetItems/vyuIPGetItem', 2) WITH (
 					strManufacturer NVARCHAR(50) Collate Latin1_General_CI_AS
 					,strBrandCode NVARCHAR(50) Collate Latin1_General_CI_AS
@@ -255,6 +268,7 @@ BEGIN TRY
 					,strM2MComputation NVARCHAR(50) Collate Latin1_General_CI_AS
 					,strTonnageTaxUOM NVARCHAR(50) Collate Latin1_General_CI_AS
 					,strSourceName NVARCHAR(50) Collate Latin1_General_CI_AS
+					,strItemNo NVARCHAR(50) Collate Latin1_General_CI_AS
 					) x
 
 			SELECT @intManufacturerId = NULL
@@ -663,8 +677,8 @@ BEGIN TRY
 						SELECT 1
 						FROM tblICItem
 						WHERE IsNULL(intItemId, 0) = @intItemId
-						--WHERE IsNULL(intItemRefId, 0) = @intItemId
 						)
+					--WHERE IsNULL(intItemRefId, 0) = @intItemId
 					SELECT @strRowState = 'Added'
 				ELSE
 					SELECT @strRowState = 'Modified'
@@ -675,8 +689,8 @@ BEGIN TRY
 				DELETE
 				FROM tblICItem
 				WHERE intItemId = @intItemId
-				--WHERE intItemRefId = @intItemId
 
+				--WHERE intItemRefId = @intItemId
 				EXEC sp_xml_removedocument @idoc
 
 				GOTO ext
@@ -848,8 +862,8 @@ BEGIN TRY
 					,intModifiedByUserId
 					,strServiceType
 					,intDataSourceId
-					--,intItemRefId
 					)
+				--,intItemRefId
 				SELECT strItemNo
 					,strShortName
 					,strType
@@ -1013,7 +1027,7 @@ BEGIN TRY
 					,intModifiedByUserId
 					,strServiceType
 					,@intDataSourceId
-					--,intItemId
+				--,intItemId
 				FROM OPENXML(@idoc, 'vyuIPGetItems/vyuIPGetItem', 2) WITH (
 						intItemId INT
 						,strItemNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
@@ -1183,6 +1197,17 @@ BEGIN TRY
 						)
 
 				SELECT @intNewItemId = SCOPE_IDENTITY()
+
+				SELECT @strDescription = 'Created from inter-company : ' + @strItemNo
+
+				EXEC uspSMAuditLog @keyValue = @intNewItemId
+					,@screenName = 'Inventory.view.Item'
+					,@entityId = @intLastModifiedUserId
+					,@actionType = 'Created'
+					,@actionIcon = 'small-new-plus'
+					,@changeDescription = @strDescription
+					,@fromValue = ''
+					,@toValue = @strItemNo
 			END
 
 			IF @strRowState = 'Modified'
@@ -1516,12 +1541,12 @@ BEGIN TRY
 						,strServiceType NVARCHAR(50) COLLATE Latin1_General_CI_AS
 						,intDataSourceId TINYINT
 						) x
-				--WHERE tblICItem.intItemRefId = @intItemId
 
+				--WHERE tblICItem.intItemRefId = @intItemId
 				SELECT @intNewItemId = intItemId
 					,@strItemNo = strItemNo
 				FROM tblICItem
-				--WHERE tblICItem.intItemRefId = @intItemId
+					--WHERE tblICItem.intItemRefId = @intItemId
 			END
 
 			EXEC sp_xml_removedocument @idoc
@@ -7487,6 +7512,36 @@ BEGIN TRY
 
 			ext:
 
+			SELECT @intItemScreenId = intScreenId
+            FROM tblSMScreen
+            WHERE strNamespace = 'Inventory.view.Item'
+
+            SELECT @intTransactionRefId = intTransactionId
+            FROM tblSMTransaction
+            WHERE intRecordId = @intNewItemId
+                AND intScreenId = @intItemScreenId
+
+            EXECUTE dbo.uspSMInterCompanyUpdateMapping @currentTransactionId = @intTransactionRefId, @referenceTransactionId = @intTransactionId,@referenceCompanyId=@intCompanyId
+
+			INSERT INTO tblICItemAcknowledgementStage (
+				intItemId
+				,strItemNo
+				,intItemRefId
+				,strMessage
+				,intTransactionId
+				,intCompanyId
+				,intTransactionRefId
+				,intCompanyRefId
+				)
+			SELECT @intNewItemId
+				,@strItemNo
+				,@intItemId
+				,'Success'
+				,@intTransactionId
+				,@intCompanyId
+				,@intTransactionRefId
+				,@intCompanyRefId
+
 			UPDATE tblICItemStage
 			SET strFeedStatus = 'Processed'
 			WHERE intItemStageId = @intItemStageId
@@ -7496,20 +7551,7 @@ BEGIN TRY
 			BEGIN
 				DECLARE @StrDescription AS NVARCHAR(MAX)
 
-				IF @strRowState = 'Added'
-				BEGIN
-					SELECT @StrDescription = 'Created '
-
-					EXEC uspSMAuditLog @keyValue = @intNewItemId
-						,@screenName = 'Inventory.view.Item'
-						,@entityId = @intLastModifiedUserId
-						,@actionType = 'Created'
-						,@actionIcon = 'small-new-plus'
-						,@changeDescription = @StrDescription
-						,@fromValue = ''
-						,@toValue = @strItemNo
-				END
-				ELSE IF @strRowState = 'Modified'
+				IF @strRowState = 'Modified'
 				BEGIN
 					SELECT @StrDescription = 'Updated '
 

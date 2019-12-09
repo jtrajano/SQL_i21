@@ -29,6 +29,10 @@ BEGIN TRY
 	DECLARE @strTransactionType					NVARCHAR(MAX)
 	DECLARE @intContractHeaderId				INT
 	DECLARE @intContractHeaderRefId				INT
+	    ,@intTransactionId int
+		,@intCompanyId int
+		,@intTransactionRefId int
+		,@intCompanyRefId int
 
 	SELECT @intAcknowledgementStageId = MIN(intAcknowledgementId)
 	FROM tblLGIntrCompLogisticsAck
@@ -48,6 +52,10 @@ BEGIN TRY
 		SET @strAckLoadCostXML = NULL
 		SET @strAckLoadStorageCostXML = NULL
 		SET @strTransactionType  = NULL
+		Select @intTransactionId = NULL
+		,@intCompanyId = NULL
+		,@intTransactionRefId = NULL
+		,@intCompanyRefId = NULL
 
 		SELECT @strAckLoadXML = strLoad
 			,@strAckLoadDetailXML = strLoadDetail
@@ -61,6 +69,10 @@ BEGIN TRY
 			,@strAckLoadCostXML = strLoadCost
 			,@strAckLoadStorageCostXML = strLoadStorageCost
 			,@strTransactionType = strTransactionType
+			,@intTransactionId = intTransactionId
+            ,@intCompanyId = intCompanyId
+            ,@intTransactionRefId = intTransactionRefId
+            ,@intCompanyRefId = intCompanyRefId
 		FROM tblLGIntrCompLogisticsAck
 		WHERE intAcknowledgementId = @intAcknowledgementStageId
 
@@ -268,6 +280,7 @@ BEGIN TRY
 		--UPDATE tblLGIntrCompLogisticsAck 
 		--SET strFeedStatus = 'Processed'
 		--WHERE intAcknowledgementId > @intAcknowledgementStageId
+		EXECUTE dbo.uspSMInterCompanyUpdateMapping @currentTransactionId = @intTransactionId, @referenceTransactionId = @intTransactionRefId,@referenceCompanyId=@intCompanyRefId
 
 		SELECT @intAcknowledgementStageId = MIN(intAcknowledgementId)
 		FROM tblLGIntrCompLogisticsAck

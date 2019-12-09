@@ -43,10 +43,17 @@ BEGIN TRY
 		,@strItemUPCXML NVARCHAR(MAX)
 		,@strItemVendorXrefXML NVARCHAR(MAX)
 		,@strItemBookXML NVARCHAR(MAX)
+		,@intCompanyId int
+        ,@intTransactionId int
+        ,@intItemScreenId int
 
 	SET @strItemXML = NULL
 	SET @strHeaderCondition = NULL
 	SET @strLastModifiedUser = NULL
+
+	Select @intCompanyId=intCompanyId
+	From tblICItem 
+	Where intItemId=@intItemId 
 
 	-------------------------Header-----------------------------------------------------------
 	SELECT @strHeaderCondition = 'intItemId = ' + LTRIM(@intItemId)
@@ -347,6 +354,13 @@ BEGIN TRY
 		,NULL
 		,NULL
 
+	SELECT    @intItemScreenId    =    intScreenId FROM tblSMScreen WHERE strNamespace = 'Inventory.view.Item'
+
+    Select @intTransactionId=intTransactionId 
+    from tblSMTransaction
+    Where intRecordId =@intItemId
+    and intScreenId =@intItemScreenId
+
 	INSERT INTO tblICItemStage (
 		intItemId
 		,strItemXML
@@ -386,6 +400,8 @@ BEGIN TRY
 		,strRowState
 		,strUserName
 		,intMultiCompanyId
+		,intTransactionId 
+        ,intCompanyId 
 		)
 	SELECT intItemId = @intItemId
 		,strItemXML = @strItemXML
@@ -425,6 +441,8 @@ BEGIN TRY
 		,strRowState = @strRowState
 		,strUserName = @strLastModifiedUser
 		,intMultiCompanyId = intCompanyId
+		,intTransactionId=@intTransactionId
+        ,intCompanyId=@intCompanyId
 	FROM tblIPMultiCompany
 	WHERE ysnParent = 0
 END TRY

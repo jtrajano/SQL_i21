@@ -43,6 +43,15 @@ BEGIN TRY
 		,@intLocationId INT
 		,@intReportMasterID INT
 		,@strItemList NVARCHAR(MAX)
+		,@intTransactionId INT
+        ,@intCompanyId INT
+        ,@intLoadScreenId INT
+        ,@intTransactionRefId INT
+        ,@intCompanyRefId INT
+        ,@strDescription NVARCHAR(50)
+        ,@intItemScreenId int
+		,@intDemandScreenId int
+		,@intNewInvPlngReportMasterID int
 
 	SELECT @intDemandStageId = MIN(intDemandStageId)
 	FROM tblMFDemandStage
@@ -55,12 +64,16 @@ BEGIN TRY
 			,@strReportMaterialXML = NULL
 			,@strReportAttributeValueXML = NULL
 			,@strRowState = NULL
+			,@intTransactionId = NULL
+            ,@intCompanyId = NULL
 
 		SELECT @intInvPlngReportMasterID = intInvPlngReportMasterID
 			,@strReportMasterXML = strReportMasterXML
 			,@strReportMaterialXML = strReportMaterialXML
 			,@strReportAttributeValueXML = strReportAttributeValueXML
 			,@strRowState = strRowState
+			,@intTransactionId = intTransactionId
+            ,@intCompanyId = intCompanyId
 		FROM tblMFDemandStage
 		WHERE intDemandStageId = @intDemandStageId
 
@@ -340,7 +353,7 @@ BEGIN TRY
 				,@dtmLastModified
 				,@intInvPlngReportMasterID
 
-			SELECT @intInvPlngReportMasterID = SCOPE_IDENTITY()
+			SELECT @intNewInvPlngReportMasterID = SCOPE_IDENTITY()
 
 			EXEC sp_xml_removedocument @idoc
 
@@ -513,6 +526,37 @@ BEGIN TRY
 			UPDATE tblMFDemandStage
 			SET strFeedStatus = 'Processed'
 			WHERE intDemandStageId = @intDemandStageId
+
+			SELECT @intDemandScreenId = intScreenId
+            FROM tblSMScreen
+            WHERE strNamespace = 'Manufacturing.view.DemandAnalysisView'
+
+            SELECT @intTransactionRefId = intTransactionId
+            FROM tblSMTransaction
+            WHERE intRecordId = @intInvPlngReportMasterID
+                AND intScreenId = @intDemandScreenId
+
+            EXECUTE dbo.uspSMInterCompanyUpdateMapping @currentTransactionId = @intTransactionRefId, @referenceTransactionId = @intTransactionId,@referenceCompanyId=@intCompanyId
+
+            INSERT INTO tblMFDemandAcknowledgementStage (
+				  intInvPlngReportMasterId 
+				,strInvPlngReportName 
+				,intInvPlngReportMasterRefId
+                ,strMessage
+                ,intTransactionId
+                ,intCompanyId
+                ,intTransactionRefId
+                ,intCompanyRefId
+                )
+            SELECT @intNewInvPlngReportMasterID 
+				,@strInvPlngReportName 
+				,@intInvPlngReportMasterID
+                ,'Success'
+                ,@intTransactionId
+                ,@intCompanyId
+                ,@intTransactionRefId
+                ,@intCompanyRefId
+
 
 			IF @intTransactionCount = 0
 				COMMIT TRANSACTION

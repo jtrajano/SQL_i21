@@ -40,4 +40,6 @@
 	,intMultiCompanyId INT
 	,strFeedStatus NVARCHAR(50)
 	,strMessage NVARCHAR(MAX)
+	,intTransactionId int
+    ,intCompanyId int
 	)

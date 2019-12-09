@@ -50,9 +50,13 @@ BEGIN TRY
 	DECLARE @strLoadWarehouseId NVARCHAR(100)
 	DECLARE @intSourceType INT
 		,@strObjectName NVARCHAR(50)
+		        ,@intCompanyId int
+        ,@intTransactionId int
+        ,@intLoadScreenId int
 
 	SELECT @strLoadNumber = strLoadNumber
 		,@intSourceType = intSourceType
+		,@intCompanyId=intCompanyId
 	FROM tblLGLoad
 	WHERE intLoadId = @intLoadId
 
@@ -293,6 +297,13 @@ BEGIN TRY
 		,NULL
 		,NULL
 
+	SELECT    @intLoadScreenId    =    intScreenId FROM tblSMScreen WHERE strNamespace = 'Logistics.view.ShipmentSchedule'
+
+    Select @intTransactionId=intTransactionId 
+    from tblSMTransaction
+    Where intRecordId =@intLoadId
+    and intScreenId =@intLoadScreenId
+
 	-- LOAD HEADER TABLE
 	INSERT INTO tblLGIntrCompLogisticsStg (
 		intLoadId
@@ -314,6 +325,8 @@ BEGIN TRY
 		,intMultiCompanyId
 		,intToCompanyLocationId
 		,intToBookId
+		,intTransactionId 
+        ,intCompanyId 
 		)
 	SELECT @intLoadId
 		,@strLoadNumber
@@ -334,6 +347,8 @@ BEGIN TRY
 		,@intToCompanyId
 		,@intToCompanyLocationId
 		,@intToBookId
+		,@intTransactionId
+        ,@intCompanyId
 END TRY
 
 BEGIN CATCH

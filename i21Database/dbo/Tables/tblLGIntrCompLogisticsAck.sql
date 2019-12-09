@@ -23,5 +23,9 @@
 		[intMultiCompanyId] INT,
 		[intReferenceId] INT,
 		[intEntityId] INT,
-		[strTransactionType] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
+		[strTransactionType] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+		intTransactionId int,
+		intCompanyId int,
+		intTransactionRefId int,
+		intCompanyRefId int
 	)

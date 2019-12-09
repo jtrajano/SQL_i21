@@ -10,6 +10,9 @@ BEGIN TRY
 		,@strReportMasterXML NVARCHAR(MAX)
 		,@strReportMaterialXML NVARCHAR(MAX)
 		,@strReportAttributeValueXML NVARCHAR(MAX)
+		,@intCompanyId int
+        ,@intTransactionId int
+		,@intDemandScreenId int
 
 	IF @strRowState = 'Delete'
 	BEGIN
@@ -50,18 +53,31 @@ BEGIN TRY
 		,NULL
 		,NULL
 
+	 SELECT    @intDemandScreenId    =    intScreenId 
+	 FROM tblSMScreen 
+	 WHERE strNamespace = 'Manufacturing.view.DemandAnalysisView'
+
+    Select @intTransactionId=intTransactionId 
+    from tblSMTransaction
+    Where intRecordId =@intInvPlngReportMasterID
+    and intScreenId =@intDemandScreenId
+
 	INSERT INTO tblMFDemandStage (
 		intInvPlngReportMasterID
 		,strReportMasterXML
 		,strReportMaterialXML
 		,strReportAttributeValueXML
 		,strRowState
+		,intTransactionId 
+        ,intCompanyId 
 		)
 	SELECT intInvPlngReportMasterID = @intInvPlngReportMasterID
 		,strReportMasterXML = @strReportMasterXML
 		,strReportMaterialXML = @strReportMaterialXML
 		,strReportAttributeValueXML = @strReportAttributeValueXML
 		,strRowState = @strRowState
+		,intTransactionId=@intTransactionId
+        ,intCompanyId=@intCompanyId
 END TRY
 
 BEGIN CATCH

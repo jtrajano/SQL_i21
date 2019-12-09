@@ -75,6 +75,7 @@ BEGIN TRY
 		,@intUserId INT
 		,@strUserName NVARCHAR(50)
 		,@strFinalErrMsg NVARCHAR(MAX) = ''
+		,@strDescription NVARCHAR(MAX)
 	DECLARE @tblLGLoadDetail TABLE (intLoadDetailId INT)
 	DECLARE @strItemNo NVARCHAR(50)
 		,@strItemUOM NVARCHAR(50)
@@ -138,6 +139,11 @@ BEGIN TRY
 		,@intFreightTermId INT
 		,@intBookId INT
 		,@intSubBookId INT
+		        ,@intTransactionId INT
+        ,@intCompanyId INT
+        ,@intLoadScreenId INT
+        ,@intTransactionRefId INT
+        ,@intCompanyRefId INT
 	DECLARE @tblLGLoadDetailLot TABLE (intLoadDetailLotId INT)
 	DECLARE @strLotNumber NVARCHAR(50)
 		,@strItemUnitMeasure NVARCHAR(50)
@@ -255,6 +261,8 @@ BEGIN TRY
 				,@intBookId = NULL
 				,@intSubBookId = NULL
 				,@strUserName = NULL
+				            ,@intTransactionId = NULL
+            ,@intCompanyId = NULL
 
 			SELECT @intLoadId = intLoadId
 				,@strLoadNumber = strLoadNumber
@@ -281,6 +289,8 @@ BEGIN TRY
 				,@strTransactionType = strTransactionType
 				,@intToBookId = intToBookId
 				,@intCompanyLocationId = intToCompanyLocationId
+				            ,@intTransactionId = intTransactionId
+            ,@intCompanyId = intCompanyId
 			FROM tblLGIntrCompLogisticsStg
 			WHERE intId = @intId
 
@@ -1188,6 +1198,16 @@ BEGIN TRY
 						) x
 
 				SELECT @intNewLoadId = SCOPE_IDENTITY()
+				SELECT @strDescription = 'Created from inter-company : ' + @strNewLoadNumber
+
+                EXEC uspSMAuditLog @keyValue = @intNewLoadId
+                    ,@screenName = 'Logistics.view.ShipmentSchedule'
+                    ,@entityId = @intUserId
+                    ,@actionType = 'Created'
+                    ,@actionIcon = 'small-new-plus'
+                    ,@changeDescription = @strDescription
+                    ,@fromValue = ''
+                    ,@toValue = @strNewLoadNumber
 			END
 			ELSE
 			BEGIN
@@ -3698,6 +3718,17 @@ BEGIN TRY
 				,NULL
 				,NULL
 
+			SELECT @intLoadScreenId = intScreenId
+            FROM tblSMScreen
+            WHERE strNamespace = 'Logistics.view.ShipmentSchedule'
+
+            SELECT @intTransactionRefId = intTransactionId
+            FROM tblSMTransaction
+            WHERE intRecordId = @intNewLoadId
+                AND intScreenId = @intLoadScreenId
+
+			EXECUTE dbo.uspSMInterCompanyUpdateMapping @currentTransactionId = @intTransactionRefId, @referenceTransactionId = @intTransactionId,@referenceCompanyId=@intCompanyId
+
 			INSERT INTO tblLGIntrCompLogisticsAck (
 				intLoadId
 				,strLoadNumber
@@ -3716,6 +3747,10 @@ BEGIN TRY
 				,strLoadWarehouse
 				,strLoadWarehouseServices
 				,strLoadWarehouseContainer
+				,intTransactionId 
+                ,intCompanyId 
+                ,intTransactionRefId 
+                ,intCompanyRefId 
 				)
 			SELECT @intNewLoadId
 				,@strNewLoadNumber
@@ -3734,6 +3769,10 @@ BEGIN TRY
 				,@strAckLoadWarehouseXML
 				,@strAckLoadWarehouseServicesXML
 				,@strAckLoadWarehouseContainerXML
+				,@intTransactionId 
+                ,@intCompanyId 
+                ,@intTransactionRefId 
+                ,@intCompanyRefId 
 
 			UPDATE tblLGIntrCompLogisticsStg
 			SET strFeedStatus = 'Processed'
