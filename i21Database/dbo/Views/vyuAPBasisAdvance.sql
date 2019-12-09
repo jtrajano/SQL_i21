@@ -32,7 +32,7 @@ SELECT TOP 100 PERCENT * FROM (
         ,cur.strCurrency
         ,ctd.intSeqCurrencyId AS intCurrencyId
         ,ticketTrans.intItemUOMId
-        ,ISNULL(ticket.dblNetUnits,ISNULL(ticketTrans.dblQuantity,0)) - ISNULL(pricedSequence.dblQtyPriced, 0) AS dblQuantity
+        ,ISNULL(ticketTrans.dblQuantity,ISNULL(ticket.dblNetUnits,0)) - ISNULL(pricedSequence.dblQtyPriced, 0) AS dblQuantity
         ,(ISNULL(basisFutures.dblPrice, 0) 
                 + ISNULL(dbo.fnMFConvertCostToTargetItemUOM(ctd.intSeqBasisUOMId, itemUOM.intItemUOMId, ctd.dblSeqBasis),0)) 
             * (ISNULL(ticket.dblNetUnits,ISNULL(ticketTrans.dblQuantity,0)) - ISNULL(pricedSequence.dblQtyPriced, 0)) AS dblGross
