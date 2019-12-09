@@ -579,7 +579,101 @@ END
 ---------------------------------------------------------------------------------------------------------------------------------------
 IF (ISNULL(@recap, 0) = 0)
 BEGIN
+	DECLARE @GainLossAccount INT;
 
+	SELECT TOP 1 
+		@GainLossAccount = intAccountsPayableRealizedId 
+	FROM tblSMMultiCurrency
+
+	IF EXISTS(SELECT 1 FROM @GLEntries WHERE intAccountId = @GainLossAccount)
+	BEGIN
+	--HANDLE DECIMAL LOSS FOR MULTI CURRENCY
+	INSERT INTO @GLEntries(
+		[dtmDate],
+		[strBatchId],
+		[intAccountId],
+		[dblDebit]  ,
+		[dblCredit] ,
+		[dblDebitUnit],
+		[dblCreditUnit],
+		[strDescription],
+		[strCode],    
+		[strReference],
+		[intCurrencyId],
+		[intCurrencyExchangeRateTypeId],
+		[dblExchangeRate],
+		[dtmDateEntered] ,
+		[dtmTransactionDate],
+		[strJournalLineDescription],
+		[intJournalLineNo],
+		[ysnIsUnposted],    
+		[intUserId],
+		[intEntityId],
+		[strTransactionId],
+		[intTransactionId],
+		[strTransactionType],
+		[strTransactionForm],
+		[strModuleName],
+		[intConcurrencyId],
+		[dblDebitForeign],
+		[dblDebitReport],
+		[dblCreditForeign],
+		[dblCreditReport],
+		[dblReportingRate],
+		[dblForeignRate],
+		[strRateType])
+	SELECT 
+		A.[dtmDate]	,
+		A.[strBatchId]  ,
+		@GainLossAccount,
+		SUM(dblDebit - dblCredit),
+		0,
+		0,
+		0,
+		'Decimal loss due to rounding.',
+		A.[strCode],    
+		NULL,
+		A.[intCurrencyId],
+		NULL,
+		1,
+		A.[dtmDateEntered] ,
+		A.[dtmTransactionDate],
+		'Posted Decimal Loss',
+		4,
+		A.[ysnIsUnposted],    
+		A.[intUserId],
+		A.[intEntityId],
+		A.[strTransactionId],
+		A.[intTransactionId],
+		A.[strTransactionType],
+		A.[strTransactionForm],
+		A.[strModuleName],
+		A.[intConcurrencyId],
+		0,
+		0,
+		0,
+		0,
+		1,
+		1,
+		NULL
+	FROM @GLEntries A
+	GROUP BY 
+		A.[dtmDate],
+		A.[strBatchId],
+		A.[ysnIsUnposted],    
+		A.[intUserId],
+		A.[intEntityId],
+		A.[strCode],
+		A.[intCurrencyId],
+		A.[dtmDateEntered],
+		A.[dtmTransactionDate],
+		A.[strTransactionId],
+		A.[intTransactionId],
+		A.[strTransactionType],
+		A.[strTransactionForm],
+		A.[strModuleName],
+		A.[intConcurrencyId]
+	END
 	--BATCH POST
 	EXEC uspGLBatchPostEntries @GLEntries, @batchId, @userId, @post
 
