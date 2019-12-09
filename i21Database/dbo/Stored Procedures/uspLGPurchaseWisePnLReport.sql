@@ -12,13 +12,16 @@ IF LTRIM(RTRIM(@xmlParam)) = ''
  SET @xmlParam = NULL   
   
 -- Declare the variables.
-DECLARE @intAllocationDetailId AS INT = NULL
+DECLARE @strAllocationDetailRefNo AS NVARCHAR(100)
+		,@strPContractNumberSeq AS NVARCHAR(100)
+		,@strSContractNumberSeq AS NVARCHAR(100)
+		,@strUnitMeasure AS NVARCHAR(200)
+		,@strFinancialStatus NVARCHAR(200) = NULL
+		,@intAllocationDetailId AS INT = NULL
 		,@intPContractDetailId AS INT = NULL
 		,@intSContractDetailId AS INT = NULL
 		,@intUnitMeasureId AS INT = NULL
-		,@strFinancialStatus NVARCHAR(200) = NULL
 		,@intDefaultCurrencyId AS INT = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
-		,@strUnitMeasure AS NVARCHAR(200)
 		,@strCurrency AS NVARCHAR(200)
 		,@strCompanyName NVARCHAR(100)
 		,@strCompanyAddress NVARCHAR(100)
@@ -61,25 +64,47 @@ WITH (
 )  
   
 -- Gather the variables values from the xml table.   
-SELECT @intAllocationDetailId = [from]  
+SELECT @strAllocationDetailRefNo = [from]  
 FROM @temp_xml_table   
-WHERE [fieldname] = 'intAllocationDetailId'  
+WHERE [fieldname] = 'strAllocationDetailRefNo'  
 
-SELECT @intPContractDetailId = [from]  
+SELECT @strPContractNumberSeq = [from]  
 FROM @temp_xml_table   
-WHERE [fieldname] = 'intPContractDetailId'  
+WHERE [fieldname] = 'strPContractNumberSeq'  
 
-SELECT @intSContractDetailId = [from]  
+SELECT @strSContractNumberSeq = [from]  
 FROM @temp_xml_table   
-WHERE [fieldname] = 'intSContractDetailId'  
+WHERE [fieldname] = 'strSContractNumberSeq'  
 
-SELECT @intUnitMeasureId = [from]  
+SELECT @strUnitMeasure = [from]  
 FROM @temp_xml_table   
-WHERE [fieldname] = 'intUnitMeasureId'
+WHERE [fieldname] = 'strUnitMeasure'
 
-SELECT @strFinancialStatus = [from]  
-FROM @temp_xml_table   
-WHERE [fieldname] = 'strFinancialStatus'
+--Extract Parameters
+SELECT @intAllocationDetailId = intAllocationDetailId FROM tblLGAllocationDetail WHERE strAllocationDetailRefNo = @strAllocationDetailRefNo
+SELECT @intUnitMeasureId = intUnitMeasureId FROM tblICUnitMeasure WHERE strUnitMeasure = @strUnitMeasure
+
+--Extract Purchase Contract Detail Id
+IF (ISNULL(@strPContractNumberSeq, '') <> '')
+BEGIN
+	SELECT @intPContractDetailId = CD.intContractDetailId 
+	FROM tblCTContractDetail CD 
+		LEFT JOIN tblCTContractHeader CH ON CD.intContractHeaderId = CH.intContractHeaderId
+		WHERE CH.intContractTypeId = 1
+			AND CH.strContractNumber = SUBSTRING(@strPContractNumberSeq, 1, LEN(@strPContractNumberSeq) - CHARINDEX('/', REVERSE(@strPContractNumberSeq)))
+			AND CD.intContractDetailId = CAST(RIGHT(@strPContractNumberSeq, CHARINDEX('/', REVERSE(@strPContractNumberSeq)) - 1) AS INT)
+END
+
+--Extract Sales Contract Detail Id
+IF (ISNULL(@strSContractNumberSeq, '') <> '')
+BEGIN
+	SELECT @intSContractDetailId = CD.intContractDetailId 
+	FROM tblCTContractDetail CD 
+		LEFT JOIN tblCTContractHeader CH ON CD.intContractHeaderId = CH.intContractHeaderId
+		WHERE CH.intContractTypeId = 1
+			AND CH.strContractNumber = SUBSTRING(@strSContractNumberSeq, 1, LEN(@strSContractNumberSeq) - CHARINDEX('/', REVERSE(@strSContractNumberSeq)))
+			AND CD.intContractDetailId = CAST(RIGHT(@strSContractNumberSeq, CHARINDEX('/', REVERSE(@strSContractNumberSeq)) - 1) AS INT)
+END
 
 -- Sanitize Parameters
 IF (@intAllocationDetailId IS NULL)
@@ -165,8 +190,8 @@ FROM
 		,strCommodity = COM.strCommodityCode
 		,strPClient = V.strName
 		,strSClient = C.strName
-		,dblPAllocatedQty = dbo.fnCalculateQtyBetweenUOM (AUOM.intItemUOMId, ToUOM.intItemUOMId, ALD.dblPAllocatedQty)
-		,dblSAllocatedQty = dbo.fnCalculateQtyBetweenUOM (AUOM.intItemUOMId, ToUOM.intItemUOMId, ALD.dblSAllocatedQty)
+		,dblPAllocatedQty = dbo.fnCalculateQtyBetweenUOM (PUOM.intItemUOMId, ToUOM.intItemUOMId, ALD.dblPAllocatedQty)
+		,dblSAllocatedQty = dbo.fnCalculateQtyBetweenUOM (SUOM.intItemUOMId, ToUOM.intItemUOMId, ALD.dblSAllocatedQty)
 		,dblPTerminalPrice = /* P-Terminal Price */
 							ISNULL(dbo.fnCalculateCostBetweenUOM(PCD.intPriceItemUOMId, ToUOM.intItemUOMId, PCD.dblFutures) / ISNULL(PCUR.intCent, 1), 0)
 		,dblSTerminalPrice = /* S-Terminal Price */
@@ -195,8 +220,8 @@ FROM
 								+ ISNULL(RA.dblReservesARateTotal, 0) 
 								+ ISNULL(RB.dblReservesBRateTotal, 0) 
 		,dblTonnageCheck = /* P-Qty - S-Qty */
-						dbo.fnCalculateQtyBetweenUOM (AUOM.intItemUOMId, ToUOM.intItemUOMId, ALD.dblPAllocatedQty) 
-						- dbo.fnCalculateQtyBetweenUOM (AUOM.intItemUOMId, ToUOM.intItemUOMId, ALD.dblSAllocatedQty)
+						dbo.fnCalculateQtyBetweenUOM (PUOM.intItemUOMId, ToUOM.intItemUOMId, ALD.dblPAllocatedQty) 
+						- dbo.fnCalculateQtyBetweenUOM (SUOM.intItemUOMId, ToUOM.intItemUOMId, ALD.dblSAllocatedQty)
 		,dblTotalMargin = RB.dblReservesBValueTotal * -1
 		,dblReservesATotalVariance = RA.dblReservesAVarianceTotal
 		,blbHeaderLogo = dbo.fnSMGetCompanyLogo('Header')
@@ -219,7 +244,8 @@ FROM
 		LEFT JOIN tblCTContractHeader SCH ON SCH.intContractHeaderId = SCD.intContractHeaderId
 		LEFT JOIN tblCTContractStatus SCS ON SCS.intContractStatusId = SCD.intContractStatusId
 		LEFT JOIN tblEMEntity C ON C.intEntityId = SCH.intEntityId
-		LEFT JOIN tblICItemUOM AUOM ON AUOM.intItemId = I.intItemId AND AUOM.intUnitMeasureId = ALD.intSUnitMeasureId
+		LEFT JOIN tblICItemUOM SUOM ON SUOM.intItemId = I.intItemId AND SUOM.intUnitMeasureId = ALD.intSUnitMeasureId
+		LEFT JOIN tblICItemUOM PUOM ON PUOM.intItemId = I.intItemId AND PUOM.intUnitMeasureId = ALD.intPUnitMeasureId
 		LEFT JOIN tblSMCurrency PCUR ON PCUR.intCurrencyID = PCD.intBasisCurrencyId
 		LEFT JOIN tblSMCurrency SCUR ON SCUR.intCurrencyID = SCD.intBasisCurrencyId
 		OUTER APPLY (SELECT	TOP 1 intItemUOMId, dblUnitQty FROM	dbo.tblICItemUOM 
