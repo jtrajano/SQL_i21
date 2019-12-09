@@ -637,7 +637,7 @@ BEGIN
 			SELECT
 				intNetworkId			= @intNetworkId
 				,strSiteNumber			= @strSiteId
-				,strSiteName			= @strSiteName
+				,strSiteName			= @strSiteId -- default site name to site number
 				,strDeliveryPickup		= 'Pickup'
 				,intARLocationId		= @intNetworkLocation
 				,strControllerType		= (CASE @strNetworkType 
