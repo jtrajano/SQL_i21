@@ -11,8 +11,10 @@ IF NOT EXISTS (
 		AND i.name = 'IX_tblICInventoryTransaction_valuation'
 )
 BEGIN 
-	ALTER TABLE tblICInventoryTransaction
-	DROP CONSTRAINT PK_tblICInventoryTransaction
+	EXEC('
+		ALTER TABLE tblICInventoryTransaction
+		DROP CONSTRAINT PK_tblICInventoryTransaction	
+	')
 END 
 
 GO
