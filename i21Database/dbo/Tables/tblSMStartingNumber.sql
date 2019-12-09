@@ -9,6 +9,7 @@
 	[ysnResetNumber]       BIT            NOT NULL DEFAULT 0,
 	[dtmResetDate]		   DATETIME		  NOT NULL DEFAULT SYSDATETIME(),
     [ysnEnable]            BIT            NOT NULL DEFAULT 0,
+    [ysnSuffixYear]        BIT            NOT NULL DEFAULT 0,
     [intConcurrencyId]     INT            DEFAULT 1 NOT NULL, 
     CONSTRAINT [PK_tblSMStartingNumber] PRIMARY KEY ([intStartingNumberId] ASC) ,
 	CONSTRAINT [AK_tblSMStartingNumber_strTransactionType] UNIQUE NONCLUSTERED ([strTransactionType] ASC)
