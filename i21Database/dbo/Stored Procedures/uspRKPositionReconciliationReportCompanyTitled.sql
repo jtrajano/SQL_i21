@@ -108,7 +108,7 @@ BEGIN
 			,@intCommodityId
 			,1
 		FROM dbo.fnICOutstandingInTransitAsOf(NULL, @intCommodityId, @dtmToTransactionDate) InTran
-		WHERE @ysnIncludeInTransitInCompanyTitled = 0
+		WHERE @ysnIncludeInTransitInCompanyTitled = 1
 
 		SELECT 
 			@dblInTransitBegBalance = @dblInTransitBegBalance + SUM(dblInTransitQty)
