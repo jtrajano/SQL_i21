@@ -419,6 +419,7 @@ LEFT JOIN (
 		--AND 
 		ad.intAccountCategoryId = 45
 		AND t.ysnIsUnposted = 0 
+        AND (gd.dblCredit != 0 OR gd.dblDebit != 0) --do not include entries with both 0 amount
 ) APClearing
 	ON		APClearing.strTransactionId = receipt.strReceiptNumber
 		AND APClearing.intTransactionId = receipt.intInventoryReceiptId
