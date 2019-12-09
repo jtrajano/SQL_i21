@@ -1364,58 +1364,40 @@ SELECT
     ,[strSourceType]                    = NULL
     ,[strPostingMessage]                = NULL
     ,[strDescription]                   = ISNULL(GL.strDescription, '') + ' Item: ' + ISNULL(ARID.strItemDescription, '') + ', Qty: ' + CAST(CAST(ARID.dblQtyShipped AS NUMERIC(18, 2)) AS nvarchar(100)) + ', Price: ' + CAST(CAST(ARID.dblPrice AS NUMERIC(18, 2)) AS nvarchar(100))
-    
-FROM
-    #ARPostInvoiceHeader ARI
-INNER JOIN
-    tblARInvoiceDetail ARID
-        ON ARI.[intInvoiceId] = ARID.[intInvoiceId]
-INNER JOIN
-    (
+FROM #ARPostInvoiceHeader ARI
+INNER JOIN tblARInvoiceDetail ARID ON ARI.[intInvoiceId] = ARID.[intInvoiceId]
+INNER JOIN (
     SELECT [intItemId], [strItemNo], [strType], [strDescription], [ysnAutoBlend], [intCategoryId] FROM tblICItem WITH(NoLock)
-    ) ICI
-        ON ARID.[intItemId] = ICI.[intItemId]
-LEFT OUTER JOIN
-    (
+) ICI ON ARID.[intItemId] = ICI.[intItemId]
+LEFT OUTER JOIN (
     SELECT [intCategoryId], [ysnRetailValuation] FROM tblICCategory WITH(NoLock)
-    ) ICC
-        ON ICI.[intCategoryId] = ICC.[intCategoryId]
-INNER JOIN
-    (
+) ICC ON ICI.[intCategoryId] = ICC.[intCategoryId]
+INNER JOIN (
     SELECT [intItemId], [intLocationId], [intItemLocationId], [intAllowNegativeInventory], [intSubLocationId] FROM tblICItemLocation WITH(NoLock)
-    ) ICIL
-        ON ICI.[intItemId] = ICIL.[intItemId]
-        AND ARI.[intCompanyLocationId] = ICIL.[intLocationId]
-LEFT OUTER JOIN
-    (
+) ICIL ON ICI.[intItemId] = ICIL.[intItemId]
+      AND ARI.[intCompanyLocationId] = ICIL.[intLocationId]
+LEFT OUTER JOIN (
     SELECT [intItemId], [intItemLocationId], [dblLastCost] FROM tblICItemPricing  WITH(NoLock)
-    ) ICIP
-        ON ICI.[intItemId] = ICIP.[intItemId]
-        AND ICIL.[intItemLocationId] = ICIP.[intItemLocationId]
-LEFT OUTER JOIN
-    (
+) ICIP ON ICI.[intItemId] = ICIP.[intItemId]
+      AND ICIL.[intItemLocationId] = ICIP.[intItemLocationId]
+LEFT OUTER JOIN (
     SELECT [intItemId], [intItemUOMId], [dblUnitQty] FROM tblICItemUOM WITH(NoLock)
-    ) ICIU
-        ON ARID.[intItemUOMId] = ICIU.[intItemUOMId]
- LEFT OUTER JOIN
-     (
-     SELECT [intItemId], [intItemUOMId] FROM tblICItemUOM WITH(NoLock) WHERE [ysnStockUnit] = 1
-     ) ICSUOM
-         ON ICI.[intItemId] = ICSUOM.[intItemId]
-LEFT OUTER JOIN
-    (
+) ICIU ON ARID.[intItemUOMId] = ICIU.[intItemUOMId]
+OUTER APPLY (
+     SELECT TOP 1 [intItemId], [intItemUOMId] 
+     FROM tblICItemUOM IUOM WITH(NOLOCK) 
+     WHERE IUOM.[ysnStockUnit] = 1
+       AND ICI.[intItemId] = IUOM.[intItemId]
+) ICSUOM
+LEFT OUTER JOIN (
     SELECT [intItemId], [intItemLocationId], [dblUnitOnHand] FROM tblICItemStock WITH(NoLock)
-    ) ICIS
-        ON ICIL.[intItemId] = ICIS.[intItemId]
+) ICIS ON ICIL.[intItemId] = ICIS.[intItemId]
         AND ICIL.[intItemLocationId] = ICIS.[intItemLocationId]
-LEFT OUTER JOIN
-    (
+LEFT OUTER JOIN (
     SELECT [intCurrencyExchangeRateTypeId], [strCurrencyExchangeRateType] FROM tblSMCurrencyExchangeRateType WITH(NoLock)
-    ) SMCERT
-        ON ARID.[intCurrencyExchangeRateTypeId] = SMCERT.[intCurrencyExchangeRateTypeId]
+) SMCERT  ON ARID.[intCurrencyExchangeRateTypeId] = SMCERT.[intCurrencyExchangeRateTypeId]
 LEFT OUTER JOIN tblGLAccount GL ON ARID.intSalesAccountId = GL.intAccountId
-WHERE
-    [dbo].[fnARIsStockTrackingItem](ICI.[strType], ICI.[intItemId]) = 1
+WHERE [dbo].[fnARIsStockTrackingItem](ICI.[strType], ICI.[intItemId]) = 1
 
 INSERT #ARPostInvoiceDetail
     ([intInvoiceId]
@@ -1778,51 +1760,30 @@ SELECT
     ,[strPostingMessage]                = NULL
     ,[strDescription]                   = ISNULL(GL.strDescription, '') + ' Item: ' + ISNULL(ARID.strItemDescription, '') + ', Qty: ' + CAST(CAST(ARID.dblQtyShipped AS NUMERIC(18, 2)) AS nvarchar(100)) + ', Price: ' + CAST(CAST(ARID.dblPrice AS NUMERIC(18, 2)) AS nvarchar(100))		
     
-FROM
-    #ARPostInvoiceHeader ARI
-INNER JOIN
-    tblARInvoiceDetail ARID
-        ON ARI.[intInvoiceId] = ARID.[intInvoiceId]
-INNER JOIN
-    (
+FROM #ARPostInvoiceHeader ARI
+INNER JOIN tblARInvoiceDetail ARID ON ARI.[intInvoiceId] = ARID.[intInvoiceId]
+INNER JOIN (
     SELECT [intItemId], [strItemNo], [strType], [strDescription], [ysnAutoBlend], [intCategoryId] FROM tblICItem WITH(NoLock)
-    ) ICI
-        ON ARID.[intItemId] = ICI.[intItemId]
-LEFT OUTER JOIN
-    (
+) ICI ON ARID.[intItemId] = ICI.[intItemId]
+LEFT OUTER JOIN (
     SELECT [intCategoryId], [ysnRetailValuation] FROM tblICCategory WITH(NoLock)
-    ) ICC
-        ON ICI.[intCategoryId] = ICC.[intCategoryId]
-LEFT OUTER JOIN
-    (
+) ICC ON ICI.[intCategoryId] = ICC.[intCategoryId]
+LEFT OUTER JOIN (
     SELECT [intItemId], [intLocationId], [intItemLocationId], [intAllowNegativeInventory], [intSubLocationId] FROM tblICItemLocation WITH(NoLock)
-    ) ICIL
-        ON ICI.[intItemId] = ICIL.[intItemId]
-        AND ARI.[intCompanyLocationId] = ICIL.[intLocationId]
-LEFT OUTER JOIN
-    (
+) ICIL ON ICI.[intItemId] = ICIL.[intItemId]
+      AND ARI.[intCompanyLocationId] = ICIL.[intLocationId]
+LEFT OUTER JOIN (
     SELECT [intItemId], [intItemLocationId], [dblLastCost] FROM tblICItemPricing  WITH(NoLock)
-    ) ICIP
-        ON ICI.[intItemId] = ICIP.[intItemId]
-        AND ICIL.[intItemLocationId] = ICIP.[intItemLocationId]
-LEFT OUTER JOIN
-    (
+) ICIP ON ICI.[intItemId] = ICIP.[intItemId]
+      AND ICIL.[intItemLocationId] = ICIP.[intItemLocationId]
+LEFT OUTER JOIN (
     SELECT [intItemId], [intItemUOMId], [dblUnitQty] FROM tblICItemUOM WITH(NoLock)
-    ) ICIU
-        ON ARID.[intItemUOMId] = ICIU.[intItemUOMId]
---LEFT OUTER JOIN
---    (
---    SELECT [intItemId], [intItemUOMId] FROM tblICItemUOM WITH(NoLock) WHERE [ysnStockUnit] = 1
---    ) ICSUOM
---        ON ICI.[intItemId] = ICSUOM.[intItemId]
-LEFT OUTER JOIN
-    (
+) ICIU ON ARID.[intItemUOMId] = ICIU.[intItemUOMId]
+LEFT OUTER JOIN (
     SELECT [intCurrencyExchangeRateTypeId], [strCurrencyExchangeRateType] FROM tblSMCurrencyExchangeRateType WITH(NoLock)
-    ) SMCERT
-        ON ARID.[intCurrencyExchangeRateTypeId] = SMCERT.[intCurrencyExchangeRateTypeId]
+) SMCERT ON ARID.[intCurrencyExchangeRateTypeId] = SMCERT.[intCurrencyExchangeRateTypeId]
 LEFT OUTER JOIN tblGLAccount GL ON ARID.intSalesAccountId = GL.intAccountId
-WHERE
-    [dbo].[fnARIsStockTrackingItem](ICI.[strType], ICI.[intItemId]) = 0
+WHERE [dbo].[fnARIsStockTrackingItem](ICI.[strType], ICI.[intItemId]) = 0
 
 INSERT #ARPostInvoiceDetail
     ([intInvoiceId]
@@ -2116,21 +2077,14 @@ SELECT
     ,[strSourceType]                    = NULL
     ,[strPostingMessage]                = NULL
     ,[strDescription]                   = ISNULL(GL.strDescription, '') + ' Item: ' + ISNULL(ARID.strItemDescription, '') + ', Qty: ' + CAST(CAST(ARID.dblQtyShipped AS NUMERIC(18, 2)) AS nvarchar(100)) + ', Price: ' + CAST(CAST(ARID.dblPrice AS NUMERIC(18, 2)) AS nvarchar(100))		
-    
-FROM
-    #ARPostInvoiceHeader ARI
-INNER JOIN
-    tblARInvoiceDetail ARID
-        ON ARI.[intInvoiceId] = ARID.[intInvoiceId]
-LEFT OUTER JOIN
-    (
+FROM #ARPostInvoiceHeader ARI
+INNER JOIN tblARInvoiceDetail ARID ON ARI.[intInvoiceId] = ARID.[intInvoiceId]
+LEFT OUTER JOIN (
     SELECT [intCurrencyExchangeRateTypeId], [strCurrencyExchangeRateType] FROM tblSMCurrencyExchangeRateType WITH(NoLock)
-    ) SMCERT
-        ON ARID.[intCurrencyExchangeRateTypeId] = SMCERT.[intCurrencyExchangeRateTypeId]
+) SMCERT ON ARID.[intCurrencyExchangeRateTypeId] = SMCERT.[intCurrencyExchangeRateTypeId]
 LEFT OUTER JOIN tblGLAccount GL ON ARID.intSalesAccountId = GL.intAccountId
-WHERE
-    ARID.[intItemId] IS NULL
-    OR ARID.[intItemId] = 0
+WHERE ARID.[intItemId] IS NULL
+   OR ARID.[intItemId] = 0
 
 UPDATE ID
 SET dblTaxesAddToCost       = IDD.dblTaxesAddToCost
