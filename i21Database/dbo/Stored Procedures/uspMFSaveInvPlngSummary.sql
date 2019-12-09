@@ -23,17 +23,21 @@ BEGIN TRY
 	BEGIN
 		INSERT INTO tblMFInvPlngSummary (
 			strPlanName
+			,dtmDate
 			,intUnitMeasureId
 			,intBookId
 			,intSubBookId
+			,strComment
 			,intCreatedUserId
 			,intLastModifiedUserId
 			,intConcurrencyId
 			)
 		SELECT strPlanName
+			,GETDATE()
 			,intUnitMeasureId
 			,intBookId
 			,intSubBookId
+			,strComment
 			,intCreatedUserId
 			,intLastModifiedUserId
 			,1
@@ -42,6 +46,7 @@ BEGIN TRY
 				,intUnitMeasureId INT
 				,intBookId INT
 				,intSubBookId INT
+				,strComment NVARCHAR(MAX)
 				,intCreatedUserId INT
 				,intLastModifiedUserId INT
 				)
@@ -55,14 +60,16 @@ BEGIN TRY
 			,intUnitMeasureId = x.intUnitMeasureId
 			,intBookId = x.intBookId
 			,intSubBookId = x.intSubBookId
+			,strComment = x.strComment
 			,intLastModifiedUserId = x.intLastModifiedUserId
-			,intConcurrencyId=InvPlngSummary.intConcurrencyId+1
+			,intConcurrencyId= (InvPlngSummary.intConcurrencyId + 1)
 		FROM OPENXML(@idoc, 'InvPlngSummarys/InvPlngSummary', 2) WITH (
 				intInvPlngSummaryId INT
 				,strPlanName NVARCHAR(50) COLLATE Latin1_General_CI_AS
 				,intUnitMeasureId INT
 				,intBookId INT
 				,intSubBookId INT
+				,strComment NVARCHAR(MAX)
 				,intLastModifiedUserId INT
 				) x
 		JOIN tblMFInvPlngSummary InvPlngSummary ON x.intInvPlngSummaryId = InvPlngSummary.intInvPlngSummaryId
