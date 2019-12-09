@@ -579,7 +579,7 @@ BEGIN
 				,strTransactionId			 	= BNKTRN.strTransactionId
 				,strCompanyName				 	= @strCompanyName
 				,strCompanyAddress				= ISNULL(@strAddress,'') + ', ' + CHAR(13) + CHAR(10) + ISNULL(@strCity,'') + ISNULL(',  ' + @strState,'') + ISNULL(', ' + @strZip,'') + ISNULL(', ' + @strCountry,'') + CHAR(13) + CHAR(10) + ISNULL('' + @strPhone,'') 
-				,strItemNo					 	= Item.strItemNo
+				,strItemNo					 	= ISNULL (Item.strItemNo , (SELECT strItemNo FROM tblICItem where intItemId = BillDtl.intItemId))
 				,lblGrade						= CASE 
 													WHEN SC.intCommodityAttributeId > 0 THEN 'Grade' 
 													ELSE NULL 
@@ -727,7 +727,7 @@ BEGIN
 			JOIN tblAPBillDetail BillDtl 
 				ON Bill.intBillId = BillDtl.intBillId 
 					AND BillDtl.intInventoryReceiptChargeId IS NULL			
-			JOIN tblICItem Item 
+			LEFT JOIN tblICItem Item 
 				ON BillDtl.intItemId = Item.intItemId 
 					AND Item.strType <> 'Other Charge'	
 			JOIN tblGRStorageHistory StrgHstry 
