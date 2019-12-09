@@ -9,12 +9,12 @@ SELECT
 	, x.intItemId
 	, x.strItemNo
 	, x.dblCountOnHand
-	, dblNewOnHand = SUM(x.dblNewOnHand)
+	, dblNewOnHand = (SUM(x.dblNewOnHand) - CASE WHEN x.ysnExcludeReserved = 1 THEN x.dblReservedQty ELSE 0 END)
 	, x.dblWeightQty
 	, x.dblNewWeightQty
 	, x.dblCost
 	, x.dblNewCost
-	, dblOnHandDiff = SUM(x.dblNewOnHand) - x.dblCountOnHand
+	, dblOnHandDiff = (SUM(x.dblNewOnHand) - CASE WHEN x.ysnExcludeReserved = 1 THEN x.dblReservedQty ELSE 0 END) - x.dblCountOnHand
 	, dblWeightQtyDiff = x.dblNewWeightQty - x.dblWeightQty
 	, dblCostDiff = x.dblNewCost - x.dblCost
 	, x.intLotId
@@ -28,6 +28,8 @@ FROM
 		cd.strCountLine,
 		c.strCountNo,
 		c.intInventoryCountId,
+		c.ysnExcludeReserved,
+		ISNULL(reserved.dblQty, 0) dblReservedQty,
 		dblNewOnHand = 
 			ISNULL(
 				CASE 
@@ -143,6 +145,21 @@ FROM
 				AND t.intLotId = cd.intLotId
 				AND dbo.fnDateLessThanEquals(t.dtmDate, c.dtmCountDate) = 1
 		) LotTransactions 
+		OUTER APPLY (
+			SELECT SUM(ReservedQty.dblQty) dblQty
+			FROM (
+				SELECT sr.strTransactionId, sr.dblQty dblQty
+				FROM tblICStockReservation sr
+					LEFT JOIN tblICInventoryTransaction xt ON xt.intTransactionId = sr.intTransactionId
+				WHERE sr.intItemId = cd.intItemId
+					AND sr.intItemLocationId = cd.intItemLocationId
+					AND ISNULL(sr.intStorageLocationId, 0) = ISNULL(cd.intStorageLocationId, 0)
+					AND ISNULL(sr.intSubLocationId, 0) = ISNULL(cd.intSubLocationId, 0)
+					AND ISNULL(sr.intLotId, 0) = ISNULL(cd.intLotId, 0)
+					AND dbo.fnDateLessThanEquals(CONVERT(VARCHAR(10), xt.dtmDate,112), c.dtmCountDate) = 1
+				GROUP BY sr.strTransactionId, sr.dblQty
+			) AS ReservedQty
+		) reserved
 	WHERE c.ysnPosted != 1
 ) x
 --WHERE ((ROUND(x.dblNewOnHand - x.dblCountOnHand, 6) != 0) OR (ROUND(x.dblNewCost - x.dblCost, 6) != 0))
@@ -158,7 +175,9 @@ GROUP BY x.intInventoryCountId
 	, x.dblNewWeightQty
 	, x.dblCost
 	, x.dblNewCost
+	, x.dblReservedQty
+	, x.ysnExcludeReserved
 	, x.intLotId
 	, x.strLotNo
 -- HAVING ((ROUND(SUM(x.dblNewOnHand) - x.dblCountOnHand, 6) != 0) OR (ROUND(x.dblNewCost - x.dblCost, 6) != 0))
-HAVING ((ROUND(SUM(x.dblNewOnHand) - x.dblCountOnHand, 6) != 0))
+HAVING ((ROUND((SUM(x.dblNewOnHand) - CASE WHEN x.ysnExcludeReserved = 1 THEN x.dblReservedQty ELSE 0 END) - x.dblCountOnHand, 6) != 0))

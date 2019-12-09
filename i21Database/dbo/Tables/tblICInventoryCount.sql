@@ -38,6 +38,7 @@
 	[dtmDateCreated] DATETIME NULL,
 	[dtmDateModified] DATETIME NULL,
 	[intCreatedByUserId] INT NULL,
+    ysnExcludeReserved BIT NULL DEFAULT(0),
 	[intModifiedByUserId] INT NULL,
 	[strDataSource] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[strStorageLocationsFilter] NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL,

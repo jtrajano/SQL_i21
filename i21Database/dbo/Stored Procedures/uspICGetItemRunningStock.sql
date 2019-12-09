@@ -235,6 +235,8 @@ SELECT
 	, intOwnershipType				= @intOwnershipType
 	, strOwnershipType				= dbo.fnICGetOwnershipType(@intOwnershipType)
 	, dblRunningAvailableQty		= t.dblQty 
+	, dblRunningReservedQty			= ISNULL(reserved.dblQty, 0)
+	, dblRunningAvailableQtyNoReserved = ISNULL(t.dblQty, 0) - ISNULL(reserved.dblQty, 0)
 	, dblStorageAvailableQty		= t.dblUnitStorage
 	, dblCost = CASE 
 				WHEN CostMethod.intCostingMethodId = 1 THEN dbo.fnGetItemAverageCost(i.intItemId, ItemLocation.intItemLocationId, CASE WHEN @intSubLocationId IS NULL OR @intStorageLocationId IS NULL THEN stock.intItemUOMId ELSE ItemUOM.intItemUOMId END)
@@ -252,6 +254,21 @@ FROM @tblInventoryTransactionGrouped t INNER JOIN tblICItem i
 			ON ItemUOM.intUnitMeasureId = iUOM.intUnitMeasureId
 	) 
 		ON ItemUOM.intItemUOMId = t.intItemUOMId
+	OUTER APPLY (
+		SELECT SUM(ReservedQty.dblQty) dblQty
+		FROM (
+			SELECT sr.strTransactionId, sr.dblQty dblQty
+			FROM tblICStockReservation sr
+				LEFT JOIN tblICInventoryTransaction xt ON xt.intTransactionId = sr.intTransactionId
+			WHERE sr.intItemId = t.intItemId
+				AND sr.intItemLocationId = t.intItemLocationId
+				AND ISNULL(sr.intStorageLocationId, 0) = ISNULL(t.intStorageLocationId, 0)
+				AND ISNULL(sr.intSubLocationId, 0) = ISNULL(t.intSubLocationId, 0)
+				--AND ISNULL(sr.intLotId, 0) = ISNULL(t.intLotId, 0)
+				AND dbo.fnDateLessThanEquals(CONVERT(VARCHAR(10), xt.dtmDate,112), @dtmDate) = 1
+			GROUP BY sr.strTransactionId, sr.dblQty
+		) AS ReservedQty
+	) reserved
 	CROSS APPLY (
 		SELECT
 			SUM(s.dblOnHand) dblOnHand

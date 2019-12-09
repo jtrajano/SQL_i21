@@ -10,6 +10,7 @@
 	, @intStorageLocationId INT = 0
 	, @ysnIncludeZeroOnHand BIT = 0
 	, @ysnCountByLots BIT = 0
+	, @ysnExcludeReserved BIT = 0
 	, @AsOfDate DATETIME = NULL
 AS
 
@@ -200,7 +201,7 @@ BEGIN
 			, Lot.intLotId
 			, Lot.strLotNumber
 			, Lot.strLotAlias
-			, dblSystemCount = ISNULL(LotTransactions.dblQty, 0)
+			, dblSystemCount = ISNULL(LotTransactions.dblQty, 0) - CASE WHEN @ysnExcludeReserved = 1 THEN ISNULL(reserved.dblQty, 0) ELSE 0 END
 			, dblWeightQty = ISNULL(LotTransactions.dblWeight, 0) 
 			, dblLastCost = --ISNULL(dbo.fnCalculateCostBetweenUOM(LastLotTransaction.intItemUOMId, StockUOM.intItemUOMId, LastLotTransaction.dblCost), 0)
 					CASE 
@@ -271,6 +272,21 @@ BEGIN
 		LEFT OUTER JOIN @CommodityIds commodityFilter ON commodityFilter.intCommodityId = Item.intCommodityId
 		LEFT OUTER JOIN @StorageLocationIds storageLocationFilter ON storageLocationFilter.intStorageLocationId = Lot.intSubLocationId
 		LEFT OUTER JOIN @StorageUnitIds storageUnitFilter ON storageUnitFilter.intStorageUnitId = Lot.intStorageLocationId
+		OUTER APPLY (
+			SELECT SUM(ReservedQty.dblQty) dblQty
+			FROM (
+				SELECT sr.strTransactionId, sr.dblQty dblQty
+				FROM tblICStockReservation sr
+					LEFT JOIN tblICInventoryTransaction xt ON xt.intTransactionId = sr.intTransactionId
+				WHERE sr.intItemId = Lot.intItemId
+					AND sr.intItemLocationId = Lot.intItemLocationId
+					AND ISNULL(sr.intStorageLocationId, 0) = ISNULL(Lot.intStorageLocationId, 0)
+					AND ISNULL(sr.intSubLocationId, 0) = ISNULL(Lot.intSubLocationId, 0)
+					AND ISNULL(sr.intLotId, 0) = ISNULL(Lot.intLotId, 0)
+					AND dbo.fnDateLessThanEquals(CONVERT(VARCHAR(10), xt.dtmDate,112), @AsOfDate) = 1
+				GROUP BY sr.strTransactionId, sr.dblQty
+			) AS ReservedQty
+		) reserved
 	WHERE (ItemLocation.intLocationId = @intLocationId OR ISNULL(@intLocationId, 0) = 0)
 		AND ((@ysnIsMultiFilter = 0 AND (Item.intCategoryId = @intCategoryId OR ISNULL(@intCategoryId, 0) = 0)) OR
 			-- If multi-filter is enabled
@@ -317,7 +333,7 @@ BEGIN
 		, intSubLocationId = stock.intSubLocationId
 		, intStorageLocationId = stock.intStorageLocationId
 		, intLotId = NULL
-		, dblSystemCount = ISNULL(stockUnit.dblOnHand, 0)-- SUM(COALESCE(stock.dblOnHand, 0.00))
+		, dblSystemCount = ISNULL(stockUnit.dblOnHand, 0) - CASE WHEN @ysnExcludeReserved = 1 THEN ISNULL(reserved.dblQty, 0) ELSE 0 END -- SUM(COALESCE(stock.dblOnHand, 0.00))
 		, dblLastCost =  
 			---- Convert the last cost from Stock UOM to stock.intItemUOMId
 			ISNULL(CASE 
@@ -416,6 +432,20 @@ BEGIN
 		LEFT OUTER JOIN @CommodityIds commodityFilter ON commodityFilter.intCommodityId = i.intCommodityId
 		LEFT OUTER JOIN @StorageLocationIds storageLocationFilter ON storageLocationFilter.intStorageLocationId = stock.intSubLocationId
 		LEFT OUTER JOIN @StorageUnitIds storageUnitFilter ON storageUnitFilter.intStorageUnitId = stock.intStorageLocationId
+		OUTER APPLY (
+			SELECT SUM(ReservedQty.dblQty) dblQty
+			FROM (
+				SELECT sr.strTransactionId, sr.dblQty dblQty
+				FROM tblICStockReservation sr
+					LEFT JOIN tblICInventoryTransaction xt ON xt.intTransactionId = sr.intTransactionId
+				WHERE sr.intItemId = stock.intItemId
+					AND sr.intItemLocationId = stock.intItemLocationId
+					AND ISNULL(sr.intStorageLocationId, 0) = ISNULL(stock.intStorageLocationId, 0)
+					AND ISNULL(sr.intSubLocationId, 0) = ISNULL(stock.intSubLocationId, 0)
+					AND dbo.fnDateLessThanEquals(CONVERT(VARCHAR(10), xt.dtmDate,112), @AsOfDate) = 1
+				GROUP BY sr.strTransactionId, sr.dblQty
+			) AS ReservedQty
+		) reserved
 	WHERE il.intLocationId = @intLocationId
 		AND ((stock.dblOnHand <> 0 AND @ysnIncludeZeroOnHand = 0) OR (@ysnIncludeZeroOnHand = 1))
 		AND ((@ysnIsMultiFilter = 0 AND (i.intCategoryId = @intCategoryId OR ISNULL(@intCategoryId, 0) = 0)) OR

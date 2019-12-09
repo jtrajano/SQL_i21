@@ -21,6 +21,9 @@ SELECT
 	, Lot.strLotNumber
 	--, Transactions.dtmDate
 	, dblOnHand = SUM(CASE WHEN @intLotId IS NOT NULL THEN Lot.dblQty ELSE dbo.fnCalculateQtyBetweenUOM(Transactions.intItemUOMId, StockUOM.intItemUOMId, Transactions.dblOnHand) END)
+	, dblReserved = ISNULL(SUM(dbo.fnCalculateQtyBetweenUOM(Transactions.intItemUOMId, StockUOM.intItemUOMId, reserved.dblQty)), 0)
+	, dblOnHandNoReserved = ISNULL(SUM(CASE WHEN @intLotId IS NOT NULL THEN Lot.dblQty ELSE dbo.fnCalculateQtyBetweenUOM(Transactions.intItemUOMId, StockUOM.intItemUOMId, Transactions.dblOnHand) END), 0)
+		- ISNULL(SUM(dbo.fnCalculateQtyBetweenUOM(Transactions.intItemUOMId, StockUOM.intItemUOMId, reserved.dblQty)), 0)
 FROM tblICItem Item
 	INNER JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemId = Item.intItemId
 	INNER JOIN (
@@ -44,6 +47,21 @@ FROM tblICItem Item
 	LEFT OUTER JOIN tblICItemUOM LotItemUOM ON LotItemUOM.intItemId = Lot.intItemId
 		AND LotItemUOM.intItemUOMId = Lot.intItemUOMId
 	LEFT OUTER JOIN tblICUnitMeasure LotUOM ON LotItemUOM.intUnitMeasureId = LotUOM.intUnitMeasureId
+	OUTER APPLY (
+		SELECT SUM(ReservedQty.dblQty) dblQty
+		FROM (
+			SELECT sr.strTransactionId, sr.dblQty dblQty
+			FROM tblICStockReservation sr
+				LEFT JOIN tblICInventoryTransaction xt ON xt.intTransactionId = sr.intTransactionId
+			WHERE sr.intItemId = Item.intItemId
+				AND sr.intItemLocationId = ItemLocation.intItemLocationId
+				AND ISNULL(sr.intStorageLocationId, 0) = ISNULL(Transactions.intStorageLocationId, 0)
+				AND ISNULL(sr.intSubLocationId, 0) = ISNULL(Transactions.intSubLocationId, 0)
+				AND ISNULL(sr.intLotId, 0) = ISNULL(Transactions.intLotId, 0)
+				AND dbo.fnDateLessThanEquals(CONVERT(VARCHAR(10), xt.dtmDate,112), @dtmAsOfDate) = 1
+			GROUP BY sr.strTransactionId, sr.dblQty
+		) AS ReservedQty
+	) reserved
 WHERE 
 	(Item.intItemId BETWEEN ISNULL(@intItemId, 1) AND ISNULL(@intItemId, 2147483647))
 	AND (ItemLocation.intLocationId = @intLocationId OR @intLocationId IS NULL)
