@@ -322,7 +322,9 @@ BEGIN
 			,[dblDebit]				= 0
 			,[dblCredit]			= CASE WHEN @intCurrencyIdFrom <> @intDefaultCurrencyId THEN  AmountUSD.Val ELSE A.dblAmount END
 			,[dblDebitForeign]		= 0
-			,[dblCreditForeign]		= CASE WHEN @intCurrencyIdFrom <> @intDefaultCurrencyId THEN A.dblAmount  ELSE AmountForeign.Val  END
+			,[dblCreditForeign]		= CASE 
+				 WHEN  @intCurrencyIdFrom = @intDefaultCurrencyId AND @intCurrencyIdTo = @intDefaultCurrencyId  THEN 0 
+				 WHEN @intCurrencyIdFrom <> @intDefaultCurrencyId THEN A.dblAmount  ELSE AmountForeign.Val  END
 			,[dblDebitUnit]			= 0
 			,[dblCreditUnit]		= 0
 			,[strDescription]		= A.strDescription
@@ -366,7 +368,9 @@ BEGIN
 			,[intAccountId]			= GLAccnt.intAccountId
 			,[dblDebit]				= CASE WHEN  @intCurrencyIdFrom <> @intDefaultCurrencyId  THEN  AmountUSD.Val ELSE  A.dblAmount END
 			,[dblCredit]			= 0 
-			,[dblDebitForeign]		= CASE WHEN @intCurrencyIdTo <> @intDefaultCurrencyId THEN AmountForeign.Val ELSE A.dblAmount END
+			,[dblDebitForeign]		= CASE 
+			WHEN  @intCurrencyIdFrom = @intDefaultCurrencyId AND @intCurrencyIdTo = @intDefaultCurrencyId  THEN 0
+			WHEN @intCurrencyIdTo <> @intDefaultCurrencyId THEN AmountForeign.Val ELSE A.dblAmount END
 			,[dblCreditForeign]		= 0
 			,[dblDebitUnit]			= 0
 			,[dblCreditUnit]		= 0
@@ -542,9 +546,7 @@ FROM #tmpGLDetail
 				,strCity					= ''
 				,strState					= ''
 				,strCountry					= ''
-				,dblAmount					= CASE WHEN @intCurrencyIdFrom <> @intDefaultCurrencyId THEN AmountUSD.Val --CAD TO USD
-												   ELSE A.dblAmount
-											  END
+				,dblAmount					= A.dblAmount
 				,dblAmountForeign			= CASE WHEN @intCurrencyIdFrom <> @intDefaultCurrencyId THEN  A.dblAmount 
 												   WHEN @intCurrencyIdTo <> @intDefaultCurrencyId THEN  AmountForeign.Val
 											  ELSE 0 END 
@@ -598,9 +600,18 @@ FROM #tmpGLDetail
 				,strCity					= ''
 				,strState					= ''
 				,strCountry					= ''
-				,dblAmount					= CASE WHEN @intCurrencyIdFrom <> @intDefaultCurrencyId THEN AmountUSD.Val --CAD TO USD
-												   ELSE A.dblAmount
-											  END
+				,dblAmount					= CASE WHEN @intCurrencyIdFrom <> @intCurrencyIdTo
+												AND @intCurrencyIdTo <> @intDefaultCurrencyId 
+												AND @intCurrencyIdFrom = @intDefaultCurrencyId
+												THEN dblAmount/A.dblRate
+											  WHEN
+												@intCurrencyIdFrom <> @intCurrencyIdTo
+												AND @intCurrencyIdTo = @intDefaultCurrencyId
+												AND @intCurrencyIdFrom <> @intDefaultCurrencyId
+
+												
+											 THEN dblAmount*A.dblHistoricRate
+											ELSE A.dblAmount END
 				,dblAmountForeign			= CASE WHEN @intCurrencyIdFrom <> @intDefaultCurrencyId THEN  A.dblAmount 
 												   WHEN @intCurrencyIdTo <> @intDefaultCurrencyId THEN  AmountForeign.Val
 											  ELSE 0 END 
@@ -761,4 +772,3 @@ Audit_Log:
 -- Delete all temporary tables used during the post transaction. 
 Post_Exit:
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpGLDetail')) DROP TABLE #tmpGLDetail
-GO
