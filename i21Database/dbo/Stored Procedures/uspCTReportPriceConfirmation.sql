@@ -205,7 +205,8 @@ BEGIN TRY
 			strSeller = CASE WHEN CH.ysnBrokerage = 1 THEN EY.strEntityName ELSE CASE WHEN CH.intContractTypeId = 2 THEN @strCompanyName ELSE EY.strEntityName END END,
 			strTitle = (case when CH.intContractTypeId = 1 then 'Purchase' else 'Sale' end) + ' Contract Pricing Confirmation',
 			strEntityLabel = (case when CH.intContractTypeId = 1 then 'Vendor' else 'Customer' end) + ' Ref',
-			blbContractSalesPersonSign = @ContractSalesPersonSign
+			blbSalesContractSalesPersonSign = (case when CH.intContractTypeId = 2 then @ContractSalesPersonSign else null end),
+			blbPurchaseContractSalesPersonSign = (case when CH.intContractTypeId = 1 then @ContractSalesPersonSign else null end)
 
 
 	FROM	tblCTPriceFixation			PF
