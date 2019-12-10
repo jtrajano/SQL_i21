@@ -33,7 +33,9 @@ BEGIN TRY
 			@FirstApprovalSign			VARBINARY(MAX),
 			@InterCompApprovalSign		VARBINARY(MAX),
 			@intScreenId				INT,
-			@intTransactionId			INT			   
+			@intTransactionId			INT,
+			@intSalespersonId			INT,
+			@ContractSalesPersonSign    VARBINARY(MAX)	   
 
 	SELECT TOP 1 @intPriceFixationId = intPriceFixationId FROM tblCTPriceFixationDetail WHERE intPriceFixationDetailId IN (SELECT * FROM dbo.fnSplitString(@strPriceFixationID,',') )
     
@@ -54,7 +56,7 @@ BEGIN TRY
 	JOIN	tblICItemUOM		U	ON	U.intItemUOMId	=	D.intNetWeightUOMId
 	WHERE	intContractHeaderId	=	@intContractHeaderId
 
-	SELECT  @TotalQuantity = dblQuantity 
+	SELECT  @TotalQuantity = dblQuantity, @intSalespersonId = intSalespersonId
 	FROM	tblCTContractHeader 
 	WHERE	intContractHeaderId	=	@intContractHeaderId
 
@@ -118,6 +120,12 @@ BEGIN TRY
 	LEFT JOIN tblSMScreen				rts9 on rts9.strNamespace = 'i21.view.Country'
 	LEFT JOIN tblSMTransaction			rtt9 on rtt9.intScreenId = rts9.intScreenId and rtt9.intRecordId = rtc9.intCountryID
 	LEFT JOIN tblSMReportTranslation	rtrt9 on rtrt9.intLanguageId = @intLaguageId and rtrt9.intTransactionId = rtt9.intTransactionId and rtrt9.strFieldName = 'Country'
+
+	SELECT @ContractSalesPersonSign =  Sig.blbDetail
+								 FROM tblSMSignature Sig  WITH (NOLOCK)
+								 JOIN tblEMEntitySignature ESig ON ESig.intElectronicSignatureId=Sig.intSignatureId
+								 left join tblEMEntity ent on ent.intEntityId = Sig.intEntityId
+								 WHERE Sig.intEntityId=@intSalespersonId
 
 	/*Declared variables for translating expression*/
 	declare @strStatus1 nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'This confirms that the above contract has been priced as follows:'), 'This confirms that the above contract has been priced as follows:');
@@ -196,7 +204,8 @@ BEGIN TRY
 			strBuyer = CASE WHEN CH.ysnBrokerage = 1 THEN EC.strEntityName ELSE CASE WHEN CH.intContractTypeId = 1 THEN @strCompanyName ELSE EY.strEntityName END END,
 			strSeller = CASE WHEN CH.ysnBrokerage = 1 THEN EY.strEntityName ELSE CASE WHEN CH.intContractTypeId = 2 THEN @strCompanyName ELSE EY.strEntityName END END,
 			strTitle = (case when CH.intContractTypeId = 1 then 'Purchase' else 'Sale' end) + ' Contract Pricing Confirmation',
-			strEntityLabel = (case when CH.intContractTypeId = 1 then 'Vendor' else 'Customer' end) + ' Ref'
+			strEntityLabel = (case when CH.intContractTypeId = 1 then 'Vendor' else 'Customer' end) + ' Ref',
+			blbContractSalesPersonSign = @ContractSalesPersonSign
 
 
 	FROM	tblCTPriceFixation			PF
