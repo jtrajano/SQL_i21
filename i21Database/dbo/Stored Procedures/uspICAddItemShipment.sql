@@ -518,6 +518,8 @@ INSERT INTO @ShipmentEntries(
 		, dblNet
 		, ysnDestinationWeightsAndGrades
 		, ysnAllowInvoice
+		, intItemContractHeaderId
+		, intItemContractDetailId
 )
 SELECT 
 		intOrderType
@@ -577,6 +579,9 @@ SELECT
 		, dblNet
 		, ysnDestinationWeightsAndGrades
 		, ysnAllowInvoice
+		, intItemContractHeaderId
+		, intItemContractDetailId
+
 FROM @Items
 
 -- 2. Charges
@@ -604,6 +609,8 @@ INSERT INTO @ShipmentCharges(
 		, strChargesLink
 		, ysnAllowVoucher
 		, ysnAllowInvoice
+		, intItemContractHeaderId
+		, intItemContractDetailId
 )
 SELECT 
 		intOrderType
@@ -629,6 +636,8 @@ SELECT
 		, strChargesLink
 		, ysnAllowVoucher
 		, ysnAllowInvoice
+		, intItemContractHeaderId
+		, intItemContractDetailId
 FROM @Charges
 
 -- 3. Item Lots
@@ -937,6 +946,8 @@ INSERT INTO tblICInventoryShipmentItem(
 	, ysnDestinationWeightsAndGrades
 	, intSort 
 	, ysnAllowInvoice
+	, intItemContractHeaderId
+	, intItemContractDetailId
 )
 SELECT 
 	se.intShipmentId
@@ -981,6 +992,8 @@ SELECT
 	, se.ysnDestinationWeightsAndGrades
 	, se.intItemLotGroup
 	, se.ysnAllowInvoice
+	, se.intItemContractHeaderId
+	, se.intItemContractDetailId
 FROM @ShipmentEntries se INNER JOIN tblICInventoryShipment s
 		ON se.intShipmentId = s.intInventoryShipmentId
 	-- Get the SM forex rate. 
@@ -1011,6 +1024,8 @@ INSERT INTO tblICInventoryShipmentCharge(
 	, intConcurrencyId
 	, ysnAllowVoucher
 	, ysnAllowInvoice
+	, intItemContractHeaderId
+	, intItemContractDetailId
 )
 SELECT 
 	sc.intShipmentId
@@ -1032,6 +1047,8 @@ SELECT
 	, intConcurrencyId = 1
 	, sc.ysnAllowVoucher
 	, sc.ysnAllowInvoice
+	, sc.intItemContractHeaderId
+	, sc.intItemContractDetailId
 FROM @ShipmentCharges sc INNER JOIN tblICInventoryShipment s
 		ON sc.intShipmentId = s.intInventoryShipmentId 
 	-- Get the SM forex rate. 

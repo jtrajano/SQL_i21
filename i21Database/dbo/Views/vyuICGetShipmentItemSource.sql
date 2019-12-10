@@ -7,13 +7,17 @@ SELECT
 	intContractSeq = CASE Shipment.intOrderType WHEN 1 THEN ContractView.intContractSeq ELSE NULL END,
 	strOrderNumber = 
 		(
-			CASE WHEN Shipment.intOrderType = 1 -- Sales Contract
-				THEN ContractView.strContractNumber
-			WHEN Shipment.intOrderType = 2 -- Sales Order
-				THEN SODetail.strSalesOrderNumber
-			WHEN Shipment.intOrderType = 3 -- Transfer Order
-				THEN NULL
-			ELSE NULL
+			CASE 
+				WHEN Shipment.intOrderType = 1 THEN -- Sales Contract
+					ContractView.strContractNumber
+				WHEN Shipment.intOrderType = 5 THEN -- Item Contract
+					ItemContract.strContractNumber
+				WHEN Shipment.intOrderType = 2 THEN -- Sales Order
+					SODetail.strSalesOrderNumber
+				WHEN Shipment.intOrderType = 3 THEN -- Transfer Order
+					NULL	
+				ELSE 
+					NULL
 			END
 		),
 	strSourceNumber =
@@ -151,6 +155,9 @@ FROM
 			
 	LEFT JOIN tblCTContractDetail ContractDetail 
 		ON ContractDetail.intContractDetailId = ContractView.intContractDetailId
+
+	LEFT JOIN tblCTItemContractHeader ItemContract 
+		ON ItemContract.intItemContractHeaderId = ShipmentItem.intItemContractHeaderId
 
 	LEFT JOIN tblSCTicket ScaleView
 		ON ScaleView.intTicketId = ShipmentItem.intSourceId

@@ -49,6 +49,8 @@
 	dblTare NUMERIC(38, 20) NULL, 
 	dblNet NUMERIC(38, 20) NULL, 
 	ysnDestinationWeightsAndGrades BIT NULL,
+	intItemContractHeaderId INT NULL,
+	intItemContractDetailId INT NULL,
 
 	-- This is used to group lots for lotted items
 	intItemLotGroup INT NULL,
