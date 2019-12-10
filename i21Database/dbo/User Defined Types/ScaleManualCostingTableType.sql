@@ -30,4 +30,6 @@ CREATE TYPE [dbo].[ScaleManualCostingTableType] AS TABLE
 	,[intStorageScheduleTypeId] INT NULL					-- storage type Id
 	,[ysnAllowVoucher] BIT NULL
 	,[intLoadDetailId] INT NULL								-- Load detail Id 
+	,intItemContractDetailId INT NULL
+	,intItemContractHeaderId INT NULL
 )
