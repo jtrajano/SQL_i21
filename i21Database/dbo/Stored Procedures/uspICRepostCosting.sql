@@ -3,7 +3,7 @@
 	,@strAccountToCounterInventory AS NVARCHAR(255) = 'Cost of Goods'
 	,@intEntityUserSecurityId AS INT
 	,@strGLDescription AS NVARCHAR(255) = NULL 
-	,@ItemsToPost AS ItemCostingTableType READONLY 
+	,@ItemsToPostRaw AS ItemCostingTableType READONLY 
 	,@strRebuildTransactionId AS NVARCHAR(50) = NULL 
 	,@ysnTransferOnSameLocation AS BIT = 0
 AS
@@ -67,6 +67,255 @@ BEGIN
 	)
 END
 
+
+DECLARE @ItemsToPost AS ItemCostingTableType
+
+-- If stocks are all negative, group the records by Qty regardless of cost. 
+IF	EXISTS (SELECT TOP 1 1 FROM @ItemsToPostRaw WHERE dblQty < 0) 
+	AND NOT EXISTS (SELECT TOP 1 1 FROM @ItemsToPostRaw WHERE dblQty > 0) 
+BEGIN 
+	INSERT INTO @ItemsToPost (
+		[intItemId] 
+		,[intItemLocationId] 
+		,[intItemUOMId] 
+		,[dtmDate] 
+		,[dblQty] 
+		,[dblUOMQty] 
+		,[dblCost] 
+		,[dblValue] 
+		,[dblSalesPrice] 
+		,[intCurrencyId] 
+		,[dblExchangeRate] 
+		,[intTransactionId] 
+		,[intTransactionDetailId] 
+		,[strTransactionId] 
+		,[intTransactionTypeId] 
+		,[intLotId] 
+		,[intSubLocationId] 
+		,[intStorageLocationId] 
+		,[ysnIsStorage] 
+		,[strActualCostId] 
+		,[intSourceTransactionId] 
+		,[strSourceTransactionId] 
+		,[intInTransitSourceLocationId] 
+		,[intForexRateTypeId] 
+		,[dblForexRate] 
+		,[intStorageScheduleTypeId] 
+		,[dblUnitRetail] 
+		,[intCategoryId] 
+		,[dblAdjustCostValue] 
+		,[dblAdjustRetailValue] 
+		,[intCostingMethod] 
+		,[ysnAllowVoucher] 
+		,[intSourceEntityId] 
+	)
+	SELECT 
+		[intItemId] 
+		,[intItemLocationId] 
+		,[intItemUOMId] 
+		,[dtmDate] 
+		,SUM([dblQty]) 
+		,[dblUOMQty] 
+		,[dblCost] = 0 
+		,[dblValue] 
+		,[dblSalesPrice] 
+		,[intCurrencyId] 
+		,[dblExchangeRate] 
+		,[intTransactionId] 
+		,[intTransactionDetailId] 
+		,[strTransactionId] 
+		,[intTransactionTypeId] 
+		,[intLotId] 
+		,[intSubLocationId] 
+		,[intStorageLocationId] 
+		,[ysnIsStorage] 
+		,[strActualCostId] 
+		,[intSourceTransactionId] 
+		,[strSourceTransactionId] 
+		,[intInTransitSourceLocationId] 
+		,[intForexRateTypeId] 
+		,[dblForexRate] 
+		,[intStorageScheduleTypeId] 
+		,[dblUnitRetail] 
+		,[intCategoryId] 
+		,[dblAdjustCostValue] 
+		,[dblAdjustRetailValue] 
+		,[intCostingMethod] 
+		,[ysnAllowVoucher] 
+		,[intSourceEntityId] 
+	FROM 
+		@ItemsToPostRaw
+	GROUP BY 
+		[intItemId] 
+		,[intItemLocationId] 
+		,[intItemUOMId] 
+		,[dtmDate] 
+		,[dblUOMQty] 
+		,[dblCost]
+		,[dblValue] 
+		,[dblSalesPrice] 
+		,[intCurrencyId] 
+		,[dblExchangeRate] 
+		,[intTransactionId] 
+		,[intTransactionDetailId] 
+		,[strTransactionId] 
+		,[intTransactionTypeId] 
+		,[intLotId] 
+		,[intSubLocationId] 
+		,[intStorageLocationId] 
+		,[ysnIsStorage] 
+		,[strActualCostId] 
+		,[intSourceTransactionId] 
+		,[strSourceTransactionId] 
+		,[intInTransitSourceLocationId] 
+		,[intForexRateTypeId] 
+		,[dblForexRate] 
+		,[intStorageScheduleTypeId] 
+		,[dblUnitRetail] 
+		,[intCategoryId] 
+		,[dblAdjustCostValue] 
+		,[dblAdjustRetailValue] 
+		,[intCostingMethod] 
+		,[ysnAllowVoucher] 
+		,[intSourceEntityId] 
+
+	-- Make sure the cost is repopulated. 
+	-- Either it will use the dblCost from @ItemsToPostRaw or use the item's last cost. 
+	UPDATE	tp
+	SET		tp.dblCost = ISNULL(NULLIF(tpCost.dblCost, 0), lastCost.dblLastCost)
+	FROM	@ItemsToPost tp 
+			CROSS APPLY (
+				SELECT TOP 1 
+					tpRaw.dblCost
+				FROM 
+					@ItemsToPostRaw tpRaw
+				WHERE 
+					tpRaw.intItemId = tp.intItemId
+					AND tpRaw.intItemLocationId = tp.intItemLocationId
+					AND tpRaw.strTransactionId = tp.strTransactionId
+					AND ISNULL(tpRaw.intTransactionDetailId, 0) = ISNULL(tp.intTransactionDetailId, 0) 			
+			) tpCost
+			OUTER APPLY (
+				SELECT TOP 1
+					dblLastCost = dbo.fnCalculateCostBetweenUOM(iu.intItemUOMId, tp.intItemUOMId, p.dblLastCost) 
+				FROM 
+					tblICItemPricing p INNER JOIN tblICItemUOM iu
+						ON p.intItemId = iu.intItemId
+						AND iu.ysnStockUnit = 1
+				WHERE
+					p.intItemId = tp.intItemId
+					AND p.intItemLocationId = tp.intItemLocationId			
+			) lastCost
+
+END
+-- Group the records by Qty. 
+ELSE 
+BEGIN 
+	INSERT INTO @ItemsToPost (
+		[intItemId] 
+		,[intItemLocationId] 
+		,[intItemUOMId] 
+		,[dtmDate] 
+		,[dblQty] 
+		,[dblUOMQty] 
+		,[dblCost] 
+		,[dblValue] 
+		,[dblSalesPrice] 
+		,[intCurrencyId] 
+		,[dblExchangeRate] 
+		,[intTransactionId] 
+		,[intTransactionDetailId] 
+		,[strTransactionId] 
+		,[intTransactionTypeId] 
+		,[intLotId] 
+		,[intSubLocationId] 
+		,[intStorageLocationId] 
+		,[ysnIsStorage] 
+		,[strActualCostId] 
+		,[intSourceTransactionId] 
+		,[strSourceTransactionId] 
+		,[intInTransitSourceLocationId] 
+		,[intForexRateTypeId] 
+		,[dblForexRate] 
+		,[intStorageScheduleTypeId] 
+		,[dblUnitRetail] 
+		,[intCategoryId] 
+		,[dblAdjustCostValue] 
+		,[dblAdjustRetailValue] 
+		,[intCostingMethod] 
+		,[ysnAllowVoucher] 
+		,[intSourceEntityId] 
+	)
+	SELECT 
+		[intItemId] 
+		,[intItemLocationId] 
+		,[intItemUOMId] 
+		,[dtmDate] 
+		,SUM([dblQty]) 
+		,[dblUOMQty] 
+		,[dblCost]
+		,[dblValue] 
+		,[dblSalesPrice] 
+		,[intCurrencyId] 
+		,[dblExchangeRate] 
+		,[intTransactionId] 
+		,[intTransactionDetailId] 
+		,[strTransactionId] 
+		,[intTransactionTypeId] 
+		,[intLotId] 
+		,[intSubLocationId] 
+		,[intStorageLocationId] 
+		,[ysnIsStorage] 
+		,[strActualCostId] 
+		,[intSourceTransactionId] 
+		,[strSourceTransactionId] 
+		,[intInTransitSourceLocationId] 
+		,[intForexRateTypeId] 
+		,[dblForexRate] 
+		,[intStorageScheduleTypeId] 
+		,[dblUnitRetail] 
+		,[intCategoryId] 
+		,[dblAdjustCostValue] 
+		,[dblAdjustRetailValue] 
+		,[intCostingMethod] 
+		,[ysnAllowVoucher] 
+		,[intSourceEntityId] 
+	FROM 
+		@ItemsToPostRaw
+	GROUP BY 
+		[intItemId] 
+		,[intItemLocationId] 
+		,[intItemUOMId] 
+		,[dtmDate] 
+		,[dblUOMQty] 
+		,[dblCost]
+		,[dblValue] 
+		,[dblSalesPrice] 
+		,[intCurrencyId] 
+		,[dblExchangeRate] 
+		,[intTransactionId] 
+		,[intTransactionDetailId] 
+		,[strTransactionId] 
+		,[intTransactionTypeId] 
+		,[intLotId] 
+		,[intSubLocationId] 
+		,[intStorageLocationId] 
+		,[ysnIsStorage] 
+		,[strActualCostId] 
+		,[intSourceTransactionId] 
+		,[strSourceTransactionId] 
+		,[intInTransitSourceLocationId] 
+		,[intForexRateTypeId] 
+		,[dblForexRate] 
+		,[intStorageScheduleTypeId] 
+		,[dblUnitRetail] 
+		,[intCategoryId] 
+		,[dblAdjustCostValue] 
+		,[dblAdjustRetailValue] 
+		,[intCostingMethod] 
+		,[ysnAllowVoucher] 
+		,[intSourceEntityId] 
+END
 -----------------------------------------------------------------------------------------------------------------------------
 -- Do the Validation
 -----------------------------------------------------------------------------------------------------------------------------
