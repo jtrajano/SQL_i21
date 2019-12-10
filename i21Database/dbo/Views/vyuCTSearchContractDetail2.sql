@@ -399,7 +399,12 @@ from
   left join tblSMCurrency o on o.intCurrencyID = a.intCurrencyId 
   left join tblCTContractStatus p on p.intContractStatusId = a.intContractStatusId 
   left join shipmentstatus r on r.intContractDetailId = a.intContractDetailId 
-  left join tblAPBillDetail s on s.intContractDetailId = a.intContractDetailId 
+  outer apply
+  (
+    select top 1 intContractDetailId
+    from tblAPBillDetail
+    where intContractDetailId = a.intContractDetailId
+  ) s
   left join fixation t on t.intContractDetailId = a.intContractDetailId 
   left join tblCTPricingType u on u.intPricingTypeId = b.intPricingTypeId 
   left join tblICItemUOM v on v.intItemId = a.intItemId 
