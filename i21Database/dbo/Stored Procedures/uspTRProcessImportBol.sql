@@ -302,8 +302,11 @@ BEGIN
 						@intRecipeItemId INT = NULL
 					SELECT @intRecipeItemId = RI.intRecipeItemId, @dblPercentage = RI.dblQuantity FROM tblMFRecipe R 
 					INNER JOIN tblMFRecipeItem RI ON RI.intRecipeId = R.intRecipeId
-					WHERE R.intItemId = @intDDDropProductId AND RI.intItemId = @intDDPullProductId AND R.ysnActive = 1
+					WHERE R.intItemId = @intDDDropProductId 
+					AND RI.intItemId = @intDDPullProductId 
+					AND R.ysnActive = 1
 					AND RI.intRecipeItemTypeId = 1
+					AND R.intLocationId = @intCustomerCompanyLocationId
 
 					IF(@dblPercentage IS NOT NULL)
 					BEGIN
