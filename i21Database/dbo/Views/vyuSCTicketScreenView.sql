@@ -243,6 +243,9 @@
 	,CYR.strCropYear
 	,SCT.ysnHasSpecialDiscount
 	,SCT.ysnSpecialGradePosted
+	,SCT.intItemContractDetailId
+	,intItemContractSequence = ICD.intLineNo
+	,strItemContractNumber = ICH.strContractNumber
   FROM tblSCTicket SCT
 	LEFT JOIN tblSCTicketPool SCTPool on SCTPool.intTicketPoolId = SCT.intTicketPoolId
 	LEFT JOIN tblSCScaleSetup SCSetup on SCSetup.intScaleSetupId = SCT.intScaleSetupId
@@ -336,3 +339,5 @@
 	left join tblCTCropYear CYR
 		on CYR.intCropYearId = SCT.intCropYearId
 	--LEFT JOIN (SELECT TOP 1 TSN.intTicketId,SCN.strSealNumber strTicketSealNumber FROM tblSCTicketSealNumber TSN INNER JOIN tblSCSealNumber SCN ON SCN.intSealNumberId = TSN.intSealNumberId where ) TSCN ON TSCN.intTicketId = SCT.intTicketId
+	LEFT JOIN tblCTItemContractDetail ICD ON ISNULL(SCT.intItemContractDetailId,0) = ICD.intItemContractDetailId
+	LEFT JOIN tblCTItemContractHeader ICH ON ICD.intItemContractHeaderId = ICH.intItemContractHeaderId 

@@ -362,3 +362,36 @@ BEGIN
 END
 GO
 
+IF NOT EXISTS(SELECT 1 FROM tblGRStorageType WHERE strStorageTypeCode = 'ICN')
+BEGIN
+	SET IDENTITY_INSERT [dbo].[tblGRStorageType] ON
+
+	INSERT INTO tblGRStorageType
+	(
+	 intStorageScheduleTypeId
+	,strStorageTypeDescription
+	,strStorageTypeCode
+	,ysnReceiptedStorage
+	,intConcurrencyId
+	,strOwnedPhysicalStock
+	,ysnDPOwnedType
+	,ysnGrainBankType
+	,ysnActive
+	,ysnCustomerStorage
+	)
+	SELECT 
+	-8 AS intStorageScheduleTypeId
+	,'Item Contract' AS strStorageTypeDescription
+	,'ICN'strStorageTypeCode
+	, 0 AS ysnReceiptedStorage
+	,1 AS intConcurrencyId
+	,'Customer' AS strOwnedPhysicalStock
+	,0 AS ysnDPOwnedType
+	,0 AS ysnGrainBankType
+	,1 AS ysnActive
+	,0 AS ysnCustomerStorage
+
+    SET IDENTITY_INSERT [dbo].[tblGRStorageType] OFF
+END
+GO
+

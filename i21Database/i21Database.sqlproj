@@ -8252,6 +8252,7 @@
     <Build Include="dbo\Stored Procedures\uspIPGetDemandAcknowledgementXML.sql" />
     <Build Include="dbo\Stored Procedures\uspMFDemandProcessAckXML.sql" />
     <Build Include="dbo\Stored Procedures\uspIPItemProcessAckXML.sql" />
+    <Build Include="dbo\Views\vyuSCItemContractDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
