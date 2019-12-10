@@ -92,7 +92,7 @@ BEGIN
 		LEFT JOIN tblCTContractHeader CH ON CD.intContractHeaderId = CH.intContractHeaderId
 		WHERE CH.intContractTypeId = 1
 			AND CH.strContractNumber = SUBSTRING(@strPContractNumberSeq, 1, LEN(@strPContractNumberSeq) - CHARINDEX('/', REVERSE(@strPContractNumberSeq)))
-			AND CD.intContractDetailId = CAST(RIGHT(@strPContractNumberSeq, CHARINDEX('/', REVERSE(@strPContractNumberSeq)) - 1) AS INT)
+			AND CD.intContractSeq = CAST(RIGHT(@strPContractNumberSeq, CHARINDEX('/', REVERSE(@strPContractNumberSeq)) - 1) AS INT)
 END
 
 --Extract Sales Contract Detail Id
@@ -101,9 +101,9 @@ BEGIN
 	SELECT @intSContractDetailId = CD.intContractDetailId 
 	FROM tblCTContractDetail CD 
 		LEFT JOIN tblCTContractHeader CH ON CD.intContractHeaderId = CH.intContractHeaderId
-		WHERE CH.intContractTypeId = 1
+		WHERE CH.intContractTypeId = 2
 			AND CH.strContractNumber = SUBSTRING(@strSContractNumberSeq, 1, LEN(@strSContractNumberSeq) - CHARINDEX('/', REVERSE(@strSContractNumberSeq)))
-			AND CD.intContractDetailId = CAST(RIGHT(@strSContractNumberSeq, CHARINDEX('/', REVERSE(@strSContractNumberSeq)) - 1) AS INT)
+			AND CD.intContractSeq = CAST(RIGHT(@strSContractNumberSeq, CHARINDEX('/', REVERSE(@strSContractNumberSeq)) - 1) AS INT)
 END
 
 -- Sanitize Parameters
