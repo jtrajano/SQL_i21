@@ -37,6 +37,9 @@ DECLARE @debitMemo NVARCHAR(5)
 DECLARE @nextVoucherNumber INT;
 DECLARE @nextPrePayNumber INT;
 DECLARE @nextDebitNumber INT;
+DECLARE @enforceControlTotal BIT = 0;
+
+SELECT TOP 1 @enforceControlTotal =  pref.ysnEnforceControlTotal FROM tblAPCompanyPreference pref
 
 DECLARE @transCount INT = @@TRANCOUNT;
 IF @transCount = 0 
@@ -282,7 +285,8 @@ UPDATE A
 						WHEN 3
 							THEN @debitMemo
 						END) + (CAST(B.intRecordNumber AS NVARCHAR)),
-		A.ysnDiscountOverride = CASE WHEN A.dblDiscount != 0 THEN 1 ELSE 0 END
+		A.ysnDiscountOverride = CASE WHEN A.dblDiscount != 0 THEN 1 ELSE 0 END,
+		A.dblTotalController = CASE WHEN @enforceControlTotal = 1 THEN A.dblTotal ELSE 0 END
 FROM tblAPBill A
 INNER JOIN #tmpVouchersWithRecordNumber B ON A.intBillId = B.intBillId
 
