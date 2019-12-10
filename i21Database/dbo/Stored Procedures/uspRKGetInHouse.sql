@@ -281,10 +281,10 @@ BEGIN
 			DECLARE @tblResult TABLE (Id INT identity(1,1)
 				, dtmDate datetime
 				, dblTotal NUMERIC(18,6)
-				, strTransactionType NVARCHAR(50)
+				, strTransactionType NVARCHAR(100)
 				, strTransactionId NVARCHAR(50)
 				, intTransactionId INT
-				, strDistribution NVARCHAR(10)
+				, strDistribution NVARCHAR(50)
 				)
 
 			INSERT INTO @tblResult (
@@ -390,8 +390,8 @@ BEGIN
 				, dblBalanceInv NUMERIC(18,6)
 				, strTransactionId NVARCHAR(50)
 				, intTransactionId INT
-				, strDistribution NVARCHAR(10)
-				, strTransactionType NVARCHAR(50)
+				, strDistribution NVARCHAR(50)
+				, strTransactionType NVARCHAR(100)
 				)
 
 			
@@ -1083,5 +1083,3 @@ BEGIN
 	drop table #tempOnHold
 	drop table #tempDateRange
 END
-
-
