@@ -1448,7 +1448,7 @@ BEGIN
 				, intCompanyLocationId
 				, intTicketId
 				, dtmTicketDateTime)
-			SELECT * FROM (
+			SELECT DISTINCT * FROM (
 				SELECT intSeqId = 12
 					, strStorageType
 					, strCommodityCode = @strCommodityCode
