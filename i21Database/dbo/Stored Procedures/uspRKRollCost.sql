@@ -8,6 +8,7 @@ DECLARE @RollCost AS TABLE
 strFutMarketName  nvarchar(50),
 strCommodityCode  nvarchar(50),
 strFutureMonth  nvarchar(50),
+strFutureMonthOrder  nvarchar(50),
 intFutureMarketId  int,
 intCommodityId int,
 dblWtAvgOpenLongPosition  DECIMAL(24,10),
@@ -38,6 +39,7 @@ strFutMarketName  nvarchar(50),
 intCommodityId int,
 strCommodityCode  nvarchar(50),
 strFutureMonth  nvarchar(50),
+strFutureMonthOrder  nvarchar(50),
 strRollMonth nvarchar(50),
 dblContractSize DECIMAL(24,10),
 ysnSubCurrency bit,
@@ -86,6 +88,7 @@ INSERT INTO @RollCostDetail (
 	,intCommodityId 
 	,strCommodityCode 
 	,strFutureMonth 
+	,strFutureMonthOrder
 	,strRollMonth
 	,dblContractSize 
 	,ysnSubCurrency 
@@ -121,6 +124,7 @@ SELECT
 	,intCommodityId 
 	,strCommodityCode 
 	,strFutureMonth 
+	,strFutureMonthOrder
 	,strRollMonth
 	,dblContractSize 
 	,ysnSubCurrency 
@@ -155,8 +159,9 @@ FROM (
 		,m.strFutMarketName
 		,ft.intCommodityId
 		,c.strCommodityCode
-		,fm.strFutureMonth
-		,rfm.strFutureMonth  strRollMonth
+		,strFutureMonth = SUBSTRING(fm.strFutureMonth,0,4) + '(' + fm.strSymbol + ') ' + CONVERT(NVARCHAR(5),fm.intYear) 
+		,strFutureMonthOrder = fm.strFutureMonth
+		,strRollMonth = SUBSTRING(rfm.strFutureMonth,0,4) + '(' + rfm.strSymbol + ') ' + CONVERT(NVARCHAR(5),rfm.intYear) 
 		,dblContractSize
 		,ysnSubCurrency
 		,isnull((SELECT sum(dblOpenContract) from vyuRKGetOpenContract fc 
@@ -270,12 +275,13 @@ FROM (
 		WHERE intSelectedInstrumentTypeId=1  AND ft.intInstrumentTypeId=1
 			and convert(datetime,CONVERT(VARCHAR(10),ft.dtmFilledDate,110)) BETWEEN @dtmFromDate and @dtmToDate	
 )t
-ORDER BY strFutureMonth
+ORDER BY strFutureMonthOrder
 
 INSERT INTO @RollCost (
 	strFutMarketName
 	,strCommodityCode
 	,strFutureMonth
+	,strFutureMonthOrder
 	,dblWtAvgOpenLongPosition
 	,dblSumBuy
 	,dblSumQty
@@ -297,6 +303,7 @@ SELECT
 	strFutMarketName
 	,strCommodityCode
 	,strFutureMonth
+	,strFutureMonthOrder
 	,SUM(isnull(dblContratPrice,0))/ case when isnull(SUM(dblOpenContract),0)=0 then 1 else SUM(dblOpenContract) end dblWtAvgOpenLongPosition
 	,((sum(isnull(dblBuyWithOutRollMonthPrice,0)+isnull(dblContratPrice,0))/
 		case when sum(isnull(dblOpenContract,0)+isnull(dblBuyWithOutRollMonthQty,0))=0 THEN 1 ELSE 
@@ -321,7 +328,7 @@ SELECT
 	,intBrokerageAccountId
 	,strBrokerAccountNo
 FROM @RollCostDetail 
-GROUP BY strFutMarketName,strCommodityCode,ysnSubCurrency,dblContractSize,strFutureMonth,intBookId
+GROUP BY strFutMarketName,strCommodityCode,ysnSubCurrency,dblContractSize,strFutureMonth,strFutureMonthOrder,intBookId
 	,strBook
 	,intSubBookId
 	,strSubBook
@@ -351,6 +358,7 @@ FROM (
 			,strFutMarketName
 			,strCommodityCode
 			,strFutureMonth
+			,strFutureMonthOrder
 			,dblWtAvgOpenLongPosition
 			,dblSumBuy
 			,dblSellMinusBuy
@@ -373,4 +381,4 @@ FROM (
 		FROM #temp
 	)t
 )t1
-ORDER BY strFutMarketName, CONVERT(DATETIME,'01 '+strFutureMonth) ASC 
+ORDER BY strFutMarketName, CONVERT(DATETIME,'01 '+strFutureMonthOrder) ASC 
