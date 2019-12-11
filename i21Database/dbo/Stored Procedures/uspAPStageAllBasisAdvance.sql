@@ -27,12 +27,14 @@ BEGIN
 	INSERT INTO tblAPBasisAdvanceStaging(
 		intBasisAdvanceDummyHeaderId,
 		intTicketId,
-		intContractDetailId
+		intContractDetailId,
+		intInventoryReceiptItemId
 	)
 	SELECT
 		dh.intBasisAdvanceDummyHeaderId,
 		ba.intTicketId,
-		ba.intContractDetailId
+		ba.intContractDetailId,
+		ba.intInventoryReceiptItemId
 	FROM vyuAPBasisAdvance ba
 	CROSS APPLY tblAPBasisAdvanceDummyHeader dh
 	WHERE ba.intAccountId > 0 --stage only those valid
