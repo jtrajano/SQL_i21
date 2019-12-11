@@ -21,6 +21,7 @@ SELECT intInvoiceId			= I.intInvoiceId
 	 , ysnPosted			= I.ysnPosted
 	 , ysnHasEmailSetup		= ISNULL(EMAILSETUP.ysnHasEmailSetup, CAST(0 AS BIT))
 	 , ysnMailSent			= ISNULL(EMAILSTATUS.ysnMailSent, CAST(0 AS BIT))
+	 , ysnHasInventory		= CASE WHEN ISNULL(INVENTORY.intInventoryCount, 0) > 0 THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
 FROM tblARInvoice I WITH (NOLOCK)
 INNER JOIN tblEMEntity EM WITH (NOLOCK) ON I.intEntityCustomerId = EM.intEntityId
 INNER JOIN tblARCustomer C WITH (NOLOCK) ON I.intEntityCustomerId = C.intEntityId
@@ -36,6 +37,13 @@ OUTER APPLY (
 	  AND ETC.intEntityId = I.intEntityCustomerId 
 	  AND REPLACE(EM.strEmailDistributionOption, 'CF Invoice', '') LIKE '%' + I.strTransactionType + '%'
 ) EMAILSETUP
+OUTER APPLY (
+	SELECT intInventoryCount = COUNT(*)
+	FROM tblARInvoiceDetail ID
+	INNER JOIN tblICItem ITEM ON ID.intItemId = ITEM.intItemId
+	WHERE ID.intInvoiceId = I.intInvoiceId
+	  AND ITEM.strType NOT IN ('Comments', 'Other Charge', 'Non-Inventory')
+) INVENTORY
 LEFT JOIN (
 	SELECT intInvoiceId = SMT.intRecordId 
 		 , ysnMailSent	= CASE WHEN COUNT(SMA.intTransactionId) > 0 THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END 

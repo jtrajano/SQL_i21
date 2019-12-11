@@ -122,21 +122,25 @@ IF ISNULL(@intInvoiceIdTo, 0) = 0
 IF ISNULL(@intInvoiceIdFrom, 0) = 0
 	SET @intInvoiceIdFrom = (SELECT MIN(intInvoiceId) FROM dbo.tblARInvoice)
 
-DECLARE @strInvoiceReportName			NVARCHAR(100) = NULL
-	  , @strTankDeliveryInvoiceFormat	NVARCHAR(100) = NULL
-	  , @strTransportsInvoiceFormat		NVARCHAR(100) = NULL
-	  , @strGrainInvoiceFormat			NVARCHAR(100) = NULL
-	  , @strMeterBillingInvoiceFormat	NVARCHAR(100) = NULL
-	  , @strCreditMemoReportName		NVARCHAR(100) = NULL
-	  , @ysnStretchLogo					BIT = 0
+DECLARE @strInvoiceReportName				NVARCHAR(100) = NULL
+	  , @strTankDeliveryInvoiceFormat		NVARCHAR(100) = NULL
+	  , @strTransportsInvoiceFormat			NVARCHAR(100) = NULL
+	  , @strGrainInvoiceFormat				NVARCHAR(100) = NULL
+	  , @strMeterBillingInvoiceFormat		NVARCHAR(100) = NULL
+	  , @strCreditMemoReportName			NVARCHAR(100) = NULL
+	  , @strOtherChargeInvoiceReportName	NVARCHAR(100) = NULL
+	  , @strOtherChargeCreditMemoReportName	NVARCHAR(100) = NULL
+	  , @ysnStretchLogo						BIT = 0
 
-SELECT TOP 1 @strInvoiceReportName			= ISNULL(strInvoiceReportName, 'Standard')
-		   , @strTankDeliveryInvoiceFormat	= ISNULL(strTankDeliveryInvoiceFormat, ISNULL(strInvoiceReportName, 'Standard'))
-		   , @strTransportsInvoiceFormat	= ISNULL(strTransportsInvoiceFormat, ISNULL(strInvoiceReportName, 'Standard'))
-		   , @strGrainInvoiceFormat			= ISNULL(strGrainInvoiceFormat, ISNULL(strInvoiceReportName, 'Standard'))
-		   , @strMeterBillingInvoiceFormat	= ISNULL(strMeterBillingInvoiceFormat, ISNULL(strInvoiceReportName, 'Standard'))
-		   , @strCreditMemoReportName		= ISNULL(strCreditMemoReportName, ISNULL(strInvoiceReportName, 'Standard'))
-		   , @ysnStretchLogo				= ISNULL(ysnStretchLogo, 0)
+SELECT TOP 1 @strInvoiceReportName					= ISNULL(strInvoiceReportName, 'Standard')
+		   , @strTankDeliveryInvoiceFormat			= ISNULL(strTankDeliveryInvoiceFormat, ISNULL(strInvoiceReportName, 'Standard'))
+		   , @strTransportsInvoiceFormat			= ISNULL(strTransportsInvoiceFormat, ISNULL(strInvoiceReportName, 'Standard'))
+		   , @strGrainInvoiceFormat					= ISNULL(strGrainInvoiceFormat, ISNULL(strInvoiceReportName, 'Standard'))
+		   , @strMeterBillingInvoiceFormat			= ISNULL(strMeterBillingInvoiceFormat, ISNULL(strInvoiceReportName, 'Standard'))
+		   , @strCreditMemoReportName				= ISNULL(strCreditMemoReportName, ISNULL(strInvoiceReportName, 'Standard'))
+		   , @strOtherChargeInvoiceReportName		= ISNULL(NULLIF(strOtherChargeInvoiceReportName, ''), 'Standard')
+		   , @strOtherChargeCreditMemoReportName	= ISNULL(NULLIF(strOtherChargeCreditMemoReportName, ''), 'Standard')
+		   , @ysnStretchLogo						= ISNULL(ysnStretchLogo, 0)
 FROM dbo.tblARCompanyPreference WITH (NOLOCK)
 
 SET @strInvoiceReportName = ISNULL(@strInvoiceReportName, 'Standard')
@@ -163,7 +167,11 @@ SELECT intInvoiceId			= INVOICE.intInvoiceId
 	 , ysnStretchLogo		= @ysnStretchLogo
 	 , strInvoiceFormat		= CASE WHEN INVOICE.strType IN ('Software', 'Standard') THEN 
 	 									CASE WHEN ISNULL(TICKET.intTicketId, 0) <> 0 THEN @strGrainInvoiceFormat
-											 ELSE @strInvoiceReportName
+											 ELSE 
+												CASE WHEN ISNULL(INVENTORY.intInventoryCount, 0) > 0 
+													 THEN @strInvoiceReportName 
+													 ELSE @strOtherChargeInvoiceReportName 
+											 END
 										END
 								   WHEN INVOICE.strType IN ('Tank Delivery') THEN @strTankDeliveryInvoiceFormat
 								   WHEN INVOICE.strType IN ('Transport Delivery') THEN @strTransportsInvoiceFormat
@@ -177,6 +185,13 @@ OUTER APPLY (
 	WHERE DETAIL.intInvoiceId = INVOICE.intInvoiceId
 	  AND DETAIL.intTicketId IS NOT NULL
 ) TICKET
+OUTER APPLY (
+	SELECT intInventoryCount = COUNT(*)
+	FROM tblARInvoiceDetail ID
+	INNER JOIN tblICItem ITEM ON ID.intItemId = ITEM.intItemId
+	WHERE ID.intInvoiceId = INVOICE.intInvoiceId
+	  AND ITEM.strType NOT IN ('Comments', 'Other Charge', 'Non-Inventory')
+) INVENTORY
 WHERE INVOICE.dtmDate BETWEEN @dtmDateFrom AND @dtmDateTo
   AND INVOICE.intInvoiceId BETWEEN @intInvoiceIdFrom AND @intInvoiceIdTo
   AND ((@strTransactionType IS NOT NULL AND INVOICE.strTransactionType = @strTransactionType) OR @strTransactionType IS NULL)
