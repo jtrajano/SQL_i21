@@ -1948,8 +1948,13 @@ BEGIN TRY
 					end
 					----- DEBUG POINT -----
 
-					update @SettleVoucherCreate set dblUnits = @dblTotalUnits where intItemType in (2, 3) and dblUnits > @dblTotalUnits
-
+					UPDATE SVC
+					SET SVC.dblUnits = CASE WHEN SVC.ysnDiscountFromGrossWeight = 1 THEN (@dblTotalUnits / CS.dblOriginalBalance) * CS.dblGrossQuantity ELSE @dblTotalUnits END
+					FROM @SettleVoucherCreate SVC
+					INNER JOIN tblGRCustomerStorage CS
+						ON CS.intCustomerStorageId = SVC.intCustomerStorageId
+					WHERE SVC.intItemType in (2, 3) and SVC.dblUnits > @dblTotalUnits
+					
 					----- DEBUG POINT -----
 					if @debug_awesome_ness = 1 AND 1 = 0
 					begin
