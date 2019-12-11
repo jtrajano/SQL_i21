@@ -8254,6 +8254,12 @@
     <Build Include="dbo\Stored Procedures\uspIPItemProcessAckXML.sql" />
     <Build Include="dbo\Views\vyuSCItemContractDetail.sql" />
     <Build Include="dbo\Views\vyuMFGetDemandItemList.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCCreateInvoiceForPostedDestinationWeightsAndGrades.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFEncodeCard.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFEncodeCardToStagingTable.sql" />
+    <Build Include="dbo\Functions\fnCFRemoveSpecialCharStrict.sql" />
+    <Build Include="dbo\Functions\fnCFCardNumberToMaximaFormat.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFDeleteEncodeCardData.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
