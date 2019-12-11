@@ -4,5 +4,6 @@
 	[intBasisAdvanceDummyHeaderId] INT NOT NULL,
 	[intTicketId] INT NOT NULL,
 	[intContractDetailId] INT NOT NULL,
+	[intInventoryReceiptItemId] INT NULL,
 	[intConcurrencyId] INT DEFAULT(0) NOT NULL
 )
