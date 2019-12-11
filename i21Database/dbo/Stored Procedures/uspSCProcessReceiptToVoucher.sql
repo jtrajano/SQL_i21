@@ -31,11 +31,7 @@ BEGIN
 	DECLARE @success AS INT
 	DECLARE @intLocationId AS INT
 
-	BEGIN 
-		DECLARE @TransactionName AS VARCHAR(500) = 'uspSCProcessReceiptToVoucher_' + CAST(NEWID() AS NVARCHAR(100));
-		BEGIN TRAN @TransactionName
-		SAVE TRAN @TransactionName
-	END
+	
 	BEGIN TRY
 		BEGIN
 			SELECT TOP 1 
@@ -206,22 +202,12 @@ BEGIN
 
 
 		END
-		IF @@TRANCOUNT > 0
-		BEGIN 
-			COMMIT TRAN @TransactionName
-		END 
 	END TRY
 	BEGIN CATCH
 		SELECT 
 			@ErrorMessage = ERROR_MESSAGE(),
 			@ErrorSeverity = ERROR_SEVERITY(),
 			@ErrorState = ERROR_STATE();
-
-		IF @@TRANCOUNT > 0 
-		BEGIN 
-			ROLLBACK TRAN @TransactionName
-			COMMIT TRAN @TransactionName
-		END
 
 		-- Use RAISERROR inside the CATCH block to return error
 		-- information about the original error that caused

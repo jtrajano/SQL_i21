@@ -35,6 +35,7 @@ AS
 				CC.strPayToReceiveFrom,
 				CC.strReferenceNo,
 				CC.intContractCostRefId,
+				CC.ysnFromBasisComponent,
 				CC.intConcurrencyId,
 				CC.intPrevConcurrencyId,								
 				IM.strItemNo, 

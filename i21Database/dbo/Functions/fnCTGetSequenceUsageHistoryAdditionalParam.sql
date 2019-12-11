@@ -128,12 +128,14 @@ BEGIN
 	END
 	ELSE IF @strScreenName = 'Transfer Storage'
 	BEGIN
-		SELECT	@intExternalHeaderId	=	HR.intCustomerStorageId,
-				@strNumber				=	HR.strStorageTicketNumber,
-				@strHeaderIdColumn		=	'intCustomerStorageId'
+		SELECT	@intExternalHeaderId	=	TS.intTransferStorageId,
+				@strNumber				=	TS.strTransferStorageTicket,
+				@strHeaderIdColumn		=	'intTransferStorageId'
 
-		FROM	tblGRCustomerStorage	HR	
-		WHERE	HR.intCustomerStorageId	=	@intExternalId
+		FROM	tblGRCustomerStorage	HR
+		LEFT JOIN	tblGRTransferStorageReference TSR on TSR.intSourceCustomerStorageId = HR.intCustomerStorageId
+		LEFT JOIN	tblGRTransferStorage TS on TS.intTransferStorageId = TSR.intTransferStorageId
+		WHERE	TSR.intSourceCustomerStorageId	=	@intExternalId OR TSR.intToCustomerStorageId = @intExternalId
 	END
 	ELSE IF @strScreenName = 'Inventory Shipment'
 	BEGIN

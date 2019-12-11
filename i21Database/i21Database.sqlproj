@@ -8103,6 +8103,11 @@
     <Build Include="dbo\Stored Procedures\uspSTCheckoutPassportTranslog.sql" />
     <None Include="Scripts\Post-Deployment\ST\37_FileFieldMapping_Passport_CPJR_340.sql" />
     <Build Include="dbo\Stored Procedures\uspSCCreateInvoiceForPostedDestinationWeightsAndGrades.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFEncodeCard.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFEncodeCardToStagingTable.sql" />
+    <Build Include="dbo\Functions\fnCFRemoveSpecialCharStrict.sql" />
+    <Build Include="dbo\Functions\fnCFCardNumberToMaximaFormat.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFDeleteEncodeCardData.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

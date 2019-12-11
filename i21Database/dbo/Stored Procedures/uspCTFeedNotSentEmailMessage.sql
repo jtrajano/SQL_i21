@@ -65,12 +65,15 @@ AS
 		 + '<td>&nbsp;' + ' ' + '</td>
 	 </tr>'
 		FROM tblSMTransaction TR WITH (NOLOCK)
-		LEFT JOIN tblCTContractFeed FD WITH (NOLOCK) ON FD.intContractHeaderId = TR.intRecordId
-		WHERE TR.intScreenId = 11
+		JOIN tblCTContractHeader CH WITH (NOLOCK) ON CH.intContractHeaderId = TR.intRecordId
+			AND TR.intScreenId = 11
 			AND ISNULL(TR.ysnOnceApproved, 0) = 1
-			AND FD.intContractFeedId IS NULL
 			AND TR.strTransactionNo NOT LIKE 'CP%'
-			AND intTransactionId <> 58191
+			AND TR.intTransactionId <> 58191
+		JOIN tblCTContractDetail CD WITH (NOLOCK) ON CD.intContractHeaderId = CH.intContractHeaderId
+			AND CD.intContractStatusId <> 2
+		LEFT JOIN tblCTContractFeed FD WITH (NOLOCK) ON FD.intContractHeaderId = CH.intContractHeaderId
+		WHERE FD.intContractFeedId IS NULL
 
 		Select @strDetail=@strDetail + 
 		'<tr>
@@ -94,7 +97,7 @@ AS
 		</tr>'
 		FROM tblCTContractDetail CD WITH (NOLOCK)
 		JOIN tblCTContractHeader CH WITH (NOLOCK) ON CH.intContractHeaderId = CD.intContractHeaderId
-			AND CD.intContractStatusId <> 3 AND CD.dtmCreated > '2018-01-01' AND ISNULL(CD.strERPPONumber, '') = ''
+			AND CD.intContractStatusId <> 3 AND CD.intContractStatusId <> 2 AND CD.dtmCreated > '2018-01-01' AND ISNULL(CD.strERPPONumber, '') = ''
 		JOIN tblSMTransaction TR WITH (NOLOCK) ON TR.intRecordId = CH.intContractHeaderId
 			AND TR.intScreenId = 11 AND ISNULL(TR.ysnOnceApproved, 0) = 1
 		LEFT JOIN tblCTContractFeed CF WITH (NOLOCK) ON CF.intContractDetailId = CD.intContractDetailId

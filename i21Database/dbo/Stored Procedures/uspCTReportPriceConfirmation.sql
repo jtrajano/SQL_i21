@@ -33,7 +33,9 @@ BEGIN TRY
 			@FirstApprovalSign			VARBINARY(MAX),
 			@InterCompApprovalSign		VARBINARY(MAX),
 			@intScreenId				INT,
-			@intTransactionId			INT			   
+			@intTransactionId			INT,
+			@intSalespersonId			INT,
+			@ContractSalesPersonSign    VARBINARY(MAX)	   
 
 	SELECT TOP 1 @intPriceFixationId = intPriceFixationId FROM tblCTPriceFixationDetail WHERE intPriceFixationDetailId IN (SELECT * FROM dbo.fnSplitString(@strPriceFixationID,',') )
     
@@ -54,7 +56,7 @@ BEGIN TRY
 	JOIN	tblICItemUOM		U	ON	U.intItemUOMId	=	D.intNetWeightUOMId
 	WHERE	intContractHeaderId	=	@intContractHeaderId
 
-	SELECT  @TotalQuantity = dblQuantity 
+	SELECT  @TotalQuantity = dblQuantity, @intSalespersonId = intSalespersonId
 	FROM	tblCTContractHeader 
 	WHERE	intContractHeaderId	=	@intContractHeaderId
 
@@ -119,6 +121,11 @@ BEGIN TRY
 	LEFT JOIN tblSMTransaction			rtt9 on rtt9.intScreenId = rts9.intScreenId and rtt9.intRecordId = rtc9.intCountryID
 	LEFT JOIN tblSMReportTranslation	rtrt9 on rtrt9.intLanguageId = @intLaguageId and rtrt9.intTransactionId = rtt9.intTransactionId and rtrt9.strFieldName = 'Country'
 
+	SELECT @ContractSalesPersonSign =  b.blbFile
+	from tblARSalesperson a, tblSMUpload b
+	where a.intEntityId = @intSalespersonId
+	and b.intAttachmentId = a.intAttachmentSignatureId
+
 	/*Declared variables for translating expression*/
 	declare @strStatus1 nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'This confirms that the above contract has been priced as follows:'), 'This confirms that the above contract has been priced as follows:');
 	declare @strStatus2 nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'This confirms that the above contract has been partially priced as follows:'),'This confirms that the above contract has been partially priced as follows:');
@@ -172,6 +179,7 @@ BEGIN TRY
 			CH.strCustomerContract,
 			IM.strItemNo,
 			strQuantity = dbo.fnRemoveTrailingZeroes(CD.dblQuantity)+ ' ' + ISNULL(rtrt2.strTranslation,UM.strUnitMeasure) ,
+			strZFSQuantity = format(CD.dblQuantity,'#,0.00####') + ' ' + ISNULL(rtrt2.strTranslation,UM.strUnitMeasure),
 			strPeriod = DATENAME(dd,CD.dtmStartDate) + ' ' + ISNULL(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,DATENAME(mm,CD.dtmStartDate)),DATENAME(mm,CD.dtmStartDate)) + ' ' + DATENAME(yyyy,CD.dtmStartDate) + ' - ' + DATENAME(dd,CD.dtmEndDate) + ' ' + ISNULL(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,DATENAME(mm,CD.dtmEndDate)),DATENAME(mm,CD.dtmEndDate)) + ' ' + DATENAME(yyyy,CD.dtmEndDate),
 			strAccountNumber = CASE WHEN CH.intContractTypeId = 1 THEN EC.strEntityNumber ELSE EY.strEntityNumber END,
 			SP.strEntityName as strSalesperson,
@@ -186,17 +194,22 @@ BEGIN TRY
 			PD.intNumber as intPricingNumber,
 			CV.strCommodityCode as strCommodity,
 			CD.dblQuantity,
+			strZFSPricedQuantity = format(PD.dblQuantity,'#,0.00####'),
 			ISNULL(rtrt2.strTranslation,CM.strSymbol) as strUOM,
 			CD.dblBasis,
+			strZFSBasis = format(CD.dblBasis,'#,0.00####'),
 			LTRIM(CAST(ROUND(PD.dblFutures,2) AS NUMERIC(18,2))) as dblFuturePrice,
 			LTRIM(CAST(ROUND(ISNULL(PD.dblFutures,0) - ISNULL(CD.dblBasis,0),2) AS NUMERIC(18,2))) + ' ' + CY.strCurrency + ' '+@per+' ' + ISNULL(rtrt2.strTranslation,CM.strUnitMeasure) strCashPrice,
+			format(PD.dblCashPrice,'#,0.00####') + ' ' + CY.strCurrency + ' '+@per+' ' + ISNULL(rtrt2.strTranslation,CM.strUnitMeasure) strZFSCashPrice,
 			MO.strFutureMonth,
 			CV.strFreightTerm,
 			PD.strNotes,
 			strBuyer = CASE WHEN CH.ysnBrokerage = 1 THEN EC.strEntityName ELSE CASE WHEN CH.intContractTypeId = 1 THEN @strCompanyName ELSE EY.strEntityName END END,
 			strSeller = CASE WHEN CH.ysnBrokerage = 1 THEN EY.strEntityName ELSE CASE WHEN CH.intContractTypeId = 2 THEN @strCompanyName ELSE EY.strEntityName END END,
 			strTitle = (case when CH.intContractTypeId = 1 then 'Purchase' else 'Sale' end) + ' Contract Pricing Confirmation',
-			strEntityLabel = (case when CH.intContractTypeId = 1 then 'Vendor' else 'Customer' end) + ' Ref'
+			strEntityLabel = (case when CH.intContractTypeId = 1 then 'Vendor' else 'Customer' end) + ' Ref',
+			blbSalesContractSalesPersonSign = (case when CH.intContractTypeId = 2 then @ContractSalesPersonSign else null end),
+			blbPurchaseContractSalesPersonSign = (case when CH.intContractTypeId = 1 then @ContractSalesPersonSign else null end)
 
 
 	FROM	tblCTPriceFixation			PF
