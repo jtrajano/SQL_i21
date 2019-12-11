@@ -310,16 +310,22 @@ SELECT TOP 100 PERCENT * FROM (
 			SUBSTRING(
 				(SELECT ',' + CAST(voucherDetail2.intBillId AS NVARCHAR)
 				FROM tblAPBillDetail voucherDetail2
-                INNER JOIN tblAPBill voucher2 ON voucher2.intBillId = voucherDetail2.intBillId
+                INNER JOIN tblAPBill voucher2 
+                    ON voucher2.intBillId = voucherDetail2.intBillId
 				WHERE voucherDetail2.intScaleTicketId = ticket.intTicketId
                 AND voucher2.intTransactionType = 13
 				FOR XML PATH ('')) , 2, 200000) AS strBillIds
 		FROM tblAPBillDetail voucherDetail
         INNER JOIN tblAPBill voucher ON voucher.intBillId = voucherDetail.intBillId
-        INNER JOIN (tblAPPaymentDetail payDetail INNER JOIN tblAPPayment pay ON payDetail.intPaymentId = pay.intPaymentId AND pay.ysnPosted = 1) --prior advances should have payment
+        INNER JOIN (tblAPPaymentDetail payDetail 
+                        INNER JOIN tblAPPayment pay ON payDetail.intPaymentId = pay.intPaymentId AND pay.ysnPosted = 1) --prior advances should have payment
             ON payDetail.intBillId = voucher.intBillId
-        LEFT JOIN tblAPBasisAdvanceCommodity commodity ON commodity.intCommodityId = ticket.intCommodityId
-		WHERE voucherDetail.intScaleTicketId = ticket.intTicketId
+        LEFT JOIN tblAPBasisAdvanceCommodity commodity 
+            ON commodity.intCommodityId = ticket.intCommodityId
+		WHERE 
+            voucherDetail.intScaleTicketId = ticket.intTicketId
+        AND ISNULL(voucherDetail.intInventoryReceiptItemId,-1) = ISNULL(ticketTrans.intInventoryReceiptItemId,-1)
+        AND ISNULL(voucherDetail.intContractDetailId,-1) = ISNULL(ticketTrans.intContractDetailId,-1)
         AND voucher.intTransactionType = 13
     ) priorAdvances
     OUTER APPLY (
@@ -355,8 +361,10 @@ SELECT TOP 100 PERCENT * FROM (
     LEFT JOIN tblAPBasisAdvanceFuture basisFutures 
         ON basisFutures.intFutureMarketId = futureMarket.intFutureMarketId AND basisFutures.intMonthId = futureMonth.intFutureMonthId
     LEFT JOIN tblAPBasisAdvanceCommodity basisCommodity ON basisCommodity.intCommodityId = ticket.intCommodityId
-    LEFT JOIN tblAPBasisAdvanceStaging staging ON staging.intContractDetailId = ctd.intContractDetailId
-                                    AND staging.intTicketId = ticket.intTicketId
+    LEFT JOIN tblAPBasisAdvanceStaging staging 
+        ON staging.intContractDetailId = ctd.intContractDetailId
+            AND staging.intInventoryReceiptItemId = ticketTrans.intInventoryReceiptItemId
+            AND staging.intTicketId = ticketTrans.intTicketId
      OUTER APPLY (
         SELECT
             SUM(taxData.dblTax) AS dblTax
