@@ -128,9 +128,9 @@ BEGIN
 	END
 	ELSE IF @strScreenName = 'Transfer Storage'
 	BEGIN
-		SELECT	@intExternalHeaderId	=	HR.intCustomerStorageId,
+		SELECT	@intExternalHeaderId	=	TS.intTransferStorageId,
 				@strNumber				=	TS.strTransferStorageTicket,
-				@strHeaderIdColumn		=	'intCustomerStorageId'
+				@strHeaderIdColumn		=	'intTransferStorageId'
 
 		FROM	tblGRCustomerStorage	HR
 		LEFT JOIN	tblGRTransferStorageReference TSR on TSR.intSourceCustomerStorageId = HR.intCustomerStorageId
