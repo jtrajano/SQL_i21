@@ -570,7 +570,7 @@ BEGIN
 	INSERT [dbo].[tblSMImportFileRecordMarker] ([intImportFileHeaderId], [strRecordMarker], [intRowsToSkip], [intPosition], [strCondition], [intSequence], [intConcurrencyId], [strFormat], [intRounding]) 
 	VALUES (@pacpridePK, N'Billing Date', 0, 30, NULL, NULL, 1, NULL, NULL)
 	INSERT [dbo].[tblSMImportFileColumnDetail] ([intImportFileHeaderId], [intImportFileRecordMarkerId], [intLevel], [intPosition], [strXMLTag], [strTable], [strColumnName], [strDataType], [intLength], [strDefaultValue], [ysnActive], [intConcurrencyId]) 
-	VALUES (@pacpridePK, 74, 40, 0, NULL, N'tblCFTransaction', N'dtmBillingDate', NULL, 0, NULL, 1, 1)
+	VALUES (@pacpridePK, SCOPE_IDENTITY(), 74, 0, NULL, N'tblCFTransaction', N'dtmBillingDate', NULL, 0, NULL, 1, 1)
 
 END
 	-----------Pac Pride-------------
