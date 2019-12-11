@@ -151,7 +151,7 @@ LEFT JOIN tblICUnitMeasure U3 ON U3.intUnitMeasureId = SIU.intUnitMeasureId
 LEFT JOIN tblICItem SIM ON SIM.intItemId = SCT.intItemId
 LEFT JOIN tblICCommodityAttribute PTS ON PTS.intCommodityAttributeId = SIM.intProductTypeId AND PTS.strType = 'ProductType'
 LEFT JOIN tblICCommodityAttribute SCA ON SCA.intCommodityAttributeId = SIM.intOriginId AND SCA.strType = 'Origin'
-LEFT JOIN tblICItem SBI ON PBI.intItemId = SCT.intItemBundleId
+LEFT JOIN tblICItem SBI ON SBI.intItemId = SCT.intItemBundleId
 LEFT JOIN tblSMCountry SCO ON SCO.intCountryID = SCA.intCountryID
 LEFT JOIN tblSMFreightTerms SCB ON SCB.intFreightTermId = SCH.intFreightTermId
 LEFT JOIN tblCTContractStatus SCS ON SCS.intContractStatusId = SCT.intContractStatusId
