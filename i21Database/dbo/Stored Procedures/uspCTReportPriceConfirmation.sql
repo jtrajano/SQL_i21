@@ -121,11 +121,10 @@ BEGIN TRY
 	LEFT JOIN tblSMTransaction			rtt9 on rtt9.intScreenId = rts9.intScreenId and rtt9.intRecordId = rtc9.intCountryID
 	LEFT JOIN tblSMReportTranslation	rtrt9 on rtrt9.intLanguageId = @intLaguageId and rtrt9.intTransactionId = rtt9.intTransactionId and rtrt9.strFieldName = 'Country'
 
-	SELECT @ContractSalesPersonSign =  Sig.blbDetail
-								 FROM tblSMSignature Sig  WITH (NOLOCK)
-								 JOIN tblEMEntitySignature ESig ON ESig.intElectronicSignatureId=Sig.intSignatureId
-								 left join tblEMEntity ent on ent.intEntityId = Sig.intEntityId
-								 WHERE Sig.intEntityId=@intSalespersonId
+	SELECT @ContractSalesPersonSign =  b.blbFile
+	from tblARSalesperson a, tblSMUpload b
+	where a.intEntityId = @intSalespersonId
+	and b.intAttachmentId = a.intAttachmentSignatureId
 
 	/*Declared variables for translating expression*/
 	declare @strStatus1 nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'This confirms that the above contract has been priced as follows:'), 'This confirms that the above contract has been priced as follows:');
