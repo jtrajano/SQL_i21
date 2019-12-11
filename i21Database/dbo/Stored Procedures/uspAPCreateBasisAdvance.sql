@@ -44,6 +44,7 @@ INSERT INTO @voucherPayables(
     intContractDetailId,
     intContractHeaderId,
     intContractSeqId,
+    intInventoryReceiptItemId,
     intItemId,
     dblOrderQty,
     dblOrderUnitQty,
@@ -75,6 +76,7 @@ SELECT
     ,intContractDetailId            = basisAdvance.intContractDetailId
     ,intContractHeaderId            = basisAdvance.intContractHeaderId
     ,intContractSeqId               = basisAdvance.intContractSeq
+    ,intInventoryReceiptItemId      = basisAdvance.intInventoryReceiptItemId
     ,intItemId                      = basisAdvance.intItemId
     ,dblOrderQty                    = basisAdvance.dblQuantity
     ,dblOrderUnitQty                = ISNULL(ItemUOM.dblUnitQty,1)
