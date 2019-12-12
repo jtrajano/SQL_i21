@@ -87,7 +87,7 @@ BEGIN TRY
 
 	INSERT INTO tblMFInvPlngSummaryBatch (
 		intInvPlngSummaryId
-		,InvPlngReportMasterID
+		,intInvPlngReportMasterID
 		)
 	SELECT @intInvPlngSummaryId
 		,Item Collate Latin1_General_CI_AS
