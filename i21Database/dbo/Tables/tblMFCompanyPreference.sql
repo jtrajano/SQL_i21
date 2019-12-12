@@ -91,5 +91,6 @@
 	ysnComputeDemandUsingRecipe BIT,
 	ysnDisplayDemandWithItemNoAndDescription BIT,
 	ysnDisplayRestrictedBookInDemandView BIT,
+	intNoofdaystoconsiderforDemandBatches INT,
 	CONSTRAINT [PK_tblMFCompanyPreference_intCompanyPreferenceId] PRIMARY KEY ([intCompanyPreferenceId]) 
 )

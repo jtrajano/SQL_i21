@@ -3963,3 +3963,8 @@ BEGIN
 END
 
 GO
+
+UPDATE tblMFCompanyPreference
+SET intNoofdaystoconsiderforDemandBatches = 7
+Where intNoofdaystoconsiderforDemandBatches IS NULL
+GO

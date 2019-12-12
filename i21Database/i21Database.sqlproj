@@ -8263,6 +8263,10 @@
     <Build Include="dbo\Stored Procedures\uspSCGetItemContractsAndAllocate.sql" />
     <Build Include="dbo\Tables\tblSCTicketItemContractUsed.sql" />
     <Build Include="dbo\Stored Procedures\uspSCUpdateTicketItemContractUsed.sql" />
+    <Build Include="dbo\Views\vyuMFDemandSummaryView.sql" />
+    <Build Include="dbo\Functions\fnMFGetDemandBatches.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFDeleteDemandSummary.sql" />
+    <Build Include="dbo\Views\vyuMFGetDemandBatchList.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

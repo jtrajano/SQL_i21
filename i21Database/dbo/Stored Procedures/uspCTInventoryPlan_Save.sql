@@ -38,20 +38,20 @@ BEGIN TRY
 
 	IF @intInvPlngReportMasterID = 0
 	BEGIN
-		IF EXISTS (
-				SELECT 1
-				FROM [tblCTInvPlngReportMaster]
-				WHERE [strInvPlngReportName] = @strInvPlngReportName
-				)
-		BEGIN
-			SET @ErrMsg = 'Plan Name must be unique.'
+		--IF EXISTS (
+		--		SELECT 1
+		--		FROM [tblCTInvPlngReportMaster]
+		--		WHERE [strInvPlngReportName] = @strInvPlngReportName
+		--		)
+		--BEGIN
+		--	SET @ErrMsg = 'Plan Name must be unique.'
 
-			RAISERROR (
-					@ErrMsg
-					,16
-					,1
-					)
-		END
+		--	RAISERROR (
+		--			@ErrMsg
+		--			,16
+		--			,1
+		--			)
+		--END
 
 		EXEC dbo.uspMFGeneratePatternId @intCategoryId = NULL
 			,@intItemId = NULL
@@ -192,21 +192,21 @@ BEGIN TRY
 	END
 	ELSE
 	BEGIN
-		IF EXISTS (
-				SELECT 1
-				FROM [tblCTInvPlngReportMaster]
-				WHERE [strInvPlngReportName] = @strInvPlngReportName
-					AND intInvPlngReportMasterID <> @intInvPlngReportMasterID
-				)
-		BEGIN
-			SET @ErrMsg = 'Plan Name must be unique.'
+		--IF EXISTS (
+		--		SELECT 1
+		--		FROM [tblCTInvPlngReportMaster]
+		--		WHERE [strInvPlngReportName] = @strInvPlngReportName
+		--			AND intInvPlngReportMasterID <> @intInvPlngReportMasterID
+		--		)
+		--BEGIN
+		--	SET @ErrMsg = 'Plan Name must be unique.'
 
-			RAISERROR (
-					@ErrMsg
-					,16
-					,1
-					)
-		END
+		--	RAISERROR (
+		--			@ErrMsg
+		--			,16
+		--			,1
+		--			)
+		--END
 
 		SELECT @intOldConcurrencyId = intConcurrencyId
 		FROM tblCTInvPlngReportMaster
@@ -238,6 +238,7 @@ BEGIN TRY
 			,ysnAllItem = x.ysnAllItem
 			,strComment = x.strComment
 			,ysnPost = x.ysnPost
+			,dtmPostDate = (CASE WHEN x.ysnPost = 1 THEN GETDATE() ELSE tblCTInvPlngReportMaster.dtmPostDate END)
 			,[intLastModifiedUserId] = x.intLastModifiedUserId
 			,[dtmLastModified] = GETDATE()
 		FROM OPENXML(@idoc, 'root/InvPlngReportMaster', 2) WITH (

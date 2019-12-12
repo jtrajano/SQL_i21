@@ -18,6 +18,7 @@
 	ysnAllItem BIT CONSTRAINT [DF_tblCTInvPlngReportMaster_ysnAllItem] DEFAULT 0,
 	strComment NVARCHAR(MAX) COLLATE Latin1_General_CI_AS,
 	ysnPost BIT CONSTRAINT [DF_tblCTInvPlngReportMaster_ysnPost] DEFAULT 0,
+	dtmPostDate DATETIME,
 
 	[intCreatedUserId] [int] NULL,
 	[dtmCreated] [datetime] NULL CONSTRAINT [DF_tblCTInvPlngReportMaster_dtmCreated] DEFAULT GetDate(),
