@@ -162,13 +162,13 @@ BEGIN
 		--EXPIRATION DATE--
 		IF(@dtmCardExpiratioYearMonth != @minDate)
 		BEGIN
-			SET @strExpirationDate = FORMAT(@dtmCardExpiratioYearMonth,'MM/yy') 
-			SET @strDateMMYY =  FORMAT(@dtmCardExpiratioYearMonth,'yyMM') 
+			SET @strExpirationDate = CAST(MONTH(@dtmCardExpiratioYearMonth) AS NVARCHAR(2)) + '/' + CAST(RIGHT(YEAR(@dtmCardExpiratioYearMonth),2) AS NVARCHAR(2)) --FORMAT(@dtmCardExpiratioYearMonth,'MM/yy') 
+			SET @strDateMMYY =  CAST(MONTH(@dtmCardExpiratioYearMonth) AS NVARCHAR(2)) + CAST(RIGHT(YEAR(@dtmCardExpiratioYearMonth),2) AS NVARCHAR(2)) 
 		END
 		ELSE
 		BEGIN
-			SET @strExpirationDate = FORMAT(@dtmGlobalCardExpirationDate,'MM/yy')
-			SET @strDateMMYY =  FORMAT(@dtmGlobalCardExpirationDate,'yyMM') 
+			SET @strExpirationDate = CAST(MONTH(@dtmGlobalCardExpirationDate) AS NVARCHAR(2)) + '/' + CAST(RIGHT(YEAR(@dtmGlobalCardExpirationDate),2) AS NVARCHAR(2))
+			SET @strDateMMYY =  CAST(MONTH(@dtmGlobalCardExpirationDate) AS NVARCHAR(2)) + '/' + CAST(RIGHT(YEAR(@dtmGlobalCardExpirationDate),2) AS NVARCHAR(2))
 		END
 
 		--ENTRY CODE--
