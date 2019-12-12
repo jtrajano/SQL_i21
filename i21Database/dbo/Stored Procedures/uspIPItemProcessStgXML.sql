@@ -7549,18 +7549,17 @@ BEGIN TRY
 			-- Audit Log
 			IF (@intNewItemId > 0)
 			BEGIN
-				DECLARE @StrDescription AS NVARCHAR(MAX)
 
 				IF @strRowState = 'Modified'
 				BEGIN
-					SELECT @StrDescription = 'Updated '
+					SELECT @strDescription = 'Updated '
 
 					EXEC uspSMAuditLog @keyValue = @intNewItemId
 						,@screenName = 'Inventory.view.Item'
 						,@entityId = @intLastModifiedUserId
 						,@actionType = 'Updated'
 						,@actionIcon = 'small-tree-modified'
-						,@changeDescription = @StrDescription
+						,@changeDescription = @strDescription
 						,@fromValue = ''
 						,@toValue = @strItemNo
 				END
