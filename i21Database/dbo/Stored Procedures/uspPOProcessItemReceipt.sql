@@ -10,6 +10,11 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
+DECLARE @poDetailIds AS Id
+
+INSERT INTO @poDetailIds
+SELECT intPurchaseDetailId FROM tblPOPurchaseDetail WHERE intPurchaseId = @poId
+
 -- Validations
 BEGIN 
 	--Purchase order already closed.
@@ -297,7 +302,7 @@ BEGIN
 				,intItemLocationId		= il.intItemLocationId 
 				,intItemUOMId			= POD.intUnitOfMeasureId  
 				-- ,intSubLocationId		= NULL 
-				,dblQty					= -POD.dblQtyOrdered
+				,dblQty					= -(POD.dblQtyOrdered - POD.dblQtyReceived)
 				,dblUOMQty				= iu.dblUnitQty
 				,intTransactionId		= PO.intPurchaseId
 				,intTransactionDetailId = POD.intPurchaseDetailId 
@@ -323,7 +328,112 @@ BEGIN
 		EXEC dbo.uspICIncreaseOnOrderQty 
 			@ItemToUpdateOnOrderQty
 	END 
+
+	
+	--REMOVE VOUCHER PAYABLE
+	--IF THERE IS PARTIALLY VOUCHERED, MOVE IT TO COMPLETE
+	DECLARE @voucherPayables AS VoucherPayable;
+	DECLARE @voucherPayableTax AS VoucherDetailTax;
+	DECLARE @error NVARCHAR(1000);
+
+	INSERT INTO @voucherPayables(
+		[intEntityVendorId]			
+		,[intTransactionType]		
+		,[intLocationId]	
+		,[intShipToId]	
+		,[intShipFromId]			
+		,[intShipFromEntityId]
+		,[intPayToAddressId]
+		,[intCurrencyId]					
+		,[dtmDate]				
+		,[strVendorOrderNumber]			
+		,[strReference]						
+		,[strSourceNumber]					
+		,[intPurchaseDetailId]				
+		,[intContractHeaderId]				
+		,[intContractDetailId]				
+		,[intContractSeqId]					
+		,[intScaleTicketId]					
+		,[intInventoryReceiptItemId]		
+		,[intInventoryReceiptChargeId]		
+		,[intInventoryShipmentItemId]		
+		,[intInventoryShipmentChargeId]		
+		,[intLoadShipmentId]				
+		,[intLoadShipmentDetailId]			
+		,[intItemId]						
+		,[intPurchaseTaxGroupId]			
+		,[strMiscDescription]				
+		,[dblOrderQty]						
+		,[dblOrderUnitQty]					
+		,[intOrderUOMId]					
+		,[dblQuantityToBill]				
+		,[dblQtyToBillUnitQty]				
+		,[intQtyToBillUOMId]				
+		,[dblCost]							
+		,[dblCostUnitQty]					
+		,[intCostUOMId]						
+		,[dblNetWeight]						
+		,[dblWeightUnitQty]					
+		,[intWeightUOMId]					
+		,[intCostCurrencyId]
+		,[dblTax]							
+		,[dblDiscount]
+		,[intCurrencyExchangeRateTypeId]	
+		,[dblExchangeRate]					
+		,[ysnSubCurrency]					
+		,[intSubCurrencyCents]				
+		,[intAccountId]						
+		,[intShipViaId]						
+		,[intTermId]						
+		,[strBillOfLading]					
+		,[ysnReturn]						
+	)
+	SELECT * FROM dbo.fnAPCreatePOVoucherPayable(@poDetailIds);
+
+	INSERT INTO @voucherPayableTax (
+		[intVoucherPayableId]
+		,[intTaxGroupId]				
+		,[intTaxCodeId]				
+		,[intTaxClassId]				
+		,[strTaxableByOtherTaxes]	
+		,[strCalculationMethod]		
+		,[dblRate]					
+		,[intAccountId]				
+		,[dblTax]					
+		,[dblAdjustedTax]			
+		,[ysnTaxAdjusted]			
+		,[ysnSeparateOnBill]			
+		,[ysnCheckOffTax]		
+		,[ysnTaxExempt]	
+		,[ysnTaxOnly]
+	)
+	SELECT
+		[intVoucherPayableId]		=	payables.intVoucherPayableId,
+		[intTaxGroupId]				=	A.intTaxGroupId, 
+		[intTaxCodeId]				=	A.intTaxCodeId, 
+		[intTaxClassId]				=	A.intTaxClassId, 
+		[strTaxableByOtherTaxes]	=	A.strTaxableByOtherTaxes, 
+		[strCalculationMethod]		=	A.strCalculationMethod, 
+		[dblRate]					=	A.dblRate, 
+		[intAccountId]				=	A.intAccountId, 
+		[dblTax]					=	A.dblTax, 
+		[dblAdjustedTax]			=	ISNULL(A.dblAdjustedTax,0), 
+		[ysnTaxAdjusted]			=	A.ysnTaxAdjusted, 
+		[ysnSeparateOnBill]			=	A.ysnSeparateOnBill, 
+		[ysnCheckOffTax]			=	A.ysnCheckOffTax,
+		[ysnTaxExempt]				=	A.ysnTaxExempt,
+		[ysnTaxOnly]				=	A.ysnTaxOnly
+	FROM tblPOPurchaseDetailTax A
+	INNER JOIN tblPOPurchaseDetail B ON A.intPurchaseDetailId = B.intPurchaseDetailId
+	INNER JOIN @voucherPayables payables ON B.intPurchaseDetailId = payables.intPurchaseDetailId
+	LEFT JOIN tblICItem C ON B.intItemId = C.intItemId
+	WHERE 
+		(dbo.fnIsStockTrackingItem(C.intItemId) = 0 OR C.intItemId IS NULL)
+	AND payables.dblTax != 0
+
+	EXEC uspAPForceCompletePayable @voucherPayable = @voucherPayables, @voucherPayableTax = @voucherPayableTax, @throwError = 1, @error = @error OUT;
 	
 	-- Update the PO Status 
 	EXEC dbo.uspPOUpdateStatus @poId
+
 END
