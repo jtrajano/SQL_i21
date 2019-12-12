@@ -408,10 +408,11 @@ BEGIN
 	FROM dbo.fnICOutstandingInTransitAsOf(NULL, @intCommodityId, @dtmToTransactionDate) InTran
 	INNER JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = InTran.intItemUOMId
 	INNER JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
+	INNER JOIN tblICItemLocation IL ON IL.intItemLocationId = InTran.intItemLocationId
 	JOIN tblICCommodityUnitMeasure cum ON cum.intCommodityId = @intCommodityId AND cum.intUnitMeasureId = UOM.intUnitMeasureId
 	WHERE InTran.intItemId = ISNULL(@intItemId, InTran.intItemId)
-		AND InTran.intItemLocationId = ISNULL(@intLocationId, InTran.intItemLocationId) 
-		AND InTran.intItemLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
+		AND IL.intLocationId = ISNULL(@intLocationId, IL.intLocationId ) 
+		AND IL.intLocationId  IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 			
 	DECLARE @tblBalanceInvByDate AS TABLE (dtmDate DATE NULL
 		, dblBalanceInv NUMERIC(18,6)

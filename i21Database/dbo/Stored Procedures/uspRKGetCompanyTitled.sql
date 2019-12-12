@@ -725,7 +725,7 @@ BEGIN
 					,I.intInvoiceId
 					,strDistribution = TV.strDistributionOption
 					,Inv.intTransactionDetailId
-					,Inv.strTransactionType
+					,strTransactionType = 'Invoice'
 				from @InventoryStock Inv
 				inner join tblICInventoryShipment S on Inv.intTransactionId = S.intInventoryShipmentId
 				inner join tblICInventoryShipmentItem ISI ON ISI.intInventoryShipmentId = S.intInventoryShipmentId AND ISI.intInventoryShipmentItemId = Inv.intTransactionDetailId
@@ -943,6 +943,7 @@ BEGIN
 				INNER JOIN tblGRTransferStorage TS ON Inv.intTransactionId = TS.intTransferStorageId
 				INNER JOIN tblGRTransferStorageSplit TSS ON Inv.intTransactionDetailId = TSS.intTransferStorageSplitId
 				INNER JOIN tblGRStorageType ST ON ST.intStorageScheduleTypeId = TSS.intStorageTypeId
+				WHERE Inv.strTransactionType = 'Transfer Storage'
 			) T
 
 			UNION ALL--PRODUCE
