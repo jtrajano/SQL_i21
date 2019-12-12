@@ -771,6 +771,8 @@ BEGIN
 				,intAttributeId INT
 				,intMonthId INT
 				,intMainItemId INT
+				,intBookId INT
+				,intSubBookId INT
 				)
 
 			IF OBJECT_ID('tempdb..#tblMFFinalDemand') IS NOT NULL
@@ -782,6 +784,8 @@ BEGIN
 				,intAttributeId INT
 				,intMonthId INT
 				,intMainItemId INT
+				,intBookId INT
+				,intSubBookId INT
 				)
 
 			DECLARE @tblMFItemDetail TABLE (
@@ -799,7 +803,6 @@ BEGIN
 			FROM tblCTInvPlngReportMaster
 			WHERE ysnPost = 1
 
-			--SELECT @dtmStartOfMonth = DATEADD(month, DATEDIFF(month, 0, @dtmDate), 0)
 			SELECT @intCurrentMonth = DATEDIFF(mm, 0, @dtmDate)
 
 			INSERT INTO @tblMFItemDetail (
@@ -827,6 +830,8 @@ BEGIN
 				,intAttributeId
 				,intMonthId
 				,intMainItemId
+				,intBookId
+				,intSubBookId
 				)
 			SELECT CASE 
 					WHEN I.ysnSpecificItemDescription = 1
@@ -837,6 +842,8 @@ BEGIN
 				,13 AS intAttributeId --Open Purchases
 				,DATEDIFF(mm, 0, SS.dtmUpdatedAvailabilityDate) + 1 - @intCurrentMonth AS intMonthId
 				,I.intMainItemId
+				,SS.intBookId
+				,SS.intSubBookId
 			FROM @tblMFItemDetail I
 			JOIN dbo.tblCTContractDetail SS ON SS.intItemId = I.intItemId
 			JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = SS.intItemUOMId
@@ -856,6 +863,8 @@ BEGIN
 					END
 				,DATEDIFF(mm, 0, SS.dtmUpdatedAvailabilityDate) + 1 - @intCurrentMonth
 				,I.intMainItemId
+				,SS.intBookId
+				,SS.intSubBookId
 
 			INSERT INTO #tblMFDemand (
 				intItemId
@@ -863,12 +872,16 @@ BEGIN
 				,intAttributeId
 				,intMonthId
 				,intMainItemId
+				,intBookId
+				,intSubBookId
 				)
 			SELECT intItemId
 				,- dblQty
 				,12 AS intAttributeId --Short/Excess Inventory
 				,intMonthId
 				,intMainItemId
+				,intBookId
+				,intSubBookId
 			FROM #tblMFDemand
 
 			INSERT INTO #tblMFDemand (
@@ -876,17 +889,22 @@ BEGIN
 				,dblQty
 				,intAttributeId
 				,intMonthId
+				,intBookId
+				,intSubBookId
 				)
-			SELECT intItemId
+			SELECT AV.intItemId
 				,CASE 
-					WHEN strValue = ''
+					WHEN AV.strValue = ''
 						THEN NULL
-					ELSE strValue
+					ELSE AV.strValue
 					END
-				,intReportAttributeID
-				,Replace(Replace(Replace(strFieldName, 'strMonth', ''), 'OpeningInv', '-1'), 'PastDue', '0') intMonthId
-			FROM tblCTInvPlngReportAttributeValue
-			WHERE intReportAttributeID IN (
+				,AV.intReportAttributeID
+				,Replace(Replace(Replace(AV.strFieldName, 'strMonth', ''), 'OpeningInv', '-1'), 'PastDue', '0') intMonthId
+				,RM.intBookId
+				,RM.intSubBookId
+			FROM tblCTInvPlngReportAttributeValue AV
+			JOIN tblCTInvPlngReportMaster RM ON AV.intInvPlngReportMasterID = RM.intInvPlngReportMasterID
+			WHERE AV.intReportAttributeID IN (
 					2
 					,--Opening Inventory
 					13
@@ -897,7 +915,7 @@ BEGIN
 					,--Forecasted Consumption
 					9 --Ending Inventory
 					)
-				AND intInvPlngReportMasterID IN (
+				AND AV.intInvPlngReportMasterID IN (
 					SELECT Item Collate Latin1_General_CI_AS
 					FROM [dbo].[fnSplitString](@strInvPlngReportMasterID, ',')
 					)
@@ -908,17 +926,23 @@ BEGIN
 				,intAttributeId
 				,intMonthId
 				,intMainItemId
+				,intBookId
+				,intSubBookId
 				)
 			SELECT intItemId
 				,SUM(dblQty) AS dblQty
 				,intAttributeId
 				,intMonthId
 				,intMainItemId
+				,intBookId
+				,intSubBookId
 			FROM #tblMFDemand
 			GROUP BY intItemId
 				,intAttributeId
 				,intMonthId
 				,intMainItemId
+				,intBookId
+				,intSubBookId
 
 			SELECT sstrBook
 				,strSubBook
@@ -1089,9 +1113,8 @@ BEGIN
 				JOIN tblCTInvPlngReportMaster RM ON RM.intInvPlngReportMasterID = @intReportMasterID
 				LEFT JOIN tblICItem MI ON MI.intItemId = IsNULL(FD.intMainItemId, FD.intItemId)
 				JOIN tblICItem I ON I.intItemId = FD.intItemId
-				LEFT JOIN tblCTBook B ON B.intBookId = RM.intBookId
-				LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = RM.intSubBookId
-				LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = RM.intSubBookId
+				LEFT JOIN tblCTBook B ON B.intBookId = FD.intBookId
+				LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = FD.intSubBookId
 				LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityId = MI.intCommodityId
 					AND MI.intProductTypeId = CA.intCommodityAttributeId
 					AND CA.strType = 'ProductType'

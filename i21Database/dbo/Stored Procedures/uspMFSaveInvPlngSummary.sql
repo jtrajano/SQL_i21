@@ -7,12 +7,17 @@ BEGIN TRY
 		,@intInvPlngSummaryId INT
 		,@idoc INT
 		,@intTransactionCount INT
+		,@strInvPlngReportMasterID NVARCHAR(MAX)
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXML
 
 	SELECT @intInvPlngSummaryId = intInvPlngSummaryId
-	FROM OPENXML(@idoc, 'InvPlngSummarys/InvPlngSummary', 2) WITH (intInvPlngSummaryId INT)
+		,@strInvPlngReportMasterID = strInvPlngReportMasterID
+	FROM OPENXML(@idoc, 'InvPlngSummarys/InvPlngSummary', 2) WITH (
+			intInvPlngSummaryId INT
+			,strInvPlngReportMasterID NVARCHAR(MAX)
+			)
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -62,7 +67,7 @@ BEGIN TRY
 			,intSubBookId = x.intSubBookId
 			,strComment = x.strComment
 			,intLastModifiedUserId = x.intLastModifiedUserId
-			,intConcurrencyId= (InvPlngSummary.intConcurrencyId + 1)
+			,intConcurrencyId = (InvPlngSummary.intConcurrencyId + 1)
 		FROM OPENXML(@idoc, 'InvPlngSummarys/InvPlngSummary', 2) WITH (
 				intInvPlngSummaryId INT
 				,strPlanName NVARCHAR(50) COLLATE Latin1_General_CI_AS
@@ -78,33 +83,15 @@ BEGIN TRY
 
 	DELETE
 	FROM tblMFInvPlngSummaryBatch
-	WHERE NOT EXISTS (
-			SELECT *
-			FROM OPENXML(@idoc, 'InvPlngSummaryBatchs/InvPlngSummaryBatch', 2) WITH (intInvPlngSummaryBatchId INT) x
-			WHERE x.intInvPlngSummaryBatchId = tblMFInvPlngSummaryBatch.intInvPlngSummaryBatchId
-			)
-		AND intInvPlngSummaryId = @intInvPlngSummaryId
-
-	UPDATE SummaryBatch
-	SET strBatch = x.strBatch
-	FROM OPENXML(@idoc, 'InvPlngSummaryBatchs/InvPlngSummaryBatch', 2) WITH (
-			strBatch NVARCHAR(50) COLLATE Latin1_General_CI_AS
-			,intInvPlngSummaryBatchId INT
-			) x
-	JOIN tblMFInvPlngSummaryBatch SummaryBatch ON SummaryBatch.intInvPlngSummaryBatchId = x.intInvPlngSummaryBatchId
-	WHERE SummaryBatch.intInvPlngSummaryId = @intInvPlngSummaryId
+	WHERE intInvPlngSummaryId = @intInvPlngSummaryId
 
 	INSERT INTO tblMFInvPlngSummaryBatch (
-		strBatch
-		,intInvPlngSummaryId
+		intInvPlngSummaryId
+		,InvPlngReportMasterID
 		)
-	SELECT strBatch
-		,@intInvPlngSummaryId
-	FROM OPENXML(@idoc, 'InvPlngSummaryBatchs/InvPlngSummaryBatch', 2) WITH (
-			strBatch NVARCHAR(50) COLLATE Latin1_General_CI_AS
-			,intInvPlngSummaryBatchId INT
-			)
-	WHERE intInvPlngSummaryBatchId IS NULL
+	SELECT @intInvPlngSummaryId
+		,Item Collate Latin1_General_CI_AS
+	FROM [dbo].[fnSplitString](@strInvPlngReportMasterID, ',')
 
 	DELETE
 	FROM tblMFInvPlngSummaryDetail
