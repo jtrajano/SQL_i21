@@ -94,6 +94,8 @@ END
 
 -- Insert Entries to Stagging table that needs to processed to Shipment Load
 BEGIN 
+
+	-- Non item contract
 	INSERT INTO @ShipmentStagingTable(
 		intOrderType
 		,intEntityCustomerId
@@ -133,7 +135,9 @@ BEGIN
 		,ysnDestinationWeightsAndGrades
 		,intLoadShipped
 		,ysnAllowInvoice
+		
 	)
+
 		SELECT
 		intOrderType				= @intOrderType
 		,intEntityCustomerId		= @intEntityId
@@ -324,6 +328,117 @@ BEGIN
 		INNER JOIN tblICItem IC ON IC.intItemId = LI.intItemId
 		LEFT JOIN tblICLot ICL ON ICL.intLotId = SC.intLotId
 		WHERE	SC.intTicketId = @intTicketId AND (SC.dblNetUnits != 0 or SC.dblFreightRate != 0)
+			AND ISNULL(SC.intItemContractDetailId,0) = 0
+
+
+
+	----Item Contract
+
+	INSERT INTO @ShipmentStagingTable(
+		intOrderType
+		,intEntityCustomerId
+		,intCurrencyId
+		,intShipFromLocationId
+		,intShipToLocationId
+		,intShipViaId
+		,intFreightTermId
+		,strBOLNumber
+		,intDiscountSchedule
+		,intForexRateTypeId
+		,dblForexRate
+		,intItemId
+		,intLineNo
+		,intOwnershipType
+		,dblQuantity
+		,intPriceUOMId
+		,dblUnitPrice
+		,intWeightUOMId
+		,intSubLocationId
+		,intStorageLocationId
+		,intStorageScheduleTypeId
+		,intItemUOMId
+		,intItemLotGroup
+		,intDestinationGradeId
+		,intDestinationWeightId
+		,intOrderId
+		,dtmShipDate
+		,intSourceId
+		,intSourceType
+		,strSourceScreenName
+		,strChargesLink
+		,dblGross
+		,dblTare
+		,ysnDestinationWeightsAndGrades
+		,intLoadShipped
+		,ysnAllowInvoice
+		,intItemContractDetailId
+		,intItemContractHeaderId
+	)
+
+	SELECT
+		intOrderType					= @intOrderType
+		,intEntityCustomerId			= @intEntityId
+		,intCurrencyId					= LI.intCurrencyId
+		,intShipFromLocationId			= SC.intProcessingLocationId
+		,intShipToLocationId			= @intShipToId
+		,intShipViaId					= SC.intFreightCarrierId
+		,intFreightTermId				= @intFreightTermId
+		,strBOLNumber					= SC.strTicketNumber
+		,intDiscountSchedule			= SC.intDiscountId
+		,intForexRateTypeId				= NULL
+		,dblForexRate					= NULL
+		,intItemId						= LI.intItemId
+		,intLineNo						= LI.intTransactionDetailId
+		,intOwnershipType				= 1
+		,dblQuantity					= LI.dblQty
+		,intPriceUOMId					= LI.intItemUOMId 
+		,dblUnitPrice					= CTD.dblPrice
+		,intWeightUOMId					= LI.intItemUOMId 
+		,intSubLocationId				= SC.intSubLocationId
+		,intStorageLocationId			= SC.intStorageLocationId
+		,intStorageScheduleTypeId	    = NULL
+		,intItemUOMId					= LI.intItemUOMId
+		,intItemLotGroup				= LI.intId
+		,intDestinationGradeId			= SC.intGradeId
+		,intDestinationWeightId			= SC.intWeightId
+		,intOrderId						= CTD.intItemContractHeaderId
+		,dtmShipDate					= SC.dtmTicketDateTime
+		,intSourceId					= SC.intTicketId
+		,intSourceType					= 1
+		,strSourceScreenName			= 'Scale Ticket'
+		,strChargesLink					= 'CL-'+ CAST (LI.intId AS nvarchar(MAX)) 
+		,dblGross						= CASE WHEN SC.dblShrink > 0 THEN (LI.dblQty / SC.dblNetUnits) * SC.dblGrossUnits ELSE LI.dblQty END
+		,dblTare						= CASE WHEN SC.dblShrink > 0 THEN ((LI.dblQty / SC.dblNetUnits) * SC.dblGrossUnits) - LI.dblQty ELSE 0 END
+		,ysnDestinationWeightsAndGrades = 0
+		,intLoadShipped					= 0			
+		,ysnAllowInvoice				= 1
+		,intItemContractDetailId		= CTD.intItemContractDetailId
+		,intItemContractHeaderId		= CTD.intItemContractHeaderId
+	FROM @Items LI 
+	INNER JOIN  dbo.tblSCTicket SC ON 
+		SC.intTicketId = LI.intTransactionId
+	INNER JOIN vyuCTItemContractDetail CTD
+		ON LI.intTransactionDetailId = CTD.intItemContractDetailId
+	INNER JOIN vyuCTItemContractHeader CTH
+		ON CTD.intItemContractHeaderId = CTH.intItemContractHeaderId
+	WHERE	SC.intTicketId = @intTicketId AND (SC.dblNetUnits != 0 or SC.dblFreightRate != 0)
+		AND ISNULL(SC.intItemContractDetailId,0) > 0
+
+
+	--SELECT * FROM @Items
+
+	--SELECT * 	FROM @Items LI 
+	--INNER JOIN  dbo.tblSCTicket SC ON 
+	--	SC.intTicketId = LI.intTransactionId
+	--INNER JOIN vyuCTItemContractDetail CTD
+	--	ON ISNULL(LI.intTransactionDetailId,0) = CTD.intItemContractDetailId
+	--INNER JOIN vyuCTItemContractHeader CTH
+	--	ON CTD.intItemContractHeaderId = CTH.intItemContractHeaderId
+	--WHERE	SC.intTicketId = @intTicketId
+
+	--	SELECT @intTicketId
+	--SELECT * FROM @ShipmentStagingTable
+
 END 
 
 -- Get the identity value from tblICInventoryShipment

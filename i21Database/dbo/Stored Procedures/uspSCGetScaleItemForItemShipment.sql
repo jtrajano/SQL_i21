@@ -20,7 +20,7 @@ DECLARE @ErrMsg NVARCHAR(MAX)
 DECLARE @intDirectType AS INT = 3
 
 BEGIN TRY
-		IF @strDistributionOption = 'CNT' OR @strDistributionOption = 'LOD'
+		IF @strDistributionOption = 'CNT' OR @strDistributionOption = 'LOD' OR @strDistributionOption = 'ICN'
 		BEGIN
 			BEGIN 
 				SELECT	intItemId = ScaleTicket.intItemId
