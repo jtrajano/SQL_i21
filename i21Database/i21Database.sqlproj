@@ -7706,6 +7706,7 @@
     <Build Include="dbo\Functions\fnCFRemoveSpecialCharStrict.sql" />
     <Build Include="dbo\Functions\fnCFCardNumberToMaximaFormat.sql" />
     <Build Include="dbo\Stored Procedures\uspCFDeleteEncodeCardData.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPForceCompletePayable.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
