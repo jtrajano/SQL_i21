@@ -181,7 +181,7 @@ BEGIN TRY
 			strQuantity = dbo.fnRemoveTrailingZeroes(CD.dblQuantity)+ ' ' + ISNULL(rtrt2.strTranslation,UM.strUnitMeasure) ,
 			strZFSQuantity = format(CD.dblQuantity,'#,0.00####') + ' ' + ISNULL(rtrt2.strTranslation,UM.strUnitMeasure),
 			strPeriod = DATENAME(dd,CD.dtmStartDate) + ' ' + ISNULL(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,DATENAME(mm,CD.dtmStartDate)),DATENAME(mm,CD.dtmStartDate)) + ' ' + DATENAME(yyyy,CD.dtmStartDate) + ' - ' + DATENAME(dd,CD.dtmEndDate) + ' ' + ISNULL(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,DATENAME(mm,CD.dtmEndDate)),DATENAME(mm,CD.dtmEndDate)) + ' ' + DATENAME(yyyy,CD.dtmEndDate),
-			strAccountNumber = CASE WHEN CH.intContractTypeId = 1 THEN EC.strEntityNumber ELSE EY.strEntityNumber END,
+			strAccountNumber = EY.strEntityNumber,--CASE WHEN CH.intContractTypeId = 1 THEN EC.strEntityNumber ELSE EY.strEntityNumber END,
 			SP.strEntityName as strSalesperson,
 			CDV.strLocationName,
 			strStatus = CASE
@@ -216,9 +216,9 @@ BEGIN TRY
 	JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId			=	PF.intContractHeaderId
 	JOIN	tblCTContractDetail			CD	ON	CD.intContractDetailId			=	PF.intContractDetailId
 	JOIN	tblSMCompanyLocation		CL	ON	CL.intCompanyLocationId			=	CD.intCompanyLocationId
-	JOIN	vyuCTEntity					EY	ON	EY.intEntityId					=	CH.intEntityId	AND
-												EY.strEntityType				=	(CASE WHEN CH.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END)	LEFT
-	JOIN	vyuCTEntity					EC	ON	EC.intEntityId					=	CH.intCounterPartyId  
+	JOIN	vyuCTEntity					EY	ON	EY.intEntityId					=	CH.intEntityId
+											--AND EY.strEntityType				=	(CASE WHEN CH.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END)	LEFT
+	LEFT JOIN	vyuCTEntity					EC	ON	EC.intEntityId					=	CH.intCounterPartyId  
 												AND EC.strEntityType				=	'Customer'			LEFT
 	JOIN	vyuCTEntity					EC1	ON	EC1.intEntityId					=	CH.intEntityId			LEFT
 	JOIN	vyuCTEntity					SP	ON	SP.intEntityId					=	CH.intSalespersonId		LEFT
