@@ -115,7 +115,8 @@
 	(SC.dblTareWeight + SC.dblTareWeight1 + SC.dblTareWeight2) AS dblLineNetWeight,
 	tblGRDiscountId.strDiscountId,
 	ISNULL(Voucher.dtmDate, ReceiptItem.dtmReceiptDate) AS dtmReceiptDate,
-	(SELECT intCurrencyDecimal FROM tblSMCompanyPreference) AS intDecimalPrecision
+	(SELECT intCurrencyDecimal FROM tblSMCompanyPreference) AS intDecimalPrecision,
+	dblShrinkage
   FROM tblSCTicket SC
   LEFT JOIN tblICCommodity ICCommodity ON ICCommodity.intCommodityId = SC.intCommodityId
   LEFT JOIN tblEMEntity tblEMEntity on tblEMEntity.intEntityId = SC.intEntityId
