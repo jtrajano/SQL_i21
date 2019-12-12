@@ -15,5 +15,6 @@ CREATE TABLE [dbo].[tblARInvoiceTaxReportStagingTable] (
 	[dblAdjustedTax]					NUMERIC (18, 6)	NULL,
 	[dblRate]							NUMERIC (18, 6)	NULL,
 	[dblTaxPerQty]						NUMERIC (18, 6)	NULL,
-	[dblComputedGrossPrice]				NUMERIC (18, 6)	NULL
+	[dblComputedGrossPrice]				NUMERIC (18, 6)	NULL,
+	[ysnIncludeInvoicePrice]			BIT				NULL,
 );
