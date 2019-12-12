@@ -64,6 +64,6 @@ RETURNS TABLE AS RETURN
 	LEFT JOIN dbo.tblSMCurrency subCurrency ON subCurrency.intMainCurrencyId = A.intCurrencyId AND subCurrency.ysnSubCurrency = 1
 	LEFT JOIN tblCTContractDetail ctd ON B.intContractDetailId = ctd.intContractDetailId
 	LEFT JOIN tblICItemLocation itemLoc ON B.intItemId = itemLoc.intItemId AND itemLoc.intLocationId = A.intShipToId
-	WHERE dbo.fnIsStockTrackingItem(B.intItemId) = 0
+	WHERE dbo.fnIsStockTrackingItem(B.intItemId) = 0 OR B.intItemId IS NULL
 	
 )
