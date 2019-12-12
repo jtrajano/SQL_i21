@@ -59,6 +59,10 @@ DECLARE @intInventoryShipmentItemId AS INT
 		,@ysnPriceFixation BIT = 0;
 DECLARE @intTicketLoadDetailId INT
 DECLARE @intTicketItemContractDetailId INT
+DECLARE @dblLoopItemContractUnits NUMERIC(38,20)
+DECLARE @dblPrevLoopItemContractId int
+DECLARE @dblLoopItemContractId int
+
 
 SELECT @intLoadId = intLoadId
 	, @dblTicketFreightRate = dblFreightRate
@@ -298,6 +302,31 @@ BEGIN TRY
 				,@intTicketItemContractDetailId
 				,@intUserId
 
+
+				SET @intLoopContractId = NULL
+
+				SELECT TOP 1 
+					@dblPrevLoopItemContractId = intContractDetailId 
+					,@dblLoopItemContractId = intContractDetailId 
+					,@dblLoopItemContractUnits = dblUnitsDistributed
+				FROM @LineItems ORDER BY intContractDetailId ASC
+
+				WHILE ISNULL(@dblLoopItemContractId,0) > 0
+				BEGIN
+					EXEC dbo.uspSCUpdateTicketItemContractUsed @intTicketId, @dblLoopItemContractId, @dblLoopItemContractUnits, @intEntityId;
+
+					SET @dblLoopItemContractId = NULL
+					SELECT TOP 1 
+						@dblPrevLoopItemContractId = intContractDetailId 
+						,@dblLoopItemContractId = intContractDetailId 
+						,@dblLoopItemContractUnits = dblUnitsDistributed
+					FROM @LineItems 
+					WHERE intContractDetailId > @dblPrevLoopItemContractId
+					ORDER BY intContractDetailId ASC
+				END
+
+
+				
 
 				INSERT INTO @ItemsForItemShipment (
 					intItemId

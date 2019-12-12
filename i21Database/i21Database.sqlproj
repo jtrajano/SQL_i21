@@ -8262,6 +8262,7 @@
     <Build Include="dbo\Stored Procedures\uspAPForceCompletePayable.sql" />
     <Build Include="dbo\Stored Procedures\uspSCGetItemContractsAndAllocate.sql" />
     <Build Include="dbo\Tables\tblSCTicketItemContractUsed.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCUpdateTicketItemContractUsed.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
