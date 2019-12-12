@@ -730,11 +730,11 @@ BEGIN
 			LEFT JOIN tblICItem Item 
 				ON BillDtl.intItemId = Item.intItemId 
 					AND Item.strType <> 'Other Charge'	
-			JOIN tblGRStorageHistory StrgHstry 
+			LEFT JOIN tblGRStorageHistory StrgHstry 
 				ON Bill.intBillId = StrgHstry.intBillId
-			JOIN tblGRCustomerStorage CS 
+			LEFT JOIN tblGRCustomerStorage CS 
 				ON CS.intCustomerStorageId = StrgHstry.intCustomerStorageId
-			JOIN tblSCTicket SC 
+			LEFT JOIN tblSCTicket SC 
 				ON SC.intTicketId = CS.intTicketId
 			LEFT JOIN vyuSCGetScaleDistribution SD 
 				ON CS.intCustomerStorageId = SD.intCustomerStorageId
