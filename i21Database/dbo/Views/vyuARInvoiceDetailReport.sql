@@ -10,6 +10,7 @@ SELECT intInvoiceId				= I.intInvoiceId
 									   ELSE 'Direct' 
 								  END COLLATE Latin1_General_CI_AS
 	 , strInvoiceNumber			= I.strInvoiceNumber
+	 , strPONumber				= I.strPONumber
 	 , dtmDate					= I.dtmDate
 	 , strContractNumber		= CT.strContractNumber
 	 , intContractSeq			= CT.intContractSeq
