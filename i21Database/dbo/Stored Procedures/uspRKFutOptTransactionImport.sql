@@ -79,7 +79,7 @@ BEGIN TRY
 			JOIN tblRKFuturesMonth m ON m.strFutureMonth = REPLACE(ti.strFutureMonth, '-', ' ') AND m.intFutureMarketId = fm.intFutureMarketId
 			LEFT JOIN tblRKOptionsMonth om ON om.strOptionMonth = REPLACE(ti.strOptionMonth, '-', ' ') AND om.intFutureMarketId = fm.intFutureMarketId
 			LEFT JOIN tblCTBook b ON b.strBook = ti.strBook
-			LEFT JOIN tblCTSubBook sb ON sb.strSubBook = ti.strSubBook
+			LEFT JOIN tblCTSubBook sb ON sb.strSubBook = ti.strSubBook AND b.intBookId = sb.intBookId
 			WHERE ISNULL(ti.strName, '') <> '' AND ISNULL(ti.strFutMarketName, '') <> '' AND ISNULL(ti.strInstrumentType, '') <> ''
 				AND ISNULL(ti.strAccountNumber, '') <> '' AND ISNULL(ti.strCommodityCode, '') <> '' AND ISNULL(ti.strLocationName, '') <> '' AND ISNULL(ti.strSalespersonId, '') <> ''
 		)t ORDER BY strInternalTradeNo
