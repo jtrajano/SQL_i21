@@ -173,7 +173,8 @@ BEGIN TRY
 	IF @strCommodityCode = 'Tea'
 		SET @strApprovalText = NULL
 
-    SELECT TOP 1 @FirstApprovalId=intApproverId,@intApproverGroupId = intApproverGroupId,@StraussContractSubmitId=intSubmittedById FROM tblSMApproval WHERE intTransactionId=@intTransactionId AND strStatus='Approved' ORDER BY intApprovalId
+    SELECT TOP 1 @StraussContractSubmitId=intSubmittedById FROM tblSMApproval WHERE intTransactionId=@intTransactionId ORDER BY intApprovalId
+    SELECT TOP 1 @FirstApprovalId=intApproverId,@intApproverGroupId = intApproverGroupId FROM tblSMApproval WHERE intTransactionId=@intTransactionId AND strStatus='Approved' ORDER BY intApprovalId
 	SELECT TOP 1 @SecondApprovalId=intApproverId FROM tblSMApproval WHERE intTransactionId=@intTransactionId AND strStatus='Approved' AND (intApproverId <> @FirstApprovalId OR ISNULL(intApproverGroupId,0) <> @intApproverGroupId) ORDER BY intApprovalId
 
 	SELECT	@FirstApprovalSign = Sig.blbDetail, @FirstApprovalName = fe.strName
