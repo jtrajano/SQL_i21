@@ -4,6 +4,9 @@
 	,@receiveNonInventory BIT = 0
 	,@receiptNumber NVARCHAR(50) OUTPUT
 AS
+
+BEGIN
+
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
@@ -11,12 +14,17 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 DECLARE @poDetailIds AS Id
+DECLARE @SavePoint NVARCHAR(32) = 'uspPOProcessItemReceipt';
+
+DECLARE @transCount INT = @@TRANCOUNT;
+IF @transCount = 0 BEGIN TRANSACTION
+ELSE SAVE TRAN @SavePoint
 
 INSERT INTO @poDetailIds
 SELECT intPurchaseDetailId FROM tblPOPurchaseDetail WHERE intPurchaseId = @poId
 
 -- Validations
-BEGIN 
+BEGIN TRY
 	--Purchase order already closed.
 	IF EXISTS(SELECT 1 FROM tblPOPurchase WHERE intPurchaseId = @poId AND intOrderStatusId = 3)
 	BEGIN
@@ -78,7 +86,6 @@ BEGIN
 		RAISERROR('Cannot process to receipt, Currency is missing.', 16, 1);
 		RETURN;
 	END  
-END 
 
 -- Process the PO to IR 
 BEGIN 
@@ -327,7 +334,7 @@ BEGIN
 		EXEC dbo.uspICIncreaseOnOrderQty 
 			@ItemToUpdateOnOrderQty
 	END 
-
+END
 	
 	--REMOVE VOUCHER PAYABLE
 	--IF THERE IS PARTIALLY VOUCHERED, MOVE IT TO COMPLETE
@@ -434,5 +441,54 @@ BEGIN
 	
 	-- Update the PO Status 
 	EXEC dbo.uspPOUpdateStatus @poId
+
+IF @transCount = 0
+	BEGIN
+		IF (XACT_STATE()) = -1
+		BEGIN
+			ROLLBACK TRANSACTION
+		END
+		ELSE IF (XACT_STATE()) = 1
+		BEGIN
+			COMMIT TRANSACTION
+		END
+	END		
+ELSE
+	BEGIN
+		IF (XACT_STATE()) = -1
+		BEGIN
+			ROLLBACK TRANSACTION  @SavePoint
+		END
+	END
+
+END TRY
+BEGIN CATCH
+	DECLARE @ErrorSeverity INT,
+			@ErrorNumber   INT,
+			@ErrorMessage nvarchar(4000),
+			@ErrorState INT,
+			@ErrorLine  INT,
+			@ErrorProc nvarchar(200);
+	-- Grab error information from SQL functions
+	SET @ErrorSeverity = ERROR_SEVERITY()
+	SET @ErrorNumber   = ERROR_NUMBER()
+	SET @ErrorMessage  = ERROR_MESSAGE()
+	SET @ErrorState    = ERROR_STATE()
+	SET @ErrorLine     = ERROR_LINE()
+
+	IF @transCount = 0
+		BEGIN
+			IF (XACT_STATE()) = -1
+			BEGIN
+				ROLLBACK TRANSACTION
+			END
+			ELSE IF (XACT_STATE()) = 1
+			BEGIN
+				COMMIT TRANSACTION
+			END
+		END		
+
+	RAISERROR (@ErrorMessage , @ErrorSeverity, @ErrorState, @ErrorNumber)
+END CATCH
 
 END
