@@ -45,6 +45,8 @@ BEGIN TRY
 	DECLARE @claimPref NVARCHAR(50);
 	DECLARE @baStartNum INT = 0;
 	DECLARE @baPref NVARCHAR(50);
+	DECLARE @prepaidStartNum INT = 0;
+	DECLARE @prepaidPref NVARCHAR(50);
 	DECLARE @deferStartNum INT = 0;
 	DECLARE @deferPref NVARCHAR(50);
 	DECLARE @adjStartNum INT = 0;
@@ -279,6 +281,20 @@ BEGIN TRY
 		,@baStartNum = @baStartNum + 1
 	FROM #tmpVoucherHeaderData A
 	WHERE A.intTransactionType = 13
+
+	--Prepayment Type
+	UPDATE A
+		SET A.intConcurrencyId = A.intConcurrencyId + 1
+		,@prepaidStartNum = A.intNumber
+		,@prepaidPref = A.strPrefix
+	FROM tblSMStartingNumber A
+	WHERE A.intStartingNumberId = 20
+
+	UPDATE A
+		SET A.strBillId = @prepaidPref + CAST(@prepaidStartNum - 1 AS NVARCHAR)
+		,@prepaidStartNum = @prepaidStartNum + 1
+	FROM #tmpVoucherHeaderData A
+	WHERE A.intTransactionType = 2
 
 	--DEFERRED INTEREST Type
 	UPDATE A
