@@ -10,7 +10,7 @@ SELECT PS.intInvPlngSummaryId
 	,UOM.strUnitMeasure
 	,B.strBook
 	,SB.strSubBook
-	,dbo.fnMFGetDemandBatches(PS.intInvPlngSummaryId) AS strDemandBatches
+	,dbo.fnMFGetDemandBatches(PS.intInvPlngSummaryId) AS strDemandPlans
 FROM tblMFInvPlngSummary PS
 LEFT JOIN tblICUnitMeasure AS UOM ON UOM.intUnitMeasureId = PS.intUnitMeasureId
 LEFT JOIN tblCTBook B ON B.intBookId = PS.intBookId
