@@ -1885,10 +1885,10 @@ BEGIN TRY
 	
 	-----------------------------------------------------SecondaryCosts Updation--------------------------------------------	
 	UPDATE RealizedPNL
-	SET  RealizedPNL.dblSecondaryCosts = ((ISNULL(CC.dblTotalCost,0)/CD.dblQuantity) * RealizedPNL.dblQuantity / CC.NoOfLines)
+	SET  RealizedPNL.dblSecondaryCosts = ((ISNULL(CC.dblTotalCost,0)/CD.dblQuantity) * RealizedPNL.dblQuantity)
 	FROM @tblUnRealizedPNL RealizedPNL
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = RealizedPNL.intContractDetailId
-	JOIN (SELECT intContractDetailId, SUM(ISNULL(dblTotalCost,0)) dblTotalCost,COUNT(1) AS NoOfLines FROM @tblContractCost GROUP BY intContractDetailId) 
+	JOIN (SELECT intContractDetailId, SUM(ISNULL(dblTotalCost,0)) dblTotalCost FROM @tblContractCost GROUP BY intContractDetailId) 
 	CC ON CC.intContractDetailId = RealizedPNL.intContractDetailId	
 	
 	-----------------------------------------------------Settlement Price Updation--------------------------------------------
