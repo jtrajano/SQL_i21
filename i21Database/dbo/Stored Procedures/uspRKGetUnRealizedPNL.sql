@@ -19,6 +19,11 @@ BEGIN TRY
 	SELECT @ysnForwardCurveDifferential = ISNULL(ysnEnterForwardCurveForMarketBasisDifferential, 0) FROM tblRKCompanyPreference
 	SELECT @intDefaultWeightUnitMeasureId = ISNULL(intWeightUOMId, 0) FROM tblLGCompanyPreference
 	SELECT @strWeightUOM = strUnitMeasure FROM tblICUnitMeasure WHERE intUnitMeasureId = @intDefaultWeightUnitMeasureId
+
+	IF @intLocationId = 0
+	BEGIN
+		SET @intLocationId = NULL
+	END
 	
 	IF NOT EXISTS(SELECT 1 FROM tblSMMultiCompany WHERE ISNULL(intMultiCompanyParentId,0) <> 0)
 	BEGIN
@@ -840,7 +845,7 @@ BEGIN TRY
 										WHEN ISNULL(@intCompanyId, 0) = 0 THEN ISNULL(L.intCompanyId,0)
 										ELSE @intCompanyId
 								       END
-        AND L.intPurchaseSale IN (2,3)
+        AND L.intPurchaseSale IN (2)
 		AND L.intShipmentType = 1
 		AND L.ysnPosted = 1
   	UNION
@@ -1046,7 +1051,7 @@ BEGIN TRY
 		,intFreightTermId							= CH.intFreightTermId
 		,intTransactionType							= 2
 		,strTransaction								= '2.In-transit' COLLATE Latin1_General_CI_AS
-		,strTransactionType							= ('In-transit('+CASE WHEN  L.intPurchaseSale =2 THEN 'S' ELSE 'P' END +')') COLLATE Latin1_General_CI_AS
+		,strTransactionType							= ('In-transit('+CASE WHEN  TP.strContractType = 'Sale' THEN 'S' ELSE 'P' END +')') COLLATE Latin1_General_CI_AS
 		,intContractDetailId						= CD.intContractDetailId
 		,intCurrencyId								= CD.intCurrencyId	
 		,intFutureMarketId							= CD.intFutureMarketId
@@ -1220,7 +1225,7 @@ BEGIN TRY
 		,intFreightTermId							= CH.intFreightTermId
 		,intTransactionType							= 2
 		,strTransaction								= '2.In-transit' COLLATE Latin1_General_CI_AS
-		,strTransactionType							= ('In-transit('+CASE WHEN  L.intPurchaseSale =2 THEN 'S' ELSE 'P' END +')') COLLATE Latin1_General_CI_AS
+		,strTransactionType							= ('In-transit('+CASE WHEN TP.strContractType = 'Sale' THEN 'S' ELSE 'P' END +')') COLLATE Latin1_General_CI_AS
 		,intContractDetailId						= CD.intContractDetailId
 		,intCurrencyId								= CD.intCurrencyId	
 		,intFutureMarketId							= CD.intFutureMarketId
