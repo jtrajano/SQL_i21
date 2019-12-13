@@ -524,7 +524,7 @@ BEGIN TRY
 		intNoOfLoad		   = SUM(FD.dblQuantity)/CD.dblQuantityPerLoad
 	   ,intShippedNoOfLoad = 0
 	FROM	tblCTPriceFixationDetail FD
-	JOIN	tblCTPriceFixation		 PF	ON	PF.intPriceFixationId =	FD.intPriceFixationId
+	JOIN	vyuCTPriceFixationContractDetail PF	ON	PF.intPriceFixationId =	FD.intPriceFixationId
 	JOIN tblCTContractHeader		 CH ON CH.intContractHeaderId = PF.intContractHeaderId
 	JOIN tblCTContractDetail		 CD ON CD.intContractDetailId = PF.intContractDetailId
 	AND     dbo.fnRemoveTimeOnDate(FD.dtmFixationDate) <= CASE WHEN @dtmEndDate IS NOT NULL   THEN @dtmEndDate   ELSE dbo.fnRemoveTimeOnDate(FD.dtmFixationDate) END
