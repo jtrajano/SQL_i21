@@ -4836,7 +4836,6 @@
     <Build Include="dbo\Functions\fnICSplitStringToTable.sql" />
     <Build Include="dbo\Stored Procedures\uspICCopyItemLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspICImportItemsFromStaging.sql" />
-    <Build Include="dbo\Stored Procedures\uspICApplyLocationsToItems.sql" />
     <Build Include="dbo\Stored Procedures\uspPATImportVolumeDetails.sql" />
     <Build Include="dbo\Stored Procedures\uspPATImportStockDetails.sql" />
     <Build Include="dbo\Stored Procedures\uspPATImportStockClassification.sql" />
