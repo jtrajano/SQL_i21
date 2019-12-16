@@ -7441,4 +7441,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intStockUOMId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="08d531d7-b96f-492e-86ce-4e495c283890" ChangeDateTime="12/10/2019 07:54:26">
+    <Property Name="ElementName" Value="[dbo].[tblCTContractBalanceLog].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCTContractBalanceLog]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intContractBalanceLogId" />
+  </Operation>
 </Operations>

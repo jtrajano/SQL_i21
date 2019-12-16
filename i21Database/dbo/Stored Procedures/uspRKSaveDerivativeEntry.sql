@@ -12,7 +12,7 @@ SET ANSI_WARNINGS OFF
 
 BEGIN
 	SELECT * INTO #tmpDerivative FROM tblRKFutOptTransaction WHERE intFutOptTransactionId = @intFutOptTransactionId
-	SELECT TOP 1 * INTO #History FROM tblRKSummaryLog WHERE intTransactionRecordId = @intFutOptTransactionId AND strTransactionType = 'DERIVATIVES' ORDER BY dtmCreatedDate DESC
+	SELECT TOP 1 * INTO #History FROM tblRKSummaryLog WHERE intTransactionRecordId = @intFutOptTransactionId AND strTransactionType = 'Derivatives' ORDER BY dtmCreatedDate DESC
 	DECLARE @SummaryLog AS RKSummaryLog
 	
 	IF EXISTS(SELECT TOP 1 1 FROM #tmpDerivative)
@@ -33,7 +33,7 @@ BEGIN
 			, intEntityId
 			, intUserId
 			, strNotes)
-		SELECT strTransactionType = 'DERIVATIVES'
+		SELECT strTransactionType = 'Derivatives'
 			, intTransactionRecordId = intFutOptTransactionId
 			, strTransactionNumber = strInternalTradeNo
 			, dtmTransactionDate = dtmTransactionDate
@@ -60,7 +60,7 @@ BEGIN
 				, ysnDelete
 				, intUserId
 				, strNotes)
-			SELECT strTransactionType = 'DERIVATIVES'
+			SELECT strTransactionType = 'Derivatives'
 				, intTransactionRecordId = @intFutOptTransactionId
 				, ysnDelete = 1
 				, intUserId = @intUserId

@@ -346,11 +346,12 @@ END
 
 IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblRKSummaryLog')
 BEGIN
-	IF NOT EXISTS (SELECT TOP 1 1 FROM tblRKSummaryLog)
+	DECLARE @ExistingHistory AS RKSummaryLog
+
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblRKSummaryLog WHERE strTransactionType = 'Derivatives')
 	BEGIN
 		PRINT 'Populate RK Summary Log - Derivatives'
-		DECLARE @ExistingHistory AS RKSummaryLog
-
+		
 		INSERT INTO @ExistingHistory(strTransactionType
 			, intTransactionRecordId
 			, strTransactionNumber
@@ -367,7 +368,7 @@ BEGIN
 			, intEntityId
 			, intUserId
 			, strNotes)
-		SELECT strTransactionType = 'DERIVATIVES'
+		SELECT strTransactionType = 'Derivatives'
 			, intTransactionRecordId = intFutOptTransactionId
 			, strTransactionNumber = strInternalTradeNo
 			, dtmTransactionDate = dtmTransactionDate
@@ -385,6 +386,74 @@ BEGIN
 			, strNotes = ''
 		FROM vyuRKGetFutOptTransactionHistory
 
+		EXEC uspRKLogRiskPosition @ExistingHistory, 1
+
+		PRINT 'End Populate RK Summary Log'
+	END
+
+	DELETE FROM @ExistingHistory
+
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblRKSummaryLog WHERE strTransactionType IN ('Collateral', 'Collateral Adjustments'))
+	BEGIN
+		PRINT 'Populate RK Summary Log - Collateral'
+		DECLARE @intUserId INT
+		
+		SELECT TOP 1 @intUserId = intEntityId FROM tblSMUserSecurity where strUserName = 'irelyadmin'
+		
+		INSERT INTO @ExistingHistory(strTransactionType
+			, intTransactionRecordId
+			, strTransactionNumber
+			, dtmTransactionDate
+			, intContractHeaderId
+			, intCommodityId
+			, intLocationId
+			, dblQty
+			, intUserId
+			, strNotes)
+		SELECT strTransactionType = 'Collateral'
+			, intTransactionRecordId = intCollateralId
+			, strTransactionNumber = strReceiptNo
+			, dtmTransactionDate = dtmOpenDate
+			, intContractHeaderId = intContractHeaderId
+			, intCommodityId = intCommodityId
+			, intLocationId = intLocationId
+			, dblQty = dblOriginalQuantity
+			, intUserId = @intUserId
+			, strNotes = strType + ' Collateral'
+		FROM tblRKCollateral
+		
+		INSERT INTO @ExistingHistory(strTransactionType
+			, intTransactionRecordId
+			, strTransactionNumber
+			, dtmTransactionDate
+			, intContractDetailId
+			, intContractHeaderId
+			, intCommodityId
+			, intLocationId
+			, dblQty
+			, intUserId
+			, strNotes)
+		SELECT strTransactionType = 'Collateral Adjustments'
+			, intTransactionRecordId = C.intCollateralId
+			, strTransactionNumber = strAdjustmentNo
+			, dtmTransactionDate = dtmAdjustmentDate
+			, intContractDetailId = CA.intCollateralAdjustmentId
+			, intContractHeaderId = C.intContractHeaderId
+			, intCommodityId = intCommodityId
+			, intLocationId = intLocationId
+			, dblQty = CA.dblAdjustmentAmount
+			, intUserId = @intUserId
+			, strNotes = strType + ' Collateral'
+		FROM tblRKCollateralAdjustment CA
+		JOIN tblRKCollateral C ON C.intCollateralId = CA.intCollateralId
+		WHERE intCollateralAdjustmentId NOT IN (SELECT DISTINCT adj.intCollateralAdjustmentId
+				FROM tblRKCollateralAdjustment adj
+				JOIN tblRKSummaryLog history ON history.intTransactionRecordId = adj.intCollateralId AND strTransactionType = 'Collateral Adjustments'
+					AND adj.dtmAdjustmentDate = history.dtmTransactionDate
+					AND adj.strAdjustmentNo = history.strTransactionNumber
+					AND adj.dblAdjustmentAmount = history.dblOrigQty
+				WHERE adj.intCollateralId = C.intCollateralId)
+		
 		EXEC uspRKLogRiskPosition @ExistingHistory, 1
 
 		PRINT 'End Populate RK Summary Log'

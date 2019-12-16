@@ -12,7 +12,7 @@ SET ANSI_WARNINGS OFF
 
 BEGIN	
 	SELECT * INTO #tmpCollateral FROM tblRKCollateral WHERE intCollateralId = @intCollateralId
-	SELECT * INTO #History FROM tblRKSummaryLog WHERE intTransactionRecordId = @intCollateralId AND strTransactionType = 'COLLATERAL'
+	SELECT * INTO #History FROM tblRKSummaryLog WHERE intTransactionRecordId = @intCollateralId AND strTransactionType = 'Collateral'
 	DECLARE @SummaryLog AS RKSummaryLog
 	
 	IF EXISTS(SELECT TOP 1 1 FROM #tmpCollateral)
@@ -40,7 +40,7 @@ BEGIN
 				, intEntityId
 				, intUserId
 				, strNotes)
-			SELECT strTransactionType = 'COLLATERAL'
+			SELECT strTransactionType = 'Collateral'
 				, intTransactionRecordId = intCollateralId
 				, strTransactionNumber = strReceiptNo
 				, dtmTransactionDate = dtmOpenDate
@@ -66,7 +66,7 @@ BEGIN
 			, dblQty
 			, intUserId
 			, strNotes)
-		SELECT strTransactionType = 'COLLATERAL ADJUSTMENTS'
+		SELECT strTransactionType = 'Collateral Adjustments'
 			, intTransactionRecordId = C.intCollateralId
 			, strTransactionNumber = strAdjustmentNo
 			, dtmTransactionDate = dtmAdjustmentDate
@@ -82,7 +82,7 @@ BEGIN
 		WHERE C.intCollateralId = @intCollateralId
 			AND intCollateralAdjustmentId NOT IN (SELECT DISTINCT adj.intCollateralAdjustmentId
 				FROM tblRKCollateralAdjustment adj
-				JOIN tblRKSummaryLog history ON history.intTransactionRecordId = adj.intCollateralId AND strTransactionType = 'COLLATERAL ADJUSTMENTS'
+				JOIN tblRKSummaryLog history ON history.intTransactionRecordId = adj.intCollateralId AND strTransactionType = 'Collateral Adjustments'
 					AND adj.dtmAdjustmentDate = history.dtmTransactionDate
 					AND adj.strAdjustmentNo = history.strTransactionNumber
 					AND adj.dblAdjustmentAmount = history.dblOrigQty
@@ -97,7 +97,7 @@ BEGIN
 				, ysnDelete
 				, intUserId
 				, strNotes)
-			SELECT strTransactionType = 'COLLATERAL'
+			SELECT strTransactionType = 'Collateral'
 				, intTransactionRecordId = @intCollateralId
 				, ysnDelete = 1
 				, intUserId = @intUserId
