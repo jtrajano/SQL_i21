@@ -123,6 +123,9 @@ BEGIN TRY
 			,strStraussText1						=	'<p>Pls arrange for pre-shipment samples for the above mentioned consignment. Samples of 250 grams per lot should be drawn and sent by Courier <span style="text-decoration: underline;"><strong>21 days prior</strong></span> to shipment to the below stated address.</p>'
 			,strCompanyName							=	@strCompanyName
 			,strCurrentUser							=	@strCurrentUser
+			,strReportTitle							=   (case when pos.strPositionType = 'Shipment' then 'PRE-SHIPMENT SAMPLE INSTRUCTIONS' when pos.strPositionType = 'Spot' then 'SAMPLE INSTRUCTIONS' else '' end)
+			,strPositionLabel						=   (case when pos.strPositionType = 'Shipment' then 'Shipment' when pos.strPositionType = 'Spot' then 'Delivery' else '' end)
+			,strContractCondtionDescription			=	(select top 1 a.strConditionDescription from tblCTContractCondition a, tblCTCondition b where a.intContractHeaderId = CH.intContractHeaderId and b.intConditionId = a.intConditionId and b.strConditionName like '%_SAMPLE_INSTRUCTION')
 
 		FROM	tblCTContractHeader				CH
 		JOIN	vyuCTEntity						EY	WITH (NOLOCK)	ON	EY.intEntityId		=	CH.intEntityId	
@@ -150,7 +153,8 @@ LEFT	JOIN	(
 					LEFT JOIN	tblSMCity				DP	WITH (NOLOCK) ON	DP.intCityId				=	CD.intDestinationPortId	
 				)										SQ	ON	SQ.intContractHeaderId		=	CH.intContractHeaderId	
 														AND SQ.intRowNum = 1
-	WHERE	CH.intContractHeaderId	=	@intContractHeaderId		
+left join tblCTPosition pos on pos.intPositionId = CH.intPositionId
+WHERE	CH.intContractHeaderId	=	@intContractHeaderId
 
 
 END TRY
