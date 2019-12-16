@@ -172,6 +172,7 @@ LEFT JOIN tblCTContractDetail CT
 	ON CT.intContractDetailId = ST.intContractDetailId
 WHERE bill.ysnPosted = 1
 --AND SS.strStorageTicket IN ('STR-56/1')
+AND glAccnt.intAccountCategoryId = 45
 UNION ALL --Charges
 SELECT 
 	CS.intEntityId AS intEntityVendorId
@@ -287,6 +288,7 @@ LEFT JOIN
     ON itemUOM.intItemUOMId = CS.intItemUOMId
 WHERE bill.ysnPosted = 1
 --AND SS.strStorageTicket = 'STR-49/3'
+AND glAccnt.intAccountCategoryId = 45
 UNION ALL --DISCOUNTS
 SELECT 
 	CS.intEntityId AS intEntityVendorId
@@ -449,4 +451,5 @@ AND EXISTS (
 		AND DSC.intItemId = billDetail.intItemId
 		AND billDetail.intCustomerStorageId = QM.intTicketFileId
 )
+AND glAccnt.intAccountCategoryId = 45
 --AND SS.strStorageTicket = 'STR-49/3'
