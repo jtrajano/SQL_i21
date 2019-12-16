@@ -79,6 +79,7 @@ INNER JOIN tblGRSettleStorage SS
 	ON SST.intSettleStorageId = SS.intSettleStorageId
 		AND SS.intParentSettleStorageId IS NOT NULL
 		--AND SS.dblSettleUnits = 0 --OPEN STORAGE ONLY , THIS IS THE ONLY SETTLE STORAGE THAT DO NOT CREATE VOUCHER IMMEDIATELEY
+		AND SS.dblSpotUnits = 0
 INNER JOIN vyuGLDetail GD
 	ON GD.strTransactionId = SS.strStorageTicket
 		AND GD.intTransactionId = SS.intSettleStorageId
@@ -150,7 +151,9 @@ INNER JOIN tblAPBillDetail billDetail
 INNER JOIN (tblGRCustomerStorage CS INNER JOIN tblGRSettleStorageTicket SST
 			ON SST.intCustomerStorageId = CS.intCustomerStorageId
 		INNER JOIN tblGRSettleStorage SS
-			ON SST.intSettleStorageId = SS.intSettleStorageId AND SS.intParentSettleStorageId IS NOT NULL)
+			ON SST.intSettleStorageId = SS.intSettleStorageId 
+				AND SS.intParentSettleStorageId IS NOT NULL
+				AND SS.dblSpotUnits = 0)
 	ON billDetail.intCustomerStorageId = CS.intCustomerStorageId AND billDetail.intItemId = CS.intItemId
 		AND SS.intBillId = bill.intBillId
 INNER JOIN vyuGLAccountDetail glAccnt
@@ -205,6 +208,7 @@ INNER JOIN tblGRSettleStorageTicket SST
 INNER JOIN tblGRSettleStorage SS
 	ON SST.intSettleStorageId = SS.intSettleStorageId
 		AND SS.intParentSettleStorageId IS NOT NULL
+		AND SS.dblSpotUnits = 0
 INNER JOIN tblGLDetail GD
 	ON GD.strTransactionId = SS.strStorageTicket
 		AND GD.intTransactionId = SS.intSettleStorageId
@@ -260,7 +264,9 @@ INNER JOIN tblAPBillDetail billDetail
 INNER JOIN (tblGRCustomerStorage CS INNER JOIN tblGRSettleStorageTicket SST
 			ON SST.intCustomerStorageId = CS.intCustomerStorageId
 		INNER JOIN tblGRSettleStorage SS
-			ON SST.intSettleStorageId = SS.intSettleStorageId AND SS.intParentSettleStorageId IS NOT NULL
+			ON SST.intSettleStorageId = SS.intSettleStorageId 
+				AND SS.intParentSettleStorageId IS NOT NULL
+				AND SS.dblSpotUnits = 0
 		INNER JOIN tblICCommodity CO
 			ON CO.intCommodityId = CS.intCommodityId
 		INNER JOIN tblICItem IM
@@ -332,6 +338,7 @@ INNER JOIN tblGRSettleStorage SS
 	ON SST.intSettleStorageId = SS.intSettleStorageId
 		AND SS.intParentSettleStorageId IS NOT NULL
 		AND SS.ysnPosted = 1
+		AND SS.dblSpotUnits = 0
 --LEFT JOIN tblGRSettleContract SC
 --		ON SC.intSettleStorageId = SS.intSettleStorageId
 --SETTLE FOR BASIS CONTRACT IS THE ONLY TRANSACTION THAT SHOULD SHOW ON CLEARING TAB
@@ -412,6 +419,7 @@ INNER JOIN (tblGRCustomerStorage CS INNER JOIN tblGRSettleStorageTicket SST
 			INNER JOIN tblGRSettleStorage SS
 				ON SST.intSettleStorageId = SS.intSettleStorageId
 					AND SS.intParentSettleStorageId IS NOT NULL
+					AND SS.dblSpotUnits = 0
 			-- INNER JOIN tblQMTicketDiscount QM
 			-- 	ON QM.intTicketFileId = CS.intCustomerStorageId
 			-- LEFT JOIN tblGRSettleContract SC
