@@ -11,8 +11,9 @@ INTO	dbo.tblICDataSource
 WITH	(HOLDLOCK) 
 AS		ICDataSource
 USING	(
-		SELECT	id = 1
-				,strType = 'CStore'
+		SELECT	id = 1 ,strType = 'CStore'
+		UNION ALL
+		SELECT id = 2, strType = 'Import CSV'
 ) AS DataSourceTypes
 	ON  ICDataSource.intDataSourceId = DataSourceTypes.id
 
