@@ -162,4 +162,22 @@ GO
 
 GO
 	print 'End fixing Freight Basis';
+	print 'Start updating empty Contract Condition Description.';
+GO
+
+	update
+		b
+	set
+		b.strConditionDescription = c.strConditionDesc
+	from
+		tblCTContractHeader a
+		,tblCTContractCondition b
+		,tblCTCondition c
+	where
+		b.strConditionDescription is null
+		and b.intContractHeaderId = a.intContractHeaderId
+		and c.intConditionId = b.intConditionId
+
+GO
+	print 'End updating empty Contract Condition Description.';
 GO
