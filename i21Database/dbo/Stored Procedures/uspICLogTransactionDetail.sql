@@ -57,11 +57,14 @@ BEGIN
 				ReceiptItem.intInventoryReceiptItemId,
 				ReceiptItem.intOrderId,
 				intOrderType = (
-					CASE WHEN Receipt.strReceiptType = 'Purchase Contract' THEN @OrderType_PurchaseContract
+					CASE 
+						WHEN Receipt.strReceiptType = 'Purchase Contract' THEN @OrderType_PurchaseContract
 						WHEN Receipt.strReceiptType = 'Purchase Order' THEN @OrderType_PurchaseOrder
 						WHEN Receipt.strReceiptType = 'Transfer Order' THEN @OrderType_TransferOrder
 						WHEN Receipt.strReceiptType = 'Direct' THEN @OrderType_Direct
 						WHEN Receipt.strReceiptType = 'Inventory Return' THEN @OrderType_InventoryReturn
+						ELSE 
+							@OrderType_Direct
 					END), 
 				ReceiptItem.intSourceId,
 				intSourceType = Receipt.intSourceType,
@@ -85,11 +88,14 @@ BEGIN
 				ReceiptItem.intInventoryReceiptItemId,
 				ReceiptItem.intOrderId,
 				intOrderType = (
-					CASE WHEN Receipt.strReceiptType = 'Purchase Contract' THEN @OrderType_PurchaseContract
+					CASE 
+						WHEN Receipt.strReceiptType = 'Purchase Contract' THEN @OrderType_PurchaseContract
 						WHEN Receipt.strReceiptType = 'Purchase Order' THEN @OrderType_PurchaseOrder
 						WHEN Receipt.strReceiptType = 'Transfer Order' THEN @OrderType_TransferOrder
 						WHEN Receipt.strReceiptType = 'Direct' THEN @OrderType_Direct
 						WHEN Receipt.strReceiptType = 'Inventory Return' THEN @OrderType_InventoryReturn
+						ELSE 
+							@OrderType_Direct
 					END), 
 				ReceiptItem.intSourceId,
 				intSourceType = Receipt.intSourceType,
