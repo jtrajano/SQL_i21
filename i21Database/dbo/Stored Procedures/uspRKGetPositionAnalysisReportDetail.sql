@@ -14,6 +14,10 @@ AS
 BEGIN
 	DECLARE @date NVARCHAR(50)
 		, @dateFilter NVARCHAR(MAX)
+		, @MainCurrencyId INT
+
+	SELECT TOP 1 @MainCurrencyId = ISNULL(intMainCurrencyId, @intCurrencyId) FROM tblSMCurrency
+	WHERE intCurrencyID = @intCurrencyId
 
 	SELECT CONVERT(INT, ROW_NUMBER() OVER(ORDER BY dtmTransactionDate ASC)) AS intRowNum
 		, intFutureMarketId
@@ -33,7 +37,7 @@ BEGIN
 		, strPosition
 		, strFutureMonth
 		, dblPrice
-		, dblValue = (CASE WHEN strBuySell = 'Buy' THEN dblQty * -1 ELSE ABS(dblQty) END) * dblFutures
+		, dblValue = (CASE WHEN strBuySell = 'Buy' THEN dblQty * -1 ELSE ABS(dblQty) END) * (dblFutures * dbo.fnRKGetCurrencyConvertion(@intCurrencyId, @MainCurrencyId))
 		, intPriceFixationId
 		, dblFutures
 	INTO #tmpReportDetail
