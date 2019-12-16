@@ -60,7 +60,7 @@ SELECT intPrepaidAndCreditId				= PC.intPrepaidAndCreditId
 	 , dblBaseInvoiceDetailBalance			= CASE WHEN ISNULL(PREPAYDETAIL.ysnRestricted, 0) = 1 THEN ISNULL(PREPAYDETAIL.dblBaseTotal, 0) ELSE ISNULL(PREPAY.dblBaseAmountDue, 0) END
 FROM tblARPrepaidAndCredit PC
 LEFT JOIN tblARInvoice PREPAY ON PC.intPrepaymentId = PREPAY.intInvoiceId
-LEFT JOIN tblARInvoiceDetail PREPAYDETAIL ON PC.intPrepaymentDetailId = PREPAYDETAIL.intInvoiceDetailId
+LEFT JOIN tblARInvoiceDetail PREPAYDETAIL ON PC.intPrepaymentId = PREPAYDETAIL.intInvoiceId
 LEFT JOIN tblCTContractHeader CH ON PREPAYDETAIL.intContractHeaderId = CH.intContractHeaderId
 LEFT JOIN tblCTContractDetail CD ON PREPAYDETAIL.intContractDetailId = CD.intContractDetailId
 LEFT JOIN tblCTItemContractHeader ICH ON PREPAYDETAIL.intItemContractHeaderId = ICH.intItemContractHeaderId
