@@ -3,6 +3,7 @@
 	[intContractConditionId] INT IDENTITY(1,1) NOT NULL, 
     [intContractHeaderId] INT NOT NULL, 
     [intConditionId] INT NOT NULL, 
+    [strConditionDescription] nvarchar(max) COLLATE Latin1_General_CI_AS,
     [intConcurrencyId] INT NOT NULL,
 	CONSTRAINT [PK_tblCTContractCondition_intContractConditionId] PRIMARY KEY CLUSTERED ([intContractConditionId] ASC),
 	CONSTRAINT [UQ_tblCTContractCondition_intContractHeaderId_intConditionId] UNIQUE ([intContractHeaderId], [intConditionId]), 

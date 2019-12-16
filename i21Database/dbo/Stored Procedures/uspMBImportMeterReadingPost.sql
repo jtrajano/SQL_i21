@@ -21,7 +21,8 @@ BEGIN
 		
 		DECLARE @intMeterCustomerId AS INT = NULL, 
 			@dtmTransactionDate AS DATE = NULL,
-			@intUserId INT = NULL
+			@intUserId INT = NULL,
+			@intMeterAccountId INT = NULL
 
 		DECLARE @CursorMeter AS CURSOR
 
@@ -29,14 +30,16 @@ BEGIN
 		SELECT DISTINCT MRD.intMeterCustomerId
 		   ,MRD.dtmTransactionDate
 		   ,MR.intUserId
+		   ,MAD.intMeterAccountId
 		FROM tblMBImportMeterReadingDetail MRD
 		INNER JOIN tblMBImportMeterReading MR ON MR.intImportMeterReadingId = MRD.intImportMeterReadingId
+		INNER JOIN tblMBMeterAccountDetail MAD ON MAD.strMeterCustomerId = MRD.intMeterCustomerId AND MAD.strMeterFuelingPoint = MRD.intMeterNumber
 		WHERE MR.intImportMeterReadingId = @intImportMeterReadingId and ysnValid = 1
 		ORDER BY MRD.dtmTransactionDate, intMeterCustomerId
 
 		BEGIN TRANSACTION
 		OPEN @CursorMeter
-		FETCH NEXT FROM @CursorMeter INTO @intMeterCustomerId, @dtmTransactionDate, @intUserId
+		FETCH NEXT FROM @CursorMeter INTO @intMeterCustomerId, @dtmTransactionDate, @intUserId, @intMeterAccountId
 		WHILE @@FETCH_STATUS = 0
 		BEGIN
 
@@ -72,6 +75,7 @@ BEGIN
 				AND MRD.dtmTransactionDate = @dtmTransactionDate
 				AND MAD.intMeterAccountDetailId IS NOT NULL
 				AND MRD.dblCurrentReading > MAD.dblLastMeterReading 
+				AND MAD.intMeterAccountId = @intMeterAccountId
 			ORDER BY MAD.intMeterAccountDetailId
 
 			OPEN @CursorMeterDetail
@@ -81,11 +85,6 @@ BEGIN
 
 				IF(@intMeterReadingId IS NULL)
 				BEGIN
-					DECLARE @intMeterAccountId INT = NULL
-
-					-- GET METER ACCOUNT
-					SELECT @intMeterAccountId = MAD.intMeterAccountId FROM tblMBMeterAccountDetail MAD
-					WHERE MAD.strMeterCustomerId = @intMeterCustomerId
 
 					-- GET STARTING NUMBER
 					EXEC uspSMGetStartingNumber @intStartingNumberId = 95, @strID = @strTransactionId OUTPUT 				
@@ -138,7 +137,7 @@ BEGIN
 			CLOSE @CursorMeterDetail
 			DEALLOCATE @CursorMeterDetail
 
-			FETCH NEXT FROM @CursorMeter INTO @intMeterCustomerId, @dtmTransactionDate, @intUserId
+			FETCH NEXT FROM @CursorMeter INTO @intMeterCustomerId, @dtmTransactionDate, @intUserId, @intMeterAccountId
 		END
 		CLOSE @CursorMeter
 		DEALLOCATE @CursorMeter

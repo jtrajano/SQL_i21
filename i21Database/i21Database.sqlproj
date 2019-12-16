@@ -8267,6 +8267,10 @@
     <Build Include="dbo\Functions\fnMFGetDemandBatches.sql" />
     <Build Include="dbo\Stored Procedures\uspMFDeleteDemandSummary.sql" />
     <Build Include="dbo\Views\vyuMFGetDemandBatchList.sql" />
+    <Build Include="dbo\Views\vyuCTPriceFixationContractDetail.sql" />
+    <Build Include="dbo\Tables\tblCTContractBalanceLog.sql" />
+    <Build Include="dbo\User Defined Types\CTContractBalanceLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTLogContractBalance.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

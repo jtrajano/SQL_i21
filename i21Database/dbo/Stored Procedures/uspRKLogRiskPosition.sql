@@ -185,7 +185,7 @@ BEGIN
 		END
 
 		-- Log counter entry to negate previous value
-		IF (@strTransactionType IN ('DERIVATIVES', 'COLLATERAL', 'COLLATERAL ADJUSTMENTS'))
+		IF (@strTransactionType IN ('Derivatives', 'Collateral', 'Collateral Adjustments'))
 		BEGIN
 			IF EXISTS(SELECT TOP 1 1 FROM #tmpPrevLog)
 			BEGIN
@@ -240,7 +240,7 @@ BEGIN
 					, intEntityId
 					, intTicketId
 					, @intUserId
-					, '(Negate previous value)' + ISNULL(@strNotes, '')
+					, '(Negate previous value)' + ISNULL(strNotes, '')
 				FROM #tmpPrevLog
 			END
 		END
@@ -248,7 +248,7 @@ BEGIN
 		---------------------------------------
 		------------ DERIVATIVES --------------
 		---------------------------------------
-		IF @strTransactionType = 'DERIVATIVES'
+		IF @strTransactionType = 'Derivatives'
 		BEGIN
 			INSERT INTO @FinalTable(strBatchId
 				, strTransactionType
@@ -305,13 +305,13 @@ BEGIN
 			FROM tblRKFutOptTransaction der
 			JOIN tblRKFutureMarket m ON m.intFutureMarketId = der.intFutureMarketId
 			LEFT JOIN tblICCommodityUnitMeasure cUOM ON cUOM.intCommodityId = der.intCommodityId AND cUOM.intUnitMeasureId = m.intUnitMeasureId
-			WHERE der.intFutOptTransactionId = @intTransactionRecordId				
+			WHERE der.intFutOptTransactionId = @intTransactionRecordId
 		END
 
 		---------------------------------------
 		------------- COLLATERAL --------------
 		---------------------------------------
-		ELSE IF @strTransactionType = 'COLLATERAL'
+		ELSE IF @strTransactionType = 'Collateral'
 		BEGIN
 			INSERT INTO @FinalTable(strBatchId
 				, strTransactionType
@@ -367,12 +367,14 @@ BEGIN
 				, @strNotes
 			FROM tblRKCollateral col		
 			WHERE col.intCollateralId = @intTransactionRecordId
+
+			SET @intContractDetailId = NULL
 		END
 
 		---------------------------------------
 		------- COLLATERAL ADJUSTMENTS --------
 		---------------------------------------
-		ELSE IF @strTransactionType = 'COLLATERAL ADJUSTMENTS'
+		ELSE IF @strTransactionType = 'Collateral Adjustments'
 		BEGIN
 			INSERT INTO @FinalTable(strBatchId
 				, strTransactionType
@@ -428,6 +430,277 @@ BEGIN
 				, @strNotes
 			FROM tblRKCollateral col		
 			WHERE col.intCollateralId = @intTransactionRecordId
+
+			SET @intContractDetailId = NULL
+		END
+
+		----------------------------------------------
+		------------- Inventory Receipt --------------
+		----------------------------------------------
+		ELSE IF @strTransactionType = 'Inventory Receipt'
+		BEGIN
+			INSERT INTO @FinalTable(strBatchId
+				, strTransactionType
+				, intTransactionRecordId
+				, strTransactionNumber
+				, dtmTransactionDate
+				, intContractDetailId
+				, intContractHeaderId
+				, intFutureMarketId
+				, intFutureMonthId
+				, intFutOptTransactionId
+				, intCommodityId
+				, intItemId
+				, intProductTypeId
+				, intOrigUOMId
+				, intBookId
+				, intSubBookId
+				, intLocationId
+				, strInOut
+				, dblOrigQty
+				, dblPrice
+				, intEntityId
+				, intTicketId
+				, intUserId
+				, strNotes)
+			SELECT TOP 1 @strBatchId
+				, @strTransactionType
+				, @intTransactionRecordId
+				, @strTransactionNumber
+				, @dtmTransactionDate
+				, @intContractDetailId
+				, @intContractHeaderId
+				, @intFutureMarketId
+				, @intFutureMonthId
+				, @intTransactionRecordId
+				, @intCommodityId
+				, @intItemId
+				, intProductTypeId = I.intProductTypeId
+				, intOrigUOMId = @intCommodityUOMId
+				, @intBookId
+				, @intSubBookId
+				, @intLocationId
+				, strInOut = CASE WHEN ISNULL(@dblQty, 0) >= 0 THEN 'IN' ELSE 'OUT' END
+				, dblOrigQty = @dblQty
+				, dblPrice = @dblPrice
+				, @intEntityId
+				, @intTicketId
+				, @intUserId
+				, @strNotes
+			FROM tblICInventoryReceiptItem IRI
+			LEFT JOIN tblICItem I ON I.intItemId = IRI.intItemId
+			WHERE IRI.intInventoryReceiptItemId = @intTransactionRecordId
+		END
+
+		------------------------------------
+		------------- Voucher --------------
+		------------------------------------
+		ELSE IF @strTransactionType = ''
+		BEGIN
+			INSERT INTO @FinalTable(strBatchId
+				, strTransactionType
+				, intTransactionRecordId
+				, strTransactionNumber
+				, dtmTransactionDate
+				, intContractDetailId
+				, intContractHeaderId
+				, intFutureMarketId
+				, intFutureMonthId
+				, intFutOptTransactionId
+				, intCommodityId
+				, intItemId
+				, intProductTypeId
+				, intOrigUOMId
+				, intBookId
+				, intSubBookId
+				, intLocationId
+				, strInOut
+				, dblOrigQty
+				, dblPrice
+				, intEntityId
+				, intTicketId
+				, intUserId
+				, strNotes)
+			SELECT TOP 1 @strBatchId
+				, @strTransactionType
+				, @intTransactionRecordId
+				, @strTransactionNumber
+				, @dtmTransactionDate
+				, @intContractDetailId
+				, @intContractHeaderId
+				, @intFutureMarketId
+				, @intFutureMonthId
+				, @intTransactionRecordId
+				, @intCommodityId
+				, @intItemId
+				, intProductTypeId = I.intProductTypeId
+				, intOrigUOMId = @intCommodityUOMId
+				, @intBookId
+				, @intSubBookId
+				, @intLocationId
+				, strInOut = CASE WHEN ISNULL(@dblQty, 0) >= 0 THEN 'OUT' ELSE 'IN' END
+				, dblOrigQty = @dblQty
+				, dblPrice = @dblPrice
+				, @intEntityId
+				, @intTicketId
+				, @intUserId
+				, @strNotes
+			FROM tblAPBillDetail BD
+			LEFT JOIN tblICItem I ON I.intItemId = BD.intItemId
+			WHERE BD.intBillDetailId = @intTransactionRecordId
+		END
+
+		---------------------------------------
+		------------- AP Payment --------------
+		---------------------------------------
+		ELSE IF @strTransactionType = ''
+		BEGIN
+			INSERT INTO @FinalTable(strBatchId
+				, strTransactionType
+				, intTransactionRecordId
+				, strTransactionNumber
+				, dtmTransactionDate
+				, intContractDetailId
+				, intContractHeaderId
+				, intFutureMarketId
+				, intFutureMonthId
+				, intFutOptTransactionId
+				, intCommodityId
+				, intItemId
+				, intProductTypeId
+				, intOrigUOMId
+				, intBookId
+				, intSubBookId
+				, intLocationId
+				, strInOut
+				, dblOrigQty
+				, dblPrice
+				, intEntityId
+				, intTicketId
+				, intUserId
+				, strNotes)
+			SELECT TOP 1 @strBatchId
+				, @strTransactionType
+				, @intTransactionRecordId
+				, @strTransactionNumber
+				, @dtmTransactionDate
+				, @intContractDetailId
+				, @intContractHeaderId
+				, @intFutureMarketId
+				, @intFutureMonthId
+				, @intTransactionRecordId
+				, @intCommodityId
+				, @intItemId
+				, intProductTypeId = NULL
+				, intOrigUOMId = @intCommodityUOMId
+				, @intBookId
+				, @intSubBookId
+				, @intLocationId
+				, strInOut = CASE WHEN ISNULL(@dblQty, 0) >= 0 THEN 'OUT' ELSE 'INT' END
+				, dblOrigQty = @dblQty
+				, dblPrice = @dblPrice
+				, @intEntityId
+				, @intTicketId
+				, @intUserId
+				, @strNotes
+		END
+
+		---------------------------------------
+		------------- Invoice --------------
+		---------------------------------------
+		ELSE IF @strTransactionType = ''
+		BEGIN
+			INSERT INTO @FinalTable(strBatchId
+				, strTransactionType
+				, intTransactionRecordId
+				, strTransactionNumber
+				, dtmTransactionDate
+				, intContractDetailId
+				, intContractHeaderId
+				, intFutureMarketId
+				, intFutureMonthId
+				, intFutOptTransactionId
+				, intCommodityId
+				, intItemId
+				, intProductTypeId
+				, intOrigUOMId
+				, intBookId
+				, intSubBookId
+				, intLocationId
+				, strInOut
+				, dblOrigQty
+				, dblPrice
+				, intEntityId
+				, intTicketId
+				, intUserId
+				, strNotes)
+			SELECT TOP 1 @strBatchId
+				, @strTransactionType
+				, @intTransactionRecordId
+				, @strTransactionNumber
+				, @dtmTransactionDate
+				, @intContractDetailId
+				, @intContractHeaderId
+				, @intFutureMarketId
+				, @intFutureMonthId
+				, @intTransactionRecordId
+				, @intCommodityId
+				, @intItemId
+				, intProductTypeId = I.intProductTypeId
+				, intOrigUOMId = @intCommodityUOMId
+				, @intBookId
+				, @intSubBookId
+				, @intLocationId
+				, strInOut = CASE WHEN ISNULL(@dblQty, 0) >= 0 THEN 'OUT' ELSE 'IN' END
+				, dblOrigQty = @dblQty
+				, dblPrice = @dblPrice
+				, @intEntityId
+				, @intTicketId
+				, @intUserId
+				, @strNotes
+			FROM tblARInvoiceDetail ID
+			LEFT JOIN tblICItem I ON I.intItemId = ID.intItemId
+			WHERE ID.intInvoiceDetailId = @intTransactionRecordId
+		END
+
+		---------------------------------------
+		------------- Grain --------------
+		---------------------------------------
+		ELSE IF @strTransactionType = ''
+		BEGIN
+			PRINT 'BEGIN ' + @strTransactionType
+
+			PRINT 'END ' + @strTransactionType
+		END
+
+		---------------------------------------
+		------------- Scale --------------
+		---------------------------------------
+		ELSE IF @strTransactionType = ''
+		BEGIN
+			PRINT 'BEGIN ' + @strTransactionType
+
+			PRINT 'END ' + @strTransactionType
+		END
+
+		---------------------------------------
+		--------- Contract Sequence -----------
+		---------------------------------------
+		ELSE IF @strTransactionType = ''
+		BEGIN
+			PRINT 'BEGIN ' + @strTransactionType
+
+			PRINT 'END ' + @strTransactionType
+		END
+
+		---------------------------------------
+		----------- Price Fixation ------------
+		---------------------------------------
+		ELSE IF @strTransactionType = ''
+		BEGIN
+			PRINT 'BEGIN ' + @strTransactionType
+
+			PRINT 'END ' + @strTransactionType
 		END
 
 		---------------------------------------
@@ -440,6 +713,141 @@ BEGIN
 			PRINT 'END ' + @strTransactionType
 		END
 
+		------------------------------
+		-- Process Contract Balance --
+		------------------------------
+		IF (ISNULL(@intContractDetailId, 0) <> 0)
+		BEGIN
+			DECLARE @cbLog AS CTContractBalanceLog
+
+			IF (@strTransactionType = 'Contract Sequence')
+			BEGIN
+				INSERT INTO @cbLog (strBatchId
+					, strTransactionType
+					, intContractDetailId
+					, intContractHeaderId
+					, intContractTypeId
+					, intEntityId
+					, intCommodityId
+					, intItemId
+					, intLocationId
+					, intPricingTypeId
+					, intFutureMarketId
+					, intFutureMonthId
+					, dblBasis
+					, dblFutures
+					, intQtyUOMId
+					, intQtyCurrencyId
+					, intBasisUOMId
+					, intBasisCurrencyId
+					, intPriceUOMId
+					, dtmStartDate
+					, dtmEndDate
+					, dblQty
+					, intContractStatusId
+					, intBookId
+					, intSubBookId
+					, strNotes)		
+				SELECT @strBatchId
+					, @strTransactionType
+					, @intContractDetailId
+					, @intContractHeaderId				
+					, intContractTypeId
+					, intEntityId
+					, intCommodityId
+					, intItemId
+					, CD.intCompanyLocationId
+					, CD.intPricingTypeId
+					, CD.intFutureMarketId
+					, CD.intFutureMonthId
+					, CD.dblBasis
+					, CD.dblFutures
+					, intQtyUOMId = CD.intUnitMeasureId
+					, intQtyCurrencyId = CD.intCurrencyId
+					, CD.intBasisUOMId
+					, CD.intBasisCurrencyId
+					, intPriceUOMId = CD.intPriceItemUOMId
+					, dtmStartDate
+					, dtmEndDate
+					, dblQty = @dblQty
+					, intContractStatusId
+					, CD.intBookId
+					, CD.intSubBookId
+					, ''
+				FROM tblCTContractDetail CD
+				JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+				WHERE CD.intContractDetailId = @intContractHeaderId
+					AND CD.intContractHeaderId = @intContractDetailId
+			END
+			ELSE IF (@strTransactionType = 'Price Fixation')
+			BEGIN
+				INSERT INTO @cbLog (strBatchId
+					, strTransactionType
+					, intContractDetailId
+					, intContractHeaderId
+					, intContractTypeId
+					, intEntityId
+					, intCommodityId
+					, intItemId
+					, intLocationId
+					, intPricingTypeId
+					, intFutureMarketId
+					, intFutureMonthId
+					, dblBasis
+					, dblFutures
+					, intQtyUOMId
+					, intQtyCurrencyId
+					, intBasisUOMId
+					, intBasisCurrencyId
+					, intPriceUOMId
+					, dtmStartDate
+					, dtmEndDate
+					, dblQty
+					, intContractStatusId
+					, intBookId
+					, intSubBookId
+					, strNotes)		
+				SELECT @strBatchId
+					, @strTransactionType
+					, @intContractDetailId
+					, @intContractHeaderId
+					, intContractTypeId
+					, intEntityId
+					, ch.intCommodityId
+					, intItemId
+					, cd.intCompanyLocationId
+					, cd.intPricingTypeId
+					, cd.intFutureMarketId
+					, cd.intFutureMonthId
+					, cd.dblBasis
+					, cd.dblFutures
+					, intQtyUOMId = cd.intUnitMeasureId
+					, intQtyCurrencyId = cd.intCurrencyId
+					, cd.intBasisUOMId
+					, cd.intBasisCurrencyId
+					, intPriceUOMId = cd.intPriceItemUOMId
+					, dtmStartDate
+					, dtmEndDate
+					, dblQty = @dblQty
+					, intContractStatusId
+					, cd.intBookId
+					, cd.intSubBookId
+					, ''
+				FROM tblCTPriceFixationDetail fd
+				JOIN tblCTPriceFixation pf ON pf.intPriceFixationId = fd.intPriceFixationId
+				JOIN tblCTContractDetail cd ON cd.intContractDetailId = pf.intContractDetailId
+				INNER JOIN tblCTContractHeader ch ON ch.intContractHeaderId = cd.intContractHeaderId
+				INNER JOIN tblICCommodityUnitMeasure cum ON cum.intCommodityId = ch.intCommodityId AND cum.ysnDefault = 1
+				WHERE cd.intContractDetailId = @intContractHeaderId
+					AND cd.intContractHeaderId = @intContractDetailId
+			END
+
+			EXEC uspCTLogContractBalance @cbLog, 0
+		END
+		------------------------------
+		------------------------------
+
+		
 		DROP TABLE #tmpPrevLog
 
 		DELETE FROM #tmpSummaryLogs

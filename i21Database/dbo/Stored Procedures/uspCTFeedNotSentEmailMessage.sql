@@ -96,8 +96,9 @@ AS
 			+ '<td>&nbsp;' + 'Slicing Issue' + '</td>
 		</tr>'
 		FROM tblCTContractDetail CD WITH (NOLOCK)
-		JOIN tblCTContractHeader CH WITH (NOLOCK) ON CH.intContractHeaderId = CD.intContractHeaderId
+		JOIN vyuCTGridContractHeader CH WITH (NOLOCK) ON CH.intContractHeaderId = CD.intContractHeaderId
 			AND CD.intContractStatusId <> 3 AND CD.intContractStatusId <> 2 AND CD.dtmCreated > '2018-01-01' AND ISNULL(CD.strERPPONumber, '') = ''
+			AND CH.strApprovalStatus NOT IN ('Waiting for Submit','Waiting for Approval')
 		JOIN tblSMTransaction TR WITH (NOLOCK) ON TR.intRecordId = CH.intContractHeaderId
 			AND TR.intScreenId = 11 AND ISNULL(TR.ysnOnceApproved, 0) = 1
 		LEFT JOIN tblCTContractFeed CF WITH (NOLOCK) ON CF.intContractDetailId = CD.intContractDetailId
