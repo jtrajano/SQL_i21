@@ -56,30 +56,61 @@ BEGIN
 			WHERE intUnitMeasureId = @ToUOMId
 		END
 
-		IF (@FromUOMRate = @ToUOMRate)
-		BEGIN			
-			SET @FinalValue = @dblValue
-		END
-		ELSE IF (@FromUOMRate < @ToUOMRate)
+		IF (@FromUOMRate > @ToUOMRate)
 		BEGIN
-			SET @FinalValue = @dblValue / @FromUOMRate
-		END
-		ELSE IF (@FromUOMRate > @ToUOMRate)
-		BEGIN
-			SET @FinalValue = @dblValue * @FromUOMRate
-		END
+			IF (@FromUOMRate = @ToUOMRate)
+			BEGIN			
+				SET @FinalValue = @dblValue
+			END
+			ELSE IF (@FromUOMRate < @ToUOMRate)
+			BEGIN
+				SET @FinalValue = @dblValue * @FromUOMRate
+			END
+			ELSE IF (@FromUOMRate > @ToUOMRate)
+			BEGIN
+				SET @FinalValue = @dblValue / @FromUOMRate
+			END
 
-		IF (@ToUOMRate = @FromUOMRate)
-		BEGIN
-			SET @FinalValue = @FinalValue
+			IF (@ToUOMRate = @FromUOMRate)
+			BEGIN
+				SET @FinalValue = @FinalValue
+			END
+			ELSE IF (@ToUOMRate < @FromUOMRate)
+			BEGIN
+				SET @FinalValue = @FinalValue * @ToUOMRate
+			END
+			ELSE IF (@ToUOMRate > @FromUOMRate)
+			BEGIN
+				SET @FinalValue = @FinalValue / @ToUOMRate
+			END
 		END
-		ELSE IF (@ToUOMRate < @FromUOMRate)
+		ELSE
 		BEGIN
-			SET @FinalValue = @FinalValue / @ToUOMRate
-		END
-		ELSE IF (@ToUOMRate > @FromUOMRate)
-		BEGIN
-			SET @FinalValue = @FinalValue * @ToUOMRate
+			IF (@FromUOMRate = @ToUOMRate)
+			BEGIN			
+				SET @FinalValue = @dblValue
+			END
+			ELSE IF (@FromUOMRate < @ToUOMRate)
+			BEGIN
+				SET @FinalValue = @dblValue / @FromUOMRate
+			END
+			ELSE IF (@FromUOMRate > @ToUOMRate)
+			BEGIN
+				SET @FinalValue = @dblValue * @FromUOMRate
+			END
+
+			IF (@ToUOMRate = @FromUOMRate)
+			BEGIN
+				SET @FinalValue = @FinalValue
+			END
+			ELSE IF (@ToUOMRate < @FromUOMRate)
+			BEGIN
+				SET @FinalValue = @FinalValue / @ToUOMRate
+			END
+			ELSE IF (@ToUOMRate > @FromUOMRate)
+			BEGIN
+				SET @FinalValue = @FinalValue * @ToUOMRate
+			END
 		END
 	END
 	ELSE
