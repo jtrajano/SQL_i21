@@ -1,4 +1,4 @@
-﻿CREATE VIEW [dbo].[vyuICGetItemStockSummary]
+﻿CREATE VIEW [dbo].[vyuICGetRunningStockQtyByStockUOM]
 AS 
 
 SELECT
@@ -8,7 +8,7 @@ SELECT
 			, ItemStock.intItemLocationId
 			, ItemStock.intSubLocationId
 			, ItemStock.intStorageLocationId
-			, ItemStock.intItemUOMId) AS INT
+			, ItemUOM.intItemUOMId) AS INT
 		)
 	, ItemStock.intItemId
 	, Item.strItemNo
@@ -26,37 +26,41 @@ SELECT
 	, SubLocation.strSubLocationName
 	, ItemStock.intStorageLocationId
 	, strStorageLocationName = StorageLocation.strName
-	, ItemStock.intItemUOMId
+	, ItemUOM.intItemUOMId
 	, UOM.strUnitMeasure
 	, ItemStock.dtmDate
-	, ItemStock.dblOnHand
+	, dblOnHand = dbo.fnCalculateQtyBetweenUOM(stockUOM.intItemUOMId, ItemUOM.intItemUOMId, ItemStock.dblOnHand) 
 	, dblConversionFactor = ItemUOM.dblUnitQty
 	, ItemPricing.dblLastCost
 	, dblTotalCost = ItemStock.dblOnHand * ItemUOM.dblUnitQty * ItemPricing.dblLastCost
-FROM
-	
+FROM		
 	(
-		SELECT	intItemId
-				,intItemLocationId
-				, intSubLocationId
-				, intStorageLocationId
-				, intItemUOMId
-				, dtmDate = CAST(CONVERT(VARCHAR(10),dtmDate,112) AS datetime)
-				, dblOnHand = SUM(dblQty)
+		SELECT	t.intItemId
+				,t.intItemLocationId
+				,t.intSubLocationId
+				,t.intStorageLocationId
+				,dtmDate = CAST(CONVERT(VARCHAR(10),t.dtmDate,112) AS datetime)
+				,dblOnHand = SUM(dbo.fnCalculateQtyBetweenUOM(t.intItemUOMId, stockUOM.intItemUOMId, t.dblQty)) 
 		FROM 
-			tblICInventoryTransaction
+			tblICInventoryTransaction t INNER JOIN tblICItemUOM stockUOM 
+				ON t.intItemId = stockUOM.intItemId
+				AND stockUOM.ysnStockUnit = 1
 		WHERE
-			dblQty <> 0 
+			dblQty <> 0 			
 		GROUP BY 
-			intItemId
-			, intItemLocationId
-			, intSubLocationId
-			, intStorageLocationId
-			, intItemUOMId
-			, CONVERT(VARCHAR(10),dtmDate,112)
-	) ItemStock
-	LEFT JOIN tblICItem Item 
+			t.intItemId
+			, t.intItemLocationId
+			, t.intSubLocationId
+			, t.intStorageLocationId
+			, CONVERT(VARCHAR(10),t.dtmDate,112)
+	) ItemStock	
+	INNER JOIN tblICItem Item 	
 		ON Item.intItemId = ItemStock.intItemId
+	INNER JOIN tblICItemUOM ItemUOM 
+		ON ItemUOM.intItemId = Item.intItemId
+	INNER JOIN tblICItemUOM stockUOM 
+		ON Item.intItemId = stockUOM.intItemId
+		AND stockUOM.ysnStockUnit = 1
 	LEFT JOIN tblICCategory Category 
 		ON Category.intCategoryId = Item.intCategoryId
 	LEFT JOIN tblICCommodity Commodity 
@@ -67,8 +71,6 @@ FROM
 		ON l.intCompanyLocationId = ItemLocation.intLocationId
 	LEFT JOIN tblICItemPricing ItemPricing 
 		ON ItemPricing.intItemLocationId = ItemStock.intItemLocationId
-	LEFT JOIN tblICItemUOM ItemUOM 
-		ON ItemUOM.intItemUOMId = ItemStock.intItemUOMId
 	LEFT JOIN tblICUnitMeasure UOM 
 		ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
 	LEFT JOIN tblSMCompanyLocationSubLocation SubLocation 

@@ -33,38 +33,37 @@ FROM
 		dblNewOnHand = 
 			ISNULL(
 				CASE 
-					WHEN Item.strLotTracking = 'No' THEN dbo.fnCalculateQtyBetweenUOM(nonLotted.intItemUOMId, StockUOM.intItemUOMId, nonLotted.dblOnHand) 
-					ELSE LotTransactions.dblQty 
+					WHEN Item.strLotTracking = 'No' AND Item.ysnSeparateStockForUOMs = 1 THEN 
+						separateUOM.dblOnHand
+					WHEN Item.strLotTracking = 'No' AND ISNULL(Item.ysnSeparateStockForUOMs, 0) = 0 THEN 
+						byStockUOM.dblOnHand
+					ELSE 
+						LotTransactions.dblQty 
 				END
 				, 0
 			),
 		dblCountOnHand = cd.dblSystemCount,
 		cd.dblWeightQty,
 		dblNewWeightQty = ISNULL(CASE WHEN Item.strLotTracking = 'No' THEN 0 ELSE LotTransactions.dblWeight END, 0),
-		dblNewCost = ISNULL(CASE WHEN c.strDataSource = 'Import CSV' THEN cd.dblLastCost ELSE CASE 
-								WHEN ItemLocation.intCostingMethod = 1 AND Item.strLotTracking = 'No'  THEN -- AVG
-									dbo.fnGetItemAverageCost(
-										cd.intItemId
-										, ItemLocation.intItemLocationId
-										, COALESCE(cd.intItemUOMId, StockUOM.intItemUOMId)
-									)
-								WHEN ItemLocation.intCostingMethod = 2 AND Item.strLotTracking = 'No' THEN -- FIFO
-									dbo.fnCalculateCostBetweenUOM(
-										COALESCE(FIFO.intItemUOMId, StockUOM.intItemUOMId)
-										,COALESCE(cd.intItemUOMId, StockUOM.intItemUOMId)
-										,COALESCE(FIFO.dblCost, ItemPricing.dblLastCost)
-									)
-								WHEN ItemLocation.intCostingMethod = 3 AND Item.strLotTracking = 'No' THEN -- LIFO
-									dbo.fnCalculateCostBetweenUOM(
-										StockUOM.intItemUOMId
-										, COALESCE(cd.intItemUOMId, StockUOM.intItemUOMId)
-										, ItemPricing.dblLastCost
-									)
-								WHEN Item.strLotTracking != 'No' THEN
-									ISNULL(ItemLot.dblLastCost, dbo.fnCalculateCostBetweenUOM(StockUOM.intItemUOMId, cd.intItemUOMId, ItemPricing.dblLastCost))
-								ELSE
-									dbo.fnCalculateCostBetweenUOM(StockUOM.intItemUOMId, cd.intItemUOMId, ItemPricing.dblLastCost)
-							END END, 0),
+		dblNewCost = 
+			ISNULL(
+				CASE 
+					WHEN c.strDataSource = 'Import CSV' THEN 
+						cd.dblLastCost 
+					ELSE 
+						CASE 
+							WHEN ItemLocation.intCostingMethod = 1 AND Item.strLotTracking = 'No'  THEN -- AVG
+								dbo.fnGetItemAverageCost(
+									cd.intItemId
+									, ItemLocation.intItemLocationId
+									, COALESCE(cd.intItemUOMId, StockUOM.intItemUOMId)
+								)
+							ELSE 
+								dbo.fnCalculateCostBetweenUOM(lastCost.intItemUOMId, cd.intItemUOMId, lastCost.dblLastCost) 
+						END 
+					END
+					, 0
+				),
 		dblCost = cd.dblLastCost,
 		intLotId = cd.intLotId,
 		strLotNo = cd.strLotNo
@@ -73,7 +72,6 @@ FROM
 		INNER JOIN tblICItem Item ON Item.intItemId = cd.intItemId
 		INNER JOIN dbo.tblICItemLocation ItemLocation ON ItemLocation.intLocationId = c.intLocationId
 			AND ItemLocation.intItemId = cd.intItemId
-		LEFT JOIN dbo.tblICItemPricing ItemPricing ON ItemPricing.intItemLocationId = ItemLocation.intItemLocationId
 		LEFT JOIN dbo.tblICItemUOM ItemUOM ON cd.intItemUOMId = ItemUOM.intItemUOMId
 		LEFT JOIN dbo.tblICLot ItemLot ON ItemLot.intLotId = cd.intLotId AND Item.strLotTracking <> 'No'
 		LEFT JOIN dbo.tblICItemUOM StockUOM ON cd.intItemId = StockUOM.intItemId AND StockUOM.ysnStockUnit = 1
@@ -85,9 +83,8 @@ FROM
 				, ss.intSubLocationId
 				, ss.intStorageLocationId
 				, dblOnHand =  SUM(COALESCE(ss.dblOnHand, 0.00))
-				, dblLastCost = MAX(ISNULL(ss.dblLastCost, 0))
 				, dtmDate
-			FROM vyuICGetItemStockSummary ss
+			FROM vyuICGetRunningStockQtyByUOM ss
 			GROUP BY 
 				ss.intItemId,
 				intItemUOMId,
@@ -95,30 +92,53 @@ FROM
 				intSubLocationId,
 				intStorageLocationId,
 				dtmDate
-		) nonLotted ON nonLotted.intItemId = cd.intItemId
-			AND nonLotted.intItemLocationId = cd.intItemLocationId
-			--AND ss.intItemUOMId = cd.intItemUOMId
+		) separateUOM 
+			ON separateUOM.intItemId = cd.intItemId
+			AND separateUOM.intItemLocationId = cd.intItemLocationId
+			AND separateUOM.intItemUOMId = cd.intItemUOMId
 			AND (
 				((CASE WHEN cd.intSubLocationId IS NULL AND cd.intStorageLocationId IS NULL THEN 0 ELSE 1 END) = 0) OR
-				((CASE WHEN cd.intSubLocationId = nonLotted.intSubLocationId AND cd.intStorageLocationId = nonLotted.intStorageLocationId THEN 0 ELSE 1 END) = 0) OR
-				((CASE WHEN cd.intSubLocationId IS NOT NULL AND cd.intStorageLocationId IS NULL AND cd.intSubLocationId = nonLotted.intSubLocationId THEN 0 ELSE 1 END) = 0)
+				((CASE WHEN cd.intSubLocationId = separateUOM.intSubLocationId AND cd.intStorageLocationId = separateUOM.intStorageLocationId THEN 0 ELSE 1 END) = 0) OR
+				((CASE WHEN cd.intSubLocationId IS NOT NULL AND cd.intStorageLocationId IS NULL AND cd.intSubLocationId = separateUOM.intSubLocationId THEN 0 ELSE 1 END) = 0)
 			)
 			AND (
-				(c.strCountBy = 'Item' AND dbo.fnDateLessThanEquals(nonLotted.dtmDate, c.dtmCountDate) = 1)
-				OR (c.strCountBy = 'Retail Count' AND dbo.fnDateLessThan(nonLotted.dtmDate, c.dtmCountDate) = 1) 
+				(c.strCountBy = 'Item' AND dbo.fnDateLessThanEquals(separateUOM.dtmDate, c.dtmCountDate) = 1)
+				OR (c.strCountBy = 'Retail Count' AND dbo.fnDateLessThan(separateUOM.dtmDate, c.dtmCountDate) = 1) 
 			)
 			AND Item.strLotTracking = 'No'
-		OUTER APPLY(
-			SELECT TOP 1
-			dblCost
-					, intItemUOMId
-			FROM tblICInventoryFIFO FIFO
-			WHERE	Item.intItemId = FIFO.intItemId
-				AND ItemLocation.intItemLocationId = FIFO.intItemLocationId
-				AND dblStockIn - dblStockOut > 0
-				AND dbo.fnDateLessThanEquals(dtmDate, c.dtmCountDate) = 1
-			ORDER BY dtmDate ASC
-		) FIFO 
+			AND Item.ysnSeparateStockForUOMs = 1
+		LEFT JOIN (
+			SELECT 
+				ss.intItemId
+				, ss.intItemUOMId
+				, ss.intItemLocationId
+				, ss.intSubLocationId
+				, ss.intStorageLocationId
+				, dblOnHand = SUM(COALESCE(ss.dblOnHand, 0.00))
+				, dtmDate
+			FROM vyuICGetRunningStockQtyByStockUOM ss
+			GROUP BY 
+				ss.intItemId,
+				intItemUOMId,
+				intItemLocationId,
+				intSubLocationId,
+				intStorageLocationId,
+				dtmDate
+		) byStockUOM 
+			ON byStockUOM.intItemId = cd.intItemId
+			AND byStockUOM.intItemLocationId = cd.intItemLocationId
+			AND byStockUOM.intItemUOMId = cd.intItemUOMId
+			AND (
+				((CASE WHEN cd.intSubLocationId IS NULL AND cd.intStorageLocationId IS NULL THEN 0 ELSE 1 END) = 0) OR
+				((CASE WHEN cd.intSubLocationId = byStockUOM.intSubLocationId AND cd.intStorageLocationId = byStockUOM.intStorageLocationId THEN 0 ELSE 1 END) = 0) OR
+				((CASE WHEN cd.intSubLocationId IS NOT NULL AND cd.intStorageLocationId IS NULL AND cd.intSubLocationId = byStockUOM.intSubLocationId THEN 0 ELSE 1 END) = 0)
+			)
+			AND (
+				(c.strCountBy = 'Item' AND dbo.fnDateLessThanEquals(byStockUOM.dtmDate, c.dtmCountDate) = 1)
+				OR (c.strCountBy = 'Retail Count' AND dbo.fnDateLessThan(byStockUOM.dtmDate, c.dtmCountDate) = 1) 
+			)
+			AND Item.strLotTracking = 'No'
+			AND ISNULL(Item.ysnSeparateStockForUOMs, 0) = 0
 		OUTER APPLY (
 			SELECT 
 				dblQty = SUM(dbo.fnCalculateQtyBetweenUOM(t.intItemUOMId, l.intItemUOMId, t.dblQty)) 
@@ -137,32 +157,60 @@ FROM
 					)
 			FROM tblICInventoryTransaction t INNER JOIN tblICLot l
 					ON t.intLotId = l.intLotId
+				CROSS APPLY dbo.udfDateLessThanEquals(t.dtmDate, c.dtmCountDate) 
 			WHERE
 				t.intItemId = Item.intItemId
 				AND t.intItemLocationId = ItemLocation.intItemLocationId
 				AND t.intSubLocationId = cd.intSubLocationId
 				AND t.intStorageLocationId = cd.intStorageLocationId
 				AND t.intLotId = cd.intLotId
-				AND dbo.fnDateLessThanEquals(t.dtmDate, c.dtmCountDate) = 1
+				
 		) LotTransactions 
 		OUTER APPLY (
-			SELECT SUM(ReservedQty.dblQty) dblQty
+			SELECT 
+				dblQty = SUM(ReservedQty.dblQty) 
 			FROM (
 				SELECT sr.strTransactionId, sr.dblQty dblQty
-				FROM tblICStockReservation sr
-					LEFT JOIN tblICInventoryTransaction xt ON xt.intTransactionId = sr.intTransactionId
+				FROM 
+					tblICStockReservation sr
+					LEFT JOIN tblICInventoryTransaction xt 
+						ON xt.intTransactionId = sr.intTransactionId
+					CROSS APPLY dbo.udfDateLessThanEquals(CONVERT(VARCHAR(10), xt.dtmDate,112), c.dtmCountDate) 
 				WHERE sr.intItemId = cd.intItemId
 					AND sr.intItemLocationId = cd.intItemLocationId
 					AND ISNULL(sr.intStorageLocationId, 0) = ISNULL(cd.intStorageLocationId, 0)
 					AND ISNULL(sr.intSubLocationId, 0) = ISNULL(cd.intSubLocationId, 0)
 					AND ISNULL(sr.intLotId, 0) = ISNULL(cd.intLotId, 0)
-					AND dbo.fnDateLessThanEquals(CONVERT(VARCHAR(10), xt.dtmDate,112), c.dtmCountDate) = 1
+					
 				GROUP BY sr.strTransactionId, sr.dblQty
 			) AS ReservedQty
 		) reserved
+
+		OUTER APPLY (
+			SELECT TOP 1
+				dblLastCost = t.dblCost 
+				,t.intItemUOMId 
+			FROM 
+				tblICInventoryTransaction t 
+				CROSS APPLY dbo.udfDateLessThanEquals(t.dtmDate, c.dtmCountDate)
+			WHERE
+				t.intItemId = Item.intItemId
+				AND t.intItemLocationId = ItemLocation.intItemLocationId
+				
+				AND (
+					((CASE WHEN cd.intSubLocationId IS NULL AND cd.intStorageLocationId IS NULL THEN 1 ELSE 0 END) = 1) OR
+					((CASE WHEN cd.intSubLocationId = t.intSubLocationId AND cd.intStorageLocationId = t.intStorageLocationId THEN 1 ELSE 0 END) = 1) OR
+					((CASE WHEN cd.intSubLocationId IS NOT NULL AND cd.intStorageLocationId IS NULL AND cd.intSubLocationId = t.intSubLocationId THEN 1 ELSE 0 END) = 1)
+				)
+				AND ISNULL(t.intLotId, 0) = ISNULL(cd.intLotId, 0) 
+				AND t.ysnIsUnposted = 0 
+			ORDER BY
+				t.dtmDate DESC 
+				,t.intInventoryTransactionId DESC 
+		) lastCost  
 	WHERE c.ysnPosted != 1
 ) x
---WHERE ((ROUND(x.dblNewOnHand - x.dblCountOnHand, 6) != 0) OR (ROUND(x.dblNewCost - x.dblCost, 6) != 0))
+
 GROUP BY x.intInventoryCountId
 	, x.intInventoryCountDetailId
 	, x.strCountNo
@@ -170,7 +218,6 @@ GROUP BY x.intInventoryCountId
 	, x.intItemId
 	, x.strItemNo
 	, x.dblCountOnHand
-	--, x.dblNewOnHand
 	, x.dblWeightQty
 	, x.dblNewWeightQty
 	, x.dblCost
@@ -179,5 +226,4 @@ GROUP BY x.intInventoryCountId
 	, x.ysnExcludeReserved
 	, x.intLotId
 	, x.strLotNo
--- HAVING ((ROUND(SUM(x.dblNewOnHand) - x.dblCountOnHand, 6) != 0) OR (ROUND(x.dblNewCost - x.dblCost, 6) != 0))
 HAVING ((ROUND((SUM(x.dblNewOnHand) - CASE WHEN x.ysnExcludeReserved = 1 THEN x.dblReservedQty ELSE 0 END) - x.dblCountOnHand, 6) != 0))
