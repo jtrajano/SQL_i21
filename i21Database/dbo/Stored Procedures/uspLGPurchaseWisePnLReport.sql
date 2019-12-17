@@ -16,11 +16,13 @@ DECLARE @strAllocationDetailRefNo AS NVARCHAR(100)
 		,@strPContractNumberSeq AS NVARCHAR(100)
 		,@strSContractNumberSeq AS NVARCHAR(100)
 		,@strUnitMeasure AS NVARCHAR(200)
+		,@strWeightUnitMeasure AS NVARCHAR(200)
 		,@strFinancialStatus NVARCHAR(200) = NULL
 		,@intAllocationDetailId AS INT = NULL
 		,@intPContractDetailId AS INT = NULL
 		,@intSContractDetailId AS INT = NULL
 		,@intUnitMeasureId AS INT = NULL
+		,@intWeightUnitMeasureId AS INT = NULL
 		,@intDefaultCurrencyId AS INT = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
 		,@strCurrency AS NVARCHAR(200)
 		,@strCompanyName NVARCHAR(100)
@@ -80,9 +82,14 @@ SELECT @strUnitMeasure = [from]
 FROM @temp_xml_table   
 WHERE [fieldname] = 'strUnitMeasure'
 
+SELECT @strWeightUnitMeasure = [from]  
+FROM @temp_xml_table   
+WHERE [fieldname] = 'strWeightUnitMeasure'
+
 --Extract Parameters
 SELECT @intAllocationDetailId = intAllocationDetailId FROM tblLGAllocationDetail WHERE strAllocationDetailRefNo = @strAllocationDetailRefNo
 SELECT @intUnitMeasureId = intUnitMeasureId FROM tblICUnitMeasure WHERE strUnitMeasure = @strUnitMeasure
+SELECT @intWeightUnitMeasureId = intUnitMeasureId FROM tblICUnitMeasure WHERE strUnitMeasure = @strWeightUnitMeasure
 
 --Extract Purchase Contract Detail Id
 IF (ISNULL(@strPContractNumberSeq, '') <> '')
@@ -124,11 +131,24 @@ BEGIN
 END
 
 IF (@intUnitMeasureId IS NULL)
-	SELECT @intUnitMeasureId = intSUnitMeasureId 
-	FROM tblLGAllocationDetail WHERE intAllocationDetailId = @intAllocationDetailId
+	SELECT @intUnitMeasureId = UOM.intUnitMeasureId
+	FROM tblLGAllocationDetail ALD 
+		INNER JOIN tblCTContractDetail SCD ON ALD.intSContractDetailId = SCD.intContractDetailId
+		INNER JOIN tblICItemUOM UOM ON UOM.intItemUOMId = SCD.intPriceItemUOMId
+	WHERE intAllocationDetailId = @intAllocationDetailId
+
+IF (@intWeightUnitMeasureId IS NULL)
+	SELECT @intUnitMeasureId = AL.intWeightUnitMeasureId 
+	FROM tblLGAllocationDetail ALD INNER JOIN tblLGAllocationHeader AL
+		ON ALD.intAllocationHeaderId = AL.intAllocationHeaderId
+	 WHERE ALD.intAllocationDetailId = @intAllocationDetailId
+
 
 SELECT @strUnitMeasure = CASE WHEN ISNULL(strSymbol, '') <> '' THEN strSymbol ELSE strUnitMeasure END
 FROM tblICUnitMeasure WHERE intUnitMeasureId = @intUnitMeasureId
+
+SELECT @strWeightUnitMeasure = CASE WHEN ISNULL(strSymbol, '') <> '' THEN strSymbol ELSE strUnitMeasure END
+FROM tblICUnitMeasure WHERE intUnitMeasureId = @intWeightUnitMeasureId
 
 SELECT @strCurrency = CASE WHEN ISNULL(strSymbol, '') <> '' THEN strSymbol ELSE strCurrency END
 FROM tblSMCurrency WHERE intCurrencyID = @intDefaultCurrencyId
@@ -149,28 +169,30 @@ SELECT
 	,dblSUnitPrice = /* S-Terminal Price + S-Differential */
 					dblSTerminalPrice + dblSDifferential
 	,dblEffectiveHedgePL = /* Effective Hedge PL = Difference x Lots Contract Size */
-						dblDifference * dblLotContractSize
+						dblDifference * dblLotContractSizeInPriceUOM
 	,dblTheoreticalHedgePL = /* Theor Hedge PL = Difference x P-Contract Qty */
-						dblDifference * dblPAllocatedQty
+						dblDifference * dblPAllocatedQtyInPriceUOM
 	,dblTotalGCCost = /* Total GC Cost = Invoiced P-Value + Effective Hedge PL + Reserves A Value */
-					dblInvoicedPValue + (dblDifference * dblLotContractSize) + dblReservesAValueTotal
+					dblInvoicedPValue + (dblDifference * dblLotContractSizeInPriceUOM) + dblReservesAValueTotal
 	,dblDifferentialCheck = /* Differential Total - S-Differential */
 							dblDifferentialRateTotal - dblSDifferential
 	,dblEffectiveMargin = /* Total GC Cost + Invoiced S-Value */
 					(dblInvoicedPValue + (dblDifference * dblLotContractSize) + dblReservesAValueTotal) + dblInvoicedSValue
 	,dblEffectiveMarginRate = /* Effective Margin / S-Qty */
-						((dblInvoicedPValue + (dblDifference * dblLotContractSize) + dblReservesAValueTotal) + dblInvoicedSValue)
+						((dblInvoicedPValue + (dblDifference * dblLotContractSizeInPriceUOM) + dblReservesAValueTotal) + dblInvoicedSValue)
 							/ dblSAllocatedQty
 	,dblHedgePLDifference = /* Effective Hedge PL - Theor Hedge PL */
-							(dblDifference * dblLotContractSize) - (dblDifference * dblPAllocatedQty)
+							(dblDifference * dblLotContractSizeInPriceUOM) - (dblDifference * dblPAllocatedQtyInPriceUOM)
 	,dblTotalToBeRecovered = /* Hedge PL Difference + Reserves A Variance */
-							(dblDifference * dblLotContractSize) - (dblDifference * dblPAllocatedQty)
+							(dblDifference * dblLotContractSizeInPriceUOM) - (dblDifference * dblPAllocatedQtyInPriceUOM)
 							+ dblReservesATotalVariance
 	,strUnitMeasure = @strUnitMeasure
+	,strWeightUnitMeasure = @strWeightUnitMeasure
 	,strCurrency = @strCurrency
 	,strUnitCurrency = @strCurrency + '/' + @strUnitMeasure
 	,intAllocationDetailId = @intAllocationDetailId
 	,intUnitMeasureId = @intUnitMeasureId
+	,intWeightUnitMeasureId = @intWeightUnitMeasureId
 	,strCompanyName = @strCompanyName
 	,strCompanyAddress = @strCompanyAddress
 	,strCompanyCountry = @strCountry 
@@ -190,8 +212,10 @@ FROM
 		,strCommodity = COM.strCommodityCode
 		,strPClient = V.strName
 		,strSClient = C.strName
-		,dblPAllocatedQty = dbo.fnCalculateQtyBetweenUOM (PUOM.intItemUOMId, ToUOM.intItemUOMId, ALD.dblPAllocatedQty)
-		,dblSAllocatedQty = dbo.fnCalculateQtyBetweenUOM (SUOM.intItemUOMId, ToUOM.intItemUOMId, ALD.dblSAllocatedQty)
+		,dblPAllocatedQty = dbo.fnCalculateQtyBetweenUOM (PUOM.intItemUOMId, ToWUOM.intItemUOMId, ALD.dblPAllocatedQty)
+		,dblSAllocatedQty = dbo.fnCalculateQtyBetweenUOM (SUOM.intItemUOMId, ToWUOM.intItemUOMId, ALD.dblSAllocatedQty)
+		,dblPAllocatedQtyInPriceUOM = dbo.fnCalculateQtyBetweenUOM (PUOM.intItemUOMId, ToUOM.intItemUOMId, ALD.dblPAllocatedQty)
+		,dblSAllocatedQtyInPriceUOM = dbo.fnCalculateQtyBetweenUOM (SUOM.intItemUOMId, ToUOM.intItemUOMId, ALD.dblSAllocatedQty)
 		,dblPTerminalPrice = /* P-Terminal Price */
 							ISNULL(dbo.fnCalculateCostBetweenUOM(PCD.intPriceItemUOMId, ToUOM.intItemUOMId, PCD.dblFutures) / ISNULL(PCUR.intCent, 1), 0)
 		,dblSTerminalPrice = /* S-Terminal Price */
@@ -210,7 +234,8 @@ FROM
 		,dblLots = /* Lots */
 					PCD.dblNoOfLots
 		,dblLotContractSize = /* Lots Contract Size = Lots x Contract Size*/
-							PCD.dblNoOfLots * dbo.fnCTConvertQuantityToTargetItemUOM(I.intItemId, FM.intUnitMeasureId, @intUnitMeasureId, FM.dblContractSize)
+							PCD.dblNoOfLots * dbo.fnCTConvertQuantityToTargetItemUOM(I.intItemId, FM.intUnitMeasureId, @intWeightUnitMeasureId, FM.dblContractSize)
+		,dblLotContractSizeInPriceUOM = PCD.dblNoOfLots * dbo.fnCTConvertQuantityToTargetItemUOM(I.intItemId, FM.intUnitMeasureId, @intUnitMeasureId, FM.dblContractSize)
 		,dblReservesARateTotal = RA.dblReservesARateTotal
 		,dblReservesAValueTotal = RA.dblReservesAValueTotal
 		,dblReservesBRateTotal = RB.dblReservesBRateTotal
@@ -220,8 +245,8 @@ FROM
 								+ ISNULL(RA.dblReservesARateTotal, 0) 
 								+ ISNULL(RB.dblReservesBRateTotal, 0) 
 		,dblTonnageCheck = /* P-Qty - S-Qty */
-						dbo.fnCalculateQtyBetweenUOM (PUOM.intItemUOMId, ToUOM.intItemUOMId, ALD.dblPAllocatedQty) 
-						- dbo.fnCalculateQtyBetweenUOM (SUOM.intItemUOMId, ToUOM.intItemUOMId, ALD.dblSAllocatedQty)
+						dbo.fnCalculateQtyBetweenUOM (PUOM.intItemUOMId, ToWUOM.intItemUOMId, ALD.dblPAllocatedQty) 
+						- dbo.fnCalculateQtyBetweenUOM (SUOM.intItemUOMId, ToWUOM.intItemUOMId, ALD.dblSAllocatedQty)
 		,dblTotalMargin = RB.dblReservesBValueTotal * -1
 		,dblReservesATotalVariance = RA.dblReservesAVarianceTotal
 		,blbHeaderLogo = dbo.fnSMGetCompanyLogo('Header')
@@ -250,6 +275,8 @@ FROM
 		LEFT JOIN tblSMCurrency SCUR ON SCUR.intCurrencyID = SCD.intBasisCurrencyId
 		OUTER APPLY (SELECT	TOP 1 intItemUOMId, dblUnitQty FROM	dbo.tblICItemUOM 
 						WHERE intItemId = I.intItemId AND intUnitMeasureId = @intUnitMeasureId) ToUOM
+		OUTER APPLY (SELECT	TOP 1 intItemUOMId, dblUnitQty FROM	dbo.tblICItemUOM 
+						WHERE intItemId = I.intItemId AND intUnitMeasureId = @intWeightUnitMeasureId) ToWUOM
 		OUTER APPLY (SELECT TOP 1 ysnFullHeaderLogo, intReportLogoHeight, intReportLogoWidth
 							,intPnLReportReserveACategoryId, intPnLReportReserveBCategoryId 
 						FROM tblLGCompanyPreference) CP
@@ -292,8 +319,10 @@ FROM
 						,dblAmount = CASE WHEN CC.strCostMethod = 'Per Unit' THEN 
 											dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId,ToUOM.intItemUOMId,CD.dblQuantity) 
 											* dbo.fnCalculateCostBetweenUOM(CC.intItemUOMId,CToUOM.intItemUOMId,CC.dblRate) / ISNULL(CCUR.intCent, 1)
-										WHEN CC.strCostMethod = 'Amount' OR CC.strCostMethod = 'Per Container' THEN
+										WHEN CC.strCostMethod = 'Amount' THEN
 											CC.dblRate
+										WHEN CC.strCostMethod = 'Per Container'	THEN
+											CC.dblRate * (CASE WHEN ISNULL(CD.intNumberOfContainers,1) = 0 THEN 1 ELSE ISNULL(CD.intNumberOfContainers,1) END)
 										WHEN CC.strCostMethod = 'Percentage' THEN 
 											dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId,ToUOM.intItemUOMId,CD.dblQuantity) * CD.dblCashPrice * CC.dblRate/100
 										END
@@ -336,8 +365,10 @@ FROM
 							,dblAmount = CASE WHEN CC.strCostMethod = 'Per Unit' THEN 
 												dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId,ToUOM.intItemUOMId,CD.dblQuantity) 
 												* dbo.fnCalculateCostBetweenUOM(CC.intItemUOMId,CToUOM.intItemUOMId,CC.dblRate) / ISNULL(CCUR.intCent, 1)
-											WHEN CC.strCostMethod = 'Amount' OR CC.strCostMethod = 'Per Container' THEN
+											WHEN CC.strCostMethod = 'Amount' THEN
 												CC.dblRate
+											WHEN CC.strCostMethod = 'Per Container'	THEN
+												CC.dblRate * (CASE WHEN ISNULL(CD.intNumberOfContainers,1) = 0 THEN 1 ELSE ISNULL(CD.intNumberOfContainers,1) END)
 											WHEN CC.strCostMethod = 'Percentage' THEN 
 												dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId,ToUOM.intItemUOMId,CD.dblQuantity) * CD.dblCashPrice * CC.dblRate/100
 											END
