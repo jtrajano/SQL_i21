@@ -163,7 +163,7 @@ BEGIN
 			INNER JOIN tblAPBill voucher ON paymentDetail.intBillId = voucher.intBillId
 			CROSS APPLY
 			(
-				SELECT (R.dblTotal + R.dblTax) AS dblTotal 
+				SELECT SUM(R.dblTotal + R.dblTax) AS dblTotal 
 				FROM dbo.tblAPBillDetail R
 				WHERE R.intBillId = voucher.intBillId
 			) Details
