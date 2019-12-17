@@ -541,7 +541,8 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\TF\DefaultData\OK_Oklahoma.sql
 :r .\TF\DefaultData\TX_Texas.sql
 :r .\TF\DefaultData\AR_Arkansas.sql
-:r .\TF\DefaultData\AfterUpgradeCleanup.sql
+:r .\TF\DefaultData\AR_Arkansas.sql
+:r .\TF\DefaultData\CO_Colorado.sql
 
 --Integration
 :R .\IP\1_MasterTables.sql
