@@ -202,7 +202,7 @@ BEGIN
 				SET @strDestination = CASE WHEN @intCustomerId IS NULL THEN 'Location' ELSE 'Customer' END
 
 				-- GET SALES PERSON
-				SELECT @intSalePerson = intSalespersonId from tblARCustomer WHERE intEntityId = @intCustomerId
+				SELECT @intSalePerson = intSalespersonId from vyuEMEntityCustomerSearch WHERE intEntityId = @intCustomerId
 				
 				INSERT INTO tblTRLoadDistributionHeader (intLoadHeaderId, 
 					strDestination, 
