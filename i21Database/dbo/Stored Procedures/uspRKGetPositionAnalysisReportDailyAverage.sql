@@ -122,10 +122,11 @@ BEGIN
 			, dblPriceFixationPrice = CASE WHEN SUM(dblPriceFixationQty) != 0 THEN SUM(dblPriceFixationPrice) / SUM(dblPriceFixationQty) ELSE 0 END 
 			, dblAverageDeltaQty = SUM(dblFutureTradeQty) + SUM(dblOutrightPhysicalDeltaQty) + SUM(dblPriceFixationDeltaQty)
 			, dblAverageQty = SUM(dblFutureTradeQty) + SUM(dblOutrightPhysicalQty) + SUM(dblPriceFixationQty)
-			, dblAveragePrice = ((SUM(dblOutrightPhysicalQty) * (CASE WHEN SUM(dblOutrightPhysicalQty) != 0 THEN SUM(dblOutrightPhysicalPrice) / SUM(dblOutrightPhysicalQty) ELSE 0 END))
-								+ (SUM(dblFutureTradeQty) * (CASE WHEN SUM(dblFutureTradeQty) != 0 THEN SUM(dblFutureTradePrice) / SUM(dblFutureTradeQty) ELSE 0 END))
-								+ (SUM(dblPriceFixationQty) * (CASE WHEN SUM(dblPriceFixationQty) != 0 THEN SUM(dblPriceFixationPrice) / SUM(dblPriceFixationQty) ELSE 0 END)))
-								/ (SUM(dblOutrightPhysicalQty) + SUM(dblFutureTradeQty) + SUM(dblPriceFixationQty))
+			, dblAveragePrice = CASE WHEN (SUM(dblOutrightPhysicalQty) + SUM(dblFutureTradeQty) + SUM(dblPriceFixationQty)) != 0 THEN ((SUM(dblOutrightPhysicalQty) * (CASE WHEN SUM(dblOutrightPhysicalQty) != 0 THEN SUM(dblOutrightPhysicalPrice) / SUM(dblOutrightPhysicalQty) ELSE 0 END))
+																																		+ (SUM(dblFutureTradeQty) * (CASE WHEN SUM(dblFutureTradeQty) != 0 THEN SUM(dblFutureTradePrice) / SUM(dblFutureTradeQty) ELSE 0 END))
+																																		+ (SUM(dblPriceFixationQty) * (CASE WHEN SUM(dblPriceFixationQty) != 0 THEN SUM(dblPriceFixationPrice) / SUM(dblPriceFixationQty) ELSE 0 END)))
+																																		/ (SUM(dblOutrightPhysicalQty) + SUM(dblFutureTradeQty) + SUM(dblPriceFixationQty))
+									ELSE 0 END
 		FROM #tmpTransactions tbl
 		WHERE dtmDate BETWEEN @dtmDateFrom AND @dtmDateTo
 		GROUP BY dtmDate
@@ -148,10 +149,11 @@ BEGIN
 			, dblPriceFixationPrice = CASE WHEN SUM(dblPriceFixationQty) != 0 THEN SUM(dblPriceFixationPrice) / SUM(dblPriceFixationQty) ELSE 0 END 
 			, dblAverageDeltaQty = SUM(dblFutureTradeQty) + SUM(dblOutrightPhysicalDeltaQty) + SUM(dblPriceFixationDeltaQty)
 			, dblAverageQty = SUM(dblFutureTradeQty) + SUM(dblOutrightPhysicalQty) + SUM(dblPriceFixationQty)
-			, dblAveragePrice = ((SUM(dblOutrightPhysicalQty) * (CASE WHEN SUM(dblOutrightPhysicalQty) != 0 THEN SUM(dblOutrightPhysicalPrice) / SUM(dblOutrightPhysicalQty) ELSE 0 END))
-								+ (SUM(dblFutureTradeQty) * (CASE WHEN SUM(dblFutureTradeQty) != 0 THEN SUM(dblFutureTradePrice) / SUM(dblFutureTradeQty) ELSE 0 END))
-								+ (SUM(dblPriceFixationQty) * (CASE WHEN SUM(dblPriceFixationQty) != 0 THEN SUM(dblPriceFixationPrice) / SUM(dblPriceFixationQty) ELSE 0 END)))
-								/ (SUM(dblOutrightPhysicalQty) + SUM(dblFutureTradeQty) + SUM(dblPriceFixationQty))
+			, dblAveragePrice = CASE WHEN (SUM(dblOutrightPhysicalQty) + SUM(dblFutureTradeQty) + SUM(dblPriceFixationQty)) != 0 THEN ((SUM(dblOutrightPhysicalQty) * (CASE WHEN SUM(dblOutrightPhysicalQty) != 0 THEN SUM(dblOutrightPhysicalPrice) / SUM(dblOutrightPhysicalQty) ELSE 0 END))
+																																		+ (SUM(dblFutureTradeQty) * (CASE WHEN SUM(dblFutureTradeQty) != 0 THEN SUM(dblFutureTradePrice) / SUM(dblFutureTradeQty) ELSE 0 END))
+																																		+ (SUM(dblPriceFixationQty) * (CASE WHEN SUM(dblPriceFixationQty) != 0 THEN SUM(dblPriceFixationPrice) / SUM(dblPriceFixationQty) ELSE 0 END)))
+																																		/ (SUM(dblOutrightPhysicalQty) + SUM(dblFutureTradeQty) + SUM(dblPriceFixationQty))
+									ELSE 0 END
 		FROM #tmpTransactions tbl
 		WHERE dtmDate = @dtmDateFrom
 		GROUP BY dtmDate
@@ -174,10 +176,11 @@ BEGIN
 			, dblPriceFixationPrice = CASE WHEN SUM(dblPriceFixationQty) != 0 THEN SUM(dblPriceFixationPrice) / SUM(dblPriceFixationQty) ELSE 0 END 
 			, dblAverageDeltaQty = SUM(dblFutureTradeQty) + SUM(dblOutrightPhysicalDeltaQty) + SUM(dblPriceFixationDeltaQty)
 			, dblAverageQty = SUM(dblFutureTradeQty) + SUM(dblOutrightPhysicalQty) + SUM(dblPriceFixationQty)
-			, dblAveragePrice = ((SUM(dblOutrightPhysicalQty) * (CASE WHEN SUM(dblOutrightPhysicalQty) != 0 THEN SUM(dblOutrightPhysicalPrice) / SUM(dblOutrightPhysicalQty) ELSE 0 END))
-								+ (SUM(dblFutureTradeQty) * (CASE WHEN SUM(dblFutureTradeQty) != 0 THEN SUM(dblFutureTradePrice) / SUM(dblFutureTradeQty) ELSE 0 END))
-								+ (SUM(dblPriceFixationQty) * (CASE WHEN SUM(dblPriceFixationQty) != 0 THEN SUM(dblPriceFixationPrice) / SUM(dblPriceFixationQty) ELSE 0 END)))
-								/ (SUM(dblOutrightPhysicalQty) + SUM(dblFutureTradeQty) + SUM(dblPriceFixationQty))
+			, dblAveragePrice = CASE WHEN (SUM(dblOutrightPhysicalQty) + SUM(dblFutureTradeQty) + SUM(dblPriceFixationQty)) != 0 THEN ((SUM(dblOutrightPhysicalQty) * (CASE WHEN SUM(dblOutrightPhysicalQty) != 0 THEN SUM(dblOutrightPhysicalPrice) / SUM(dblOutrightPhysicalQty) ELSE 0 END))
+																																		+ (SUM(dblFutureTradeQty) * (CASE WHEN SUM(dblFutureTradeQty) != 0 THEN SUM(dblFutureTradePrice) / SUM(dblFutureTradeQty) ELSE 0 END))
+																																		+ (SUM(dblPriceFixationQty) * (CASE WHEN SUM(dblPriceFixationQty) != 0 THEN SUM(dblPriceFixationPrice) / SUM(dblPriceFixationQty) ELSE 0 END)))
+																																		/ (SUM(dblOutrightPhysicalQty) + SUM(dblFutureTradeQty) + SUM(dblPriceFixationQty))
+									ELSE 0 END
 		FROM #tmpTransactions tbl
 		WHERE dtmDate > @dtmDateFrom
 		GROUP BY dtmDate
@@ -200,10 +203,11 @@ BEGIN
 			, dblPriceFixationPrice = CASE WHEN SUM(dblPriceFixationQty) != 0 THEN SUM(dblPriceFixationPrice) / SUM(dblPriceFixationQty) ELSE 0 END 
 			, dblAverageDeltaQty = SUM(dblFutureTradeQty) + SUM(dblOutrightPhysicalDeltaQty) + SUM(dblPriceFixationDeltaQty)
 			, dblAverageQty = SUM(dblFutureTradeQty) + SUM(dblOutrightPhysicalQty) + SUM(dblPriceFixationQty)
-			, dblAveragePrice = ((SUM(dblOutrightPhysicalQty) * (CASE WHEN SUM(dblOutrightPhysicalQty) != 0 THEN SUM(dblOutrightPhysicalPrice) / SUM(dblOutrightPhysicalQty) ELSE 0 END))
-								+ (SUM(dblFutureTradeQty) * (CASE WHEN SUM(dblFutureTradeQty) != 0 THEN SUM(dblFutureTradePrice) / SUM(dblFutureTradeQty) ELSE 0 END))
-								+ (SUM(dblPriceFixationQty) * (CASE WHEN SUM(dblPriceFixationQty) != 0 THEN SUM(dblPriceFixationPrice) / SUM(dblPriceFixationQty) ELSE 0 END)))
-								/ (SUM(dblOutrightPhysicalQty) + SUM(dblFutureTradeQty) + SUM(dblPriceFixationQty))
+			, dblAveragePrice = CASE WHEN (SUM(dblOutrightPhysicalQty) + SUM(dblFutureTradeQty) + SUM(dblPriceFixationQty)) != 0 THEN ((SUM(dblOutrightPhysicalQty) * (CASE WHEN SUM(dblOutrightPhysicalQty) != 0 THEN SUM(dblOutrightPhysicalPrice) / SUM(dblOutrightPhysicalQty) ELSE 0 END))
+																																		+ (SUM(dblFutureTradeQty) * (CASE WHEN SUM(dblFutureTradeQty) != 0 THEN SUM(dblFutureTradePrice) / SUM(dblFutureTradeQty) ELSE 0 END))
+																																		+ (SUM(dblPriceFixationQty) * (CASE WHEN SUM(dblPriceFixationQty) != 0 THEN SUM(dblPriceFixationPrice) / SUM(dblPriceFixationQty) ELSE 0 END)))
+																																		/ (SUM(dblOutrightPhysicalQty) + SUM(dblFutureTradeQty) + SUM(dblPriceFixationQty))
+									ELSE 0 END
 		FROM #tmpTransactions tbl
 		WHERE dtmDate < @dtmDateFrom
 		GROUP BY dtmDate
