@@ -49,7 +49,10 @@ SELECT
 	dblStockUnitCost = ItemPricing.dblLastCost,
 	dblLastCost = ItemPricing.dblLastCost * ItemUOM.dblUnitQty,
 	Item.intLifeTime,
-	Item.strLifeTimeType
+	Item.strLifeTimeType,
+	strReceiveUPC = COALESCE(ItemUOM.strLongUPCCode, ItemUOM.strLongUPCCode, ''),
+	Item.ysnLotWeightsRequired,
+	ItemLoc.ysnStorageUnitRequired
 FROM tblICItemStockUOM StockUOM
 LEFT JOIN tblICItem Item ON Item.intItemId = StockUOM.intItemId
 LEFT JOIN tblICCategory Category ON Category.intCategoryId = Item.intCategoryId
