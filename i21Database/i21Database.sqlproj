@@ -8091,7 +8091,7 @@
     <Build Include="dbo\Stored Procedures\uspICAddProRatedReceiptChargesToVoucher.sql" />
     <Build Include="dbo\Stored Procedures\uspSCPostSpecialDiscount.sql" />
     <Build Include="dbo\Stored Procedures\uspSCProcessReceiptToVoucher.sql" />
-	<Build Include="dbo\Tables\tblTRImportDtn.sql" />
+    <Build Include="dbo\Tables\tblTRImportDtn.sql" />
     <Build Include="dbo\Tables\tblTRDtnImportSetup.sql" />
     <Build Include="dbo\Tables\tblTRDtnImportSetupDetail.sql" />
     <Build Include="dbo\Tables\tblTRImportDtnDetail.sql" />
@@ -8513,5 +8513,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\TR\CrossReferenceDefault.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\CO_Colorado.sql" />
   </ItemGroup>
 </Project>

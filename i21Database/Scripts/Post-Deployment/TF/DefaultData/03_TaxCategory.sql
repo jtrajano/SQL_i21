@@ -32,6 +32,32 @@ DELETE @TaxCategoryAR
 GO
 
 
+PRINT ('Deploying CO Tax Category')
+
+DECLARE @TaxCategoryCO AS TFTaxCategory
+
+INSERT INTO @TaxCategoryCO(
+	intTaxCategoryId
+	, strState
+	, strTaxCategory
+	, intMasterId
+)
+SELECT intTaxCategoryId = 0, strState = 'CO', strTaxCategory = 'CO Excise Aviation Jet Fuels', intMasterId = 6206
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'CO', strTaxCategory = 'CO Excise Aviation Gasolines', intMasterId = 6207
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'CO', strTaxCategory = 'CO Excise CNG', intMasterId = 6208
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'CO', strTaxCategory = 'CO Excise Gasolines', intMasterId = 6209
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'CO', strTaxCategory = 'CO Excise Special Fuels', intMasterId = 6210
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'CO', strTaxCategory = 'CO Excise LNG', intMasterId = 6211
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'CO', strTaxCategory = 'CO Excise ERS', intMasterId = 6212
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'CO', strTaxCategory = 'CO Excise LPG', intMasterId = 6213
+
+EXEC uspTFUpgradeTaxCategories @TaxAuthorityCode = 'CO', @TaxCategories = @TaxCategoryCO
+
+DELETE @TaxCategoryCO
+
+GO
+
+
 PRINT ('Deploying ID Tax Category')
 
 DECLARE @TaxCategoryID AS TFTaxCategory
