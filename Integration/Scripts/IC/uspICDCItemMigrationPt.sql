@@ -419,4 +419,8 @@ SELECT inv.intItemId
 		JOIN tblICItemUOM U ON I.intItemId = U.intItemId AND U.ysnStockUnit = 1
 	WHERE ptitm_alt_itm <>'' AND ptitm_alt_itm <> ptitm_itm_no
 
+UPDATE tblICItemUOM SET ysnStockUnit = 0 WHERE dblUnitQty <> 1 AND ysnStockUnit = 1
+UPDATE tblICItemUOM SET ysnStockUnit = 1 WHERE ysnStockUnit = 0 AND dblUnitQty = 1
+UPDATE tblICItemLocation SET intCostingMethod = 1 WHERE intCostingMethod IS NULL
+
 GO

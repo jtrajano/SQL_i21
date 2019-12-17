@@ -391,3 +391,7 @@ INSERT INTO [dbo].[tblICItemPricing] (
 		)
 	)
 --------------------------------------------------------------------------------------------------------------------------------------------
+
+UPDATE tblICItemUOM SET ysnStockUnit = 0 WHERE dblUnitQty <> 1 AND ysnStockUnit = 1
+UPDATE tblICItemUOM SET ysnStockUnit = 1 WHERE ysnStockUnit = 0 AND dblUnitQty = 1
+UPDATE tblICItemLocation SET intCostingMethod = 1 WHERE intCostingMethod IS NULL
