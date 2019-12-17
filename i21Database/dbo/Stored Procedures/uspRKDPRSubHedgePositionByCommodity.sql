@@ -1242,7 +1242,7 @@ BEGIN
 				SELECT strCommodityCode
 					,'Basis Risk' COLLATE Latin1_General_CI_AS strType
 					, strContractType
-					, sum(dblTotal)
+					, sum(round(dblTotal,2))
 					, intContractHeaderId
 					, strContractNumber
 					, strShipmentNumber
@@ -1285,7 +1285,7 @@ BEGIN
 					, strContractType
 					, strLocationName
 					, strContractEndMonth
-					, sum(dblTotal)
+					, sum(round(dblTotal,2))
 					, intFromCommodityUnitMeasureId
 					, intCommodityId
 					, intCompanyLocationId
