@@ -1254,19 +1254,13 @@ BEGIN TRY
 			WHEN @ysnCalculatePlannedPurchases = 0
 				AND @ysnCalculateEndInventory = 0
 				AND @intContainerTypeId IS NOT NULL
-				THEN IsNULL(IL.dblMinOrder * CW.dblWeight * IsNULL(UMCByWeight.dblConversionToStock, 1), 0)
+				--THEN IsNULL(IL.dblMinOrder * CW.dblWeight * IsNULL(UMCByWeight.dblConversionToStock, 1), 0)
+				THEN IsNULL(IL.dblMinOrder * IsNULL(UMCByWeight.dblConversionToStock, 1), 0)
 			ELSE 0
 			END
 		,5 AS intAttributeId --Planned Purchases
 		,D.intMonthId
 	FROM #tblMFDemand D
-	--JOIN tblICItem I ON I.intItemId = D.intItemId
-	--LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityId = I.intCommodityId
-	--LEFT JOIN tblLGContainerTypeCommodityQty CTCQ ON CTCQ.intCommodityAttributeId = I.intOriginId
-	--	AND CTCQ.intCommodityId = I.intCommodityId
-	--	AND CTCQ.intContainerTypeId = @intContainerTypeId
-	--	AND CA.intDefaultPackingUOMId = CTCQ.intUnitMeasureId
-	--LEFT JOIN tblLGContainerType CT ON CT.intContainerTypeId = CTCQ.intContainerTypeId
 	LEFT JOIN @tblMFContainerWeight CW ON CW.intItemId = D.intItemId
 	LEFT JOIN tblICUnitMeasureConversion UMCByWeight ON UMCByWeight.intUnitMeasureId = CW.intWeightUnitMeasureId --From Unit
 		AND UMCByWeight.intStockUnitMeasureId = @intUnitMeasureId -- To Unit
@@ -1289,31 +1283,24 @@ BEGIN TRY
 	WHERE intAttributeId = 2 --Opening Inventory
 		AND intMonthId > 0
 
-	IF @PlannedPurchasesXML <> ''
-	BEGIN
-		UPDATE D
-		SET dblQty = CASE 
-				WHEN @intContainerTypeId IS NOT NULL
-					THEN IsNULL(Purchase.[strValue] * CW.dblWeight * IsNULL(UMCByWeight.dblConversionToStock, 1), 0)
-				ELSE Purchase.[strValue]
-				END
-		FROM #tblMFDemand D
-		JOIN #TempPlannedPurchases Purchase ON Purchase.intItemId = D.intItemId
-			AND Purchase.[strName] = D.intMonthId
-		--JOIN tblICItem I ON I.intItemId = D.intItemId
-		--LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityId = I.intCommodityId
-		--LEFT JOIN tblLGContainerTypeCommodityQty CTCQ ON CTCQ.intCommodityAttributeId = I.intOriginId
-		--	AND CTCQ.intCommodityId = I.intCommodityId
-		--	AND CTCQ.intContainerTypeId = @intContainerTypeId
-		--	AND CA.intDefaultPackingUOMId = CTCQ.intUnitMeasureId
-		--LEFT JOIN tblLGContainerType CT ON CT.intContainerTypeId = CTCQ.intContainerTypeId
-		LEFT JOIN @tblMFContainerWeight CW ON CW.intItemId = D.intItemId
-		LEFT JOIN tblICUnitMeasureConversion UMCByWeight ON UMCByWeight.intUnitMeasureId = CW.intWeightUnitMeasureId --From Unit
-			AND UMCByWeight.intStockUnitMeasureId = @intUnitMeasureId -- To Unit
-		LEFT JOIN tblICItemLocation IL ON IL.intItemId = D.intItemId
-		WHERE intAttributeId = 5 --Planned Purchases -
-			AND intMonthId > 0
-	END
+	--IF @PlannedPurchasesXML <> ''
+	--BEGIN
+	--	UPDATE D
+	--	SET dblQty = CASE 
+	--			WHEN @intContainerTypeId IS NOT NULL
+	--				THEN IsNULL(Purchase.[strValue] * CW.dblWeight * IsNULL(UMCByWeight.dblConversionToStock, 1), 0)
+	--			ELSE Purchase.[strValue]
+	--			END
+	--	FROM #tblMFDemand D
+	--	JOIN #TempPlannedPurchases Purchase ON Purchase.intItemId = D.intItemId
+	--		AND Purchase.[strName] = D.intMonthId
+	--	LEFT JOIN @tblMFContainerWeight CW ON CW.intItemId = D.intItemId
+	--	LEFT JOIN tblICUnitMeasureConversion UMCByWeight ON UMCByWeight.intUnitMeasureId = CW.intWeightUnitMeasureId --From Unit
+	--		AND UMCByWeight.intStockUnitMeasureId = @intUnitMeasureId -- To Unit
+	--	LEFT JOIN tblICItemLocation IL ON IL.intItemId = D.intItemId
+	--	WHERE intAttributeId = 5 --Planned Purchases -
+	--		AND intMonthId > 0
+	--END
 
 	IF @WeeksOfSupplyTargetXML <> ''
 	BEGIN
@@ -1945,7 +1932,7 @@ BEGIN TRY
 					WHEN A.intReportAttributeID = 5
 						AND @intContainerTypeId IS NOT NULL
 						AND IsNULL(CW.dblWeight, 0) > 0
-						THEN Round(IsNULL((D.dblQty * IsNULL(UMC.dblConversionToStock, 1)) / CW.dblWeight, 0), 0)
+						THEN Round(IsNULL((D.dblQty * IsNULL(UMC.dblConversionToStock, 1)) / CW.dblWeight, 0), 0)*CW.dblWeight
 					WHEN DL.intMonthId IN (
 							- 1
 							,0
@@ -1974,14 +1961,6 @@ BEGIN TRY
 		FROM #tblMFDemandList DL
 		JOIN tblCTReportAttribute A ON A.intReportAttributeID = DL.intAttributeId
 		JOIN tblICItem I ON I.intItemId = DL.intItemId
-		--LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityId = I.intCommodityId
-		--LEFT JOIN tblLGContainerTypeCommodityQty CTCQ ON CTCQ.intCommodityAttributeId = I.intOriginId
-		--	AND CTCQ.intCommodityId = I.intCommodityId
-		--	AND CTCQ.intContainerTypeId = @intContainerTypeId
-		--	AND CA.intDefaultPackingUOMId = CTCQ.intUnitMeasureId
-		--LEFT JOIN tblLGContainerType CT ON CT.intContainerTypeId = CTCQ.intContainerTypeId
-		--LEFT JOIN tblICUnitMeasureConversion UMCByWeight ON UMCByWeight.intUnitMeasureId = @intUnitMeasureId --From Unit
-		--	AND UMCByWeight.intStockUnitMeasureId = CTCQ.intWeightUnitMeasureId -- To Unit
 		LEFT JOIN @tblMFContainerWeight CW ON CW.intItemId = DL.intItemId
 		LEFT JOIN tblICUnitMeasureConversion UMC ON UMC.intUnitMeasureId = @intUnitMeasureId --From Unit
 			AND UMC.intStockUnitMeasureId = CW.intWeightUnitMeasureId -- To Unit
