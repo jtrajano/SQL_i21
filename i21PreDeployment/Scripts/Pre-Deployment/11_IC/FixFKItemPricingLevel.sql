@@ -9,19 +9,20 @@ BEGIN
 	BEGIN 
 		EXEC ('
 			UPDATE ipl
-			SET 
-				ipl.[intCompanyLocationPricingLevelId] = spl.intCompanyLocationPricingLevelId	
-			FROM 
-				tblICItemPricingLevel ipl LEFT JOIN tblICItemLocation il
-					ON ipl.intItemLocationId = il.intItemLocationId	
-				LEFT JOIN tblSMCompanyLocation cl
-					ON cl.intCompanyLocationId = il.intLocationId
-				LEFT JOIN tblSMCompanyLocationPricingLevel spl 
-					ON spl.strPricingLevelName = ipl.strPriceLevel
+			SET ipl.[intCompanyLocationPricingLevelId] = ISNULL(spl.intCompanyLocationPricingLevelId, matchedLevel.intCompanyLocationPricingLevelId)
+			FROM tblICItemPricingLevel ipl
+				LEFT JOIN tblICItemLocation il ON ipl.intItemLocationId = il.intItemLocationId	
+				LEFT JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = il.intLocationId
+				LEFT JOIN tblSMCompanyLocationPricingLevel spl  ON spl.strPricingLevelName = ipl.strPriceLevel
 					AND spl.intCompanyLocationId = il.intLocationId
-			WHERE
-				ipl.intCompanyLocationPricingLevelId IS NULL 
-				AND spl.strPricingLevelName IS NOT NULL 		
+				OUTER APPLY (
+					SELECT MIN(innerLevel.strPricingLevelName) strPricingLevelName, MIN(innerLevel.intSort) intPricingLevel,
+						MIN(innerLevel.intCompanyLocationPricingLevelId) intCompanyLocationPricingLevelId
+					FROM tblSMCompanyLocationPricingLevel innerLevel
+					WHERE innerLevel.intCompanyLocationId = il.intLocationId
+						
+				) matchedLevel
+			WHERE ipl.intCompanyLocationPricingLevelId IS NULL  		
 		')
 	END 
 END 
