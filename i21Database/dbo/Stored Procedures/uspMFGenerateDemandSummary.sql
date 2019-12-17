@@ -7,8 +7,83 @@
 	)
 AS
 BEGIN
+	DECLARE @intNoOfMonths INT
+
+	SELECT @intNoOfMonths = Max(intNoOfMonths)
+	FROM tblCTInvPlngReportMaster
+	WHERE intInvPlngReportMasterID IN (
+			SELECT Item Collate Latin1_General_CI_AS
+			FROM [dbo].[fnSplitString](@strInvPlngReportMasterID, ',')
+			)
+
+	IF @intNoOfMonths IS NULL
+		SELECT @intNoOfMonths = 0
+
 	IF @ysnLoadPlan = 1
 	BEGIN
+		SELECT [strMonth1]
+			,[strMonth2]
+			,[strMonth3]
+			,[strMonth4]
+			,[strMonth5]
+			,[strMonth6]
+			,[strMonth7]
+			,[strMonth8]
+			,[strMonth9]
+			,[strMonth10]
+			,[strMonth11]
+			,[strMonth12]
+			,[strMonth13]
+			,[strMonth14]
+			,[strMonth15]
+			,[strMonth16]
+			,[strMonth17]
+			,[strMonth18]
+			,[strMonth19]
+			,[strMonth20]
+			,[strMonth21]
+			,[strMonth22]
+			,[strMonth23]
+			,[strMonth24]
+		FROM (
+			SELECT strFieldName
+				,strValue
+			FROM tblMFInvPlngSummaryDetail SD
+			JOIN tblCTReportAttribute RA ON RA.intReportAttributeID = SD.intAttributeId
+			WHERE intAttributeId = 1
+				AND RA.intReportMasterID IN (
+					SELECT Item Collate Latin1_General_CI_AS
+					FROM [dbo].[fnSplitString](@strInvPlngReportMasterID, ',')
+					)
+				AND strValue <> ''
+			) AS SourceTable
+		PIVOT(MIN(strValue) FOR strFieldName IN (
+					[strMonth1]
+					,[strMonth2]
+					,[strMonth3]
+					,[strMonth4]
+					,[strMonth5]
+					,[strMonth6]
+					,[strMonth7]
+					,[strMonth8]
+					,[strMonth9]
+					,[strMonth10]
+					,[strMonth11]
+					,[strMonth12]
+					,[strMonth13]
+					,[strMonth14]
+					,[strMonth15]
+					,[strMonth16]
+					,[strMonth17]
+					,[strMonth18]
+					,[strMonth19]
+					,[strMonth20]
+					,[strMonth21]
+					,[strMonth22]
+					,[strMonth23]
+					,[strMonth24]
+					)) AS PivotTable;
+
 		SELECT strBook
 			,strSubBook
 			,strProductType
@@ -347,8 +422,11 @@ BEGIN
 					,[Ending Inventory strMonth24]
 					,[Months of Supply Target strMonth24]
 					)) AS PivotTable;
-
-		SELECT [strMonth1]
+	END
+	ELSE
+	BEGIN
+		SELECT @intNoOfMonths AS intNoOfMonths
+			,[strMonth1]
 			,[strMonth2]
 			,[strMonth3]
 			,[strMonth4]
@@ -375,10 +453,9 @@ BEGIN
 		FROM (
 			SELECT strFieldName
 				,strValue
-			FROM tblMFInvPlngSummaryDetail SD
-			JOIN tblCTReportAttribute RA ON RA.intReportAttributeID = SD.intAttributeId
-			WHERE intAttributeId = 1
-				AND RA.intReportMasterID IN (
+			FROM tblCTInvPlngReportAttributeValue
+			WHERE intReportAttributeID = 1
+				AND intInvPlngReportMasterID IN (
 					SELECT Item Collate Latin1_General_CI_AS
 					FROM [dbo].[fnSplitString](@strInvPlngReportMasterID, ',')
 					)
@@ -410,9 +487,7 @@ BEGIN
 					,[strMonth23]
 					,[strMonth24]
 					)) AS PivotTable;
-	END
-	ELSE
-	BEGIN
+
 		IF @ysnRefreshContract = 0
 		BEGIN
 			SELECT strBook
@@ -1279,67 +1354,5 @@ BEGIN
 						,[Months of Supply Target strMonth24]
 						)) AS PivotTable;
 		END
-
-		SELECT [strMonth1]
-			,[strMonth2]
-			,[strMonth3]
-			,[strMonth4]
-			,[strMonth5]
-			,[strMonth6]
-			,[strMonth7]
-			,[strMonth8]
-			,[strMonth9]
-			,[strMonth10]
-			,[strMonth11]
-			,[strMonth12]
-			,[strMonth13]
-			,[strMonth14]
-			,[strMonth15]
-			,[strMonth16]
-			,[strMonth17]
-			,[strMonth18]
-			,[strMonth19]
-			,[strMonth20]
-			,[strMonth21]
-			,[strMonth22]
-			,[strMonth23]
-			,[strMonth24]
-		FROM (
-			SELECT strFieldName
-				,strValue
-			FROM tblCTInvPlngReportAttributeValue
-			WHERE intReportAttributeID = 1
-				AND intInvPlngReportMasterID IN (
-					SELECT Item Collate Latin1_General_CI_AS
-					FROM [dbo].[fnSplitString](@strInvPlngReportMasterID, ',')
-					)
-				AND strValue <> ''
-			) AS SourceTable
-		PIVOT(MIN(strValue) FOR strFieldName IN (
-					[strMonth1]
-					,[strMonth2]
-					,[strMonth3]
-					,[strMonth4]
-					,[strMonth5]
-					,[strMonth6]
-					,[strMonth7]
-					,[strMonth8]
-					,[strMonth9]
-					,[strMonth10]
-					,[strMonth11]
-					,[strMonth12]
-					,[strMonth13]
-					,[strMonth14]
-					,[strMonth15]
-					,[strMonth16]
-					,[strMonth17]
-					,[strMonth18]
-					,[strMonth19]
-					,[strMonth20]
-					,[strMonth21]
-					,[strMonth22]
-					,[strMonth23]
-					,[strMonth24]
-					)) AS PivotTable;
 	END
 END
