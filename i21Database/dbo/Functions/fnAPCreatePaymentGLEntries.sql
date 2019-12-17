@@ -137,7 +137,7 @@ BEGIN
 			,ROUND(SUM([dblCreditForeign]),2) as [dblCreditForeign]	
 	FROM
 	(
-		SELECT		--DISTINCT
+		SELECT		DISTINCT
 					[intPaymentId]					=	A.intPaymentId,
 					[dblCredit]	 					=	CASE WHEN A.dblExchangeRate != 1 THEN CAST(
 														dbo.fnAPGetPaymentAmountFactor((Details.dblTotal 
@@ -154,7 +154,8 @@ BEGIN
 															paymentDetail.dblPayment, voucher.dblTotal)
 														AS DECIMAL(18,6)) * (CASE WHEN voucher.intTransactionType NOT IN (1,14) AND A.ysnPrepay = 0 THEN -1 ELSE 1 END)
 														ELSE
-															CAST(A.dblAmountPaid AS DECIMAL(18,2)) END												
+															CAST(A.dblAmountPaid AS DECIMAL(18,2)) END,
+					paymentDetail.intPaymentDetailId										
 				
 			FROM	[dbo].tblAPPayment A 
 			INNER JOIN tblAPPaymentDetail paymentDetail ON A.intPaymentId = paymentDetail.intPaymentId
