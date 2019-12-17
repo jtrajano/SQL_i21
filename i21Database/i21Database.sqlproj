@@ -8273,6 +8273,7 @@
     <Build Include="dbo\Tables\tblCTContractBalanceLog.sql" />
     <Build Include="dbo\User Defined Types\CTContractBalanceLog.sql" />
     <Build Include="dbo\Stored Procedures\uspCTLogContractBalance.sql" />
+    <None Include="Scripts\Post-Deployment\SM\2010_RemoveF9Shortcut.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
