@@ -8275,6 +8275,7 @@
     <Build Include="dbo\Stored Procedures\uspCTLogContractBalance.sql" />
     <None Include="Scripts\Post-Deployment\SM\2010_RemoveF9Shortcut.sql" />
     <Build Include="dbo\Functions\fnICOutstandingInTransitPerDay.sql" />
+    <Build Include="dbo\Functions\fnAPCreateVoucherAllocation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
