@@ -484,8 +484,49 @@ AS
 		, strBook NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		, intSubBookId INT
 		, strSubBook NVARCHAR(100) COLLATE Latin1_General_CI_AS)
+
+	DECLARE @ContractList AS TABLE (intRowNum INT
+		, strCommodityCode NVARCHAR (100)
+		, intCommodityId INT
+		, intContractHeaderId INT
+		, strContractNumber NVARCHAR (100)
+		, strLocationName NVARCHAR (100)
+		, dtmEndDate DATETIME
+		, dblBalance NUMERIC(24, 10)
+		, intUnitMeasureId INT
+		, intPricingTypeId INT
+		, intContractTypeId INT
+		, intCompanyLocationId INT
+		, strContractType NVARCHAR (100)
+		, strPricingType NVARCHAR (100)
+		, intCommodityUnitMeasureId INT
+		, intContractDetailId INT
+		, intContractStatusId INT
+		, intEntityId INT
+		, intCurrencyId INT
+		, strType NVARCHAR (100)
+		, intItemId INT
+		, strItemNo NVARCHAR (100)
+		, dtmContractDate DATETIME
+		, strEntityName NVARCHAR (200)
+		, strCustomerContract NVARCHAR (200)
+		, intFutureMarketId INT
+		, intFutureMonthId INT
+		, intItemUOMId INT
+		, intBookId INT
+		, intSubBookId INT
+		, dblQuantity NUMERIC(24, 10)
+		, dblRatioQty NUMERIC(24, 10)
+		, dblNoOfLot NUMERIC(24, 10)
+		, dtmHistoryCreated DATETIME
+		, intHeaderPricingTypeId INT
+		, dtmStartDate DATETIME
+		, intPricingTypeIdHeader INT
+		, ysnMultiplePriceFixation BIT
+		, dtmM2MDate DATETIME)
 	
-	SELECT DISTINCT intRowNum
+	INSERT INTO @ContractList
+	SELECT intRowNum
 		, strCommodityCode
 		, intCommodityId
 		, intContractHeaderId
@@ -523,7 +564,7 @@ AS
 		, dtmStartDate
 		, intPricingTypeIdHeader
 		, ysnMultiplePriceFixation
-	INTO #tmpContractList
+		, dtmM2MDate
 	FROM (
 		SELECT * FROM (
 			SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY h.intContractDetailId ORDER BY dtmHistoryCreated DESC)
@@ -565,6 +606,7 @@ AS
 				, dtmStartDate = cd.dtmStartDate
 				, intPricingTypeIdHeader = ch.intPricingTypeId
 				, ysnMultiplePriceFixation
+				, dtmM2MDate
 			FROM tblCTSequenceHistory h
 			JOIN tblCTContractDetail cd ON cd.intContractDetailId = h.intContractDetailId
 			JOIN tblCTContractHeader ch ON ch.intContractHeaderId = h.intContractHeaderId
@@ -616,6 +658,7 @@ AS
 				, dtmStartDate = cd.dtmStartDate
 				, intPricingTypeIdHeader = ch.intPricingTypeId
 				, ysnMultiplePriceFixation
+				, dtmM2MDate
 			FROM tblCTSequenceHistory h
 			JOIN tblCTContractDetail cd ON cd.intContractDetailId = h.intContractDetailId
 			JOIN tblCTContractHeader ch ON ch.intContractHeaderId = h.intContractHeaderId
@@ -665,6 +708,7 @@ AS
 			, dtmStartDate
 			, intPricingTypeIdHeader
 			, ysnMultiplePriceFixation
+			, dtmM2MDate
 		FROM (
 			SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY h.intContractDetailId ORDER BY dtmHistoryCreated DESC)
 				, dtmHistoryCreated
@@ -705,6 +749,7 @@ AS
 				, dtmStartDate = cd.dtmStartDate
 				, intPricingTypeIdHeader = ch.intPricingTypeId
 				, ysnMultiplePriceFixation
+				, dtmM2MDate
 			FROM tblCTSequenceHistory h
 			JOIN tblCTContractDetail cd ON cd.intContractDetailId = h.intContractDetailId
 			JOIN tblCTContractHeader ch ON ch.intContractHeaderId = h.intContractHeaderId
@@ -715,6 +760,15 @@ AS
 		) a
 		WHERE a.intRowNum = 1 AND intContractStatusId NOT IN (2, 3, 6) AND strPricingStatus = 'Parially Priced' AND intPricingTypeId IN (2, 8)
 	)t
+
+	IF EXISTS (SELECT TOP 1 1 FROM tblRKCompanyPreference WHERE ysnUseM2MDate = 1)
+	BEGIN
+		DELETE FROM @ContractList
+		WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmM2MDate, 110), 110) > @dtmToDate
+
+		UPDATE @ContractList
+		SET dtmStartDate = ISNULL(dtmM2MDate, dtmStartDate)
+	END
 	
 	SELECT fm.strFutureMonth
 		, strAccountNumber = strContractType + ' - ' + CASE WHEN @strPositionBy = 'Product Type' THEN ISNULL(ca.strDescription, '') ELSE ISNULL(cv.strEntityName, '') END COLLATE Latin1_General_CI_AS
@@ -756,7 +810,7 @@ AS
 		, cv.intSubBookId
 		, strSubBook
 	INTO #PricedContractList
-	FROM #tmpContractList cv
+	FROM @ContractList cv
 	JOIN tblRKFutureMarket ffm ON ffm.intFutureMarketId = cv.intFutureMarketId
 	JOIN tblICCommodityUnitMeasure um2 ON um2.intUnitMeasureId = ffm.intUnitMeasureId AND um2.intCommodityId = cv.intCommodityId
 	JOIN tblRKFuturesMonth fm ON fm.intFutureMonthId = cv.intFutureMonthId
@@ -1030,7 +1084,6 @@ AS
 	
 	DROP TABLE #tmpLotsQtyByDetail
 	DROP TABLE #tmpLotsQtyByHeader
-	DROP TABLE #tmpContractList
 
 	INSERT INTO @ListFinal (intRowNumber
 		, strGroup
