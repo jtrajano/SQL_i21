@@ -17,6 +17,7 @@
     ,[intConcurrencyId] INT NULL DEFAULT ((0))
 	,[ysnPosted] BIT NULL DEFAULT((0))
 	,[intCompanyId] INT NULL
+	,[dtmDate] DATETIME NULL
     ,[dtmDateCreated] DATETIME NULL
     ,[dtmDateModified] DATETIME NULL
     ,[intCreatedByUserId] INT NULL

@@ -15,4 +15,5 @@ CREATE TYPE [dbo].[ItemReservationTableType] AS TABLE
 	,[strTransactionId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL			-- The string id of the source transaction. 
 	,[intTransactionTypeId] INT NOT NULL											-- The transaction type. Source table for the types are found in tblICInventoryTransactionType	
 	,[intOwnershipTypeId] INT NULL DEFAULT 1	-- Ownership type of the item.  
+	,[dtmDate] DATETIME 						-- Date of the reservation.
 )

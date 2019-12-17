@@ -8,6 +8,7 @@ CREATE PROCEDURE dbo.uspICGetItemRunningStockQty (
 	, @intCategoryId INT = NULL
 	, @dtmAsOfDate DATETIME = NULL
 	, @ysnActiveOnly BIT = 1
+	, @intItemUOMId INT = NULL
 )
 AS
 
@@ -19,13 +20,79 @@ SELECT
 	, Item.strType
 	, CASE WHEN @intLotId IS NOT NULL THEN LotUOM.strUnitMeasure ELSE UOM.strUnitMeasure END strUnitMeasure
 	, Lot.strLotNumber
-	--, Transactions.dtmDate
-	, dblOnHand = SUM(CASE WHEN @intLotId IS NOT NULL THEN Lot.dblQty ELSE dbo.fnCalculateQtyBetweenUOM(Transactions.intItemUOMId, StockUOM.intItemUOMId, Transactions.dblOnHand) END)
-	, dblReserved = ISNULL(SUM(dbo.fnCalculateQtyBetweenUOM(Transactions.intItemUOMId, StockUOM.intItemUOMId, reserved.dblQty)), 0)
-	, dblOnHandNoReserved = ISNULL(SUM(CASE WHEN @intLotId IS NOT NULL THEN Lot.dblQty ELSE dbo.fnCalculateQtyBetweenUOM(Transactions.intItemUOMId, StockUOM.intItemUOMId, Transactions.dblOnHand) END), 0)
-		- ISNULL(SUM(dbo.fnCalculateQtyBetweenUOM(Transactions.intItemUOMId, StockUOM.intItemUOMId, reserved.dblQty)), 0)
-FROM tblICItem Item
-	INNER JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemId = Item.intItemId
+	, dblOnHand = 
+		SUM (
+			CASE 
+				WHEN @intLotId IS NOT NULL THEN 
+					Lot.dblQty 
+				ELSE 
+					CASE 
+						WHEN @intItemUOMId IS NULL THEN 
+							dbo.fnCalculateQtyBetweenUOM (
+								Transactions.intItemUOMId
+								, StockUOM.intItemUOMId
+								, Transactions.dblOnHand
+							) 
+						ELSE 
+							Transactions.dblOnHand
+					END 
+			END
+		)
+	, dblReserved = 
+		ISNULL(
+			SUM(
+				CASE 
+					WHEN @intItemUOMId IS NULL THEN 
+						dbo.fnCalculateQtyBetweenUOM (
+							Transactions.intItemUOMId
+							, StockUOM.intItemUOMId
+							, reserved.dblQty
+						)
+					ELSE 
+						reserved.dblQty	
+				END 
+			)
+			, 0
+		)
+	, dblOnHandNoReserved = 
+		SUM (
+			CASE 
+				WHEN @intLotId IS NOT NULL THEN 
+					Lot.dblQty 
+				ELSE 
+					CASE 
+						WHEN @intItemUOMId IS NULL THEN 
+							dbo.fnCalculateQtyBetweenUOM (
+								Transactions.intItemUOMId
+								, StockUOM.intItemUOMId
+								, Transactions.dblOnHand
+							) 
+						ELSE 
+							Transactions.dblOnHand
+					END 
+			END
+		)
+		- 
+		ISNULL(
+			SUM(
+				CASE 
+					WHEN @intItemUOMId IS NULL THEN 
+						dbo.fnCalculateQtyBetweenUOM (
+							Transactions.intItemUOMId
+							, StockUOM.intItemUOMId
+							, reserved.dblQty
+						)
+					ELSE 
+						reserved.dblQty	
+				END 
+			)
+			, 0
+		)
+
+FROM 
+	tblICItem Item
+	INNER JOIN tblICItemLocation ItemLocation 
+		ON ItemLocation.intItemId = Item.intItemId
 	INNER JOIN (
 		SELECT
 			  t.intItemId
@@ -35,35 +102,61 @@ FROM tblICItem Item
 			, t.intLotId
 			, t.intItemUOMId
 			, dblOnHand = SUM(t.dblQty)
-		FROM tblICInventoryTransaction t
-		WHERE dbo.fnDateLessThanEquals(CONVERT(VARCHAR(10), t.dtmDate,112), @dtmAsOfDate) = 1
-		GROUP BY t.intItemId, t.intItemLocationId, t.intSubLocationId, t.intStorageLocationId, t.intLotId, t.intItemUOMId
-	) Transactions ON Transactions.intItemId = Item.intItemId
+		FROM 
+			tblICInventoryTransaction t
+		WHERE 
+			dbo.fnDateLessThanEquals(CONVERT(VARCHAR(10), t.dtmDate,112), @dtmAsOfDate) = 1
+			AND (t.intItemUOMId = @intItemUOMId OR @intItemUOMId IS NULL) 
+		GROUP BY 
+			t.intItemId
+			, t.intItemLocationId
+			, t.intSubLocationId
+			, t.intStorageLocationId
+			, t.intLotId
+			, t.intItemUOMId
+	) Transactions 
+		ON Transactions.intItemId = Item.intItemId
 		AND Transactions.intItemLocationId = ItemLocation.intItemLocationId 
-	INNER JOIN tblICItemUOM StockUOM ON StockUOM.intItemId = Item.intItemId
+	INNER JOIN tblICItemUOM StockUOM 
+		ON StockUOM.intItemId = Item.intItemId
 		AND StockUOM.ysnStockUnit = 1
-	INNER JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = StockUOM.intUnitMeasureId
-	LEFT OUTER JOIN tblICLot Lot ON Lot.intLotId = @intLotId
-	LEFT OUTER JOIN tblICItemUOM LotItemUOM ON LotItemUOM.intItemId = Lot.intItemId
+	INNER JOIN tblICUnitMeasure UOM 
+		ON UOM.intUnitMeasureId = StockUOM.intUnitMeasureId
+	LEFT OUTER JOIN tblICLot Lot 
+		ON Lot.intLotId = @intLotId
+	LEFT OUTER JOIN tblICItemUOM LotItemUOM 
+		ON LotItemUOM.intItemId = Lot.intItemId
 		AND LotItemUOM.intItemUOMId = Lot.intItemUOMId
-	LEFT OUTER JOIN tblICUnitMeasure LotUOM ON LotItemUOM.intUnitMeasureId = LotUOM.intUnitMeasureId
+	LEFT OUTER JOIN tblICUnitMeasure LotUOM 
+		ON LotItemUOM.intUnitMeasureId = LotUOM.intUnitMeasureId
 	OUTER APPLY (
 		SELECT SUM(ReservedQty.dblQty) dblQty
 		FROM (
-			SELECT sr.strTransactionId, sr.dblQty dblQty
-			FROM tblICStockReservation sr
-				LEFT JOIN tblICInventoryTransaction xt ON xt.intTransactionId = sr.intTransactionId
-			WHERE sr.intItemId = Item.intItemId
+			SELECT 
+				sr.strTransactionId
+				, sr.dblQty dblQty
+			FROM 
+				tblICStockReservation sr
+				LEFT JOIN tblICInventoryTransaction xt 
+					ON xt.intTransactionId = sr.intTransactionId
+			WHERE 
+				sr.intItemId = Item.intItemId
 				AND sr.intItemLocationId = ItemLocation.intItemLocationId
 				AND ISNULL(sr.intStorageLocationId, 0) = ISNULL(Transactions.intStorageLocationId, 0)
 				AND ISNULL(sr.intSubLocationId, 0) = ISNULL(Transactions.intSubLocationId, 0)
 				AND ISNULL(sr.intLotId, 0) = ISNULL(Transactions.intLotId, 0)
 				AND dbo.fnDateLessThanEquals(CONVERT(VARCHAR(10), xt.dtmDate,112), @dtmAsOfDate) = 1
-			GROUP BY sr.strTransactionId, sr.dblQty
+				AND (sr.intItemUOMId = @intItemUOMId OR @intItemUOMId IS NULL)
+			GROUP BY 
+				sr.strTransactionId
+				, sr.dblQty
 		) AS ReservedQty
 	) reserved
+
+
 WHERE 
-	(Item.intItemId BETWEEN ISNULL(@intItemId, 1) AND ISNULL(@intItemId, 2147483647))
+	--(Item.intItemId BETWEEN ISNULL(@intItemId, 1) AND ISNULL(@intItemId, 2147483647))
+	(Item.intItemId = @intItemId OR @intItemId IS NULL) 
 	AND (ItemLocation.intLocationId = @intLocationId OR @intLocationId IS NULL)
 	AND (Transactions.intSubLocationId = @intStorageLocationId OR @intStorageLocationId IS NULL)
 	AND (Transactions.intStorageLocationId = @intStorageUnitId OR @intStorageUnitId IS NULL)
@@ -72,5 +165,13 @@ WHERE
 	AND (Item.intCommodityId = @intCommodityId OR @intCommodityId IS NULL)
 	AND Item.strType = 'Inventory'
 	AND (Item.strStatus = 'Active' AND @ysnActiveOnly = 1 OR NULLIF(@ysnActiveOnly, 0) IS NULL)
-GROUP BY Item.intItemId, Item.strItemNo, Item.strType, UOM.strUnitMeasure, Lot.strLotNumber, LotUOM.strUnitMeasure--,  Transactions.dtmDate
-ORDER BY Item.strItemNo
+	
+GROUP BY 
+	Item.intItemId
+	, Item.strItemNo
+	, Item.strType
+	, UOM.strUnitMeasure
+	, Lot.strLotNumber
+	, LotUOM.strUnitMeasure
+ORDER BY 
+	Item.strItemNo

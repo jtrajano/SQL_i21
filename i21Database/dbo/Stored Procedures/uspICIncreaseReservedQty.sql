@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspICIncreaseReservedQty]
 	@ItemsToIncreaseReserve AS ItemReservationTableType READONLY
+	,@intUserId AS INT = NULL
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -313,6 +314,9 @@ BEGIN
 			,strTransactionId
 			,dblQty
 			,intConcurrencyId
+			,dtmDate
+			,dtmDateCreated
+			,intCreatedByUserId
 	)
 	SELECT 
 			intItemStockTypeId	= @stockType_Reserved
@@ -324,6 +328,9 @@ BEGIN
 			,strTransactionId	= strTransactionId
 			,dblQty				= dblQty
 			,intConcurrencyId	= 1
+			,dtmDate
+			,dtmDateCreated		= GETDATE()
+			,intCreatedByUserId	= @intUserId
 	FROM	@ItemsToIncreaseReserve cp 
 	WHERE	ISNULL(dblQty, 0) <> 0 
 END 

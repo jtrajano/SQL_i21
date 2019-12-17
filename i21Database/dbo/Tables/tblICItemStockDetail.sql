@@ -25,6 +25,7 @@ CREATE TABLE [dbo].[tblICItemStockDetail]
 	,[intStorageLocationId] INT NULL
 	,[strTransactionId] NVARCHAR (50) COLLATE Latin1_General_CI_AS NOT NULL
 	,[dblQty] NUMERIC(38, 20) NULL DEFAULT ((0))
+	,[dtmDate] DATETIME NULL
 	,[dtmDateCreated] DATETIME NULL
 	,[dtmDateModified] DATETIME NULL
 	,[intCreatedByUserId] INT NULL

@@ -2,6 +2,7 @@
 	@ItemsToReserve AS ItemReservationTableType READONLY
 	,@intTransactionId AS INT
 	,@intTransactionTypeId AS INT
+	,@intUserId AS INT = NULL
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -24,7 +25,8 @@ INSERT INTO @ItemsToReserveAggregrate (
 		,strTransactionId
 		,intTransactionTypeId
 		,intSubLocationId
-		,intStorageLocationId	
+		,intStorageLocationId
+		,dtmDate
 )
 SELECT	intItemId
 		,intItemLocationId
@@ -35,9 +37,20 @@ SELECT	intItemId
 		,strTransactionId
 		,intTransactionTypeId
 		,intSubLocationId
-		,intStorageLocationId	 
+		,intStorageLocationId	
+		,dtmDate
 FROM	@ItemsToReserve
-GROUP  BY intItemId, intItemLocationId, intItemUOMId, intLotId, intTransactionId, strTransactionId, intTransactionTypeId, intSubLocationId, intStorageLocationId
+GROUP  BY 
+	intItemId
+	, intItemLocationId
+	, intItemUOMId
+	, intLotId
+	, intTransactionId
+	, strTransactionId
+	, intTransactionTypeId
+	, intSubLocationId
+	, intStorageLocationId
+	, dtmDate
 
 -- Clear the existing reserved records. 
 IF EXISTS (
@@ -57,7 +70,8 @@ BEGIN
 			,strTransactionId
 			,intTransactionTypeId
 			,intSubLocationId
-			,intStorageLocationId		
+			,intStorageLocationId	
+			,dtmDate
 	)
 	SELECT 
 			intItemId
@@ -70,6 +84,7 @@ BEGIN
 			,intInventoryTransactionType
 			,intSubLocationId
 			,intStorageLocationId
+			,dtmDate
 	FROM	dbo.tblICStockReservation Reservations 
 	WHERE	intTransactionId = @intTransactionId
 			AND intInventoryTransactionType = @intTransactionTypeId
@@ -77,6 +92,7 @@ BEGIN
 	-- Call this SP to decrease the reserved qty. 
 	EXEC @intReturn = dbo.uspICIncreaseReservedQty
 		@ReservationToClear
+		,@intUserId
 
 	IF @intReturn <> 0
 		RETURN @intReturn
@@ -104,6 +120,9 @@ INSERT INTO dbo.tblICStockReservation (
 		,intSubLocationId
 		,intStorageLocationId
 		,intConcurrencyId
+		,dtmDate
+		,dtmDateCreated
+		,intCreatedByUserId
 )
 SELECT	intItemId						= Items.intItemId
 		,intLocationId					= ItemLocation.intLocationId
@@ -118,12 +137,16 @@ SELECT	intItemId						= Items.intItemId
 		,intSubLocationId				= Items.intSubLocationId
 		,intStorageLocationId			= Items.intStorageLocationId
 		,intConcurrencyId				= 1
+		,dtmDate
+		,dtmDateCreated					= GETDATE()
+		,intCreatedByUserId				= @intUserId
 FROM	@ItemsToReserveAggregrate Items INNER JOIN dbo.tblICItemLocation ItemLocation
 			ON Items.intItemLocationId = ItemLocation.intItemLocationId
 
 -- Call this SP to increase the reserved qty. 
 EXEC @intReturn = dbo.uspICIncreaseReservedQty
 	@ItemsToReserveAggregrate
+	,@intUserId
 
 IF @intReturn <> 0
 	RETURN @intReturn

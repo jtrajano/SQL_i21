@@ -25,7 +25,8 @@ BEGIN
 			,strTransactionId
 			,intTransactionTypeId
 			,intSubLocationId
-			,intStorageLocationId		
+			,intStorageLocationId
+			,dtmDate
 	)
 	SELECT 
 			intItemId
@@ -38,6 +39,7 @@ BEGIN
 			,intInventoryTransactionType
 			,intSubLocationId
 			,intStorageLocationId
+			,dtmDate
 	FROM	dbo.tblICStockReservation Reservations 
 	WHERE	intTransactionId = @intTransactionId
 			AND @intTransactionTypeId = @intTransactionTypeId
@@ -66,7 +68,8 @@ BEGIN
 			,strTransactionId
 			,intTransactionTypeId
 			,intSubLocationId
-			,intStorageLocationId		
+			,intStorageLocationId
+			,dtmDate
 	)
 	SELECT 
 			intItemId
@@ -79,6 +82,7 @@ BEGIN
 			,intInventoryTransactionType
 			,intSubLocationId
 			,intStorageLocationId
+			,dtmDate
 	FROM	dbo.tblICStockReservation Reservations 
 	WHERE	intTransactionId = @intTransactionId
 			AND @intTransactionTypeId = @intTransactionTypeId
