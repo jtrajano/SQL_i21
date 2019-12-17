@@ -132,11 +132,36 @@ Begin
 	</tr>'
 	From tblLGLoadStg lg WITH (NOLOCK)
 	Where strFeedStatus='Ack Rcvd' AND ISNULL(strMessage,'') NOT IN ('', 'Success') AND GETDATE() > DATEADD(MI,@intDuration,dtmFeedCreated)
+	AND ISNULL(strMessage, '') NOT LIKE 'Received different Shipment Number from SAP%'
 	AND ISNULL(ysnMailSent,0)=0
 
 	Update tblLGLoadStg Set ysnMailSent=1
 	Where strFeedStatus='Ack Rcvd' AND ISNULL(strMessage,'') NOT IN ('', 'Success') AND GETDATE() > DATEADD(MI,@intDuration,dtmFeedCreated)
+	AND ISNULL(strMessage, '') NOT LIKE 'Received different Shipment Number from SAP%'
 	AND ISNULL(ysnMailSent,0)=0
+End
+
+If @strMessageType='Shipment1'
+Begin
+	SET @strHeader = '<tr>
+						<th>&nbsp;Shipment No</th>
+						<th>&nbsp;Type</th>
+						<th>&nbsp;Delivery No</th>
+						<th>&nbsp;Commodity</th>
+						<th>&nbsp;Ack Message</th>
+					</tr>'
+	
+	Select @strDetail=@strDetail + 
+	'<tr>
+		   <td>&nbsp;'  + ISNULL(strLoadNumber,'') + '</td>'
+		+ '<td>&nbsp;' + CASE WHEN UPPER(strMessageState)='ADDED' THEN 'Create' When UPPER(strMessageState)='DELETE' THEN 'Delete' Else 'Update' End + '</td>'
+		+ '<td>&nbsp;' + ISNULL(strExternalShipmentNumber,'') + '</td>'
+		+ '<td>&nbsp;' + ISNULL((select TOP 1 strCommodityCode from tblLGLoadDetailStg WITH (NOLOCK) Where intLoadStgId=lg.intLoadStgId),'') + '</td>'
+		+ '<td>&nbsp;' + ISNULL(strMessage,'') + '</td>
+	</tr>'
+	From tblLGLoadStg lg WITH (NOLOCK)
+	Where strFeedStatus='Ack Rcvd' AND ISNULL(strMessage,'') NOT IN ('', 'Success')
+	AND ISNULL(strMessage, '') LIKE 'Received different Shipment Number from SAP%'
 End
 
 If @strMessageType='Receipt'
