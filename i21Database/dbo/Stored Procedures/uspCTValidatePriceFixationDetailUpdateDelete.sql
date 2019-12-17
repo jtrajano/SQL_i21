@@ -36,7 +36,7 @@ BEGIN TRY
 
 	IF ISNULL(@List,'') <> ''
 	BEGIN
-		SET @ErrMsg = 'Cannot delete pricing as following Invoice/Vouchers are available. ' + @List + '. Unpost those Invoice/Voucher to continue delete the price.'
+		SET @ErrMsg = 'Cannot delete pricing as following Invoices/Vouchers are available. ' + @List + '. Unpost those Invoices/Vouchers to continue delete the price.'
 		RAISERROR(@ErrMsg,16,1)
 	END
 
