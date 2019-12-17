@@ -40,5 +40,11 @@ FROM (
 		AND SalesContracts.intFutureMarketId = DAP.intFutureMarketId
 		AND SalesContracts.intFutureMonthId = DAP.intFutureMonthId
 		AND SalesContracts.intCommodityId = DAP.intCommodityId
-	WHERE DAP.intDailyAveragePriceId = (SELECT TOP 1 intDailyAveragePriceId FROM tblRKDailyAveragePrice ORDER BY dtmDate DESC)
+	WHERE DAP.intDailyAveragePriceId IN (SELECT intDailyAveragePriceId
+										FROM (
+											SELECT intRowNum = ROW_NUMBER() OVER(PARTITION BY intBookId, intSubBookId ORDER BY dtmDate DESC)
+												, intDailyAveragePriceId	
+											FROM tblRKDailyAveragePrice
+											WHERE ysnPosted = 1
+										) t WHERE intRowNum = 1)
 )t
