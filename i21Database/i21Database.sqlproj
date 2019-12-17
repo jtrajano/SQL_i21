@@ -8693,4 +8693,7 @@
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\CT\1920_Add_Accrued_Payables.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\CO_Colorado.sql" />
+  </ItemGroup>
 </Project>
