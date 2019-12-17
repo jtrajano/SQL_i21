@@ -8111,6 +8111,7 @@
     <Build Include="dbo\Functions\fnCFCardNumberToMaximaFormat.sql" />
     <Build Include="dbo\Stored Procedures\uspCFDeleteEncodeCardData.sql" />
     <Build Include="dbo\Stored Procedures\uspAPForceCompletePayable.sql" />
+    <Build Include="dbo\Functions\fnICOutstandingInTransitPerDay.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
