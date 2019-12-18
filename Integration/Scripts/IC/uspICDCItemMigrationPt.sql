@@ -125,6 +125,7 @@ SELECT DISTINCT LTRIM(RTRIM(ptitm_itm_no))
 	  ,1,1,0
 FROM   ptitmmst
 where RTRIM(LTRIM(ptitm_phys_inv_yno)) <> 'O'
+---and ptitm_itm_no = '10093P'
 group by ptitm_itm_no,ptitm_unit,ptitm_pak_desc
 
 DECLARE @PackUnits TABLE (
@@ -146,7 +147,7 @@ DECLARE @BaseUnits TABLE (
 	ysnAllowPurchase BIT)
 
 INSERT INTO @BaseUnits(intItemId, intUnitMeasureId, dblUnitQty, strUpcCode, ysnStockUnit, ysnAllowPurchase, ysnAllowSale)
-SELECT inv.intItemId, u.intUnitMeasureId, uom.dblPackQty, uom.strUpcCode, 1 ysnStockUnit, 1 ysnAllowPurchase, 1 ysnAllowSale
+SELECT inv.intItemId, u.intUnitMeasureId, 1, uom.strUpcCode, 1 ysnStockUnit, 1 ysnAllowPurchase, 1 ysnAllowSale
 FROM @ItemUoms uom
 	INNER JOIN tblICItem inv ON inv.strItemNo = uom.strItemNo
 	INNER JOIN tblICUnitMeasure u ON UPPER(u.strSymbol) = UPPER(uom.strUnit)
@@ -199,7 +200,7 @@ WHERE NULLIF(uom.strPack, '') IS NOT NULL
 
 MERGE INTO tblICItemUOM AS Target
 USING (
-	SELECT pu.intItemId, pu.intUnitMeasureId, pu.dblUnitQty, pu.strUpcCode, 1 ysnStockUnit, 1 ysnAllowPurchase, 1 ysnAllowSale, 1 intConcurrencyId
+	SELECT pu.intItemId, pu.intUnitMeasureId, pu.dblUnitQty, pu.strUpcCode, 0 ysnStockUnit, 1 ysnAllowPurchase, 1 ysnAllowSale, 1 intConcurrencyId
 	FROM @PackUnits pu
 ) AS Source ON ((Source.strUpcCode = Target.strUpcCode AND Source.strUpcCode IS NOT NULL) OR (Source.strUpcCode IS NULL AND Source.intItemId = Target.intItemId AND Source.intUnitMeasureId = Target.intUnitMeasureId))
 WHEN NOT MATCHED THEN
