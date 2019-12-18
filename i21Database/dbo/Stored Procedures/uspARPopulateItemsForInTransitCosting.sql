@@ -168,8 +168,9 @@ SELECT
 	,[intItemUOMId]					= ICIT.[intItemUOMId]
 	,[dtmDate]						= ISNULL(ARID.[dtmPostDate], ARID.[dtmShipDate])
 	,[dblQty]						= - CASE WHEN ISNULL(CP.intPricingCount, 0) > 1 AND (ISNULL(ICS.ysnDestinationWeightsAndGrades, 0) = 0 OR ISNULL(ICS.intDestinationWeightId, 0) = 0) THEN ARID.dblQtyShipped
-											 WHEN ISNULL(ICS.ysnDestinationWeightsAndGrades, 0) = 1 AND ISNULL(ICS.intDestinationWeightId, 0) <> 0 AND ISNULL(ICS.intDestinationGradeId, 0) <> 0 THEN ARID.dblQtyShipped
-		 							  	     ELSE ICIT.[dblQty] 
+											 WHEN ISNULL(ICS.ysnDestinationWeightsAndGrades, 0) = 1 AND ISNULL(ICS.intDestinationWeightId, 0) <> 0 AND ISNULL(ICS.intDestinationGradeId, 0) <> 0 THEN
+											 	CASE WHEN ARID.dblQtyShipped > ICIT.dblQty THEN ICIT.dblQty ELSE ARID.dblQtyShipped END
+		 							  	     ELSE ICIT.dblQty
 										END
 	,[dblUOMQty]					= ICIT.[dblUOMQty]
 	,[dblCost]						= ICIT.[dblCost]
@@ -238,7 +239,8 @@ SELECT
 	,[intItemUOMId]					= ICIT.[intItemUOMId]
 	,[dtmDate]						= ISNULL(ARID.[dtmPostDate], ARID.[dtmShipDate])
 	,[dblQty]						= - CASE WHEN ISNULL(CP.intPricingCount, 0) > 1 AND (ISNULL(ICS.ysnDestinationWeightsAndGrades, 0) = 0 OR ISNULL(ICS.intDestinationWeightId, 0) = 0) THEN ARID.dblQtyShipped 
-											 WHEN ISNULL(ICS.ysnDestinationWeightsAndGrades, 0) = 1 AND ISNULL(ICS.intDestinationWeightId, 0) <> 0 AND ISNULL(ICS.intDestinationGradeId, 0) <> 0 THEN ARID.dblQtyShipped
+											 WHEN ISNULL(ICS.ysnDestinationWeightsAndGrades, 0) = 1 AND ISNULL(ICS.intDestinationWeightId, 0) <> 0 AND ISNULL(ICS.intDestinationGradeId, 0) <> 0 THEN 
+											 	CASE WHEN ARID.dblQtyShipped > ICIT.dblQty THEN ICIT.dblQty ELSE ARID.dblQtyShipped END
 									 		 ELSE ICIT.[dblQty] 
 										END
 	,[dblUOMQty]					= ICIT.[dblUOMQty]
