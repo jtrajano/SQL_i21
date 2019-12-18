@@ -1026,38 +1026,6 @@ BEGIN
 					AND intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 					AND BD.ysnOpenGetBasisDelivery = 1
 
-				--INSERT INTO @tempFinal(strCommodityCode
-    --                , strType
-    --                , strContractType
-    --                , dblTotal
-    --                , intInventoryReceiptId
-    --                , strReceiptNumber
-    --                , intFromCommodityUnitMeasureId
-    --                , intCommodityId
-    --                , strLocationName
-    --                , strCurrency)
-    --            SELECT @strCommodityCode
-    --                , 'Price Risk' COLLATE Latin1_General_CI_AS [strType]
-    --                , 'Sales Basis Deliveries' COLLATE Latin1_General_CI_AS strContractType
-    --                , dblTotal = BD.dblQuantity
-    --                , intInventoryShipmentId = BD.intTransactionId
-    --                , strShipmentNumber = BD.strTransactionId
-    --                , intCommodityUnitMeasureId = NULL
-    --                , BD.intCommodityId
-    --                , strLocationName = BD.strCompanyLocation
-    --                , cur.strCurrency
-    --            FROM dbo.fnCTGetBasisDelivery(@dtmToDate) BD
-				--	INNER JOIN tblRKFutureMarket fm ON BD.intFutureMarketId = fm.intFutureMarketId
-				--	INNER JOIN tblRKFuturesMonth mnt ON BD.intFutureMonthId = mnt.intFutureMonthId
-				--	INNER JOIN tblICItem i ON BD.intItemId = i.intItemId
-				--	INNER JOIN tblICCategory cat ON i.intCategoryId = cat.intCategoryId
-				--	INNER JOIN tblSMCurrency cur ON cur.intCurrencyID = BD.intCurrencyId
-				--WHERE BD.intCommodityId = @intCommodityId
-				--	AND strContractType = 'Sale'
-				--	AND intCompanyLocationId = ISNULL(@intLocationId, intCompanyLocationId)
-				--	AND intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
-				--	AND BD.ysnOpenGetBasisDelivery = 1
-
 				INSERT INTO @tempFinal(strCommodityCode
                     , strType
                     , strContractType
@@ -1071,51 +1039,83 @@ BEGIN
                 SELECT @strCommodityCode
                     , 'Price Risk' COLLATE Latin1_General_CI_AS [strType]
                     , 'Sales Basis Deliveries' COLLATE Latin1_General_CI_AS strContractType
-                    , sum(dblTotal)
-                    , intInventoryShipmentId
-                    , strShipmentNumber
-                    , intCommodityUnitMeasureId
-                    , intCommodityId
-                    , strLocationName
-                    , strCurrency
-                FROM (
-                    SELECT DISTINCT dblTotal = dbo.fnCTConvertQuantityToTargetItemUOM(cd.intItemId,iuom.intUnitMeasureId,@intCommodityStockUOMId,isnull(ri.dblQuantity, 0))
-                            , r.intInventoryShipmentId
-                            , r.strShipmentNumber
-                            , intCommodityUnitMeasureId = @intCommodityUnitMeasureId
-                            , i.intCommodityId
-                            , cl.strLocationName
-                            , cl.intCompanyLocationId
-                            , v.strCurrency
-                            , cd.intItemId
-                            , i.strItemNo
-                            , cat.strCategoryCode
-                            , cd.intFutureMarketId
-                            , fm.strFutMarketName
-                            , cd.intFutureMonthId
-                            , mnt.strFutureMonth
-                    FROM vyuRKGetInventoryValuation v
-                    JOIN tblICInventoryShipment r ON r.strShipmentNumber = v.strTransactionId
-                    INNER JOIN tblICInventoryShipmentItem ri ON r.intInventoryShipmentId = ri.intInventoryShipmentId AND ri.intInventoryShipmentItemId =  v.intTransactionDetailId
-                    INNER JOIN tblCTContractDetail cd ON cd.intContractDetailId = ri.intLineNo AND cd.intPricingTypeId = 2 AND cd.intContractStatusId <> 3
-                    INNER JOIN tblCTContractHeader ch ON cd.intContractHeaderId = ch.intContractHeaderId  AND ch.intContractTypeId = 2
-                    INNER JOIN tblICItem i on cd.intItemId = i.intItemId
-					INNER JOIN tblICItemUOM iuom on iuom.intItemId = i.intItemId and iuom.intItemUOMId = ri.intItemUOMId
-                    INNER JOIN tblICCategory cat on i.intCategoryId = cat.intCategoryId
-                    INNER JOIN tblRKFutureMarket fm on cd.intFutureMarketId = fm.intFutureMarketId
-                    INNER JOIN tblRKFuturesMonth mnt on cd.intFutureMonthId = mnt.intFutureMonthId
-                    INNER JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = cd.intCompanyLocationId
-                    LEFT JOIN tblARInvoiceDetail invD ON ri.intInventoryShipmentItemId = invD.intInventoryShipmentItemId
-                    LEFT JOIN tblARInvoice inv ON invD.intInvoiceId = inv.intInvoiceId
-                    LEFT JOIN tblCTPriceFixationDetail pfd ON invD.intInvoiceDetailId = pfd.intInvoiceDetailId
-                    WHERE ch.intCommodityId = @intCommodityId AND v.strTransactionType = 'Inventory Shipment'
-                        AND cl.intCompanyLocationId = ISNULL(@intLocationId, cl.intCompanyLocationId)
-                        AND CONVERT(DATETIME, CONVERT(VARCHAR(10), v.dtmDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
-                        AND CONVERT(DATETIME, @dtmToDate) < CONVERT(DATETIME, CONVERT(VARCHAR(10), ISNULL(inv.dtmDate,DATEADD(DAY,1,@dtmToDate)), 110), 110)
-                        AND CONVERT(DATETIME, @dtmToDate) < CONVERT(DATETIME, CONVERT(VARCHAR(10), ISNULL(pfd.dtmFixationDate,DATEADD(DAY,1,@dtmToDate)), 110), 110)
-                ) t
-                WHERE intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
-                GROUP BY intInventoryShipmentId,strShipmentNumber,intCommodityUnitMeasureId,intCommodityId,strLocationName,strCurrency
+                    , dblTotal = BD.dblQuantity
+                    , intInventoryShipmentId = BD.intTransactionId
+                    , strShipmentNumber = BD.strTransactionId
+                    , intCommodityUnitMeasureId = NULL
+                    , BD.intCommodityId
+                    , strLocationName = BD.strCompanyLocation
+                    , cur.strCurrency
+                FROM dbo.fnCTGetBasisDelivery(@dtmToDate) BD
+					INNER JOIN tblRKFutureMarket fm ON BD.intFutureMarketId = fm.intFutureMarketId
+					INNER JOIN tblRKFuturesMonth mnt ON BD.intFutureMonthId = mnt.intFutureMonthId
+					INNER JOIN tblICItem i ON BD.intItemId = i.intItemId
+					INNER JOIN tblICCategory cat ON i.intCategoryId = cat.intCategoryId
+					INNER JOIN tblSMCurrency cur ON cur.intCurrencyID = BD.intCurrencyId
+				WHERE BD.intCommodityId = @intCommodityId
+					AND strContractType = 'Sale'
+					AND intCompanyLocationId = ISNULL(@intLocationId, intCompanyLocationId)
+					AND intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
+					AND BD.ysnOpenGetBasisDelivery = 1
+
+				--INSERT INTO @tempFinal(strCommodityCode
+    --                , strType
+    --                , strContractType
+    --                , dblTotal
+    --                , intInventoryReceiptId
+    --                , strReceiptNumber
+    --                , intFromCommodityUnitMeasureId
+    --                , intCommodityId
+    --                , strLocationName
+    --                , strCurrency)
+    --            SELECT @strCommodityCode
+    --                , 'Price Risk' COLLATE Latin1_General_CI_AS [strType]
+    --                , 'Sales Basis Deliveries' COLLATE Latin1_General_CI_AS strContractType
+    --                , sum(dblTotal)
+    --                , intInventoryShipmentId
+    --                , strShipmentNumber
+    --                , intCommodityUnitMeasureId
+    --                , intCommodityId
+    --                , strLocationName
+    --                , strCurrency
+    --            FROM (
+    --                SELECT DISTINCT dblTotal = dbo.fnCTConvertQuantityToTargetItemUOM(cd.intItemId,iuom.intUnitMeasureId,@intCommodityStockUOMId,isnull(ri.dblQuantity, 0))
+    --                        , r.intInventoryShipmentId
+    --                        , r.strShipmentNumber
+    --                        , intCommodityUnitMeasureId = @intCommodityUnitMeasureId
+    --                        , i.intCommodityId
+    --                        , cl.strLocationName
+    --                        , cl.intCompanyLocationId
+    --                        , v.strCurrency
+    --                        , cd.intItemId
+    --                        , i.strItemNo
+    --                        , cat.strCategoryCode
+    --                        , cd.intFutureMarketId
+    --                        , fm.strFutMarketName
+    --                        , cd.intFutureMonthId
+    --                        , mnt.strFutureMonth
+    --                FROM vyuRKGetInventoryValuation v
+    --                JOIN tblICInventoryShipment r ON r.strShipmentNumber = v.strTransactionId
+    --                INNER JOIN tblICInventoryShipmentItem ri ON r.intInventoryShipmentId = ri.intInventoryShipmentId AND ri.intInventoryShipmentItemId =  v.intTransactionDetailId
+    --                INNER JOIN tblCTContractDetail cd ON cd.intContractDetailId = ri.intLineNo AND cd.intPricingTypeId = 2 AND cd.intContractStatusId <> 3
+    --                INNER JOIN tblCTContractHeader ch ON cd.intContractHeaderId = ch.intContractHeaderId  AND ch.intContractTypeId = 2
+    --                INNER JOIN tblICItem i on cd.intItemId = i.intItemId
+				--	INNER JOIN tblICItemUOM iuom on iuom.intItemId = i.intItemId and iuom.intItemUOMId = ri.intItemUOMId
+    --                INNER JOIN tblICCategory cat on i.intCategoryId = cat.intCategoryId
+    --                INNER JOIN tblRKFutureMarket fm on cd.intFutureMarketId = fm.intFutureMarketId
+    --                INNER JOIN tblRKFuturesMonth mnt on cd.intFutureMonthId = mnt.intFutureMonthId
+    --                INNER JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = cd.intCompanyLocationId
+    --                LEFT JOIN tblARInvoiceDetail invD ON ri.intInventoryShipmentItemId = invD.intInventoryShipmentItemId
+    --                LEFT JOIN tblARInvoice inv ON invD.intInvoiceId = inv.intInvoiceId
+    --                LEFT JOIN tblCTPriceFixationDetail pfd ON invD.intInvoiceDetailId = pfd.intInvoiceDetailId
+    --                WHERE ch.intCommodityId = @intCommodityId AND v.strTransactionType = 'Inventory Shipment'
+    --                    AND cl.intCompanyLocationId = ISNULL(@intLocationId, cl.intCompanyLocationId)
+    --                    AND CONVERT(DATETIME, CONVERT(VARCHAR(10), v.dtmDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
+    --                    AND CONVERT(DATETIME, @dtmToDate) < CONVERT(DATETIME, CONVERT(VARCHAR(10), ISNULL(inv.dtmDate,DATEADD(DAY,1,@dtmToDate)), 110), 110)
+    --                    AND CONVERT(DATETIME, @dtmToDate) < CONVERT(DATETIME, CONVERT(VARCHAR(10), ISNULL(pfd.dtmFixationDate,DATEADD(DAY,1,@dtmToDate)), 110), 110)
+    --            ) t
+    --            WHERE intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
+    --            GROUP BY intInventoryShipmentId,strShipmentNumber,intCommodityUnitMeasureId,intCommodityId,strLocationName,strCurrency
 
 				INSERT INTO @tempFinal(strCommodityCode
 					, strType
