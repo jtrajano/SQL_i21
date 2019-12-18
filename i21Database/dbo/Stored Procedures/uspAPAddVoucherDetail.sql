@@ -177,7 +177,9 @@ SELECT TOP 100 PERCENT
 												END
 	/*1099 info*/						
 	,int1099Form						=	ISNULL(A.int1099Form,
-												(CASE WHEN patron.intEntityId IS NOT NULL 
+												(CASE 
+													WHEN item.intCommodityId > 0 THEN 0
+													WHEN patron.intEntityId IS NOT NULL 
 														AND item.intItemId > 0
 														AND item.ysn1099Box3 = 1
 														AND patron.ysnStockStatusQualified = 1 
@@ -188,7 +190,9 @@ SELECT TOP 100 PERCENT
 												ELSE 0 END)
 											)
 	,int1099Category					=	ISNULL(A.int1099Category,
-												CASE 	WHEN patron.intEntityId IS NOT NULL 
+												CASE 	
+													WHEN item.intCommodityId > 0 THEN 0
+													WHEN patron.intEntityId IS NOT NULL 
 														AND item.intItemId > 0
 														AND item.ysn1099Box3 = 1
 														AND patron.ysnStockStatusQualified = 1 
