@@ -33,6 +33,28 @@ WHEN NOT MATCHED THEN
 INSERT (strUnitMeasure, strSymbol, intConcurrencyId)
 VALUES ([Source].strUnitMeasure, [Source].strSymbol, [Source].intConcurrencyId);
 
+--------------------------------------------------------------------------------------------------------------------------------------------
+-- UnitMeasure data migration from ptpkgmst origin table to tblICUnitMeasure i21 table 
+-- This does not insert duplicates
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+MERGE tblICUnitMeasure AS [Target]
+USING 
+(
+	SELECT
+		  strUnitMeasure	= RTRIM(ptpkg_desc) COLLATE Latin1_General_CI_AS 
+		, strSymbol			= RTRIM(ptpkg_code) COLLATE Latin1_General_CI_AS
+		, intConcurrencyId	= 1
+	FROM ptpkgmst
+	WHERE ptpkg_code != ' '	
+) AS [Source] (strUnitMeasure, strSymbol, intConcurrencyId)
+ON [Target].strSymbol = [Source].strSymbol
+WHEN NOT MATCHED THEN
+INSERT (strUnitMeasure, strSymbol, intConcurrencyId)
+VALUES ([Source].strUnitMeasure, [Source].strSymbol, [Source].intConcurrencyId);
+
+
+
 --update the unit type for the imported uoms
 UPDATE tblICUnitMeasure
 SET strUnitType = 
