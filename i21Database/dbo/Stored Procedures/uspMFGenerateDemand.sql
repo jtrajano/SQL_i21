@@ -568,10 +568,19 @@ BEGIN TRY
 	SELECT Item Collate Latin1_General_CI_AS
 	FROM [dbo].[fnSplitString](@strRefreshItemStock, ',')
 
-	if not exists(Select *from @tblMFRefreshtemStock)
-	Begin
-		Insert into @tblMFRefreshtemStock Select distinct intItemId from @tblMFItemDetail
-	End
+	DELETE
+	FROM @tblMFRefreshtemStock
+	WHERE intItemId = 0
+
+	IF NOT EXISTS (
+			SELECT *
+			FROM @tblMFRefreshtemStock
+			)
+	BEGIN
+		INSERT INTO @tblMFRefreshtemStock
+		SELECT DISTINCT intItemId
+		FROM @tblMFItemDetail
+	END
 
 	IF @ysnIncludeInventory = 1
 	BEGIN
@@ -1283,24 +1292,20 @@ BEGIN TRY
 	WHERE intAttributeId = 2 --Opening Inventory
 		AND intMonthId > 0
 
-	--IF @PlannedPurchasesXML <> ''
-	--BEGIN
-	--	UPDATE D
-	--	SET dblQty = CASE 
-	--			WHEN @intContainerTypeId IS NOT NULL
-	--				THEN IsNULL(Purchase.[strValue] * CW.dblWeight * IsNULL(UMCByWeight.dblConversionToStock, 1), 0)
-	--			ELSE Purchase.[strValue]
-	--			END
-	--	FROM #tblMFDemand D
-	--	JOIN #TempPlannedPurchases Purchase ON Purchase.intItemId = D.intItemId
-	--		AND Purchase.[strName] = D.intMonthId
-	--	LEFT JOIN @tblMFContainerWeight CW ON CW.intItemId = D.intItemId
-	--	LEFT JOIN tblICUnitMeasureConversion UMCByWeight ON UMCByWeight.intUnitMeasureId = CW.intWeightUnitMeasureId --From Unit
-	--		AND UMCByWeight.intStockUnitMeasureId = @intUnitMeasureId -- To Unit
-	--	LEFT JOIN tblICItemLocation IL ON IL.intItemId = D.intItemId
-	--	WHERE intAttributeId = 5 --Planned Purchases -
-	--		AND intMonthId > 0
-	--END
+	IF @PlannedPurchasesXML <> ''
+	BEGIN
+		UPDATE D
+		SET dblQty = Purchase.[strValue]
+		FROM #tblMFDemand D
+		JOIN #TempPlannedPurchases Purchase ON Purchase.intItemId = D.intItemId
+			AND Purchase.[strName] = D.intMonthId
+		--LEFT JOIN @tblMFContainerWeight CW ON CW.intItemId = D.intItemId
+		--LEFT JOIN tblICUnitMeasureConversion UMCByWeight ON UMCByWeight.intUnitMeasureId = CW.intWeightUnitMeasureId --From Unit
+		--	AND UMCByWeight.intStockUnitMeasureId = @intUnitMeasureId -- To Unit
+		--LEFT JOIN tblICItemLocation IL ON IL.intItemId = D.intItemId
+		WHERE intAttributeId = 5 --Planned Purchases -
+			AND intMonthId > 0
+	END
 
 	IF @WeeksOfSupplyTargetXML <> ''
 	BEGIN
@@ -1932,7 +1937,7 @@ BEGIN TRY
 					WHEN A.intReportAttributeID = 5
 						AND @intContainerTypeId IS NOT NULL
 						AND IsNULL(CW.dblWeight, 0) > 0
-						THEN Round(IsNULL((D.dblQty * IsNULL(UMC.dblConversionToStock, 1)) / CW.dblWeight, 0), 0)*CW.dblWeight
+						THEN Round(IsNULL((D.dblQty * IsNULL(UMC.dblConversionToStock, 1)) / CW.dblWeight, 0), 0) * CW.dblWeight
 					WHEN DL.intMonthId IN (
 							- 1
 							,0
