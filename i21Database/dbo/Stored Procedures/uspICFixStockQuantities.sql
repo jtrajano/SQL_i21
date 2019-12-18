@@ -211,8 +211,12 @@ BEGIN
 		FROM	tblICItem i INNER JOIN tblICItemLocation il
 					ON i.intItemId = il.intItemId 
 				OUTER APPLY (
-					SELECT	dblQuantity = SUM(dbo.fnCalculateStockUnitQty(t.dblQty, t.dblUOMQty)) 
+					SELECT	dblQuantity = --SUM(dbo.fnCalculateStockUnitQty(t.dblQty, t.dblUOMQty)) 
+								SUM(dbo.fnCalculateQtyBetweenUOM(t.intItemUOMId, stockUOM.intItemUOMId, t.dblQty))
 					FROM	tblICInventoryTransaction t
+							INNER JOIN tblICItemUOM stockUOM 
+								ON t.intItemId = stockUOM.intItemId
+								AND stockUOM.ysnStockUnit = 1
 					WHERE	t.intItemId = i.intItemId 
 							AND t.intInTransitSourceLocationId = il.intItemLocationId
 							AND t.strTransactionForm IN (
@@ -251,80 +255,79 @@ BEGIN
 			,1	
 		);
 
-	-- Update the Stock UOM
-	-- (1) Convert all qty to stock unit
-	MERGE	
-	INTO	dbo.tblICItemStockUOM 
-	WITH	(HOLDLOCK) 
-	AS		ItemStockUOM	
-	USING (
-		SELECT	i.intItemId
-				,il.intItemLocationId
-				,StockUOM.intItemUOMId
-				,intSubLocationId = null 
-				,intStorageLocationId = null 
-				,dblInTransitOutbound = SUM(ISNULL(t.dblQuantity, 0)) 
-		FROM	tblICItem i INNER JOIN tblICItemLocation il
-					ON i.intItemId = il.intItemId 
-				CROSS APPLY (
-					SELECT	intItemUOMId
-					FROM	tblICItemUOM stockUOM
-					WHERE	stockUOM.intItemId = i.intItemId
-							AND stockUOM.ysnStockUnit = 1
-				) StockUOM
-				OUTER APPLY (
-					SELECT	dblQuantity = dbo.fnCalculateStockUnitQty(t.dblQty, t.dblUOMQty)
-					FROM	tblICInventoryTransaction t
-					WHERE	t.intItemId = i.intItemId 
-							AND t.intInTransitSourceLocationId = il.intItemLocationId
-							AND t.strTransactionForm IN (
-								'Inventory Shipment'
-								,'Outbound Shipment'
-								,'Invoice'
-							)
-				) t 
-		WHERE
-			ISNULL(@intItemId, i.intItemId) = i.intItemId
-			AND ISNULL(@intCategoryId, i.intCategoryId) = i.intCategoryId
-		GROUP BY 
-			i.intItemId
-			, il.intItemLocationId
-			, StockUOM.intItemUOMId
-	) AS RawStockData
-		ON ItemStockUOM.intItemId = RawStockData.intItemId
-		AND ItemStockUOM.intItemLocationId = RawStockData.intItemLocationId
-		AND ItemStockUOM.intItemUOMId = RawStockData.intItemUOMId
-		AND ISNULL(ItemStockUOM.intSubLocationId, 0) = ISNULL(RawStockData.intSubLocationId, 0)
-		AND ISNULL(ItemStockUOM.intStorageLocationId, 0) = ISNULL(RawStockData.intStorageLocationId, 0)	
+	---- Update the Stock UOM
+	---- (1) Convert all qty to stock unit
+	--MERGE	
+	--INTO	dbo.tblICItemStockUOM 
+	--WITH	(HOLDLOCK) 
+	--AS		ItemStockUOM	
+	--USING (
+	--	SELECT	i.intItemId
+	--			,il.intItemLocationId
+	--			,StockUOM.intItemUOMId
+	--			,intSubLocationId = null 
+	--			,intStorageLocationId = null 
+	--			,dblInTransitOutbound = SUM(ISNULL(t.dblQuantity, 0)) 
+	--	FROM	tblICItem i INNER JOIN tblICItemLocation il
+	--				ON i.intItemId = il.intItemId 
+	--			CROSS APPLY (
+	--				SELECT	intItemUOMId
+	--				FROM	tblICItemUOM stockUOM
+	--				WHERE	stockUOM.intItemId = i.intItemId
+	--						AND stockUOM.ysnStockUnit = 1
+	--			) StockUOM
+	--			OUTER APPLY (
+	--				SELECT	dblQuantity = dbo.fnCalculateStockUnitQty(t.dblQty, t.dblUOMQty)
+	--				FROM	tblICInventoryTransaction t
+	--				WHERE	t.intItemId = i.intItemId 
+	--						AND t.intInTransitSourceLocationId = il.intItemLocationId
+	--						AND t.strTransactionForm IN (
+	--							'Inventory Shipment'
+	--							,'Outbound Shipment'
+	--							,'Invoice'
+	--						)
+	--			) t 
+	--	WHERE
+	--		ISNULL(@intItemId, i.intItemId) = i.intItemId
+	--		AND ISNULL(@intCategoryId, i.intCategoryId) = i.intCategoryId
+	--	GROUP BY 
+	--		i.intItemId
+	--		, il.intItemLocationId
+	--		, StockUOM.intItemUOMId
+	--) AS RawStockData
+	--	ON ItemStockUOM.intItemId = RawStockData.intItemId
+	--	AND ItemStockUOM.intItemLocationId = RawStockData.intItemLocationId
+	--	AND ItemStockUOM.intItemUOMId = RawStockData.intItemUOMId
+	--	AND ISNULL(ItemStockUOM.intSubLocationId, 0) = ISNULL(RawStockData.intSubLocationId, 0)
+	--	AND ISNULL(ItemStockUOM.intStorageLocationId, 0) = ISNULL(RawStockData.intStorageLocationId, 0)	
 
-	WHEN MATCHED THEN 
-		UPDATE 
-		SET		dblInTransitOutbound = RawStockData.dblInTransitOutbound
+	--WHEN MATCHED THEN 
+	--	UPDATE 
+	--	SET		dblInTransitOutbound = RawStockData.dblInTransitOutbound
 
-	-- If none found, insert a new item stock record
-	WHEN NOT MATCHED AND ISNULL(RawStockData.dblInTransitOutbound, 0) <> 0 THEN 
-		INSERT (
-			intItemId
-			,intItemLocationId
-			,intItemUOMId
-			,intSubLocationId
-			,intStorageLocationId
-			,dblInTransitOutbound
-			,intConcurrencyId
-		)
-		VALUES (
-			RawStockData.intItemId
-			,RawStockData.intItemLocationId
-			,RawStockData.intItemUOMId
-			,RawStockData.intSubLocationId
-			,RawStockData.intStorageLocationId
-			,RawStockData.dblInTransitOutbound
-			,1	
-		)
-	;
+	---- If none found, insert a new item stock record
+	--WHEN NOT MATCHED AND ISNULL(RawStockData.dblInTransitOutbound, 0) <> 0 THEN 
+	--	INSERT (
+	--		intItemId
+	--		,intItemLocationId
+	--		,intItemUOMId
+	--		,intSubLocationId
+	--		,intStorageLocationId
+	--		,dblInTransitOutbound
+	--		,intConcurrencyId
+	--	)
+	--	VALUES (
+	--		RawStockData.intItemId
+	--		,RawStockData.intItemLocationId
+	--		,RawStockData.intItemUOMId
+	--		,RawStockData.intSubLocationId
+	--		,RawStockData.intStorageLocationId
+	--		,RawStockData.dblInTransitOutbound
+	--		,1	
+	--	)
+	--;
 
-	-- Update the Stock UOM
-	-- (2) ysnStockUnit = 0 
+	-- Update the dblInTransitOutbound in Stock UOM	
 	MERGE	
 	INTO	dbo.tblICItemStockUOM 
 	WITH	(HOLDLOCK) 
@@ -338,11 +341,11 @@ BEGIN
 				,dblInTransitOutbound = SUM(t.dblQuantity) 
 		FROM	tblICItem i INNER JOIN tblICItemLocation il
 					ON i.intItemId = il.intItemId 
-				INNER JOIN tblICItemUOM uom
+				INNER JOIN tblICItemUOM uom					
 					ON uom.intItemId = i.intItemId
-					AND ISNULL(uom.ysnStockUnit, 0) = 0
+					--AND ISNULL(uom.ysnStockUnit, 0) = 0
 				OUTER APPLY (
-					SELECT	dblQuantity = dbo.fnCalculateStockUnitQty(t.dblQty, t.dblUOMQty)
+					SELECT	dblQuantity = t.dblQty --dbo.fnCalculateStockUnitQty(t.dblQty, t.dblUOMQty)
 					FROM	tblICInventoryTransaction t
 					WHERE	t.intItemId = i.intItemId 
 							AND t.intItemUOMId = uom.intItemUOMId 
