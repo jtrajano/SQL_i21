@@ -23,12 +23,15 @@ SELECT Detail.intDailyAveragePriceDetailId
     , Detail.dblOptionsPL
     , Detail.dblNetLongAvg
     , Detail.intBrokerId
+	, Detail.dblSettlementPrice
+	, dblM2M = ((Detail.dblSettlementPrice - Detail.dblNetLongAvg) * Detail.dblNoOfLots * Market.dblContractSize) / CASE WHEN ISNULL(Cur.ysnSubCurrency, 0) = 1 THEN 100 ELSE 1 END
 	, strBrokerName = Broker.strName
     , Detail.intConcurrencyId
 	, Month.ysnExpired
 FROM tblRKDailyAveragePriceDetail Detail
 LEFT JOIN vyuRKGetDailyAveragePrice Header ON Header.intDailyAveragePriceId = Detail.intDailyAveragePriceId
 LEFT JOIN tblRKFutureMarket Market ON Market.intFutureMarketId = Detail.intFutureMarketId
+LEFT JOIN tblSMCurrency Cur ON Cur.intCurrencyID = Market.intCurrencyId
 LEFT JOIN tblRKFuturesMonth Month ON Month.intFutureMonthId = Detail.intFutureMonthId
 LEFT JOIN tblICCommodity Commodity ON Commodity.intCommodityId = Detail.intCommodityId
 LEFT JOIN tblEMEntity Broker ON Broker.intEntityId = Detail.intBrokerId

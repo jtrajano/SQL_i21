@@ -1,7 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspRKGenerateDailyAveragePrice]
 
 AS
---BEGIN TRANSACTION
 
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -521,12 +520,6 @@ BEGIN
 					GROUP BY intDailyAveragePriceDetailId
 			) tblPatch
 			WHERE tblPatch.intDailyAveragePriceDetailId = tblRKDailyAveragePriceDetailTransaction.intDailyAveragePriceDetailId AND tblRKDailyAveragePriceDetailTransaction.strTransactionType = 'DailyAveragePrice'
-		
-		-- TEST
-		--IF (@intRowId = 6)
-		--BEGIN
-		--	SELECT * FROM tblRKDailyAveragePriceDetailTransaction WHERE intDailyAveragePriceDetailId IN (SELECT intDailyAveragePriceDetailId FROM tblRKDailyAveragePriceDetail WHERE intDailyAveragePriceId = @intDailyAveragePriceId)
-		--END
 
 			UPDATE tblRKDailyAveragePriceDetail
 			SET dblAverageLongPrice = tblPatch.dblAvgLongPrice
@@ -550,13 +543,30 @@ BEGIN
 				) t
 			) tblPatch
 			WHERE tblPatch.intDailyAveragePriceDetailId = tblRKDailyAveragePriceDetail.intDailyAveragePriceDetailId
-		END
-		-- TEST
-		--IF (@intRowId = 6)
-		--BEGIN
-		--	SELECT * FROM tblRKDailyAveragePriceDetail WHERE intDailyAveragePriceId = @intDailyAveragePriceId
-		--END
 
+			UPDATE tblRKDailyAveragePriceDetail
+			SET dblSettlementPrice = tblPatch.dblLastSettle
+			FROM (
+				SELECT * FROM (
+					SELECT intRowNo = ROW_NUMBER() OVER(PARTITION BY SP.intFutureMarketId, SPD.intFutureMonthId, CMM.intCommodityId ORDER BY SP.dtmPriceDate DESC)
+						, SPD.intFutSettlementPriceMonthId
+						, SPD.intFutureSettlementPriceId
+						, SP.intFutureMarketId
+						, SPD.intFutureMonthId
+						, CMM.intCommodityId
+						, dblLastSettle
+						, SP.dtmPriceDate
+					FROM tblRKFutSettlementPriceMarketMap SPD
+					JOIN tblRKFuturesSettlementPrice SP ON SP.intFutureSettlementPriceId = SPD.intFutureSettlementPriceId
+					JOIN tblRKCommodityMarketMapping CMM ON CMM.intCommodityMarketId = SP.intCommodityMarketId
+				) t WHERE intRowNo = 1
+			) tblPatch
+			WHERE tblPatch.intFutureMarketId = tblRKDailyAveragePriceDetail.intFutureMarketId
+				AND tblPatch.intFutureMonthId = tblRKDailyAveragePriceDetail.intFutureMonthId
+				AND tblPatch.intCommodityId = tblRKDailyAveragePriceDetail.intCommodityId
+				AND tblRKDailyAveragePriceDetail.intDailyAveragePriceDetailId IN (SELECT intDailyAveragePriceDetailId FROM tblRKDailyAveragePriceDetail WHERE intDailyAveragePriceId = @intDailyAveragePriceId)
+		END
+		
 		DROP TABLE #tmpDetailTable
 
 		DELETE FROM #BookSubBook WHERE intRowId = @intRowId
@@ -564,6 +574,4 @@ BEGIN
 
 	DROP TABLE #BookSubBook
 	DROP TABLE #tmpDerivatives
-
---	ROLLBACK TRANSACTION
 END

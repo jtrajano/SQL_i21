@@ -10,6 +10,7 @@
     [dblSwitchPL] NUMERIC(18, 6) NULL DEFAULT ((0)), 
     [dblOptionsPL] NUMERIC(18, 6) NULL DEFAULT ((0)), 
     [dblNetLongAvg] NUMERIC(18, 6) NULL DEFAULT ((0)), 
+	[dblSettlementPrice] NUMERIC(18, 6) NULL DEFAULT ((0)), 
     [intBrokerId] INT NULL, 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblRKDailyAveragePriceDetail] PRIMARY KEY ([intDailyAveragePriceDetailId]), 
