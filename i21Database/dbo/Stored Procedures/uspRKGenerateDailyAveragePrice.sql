@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspRKGenerateDailyAveragePrice]
 
 AS
+--BEGIN TRANSACTION
 
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -72,6 +73,7 @@ BEGIN
 		AND FMonth.ysnExpired = 0
 		AND ISNULL(Book.ysnActive, 1) = 1
 		AND ISNULL(SubBook.ysnActive, 1) = 1
+
 
 	INSERT INTO @Categories (intRowId
 		, intBookId
@@ -480,7 +482,7 @@ BEGIN
 				, 'DailyAveragePrice'
 				, Detail.dtmDate
 				, strEntity = Detail.strBrokerName
-				, RefDetail.dblNoOfLots - (SELECT ISNULL(SUM(ISNULL(dblNoOfLots, 0)), 0) FROM tblCTPriceFixationDetail CT WHERE CT.intDailyAveragePriceDetailId = RefDetail.intDailyAveragePriceDetailId)
+				, RefDetail.dblNoOfLots 
 				, 'Futures'
 				, dblNetLongAvg = ISNULL(RefDetail.dblAverageLongPrice, 0.00) + ISNULL(RefDetail.dblSwitchPL, 0.00) + ISNULL(RefDetail.dblOptionsPL, 0.00)
 				, 'Buy'
@@ -504,6 +506,27 @@ BEGIN
 														ORDER BY dtmDate DESC)
 			WHERE ISNULL(RefDetail.dblNoOfLots, 0) <> 0
 
+			UPDATE tblRKDailyAveragePriceDetailTransaction
+			SET dblNoOfContract = dblOpenContract + dblSellContract
+			FROM (
+					SELECT intDailyAveragePriceDetailId
+						, dblOpenContract = SUM((CASE WHEN strBuySell = 'Buy' AND strTransactionType = 'DailyAveragePrice' THEN dblNewNoOfContract ELSE 0 END))
+						, dblSellContract = SUM((CASE WHEN strBuySell = 'Sell' THEN dblNewNoOfContract ELSE 0 END))
+					FROM (
+						SELECT *
+							, dblNewNoOfContract = CASE WHEN strInstrumentType = 'Futures' THEN dblNoOfContract ELSE 0 END
+						FROM tblRKDailyAveragePriceDetailTransaction
+					) tblRKDailyAveragePriceDetailTransaction
+					WHERE intDailyAveragePriceDetailId IN (SELECT intDailyAveragePriceDetailId FROM tblRKDailyAveragePriceDetail WHERE intDailyAveragePriceId = @intDailyAveragePriceId)
+					GROUP BY intDailyAveragePriceDetailId
+			) tblPatch
+			WHERE tblPatch.intDailyAveragePriceDetailId = tblRKDailyAveragePriceDetailTransaction.intDailyAveragePriceDetailId AND tblRKDailyAveragePriceDetailTransaction.strTransactionType = 'DailyAveragePrice'
+		
+		-- TEST
+		--IF (@intRowId = 6)
+		--BEGIN
+		--	SELECT * FROM tblRKDailyAveragePriceDetailTransaction WHERE intDailyAveragePriceDetailId IN (SELECT intDailyAveragePriceDetailId FROM tblRKDailyAveragePriceDetail WHERE intDailyAveragePriceId = @intDailyAveragePriceId)
+		--END
 
 			UPDATE tblRKDailyAveragePriceDetail
 			SET dblAverageLongPrice = tblPatch.dblAvgLongPrice
@@ -528,6 +551,11 @@ BEGIN
 			) tblPatch
 			WHERE tblPatch.intDailyAveragePriceDetailId = tblRKDailyAveragePriceDetail.intDailyAveragePriceDetailId
 		END
+		-- TEST
+		--IF (@intRowId = 6)
+		--BEGIN
+		--	SELECT * FROM tblRKDailyAveragePriceDetail WHERE intDailyAveragePriceId = @intDailyAveragePriceId
+		--END
 
 		DROP TABLE #tmpDetailTable
 
@@ -536,4 +564,6 @@ BEGIN
 
 	DROP TABLE #BookSubBook
 	DROP TABLE #tmpDerivatives
+
+--	ROLLBACK TRANSACTION
 END
