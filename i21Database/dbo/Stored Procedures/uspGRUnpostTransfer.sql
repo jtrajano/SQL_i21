@@ -11,7 +11,6 @@ BEGIN
 	SET XACT_ABORT ON
 	SET ANSI_WARNINGS OFF	
 
-	DECLARE @enable_debug bit = 0
 	DECLARE @ErrMsg AS NVARCHAR(MAX)
 	DECLARE @intTransferContractDetailId INT
 	DECLARE @dblTransferUnits NUMERIC(18,6)
@@ -89,7 +88,7 @@ BEGIN
 		) AS (
 			SELECT 
 				intTransferContractDetailId		= TSplit.intContractDetailId,
-				dblTransferUnits				= case when TSplit.intStorageTypeId = 2 then TSplit.dblUnits  else -(TSplit.dblUnits) end,
+				dblTransferUnits				= -(TSplit.dblUnits),
 				intSourceItemUOMId				= TransferStorage.intItemUOMId,
 				intCustomerStorageId			= TSplit.intTransferToCustomerStorageId
 			FROM tblGRTransferStorageSplit TSplit
@@ -108,7 +107,7 @@ BEGIN
 		OPEN c;
 
 		FETCH c INTO @intTransferContractDetailId, @dblTransferUnits, @intSourceItemUOMId, @intCustomerStorageId
-		if @enable_debug = 1	
+		if @d_a_v = 1 and 1 = 0
 		begin
 		
 			select 'check contract details transfercontractdetail,transferunits,customerstorageid,sourceitemuom', @intTransferContractDetailId,@dblTransferUnits,@intCustomerStorageId,@intSourceItemUOMId
