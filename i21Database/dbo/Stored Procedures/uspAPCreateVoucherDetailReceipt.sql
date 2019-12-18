@@ -182,7 +182,8 @@ SELECT
 											THEN contractDetail.intPriceItemUOMId
 											ELSE B.intCostUOMId END,
 	[intTaxGroupId]					=	A.intTaxGroupId,
-	[int1099Form]					=	CASE 	WHEN patron.intEntityId IS NOT NULL 
+	[int1099Form]					=	CASE 	WHEN item.intItemId > 0 AND item.intCommodityId > 0 THEN 0
+												WHEN patron.intEntityId IS NOT NULL 
 													AND B.intItemId > 0
 													AND item.ysn1099Box3 = 1
 													AND patron.ysnStockStatusQualified = 1 
@@ -192,7 +193,8 @@ SELECT
 												WHEN entity.str1099Form = '1099-B' THEN 3
 										ELSE 0
 										END,
-	[int1099Category]				=	CASE 	WHEN patron.intEntityId IS NOT NULL 
+	[int1099Category]				=	CASE 	WHEN item.intItemId > 0 AND item.intCommodityId > 0 THEN 0
+												WHEN patron.intEntityId IS NOT NULL 
 												AND B.intItemId > 0
 												AND item.ysn1099Box3 = 1
 												AND patron.ysnStockStatusQualified = 1 

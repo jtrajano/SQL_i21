@@ -126,7 +126,8 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[dblUnitQty]					=	1,
 		[intCurrencyId]					=	ISNULL(A.intCurrencyId,0),
 		[intStorageLocationId]			=	NULL,
-		[int1099Form]					=	CASE 	WHEN patron.intEntityId IS NOT NULL 
+		[int1099Form]					=	CASE 	WHEN item.intItemId > 0 AND item.intCommodityId > 0 THEN 0
+													WHEN patron.intEntityId IS NOT NULL 
 														AND A.intItemId > 0
 														AND item.ysn1099Box3 = 1
 														AND patron.ysnStockStatusQualified = 1 
@@ -136,7 +137,8 @@ IF @transCount = 0 BEGIN TRANSACTION
 													WHEN entity.str1099Form = '1099-B' THEN 3
 											ELSE 0
 											END,
-		[int1099Category]				=	CASE 	WHEN patron.intEntityId IS NOT NULL 
+		[int1099Category]				=	CASE 	WHEN item.intItemId > 0 AND item.intCommodityId > 0 THEN 0
+													WHEN patron.intEntityId IS NOT NULL 
 													AND A.intItemId > 0
 													AND item.ysn1099Box3 = 1
 													AND patron.ysnStockStatusQualified = 1 

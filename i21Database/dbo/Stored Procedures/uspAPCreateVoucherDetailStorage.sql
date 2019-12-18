@@ -58,7 +58,8 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[dblQtyOrdered]					=	A.dblQtyReceived,
 		[dblQtyReceived]					=	A.dblQtyReceived,
 		[dblCost]						=	A.dblCost,
-		[int1099Form]					=	(CASE WHEN patron.intEntityId IS NOT NULL 
+		[int1099Form]					=	(CASE 	WHEN A2.intItemId > 0 AND A2.intCommodityId > 0 THEN 0
+													WHEN patron.intEntityId IS NOT NULL 
 														AND A2.intItemId > 0
 														AND A2.ysn1099Box3 = 1
 														AND patron.ysnStockStatusQualified = 1 
@@ -67,7 +68,8 @@ IF @transCount = 0 BEGIN TRANSACTION
 													WHEN E.str1099Form = '1099-INT' THEN 2
 													WHEN E.str1099Form = '1099-B' THEN 3
 												ELSE 0 END),
-		[int1099Category]				=	CASE 	WHEN patron.intEntityId IS NOT NULL 
+		[int1099Category]				=	CASE 	WHEN A2.intItemId > 0 AND A2.intCommodityId > 0 THEN 0
+													WHEN patron.intEntityId IS NOT NULL 
 														AND A2.intItemId > 0
 														AND A2.ysn1099Box3 = 1
 														AND patron.ysnStockStatusQualified = 1 
