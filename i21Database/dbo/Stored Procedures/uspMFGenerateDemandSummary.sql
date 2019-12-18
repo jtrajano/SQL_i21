@@ -1,27 +1,54 @@
 ﻿CREATE PROCEDURE uspMFGenerateDemandSummary (
 	@strInvPlngReportMasterID NVARCHAR(MAX) = NULL
-	,@intUnitMeasureId INT
+	,@intUnitMeasureId INT=0
 	,@ysnRefreshContract BIT = 0
 	,@intCompanyLocationId INT
 	,@ysnLoadPlan BIT = 0
+	,@intInvPlngSummaryId INT = 0
 	)
 AS
 BEGIN
 	DECLARE @intNoOfMonths INT
-
-	SELECT @intNoOfMonths = Max(intNoOfMonths)
-	FROM tblCTInvPlngReportMaster
-	WHERE intInvPlngReportMasterID IN (
-			SELECT Item Collate Latin1_General_CI_AS
-			FROM [dbo].[fnSplitString](@strInvPlngReportMasterID, ',')
-			)
-
-	IF @intNoOfMonths IS NULL
-		SELECT @intNoOfMonths = 0
+		,@strBatch NVARCHAR(MAX) = ''
+		,@strBatchId NVARCHAR(MAX) = ''
 
 	IF @ysnLoadPlan = 1
 	BEGIN
-		SELECT [strMonth1]
+		SELECT @intNoOfMonths = Max(intNoOfMonths)
+		FROM tblCTInvPlngReportMaster RM
+		JOIN tblMFInvPlngSummaryBatch B ON B.intInvPlngReportMasterID = RM.intInvPlngReportMasterID
+		WHERE B.intInvPlngSummaryId = @intInvPlngSummaryId
+
+		IF @intNoOfMonths IS NULL
+			SELECT @intNoOfMonths = 0
+
+		SELECT @strBatch = @strBatch + RM.strPlanNo + ','
+			,@strBatchId = @strBatchId + Ltrim(B.intInvPlngReportMasterID) + ','
+		FROM tblMFInvPlngSummaryBatch B
+		JOIN tblCTInvPlngReportMaster RM ON RM.intInvPlngReportMasterID = B.intInvPlngReportMasterID
+		WHERE B.intInvPlngSummaryId = @intInvPlngSummaryId
+
+		SELECT S.intInvPlngSummaryId
+			,S.strPlanName
+			,S.dtmDate
+			,S.intUnitMeasureId
+			,UM.strUnitMeasure
+			,S.intBookId
+			,B.strBook
+			,S.intSubBookId
+			,SB.strSubBook
+			,S.strComment
+			,S.intConcurrencyId
+			,@strBatch AS strDemandPlans
+			,@strBatchId AS strDemandIds
+		FROM tblMFInvPlngSummary S
+		JOIN tblCTBook B ON B.intBookId = S.intBookId
+		JOIN tblCTSubBook SB ON SB.intSubBookId = S.intSubBookId
+		JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = S.intUnitMeasureId
+		WHERE intInvPlngSummaryId = @intInvPlngSummaryId
+
+		SELECT @intNoOfMonths AS intNoOfMonths
+			,[strMonth1]
 			,[strMonth2]
 			,[strMonth3]
 			,[strMonth4]
@@ -425,6 +452,16 @@ BEGIN
 	END
 	ELSE
 	BEGIN
+		SELECT @intNoOfMonths = Max(intNoOfMonths)
+		FROM tblCTInvPlngReportMaster
+		WHERE intInvPlngReportMasterID IN (
+				SELECT Item Collate Latin1_General_CI_AS
+				FROM [dbo].[fnSplitString](@strInvPlngReportMasterID, ',')
+				)
+
+		IF @intNoOfMonths IS NULL
+			SELECT @intNoOfMonths = 0
+
 		SELECT @intNoOfMonths AS intNoOfMonths
 			,[strMonth1]
 			,[strMonth2]
