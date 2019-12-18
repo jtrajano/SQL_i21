@@ -8,9 +8,13 @@
 	,@TransactionDate			DATETIME
 	,@Quantity					NUMERIC(18,6)
 	,@ContractHeaderId			INT
-	,@ContractDetailId			INT
+	,@ContractDetailId			INT	
 	,@ContractNumber			NVARCHAR(50)
 	,@ContractSeq				INT
+	,@ItemContractHeaderId		INT
+	,@ItemContractDetailId		INT
+	,@ItemContractNumber		NVARCHAR(50)
+	,@ItemContractSeq			INT
 	,@AvailableQuantity			NUMERIC(18,6)
 	,@UnlimitedQuantity			BIT
 	,@OriginalQuantity			NUMERIC(18,6)
@@ -56,6 +60,10 @@ RETURNS @returntable TABLE
 	,intContractDetailId			INT
 	,strContractNumber				NVARCHAR(50)
 	,intContractSeq					INT
+	,intItemContractHeaderId		INT
+	,intItemContractDetailId		INT
+	,strItemContractNumber			NVARCHAR(50)
+	,intItemContractSeq				INT
 	,dblPriceUOMQuantity			NUMERIC(18,6)
 	,dblQuantity					NUMERIC(18,6)
 	,dblAvailableQty				NUMERIC(18,6)
@@ -283,11 +291,49 @@ DECLARE	 @Price							NUMERIC(18,6)
 			END
 
 			SET @Sort = 1
-			INSERT @returntable(dblPrice, dblUnitPrice, dblOriginalGrossPrice, dblTermDiscount, strTermDiscountBy, dblTermDiscountRate, ysnTermDiscountExempt, strPricing, intCurrencyExchangeRateTypeId, strCurrencyExchangeRateType, dblCurrencyExchangeRate, intSubCurrencyId, dblSubCurrencyRate, strSubCurrency, intContractUOMId, strContractUOM, intPriceUOMId, strPriceUOM, dblDeviation, intContractHeaderId, intContractDetailId, strContractNumber, intContractSeq, dblPriceUOMQuantity, dblQuantity, dblAvailableQty, ysnUnlimitedQty, strPricingType, intTermId, intSort, intSpecialPriceId)
-			SELECT @Price, @UnitPrice, @OriginalGrossPrice, @TermDiscount, @TermDiscountBy, @TermDiscountRate, @TermDiscountExempt, @Pricing, @CurrencyExchangeRateTypeId, @CurrencyExchangeRateType, @CurrencyExchangeRate, @SubCurrencyId, @SubCurrencyRate, @SubCurrency, @ContractUOMId, @ContractUOM, @PriceUOMId, @PriceUOM, @Deviation, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @PriceUOMQuantity, @Quantity, @AvailableQuantity, @UnlimitedQuantity, @PricingType, @TermId, @Sort, @SpecialPriceId			
+			INSERT @returntable(dblPrice, dblUnitPrice, dblOriginalGrossPrice, dblTermDiscount, strTermDiscountBy, dblTermDiscountRate, ysnTermDiscountExempt, strPricing, intCurrencyExchangeRateTypeId, strCurrencyExchangeRateType, dblCurrencyExchangeRate, intSubCurrencyId, dblSubCurrencyRate, strSubCurrency, intContractUOMId, strContractUOM, intPriceUOMId, strPriceUOM, dblDeviation, intContractHeaderId, intContractDetailId, strContractNumber, intContractSeq, intItemContractHeaderId, intItemContractDetailId, strItemContractNumber, intItemContractSeq, dblPriceUOMQuantity, dblQuantity, dblAvailableQty, ysnUnlimitedQty, strPricingType, intTermId, intSort, intSpecialPriceId)
+			SELECT @Price, @UnitPrice, @OriginalGrossPrice, @TermDiscount, @TermDiscountBy, @TermDiscountRate, @TermDiscountExempt, @Pricing, @CurrencyExchangeRateTypeId, @CurrencyExchangeRateType, @CurrencyExchangeRate, @SubCurrencyId, @SubCurrencyRate, @SubCurrency, @ContractUOMId, @ContractUOM, @PriceUOMId, @PriceUOM, @Deviation, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @ItemContractHeaderId, @ItemContractDetailId, @ItemContractNumber, @ItemContractSeq, @PriceUOMQuantity, @Quantity, @AvailableQuantity, @UnlimitedQuantity, @PricingType, @TermId, @Sort, @SpecialPriceId			
 			IF @GetAllAvailablePricing = 0 RETURN
 		END	
 		
+	END
+
+	IF NOT(@CustomerPricingOnly = 1 OR @ExcludeContractPricing = 1) AND @ItemPricingOnly = 0 AND @ysnFromItemSelection = 0 AND @ItemContractDetailId IS NOT NULL
+	BEGIN		
+		--Item Contract Price		
+		SELECT TOP 1
+			 @Price							= dblPrice
+			,@UnitPrice						= dblPrice
+			,@OriginalGrossPrice			= 0
+			,@Pricing						= strPricing
+			,@ContractPrice					= dblPrice
+			,@ContractPricing				= strPricing
+			,@Deviation						= dblPrice 
+			,@ItemContractHeaderId			= intItemContractHeaderId
+			,@ItemContractDetailId			= intItemContractDetailId
+			,@ItemContractNumber			= strItemContractNumber
+			,@ItemContractSeq				= intItemContractSeq
+			,@AvailableQuantity				= dblAvailableQty
+			,@ContractUOMId					= intItemContractUOMId
+			,@ContractUOM					= strItemContractUOM
+			,@termIdOut						= intTermId
+		FROM [dbo].[fnARGetItemContractPricingDetails](
+			  @ItemId
+			, @CustomerId
+			, @LocationId
+			, @ItemUOMId
+			, @CurrencyId
+			, @TransactionDate
+			, @Quantity
+			, @ItemContractHeaderId
+			, @ItemContractDetailId
+			, @OriginalQuantity
+		);
+		
+		SET @Sort = 1
+		INSERT @returntable(dblPrice, dblUnitPrice, dblOriginalGrossPrice, dblTermDiscount, strTermDiscountBy, dblTermDiscountRate, ysnTermDiscountExempt, strPricing, intCurrencyExchangeRateTypeId, strCurrencyExchangeRateType, dblCurrencyExchangeRate, intSubCurrencyId, dblSubCurrencyRate, strSubCurrency, intContractUOMId, strContractUOM, intPriceUOMId, strPriceUOM, dblDeviation, intContractHeaderId, intContractDetailId, strContractNumber, intContractSeq, intItemContractHeaderId, intItemContractDetailId, strItemContractNumber, intItemContractSeq, dblPriceUOMQuantity, dblQuantity, dblAvailableQty, ysnUnlimitedQty, strPricingType, intTermId, intSort, intSpecialPriceId)
+		SELECT @Price, @UnitPrice, @OriginalGrossPrice, @TermDiscount, @TermDiscountBy, @TermDiscountRate, @TermDiscountExempt, @Pricing, @CurrencyExchangeRateTypeId, @CurrencyExchangeRateType, @CurrencyExchangeRate, @SubCurrencyId, @SubCurrencyRate, @SubCurrency, @ContractUOMId, @ContractUOM, @PriceUOMId, @PriceUOM, @Deviation, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @ItemContractHeaderId, @ItemContractDetailId, @ItemContractNumber, @ItemContractSeq, @PriceUOMQuantity, @Quantity, @AvailableQuantity, @UnlimitedQuantity, @PricingType, @TermId, @Sort, @SpecialPriceId			
+		IF @GetAllAvailablePricing = 0 RETURN		
 	END
 	
 	SELECT
@@ -295,6 +341,10 @@ DECLARE	 @Price							NUMERIC(18,6)
 		,@ContractDetailId				= NULL
 		,@ContractNumber				= NULL
 		,@ContractSeq					= NULL
+		,@ItemContractHeaderId			= NULL
+		,@ItemContractDetailId			= NULL
+		,@ItemContractNumber			= NULL
+		,@ItemContractSeq				= NULL
 		,@AvailableQuantity				= 0.000000
 		,@UnlimitedQuantity				= 0.000000
 		,@PricingType					= NULL
@@ -343,8 +393,10 @@ DECLARE	 @Price							NUMERIC(18,6)
 				IF(@Price IS NOT NULL)
 				BEGIN
 					SET @Sort = @SpecialPriceId
-					INSERT @returntable(dblPrice, dblUnitPrice, dblTermDiscount, strTermDiscountBy, dblTermDiscountRate, ysnTermDiscountExempt, strPricing, intCurrencyExchangeRateTypeId, strCurrencyExchangeRateType, dblCurrencyExchangeRate, intSubCurrencyId, dblSubCurrencyRate, strSubCurrency, intContractUOMId, strContractUOM, intPriceUOMId, strPriceUOM, dblDeviation, intContractHeaderId, intContractDetailId, strContractNumber, intContractSeq, dblPriceUOMQuantity, dblQuantity, dblAvailableQty, ysnUnlimitedQty, strPricingType, intTermId, intSort, intSpecialPriceId)
-					SELECT @Price, @UnitPrice, @TermDiscount, @TermDiscountBy, @TermDiscountRate, @TermDiscountExempt, @Pricing, @CurrencyExchangeRateTypeId, @CurrencyExchangeRateType, @CurrencyExchangeRate, @SubCurrencyId, @SubCurrencyRate, @SubCurrency, @ContractUOMId, @ContractUOM, @PriceUOMId, @PriceUOM, @Deviation, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @PriceUOMQuantity, @Quantity, @AvailableQuantity, @UnlimitedQuantity, @PricingType, @TermId, @Sort, @SpecialPriceId			
+					INSERT @returntable(
+							dblPrice
+						 , dblUnitPrice, dblTermDiscount, strTermDiscountBy, dblTermDiscountRate, ysnTermDiscountExempt, strPricing, intCurrencyExchangeRateTypeId, strCurrencyExchangeRateType, dblCurrencyExchangeRate, intSubCurrencyId, dblSubCurrencyRate, strSubCurrency, intContractUOMId, strContractUOM, intPriceUOMId, strPriceUOM, dblDeviation, intContractHeaderId, intContractDetailId, strContractNumber, intContractSeq, intItemContractHeaderId, intItemContractDetailId, strItemContractNumber, intItemContractSeq, dblPriceUOMQuantity, dblQuantity, dblAvailableQty, ysnUnlimitedQty, strPricingType, intTermId, intSort, intSpecialPriceId)
+					SELECT @Price, @UnitPrice, @TermDiscount, @TermDiscountBy, @TermDiscountRate, @TermDiscountExempt, @Pricing, @CurrencyExchangeRateTypeId, @CurrencyExchangeRateType, @CurrencyExchangeRate, @SubCurrencyId, @SubCurrencyRate, @SubCurrency, @ContractUOMId, @ContractUOM, @PriceUOMId, @PriceUOM, @Deviation, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @ItemContractHeaderId, @ItemContractDetailId, @ItemContractNumber, @ItemContractSeq, @PriceUOMQuantity, @Quantity, @AvailableQuantity, @UnlimitedQuantity, @PricingType, @TermId, @Sort, @SpecialPriceId			
 					RETURN
 				END	
 			END
@@ -373,6 +425,10 @@ DECLARE	 @Price							NUMERIC(18,6)
 					,intContractDetailId
 					,strContractNumber
 					,intContractSeq
+					,intItemContractHeaderId
+					,intItemContractDetailId
+					,strItemContractNumber
+					,intItemContractSeq
 					,dblPriceUOMQuantity
 					,dblQuantity
 					,dblAvailableQty
@@ -404,6 +460,10 @@ DECLARE	 @Price							NUMERIC(18,6)
 					,intContractDetailId			= @ContractDetailId
 					,strContractNumber				= @ContractNumber
 					,intContractSeq					= @ContractSeq
+					,intItemContractHeaderId		= @ItemContractHeaderId
+					,intItemContractDetailId		= @ItemContractDetailId
+					,strItemContractNumber			= @ItemContractNumber
+					,intItemContractSeq				= @ItemContractSeq
 					,dblPriceUOMQuantity			= @PriceUOMQuantity
 					,dblQuantity					= @Quantity
 					,dblAvailableQty				= @AvailableQuantity
@@ -467,8 +527,8 @@ DECLARE	 @Price							NUMERIC(18,6)
 				IF(@Price IS NOT NULL)
 				BEGIN
 					SET @Sort = @SpecialPriceId
-					INSERT @returntable(dblPrice, dblUnitPrice, dblOriginalGrossPrice, dblTermDiscount, strTermDiscountBy, dblTermDiscountRate, ysnTermDiscountExempt, strPricing, intCurrencyExchangeRateTypeId, strCurrencyExchangeRateType, dblCurrencyExchangeRate, intSubCurrencyId, dblSubCurrencyRate, strSubCurrency, intContractUOMId, strContractUOM, intPriceUOMId, strPriceUOM, dblDeviation, intContractHeaderId, intContractDetailId, strContractNumber, intContractSeq, dblPriceUOMQuantity, dblQuantity, dblAvailableQty, ysnUnlimitedQty, strPricingType, intTermId, intSort, intSpecialPriceId)
-					SELECT @Price, @UnitPrice, @OriginalGrossPrice, @TermDiscount, @TermDiscountBy, @TermDiscountRate, @TermDiscountExempt, @Pricing, @CurrencyExchangeRateTypeId, @CurrencyExchangeRateType, @CurrencyExchangeRate, @SubCurrencyId, @SubCurrencyRate, @SubCurrency, @ContractUOMId, @ContractUOM, @PriceUOMId, @PriceUOM, @Deviation, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @PriceUOMQuantity, @Quantity, @AvailableQuantity, @UnlimitedQuantity, @PricingType, @TermId, @Sort, @SpecialPriceId			
+					INSERT @returntable(dblPrice, dblUnitPrice, dblOriginalGrossPrice, dblTermDiscount, strTermDiscountBy, dblTermDiscountRate, ysnTermDiscountExempt, strPricing, intCurrencyExchangeRateTypeId, strCurrencyExchangeRateType, dblCurrencyExchangeRate, intSubCurrencyId, dblSubCurrencyRate, strSubCurrency, intContractUOMId, strContractUOM, intPriceUOMId, strPriceUOM, dblDeviation, intContractHeaderId, intContractDetailId, strContractNumber, intContractSeq, intItemContractHeaderId, intItemContractDetailId, strItemContractNumber, intItemContractSeq, dblPriceUOMQuantity, dblQuantity, dblAvailableQty, ysnUnlimitedQty, strPricingType, intTermId, intSort, intSpecialPriceId)
+					SELECT @Price, @UnitPrice, @OriginalGrossPrice, @TermDiscount, @TermDiscountBy, @TermDiscountRate, @TermDiscountExempt, @Pricing, @CurrencyExchangeRateTypeId, @CurrencyExchangeRateType, @CurrencyExchangeRate, @SubCurrencyId, @SubCurrencyRate, @SubCurrency, @ContractUOMId, @ContractUOM, @PriceUOMId, @PriceUOM, @Deviation, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @ItemContractHeaderId, @ItemContractDetailId, @ItemContractNumber, @ItemContractSeq, @PriceUOMQuantity, @Quantity, @AvailableQuantity, @UnlimitedQuantity, @PricingType, @TermId, @Sort, @SpecialPriceId			
 					RETURN
 				END	
 			END
@@ -498,6 +558,10 @@ DECLARE	 @Price							NUMERIC(18,6)
 					,intContractDetailId
 					,strContractNumber
 					,intContractSeq
+					,intItemContractHeaderId
+					,intItemContractDetailId
+					,strItemContractNumber
+					,intItemContractSeq
 					,dblPriceUOMQuantity
 					,dblQuantity
 					,dblAvailableQty
@@ -530,6 +594,10 @@ DECLARE	 @Price							NUMERIC(18,6)
 					,intContractDetailId			= @ContractDetailId
 					,strContractNumber				= @ContractNumber
 					,intContractSeq					= @ContractSeq
+					,intItemContractHeaderId		= @ItemContractHeaderId
+					,intItemContractDetailId		= @ItemContractDetailId
+					,strItemContractNumber			= @ItemContractNumber
+					,intItemContractSeq				= @ItemContractSeq
 					,dblPriceUOMQuantity			= @PriceUOMQuantity
 					,dblQuantity					= @Quantity
 					,dblAvailableQty				= @AvailableQuantity
@@ -571,8 +639,8 @@ DECLARE	 @Price							NUMERIC(18,6)
 			BEGIN
 				SET @Pricing = 'Inventory - Pricing Level'
 				SET @Sort = 1000
-				INSERT @returntable(dblPrice, dblUnitPrice, dblTermDiscount, strTermDiscountBy, dblTermDiscountRate, ysnTermDiscountExempt, strPricing, intCurrencyExchangeRateTypeId, strCurrencyExchangeRateType, dblCurrencyExchangeRate, intSubCurrencyId, dblSubCurrencyRate, strSubCurrency, intContractUOMId, strContractUOM, intPriceUOMId, strPriceUOM, dblDeviation, intContractHeaderId, intContractDetailId, strContractNumber, intContractSeq, dblPriceUOMQuantity, dblQuantity, dblAvailableQty, ysnUnlimitedQty, strPricingType, intTermId, intSort, intSpecialPriceId)
-				SELECT @Price, @Price, @TermDiscount, @TermDiscountBy, @TermDiscountRate, @TermDiscountExempt, @Pricing, @CurrencyExchangeRateTypeId, @CurrencyExchangeRateType, @CurrencyExchangeRate, @SubCurrencyId, @SubCurrencyRate, @SubCurrency, @ContractUOMId, @ContractUOM, @PriceUOMId, @PriceUOM, @Deviation, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @PriceUOMQuantity, @Quantity, @AvailableQuantity, @UnlimitedQuantity, @PricingType, @TermId, @Sort, @SpecialPriceId			
+				INSERT @returntable(dblPrice, dblUnitPrice, dblTermDiscount, strTermDiscountBy, dblTermDiscountRate, ysnTermDiscountExempt, strPricing, intCurrencyExchangeRateTypeId, strCurrencyExchangeRateType, dblCurrencyExchangeRate, intSubCurrencyId, dblSubCurrencyRate, strSubCurrency, intContractUOMId, strContractUOM, intPriceUOMId, strPriceUOM, dblDeviation, intContractHeaderId, intContractDetailId, strContractNumber, intContractSeq, intItemContractHeaderId, intItemContractDetailId, strItemContractNumber, intItemContractSeq, dblPriceUOMQuantity, dblQuantity, dblAvailableQty, ysnUnlimitedQty, strPricingType, intTermId, intSort, intSpecialPriceId)
+				SELECT @Price, @Price, @TermDiscount, @TermDiscountBy, @TermDiscountRate, @TermDiscountExempt, @Pricing, @CurrencyExchangeRateTypeId, @CurrencyExchangeRateType, @CurrencyExchangeRate, @SubCurrencyId, @SubCurrencyRate, @SubCurrency, @ContractUOMId, @ContractUOM, @PriceUOMId, @PriceUOM, @Deviation, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @ItemContractHeaderId, @ItemContractDetailId, @ItemContractNumber, @ItemContractSeq, @PriceUOMQuantity, @Quantity, @AvailableQuantity, @UnlimitedQuantity, @PricingType, @TermId, @Sort, @SpecialPriceId			
 				IF @GetAllAvailablePricing = 0 RETURN
 			END	
 	END
@@ -688,15 +756,15 @@ DECLARE	 @Price							NUMERIC(18,6)
 			SET @CurrencyExchangeRate = (CASE WHEN ISNULL(@CurrencyExchangeRate, 0.000000) = 0.000000 THEN 1.000000 ELSE @CurrencyExchangeRate END)					
 			SET @Pricing = 'Inventory - Standard Pricing'
 			SET @Sort = 1100
-				INSERT @returntable(dblPrice, dblUnitPrice, dblOriginalGrossPrice, dblTermDiscount, strTermDiscountBy, dblTermDiscountRate, ysnTermDiscountExempt, strPricing, intCurrencyExchangeRateTypeId, strCurrencyExchangeRateType, dblCurrencyExchangeRate, intSubCurrencyId, dblSubCurrencyRate, strSubCurrency, intContractUOMId, strContractUOM, intPriceUOMId, strPriceUOM, dblDeviation, intContractHeaderId, intContractDetailId, strContractNumber, intContractSeq, dblPriceUOMQuantity, dblQuantity, dblAvailableQty, ysnUnlimitedQty, strPricingType, intTermId, intSort, intSpecialPriceId)
-				SELECT @Price, @Price, @OriginalGrossPrice, @TermDiscount, @TermDiscountBy, @TermDiscountRate, @TermDiscountExempt, @Pricing, @CurrencyExchangeRateTypeId, @CurrencyExchangeRateType, @CurrencyExchangeRate, @SubCurrencyId, @SubCurrencyRate, @SubCurrency, @ContractUOMId, @ContractUOM, @PriceUOMId, @PriceUOM, @Deviation, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @PriceUOMQuantity, @Quantity, @AvailableQuantity, @UnlimitedQuantity, @PricingType, @TermId, @Sort, @SpecialPriceId			
+				INSERT @returntable(dblPrice, dblUnitPrice, dblOriginalGrossPrice, dblTermDiscount, strTermDiscountBy, dblTermDiscountRate, ysnTermDiscountExempt, strPricing, intCurrencyExchangeRateTypeId, strCurrencyExchangeRateType, dblCurrencyExchangeRate, intSubCurrencyId, dblSubCurrencyRate, strSubCurrency, intContractUOMId, strContractUOM, intPriceUOMId, strPriceUOM, dblDeviation, intContractHeaderId, intContractDetailId, strContractNumber, intContractSeq, intItemContractHeaderId, intItemContractDetailId, strItemContractNumber, intItemContractSeq, dblPriceUOMQuantity, dblQuantity, dblAvailableQty, ysnUnlimitedQty, strPricingType, intTermId, intSort, intSpecialPriceId)
+				SELECT @Price, @Price, @OriginalGrossPrice, @TermDiscount, @TermDiscountBy, @TermDiscountRate, @TermDiscountExempt, @Pricing, @CurrencyExchangeRateTypeId, @CurrencyExchangeRateType, @CurrencyExchangeRate, @SubCurrencyId, @SubCurrencyRate, @SubCurrency, @ContractUOMId, @ContractUOM, @PriceUOMId, @PriceUOM, @Deviation, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @ItemContractHeaderId, @ItemContractDetailId, @ItemContractNumber, @ItemContractSeq, @PriceUOMQuantity, @Quantity, @AvailableQuantity, @UnlimitedQuantity, @PricingType, @TermId, @Sort, @SpecialPriceId			
 			IF @GetAllAvailablePricing = 0 RETURN
 		END	
 	
 	IF @GetAllAvailablePricing = 1 RETURN			
 	SET @Sort = 1000
-	INSERT @returntable(dblPrice, dblUnitPrice, dblOriginalGrossPrice, dblTermDiscount, strTermDiscountBy, dblTermDiscountRate, ysnTermDiscountExempt, strPricing, intCurrencyExchangeRateTypeId, strCurrencyExchangeRateType, dblCurrencyExchangeRate, intSubCurrencyId, dblSubCurrencyRate, strSubCurrency, intContractUOMId, strContractUOM, intPriceUOMId, strPriceUOM, dblDeviation, intContractHeaderId, intContractDetailId, strContractNumber, intContractSeq, dblPriceUOMQuantity, dblQuantity, dblAvailableQty, ysnUnlimitedQty, strPricingType, intTermId, intSort, intSpecialPriceId)
-	SELECT @Price, @UnitPrice, @OriginalGrossPrice, @TermDiscount, @TermDiscountBy, @TermDiscountRate, @TermDiscountExempt, @Pricing, @CurrencyExchangeRateTypeId, @CurrencyExchangeRateType, @CurrencyExchangeRate, @SubCurrencyId, @SubCurrencyRate, @SubCurrency, @ContractUOMId, @ContractUOM, @PriceUOMId, @PriceUOM, @Deviation, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @PriceUOMQuantity, @Quantity, @AvailableQuantity, @UnlimitedQuantity, @PricingType, @TermId, @Sort, @SpecialPriceId			
+	INSERT @returntable(dblPrice, dblUnitPrice, dblOriginalGrossPrice, dblTermDiscount, strTermDiscountBy, dblTermDiscountRate, ysnTermDiscountExempt, strPricing, intCurrencyExchangeRateTypeId, strCurrencyExchangeRateType, dblCurrencyExchangeRate, intSubCurrencyId, dblSubCurrencyRate, strSubCurrency, intContractUOMId, strContractUOM, intPriceUOMId, strPriceUOM, dblDeviation, intContractHeaderId, intContractDetailId, strContractNumber, intContractSeq, intItemContractHeaderId, intItemContractDetailId, strItemContractNumber, intItemContractSeq, dblPriceUOMQuantity, dblQuantity, dblAvailableQty, ysnUnlimitedQty, strPricingType, intTermId, intSort, intSpecialPriceId)
+	SELECT @Price, @UnitPrice, @OriginalGrossPrice, @TermDiscount, @TermDiscountBy, @TermDiscountRate, @TermDiscountExempt, @Pricing, @CurrencyExchangeRateTypeId, @CurrencyExchangeRateType, @CurrencyExchangeRate, @SubCurrencyId, @SubCurrencyRate, @SubCurrency, @ContractUOMId, @ContractUOM, @PriceUOMId, @PriceUOM, @Deviation, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @ItemContractHeaderId, @ItemContractDetailId, @ItemContractNumber, @ItemContractSeq, @PriceUOMQuantity, @Quantity, @AvailableQuantity, @UnlimitedQuantity, @PricingType, @TermId, @Sort, @SpecialPriceId			
 	RETURN				
 END
 

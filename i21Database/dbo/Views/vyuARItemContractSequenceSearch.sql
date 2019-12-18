@@ -2,6 +2,8 @@ CREATE VIEW [dbo].[vyuARItemContractSequenceSearch]
 AS 
 SELECT intItemContractHeaderId		= ICH.intItemContractHeaderId
 	 , intItemContractDetailId		= ICD.intItemContractDetailId
+	 , intTermId					= ICH.intTermId
+	 , intCurrencyId				= ICH.intCurrencyId
 	 , strItemContractNumber		= ICH.strContractNumber
 	 , intItemContractSeq			= ICD.intLineNo
 	 , strContractCategoryId		= ICH.strContractCategoryId

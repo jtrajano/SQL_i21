@@ -53,7 +53,11 @@ BEGIN
 		,@ContractHeaderId		
 		,@ContractDetailId		
 		,@ContractNumber		
-		,@ContractSeq			
+		,@ContractSeq
+		,NULL
+		,NULL
+		,NULL
+		,NULL			
 		,@AvailableQuantity		
 		,@UnlimitedQuantity		
 		,@OriginalQuantity		

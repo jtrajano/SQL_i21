@@ -47,6 +47,10 @@ BEGIN
 			,@ContractSeq
 			,NULL
 			,NULL
+			,NULL
+			,NULL
+			,NULL
+			,NULL
 			,@OriginalQuantity
 			,@CustomerPricingOnly
 			,@ItemPricingOnly

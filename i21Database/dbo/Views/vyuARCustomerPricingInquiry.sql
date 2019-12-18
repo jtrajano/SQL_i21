@@ -43,6 +43,10 @@ CROSS APPLY (
 		,NULL						--@ContractDetailId
 		,NULL						--@ContractNumber
 		,NULL						--@ContractSeq
+		,NULL  						--@ItemContractHeaderId
+	    ,NULL  						--@ItemContractDetailId
+	    ,NULL  						--@ItemContractNumber
+	    ,NULL  						--@ItemContractSeq
 		,NULL						--@AvailableQuantity
 		,0							--@UnlimitedQuantity
 		,0							--@OriginalQuantity

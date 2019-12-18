@@ -51,6 +51,10 @@ CROSS APPLY (
 	    ,NULL  --@ContractDetailId		INT
 	    ,NULL  --@ContractNumber		NVARCHAR(50)
 	    ,NULL  --@ContractSeq			INT
+		,NULL  --@ItemContractHeaderId  INT
+	    ,NULL  --@ItemContractDetailId	INT
+	    ,NULL  --@ItemContractNumber	NVARCHAR(50)
+	    ,NULL  --@ItemContractSeq		INT
 	    ,NULL  --@AvailableQuantity		NUMERIC(18,6)
 	    ,NULL  --@UnlimitedQuantity     BIT
 	    ,NULL  --@OriginalQuantity		NUMERIC(18,6)

@@ -10,9 +10,13 @@
 	,@OriginalGrossPrice		NUMERIC(18,6)	= NULL OUTPUT
 	,@Pricing					NVARCHAR(250)	= NULL OUTPUT	
 	,@ContractHeaderId			INT				= NULL OUTPUT
-	,@ContractDetailId			INT				= NULL OUTPUT
+	,@ContractDetailId			INT				= NULL OUTPUT	
 	,@ContractNumber			NVARCHAR(50)	= NULL OUTPUT
 	,@ContractSeq				INT				= NULL OUTPUT
+	,@ItemContractHeaderId		INT				= NULL OUTPUT
+	,@ItemContractDetailId		INT				= NULL OUTPUT
+	,@ItemContractNumber		NVARCHAR(50)	= NULL OUTPUT
+	,@ItemContractSeq			INT				= NULL OUTPUT
 	,@PriceUOMQuantity			NUMERIC(18,6)   = NULL OUTPUT
 	,@ContractUOMId				INT			    = NULL OUTPUT
 	,@ContractUOM				NVARCHAR(50)	= NULL OUTPUT
@@ -61,9 +65,13 @@ AS
 		,@OriginalGrossPrice			= dblOriginalGrossPrice
 		,@Pricing						= strPricing
 		,@ContractHeaderId				= intContractHeaderId
-		,@ContractDetailId				= intContractDetailId
+		,@ContractDetailId				= intContractDetailId		
 		,@ContractNumber				= strContractNumber
 		,@ContractSeq					= intContractSeq
+		,@ItemContractHeaderId			= intItemContractHeaderId
+		,@ItemContractDetailId			= intItemContractDetailId
+		,@ItemContractNumber			= strItemContractNumber
+		,@ItemContractSeq				= intItemContractSeq
 		,@ContractUOMId					= intContractUOMId
 		,@ContractUOM					= strContractUOM
 		,@PriceUOMId					= intPriceUOMId
@@ -98,6 +106,10 @@ AS
 			,@ContractDetailId
 			,@ContractNumber
 			,@ContractSeq
+			,@ItemContractHeaderId
+			,@ItemContractDetailId
+			,@ItemContractNumber
+			,@ItemContractSeq
 			,@AvailableQuantity
 			,@UnlimitedQuantity
 			,@OriginalQuantity

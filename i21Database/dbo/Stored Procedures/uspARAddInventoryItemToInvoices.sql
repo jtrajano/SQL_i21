@@ -356,6 +356,10 @@ BEGIN TRY
 		,IE.[intContractDetailId]	--@ContractDetailId
 		,''							--@ContractNumber
 		,''							--@ContractSeq
+		,IE.intItemContractHeaderId --@ItemContractHeaderId
+		,IE.intItemContractDetailId --@ItemContractDetailId
+		,NULL						--@ItemContractNumber
+		,NULL						--@ItemContractSeq
 		,0							--@AvailableQuantity
 		,0							--@UnlimitedQuantity
 		,0							--@OriginalQuantity
