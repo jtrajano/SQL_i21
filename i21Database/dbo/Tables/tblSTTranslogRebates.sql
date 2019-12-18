@@ -169,14 +169,17 @@
     [strTrlMatchLineTrlPromotionID]          NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [strTrlMatchLineTrlPromotionIDPromoType] NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [intTrlMatchLineTrlMatchNumber]          INT             NULL,
+
+	[intRegisterClassId]					 INT             NULL,		-- Will be used to determine the Register Class
     [intStoreId]                             INT             NOT NULL,
-    [intCheckoutId]                          INT             NOT NULL,
+    [intCheckoutId]                          INT             NULL,			-- In the future the intCheckoutId is not necessary
     [ysnSubmitted]                           BIT             NOT NULL,
     [ysnPMMSubmitted]                        BIT             DEFAULT ((0)) NOT NULL,
     [ysnRJRSubmitted]                        BIT             DEFAULT ((0)) NOT NULL,
     [intConcurrencyId]                       INT             NOT NULL,
     CONSTRAINT [PK_tblSTTranslogRebates] PRIMARY KEY CLUSTERED ([intTranslogId] ASC),
-    CONSTRAINT [FK_tblSTTranslogRebates_tblSTCheckoutHeader] FOREIGN KEY ([intCheckoutId]) REFERENCES [dbo].[tblSTCheckoutHeader] ([intCheckoutId]) ON DELETE CASCADE
+    CONSTRAINT [FK_tblSTTranslogRebates_tblSTCheckoutHeader] FOREIGN KEY ([intCheckoutId]) REFERENCES [dbo].[tblSTCheckoutHeader] ([intCheckoutId]) ON DELETE CASCADE,
+	CONSTRAINT [FK_tblSTTranslogRebates_tblSTRegisterSetup] FOREIGN KEY ([intRegisterClassId]) REFERENCES [dbo].[tblSTRegisterSetup] ([intRegisterSetupId]) ON DELETE CASCADE
 );
 
 
