@@ -341,11 +341,11 @@ BEGIN TRY
 			,intWeightUnitMeasureId
 			)
 		SELECT ID.intMainItemId
-			,AVG(CASE 
+			,AVG((CASE 
 					WHEN @ysnCalculateNoOfContainerByBagQty = 1
 						THEN CTCQ.dblWeight
 					ELSE CTCQ.dblBulkQuantity
-					END)
+					END)* IsNULL(UMCByWeight.dblConversionToStock, 1)) 
 			,MIN(CASE 
 					WHEN @ysnCalculateNoOfContainerByBagQty = 1
 						THEN CTCQ.intWeightUnitMeasureId
@@ -359,6 +359,14 @@ BEGIN TRY
 			AND CTCQ.intContainerTypeId = @intContainerTypeId
 			AND CA.intDefaultPackingUOMId = CTCQ.intUnitMeasureId
 		LEFT JOIN tblLGContainerType CT ON CT.intContainerTypeId = CTCQ.intContainerTypeId
+		LEFT JOIN tblICUnitMeasureConversion UMCByWeight ON UMCByWeight.intUnitMeasureId = (
+				CASE 
+					WHEN @ysnCalculateNoOfContainerByBagQty = 1
+						THEN CTCQ.intWeightUnitMeasureId
+					ELSE CT.intWeightUnitMeasureId
+					END
+				) --From Unit
+			AND UMCByWeight.intStockUnitMeasureId = @intUnitMeasureId -- To Unit
 		WHERE ID.ysnSpecificItemDescription = 0
 		GROUP BY ID.intMainItemId
 
@@ -374,7 +382,7 @@ BEGIN TRY
 						THEN CTCQ.dblWeight
 					ELSE CTCQ.dblBulkQuantity
 					END
-				)
+				) * IsNULL(UMCByWeight.dblConversionToStock, 1)
 			,(
 				CASE 
 					WHEN @ysnCalculateNoOfContainerByBagQty = 1
@@ -390,6 +398,14 @@ BEGIN TRY
 			AND CTCQ.intContainerTypeId = @intContainerTypeId
 			AND CA.intDefaultPackingUOMId = CTCQ.intUnitMeasureId
 		LEFT JOIN tblLGContainerType CT ON CT.intContainerTypeId = CTCQ.intContainerTypeId
+		LEFT JOIN tblICUnitMeasureConversion UMCByWeight ON UMCByWeight.intUnitMeasureId = (
+				CASE 
+					WHEN @ysnCalculateNoOfContainerByBagQty = 1
+						THEN CTCQ.intWeightUnitMeasureId
+					ELSE CT.intWeightUnitMeasureId
+					END
+				) --From Unit
+			AND UMCByWeight.intStockUnitMeasureId = @intUnitMeasureId -- To Unit
 		WHERE ID.ysnSpecificItemDescription = 1
 	END
 
@@ -1263,7 +1279,6 @@ BEGIN TRY
 			WHEN @ysnCalculatePlannedPurchases = 0
 				AND @ysnCalculateEndInventory = 0
 				AND @intContainerTypeId IS NOT NULL
-				--THEN IsNULL(IL.dblMinOrder * CW.dblWeight * IsNULL(UMCByWeight.dblConversionToStock, 1), 0)
 				THEN IsNULL(IL.dblMinOrder * IsNULL(UMCByWeight.dblConversionToStock, 1), 0)
 			ELSE 0
 			END
@@ -1299,10 +1314,6 @@ BEGIN TRY
 		FROM #tblMFDemand D
 		JOIN #TempPlannedPurchases Purchase ON Purchase.intItemId = D.intItemId
 			AND Purchase.[strName] = D.intMonthId
-		--LEFT JOIN @tblMFContainerWeight CW ON CW.intItemId = D.intItemId
-		--LEFT JOIN tblICUnitMeasureConversion UMCByWeight ON UMCByWeight.intUnitMeasureId = CW.intWeightUnitMeasureId --From Unit
-		--	AND UMCByWeight.intStockUnitMeasureId = @intUnitMeasureId -- To Unit
-		--LEFT JOIN tblICItemLocation IL ON IL.intItemId = D.intItemId
 		WHERE intAttributeId = 5 --Planned Purchases -
 			AND intMonthId > 0
 	END
@@ -1937,7 +1948,7 @@ BEGIN TRY
 					WHEN A.intReportAttributeID = 5
 						AND @intContainerTypeId IS NOT NULL
 						AND IsNULL(CW.dblWeight, 0) > 0
-						THEN Round(IsNULL((D.dblQty * IsNULL(UMC.dblConversionToStock, 1)) / CW.dblWeight, 0), 0) * CW.dblWeight
+						THEN Round(IsNULL(D.dblQty / CW.dblWeight, 0), 0) * CW.dblWeight
 					WHEN DL.intMonthId IN (
 							- 1
 							,0
@@ -1967,8 +1978,6 @@ BEGIN TRY
 		JOIN tblCTReportAttribute A ON A.intReportAttributeID = DL.intAttributeId
 		JOIN tblICItem I ON I.intItemId = DL.intItemId
 		LEFT JOIN @tblMFContainerWeight CW ON CW.intItemId = DL.intItemId
-		LEFT JOIN tblICUnitMeasureConversion UMC ON UMC.intUnitMeasureId = @intUnitMeasureId --From Unit
-			AND UMC.intStockUnitMeasureId = CW.intWeightUnitMeasureId -- To Unit
 		LEFT JOIN #tblMFDemand D ON D.intItemId = DL.intItemId
 			AND D.intMonthId = DL.intMonthId
 			AND D.intAttributeId = DL.intAttributeId
