@@ -493,7 +493,7 @@ BEGIN TRY
 		intNoOfLoad		 = SUM(FD.dblQuantity)/CD.dblQuantityPerLoad
 	 ,intShippedNoOfLoad = 0
 	FROM	tblCTPriceFixationDetail FD
-	JOIN	tblCTPriceFixation		 PF	ON	PF.intPriceFixationId =	FD.intPriceFixationId
+	JOIN	vyuCTPriceFixationContractDetail PF	ON	PF.intPriceFixationId =	FD.intPriceFixationId
 	JOIN tblCTContractHeader		 CH ON CH.intContractHeaderId = PF.intContractHeaderId
 	JOIN tblCTContractDetail		 CD ON CD.intContractDetailId = PF.intContractDetailId
 	AND dbo.fnRemoveTimeOnDate(FD.dtmFixationDate) <= CASE WHEN @dtmEndDate IS NOT NULL THEN @dtmEndDate ELSE dbo.fnRemoveTimeOnDate(FD.dtmFixationDate) END
@@ -764,7 +764,7 @@ BEGIN TRY
 		,dtmSeqEndDate			= CD.dtmEndDate
 		,strFutMarketName		= FM.strFutMarketName
 		,strCategory			= Category.strCategoryCode
-		,strPricingStatus		= ISNULL(HT.strPricingStatus, CASE WHEN ISNULL(PF.dblQuantity, 0) = 0 THEN 'Unpriced' ELSE 'Partially Priced' END)
+		,strPricingStatus		= CASE WHEN ISNULL(PF.dblQuantity, 0) = 0 THEN ISNULL(HT.strPricingStatus, 'Unpriced') ELSE 'Partially Priced' END
 	
 		FROM tblCTContractDetail					CD
 		JOIN tblCTContractStatus					CS	ON CS.intContractStatusId			=	CD.intContractStatusId
