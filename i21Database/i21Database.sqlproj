@@ -8099,6 +8099,14 @@
     <None Include="Scripts\Post-Deployment\CT\uspCTRebuildScheduledQuantityAboveR2.sql" />
     <Build Include="dbo\Stored Procedures\uspSCPostSpecialDiscount.sql" />
     <Build Include="dbo\Stored Procedures\uspSCProcessReceiptToVoucher.sql" />
+    <Build Include="dbo\Tables\tblTRImportDtn.sql" />
+    <Build Include="dbo\Tables\tblTRDtnImportSetup.sql" />
+    <Build Include="dbo\Tables\tblTRDtnImportSetupDetail.sql" />
+    <Build Include="dbo\Tables\tblTRImportDtnDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspTRImportDtn.sql" />
+    <Build Include="dbo\Stored Procedures\uspTRProcessImportDtn.sql" />
+    <Build Include="dbo\Tables\tblTRCrossReferenceDtn.sql" />
+    <Build Include="dbo\Views\vyuTRCrossReferenceDtn.sql" />
     <Build Include="dbo\Tables\tblSCInventoryReceiptAllowVoucherTracker.sql" />
     <Build Include="dbo\Views\vyuAPUnknownPayables.sql" />
     <Build Include="dbo\Views\vyuCTEntityContainer.sql" />
@@ -8523,5 +8531,17 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\CT\1920_Add_Accrued_Payables.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\TR\ImportDtnFileSetup.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\TR\ImportDtnDefaultSetup.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\TR\CrossReferenceDefault.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\CO_Colorado.sql" />
   </ItemGroup>
 </Project>
