@@ -70,16 +70,20 @@ BEGIN
 
 				--Get StoreId
 				DECLARE @intStoreId			INT,
-						@strRegisterClass	NVARCHAR(50)
+						@strRegisterClass	NVARCHAR(50),
+						@intRegisterClassId INT
 
 				SELECT
 					@intStoreId			= chk.intStoreId,
-					@strRegisterClass	= r.strRegisterClass
+					@strRegisterClass	= r.strRegisterClass,
+					@intRegisterClassId = setup.intRegisterSetupId
 				FROM tblSTCheckoutHeader chk
 				INNER JOIN tblSTStore st
 					ON chk.intStoreId = st.intStoreId
 				INNER JOIN tblSTRegister r
 					ON st.intRegisterId = r.intRegisterId
+				INNER JOIN tblSTRegisterSetup setup
+					ON r.strRegisterClass = setup.strRegisterClass
 				WHERE chk.intCheckoutId = @intCheckoutId
 
 
@@ -152,6 +156,7 @@ BEGIN
 							AND c.dtmDate IS NOT NULL
 						GROUP BY c.intTermMsgSN
 					END
+
 
 
 
@@ -365,7 +370,7 @@ BEGIN
 							[strTrlMatchLineTrlPromotionIDPromoType],
 							[intTrlMatchLineTrlMatchNumber],
 
-
+							[intRegisterClassId],
 							[intStoreId],
 							[intCheckoutId],
 							[ysnSubmitted],
@@ -605,7 +610,7 @@ BEGIN
 							[strTrlMatchLineTrlPromotionIDPromoType]	= strTrlMatchLineTrlPromotionIDPromoType,
 							[intTrlMatchLineTrlMatchNumber]				= intTrlMatchLineTrlMatchNumber,
 
-
+							[intRegisterClassId]					= @intRegisterClassId,
 							[intStoreId]							= @intStoreId,
 							[intCheckoutId]							= @intCheckoutId,
 							[ysnSubmitted]							= CAST(0 AS BIT),
