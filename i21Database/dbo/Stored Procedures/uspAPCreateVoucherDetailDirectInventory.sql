@@ -68,7 +68,8 @@ IF @transCount = 0 BEGIN TRANSACTION
 																		,CASE WHEN ctd.intPriceItemUOMId > 0 THEN ctd.intPriceItemUOMId ELSE A.intCostUOMId END
 																		,ISNULL(A.dblCost, ISNULL(C.dblReceiveLastCost,0))),
 		[dblCostUnitQty]				=	CASE WHEN ctd.intPriceItemUOMId > 0 THEN ctd.dblCostUnitQty ELSE A.dblCostUnitQty END,
-		[int1099Form]					=	(CASE WHEN patron.intEntityId IS NOT NULL 
+		[int1099Form]					=	(CASE 	WHEN C.intItemId > 0 AND C.intCommodityId > 0 THEN 0
+													WHEN patron.intEntityId IS NOT NULL 
 														AND C.intItemId > 0
 														AND C.ysn1099Box3 = 1
 														AND patron.ysnStockStatusQualified = 1 
@@ -77,7 +78,8 @@ IF @transCount = 0 BEGIN TRANSACTION
 													WHEN E.str1099Form = '1099-INT' THEN 2
 													WHEN E.str1099Form = '1099-B' THEN 3
 												ELSE 0 END),
-		[int1099Category]				=	CASE 	WHEN patron.intEntityId IS NOT NULL 
+		[int1099Category]				=	CASE 	WHEN C.intItemId > 0 AND C.intCommodityId > 0 THEN 0
+													WHEN patron.intEntityId IS NOT NULL 
 														AND C.intItemId > 0
 														AND C.ysn1099Box3 = 1
 														AND patron.ysnStockStatusQualified = 1 
