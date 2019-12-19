@@ -8,3 +8,4 @@ SELECT RM.intInvPlngReportMasterID
 	,RM.intSubBookId
 	,DATEDIFF(d, RM.dtmPostDate, GETDATE()) AS intDiff
 FROM tblCTInvPlngReportMaster RM
+WHERE IsNULL(ysnPost, 0) = 1

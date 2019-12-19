@@ -4,19 +4,23 @@ BEGIN TRY
 	SET NOCOUNT ON
 
 	DECLARE @strErrMsg NVARCHAR(MAX)
-		,@intInvPlngSummaryId INT
 		,@idoc INT
 		,@intTransactionCount INT
 		,@strInvPlngReportMasterID NVARCHAR(MAX)
+		,@intTableConcurrencyId INT
+		,@intConcurrencyId INT
+		,@intInvPlngSummaryId INT
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXML
 
 	SELECT @intInvPlngSummaryId = intInvPlngSummaryId
 		,@strInvPlngReportMasterID = strInvPlngReportMasterID
-	FROM OPENXML(@idoc, 'InvPlngSummarys/InvPlngSummary', 2) WITH (
+		,@intConcurrencyId = intConcurrencyId
+	FROM OPENXML(@idoc, 'root/InvPlngSummary', 2) WITH (
 			intInvPlngSummaryId INT
 			,strInvPlngReportMasterID NVARCHAR(MAX)
+			,intConcurrencyId INT
 			)
 
 	SELECT @intTransactionCount = @@TRANCOUNT
@@ -46,7 +50,7 @@ BEGIN TRY
 			,intCreatedUserId
 			,intLastModifiedUserId
 			,1
-		FROM OPENXML(@idoc, 'InvPlngSummarys/InvPlngSummary', 2) WITH (
+		FROM OPENXML(@idoc, 'root/InvPlngSummary', 2) WITH (
 				strPlanName NVARCHAR(50) COLLATE Latin1_General_CI_AS
 				,intUnitMeasureId INT
 				,intBookId INT
@@ -60,6 +64,20 @@ BEGIN TRY
 	END
 	ELSE
 	BEGIN
+		SELECT @intTableConcurrencyId = intConcurrencyId
+		FROM tblMFInvPlngSummary
+		WHERE intInvPlngSummaryId = @intInvPlngSummaryId
+
+		IF @intTableConcurrencyId <> @intConcurrencyId
+		BEGIN
+			RAISERROR (
+					'Demand summary data is already modified by other user. Please refresh.'
+					,16
+					,1
+					,'WITH NOWAIT'
+					)
+		END
+
 		UPDATE InvPlngSummary
 		SET strPlanName = x.strPlanName
 			,intUnitMeasureId = x.intUnitMeasureId
@@ -68,7 +86,7 @@ BEGIN TRY
 			,strComment = x.strComment
 			,intLastModifiedUserId = x.intLastModifiedUserId
 			,intConcurrencyId = (InvPlngSummary.intConcurrencyId + 1)
-		FROM OPENXML(@idoc, 'InvPlngSummarys/InvPlngSummary', 2) WITH (
+		FROM OPENXML(@idoc, 'root/InvPlngSummary', 2) WITH (
 				intInvPlngSummaryId INT
 				,strPlanName NVARCHAR(50) COLLATE Latin1_General_CI_AS
 				,intUnitMeasureId INT
@@ -97,7 +115,7 @@ BEGIN TRY
 	FROM tblMFInvPlngSummaryDetail
 	WHERE NOT EXISTS (
 			SELECT *
-			FROM OPENXML(@idoc, 'InvPlngSummaryDetails/InvPlngSummaryDetail', 2) WITH (intInvPlngSummaryDetailId INT) x
+			FROM OPENXML(@idoc, 'root/InvPlngSummaryDetails/InvPlngSummaryDetail', 2) WITH (intInvPlngSummaryDetailId INT) x
 			WHERE x.intInvPlngSummaryDetailId = tblMFInvPlngSummaryDetail.intInvPlngSummaryDetailId
 			)
 		AND intInvPlngSummaryId = @intInvPlngSummaryId
@@ -108,7 +126,7 @@ BEGIN TRY
 		,strFieldName = x.strFieldName
 		,strValue = x.strValue
 		,intMainItemId = x.intMainItemId
-	FROM OPENXML(@idoc, 'InvPlngSummaryDetails/InvPlngSummaryDetail', 2) WITH (
+	FROM OPENXML(@idoc, 'root/InvPlngSummaryDetails/InvPlngSummaryDetail', 2) WITH (
 			intAttributeId INT
 			,intItemId INT
 			,strFieldName NVARCHAR(50) COLLATE Latin1_General_CI_AS
@@ -131,7 +149,7 @@ BEGIN TRY
 		,strFieldName
 		,strValue
 		,intMainItemId
-	FROM OPENXML(@idoc, 'InvPlngSummaryDetails/InvPlngSummaryDetail', 2) WITH (
+	FROM OPENXML(@idoc, 'root/InvPlngSummaryDetails/InvPlngSummaryDetail', 2) WITH (
 			intAttributeId INT
 			,intItemId INT
 			,strFieldName NVARCHAR(50) COLLATE Latin1_General_CI_AS
@@ -145,6 +163,8 @@ BEGIN TRY
 		COMMIT TRANSACTION
 
 	EXEC sp_xml_removedocument @idoc
+
+	SELECT @intInvPlngSummaryId AS intInvPlngSummaryId
 END TRY
 
 BEGIN CATCH

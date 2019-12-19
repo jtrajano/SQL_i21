@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE uspMFGenerateDemandSummary (
 	@strInvPlngReportMasterID NVARCHAR(MAX) = NULL
-	,@intUnitMeasureId INT=0
+	,@intUnitMeasureId INT = 0
 	,@ysnRefreshContract BIT = 0
 	,@intCompanyLocationId INT
 	,@ysnLoadPlan BIT = 0
@@ -76,9 +76,9 @@ BEGIN
 			SELECT strFieldName
 				,strValue
 			FROM tblMFInvPlngSummaryDetail SD
-			JOIN tblCTReportAttribute RA ON RA.intReportAttributeID = SD.intAttributeId
+			JOIN tblMFInvPlngSummaryBatch Batch ON Batch.intInvPlngSummaryId = SD.intInvPlngSummaryId
 			WHERE intAttributeId = 1
-				AND RA.intReportMasterID IN (
+				AND Batch.intInvPlngReportMasterID IN (
 					SELECT Item Collate Latin1_General_CI_AS
 					FROM [dbo].[fnSplitString](@strInvPlngReportMasterID, ',')
 					)
@@ -117,157 +117,157 @@ BEGIN
 			,strItemNo
 			,strItemDescription
 			,0 AS strSupplyTarget
-			,[Opening Inventory strMonth1] AS strOIMonth1
-			,[Forecasted Consumption strMonth1] AS strFCMonth1
-			,[Open Purchases strMonth1] AS strOPMonth1
-			,[Short/Excess Inventory strMonth1] AS strSEMonth1
-			,[Ending Inventory strMonth1] AS strEIMonth1
-			,[Months of Supply Target strMonth1] AS strSTMonth1
-			,[Opening Inventory strMonth2] AS strOIMonth2
-			,[Forecasted Consumption strMonth2] AS strFCMonth2
-			,[Open Purchases strMonth2] AS strOPMonth2
-			,[Short/Excess Inventory strMonth2] AS strSEMonth2
-			,[Ending Inventory strMonth2] AS strEIMonth2
-			,[Months of Supply Target strMonth2] AS strSTMonth2
-			,[Opening Inventory strMonth3] AS strOIMonth3
-			,[Forecasted Consumption strMonth3] AS strFCMonth3
-			,[Open Purchases strMonth3] AS strOPMonth3
-			,[Short/Excess Inventory strMonth3] AS strSEMonth3
-			,[Ending Inventory strMonth3] AS strEIMonth3
-			,[Months of Supply Target strMonth3] AS strSTMonth3
-			,[Opening Inventory strMonth4] AS strOIMonth4
-			,[Forecasted Consumption strMonth4] AS strFCMonth4
-			,[Open Purchases strMonth4] AS strOPMonth4
-			,[Short/Excess Inventory strMonth4] AS strSEMonth4
-			,[Ending Inventory strMonth4] AS strEIMonth4
-			,[Months of Supply Target strMonth4] AS strSTMonth4
-			,[Opening Inventory strMonth5] AS strOIMonth5
-			,[Forecasted Consumption strMonth5] AS strFCMonth5
-			,[Open Purchases strMonth5] AS strOPMonth5
-			,[Short/Excess Inventory strMonth5] AS strSEMonth5
-			,[Ending Inventory strMonth5] AS strEIMonth5
-			,[Months of Supply Target strMonth5] AS strSTMonth5
-			,[Opening Inventory strMonth6] AS strOIMonth6
-			,[Forecasted Consumption strMonth6] AS strFCMonth6
-			,[Open Purchases strMonth6] AS strOPMonth6
-			,[Short/Excess Inventory strMonth6] AS strSEMonth6
-			,[Ending Inventory strMonth6] AS strEIMonth6
-			,[Months of Supply Target strMonth6] AS strSTMonth6
-			,[Opening Inventory strMonth7] AS strOIMonth7
-			,[Forecasted Consumption strMonth7] AS strFCMonth7
-			,[Open Purchases strMonth7] AS strOPMonth7
-			,[Short/Excess Inventory strMonth7] AS strSEMonth7
-			,[Ending Inventory strMonth7] AS strEIMonth7
-			,[Months of Supply Target strMonth7] AS strSTMonth7
-			,[Opening Inventory strMonth8] AS strOIMonth8
-			,[Forecasted Consumption strMonth8] AS strFCMonth8
-			,[Open Purchases strMonth8] AS strOPMonth8
-			,[Short/Excess Inventory strMonth8] AS strSEMonth8
-			,[Ending Inventory strMonth8] AS strEIMonth8
-			,[Months of Supply Target strMonth8] AS strSTMonth8
-			,[Opening Inventory strMonth9] AS strOIMonth9
-			,[Forecasted Consumption strMonth9] AS strFCMonth9
-			,[Open Purchases strMonth9] AS strOPMonth9
-			,[Short/Excess Inventory strMonth9] AS strSEMonth9
-			,[Ending Inventory strMonth9] AS strEIMonth9
-			,[Months of Supply Target strMonth9] AS strSTMonth9
-			,[Opening Inventory strMonth10] AS strOIMonth10
-			,[Forecasted Consumption strMonth10] AS strFCMonth10
-			,[Open Purchases strMonth10] AS strOPMonth10
-			,[Short/Excess Inventory strMonth10] AS strSEMonth10
-			,[Ending Inventory strMonth10] AS strEIMonth10
-			,[Months of Supply Target strMonth10] AS strSTMonth10
-			,[Opening Inventory strMonth11] AS strOIMonth11
-			,[Forecasted Consumption strMonth11] AS strFCMonth11
-			,[Open Purchases strMonth11] AS strOPMonth11
-			,[Short/Excess Inventory strMonth11] AS strSEMonth11
-			,[Ending Inventory strMonth11] AS strEIMonth11
-			,[Months of Supply Target strMonth11] AS strSTMonth11
-			,[Opening Inventory strMonth12] AS strOIMonth12
-			,[Forecasted Consumption strMonth12] AS strFCMonth12
-			,[Open Purchases strMonth12] AS strOPMonth12
-			,[Short/Excess Inventory strMonth12] AS strSEMonth12
-			,[Ending Inventory strMonth12] AS strEIMonth12
-			,[Months of Supply Target strMonth12] AS strSTMonth12
-			,[Opening Inventory strMonth13] AS strOIMonth13
-			,[Forecasted Consumption strMonth13] AS strFCMonth13
-			,[Open Purchases strMonth13] AS strOPMonth13
-			,[Short/Excess Inventory strMonth13] AS strSEMonth13
-			,[Ending Inventory strMonth13] AS strEIMonth13
-			,[Months of Supply Target strMonth13] AS strSTMonth13
-			,[Opening Inventory strMonth14] AS strOIMonth14
-			,[Forecasted Consumption strMonth14] AS strFCMonth14
-			,[Open Purchases strMonth14] AS strOPMonth14
-			,[Short/Excess Inventory strMonth14] AS strSEMonth14
-			,[Ending Inventory strMonth14] AS strEIMonth14
-			,[Months of Supply Target strMonth14] AS strSTMonth14
-			,[Opening Inventory strMonth15] AS strOIMonth15
-			,[Forecasted Consumption strMonth15] AS strFCMonth15
-			,[Open Purchases strMonth15] AS strOPMonth15
-			,[Short/Excess Inventory strMonth15] AS strSEMonth15
-			,[Ending Inventory strMonth15] AS strEIMonth15
-			,[Months of Supply Target strMonth15] AS strSTMonth15
-			,[Opening Inventory strMonth16] AS strOIMonth16
-			,[Forecasted Consumption strMonth16] AS strFCMonth16
-			,[Open Purchases strMonth16] AS strOPMonth16
-			,[Short/Excess Inventory strMonth16] AS strSEMonth16
-			,[Ending Inventory strMonth16] AS strEIMonth16
-			,[Months of Supply Target strMonth16] AS strSTMonth16
-			,[Opening Inventory strMonth17] AS strOIMonth17
-			,[Forecasted Consumption strMonth17] AS strFCMonth17
-			,[Open Purchases strMonth17] AS strOPMonth17
-			,[Short/Excess Inventory strMonth17] AS strSEMonth17
-			,[Ending Inventory strMonth17] AS strEIMonth17
-			,[Months of Supply Target strMonth17] AS strSTMonth17
-			,[Opening Inventory strMonth18] AS strOIMonth18
-			,[Forecasted Consumption strMonth18] AS strFCMonth18
-			,[Open Purchases strMonth18] AS strOPMonth18
-			,[Short/Excess Inventory strMonth18] AS strSEMonth18
-			,[Ending Inventory strMonth18] AS strEIMonth18
-			,[Months of Supply Target strMonth18] AS strSTMonth18
-			,[Opening Inventory strMonth19] AS strOIMonth19
-			,[Forecasted Consumption strMonth19] AS strFCMonth19
-			,[Open Purchases strMonth19] AS strOPMonth19
-			,[Short/Excess Inventory strMonth19] AS strSEMonth19
-			,[Ending Inventory strMonth19] AS strEIMonth19
-			,[Months of Supply Target strMonth19] AS strSTMonth19
-			,[Opening Inventory strMonth20] AS strOIMonth20
-			,[Forecasted Consumption strMonth20] AS strFCMonth20
-			,[Open Purchases strMonth20] AS strOPMonth20
-			,[Short/Excess Inventory strMonth20] AS strSEMonth20
-			,[Ending Inventory strMonth20] AS strEIMonth20
-			,[Months of Supply Target strMonth20] AS strSTMonth20
-			,[Opening Inventory strMonth21] AS strOIMonth21
-			,[Forecasted Consumption strMonth21] AS strFCMonth21
-			,[Open Purchases strMonth21] AS strOPMonth21
-			,[Short/Excess Inventory strMonth21] AS strSEMonth21
-			,[Ending Inventory strMonth21] AS strEIMonth21
-			,[Months of Supply Target strMonth21] AS strSTMonth21
-			,[Opening Inventory strMonth22] AS strOIMonth22
-			,[Forecasted Consumption strMonth22] AS strFCMonth22
-			,[Open Purchases strMonth22] AS strOPMonth22
-			,[Short/Excess Inventory strMonth22] AS strSEMonth22
-			,[Ending Inventory strMonth22] AS strEIMonth22
-			,[Months of Supply Target strMonth22] AS strSTMonth22
-			,[Opening Inventory strMonth23] AS strOIMonth23
-			,[Forecasted Consumption strMonth23] AS strFCMonth23
-			,[Open Purchases strMonth23] AS strOPMonth23
-			,[Short/Excess Inventory strMonth23] AS strSEMonth23
-			,[Ending Inventory strMonth23] AS strEIMonth23
-			,[Months of Supply Target strMonth23] AS strSTMonth23
-			,[Opening Inventory strMonth24] AS strOIMonth24
-			,[Forecasted Consumption strMonth24] AS strFCMonth24
-			,[Open Purchases strMonth24] AS strOPMonth24
-			,[Short/Excess Inventory strMonth24] AS strSEMonth24
-			,[Ending Inventory strMonth24] AS strEIMonth24
-			,[Months of Supply Target strMonth24] AS strSTMonth24
+			,IsNULL([Opening Inventory strMonth1], 0) AS strOIMonth1
+			,IsNULL([Forecasted Consumption strMonth1], 0) AS strFCMonth1
+			,IsNULL([Existing Purchases strMonth1], 0) AS strOPMonth1
+			,IsNULL([Planned Purchases strMonth1], 0) AS strSEMonth1
+			,IsNULL([Ending Inventory strMonth1], 0) AS strEIMonth1
+			,IsNULL([Weeks of Supply strMonth1], 0) AS strSTMonth1
+			,IsNULL([Opening Inventory strMonth2], 0) AS strOIMonth2
+			,IsNULL([Forecasted Consumption strMonth2], 0) AS strFCMonth2
+			,IsNULL([Existing Purchases strMonth2], 0) AS strOPMonth2
+			,IsNULL([Planned Purchases strMonth2], 0) AS strSEMonth2
+			,IsNULL([Ending Inventory strMonth2], 0) AS strEIMonth2
+			,IsNULL([Weeks of Supply strMonth2], 0) AS strSTMonth2
+			,IsNULL([Opening Inventory strMonth3], 0) AS strOIMonth3
+			,IsNULL([Forecasted Consumption strMonth3], 0) AS strFCMonth3
+			,IsNULL([Existing Purchases strMonth3], 0) AS strOPMonth3
+			,IsNULL([Planned Purchases strMonth3], 0) AS strSEMonth3
+			,IsNULL([Ending Inventory strMonth3], 0) AS strEIMonth3
+			,IsNULL([Weeks of Supply strMonth3], 0) AS strSTMonth3
+			,IsNULL([Opening Inventory strMonth4], 0) AS strOIMonth4
+			,IsNULL([Forecasted Consumption strMonth4], 0) AS strFCMonth4
+			,IsNULL([Existing Purchases strMonth4], 0) AS strOPMonth4
+			,IsNULL([Planned Purchases strMonth4], 0) AS strSEMonth4
+			,IsNULL([Ending Inventory strMonth4], 0) AS strEIMonth4
+			,IsNULL([Weeks of Supply strMonth4], 0) AS strSTMonth4
+			,IsNULL([Opening Inventory strMonth5], 0) AS strOIMonth5
+			,IsNULL([Forecasted Consumption strMonth5], 0) AS strFCMonth5
+			,IsNULL([Existing Purchases strMonth5], 0) AS strOPMonth5
+			,IsNULL([Planned Purchases strMonth5], 0) AS strSEMonth5
+			,IsNULL([Ending Inventory strMonth5], 0) AS strEIMonth5
+			,IsNULL([Weeks of Supply strMonth5], 0) AS strSTMonth5
+			,IsNULL([Opening Inventory strMonth6], 0) AS strOIMonth6
+			,IsNULL([Forecasted Consumption strMonth6], 0) AS strFCMonth6
+			,IsNULL([Existing Purchases strMonth6], 0) AS strOPMonth6
+			,IsNULL([Planned Purchases strMonth6], 0) AS strSEMonth6
+			,IsNULL([Ending Inventory strMonth6], 0) AS strEIMonth6
+			,IsNULL([Weeks of Supply strMonth6], 0) AS strSTMonth6
+			,IsNULL([Opening Inventory strMonth7], 0) AS strOIMonth7
+			,IsNULL([Forecasted Consumption strMonth7], 0) AS strFCMonth7
+			,IsNULL([Existing Purchases strMonth7], 0) AS strOPMonth7
+			,IsNULL([Planned Purchases strMonth7], 0) AS strSEMonth7
+			,IsNULL([Ending Inventory strMonth7], 0) AS strEIMonth7
+			,IsNULL([Weeks of Supply strMonth7], 0) AS strSTMonth7
+			,IsNULL([Opening Inventory strMonth8], 0) AS strOIMonth8
+			,IsNULL([Forecasted Consumption strMonth8], 0) AS strFCMonth8
+			,IsNULL([Existing Purchases strMonth8], 0) AS strOPMonth8
+			,IsNULL([Planned Purchases strMonth8], 0) AS strSEMonth8
+			,IsNULL([Ending Inventory strMonth8], 0) AS strEIMonth8
+			,IsNULL([Weeks of Supply strMonth8], 0) AS strSTMonth8
+			,IsNULL([Opening Inventory strMonth9], 0) AS strOIMonth9
+			,IsNULL([Forecasted Consumption strMonth9], 0) AS strFCMonth9
+			,IsNULL([Existing Purchases strMonth9], 0) AS strOPMonth9
+			,IsNULL([Planned Purchases strMonth9], 0) AS strSEMonth9
+			,IsNULL([Ending Inventory strMonth9], 0) AS strEIMonth9
+			,IsNULL([Weeks of Supply strMonth9], 0) AS strSTMonth9
+			,IsNULL([Opening Inventory strMonth10], 0) AS strOIMonth10
+			,IsNULL([Forecasted Consumption strMonth10], 0) AS strFCMonth10
+			,IsNULL([Existing Purchases strMonth10], 0) AS strOPMonth10
+			,IsNULL([Planned Purchases strMonth10], 0) AS strSEMonth10
+			,IsNULL([Ending Inventory strMonth10], 0) AS strEIMonth10
+			,IsNULL([Weeks of Supply strMonth10], 0) AS strSTMonth10
+			,IsNULL([Opening Inventory strMonth11], 0) AS strOIMonth11
+			,IsNULL([Forecasted Consumption strMonth11], 0) AS strFCMonth11
+			,IsNULL([Existing Purchases strMonth11], 0) AS strOPMonth11
+			,IsNULL([Planned Purchases strMonth11], 0) AS strSEMonth11
+			,IsNULL([Ending Inventory strMonth11], 0) AS strEIMonth11
+			,IsNULL([Weeks of Supply strMonth11], 0) AS strSTMonth11
+			,IsNULL([Opening Inventory strMonth12], 0) AS strOIMonth12
+			,IsNULL([Forecasted Consumption strMonth12], 0) AS strFCMonth12
+			,IsNULL([Existing Purchases strMonth12], 0) AS strOPMonth12
+			,IsNULL([Planned Purchases strMonth12], 0) AS strSEMonth12
+			,IsNULL([Ending Inventory strMonth12], 0) AS strEIMonth12
+			,IsNULL([Weeks of Supply strMonth12], 0) AS strSTMonth12
+			,IsNULL([Opening Inventory strMonth13], 0) AS strOIMonth13
+			,IsNULL([Forecasted Consumption strMonth13], 0) AS strFCMonth13
+			,IsNULL([Existing Purchases strMonth13], 0) AS strOPMonth13
+			,IsNULL([Planned Purchases strMonth13], 0) AS strSEMonth13
+			,IsNULL([Ending Inventory strMonth13], 0) AS strEIMonth13
+			,IsNULL([Weeks of Supply strMonth13], 0) AS strSTMonth13
+			,IsNULL([Opening Inventory strMonth14], 0) AS strOIMonth14
+			,IsNULL([Forecasted Consumption strMonth14], 0) AS strFCMonth14
+			,IsNULL([Existing Purchases strMonth14], 0) AS strOPMonth14
+			,IsNULL([Planned Purchases strMonth14], 0) AS strSEMonth14
+			,IsNULL([Ending Inventory strMonth14], 0) AS strEIMonth14
+			,IsNULL([Weeks of Supply strMonth14], 0) AS strSTMonth14
+			,IsNULL([Opening Inventory strMonth15], 0) AS strOIMonth15
+			,IsNULL([Forecasted Consumption strMonth15], 0) AS strFCMonth15
+			,IsNULL([Existing Purchases strMonth15], 0) AS strOPMonth15
+			,IsNULL([Planned Purchases strMonth15], 0) AS strSEMonth15
+			,IsNULL([Ending Inventory strMonth15], 0) AS strEIMonth15
+			,IsNULL([Weeks of Supply strMonth15], 0) AS strSTMonth15
+			,IsNULL([Opening Inventory strMonth16], 0) AS strOIMonth16
+			,IsNULL([Forecasted Consumption strMonth16], 0) AS strFCMonth16
+			,IsNULL([Existing Purchases strMonth16], 0) AS strOPMonth16
+			,IsNULL([Planned Purchases strMonth16], 0) AS strSEMonth16
+			,IsNULL([Ending Inventory strMonth16], 0) AS strEIMonth16
+			,IsNULL([Weeks of Supply strMonth16], 0) AS strSTMonth16
+			,IsNULL([Opening Inventory strMonth17], 0) AS strOIMonth17
+			,IsNULL([Forecasted Consumption strMonth17], 0) AS strFCMonth17
+			,IsNULL([Existing Purchases strMonth17], 0) AS strOPMonth17
+			,IsNULL([Planned Purchases strMonth17], 0) AS strSEMonth17
+			,IsNULL([Ending Inventory strMonth17], 0) AS strEIMonth17
+			,IsNULL([Weeks of Supply strMonth17], 0) AS strSTMonth17
+			,IsNULL([Opening Inventory strMonth18], 0) AS strOIMonth18
+			,IsNULL([Forecasted Consumption strMonth18], 0) AS strFCMonth18
+			,IsNULL([Existing Purchases strMonth18], 0) AS strOPMonth18
+			,IsNULL([Planned Purchases strMonth18], 0) AS strSEMonth18
+			,IsNULL([Ending Inventory strMonth18], 0) AS strEIMonth18
+			,IsNULL([Weeks of Supply strMonth18], 0) AS strSTMonth18
+			,IsNULL([Opening Inventory strMonth19], 0) AS strOIMonth19
+			,IsNULL([Forecasted Consumption strMonth19], 0) AS strFCMonth19
+			,IsNULL([Existing Purchases strMonth19], 0) AS strOPMonth19
+			,IsNULL([Planned Purchases strMonth19], 0) AS strSEMonth19
+			,IsNULL([Ending Inventory strMonth19], 0) AS strEIMonth19
+			,IsNULL([Weeks of Supply strMonth19], 0) AS strSTMonth19
+			,IsNULL([Opening Inventory strMonth20], 0) AS strOIMonth20
+			,IsNULL([Forecasted Consumption strMonth20], 0) AS strFCMonth20
+			,IsNULL([Existing Purchases strMonth20], 0) AS strOPMonth20
+			,IsNULL([Planned Purchases strMonth20], 0) AS strSEMonth20
+			,IsNULL([Ending Inventory strMonth20], 0) AS strEIMonth20
+			,IsNULL([Weeks of Supply strMonth20], 0) AS strSTMonth20
+			,IsNULL([Opening Inventory strMonth21], 0) AS strOIMonth21
+			,IsNULL([Forecasted Consumption strMonth21], 0) AS strFCMonth21
+			,IsNULL([Existing Purchases strMonth21], 0) AS strOPMonth21
+			,IsNULL([Planned Purchases strMonth21], 0) AS strSEMonth21
+			,IsNULL([Ending Inventory strMonth21], 0) AS strEIMonth21
+			,IsNULL([Weeks of Supply strMonth21], 0) AS strSTMonth21
+			,IsNULL([Opening Inventory strMonth22], 0) AS strOIMonth22
+			,IsNULL([Forecasted Consumption strMonth22], 0) AS strFCMonth22
+			,IsNULL([Existing Purchases strMonth22], 0) AS strOPMonth22
+			,IsNULL([Planned Purchases strMonth22], 0) AS strSEMonth22
+			,IsNULL([Ending Inventory strMonth22], 0) AS strEIMonth22
+			,IsNULL([Weeks of Supply strMonth22], 0) AS strSTMonth22
+			,IsNULL([Opening Inventory strMonth23], 0) AS strOIMonth23
+			,IsNULL([Forecasted Consumption strMonth23], 0) AS strFCMonth23
+			,IsNULL([Existing Purchases strMonth23], 0) AS strOPMonth23
+			,IsNULL([Planned Purchases strMonth23], 0) AS strSEMonth23
+			,IsNULL([Ending Inventory strMonth23], 0) AS strEIMonth23
+			,IsNULL([Weeks of Supply strMonth23], 0) AS strSTMonth23
+			,IsNULL([Opening Inventory strMonth24], 0) AS strOIMonth24
+			,IsNULL([Forecasted Consumption strMonth24], 0) AS strFCMonth24
+			,IsNULL([Existing Purchases strMonth24], 0) AS strOPMonth24
+			,IsNULL([Planned Purchases strMonth24], 0) AS strSEMonth24
+			,IsNULL([Ending Inventory strMonth24], 0) AS strEIMonth24
+			,IsNULL([Weeks of Supply strMonth24], 0) AS strSTMonth24
 		FROM (
 			SELECT B.strBook
 				,SB.strSubBook
 				,CA.strDescription AS strProductType
 				,MI.strItemNo
 				,I.strItemNo AS strItemDescription
-				,A.strAttributeName + ' ' + AV.strFieldName AS strAttributeName
+				,Replace(Replace(A.strAttributeName, '<a>+ ', ''), '</a>', '') + ' ' + AV.strFieldName AS strAttributeName
 				,(
 					CASE 
 						WHEN IsNUmeric(AV.strValue) = 0
@@ -276,28 +276,30 @@ BEGIN
 						END
 					) strValue
 			FROM tblMFInvPlngSummaryDetail AV
+			JOIN tblMFInvPlngSummary S ON S.intInvPlngSummaryId = AV.intInvPlngSummaryId
 			JOIN tblCTReportAttribute A ON A.intReportAttributeID = AV.intAttributeId
-			JOIN tblCTInvPlngReportMaster RM ON RM.intInvPlngReportMasterID = A.intReportMasterID
+			JOIN tblMFInvPlngSummaryBatch Batch ON Batch.intInvPlngSummaryId = AV.intInvPlngSummaryId
 			LEFT JOIN tblICItem MI ON MI.intItemId = IsNULL(AV.intMainItemId, AV.intItemId)
 			JOIN tblICItem I ON I.intItemId = AV.intItemId
-			LEFT JOIN tblCTBook B ON B.intBookId = RM.intBookId
-			LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = RM.intSubBookId
-			LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityId = MI.intCommodityId
-				AND MI.intProductTypeId = CA.intCommodityAttributeId
+			LEFT JOIN tblCTBook B ON B.intBookId = S.intBookId
+			LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = S.intSubBookId
+			LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityId = I.intCommodityId
+				AND I.intProductTypeId = CA.intCommodityAttributeId
 				AND CA.strType = 'ProductType'
 			WHERE A.intReportAttributeID IN (
 					2 --Opening Inventory
 					,8 --Forecasted Consumption
+					,10 --Weeks of Supply
 					,9 --Ending Inventory
-					,12 --Short/Excess Inventory
-					,13 --Open Purchases
+					,5 --Planned Purchases
+					,4 --Existing Purchases
 					)
-				AND IsNumeric(AV.strValue) = 0
-				AND RM.intInvPlngReportMasterID IN (
+				AND IsNumeric(AV.strValue) = 1
+				AND Batch.intInvPlngReportMasterID IN (
 					SELECT Item Collate Latin1_General_CI_AS
 					FROM [dbo].[fnSplitString](@strInvPlngReportMasterID, ',')
 					)
-				--2-Opening Inventory;8-Forecasted Consumption;9-Ending Inventory;13-Open Purchases;12-Short/Excess Inventory
+				--2-Opening Inventory;8-Forecasted Consumption;9-Ending Inventory;13-Existing Purchases;12-Planned Purchases
 				AND AV.strFieldName NOT IN (
 					'OpeningInv'
 					,'PastDue'
@@ -306,149 +308,154 @@ BEGIN
 		PIVOT(SUM(strValue) FOR strAttributeName IN (
 					[Opening Inventory strMonth1]
 					,[Forecasted Consumption strMonth1]
-					,[Open Purchases strMonth1]
-					,[Short/Excess Inventory strMonth1]
+					,[Existing Purchases strMonth1]
+					,[Planned Purchases strMonth1]
 					,[Ending Inventory strMonth1]
-					,[Months of Supply Target strMonth1]
+					,[Weeks of Supply strMonth1]
 					,[Opening Inventory strMonth2]
 					,[Forecasted Consumption strMonth2]
-					,[Open Purchases strMonth2]
-					,[Short/Excess Inventory strMonth2]
+					,[Existing Purchases strMonth2]
+					,[Planned Purchases strMonth2]
 					,[Ending Inventory strMonth2]
-					,[Months of Supply Target strMonth2]
+					,[Weeks of Supply strMonth2]
 					,[Opening Inventory strMonth3]
 					,[Forecasted Consumption strMonth3]
-					,[Open Purchases strMonth3]
-					,[Short/Excess Inventory strMonth3]
+					,[Existing Purchases strMonth3]
+					,[Planned Purchases strMonth3]
 					,[Ending Inventory strMonth3]
-					,[Months of Supply Target strMonth3]
+					,[Weeks of Supply strMonth3]
 					,[Opening Inventory strMonth4]
 					,[Forecasted Consumption strMonth4]
-					,[Open Purchases strMonth4]
-					,[Short/Excess Inventory strMonth4]
+					,[Existing Purchases strMonth4]
+					,[Planned Purchases strMonth4]
 					,[Ending Inventory strMonth4]
-					,[Months of Supply Target strMonth4]
+					,[Weeks of Supply strMonth4]
 					,[Opening Inventory strMonth5]
 					,[Forecasted Consumption strMonth5]
-					,[Open Purchases strMonth5]
-					,[Short/Excess Inventory strMonth5]
+					,[Existing Purchases strMonth5]
+					,[Planned Purchases strMonth5]
 					,[Ending Inventory strMonth5]
-					,[Months of Supply Target strMonth5]
+					,[Weeks of Supply strMonth5]
 					,[Opening Inventory strMonth6]
 					,[Forecasted Consumption strMonth6]
-					,[Open Purchases strMonth6]
-					,[Short/Excess Inventory strMonth6]
+					,[Existing Purchases strMonth6]
+					,[Planned Purchases strMonth6]
 					,[Ending Inventory strMonth6]
-					,[Months of Supply Target strMonth6]
+					,[Weeks of Supply strMonth6]
 					,[Opening Inventory strMonth7]
 					,[Forecasted Consumption strMonth7]
-					,[Open Purchases strMonth7]
-					,[Short/Excess Inventory strMonth7]
+					,[Existing Purchases strMonth7]
+					,[Planned Purchases strMonth7]
 					,[Ending Inventory strMonth7]
-					,[Months of Supply Target strMonth7]
+					,[Weeks of Supply strMonth7]
 					,[Opening Inventory strMonth8]
 					,[Forecasted Consumption strMonth8]
-					,[Open Purchases strMonth8]
-					,[Short/Excess Inventory strMonth8]
+					,[Existing Purchases strMonth8]
+					,[Planned Purchases strMonth8]
 					,[Ending Inventory strMonth8]
-					,[Months of Supply Target strMonth8]
+					,[Weeks of Supply strMonth8]
 					,[Opening Inventory strMonth9]
 					,[Forecasted Consumption strMonth9]
-					,[Open Purchases strMonth9]
-					,[Short/Excess Inventory strMonth9]
+					,[Existing Purchases strMonth9]
+					,[Planned Purchases strMonth9]
 					,[Ending Inventory strMonth9]
-					,[Months of Supply Target strMonth9]
+					,[Weeks of Supply strMonth9]
 					,[Opening Inventory strMonth10]
 					,[Forecasted Consumption strMonth10]
-					,[Open Purchases strMonth10]
-					,[Short/Excess Inventory strMonth10]
+					,[Existing Purchases strMonth10]
+					,[Planned Purchases strMonth10]
 					,[Ending Inventory strMonth10]
-					,[Months of Supply Target strMonth10]
+					,[Weeks of Supply strMonth10]
 					,[Opening Inventory strMonth11]
 					,[Forecasted Consumption strMonth11]
-					,[Open Purchases strMonth11]
-					,[Short/Excess Inventory strMonth11]
+					,[Existing Purchases strMonth11]
+					,[Planned Purchases strMonth11]
 					,[Ending Inventory strMonth11]
-					,[Months of Supply Target strMonth11]
+					,[Weeks of Supply strMonth11]
 					,[Opening Inventory strMonth12]
 					,[Forecasted Consumption strMonth12]
-					,[Open Purchases strMonth12]
-					,[Short/Excess Inventory strMonth12]
+					,[Existing Purchases strMonth12]
+					,[Planned Purchases strMonth12]
 					,[Ending Inventory strMonth12]
-					,[Months of Supply Target strMonth12]
+					,[Weeks of Supply strMonth12]
 					,[Opening Inventory strMonth13]
 					,[Forecasted Consumption strMonth13]
-					,[Open Purchases strMonth13]
-					,[Short/Excess Inventory strMonth13]
+					,[Existing Purchases strMonth13]
+					,[Planned Purchases strMonth13]
 					,[Ending Inventory strMonth13]
-					,[Months of Supply Target strMonth13]
+					,[Weeks of Supply strMonth13]
 					,[Opening Inventory strMonth14]
 					,[Forecasted Consumption strMonth14]
-					,[Open Purchases strMonth14]
-					,[Short/Excess Inventory strMonth14]
+					,[Existing Purchases strMonth14]
+					,[Planned Purchases strMonth14]
 					,[Ending Inventory strMonth14]
-					,[Months of Supply Target strMonth14]
+					,[Weeks of Supply strMonth14]
 					,[Opening Inventory strMonth15]
 					,[Forecasted Consumption strMonth15]
-					,[Open Purchases strMonth15]
-					,[Short/Excess Inventory strMonth15]
+					,[Existing Purchases strMonth15]
+					,[Planned Purchases strMonth15]
 					,[Ending Inventory strMonth15]
-					,[Months of Supply Target strMonth15]
+					,[Weeks of Supply strMonth15]
 					,[Opening Inventory strMonth16]
 					,[Forecasted Consumption strMonth16]
-					,[Open Purchases strMonth16]
-					,[Short/Excess Inventory strMonth16]
+					,[Existing Purchases strMonth16]
+					,[Planned Purchases strMonth16]
 					,[Ending Inventory strMonth16]
-					,[Months of Supply Target strMonth16]
+					,[Weeks of Supply strMonth16]
 					,[Opening Inventory strMonth17]
 					,[Forecasted Consumption strMonth17]
-					,[Open Purchases strMonth17]
-					,[Short/Excess Inventory strMonth17]
+					,[Existing Purchases strMonth17]
+					,[Planned Purchases strMonth17]
 					,[Ending Inventory strMonth17]
-					,[Months of Supply Target strMonth17]
+					,[Weeks of Supply strMonth17]
 					,[Opening Inventory strMonth18]
 					,[Forecasted Consumption strMonth18]
-					,[Open Purchases strMonth18]
-					,[Short/Excess Inventory strMonth18]
+					,[Existing Purchases strMonth18]
+					,[Planned Purchases strMonth18]
 					,[Ending Inventory strMonth18]
-					,[Months of Supply Target strMonth18]
+					,[Weeks of Supply strMonth18]
 					,[Opening Inventory strMonth19]
 					,[Forecasted Consumption strMonth19]
-					,[Open Purchases strMonth19]
-					,[Short/Excess Inventory strMonth19]
+					,[Existing Purchases strMonth19]
+					,[Planned Purchases strMonth19]
 					,[Ending Inventory strMonth19]
-					,[Months of Supply Target strMonth19]
+					,[Weeks of Supply strMonth19]
 					,[Opening Inventory strMonth20]
 					,[Forecasted Consumption strMonth20]
-					,[Open Purchases strMonth20]
-					,[Short/Excess Inventory strMonth20]
+					,[Existing Purchases strMonth20]
+					,[Planned Purchases strMonth20]
 					,[Ending Inventory strMonth20]
-					,[Months of Supply Target strMonth20]
+					,[Weeks of Supply strMonth20]
 					,[Opening Inventory strMonth21]
 					,[Forecasted Consumption strMonth21]
-					,[Open Purchases strMonth21]
-					,[Short/Excess Inventory strMonth21]
+					,[Existing Purchases strMonth21]
+					,[Planned Purchases strMonth21]
 					,[Ending Inventory strMonth21]
-					,[Months of Supply Target strMonth21]
+					,[Weeks of Supply strMonth21]
 					,[Opening Inventory strMonth22]
 					,[Forecasted Consumption strMonth22]
-					,[Open Purchases strMonth22]
-					,[Short/Excess Inventory strMonth22]
+					,[Existing Purchases strMonth22]
+					,[Planned Purchases strMonth22]
 					,[Ending Inventory strMonth22]
-					,[Months of Supply Target strMonth22]
+					,[Weeks of Supply strMonth22]
 					,[Opening Inventory strMonth23]
 					,[Forecasted Consumption strMonth23]
-					,[Open Purchases strMonth23]
-					,[Short/Excess Inventory strMonth23]
+					,[Existing Purchases strMonth23]
+					,[Planned Purchases strMonth23]
 					,[Ending Inventory strMonth23]
-					,[Months of Supply Target strMonth23]
+					,[Weeks of Supply strMonth23]
 					,[Opening Inventory strMonth24]
 					,[Forecasted Consumption strMonth24]
-					,[Open Purchases strMonth24]
-					,[Short/Excess Inventory strMonth24]
+					,[Existing Purchases strMonth24]
+					,[Planned Purchases strMonth24]
 					,[Ending Inventory strMonth24]
-					,[Months of Supply Target strMonth24]
-					)) AS PivotTable;
+					,[Weeks of Supply strMonth24]
+					)) AS PivotTable
+		ORDER BY strBook
+			,strSubBook
+			,strProductType
+			,strItemNo
+			,strItemDescription
 	END
 	ELSE
 	BEGIN
@@ -533,157 +540,157 @@ BEGIN
 				,strItemNo
 				,strItemDescription
 				,0 AS strSupplyTarget
-				,[Opening Inventory strMonth1] AS strOIMonth1
-				,[Forecasted Consumption strMonth1] AS strFCMonth1
-				,[Open Purchases strMonth1] AS strOPMonth1
-				,[Short/Excess Inventory strMonth1] AS strSEMonth1
-				,[Ending Inventory strMonth1] AS strEIMonth1
-				,[Months of Supply Target strMonth1] AS strSTMonth1
-				,[Opening Inventory strMonth2] AS strOIMonth2
-				,[Forecasted Consumption strMonth2] AS strFCMonth2
-				,[Open Purchases strMonth2] AS strOPMonth2
-				,[Short/Excess Inventory strMonth2] AS strSEMonth2
-				,[Ending Inventory strMonth2] AS strEIMonth2
-				,[Months of Supply Target strMonth2] AS strSTMonth2
-				,[Opening Inventory strMonth3] AS strOIMonth3
-				,[Forecasted Consumption strMonth3] AS strFCMonth3
-				,[Open Purchases strMonth3] AS strOPMonth3
-				,[Short/Excess Inventory strMonth3] AS strSEMonth3
-				,[Ending Inventory strMonth3] AS strEIMonth3
-				,[Months of Supply Target strMonth3] AS strSTMonth3
-				,[Opening Inventory strMonth4] AS strOIMonth4
-				,[Forecasted Consumption strMonth4] AS strFCMonth4
-				,[Open Purchases strMonth4] AS strOPMonth4
-				,[Short/Excess Inventory strMonth4] AS strSEMonth4
-				,[Ending Inventory strMonth4] AS strEIMonth4
-				,[Months of Supply Target strMonth4] AS strSTMonth4
-				,[Opening Inventory strMonth5] AS strOIMonth5
-				,[Forecasted Consumption strMonth5] AS strFCMonth5
-				,[Open Purchases strMonth5] AS strOPMonth5
-				,[Short/Excess Inventory strMonth5] AS strSEMonth5
-				,[Ending Inventory strMonth5] AS strEIMonth5
-				,[Months of Supply Target strMonth5] AS strSTMonth5
-				,[Opening Inventory strMonth6] AS strOIMonth6
-				,[Forecasted Consumption strMonth6] AS strFCMonth6
-				,[Open Purchases strMonth6] AS strOPMonth6
-				,[Short/Excess Inventory strMonth6] AS strSEMonth6
-				,[Ending Inventory strMonth6] AS strEIMonth6
-				,[Months of Supply Target strMonth6] AS strSTMonth6
-				,[Opening Inventory strMonth7] AS strOIMonth7
-				,[Forecasted Consumption strMonth7] AS strFCMonth7
-				,[Open Purchases strMonth7] AS strOPMonth7
-				,[Short/Excess Inventory strMonth7] AS strSEMonth7
-				,[Ending Inventory strMonth7] AS strEIMonth7
-				,[Months of Supply Target strMonth7] AS strSTMonth7
-				,[Opening Inventory strMonth8] AS strOIMonth8
-				,[Forecasted Consumption strMonth8] AS strFCMonth8
-				,[Open Purchases strMonth8] AS strOPMonth8
-				,[Short/Excess Inventory strMonth8] AS strSEMonth8
-				,[Ending Inventory strMonth8] AS strEIMonth8
-				,[Months of Supply Target strMonth8] AS strSTMonth8
-				,[Opening Inventory strMonth9] AS strOIMonth9
-				,[Forecasted Consumption strMonth9] AS strFCMonth9
-				,[Open Purchases strMonth9] AS strOPMonth9
-				,[Short/Excess Inventory strMonth9] AS strSEMonth9
-				,[Ending Inventory strMonth9] AS strEIMonth9
-				,[Months of Supply Target strMonth9] AS strSTMonth9
-				,[Opening Inventory strMonth10] AS strOIMonth10
-				,[Forecasted Consumption strMonth10] AS strFCMonth10
-				,[Open Purchases strMonth10] AS strOPMonth10
-				,[Short/Excess Inventory strMonth10] AS strSEMonth10
-				,[Ending Inventory strMonth10] AS strEIMonth10
-				,[Months of Supply Target strMonth10] AS strSTMonth10
-				,[Opening Inventory strMonth11] AS strOIMonth11
-				,[Forecasted Consumption strMonth11] AS strFCMonth11
-				,[Open Purchases strMonth11] AS strOPMonth11
-				,[Short/Excess Inventory strMonth11] AS strSEMonth11
-				,[Ending Inventory strMonth11] AS strEIMonth11
-				,[Months of Supply Target strMonth11] AS strSTMonth11
-				,[Opening Inventory strMonth12] AS strOIMonth12
-				,[Forecasted Consumption strMonth12] AS strFCMonth12
-				,[Open Purchases strMonth12] AS strOPMonth12
-				,[Short/Excess Inventory strMonth12] AS strSEMonth12
-				,[Ending Inventory strMonth12] AS strEIMonth12
-				,[Months of Supply Target strMonth12] AS strSTMonth12
-				,[Opening Inventory strMonth13] AS strOIMonth13
-				,[Forecasted Consumption strMonth13] AS strFCMonth13
-				,[Open Purchases strMonth13] AS strOPMonth13
-				,[Short/Excess Inventory strMonth13] AS strSEMonth13
-				,[Ending Inventory strMonth13] AS strEIMonth13
-				,[Months of Supply Target strMonth13] AS strSTMonth13
-				,[Opening Inventory strMonth14] AS strOIMonth14
-				,[Forecasted Consumption strMonth14] AS strFCMonth14
-				,[Open Purchases strMonth14] AS strOPMonth14
-				,[Short/Excess Inventory strMonth14] AS strSEMonth14
-				,[Ending Inventory strMonth14] AS strEIMonth14
-				,[Months of Supply Target strMonth14] AS strSTMonth14
-				,[Opening Inventory strMonth15] AS strOIMonth15
-				,[Forecasted Consumption strMonth15] AS strFCMonth15
-				,[Open Purchases strMonth15] AS strOPMonth15
-				,[Short/Excess Inventory strMonth15] AS strSEMonth15
-				,[Ending Inventory strMonth15] AS strEIMonth15
-				,[Months of Supply Target strMonth15] AS strSTMonth15
-				,[Opening Inventory strMonth16] AS strOIMonth16
-				,[Forecasted Consumption strMonth16] AS strFCMonth16
-				,[Open Purchases strMonth16] AS strOPMonth16
-				,[Short/Excess Inventory strMonth16] AS strSEMonth16
-				,[Ending Inventory strMonth16] AS strEIMonth16
-				,[Months of Supply Target strMonth16] AS strSTMonth16
-				,[Opening Inventory strMonth17] AS strOIMonth17
-				,[Forecasted Consumption strMonth17] AS strFCMonth17
-				,[Open Purchases strMonth17] AS strOPMonth17
-				,[Short/Excess Inventory strMonth17] AS strSEMonth17
-				,[Ending Inventory strMonth17] AS strEIMonth17
-				,[Months of Supply Target strMonth17] AS strSTMonth17
-				,[Opening Inventory strMonth18] AS strOIMonth18
-				,[Forecasted Consumption strMonth18] AS strFCMonth18
-				,[Open Purchases strMonth18] AS strOPMonth18
-				,[Short/Excess Inventory strMonth18] AS strSEMonth18
-				,[Ending Inventory strMonth18] AS strEIMonth18
-				,[Months of Supply Target strMonth18] AS strSTMonth18
-				,[Opening Inventory strMonth19] AS strOIMonth19
-				,[Forecasted Consumption strMonth19] AS strFCMonth19
-				,[Open Purchases strMonth19] AS strOPMonth19
-				,[Short/Excess Inventory strMonth19] AS strSEMonth19
-				,[Ending Inventory strMonth19] AS strEIMonth19
-				,[Months of Supply Target strMonth19] AS strSTMonth19
-				,[Opening Inventory strMonth20] AS strOIMonth20
-				,[Forecasted Consumption strMonth20] AS strFCMonth20
-				,[Open Purchases strMonth20] AS strOPMonth20
-				,[Short/Excess Inventory strMonth20] AS strSEMonth20
-				,[Ending Inventory strMonth20] AS strEIMonth20
-				,[Months of Supply Target strMonth20] AS strSTMonth20
-				,[Opening Inventory strMonth21] AS strOIMonth21
-				,[Forecasted Consumption strMonth21] AS strFCMonth21
-				,[Open Purchases strMonth21] AS strOPMonth21
-				,[Short/Excess Inventory strMonth21] AS strSEMonth21
-				,[Ending Inventory strMonth21] AS strEIMonth21
-				,[Months of Supply Target strMonth21] AS strSTMonth21
-				,[Opening Inventory strMonth22] AS strOIMonth22
-				,[Forecasted Consumption strMonth22] AS strFCMonth22
-				,[Open Purchases strMonth22] AS strOPMonth22
-				,[Short/Excess Inventory strMonth22] AS strSEMonth22
-				,[Ending Inventory strMonth22] AS strEIMonth22
-				,[Months of Supply Target strMonth22] AS strSTMonth22
-				,[Opening Inventory strMonth23] AS strOIMonth23
-				,[Forecasted Consumption strMonth23] AS strFCMonth23
-				,[Open Purchases strMonth23] AS strOPMonth23
-				,[Short/Excess Inventory strMonth23] AS strSEMonth23
-				,[Ending Inventory strMonth23] AS strEIMonth23
-				,[Months of Supply Target strMonth23] AS strSTMonth23
-				,[Opening Inventory strMonth24] AS strOIMonth24
-				,[Forecasted Consumption strMonth24] AS strFCMonth24
-				,[Open Purchases strMonth24] AS strOPMonth24
-				,[Short/Excess Inventory strMonth24] AS strSEMonth24
-				,[Ending Inventory strMonth24] AS strEIMonth24
-				,[Months of Supply Target strMonth24] AS strSTMonth24
+				,IsNULL([Opening Inventory strMonth1], 0) AS strOIMonth1
+				,IsNULL([Forecasted Consumption strMonth1], 0) AS strFCMonth1
+				,IsNULL([Existing Purchases strMonth1], 0) AS strOPMonth1
+				,IsNULL([Planned Purchases strMonth1], 0) AS strSEMonth1
+				,IsNULL([Ending Inventory strMonth1], 0) AS strEIMonth1
+				,IsNULL([Weeks of Supply strMonth1], 0) AS strSTMonth1
+				,IsNULL([Opening Inventory strMonth2], 0) AS strOIMonth2
+				,IsNULL([Forecasted Consumption strMonth2], 0) AS strFCMonth2
+				,IsNULL([Existing Purchases strMonth2], 0) AS strOPMonth2
+				,IsNULL([Planned Purchases strMonth2], 0) AS strSEMonth2
+				,IsNULL([Ending Inventory strMonth2], 0) AS strEIMonth2
+				,IsNULL([Weeks of Supply strMonth2], 0) AS strSTMonth2
+				,IsNULL([Opening Inventory strMonth3], 0) AS strOIMonth3
+				,IsNULL([Forecasted Consumption strMonth3], 0) AS strFCMonth3
+				,IsNULL([Existing Purchases strMonth3], 0) AS strOPMonth3
+				,IsNULL([Planned Purchases strMonth3], 0) AS strSEMonth3
+				,IsNULL([Ending Inventory strMonth3], 0) AS strEIMonth3
+				,IsNULL([Weeks of Supply strMonth3], 0) AS strSTMonth3
+				,IsNULL([Opening Inventory strMonth4], 0) AS strOIMonth4
+				,IsNULL([Forecasted Consumption strMonth4], 0) AS strFCMonth4
+				,IsNULL([Existing Purchases strMonth4], 0) AS strOPMonth4
+				,IsNULL([Planned Purchases strMonth4], 0) AS strSEMonth4
+				,IsNULL([Ending Inventory strMonth4], 0) AS strEIMonth4
+				,IsNULL([Weeks of Supply strMonth4], 0) AS strSTMonth4
+				,IsNULL([Opening Inventory strMonth5], 0) AS strOIMonth5
+				,IsNULL([Forecasted Consumption strMonth5], 0) AS strFCMonth5
+				,IsNULL([Existing Purchases strMonth5], 0) AS strOPMonth5
+				,IsNULL([Planned Purchases strMonth5], 0) AS strSEMonth5
+				,IsNULL([Ending Inventory strMonth5], 0) AS strEIMonth5
+				,IsNULL([Weeks of Supply strMonth5], 0) AS strSTMonth5
+				,IsNULL([Opening Inventory strMonth6], 0) AS strOIMonth6
+				,IsNULL([Forecasted Consumption strMonth6], 0) AS strFCMonth6
+				,IsNULL([Existing Purchases strMonth6], 0) AS strOPMonth6
+				,IsNULL([Planned Purchases strMonth6], 0) AS strSEMonth6
+				,IsNULL([Ending Inventory strMonth6], 0) AS strEIMonth6
+				,IsNULL([Weeks of Supply strMonth6], 0) AS strSTMonth6
+				,IsNULL([Opening Inventory strMonth7], 0) AS strOIMonth7
+				,IsNULL([Forecasted Consumption strMonth7], 0) AS strFCMonth7
+				,IsNULL([Existing Purchases strMonth7], 0) AS strOPMonth7
+				,IsNULL([Planned Purchases strMonth7], 0) AS strSEMonth7
+				,IsNULL([Ending Inventory strMonth7], 0) AS strEIMonth7
+				,IsNULL([Weeks of Supply strMonth7], 0) AS strSTMonth7
+				,IsNULL([Opening Inventory strMonth8], 0) AS strOIMonth8
+				,IsNULL([Forecasted Consumption strMonth8], 0) AS strFCMonth8
+				,IsNULL([Existing Purchases strMonth8], 0) AS strOPMonth8
+				,IsNULL([Planned Purchases strMonth8], 0) AS strSEMonth8
+				,IsNULL([Ending Inventory strMonth8], 0) AS strEIMonth8
+				,IsNULL([Weeks of Supply strMonth8], 0) AS strSTMonth8
+				,IsNULL([Opening Inventory strMonth9], 0) AS strOIMonth9
+				,IsNULL([Forecasted Consumption strMonth9], 0) AS strFCMonth9
+				,IsNULL([Existing Purchases strMonth9], 0) AS strOPMonth9
+				,IsNULL([Planned Purchases strMonth9], 0) AS strSEMonth9
+				,IsNULL([Ending Inventory strMonth9], 0) AS strEIMonth9
+				,IsNULL([Weeks of Supply strMonth9], 0) AS strSTMonth9
+				,IsNULL([Opening Inventory strMonth10], 0) AS strOIMonth10
+				,IsNULL([Forecasted Consumption strMonth10], 0) AS strFCMonth10
+				,IsNULL([Existing Purchases strMonth10], 0) AS strOPMonth10
+				,IsNULL([Planned Purchases strMonth10], 0) AS strSEMonth10
+				,IsNULL([Ending Inventory strMonth10], 0) AS strEIMonth10
+				,IsNULL([Weeks of Supply strMonth10], 0) AS strSTMonth10
+				,IsNULL([Opening Inventory strMonth11], 0) AS strOIMonth11
+				,IsNULL([Forecasted Consumption strMonth11], 0) AS strFCMonth11
+				,IsNULL([Existing Purchases strMonth11], 0) AS strOPMonth11
+				,IsNULL([Planned Purchases strMonth11], 0) AS strSEMonth11
+				,IsNULL([Ending Inventory strMonth11], 0) AS strEIMonth11
+				,IsNULL([Weeks of Supply strMonth11], 0) AS strSTMonth11
+				,IsNULL([Opening Inventory strMonth12], 0) AS strOIMonth12
+				,IsNULL([Forecasted Consumption strMonth12], 0) AS strFCMonth12
+				,IsNULL([Existing Purchases strMonth12], 0) AS strOPMonth12
+				,IsNULL([Planned Purchases strMonth12], 0) AS strSEMonth12
+				,IsNULL([Ending Inventory strMonth12], 0) AS strEIMonth12
+				,IsNULL([Weeks of Supply strMonth12], 0) AS strSTMonth12
+				,IsNULL([Opening Inventory strMonth13], 0) AS strOIMonth13
+				,IsNULL([Forecasted Consumption strMonth13], 0) AS strFCMonth13
+				,IsNULL([Existing Purchases strMonth13], 0) AS strOPMonth13
+				,IsNULL([Planned Purchases strMonth13], 0) AS strSEMonth13
+				,IsNULL([Ending Inventory strMonth13], 0) AS strEIMonth13
+				,IsNULL([Weeks of Supply strMonth13], 0) AS strSTMonth13
+				,IsNULL([Opening Inventory strMonth14], 0) AS strOIMonth14
+				,IsNULL([Forecasted Consumption strMonth14], 0) AS strFCMonth14
+				,IsNULL([Existing Purchases strMonth14], 0) AS strOPMonth14
+				,IsNULL([Planned Purchases strMonth14], 0) AS strSEMonth14
+				,IsNULL([Ending Inventory strMonth14], 0) AS strEIMonth14
+				,IsNULL([Weeks of Supply strMonth14], 0) AS strSTMonth14
+				,IsNULL([Opening Inventory strMonth15], 0) AS strOIMonth15
+				,IsNULL([Forecasted Consumption strMonth15], 0) AS strFCMonth15
+				,IsNULL([Existing Purchases strMonth15], 0) AS strOPMonth15
+				,IsNULL([Planned Purchases strMonth15], 0) AS strSEMonth15
+				,IsNULL([Ending Inventory strMonth15], 0) AS strEIMonth15
+				,IsNULL([Weeks of Supply strMonth15], 0) AS strSTMonth15
+				,IsNULL([Opening Inventory strMonth16], 0) AS strOIMonth16
+				,IsNULL([Forecasted Consumption strMonth16], 0) AS strFCMonth16
+				,IsNULL([Existing Purchases strMonth16], 0) AS strOPMonth16
+				,IsNULL([Planned Purchases strMonth16], 0) AS strSEMonth16
+				,IsNULL([Ending Inventory strMonth16], 0) AS strEIMonth16
+				,IsNULL([Weeks of Supply strMonth16], 0) AS strSTMonth16
+				,IsNULL([Opening Inventory strMonth17], 0) AS strOIMonth17
+				,IsNULL([Forecasted Consumption strMonth17], 0) AS strFCMonth17
+				,IsNULL([Existing Purchases strMonth17], 0) AS strOPMonth17
+				,IsNULL([Planned Purchases strMonth17], 0) AS strSEMonth17
+				,IsNULL([Ending Inventory strMonth17], 0) AS strEIMonth17
+				,IsNULL([Weeks of Supply strMonth17], 0) AS strSTMonth17
+				,IsNULL([Opening Inventory strMonth18], 0) AS strOIMonth18
+				,IsNULL([Forecasted Consumption strMonth18], 0) AS strFCMonth18
+				,IsNULL([Existing Purchases strMonth18], 0) AS strOPMonth18
+				,IsNULL([Planned Purchases strMonth18], 0) AS strSEMonth18
+				,IsNULL([Ending Inventory strMonth18], 0) AS strEIMonth18
+				,IsNULL([Weeks of Supply strMonth18], 0) AS strSTMonth18
+				,IsNULL([Opening Inventory strMonth19], 0) AS strOIMonth19
+				,IsNULL([Forecasted Consumption strMonth19], 0) AS strFCMonth19
+				,IsNULL([Existing Purchases strMonth19], 0) AS strOPMonth19
+				,IsNULL([Planned Purchases strMonth19], 0) AS strSEMonth19
+				,IsNULL([Ending Inventory strMonth19], 0) AS strEIMonth19
+				,IsNULL([Weeks of Supply strMonth19], 0) AS strSTMonth19
+				,IsNULL([Opening Inventory strMonth20], 0) AS strOIMonth20
+				,IsNULL([Forecasted Consumption strMonth20], 0) AS strFCMonth20
+				,IsNULL([Existing Purchases strMonth20], 0) AS strOPMonth20
+				,IsNULL([Planned Purchases strMonth20], 0) AS strSEMonth20
+				,IsNULL([Ending Inventory strMonth20], 0) AS strEIMonth20
+				,IsNULL([Weeks of Supply strMonth20], 0) AS strSTMonth20
+				,IsNULL([Opening Inventory strMonth21], 0) AS strOIMonth21
+				,IsNULL([Forecasted Consumption strMonth21], 0) AS strFCMonth21
+				,IsNULL([Existing Purchases strMonth21], 0) AS strOPMonth21
+				,IsNULL([Planned Purchases strMonth21], 0) AS strSEMonth21
+				,IsNULL([Ending Inventory strMonth21], 0) AS strEIMonth21
+				,IsNULL([Weeks of Supply strMonth21], 0) AS strSTMonth21
+				,IsNULL([Opening Inventory strMonth22], 0) AS strOIMonth22
+				,IsNULL([Forecasted Consumption strMonth22], 0) AS strFCMonth22
+				,IsNULL([Existing Purchases strMonth22], 0) AS strOPMonth22
+				,IsNULL([Planned Purchases strMonth22], 0) AS strSEMonth22
+				,IsNULL([Ending Inventory strMonth22], 0) AS strEIMonth22
+				,IsNULL([Weeks of Supply strMonth22], 0) AS strSTMonth22
+				,IsNULL([Opening Inventory strMonth23], 0) AS strOIMonth23
+				,IsNULL([Forecasted Consumption strMonth23], 0) AS strFCMonth23
+				,IsNULL([Existing Purchases strMonth23], 0) AS strOPMonth23
+				,IsNULL([Planned Purchases strMonth23], 0) AS strSEMonth23
+				,IsNULL([Ending Inventory strMonth23], 0) AS strEIMonth23
+				,IsNULL([Weeks of Supply strMonth23], 0) AS strSTMonth23
+				,IsNULL([Opening Inventory strMonth24], 0) AS strOIMonth24
+				,IsNULL([Forecasted Consumption strMonth24], 0) AS strFCMonth24
+				,IsNULL([Existing Purchases strMonth24], 0) AS strOPMonth24
+				,IsNULL([Planned Purchases strMonth24], 0) AS strSEMonth24
+				,IsNULL([Ending Inventory strMonth24], 0) AS strEIMonth24
+				,IsNULL([Weeks of Supply strMonth24], 0) AS strSTMonth24
 			FROM (
 				SELECT B.strBook
 					,SB.strSubBook
 					,CA.strDescription AS strProductType
 					,MI.strItemNo
 					,I.strItemNo AS strItemDescription
-					,A.strAttributeName + ' ' + AV.strFieldName AS strAttributeName
+					,Replace(Replace(A.strAttributeName, '<a>+ ', ''), '</a>', '') + ' ' + AV.strFieldName AS strAttributeName
 					,(
 						CASE 
 							WHEN IsNUmeric(AV.strValue) = 0
@@ -692,25 +699,25 @@ BEGIN
 							END
 						) strValue
 				FROM tblCTInvPlngReportAttributeValue AV
+				JOIN tblCTInvPlngReportMaster RM ON RM.intInvPlngReportMasterID = AV.intInvPlngReportMasterID
 				JOIN tblCTReportAttribute A ON A.intReportAttributeID = AV.intReportAttributeID
 					AND IsNumeric(AV.strValue) = 1
-				JOIN tblCTInvPlngReportMaster RM ON RM.intInvPlngReportMasterID = AV.intInvPlngReportMasterID
 				LEFT JOIN tblICItem MI ON MI.intItemId = IsNULL(AV.intMainItemId, AV.intItemId)
 				JOIN tblICItem I ON I.intItemId = AV.intItemId
 				LEFT JOIN tblCTBook B ON B.intBookId = RM.intBookId
 				LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = RM.intSubBookId
-				LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityId = MI.intCommodityId
-					AND MI.intProductTypeId = CA.intCommodityAttributeId
+				LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityId = I.intCommodityId
+					AND I.intProductTypeId = CA.intCommodityAttributeId
 					AND CA.strType = 'ProductType'
 				WHERE A.intReportAttributeID IN (
 						2 --Opening Inventory
 						,8 --Forecasted Consumption
 						,9 --Ending Inventory
-						,12 --Short/Excess Inventory
-						,13 --Open Purchases
+						,5 --Planned Purchases
+						,4 --Existing Purchases
 						,10 --Weeks of Supply
 						)
-					AND RM.intInvPlngReportMasterID IN (
+					AND AV.intInvPlngReportMasterID IN (
 						SELECT Item Collate Latin1_General_CI_AS
 						FROM [dbo].[fnSplitString](@strInvPlngReportMasterID, ',')
 						)
@@ -718,154 +725,159 @@ BEGIN
 						'OpeningInv'
 						,'PastDue'
 						)
-					--2-Opening Inventory;8-Forecasted Consumption;9-Ending Inventory;13-Open Purchases;12-Short/Excess Inventory
+					--2-Opening Inventory;8-Forecasted Consumption;9-Ending Inventory;13-Existing Purchases;12-Planned Purchases
 				) AS SourceTable
-			PIVOT(MAX(strValue) FOR strAttributeName IN (
+			PIVOT(SUM(strValue) FOR strAttributeName IN (
 						[Opening Inventory strMonth1]
 						,[Forecasted Consumption strMonth1]
-						,[Open Purchases strMonth1]
-						,[Short/Excess Inventory strMonth1]
+						,[Existing Purchases strMonth1]
+						,[Planned Purchases strMonth1]
 						,[Ending Inventory strMonth1]
-						,[Months of Supply Target strMonth1]
+						,[Weeks of Supply strMonth1]
 						,[Opening Inventory strMonth2]
 						,[Forecasted Consumption strMonth2]
-						,[Open Purchases strMonth2]
-						,[Short/Excess Inventory strMonth2]
+						,[Existing Purchases strMonth2]
+						,[Planned Purchases strMonth2]
 						,[Ending Inventory strMonth2]
-						,[Months of Supply Target strMonth2]
+						,[Weeks of Supply strMonth2]
 						,[Opening Inventory strMonth3]
 						,[Forecasted Consumption strMonth3]
-						,[Open Purchases strMonth3]
-						,[Short/Excess Inventory strMonth3]
+						,[Existing Purchases strMonth3]
+						,[Planned Purchases strMonth3]
 						,[Ending Inventory strMonth3]
-						,[Months of Supply Target strMonth3]
+						,[Weeks of Supply strMonth3]
 						,[Opening Inventory strMonth4]
 						,[Forecasted Consumption strMonth4]
-						,[Open Purchases strMonth4]
-						,[Short/Excess Inventory strMonth4]
+						,[Existing Purchases strMonth4]
+						,[Planned Purchases strMonth4]
 						,[Ending Inventory strMonth4]
-						,[Months of Supply Target strMonth4]
+						,[Weeks of Supply strMonth4]
 						,[Opening Inventory strMonth5]
 						,[Forecasted Consumption strMonth5]
-						,[Open Purchases strMonth5]
-						,[Short/Excess Inventory strMonth5]
+						,[Existing Purchases strMonth5]
+						,[Planned Purchases strMonth5]
 						,[Ending Inventory strMonth5]
-						,[Months of Supply Target strMonth5]
+						,[Weeks of Supply strMonth5]
 						,[Opening Inventory strMonth6]
 						,[Forecasted Consumption strMonth6]
-						,[Open Purchases strMonth6]
-						,[Short/Excess Inventory strMonth6]
+						,[Existing Purchases strMonth6]
+						,[Planned Purchases strMonth6]
 						,[Ending Inventory strMonth6]
-						,[Months of Supply Target strMonth6]
+						,[Weeks of Supply strMonth6]
 						,[Opening Inventory strMonth7]
 						,[Forecasted Consumption strMonth7]
-						,[Open Purchases strMonth7]
-						,[Short/Excess Inventory strMonth7]
+						,[Existing Purchases strMonth7]
+						,[Planned Purchases strMonth7]
 						,[Ending Inventory strMonth7]
-						,[Months of Supply Target strMonth7]
+						,[Weeks of Supply strMonth7]
 						,[Opening Inventory strMonth8]
 						,[Forecasted Consumption strMonth8]
-						,[Open Purchases strMonth8]
-						,[Short/Excess Inventory strMonth8]
+						,[Existing Purchases strMonth8]
+						,[Planned Purchases strMonth8]
 						,[Ending Inventory strMonth8]
-						,[Months of Supply Target strMonth8]
+						,[Weeks of Supply strMonth8]
 						,[Opening Inventory strMonth9]
 						,[Forecasted Consumption strMonth9]
-						,[Open Purchases strMonth9]
-						,[Short/Excess Inventory strMonth9]
+						,[Existing Purchases strMonth9]
+						,[Planned Purchases strMonth9]
 						,[Ending Inventory strMonth9]
-						,[Months of Supply Target strMonth9]
+						,[Weeks of Supply strMonth9]
 						,[Opening Inventory strMonth10]
 						,[Forecasted Consumption strMonth10]
-						,[Open Purchases strMonth10]
-						,[Short/Excess Inventory strMonth10]
+						,[Existing Purchases strMonth10]
+						,[Planned Purchases strMonth10]
 						,[Ending Inventory strMonth10]
-						,[Months of Supply Target strMonth10]
+						,[Weeks of Supply strMonth10]
 						,[Opening Inventory strMonth11]
 						,[Forecasted Consumption strMonth11]
-						,[Open Purchases strMonth11]
-						,[Short/Excess Inventory strMonth11]
+						,[Existing Purchases strMonth11]
+						,[Planned Purchases strMonth11]
 						,[Ending Inventory strMonth11]
-						,[Months of Supply Target strMonth11]
+						,[Weeks of Supply strMonth11]
 						,[Opening Inventory strMonth12]
 						,[Forecasted Consumption strMonth12]
-						,[Open Purchases strMonth12]
-						,[Short/Excess Inventory strMonth12]
+						,[Existing Purchases strMonth12]
+						,[Planned Purchases strMonth12]
 						,[Ending Inventory strMonth12]
-						,[Months of Supply Target strMonth12]
+						,[Weeks of Supply strMonth12]
 						,[Opening Inventory strMonth13]
 						,[Forecasted Consumption strMonth13]
-						,[Open Purchases strMonth13]
-						,[Short/Excess Inventory strMonth13]
+						,[Existing Purchases strMonth13]
+						,[Planned Purchases strMonth13]
 						,[Ending Inventory strMonth13]
-						,[Months of Supply Target strMonth13]
+						,[Weeks of Supply strMonth13]
 						,[Opening Inventory strMonth14]
 						,[Forecasted Consumption strMonth14]
-						,[Open Purchases strMonth14]
-						,[Short/Excess Inventory strMonth14]
+						,[Existing Purchases strMonth14]
+						,[Planned Purchases strMonth14]
 						,[Ending Inventory strMonth14]
-						,[Months of Supply Target strMonth14]
+						,[Weeks of Supply strMonth14]
 						,[Opening Inventory strMonth15]
 						,[Forecasted Consumption strMonth15]
-						,[Open Purchases strMonth15]
-						,[Short/Excess Inventory strMonth15]
+						,[Existing Purchases strMonth15]
+						,[Planned Purchases strMonth15]
 						,[Ending Inventory strMonth15]
-						,[Months of Supply Target strMonth15]
+						,[Weeks of Supply strMonth15]
 						,[Opening Inventory strMonth16]
 						,[Forecasted Consumption strMonth16]
-						,[Open Purchases strMonth16]
-						,[Short/Excess Inventory strMonth16]
+						,[Existing Purchases strMonth16]
+						,[Planned Purchases strMonth16]
 						,[Ending Inventory strMonth16]
-						,[Months of Supply Target strMonth16]
+						,[Weeks of Supply strMonth16]
 						,[Opening Inventory strMonth17]
 						,[Forecasted Consumption strMonth17]
-						,[Open Purchases strMonth17]
-						,[Short/Excess Inventory strMonth17]
+						,[Existing Purchases strMonth17]
+						,[Planned Purchases strMonth17]
 						,[Ending Inventory strMonth17]
-						,[Months of Supply Target strMonth17]
+						,[Weeks of Supply strMonth17]
 						,[Opening Inventory strMonth18]
 						,[Forecasted Consumption strMonth18]
-						,[Open Purchases strMonth18]
-						,[Short/Excess Inventory strMonth18]
+						,[Existing Purchases strMonth18]
+						,[Planned Purchases strMonth18]
 						,[Ending Inventory strMonth18]
-						,[Months of Supply Target strMonth18]
+						,[Weeks of Supply strMonth18]
 						,[Opening Inventory strMonth19]
 						,[Forecasted Consumption strMonth19]
-						,[Open Purchases strMonth19]
-						,[Short/Excess Inventory strMonth19]
+						,[Existing Purchases strMonth19]
+						,[Planned Purchases strMonth19]
 						,[Ending Inventory strMonth19]
-						,[Months of Supply Target strMonth19]
+						,[Weeks of Supply strMonth19]
 						,[Opening Inventory strMonth20]
 						,[Forecasted Consumption strMonth20]
-						,[Open Purchases strMonth20]
-						,[Short/Excess Inventory strMonth20]
+						,[Existing Purchases strMonth20]
+						,[Planned Purchases strMonth20]
 						,[Ending Inventory strMonth20]
-						,[Months of Supply Target strMonth20]
+						,[Weeks of Supply strMonth20]
 						,[Opening Inventory strMonth21]
 						,[Forecasted Consumption strMonth21]
-						,[Open Purchases strMonth21]
-						,[Short/Excess Inventory strMonth21]
+						,[Existing Purchases strMonth21]
+						,[Planned Purchases strMonth21]
 						,[Ending Inventory strMonth21]
-						,[Months of Supply Target strMonth21]
+						,[Weeks of Supply strMonth21]
 						,[Opening Inventory strMonth22]
 						,[Forecasted Consumption strMonth22]
-						,[Open Purchases strMonth22]
-						,[Short/Excess Inventory strMonth22]
+						,[Existing Purchases strMonth22]
+						,[Planned Purchases strMonth22]
 						,[Ending Inventory strMonth22]
-						,[Months of Supply Target strMonth22]
+						,[Weeks of Supply strMonth22]
 						,[Opening Inventory strMonth23]
 						,[Forecasted Consumption strMonth23]
-						,[Open Purchases strMonth23]
-						,[Short/Excess Inventory strMonth23]
+						,[Existing Purchases strMonth23]
+						,[Planned Purchases strMonth23]
 						,[Ending Inventory strMonth23]
-						,[Months of Supply Target strMonth23]
+						,[Weeks of Supply strMonth23]
 						,[Opening Inventory strMonth24]
 						,[Forecasted Consumption strMonth24]
-						,[Open Purchases strMonth24]
-						,[Short/Excess Inventory strMonth24]
+						,[Existing Purchases strMonth24]
+						,[Planned Purchases strMonth24]
 						,[Ending Inventory strMonth24]
-						,[Months of Supply Target strMonth24]
-						)) AS PivotTable;
+						,[Weeks of Supply strMonth24]
+						)) AS PivotTable
+						ORDER BY strBook
+			,strSubBook
+			,strProductType
+			,strItemNo
+			,strItemDescription
 		END
 		ELSE
 		BEGIN
@@ -930,7 +942,7 @@ BEGIN
 					ELSE 0
 					END AS ysnSpecificItemDescription
 			FROM tblCTInvPlngReportAttributeValue
-			WHERE intReportAttributeID = 13 --Open Purchases 
+			WHERE intReportAttributeID = 13 --Existing Purchases 
 				AND intInvPlngReportMasterID IN (
 					SELECT Item Collate Latin1_General_CI_AS
 					FROM [dbo].[fnSplitString](@strInvPlngReportMasterID, ',')
@@ -951,7 +963,7 @@ BEGIN
 					ELSE I.intMainItemId
 					END AS intItemId
 				,sum(dbo.fnCTConvertQuantityToTargetItemUOM(SS.intItemId, IU.intUnitMeasureId, @intUnitMeasureId, SS.dblBalance) * I.dblRatio) AS dblIntrasitQty
-				,13 AS intAttributeId --Open Purchases
+				,13 AS intAttributeId --Existing Purchases
 				,DATEDIFF(mm, 0, SS.dtmUpdatedAvailabilityDate) + 1 - @intCurrentMonth AS intMonthId
 				,I.intMainItemId
 				,SS.intBookId
@@ -989,7 +1001,7 @@ BEGIN
 				)
 			SELECT intItemId
 				,- dblQty
-				,12 AS intAttributeId --Short/Excess Inventory
+				,12 AS intAttributeId --Planned Purchases
 				,intMonthId
 				,intMainItemId
 				,intBookId
@@ -1019,13 +1031,14 @@ BEGIN
 			WHERE AV.intReportAttributeID IN (
 					2
 					,--Opening Inventory
-					13
-					,--Open Purchases
-					12
-					,--Short/Excess Inventory
+					4
+					,--Existing Purchases
+					5
+					,--Planned Purchases
 					8
 					,--Forecasted Consumption
 					9 --Ending Inventory
+					,10
 					)
 				AND AV.intInvPlngReportMasterID IN (
 					SELECT Item Collate Latin1_General_CI_AS
@@ -1062,157 +1075,157 @@ BEGIN
 				,strItemNo
 				,strItemDescription
 				,0 AS strSupplyTarget
-				,[Opening Inventory strMonth1] AS strOIMonth1
-				,[Forecasted Consumption strMonth1] AS strFCMonth1
-				,[Open Purchases strMonth1] AS strOPMonth1
-				,[Short/Excess Inventory strMonth1] AS strSEMonth1
-				,[Ending Inventory strMonth1] AS strEIMonth1
-				,[Months of Supply Target strMonth1] AS strSTMonth1
-				,[Opening Inventory strMonth2] AS strOIMonth2
-				,[Forecasted Consumption strMonth2] AS strFCMonth2
-				,[Open Purchases strMonth2] AS strOPMonth2
-				,[Short/Excess Inventory strMonth2] AS strSEMonth2
-				,[Ending Inventory strMonth2] AS strEIMonth2
-				,[Months of Supply Target strMonth2] AS strSTMonth2
-				,[Opening Inventory strMonth3] AS strOIMonth3
-				,[Forecasted Consumption strMonth3] AS strFCMonth3
-				,[Open Purchases strMonth3] AS strOPMonth3
-				,[Short/Excess Inventory strMonth3] AS strSEMonth3
-				,[Ending Inventory strMonth3] AS strEIMonth3
-				,[Months of Supply Target strMonth3] AS strSTMonth3
-				,[Opening Inventory strMonth4] AS strOIMonth4
-				,[Forecasted Consumption strMonth4] AS strFCMonth4
-				,[Open Purchases strMonth4] AS strOPMonth4
-				,[Short/Excess Inventory strMonth4] AS strSEMonth4
-				,[Ending Inventory strMonth4] AS strEIMonth4
-				,[Months of Supply Target strMonth4] AS strSTMonth4
-				,[Opening Inventory strMonth5] AS strOIMonth5
-				,[Forecasted Consumption strMonth5] AS strFCMonth5
-				,[Open Purchases strMonth5] AS strOPMonth5
-				,[Short/Excess Inventory strMonth5] AS strSEMonth5
-				,[Ending Inventory strMonth5] AS strEIMonth5
-				,[Months of Supply Target strMonth5] AS strSTMonth5
-				,[Opening Inventory strMonth6] AS strOIMonth6
-				,[Forecasted Consumption strMonth6] AS strFCMonth6
-				,[Open Purchases strMonth6] AS strOPMonth6
-				,[Short/Excess Inventory strMonth6] AS strSEMonth6
-				,[Ending Inventory strMonth6] AS strEIMonth6
-				,[Months of Supply Target strMonth6] AS strSTMonth6
-				,[Opening Inventory strMonth7] AS strOIMonth7
-				,[Forecasted Consumption strMonth7] AS strFCMonth7
-				,[Open Purchases strMonth7] AS strOPMonth7
-				,[Short/Excess Inventory strMonth7] AS strSEMonth7
-				,[Ending Inventory strMonth7] AS strEIMonth7
-				,[Months of Supply Target strMonth7] AS strSTMonth7
-				,[Opening Inventory strMonth8] AS strOIMonth8
-				,[Forecasted Consumption strMonth8] AS strFCMonth8
-				,[Open Purchases strMonth8] AS strOPMonth8
-				,[Short/Excess Inventory strMonth8] AS strSEMonth8
-				,[Ending Inventory strMonth8] AS strEIMonth8
-				,[Months of Supply Target strMonth8] AS strSTMonth8
-				,[Opening Inventory strMonth9] AS strOIMonth9
-				,[Forecasted Consumption strMonth9] AS strFCMonth9
-				,[Open Purchases strMonth9] AS strOPMonth9
-				,[Short/Excess Inventory strMonth9] AS strSEMonth9
-				,[Ending Inventory strMonth9] AS strEIMonth9
-				,[Months of Supply Target strMonth9] AS strSTMonth9
-				,[Opening Inventory strMonth10] AS strOIMonth10
-				,[Forecasted Consumption strMonth10] AS strFCMonth10
-				,[Open Purchases strMonth10] AS strOPMonth10
-				,[Short/Excess Inventory strMonth10] AS strSEMonth10
-				,[Ending Inventory strMonth10] AS strEIMonth10
-				,[Months of Supply Target strMonth10] AS strSTMonth10
-				,[Opening Inventory strMonth11] AS strOIMonth11
-				,[Forecasted Consumption strMonth11] AS strFCMonth11
-				,[Open Purchases strMonth11] AS strOPMonth11
-				,[Short/Excess Inventory strMonth11] AS strSEMonth11
-				,[Ending Inventory strMonth11] AS strEIMonth11
-				,[Months of Supply Target strMonth11] AS strSTMonth11
-				,[Opening Inventory strMonth12] AS strOIMonth12
-				,[Forecasted Consumption strMonth12] AS strFCMonth12
-				,[Open Purchases strMonth12] AS strOPMonth12
-				,[Short/Excess Inventory strMonth12] AS strSEMonth12
-				,[Ending Inventory strMonth12] AS strEIMonth12
-				,[Months of Supply Target strMonth12] AS strSTMonth12
-				,[Opening Inventory strMonth13] AS strOIMonth13
-				,[Forecasted Consumption strMonth13] AS strFCMonth13
-				,[Open Purchases strMonth13] AS strOPMonth13
-				,[Short/Excess Inventory strMonth13] AS strSEMonth13
-				,[Ending Inventory strMonth13] AS strEIMonth13
-				,[Months of Supply Target strMonth13] AS strSTMonth13
-				,[Opening Inventory strMonth14] AS strOIMonth14
-				,[Forecasted Consumption strMonth14] AS strFCMonth14
-				,[Open Purchases strMonth14] AS strOPMonth14
-				,[Short/Excess Inventory strMonth14] AS strSEMonth14
-				,[Ending Inventory strMonth14] AS strEIMonth14
-				,[Months of Supply Target strMonth14] AS strSTMonth14
-				,[Opening Inventory strMonth15] AS strOIMonth15
-				,[Forecasted Consumption strMonth15] AS strFCMonth15
-				,[Open Purchases strMonth15] AS strOPMonth15
-				,[Short/Excess Inventory strMonth15] AS strSEMonth15
-				,[Ending Inventory strMonth15] AS strEIMonth15
-				,[Months of Supply Target strMonth15] AS strSTMonth15
-				,[Opening Inventory strMonth16] AS strOIMonth16
-				,[Forecasted Consumption strMonth16] AS strFCMonth16
-				,[Open Purchases strMonth16] AS strOPMonth16
-				,[Short/Excess Inventory strMonth16] AS strSEMonth16
-				,[Ending Inventory strMonth16] AS strEIMonth16
-				,[Months of Supply Target strMonth16] AS strSTMonth16
-				,[Opening Inventory strMonth17] AS strOIMonth17
-				,[Forecasted Consumption strMonth17] AS strFCMonth17
-				,[Open Purchases strMonth17] AS strOPMonth17
-				,[Short/Excess Inventory strMonth17] AS strSEMonth17
-				,[Ending Inventory strMonth17] AS strEIMonth17
-				,[Months of Supply Target strMonth17] AS strSTMonth17
-				,[Opening Inventory strMonth18] AS strOIMonth18
-				,[Forecasted Consumption strMonth18] AS strFCMonth18
-				,[Open Purchases strMonth18] AS strOPMonth18
-				,[Short/Excess Inventory strMonth18] AS strSEMonth18
-				,[Ending Inventory strMonth18] AS strEIMonth18
-				,[Months of Supply Target strMonth18] AS strSTMonth18
-				,[Opening Inventory strMonth19] AS strOIMonth19
-				,[Forecasted Consumption strMonth19] AS strFCMonth19
-				,[Open Purchases strMonth19] AS strOPMonth19
-				,[Short/Excess Inventory strMonth19] AS strSEMonth19
-				,[Ending Inventory strMonth19] AS strEIMonth19
-				,[Months of Supply Target strMonth19] AS strSTMonth19
-				,[Opening Inventory strMonth20] AS strOIMonth20
-				,[Forecasted Consumption strMonth20] AS strFCMonth20
-				,[Open Purchases strMonth20] AS strOPMonth20
-				,[Short/Excess Inventory strMonth20] AS strSEMonth20
-				,[Ending Inventory strMonth20] AS strEIMonth20
-				,[Months of Supply Target strMonth20] AS strSTMonth20
-				,[Opening Inventory strMonth21] AS strOIMonth21
-				,[Forecasted Consumption strMonth21] AS strFCMonth21
-				,[Open Purchases strMonth21] AS strOPMonth21
-				,[Short/Excess Inventory strMonth21] AS strSEMonth21
-				,[Ending Inventory strMonth21] AS strEIMonth21
-				,[Months of Supply Target strMonth21] AS strSTMonth21
-				,[Opening Inventory strMonth22] AS strOIMonth22
-				,[Forecasted Consumption strMonth22] AS strFCMonth22
-				,[Open Purchases strMonth22] AS strOPMonth22
-				,[Short/Excess Inventory strMonth22] AS strSEMonth22
-				,[Ending Inventory strMonth22] AS strEIMonth22
-				,[Months of Supply Target strMonth22] AS strSTMonth22
-				,[Opening Inventory strMonth23] AS strOIMonth23
-				,[Forecasted Consumption strMonth23] AS strFCMonth23
-				,[Open Purchases strMonth23] AS strOPMonth23
-				,[Short/Excess Inventory strMonth23] AS strSEMonth23
-				,[Ending Inventory strMonth23] AS strEIMonth23
-				,[Months of Supply Target strMonth23] AS strSTMonth23
-				,[Opening Inventory strMonth24] AS strOIMonth24
-				,[Forecasted Consumption strMonth24] AS strFCMonth24
-				,[Open Purchases strMonth24] AS strOPMonth24
-				,[Short/Excess Inventory strMonth24] AS strSEMonth24
-				,[Ending Inventory strMonth24] AS strEIMonth24
-				,[Months of Supply Target strMonth24] AS strSTMonth24
+				,IsNULL([Opening Inventory strMonth1], 0) AS strOIMonth1
+				,IsNULL([Forecasted Consumption strMonth1], 0) AS strFCMonth1
+				,IsNULL([Existing Purchases strMonth1], 0) AS strOPMonth1
+				,IsNULL([Planned Purchases strMonth1], 0) AS strSEMonth1
+				,IsNULL([Ending Inventory strMonth1], 0) AS strEIMonth1
+				,IsNULL([Weeks of Supply strMonth1], 0) AS strSTMonth1
+				,IsNULL([Opening Inventory strMonth2], 0) AS strOIMonth2
+				,IsNULL([Forecasted Consumption strMonth2], 0) AS strFCMonth2
+				,IsNULL([Existing Purchases strMonth2], 0) AS strOPMonth2
+				,IsNULL([Planned Purchases strMonth2], 0) AS strSEMonth2
+				,IsNULL([Ending Inventory strMonth2], 0) AS strEIMonth2
+				,IsNULL([Weeks of Supply strMonth2], 0) AS strSTMonth2
+				,IsNULL([Opening Inventory strMonth3], 0) AS strOIMonth3
+				,IsNULL([Forecasted Consumption strMonth3], 0) AS strFCMonth3
+				,IsNULL([Existing Purchases strMonth3], 0) AS strOPMonth3
+				,IsNULL([Planned Purchases strMonth3], 0) AS strSEMonth3
+				,IsNULL([Ending Inventory strMonth3], 0) AS strEIMonth3
+				,IsNULL([Weeks of Supply strMonth3], 0) AS strSTMonth3
+				,IsNULL([Opening Inventory strMonth4], 0) AS strOIMonth4
+				,IsNULL([Forecasted Consumption strMonth4], 0) AS strFCMonth4
+				,IsNULL([Existing Purchases strMonth4], 0) AS strOPMonth4
+				,IsNULL([Planned Purchases strMonth4], 0) AS strSEMonth4
+				,IsNULL([Ending Inventory strMonth4], 0) AS strEIMonth4
+				,IsNULL([Weeks of Supply strMonth4], 0) AS strSTMonth4
+				,IsNULL([Opening Inventory strMonth5], 0) AS strOIMonth5
+				,IsNULL([Forecasted Consumption strMonth5], 0) AS strFCMonth5
+				,IsNULL([Existing Purchases strMonth5], 0) AS strOPMonth5
+				,IsNULL([Planned Purchases strMonth5], 0) AS strSEMonth5
+				,IsNULL([Ending Inventory strMonth5], 0) AS strEIMonth5
+				,IsNULL([Weeks of Supply strMonth5], 0) AS strSTMonth5
+				,IsNULL([Opening Inventory strMonth6], 0) AS strOIMonth6
+				,IsNULL([Forecasted Consumption strMonth6], 0) AS strFCMonth6
+				,IsNULL([Existing Purchases strMonth6], 0) AS strOPMonth6
+				,IsNULL([Planned Purchases strMonth6], 0) AS strSEMonth6
+				,IsNULL([Ending Inventory strMonth6], 0) AS strEIMonth6
+				,IsNULL([Weeks of Supply strMonth6], 0) AS strSTMonth6
+				,IsNULL([Opening Inventory strMonth7], 0) AS strOIMonth7
+				,IsNULL([Forecasted Consumption strMonth7], 0) AS strFCMonth7
+				,IsNULL([Existing Purchases strMonth7], 0) AS strOPMonth7
+				,IsNULL([Planned Purchases strMonth7], 0) AS strSEMonth7
+				,IsNULL([Ending Inventory strMonth7], 0) AS strEIMonth7
+				,IsNULL([Weeks of Supply strMonth7], 0) AS strSTMonth7
+				,IsNULL([Opening Inventory strMonth8], 0) AS strOIMonth8
+				,IsNULL([Forecasted Consumption strMonth8], 0) AS strFCMonth8
+				,IsNULL([Existing Purchases strMonth8], 0) AS strOPMonth8
+				,IsNULL([Planned Purchases strMonth8], 0) AS strSEMonth8
+				,IsNULL([Ending Inventory strMonth8], 0) AS strEIMonth8
+				,IsNULL([Weeks of Supply strMonth8], 0) AS strSTMonth8
+				,IsNULL([Opening Inventory strMonth9], 0) AS strOIMonth9
+				,IsNULL([Forecasted Consumption strMonth9], 0) AS strFCMonth9
+				,IsNULL([Existing Purchases strMonth9], 0) AS strOPMonth9
+				,IsNULL([Planned Purchases strMonth9], 0) AS strSEMonth9
+				,IsNULL([Ending Inventory strMonth9], 0) AS strEIMonth9
+				,IsNULL([Weeks of Supply strMonth9], 0) AS strSTMonth9
+				,IsNULL([Opening Inventory strMonth10], 0) AS strOIMonth10
+				,IsNULL([Forecasted Consumption strMonth10], 0) AS strFCMonth10
+				,IsNULL([Existing Purchases strMonth10], 0) AS strOPMonth10
+				,IsNULL([Planned Purchases strMonth10], 0) AS strSEMonth10
+				,IsNULL([Ending Inventory strMonth10], 0) AS strEIMonth10
+				,IsNULL([Weeks of Supply strMonth10], 0) AS strSTMonth10
+				,IsNULL([Opening Inventory strMonth11], 0) AS strOIMonth11
+				,IsNULL([Forecasted Consumption strMonth11], 0) AS strFCMonth11
+				,IsNULL([Existing Purchases strMonth11], 0) AS strOPMonth11
+				,IsNULL([Planned Purchases strMonth11], 0) AS strSEMonth11
+				,IsNULL([Ending Inventory strMonth11], 0) AS strEIMonth11
+				,IsNULL([Weeks of Supply strMonth11], 0) AS strSTMonth11
+				,IsNULL([Opening Inventory strMonth12], 0) AS strOIMonth12
+				,IsNULL([Forecasted Consumption strMonth12], 0) AS strFCMonth12
+				,IsNULL([Existing Purchases strMonth12], 0) AS strOPMonth12
+				,IsNULL([Planned Purchases strMonth12], 0) AS strSEMonth12
+				,IsNULL([Ending Inventory strMonth12], 0) AS strEIMonth12
+				,IsNULL([Weeks of Supply strMonth12], 0) AS strSTMonth12
+				,IsNULL([Opening Inventory strMonth13], 0) AS strOIMonth13
+				,IsNULL([Forecasted Consumption strMonth13], 0) AS strFCMonth13
+				,IsNULL([Existing Purchases strMonth13], 0) AS strOPMonth13
+				,IsNULL([Planned Purchases strMonth13], 0) AS strSEMonth13
+				,IsNULL([Ending Inventory strMonth13], 0) AS strEIMonth13
+				,IsNULL([Weeks of Supply strMonth13], 0) AS strSTMonth13
+				,IsNULL([Opening Inventory strMonth14], 0) AS strOIMonth14
+				,IsNULL([Forecasted Consumption strMonth14], 0) AS strFCMonth14
+				,IsNULL([Existing Purchases strMonth14], 0) AS strOPMonth14
+				,IsNULL([Planned Purchases strMonth14], 0) AS strSEMonth14
+				,IsNULL([Ending Inventory strMonth14], 0) AS strEIMonth14
+				,IsNULL([Weeks of Supply strMonth14], 0) AS strSTMonth14
+				,IsNULL([Opening Inventory strMonth15], 0) AS strOIMonth15
+				,IsNULL([Forecasted Consumption strMonth15], 0) AS strFCMonth15
+				,IsNULL([Existing Purchases strMonth15], 0) AS strOPMonth15
+				,IsNULL([Planned Purchases strMonth15], 0) AS strSEMonth15
+				,IsNULL([Ending Inventory strMonth15], 0) AS strEIMonth15
+				,IsNULL([Weeks of Supply strMonth15], 0) AS strSTMonth15
+				,IsNULL([Opening Inventory strMonth16], 0) AS strOIMonth16
+				,IsNULL([Forecasted Consumption strMonth16], 0) AS strFCMonth16
+				,IsNULL([Existing Purchases strMonth16], 0) AS strOPMonth16
+				,IsNULL([Planned Purchases strMonth16], 0) AS strSEMonth16
+				,IsNULL([Ending Inventory strMonth16], 0) AS strEIMonth16
+				,IsNULL([Weeks of Supply strMonth16], 0) AS strSTMonth16
+				,IsNULL([Opening Inventory strMonth17], 0) AS strOIMonth17
+				,IsNULL([Forecasted Consumption strMonth17], 0) AS strFCMonth17
+				,IsNULL([Existing Purchases strMonth17], 0) AS strOPMonth17
+				,IsNULL([Planned Purchases strMonth17], 0) AS strSEMonth17
+				,IsNULL([Ending Inventory strMonth17], 0) AS strEIMonth17
+				,IsNULL([Weeks of Supply strMonth17], 0) AS strSTMonth17
+				,IsNULL([Opening Inventory strMonth18], 0) AS strOIMonth18
+				,IsNULL([Forecasted Consumption strMonth18], 0) AS strFCMonth18
+				,IsNULL([Existing Purchases strMonth18], 0) AS strOPMonth18
+				,IsNULL([Planned Purchases strMonth18], 0) AS strSEMonth18
+				,IsNULL([Ending Inventory strMonth18], 0) AS strEIMonth18
+				,IsNULL([Weeks of Supply strMonth18], 0) AS strSTMonth18
+				,IsNULL([Opening Inventory strMonth19], 0) AS strOIMonth19
+				,IsNULL([Forecasted Consumption strMonth19], 0) AS strFCMonth19
+				,IsNULL([Existing Purchases strMonth19], 0) AS strOPMonth19
+				,IsNULL([Planned Purchases strMonth19], 0) AS strSEMonth19
+				,IsNULL([Ending Inventory strMonth19], 0) AS strEIMonth19
+				,IsNULL([Weeks of Supply strMonth19], 0) AS strSTMonth19
+				,IsNULL([Opening Inventory strMonth20], 0) AS strOIMonth20
+				,IsNULL([Forecasted Consumption strMonth20], 0) AS strFCMonth20
+				,IsNULL([Existing Purchases strMonth20], 0) AS strOPMonth20
+				,IsNULL([Planned Purchases strMonth20], 0) AS strSEMonth20
+				,IsNULL([Ending Inventory strMonth20], 0) AS strEIMonth20
+				,IsNULL([Weeks of Supply strMonth20], 0) AS strSTMonth20
+				,IsNULL([Opening Inventory strMonth21], 0) AS strOIMonth21
+				,IsNULL([Forecasted Consumption strMonth21], 0) AS strFCMonth21
+				,IsNULL([Existing Purchases strMonth21], 0) AS strOPMonth21
+				,IsNULL([Planned Purchases strMonth21], 0) AS strSEMonth21
+				,IsNULL([Ending Inventory strMonth21], 0) AS strEIMonth21
+				,IsNULL([Weeks of Supply strMonth21], 0) AS strSTMonth21
+				,IsNULL([Opening Inventory strMonth22], 0) AS strOIMonth22
+				,IsNULL([Forecasted Consumption strMonth22], 0) AS strFCMonth22
+				,IsNULL([Existing Purchases strMonth22], 0) AS strOPMonth22
+				,IsNULL([Planned Purchases strMonth22], 0) AS strSEMonth22
+				,IsNULL([Ending Inventory strMonth22], 0) AS strEIMonth22
+				,IsNULL([Weeks of Supply strMonth22], 0) AS strSTMonth22
+				,IsNULL([Opening Inventory strMonth23], 0) AS strOIMonth23
+				,IsNULL([Forecasted Consumption strMonth23], 0) AS strFCMonth23
+				,IsNULL([Existing Purchases strMonth23], 0) AS strOPMonth23
+				,IsNULL([Planned Purchases strMonth23], 0) AS strSEMonth23
+				,IsNULL([Ending Inventory strMonth23], 0) AS strEIMonth23
+				,IsNULL([Weeks of Supply strMonth23], 0) AS strSTMonth23
+				,IsNULL([Opening Inventory strMonth24], 0) AS strOIMonth24
+				,IsNULL([Forecasted Consumption strMonth24], 0) AS strFCMonth24
+				,IsNULL([Existing Purchases strMonth24], 0) AS strOPMonth24
+				,IsNULL([Planned Purchases strMonth24], 0) AS strSEMonth24
+				,IsNULL([Ending Inventory strMonth24], 0) AS strEIMonth24
+				,IsNULL([Weeks of Supply strMonth24], 0) AS strSTMonth24
 			FROM (
 				SELECT B.strBook
 					,SB.strSubBook
 					,CA.strDescription AS strProductType
 					,MI.strItemNo
 					,I.strItemNo AS strItemDescription
-					,A.strAttributeName + ' strMonth' + CHAR(FD.intMonthId) AS strAttributeName
+					,Replace(Replace(A.strAttributeName, '<a>+ ', ''), '</a>', '') + ' strMonth' + CHAR(FD.intMonthId) AS strAttributeName
 					,(
 						CASE 
 							WHEN IsNUmeric(FD.dblQty) = 0
@@ -1222,174 +1235,176 @@ BEGIN
 						) strValue
 				FROM #tblMFFinalDemand FD
 				JOIN tblCTReportAttribute A ON A.intReportAttributeID = FD.intAttributeId
-				JOIN tblCTInvPlngReportMaster RM ON RM.intInvPlngReportMasterID = @intReportMasterID
+				--JOIN tblCTInvPlngReportMaster RM ON RM.intInvPlngReportMasterID = @intReportMasterID
 				LEFT JOIN tblICItem MI ON MI.intItemId = IsNULL(FD.intMainItemId, FD.intItemId)
 				JOIN tblICItem I ON I.intItemId = FD.intItemId
 				LEFT JOIN tblCTBook B ON B.intBookId = FD.intBookId
 				LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = FD.intSubBookId
-				LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityId = MI.intCommodityId
-					AND MI.intProductTypeId = CA.intCommodityAttributeId
+				LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityId = I.intCommodityId
+					AND I.intProductTypeId = CA.intCommodityAttributeId
 					AND CA.strType = 'ProductType'
 				WHERE A.intReportAttributeID IN (
 						2
 						,8
 						,9
-						,12
+						,5 --Planned Purchases
 						,13
+						,10 --Weeks of Supply
 						)
-					AND IsNumeric(FD.dblQty) = 0
-					AND RM.intInvPlngReportMasterID IN (
-						SELECT Item Collate Latin1_General_CI_AS
-						FROM [dbo].[fnSplitString](@strInvPlngReportMasterID, ',')
-						)
-					--2-Opening Inventory;8-Forecasted Consumption;9-Ending Inventory;13-Open Purchases;12-Short/Excess Inventory
+					AND IsNumeric(FD.dblQty) = 1
+					--2-Opening Inventory;8-Forecasted Consumption;9-Ending Inventory;13-Existing Purchases;12-Planned Purchases
 				) AS SourceTable
 			PIVOT(SUM(strValue) FOR strAttributeName IN (
 						[Opening Inventory strMonth1]
 						,[Forecasted Consumption strMonth1]
-						,[Open Purchases strMonth1]
-						,[Short/Excess Inventory strMonth1]
+						,[Existing Purchases strMonth1]
+						,[Planned Purchases strMonth1]
 						,[Ending Inventory strMonth1]
-						,[Months of Supply Target strMonth1]
+						,[Weeks of Supply strMonth1]
 						,[Opening Inventory strMonth2]
 						,[Forecasted Consumption strMonth2]
-						,[Open Purchases strMonth2]
-						,[Short/Excess Inventory strMonth2]
+						,[Existing Purchases strMonth2]
+						,[Planned Purchases strMonth2]
 						,[Ending Inventory strMonth2]
-						,[Months of Supply Target strMonth2]
+						,[Weeks of Supply strMonth2]
 						,[Opening Inventory strMonth3]
 						,[Forecasted Consumption strMonth3]
-						,[Open Purchases strMonth3]
-						,[Short/Excess Inventory strMonth3]
+						,[Existing Purchases strMonth3]
+						,[Planned Purchases strMonth3]
 						,[Ending Inventory strMonth3]
-						,[Months of Supply Target strMonth3]
+						,[Weeks of Supply strMonth3]
 						,[Opening Inventory strMonth4]
 						,[Forecasted Consumption strMonth4]
-						,[Open Purchases strMonth4]
-						,[Short/Excess Inventory strMonth4]
+						,[Existing Purchases strMonth4]
+						,[Planned Purchases strMonth4]
 						,[Ending Inventory strMonth4]
-						,[Months of Supply Target strMonth4]
+						,[Weeks of Supply strMonth4]
 						,[Opening Inventory strMonth5]
 						,[Forecasted Consumption strMonth5]
-						,[Open Purchases strMonth5]
-						,[Short/Excess Inventory strMonth5]
+						,[Existing Purchases strMonth5]
+						,[Planned Purchases strMonth5]
 						,[Ending Inventory strMonth5]
-						,[Months of Supply Target strMonth5]
+						,[Weeks of Supply strMonth5]
 						,[Opening Inventory strMonth6]
 						,[Forecasted Consumption strMonth6]
-						,[Open Purchases strMonth6]
-						,[Short/Excess Inventory strMonth6]
+						,[Existing Purchases strMonth6]
+						,[Planned Purchases strMonth6]
 						,[Ending Inventory strMonth6]
-						,[Months of Supply Target strMonth6]
+						,[Weeks of Supply strMonth6]
 						,[Opening Inventory strMonth7]
 						,[Forecasted Consumption strMonth7]
-						,[Open Purchases strMonth7]
-						,[Short/Excess Inventory strMonth7]
+						,[Existing Purchases strMonth7]
+						,[Planned Purchases strMonth7]
 						,[Ending Inventory strMonth7]
-						,[Months of Supply Target strMonth7]
+						,[Weeks of Supply strMonth7]
 						,[Opening Inventory strMonth8]
 						,[Forecasted Consumption strMonth8]
-						,[Open Purchases strMonth8]
-						,[Short/Excess Inventory strMonth8]
+						,[Existing Purchases strMonth8]
+						,[Planned Purchases strMonth8]
 						,[Ending Inventory strMonth8]
-						,[Months of Supply Target strMonth8]
+						,[Weeks of Supply strMonth8]
 						,[Opening Inventory strMonth9]
 						,[Forecasted Consumption strMonth9]
-						,[Open Purchases strMonth9]
-						,[Short/Excess Inventory strMonth9]
+						,[Existing Purchases strMonth9]
+						,[Planned Purchases strMonth9]
 						,[Ending Inventory strMonth9]
-						,[Months of Supply Target strMonth9]
+						,[Weeks of Supply strMonth9]
 						,[Opening Inventory strMonth10]
 						,[Forecasted Consumption strMonth10]
-						,[Open Purchases strMonth10]
-						,[Short/Excess Inventory strMonth10]
+						,[Existing Purchases strMonth10]
+						,[Planned Purchases strMonth10]
 						,[Ending Inventory strMonth10]
-						,[Months of Supply Target strMonth10]
+						,[Weeks of Supply strMonth10]
 						,[Opening Inventory strMonth11]
 						,[Forecasted Consumption strMonth11]
-						,[Open Purchases strMonth11]
-						,[Short/Excess Inventory strMonth11]
+						,[Existing Purchases strMonth11]
+						,[Planned Purchases strMonth11]
 						,[Ending Inventory strMonth11]
-						,[Months of Supply Target strMonth11]
+						,[Weeks of Supply strMonth11]
 						,[Opening Inventory strMonth12]
 						,[Forecasted Consumption strMonth12]
-						,[Open Purchases strMonth12]
-						,[Short/Excess Inventory strMonth12]
+						,[Existing Purchases strMonth12]
+						,[Planned Purchases strMonth12]
 						,[Ending Inventory strMonth12]
-						,[Months of Supply Target strMonth12]
+						,[Weeks of Supply strMonth12]
 						,[Opening Inventory strMonth13]
 						,[Forecasted Consumption strMonth13]
-						,[Open Purchases strMonth13]
-						,[Short/Excess Inventory strMonth13]
+						,[Existing Purchases strMonth13]
+						,[Planned Purchases strMonth13]
 						,[Ending Inventory strMonth13]
-						,[Months of Supply Target strMonth13]
+						,[Weeks of Supply strMonth13]
 						,[Opening Inventory strMonth14]
 						,[Forecasted Consumption strMonth14]
-						,[Open Purchases strMonth14]
-						,[Short/Excess Inventory strMonth14]
+						,[Existing Purchases strMonth14]
+						,[Planned Purchases strMonth14]
 						,[Ending Inventory strMonth14]
-						,[Months of Supply Target strMonth14]
+						,[Weeks of Supply strMonth14]
 						,[Opening Inventory strMonth15]
 						,[Forecasted Consumption strMonth15]
-						,[Open Purchases strMonth15]
-						,[Short/Excess Inventory strMonth15]
+						,[Existing Purchases strMonth15]
+						,[Planned Purchases strMonth15]
 						,[Ending Inventory strMonth15]
-						,[Months of Supply Target strMonth15]
+						,[Weeks of Supply strMonth15]
 						,[Opening Inventory strMonth16]
 						,[Forecasted Consumption strMonth16]
-						,[Open Purchases strMonth16]
-						,[Short/Excess Inventory strMonth16]
+						,[Existing Purchases strMonth16]
+						,[Planned Purchases strMonth16]
 						,[Ending Inventory strMonth16]
-						,[Months of Supply Target strMonth16]
+						,[Weeks of Supply strMonth16]
 						,[Opening Inventory strMonth17]
 						,[Forecasted Consumption strMonth17]
-						,[Open Purchases strMonth17]
-						,[Short/Excess Inventory strMonth17]
+						,[Existing Purchases strMonth17]
+						,[Planned Purchases strMonth17]
 						,[Ending Inventory strMonth17]
-						,[Months of Supply Target strMonth17]
+						,[Weeks of Supply strMonth17]
 						,[Opening Inventory strMonth18]
 						,[Forecasted Consumption strMonth18]
-						,[Open Purchases strMonth18]
-						,[Short/Excess Inventory strMonth18]
+						,[Existing Purchases strMonth18]
+						,[Planned Purchases strMonth18]
 						,[Ending Inventory strMonth18]
-						,[Months of Supply Target strMonth18]
+						,[Weeks of Supply strMonth18]
 						,[Opening Inventory strMonth19]
 						,[Forecasted Consumption strMonth19]
-						,[Open Purchases strMonth19]
-						,[Short/Excess Inventory strMonth19]
+						,[Existing Purchases strMonth19]
+						,[Planned Purchases strMonth19]
 						,[Ending Inventory strMonth19]
-						,[Months of Supply Target strMonth19]
+						,[Weeks of Supply strMonth19]
 						,[Opening Inventory strMonth20]
 						,[Forecasted Consumption strMonth20]
-						,[Open Purchases strMonth20]
-						,[Short/Excess Inventory strMonth20]
+						,[Existing Purchases strMonth20]
+						,[Planned Purchases strMonth20]
 						,[Ending Inventory strMonth20]
-						,[Months of Supply Target strMonth20]
+						,[Weeks of Supply strMonth20]
 						,[Opening Inventory strMonth21]
 						,[Forecasted Consumption strMonth21]
-						,[Open Purchases strMonth21]
-						,[Short/Excess Inventory strMonth21]
+						,[Existing Purchases strMonth21]
+						,[Planned Purchases strMonth21]
 						,[Ending Inventory strMonth21]
-						,[Months of Supply Target strMonth21]
+						,[Weeks of Supply strMonth21]
 						,[Opening Inventory strMonth22]
 						,[Forecasted Consumption strMonth22]
-						,[Open Purchases strMonth22]
-						,[Short/Excess Inventory strMonth22]
+						,[Existing Purchases strMonth22]
+						,[Planned Purchases strMonth22]
 						,[Ending Inventory strMonth22]
-						,[Months of Supply Target strMonth22]
+						,[Weeks of Supply strMonth22]
 						,[Opening Inventory strMonth23]
 						,[Forecasted Consumption strMonth23]
-						,[Open Purchases strMonth23]
-						,[Short/Excess Inventory strMonth23]
+						,[Existing Purchases strMonth23]
+						,[Planned Purchases strMonth23]
 						,[Ending Inventory strMonth23]
-						,[Months of Supply Target strMonth23]
+						,[Weeks of Supply strMonth23]
 						,[Opening Inventory strMonth24]
 						,[Forecasted Consumption strMonth24]
-						,[Open Purchases strMonth24]
-						,[Short/Excess Inventory strMonth24]
+						,[Existing Purchases strMonth24]
+						,[Planned Purchases strMonth24]
 						,[Ending Inventory strMonth24]
-						,[Months of Supply Target strMonth24]
-						)) AS PivotTable;
+						,[Weeks of Supply strMonth24]
+						)) AS PivotTable
+						ORDER BY strBook
+			,strSubBook
+			,strProductType
+			,strItemNo
+			,strItemDescription
 		END
 	END
 END
