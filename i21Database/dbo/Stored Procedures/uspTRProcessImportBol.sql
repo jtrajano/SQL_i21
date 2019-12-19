@@ -261,7 +261,7 @@ BEGIN
 				OPEN @CursorDistributionDetailTran
 				FETCH NEXT FROM @CursorDistributionDetailTran INTO @intDDPullProductId, @intDDDropProductId, @dblDDDropGross, @dblDDDropNet, @strDDBillOfLading, @strDDGrossNet
 				WHILE @@FETCH_STATUS = 0
-				BEGIN
+				BEGIN	
 					IF(@ysnMain = 1)
 					BEGIN
 						INSERT INTO tblTRLoadDistributionDetail(intLoadDistributionHeaderId, 
@@ -297,9 +297,10 @@ BEGIN
 
 						SET @ysnMain = 0
 					END
-						
+					
 					DECLARE @dblPercentage NUMERIC(18, 6) = NULL,
 						@intRecipeItemId INT = NULL
+						
 					SELECT @intRecipeItemId = RI.intRecipeItemId, @dblPercentage = RI.dblQuantity FROM tblMFRecipe R 
 					INNER JOIN tblMFRecipeItem RI ON RI.intRecipeId = R.intRecipeId
 					WHERE R.intItemId = @intDDDropProductId 
@@ -338,13 +339,35 @@ BEGIN
 							1)
 					END
 
-					UPDATE tblTRLoadDistributionDetail SET dblUnits = @dblSum WHERE intLoadDistributionDetailId = @intLoadDistributionDetailId
+					IF(@intRecipeItemId IS NULL)
+					BEGIN
+						DECLARE @strDistributionLocationName NVARCHAR(500) = NULL,
+							@strDistributionItemName NVARCHAR(500) = NULL
+						
+						SELECT @strDistributionLocationName = strLocationName from tblSMCompanyLocation where intCompanyLocationId = @intCustomerCompanyLocationId
+						SELECT @strDistributionItemName = strItemNo FROM tblICItem WHERE intItemId = @intDDDropProductId
+
+						DECLARE @strMessageNoBlend NVARCHAR(100) = 'There is no Recipe for Distribution Bulk Location ' + @strDistributionLocationName + ' for Item ' + @strDistributionItemName
+
+						UPDATE tblTRImportLoadDetail SET strMessage = CASE WHEN @intRecipeItemId IS NULL THEN 
+						(CASE WHEN strMessage like '%There is no Recipe for Distribution Bulk Location%' THEN strMessage ELSE dbo.fnTRMessageConcat(strMessage, @strMessageNoBlend)  END) ELSE 
+							strMessage
+						END
+						WHERE intImportLoadId = @intImportLoadId 
+						AND intLoadDistributionHeaderId = @intLoadDistributionHeaderId
+						AND intDropProductId = @intDDDropProductId
+						AND ysnValid = 1
+					END
+
+					UPDATE tblTRLoadDistributionDetail SET dblUnits = @dblSum 	
+					WHERE intLoadDistributionDetailId = @intLoadDistributionDetailId
 					
 					FETCH NEXT FROM @CursorDistributionDetailTran INTO @intDDPullProductId, @intDDDropProductId, @dblDDDropGross, @dblDDDropNet, @strDDBillOfLading, @strDDGrossNet
 				END
 				CLOSE @CursorDistributionDetailTran
 				DEALLOCATE @CursorDistributionDetailTran
 				-- DISTRIBUTION DETAIL - BLENDING - END
+
 
 				-- DISTRIBUTION DETAIL - NON BLENDING - START
 				DECLARE @CursorDistributionDetailNonBlendTran AS CURSOR
