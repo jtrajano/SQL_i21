@@ -116,11 +116,11 @@ BEGIN
 				,[intSubLocationId] 
 				,[intStorageLocationId] 
 				,[ysnIsStorage] 
-				,[strActualCostId] 
 				,[intSourceTransactionId] 
 				,[intSourceTransactionDetailId] 
 				,[strSourceTransactionId]
 				,[intOtherChargeItemId] 
+				,[strActualCostId]
 		)
 		SELECT
 				[intItemId]						= ReceiptItem.intItemId
@@ -142,11 +142,11 @@ BEGIN
 				,[intSubLocationId]				= ReceiptItem.intSubLocationId
 				,[intStorageLocationId]			= ReceiptItem.intStorageLocationId
 				,[ysnIsStorage]					= 0
-				,[strActualCostId]				= Receipt.strActualCostId
 				,[intSourceTransactionId]		= Receipt.intInventoryReceiptId
 				,[intSourceTransactionDetailId] = ReceiptItem.intInventoryReceiptItemId
 				,[strSourceTransactionId]		= Receipt.strReceiptNumber
 				,[intOtherChargeItemId]			= ReceiptCharge.intChargeId 
+				,[strActualCostId]				= ReceiptItem.strActualCostId
 		FROM	tblICInventoryReceiptCharge ReceiptCharge INNER JOIN @ApprovedChargesToAdjust approvedCharges
 					ON ReceiptCharge.intInventoryReceiptChargeId = approvedCharges.intInventoryReceiptChargeId						
 				INNER JOIN tblICInventoryReceipt Receipt 
@@ -209,11 +209,11 @@ BEGIN
 				,[intSubLocationId]				= ReceiptItem.intSubLocationId
 				,[intStorageLocationId]			= ReceiptItem.intStorageLocationId
 				,[ysnIsStorage]					= 0
-				,[strActualCostId]				= Receipt.strActualCostId
 				,[intSourceTransactionId]		= Receipt.intInventoryReceiptId
 				,[intSourceTransactionDetailId] = ReceiptItem.intInventoryReceiptItemId
 				,[strSourceTransactionId]		= Receipt.strReceiptNumber
 				,[intOtherChargeItemId]			= ReceiptCharge.intChargeId
+				,[strActualCostId]				= ReceiptItem.strActualCostId
 		FROM	tblICInventoryReceiptCharge ReceiptCharge INNER JOIN @ApprovedChargesToAdjust approvedCharges
 					ON ReceiptCharge.intInventoryReceiptChargeId = approvedCharges.intInventoryReceiptChargeId		
 				INNER JOIN tblICInventoryReceipt Receipt 
@@ -276,11 +276,11 @@ BEGIN
 				,[intSubLocationId]				= ReceiptItem.intSubLocationId
 				,[intStorageLocationId]			= ReceiptItem.intStorageLocationId
 				,[ysnIsStorage]					= 0
-				,[strActualCostId]				= Receipt.strActualCostId
 				,[intSourceTransactionId]		= Receipt.intInventoryReceiptId
 				,[intSourceTransactionDetailId] = ReceiptItem.intInventoryReceiptItemId
 				,[strSourceTransactionId]		= Receipt.strReceiptNumber
 				,[intOtherChargeItemId]			= ReceiptCharge.intChargeId
+				,[strActualCostId]				= ReceiptItem.strActualCostId
 		FROM	tblICInventoryReceiptCharge ReceiptCharge INNER JOIN @ApprovedChargesToAdjust approvedCharges
 					ON ReceiptCharge.intInventoryReceiptChargeId = approvedCharges.intInventoryReceiptChargeId						
 				INNER JOIN tblICInventoryReceipt Receipt 
@@ -335,11 +335,11 @@ BEGIN
 				,[intSubLocationId] 
 				,[intStorageLocationId] 
 				,[ysnIsStorage] 
-				,[strActualCostId] 
 				,[intSourceTransactionId] 
 				,[intSourceTransactionDetailId] 
 				,[strSourceTransactionId] 
 				,[intOtherChargeItemId]
+				,[strActualCostId]
 		)
 		SELECT
 				[intItemId]						= ReceiptItem.intItemId
@@ -361,11 +361,11 @@ BEGIN
 				,[intSubLocationId]				= ReceiptItem.intSubLocationId
 				,[intStorageLocationId]			= ReceiptItem.intStorageLocationId
 				,[ysnIsStorage]					= 0
-				,[strActualCostId]				= Receipt.strActualCostId
 				,[intSourceTransactionId]		= Receipt.intInventoryReceiptId
 				,[intSourceTransactionDetailId] = ReceiptItem.intInventoryReceiptItemId
 				,[strSourceTransactionId]		= Receipt.strReceiptNumber
 				,[intOtherChargeItemId]			= ReceiptCharge.intChargeId
+				,[strActualCostId]				= ReceiptItem.strActualCostId
 		FROM	tblICInventoryReceiptCharge ReceiptCharge INNER JOIN @ApprovedChargesToAdjust approvedCharges
 					ON ReceiptCharge.intInventoryReceiptChargeId = approvedCharges.intInventoryReceiptChargeId						
 				INNER JOIN tblICInventoryReceipt Receipt 
@@ -431,11 +431,11 @@ BEGIN
 				,[intSubLocationId]				= ReceiptItem.intSubLocationId
 				,[intStorageLocationId]			= ReceiptItem.intStorageLocationId
 				,[ysnIsStorage]					= 0
-				,[strActualCostId]				= Receipt.strActualCostId
 				,[intSourceTransactionId]		= Receipt.intInventoryReceiptId
 				,[intSourceTransactionDetailId] = ReceiptItem.intInventoryReceiptItemId
 				,[strSourceTransactionId]		= Receipt.strReceiptNumber
 				,[intOtherChargeItemId]			= ReceiptCharge.intChargeId
+				,[strActualCostId]				= ReceiptItem.strActualCostId
 		FROM	tblICInventoryReceiptCharge ReceiptCharge INNER JOIN @ApprovedChargesToAdjust approvedCharges
 					ON ReceiptCharge.intInventoryReceiptChargeId = approvedCharges.intInventoryReceiptChargeId		
 				INNER JOIN tblICInventoryReceipt Receipt 
@@ -501,11 +501,11 @@ BEGIN
 				,[intSubLocationId]				= ReceiptItem.intSubLocationId
 				,[intStorageLocationId]			= ReceiptItem.intStorageLocationId
 				,[ysnIsStorage]					= 0
-				,[strActualCostId]				= Receipt.strActualCostId
 				,[intSourceTransactionId]		= Receipt.intInventoryReceiptId
 				,[intSourceTransactionDetailId] = ReceiptItem.intInventoryReceiptItemId
 				,[strSourceTransactionId]		= Receipt.strReceiptNumber
 				,[intOtherChargeItemId]			= ReceiptCharge.intChargeId
+				,[strActualCostId]				= ReceiptItem.strActualCostId
 		FROM	tblICInventoryReceiptCharge ReceiptCharge INNER JOIN @ApprovedChargesToAdjust approvedCharges
 					ON ReceiptCharge.intInventoryReceiptChargeId = approvedCharges.intInventoryReceiptChargeId						
 				INNER JOIN tblICInventoryReceipt Receipt 
