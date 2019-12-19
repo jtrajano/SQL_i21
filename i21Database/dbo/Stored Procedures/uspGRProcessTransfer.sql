@@ -888,6 +888,7 @@ BEGIN
 					FROM tblCTContractDetail
 					WHERE intContractHeaderId = @intNewContractHeaderId
 				) CD
+				WHERE intTransferStorageSplitId = @intTransferStorageSplitId
 			END
 
 			FETCH c INTO @intTransferStorageSplitId, @intEntityId, @intToEntityId

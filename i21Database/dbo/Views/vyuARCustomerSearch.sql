@@ -2,7 +2,7 @@
 AS
 SELECT intEntityId				= ENTITY.intEntityId
      , intEntityCustomerId		= ENTITY.intEntityId   	 
-	 , intSalespersonId			= CUSTOMER.intSalespersonId
+	 , intSalespersonId			= SALESPERSON.intEntityId
 	 , intCurrencyId			= CUSTOMER.intCurrencyId
 	 , intTermsId				= CUSTOMER.intTermsId
 	 , intShipToId				= CUSTOMER.intShipToId
@@ -14,8 +14,8 @@ SELECT intEntityId				= ENTITY.intEntityId
 	 , strStockStatus			= CUSTOMER.strStockStatus	 
 	 , strStatementFormat		= CUSTOMER.strStatementFormat
 	 , strAccountNumber			= CUSTOMER.strAccountNumber
-	 , strSalespersonId			= CUSTOMER.strSalespersonId
-	 , strSalesPersonName		= CUSTOMER.strSalesPersonName
+	 , strSalespersonId			= SALESPERSON.strSalespersonId
+	 , strSalesPersonName		= SALESPERSON.strSalesPersonName
 	 , strTerm					= CUSTOMER.strTerm
 	 , dtmMembershipDate		= CUSTOMER.dtmMembershipDate
 	 , dtmBirthDate				= CUSTOMER.dtmBirthDate
@@ -99,8 +99,6 @@ INNER JOIN (
 		 , ysnPORequired
 		 , C.ysnActive
 		 , ysnTaxExempt
-		 , strSalespersonId		= SALESPERSON.strSalespersonId
-		 , strSalesPersonName	= SALESPERSON.strSalesPersonName
 		 , strTerm				= TERM.strTerm
 		 , ysnHasBudgetSetup	= CAST(CASE WHEN (BUDGET.ysnHasBudgetSetup) = 1 THEN 1 ELSE 0 END AS BIT)
 		 , intServiceChargeId	= C.intServiceChargeId
@@ -110,19 +108,7 @@ INNER JOIN (
 		 , intCreditStopDays
 		 , strCreditCode
 		 , dtmCreditLimitReached		 
-	FROM dbo.tblARCustomer C WITH (NOLOCK)
-	LEFT JOIN (
-		SELECT S.intEntityId
-			 , strSalespersonId	    = CASE WHEN ISNULL(S.strSalespersonId, '') = '' THEN ST.strEntityNo ELSE S.strSalespersonId END
-			 , strSalesPersonName	= ST.strName
-		FROM dbo.tblARSalesperson S WITH (NOLOCK)
-		INNER JOIN (
-			SELECT intEntityId
-				 , strName
-				 , strEntityNo
-			FROM dbo.tblEMEntity WITH (NOLOCK)
-		) ST on S.intEntityId = ST.intEntityId
-	) SALESPERSON ON C.intSalespersonId = SALESPERSON.intEntityId
+	FROM dbo.tblARCustomer C WITH (NOLOCK)	
 	LEFT JOIN (
 		SELECT intTermID
 			 , strTerm
@@ -167,6 +153,7 @@ LEFT JOIN (
 		 , L.intFreightTermId
 		 , L.intTaxGroupId 
 		 , L.intCountyTaxCodeId
+		 , L.intSalespersonId
 		 , L.strAddress
 		 , L.strCity
 		 , L.strState
@@ -206,10 +193,11 @@ LEFT JOIN (
 			 , strWarehouseName	= strLocationName
 		FROM dbo.tblSMCompanyLocation WITH (NOLOCK)
 	) WH ON L.intWarehouseId = WH.intCompanyLocationId
-	WHERE ysnDefaultLocation = 1
+	WHERE L.ysnDefaultLocation = 1
 ) CUSTOMERLOCATION ON CUSTOMER.intEntityId = CUSTOMERLOCATION.intEntityId
 LEFT JOIN (
 	SELECT intEntityLocationId
+		 , intSalespersonId
 		 , strLocationName
 		 , strAddress
 		 , strCity
@@ -236,4 +224,16 @@ LEFT JOIN (
 		 , strPhone
 	FROM dbo.tblEMEntityLocation WITH (NOLOCK)
 ) BILLTOLOCATION ON CUSTOMER.intBillToId = BILLTOLOCATION.intEntityLocationId
+LEFT JOIN (
+	SELECT S.intEntityId
+		 , strSalespersonId	    = CASE WHEN ISNULL(S.strSalespersonId, '') = '' THEN ST.strEntityNo ELSE S.strSalespersonId END
+		 , strSalesPersonName	= ST.strName
+	FROM dbo.tblARSalesperson S WITH (NOLOCK)
+	INNER JOIN (
+		SELECT intEntityId
+			 , strName
+			 , strEntityNo
+		FROM dbo.tblEMEntity WITH (NOLOCK)
+	) ST on S.intEntityId = ST.intEntityId
+) SALESPERSON ON SALESPERSON.intEntityId = ISNULL(SHIPTOLOCATION.intSalespersonId, CUSTOMER.intSalespersonId)
 CROSS APPLY (SELECT(SELECT '|^|' + CONVERT(VARCHAR,intLineOfBusinessId) FROM tblEMEntityLineOfBusiness WHERE intEntityId = CUSTOMER.intEntityId FOR XML PATH('')) as intEntityLineOfBusinessIds) as LOB

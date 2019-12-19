@@ -39,16 +39,17 @@ SELECT strTransactionType = 'Load Schedule' COLLATE Latin1_General_CI_AS
 	,intFreightTermId = CD.intFreightTermId
 	,intItemId = LD.intItemId
 	,strItemDescription = ICI.[strDescription]
-	,intItemUOMId = ISNULL(AD.intSeqPriceUOMId, LD.intItemUOMId)
+	,intItemUOMId = LD.intWeightItemUOMId
 	,intOrderUOMId = CD.intItemUOMId
-	,intShipmentItemUOMId = ISNULL(AD.intSeqPriceUOMId, LD.intItemUOMId)
+	,intShipmentItemUOMId = LD.intWeightItemUOMId
 	,intWeightUOMId = LD.intWeightItemUOMId
-	,dblWeight = dbo.fnCalculateQtyBetweenUOM(LD.intWeightItemUOMId, ISNULL(CD.intItemUOMId, LD.intItemUOMId), 1.000000)
-	,dblQtyShipped = CASE WHEN L.intSourceType = 7 THEN LD.dblQuantity ELSE dbo.fnCalculateQtyBetweenUOM(ISNULL(CD.intItemUOMId, LD.intWeightItemUOMId), ISNULL(CD.intItemUOMId, LD.intItemUOMId), LD.dblQuantity) END
+	,dblWeight = dbo.fnCalculateQtyBetweenUOM(ISNULL(CD.intItemUOMId, LD.intItemUOMId), LD.intWeightItemUOMId, 1.000000)
+	,dblQtyShipped = ISNULL(LD.dblQuantity, 0)
 	,dblQtyOrdered = ISNULL(LD.dblQuantity, 0)
-	,dblShipmentQuantity = dbo.fnCalculateQtyBetweenUOM(ISNULL(LD.intItemUOMId, CD.intItemUOMId), ISNULL(AD.intSeqPriceUOMId, LD.intItemUOMId), ISNULL(LD.dblQuantity, CD.dblQuantity))
-	,dblShipmentQtyShippedTotal = dbo.fnCalculateQtyBetweenUOM(ISNULL(LD.intItemUOMId, CD.intItemUOMId), ISNULL(AD.intSeqPriceUOMId, LD.intItemUOMId), ISNULL(LD.dblQuantity, CD.dblQuantity))
-	,dblQtyRemaining = dbo.fnCalculateQtyBetweenUOM(ISNULL(LD.intItemUOMId, CD.intItemUOMId), ISNULL(AD.intSeqPriceUOMId, LD.intItemUOMId), ISNULL(LD.dblQuantity, CD.dblQuantity))
+	,dblShipmentQuantity = dbo.fnCalculateQtyBetweenUOM(ISNULL(LD.intItemUOMId, CD.intItemUOMId), ISNULL(LD.intWeightItemUOMId, CD.intNetWeightUOMId), ISNULL(LD.dblQuantity, CD.dblQuantity))
+	,dblShipmentQtyShippedTotal = dbo.fnCalculateQtyBetweenUOM(ISNULL(LD.intItemUOMId, CD.intItemUOMId), ISNULL(LD.intWeightItemUOMId, CD.intNetWeightUOMId), ISNULL(LD.dblQuantity, CD.dblQuantity))
+	,dblQtyRemaining = dbo.fnCalculateQtyBetweenUOM(ISNULL(LD.intItemUOMId, CD.intItemUOMId), ISNULL(LD.intWeightItemUOMId, CD.intNetWeightUOMId), ISNULL(LD.dblQuantity, CD.dblQuantity))
+					- ISNULL(LD.dblNet, 0)
 	,dblDiscount = 0.0000000
 	,dblPrice = CASE 
 				WHEN L.intSourceType = 7
@@ -57,13 +58,14 @@ SELECT strTransactionType = 'Load Schedule' COLLATE Latin1_General_CI_AS
 				END
     ,dblShipmentUnitPrice = CASE WHEN L.intSourceType = 7 THEN  (
                          LD.dblUnitPrice
-                    ) / dbo.fnCalculateQtyBetweenUOM(ISNULL(LD.intPriceUOMId, LD.intItemUOMId), LD.intWeightItemUOMId, 1)
+                    ) * dbo.fnCalculateQtyBetweenUOM(LD.intWeightItemUOMId, ISNULL(LD.intPriceUOMId, LD.intItemUOMId), 1)
 					 ELSE (
                     (
                         dbo.fnCTGetSequencePrice(CD.intContractDetailId,NULL)
-                    ) / dbo.fnCalculateQtyBetweenUOM(ISNULL(AD.intSeqPriceUOMId, LD.intItemUOMId), LD.intWeightItemUOMId, 1)
+                    ) * dbo.fnCalculateQtyBetweenUOM(LD.intWeightItemUOMId, ISNULL(AD.intSeqPriceUOMId, LD.intPriceUOMId), 1)
             ) 
 			END
+	,intPriceUOMId = ISNULL(AD.intSeqPriceUOMId, LD.intPriceUOMId)
 	,strPricing = CAST('' AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 	,strVFDDocumentNumber = CAST('' AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 	,dblTotalTax = 0.000000
@@ -71,14 +73,14 @@ SELECT strTransactionType = 'Load Schedule' COLLATE Latin1_General_CI_AS
 	            (
                     (
                         LD.dblUnitPrice
-                    ) / dbo.fnCalculateQtyBetweenUOM(ISNULL(LD.intPriceUOMId, LD.intItemUOMId), LD.intWeightItemUOMId, 1)
-	            ) * dbo.fnCalculateQtyBetweenUOM(LD.intWeightItemUOMId, ISNULL(LD.intWeightItemUOMId, LD.intItemUOMId), LD.dblNet)
+                    ) * dbo.fnCalculateQtyBetweenUOM(LD.intWeightItemUOMId, ISNULL(LD.intPriceUOMId, LD.intItemUOMId), 1)
+	            ) * dbo.fnCalculateQtyBetweenUOM(ISNULL(LD.intItemUOMId, CD.intItemUOMId), ISNULL(LD.intWeightItemUOMId, CD.intNetWeightUOMId), ISNULL(LD.dblNet, CD.dblNetWeight))
 			 ELSE
 				(
 					(
-						dbo.fnCTGetSequencePrice(CD.intContractDetailId,NULL)
-					) / dbo.fnCalculateQtyBetweenUOM(ISNULL(AD.intSeqPriceUOMId, LD.intItemUOMId), LD.intWeightItemUOMId, 1)
-				) * dbo.fnCalculateQtyBetweenUOM(LD.intWeightItemUOMId, ISNULL(LD.intWeightItemUOMId, LD.intItemUOMId), LD.dblNet)
+                        dbo.fnCTGetSequencePrice(CD.intContractDetailId,NULL)
+                    ) * dbo.fnCalculateQtyBetweenUOM(LD.intWeightItemUOMId, ISNULL(AD.intSeqPriceUOMId, LD.intPriceUOMId), 1)
+				) * dbo.fnCalculateQtyBetweenUOM(ISNULL(LD.intItemUOMId, CD.intItemUOMId), ISNULL(LD.intWeightItemUOMId, CD.intNetWeightUOMId), ISNULL(LD.dblNet, CD.dblNetWeight))
 			END
 	,intStorageLocationId = NULL
 	,intTermId = NULL

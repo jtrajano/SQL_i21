@@ -127,7 +127,9 @@ BEGIN TRANSACTION
 	WHERE ISNULL(B.strControlName, '') = '' 
 
 	-- Delete control(s) staging that doesn't have conflicts
-	DELETE FROM tblSMControlStage WHERE ISNULL(strChange, '') = ''
+	UPDATE tblSMControlStage 
+	SET strChange = 'Updated'
+	WHERE ISNULL(strChange, '') = ''
 	
 	-- Delete screen(s) staging that doesn't have conflicts
 	DELETE FROM tblSMScreenStage

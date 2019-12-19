@@ -236,6 +236,7 @@ IF EXISTS (SELECT TOP 1 1 FROM @GLEntries)
 	BEGIN
 		EXEC dbo.uspGLBookEntries @GLEntries		= @GLEntries
 								, @ysnPost			= 1
+								, @SkipValidation	= 1
 	END
 
 --UPDATE CASH INVOICE RECORDS
@@ -677,7 +678,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM tblARNSFStagingTableDetail WHERE intNSFTransac
 	END
 ELSE
 	BEGIN
-		SELECT @strMessage = 'Bank Deposit: ' + vyu.strTransactionId + ' and Receive Payment: ' +  vyu.strRecordNumber + ' are reversed'
+		SELECT @strMessage = 'Bank Deposit: ' + vyu.strTransactionId + ' and Cash/Receive Payment: ' +  vyu.strRecordNumber + ' are reversed'
 		     , @intPaymentId = NSFDetail.intTransactionId
 		FROM vyuARPaymentBankTransaction vyu
 		INNER JOIN tblARNSFStagingTableDetail NSFDetail

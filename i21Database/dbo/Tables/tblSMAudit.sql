@@ -18,3 +18,7 @@ CREATE TABLE [dbo].[tblSMAudit] (
 	CONSTRAINT [FK_dbo.tblSMAudit_tblSMAuditLog] FOREIGN KEY ([intOldAuditLogId]) REFERENCES [tblSMAuditLog]([intAuditLogId]),
     CONSTRAINT [PK_dbo.tblSMAudit] PRIMARY KEY CLUSTERED ([intAuditId] ASC)
 );
+
+GO
+CREATE NONCLUSTERED INDEX [IX_tblSMAudit_1] ON [dbo].[tblSMAudit] ([intParentAuditId], [ysnHidden])
+GO

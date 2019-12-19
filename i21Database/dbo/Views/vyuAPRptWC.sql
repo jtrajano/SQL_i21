@@ -54,7 +54,7 @@ SELECT
 	LEFT JOIN tblSMCompanyLocationSubLocation LPlant ON ContractDetail.intSubLocationId = LPlant.intCompanyLocationSubLocationId
 	LEFT JOIN dbo.tblICInventoryReceiptItem ReceiptDetail ON ReceiptDetail.intInventoryReceiptItemId = WC2Details.intInventoryReceiptItemId
 	LEFT JOIN tblLGLoadContainer LCointainer ON LCointainer.intLoadContainerId = ReceiptDetail.intContainerId
-		LEFT JOIN tblLGLoad Loads ON Loads.intLoadId = LCointainer.intLoadId
+		LEFT JOIN tblLGLoad Loads ON Loads.intLoadId = ISNULL(LCointainer.intLoadId, WC2Details.intLoadId)
 	LEFT JOIN tblCMBankAccount BankAccount ON BankAccount.intBankAccountId = WC2.intBankInfoId
 	LEFT JOIN tblCMBank Bank ON BankAccount.intBankId = Bank.intBankId
 	WHERE WC2.intTransactionType = 11

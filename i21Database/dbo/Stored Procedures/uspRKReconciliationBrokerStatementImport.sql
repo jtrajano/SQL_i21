@@ -85,7 +85,7 @@ BEGIN TRY
 		, dblNoOfContract = SUM(dblNoOfContract)
 		, strFutureMonth = REPLACE(strFutureMonth, '-', ' ')
 		, dblPrice
-		, dtmFilledDate = REPLACE(dtmFilledDate, '-', '/')
+		, dtmFilledDate = REPLACE(strFilledDate, '-', '/')
 		, NULL
 		, 'No derivative entries for this filled date '+ CONVERT(VARCHAR(24), CONVERT(DATE,@dtmFilledDate), 113) + ' matched in the file.'
 	FROM tblRKReconciliationBrokerStatementImport
@@ -93,7 +93,7 @@ BEGIN TRY
 		AND strCommodityCode = @strCommodityCode
 		AND strName = @strName
 		AND strAccountNumber = CASE WHEN ISNULL(@strAccountNumber, '') = '' THEN strAccountNumber ELSE @strAccountNumber END
-		AND CONVERT(DATETIME, (CONVERT(NVARCHAR, REPLACE(dtmFilledDate, '-' , '/'), @ConvertYear)), @ConvertYear) <> CONVERT(DATETIME, (CONVERT(NVARCHAR, REPLACE(@dtmFilledDate, '-', '/'), @ConvertYear)), @ConvertYear)
+		AND CONVERT(DATETIME, (CONVERT(NVARCHAR, REPLACE(strFilledDate, '-' , '/'), @ConvertYear)), @ConvertYear) <> CONVERT(DATETIME, (CONVERT(NVARCHAR, REPLACE(@dtmFilledDate, '-', '/'), @ConvertYear)), @ConvertYear)
 	GROUP BY strName
 		, strAccountNumber
 		, strFutMarketName
@@ -101,7 +101,7 @@ BEGIN TRY
 		, strBuySell
 		, strFutureMonth
 		, dblPrice
-		, dtmFilledDate
+		, strFilledDate
 	ORDER BY strName
 		, strAccountNumber
 		, strFutMarketName
@@ -128,13 +128,13 @@ BEGIN TRY
 		, dblNoOfContract = SUM(dblNoOfContract)
 		, strFutureMonth = REPLACE(strFutureMonth, '-', ' ')
 		, dblPrice
-		, dtmFilledDate = REPLACE(dtmFilledDate, '-', '/')
+		, dtmFilledDate = REPLACE(strFilledDate, '-', '/')
 	FROM tblRKReconciliationBrokerStatementImport
 	WHERE strFutMarketName = @strFutMarketName
 		AND strCommodityCode = @strCommodityCode
 		AND strName = @strName
 		AND strAccountNumber = CASE WHEN ISNULL(@strAccountNumber, '') = '' THEN strAccountNumber ELSE @strAccountNumber END
-		AND CONVERT(DATETIME, (CONVERT(NVARCHAR, REPLACE(dtmFilledDate, '-' , '/'), @ConvertYear)), @ConvertYear) = CONVERT(DATETIME, (CONVERT(NVARCHAR, REPLACE(@dtmFilledDate, '-', '/'), @ConvertYear)), @ConvertYear)
+		AND CONVERT(DATETIME, (CONVERT(NVARCHAR, REPLACE(strFilledDate, '-' , '/'), @ConvertYear)), @ConvertYear) = CONVERT(DATETIME, (CONVERT(NVARCHAR, REPLACE(@dtmFilledDate, '-', '/'), @ConvertYear)), @ConvertYear)
 	GROUP BY strName
 		, strAccountNumber
 		, strFutMarketName
@@ -142,7 +142,7 @@ BEGIN TRY
 		, strBuySell
 		, strFutureMonth
 		, dblPrice
-		, dtmFilledDate
+		, strFilledDate
 	ORDER BY strName
 		, strAccountNumber
 		, strFutMarketName

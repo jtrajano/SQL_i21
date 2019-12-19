@@ -20,7 +20,7 @@ select @checkPayee = ISNULL(
                     1, 1, ''),'')
 
 
-SELECT TOP 1 @checkPayee  = strCheckPayeeName + ' '  +   @checkPayee + CHAR(13) +  ISNULL(dbo.fnConvertToFullAddress(A.strAddress, A.strCity, A.strState, A.strZipCode),'')
+SELECT TOP 1 @checkPayee  = strCheckPayeeName + ' '  +   @checkPayee + CHAR(13) +  CHAR(10)+ +  ISNULL(dbo.fnConvertToFullAddress(A.strAddress, A.strCity, A.strState, A.strZipCode),'')
 FROM tblEMEntityLocation A join
 tblAPPayment B ON A.intEntityLocationId = B.intPayToAddressId
 WHERE strPaymentRecordNum = @strPaymentRecordNum

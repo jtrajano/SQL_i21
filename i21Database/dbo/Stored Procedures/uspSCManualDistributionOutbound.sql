@@ -63,6 +63,7 @@ DECLARE @intTicketContractDetailId INT
 DECLARE @dblTicketScheduleQuantity AS NUMERIC(18,6)
 DECLARE @dblLoopAdjustedScheduleQuantity NUMERIC (38,20)  
 DECLARE @strTicketDistributionOption NVARCHAR(3)
+DECLARE @intTicketLoadDetailId INT  
 
 SELECT @ysnUpdateContractWeightGrade  = CASE WHEN intContractId IS NULL AND strDistributionOption = 'CNT' AND (intWeightId IS NULL AND intGradeId IS NULL ) THEN 1 ELSE 0 END FROM tblSCTicket WHERE intTicketId = @intTicketId
 IF (@ysnUpdateContractWeightGrade = 1)
@@ -91,6 +92,7 @@ SELECT @intTicketItemUOMId = intItemUOMIdTo
 	,@strTicketDistributionOption  = strDistributionOption
 	, @dblTicketScheduleQuantity = ISNULL(dblScheduleQty,0)
 	, @intTicketContractDetailId = intContractId
+	, @intTicketLoadDetailId = intLoadDetailId
 FROM vyuSCTicketScreenView where intTicketId = @intTicketId
 
 BEGIN TRY
@@ -139,6 +141,29 @@ OPEN intListCursor;
 							
 					
 							EXEC dbo.uspSCUpdateTicketLoadUsed @intTicketId, @intLoadDetailId, @dblLoopContractUnits, @intEntityId;   
+
+							IF(@intLoadDetailId = @intTicketLoadDetailId)
+							BEGIN
+								IF(@dblLoopContractUnits > @dblTicketScheduleQuantity )
+								BEGIN
+									SET @dblLoopAdjustedScheduleQuantity = @dblLoopContractUnits - @dblTicketScheduleQuantity
+								END
+								ELSE
+								BEGIN
+									SET @dblLoopAdjustedScheduleQuantity = (@dblTicketScheduleQuantity - @dblLoopContractUnits) * -1
+								END
+								
+
+								IF @dblLoopAdjustedScheduleQuantity <> 0
+								BEGIN
+									EXEC	uspCTUpdateScheduleQuantity 
+									@intContractDetailId	=	@intLoopContractId,
+									@dblQuantityToUpdate	=	@dblLoopAdjustedScheduleQuantity,
+									@intUserId				=	@intUserId,
+									@intExternalId			=	@intTicketId,
+									@strScreenName			=	'Auto - Scale'
+								END
+							END
 						END  
 						ELSE  
 						BEGIN  

@@ -311,11 +311,11 @@ BEGIN
 					IF(@dblPercentage IS NOT NULL)
 					BEGIN
 						DECLARE @strReceiptLink NVARCHAR(50) = NULL,
-							@dblPercentageValue NUMERIC(18,6) = NULL
+							@dblRawValue NUMERIC(18,6) = NULL
 						
-						SET @dblPercentageValue = CASE WHEN @strDDGrossNet = 'Gross' THEN @dblDDDropGross * @dblPercentage ELSE @dblDDDropNet * @dblPercentage END
+						SET @dblRawValue = CASE WHEN @strDDGrossNet = 'Gross' THEN @dblDDDropGross ELSE @dblDDDropNet END
 
-						SET @dblSum = @dblSum + @dblPercentageValue 
+						SET @dblSum = @dblSum + @dblRawValue 
 
 						SELECT DISTINCT @strReceiptLink = LR.strReceiptLink FROM tblTRImportLoadDetail LR 
 						WHERE LR.intPullProductId = @intDDPullProductId 
@@ -334,7 +334,7 @@ BEGIN
 							@strDDBillOfLading,
 							@strReceiptLink,
 							@intRecipeItemId,
-							@dblPercentageValue,
+							@dblRawValue,
 							1)
 					END
 

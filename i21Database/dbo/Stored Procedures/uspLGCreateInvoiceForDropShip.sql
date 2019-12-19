@@ -282,6 +282,7 @@ BEGIN
 		,[dblItemWeight]
 		,[intItemWeightUOMId]
 		,[dblPrice]
+		,[intPriceUOMId]
 		,[dblUnitPrice]
 		,[strPricing]
 		,[ysnRefreshPrice]
@@ -383,6 +384,7 @@ BEGIN
 		,[dblItemWeight]						= ARSI.[dblWeight]  
 		,[intItemWeightUOMId]					= ARSI.[intWeightUOMId] 
 		,[dblPrice]								= ARSI.[dblPrice] 
+		,[intPriceUOMId]						= ARSI.[intPriceUOMId]
 		,[dblUnitPrice]							= ARSI.[dblShipmentUnitPrice]
 		,[strPricing]							= 'Inventory Shipment Item Price'
 		,[ysnRefreshPrice]						= 0

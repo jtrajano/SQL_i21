@@ -125,7 +125,7 @@ BEGIN TRY
 
 			FROM	vyuCTNotificationHeader CH
 	LEFT	JOIN	vyuCTEventRecipientFilter	RF	ON	RF.intEntityId			=	'+LTRIM(@intUserId)+' AND RF.strNotificationType = ''Unsubmitted'' 
-			WHERE	CH.strContractNumber NOT IN(SELECT strTransactionNumber FROM tblSMApproval WHERE strStatus=''Submitted'')  AND 4 <> intAllStatusId & 4
+			WHERE	CH.intContractHeaderId NOT IN(SELECT B.intRecordId FROM tblSMApproval A INNER JOIN tblSMTransaction B ON A.intTransactionId = B.intTransactionId WHERE strStatus=''Submitted'')  AND 4 <> intAllStatusId & 4
 			AND		intContractDetailId IS NOT NULL'
 	END
 	ELSE IF @strNotificationType = 'Approved Not Sent'
