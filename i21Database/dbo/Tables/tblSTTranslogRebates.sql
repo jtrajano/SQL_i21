@@ -130,7 +130,7 @@
     [strTrlFuelDepst]                        DECIMAL (18, 3) NULL,
     [strTrlFuelProd]                         NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL,
     [strTrlFuelProdSysid]                    INT             NULL,
-    [strTrlFuelProdNAXMLFuelGradeID]         INT             NULL,
+    [strTrlFuelProdNAXMLFuelGradeID]         NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL,
     [strTrlFuelSvcMode]                      NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL,
     [strTrlFuelSvcModeSysid]                 INT             NULL,
     [strTrlFuelMOP]                          NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL,
