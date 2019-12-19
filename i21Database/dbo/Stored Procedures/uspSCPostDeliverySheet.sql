@@ -48,6 +48,20 @@ DECLARE @CustomerStorageStagingTable	AS CustomerStorageStagingTable
 		,@dblTempAdjustByQuantity		NUMERIC (38,20)
 		,@shipFromEntityId				INT
 		,@shipFrom						INT;
+DECLARE @ysnLoopIsDP					BIT;
+DECLARE @intLoopDPContractDetailId		INT
+DECLARE @dblLoopPDContractAdjustment	NUMERIC (38,20)
+DECLARE @intDSLocationId				INT
+DECLARE @intDSItemId					INT
+DECLARE @dblDSShrink					NUMERIC (18,6)
+
+
+DECLARE @_intLoopEntityId				INT
+DECLARE @_dblLoopSplitPercentage		NUMERIC(18,6)
+DECLARE @_intLoopCurrentEntityId		INT
+DECLARE	@dtmDeliverySheetDate			DATETIME
+DECLARE @_dblCompanyOwnedPercentage		NUMERIC(18,6)
+DECLARE @intTicketScaleSetupId			INT
 		
 DECLARE @splitTable TABLE(
 	[intEntityId] INT NOT NULL, 
@@ -79,6 +93,15 @@ DECLARE @processTicket TABLE(
 
 BEGIN TRY
 	SET @dblTempSplitQty = @dblNetUnits;
+
+
+	SELECT TOP 1 
+		@intDSLocationId = intCompanyLocationId
+		,@intDSItemId	= intItemId
+		,@dblDSShrink	= dblShrink
+		,@dtmDeliverySheetDate = dtmDeliverySheetDate
+	FROM tblSCDeliverySheet
+	WHERE intDeliverySheetId = @intDeliverySheetId
 
 	-- SELECT @currencyDecimal = intCurrencyDecimal from tblSMCompanyPreference
 	SET @currencyDecimal = 20
@@ -295,9 +318,9 @@ BEGIN TRY
 			SET @dblTempAdjustByQuantity = CASE WHEN @dblAdjustByQuantity  < 0 THEN @dblAdjustByQuantity * -1 ELSE @dblAdjustByQuantity END;
 			DELETE FROM @storageHistoryData
 
-			DECLARE splitCursor CURSOR FOR SELECT intEntityId, dblPercent FROM @splitPerEntityBasedOnCustomerCompany
+			DECLARE splitCursor CURSOR FOR SELECT intEntityId, dblPercent, ysnCompanyOwned FROM @splitPerEntityBasedOnCustomerCompany
 			OPEN splitCursor;  
-			FETCH NEXT FROM splitCursor INTO @intEntityId, @dblSplitPercent;  
+			FETCH NEXT FROM splitCursor INTO @intEntityId, @dblSplitPercent, @ysnLoopIsDP;  
 			WHILE @@FETCH_STATUS = 0  
 			BEGIN
 				SET @dblFinalSplitQty = ROUND((@dblTempAdjustByQuantity * @dblSplitPercent) / 100, @currencyDecimal);
@@ -340,9 +363,12 @@ BEGIN TRY
 						ON GR.intStorageTypeId = ST.intStorageScheduleTypeId
 							AND CASE WHEN ISNULL(ST.strOwnedPhysicalStock, 'Company') = 'Company' THEN 1 ELSE 2 END = @intOwnershipType
 					WHERE GR.intDeliverySheetId = @intDeliverySheetId AND intEntityId = @intEntityId
-						
+					
+					
 
-				FETCH NEXT FROM splitCursor INTO @intEntityId, @dblSplitPercent;
+					SET @ysnLoopIsDP = NULL
+					SET @intLoopDPContractDetailId = NULL 
+				FETCH NEXT FROM splitCursor INTO @intEntityId, @dblSplitPercent,@ysnLoopIsDP;
 			END
 			CLOSE splitCursor;  
 			DEALLOCATE splitCursor;
@@ -363,6 +389,91 @@ BEGIN TRY
 	END
 	CLOSE ticketCursor;  
 	DEALLOCATE ticketCursor;
+
+
+	--- Check for DP storage and adjust the DP contract 
+	BEGIN
+
+
+		SELECT TOP 1 
+			@intItemUOMId = intItemUOMId
+		FROM @processTicket
+
+		SELECT TOP 1
+			@intTicketScaleSetupId = intScaleSetupId
+		FROM tblSCTicket
+		WHERE intDeliverySheetId = @intDeliverySheetId
+
+		SELECT TOP 1 
+			@_dblCompanyOwnedPercentage = dblPercent
+		FROM @splitCustomerCompany
+		WHERE ysnCompanyOwned = 1
+
+		SELECT TOP 1 
+			@_intLoopEntityId = intEntityId
+			,@_dblLoopSplitPercentage = SUM(dblPercent)
+			,@_intLoopCurrentEntityId = intEntityId
+		FROM @splitPerEntityBasedOnCustomerCompany
+		WHERE ysnCompanyOwned = 1
+		GROUP BY intEntityId
+		ORDER BY intEntityId ASC 
+
+		SET @dblDSShrink = (@dblDSShrink * @_dblCompanyOwnedPercentage) / 100
+
+		WHILE (ISNULL(@_intLoopEntityId,0) > 0)
+		BEGIN
+		
+			SET @intLoopDPContractDetailId = NULL
+
+			IF(ISNULL((SELECT TOP 1 intAllowOtherLocationContracts FROM tblSCScaleSetup WHERE intScaleSetupId = @intTicketScaleSetupId),0) = 2)
+			BEGIN
+				SELECT	TOP	1	@intLoopDPContractDetailId	=	intContractDetailId
+				FROM [fnSCGetDPContract](@intDSLocationId,@_intLoopEntityId,@intDSItemId, 'I',@dtmDeliverySheetDate)
+			END
+			ELSE
+			BEGIN
+				SELECT	TOP	1	@intLoopDPContractDetailId	=	intContractDetailId
+				FROM [fnSCGetDPContract](NULL,@_intLoopEntityId,@intDSItemId, 'I',@dtmDeliverySheetDate)
+			END
+			
+
+			IF(ISNULL(@intLoopDPContractDetailId,0) <> 0)
+			BEGIN 
+				SET @dblFinalSplitQty = (@dblDSShrink * @_dblLoopSplitPercentage) / 100
+				SET @dblLoopPDContractAdjustment = @dblFinalSplitQty * -1
+
+				EXEC uspCTUpdateSequenceQuantityUsingUOM @intLoopDPContractDetailId, @dblLoopPDContractAdjustment, @intUserId, @intDeliverySheetId, 'Delivery Sheet',@intItemUOMId
+
+				INSERT INTO [tblSCDeliverySheetContractAdjustment]
+				(
+					[intDeliverySheetId]
+					,[intContractDetailId]
+					,[intEntityId]
+					,[dblQuantity]
+					,[intItemUOMId]
+				)
+				SELECT
+					[intDeliverySheetId]						= @intDeliverySheetId
+					,[intContractDetailId]						= @intLoopDPContractDetailId
+					,[intEntityId]								= @_intLoopEntityId
+					,[dblQuantity]								= @dblLoopPDContractAdjustment					
+					,[intItemUOMId]								= @intItemUOMId
+							
+			END
+
+			SET @_intLoopEntityId = NULL
+
+			SELECT TOP 1 
+				@_intLoopEntityId = intEntityId
+				,@_dblLoopSplitPercentage = SUM(dblPercent)
+				,@_intLoopCurrentEntityId = intEntityId
+			FROM @splitPerEntityBasedOnCustomerCompany
+			WHERE ysnCompanyOwned = 1
+				AND intEntityId > @_intLoopCurrentEntityId
+			GROUP BY intEntityId
+			ORDER BY intEntityId ASC
+		END
+	END
 
 	INSERT INTO [dbo].[tblQMTicketDiscount]
         ([intConcurrencyId]         
@@ -466,3 +577,6 @@ BEGIN
 	END
 END CATCH
 GO
+
+
+

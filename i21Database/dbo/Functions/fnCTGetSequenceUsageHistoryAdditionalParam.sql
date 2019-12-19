@@ -182,6 +182,16 @@ BEGIN
 				@strNumber						=	'Split',
 				@strHeaderIdColumn				=	'intContractHeaderId'
 	END
+	ELSE IF @strScreenName = 'Delivery Sheet'
+	BEGIN
+		SELECT	@intExternalHeaderId	=	HR.intDeliverySheetId,
+				@strNumber				=	HR.strDeliverySheetNumber,
+				@strHeaderIdColumn		=	'intDeliverySheetId',
+				@dtmScreenDate			=	HR.dtmDeliverySheetDate
+		FROM	tblSCDeliverySheet	HR
+		WHERE	HR.intDeliverySheetId	=	@intExternalId
+		
+	END
 
 	IF ISNULL(@strNumber,'')  = ''
 	BEGIN
