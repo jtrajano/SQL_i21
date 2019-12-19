@@ -88,37 +88,14 @@ INTO	dbo.tblICItemStockUOM
 WITH	(HOLDLOCK) 
 AS		ItemStockUOM
 USING (
-		-- NON-LOTTED
-		-- Convert the Reserved Qty to 'Stock UOM' before adding it into tblICItemStockUOM		 
+		-- NON-LOTTED		
+		-- If separate UOMs is not enabled, convert the qty to stock unit. 
 		SELECT	r.intItemId
 				,r.intItemLocationId
 				,StockUOM.intItemUOMId 
 				,r.intSubLocationId
 				,r.intStorageLocationId
 				,Aggregrate_Qty = SUM(dbo.fnCalculateQtyBetweenUOM(r.intItemUOMId, StockUOM.intItemUOMId, r.dblQty)) 
-		FROM	@ItemsToIncreaseReserve r
-				CROSS APPLY (
-					SELECT	TOP 1 
-							iUOM.intItemUOMId
-							,iUOM.dblUnitQty 
-					FROM	tblICItemUOM iUOM
-					WHERE	iUOM.intItemId = r.intItemId
-							AND iUOM.ysnStockUnit = 1 
-				) StockUOM
-		WHERE	r.intLotId IS NULL 
-		GROUP BY r.intItemId
-				, r.intItemLocationId
-				, StockUOM.intItemUOMId 
-				, r.intSubLocationId
-				, r.intStorageLocationId
-		-- If the UOM is not a stock unit, reserve it as it is. 
-		UNION ALL 
-		SELECT	r.intItemId
-				,r.intItemLocationId
-				,r.intItemUOMId 
-				,r.intSubLocationId
-				,r.intStorageLocationId
-				,Aggregrate_Qty = SUM(r.dblQty) 
 		FROM	@ItemsToIncreaseReserve r
 				INNER JOIN tblICItem i
 					ON r.intItemId = i.intItemId 
@@ -131,8 +108,25 @@ USING (
 							AND iUOM.ysnStockUnit = 1 
 				) StockUOM
 		WHERE	r.intLotId IS NULL 
-				AND r.intItemUOMId <> StockUOM.intItemUOMId 
-				AND ISNULL(i.ysnSeparateStockForUOMs, 0) = 0 -- If separate UOMs is not enabled, then don't track the non-stock unit UOM. 
+				AND ISNULL(i.ysnSeparateStockForUOMs, 0) = 0 
+		GROUP BY r.intItemId
+				, r.intItemLocationId
+				, StockUOM.intItemUOMId 
+				, r.intSubLocationId
+				, r.intStorageLocationId		
+		-- If separate UOMs is enabled, don't convert the qty. Track it using the same uom. 
+		UNION ALL 
+		SELECT	r.intItemId
+				,r.intItemLocationId
+				,r.intItemUOMId 
+				,r.intSubLocationId
+				,r.intStorageLocationId
+				,Aggregrate_Qty = SUM(r.dblQty) 
+		FROM	@ItemsToIncreaseReserve r
+				INNER JOIN tblICItem i
+					ON r.intItemId = i.intItemId 
+		WHERE	r.intLotId IS NULL 
+				AND ISNULL(i.ysnSeparateStockForUOMs, 0) = 1 
 		GROUP BY r.intItemId
 				, r.intItemLocationId
 				, r.intItemUOMId 

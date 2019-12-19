@@ -86,13 +86,13 @@ INTO	dbo.tblICItemStockUOM
 WITH	(HOLDLOCK) 
 AS		ItemStockUOM
 USING (
-		-- Aggregrate the non-stock-unit UOMs. 
+		-- If separate UOMs is not enabled, convert the qty to stock unit. 
 		SELECT	ib.intItemId
 				,ib.intItemLocationId
 				,ib.intItemUOMId
 				,ib.intSubLocationId
 				,ib.intStorageLocationId
-				,Aggregrate_Qty = SUM(ISNULL(dblQty, 0))
+				,Aggregrate_Qty = SUM(dbo.fnCalculateQtyBetweenUOM(ib.intItemUOMId, StockUOM.intItemUOMId, ib.dblQty))  
 		FROM	@ItemsToIncreaseInTransitInBound ib 
 				INNER JOIN tblICItem i
 					ON ib.intItemId = i.intItemId 
@@ -104,33 +104,31 @@ USING (
 					WHERE	iUOM.intItemId = ib.intItemId
 							AND iUOM.ysnStockUnit = 1 
 				) StockUOM 
-		WHERE	ib.intItemUOMId <> StockUOM.intItemUOMId
-				AND ISNULL(i.ysnSeparateStockForUOMs, 0) = 0 -- If separate UOMs is not enabled, then don't track the non-stock unit UOM. 
+		WHERE	
+			ISNULL(i.ysnSeparateStockForUOMs, 0) = 0 -- If separate UOMs is not enabled, then don't track the non-stock unit UOM. 
+			AND i.strLotTracking NOT LIKE 'Yes%'
 		GROUP BY ib.intItemId
 				, ib.intItemLocationId
 				, ib.intItemUOMId
 				, ib.intSubLocationId
 				, ib.intStorageLocationId
-		-- Convert the InTransit-Inbound Qty to 'Stock UOM'
+		-- If separate UOMs is enabled, don't convert the qty. Track it using the same uom. 
 		UNION ALL 
 		SELECT	ib.intItemId
 				,ib.intItemLocationId
-				,StockUOM.intItemUOMId
+				,ib.intItemUOMId
 				,ib.intSubLocationId
 				,ib.intStorageLocationId
-				,Aggregrate_Qty = SUM(dbo.fnCalculateQtyBetweenUOM(ib.intItemUOMId, StockUOM.intItemUOMId, ib.dblQty))  
+				,Aggregrate_Qty = SUM(ib.dblQty)  
 		FROM	@ItemsToIncreaseInTransitInBound ib 
-				CROSS APPLY (
-					SELECT	TOP 1 
-							intItemUOMId
-							,dblUnitQty 
-					FROM	tblICItemUOM iUOM
-					WHERE	iUOM.intItemId = ib.intItemId
-							AND iUOM.ysnStockUnit = 1 
-				) StockUOM 
+				INNER JOIN tblICItem i
+					ON ib.intItemId = i.intItemId 
+		WHERE	
+			ISNULL(i.ysnSeparateStockForUOMs, 0) = 1
+			OR i.strLotTracking LIKE 'Yes%'
 		GROUP BY ib.intItemId
 				, ib.intItemLocationId
-				, StockUOM.intItemUOMId
+				, ib.intItemUOMId
 				, ib.intSubLocationId
 				, ib.intStorageLocationId
 ) AS Source_Query  

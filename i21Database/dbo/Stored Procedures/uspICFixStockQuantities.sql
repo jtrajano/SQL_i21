@@ -118,6 +118,60 @@ BEGIN
 	WITH	(HOLDLOCK) 
 	AS		ItemStockUOM	
 	USING (
+		-- If separate UOMs is not enabled, convert the qty to stock unit. 
+		SELECT	
+			B.intItemId
+			,StockUOM.intItemUOMId
+			,C.intItemLocationId
+			,B.intSubLocationId
+			,B.intStorageLocationId
+			,dblOnOrder = 
+				CASE 
+					WHEN SUM(dblQtyReceived) > SUM(dblQtyOrdered) THEN 
+						0 
+					ELSE
+						SUM(						
+							dbo.fnCalculateQtyBetweenUOM(
+								B.intUnitOfMeasureId
+								,StockUOM.intItemUOMId
+								,dblQtyOrdered - dblQtyReceived
+							)						
+						)
+				END
+		FROM 
+			tblPOPurchase A INNER JOIN tblPOPurchaseDetail B 
+				ON A.intPurchaseId = B.intPurchaseId
+			INNER JOIN tblICItem i 
+				ON i.intItemId = B.intItemId 
+			INNER JOIN tblICItemLocation C 
+				ON A.intShipToId = C.intLocationId 
+				AND B.intItemId = C.intItemId
+			CROSS APPLY (
+				SELECT	TOP 1 
+						intItemUOMId
+						,dblUnitQty 
+				FROM	tblICItemUOM iUOM
+				WHERE	iUOM.intItemId = i.intItemId
+						AND iUOM.ysnStockUnit = 1 
+			) StockUOM
+		WHERE 
+			ISNULL(@intItemId, i.intItemId) = i.intItemId
+			AND ISNULL(@intCategoryId, i.intCategoryId) = i.intCategoryId
+			AND (
+				intOrderStatusId NOT IN (4, 3, 6)
+				OR (dblQtyOrdered > dblQtyReceived AND intOrderStatusId NOT IN (4, 3, 6))--Handle wrong status of PO, greater qty received should be closed status
+			)
+			AND ISNULL(i.ysnSeparateStockForUOMs, 0) = 0 
+			AND i.strLotTracking NOT LIKE 'Yes%'
+		GROUP BY 
+			B.intItemId,
+			StockUOM.intItemUOMId,
+			C.intItemLocationId,
+			B.intSubLocationId,
+			B.intStorageLocationId
+
+		-- If separate UOMs is enabled, don't convert the qty. Track it using the same uom. 
+		UNION ALL 
 		SELECT	
 			B.intItemId
 			,B.intUnitOfMeasureId AS intItemUOMId
@@ -126,9 +180,13 @@ BEGIN
 			,B.intStorageLocationId
 			,dblOnOrder =  (CASE WHEN SUM(dblQtyReceived) > SUM(dblQtyOrdered) THEN 0 ELSE SUM(dblQtyOrdered) - SUM(dblQtyReceived) END)
 		FROM 
-			tblPOPurchase A INNER JOIN tblPOPurchaseDetail B ON A.intPurchaseId = B.intPurchaseId
-			INNER JOIN tblICItem i ON i.intItemId = B.intItemId 
-			INNER JOIN tblICItemLocation C ON A.intShipToId = C.intLocationId AND B.intItemId = C.intItemId
+			tblPOPurchase A INNER JOIN tblPOPurchaseDetail B 
+				ON A.intPurchaseId = B.intPurchaseId
+			INNER JOIN tblICItem i 
+				ON i.intItemId = B.intItemId 
+			INNER JOIN tblICItemLocation C 
+				ON A.intShipToId = C.intLocationId 
+				AND B.intItemId = C.intItemId
 		WHERE 
 			ISNULL(@intItemId, i.intItemId) = i.intItemId
 			AND ISNULL(@intCategoryId, i.intCategoryId) = i.intCategoryId
@@ -136,12 +194,17 @@ BEGIN
 				intOrderStatusId NOT IN (4, 3, 6)
 				OR (dblQtyOrdered > dblQtyReceived AND intOrderStatusId NOT IN (4, 3, 6))--Handle wrong status of PO, greater qty received should be closed status
 			)
+			AND (
+				ISNULL(i.ysnSeparateStockForUOMs, 0) = 1			
+				OR i.strLotTracking LIKE 'Yes%'
+			)
 		GROUP BY 
 			B.intItemId,
 			B.intUnitOfMeasureId,
 			C.intItemLocationId,
 			B.intSubLocationId,
 			B.intStorageLocationId
+
 	) AS RawStockData
 		ON ItemStockUOM.intItemId = RawStockData.intItemId
 		AND ItemStockUOM.intItemLocationId = RawStockData.intItemLocationId

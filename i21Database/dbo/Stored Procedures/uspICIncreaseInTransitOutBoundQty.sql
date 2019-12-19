@@ -122,19 +122,29 @@ INTO	dbo.tblICItemStockUOM
 WITH	(HOLDLOCK) 
 AS		ItemStockUOM
 USING (
-		-- Aggregrate the non-stock-unit UOMs. 
+		-- If separate UOMs is not enabled, convert the qty to stock unit. 
 		SELECT	ob.intItemId
 				,ob.intItemLocationId
-				,ob.intItemUOMId
+				,StockUOM.intItemUOMId
 				,ob.intSubLocationId
 				,ob.intStorageLocationId
 				,ob.intTransactionTypeId
-				,dtmTransactionDate = CASE 
-										WHEN ARI.ysnPosted = 0 
-										THEN [dbo].[fnICGetPreviousTransactionDate](ob.intItemId, ob.intItemLocationId, ob.intSubLocationId, ob.intStorageLocationId, ob.intTransactionTypeId) 
-										ELSE ob.dtmTransactionDate 
-									END
-				,Aggregrate_Qty = SUM(ISNULL(dblQty, 0))
+				,dtmTransactionDate = 
+					CASE 
+						WHEN ARI.ysnPosted = 0 THEN 
+							[dbo].[fnICGetPreviousTransactionDate](
+								ob.intItemId
+								, ob.intItemLocationId
+								, ob.intSubLocationId
+								, ob.intStorageLocationId
+								, ob.intTransactionTypeId
+							) 
+						ELSE 
+							ob.dtmTransactionDate 
+					END
+				,Aggregrate_Qty = SUM(
+						dbo.fnCalculateQtyBetweenUOM(ob.intItemUOMId, StockUOM.intItemUOMId, ISNULL(ob.dblQty, 0))
+					)
 		FROM	@ItemsToIncreaseInTransitOutBound ob 
 				INNER JOIN tblICItem i
 					ON ob.intItemId = i.intItemId 
@@ -149,46 +159,52 @@ USING (
 				LEFT JOIN tblARInvoice ARI
 					ON ARI.intInvoiceId = ob.intTransactionId
 					AND ob.intTransactionTypeId = @TransactionType_Invoice
-		WHERE	ob.intItemUOMId <> StockUOM.intItemUOMId
-				AND ISNULL(i.ysnSeparateStockForUOMs, 0) = 0 -- If separate UOMs is not enabled, then don't track the non-stock unit UOM. 
+		WHERE	
+				ISNULL(i.ysnSeparateStockForUOMs, 0) = 0 
+				AND i.strLotTracking NOT LIKE 'Yes%'
 		GROUP BY ob.intItemId
 				, ob.intItemLocationId
-				, ob.intItemUOMId
+				, StockUOM.intItemUOMId
 				, ob.intSubLocationId
 				, ob.intStorageLocationId
 				, ob.intTransactionTypeId
 				, ARI.ysnPosted
 				, ob.dtmTransactionDate 
 
-		-- Convert all the In-Transit Outbound Qty to 'Stock UOM' 
+		-- If separate UOMs is enabled, don't convert the qty. Track it using the same uom. 
 		UNION ALL 
 		SELECT	ob.intItemId
 				,ob.intItemLocationId
-				,StockUOM.intItemUOMId
+				,ob.intItemUOMId
 				,ob.intSubLocationId
 				,ob.intStorageLocationId
 				,ob.intTransactionTypeId
-				,dtmTransactionDate = CASE 
-										WHEN ARI.ysnPosted = 0 
-										THEN [dbo].[fnICGetPreviousTransactionDate](ob.intItemId, ob.intItemLocationId, ob.intSubLocationId, ob.intStorageLocationId, ob.intTransactionTypeId) 
-										ELSE ob.dtmTransactionDate 
-									END
-				,Aggregrate_Qty = SUM(dbo.fnCalculateQtyBetweenUOM(ob.intItemUOMId, StockUOM.intItemUOMId, ob.dblQty)) 
+				,dtmTransactionDate =
+					CASE 
+						WHEN ARI.ysnPosted = 0 THEN 
+							[dbo].[fnICGetPreviousTransactionDate](
+								ob.intItemId
+								, ob.intItemLocationId
+								, ob.intSubLocationId
+								, ob.intStorageLocationId
+								, ob.intTransactionTypeId
+							) 
+						ELSE 
+							ob.dtmTransactionDate 
+					END
+				,Aggregrate_Qty = SUM(ob.dblQty) 
 		FROM	@ItemsToIncreaseInTransitOutBound ob 
-				CROSS APPLY (
-					SELECT	TOP 1 
-							intItemUOMId
-							,dblUnitQty 
-					FROM	tblICItemUOM iUOM
-					WHERE	iUOM.intItemId = ob.intItemId
-							AND iUOM.ysnStockUnit = 1 
-				) StockUOM 
+				INNER JOIN tblICItem i
+					ON ob.intItemId = i.intItemId 
 				LEFT JOIN tblARInvoice ARI
 					ON ARI.intInvoiceId = ob.intTransactionId
 					AND ob.intTransactionTypeId = @TransactionType_Invoice
+		WHERE 
+				ISNULL(i.ysnSeparateStockForUOMs, 0) = 1
+				OR i.strLotTracking LIKE 'Yes%'
 		GROUP BY ob.intItemId
 				, ob.intItemLocationId
-				, StockUOM.intItemUOMId
+				, ob.intItemUOMId
 				, ob.intSubLocationId
 				, ob.intStorageLocationId
 				, ob.intTransactionTypeId
@@ -257,6 +273,8 @@ BEGIN
 			,strTransactionId
 			,dblQty
 			,intConcurrencyId
+			,dtmDate
+			,dtmDateCreated
 	)
 	SELECT 
 			intItemStockTypeId	= @stockType_InTransitOutbound
@@ -268,6 +286,8 @@ BEGIN
 			,strTransactionId	= strTransactionId
 			,dblQty				= dblQty
 			,intConcurrencyId	= 1
+			,dtmDate			= cp.dtmTransactionDate
+			,dtmDateCreated		= GETDATE()
 	FROM	@ItemsToIncreaseInTransitOutBound cp 
 	WHERE	ISNULL(dblQty, 0) <> 0 
 END 

@@ -93,13 +93,13 @@ INTO	dbo.tblICItemStockUOM
 WITH	(HOLDLOCK) 
 AS		ItemStockUOM
 USING (
-		-- Aggregrate the non-stock-unit UOMs. 
+		-- If separate UOMs is not enabled, convert the qty to stock unit. 
 		SELECT	o.intItemId
 				,o.intItemLocationId
-				,o.intItemUOMId
+				,StockUOM.intItemUOMId
 				,o.intSubLocationId
 				,o.intStorageLocationId
-				,Aggregrate_OnOrderQty = SUM(ISNULL(o.dblQty, 0))
+				,Aggregrate_OnOrderQty = SUM(dbo.fnCalculateQtyBetweenUOM(o.intItemUOMId, StockUOM.intItemUOMId, o.dblQty))  
 		FROM	@ItemsToIncreaseOnOrder o
 				INNER JOIN tblICItem i
 					ON o.intItemId = i.intItemId 
@@ -111,35 +111,31 @@ USING (
 					WHERE	iUOM.intItemId = o.intItemId
 							AND iUOM.ysnStockUnit = 1 
 				) StockUOM
-		WHERE	o.intItemUOMId <> StockUOM.intItemUOMId 
-				AND ISNULL(i.ysnSeparateStockForUOMs, 0) = 0 -- If separate UOMs is not enabled, then don't track the non-stock unit UOM. 
-		GROUP BY 
-			o.intItemId
-			, o.intItemLocationId
-			, o.intItemUOMId 
-			, o.intSubLocationId
-			, o.intStorageLocationId
-		-- Convert all the On Order Qty to the Stock UOM before adding it into tblICItemStockUOM
-		UNION ALL 
-		SELECT	o.intItemId
-				,o.intItemLocationId
-				,StockUOM.intItemUOMId 
-				,o.intSubLocationId
-				,o.intStorageLocationId
-				,Aggregrate_OnOrderQty = SUM(dbo.fnCalculateQtyBetweenUOM(o.intItemUOMId, StockUOM.intItemUOMId, o.dblQty))  
-		FROM	@ItemsToIncreaseOnOrder o
-				CROSS APPLY (
-					SELECT	TOP 1 
-							intItemUOMId
-							,dblUnitQty 
-					FROM	tblICItemUOM iUOM
-					WHERE	iUOM.intItemId = o.intItemId
-							AND iUOM.ysnStockUnit = 1 
-				) StockUOM
+		WHERE	ISNULL(i.ysnSeparateStockForUOMs, 0) = 0 
+				AND i.strLotTracking NOT LIKE 'Yes%'
 		GROUP BY 
 			o.intItemId
 			, o.intItemLocationId
 			, StockUOM.intItemUOMId 
+			, o.intSubLocationId
+			, o.intStorageLocationId
+		-- If separate UOMs is enabled, don't convert the qty. Track it using the same uom. 
+		UNION ALL 
+		SELECT	o.intItemId
+				,o.intItemLocationId
+				,o.intItemUOMId 
+				,o.intSubLocationId
+				,o.intStorageLocationId
+				,Aggregrate_OnOrderQty = SUM(o.dblQty)
+		FROM	@ItemsToIncreaseOnOrder o
+				INNER JOIN tblICItem i
+					ON o.intItemId = o.intItemId 
+		WHERE	ISNULL(i.ysnSeparateStockForUOMs, 0) = 1
+				OR i.strLotTracking LIKE 'Yes%'
+		GROUP BY 
+			o.intItemId
+			, o.intItemLocationId
+			, o.intItemUOMId 
 			, o.intSubLocationId
 			, o.intStorageLocationId
 ) AS Source_Query  
