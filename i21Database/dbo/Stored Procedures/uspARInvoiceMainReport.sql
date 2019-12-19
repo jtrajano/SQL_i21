@@ -209,6 +209,8 @@ IF ISNULL(@strInvoiceIds, '') <> ''
 		WHERE INVOICE.intInvoiceId NOT IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@strInvoiceIds))
 	END
 
+UPDATE @INVOICETABLE SET strInvoiceFormat = 'Format 3 - Swink' WHERE strInvoiceFormat = 'Format 1 - Swink'
+
 INSERT INTO @MCPINVOICES
 SELECT * FROM @INVOICETABLE WHERE strInvoiceFormat IN ('Format 1 - MCP', 'Format 5 - Honstein')
 
