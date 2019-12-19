@@ -1,6 +1,13 @@
 CREATE PROCEDURE uspICImportItemsFromStaging @strIdentifier NVARCHAR(100)
 AS
 
+;WITH cte AS
+(
+   SELECT *, ROW_NUMBER() OVER(PARTITION BY strItemNo ORDER BY strItemNo) AS RowNumber
+   FROM tblICImportStagingItem
+)
+DELETE FROM cte WHERE RowNumber > 1;
+
 INSERT INTO tblICItem(
 	  strItemNo
 	, strType

@@ -1,6 +1,20 @@
 CREATE PROCEDURE uspICImportItemUOMsFromStaging @strIdentifier NVARCHAR(100)
 AS
 
+;WITH cte AS
+(
+   SELECT *, ROW_NUMBER() OVER(PARTITION BY strItemNo, strUOM ORDER BY strItemNo, strUOM) AS RowNumber
+   FROM tblICImportStagingUOM
+)
+DELETE FROM cte WHERE RowNumber > 1;
+
+;WITH cte AS
+(
+   SELECT *, ROW_NUMBER() OVER(PARTITION BY strUPCCode ORDER BY strUPCCode) AS RowNumber
+   FROM tblICImportStagingUOM
+)
+DELETE FROM cte WHERE RowNumber > 1;
+
 INSERT INTO tblICItemUOM (
 	intItemId, 
 	intUnitMeasureId, 
@@ -65,3 +79,6 @@ FROM tblICImportLog l
 WHERE l.strUniqueId = @strIdentifier
 
 DELETE FROM tblICImportStagingUOM WHERE strImportIdentifier = @strIdentifier
+
+UPDATE tblICItemUOM SET ysnStockUnit = 0 WHERE dblUnitQty <> 1 AND ysnStockUnit = 1
+UPDATE tblICItemUOM SET ysnStockUnit = 1 WHERE ysnStockUnit = 0 AND dblUnitQty = 1
