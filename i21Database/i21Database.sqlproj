@@ -8281,6 +8281,7 @@
     <Build Include="dbo\Tables\tblSCInventoryReceiptAllowVoucherTracker.sql" />
     <Build Include="dbo\Stored Procedures\uspSCCreateInvoiceForPostedDestinationWeightsAndGrades.sql" />
     <Build Include="dbo\Tables\tblDBSchedule.sql" />
+    <Build Include="dbo\Functions\fnSCGetDPContract.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

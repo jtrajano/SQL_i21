@@ -28,7 +28,7 @@ BEGIN TRY
 			BEGIN
 				IF EXISTS(SELECT TOP 1 intContractId FROM tblSCTicket WHERE intTicketId = @intTicketId AND ISNULL(intContractId,0) = 0 AND strDistributionOption != 'SPL')
 				BEGIN
-					UPDATE tblSCTicket SET 
+					UPDATE tblSCTicket SET
 					intContractId = CT.intContractDetailId
 					, strContractNumber = CT.strContractNumber
 					, intContractSequence = CT.intContractSeq
@@ -41,23 +41,23 @@ BEGIN TRY
 					, ysnFarmerPaysFreight = ISNULL(CT.ysnPrice,SC.ysnFarmerPaysFreight)
 					, intWeightId = CT.intWeightId
 					, intGradeId  = CT.intGradeId
-					FROM tblSCTicket SC 
+					FROM tblSCTicket SC
 					INNER JOIN tblSCScaleSetup SCS ON SCS.intScaleSetupId = SC.intScaleSetupId
 					OUTER APPLY(
-						SELECT 
+						SELECT
 						CTD.intContractHeaderId
 						,CTD.intContractDetailId
-						,CTH.strContractNumber 
-						,SM.strLocationName 
-						,CTD.intContractSeq 
-						,CTD.dblFutures 
-						,CTD.dblBasis 
+						,CTH.strContractNumber
+						,SM.strLocationName
+						,CTD.intContractSeq
+						,CTD.dblFutures
+						,CTD.dblBasis
 						,CTCost.dblRate
 						,CTCost.intVendorId
 						,CTCost.ysnPrice
 						,CTH.intWeightId
 						,CTH.intGradeId
-						FROM tblCTContractDetail CTD 
+						FROM tblCTContractDetail CTD
 						INNER JOIN tblCTContractHeader CTH ON CTH.intContractHeaderId = CTD.intContractHeaderId
 						INNER JOIN tblSMCompanyLocation SM ON SM.intCompanyLocationId = CTD.intCompanyLocationId
 						LEFT JOIN tblCTContractCost CTCost ON CTCost.intContractDetailId = CTD.intContractDetailId AND CTCost.intItemId = SCS.intFreightItemId
@@ -67,34 +67,34 @@ BEGIN TRY
 						AND SC.strDistributionOption != 'LOD'
 				END
 				ELSE
-				BEGIN 
+				BEGIN
 					-- UPDATE tblSCTicket SET dblScheduleQty = @dblScheduleQty  WHERE intTicketId = @intTicketId AND ISNULL(intContractId,0) = @intContractDetailId AND strDistributionOption != 'SPL' AND strDistributionOption != 'LOD'
 					print 'remove update of schedule qty'
 				END
 			END
 		ELSE
 		BEGIN
-			UPDATE tblSCTicket SET 
+			UPDATE tblSCTicket SET
 			intContractId = CT.intContractDetailId
 			, strContractNumber = CT.strContractNumber
 			, intContractSequence = CT.intContractSeq
 			, strContractLocation = CT.strLocationName
-			FROM tblSCTicket SC 
+			FROM tblSCTicket SC
 				OUTER APPLY(
-					SELECT 
+					SELECT
 					CTD.intContractHeaderId
 					,CTD.intContractDetailId
-					,CTH.strContractNumber 
-					,SM.strLocationName 
-					,CTD.intContractSeq 
-					,CTD.dblFutures 
-					,CTD.dblBasis 
-					FROM tblCTContractDetail CTD 
+					,CTH.strContractNumber
+					,SM.strLocationName
+					,CTD.intContractSeq
+					,CTD.dblFutures
+					,CTD.dblBasis
+					FROM tblCTContractDetail CTD
 					INNER JOIN tblCTContractHeader CTH ON CTH.intContractHeaderId = CTD.intContractHeaderId
 					INNER JOIN tblSMCompanyLocation SM ON SM.intCompanyLocationId = CTD.intCompanyLocationId
 					WHERE CTD.intContractDetailId = @intContractDetailId
 				) CT
-			WHERE intTicketId = @intTicketId AND ISNULL(intContractId,0) = 0
+			WHERE intTicketId = @intTicketId AND intEntityId = @intEntityId
 		END
 	END
 END TRY

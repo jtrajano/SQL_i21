@@ -49,8 +49,15 @@ BEGIN TRY
 			@dblNetUnitsToCompare	NUMERIC(18,6),
 			@intDistributionMethod	INT,
 			@locationId				INT
+
+	DECLARE @dtmTicketDate 			DATETIME
+	DECLARE @intTicketSclaeSetupId	INT
+
+	DECLARE @strEntityNo NVARCHAR(200)
+	DECLARE @errorMessage NVARCHAR(500)
 	
-	SET @ErrMsg =	'uspCTUpdationFromTicketDistribution '+ 
+
+	SET @ErrMsg =	'uspCTUpdationFromTicketDistribution '+
 					LTRIM(@intTicketId) +',' + 
 					LTRIM(@intEntityId) +',' +
 					LTRIM(ISNULL(@dblNetUnits,0)) +',' +
@@ -79,6 +86,13 @@ BEGIN TRY
 	*/
 	SELECT  @intDistributionMethod = intDistributionMethod, @intTicketContractDetailId = intContractId, @intStorageScheduleTypeId = intStorageScheduleTypeId, @UseScheduleForAvlCalc = CASE WHEN intStorageScheduleTypeId = -6 THEN 0 ELSE 1 END FROM tblSCTicket WHERE intTicketId = @intTicketId
 
+	SELECT TOP 1
+		@locationId		=	intProcessingLocationId
+		,@dtmTicketDate  = dtmTicketDateTime
+		,@intTicketSclaeSetupId = intScaleSetupId
+	FROM tblSCTicket
+	WHERE	intTicketId		=	@intTicketId
+
 	IF @ysnDeliverySheet = 0
 		BEGIN
 			IF NOT EXISTS(SELECT * FROM tblSCTicket WHERE intTicketId = @intTicketId)
@@ -87,8 +101,7 @@ BEGIN TRY
 			END
 			
 			SELECT	@intItemId		=	intItemId,
-					@strInOutFlag	=	strInOutFlag,
-					@locationId		=	intProcessingLocationId
+					@strInOutFlag	=	strInOutFlag
 			FROM	tblSCTicket
 			WHERE	intTicketId		=	@intTicketId
 
@@ -136,14 +149,26 @@ BEGIN TRY
 
 	IF	@ysnDP = 1 AND ISNULL(@intContractDetailId,0) = 0
 	BEGIN
-		SELECT	TOP	1	@intContractDetailId	=	intContractDetailId
-		FROM	vyuCTContractDetailView CD
-		WHERE	CD.intContractTypeId	=	CASE WHEN @strInOutFlag = 'I' THEN 1 ELSE 2 END
-		AND		CD.intEntityId			=	@intEntityId
-		AND		CD.intItemId			=	@intItemId
-		AND		CD.intPricingTypeId		=	5
-		AND		CD.ysnAllowedToShow		=	1
-		ORDER BY CD.dtmStartDate DESC
+		-- SELECT	TOP	1	@intContractDetailId	=	intContractDetailId
+		-- FROM	vyuCTContractDetailView CD
+		-- WHERE	CD.intContractTypeId	=	CASE WHEN @strInOutFlag = 'I' THEN 1 ELSE 2 END
+		-- AND		CD.intEntityId			=	@intEntityId
+		-- AND		CD.intItemId			=	@intItemId
+		-- AND		CD.intPricingTypeId		=	5
+		-- AND		CD.ysnAllowedToShow		=	1
+		-- ORDER BY CD.dtmStartDate DESC
+
+		IF(ISNULL((SELECT TOP 1 intAllowOtherLocationContracts FROM tblSCScaleSetup WHERE intScaleSetupId = @intTicketSclaeSetupId),0) = 2)
+		BEGIN
+			SELECT	TOP	1	@intContractDetailId	=	intContractDetailId
+			FROM fnSCGetDPContract(@locationId,@intEntityId,@intItemId,'I',@dtmTicketDate)
+		END
+		ELSE
+		BEGIN
+			SELECT	TOP	1	@intContractDetailId	=	intContractDetailId
+			FROM fnSCGetDPContract(NULL,@intEntityId,@intItemId,'I',@dtmTicketDate)
+		END
+
 
 		IF	ISNULL(@intContractDetailId,0) = 0
 		BEGIN
@@ -409,12 +434,12 @@ BEGIN TRY
 	
 	UPDATE	@Processed SET dblUnitsRemaining = @dblNetUnits
 	
-	IF(		SELECT	MAX(dblUnitsRemaining) 
+	IF(		SELECT	MAX(dblUnitsRemaining)
 			FROM	@Processed	PR
 			JOIN	tblCTContractDetail	CD	ON	CD.intContractDetailId	=	PR.intContractDetailId
 			WHERE	ISNULL(ysnIgnore,0) <> 1) > 0 AND @ysnAutoDistribution = 1
 	BEGIN
-		RAISERROR ('The entire ticket quantity can not be applied to the contract.',16,1,'WITH NOWAIT') 
+		RAISERROR ('The entire ticket quantity can not be applied to the contract.',16,1,'WITH NOWAIT')
 	END
 
 	SELECT	PR.intContractDetailId,
