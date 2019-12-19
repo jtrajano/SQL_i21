@@ -25,6 +25,13 @@ BEGIN
 				SAVE TRANSACTION @Savepoint
 			END
 
+
+		-- Set default value
+		SET @ysnSuccess = CAST(1 AS BIT)
+		SET @strMessage = ''
+		SET @intCountRows = 0
+
+
 		
 		-- COUNT
 		DECLARE @intTableRowCount AS INT = 0
@@ -57,21 +64,44 @@ BEGIN
 					BEGIN
 						
 						--Get Number of rows
-						SELECT @intCountRows = COUNT(intRowCount)
+						SELECT @intCountRows = COUNT(chk.intRowCount)
 						FROM @UDT_Translog chk
-						JOIN
-						(
-							SELECT c.intTransactionID as intTransactionID
-							FROM @UDT_Translog c
-							GROUP BY c.intTransactionID
-						) x ON x.intTransactionID = chk.intTransactionID
-						WHERE NOT EXISTS
-						(
-							SELECT *
-							FROM tblSTTranslogRebates TR
-							WHERE TR.intTermMsgSN = chk.intTransactionID
-								--AND TR.intStoreId = @intStoreId
-						)
+						INNER JOIN @UDT_Translog tender
+							ON chk.intTransactionID = tender.intTransactionID
+						WHERE (
+								-- MAIN
+								(chk.strItemLineItemCodeFormat IS NOT NULL AND chk.strItemLinePOSCode IS NOT NULL)
+								OR
+								(chk.strFuelGradeID IS NOT NULL AND chk.intFuelPositionID IS NOT NULL)
+							  )
+							  AND
+							  (
+							     -- TENDER
+								 tender.strTenderCode IN ('outsideMobileCr', 'outsideCredit', 'coupons', 'debitCards', 'creditCards', 'cash', 'loyaltyOffer', 'check', 'houseCharges') 
+								 AND 
+								 tender.strChangeFlag IN ('yes','no')
+							  )
+							  AND NOT EXISTS
+							  (
+								SELECT *
+								FROM tblSTTranslogRebates TR
+								WHERE TR.intTermMsgSN = chk.intTransactionID
+							  )
+						--SELECT @intCountRows = COUNT(intRowCount)
+						--FROM @UDT_Translog chk
+						--JOIN
+						--(
+						--	SELECT c.intTransactionID as intTransactionID
+						--	FROM @UDT_Translog c
+						--	GROUP BY c.intTransactionID
+						--) x ON x.intTransactionID = chk.intTransactionID
+						--WHERE NOT EXISTS
+						--(
+						--	SELECT *
+						--	FROM tblSTTranslogRebates TR
+						--	WHERE TR.intTermMsgSN = chk.intTransactionID
+						--		--AND TR.intStoreId = @intStoreId
+						--)
 
 
 						
@@ -560,7 +590,12 @@ BEGIN
 										AND 
 										tender.strChangeFlag IN ('yes','no')
 									  )
-									  -- AND chk.intTransactionID = 7129
+									  AND NOT EXISTS
+									  (
+										SELECT *
+										FROM tblSTTranslogRebates TR
+										WHERE TR.intTermMsgSN = chk.intTransactionID
+									  )
 								ORDER BY chk.intTransactionID ASC
 
 
