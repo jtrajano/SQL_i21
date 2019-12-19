@@ -10,7 +10,7 @@ CREATE TABLE [dbo].[tblICImportStagingItemLocation]
     [strStorageLocation] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
     [strStorageUnit] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
     [strSaleUOM] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
-    [strGross/NetUOM] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+    [strGrossNetUOM] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
     [strPurchaseUOM] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
     [strFamily] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
     [strClass] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
