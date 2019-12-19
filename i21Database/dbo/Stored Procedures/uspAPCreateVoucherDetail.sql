@@ -76,6 +76,15 @@ IF @transCount = 0 BEGIN TRANSACTION
 
 	EXEC uspAPUpdateVoucherDetailForeignRate @voucherId = @billId
 
+	UPDATE A
+	SET
+		A.int1099Form = CASE WHEN B.intTransactionType IN (1, 3, 9, 14) THEN A.int1099Form ELSE 0 END,
+		A.int1099Category = CASE WHEN B.intTransactionType IN (1, 3, 9, 14) THEN A.int1099Category ELSE 0 END,
+		A.dbl1099 = CASE WHEN B.intTransactionType IN (1, 3, 9, 14) THEN A.dbl1099 ELSE 0 END
+	FROM tblAPBillDetail A
+	INNER JOIN tblAPBill B ON A.intBillId = B.intBillId
+	WHERE B.intBillId = @billId
+
 	INSERT INTO @voucherIds
 	SELECT @billId
 	EXEC uspAPUpdateVoucherTotal @voucherIds
