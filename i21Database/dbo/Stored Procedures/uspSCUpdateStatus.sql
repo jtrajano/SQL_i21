@@ -32,9 +32,8 @@ BEGIN
 			FROM tblCTContractDetail CT 
 			LEFT JOIN tblSCTicketContractUsed SC ON SC.intContractDetailId = CT.intContractDetailId
 			WHERE SC.intTicketId = @scId AND SC.intContractDetailId != ISNULL(@intContractDetailId,0)
-
-			DELETE FROM tblSCTicketContractUsed WHERE intTicketId = @scId
 		END
+		DELETE FROM tblSCTicketContractUsed WHERE intTicketId = @scId
 	END
 	ELSE
 	BEGIN
