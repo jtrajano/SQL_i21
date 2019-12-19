@@ -7707,6 +7707,7 @@
     <Build Include="dbo\Functions\fnCFCardNumberToMaximaFormat.sql" />
     <Build Include="dbo\Stored Procedures\uspCFDeleteEncodeCardData.sql" />
     <Build Include="dbo\Stored Procedures\uspAPForceCompletePayable.sql" />
+    <Build Include="dbo\Functions\fnSCGetDPContract.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
