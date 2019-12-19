@@ -176,7 +176,9 @@ SELECT TOP 100 PERCENT
 												ELSE ISNULL(ctDetail.dblSeqPrice,0)
 												END
 	/*1099 info*/						
-	,int1099Form						=	ISNULL(A.int1099Form,
+	,int1099Form						=	CASE WHEN B.intTransactionType IN (1, 3, 9, 14)
+											THEN
+											ISNULL(A.int1099Form,
 												(CASE 
 													WHEN item.intCommodityId > 0 THEN 0
 													WHEN patron.intEntityId IS NOT NULL 
@@ -188,8 +190,10 @@ SELECT TOP 100 PERCENT
 													WHEN entity.str1099Form = '1099-INT' THEN 2
 													WHEN entity.str1099Form = '1099-B' THEN 3
 												ELSE 0 END)
-											)
-	,int1099Category					=	ISNULL(A.int1099Category,
+											) ELSE 0 END
+	,int1099Category					=	CASE WHEN B.intTransactionType IN (1, 3, 9, 14)
+											THEN
+											ISNULL(A.int1099Category,
 												CASE 	
 													WHEN item.intCommodityId > 0 THEN 0
 													WHEN patron.intEntityId IS NOT NULL 
@@ -198,8 +202,9 @@ SELECT TOP 100 PERCENT
 														AND patron.ysnStockStatusQualified = 1 
 														THEN 3
 												ELSE ISNULL(category1099.int1099CategoryId, 0) END
-											)
-	,dbl1099							=	ISNULL(A.dbl1099, 0)
+											) ELSE 0 END
+	,dbl1099							=	CASE WHEN B.intTransactionType IN (1, 3, 9, 14)
+											THEN ISNULL(A.dbl1099, 0) ELSE 0 END
 	,ysn1099Printed						=	0
 	/*Exchange rate info*/				
 	,intCurrencyExchangeRateTypeId		=	CASE WHEN A.intCurrencyId != compPref.intDefaultCurrencyId --if foreign currency
