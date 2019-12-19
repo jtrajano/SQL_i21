@@ -8212,7 +8212,6 @@
     <Build Include="dbo\Stored Procedures\uspCTReportPriceConfirmation.sql" />
     <Build Include="dbo\Stored Procedures\uspSCPostSpecialDiscount.sql" />
     <Build Include="dbo\Stored Procedures\uspSCProcessReceiptToVoucher.sql" />
-    <Build Include="dbo\Index\IX_tblSMAudit.sql" />
     <Build Include="dbo\Tables\tblRKSummaryLog.sql" />
     <Build Include="dbo\Stored Procedures\uspRKLogRiskPosition.sql" />
     <Build Include="dbo\User Defined Types\RKSummaryLog.sql" />
