@@ -7709,6 +7709,7 @@
     <Build Include="dbo\Stored Procedures\uspAPForceCompletePayable.sql" />
     <Build Include="dbo\Functions\fnICOutstandingInTransitPerDay.sql" />
     <Build Include="dbo\Views\vyuAPClearingFilterTransactionNo.sql" />
+    <Build Include="dbo\Functions\fnSCGetDPContract.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

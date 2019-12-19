@@ -89,7 +89,7 @@ BEGIN TRY
 				INNER JOIN tblSMCompanyLocation SM ON SM.intCompanyLocationId = CTD.intCompanyLocationId
 				WHERE CTD.intContractDetailId = @intContractDetailId
 			) CT
-		WHERE intTicketId = @intTicketId AND ISNULL(intContractId,0) = 0
+		WHERE intTicketId = @intTicketId AND intEntityId = @intEntityId
 	END
 END TRY
 BEGIN CATCH

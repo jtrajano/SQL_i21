@@ -324,8 +324,8 @@ BEGIN TRY
 		,[dblFeesDue]							= CASE WHEN ICFees.strCostMethod = 'Amount' THEN ROUND(SC.dblTicketFees / SC.dblNetUnits ,6) ELSE SC.dblTicketFees END
 		,[intDeliverySheetId]					= SC.intDeliverySheetId
 		,[intTicketId]							= SC.intTicketId
-		,[intContractHeaderId]					= CT.intContractHeaderId
-		,[intContractDetailId]					= SC.intContractId
+		,[intContractHeaderId]					= ISNULL(DPCT.intContractHeaderId, CT.intContractHeaderId)
+		,[intContractDetailId]					= ISNULL(DPCT.intContractDetailId, SC.intContractId)
 		,[intUnitMeasureId]						= UOM.intUnitMeasureId
 		,[intItemUOMId]							= SC.intItemUOMIdTo
 		,[intCurrencyId]						= SC.intCurrencyId
@@ -336,6 +336,7 @@ BEGIN TRY
 	LEFT JOIN tblICItem ICFees ON ICFees.intItemId = SCSetup.intDefaultFeeItemId
 	LEFT JOIN tblICItemUOM UOM ON UOM.intItemId = SC.intItemId AND UOM.intItemUOMId = SC.intItemUOMIdTo
 	LEFT JOIN tblCTContractDetail CT ON CT.intContractDetailId = SC.intContractId
+	LEFT JOIN tblCTContractDetail DPCT ON DPCT.intContractDetailId = @intDPContractId
 	WHERE SC.intTicketId = @intTicketId
 
 	EXEC uspGRCreateCustomerStorage @CustomerStorageStagingTable, @intHoldCustomerStorageId OUTPUT
