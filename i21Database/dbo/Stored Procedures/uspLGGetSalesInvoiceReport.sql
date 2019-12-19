@@ -7,6 +7,7 @@ BEGIN
 		,@strContractDocuments NVARCHAR(MAX)
 		,@strContractConditions NVARCHAR(MAX)
 		,@strFreightConditions NVARCHAR(MAX)
+		,@strFreightDescConditions NVARCHAR(MAX)
 		,@strCompanyName NVARCHAR(100)
 		,@strCompanyAddress NVARCHAR(100)
 		,@strContactName NVARCHAR(50)
@@ -102,6 +103,7 @@ BEGIN
 	WHERE InvDet.intInvoiceId = @intInvoiceId
 
 	SELECT @strFreightConditions = RTRIM(LTRIM(ISNULL(FT.strContractBasis, '') + ' ' + COALESCE(CT.strCity, CLSL.strSubLocationName, CN.strCountry, '') + ' ' + ISNULL(WG.strWeightGradeDesc, '')))
+		,@strFreightDescConditions = RTRIM(LTRIM(ISNULL(FT.strDescription, '') + ' ' + COALESCE(CT.strCity, CLSL.strSubLocationName, CN.strCountry, '') + ' ' + ISNULL(WG.strWeightGradeDesc, '')))
 	FROM tblARInvoiceDetail InvDet
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = InvDet.intContractDetailId
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
@@ -146,10 +148,9 @@ BEGIN
 	declare @dated nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'dated'),'dated');
 
 	SELECT Inv.intInvoiceId
-		,intSerialNo = ROW_NUMBER() OVER (
-			ORDER BY InvDet.intInvoiceDetailId
-			)
-		,Inv.strInvoiceNumber
+		,intSerialNo = ROW_NUMBER() OVER (ORDER BY InvDet.intInvoiceDetailId)
+		,strInvoiceNumber = Inv.strInvoiceNumber
+		,strPONumber = Inv.strPONumber
 		,strCustomer = EN.strName
 		,CUS.strVatNumber
 		,Inv.strBillToAddress
@@ -162,8 +163,10 @@ BEGIN
 		,Inv.strFooterComments
 		,Inv.strTransactionType
 		,Inv.strType
-		,Item.strItemNo
-		,InvDet.strItemDescription
+		,strItemNo = Item.strItemNo
+		,strBundleItemNo = Bun.strItemNo 
+		,strItemDescription = InvDet.strItemDescription
+		,strItemOrigin = OG.strDescription
 		,InvDet.dblPrice
 		,strPrice2Decimals = LTRIM(CAST(ROUND(InvDet.dblPrice, 2) AS NUMERIC(18, 2)))
 		,strPrice4Decimals = LTRIM(CAST(ROUND(InvDet.dblPrice, 4) AS NUMERIC(18, 4)))
@@ -172,6 +175,17 @@ BEGIN
 		,InvDet.dblShipmentGrossWt
 		,InvDet.dblShipmentTareWt
 		,InvDet.dblShipmentNetWt
+		,strProvisionalInvoiceNumber = Prov.strInvoiceNumber
+		,strProvisionalPONumber = Prov.strPONumber
+		,dtmProvDate = Prov.dtmDate
+		,dblProvQtyShipped = ProvDet.dblQtyShipped
+		,dblProvGrossWt = ProvDet.dblShipmentGrossWt
+		,dblProvTareWt = ProvDet.dblShipmentTareWt
+		,dblProvNetWt = ProvDet.dblShipmentNetWt
+		,dblProvPrice = ProvDet.dblPrice
+		,dblProvTotal = ProvDet.dblTotal
+		,dblProvInvoiceTotal = Inv.dblProvisionalAmount
+		,dblProvAmountDue = Inv.dblAmountDue
 		,blbHeaderLogo = dbo.fnSMGetCompanyLogo('Header') 
 		,blbFooterLogo = dbo.fnSMGetCompanyLogo('Footer')
 		,intReportLogoHeight = ISNULL(CP.intReportLogoHeight,0)
@@ -195,6 +209,7 @@ BEGIN
 		,strNetUOM = isnull(rtWUOMTranslation.strTranslation, WUOM.strUnitMeasure) 
 		,strNetWtInfo = LTRIM(dbo.fnRemoveTrailingZeroes(ROUND(InvDet.dblShipmentNetWt, 2))) + ' ' + isnull(rtWUOMTranslation.strTranslation,WUOM.strUnitMeasure) 
 		,strPriceInfo = LTRIM(CAST(ROUND(InvDet.dblPrice, 2) AS NUMERIC(18, 2))) + ' ' + InvDetPriceCur.strCurrency + ' '+@per+' ' + isnull(rtPriceUOMTranslation.strTranslation,InvDetPriceUOM.strUnitMeasure)
+		,strPriceInfo2 = InvDetPriceCur.strCurrency + ' ' + LTRIM(CAST(ROUND(InvDet.dblPrice, 2) AS NUMERIC(18, 2))) + ' / ' + isnull(rtPriceUOMTranslation.strTranslation,InvDetPriceUOM.strUnitMeasure)
 		,InvDet.dblTotal
 		,strQtyOrderedInfo = LTRIM(dbo.fnRemoveTrailingZeroes(ROUND(InvDet.dblQtyOrdered, 2))) + ' ' + isnull(rtOUOMTranslation.strTranslation,OUOM.strUnitMeasure)
 		,strQtyShippedInfo = LTRIM(dbo.fnRemoveTrailingZeroes(ROUND(InvDet.dblQtyShipped, 2))) + ' ' + isnull(rtSUOMTranslation.strTranslation,SUOM.strUnitMeasure)
@@ -205,6 +220,7 @@ BEGIN
 		,CH.strCustomerContract
 		,strContractNumber = LTRIM(CH.strContractNumber) +'/'+ LTRIM(CD.intContractSeq)
 		,strContractNumberOnly = LTRIM(CH.strContractNumber)
+		,CH.dtmContractDate
 		,CD.intContractSeq
 		,strContainerNumber = CASE WHEN (L.intPurchaseSale = 3) THEN ISNULL(DSCont.strContainerNumber, Cont.strContainerNumber) ELSE Cont.strContainerNumber END
 		,strMarks = CASE WHEN (L.intPurchaseSale = 3) THEN ISNULL(DSCont.strMarks, Cont.strMarks) ELSE Cont.strMarks END
@@ -215,6 +231,10 @@ BEGIN
 		,intLineCount = 1
 		,FT.strFreightTerm
 		,strMVessel = CASE WHEN L.intPurchaseSale = 2 THEN ISNULL(PL.strMVessel, L.strMVessel) ELSE L.strMVessel END
+		,strTransshipmentVessel = UPPER(L.strMVessel + ' VOY.' + L.strMVoyageNumber
+									+ CASE WHEN ISNULL(L.strVessel2, '') <> '' THEN ', ' + L.strVessel2 ELSE '' END 
+									+ CASE WHEN ISNULL(L.strVessel3, '') <> '' THEN ', ' + L.strVessel3 ELSE '' END 
+									+ CASE WHEN ISNULL(L.strVessel4, '') <> '' THEN ', ' + L.strVessel4 ELSE '' END)
 		,strVesselDirection = CASE WHEN L.intPurchaseSale = 2 THEN
 							  	COALESCE(PL.strMVessel, L.strMVessel, '') + CASE WHEN (COALESCE(PL.strOriginPort, L.strOriginPort, '') <>  '' AND COALESCE(PL.strDestinationPort, L.strDestinationPort, '') <> '') 
 									THEN ' ' + @from + ' ' + ISNULL(PL.strOriginPort, L.strOriginPort) + ' ' + @to + ' ' + ISNULL(PL.strDestinationPort, L.strDestinationPort)  ELSE '' END
@@ -236,23 +256,34 @@ BEGIN
 		,strDocument = @strContractDocuments 
 		,strCondition = @strContractConditions 
 		,strFreightCondition = @strFreightConditions
+		,strFreightDescCondition = @strFreightDescConditions
 		,TM.strTerm
+		,Inv.dtmDueDate
 		,dtmInvoiceDate = Inv.dtmDate
 		,strInvoicePaymentInformation = @strPaymentInfo 
+		,strWarehouse = COALESCE(CT.strCity, CLSL.strSubLocationName, CN.strCountry, '')
 		,strWarehouseCondition = (SELECT TOP 1 CASE WHEN ISNULL(ID.strItemDescription, '') = '' 
 									THEN I.strDescription ELSE ID.strItemDescription END
 								  FROM tblARInvoiceDetail ID
 								  JOIN tblICItem I ON I.intItemId = ID.intItemId
 								  WHERE intInvoiceId = Inv.intInvoiceId AND I.strType = 'Comment')
+		,strPositionType = POS.strPositionType
 	FROM tblARInvoice Inv
 	JOIN tblEMEntity EN ON EN.intEntityId = Inv.intEntityCustomerId
 	JOIN tblARCustomer CUS ON CUS.intEntityId = EN.intEntityId
 	JOIN tblARInvoiceDetail InvDet ON InvDet.intInvoiceId = Inv.intInvoiceId
-	JOIN tblICItem Item ON Item.intItemId = InvDet.intItemId
+	JOIN tblICItem Item ON Item.intItemId = InvDet.intItemId AND Item.strType <> 'Comment'
 	JOIN tblSMCurrency InvCur ON InvCur.intCurrencyID = Inv.intCurrencyId
 	LEFT JOIN tblSMTaxGroup TaxG ON TaxG.intTaxGroupId = InvDet.intTaxGroupId
 	LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = InvDet.intContractDetailId
 	LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+	LEFT JOIN tblICCommodityAttribute OG ON OG.intCommodityAttributeId = Item.intOriginId
+	LEFT JOIN tblICItem Bun ON Bun.intItemId = CD.intItemBundleId
+	LEFT JOIN tblSMFreightTerms CFT ON CH.intFreightTermId = CFT.intFreightTermId
+	LEFT JOIN tblCTPosition POS ON POS.intPositionId = CH.intPositionId
+	LEFT JOIN tblSMCity CT ON CT.intCityId = CH.intINCOLocationTypeId AND CFT.strINCOLocationType = 'City'
+	LEFT JOIN tblSMCountry CN ON CN.intCountryID = CH.intCountryId
+	LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = CH.intWarehouseId AND CFT.strINCOLocationType <> 'City'
 	LEFT JOIN tblSMCurrency PriceCur ON PriceCur.intCurrencyID = CD.intCurrencyId
 	LEFT JOIN tblSMCurrency InvDetPriceCur ON InvDetPriceCur.intCurrencyID = InvDet.intSubCurrencyId 
 	LEFT JOIN tblICItemUOM OIM ON OIM.intItemUOMId = InvDet.intOrderUOMId
@@ -267,7 +298,9 @@ BEGIN
 	LEFT JOIN tblICUnitMeasure InvDetPriceUOM ON InvDetPriceUOM.intUnitMeasureId = InvDetPriceItemUOM.intUnitMeasureId 
 	LEFT JOIN tblICItemUOM WtItemUOM ON WtItemUOM.intItemUOMId = InvDet.intItemWeightUOMId
 	LEFT JOIN tblICUnitMeasure WtUOM ON WtUOM.intUnitMeasureId = WtItemUOM.intUnitMeasureId
-	LEFT JOIN tblLGLoad L ON L.intLoadId = Inv.intLoadId
+	LEFT JOIN tblARInvoice Prov ON Prov.intInvoiceId = Inv.intOriginalInvoiceId AND Prov.strType = 'Provisional'
+	LEFT JOIN tblARInvoiceDetail ProvDet ON ProvDet.intInvoiceId = Prov.intInvoiceId
+	LEFT JOIN tblLGLoad L ON L.intLoadId = ISNULL(Prov.intLoadId, Inv.intLoadId)
 	LEFT JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
 		AND LD.intLoadDetailId = InvDet.intLoadDetailId
 	LEFT JOIN tblEMEntity LFA ON LFA.intEntityId = L.intForwardingAgentEntityId
@@ -286,6 +319,7 @@ BEGIN
 	LEFT JOIN tblEMEntity PLFA ON PLFA.intEntityId = PL.intForwardingAgentEntityId
 	LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = Inv.intFreightTermId
 	LEFT JOIN tblSMTerm TM ON TM.intTermID = CH.intTermId
+
 	CROSS APPLY tblLGCompanyPreference CP
 	left join tblSMScreen				rtWUOMScreen on rtWUOMScreen.strNamespace = 'Inventory.view.ReportTranslation'
 	left join tblSMTransaction			rtWUOMTransaction on rtWUOMTransaction.intScreenId = rtWUOMScreen.intScreenId and rtWUOMTransaction.intRecordId = WUOM.intUnitMeasureId
