@@ -1696,8 +1696,7 @@ BEGIN TRY
 		JOIN tblICCommodity						Commodity		 ON Commodity.intCommodityId		 = Item.intCommodityId
 		JOIN tblICCommodityAttribute			CA1				 ON CA1.intCommodityAttributeId		 = Item.intProductTypeId
 		AND	CA1.strType						 = 'ProductType'
-		JOIN tblRKCommodityMarketMapping		MarketMapping	 ON  MarketMapping.strCommodityAttributeId = CA1.intCommodityAttributeId 
-		AND MarketMapping.intCommodityId = CA1.intCommodityId
+		JOIN tblRKCommodityMarketMapping		MarketMapping	 ON  MarketMapping.intCommodityId = CA1.intCommodityId
 		JOIN tblRKFutureMarket					Market			 ON  Market.intFutureMarketId		 = MarketMapping.intFutureMarketId
 		JOIN tblSMCurrency						FCY				 ON	FCY.intCurrencyID				 = Market.intCurrencyId
 		JOIN tblICUnitMeasure					MarketUOM		 ON	 MarketUOM.intUnitMeasureId		 = Market.intUnitMeasureId
@@ -1714,7 +1713,8 @@ BEGIN TRY
 		WHERE ISNULL(Lot.intCompanyId,0) = CASE 
 												WHEN ISNULL(@intCompanyId, 0) = 0 THEN ISNULL(Lot.intCompanyId,0)
 												ELSE @intCompanyId
-										   END	
+										   END
+		AND CA1.intCommodityAttributeId IN (select * from dbo.fnCommaSeparatedValueToTable(MarketMapping.strCommodityAttributeId))
 
 	
 	INSERT INTO @tblContractCost
