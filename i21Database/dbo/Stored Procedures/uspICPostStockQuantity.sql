@@ -77,7 +77,14 @@ BEGIN
 	RETURN; 
 END 
 
-IF EXISTS (SELECT 1 FROM tblICItem i WHERE i.intItemId = @intItemId AND ISNULL(i.ysnSeparateStockForUOMs, 0) = 0) 
+IF EXISTS (
+	SELECT TOP 1 1 
+	FROM tblICItem i 
+	WHERE 
+		i.intItemId = @intItemId 
+		AND ISNULL(i.ysnSeparateStockForUOMs, 0) = 0 
+		AND ISNULL(i.strLotTracking, 'No') = 'No'
+) 
 BEGIN 	
 	-- Replace the UOM to 'Stock Unit'. 
 	-- Convert the Qty, Cost, and Sales Price to stock UOM. 
