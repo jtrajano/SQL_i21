@@ -7710,6 +7710,7 @@
     <Build Include="dbo\Functions\fnSCGetDPContract.sql" />
     <Build Include="dbo\Views\vyuAPClearingFilterTransactionNo.sql" />
     <Build Include="dbo\Tables\tblSCDeliverySheetContractAdjustment.sql" />
+    <Build Include="dbo\Views\vyuAPReceiptClearingGL.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
