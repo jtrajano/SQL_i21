@@ -360,12 +360,13 @@ BEGIN TRY
 				,intCustomerStorageId	  = SST.intCustomerStorageId
 				,dblStorageUnits          = SST.dblUnits
 				,dblRemainingUnits        = SST.dblUnits
-				,dblOpenBalance           = SSV.dblOpenBalance
-				,strStorageTicketNumber   = SSV.strStorageTicketNumber
-				,intCompanyLocationId     = SSV.intCompanyLocationId
-				,intStorageTypeId         = SSV.intStorageTypeId
-				,intStorageScheduleId     = SSV.intStorageScheduleId
-				,intContractHeaderId      = SSV.intContractHeaderId
+				,dblOpenBalance           = CS.dblOpenBalance
+				,strStorageTicketNumber   = CS.strStorageTicketNumber
+				,intCompanyLocationId     = CS.intCompanyLocationId
+				,intStorageTypeId         = CS.intStorageTypeId
+				,intStorageScheduleId     = CS.intStorageScheduleId
+				,intContractHeaderId      = SH.intContractHeaderId
+				,ysnTransferStorage		  = CS.ysnTransferStorage
 			FROM tblGRSettleStorageTicket SST
 			JOIN tblGRCustomerStorage CS
 				ON CS.intCustomerStorageId = SST.intCustomerStorageId
