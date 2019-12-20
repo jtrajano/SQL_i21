@@ -402,7 +402,16 @@ BEGIN TRY
 	-- Add Payables if Create Other Cost Payable on Save Contract set to true
 	IF EXISTS(SELECT TOP 1 1 FROM tblCTCompanyPreference WHERE ysnCreateOtherCostPayable = 1)
 	BEGIN
-		EXEC uspCTManagePayable @intContractHeaderId, 'header', 0, @userId
+		--EXEC uspCTManagePayable @intContractHeaderId, 'header', 0, @userId
+		select top 1 @strAddToPayableMessage = strMessage from dbo.fnCTGetVoucherPayable(@intContractHeaderId, 'header', 1, 0);
+		if (isnull(@strAddToPayableMessage,'') <> '')
+		begin
+			RAISERROR (@strAddToPayableMessage,18,1,'WITH NOWAIT')   
+		end
+		else
+		begin
+			EXEC uspCTManagePayable @intContractHeaderId, 'header', 0, @userId  
+		end
 	END
 
 END TRY

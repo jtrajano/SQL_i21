@@ -8284,6 +8284,7 @@
     <Build Include="dbo\Functions\fnSCGetDPContract.sql" />
     <None Include="Scripts\Post-Deployment\SM\2010_DefaultAdminUser.sql" />
     <Build Include="dbo\Views\vyuAPReceiptClearingGL.sql" />
+    <Build Include="dbo\Functions\fnCTGetVoucherPayable.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
