@@ -586,7 +586,7 @@ BEGIN
 						, strLocationName
 						, strCurrency = NULL
 					FROM (
-						SELECT intTicketId
+						SELECT DISTINCT intTicketId
 							, strTicketNumber
 							, dblTotal = dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId, @intCommodityUnitMeasureId, (ISNULL([Balance],0)))
 							, ch.intCompanyLocationId
@@ -629,7 +629,7 @@ BEGIN
 							, strLocationName
 							, strCurrency = NULL
 						FROM (
-							SELECT intTicketId
+							SELECT DISTINCT intTicketId
 								, strTicketNumber
 								, dblTotal = dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId, @intCommodityUnitMeasureId, (ISNULL([Balance],0)))
 								, ch.intCompanyLocationId

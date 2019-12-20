@@ -360,15 +360,23 @@ BEGIN TRY
 				,intCustomerStorageId	  = SST.intCustomerStorageId
 				,dblStorageUnits          = SST.dblUnits
 				,dblRemainingUnits        = SST.dblUnits
-				,dblOpenBalance           = SSV.dblOpenBalance
-				,strStorageTicketNumber   = SSV.strStorageTicketNumber
-				,intCompanyLocationId     = SSV.intCompanyLocationId
-				,intStorageTypeId         = SSV.intStorageTypeId
-				,intStorageScheduleId     = SSV.intStorageScheduleId
-				,intContractHeaderId      = SSV.intContractHeaderId
+				,dblOpenBalance           = CS.dblOpenBalance
+				,strStorageTicketNumber   = CS.strStorageTicketNumber
+				,intCompanyLocationId     = CS.intCompanyLocationId
+				,intStorageTypeId         = CS.intStorageTypeId
+				,intStorageScheduleId     = CS.intStorageScheduleId
+				,intContractHeaderId      = SH.intContractHeaderId
 			FROM tblGRSettleStorageTicket SST
-			JOIN vyuGRStorageSearchView SSV 
-				ON SSV.intCustomerStorageId = SST.intCustomerStorageId
+			JOIN tblGRCustomerStorage CS
+				ON CS.intCustomerStorageId = SST.intCustomerStorageId
+			OUTER APPLY (
+				SELECT DISTINCT
+					intContractHeaderId
+				FROM tblGRStorageHistory
+				WHERE intCustomerStorageId = CS.intCustomerStorageId
+					AND intContractHeaderId IS NOT NULL
+					AND intInventoryReceiptId IS NOT NULL
+			) SH 
 			WHERE SST.intSettleStorageId = @intSettleStorageId 
 				AND SST.dblUnits > 0
 			ORDER BY SST.intSettleStorageTicketId
