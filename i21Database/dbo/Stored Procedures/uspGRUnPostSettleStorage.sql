@@ -189,7 +189,7 @@ BEGIN TRY
 				WHERE intCustomerStorageId = SST.intCustomerStorageId
 					AND intContractHeaderId IS NOT NULL
 					AND intInventoryReceiptId IS NOT NULL
-					AND UH.intContractHeaderId = SH.intContractHeaderId
+					AND intContractHeaderId = UH.intContractHeaderId
 			) SH
 			WHERE UH.intExternalHeaderId = @intSettleStorageId 
 				AND UH.strScreenName = 'Settle Storage' 
