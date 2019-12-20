@@ -26,6 +26,7 @@ DECLARE @voucherBillId NVARCHAR(100)
 DECLARE @prepayBillId NVARCHAR(100);
 DECLARE @error NVARCHAR(1000);
 DECLARE @batchIdUsed NVARCHAR(50);
+DECLARE @type INT;
 
 BEGIN TRY
 
@@ -37,9 +38,21 @@ SELECT
 	@prepayAccount = ISNULL(loc.intPurchaseAdvAccount,@prepayAccount)
 	,@apAccount = voucher.intAccountId
 	,@voucherBillId = voucher.strBillId
+	,@type = voucher.intTransactionType
 FROM tblSMCompanyLocation loc
 INNER JOIN tblAPBill voucher ON loc.intCompanyLocationId = voucher.intShipToId
 WHERE voucher.intBillId = @voucherKey;
+
+DECLARE @supportedTypes TABLE(intTransactionType INT);
+INSERT INTO @supportedTypes
+SELECT 1
+UNION ALL
+SELECT 14
+IF NOT EXISTS(SELECT 1 FROM @supportedTypes WHERE intTransactionType = @type)
+BEGIN
+	RAISERROR('We cannot create prepaid for the current transaction type.', 16, 1);
+	RETURN;
+END
 
 IF @prepayAccount IS NULL
 BEGIN 
