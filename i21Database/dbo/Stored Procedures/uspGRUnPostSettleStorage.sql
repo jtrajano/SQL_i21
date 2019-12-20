@@ -171,11 +171,13 @@ BEGIN TRY
 				WHERE intCustomerStorageId = SST.intCustomerStorageId
 					AND intContractHeaderId IS NOT NULL
 					AND intInventoryReceiptId IS NOT NULL
+					AND UH.intContractHeaderId = SH.intContractHeaderId
 			) SH
 			WHERE UH.intExternalHeaderId = @intSettleStorageId 
 				AND UH.strScreenName = 'Settle Storage' 
 				AND UH.strFieldName = 'Balance' 
 				--AND SH.strType IN ('From Scale','From Delivery Sheet')
+				AND SH.intContractHeaderId IS NOT NULL
 
 			UNION ALL
 		
