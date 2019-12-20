@@ -128,6 +128,7 @@ BEGIN TRY
 	DECLARE @createdVouchersId NVARCHAR(MAX)
 	DECLARE @ysnDPOwnedType AS BIT
 	DECLARE @ysnFromTransferStorage AS BIT
+	DECLARE @intTransferStorageId INT
 
 	--Get vouchered quantity
 	DECLARE @dblTotalVoucheredQuantity AS DECIMAL(24,10)
@@ -783,7 +784,8 @@ BEGIN TRY
 					,@ysnFromTransferStorage	= ysnTransferStorage
 				FROM @SettleStorage
 				WHERE intSettleStorageKey = @SettleStorageKey
-				
+
+				SELECT @intTransferStorageId = intTransferStorageId FROM tblGRTransferStorageReference where @intCustomerStorageId = @intCustomerStorageId
 				IF @LocationId IS NULL
 				BEGIN
 					SET @LocationId = @intCompanyLocationId
@@ -1490,7 +1492,7 @@ BEGIN TRY
 					select ' contract depletion',* from @tblDepletion
 
 				end 
-				IF @debug_awesome_ness = 1 and 1 = 1
+				IF @debug_awesome_ness = 1 and 1 = 0
 				begin
 					select 'items to post',* from @ItemsToPost
 
@@ -2122,8 +2124,9 @@ BEGIN TRY
 																(select dblCost from tblICInventoryTransaction IT
 																inner join tblGRStorageHistory STH
 																	on STH.intTransferStorageId = IT.intTransactionId
-																	where IT.intTransactionTypeId = 56
-																		and IT.intItemId = a.intItemId)
+																	where IT.intTransactionId = @intTransferStorageId 
+																		and IT.intTransactionTypeId = 56	
+																		and IT.intItemId = a.intItemId and STH.strType = 'Transfer')
 															else null end
 														end								
 					,[dblCostUnitQty]				= ISNULL(a.dblCostUnitQty,1)
