@@ -113,22 +113,22 @@ CustomerNumber
 ,State			
 ,Authority1		
 ,Authority2  COLLATE Latin1_General_CI_AS AS Authority2
-,FETCharge		= CASE WHEN SUM(CASE WHEN strTaxCodeReference = 'FET' THEN Charge ELSE  0 END) > 0 THEN 'Y' ELSE 'N' END COLLATE Latin1_General_CI_AS
-,SETCharge		= CASE WHEN SUM(CASE WHEN strTaxCodeReference = 'SET' THEN Charge ELSE  0 END) > 0 THEN 'Y' ELSE 'N' END COLLATE Latin1_General_CI_AS
-,SSTCharge		= CASE WHEN SUM(CASE WHEN strTaxCodeReference = 'SST' THEN Charge ELSE  0 END) > 0 THEN 'Y' ELSE 'N' END COLLATE Latin1_General_CI_AS
-,Locale1Charge  = CASE WHEN SUM(CASE WHEN strTaxCodeReference = 'LC1' THEN Charge ELSE  0 END) > 0 THEN 'Y' ELSE 'N' END COLLATE Latin1_General_CI_AS
-,Locale2Charge  = CASE WHEN SUM(CASE WHEN strTaxCodeReference = 'LC2' THEN Charge ELSE  0 END) > 0 THEN 'Y' ELSE 'N' END COLLATE Latin1_General_CI_AS
-,Locale3Charge  = CASE WHEN SUM(CASE WHEN strTaxCodeReference = 'LC3' THEN Charge ELSE  0 END) > 0 THEN 'Y' ELSE 'N' END COLLATE Latin1_General_CI_AS
-,Locale4Charge  = CASE WHEN SUM(CASE WHEN strTaxCodeReference = 'LC4' THEN Charge ELSE  0 END) > 0 THEN 'Y' ELSE 'N' END COLLATE Latin1_General_CI_AS
-,Locale5Charge  = CASE WHEN SUM(CASE WHEN strTaxCodeReference = 'LC5' THEN Charge ELSE  0 END) > 0 THEN 'Y' ELSE 'N' END COLLATE Latin1_General_CI_AS
-,Locale6Charge  = CASE WHEN SUM(CASE WHEN strTaxCodeReference = 'LC6' THEN Charge ELSE  0 END) > 0 THEN 'Y' ELSE 'N' END COLLATE Latin1_General_CI_AS
-,Locale7Charge  = CASE WHEN SUM(CASE WHEN strTaxCodeReference = 'LC7' THEN Charge ELSE  0 END) > 0 THEN 'Y' ELSE 'N' END COLLATE Latin1_General_CI_AS
-,Locale8Charge  = CASE WHEN SUM(CASE WHEN strTaxCodeReference = 'LC8' THEN Charge ELSE  0 END) > 0 THEN 'Y' ELSE 'N' END COLLATE Latin1_General_CI_AS
-,Locale9Charge  = CASE WHEN SUM(CASE WHEN strTaxCodeReference = 'LC9' THEN Charge ELSE  0 END) > 0 THEN 'Y' ELSE 'N' END COLLATE Latin1_General_CI_AS
-,Locale10Charge  = CASE WHEN SUM(CASE WHEN strTaxCodeReference = 'LC10' THEN Charge ELSE  0 END) > 0 THEN 'Y' ELSE 'N' END COLLATE Latin1_General_CI_AS
-,Locale11Charge  = CASE WHEN SUM(CASE WHEN strTaxCodeReference = 'LC11' THEN Charge ELSE  0 END) > 0 THEN 'Y' ELSE 'N' END COLLATE Latin1_General_CI_AS
-,Locale12Charge  = CASE WHEN SUM(CASE WHEN strTaxCodeReference = 'LC12' THEN Charge ELSE  0 END) > 0 THEN 'Y' ELSE 'N' END COLLATE Latin1_General_CI_AS
-
+,FETCharge		= CASE WHEN SUM(CASE WHEN strTaxCodeReference = 'FET' THEN Charge ELSE  1 END) > 0 THEN 'Y' ELSE 'N' END COLLATE Latin1_General_CI_AS
+,SETCharge		= CASE WHEN SUM(CASE WHEN strTaxCodeReference = 'SET' THEN Charge ELSE  1 END) > 0 THEN 'Y' ELSE 'N' END COLLATE Latin1_General_CI_AS
+,SSTCharge		= CASE WHEN SUM(CASE WHEN strTaxCodeReference = 'SST' THEN Charge ELSE  1 END) > 0 THEN 'Y' ELSE 'N' END COLLATE Latin1_General_CI_AS
+,Locale1Charge  = CASE WHEN SUM(CASE WHEN strTaxCodeReference = 'LC1' THEN Charge ELSE  1 END) > 0 THEN 'Y' ELSE 'N' END COLLATE Latin1_General_CI_AS
+,Locale2Charge  = CASE WHEN SUM(CASE WHEN strTaxCodeReference = 'LC2' THEN Charge ELSE  1 END) > 0 THEN 'Y' ELSE 'N' END COLLATE Latin1_General_CI_AS
+,Locale3Charge  = CASE WHEN SUM(CASE WHEN strTaxCodeReference = 'LC3' THEN Charge ELSE  1 END) > 0 THEN 'Y' ELSE 'N' END COLLATE Latin1_General_CI_AS
+,Locale4Charge  = CASE WHEN SUM(CASE WHEN strTaxCodeReference = 'LC4' THEN Charge ELSE  1 END) > 0 THEN 'Y' ELSE 'N' END COLLATE Latin1_General_CI_AS
+,Locale5Charge  = CASE WHEN SUM(CASE WHEN strTaxCodeReference = 'LC5' THEN Charge ELSE  1 END) > 0 THEN 'Y' ELSE 'N' END COLLATE Latin1_General_CI_AS
+,Locale6Charge  = CASE WHEN SUM(CASE WHEN strTaxCodeReference = 'LC6' THEN Charge ELSE  1 END) > 0 THEN 'Y' ELSE 'N' END COLLATE Latin1_General_CI_AS
+,Locale7Charge  = CASE WHEN SUM(CASE WHEN strTaxCodeReference = 'LC7' THEN Charge ELSE  1 END) > 0 THEN 'Y' ELSE 'N' END COLLATE Latin1_General_CI_AS
+,Locale8Charge  = CASE WHEN SUM(CASE WHEN strTaxCodeReference = 'LC8' THEN Charge ELSE  1 END) > 0 THEN 'Y' ELSE 'N' END COLLATE Latin1_General_CI_AS
+,Locale9Charge  = CASE WHEN SUM(CASE WHEN strTaxCodeReference = 'LC9' THEN Charge ELSE  1 END) > 0 THEN 'Y' ELSE 'N' END COLLATE Latin1_General_CI_AS
+,Locale10Charge  = CASE WHEN SUM(CASE WHEN strTaxCodeReference = 'LC10' THEN Charge ELSE  1 END) > 0 THEN 'Y' ELSE 'N' END COLLATE Latin1_General_CI_AS
+,Locale11Charge  = CASE WHEN SUM(CASE WHEN strTaxCodeReference = 'LC11' THEN Charge ELSE  1 END) > 0 THEN 'Y' ELSE 'N' END COLLATE Latin1_General_CI_AS
+,Locale12Charge  = CASE WHEN SUM(CASE WHEN strTaxCodeReference = 'LC12' THEN Charge ELSE  1 END) > 0 THEN 'Y' ELSE 'N' END COLLATE Latin1_General_CI_AS
+,intEntityCustomerId
 FROM  (
 
 /******************************************************************************************************************************************************************************************************/
@@ -209,9 +209,34 @@ FROM  (
 		
 ) ALLTaxCodes
 /******************************************************************************************************************************************************************************************************/		--LEFT JOIN EXEMPTIONS B ON B.intEntityCustomerId = A.intEntityCustomerId
+
+
+INNER JOIN
+
+(
+	SELECT DISTINCT A.intTaxStateID TaxGroupID ,C.intEntityId
+	FROM tblTMSite A
+	INNER JOIN tblTMCustomer B ON A.intCustomerID = B.intCustomerID AND A.intTaxStateID IS NOT NULL AND A.ysnActive = 1
+	INNER JOIN (SELECT 
+					Ent.strEntityNo
+					,Ent.intEntityId
+					,Cus.ysnActive
+					,Loc.intTermsId
+					,Trm.strTermCode
+					,Trm.strTerm
+				FROM tblEMEntity Ent
+				INNER JOIN tblARCustomer Cus ON Ent.intEntityId = Cus.[intEntityId] AND Cus.ysnActive = 1
+				INNER JOIN [tblEMEntityLocation] Loc ON Ent.intEntityId = Loc.intEntityId and Loc.ysnDefaultLocation = 1
+				LEFT JOIN tblSMTerm Trm ON Trm.intTermID = Loc.intTermsId) C ON B.intCustomerNumber = C.intEntityId
+	
+	UNION 
+	
+	SELECT DISTINCT TaxGroupId,intEntityId FROM [vyuETExportCustomer] WHERE ISNULL(NULLIF(TaxGroupId, ''),0) <> 0
+
+) CustomerSiteAndDefaultTaxGroup ON ALLTaxCodes.intEntityCustomerId = CustomerSiteAndDefaultTaxGroup.intEntityId AND ALLTaxCodes.Authority1 = CustomerSiteAndDefaultTaxGroup.TaxGroupID
 		
 GROUP BY 
-	--intEntityCustomerId	,
+	intEntityCustomerId	,
 	CustomerNumber
 	--,intEntityCustomerId
 	--,intItemId 
