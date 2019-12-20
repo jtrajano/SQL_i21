@@ -111,8 +111,8 @@ BEGIN
 					,[strMonth24]
 					)) AS PivotTable;
 
-		SELECT intBookId 
-			,intSubBookId 
+		SELECT intBookId
+			,intSubBookId
 			,intMainItemId
 			,intItemId
 			,strBook
@@ -279,10 +279,10 @@ BEGIN
 						ELSE AV.strValue
 						END
 					) strValue
-					,B.intBookId 
-					,SB.intSubBookId 
-					,MI.intItemId AS intMainItemId
-					,I.intItemId
+				,B.intBookId
+				,SB.intSubBookId
+				,MI.intItemId AS intMainItemId
+				,I.intItemId
 			FROM tblMFInvPlngSummaryDetail AV
 			JOIN tblMFInvPlngSummary S ON S.intInvPlngSummaryId = AV.intInvPlngSummaryId
 			JOIN tblCTReportAttribute A ON A.intReportAttributeID = AV.intAttributeId
@@ -542,8 +542,8 @@ BEGIN
 
 		IF @ysnRefreshContract = 0
 		BEGIN
-			SELECT intBookId 
-				,intSubBookId 
+			SELECT intBookId
+				,intSubBookId
 				,intMainItemId
 				,intItemId
 				,strBook
@@ -709,9 +709,15 @@ BEGIN
 								THEN Convert(NUMERIC(18, 6), 0.0)
 							ELSE AV.strValue
 							END
-						) *IsNULL(UMCByWeight.dblConversionToStock, 1) As strValue
-						,B.intBookId 
-					,SB.intSubBookId 
+						) * (
+						CASE 
+							WHEN AV.intReportAttributeID = 10
+								THEN 1
+							ELSE IsNULL(UMCByWeight.dblConversionToStock, 1)
+							END
+						) AS strValue
+					,B.intBookId
+					,SB.intSubBookId
 					,MI.intItemId AS intMainItemId
 					,I.intItemId
 				FROM tblCTInvPlngReportAttributeValue AV
@@ -725,8 +731,8 @@ BEGIN
 				LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityId = I.intCommodityId
 					AND I.intProductTypeId = CA.intCommodityAttributeId
 					AND CA.strType = 'ProductType'
-					LEFT JOIN tblICUnitMeasureConversion UMCByWeight ON UMCByWeight.intUnitMeasureId = RM.intUnitMeasureId --From Unit
-			AND UMCByWeight.intStockUnitMeasureId = @intUnitMeasureId 
+				LEFT JOIN tblICUnitMeasureConversion UMCByWeight ON UMCByWeight.intUnitMeasureId = RM.intUnitMeasureId --From Unit
+					AND UMCByWeight.intStockUnitMeasureId = @intUnitMeasureId
 				WHERE A.intReportAttributeID IN (
 						2 --Opening Inventory
 						,8 --Forecasted Consumption
@@ -891,11 +897,11 @@ BEGIN
 						,[Ending Inventory strMonth24]
 						,[Weeks of Supply strMonth24]
 						)) AS PivotTable
-						ORDER BY strBook
-			,strSubBook
-			,strProductType
-			,strItemNo
-			,strItemDescription
+			ORDER BY strBook
+				,strSubBook
+				,strProductType
+				,strItemNo
+				,strItemDescription
 		END
 		ELSE
 		BEGIN
@@ -1087,9 +1093,8 @@ BEGIN
 				,intBookId
 				,intSubBookId
 
-			SELECT 
-				intBookId 
-				,intSubBookId 
+			SELECT intBookId
+				,intSubBookId
 				,intMainItemId
 				,intItemId
 				,strBook
@@ -1255,11 +1260,17 @@ BEGIN
 								THEN Convert(NUMERIC(18, 6), 0.0)
 							ELSE FD.dblQty
 							END
-						)*IsNULL(UMCByWeight.dblConversionToStock, 1) as strValue
-						,B.intBookId 
-						,SB.intSubBookId 
-						,MI.intItemId AS intMainItemId
-						,I.intItemId
+						) *(
+						CASE 
+							WHEN AV.intReportAttributeID = 10
+								THEN 1
+							ELSE IsNULL(UMCByWeight.dblConversionToStock, 1)
+							END
+						) AS strValue
+					,B.intBookId
+					,SB.intSubBookId
+					,MI.intItemId AS intMainItemId
+					,I.intItemId
 				FROM #tblMFFinalDemand FD
 				JOIN tblCTReportAttribute A ON A.intReportAttributeID = FD.intAttributeId
 				--JOIN tblCTInvPlngReportMaster RM ON RM.intInvPlngReportMasterID = @intReportMasterID
@@ -1271,7 +1282,7 @@ BEGIN
 					AND I.intProductTypeId = CA.intCommodityAttributeId
 					AND CA.strType = 'ProductType'
 				LEFT JOIN tblICUnitMeasureConversion UMCByWeight ON UMCByWeight.intUnitMeasureId = RM.intUnitMeasureId --From Unit
-			AND UMCByWeight.intStockUnitMeasureId = @intUnitMeasureId 
+					AND UMCByWeight.intStockUnitMeasureId = @intUnitMeasureId
 				WHERE A.intReportAttributeID IN (
 						2
 						,8
@@ -1429,11 +1440,11 @@ BEGIN
 						,[Ending Inventory strMonth24]
 						,[Weeks of Supply strMonth24]
 						)) AS PivotTable
-						ORDER BY strBook
-			,strSubBook
-			,strProductType
-			,strItemNo
-			,strItemDescription
+			ORDER BY strBook
+				,strSubBook
+				,strProductType
+				,strItemNo
+				,strItemDescription
 		END
 	END
 END
