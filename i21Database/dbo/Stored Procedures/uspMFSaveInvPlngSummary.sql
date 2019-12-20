@@ -28,7 +28,7 @@ BEGIN TRY
 	IF @intTransactionCount = 0
 		BEGIN TRANSACTION
 
-	IF @intInvPlngSummaryId IS NULL
+	IF @intInvPlngSummaryId = 0
 	BEGIN
 		INSERT INTO tblMFInvPlngSummary (
 			strPlanName
@@ -113,29 +113,7 @@ BEGIN TRY
 
 	DELETE
 	FROM tblMFInvPlngSummaryDetail
-	WHERE NOT EXISTS (
-			SELECT *
-			FROM OPENXML(@idoc, 'root/InvPlngSummaryDetails/InvPlngSummaryDetail', 2) WITH (intInvPlngSummaryDetailId INT) x
-			WHERE x.intInvPlngSummaryDetailId = tblMFInvPlngSummaryDetail.intInvPlngSummaryDetailId
-			)
-		AND intInvPlngSummaryId = @intInvPlngSummaryId
-
-	UPDATE SummaryDetail
-	SET intAttributeId = x.intAttributeId
-		,intItemId = x.intItemId
-		,strFieldName = x.strFieldName
-		,strValue = x.strValue
-		,intMainItemId = x.intMainItemId
-	FROM OPENXML(@idoc, 'root/InvPlngSummaryDetails/InvPlngSummaryDetail', 2) WITH (
-			intAttributeId INT
-			,intItemId INT
-			,strFieldName NVARCHAR(50) COLLATE Latin1_General_CI_AS
-			,strValue NVARCHAR(100) COLLATE Latin1_General_CI_AS
-			,intMainItemId INT
-			,intInvPlngSummaryDetailId INT
-			) x
-	JOIN tblMFInvPlngSummaryDetail SummaryDetail ON SummaryDetail.intInvPlngSummaryDetailId = x.intInvPlngSummaryDetailId
-		AND SummaryDetail.intInvPlngSummaryId = @intInvPlngSummaryId
+	WHERE intInvPlngSummaryId = @intInvPlngSummaryId
 
 	INSERT INTO tblMFInvPlngSummaryDetail (
 		intAttributeId
@@ -143,21 +121,27 @@ BEGIN TRY
 		,strFieldName
 		,strValue
 		,intMainItemId
+		,intBookId
+		,intSubBookId
+		,intInvPlngSummaryId
 		)
 	SELECT intAttributeId
 		,intItemId
 		,strFieldName
 		,strValue
 		,intMainItemId
+		,intBookId
+		,intSubBookId
+		,@intInvPlngSummaryId
 	FROM OPENXML(@idoc, 'root/InvPlngSummaryDetails/InvPlngSummaryDetail', 2) WITH (
 			intAttributeId INT
 			,intItemId INT
 			,strFieldName NVARCHAR(50) COLLATE Latin1_General_CI_AS
 			,strValue NVARCHAR(100) COLLATE Latin1_General_CI_AS
 			,intMainItemId INT
-			,intInvPlngSummaryId INT
+			,intBookId INT
+			,intSubBookId INT
 			)
-	WHERE intInvPlngSummaryId IS NULL
 
 	IF @intTransactionCount = 0
 		COMMIT TRANSACTION

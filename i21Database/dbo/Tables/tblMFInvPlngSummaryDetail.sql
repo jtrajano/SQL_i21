@@ -5,6 +5,8 @@
 	,intItemId INT NOT NULL
 	,strFieldName NVARCHAR(50) COLLATE Latin1_General_CI_AS
 	,strValue NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	,intBookId int
+	,intSubBookId int
 	,intMainItemId INT NULL
 	,CONSTRAINT PK_tblMFInvPlngSummaryDetail PRIMARY KEY (intInvPlngSummaryDetailId)
 	,CONSTRAINT FK_tblMFInvPlngSummaryDetail_tblCTReportAttribute FOREIGN KEY (intAttributeId) REFERENCES tblCTReportAttribute(intReportAttributeID)

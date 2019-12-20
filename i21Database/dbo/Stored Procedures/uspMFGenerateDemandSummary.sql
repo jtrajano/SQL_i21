@@ -73,7 +73,7 @@ BEGIN
 			,[strMonth23]
 			,[strMonth24]
 		FROM (
-			SELECT strFieldName
+			SELECT DISTINCT strFieldName
 				,strValue
 			FROM tblMFInvPlngSummaryDetail SD
 			JOIN tblMFInvPlngSummaryBatch Batch ON Batch.intInvPlngSummaryId = SD.intInvPlngSummaryId
@@ -111,7 +111,11 @@ BEGIN
 					,[strMonth24]
 					)) AS PivotTable;
 
-		SELECT strBook
+		SELECT intBookId 
+			,intSubBookId 
+			,intMainItemId
+			,intItemId
+			,strBook
 			,strSubBook
 			,strProductType
 			,strItemNo
@@ -275,14 +279,18 @@ BEGIN
 						ELSE AV.strValue
 						END
 					) strValue
+					,B.intBookId 
+					,SB.intSubBookId 
+					,MI.intItemId AS intMainItemId
+					,I.intItemId
 			FROM tblMFInvPlngSummaryDetail AV
 			JOIN tblMFInvPlngSummary S ON S.intInvPlngSummaryId = AV.intInvPlngSummaryId
 			JOIN tblCTReportAttribute A ON A.intReportAttributeID = AV.intAttributeId
 			JOIN tblMFInvPlngSummaryBatch Batch ON Batch.intInvPlngSummaryId = AV.intInvPlngSummaryId
 			LEFT JOIN tblICItem MI ON MI.intItemId = IsNULL(AV.intMainItemId, AV.intItemId)
 			JOIN tblICItem I ON I.intItemId = AV.intItemId
-			LEFT JOIN tblCTBook B ON B.intBookId = S.intBookId
-			LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = S.intSubBookId
+			LEFT JOIN tblCTBook B ON B.intBookId = AV.intBookId
+			LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = AV.intSubBookId
 			LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityId = I.intCommodityId
 				AND I.intProductTypeId = CA.intCommodityAttributeId
 				AND CA.strType = 'ProductType'
@@ -534,7 +542,11 @@ BEGIN
 
 		IF @ysnRefreshContract = 0
 		BEGIN
-			SELECT strBook
+			SELECT intBookId 
+				,intSubBookId 
+				,intMainItemId
+				,intItemId
+				,strBook
 				,strSubBook
 				,strProductType
 				,strItemNo
@@ -697,7 +709,11 @@ BEGIN
 								THEN Convert(NUMERIC(18, 6), 0.0)
 							ELSE AV.strValue
 							END
-						) strValue
+						) *IsNULL(UMCByWeight.dblConversionToStock, 1) As strValue
+						,B.intBookId 
+					,SB.intSubBookId 
+					,MI.intItemId AS intMainItemId
+					,I.intItemId
 				FROM tblCTInvPlngReportAttributeValue AV
 				JOIN tblCTInvPlngReportMaster RM ON RM.intInvPlngReportMasterID = AV.intInvPlngReportMasterID
 				JOIN tblCTReportAttribute A ON A.intReportAttributeID = AV.intReportAttributeID
@@ -709,6 +725,8 @@ BEGIN
 				LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityId = I.intCommodityId
 					AND I.intProductTypeId = CA.intCommodityAttributeId
 					AND CA.strType = 'ProductType'
+					LEFT JOIN tblICUnitMeasureConversion UMCByWeight ON UMCByWeight.intUnitMeasureId = RM.intUnitMeasureId --From Unit
+			AND UMCByWeight.intStockUnitMeasureId = @intUnitMeasureId 
 				WHERE A.intReportAttributeID IN (
 						2 --Opening Inventory
 						,8 --Forecasted Consumption
@@ -1069,7 +1087,12 @@ BEGIN
 				,intBookId
 				,intSubBookId
 
-			SELECT sstrBook
+			SELECT 
+				intBookId 
+				,intSubBookId 
+				,intMainItemId
+				,intItemId
+				,strBook
 				,strSubBook
 				,strProductType
 				,strItemNo
@@ -1232,7 +1255,11 @@ BEGIN
 								THEN Convert(NUMERIC(18, 6), 0.0)
 							ELSE FD.dblQty
 							END
-						) strValue
+						)*IsNULL(UMCByWeight.dblConversionToStock, 1) as strValue
+						,B.intBookId 
+						,SB.intSubBookId 
+						,MI.intItemId AS intMainItemId
+						,I.intItemId
 				FROM #tblMFFinalDemand FD
 				JOIN tblCTReportAttribute A ON A.intReportAttributeID = FD.intAttributeId
 				--JOIN tblCTInvPlngReportMaster RM ON RM.intInvPlngReportMasterID = @intReportMasterID
@@ -1243,6 +1270,8 @@ BEGIN
 				LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityId = I.intCommodityId
 					AND I.intProductTypeId = CA.intCommodityAttributeId
 					AND CA.strType = 'ProductType'
+				LEFT JOIN tblICUnitMeasureConversion UMCByWeight ON UMCByWeight.intUnitMeasureId = RM.intUnitMeasureId --From Unit
+			AND UMCByWeight.intStockUnitMeasureId = @intUnitMeasureId 
 				WHERE A.intReportAttributeID IN (
 						2
 						,8
