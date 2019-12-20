@@ -80,7 +80,7 @@ INNER JOIN tblGRSettleStorage SS
 		AND SS.intParentSettleStorageId IS NOT NULL
 		--AND SS.dblSettleUnits = 0 --OPEN STORAGE ONLY , THIS IS THE ONLY SETTLE STORAGE THAT DO NOT CREATE VOUCHER IMMEDIATELEY
 		AND SS.dblSpotUnits = 0
-INNER JOIN vyuGLDetail GD
+INNER JOIN tblGLDetail GD
 	ON GD.strTransactionId = SS.strStorageTicket
 		AND GD.intTransactionId = SS.intSettleStorageId
 		AND GD.strTransactionType = 'Storage Settlement'
