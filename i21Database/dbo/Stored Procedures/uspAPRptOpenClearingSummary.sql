@@ -124,16 +124,20 @@ DELETE FROM @temp_xml_table  where [condition] = 'Dummy'
 SELECT @strAccountId = [from], @strAccountIdTo = [to], @condition = condition FROM @temp_xml_table WHERE [fieldname] = 'strAccountId';  
 IF @strAccountId IS NOT NULL
 BEGIN
+  DECLARE @intAccountId NVARCHAR(20);
+  DECLARE @intAccountIdTo NVARCHAR(20);
+  SELECT @intAccountId = CAST(intAccountId AS NVARCHAR) FROM tblGLAccount WHERE strAccountId = @strAccountId;
+  SELECT @intAccountIdTo = CAST(intAccountId AS NVARCHAR) FROM tblGLAccount WHERE strAccountId = @strAccountIdTo;
   IF @condition = 'Equal To'  
   BEGIN   
-    SET @innerQueryFilter = @innerQueryFilter + CASE WHEN NULLIF(@innerQueryFilter,'') IS NOT NULL THEN ' AND strAccountId = ''' + @strAccountId + ''''   
-    ELSE ' WHERE strAccountId = ''' + @strAccountId + '''' END   
+    SET @innerQueryFilter = @innerQueryFilter + CASE WHEN NULLIF(@innerQueryFilter,'') IS NOT NULL THEN ' AND intAccountId = ' + @intAccountId + ''   
+    ELSE ' WHERE intAccountId = ' + @intAccountId + '' END   
   END
   ELSE
   BEGIN
     SET @innerQueryFilter = @innerQueryFilter + CASE WHEN NULLIF(@innerQueryFilter,'') IS NOT NULL   
-            THEN ' AND strAccountId BETWEEN ''' + @strAccountId + ''' AND '''  + @strAccountIdTo + ''''   
-          ELSE ' WHERE strAccountId BETWEEN ''' + @strAccountId + ''' AND '''  + @strAccountIdTo + ''''   
+            THEN ' AND intAccountId BETWEEN ' + @intAccountId + ' AND '  + @intAccountIdTo + ''   
+          ELSE ' WHERE intAccountId BETWEEN ' + @intAccountId + ' AND '  + @intAccountIdTo + ''   
           END
   END
 END
