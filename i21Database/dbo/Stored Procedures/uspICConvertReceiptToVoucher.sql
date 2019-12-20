@@ -304,6 +304,31 @@ BEGIN
 				RETURN -80218; 	
 			END
 
+			-- Check if contract already has a payable. 
+			DECLARE @strSourceNumber AS NVARCHAR(50)  
+			SELECT TOP 1
+				@strSourceNumber = ap.strSourceNumber 
+			FROM
+				tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptItem ri
+					ON r.intInventoryReceiptId = ri.intInventoryReceiptId
+				INNER JOIN tblAPVoucherPayable ap
+					ON ap.intEntityVendorId = r.intEntityVendorId
+					AND ap.intContractDetailId = ri.intContractDetailId
+					AND ap.strSourceNumber <> r.strReceiptNumber
+					AND ap.intInventoryReceiptItemId IS NULL
+					AND ap.intInventoryReceiptChargeId IS NULL 
+					AND ap.intInventoryShipmentItemId IS NULL 
+			WHERE
+				r.intInventoryReceiptId = @intReceiptId
+
+			IF @strSourceNumber IS NOT NULL 
+			BEGIN 
+				-- 'Cannot process [ir-#] because it already included in the Add Payables by [source #].'
+				EXEC uspICRaiseError 80243, @strReceiptNumber, @strSourceNumber
+				RETURN -80243;
+			END 
+
+			-- Check if IR details
 			IF EXISTS(
 				SELECT TOP 1 1
 				FROM 

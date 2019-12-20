@@ -256,6 +256,7 @@ BEGIN
 		WHEN @msgId = 80240 THEN 'Inventory Count is ongoing and is locked for item %s in storage unit %s.'
 		WHEN @msgId = 80241 THEN 'Inventory Count is ongoing and is locked for item %s in lot number %s.'
 		WHEN @msgId = 80242 THEN 'Unable to update the Other Charge. The Inventory Receipt total is going to be negative.'
+		WHEN @msgId = 80243 THEN 'Cannot process %s because it is already included in the Add Payables by %s.'
 	END 
 
 	RETURN @msg
