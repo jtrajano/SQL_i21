@@ -179,13 +179,21 @@ BEGIN TRY
 			JOIN tblGRSettleStorageTicket SST 
 				ON SST.intSettleStorageTicketId = UH.intExternalId 
 					AND SST.intSettleStorageId = UH.intExternalHeaderId
-			JOIN tblGRStorageHistory SH 
-				ON SH.intContractHeaderId = UH.intContractHeaderId 
-					AND SH.intCustomerStorageId = SST.intCustomerStorageId
+			-- JOIN tblGRStorageHistory SH 
+			-- 	ON SH.intContractHeaderId = UH.intContractHeaderId 
+			-- 		AND SH.intCustomerStorageId = SST.intCustomerStorageId
+			OUTER APPLY (
+				SELECT DISTINCT
+					intContractHeaderId
+				FROM tblGRStorageHistory
+				WHERE intCustomerStorageId = SST.intCustomerStorageId
+					AND intContractHeaderId IS NOT NULL
+					AND intInventoryReceiptId IS NOT NULL
+			) SH
 			WHERE UH.intExternalHeaderId = @intSettleStorageId 
 				AND UH.strScreenName = 'Settle Storage' 
 				AND UH.strFieldName = 'Balance' 
-				AND SH.strType IN ('From Scale','From Delivery Sheet')
+				--AND SH.strType IN ('From Scale','From Delivery Sheet')
 
 			UNION ALL
 		
