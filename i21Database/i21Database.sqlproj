@@ -8282,6 +8282,7 @@
     <Build Include="dbo\Stored Procedures\uspSCCreateInvoiceForPostedDestinationWeightsAndGrades.sql" />
     <Build Include="dbo\Tables\tblDBSchedule.sql" />
     <Build Include="dbo\Functions\fnSCGetDPContract.sql" />
+    <None Include="Scripts\Post-Deployment\SM\2010_DefaultAdminUser.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
