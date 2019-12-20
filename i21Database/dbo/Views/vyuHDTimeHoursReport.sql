@@ -102,8 +102,11 @@
 			,tblPRTimeOffRequest b
 			,tblPRTypeTimeOff c
 			,tblEMEntity d
+			,tblSMTransaction e
 		where
 			b.intTimeOffRequestId = a.intPRTimeOffRequestId
 			and c.intTypeTimeOffId = b.intTypeTimeOffId
 			and d.intEntityId = a.intPREntityEmployeeId
-			and b.ysnPostedToCalendar = 1
+			and (e.intScreenId = (select intScreenId from tblSMScreen where strNamespace = 'Payroll.view.TimeOffRequest') 
+				 and e.intRecordId = b.intTypeTimeOffId 
+				 and (e.strApprovalStatus = 'Approved' or e.strApprovalStatus = 'Approved with Modification'))
