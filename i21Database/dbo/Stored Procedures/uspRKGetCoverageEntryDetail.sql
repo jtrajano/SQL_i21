@@ -128,9 +128,106 @@ BEGIN
 		SUM(dblBalance)
 		FOR strType IN ([Contracts], [In-Transit], [Stock], [Futures])
 	) tblPivot
+
+	SELECT intCommodityId
+		, dblFuturesM2M = SUM(dblFuturesM2M) / SUM(dblNoOfLots)
+		, dblFuturesM2MPlus = SUM(dblFuturesM2MPlus) / SUM(dblNoOfLots)
+		, dblFuturesM2MMinus = SUM(dblFuturesM2MMinus) / SUM(dblNoOfLots)
+	INTO #DapSettlement
+	FROM (
+		SELECT t.*
+			, dblM2MSimulationPercent = dblM2MSimulationPercent / 100
+			, dblFuturesM2MPlus = dblFuturesM2M + (dblFuturesM2M * (dblM2MSimulationPercent / 100))
+			, dblFuturesM2MMinus = dblFuturesM2M - (dblFuturesM2M * (dblM2MSimulationPercent / 100))
+		FROM
+		(
+			SELECT dap.intCommodityId
+				, dap.intFutureMarketId
+				, dap.intFutureMonthId
+				, dap.dblNoOfLots
+				, dap.dblNetLongAvg
+				, dblSettlementPrice = ISNULL(sp.dblLastSettle, 0)
+				, dblFuturesM2M = (dblNetLongAvg - ISNULL(sp.dblLastSettle, 0)) * dblNoOfLots
+			FROM tblRKDailyAveragePriceDetail dap
+			JOIN (
+				SELECT * FROM (
+					SELECT intRowNo = ROW_NUMBER() OVER(PARTITION BY SP.intFutureMarketId, SPD.intFutureMonthId, CMM.intCommodityId ORDER BY SP.dtmPriceDate DESC)
+						, SPD.intFutSettlementPriceMonthId
+						, SPD.intFutureSettlementPriceId
+						, SP.intFutureMarketId
+						, SPD.intFutureMonthId
+						, CMM.intCommodityId
+						, dblLastSettle
+						, SP.dtmPriceDate
+					FROM tblRKFutSettlementPriceMarketMap SPD
+					JOIN tblRKFuturesSettlementPrice SP ON SP.intFutureSettlementPriceId = SPD.intFutureSettlementPriceId
+					JOIN tblRKCommodityMarketMapping CMM ON CMM.intCommodityMarketId = SP.intCommodityMarketId
+					WHERE CAST(FLOOR(CAST(SP.dtmPriceDate AS FLOAT)) AS DATETIME) <= @Date
+				) t WHERE intRowNo = 1
+			) sp ON sp.intFutureMarketId = dap.intFutureMarketId
+				AND sp.intFutureMonthId = dap.intFutureMonthId
+				AND sp.intCommodityId = dap.intCommodityId
+			WHERE dap.intDailyAveragePriceId = (SELECT TOP 1 intDailyAveragePriceId FROM tblRKDailyAveragePrice WHERE ysnPosted = 1 AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= @Date ORDER BY dtmDate DESC)
+		) t
+		JOIN tblRKFutureMarket FM ON FM.intFutureMarketId = t.intFutureMarketId
+	) t
+	GROUP BY intCommodityId
+
+	SELECT DER.intCommodityId
+		, dblQty = SUM(dbo.fnCTConvertQtyToTargetCommodityUOM(DER.intCommodityId, FM.intUnitMeasureId, @intUnitMeasureId, DER.dblOpenContract * DER.dblContractSize))
+	INTO #OptionsTotal
+	FROM dbo.fnRKGetOpenFutureByDate(NULL, '1/1/1900', GETDATE(), 1) DER
+	JOIN tblRKFutureMarket FM ON FM.intFutureMarketId = DER.intFutureMarketId
+	LEFT JOIN (
+		SELECT * FROM (
+			SELECT intRowNo = ROW_NUMBER() OVER(PARTITION BY SP.intFutureMarketId, SPD.intFutureMonthId, CMM.intCommodityId ORDER BY SP.dtmPriceDate DESC)
+				, SPD.intFutSettlementPriceMonthId
+				, SPD.intFutureSettlementPriceId
+				, SP.intFutureMarketId
+				, SPD.intFutureMonthId
+				, CMM.intCommodityId
+				, dblLastSettle
+				, SP.dtmPriceDate
+			FROM tblRKFutSettlementPriceMarketMap SPD
+			JOIN tblRKFuturesSettlementPrice SP ON SP.intFutureSettlementPriceId = SPD.intFutureSettlementPriceId
+			JOIN tblRKCommodityMarketMapping CMM ON CMM.intCommodityMarketId = SP.intCommodityMarketId
+		) t WHERE intRowNo = 1
+	) sp ON sp.intFutureMarketId = DER.intFutureMarketId
+		AND sp.intFutureMonthId = DER.intFutureMonthId
+		AND sp.intCommodityId = DER.intCommodityId
+	WHERE strInstrumentType = 'Options'
+		AND dblOpenContract <> 0
+		AND ((strOptionType = 'Call' AND dblLastSettle > dblStrike) OR
+			(strOptionType = 'Put' AND dblLastSettle < dblStrike))
+	GROUP BY DER.intCommodityId
+
+	DECLARE @FinalTable AS TABLE(intRowId INT
+		, intProductTypeId INT
+		, strProductType NVARCHAR(100)
+		, intCommodityId INT
+		, intBookId INT
+		, strBook NVARCHAR(100)
+		, intSubBookId INT
+		, strSubBook NVARCHAR(100)
+		, dblOpenContract NUMERIC(24, 10)
+		, dblInTransit NUMERIC(24, 10)
+		, dblStock NUMERIC(24, 10)
+		, dblTotalPhysical NUMERIC(24, 10)
+		, dblOpenFutures NUMERIC(24, 10)
+		, dblTotalPosition NUMERIC(24, 10)
+		, dblMonthsCovered NUMERIC(24, 10)
+		, dblAveragePrice NUMERIC(24, 10)
+		, dblTotalOption NUMERIC(24, 10)
+		, dblOptionsCovered NUMERIC(24, 10)
+		, dblFuturesM2M NUMERIC(24, 10)
+		, dblM2MPlus10 NUMERIC(24, 10)
+		, dblM2MMinus10 NUMERIC(24, 10))
 	
-	SELECT intProductTypeId = ComAtt.intCommodityAttributeId
+	INSERT INTO @FinalTable
+	SELECT intRowId = ROW_NUMBER() OVER(ORDER BY intProductTypeId, Book.intBookId, SubBook.intSubBookId)
+		, intProductTypeId = ComAtt.intCommodityAttributeId
 		, strProductType = ComAtt.strDescription
+		, ComAtt.intCommodityId
 		, Book.intBookId
 		, Book.strBook
 		, SubBook.intSubBookId
@@ -141,19 +238,157 @@ BEGIN
 		, dblTotalPhysical = Balance.dblContracts + Balance.dblInTransit + Balance.dblStock
 		, dblOpenFutures = Balance.dblFutures
 		, dblTotalPosition = Balance.dblContracts + Balance.dblInTransit + Balance.dblStock + Balance.dblFutures
-		, intMonthsCovered = 0
-		, dblAveragePrice = 0.00
+		, dblMonthsCovered = 0.00
+		, dblAveragePrice = dap.dblWeightedAvePrice
+		, dblTotalOption = ot.dblQty
 		, dblOptionsCovered = 0.00
-		, dblFuturesM2M = 0.00
-		, dblM2MPlus10 = 0.00
-		, dblM2MMinus10 = 0.00
+		, dblFuturesM2M = ds.dblFuturesM2M
+		, dblM2MPlus10 = ds.dblFuturesM2MPlus
+		, dblM2MMinus10 = ds.dblFuturesM2MMinus
 	FROM tblICCommodityAttribute ComAtt
 	LEFT JOIN #tmpBalances Balance ON Balance.intCommodityId = ComAtt.intCommodityId AND ComAtt.intCommodityAttributeId = Balance.intProductTypeId
 	LEFT JOIN tblCTBook Book ON Book.intBookId = Balance.intBookId
 	LEFT JOIN tblCTSubBook SubBook ON SubBook.intSubBookId = Balance.intSubBookId
+	LEFT JOIN (
+		SELECT intCommodityId
+			, intBookId
+			, intSubBookId
+			, dblWeightedAvePrice = SUM((dblNoOfLots * dblAverageLongPrice)) / SUM(dblNoOfLots)
+		FROM tblRKDailyAveragePriceDetail dapD
+		JOIN tblRKDailyAveragePrice dap ON dap.intDailyAveragePriceId = dapD.intDailyAveragePriceId
+		WHERE dap.intDailyAveragePriceId = (SELECT TOP 1 intDailyAveragePriceId FROM tblRKDailyAveragePrice WHERE ysnPosted = 1 AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= @Date ORDER BY dtmDate DESC)
+			AND ISNULL(dblNoOfLots, 0) <> 0
+		GROUP BY intCommodityId
+			, intBookId
+			, intSubBookId
+	) dap ON dap.intCommodityId = Balance.intCommodityId AND dap.intBookId = Balance.intBookId AND dap.intSubBookId = Balance.intSubBookId
+	LEFT JOIN #DapSettlement ds ON ds.intCommodityId = Balance.intCommodityId
+	LEFT JOIN #OptionsTotal ot ON ot.intCommodityId = Balance.intCommodityId
 	WHERE ISNULL(ComAtt.intCommodityId, 0) = ISNULL(@CommodityId, 0)
 		AND strType = 'ProductType'
 		AND (Balance.dblContracts IS NOT NULL AND Balance.dblInTransit IS NOT NULL AND Balance.dblStock IS NOT NULL AND Balance.dblFutures IS NOT NULL)
 
+
+	SELECT intRowNum = ROW_NUMBER() OVER(ORDER BY dtmDemandDate)
+		, intCommodityId
+		, dtmDemandDate
+		, intProductTypeId
+		, dblQuantity
+		, dblRunningTotal = SUM(dblQuantity) OVER (ORDER BY dtmDemandDate)
+	INTO #Demand
+	FROM (
+		SELECT i.intCommodityId
+			, DD.dtmDemandDate
+			, dblQuantity = dbo.fnCTConvertQuantityToTargetItemUOM (i.intItemId, iUOM.intUnitMeasureId, @intUnitMeasureId, DD.dblQuantity)
+			, intProductTypeId = (SELECT DISTINCT TOP 1 intProductTypeId
+								FROM tblICItemBundle bundle
+								JOIN tblICItem bundleItem ON bundleItem.intItemId = bundle.intBundleItemId
+								WHERE bundle.intItemId = DD.intItemId)
+	
+		FROM tblMFDemandDetail DD
+		JOIN tblICItem i ON i.intItemId = DD.intItemId
+		JOIN tblICItemUOM iUOM ON iUOM.intItemUOMId = DD.intItemUOMId
+	) tbl
+
+	SELECT *
+	INTO #iterateTable
+	FROM @FinalTable
+
+	DECLARE @rowId INT
+		, @dblPosition NUMERIC(24, 10)
+		, @dblOption NUMERIC(24, 10)
+		, @dblRunningBalance NUMERIC(24, 10)
+		, @startOption INT
+		, @endOption INT
+		, @monthsCovered NUMERIC(24,10)
+		, @optionsCovered NUMERIC(24, 10)
+		, @dblDemand NUMERIC(24,10)
+		, @dblDifference NUMERIC(24,10) = 0
+
+	WHILE EXISTS(SELECT TOP 1 1 FROM #iterateTable)
+	BEGIN
+		SELECT TOP 1 @rowId = intRowId
+			, @dblPosition = dblTotalPosition
+			, @dblOption = dblTotalOption
+		FROM #iterateTable
+
+		SELECT TOP 1 @dblRunningBalance = dblRunningTotal
+			, @monthsCovered = intRowNum
+			, @startOption = intRowNum
+			, @dblDemand = dblQuantity
+		FROM #Demand
+		WHERE dblRunningTotal >= @dblPosition
+		ORDER BY dtmDemandDate
+
+		IF (@dblRunningBalance > @dblPosition)
+		BEGIN
+			SET @monthsCovered -= 1
+			SET @dblDifference = @dblPosition - (@dblRunningBalance - @dblDemand)
+			SET @monthsCovered += @dblDifference / @dblDemand
+			SET @dblDifference = @dblDemand - @dblDifference
+		END
+
+		IF (@dblDifference > @dblOption)
+		BEGIN
+			SET @optionsCovered = @dblOption / @dblDemand
+		END
+		ELSE IF (@dblOption >= @dblDifference)
+		BEGIN
+			SET @optionsCovered = @dblDifference / @dblDemand
+			SET @dblDifference = @dblOption - @dblDifference
+		END
+
+		IF (@dblDifference <> 0)
+		BEGIN
+			SELECT TOP 1 @dblRunningBalance = dblRunningTotal, @endOption = intRowNum, @dblDemand = dblQuantity FROM #Demand
+			WHERE dblRunningTotal >= (@dblPosition + @dblOption)
+			ORDER BY dtmDemandDate
+
+			IF (@dblRunningBalance > (@dblPosition + @dblOption))
+			BEGIN
+				SET @endOption -= 1
+				SET @endOption -= @startOption
+
+				SET @dblDifference = (@dblPosition + @dblOption) - (@dblRunningBalance - @dblDemand)
+				SET @optionsCovered += @dblDifference / @dblDemand
+				SET @dblDifference = 0
+			END
+
+			SET @optionsCovered += @endOption
+		END
+
+		UPDATE @FinalTable
+		SET dblMonthsCovered = @monthsCovered
+			, dblOptionsCovered = @optionsCovered
+		WHERE intRowId = @rowId
+
+		DELETE FROM #iterateTable WHERE intRowId = @rowId
+	END
+
+	SELECT intProductTypeId
+		, strProductType
+		, intBookId
+		, strBook
+		, intSubBookId
+		, strSubBook
+		, dblOpenContract
+		, dblInTransit
+		, dblStock
+		, dblTotalPhysical
+		, dblOpenFutures
+		, dblTotalPosition
+		, dblMonthsCovered
+		, dblAveragePrice
+		, dblTotalOption
+		, dblOptionsCovered
+		, dblFuturesM2M
+		, dblM2MPlus10
+		, dblM2MMinus10
+	FROM @FinalTable
+
+	DROP TABLE #OptionsTotal
+	DROP TABLE #DapSettlement
+	DROP TABLE #iterateTable
+	DROP TABLE #Demand
 	DROP TABLE #tmpBalances
 END
