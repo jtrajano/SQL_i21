@@ -8126,6 +8126,7 @@
     <Build Include="dbo\Functions\fnICOutstandingInTransitPerDay.sql" />
     <Build Include="dbo\Functions\fnSCGetDPContract.sql" />
     <Build Include="dbo\Views\vyuAPReceiptClearingGL.sql" />
+    <Build Include="dbo\Functions\fnCTGetVoucherPayable.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
