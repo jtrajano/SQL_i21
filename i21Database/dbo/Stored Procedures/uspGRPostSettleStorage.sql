@@ -2118,7 +2118,7 @@ BEGIN TRY
 																		and IT.intItemId = a.intItemId
 																)
 																--IT.dblCost--RI.dblUnitCost --dbo.fnCTConvertQtyToTargetItemUOM(a.intContractUOMId,RI.intCostUOMId, RI.dblUnitCost)
-																WHEN CS.intStorageTypeId = 2 THEN 
+																WHEN CS.intStorageTypeId = 2 and @ysnFromTransferStorage = 1 THEN 
 																(select dblCost from tblICInventoryTransaction IT
 																inner join tblGRStorageHistory STH
 																	on STH.intTransferStorageId = IT.intTransactionId
