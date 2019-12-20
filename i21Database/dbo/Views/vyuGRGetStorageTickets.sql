@@ -1,8 +1,8 @@
 CREATE VIEW [dbo].[vyuGRGetStorageTickets]  
 AS  
-SELECT
+SELECT DISTINCT
     intCustomerStorageId				= CS.intCustomerStorageId  
-    ,strStorageTicketNumber				= ISNULL(TS.strTransferStorageTicket,CS.strStorageTicketNumber)
+    ,strStorageTicketNumber				= CS.strStorageTicketNumber
     ,intEntityId						= CS.intEntityId  
     ,strName							= E.strName  
     ,intStorageTypeId					= CS.intStorageTypeId  
@@ -20,9 +20,9 @@ SELECT
     ,strDPARecieptNumber				= ISNULL(CS.strDPARecieptNumber,'')
     ,dblOpenBalance						= ROUND(dbo.fnCTConvertQtyToTargetItemUOM(CS.intItemUOMId, ItemUOM.intItemUOMId, CS.dblOpenBalance), 6)
     ,ysnDPOwnedType						= ST.ysnDPOwnedType
-    ,intContractHeaderId                = CASE WHEN CS.ysnTransferStorage = 0 THEN CH_Ticket.intContractHeaderId ELSE CH_Transfer.intContractHeaderId END
-    ,intContractDetailId				= CASE WHEN CS.ysnTransferStorage = 0 THEN SC.intContractId ELSE CD_Transfer.intContractDetailId END
-    ,strContractNumber					= CASE WHEN CS.ysnTransferStorage = 0 THEN CH_Ticket.strContractNumber ELSE CH_Transfer.strContractNumber END
+    ,intContractHeaderId                = case when (CS.intStorageTypeId = 2 and GHistory.intContractHeaderId is not null) then GHistory.intContractHeaderId else CASE WHEN CS.ysnTransferStorage = 0 THEN CH_Ticket.intContractHeaderId ELSE CH_Transfer.intContractHeaderId END end
+    ,intContractDetailId				= case when (CS.intStorageTypeId = 2 and GHistory.intContractDetailId is not null) then GHistory.intContractDetailId else CASE WHEN CS.ysnTransferStorage = 0 THEN SC.intContractId ELSE CD_Transfer.intContractDetailId END end
+    ,strContractNumber					= case when (CS.intStorageTypeId = 2 and GHistory.intContractHeaderId is not null) then GHistory.strContractNumber else CASE WHEN CS.ysnTransferStorage = 0 THEN CH_Ticket.strContractNumber ELSE CH_Transfer.strContractNumber END end
     ,intTicketId						= ISNULL(SC.intTicketId,0)
     ,dblDiscountUnPaid					= ISNULL(dblDiscountsDue,0) - ISNULL(dblDiscountsPaid,0)
     ,dblStorageUnPaid					= ISNULL(dblStorageDue,0) - ISNULL(dblStoragePaid,0)
@@ -57,6 +57,17 @@ JOIN tblICItemUOM ItemUOM
 		AND ItemUOM.ysnStockUnit = 1
 LEFT JOIN tblSMCompanyLocationSubLocation SLOC 
     ON SLOC.intCompanyLocationSubLocationId = CS.intCompanyLocationSubLocationId
+left join 
+    (
+        select GSH.intCustomerStorageId, GCH.intContractHeaderId, GCH.strContractNumber, GCD.intContractDetailId from tblGRStorageHistory GSH
+	join tblCTContractHeader GCH
+		on GCH.intContractHeaderId = GSH.intContractHeaderId
+	join tblCTContractDetail GCD
+		on GCH.intContractHeaderId = GCD.intContractHeaderId
+    
+    )GHistory
+    on GHistory.intCustomerStorageId = CS.intCustomerStorageId 
+        and CS.intStorageTypeId = 2
 LEFT JOIN tblSCTicket SC
 	ON SC.intTicketId = CS.intTicketId
 LEFT JOIN tblCTContractDetail CD_Ticket
@@ -75,8 +86,4 @@ LEFT JOIN tblICInventoryReceipt IR
     ON IR.intInventoryReceiptId = SC.intInventoryReceiptId
 LEFT JOIN tblSCDeliverySheet DS
     ON DS.intDeliverySheetId = CS.intDeliverySheetId
-LEFT JOIN tblGRTransferStorageReference TSR
-	ON TSR.intToCustomerStorageId = CS.intCustomerStorageId
-LEFT JOIN tblGRTransferStorage TS
-	ON TS.intTransferStorageId = TSR.intTransferStorageId
 WHERE CS.dblOpenBalance > 0
