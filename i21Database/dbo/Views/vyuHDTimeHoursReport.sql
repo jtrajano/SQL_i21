@@ -108,5 +108,5 @@
 			and c.intTypeTimeOffId = b.intTypeTimeOffId
 			and d.intEntityId = a.intPREntityEmployeeId
 			and (e.intScreenId = (select intScreenId from tblSMScreen where strNamespace = 'Payroll.view.TimeOffRequest') 
-				 and e.intRecordId = b.intTypeTimeOffId 
+				 and e.intRecordId = a.intPRTimeOffRequestId 
 				 and (e.strApprovalStatus = 'Approved' or e.strApprovalStatus = 'Approved with Modification'))
