@@ -88,7 +88,7 @@ SELECT
 	A2.dtmClr
 FROM dbo.tblAPBill A
 INNER JOIN (dbo.tblAPVendor G INNER JOIN dbo.tblEMEntity G2 ON G.[intEntityId] = G2.intEntityId) ON G.[intEntityId] = A.intEntityVendorId
-INNER JOIN dbo.tblAPBillDetail B 
+LEFT JOIN dbo.tblAPBillDetail B 
 	ON A.intBillId = B.intBillId
 LEFT JOIN dbo.vyuAPVouchersPaymentInfo A2
 	ON A2.intBillId = A.intBillId

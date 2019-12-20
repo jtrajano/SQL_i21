@@ -8276,6 +8276,7 @@
     <None Include="Scripts\Post-Deployment\SM\2010_RemoveF9Shortcut.sql" />
     <Build Include="dbo\Functions\fnICOutstandingInTransitPerDay.sql" />
     <Build Include="dbo\Functions\fnAPCreateVoucherAllocation.sql" />
+    <Build Include="dbo\Tables\tblAPBillReallocation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
