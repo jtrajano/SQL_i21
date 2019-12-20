@@ -106,3 +106,4 @@
 			b.intTimeOffRequestId = a.intPRTimeOffRequestId
 			and c.intTypeTimeOffId = b.intTypeTimeOffId
 			and d.intEntityId = a.intPREntityEmployeeId
+			and b.ysnPostedToCalendar = 1
