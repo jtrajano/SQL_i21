@@ -52,7 +52,8 @@ BEGIN TRY
 			@intProducerId				INT,
 			@strCertificationName		NVARCHAR(MAX),
 			@strCustomerContract		NVARCHAR(100),
-			@intContractTypeId			INT
+			@intContractTypeId			INT,
+			@strAddToPayableMessage		NVARCHAR(MAX)
 
 	SELECT	@ysnMultiplePriceFixation	=	ysnMultiplePriceFixation,
 			@strContractNumber			=	strContractNumber,
