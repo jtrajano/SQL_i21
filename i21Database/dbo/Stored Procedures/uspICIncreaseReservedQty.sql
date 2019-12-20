@@ -79,7 +79,8 @@ WHEN NOT MATCHED THEN
 		,Source_Query.Aggregrate_Qty 
 		,NULL 
 		,1	
-	)		
+	)			
+
 ;
 
 -- Do an upsert for the Item Stock UOM table when updating the Reserved Qty
@@ -96,6 +97,7 @@ USING (
 				,r.intSubLocationId
 				,r.intStorageLocationId
 				,Aggregrate_Qty = SUM(dbo.fnCalculateQtyBetweenUOM(r.intItemUOMId, StockUOM.intItemUOMId, r.dblQty)) 
+				,intMark = 1
 		FROM	@ItemsToIncreaseReserve r
 				INNER JOIN tblICItem i
 					ON r.intItemId = i.intItemId 
@@ -114,6 +116,7 @@ USING (
 				, StockUOM.intItemUOMId 
 				, r.intSubLocationId
 				, r.intStorageLocationId		
+				
 		-- If separate UOMs is enabled, don't convert the qty. Track it using the same uom. 
 		UNION ALL 
 		SELECT	r.intItemId
@@ -122,6 +125,7 @@ USING (
 				,r.intSubLocationId
 				,r.intStorageLocationId
 				,Aggregrate_Qty = SUM(r.dblQty) 
+				,intMark = 2
 		FROM	@ItemsToIncreaseReserve r
 				INNER JOIN tblICItem i
 					ON r.intItemId = i.intItemId 
@@ -132,157 +136,108 @@ USING (
 				, r.intItemUOMId 
 				, r.intSubLocationId
 				, r.intStorageLocationId
+
 		-- LOTTED
-		-- Convert the lot qty or weight to stock uom. 
-		--UNION ALL 
-		--SELECT	r.intItemId
-		--		,r.intItemLocationId
-		--		,StockUOM.intItemUOMId 
-		--		,r.intSubLocationId
-		--		,r.intStorageLocationId
-		--		,Aggregrate_Qty = 
-		--			SUM(
-		--				dbo.fnCalculateQtyBetweenUOM (
-		--					CASE 
-		--						WHEN r.intItemUOMId = l.intItemUOMId AND l.intWeightUOMId = l.intItemUOMId THEN 
-		--							l.intItemUOMId 
-		--						WHEN r.intItemUOMId = l.intItemUOMId AND l.intWeightUOMId IS NOT NULL THEN 
-		--							l.intWeightUOMId
-		--						WHEN r.intItemUOMId = l.intItemUOMId AND l.intWeightUOMId IS NULL THEN 
-		--							l.intItemUOMId 
-		--						WHEN r.intItemUOMId = l.intWeightUOMId THEN 
-		--							l.intWeightUOMId
-		--					END
-		--					,StockUOM.intItemUOMId
-		--					,CASE 
-		--						WHEN r.intItemUOMId = l.intItemUOMId AND l.intWeightUOMId = l.intItemUOMId THEN 
-		--							r.dblQty
-		--						WHEN r.intItemUOMId = l.intItemUOMId AND l.intWeightUOMId IS NOT NULL THEN 
-		--							dbo.fnMultiply(r.dblQty,l.dblWeightPerQty) -- convert the pack to weight 
-		--						WHEN r.intItemUOMId = l.intItemUOMId AND l.intWeightUOMId IS NULL THEN 
-		--							r.dblQty 
-		--						WHEN r.intItemUOMId = l.intWeightUOMId THEN 
-		--							r.dblQty 
-		--					END 						
-		--				)
-		--			) 
-		--FROM	@ItemsToIncreaseReserve r INNER JOIN tblICLot l
-		--			ON r.intLotId = l.intLotId 
-		--		CROSS APPLY (
-		--			SELECT	TOP 1 
-		--					iUOM.intItemUOMId
-		--					,iUOM.dblUnitQty 
-		--			FROM	tblICItemUOM iUOM
-		--			WHERE	iUOM.intItemId = r.intItemId
-		--					AND iUOM.ysnStockUnit = 1 
-		--		) StockUOM
-		--WHERE	r.intLotId IS NOT NULL 
-		--GROUP BY r.intItemId
-		--		, r.intItemLocationId
-		--		, StockUOM.intItemUOMId 
-		--		, r.intSubLocationId
-		--		, r.intStorageLocationId
-
-		-- Reserve the Lot Qty 
+		-- Reserve the Lot Pack Qty 
 		UNION ALL 
-		SELECT	r.intItemId
-				,r.intItemLocationId
-				,r.intItemUOMId  
-				,r.intSubLocationId
-				,r.intStorageLocationId
-				,Aggregrate_Qty = SUM(r.dblQty) 
-		FROM	@ItemsToIncreaseReserve r INNER JOIN tblICLot l
-					ON r.intLotId = l.intLotId 
-		WHERE	r.intLotId IS NOT NULL 
-				AND l.intItemUOMId = r.intItemUOMId 
-				AND l.intWeightUOMId IS NOT NULL 				
-		GROUP BY r.intItemId
-				, r.intItemLocationId
-				, r.intItemUOMId 
-				, r.intSubLocationId
-				, r.intStorageLocationId
+		SELECT 
+			lotted.intItemId
+			,lotted.intItemLocationId
+			,lotted.intItemUOMId
+			,lotted.intSubLocationId
+			,lotted.intStorageLocationId
+			,dblQty = SUM(lotted.Aggregrate_Qty) 
+			,intMark = 3
+		FROM (
+			SELECT	r.intItemId
+					,r.intItemLocationId
+					,r.intItemUOMId  
+					,r.intSubLocationId
+					,r.intStorageLocationId
+					,Aggregrate_Qty = SUM(r.dblQty) 
+					--,intMark = 3
+			FROM	@ItemsToIncreaseReserve r INNER JOIN tblICLot l
+						ON r.intLotId = l.intLotId 
+			WHERE	r.intLotId IS NOT NULL 
+					AND l.intItemUOMId = r.intItemUOMId 
+			GROUP BY r.intItemId
+					, r.intItemLocationId
+					, r.intItemUOMId 
+					, r.intSubLocationId
+					, r.intStorageLocationId
 
-		-- Convert the pack qty to weight qty
-		UNION ALL 
-		SELECT	r.intItemId
-				,r.intItemLocationId
-				,l.intWeightUOMId 
-				,r.intSubLocationId
-				,r.intStorageLocationId
-				,Aggregrate_Qty = SUM(dbo.fnMultiply(r.dblQty, l.dblWeightPerQty)) 
-		FROM	@ItemsToIncreaseReserve r INNER JOIN tblICLot l
-					ON r.intLotId = l.intLotId 
-		WHERE	r.intLotId IS NOT NULL 
-				AND l.intItemUOMId = r.intItemUOMId 
-				AND l.intWeightUOMId IS NOT NULL 
-				AND l.intItemUOMId <> l.intWeightUOMId
-				AND ISNULL(l.dblWeightPerQty, 0) <> 0	
-		GROUP BY r.intItemId
-				, r.intItemLocationId
-				, l.intWeightUOMId 
-				, r.intSubLocationId
-				, r.intStorageLocationId
+			-- Convert the pack qty to weight qty
+			UNION ALL 
+			SELECT	r.intItemId
+					,r.intItemLocationId
+					,l.intWeightUOMId 
+					,r.intSubLocationId
+					,r.intStorageLocationId
+					,Aggregrate_Qty = SUM(dbo.fnMultiply(r.dblQty, l.dblWeightPerQty)) 
+					--,intMark = 4
+			FROM	@ItemsToIncreaseReserve r INNER JOIN tblICLot l
+						ON r.intLotId = l.intLotId 
+			WHERE	r.intLotId IS NOT NULL 
+					AND l.intItemUOMId = r.intItemUOMId 
+					AND l.intWeightUOMId IS NOT NULL 
+					AND l.intItemUOMId <> l.intWeightUOMId
+					AND ISNULL(l.dblWeightPerQty, 0) <> 0	
+			GROUP BY r.intItemId
+					, r.intItemLocationId
+					, l.intWeightUOMId 
+					, r.intSubLocationId
+					, r.intStorageLocationId
 
-		-- Reserve the Weight Qty 
-		UNION ALL 
-		SELECT	r.intItemId
-				,r.intItemLocationId
-				,r.intItemUOMId  
-				,r.intSubLocationId
-				,r.intStorageLocationId
-				,Aggregrate_Qty = SUM(r.dblQty) 
-		FROM	@ItemsToIncreaseReserve r INNER JOIN tblICLot l
-					ON r.intLotId = l.intLotId 
-		WHERE	r.intLotId IS NOT NULL 
-				AND l.intWeightUOMId = r.intItemUOMId 
-				AND l.intWeightUOMId IS NOT NULL 	
-				AND l.intItemUOMId <> l.intWeightUOMId
-				AND ISNULL(l.dblWeightPerQty, 0) <> 0
-		GROUP BY r.intItemId
-				, r.intItemLocationId
-				, r.intItemUOMId  
-				, r.intSubLocationId
-				, r.intStorageLocationId
+			-- Reserve the Weight Qty 
+			UNION ALL 
+			SELECT	r.intItemId
+					,r.intItemLocationId
+					,r.intItemUOMId  
+					,r.intSubLocationId
+					,r.intStorageLocationId
+					,Aggregrate_Qty = SUM(r.dblQty) 
+					--,intMark = 5
+			FROM	@ItemsToIncreaseReserve r INNER JOIN tblICLot l
+						ON r.intLotId = l.intLotId 
+			WHERE	r.intLotId IS NOT NULL 
+					AND l.intWeightUOMId = r.intItemUOMId 
+					AND l.intWeightUOMId IS NOT NULL 	
+					AND l.intItemUOMId <> l.intWeightUOMId
+					AND ISNULL(l.dblWeightPerQty, 0) <> 0
+			GROUP BY r.intItemId
+					, r.intItemLocationId
+					, r.intItemUOMId  
+					, r.intSubLocationId
+					, r.intStorageLocationId
 
-		-- Convert the weight qty to pack qty
-		UNION ALL 
-		SELECT	r.intItemId
-				,r.intItemLocationId
-				,l.intItemUOMId  
-				,r.intSubLocationId
-				,r.intStorageLocationId
-				,Aggregrate_Qty = SUM(dbo.fnDivide(r.dblQty, l.dblWeightPerQty)) 
-		FROM	@ItemsToIncreaseReserve r INNER JOIN tblICLot l
-					ON r.intLotId = l.intLotId 
-		WHERE	r.intLotId IS NOT NULL 
-				AND l.intWeightUOMId = r.intItemUOMId 
-				AND l.intWeightUOMId IS NOT NULL 
-				AND l.intItemUOMId <> l.intWeightUOMId
-				AND ISNULL(l.dblWeightPerQty, 0) <> 0	
-		GROUP BY r.intItemId
-				, r.intItemLocationId
-				, l.intItemUOMId  
-				, r.intSubLocationId
-				, r.intStorageLocationId
-
-		-- Reserve the Lot Qty that does not have weight
-		UNION ALL 
-		SELECT	r.intItemId
-				,r.intItemLocationId
-				,r.intItemUOMId  
-				,r.intSubLocationId
-				,r.intStorageLocationId
-				,Aggregrate_Qty = SUM(r.dblQty) 
-		FROM	@ItemsToIncreaseReserve r INNER JOIN tblICLot l
-					ON r.intLotId = l.intLotId 
-		WHERE	r.intLotId IS NOT NULL 
-				AND l.intItemUOMId = r.intItemUOMId 
-				AND l.intWeightUOMId IS NULL 				
-		GROUP BY r.intItemId
-				, r.intItemLocationId
-				, r.intItemUOMId 
-				, r.intSubLocationId
-				, r.intStorageLocationId
+			-- Convert the weight qty to pack qty
+			UNION ALL 
+			SELECT	r.intItemId
+					,r.intItemLocationId
+					,l.intItemUOMId  
+					,r.intSubLocationId
+					,r.intStorageLocationId
+					,Aggregrate_Qty = SUM(dbo.fnDivide(r.dblQty, l.dblWeightPerQty)) 
+					--,intMark = 6
+			FROM	@ItemsToIncreaseReserve r INNER JOIN tblICLot l
+						ON r.intLotId = l.intLotId 
+			WHERE	r.intLotId IS NOT NULL 
+					AND l.intWeightUOMId = r.intItemUOMId 
+					AND l.intWeightUOMId IS NOT NULL 
+					AND l.intItemUOMId <> l.intWeightUOMId
+					AND ISNULL(l.dblWeightPerQty, 0) <> 0	
+			GROUP BY r.intItemId
+					, r.intItemLocationId
+					, l.intItemUOMId  
+					, r.intSubLocationId
+					, r.intStorageLocationId
+		) lotted
+		GROUP BY 
+			lotted.intItemId
+			,lotted.intItemLocationId
+			,lotted.intItemUOMId
+			,lotted.intSubLocationId
+			,lotted.intStorageLocationId
 
 ) AS Source_Query  
 	ON ItemStockUOM.intItemId = Source_Query.intItemId
