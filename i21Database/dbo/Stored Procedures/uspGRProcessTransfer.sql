@@ -110,7 +110,7 @@ BEGIN
 				@intContractDetailId	= @intTransferContractDetailId
 				,@dblQuantityToUpdate	= @dblTransferUnits
 				,@intUserId				= @intUserId
-				,@intExternalId			= @intCustomerStorageId
+				,@intExternalId			= @intTransferStorageId
 				,@strScreenName			= 'Transfer Storage'
 				,@intSourceItemUOMId	= @intSourceItemUOMId
 
@@ -1140,7 +1140,7 @@ BEGIN
 				@intContractDetailId	= @intTransferContractDetailId
 				,@dblQuantityToUpdate	= @dblTransferUnits
 				,@intUserId				= @intUserId
-				,@intExternalId			= @intCustomerStorageId
+				,@intExternalId			= @intTransferStorageId
 				,@strScreenName			= 'Transfer Storage'
 				,@intSourceItemUOMId	= @intSourceItemUOMId
 

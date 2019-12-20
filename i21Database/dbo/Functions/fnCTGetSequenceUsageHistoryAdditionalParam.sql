@@ -132,10 +132,8 @@ BEGIN
 				@strNumber				=	TS.strTransferStorageTicket,
 				@strHeaderIdColumn		=	'intTransferStorageId'
 
-		FROM	tblGRCustomerStorage	HR
-		LEFT JOIN	tblGRTransferStorageReference TSR on TSR.intSourceCustomerStorageId = HR.intCustomerStorageId
-		LEFT JOIN	tblGRTransferStorage TS on TS.intTransferStorageId = TSR.intTransferStorageId
-		WHERE	TSR.intSourceCustomerStorageId	=	@intExternalId OR TSR.intToCustomerStorageId = @intExternalId
+		FROM	tblGRTransferStorage	TS
+		WHERE	TS.intTransferStorageId	=	@intExternalId
 	END
 	ELSE IF @strScreenName = 'Inventory Shipment'
 	BEGIN
