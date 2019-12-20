@@ -167,5 +167,5 @@ WHERE
 	((B.ysnPosted = 1 AND B2.dblPayment IS NOT NULL) 
 AND A.int1099Form <> 0
 AND (C2.ysnPrint1099 = 1 OR patRef.intBillId IS NOT NULL)
-AND	B.intTransactionType NOT IN (1,3,14))
+AND	B.intTransactionType IN (1,3,14))
 OR B.intTransactionType = 9 
