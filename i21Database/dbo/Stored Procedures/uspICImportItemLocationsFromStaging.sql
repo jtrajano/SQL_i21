@@ -62,6 +62,8 @@ INSERT INTO tblICItemLocation(
 	, intReceiveUOMId
 	, intIssueUOMId
 	, intGrossUOMId
+	, dtmDateCreated
+	, intCreatedByUserId
 )
 SElECT 
 	  intItemId					= i.intItemId
@@ -116,6 +118,8 @@ SElECT
 	, intReceiveUOMId			= rs.intItemUOMId
 	, intIssueUOMId				= rs.intItemUOMId
 	, intGrossUOMId				= gs.intItemUOMId
+	, dtmDateCreated			= s.dtmDateCreated
+	, intCreatedByUserId		= s.intCreatedByUserId
 FROM tblICImportStagingItemLocation s
 	INNER JOIN tblICItem i ON LOWER(i.strItemNo) = LTRIM(RTRIM(LOWER(s.strItemNo))) 
 	INNER JOIN tblSMCompanyLocation c ON LOWER(c.strLocationName) = LTRIM(RTRIM(LOWER(s.strLocation)))
