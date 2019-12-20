@@ -8128,9 +8128,6 @@
     <Build Include="dbo\Views\vyuAPReceiptClearingGL.sql" />
     <Build Include="dbo\Functions\fnCTGetVoucherPayable.sql" />
     <Build Include="dbo\Tables\tblSCDeliverySheetContractAdjustment.sql" />
-    <Build Include="dbo\User Defined Types\StagingTransactionLogPassport.sql" />
-    <Build Include="dbo\Tables\tblSTTranslogRebatesPassport.sql" />
-    <Build Include="dbo\Stored Procedures\uspSTCheckoutPassportTranslog.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
