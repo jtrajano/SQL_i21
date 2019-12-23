@@ -8293,6 +8293,16 @@
     <Build Include="dbo\Tables\tblDBDistributionBurstGroupContact.sql" />
     <None Include="Scripts\Post-Deployment\ST\38_FileFieldMapping_Commander_NetworkCards.sql" />
     <Build Include="dbo\Tables\tblIPItemSupplyTarget.sql" />
+    <Build Include="dbo\Views\vyuIPGetOpenWeightClaim.sql" />
+    <Build Include="dbo\Tables\tblLGWeightClaimStage.sql" />
+    <Build Include="dbo\Tables\tblIPInventoryReceiptWeightClaim.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPWeightClaimCheck.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPWeightClaimTransferStgXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPCreateWeightClaims.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPWeightClaimPopulateStgXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPWeightClaimProcessStgXML.sql" />
+    <Build Include="dbo\Views\vyuIPGetWeightClaimDetail.sql" />
+    <Build Include="dbo\Views\vyuIPGetWeightClaim.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
