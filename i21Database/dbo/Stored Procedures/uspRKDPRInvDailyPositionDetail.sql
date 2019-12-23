@@ -2180,7 +2180,7 @@ BEGIN
 					, intCategoryId
 					, strCategory
 				FROM (
-					SELECT intTicketId
+					SELECT DISTINCT intTicketId
 						, strTicketType
 						, strTicketNumber
 						, dblTotal = dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId, @intCommodityUnitMeasureId, (ISNULL(dblBalance,0)))
