@@ -1016,7 +1016,7 @@ BEGIN
 					, intFromCommodityUnitMeasureId
 					, intCompanyLocationId  
 				FROM(
-					select intTicketId
+					select DISTINCT intTicketId
 						, strTicketNumber
 						, dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId,@intCommodityUnitMeasureId,(ISNULL(Balance, 0))) dblTotal
 						, ch.intCompanyLocationId
