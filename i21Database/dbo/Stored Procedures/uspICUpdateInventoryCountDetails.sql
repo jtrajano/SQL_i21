@@ -275,6 +275,7 @@ BEGIN
 				AND t.intStorageLocationId = Lot.intStorageLocationId
 				AND t.intLotId = Lot.intLotId
 				AND t.dblQty > 0 
+				AND ISNULL(t.ysnIsUnposted, 0) = 0 
 				AND dbo.fnDateLessThanEquals(t.dtmDate, @AsOfDate) = 1	
 			ORDER BY
 				t.intInventoryTransactionId DESC 		
@@ -493,6 +494,7 @@ BEGIN
 				t.intItemId = i.intItemId
 				AND t.intItemLocationId = il.intItemLocationId 
 				AND t.dblQty > 0 
+				AND ISNULL(t.ysnIsUnposted, 0) = 0 
 				AND dbo.fnDateLessThanEquals(CONVERT(VARCHAR(10), t.dtmDate,112), @AsOfDate) = 1
 			ORDER BY
 				t.intInventoryTransactionId DESC 		
