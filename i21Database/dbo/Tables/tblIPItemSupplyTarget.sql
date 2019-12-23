@@ -1,7 +1,7 @@
 ﻿Create table tblIPItemSupplyTarget
 (
 intItemSupplyTarget int IDENTITY (1, 1) NOT NULL
-,intItemLocationId int
+,intItemId int
 ,dblSupplyTarget numeric(18,6)
 ,intBookId int
 ,intSubBookId int

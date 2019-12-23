@@ -552,29 +552,24 @@ BEGIN TRY
 				AND IsNULL(intSubBookId, @intSubBookId) = @intSubBookId
 
 			INSERT INTO tblIPItemSupplyTarget (
-				intItemLocationId
+				intItemId
 				,dblSupplyTarget
 				,intBookId
 				,intSubBookId
 				,intCompanyId
 				)
-			SELECT IL.intItemLocationId
+			SELECT I.intItemId
 				,x.dblSupplyTarget
 				,@intBookId
 				,@intSubBookId
 				,NULL AS intCompanyId
 			FROM OPENXML(@idoc, 'vyuMFGetItemSupplyTargets/vyuMFGetItemSupplyTarget', 2) WITH (
 					strItemNo NVARCHAR(50) Collate Latin1_General_CI_AS
-					,strLocationName NVARCHAR(50) Collate Latin1_General_CI_AS
 					,strCompanyName NVARCHAR(50) Collate Latin1_General_CI_AS
 					,dblSupplyTarget NUMERIC(18, 6)
 					) x
 			JOIN tblICItem I ON I.strItemNo = x.strItemNo
-			JOIN tblSMCompanyLocation CL ON CL.strLocationName = x.strLocationName
-			JOIN tblICItemLocation IL ON IL.intItemId = I.intItemId
-				AND IL.intLocationId = CL.intCompanyLocationId
-			--JOIN tblIPCompany C on C.strCompanyName=x.strCompanyName
-			
+						
 			EXEC sp_xml_removedocument @idoc
 
 			ext:
