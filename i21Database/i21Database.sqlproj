@@ -8292,6 +8292,7 @@
     <Build Include="dbo\Functions\fnCTGetVoucherPayable.sql" />
     <Build Include="dbo\Tables\tblDBDistributionBurstGroupContact.sql" />
     <None Include="Scripts\Post-Deployment\ST\38_FileFieldMapping_Commander_NetworkCards.sql" />
+    <Build Include="dbo\Tables\tblIPItemSupplyTarget.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

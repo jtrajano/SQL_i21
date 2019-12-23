@@ -10,5 +10,6 @@
 	,strMessage NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
 	,intTransactionId int
     ,intCompanyId int
+	,strItemSupplyTarget NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
 	)
 

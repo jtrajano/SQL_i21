@@ -42,8 +42,8 @@ BEGIN
 			,@strBatch AS strDemandPlans
 			,@strBatchId AS strDemandIds
 		FROM tblMFInvPlngSummary S
-		JOIN tblCTBook B ON B.intBookId = S.intBookId
-		JOIN tblCTSubBook SB ON SB.intSubBookId = S.intSubBookId
+		Left JOIN tblCTBook B ON B.intBookId = S.intBookId
+		Left JOIN tblCTSubBook SB ON SB.intSubBookId = S.intSubBookId
 		JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = S.intUnitMeasureId
 		WHERE intInvPlngSummaryId = @intInvPlngSummaryId
 
@@ -80,7 +80,7 @@ BEGIN
 			WHERE intAttributeId = 1
 				AND Batch.intInvPlngReportMasterID IN (
 					SELECT Item Collate Latin1_General_CI_AS
-					FROM [dbo].[fnSplitString](@strInvPlngReportMasterID, ',')
+					FROM [dbo].[fnSplitString](@strBatchId, ',')
 					)
 				AND strValue <> ''
 			) AS SourceTable
@@ -120,7 +120,7 @@ BEGIN
 			,strProductType
 			,strItemNo
 			,strItemDescription
-			,0 AS strSupplyTarget
+			,dblSupplyTarget AS strSupplyTarget
 			,IsNULL([Opening Inventory strMonth1], 0) AS strOIMonth1
 			,IsNULL([Forecasted Consumption strMonth1], 0) AS strFCMonth1
 			,IsNULL([Existing Purchases strMonth1], 0) AS strOPMonth1
@@ -283,6 +283,7 @@ BEGIN
 				,SB.intSubBookId
 				,MI.intItemId AS intMainItemId
 				,I.intItemId
+				,ST.dblSupplyTarget
 			FROM tblMFInvPlngSummaryDetail AV
 			JOIN tblMFInvPlngSummary S ON S.intInvPlngSummaryId = AV.intInvPlngSummaryId
 			JOIN tblCTReportAttribute A ON A.intReportAttributeID = AV.intAttributeId
@@ -294,6 +295,7 @@ BEGIN
 			LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityId = I.intCommodityId
 				AND I.intProductTypeId = CA.intCommodityAttributeId
 				AND CA.strType = 'ProductType'
+			LEFT JOIN tblIPItemSupplyTarget ST on ST.intBookId =B.intBookId and IsNULL(ST.intSubBookId,0)=IsNULL(SB.intSubBookId,0)
 			WHERE A.intReportAttributeID IN (
 					2 --Opening Inventory
 					,8 --Forecasted Consumption
@@ -305,7 +307,7 @@ BEGIN
 				AND IsNumeric(AV.strValue) = 1
 				AND Batch.intInvPlngReportMasterID IN (
 					SELECT Item Collate Latin1_General_CI_AS
-					FROM [dbo].[fnSplitString](@strInvPlngReportMasterID, ',')
+					FROM [dbo].[fnSplitString](@strBatchId, ',')
 					)
 				--2-Opening Inventory;8-Forecasted Consumption;9-Ending Inventory;13-Existing Purchases;12-Planned Purchases
 				AND AV.strFieldName NOT IN (
@@ -551,7 +553,7 @@ BEGIN
 				,strProductType
 				,strItemNo
 				,strItemDescription
-				,0 AS strSupplyTarget
+				,dblSupplyTarget AS strSupplyTarget
 				,IsNULL([Opening Inventory strMonth1], 0) AS strOIMonth1
 				,IsNULL([Forecasted Consumption strMonth1], 0) AS strFCMonth1
 				,IsNULL([Existing Purchases strMonth1], 0) AS strOPMonth1
@@ -720,6 +722,7 @@ BEGIN
 					,SB.intSubBookId
 					,MI.intItemId AS intMainItemId
 					,I.intItemId
+					,ST.dblSupplyTarget
 				FROM tblCTInvPlngReportAttributeValue AV
 				JOIN tblCTInvPlngReportMaster RM ON RM.intInvPlngReportMasterID = AV.intInvPlngReportMasterID
 				JOIN tblCTReportAttribute A ON A.intReportAttributeID = AV.intReportAttributeID
@@ -733,6 +736,8 @@ BEGIN
 					AND CA.strType = 'ProductType'
 				LEFT JOIN tblICUnitMeasureConversion UMCByWeight ON UMCByWeight.intUnitMeasureId = RM.intUnitMeasureId --From Unit
 					AND UMCByWeight.intStockUnitMeasureId = @intUnitMeasureId
+					LEFT JOIN tblIPItemSupplyTarget ST on ST.intBookId =B.intBookId and IsNULL(ST.intSubBookId,0)=IsNULL(SB.intSubBookId,0)
+			
 				WHERE A.intReportAttributeID IN (
 						2 --Opening Inventory
 						,8 --Forecasted Consumption
@@ -1102,7 +1107,7 @@ BEGIN
 				,strProductType
 				,strItemNo
 				,strItemDescription
-				,0 AS strSupplyTarget
+				,dblSupplyTarget AS strSupplyTarget
 				,IsNULL([Opening Inventory strMonth1], 0) AS strOIMonth1
 				,IsNULL([Forecasted Consumption strMonth1], 0) AS strFCMonth1
 				,IsNULL([Existing Purchases strMonth1], 0) AS strOPMonth1
@@ -1271,6 +1276,7 @@ BEGIN
 					,SB.intSubBookId
 					,MI.intItemId AS intMainItemId
 					,I.intItemId
+					,ST.dblSupplyTarget
 				FROM #tblMFFinalDemand FD
 				JOIN tblCTReportAttribute A ON A.intReportAttributeID = FD.intAttributeId
 				--JOIN tblCTInvPlngReportMaster RM ON RM.intInvPlngReportMasterID = @intReportMasterID
@@ -1283,6 +1289,7 @@ BEGIN
 					AND CA.strType = 'ProductType'
 				LEFT JOIN tblICUnitMeasureConversion UMCByWeight ON UMCByWeight.intUnitMeasureId = RM.intUnitMeasureId --From Unit
 					AND UMCByWeight.intStockUnitMeasureId = @intUnitMeasureId
+				LEFT JOIN tblIPItemSupplyTarget ST on ST.intBookId =B.intBookId and IsNULL(ST.intSubBookId,0)=IsNULL(SB.intSubBookId,0)
 				WHERE A.intReportAttributeID IN (
 						2
 						,8

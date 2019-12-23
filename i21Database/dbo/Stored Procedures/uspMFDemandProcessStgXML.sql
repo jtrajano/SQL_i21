@@ -44,14 +44,15 @@ BEGIN TRY
 		,@intReportMasterID INT
 		,@strItemList NVARCHAR(MAX)
 		,@intTransactionId INT
-        ,@intCompanyId INT
-        ,@intLoadScreenId INT
-        ,@intTransactionRefId INT
-        ,@intCompanyRefId INT
-        ,@strDescription NVARCHAR(50)
-        ,@intItemScreenId int
-		,@intDemandScreenId int
-		,@intNewInvPlngReportMasterID int
+		,@intCompanyId INT
+		,@intLoadScreenId INT
+		,@intTransactionRefId INT
+		,@intCompanyRefId INT
+		,@strDescription NVARCHAR(50)
+		,@intItemScreenId INT
+		,@intDemandScreenId INT
+		,@intNewInvPlngReportMasterID INT
+		,@strItemSupplyTargetXML NVARCHAR(MAX)
 
 	SELECT @intDemandStageId = MIN(intDemandStageId)
 	FROM tblMFDemandStage
@@ -65,7 +66,8 @@ BEGIN TRY
 			,@strReportAttributeValueXML = NULL
 			,@strRowState = NULL
 			,@intTransactionId = NULL
-            ,@intCompanyId = NULL
+			,@intCompanyId = NULL
+			,@strItemSupplyTargetXML=NULL
 
 		SELECT @intInvPlngReportMasterID = intInvPlngReportMasterID
 			,@strReportMasterXML = strReportMasterXML
@@ -73,7 +75,8 @@ BEGIN TRY
 			,@strReportAttributeValueXML = strReportAttributeValueXML
 			,@strRowState = strRowState
 			,@intTransactionId = intTransactionId
-            ,@intCompanyId = intCompanyId
+			,@intCompanyId = intCompanyId
+			,@strItemSupplyTargetXML=strItemSupplyTarget
 		FROM tblMFDemandStage
 		WHERE intDemandStageId = @intDemandStageId
 
@@ -521,6 +524,59 @@ BEGIN TRY
 
 			EXEC sp_xml_removedocument @idoc
 
+			EXEC sp_xml_preparedocument @idoc OUTPUT
+				,@strItemSupplyTargetXML
+
+			SELECT @strBook = strBook
+				,@strSubBook = strSubBook
+			FROM OPENXML(@idoc, 'vyuMFGetItemSupplyTargets', 2) WITH (
+					strBook NVARCHAR(50) Collate Latin1_General_CI_AS
+					,strSubBook NVARCHAR(50) Collate Latin1_General_CI_AS
+					) x
+
+			--Declare @intBookId int
+			SELECT @intBookId = intBookId
+			FROM tblCTBook
+			WHERE strBook = @strBook
+
+			SELECT @intSubBookId = intSubBookId
+			FROM tblCTSubBook
+			WHERE strSubBook = @strSubBook
+
+			IF @intSubBookId IS NULL
+				SELECT @intSubBookId = 0
+
+			DELETE
+			FROM tblIPItemSupplyTarget
+			WHERE intBookId = @intBookId
+				AND IsNULL(intSubBookId, @intSubBookId) = @intSubBookId
+
+			INSERT INTO tblIPItemSupplyTarget (
+				intItemLocationId
+				,dblSupplyTarget
+				,intBookId
+				,intSubBookId
+				,intCompanyId
+				)
+			SELECT IL.intItemLocationId
+				,x.dblSupplyTarget
+				,@intBookId
+				,@intSubBookId
+				,NULL AS intCompanyId
+			FROM OPENXML(@idoc, 'vyuMFGetItemSupplyTargets/vyuMFGetItemSupplyTarget', 2) WITH (
+					strItemNo NVARCHAR(50) Collate Latin1_General_CI_AS
+					,strLocationName NVARCHAR(50) Collate Latin1_General_CI_AS
+					,strCompanyName NVARCHAR(50) Collate Latin1_General_CI_AS
+					,dblSupplyTarget NUMERIC(18, 6)
+					) x
+			JOIN tblICItem I ON I.strItemNo = x.strItemNo
+			JOIN tblSMCompanyLocation CL ON CL.strLocationName = x.strLocationName
+			JOIN tblICItemLocation IL ON IL.intItemId = I.intItemId
+				AND IL.intLocationId = CL.intCompanyLocationId
+			--JOIN tblIPCompany C on C.strCompanyName=x.strCompanyName
+			
+			EXEC sp_xml_removedocument @idoc
+
 			ext:
 
 			UPDATE tblMFDemandStage
@@ -528,35 +584,36 @@ BEGIN TRY
 			WHERE intDemandStageId = @intDemandStageId
 
 			SELECT @intDemandScreenId = intScreenId
-            FROM tblSMScreen
-            WHERE strNamespace = 'Manufacturing.view.DemandAnalysisView'
+			FROM tblSMScreen
+			WHERE strNamespace = 'Manufacturing.view.DemandAnalysisView'
 
-            SELECT @intTransactionRefId = intTransactionId
-            FROM tblSMTransaction
-            WHERE intRecordId = @intInvPlngReportMasterID
-                AND intScreenId = @intDemandScreenId
+			SELECT @intTransactionRefId = intTransactionId
+			FROM tblSMTransaction
+			WHERE intRecordId = @intInvPlngReportMasterID
+				AND intScreenId = @intDemandScreenId
 
-            EXECUTE dbo.uspSMInterCompanyUpdateMapping @currentTransactionId = @intTransactionRefId, @referenceTransactionId = @intTransactionId,@referenceCompanyId=@intCompanyId
+			EXECUTE dbo.uspSMInterCompanyUpdateMapping @currentTransactionId = @intTransactionRefId
+				,@referenceTransactionId = @intTransactionId
+				,@referenceCompanyId = @intCompanyId
 
-            INSERT INTO tblMFDemandAcknowledgementStage (
-				  intInvPlngReportMasterId 
-				,strInvPlngReportName 
+			INSERT INTO tblMFDemandAcknowledgementStage (
+				intInvPlngReportMasterId
+				,strInvPlngReportName
 				,intInvPlngReportMasterRefId
-                ,strMessage
-                ,intTransactionId
-                ,intCompanyId
-                ,intTransactionRefId
-                ,intCompanyRefId
-                )
-            SELECT @intNewInvPlngReportMasterID 
-				,@strInvPlngReportName 
+				,strMessage
+				,intTransactionId
+				,intCompanyId
+				,intTransactionRefId
+				,intCompanyRefId
+				)
+			SELECT @intNewInvPlngReportMasterID
+				,@strInvPlngReportName
 				,@intInvPlngReportMasterID
-                ,'Success'
-                ,@intTransactionId
-                ,@intCompanyId
-                ,@intTransactionRefId
-                ,@intCompanyRefId
-
+				,'Success'
+				,@intTransactionId
+				,@intCompanyId
+				,@intTransactionRefId
+				,@intCompanyRefId
 
 			IF @intTransactionCount = 0
 				COMMIT TRANSACTION
@@ -597,4 +654,3 @@ BEGIN CATCH
 			,'WITH NOWAIT'
 			)
 END CATCH
-

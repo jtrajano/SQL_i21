@@ -10,9 +10,14 @@ BEGIN TRY
 		,@strReportMasterXML NVARCHAR(MAX)
 		,@strReportMaterialXML NVARCHAR(MAX)
 		,@strReportAttributeValueXML NVARCHAR(MAX)
-		,@intCompanyId int
-        ,@intTransactionId int
-		,@intDemandScreenId int
+		,@intCompanyId INT
+		,@intTransactionId INT
+		,@intDemandScreenId INT
+		,@strItemSupplyTargetXML NVARCHAR(MAX)
+		,@strBook NVARCHAR(50)
+		,@strSubBook NVARCHAR(50)
+		,@strAdditionalInfo NVARCHAR(MAX) = ''
+		,@strItemSupplyTarget NVARCHAR(MAX)
 
 	IF @strRowState = 'Delete'
 	BEGIN
@@ -53,14 +58,44 @@ BEGIN TRY
 		,NULL
 		,NULL
 
-	 SELECT    @intDemandScreenId    =    intScreenId 
-	 FROM tblSMScreen 
-	 WHERE strNamespace = 'Manufacturing.view.DemandAnalysisView'
+	SELECT @strObjectName = 'vyuMFGetItemSupplyTarget'
 
-    Select @intTransactionId=intTransactionId 
-    from tblSMTransaction
-    Where intRecordId =@intInvPlngReportMasterID
-    and intScreenId =@intDemandScreenId
+	SELECT @intCompanyId = intCompanyId
+	FROM tblICItem
+	Where IsNUll(intCompanyId,0) >0
+
+	SELECT @strHeaderCondition = 'intCompanyId = ' + LTRIM(@intCompanyId)
+
+	EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
+		,@strHeaderCondition
+		,@strItemSupplyTargetXML OUTPUT
+		,NULL
+		,NULL
+
+	SELECT @strBook = strBook
+		,@strSubBook = strSubBook
+	FROM vyuMFInvPlngReportMaster
+	WHERE intInvPlngReportMasterID = @intInvPlngReportMasterID
+
+	SELECT @strAdditionalInfo = @strAdditionalInfo + '<strBook>' + @strBook + '</strBook>'
+
+	IF IsNULL(@strSubBook, '') <> ''
+	BEGIN
+		SELECT @strAdditionalInfo = @strAdditionalInfo + '<strSubBook>' + @strSubBook + '</strSubBook>'
+	END
+
+	SELECT @strAdditionalInfo = @strAdditionalInfo + '</vyuMFGetItemSupplyTargets>'
+
+	SELECT @strItemSupplyTargetXML= Replace(@strItemSupplyTargetXML, '</vyuMFGetItemSupplyTargets>', @strAdditionalInfo)
+
+	SELECT @intDemandScreenId = intScreenId
+	FROM tblSMScreen
+	WHERE strNamespace = 'Manufacturing.view.DemandAnalysisView'
+
+	SELECT @intTransactionId = intTransactionId
+	FROM tblSMTransaction
+	WHERE intRecordId = @intInvPlngReportMasterID
+		AND intScreenId = @intDemandScreenId
 
 	INSERT INTO tblMFDemandStage (
 		intInvPlngReportMasterID
@@ -68,16 +103,18 @@ BEGIN TRY
 		,strReportMaterialXML
 		,strReportAttributeValueXML
 		,strRowState
-		,intTransactionId 
-        ,intCompanyId 
+		,intTransactionId
+		,intCompanyId
+		,strItemSupplyTarget
 		)
 	SELECT intInvPlngReportMasterID = @intInvPlngReportMasterID
 		,strReportMasterXML = @strReportMasterXML
 		,strReportMaterialXML = @strReportMaterialXML
 		,strReportAttributeValueXML = @strReportAttributeValueXML
 		,strRowState = @strRowState
-		,intTransactionId=@intTransactionId
-        ,intCompanyId=@intCompanyId
+		,intTransactionId = @intTransactionId
+		,intCompanyId = @intCompanyId
+		,strItemSupplyTarget = @strItemSupplyTargetXML
 END TRY
 
 BEGIN CATCH
@@ -90,4 +127,3 @@ BEGIN CATCH
 			,'WITH NOWAIT'
 			)
 END CATCH
-
