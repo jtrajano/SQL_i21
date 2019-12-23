@@ -107,7 +107,8 @@ FROM
 					 WHERE SCH.intCommodityId = MTMBD.intCommodityId
 						AND SCD.intItemId = MTMBD.intItemId
 						AND SCD.intFutureMarketId = MTMBD.intFutureMarketId
-						AND SCH.dtmContractDate >= MTMB.dtmM2MBasisDate
+						AND DATEADD(ms, -3, SCH.dtmContractDate) >= MTMB.dtmM2MBasisDate
+						AND MTMBD.intContractTypeId = 2
 					 ORDER BY MTMB.dtmM2MBasisDate ASC
 					 ) MB
 		/* Payment Terms Adjustment Basis */
