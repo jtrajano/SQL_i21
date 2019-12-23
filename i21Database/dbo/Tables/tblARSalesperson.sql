@@ -38,6 +38,13 @@
     --CONSTRAINT [UQ_tblARSalesperson_strSalespersonId] UNIQUE NONCLUSTERED ([strSalespersonId] ASC)
 
 );
+GO
+
+CREATE UNIQUE NONCLUSTERED INDEX [IX_tblARSalesperson_strDriverNumber]
+ ON [dbo].[tblARSalesperson]([strDriverNumber])
+ Where [strDriverNumber] IS NOT NULL AND [strDriverNumber] != ''; 
+GO
+ 
 
 
 
