@@ -317,8 +317,8 @@ BEGIN
 		INNER JOIN tblGRSettleStorage C3 ON A.intBillId = C3.intBillId
 		INNER JOIN tblGRSettleStorageTicket C2 ON C3.intSettleStorageId = C2.intSettleStorageId
 		INNER JOIN tblGRCustomerStorage C ON C2.intCustomerStorageId = C.intCustomerStorageId AND B.intCustomerStorageId = C.intCustomerStorageId
-		INNER JOIN tblGRStorageHistory sh 
-			ON sh.intCustomerStorageId = C2.intCustomerStorageId AND sh.intSettleStorageId = C3.intSettleStorageId 
+		--INNER JOIN tblGRStorageHistory sh 
+		--	ON sh.intCustomerStorageId = C2.intCustomerStorageId AND sh.intSettleStorageId = C3.intSettleStorageId 
 		INNER JOIN tblGRTransferStorageReference TSR ON TSR.intToCustomerStorageId = C.intCustomerStorageId
 		INNER JOIN tblGRTransferStorage TS ON TS.intTransferStorageId = TSR.intTransferStorageId
 		INNER JOIN tblGRTransferStorageSplit TSS on TSS.intTransferStorageId = TS.intTransferStorageId
