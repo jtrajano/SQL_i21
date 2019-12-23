@@ -664,7 +664,7 @@ BEGIN
 			ON InventoryCostCharges.intChargeId = OtherChargesGLAccounts.intChargeId
 				AND InventoryCostCharges.intChargeItemLocation = OtherChargesGLAccounts.intItemLocationId
 		INNER JOIN dbo.tblGLAccount GLAccount
-			ON GLAccount.intAccountId = OtherChargesGLAccounts.intAPClearing
+			ON GLAccount.intAccountId = OtherChargesGLAccounts.intOtherChargeExpense
 		CROSS APPLY dbo.fnGetDebit(InventoryCostCharges.dblCost) DebitForeign
 		CROSS APPLY dbo.fnGetCredit(InventoryCostCharges.dblCost) CreditForeign
 		WHERE ISNULL(InventoryCostCharges.ysnAccrue, 0) = 0
@@ -820,6 +820,7 @@ BEGIN
 		-- Dr...... Other Charge Expense
 		-- Cr..................... Other Charge Income 
 		-------------------------------------------------------------------------------------------
+		UNION ALL
 		SELECT	
 				 intItemId					= NonInventoryCostCharges.intChargeId
 				,[strItemNo]				= NonInventoryCostCharges.strItemNo
