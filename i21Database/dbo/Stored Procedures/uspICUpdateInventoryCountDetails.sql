@@ -201,13 +201,18 @@ BEGIN
 			, Lot.intLotId
 			, Lot.strLotNumber
 			, Lot.strLotAlias
-			, dblSystemCount = ISNULL(LotTransactions.dblQty, 0) - CASE WHEN @ysnExcludeReserved = 1 THEN ISNULL(reserved.dblQty, 0) ELSE 0 END
-			, dblWeightQty = ISNULL(LotTransactions.dblWeight, 0) 
-			, dblLastCost = --ISNULL(dbo.fnCalculateCostBetweenUOM(LastLotTransaction.intItemUOMId, StockUOM.intItemUOMId, LastLotTransaction.dblCost), 0)
-					CASE 
-						WHEN Lot.intWeightUOMId IS NOT NULL THEN ISNULL(dbo.fnCalculateCostBetweenUOM(LastLotTransaction.intItemUOMId, Lot.intWeightUOMId, LastLotTransaction.dblCost), 0)
-						ELSE ISNULL(dbo.fnCalculateCostBetweenUOM(LastLotTransaction.intItemUOMId, Lot.intItemUOMId, LastLotTransaction.dblCost), 0)
-					END 
+			, dblSystemCount = 
+				ISNULL(LotTransactions.dblQty, 0) 
+				- CASE WHEN @ysnExcludeReserved = 1 THEN ISNULL(reserved.dblQty, 0) ELSE 0 END
+			, dblWeightQty = 
+				ISNULL(LotTransactions.dblWeight, 0) 
+			, dblLastCost = 
+				CASE 
+					WHEN Lot.intWeightUOMId IS NOT NULL THEN 
+						ISNULL(dbo.fnCalculateCostBetweenUOM(LastLotTransaction.intItemUOMId, Lot.intWeightUOMId, LastLotTransaction.dblCost), 0)
+					ELSE 
+						ISNULL(dbo.fnCalculateCostBetweenUOM(LastLotTransaction.intItemUOMId, Lot.intItemUOMId, LastLotTransaction.dblCost), 0)
+				END 
 			, strCountLine = @strHeaderNo + '-' + CAST(ROW_NUMBER() OVER(ORDER BY Lot.intItemId ASC) AS NVARCHAR(50))
 			, Lot.intItemUOMId
 			, StockUOM.intItemUOMId
@@ -253,39 +258,45 @@ BEGIN
 				AND t.intLotId = Lot.intLotId
 				AND dbo.fnDateLessThanEquals(t.dtmDate, @AsOfDate) = 1		
 		) LotTransactions 
-		CROSS APPLY (
-			SELECT TOP 1 
-				t.dblCost 
-				,t.intItemUOMId
-			FROM tblICInventoryTransaction t 
-			WHERE
+
+		-- last transaction
+		OUTER APPLY (
+			SELECT
+				TOP 1 
+				t.intItemUOMId
+				,t.dblCost
+				,t.intInventoryTransactionId
+			FROM 
+				tblICInventoryTransaction t
+			WHERE 
 				t.intItemId = Item.intItemId
 				AND t.intItemLocationId = ItemLocation.intItemLocationId
 				AND t.intSubLocationId = Lot.intSubLocationId
 				AND t.intStorageLocationId = Lot.intStorageLocationId
 				AND t.intLotId = Lot.intLotId
-				AND dbo.fnDateLessThanEquals(t.dtmDate, @AsOfDate) = 1		
-			ORDER BY 
-				t.intInventoryTransactionId DESC 
-		) LastLotTransaction
+				AND t.dblQty > 0 
+				AND dbo.fnDateLessThanEquals(t.dtmDate, @AsOfDate) = 1	
+			ORDER BY
+				t.intInventoryTransactionId DESC 		
+		) LastLotTransaction 
+
 		LEFT OUTER JOIN @CategoryIds categoryFilter ON categoryFilter.intCategoryId = Item.intCategoryId
 		LEFT OUTER JOIN @CommodityIds commodityFilter ON commodityFilter.intCommodityId = Item.intCommodityId
 		LEFT OUTER JOIN @StorageLocationIds storageLocationFilter ON storageLocationFilter.intStorageLocationId = Lot.intSubLocationId
 		LEFT OUTER JOIN @StorageUnitIds storageUnitFilter ON storageUnitFilter.intStorageUnitId = Lot.intStorageLocationId
 		OUTER APPLY (
-			SELECT SUM(ReservedQty.dblQty) dblQty
-			FROM (
-				SELECT sr.strTransactionId, sr.dblQty dblQty
-				FROM tblICStockReservation sr
-					LEFT JOIN tblICInventoryTransaction xt ON xt.intTransactionId = sr.intTransactionId
-				WHERE sr.intItemId = Lot.intItemId
-					AND sr.intItemLocationId = Lot.intItemLocationId
-					AND ISNULL(sr.intStorageLocationId, 0) = ISNULL(Lot.intStorageLocationId, 0)
-					AND ISNULL(sr.intSubLocationId, 0) = ISNULL(Lot.intSubLocationId, 0)
-					AND ISNULL(sr.intLotId, 0) = ISNULL(Lot.intLotId, 0)
-					AND dbo.fnDateLessThanEquals(CONVERT(VARCHAR(10), xt.dtmDate,112), @AsOfDate) = 1
-				GROUP BY sr.strTransactionId, sr.dblQty
-			) AS ReservedQty
+			SELECT dblQty = SUM(sr.dblQty) 
+			FROM 
+				tblICStockReservation sr
+				LEFT JOIN tblICInventoryTransaction xt 
+					ON xt.intTransactionId = sr.intTransactionId
+			WHERE 
+				sr.intItemId = Lot.intItemId
+				AND sr.intItemLocationId = Lot.intItemLocationId
+				AND ISNULL(sr.intLotId, 0) = ISNULL(Lot.intLotId, 0)
+				AND ISNULL(sr.intStorageLocationId, 0) = ISNULL(Lot.intStorageLocationId, 0)
+				AND ISNULL(sr.intSubLocationId, 0) = ISNULL(Lot.intSubLocationId, 0)				
+				AND dbo.fnDateLessThanEquals(CONVERT(VARCHAR(10), xt.dtmDate,112), @AsOfDate) = 1
 		) reserved
 	WHERE (ItemLocation.intLocationId = @intLocationId OR ISNULL(@intLocationId, 0) = 0)
 		AND ((@ysnIsMultiFilter = 0 AND (Item.intCategoryId = @intCategoryId OR ISNULL(@intCategoryId, 0) = 0)) OR
