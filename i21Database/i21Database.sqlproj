@@ -8303,6 +8303,7 @@
     <Build Include="dbo\Stored Procedures\uspIPWeightClaimProcessStgXML.sql" />
     <Build Include="dbo\Views\vyuIPGetWeightClaimDetail.sql" />
     <Build Include="dbo\Views\vyuIPGetWeightClaim.sql" />
+    <Build Include="dbo\Tables\tblLGWeightClaimAcknowledgementStage.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
