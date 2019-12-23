@@ -340,17 +340,16 @@ BEGIN
 								- ISNULL(Detail.dblQtySold, 0) 
 							)
 
-						-- If Physical count is a whole number, use it. 
+						-- Lot: If Physical count is a whole number, use it. 
 						WHEN Item.strLotTracking <> 'No' 
 							 AND ROUND((ISNULL(Detail.dblPhysicalCount, 0) - ISNULL(Detail.dblSystemCount, 0)) % 1, 6) = 0 
 							 AND ROUND((ISNULL(Detail.dblPhysicalCount, 0)), 6) <> 0 
 						THEN 
 							ISNULL(Detail.dblPhysicalCount, 0) - ISNULL(Detail.dblSystemCount, 0) 
-						WHEN Detail.intWeightUOMId IS NULL THEN 
-							ISNULL(Detail.dblPhysicalCount, 0) - ISNULL(Detail.dblSystemCount, 0) 
+
 						ELSE 
 							CASE 
-								WHEN Item.strLotTracking <> 'No' THEN 
+								WHEN Item.strLotTracking <> 'No' AND Detail.intWeightUOMId IS NOT NULL THEN 
 									ISNULL(Detail.dblNetQty, 0) - ISNULL(Detail.dblWeightQty, 0) 
 								ELSE 
 									ISNULL(Detail.dblPhysicalCount, 0) - ISNULL(Detail.dblSystemCount, 0) 
@@ -358,13 +357,12 @@ BEGIN
 					END
 			,dblUOMQty				= 
 					CASE 
-						-- If Physical count is a whole number, use it. 
+						-- Lot: If Physical count is a whole number, use it. 
 						WHEN Item.strLotTracking <> 'No' 
 							 AND ROUND((ISNULL(Detail.dblPhysicalCount, 0) - ISNULL(Detail.dblSystemCount, 0)) % 1, 6) = 0 
 							 AND ROUND((ISNULL(Detail.dblPhysicalCount, 0)), 6) <> 0 
 						THEN 
 							ItemUOM.dblUnitQty
-
 						WHEN Detail.intWeightUOMId IS NULL THEN 
 							ItemUOM.dblUnitQty
 						ELSE 
@@ -372,7 +370,7 @@ BEGIN
 					END
 			,dblCost = 
 					CASE 
-						-- If Physical count is a whole number, use it. 
+						-- Lot: If Physical count is a whole number, use it. 
 						WHEN Item.strLotTracking <> 'No' 
 							 AND ROUND((ISNULL(Detail.dblPhysicalCount, 0) - ISNULL(Detail.dblSystemCount, 0)) % 1, 6) = 0 
 							 AND ROUND((ISNULL(Detail.dblPhysicalCount, 0)), 6) <> 0 
@@ -386,15 +384,11 @@ BEGIN
 									, dbo.fnCalculateCostBetweenUOM(StockUOM.intItemUOMId, Detail.intItemUOMId, ItemPricing.dblLastCost)
 								) 
 							)
-						WHEN Detail.intWeightUOMId IS NULL THEN 
-							COALESCE(
-								NULLIF(Detail.dblNewCost, 0)
-								, Detail.dblLastCost
-								, dbo.fnCalculateCostBetweenUOM(StockUOM.intItemUOMId, Detail.intItemUOMId, ItemPricing.dblLastCost)
-							)
+
 						ELSE 
 							CASE 
-								WHEN Item.strLotTracking <> 'No' THEN 
+								-- Lot: 
+								WHEN Item.strLotTracking <> 'No' AND Detail.intWeightUOMId IS NOT NULL THEN 
 									dbo.fnCalculateCostBetweenUOM (
 										ISNULL(Detail.intWeightUOMId, Detail.intItemUOMId)
 										,ISNULL(Detail.intWeightUOMId, Detail.intItemUOMId)
@@ -404,7 +398,7 @@ BEGIN
 											, dbo.fnCalculateCostBetweenUOM(StockUOM.intItemUOMId, Detail.intItemUOMId, ItemPricing.dblLastCost)
 										) 
 									)
-
+								-- Non-Lotted:
 								ELSE 
 									COALESCE(
 										NULLIF(Detail.dblNewCost, 0)
@@ -413,29 +407,6 @@ BEGIN
 									)
 							END
 					END
-					--COALESCE (
-					--	CASE 
-					--		WHEN (Detail.dblPhysicalCount > Detail.dblSystemCount AND ISNULL(Detail.dblNewCost,0) > 0) THEN 
-					--			Detail.dblNewCost 
-					--		ELSE 
-					--			NULL 
-					--	END
-					--	,Detail.dblLastCost
-					--	,dbo.fnCalculateCostBetweenUOM(
-					--		StockUOM.intItemUOMId
-					--		,CASE 
-					--			-- If Physical count is a whole number, use it. 
-					--			WHEN Item.strLotTracking <> 'No' 
-					--				 AND ROUND((ISNULL(Detail.dblPhysicalCount, 0) - ISNULL(Detail.dblSystemCount, 0)) % 1, 6) = 0 
-					--				 AND ROUND((ISNULL(Detail.dblPhysicalCount, 0)), 6) <> 0 
-					--			THEN 
-					--				Detail.intItemUOMId
-					--			ELSE 
-					--				ISNULL(Detail.intWeightUOMId, Detail.intItemUOMId)
-					--		END
-					--		,  ISNULL(ItemLot.dblLastCost, ItemPricing.dblLastCost)
-					--	)
-					--)
 			,dblValue				= 0
 			,dblSalesPrice			= 0
 			,intCurrencyId			= @DefaultCurrencyId 

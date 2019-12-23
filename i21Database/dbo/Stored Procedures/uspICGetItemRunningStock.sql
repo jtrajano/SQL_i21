@@ -61,6 +61,7 @@ DECLARE
 	@ysnSeparateStockForUOMs AS BIT
 	,@intStockUOMId AS INT 
 	,@dblLastCost AS NUMERIC(38, 20) 
+	,@intLastInventoryTransactionId AS INT 
 
 	SELECT @ysnSeparateStockForUOMs = ISNULL(i.ysnSeparateStockForUOMs,0) FROM tblICItem i WHERE i.intItemId = @intItemId 
 	SELECT TOP 1 @intStockUOMId = iu.intItemUOMId FROM tblICItemUOM iu WHERE iu.intItemId = @intItemId AND iu.ysnStockUnit = 1
@@ -161,6 +162,7 @@ WHERE
 -- Get the last cost
 SELECT TOP 1 
 	@dblLastCost = dbo.fnCalculateCostBetweenUOM(t.intItemUOMId, @intStockUOMId, t.dblCost) 
+	,@intLastInventoryTransactionId = t.intInventoryTransactionId
 FROM
 	tblICInventoryTransaction t INNER JOIN tblICItemLocation IL
 		ON IL.intItemLocationId = t.intItemLocationId
@@ -175,12 +177,9 @@ WHERE
 	AND (@intSubLocationId IS NULL OR @intSubLocationId = CASE WHEN Lot.intLotId IS NULL THEN t.intSubLocationId ELSE Lot.intSubLocationId END)
 	AND (@intStorageLocationId IS NULL OR @intStorageLocationId = CASE WHEN Lot.intLotId IS NULL THEN t.intStorageLocationId ELSE Lot.intStorageLocationId END)
 	AND @intOwnershipType = 1
-	AND t.dblQty <> 0 
+	AND t.dblQty > 0 
 ORDER BY
-	t.intItemId DESC
-	,t.intItemLocationId DESC
-	,t.dtmDate DESC 
-	,t.intInventoryTransactionId DESC 
+	t.intInventoryTransactionId DESC 
 
 -- If transaction does not exists, add a dummy record. 
 IF NOT EXISTS(SELECT TOP 1 1 FROM @tblInventoryTransaction)
@@ -313,7 +312,7 @@ BEGIN
 		,stock.intCostingMethodId
 		,dblQty = dbo.fnCalculateQtyBetweenUOM(stock.intItemUOMId, iu.intItemUOMId, stock.dblQty)
 		,dblUnitStorage = dbo.fnCalculateQtyBetweenUOM(stock.intItemUOMId, iu.intItemUOMId, stock.dblUnitStorage)
-		,dblCost = dbo.fnCalculateCostBetweenUOM(@intStockUOMId, iu.intItemUOMId, @dblLastCost) 
+		,dblCost = @dblLastCost
 	FROM 
 		tblICItem i INNER JOIN tblICItemUOM iu
 			ON i.intItemId = iu.intItemId
@@ -350,14 +349,14 @@ SELECT
 	, dblCost = 
 			CASE 
 				-- Get the average cost. 
-				WHEN CostMethod.intCostingMethodId = 1 THEN 
+				WHEN CostMethod.intCostingMethodId = 1 THEN 				
 					dbo.fnCalculateCostBetweenUOM(
 						@intStockUOMId
-						, t.intItemUOMId
-						, dbo.fnGetItemAverageCost(
+						, ItemUOM.intItemUOMId
+						, dbo.[fnICGetMovingAverageCost](
 							t.intItemId
 							, t.intItemLocationId
-							, t.intItemUOMId
+							, @intLastInventoryTransactionId
 						)
 					)
 				-- Otherwise, get the last cost 
