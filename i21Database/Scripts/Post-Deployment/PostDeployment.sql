@@ -515,6 +515,8 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\ST\35_RegisterSetupEntries.sql
 :r .\ST\36_CStoreSQLJobScheduler.sql
 :r .\ST\37_FileFieldMapping_Passport_CPJR_340.sql
+:r .\ST\38_FileFieldMapping_Commander_NetworkCards.sql
+
 
 
 -- Motor Fuel Tax

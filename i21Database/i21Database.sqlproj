@@ -8289,6 +8289,7 @@
     <None Include="Scripts\Post-Deployment\SM\2010_DefaultAdminUser.sql" />
     <Build Include="dbo\Views\vyuAPReceiptClearingGL.sql" />
     <Build Include="dbo\Functions\fnCTGetVoucherPayable.sql" />
+    <None Include="Scripts\Post-Deployment\ST\38_FileFieldMapping_Commander_NetworkCards.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
