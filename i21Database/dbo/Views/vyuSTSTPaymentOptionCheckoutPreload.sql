@@ -9,6 +9,8 @@ SELECT
     stpo.[intAccountId], 
     stpo.[strRegisterMop],  
 	stpo.[ysnDepositable], 
+	stpo.[strNetworkCreditCardName],
+	stpo.[ysnSkipImport],
     stpo.[intConcurrencyId],
 
 	-- Not Map

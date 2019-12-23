@@ -134,6 +134,7 @@ BEGIN
 				ON st.intStoreId = stpo.intStoreId
 				AND stpo.intPaymentOptionId IN (st.intCashTransctionMopId, st.intCustomerChargeMopId)
 			WHERE st.intStoreId = @intStoreId
+				AND stpo.ysnSkipImport = CAST(0 AS BIT)
             -- ======================================================================================================================
 			-- [END] - Create list of excluded MOP Id
 			-- ======================================================================================================================
@@ -167,6 +168,7 @@ BEGIN
 				ON CPO.intPaymentOptionId = PO.intPaymentOptionId
             WHERE Store.intStoreId = @intStoreId
 				AND CPO.intCheckoutId = @intCheckoutId
+				AND CPO.ysnSkipImport = CAST(0 AS BIT)
 				--AND PO.strRegisterMop NOT IN (SELECT DISTINCT strRegisterMop FROM @tempExcludedMOPid)
 				AND (
 						(
