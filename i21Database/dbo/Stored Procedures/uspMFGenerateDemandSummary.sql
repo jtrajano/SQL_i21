@@ -269,8 +269,8 @@ BEGIN
 			SELECT B.strBook
 				,SB.strSubBook
 				,CA.strDescription AS strProductType
-				,MI.strItemNo
-				,I.strItemNo AS strItemDescription
+				,I.strItemNo
+				,I.strDescription AS strItemDescription
 				,Replace(Replace(A.strAttributeName, '<a>+ ', ''), '</a>', '') + ' ' + AV.strFieldName AS strAttributeName
 				,(
 					CASE 
@@ -281,14 +281,14 @@ BEGIN
 					) strValue
 				,B.intBookId
 				,SB.intSubBookId
-				,MI.intItemId AS intMainItemId
+				,AV.intMainItemId
 				,I.intItemId
 				,ST.dblSupplyTarget
 			FROM tblMFInvPlngSummaryDetail AV
 			JOIN tblMFInvPlngSummary S ON S.intInvPlngSummaryId = AV.intInvPlngSummaryId
 			JOIN tblCTReportAttribute A ON A.intReportAttributeID = AV.intAttributeId
 			JOIN tblMFInvPlngSummaryBatch Batch ON Batch.intInvPlngSummaryId = AV.intInvPlngSummaryId
-			LEFT JOIN tblICItem MI ON MI.intItemId = IsNULL(AV.intMainItemId, AV.intItemId)
+			--LEFT JOIN tblICItem MI ON MI.intItemId = IsNULL(AV.intMainItemId, AV.intItemId)
 			JOIN tblICItem I ON I.intItemId = AV.intItemId
 			LEFT JOIN tblCTBook B ON B.intBookId = AV.intBookId
 			LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = AV.intSubBookId
@@ -702,8 +702,8 @@ BEGIN
 				SELECT B.strBook
 					,SB.strSubBook
 					,CA.strDescription AS strProductType
-					,MI.strItemNo
-					,I.strItemNo AS strItemDescription
+					,I.strItemNo
+					,I.strDescription AS strItemDescription
 					,Replace(Replace(A.strAttributeName, '<a>+ ', ''), '</a>', '') + ' ' + AV.strFieldName AS strAttributeName
 					,(
 						CASE 
@@ -720,14 +720,14 @@ BEGIN
 						) AS strValue
 					,B.intBookId
 					,SB.intSubBookId
-					,MI.intItemId AS intMainItemId
+					,AV.intMainItemId 
 					,I.intItemId
 					,ST.dblSupplyTarget
 				FROM tblCTInvPlngReportAttributeValue AV
 				JOIN tblCTInvPlngReportMaster RM ON RM.intInvPlngReportMasterID = AV.intInvPlngReportMasterID
 				JOIN tblCTReportAttribute A ON A.intReportAttributeID = AV.intReportAttributeID
 					AND IsNumeric(AV.strValue) = 1
-				LEFT JOIN tblICItem MI ON MI.intItemId = IsNULL(AV.intMainItemId, AV.intItemId)
+				--LEFT JOIN tblICItem MI ON MI.intItemId = IsNULL(AV.intMainItemId, AV.intItemId)
 				JOIN tblICItem I ON I.intItemId = AV.intItemId
 				LEFT JOIN tblCTBook B ON B.intBookId = RM.intBookId
 				LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = RM.intSubBookId
@@ -1256,8 +1256,8 @@ BEGIN
 				SELECT B.strBook
 					,SB.strSubBook
 					,CA.strDescription AS strProductType
-					,MI.strItemNo
-					,I.strItemNo AS strItemDescription
+					,I.strItemNo
+					,I.strDescription AS strItemDescription
 					,Replace(Replace(A.strAttributeName, '<a>+ ', ''), '</a>', '') + ' strMonth' + CHAR(FD.intMonthId) AS strAttributeName
 					,(
 						CASE 
@@ -1274,13 +1274,13 @@ BEGIN
 						) AS strValue
 					,B.intBookId
 					,SB.intSubBookId
-					,MI.intItemId AS intMainItemId
+					,FD.intMainItemId
 					,I.intItemId
 					,ST.dblSupplyTarget
 				FROM #tblMFFinalDemand FD
 				JOIN tblCTReportAttribute A ON A.intReportAttributeID = FD.intAttributeId
 				--JOIN tblCTInvPlngReportMaster RM ON RM.intInvPlngReportMasterID = @intReportMasterID
-				LEFT JOIN tblICItem MI ON MI.intItemId = IsNULL(FD.intMainItemId, FD.intItemId)
+				--LEFT JOIN tblICItem MI ON MI.intItemId = IsNULL(FD.intMainItemId, FD.intItemId)
 				JOIN tblICItem I ON I.intItemId = FD.intItemId
 				LEFT JOIN tblCTBook B ON B.intBookId = FD.intBookId
 				LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = FD.intSubBookId
