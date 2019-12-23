@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblDBSchedule]
 (
-	[intScheduleId]				INT NOT NULL PRIMARY KEY IDENTITY,
+	[intScheduleId]				INT IDENTITY (1, 1) NOT NULL,
 	[strDescription]			[nvarchar](500) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strFrequency]				[nvarchar](500) COLLATE Latin1_General_CI_AS NULL,
 	[ysnMonday]					[bit] NULL,
@@ -14,6 +14,7 @@
 	[dtmRunTime]				DATE NULL,
 	[intConcurrencyId]			[int] DEFAULT 1,
 
+	CONSTRAINT [PK_tblDBSchedule] PRIMARY KEY CLUSTERED ([intScheduleId] ASC),
 	CONSTRAINT [UC_tblDBSchedule] UNIQUE (strDescription)
 )
 GO

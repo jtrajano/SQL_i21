@@ -8285,10 +8285,12 @@
     <Build Include="dbo\Tables\tblSCInventoryReceiptAllowVoucherTracker.sql" />
     <Build Include="dbo\Stored Procedures\uspSCCreateInvoiceForPostedDestinationWeightsAndGrades.sql" />
     <Build Include="dbo\Tables\tblDBSchedule.sql" />
+    <Build Include="dbo\Tables\tblDBDistributionBurstGroup.sql" />
     <Build Include="dbo\Functions\fnSCGetDPContract.sql" />
     <None Include="Scripts\Post-Deployment\SM\2010_DefaultAdminUser.sql" />
     <Build Include="dbo\Views\vyuAPReceiptClearingGL.sql" />
     <Build Include="dbo\Functions\fnCTGetVoucherPayable.sql" />
+    <Build Include="dbo\Tables\tblDBDistributionBurstGroupContact.sql" />
     <None Include="Scripts\Post-Deployment\ST\38_FileFieldMapping_Commander_NetworkCards.sql" />
   </ItemGroup>
   <ItemGroup>
