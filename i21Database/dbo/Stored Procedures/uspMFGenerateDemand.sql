@@ -1844,7 +1844,7 @@ BEGIN TRY
 				,[24]
 				)) AS pvt
 
-	SELECT intRecordId, intItemId
+	SELECT  intItemId
 		,strItemNo
 		,intReportAttributeID AS AttributeId
 		,strAttributeName
@@ -1879,6 +1879,7 @@ BEGIN TRY
 				THEN NULL
 			ELSE intMainItemId
 			END AS intMainItemId
+		,strGroupByColumn
 	FROM (
 		SELECT I.intItemId
 			,CASE 
@@ -1976,11 +1977,11 @@ BEGIN TRY
 			,A.intDisplayOrder
 			,DL.intMainItemId
 			,MI.strItemNo AS strMainItemNo
-			,Row_Number() OVER (
-				ORDER BY IsNULL(MI.strItemNo, I.strItemNo)
-					,I.strItemNo
-					,A.intDisplayOrder
-				) AS intRecordId
+			,CASE 
+											WHEN I.intItemId = MI.intItemId
+												THEN I.strItemNo
+											ELSE MI.strItemNo + ' [ ' + I.strItemNo + ' ]'
+											END As strGroupByColumn
 		FROM #tblMFDemandList DL
 		JOIN tblCTReportAttribute A ON A.intReportAttributeID = DL.intAttributeId
 		JOIN tblICItem I ON I.intItemId = DL.intItemId

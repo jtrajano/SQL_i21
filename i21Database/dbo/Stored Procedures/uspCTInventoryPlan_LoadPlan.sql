@@ -212,7 +212,7 @@ BEGIN
 	WHERE intInvPlngReportMasterID = @intInvPlngReportMasterID
 
 	SET @SQL = ''
-	SET @SQL = @SQL + 'DECLARE @Table table(intItemId Int, strItemNo nvarchar(200), AttributeId int, strAttributeName nvarchar(50), OpeningInv nvarchar(35), PastDue nvarchar(35),intMainItemId Int, strMainItemNo nvarchar(50)'
+	SET @SQL = @SQL + 'DECLARE @Table table(intItemId Int, strItemNo nvarchar(200), AttributeId int, strAttributeName nvarchar(50), OpeningInv nvarchar(35), PastDue nvarchar(35),intMainItemId Int, strMainItemNo nvarchar(50), strGroupByColumn nvarchar(50)'
 
 	WHILE @Cnt <= @intNoOfMonths
 	BEGIN
@@ -285,7 +285,12 @@ BEGIN
 						, Ext.OpeningInv
 						, Ext.PastDue
 						, Ext.intMainItemId
-						, MI.strItemNo	'
+						, MI.strItemNo
+						, CASE 
+										WHEN M.intItemId = IsNULL(MI.intItemId,M.intItemId)
+											THEN M.strItemNo
+										Else MI.strItemNo + '' [ '' + M.strItemNo + '' ]'' 
+										END	AS strGroupByColumn '
 	SET @Cnt = 1
 
 	WHILE @Cnt <= @intNoOfMonths
@@ -321,7 +326,7 @@ BEGIN
 					LEFT JOIN tblICItem MI ON MI.intItemId = Ext.intMainItemId
 					Left JOIN #tblMFItemBook IB on IB.intItemId=Ext.intItemId
 					order by Ext.intInvPlngReportMasterID,Ext.intItemId, Ext.intReportAttributeID '
-	SET @SQL = CHAR(13) + @SQL + ' SELECT Row_Number() OVER (ORDER By IsNULL(T.strMainItemNo,T.strItemNo), T.strItemNo, RA.intDisplayOrder) AS intRecordId, T.* FROM @Table T JOIN tblCTReportAttribute RA ON RA.intReportAttributeID = T.AttributeId ORDER By IsNULL(T.strMainItemNo,T.strItemNo), T.strItemNo, RA.intDisplayOrder '
+	SET @SQL = CHAR(13) + @SQL + ' SELECT T.* FROM @Table T JOIN tblCTReportAttribute RA ON RA.intReportAttributeID = T.AttributeId ORDER By IsNULL(T.strMainItemNo,T.strItemNo), T.strItemNo, RA.intDisplayOrder '
 
 	--SELECT @SQL		
 	EXEC (@SQL)

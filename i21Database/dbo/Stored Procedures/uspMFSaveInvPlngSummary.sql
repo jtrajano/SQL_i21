@@ -10,6 +10,14 @@ BEGIN TRY
 		,@intTableConcurrencyId INT
 		,@intConcurrencyId INT
 		,@intInvPlngSummaryId INT
+		,@strDetails NVARCHAR(MAX)
+		,@intUserId int
+	DECLARE @tblIPAuditLog TABLE (
+		strColumnName NVARCHAR(50)
+		,strColumnDescription NVARCHAR(50)
+		,strOldValue NVARCHAR(MAX)
+		,strNewValue NVARCHAR(MAX)
+		)
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXML
@@ -17,10 +25,12 @@ BEGIN TRY
 	SELECT @intInvPlngSummaryId = intInvPlngSummaryId
 		,@strInvPlngReportMasterID = strInvPlngReportMasterID
 		,@intConcurrencyId = intConcurrencyId
+		,@intUserId=intUserId
 	FROM OPENXML(@idoc, 'root/InvPlngSummary', 2) WITH (
 			intInvPlngSummaryId INT
 			,strInvPlngReportMasterID NVARCHAR(MAX)
 			,intConcurrencyId INT
+			,intUserId int
 			)
 
 	SELECT @intTransactionCount = @@TRANCOUNT
@@ -111,6 +121,41 @@ BEGIN TRY
 		,Item Collate Latin1_General_CI_AS
 	FROM [dbo].[fnSplitString](@strInvPlngReportMasterID, ',')
 
+	INSERT INTO @tblIPAuditLog
+	SELECT (
+			SELECT TOP 1 PSD.strValue
+			FROM tblMFInvPlngSummaryDetail PSD
+			WHERE PSD.intInvPlngSummaryId = @intInvPlngSummaryId
+				AND intAttributeId = 1
+				AND PSD.strFieldName = x.strFieldName
+			)
+		,B.strBook + IsNULL(' - ' + SB.strSubBook, '') + ' - ' + I.strItemNo + IsNULL(' - [ ' + MI.strItemNo +' ] ', '') + ' - ' + RA.strAttributeName
+		,SD.strValue
+		,x.strValue
+	FROM OPENXML(@idoc, 'root/InvPlngSummaryDetails/InvPlngSummaryDetail', 2) WITH (
+			intAttributeId INT
+			,intItemId INT
+			,strFieldName NVARCHAR(50) COLLATE Latin1_General_CI_AS
+			,strValue NVARCHAR(100) COLLATE Latin1_General_CI_AS
+			,intMainItemId INT
+			,intBookId INT
+			,intSubBookId INT
+			) x
+	JOIN tblMFInvPlngSummaryDetail SD ON x.intAttributeId = SD.intAttributeId
+		AND x.intItemId = SD.intItemId
+		AND x.strFieldName = SD.strFieldName
+		AND x.intMainItemId = SD.intMainItemId
+		AND x.intBookId = SD.intBookId
+		AND x.intSubBookId = SD.intSubBookId
+	JOIN tblICItem I ON I.intItemId = x.intItemId
+	LEFT JOIN tblICItem MI ON MI.intItemId = x.intMainItemId
+	JOIN tblCTBook B ON B.intBookId = x.intBookId
+	LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = x.intSubBookId
+	JOIN tblCTReportAttribute RA ON RA.intReportAttributeID = x.intAttributeId
+	WHERE x.strValue <> SD.strValue
+		AND SD.intInvPlngSummaryId = @intInvPlngSummaryId
+		And SD.intAttributeId in (12,13)
+
 	DELETE
 	FROM tblMFInvPlngSummaryDetail
 	WHERE intInvPlngSummaryId = @intInvPlngSummaryId
@@ -142,6 +187,30 @@ BEGIN TRY
 			,intBookId INT
 			,intSubBookId INT
 			)
+
+	IF EXISTS (
+			SELECT *
+			FROM @tblIPAuditLog
+			)
+	BEGIN
+		SELECT @strDetails = ''
+
+		SELECT @strDetails += '{"change":"' + strColumnName + '","iconCls":"small-gear","from":"' + Ltrim(isNULL(strOldValue, '')) + '","to":"' + Ltrim(IsNULL(strNewValue, '')) + '","leaf":true,"changeDescription":"' + strColumnDescription + '"},'
+		FROM @tblIPAuditLog 
+		WHERE IsNULL(strOldValue, '') <> IsNULL(strNewValue, '')
+	END
+
+	IF (LEN(@strDetails) > 1)
+	BEGIN
+		SET @strDetails = SUBSTRING(@strDetails, 0, LEN(@strDetails))
+
+		EXEC uspSMAuditLog @keyValue = @intInvPlngSummaryId
+			,@screenName = 'Manufacturing.view.DemandSummaryView'
+			,@entityId = @intUserId
+			,@actionType = 'Updated'
+			,@actionIcon = 'small-tree-modified'
+			,@details = @strDetails
+	END
 
 	IF @intTransactionCount = 0
 		COMMIT TRANSACTION

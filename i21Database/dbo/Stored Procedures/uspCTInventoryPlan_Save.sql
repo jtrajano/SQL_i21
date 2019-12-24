@@ -16,6 +16,14 @@ BEGIN TRY
 		,@strPlanNo NVARCHAR(50)
 		,@intConcurrencyId INT
 		,@intOldConcurrencyId INT
+		,@strDetails NVARCHAR(MAX)
+		,@intLastModifiedUserId INT
+	DECLARE @tblIPAuditLog TABLE (
+		strColumnName NVARCHAR(50)
+		,strColumnDescription NVARCHAR(50)
+		,strOldValue NVARCHAR(MAX)
+		,strNewValue NVARCHAR(MAX)
+		)
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXML
@@ -34,7 +42,11 @@ BEGIN TRY
 	FROM OPENXML(@idoc, 'root/InvPlngReportMaster', 2) WITH (strInvPlngReportName NVARCHAR(150))
 
 	SELECT @intConcurrencyId = intConcurrencyId
-	FROM OPENXML(@idoc, 'root/InvPlngReportMaster', 2) WITH (intConcurrencyId INT)
+		,@intLastModifiedUserId = intLastModifiedUserId
+	FROM OPENXML(@idoc, 'root/InvPlngReportMaster', 2) WITH (
+			intConcurrencyId INT
+			,intLastModifiedUserId INT
+			)
 
 	IF @intInvPlngReportMasterID = 0
 	BEGIN
@@ -45,14 +57,12 @@ BEGIN TRY
 		--		)
 		--BEGIN
 		--	SET @ErrMsg = 'Plan Name must be unique.'
-
 		--	RAISERROR (
 		--			@ErrMsg
 		--			,16
 		--			,1
 		--			)
 		--END
-
 		EXEC dbo.uspMFGeneratePatternId @intCategoryId = NULL
 			,@intItemId = NULL
 			,@intManufacturingId = NULL
@@ -187,7 +197,7 @@ BEGIN TRY
 				,strValue NVARCHAR(100)
 				,intCreatedUserId INT
 				,intLastModifiedUserId INT
-				,intMainItemId int
+				,intMainItemId INT
 				)
 	END
 	ELSE
@@ -200,14 +210,12 @@ BEGIN TRY
 		--		)
 		--BEGIN
 		--	SET @ErrMsg = 'Plan Name must be unique.'
-
 		--	RAISERROR (
 		--			@ErrMsg
 		--			,16
 		--			,1
 		--			)
 		--END
-
 		SELECT @intOldConcurrencyId = intConcurrencyId
 		FROM tblCTInvPlngReportMaster
 		WHERE intInvPlngReportMasterID = @intInvPlngReportMasterID
@@ -238,7 +246,13 @@ BEGIN TRY
 			,ysnAllItem = x.ysnAllItem
 			,strComment = x.strComment
 			,ysnPost = x.ysnPost
-			,dtmPostDate = (CASE WHEN x.ysnPost = 1 THEN GETDATE() ELSE tblCTInvPlngReportMaster.dtmPostDate END)
+			,dtmPostDate = (
+				CASE 
+					WHEN x.ysnPost = 1
+						THEN GETDATE()
+					ELSE tblCTInvPlngReportMaster.dtmPostDate
+					END
+				)
 			,[intLastModifiedUserId] = x.intLastModifiedUserId
 			,[dtmLastModified] = GETDATE()
 		FROM OPENXML(@idoc, 'root/InvPlngReportMaster', 2) WITH (
@@ -276,6 +290,41 @@ BEGIN TRY
 				,intLastModifiedUserId INT
 				)
 
+		INSERT INTO @tblIPAuditLog
+		SELECT (
+				SELECT TOP 1 RAV.strValue
+				FROM tblCTInvPlngReportAttributeValue RAV
+				WHERE RAV.intInvPlngReportMasterID = @intInvPlngReportMasterID
+					AND RAV.intReportAttributeID = 1
+					AND RAV.strFieldName = x.strFieldName
+				)
+			,I.strItemNo + IsNULL(' - [ ' + MI.strItemNo + ' ] ', '') + ' - ' + RA.strAttributeName
+			,AV.strValue
+			,x.strValue
+		FROM OPENXML(@idoc, 'root/InvPlngReportAttributeValue/InvPlngReportAttributeValueRow', 2) WITH (
+				intReportAttributeID INT
+				,intItemId INT
+				,strFieldName NVARCHAR(50) Collate Latin1_General_CI_AS
+				,strValue NVARCHAR(100)Collate Latin1_General_CI_AS
+				,intCreatedUserId INT
+				,intLastModifiedUserId INT
+				,intMainItemId INT
+				) x
+		JOIN tblCTInvPlngReportAttributeValue AV ON x.intReportAttributeID = AV.intReportAttributeID
+			AND x.intItemId = AV.intItemId
+			AND x.strFieldName = AV.strFieldName
+			AND x.intMainItemId = AV.intMainItemId
+		JOIN tblICItem I ON I.intItemId = x.intItemId
+		LEFT JOIN tblICItem MI ON MI.intItemId = x.intMainItemId
+		JOIN tblCTReportAttribute RA ON RA.intReportAttributeID = x.intReportAttributeID
+		WHERE x.strValue <> AV.strValue
+			AND AV.intInvPlngReportMasterID = @intInvPlngReportMasterID
+			AND AV.intReportAttributeID IN (
+				5
+				,8
+				,11
+				)
+
 		DELETE
 		FROM dbo.tblCTInvPlngReportAttributeValue
 		WHERE intInvPlngReportMasterID = @intInvPlngReportMasterID
@@ -298,8 +347,32 @@ BEGIN TRY
 				,strValue NVARCHAR(100)
 				,intCreatedUserId INT
 				,intLastModifiedUserId INT
-				,intMainItemId int
+				,intMainItemId INT
 				)
+
+		IF EXISTS (
+				SELECT *
+				FROM @tblIPAuditLog
+				)
+		BEGIN
+			SELECT @strDetails = ''
+
+			SELECT @strDetails += '{"change":"' + strColumnName + '","iconCls":"small-gear","from":"' + Ltrim(isNULL(strOldValue, '')) + '","to":"' + Ltrim(IsNULL(strNewValue, '')) + '","leaf":true,"changeDescription":"' + strColumnDescription + '"},'
+			FROM @tblIPAuditLog
+			WHERE IsNULL(strOldValue, '') <> IsNULL(strNewValue, '')
+		END
+
+		IF (LEN(@strDetails) > 1)
+		BEGIN
+			SET @strDetails = SUBSTRING(@strDetails, 0, LEN(@strDetails))
+
+			EXEC uspSMAuditLog @keyValue = @intInvPlngReportMasterID
+				,@screenName = 'Manufacturing.view.DemandAnalysisView'
+				,@entityId = @intLastModifiedUserId
+				,@actionType = 'Updated'
+				,@actionIcon = 'small-tree-modified'
+				,@details = @strDetails
+		END
 	END
 
 	IF EXISTS (
