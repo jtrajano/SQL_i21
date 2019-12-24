@@ -341,11 +341,13 @@ BEGIN TRY
 			,intWeightUnitMeasureId
 			)
 		SELECT ID.intMainItemId
-			,AVG((CASE 
-					WHEN @ysnCalculateNoOfContainerByBagQty = 1
-						THEN CTCQ.dblWeight
-					ELSE CTCQ.dblBulkQuantity
-					END)* IsNULL(UMCByWeight.dblConversionToStock, 1)) 
+			,AVG((
+					CASE 
+						WHEN @ysnCalculateNoOfContainerByBagQty = 1
+							THEN CTCQ.dblWeight
+						ELSE CTCQ.dblBulkQuantity
+						END
+					) * IsNULL(UMCByWeight.dblConversionToStock, 1))
 			,MIN(CASE 
 					WHEN @ysnCalculateNoOfContainerByBagQty = 1
 						THEN CTCQ.intWeightUnitMeasureId
@@ -1842,7 +1844,7 @@ BEGIN TRY
 				,[24]
 				)) AS pvt
 
-	SELECT intItemId
+	SELECT intRecordId, intItemId
 		,strItemNo
 		,intReportAttributeID AS AttributeId
 		,strAttributeName
@@ -1974,6 +1976,11 @@ BEGIN TRY
 			,A.intDisplayOrder
 			,DL.intMainItemId
 			,MI.strItemNo AS strMainItemNo
+			,Row_Number() OVER (
+				ORDER BY IsNULL(MI.strItemNo, I.strItemNo)
+					,I.strItemNo
+					,A.intDisplayOrder
+				) AS intRecordId
 		FROM #tblMFDemandList DL
 		JOIN tblCTReportAttribute A ON A.intReportAttributeID = DL.intAttributeId
 		JOIN tblICItem I ON I.intItemId = DL.intItemId
