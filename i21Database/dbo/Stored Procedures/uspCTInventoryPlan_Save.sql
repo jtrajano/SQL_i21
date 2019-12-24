@@ -313,7 +313,7 @@ BEGIN TRY
 		JOIN tblCTInvPlngReportAttributeValue AV ON x.intReportAttributeID = AV.intReportAttributeID
 			AND x.intItemId = AV.intItemId
 			AND x.strFieldName = AV.strFieldName
-			AND x.intMainItemId = AV.intMainItemId
+			AND IsNULL(x.intMainItemId,0) = IsNULL(AV.intMainItemId,0)
 		JOIN tblICItem I ON I.intItemId = x.intItemId
 		LEFT JOIN tblICItem MI ON MI.intItemId = x.intMainItemId
 		JOIN tblCTReportAttribute RA ON RA.intReportAttributeID = x.intReportAttributeID
@@ -322,7 +322,9 @@ BEGIN TRY
 			AND AV.intReportAttributeID IN (
 				5
 				,8
+				,9
 				,11
+				,13
 				)
 
 		DELETE

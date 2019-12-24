@@ -144,7 +144,7 @@ BEGIN TRY
 	JOIN tblMFInvPlngSummaryDetail SD ON x.intAttributeId = SD.intAttributeId
 		AND x.intItemId = SD.intItemId
 		AND x.strFieldName = SD.strFieldName
-		AND x.intMainItemId = SD.intMainItemId
+		AND IsNULL(x.intMainItemId,0) = IsNULL(SD.intMainItemId,0)
 		AND x.intBookId = SD.intBookId
 		AND x.intSubBookId = SD.intSubBookId
 	JOIN tblICItem I ON I.intItemId = x.intItemId
