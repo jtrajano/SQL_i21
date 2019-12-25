@@ -369,6 +369,7 @@ BEGIN TRY
 				,intStorageTypeId         = CS.intStorageTypeId
 				,intStorageScheduleId     = CS.intStorageScheduleId
 				,intContractHeaderId      = SH.intContractHeaderId
+				,ysnTransferStorage		  = @ysnFromTransferStorage
 			FROM tblGRSettleStorageTicket SST
 			JOIN tblGRCustomerStorage CS
 				ON CS.intCustomerStorageId = SST.intCustomerStorageId
