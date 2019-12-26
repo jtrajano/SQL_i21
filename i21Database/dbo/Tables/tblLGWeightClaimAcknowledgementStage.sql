@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblLGWeightClaimAcknowledgementStage]
 (
-	intWeightClaimAcknowledgementStageId int not null Constraint PK_tblMFWeightClaimAcknowledgementStage Primary key
+	intWeightClaimAcknowledgementStageId int not null identity(1,1) Constraint PK_tblMFWeightClaimAcknowledgementStage Primary key
 	,intWeightClaimId int
 	,intWeightClaimRefId int
 	,strMessage nvarchar(MAX)COLLATE Latin1_General_CI_AS

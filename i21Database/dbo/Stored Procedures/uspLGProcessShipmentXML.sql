@@ -139,11 +139,11 @@ BEGIN TRY
 		,@intFreightTermId INT
 		,@intBookId INT
 		,@intSubBookId INT
-		        ,@intTransactionId INT
-        ,@intCompanyId INT
-        ,@intLoadScreenId INT
-        ,@intTransactionRefId INT
-        ,@intCompanyRefId INT
+		,@intTransactionId INT
+		,@intCompanyId INT
+		,@intLoadScreenId INT
+		,@intTransactionRefId INT
+		,@intCompanyRefId INT
 	DECLARE @tblLGLoadDetailLot TABLE (intLoadDetailLotId INT)
 	DECLARE @strLotNumber NVARCHAR(50)
 		,@strItemUnitMeasure NVARCHAR(50)
@@ -261,8 +261,8 @@ BEGIN TRY
 				,@intBookId = NULL
 				,@intSubBookId = NULL
 				,@strUserName = NULL
-				            ,@intTransactionId = NULL
-            ,@intCompanyId = NULL
+				,@intTransactionId = NULL
+				,@intCompanyId = NULL
 
 			SELECT @intLoadId = intLoadId
 				,@strLoadNumber = strLoadNumber
@@ -289,8 +289,8 @@ BEGIN TRY
 				,@strTransactionType = strTransactionType
 				,@intToBookId = intToBookId
 				,@intCompanyLocationId = intToCompanyLocationId
-				            ,@intTransactionId = intTransactionId
-            ,@intCompanyId = intCompanyId
+				,@intTransactionId = intTransactionId
+				,@intCompanyId = intCompanyId
 			FROM tblLGIntrCompLogisticsStg
 			WHERE intId = @intId
 
@@ -726,6 +726,7 @@ BEGIN TRY
 
 			SELECT @intNewLoadId = intLoadId
 				,@strNewLoadNumber = strLoadNumber
+				,@intCompanyRefId = intCompanyId
 			FROM tblLGLoad
 			WHERE intLoadRefId = @intLoadRefId
 
@@ -1198,16 +1199,17 @@ BEGIN TRY
 						) x
 
 				SELECT @intNewLoadId = SCOPE_IDENTITY()
+
 				SELECT @strDescription = 'Created from inter-company : ' + @strNewLoadNumber
 
-                EXEC uspSMAuditLog @keyValue = @intNewLoadId
-                    ,@screenName = 'Logistics.view.ShipmentSchedule'
-                    ,@entityId = @intUserId
-                    ,@actionType = 'Created'
-                    ,@actionIcon = 'small-new-plus'
-                    ,@changeDescription = @strDescription
-                    ,@fromValue = ''
-                    ,@toValue = @strNewLoadNumber
+				EXEC uspSMAuditLog @keyValue = @intNewLoadId
+					,@screenName = 'Logistics.view.ShipmentSchedule'
+					,@entityId = @intUserId
+					,@actionType = 'Created'
+					,@actionIcon = 'small-new-plus'
+					,@changeDescription = @strDescription
+					,@fromValue = ''
+					,@toValue = @strNewLoadNumber
 			END
 			ELSE
 			BEGIN
@@ -1339,26 +1341,26 @@ BEGIN TRY
 					,intBookId = @intBookId
 					,intSubBookId = @intSubBookId
 					,ysnLoadBased = x.ysnLoadBased
-					,[strVessel1]=x.[strVessel1]
-					,[strOriginPort1]=x.[strOriginPort1]
-					,[strDestinationPort1]=x.[strDestinationPort1]
-					,[dtmETSPOL1]=x.[dtmETSPOL1]
-					,[dtmETAPOD1]=x.[dtmETAPOD1]
-					,[strVessel2]=x.[strVessel2]
-					,[strOriginPort2]=x.[strOriginPort2]
-					,[strDestinationPort2]=x.[strDestinationPort2]
-					,[dtmETSPOL2]=x.[dtmETSPOL2]
-					,[dtmETAPOD2]=x.[dtmETAPOD2]
-					,[strVessel3]=x.[strVessel3]
-					,[strOriginPort3]=x.[strOriginPort3]
-					,[strDestinationPort3]=x.[strDestinationPort3]
-					,[dtmETSPOL3]=x.[dtmETSPOL3]
-					,[dtmETAPOD3]=x.[dtmETAPOD3]
-					,[strVessel4]=x.[strVessel4]
-					,[strOriginPort4]=x.[strOriginPort4]
-					,[strDestinationPort4]=x.[strDestinationPort4]
-					,[dtmETSPOL4]=x.[dtmETSPOL4]
-					,[dtmETAPOD4]=x.[dtmETAPOD4]
+					,[strVessel1] = x.[strVessel1]
+					,[strOriginPort1] = x.[strOriginPort1]
+					,[strDestinationPort1] = x.[strDestinationPort1]
+					,[dtmETSPOL1] = x.[dtmETSPOL1]
+					,[dtmETAPOD1] = x.[dtmETAPOD1]
+					,[strVessel2] = x.[strVessel2]
+					,[strOriginPort2] = x.[strOriginPort2]
+					,[strDestinationPort2] = x.[strDestinationPort2]
+					,[dtmETSPOL2] = x.[dtmETSPOL2]
+					,[dtmETAPOD2] = x.[dtmETAPOD2]
+					,[strVessel3] = x.[strVessel3]
+					,[strOriginPort3] = x.[strOriginPort3]
+					,[strDestinationPort3] = x.[strDestinationPort3]
+					,[dtmETSPOL3] = x.[dtmETSPOL3]
+					,[dtmETAPOD3] = x.[dtmETAPOD3]
+					,[strVessel4] = x.[strVessel4]
+					,[strOriginPort4] = x.[strOriginPort4]
+					,[strDestinationPort4] = x.[strDestinationPort4]
+					,[dtmETSPOL4] = x.[dtmETSPOL4]
+					,[dtmETAPOD4] = x.[dtmETAPOD4]
 				FROM OPENXML(@idoc, 'vyuIPLoadViews/vyuIPLoadView', 2) WITH (
 						strHauler NVARCHAR(100) Collate Latin1_General_CI_AS
 						,strDriver NVARCHAR(100) Collate Latin1_General_CI_AS
@@ -1513,7 +1515,7 @@ BEGIN TRY
 						,intLoadRefId INT
 						,ysnLoadBased BIT
 						,intContractDetailId INT
-						,intLoadId int
+						,intLoadId INT
 						) x
 				JOIN tblLGLoad L ON L.intLoadRefId = x.intLoadId
 				WHERE L.intLoadRefId = @intLoadRefId
@@ -1826,6 +1828,31 @@ BEGIN TRY
 				FROM tblEMEntityLocation EL
 				WHERE EL.intEntityId = @intCustomerId
 					AND EL.strLocationName = @strShipTo
+
+				IF EXISTS (
+						SELECT *
+						FROM OPENXML(@idoc, 'vyuLGLoadDetailViews/vyuLGLoadDetailView', 2) WITH (
+								[intPContractDetailId] INT
+								,[intSContractDetailId] INT
+								,intLoadDetailId int
+								) x
+						LEFT JOIN tblCTContractDetail PCD ON PCD.intContractDetailRefId = x.intSContractDetailId
+						LEFT JOIN tblCTContractDetail SCD ON SCD.intContractDetailRefId = x.intPContractDetailId
+						WHERE x.intLoadDetailId = @intLoadDetailId
+							AND (
+								PCD.intContractDetailRefId IS NULL
+								OR SCD.intContractDetailRefId IS NULL
+								)
+						)
+				BEGIN
+					SELECT @strErrorMessage = 'Contract is not created for the load.'
+
+					RAISERROR (
+							@strErrorMessage
+							,16
+							,1
+							)
+				END
 
 				IF NOT EXISTS (
 						SELECT *
@@ -2497,8 +2524,8 @@ BEGIN TRY
 				,ysnReceived
 				,dtmReceivedDate
 				,intLoadDocumentRefId
-				,[ysnReceivedCopy] 
-,[dtmCopyReceivedDate]
+				,[ysnReceivedCopy]
+				,[dtmCopyReceivedDate]
 				)
 			SELECT 1 AS intConcurrencyId
 				,@intNewLoadId
@@ -2512,8 +2539,8 @@ BEGIN TRY
 				,x.ysnReceived
 				,x.dtmReceivedDate
 				,x.intLoadDocumentId
-				,x.[ysnReceivedCopy] 
-,x.[dtmCopyReceivedDate]
+				,x.[ysnReceivedCopy]
+				,x.[dtmCopyReceivedDate]
 			FROM OPENXML(@idoc, 'vyuLGLoadDocumentViews/vyuLGLoadDocumentView', 2) WITH (
 					[intConcurrencyId] INT
 					,[intLoadId] INT
@@ -2541,19 +2568,19 @@ BEGIN TRY
 
 			UPDATE LD
 			SET intDocumentId = D.intDocumentId
-				,strDocumentType=x.strDocumentType
-				,strDocumentNo=x.strDocumentNo
-				,intOriginal=x.intOriginal
-				,intCopies=x.intCopies
-				,ysnSent=x.ysnSent
-				,dtmSentDate=x.dtmSentDate
-				,ysnReceived=x.ysnReceived
-				,dtmReceivedDate=x.dtmReceivedDate
-				,[ysnReceivedCopy] =x.[ysnReceivedCopy]
-				,[dtmCopyReceivedDate]=x.[dtmCopyReceivedDate]
+				,strDocumentType = x.strDocumentType
+				,strDocumentNo = x.strDocumentNo
+				,intOriginal = x.intOriginal
+				,intCopies = x.intCopies
+				,ysnSent = x.ysnSent
+				,dtmSentDate = x.dtmSentDate
+				,ysnReceived = x.ysnReceived
+				,dtmReceivedDate = x.dtmReceivedDate
+				,[ysnReceivedCopy] = x.[ysnReceivedCopy]
+				,[dtmCopyReceivedDate] = x.[dtmCopyReceivedDate]
 			FROM OPENXML(@idoc, 'vyuLGLoadDocumentViews/vyuLGLoadDocumentView', 2) WITH (
 					intLoadDocumentId INT
-						,[strDocumentType] NVARCHAR(100) COLLATE Latin1_General_CI_AS
+					,[strDocumentType] NVARCHAR(100) COLLATE Latin1_General_CI_AS
 					,[strDocumentNo] NVARCHAR(100) COLLATE Latin1_General_CI_AS
 					,[intOriginal] INT
 					,[intCopies] INT
@@ -2757,7 +2784,7 @@ BEGIN TRY
 					,strStaticValueCurrency NVARCHAR(50) COLLATE Latin1_General_CI_AS
 					,strAmountCurrency NVARCHAR(50) COLLATE Latin1_General_CI_AS
 					,intLoadContainerId INT
-					,intSort int
+					,intSort INT
 					) x
 			LEFT JOIN tblICUnitMeasure UM ON UM.strUnitMeasure = x.strUnitMeasure
 			LEFT JOIN tblICUnitMeasure WUM ON WUM.strUnitMeasure = x.strWeightUnitMeasure
@@ -2768,7 +2795,8 @@ BEGIN TRY
 					FROM tblLGLoadContainer LD
 					WHERE LD.intLoadId = @intNewLoadId
 						AND LD.intLoadContainerRefId = x.intLoadContainerId
-					) Order by x.intSort
+					)
+			ORDER BY x.intSort
 
 			UPDATE LD
 			SET [intConcurrencyId] = LD.[intConcurrencyId] + 1
@@ -2814,7 +2842,7 @@ BEGIN TRY
 				,[dblAmount] = x.[dblAmount]
 				,[intAmountCurrencyId] = ACU.[intCurrencyID]
 				,[strRemarks] = x.[strRemarks]
-				,intSort=x.intSort
+				,intSort = x.intSort
 			FROM OPENXML(@idoc, 'vyuLGLoadContainerViews/vyuLGLoadContainerView', 2) WITH (
 					[strContainerNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS
 					,[dblQuantity] NUMERIC(18, 6)
@@ -2864,7 +2892,7 @@ BEGIN TRY
 					,strWeightUnitMeasure NVARCHAR(50) COLLATE Latin1_General_CI_AS
 					,strStaticValueCurrency NVARCHAR(50) COLLATE Latin1_General_CI_AS
 					,strAmountCurrency NVARCHAR(50) COLLATE Latin1_General_CI_AS
-					,intSort int
+					,intSort INT
 					) x
 			JOIN tblLGLoadContainer LD ON LD.intLoadId = @intNewLoadId
 				AND LD.intLoadContainerRefId = x.intLoadContainerId
@@ -2981,7 +3009,6 @@ BEGIN TRY
 			LEFT JOIN tblICItem I ON I.strItemNo = x.strItemNo
 			LEFT JOIN tblICItemUOM IU ON IU.intItemId = I.intItemId
 				AND IU.intUnitMeasureId = UM.intUnitMeasureId
-			
 			WHERE NOT EXISTS (
 					SELECT *
 					FROM tblLGLoadDetailContainerLink LDCL
@@ -3041,9 +3068,8 @@ BEGIN TRY
 			LEFT JOIN tblICItem I ON I.strItemNo = x.strItemNo
 			LEFT JOIN tblICItemUOM IU ON IU.intItemId = I.intItemId
 				AND IU.intUnitMeasureId = UM.intUnitMeasureId
-				JOIN tblLGLoadDetailContainerLink LDCL
-					On LDCL.intLoadId = @intNewLoadId
-						AND LDCL.intLoadDetailContainerLinkRefId = x.intLoadDetailContainerLinkId
+			JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadId = @intNewLoadId
+				AND LDCL.intLoadDetailContainerLinkRefId = x.intLoadDetailContainerLinkId
 			WHERE EXISTS (
 					SELECT *
 					FROM tblLGLoadDetailContainerLink LDCL
@@ -3719,15 +3745,17 @@ BEGIN TRY
 				,NULL
 
 			SELECT @intLoadScreenId = intScreenId
-            FROM tblSMScreen
-            WHERE strNamespace = 'Logistics.view.ShipmentSchedule'
+			FROM tblSMScreen
+			WHERE strNamespace = 'Logistics.view.ShipmentSchedule'
 
-            SELECT @intTransactionRefId = intTransactionId
-            FROM tblSMTransaction
-            WHERE intRecordId = @intNewLoadId
-                AND intScreenId = @intLoadScreenId
+			SELECT @intTransactionRefId = intTransactionId
+			FROM tblSMTransaction
+			WHERE intRecordId = @intNewLoadId
+				AND intScreenId = @intLoadScreenId
 
-			EXECUTE dbo.uspSMInterCompanyUpdateMapping @currentTransactionId = @intTransactionRefId, @referenceTransactionId = @intTransactionId,@referenceCompanyId=@intCompanyId
+			EXECUTE dbo.uspSMInterCompanyUpdateMapping @currentTransactionId = @intTransactionRefId
+				,@referenceTransactionId = @intTransactionId
+				,@referenceCompanyId = @intCompanyId
 
 			INSERT INTO tblLGIntrCompLogisticsAck (
 				intLoadId
@@ -3747,10 +3775,10 @@ BEGIN TRY
 				,strLoadWarehouse
 				,strLoadWarehouseServices
 				,strLoadWarehouseContainer
-				,intTransactionId 
-                ,intCompanyId 
-                ,intTransactionRefId 
-                ,intCompanyRefId 
+				,intTransactionId
+				,intCompanyId
+				,intTransactionRefId
+				,intCompanyRefId
 				)
 			SELECT @intNewLoadId
 				,@strNewLoadNumber
@@ -3769,10 +3797,10 @@ BEGIN TRY
 				,@strAckLoadWarehouseXML
 				,@strAckLoadWarehouseServicesXML
 				,@strAckLoadWarehouseContainerXML
-				,@intTransactionId 
-                ,@intCompanyId 
-                ,@intTransactionRefId 
-                ,@intCompanyRefId 
+				,@intTransactionId
+				,@intCompanyId
+				,@intTransactionRefId
+				,@intCompanyRefId
 
 			UPDATE tblLGIntrCompLogisticsStg
 			SET strFeedStatus = 'Processed'

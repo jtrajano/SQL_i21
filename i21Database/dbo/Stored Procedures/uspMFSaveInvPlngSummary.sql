@@ -154,7 +154,7 @@ BEGIN TRY
 	JOIN tblCTReportAttribute RA ON RA.intReportAttributeID = x.intAttributeId
 	WHERE x.strValue <> SD.strValue
 		AND SD.intInvPlngSummaryId = @intInvPlngSummaryId
-		And SD.intAttributeId in (12,13)
+		And SD.intAttributeId in (4,9)
 
 	DELETE
 	FROM tblMFInvPlngSummaryDetail

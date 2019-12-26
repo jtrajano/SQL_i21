@@ -19,5 +19,5 @@ SELECT WC.[intWeightClaimId]
 	,PM.strPaymentMethod 
 FROM tblLGWeightClaim WC
 JOIN [tblCTBook] B on B.intBookId=WC.intBookId
-JOIN [tblCTSubBook] SB on SB.intSubBookId=WC.intSubBookId
+Left JOIN [tblCTSubBook] SB on SB.intSubBookId=WC.intSubBookId
 Left JOIN tblSMPaymentMethod PM on PM.intPaymentMethodID=WC.intPaymentMethodId
