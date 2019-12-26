@@ -8305,6 +8305,8 @@
     <Build Include="dbo\Views\vyuIPGetWeightClaim.sql" />
     <Build Include="dbo\Tables\tblLGWeightClaimAcknowledgementStage.sql" />
     <Build Include="dbo\Views\vyuCTPricedHTADetail.sql" />
+    <None Include="Scripts\Post-Deployment\CT\Create_fnCTFormatNumber.sql" />
+    <Build Include="dbo\Functions\fnCTFormatNumber.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
