@@ -403,7 +403,7 @@ IF (@intTableCount = 3)
 				SET @strFileType			= N'Inbound'
 				SET @strFilePrefix			= N'CPJR'
 				SET @strFileNamePattern		= N'[prefix]+[MMddyyyyHHmmss]'
-				SET @strStoredProcedure		= N'uspSTCheckoutPassportTranslog'
+				SET @strStoredProcedure		= N'uspSTCheckoutCommanderNetworkCard'
 						
 				IF EXISTS (SELECT TOP 1 1 FROM tblSMImportFileHeader WHERE strLayoutTitle = @strImportFileHeader)
 					BEGIN

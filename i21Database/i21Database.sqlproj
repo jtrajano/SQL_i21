@@ -8307,6 +8307,8 @@
     <Build Include="dbo\Views\vyuCTPricedHTADetail.sql" />
     <None Include="Scripts\Post-Deployment\CT\Create_fnCTFormatNumber.sql" />
     <Build Include="dbo\Functions\fnCTFormatNumber.sql" />
+    <Build Include="dbo\User Defined Types\StagingNetworkCard.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTCheckoutCommanderNetworkCard.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
