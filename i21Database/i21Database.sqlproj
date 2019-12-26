@@ -8105,6 +8105,8 @@
     <Build Include="dbo\Stored Procedures\uspTRProcessImportDtn.sql" />
     <Build Include="dbo\Tables\tblTRCrossReferenceDtn.sql" />
     <Build Include="dbo\Views\vyuTRCrossReferenceDtn.sql" />
+    <None Include="Scripts\Post-Deployment\CT\Create_fnCTFormatNumber.sql" />
+    <Build Include="dbo\Functions\fnCTFormatNumber.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
