@@ -107,6 +107,27 @@ FROM(
 	inner join tblCTPricingType pt on pt.intPricingTypeId = sh.intPricingTypeId
 	inner join tblICCommodityUnitMeasure cum on cum.intCommodityId = ch.intCommodityId and cum.ysnDefault = 1
 	where intSequenceUsageHistoryId is null 
+
+	union all --HTA (Priced)
+	select 
+		1 as Row_Num
+		, dtmTransactionDate = min(dbo.fnRemoveTimeOnDate(a.dtmHistoryCreated))
+		, a.intContractHeaderId
+		, a.intContractDetailId
+		, dblQuantity = a.dblQuantity * -1
+		, b.strPricingType
+		, strTransactionType = ''
+		, intTransactionId = null
+		, strTransactionId = ''
+		, intOrderBy = 1
+	from tblCTSequenceHistory a
+	INNER JOIN tblCTSequenceHistory b on a.intContractDetailId = b.intContractDetailId
+	AND a.intPricingTypeId = 1 AND b.intPricingTypeId = 3
+	group by 
+		a.dblQuantity,
+		b.strPricingType,
+		a.intContractHeaderId,
+		a.intContractDetailId
 	
 	union all
 	select  
