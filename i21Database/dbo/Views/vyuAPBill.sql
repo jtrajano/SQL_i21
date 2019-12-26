@@ -89,7 +89,7 @@ FROM
 		ON CL.intCompanyLocationId = A.intShipToId
 	INNER JOIN dbo.tblSMTerm ST
 		ON ST.intTermID = A.intTermsId
-	CROSS APPLY [dbo].[fnAPGetVoucherCommodity](A.intBillId) commodity
+	OUTER APPLY [dbo].[fnAPGetVoucherCommodity](A.intBillId) commodity
 	LEFT JOIN dbo.tblSMShipVia SV
 		ON SV.intEntityId = A.intShipViaId
 	LEFT JOIN dbo.tblEMEntity EN

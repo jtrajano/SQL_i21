@@ -41,7 +41,7 @@ FROM
 	INNER JOIN 
 		(dbo.tblAPVendor B INNER JOIN dbo.tblEMEntity B1 ON B.[intEntityId] = B1.intEntityId)
 		ON A.[intEntityVendorId] = B.[intEntityId]
-	CROSS APPLY (
+	OUTER APPLY (
 		SELECT TOP 1
 			COUNT(commodity.intCommodityId) intCount, 
 			commodity.intCommodityId,
