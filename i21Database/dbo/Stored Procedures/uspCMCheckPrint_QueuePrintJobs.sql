@@ -111,7 +111,7 @@ WHERE	F.intBankAccountId = @intBankAccountId
 		AND F.ysnPosted = 1
 		AND F.ysnClr = 0
 		AND F.dblAmount <> 0
-		AND F.dtmCheckPrinted IS NULL
+		--AND F.dtmCheckPrinted IS NULL
 		AND F.ysnCheckToBePrinted = 1
 		AND F.intBankTransactionTypeId = @intTransactionType
 		AND ISNULL(F.strReferenceNo,'') != (@CASH_PAYMENT) 
