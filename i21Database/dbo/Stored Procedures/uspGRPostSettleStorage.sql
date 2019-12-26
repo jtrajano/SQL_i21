@@ -233,12 +233,6 @@ BEGIN TRY
 				ON CD.intContractDetailId = SSC.intContractDetailId
 			WHERE intSettleStorageId = @intSettleStorageId
 
-	
-
-
-	
-
-
 	WHILE @intSettleStorageId > 0
 	BEGIN		
 		DELETE FROM @SettleStorage
@@ -2331,8 +2325,8 @@ BEGIN TRY
 						AND DSC.intItemId = a.intItemId
 				JOIN tblGRStorageType ST
 					ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
-				LEFT JOIN tblGRStorageHistory STH
-					ON STH.intCustomerStorageId = a.intCustomerStorageId
+				--LEFT JOIN tblGRStorageHistory STH
+				--	ON STH.intCustomerStorageId = a.intCustomerStorageId
 				LEFT JOIN (
 						tblICInventoryReceiptItem RI
 						INNER JOIN tblGRStorageHistory SH
