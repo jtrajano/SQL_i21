@@ -8304,6 +8304,7 @@
     <Build Include="dbo\Views\vyuIPGetWeightClaimDetail.sql" />
     <Build Include="dbo\Views\vyuIPGetWeightClaim.sql" />
     <Build Include="dbo\Tables\tblLGWeightClaimAcknowledgementStage.sql" />
+    <Build Include="dbo\Views\vyuCTPricedHTADetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
