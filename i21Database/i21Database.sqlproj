@@ -8132,6 +8132,7 @@
     <Build Include="dbo\Views\vyuAPReceiptClearingGL.sql" />
     <Build Include="dbo\Functions\fnCTGetVoucherPayable.sql" />
     <Build Include="dbo\Tables\tblSCDeliverySheetContractAdjustment.sql" />
+    <Build Include="dbo\Views\vyuCTPricedHTADetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
