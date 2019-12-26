@@ -8133,6 +8133,8 @@
     <Build Include="dbo\Functions\fnCTGetVoucherPayable.sql" />
     <Build Include="dbo\Tables\tblSCDeliverySheetContractAdjustment.sql" />
     <Build Include="dbo\Views\vyuCTPricedHTADetail.sql" />
+    <None Include="Scripts\Post-Deployment\CT\Create_fnCTFormatNumber.sql" />
+    <Build Include="dbo\Functions\fnCTFormatNumber.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
