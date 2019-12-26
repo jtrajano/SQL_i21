@@ -10,11 +10,11 @@
 	, @intSetNum AS INT OUTPUT
 	, @strPullTime AS NVARCHAR(30) OUTPUT
 	
-	, @ysnAutoUpdatePassword AS BIT OUTPUT
-	, @dtmLastPasswordChangeDate AS DATETIME OUTPUT
-	, @strBasePassword AS NVARCHAR(100) OUTPUT
-	, @intPasswordIntervalDays AS INT OUTPUT
-	, @intPasswordIncrementNo AS INT OUTPUT
+	-- , @ysnAutoUpdatePassword AS BIT OUTPUT
+	--, @dtmLastPasswordChangeDate AS DATETIME OUTPUT
+	--, @strBasePassword AS NVARCHAR(100) OUTPUT
+	--, @intPasswordIntervalDays AS INT OUTPUT
+	--, @intPasswordIncrementNo AS INT OUTPUT
 AS
 BEGIN
 	BEGIN TRY
