@@ -81,6 +81,10 @@ BEGIN TRY
 		JOIN tblRKOptionsMonth fm ON fm.strOptionMonth = REPLACE(i.strFutureMonth, '-', ' ') AND intFutureMarketId = @intFutureMarketId
 		WHERE strInstrumentType LIKE 'Opt%' AND strFutureMarket = @strMarket
 		
+		EXEC uspIPInterCompanyPreStageSettlementPrice @intFutureSettlementPriceId = @intFutureSettlementPriceId
+			, @strRowState = 'Added'
+			, @intUserId = @intEntityUserId		
+
 		EXEC uspSMAuditLog @keyValue = @intFutureSettlementPriceId
 			, @screenName = 'RiskManagement.view.FuturesOptionsSettlementPrices'
 			, @entityId = @intEntityUserId

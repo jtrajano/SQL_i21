@@ -1,4 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspRKGenerateDailyAveragePrice]
+	@intUserId INT
 
 AS
 
@@ -565,6 +566,10 @@ BEGIN
 				AND tblPatch.intFutureMonthId = tblRKDailyAveragePriceDetail.intFutureMonthId
 				AND tblPatch.intCommodityId = tblRKDailyAveragePriceDetail.intCommodityId
 				AND tblRKDailyAveragePriceDetail.intDailyAveragePriceDetailId IN (SELECT intDailyAveragePriceDetailId FROM tblRKDailyAveragePriceDetail WHERE intDailyAveragePriceId = @intDailyAveragePriceId)
+
+			EXEC uspIPInterCompanyPreStageDailyAveragePrice @intDailyAveragePriceId = @intDailyAveragePriceId
+				, @strRowState = 'Added'
+				, @intUserId = @intUserId
 		END
 		
 		DROP TABLE #tmpDetailTable

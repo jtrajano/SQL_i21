@@ -3,7 +3,7 @@
 	, @intCommodityMarketId INT
 	, @intFutureMonthsToOpen INT
 	, @intOptMonthsToOpen INT
-
+	, @intUserId INT
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -229,6 +229,9 @@ BEGIN TRY
 	FROM @ProjectedFutureMonths P
 	WHERE ISNULL(strMonth,'') <> ''
 
+	DECLARE @MaxId INT
+	SELECT @MaxId = MAX(intFutureMonthId) FROM tblRKFuturesMonth
+
 	INSERT INTO tblRKFuturesMonth(intConcurrencyId
 		, strFutureMonth
 		, intFutureMarketId
@@ -258,6 +261,19 @@ BEGIN TRY
 	WHERE t.strFMonth NOT IN(SELECT strFutureMonth COLLATE Latin1_General_CI_AS FROM tblRKFuturesMonth WHERE intFutureMarketId = @FutureMarketId AND intCommodityMarketId = @intCommodityMarketId)
 	ORDER BY CONVERT(DATETIME,'01 ' + strFMonth) ASC
 
+	DECLARE @newRowId INT
+	SELECT intFutureMonthId INTO #tmpNewRows FROM tblRKFuturesMonth WHERE intFutureMonthId > @MaxId
+	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpNewRows)
+	BEGIN
+		SELECT TOP 1 @newRowId = intFutureMonthId FROM #tmpNewRows
+
+		EXEC uspIPInterCompanyPreStageFutureMonth @intFutureMonthId = @newRowId
+			, @strRowState = 'Added'
+			, @intUserId = @intUserId
+
+		DELETE FROM #tmpNewRows WHERE intFutureMonthId = @newRowId
+	END
+
 	SELECT @HasOptionMonths = CAST(ISNULL(ysnOptions,0) AS BIT) FROM tblRKFutureMarket WHERE intFutureMarketId = @FutureMarketId
 
 	IF (@intOptMonthsToOpen > 0 AND @HasOptionMonths = 1)
@@ -266,7 +282,7 @@ BEGIN TRY
 			strMissingFutureMonths
 			,strOrphanOptionMonths
 		)
-		EXEC uspRKGenerateOptionsMonthList @FutureMarketId,@intCommodityMarketId,@intOptMonthsToOpen
+		EXEC uspRKGenerateOptionsMonthList @FutureMarketId,@intCommodityMarketId,@intOptMonthsToOpen, @intUserId
 	END
 
 	DROP TABLE ##AllowedFutMonth

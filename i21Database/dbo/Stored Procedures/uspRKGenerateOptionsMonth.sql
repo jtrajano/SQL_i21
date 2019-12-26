@@ -1,7 +1,8 @@
-﻿CREATE PROCEDURE [dbo].[uspRKGenerateOptionsMonth]
+﻿CREATE PROCEDURE uspRKGenerateOptionsMonth
 	  @intFutureMarketId INT
 	, @strOptionMonth NVARCHAR(10)
 	, @intCommodityMarketId INT
+	, @intUserId INT
 
 AS
 
@@ -70,6 +71,10 @@ BEGIN TRY
 		)
 
 		SET @IntOptionMonthId = SCOPE_IDENTITY();
+
+		EXEC uspIPInterCompanyPreStageOptionMonth @intOptionMonthId = @IntOptionMonthId
+			, @strRowState = 'Added'
+			, @intUserId = @intUserId
 	END
 	
 	SELECT @IntOptionMonthId;

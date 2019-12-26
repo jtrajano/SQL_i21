@@ -8,6 +8,7 @@
 	[intFutOptTransactionId] INT NOT NULL,
 	[intFutTransactionId] int ,
 	[ysnAssigned] bit,
+	[intOptionsPnSExercisedAssignedRefId] INT NULL,
 	[intConcurrencyId] INT NOT NULL
     CONSTRAINT [PK_tblRKOptionsPnSExercisedAssigned_intOptionsPnSExercisedAssignedId] PRIMARY KEY (intOptionsPnSExercisedAssignedId), 
 	CONSTRAINT [FK_tblRKOptionsPnSExercisedAssigned_tblRKOptionsMatchPnSHeader_intOptionsMatchPnSHeaderId] FOREIGN KEY ([intOptionsMatchPnSHeaderId]) REFERENCES [tblRKOptionsMatchPnSHeader]([intOptionsMatchPnSHeaderId]),	

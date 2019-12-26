@@ -46,6 +46,7 @@
 	[dtmCreateDateTime] DATETIME NULL, 
     [ysnFreezed] BIT NULL, 
     [ysnPreCrush] BIT NULL,
+	[intDailyAveragePriceDetailTransactionRefId] INT NULL,
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblRKDailyAveragePriceTransaction] PRIMARY KEY ([intDailyAveragePriceDetailTransactionId]), 
     CONSTRAINT [FK_tblRKDailyAveragePriceTransaction_tblRKDailyAveragePriceDetail] FOREIGN KEY ([intDailyAveragePriceDetailId]) REFERENCES [tblRKDailyAveragePriceDetail]([intDailyAveragePriceDetailId]) ON DELETE CASCADE

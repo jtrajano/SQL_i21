@@ -1,4 +1,5 @@
 ﻿CREATE PROCEDURE uspRKM2MBasisImport
+	@intUserId INT
 
 AS
 
@@ -52,6 +53,10 @@ BEGIN TRY
 	LEFT JOIN tblARMarketZone mz ON mz.strMarketZoneCode = i.strMarketZone
 
 	COMMIT TRAN
+
+	EXEC uspIPInterCompanyPreStageM2MBasis @intM2MBasisId = @intNewBasisId
+		, @strRowState = 'Added'
+		, @intUserId = @intUserId
 	
 	SELECT 0 as intCuncurrencyId
 		, *

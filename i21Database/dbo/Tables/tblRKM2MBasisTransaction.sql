@@ -9,7 +9,7 @@
     [intCurrencyId] INT NULL, 
     [dblBasis] NUMERIC(18, 6) NULL, 
     [intUnitMeasureId] INT NULL,
-
+	[intM2MBasisTransactionRefId] INT NULL,
 	CONSTRAINT [PK_tblRKM2MBasisTransaction_intM2MBasisTransactionId] PRIMARY KEY (intM2MBasisTransactionId),
 	CONSTRAINT [FK_tblRKM2MBasisTransaction_tblRKM2MBasis_intM2MBasisId] FOREIGN KEY ([intM2MBasisId]) REFERENCES [dbo].[tblRKM2MBasis] ([intM2MBasisId]) ON DELETE CASCADE,  
 	CONSTRAINT [FK_tblRKM2MBasisTransaction_tblICCommodity_intCommodityId] FOREIGN KEY ([intCommodityId]) REFERENCES [dbo].[tblICCommodity] ([intCommodityId]),  

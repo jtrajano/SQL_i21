@@ -1,7 +1,8 @@
-﻿CREATE PROCEDURE [dbo].[uspRKGenerateFuturesMonth]
+﻿CREATE PROCEDURE uspRKGenerateFuturesMonth
 	  @intFutureMarketId INT
 	, @strFutureMonth NVARCHAR(10)
 	, @intCommodityMarketId INT
+	, @intUserId INT
 
 AS
 
@@ -155,6 +156,10 @@ BEGIN TRY
 	DROP TABLE ##AllowedFutMonths
 
     SET @IntFutureMonthId = SCOPE_IDENTITY();
+
+	EXEC uspIPInterCompanyPreStageFutureMonth @intFutureMonthId = @IntFutureMonthId
+		, @strRowState = 'Added'
+		, @intUserId = @intUserId
 
 	SELECT @IntFutureMonthId;
 END TRY

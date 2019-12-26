@@ -9,7 +9,7 @@
     [intFutureMonthId] INT NULL, 
     [dblBasis] NUMERIC(18, 6) NULL,
 	[intCompanyLocationId] INT NULL, 
-
+	[intM2MGrainBasisRefId] INT NULL,
 	CONSTRAINT [PK_tblRKM2MGrainBasis_intM2MGrainBasisId] PRIMARY KEY (intM2MGrainBasisId),
 	CONSTRAINT [FK_tblRKM2MGrainBasis_tblRKM2MBasis_intM2MBasisId] FOREIGN KEY ([intM2MBasisId]) REFERENCES [dbo].[tblRKM2MBasis] ([intM2MBasisId]) ON DELETE CASCADE, 
 	CONSTRAINT [UK_tblRKM2MGrainBasis_intM2MBasisId_intCommodityId_strDeliveryMonth_intCompanyLocationId] UNIQUE ([intM2MBasisId] , [intCommodityId], [strDeliveryMonth],[intCompanyLocationId]), 

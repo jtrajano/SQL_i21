@@ -6,6 +6,7 @@
 	[dtmExpiredDate] DATETIME NOT NULL, 
     [dblLots] NUMERIC(18, 6) NOT NULL, 
 	[intFutOptTransactionId] INT NOT NULL,
+	[intOptionsPnSExpiredRefId] INT NULL,
 	[intConcurrencyId] INT NOT NULL
     CONSTRAINT [PK_tblRKOptionsPnSExpired_intOptionsPnSExpiredId] PRIMARY KEY (intOptionsPnSExpiredId), 
 	CONSTRAINT [FK_tblRKOptionsPnSExpired_tblRKOptionsMatchPnSHeader_intOptionsMatchPnSHeaderId] FOREIGN KEY ([intOptionsMatchPnSHeaderId]) REFERENCES [tblRKOptionsMatchPnSHeader]([intOptionsMatchPnSHeaderId]),	

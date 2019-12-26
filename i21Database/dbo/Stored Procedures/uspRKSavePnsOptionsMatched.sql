@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspRKSavePnsOptionsMatched]
 	@strXml NVARCHAR(MAX)
 	, @strTranNoPNS NVARCHAR(50) OUT
+	, @intUserId INT
 
 AS    
 
@@ -80,6 +81,7 @@ BEGIN TRY
 	IF EXISTS(SELECT TOP 1 1 FROM @tblExpiredDelete)
 	BEGIN
 		DELETE FROM tblRKOptionsPnSExpired WHERE CONVERT(INT, strTranNo) IN (SELECT CONVERT(INT, strTranNo) FROM @tblExpiredDelete)
+
 	END
 	------------------------- END Delete Expired ---------------------------
 	
@@ -171,7 +173,8 @@ BEGIN TRY
 	WHERE strTranNo = @strTranNoPNS
 	
 	---------------Expired Record Insert ----------------
-	SELECT @strExpiredTranNo = ISNULL(MAX(CONVERT(INT, strTranNo)), 0) FROM tblRKOptionsPnSExpired
+	DECLARE @MaxRow INT
+	SELECT @strExpiredTranNo = ISNULL(MAX(CONVERT(INT, strTranNo)), 0), @MaxRow = MAX(ISNULL(intOptionsPnSExpiredId, 0)) FROM tblRKOptionsPnSExpired
 	
 	INSERT INTO tblRKOptionsPnSExpired (intOptionsMatchPnSHeaderId
 		, strTranNo
@@ -190,6 +193,19 @@ BEGIN TRY
 	WITH ([dtmExpiredDate]  DATETIME
 		, [dblLots] numeric(18,6)
 		, [intFutOptTransactionId] INT)
+
+	DECLARE @newRowId INT
+	SELECT DISTINCT intOptionsMatchPnSHeaderId INTO #tmpNewRows FROM tblRKOptionsPnSExpired WHERE intOptionsPnSExpiredId > @MaxRow
+	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpNewRows)
+	BEGIN
+		SELECT TOP 1 @newRowId = intOptionsMatchPnSHeaderId FROM #tmpNewRows
+
+		EXEC uspIPInterCompanyPreStageOptionsPnS @intOptionsMatchPnSHeaderId = @newRowId
+			, @strRowState = 'Added'
+			, @intUserId = @intUserId
+
+		DELETE FROM #tmpNewRows WHERE intOptionsMatchPnSHeaderId = @newRowId
+	END
 	
 	---------------Exercised/Assigned Record Insert ----------------
 	DECLARE @tblExercisedAssignedDetail TABLE (RowNumber INT IDENTITY(1,1)
@@ -343,9 +359,9 @@ BEGIN TRY
 			, intOptionMonthId = null
 		WHERE intFutOptTransactionId = @NewFutOptTransactionId
 
-		DECLARE @intUserId INT
-		SELECT TOP 1 @intUserId = intEntityId FROM tblEMEntity WHERE strName = @strName
-		EXEC uspRKFutOptTransactionHistory @NewFutOptTransactionId, @NewFutOptTransactionHeaderId, 'Exercise Options', @intUserId, 'ADD'
+		DECLARE @UserId INT
+		SELECT TOP 1 @UserId = intEntityId FROM tblEMEntity WHERE strName = @strName
+		EXEC uspRKFutOptTransactionHistory @NewFutOptTransactionId, @NewFutOptTransactionHeaderId, 'Exercise Options', @UserId, 'ADD'
 		
 		UPDATE tblRKOptionsPnSExercisedAssigned SET intFutTransactionId = @NewFutOptTransactionId WHERE intOptionsPnSExercisedAssignedId = @intOptionsPnSExercisedAssignedId
 		SELECT @mRowNumber = MIN(RowNumber) FROM @tblExercisedAssignedDetail WHERE RowNumber > @mRowNumber

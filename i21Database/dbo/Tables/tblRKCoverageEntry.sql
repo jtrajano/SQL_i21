@@ -10,6 +10,7 @@
     [strUOMType] NVARCHAR(50) NULL, 
     [intDecimal] INT NULL, 
 	[ysnPosted] BIT NULL DEFAULT ((0)),
+	[intCoverageEntryRefId] INT NULL,
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblRKCoverageEntry] PRIMARY KEY ([intCoverageEntryId]) 
 )

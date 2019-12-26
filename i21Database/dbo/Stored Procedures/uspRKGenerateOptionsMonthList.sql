@@ -2,6 +2,7 @@
 	@FutureMarketId INT
 	, @intCommodityMarketId INT
 	, @intOptMonthsToOpen INT
+	, @intUserId INT
 
 AS
 
@@ -235,6 +236,9 @@ BEGIN TRY
 	GROUP BY strOptionMonth
 
 	IF OBJECT_ID('tempdb..#OptTemp') IS NOT NULL DROP TABLE #OptTemp
+
+	DECLARE @MaxId INT
+	SELECT @MaxId = MAX(intOptionMonthId) FROM tblRKOptionsMonth
 	
 	INSERT INTO tblRKOptionsMonth(intConcurrencyId
 		, intFutureMarketId
@@ -257,6 +261,19 @@ BEGIN TRY
 	FROM @ProjectedOptionMonths
 	WHERE ISNULL(intFutureMonthId, '') <> '' 
 		AND strOptionMonth NOT IN(SELECT strOptionMonth COLLATE Latin1_General_CI_AS FROM tblRKOptionsMonth WHERE intFutureMarketId = @FutureMarketId AND intCommodityMarketId = @intCommodityMarketId)
+
+	DECLARE @newRowId INT
+	SELECT intOptionMonthId INTO #tmpNewRows FROM tblRKOptionsMonth WHERE intOptionMonthId > @MaxId
+	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpNewRows)
+	BEGIN
+		SELECT TOP 1 @newRowId = intOptionMonthId FROM #tmpNewRows
+
+		EXEC uspIPInterCompanyPreStageOptionMonth @intOptionMonthId = @newRowId
+			, @strRowState = 'Added'
+			, @intUserId = @intUserId
+
+		DELETE FROM #tmpNewRows WHERE intOptionMonthId = @newRowId
+	END
 
 	SELECT MissingFutureMonths = @MissingFutureMonths
 		,OrphanOptionMonths = @OrphanOptionMonths;

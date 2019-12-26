@@ -12,6 +12,7 @@
     [dblNetLongAvg] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 	[dblSettlementPrice] NUMERIC(18, 6) NULL DEFAULT ((0)), 
     [intBrokerId] INT NULL, 
+	[intDailyAveragePriceDetailRefId] INT NULL,
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblRKDailyAveragePriceDetail] PRIMARY KEY ([intDailyAveragePriceDetailId]), 
     CONSTRAINT [FK_tblRKDailyAveragePriceDetail_tblRKDailyAveragePrice] FOREIGN KEY ([intDailyAveragePriceId]) REFERENCES [tblRKDailyAveragePrice]([intDailyAveragePriceId]) ON DELETE CASCADE, 
