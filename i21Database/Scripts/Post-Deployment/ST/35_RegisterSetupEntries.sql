@@ -403,7 +403,7 @@ IF (@intTableCount = 3)
 				SET @strFileType			= N'Inbound'
 				SET @strFilePrefix			= N'CPJR'
 				SET @strFileNamePattern		= N'[prefix]+[MMddyyyyHHmmss]'
-				SET @strStoredProcedure		= N'uspSTCheckoutCommanderNetworkCard'
+				SET @strStoredProcedure		= N'uspSTCheckoutPassportTranslog'
 						
 				IF EXISTS (SELECT TOP 1 1 FROM tblSMImportFileHeader WHERE strLayoutTitle = @strImportFileHeader)
 					BEGIN
@@ -1046,6 +1046,72 @@ IF (@intTableCount = 3)
 				SET @strFilePrefix			= N'vrubyrept-summary'
 				SET @strFileNamePattern		= N'[prefix]+[MMddyyyyHHmmss]'
 				SET @strStoredProcedure		= N'uspSTCheckoutCommanderSummary'
+						
+				IF EXISTS (SELECT TOP 1 1 FROM tblSMImportFileHeader WHERE strLayoutTitle = @strImportFileHeader)
+					BEGIN
+						-- Get Values
+						SELECT TOP 1 
+							@intImportFileHeaderId = intImportFileHeaderId
+							, @strImportFileHeader = strLayoutTitle
+						FROM tblSMImportFileHeader WHERE strLayoutTitle = @strImportFileHeader
+
+						IF NOT EXISTS(SELECT TOP 1 1 FROM tblSTRegisterSetupDetail WHERE intRegisterSetupId = @intRegisterSetupId AND intImportFileHeaderId = @intImportFileHeaderId)
+							BEGIN
+								-- INSERT
+								INSERT INTO tblSTRegisterSetupDetail 
+								(
+									intRegisterSetupId, 
+									intImportFileHeaderId, 
+									strImportFileHeaderName, 
+									strFileType, strFilePrefix, 
+									strFileNamePattern, 
+									strURICommand, 
+									strStoredProcedure, 
+									intConcurrencyId
+								)
+								SELECT 
+									intRegisterSetupId			= @intRegisterSetupId, 
+									intImportFileHeaderId		= @intImportFileHeaderId, 
+									strImportFileHeaderName		= @strImportFileHeader, 
+									strFileType					= @strFileType, 
+									strFilePrefix				= @strFilePrefix, 
+									strFileNamePattern			= @strFileNamePattern, 
+									strURICommand				= NULL, 
+									strStoredProcedure			= @strStoredProcedure, 
+									intConcurrencyId			= 1
+							END
+						ELSE
+							BEGIN
+								
+								SELECT TOP 1
+									@intRegisterSetupDetailId = intRegisterSetupDetailId
+								FROM tblSTRegisterSetupDetail
+								WHERE intRegisterSetupId = @intRegisterSetupId 
+									AND intImportFileHeaderId = @intImportFileHeaderId
+
+								-- UPDATE
+								UPDATE tblSTRegisterSetupDetail
+								SET strImportFileHeaderName		= @strImportFileHeader, 
+									strFileType					= @strFileType, 
+									strFilePrefix				= @strFilePrefix, 
+									strFileNamePattern			= @strFileNamePattern, 
+									strURICommand				= NULL, 
+									strStoredProcedure			= @strStoredProcedure, 
+									intConcurrencyId			= 1
+								WHERE intRegisterSetupDetailId = @intRegisterSetupDetailId
+							END
+					END
+								
+			END
+
+
+			-- vrubyrept-summary
+			BEGIN
+				SET @strImportFileHeader	= N'Commander Network Card'
+				SET @strFileType			= N'Inbound'
+				SET @strFilePrefix			= N'vrubyrept-network'
+				SET @strFileNamePattern		= N'[prefix]+[MMddyyyyHHmmss]'
+				SET @strStoredProcedure		= N'uspSTCheckoutCommanderNetworkCard'
 						
 				IF EXISTS (SELECT TOP 1 1 FROM tblSMImportFileHeader WHERE strLayoutTitle = @strImportFileHeader)
 					BEGIN
