@@ -1,6 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuCTPricedHTADetail]
 AS 
-SELECT dtmHistoryCreated = dbo.fnRemoveTimeOnDate(dtmHistoryCreated)
+SELECT dbo.fnRemoveTimeOnDate(dtmHistoryCreated)
 ,dblQuantity
 ,strPricingType
 ,strContract
@@ -36,3 +36,4 @@ FROM
 	AND a.intPricingTypeId = 1 AND b.intPricingTypeId = 3
 	GROUP BY a.dblQuantity,a.strPricingType,a.strContractNumber,a.intContractSeq
 ) tbl
+ORDER BY strContract, dtmHistoryCreated
