@@ -239,6 +239,8 @@ OPEN intListCursor;
 						-- uses a PRINT statement as that action (not a very good
 						-- example).
 						IF	ISNULL(@intDPContractId,0) != 0
+						BEGIN
+							EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intDPContractId, @dblLoopContractUnits, @intEntityId, @ysnIsStorage;
 							INSERT INTO @ItemsForItemReceipt (
 								intItemId
 								,intItemLocationId
@@ -262,7 +264,8 @@ OPEN intListCursor;
 								,ysnAllowInvoiceVoucher  
 							)
 							EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblLoopContractUnits , @intEntityId, @strDistributionOption, @intDPContractId, @intStorageScheduleId
-							EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intDPContractId, @dblLoopContractUnits, @intEntityId, @ysnIsStorage;
+							
+						END
 						-- Attempt to fetch next row from cursor
 						FETCH NEXT FROM intListCursorDP INTO @intLoopContractId, @dblDPContractUnits;
 					END;
