@@ -379,7 +379,7 @@ BEGIN TRY
 	 ,CD.intContractDetailId
 	 ,InvTran.dtmDate
 	 ,@dtmEndDate AS dtmEndDate
-	 ,dblQuantity = ISNULL(dbo.fnMFConvertCostToTargetItemUOM(CD.intItemUOMId,ReceiptItem.intCostUOMId,MAX(ReceiptItem.dblOpenReceive)),0)
+     ,dblQuantity = ISNULL(dbo.fnMFConvertCostToTargetItemUOM(CD.intItemUOMId,ReceiptItem.intUnitMeasureId,MAX(ReceiptItem.dblOpenReceive)),0)
 	 ,0
 	 ,COUNT(DISTINCT Receipt.intInventoryReceiptId)
 	 ,Receipt.intInventoryReceiptId
@@ -395,11 +395,12 @@ BEGIN TRY
 	 AND CD.intContractHeaderId = CH.intContractHeaderId
 	 WHERE strTransactionForm = 'Inventory Receipt'
 	 	AND ysnIsUnposted = 0
-	 	AND dbo.fnRemoveTimeOnDate(InvTran.dtmDate) <= CASE WHEN @dtmEndDate IS NOT NULL THEN @dtmEndDate ELSE dbo.fnRemoveTimeOnDate(InvTran.dtmDate) END
+		AND dbo.fnRemoveTimeOnDate(InvTran.dtmDate) <= CASE WHEN @dtmEndDate IS NOT NULL THEN @dtmEndDate ELSE dbo.fnRemoveTimeOnDate(InvTran.dtmDate) END
 	 	AND intContractTypeId = 1
 	 	AND InvTran.intTransactionTypeId = 4
 	 GROUP BY CH.intContractTypeId,CH.intContractHeaderId
-	 	,CD.intContractDetailId,InvTran.dtmDate,Receipt.intInventoryReceiptId,CD.intItemUOMId,ReceiptItem.intCostUOMId
+	 	,CD.intContractDetailId,InvTran.dtmDate,Receipt.intInventoryReceiptId,CD.intItemUOMId,ReceiptItem.intUnitMeasureId
+
 
 	INSERT INTO @Shipment
 	 (
