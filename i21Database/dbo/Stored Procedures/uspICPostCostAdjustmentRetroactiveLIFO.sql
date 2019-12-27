@@ -246,7 +246,8 @@ BEGIN
 	UNION ALL 
 	SELECT	cbOut.intInventoryTransactionId
 	FROM	tblICInventoryLIFOOut cbOut
-	WHERE	cbOut.intInventoryLIFOId = @CostBucketId			
+	WHERE	cbOut.intInventoryLIFOId = @CostBucketId	
+			AND (cbOut.intInventoryTransactionId <> @InventoryTransactionStartId OR @InventoryTransactionStartId IS NULL) 
 END 
 
 -- Calculate how much cost adjustment goes for each qty. 

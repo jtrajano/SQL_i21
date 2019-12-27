@@ -247,6 +247,7 @@ BEGIN
 	SELECT	cbOut.intInventoryTransactionId
 	FROM	tblICInventoryFIFOOut cbOut
 	WHERE	cbOut.intInventoryFIFOId = @CostBucketId			
+			AND (cbOut.intInventoryTransactionId <> @InventoryTransactionStartId OR @InventoryTransactionStartId IS NULL) 
 END 
 
 -- Calculate how much cost adjustment goes for each qty. 
