@@ -168,7 +168,7 @@ BEGIN
 		------------------------------------------------------------------------------
 		-- Set Invoice Type for MAIN
 		-- http://jira.irelyserver.com/browse/ST-1352
-		IF((@dblCheckoutTotalDeposited - @dblCheckoutTotalCustomerPayments) >= 0)
+		IF((ISNULL(@dblCheckoutTotalDeposited, 0) - ISNULL(@dblCheckoutTotalCustomerPayments, 0)) >= 0)
 			BEGIN
 				SET @strInvoiceTransactionTypeMain = @strCASH
 			END
