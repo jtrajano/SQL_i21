@@ -26,7 +26,7 @@ BEGIN TRY
 	EXEC dbo.[uspARGetItemsFromInvoice] @intInvoiceId = @intInvoiceId
 
 	--REMOVE OVERPAYMENTS AND CUSTOMER PREPAYMENT ITEM CONTRACTS
-	DELETE FROM @ItemsFromInvoice WHERE strTransactionType NOT IN ('Overpayment', 'Customer Prepayment')
+	DELETE FROM @ItemsFromInvoice WHERE strTransactionType IN ('Overpayment', 'Customer Prepayment')
 
 	INSERT INTO @tblToProcess (
 		  intInvoiceDetailId
