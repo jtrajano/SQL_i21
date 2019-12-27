@@ -56,10 +56,10 @@ BEGIN TRY
 					,intDailyAveragePriceRefId INT
 					)
 
-			--UPDATE tblRKDailyAveragePrice
-			--SET intDailyAveragePriceRefId = @intDailyAveragePriceId
-			--WHERE intDailyAveragePriceId = @intDailyAveragePriceRefId
-			--	AND intDailyAveragePriceRefId IS NULL
+			UPDATE tblRKDailyAveragePrice
+			SET intDailyAveragePriceRefId = @intDailyAveragePriceId
+			WHERE intDailyAveragePriceId = @intDailyAveragePriceRefId
+				AND intDailyAveragePriceRefId IS NULL
 
 			EXEC sp_xml_removedocument @idoc
 
@@ -67,15 +67,15 @@ BEGIN TRY
 			EXEC sp_xml_preparedocument @idoc OUTPUT
 				,@strAckDetailXML
 
-			--UPDATE SD
-			--SET SD.intDailyAveragePriceDetailRefId = XMLDetail.intDailyAveragePriceDetailId
-			--FROM OPENXML(@idoc, 'vyuIPGetDailyAveragePriceDetails/vyuIPGetDailyAveragePriceDetail', 2) WITH (
-			--		intDailyAveragePriceDetailId INT
-			--		,intDailyAveragePriceDetailRefId INT
-			--		) XMLDetail
-			--JOIN tblRKDailyAveragePriceDetail SD ON SD.intDailyAveragePriceDetailId = XMLDetail.intDailyAveragePriceDetailRefId
-			--WHERE SD.intDailyAveragePriceId = @intDailyAveragePriceRefId
-			--	AND SD.intDailyAveragePriceDetailRefId IS NULL
+			UPDATE SD
+			SET SD.intDailyAveragePriceDetailRefId = XMLDetail.intDailyAveragePriceDetailId
+			FROM OPENXML(@idoc, 'vyuIPGetDailyAveragePriceDetails/vyuIPGetDailyAveragePriceDetail', 2) WITH (
+					intDailyAveragePriceDetailId INT
+					,intDailyAveragePriceDetailRefId INT
+					) XMLDetail
+			JOIN tblRKDailyAveragePriceDetail SD ON SD.intDailyAveragePriceDetailId = XMLDetail.intDailyAveragePriceDetailRefId
+			WHERE SD.intDailyAveragePriceId = @intDailyAveragePriceRefId
+				AND SD.intDailyAveragePriceDetailRefId IS NULL
 
 			EXEC sp_xml_removedocument @idoc
 

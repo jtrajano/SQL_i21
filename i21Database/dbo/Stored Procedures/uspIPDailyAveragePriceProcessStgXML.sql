@@ -160,7 +160,7 @@ BEGIN TRY
 				IF NOT EXISTS (
 						SELECT 1
 						FROM tblRKDailyAveragePrice
-						--WHERE intDailyAveragePriceRefId = @intDailyAveragePriceRefId
+						WHERE intDailyAveragePriceRefId = @intDailyAveragePriceRefId
 						)
 					SELECT @strRowState = 'Added'
 				ELSE
@@ -172,11 +172,11 @@ BEGIN TRY
 				SELECT @intNewDailyAveragePriceId = intDailyAveragePriceId
 					,@strAverageNo = strAverageNo
 				FROM tblRKDailyAveragePrice
-				--WHERE intDailyAveragePriceRefId = @intDailyAveragePriceRefId
+				WHERE intDailyAveragePriceRefId = @intDailyAveragePriceRefId
 
 				DELETE
 				FROM tblRKDailyAveragePrice
-				--WHERE intDailyAveragePriceRefId = @intDailyAveragePriceRefId
+				WHERE intDailyAveragePriceRefId = @intDailyAveragePriceRefId
 
 				GOTO ext
 			END
@@ -190,7 +190,7 @@ BEGIN TRY
 					,intBookId
 					,intSubBookId
 					,ysnPosted
-					--,intDailyAveragePriceRefId
+					,intDailyAveragePriceRefId
 					)
 				SELECT 1
 					,strAverageNo
@@ -198,7 +198,7 @@ BEGIN TRY
 					,@intBookId
 					,@intSubBookId
 					,ysnPosted
-					--,@intDailyAveragePriceRefId
+					,@intDailyAveragePriceRefId
 				FROM OPENXML(@idoc, 'vyuIPGetDailyAveragePrices/vyuIPGetDailyAveragePrice', 2) WITH (
 						strAverageNo NVARCHAR(50)
 						,dtmDate DATETIME
@@ -222,12 +222,12 @@ BEGIN TRY
 						,dtmDate DATETIME
 						,ysnPosted BIT
 						) x
-				--WHERE tblRKDailyAveragePrice.intDailyAveragePriceRefId = @intDailyAveragePriceRefId
+				WHERE tblRKDailyAveragePrice.intDailyAveragePriceRefId = @intDailyAveragePriceRefId
 
 				SELECT @intNewDailyAveragePriceId = intDailyAveragePriceId
 					,@strAverageNo = strAverageNo
 				FROM tblRKDailyAveragePrice
-				--WHERE intDailyAveragePriceRefId = @intDailyAveragePriceRefId
+				WHERE intDailyAveragePriceRefId = @intDailyAveragePriceRefId
 			END
 
 			------------------------------------Detail--------------------------------------------
@@ -377,7 +377,7 @@ BEGIN TRY
 				IF NOT EXISTS (
 						SELECT 1
 						FROM tblRKDailyAveragePriceDetail
-						--WHERE intDailyAveragePriceDetailRefId = @intDailyAveragePriceDetailId
+						WHERE intDailyAveragePriceDetailRefId = @intDailyAveragePriceDetailId
 						)
 				BEGIN
 					INSERT INTO tblRKDailyAveragePriceDetail (
@@ -392,7 +392,7 @@ BEGIN TRY
 						,dblNetLongAvg
 						,intBrokerId
 						,intConcurrencyId
-						--,intDailyAveragePriceDetailRefId
+						,intDailyAveragePriceDetailRefId
 						)
 					SELECT @intNewDailyAveragePriceId
 						,@intFutureMarketId
@@ -405,7 +405,7 @@ BEGIN TRY
 						,dblNetLongAvg
 						,@intBrokerId
 						,1
-						--,@intDailyAveragePriceDetailId
+						,@intDailyAveragePriceDetailId
 					FROM OPENXML(@idoc, 'vyuIPGetDailyAveragePriceDetails/vyuIPGetDailyAveragePriceDetail', 2) WITH (
 							dblNoOfLots NUMERIC(18, 6)
 							,dblAverageLongPrice NUMERIC(18, 6)
@@ -437,8 +437,8 @@ BEGIN TRY
 							,dblNetLongAvg NUMERIC(18, 6)
 							,intDailyAveragePriceDetailId INT
 							) x
-					--JOIN tblRKDailyAveragePriceDetail D ON D.intDailyAveragePriceDetailRefId = x.intDailyAveragePriceDetailId
-					--	AND D.intDailyAveragePriceId = @intNewDailyAveragePriceId
+					JOIN tblRKDailyAveragePriceDetail D ON D.intDailyAveragePriceDetailRefId = x.intDailyAveragePriceDetailId
+						AND D.intDailyAveragePriceId = @intNewDailyAveragePriceId
 					WHERE x.intDailyAveragePriceDetailId = @intDailyAveragePriceDetailId
 				END
 
@@ -450,10 +450,10 @@ BEGIN TRY
 			DELETE
 			FROM tblRKDailyAveragePriceDetail
 			WHERE intDailyAveragePriceId = @intNewDailyAveragePriceId
-				--AND intDailyAveragePriceDetailRefId NOT IN (
-				--	SELECT intDailyAveragePriceDetailId
-				--	FROM @tblRKDailyAveragePriceDetail
-				--	)
+				AND intDailyAveragePriceDetailRefId NOT IN (
+					SELECT intDailyAveragePriceDetailId
+					FROM @tblRKDailyAveragePriceDetail
+					)
 
 			SELECT @strHeaderCondition = 'intDailyAveragePriceId = ' + LTRIM(@intNewDailyAveragePriceId)
 
