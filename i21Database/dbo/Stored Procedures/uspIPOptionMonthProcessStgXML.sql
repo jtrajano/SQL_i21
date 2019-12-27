@@ -203,7 +203,7 @@ BEGIN TRY
 				IF NOT EXISTS (
 						SELECT 1
 						FROM tblRKOptionsMonth
-						--WHERE intOptionMonthRefId = @intOptionMonthRefId
+						WHERE intOptionMonthRefId = @intOptionMonthRefId
 						)
 					SELECT @strRowState = 'Added'
 				ELSE
@@ -217,7 +217,7 @@ BEGIN TRY
 
 				DELETE
 				FROM tblRKOptionsMonth
-				--WHERE intOptionMonthRefId = @intOptionMonthRefId
+				WHERE intOptionMonthRefId = @intOptionMonthRefId
 
 				GOTO ext
 			END
@@ -234,7 +234,7 @@ BEGIN TRY
 					,ysnMonthExpired
 					,dtmExpirationDate
 					,strOptMonthSymbol
-					--,intOptionMonthRefId
+					,intOptionMonthRefId
 					)
 				SELECT 1
 					,@intFutureMarketId
@@ -245,7 +245,7 @@ BEGIN TRY
 					,ysnMonthExpired
 					,dtmExpirationDate
 					,strOptMonthSymbol
-					--,@intOptionMonthRefId
+					,@intOptionMonthRefId
 				FROM OPENXML(@idoc, 'vyuIPGetOptionMonths/vyuIPGetOptionMonth', 2) WITH (
 						strOptionMonth NVARCHAR(20)
 						,intYear INT
@@ -276,12 +276,12 @@ BEGIN TRY
 						,dtmExpirationDate DATETIME
 						,strOptMonthSymbol NVARCHAR(10)
 						) x
-				--WHERE tblRKOptionsMonth.intOptionMonthRefId = @intOptionMonthRefId
+				WHERE tblRKOptionsMonth.intOptionMonthRefId = @intOptionMonthRefId
 				
 				SELECT @intNewOptionMonthId = intOptionMonthId
 					,@strOptionMonth = strOptionMonth
 				FROM tblRKOptionsMonth
-				--WHERE intOptionMonthRefId = @intOptionMonthRefId
+				WHERE intOptionMonthRefId = @intOptionMonthRefId
 			END
 
 			ext:

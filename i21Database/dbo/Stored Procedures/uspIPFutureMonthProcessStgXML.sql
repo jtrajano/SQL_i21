@@ -164,7 +164,7 @@ BEGIN TRY
 				IF NOT EXISTS (
 						SELECT 1
 						FROM tblRKFuturesMonth
-						--WHERE intFutureMonthRefId = @intFutureMonthRefId
+						WHERE intFutureMonthRefId = @intFutureMonthRefId
 						)
 					SELECT @strRowState = 'Added'
 				ELSE
@@ -178,7 +178,7 @@ BEGIN TRY
 
 				DELETE
 				FROM tblRKFuturesMonth
-				--WHERE intFutureMonthRefId = @intFutureMonthRefId
+				WHERE intFutureMonthRefId = @intFutureMonthRefId
 
 				GOTO ext
 			END
@@ -198,7 +198,7 @@ BEGIN TRY
 					,dtmLastTradingDate
 					,dtmSpotDate
 					,ysnExpired
-					--,intFutureMonthRefId
+					,intFutureMonthRefId
 					)
 				SELECT 1
 					,strFutureMonth
@@ -212,7 +212,7 @@ BEGIN TRY
 					,dtmLastTradingDate
 					,dtmSpotDate
 					,ysnExpired
-					--,@intFutureMonthRefId
+					,@intFutureMonthRefId
 				FROM OPENXML(@idoc, 'vyuIPGetFutureMonths/vyuIPGetFutureMonth', 2) WITH (
 						strFutureMonth NVARCHAR(20)
 						,dtmFutureMonthsDate DATETIME
@@ -254,12 +254,12 @@ BEGIN TRY
 						,dtmSpotDate DATETIME
 						,ysnExpired BIT
 						) x
-				--WHERE tblRKFuturesMonth.intFutureMonthRefId = @intFutureMonthRefId
+				WHERE tblRKFuturesMonth.intFutureMonthRefId = @intFutureMonthRefId
 
 				SELECT @intNewFutureMonthId = intFutureMonthId
 					,@strFutureMonth = strFutureMonth
 				FROM tblRKFuturesMonth
-				--WHERE intFutureMonthRefId = @intFutureMonthRefId
+				WHERE intFutureMonthRefId = @intFutureMonthRefId
 			END
 
 			ext:
