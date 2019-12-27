@@ -6,5 +6,5 @@
 	RETURNS NVARCHAR(MAX)
 	AS 
 	BEGIN 
-		return format(@dblNumber,@strNumberFormat);
+		return convert(nvarchar(50),cast(@dblNumber as money),1);
 	END
