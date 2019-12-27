@@ -108,7 +108,7 @@ FROM(
 	inner join tblICCommodityUnitMeasure cum on cum.intCommodityId = ch.intCommodityId and cum.ysnDefault = 1
 	where intSequenceUsageHistoryId is null 
 
-	union all --HTA (Priced)
+	union all --HTA (Priced) decrease
 	select 
 		1 as Row_Num
 		, dtmTransactionDate = min(dbo.fnRemoveTimeOnDate(a.dtmHistoryCreated))
@@ -125,6 +125,27 @@ FROM(
 	AND a.intPricingTypeId = 1 AND b.intPricingTypeId = 3
 	group by 
 		a.dblQuantity,
+		b.strPricingType,
+		a.intContractHeaderId,
+		a.intContractDetailId
+
+	union all --HTA (Priced) increase
+	select 
+		1 as Row_Num
+		, dtmTransactionDate = min(dbo.fnRemoveTimeOnDate(b.dtmHistoryCreated))
+		, a.intContractHeaderId
+		, a.intContractDetailId
+		, dblQuantity = b.dblQuantity 
+		, b.strPricingType
+		, strTransactionType = ''
+		, intTransactionId = null
+		, strTransactionId = ''
+		, intOrderBy = 4
+	from tblCTSequenceHistory a
+	INNER JOIN tblCTSequenceHistory b on a.intContractDetailId = b.intContractDetailId
+	AND a.intPricingTypeId = 3 AND b.intPricingTypeId = 1
+	group by 
+		b.dblQuantity,
 		b.strPricingType,
 		a.intContractHeaderId,
 		a.intContractDetailId
