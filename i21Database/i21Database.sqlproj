@@ -8311,6 +8311,8 @@
     <Build Include="dbo\Stored Procedures\uspSTCheckoutCommanderNetworkCard.sql" />
     <Build Include="dbo\Functions\fnAPCreateVoucherAllocation.sql" />
     <Build Include="dbo\Tables\tblAPBillReallocation.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPInterCompanyPreStageOptionsPnS.sql" />
+    <Build Include="dbo\Tables\tblRKOptionsMatchPnSHeaderPreStage.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
