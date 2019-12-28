@@ -19,12 +19,16 @@ with summ as (
 ),
 bill as (
 	select
-		intContractDetailId
-		,dblQtyReceived = sum(dblQtyReceived)
+		a.intContractDetailId
+		,dblQtyReceived = sum(a.dblQtyReceived)
 	from
-		tblAPBillDetail
+		tblAPBillDetail a
+		,tblICItem b
+	where
+		b.intItemId = a.intItemId
+		and b.strType <> 'Other Charge'
 	group by
-		intContractDetailId
+		a.intContractDetailId
 ),
 availble as
 (
