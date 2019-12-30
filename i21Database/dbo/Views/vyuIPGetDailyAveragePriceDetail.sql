@@ -10,7 +10,9 @@ SELECT D.intDailyAveragePriceDetailId
 	,D.dblSwitchPL
 	,D.dblOptionsPL
 	,D.dblNetLongAvg
+	,D.dblSettlementPrice
 	,D.intBrokerId
+	,D.intDailyAveragePriceDetailRefId
 	,D.intConcurrencyId
 	,FM.strFutMarketName
 	,FMON.strFutureMonth

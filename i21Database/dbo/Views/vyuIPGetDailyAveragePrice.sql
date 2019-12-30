@@ -6,6 +6,7 @@ SELECT D.intDailyAveragePriceId
 	,D.intBookId
 	,D.intSubBookId
 	,D.ysnPosted
+	,D.intDailyAveragePriceRefId
 	,D.intConcurrencyId
 	,B.strBook
 	,SB.strSubBook

@@ -29,6 +29,7 @@ BEGIN TRY
 		SELECT @intDailyAveragePriceId = NULL
 			,@strRowState = NULL
 			,@intUserId = NULL
+			,@intToCompanyId = NULL
 
 		SELECT @intDailyAveragePriceId = intDailyAveragePriceId
 			,@strRowState = strRowState
@@ -39,6 +40,11 @@ BEGIN TRY
 		SELECT TOP 1 @strFromCompanyName = strName
 		FROM tblIPMultiCompany
 		WHERE ysnParent = 1
+
+		SELECT TOP 1 @intToCompanyId = intCompanyId
+		FROM tblRKDailyAveragePrice DAP
+		JOIN tblIPMultiCompany MC ON MC.intBookId = DAP.intBookId
+			AND DAP.intDailyAveragePriceId = @intDailyAveragePriceId
 
 		-- Process only Posted transaction
 		IF EXISTS (

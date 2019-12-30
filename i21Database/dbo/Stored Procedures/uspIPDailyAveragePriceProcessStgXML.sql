@@ -492,6 +492,7 @@ BEGIN TRY
 
 			UPDATE tblRKDailyAveragePriceStage
 			SET strFeedStatus = 'Processed'
+				,strMessage = 'Success'
 			WHERE intDailyAveragePriceStageId = @intDailyAveragePriceStageId
 
 			-- Audit Log

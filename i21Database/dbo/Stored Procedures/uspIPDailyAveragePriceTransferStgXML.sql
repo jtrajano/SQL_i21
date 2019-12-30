@@ -6,11 +6,11 @@ BEGIN TRY
 	DECLARE @ErrMsg NVARCHAR(MAX)
 
 	SELECT *
-	FROM tblRKFuturesMonthStage
+	FROM tblRKDailyAveragePriceStage
 	WHERE intMultiCompanyId = @intToCompanyId
 		AND ISNULL(strFeedStatus, '') = ''
 
-	UPDATE tblRKFuturesMonthStage
+	UPDATE tblRKDailyAveragePriceStage
 	SET strFeedStatus = 'Awt Ack'
 	WHERE intMultiCompanyId = @intToCompanyId
 		AND ISNULL(strFeedStatus, '') = ''
