@@ -268,6 +268,7 @@ BEGIN TRY
 
 			UPDATE tblRKFuturesMonthStage
 			SET strFeedStatus = 'Processed'
+				,strMessage = 'Success'
 			WHERE intFutureMonthStageId = @intFutureMonthStageId
 
 			-- Audit Log

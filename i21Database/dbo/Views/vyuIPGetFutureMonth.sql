@@ -13,6 +13,7 @@ SELECT F.intFutureMonthId
 	,F.dtmLastTradingDate
 	,F.dtmSpotDate
 	,F.ysnExpired
+	,F.intFutureMonthRefId
 	,F.intCompanyId
 	,FM.strFutMarketName
 	,C.strCommodityCode

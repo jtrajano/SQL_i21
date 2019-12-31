@@ -290,6 +290,7 @@ BEGIN TRY
 
 			UPDATE tblRKOptionsMonthStage
 			SET strFeedStatus = 'Processed'
+				,strMessage = 'Success'
 			WHERE intOptionMonthStageId = @intOptionMonthStageId
 
 			-- Audit Log

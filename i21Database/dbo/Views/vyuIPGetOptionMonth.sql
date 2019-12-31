@@ -10,6 +10,7 @@ SELECT O.intOptionMonthId
       ,O.ysnMonthExpired
       ,O.dtmExpirationDate
       ,O.strOptMonthSymbol
+	  ,O.intOptionMonthRefId
       ,O.intCompanyId
 	  ,FM.strFutMarketName
 	  ,C.strCommodityCode
