@@ -230,6 +230,8 @@ BEGIN TRY
 				WHERE intDailyAveragePriceRefId = @intDailyAveragePriceRefId
 			END
 
+			EXEC sp_xml_removedocument @idoc
+
 			------------------------------------Detail--------------------------------------------
 			EXEC sp_xml_preparedocument @idoc OUTPUT
 				,@strDetailXML
