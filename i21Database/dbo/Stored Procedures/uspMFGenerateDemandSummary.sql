@@ -119,7 +119,15 @@ BEGIN
 					,[strMonth24]
 					)) AS PivotTable;
 
-		SELECT intBookId
+		SELECT Row_Number() OVER (
+				ORDER BY strBook
+					,strSubBook
+					,strProductType
+					,IsNULL(strMainItemNo, strItemNo)
+					,strItemNo
+					,strItemDescription
+				) AS intSort
+			,intBookId
 			,intSubBookId
 			,intMainItemId
 			,intItemId
@@ -273,13 +281,6 @@ BEGIN
 			,IsNULL([Planned Purchases strMonth24], 0) AS strSEMonth24
 			,IsNULL([Ending Inventory strMonth24], 0) AS strEIMonth24
 			,IsNULL([Weeks of Supply strMonth24], 0) AS strSTMonth24
-			,Row_Number() OVER (
-				ORDER BY strBook
-					,strSubBook
-					,strProductType
-					,strItemNo
-					,strItemDescription
-				) AS intSort
 		FROM (
 			SELECT B.strBook
 				,SB.strSubBook
@@ -299,11 +300,12 @@ BEGIN
 				,AV.intMainItemId
 				,I.intItemId
 				,ST.dblSupplyTarget
+				,MI.strItemNo AS strMainItemNo
 			FROM tblMFInvPlngSummaryDetail AV
 			JOIN tblMFInvPlngSummary S ON S.intInvPlngSummaryId = AV.intInvPlngSummaryId
 			JOIN tblCTReportAttribute A ON A.intReportAttributeID = AV.intAttributeId
 			JOIN tblMFInvPlngSummaryBatch Batch ON Batch.intInvPlngSummaryId = AV.intInvPlngSummaryId
-			--LEFT JOIN tblICItem MI ON MI.intItemId = IsNULL(AV.intMainItemId, AV.intItemId)
+			LEFT JOIN tblICItem MI ON MI.intItemId = AV.intMainItemId
 			JOIN tblICItem I ON I.intItemId = AV.intItemId
 			LEFT JOIN tblCTBook B ON B.intBookId = AV.intBookId
 			LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = AV.intSubBookId
@@ -562,7 +564,15 @@ BEGIN
 
 		IF @ysnRefreshContract = 0
 		BEGIN
-			SELECT intBookId
+			SELECT Row_Number() OVER (
+					ORDER BY strBook
+						,strSubBook
+						,strProductType
+						,IsNULL(strMainItemNo, strItemNo)
+						,strItemNo
+						,strItemDescription
+					) AS intSort
+				,intBookId
 				,intSubBookId
 				,intMainItemId
 				,intItemId
@@ -716,13 +726,6 @@ BEGIN
 				,IsNULL([Planned Purchases strMonth24], 0) AS strSEMonth24
 				,IsNULL([Ending Inventory strMonth24], 0) AS strEIMonth24
 				,IsNULL([Weeks of Supply strMonth24], 0) AS strSTMonth24
-				,Row_Number() OVER (
-					ORDER BY strBook
-						,strSubBook
-						,strProductType
-						,strItemNo
-						,strItemDescription
-					) AS intSort
 			FROM (
 				SELECT B.strBook
 					,SB.strSubBook
@@ -748,11 +751,12 @@ BEGIN
 					,AV.intMainItemId
 					,I.intItemId
 					,ST.dblSupplyTarget
+					,MI.strItemNo as strMainItemNo
 				FROM tblCTInvPlngReportAttributeValue AV
 				JOIN tblCTInvPlngReportMaster RM ON RM.intInvPlngReportMasterID = AV.intInvPlngReportMasterID
 				JOIN tblCTReportAttribute A ON A.intReportAttributeID = AV.intReportAttributeID
 					AND IsNumeric(AV.strValue) = 1
-				--LEFT JOIN tblICItem MI ON MI.intItemId = IsNULL(AV.intMainItemId, AV.intItemId)
+				LEFT JOIN tblICItem MI ON MI.intItemId = AV.intMainItemId
 				JOIN tblICItem I ON I.intItemId = AV.intItemId
 				LEFT JOIN tblCTBook B ON B.intBookId = RM.intBookId
 				LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = RM.intSubBookId
@@ -928,17 +932,12 @@ BEGIN
 						,[Ending Inventory strMonth24]
 						,[Weeks of Supply strMonth24]
 						)) AS PivotTable
-				--ORDER BY strBook
-				--	,strSubBook
-				--	,strProductType
-				--	,strItemNo
-				--	,strItemDescription
+
 		END
 		ELSE
 		BEGIN
 			DECLARE @intReportMasterID INT
 				,@dtmDate DATETIME
-				--,@dtmStartOfMonth DATETIME
 				,@intCurrentMonth INT
 
 			IF OBJECT_ID('tempdb..#tblMFDemand') IS NOT NULL
@@ -1090,6 +1089,7 @@ BEGIN
 				,intMonthId
 				,intBookId
 				,intSubBookId
+				,intMainItemId
 				)
 			SELECT AV.intItemId
 				,CASE 
@@ -1107,8 +1107,9 @@ BEGIN
 					END
 				,AV.intAttributeId
 				,Replace(Replace(Replace(AV.strFieldName, 'strMonth', ''), 'OpeningInv', '-1'), 'PastDue', '0') intMonthId
-				,RM.intBookId
-				,RM.intSubBookId
+				,AV.intBookId
+				,AV.intSubBookId
+				,AV.intMainItemId
 			FROM tblMFInvPlngSummaryDetail AV
 			JOIN tblMFInvPlngSummary RM ON RM.intInvPlngSummaryId = AV.intInvPlngSummaryId
 			JOIN tblMFInvPlngSummaryBatch B ON B.intInvPlngSummaryId = AV.intInvPlngSummaryId
@@ -1152,7 +1153,15 @@ BEGIN
 				,intBookId
 				,intSubBookId
 
-			SELECT intBookId
+			SELECT Row_Number() OVER (
+					ORDER BY strBook
+						,strSubBook
+						,strProductType
+						,IsNULL(strMainItemNo, strItemNo)
+						,strItemNo
+						,strItemDescription
+					) AS intSort
+				,intBookId
 				,intSubBookId
 				,intMainItemId
 				,intItemId
@@ -1306,13 +1315,6 @@ BEGIN
 				,IsNULL([Planned Purchases strMonth24], 0) AS strSEMonth24
 				,IsNULL([Ending Inventory strMonth24], 0) AS strEIMonth24
 				,IsNULL([Weeks of Supply strMonth24], 0) AS strSTMonth24
-				,Row_Number() OVER (
-					ORDER BY strBook
-						,strSubBook
-						,strProductType
-						,strItemNo
-						,strItemDescription
-					) AS intSort
 			FROM (
 				SELECT B.strBook
 					,SB.strSubBook
@@ -1331,11 +1333,11 @@ BEGIN
 					,SB.intSubBookId
 					,FD.intMainItemId
 					,I.intItemId
-					,ST.dblSupplyTarget
+					,ST.dblSupplyTarget,MI.strItemNo as strMainItemNo
 				FROM #tblMFFinalDemand FD
 				JOIN tblCTReportAttribute A ON A.intReportAttributeID = FD.intAttributeId
 				--JOIN tblCTInvPlngReportMaster RM ON RM.intInvPlngReportMasterID = @intReportMasterID
-				--LEFT JOIN tblICItem MI ON MI.intItemId = IsNULL(FD.intMainItemId, FD.intItemId)
+				LEFT JOIN tblICItem MI ON MI.intItemId = FD.intMainItemId
 				JOIN tblICItem I ON I.intItemId = FD.intItemId
 				LEFT JOIN tblCTBook B ON B.intBookId = FD.intBookId
 				LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = FD.intSubBookId
