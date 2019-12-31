@@ -319,7 +319,7 @@ BEGIN
 			JOIN tblICItemUOM IU ON IU.intItemId = I.intItemId
 				AND IU.ysnStockUnit = 1
 			WHERE InvS.ysnPosted = 0
-				AND I.strType = 'Raw Material'
+				AND I.strManufactureType = 'Raw Material'
 				AND InvS.dtmShipDate >= @dtmCurrentDate
 				AND InvS.intShipFromLocationId = @intCompanyLocationId
 			GROUP BY DATEPART(Month, InvS.dtmShipDate)

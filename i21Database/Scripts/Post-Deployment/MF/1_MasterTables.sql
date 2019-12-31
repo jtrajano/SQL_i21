@@ -3968,3 +3968,7 @@ UPDATE tblMFCompanyPreference
 SET intNoofdaystoconsiderforDemandBatches = 7
 Where intNoofdaystoconsiderforDemandBatches IS NULL
 GO
+Update tblICItem
+Set strManufactureType='Raw Material'
+Where strManufactureType is null and strType='Raw Material'
+GO
