@@ -564,7 +564,7 @@ BEGIN TRY
 					,@strTextCode = strTextCode
 					,@strCountry = strCountry
 					,@ysnApproval = ysnApproval
-				FROM OPENXML(@idoc, 'vyuCTContractHeaderViews/vyuCTContractHeaderView', 2) WITH (
+				FROM OPENXML(@idoc, 'vyuIPContractHeaderViews/vyuIPContractHeaderView', 2) WITH (
 						strSalespersonId NVARCHAR(3) Collate Latin1_General_CI_AS
 						,strCommodityCode NVARCHAR(50) Collate Latin1_General_CI_AS
 						,strHeaderUnitMeasure NVARCHAR(50) Collate Latin1_General_CI_AS
@@ -1096,7 +1096,7 @@ BEGIN TRY
 					,strExternalEntity
 					,strExternalContractNumber
 					,IsNULL(ysnReceivedSignedFixationLetter, 0)
-				FROM OPENXML(@idoc, 'vyuCTContractHeaderViews/vyuCTContractHeaderView', 2) WITH (
+				FROM OPENXML(@idoc, 'vyuIPContractHeaderViews/vyuIPContractHeaderView', 2) WITH (
 						strEntityName NVARCHAR(100) Collate Latin1_General_CI_AS
 						,dtmContractDate DATETIME
 						,dblHeaderQuantity NUMERIC(18, 6)
