@@ -14,7 +14,7 @@ BEGIN TRY
 		,@intUserId int
 	DECLARE @tblIPAuditLog TABLE (
 		strColumnName NVARCHAR(50)
-		,strColumnDescription NVARCHAR(50)
+		,strColumnDescription NVARCHAR(200)
 		,strOldValue NVARCHAR(MAX)
 		,strNewValue NVARCHAR(MAX)
 		)
@@ -25,12 +25,12 @@ BEGIN TRY
 	SELECT @intInvPlngSummaryId = intInvPlngSummaryId
 		,@strInvPlngReportMasterID = strInvPlngReportMasterID
 		,@intConcurrencyId = intConcurrencyId
-		,@intUserId=intUserId
+		,@intUserId=intCreatedUserId
 	FROM OPENXML(@idoc, 'root/InvPlngSummary', 2) WITH (
 			intInvPlngSummaryId INT
 			,strInvPlngReportMasterID NVARCHAR(MAX)
 			,intConcurrencyId INT
-			,intUserId int
+			,intCreatedUserId int
 			)
 
 	SELECT @intTransactionCount = @@TRANCOUNT
@@ -122,14 +122,14 @@ BEGIN TRY
 	FROM [dbo].[fnSplitString](@strInvPlngReportMasterID, ',')
 
 	INSERT INTO @tblIPAuditLog
-	SELECT (
+	SELECT Distinct (
 			SELECT TOP 1 PSD.strValue
 			FROM tblMFInvPlngSummaryDetail PSD
 			WHERE PSD.intInvPlngSummaryId = @intInvPlngSummaryId
 				AND intAttributeId = 1
 				AND PSD.strFieldName = x.strFieldName
 			)
-		,B.strBook + IsNULL(' - ' + SB.strSubBook, '') + ' - ' + I.strItemNo + IsNULL(' - [ ' + MI.strItemNo +' ] ', '') + ' - ' + RA.strAttributeName
+		,B.strBook + IsNULL(' - ' + SB.strSubBook, '') + ' - ' + I.strItemNo + IsNULL(' - [ ' + MI.strItemNo +' ] ', '') + ' - ' + Replace(Replace(RA.strAttributeName, '<a>+ ', ''), '</a>', '') 
 		,SD.strValue
 		,x.strValue
 	FROM OPENXML(@idoc, 'root/InvPlngSummaryDetails/InvPlngSummaryDetail', 2) WITH (
@@ -146,7 +146,7 @@ BEGIN TRY
 		AND x.strFieldName = SD.strFieldName
 		AND IsNULL(x.intMainItemId,0) = IsNULL(SD.intMainItemId,0)
 		AND x.intBookId = SD.intBookId
-		AND x.intSubBookId = SD.intSubBookId
+		--AND IsNUll(x.intSubBookId,0) = IsNULL(SD.intSubBookId,0)
 	JOIN tblICItem I ON I.intItemId = x.intItemId
 	LEFT JOIN tblICItem MI ON MI.intItemId = x.intMainItemId
 	JOIN tblCTBook B ON B.intBookId = x.intBookId

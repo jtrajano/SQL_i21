@@ -90,6 +90,7 @@ BEGIN
 					FROM [dbo].[fnSplitString](@strBatchId, ',')
 					)
 				AND strValue <> ''
+				AND SD.intInvPlngSummaryId = @intInvPlngSummaryId
 			) AS SourceTable
 		PIVOT(MIN(strValue) FOR strFieldName IN (
 					[strMonth1]
@@ -272,6 +273,13 @@ BEGIN
 			,IsNULL([Planned Purchases strMonth24], 0) AS strSEMonth24
 			,IsNULL([Ending Inventory strMonth24], 0) AS strEIMonth24
 			,IsNULL([Weeks of Supply strMonth24], 0) AS strSTMonth24
+			,Row_Number() OVER (
+				ORDER BY strBook
+					,strSubBook
+					,strProductType
+					,strItemNo
+					,strItemDescription
+				) AS intSort
 		FROM (
 			SELECT B.strBook
 				,SB.strSubBook
@@ -304,14 +312,14 @@ BEGIN
 				AND CA.strType = 'ProductType'
 			LEFT JOIN tblIPItemSupplyTarget ST ON ST.intBookId = B.intBookId
 				AND IsNULL(ST.intSubBookId, 0) = IsNULL(SB.intSubBookId, 0)
-				and ST.intItemId=I.intItemId
+				AND ST.intItemId = I.intItemId
 			WHERE A.intReportAttributeID IN (
 					2 --Opening Inventory
-					,8 --Forecasted Consumption
-					,10 --Weeks of Supply
-					,9 --Ending Inventory
-					,5 --Planned Purchases
 					,4 --Existing Purchases
+					,5 --Planned Purchases
+					,8 --Forecasted Consumption
+					,9 --Ending Inventory
+					,10 --Weeks of Supply
 					)
 				AND IsNumeric(AV.strValue) = 1
 				AND Batch.intInvPlngReportMasterID IN (
@@ -323,6 +331,7 @@ BEGIN
 					'OpeningInv'
 					,'PastDue'
 					)
+				AND AV.intInvPlngSummaryId = @intInvPlngSummaryId
 			) AS SourceTable
 		PIVOT(SUM(strValue) FOR strAttributeName IN (
 					[Opening Inventory strMonth1]
@@ -470,11 +479,11 @@ BEGIN
 					,[Ending Inventory strMonth24]
 					,[Weeks of Supply strMonth24]
 					)) AS PivotTable
-		ORDER BY strBook
-			,strSubBook
-			,strProductType
-			,strItemNo
-			,strItemDescription
+			--ORDER BY strBook
+			--	,strSubBook
+			--	,strProductType
+			--	,strItemNo
+			--	,strItemDescription
 	END
 	ELSE
 	BEGIN
@@ -707,6 +716,13 @@ BEGIN
 				,IsNULL([Planned Purchases strMonth24], 0) AS strSEMonth24
 				,IsNULL([Ending Inventory strMonth24], 0) AS strEIMonth24
 				,IsNULL([Weeks of Supply strMonth24], 0) AS strSTMonth24
+				,Row_Number() OVER (
+					ORDER BY strBook
+						,strSubBook
+						,strProductType
+						,strItemNo
+						,strItemDescription
+					) AS intSort
 			FROM (
 				SELECT B.strBook
 					,SB.strSubBook
@@ -747,13 +763,13 @@ BEGIN
 					AND UMCByWeight.intStockUnitMeasureId = @intUnitMeasureId
 				LEFT JOIN tblIPItemSupplyTarget ST ON ST.intBookId = B.intBookId
 					AND IsNULL(ST.intSubBookId, 0) = IsNULL(SB.intSubBookId, 0)
-					and ST.intItemId=I.intItemId
+					AND ST.intItemId = I.intItemId
 				WHERE A.intReportAttributeID IN (
 						2 --Opening Inventory
+						,4 --Existing Purchases
+						,5 --Planned Purchases
 						,8 --Forecasted Consumption
 						,9 --Ending Inventory
-						,5 --Planned Purchases
-						,4 --Existing Purchases
 						,10 --Weeks of Supply
 						)
 					AND AV.intInvPlngReportMasterID IN (
@@ -912,11 +928,11 @@ BEGIN
 						,[Ending Inventory strMonth24]
 						,[Weeks of Supply strMonth24]
 						)) AS PivotTable
-			ORDER BY strBook
-				,strSubBook
-				,strProductType
-				,strItemNo
-				,strItemDescription
+				--ORDER BY strBook
+				--	,strSubBook
+				--	,strProductType
+				--	,strItemNo
+				--	,strItemDescription
 		END
 		ELSE
 		BEGIN
@@ -962,11 +978,27 @@ BEGIN
 			FROM tblCTReportMaster
 			WHERE strReportName = 'Inventory Planning Report'
 
-			SELECT @dtmDate = Max(dtmDate)
+			DECLARE @tblMFDate TABLE (
+				dtmDate DATETIME
+				,intBookId INT
+				,intSubBookId INT
+				,intCurrentMonth INT
+				)
+
+			INSERT INTO @tblMFDate (
+				dtmDate
+				,intBookId
+				,intSubBookId
+				,intCurrentMonth
+				)
+			SELECT Max(dtmDate)
+				,intBookId
+				,intSubBookId
+				,DATEDIFF(mm, 0, Max(dtmDate))
 			FROM tblCTInvPlngReportMaster
 			WHERE ysnPost = 1
-
-			SELECT @intCurrentMonth = DATEDIFF(mm, 0, @dtmDate)
+			GROUP BY intBookId
+				,intSubBookId
 
 			INSERT INTO @tblMFItemDetail (
 				intItemId
@@ -1001,14 +1033,16 @@ BEGIN
 						THEN I.intItemId
 					ELSE I.intMainItemId
 					END AS intItemId
-				,sum(dbo.fnCTConvertQuantityToTargetItemUOM(SS.intItemId, IU.intUnitMeasureId, @intUnitMeasureId, SS.dblBalance) * I.dblRatio) AS dblIntrasitQty
-				,13 AS intAttributeId --Existing Purchases
-				,DATEDIFF(mm, 0, SS.dtmUpdatedAvailabilityDate) + 1 - @intCurrentMonth AS intMonthId
+				,sum(dbo.fnCTConvertQuantityToTargetItemUOM(SS.intItemId, IU.intUnitMeasureId, @intUnitMeasureId, SS.dblBalance)) AS dblIntrasitQty
+				,4 AS intAttributeId --Existing Purchases
+				,DATEDIFF(mm, 0, SS.dtmUpdatedAvailabilityDate) + 1 - D.intCurrentMonth AS intMonthId
 				,I.intMainItemId
 				,SS.intBookId
 				,SS.intSubBookId
 			FROM @tblMFItemDetail I
 			JOIN dbo.tblCTContractDetail SS ON SS.intItemId = I.intItemId
+			JOIN dbo.tblCTContractHeader CH ON CH.intContractHeaderId = SS.intContractHeaderId
+				AND CH.intContractTypeId = 1
 			JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = SS.intItemUOMId
 				AND ISNULL(SS.intCompanyLocationId, 0) = (
 					CASE 
@@ -1017,14 +1051,16 @@ BEGIN
 						ELSE @intCompanyLocationId
 						END
 					)
+			JOIN @tblMFDate D ON D.intBookId = SS.intBookId
+				AND IsNULL(D.intSubBookId, 0) = IsNULL(SS.intSubBookId, 0)
 			WHERE SS.intContractStatusId = 1
-				AND SS.dtmUpdatedAvailabilityDate > @dtmDate
+				AND SS.dtmUpdatedAvailabilityDate > D.dtmDate
 			GROUP BY CASE 
 					WHEN I.ysnSpecificItemDescription = 1
 						THEN I.intItemId
 					ELSE I.intMainItemId
 					END
-				,DATEDIFF(mm, 0, SS.dtmUpdatedAvailabilityDate) + 1 - @intCurrentMonth
+				,DATEDIFF(mm, 0, SS.dtmUpdatedAvailabilityDate) + 1 - D.intCurrentMonth
 				,I.intMainItemId
 				,SS.intBookId
 				,SS.intSubBookId
@@ -1040,7 +1076,7 @@ BEGIN
 				)
 			SELECT intItemId
 				,- dblQty
-				,12 AS intAttributeId --Planned Purchases
+				,5 AS intAttributeId --Planned Purchases
 				,intMonthId
 				,intMainItemId
 				,intBookId
@@ -1059,38 +1095,38 @@ BEGIN
 				,CASE 
 					WHEN AV.strValue = ''
 						THEN NULL
-					ELSE ((AV.strValue)*(
-						CASE 
-							WHEN AV.intReportAttributeID = 10
-								THEN 1
-							ELSE IsNULL(UMCByWeight.dblConversionToStock, 1)
-							END
-						) )
+					ELSE (
+							(AV.strValue) * (
+								CASE 
+									WHEN AV.intAttributeId = 10
+										THEN 1
+									ELSE IsNULL(UMCByWeight.dblConversionToStock, 1)
+									END
+								)
+							)
 					END
-				,AV.intReportAttributeID
+				,AV.intAttributeId
 				,Replace(Replace(Replace(AV.strFieldName, 'strMonth', ''), 'OpeningInv', '-1'), 'PastDue', '0') intMonthId
 				,RM.intBookId
 				,RM.intSubBookId
-			FROM tblCTInvPlngReportAttributeValue AV
-			JOIN tblCTInvPlngReportMaster RM ON AV.intInvPlngReportMasterID = RM.intInvPlngReportMasterID
-							LEFT JOIN tblICUnitMeasureConversion UMCByWeight ON UMCByWeight.intUnitMeasureId = RM.intUnitMeasureId --From Unit
-					AND UMCByWeight.intStockUnitMeasureId = @intUnitMeasureId
-			WHERE AV.intReportAttributeID IN (
-					2
-					,--Opening Inventory
-					4
-					,--Existing Purchases
-					5
-					,--Planned Purchases
-					8
-					,--Forecasted Consumption
-					9 --Ending Inventory
-					,10
+			FROM tblMFInvPlngSummaryDetail AV
+			JOIN tblMFInvPlngSummary RM ON RM.intInvPlngSummaryId = AV.intInvPlngSummaryId
+			JOIN tblMFInvPlngSummaryBatch B ON B.intInvPlngSummaryId = AV.intInvPlngSummaryId
+			LEFT JOIN tblICUnitMeasureConversion UMCByWeight ON UMCByWeight.intUnitMeasureId = RM.intUnitMeasureId --From Unit
+				AND UMCByWeight.intStockUnitMeasureId = @intUnitMeasureId
+			WHERE AV.intAttributeId IN (
+					2 --Opening Inventory
+					,4 --Existing Purchases
+					,5 --Planned Purchases
+					,8 --Forecasted Consumption
+					,9 --Ending Inventory
+					,10 --Weeks of Supply
 					)
-				AND AV.intInvPlngReportMasterID IN (
+				AND B.intInvPlngReportMasterID IN (
 					SELECT Item Collate Latin1_General_CI_AS
 					FROM [dbo].[fnSplitString](@strInvPlngReportMasterID, ',')
 					)
+				AND AV.intInvPlngSummaryId = @intInvPlngSummaryId
 
 			INSERT INTO #tblMFFinalDemand (
 				intItemId
@@ -1270,20 +1306,27 @@ BEGIN
 				,IsNULL([Planned Purchases strMonth24], 0) AS strSEMonth24
 				,IsNULL([Ending Inventory strMonth24], 0) AS strEIMonth24
 				,IsNULL([Weeks of Supply strMonth24], 0) AS strSTMonth24
+				,Row_Number() OVER (
+					ORDER BY strBook
+						,strSubBook
+						,strProductType
+						,strItemNo
+						,strItemDescription
+					) AS intSort
 			FROM (
 				SELECT B.strBook
 					,SB.strSubBook
 					,CA.strDescription AS strProductType
 					,I.strItemNo
 					,I.strDescription AS strItemDescription
-					,Replace(Replace(A.strAttributeName, '<a>+ ', ''), '</a>', '') + ' strMonth' + CHAR(FD.intMonthId) AS strAttributeName
+					,Replace(Replace(A.strAttributeName, '<a>+ ', ''), '</a>', '') + ' strMonth' + Ltrim(FD.intMonthId) AS strAttributeName
 					,(
 						CASE 
 							WHEN IsNUmeric(FD.dblQty) = 0
 								THEN Convert(NUMERIC(18, 6), 0.0)
 							ELSE FD.dblQty
 							END
-						)  AS strValue
+						) AS strValue
 					,B.intBookId
 					,SB.intSubBookId
 					,FD.intMainItemId
@@ -1301,16 +1344,8 @@ BEGIN
 					AND CA.strType = 'ProductType'
 				LEFT JOIN tblIPItemSupplyTarget ST ON ST.intBookId = B.intBookId
 					AND IsNULL(ST.intSubBookId, 0) = IsNULL(SB.intSubBookId, 0)
-					and ST.intItemId=I.intItemId
-				WHERE A.intReportAttributeID IN (
-						2
-						,8
-						,9
-						,5 --Planned Purchases
-						,13
-						,10 --Weeks of Supply
-						)
-					AND IsNumeric(FD.dblQty) = 1
+					AND ST.intItemId = I.intItemId
+				WHERE IsNumeric(FD.dblQty) = 1
 					--2-Opening Inventory;8-Forecasted Consumption;9-Ending Inventory;13-Existing Purchases;12-Planned Purchases
 				) AS SourceTable
 			PIVOT(SUM(strValue) FOR strAttributeName IN (
@@ -1459,11 +1494,11 @@ BEGIN
 						,[Ending Inventory strMonth24]
 						,[Weeks of Supply strMonth24]
 						)) AS PivotTable
-			ORDER BY strBook
-				,strSubBook
-				,strProductType
-				,strItemNo
-				,strItemDescription
+				--ORDER BY strBook
+				--	,strSubBook
+				--	,strProductType
+				--	,strItemNo
+				--	,strItemDescription
 		END
 	END
 END
