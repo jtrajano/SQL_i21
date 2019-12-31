@@ -125,6 +125,11 @@ BEGIN TRY
 		,@intPropertyValidityPeriodId INT
 		,@intProductId INT
 		,@intProductPropertyValidityPeriodId INT
+		,@intTransactionId INT
+		,@intCompanyId INT
+		,@intScreenId INT
+		,@intTransactionRefId INT
+		,@intCompanyRefId INT
 
 	SELECT @intSampleStageId = MIN(intSampleStageId)
 	FROM tblQMSampleStage
@@ -149,6 +154,11 @@ BEGIN TRY
 		SET @strTransactionType = NULL
 		SET @intToBookId = NULL
 		SET @strFromBook = NULL
+		SELECT @intTransactionId = NULL
+			,@intCompanyId = NULL
+			,@intScreenId = NULL
+			,@intTransactionRefId = NULL
+			,@intCompanyRefId = NULL
 
 		SELECT @intSampleId = intSampleId
 			,@strSampleNumber = strSampleNumber
@@ -165,6 +175,8 @@ BEGIN TRY
 			,@intCompanyLocationId = intCompanyLocationId
 			,@strTransactionType = strTransactionType
 			,@intToBookId = intToBookId
+			,@intTransactionId = intTransactionId
+			,@intCompanyId = intCompanyId
 		FROM tblQMSampleStage
 		WHERE intSampleStageId = @intSampleStageId
 
@@ -2277,39 +2289,9 @@ BEGIN TRY
 
 			ext:
 
-			INSERT INTO tblQMSampleAcknowledgementStage (
-				intSampleId
-				,strSampleAckNumber
-				,dtmFeedDate
-				,strMessage
-				,strTransactionType
-				,intMultiCompanyId
-				,strAckHeaderXML
-				,strAckDetailXML
-				,strAckTestResultXML
-				,strRowState
-				)
-			SELECT @intNewSampleId
-				,@strNewSampleNumber
-				,GETDATE()
-				,'Success'
-				,@strTransactionType
-				,@intMultiCompanyId
-				,@strAckHeaderXML
-				,@strAckDetailXML
-				,@strAckTestResultXML
-				,@strRowState
-
-			SELECT @intSampleAcknowledgementStageId = SCOPE_IDENTITY()
-
-			EXEC sp_xml_removedocument @idoc
-
-			UPDATE tblQMSampleStage
-			SET strFeedStatus = 'Processed'
-				,intNewSampleId = @intNewSampleId
-				,strNewSampleNumber = @strNewSampleNumber
-				,strNewSampleTypeName = @strSampleTypeName
-			WHERE intSampleStageId = @intSampleStageId
+			SELECT @intCompanyRefId = intCompanyId
+			FROM tblQMSample
+			WHERE intSampleId = @intNewSampleId
 
 			IF (@intNewSampleId > 0)
 			BEGIN
@@ -2349,6 +2331,61 @@ BEGIN TRY
 						,@toValue = @strNewSampleNumber
 				END
 			END
+
+			SELECT @intScreenId = intScreenId
+			FROM tblSMScreen
+			WHERE strNamespace = 'Quality.view.QualitySample'
+
+			SELECT @intTransactionRefId = intTransactionId
+			FROM tblSMTransaction
+			WHERE intRecordId = @intNewSampleId
+				AND intScreenId = @intScreenId
+
+			INSERT INTO tblQMSampleAcknowledgementStage (
+				intSampleId
+				,strSampleAckNumber
+				,dtmFeedDate
+				,strMessage
+				,strTransactionType
+				,intMultiCompanyId
+				,strAckHeaderXML
+				,strAckDetailXML
+				,strAckTestResultXML
+				,strRowState
+				,intTransactionId
+				,intCompanyId
+				,intTransactionRefId
+				,intCompanyRefId
+				)
+			SELECT @intNewSampleId
+				,@strNewSampleNumber
+				,GETDATE()
+				,'Success'
+				,@strTransactionType
+				,@intMultiCompanyId
+				,@strAckHeaderXML
+				,@strAckDetailXML
+				,@strAckTestResultXML
+				,@strRowState
+				,@intTransactionId
+				,@intCompanyId
+				,@intTransactionRefId
+				,@intCompanyRefId
+
+			SELECT @intSampleAcknowledgementStageId = SCOPE_IDENTITY()
+
+			EXECUTE dbo.uspSMInterCompanyUpdateMapping @currentTransactionId = @intTransactionRefId
+				,@referenceTransactionId = @intTransactionId
+				,@referenceCompanyId = @intCompanyId
+
+			EXEC sp_xml_removedocument @idoc
+
+			UPDATE tblQMSampleStage
+			SET strFeedStatus = 'Processed'
+				,intNewSampleId = @intNewSampleId
+				,strNewSampleNumber = @strNewSampleNumber
+				,strNewSampleTypeName = @strSampleTypeName
+			WHERE intSampleStageId = @intSampleStageId
 
 			IF @intTransactionCount = 0
 				COMMIT TRANSACTION

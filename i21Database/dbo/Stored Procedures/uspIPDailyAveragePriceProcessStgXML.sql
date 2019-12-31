@@ -27,6 +27,11 @@ BEGIN TRY
 	DECLARE @strHeaderCondition NVARCHAR(MAX)
 		,@strAckHeaderXML NVARCHAR(MAX)
 		,@strAckDetailXML NVARCHAR(MAX)
+		,@intTransactionId INT
+		,@intCompanyId INT
+		,@intScreenId INT
+		,@intTransactionRefId INT
+		,@intCompanyRefId INT
 
 	SELECT @intDailyAveragePriceStageId = MIN(intDailyAveragePriceStageId)
 	FROM tblRKDailyAveragePriceStage
@@ -42,6 +47,11 @@ BEGIN TRY
 			,@strTransactionType = NULL
 			,@strUserName = NULL
 			,@strDetailXML = NULL
+			,@intTransactionId = NULL
+			,@intCompanyId = NULL
+			,@intScreenId = NULL
+			,@intTransactionRefId = NULL
+			,@intCompanyRefId = NULL
 
 		SELECT @intDailyAveragePriceId = intDailyAveragePriceId
 			,@strHeaderXML = strHeaderXML
@@ -50,6 +60,8 @@ BEGIN TRY
 			,@intMultiCompanyId = intMultiCompanyId
 			,@strTransactionType = strTransactionType
 			,@strUserName = strUserName
+			,@intTransactionId = intTransactionId
+			,@intCompanyId = intCompanyId
 		FROM tblRKDailyAveragePriceStage
 		WHERE intDailyAveragePriceStageId = @intDailyAveragePriceStageId
 
@@ -471,31 +483,9 @@ BEGIN TRY
 
 			EXEC sp_xml_removedocument @idoc
 
-			INSERT INTO tblRKDailyAveragePriceAckStage (
-				intDailyAveragePriceId
-				,strAckAverageNo
-				,strAckHeaderXML
-				,strAckDetailXML
-				,strRowState
-				,dtmFeedDate
-				,strMessage
-				,intMultiCompanyId
-				,strTransactionType
-				)
-			SELECT @intNewDailyAveragePriceId
-				,@strAverageNo
-				,@strAckHeaderXML
-				,@strAckDetailXML
-				,@strRowState
-				,GETDATE()
-				,'Success'
-				,@intMultiCompanyId
-				,@strTransactionType
-
-			UPDATE tblRKDailyAveragePriceStage
-			SET strFeedStatus = 'Processed'
-				,strMessage = 'Success'
-			WHERE intDailyAveragePriceStageId = @intDailyAveragePriceStageId
+			SELECT @intCompanyRefId = intCompanyId
+			FROM tblRKDailyAveragePrice
+			WHERE intDailyAveragePriceId = @intNewDailyAveragePriceId
 
 			-- Audit Log
 			IF (@intNewDailyAveragePriceId > 0)
@@ -529,6 +519,53 @@ BEGIN TRY
 						,@toValue = @strAverageNo
 				END
 			END
+
+			SELECT @intScreenId = intScreenId
+			FROM tblSMScreen
+			WHERE strNamespace = 'RiskManagement.view.DailyAveragePrice'
+
+			SELECT @intTransactionRefId = intTransactionId
+			FROM tblSMTransaction
+			WHERE intRecordId = @intNewDailyAveragePriceId
+				AND intScreenId = @intScreenId
+
+			INSERT INTO tblRKDailyAveragePriceAckStage (
+				intDailyAveragePriceId
+				,strAckAverageNo
+				,strAckHeaderXML
+				,strAckDetailXML
+				,strRowState
+				,dtmFeedDate
+				,strMessage
+				,intMultiCompanyId
+				,strTransactionType
+				,intTransactionId
+				,intCompanyId
+				,intTransactionRefId
+				,intCompanyRefId
+				)
+			SELECT @intNewDailyAveragePriceId
+				,@strAverageNo
+				,@strAckHeaderXML
+				,@strAckDetailXML
+				,@strRowState
+				,GETDATE()
+				,'Success'
+				,@intMultiCompanyId
+				,@strTransactionType
+				,@intTransactionId
+				,@intCompanyId
+				,@intTransactionRefId
+				,@intCompanyRefId
+
+			EXECUTE dbo.uspSMInterCompanyUpdateMapping @currentTransactionId = @intTransactionRefId
+				,@referenceTransactionId = @intTransactionId
+				,@referenceCompanyId = @intCompanyId
+
+			UPDATE tblRKDailyAveragePriceStage
+			SET strFeedStatus = 'Processed'
+				,strMessage = 'Success'
+			WHERE intDailyAveragePriceStageId = @intDailyAveragePriceStageId
 
 			IF @intTransactionCount = 0
 				COMMIT TRANSACTION

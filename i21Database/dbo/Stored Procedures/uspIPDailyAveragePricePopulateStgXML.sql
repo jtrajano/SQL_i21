@@ -21,6 +21,9 @@ BEGIN TRY
 		,@strAdditionalInfo NVARCHAR(MAX)
 		,@strDetailXML NVARCHAR(MAX)
 		,@strAverageNo NVARCHAR(50)
+		,@intCompanyId int
+		,@intTransactionId int
+		,@intScreenId int
 
 	SET @intDailyAveragePriceStageId = NULL
 	SET @strHeaderXML = NULL
@@ -29,8 +32,18 @@ BEGIN TRY
 	SET @strAverageNo = NULL
 
 	SELECT @strAverageNo = strAverageNo
+		,@intCompanyId = intCompanyId
 	FROM tblRKDailyAveragePrice
 	WHERE intDailyAveragePriceId = @intDailyAveragePriceId
+
+	SELECT @intScreenId = intScreenId
+	FROM tblSMScreen
+	WHERE strNamespace = 'RiskManagement.view.DailyAveragePrice'
+ 
+	SELECT @intTransactionId = intTransactionId 
+	FROM tblSMTransaction
+	WHERE intRecordId = @intDailyAveragePriceId
+		AND intScreenId = @intScreenId
 
 	-------------------------Header-----------------------------------------------------------
 	SELECT @strHeaderCondition = 'intDailyAveragePriceId = ' + LTRIM(@intDailyAveragePriceId)
@@ -94,6 +107,8 @@ BEGIN TRY
 		,strTransactionType
 		,intToBookId
 		,strFromCompanyName
+		,intTransactionId
+		,intCompanyId
 		)
 	SELECT intDailyAveragePriceId = @intDailyAveragePriceId
 		,strAverageNo = @strAverageNo
@@ -107,6 +122,8 @@ BEGIN TRY
 		,strTransactionType = @strToTransactionType
 		,intToBookId = @intToBookId
 		,strFromCompanyName = @strFromCompanyName
+		,intTransactionId = @intTransactionId
+		,intCompanyId = @intCompanyId
 END TRY
 
 BEGIN CATCH

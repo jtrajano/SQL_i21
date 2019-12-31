@@ -20,5 +20,7 @@
 	intNewSampleId			INT,
 	strNewSampleNumber		NVARCHAR(100) COLLATE Latin1_General_CI_AS,
 	strNewSampleTypeName	NVARCHAR(100) COLLATE Latin1_General_CI_AS,
-	ysnMailSent				BIT CONSTRAINT DF_tblQMSampleStage_ysnMailSent DEFAULT 0
+	ysnMailSent				BIT CONSTRAINT DF_tblQMSampleStage_ysnMailSent DEFAULT 0,
+	intTransactionId		INT,
+	intCompanyId			INT
 )

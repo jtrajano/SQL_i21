@@ -14,6 +14,10 @@ BEGIN TRY
 	DECLARE @intSampleId INT
 	DECLARE @intSampleRefId INT
 		,@strRowState NVARCHAR(100)
+		,@intTransactionId INT
+		,@intCompanyId INT
+		,@intTransactionRefId INT
+		,@intCompanyRefId INT
 
 	SELECT @intSampleAcknowledgementStageId = MIN(intSampleAcknowledgementStageId)
 	FROM tblQMSampleAcknowledgementStage
@@ -31,12 +35,20 @@ BEGIN TRY
 			,@intSampleRefId = NULL
 			,@strSampleNumber = NULL
 			,@strRowState = NULL
+			,@intTransactionId = NULL
+			,@intCompanyId = NULL
+			,@intTransactionRefId = NULL
+			,@intCompanyRefId = NULL
 
 		SELECT @strAckHeaderXML = strAckHeaderXML
 			,@strAckDetailXML = strAckDetailXML
 			,@strAckTestResultXML = strAckTestResultXML
 			,@strTransactionType = strTransactionType
 			,@strRowState = strRowState
+			,@intTransactionId = intTransactionId
+			,@intCompanyId = intCompanyId
+			,@intTransactionRefId = intTransactionRefId
+			,@intCompanyRefId = intCompanyRefId
 		FROM tblQMSampleAcknowledgementStage
 		WHERE intSampleAcknowledgementStageId = @intSampleAcknowledgementStageId
 
@@ -117,6 +129,10 @@ BEGIN TRY
 			SET strFeedStatus = 'Ack Processed'
 			WHERE intSampleAcknowledgementStageId = @intSampleAcknowledgementStageId
 		END
+
+		EXECUTE dbo.uspSMInterCompanyUpdateMapping @currentTransactionId = @intTransactionId
+			,@referenceTransactionId = @intTransactionRefId
+			,@referenceCompanyId = @intCompanyRefId
 
 		SELECT @intSampleAcknowledgementStageId = MIN(intSampleAcknowledgementStageId)
 		FROM tblQMSampleAcknowledgementStage

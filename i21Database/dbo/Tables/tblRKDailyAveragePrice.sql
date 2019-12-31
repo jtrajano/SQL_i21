@@ -7,6 +7,7 @@
     [intSubBookId] INT NULL, 
 	[ysnPosted] BIT NULL DEFAULT((0)),
 	[intDailyAveragePriceRefId] INT NULL,
+	intCompanyId INT NULL,
     [intConcurrencyId] INT NOT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblRKDailyAveragePrice] PRIMARY KEY ([intDailyAveragePriceId]), 
     CONSTRAINT [FK_tblRKDailyAveragePrice_tblCTBook] FOREIGN KEY ([intBookId]) REFERENCES [tblCTBook]([intBookId]), 

@@ -16,5 +16,7 @@
 	strTransactionType			NVARCHAR(100) COLLATE Latin1_General_CI_AS,
 	intToBookId					INT,
 	strFromCompanyName			NVARCHAR(150) COLLATE Latin1_General_CI_AS,
-	ysnMailSent					BIT CONSTRAINT DF_tblRKDailyAveragePriceStage_ysnMailSent DEFAULT 0
+	ysnMailSent					BIT CONSTRAINT DF_tblRKDailyAveragePriceStage_ysnMailSent DEFAULT 0,
+	intTransactionId			INT,
+	intCompanyId				INT
 )

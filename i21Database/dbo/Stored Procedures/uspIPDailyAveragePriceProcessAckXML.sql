@@ -12,6 +12,10 @@ BEGIN TRY
 	DECLARE @intDailyAveragePriceId INT
 	DECLARE @intDailyAveragePriceRefId INT
 		,@strRowState NVARCHAR(100)
+		,@intTransactionId INT
+		,@intCompanyId INT
+		,@intTransactionRefId INT
+		,@intCompanyRefId INT
 
 	SELECT @intDailyAveragePriceAckStageId = MIN(intDailyAveragePriceAckStageId)
 	FROM tblRKDailyAveragePriceAckStage
@@ -27,11 +31,19 @@ BEGIN TRY
 			,@intDailyAveragePriceId = NULL
 			,@intDailyAveragePriceRefId = NULL
 			,@strRowState = NULL
+			,@intTransactionId = NULL
+			,@intCompanyId = NULL
+			,@intTransactionRefId = NULL
+			,@intCompanyRefId = NULL
 
 		SELECT @strAckHeaderXML = strAckHeaderXML
 			,@strAckDetailXML = strAckDetailXML
 			,@strTransactionType = strTransactionType
 			,@strRowState = strRowState
+			,@intTransactionId = intTransactionId
+			,@intCompanyId = intCompanyId
+			,@intTransactionRefId = intTransactionRefId
+			,@intCompanyRefId = intCompanyRefId
 		FROM tblRKDailyAveragePriceAckStage
 		WHERE intDailyAveragePriceAckStageId = @intDailyAveragePriceAckStageId
 
@@ -93,6 +105,10 @@ BEGIN TRY
 			SET strFeedStatus = 'Ack Processed'
 			WHERE intDailyAveragePriceAckStageId = @intDailyAveragePriceAckStageId
 		END
+
+		EXECUTE dbo.uspSMInterCompanyUpdateMapping @currentTransactionId = @intTransactionId
+			,@referenceTransactionId = @intTransactionRefId
+			,@referenceCompanyId = @intCompanyRefId
 
 		SELECT @intDailyAveragePriceAckStageId = MIN(intDailyAveragePriceAckStageId)
 		FROM tblRKDailyAveragePriceAckStage

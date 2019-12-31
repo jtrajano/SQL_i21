@@ -20,6 +20,9 @@ BEGIN TRY
 		,@intSampleStageId INT
 		,@intMultiCompanyId INT
 		,@strObjectName NVARCHAR(50)
+		,@intCompanyId int
+		,@intTransactionId int
+		,@intScreenId int
 
 	SET @intSampleStageId = NULL
 	SET @strSampleNumber = NULL
@@ -27,8 +30,18 @@ BEGIN TRY
 	SET @strHeaderCondition = NULL
 
 	SELECT @strSampleNumber = strSampleNumber
+		,@intCompanyId = intCompanyId
 	FROM tblQMSample
 	WHERE intSampleId = @intSampleId
+
+	SELECT @intScreenId = intScreenId
+	FROM tblSMScreen
+	WHERE strNamespace = 'Quality.view.QualitySample'
+ 
+	SELECT @intTransactionId = intTransactionId 
+	FROM tblSMTransaction
+	WHERE intRecordId = @intSampleId
+		AND intScreenId = @intScreenId
 
 	-------------------------Header-----------------------------------------------------------
 	SELECT @strHeaderCondition = 'intSampleId = ' + LTRIM(@intSampleId)
@@ -80,6 +93,8 @@ BEGIN TRY
 		,intMultiCompanyId
 		,intToBookId
 		,strFromCompanyName
+		,intTransactionId
+		,intCompanyId
 		)
 	SELECT intSampleId = @intSampleId
 		,strSampleNumber = @strSampleNumber
@@ -93,6 +108,8 @@ BEGIN TRY
 		,intMultiCompanyId = @intToCompanyId
 		,intToBookId = @intToBookId
 		,strFromCompanyName = @strFromCompanyName
+		,intTransactionId = @intTransactionId
+		,intCompanyId = @intCompanyId
 END TRY
 
 BEGIN CATCH
