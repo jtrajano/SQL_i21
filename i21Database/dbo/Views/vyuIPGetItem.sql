@@ -185,6 +185,7 @@ SELECT I.[intItemId]
 	,M2MC.strM2MComputation
 	,UM1.strUnitMeasure AS strTonnageTaxUOM
 	,DS.strSourceName
+	,PItem.strItemNo as strPhysicalItemNo
 FROM tblICItem I
 LEFT JOIN tblICManufacturer M ON M.intManufacturerId = I.intManufacturerId
 LEFT JOIN tblICBrand B ON B.intBrandId = I.intBrandId
@@ -207,4 +208,5 @@ LEFT JOIN tblICLotStatus L ON L.intLotStatusId = I.intLotStatusId
 LEFT JOIN tblICM2MComputation M2MC ON M2MC.intM2MComputationId = I.intM2MComputationId
 LEFT JOIN tblICUnitMeasure UM1 ON UM1.intUnitMeasureId = I.intTonnageTaxUOMId
 LEFT JOIN tblICDataSource DS ON DS.intDataSourceId = I.intDataSourceId
+Left JOIN tblICItem PItem on PItem.intItemId=I.intPhysicalItem
 

@@ -100,7 +100,12 @@ BEGIN TRY
 		,@intTransactionRefId INT
 		,@intCompanyRefId INT
 		,@strDescription NVARCHAR(50)
-		,@intItemScreenId int
+		,@intItemScreenId INT
+		,@intItemLocationId INT
+		,@strLocationName NVARCHAR(50)
+		,@intLocationId INT
+		,@strPhysicalItemNo nvarchar(50)
+		,@intPhysicalItemId int
 
 	SELECT @intItemStageId = MIN(intItemStageId)
 	FROM tblICItemStage
@@ -223,6 +228,7 @@ BEGIN TRY
 				,@strTonnageTaxUOM = NULL
 				,@strSourceName = NULL
 				,@strItemNo = NULL
+				,@strPhysicalItemNo=NULL
 
 			SELECT @strManufacturer = strManufacturer
 				,@strBrandCode = strBrandCode
@@ -246,6 +252,7 @@ BEGIN TRY
 				,@strTonnageTaxUOM = strTonnageTaxUOM
 				,@strSourceName = strSourceName
 				,@strItemNo = strItemNo
+				,@strPhysicalItemNo=strPhysicalItemNo
 			FROM OPENXML(@idoc, 'vyuIPGetItems/vyuIPGetItem', 2) WITH (
 					strManufacturer NVARCHAR(50) Collate Latin1_General_CI_AS
 					,strBrandCode NVARCHAR(50) Collate Latin1_General_CI_AS
@@ -269,6 +276,7 @@ BEGIN TRY
 					,strTonnageTaxUOM NVARCHAR(50) Collate Latin1_General_CI_AS
 					,strSourceName NVARCHAR(50) Collate Latin1_General_CI_AS
 					,strItemNo NVARCHAR(50) Collate Latin1_General_CI_AS
+					,strPhysicalItemNo NVARCHAR(50) Collate Latin1_General_CI_AS
 					) x
 
 			SELECT @intManufacturerId = NULL
@@ -649,6 +657,24 @@ BEGIN TRY
 						)
 			END
 
+			SELECT @intPhysicalItemId = NULL
+
+			SELECT @intPhysicalItemId = intItemId
+			FROM tblICItem
+			WHERE strItemNo = @strPhysicalItemNo
+
+			IF @strPhysicalItemNo IS NOT NULL
+				AND @intPhysicalItemId IS NULL
+			BEGIN
+				SELECT @strErrorMessage = 'Physical Item ' + @strTonnageTaxUOM + ' is not available.'
+
+				RAISERROR (
+						@strErrorMessage
+						,16
+						,1
+						)
+			END
+
 			SELECT @intLastModifiedUserId = t.intEntityId
 			FROM tblEMEntity t
 			JOIN tblEMEntityType ET ON ET.intEntityId = t.intEntityId
@@ -676,9 +702,8 @@ BEGIN TRY
 				IF NOT EXISTS (
 						SELECT 1
 						FROM tblICItem
-						WHERE IsNULL(intItemId, 0) = @intItemId
+						WHERE IsNULL(intItemRefId, 0) = @intItemId
 						)
-					--WHERE IsNULL(intItemRefId, 0) = @intItemId
 					SELECT @strRowState = 'Added'
 				ELSE
 					SELECT @strRowState = 'Modified'
@@ -688,9 +713,8 @@ BEGIN TRY
 			BEGIN
 				DELETE
 				FROM tblICItem
-				WHERE intItemId = @intItemId
+				WHERE intItemRefId = @intItemId
 
-				--WHERE intItemRefId = @intItemId
 				EXEC sp_xml_removedocument @idoc
 
 				GOTO ext
@@ -862,8 +886,8 @@ BEGIN TRY
 					,intModifiedByUserId
 					,strServiceType
 					,intDataSourceId
+					,intItemRefId
 					)
-				--,intItemRefId
 				SELECT strItemNo
 					,strShortName
 					,strType
@@ -928,7 +952,7 @@ BEGIN TRY
 					,@intIngredientTag
 					,intHazmatTag
 					,strVolumeRebateGroup
-					,intPhysicalItem
+					,@intPhysicalItemId
 					,ysnExtendPickTicket
 					,ysnExportEDI
 					,ysnHazardMaterial
@@ -1027,7 +1051,7 @@ BEGIN TRY
 					,intModifiedByUserId
 					,strServiceType
 					,@intDataSourceId
-				--,intItemId
+					,intItemId
 				FROM OPENXML(@idoc, 'vyuIPGetItems/vyuIPGetItem', 2) WITH (
 						intItemId INT
 						,strItemNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
@@ -1094,7 +1118,6 @@ BEGIN TRY
 						,intIngredientTag INT
 						,intHazmatTag INT
 						,strVolumeRebateGroup NVARCHAR(50) COLLATE Latin1_General_CI_AS
-						,intPhysicalItem INT
 						,ysnExtendPickTicket BIT
 						,ysnExportEDI BIT
 						,ysnHazardMaterial BIT
@@ -1277,7 +1300,7 @@ BEGIN TRY
 					,intIngredientTag = @intIngredientTag
 					,intHazmatTag = x.intHazmatTag
 					,strVolumeRebateGroup = x.strVolumeRebateGroup
-					,intPhysicalItem = x.intPhysicalItem
+					,intPhysicalItem = @intPhysicalItemId
 					,ysnExtendPickTicket = x.ysnExtendPickTicket
 					,ysnExportEDI = x.ysnExportEDI
 					,ysnHazardMaterial = x.ysnHazardMaterial
@@ -1441,7 +1464,6 @@ BEGIN TRY
 						,intIngredientTag INT
 						,intHazmatTag INT
 						,strVolumeRebateGroup NVARCHAR(50) COLLATE Latin1_General_CI_AS
-						,intPhysicalItem INT
 						,ysnExtendPickTicket BIT
 						,ysnExportEDI BIT
 						,ysnHazardMaterial BIT
@@ -1541,12 +1563,12 @@ BEGIN TRY
 						,strServiceType NVARCHAR(50) COLLATE Latin1_General_CI_AS
 						,intDataSourceId TINYINT
 						) x
+				WHERE tblICItem.intItemRefId = @intItemId
 
-				--WHERE tblICItem.intItemRefId = @intItemId
 				SELECT @intNewItemId = intItemId
 					,@strItemNo = strItemNo
 				FROM tblICItem
-					--WHERE tblICItem.intItemRefId = @intItemId
+				WHERE tblICItem.intItemRefId = @intItemId
 			END
 
 			EXEC sp_xml_removedocument @idoc
@@ -2711,16 +2733,1041 @@ BEGIN TRY
 
 			EXEC sp_xml_removedocument @idoc
 
+			------------------Item Location------------------------------------------------------
+			DECLARE @strVendorId NVARCHAR(50)
+				,@strIssueUnitMeasure NVARCHAR(50)
+				,@strReceiveUnitMeasure NVARCHAR(50)
+				,@strCountGroup NVARCHAR(50)
+				,@strShipVia NVARCHAR(100)
+				,@strStorageLocation NVARCHAR(100)
+				,@strSubLocationName NVARCHAR(100)
+				,@intCompanyLocationSubLocationId INT
+				,@intStorageLocationId INT
+				,@intShipViaId INT
+				,@intCountGroupId INT
+				,@intReceiveUnitMeasureId INT
+				,@intIssueUnitMeasureId INT
+				,@intReceiveItemUOMId INT
+				,@intIssueItemUOMId INT
+				,@intVendorId INT
+
+			EXEC sp_xml_preparedocument @idoc OUTPUT
+				,@strItemLocationXML
+
+			DECLARE @tblICItemLocation TABLE (
+				intItemLocationId INT identity(1, 1)
+				,strDescription NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
+				,intCostingMethod INT
+				,intAllowNegativeInventory INT
+				,intGrossUOMId INT
+				,intFamilyId INT
+				,intClassId INT
+				,intProductCodeId INT
+				,intFuelTankId INT
+				,strPassportFuelId1 NVARCHAR(50) COLLATE Latin1_General_CI_AS
+				,strPassportFuelId2 NVARCHAR(50) COLLATE Latin1_General_CI_AS
+				,strPassportFuelId3 NVARCHAR(50) COLLATE Latin1_General_CI_AS
+				,ysnTaxFlag1 BIT
+				,ysnTaxFlag2 BIT
+				,ysnTaxFlag3 BIT
+				,ysnTaxFlag4 BIT
+				,ysnPromotionalItem BIT
+				,intMixMatchId INT
+				,ysnDepositRequired BIT
+				,intDepositPLUId INT
+				,intBottleDepositNo INT
+				,ysnSaleable BIT
+				,ysnQuantityRequired BIT
+				,ysnScaleItem BIT
+				,ysnFoodStampable BIT
+				,ysnReturnable BIT
+				,ysnPrePriced BIT
+				,ysnOpenPricePLU BIT
+				,ysnLinkedItem BIT
+				,strVendorCategory NVARCHAR(50)
+				,ysnCountBySINo BIT
+				,strSerialNoBegin NVARCHAR(50) COLLATE Latin1_General_CI_AS
+				,strSerialNoEnd NVARCHAR(50) COLLATE Latin1_General_CI_AS
+				,ysnIdRequiredLiquor BIT
+				,ysnIdRequiredCigarette BIT
+				,intMinimumAge INT
+				,ysnApplyBlueLaw1 BIT
+				,ysnApplyBlueLaw2 BIT
+				,ysnCarWash BIT
+				,intItemTypeCode INT
+				,intItemTypeSubCode INT
+				,ysnAutoCalculateFreight BIT
+				,intFreightMethodId INT
+				,dblFreightRate NUMERIC(18, 6)
+				,intShipViaId INT
+				,intNegativeInventory INT
+				,dblReorderPoint NUMERIC(18, 6)
+				,dblMinOrder NUMERIC(18, 6)
+				,dblSuggestedQty NUMERIC(18, 6)
+				,dblLeadTime NUMERIC(18, 6)
+				,strCounted NVARCHAR(50) COLLATE Latin1_General_CI_AS
+				,ysnCountedDaily BIT
+				,intAllowZeroCostTypeId INT
+				,ysnLockedInventory BIT
+				,ysnStorageUnitRequired BIT
+				,strStorageUnitNo NVARCHAR(100) COLLATE Latin1_General_CI_AS
+				,intCostAdjustmentType INT
+				,intSort INT
+				,intConcurrencyId INT
+				,dtmDateCreated DATETIME
+				,dtmDateModified DATETIME
+				,strCreatedBy NVARCHAR(100) COLLATE Latin1_General_CI_AS
+				,strModifiedBy NVARCHAR(100) COLLATE Latin1_General_CI_AS
+				,strVendorId NVARCHAR(50) COLLATE Latin1_General_CI_AS
+				,strLocationName NVARCHAR(50) COLLATE Latin1_General_CI_AS
+				,strIssueUnitMeasure NVARCHAR(50) COLLATE Latin1_General_CI_AS
+				,strReceiveUnitMeasure NVARCHAR(50) COLLATE Latin1_General_CI_AS
+				,strCountGroup NVARCHAR(50) COLLATE Latin1_General_CI_AS
+				,strShipVia NVARCHAR(100) COLLATE Latin1_General_CI_AS
+				,strStorageLocation NVARCHAR(100) COLLATE Latin1_General_CI_AS
+				,strSubLocationName NVARCHAR(100) COLLATE Latin1_General_CI_AS
+				,strSourceName NVARCHAR(200) COLLATE Latin1_General_CI_AS
+				)
+			DECLARE @tblICFinalItemLocation TABLE (
+				intItemId INT NOT NULL
+				,intLocationId INT NULL
+				,intVendorId INT NULL
+				,strDescription NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
+				,intCostingMethod INT NULL
+				,intAllowNegativeInventory INT NOT NULL DEFAULT((3))
+				,intSubLocationId INT NULL
+				,intStorageLocationId INT NULL
+				,intIssueUOMId INT NULL
+				,intReceiveUOMId INT NULL
+				,intGrossUOMId INT NULL
+				,intFamilyId INT NULL
+				,intClassId INT NULL
+				,intProductCodeId INT NULL
+				,intFuelTankId INT NULL
+				,strPassportFuelId1 NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+				,strPassportFuelId2 NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+				,strPassportFuelId3 NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+				,ysnTaxFlag1 BIT NULL
+				,ysnTaxFlag2 BIT NULL
+				,ysnTaxFlag3 BIT NULL
+				,ysnTaxFlag4 BIT NULL
+				,ysnPromotionalItem BIT NULL
+				,intMixMatchId INT NULL
+				,ysnDepositRequired BIT NULL
+				,intDepositPLUId INT NULL
+				,intBottleDepositNo INT NULL
+				,ysnSaleable BIT NULL
+				,ysnQuantityRequired BIT NULL
+				,ysnScaleItem BIT NULL
+				,ysnFoodStampable BIT NULL
+				,ysnReturnable BIT NULL
+				,ysnPrePriced BIT NULL
+				,ysnOpenPricePLU BIT NULL
+				,ysnLinkedItem BIT NULL
+				,strVendorCategory NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+				,ysnCountBySINo BIT NULL
+				,strSerialNoBegin NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+				,strSerialNoEnd NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+				,ysnIdRequiredLiquor BIT NULL
+				,ysnIdRequiredCigarette BIT NULL
+				,intMinimumAge INT NULL
+				,ysnApplyBlueLaw1 BIT NULL
+				,ysnApplyBlueLaw2 BIT NULL
+				,ysnCarWash BIT NULL
+				,intItemTypeCode INT NULL
+				,intItemTypeSubCode INT NULL
+				,ysnAutoCalculateFreight BIT NULL
+				,intFreightMethodId INT NULL
+				,dblFreightRate NUMERIC(18, 6) NULL DEFAULT((0))
+				,intShipViaId INT NULL
+				,intNegativeInventory INT NULL DEFAULT((3))
+				,dblReorderPoint NUMERIC(18, 6) NULL DEFAULT((0))
+				,dblMinOrder NUMERIC(18, 6) NULL DEFAULT((0))
+				,dblSuggestedQty NUMERIC(18, 6) NULL DEFAULT((0))
+				,dblLeadTime NUMERIC(18, 6) NULL DEFAULT((0))
+				,strCounted NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+				,intCountGroupId INT NULL
+				,ysnCountedDaily BIT NULL DEFAULT((0))
+				,intAllowZeroCostTypeId INT NULL
+				,-- 1 OR NULL = No, 2 = Yes, 3 = Yes but warn user
+				ysnLockedInventory BIT NULL DEFAULT((0))
+				,ysnStorageUnitRequired BIT NULL DEFAULT((1))
+				,strStorageUnitNo NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
+				,intCostAdjustmentType TINYINT NULL
+				,intSort INT NULL
+				,intConcurrencyId INT NULL DEFAULT((0))
+				,dtmDateCreated DATETIME NULL
+				,dtmDateModified DATETIME NULL
+				,intCreatedByUserId INT NULL
+				,intModifiedByUserId INT NULL
+				,intDataSourceId TINYINT NULL
+				)
+
+			INSERT INTO @tblICItemLocation (
+				strDescription
+				,intCostingMethod
+				,intAllowNegativeInventory
+				,intGrossUOMId
+				,intFamilyId
+				,intClassId
+				,intProductCodeId
+				,intFuelTankId
+				,strPassportFuelId1
+				,strPassportFuelId2
+				,strPassportFuelId3
+				,ysnTaxFlag1
+				,ysnTaxFlag2
+				,ysnTaxFlag3
+				,ysnTaxFlag4
+				,ysnPromotionalItem
+				,intMixMatchId
+				,ysnDepositRequired
+				,intDepositPLUId
+				,intBottleDepositNo
+				,ysnSaleable
+				,ysnQuantityRequired
+				,ysnScaleItem
+				,ysnFoodStampable
+				,ysnReturnable
+				,ysnPrePriced
+				,ysnOpenPricePLU
+				,ysnLinkedItem
+				,strVendorCategory
+				,ysnCountBySINo
+				,strSerialNoBegin
+				,strSerialNoEnd
+				,ysnIdRequiredLiquor
+				,ysnIdRequiredCigarette
+				,intMinimumAge
+				,ysnApplyBlueLaw1
+				,ysnApplyBlueLaw2
+				,ysnCarWash
+				,intItemTypeCode
+				,intItemTypeSubCode
+				,ysnAutoCalculateFreight
+				,intFreightMethodId
+				,dblFreightRate
+				,intShipViaId
+				,intNegativeInventory
+				,dblReorderPoint
+				,dblMinOrder
+				,dblSuggestedQty
+				,dblLeadTime
+				,strCounted
+				,ysnCountedDaily
+				,intAllowZeroCostTypeId
+				,ysnLockedInventory
+				,ysnStorageUnitRequired
+				,strStorageUnitNo
+				,intCostAdjustmentType
+				,intSort
+				,intConcurrencyId
+				,dtmDateCreated
+				,dtmDateModified
+				,strCreatedBy
+				,strModifiedBy
+				,strVendorId
+				,strLocationName
+				,strIssueUnitMeasure
+				,strReceiveUnitMeasure
+				,strCountGroup
+				,strShipVia
+				,strStorageLocation
+				,strSubLocationName
+				,strSourceName
+				)
+			SELECT strDescription
+				,intCostingMethod
+				,intAllowNegativeInventory
+				,intGrossUOMId
+				,intFamilyId
+				,intClassId
+				,intProductCodeId
+				,intFuelTankId
+				,strPassportFuelId1
+				,strPassportFuelId2
+				,strPassportFuelId3
+				,ysnTaxFlag1
+				,ysnTaxFlag2
+				,ysnTaxFlag3
+				,ysnTaxFlag4
+				,ysnPromotionalItem
+				,intMixMatchId
+				,ysnDepositRequired
+				,intDepositPLUId
+				,intBottleDepositNo
+				,ysnSaleable
+				,ysnQuantityRequired
+				,ysnScaleItem
+				,ysnFoodStampable
+				,ysnReturnable
+				,ysnPrePriced
+				,ysnOpenPricePLU
+				,ysnLinkedItem
+				,strVendorCategory
+				,ysnCountBySINo
+				,strSerialNoBegin
+				,strSerialNoEnd
+				,ysnIdRequiredLiquor
+				,ysnIdRequiredCigarette
+				,intMinimumAge
+				,ysnApplyBlueLaw1
+				,ysnApplyBlueLaw2
+				,ysnCarWash
+				,intItemTypeCode
+				,intItemTypeSubCode
+				,ysnAutoCalculateFreight
+				,intFreightMethodId
+				,dblFreightRate
+				,intShipViaId
+				,intNegativeInventory
+				,dblReorderPoint
+				,dblMinOrder
+				,dblSuggestedQty
+				,dblLeadTime
+				,strCounted
+				,ysnCountedDaily
+				,intAllowZeroCostTypeId
+				,ysnLockedInventory
+				,ysnStorageUnitRequired
+				,strStorageUnitNo
+				,intCostAdjustmentType
+				,intSort
+				,intConcurrencyId
+				,dtmDateCreated
+				,dtmDateModified
+				,strCreatedBy
+				,strModifiedBy
+				,strVendorId
+				,strLocationName
+				,strIssueUnitMeasure
+				,strReceiveUnitMeasure
+				,strCountGroup
+				,strShipVia
+				,strStorageLocation
+				,strSubLocationName
+				,strSourceName
+			FROM OPENXML(@idoc, 'vyuIPGetItemLocations/vyuIPGetItemLocation', 2) WITH (
+					strDescription NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
+					,intCostingMethod INT
+					,intAllowNegativeInventory INT
+					,intGrossUOMId INT
+					,intFamilyId INT
+					,intClassId INT
+					,intProductCodeId INT
+					,intFuelTankId INT
+					,strPassportFuelId1 NVARCHAR(50) COLLATE Latin1_General_CI_AS
+					,strPassportFuelId2 NVARCHAR(50) COLLATE Latin1_General_CI_AS
+					,strPassportFuelId3 NVARCHAR(50) COLLATE Latin1_General_CI_AS
+					,ysnTaxFlag1 BIT
+					,ysnTaxFlag2 BIT
+					,ysnTaxFlag3 BIT
+					,ysnTaxFlag4 BIT
+					,ysnPromotionalItem BIT
+					,intMixMatchId INT
+					,ysnDepositRequired BIT
+					,intDepositPLUId INT
+					,intBottleDepositNo INT
+					,ysnSaleable BIT
+					,ysnQuantityRequired BIT
+					,ysnScaleItem BIT
+					,ysnFoodStampable BIT
+					,ysnReturnable BIT
+					,ysnPrePriced BIT
+					,ysnOpenPricePLU BIT
+					,ysnLinkedItem BIT
+					,strVendorCategory NVARCHAR(50)
+					,ysnCountBySINo BIT
+					,strSerialNoBegin NVARCHAR(50) COLLATE Latin1_General_CI_AS
+					,strSerialNoEnd NVARCHAR(50) COLLATE Latin1_General_CI_AS
+					,ysnIdRequiredLiquor BIT
+					,ysnIdRequiredCigarette BIT
+					,intMinimumAge INT
+					,ysnApplyBlueLaw1 BIT
+					,ysnApplyBlueLaw2 BIT
+					,ysnCarWash BIT
+					,intItemTypeCode INT
+					,intItemTypeSubCode INT
+					,ysnAutoCalculateFreight BIT
+					,intFreightMethodId INT
+					,dblFreightRate NUMERIC(18, 6)
+					,intShipViaId INT
+					,intNegativeInventory INT
+					,dblReorderPoint NUMERIC(18, 6)
+					,dblMinOrder NUMERIC(18, 6)
+					,dblSuggestedQty NUMERIC(18, 6)
+					,dblLeadTime NUMERIC(18, 6)
+					,strCounted NVARCHAR(50) COLLATE Latin1_General_CI_AS
+					,ysnCountedDaily BIT
+					,intAllowZeroCostTypeId INT
+					,ysnLockedInventory BIT
+					,ysnStorageUnitRequired BIT
+					,strStorageUnitNo NVARCHAR(100) COLLATE Latin1_General_CI_AS
+					,intCostAdjustmentType INT
+					,intSort INT
+					,intConcurrencyId INT
+					,dtmDateCreated DATETIME
+					,dtmDateModified DATETIME
+					,strCreatedBy NVARCHAR(100) COLLATE Latin1_General_CI_AS
+					,strModifiedBy NVARCHAR(100) COLLATE Latin1_General_CI_AS
+					,strVendorId NVARCHAR(50) COLLATE Latin1_General_CI_AS
+					,strLocationName NVARCHAR(50) COLLATE Latin1_General_CI_AS
+					,strIssueUnitMeasure NVARCHAR(50) COLLATE Latin1_General_CI_AS
+					,strReceiveUnitMeasure NVARCHAR(50) COLLATE Latin1_General_CI_AS
+					,strCountGroup NVARCHAR(50) COLLATE Latin1_General_CI_AS
+					,strShipVia NVARCHAR(100) COLLATE Latin1_General_CI_AS
+					,strStorageLocation NVARCHAR(100) COLLATE Latin1_General_CI_AS
+					,strSubLocationName NVARCHAR(100) COLLATE Latin1_General_CI_AS
+					,strSourceName NVARCHAR(200) COLLATE Latin1_General_CI_AS
+					)
+
+			SELECT @intItemLocationId = min(intItemLocationId)
+			FROM @tblICItemLocation
+
+			WHILE @intItemLocationId IS NOT NULL
+			BEGIN
+				SELECT @strCreatedBy = NULL
+					,@strModifiedBy = NULL
+					,@strVendorId = NULL
+					,@strLocationName = NULL
+					,@strIssueUnitMeasure = NULL
+					,@strReceiveUnitMeasure = NULL
+					,@strCountGroup = NULL
+					,@strShipVia = NULL
+					,@strStorageLocation = NULL
+					,@strSubLocationName = NULL
+					,@strSourceName = NULL
+
+				SELECT @strCreatedBy = strCreatedBy
+					,@strModifiedBy = strModifiedBy
+					,@strVendorId = strVendorId
+					,@strLocationName = strLocationName
+					,@strIssueUnitMeasure = strIssueUnitMeasure
+					,@strReceiveUnitMeasure = strReceiveUnitMeasure
+					,@strCountGroup = strCountGroup
+					,@strShipVia = strShipVia
+					,@strStorageLocation = strStorageLocation
+					,@strSubLocationName = strSubLocationName
+					,@strSourceName = strSourceName
+				FROM @tblICItemLocation
+				WHERE intItemLocationId = @intItemLocationId
+
+				SELECT @intDataSourceId = NULL
+
+				SELECT @intDataSourceId = intDataSourceId
+				FROM tblICDataSource
+				WHERE strSourceName = @strSourceName
+
+				IF @strSourceName IS NOT NULL
+					AND @intDataSourceId IS NULL
+				BEGIN
+					SELECT @strErrorMessage = 'Source Name ' + @strSourceName + ' is not available.'
+
+					RAISERROR (
+							@strErrorMessage
+							,16
+							,1
+							)
+				END
+
+				SELECT @intCompanyLocationSubLocationId = NULL
+
+				SELECT @intCompanyLocationSubLocationId = intCompanyLocationSubLocationId
+				FROM tblSMCompanyLocationSubLocation
+				WHERE strSubLocationName = @strSubLocationName
+
+				IF @strSubLocationName IS NOT NULL
+					AND @intCompanyLocationSubLocationId IS NULL
+				BEGIN
+					SELECT @strErrorMessage = 'Sub Location ' + @strSubLocationName + ' is not available.'
+
+					RAISERROR (
+							@strErrorMessage
+							,16
+							,1
+							)
+				END
+
+				SELECT @intStorageLocationId = NULL
+
+				SELECT @intStorageLocationId = intStorageLocationId
+				FROM tblICStorageLocation
+				WHERE strName = @strStorageLocation
+
+				IF @strStorageLocation IS NOT NULL
+					AND @intStorageLocationId IS NULL
+				BEGIN
+					SELECT @strErrorMessage = 'Storage Location ' + @strShipVia + ' is not available.'
+
+					RAISERROR (
+							@strErrorMessage
+							,16
+							,1
+							)
+				END
+
+				SELECT @intShipViaId = NULL
+
+				SELECT @intShipViaId = intEntityId
+				FROM tblSMShipVia
+				WHERE strShipVia = @strShipVia
+
+				IF @strShipVia IS NOT NULL
+					AND @intShipViaId IS NULL
+				BEGIN
+					SELECT @strErrorMessage = 'Ship Via ' + @strShipVia + ' is not available.'
+
+					RAISERROR (
+							@strErrorMessage
+							,16
+							,1
+							)
+				END
+
+				SELECT @intCountGroupId = NULL
+
+				SELECT @intCountGroupId = intCountGroupId
+				FROM tblICCountGroup
+				WHERE strCountGroup = @strCountGroup
+
+				IF @strCountGroup IS NOT NULL
+					AND @intCountGroupId IS NULL
+				BEGIN
+					SELECT @strErrorMessage = 'Count Group ' + @strCountGroup + ' is not available.'
+
+					RAISERROR (
+							@strErrorMessage
+							,16
+							,1
+							)
+				END
+
+				SELECT @intReceiveUnitMeasureId = NULL
+
+				SELECT @intReceiveUnitMeasureId = intUnitMeasureId
+				FROM tblICUnitMeasure
+				WHERE strUnitMeasure = @strReceiveUnitMeasure
+
+				IF @strReceiveUnitMeasure IS NOT NULL
+					AND @intReceiveUnitMeasureId IS NULL
+				BEGIN
+					SELECT @strErrorMessage = 'Unit Measure ' + @strReceiveUnitMeasure + ' is not available.'
+
+					RAISERROR (
+							@strErrorMessage
+							,16
+							,1
+							)
+				END
+
+				SELECT @intReceiveItemUOMId = NULL
+
+				SELECT @intReceiveItemUOMId = intItemUOMId
+				FROM tblICItemUOM
+				WHERE intItemId = @intNewItemId
+					AND intUnitMeasureId = @intReceiveUnitMeasureId
+
+				IF @strReceiveUnitMeasure IS NOT NULL
+					AND @intReceiveItemUOMId IS NULL
+				BEGIN
+					SELECT @strErrorMessage = 'Unit Measure ' + @strReceiveUnitMeasure + ' is not associated for the item ' + @strItemNo + '.'
+
+					RAISERROR (
+							@strErrorMessage
+							,16
+							,1
+							)
+				END
+
+				SELECT @intIssueUnitMeasureId = NULL
+
+				SELECT @intIssueUnitMeasureId = intUnitMeasureId
+				FROM tblICUnitMeasure
+				WHERE strUnitMeasure = @strIssueUnitMeasure
+
+				IF @strIssueUnitMeasure IS NOT NULL
+					AND @intIssueUnitMeasureId IS NULL
+				BEGIN
+					SELECT @strErrorMessage = 'Unit Measure ' + @strIssueUnitMeasure + ' is not available.'
+
+					RAISERROR (
+							@strErrorMessage
+							,16
+							,1
+							)
+				END
+
+				SELECT @intIssueItemUOMId = NULL
+
+				SELECT @intIssueItemUOMId = intItemUOMId
+				FROM tblICItemUOM
+				WHERE intItemId = @intNewItemId
+					AND intUnitMeasureId = @intIssueUnitMeasureId
+
+				IF @strIssueUnitMeasure IS NOT NULL
+					AND @intIssueItemUOMId IS NULL
+				BEGIN
+					SELECT @strErrorMessage = 'Unit Measure ' + @strIssueUnitMeasure + ' is not associated for the item ' + @strItemNo + '.'
+
+					RAISERROR (
+							@strErrorMessage
+							,16
+							,1
+							)
+				END
+
+				SELECT @intLocationId = NULL
+
+				SELECT @intLocationId = intCompanyLocationId
+				FROM tblSMCompanyLocation
+				WHERE strLocationName = @strLocationName
+
+				IF @strLocationName IS NOT NULL
+					AND @intLocationId IS NULL
+				BEGIN
+					SELECT @strErrorMessage = 'Location ' + @strLocationName + ' is not available.'
+
+					RAISERROR (
+							@strErrorMessage
+							,16
+							,1
+							)
+				END
+
+				SELECT @intVendorId = NULL
+
+				SELECT @intVendorId = intEntityId
+				FROM tblAPVendor
+				WHERE strVendorId = @strVendorId
+
+				IF @strVendorId IS NOT NULL
+					AND @intVendorId IS NULL
+				BEGIN
+					SELECT @strErrorMessage = 'Vendor ' + @strVendorId + ' is not available.'
+
+					RAISERROR (
+							@strErrorMessage
+							,16
+							,1
+							)
+				END
+
+				SELECT @intCreatedById = intEntityId
+				FROM tblSMUserSecurity
+				WHERE strUserName = @strCreatedBy
+
+				SELECT @intModifiedById = intEntityId
+				FROM tblSMUserSecurity
+				WHERE strUserName = @strModifiedBy
+
+				INSERT INTO @tblICFinalItemLocation (
+					intItemId
+					,intLocationId
+					,intVendorId
+					,strDescription
+					,intCostingMethod
+					,intAllowNegativeInventory
+					,intSubLocationId
+					,intStorageLocationId
+					,intIssueUOMId
+					,intReceiveUOMId
+					,intGrossUOMId
+					,intFamilyId
+					,intClassId
+					,intProductCodeId
+					,intFuelTankId
+					,strPassportFuelId1
+					,strPassportFuelId2
+					,strPassportFuelId3
+					,ysnTaxFlag1
+					,ysnTaxFlag2
+					,ysnTaxFlag3
+					,ysnTaxFlag4
+					,ysnPromotionalItem
+					,intMixMatchId
+					,ysnDepositRequired
+					,intDepositPLUId
+					,intBottleDepositNo
+					,ysnSaleable
+					,ysnQuantityRequired
+					,ysnScaleItem
+					,ysnFoodStampable
+					,ysnReturnable
+					,ysnPrePriced
+					,ysnOpenPricePLU
+					,ysnLinkedItem
+					,strVendorCategory
+					,ysnCountBySINo
+					,strSerialNoBegin
+					,strSerialNoEnd
+					,ysnIdRequiredLiquor
+					,ysnIdRequiredCigarette
+					,intMinimumAge
+					,ysnApplyBlueLaw1
+					,ysnApplyBlueLaw2
+					,ysnCarWash
+					,intItemTypeCode
+					,intItemTypeSubCode
+					,ysnAutoCalculateFreight
+					,intFreightMethodId
+					,dblFreightRate
+					,intShipViaId
+					,intNegativeInventory
+					,dblReorderPoint
+					,dblMinOrder
+					,dblSuggestedQty
+					,dblLeadTime
+					,strCounted
+					,intCountGroupId
+					,ysnCountedDaily
+					,intAllowZeroCostTypeId
+					,-- 1 OR NULL = No, 2 = Yes, 3 = Yes but warn user
+					ysnLockedInventory
+					,ysnStorageUnitRequired
+					,strStorageUnitNo
+					,intCostAdjustmentType
+					,intSort
+					,intConcurrencyId
+					,dtmDateCreated
+					,dtmDateModified
+					,intCreatedByUserId
+					,intModifiedByUserId
+					,intDataSourceId
+					)
+				SELECT @intNewItemId
+					,@intLocationId
+					,@intVendorId
+					,strDescription
+					,intCostingMethod
+					,intAllowNegativeInventory
+					,@intCompanyLocationSubLocationId
+					,@intStorageLocationId
+					,@intIssueItemUOMId
+					,@intReceiveItemUOMId
+					,intGrossUOMId
+					,intFamilyId
+					,intClassId
+					,intProductCodeId
+					,intFuelTankId
+					,strPassportFuelId1
+					,strPassportFuelId2
+					,strPassportFuelId3
+					,ysnTaxFlag1
+					,ysnTaxFlag2
+					,ysnTaxFlag3
+					,ysnTaxFlag4
+					,ysnPromotionalItem
+					,intMixMatchId
+					,ysnDepositRequired
+					,intDepositPLUId
+					,intBottleDepositNo
+					,ysnSaleable
+					,ysnQuantityRequired
+					,ysnScaleItem
+					,ysnFoodStampable
+					,ysnReturnable
+					,ysnPrePriced
+					,ysnOpenPricePLU
+					,ysnLinkedItem
+					,strVendorCategory
+					,ysnCountBySINo
+					,strSerialNoBegin
+					,strSerialNoEnd
+					,ysnIdRequiredLiquor
+					,ysnIdRequiredCigarette
+					,intMinimumAge
+					,ysnApplyBlueLaw1
+					,ysnApplyBlueLaw2
+					,ysnCarWash
+					,intItemTypeCode
+					,intItemTypeSubCode
+					,ysnAutoCalculateFreight
+					,intFreightMethodId
+					,dblFreightRate
+					,@intShipViaId
+					,intNegativeInventory
+					,dblReorderPoint
+					,dblMinOrder
+					,dblSuggestedQty
+					,dblLeadTime
+					,strCounted
+					,@intCountGroupId
+					,ysnCountedDaily
+					,intAllowZeroCostTypeId
+					,-- 1 OR NULL = No, 2 = Yes, 3 = Yes but warn user
+					ysnLockedInventory
+					,ysnStorageUnitRequired
+					,strStorageUnitNo
+					,intCostAdjustmentType
+					,intSort
+					,intConcurrencyId
+					,dtmDateCreated
+					,dtmDateModified
+					,@intCreatedById
+					,@intModifiedById
+					,@intDataSourceId
+				FROM @tblICItemLocation
+				WHERE intItemLocationId = @intItemLocationId
+
+				SELECT @intItemLocationId = min(intItemLocationId)
+				FROM @tblICItemLocation
+				WHERE intItemLocationId > @intItemLocationId
+			END
+
+			DELETE IA
+			FROM tblICItemLocation IA
+			WHERE IA.intItemId = @intNewItemId
+				AND NOT EXISTS (
+					SELECT *
+					FROM @tblICFinalItemLocation IA1
+					WHERE IA1.intItemId = IA.intItemId
+						AND IA1.intLocationId = IA.intLocationId
+					)
+
+			UPDATE IA1
+			SET intVendorId = @intVendorId
+				,strDescription = IA.strDescription
+				,intCostingMethod = IA.intCostingMethod
+				,intAllowNegativeInventory = IA.intAllowNegativeInventory
+				,intSubLocationId = @intCompanyLocationSubLocationId
+				,intStorageLocationId = @intStorageLocationId
+				,intIssueUOMId = @intIssueItemUOMId
+				,intReceiveUOMId = @intReceiveItemUOMId
+				,intGrossUOMId = IA.intGrossUOMId
+				,intFamilyId = IA.intFamilyId
+				,intClassId = IA.intClassId
+				,intProductCodeId = IA.intProductCodeId
+				,intFuelTankId = IA.intFuelTankId
+				,strPassportFuelId1 = IA.strPassportFuelId1
+				,strPassportFuelId2 = IA.strPassportFuelId2
+				,strPassportFuelId3 = IA.strPassportFuelId3
+				,ysnTaxFlag1 = IA.ysnTaxFlag1
+				,ysnTaxFlag2 = IA.ysnTaxFlag2
+				,ysnTaxFlag3 = IA.ysnTaxFlag3
+				,ysnTaxFlag4 = IA.ysnTaxFlag4
+				,ysnPromotionalItem = IA.ysnPromotionalItem
+				,intMixMatchId = IA.intMixMatchId
+				,ysnDepositRequired = IA.ysnDepositRequired
+				,intDepositPLUId = IA.intDepositPLUId
+				,intBottleDepositNo = IA.intBottleDepositNo
+				,ysnSaleable = IA.ysnSaleable
+				,ysnQuantityRequired = IA.ysnQuantityRequired
+				,ysnScaleItem = IA.ysnScaleItem
+				,ysnFoodStampable = IA.ysnFoodStampable
+				,ysnReturnable = IA.ysnReturnable
+				,ysnPrePriced = IA.ysnPrePriced
+				,ysnOpenPricePLU = IA.ysnOpenPricePLU
+				,ysnLinkedItem = IA.ysnLinkedItem
+				,strVendorCategory = IA.strVendorCategory
+				,ysnCountBySINo = IA.ysnCountBySINo
+				,strSerialNoBegin = IA.strSerialNoBegin
+				,strSerialNoEnd = IA.strSerialNoEnd
+				,ysnIdRequiredLiquor = IA.ysnIdRequiredLiquor
+				,ysnIdRequiredCigarette = IA.ysnIdRequiredCigarette
+				,intMinimumAge = IA.intMinimumAge
+				,ysnApplyBlueLaw1 = IA.ysnApplyBlueLaw1
+				,ysnApplyBlueLaw2 = IA.ysnApplyBlueLaw2
+				,ysnCarWash = IA.ysnCarWash
+				,intItemTypeCode = IA.intItemTypeCode
+				,intItemTypeSubCode = IA.intItemTypeSubCode
+				,ysnAutoCalculateFreight = IA.ysnAutoCalculateFreight
+				,intFreightMethodId = IA.intFreightMethodId
+				,dblFreightRate = IA.dblFreightRate
+				,intShipViaId = @intShipViaId
+				,intNegativeInventory = IA.intNegativeInventory
+				,dblReorderPoint = IA.dblReorderPoint
+				,dblMinOrder = IA.dblMinOrder
+				,dblSuggestedQty = IA.dblSuggestedQty
+				,dblLeadTime = IA.dblLeadTime
+				,strCounted = IA.strCounted
+				,intCountGroupId = @intCountGroupId
+				,ysnCountedDaily = IA.ysnCountedDaily
+				,intAllowZeroCostTypeId = IA.intAllowZeroCostTypeId
+				,-- 1 OR NULL = No, 2 = Yes, 3 = Yes but warn user
+				ysnLockedInventory = IA.ysnLockedInventory
+				,ysnStorageUnitRequired = IA.ysnStorageUnitRequired
+				,strStorageUnitNo = IA.strStorageUnitNo
+				,intCostAdjustmentType = IA.intCostAdjustmentType
+				,intSort = IA.intSort
+				,intConcurrencyId = IA.intConcurrencyId
+				,dtmDateCreated = IA.dtmDateCreated
+				,dtmDateModified = IA.dtmDateModified
+				,intCreatedByUserId = @intCreatedById
+				,intModifiedByUserId = @intModifiedById
+				,intDataSourceId = @intDataSourceId
+			FROM @tblICFinalItemLocation IA
+			JOIN tblICItemLocation IA1 ON IA1.intItemId = IA.intItemId
+				AND IA1.intLocationId = IA.intLocationId
+
+			INSERT INTO tblICItemLocation (
+				intItemId
+				,intLocationId
+				,intVendorId
+				,strDescription
+				,intCostingMethod
+				,intAllowNegativeInventory
+				,intSubLocationId
+				,intStorageLocationId
+				,intIssueUOMId
+				,intReceiveUOMId
+				,intGrossUOMId
+				,intFamilyId
+				,intClassId
+				,intProductCodeId
+				,intFuelTankId
+				,strPassportFuelId1
+				,strPassportFuelId2
+				,strPassportFuelId3
+				,ysnTaxFlag1
+				,ysnTaxFlag2
+				,ysnTaxFlag3
+				,ysnTaxFlag4
+				,ysnPromotionalItem
+				,intMixMatchId
+				,ysnDepositRequired
+				,intDepositPLUId
+				,intBottleDepositNo
+				,ysnSaleable
+				,ysnQuantityRequired
+				,ysnScaleItem
+				,ysnFoodStampable
+				,ysnReturnable
+				,ysnPrePriced
+				,ysnOpenPricePLU
+				,ysnLinkedItem
+				,strVendorCategory
+				,ysnCountBySINo
+				,strSerialNoBegin
+				,strSerialNoEnd
+				,ysnIdRequiredLiquor
+				,ysnIdRequiredCigarette
+				,intMinimumAge
+				,ysnApplyBlueLaw1
+				,ysnApplyBlueLaw2
+				,ysnCarWash
+				,intItemTypeCode
+				,intItemTypeSubCode
+				,ysnAutoCalculateFreight
+				,intFreightMethodId
+				,dblFreightRate
+				,intShipViaId
+				,intNegativeInventory
+				,dblReorderPoint
+				,dblMinOrder
+				,dblSuggestedQty
+				,dblLeadTime
+				,strCounted
+				,intCountGroupId
+				,ysnCountedDaily
+				,intAllowZeroCostTypeId
+				,-- 1 OR NULL = No, 2 = Yes, 3 = Yes but warn user
+				ysnLockedInventory
+				,ysnStorageUnitRequired
+				,strStorageUnitNo
+				,intCostAdjustmentType
+				,intSort
+				,intConcurrencyId
+				,dtmDateCreated
+				,dtmDateModified
+				,intCreatedByUserId
+				,intModifiedByUserId
+				,intDataSourceId
+				)
+			SELECT intItemId
+				,intLocationId
+				,intVendorId
+				,strDescription
+				,intCostingMethod
+				,intAllowNegativeInventory
+				,intSubLocationId
+				,intStorageLocationId
+				,intIssueUOMId
+				,intReceiveUOMId
+				,intGrossUOMId
+				,intFamilyId
+				,intClassId
+				,intProductCodeId
+				,intFuelTankId
+				,strPassportFuelId1
+				,strPassportFuelId2
+				,strPassportFuelId3
+				,ysnTaxFlag1
+				,ysnTaxFlag2
+				,ysnTaxFlag3
+				,ysnTaxFlag4
+				,ysnPromotionalItem
+				,intMixMatchId
+				,ysnDepositRequired
+				,intDepositPLUId
+				,intBottleDepositNo
+				,ysnSaleable
+				,ysnQuantityRequired
+				,ysnScaleItem
+				,ysnFoodStampable
+				,ysnReturnable
+				,ysnPrePriced
+				,ysnOpenPricePLU
+				,ysnLinkedItem
+				,strVendorCategory
+				,ysnCountBySINo
+				,strSerialNoBegin
+				,strSerialNoEnd
+				,ysnIdRequiredLiquor
+				,ysnIdRequiredCigarette
+				,intMinimumAge
+				,ysnApplyBlueLaw1
+				,ysnApplyBlueLaw2
+				,ysnCarWash
+				,intItemTypeCode
+				,intItemTypeSubCode
+				,ysnAutoCalculateFreight
+				,intFreightMethodId
+				,dblFreightRate
+				,intShipViaId
+				,intNegativeInventory
+				,dblReorderPoint
+				,dblMinOrder
+				,dblSuggestedQty
+				,dblLeadTime
+				,strCounted
+				,intCountGroupId
+				,ysnCountedDaily
+				,intAllowZeroCostTypeId
+				,-- 1 OR NULL = No, 2 = Yes, 3 = Yes but warn user
+				ysnLockedInventory
+				,ysnStorageUnitRequired
+				,strStorageUnitNo
+				,intCostAdjustmentType
+				,intSort
+				,intConcurrencyId
+				,dtmDateCreated
+				,dtmDateModified
+				,intCreatedByUserId
+				,intModifiedByUserId
+				,intDataSourceId
+			FROM @tblICFinalItemLocation IA
+			WHERE NOT EXISTS (
+					SELECT *
+					FROM tblICItemLocation IA1
+					WHERE IA1.intItemId = IA.intItemId
+						AND IA1.intLocationId = IA.intLocationId
+					)
+
+			DELETE
+			FROM @tblICFinalItemLocation
+
+			DELETE
+			FROM @tblICItemLocation
+
+			EXEC sp_xml_removedocument @idoc
+
 			------------------Item Commodity cost------------------------------------------------------
 			DECLARE @intItemCommodityCostId INT
-				,@strLocationName NVARCHAR(50)
 				,@intCommodityCostId INT
 				,@dblLastCost NUMERIC(38, 20)
 				,@dblStandardCost NUMERIC(38, 20)
 				,@dblAverageCost NUMERIC(38, 20)
 				,@dblEOMCost NUMERIC(38, 20)
-				,@intLocationId INT
-				,@intItemLocationId INT
 
 			EXEC sp_xml_preparedocument @idoc OUTPUT
 				,@strItemCommodityCostXML
@@ -4309,1034 +5356,6 @@ BEGIN TRY
 			LEFT JOIN tblSMUserSecurity US ON US.strUserName = x.strCreatedBy
 			LEFT JOIN tblSMUserSecurity US1 ON US1.strUserName = x.strModifiedBy
 			LEFT JOIN tblSMLicenseType LT ON LT.strCode = x.strCode
-
-			EXEC sp_xml_removedocument @idoc
-
-			------------------Item Location------------------------------------------------------
-			DECLARE @strVendorId NVARCHAR(50)
-				,@strIssueUnitMeasure NVARCHAR(50)
-				,@strReceiveUnitMeasure NVARCHAR(50)
-				,@strCountGroup NVARCHAR(50)
-				,@strShipVia NVARCHAR(100)
-				,@strStorageLocation NVARCHAR(100)
-				,@strSubLocationName NVARCHAR(100)
-				,@intCompanyLocationSubLocationId INT
-				,@intStorageLocationId INT
-				,@intShipViaId INT
-				,@intCountGroupId INT
-				,@intReceiveUnitMeasureId INT
-				,@intIssueUnitMeasureId INT
-				,@intReceiveItemUOMId INT
-				,@intIssueItemUOMId INT
-				,@intVendorId INT
-
-			EXEC sp_xml_preparedocument @idoc OUTPUT
-				,@strItemLocationXML
-
-			DECLARE @tblICItemLocation TABLE (
-				intItemLocationId INT identity(1, 1)
-				,strDescription NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
-				,intCostingMethod INT
-				,intAllowNegativeInventory INT
-				,intGrossUOMId INT
-				,intFamilyId INT
-				,intClassId INT
-				,intProductCodeId INT
-				,intFuelTankId INT
-				,strPassportFuelId1 NVARCHAR(50) COLLATE Latin1_General_CI_AS
-				,strPassportFuelId2 NVARCHAR(50) COLLATE Latin1_General_CI_AS
-				,strPassportFuelId3 NVARCHAR(50) COLLATE Latin1_General_CI_AS
-				,ysnTaxFlag1 BIT
-				,ysnTaxFlag2 BIT
-				,ysnTaxFlag3 BIT
-				,ysnTaxFlag4 BIT
-				,ysnPromotionalItem BIT
-				,intMixMatchId INT
-				,ysnDepositRequired BIT
-				,intDepositPLUId INT
-				,intBottleDepositNo INT
-				,ysnSaleable BIT
-				,ysnQuantityRequired BIT
-				,ysnScaleItem BIT
-				,ysnFoodStampable BIT
-				,ysnReturnable BIT
-				,ysnPrePriced BIT
-				,ysnOpenPricePLU BIT
-				,ysnLinkedItem BIT
-				,strVendorCategory NVARCHAR(50)
-				,ysnCountBySINo BIT
-				,strSerialNoBegin NVARCHAR(50) COLLATE Latin1_General_CI_AS
-				,strSerialNoEnd NVARCHAR(50) COLLATE Latin1_General_CI_AS
-				,ysnIdRequiredLiquor BIT
-				,ysnIdRequiredCigarette BIT
-				,intMinimumAge INT
-				,ysnApplyBlueLaw1 BIT
-				,ysnApplyBlueLaw2 BIT
-				,ysnCarWash BIT
-				,intItemTypeCode INT
-				,intItemTypeSubCode INT
-				,ysnAutoCalculateFreight BIT
-				,intFreightMethodId INT
-				,dblFreightRate NUMERIC(18, 6)
-				,intShipViaId INT
-				,intNegativeInventory INT
-				,dblReorderPoint NUMERIC(18, 6)
-				,dblMinOrder NUMERIC(18, 6)
-				,dblSuggestedQty NUMERIC(18, 6)
-				,dblLeadTime NUMERIC(18, 6)
-				,strCounted NVARCHAR(50) COLLATE Latin1_General_CI_AS
-				,ysnCountedDaily BIT
-				,intAllowZeroCostTypeId INT
-				,ysnLockedInventory BIT
-				,ysnStorageUnitRequired BIT
-				,strStorageUnitNo NVARCHAR(100) COLLATE Latin1_General_CI_AS
-				,intCostAdjustmentType INT
-				,intSort INT
-				,intConcurrencyId INT
-				,dtmDateCreated DATETIME
-				,dtmDateModified DATETIME
-				,strCreatedBy NVARCHAR(100) COLLATE Latin1_General_CI_AS
-				,strModifiedBy NVARCHAR(100) COLLATE Latin1_General_CI_AS
-				,strVendorId NVARCHAR(50) COLLATE Latin1_General_CI_AS
-				,strLocationName NVARCHAR(50) COLLATE Latin1_General_CI_AS
-				,strIssueUnitMeasure NVARCHAR(50) COLLATE Latin1_General_CI_AS
-				,strReceiveUnitMeasure NVARCHAR(50) COLLATE Latin1_General_CI_AS
-				,strCountGroup NVARCHAR(50) COLLATE Latin1_General_CI_AS
-				,strShipVia NVARCHAR(100) COLLATE Latin1_General_CI_AS
-				,strStorageLocation NVARCHAR(100) COLLATE Latin1_General_CI_AS
-				,strSubLocationName NVARCHAR(100) COLLATE Latin1_General_CI_AS
-				,strSourceName NVARCHAR(200) COLLATE Latin1_General_CI_AS
-				)
-			DECLARE @tblICFinalItemLocation TABLE (
-				intItemId INT NOT NULL
-				,intLocationId INT NULL
-				,intVendorId INT NULL
-				,strDescription NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
-				,intCostingMethod INT NULL
-				,intAllowNegativeInventory INT NOT NULL DEFAULT((3))
-				,intSubLocationId INT NULL
-				,intStorageLocationId INT NULL
-				,intIssueUOMId INT NULL
-				,intReceiveUOMId INT NULL
-				,intGrossUOMId INT NULL
-				,intFamilyId INT NULL
-				,intClassId INT NULL
-				,intProductCodeId INT NULL
-				,intFuelTankId INT NULL
-				,strPassportFuelId1 NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
-				,strPassportFuelId2 NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
-				,strPassportFuelId3 NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
-				,ysnTaxFlag1 BIT NULL
-				,ysnTaxFlag2 BIT NULL
-				,ysnTaxFlag3 BIT NULL
-				,ysnTaxFlag4 BIT NULL
-				,ysnPromotionalItem BIT NULL
-				,intMixMatchId INT NULL
-				,ysnDepositRequired BIT NULL
-				,intDepositPLUId INT NULL
-				,intBottleDepositNo INT NULL
-				,ysnSaleable BIT NULL
-				,ysnQuantityRequired BIT NULL
-				,ysnScaleItem BIT NULL
-				,ysnFoodStampable BIT NULL
-				,ysnReturnable BIT NULL
-				,ysnPrePriced BIT NULL
-				,ysnOpenPricePLU BIT NULL
-				,ysnLinkedItem BIT NULL
-				,strVendorCategory NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
-				,ysnCountBySINo BIT NULL
-				,strSerialNoBegin NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
-				,strSerialNoEnd NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
-				,ysnIdRequiredLiquor BIT NULL
-				,ysnIdRequiredCigarette BIT NULL
-				,intMinimumAge INT NULL
-				,ysnApplyBlueLaw1 BIT NULL
-				,ysnApplyBlueLaw2 BIT NULL
-				,ysnCarWash BIT NULL
-				,intItemTypeCode INT NULL
-				,intItemTypeSubCode INT NULL
-				,ysnAutoCalculateFreight BIT NULL
-				,intFreightMethodId INT NULL
-				,dblFreightRate NUMERIC(18, 6) NULL DEFAULT((0))
-				,intShipViaId INT NULL
-				,intNegativeInventory INT NULL DEFAULT((3))
-				,dblReorderPoint NUMERIC(18, 6) NULL DEFAULT((0))
-				,dblMinOrder NUMERIC(18, 6) NULL DEFAULT((0))
-				,dblSuggestedQty NUMERIC(18, 6) NULL DEFAULT((0))
-				,dblLeadTime NUMERIC(18, 6) NULL DEFAULT((0))
-				,strCounted NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
-				,intCountGroupId INT NULL
-				,ysnCountedDaily BIT NULL DEFAULT((0))
-				,intAllowZeroCostTypeId INT NULL
-				,-- 1 OR NULL = No, 2 = Yes, 3 = Yes but warn user
-				ysnLockedInventory BIT NULL DEFAULT((0))
-				,ysnStorageUnitRequired BIT NULL DEFAULT((1))
-				,strStorageUnitNo NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
-				,intCostAdjustmentType TINYINT NULL
-				,intSort INT NULL
-				,intConcurrencyId INT NULL DEFAULT((0))
-				,dtmDateCreated DATETIME NULL
-				,dtmDateModified DATETIME NULL
-				,intCreatedByUserId INT NULL
-				,intModifiedByUserId INT NULL
-				,intDataSourceId TINYINT NULL
-				)
-
-			INSERT INTO @tblICItemLocation (
-				strDescription
-				,intCostingMethod
-				,intAllowNegativeInventory
-				,intGrossUOMId
-				,intFamilyId
-				,intClassId
-				,intProductCodeId
-				,intFuelTankId
-				,strPassportFuelId1
-				,strPassportFuelId2
-				,strPassportFuelId3
-				,ysnTaxFlag1
-				,ysnTaxFlag2
-				,ysnTaxFlag3
-				,ysnTaxFlag4
-				,ysnPromotionalItem
-				,intMixMatchId
-				,ysnDepositRequired
-				,intDepositPLUId
-				,intBottleDepositNo
-				,ysnSaleable
-				,ysnQuantityRequired
-				,ysnScaleItem
-				,ysnFoodStampable
-				,ysnReturnable
-				,ysnPrePriced
-				,ysnOpenPricePLU
-				,ysnLinkedItem
-				,strVendorCategory
-				,ysnCountBySINo
-				,strSerialNoBegin
-				,strSerialNoEnd
-				,ysnIdRequiredLiquor
-				,ysnIdRequiredCigarette
-				,intMinimumAge
-				,ysnApplyBlueLaw1
-				,ysnApplyBlueLaw2
-				,ysnCarWash
-				,intItemTypeCode
-				,intItemTypeSubCode
-				,ysnAutoCalculateFreight
-				,intFreightMethodId
-				,dblFreightRate
-				,intShipViaId
-				,intNegativeInventory
-				,dblReorderPoint
-				,dblMinOrder
-				,dblSuggestedQty
-				,dblLeadTime
-				,strCounted
-				,ysnCountedDaily
-				,intAllowZeroCostTypeId
-				,ysnLockedInventory
-				,ysnStorageUnitRequired
-				,strStorageUnitNo
-				,intCostAdjustmentType
-				,intSort
-				,intConcurrencyId
-				,dtmDateCreated
-				,dtmDateModified
-				,strCreatedBy
-				,strModifiedBy
-				,strVendorId
-				,strLocationName
-				,strIssueUnitMeasure
-				,strReceiveUnitMeasure
-				,strCountGroup
-				,strShipVia
-				,strStorageLocation
-				,strSubLocationName
-				,strSourceName
-				)
-			SELECT strDescription
-				,intCostingMethod
-				,intAllowNegativeInventory
-				,intGrossUOMId
-				,intFamilyId
-				,intClassId
-				,intProductCodeId
-				,intFuelTankId
-				,strPassportFuelId1
-				,strPassportFuelId2
-				,strPassportFuelId3
-				,ysnTaxFlag1
-				,ysnTaxFlag2
-				,ysnTaxFlag3
-				,ysnTaxFlag4
-				,ysnPromotionalItem
-				,intMixMatchId
-				,ysnDepositRequired
-				,intDepositPLUId
-				,intBottleDepositNo
-				,ysnSaleable
-				,ysnQuantityRequired
-				,ysnScaleItem
-				,ysnFoodStampable
-				,ysnReturnable
-				,ysnPrePriced
-				,ysnOpenPricePLU
-				,ysnLinkedItem
-				,strVendorCategory
-				,ysnCountBySINo
-				,strSerialNoBegin
-				,strSerialNoEnd
-				,ysnIdRequiredLiquor
-				,ysnIdRequiredCigarette
-				,intMinimumAge
-				,ysnApplyBlueLaw1
-				,ysnApplyBlueLaw2
-				,ysnCarWash
-				,intItemTypeCode
-				,intItemTypeSubCode
-				,ysnAutoCalculateFreight
-				,intFreightMethodId
-				,dblFreightRate
-				,intShipViaId
-				,intNegativeInventory
-				,dblReorderPoint
-				,dblMinOrder
-				,dblSuggestedQty
-				,dblLeadTime
-				,strCounted
-				,ysnCountedDaily
-				,intAllowZeroCostTypeId
-				,ysnLockedInventory
-				,ysnStorageUnitRequired
-				,strStorageUnitNo
-				,intCostAdjustmentType
-				,intSort
-				,intConcurrencyId
-				,dtmDateCreated
-				,dtmDateModified
-				,strCreatedBy
-				,strModifiedBy
-				,strVendorId
-				,strLocationName
-				,strIssueUnitMeasure
-				,strReceiveUnitMeasure
-				,strCountGroup
-				,strShipVia
-				,strStorageLocation
-				,strSubLocationName
-				,strSourceName
-			FROM OPENXML(@idoc, 'vyuIPGetItemLocations/vyuIPGetItemLocation', 2) WITH (
-					strDescription NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
-					,intCostingMethod INT
-					,intAllowNegativeInventory INT
-					,intGrossUOMId INT
-					,intFamilyId INT
-					,intClassId INT
-					,intProductCodeId INT
-					,intFuelTankId INT
-					,strPassportFuelId1 NVARCHAR(50) COLLATE Latin1_General_CI_AS
-					,strPassportFuelId2 NVARCHAR(50) COLLATE Latin1_General_CI_AS
-					,strPassportFuelId3 NVARCHAR(50) COLLATE Latin1_General_CI_AS
-					,ysnTaxFlag1 BIT
-					,ysnTaxFlag2 BIT
-					,ysnTaxFlag3 BIT
-					,ysnTaxFlag4 BIT
-					,ysnPromotionalItem BIT
-					,intMixMatchId INT
-					,ysnDepositRequired BIT
-					,intDepositPLUId INT
-					,intBottleDepositNo INT
-					,ysnSaleable BIT
-					,ysnQuantityRequired BIT
-					,ysnScaleItem BIT
-					,ysnFoodStampable BIT
-					,ysnReturnable BIT
-					,ysnPrePriced BIT
-					,ysnOpenPricePLU BIT
-					,ysnLinkedItem BIT
-					,strVendorCategory NVARCHAR(50)
-					,ysnCountBySINo BIT
-					,strSerialNoBegin NVARCHAR(50) COLLATE Latin1_General_CI_AS
-					,strSerialNoEnd NVARCHAR(50) COLLATE Latin1_General_CI_AS
-					,ysnIdRequiredLiquor BIT
-					,ysnIdRequiredCigarette BIT
-					,intMinimumAge INT
-					,ysnApplyBlueLaw1 BIT
-					,ysnApplyBlueLaw2 BIT
-					,ysnCarWash BIT
-					,intItemTypeCode INT
-					,intItemTypeSubCode INT
-					,ysnAutoCalculateFreight BIT
-					,intFreightMethodId INT
-					,dblFreightRate NUMERIC(18, 6)
-					,intShipViaId INT
-					,intNegativeInventory INT
-					,dblReorderPoint NUMERIC(18, 6)
-					,dblMinOrder NUMERIC(18, 6)
-					,dblSuggestedQty NUMERIC(18, 6)
-					,dblLeadTime NUMERIC(18, 6)
-					,strCounted NVARCHAR(50) COLLATE Latin1_General_CI_AS
-					,ysnCountedDaily BIT
-					,intAllowZeroCostTypeId INT
-					,ysnLockedInventory BIT
-					,ysnStorageUnitRequired BIT
-					,strStorageUnitNo NVARCHAR(100) COLLATE Latin1_General_CI_AS
-					,intCostAdjustmentType INT
-					,intSort INT
-					,intConcurrencyId INT
-					,dtmDateCreated DATETIME
-					,dtmDateModified DATETIME
-					,strCreatedBy NVARCHAR(100) COLLATE Latin1_General_CI_AS
-					,strModifiedBy NVARCHAR(100) COLLATE Latin1_General_CI_AS
-					,strVendorId NVARCHAR(50) COLLATE Latin1_General_CI_AS
-					,strLocationName NVARCHAR(50) COLLATE Latin1_General_CI_AS
-					,strIssueUnitMeasure NVARCHAR(50) COLLATE Latin1_General_CI_AS
-					,strReceiveUnitMeasure NVARCHAR(50) COLLATE Latin1_General_CI_AS
-					,strCountGroup NVARCHAR(50) COLLATE Latin1_General_CI_AS
-					,strShipVia NVARCHAR(100) COLLATE Latin1_General_CI_AS
-					,strStorageLocation NVARCHAR(100) COLLATE Latin1_General_CI_AS
-					,strSubLocationName NVARCHAR(100) COLLATE Latin1_General_CI_AS
-					,strSourceName NVARCHAR(200) COLLATE Latin1_General_CI_AS
-					)
-
-			SELECT @intItemLocationId = min(intItemLocationId)
-			FROM @tblICItemLocation
-
-			WHILE @intItemLocationId IS NOT NULL
-			BEGIN
-				SELECT @strCreatedBy = NULL
-					,@strModifiedBy = NULL
-					,@strVendorId = NULL
-					,@strLocationName = NULL
-					,@strIssueUnitMeasure = NULL
-					,@strReceiveUnitMeasure = NULL
-					,@strCountGroup = NULL
-					,@strShipVia = NULL
-					,@strStorageLocation = NULL
-					,@strSubLocationName = NULL
-					,@strSourceName = NULL
-
-				SELECT @strCreatedBy = strCreatedBy
-					,@strModifiedBy = strModifiedBy
-					,@strVendorId = strVendorId
-					,@strLocationName = strLocationName
-					,@strIssueUnitMeasure = strIssueUnitMeasure
-					,@strReceiveUnitMeasure = strReceiveUnitMeasure
-					,@strCountGroup = strCountGroup
-					,@strShipVia = strShipVia
-					,@strStorageLocation = strStorageLocation
-					,@strSubLocationName = strSubLocationName
-					,@strSourceName = strSourceName
-				FROM @tblICItemLocation
-				WHERE intItemLocationId = @intItemLocationId
-
-				SELECT @intDataSourceId = NULL
-
-				SELECT @intDataSourceId = intDataSourceId
-				FROM tblICDataSource
-				WHERE strSourceName = @strSourceName
-
-				IF @strSourceName IS NOT NULL
-					AND @intDataSourceId IS NULL
-				BEGIN
-					SELECT @strErrorMessage = 'Source Name ' + @strSourceName + ' is not available.'
-
-					RAISERROR (
-							@strErrorMessage
-							,16
-							,1
-							)
-				END
-
-				SELECT @intCompanyLocationSubLocationId = NULL
-
-				SELECT @intCompanyLocationSubLocationId = intCompanyLocationSubLocationId
-				FROM tblSMCompanyLocationSubLocation
-				WHERE strSubLocationName = @strSubLocationName
-
-				IF @strSubLocationName IS NOT NULL
-					AND @intCompanyLocationSubLocationId IS NULL
-				BEGIN
-					SELECT @strErrorMessage = 'Sub Location ' + @strSubLocationName + ' is not available.'
-
-					RAISERROR (
-							@strErrorMessage
-							,16
-							,1
-							)
-				END
-
-				SELECT @intStorageLocationId = NULL
-
-				SELECT @intStorageLocationId = intStorageLocationId
-				FROM tblICStorageLocation
-				WHERE strName = @strStorageLocation
-
-				IF @strStorageLocation IS NOT NULL
-					AND @intStorageLocationId IS NULL
-				BEGIN
-					SELECT @strErrorMessage = 'Storage Location ' + @strShipVia + ' is not available.'
-
-					RAISERROR (
-							@strErrorMessage
-							,16
-							,1
-							)
-				END
-
-				SELECT @intShipViaId = NULL
-
-				SELECT @intShipViaId = intEntityId
-				FROM tblSMShipVia
-				WHERE strShipVia = @strShipVia
-
-				IF @strShipVia IS NOT NULL
-					AND @intShipViaId IS NULL
-				BEGIN
-					SELECT @strErrorMessage = 'Ship Via ' + @strShipVia + ' is not available.'
-
-					RAISERROR (
-							@strErrorMessage
-							,16
-							,1
-							)
-				END
-
-				SELECT @intCountGroupId = NULL
-
-				SELECT @intCountGroupId = intCountGroupId
-				FROM tblICCountGroup
-				WHERE strCountGroup = @strCountGroup
-
-				IF @strCountGroup IS NOT NULL
-					AND @intCountGroupId IS NULL
-				BEGIN
-					SELECT @strErrorMessage = 'Count Group ' + @strCountGroup + ' is not available.'
-
-					RAISERROR (
-							@strErrorMessage
-							,16
-							,1
-							)
-				END
-
-				SELECT @intReceiveUnitMeasureId = NULL
-
-				SELECT @intReceiveUnitMeasureId = intUnitMeasureId
-				FROM tblICUnitMeasure
-				WHERE strUnitMeasure = @strReceiveUnitMeasure
-
-				IF @strReceiveUnitMeasure IS NOT NULL
-					AND @intReceiveUnitMeasureId IS NULL
-				BEGIN
-					SELECT @strErrorMessage = 'Unit Measure ' + @strReceiveUnitMeasure + ' is not available.'
-
-					RAISERROR (
-							@strErrorMessage
-							,16
-							,1
-							)
-				END
-
-				SELECT @intReceiveItemUOMId = NULL
-
-				SELECT @intReceiveItemUOMId = intItemUOMId
-				FROM tblICItemUOM
-				WHERE intItemId = @intNewItemId
-					AND intUnitMeasureId = @intReceiveUnitMeasureId
-
-				IF @strReceiveUnitMeasure IS NOT NULL
-					AND @intReceiveItemUOMId IS NULL
-				BEGIN
-					SELECT @strErrorMessage = 'Unit Measure ' + @strReceiveUnitMeasure + ' is not associated for the item ' + @strItemNo + '.'
-
-					RAISERROR (
-							@strErrorMessage
-							,16
-							,1
-							)
-				END
-
-				SELECT @intIssueUnitMeasureId = NULL
-
-				SELECT @intIssueUnitMeasureId = intUnitMeasureId
-				FROM tblICUnitMeasure
-				WHERE strUnitMeasure = @strIssueUnitMeasure
-
-				IF @strIssueUnitMeasure IS NOT NULL
-					AND @intIssueUnitMeasureId IS NULL
-				BEGIN
-					SELECT @strErrorMessage = 'Unit Measure ' + @strIssueUnitMeasure + ' is not available.'
-
-					RAISERROR (
-							@strErrorMessage
-							,16
-							,1
-							)
-				END
-
-				SELECT @intIssueItemUOMId = NULL
-
-				SELECT @intIssueItemUOMId = intItemUOMId
-				FROM tblICItemUOM
-				WHERE intItemId = @intNewItemId
-					AND intUnitMeasureId = @intIssueUnitMeasureId
-
-				IF @strIssueUnitMeasure IS NOT NULL
-					AND @intIssueItemUOMId IS NULL
-				BEGIN
-					SELECT @strErrorMessage = 'Unit Measure ' + @strIssueUnitMeasure + ' is not associated for the item ' + @strItemNo + '.'
-
-					RAISERROR (
-							@strErrorMessage
-							,16
-							,1
-							)
-				END
-
-				SELECT @intLocationId = NULL
-
-				SELECT @intLocationId = intCompanyLocationId
-				FROM tblSMCompanyLocation
-				WHERE strLocationName = @strLocationName
-
-				IF @strLocationName IS NOT NULL
-					AND @intLocationId IS NULL
-				BEGIN
-					SELECT @strErrorMessage = 'Location ' + @strLocationName + ' is not available.'
-
-					RAISERROR (
-							@strErrorMessage
-							,16
-							,1
-							)
-				END
-
-				SELECT @intVendorId = NULL
-
-				SELECT @intVendorId = intEntityId
-				FROM tblAPVendor
-				WHERE strVendorId = @strVendorId
-
-				IF @strVendorId IS NOT NULL
-					AND @intVendorId IS NULL
-				BEGIN
-					SELECT @strErrorMessage = 'Vendor ' + @strVendorId + ' is not available.'
-
-					RAISERROR (
-							@strErrorMessage
-							,16
-							,1
-							)
-				END
-
-				SELECT @intCreatedById = intEntityId
-				FROM tblSMUserSecurity
-				WHERE strUserName = @strCreatedBy
-
-				SELECT @intModifiedById = intEntityId
-				FROM tblSMUserSecurity
-				WHERE strUserName = @strModifiedBy
-
-				INSERT INTO @tblICFinalItemLocation (
-					intItemId
-					,intLocationId
-					,intVendorId
-					,strDescription
-					,intCostingMethod
-					,intAllowNegativeInventory
-					,intSubLocationId
-					,intStorageLocationId
-					,intIssueUOMId
-					,intReceiveUOMId
-					,intGrossUOMId
-					,intFamilyId
-					,intClassId
-					,intProductCodeId
-					,intFuelTankId
-					,strPassportFuelId1
-					,strPassportFuelId2
-					,strPassportFuelId3
-					,ysnTaxFlag1
-					,ysnTaxFlag2
-					,ysnTaxFlag3
-					,ysnTaxFlag4
-					,ysnPromotionalItem
-					,intMixMatchId
-					,ysnDepositRequired
-					,intDepositPLUId
-					,intBottleDepositNo
-					,ysnSaleable
-					,ysnQuantityRequired
-					,ysnScaleItem
-					,ysnFoodStampable
-					,ysnReturnable
-					,ysnPrePriced
-					,ysnOpenPricePLU
-					,ysnLinkedItem
-					,strVendorCategory
-					,ysnCountBySINo
-					,strSerialNoBegin
-					,strSerialNoEnd
-					,ysnIdRequiredLiquor
-					,ysnIdRequiredCigarette
-					,intMinimumAge
-					,ysnApplyBlueLaw1
-					,ysnApplyBlueLaw2
-					,ysnCarWash
-					,intItemTypeCode
-					,intItemTypeSubCode
-					,ysnAutoCalculateFreight
-					,intFreightMethodId
-					,dblFreightRate
-					,intShipViaId
-					,intNegativeInventory
-					,dblReorderPoint
-					,dblMinOrder
-					,dblSuggestedQty
-					,dblLeadTime
-					,strCounted
-					,intCountGroupId
-					,ysnCountedDaily
-					,intAllowZeroCostTypeId
-					,-- 1 OR NULL = No, 2 = Yes, 3 = Yes but warn user
-					ysnLockedInventory
-					,ysnStorageUnitRequired
-					,strStorageUnitNo
-					,intCostAdjustmentType
-					,intSort
-					,intConcurrencyId
-					,dtmDateCreated
-					,dtmDateModified
-					,intCreatedByUserId
-					,intModifiedByUserId
-					,intDataSourceId
-					)
-				SELECT @intNewItemId
-					,@intLocationId
-					,@intVendorId
-					,strDescription
-					,intCostingMethod
-					,intAllowNegativeInventory
-					,@intCompanyLocationSubLocationId
-					,@intStorageLocationId
-					,@intIssueItemUOMId
-					,@intReceiveItemUOMId
-					,intGrossUOMId
-					,intFamilyId
-					,intClassId
-					,intProductCodeId
-					,intFuelTankId
-					,strPassportFuelId1
-					,strPassportFuelId2
-					,strPassportFuelId3
-					,ysnTaxFlag1
-					,ysnTaxFlag2
-					,ysnTaxFlag3
-					,ysnTaxFlag4
-					,ysnPromotionalItem
-					,intMixMatchId
-					,ysnDepositRequired
-					,intDepositPLUId
-					,intBottleDepositNo
-					,ysnSaleable
-					,ysnQuantityRequired
-					,ysnScaleItem
-					,ysnFoodStampable
-					,ysnReturnable
-					,ysnPrePriced
-					,ysnOpenPricePLU
-					,ysnLinkedItem
-					,strVendorCategory
-					,ysnCountBySINo
-					,strSerialNoBegin
-					,strSerialNoEnd
-					,ysnIdRequiredLiquor
-					,ysnIdRequiredCigarette
-					,intMinimumAge
-					,ysnApplyBlueLaw1
-					,ysnApplyBlueLaw2
-					,ysnCarWash
-					,intItemTypeCode
-					,intItemTypeSubCode
-					,ysnAutoCalculateFreight
-					,intFreightMethodId
-					,dblFreightRate
-					,@intShipViaId
-					,intNegativeInventory
-					,dblReorderPoint
-					,dblMinOrder
-					,dblSuggestedQty
-					,dblLeadTime
-					,strCounted
-					,@intCountGroupId
-					,ysnCountedDaily
-					,intAllowZeroCostTypeId
-					,-- 1 OR NULL = No, 2 = Yes, 3 = Yes but warn user
-					ysnLockedInventory
-					,ysnStorageUnitRequired
-					,strStorageUnitNo
-					,intCostAdjustmentType
-					,intSort
-					,intConcurrencyId
-					,dtmDateCreated
-					,dtmDateModified
-					,@intCreatedById
-					,@intModifiedById
-					,@intDataSourceId
-				FROM @tblICItemLocation
-				WHERE intItemLocationId = @intItemLocationId
-
-				SELECT @intItemLocationId = min(intItemLocationId)
-				FROM @tblICItemLocation
-				WHERE intItemLocationId > @intItemLocationId
-			END
-
-			DELETE IA
-			FROM tblICItemLocation IA
-			WHERE IA.intItemId = @intNewItemId
-				AND NOT EXISTS (
-					SELECT *
-					FROM @tblICFinalItemLocation IA1
-					WHERE IA1.intItemId = IA.intItemId
-						AND IA1.intLocationId = IA.intLocationId
-					)
-
-			UPDATE IA1
-			SET intVendorId = @intVendorId
-				,strDescription = IA.strDescription
-				,intCostingMethod = IA.intCostingMethod
-				,intAllowNegativeInventory = IA.intAllowNegativeInventory
-				,intSubLocationId = @intCompanyLocationSubLocationId
-				,intStorageLocationId = @intStorageLocationId
-				,intIssueUOMId = @intIssueItemUOMId
-				,intReceiveUOMId = @intReceiveItemUOMId
-				,intGrossUOMId = IA.intGrossUOMId
-				,intFamilyId = IA.intFamilyId
-				,intClassId = IA.intClassId
-				,intProductCodeId = IA.intProductCodeId
-				,intFuelTankId = IA.intFuelTankId
-				,strPassportFuelId1 = IA.strPassportFuelId1
-				,strPassportFuelId2 = IA.strPassportFuelId2
-				,strPassportFuelId3 = IA.strPassportFuelId3
-				,ysnTaxFlag1 = IA.ysnTaxFlag1
-				,ysnTaxFlag2 = IA.ysnTaxFlag2
-				,ysnTaxFlag3 = IA.ysnTaxFlag3
-				,ysnTaxFlag4 = IA.ysnTaxFlag4
-				,ysnPromotionalItem = IA.ysnPromotionalItem
-				,intMixMatchId = IA.intMixMatchId
-				,ysnDepositRequired = IA.ysnDepositRequired
-				,intDepositPLUId = IA.intDepositPLUId
-				,intBottleDepositNo = IA.intBottleDepositNo
-				,ysnSaleable = IA.ysnSaleable
-				,ysnQuantityRequired = IA.ysnQuantityRequired
-				,ysnScaleItem = IA.ysnScaleItem
-				,ysnFoodStampable = IA.ysnFoodStampable
-				,ysnReturnable = IA.ysnReturnable
-				,ysnPrePriced = IA.ysnPrePriced
-				,ysnOpenPricePLU = IA.ysnOpenPricePLU
-				,ysnLinkedItem = IA.ysnLinkedItem
-				,strVendorCategory = IA.strVendorCategory
-				,ysnCountBySINo = IA.ysnCountBySINo
-				,strSerialNoBegin = IA.strSerialNoBegin
-				,strSerialNoEnd = IA.strSerialNoEnd
-				,ysnIdRequiredLiquor = IA.ysnIdRequiredLiquor
-				,ysnIdRequiredCigarette = IA.ysnIdRequiredCigarette
-				,intMinimumAge = IA.intMinimumAge
-				,ysnApplyBlueLaw1 = IA.ysnApplyBlueLaw1
-				,ysnApplyBlueLaw2 = IA.ysnApplyBlueLaw2
-				,ysnCarWash = IA.ysnCarWash
-				,intItemTypeCode = IA.intItemTypeCode
-				,intItemTypeSubCode = IA.intItemTypeSubCode
-				,ysnAutoCalculateFreight = IA.ysnAutoCalculateFreight
-				,intFreightMethodId = IA.intFreightMethodId
-				,dblFreightRate = IA.dblFreightRate
-				,intShipViaId = @intShipViaId
-				,intNegativeInventory = IA.intNegativeInventory
-				,dblReorderPoint = IA.dblReorderPoint
-				,dblMinOrder = IA.dblMinOrder
-				,dblSuggestedQty = IA.dblSuggestedQty
-				,dblLeadTime = IA.dblLeadTime
-				,strCounted = IA.strCounted
-				,intCountGroupId = @intCountGroupId
-				,ysnCountedDaily = IA.ysnCountedDaily
-				,intAllowZeroCostTypeId = IA.intAllowZeroCostTypeId
-				,-- 1 OR NULL = No, 2 = Yes, 3 = Yes but warn user
-				ysnLockedInventory = IA.ysnLockedInventory
-				,ysnStorageUnitRequired = IA.ysnStorageUnitRequired
-				,strStorageUnitNo = IA.strStorageUnitNo
-				,intCostAdjustmentType = IA.intCostAdjustmentType
-				,intSort = IA.intSort
-				,intConcurrencyId = IA.intConcurrencyId
-				,dtmDateCreated = IA.dtmDateCreated
-				,dtmDateModified = IA.dtmDateModified
-				,intCreatedByUserId = @intCreatedById
-				,intModifiedByUserId = @intModifiedById
-				,intDataSourceId = @intDataSourceId
-			FROM @tblICFinalItemLocation IA
-			JOIN tblICItemLocation IA1 ON IA1.intItemId = IA.intItemId
-				AND IA1.intLocationId = IA.intLocationId
-
-			INSERT INTO tblICItemLocation (
-				intItemId
-				,intLocationId
-				,intVendorId
-				,strDescription
-				,intCostingMethod
-				,intAllowNegativeInventory
-				,intSubLocationId
-				,intStorageLocationId
-				,intIssueUOMId
-				,intReceiveUOMId
-				,intGrossUOMId
-				,intFamilyId
-				,intClassId
-				,intProductCodeId
-				,intFuelTankId
-				,strPassportFuelId1
-				,strPassportFuelId2
-				,strPassportFuelId3
-				,ysnTaxFlag1
-				,ysnTaxFlag2
-				,ysnTaxFlag3
-				,ysnTaxFlag4
-				,ysnPromotionalItem
-				,intMixMatchId
-				,ysnDepositRequired
-				,intDepositPLUId
-				,intBottleDepositNo
-				,ysnSaleable
-				,ysnQuantityRequired
-				,ysnScaleItem
-				,ysnFoodStampable
-				,ysnReturnable
-				,ysnPrePriced
-				,ysnOpenPricePLU
-				,ysnLinkedItem
-				,strVendorCategory
-				,ysnCountBySINo
-				,strSerialNoBegin
-				,strSerialNoEnd
-				,ysnIdRequiredLiquor
-				,ysnIdRequiredCigarette
-				,intMinimumAge
-				,ysnApplyBlueLaw1
-				,ysnApplyBlueLaw2
-				,ysnCarWash
-				,intItemTypeCode
-				,intItemTypeSubCode
-				,ysnAutoCalculateFreight
-				,intFreightMethodId
-				,dblFreightRate
-				,intShipViaId
-				,intNegativeInventory
-				,dblReorderPoint
-				,dblMinOrder
-				,dblSuggestedQty
-				,dblLeadTime
-				,strCounted
-				,intCountGroupId
-				,ysnCountedDaily
-				,intAllowZeroCostTypeId
-				,-- 1 OR NULL = No, 2 = Yes, 3 = Yes but warn user
-				ysnLockedInventory
-				,ysnStorageUnitRequired
-				,strStorageUnitNo
-				,intCostAdjustmentType
-				,intSort
-				,intConcurrencyId
-				,dtmDateCreated
-				,dtmDateModified
-				,intCreatedByUserId
-				,intModifiedByUserId
-				,intDataSourceId
-				)
-			SELECT intItemId
-				,intLocationId
-				,intVendorId
-				,strDescription
-				,intCostingMethod
-				,intAllowNegativeInventory
-				,intSubLocationId
-				,intStorageLocationId
-				,intIssueUOMId
-				,intReceiveUOMId
-				,intGrossUOMId
-				,intFamilyId
-				,intClassId
-				,intProductCodeId
-				,intFuelTankId
-				,strPassportFuelId1
-				,strPassportFuelId2
-				,strPassportFuelId3
-				,ysnTaxFlag1
-				,ysnTaxFlag2
-				,ysnTaxFlag3
-				,ysnTaxFlag4
-				,ysnPromotionalItem
-				,intMixMatchId
-				,ysnDepositRequired
-				,intDepositPLUId
-				,intBottleDepositNo
-				,ysnSaleable
-				,ysnQuantityRequired
-				,ysnScaleItem
-				,ysnFoodStampable
-				,ysnReturnable
-				,ysnPrePriced
-				,ysnOpenPricePLU
-				,ysnLinkedItem
-				,strVendorCategory
-				,ysnCountBySINo
-				,strSerialNoBegin
-				,strSerialNoEnd
-				,ysnIdRequiredLiquor
-				,ysnIdRequiredCigarette
-				,intMinimumAge
-				,ysnApplyBlueLaw1
-				,ysnApplyBlueLaw2
-				,ysnCarWash
-				,intItemTypeCode
-				,intItemTypeSubCode
-				,ysnAutoCalculateFreight
-				,intFreightMethodId
-				,dblFreightRate
-				,intShipViaId
-				,intNegativeInventory
-				,dblReorderPoint
-				,dblMinOrder
-				,dblSuggestedQty
-				,dblLeadTime
-				,strCounted
-				,intCountGroupId
-				,ysnCountedDaily
-				,intAllowZeroCostTypeId
-				,-- 1 OR NULL = No, 2 = Yes, 3 = Yes but warn user
-				ysnLockedInventory
-				,ysnStorageUnitRequired
-				,strStorageUnitNo
-				,intCostAdjustmentType
-				,intSort
-				,intConcurrencyId
-				,dtmDateCreated
-				,dtmDateModified
-				,intCreatedByUserId
-				,intModifiedByUserId
-				,intDataSourceId
-			FROM @tblICFinalItemLocation IA
-			WHERE NOT EXISTS (
-					SELECT *
-					FROM tblICItemLocation IA1
-					WHERE IA1.intItemId = IA.intItemId
-						AND IA1.intLocationId = IA.intLocationId
-					)
-
-			DELETE
-			FROM @tblICFinalItemLocation
-
-			DELETE
-			FROM @tblICItemLocation
 
 			EXEC sp_xml_removedocument @idoc
 
@@ -7513,15 +7532,17 @@ BEGIN TRY
 			ext:
 
 			SELECT @intItemScreenId = intScreenId
-            FROM tblSMScreen
-            WHERE strNamespace = 'Inventory.view.Item'
+			FROM tblSMScreen
+			WHERE strNamespace = 'Inventory.view.Item'
 
-            SELECT @intTransactionRefId = intTransactionId
-            FROM tblSMTransaction
-            WHERE intRecordId = @intNewItemId
-                AND intScreenId = @intItemScreenId
+			SELECT @intTransactionRefId = intTransactionId
+			FROM tblSMTransaction
+			WHERE intRecordId = @intNewItemId
+				AND intScreenId = @intItemScreenId
 
-            EXECUTE dbo.uspSMInterCompanyUpdateMapping @currentTransactionId = @intTransactionRefId, @referenceTransactionId = @intTransactionId,@referenceCompanyId=@intCompanyId
+			EXECUTE dbo.uspSMInterCompanyUpdateMapping @currentTransactionId = @intTransactionRefId
+				,@referenceTransactionId = @intTransactionId
+				,@referenceCompanyId = @intCompanyId
 
 			INSERT INTO tblICItemAcknowledgementStage (
 				intItemId
@@ -7549,7 +7570,6 @@ BEGIN TRY
 			-- Audit Log
 			IF (@intNewItemId > 0)
 			BEGIN
-
 				IF @strRowState = 'Modified'
 				BEGIN
 					SELECT @strDescription = 'Updated '
