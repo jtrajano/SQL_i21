@@ -305,7 +305,7 @@ BEGIN
 			,[ysnIsStorage] 					=	0
 			,[strActualCostId] 					=	NULL
 			,[intSourceTransactionId] 			=	C3.intSettleStorageId
-			,[intSourceTransactionDetailId] 	=	SC.intSettleContractId
+			,[intSourceTransactionDetailId] 	=	case when OLDG.intId is not null then  C2.intSettleStorageTicketId else SC.intSettleContractId end
 			,[strSourceTransactionId] 			=	C3.strStorageTicket
 			,[intFobPointId]					=	NULL
 			,[intInTransitSourceLocationId]		=	NULL
@@ -325,9 +325,16 @@ BEGIN
 		INNER JOIN tblGRSettleContract SC
 			on SC.intSettleStorageId = C3.intSettleStorageId  
 				and B.intContractDetailId = SC.intContractDetailId
+		---
+		left join tblGROldTransactionMapping OLDG
+			on OLDG.intSettleStorageId = C3.intSettleStorageId
+				and OLDG.intSettleStorageTicketId  = C2.intSettleStorageTicketId 
+				and OLDG.intSettleContractId= SC.intSettleContractId
+		---
 		LEFT JOIN tblICItemUOM voucherCostUOM
 			ON voucherCostUOM.intItemUOMId = ISNULL(B.intCostUOMId, B.intUnitOfMeasureId)		
 		WHERE B.intCustomerStorageId > 0 AND D.strType = 'Inventory' and sh.dblPaidAmount != B.dblCost
+			
 			
 		-- UNION ALL
 		-- --DISCOUNTS
