@@ -100,6 +100,10 @@ BEGIN
 			,@t_strBatchId AS NVARCHAR(50) 
 			,@t_intLocationId AS INT 
 			,@t_NegativeStockCost AS NUMERIC(38, 20)
+			,@t_NegativeStockStrBatchId AS NVARCHAR(50) 
+			,@t_NegativeStockIntTransactionId AS INT 
+			,@t_NegativeStockStrTransactionId AS NVARCHAR(50)
+			,@t_NegativeStockIntTransactionDetailId AS INT
 
 			,@EscalateInventoryTransactionId AS INT 
 			,@EscalateInventoryTransactionTypeId AS INT 
@@ -231,23 +235,34 @@ BEGIN
 	IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpRetroactiveTransactions')) 
 	BEGIN 
 		CREATE TABLE #tmpRetroactiveTransactions (
-			[intInventoryTransactionId] INT PRIMARY KEY CLUSTERED	
+			[intInventoryTransactionId] INT PRIMARY KEY CLUSTERED
+			,[intSort] INT 
 		)
 	END 
 
 	DELETE FROM #tmpRetroactiveTransactions
 	INSERT INTO #tmpRetroactiveTransactions (
 		intInventoryTransactionId
+		,intSort
 	)
 	-- Self: 
 	SELECT	@InventoryTransactionStartId 
+			,1
 	WHERE	@InventoryTransactionStartId IS NOT NULL 
+	-- Negative Stocks 
+	UNION ALL 
+	SELECT	-cbOut.intInventoryTransactionId
+			,2 
+	FROM	tblICInventoryFIFOOut cbOut 
+	WHERE	cbOut.intInventoryFIFOId = @CostBucketId			
+			AND cbOut.intRevalueFifoId IS NOT NULL 
 	-- Cost Bucket Out: 
 	UNION ALL 
 	SELECT	cbOut.intInventoryTransactionId
+			,3
 	FROM	tblICInventoryFIFOOut cbOut
 	WHERE	cbOut.intInventoryFIFOId = @CostBucketId			
-			AND (cbOut.intInventoryTransactionId <> @InventoryTransactionStartId OR @InventoryTransactionStartId IS NULL) 
+			AND cbOut.intRevalueFifoId IS NULL 			
 END 
 
 -- Calculate how much cost adjustment goes for each qty. 
@@ -326,25 +341,74 @@ BEGIN
 			,t.strTransactionId
 			,t.intTransactionId
 			,t.intTransactionDetailId
-			,t.intTransactionTypeId
+			,intTransactionTypeId = 
+				CASE 
+					WHEN cbOut.intRevalueFifoId IS NOT NULL THEN 
+						@INV_TRANS_TYPE_NegativeStock 
+					ELSE 
+						t.intTransactionTypeId 
+				END
 			,t.strBatchId 
 			,il.intLocationId
-			,[negative stock cost] = cb.dblCost 
+			,[negative stock cost] = cbRevalue.dblCost 
+			,negativeTransaction.strBatchId
+			,negativeTransaction.intTransactionId
+			,negativeTransaction.strTransactionId
+			,negativeTransaction.intTransactionDetailId
 	FROM	tblICInventoryTransaction t INNER JOIN #tmpRetroactiveTransactions tmp
-				ON t.intInventoryTransactionId = tmp.intInventoryTransactionId
+				ON	t.intInventoryTransactionId = tmp.intInventoryTransactionId
+					OR t.intInventoryTransactionId = -tmp.intInventoryTransactionId -- Negative stock. 				
 			INNER JOIN tblICItemLocation il
 				ON t.intItemLocationId = il.intItemLocationId
 				AND t.intItemId = il.intItemId
-			LEFT JOIN tblICInventoryFIFOOut cbOut 
-				ON cbOut.intInventoryTransactionId = t.intInventoryTransactionId
-				AND cbOut.intRevalueFifoId IS NOT NULL 
-			LEFT JOIN tblICInventoryFIFO cb
-				ON cb.intInventoryFIFOId = cbOut.intRevalueFifoId
+			OUTER APPLY (
+				SELECT 
+					dblQty = SUM(cbOut.dblQty) 
+					,cbOut.intRevalueFifoId
+				FROM 
+					tblICInventoryFIFOOut cbOut  
+				WHERE
+					cbOut.intInventoryTransactionId = t.intInventoryTransactionId
+					AND cbOut.intRevalueFifoId IS NOT NULL
+					AND SIGN(tmp.intInventoryTransactionId) = -1
+				GROUP BY 
+					cbOut.intRevalueFifoId
+			) cbOut
+			OUTER APPLY (
+				SELECT 
+					cb.*
+				FROM 
+					tblICInventoryFIFO cb
+				WHERE
+					cb.intInventoryFIFOId = cbOut.intRevalueFifoId
+					AND cbOut.intRevalueFifoId IS NOT NULL 
+			) cbRevalue
+			OUTER APPLY (
+				SELECT TOP 1 
+					tRevalue.strTransactionId
+					,tRevalue.intTransactionId
+					,tRevalue.intTransactionDetailId
+					,tRevalue.strBatchId
+					,tRevalue.strActualCostId
+				FROM 
+					tblICInventoryTransaction tRevalue
+				WHERE
+					tRevalue.strTransactionId = cbRevalue.strTransactionId
+					AND tRevalue.intTransactionId = cbRevalue.intTransactionId
+					AND tRevalue.intTransactionDetailId = cbRevalue.intTransactionDetailId
+					AND tRevalue.intItemId = cbRevalue.intItemId
+					AND tRevalue.intItemLocationId = cbRevalue.intItemLocationId
+					AND tRevalue.intItemUOMId = cbRevalue.intItemUOMId
+					AND tRevalue.dblQty = -cbRevalue.dblStockOut			
+			) negativeTransaction
+			
 	WHERE	t.intItemId = @intItemId
 			AND t.intItemLocationId = @intItemLocationId			
 			AND ISNULL(t.ysnIsUnposted, 0) = 0 
 			AND t.dblQty <> 0 
-	ORDER BY t.intInventoryTransactionId ASC 
+	ORDER BY 
+		tmp.intSort ASC 
+		,t.intInventoryTransactionId ASC 
 
 	OPEN loopRetroactive;
 
@@ -364,6 +428,10 @@ BEGIN
 		,@t_strBatchId
 		,@t_intLocationId
 		,@t_NegativeStockCost
+		,@t_NegativeStockStrBatchId 
+		,@t_NegativeStockIntTransactionId 
+		,@t_NegativeStockStrTransactionId 
+		,@t_NegativeStockIntTransactionDetailId 
 	;
 
 	WHILE @@FETCH_STATUS = 0 
@@ -433,20 +501,25 @@ BEGIN
 
 			SET @EscalateInventoryTransactionTypeId = NULL
 			EXEC [uspICPostCostAdjustmentEscalate]
-				@dtmDate 
-				,@t_intItemId 
-				,@t_intItemLocationId 
-				,@t_dblQty 
-				,@t_strBatchId 
-				,@t_intTransactionId 
-				,@t_intTransactionDetailId 
-				,@t_strTransactionId 
-				,@t_intInventoryTransactionId 
-				,@EscalateCostAdjustment 
-				,@intTransactionId 
-				,@intTransactionDetailId 
-				,@strTransactionId 
+				@dtmDate
+				,@t_intItemId
+				,@t_intItemLocationId
+				,@t_dblQty
+				,@t_strBatchId
+				,@t_intTransactionId
+				,@t_intTransactionDetailId
+				,@t_strTransactionId
+				,@t_intInventoryTransactionId
+				,@EscalateCostAdjustment
+				,@intTransactionId
+				,@intTransactionDetailId
+				,@strTransactionId
 				,@EscalateInventoryTransactionTypeId OUTPUT 
+				,NULL 
+				,@t_NegativeStockStrBatchId 
+				,@t_NegativeStockIntTransactionId 
+				,@t_NegativeStockStrTransactionId 
+				,@t_NegativeStockIntTransactionDetailId 
 		END 
 
 		-- Log the cost adjustment 
@@ -588,6 +661,10 @@ BEGIN
 			,@t_strBatchId
 			,@t_intLocationId
 			,@t_NegativeStockCost
+			,@t_NegativeStockStrBatchId 
+			,@t_NegativeStockIntTransactionId 
+			,@t_NegativeStockStrTransactionId 
+			,@t_NegativeStockIntTransactionDetailId 
 		;		
 	END 
 
@@ -810,3 +887,6 @@ BEGIN
 		@intItemId
 		,@intItemLocationId
 END
+
+IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpRetroactiveTransactions')) 
+	DROP TABLE #tmpRetroactiveTransactions 
