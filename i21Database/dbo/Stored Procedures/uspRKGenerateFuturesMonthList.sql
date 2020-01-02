@@ -262,16 +262,16 @@ BEGIN TRY
 	ORDER BY CONVERT(DATETIME,'01 ' + strFMonth) ASC
 
 	DECLARE @newRowId INT
-	SELECT intFutureMonthId INTO #tmpNewRows FROM tblRKFuturesMonth WHERE intFutureMonthId > @MaxId
-	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpNewRows)
+	SELECT intFutureMonthId INTO #tmpNewMonths FROM tblRKFuturesMonth WHERE intFutureMonthId > @MaxId
+	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpNewMonths)
 	BEGIN
-		SELECT TOP 1 @newRowId = intFutureMonthId FROM #tmpNewRows
+		SELECT TOP 1 @newRowId = intFutureMonthId FROM #tmpNewMonths
 
 		EXEC uspIPInterCompanyPreStageFutureMonth @intFutureMonthId = @newRowId
 			, @strRowState = 'Added'
 			, @intUserId = @intUserId
 
-		DELETE FROM #tmpNewRows WHERE intFutureMonthId = @newRowId
+		DELETE FROM #tmpNewMonths WHERE intFutureMonthId = @newRowId
 	END
 
 	SELECT @HasOptionMonths = CAST(ISNULL(ysnOptions,0) AS BIT) FROM tblRKFutureMarket WHERE intFutureMarketId = @FutureMarketId
@@ -286,7 +286,7 @@ BEGIN TRY
 	END
 
 	DROP TABLE ##AllowedFutMonth
-	--DROP TABLE ##FinalFutMonths
+	DROP TABLE #tmpNewMonths
 	DROP TABLE #FutTemp
 
 	SELECT * FROM @GenerateOptionMonthResult

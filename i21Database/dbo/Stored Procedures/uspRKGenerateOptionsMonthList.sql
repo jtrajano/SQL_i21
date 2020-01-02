@@ -263,16 +263,16 @@ BEGIN TRY
 		AND strOptionMonth NOT IN(SELECT strOptionMonth COLLATE Latin1_General_CI_AS FROM tblRKOptionsMonth WHERE intFutureMarketId = @FutureMarketId AND intCommodityMarketId = @intCommodityMarketId)
 
 	DECLARE @newRowId INT
-	SELECT intOptionMonthId INTO #tmpNewRows FROM tblRKOptionsMonth WHERE intOptionMonthId > @MaxId
-	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpNewRows)
+	SELECT intOptionMonthId INTO #tmpNewOptions FROM tblRKOptionsMonth WHERE intOptionMonthId > @MaxId
+	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpNewOptions)
 	BEGIN
-		SELECT TOP 1 @newRowId = intOptionMonthId FROM #tmpNewRows
+		SELECT TOP 1 @newRowId = intOptionMonthId FROM #tmpNewOptions
 
 		EXEC uspIPInterCompanyPreStageOptionMonth @intOptionMonthId = @newRowId
 			, @strRowState = 'Added'
 			, @intUserId = @intUserId
 
-		DELETE FROM #tmpNewRows WHERE intOptionMonthId = @newRowId
+		DELETE FROM #tmpNewOptions WHERE intOptionMonthId = @newRowId
 	END
 
 	SELECT MissingFutureMonths = @MissingFutureMonths
@@ -280,7 +280,7 @@ BEGIN TRY
 
 	DROP TABLE ##AllowedOptMonths
 	DROP TABLE ##FinalOptMonths
-	--DROP TABLE #OptTemp
+	DROP TABLE #tmpNewOptions
 
 END TRY
 BEGIN CATCH
