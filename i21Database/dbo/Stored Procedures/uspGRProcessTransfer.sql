@@ -701,6 +701,8 @@ BEGIN
 							,[dblReportingRate]	
 							,[dblForeignRate]
 							,[strRateType]
+							,[intSourceEntityId] --MOD
+							,[intCommodityId]--MOD
 							)
 							EXEC	dbo.uspICPostCosting @Entry,@strBatchId,'AP Clearing',@intUserId
 
@@ -833,7 +835,9 @@ BEGIN
 							,[dblCreditReport]	
 							,[dblReportingRate]	
 							,[dblForeignRate]
-							,[strRateType]
+							,[strRateType]							
+							,[intSourceEntityId] --MOD
+							,[intCommodityId]--MOD
 							)
 							EXEC	dbo.uspICPostCosting @Entry,@strBatchId,'AP Clearing',@intUserId
 							--Used total discount cost on @GLForItem to get the correct decimal
