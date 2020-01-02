@@ -27,7 +27,7 @@
 	[intSourceLocationId] INT NULL,
 	[intSourceUOMId] INT NULL,
 	[intCommodityId] INT NOT NULL,
-	[intConcurrencyId] INT NOT NULL,
+	[intConcurrencyId] INT NULL DEFAULT ((1)),
 		
 	CONSTRAINT [PK_tblRKMatchDerivativesPostRecap] PRIMARY KEY CLUSTERED ([intMatchDerivativesPostRecapId] ASC)
 );
