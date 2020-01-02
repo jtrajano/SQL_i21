@@ -22,11 +22,14 @@ bill as (
 		a.intContractDetailId
 		,dblQtyReceived = sum(a.dblQtyReceived)
 	from
-		tblAPBillDetail a
-		,tblICItem b
+	  	tblAPBillDetail a
+	  	,tblICItem b
+	  	,tblAPBill c
 	where
-		b.intItemId = a.intItemId
-		and b.strType <> 'Other Charge'
+	  	b.intItemId = a.intItemId
+	  	and b.strType = 'Inventory'
+	  	and c.intTransactionType = 1
+	  	and c.intBillId = a.intBillId
 	group by
 		a.intContractDetailId
 ),
