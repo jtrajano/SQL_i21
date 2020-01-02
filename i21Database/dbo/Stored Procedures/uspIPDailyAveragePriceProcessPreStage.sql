@@ -41,7 +41,7 @@ BEGIN TRY
 		FROM tblIPMultiCompany
 		WHERE ysnParent = 1
 
-		SELECT TOP 1 @intToCompanyId = intCompanyId
+		SELECT TOP 1 @intToCompanyId = MC.intCompanyId
 		FROM tblRKDailyAveragePrice DAP
 		JOIN tblIPMultiCompany MC ON MC.intBookId = DAP.intBookId
 			AND DAP.intDailyAveragePriceId = @intDailyAveragePriceId
