@@ -306,9 +306,9 @@ BEGIN
 			,[intStorageLocationId] 			=	C.intStorageLocationId
 			,[ysnIsStorage] 					=	0
 			,[strActualCostId] 					=	NULL
-			,[intSourceTransactionId] 			=	TS.intTransferStorageId
-			,[intSourceTransactionDetailId] 	=	TSS.intTransferStorageSplitId
-			,[strSourceTransactionId] 			=	TS.strTransferStorageTicket
+			,[intSourceTransactionId] 			=	C3.intSettleStorageId
+			,[intSourceTransactionDetailId] 	=	case when OLDG.intId is not null then  C2.intSettleStorageTicketId else SC.intSettleContractId end
+			,[strSourceTransactionId] 			=	C3.strStorageTicket
 			,[intFobPointId]					=	NULL
 			,[intInTransitSourceLocationId]		=	NULL
 		FROM @voucherIds ids
@@ -316,12 +316,7 @@ BEGIN
 		INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
 		INNER JOIN tblGRSettleStorage C3 ON A.intBillId = C3.intBillId
 		INNER JOIN tblGRSettleStorageTicket C2 ON C3.intSettleStorageId = C2.intSettleStorageId
-		INNER JOIN tblGRCustomerStorage C ON C2.intCustomerStorageId = C.intCustomerStorageId AND B.intCustomerStorageId = C.intCustomerStorageId
-		--INNER JOIN tblGRStorageHistory sh 
-		--	ON sh.intCustomerStorageId = C2.intCustomerStorageId AND sh.intSettleStorageId = C3.intSettleStorageId 
-		INNER JOIN tblGRTransferStorageReference TSR ON TSR.intToCustomerStorageId = C.intCustomerStorageId
-		INNER JOIN tblGRTransferStorage TS ON TS.intTransferStorageId = TSR.intTransferStorageId
-		INNER JOIN tblGRTransferStorageSplit TSS on TSS.intTransferStorageId = TS.intTransferStorageId
+		INNER JOIN tblGRCustomerStorage C ON C2.intCustomerStorageId = C.intCustomerStorageId AND B.intCustomerStorageId = C.intCustomerStorageId		
 		INNER JOIN tblICItem D ON B.intItemId = D.intItemId
 		INNER JOIN tblICItemLocation E ON C.intCompanyLocationId = E.intLocationId AND E.intItemId = D.intItemId
 		INNER JOIN tblICItemUOM F ON D.intItemId = F.intItemId AND C.intItemUOMId = F.intItemUOMId
@@ -332,9 +327,16 @@ BEGIN
 		INNER JOIN tblGRSettleContract SC
 			on SC.intSettleStorageId = C3.intSettleStorageId  
 				and B.intContractDetailId = SC.intContractDetailId
+		---
+		left join tblGROldTransactionMapping OLDG
+			on OLDG.intSettleStorageId = C3.intSettleStorageId
+				and OLDG.intSettleStorageTicketId  = C2.intSettleStorageTicketId 
+				and OLDG.intSettleContractId= SC.intSettleContractId
+		---
 		LEFT JOIN tblICItemUOM voucherCostUOM
 			ON voucherCostUOM.intItemUOMId = ISNULL(B.intCostUOMId, B.intUnitOfMeasureId)		
 		WHERE B.intCustomerStorageId > 0 AND D.strType = 'Inventory' and sh.dblPaidAmount != B.dblCost
+			
 			
 		-- UNION ALL
 		-- --DISCOUNTS
