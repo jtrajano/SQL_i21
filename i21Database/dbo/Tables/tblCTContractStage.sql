@@ -22,5 +22,6 @@
     intToBookId INT NULL,
 	strAmendmentApprovalXML NVARCHAR(MAX)COLLATE Latin1_General_CI_AS
 	,intTransactionId int
-	,intCompanyId int
+	,intCompanyId int, 
+    ysnMailSent BIT NULL
 )

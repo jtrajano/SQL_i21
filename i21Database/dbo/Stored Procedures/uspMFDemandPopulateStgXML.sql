@@ -18,6 +18,7 @@ BEGIN TRY
 		,@strSubBook NVARCHAR(50)
 		,@strAdditionalInfo NVARCHAR(MAX) = ''
 		,@strItemSupplyTarget NVARCHAR(MAX)
+		,@strInvPlngReportName NVARCHAR(150)
 
 	IF @strRowState = 'Delete'
 	BEGIN
@@ -74,6 +75,7 @@ BEGIN TRY
 
 	SELECT @strBook = strBook
 		,@strSubBook = strSubBook
+		,@strInvPlngReportName=strInvPlngReportName
 	FROM vyuMFInvPlngReportMaster
 	WHERE intInvPlngReportMasterID = @intInvPlngReportMasterID
 
@@ -99,6 +101,7 @@ BEGIN TRY
 
 	INSERT INTO tblMFDemandStage (
 		intInvPlngReportMasterID
+		,strInvPlngReportName
 		,strReportMasterXML
 		,strReportMaterialXML
 		,strReportAttributeValueXML
@@ -108,6 +111,7 @@ BEGIN TRY
 		,strItemSupplyTarget
 		)
 	SELECT intInvPlngReportMasterID = @intInvPlngReportMasterID
+		,strInvPlngReportName=@strInvPlngReportName
 		,strReportMasterXML = @strReportMasterXML
 		,strReportMaterialXML = @strReportMaterialXML
 		,strReportAttributeValueXML = @strReportAttributeValueXML

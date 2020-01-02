@@ -17,4 +17,5 @@
 	strTransactionType        NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	,intTransactionId int
 	,intCompanyId int
+	,ysnMailSent Bit
 )

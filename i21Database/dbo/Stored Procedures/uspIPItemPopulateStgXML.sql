@@ -46,12 +46,14 @@ BEGIN TRY
 		,@intCompanyId int
         ,@intTransactionId int
         ,@intItemScreenId int
+		,@strItemNo nvarchar(50)
 
 	SET @strItemXML = NULL
 	SET @strHeaderCondition = NULL
 	SET @strLastModifiedUser = NULL
+	SET @strItemNo=NULL
 
-	Select @intCompanyId=intCompanyId
+	Select @intCompanyId=intCompanyId,@strItemNo=strItemNo
 	From tblICItem 
 	Where intItemId=@intItemId 
 
@@ -363,6 +365,7 @@ BEGIN TRY
 
 	INSERT INTO tblICItemStage (
 		intItemId
+		,strItemNo
 		,strItemXML
 		,strItemAccountXML
 		,strItemAddOnXML
@@ -404,6 +407,7 @@ BEGIN TRY
         ,intCompanyId 
 		)
 	SELECT intItemId = @intItemId
+		,strItemNo=@strItemNo
 		,strItemXML = @strItemXML
 		,strItemAccountXML = @strItemAccountXML
 		,strItemAddOnXML = @strItemAddOnXML

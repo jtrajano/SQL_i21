@@ -12,6 +12,7 @@ BEGIN TRY
 		,@intCompanyId INT
 		,@intTransactionId INT
 		,@intWeightClaimScreenId INT
+		,@strReferenceNumber NVARCHAR(100)
 
 	IF @strRowState = 'Delete'
 	BEGIN
@@ -27,6 +28,10 @@ BEGIN TRY
 
 	-------------------------Header-----------------------------------------------------------
 	SELECT @strHeaderCondition = 'intWeightClaimId = ' + LTRIM(@intWeightClaimId)
+
+	SELECT @strReferenceNumber = strReferenceNumber
+	FROM tblLGWeightClaim
+	WHERE intWeightClaimId = @intWeightClaimId
 
 	SELECT @strObjectName = 'vyuIPGetWeightClaim'
 
@@ -55,6 +60,7 @@ BEGIN TRY
 
 	INSERT INTO tblLGWeightClaimStage (
 		intWeightClaimId
+		,strReferenceNumber
 		,strWeightClaimXML
 		,strWeightClaimDetailXML
 		,strRowState
@@ -62,6 +68,7 @@ BEGIN TRY
 		,intCompanyId
 		)
 	SELECT intWeightClaimId = @intWeightClaimId
+		,strReferenceNumber = @strReferenceNumber
 		,strWeightClaimXML = @strWeightClaimXML
 		,strWeightClaimDetailXML = @strWeightClaimDetailXML
 		,strRowState = @strRowState
@@ -79,4 +86,3 @@ BEGIN CATCH
 			,'WITH NOWAIT'
 			)
 END CATCH
-

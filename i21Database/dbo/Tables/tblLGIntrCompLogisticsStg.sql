@@ -27,6 +27,6 @@
 		[intEntityId] INT,
 		[strTransactionType] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 		intTransactionId int,
-		intCompanyId int
-
+		intCompanyId int,
+		ysnMailSent bit
 	)

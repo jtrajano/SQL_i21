@@ -1,6 +1,7 @@
 ﻿CREATE TABLE tblLGWeightClaimStage (
 	intWeightClaimStageId INT IDENTITY(1, 1) CONSTRAINT [PK_tblLGWeightClaimStage_intWeightClaimStageId] PRIMARY KEY
 	,intWeightClaimId INT
+	,strReferenceNumber [nvarchar](100) COLLATE Latin1_General_CI_AS 
 	,strWeightClaimXML NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
 	,strWeightClaimDetailXML NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
 	,strFeedStatus NVARCHAR(50) COLLATE Latin1_General_CI_AS
@@ -9,4 +10,5 @@
 	,intTransactionId int
 	,intCompanyId int
 	,strMessage NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
+	,ysnMailSent bit
 	)

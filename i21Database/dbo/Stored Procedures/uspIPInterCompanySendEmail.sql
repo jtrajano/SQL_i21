@@ -144,6 +144,288 @@ BEGIN
 	END
 END
 
+IF @strMessageType = 'Item'
+BEGIN
+	SET @strHeader = '<tr>
+						<th>&nbsp;Item</th>
+						<th>&nbsp;Row State</th>
+						<th>&nbsp;From Company</th>
+						<th>&nbsp;Message</th>
+					</tr>'
+
+	IF @strStatus = 'Success'
+	BEGIN
+		SELECT @strDetail = @strDetail + '<tr>
+			   <td>&nbsp;' + ISNULL(S.strItemNo, '') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(S.strRowState, '') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(MC.strName, '') + '</td>' + 
+			   '<td>&nbsp;' + 'Success' + '</td>
+		</tr>'
+		FROM tblICItemStage S WITH (NOLOCK)
+		Left JOIN tblIPMultiCompany MC on MC.intCompanyId=S.intCompanyId
+		WHERE ISNULL(S.strFeedStatus, '') = 'Processed'
+			AND ISNULL(S.ysnMailSent, 0) = 0
+
+		UPDATE tblICItemStage
+		SET ysnMailSent = 1
+		WHERE ISNULL(strFeedStatus, '') = 'Processed'
+			AND ISNULL(ysnMailSent, 0) = 0
+	END
+	ELSE
+	BEGIN
+		SELECT @strDetail = @strDetail + '<tr>
+			   <td>&nbsp;' + ISNULL(S.strItemNo, '') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(S.strRowState, '') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(MC.strName, '') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(S.strMessage, '') + '</td>
+		</tr>'
+		FROM tblICItemStage S WITH (NOLOCK)
+		Left JOIN tblIPMultiCompany MC on MC.intCompanyId=S.intCompanyId
+		WHERE ISNULL(S.strFeedStatus, '') = 'Failed'
+			AND ISNULL(S.ysnMailSent, 0) = 0
+
+		UPDATE tblICItemStage
+		SET ysnMailSent = 1
+		WHERE ISNULL(strFeedStatus, '') = 'Failed'
+			AND ISNULL(ysnMailSent, 0) = 0
+	END
+END
+
+IF @strMessageType = 'Contract'
+BEGIN
+	SET @strHeader = '<tr>
+						<th>&nbsp;Contract Number</th>
+						<th>&nbsp;Row State</th>
+						<th>&nbsp;From Company</th>
+						<th>&nbsp;Message</th>
+					</tr>'
+
+	IF @strStatus = 'Success'
+	BEGIN
+		SELECT @strDetail = @strDetail + '<tr>
+			   <td>&nbsp;' + ISNULL(S.strContractNumber, '') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(S.strRowState, '') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(MC.strName, '') + '</td>' + 
+			   '<td>&nbsp;' + 'Success' + '</td>
+		</tr>'
+		FROM tblCTContractStage S WITH (NOLOCK)
+		Left JOIN tblIPMultiCompany MC on MC.intCompanyId=S.intCompanyId
+		WHERE ISNULL(S.strFeedStatus, '') = 'Processed'
+			AND ISNULL(S.ysnMailSent, 0) = 0
+
+		UPDATE tblCTContractStage
+		SET ysnMailSent = 1
+		WHERE ISNULL(strFeedStatus, '') = 'Processed'
+			AND ISNULL(ysnMailSent, 0) = 0
+	END
+	ELSE
+	BEGIN
+		SELECT @strDetail = @strDetail + '<tr>
+			   <td>&nbsp;' + ISNULL(S.strContractNumber, '') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(S.strRowState, '') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(MC.strName, '') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(S.strMessage, '') + '</td>
+		</tr>'
+		FROM tblCTContractStage S WITH (NOLOCK)
+		Left JOIN tblIPMultiCompany MC on MC.intCompanyId=S.intCompanyId
+		WHERE ISNULL(S.strFeedStatus, '') = 'Failed'
+			AND ISNULL(S.ysnMailSent, 0) = 0
+
+		UPDATE tblCTContractStage
+		SET ysnMailSent = 1
+		WHERE ISNULL(strFeedStatus, '') = 'Failed'
+			AND ISNULL(ysnMailSent, 0) = 0
+	END
+END
+
+IF @strMessageType = 'Price Contract'
+BEGIN
+	SET @strHeader = '<tr>
+						<th>&nbsp;Contract Number</th>
+						<th>&nbsp;Row State</th>
+						<th>&nbsp;From Company</th>
+						<th>&nbsp;Message</th>
+					</tr>'
+
+	IF @strStatus = 'Success'
+	BEGIN
+		SELECT @strDetail = @strDetail + '<tr>
+			   <td>&nbsp;' + ISNULL(S.strPriceContractNo, '') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(S.strRowState, '') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(MC.strName, '') + '</td>' + 
+			   '<td>&nbsp;' + 'Success' + '</td>
+		</tr>'
+		FROM tblCTPriceContractStage S WITH (NOLOCK)
+		Left JOIN tblIPMultiCompany MC on MC.intCompanyId=S.intCompanyId
+		WHERE ISNULL(S.strFeedStatus, '') = 'Processed'
+			AND ISNULL(S.ysnMailSent, 0) = 0
+
+		UPDATE tblCTPriceContractStage
+		SET ysnMailSent = 1
+		WHERE ISNULL(strFeedStatus, '') = 'Processed'
+			AND ISNULL(ysnMailSent, 0) = 0
+	END
+	ELSE
+	BEGIN
+		SELECT @strDetail = @strDetail + '<tr>
+			   <td>&nbsp;' + ISNULL(S.strPriceContractNo, '') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(S.strRowState, '') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(MC.strName, '') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(S.strMessage, '') + '</td>
+		</tr>'
+		FROM tblCTPriceContractStage S WITH (NOLOCK)
+		Left JOIN tblIPMultiCompany MC on MC.intCompanyId=S.intCompanyId
+		WHERE ISNULL(S.strFeedStatus, '') = 'Failed'
+			AND ISNULL(S.ysnMailSent, 0) = 0
+
+		UPDATE tblCTPriceContractStage
+		SET ysnMailSent = 1
+		WHERE ISNULL(strFeedStatus, '') = 'Failed'
+			AND ISNULL(ysnMailSent, 0) = 0
+	END
+END
+
+IF @strMessageType = 'Load'
+BEGIN
+	SET @strHeader = '<tr>
+						<th>&nbsp;Load Number</th>
+						<th>&nbsp;Row State</th>
+						<th>&nbsp;From Company</th>
+						<th>&nbsp;Message</th>
+					</tr>'
+
+	IF @strStatus = 'Success'
+	BEGIN
+		SELECT @strDetail = @strDetail + '<tr>
+			   <td>&nbsp;' + ISNULL(S.strLoadNumber, '') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(S.strRowState, '') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(MC.strName, '') + '</td>' + 
+			   '<td>&nbsp;' + 'Success' + '</td>
+		</tr>'
+		FROM tblLGIntrCompLogisticsStg S WITH (NOLOCK)
+		Left JOIN tblIPMultiCompany MC on MC.intCompanyId=S.intCompanyId
+		WHERE ISNULL(S.strFeedStatus, '') = 'Processed'
+			AND ISNULL(S.ysnMailSent, 0) = 0
+
+		UPDATE tblLGIntrCompLogisticsStg
+		SET ysnMailSent = 1
+		WHERE ISNULL(strFeedStatus, '') = 'Processed'
+			AND ISNULL(ysnMailSent, 0) = 0
+	END
+	ELSE
+	BEGIN
+		SELECT @strDetail = @strDetail + '<tr>
+			   <td>&nbsp;' + ISNULL(S.strLoadNumber, '') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(S.strRowState, '') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(MC.strName, '') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(S.strMessage, '') + '</td>
+		</tr>'
+		FROM tblLGIntrCompLogisticsStg S WITH (NOLOCK)
+		Left JOIN tblIPMultiCompany MC on MC.intCompanyId=S.intCompanyId
+		WHERE ISNULL(S.strFeedStatus, '') = 'Failed'
+			AND ISNULL(S.ysnMailSent, 0) = 0
+
+		UPDATE tblLGIntrCompLogisticsStg
+		SET ysnMailSent = 1
+		WHERE ISNULL(strFeedStatus, '') = 'Failed'
+			AND ISNULL(ysnMailSent, 0) = 0
+	END
+END
+
+IF @strMessageType = 'Demand'
+BEGIN
+	SET @strHeader = '<tr>
+						<th>&nbsp;Plan Name</th>
+						<th>&nbsp;Row State</th>
+						<th>&nbsp;From Company</th>
+						<th>&nbsp;Message</th>
+					</tr>'
+
+	IF @strStatus = 'Success'
+	BEGIN
+		SELECT @strDetail = @strDetail + '<tr>
+			   <td>&nbsp;' + ISNULL(S.strInvPlngReportName, '') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(S.strRowState, '') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(MC.strName, '') + '</td>' + 
+			   '<td>&nbsp;' + 'Success' + '</td>
+		</tr>'
+		FROM tblMFDemandStage S WITH (NOLOCK)
+		Left JOIN tblIPMultiCompany MC on MC.intCompanyId=S.intCompanyId
+		WHERE ISNULL(S.strFeedStatus, '') = 'Processed'
+			AND ISNULL(S.ysnMailSent, 0) = 0
+
+		UPDATE tblMFDemandStage
+		SET ysnMailSent = 1
+		WHERE ISNULL(strFeedStatus, '') = 'Processed'
+			AND ISNULL(ysnMailSent, 0) = 0
+	END
+	ELSE
+	BEGIN
+		SELECT @strDetail = @strDetail + '<tr>
+			   <td>&nbsp;' + ISNULL(S.strInvPlngReportName, '') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(S.strRowState, '') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(MC.strName, '') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(S.strMessage, '') + '</td>
+		</tr>'
+		FROM tblMFDemandStage S WITH (NOLOCK)
+		Left JOIN tblIPMultiCompany MC on MC.intCompanyId=S.intCompanyId
+		WHERE ISNULL(S.strFeedStatus, '') = 'Failed'
+			AND ISNULL(S.ysnMailSent, 0) = 0
+
+		UPDATE tblMFDemandStage
+		SET ysnMailSent = 1
+		WHERE ISNULL(strFeedStatus, '') = 'Failed'
+			AND ISNULL(ysnMailSent, 0) = 0
+	END
+END
+
+IF @strMessageType = 'WeightClaim'
+BEGIN
+	SET @strHeader = '<tr>
+						<th>&nbsp;Claim No</th>
+						<th>&nbsp;Row State</th>
+						<th>&nbsp;From Company</th>
+						<th>&nbsp;Message</th>
+					</tr>'
+
+	IF @strStatus = 'Success'
+	BEGIN
+		SELECT @strDetail = @strDetail + '<tr>
+			   <td>&nbsp;' + ISNULL(S.strReferenceNumber, '') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(S.strRowState, '') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(MC.strName, '') + '</td>' + 
+			   '<td>&nbsp;' + 'Success' + '</td>
+		</tr>'
+		FROM tblLGWeightClaimStage S WITH (NOLOCK)
+		Left JOIN tblIPMultiCompany MC on MC.intCompanyId=S.intCompanyId
+		WHERE ISNULL(S.strFeedStatus, '') = 'Processed'
+			AND ISNULL(S.ysnMailSent, 0) = 0
+
+		UPDATE tblLGWeightClaimStage
+		SET ysnMailSent = 1
+		WHERE ISNULL(strFeedStatus, '') = 'Processed'
+			AND ISNULL(ysnMailSent, 0) = 0
+	END
+	ELSE
+	BEGIN
+		SELECT @strDetail = @strDetail + '<tr>
+			   <td>&nbsp;' + ISNULL(S.strReferenceNumber, '') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(S.strRowState, '') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(MC.strName, '') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(S.strMessage, '') + '</td>
+		</tr>'
+		FROM tblLGWeightClaimStage S WITH (NOLOCK)
+		Left JOIN tblIPMultiCompany MC on MC.intCompanyId=S.intCompanyId
+		WHERE ISNULL(S.strFeedStatus, '') = 'Failed'
+			AND ISNULL(S.ysnMailSent, 0) = 0
+
+		UPDATE tblLGWeightClaimStage
+		SET ysnMailSent = 1
+		WHERE ISNULL(strFeedStatus, '') = 'Failed'
+			AND ISNULL(ysnMailSent, 0) = 0
+	END
+END
+
 SET @strHtml = REPLACE(@strHtml, '@header', @strHeader)
 SET @strHtml = REPLACE(@strHtml, '@detail', @strDetail)
 SET @strMessage = @strStyle + @strHtml
