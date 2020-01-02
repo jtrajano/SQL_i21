@@ -34,10 +34,13 @@ FROM
 		 , USec.strDashboardRole
 		 , USec.intEntityId
 	FROM tblSTTranslogRebates TR
-	JOIN tblSTCheckoutHeader CH 
+	--JOIN tblSTCheckoutHeader CH 
+	LEFT JOIN tblSTCheckoutHeader CH 
 		ON TR.intCheckoutId = CH.intCheckoutId
-	JOIN tblSTStore ST 
-		ON CH.intStoreId = ST.intStoreId
+	--JOIN tblSTStore ST 
+	LEFT JOIN tblSTStore ST 
+		--ON CH.intStoreId = ST.intStoreId
+		ON TR.intStoreId = ST.intStoreId
 	OUTER APPLY tblSMUserSecurity USec
 	INNER JOIN tblSMUserSecurityCompanyLocationRolePermission RolePerm
 		ON USec.intEntityId = RolePerm.intEntityId
@@ -45,4 +48,5 @@ FROM
 	WHERE TR.strTrpPaycode = 'CASH'
 	AND TR.dblTrpAmt > 0
 	--ORDER BY TR.dtmDate OFFSET 0 ROWS
-) TRR 
+) TRR
+GO
