@@ -17,6 +17,10 @@ CREATE PROCEDURE [dbo].[uspICPostCostAdjustmentEscalate]
 	,@strTransactionId AS NVARCHAR(50) 
 	,@EscalateInventoryTransactionTypeId AS INT OUTPUT 
 	,@dblEscalateAvgCost AS NUMERIC(38, 20) = NULL 
+	,@negativeStockStrBatchId AS NVARCHAR(50) = NULL 
+	,@negativeStockIntTransactionId AS INT = NULL 
+	,@negativeStockStrTransactionId AS NVARCHAR(50) = NULL 
+	,@negativeStockIntTransactionDetailId AS INT = NULL 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -99,16 +103,16 @@ SELECT	TOP 1
 		,@EscalateInventoryTransactionTypeId = t.intTransactionTypeId
 FROM	dbo.tblICInventoryTransaction t
 WHERE	@t_dblQty < 0 
-		AND t.strBatchId = @t_strBatchId 
-		AND t.intTransactionId = @t_intTransactionId
-		AND t.strTransactionId = @t_strTransactionId
+		AND t.strBatchId = ISNULL(@negativeStockStrBatchId, @t_strBatchId)
+		AND t.intTransactionId = ISNULL(@negativeStockIntTransactionId, @t_intTransactionId)
+		AND t.strTransactionId = ISNULL(@negativeStockStrTransactionId, @t_strTransactionId)
 		AND ISNULL(t.ysnIsUnposted, 0) = 0
 		AND ISNULL(t.dblQty, 0) > 0
 		AND 1 = 
 			CASE 
-				WHEN t.intTransactionTypeId = @INV_TRANS_TYPE_Inventory_Receipt AND t.intTransactionDetailId = @t_intTransactionDetailId THEN 1
+				WHEN t.intTransactionTypeId = @INV_TRANS_TYPE_Inventory_Receipt AND t.intTransactionDetailId = ISNULL(@negativeStockIntTransactionDetailId, @t_intTransactionDetailId) THEN 1
 				WHEN t.intTransactionTypeId = @INV_TRANS_TYPE_Produce THEN 0
-				WHEN t.intItemId = @t_intItemId AND t.intTransactionDetailId = @t_intTransactionDetailId THEN 1 
+				WHEN t.intItemId = @t_intItemId AND t.intTransactionDetailId = ISNULL(@negativeStockIntTransactionDetailId, @t_intTransactionDetailId) THEN 1 
 				ELSE 0 
 			END 
 
