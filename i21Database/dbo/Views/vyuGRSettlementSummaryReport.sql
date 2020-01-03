@@ -56,7 +56,7 @@ FROM
 		,InboundNetDue					= SUM(
 												CASE 
 													WHEN BillDtl.intInventoryReceiptItemId IS NULL AND BillDtl.intInventoryReceiptChargeId IS NULL THEN 0 
-													ELSE BillDtl.dblTotal + BillDtl.dblTax 
+													ELSE BillDtl.dblTotal + BillDtl.dblTax +BillDtl.dblDiscount
 												END
 											) +
 											( 
@@ -88,12 +88,12 @@ FROM
 										END
 		,lblFactorTax					= 'Factor Tax' COLLATE Latin1_General_CI_AS
 		,dblPartialPrepaymentSubTotal	= CASE 
-											WHEN ISNULL(PartialPayment.dblPayment, 0) <> 0 THEN PartialPayment.dblTotals
+											WHEN ISNULL(PartialPayment.dblPayment, 0) <> 0 THEN PartialPayment.dblPayment 
 											ELSE NULL 
 										END
-		,lblPartialPrepayment			= 'Partial Payment Adj' COLLATE Latin1_General_CI_AS
+		,lblPartialPrepayment			= 'Basis Adv/Debit Memo' COLLATE Latin1_General_CI_AS
 		,dblPartialPrepayment		  = CASE 
-											WHEN ISNULL(PartialPayment.dblPayment, 0) <> 0 THEN PartialPayment.dblPayment - PartialPayment.dblTotals 
+											WHEN ISNULL(PartialPayment.dblPayment, 0) <> 0 THEN PartialPayment.dblPayment -- PartialPayment.dblTotals 
 											ELSE NULL 
 										END
 		,CheckAmount				  = PYMT.dblAmountPaid
@@ -181,12 +181,13 @@ FROM
 	LEFT JOIN (
 		SELECT 
 			intPaymentId
-			,SUM(dblTotal) dblTotals
-			,SUM(dblPayment) dblPayment
-		FROM tblAPPaymentDetail
-		WHERE intBillId IS NOT NULL
+			,SUM(APD.dblTotal) dblTotals
+			,SUM(APD.dblPayment) dblPayment
+		FROM tblAPPaymentDetail APD
+		JOIN tblAPBill APB on APB.intBillId = APD.intBillId
+		WHERE APD.intBillId IS NOT NULL and (APB.intTransactionType = 13 OR APB.intTransactionType = 3)
 		GROUP BY intPaymentId
-		HAVING SUM(dblTotal) <> SUM(dblPayment)
+		HAVING SUM(APD.dblTotal) <> SUM(APD.dblPayment)
 	) PartialPayment ON PartialPayment.intPaymentId = PYMT.intPaymentId
 	WHERE (
 			BillDtl.intInventoryReceiptChargeId IS NOT NULL
@@ -221,11 +222,11 @@ FROM
 		intPaymentId					= PYMT.intPaymentId
 		,strPaymentNo					= PYMT.strPaymentRecordNum
 		,strBillId						= Bill.strBillId
-		,InboundNetWeight				= SUM(BillDtl.dblQtyOrdered)
-		,InboundGrossDollars			= SUM(BillDtl.dblTotal) 
-		,InboundTax						= SUM(BillDtl.dblTax) 
-		,InboundDiscount				= ISNULL(tblOtherCharge.dblTotal, 0)
-		,InboundNetDue					= SUM(BillDtl.dblTotal) + SUM(BillDtl.dblTax) + ISNULL(tblOtherCharge.dblTotal, 0)
+		,InboundNetWeight				= 0
+		,InboundGrossDollars			= 0
+		,InboundTax						= 0
+		,InboundDiscount				= 0
+		,InboundNetDue					= 0
 		,OutboundNetWeight				= 0 
 		,OutboundGrossDollars			= 0 
 		,OutboundTax		            = 0
@@ -249,12 +250,12 @@ FROM
 										END 
 		,lblFactorTax					= 'Factor Tax' COLLATE Latin1_General_CI_AS
 		,dblPartialPrepaymentSubTotal	= CASE 
-											WHEN ISNULL(PartialPayment.dblPayment,0) <> 0 THEN PartialPayment.dblTotals
+											WHEN ISNULL(PartialPayment.dblPayment,0) <> 0 THEN PartialPayment.dblPayment--PartialPayment.dblPayment
 											ELSE NULL 
 										END
-		,lblPartialPrepayment			= 'Partial Payment Adj' COLLATE Latin1_General_CI_AS
+		,lblPartialPrepayment			= 'Basis Adv/Debit Memo' COLLATE Latin1_General_CI_AS
 		,dblPartialPrepayment			= CASE 
-											WHEN ISNULL(PartialPayment.dblPayment,0) <> 0 THEN PartialPayment.dblPayment-PartialPayment.dblTotals 
+											WHEN ISNULL(PartialPayment.dblPayment,0) <> 0 THEN PartialPayment.dblPayment--PartialPayment.dblTotals 
 											ELSE NULL 
 										END
 		,CheckAmount				    = PYMT.dblAmountPaid 		    
@@ -336,12 +337,13 @@ FROM
 	LEFT JOIN (
 		SELECT 
 			intPaymentId
-			,SUM(dblTotal) dblTotals
-			,SUM(dblPayment) dblPayment 
-		FROM tblAPPaymentDetail
-		WHERE intBillId IS NOT NULL
+			,SUM(APD.dblTotal) dblTotals
+			,SUM(APD.dblPayment) dblPayment
+		FROM tblAPPaymentDetail APD
+		JOIN tblAPBill APB on APB.intBillId = APD.intBillId
+		WHERE APD.intBillId IS NOT NULL and (APB.intTransactionType = 13 OR APB.intTransactionType = 3)
 		GROUP BY intPaymentId
-		HAVING SUM(dblTotal) <> SUM(dblPayment)
+		HAVING SUM(APD.dblTotal) <> SUM(APD.dblPayment)
 	) PartialPayment ON PartialPayment.intPaymentId = PYMT.intPaymentId
 	WHERE Item.strType <> 'Other Charge' 
 		AND (intInventoryReceiptChargeId IS NULL AND BillDtl.intInventoryReceiptItemId IS NULL)
