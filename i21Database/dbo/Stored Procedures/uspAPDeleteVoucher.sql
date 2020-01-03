@@ -69,6 +69,13 @@ BEGIN TRY
 		)
 
 		UPDATE tblCTPriceFixationDetailAPAR SET intBillDetailId = NULL , intBillId = NULL WHERE intBillId = @intBillId
+		
+
+		-- we need to set this to null so that it will not be deleted
+		-- the only time we will not delete this is when a pricing is deleted,
+		-- other scenario SHOULD delete the history
+		-- Mon
+		update tblGRStorageHistory set intBillId = null Where intBillId=@intBillId 
 	END
 	--WILL REVERT FIRST THE APPLIED BILL 
 	UPDATE tblAPAppliedPrepaidAndDebit SET intBillDetailApplied = NULL  WHERE intBillId = @intBillId
