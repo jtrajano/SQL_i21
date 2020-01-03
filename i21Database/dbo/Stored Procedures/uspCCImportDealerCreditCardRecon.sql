@@ -75,11 +75,11 @@ BEGIN
 			WHERE DCC.guidImportIdentifier = @guidImportIdentifier AND DCCD.ysnValid = 1
 		END
 
-		-- SUM the Batches to get the Gross, Net, Fees - Applicable for Conoco Philips Format only
+		-- SUM the Batches to get the Gross, Net, Fees - Applicable for Conoco Philips and DCC - Citgo Format only
 		IF EXISTS(SELECT TOP 1 1 FROM tblCCImportDealerCreditCardRecon DCC 
 		INNER JOIN tblSMImportFileHeader FH ON FH.intImportFileHeaderId = DCC.intImportFileHeaderId
 		WHERE DCC.guidImportIdentifier = @guidImportIdentifier 
-		AND FH.strLayoutTitle = 'DCC - Conoco Philips Format')
+		AND FH.strLayoutTitle IN ('DCC - Conoco Philips Format', 'DCC - Citgo Format'))
 		BEGIN
 			UPDATE D SET D.dblGross = A.dblGross, D.dblNet = A.dblNet, D.dblFee = A.dblFee  
 			FROM tblCCImportDealerCreditCardReconDetail D INNER JOIN

@@ -73,6 +73,12 @@ BEGIN
 
 END
 
+GO
+
+DECLARE @LayoutTitle NVARCHAR(100)
+	, @FileHeaderId INT = NULL
+	, @DetailId INT = NULL
+
 -- BP Loyalty Format
 SET @LayoutTitle = 'DCC - BP Loyalty Format'
 IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMImportFileHeader WHERE strLayoutTitle = @LayoutTitle)
@@ -138,6 +144,12 @@ BEGIN
 	VALUES (@FileHeaderId, @DetailId, 5, 'tblCCImportDealerCreditCardReconDetail', 'dblNet', 1, 1)
 
 END
+
+GO
+
+DECLARE @LayoutTitle NVARCHAR(100)
+	, @FileHeaderId INT = NULL
+	, @DetailId INT = NULL
 
 -- Shell Motiva Format
 SET @LayoutTitle = 'DCC - Shell Motiva Format'
@@ -239,8 +251,13 @@ BEGIN
 	INSERT INTO tblSMImportFileColumnDetail (intImportFileHeaderId, intImportFileRecordMarkerId, intLevel, strTable, strColumnName, ysnActive, intConcurrencyId)
 	VALUES (@FileHeaderId, @DetailId, 9, 'tblCCImportDealerCreditCardReconDetail', 'dblBatchNet', 1, 1)
 
-
 END
+
+GO
+
+DECLARE @LayoutTitle NVARCHAR(100)
+	, @FileHeaderId INT = NULL
+	, @DetailId INT = NULL
 
 -- Shell Excentus Format
 SET @LayoutTitle = 'DCC - Shell Excentus Format'
@@ -323,6 +340,12 @@ BEGIN
 	DELETE tblSMImportFileRecordMarker WHERE intImportFileHeaderId = @FileHeaderId AND strRecordMarker = 'Net'
 END
 
+GO
+
+DECLARE @LayoutTitle NVARCHAR(100)
+	, @FileHeaderId INT = NULL
+	, @DetailId INT = NULL
+
 -- Heartland Format
 SET @LayoutTitle = 'DCC - Heartland Format'
 IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMImportFileHeader WHERE strLayoutTitle = @LayoutTitle)
@@ -397,6 +420,12 @@ BEGIN
 	VALUES (@FileHeaderId, @DetailId, 6, 'tblCCImportDealerCreditCardReconDetail', 'dblNet', 1, 1)
 
 END
+
+GO
+
+DECLARE @LayoutTitle NVARCHAR(100)
+	, @FileHeaderId INT = NULL
+	, @DetailId INT = NULL
 
 -- Gulf Format
 SET @LayoutTitle = 'DCC - Gulf Format'
@@ -473,6 +502,11 @@ BEGIN
 
 END
 
+GO
+
+DECLARE @LayoutTitle NVARCHAR(100)
+	, @FileHeaderId INT = NULL
+	, @DetailId INT = NULL
 
 -- Conoco Philips Format
 SET @LayoutTitle = 'DCC - Conoco Philips Format'
@@ -566,3 +600,87 @@ BEGIN
 	VALUES (@FileHeaderId, @DetailId, 8, 'tblCCImportDealerCreditCardReconDetail', 'dblBatchNet', 1, 1)
 
 END
+
+GO
+
+DECLARE @LayoutTitle NVARCHAR(100)
+	, @FileHeaderId INT = NULL
+	, @DetailId INT = NULL
+
+-- Citgo Format
+SET @LayoutTitle = 'DCC - Citgo Format'
+IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMImportFileHeader WHERE strLayoutTitle = @LayoutTitle)
+BEGIN
+	PRINT ('DCC - Citgo Format')
+
+	INSERT INTO tblSMImportFileHeader (strLayoutTitle
+		, strFileType
+		, strFieldDelimiter
+		, ysnActive
+		, intConcurrencyId)
+	VALUES (@LayoutTitle
+		, 'Delimiter'
+		, 'Comma'
+		, 1
+		, 1)
+
+	SET @FileHeaderId = SCOPE_IDENTITY()
+
+	-- Transaction Date
+	INSERT INTO tblSMImportFileRecordMarker (intImportFileHeaderId, strRecordMarker, intRowsToSkip, intPosition, intConcurrencyId) 
+	VALUES (@FileHeaderId, 'Transaction Date', 1, 4, 1)
+
+	SET @DetailId = SCOPE_IDENTITY()
+
+	INSERT INTO tblSMImportFileColumnDetail (intImportFileHeaderId, intImportFileRecordMarkerId, intLevel, strTable, strColumnName, ysnActive, intConcurrencyId)
+	VALUES (@FileHeaderId, @DetailId, 1, 'tblCCImportDealerCreditCardReconDetail', 'dtmTransactionDate', 1, 1)
+
+	-- Site Number
+	INSERT INTO tblSMImportFileRecordMarker (intImportFileHeaderId, strRecordMarker, intRowsToSkip, intPosition, intConcurrencyId) 
+	VALUES (@FileHeaderId, 'Site Number', 1, 0, 1)
+
+	SET @DetailId = SCOPE_IDENTITY()
+
+	INSERT INTO tblSMImportFileColumnDetail (intImportFileHeaderId, intImportFileRecordMarkerId, intLevel, strTable, strColumnName, ysnActive, intConcurrencyId)
+	VALUES (@FileHeaderId, @DetailId, 2, 'tblCCImportDealerCreditCardReconDetail', 'strSiteNumber', 1, 1)
+
+	-- Batch Number
+	INSERT INTO tblSMImportFileRecordMarker (intImportFileHeaderId, strRecordMarker, intRowsToSkip, intPosition, intConcurrencyId) 
+	VALUES (@FileHeaderId, 'Batch Number', 1, 2, 1)
+
+	SET @DetailId = SCOPE_IDENTITY()
+
+	INSERT INTO tblSMImportFileColumnDetail (intImportFileHeaderId, intImportFileRecordMarkerId, intLevel, strTable, strColumnName, ysnActive, intConcurrencyId)
+	VALUES (@FileHeaderId, @DetailId, 3, 'tblCCImportDealerCreditCardReconDetail', 'strBatchNumber', 1, 1)
+
+	-- Batch Gross
+	INSERT INTO tblSMImportFileRecordMarker (intImportFileHeaderId, strRecordMarker, intRowsToSkip, intPosition, intConcurrencyId) 
+	VALUES (@FileHeaderId, 'Batch Gross', 1, 7, 1)
+
+	SET @DetailId = SCOPE_IDENTITY()
+
+	INSERT INTO tblSMImportFileColumnDetail (intImportFileHeaderId, intImportFileRecordMarkerId, intLevel, strTable, strColumnName, ysnActive, intConcurrencyId)
+	VALUES (@FileHeaderId, @DetailId, 4, 'tblCCImportDealerCreditCardReconDetail', 'dblBatchGross', 1, 1)
+
+	-- Batch Fee
+	INSERT INTO tblSMImportFileRecordMarker (intImportFileHeaderId, strRecordMarker, intRowsToSkip, intPosition, intConcurrencyId) 
+	VALUES (@FileHeaderId, 'Batch Transaction Fee', 1, 8, 1)
+
+	SET @DetailId = SCOPE_IDENTITY()
+
+	INSERT INTO tblSMImportFileColumnDetail (intImportFileHeaderId, intImportFileRecordMarkerId, intLevel, strTable, strColumnName, ysnActive, intConcurrencyId)
+	VALUES (@FileHeaderId, @DetailId, 5, 'tblCCImportDealerCreditCardReconDetail', 'dblBatchFee', 1, 1)
+	
+	-- Batch Net
+	INSERT INTO tblSMImportFileRecordMarker (intImportFileHeaderId, strRecordMarker, intRowsToSkip, intPosition, intConcurrencyId) 
+	VALUES (@FileHeaderId, 'Batch Net', 1, 9, 1)
+
+	SET @DetailId = SCOPE_IDENTITY()
+
+	INSERT INTO tblSMImportFileColumnDetail (intImportFileHeaderId, intImportFileRecordMarkerId, intLevel, strTable, strColumnName, ysnActive, intConcurrencyId)
+	VALUES (@FileHeaderId, @DetailId, 6, 'tblCCImportDealerCreditCardReconDetail', 'dblBatchNet', 1, 1)
+
+END
+
+GO
+
