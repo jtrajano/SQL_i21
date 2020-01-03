@@ -148,7 +148,7 @@ BEGIN TRY
 
 	SELECT @List = NULL
 
-	SELECT  DA.intInvoiceId AS Id, FT.intDetailId AS DetailId
+	SELECT  DA.intInvoiceId AS Id, isnull(FT.intDetailId,DA.intInvoiceDetailId) AS DetailId
 	INTO	#ItemInvoice
 	FROM	tblCTPriceFixationDetailAPAR	DA	LEFT
 	JOIN    vyuCTPriceFixationTicket        FT	ON  FT.intDetailId				=   DA.intInvoiceDetailId
@@ -160,6 +160,29 @@ BEGIN TRY
 	-- Perfomance hit
 	AND		ISNULL(FT.intPriceFixationTicketId, 0)	=   CASE WHEN @intPriceFixationTicketId IS NOT NULL THEN @intPriceFixationTicketId ELSE ISNULL(FT.intPriceFixationTicketId,0) END
 	AND		ISNULL(IV.ysnPosted,0) = 0
+
+	 if (@intPriceFixationId is null or @intPriceFixationId < 1)
+	 begin
+		select @intPriceFixationId = intPriceFixationId from tblCTPriceFixationDetail where intPriceFixationDetailId = @intPriceFixationDetailId;
+	 end
+
+	UPDATE	CD
+	SET		CD.dblBasis				=	ISNULL(CD.dblOriginalBasis,0),
+			CD.intFutureMarketId	=	PF.intOriginalFutureMarketId,
+			CD.intFutureMonthId		=	PF.intOriginalFutureMonthId,
+			CD.intPricingTypeId		=	CASE WHEN CH.intPricingTypeId <> 8 THEN 2 ELSE 8 END,
+			CD.dblFutures			=	NULL,
+			CD.dblCashPrice			=	NULL,
+			CD.dblTotalCost			=	NULL,
+			CD.intConcurrencyId		=	CD.intConcurrencyId + 1
+	FROM	tblCTContractDetail	CD
+	JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId
+	JOIN	tblCTPriceFixation	PF	ON	CD.intContractDetailId = PF.intContractDetailId OR CD.intSplitFromId = PF.intContractDetailId
+	AND EXISTS(SELECT * FROM tblCTPriceFixation WHERE intContractDetailId = ISNULL(CD.intContractDetailId,0))
+	WHERE	PF.intPriceFixationId	=	@intPriceFixationId
+
+	select @intContractHeaderId = intContractHeaderId, @intCOntractDetailId = intContractDetailId from tblCTPriceFixation where intPriceFixationId = @intPriceFixationId;
+	exec uspCTCreateDetailHistory @intContractHeaderId,@intCOntractDetailId,null,null;
 
 	SELECT @Id = MIN(Id), @DetailId = MIN(DetailId) FROM #ItemInvoice
 	WHILE ISNULL(@Id,0) > 0
