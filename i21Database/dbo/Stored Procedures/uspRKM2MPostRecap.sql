@@ -10,7 +10,24 @@ BEGIN
 	
 	IF EXISTS(SELECT TOP 1 1 FROM tblRKM2MPostRecap WHERE intM2MInquiryId = @intM2MInquiryId)
 	RETURN
-	
+
+	DECLARE @dtmGLPostDate DATETIME
+	DECLARE @intCommodityId INT
+	DECLARE @Todate DATETIME
+	DECLARE @intUnitMeasureId INT
+	DECLARE @intLocationId INT
+	DECLARE @strRateType NVARCHAR(50)
+	SELECT @dtmGLPostDate = ISNULL(dtmGLPostDate, GETDATE())
+		, @intCurrencyId = intCurrencyId
+		, @intCommodityId = intCommodityId
+		, @Todate = dtmTransactionUpTo
+		, @strRecordName = strRecordName
+		, @intLocationId = intCompanyLocationId
+		, @intUnitMeasureId = intUnitMeasureId
+		, @strRateType = strRateType
+	FROM tblRKM2MInquiry WHERE intM2MInquiryId = @intM2MInquiryId
+
+
 	DECLARE @intUnrealizedGainOnBasisId INT
 		, @intUnrealizedGainOnFuturesId INT
 		, @intUnrealizedGainOnCashId INT
@@ -31,27 +48,57 @@ BEGIN
 		, @intUnrealizedLossOnInventoryRatioIOSId INT
 		, @intUnrealizedGainOnInventoryIOSId INT
 		, @intUnrealizedLossOnInventoryIOSId INT
-	SELECT @intUnrealizedGainOnBasisId = intUnrealizedGainOnBasisId
-		, @intUnrealizedGainOnFuturesId = intUnrealizedGainOnFuturesId
-		, @intUnrealizedGainOnCashId = intUnrealizedGainOnCashId
-		, @intUnrealizedLossOnBasisId = intUnrealizedLossOnBasisId
-		, @intUnrealizedLossOnFuturesId = intUnrealizedLossOnFuturesId
-		, @intUnrealizedLossOnCashId = intUnrealizedLossOnCashId
-		, @intUnrealizedGainOnInventoryBasisIOSId = intUnrealizedGainOnInventoryBasisIOSId
-		, @intUnrealizedGainOnInventoryFuturesIOSId = intUnrealizedGainOnInventoryFuturesIOSId
-		, @intUnrealizedGainOnInventoryCashIOSId = intUnrealizedGainOnInventoryCashIOSId
-		, @intUnrealizedLossOnInventoryBasisIOSId = intUnrealizedLossOnInventoryBasisIOSId
-		, @intUnrealizedLossOnInventoryFuturesIOSId = intUnrealizedLossOnInventoryFuturesIOSId
- 		, @intUnrealizedLossOnInventoryCashIOSId = intUnrealizedLossOnInventoryCashIOSId
-		, @intUnrealizedGainOnInventoryIntransitIOSId= intUnrealizedGainOnInventoryIntransitIOSId
- 		, @intUnrealizedLossOnInventoryIntransitIOSId = intUnrealizedLossOnInventoryIntransitIOSId
-		, @intUnrealizedGainOnRatioId = intUnrealizedGainOnRatioId
-		, @intUnrealizedLossOnRatioId = intUnrealizedLossOnRatioId
-		, @intUnrealizedGainOnInventoryRatioIOSId = intUnrealizedGainOnInventoryRatioIOSId
-		, @intUnrealizedLossOnInventoryRatioIOSId = intUnrealizedLossOnInventoryRatioIOSId 
-		, @intUnrealizedGainOnInventoryIOSId = intUnrealizedGainOnInventoryIOSId
-		, @intUnrealizedLossOnInventoryIOSId = intUnrealizedLossOnInventoryIOSId 
-	FROM tblRKCompanyPreference
+
+
+	IF (SELECT intPostToGLId FROM tblRKCompanyPreference) = 1
+	BEGIN
+
+		SELECT @intUnrealizedGainOnBasisId = intUnrealizedGainOnBasisId
+			, @intUnrealizedGainOnFuturesId = intUnrealizedGainOnFuturesId
+			, @intUnrealizedGainOnCashId = intUnrealizedGainOnCashId
+			, @intUnrealizedLossOnBasisId = intUnrealizedLossOnBasisId
+			, @intUnrealizedLossOnFuturesId = intUnrealizedLossOnFuturesId
+			, @intUnrealizedLossOnCashId = intUnrealizedLossOnCashId
+			, @intUnrealizedGainOnInventoryBasisIOSId = intUnrealizedGainOnInventoryBasisIOSId
+			, @intUnrealizedGainOnInventoryFuturesIOSId = intUnrealizedGainOnInventoryFuturesIOSId
+			, @intUnrealizedGainOnInventoryCashIOSId = intUnrealizedGainOnInventoryCashIOSId
+			, @intUnrealizedLossOnInventoryBasisIOSId = intUnrealizedLossOnInventoryBasisIOSId
+			, @intUnrealizedLossOnInventoryFuturesIOSId = intUnrealizedLossOnInventoryFuturesIOSId
+ 			, @intUnrealizedLossOnInventoryCashIOSId = intUnrealizedLossOnInventoryCashIOSId
+			, @intUnrealizedGainOnInventoryIntransitIOSId= intUnrealizedGainOnInventoryIntransitIOSId
+ 			, @intUnrealizedLossOnInventoryIntransitIOSId = intUnrealizedLossOnInventoryIntransitIOSId
+			, @intUnrealizedGainOnRatioId = intUnrealizedGainOnRatioId
+			, @intUnrealizedLossOnRatioId = intUnrealizedLossOnRatioId
+			, @intUnrealizedGainOnInventoryRatioIOSId = intUnrealizedGainOnInventoryRatioIOSId
+			, @intUnrealizedLossOnInventoryRatioIOSId = intUnrealizedLossOnInventoryRatioIOSId 
+			, @intUnrealizedGainOnInventoryIOSId = intUnrealizedGainOnInventoryIOSId
+			, @intUnrealizedLossOnInventoryIOSId = intUnrealizedLossOnInventoryIOSId 
+		FROM tblRKCompanyPreference
+	
+	END 
+	ELSE
+	BEGIN
+		SELECT @intUnrealizedGainOnBasisId = dbo.fnGetCommodityGLAccountM2M(DEFAULT,@intCommodityId,'Unrealized Gain on Basis')
+			, @intUnrealizedGainOnFuturesId = dbo.fnGetCommodityGLAccountM2M(DEFAULT,@intCommodityId,'Unrealized Gain on Futures')
+			, @intUnrealizedGainOnCashId = dbo.fnGetCommodityGLAccountM2M(DEFAULT,@intCommodityId,'Unrealized Gain on Cash')
+			, @intUnrealizedGainOnRatioId = dbo.fnGetCommodityGLAccountM2M(DEFAULT,@intCommodityId,'Unrealized Gain on Ratio')
+			, @intUnrealizedLossOnBasisId = dbo.fnGetCommodityGLAccountM2M(DEFAULT,@intCommodityId,'Unrealized Loss on Basis')
+			, @intUnrealizedLossOnFuturesId = dbo.fnGetCommodityGLAccountM2M(DEFAULT,@intCommodityId,'Unrealized Loss on Futures')
+			, @intUnrealizedLossOnCashId = dbo.fnGetCommodityGLAccountM2M(DEFAULT,@intCommodityId,'Unrealized Loss on Cash')
+			, @intUnrealizedLossOnRatioId = dbo.fnGetCommodityGLAccountM2M(DEFAULT,@intCommodityId,'Unrealized Loss on Ratio')
+			, @intUnrealizedGainOnInventoryBasisIOSId = dbo.fnGetCommodityGLAccountM2M(DEFAULT,@intCommodityId,'Unrealized Gain on Basis (Inventory Offset)')
+			, @intUnrealizedGainOnInventoryFuturesIOSId = dbo.fnGetCommodityGLAccountM2M(DEFAULT,@intCommodityId,'Unrealized Gain on Futures (Inventory Offset)')
+			, @intUnrealizedGainOnInventoryCashIOSId = dbo.fnGetCommodityGLAccountM2M(DEFAULT,@intCommodityId,'Unrealized Gain on Cash (Inventory Offset)')
+			, @intUnrealizedGainOnInventoryRatioIOSId = dbo.fnGetCommodityGLAccountM2M(DEFAULT,@intCommodityId,'Unrealized Gain on Ratio (Inventory Offset)')
+			, @intUnrealizedGainOnInventoryIntransitIOSId= dbo.fnGetCommodityGLAccountM2M(DEFAULT,@intCommodityId,'Unrealized Gain on Intransit (Inventory Offset)')
+			, @intUnrealizedGainOnInventoryIOSId = dbo.fnGetCommodityGLAccountM2M(DEFAULT,@intCommodityId,'Unrealized Gain on Inventory (Inventory Offset)')
+			, @intUnrealizedLossOnInventoryBasisIOSId = dbo.fnGetCommodityGLAccountM2M(DEFAULT,@intCommodityId,'Unrealized Loss on Basis (Inventory Offset)')
+			, @intUnrealizedLossOnInventoryFuturesIOSId = dbo.fnGetCommodityGLAccountM2M(DEFAULT,@intCommodityId,'Unrealized Loss on Futures (Inventory Offset)')
+ 			, @intUnrealizedLossOnInventoryCashIOSId = dbo.fnGetCommodityGLAccountM2M(DEFAULT,@intCommodityId,'Unrealized Loss on Cash (Inventory Offset)')
+			, @intUnrealizedLossOnInventoryRatioIOSId = dbo.fnGetCommodityGLAccountM2M(DEFAULT,@intCommodityId,'Unrealized Loss on Ratio (Inventory Offset)') 
+ 			, @intUnrealizedLossOnInventoryIntransitIOSId = dbo.fnGetCommodityGLAccountM2M(DEFAULT,@intCommodityId,'Unrealized Loss on Intransit (Inventory Offset)')
+			, @intUnrealizedLossOnInventoryIOSId = dbo.fnGetCommodityGLAccountM2M(DEFAULT,@intCommodityId,'Unrealized Loss on Inventory (Inventory Offset)') 
+	END
 	
 	DECLARE @strUnrealizedGainOnBasisId NVARCHAR(50)
 		, @strUnrealizedGainOnFuturesId NVARCHAR(50)
@@ -75,7 +122,7 @@ BEGIN
 		, @strUnrealizedLossOnInventoryIOSId NVARCHAR(50)
 
 	SELECT @strUnrealizedGainOnBasisId = strAccountId FROM tblGLAccount WHERE intAccountId = @intUnrealizedGainOnBasisId
-	SELECT @strUnrealizedGainOnFuturesId = strAccountId FROM tblGLAccount WHERE intAccountId = @intUnrealizedGainOnCashId
+	SELECT @strUnrealizedGainOnFuturesId = strAccountId FROM tblGLAccount WHERE intAccountId = @intUnrealizedGainOnFuturesId
 	SELECT @strUnrealizedGainOnCashId = strAccountId FROM tblGLAccount WHERE intAccountId = @intUnrealizedGainOnCashId
 	SELECT @strUnrealizedLossOnBasisId = strAccountId FROM tblGLAccount WHERE intAccountId = @intUnrealizedLossOnBasisId
 	SELECT @strUnrealizedLossOnFuturesId = strAccountId FROM tblGLAccount WHERE intAccountId = @intUnrealizedLossOnFuturesId
@@ -95,21 +142,7 @@ BEGIN
 	SELECT @strUnrealizedGainOnInventoryIOSId = strAccountId FROM tblGLAccount WHERE intAccountId = @intUnrealizedGainOnInventoryIOSId
 	SELECT @strUnrealizedLossOnInventoryIOSId = strAccountId FROM tblGLAccount WHERE intAccountId = @intUnrealizedLossOnInventoryIOSId
 
-	DECLARE @dtmGLPostDate DATETIME
-	DECLARE @intCommodityId INT
-	DECLARE @Todate DATETIME
-	DECLARE @intUnitMeasureId INT
-	DECLARE @intLocationId INT
-	DECLARE @strRateType NVARCHAR(50)
-	SELECT @dtmGLPostDate = ISNULL(dtmGLPostDate, GETDATE())
-		, @intCurrencyId = intCurrencyId
-		, @intCommodityId = intCommodityId
-		, @Todate = dtmTransactionUpTo
-		, @strRecordName = strRecordName
-		, @intLocationId = intCompanyLocationId
-		, @intUnitMeasureId = intUnitMeasureId
-		, @strRateType = strRateType
-	FROM tblRKM2MInquiry WHERE intM2MInquiryId = @intM2MInquiryId
+
 	
 	IF @strRateType = 'Stress Test' RETURN
 	----Derivative unrealized start
@@ -800,6 +833,11 @@ BEGIN
 	JOIN tblEMEntity e on t.strName = e.strName
 	WHERE ISNULL(dblGrossPnL,0) <> 0
 
+	--No need this if Post to GL Using Commodity GL
+	IF (SELECT intPostToGLId FROM tblRKCompanyPreference) = 2
+	BEGIN
+		RETURN
+	END
 	--=====================================================================
 	--		Update the proper GL Account for each transaction
 	--		Set null if GL Account not exist
@@ -951,4 +989,5 @@ BEGIN
 		END	
 		DELETE FROM #tmpPostRecap WHERE intM2MTransactionId = @intM2MTransactionId
 	END
+
 END
