@@ -17,7 +17,9 @@ BEGIN TRY
 			@BillDetailId	INT,
 			@ItemId			INT,
 			@Quantity		NUMERIC(18,6),
-			@ysnSuccess		BIT;
+			@ysnSuccess		BIT,
+			@intContractHeaderId int,
+			@intCOntractDetailId int;
 	
 	DECLARE @tblItemBillDetail TABLE
 	(
