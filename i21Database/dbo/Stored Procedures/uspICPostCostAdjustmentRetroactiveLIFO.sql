@@ -382,7 +382,6 @@ BEGIN
 					tblICInventoryLIFO cb
 				WHERE
 					cb.intInventoryLIFOId = cbOut.intRevalueLifoId
-					AND cbOut.intRevalueLifoId IS NOT NULL 
 			) cbRevalue
 			OUTER APPLY (
 				SELECT TOP 1 
@@ -396,7 +395,6 @@ BEGIN
 				WHERE
 					tRevalue.strTransactionId = cbRevalue.strTransactionId
 					AND tRevalue.intTransactionId = cbRevalue.intTransactionId
-					AND tRevalue.intTransactionDetailId = cbRevalue.intTransactionDetailId
 					AND tRevalue.intItemId = cbRevalue.intItemId
 					AND tRevalue.intItemLocationId = cbRevalue.intItemLocationId
 					AND tRevalue.intItemUOMId = cbRevalue.intItemUOMId
