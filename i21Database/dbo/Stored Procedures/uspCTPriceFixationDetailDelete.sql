@@ -16,7 +16,9 @@ BEGIN TRY
 			@voucherIds		AS Id,
 			@BillDetailId	INT,
 			@ItemId			INT,
-			@Quantity		NUMERIC(18,6);
+			@Quantity		NUMERIC(18,6),
+			   @intContractHeaderId int,
+			   @intCOntractDetailId int;
 	
 	DECLARE @tblItemBillDetail TABLE
 	(
