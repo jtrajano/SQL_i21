@@ -515,11 +515,6 @@ OUTER APPLY (
 		FOR XML PATH ('')
 	) INV (strTicketNumber)
 ) SCALETICKETS
--- LEFT JOIN(
--- 	SELECT intInvoiceId, strAddonDetailKey 
--- 	FROM dbo.tblARInvoiceDetail WITH(NOLOCK)
--- 	WHERE  ysnAddonParent = 0
--- ) ADDON ON INV.intInvoiceId = ADDON.intInvoiceId AND ADDON.strAddonDetailKey =  INVOICEDETAIL.strAddonDetailKey
 OUTER APPLY (
 	SELECT strCustomerComments = LEFT(strMessage, LEN(strMessage) - 1)
 	FROM (
@@ -553,3 +548,10 @@ WHERE STAGING.intEntityUserId = @intEntityUserId
   AND STAGING.strInvoiceFormat <> 'Format 1 - MCP' 
 
 EXEC dbo.uspARInvoiceDetailTaxReport @intEntityUserId, @strRequestId
+
+DELETE FROM tblARInvoiceTaxReportStagingTable 
+WHERE intEntityUserId = @intEntityUserId 
+  AND strRequestId = @strRequestId 
+  AND ysnIncludeInvoicePrice = 1
+  AND strInvoiceType = 'Transport Delivery'
+  AND strInvoiceFormat NOT IN ('Format 1 - MCP', 'Format 5 - Honstein')

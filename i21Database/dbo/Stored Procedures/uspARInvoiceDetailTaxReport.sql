@@ -24,6 +24,7 @@ INSERT INTO tblARInvoiceTaxReportStagingTable (
 	, [dblRate]
 	, [dblTaxPerQty]
 	, [dblComputedGrossPrice]
+	, [ysnIncludeInvoicePrice]
 )
 SELECT [intTransactionId]			= ID.intInvoiceId
 	, [intTransactionDetailId]		= IDT.intInvoiceDetailId
@@ -42,6 +43,7 @@ SELECT [intTransactionId]			= ID.intInvoiceId
 	, [dblRate]						= IDT.dblRate
 	, [dblTaxPerQty]				= CASE WHEN ISNULL(ID.dblQtyShipped, 0) <> 0 THEN IDT.dblAdjustedTax / ID.dblQtyShipped ELSE 0 END
 	, [dblComputedGrossPrice]		= ISNULL(ID.dblComputedGrossPrice, 0)	
+	, [ysnIncludeInvoicePrice]		= ISNULL(SMT.ysnIncludeInvoicePrice, 0)
 FROM tblARInvoiceDetailTax IDT 	
 INNER JOIN tblARInvoiceDetail ID ON IDT.intInvoiceDetailId = ID.intInvoiceDetailId
 INNER JOIN (

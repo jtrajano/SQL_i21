@@ -1,5 +1,4 @@
-﻿
-CREATE PROCEDURE [dbo].[uspCFSyncInvoiceFormat]
+﻿CREATE PROCEDURE [dbo].[uspCFSyncInvoiceFormat]
 		@strInvoiceNumber NVARCHAR(MAX),
 		@intCustomerId	  INT  
 		AS 
@@ -21,9 +20,15 @@ BEGIN
 	DECLARE @ysnSummaryByDepartment				BIT
 	DECLARE @ysnSummaryByDeptCardProd			BIT
 	DECLARE @ysnSummaryByDeptVehicleProd		BIT
+	DECLARE @ysnSummaryByDriverPin				BIT
 	DECLARE @ysnPrintTimeOnInvoices				BIT
 	DECLARE @ysnPrintTimeOnReports				BIT
 	DECLARE @ysnPrintMiscellaneous				BIT
+	DECLARE @ysnShowDriverPinDescriptionOnly	BIT
+	DECLARE @ysnShowVehicleDescriptionOnly		BIT
+	DECLARE @ysnPageBreakByPrimarySortOrder		BIT
+	
+
 
 	--===GET LATEST ACCOUNT INVOICE FORMATTING===--
 	SELECT TOP 1
@@ -45,7 +50,12 @@ BEGIN
 	,@ysnPrintTimeOnInvoices			 =  ysnPrintTimeOnInvoices		
 	,@ysnPrintTimeOnReports				 =  ysnPrintTimeOnReports		
 	,@ysnPrintMiscellaneous				 =  ysnPrintMiscellaneous
+	,@ysnSummaryByDriverPin				 =  ysnSummaryByDriverPin
 	,@strDetailDisplay					 =  strDetailDisplay
+	,@ysnShowDriverPinDescriptionOnly	 =  ysnShowDriverPinDescriptionOnly
+	,@ysnShowVehicleDescriptionOnly		 =  ysnShowVehicleDescriptionOnly
+	,@ysnPageBreakByPrimarySortOrder	 =  ysnPageBreakByPrimarySortOrder
+	
 	FROM tblCFAccount
 	WHERE intCustomerId = @intCustomerId
 	
@@ -71,6 +81,51 @@ BEGIN
 	,ysnPrintTimeOnInvoices			  = 	 @ysnPrintTimeOnInvoices		
 	,ysnPrintTimeOnReports			  = 	 @ysnPrintTimeOnReports			
 	,ysnPrintMiscellaneous			  = 	 @ysnPrintMiscellaneous			
+	,ysnShowDriverPinDescriptionOnly  =		 @ysnShowDriverPinDescriptionOnly
+	,ysnShowVehicleDescriptionOnly	  =		 @ysnShowVehicleDescriptionOnly
+	,ysnSummaryByDriverPin			  =		 @ysnSummaryByDriverPin
+	,ysnPageBreakByPrimarySortOrder	  =		 @ysnPageBreakByPrimarySortOrder
+	WHERE strInvoiceNumberHistory = @strInvoiceNumber
+
+	UPDATE tblCFInvoiceHistoryStagingTable  
+	SET
+	strDetailDisplayValue			= CASE WHEN LOWER(strDetailDisplay) = 'card'
+									THEN strCardNumber + ' - ' + strCardDescription
+
+								  WHEN LOWER(strDetailDisplay) = 'vehicle'
+									THEN (CASE	
+											WHEN ISNULL(strVehicleNumber,'') != '' THEN 
+												CASE WHEN ISNULL(ysnShowVehicleDescriptionOnly,0) = 0 THEN strVehicleNumber + ' - ' + strVehicleDescription ELSE strVehicleDescription END
+											ELSE (CASE	
+													WHEN LOWER(strPrimarySortOptions) = 'card' THEN 
+														CASE WHEN ISNULL(ysnShowDriverPinDescriptionOnly,0) = 0 THEN strDriverPinNumber + ' - ' + strDriverDescription ELSE strDriverDescription END
+													WHEN LOWER(strPrimarySortOptions) = 'driverpin' THEN strCardNumber + ' - ' + strCardDescription
+													WHEN LOWER(strPrimarySortOptions) = 'driver pin' THEN strCardNumber + ' - ' + strCardDescription
+													WHEN LOWER(strPrimarySortOptions) = 'miscellaneous' THEN 
+														CASE WHEN ISNULL(ysnShowDriverPinDescriptionOnly,0) = 0 THEN strDriverPinNumber + ' - ' + strDriverDescription ELSE strDriverDescription END
+												  END)
+										  END)
+
+								  WHEN LOWER(strDetailDisplay) = 'driverpin' OR LOWER(strDetailDisplay) = 'driver pin' 
+									THEN (CASE
+											WHEN ISNULL(strDriverPinNumber,'') != '' THEN
+												CASE WHEN ISNULL(ysnShowDriverPinDescriptionOnly,0) = 0 THEN strDriverPinNumber + ' - ' + strDriverDescription ELSE strDriverDescription END
+											ELSE (CASE 
+													WHEN LOWER(strPrimarySortOptions) = 'card' THEN CASE WHEN ISNULL(ysnShowVehicleDescriptionOnly,0) = 0 THEN strVehicleNumber + ' - ' + strVehicleDescription ELSE strVehicleDescription END
+													WHEN LOWER(strPrimarySortOptions) = 'vehicle' THEN strCardNumber + ' - ' + strCardDescription
+													WHEN LOWER(strPrimarySortOptions) = 'miscellaneous' THEN CASE WHEN ISNULL(ysnShowVehicleDescriptionOnly,0) = 0 THEN strVehicleNumber + ' - ' + strVehicleDescription ELSE strVehicleDescription END
+												  END)
+											END)
+							 END
+	,strDetailDisplayLabel = CASE WHEN LOWER(strDetailDisplay) = 'card'
+									THEN 'Card'
+
+								  WHEN LOWER(strDetailDisplay) = 'vehicle'
+									THEN 'Vehicle'
+
+								  WHEN LOWER(strDetailDisplay) = 'driverpin' OR LOWER(strDetailDisplay) = 'driver pin' 
+									THEN  'Driver Pin'
+							 END
 	WHERE strInvoiceNumberHistory = @strInvoiceNumber
 
 	--SELECT @@ROWCOUNT

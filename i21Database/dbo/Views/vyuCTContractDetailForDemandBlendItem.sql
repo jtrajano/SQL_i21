@@ -16,5 +16,5 @@ JOIN [dbo].[tblMFRecipe] R ON R.intRecipeId = RI.intRecipeId
 	AND R.ysnActive = 1
 	AND RI.intRecipeItemTypeId = 1
 JOIN vyuCTContractDetailView CD ON CD.intItemId = R.intItemId
-	AND CD.intContractStatusId = 1
+	AND CD.intContractStatusId IN (1, 4)
 	AND CD.dblBalanceInItemStockUOM > 0

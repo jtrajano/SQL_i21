@@ -196,6 +196,7 @@ JOIN tblICUnitMeasure WUOM ON WUOM.intUnitMeasureId = L.intWeightUnitMeasureId
 JOIN tblICItem I ON I.intItemId = CD.intItemId
 JOIN (
 	SELECT TOP 1 LOD.intPCompanyLocationId
+		,LOD.intPContractDetailId
 		,LOD.intVendorEntityId
 		,LOD.intVendorEntityLocationId
 		,LOD.intLoadId
@@ -209,8 +210,9 @@ JOIN (
 		,LOD.intLoadDetailId
 	FROM tblLGLoadDetail LOD
 	WHERE LOD.intLoadId = @intLoadId
-	) LD ON ISNULL(LD.intVendorEntityId, LD.intCustomerEntityId) = E.intEntityId
-LEFT JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = ISNULL(LD.intVendorEntityLocationId, E.intDefaultLocationId)
+	) LD ON WCD.intContractDetailId = LD.intPContractDetailId
+LEFT JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = CASE WHEN LD.intVendorEntityId <> WCD.intPartyEntityId THEN E.intDefaultLocationId 
+																ELSE ISNULL(LD.intVendorEntityLocationId, E.intDefaultLocationId) END
 LEFT JOIN tblAPBill B ON B.intBillId = WCD.intBillId
 LEFT JOIN vyuCMBankAccount BA ON BA.intBankAccountId = B.intBankInfoId
 LEFT JOIN tblEMEntity ShippingLine ON ShippingLine.intEntityId = L.intShippingLineEntityId

@@ -303,7 +303,7 @@ BEGIN TRY
 		SELECT @intPrevApprovedContractId = NULL, @intLastApprovedContractId = NULL
 		SELECT TOP 1 @intLastApprovedContractId =  intApprovedContractId,@dtmApproved = dtmApproved 
 		FROM   tblCTApprovedContract  WITH (NOLOCK)
-		WHERE  intContractDetailId = @intContractDetailId AND strApprovalType IN ('Contract Amendment ') AND ysnApproved = 1
+		WHERE  intContractDetailId = @intContractDetailId AND strApprovalType IN ('Amendment and Approvals','Contract Amendment ') AND ysnApproved = 1
 		ORDER BY intApprovedContractId DESC
 
 		SELECT TOP 1 @intPrevApprovedContractId =  intApprovedContractId

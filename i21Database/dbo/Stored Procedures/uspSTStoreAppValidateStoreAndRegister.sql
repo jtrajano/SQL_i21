@@ -9,6 +9,12 @@
 	, @intPeriodNum AS INT OUTPUT
 	, @intSetNum AS INT OUTPUT
 	, @strPullTime AS NVARCHAR(30) OUTPUT
+	
+	-- , @ysnAutoUpdatePassword AS BIT OUTPUT
+	--, @dtmLastPasswordChangeDate AS DATETIME OUTPUT
+	--, @strBasePassword AS NVARCHAR(100) OUTPUT
+	--, @intPasswordIntervalDays AS INT OUTPUT
+	--, @intPasswordIncrementNo AS INT OUTPUT
 AS
 BEGIN
 	BEGIN TRY
@@ -32,20 +38,30 @@ BEGIN
 
 		-- Get Register Class if exists
 		SELECT 
-			@strRegisterClass = ISNULL(strRegisterClass, '')
-			, @strRegisterIPAddress = ISNULL(strSapphireIpAddress, '')
-			, @strRegisterUsername = ISNULL(strSAPPHIREUserName, '')
-			, @strRegisterPassword = ISNULL(strSAPPHIREPassword, '')
-			, @intPeriodNum = ISNULL(intSAPPHIRECheckoutPullTimePeriodId, 0)
-			, @intSetNum = ISNULL(intSAPPHIRECheckoutPullTimeSetId, 0)
-			, @strPullTime = ISNULL(strSAPPHIRECheckoutPullTime, '')
+			@strRegisterClass = ISNULL(Reg.strRegisterClass, '')
+			, @strRegisterIPAddress = ISNULL(Reg.strSapphireIpAddress, '')
+			, @strRegisterUsername = ISNULL(Reg.strSAPPHIREUserName, '')
+			, @strRegisterPassword = ISNULL(dbo.fnAESDecryptASym(Reg.strSAPPHIREPassword), '')
+			, @intPeriodNum = ISNULL(Reg.intSAPPHIRECheckoutPullTimePeriodId, 0)
+			, @intSetNum = ISNULL(Reg.intSAPPHIRECheckoutPullTimeSetId, 0)
+			, @strPullTime = ISNULL(Reg.strSAPPHIRECheckoutPullTime, '')
+
+			--, @ysnAutoUpdatePassword = ISNULL(Reg.ysnSAPPHIREAutoUpdatePassword, 0)
+			--, @dtmLastPasswordChangeDate = ISNULL(Reg.dtmSAPPHIRELastPasswordChangeDate, GETDATE())
+			--, @strBasePassword = ISNULL(dbo.fnAESDecryptASym(Reg.strSAPPHIREBasePassword), '')
+			--, @intPasswordIntervalDays = Reg.intSAPPHIREPasswordIntervalDays
+			--, @intPasswordIncrementNo = Reg.intSAPPHIREPasswordIncrementNo
 		FROM tblSTRegister Reg
 		JOIN tblSTStore ST
 			ON Reg.intRegisterId = ST.intRegisterId
 		WHERE ST.intStoreNo = @intStoreNo
 
 		-- Convert to TIME, example: '4:00:00 AM'
-		SET @strPullTime = LTRIM(RIGHT(CONVERT(CHAR(20), CAST((@strPullTime) AS DATETIME), 22), 11))
+		IF (@strPullTime != '')
+			BEGIN
+				SET @strPullTime = LTRIM(RIGHT(CONVERT(CHAR(20), CAST((@strPullTime) AS DATETIME), 22), 11))
+			END
+		
 
 		--IF(@strRegisterClass IN ('PASSPORT', 'RADIANT'))
 		--	BEGIN
@@ -93,6 +109,10 @@ BEGIN
 				SELECT 'Register ' + @strRegisterClass + ' is not configured for Shared Drive transaction'
 			END
 
+
+
+
+
 		-- Check Register has Shared Drive folder path (Inbound)
 		ELSE IF NOT EXISTS
 		(
@@ -128,6 +148,10 @@ BEGIN
 				)
 				SELECT 'Register ' + ISNULL(@strRegisterClass, '') + ' does not have setup for Shared Drive Outbound'
 			END
+
+
+
+
 
 		-- Check Register has xml configuration
 		ELSE IF NOT EXISTS

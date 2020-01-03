@@ -491,9 +491,11 @@ DECLARE @CustomerSpecialPricing TABLE(
 								PL.dblUnitPrice
 							FROM
 								tblICItemPricingLevel PL
+							INNER JOIN tblSMCompanyLocationPricingLevel CPL
+								ON PL.intCompanyLocationPricingLevelId = CPL.intCompanyLocationPricingLevelId
 							INNER JOIN
 								[tblEMEntityLocation] CL
-									ON PL.strPriceLevel = CL.strPricingLevel
+									ON CPL.strPricingLevelName = CL.strPricingLevel
 							INNER JOIN
 								tblARCustomer C									
 									ON CL.intEntityId = C.[intEntityId]

@@ -90,6 +90,7 @@ AS
 		,tic.strUpgradeCopyDataFrom
 		,tic.strUpgradeCopyDataTo
 		,tic.strUpgradeSpecialInstruction
+		,rc.strRootCause
 	from
 		tblHDTicket tic
 		join tblHDTicketType typ on typ.intTicketTypeId = tic.intTicketTypeId
@@ -111,3 +112,4 @@ AS
 		left join x on x.intTicketId = tic.intTicketId
 		left join tblHDUpgradeType ut on ut.intUpgradeTypeId = tic.intUpgradeTypeId
 		left join tblHDVersion uv on uv.intVersionId = tic.intUpgradeTargetVersionId
+		left join tblHDTicketRootCause rc on rc.intRootCauseId = tic.intRootCauseId

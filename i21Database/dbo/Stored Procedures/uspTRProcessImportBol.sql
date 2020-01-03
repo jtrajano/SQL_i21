@@ -202,7 +202,7 @@ BEGIN
 				SET @strDestination = CASE WHEN @intCustomerId IS NULL THEN 'Location' ELSE 'Customer' END
 
 				-- GET SALES PERSON
-				SELECT @intSalePerson = intSalespersonId from tblARCustomer WHERE intEntityId = @intCustomerId
+				SELECT @intSalePerson = intSalespersonId from vyuEMEntityCustomerSearch WHERE intEntityId = @intCustomerId
 				
 				INSERT INTO tblTRLoadDistributionHeader (intLoadHeaderId, 
 					strDestination, 
@@ -261,7 +261,7 @@ BEGIN
 				OPEN @CursorDistributionDetailTran
 				FETCH NEXT FROM @CursorDistributionDetailTran INTO @intDDPullProductId, @intDDDropProductId, @dblDDDropGross, @dblDDDropNet, @strDDBillOfLading, @strDDGrossNet
 				WHILE @@FETCH_STATUS = 0
-				BEGIN
+				BEGIN	
 					IF(@ysnMain = 1)
 					BEGIN
 						INSERT INTO tblTRLoadDistributionDetail(intLoadDistributionHeaderId, 
@@ -297,22 +297,26 @@ BEGIN
 
 						SET @ysnMain = 0
 					END
-						
+					
 					DECLARE @dblPercentage NUMERIC(18, 6) = NULL,
 						@intRecipeItemId INT = NULL
+						
 					SELECT @intRecipeItemId = RI.intRecipeItemId, @dblPercentage = RI.dblQuantity FROM tblMFRecipe R 
 					INNER JOIN tblMFRecipeItem RI ON RI.intRecipeId = R.intRecipeId
-					WHERE R.intItemId = @intDDDropProductId AND RI.intItemId = @intDDPullProductId AND R.ysnActive = 1
+					WHERE R.intItemId = @intDDDropProductId 
+					AND RI.intItemId = @intDDPullProductId 
+					AND R.ysnActive = 1
 					AND RI.intRecipeItemTypeId = 1
+					AND R.intLocationId = @intCustomerCompanyLocationId
 
 					IF(@dblPercentage IS NOT NULL)
 					BEGIN
 						DECLARE @strReceiptLink NVARCHAR(50) = NULL,
-							@dblPercentageValue NUMERIC(18,6) = NULL
+							@dblRawValue NUMERIC(18,6) = NULL
 						
-						SET @dblPercentageValue = CASE WHEN @strDDGrossNet = 'Gross' THEN @dblDDDropGross * @dblPercentage ELSE @dblDDDropNet * @dblPercentage END
+						SET @dblRawValue = CASE WHEN @strDDGrossNet = 'Gross' THEN @dblDDDropGross ELSE @dblDDDropNet END
 
-						SET @dblSum = @dblSum + @dblPercentageValue 
+						SET @dblSum = @dblSum + @dblRawValue 
 
 						SELECT DISTINCT @strReceiptLink = LR.strReceiptLink FROM tblTRImportLoadDetail LR 
 						WHERE LR.intPullProductId = @intDDPullProductId 
@@ -331,17 +335,39 @@ BEGIN
 							@strDDBillOfLading,
 							@strReceiptLink,
 							@intRecipeItemId,
-							@dblPercentageValue,
+							@dblRawValue,
 							1)
 					END
 
-					UPDATE tblTRLoadDistributionDetail SET dblUnits = @dblSum WHERE intLoadDistributionDetailId = @intLoadDistributionDetailId
+					IF(@intRecipeItemId IS NULL)
+					BEGIN
+						DECLARE @strDistributionLocationName NVARCHAR(500) = NULL,
+							@strDistributionItemName NVARCHAR(500) = NULL
+						
+						SELECT @strDistributionLocationName = strLocationName from tblSMCompanyLocation where intCompanyLocationId = @intCustomerCompanyLocationId
+						SELECT @strDistributionItemName = strItemNo FROM tblICItem WHERE intItemId = @intDDDropProductId
+
+						DECLARE @strMessageNoBlend NVARCHAR(100) = 'There is no Recipe for Distribution Bulk Location ' + @strDistributionLocationName + ' for Item ' + @strDistributionItemName
+
+						UPDATE tblTRImportLoadDetail SET strMessage = CASE WHEN @intRecipeItemId IS NULL THEN 
+						(CASE WHEN strMessage like '%There is no Recipe for Distribution Bulk Location%' THEN strMessage ELSE dbo.fnTRMessageConcat(strMessage, @strMessageNoBlend)  END) ELSE 
+							strMessage
+						END
+						WHERE intImportLoadId = @intImportLoadId 
+						AND intLoadDistributionHeaderId = @intLoadDistributionHeaderId
+						AND intDropProductId = @intDDDropProductId
+						AND ysnValid = 1
+					END
+
+					UPDATE tblTRLoadDistributionDetail SET dblUnits = @dblSum 	
+					WHERE intLoadDistributionDetailId = @intLoadDistributionDetailId
 					
 					FETCH NEXT FROM @CursorDistributionDetailTran INTO @intDDPullProductId, @intDDDropProductId, @dblDDDropGross, @dblDDDropNet, @strDDBillOfLading, @strDDGrossNet
 				END
 				CLOSE @CursorDistributionDetailTran
 				DEALLOCATE @CursorDistributionDetailTran
 				-- DISTRIBUTION DETAIL - BLENDING - END
+
 
 				-- DISTRIBUTION DETAIL - NON BLENDING - START
 				DECLARE @CursorDistributionDetailNonBlendTran AS CURSOR

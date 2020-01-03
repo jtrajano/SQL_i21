@@ -784,7 +784,7 @@ BEGIN
 											FROM	tblCTContractHeader CH,	
 													tblCTEvent EV											
 											JOIN	tblCTEventRecipient ER ON ER.intEventId = EV.intEventId
-											WHERE	CH.strContractNumber NOT IN(SELECT strTransactionNumber FROM tblSMApproval WHERE strStatus=''Submitted'') 
+											WHERE	CH.intContractHeaderId NOT IN(SELECT intRecordId FROM tblSMApproval A INNER JOIN tblSMTransaction B ON A.intTransactionId = B.intTransactionId WHERE strStatus=''Submitted'') 
 											AND     CH.intContractHeaderId   IN(SELECT intContractHeaderId FROM tblCTContractDetail WHERE LTRIM(RTRIM(ISNULL(strERPPONumber,''''))) = '''')
 											AND		EV.strEventName  =  ''Unsubmitted Contract Alert'' AND ER.intEntityId = {0}
 											',
@@ -801,7 +801,7 @@ BEGIN
 						JOIN	tblCTEventRecipient ER ON ER.intEventId = EV.intEventId
 						LEFT JOIN tblCTEventRecipientFilter RF ON RF.intEntityId = ER.intEntityId  AND ER.intEventId = RF.intEventId
 						LEFT JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId
-						WHERE	CH.strContractNumber NOT IN(SELECT strTransactionNumber FROM tblSMApproval WHERE strStatus=''Submitted'') 
+						WHERE	CH.intContractHeaderId NOT IN(SELECT intRecordId FROM tblSMApproval A INNER JOIN tblSMTransaction B ON A.intTransactionId = B.intTransactionId WHERE strStatus=''Submitted'') 
 						AND		CH.intContractHeaderId	NOT IN (SELECT intContractHeaderId FROM tblCTContractDetail WHERE intContractStatusId = 2)
 						AND		EV.strEventName = ''Unsubmitted Contract Alert'' AND ER.intEntityId = {0}
 						AND CH.intCommodityId = ISNULL(RF.intCommodityId,CH.intCommodityId)

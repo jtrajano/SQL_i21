@@ -54,7 +54,7 @@ BEGIN
 	SELECT @strCommodities =  COALESCE(@strCommodities + ', ' + strCommodityCode, strCommodityCode) FROM #tempCommodity
 
 
-SELECT
+SELECT DISTINCT
 	strHeaderType = @strContractType + ' Contract Balance' 
 	,dtmTransactionDate 
 	,C.strCommodityCode
@@ -76,7 +76,7 @@ FROM(
 		, dtmTransactionDate = dbo.fnRemoveTimeOnDate(cd.dtmCreated)
 		, sh.intContractHeaderId
 		, sh.intContractDetailId
-		, dblQty = dbo.fnCTConvertQtyToTargetCommodityUOM(ch.intCommodityId,dbo.fnCTGetCommodityUnitMeasure(ch.intCommodityUOMId),cum.intUnitMeasureId,sh.dblBalance)
+		, dblQty = dbo.fnCTConvertQtyToTargetCommodityUOM(ch.intCommodityId,dbo.fnCTGetCommodityUnitMeasure(ch.intCommodityUOMId),cum.intUnitMeasureId,sh.dblBalance - isnull(sh.dblOldQuantity,0))
 		, pt.strPricingType
 		, strTransactionType = ''
 		, intTransactionId = null
@@ -89,6 +89,66 @@ FROM(
 	inner join tblICCommodityUnitMeasure cum on cum.intCommodityId = ch.intCommodityId and cum.ysnDefault = 1
 	where intSequenceUsageHistoryId is null and strPricingStatus not in ( 'Partially Priced', 'Fully Priced')
 
+	union
+	select 
+		Row_Number() OVER (PARTITION BY sh.intContractDetailId ORDER BY cd.dtmCreated  DESC, sh.intSequenceHistoryId) AS Row_Num
+		, dtmTransactionDate = dbo.fnRemoveTimeOnDate(cd.dtmCreated)
+		, sh.intContractHeaderId
+		, sh.intContractDetailId
+		, dblQty = dbo.fnCTConvertQtyToTargetCommodityUOM(ch.intCommodityId,dbo.fnCTGetCommodityUnitMeasure(ch.intCommodityUOMId),cum.intUnitMeasureId,sh.dblBalance)
+		, pt.strPricingType
+		, strTransactionType = ''
+		, intTransactionId = null
+		, strTransactionId = ''
+		, intOrderBy = 1
+	from tblCTSequenceHistory sh
+	inner join tblCTContractDetail cd on cd.intContractDetailId = sh.intContractDetailId
+	inner join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
+	inner join tblCTPricingType pt on pt.intPricingTypeId = sh.intPricingTypeId
+	inner join tblICCommodityUnitMeasure cum on cum.intCommodityId = ch.intCommodityId and cum.ysnDefault = 1
+	where intSequenceUsageHistoryId is null 
+
+	union all --HTA (Priced) decrease
+	select 
+		1 as Row_Num
+		, dtmTransactionDate = min(dbo.fnRemoveTimeOnDate(a.dtmHistoryCreated))
+		, a.intContractHeaderId
+		, a.intContractDetailId
+		, dblQuantity = a.dblQuantity * -1
+		, b.strPricingType
+		, strTransactionType = ''
+		, intTransactionId = null
+		, strTransactionId = ''
+		, intOrderBy = 1
+	from tblCTSequenceHistory a
+	INNER JOIN tblCTSequenceHistory b on a.intContractDetailId = b.intContractDetailId
+	AND a.intPricingTypeId = 1 AND b.intPricingTypeId = 3
+	group by 
+		a.dblQuantity,
+		b.strPricingType,
+		a.intContractHeaderId,
+		a.intContractDetailId
+
+	union all --HTA (Priced) increase
+	select 
+		1 as Row_Num
+		, dtmTransactionDate = min(dbo.fnRemoveTimeOnDate(b.dtmHistoryCreated))
+		, a.intContractHeaderId
+		, a.intContractDetailId
+		, dblQuantity = b.dblQuantity 
+		, b.strPricingType
+		, strTransactionType = ''
+		, intTransactionId = null
+		, strTransactionId = ''
+		, intOrderBy = 4
+	from tblCTSequenceHistory a
+	INNER JOIN tblCTSequenceHistory b on a.intContractDetailId = b.intContractDetailId
+	AND a.intPricingTypeId = 3 AND b.intPricingTypeId = 1
+	group by 
+		b.dblQuantity,
+		b.strPricingType,
+		a.intContractHeaderId,
+		a.intContractDetailId
 	
 	union all
 	select  

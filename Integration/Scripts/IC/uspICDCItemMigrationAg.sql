@@ -751,3 +751,8 @@ FROM agitmmst o
         AND inv.strType = 'Ingredient Tag'
 WHERE i.intIngredientTag IS NULL
     AND o.agitm_invc_tag IS NOT NULL
+
+-- Fix stock units and costing methods
+UPDATE tblICItemUOM SET ysnStockUnit = 0 WHERE dblUnitQty <> 1 AND ysnStockUnit = 1
+UPDATE tblICItemUOM SET ysnStockUnit = 1 WHERE ysnStockUnit = 0 AND dblUnitQty = 1
+UPDATE tblICItemLocation SET intCostingMethod = 1 WHERE intCostingMethod IS NULL

@@ -188,5 +188,10 @@ AS
 	OUTER	APPLY	dbo.fnCTGetShipmentStatus(CD.intContractDetailId) LD
 	--OUTER	APPLY	dbo.fnCTGetFinancialStatus(CD.intContractDetailId) FS
 	OUTER	APPLY	dbo.fnCTGetSeqPriceFixationInfo(CD.intContractDetailId) FI
-	LEFT	JOIN	tblAPBillDetail			BD	ON	BD.intContractDetailId		=	CD.intContractDetailId
+	OUTER	APPLY 
+	(
+		SELECT TOP 1 intContractDetailId
+		FROM tblAPBillDetail
+		WHERE intContractDetailId = CD.intContractDetailId
+	) BD
 	LEFT	JOIN	tblSMFreightTerms	CDFT	ON CDFT.intFreightTermId = CD.intFreightTermId

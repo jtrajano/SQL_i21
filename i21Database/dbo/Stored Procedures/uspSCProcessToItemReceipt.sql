@@ -638,7 +638,7 @@ BEGIN TRY
 
 	IF(@ysnTicketHasSpecialDiscount <> 1 OR (@ysnTicketSpecialGradePosted = 1 AND @ysnTicketHasSpecialDiscount = 1))
 	BEGIN
-		EXEC uspSCProcessReceiptToVoucher @intTicketId, @InventoryReceiptId	,@intUserId
+		EXEC uspSCProcessReceiptToVoucher @intTicketId, @InventoryReceiptId	,@intUserId, @intBillId OUTPUT
 	END
 
 	EXEC dbo.uspSMAuditLog 

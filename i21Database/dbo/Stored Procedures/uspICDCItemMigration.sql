@@ -391,3 +391,16 @@ INSERT INTO [dbo].[tblICItemPricing] (
 		)
 	)
 --------------------------------------------------------------------------------------------------------------------------------------------
+-- Fix stock units and costing methods
+UPDATE tblICItemUOM SET ysnStockUnit = 0 WHERE dblUnitQty <> 1 AND ysnStockUnit = 1
+UPDATE tblICItemUOM SET ysnStockUnit = 1 WHERE ysnStockUnit = 0 AND dblUnitQty = 1
+UPDATE tblICItemLocation SET intCostingMethod = 1 WHERE intCostingMethod IS NULL
+
+-- import Storage unit #
+update tblICItemLocation
+set strStorageUnitNo = D.ptitm_binloc
+from tblICItemLocation A
+inner join tblICItem B on A.intItemId = B.intItemId
+inner join tblSMCompanyLocation C on A.intLocationId = C.intCompanyLocationId
+inner join ptitmmst D on B.strItemNo = D.ptitm_itm_no collate SQL_Latin1_General_CP1_CS_AS
+ and C.strLocationNumber = D.ptitm_loc_no collate SQL_Latin1_General_CP1_CS_AS

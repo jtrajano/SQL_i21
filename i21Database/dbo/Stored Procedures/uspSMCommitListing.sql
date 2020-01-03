@@ -63,6 +63,15 @@ BEGIN TRANSACTION
 	 INNER JOIN tblSMScreenStage B ON A.intScreenStageId = B.intScreenStageId
 	 INNER JOIN tblSMScreen C ON B.strNamespace = C.strNamespace
 	WHERE ISNULL(A.strChange, '') = 'Added'
+
+	UPDATE tblSMControl
+	SET strControlName = A.strControlName,
+		strControlType = A.strControlType
+	FROM tblSMControlStage A
+	 INNER JOIN tblSMScreenStage B ON A.intScreenStageId = B.intScreenStageId
+	 INNER JOIN tblSMScreen C ON B.strNamespace = C.strNamespace
+	 INNER JOIN tblSMControl D ON D.strControlId = A.strControlId
+	WHERE ISNULL(A.strChange, '') = 'Updated' AND B.strNamespace = C.strNamespace and D.intScreenId = C.intScreenId
 	
 	-- DELETE Controls
 	-- DELETE tblSMControl 

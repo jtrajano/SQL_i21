@@ -32,6 +32,7 @@ DECLARE @strDeliveryType NVARCHAR(50)
 DECLARE @strPartnerNo NVARCHAR(100)
 DECLARE @strContractSeq NVARCHAR(50)
 DECLARE @intLoadStgId INT
+DECLARE @strOldExternalShipmentNumber NVARCHAR(MAX)
 
 Set @strXml= REPLACE(@strXml,'utf-8' COLLATE Latin1_General_CI_AS,'utf-16' COLLATE Latin1_General_CI_AS)  
 
@@ -109,6 +110,7 @@ Select @intMinRowNo=MIN(intRowNo) From @tblAcknowledgement
 While(@intMinRowNo is not null) --Loop Start
 Begin
 	Set @strDeliveryType=''
+	SET @strOldExternalShipmentNumber = ''
 
 	Select 
 		@strMesssageType = strMesssageType,
@@ -207,7 +209,7 @@ Begin
 	--Shipment Create
 	If @strMesssageType='DESADV'
 	Begin
-		Select @intLoadId=intLoadId From tblLGLoad Where strLoadNumber=@strRefNo
+		Select @intLoadId=intLoadId, @strOldExternalShipmentNumber = strExternalShipmentNumber From tblLGLoad Where strLoadNumber=@strRefNo
 
 		--Get Last sent StgId
 		Select TOP 1 @intLoadStgId=intLoadStgId From tblLGLoadStg Where intLoadId=@intLoadId AND strFeedStatus='Awt Ack' Order By intLoadStgId Desc
@@ -227,6 +229,11 @@ Begin
 
 				Update tblLGLoadStg Set strFeedStatus='Ack Rcvd',strMessage='Success',strExternalShipmentNumber=@strParam
 				Where intLoadId=@intLoadId AND ISNULL(strFeedStatus,'') IN ('Awt Ack','Ack Rcvd')
+
+				--Mail notify for getting different shipment no from SAP
+				Update tblLGLoadStg Set strMessage = 'Received different Shipment Number from SAP. Old No: ' + @strOldExternalShipmentNumber
+				Where intLoadId=@intLoadId AND ISNULL(strFeedStatus,'') IN ('Awt Ack','Ack Rcvd')
+				AND ISNULL(@strOldExternalShipmentNumber, '') <> '' AND @strOldExternalShipmentNumber <> @strParam
 
 				Update tblLGLoadDetailStg Set strExternalShipmentItemNumber=@strDeliveryItemNo Where intLoadDetailId=@strTrackingNo AND intLoadId=@intLoadId
 

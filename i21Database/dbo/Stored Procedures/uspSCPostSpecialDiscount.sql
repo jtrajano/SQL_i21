@@ -25,12 +25,13 @@ BEGIN
 	DECLARE @dblChargeAmount NUMERIC(18,6)
 	DECLARE @ysnTicketSpecialGradePosted BIT
 	DECLARE @ysnTicketHasSpecialDiscount BIT
+	DECLARE @intBillId INT
 	DECLARE @ysnLoadContract BIT
 	DECLARE @intTicketContractDetailId INT
 	DECLARE @dblTicketScheduledQty NUMERIC(18,6)
 	DECLARE @intTicketItemUOMId INT
 	DECLARE @dblQuantityToReceive NUMERIC(38,15)
-	
+
 BEGIN 
 	DECLARE @TransactionName AS VARCHAR(500) = 'uspSCProcessReceiptToVoucher_' + CAST(NEWID() AS NVARCHAR(100));
 	BEGIN TRAN @TransactionName
@@ -70,12 +71,12 @@ END
 			intInventoryReceiptId
 			,strReceiptNumber
 			,ysnPosted
-			,dblQty) 
+			,dblQty)
 		SELECT DISTINCT(
 			intInventoryReceiptId)
 			,strReceiptNumber
 			,ysnPosted
-			,[dblQty] = dblQtyToReceive 
+			,[dblQty] = dblQtyToReceive
 		FROM vyuICGetInventoryReceiptItem 
 		WHERE intSourceId = @intTicketId AND strSourceType = 'Scale'
 		ORDER BY intInventoryReceiptId ASC
@@ -86,13 +87,13 @@ END
 		SET @intInventoryReceiptId = NULL
 		SET @dblQuantityToReceive = 0
 
-		SELECT TOP 1 
+		SELECT TOP 1
 			@intInventoryReceiptId =  intInventoryReceiptId 
 			,@strTransactionId = strReceiptNumber
 			,@ysnIRPosted = ysnPosted
 			,@dblQuantityToReceive = dblQty
-			,@intLoopInventoryReceiptId = intInventoryReceiptId 
-		FROM #tmpItemReceiptIds  
+			,@intLoopInventoryReceiptId = intInventoryReceiptId
+		FROM #tmpItemReceiptIds
 
 		WHILE @intInventoryReceiptId IS NOT NULL
 		BEGIN
@@ -106,12 +107,12 @@ END
 
 				IF ISNULL(@intTicketContractDetailId,0) > 0
 				BEGIN
-					---- Update contract schedule based on ticket schedule qty							
+					---- Update contract schedule based on ticket schedule qty
 					IF ISNULL(@intTicketContractDetailId, 0) > 0 AND (@splitDistribution = 'CNT' OR @splitDistribution = 'LOD')
 					BEGIN
 						-- For Review
 						SET @ysnLoadContract = 0
-						SELECT TOP 1 
+						SELECT TOP 1
 							@ysnLoadContract = A.ysnLoad
 						FROM tblCTContractHeader A
 						INNER JOIN tblCTContractDetail B
@@ -239,20 +240,20 @@ END
 				END
 			END
 
-				
+
 
 			EXEC [dbo].[uspICPostInventoryReceipt] 1, 0, @strTransactionId, @intUserId
 
 			IF(@ysnTicketHasSpecialDiscount <> 1 OR (@ysnTicketSpecialGradePosted = 1 AND @ysnTicketHasSpecialDiscount = 1))
 			BEGIN
-				EXEC uspSCProcessReceiptToVoucher @intTicketId, @intLoopInventoryReceiptId	,@intUserId
+				EXEC uspSCProcessReceiptToVoucher @intTicketId, @intLoopInventoryReceiptId	,@intUserId, @intBillId OUTPUT
 			END
 
 			SET @ysnIRPosted = 0
 			SET @intInventoryReceiptId = NULL
 			SET @dblQuantityToReceive = 0
 
-			SELECT TOP 1 
+			SELECT TOP 1
 				@intInventoryReceiptId =  intInventoryReceiptId 
 				,@strTransactionId = strReceiptNumber
 				,@ysnIRPosted = ysnPosted

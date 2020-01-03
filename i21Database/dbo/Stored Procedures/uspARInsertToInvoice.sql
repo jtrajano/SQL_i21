@@ -1,9 +1,10 @@
 ﻿CREATE PROCEDURE [dbo].[uspARInsertToInvoice]
-	@SalesOrderId	     INT = 0,
-	@UserId			     INT = 0,
-	@ShipmentId			 INT = 0,
-	@FromShipping		 BIT = 0,
-	@NewInvoiceId		 INT = 0 OUTPUT
+	@SalesOrderId	     	INT = 0,
+	@UserId			     	INT = 0,
+	@ShipmentId			 	INT = 0,
+	@FromShipping		 	BIT = 0,
+	@intShipToLocationId	INT = NULL,
+	@NewInvoiceId		 	INT = 0 OUTPUT
 AS
 BEGIN
 
@@ -535,7 +536,7 @@ SELECT TOP 1
 		@BOLNumber				=	strBOLNumber,
 		@DeliverPickUp			=	'',
 		@SalesOrderNumber		=	strSalesOrderNumber,
-		@ShipToLocationId		=	intShipToLocationId,
+		@ShipToLocationId		=	ISNULL(@intShipToLocationId, intShipToLocationId),
 		@BillToLocationId		=	intBillToLocationId,
 		@SplitId				=	intSplitId,
 		@SalesOrderComment		=   strComments,

@@ -61,7 +61,7 @@ BEGIN TRY
 					NULL strPurchasingGroup,		CY.strEntityNo strCreatedByNo,	CH.strContractNumber,				CH.dtmContractDate,
 					CT.strContractType,				CO.strCommodityCode,			EY.strName strEntityName,			''Empty'' AS strNotificationType,
 					NULL strItemDescription,		dbo.fnCTConvertQuantityToTargetCommodityUOM(CH.intCommodityUOMId,SU.intCommodityUnitMeasureId,CH.dblQuantity) dblQtyInStockUOM,		NULL intContractDetailId,			NULL strProductType,
-					NULL strBasisComponent,			PO.strPosition,					CB.strContractBasis,				CR.strCountry,			
+					NULL strBasisComponent,			PO.strPosition,					strContractBasis = CB.strFreightTerm,				CR.strCountry,			
 					CH.strCustomerContract,			SP.strName strSalesperson,		CD.intContractStatusId,				'''' AS strContractItemName,		
 					'''' AS strContractItemNo,
 					CAST(ROW_NUMBER() OVER(ORDER BY CH.intContractHeaderId DESC) AS INT) AS intUniqueId,
@@ -76,7 +76,7 @@ BEGIN TRY
 			JOIN	tblICUnitMeasure			UM	ON	UM.intUnitMeasureId				=	CU.intUnitMeasureId
 			JOIN	tblICCommodityUnitMeasure	SU	ON	SU.intCommodityId				=	CH.intCommodityId
 													AND	SU.ysnStockUnit					=	1						
-	LEFT	JOIN	tblCTContractBasis			CB	ON	CB.intContractBasisId			=	CH.intContractBasisId
+	LEFT	JOIN	tblSMFreightTerms			CB	ON	CB.intFreightTermId				=	CH.intFreightTermId
 	LEFT	JOIN	tblCTPosition				PO	ON	PO.intPositionId				=	CH.intPositionId	
 	LEFT	JOIN	tblEMEntity					SP	ON	SP.intEntityId					=	CH.intSalespersonId	
 	LEFT	JOIN	tblSMCountry				CR	ON	CR.intCountryID					=	CH.intCountryId		
@@ -125,7 +125,7 @@ BEGIN TRY
 
 			FROM	vyuCTNotificationHeader CH
 	LEFT	JOIN	vyuCTEventRecipientFilter	RF	ON	RF.intEntityId			=	'+LTRIM(@intUserId)+' AND RF.strNotificationType = ''Unsubmitted'' 
-			WHERE	CH.strContractNumber NOT IN(SELECT strTransactionNumber FROM tblSMApproval WHERE strStatus=''Submitted'')  AND 4 <> intAllStatusId & 4
+			WHERE	CH.intContractHeaderId NOT IN(SELECT B.intRecordId FROM tblSMApproval A INNER JOIN tblSMTransaction B ON A.intTransactionId = B.intTransactionId WHERE strStatus=''Submitted'')  AND 4 <> intAllStatusId & 4
 			AND		intContractDetailId IS NOT NULL'
 	END
 	ELSE IF @strNotificationType = 'Approved Not Sent'

@@ -342,6 +342,7 @@ BEGIN
 		WHERE  A.[intPaymentId] IN (SELECT intId FROM @paymentIds)
 		AND B.dblPayment <> 0
 		AND (payment.dblBillPayment > C.dblAmountDue OR arPayment.dblBillPayment > D.dblAmountDue)
+		AND B.dblPayment <> 0
 
 
 		-- INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
@@ -492,8 +493,7 @@ BEGIN
 				voucher.intTransactionType = 2
 			AND payDetail.intPaymentId = A.intPaymentId
 			AND payDetail.ysnOffset = 1
-			AND
-				payDetail.dblPayment <> 0
+			AND payDetail.dblPayment <> 0
 			AND NOT EXISTS
 			(
 				SELECT

@@ -167,7 +167,11 @@ SELECT
 	,[intItemLocationId]			= ICIT.[intItemLocationId]
 	,[intItemUOMId]					= ICIT.[intItemUOMId]
 	,[dtmDate]						= ISNULL(ARID.[dtmPostDate], ARID.[dtmShipDate])
-	,[dblQty]						= - CASE WHEN ISNULL(CP.intPricingCount, 0) > 1 AND (ISNULL(ICS.ysnDestinationWeightsAndGrades, 0) = 0 OR ISNULL(ICS.intDestinationWeightId, 0) = 0) THEN ARID.dblQtyShipped ELSE ICIT.[dblQty] END
+	,[dblQty]						= - CASE WHEN ISNULL(CP.intPricingCount, 0) > 1 AND (ISNULL(ICS.ysnDestinationWeightsAndGrades, 0) = 0 OR ISNULL(ICS.intDestinationWeightId, 0) = 0) THEN ARID.dblQtyShipped
+											 WHEN ISNULL(ICS.ysnDestinationWeightsAndGrades, 0) = 1 AND ISNULL(ICS.intDestinationWeightId, 0) <> 0 AND ISNULL(ICS.intDestinationGradeId, 0) <> 0 THEN
+											 	CASE WHEN ARID.dblQtyShipped > ICIT.dblQty THEN ICIT.dblQty ELSE ARID.dblQtyShipped END
+		 							  	     ELSE ICIT.dblQty
+										END
 	,[dblUOMQty]					= ICIT.[dblUOMQty]
 	,[dblCost]						= ICIT.[dblCost]
 	,[dblValue]						= 0
@@ -194,6 +198,7 @@ INNER JOIN (
 		 , ICISI.[intInventoryShipmentItemId]
 		 , ICISI.[intChildItemLinkId]
 		 , ICISI.[intDestinationWeightId]
+		 , ICISI.[intDestinationGradeId]
 		 , ICISI.[ysnDestinationWeightsAndGrades]
 	FROM tblICInventoryShipmentItem ICISI WITH (NOLOCK)  
 	INNER JOIN tblICInventoryShipment ICIS WITH (NOLOCK) ON ICISI.intInventoryShipmentId = ICIS.intInventoryShipmentId
@@ -233,7 +238,11 @@ SELECT
 	,[intItemLocationId]			= ICIT.[intItemLocationId]
 	,[intItemUOMId]					= ICIT.[intItemUOMId]
 	,[dtmDate]						= ISNULL(ARID.[dtmPostDate], ARID.[dtmShipDate])
-	,[dblQty]						= - CASE WHEN ISNULL(CP.intPricingCount, 0) > 1 AND (ISNULL(ICS.ysnDestinationWeightsAndGrades, 0) = 0 OR ISNULL(ICS.intDestinationWeightId, 0) = 0) THEN ARID.dblQtyShipped ELSE ICIT.[dblQty] END
+	,[dblQty]						= - CASE WHEN ISNULL(CP.intPricingCount, 0) > 1 AND (ISNULL(ICS.ysnDestinationWeightsAndGrades, 0) = 0 OR ISNULL(ICS.intDestinationWeightId, 0) = 0) THEN ARID.dblQtyShipped 
+											 WHEN ISNULL(ICS.ysnDestinationWeightsAndGrades, 0) = 1 AND ISNULL(ICS.intDestinationWeightId, 0) <> 0 AND ISNULL(ICS.intDestinationGradeId, 0) <> 0 THEN 
+											 	CASE WHEN ARID.dblQtyShipped > ICIT.dblQty THEN ICIT.dblQty ELSE ARID.dblQtyShipped END
+									 		 ELSE ICIT.[dblQty] 
+										END
 	,[dblUOMQty]					= ICIT.[dblUOMQty]
 	,[dblCost]						= ICIT.[dblCost]
 	,[dblValue]						= 0
@@ -260,6 +269,7 @@ INNER JOIN (
 		 , ICISI.[intInventoryShipmentItemId]
 		 , ICISI.[intChildItemLinkId]
 		 , ICISI.[intDestinationWeightId]
+		 , ICISI.[intDestinationGradeId]
 		 , ICISI.[ysnDestinationWeightsAndGrades]
 	FROM tblICInventoryShipmentItem ICISI WITH (NOLOCK)  
 	INNER JOIN tblICInventoryShipment ICIS WITH (NOLOCK) ON ICISI.intInventoryShipmentId = ICIS.intInventoryShipmentId

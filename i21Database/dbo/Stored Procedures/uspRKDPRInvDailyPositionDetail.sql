@@ -1448,7 +1448,7 @@ BEGIN
 				, intCompanyLocationId
 				, intTicketId
 				, dtmTicketDateTime)
-			SELECT * FROM (
+			SELECT DISTINCT * FROM (
 				SELECT intSeqId = 12
 					, strStorageType
 					, strCommodityCode = @strCommodityCode
@@ -1547,71 +1547,6 @@ BEGIN
 				AND intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 				AND BD.ysnOpenGetBasisDelivery = 1
 		
-			--INSERT INTO @Final (intSeqId
-			--	, strSeqHeader
-			--	, strCommodityCode
-			--	, strType
-			--	, dblTotal
-			--	, intCommodityId
-			--	, strLocationName
-			--	, intItemId
-			--	, strItemNo
-			--	, strCategory
-			--	, dtmTicketDateTime
-			--	, strDistributionOption
-			--	, intFromCommodityUnitMeasureId
-			--	, intCompanyLocationId
-			--	, strDPAReceiptNo
-			--	, intContractHeaderId
-			--	, strContractNumber
-			--	, intInventoryShipmentId
-			--	, strShipmentNumber
-			--	, strTicketNumber
-			--	, intTicketId
-			--	, intFutureMarketId
-			--	, intFutureMonthId
-			--	, strFutMarketName
-			--	, strFutureMonth
-			--	, strContractEndMonth
-			--	, strDeliveryDate)
-			--SELECT intSeqId = 14
-			--	, strSeqHeader = 'Sales Basis Deliveries' COLLATE Latin1_General_CI_AS
-			--	, strCommodityCode
-			--	, strType = 'Sales Basis Deliveries' COLLATE Latin1_General_CI_AS
-			--	, dblTotal = dblQuantity
-			--	, BD.intCommodityId
-			--	, strLocationName = BD.strCompanyLocation
-			--	, intItemId = BD.intItemId
-			--	, strItemNo = BD.strItemNo
-			--	, strCategory = cat.strCategoryCode
-			--	, dtmTicketDateTime = dtmDate
-			--	, strDistributionOption = 'CNT' COLLATE Latin1_General_CI_AS
-			--	, intUnitMeasureId = NULL
-			--	, intCompanyLocationId
-			--	, strDPAReceiptNo = BD.strTransactionId
-			--	, intContractHeaderId
-			--	, strContractNumber
-			--	, intInventoryShipmentId = BD.intTransactionId
-			--	, strShipmentNumber = BD.strTransactionId
-			--	, strTicketNumber = ''
-			--	, intTicketId = NULL
-			--	, BD.intFutureMarketId
-			--	, BD.intFutureMonthId
-			--	, fm.strFutMarketName
-			--	, mnt.strFutureMonth
-			--	, strContractEndMonth = 'Near By' COLLATE Latin1_General_CI_AS
-			--	, strDeliveryDate = dbo.fnRKFormatDate(dtmEndDate, 'MMM yyyy')
-			--FROM dbo.fnCTGetBasisDelivery(@dtmToDate) BD
-			--	INNER JOIN tblRKFutureMarket fm ON BD.intFutureMarketId = fm.intFutureMarketId
-			--	INNER JOIN tblRKFuturesMonth mnt ON BD.intFutureMonthId = mnt.intFutureMonthId
-			--	INNER JOIN tblICItem i ON BD.intItemId = i.intItemId
-			--	INNER JOIN tblICCategory cat ON i.intCategoryId = cat.intCategoryId
-			--WHERE BD.intCommodityId = @intCommodityId
-			--	AND strContractType = 'Sale'
-			--	AND intCompanyLocationId = ISNULL(@intLocationId, intCompanyLocationId)
-			--	AND intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
-			--	AND BD.ysnOpenGetBasisDelivery = 1
-
 			INSERT INTO @Final (intSeqId
 				, strSeqHeader
 				, strCommodityCode
@@ -1639,81 +1574,146 @@ BEGIN
 				, strFutureMonth
 				, strContractEndMonth
 				, strDeliveryDate)
-			SELECT intSeqId
-				, strSeqHeader
+			SELECT intSeqId = 14
+				, strSeqHeader = 'Sales Basis Deliveries' COLLATE Latin1_General_CI_AS
 				, strCommodityCode
-				, strType
-				, dblTotal
-				, intCommodityId
-				, strLocationName
-				, intItemId
-				, strItemNo
-				, strCategory
-				, dtmTicketDateTime
-				, strDistributionOption
-				, intUnitMeasureId
+				, strType = 'Sales Basis Deliveries' COLLATE Latin1_General_CI_AS
+				, dblTotal = dblQuantity
+				, BD.intCommodityId
+				, strLocationName = BD.strCompanyLocation
+				, intItemId = BD.intItemId
+				, strItemNo = BD.strItemNo
+				, strCategory = cat.strCategoryCode
+				, dtmTicketDateTime = dtmDate
+				, strDistributionOption = 'CNT' COLLATE Latin1_General_CI_AS
+				, intUnitMeasureId = NULL
 				, intCompanyLocationId
-				, strShipmentNumber
+				, strDPAReceiptNo = BD.strTransactionId
 				, intContractHeaderId
 				, strContractNumber
-				, intInventoryShipmentId
-				, strShipmentNumber
-				, strTicketNumber
-				, intTicketId
-				, intFutureMarketId
-				, intFutureMonthId
-				, strFutMarketName
-				, strFutureMonth
-				, strContractEndMonth
-				, strDeliveryDate
-			FROM (
-				SELECT DISTINCT intSeqId = 14
-					, strSeqHeader = 'Sales Basis Deliveries' COLLATE Latin1_General_CI_AS
-					, strCommodityCode = @strCommodityCode 
-					, strType = 'Sales Basis Deliveries' COLLATE Latin1_General_CI_AS
-					, dblTotal = dbo.fnCTConvertQuantityToTargetItemUOM(cd.intItemId,iuom.intUnitMeasureId,@intCommodityStockUOMId,isnull(ri.dblQuantity, 0))
-					, ch.intCommodityId
-					, cl.strLocationName
-					, cd.intItemId
-					, i.strItemNo
-					, strCategory = cat.strCategoryCode
-					, intTicketId = cd.intContractDetailId
-					, strTicketNumber = ch.strContractNumber + '-' +LTRIM(cd.intContractSeq) COLLATE Latin1_General_CI_AS
-					, dtmTicketDateTime = ch.dtmContractDate
-					, strDistributionOption = 'CNT' COLLATE Latin1_General_CI_AS
-					, cd.intUnitMeasureId
-					, cl.intCompanyLocationId
-					, r.strShipmentNumber
-					, cd.intContractHeaderId
-					, strContractNumber = ch.strContractNumber + '-' +LTRIM(cd.intContractSeq) COLLATE Latin1_General_CI_AS
-					, r.intInventoryShipmentId
-					, ri.intSourceId
-					, cd.intFutureMarketId
-					, cd.intFutureMonthId
-					, fm.strFutMarketName
-					, mnt.strFutureMonth
-					, strContractEndMonth = 'Near By' COLLATE Latin1_General_CI_AS
-					, strDeliveryDate = dbo.fnRKFormatDate(dtmEndDate, 'MMM yyyy')
-				FROM vyuRKGetInventoryValuation v
-				JOIN tblICInventoryShipment r ON r.strShipmentNumber = v.strTransactionId
-				INNER JOIN tblICInventoryShipmentItem ri ON r.intInventoryShipmentId = ri.intInventoryShipmentId AND ri.intInventoryShipmentItemId =  v.intTransactionDetailId
-				INNER JOIN tblCTContractDetail cd ON cd.intContractDetailId = ri.intLineNo AND cd.intPricingTypeId = 2 AND cd.intContractStatusId <> 3
-				INNER JOIN tblCTContractHeader ch ON cd.intContractHeaderId = ch.intContractHeaderId  AND ch.intContractTypeId = 2
-				INNER JOIN tblICItem i on cd.intItemId = i.intItemId
-				INNER JOIN tblICItemUOM iuom on iuom.intItemId = i.intItemId and iuom.intItemUOMId = ri.intItemUOMId
-				INNER JOIN tblICCategory cat on i.intCategoryId = cat.intCategoryId
-				INNER JOIN tblRKFutureMarket fm on cd.intFutureMarketId = fm.intFutureMarketId
-				INNER JOIN tblRKFuturesMonth mnt on cd.intFutureMonthId = mnt.intFutureMonthId
-				INNER JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = cd.intCompanyLocationId
-				LEFT JOIN tblARInvoiceDetail invD ON ri.intInventoryShipmentItemId = invD.intInventoryShipmentItemId
-				LEFT JOIN tblARInvoice inv ON invD.intInvoiceId = inv.intInvoiceId
-				LEFT JOIN tblCTPriceFixationDetail pfd ON invD.intInvoiceDetailId = pfd.intInvoiceDetailId
-				WHERE ch.intCommodityId = @intCommodityId AND v.strTransactionType = 'Inventory Shipment'
-					AND cl.intCompanyLocationId = ISNULL(@intLocationId, cl.intCompanyLocationId)
-					AND CONVERT(DATETIME, CONVERT(VARCHAR(10), v.dtmDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
-					AND CONVERT(DATETIME, @dtmToDate) < CONVERT(DATETIME, CONVERT(VARCHAR(10), ISNULL(inv.dtmDate,DATEADD(DAY,1,@dtmToDate)), 110), 110)
-					AND CONVERT(DATETIME, @dtmToDate) < CONVERT(DATETIME, CONVERT(VARCHAR(10), ISNULL(pfd.dtmFixationDate,DATEADD(DAY,1,@dtmToDate)), 110), 110)
-			) t WHERE intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
+				, intInventoryShipmentId = BD.intTransactionId
+				, strShipmentNumber = BD.strTransactionId
+				, strTicketNumber = ''
+				, intTicketId = NULL
+				, BD.intFutureMarketId
+				, BD.intFutureMonthId
+				, fm.strFutMarketName
+				, mnt.strFutureMonth
+				, strContractEndMonth = 'Near By' COLLATE Latin1_General_CI_AS
+				, strDeliveryDate = dbo.fnRKFormatDate(dtmEndDate, 'MMM yyyy')
+			FROM dbo.fnCTGetBasisDelivery(@dtmToDate) BD
+				INNER JOIN tblRKFutureMarket fm ON BD.intFutureMarketId = fm.intFutureMarketId
+				INNER JOIN tblRKFuturesMonth mnt ON BD.intFutureMonthId = mnt.intFutureMonthId
+				INNER JOIN tblICItem i ON BD.intItemId = i.intItemId
+				INNER JOIN tblICCategory cat ON i.intCategoryId = cat.intCategoryId
+			WHERE BD.intCommodityId = @intCommodityId
+				AND strContractType = 'Sale'
+				AND intCompanyLocationId = ISNULL(@intLocationId, intCompanyLocationId)
+				AND intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
+				AND BD.ysnOpenGetBasisDelivery = 1
+
+			--INSERT INTO @Final (intSeqId
+			--	, strSeqHeader
+			--	, strCommodityCode
+			--	, strType
+			--	, dblTotal
+			--	, intCommodityId
+			--	, strLocationName
+			--	, intItemId
+			--	, strItemNo
+			--	, strCategory
+			--	, dtmTicketDateTime
+			--	, strDistributionOption
+			--	, intFromCommodityUnitMeasureId
+			--	, intCompanyLocationId
+			--	, strDPAReceiptNo
+			--	, intContractHeaderId
+			--	, strContractNumber
+			--	, intInventoryShipmentId
+			--	, strShipmentNumber
+			--	, strTicketNumber
+			--	, intTicketId
+			--	, intFutureMarketId
+			--	, intFutureMonthId
+			--	, strFutMarketName
+			--	, strFutureMonth
+			--	, strContractEndMonth
+			--	, strDeliveryDate)
+			--SELECT intSeqId
+			--	, strSeqHeader
+			--	, strCommodityCode
+			--	, strType
+			--	, dblTotal
+			--	, intCommodityId
+			--	, strLocationName
+			--	, intItemId
+			--	, strItemNo
+			--	, strCategory
+			--	, dtmTicketDateTime
+			--	, strDistributionOption
+			--	, intUnitMeasureId
+			--	, intCompanyLocationId
+			--	, strShipmentNumber
+			--	, intContractHeaderId
+			--	, strContractNumber
+			--	, intInventoryShipmentId
+			--	, strShipmentNumber
+			--	, strTicketNumber
+			--	, intTicketId
+			--	, intFutureMarketId
+			--	, intFutureMonthId
+			--	, strFutMarketName
+			--	, strFutureMonth
+			--	, strContractEndMonth
+			--	, strDeliveryDate
+			--FROM (
+			--	SELECT DISTINCT intSeqId = 14
+			--		, strSeqHeader = 'Sales Basis Deliveries' COLLATE Latin1_General_CI_AS
+			--		, strCommodityCode = @strCommodityCode 
+			--		, strType = 'Sales Basis Deliveries' COLLATE Latin1_General_CI_AS
+			--		, dblTotal = dbo.fnCTConvertQuantityToTargetItemUOM(cd.intItemId,iuom.intUnitMeasureId,@intCommodityStockUOMId,isnull(ri.dblQuantity, 0))
+			--		, ch.intCommodityId
+			--		, cl.strLocationName
+			--		, cd.intItemId
+			--		, i.strItemNo
+			--		, strCategory = cat.strCategoryCode
+			--		, intTicketId = cd.intContractDetailId
+			--		, strTicketNumber = ch.strContractNumber + '-' +LTRIM(cd.intContractSeq) COLLATE Latin1_General_CI_AS
+			--		, dtmTicketDateTime = ch.dtmContractDate
+			--		, strDistributionOption = 'CNT' COLLATE Latin1_General_CI_AS
+			--		, cd.intUnitMeasureId
+			--		, cl.intCompanyLocationId
+			--		, r.strShipmentNumber
+			--		, cd.intContractHeaderId
+			--		, strContractNumber = ch.strContractNumber + '-' +LTRIM(cd.intContractSeq) COLLATE Latin1_General_CI_AS
+			--		, r.intInventoryShipmentId
+			--		, ri.intSourceId
+			--		, cd.intFutureMarketId
+			--		, cd.intFutureMonthId
+			--		, fm.strFutMarketName
+			--		, mnt.strFutureMonth
+			--		, strContractEndMonth = 'Near By' COLLATE Latin1_General_CI_AS
+			--		, strDeliveryDate = dbo.fnRKFormatDate(dtmEndDate, 'MMM yyyy')
+			--	FROM vyuRKGetInventoryValuation v
+			--	JOIN tblICInventoryShipment r ON r.strShipmentNumber = v.strTransactionId
+			--	INNER JOIN tblICInventoryShipmentItem ri ON r.intInventoryShipmentId = ri.intInventoryShipmentId AND ri.intInventoryShipmentItemId =  v.intTransactionDetailId
+			--	INNER JOIN tblCTContractDetail cd ON cd.intContractDetailId = ri.intLineNo AND cd.intPricingTypeId = 2 AND cd.intContractStatusId <> 3
+			--	INNER JOIN tblCTContractHeader ch ON cd.intContractHeaderId = ch.intContractHeaderId  AND ch.intContractTypeId = 2
+			--	INNER JOIN tblICItem i on cd.intItemId = i.intItemId
+			--	INNER JOIN tblICItemUOM iuom on iuom.intItemId = i.intItemId and iuom.intItemUOMId = ri.intItemUOMId
+			--	INNER JOIN tblICCategory cat on i.intCategoryId = cat.intCategoryId
+			--	INNER JOIN tblRKFutureMarket fm on cd.intFutureMarketId = fm.intFutureMarketId
+			--	INNER JOIN tblRKFuturesMonth mnt on cd.intFutureMonthId = mnt.intFutureMonthId
+			--	INNER JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = cd.intCompanyLocationId
+			--	LEFT JOIN tblARInvoiceDetail invD ON ri.intInventoryShipmentItemId = invD.intInventoryShipmentItemId
+			--	LEFT JOIN tblARInvoice inv ON invD.intInvoiceId = inv.intInvoiceId
+			--	LEFT JOIN tblCTPriceFixationDetail pfd ON invD.intInvoiceDetailId = pfd.intInvoiceDetailId
+			--	WHERE ch.intCommodityId = @intCommodityId AND v.strTransactionType = 'Inventory Shipment'
+			--		AND cl.intCompanyLocationId = ISNULL(@intLocationId, cl.intCompanyLocationId)
+			--		AND CONVERT(DATETIME, CONVERT(VARCHAR(10), v.dtmDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
+			--		AND CONVERT(DATETIME, @dtmToDate) < CONVERT(DATETIME, CONVERT(VARCHAR(10), ISNULL(inv.dtmDate,DATEADD(DAY,1,@dtmToDate)), 110), 110)
+			--		AND CONVERT(DATETIME, @dtmToDate) < CONVERT(DATETIME, CONVERT(VARCHAR(10), ISNULL(pfd.dtmFixationDate,DATEADD(DAY,1,@dtmToDate)), 110), 110)
+			--) t WHERE intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 			
 			INSERT INTO @Final(intSeqId
 				, strSeqHeader
@@ -2180,7 +2180,7 @@ BEGIN
 					, intCategoryId
 					, strCategory
 				FROM (
-					SELECT intTicketId
+					SELECT DISTINCT intTicketId
 						, strTicketType
 						, strTicketNumber
 						, dblTotal = dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId, @intCommodityUnitMeasureId, (ISNULL(dblBalance,0)))

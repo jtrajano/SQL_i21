@@ -11,12 +11,27 @@ BEGIN TRY
 	
 	SELECT	CAST(ROW_NUMBER() OVER (ORDER BY intContractSeq ASC) AS INT) intUniqueId,
 			*,
-			dbo.fnCTConvertQuantityToTargetCommodityUOM(intFinalPriceUOMId,intBasisCommodityUOMId,dblOriginalBasis)/ 
-			CASE	WHEN	intBasisCurrencyId = intCurrencyId	THEN 1
-					WHEN	intBasisCurrencyId <> intCurrencyId 
-					AND		ysnBasisSubCurrency = 1				THEN 100 ELSE 0.01 
-			END AS dblConvertedBasis
-			 
+			CASE	WHEN (SELECT 1 FROM tblCTCompanyPreference WHERE ysnEnableFreightBasis = 1) = 1 THEN 
+						CASE	WHEN strContractType = 'Purchase' THEN
+										ISNULL((dbo.fnCTConvertQuantityToTargetCommodityUOM(intFinalPriceUOMId,intBasisCommodityUOMId,dblOriginalBasis)/ 
+										CASE	WHEN	intBasisCurrencyId = intCurrencyId	THEN 1
+												WHEN	intBasisCurrencyId <> intCurrencyId 
+												AND		ysnBasisSubCurrency = 1				THEN 100 ELSE 0.01 
+										END),0) - ISNULL((SELECT dblFreightBasis FROM tblCTContractDetail WHERE intContractDetailId = t.intContractDetailId),0)
+								WHEN strContractType = 'Sale' THEN
+										ISNULL((dbo.fnCTConvertQuantityToTargetCommodityUOM(intFinalPriceUOMId,intBasisCommodityUOMId,dblOriginalBasis)/ 
+										CASE	WHEN	intBasisCurrencyId = intCurrencyId	THEN 1
+												WHEN	intBasisCurrencyId <> intCurrencyId 
+												AND		ysnBasisSubCurrency = 1				THEN 100 ELSE 0.01 
+										END),0) + ISNULL((SELECT dblFreightBasis FROM tblCTContractDetail WHERE intContractDetailId = t.intContractDetailId),0)
+								END
+				ELSE
+						dbo.fnCTConvertQuantityToTargetCommodityUOM(intFinalPriceUOMId,intBasisCommodityUOMId,dblOriginalBasis)/ 
+						CASE	WHEN	intBasisCurrencyId = intCurrencyId	THEN 1
+								WHEN	intBasisCurrencyId <> intCurrencyId 
+								AND		ysnBasisSubCurrency = 1				THEN 100 ELSE 0.01 
+						END
+			END AS dblConvertedBasis			 
 	FROM
 	(
 		SELECT	CD.intContractHeaderId,

@@ -27,7 +27,7 @@ SELECT
 	
 	-- Purchase Contract Details
 	,intPContractDetailId = ALD.intPContractDetailId
-	,dblPAllocatedQty = ALD.dblPAllocatedQty
+	,dblPAllocatedQty = ISNULL(dbo.fnCalculateQtyBetweenUOM(PCT.intItemUOMId, PToUOM.intItemUOMId, ALD.dblPAllocatedQty), ALD.dblPAllocatedQty)
 	,dblPContractAllocatedQty = PCT.dblAllocatedQty
 	,intPUnitMeasureId = ALD.intPUnitMeasureId
 	,strPurchaseContractNumber = PCH.strContractNumber
@@ -67,7 +67,7 @@ SELECT
 	
 	---- Sales Contract Details
 	,intSContractDetailId = ALD.intSContractDetailId
-	,dblSAllocatedQty = ALD.dblSAllocatedQty
+	,dblSAllocatedQty = ISNULL(dbo.fnCalculateQtyBetweenUOM(SCT.intItemUOMId, SToUOM.intItemUOMId, ALD.dblSAllocatedQty), ALD.dblSAllocatedQty)
 	,dblSContractAllocatedQty = SCT.dblAllocatedQty
 	,intSUnitMeasureId = ALD.intSUnitMeasureId
 	,strSalesContractNumber = SCH.strContractNumber
@@ -106,9 +106,10 @@ SELECT
 	,strSOriginDest = SFR.strOrigin+' - '+SFR.strDest
 	,strSOrigin = SCO.strCountry
 	,dblSNoOfLots = SCT.dblNoOfLots
-	,ysnDelivered = CONVERT(BIT, CASE WHEN (ALD.dblSAllocatedQty > ISNULL(LS.dblQuantity, 0)) THEN 0 ELSE 1 END)
+	,ysnDelivered = CONVERT(BIT, 
+		CASE WHEN (ISNULL(dbo.fnCalculateQtyBetweenUOM(SCT.intItemUOMId, SToUOM.intItemUOMId, ALD.dblSAllocatedQty), ALD.dblSAllocatedQty) > ISNULL(LS.dblQuantity, 0)) THEN 0 ELSE 1 END)
 	,dblSDeliveredQty = ISNULL(LS.dblQuantity, 0)
-	,dblBalanceToDeliver = ALD.dblSAllocatedQty - ISNULL(LSB.dblBatchQuantity, 0)
+	,dblBalanceToDeliver = dbo.fnCalculateQtyBetweenUOM(SCT.intItemUOMId, SToUOM.intItemUOMId, ALD.dblSAllocatedQty) - ISNULL(LSB.dblBatchQuantity, 0)
 	,strInvoiceStatus = CASE WHEN (ISNULL(PCT.dblInvoicedQty, 0) = 0 AND ISNULL(SCT.dblInvoicedQty, 0) = 0) THEN 'Not Invoiced' ELSE 'Partially Invoiced' END COLLATE Latin1_General_CI_AS 
 	
 	--Load Shipment
@@ -167,8 +168,15 @@ LEFT JOIN tblCTPricingType SPT ON SPT.intPricingTypeId = SCT.intPricingTypeId
 LEFT JOIN tblCTFreightRate SFR ON SFR.intFreightRateId = SCT.intFreightRateId
 LEFT JOIN tblCTBook BO ON BO.intBookId = ALH.intBookId
 LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = ALH.intSubBookId
-OUTER APPLY (SELECT L.strLoadNumber, L.dtmETAPOD, L.strDestinationCity, dblQuantity = SUM(LD.dblQuantity) FROM tblLGLoadDetail LD JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
+OUTER APPLY (SELECT intItemUOMId FROM tblICItemUOM WHERE intItemId = IM.intItemId AND intUnitMeasureId = ALH.intWeightUnitMeasureId) PToUOM
+OUTER APPLY (SELECT intItemUOMId FROM tblICItemUOM WHERE intItemId = SIM.intItemId AND intUnitMeasureId = ALH.intWeightUnitMeasureId) SToUOM
+OUTER APPLY (SELECT L.strLoadNumber, L.dtmETAPOD, L.strDestinationCity, dblQuantity = SUM(ISNULL(dbo.fnCalculateQtyBetweenUOM(LD.intItemUOMId, ToUOM.intItemUOMId, LD.dblQuantity), 0)) 
+				FROM tblLGLoadDetail LD JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
+				OUTER APPLY (SELECT intItemUOMId FROM tblICItemUOM WHERE intItemId = LD.intItemId AND intUnitMeasureId = ALH.intWeightUnitMeasureId) ToUOM
 			WHERE LD.intAllocationDetailId = ALD.intAllocationDetailId AND L.ysnPosted = 1 AND L.intPurchaseSale IN (2, 3) AND L.intShipmentType = 1
 			GROUP BY L.strLoadNumber, L.dtmETAPOD, L.strDestinationCity) LS
-OUTER APPLY (SELECT dblBatchQuantity = SUM(LD.dblQuantity) FROM tblLGLoadDetail LD JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
+OUTER APPLY (SELECT 
+				dblBatchQuantity = SUM(ISNULL(dbo.fnCalculateQtyBetweenUOM(LD.intItemUOMId, ToUOM.intItemUOMId, LD.dblQuantity), 0)) 
+			FROM tblLGLoadDetail LD JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
+				OUTER APPLY (SELECT intItemUOMId FROM tblICItemUOM WHERE intItemId = LD.intItemId AND intUnitMeasureId = ALH.intWeightUnitMeasureId) ToUOM
 			WHERE LD.intAllocationDetailId = ALD.intAllocationDetailId AND L.ysnPosted = 1 AND L.intPurchaseSale IN (2, 3) AND L.intShipmentType = 1) LSB

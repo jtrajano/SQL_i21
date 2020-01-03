@@ -387,6 +387,7 @@
     <None Include="Scripts\Pre-Deployment\6_GL\6_1910.sql" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Scripts\Pre-Deployment\11_IC\FixFKItemPricingLevel.sql" />
     <None Include="Scripts\Pre-Deployment\14_CT\1920_ItemContracts.sql" />
   </ItemGroup>
 </Project>

@@ -289,7 +289,9 @@ WHERE NOT EXISTS (select * from tblICItemLocation where intItemId = I.intItemId 
 --join gacommst cmst on strDiscountId COLLATE SQL_Latin1_General_CP1_CS_AS = CAST(gacom_def_disc_schd_no AS VARCHAR(15)) COLLATE SQL_Latin1_General_CP1_CS_AS
 --) as St
 --where St.gacom_com_cd COLLATE SQL_Latin1_General_CP1_CS_AS = tblICCommodity.strCommodityCode COLLATE SQL_Latin1_General_CP1_CS_AS
-
+UPDATE tblICItemUOM SET ysnStockUnit = 0 WHERE dblUnitQty <> 1 AND ysnStockUnit = 1
+UPDATE tblICItemUOM SET ysnStockUnit = 1 WHERE ysnStockUnit = 0 AND dblUnitQty = 1
+UPDATE tblICItemLocation SET intCostingMethod = 1 WHERE intCostingMethod IS NULL
 
 GO
 

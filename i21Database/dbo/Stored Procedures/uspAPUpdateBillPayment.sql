@@ -150,6 +150,7 @@ BEGIN
 		WHERE 
 			B.intPaymentId = A.intPaymentId AND B.intPayScheduleId IS NULL
 		AND B.intBillId = C.intBillId
+		AND B.dblPayment != 0
 		GROUP BY B.intBillId
 	) payDetails
 	OUTER APPLY (
@@ -162,6 +163,7 @@ BEGIN
 		WHERE 
 			B.intPaymentId = A.intPaymentId AND B.intPayScheduleId > 0
 		AND B.intBillId = C.intBillId
+		AND B.dblPayment != 0
 		GROUP BY B.intBillId
 	) paySchedDetails
 	WHERE A.intPaymentId IN (SELECT intId FROM @paymentIds)

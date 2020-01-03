@@ -39,12 +39,10 @@ BEGIN TRY
 		,@ysnCostEnabled BIT
 		,@intWOItemUOMId INT
 		,@intUnitMeasureId INT
-
 	DECLARE @intReturnValue AS INT
 	DECLARE @unpostCostAdjustment AS ItemCostAdjustmentTableType
 	DECLARE @strBatchIdForUnpost AS NVARCHAR(50)
 	DECLARE @strErrorMessage AS NVARCHAR(4000)
-
 
 	SELECT TOP 1 @ysnCostEnabled = ysnCostEnabled
 	FROM tblMFCompanyPreference
@@ -220,7 +218,7 @@ BEGIN TRY
 			,[dblQty]
 			,[dblUOMQty]
 			,[intCostUOMId] = t.[intItemUOMId]
-			,[dblNewValue] = t.dblValue
+			,[dblNewValue] = IsNULL(PL.dblItemValue, t.dblValue)
 			,[intCurrencyId]
 			,[intTransactionId] = t.intRelatedTransactionId
 			,[intTransactionDetailId] = t.intTransactionDetailId
@@ -237,14 +235,14 @@ BEGIN TRY
 			,intFobPointId
 			,dblVoucherCost = NULL
 		FROM tblICInventoryTransaction t
+		LEFT JOIN tblMFWorkOrderProducedLot PL ON PL.intWorkOrderProducedLotId = t.intTransactionDetailId
 		WHERE t.strBatchId = @strCostAdjustmentBatchId
 			AND t.ysnIsUnposted = 0
 			AND t.intTransactionTypeId = 26
 			AND t.strTransactionId = t.strRelatedTransactionId
 			AND t.strTransactionId = @strWorkOrderNo
 
-		EXEC @intReturnValue = uspICPostCostAdjustment
-			@ItemsToAdjust = @unpostCostAdjustment
+		EXEC @intReturnValue = uspICPostCostAdjustment @ItemsToAdjust = @unpostCostAdjustment
 			,@strBatchId = @strBatchIdForUnpost
 			,@intEntityUserSecurityId = @userId
 			,@ysnPost = 0
@@ -298,8 +296,7 @@ BEGIN TRY
 			,intSourceEntityId
 			,intCommodityId
 			)
-		EXEC dbo.uspICCreateGLEntriesOnCostAdjustment 
-			@strBatchId = @strBatchIdForUnpost
+		EXEC dbo.uspICCreateGLEntriesOnCostAdjustment @strBatchId = @strBatchIdForUnpost
 			,@intEntityUserSecurityId = @intUserId
 			,@strGLDescription = ''
 			,@ysnPost = 0
@@ -315,8 +312,7 @@ BEGIN TRY
 				FROM @GLEntries
 				)
 		BEGIN
-			EXEC uspGLBookEntries 
-				@GLEntries
+			EXEC uspGLBookEntries @GLEntries
 				,0
 		END
 	END
@@ -402,15 +398,13 @@ BEGIN TRY
 			,[intSourceEntityId]
 			,[intCommodityId]
 			)
-		EXEC dbo.uspICUnpostCosting 
-			@intTransactionId
+		EXEC dbo.uspICUnpostCosting @intTransactionId
 			,@strAdjustmentNo
 			,@strBatchId
 			,@intUserId
 			,0
 
-		EXEC dbo.uspGLBookEntries 
-			@GLEntries
+		EXEC dbo.uspGLBookEntries @GLEntries
 			,0
 
 		SELECT @intWorkOrderProducedLotTransactionId = MIN(intWorkOrderProducedLotTransactionId)
@@ -477,8 +471,7 @@ BEGIN TRY
 			,[intSourceEntityId]
 			,[intCommodityId]
 			)
-		EXEC dbo.uspICUnpostCosting 
-			@intBatchId
+		EXEC dbo.uspICUnpostCosting @intBatchId
 			,@strWorkOrderNo
 			,@strBatchIdForUnpost --@strBatchId
 			,@intUserId
@@ -533,7 +526,7 @@ BEGIN TRY
 			,intWorkOrderConsumedLotId
 			,dtmBusinessDate
 			,intBusinessShiftId
-			,intWorkOrderId 
+			,intWorkOrderId
 			)
 		SELECT dtmDate
 			,intTransactionTypeId
@@ -653,8 +646,7 @@ BEGIN TRY
 				,[intSourceEntityId]
 				,[intCommodityId]
 				)
-			EXEC dbo.uspICPostCosting 
-				@ItemsForPost
+			EXEC dbo.uspICPostCosting @ItemsForPost
 				,@strBatchId
 				,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
 				,@intUserId
@@ -732,8 +724,7 @@ BEGIN TRY
 		FROM dbo.tblICStorageLocation
 		WHERE intStorageLocationId = @intConsumptionStorageLocationId
 
-		EXEC dbo.uspICCreateStockReservation 
-			@ItemsToReserve
+		EXEC dbo.uspICCreateStockReservation @ItemsToReserve
 			,@intWorkOrderId
 			,@intInventoryTransactionType
 
@@ -775,8 +766,7 @@ BEGIN TRY
 			,WI.intItemIssuedUOMId
 			,L.strLotNumber
 
-		EXEC dbo.uspICCreateStockReservation 
-			@ItemsToReserve
+		EXEC dbo.uspICCreateStockReservation @ItemsToReserve
 			,@intWorkOrderId
 			,@intInventoryTransactionType
 	END
@@ -805,3 +795,5 @@ BEGIN CATCH
 			)
 END CATCH
 GO
+
+

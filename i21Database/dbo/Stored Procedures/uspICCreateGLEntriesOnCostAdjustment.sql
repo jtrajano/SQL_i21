@@ -147,7 +147,7 @@ END
 -- Get the GL Account ids for the Other Charges 
 BEGIN 
 	DECLARE @OtherChargeGLAccounts AS dbo.ItemGLAccount; 
-	
+
 	-- FIFO LOG
 	INSERT INTO @OtherChargeGLAccounts (
 			intItemId 
@@ -203,13 +203,13 @@ BEGIN
 							AND ocl.intLocationId = il.intLocationId
 						LEFT JOIN @OtherChargeGLAccounts OtherChargeGLAccounts
 							ON OtherChargeGLAccounts.intItemId = cbLog.intOtherChargeItemId
-							AND OtherChargeGLAccounts.intItemLocationId = t.intItemLocationId
+							AND OtherChargeGLAccounts.intItemLocationId = ocl.intItemLocationId
+							AND OtherChargeGLAccounts.intTransactionTypeId = t.intTransactionTypeId
 				WHERE	t.strBatchId = @strBatchId
-						AND (@strTransactionId IS NULL OR t.strTransactionId = @strTransactionId)
-						AND OtherChargeGLAccounts.intItemId IS NULL 
-						AND OtherChargeGLAccounts.intItemLocationId IS NULL 
+						AND (@strTransactionId IS NULL OR t.strTransactionId = @strTransactionId)						
 						AND cbLog.intOtherChargeItemId IS NOT NULL 
 						AND t.intItemLocationId IS NOT NULL 
+						AND OtherChargeGLAccounts.intItemId IS NULL 
 			) Query
 	;
 
@@ -239,13 +239,13 @@ BEGIN
 							AND ocl.intLocationId = il.intLocationId
 						LEFT JOIN @OtherChargeGLAccounts OtherChargeGLAccounts
 							ON OtherChargeGLAccounts.intItemId = cbLog.intOtherChargeItemId
-							AND OtherChargeGLAccounts.intItemLocationId = t.intItemLocationId
+							AND OtherChargeGLAccounts.intItemLocationId = ocl.intItemLocationId
+							AND OtherChargeGLAccounts.intTransactionTypeId = t.intTransactionTypeId
 				WHERE	t.strBatchId = @strBatchId
 						AND (@strTransactionId IS NULL OR t.strTransactionId = @strTransactionId)
-						AND OtherChargeGLAccounts.intItemId IS NULL 
-						AND OtherChargeGLAccounts.intItemLocationId IS NULL 
 						AND cbLog.intOtherChargeItemId IS NOT NULL 
 						AND t.intItemLocationId IS NOT NULL 
+						AND OtherChargeGLAccounts.intItemId IS NULL 
 			) Query
 	;
 
@@ -273,15 +273,17 @@ BEGIN
 						INNER JOIN tblICItemLocation ocl
 							ON ocl.intItemId = cbLog.intOtherChargeItemId
 							AND ocl.intLocationId = il.intLocationId
+						
 						LEFT JOIN @OtherChargeGLAccounts OtherChargeGLAccounts
 							ON OtherChargeGLAccounts.intItemId = cbLog.intOtherChargeItemId
-							AND OtherChargeGLAccounts.intItemLocationId = t.intItemLocationId
+							AND OtherChargeGLAccounts.intItemLocationId = ocl.intItemLocationId
+							AND OtherChargeGLAccounts.intTransactionTypeId = t.intTransactionTypeId
+
 				WHERE	t.strBatchId = @strBatchId
 						AND (@strTransactionId IS NULL OR t.strTransactionId = @strTransactionId)
-						AND OtherChargeGLAccounts.intItemId IS NULL 
-						AND OtherChargeGLAccounts.intItemLocationId IS NULL 
 						AND cbLog.intOtherChargeItemId IS NOT NULL 
 						AND t.intItemLocationId IS NOT NULL 
+						AND OtherChargeGLAccounts.intItemId IS NULL 
 			) Query
 	;
 END

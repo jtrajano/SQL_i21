@@ -128,12 +128,12 @@ BEGIN
 	END
 	ELSE IF @strScreenName = 'Transfer Storage'
 	BEGIN
-		SELECT	@intExternalHeaderId	=	HR.intCustomerStorageId,
-				@strNumber				=	HR.strStorageTicketNumber,
-				@strHeaderIdColumn		=	'intCustomerStorageId'
+		SELECT	@intExternalHeaderId	=	TS.intTransferStorageId,
+				@strNumber				=	TS.strTransferStorageTicket,
+				@strHeaderIdColumn		=	'intTransferStorageId'
 
-		FROM	tblGRCustomerStorage	HR	
-		WHERE	HR.intCustomerStorageId	=	@intExternalId
+		FROM	tblGRTransferStorage	TS
+		WHERE	TS.intTransferStorageId	=	@intExternalId
 	END
 	ELSE IF @strScreenName = 'Inventory Shipment'
 	BEGIN
@@ -179,6 +179,16 @@ BEGIN
 		SELECT	@intExternalHeaderId			=	-1,
 				@strNumber						=	'Split',
 				@strHeaderIdColumn				=	'intContractHeaderId'
+	END
+	ELSE IF @strScreenName = 'Delivery Sheet'
+	BEGIN
+		SELECT	@intExternalHeaderId	=	HR.intDeliverySheetId,
+				@strNumber				=	HR.strDeliverySheetNumber,
+				@strHeaderIdColumn		=	'intDeliverySheetId',
+				@dtmScreenDate			=	HR.dtmDeliverySheetDate
+		FROM	tblSCDeliverySheet	HR
+		WHERE	HR.intDeliverySheetId	=	@intExternalId
+		
 	END
 
 	IF ISNULL(@strNumber,'')  = ''

@@ -27,9 +27,8 @@ AS
 			CY.ysnSubCurrency,
 			MY.strCurrency		AS	strMainCurrency,
 			ISNULL(V.strFLOId,U.strFLOId) AS strFLOId,
-			S.intContainerTypeId,
-			ISNULL(S.dblTotalCostPerContainer,0) AS dblTotalCostPerContainer
-
+			NULL AS intContainerTypeId,
+			CAST(0 AS DECIMAL(18,6)) AS dblTotalCostPerContainer
 	FROM	tblEMEntity				E
 	CROSS APPLY	(SELECT TOP 1 * FROM tblSMCompanyPreference) SC	
 	LEFT JOIN	[tblEMEntityLocation]	L	ON	E.intEntityId			=	L.intEntityId 
@@ -43,20 +42,8 @@ AS
 	LEFT JOIN	tblARSalesperson		P	ON	P.intEntityId			=	E.intEntityId
 	OUTER APPLY (
 		SELECT	EY.intEntityId
-				,intContainerTypeId = null
-				,dblTotalCostPerContainer = 0
-		FROM	tblEMEntity EY INNER JOIN tblEMEntityType ET
-					ON EY.intEntityId = ET.intEntityId		
-		WHERE	EY.intEntityId = E.intEntityId	
-				AND	ET.strType = 'Ship Via'
-		UNION
-		SELECT	EY.intEntityId
-				,FRM.intContainerTypeId
-				,dblTotalCostPerContainer = ISNULL(FRM.dblTotalCostPerContainer,0)
 		FROM	tblEMEntity EY INNER JOIN tblEMEntityType ET
 					ON EY.intEntityId = ET.intEntityId
-		JOIN tblLGFreightRateMatrix FRM 
-					ON EY.intEntityId = FRM.intEntityId
 		WHERE	EY.intEntityId = E.intEntityId	
 				AND	ET.strType = 'Ship Via'
 	) S	

@@ -369,6 +369,7 @@ print 'BEGIN POST DEPLOYMENT'
 :R .\CT\TitleToCode.sql
 :R .\CT\5_DataFix.sql
 :R .\CT\1920_Add_Accrued_Payables.sql
+:R .\CT\Create_fnCTFormatNumber.sql
 
 --Notes Receivable
 :R .\NR\1_NoteTransType.sql
@@ -511,6 +512,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\ST\34_FileFieldMapping_Commander_uMaintenance_MixMatch.sql
 :r .\ST\35_RegisterSetupEntries.sql
 :r .\ST\36_CStoreSQLJobScheduler.sql
+:r .\ST\37_FileFieldMapping_Passport_CPJR_340.sql
 
 
 -- Motor Fuel Tax
@@ -539,7 +541,8 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\TF\DefaultData\OK_Oklahoma.sql
 :r .\TF\DefaultData\TX_Texas.sql
 :r .\TF\DefaultData\AR_Arkansas.sql
-:r .\TF\DefaultData\AfterUpgradeCleanup.sql
+:r .\TF\DefaultData\AR_Arkansas.sql
+:r .\TF\DefaultData\CO_Colorado.sql
 
 --Integration
 :R .\IP\1_MasterTables.sql
@@ -570,6 +573,8 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\TR\ImportBolFileSetup.sql
 :r .\TR\CrossReferenceDefault.sql
 :r .\TR\OverrideTaxGroupDefault.sql
+:r .\TR\ImportDtnFileSetup.sql
+:r .\TR\ImportDtnDefaultSetup.sql
 
 --Help Desk
 :R .\HD\DefaultData\1_StatusData.sql

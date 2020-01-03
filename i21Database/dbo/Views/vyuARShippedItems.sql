@@ -886,7 +886,7 @@ FROM (
 	     , intItemId						= intItemId
 	     , strItemDescription				= strItemDescription
 	     , intItemUOMId						= intItemUOMId
-		 , intPriceUOMId					= intShipmentItemUOMId
+		 , intPriceUOMId					= intPriceUOMId
 	     , intOrderUOMId					= intOrderUOMId
 	     , intShipmentItemUOMId				= intShipmentItemUOMId
 		 , intWeightUOMId					= intItemUOMId
@@ -900,7 +900,7 @@ FROM (
 	     , dblDiscount						= dblDiscount
 	     , dblPrice							= CAST(dblPrice AS DECIMAL(18,6))
 		 , dblUnitPrice						= CAST(dblPrice AS DECIMAL(18,6))
-	     , dblShipmentUnitPrice				= CAST(dblPrice AS DECIMAL(18,6))
+	     , dblShipmentUnitPrice				= CAST(dblShipmentUnitPrice AS DECIMAL(18,6))
 	     , strPricing						= strPricing
 	     , strVFDDocumentNumber				= strVFDDocumentNumber
 	     , dblTotalTax						= dblTotalTax

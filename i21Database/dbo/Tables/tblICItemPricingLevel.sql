@@ -13,6 +13,7 @@ Type the overview for the table here.
 	CREATE TABLE [dbo].[tblICItemPricingLevel]
 	(
 		[intItemPricingLevelId] INT NOT NULL IDENTITY, 
+		[intCompanyLocationPricingLevelId] INT NOT NULL,
 		[intItemId] INT NOT NULL, 
 		[intItemLocationId] INT NOT NULL, 
 		[strPriceLevel] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
@@ -38,7 +39,8 @@ Type the overview for the table here.
 		CONSTRAINT [FK_tblICItemPricingLevel_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]) ON DELETE CASCADE, 
 		CONSTRAINT [FK_tblICItemPricingLevel_tblICItemLocation] FOREIGN KEY ([intItemLocationId]) REFERENCES [tblICItemLocation]([intItemLocationId]),
 		CONSTRAINT [FK_tblICItemPricingLevel_tblICItemUOM] FOREIGN KEY ([intItemUnitMeasureId]) REFERENCES [tblICItemUOM]([intItemUOMId]),
-		CONSTRAINT [FK_tblICItemPricingLevel_tblSMCurrency] FOREIGN KEY ([intCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID])
+		CONSTRAINT [FK_tblICItemPricingLevel_tblSMCurrency] FOREIGN KEY ([intCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID]),
+		CONSTRAINT [FK_tblICItemPricingLevel_tblSMCompanyLocationPricingLevel] FOREIGN KEY ([intCompanyLocationPricingLevelId]) REFERENCES [tblSMCompanyLocationPricingLevel]([intCompanyLocationPricingLevelId])
 	)
 
 	GO

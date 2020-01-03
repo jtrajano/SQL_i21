@@ -69,3 +69,16 @@ IF EXISTS(SELECT * FROM sys.indexes WHERE name = 'tblCFFactorTaxGroupXRef_Unique
 BEGIN
 	DROP INDEX tblCFFactorTaxGroupXRef_UniqueCustomerState ON tblCFFactorTaxGroupXRef;
 END
+
+
+--CF-2442
+UPDATE tblCFInvoiceHistoryStagingTable 
+SET 
+ tblCFInvoiceHistoryStagingTable.ysnShowDriverPinDescriptionOnly  = tblCFAccount.ysnShowDriverPinDescriptionOnly
+,tblCFInvoiceHistoryStagingTable.ysnShowVehicleDescriptionOnly  = tblCFAccount.ysnShowVehicleDescriptionOnly
+FROM tblCFInvoiceHistoryStagingTable 
+INNER JOIN tblCFAccount
+ON tblCFInvoiceHistoryStagingTable.intAccountId = tblCFAccount.intAccountId
+WHERE tblCFInvoiceHistoryStagingTable.ysnShowDriverPinDescriptionOnly IS NULL 
+AND tblCFInvoiceHistoryStagingTable.ysnShowVehicleDescriptionOnly IS NULL
+--CF-2442

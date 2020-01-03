@@ -214,6 +214,7 @@ DECLARE
 		,[dblItemWeight]
 		,[intItemWeightUOMId]
 		,[dblPrice]
+		,[intPriceUOMId]
 		,[dblUnitPrice]
 		,[strPricing]
 		,[ysnRefreshPrice]
@@ -313,6 +314,7 @@ DECLARE
 		,[dblItemWeight]						= ARSI.[dblWeight]  
 		,[intItemWeightUOMId]					= ARSI.[intWeightUOMId] 
 		,[dblPrice]								= ARSI.[dblPrice] 
+		,[intPriceUOMId]						= ARSI.[intPriceUOMId]
 		,[dblUnitPrice]							= ARSI.[dblShipmentUnitPrice]
 		,[strPricing]							= 'Inventory Shipment Item Price'
 		,[ysnRefreshPrice]						= 0

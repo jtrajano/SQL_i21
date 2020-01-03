@@ -1,5 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuHDTimeHoursReport]
 	AS
+		
 		select
 			a.intTicketHoursWorkedId
 			,intTicketId = convert(nvarchar(20),b.intTicketId) COLLATE Latin1_General_CI_AS
@@ -55,3 +56,57 @@
 			left join tblHDTicketStatus n on n.intTicketStatusId = b.intTicketStatusId
 			left join tblHDMilestone o on o.intMilestoneId = b.intMilestoneId
 		where a.intAgentEntityId is not null and a.intAgentEntityId > 0
+
+		union all
+
+		select
+			intTicketHoursWorkedId = convert(int,ROW_NUMBER() over (order by a.intPREntityEmployeeId asc))
+			,intTicketId = 0
+			,strTicketNumber = null
+			,strSubject = null
+			,intProjectId = null
+			,strProjectName = null
+			,intCustomerId = 0
+			,strCustomerName = null
+			,strModule = null
+			,dtmDate = a.dtmPRDate
+			,intAgentEntityId = a.intPREntityEmployeeId
+			,strAgentName = d.strName
+			,intHours = a.dblPRRequest
+			,dblEstimatedHours = a.dblPRRequest
+			,dblHours = a.dblPRRequest
+			,intBilledAmount = 0
+			,intBillableHours = 0
+			,intNonBillableHours = 0
+			,intJobCodeId = null
+			,strJobCode = null
+			,dblRate = 0.00
+			,ysnBillable = convert(bit,0)
+			,strDescription = c.strTimeOff + ' (' + c.strDescription + ')'
+			,intInvoiceId = null
+			,strInvoiceNumber = null
+			,dblAmountDue = null
+			,dblPayment = null
+			,intInternalProjectManager = null
+			,strInternalProjectManager = null
+			,intVersionId = null
+			,strVersionNo = null
+			,intTicketTypeId = null
+			,strType = null
+			,intTicketStatusId = null
+			,strStatus = null
+			,intMilestoneId = null
+			,strMileStone = null
+		from
+			tblHDTimeOffRequest a
+			,tblPRTimeOffRequest b
+			,tblPRTypeTimeOff c
+			,tblEMEntity d
+			,tblSMTransaction e
+		where
+			b.intTimeOffRequestId = a.intPRTimeOffRequestId
+			and c.intTypeTimeOffId = b.intTypeTimeOffId
+			and d.intEntityId = a.intPREntityEmployeeId
+			and (e.intScreenId = (select intScreenId from tblSMScreen where strNamespace = 'Payroll.view.TimeOffRequest') 
+				 and e.intRecordId = a.intPRTimeOffRequestId 
+				 and (e.strApprovalStatus = 'Approved' or e.strApprovalStatus = 'Approved with Modification'))

@@ -14,6 +14,10 @@ AS
 BEGIN
 	DECLARE @date NVARCHAR(50)
 		, @dateFilter NVARCHAR(MAX)
+		, @SubCurrency BIT
+
+	SELECT TOP 1 @SubCurrency = ISNULL(ysnSubCurrency, 0) FROM tblSMCurrency
+	WHERE intCurrencyID = @intCurrencyId
 
 	SELECT CONVERT(INT, ROW_NUMBER() OVER(ORDER BY dtmTransactionDate ASC)) AS intRowNum
 		, intFutureMarketId
@@ -33,7 +37,7 @@ BEGIN
 		, strPosition
 		, strFutureMonth
 		, dblPrice
-		, dblValue = (CASE WHEN strBuySell = 'Buy' THEN dblQty * -1 ELSE ABS(dblQty) END) * dblFutures
+		, dblValue = (CASE WHEN strBuySell = 'Buy' THEN dblQty * -1 ELSE ABS(dblQty) END) * (dblFutures / CASE WHEN @SubCurrency = 1 THEN 100 ELSE 1 END)
 		, intPriceFixationId
 		, dblFutures
 	INTO #tmpReportDetail

@@ -1,4 +1,4 @@
-﻿CREATE VIEW vyuMFStockReservation
+﻿CREATE VIEW dbo.vyuMFStockReservation
 AS
 SELECT S.intLotId
 	,SUM(CASE 

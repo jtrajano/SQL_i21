@@ -1,8 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspARInvoiceProductRecapReport]
 	  @dtmDateFrom			DATETIME = NULL
 	, @dtmDateTo			DATETIME = NULL
-	, @strCustomerName		NVARCHAR(200) = NULL
-	, @strCategoryCode		NVARCHAR(100) = NULL
+	, @strCustomerIds		NVARCHAR(200) = NULL
+	, @strCategoryCodeIds	NVARCHAR(100) = NULL
 	, @strTransactionType	NVARCHAR(100) = NULL
 	, @strFormattingOptions	NVARCHAR(100) = NULL
 	, @intEntityUserId		INT = NULL
@@ -14,20 +14,15 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-DECLARE @intCategoryId INT
-
 IF @dtmDateFrom IS NULL
     SET @dtmDateFrom = CAST(-53690 AS DATETIME)
 
 IF @dtmDateTo IS NULL
     SET @dtmDateTo = GETDATE()
 
-SET @strCategoryCode = NULLIF(@strCategoryCode, '')
+SET @strCategoryCodeIds = NULLIF(@strCategoryCodeIds, '')
 SET @strTransactionType = NULLIF(@strTransactionType, '')
 SET @strFormattingOptions = ISNULL(@strFormattingOptions, 'Original')
-
-IF @strCategoryCode IS NOT NULL
-	SELECT TOP 1 @intCategoryId = intCategoryId FROM tblICCategory WHERE strCategoryCode = @strCategoryCode
 
 IF @strFormattingOptions = 'Product Recap Totals Only'
 	BEGIN
@@ -48,8 +43,8 @@ IF @strFormattingOptions = 'Product Recap Totals Only'
 		INNER JOIN (
 			SELECT intEntityId
 			     , strName
-			FROM dbo.tblEMEntity WITH (NOLOCK)
-			WHERE (@strCustomerName IS NULL OR strName = @strCustomerName)
+			FROM dbo.tblEMEntity E WITH (NOLOCK)
+			INNER JOIN dbo.fnGetRowsFromDelimitedValues(@strCustomerIds) DV ON E.intEntityId = DV.intID
 		) EC ON C.intEntityId = EC.intEntityId
 	END
 
@@ -149,7 +144,6 @@ FROM
 			 , strItemNo
 			 , strDescription
 		FROM dbo.tblICItem WITH (NOLOCK)
-		WHERE (@intCategoryId IS NULL OR intCategoryId = @intCategoryId)
 	) ICI ON Items.intItemId = ICI.intItemId
 	
 	UNION ALL
@@ -188,7 +182,6 @@ FROM
 					 , strItemNo
 					 , strDescription
 				FROM dbo.tblICItem WITH (NOLOCK)
-				WHERE (@intCategoryId IS NULL OR intCategoryId = @intCategoryId)
 			) ICI ON ID.intItemId = ICI.intItemId
 		) ARID ON ARI.intInvoiceId = ARID.intInvoiceId
 		INNER JOIN (
@@ -251,7 +244,6 @@ FROM
 					, strItemNo
 					, strDescription
 			FROM dbo.tblICItem WITH (NOLOCK)
-			WHERE (@intCategoryId IS NULL OR intCategoryId = @intCategoryId)
 		) ICI ON ID.intItemId = ICI.intItemId
 	) ARID ON ARI.intInvoiceId = ARID.intInvoiceId
 	LEFT JOIN (
@@ -356,3 +348,11 @@ LEFT JOIN (
 WHERE ISNULL(ABC.dblQtyShipped, 0) <> 0 OR ISNULL(ABC.dblInvoiceTotal, 0) <> 0 AND ABC.strTransactionType NOT IN ('Payments','Customer Prepayment','Overpayment')
 ORDER BY ABC.intCompanyLocationId, intSortNo
 
+--ITEM CATEGORY
+IF ISNULL(@strCategoryCodeIds, '') <> ''
+	BEGIN
+		DELETE FROM PRODUCT
+		FROM tblARProductRecapStagingTable PRODUCT
+		INNER JOIN tblICItem ITEM ON PRODUCT.intItemId = ITEM.intItemId		
+		INNER JOIN dbo.fnGetRowsFromDelimitedValues(@strCategoryCodeIds) DV ON ITEM.intCategoryId = DV.intID
+	END

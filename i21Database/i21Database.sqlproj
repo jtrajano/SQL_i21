@@ -2200,6 +2200,8 @@
     <Build Include="dbo\Stored Procedures\uspRKGetGrainBankDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetNetHedgeDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspGRProcessTransfer.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRCreateItemGLEntriesTransfer.sql" />
+    <Build Include="dbo\User Defined Types\GLForItem.sql" />
     <Build Include="dbo\Stored Procedures\uspGRCreateGLEntriesForTransferStorage.sql" />
     <Build Include="dbo\Views\vyuGRGetTransferStorageSchedule.sql" />
     <Build Include="dbo\Views\vyuGRGetTransferStorageType.sql" />
@@ -4825,6 +4827,10 @@
     <Build Include="dbo\Views\vyuCMCashGLAccountSetup.sql" />
     <Build Include="dbo\Functions\fnICGetReceiptTotals.sql" />
     <Build Include="dbo\Tables\tblSMApproverGroup.sql" />
+    <Build Include="dbo\Tables\tblICImportStagingUOM.sql" />
+    <Build Include="dbo\Tables\tblICImportStagingItem.sql" />
+    <Build Include="dbo\Tables\tblICImportStagingItemLocation.sql" />
+    <Build Include="dbo\Tables\tblICImportStagingItemPricing.sql" />
     <Build Include="dbo\Tables\tblSMApproverGroupUserSecurity.sql" />
     <Build Include="dbo\Tables\tblSMTransactionLockHistory.sql" />
     <Build Include="dbo\Tables\tblSMSignature.sql" />
@@ -4834,6 +4840,10 @@
     <Build Include="dbo\Tables\tblEMEntitySignature.sql" />
     <Build Include="dbo\Functions\fnICSplitStringToTable.sql" />
     <Build Include="dbo\Stored Procedures\uspICCopyItemLocation.sql" />
+    <Build Include="dbo\Stored Procedures\uspICImportItemsFromStaging.sql" />
+    <Build Include="dbo\Stored Procedures\uspICImportItemLocationsFromStaging.sql" />
+    <Build Include="dbo\Stored Procedures\uspICImportItemUOMsFromStaging.sql" />
+    <Build Include="dbo\Stored Procedures\uspICImportItemPricingsFromStaging.sql" />
     <Build Include="dbo\Stored Procedures\uspPATImportVolumeDetails.sql" />
     <Build Include="dbo\Stored Procedures\uspPATImportStockDetails.sql" />
     <Build Include="dbo\Stored Procedures\uspPATImportStockClassification.sql" />
@@ -8095,10 +8105,40 @@
     <None Include="Scripts\Post-Deployment\CT\uspCTRebuildScheduledQuantityAboveR2.sql" />
     <Build Include="dbo\Stored Procedures\uspSCPostSpecialDiscount.sql" />
     <Build Include="dbo\Stored Procedures\uspSCProcessReceiptToVoucher.sql" />
+    <Build Include="dbo\Tables\tblTRImportDtn.sql" />
+    <Build Include="dbo\Tables\tblTRDtnImportSetup.sql" />
+    <Build Include="dbo\Tables\tblTRDtnImportSetupDetail.sql" />
+    <Build Include="dbo\Tables\tblTRImportDtnDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspTRImportDtn.sql" />
+    <Build Include="dbo\Stored Procedures\uspTRProcessImportDtn.sql" />
+    <Build Include="dbo\Tables\tblTRCrossReferenceDtn.sql" />
+    <Build Include="dbo\Views\vyuTRCrossReferenceDtn.sql" />
     <Build Include="dbo\Stored Procedures\uspSCGetTicketShipExpressExport.sql" />
     <Build Include="dbo\Tables\tblSCCertificateOfAnalysis.sql" />
     <Build Include="dbo\Tables\tblSCTicketCertificateOfAnalysis.sql" />
     <Build Include="dbo\Tables\tblSCInventoryReceiptAllowVoucherTracker.sql" />
+    <Build Include="dbo\Views\vyuAPUnknownPayables.sql" />
+    <Build Include="dbo\Views\vyuCTEntityContainer.sql" />
+    <Build Include="dbo\User Defined Types\StagingTransactionLogPassport.sql" />
+    <Build Include="dbo\Tables\tblSTTranslogRebatesPassport.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTCheckoutPassportTranslog.sql" />
+    <None Include="Scripts\Post-Deployment\ST\37_FileFieldMapping_Passport_CPJR_340.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCCreateInvoiceForPostedDestinationWeightsAndGrades.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFEncodeCard.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFEncodeCardToStagingTable.sql" />
+    <Build Include="dbo\Functions\fnCFRemoveSpecialCharStrict.sql" />
+    <Build Include="dbo\Functions\fnCFCardNumberToMaximaFormat.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFDeleteEncodeCardData.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPForceCompletePayable.sql" />
+    <Build Include="dbo\Functions\fnICOutstandingInTransitPerDay.sql" />
+    <Build Include="dbo\Functions\fnSCGetDPContract.sql" />
+    <Build Include="dbo\Views\vyuAPReceiptClearingGL.sql" />
+    <Build Include="dbo\Functions\fnCTGetVoucherPayable.sql" />
+    <Build Include="dbo\Tables\tblSCDeliverySheetContractAdjustment.sql" />
+    <Build Include="dbo\Views\vyuCTPricedHTADetail.sql" />
+    <None Include="Scripts\Post-Deployment\CT\Create_fnCTFormatNumber.sql" />
+    <Build Include="dbo\Functions\fnCTFormatNumber.sql" />
+    <Build Include="dbo\Tables\tblGROldTransactionMapping.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -8338,6 +8378,7 @@
     <Build Include="dbo\Views\vyuARPaymentForNSF.sql" />
     <Build Include="dbo\Views\vyuSCTicketContractUsed.sql" />
     <Build Include="dbo\Functions\fnARGetInvoiceForBatch.sql" />
+    <Build Include="dbo\Views\vyuARGetPayment.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
@@ -8507,5 +8548,17 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\CT\1920_Add_Accrued_Payables.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\TR\ImportDtnFileSetup.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\TR\ImportDtnDefaultSetup.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\TR\CrossReferenceDefault.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\CO_Colorado.sql" />
   </ItemGroup>
 </Project>

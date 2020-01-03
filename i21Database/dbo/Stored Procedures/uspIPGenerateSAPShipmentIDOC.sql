@@ -161,6 +161,14 @@ Begin
 		GOTO NEXT_SHIPMENT
 	End
 
+	If UPPER(@strHeaderRowState) in ('ADDED') AND EXISTS (Select TOP 1 strFeedStatus From tblLGLoadStg Where intLoadId=@intLoadId
+		AND strTransactionType='Shipment' AND UPPER(@strHeaderRowState) = 'ADDED'
+		AND intLoadStgId < @intLoadStgId Order By intLoadStgId Desc)
+	BEGIN
+		Update tblLGLoadStg Set strRowState = 'MODIFIED' Where intLoadStgId = @intLoadStgId
+		SET @strHeaderRowState = 'MODIFIED'
+	END
+
 	If UPPER(@strHeaderRowState) in ('MODIFIED','DELETE') AND ISNULL(@strExternalDeliveryNumber,'')=''
 		Begin
 			GOTO NEXT_SHIPMENT

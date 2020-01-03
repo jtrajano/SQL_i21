@@ -45,4 +45,22 @@ IF EXISTS(
 -- [END]: Update tblSTRegister.ysnTransctionLog to tblSTRegisterFileConfiguration.ysnActive
 ----------------------------------------------------------------------------------------------------------------------------------
 
+IF EXISTS(
+			SELECT TOP 1 1 FROM tblSTTranslogRebates
+			WHERE intRegisterClassId IS NULL
+		)
+	BEGIN
+		
+		UPDATE tr
+			SET tr.intRegisterClassId = setup.intRegisterSetupId
+		FROM tblSTTranslogRebates tr
+		INNER JOIN tblSTStore st
+			ON tr.intStoreId = st.intStoreId
+		INNER JOIN tblSTRegister reg
+			ON st.intRegisterId = reg.intRegisterId
+		INNER JOIN tblSTRegisterSetup setup
+			ON reg.strRegisterClass = setup.strRegisterClass
+		WHERE tr.intRegisterClassId IS NULL 
+	END
+
 GO
