@@ -498,7 +498,7 @@ BEGIN TRY
 			,strLoadingPointName					= SQ.strLoadingPointName
 			,strShipper								= SQ.strShipper
 			,srtDestinationPoint					= SQ.srtDestinationPoint 
-			,strDestinationPointName				= SQ.strDestinationPointName
+			,strDestinationPointName				= (case when PO.strPositionType = 'Spot' then CT.strCity else SQ.strDestinationPointName end)
 			,strLoadingAndDestinationPointName		= SQ.strLoadingPointName + ' '+@rtTo+' ' + SQ.strDestinationPointName
 			,strWeight								= dbo.fnCTGetTranslation('ContractManagement.view.WeightGrades',W1.intWeightGradeId,@intLaguageId,'Name',W1.strWeightGradeDesc)
 			,strTerm							    = dbo.fnCTGetTranslation('i21.view.Term',TM.intTermID,@intLaguageId,'Terms',TM.strTerm) 
@@ -796,7 +796,8 @@ BEGIN TRY
 		   ,strStrussOtherCondition    = '<span style="font-family:Arial;font-size:13px;">' + isnull(W2.strWeightGradeDesc,'') +  '</br>' + isnull(@strGeneralCondition,'') + '</span>'
 			--,strStraussShipment						=	REPLACE(CONVERT (VARCHAR,GETDATE(),107),LTRIM(DAY (GETDATE())) + ', ' ,'') + ' shipment at '+ SQ.strFixationBy+'''s option'
 		   --,strStraussShipment      = REPLACE(CONVERT (VARCHAR,GETDATE(),107),LTRIM(DAY (GETDATE())) + ', ' ,'') + ' shipment'    
-		   ,strStraussShipment      = substring(CONVERT(VARCHAR,SQ.dtmEndDate,107),1,4) + substring(CONVERT(VARCHAR,SQ.dtmEndDate,107),9,4) + ' shipment'  
+		   ,strStraussShipment      = substring(CONVERT(VARCHAR,SQ.dtmEndDate,107),1,4) + substring(CONVERT(VARCHAR,SQ.dtmEndDate,107),9,4) + (case when PO.strPositionType = 'Spot' then ' delivery' else ' shipment' end) 
+		   ,strStraussShipmentLabel      = (case when PO.strPositionType = 'Spot' then 'DELIVERY' else 'SHIPMENT' end) 
 			,intContractTypeId						=	CH.intContractTypeId
 
 	FROM	tblCTContractHeader				CH
