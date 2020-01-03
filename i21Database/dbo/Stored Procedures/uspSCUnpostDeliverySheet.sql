@@ -50,6 +50,14 @@ DECLARE @storageHistoryData				AS StorageHistoryStagingTable
 		,@strFreightCostMethod			NVARCHAR(40)
 		,@strFeesCostMethod				NVARCHAR(40);
 
+DECLARE @_intLoopDeliverySheetContractAdjustmentId INT
+DECLARE @intLoopDeliverySheetContractAdjustmentId INT
+DECLARE @intDSContractAdjusmentDeliverySheetId INT
+DECLARE @intDSContractAdjusmentContractDetailId INT
+DECLARE @intDSContractAdjusmentEntityId INT
+DECLARE @dblDSContractAdjusmentQuantity NUMERIC(38,20)
+DECLARE @intDSContractAdjusmentItemUOMId INT
+
 BEGIN TRY
 		-- SELECT @currencyDecimal = intCurrencyDecimal from tblSMCompanyPreference
 		SET @currencyDecimal = 20
@@ -281,6 +289,53 @@ BEGIN TRY
 				) SC
 				WHERE CS.intDeliverySheetId = @intDeliverySheetId
 				EXEC [dbo].[uspSCUpdateDeliverySheetStatus] @intDeliverySheetId, 1;
+
+				--- Check DP Contrac Adjustments
+				BEGIN
+					IF EXISTS(SELECT TOP 1 1 FROM tblSCDeliverySheetContractAdjustment WHERE intDeliverySheetId = @intDeliverySheetId)
+					BEGIN
+						SELECT 
+							*
+						INTO #tblSCDeliverySheetContractAdjustment
+						FROM tblSCDeliverySheetContractAdjustment
+						WHERE intDeliverySheetId = @intDeliverySheetId
+
+						SELECT TOP 1 
+							@intLoopDeliverySheetContractAdjustmentId = intDeliverySheetContractAdjustmentId
+							,@_intLoopDeliverySheetContractAdjustmentId = intDeliverySheetContractAdjustmentId
+							,@intDSContractAdjusmentDeliverySheetId = [intDeliverySheetId]
+							,@intDSContractAdjusmentContractDetailId = [intContractDetailId]
+							,@intDSContractAdjusmentEntityId = [intEntityId]
+							,@dblDSContractAdjusmentQuantity = -[dblQuantity]
+							,@intDSContractAdjusmentItemUOMId = [intItemUOMId]
+						FROM #tblSCDeliverySheetContractAdjustment
+						ORDER BY intDeliverySheetContractAdjustmentId
+
+						WHILE (ISNULL(@_intLoopDeliverySheetContractAdjustmentId,0) > 0)
+						BEGIN
+
+							EXEC uspCTUpdateSequenceQuantityUsingUOM @intDSContractAdjusmentContractDetailId, @dblDSContractAdjusmentQuantity, @intUserId, @intDSContractAdjusmentDeliverySheetId, 'Delivery Sheet',@intDSContractAdjusmentItemUOMId
+
+							SET @_intLoopDeliverySheetContractAdjustmentId = NULL
+
+							SELECT TOP 1 
+								@intLoopDeliverySheetContractAdjustmentId = intDeliverySheetContractAdjustmentId
+								,@_intLoopDeliverySheetContractAdjustmentId = intDeliverySheetContractAdjustmentId
+								,@intDSContractAdjusmentDeliverySheetId = [intDeliverySheetId]
+								,@intDSContractAdjusmentContractDetailId = [intContractDetailId]
+								,@intDSContractAdjusmentEntityId = [intEntityId]
+								,@dblDSContractAdjusmentQuantity = [dblQuantity]
+								,@intDSContractAdjusmentItemUOMId = [intItemUOMId]
+							FROM #tblSCDeliverySheetContractAdjustment
+							WHERE intDeliverySheetContractAdjustmentId > @intLoopDeliverySheetContractAdjustmentId
+							ORDER BY intDeliverySheetContractAdjustmentId
+
+						END
+
+						DELETE FROM tblSCDeliverySheetContractAdjustment
+						WHERE intDeliverySheetId = @intDeliverySheetId 
+					END
+				END
 			END
 		ELSE
 			BEGIN

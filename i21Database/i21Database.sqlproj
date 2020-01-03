@@ -2201,6 +2201,8 @@
     <Build Include="dbo\Stored Procedures\uspRKGetGrainBankDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetNetHedgeDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspGRProcessTransfer.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRCreateItemGLEntriesTransfer.sql" />
+    <Build Include="dbo\User Defined Types\GLForItem.sql" />
     <Build Include="dbo\Stored Procedures\uspGRCreateGLEntriesForTransferStorage.sql" />
     <Build Include="dbo\Views\vyuGRGetTransferStorageSchedule.sql" />
     <Build Include="dbo\Views\vyuGRGetTransferStorageType.sql" />
@@ -8223,6 +8225,9 @@
     <Build Include="dbo\Stored Procedures\uspRKSaveCollateral.sql" />
     <Build Include="dbo\Tables\tblICCommodityAccountM2M.sql" />
     <Build Include="dbo\Functions\fnGetCommodityGLAccountM2M.sql" />
+    <Build Include="dbo\Tables\tblSCCertificateOfAnalysis.sql" />
+    <Build Include="dbo\Tables\tblSCTicketCertificateOfAnalysis.sql" />
+    <Build Include="dbo\Tables\tblSCInventoryReceiptAllowVoucherTracker.sql" />
     <Build Include="dbo\Views\vyuAPUnknownPayables.sql" />
     <Build Include="dbo\Views\vyuCTEntityContainer.sql" />
     <None Include="Scripts\Post-Deployment\IC\22_InventoryValuationPerformance.sql" />
@@ -8313,6 +8318,8 @@
     <Build Include="dbo\Tables\tblAPBillReallocation.sql" />
     <Build Include="dbo\Stored Procedures\uspIPInterCompanyPreStageOptionsPnS.sql" />
     <Build Include="dbo\Tables\tblRKOptionsMatchPnSHeaderPreStage.sql" />
+    <Build Include="dbo\Tables\tblSCDeliverySheetContractAdjustment.sql" />
+    <Build Include="dbo\Tables\tblGROldTransactionMapping.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -391,7 +391,6 @@ BEGIN TRY
 
 
 						---- Update contract schedule based on ticket schedule qty							
-
 						IF ISNULL(@intTicketContractDetailId, 0) > 0 AND (@strDistributionOption = 'CNT' OR @strDistributionOption = 'LOD')
 						BEGIN
 							-- For Review
@@ -405,9 +404,6 @@ BEGIN TRY
 
 							IF(ISNULL(@ysnLoadContract,0) = 0)
 							BEGIN
-								-- UPDATE tblCTContractDetail
-								-- SET dblScheduleQty = ISNULL(dblScheduleQty,0) + @dblTicketScheduledQty
-								-- WHERE intContractDetailId = @intTicketContractDetailId
 								EXEC uspCTUpdateScheduleQuantityUsingUOM @intTicketContractDetailId, @dblTicketScheduledQty, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId
 							END
 						END

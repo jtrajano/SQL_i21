@@ -38,7 +38,7 @@ RETURNS TABLE AS RETURN
 															AND B.intCustomerStorageId = customerStorage.intCustomerStorageId
 		INNER JOIN tblGRStorageHistory storageHistory ON storageHistory.intCustomerStorageId = customerStorage.intCustomerStorageId 
 													AND storageHistory.intSettleStorageId = storageTicket.intSettleStorageId
-													AND B.intContractHeaderId = storageHistory.intContractHeaderId
+													AND ISNULL(B.intContractHeaderId,0) = ISNULL(storageHistory.intContractHeaderId,0)
 		WHERE B.intBillId = storage.intBillId
 	) storageOldCost 
 	WHERE A.intBillId = @billId
