@@ -26,7 +26,7 @@ BEGIN
 				SAVE TRANSACTION @Savepoint
 			END
 
-		
+		--SELECT * FROM @UDT_NetworkCard
 		-- =================================================================================================================
 		-- [START] - Get Store and Register Id 
 		-- =================================================================================================================
@@ -153,6 +153,14 @@ BEGIN
 					ON CPO.intPaymentOptionId = PO.intPaymentOptionId
 				WHERE Store.intStoreId = @intStoreId
 					AND CPO.intCheckoutId = @intCheckoutId
+					AND PO.ysnSkipImport = CAST(0 AS BIT)
+
+				
+				SET @ysnSuccess = CAST(1 AS BIT)
+				SET @strMessage = 'Success'
+				SET @intCountRows = @@ROWCOUNT
+
+
 
 			END
 		ELSE IF(@intTableRowCount = 0)
