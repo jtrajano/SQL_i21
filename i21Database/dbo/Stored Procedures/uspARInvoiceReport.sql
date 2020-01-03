@@ -325,7 +325,7 @@ LEFT JOIN (
 		 , strTicketNumberDate		= SCALE.strTicketNumber + ' - ' + CONVERT(NVARCHAR(50), SCALE.dtmTicketDateTime, 101) 
 		 , strTrailerNumber			= SCALE.strTrailerNumber
 		 , strSealNumber			= SCALE.strSealNumber
-		 , strCustomerReference		= CONTRACTS.strCustomerContract
+		 , strCustomerReference		= ISNULL(NULLIF(SCALE.strScaleCustomerReference,''), ISNULL(NULLIF(CONTRACTS.strCustomerContract,''), ISNULL(LGLOAD.strCustomerReference,'')))
 		 , strSalesReference		= ISNULL(NULLIF(LGLOAD.strCustomerReference, ''), SCALE.strCustomerReference)
 	 	 , strPurchaseReference		= ISNULL(NULLIF(LGLOAD.strExternalLoadNumber, ''), SCALE.strExternalLoadNumber)
 		 , strLoadNumber			= ISNULL(LGLOAD.strLoadNumber, SCALE.strLoadNumber)
