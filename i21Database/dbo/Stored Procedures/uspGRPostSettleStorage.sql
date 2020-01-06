@@ -9,7 +9,7 @@ AS
 BEGIN TRY
 	--return	
 	SET NOCOUNT ON
-	declare @debug_awesome_ness bit = 0
+	declare @debug_awesome_ness bit = 1
 	----- DEBUG POINT -----
 	if @debug_awesome_ness = 1	 AND 1 = 0
 	begin
@@ -660,7 +660,7 @@ BEGIN TRY
 				SELECT 
 					 intCustomerStorageId		= CS.intCustomerStorageId
 					,intCompanyLocationId		= CS.intCompanyLocationId 
-					,intContractHeaderId		= CD.intContractHeaderId
+					,intContractHeaderId		= NULL
 					,intContractDetailId		= SC.intContractDetailId
 					,dblUnits					= CASE													
 													WHEN DCO.strDiscountCalculationOption = 'Gross Weight' THEN 
@@ -1914,7 +1914,7 @@ BEGIN TRY
 								on d.intContractDetailId = a.intContractDetailId
 						where intItemType = 3 and d.id is null
 
-					--update @SettleVoucherCreate set intContractDetailId = null where intItemType = 3
+					update @SettleVoucherCreate set intContractDetailId = null where intItemType = 3
 
 				end
 				----- DEBUG POINT -----
@@ -2168,8 +2168,8 @@ BEGIN TRY
 																				ELSE 'Other Charge Expense' 
 																			END
 																				)
-					,[intContractHeaderId]			= a.[intContractHeaderId] ---case when a.intItemType = 1 then  a.[intContractHeaderId] else null end -- need to set the contract details to null for non item
-					,[intContractDetailId]			= a.[intContractDetailId] --case when a.intItemType = 1 then  a.[intContractDetailId] else null end -- need to set the contract details to null for non item
+					,[intContractHeaderId]			= case when a.intItemType = 1 then  a.[intContractHeaderId] else null end -- need to set the contract details to null for non item
+					,[intContractDetailId]			= case when a.intItemType = 1 then  a.[intContractDetailId] else null end -- need to set the contract details to null for non item
 					,[intInventoryReceiptItemId] = 
 														--CASE 
 														--    WHEN ST.ysnDPOwnedType = 0 THEN NULL
@@ -2242,7 +2242,6 @@ BEGIN TRY
 														ELSE b.intItemUOMId
 													END
 					,[dblCost]						= 
-														isnull(
 														case when @doPartialHistory = 1 then
 															isnull(availableQtyForVoucher.dblCashPrice, a.dblCashPrice)
 														else
@@ -2253,7 +2252,7 @@ BEGIN TRY
 																ELSE a.dblCashPrice
 															END
 														end					
-														, 0)
+															
 					,[dblOldCost]					=  case when @ysnFromPriceBasisContract = 0 and CS.intStorageTypeId != 2 then null 
 														else 
 															case WHEN a.[intContractHeaderId] IS NOT NULL AND @ysnFromPriceBasisContract = 1 and (@dblQtyFromCt = @dblSelectedUnits) THEN 															
@@ -3353,7 +3352,7 @@ BEGIN TRY
 					,[intEntityId]			= @EntityId
 					,[strSettleTicket]		= @TicketNo
 					,[intTransactionTypeId]	= 4 
-					,[dblPaidAmount]		= ISNULL(((select top 1 dblOldCost from @voucherPayable where intItemId = CS.intItemId) + isnull(@sum_e, 0)) * SV.[dblUnits],SV.dblCashPrice)
+					,[dblPaidAmount]		= ISNULL(((select dblOldCost from @voucherPayable where intItemId = CS.intItemId) + isnull(@sum_e, 0)) * SV.[dblUnits],SV.dblCashPrice)
 					,[intBillId]			= CASE WHEN @intVoucherId = 0 THEN NULL ELSE @intVoucherId END
 					,intSettleStorageId		= @intSettleStorageId
 					,strVoucher				= @strVoucher
