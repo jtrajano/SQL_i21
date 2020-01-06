@@ -59,34 +59,44 @@ SELECT
 	    THEN (A.dblTotal + A.dblTax) / B.dblTotal  * ISNULL(B2.dblPayment,A.dbl1099)
      ELSE 0 END
 	, dblDividends = CASE WHEN A.int1099Form = 4  AND A.int1099Category = 1
-	    THEN (A.dblTotal + A.dblTax) 
+	    THEN 
+			CASE WHEN patRef.intBillId IS NULL THEN (A.dblTotal + A.dblTax) ELSE A.dbl1099 END
      ELSE 0 END 
 	, dblNonpatronage = CASE WHEN A.int1099Form = 4  AND A.int1099Category = 2
-	    THEN (A.dblTotal + A.dblTax) 
+	    THEN 
+			CASE WHEN patRef.intBillId IS NULL THEN (A.dblTotal + A.dblTax) ELSE A.dbl1099 END
      ELSE 0 END
 	, dblPerUnit = CASE WHEN A.int1099Form = 4  AND A.int1099Category = 3
-	    THEN (A.dblTotal + A.dblTax) 
+	    THEN 
+			CASE WHEN patRef.intBillId IS NULL THEN (A.dblTotal + A.dblTax) ELSE A.dbl1099 END
      ELSE 0 END
 	, dblFederalTax = CASE WHEN A.int1099Form = 4  AND A.int1099Category = 4
-	    THEN (A.dblTotal + A.dblTax) 
+	    THEN 
+			CASE WHEN patRef.intBillId IS NULL THEN (A.dblTotal + A.dblTax) ELSE A.dbl1099 END
      ELSE 0 END
 	, dblRedemption = CASE WHEN A.int1099Form = 4  AND A.int1099Category = 5
-	    THEN (A.dblTotal + A.dblTax) 
+	    THEN 
+			CASE WHEN patRef.intBillId IS NULL THEN (A.dblTotal + A.dblTax) ELSE A.dbl1099 END
      ELSE 0 END
 	, dblDomestic = CASE WHEN A.int1099Form = 4  AND A.int1099Category = 6
-	    THEN (A.dblTotal + A.dblTax) 
+	    THEN 
+			CASE WHEN patRef.intBillId IS NULL THEN (A.dblTotal + A.dblTax) ELSE A.dbl1099 END
      ELSE 0 END
 	, dblInvestments = CASE WHEN A.int1099Form = 4  AND A.int1099Category = 7
-	    THEN (A.dblTotal + A.dblTax) 
+	    THEN 
+			CASE WHEN patRef.intBillId IS NULL THEN (A.dblTotal + A.dblTax) ELSE A.dbl1099 END
      ELSE 0 END
 	, dblOpportunity = CASE WHEN A.int1099Form = 4  AND A.int1099Category = 8
-	    THEN (A.dblTotal + A.dblTax) 
+	    THEN 
+			CASE WHEN patRef.intBillId IS NULL THEN (A.dblTotal + A.dblTax) ELSE A.dbl1099 END
      ELSE 0 END
 	, dblAMT = CASE WHEN A.int1099Form = 4  AND A.int1099Category = 9
-	    THEN (A.dblTotal + A.dblTax) 
+	    THEN 
+			CASE WHEN patRef.intBillId IS NULL THEN (A.dblTotal + A.dblTax) ELSE A.dbl1099 END
      ELSE 0 END
 	, dblOther = CASE WHEN A.int1099Form = 4  AND A.int1099Category = 10
-	    THEN (A.dblTotal + A.dblTax) 
+	    THEN
+			CASE WHEN patRef.intBillId IS NULL THEN (A.dblTotal + A.dblTax) ELSE A.dbl1099 END
      ELSE 0 END 	 	           
 	, dblOrdinaryDividends = CASE WHEN A.int1099Form = 5 AND A.int1099Category = 0--'OrdinaryDividends'     
 		THEN  (A.dblTotal + A.dblTax)
