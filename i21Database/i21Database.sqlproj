@@ -8327,6 +8327,13 @@
     <Build Include="dbo\Stored Procedures\uspIPM2MBasisTransferStgXML.sql" />
     <Build Include="dbo\Stored Procedures\uspIPM2MBasisProcessStgXML.sql" />
     <Build Include="dbo\Views\vyuMFGetItemSupplyTarget.sql" />
+    <Build Include="dbo\Views\vyuIPGetOptSettlementPriceMarketMap.sql" />
+    <Build Include="dbo\Views\vyuIPGetFutSettlementPriceMarketMap.sql" />
+    <Build Include="dbo\Views\vyuIPGetFuturesSettlementPrice.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPSettlementPriceProcessStgXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPSettlementPriceTransferStgXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPSettlementPriceProcessPreStage.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPSettlementPricePopulateStgXML.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
