@@ -342,26 +342,7 @@ BEGIN
 		INNER JOIN tblAPPaymentDetail B
 			ON A.intPaymentId = B.intPaymentId
 		INNER JOIN tblAPBill C
-			ON C.intBillId = ISNULL(B.intOrigBillId, C.intBillId)
-	WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayables)
-
-	UPDATE B
-	SET B.dblAmountDue = CASE WHEN A.ysnPrepay = 1 THEN B.dblAmountDue --DO NOTHING IF PREPAYMENT VOIDING
-								ELSE 
-									(CASE WHEN B.dblAmountDue = 0 
-										THEN CAST(B.dblDiscount + B.dblPayment - B.dblInterest AS DECIMAL(18,2)) 
-										ELSE (C.dblAmountDue + B.dblPayment + B.dblDiscount - B.dblInterest) --this will handle issue on voiding which the first payment is voided
-									END)
-							END
-		,B.intOrigBillId = B.intBillId
-		,B.intBillId = NULL
-		,B.intOrigInvoiceId = B.intInvoiceId
-		,B.intInvoiceId = NULL
-	FROM tblAPPayment A
-		INNER JOIN tblAPPaymentDetail B
-			ON A.intPaymentId = B.intPaymentId
-		INNER JOIN tblARInvoice C
-			ON B.intInvoiceId = ISNULL(B.intOrigInvoiceId, C.intInvoiceId)
+			ON C.intBillId = ISNULL(B.intOrigBillId, B.intBillId)
 	WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayables)
 
 	--Update dblAmountDue, dtmDatePaid and ysnPaid on tblAPBill
