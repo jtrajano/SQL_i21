@@ -372,4 +372,7 @@
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\4_SM\11_RemoveDuplicateTaxCodeUnderTaxGroup.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Pre-Deployment\1_TM\9_DataFix.sql" />
+  </ItemGroup>
 </Project>
