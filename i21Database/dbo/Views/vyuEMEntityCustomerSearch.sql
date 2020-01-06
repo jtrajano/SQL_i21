@@ -26,7 +26,7 @@ SELECT DISTINCT
 	, strEmail				= entityContact.strEmail
 	, strContactName		= entityContact.strName
 	, intEntityContactId	= entityContact.intEntityId
-	, strLineOfBusiness		= dbo.fnEMGetEntityLineOfBusiness(CUSTOMER.intEntityId) COLLATE Latin1_General_CI_AS --LOB.strLineOfBusiness
+	--, strLineOfBusiness		= dbo.fnEMGetEntityLineOfBusiness(CUSTOMER.intEntityId) COLLATE Latin1_General_CI_AS --LOB.strLineOfBusiness
 	, strClass				= entityClass.strClass
 	, ysnHasBudgetSetup		= ISNULL(BUDGET.ysnHasBudgetSetup, CAST(0 AS BIT))
 	, intPaymentMethodId	= CUSTOMER.intPaymentMethodId
@@ -55,7 +55,7 @@ SELECT DISTINCT
 	, strTerm				= custTerm.strTerm
 	, intCurrencyId			= CUSTOMER.intCurrencyId
 	, intTermsId			= CUSTOMER.intTermsId
-	, intLineOfBusinessIds	= LINEOFBUSINESS.intEntityLineOfBusinessIds COLLATE Latin1_General_CI_AS
+	--, intLineOfBusinessIds	= LINEOFBUSINESS.intEntityLineOfBusinessIds COLLATE Latin1_General_CI_AS
 	, ysnProspect			= entityType.Prospect
 	, ysnCustomer			= entityType.Customer
 	, ysnCreditHold			= CUSTOMER.ysnCreditHold
@@ -106,14 +106,14 @@ OUTER APPLY (
 	FROM dbo.tblARCustomerBudget WITH (NOLOCK)
 	WHERE intEntityCustomerId = CUSTOMER.intEntityId
 ) BUDGET
-OUTER APPLY (
-	SELECT intEntityLineOfBusinessIds = intLineOfBusinessId
-	FROM (
-		SELECT CAST(intLineOfBusinessId AS VARCHAR(200)) + CASE WHEN CAST(intLineOfBusinessId AS VARCHAR(200)) <> NULL THEN '|^|' ELSE '' END
-		FROM dbo.tblEMEntityLineOfBusiness WITH(NOLOCK)
-		WHERE intEntityId = CUSTOMER.intEntityId
-		FOR XML PATH ('')
-	) INV (intLineOfBusinessId)
-) LINEOFBUSINESS
+--OUTER APPLY (
+--	SELECT intEntityLineOfBusinessIds = intLineOfBusinessId
+--	FROM (
+--		SELECT CAST(intLineOfBusinessId AS VARCHAR(200)) + CASE WHEN CAST(intLineOfBusinessId AS VARCHAR(200)) <> NULL THEN '|^|' ELSE '' END
+--		FROM dbo.tblEMEntityLineOfBusiness WITH(NOLOCK)
+--		WHERE intEntityId = CUSTOMER.intEntityId
+--		FOR XML PATH ('')
+--	) INV (intLineOfBusinessId)
+--) LINEOFBUSINESS
 WHERE (entityType.Customer = 1 OR entityType.Prospect = 1)
 GO
