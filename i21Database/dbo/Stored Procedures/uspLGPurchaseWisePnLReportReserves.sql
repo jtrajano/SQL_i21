@@ -21,21 +21,22 @@ FROM tblSMCurrency WHERE intCurrencyID = @intDefaultCurrencyId
 SELECT
 	I.strItemNo
 	,dblRate = ISNULL(CC.dblRate, 0)
-	,dblEstimatedAmount = ISNULL(CC.dblAmount, 0)
-	,dblInvoicedAmount = CASE WHEN @intReserves = 1 THEN ISNULL(VCHR.dblTotal, 0) + ISNULL(INVC.dblTotal, 0) ELSE 0 END
+	,dblEstimatedAmount = ISNULL(CC.dblAmount, 0) * -1
+	,dblInvoicedAmount = CASE WHEN @intReserves = 1 THEN ISNULL(VCHR.dblTotal, 0) + ISNULL(INVC.dblTotal, 0) ELSE 0 END * -1
 	,dblVariance = CASE WHEN @intReserves = 1 THEN 
-						CASE WHEN (ISNULL(VCHR.dblTotal, 0) + ISNULL(INVC.dblTotal, 0)) < 0 
+						CASE WHEN (ISNULL(VCHR.dblTotal, 0) + ISNULL(INVC.dblTotal, 0)) <> 0 
 							THEN (ISNULL(VCHR.dblTotal, 0) + ISNULL(INVC.dblTotal, 0)) - ISNULL(CC.dblAmount, 0)
 							ELSE 0 END
 					ELSE 0 END
 	,dblRecalcValue = CASE WHEN @intReserves = 1 THEN 
-						CASE WHEN (ISNULL(VCHR.dblTotal, 0) + ISNULL(INVC.dblTotal, 0)) < 0 
+						CASE WHEN (ISNULL(VCHR.dblTotal, 0) + ISNULL(INVC.dblTotal, 0)) <> 0 
 							THEN (ISNULL(VCHR.dblTotal, 0) + ISNULL(INVC.dblTotal, 0)) 
 							ELSE ISNULL(CC.dblAmount, 0) END
-					ELSE ISNULL(CC.dblAmount, 0) * -1 END
+					ELSE ISNULL(CC.dblAmount, 0) END * -1 
 	,strUnitCurrency = @strCurrency + '/' + @strUnitMeasure
 FROM tblICItem I
-	OUTER APPLY (SELECT CC.intContractDetailId
+	OUTER APPLY (SELECT intPContractDetailId
+						,intSContractDetailId
 						,dblRate = CASE WHEN CC.strCostMethod = 'Per Unit' THEN 
 											dbo.fnCalculateCostBetweenUOM(CC.intItemUOMId,CToUOM.intItemUOMId,CC.dblRate)
 										ELSE CC.dblRate END / ISNULL(CCUR.intCent, 1)
@@ -65,7 +66,7 @@ FROM tblICItem I
 					INNER JOIN tblAPBill BL ON BL.intBillId = BLD.intBillId
 					INNER JOIN tblICItem BLDI ON BLDI.intItemId = BLD.intItemId
 				WHERE BL.ysnPosted = 1
-					AND BLD.intContractDetailId = CC.intContractDetailId 
+					AND BLD.intContractDetailId IN (CC.intPContractDetailId, CC.intSContractDetailId)
 					AND BLD.intItemId = I.intItemId 
 				) VCHR
 	OUTER APPLY (SELECT dblTotal = SUM(CASE WHEN IV.strTransactionType IN ('Credit Memo') 
@@ -75,7 +76,7 @@ FROM tblICItem I
 					INNER JOIN tblARInvoice IV ON IV.intInvoiceId = IVD.intInvoiceId
 					INNER JOIN tblICItem IVDI ON IVDI.intItemId = IVD.intItemId
 				WHERE IV.ysnPosted = 1
-					AND IVD.intContractDetailId = CC.intContractDetailId 
+					AND IVD.intContractDetailId IN (CC.intPContractDetailId, CC.intSContractDetailId)
 					AND IVD.intItemId = I.intItemId 
 				) INVC
 WHERE I.intCategoryId = (SELECT TOP 1 CASE WHEN @intReserves <> 1 
