@@ -58,6 +58,7 @@ BEGIN TRY
 			,@intTransactionId = NULL
 			,@intCompanyId = NULL
 			,@intLoadId = NULL
+			,@strErrorMessage = ''
 
 		SELECT @intWeightClaimId = intWeightClaimId
 			,@strWeightClaimXML = strWeightClaimXML
@@ -104,13 +105,14 @@ BEGIN TRY
 					WHERE intLoadRefId = @intLoadId
 					)
 			BEGIN
-				SELECT @strErrorMessage = 'Unable to find Outbound shipment.'
-
-				RAISERROR (
-						@strErrorMessage
-						,16
-						,1
-						)
+				IF @strErrorMessage <> ''
+				BEGIN
+					SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Unable to find Outbound shipment.'
+				END
+				ELSE
+				BEGIN
+					SELECT @strErrorMessage = 'Unable to find Outbound shipment.'
+				END
 			END
 
 			IF @strBook IS NOT NULL
@@ -120,13 +122,14 @@ BEGIN TRY
 					WHERE B.strBook = @strBook
 					)
 			BEGIN
-				SELECT @strErrorMessage = 'Book ' + @strBook + ' is not available.'
-
-				RAISERROR (
-						@strErrorMessage
-						,16
-						,1
-						)
+				IF @strErrorMessage <> ''
+				BEGIN
+					SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Book ' + @strBook + ' is not available.'
+				END
+				ELSE
+				BEGIN
+					SELECT @strErrorMessage = 'Book ' + @strBook + ' is not available.'
+				END
 			END
 
 			IF @strSubBook IS NOT NULL
@@ -136,13 +139,14 @@ BEGIN TRY
 					WHERE SB.strSubBook = @strSubBook
 					)
 			BEGIN
-				SELECT @strErrorMessage = 'Sub Book ' + @strSubBook + ' is not available.'
-
-				RAISERROR (
-						@strErrorMessage
-						,16
-						,1
-						)
+				IF @strErrorMessage <> ''
+				BEGIN
+					SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Sub Book ' + @strSubBook + ' is not available.'
+				END
+				ELSE
+				BEGIN
+					SELECT @strErrorMessage = 'Sub Book ' + @strSubBook + ' is not available.'
+				END
 			END
 
 			IF @strPaymentMethod IS NOT NULL
@@ -152,8 +156,18 @@ BEGIN TRY
 					WHERE PM.strPaymentMethod = @strPaymentMethod
 					)
 			BEGIN
-				SELECT @strErrorMessage = 'Payment Method ' + @strPaymentMethod + ' is not available.'
+				IF @strErrorMessage <> ''
+				BEGIN
+					SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Payment Method ' + @strPaymentMethod + ' is not available.'
+				END
+				ELSE
+				BEGIN
+					SELECT @strErrorMessage = 'Payment Method ' + @strPaymentMethod + ' is not available.'
+				END
+			END
 
+			IF @strErrorMessage <> ''
+			BEGIN
 				RAISERROR (
 						@strErrorMessage
 						,16
@@ -469,6 +483,7 @@ BEGIN TRY
 					,@strCurrency = NULL
 					,@strPartyName = NULL
 					,@strPriceUOM = NULL
+					,@strErrorMessage = ''
 
 				SELECT @strItemNo = strItemNo
 					,@strCurrency = strCurrency
@@ -486,13 +501,14 @@ BEGIN TRY
 				IF @strItemNo IS NOT NULL
 					AND @intItemId IS NULL
 				BEGIN
-					SELECT @strErrorMessage = 'Item ' + @strItemNo + ' is not available.'
-
-					RAISERROR (
-							@strErrorMessage
-							,16
-							,1
-							)
+					IF @strErrorMessage <> ''
+					BEGIN
+						SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Item ' + @strItemNo + ' is not available.'
+					END
+					ELSE
+					BEGIN
+						SELECT @strErrorMessage = 'Item ' + @strItemNo + ' is not available.'
+					END
 				END
 
 				SELECT @intCurrencyId = NULL
@@ -504,13 +520,14 @@ BEGIN TRY
 				IF @strCurrency IS NOT NULL
 					AND @intCurrencyId IS NULL
 				BEGIN
-					SELECT @strErrorMessage = 'Currency ' + @strCurrency + ' is not available.'
-
-					RAISERROR (
-							@strErrorMessage
-							,16
-							,1
-							)
+					IF @strErrorMessage <> ''
+					BEGIN
+						SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Currency ' + @strCurrency + ' is not available.'
+					END
+					ELSE
+					BEGIN
+						SELECT @strErrorMessage = 'Currency ' + @strCurrency + ' is not available.'
+					END
 				END
 
 				SELECT @intEntityId = NULL
@@ -524,13 +541,14 @@ BEGIN TRY
 				IF @strPartyName IS NOT NULL
 					AND @intEntityId IS NULL
 				BEGIN
-					SELECT @strErrorMessage = 'Party Name ' + @strPartyName + ' is not available.'
-
-					RAISERROR (
-							@strErrorMessage
-							,16
-							,1
-							)
+					IF @strErrorMessage <> ''
+					BEGIN
+						SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Party Name ' + @strPartyName + ' is not available.'
+					END
+					ELSE
+					BEGIN
+						SELECT @strErrorMessage = 'Party Name ' + @strPartyName + ' is not available.'
+					END
 				END
 
 				SELECT @intUnitMeasureId = NULL
@@ -542,13 +560,14 @@ BEGIN TRY
 				IF @strPriceUOM IS NOT NULL
 					AND @intUnitMeasureId IS NULL
 				BEGIN
-					SELECT @strErrorMessage = 'Price UOM ' + @strPriceUOM + ' is not available.'
-
-					RAISERROR (
-							@strErrorMessage
-							,16
-							,1
-							)
+					IF @strErrorMessage <> ''
+					BEGIN
+						SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Price UOM ' + @strPriceUOM + ' is not available.'
+					END
+					ELSE
+					BEGIN
+						SELECT @strErrorMessage = 'Price UOM ' + @strPriceUOM + ' is not available.'
+					END
 				END
 
 				SELECT @intPriceItemUOMId = intItemUOMId
@@ -562,8 +581,18 @@ BEGIN TRY
 					FROM tblICItem
 					WHERE intItemId = @intItemId
 
-					SELECT @strErrorMessage = 'Price UOM ' + @strPriceUOM + ' is not associated for the item ' + @strItemNo + '.'
+					IF @strErrorMessage <> ''
+					BEGIN
+						SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Price UOM ' + @strPriceUOM + ' is not associated for the item ' + @strItemNo + '.'
+					END
+					ELSE
+					BEGIN
+						SELECT @strErrorMessage = 'Price UOM ' + @strPriceUOM + ' is not associated for the item ' + @strItemNo + '.'
+					END
+				END
 
+				IF @strErrorMessage <> ''
+				BEGIN
 					RAISERROR (
 							@strErrorMessage
 							,16

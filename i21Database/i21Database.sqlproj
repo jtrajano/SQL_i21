@@ -8326,6 +8326,7 @@
     <Build Include="dbo\Stored Procedures\uspIPM2MBasisPopulateStgXML.sql" />
     <Build Include="dbo\Stored Procedures\uspIPM2MBasisTransferStgXML.sql" />
     <Build Include="dbo\Stored Procedures\uspIPM2MBasisProcessStgXML.sql" />
+    <Build Include="dbo\Views\vyuMFGetItemSupplyTarget.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

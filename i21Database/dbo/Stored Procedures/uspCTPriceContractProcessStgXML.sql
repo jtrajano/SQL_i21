@@ -114,7 +114,7 @@ BEGIN TRY
 		,@intContractScreenId INT
 		,@intTransactionRefId INT
 		,@intCompanyRefId INT
-		,@strDescription nvarchar(100)
+		,@strDescription NVARCHAR(100)
 
 	SELECT @intPriceContractStageId = MIN(intPriceContractStageId)
 	FROM tblCTPriceContractStage
@@ -135,8 +135,8 @@ BEGIN TRY
 		SET @intMultiCompanyId = NULL
 		SET @intEntityId = NULL
 		SET @strTransactionType = NULL
-		SET @intTransactionId=NULL
-			SET @intCompanyId=NULL
+		SET @intTransactionId = NULL
+		SET @intCompanyId = NULL
 
 		SELECT @intPriceContractId = intPriceContractId
 			,@strPriceContractNo = strPriceContractNo
@@ -151,8 +151,8 @@ BEGIN TRY
 			,@intMultiCompanyId = intMultiCompanyId
 			,@intEntityId = intEntityId
 			,@strTransactionType = strTransactionType
-			,@intTransactionId=intTransactionId
-			,@intCompanyId=intCompanyId
+			,@intTransactionId = intTransactionId
+			,@intCompanyId = intCompanyId
 		FROM tblCTPriceContractStage
 		WHERE intPriceContractStageId = @intPriceContractStageId
 
@@ -508,11 +508,14 @@ BEGIN TRY
 				IF @intTransactionCount = 0
 					BEGIN TRANSACTION
 
-					if @strRowState='Delete'
-					Begin
-						Delete from tblCTPriceContract Where intPriceContractRefId =@intPriceContractId
-						Goto x
-					End
+				IF @strRowState = 'Delete'
+				BEGIN
+					DELETE
+					FROM tblCTPriceContract
+					WHERE intPriceContractRefId = @intPriceContractId
+
+					GOTO x
+				END
 
 				------------------Header------------------------------------------------------
 				EXEC sp_xml_preparedocument @idoc OUTPUT
@@ -553,16 +556,19 @@ BEGIN TRY
 				FROM tblICUnitMeasure UM
 				WHERE UM.strUnitMeasure = @strUnitMeasure
 
+				SELECT @strErrorMessage = ''
+
 				IF @strUnitMeasure IS NOT NULL
 					AND @intUnitMeasureId IS NULL
 				BEGIN
-					SELECT @strErrorMessage = 'Unit Measure ' + @strUnitMeasure + ' is not available.'
-
-					RAISERROR (
-							@strErrorMessage
-							,16
-							,1
-							)
+					IF @strErrorMessage <> ''
+					BEGIN
+						SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Unit Measure ' + @strUnitMeasure + ' is not available.'
+					END
+					ELSE
+					BEGIN
+						SELECT @strErrorMessage = 'Unit Measure ' + @strUnitMeasure + ' is not available.'
+					END
 				END
 
 				SELECT @intCommodityId = intCommodityId
@@ -572,13 +578,14 @@ BEGIN TRY
 				IF @strCommodityCode IS NOT NULL
 					AND @intCommodityId IS NULL
 				BEGIN
-					SELECT @strErrorMessage = 'Commodity Code ' + @strCommodityCode + ' is not available.'
-
-					RAISERROR (
-							@strErrorMessage
-							,16
-							,1
-							)
+					IF @strErrorMessage <> ''
+					BEGIN
+						SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Commodity Code ' + @strCommodityCode + ' is not available.'
+					END
+					ELSE
+					BEGIN
+						SELECT @strErrorMessage = 'Commodity Code ' + @strCommodityCode + ' is not available.'
+					END
 				END
 
 				SELECT @intCurrencyId = NULL
@@ -590,8 +597,17 @@ BEGIN TRY
 				IF @strCurrency IS NOT NULL
 					AND @intCurrencyId IS NULL
 				BEGIN
-					SELECT @strErrorMessage = 'Currency ' + @strCurrency + ' is not available.'
-
+					IF @strErrorMessage <> ''
+					BEGIN
+						SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Currency ' + @strCurrency + ' is not available.'
+					END
+					ELSE
+					BEGIN
+						SELECT @strErrorMessage = 'Currency ' + @strCurrency + ' is not available.'
+					END
+				END
+				IF @strErrorMessage <> ''
+				BEGIN
 					RAISERROR (
 							@strErrorMessage
 							,16
@@ -737,6 +753,7 @@ BEGIN TRY
 						,@strCommodityCode = NULL
 						,@strFutMarketName = NULL
 						,@strFutureMonth = NULL
+						,@strErrorMessage=''
 
 					SELECT @strFinalPriceUOM = strFinalPriceUOM
 						,@strAgreedItemUOM = strAgreedItemUOM
@@ -762,13 +779,14 @@ BEGIN TRY
 					IF @strFinalPriceUOM IS NOT NULL
 						AND @intUnitMeasureId IS NULL
 					BEGIN
-						SELECT @strErrorMessage = 'Final Price UOM ' + @strFinalPriceUOM + ' is not available.'
-
-						RAISERROR (
-								@strErrorMessage
-								,16
-								,1
-								)
+						IF @strErrorMessage <> ''
+						BEGIN
+							SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Final Price UOM ' + @strFinalPriceUOM + ' is not available.'
+						END
+						ELSE
+						BEGIN
+							SELECT @strErrorMessage = 'Final Price UOM ' + @strFinalPriceUOM + ' is not available.'
+						END
 					END
 
 					SELECT @intCommodityId = intCommodityId
@@ -778,13 +796,14 @@ BEGIN TRY
 					IF @strCommodityCode IS NOT NULL
 						AND @intCommodityId IS NULL
 					BEGIN
-						SELECT @strErrorMessage = 'Commodity Code ' + @strCommodityCode + ' is not available.'
-
-						RAISERROR (
-								@strErrorMessage
-								,16
-								,1
-								)
+						IF @strErrorMessage <> ''
+						BEGIN
+							SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Commodity Code ' + @strCommodityCode + ' is not available.'
+						END
+						ELSE
+						BEGIN
+							SELECT @strErrorMessage = 'Commodity Code ' + @strCommodityCode + ' is not available.'
+						END
 					END
 
 					SELECT @intCommodityUnitMeasureId = NULL
@@ -803,13 +822,14 @@ BEGIN TRY
 					IF @strAgreedItemUOM IS NOT NULL
 						AND @intAgreedItemUOMId IS NULL
 					BEGIN
-						SELECT @strErrorMessage = 'Agreed Item UOM ' + @strAgreedItemUOM + ' is not available.'
-
-						RAISERROR (
-								@strErrorMessage
-								,16
-								,1
-								)
+						IF @strErrorMessage <> ''
+						BEGIN
+							SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Agreed Item UOM ' + @strAgreedItemUOM + ' is not available.'
+						END
+						ELSE
+						BEGIN
+							SELECT @strErrorMessage = 'Agreed Item UOM ' + @strAgreedItemUOM + ' is not available.'
+						END
 					END
 
 					SELECT @intCommodityUnitMeasureId2 = NULL
@@ -825,13 +845,14 @@ BEGIN TRY
 							JOIN tblCTContractHeader CH ON x.intContractHeaderId = CH.intContractHeaderRefId
 							)
 					BEGIN
-						SELECT @strErrorMessage = 'Contract is not available.'
-
-						RAISERROR (
-								@strErrorMessage
-								,16
-								,1
-								)
+						IF @strErrorMessage <> ''
+						BEGIN
+							SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Contract is not available.'
+						END
+						ELSE
+						BEGIN
+							SELECT @strErrorMessage = 'Contract is not available.'
+						END
 					END
 
 					SELECT @intFutureMarketId = intFutureMarketId
@@ -841,13 +862,14 @@ BEGIN TRY
 					IF @strFutMarketName IS NOT NULL
 						AND @intFutureMarketId IS NULL
 					BEGIN
-						SELECT @strErrorMessage = 'Future Market Name ' + @strFutMarketName + ' is not available.'
-
-						RAISERROR (
-								@strErrorMessage
-								,16
-								,1
-								)
+						IF @strErrorMessage <> ''
+						BEGIN
+							SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Future Market Name ' + @strFutMarketName + ' is not available.'
+						END
+						ELSE
+						BEGIN
+							SELECT @strErrorMessage = 'Future Market Name ' + @strFutMarketName + ' is not available.'
+						END
 					END
 
 					SELECT @intFutureMonthId = MO.intFutureMonthId
@@ -857,14 +879,24 @@ BEGIN TRY
 					IF @strFutureMonth IS NOT NULL
 						AND @intFutureMonthId IS NULL
 					BEGIN
-						SELECT @strErrorMessage = 'Future Month ' + @strFutureMonth + ' is not available.'
-
-						RAISERROR (
-								@strErrorMessage
-								,16
-								,1
-								)
+						IF @strErrorMessage <> ''
+						BEGIN
+							SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Future Month ' + @strFutureMonth + ' is not available.'
+						END
+						ELSE
+						BEGIN
+							SELECT @strErrorMessage = 'Future Month ' + @strFutureMonth + ' is not available.'
+						END
 					END
+
+					IF @strErrorMessage <> ''
+				BEGIN
+					RAISERROR (
+							@strErrorMessage
+							,16
+							,1
+							)
+				END
 
 					DELETE PF
 					FROM tblCTPriceFixation PF
@@ -1103,7 +1135,7 @@ BEGIN TRY
 						,@strHedgeFutureMonth = strHedgeFutureMonth
 						,@strBroker = strBroker
 						,@strAccountNumber = strAccountNumber
-						,@strPriceItemUOM=strPriceItemUOM
+						,@strPriceItemUOM = strPriceItemUOM
 					FROM OPENXML(@idoc, 'vyuIPPriceFixationDetails/vyuIPPriceFixationDetail', 2) WITH (
 							strItemNo NVARCHAR(50) Collate Latin1_General_CI_AS
 							,strQtyItemUOM NVARCHAR(50) Collate Latin1_General_CI_AS
@@ -1126,13 +1158,14 @@ BEGIN TRY
 					IF @strItemNo IS NOT NULL
 						AND @intItemId IS NULL
 					BEGIN
-						SELECT @strErrorMessage = 'Item ' + @strItemNo + ' is not available.'
-
-						RAISERROR (
-								@strErrorMessage
-								,16
-								,1
-								)
+						IF @strErrorMessage <> ''
+						BEGIN
+							SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Item ' + @strItemNo + ' is not available.'
+						END
+						ELSE
+						BEGIN
+							SELECT @strErrorMessage = 'Item ' + @strItemNo + ' is not available.'
+						END
 					END
 
 					SELECT @intUnitMeasureId = NULL
@@ -1144,13 +1177,14 @@ BEGIN TRY
 					IF @strQtyItemUOM IS NOT NULL
 						AND @intUnitMeasureId IS NULL
 					BEGIN
-						SELECT @strErrorMessage = 'Quantity UOM ' + @strFinalPriceUOM + ' is not available.'
-
-						RAISERROR (
-								@strErrorMessage
-								,16
-								,1
-								)
+						IF @strErrorMessage <> ''
+						BEGIN
+							SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Quantity UOM ' + @strFinalPriceUOM + ' is not available.'
+						END
+						ELSE
+						BEGIN
+							SELECT @strErrorMessage = 'Quantity UOM ' + @strFinalPriceUOM + ' is not available.'
+						END
 					END
 
 					SELECT @intUnitMeasureId = NULL
@@ -1162,13 +1196,14 @@ BEGIN TRY
 					IF @strPriceItemUOM IS NOT NULL
 						AND @intPriceUnitMeasureId IS NULL
 					BEGIN
-						SELECT @strErrorMessage = 'Price UOM ' + @strPriceItemUOM + ' is not available.'
-
-						RAISERROR (
-								@strErrorMessage
-								,16
-								,1
-								)
+						IF @strErrorMessage <> ''
+						BEGIN
+							SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Price UOM ' + @strPriceItemUOM + ' is not available.'
+						END
+						ELSE
+						BEGIN
+							SELECT @strErrorMessage = 'Price UOM ' + @strPriceItemUOM + ' is not available.'
+						END
 					END
 
 					SELECT @intFutureMarketId = NULL
@@ -1180,13 +1215,14 @@ BEGIN TRY
 					IF @strFutMarketName IS NOT NULL
 						AND @intFutureMarketId IS NULL
 					BEGIN
-						SELECT @strErrorMessage = 'Future Market Name ' + @strFutMarketName + ' is not available.'
-
-						RAISERROR (
-								@strErrorMessage
-								,16
-								,1
-								)
+						IF @strErrorMessage <> ''
+						BEGIN
+							SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Future Market Name ' + @strFutMarketName + ' is not available.'
+						END
+						ELSE
+						BEGIN
+							SELECT @strErrorMessage = 'Future Market Name ' + @strFutMarketName + ' is not available.'
+						END
 					END
 
 					SELECT @intFutureMonthId = NULL
@@ -1198,13 +1234,14 @@ BEGIN TRY
 					IF @strFutureMonth IS NOT NULL
 						AND @intFutureMonthId IS NULL
 					BEGIN
-						SELECT @strErrorMessage = 'Future Month ' + @strFutureMonth + ' is not available.'
-
-						RAISERROR (
-								@strErrorMessage
-								,16
-								,1
-								)
+						IF @strErrorMessage <> ''
+						BEGIN
+							SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Future Month ' + @strFutureMonth + ' is not available.'
+						END
+						ELSE
+						BEGIN
+							SELECT @strErrorMessage = 'Future Month ' + @strFutureMonth + ' is not available.'
+						END
 					END
 
 					SELECT @intHedgeFutureMonthId = MO.intFutureMonthId
@@ -1214,13 +1251,14 @@ BEGIN TRY
 					IF @strHedgeFutureMonth IS NOT NULL
 						AND @intHedgeFutureMonthId IS NULL
 					BEGIN
-						SELECT @strErrorMessage = 'Hedge Future Month ' + @strHedgeFutureMonth + ' is not available.'
-
-						RAISERROR (
-								@strErrorMessage
-								,16
-								,1
-								)
+						IF @strErrorMessage <> ''
+						BEGIN
+							SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Hedge Future Month ' + @strHedgeFutureMonth + ' is not available.'
+						END
+						ELSE
+						BEGIN
+							SELECT @strErrorMessage = 'Hedge Future Month ' + @strHedgeFutureMonth + ' is not available.'
+						END
 					END
 
 					SELECT @intBrokerId = Broker.intEntityId
@@ -1230,13 +1268,14 @@ BEGIN TRY
 					IF @strBroker IS NOT NULL
 						AND @intBrokerId IS NULL
 					BEGIN
-						SELECT @strErrorMessage = 'Broker ' + @strBroker + ' is not available.'
-
-						RAISERROR (
-								@strErrorMessage
-								,16
-								,1
-								)
+						IF @strErrorMessage <> ''
+						BEGIN
+							SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Broker ' + @strBroker + ' is not available.'
+						END
+						ELSE
+						BEGIN
+							SELECT @strErrorMessage = 'Broker ' + @strBroker + ' is not available.'
+						END
 					END
 
 					SELECT @intBrokerageAccountId = BrokerageAccount.intBrokerageAccountId
@@ -1246,8 +1285,18 @@ BEGIN TRY
 					IF @strAccountNumber IS NOT NULL
 						AND @intBrokerageAccountId IS NULL
 					BEGIN
-						SELECT @strErrorMessage = 'Brokerage Account ' + @strAccountNumber + ' is not available.'
+						IF @strErrorMessage <> ''
+						BEGIN
+							SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Brokerage Account ' + @strAccountNumber + ' is not available.'
+						END
+						ELSE
+						BEGIN
+							SELECT @strErrorMessage = 'Brokerage Account ' + @strAccountNumber + ' is not available.'
+						END
+					END
 
+					IF @strErrorMessage <> ''
+					BEGIN
 						RAISERROR (
 								@strErrorMessage
 								,16
@@ -1504,7 +1553,9 @@ BEGIN TRY
 					,@strPriceFixationDetailXML OUTPUT
 					,NULL
 					,NULL
-x:
+
+				x:
+
 				SELECT @intContractScreenId = intScreenId
 				FROM tblSMScreen
 				WHERE strNamespace = 'ContractManagement.view.PriceContracts'
@@ -1524,10 +1575,10 @@ x:
 					,strAckPriceContractXML
 					,strAckPriceFixationXML
 					,strAckPriceFixationDetailXML
-					,intTransactionId 
-					,intCompanyId 
-					,intTransactionRefId 
-					,intCompanyRefId 
+					,intTransactionId
+					,intCompanyId
+					,intTransactionRefId
+					,intCompanyRefId
 					)
 				SELECT @intNewPriceContractId
 					,@strNewPriceContractNo
@@ -1538,12 +1589,14 @@ x:
 					,@strAckPriceContractXML
 					,@strAckPriceFixationXML
 					,@strAckPriceFixationDetailXML
-					,@intTransactionId 
-					,@intCompanyId 
-					,@intTransactionRefId 
-					,@intCompanyRefId 
+					,@intTransactionId
+					,@intCompanyId
+					,@intTransactionRefId
+					,@intCompanyRefId
 
-				EXECUTE dbo.uspSMInterCompanyUpdateMapping @currentTransactionId = @intTransactionRefId, @referenceTransactionId = @intTransactionId,@referenceCompanyId=@intCompanyId
+				EXECUTE dbo.uspSMInterCompanyUpdateMapping @currentTransactionId = @intTransactionRefId
+					,@referenceTransactionId = @intTransactionId
+					,@referenceCompanyId = @intCompanyId
 
 				UPDATE tblCTPriceContractStage
 				SET strFeedStatus = 'Processed'

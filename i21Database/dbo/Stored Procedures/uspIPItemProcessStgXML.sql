@@ -104,8 +104,8 @@ BEGIN TRY
 		,@intItemLocationId INT
 		,@strLocationName NVARCHAR(50)
 		,@intLocationId INT
-		,@strPhysicalItemNo nvarchar(50)
-		,@intPhysicalItemId int
+		,@strPhysicalItemNo NVARCHAR(50)
+		,@intPhysicalItemId INT
 
 	SELECT @intItemStageId = MIN(intItemStageId)
 	FROM tblICItemStage
@@ -228,7 +228,7 @@ BEGIN TRY
 				,@strTonnageTaxUOM = NULL
 				,@strSourceName = NULL
 				,@strItemNo = NULL
-				,@strPhysicalItemNo=NULL
+				,@strPhysicalItemNo = NULL
 
 			SELECT @strManufacturer = strManufacturer
 				,@strBrandCode = strBrandCode
@@ -252,7 +252,7 @@ BEGIN TRY
 				,@strTonnageTaxUOM = strTonnageTaxUOM
 				,@strSourceName = strSourceName
 				,@strItemNo = strItemNo
-				,@strPhysicalItemNo=strPhysicalItemNo
+				,@strPhysicalItemNo = strPhysicalItemNo
 			FROM OPENXML(@idoc, 'vyuIPGetItems/vyuIPGetItem', 2) WITH (
 					strManufacturer NVARCHAR(50) Collate Latin1_General_CI_AS
 					,strBrandCode NVARCHAR(50) Collate Latin1_General_CI_AS
@@ -285,16 +285,19 @@ BEGIN TRY
 			FROM tblICManufacturer
 			WHERE strManufacturer = @strManufacturer
 
+			SELECT @strErrorMessage = ''
+
 			IF @strManufacturer IS NOT NULL
 				AND @intManufacturerId IS NULL
 			BEGIN
-				SELECT @strErrorMessage = 'Manufacturer ' + @strManufacturer + ' is not available.'
-
-				RAISERROR (
-						@strErrorMessage
-						,16
-						,1
-						)
+				IF @strErrorMessage <> ''
+				BEGIN
+					SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Manufacturer ' + @strManufacturer + ' is not available.'
+				END
+				ELSE
+				BEGIN
+					SELECT @strErrorMessage = 'Manufacturer ' + @strManufacturer + ' is not available.'
+				END
 			END
 
 			SELECT @intBrandId = NULL
@@ -306,13 +309,14 @@ BEGIN TRY
 			IF @strBrandCode IS NOT NULL
 				AND @intBrandId IS NULL
 			BEGIN
-				SELECT @strErrorMessage = 'Brand ' + @strBrandCode + ' is not available.'
-
-				RAISERROR (
-						@strErrorMessage
-						,16
-						,1
-						)
+				IF @strErrorMessage <> ''
+				BEGIN
+					SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Brand ' + @strBrandCode + ' is not available.'
+				END
+				ELSE
+				BEGIN
+					SELECT @strErrorMessage = 'Brand ' + @strBrandCode + ' is not available.'
+				END
 			END
 
 			SELECT @intDimensionUOMId = NULL
@@ -324,13 +328,14 @@ BEGIN TRY
 			IF @strDimensionUOM IS NOT NULL
 				AND @intDimensionUOMId IS NULL
 			BEGIN
-				SELECT @strErrorMessage = 'Dimension UOM ' + @strDimensionUOM + ' is not available.'
-
-				RAISERROR (
-						@strErrorMessage
-						,16
-						,1
-						)
+				IF @strErrorMessage <> ''
+				BEGIN
+					SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Dimension UOM ' + @strDimensionUOM + ' is not available.'
+				END
+				ELSE
+				BEGIN
+					SELECT @strErrorMessage = 'Dimension UOM ' + @strDimensionUOM + ' is not available.'
+				END
 			END
 
 			SELECT @intWeightUOMId = NULL
@@ -342,13 +347,14 @@ BEGIN TRY
 			IF @strWeightUOM IS NOT NULL
 				AND @intWeightUOMId IS NULL
 			BEGIN
-				SELECT @strErrorMessage = 'Weight UOM ' + @strWeightUOM + ' is not available.'
-
-				RAISERROR (
-						@strErrorMessage
-						,16
-						,1
-						)
+				IF @strErrorMessage <> ''
+				BEGIN
+					SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Weight UOM ' + @strWeightUOM + ' is not available.'
+				END
+				ELSE
+				BEGIN
+					SELECT @strErrorMessage = 'Weight UOM ' + @strWeightUOM + ' is not available.'
+				END
 			END
 
 			SELECT @intPatronageCategoryId = NULL
@@ -360,13 +366,14 @@ BEGIN TRY
 			IF @strPatronageCategoryCode IS NOT NULL
 				AND @intPatronageCategoryId IS NULL
 			BEGIN
-				SELECT @strErrorMessage = 'Patronage Category Code ' + @strPatronageCategoryCode + ' is not available.'
-
-				RAISERROR (
-						@strErrorMessage
-						,16
-						,1
-						)
+				IF @strErrorMessage <> ''
+				BEGIN
+					SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Patronage Category Code ' + @strPatronageCategoryCode + ' is not available.'
+				END
+				ELSE
+				BEGIN
+					SELECT @strErrorMessage = 'Patronage Category Code ' + @strPatronageCategoryCode + ' is not available.'
+				END
 			END
 
 			SELECT @intRinFuelCategoryId = NULL
@@ -378,13 +385,14 @@ BEGIN TRY
 			IF @strRinFuelCategoryCode IS NOT NULL
 				AND @intRinFuelCategoryId IS NULL
 			BEGIN
-				SELECT @strErrorMessage = 'Rin Fuel Category Code ' + @strRinFuelCategoryCode + ' is not available.'
-
-				RAISERROR (
-						@strErrorMessage
-						,16
-						,1
-						)
+				IF @strErrorMessage <> ''
+				BEGIN
+					SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Rin Fuel Category Code ' + @strRinFuelCategoryCode + ' is not available.'
+				END
+				ELSE
+				BEGIN
+					SELECT @strErrorMessage = 'Rin Fuel Category Code ' + @strRinFuelCategoryCode + ' is not available.'
+				END
 			END
 
 			SELECT @intMedicationTag = NULL
@@ -396,13 +404,14 @@ BEGIN TRY
 			IF @strMedicationTag IS NOT NULL
 				AND @intMedicationTag IS NULL
 			BEGIN
-				SELECT @strErrorMessage = 'Medication Tag ' + @strMedicationTag + ' is not available.'
-
-				RAISERROR (
-						@strErrorMessage
-						,16
-						,1
-						)
+				IF @strErrorMessage <> ''
+				BEGIN
+					SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Medication Tag ' + @strMedicationTag + ' is not available.'
+				END
+				ELSE
+				BEGIN
+					SELECT @strErrorMessage = 'Medication Tag ' + @strMedicationTag + ' is not available.'
+				END
 			END
 
 			SELECT @intIngredientTag = NULL
@@ -414,13 +423,14 @@ BEGIN TRY
 			IF @strIngredientTag IS NOT NULL
 				AND @intIngredientTag IS NULL
 			BEGIN
-				SELECT @strErrorMessage = 'Ingredient Tag ' + @strIngredientTag + ' is not available.'
-
-				RAISERROR (
-						@strErrorMessage
-						,16
-						,1
-						)
+				IF @strErrorMessage <> ''
+				BEGIN
+					SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Ingredient Tag ' + @strIngredientTag + ' is not available.'
+				END
+				ELSE
+				BEGIN
+					SELECT @strErrorMessage = 'Ingredient Tag ' + @strIngredientTag + ' is not available.'
+				END
 			END
 
 			SELECT @intCommodityId = NULL
@@ -432,13 +442,14 @@ BEGIN TRY
 			IF @strCommodityCode IS NOT NULL
 				AND @intCommodityId IS NULL
 			BEGIN
-				SELECT @strErrorMessage = 'Commodity Code ' + @strCommodityCode + ' is not available.'
-
-				RAISERROR (
-						@strErrorMessage
-						,16
-						,1
-						)
+				IF @strErrorMessage <> ''
+				BEGIN
+					SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Commodity Code ' + @strCommodityCode + ' is not available.'
+				END
+				ELSE
+				BEGIN
+					SELECT @strErrorMessage = 'Commodity Code ' + @strCommodityCode + ' is not available.'
+				END
 			END
 
 			SELECT @intCategoryId = NULL
@@ -450,13 +461,14 @@ BEGIN TRY
 			IF @strCategoryCode IS NOT NULL
 				AND @intCategoryId IS NULL
 			BEGIN
-				SELECT @strErrorMessage = 'Category Code ' + @strCategoryCode + ' is not available.'
-
-				RAISERROR (
-						@strErrorMessage
-						,16
-						,1
-						)
+				IF @strErrorMessage <> ''
+				BEGIN
+					SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Category Code ' + @strCategoryCode + ' is not available.'
+				END
+				ELSE
+				BEGIN
+					SELECT @strErrorMessage = 'Category Code ' + @strCategoryCode + ' is not available.'
+				END
 			END
 
 			SELECT @intOriginId = NULL
@@ -468,13 +480,14 @@ BEGIN TRY
 			IF @strOrigin IS NOT NULL
 				AND @intOriginId IS NULL
 			BEGIN
-				SELECT @strErrorMessage = 'Origin ' + @strOrigin + ' is not available.'
-
-				RAISERROR (
-						@strErrorMessage
-						,16
-						,1
-						)
+				IF @strErrorMessage <> ''
+				BEGIN
+					SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Origin ' + @strOrigin + ' is not available.'
+				END
+				ELSE
+				BEGIN
+					SELECT @strErrorMessage = 'Origin ' + @strOrigin + ' is not available.'
+				END
 			END
 
 			SELECT @intMaterialPackTypeId = NULL
@@ -486,13 +499,14 @@ BEGIN TRY
 			IF @strMaterialPackType IS NOT NULL
 				AND @intMaterialPackTypeId IS NULL
 			BEGIN
-				SELECT @strErrorMessage = 'Material Pack Type ' + @strMaterialPackType + ' is not available.'
-
-				RAISERROR (
-						@strErrorMessage
-						,16
-						,1
-						)
+				IF @strErrorMessage <> ''
+				BEGIN
+					SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Material Pack Type ' + @strMaterialPackType + ' is not available.'
+				END
+				ELSE
+				BEGIN
+					SELECT @strErrorMessage = 'Material Pack Type ' + @strMaterialPackType + ' is not available.'
+				END
 			END
 
 			SELECT @intOwnerId = NULL
@@ -504,13 +518,14 @@ BEGIN TRY
 			IF @strOwner IS NOT NULL
 				AND @intOwnerId IS NULL
 			BEGIN
-				SELECT @strErrorMessage = 'Owner ' + @strOwner + ' is not available.'
-
-				RAISERROR (
-						@strErrorMessage
-						,16
-						,1
-						)
+				IF @strErrorMessage <> ''
+				BEGIN
+					SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Owner ' + @strOwner + ' is not available.'
+				END
+				ELSE
+				BEGIN
+					SELECT @strErrorMessage = 'Owner ' + @strOwner + ' is not available.'
+				END
 			END
 
 			SELECT @intCustomerId = NULL
@@ -522,13 +537,14 @@ BEGIN TRY
 			IF @strCustomer IS NOT NULL
 				AND @intCustomerId IS NULL
 			BEGIN
-				SELECT @strErrorMessage = 'Customer ' + @strCustomer + ' is not available.'
-
-				RAISERROR (
-						@strErrorMessage
-						,16
-						,1
-						)
+				IF @strErrorMessage <> ''
+				BEGIN
+					SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Customer ' + @strCustomer + ' is not available.'
+				END
+				ELSE
+				BEGIN
+					SELECT @strErrorMessage = 'Customer ' + @strCustomer + ' is not available.'
+				END
 			END
 
 			SELECT @intModuleId = NULL
@@ -540,13 +556,14 @@ BEGIN TRY
 			IF @strModule IS NOT NULL
 				AND @intModuleId IS NULL
 			BEGIN
-				SELECT @strErrorMessage = 'Module ' + @strModule + ' is not available.'
-
-				RAISERROR (
-						@strErrorMessage
-						,16
-						,1
-						)
+				IF @strErrorMessage <> ''
+				BEGIN
+					SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Module ' + @strModule + ' is not available.'
+				END
+				ELSE
+				BEGIN
+					SELECT @strErrorMessage = 'Module ' + @strModule + ' is not available.'
+				END
 			END
 
 			SELECT @intBuyingGroupId = NULL
@@ -558,13 +575,14 @@ BEGIN TRY
 			IF @strBuyingGroup IS NOT NULL
 				AND @intBuyingGroupId IS NULL
 			BEGIN
-				SELECT @strErrorMessage = 'Buying Group ' + @strBuyingGroup + ' is not available.'
-
-				RAISERROR (
-						@strErrorMessage
-						,16
-						,1
-						)
+				IF @strErrorMessage <> ''
+				BEGIN
+					SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Buying Group ' + @strBuyingGroup + ' is not available.'
+				END
+				ELSE
+				BEGIN
+					SELECT @strErrorMessage = 'Buying Group ' + @strBuyingGroup + ' is not available.'
+				END
 			END
 
 			SELECT @intAccountManagerId = NULL
@@ -576,13 +594,14 @@ BEGIN TRY
 			IF @strAccountManager IS NOT NULL
 				AND @intAccountManagerId IS NULL
 			BEGIN
-				SELECT @strErrorMessage = 'Account Manager ' + @strAccountManager + ' is not available.'
-
-				RAISERROR (
-						@strErrorMessage
-						,16
-						,1
-						)
+				IF @strErrorMessage <> ''
+				BEGIN
+					SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Account Manager ' + @strAccountManager + ' is not available.'
+				END
+				ELSE
+				BEGIN
+					SELECT @strErrorMessage = 'Account Manager ' + @strAccountManager + ' is not available.'
+				END
 			END
 
 			SELECT @intLotStatusId = NULL
@@ -594,13 +613,14 @@ BEGIN TRY
 			IF @strSecondaryStatus IS NOT NULL
 				AND @intLotStatusId IS NULL
 			BEGIN
-				SELECT @strErrorMessage = 'Lot Status ' + @strSecondaryStatus + ' is not available.'
-
-				RAISERROR (
-						@strErrorMessage
-						,16
-						,1
-						)
+				IF @strErrorMessage <> ''
+				BEGIN
+					SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Lot Status ' + @strSecondaryStatus + ' is not available.'
+				END
+				ELSE
+				BEGIN
+					SELECT @strErrorMessage = 'Lot Status ' + @strSecondaryStatus + ' is not available.'
+				END
 			END
 
 			SELECT @intM2MComputationId = NULL
@@ -612,13 +632,14 @@ BEGIN TRY
 			IF @strM2MComputation IS NOT NULL
 				AND @intM2MComputationId IS NULL
 			BEGIN
-				SELECT @strErrorMessage = 'M2MComputation ' + @strM2MComputation + ' is not available.'
-
-				RAISERROR (
-						@strErrorMessage
-						,16
-						,1
-						)
+				IF @strErrorMessage <> ''
+				BEGIN
+					SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'M2MComputation ' + @strM2MComputation + ' is not available.'
+				END
+				ELSE
+				BEGIN
+					SELECT @strErrorMessage = 'M2MComputation ' + @strM2MComputation + ' is not available.'
+				END
 			END
 
 			SELECT @intTonnageTaxUOMId = NULL
@@ -630,13 +651,14 @@ BEGIN TRY
 			IF @strTonnageTaxUOM IS NOT NULL
 				AND @intTonnageTaxUOMId IS NULL
 			BEGIN
-				SELECT @strErrorMessage = 'Tonnage Tax UOM ' + @strTonnageTaxUOM + ' is not available.'
-
-				RAISERROR (
-						@strErrorMessage
-						,16
-						,1
-						)
+				IF @strErrorMessage <> ''
+				BEGIN
+					SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Tonnage Tax UOM ' + @strTonnageTaxUOM + ' is not available.'
+				END
+				ELSE
+				BEGIN
+					SELECT @strErrorMessage = 'Tonnage Tax UOM ' + @strTonnageTaxUOM + ' is not available.'
+				END
 			END
 
 			SELECT @intDataSourceId = NULL
@@ -648,13 +670,14 @@ BEGIN TRY
 			IF @strSourceName IS NOT NULL
 				AND @intDataSourceId IS NULL
 			BEGIN
-				SELECT @strErrorMessage = 'Source Name ' + @strSourceName + ' is not available.'
-
-				RAISERROR (
-						@strErrorMessage
-						,16
-						,1
-						)
+				IF @strErrorMessage <> ''
+				BEGIN
+					SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Source Name ' + @strSourceName + ' is not available.'
+				END
+				ELSE
+				BEGIN
+					SELECT @strErrorMessage = 'Source Name ' + @strSourceName + ' is not available.'
+				END
 			END
 
 			SELECT @intPhysicalItemId = NULL
@@ -666,8 +689,18 @@ BEGIN TRY
 			IF @strPhysicalItemNo IS NOT NULL
 				AND @intPhysicalItemId IS NULL
 			BEGIN
-				SELECT @strErrorMessage = 'Physical Item ' + @strTonnageTaxUOM + ' is not available.'
+				IF @strErrorMessage <> ''
+				BEGIN
+					SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Physical Item ' + @strPhysicalItemNo + ' is not available.'
+				END
+				ELSE
+				BEGIN
+					SELECT @strErrorMessage = 'Physical Item ' + @strPhysicalItemNo + ' is not available.'
+				END
+			END
 
+			IF @strErrorMessage <> ''
+			BEGIN
 				RAISERROR (
 						@strErrorMessage
 						,16
@@ -1650,6 +1683,7 @@ BEGIN TRY
 					,@intSort = NULL
 					,@dtmDateCreated = NULL
 					,@dtmDateModified = NULL
+					,@strErrorMessage = ''
 
 				SELECT @strAccountCategory = strAccountCategory
 					,@strAccountId = strAccountId
@@ -1670,13 +1704,14 @@ BEGIN TRY
 				IF @strAccountCategory IS NOT NULL
 					AND @intAccountCategoryId IS NULL
 				BEGIN
-					SELECT @strErrorMessage = 'Account Category ' + @strAccountCategory + ' is not available.'
-
-					RAISERROR (
-							@strErrorMessage
-							,16
-							,1
-							)
+					IF @strErrorMessage <> ''
+					BEGIN
+						SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Account Category ' + @strAccountCategory + ' is not available.'
+					END
+					ELSE
+					BEGIN
+						SELECT @strErrorMessage = 'Account Category ' + @strAccountCategory + ' is not available.'
+					END
 				END
 
 				SELECT @intAccountId = NULL
@@ -1688,8 +1723,18 @@ BEGIN TRY
 				IF @strAccountId IS NOT NULL
 					AND @intAccountId IS NULL
 				BEGIN
-					SELECT @strErrorMessage = 'Account ' + @strAccountId + ' is not available.'
+					IF @strErrorMessage <> ''
+					BEGIN
+						SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Account ' + @strAccountId + ' is not available.'
+					END
+					ELSE
+					BEGIN
+						SELECT @strErrorMessage = 'Account ' + @strAccountId + ' is not available.'
+					END
+				END
 
+				IF @strErrorMessage <> ''
+				BEGIN
 					RAISERROR (
 							@strErrorMessage
 							,16
@@ -1873,6 +1918,7 @@ BEGIN TRY
 					,@strModifiedBy = NULL
 					,@intUnitMeasureId = NULL
 					,@ysnAutoAdd = NULL
+					,@strErrorMessage = ''
 
 				SELECT @strAddOnItemNo = strAddOnItemNo
 					,@dblQuantity = dblQuantity
@@ -1894,13 +1940,14 @@ BEGIN TRY
 				IF @strAddOnItemNo IS NOT NULL
 					AND @intAddOnItemId IS NULL
 				BEGIN
-					SELECT @strErrorMessage = 'Add-on Item ' + @strAddOnItemNo + ' is not available.'
-
-					RAISERROR (
-							@strErrorMessage
-							,16
-							,1
-							)
+					IF @strErrorMessage <> ''
+					BEGIN
+						SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Add-on Item ' + @strAddOnItemNo + ' is not available.'
+					END
+					ELSE
+					BEGIN
+						SELECT @strErrorMessage = 'Add-on Item ' + @strAddOnItemNo + ' is not available.'
+					END
 				END
 
 				SELECT @intUnitMeasureId = NULL
@@ -1912,8 +1959,18 @@ BEGIN TRY
 				IF @strUnitMeasure IS NOT NULL
 					AND @intUnitMeasureId IS NULL
 				BEGIN
-					SELECT @strErrorMessage = 'Unit Measure ' + @strUnitMeasure + ' is not available.'
+					IF @strErrorMessage <> ''
+					BEGIN
+						SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Unit Measure ' + @strUnitMeasure + ' is not available.'
+					END
+					ELSE
+					BEGIN
+						SELECT @strErrorMessage = 'Unit Measure ' + @strUnitMeasure + ' is not available.'
+					END
+				END
 
+				IF @strErrorMessage <> ''
+				BEGIN
 					RAISERROR (
 							@strErrorMessage
 							,16
@@ -2120,6 +2177,7 @@ BEGIN TRY
 					,@dblUnit = NULL
 					,@dblCost = NULL
 					,@intSort = NULL
+					,@strErrorMessage = ''
 
 				SELECT @strAssemblyItemNo = strAssemblyItemNo
 					,@dblQuantity = dblQuantity
@@ -2143,13 +2201,14 @@ BEGIN TRY
 				IF @strAssemblyItemNo IS NOT NULL
 					AND @intAssemblyItemId IS NULL
 				BEGIN
-					SELECT @strErrorMessage = 'Assembly Item ' + @strAssemblyItemNo + ' is not available.'
-
-					RAISERROR (
-							@strErrorMessage
-							,16
-							,1
-							)
+					IF @strErrorMessage <> ''
+					BEGIN
+						SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Assembly Item ' + @strAssemblyItemNo + ' is not available.'
+					END
+					ELSE
+					BEGIN
+						SELECT @strErrorMessage = 'Assembly Item ' + @strAssemblyItemNo + ' is not available.'
+					END
 				END
 
 				SELECT @intUnitMeasureId = NULL
@@ -2161,8 +2220,18 @@ BEGIN TRY
 				IF @strUnitMeasure IS NOT NULL
 					AND @intUnitMeasureId IS NULL
 				BEGIN
-					SELECT @strErrorMessage = 'Assembly Unit Measure ' + @strUnitMeasure + ' is not available.'
+					IF @strErrorMessage <> ''
+					BEGIN
+						SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Assembly Unit Measure ' + @strUnitMeasure + ' is not available.'
+					END
+					ELSE
+					BEGIN
+						SELECT @strErrorMessage = 'Assembly Unit Measure ' + @strUnitMeasure + ' is not available.'
+					END
+				END
 
+				IF @strErrorMessage <> ''
+				BEGIN
 					RAISERROR (
 							@strErrorMessage
 							,16
@@ -2386,6 +2455,7 @@ BEGIN TRY
 					,@dblUnit = NULL
 					,@dblCost = NULL
 					,@intSort = NULL
+					,@strErrorMessage = ''
 
 				SELECT @strBundleItemNo = strBundleItemNo
 					,@dblQuantity = dblQuantity
@@ -2410,13 +2480,14 @@ BEGIN TRY
 				IF @strBundleItemNo IS NOT NULL
 					AND @intBundleItemId IS NULL
 				BEGIN
-					SELECT @strErrorMessage = 'Bundle Item ' + @strBundleItemNo + ' is not available.'
-
-					RAISERROR (
-							@strErrorMessage
-							,16
-							,1
-							)
+					IF @strErrorMessage <> ''
+					BEGIN
+						SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Bundle Item ' + @strBundleItemNo + ' is not available.'
+					END
+					ELSE
+					BEGIN
+						SELECT @strErrorMessage = 'Bundle Item ' + @strBundleItemNo + ' is not available.'
+					END
 				END
 
 				SELECT @intUnitMeasureId = NULL
@@ -2428,8 +2499,18 @@ BEGIN TRY
 				IF @strUnitMeasure IS NOT NULL
 					AND @intUnitMeasureId IS NULL
 				BEGIN
-					SELECT @strErrorMessage = 'Bundle Unit Measure ' + @strUnitMeasure + ' is not available.'
+					IF @strErrorMessage <> ''
+					BEGIN
+						SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Bundle Unit Measure ' + @strUnitMeasure + ' is not available.'
+					END
+					ELSE
+					BEGIN
+						SELECT @strErrorMessage = 'Bundle Unit Measure ' + @strUnitMeasure + ' is not available.'
+					END
+				END
 
+				IF @strErrorMessage <> ''
+				BEGIN
 					RAISERROR (
 							@strErrorMessage
 							,16
@@ -3137,6 +3218,7 @@ BEGIN TRY
 					,@strStorageLocation = NULL
 					,@strSubLocationName = NULL
 					,@strSourceName = NULL
+					,@strErrorMessage = ''
 
 				SELECT @strCreatedBy = strCreatedBy
 					,@strModifiedBy = strModifiedBy
@@ -3161,13 +3243,14 @@ BEGIN TRY
 				IF @strSourceName IS NOT NULL
 					AND @intDataSourceId IS NULL
 				BEGIN
-					SELECT @strErrorMessage = 'Source Name ' + @strSourceName + ' is not available.'
-
-					RAISERROR (
-							@strErrorMessage
-							,16
-							,1
-							)
+					IF @strErrorMessage <> ''
+					BEGIN
+						SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Source Name ' + @strSourceName + ' is not available.'
+					END
+					ELSE
+					BEGIN
+						SELECT @strErrorMessage = 'Source Name ' + @strSourceName + ' is not available.'
+					END
 				END
 
 				SELECT @intCompanyLocationSubLocationId = NULL
@@ -3179,13 +3262,14 @@ BEGIN TRY
 				IF @strSubLocationName IS NOT NULL
 					AND @intCompanyLocationSubLocationId IS NULL
 				BEGIN
-					SELECT @strErrorMessage = 'Sub Location ' + @strSubLocationName + ' is not available.'
-
-					RAISERROR (
-							@strErrorMessage
-							,16
-							,1
-							)
+					IF @strErrorMessage <> ''
+					BEGIN
+						SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Sub Location ' + @strSubLocationName + ' is not available.'
+					END
+					ELSE
+					BEGIN
+						SELECT @strErrorMessage = 'Sub Location ' + @strSubLocationName + ' is not available.'
+					END
 				END
 
 				SELECT @intStorageLocationId = NULL
@@ -3197,13 +3281,14 @@ BEGIN TRY
 				IF @strStorageLocation IS NOT NULL
 					AND @intStorageLocationId IS NULL
 				BEGIN
-					SELECT @strErrorMessage = 'Storage Location ' + @strShipVia + ' is not available.'
-
-					RAISERROR (
-							@strErrorMessage
-							,16
-							,1
-							)
+					IF @strErrorMessage <> ''
+					BEGIN
+						SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Storage Location ' + @strShipVia + ' is not available.'
+					END
+					ELSE
+					BEGIN
+						SELECT @strErrorMessage = 'Storage Location ' + @strShipVia + ' is not available.'
+					END
 				END
 
 				SELECT @intShipViaId = NULL
@@ -3215,13 +3300,14 @@ BEGIN TRY
 				IF @strShipVia IS NOT NULL
 					AND @intShipViaId IS NULL
 				BEGIN
-					SELECT @strErrorMessage = 'Ship Via ' + @strShipVia + ' is not available.'
-
-					RAISERROR (
-							@strErrorMessage
-							,16
-							,1
-							)
+					IF @strErrorMessage <> ''
+					BEGIN
+						SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Ship Via ' + @strShipVia + ' is not available.'
+					END
+					ELSE
+					BEGIN
+						SELECT @strErrorMessage = 'Ship Via ' + @strShipVia + ' is not available.'
+					END
 				END
 
 				SELECT @intCountGroupId = NULL
@@ -3233,13 +3319,14 @@ BEGIN TRY
 				IF @strCountGroup IS NOT NULL
 					AND @intCountGroupId IS NULL
 				BEGIN
-					SELECT @strErrorMessage = 'Count Group ' + @strCountGroup + ' is not available.'
-
-					RAISERROR (
-							@strErrorMessage
-							,16
-							,1
-							)
+					IF @strErrorMessage <> ''
+					BEGIN
+						SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Count Group ' + @strCountGroup + ' is not available.'
+					END
+					ELSE
+					BEGIN
+						SELECT @strErrorMessage = 'Count Group ' + @strCountGroup + ' is not available.'
+					END
 				END
 
 				SELECT @intReceiveUnitMeasureId = NULL
@@ -3251,13 +3338,14 @@ BEGIN TRY
 				IF @strReceiveUnitMeasure IS NOT NULL
 					AND @intReceiveUnitMeasureId IS NULL
 				BEGIN
-					SELECT @strErrorMessage = 'Unit Measure ' + @strReceiveUnitMeasure + ' is not available.'
-
-					RAISERROR (
-							@strErrorMessage
-							,16
-							,1
-							)
+					IF @strErrorMessage <> ''
+					BEGIN
+						SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Unit Measure ' + @strReceiveUnitMeasure + ' is not available.'
+					END
+					ELSE
+					BEGIN
+						SELECT @strErrorMessage = 'Unit Measure ' + @strReceiveUnitMeasure + ' is not available.'
+					END
 				END
 
 				SELECT @intReceiveItemUOMId = NULL
@@ -3270,13 +3358,14 @@ BEGIN TRY
 				IF @strReceiveUnitMeasure IS NOT NULL
 					AND @intReceiveItemUOMId IS NULL
 				BEGIN
-					SELECT @strErrorMessage = 'Unit Measure ' + @strReceiveUnitMeasure + ' is not associated for the item ' + @strItemNo + '.'
-
-					RAISERROR (
-							@strErrorMessage
-							,16
-							,1
-							)
+					IF @strErrorMessage <> ''
+					BEGIN
+						SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Unit Measure ' + @strReceiveUnitMeasure + ' is not associated for the item ' + @strItemNo + '.'
+					END
+					ELSE
+					BEGIN
+						SELECT @strErrorMessage = 'Unit Measure ' + @strReceiveUnitMeasure + ' is not associated for the item ' + @strItemNo + '.'
+					END
 				END
 
 				SELECT @intIssueUnitMeasureId = NULL
@@ -3288,13 +3377,14 @@ BEGIN TRY
 				IF @strIssueUnitMeasure IS NOT NULL
 					AND @intIssueUnitMeasureId IS NULL
 				BEGIN
-					SELECT @strErrorMessage = 'Unit Measure ' + @strIssueUnitMeasure + ' is not available.'
-
-					RAISERROR (
-							@strErrorMessage
-							,16
-							,1
-							)
+					IF @strErrorMessage <> ''
+					BEGIN
+						SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Unit Measure ' + @strIssueUnitMeasure + ' is not available.'
+					END
+					ELSE
+					BEGIN
+						SELECT @strErrorMessage = 'Unit Measure ' + @strIssueUnitMeasure + ' is not available.'
+					END
 				END
 
 				SELECT @intIssueItemUOMId = NULL
@@ -3307,13 +3397,14 @@ BEGIN TRY
 				IF @strIssueUnitMeasure IS NOT NULL
 					AND @intIssueItemUOMId IS NULL
 				BEGIN
-					SELECT @strErrorMessage = 'Unit Measure ' + @strIssueUnitMeasure + ' is not associated for the item ' + @strItemNo + '.'
-
-					RAISERROR (
-							@strErrorMessage
-							,16
-							,1
-							)
+					IF @strErrorMessage <> ''
+					BEGIN
+						SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Unit Measure ' + @strIssueUnitMeasure + ' is not associated for the item ' + @strItemNo + '.'
+					END
+					ELSE
+					BEGIN
+						SELECT @strErrorMessage = 'Unit Measure ' + @strIssueUnitMeasure + ' is not associated for the item ' + @strItemNo + '.'
+					END
 				END
 
 				SELECT @intLocationId = NULL
@@ -3325,13 +3416,14 @@ BEGIN TRY
 				IF @strLocationName IS NOT NULL
 					AND @intLocationId IS NULL
 				BEGIN
-					SELECT @strErrorMessage = 'Location ' + @strLocationName + ' is not available.'
-
-					RAISERROR (
-							@strErrorMessage
-							,16
-							,1
-							)
+					IF @strErrorMessage <> ''
+					BEGIN
+						SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Location ' + @strLocationName + ' is not available.'
+					END
+					ELSE
+					BEGIN
+						SELECT @strErrorMessage = 'Location ' + @strLocationName + ' is not available.'
+					END
 				END
 
 				SELECT @intVendorId = NULL
@@ -3343,8 +3435,18 @@ BEGIN TRY
 				IF @strVendorId IS NOT NULL
 					AND @intVendorId IS NULL
 				BEGIN
-					SELECT @strErrorMessage = 'Vendor ' + @strVendorId + ' is not available.'
+					IF @strErrorMessage <> ''
+					BEGIN
+						SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Vendor ' + @strVendorId + ' is not available.'
+					END
+					ELSE
+					BEGIN
+						SELECT @strErrorMessage = 'Vendor ' + @strVendorId + ' is not available.'
+					END
+				END
 
+				IF @strErrorMessage <> ''
+				BEGIN
 					RAISERROR (
 							@strErrorMessage
 							,16
@@ -4116,6 +4218,8 @@ BEGIN TRY
 					,@dtmDateCreated = NULL
 					,@dtmDateModified = NULL
 
+				SELECT @strErrorMessage = ''
+
 				SELECT @strLocationName = strLocationName
 					,@strContractItemNo = strContractItemNo
 					,@strContractItemName = strContractItemName
@@ -4144,13 +4248,14 @@ BEGIN TRY
 				IF @strLocationName IS NOT NULL
 					AND @intLocationId IS NULL
 				BEGIN
-					SELECT @strErrorMessage = 'Location name ' + @strLocationName + ' is not available.'
-
-					RAISERROR (
-							@strErrorMessage
-							,16
-							,1
-							)
+					IF @strErrorMessage <> ''
+					BEGIN
+						SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Location name ' + @strLocationName + ' is not available.'
+					END
+					ELSE
+					BEGIN
+						SELECT @strErrorMessage = 'Location name ' + @strLocationName + ' is not available.'
+					END
 				END
 
 				SELECT @intCountryId = NULL
@@ -4162,8 +4267,18 @@ BEGIN TRY
 				IF @strCountry IS NOT NULL
 					AND @intCountryId IS NULL
 				BEGIN
-					SELECT @strErrorMessage = 'Country ' + @strCountry + ' is not available.'
+					IF @strErrorMessage <> ''
+					BEGIN
+						SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Country ' + @strCountry + ' is not available.'
+					END
+					ELSE
+					BEGIN
+						SELECT @strErrorMessage = 'Country ' + @strCountry + ' is not available.'
+					END
+				END
 
+				IF @strErrorMessage <> ''
+				BEGIN
 					RAISERROR (
 							@strErrorMessage
 							,16
@@ -4391,6 +4506,7 @@ BEGIN TRY
 					,@dtmDateCreated = NULL
 					,@dtmDateModified = NULL
 					,@strDocumentName = NULL
+					,@strErrorMessage = ''
 
 				SELECT @strLocationName = strLocationName
 					,@strContractItemNo = strContractItemNo
@@ -4412,13 +4528,14 @@ BEGIN TRY
 				IF @strLocationName IS NOT NULL
 					AND @intLocationId IS NULL
 				BEGIN
-					SELECT @strErrorMessage = 'Location name ' + @strLocationName + ' is not available.'
-
-					RAISERROR (
-							@strErrorMessage
-							,16
-							,1
-							)
+					IF @strErrorMessage <> ''
+					BEGIN
+						SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Location name ' + @strLocationName + ' is not available.'
+					END
+					ELSE
+					BEGIN
+						SELECT @strErrorMessage = 'Location name ' + @strLocationName + ' is not available.'
+					END
 				END
 
 				SELECT @intDocumentId = NULL
@@ -4430,8 +4547,18 @@ BEGIN TRY
 				IF @strDocument IS NOT NULL
 					AND @intDocumentId IS NULL
 				BEGIN
-					SELECT @strErrorMessage = 'Document ' + @strDocument + ' is not available.'
+					IF @strErrorMessage <> ''
+					BEGIN
+						SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Document ' + @strDocument + ' is not available.'
+					END
+					ELSE
+					BEGIN
+						SELECT @strErrorMessage = 'Document ' + @strDocument + ' is not available.'
+					END
+				END
 
+				IF @strErrorMessage <> ''
+				BEGIN
 					RAISERROR (
 							@strErrorMessage
 							,16
@@ -4661,13 +4788,14 @@ BEGIN TRY
 				IF @strLocationName IS NOT NULL
 					AND @intLocationId IS NULL
 				BEGIN
-					SELECT @strErrorMessage = 'Location name ' + @strLocationName + ' is not available.'
-
-					RAISERROR (
-							@strErrorMessage
-							,16
-							,1
-							)
+					IF @strErrorMessage <> ''
+					BEGIN
+						SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Location name ' + @strLocationName + ' is not available.'
+					END
+					ELSE
+					BEGIN
+						SELECT @strErrorMessage = 'Location name ' + @strLocationName + ' is not available.'
+					END
 				END
 
 				SELECT @intEntityId = NULL
@@ -4681,8 +4809,18 @@ BEGIN TRY
 				IF @strCustomer IS NOT NULL
 					AND @intEntityId IS NULL
 				BEGIN
-					SELECT @strErrorMessage = 'Customer ' + @strCustomer + ' is not available.'
+					IF @strErrorMessage <> ''
+					BEGIN
+						SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Customer ' + @strCustomer + ' is not available.'
+					END
+					ELSE
+					BEGIN
+						SELECT @strErrorMessage = 'Customer ' + @strCustomer + ' is not available.'
+					END
+				END
 
+				IF @strErrorMessage <> ''
+				BEGIN
 					RAISERROR (
 							@strErrorMessage
 							,16
@@ -5073,6 +5211,8 @@ BEGIN TRY
 					,@dtmDateCreated = NULL
 					,@dtmDateModified = NULL
 
+				SELECT @strErrorMessage = ''
+
 				SELECT @strLocationName = strLocationName
 					,@strCellName = strCellName
 					,@ysnDefault = ysnDefault
@@ -5094,13 +5234,14 @@ BEGIN TRY
 				IF @strLocationName IS NOT NULL
 					AND @intLocationId IS NULL
 				BEGIN
-					SELECT @strErrorMessage = 'Location name ' + @strLocationName + ' is not available.'
-
-					RAISERROR (
-							@strErrorMessage
-							,16
-							,1
-							)
+					IF @strErrorMessage <> ''
+					BEGIN
+						SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Location name ' + @strLocationName + ' is not available.'
+					END
+					ELSE
+					BEGIN
+						SELECT @strErrorMessage = 'Location name ' + @strLocationName + ' is not available.'
+					END
 				END
 
 				SELECT @intManufacturingCellId = NULL
@@ -5112,8 +5253,18 @@ BEGIN TRY
 				IF @strCellName IS NOT NULL
 					AND @intManufacturingCellId IS NULL
 				BEGIN
-					SELECT @strErrorMessage = 'Manufacturing cell name ' + @strLocationName + ' is not available.'
+					IF @strErrorMessage <> ''
+					BEGIN
+						SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Manufacturing cell name ' + @strLocationName + ' is not available.'
+					END
+					ELSE
+					BEGIN
+						SELECT @strErrorMessage = 'Manufacturing cell name ' + @strLocationName + ' is not available.'
+					END
+				END
 
+				IF @strErrorMessage <> ''
+				BEGIN
 					RAISERROR (
 							@strErrorMessage
 							,16
@@ -5824,6 +5975,8 @@ BEGIN TRY
 					,@strModifiedBy = NULL
 					,@strCurrency = NULL
 
+				SELECT @strErrorMessage = ''
+
 				SELECT @strLocationName = strLocationName
 					,@strUnitMeasure = strUnitMeasure
 					,@strCurrency = strCurrency
@@ -5841,13 +5994,14 @@ BEGIN TRY
 				IF @strLocationName IS NOT NULL
 					AND @intLocationId IS NULL
 				BEGIN
-					SELECT @strErrorMessage = 'Location name ' + @strLocationName + ' is not available.'
-
-					RAISERROR (
-							@strErrorMessage
-							,16
-							,1
-							)
+					IF @strErrorMessage <> ''
+					BEGIN
+						SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Location name ' + @strLocationName + ' is not available.'
+					END
+					ELSE
+					BEGIN
+						SELECT @strErrorMessage = 'Location name ' + @strLocationName + ' is not available.'
+					END
 				END
 
 				SELECT @intItemLocationId = NULL
@@ -5866,13 +6020,14 @@ BEGIN TRY
 				IF @strUnitMeasure IS NOT NULL
 					AND @intUnitMeasureId IS NULL
 				BEGIN
-					SELECT @strErrorMessage = 'Unit Measure ' + @strUnitMeasure + ' is not available.'
-
-					RAISERROR (
-							@strErrorMessage
-							,16
-							,1
-							)
+					IF @strErrorMessage <> ''
+					BEGIN
+						SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Unit Measure ' + @strUnitMeasure + ' is not available.'
+					END
+					ELSE
+					BEGIN
+						SELECT @strErrorMessage = 'Unit Measure ' + @strUnitMeasure + ' is not available.'
+					END
 				END
 
 				SELECT @intItemUOMId = NULL
@@ -5885,13 +6040,14 @@ BEGIN TRY
 				IF @strUnitMeasure IS NOT NULL
 					AND @intItemUOMId IS NULL
 				BEGIN
-					SELECT @strErrorMessage = 'Unit Measure ' + @strUnitMeasure + ' is not associated for the item ' + @strItemNo + '.'
-
-					RAISERROR (
-							@strErrorMessage
-							,16
-							,1
-							)
+					IF @strErrorMessage <> ''
+					BEGIN
+						SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Unit Measure ' + @strUnitMeasure + ' is not associated for the item ' + @strItemNo + '.'
+					END
+					ELSE
+					BEGIN
+						SELECT @strErrorMessage = 'Unit Measure ' + @strUnitMeasure + ' is not associated for the item ' + @strItemNo + '.'
+					END
 				END
 
 				SELECT @intCurrencyId = NULL
@@ -5903,8 +6059,18 @@ BEGIN TRY
 				IF @strCurrency IS NOT NULL
 					AND @intCurrencyId IS NULL
 				BEGIN
-					SELECT @strErrorMessage = 'Currency name ' + @strCurrency + ' is not available.'
+					IF @strErrorMessage <> ''
+					BEGIN
+						SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Currency name ' + @strCurrency + ' is not available.'
+					END
+					ELSE
+					BEGIN
+						SELECT @strErrorMessage = 'Currency name ' + @strCurrency + ' is not available.'
+					END
+				END
 
+				IF @strErrorMessage <> ''
+				BEGIN
 					RAISERROR (
 							@strErrorMessage
 							,16
@@ -6188,6 +6354,7 @@ BEGIN TRY
 					,@strCreatedBy = NULL
 					,@strModifiedBy = NULL
 					,@strCurrency = NULL
+					,@strErrorMessage = ''
 
 				SELECT @strLocationName = strLocationName
 					,@strUnitMeasure = strUnitMeasure
@@ -6206,13 +6373,14 @@ BEGIN TRY
 				IF @strLocationName IS NOT NULL
 					AND @intLocationId IS NULL
 				BEGIN
-					SELECT @strErrorMessage = 'Location name ' + @strLocationName + ' is not available.'
-
-					RAISERROR (
-							@strErrorMessage
-							,16
-							,1
-							)
+					IF @strErrorMessage <> ''
+					BEGIN
+						SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Location name ' + @strLocationName + ' is not available.'
+					END
+					ELSE
+					BEGIN
+						SELECT @strErrorMessage = 'Location name ' + @strLocationName + ' is not available.'
+					END
 				END
 
 				SELECT @intItemLocationId = NULL
@@ -6231,13 +6399,14 @@ BEGIN TRY
 				IF @strUnitMeasure IS NOT NULL
 					AND @intUnitMeasureId IS NULL
 				BEGIN
-					SELECT @strErrorMessage = 'Unit Measure ' + @strUnitMeasure + ' is not available.'
-
-					RAISERROR (
-							@strErrorMessage
-							,16
-							,1
-							)
+					IF @strErrorMessage <> ''
+					BEGIN
+						SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Unit Measure ' + @strUnitMeasure + ' is not available.'
+					END
+					ELSE
+					BEGIN
+						SELECT @strErrorMessage = 'Unit Measure ' + @strUnitMeasure + ' is not available.'
+					END
 				END
 
 				SELECT @intItemUOMId = NULL
@@ -6250,13 +6419,14 @@ BEGIN TRY
 				IF @strUnitMeasure IS NOT NULL
 					AND @intItemUOMId IS NULL
 				BEGIN
-					SELECT @strErrorMessage = 'Unit Measure ' + @strUnitMeasure + ' is not associated for the item ' + @strItemNo + '.'
-
-					RAISERROR (
-							@strErrorMessage
-							,16
-							,1
-							)
+					IF @strErrorMessage <> ''
+					BEGIN
+						SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Unit Measure ' + @strUnitMeasure + ' is not associated for the item ' + @strItemNo + '.'
+					END
+					ELSE
+					BEGIN
+						SELECT @strErrorMessage = 'Unit Measure ' + @strUnitMeasure + ' is not associated for the item ' + @strItemNo + '.'
+					END
 				END
 
 				SELECT @intCurrencyId = NULL
@@ -6268,8 +6438,18 @@ BEGIN TRY
 				IF @strCurrency IS NOT NULL
 					AND @intCurrencyId IS NULL
 				BEGIN
-					SELECT @strErrorMessage = 'Currency name ' + @strCurrency + ' is not available.'
+					IF @strErrorMessage <> ''
+					BEGIN
+						SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Currency name ' + @strCurrency + ' is not available.'
+					END
+					ELSE
+					BEGIN
+						SELECT @strErrorMessage = 'Currency name ' + @strCurrency + ' is not available.'
+					END
+				END
 
+				IF @strErrorMessage <> ''
+				BEGIN
 					RAISERROR (
 							@strErrorMessage
 							,16
@@ -6434,6 +6614,8 @@ BEGIN TRY
 			EXEC sp_xml_preparedocument @idoc OUTPUT
 				,@strItemSubLocationXML
 
+			SELECT @strErrorMessage = ''
+
 			---**************************** Item SubLocation********************************
 			IF EXISTS (
 					SELECT *
@@ -6451,13 +6633,14 @@ BEGIN TRY
 					AND IL.intItemId = @intNewItemId
 				WHERE IL.intItemLocationId IS NULL
 
-				SELECT @strErrorMessage = 'Location name ' + @strLocationName + ' is not associated with the item ' + @strItemNo + '.'
-
-				RAISERROR (
-						@strErrorMessage
-						,16
-						,1
-						)
+				IF @strErrorMessage <> ''
+				BEGIN
+					SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Location name ' + @strLocationName + ' is not associated with the item ' + @strItemNo + '.'
+				END
+				ELSE
+				BEGIN
+					SELECT @strErrorMessage = 'Location name ' + @strLocationName + ' is not associated with the item ' + @strItemNo + '.'
+				END
 			END
 
 			IF EXISTS (
@@ -6472,8 +6655,18 @@ BEGIN TRY
 				LEFT JOIN tblSMCompanyLocationSubLocation CL ON CL.strSubLocationName = x.strSubLocationName
 				WHERE CL.intCompanyLocationSubLocationId IS NULL
 
-				SELECT @strErrorMessage = 'Sub Location name ' + @strSubLocationName + ' is not available.'
+				IF @strErrorMessage <> ''
+				BEGIN
+					SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Sub Location name ' + @strSubLocationName + ' is not available.'
+				END
+				ELSE
+				BEGIN
+					SELECT @strErrorMessage = 'Sub Location name ' + @strSubLocationName + ' is not available.'
+				END
+			END
 
+			IF @strErrorMessage <> ''
+			BEGIN
 				RAISERROR (
 						@strErrorMessage
 						,16
@@ -6609,6 +6802,7 @@ BEGIN TRY
 					,@strUnitMeasure = NULL
 					,@strCreatedBy = NULL
 					,@strModifiedBy = NULL
+					,@strErrorMessage = ''
 
 				SELECT @strSubstituteItem = strSubstituteItem
 					,@strUnitMeasure = strUnitMeasure
@@ -6626,13 +6820,14 @@ BEGIN TRY
 				IF @strSubstituteItem IS NOT NULL
 					AND @intSubstituteItemId IS NULL
 				BEGIN
-					SELECT @strErrorMessage = 'Substitute Item ' + @strSubstituteItem + ' is not available.'
-
-					RAISERROR (
-							@strErrorMessage
-							,16
-							,1
-							)
+					IF @strErrorMessage <> ''
+					BEGIN
+						SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Substitute Item ' + @strSubstituteItem + ' is not available.'
+					END
+					ELSE
+					BEGIN
+						SELECT @strErrorMessage = 'Substitute Item ' + @strSubstituteItem + ' is not available.'
+					END
 				END
 
 				SELECT @intUnitMeasureId = NULL
@@ -6644,13 +6839,14 @@ BEGIN TRY
 				IF @strUnitMeasure IS NOT NULL
 					AND @intUnitMeasureId IS NULL
 				BEGIN
-					SELECT @strErrorMessage = 'Unit Measure ' + @strUnitMeasure + ' is not available.'
-
-					RAISERROR (
-							@strErrorMessage
-							,16
-							,1
-							)
+					IF @strErrorMessage <> ''
+					BEGIN
+						SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Unit Measure ' + @strUnitMeasure + ' is not available.'
+					END
+					ELSE
+					BEGIN
+						SELECT @strErrorMessage = 'Unit Measure ' + @strUnitMeasure + ' is not available.'
+					END
 				END
 
 				SELECT @intItemUOMId = NULL
@@ -6663,8 +6859,18 @@ BEGIN TRY
 				IF @strUnitMeasure IS NOT NULL
 					AND @intItemUOMId IS NULL
 				BEGIN
-					SELECT @strErrorMessage = 'Unit Measure ' + @strUnitMeasure + ' is not associated for the item ' + @strItemNo + '.'
+					IF @strErrorMessage <> ''
+					BEGIN
+						SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Unit Measure ' + @strUnitMeasure + ' is not associated for the item ' + @strItemNo + '.'
+					END
+					ELSE
+					BEGIN
+						SELECT @strErrorMessage = 'Unit Measure ' + @strUnitMeasure + ' is not associated for the item ' + @strItemNo + '.'
+					END
+				END
 
+				IF @strErrorMessage <> ''
+				BEGIN
 					RAISERROR (
 							@strErrorMessage
 							,16
@@ -7143,6 +7349,7 @@ BEGIN TRY
 					,@strDimensionUnitMeasure = NULL
 					,@strCreatedBy = NULL
 					,@strModifiedBy = NULL
+					,@strErrorMessage = ''
 
 				SELECT @strUnitMeasure = strUnitMeasure
 					,@strWeightUnitMeasure = strWeightUnitMeasure
@@ -7162,13 +7369,14 @@ BEGIN TRY
 				IF @strUnitMeasure IS NOT NULL
 					AND @intUnitMeasureId IS NULL
 				BEGIN
-					SELECT @strErrorMessage = 'UnitMeasure ' + @strUnitMeasure + ' is not available.'
-
-					RAISERROR (
-							@strErrorMessage
-							,16
-							,1
-							)
+					IF @strErrorMessage <> ''
+					BEGIN
+						SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'UnitMeasure ' + @strUnitMeasure + ' is not available.'
+					END
+					ELSE
+					BEGIN
+						SELECT @strErrorMessage = 'UnitMeasure ' + @strUnitMeasure + ' is not available.'
+					END
 				END
 
 				SELECT @intWeightUOMId = NULL
@@ -7180,13 +7388,14 @@ BEGIN TRY
 				IF @strWeightUnitMeasure IS NOT NULL
 					AND @intWeightUOMId IS NULL
 				BEGIN
-					SELECT @strErrorMessage = 'Weight Unit Measure ' + @strWeightUnitMeasure + ' is not available.'
-
-					RAISERROR (
-							@strErrorMessage
-							,16
-							,1
-							)
+					IF @strErrorMessage <> ''
+					BEGIN
+						SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Weight Unit Measure ' + @strWeightUnitMeasure + ' is not available.'
+					END
+					ELSE
+					BEGIN
+						SELECT @strErrorMessage = 'Weight Unit Measure ' + @strWeightUnitMeasure + ' is not available.'
+					END
 				END
 
 				SELECT @intVolumeUOMId = NULL
@@ -7198,13 +7407,14 @@ BEGIN TRY
 				IF @strVolumeUnitMeasure IS NOT NULL
 					AND @intVolumeUOMId IS NULL
 				BEGIN
-					SELECT @strErrorMessage = 'Volume Unit Measure ' + @strVolumeUnitMeasure + ' is not available.'
-
-					RAISERROR (
-							@strErrorMessage
-							,16
-							,1
-							)
+					IF @strErrorMessage <> ''
+					BEGIN
+						SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Volume Unit Measure ' + @strVolumeUnitMeasure + ' is not available.'
+					END
+					ELSE
+					BEGIN
+						SELECT @strErrorMessage = 'Volume Unit Measure ' + @strVolumeUnitMeasure + ' is not available.'
+					END
 				END
 
 				SELECT @intDimensionUOMId = NULL
@@ -7216,13 +7426,14 @@ BEGIN TRY
 				IF @strDimensionUOM IS NOT NULL
 					AND @intDimensionUOMId IS NULL
 				BEGIN
-					SELECT @strErrorMessage = 'Dimension Unit Measure ' + @strDimensionUnitMeasure + ' is not available.'
-
-					RAISERROR (
-							@strErrorMessage
-							,16
-							,1
-							)
+					IF @strErrorMessage <> ''
+					BEGIN
+						SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Dimension Unit Measure ' + @strDimensionUnitMeasure + ' is not available.'
+					END
+					ELSE
+					BEGIN
+						SELECT @strErrorMessage = 'Dimension Unit Measure ' + @strDimensionUnitMeasure + ' is not available.'
+					END
 				END
 
 				SELECT @intDataSourceId = NULL
@@ -7234,8 +7445,18 @@ BEGIN TRY
 				IF @strSourceName IS NOT NULL
 					AND @intDataSourceId IS NULL
 				BEGIN
-					SELECT @strErrorMessage = 'Source Name ' + @strSourceName + ' is not available.'
+					IF @strErrorMessage <> ''
+					BEGIN
+						SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Source Name ' + @strSourceName + ' is not available.'
+					END
+					ELSE
+					BEGIN
+						SELECT @strErrorMessage = 'Source Name ' + @strSourceName + ' is not available.'
+					END
+				END
 
+				IF @strErrorMessage <> ''
+				BEGIN
 					RAISERROR (
 							@strErrorMessage
 							,16

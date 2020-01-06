@@ -378,6 +378,8 @@ BEGIN TRY
 						THEN 7
 					END
 
+			SELECT @strErrorMessage = ''
+
 			IF @strHauler IS NOT NULL
 				AND NOT EXISTS (
 					SELECT 1
@@ -385,13 +387,14 @@ BEGIN TRY
 					WHERE Hauler.strName = @strHauler
 					)
 			BEGIN
-				SELECT @strErrorMessage = 'Hauler ' + @strHauler + ' is not available.'
-
-				RAISERROR (
-						@strErrorMessage
-						,16
-						,1
-						)
+				IF @strErrorMessage <> ''
+				BEGIN
+					SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Hauler ' + @strHauler + ' is not available.'
+				END
+				ELSE
+				BEGIN
+					SELECT @strErrorMessage = 'Hauler ' + @strHauler + ' is not available.'
+				END
 			END
 
 			IF @strDriver IS NOT NULL
@@ -401,13 +404,14 @@ BEGIN TRY
 					WHERE Driver.strName = @strDriver
 					)
 			BEGIN
-				SELECT @strErrorMessage = 'Driver ' + @strDriver + ' is not available.'
-
-				RAISERROR (
-						@strErrorMessage
-						,16
-						,1
-						)
+				IF @strErrorMessage <> ''
+				BEGIN
+					SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Driver ' + @strDriver + ' is not available.'
+				END
+				ELSE
+				BEGIN
+					SELECT @strErrorMessage = 'Driver ' + @strDriver + ' is not available.'
+				END
 			END
 
 			IF @strTerminal IS NOT NULL
@@ -417,13 +421,14 @@ BEGIN TRY
 					WHERE Terminal.strName = @strTerminal
 					)
 			BEGIN
-				SELECT @strErrorMessage = 'Terminal ' + @strTerminal + ' is not available.'
-
-				RAISERROR (
-						@strErrorMessage
-						,16
-						,1
-						)
+				IF @strErrorMessage <> ''
+				BEGIN
+					SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Terminal ' + @strTerminal + ' is not available.'
+				END
+				ELSE
+				BEGIN
+					SELECT @strErrorMessage = 'Terminal ' + @strTerminal + ' is not available.'
+				END
 			END
 
 			IF @strShippingLine IS NOT NULL
@@ -433,13 +438,14 @@ BEGIN TRY
 					WHERE ShippingLine.strName = @strShippingLine
 					)
 			BEGIN
-				SELECT @strErrorMessage = 'ShippingLine ' + @strShippingLine + ' is not available.'
-
-				RAISERROR (
-						@strErrorMessage
-						,16
-						,1
-						)
+				IF @strErrorMessage <> ''
+				BEGIN
+					SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'ShippingLine ' + @strShippingLine + ' is not available.'
+				END
+				ELSE
+				BEGIN
+					SELECT @strErrorMessage = 'ShippingLine ' + @strShippingLine + ' is not available.'
+				END
 			END
 
 			IF @strForwardingAgent IS NOT NULL
@@ -449,13 +455,16 @@ BEGIN TRY
 					WHERE ForwardingAgent.strName = @strForwardingAgent
 					)
 			BEGIN
-				SELECT @strErrorMessage = 'ForwardingAgent ' + @strForwardingAgent + ' is not available.'
+				
 
-				RAISERROR (
-						@strErrorMessage
-						,16
-						,1
-						)
+				IF @strErrorMessage <> ''
+				BEGIN
+					SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'ForwardingAgent ' + @strForwardingAgent + ' is not available.'
+				END
+				ELSE
+				BEGIN
+					SELECT @strErrorMessage = 'ForwardingAgent ' + @strForwardingAgent + ' is not available.'
+				END
 			END
 
 			IF @strInsurer IS NOT NULL
@@ -465,13 +474,14 @@ BEGIN TRY
 					WHERE Insurer.strName = @strInsurer
 					)
 			BEGIN
-				SELECT @strErrorMessage = 'Insurer ' + @strInsurer + ' is not available.'
-
-				RAISERROR (
-						@strErrorMessage
-						,16
-						,1
-						)
+				IF @strErrorMessage <> ''
+				BEGIN
+					SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Insurer ' + @strInsurer + ' is not available.'
+				END
+				ELSE
+				BEGIN
+					SELECT @strErrorMessage = 'Insurer ' + @strInsurer + ' is not available.'
+				END
 			END
 
 			IF @strBLDraftToBeSent IS NOT NULL
@@ -481,13 +491,14 @@ BEGIN TRY
 					WHERE BLDraftToBeSent.strName = @strBLDraftToBeSent
 					)
 			BEGIN
-				SELECT @strErrorMessage = 'BLDraftToBeSent ' + @strBLDraftToBeSent + ' is not available.'
-
-				RAISERROR (
-						@strErrorMessage
-						,16
-						,1
-						)
+				IF @strErrorMessage <> ''
+				BEGIN
+					SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'BLDraftToBeSent ' + @strBLDraftToBeSent + ' is not available.'
+				END
+				ELSE
+				BEGIN
+					SELECT @strErrorMessage = 'BLDraftToBeSent ' + @strBLDraftToBeSent + ' is not available.'
+				END
 			END
 
 			IF @strDocPresentationVal IS NOT NULL
@@ -497,13 +508,15 @@ BEGIN TRY
 					WHERE DocPresentationVal.strName = @strDocPresentationVal
 					)
 			BEGIN
-				SELECT @strErrorMessage = 'DocPresentationVal ' + @strDocPresentationVal + ' is not available.'
-
-				RAISERROR (
-						@strErrorMessage
-						,16
-						,1
-						)
+				
+				IF @strErrorMessage <> ''
+				BEGIN
+					SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'DocPresentationVal ' + @strDocPresentationVal + ' is not available.'
+				END
+				ELSE
+				BEGIN
+					SELECT @strErrorMessage = 'DocPresentationVal ' + @strDocPresentationVal + ' is not available.'
+				END
 			END
 
 			IF @strInsuranceCurrency IS NOT NULL
@@ -513,13 +526,16 @@ BEGIN TRY
 					WHERE InsuranceCurrency.strCurrency = @strInsuranceCurrency
 					)
 			BEGIN
-				SELECT @strErrorMessage = 'Insurance Currency ' + @strInsuranceCurrency + ' is not available.'
+				
 
-				RAISERROR (
-						@strErrorMessage
-						,16
-						,1
-						)
+				IF @strErrorMessage <> ''
+				BEGIN
+					SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Insurance Currency ' + @strInsuranceCurrency + ' is not available.'
+				END
+				ELSE
+				BEGIN
+					SELECT @strErrorMessage = 'Insurance Currency ' + @strInsuranceCurrency + ' is not available.'
+				END
 			END
 
 			IF @strContainerType IS NOT NULL
@@ -529,13 +545,16 @@ BEGIN TRY
 					WHERE ContainerType.strContainerType = @strContainerType
 					)
 			BEGIN
-				SELECT @strErrorMessage = 'ContainerType ' + @strContainerType + ' is not available.'
+				
 
-				RAISERROR (
-						@strErrorMessage
-						,16
-						,1
-						)
+				IF @strErrorMessage <> ''
+				BEGIN
+					SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'ContainerType ' + @strContainerType + ' is not available.'
+				END
+				ELSE
+				BEGIN
+					SELECT @strErrorMessage = 'ContainerType ' + @strContainerType + ' is not available.'
+				END
 			END
 
 			IF @strEquipmentType IS NOT NULL
@@ -545,13 +564,16 @@ BEGIN TRY
 					WHERE EquipmentType.strEquipmentType = @strEquipmentType
 					)
 			BEGIN
-				SELECT @strErrorMessage = 'Equipment Type ' + @strEquipmentType + ' is not available.'
+				
 
-				RAISERROR (
-						@strErrorMessage
-						,16
-						,1
-						)
+				IF @strErrorMessage <> ''
+				BEGIN
+					SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Equipment Type ' + @strEquipmentType + ' is not available.'
+				END
+				ELSE
+				BEGIN
+					SELECT @strErrorMessage = 'Equipment Type ' + @strEquipmentType + ' is not available.'
+				END
 			END
 
 			IF @strDispatcher IS NOT NULL
@@ -561,13 +583,16 @@ BEGIN TRY
 					WHERE Dispatcher.strUserName = @strDispatcher
 					)
 			BEGIN
-				SELECT @strErrorMessage = 'Dispatcher ' + @strDispatcher + ' is not available.'
+				
 
-				RAISERROR (
-						@strErrorMessage
-						,16
-						,1
-						)
+				IF @strErrorMessage <> ''
+				BEGIN
+					SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Dispatcher ' + @strDispatcher + ' is not available.'
+				END
+				ELSE
+				BEGIN
+					SELECT @strErrorMessage = 'Dispatcher ' + @strDispatcher + ' is not available.'
+				END
 			END
 
 			IF @strPosition IS NOT NULL
@@ -577,13 +602,16 @@ BEGIN TRY
 					WHERE Position.strPosition = @strPosition
 					)
 			BEGIN
-				SELECT @strErrorMessage = 'Position ' + @strPosition + ' is not available.'
+				
 
-				RAISERROR (
-						@strErrorMessage
-						,16
-						,1
-						)
+				IF @strErrorMessage <> ''
+				BEGIN
+					SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Position ' + @strPosition + ' is not available.'
+				END
+				ELSE
+				BEGIN
+					SELECT @strErrorMessage = 'Position ' + @strPosition + ' is not available.'
+				END
 			END
 
 			SELECT @intHaulerId = intEntityId
@@ -645,13 +673,16 @@ BEGIN TRY
 			IF @intFreightTermId IS NULL
 				AND @strFreightTerm IS NOT NULL
 			BEGIN
-				SELECT @strErrorMessage = 'Freight Term ' + @strFreightTerm + ' is not available.'
+				
 
-				RAISERROR (
-						@strErrorMessage
-						,16
-						,1
-						)
+				IF @strErrorMessage <> ''
+				BEGIN
+					SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Freight Term ' + @strFreightTerm + ' is not available.'
+				END
+				ELSE
+				BEGIN
+					SELECT @strErrorMessage = 'Freight Term ' + @strFreightTerm + ' is not available.'
+				END
 			END
 
 			SELECT @intBookId = intBookId
@@ -661,13 +692,16 @@ BEGIN TRY
 			IF @intBookId IS NULL
 				AND @strBook IS NOT NULL
 			BEGIN
-				SELECT @strErrorMessage = 'Book ' + @strBook + ' is not available.'
+				 
 
-				RAISERROR (
-						@strErrorMessage
-						,16
-						,1
-						)
+				IF @strErrorMessage <> ''
+				BEGIN
+					SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Book ' + @strBook + ' is not available.'
+				END
+				ELSE
+				BEGIN
+					SELECT @strErrorMessage = 'Book ' + @strBook + ' is not available.'
+				END
 			END
 
 			SELECT @intSubBookId = intSubBookId
@@ -677,13 +711,16 @@ BEGIN TRY
 			IF @intSubBookId IS NULL
 				AND @strSubBook IS NOT NULL
 			BEGIN
-				SELECT @strErrorMessage = 'Sub Book ' + @strSubBook + ' is not available.'
+				
 
-				RAISERROR (
-						@strErrorMessage
-						,16
-						,1
-						)
+				IF @strErrorMessage <> ''
+				BEGIN
+					SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Sub Book ' + @strSubBook + ' is not available.'
+				END
+				ELSE
+				BEGIN
+					SELECT @strErrorMessage = 'Sub Book ' + @strSubBook + ' is not available.'
+				END
 			END
 
 			SELECT @intCurrencyId = intCurrencyID
@@ -1834,7 +1871,7 @@ BEGIN TRY
 						FROM OPENXML(@idoc, 'vyuLGLoadDetailViews/vyuLGLoadDetailView', 2) WITH (
 								[intPContractDetailId] INT
 								,[intSContractDetailId] INT
-								,intLoadDetailId int
+								,intLoadDetailId INT
 								) x
 						LEFT JOIN tblCTContractDetail PCD ON PCD.intContractDetailRefId = x.intSContractDetailId
 						LEFT JOIN tblCTContractDetail SCD ON SCD.intContractDetailRefId = x.intPContractDetailId

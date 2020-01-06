@@ -67,7 +67,8 @@ BEGIN TRY
 			,@strRowState = NULL
 			,@intTransactionId = NULL
 			,@intCompanyId = NULL
-			,@strItemSupplyTargetXML=NULL
+			,@strItemSupplyTargetXML = NULL
+			,@strErrorMessage = ''
 
 		SELECT @intInvPlngReportMasterID = intInvPlngReportMasterID
 			,@strReportMasterXML = strReportMasterXML
@@ -76,7 +77,7 @@ BEGIN TRY
 			,@strRowState = strRowState
 			,@intTransactionId = intTransactionId
 			,@intCompanyId = intCompanyId
-			,@strItemSupplyTargetXML=strItemSupplyTarget
+			,@strItemSupplyTargetXML = strItemSupplyTarget
 		FROM tblMFDemandStage
 		WHERE intDemandStageId = @intDemandStageId
 
@@ -151,13 +152,14 @@ BEGIN TRY
 					WHERE strReportName = @strReportName
 					)
 			BEGIN
-				SELECT @strErrorMessage = 'ReportName ' + @strReportName + ' is not available.'
-
-				RAISERROR (
-						@strErrorMessage
-						,16
-						,1
-						)
+				IF @strErrorMessage <> ''
+				BEGIN
+					SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'ReportName ' + @strReportName + ' is not available.'
+				END
+				ELSE
+				BEGIN
+					SELECT @strErrorMessage = 'ReportName ' + @strReportName + ' is not available.'
+				END
 			END
 
 			IF @strCategoryCode IS NOT NULL
@@ -167,13 +169,14 @@ BEGIN TRY
 					WHERE C.strCategoryCode = @strCategoryCode
 					)
 			BEGIN
-				SELECT @strErrorMessage = 'CategoryCode ' + @strCategoryCode + ' is not available.'
-
-				RAISERROR (
-						@strErrorMessage
-						,16
-						,1
-						)
+				IF @strErrorMessage <> ''
+				BEGIN
+					SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'CategoryCode ' + @strCategoryCode + ' is not available.'
+				END
+				ELSE
+				BEGIN
+					SELECT @strErrorMessage = 'CategoryCode ' + @strCategoryCode + ' is not available.'
+				END
 			END
 
 			IF @strUnitMeasure IS NOT NULL
@@ -183,13 +186,14 @@ BEGIN TRY
 					WHERE U2.strUnitMeasure = @strUnitMeasure
 					)
 			BEGIN
-				SELECT @strErrorMessage = 'Unit Measure ' + @strUnitMeasure + ' is not available.'
-
-				RAISERROR (
-						@strErrorMessage
-						,16
-						,1
-						)
+				IF @strErrorMessage <> ''
+				BEGIN
+					SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Unit Measure ' + @strUnitMeasure + ' is not available.'
+				END
+				ELSE
+				BEGIN
+					SELECT @strErrorMessage = 'Unit Measure ' + @strUnitMeasure + ' is not available.'
+				END
 			END
 
 			IF @strLocationName IS NOT NULL
@@ -199,13 +203,14 @@ BEGIN TRY
 					WHERE CL.strLocationName = @strLocationName
 					)
 			BEGIN
-				SELECT @strErrorMessage = 'LocationName ' + @strLocationName + ' is not available.'
-
-				RAISERROR (
-						@strErrorMessage
-						,16
-						,1
-						)
+				IF @strErrorMessage <> ''
+				BEGIN
+					SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Location Name ' + @strLocationName + ' is not available.'
+				END
+				ELSE
+				BEGIN
+					SELECT @strErrorMessage = 'Location Name ' + @strLocationName + ' is not available.'
+				END
 			END
 
 			IF @strBook IS NOT NULL
@@ -215,13 +220,14 @@ BEGIN TRY
 					WHERE B.strBook = @strBook
 					)
 			BEGIN
-				SELECT @strErrorMessage = 'Book ' + @strBook + ' is not available.'
-
-				RAISERROR (
-						@strErrorMessage
-						,16
-						,1
-						)
+				IF @strErrorMessage <> ''
+				BEGIN
+					SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Book ' + @strBook + ' is not available.'
+				END
+				ELSE
+				BEGIN
+					SELECT @strErrorMessage = 'Book ' + @strBook + ' is not available.'
+				END
 			END
 
 			IF @strSubBook IS NOT NULL
@@ -231,8 +237,18 @@ BEGIN TRY
 					WHERE SB.strSubBook = @strSubBook
 					)
 			BEGIN
-				SELECT @strErrorMessage = 'Sub Book ' + @strSubBook + ' is not available.'
+				IF @strErrorMessage <> ''
+				BEGIN
+					SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Sub Book ' + @strSubBook + ' is not available.'
+				END
+				ELSE
+				BEGIN
+					SELECT @strErrorMessage = 'Sub Book ' + @strSubBook + ' is not available.'
+				END
+			END
 
+			IF @strErrorMessage <> ''
+			BEGIN
 				RAISERROR (
 						@strErrorMessage
 						,16
@@ -414,6 +430,8 @@ BEGIN TRY
 			EXEC sp_xml_preparedocument @idoc OUTPUT
 				,@strReportAttributeValueXML
 
+			SELECT @strErrorMessage = ''
+
 			IF EXISTS (
 					SELECT *
 					FROM OPENXML(@idoc, 'vyuMFInvPlngReportAttributeValues/vyuMFInvPlngReportAttributeValue', 2) WITH (
@@ -439,13 +457,14 @@ BEGIN TRY
 					SELECT @strItemList = Left(@strItemList, Len(@strItemList) - 2)
 				END
 
-				SELECT @strErrorMessage = 'Item(s) ' + @strItemList + ' are not available.'
-
-				RAISERROR (
-						@strErrorMessage
-						,16
-						,1
-						)
+				IF @strErrorMessage <> ''
+				BEGIN
+					SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Item(s) ' + @strItemList + ' are not available.'
+				END
+				ELSE
+				BEGIN
+					SELECT @strErrorMessage = 'Item(s) ' + @strItemList + ' are not available.'
+				END
 			END
 
 			IF EXISTS (
@@ -475,13 +494,14 @@ BEGIN TRY
 					SELECT @strItemList = Left(@strItemList, Len(@strItemList) - 2)
 				END
 
-				SELECT @strErrorMessage = 'Item(s) ' + @strItemList + ' are not available.'
-
-				RAISERROR (
-						@strErrorMessage
-						,16
-						,1
-						)
+				IF @strErrorMessage <> ''
+				BEGIN
+					SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Bundle Item(s) ' + @strItemList + ' are not available.'
+				END
+				ELSE
+				BEGIN
+					SELECT @strErrorMessage = 'Bundle Item(s) ' + @strItemList + ' are not available.'
+				END
 			END
 
 			INSERT INTO tblCTInvPlngReportAttributeValue (
@@ -569,7 +589,7 @@ BEGIN TRY
 					,dblSupplyTarget NUMERIC(18, 6)
 					) x
 			JOIN tblICItem I ON I.strItemNo = x.strItemNo
-						
+
 			EXEC sp_xml_removedocument @idoc
 
 			ext:
