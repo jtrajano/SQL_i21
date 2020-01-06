@@ -417,7 +417,7 @@ BEGIN TRY
 				intInvPlngReportMasterID
 				,intItemId
 				)
-			SELECT @intInvPlngReportMasterID
+			SELECT @intNewInvPlngReportMasterID
 				,I.intItemId
 			FROM OPENXML(@idoc, 'vyuMFInvPlngReportMaterials/vyuMFInvPlngReportMaterial', 2) WITH (
 					intInvPlngReportMasterID INT
@@ -516,7 +516,7 @@ BEGIN TRY
 				,intCreatedUserId
 				,intLastModifiedUserId
 				)
-			SELECT @intInvPlngReportMasterID
+			SELECT @intNewInvPlngReportMasterID
 				,intReportAttributeID
 				,I.intItemId
 				,strFieldName

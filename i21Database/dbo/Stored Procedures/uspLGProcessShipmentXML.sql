@@ -1869,17 +1869,15 @@ BEGIN TRY
 				IF EXISTS (
 						SELECT *
 						FROM OPENXML(@idoc, 'vyuLGLoadDetailViews/vyuLGLoadDetailView', 2) WITH (
-								[intPContractDetailId] INT
-								,[intSContractDetailId] INT
+								[intSContractDetailId] INT
 								,intLoadDetailId INT
 								) x
 						LEFT JOIN tblCTContractDetail PCD ON PCD.intContractDetailRefId = x.intSContractDetailId
-						LEFT JOIN tblCTContractDetail SCD ON SCD.intContractDetailRefId = x.intPContractDetailId
 						WHERE x.intLoadDetailId = @intLoadDetailId
-							AND (
+							AND 
 								PCD.intContractDetailRefId IS NULL
-								OR SCD.intContractDetailRefId IS NULL
-								)
+								
+								
 						)
 				BEGIN
 					SELECT @strErrorMessage = 'Contract is not created for the load.'
