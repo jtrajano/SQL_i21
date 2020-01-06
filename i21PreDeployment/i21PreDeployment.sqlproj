@@ -390,4 +390,7 @@
     <None Include="Scripts\Pre-Deployment\11_IC\FixFKItemPricingLevel.sql" />
     <None Include="Scripts\Pre-Deployment\14_CT\1920_ItemContracts.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Pre-Deployment\1_TM\9_DataFix.sql" />
+  </ItemGroup>
 </Project>
