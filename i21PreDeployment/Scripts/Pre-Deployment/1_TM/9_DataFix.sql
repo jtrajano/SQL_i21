@@ -5,6 +5,12 @@ IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[
 begin
 	IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[tblTMFillMethod]') AND type in (N'U')) 
 	begin
+
+		if exists (SELECT * FROM sys.indexes  WHERE name='IX_tblTMSite_intFillMethodId' AND object_id = OBJECT_ID('[dbo].[tblTMSite]'))
+		begin
+			exec('drop index tblTMSite.IX_tblTMSite_intFillMethodId');
+		end
+
 		exec('
 			update a
 			set
@@ -31,3 +37,4 @@ end
 go
 
 print 'End updating Sites empty Fill Method to Will Call';
+go
