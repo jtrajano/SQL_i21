@@ -64,7 +64,7 @@ BEGIN TRY
 		END
 		
 		SELECT @intLastModifiedById = intLastModifiedById FROM tblCTContractHeader WHERE intContractHeaderId = @intContractHeaderId
-		SELECT @intApprovalListId   = intApprovalListId  FROM tblSMApprovalList WHERE strApprovalList ='Contract Amendment'
+		SELECT @intApprovalListId   = intApprovalListId FROM tblSMUserSecurityRequireApprovalFor WHERE [intEntityUserSecurityId] = @intLastModifiedById AND [intScreenId] = (select [intScreenId] from tblSMScreen where strScreenName = 'Amendment and Approvals')
 		SELECT @ysnAmdWoAppvl	    = ISNULL(ysnAmdWoAppvl,0) FROM tblCTCompanyPreference
 
 		DELETE FROM @tblHeader
