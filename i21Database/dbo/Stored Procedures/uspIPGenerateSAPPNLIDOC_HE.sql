@@ -199,7 +199,10 @@ BEGIN
 	IF ISNUMERIC(LEFT(@strBook, 4)) = 1
 	BEGIN
 		SELECT @intYearDiff = DATEDIFF(year, @dtmMatchDate, LEFT(@strBook, 4))
-
+		
+		IF @intYearDiff < 0
+			SELECT @intYearDiff = 0
+		
 		IF ISNULL(@intYearDiff, 0) >= 0
 		BEGIN
 			SELECT @strSAPInternalOrderNo = strSAPInternalOrderNo
