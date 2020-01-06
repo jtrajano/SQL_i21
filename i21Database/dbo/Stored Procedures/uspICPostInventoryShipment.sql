@@ -496,7 +496,7 @@ BEGIN
 															LotWeightUOM.dblUnitQty
 												END
 
-				,dblCost					= 0.00 
+				,dblCost					= NULL--0.00 
 				,dblSalesPrice              = 
 											dbo.fnCalculateCostBetweenUOM (
 												ISNULL(DetailItem.intPriceUOMId, ItemUOM.intItemUOMId) 
@@ -538,6 +538,20 @@ BEGIN
 					ON LotWeightUOM.intItemUOMId = Lot.intWeightUOMId					         
 				LEFT JOIN tblICItem i
 					ON DetailItem.intItemId = i.intItemId
+				OUTER APPLY (
+					SELECT * 
+					FROM
+						tblICInventoryShipment s INNER JOIN tblICInventoryShipmentItem si
+							ON s.intInventoryShipmentId = si.intInventoryShipmentId
+						INNER JOIN tblICInventoryTransaction t
+							ON t.strTransactionId = s.strShipmentNumber
+							AND t.intItemId = si.intItemId
+					WHERE						
+						Header.strDataSource = 'Reverse'
+						AND si.intInventoryShipmentItemId = DetailItem.intSourceInventoryShipmentItemId
+
+				) originalShipment 
+
 		WHERE   Header.intInventoryShipmentId = @intTransactionId
 				AND ISNULL(DetailItem.intOwnershipType, @OWNERSHIP_TYPE_OWN) = @OWNERSHIP_TYPE_OWN
 				AND i.strType <> 'Bundle' -- Do not include Bundle items in the item costing. Bundle components are the ones included in the item costing. 
