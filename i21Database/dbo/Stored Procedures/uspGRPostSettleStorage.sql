@@ -197,7 +197,7 @@ BEGIN TRY
 	
 	----- DEBUG POINT -----
 
-	if @debug_awesome_ness = 1 and 1 = 1
+	if @debug_awesome_ness = 1 and 1 = 0
 	begin
 		select 'Settle storaget ticket information'
 		select * from tblGRSettleStorageTicket where intCustomerStorageId in ( 3375 )	
@@ -215,7 +215,7 @@ BEGIN TRY
 	WHERE CASE WHEN @ysnFromPriceBasisContract = 1 THEN CASE WHEN intSettleStorageId = @intSettleStorageId THEN 1 ELSE 0 END ELSE CASE WHEN intParentSettleStorageId = @intParentSettleStorageId THEN 1 ELSE 0 END END = 1
 
 	----- DEBUG POINT -----
-	if @debug_awesome_ness = 1	and 1 = 1
+	if @debug_awesome_ness = 1	and 1 = 0
 	begin
 		select 'settle storage' , * FROM tblGRSettleStorage
 					WHERE CASE WHEN @ysnFromPriceBasisContract = 1 THEN CASE WHEN intSettleStorageId = @intSettleStorageId THEN 1 ELSE 0 END ELSE CASE WHEN intParentSettleStorageId = @intParentSettleStorageId THEN 1 ELSE 0 END END = 1		
@@ -724,7 +724,7 @@ BEGIN TRY
 			END
 			
 			----- DEBUG POINT -----
-			if @debug_awesome_ness = 1 AND 1 = 0
+			if @debug_awesome_ness = 1 AND 1 = 1
 			begin
 				select 'after discount add to settle voucher create', * from @SettleVoucherCreate
 
@@ -1264,7 +1264,7 @@ BEGIN TRY
 
 			
 			----- DEBUG POINT -----
-			if @debug_awesome_ness = 1  AND 1 = 0
+			if @debug_awesome_ness = 1  AND 1 = 1
 			begin
 				select 'settle voucher create before updating ', * from @SettleVoucherCreate 
 			end
@@ -1973,9 +1973,10 @@ BEGIN TRY
 						where intContractDetailId = a.intContractDetailId
 					) availableQtyForVoucher
 					WHERE availableQtyForVoucher.intContractDetailId is not null and availableQtyForVoucher.intPriceFixationDetailId is not null
-				
+					and a.intItemType = 1
+
 				----- DEBUG POINT -----
-				if @debug_awesome_ness = 1 and 1 = 0
+				if @debug_awesome_ness = 1 and 1 = 1
 				begin
 					select 'checking the update of cash price'
 					select * 
@@ -2103,7 +2104,7 @@ BEGIN TRY
 					WHERE SVC.intItemType in (2, 3) and SVC.dblUnits > @dblTotalUnits
 					
 					----- DEBUG POINT -----
-					if @debug_awesome_ness = 1 AND 1 = 0
+					if @debug_awesome_ness = 1 AND 1 = 1
 					begin
 
 						select 'Total Units for updating the discounts ',@dblTotalUnits, @origdblSpotUnits
@@ -2244,9 +2245,11 @@ BEGIN TRY
 					,[dblCost]						= 
 														isnull(
 														case when @doPartialHistory = 1 then
-															isnull(availableQtyForVoucher.dblCashPrice, a.dblCashPrice)
+															case WHEN (intItemType = 2 or intItemType = 3) then a.dblCashPrice
+															else isnull(availableQtyForVoucher.dblCashPrice, a.dblCashPrice) end
 														else
 															CASE
+																
 																when availableQtyForVoucher.intContractDetailId is not null and @ysnFromPriceBasisContract = 1 then
 																	dbo.fnCTConvertQtyToTargetItemUOM(a.intContractUOMId,b.intItemUOMId, availableQtyForVoucher.dblCashPrice)
 																WHEN a.[intContractHeaderId] IS NOT NULL THEN dbo.fnCTConvertQtyToTargetItemUOM(a.intContractUOMId,b.intItemUOMId,a.dblCashPrice)
@@ -2471,7 +2474,9 @@ BEGIN TRY
 													END
 					,[dblCost]						= 
 														case when @doPartialHistory = 1 then
-															isnull(availableQtyForVoucher.dblCashPrice, a.dblCashPrice)
+														
+															case WHEN (intItemType = 2 or intItemType = 3) then a.dblCashPrice
+															else isnull(availableQtyForVoucher.dblCashPrice, a.dblCashPrice) end
 														else
 															CASE
 																when availableQtyForVoucher.intContractDetailId is not null and @ysnFromPriceBasisContract = 1 then
@@ -2581,7 +2586,7 @@ BEGIN TRY
 					select 'checking generated voucher payable '
 					select 'checking generated voucher payable ',* from @voucherPayable
 
-					if 1 = 0 
+					if 1 = 1 
 					begin
 						select 'this will check the '
 						select * FROM @SettleVoucherCreate a
