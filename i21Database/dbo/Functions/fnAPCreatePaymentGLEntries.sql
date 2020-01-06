@@ -144,7 +144,7 @@ BEGIN
 															dbo.fnAPGetPaymentAmountFactor((Details.dblTotal 
 																- (CASE WHEN paymentDetail.dblWithheld > 0 THEN (Details.dblTotal * ISNULL(withHoldData.dblWithholdPercent,1)) ELSE 0 END)), 
 																paymentDetail.dblPayment, voucher.dblTotal) * ISNULL(NULLIF(A.dblExchangeRate,0),1) 
-															AS DECIMAL(18,6)), 
+															AS DECIMAL(18,6)) * (CASE WHEN paymentDetail.ysnOffset = 1 THEN -1 ELSE 1 END), 
 																--* (CASE WHEN paymentDetail.ysnOffset = 1 THEN -1 ELSE 1 END),
 															-- ELSE
 															-- 	CAST(A.dblAmountPaid AS DECIMAL(18,2)) END,
@@ -153,7 +153,7 @@ BEGIN
 															dbo.fnAPGetPaymentAmountFactor((Details.dblTotal 
 																- (CASE WHEN paymentDetail.dblWithheld > 0 THEN (Details.dblTotal * ISNULL(withHoldData.dblWithholdPercent,1)) ELSE 0 END)), 
 																paymentDetail.dblPayment, voucher.dblTotal)
-															AS DECIMAL(18,6)) 
+															AS DECIMAL(18,6)) * (CASE WHEN paymentDetail.ysnOffset = 1 THEN -1 ELSE 1 END)
 															--* (CASE WHEN paymentDetail.ysnOffset = 1 THEN -1 ELSE 1 END)
 															-- ELSE
 															-- 	CAST(A.dblAmountPaid AS DECIMAL(18,2)) END												
