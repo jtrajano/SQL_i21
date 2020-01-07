@@ -285,8 +285,8 @@ BEGIN
 			SELECT B.strBook
 				,SB.strSubBook
 				,CA.strDescription AS strProductType
-				,I.strItemNo
-				,I.strDescription AS strItemDescription
+				,IsNULL(MI.strItemNo,I.strItemNo) AS strItemNo
+				,(Case When MI.intItemId is not null Then I.strItemNo else NULL  End) AS strItemDescription
 				,Replace(Replace(A.strAttributeName, '<a>+ ', ''), '</a>', '') + ' ' + AV.strFieldName AS strAttributeName
 				,(
 					CASE 
@@ -730,8 +730,8 @@ BEGIN
 				SELECT B.strBook
 					,SB.strSubBook
 					,CA.strDescription AS strProductType
-					,I.strItemNo
-					,I.strDescription AS strItemDescription
+					,IsNULL(MI.strItemNo,I.strItemNo) AS strItemNo
+					,(Case When MI.intItemId is not null Then I.strItemNo else NULL  End) AS strItemDescription
 					,Replace(Replace(A.strAttributeName, '<a>+ ', ''), '</a>', '') + ' ' + AV.strFieldName AS strAttributeName
 					,(
 						CASE 
@@ -1319,8 +1319,8 @@ BEGIN
 				SELECT B.strBook
 					,SB.strSubBook
 					,CA.strDescription AS strProductType
-					,I.strItemNo
-					,I.strDescription AS strItemDescription
+					,IsNULL(MI.strItemNo,I.strItemNo) AS strItemNo
+				,(Case When MI.intItemId is not null Then I.strItemNo else NULL  End) AS strItemDescription
 					,Replace(Replace(A.strAttributeName, '<a>+ ', ''), '</a>', '') + ' strMonth' + Ltrim(FD.intMonthId) AS strAttributeName
 					,(
 						CASE 
