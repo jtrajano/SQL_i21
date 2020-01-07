@@ -15,13 +15,51 @@ DECLARE @TransactionNo NVARCHAR(50);
 DECLARE @ReceiptQty NUMERIC(18,6);
 DECLARE @BilledQty NUMERIC(18,6);
 
-/*
+DECLARE	@summarizedUpdateDetails AS InventoryUpdateBillQty 
+
+INSERT INTO @summarizedUpdateDetails (
+	[intInventoryReceiptItemId]
+	,[intInventoryReceiptChargeId]
+	,[intInventoryShipmentChargeId]
+	,[intSourceTransactionNoId]
+	,[strSourceTransactionNo]
+	,[intEntityVendorId]
+	,[intItemId]
+	,[intToBillUOMId]
+	,[dblToBillQty]
+	,[dblAmountToBill]
+)
+SELECT 
+	[intInventoryReceiptItemId]
+	,[intInventoryReceiptChargeId]
+	,[intInventoryShipmentChargeId]
+	,[intSourceTransactionNoId]
+	,[strSourceTransactionNo]
+	,[intEntityVendorId]
+	,[intItemId]
+	,[intToBillUOMId]
+	,SUM([dblToBillQty])
+	,SUM([dblAmountToBill])
+FROM 
+	@updateDetails
+GROUP BY 
+	[intInventoryReceiptItemId]
+	,[intInventoryReceiptChargeId]
+	,[intInventoryShipmentChargeId]
+	,[intSourceTransactionNoId]
+	,[strSourceTransactionNo]
+	,[intEntityVendorId]
+	,[intItemId]
+	,[intToBillUOMId]
+
+
+/*************************************************************************************************
 	BEGIN - Update Receipt Item Bill Qty
-*/
+*************************************************************************************************/
 IF EXISTS(
 	SELECT TOP 1 1 
 	FROM 
-		@updateDetails UpdateTbl INNER JOIN tblICInventoryReceiptItem ReceiptItem 
+		@summarizedUpdateDetails UpdateTbl INNER JOIN tblICInventoryReceiptItem ReceiptItem 
 			ON ReceiptItem.intInventoryReceiptItemId = UpdateTbl.intInventoryReceiptItemId 
 			AND ReceiptItem.intItemId = UpdateTbl.intItemId
 		INNER JOIN tblICItem Item 
@@ -52,7 +90,7 @@ BEGIN
 	FROM 
 		tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptItem ri 
 			ON ri.intInventoryReceiptId = r.intInventoryReceiptId
-		INNER JOIN @updateDetails d 
+		INNER JOIN @summarizedUpdateDetails d 
 			ON d.intInventoryReceiptItemId = ri.intInventoryReceiptItemId
 			AND ri.intItemId = d.intItemId
 	WHERE 
@@ -64,8 +102,12 @@ BEGIN
 		,dblBillQty NUMERIC(38, 20)
 		,intItemId INT
 		,intInventoryReceiptItemId INT
+		,intUnitMeasureId INT
+		,strItemNo NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+		,dblToBillQty NUMERIC(38, 20)
 	)
 	
+	-- Summarize the receipt details. 
 	INSERT INTO @ReceiptToBills
 	SELECT
 		r.strReceiptNumber
@@ -73,35 +115,52 @@ BEGIN
 		,dblBillQty = CASE WHEN @type_BillToUse = @type_DebitMemo THEN -ri.dblBillQty ELSE ri.dblBillQty END
 		,ri.intItemId
 		,ri.intInventoryReceiptItemId
+		,ri.intUnitMeasureId
+		,Item.strItemNo
+		,ISNULL(GroupedUpdateDetails.dblToBillQty, 0)
 	FROM 
 		tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptItem ri 
 			ON ri.intInventoryReceiptId = r.intInventoryReceiptId
-		INNER JOIN @updateDetails d 
-			ON d.intInventoryReceiptItemId = ri.intInventoryReceiptItemId
-			AND ri.intItemId = d.intItemId
+		INNER JOIN tblICItem Item
+			ON Item.intItemId = ri.intItemId
+		CROSS APPLY (
+			SELECT 
+				UpdateTbl.intInventoryReceiptItemId
+				,UpdateTbl.intItemId
+				,dblToBillQty = 
+					SUM(
+						dbo.fnCalculateQtyBetweenUOM(
+							UpdateTbl.intToBillUOMId
+							, ri2.intUnitMeasureId
+							, CASE WHEN @type_BillToUse = @type_DebitMemo THEN -UpdateTbl.dblToBillQty ELSE UpdateTbl.dblToBillQty END
+						)
+					)	
+			FROM 
+				@summarizedUpdateDetails UpdateTbl INNER JOIN tblICInventoryReceiptItem ri2
+					ON UpdateTbl.intInventoryReceiptItemId = ri2.intInventoryReceiptItemId 
+					AND UpdateTbl.intItemId	= ri2.intItemId
+			WHERE 
+				UpdateTbl.intInventoryReceiptItemId = ri.intInventoryReceiptItemId 
+				AND UpdateTbl.intItemId	= ri.intItemId
+				AND UpdateTbl.intInventoryReceiptItemId IS NOT NULL
+				AND UpdateTbl.intInventoryReceiptChargeId IS NULL
+			GROUP BY
+				UpdateTbl.intInventoryReceiptItemId
+				,UpdateTbl.intItemId	
+		) GroupedUpdateDetails
 
+	-- Get the top record that will over-bill the voucher. 
 	SELECT TOP 1 
 		@TransactionNo = ReceiptItem.strReceiptNumber
-		,@ItemNo = Item.strItemNo
+		,@ItemNo = ReceiptItem.strItemNo
 		,@ReceiptQty = ReceiptItem.dblOpenReceive
 		,@BilledQty = ReceiptItem.dblBillQty
 	FROM 
-		@updateDetails UpdateTbl INNER JOIN @ReceiptToBills ReceiptItem 
-			ON ReceiptItem.intInventoryReceiptItemId = UpdateTbl.intInventoryReceiptItemId 
-			AND ReceiptItem.intItemId = UpdateTbl.intItemId
-		INNER JOIN tblICInventoryReceiptItem SourceReceiptItem 
-			ON SourceReceiptItem.intInventoryReceiptItemId = UpdateTbl.intInventoryReceiptItemId 
-			AND SourceReceiptItem.intItemId = UpdateTbl.intItemId
-		INNER JOIN tblICItem Item
-			ON Item.intItemId = UpdateTbl.intItemId
+		@ReceiptToBills ReceiptItem 		
 	WHERE 
-		ABS(
-			ISNULL(ReceiptItem.dblBillQty, 0) 
-			+ dbo.fnCalculateQtyBetweenUOM(UpdateTbl.intToBillUOMId, SourceReceiptItem.intUnitMeasureId, UpdateTbl.dblToBillQty) 
-		) > ABS(ReceiptItem.dblOpenReceive)
-		AND UpdateTbl.intInventoryReceiptItemId IS NOT NULL
-		AND UpdateTbl.intInventoryReceiptChargeId IS NULL
-
+		ABS(ISNULL(ReceiptItem.dblBillQty, 0) + ReceiptItem.dblToBillQty) > ABS(ReceiptItem.dblOpenReceive)		
+	
+	-- If there is an over-bill, raise the error. 
 	IF (ISNULL(@TransactionNo,'') <> '')
 	BEGIN
 		--'Billed Qty for {Item No} is already {Billed Qty}. You cannot overbill the transaction'
@@ -109,34 +168,31 @@ BEGIN
 		GOTO Post_Exit;
 	END
 
+	-- Otherwise, update the ri dblBillQty. 
 	UPDATE SourceReceiptItem
 	SET 
 		SourceReceiptItem.dblBillQty = 
 			ISNULL(SourceReceiptItem.dblBillQty, 0) 
-			+ dbo.fnCalculateQtyBetweenUOM (
-				UpdateTbl.intToBillUOMId
-				, SourceReceiptItem.intUnitMeasureId
-				, CASE WHEN @type_BillToUse = @type_DebitMemo THEN -UpdateTbl.dblToBillQty ELSE UpdateTbl.dblToBillQty END
-			)
+			+ UpdateTbl.dblToBillQty
 	FROM 
-		tblICInventoryReceiptItem SourceReceiptItem INNER JOIN @updateDetails UpdateTbl
-			ON UpdateTbl.intInventoryReceiptItemId = SourceReceiptItem.intInventoryReceiptItemId
-	WHERE 
-		UpdateTbl.intInventoryReceiptItemId IS NOT NULL
-		AND UpdateTbl.intInventoryReceiptChargeId IS NULL
+		tblICInventoryReceiptItem SourceReceiptItem INNER JOIN @ReceiptToBills UpdateTbl
+			ON 
+				UpdateTbl.intInventoryReceiptItemId = SourceReceiptItem.intInventoryReceiptItemId 
+				AND UpdateTbl.intItemId	= SourceReceiptItem.intItemId
+				AND UpdateTbl.intInventoryReceiptItemId IS NOT NULL		
 END
-/*
+/*************************************************************************************************
 	END - Update Receipt Item Bill Qty
-*/
+*************************************************************************************************/
 
 
-/*
+/*****************************************************************************************************
 	BEGIN - Update Receipt Charges Bill Qty
-*/
+*****************************************************************************************************/
 IF EXISTS(
 	SELECT TOP 1 1 
 	FROM 
-		@updateDetails UpdateTbl INNER JOIN tblICInventoryReceiptCharge ReceiptCharge 
+		@summarizedUpdateDetails UpdateTbl INNER JOIN tblICInventoryReceiptCharge ReceiptCharge 
 			ON ReceiptCharge.intInventoryReceiptChargeId = UpdateTbl.intInventoryReceiptChargeId 
 			AND ReceiptCharge.intChargeId = UpdateTbl.intItemId
 		INNER JOIN tblICItem Item 
@@ -167,7 +223,7 @@ BEGIN
 			ON Item.intItemId = ReceiptCharge.intChargeId
 		INNER JOIN tblICInventoryReceipt Receipt
 			ON Receipt.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId
-		INNER JOIN @updateDetails UpdateTbl
+		INNER JOIN @summarizedUpdateDetails UpdateTbl
 			ON UpdateTbl.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId
 			AND UpdateTbl.intItemId = ReceiptCharge.intChargeId
 		
@@ -212,7 +268,7 @@ BEGIN
 	FROM 
 		tblICInventoryReceiptCharge ReceiptCharge INNER JOIN tblICInventoryReceipt Receipt
 			ON Receipt.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId
-		INNER JOIN @updateDetails UpdateTbl
+		INNER JOIN @summarizedUpdateDetails UpdateTbl
 			ON UpdateTbl.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId
 			AND UpdateTbl.intItemId = ReceiptCharge.intChargeId
 		INNER JOIN tblAPBillDetail BillDetail
@@ -223,15 +279,20 @@ BEGIN
 		UpdateTbl.intInventoryReceiptChargeId IS NOT NULL
 		AND UpdateTbl.intEntityVendorId = ReceiptCharge.intEntityVendorId
 END 
+/*****************************************************************************************************
+	END - Update Receipt Charges Bill Qty
+*****************************************************************************************************/
 
--- Validate if the item is over billed for Charge Entity/Price = true
+/*****************************************************************************************************
+-- BEGIN - Update the billed for Charge Entity/Price = true
+*****************************************************************************************************/
 IF EXISTS(
 	SELECT TOP 1 1 
 	FROM 
 		tblICInventoryReceipt Receipt 			
 		INNER JOIN tblICInventoryReceiptCharge ReceiptCharge 
 			ON Receipt.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId
-		INNER JOIN @updateDetails UpdateTbl 		
+		INNER JOIN @summarizedUpdateDetails UpdateTbl 		
 			ON ReceiptCharge.intInventoryReceiptChargeId = UpdateTbl.intInventoryReceiptChargeId 
 			AND ReceiptCharge.intChargeId = UpdateTbl.intItemId			
 		INNER JOIN tblICItem Item 
@@ -257,7 +318,7 @@ BEGIN
 		tblICInventoryReceipt Receipt 			
 		INNER JOIN tblICInventoryReceiptCharge ReceiptCharge 
 			ON Receipt.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId
-		INNER JOIN @updateDetails UpdateTbl 		
+		INNER JOIN @summarizedUpdateDetails UpdateTbl 		
 			ON ReceiptCharge.intInventoryReceiptChargeId = UpdateTbl.intInventoryReceiptChargeId 
 			AND ReceiptCharge.intChargeId = UpdateTbl.intItemId			
 		INNER JOIN tblICItem Item 
@@ -303,7 +364,7 @@ BEGIN
 	FROM 
 		tblICInventoryReceiptCharge ReceiptCharge INNER JOIN tblICInventoryReceipt Receipt
 			ON Receipt.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId
-		INNER JOIN @updateDetails UpdateTbl
+		INNER JOIN @summarizedUpdateDetails UpdateTbl
 			ON UpdateTbl.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId
 			AND ReceiptCharge.intChargeId = UpdateTbl.intItemId
 			
@@ -312,17 +373,17 @@ BEGIN
 		AND ReceiptCharge.ysnPrice = 1
 		AND UpdateTbl.intEntityVendorId = Receipt.intEntityVendorId		
 END
-/*
-	END - Update Receipt Charges Bill Qty
-*/
+/*****************************************************************************************************
+	END - Update the billed for Charge Entity/Price = true
+*****************************************************************************************************/
 
-/*
+/*****************************************************************************************************
 	BEGIN - Update Shipment Charges Bill Qty
-*/
+*****************************************************************************************************/
 IF EXISTS(
 	SELECT TOP 1 1 
 	FROM 
-		@updateDetails UpdateTbl INNER JOIN tblICInventoryShipmentCharge ShipmentCharge 
+		@summarizedUpdateDetails UpdateTbl INNER JOIN tblICInventoryShipmentCharge ShipmentCharge 
 			ON ShipmentCharge.intInventoryShipmentChargeId = UpdateTbl.intInventoryShipmentChargeId 
 	WHERE 
 		UpdateTbl.intInventoryShipmentChargeId IS NOT NULL 
@@ -340,7 +401,7 @@ BEGIN
 				ELSE ISNULL(ShipmentCharge.dblQuantityBilled, 0) 
 			END 
 	FROM 
-		@updateDetails UpdateTbl INNER JOIN tblICInventoryShipmentCharge ShipmentCharge
+		@summarizedUpdateDetails UpdateTbl INNER JOIN tblICInventoryShipmentCharge ShipmentCharge
 			ON ShipmentCharge.intInventoryShipmentChargeId = UpdateTbl.intInventoryShipmentChargeId 
 			AND ShipmentCharge.intChargeId = UpdateTbl.intItemId
 		INNER JOIN tblICInventoryShipment Shipment
@@ -388,15 +449,16 @@ BEGIN
 			
 	FROM 
 		tblICInventoryShipmentCharge ShipmentCharge
-		INNER JOIN @updateDetails UpdateTbl
+		INNER JOIN @summarizedUpdateDetails UpdateTbl
 			ON UpdateTbl.intInventoryShipmentChargeId = ShipmentCharge.intInventoryShipmentChargeId			
 	WHERE 
 		UpdateTbl.intInventoryShipmentChargeId IS NOT NULL
 		AND ShipmentCharge.intEntityVendorId = UpdateTbl.intEntityVendorId
 END
-/*
+/*****************************************************************************************************
 	END - Update Shipment Charges Bill Qty
-*/
+*****************************************************************************************************/
+
 
 Post_Exit:
 END
