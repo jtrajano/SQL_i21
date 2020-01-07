@@ -400,7 +400,7 @@ BEGIN TRY
 					 intCustomerStorageId		= CS.intCustomerStorageId
 					,intCompanyLocationId		= CS.intCompanyLocationId 
 					,intContractHeaderId		= NULL
-					,intContractDetailId		= NULL
+					,intContractDetailId		= CD.intContractDetailId
 					,dblUnits					= CASE
 													WHEN DCO.strDiscountCalculationOption = 'Gross Weight' THEN 
 														CASE WHEN CS.dblGrossQuantity IS NULL THEN SST.dblUnits
@@ -1298,7 +1298,10 @@ BEGIN TRY
 														END														
 												END
 					,[strMiscDescription]		= c.[strItemNo]
-					,[dblCost]					= a.[dblCashPrice]
+					,[dblCost]					= CASE
+																WHEN a.[intContractHeaderId] IS NOT NULL THEN ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(a.intContractUOMId,b.intItemUOMId,a.dblCashPrice),0)
+																ELSE a.dblCashPrice
+															END
 					,[intContractHeaderId]		= a.[intContractHeaderId]
 					,[intContractDetailId]		= a.[intContractDetailId]
 					,[intUnitOfMeasureId]		= CASE
@@ -1382,6 +1385,29 @@ BEGIN TRY
 					AND SST.intSettleStorageId = @intSettleStorageId
 				ORDER BY SST.intSettleStorageTicketId
 					,a.intItemType
+
+
+				---we should delete priced contracts that has a voucher already
+					delete from @voucherDetailStorage 
+						where intContractDetailId in (
+							select c.intContractDetailId from @voucherDetailStorage a
+								join tblCTContractHeader b 
+									on a.intContractHeaderId = b.intContractHeaderId and b.intPricingTypeId = 1
+								join tblAPBillDetail c
+									on a.intContractHeaderId = c.intContractHeaderId
+										and a.intContractDetailId = c.intContractDetailId
+										and c.intCustomerStorageId = a.intCustomerStorageId
+							)
+
+											select c.intContractDetailId from @voucherDetailStorage a
+								join tblCTContractHeader b 
+									on a.intContractHeaderId = b.intContractHeaderId and b.intPricingTypeId = 1
+								join tblAPBillDetail c
+									on a.intContractHeaderId = c.intContractHeaderId
+										and a.intContractDetailId = c.intContractDetailId
+										and c.intCustomerStorageId = a.intCustomerStorageId
+
+			update @voucherDetailStorage set intContractDetailId = null where intContractDetailId is not null and intContractHeaderId is null
 
 				IF(@ysnDPOwnedType = 0)
 				BEGIN
