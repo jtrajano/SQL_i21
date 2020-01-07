@@ -68,6 +68,7 @@ BEGIN
 			,@ysnTransactionPostedFlag AS BIT  
 			,@intFobPointId AS INT 
 			,@intLocationId AS INT
+			,@intSourceInventoryShipmentId AS INT
   
 	SELECT TOP 1   
 			@intTransactionId = s.intInventoryShipmentId
@@ -77,6 +78,7 @@ BEGIN
 			,@intFobPointId = fp.intFobPointId
 			,@intLocationId = s.intShipFromLocationId
 			,@intEntityCustomerId = s.intEntityCustomerId
+			,@intSourceInventoryShipmentId = s.intSourceInventoryShipmentId
 	FROM	dbo.tblICInventoryShipment s LEFT JOIN tblSMFreightTerms ft
 				ON s.intFreightTermId = ft.intFreightTermId
 			LEFT JOIN tblICFobPoint fp
@@ -744,11 +746,75 @@ BEGIN
 					,[dblForexRate] = t.dblForexRate
 					,[intSourceEntityId] = t.intSourceEntityId
 			FROM	tblICInventoryTransaction t 
-			WHERE	t.strTransactionId = @strTransactionId
+			WHERE	t.strTransactionId = @strTransactionId 
 					AND t.ysnIsUnposted = 0 
 					AND t.strBatchId = @strBatchId
-					--AND @intFobPointId = @FOB_DESTINATION
 					AND t.dblQty < 0 -- Ensure the Qty is negative. Credit Memo are positive Qtys.  Credit Memo does not ship out but receives stock. 
+
+			IF (@intSourceInventoryShipmentId IS NOT NULL) 
+			BEGIN 
+				-- Do reversal for the In-Transit Costing 
+				INSERT INTO @ItemsForInTransitCosting (
+						[intItemId] 
+						,[intItemLocationId] 
+						,[intItemUOMId] 
+						,[dtmDate] 
+						,[dblQty] 
+						,[dblUOMQty] 
+						,[dblCost] 
+						,[dblValue] 
+						,[dblSalesPrice] 
+						,[intCurrencyId] 
+						,[dblExchangeRate] 
+						,[intTransactionId] 
+						,[intTransactionDetailId] 
+						,[strTransactionId] 
+						,[intTransactionTypeId] 
+						,[intLotId] 
+						,[intSourceTransactionId] 
+						,[strSourceTransactionId] 
+						,[intSourceTransactionDetailId]
+						,[intFobPointId]
+						,[intInTransitSourceLocationId]
+						,[intForexRateTypeId]
+						,[dblForexRate]
+						,intSourceEntityId
+				)
+				SELECT 
+					t.[intItemId] 
+					,t.[intItemLocationId] 
+					,t.[intItemUOMId] 
+					,t.[dtmDate] 
+					,-t.[dblQty] 
+					,t.[dblUOMQty] 
+					,t.[dblCost] 
+					,t.[dblValue] 
+					,t.[dblSalesPrice] 
+					,t.[intCurrencyId] 
+					,t.[dblExchangeRate] 
+					,t.[intTransactionId] 
+					,t.[intTransactionDetailId] 
+					,t.[strTransactionId] 
+					,t.[intTransactionTypeId] 
+					,t.[intLotId] 
+					,t.[intTransactionId] 
+					,t.[strTransactionId] 
+					,t.[intTransactionDetailId] 
+					,[intFobPointId] = @intFobPointId
+					,[intInTransitSourceLocationId] = t.intItemLocationId
+					,[intForexRateTypeId] = t.intForexRateTypeId
+					,[dblForexRate] = t.dblForexRate
+					,[intSourceEntityId] = t.intSourceEntityId
+				FROM 
+					tblICInventoryShipment s INNER JOIN tblICInventoryTransaction t
+						ON s.strShipmentNumber = t.strTransactionId
+						AND s.intInventoryShipmentId = t.intTransactionId
+				WHERE
+					s.intInventoryShipmentId = @intSourceInventoryShipmentId
+					AND t.ysnIsUnposted = 0
+					AND t.intInTransitSourceLocationId IS NOT NULL 
+			END
+
 
 			IF EXISTS (SELECT TOP 1 1 FROM @ItemsForInTransitCosting)
 			BEGIN 
