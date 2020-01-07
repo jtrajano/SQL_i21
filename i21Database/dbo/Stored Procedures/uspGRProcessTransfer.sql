@@ -19,7 +19,7 @@ BEGIN TRY
 	DECLARE @intStorageHistoryId INT = 0
 	DECLARE @intDecimalPrecision INT	
 	SELECT @intDecimalPrecision = intCurrencyDecimal FROM tblSMCompanyPreference
-
+	DECLARE @intTransferStorageReferenceId INT
 	---START---TRANSACTIONS FOR THE SOURCE-----	
 	IF EXISTS(SELECT TOP 1 1 
 			FROM tblGRCustomerStorage A 
@@ -46,7 +46,6 @@ BEGIN TRY
 	END
 	
 	BEGIN TRANSACTION
-	BEGIN TRY
 		--integration to IC
 		DECLARE @cnt INT = 0
 
