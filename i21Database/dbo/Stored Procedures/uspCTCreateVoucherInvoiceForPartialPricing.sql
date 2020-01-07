@@ -755,7 +755,7 @@ BEGIN TRY
 
 					SELECT  @dblTotal = SUM(dblTotal) FROM tblAPBillDetail WHERE intBillDetailId = @intBillDetailId
 					
-					SELECT  @ysnBillPosted = ysnPosted, @strBillId = strBillId FROM tblAPBill WHERE intBillId = @intBillId
+					SELECT  @ysnBillPosted = ysnPosted, @strBillId = strBillId, @ysnBillPaid = ysnPaid FROM tblAPBill WHERE intBillId = @intBillId  
 					
 					SELECT  @intBillQtyUOMId = intUnitOfMeasureId,
 							@dblTotalBillQty = dblQtyReceived,
@@ -766,7 +766,7 @@ BEGIN TRY
 
 					IF  @dblVoucherPrice	<>	@dblFinalPrice
 					BEGIN
-						IF @ysnBillPosted = 1
+						IF ISNULL(@ysnBillPosted,0) = 1 AND ISNULL(@ysnBillPaid,0) = 0
 						BEGIN
 							SELECT @strPostedAPAR = ISNULL(@strPostedAPAR + ',','') + @strBillId
 						END
@@ -781,7 +781,7 @@ BEGIN TRY
 
 						IF  ISNULL(@ysnRequireApproval , 0) = 0
 						BEGIN
-								IF ISNULL(@ysnBillPosted,0) = 1
+								IF ISNULL(@ysnBillPosted,0) = 1 AND ISNULL(@ysnBillPaid,0) = 0
 								BEGIN
 									EXEC [dbo].[uspAPPostBill] @post = 0,@recap = 0,@isBatch = 0,@param = @intBillId,@userId = @intUserId,@success = @ysnSuccess OUTPUT, @batchIdUsed = @batchIdUsed OUTPUT
 									IF ISNULL(@ysnSuccess, 0) = 0
@@ -797,12 +797,12 @@ BEGIN TRY
 
 								--UPDATE tblAPBillDetail SET dblQtyOrdered = @dblTotalIVForPFQty, dblQtyReceived = @dblTotalIVForPFQty WHERE intBillDetailId = @intBillDetailId
 
-								IF (ISNULL(@intBillDetailId, 0) <> 0)
+								IF ISNULL(@intBillDetailId, 0) <> 0 AND ISNULL(@ysnBillPosted,0) = 1 AND ISNULL(@ysnBillPaid,0) = 0
 								BEGIN
 									EXEC uspAPUpdateCost @intBillDetailId, @dblFinalPrice, 1
 								END
 
-								IF ISNULL(@ysnBillPosted,0) = 1
+								IF ISNULL(@ysnBillPosted,0) = 1 AND ISNULL(@ysnBillPaid,0) = 0
 								BEGIN
 									EXEC [dbo].[uspAPPostBill] @post = 1,@recap = 0,@isBatch = 0,@param = @intBillId,@userId = @intUserId,@success = @ysnSuccess OUTPUT
 								END
