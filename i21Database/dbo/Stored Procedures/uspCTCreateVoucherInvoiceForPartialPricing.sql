@@ -415,6 +415,11 @@ BEGIN TRY
 							SELECT	2,@intInventoryReceiptItemId, @dblQtyToBill, @dblFinalPrice
 					    
 							EXEC	uspAPCreateVoucherDetailReceipt @intBillId,@voucherDetailReceipt
+
+							UPDATE A
+							SET A.ysnStage = 1
+							FROM tblAPBillDetail A
+							WHERE A.intBillId = @intBillId
 					    
 							-- Get the intBillDetailId of the newly inserted voucher item. 
 							SELECT	TOP 1	
