@@ -21,6 +21,7 @@ SELECT IRM.intInvPlngReportMasterID,IRM.strInvPlngReportName
 	,IRM.dtmLastModified
 	,US.strUserName AS strCreatedBy
 	,US1.strUserName AS strModifiedBy
+	,IRM.dtmPostDate 
 FROM tblCTInvPlngReportMaster IRM
 JOIN tblCTReportMaster RM ON RM.intReportMasterID = IRM.intReportMasterID
 JOIN tblICCategory C ON C.intCategoryId = IRM.intCategoryId

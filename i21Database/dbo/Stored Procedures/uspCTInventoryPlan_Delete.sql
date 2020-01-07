@@ -20,6 +20,13 @@ BEGIN TRY
 	DELETE
 	FROM tblCTInvPlngReportMaster
 	WHERE intInvPlngReportMasterID = @intInvPlngReportMasterID
+
+	INSERT INTO tblMFDemandPreStage (
+		intInvPlngReportMasterID
+		,strRowState
+		)
+	SELECT @intInvPlngReportMasterID
+		,'Delete'
 END TRY
 
 BEGIN CATCH
