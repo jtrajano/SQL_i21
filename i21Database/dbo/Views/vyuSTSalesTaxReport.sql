@@ -9,7 +9,8 @@ SELECT ST.intStoreId
 	, ISNULL(Inv.ysnPosted, CAST(0 AS BIT)) AS ysnPosted
 	, ACC.strAccountId
 	, STT.strTaxNo
-	, SMTax.strTaxCode
+	--, SMTax.strTaxCode
+	, IT.strItemNo strTaxCode
 	, SUM(STT.dblTotalTax) dblTotalTax
 	, SUM(STT.dblTaxableSales) dblTaxableSales
 	, SUM(STT.dblTaxExemptSales) dblTaxExemptSales
@@ -22,9 +23,9 @@ LEFT JOIN tblARInvoice Inv
 	ON Inv.intInvoiceId = CH.intInvoiceId
 INNER JOIN tblSTCheckoutSalesTaxTotals STT 
 	ON STT.intCheckoutId = CH.intCheckoutId 
-INNER JOIN tblSMTaxCode SMTax
-	ON STTax.intTaxCodeId = SMTax.intTaxCodeId
-	AND STT.strTaxNo = SMTax.strStoreTaxNumber
+-- INNER JOIN tblSMTaxCode SMTax
+-- 	ON STTax.intTaxCodeId = SMTax.intTaxCodeId
+-- 	AND STT.strTaxNo = SMTax.strStoreTaxNumber
 INNER JOIN tblGLAccount ACC 
 	ON ACC.intAccountId = STT.intSalesTaxAccount
 INNER JOIN tblICItem IT 
@@ -33,4 +34,4 @@ INNER JOIN tblICCategory CAT
 	ON CAT.intCategoryId = IT.intCategoryId
 WHERE STT.dblTotalTax <> 0	
 	OR STT.dblTaxableSales <> 0	
-GROUP BY ST.intStoreId, ST.intStoreNo, ST.strRegion, ST.strDistrict, ST.strDescription, CH.dtmCheckoutDate, Inv.ysnPosted, ACC.strAccountId, STT.strTaxNo, strTaxCode
+GROUP BY ST.intStoreId, ST.intStoreNo, ST.strRegion, ST.strDistrict, ST.strDescription, CH.dtmCheckoutDate, Inv.ysnPosted, ACC.strAccountId, STT.strTaxNo, IT.strItemNo
