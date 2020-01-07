@@ -219,10 +219,11 @@ BEGIN TRY
 	begin
 		select 'settle storage' , * FROM tblGRSettleStorage
 					WHERE CASE WHEN @ysnFromPriceBasisContract = 1 THEN CASE WHEN intSettleStorageId = @intSettleStorageId THEN 1 ELSE 0 END ELSE CASE WHEN intParentSettleStorageId = @intParentSettleStorageId THEN 1 ELSE 0 END END = 1		
-		select 'settle storage', @intSettleStorageId	
-		
-		select 'Settle storage ticket information'
-		select * from tblGRSettleStorageTicket where intCustomerStorageId in ( 3375 )	
+		select 'settle storage contract' , * FROM tblGRSettleContract
+					where intSettleStorageId in (select intSettleStorageId from tblGRSettleStorage where intParentSettleStorageId = @intParentSettleStorageId)	
+		select 'settle storage ticket' , * FROM tblGRSettleStorageTicket
+					where intSettleStorageId in (select intSettleStorageId from tblGRSettleStorage where intParentSettleStorageId = @intParentSettleStorageId)
+		select 'settle storage', @intSettleStorageId		
 	end
 	----- DEBUG POINT -----
 			
@@ -497,21 +498,31 @@ BEGIN TRY
 					)
 				select 
 						a.intContractDetailId, 
-						case when b.dblAvailableQuantity > b.dblQuantity then b.dblQuantity else b.dblAvailableQuantity end,  
+						case 
+							when b.intPriceFixationDetailId is not null then
+								case 
+									when b.dblAvailableQuantity > b.dblQuantity then b.dblQuantity else b.dblAvailableQuantity 
+								end							
+							else c.dblAvailableQty
+						end,
 						b.intPriceFixationDetailId ,
-						b.dblCashPrice,
+						case when b.intPriceFixationDetailId is not null then b.dblCashPrice else c.dblCashPrice end,
 						ContractEntityId,
 						dblContractUnits
-				from (select distinct intContractDetailId, ContractEntityId, dblContractUnits from @SettleContract) a
-					join vyuCTAvailableQuantityForVoucher b
-						on b.intContractDetailId = a.intContractDetailId 
-					outer apply (
-						(select sum(dblQtyReceived) as dblTotal
-							from tblAPBillDetail 
-								where intBillId in 
-									(select intBillId from tblAPBill where strVendorOrderNumber = (select strStorageTicket from tblGRSettleStorage where intSettleStorageId = @intSettleStorageId)) 
-								and intContractDetailId = a.intContractDetailId )
-					) total_bill
+				from (
+						select distinct intContractDetailId, ContractEntityId, dblContractUnits from @SettleContract
+					) a
+				left join vyuCTAvailableQuantityForVoucher b
+					on b.intContractDetailId = a.intContractDetailId 
+				left join vyuGRGetContracts c
+					on c.intContractDetailId = a.intContractDetailId 
+				outer apply (
+					select sum(dblQtyReceived) as dblTotal
+						from tblAPBillDetail 
+							where intBillId in 
+								(select intBillId from tblAPBill where strVendorOrderNumber = (select strStorageTicket from tblGRSettleStorage where intSettleStorageId = @intSettleStorageId)) 
+							and intContractDetailId = a.intContractDetailId
+				) total_bill
 					where a.dblContractUnits > isnull(total_bill.dblTotal, 0)
 
 
@@ -3209,7 +3220,7 @@ BEGIN TRY
 						*/
 						
 						insert into tblCTPriceFixationDetailAPAR(intPriceFixationDetailId, intBillId, intBillDetailId, intConcurrencyId)
-						select intPriceFixationDetailId, @intVoucherId, intBillDetailId, 1  from @avqty where intBillDetailId is not null
+						select intPriceFixationDetailId, @intVoucherId, intBillDetailId, 1  from @avqty where intBillDetailId is not null and intPriceFixationDetailId is not null
 						----- DEBUG POINT -----
 						if @debug_awesome_ness = 1 and 1 = 0
 						begin
