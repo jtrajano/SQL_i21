@@ -19,8 +19,15 @@ BEGIN TRY
 		, @intMatchFuturesPSHeaderId INT
 		, @GLEntries AS RecapTableType
 		, @strBatchId NVARCHAR(100)
+		, @intCommodityId INT
+
+	DECLARE @tblResult  TABLE (
+		Result nvarchar(max)
+	)
 	
-	SELECT TOP 1 @intMatchFuturesPSHeaderId = intMatchFuturesPSHeaderId
+	SELECT TOP 1 
+		@intMatchFuturesPSHeaderId = intMatchFuturesPSHeaderId
+		,@intCommodityId = intCommodityId
 	FROM tblRKMatchFuturesPSHeader WHERE intMatchNo = @intMatchNo
 	
 	SELECT @dblGrossPL = SUM(dblGrossPL)
@@ -62,6 +69,155 @@ BEGIN TRY
 	SELECT @strCurrency = strCurrency
 	FROM tblSMCurrency
 	WHERE intCurrencyID = @intCurrencyId
+
+	--GL Account Validation
+
+	
+	SELECT * INTO #tmpPostRecap
+	FROM tblRKMatchDerivativesPostRecap 
+	WHERE intTransactionId = @intMatchFuturesPSHeaderId
+
+	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpPostRecap)
+	BEGIN
+		DECLARE @intMatchDerivativesPostRecapId INT
+				,@intAccountId INT
+
+		SELECT TOP 1 
+			@intMatchDerivativesPostRecapId = intMatchDerivativesPostRecapId
+			,@intAccountId = intAccountId
+		FROM #tmpPostRecap
+
+		DECLARE @intFuturesGainOrLossRealized INT
+				,@intFuturesGainOrLossRealizedOffset INT
+				,@strFuturesGainOrLossRealized NVARCHAR(100)
+				,@strFuturesGainOrLossRealizedOffset NVARCHAR(100)
+				,@strFuturesGainOrLossRealizedDescription NVARCHAR(100)
+				,@strFuturesGainOrLossRealizedOffsetDescription NVARCHAR(100)
+
+		IF (SELECT intPostToGLId FROM tblRKCompanyPreference) = 1
+		BEGIN
+			
+
+			SELECT 
+				@intFuturesGainOrLossRealized =  intFuturesGainOrLossRealizedId
+				,@intFuturesGainOrLossRealizedOffset = intFuturesGainOrLossRealizedOffsetId
+			FROM tblRKCompanyPreference
+
+			IF ISNULL(@intFuturesGainOrLossRealized,0) = 0 
+			BEGIN
+				INSERT INTO @tblResult(Result)
+				VALUES('Futures Gain or Loss Realized cannot be blank. Please set up the default account(s) in Company Configuration Risk Management GL Account tab.')
+			END
+			ELSE
+			BEGIN
+				IF ISNULL(@intAccountId,0) = 0
+				BEGIN
+					SELECT 
+						@strFuturesGainOrLossRealized = strAccountId 
+						,@strFuturesGainOrLossRealizedDescription = strDescription
+					FROM tblGLAccount 
+					WHERE intAccountId = @intFuturesGainOrLossRealized
+
+					UPDATE tblRKMatchDerivativesPostRecap
+					SET intAccountId = @intFuturesGainOrLossRealized
+						,strAccountId = @strFuturesGainOrLossRealized
+						,strAccountDescription = @strFuturesGainOrLossRealizedDescription
+					WHERE dblCredit <> 0 and intMatchDerivativesPostRecapId = @intMatchDerivativesPostRecapId
+				END
+			END
+
+			IF ISNULL(@intFuturesGainOrLossRealizedOffset,0) = 0 
+			BEGIN
+				INSERT INTO @tblResult(Result)
+				VALUES('Futures Gain or Loss Realized Offset cannot be blank. Please set up the default account(s) in Company Configuration Risk Management GL Account tab.')
+			END
+			ELSE
+			BEGIN
+				IF ISNULL(@intAccountId,0) = 0
+				BEGIN
+					SELECT 
+						@strFuturesGainOrLossRealizedOffset = strAccountId 
+						,@strFuturesGainOrLossRealizedOffsetDescription = strDescription
+					FROM tblGLAccount 
+					WHERE intAccountId = @intFuturesGainOrLossRealizedOffset
+
+					UPDATE tblRKMatchDerivativesPostRecap
+					SET intAccountId = @intFuturesGainOrLossRealizedOffset
+						,strAccountId = @strFuturesGainOrLossRealizedOffset
+						,strAccountDescription = @strFuturesGainOrLossRealizedOffsetDescription
+					WHERE dblDebit <> 0 and intMatchDerivativesPostRecapId = @intMatchDerivativesPostRecapId
+				END
+			END
+		END
+		ELSE
+		BEGIN
+
+			SELECT @intFuturesGainOrLossRealized =  dbo.fnGetCommodityGLAccountM2M(DEFAULT,@intCommodityId,'Futures Gain or Loss Realized')
+			SELECT @intFuturesGainOrLossRealizedOffset =  dbo.fnGetCommodityGLAccountM2M(DEFAULT,@intCommodityId,'Futures Gain or Loss Realized Offset')
+
+			IF ISNULL(@intFuturesGainOrLossRealized,0) = 0 
+			BEGIN
+				INSERT INTO @tblResult(Result)
+				VALUES('Futures Gain or Loss Realized cannot be blank. Please set up the default account(s) in Commodity GL Accounts M2M tab.')
+			END
+			ELSE
+			BEGIN
+				IF ISNULL(@intAccountId,0) = 0
+				BEGIN
+					SELECT 
+						@strFuturesGainOrLossRealized = strAccountId 
+						,@strFuturesGainOrLossRealizedDescription = strDescription
+					FROM tblGLAccount 
+					WHERE intAccountId = @intFuturesGainOrLossRealized
+
+					UPDATE tblRKMatchDerivativesPostRecap
+					SET intAccountId = @intFuturesGainOrLossRealized
+						,strAccountId = @strFuturesGainOrLossRealized
+						,strAccountDescription = @strFuturesGainOrLossRealizedDescription
+					WHERE dblCredit <> 0 and intMatchDerivativesPostRecapId = @intMatchDerivativesPostRecapId
+				END
+			END
+
+			IF ISNULL(@intFuturesGainOrLossRealizedOffset,0) = 0 
+			BEGIN
+				INSERT INTO @tblResult(Result)
+				VALUES('Futures Gain or Loss Realized Offset cannot be blank. Please set up the default account(s) in Commodity GL Accounts M2M tab.')
+			END
+			ELSE
+			BEGIN
+				IF ISNULL(@intAccountId,0) = 0
+				BEGIN
+					SELECT 
+						@strFuturesGainOrLossRealizedOffset = strAccountId 
+						,@strFuturesGainOrLossRealizedOffsetDescription = strDescription
+					FROM tblGLAccount 
+					WHERE intAccountId = @intFuturesGainOrLossRealizedOffset
+
+					UPDATE tblRKMatchDerivativesPostRecap
+					SET intAccountId = @intFuturesGainOrLossRealizedOffset
+						,strAccountId = @strFuturesGainOrLossRealizedOffset
+						,strAccountDescription = @strFuturesGainOrLossRealizedOffsetDescription
+					WHERE dblDebit <> 0 and intMatchDerivativesPostRecapId = @intMatchDerivativesPostRecapId
+				END
+			END
+
+		END
+
+		Delete_Routine:
+			DELETE FROM #tmpPostRecap WHERE intMatchDerivativesPostRecapId = @intMatchDerivativesPostRecapId
+	END
+
+
+
+
+	IF (SELECT COUNT(Result) FROM @tblResult) > 0  
+	BEGIN
+		SELECT DISTINCT * from @tblResult
+
+		GOTO Exit_Routine
+	END
+
+
 
 	BEGIN TRANSACTION
 
@@ -117,12 +273,6 @@ BEGIN TRY
 		, 1
 	FROM tblRKMatchFuturesPSHeader h
 	WHERE intMatchNo = @intMatchNo
-
-	--GL Account Validation
-	IF ((SELECT COUNT(intAccountId) FROM tblRKMatchDerivativesPostRecap WHERE intTransactionId = @intMatchFuturesPSHeaderId AND intAccountId IS NULL) > 0)
-	BEGIN
-		RAISERROR('GL Account is not setup.',16,1)
-	END
 
 
 	IF (@strBatchId IS NULL)
@@ -212,3 +362,5 @@ BEGIN CATCH
 		RAISERROR (@ErrMsg, 16, 1, 'WITH NOWAIT')
 	END
 END CATCH
+
+Exit_Routine:
