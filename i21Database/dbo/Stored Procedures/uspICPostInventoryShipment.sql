@@ -69,9 +69,11 @@ BEGIN
 			,@intFobPointId AS INT 
 			,@intLocationId AS INT
 			,@intSourceInventoryShipmentId AS INT
+			,@strShipmentNumber AS NVARCHAR(50)
   
 	SELECT TOP 1   
 			@intTransactionId = s.intInventoryShipmentId
+			,@strShipmentNumber = s.strShipmentNumber 
 			,@ysnTransactionPostedFlag = s.ysnPosted  
 			,@dtmDate = s.dtmShipDate
 			,@intCreatedEntityId = s.intEntityId  
@@ -792,13 +794,13 @@ BEGIN
 					,t.[dblSalesPrice] 
 					,t.[intCurrencyId] 
 					,t.[dblExchangeRate] 
-					,t.[intTransactionId] 
-					,t.[intTransactionDetailId] 
-					,t.[strTransactionId] 
+					,[intTransactionId] = newSi.intInventoryShipmentId
+					,[intTransactionDetailId] = newSi.intSourceInventoryShipmentItemId
+					,[strTransactionId] = @strShipmentNumber
 					,t.[intTransactionTypeId] 
 					,t.[intLotId] 
-					,t.[intTransactionId] 
-					,t.[strTransactionId] 
+					,t.[intTransactionId]
+					,t.[strTransactionId]
 					,t.[intTransactionDetailId] 
 					,[intFobPointId] = @intFobPointId
 					,[intInTransitSourceLocationId] = t.intItemLocationId
@@ -809,12 +811,15 @@ BEGIN
 					tblICInventoryShipment s INNER JOIN tblICInventoryTransaction t
 						ON s.strShipmentNumber = t.strTransactionId
 						AND s.intInventoryShipmentId = t.intTransactionId
+					INNER JOIN tblICInventoryShipmentItem newSi
+						ON newSi.intSourceInventoryShipmentItemId = t.intTransactionDetailId
+						AND newSi.intItemId = t.intItemId 
+						AND newSi.intInventoryShipmentId = @intTransactionId
 				WHERE
 					s.intInventoryShipmentId = @intSourceInventoryShipmentId
 					AND t.ysnIsUnposted = 0
 					AND t.intInTransitSourceLocationId IS NOT NULL 
 			END
-
 
 			IF EXISTS (SELECT TOP 1 1 FROM @ItemsForInTransitCosting)
 			BEGIN 
