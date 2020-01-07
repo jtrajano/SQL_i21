@@ -23,7 +23,7 @@ BEGIN TRY
 	JOIN	tblLGLoadDetail		LD	ON	LD.intLoadId			=	LO.intLoadId
 	JOIN	tblCTContractDetail	CD	ON	CD.intContractDetailId	=	ISNULL(LD.intSContractDetailId,LD.intPContractDetailId)
 	WHERE	intTicketId IS NULL 
-	AND		LO.intShipmentStatus NOT IN (4, 10)
+	AND		LO.intShipmentStatus IN (1, 7)
 	AND		LO.intShipmentType <> 2
 	AND		CD.intContractHeaderId	=	@intContractHeaderId
 	
