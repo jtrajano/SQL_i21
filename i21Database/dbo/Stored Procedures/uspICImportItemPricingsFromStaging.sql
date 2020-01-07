@@ -1,30 +1,53 @@
 CREATE PROCEDURE uspICImportItemPricingsFromStaging @strIdentifier NVARCHAR(100)
 AS
 
+DELETE FROM tblICImportStagingItemPricing WHERE strImportIdentifier <> @strIdentifier
+
 ;WITH cte AS
 (
    SELECT *, ROW_NUMBER() OVER(PARTITION BY strItemNo, strLocation ORDER BY strItemNo, strLocation) AS RowNumber
    FROM tblICImportStagingItemPricing
+   WHERE strImportIdentifier = @strIdentifier
 )
 DELETE FROM cte WHERE RowNumber > 1;
 
-INSERT INTO tblICItemPricing(
-	  intItemId
-	, intItemLocationId
-	, dblAmountPercent
-	, dblSalePrice
-	, dblMSRPPrice
-	, strPricingMethod
-	, dblLastCost
-	, dblStandardCost
-	, dblAverageCost
-	, dblDefaultGrossPrice
-	, dtmDateCreated
-	, intCreatedByUserId
+CREATE TABLE #tmp (
+	  intId INT IDENTITY(1, 1) PRIMARY KEY
+	, intItemId INT NULL
+	, intItemLocationId INT NULL
+	, intCompanyLocationId INT NULL
+	, dblAmountPercent NUMERIC(38, 20) NULL
+	, dblSalePrice NUMERIC(38, 20) NULL
+	, dblMSRPPrice NUMERIC(38, 20) NULL
+	, strPricingMethod NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
+	, dblLastCost NUMERIC(38, 20) NULL
+	, dblStandardCost NUMERIC(38, 20) NULL
+	, dblAverageCost NUMERIC(38, 20) NULL
+	, dblDefaultGrossPrice NUMERIC(38, 20) NULL
+	, dtmDateCreated DATETIME NULL
+	, intCreatedByUserId INT NULL
+)
+
+INSERT INTO #tmp
+(
+	  intItemId				
+	, intItemLocationId		
+	, intCompanyLocationId
+	, dblAmountPercent		
+	, dblSalePrice			
+	, dblMSRPPrice			
+	, strPricingMethod		
+	, dblLastCost			
+	, dblStandardCost		
+	, dblAverageCost		
+	, dblDefaultGrossPrice	
+	, dtmDateCreated		
+	, intCreatedByUserId	
 )
 SELECT
 	  intItemId				= i.intItemId
 	, intItemLocationId		= il.intItemLocationId
+	, intCompanyLocationId	= c.intCompanyLocationId
 	, dblAmountPercent		= s.dblAmountPercent
 	, dblSalePrice			= s.dblRetailPrice
 	, dblMSRPPrice			= s.dblMSRP		
@@ -41,17 +64,99 @@ FROM tblICImportStagingItemPricing s
 	INNER JOIN tblICItemLocation il ON il.intLocationId = c.intCompanyLocationId
 		AND il.intItemId = i.intItemId
 WHERE s.strImportIdentifier = @strIdentifier
-	AND NOT EXISTS(
-		SELECT TOP 1 1
-		FROM tblICItemPricing
-		WHERE intItemId = i.intItemId
-			AND intLocationId = c.intCompanyLocationId
-	)
 
+CREATE TABLE #output (
+	  intItemIdDeleted INT NULL
+	, strAction NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
+	, intItemIdInserted INT NULL)
+
+;MERGE INTO tblICItemPricing AS target
+USING
+(
+	SELECT
+	  intItemId				
+	, intItemLocationId	
+	, intCompanyLocationId
+	, dblAmountPercent		
+	, dblSalePrice			
+	, dblMSRPPrice			
+	, strPricingMethod		
+	, dblLastCost			
+	, dblStandardCost		
+	, dblAverageCost		
+	, dblDefaultGrossPrice	
+	, dtmDateCreated		
+	, intCreatedByUserId	
+	FROM #tmp s
+) AS source ON target.intItemId = source.intItemId
+	AND target.intItemLocationId = source.intItemLocationId
+WHEN MATCHED THEN
+	UPDATE SET
+		  intItemId				= source.intItemId
+		, intItemLocationId		= source.intItemLocationId
+		, dblAmountPercent		= source.dblAmountPercent
+		, dblSalePrice			= source.dblSalePrice
+		, dblMSRPPrice			= source.dblMSRPPrice
+		, strPricingMethod		= source.strPricingMethod
+		, dblLastCost			= source.dblLastCost
+		, dblStandardCost		= source.dblStandardCost
+		, dblAverageCost		= source.dblAverageCost
+		, dblDefaultGrossPrice	= source.dblDefaultGrossPrice
+		, dtmDateModified = GETUTCDATE()
+		, intModifiedByUserId = source.intCreatedByUserId
+WHEN NOT MATCHED THEN
+	INSERT
+	(
+		  intItemId				
+		, intItemLocationId		
+		, dblAmountPercent		
+		, dblSalePrice			
+		, dblMSRPPrice			
+		, strPricingMethod		
+		, dblLastCost			
+		, dblStandardCost		
+		, dblAverageCost		
+		, dblDefaultGrossPrice	
+		, dtmDateCreated		
+		, intCreatedByUserId	
+	)
+	VALUES
+	(
+		intItemId				
+		, intItemLocationId		
+		, dblAmountPercent		
+		, dblSalePrice			
+		, dblMSRPPrice			
+		, strPricingMethod		
+		, dblLastCost			
+		, dblStandardCost		
+		, dblAverageCost		
+		, dblDefaultGrossPrice	
+		, dtmDateCreated		
+		, intCreatedByUserId	
+	)
+	OUTPUT deleted.intItemId, $action, inserted.intItemId INTO #output;
 
 UPDATE l
-SET l.intRowsImported = @@ROWCOUNT
+SET l.intRowsImported = (SELECT COUNT(*) FROM #output WHERE strAction = 'INSERT')
+	, l.intRowsUpdated = (SELECT COUNT(*) FROM #output WHERE strAction = 'UPDATE')
 FROM tblICImportLog l
 WHERE l.strUniqueId = @strIdentifier
+
+DECLARE @TotalImported INT
+DECLARE @LogId INT
+
+SELECT @LogId = intImportLogId, @TotalImported = ISNULL(intRowsImported, 0) + ISNULL(intRowsUpdated, 0) 
+FROM tblICImportLog 
+WHERE strUniqueId = @strIdentifier
+
+IF @TotalImported = 0 AND @LogId IS NOT NULL
+BEGIN
+	INSERT INTO tblICImportLogDetail(intImportLogId, intRecordNo, strAction, strValue, strMessage, strStatus, strType, intConcurrencyId)
+	SELECT @LogId, 0, 'Import finished.', ' ', 'Nothing was imported', 'Success', 'Warning', 1
+END
+
+DROP TABLE #tmp
+DROP TABLE #output
 
 DELETE FROM [tblICImportStagingItemPricing] WHERE strImportIdentifier = @strIdentifier
