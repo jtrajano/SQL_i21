@@ -157,7 +157,7 @@ SELECT DISTINCT
 	,[strPurchaseOrderNumber]	=	PurchaseOrder.strPurchaseOrderNumber
 	,[intPurchaseDetailId]		=	PurchaseOrder.intPurchaseDetailId
 	,[intItemId]				=	B.intItemId
-	,[strMiscDescription]		=	C.strDescription
+	,[strMiscDescription]		=	CASE WHEN A.strReceiptType IN ('Purchase Order') THEN PurchaseOrder.strDescription ELSE C.strDescription END
 	,[strItemNo]				=	C.strItemNo
 	,[strDescription]			=	C.strDescription
 	,[intPurchaseTaxGroupId]	=	B.intTaxGroupId
@@ -417,6 +417,7 @@ FROM tblICInventoryReceipt A INNER JOIN tblICInventoryReceiptItem B
 		SELECT 
 			po.strPurchaseOrderNumber
 			,po.intPurchaseDetailId	 
+			,po.strDescription
 		FROM 
 			vyuPODetails po 
 		WHERE 
