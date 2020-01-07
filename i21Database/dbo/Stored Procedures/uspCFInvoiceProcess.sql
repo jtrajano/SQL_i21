@@ -916,7 +916,8 @@ BEGIN TRY
 	
 	UPDATE tblCFTransaction 
 	SET ysnInvoiced = 1
-	WHERE intTransactionId IN (SELECT intTransactionId FROM tblCFInvoiceStagingTable WHERE strUserId = @username  AND ISNULL(ysnExpensed,0) = 0 AND LOWER(strStatementType) = @statementType) 
+	-- WHERE intTransactionId IN (SELECT intTransactionId FROM tblCFInvoiceStagingTable WHERE strUserId = @username  AND ISNULL(ysnExpensed,0) = 0 AND LOWER(strStatementType) = @statementType) 
+	WHERE intTransactionId IN (SELECT intTransactionId FROM tblCFInvoiceStagingTable WHERE strUserId = @username AND LOWER(strStatementType) = @statementType) -- CF-2459
 
 
 	----------DROP TEMPORARY TABLE----------
