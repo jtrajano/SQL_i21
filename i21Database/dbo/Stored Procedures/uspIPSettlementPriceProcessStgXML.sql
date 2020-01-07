@@ -166,6 +166,7 @@ BEGIN TRY
 			BEGIN
 				SELECT @intNewFutureSettlementPriceId = @intFutureSettlementPriceRefId
 					,@dtmPriceDate = @dtmPriceDate
+					,@strFutMarketName = @strFutMarketName
 
 				DELETE
 				FROM tblRKFuturesSettlementPrice
@@ -222,7 +223,7 @@ BEGIN TRY
 
 			INSERT INTO @tblRKFuturesSettlementPriceDetail (intFutSettlementPriceMonthId)
 			SELECT intFutSettlementPriceMonthId
-			FROM OPENXML(@idoc, 'vyuIPGetFutSettlementPriceMarketMaps/vyuIPGetFutSettlementPriceMarketMaps', 2) WITH (intFutSettlementPriceMonthId INT)
+			FROM OPENXML(@idoc, 'vyuIPGetFutSettlementPriceMarketMaps/vyuIPGetFutSettlementPriceMarketMap', 2) WITH (intFutSettlementPriceMonthId INT)
 
 			SELECT @intFutSettlementPriceMonthId = MIN(intFutSettlementPriceMonthId)
 			FROM @tblRKFuturesSettlementPriceDetail
@@ -338,6 +339,132 @@ BEGIN TRY
 					FROM @tblRKFuturesSettlementPriceDetail
 					)
 
+			EXEC sp_xml_removedocument @idoc
+
+			------------------------------------Option Settlement Price--------------------------------------------
+			EXEC sp_xml_preparedocument @idoc OUTPUT
+				,@strOptSettlementPriceXML
+
+			DECLARE @tblRKOptionsSettlementPriceDetail TABLE (intOptSettlementPriceMonthId INT)
+
+			INSERT INTO @tblRKOptionsSettlementPriceDetail (intOptSettlementPriceMonthId)
+			SELECT intOptSettlementPriceMonthId
+			FROM OPENXML(@idoc, 'vyuIPGetOptSettlementPriceMarketMaps/vyuIPGetOptSettlementPriceMarketMap', 2) WITH (intOptSettlementPriceMonthId INT)
+
+			SELECT @intOptSettlementPriceMonthId = MIN(intOptSettlementPriceMonthId)
+			FROM @tblRKOptionsSettlementPriceDetail
+
+			WHILE @intOptSettlementPriceMonthId IS NOT NULL
+			BEGIN
+				SELECT @strOptionMonth = NULL
+
+				SELECT @strOptionMonth = strOptionMonth
+				FROM OPENXML(@idoc, 'vyuIPGetOptSettlementPriceMarketMaps/vyuIPGetOptSettlementPriceMarketMap', 2) WITH (
+						strOptionMonth NVARCHAR(20) Collate Latin1_General_CI_AS
+						,intOptSettlementPriceMonthId INT
+						) SD
+				WHERE intOptSettlementPriceMonthId = @intOptSettlementPriceMonthId
+
+				IF @strOptionMonth IS NOT NULL
+					AND NOT EXISTS (
+						SELECT 1
+						FROM tblRKOptionsMonth t
+						WHERE t.strOptionMonth = @strOptionMonth
+						)
+				BEGIN
+					SELECT @strErrorMessage = 'Options Month ' + @strOptionMonth + ' is not available.'
+
+					RAISERROR (
+							@strErrorMessage
+							,16
+							,1
+							)
+				END
+
+				SELECT @intOptionMonthId = NULL
+
+				SELECT @intOptionMonthId = t.intOptionMonthId
+				FROM tblRKOptionsMonth t
+				WHERE t.strOptionMonth = @strOptionMonth
+					AND t.intFutureMarketId = @intFutureMarketId
+
+				IF NOT EXISTS (
+						SELECT 1
+						FROM tblRKOptSettlementPriceMarketMap
+						WHERE intOptSettlementPriceMonthRefId = @intOptSettlementPriceMonthId
+						)
+				BEGIN
+					INSERT INTO tblRKOptSettlementPriceMarketMap (
+						intConcurrencyId
+						,intFutureSettlementPriceId
+						,intOptionMonthId
+						,dblStrike
+						,intTypeId
+						,dblSettle
+						,dblDelta
+						,strComments
+						,ysnImported
+						,intOptSettlementPriceMonthRefId
+						)
+					SELECT 1
+						,@intNewFutureSettlementPriceId
+						,@intOptionMonthId
+						,dblStrike
+						,intTypeId
+						,dblSettle
+						,dblDelta
+						,strComments
+						,ysnImported
+						,@intOptSettlementPriceMonthId
+					FROM OPENXML(@idoc, 'vyuIPGetOptSettlementPriceMarketMaps/vyuIPGetOptSettlementPriceMarketMap', 2) WITH (
+							dblStrike NUMERIC(18, 6)
+							,intTypeId INT
+							,dblSettle NUMERIC(18, 6)
+							,dblDelta NUMERIC(18, 6)
+							,strComments NVARCHAR(MAX)
+							,ysnImported BIT
+							,intOptSettlementPriceMonthId INT
+							) x
+					WHERE x.intOptSettlementPriceMonthId = @intOptSettlementPriceMonthId
+				END
+				ELSE
+				BEGIN
+					UPDATE tblRKOptSettlementPriceMarketMap
+					SET intConcurrencyId = intConcurrencyId + 1
+						,intOptionMonthId = @intOptionMonthId
+						,dblStrike = x.dblStrike
+						,intTypeId = x.intTypeId
+						,dblSettle = x.dblSettle
+						,dblDelta = x.dblDelta
+						,strComments = x.strComments
+						,ysnImported = x.ysnImported
+					FROM OPENXML(@idoc, 'vyuIPGetOptSettlementPriceMarketMaps/vyuIPGetOptSettlementPriceMarketMap', 2) WITH (
+							dblStrike NUMERIC(18, 6)
+							,intTypeId INT
+							,dblSettle NUMERIC(18, 6)
+							,dblDelta NUMERIC(18, 6)
+							,strComments NVARCHAR(MAX)
+							,ysnImported BIT
+							,intOptSettlementPriceMonthId INT
+							) x
+					JOIN tblRKOptSettlementPriceMarketMap D ON D.intOptSettlementPriceMonthRefId = x.intOptSettlementPriceMonthId
+						AND D.intFutureSettlementPriceId = @intNewFutureSettlementPriceId
+					WHERE x.intOptSettlementPriceMonthId = @intOptSettlementPriceMonthId
+				END
+
+				SELECT @intOptSettlementPriceMonthId = MIN(intOptSettlementPriceMonthId)
+				FROM @tblRKOptionsSettlementPriceDetail
+				WHERE intOptSettlementPriceMonthId > @intOptSettlementPriceMonthId
+			END
+
+			DELETE
+			FROM tblRKOptSettlementPriceMarketMap
+			WHERE intFutureSettlementPriceId = @intNewFutureSettlementPriceId
+				AND intOptSettlementPriceMonthRefId NOT IN (
+					SELECT intOptSettlementPriceMonthId
+					FROM @tblRKOptionsSettlementPriceDetail
+					)
+
 			ext:
 
 			EXEC sp_xml_removedocument @idoc
@@ -351,10 +478,12 @@ BEGIN TRY
 			IF (@intNewFutureSettlementPriceId > 0)
 			BEGIN
 				DECLARE @StrDescription AS NVARCHAR(MAX)
+					,@strToValue NVARCHAR(255)
 
 				IF @strRowState = 'Added'
 				BEGIN
 					SELECT @StrDescription = 'Created '
+						,@strToValue = @strFutMarketName + ' - ' + CONVERT(NVARCHAR, @dtmPriceDate)
 
 					EXEC uspSMAuditLog @keyValue = @intNewFutureSettlementPriceId
 						,@screenName = 'RiskManagement.view.FuturesOptionsSettlementPrices'
@@ -363,11 +492,12 @@ BEGIN TRY
 						,@actionIcon = 'small-new-plus'
 						,@changeDescription = @StrDescription
 						,@fromValue = ''
-						,@toValue = @dtmPriceDate
+						,@toValue = @strToValue
 				END
 				ELSE IF @strRowState = 'Modified'
 				BEGIN
 					SELECT @StrDescription = 'Updated '
+						,@strToValue = @strFutMarketName + ' - ' + CONVERT(NVARCHAR, @dtmPriceDate)
 
 					EXEC uspSMAuditLog @keyValue = @intNewFutureSettlementPriceId
 						,@screenName = 'RiskManagement.view.FuturesOptionsSettlementPrices'
@@ -376,7 +506,7 @@ BEGIN TRY
 						,@actionIcon = 'small-tree-modified'
 						,@changeDescription = @StrDescription
 						,@fromValue = ''
-						,@toValue = @dtmPriceDate
+						,@toValue = @strToValue
 				END
 			END
 
