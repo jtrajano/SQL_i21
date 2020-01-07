@@ -891,6 +891,11 @@ BEGIN TRY
 								ELSE
 								BEGIN
 
+									IF OBJECT_ID (N'tempdb.dbo.#invoiceIdTable') IS NOT NULL
+									BEGIN 
+										DROP TABLE #invoiceIdTable
+									END
+
 									SELECT DISTINCT
 										ARID.intInvoiceId
 									INTO #invoiceIdTable
