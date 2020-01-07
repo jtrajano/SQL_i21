@@ -23,7 +23,7 @@ GO
 	--IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Contract vs Market Differential Analysis' AND strModuleName = 'Logistics' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Contract vs Market Differential Analysis' AND strModuleName = 'Logistics') AND strCommand = N'Logistics.view.ContractVsMarketDifferential') 
 	--IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Blend Demand' AND strModuleName = 'Manufacturing' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Blend Demand' AND strModuleName = 'Contract Management') AND strCommand = N'ContractManagement.view.ItemContract?showSearch=true') 
 	--IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Comment Maintenance' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Comment Maintenance' AND strModuleName = 'Accounts Receivable') AND strCommand = N'AccountsReceivable.view.StatementFooterMessage') 
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Dashboard.view.Schedule' AND strModuleName = 'Dashboard' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'Dashboard') AND strCommand = N'Dashboard.view.Schedule?showSearch=true') 
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Purchase-Wise P&L Report by Allocation' AND strModuleName = 'Logistics' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Report' AND strModuleName = 'Logistics') AND strCommand = N'Reporting.view.ReportManager?group=Logistics&report=PurchaseWisePnL&direct=true') 
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 		
@@ -3951,9 +3951,9 @@ ELSE
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Purchase-Wise P&L Report by Allocation' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsReportParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Purchase-Wise P&L Report by Allocation', N'Logistics', @LogisticsReportParentMenuId, N'Purchase-Wise P&L Report by Allocation', N'Report', N'Screen', N'Reporting.view.ReportManager?group=Logistics&report=PurchaseWisePnL&direct=true&showCriteria=true', N'small-menu-report', 0, 0, 0, 1, 4, 1)
+	VALUES (N'Purchase-Wise P&L Report by Allocation', N'Logistics', @LogisticsReportParentMenuId, N'Purchase-Wise P&L Report by Allocation', N'Report', N'Screen', N'Reporting.view.ReportManager?group=Logistics&report=PurchaseWisePnL&direct=true', N'small-menu-report', 0, 0, 0, 1, 4, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET intSort = 4, strCommand = N'Reporting.view.ReportManager?group=Logistics&report=PurchaseWisePnL&direct=true&showCriteria=true' WHERE strMenuName = 'Purchase-Wise P&L Report by Allocation' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsReportParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 4, strCommand = N'Reporting.view.ReportManager?group=Logistics&report=PurchaseWisePnL&direct=true' WHERE strMenuName = 'Purchase-Wise P&L Report by Allocation' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsReportParentMenuId
 
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Unallocated' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsReportParentMenuId)

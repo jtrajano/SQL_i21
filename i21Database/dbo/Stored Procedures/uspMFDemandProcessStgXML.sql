@@ -53,6 +53,7 @@ BEGIN TRY
 		,@intDemandScreenId INT
 		,@intNewInvPlngReportMasterID INT
 		,@strItemSupplyTargetXML NVARCHAR(MAX)
+		,@dtmPostDate datetime
 
 	SELECT @intDemandStageId = MIN(intDemandStageId)
 	FROM tblMFDemandStage
@@ -69,6 +70,7 @@ BEGIN TRY
 			,@intCompanyId = NULL
 			,@strItemSupplyTargetXML = NULL
 			,@strErrorMessage = ''
+			,@dtmPostDate=NULL
 
 		SELECT @intInvPlngReportMasterID = intInvPlngReportMasterID
 			,@strReportMasterXML = strReportMasterXML
@@ -87,13 +89,38 @@ BEGIN TRY
 			IF @intTransactionCount = 0
 				BEGIN TRANSACTION
 
+			IF EXISTS (
+					SELECT *
+					FROM tblCTInvPlngReportMaster RM
+					JOIN tblMFInvPlngSummaryBatch SB on SB.intInvPlngReportMasterID=RM.intInvPlngReportMasterID
+					WHERE RM.intInvPlngReportMasterRefID = @intInvPlngReportMasterID
+					)
+			BEGIN
+				IF @strErrorMessage <> ''
+				BEGIN
+					SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Demand summary exists.'
+				END
+				ELSE
+				BEGIN
+					SELECT @strErrorMessage = 'Demand summary exists.'
+				END
+			END
+			IF @strErrorMessage <> ''
+			BEGIN
+				RAISERROR (
+						@strErrorMessage
+						,16
+						,1
+						)
+			END
+
 			IF @strRowState = 'Delete'
 			BEGIN
 				DELETE
 				FROM tblCTInvPlngReportMaster
 				WHERE intInvPlngReportMasterRefID = @intInvPlngReportMasterID
 
-				GOTO x
+				GOTO ext
 			END
 
 			------------------Header------------------------------------------------------
@@ -121,6 +148,7 @@ BEGIN TRY
 				,@dtmLastModified = dtmLastModified
 				,@strCreatedBy = strCreatedBy
 				,@strModifiedBy = strModifiedBy
+				,@dtmPostDate=dtmPostDate
 			FROM OPENXML(@idoc, 'vyuMFInvPlngReportMasters/vyuMFInvPlngReportMaster', 2) WITH (
 					intInvPlngReportMasterID INT
 					,strInvPlngReportName NVARCHAR(50) Collate Latin1_General_CI_AS
@@ -143,6 +171,7 @@ BEGIN TRY
 					,dtmLastModified DATETIME
 					,strCreatedBy NVARCHAR(50) Collate Latin1_General_CI_AS
 					,strModifiedBy NVARCHAR(50) Collate Latin1_General_CI_AS
+					,dtmPostDate DATETIME
 					) x
 
 			IF @strReportName IS NOT NULL
@@ -247,6 +276,8 @@ BEGIN TRY
 				END
 			END
 
+			
+
 			IF @strErrorMessage <> ''
 			BEGIN
 				RAISERROR (
@@ -348,6 +379,7 @@ BEGIN TRY
 				,intLastModifiedUserId
 				,dtmLastModified
 				,intInvPlngReportMasterRefID
+				,dtmPostDate
 				)
 			SELECT 1 intConcurrencyId
 				,@strInvPlngReportName
@@ -371,6 +403,7 @@ BEGIN TRY
 				,@intUserId
 				,@dtmLastModified
 				,@intInvPlngReportMasterID
+				,@dtmPostDate
 
 			SELECT @intNewInvPlngReportMasterID = SCOPE_IDENTITY()
 
@@ -649,8 +682,6 @@ BEGIN TRY
 				,strMessage = @ErrMsg
 			WHERE intDemandStageId = @intDemandStageId
 		END CATCH
-
-		x:
 
 		SELECT @intDemandStageId = MIN(intDemandStageId)
 		FROM tblMFDemandStage

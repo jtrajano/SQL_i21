@@ -38,6 +38,7 @@
 	[ysnAllowInvoice] BIT NULL,
 	[intItemContractHeaderId] INT NULL,
 	[intItemContractDetailId] INT NULL,
+	[intSourceInventoryShipmentChargeId] INT NULL, 
     CONSTRAINT [PK_tblICInventoryShipmentCharge] PRIMARY KEY ([intInventoryShipmentChargeId]), 
     CONSTRAINT [FK_tblICInventoryShipmentCharge_tblICItem] FOREIGN KEY ([intChargeId]) REFERENCES [tblICItem]([intItemId]), 
     CONSTRAINT [FK_tblICInventoryShipmentCharge_tblICItemLocation] FOREIGN KEY ([intCostUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]), 

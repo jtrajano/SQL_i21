@@ -58,6 +58,7 @@ Type the overview for the table here.
         [dtmDateModified] DATETIME NULL,
         [intCreatedByUserId] INT NULL,
         [intModifiedByUserId] INT NULL, 
+		[intSourceInventoryReceiptItemLotId] INT NULL,
 		CONSTRAINT [PK_tblICInventoryReceiptItemLot] PRIMARY KEY ([intInventoryReceiptItemLotId]), 
 		CONSTRAINT [FK_tblICInventoryReceiptItemLot_tblICInventoryReceiptItem] FOREIGN KEY ([intInventoryReceiptItemId]) REFERENCES [tblICInventoryReceiptItem]([intInventoryReceiptItemId]) ON DELETE CASCADE, 
 		CONSTRAINT [FK_tblICInventoryReceiptItemLot_tblICLot] FOREIGN KEY ([intLotId]) REFERENCES [tblICLot]([intLotId]), 

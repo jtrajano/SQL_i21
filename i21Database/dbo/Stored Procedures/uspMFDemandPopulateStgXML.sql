@@ -20,14 +20,27 @@ BEGIN TRY
 		,@strItemSupplyTarget NVARCHAR(MAX)
 		,@strInvPlngReportName NVARCHAR(150)
 
+	SELECT @intDemandScreenId = intScreenId
+	FROM tblSMScreen
+	WHERE strNamespace = 'Manufacturing.view.DemandAnalysisView'
+
+	SELECT @intTransactionId = intTransactionId
+	FROM tblSMTransaction
+	WHERE intRecordId = @intInvPlngReportMasterID
+		AND intScreenId = @intDemandScreenId
+
 	IF @strRowState = 'Delete'
 	BEGIN
 		INSERT INTO tblMFDemandStage (
 			intInvPlngReportMasterID
 			,strRowState
+			,intTransactionId
+			,intCompanyId
 			)
 		SELECT intInvPlngReportMasterID = @intInvPlngReportMasterID
 			,strRowState = @strRowState
+			,intTransactionId = @intTransactionId
+			,intCompanyId = @intCompanyId
 
 		RETURN
 	END
@@ -63,7 +76,7 @@ BEGIN TRY
 
 	SELECT @intCompanyId = intCompanyId
 	FROM tblICItem
-	Where IsNUll(intCompanyId,0) >0
+	WHERE IsNUll(intCompanyId, 0) > 0
 
 	SELECT @strHeaderCondition = 'intCompanyId = ' + LTRIM(@intCompanyId)
 
@@ -75,7 +88,7 @@ BEGIN TRY
 
 	SELECT @strBook = strBook
 		,@strSubBook = strSubBook
-		,@strInvPlngReportName=strInvPlngReportName
+		,@strInvPlngReportName = strInvPlngReportName
 	FROM vyuMFInvPlngReportMaster
 	WHERE intInvPlngReportMasterID = @intInvPlngReportMasterID
 
@@ -88,16 +101,7 @@ BEGIN TRY
 
 	SELECT @strAdditionalInfo = @strAdditionalInfo + '</vyuMFGetItemSupplyTargets>'
 
-	SELECT @strItemSupplyTargetXML= Replace(@strItemSupplyTargetXML, '</vyuMFGetItemSupplyTargets>', @strAdditionalInfo)
-
-	SELECT @intDemandScreenId = intScreenId
-	FROM tblSMScreen
-	WHERE strNamespace = 'Manufacturing.view.DemandAnalysisView'
-
-	SELECT @intTransactionId = intTransactionId
-	FROM tblSMTransaction
-	WHERE intRecordId = @intInvPlngReportMasterID
-		AND intScreenId = @intDemandScreenId
+	SELECT @strItemSupplyTargetXML = Replace(@strItemSupplyTargetXML, '</vyuMFGetItemSupplyTargets>', @strAdditionalInfo)
 
 	INSERT INTO tblMFDemandStage (
 		intInvPlngReportMasterID
@@ -111,7 +115,7 @@ BEGIN TRY
 		,strItemSupplyTarget
 		)
 	SELECT intInvPlngReportMasterID = @intInvPlngReportMasterID
-		,strInvPlngReportName=@strInvPlngReportName
+		,strInvPlngReportName = @strInvPlngReportName
 		,strReportMasterXML = @strReportMasterXML
 		,strReportMaterialXML = @strReportMaterialXML
 		,strReportAttributeValueXML = @strReportAttributeValueXML

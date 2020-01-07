@@ -68,6 +68,7 @@ BEGIN
 			,@ysnTransactionPostedFlag AS BIT  
 			,@intFobPointId AS INT 
 			,@intLocationId AS INT
+			,@intSourceInventoryShipmentId AS INT
   
 	SELECT TOP 1   
 			@intTransactionId = s.intInventoryShipmentId
@@ -77,6 +78,7 @@ BEGIN
 			,@intFobPointId = fp.intFobPointId
 			,@intLocationId = s.intShipFromLocationId
 			,@intEntityCustomerId = s.intEntityCustomerId
+			,@intSourceInventoryShipmentId = s.intSourceInventoryShipmentId
 	FROM	dbo.tblICInventoryShipment s LEFT JOIN tblSMFreightTerms ft
 				ON s.intFreightTermId = ft.intFreightTermId
 			LEFT JOIN tblICFobPoint fp
@@ -468,7 +470,11 @@ BEGIN
 		) 
 		SELECT	intItemId					= DetailItem.intItemId
 				,intItemLocationId			= dbo.fnICGetItemLocation(DetailItem.intItemId, Header.intShipFromLocationId)
-				,intItemUOMId				=	CASE	WHEN Lot.intLotId IS NULL THEN 
+				,intItemUOMId				=	CASE	
+														WHEN originalShipment.intInventoryTransactionId IS NOT NULL THEN 
+															originalShipment.intItemUOMId
+				
+														WHEN Lot.intLotId IS NULL THEN 
 															ItemUOM.intItemUOMId
 														WHEN Lot.intWeightUOMId IS NULL THEN 
 															Lot.intItemUOMId
@@ -477,7 +483,10 @@ BEGIN
 			 									END
 
 				,dtmDate					=	dbo.fnRemoveTimeOnDate(Header.dtmShipDate)
-				,dblQty						=	CASE	WHEN  Lot.intLotId IS NULL THEN 
+				,dblQty						=	CASE	
+														WHEN originalShipment.intInventoryTransactionId IS NOT NULL THEN 
+															-originalShipment.dblQty				
+														WHEN  Lot.intLotId IS NULL THEN 
 															-ISNULL(DetailItem.dblQuantity, 0) 
 														WHEN Lot.intWeightUOMId IS NULL THEN 
 															-ISNULL(DetailLot.dblQuantityShipped, 0)
@@ -488,7 +497,10 @@ BEGIN
 															)
 												END
 
-				,dblUOMQty					=	CASE	WHEN  Lot.intLotId IS NULL THEN 
+				,dblUOMQty					=	CASE	
+														WHEN originalShipment.intInventoryTransactionId IS NOT NULL THEN 
+															originalShipment.dblUOMQty
+														WHEN  Lot.intLotId IS NULL THEN 
 															ItemUOM.dblUnitQty
 														WHEN  Lot.intWeightUOMId IS NULL THEN 
 															LotItemUOM.dblUnitQty
@@ -496,20 +508,25 @@ BEGIN
 															LotWeightUOM.dblUnitQty
 												END
 
-				,dblCost					= 0.00 
-				,dblSalesPrice              = 
-											dbo.fnCalculateCostBetweenUOM (
-												ISNULL(DetailItem.intPriceUOMId, ItemUOM.intItemUOMId) 
-												,CASE	WHEN Lot.intLotId IS NULL THEN 
-															ItemUOM.intItemUOMId
-														WHEN Lot.intWeightUOMId IS NULL THEN 
-															Lot.intItemUOMId
-														ELSE
-															Lot.intWeightUOMId
-			 									END
-												,DetailItem.dblUnitPrice
-											)
+				,dblCost					= ISNULL(originalShipment.dblCost, 0)
 
+				,dblSalesPrice              = 
+												CASE	
+													WHEN originalShipment.intInventoryTransactionId IS NOT NULL THEN 
+														originalShipment.dblSalesPrice
+													ELSE
+														dbo.fnCalculateCostBetweenUOM (
+															ISNULL(DetailItem.intPriceUOMId, ItemUOM.intItemUOMId) 
+															,CASE	WHEN Lot.intLotId IS NULL THEN 
+																		ItemUOM.intItemUOMId
+																	WHEN Lot.intWeightUOMId IS NULL THEN 
+																		Lot.intItemUOMId
+																	ELSE
+																		Lot.intWeightUOMId
+			 												END
+															,DetailItem.dblUnitPrice
+														)
+												END
 
 				,intCurrencyId              = @intFunctionalCurrencyId 
 				,dblExchangeRate            = 1
@@ -517,9 +534,29 @@ BEGIN
 				,intTransactionDetailId     = DetailItem.intInventoryShipmentItemId
 				,strTransactionId           = Header.strShipmentNumber
 				,intTransactionTypeId       = @INVENTORY_SHIPMENT_TYPE
-				,intLotId                   = Lot.intLotId
-				,intSubLocationId           = ISNULL(Lot.intSubLocationId, DetailItem.intSubLocationId)
-				,intStorageLocationId       = ISNULL(Lot.intStorageLocationId, DetailItem.intStorageLocationId) 
+				,intLotId                   = 
+												CASE	
+													WHEN originalShipment.intInventoryTransactionId IS NOT NULL THEN 
+														originalShipment.intLotId
+													ELSE
+														Lot.intLotId
+												END
+				,intSubLocationId           = 
+												CASE	
+													WHEN originalShipment.intInventoryTransactionId IS NOT NULL THEN 
+														originalShipment.intSubLocationId
+													ELSE
+														ISNULL(Lot.intSubLocationId, DetailItem.intSubLocationId)
+												END
+
+				,intStorageLocationId       = 
+												CASE	
+													WHEN originalShipment.intInventoryTransactionId IS NOT NULL THEN 
+														originalShipment.intStorageLocationId
+													ELSE
+														ISNULL(Lot.intStorageLocationId, DetailItem.intStorageLocationId) 
+												END
+
 				,intForexRateTypeId			= DetailItem.intForexRateTypeId
 				,dblForexRate				= 1 
 				,intCategoryId				= i.intCategoryId 
@@ -538,6 +575,26 @@ BEGIN
 					ON LotWeightUOM.intItemUOMId = Lot.intWeightUOMId					         
 				LEFT JOIN tblICItem i
 					ON DetailItem.intItemId = i.intItemId
+				OUTER APPLY (
+					SELECT 
+						t.* 
+					FROM
+						tblICInventoryShipment s INNER JOIN tblICInventoryShipmentItem si
+							ON s.intInventoryShipmentId = si.intInventoryShipmentId
+						INNER JOIN tblICInventoryTransaction t
+							ON t.strTransactionId = s.strShipmentNumber
+							AND t.intItemId = si.intItemId
+							AND t.intItemLocationId = dbo.fnICGetItemLocation(si.intItemId, s.intShipFromLocationId)
+							AND t.intTransactionId = s.intInventoryShipmentId
+							AND t.intTransactionDetailId = si.intInventoryShipmentItemId
+							AND t.ysnIsUnposted = 0 
+							AND t.intInTransitSourceLocationId IS NULL 						
+					WHERE						
+						Header.strDataSource = 'Reverse'
+						AND s.intInventoryShipmentId = Header.intSourceInventoryShipmentId
+						AND si.intInventoryShipmentItemId = DetailItem.intSourceInventoryShipmentItemId
+				) originalShipment 
+
 		WHERE   Header.intInventoryShipmentId = @intTransactionId
 				AND ISNULL(DetailItem.intOwnershipType, @OWNERSHIP_TYPE_OWN) = @OWNERSHIP_TYPE_OWN
 				AND i.strType <> 'Bundle' -- Do not include Bundle items in the item costing. Bundle components are the ones included in the item costing. 
@@ -689,11 +746,75 @@ BEGIN
 					,[dblForexRate] = t.dblForexRate
 					,[intSourceEntityId] = t.intSourceEntityId
 			FROM	tblICInventoryTransaction t 
-			WHERE	t.strTransactionId = @strTransactionId
+			WHERE	t.strTransactionId = @strTransactionId 
 					AND t.ysnIsUnposted = 0 
 					AND t.strBatchId = @strBatchId
-					--AND @intFobPointId = @FOB_DESTINATION
 					AND t.dblQty < 0 -- Ensure the Qty is negative. Credit Memo are positive Qtys.  Credit Memo does not ship out but receives stock. 
+
+			IF (@intSourceInventoryShipmentId IS NOT NULL) 
+			BEGIN 
+				-- Do reversal for the In-Transit Costing 
+				INSERT INTO @ItemsForInTransitCosting (
+						[intItemId] 
+						,[intItemLocationId] 
+						,[intItemUOMId] 
+						,[dtmDate] 
+						,[dblQty] 
+						,[dblUOMQty] 
+						,[dblCost] 
+						,[dblValue] 
+						,[dblSalesPrice] 
+						,[intCurrencyId] 
+						,[dblExchangeRate] 
+						,[intTransactionId] 
+						,[intTransactionDetailId] 
+						,[strTransactionId] 
+						,[intTransactionTypeId] 
+						,[intLotId] 
+						,[intSourceTransactionId] 
+						,[strSourceTransactionId] 
+						,[intSourceTransactionDetailId]
+						,[intFobPointId]
+						,[intInTransitSourceLocationId]
+						,[intForexRateTypeId]
+						,[dblForexRate]
+						,intSourceEntityId
+				)
+				SELECT 
+					t.[intItemId] 
+					,t.[intItemLocationId] 
+					,t.[intItemUOMId] 
+					,t.[dtmDate] 
+					,-t.[dblQty] 
+					,t.[dblUOMQty] 
+					,t.[dblCost] 
+					,t.[dblValue] 
+					,t.[dblSalesPrice] 
+					,t.[intCurrencyId] 
+					,t.[dblExchangeRate] 
+					,t.[intTransactionId] 
+					,t.[intTransactionDetailId] 
+					,t.[strTransactionId] 
+					,t.[intTransactionTypeId] 
+					,t.[intLotId] 
+					,t.[intTransactionId] 
+					,t.[strTransactionId] 
+					,t.[intTransactionDetailId] 
+					,[intFobPointId] = @intFobPointId
+					,[intInTransitSourceLocationId] = t.intItemLocationId
+					,[intForexRateTypeId] = t.intForexRateTypeId
+					,[dblForexRate] = t.dblForexRate
+					,[intSourceEntityId] = t.intSourceEntityId
+				FROM 
+					tblICInventoryShipment s INNER JOIN tblICInventoryTransaction t
+						ON s.strShipmentNumber = t.strTransactionId
+						AND s.intInventoryShipmentId = t.intTransactionId
+				WHERE
+					s.intInventoryShipmentId = @intSourceInventoryShipmentId
+					AND t.ysnIsUnposted = 0
+					AND t.intInTransitSourceLocationId IS NOT NULL 
+			END
+
 
 			IF EXISTS (SELECT TOP 1 1 FROM @ItemsForInTransitCosting)
 			BEGIN 

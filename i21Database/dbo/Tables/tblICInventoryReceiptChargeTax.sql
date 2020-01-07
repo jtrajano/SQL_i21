@@ -37,6 +37,7 @@ Type the overview for the table here.
         [dtmDateModified] DATETIME NULL,
         [intCreatedByUserId] INT NULL,
         [intModifiedByUserId] INT NULL,
+		[intSourceInventoryReceiptChargeTaxId] INT NULL, 
 		CONSTRAINT [PK_tblICInventoryReceiptChargeTax] PRIMARY KEY ([intInventoryReceiptChargeTaxId]), 
 		CONSTRAINT [FK_tblICInventoryReceiptChargeTax_tblICInventoryReceiptCharge] FOREIGN KEY ([intInventoryReceiptChargeId]) REFERENCES [tblICInventoryReceiptCharge]([intInventoryReceiptChargeId]) ON DELETE CASCADE, 
 		CONSTRAINT [FK_tblICInventoryReceiptChargeTax_tblSMTaxCode] FOREIGN KEY ([intTaxCodeId]) REFERENCES [tblSMTaxCode]([intTaxCodeId]),

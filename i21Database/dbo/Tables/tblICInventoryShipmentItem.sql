@@ -58,6 +58,7 @@ Type the overview for the table here.
 		[ysnAllowInvoice] BIT NULL,
 		[intItemContractHeaderId] INT NULL,
 		[intItemContractDetailId] INT NULL,
+		[intSourceInventoryShipmentItemId] INT NULL,
 		CONSTRAINT [PK_tblICInventoryShipmentItem] PRIMARY KEY ([intInventoryShipmentItemId]), 
 		CONSTRAINT [FK_tblICInventoryShipmentItem_tblICInventoryShipment] FOREIGN KEY ([intInventoryShipmentId]) REFERENCES [tblICInventoryShipment]([intInventoryShipmentId]) ON DELETE CASCADE, 
 		CONSTRAINT [FK_tblICInventoryShipmentItem_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
