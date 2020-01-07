@@ -23,6 +23,7 @@
 	[ysnImpactForProvisional]		BIT	NOT NULL CONSTRAINT [DF_tblARCompanyPreference_ysnImpactForProvisional] DEFAULT ((0)),
 	[ysnExcludePaymentInFinalInvoice]    BIT    NOT NULL CONSTRAINT [DF_tblARCompanyPreference_ysnExcludePaymentInFinalInvoice] DEFAULT ((0)),
 	[ysnAutoApplyPrepaids]			BIT	NOT NULL CONSTRAINT [DF_tblARCompanyPreference_ysnAutoApplyPrepaids] DEFAULT ((0)),
+	[ysnPromptPastDue]              BIT NOT NULL CONSTRAINT [DF_tblARCompanyPreference_ysnPromptPastDue] DEFAULT ((1)),
 	[ysnChargeonCharge]				BIT	NOT NULL CONSTRAINT [DF_tblARCompanyPreference_ysnChargeonCharge] DEFAULT ((1)),
 	[ysnPrintInvoicePaymentDetail]  BIT	NOT NULL CONSTRAINT [DF_tblARCompanyPreference_ysnPrintInvoicePaymentDetail] DEFAULT ((0)),	
 	[ysnStretchLogo]				BIT	NOT NULL CONSTRAINT [DF_tblARCompanyPreference_ysnStretchLogo] DEFAULT ((0)),
