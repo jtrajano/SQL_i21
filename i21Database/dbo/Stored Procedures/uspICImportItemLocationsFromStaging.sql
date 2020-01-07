@@ -1,7 +1,7 @@
 CREATE PROCEDURE uspICImportItemLocationsFromStaging @strIdentifier NVARCHAR(100)
 AS
 
-DELETE FROM tblICImportStagingUOM WHERE strImportIdentifier <> @strIdentifier
+DELETE FROM tblICImportStagingItemLocation WHERE strImportIdentifier <> @strIdentifier
 
 ;WITH cte AS
 (
@@ -11,8 +11,65 @@ DELETE FROM tblICImportStagingUOM WHERE strImportIdentifier <> @strIdentifier
 )
 DELETE FROM cte WHERE RowNumber > 1;
 
+CREATE TABLE #tmp (
+	  intId INT IDENTITY(1, 1) PRIMARY KEY
+	, intItemId INT NULL
+	, intLocationId INT NULL
+	, intVendorId INT NULL
+	, intSubLocationId INT NULL
+	, intStorageLocationId INT NULL
+	, strDescription NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
+	, intFamilyId INT NULL
+	, intClassId INT NULL
+	, intProductCodeId INT NULL
+	, strPassportFuelId1 NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
+	, strPassportFuelId2 NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
+	, strPassportFuelId3 NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
+	, ysnTaxFlag1 BIT NULL
+	, ysnTaxFlag2 BIT NULL
+	, ysnTaxFlag3 BIT NULL
+	, ysnTaxFlag4 BIT NULL
+	, ysnPromotionalItem BIT NULL
+	, ysnStorageUnitRequired BIT NULL
+	, ysnDepositRequired BIT NULL
+	, intBottleDepositNo INT NULL
+	, ysnSaleable BIT NULL
+	, ysnQuantityRequired BIT NULL
+	, ysnScaleItem BIT NULL
+	, ysnFoodStampable BIT NULL
+	, ysnReturnable BIT NULL
+	, ysnPrePriced BIT NULL
+	, ysnOpenPricePLU BIT NULL
+	, ysnLinkedItem BIT NULL
+	, strVendorCategory NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
+	, ysnIdRequiredLiquor BIT NULL
+	, ysnIdRequiredCigarette BIT NULL
+	, intMinimumAge INT NULL
+	, ysnApplyBlueLaw1 BIT NULL
+	, ysnApplyBlueLaw2 BIT NULL
+	, ysnCarWash BIT NULL
+	, intItemTypeSubCode INT NULL
+	, dblReorderPoint NUMERIC(38, 20)
+	, dblMinOrder NUMERIC(38, 20)
+	, dblSuggestedQty NUMERIC(38, 20)
+	, dblLeadTime NUMERIC(38, 20)
+	, strCounted NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
+	, ysnCountedDaily BIT NULL
+	, ysnCountBySINo BIT NULL
+	, strSerialNoBegin NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
+	, strSerialNoEnd NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
+	, ysnAutoCalculateFreight BIT NULL
+	, dblFreightRate NUMERIC(38, 20)
+	, intCostingMethod INT NULL
+	, intAllowNegativeInventory INT NULL
+	, intReceiveUOMId INT NULL
+	, intIssueUOMId INT NULL
+	, intGrossUOMId INT NULL
+	, dtmDateCreated DATETIME NULL
+	, intCreatedByUserId INT NULL
+)
 
-INSERT INTO tblICItemLocation(
+INSERT INTO #tmp (
 	  intItemId
 	, intLocationId
 	, intVendorId
@@ -147,18 +204,267 @@ FROM tblICImportStagingItemLocation s
 	LEFT OUTER JOIN tblICUnitMeasure g ON LOWER(g.strUnitMeasure) = LTRIM(RTRIM(LOWER(s.strGrossNetUOM)))
 	LEFT OUTER JOIN tblICItemUOM gs ON gs.intUnitMeasureId = g.intUnitMeasureId
 WHERE s.strImportIdentifier = @strIdentifier
-	AND NOT EXISTS(
-		SELECT TOP 1 1
-		FROM tblICItemLocation
-		WHERE intItemId = i.intItemId
-			AND intLocationId = c.intCompanyLocationId
-	)
+	
+CREATE TABLE #output (
+	  intItemIdDeleted INT NULL
+	, strAction NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
+	, intItemIdInserted INT NULL)
 
+;MERGE INTO tblICItemLocation AS target
+USING
+(
+	SELECT
+		  intItemId					
+		, intLocationId				
+		, intVendorId				
+		, intSubLocationId			
+		, intStorageLocationId		
+		, strDescription			
+		, intFamilyId				
+		, intClassId				
+		, intProductCodeId			
+		, strPassportFuelId1		
+		, strPassportFuelId2		
+		, strPassportFuelId3		
+		, ysnTaxFlag1				
+		, ysnTaxFlag2				
+		, ysnTaxFlag3				
+		, ysnTaxFlag4				
+		, ysnPromotionalItem		
+		, ysnStorageUnitRequired	
+		, ysnDepositRequired        
+		, intBottleDepositNo        
+		, ysnSaleable               
+		, ysnQuantityRequired       
+		, ysnScaleItem              
+		, ysnFoodStampable          
+		, ysnReturnable             
+		, ysnPrePriced              
+		, ysnOpenPricePLU           
+		, ysnLinkedItem             
+		, strVendorCategory         
+		, ysnIdRequiredLiquor       
+		, ysnIdRequiredCigarette    
+		, intMinimumAge             
+		, ysnApplyBlueLaw1          
+		, ysnApplyBlueLaw2          
+		, ysnCarWash                
+		, intItemTypeSubCode        
+		, dblReorderPoint           
+		, dblMinOrder               
+		, dblSuggestedQty           
+		, dblLeadTime               
+		, strCounted                
+		, ysnCountedDaily           
+		, ysnCountBySINo            
+		, strSerialNoBegin          
+		, strSerialNoEnd            
+		, ysnAutoCalculateFreight   
+		, dblFreightRate            
+		, intCostingMethod          
+		, intAllowNegativeInventory 
+		, intReceiveUOMId			
+		, intIssueUOMId				
+		, intGrossUOMId				
+		, dtmDateCreated			
+		, intCreatedByUserId		
+	FROM #tmp s
+) AS source ON target.intItemId = source.intItemId
+	AND target.intLocationId = source.intLocationId
+WHEN MATCHED THEN
+UPDATE SET
+	  intItemId = source.intItemId
+	, intLocationId = source.intLocationId
+	, intVendorId = source.intVendorId
+	, intSubLocationId = source.intSubLocationId
+	, intStorageLocationId = source.intStorageLocationId
+	, strDescription = source.strDescription
+	, intFamilyId = source.intFamilyId
+	, intClassId = source.intClassId
+	, intProductCodeId = source.intProductCodeId
+	, strPassportFuelId1 = source.strPassportFuelId1
+	, strPassportFuelId2 = source.strPassportFuelId2
+	, strPassportFuelId3 = source.strPassportFuelId3
+	, ysnTaxFlag1 = source.ysnTaxFlag1
+	, ysnTaxFlag2 = source.ysnTaxFlag2
+	, ysnTaxFlag3 = source.ysnTaxFlag3
+	, ysnTaxFlag4 = source.ysnTaxFlag4
+	, ysnPromotionalItem = source.ysnPromotionalItem
+	, ysnStorageUnitRequired = source.ysnStorageUnitRequired
+	, ysnDepositRequired = source.ysnDepositRequired
+	, intBottleDepositNo = source.intBottleDepositNo
+	, ysnSaleable = source.ysnSaleable
+	, ysnQuantityRequired = source.ysnQuantityRequired
+	, ysnScaleItem = source.ysnScaleItem
+	, ysnFoodStampable = source.ysnFoodStampable
+	, ysnReturnable = source.ysnReturnable
+	, ysnPrePriced = source.ysnPrePriced
+	, ysnOpenPricePLU = source.ysnOpenPricePLU
+	, ysnLinkedItem = source.ysnLinkedItem
+	, strVendorCategory = source.strVendorCategory
+	, ysnIdRequiredLiquor = source.ysnIdRequiredLiquor
+	, ysnIdRequiredCigarette = source.ysnIdRequiredCigarette
+	, intMinimumAge = source.intMinimumAge
+	, ysnApplyBlueLaw1 = source.ysnApplyBlueLaw1
+	, ysnApplyBlueLaw2 = source.ysnApplyBlueLaw2
+	, ysnCarWash = source.ysnCarWash
+	, intItemTypeSubCode = source.intItemTypeSubCode
+	, dblReorderPoint = source.dblReorderPoint
+	, dblMinOrder = source.dblMinOrder
+	, dblSuggestedQty = source.dblSuggestedQty
+	, dblLeadTime = source.dblLeadTime
+	, strCounted = source.strCounted
+	, ysnCountedDaily = source.ysnCountedDaily
+	, ysnCountBySINo = source.ysnCountBySINo
+	, strSerialNoBegin = source.strSerialNoBegin
+	, strSerialNoEnd = source.strSerialNoEnd
+	, ysnAutoCalculateFreight = source.ysnAutoCalculateFreight
+	, dblFreightRate = source.dblFreightRate
+	, intCostingMethod = source.intCostingMethod
+	, intAllowNegativeInventory = source.intAllowNegativeInventory
+	, intReceiveUOMId = source.intReceiveUOMId
+	, intIssueUOMId = source.intIssueUOMId
+	, intGrossUOMId = source.intGrossUOMId
+	, dtmDateModified = GETUTCDATE()
+	, intModifiedByUserId = source.intCreatedByUserId
+WHEN NOT MATCHED THEN
+INSERT
+(
+	  intItemId					
+	, intLocationId				
+	, intVendorId				
+	, intSubLocationId			
+	, intStorageLocationId		
+	, strDescription			
+	, intFamilyId				
+	, intClassId				
+	, intProductCodeId			
+	, strPassportFuelId1		
+	, strPassportFuelId2		
+	, strPassportFuelId3		
+	, ysnTaxFlag1				
+	, ysnTaxFlag2				
+	, ysnTaxFlag3				
+	, ysnTaxFlag4				
+	, ysnPromotionalItem		
+	, ysnStorageUnitRequired	
+	, ysnDepositRequired        
+	, intBottleDepositNo        
+	, ysnSaleable               
+	, ysnQuantityRequired       
+	, ysnScaleItem              
+	, ysnFoodStampable          
+	, ysnReturnable             
+	, ysnPrePriced              
+	, ysnOpenPricePLU           
+	, ysnLinkedItem             
+	, strVendorCategory         
+	, ysnIdRequiredLiquor       
+	, ysnIdRequiredCigarette    
+	, intMinimumAge             
+	, ysnApplyBlueLaw1          
+	, ysnApplyBlueLaw2          
+	, ysnCarWash                
+	, intItemTypeSubCode        
+	, dblReorderPoint           
+	, dblMinOrder               
+	, dblSuggestedQty           
+	, dblLeadTime               
+	, strCounted                
+	, ysnCountedDaily           
+	, ysnCountBySINo            
+	, strSerialNoBegin          
+	, strSerialNoEnd            
+	, ysnAutoCalculateFreight   
+	, dblFreightRate            
+	, intCostingMethod          
+	, intAllowNegativeInventory 
+	, intReceiveUOMId			
+	, intIssueUOMId				
+	, intGrossUOMId				
+	, dtmDateCreated			
+	, intCreatedByUserId
+)
+VALUES
+(
+	  intItemId					
+	, intLocationId				
+	, intVendorId				
+	, intSubLocationId			
+	, intStorageLocationId		
+	, strDescription			
+	, intFamilyId				
+	, intClassId				
+	, intProductCodeId			
+	, strPassportFuelId1		
+	, strPassportFuelId2		
+	, strPassportFuelId3		
+	, ysnTaxFlag1				
+	, ysnTaxFlag2				
+	, ysnTaxFlag3				
+	, ysnTaxFlag4				
+	, ysnPromotionalItem		
+	, ysnStorageUnitRequired	
+	, ysnDepositRequired        
+	, intBottleDepositNo        
+	, ysnSaleable               
+	, ysnQuantityRequired       
+	, ysnScaleItem              
+	, ysnFoodStampable          
+	, ysnReturnable             
+	, ysnPrePriced              
+	, ysnOpenPricePLU           
+	, ysnLinkedItem             
+	, strVendorCategory         
+	, ysnIdRequiredLiquor       
+	, ysnIdRequiredCigarette    
+	, intMinimumAge             
+	, ysnApplyBlueLaw1          
+	, ysnApplyBlueLaw2          
+	, ysnCarWash                
+	, intItemTypeSubCode        
+	, dblReorderPoint           
+	, dblMinOrder               
+	, dblSuggestedQty           
+	, dblLeadTime               
+	, strCounted                
+	, ysnCountedDaily           
+	, ysnCountBySINo            
+	, strSerialNoBegin          
+	, strSerialNoEnd            
+	, ysnAutoCalculateFreight   
+	, dblFreightRate            
+	, intCostingMethod          
+	, intAllowNegativeInventory 
+	, intReceiveUOMId			
+	, intIssueUOMId				
+	, intGrossUOMId				
+	, dtmDateCreated			
+	, intCreatedByUserId
+)
+OUTPUT deleted.intItemId, $action, inserted.intItemId INTO #output;
 
 UPDATE l
-SET l.intRowsImported = @@ROWCOUNT
+SET l.intRowsImported = (SELECT COUNT(*) FROM #output WHERE strAction = 'INSERT')
+	, l.intRowsUpdated = (SELECT COUNT(*) FROM #output WHERE strAction = 'UPDATE')
 FROM tblICImportLog l
 WHERE l.strUniqueId = @strIdentifier
+
+DECLARE @TotalImported INT
+DECLARE @LogId INT
+
+SELECT @LogId = intImportLogId, @TotalImported = ISNULL(intRowsImported, 0) + ISNULL(intRowsUpdated, 0) 
+FROM tblICImportLog 
+WHERE strUniqueId = @strIdentifier
+
+IF @TotalImported = 0 AND @LogId IS NOT NULL
+BEGIN
+	INSERT INTO tblICImportLogDetail(intImportLogId, intRecordNo, strAction, strValue, strMessage, strStatus, strType, intConcurrencyId)
+	SELECT @LogId, 0, 'Import finished.', ' ', 'Nothing was imported', 'Success', 'Warning', 1
+END
+
+DROP TABLE #tmp
+DROP TABLE #output
 
 DELETE FROM [tblICImportStagingItemLocation] WHERE strImportIdentifier = @strIdentifier
 
