@@ -565,6 +565,12 @@ BEGIN TRY
 
 							WHILE @@FETCH_STATUS = 0
 							BEGIN
+
+								IF OBJECT_ID (N'tempdb.dbo.#invoiceIdTable') IS NOT NULL
+								BEGIN 
+									DROP TABLE #invoiceIdTable
+								END
+
 								SELECT DISTINCT
 									ARID.intInvoiceId
 								INTO #invoiceIdTable
