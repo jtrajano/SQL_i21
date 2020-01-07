@@ -548,12 +548,13 @@ BEGIN TRY
 	DECLARE @errMessage NVARCHAR(250)
 		, @strLink NVARCHAR(10)
 	
-	SELECT TOP 1 @strLink = ISNULL(strReceiptLink, '') FROM #tmpDistributionList WHERE strOrigin = 'Terminal' AND strDestination = 'Customer' AND ISNULL(dblCost, 0) = 0 AND ISNULL(ysnFreightOnly, 0) = 0
-	IF ISNULL(@strLink, '') <> ''
-	BEGIN
-		SET @errMessage = 'Terminal to Customer Load cannot have a cost of zero(0). ' + @strLink + ' has a zero(0) cost.' 
-		RAISERROR(@errMessage, 16, 1)
-	END
+	-- Remove the validation - TR-1371
+	-- SELECT TOP 1 @strLink = ISNULL(strReceiptLink, '') FROM #tmpDistributionList WHERE strOrigin = 'Terminal' AND strDestination = 'Customer' AND ISNULL(dblCost, 0) = 0 AND ISNULL(ysnFreightOnly, 0) = 0
+	-- IF ISNULL(@strLink, '') <> ''
+	-- BEGIN
+	-- 	SET @errMessage = 'Terminal to Customer Load cannot have a cost of zero(0). ' + @strLink + ' has a zero(0) cost.' 
+	-- 	RAISERROR(@errMessage, 16, 1)
+	-- END
 
 	SELECT TOP 1 @strLink = ISNULL(strReceiptLink, '') FROM #tmpDistributionList WHERE ISNULL(ysnFreightOnly, 0) = 0 AND ISNULL(dblCost, 0) = 0 AND ISNULL(dblPrice, 0) = 0
 	IF ISNULL(@strLink, '') <> ''
@@ -562,12 +563,13 @@ BEGIN TRY
 		RAISERROR(@errMessage, 16, 1)
 	END
 
-	SELECT TOP 1 @strLink = ISNULL(strReceiptLink, '') FROM #tmpDistributionList WHERE strOrigin = 'Terminal' AND ISNULL(ysnFreightOnly, 0) = 0 AND ISNULL(dblCost, 0) = 0
-	IF ISNULL(@strLink, '') <> ''
-	BEGIN
-		SET @errMessage = 'Terminal Receipts cannot have a cost of zero(0). ' + @strLink + ' has a zero(0) cost.' 
-		RAISERROR(@errMessage, 16, 1)
-	END
+	-- Remove the validation - TR-1371
+	-- SELECT TOP 1 @strLink = ISNULL(strReceiptLink, '') FROM #tmpDistributionList WHERE strOrigin = 'Terminal' AND ISNULL(ysnFreightOnly, 0) = 0 AND ISNULL(dblCost, 0) = 0
+	-- IF ISNULL(@strLink, '') <> ''
+	-- BEGIN
+	-- 	SET @errMessage = 'Terminal Receipts cannot have a cost of zero(0). ' + @strLink + ' has a zero(0) cost.' 
+	-- 	RAISERROR(@errMessage, 16, 1)
+	-- END
 
 	SELECT TOP 1 @strLink = ISNULL(strReceiptLink, '') FROM #tmpDistributionList WHERE strDestination = 'Customer' AND ISNULL(ysnFreightOnly, 0) = 0 AND ISNULL(dblPrice, 0) = 0
 	IF ISNULL(@strLink, '') <> ''

@@ -120,7 +120,7 @@ END
 	WHERE	TL.intLoadHeaderId = @intLoadHeaderId --333333
 			AND TR.strOrigin = 'Terminal'
 			AND IC.strType != 'Non-Inventory'
-			AND (TR.dblUnitCost != 0 or TR.dblFreightRate != 0 or TR.dblPurSurcharge != 0)
+			--AND (TR.dblUnitCost != 0 or TR.dblFreightRate != 0 or TR.dblPurSurcharge != 0)
     group by TR.intLoadReceiptId
 	ORDER BY intEntityVendorId
 		,strBillOfLadding
