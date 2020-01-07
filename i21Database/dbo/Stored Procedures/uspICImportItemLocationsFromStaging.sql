@@ -1,10 +1,13 @@
 CREATE PROCEDURE uspICImportItemLocationsFromStaging @strIdentifier NVARCHAR(100)
 AS
 
+DELETE FROM tblICImportStagingUOM WHERE strImportIdentifier <> @strIdentifier
+
 ;WITH cte AS
 (
    SELECT *, ROW_NUMBER() OVER(PARTITION BY strItemNo, strLocation ORDER BY strItemNo, strLocation) AS RowNumber
    FROM tblICImportStagingItemLocation
+   WHERE strImportIdentifier = @strIdentifier
 )
 DELETE FROM cte WHERE RowNumber > 1;
 
