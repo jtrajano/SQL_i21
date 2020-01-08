@@ -6713,438 +6713,7 @@ BEGIN TRY
 
 			EXEC sp_xml_removedocument @idoc
 
-			---******************************** Item Substitute ********************************************
-			DECLARE @intItemSubstituteId INT
-				,@strSubstituteItem NVARCHAR(50)
-				,@intSubstituteItemId INT
-
-			EXEC sp_xml_preparedocument @idoc OUTPUT
-				,@strItemSubstituteXML
-
-			DECLARE @tblICItemSubstitute TABLE (
-				intItemSubstituteId INT identity(1, 1)
-				,strSubstituteItem NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
-				,strDescription NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
-				,dblQuantity NUMERIC(18, 6)
-				,strUnitMeasure NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
-				,dblMarkUpOrDown NUMERIC(18, 6)
-				,dtmBeginDate DATETIME
-				,dtmEndDate DATETIME
-				,intConcurrencyId INT
-				,dtmDateCreated DATETIME
-				,dtmDateModified DATETIME
-				,strCreatedBy NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
-				,strModifiedBy NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
-				)
-			DECLARE @tblICFinalItemSubstitute TABLE (
-				intItemId INT NOT NULL
-				,intSubstituteItemId INT NOT NULL
-				,strDescription NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
-				,dblQuantity NUMERIC(38, 20) NULL DEFAULT((0))
-				,intItemUOMId INT NULL
-				,dblMarkUpOrDown NUMERIC(38, 20) NULL DEFAULT((0))
-				,dtmBeginDate DATETIME NULL
-				,dtmEndDate DATETIME NULL
-				,intConcurrencyId INT NULL DEFAULT((0))
-				,dtmDateCreated DATETIME NULL
-				,dtmDateModified DATETIME NULL
-				,intCreatedByUserId INT NULL
-				,intModifiedByUserId INT NULL
-				)
-
-			INSERT INTO @tblICItemSubstitute (
-				strSubstituteItem
-				,strDescription
-				,dblQuantity
-				,strUnitMeasure
-				,dblMarkUpOrDown
-				,dtmBeginDate
-				,dtmEndDate
-				,intConcurrencyId
-				,dtmDateCreated
-				,dtmDateModified
-				,strCreatedBy
-				,strModifiedBy
-				)
-			SELECT strSubstituteItem
-				,strDescription
-				,dblQuantity
-				,strUnitMeasure
-				,dblMarkUpOrDown
-				,dtmBeginDate
-				,dtmEndDate
-				,intConcurrencyId
-				,dtmDateCreated
-				,dtmDateModified
-				,strCreatedBy
-				,strModifiedBy
-			FROM OPENXML(@idoc, 'vyuIPGetItemSubstitutes/vyuIPGetItemSubstitute', 2) WITH (
-					strSubstituteItem NVARCHAR(50) COLLATE Latin1_General_CI_AS
-					,strDescription NVARCHAR(100) COLLATE Latin1_General_CI_AS
-					,dblQuantity NUMERIC(18, 6)
-					,strUnitMeasure NVARCHAR(50) COLLATE Latin1_General_CI_AS
-					,dblMarkUpOrDown NUMERIC(18, 6)
-					,dtmBeginDate DATETIME
-					,dtmEndDate DATETIME
-					,intConcurrencyId INT
-					,dtmDateCreated DATETIME
-					,dtmDateModified DATETIME
-					,strCreatedBy NVARCHAR(50) COLLATE Latin1_General_CI_AS
-					,strModifiedBy NVARCHAR(50) COLLATE Latin1_General_CI_AS
-					)
-
-			SELECT @intItemSubstituteId = min(intItemSubstituteId)
-			FROM @tblICItemSubstitute
-
-			WHILE @intItemSubstituteId IS NOT NULL
-			BEGIN
-				SELECT @strSubstituteItem = NULL
-					,@strUnitMeasure = NULL
-					,@strCreatedBy = NULL
-					,@strModifiedBy = NULL
-					,@strErrorMessage = ''
-
-				SELECT @strSubstituteItem = strSubstituteItem
-					,@strUnitMeasure = strUnitMeasure
-					,@strCreatedBy = strCreatedBy
-					,@strModifiedBy = strModifiedBy
-				FROM @tblICItemSubstitute
-				WHERE intItemSubstituteId = @intItemSubstituteId
-
-				SELECT @intSubstituteItemId = NULL
-
-				SELECT @intSubstituteItemId = intItemId
-				FROM tblICItem
-				WHERE strItemNo = @strSubstituteItem
-
-				IF @strSubstituteItem IS NOT NULL
-					AND @intSubstituteItemId IS NULL
-				BEGIN
-					IF @strErrorMessage <> ''
-					BEGIN
-						SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Substitute Item ' + @strSubstituteItem + ' is not available.'
-					END
-					ELSE
-					BEGIN
-						SELECT @strErrorMessage = 'Substitute Item ' + @strSubstituteItem + ' is not available.'
-					END
-				END
-
-				SELECT @intUnitMeasureId = NULL
-
-				SELECT @intUnitMeasureId = intUnitMeasureId
-				FROM tblICUnitMeasure
-				WHERE @strUnitMeasure = @strUnitMeasure
-
-				IF @strUnitMeasure IS NOT NULL
-					AND @intUnitMeasureId IS NULL
-				BEGIN
-					IF @strErrorMessage <> ''
-					BEGIN
-						SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Unit Measure ' + @strUnitMeasure + ' is not available.'
-					END
-					ELSE
-					BEGIN
-						SELECT @strErrorMessage = 'Unit Measure ' + @strUnitMeasure + ' is not available.'
-					END
-				END
-
-				SELECT @intItemUOMId = NULL
-
-				SELECT @intItemUOMId = intItemUOMId
-				FROM tblICItemUOM
-				WHERE intItemId = @intNewItemId
-					AND intUnitMeasureId = @intUnitMeasureId
-
-				IF @strUnitMeasure IS NOT NULL
-					AND @intItemUOMId IS NULL
-				BEGIN
-					IF @strErrorMessage <> ''
-					BEGIN
-						SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Unit Measure ' + @strUnitMeasure + ' is not associated for the item ' + @strItemNo + '.'
-					END
-					ELSE
-					BEGIN
-						SELECT @strErrorMessage = 'Unit Measure ' + @strUnitMeasure + ' is not associated for the item ' + @strItemNo + '.'
-					END
-				END
-
-				IF @strErrorMessage <> ''
-				BEGIN
-					RAISERROR (
-							@strErrorMessage
-							,16
-							,1
-							)
-				END
-
-				SELECT @intCreatedById = intEntityId
-				FROM tblSMUserSecurity
-				WHERE strUserName = @strCreatedBy
-
-				SELECT @intModifiedById = intEntityId
-				FROM tblSMUserSecurity
-				WHERE strUserName = @strModifiedBy
-
-				INSERT INTO @tblICFinalItemSubstitute (
-					intItemId
-					,intSubstituteItemId
-					,strDescription
-					,dblQuantity
-					,intItemUOMId
-					,dblMarkUpOrDown
-					,dtmBeginDate
-					,dtmEndDate
-					,intConcurrencyId
-					,dtmDateCreated
-					,dtmDateModified
-					,intCreatedByUserId
-					,intModifiedByUserId
-					)
-				SELECT @intNewItemId
-					,@intSubstituteItemId
-					,strDescription
-					,dblQuantity
-					,@intItemUOMId
-					,dblMarkUpOrDown
-					,dtmBeginDate
-					,dtmEndDate
-					,intConcurrencyId
-					,dtmDateCreated
-					,dtmDateModified
-					,@intCreatedById
-					,@intModifiedById
-				FROM @tblICItemSubstitute
-				WHERE intItemSubstituteId = @intItemSubstituteId
-
-				SELECT @intItemSubstituteId = min(intItemSubstituteId)
-				FROM @tblICItemSubstitute
-				WHERE intItemSubstituteId > @intItemSubstituteId
-			END
-
-			DELETE IA
-			FROM tblICItemSubstitute IA
-			WHERE IA.intItemId = @intNewItemId
-				AND NOT EXISTS (
-					SELECT *
-					FROM @tblICFinalItemSubstitute IA1
-					WHERE IA1.intItemId = IA.intItemId
-						AND IA1.intSubstituteItemId = IA.intSubstituteItemId
-					)
-
-			UPDATE IA1
-			SET strDescription = IA.strDescription
-				,dblQuantity = IA.dblQuantity
-				,intItemUOMId = IA.intItemUOMId
-				,dblMarkUpOrDown = IA.dblMarkUpOrDown
-				,dtmBeginDate = IA.dtmBeginDate
-				,dtmEndDate = IA.dtmEndDate
-				,intConcurrencyId = IA.intConcurrencyId
-				,dtmDateCreated = IA.dtmDateCreated
-				,dtmDateModified = IA.dtmDateModified
-				,intCreatedByUserId = IA.intCreatedByUserId
-				,intModifiedByUserId = IA.intModifiedByUserId
-			FROM @tblICFinalItemSubstitute IA
-			JOIN tblICItemSubstitute IA1 ON IA1.intItemId = IA.intItemId
-				AND IA1.intSubstituteItemId = IA.intSubstituteItemId
-
-			INSERT INTO tblICItemSubstitute (
-				intItemId
-				,intSubstituteItemId
-				,strDescription
-				,dblQuantity
-				,intItemUOMId
-				,dblMarkUpOrDown
-				,dtmBeginDate
-				,dtmEndDate
-				,intConcurrencyId
-				,dtmDateCreated
-				,dtmDateModified
-				,intCreatedByUserId
-				,intModifiedByUserId
-				)
-			SELECT intItemId
-				,intSubstituteItemId
-				,strDescription
-				,dblQuantity
-				,intItemUOMId
-				,dblMarkUpOrDown
-				,dtmBeginDate
-				,dtmEndDate
-				,intConcurrencyId
-				,dtmDateCreated
-				,dtmDateModified
-				,intCreatedByUserId
-				,intModifiedByUserId
-			FROM @tblICFinalItemSubstitute IA
-			WHERE NOT EXISTS (
-					SELECT *
-					FROM tblICItemSubstitute IA1
-					WHERE IA1.intItemId = IA.intItemId
-						AND IA1.intSubstituteItemId = IA.intSubstituteItemId
-					)
-
-			DELETE
-			FROM @tblICItemSubstitute
-
-			DELETE
-			FROM @tblICFinalItemSubstitute
-
-			EXEC sp_xml_removedocument @idoc
-
-			---**************************** Item Substitution Detail********************************
-			EXEC sp_xml_preparedocument @idoc OUTPUT
-				,@strItemSubstitutionDetailXML
-
-			IF EXISTS (
-					SELECT *
-					FROM OPENXML(@idoc, 'vyuIPGetItemSubstitutionDetails/vyuIPGetItemSubstitutionDetail', 2) WITH (strSubstitutionItem NVARCHAR(50) Collate Latin1_General_CI_AS) x
-					LEFT JOIN tblICItem I ON I.strItemNo = x.strSubstitutionItem
-					WHERE I.intItemId IS NULL
-					)
-			BEGIN
-				SELECT @strSubstitutionItem = x.strSubstitutionItem
-				FROM OPENXML(@idoc, 'vyuIPGetItemSubstitutionDetails/vyuIPGetItemSubstitutionDetail', 2) WITH (strSubstitutionItem NVARCHAR(50) Collate Latin1_General_CI_AS) x
-				LEFT JOIN tblICItem I ON I.strItemNo = x.strSubstitutionItem
-				WHERE I.intItemId IS NULL
-
-				SELECT @strErrorMessage = 'Substitution Item ' + @strSubstitutionItem + ' is not available.'
-
-				RAISERROR (
-						@strErrorMessage
-						,16
-						,1
-						)
-			END
-
-			DELETE ISD
-			FROM tblICItemSubstitutionDetail ISD
-			JOIN tblICItemSubstitution ISub ON ISub.intItemSubstitutionId = ISD.intItemSubstitutionId
-			WHERE ISub.intItemId = @intNewItemId
-
-			INSERT INTO tblICItemSubstitutionDetail (
-				intItemSubstitutionId
-				,intSubstituteItemId
-				,dtmValidFrom
-				,dtmValidTo
-				,dblRatio
-				,dblPercent
-				,ysnYearValidationRequired
-				,intSort
-				,intConcurrencyId
-				,dtmDateCreated
-				,dtmDateModified
-				,intCreatedByUserId
-				,intModifiedByUserId
-				)
-			SELECT intItemSubstitutionId
-				,I.intItemId AS intSubstituteItemId
-				,dtmValidFrom
-				,dtmValidTo
-				,dblRatio
-				,dblPercent
-				,ysnYearValidationRequired
-				,intSort
-				,1 AS intConcurrencyId
-				,x.dtmDateCreated
-				,x.dtmDateModified
-				,US.intEntityId AS intCreatedByUserId
-				,US1.intEntityId AS intModifiedByUserId
-			FROM OPENXML(@idoc, 'vyuIPGetItemSubstitutionDetails/vyuIPGetItemSubstitutionDetail', 2) WITH (
-					intItemSubstitutionId INT
-					,strSubstitutionItem NVARCHAR(50) Collate Latin1_General_CI_AS
-					,dtmValidFrom DATETIME
-					,dtmValidTo DATETIME
-					,dblRatio NUMERIC(18, 6)
-					,dblPercent NUMERIC(18, 6)
-					,ysnYearValidationRequired BIT
-					,intSort INT
-					,intConcurrencyId INT
-					,dtmDateCreated DATETIME
-					,dtmDateModified DATETIME
-					,strCreatedBy NVARCHAR(100) Collate Latin1_General_CI_AS
-					,strModifiedBy NVARCHAR(100) Collate Latin1_General_CI_AS
-					) x
-			LEFT JOIN tblSMUserSecurity US ON US.strUserName = x.strCreatedBy
-			LEFT JOIN tblSMUserSecurity US1 ON US.strUserName = x.strModifiedBy
-			LEFT JOIN tblICItem I ON I.strItemNo = x.strSubstitutionItem
-
-			EXEC sp_xml_removedocument @idoc
-
-			---**************************** Item Substitution********************************
-			EXEC sp_xml_preparedocument @idoc OUTPUT
-				,@strItemSubstitutionXML
-
-			IF EXISTS (
-					SELECT *
-					FROM OPENXML(@idoc, 'vyuIPGetItemSubstitutions/vyuIPGetItemSubstitution', 2) WITH (strLocationName NVARCHAR(50) Collate Latin1_General_CI_AS) x
-					LEFT JOIN tblSMCompanyLocation CL ON CL.strLocationName = x.strLocationName
-					LEFT JOIN tblICItemLocation IL ON IL.intLocationId = CL.intCompanyLocationId
-						AND IL.intItemId = @intNewItemId
-					WHERE IL.intItemLocationId IS NULL
-					)
-			BEGIN
-				SELECT @strLocationName = x.strLocationName
-				FROM OPENXML(@idoc, 'vyuIPGetItemSubstitutions/vyuIPGetItemSubstitution', 2) WITH (strLocationName NVARCHAR(50) Collate Latin1_General_CI_AS) x
-				LEFT JOIN tblSMCompanyLocation CL ON CL.strLocationName = x.strLocationName
-				LEFT JOIN tblICItemLocation IL ON IL.intLocationId = CL.intCompanyLocationId
-					AND IL.intItemId = @intNewItemId
-				WHERE IL.intItemLocationId IS NULL
-
-				SELECT @strErrorMessage = 'Location name ' + @strLocationName + ' is not associated with the item ' + @strItemNo + '.'
-
-				RAISERROR (
-						@strErrorMessage
-						,16
-						,1
-						)
-			END
-
-			DELETE
-			FROM tblICItemSubstitution
-			WHERE intItemId = @intNewItemId
-
-			INSERT INTO tblICItemSubstitution (
-				intLocationId
-				,intItemId
-				,strModification
-				,ysnContracted
-				,strComment
-				,intSort
-				,intConcurrencyId
-				,dtmDateCreated
-				,dtmDateModified
-				,intCreatedByUserId
-				,intModifiedByUserId
-				)
-			SELECT CL.intCompanyLocationId
-				,@intNewItemId
-				,strModification
-				,ysnContracted
-				,strComment
-				,intSort
-				,1 AS intConcurrencyId
-				,x.dtmDateCreated
-				,x.dtmDateModified
-				,US.intEntityId AS intCreatedByUserId
-				,US1.intEntityId AS intModifiedByUserId
-			FROM OPENXML(@idoc, 'vyuIPGetItemSubstitutions/vyuIPGetItemSubstitution', 2) WITH (
-					strLocationName NVARCHAR(50) Collate Latin1_General_CI_AS
-					,strModification NVARCHAR(50)
-					,ysnContracted BIT
-					,strComment NVARCHAR(MAX)
-					,intSort INT
-					,intConcurrencyId INT
-					,dtmDateCreated DATETIME
-					,dtmDateModified DATETIME
-					,strCreatedBy NVARCHAR(100) Collate Latin1_General_CI_AS
-					,strModifiedBy NVARCHAR(100) Collate Latin1_General_CI_AS
-					) x
-			LEFT JOIN tblSMUserSecurity US ON US.strUserName = x.strCreatedBy
-			LEFT JOIN tblSMUserSecurity US1 ON US.strUserName = x.strModifiedBy
-			LEFT JOIN tblSMCompanyLocation CL ON CL.strLocationName = x.strLocationName
-
-			EXEC sp_xml_removedocument @idoc
+			
 
 			------------------Item UOM UPC------------------------------------------------------
 			EXEC sp_xml_preparedocument @idoc OUTPUT
@@ -7684,6 +7253,439 @@ BEGIN TRY
 			LEFT JOIN tblICUnitMeasure UM ON UM.strUnitMeasure = x.strUnitMeasure
 			LEFT JOIN tblICItemUOM IU ON IU.intItemId = @intNewItemId
 				AND IU.intUnitMeasureId = UM.intUnitMeasureId
+
+			EXEC sp_xml_removedocument @idoc
+
+			---******************************** Item Substitute ********************************************
+			DECLARE @intItemSubstituteId INT
+				,@strSubstituteItem NVARCHAR(50)
+				,@intSubstituteItemId INT
+
+			EXEC sp_xml_preparedocument @idoc OUTPUT
+				,@strItemSubstituteXML
+
+			DECLARE @tblICItemSubstitute TABLE (
+				intItemSubstituteId INT identity(1, 1)
+				,strSubstituteItem NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+				,strDescription NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
+				,dblQuantity NUMERIC(18, 6)
+				,strUnitMeasure NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+				,dblMarkUpOrDown NUMERIC(18, 6)
+				,dtmBeginDate DATETIME
+				,dtmEndDate DATETIME
+				,intConcurrencyId INT
+				,dtmDateCreated DATETIME
+				,dtmDateModified DATETIME
+				,strCreatedBy NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+				,strModifiedBy NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+				)
+			DECLARE @tblICFinalItemSubstitute TABLE (
+				intItemId INT NOT NULL
+				,intSubstituteItemId INT NOT NULL
+				,strDescription NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
+				,dblQuantity NUMERIC(38, 20) NULL DEFAULT((0))
+				,intItemUOMId INT NULL
+				,dblMarkUpOrDown NUMERIC(38, 20) NULL DEFAULT((0))
+				,dtmBeginDate DATETIME NULL
+				,dtmEndDate DATETIME NULL
+				,intConcurrencyId INT NULL DEFAULT((0))
+				,dtmDateCreated DATETIME NULL
+				,dtmDateModified DATETIME NULL
+				,intCreatedByUserId INT NULL
+				,intModifiedByUserId INT NULL
+				)
+
+			INSERT INTO @tblICItemSubstitute (
+				strSubstituteItem
+				,strDescription
+				,dblQuantity
+				,strUnitMeasure
+				,dblMarkUpOrDown
+				,dtmBeginDate
+				,dtmEndDate
+				,intConcurrencyId
+				,dtmDateCreated
+				,dtmDateModified
+				,strCreatedBy
+				,strModifiedBy
+				)
+			SELECT strSubstituteItem
+				,strDescription
+				,dblQuantity
+				,strUnitMeasure
+				,dblMarkUpOrDown
+				,dtmBeginDate
+				,dtmEndDate
+				,intConcurrencyId
+				,dtmDateCreated
+				,dtmDateModified
+				,strCreatedBy
+				,strModifiedBy
+			FROM OPENXML(@idoc, 'vyuIPGetItemSubstitutes/vyuIPGetItemSubstitute', 2) WITH (
+					strSubstituteItem NVARCHAR(50) COLLATE Latin1_General_CI_AS
+					,strDescription NVARCHAR(100) COLLATE Latin1_General_CI_AS
+					,dblQuantity NUMERIC(18, 6)
+					,strUnitMeasure NVARCHAR(50) COLLATE Latin1_General_CI_AS
+					,dblMarkUpOrDown NUMERIC(18, 6)
+					,dtmBeginDate DATETIME
+					,dtmEndDate DATETIME
+					,intConcurrencyId INT
+					,dtmDateCreated DATETIME
+					,dtmDateModified DATETIME
+					,strCreatedBy NVARCHAR(50) COLLATE Latin1_General_CI_AS
+					,strModifiedBy NVARCHAR(50) COLLATE Latin1_General_CI_AS
+					)
+
+			SELECT @intItemSubstituteId = min(intItemSubstituteId)
+			FROM @tblICItemSubstitute
+
+			WHILE @intItemSubstituteId IS NOT NULL
+			BEGIN
+				SELECT @strSubstituteItem = NULL
+					,@strUnitMeasure = NULL
+					,@strCreatedBy = NULL
+					,@strModifiedBy = NULL
+					,@strErrorMessage = ''
+
+				SELECT @strSubstituteItem = strSubstituteItem
+					,@strUnitMeasure = strUnitMeasure
+					,@strCreatedBy = strCreatedBy
+					,@strModifiedBy = strModifiedBy
+				FROM @tblICItemSubstitute
+				WHERE intItemSubstituteId = @intItemSubstituteId
+
+				SELECT @intSubstituteItemId = NULL
+
+				SELECT @intSubstituteItemId = intItemId
+				FROM tblICItem
+				WHERE strItemNo = @strSubstituteItem
+
+				IF @strSubstituteItem IS NOT NULL
+					AND @intSubstituteItemId IS NULL
+				BEGIN
+					IF @strErrorMessage <> ''
+					BEGIN
+						SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Substitute Item ' + @strSubstituteItem + ' is not available.'
+					END
+					ELSE
+					BEGIN
+						SELECT @strErrorMessage = 'Substitute Item ' + @strSubstituteItem + ' is not available.'
+					END
+				END
+
+				SELECT @intUnitMeasureId = NULL
+
+				SELECT @intUnitMeasureId = intUnitMeasureId
+				FROM tblICUnitMeasure
+				WHERE @strUnitMeasure = @strUnitMeasure
+
+				IF @strUnitMeasure IS NOT NULL
+					AND @intUnitMeasureId IS NULL
+				BEGIN
+					IF @strErrorMessage <> ''
+					BEGIN
+						SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Unit Measure ' + @strUnitMeasure + ' is not available.'
+					END
+					ELSE
+					BEGIN
+						SELECT @strErrorMessage = 'Unit Measure ' + @strUnitMeasure + ' is not available.'
+					END
+				END
+
+				SELECT @intItemUOMId = NULL
+
+				SELECT @intItemUOMId = intItemUOMId
+				FROM tblICItemUOM
+				WHERE intItemId = @intNewItemId
+					AND intUnitMeasureId = @intUnitMeasureId
+
+				IF @strUnitMeasure IS NOT NULL
+					AND @intItemUOMId IS NULL
+				BEGIN
+					IF @strErrorMessage <> ''
+					BEGIN
+						SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Unit Measure ' + @strUnitMeasure + ' is not associated for the item ' + @strItemNo + '.'
+					END
+					ELSE
+					BEGIN
+						SELECT @strErrorMessage = 'Unit Measure ' + @strUnitMeasure + ' is not associated for the item ' + @strItemNo + '.'
+					END
+				END
+
+				IF @strErrorMessage <> ''
+				BEGIN
+					RAISERROR (
+							@strErrorMessage
+							,16
+							,1
+							)
+				END
+
+				SELECT @intCreatedById = intEntityId
+				FROM tblSMUserSecurity
+				WHERE strUserName = @strCreatedBy
+
+				SELECT @intModifiedById = intEntityId
+				FROM tblSMUserSecurity
+				WHERE strUserName = @strModifiedBy
+
+				INSERT INTO @tblICFinalItemSubstitute (
+					intItemId
+					,intSubstituteItemId
+					,strDescription
+					,dblQuantity
+					,intItemUOMId
+					,dblMarkUpOrDown
+					,dtmBeginDate
+					,dtmEndDate
+					,intConcurrencyId
+					,dtmDateCreated
+					,dtmDateModified
+					,intCreatedByUserId
+					,intModifiedByUserId
+					)
+				SELECT @intNewItemId
+					,@intSubstituteItemId
+					,strDescription
+					,dblQuantity
+					,@intItemUOMId
+					,dblMarkUpOrDown
+					,dtmBeginDate
+					,dtmEndDate
+					,intConcurrencyId
+					,dtmDateCreated
+					,dtmDateModified
+					,@intCreatedById
+					,@intModifiedById
+				FROM @tblICItemSubstitute
+				WHERE intItemSubstituteId = @intItemSubstituteId
+
+				SELECT @intItemSubstituteId = min(intItemSubstituteId)
+				FROM @tblICItemSubstitute
+				WHERE intItemSubstituteId > @intItemSubstituteId
+			END
+
+			DELETE IA
+			FROM tblICItemSubstitute IA
+			WHERE IA.intItemId = @intNewItemId
+				AND NOT EXISTS (
+					SELECT *
+					FROM @tblICFinalItemSubstitute IA1
+					WHERE IA1.intItemId = IA.intItemId
+						AND IA1.intSubstituteItemId = IA.intSubstituteItemId
+					)
+
+			UPDATE IA1
+			SET strDescription = IA.strDescription
+				,dblQuantity = IA.dblQuantity
+				,intItemUOMId = IA.intItemUOMId
+				,dblMarkUpOrDown = IA.dblMarkUpOrDown
+				,dtmBeginDate = IA.dtmBeginDate
+				,dtmEndDate = IA.dtmEndDate
+				,intConcurrencyId = IA.intConcurrencyId
+				,dtmDateCreated = IA.dtmDateCreated
+				,dtmDateModified = IA.dtmDateModified
+				,intCreatedByUserId = IA.intCreatedByUserId
+				,intModifiedByUserId = IA.intModifiedByUserId
+			FROM @tblICFinalItemSubstitute IA
+			JOIN tblICItemSubstitute IA1 ON IA1.intItemId = IA.intItemId
+				AND IA1.intSubstituteItemId = IA.intSubstituteItemId
+
+			INSERT INTO tblICItemSubstitute (
+				intItemId
+				,intSubstituteItemId
+				,strDescription
+				,dblQuantity
+				,intItemUOMId
+				,dblMarkUpOrDown
+				,dtmBeginDate
+				,dtmEndDate
+				,intConcurrencyId
+				,dtmDateCreated
+				,dtmDateModified
+				,intCreatedByUserId
+				,intModifiedByUserId
+				)
+			SELECT intItemId
+				,intSubstituteItemId
+				,strDescription
+				,dblQuantity
+				,intItemUOMId
+				,dblMarkUpOrDown
+				,dtmBeginDate
+				,dtmEndDate
+				,intConcurrencyId
+				,dtmDateCreated
+				,dtmDateModified
+				,intCreatedByUserId
+				,intModifiedByUserId
+			FROM @tblICFinalItemSubstitute IA
+			WHERE NOT EXISTS (
+					SELECT *
+					FROM tblICItemSubstitute IA1
+					WHERE IA1.intItemId = IA.intItemId
+						AND IA1.intSubstituteItemId = IA.intSubstituteItemId
+					)
+
+			DELETE
+			FROM @tblICItemSubstitute
+
+			DELETE
+			FROM @tblICFinalItemSubstitute
+
+			EXEC sp_xml_removedocument @idoc
+
+			---**************************** Item Substitution Detail********************************
+			EXEC sp_xml_preparedocument @idoc OUTPUT
+				,@strItemSubstitutionDetailXML
+
+			IF EXISTS (
+					SELECT *
+					FROM OPENXML(@idoc, 'vyuIPGetItemSubstitutionDetails/vyuIPGetItemSubstitutionDetail', 2) WITH (strSubstitutionItem NVARCHAR(50) Collate Latin1_General_CI_AS) x
+					LEFT JOIN tblICItem I ON I.strItemNo = x.strSubstitutionItem
+					WHERE I.intItemId IS NULL
+					)
+			BEGIN
+				SELECT @strSubstitutionItem = x.strSubstitutionItem
+				FROM OPENXML(@idoc, 'vyuIPGetItemSubstitutionDetails/vyuIPGetItemSubstitutionDetail', 2) WITH (strSubstitutionItem NVARCHAR(50) Collate Latin1_General_CI_AS) x
+				LEFT JOIN tblICItem I ON I.strItemNo = x.strSubstitutionItem
+				WHERE I.intItemId IS NULL
+
+				SELECT @strErrorMessage = 'Substitution Item ' + @strSubstitutionItem + ' is not available.'
+
+				RAISERROR (
+						@strErrorMessage
+						,16
+						,1
+						)
+			END
+
+			DELETE ISD
+			FROM tblICItemSubstitutionDetail ISD
+			JOIN tblICItemSubstitution ISub ON ISub.intItemSubstitutionId = ISD.intItemSubstitutionId
+			WHERE ISub.intItemId = @intNewItemId
+
+			INSERT INTO tblICItemSubstitutionDetail (
+				intItemSubstitutionId
+				,intSubstituteItemId
+				,dtmValidFrom
+				,dtmValidTo
+				,dblRatio
+				,dblPercent
+				,ysnYearValidationRequired
+				,intSort
+				,intConcurrencyId
+				,dtmDateCreated
+				,dtmDateModified
+				,intCreatedByUserId
+				,intModifiedByUserId
+				)
+			SELECT intItemSubstitutionId
+				,I.intItemId AS intSubstituteItemId
+				,dtmValidFrom
+				,dtmValidTo
+				,dblRatio
+				,dblPercent
+				,ysnYearValidationRequired
+				,intSort
+				,1 AS intConcurrencyId
+				,x.dtmDateCreated
+				,x.dtmDateModified
+				,US.intEntityId AS intCreatedByUserId
+				,US1.intEntityId AS intModifiedByUserId
+			FROM OPENXML(@idoc, 'vyuIPGetItemSubstitutionDetails/vyuIPGetItemSubstitutionDetail', 2) WITH (
+					intItemSubstitutionId INT
+					,strSubstitutionItem NVARCHAR(50) Collate Latin1_General_CI_AS
+					,dtmValidFrom DATETIME
+					,dtmValidTo DATETIME
+					,dblRatio NUMERIC(18, 6)
+					,dblPercent NUMERIC(18, 6)
+					,ysnYearValidationRequired BIT
+					,intSort INT
+					,intConcurrencyId INT
+					,dtmDateCreated DATETIME
+					,dtmDateModified DATETIME
+					,strCreatedBy NVARCHAR(100) Collate Latin1_General_CI_AS
+					,strModifiedBy NVARCHAR(100) Collate Latin1_General_CI_AS
+					) x
+			LEFT JOIN tblSMUserSecurity US ON US.strUserName = x.strCreatedBy
+			LEFT JOIN tblSMUserSecurity US1 ON US.strUserName = x.strModifiedBy
+			LEFT JOIN tblICItem I ON I.strItemNo = x.strSubstitutionItem
+
+			EXEC sp_xml_removedocument @idoc
+
+			---**************************** Item Substitution********************************
+			EXEC sp_xml_preparedocument @idoc OUTPUT
+				,@strItemSubstitutionXML
+
+			IF EXISTS (
+					SELECT *
+					FROM OPENXML(@idoc, 'vyuIPGetItemSubstitutions/vyuIPGetItemSubstitution', 2) WITH (strLocationName NVARCHAR(50) Collate Latin1_General_CI_AS) x
+					LEFT JOIN tblSMCompanyLocation CL ON CL.strLocationName = x.strLocationName
+					LEFT JOIN tblICItemLocation IL ON IL.intLocationId = CL.intCompanyLocationId
+						AND IL.intItemId = @intNewItemId
+					WHERE IL.intItemLocationId IS NULL
+					)
+			BEGIN
+				SELECT @strLocationName = x.strLocationName
+				FROM OPENXML(@idoc, 'vyuIPGetItemSubstitutions/vyuIPGetItemSubstitution', 2) WITH (strLocationName NVARCHAR(50) Collate Latin1_General_CI_AS) x
+				LEFT JOIN tblSMCompanyLocation CL ON CL.strLocationName = x.strLocationName
+				LEFT JOIN tblICItemLocation IL ON IL.intLocationId = CL.intCompanyLocationId
+					AND IL.intItemId = @intNewItemId
+				WHERE IL.intItemLocationId IS NULL
+
+				SELECT @strErrorMessage = 'Location name ' + @strLocationName + ' is not associated with the item ' + @strItemNo + '.'
+
+				RAISERROR (
+						@strErrorMessage
+						,16
+						,1
+						)
+			END
+
+			DELETE
+			FROM tblICItemSubstitution
+			WHERE intItemId = @intNewItemId
+
+			INSERT INTO tblICItemSubstitution (
+				intLocationId
+				,intItemId
+				,strModification
+				,ysnContracted
+				,strComment
+				,intSort
+				,intConcurrencyId
+				,dtmDateCreated
+				,dtmDateModified
+				,intCreatedByUserId
+				,intModifiedByUserId
+				)
+			SELECT CL.intCompanyLocationId
+				,@intNewItemId
+				,strModification
+				,ysnContracted
+				,strComment
+				,intSort
+				,1 AS intConcurrencyId
+				,x.dtmDateCreated
+				,x.dtmDateModified
+				,US.intEntityId AS intCreatedByUserId
+				,US1.intEntityId AS intModifiedByUserId
+			FROM OPENXML(@idoc, 'vyuIPGetItemSubstitutions/vyuIPGetItemSubstitution', 2) WITH (
+					strLocationName NVARCHAR(50) Collate Latin1_General_CI_AS
+					,strModification NVARCHAR(50)
+					,ysnContracted BIT
+					,strComment NVARCHAR(MAX)
+					,intSort INT
+					,intConcurrencyId INT
+					,dtmDateCreated DATETIME
+					,dtmDateModified DATETIME
+					,strCreatedBy NVARCHAR(100) Collate Latin1_General_CI_AS
+					,strModifiedBy NVARCHAR(100) Collate Latin1_General_CI_AS
+					) x
+			LEFT JOIN tblSMUserSecurity US ON US.strUserName = x.strCreatedBy
+			LEFT JOIN tblSMUserSecurity US1 ON US.strUserName = x.strModifiedBy
+			LEFT JOIN tblSMCompanyLocation CL ON CL.strLocationName = x.strLocationName
 
 			EXEC sp_xml_removedocument @idoc
 

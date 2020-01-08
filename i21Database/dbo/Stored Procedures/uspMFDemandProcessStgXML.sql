@@ -53,7 +53,7 @@ BEGIN TRY
 		,@intDemandScreenId INT
 		,@intNewInvPlngReportMasterID INT
 		,@strItemSupplyTargetXML NVARCHAR(MAX)
-		,@dtmPostDate datetime
+		,@dtmPostDate DATETIME
 
 	SELECT @intDemandStageId = MIN(intDemandStageId)
 	FROM tblMFDemandStage
@@ -70,7 +70,7 @@ BEGIN TRY
 			,@intCompanyId = NULL
 			,@strItemSupplyTargetXML = NULL
 			,@strErrorMessage = ''
-			,@dtmPostDate=NULL
+			,@dtmPostDate = NULL
 
 		SELECT @intInvPlngReportMasterID = intInvPlngReportMasterID
 			,@strReportMasterXML = strReportMasterXML
@@ -92,7 +92,7 @@ BEGIN TRY
 			IF EXISTS (
 					SELECT *
 					FROM tblCTInvPlngReportMaster RM
-					JOIN tblMFInvPlngSummaryBatch SB on SB.intInvPlngReportMasterID=RM.intInvPlngReportMasterID
+					JOIN tblMFInvPlngSummaryBatch SB ON SB.intInvPlngReportMasterID = RM.intInvPlngReportMasterID
 					WHERE RM.intInvPlngReportMasterRefID = @intInvPlngReportMasterID
 					)
 			BEGIN
@@ -105,6 +105,7 @@ BEGIN TRY
 					SELECT @strErrorMessage = 'Demand summary exists.'
 				END
 			END
+
 			IF @strErrorMessage <> ''
 			BEGIN
 				RAISERROR (
@@ -148,7 +149,7 @@ BEGIN TRY
 				,@dtmLastModified = dtmLastModified
 				,@strCreatedBy = strCreatedBy
 				,@strModifiedBy = strModifiedBy
-				,@dtmPostDate=dtmPostDate
+				,@dtmPostDate = dtmPostDate
 			FROM OPENXML(@idoc, 'vyuMFInvPlngReportMasters/vyuMFInvPlngReportMaster', 2) WITH (
 					intInvPlngReportMasterID INT
 					,strInvPlngReportName NVARCHAR(50) Collate Latin1_General_CI_AS
@@ -276,8 +277,6 @@ BEGIN TRY
 				END
 			END
 
-			
-
 			IF @strErrorMessage <> ''
 			BEGIN
 				RAISERROR (
@@ -310,6 +309,7 @@ BEGIN TRY
 			SELECT @intSubBookId = intSubBookId
 			FROM tblCTSubBook SB
 			WHERE strSubBook = @strSubBook
+				AND intBookId = @intBookId
 
 			SELECT @intReportMasterID = NULL
 

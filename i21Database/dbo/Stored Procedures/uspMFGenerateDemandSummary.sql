@@ -136,7 +136,7 @@ BEGIN
 			,strProductType
 			,strItemNo
 			,strItemDescription
-			,dblSupplyTarget AS strSupplyTarget
+			,dblSupplyTarget*100 AS strSupplyTarget
 			,IsNULL([Opening Inventory strMonth1], 0) AS strOIMonth1
 			,IsNULL([Forecasted Consumption strMonth1], 0) AS strFCMonth1
 			,IsNULL([Existing Purchases strMonth1], 0) AS strOPMonth1
@@ -286,7 +286,7 @@ BEGIN
 				,SB.strSubBook
 				,CA.strDescription AS strProductType
 				,IsNULL(MI.strItemNo,I.strItemNo) AS strItemNo
-				,(Case When MI.intItemId is not null Then I.strItemNo else NULL  End) AS strItemDescription
+				,(Case When MI.intItemId is not null Then I.strItemNo+' - '+I.strDescription else NULL  End) AS strItemDescription
 				,Replace(Replace(A.strAttributeName, '<a>+ ', ''), '</a>', '') + ' ' + AV.strFieldName AS strAttributeName
 				,(
 					CASE 
@@ -581,7 +581,7 @@ BEGIN
 				,strProductType
 				,strItemNo
 				,strItemDescription
-				,dblSupplyTarget AS strSupplyTarget
+				,dblSupplyTarget*100 AS strSupplyTarget
 				,IsNULL([Opening Inventory strMonth1], 0) AS strOIMonth1
 				,IsNULL([Forecasted Consumption strMonth1], 0) AS strFCMonth1
 				,IsNULL([Existing Purchases strMonth1], 0) AS strOPMonth1
@@ -731,7 +731,7 @@ BEGIN
 					,SB.strSubBook
 					,CA.strDescription AS strProductType
 					,IsNULL(MI.strItemNo,I.strItemNo) AS strItemNo
-					,(Case When MI.intItemId is not null Then I.strItemNo else NULL  End) AS strItemDescription
+					,(Case When MI.intItemId is not null Then I.strItemNo+' - '+I.strDescription else NULL  End) AS strItemDescription
 					,Replace(Replace(A.strAttributeName, '<a>+ ', ''), '</a>', '') + ' ' + AV.strFieldName AS strAttributeName
 					,(
 						CASE 
@@ -1041,7 +1041,7 @@ BEGIN
 			FROM @tblMFItemDetail I
 			JOIN dbo.tblCTContractDetail SS ON SS.intItemId = I.intItemId
 			JOIN dbo.tblCTContractHeader CH ON CH.intContractHeaderId = SS.intContractHeaderId
-				AND CH.intContractTypeId = 1
+				AND CH.intContractTypeId = 2
 			JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = SS.intItemUOMId
 				AND ISNULL(SS.intCompanyLocationId, 0) = (
 					CASE 
@@ -1170,7 +1170,7 @@ BEGIN
 				,strProductType
 				,strItemNo
 				,strItemDescription
-				,dblSupplyTarget AS strSupplyTarget
+				,dblSupplyTarget*100 AS strSupplyTarget
 				,IsNULL([Opening Inventory strMonth1], 0) AS strOIMonth1
 				,IsNULL([Forecasted Consumption strMonth1], 0) AS strFCMonth1
 				,IsNULL([Existing Purchases strMonth1], 0) AS strOPMonth1
@@ -1320,7 +1320,7 @@ BEGIN
 					,SB.strSubBook
 					,CA.strDescription AS strProductType
 					,IsNULL(MI.strItemNo,I.strItemNo) AS strItemNo
-				,(Case When MI.intItemId is not null Then I.strItemNo else NULL  End) AS strItemDescription
+				,(Case When MI.intItemId is not null Then I.strItemNo+' - '+I.strDescription else NULL  End) AS strItemDescription
 					,Replace(Replace(A.strAttributeName, '<a>+ ', ''), '</a>', '') + ' strMonth' + Ltrim(FD.intMonthId) AS strAttributeName
 					,(
 						CASE 
