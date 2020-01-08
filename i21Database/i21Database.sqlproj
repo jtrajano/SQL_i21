@@ -8340,6 +8340,10 @@
     <Build Include="dbo\Stored Procedures\uspICReverseInventoryShipment.sql" />
     <Build Include="dbo\Functions\fnRKGetAveragePriceReport.sql" />
     <Build Include="dbo\Views\vyuRKGetAveragePriceReport.sql" />
+    <Build Include="dbo\Views\vyuIPGetFutOptTransaction.sql" />
+    <Build Include="dbo\Views\vyuIPGetFutOptTransactionHeader.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPFutOptTransactionPopulateStgXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPFutOptTransactionProcessPreStage.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
