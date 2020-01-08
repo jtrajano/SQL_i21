@@ -213,7 +213,6 @@ UPDATE tblICItemUOM SET ysnStockUnit = 1 WHERE ysnStockUnit = 0 AND dblUnitQty =
 (
    SELECT *, ROW_NUMBER() OVER(PARTITION BY intItemId ORDER BY intItemId, ysnStockUnit) AS RowNumber
    FROM tblICItemUOM
-   WHERE intItemId = 52436
-	AND ysnStockUnit = 1
+   WHERE ysnStockUnit = 1
 )
 UPDATE cte SET ysnStockUnit = 0 WHERE RowNumber > 1;
