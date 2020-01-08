@@ -21,7 +21,7 @@ AS
 -- , @intFutureMarketId INT  = 4151
 -- , @intFutureMonthId INT  = 5180
 -- , @intUOMId INT = 13  
--- , @intDecimal INT = 0  
+-- , @intDecimal INT = 2  
 -- , @intForecastWeeklyConsumption INT = NULL  
 -- , @intForecastWeeklyConsumptionUOMId INT = NULL  
 -- , @intBookId INT = NULL  
@@ -1078,8 +1078,8 @@ AS
 			FROM #PricedContractList cv
 			WHERE cv.intContractStatusId <> 3 AND ISNULL(ysnDeltaHedge, 0) = 0
 				AND intContractDetailId IN (SELECT ISNULL(intContractDetailId, 0) FROM #tmpLotsQtyByDetail)
+				AND intPricingTypeId <> 1
 		) t
-		WHERE ISNULL(dblNoOfLot, 0) <> 0
 	) t1
 	
 	DROP TABLE #tmpLotsQtyByDetail
