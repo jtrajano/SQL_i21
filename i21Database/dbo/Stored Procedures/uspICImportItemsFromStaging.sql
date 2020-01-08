@@ -318,6 +318,7 @@ USING
 		, intRINFuelTypeId
 		, strFuelInspectFee
 		, dtmDateCreated
+		, intCreatedByUserId
 	FROM #tmp s
 ) AS source ON LTRIM(RTRIM(target.strItemNo)) = LTRIM(RTRIM(source.strItemNo))
 WHEN MATCHED THEN
