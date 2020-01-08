@@ -325,11 +325,9 @@ BEGIN
 				,strTransactionType
 				,strTransactionId 
 				,intTransactionId
-				,strStorageTypeCode = CASE WHEN dblTotal < 0 THEN STFr.strStorageTypeCode ELSE STTo.strStorageTypeCode END
+				,strStorageTypeCode = CASE WHEN dblTotal < 0 THEN SS.strFromStorageTypeDescription ELSE SS.strToStorageTypeDescription END
 			FROM #invQty Inv
 			inner join vyuGRTransferStorageSearchView SS ON Inv.intTransactionId = SS.intTransferStorageId
-			left join tblGRStorageType STFr ON SS.intFromStorageTypeId = STFr.intStorageScheduleTypeId
-			left join tblGRStorageType STTo ON SS.intToStorageTypeId = STTo.intStorageScheduleTypeId
 			WHERE Inv.strTransactionType = 'Transfer Storage'
 			
 
