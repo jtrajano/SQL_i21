@@ -117,7 +117,7 @@ OPEN intListCursor;
 			IF ISNULL(@intStorageScheduleTypeId,0) > 0
 				SELECT	@ysnDPStorage = ST.ysnDPOwnedType, @ysnCustomerStorage = ysnCustomerStorage FROM dbo.tblGRStorageType ST WHERE ST.intStorageScheduleTypeId = @intStorageScheduleTypeId
 
-			IF @ysnIsStorage = 0 AND (ISNULL(@ysnDPStorage,0) = 0 OR @strDistributionOption = 'SPT') AND ISNULL(@intStorageScheduleTypeId, 0) <= 0
+			IF @ysnIsStorage = 0 AND (ISNULL(@ysnDPStorage,0) = 0 OR @strDistributionOption = 'SPT') AND (ISNULL(@intStorageScheduleTypeId, 0) <= 0 OR  (@strDistributionOption = 'CNT' OR @strDistributionOption = 'LOD'))
 				BEGIN
 					IF @strDistributionOption = 'CNT' OR @strDistributionOption = 'LOD'  
 					BEGIN  
