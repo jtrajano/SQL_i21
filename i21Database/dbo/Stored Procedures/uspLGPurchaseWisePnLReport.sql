@@ -180,7 +180,7 @@ SELECT
 					(dblInvoicedPValue + (dblDifferenceInFC * dblLotContractSizeInPriceUOM) + dblReservesAValueTotal) + dblInvoicedSValue
 	,dblEffectiveMarginRate = /* Effective Margin / S-Qty */
 						((dblInvoicedPValue + (dblDifferenceInFC * dblLotContractSizeInPriceUOM) + dblReservesAValueTotal) + dblInvoicedSValue)
-							/ dblSAllocatedQty
+							/ dblSAllocatedQtyInPriceUOM
 	,dblHedgePLDifference = /* Effective Hedge PL - Theor Hedge PL */
 							(dblDifferenceInFC * dblLotContractSizeInPriceUOM) - (dblDifferenceInFC * dblPAllocatedQtyInPriceUOM)
 	,dblTotalToBeRecovered = /* Hedge PL Difference + Reserves A Variance */
@@ -216,6 +216,7 @@ FROM
 		,dblSAllocatedQty = dbo.fnCalculateQtyBetweenUOM (SUOM.intItemUOMId, ToWUOM.intItemUOMId, ALD.dblSAllocatedQty)
 		,dblPAllocatedQtyInPriceUOM = dbo.fnCalculateQtyBetweenUOM (PUOM.intItemUOMId, PCD.intPriceItemUOMId, ALD.dblPAllocatedQty)
 		,dblSAllocatedQtyInPriceUOM = dbo.fnCalculateQtyBetweenUOM (SUOM.intItemUOMId, SCD.intPriceItemUOMId, ALD.dblSAllocatedQty)
+		,dblSAllocatedQtyInResUOM = dbo.fnCalculateQtyBetweenUOM (SUOM.intItemUOMId, ToUOM.intItemUOMId, ALD.dblSAllocatedQty)
 		,dblPTerminalPrice = /* P-Terminal Price */
 							ISNULL(PCD.dblFutures, 0)
 		,dblSTerminalPrice = /* S-Terminal Price */
@@ -237,9 +238,9 @@ FROM
 							PCD.dblNoOfLots * dbo.fnCTConvertQuantityToTargetItemUOM(I.intItemId, FM.intUnitMeasureId, @intWeightUnitMeasureId, FM.dblContractSize)
 		,dblLotContractSizeInPriceUOM = PCD.dblNoOfLots * dbo.fnCTConvertQuantityToTargetItemUOM(I.intItemId, FM.intUnitMeasureId, IUOM.intUnitMeasureId, FM.dblContractSize)
 		,dblReservesARateTotal = RA.dblReservesARateTotal
-		,dblReservesAValueTotal = RA.dblReservesAValueTotal
+		,dblReservesAValueTotal = RA.dblReservesAValueTotal * -1
 		,dblReservesBRateTotal = RB.dblReservesBRateTotal
-		,dblReservesBValueTotal = RB.dblReservesBValueTotal
+		,dblReservesBValueTotal = RB.dblReservesBValueTotal * -1
 		,dblDifferentialRateTotal = /* P-Differential + Reserves A Total + Reserves B Total */
 								ISNULL(PCD.dblBasis, 0)
 								+ ISNULL(RA.dblReservesARateTotal, 0) 
@@ -247,8 +248,9 @@ FROM
 		,dblTonnageCheck = /* P-Qty - S-Qty */
 						dbo.fnCalculateQtyBetweenUOM (PUOM.intItemUOMId, ToWUOM.intItemUOMId, ALD.dblPAllocatedQty) 
 						- dbo.fnCalculateQtyBetweenUOM (SUOM.intItemUOMId, ToWUOM.intItemUOMId, ALD.dblSAllocatedQty)
-		,dblTotalMargin = RB.dblReservesBValueTotal * -1
-		,dblReservesATotalVariance = RA.dblReservesAVarianceTotal
+		,dblTotalMargin = /* Reserves B Total in Absolute Value */ 
+							ABS(RB.dblReservesBValueTotal)
+		,dblReservesATotalVariance = RA.dblReservesAVarianceTotal * -1
 		,blbHeaderLogo = dbo.fnSMGetCompanyLogo('Header')
 		,blbFooterLogo = dbo.fnSMGetCompanyLogo('Footer')
 		,blbFullHeaderLogo = dbo.fnSMGetCompanyLogo('FullHeaderLogo')
@@ -370,7 +372,7 @@ FROM
 										ELSE CC.dblRate END
 							,dblAmount = CASE WHEN CC.strCostMethod = 'Per Unit' THEN 
 												dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId,ToUOM.intItemUOMId,CD.dblQuantity) 
-												* dbo.fnCalculateCostBetweenUOM(CC.intItemUOMId,CToUOM.intItemUOMId,CC.dblRate) / ISNULL(CCUR.intCent, 1)
+												* dbo.fnCalculateCostBetweenUOM(CC.intItemUOMId,TonUOM.intItemUOMId,CC.dblRate) / ISNULL(CCUR.intCent, 1)
 											WHEN CC.strCostMethod = 'Amount' THEN
 												CC.dblRate
 											WHEN CC.strCostMethod = 'Per Container'	THEN
@@ -385,6 +387,8 @@ FROM
 							LEFT JOIN tblICItemUOM CDUOM ON CDUOM.intItemUOMId = CD.intPriceItemUOMId
 							OUTER APPLY (SELECT	TOP 1 intItemUOMId, dblUnitQty FROM	dbo.tblICItemUOM 
 									WHERE intItemId = CC.intItemId AND intUnitMeasureId = CDUOM.intUnitMeasureId) CToUOM
+							OUTER APPLY (SELECT	TOP 1 intItemUOMId, dblUnitQty FROM	dbo.tblICItemUOM 
+									WHERE intItemId = CC.intItemId AND intUnitMeasureId = @intUnitMeasureId) TonUOM
 					 WHERE CC.intItemId = I.intItemId AND ALD.intAllocationDetailId = @intAllocationDetailId) CC
 			WHERE I.intCategoryId = CP.intPnLReportReserveBCategoryId
 		) RB 

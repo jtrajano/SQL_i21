@@ -25,7 +25,7 @@ SELECT
 	,dblInvoicedAmount = CASE WHEN @intReserves = 1 THEN ISNULL(VCHR.dblTotal, 0) + ISNULL(INVC.dblTotal, 0) ELSE 0 END * -1
 	,dblVariance = CASE WHEN @intReserves = 1 THEN 
 						CASE WHEN (ISNULL(VCHR.dblTotal, 0) + ISNULL(INVC.dblTotal, 0)) <> 0 
-							THEN (ISNULL(VCHR.dblTotal, 0) + ISNULL(INVC.dblTotal, 0)) - ISNULL(CC.dblAmount, 0)
+							THEN ((ISNULL(VCHR.dblTotal, 0) + ISNULL(INVC.dblTotal, 0)) * -1) - (ISNULL(CC.dblAmount, 0) * -1)
 							ELSE 0 END
 					ELSE 0 END
 	,dblRecalcValue = CASE WHEN @intReserves = 1 THEN 
