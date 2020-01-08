@@ -93,7 +93,7 @@ FROM (
 		,strLocation strLocationName
 		,dtmEndDate
 		--,isnull(dblQtyUnpriced,dblQuantity) + ISNULL(dblQtyPriced - (dblQuantity - dblBalance),0) dblBalance
-		,case when strPricingStatus='Parially Priced' then h.dblQuantity - ISNULL(h.dblQtyPriced + (h.dblQuantity - h.dblBalance),0) 
+		,case when strPricingStatus='Partially Priced' then h.dblQuantity - ISNULL(h.dblQtyPriced + (h.dblQuantity - h.dblBalance),0) 
 				else isnull(h.dblQtyUnpriced,h.dblQuantity) end dblBalance 		
 		,-- wrong need to check
 		intDtlQtyUnitMeasureId intUnitMeasureId
@@ -126,7 +126,7 @@ FROM (
 	AND h.intCommodityId = case when isnull(@intCommodityId,0)=0 then h.intCommodityId else @intCommodityId end 
 	
 	) a
-WHERE a.intRowNum = 1  AND intContractStatusId NOT IN (2, 3, 6) and intPricingTypeId in(2,8) and strPricingStatus in( 'Parially Priced','Unpriced') 
+WHERE a.intRowNum = 1  AND intContractStatusId NOT IN (2, 3, 6) and intPricingTypeId in(2,8) and strPricingStatus in ('Partially Priced','Unpriced') 
 
 UNION
 
@@ -178,6 +178,6 @@ FROM (
 	AND h.intCommodityId = case when isnull(@intCommodityId,0)=0 then h.intCommodityId else @intCommodityId end 
 
 	) a
-WHERE a.intRowNum = 1  AND intContractStatusId NOT IN (2, 3, 6) and strPricingStatus = 'Parially Priced'  and intPricingTypeId in(2,8)
+WHERE a.intRowNum = 1  AND intContractStatusId NOT IN (2, 3, 6) and strPricingStatus = 'Partially Priced'  and intPricingTypeId in(2,8)
 
 )t

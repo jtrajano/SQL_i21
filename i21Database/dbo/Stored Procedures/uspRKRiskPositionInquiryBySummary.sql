@@ -16,19 +16,19 @@
 AS
 
 --DECLARE
---@intCommodityId INT = 1
---	, @intCompanyLocationId INT
---	, @intFutureMarketId INT = 1
---	, @intFutureMonthId INT = 41
---	, @intUOMId INT = 18
---	, @intDecimal INT = 0
---	, @intForecastWeeklyConsumption INT = 5900
---	, @intForecastWeeklyConsumptionUOMId INT = 0
---	, @intBookId INT = NULL
---	, @intSubBookId INT = NULL
---	, @strPositionBy NVARCHAR(100) = 'Product Type'
---	, @dtmPositionAsOf DATETIME = '2019-11-12 17:35:01'
---	, @strUomType NVARCHAR(100) = 'By Quantity'
+-- @intCommodityId INT   = 4174
+-- , @intCompanyLocationId INT  = 0
+-- , @intFutureMarketId INT  = 4151
+-- , @intFutureMonthId INT  = 5180
+-- , @intUOMId INT = 13  
+-- , @intDecimal INT = 0  
+-- , @intForecastWeeklyConsumption INT = NULL  
+-- , @intForecastWeeklyConsumptionUOMId INT = NULL  
+-- , @intBookId INT = NULL  
+-- , @intSubBookId INT = NULL  
+-- , @strPositionBy NVARCHAR(100)   = 'Product Type'
+-- , @dtmPositionAsOf DATETIME  = '2020-01-08'
+-- , @strUomType NVARCHAR(100)  = 'By Quantity'
 
 	DECLARE @dtmToDate DATETIME
 
@@ -626,7 +626,7 @@ AS
 				, strContractNumber = h.strContractNumber + '-' + CONVERT(NVARCHAR, h.intContractSeq) COLLATE Latin1_General_CI_AS
 				, strLocationName = strLocation
 				, h.dtmEndDate
-				, dblBalance = CASE WHEN strPricingStatus = 'Parially Priced' THEN h.dblQuantity - ISNULL(h.dblQtyPriced + (h.dblQuantity - h.dblBalance), 0)
+				, dblBalance = CASE WHEN strPricingStatus = 'Partially Priced' THEN h.dblQuantity - ISNULL(h.dblQtyPriced + (h.dblQuantity - h.dblBalance), 0)
 									ELSE ISNULL(h.dblQtyUnpriced, h.dblQuantity) END
 				, intUnitMeasureId = intDtlQtyUnitMeasureId
 				, intPricingTypeId = 2
@@ -667,7 +667,7 @@ AS
 			WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmHistoryCreated, 110), 110) <= @dtmToDate
 				AND h.intCommodityId = ISNULL(@intCommodityId, h.intCommodityId)
 		) a
-		WHERE a.intRowNum = 1 AND intContractStatusId NOT IN (2, 3, 6) AND intPricingTypeId IN(2, 8) AND strPricingStatus IN ('Parially Priced', 'Unpriced')
+		WHERE a.intRowNum = 1 AND intContractStatusId NOT IN (2, 3, 6) AND intPricingTypeId IN(2, 8) AND strPricingStatus IN ('Partially Priced', 'Unpriced')
 		
 		UNION ALL SELECT intRowNum
 			, dtmHistoryCreated
@@ -758,7 +758,7 @@ AS
 			WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmHistoryCreated, 110), 110) <= @dtmToDate
 				AND h.intCommodityId = ISNULL(@intCommodityId, h.intCommodityId)
 		) a
-		WHERE a.intRowNum = 1 AND intContractStatusId NOT IN (2, 3, 6) AND strPricingStatus = 'Parially Priced' AND intPricingTypeId IN (2, 8)
+		WHERE a.intRowNum = 1 AND intContractStatusId NOT IN (2, 3, 6) AND strPricingStatus = 'Partially Priced' AND intPricingTypeId IN (2, 8)
 	)t
 
 	IF EXISTS (SELECT TOP 1 1 FROM tblRKCompanyPreference WHERE ysnUseM2MDate = 1)
@@ -1004,7 +1004,7 @@ AS
 			, TransactionDate
 			, TranType
 			, CustVendor
-			, ISNULL(dblNoOfLot, 0) - ISNULL(dblFixedLots, 0) dblNoOfLot
+			, ISNULL(dblNoOfLot, 0) dblNoOfLot
 			, dblQuantity = CASE WHEN intPricingTypeIdHeader = 8 THEN dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId, @intUOMId, ((dblRatioQty / dblNoOfLot) * ISNULL(dblNoOfLot, 0) - (dblRatioQty / dblNoOfLot) * ISNULL(dblFixedLots, 0))) ELSE dblQuantity - dblFixedQty END
 			, intContractHeaderId
 			, intFutOptTransactionHeaderId
@@ -1079,7 +1079,7 @@ AS
 			WHERE cv.intContractStatusId <> 3 AND ISNULL(ysnDeltaHedge, 0) = 0
 				AND intContractDetailId IN (SELECT ISNULL(intContractDetailId, 0) FROM #tmpLotsQtyByDetail)
 		) t
-		WHERE ISNULL(dblNoOfLot, 0) - ISNULL(dblFixedLots, 0) <> 0
+		WHERE ISNULL(dblNoOfLot, 0) <> 0
 	) t1
 	
 	DROP TABLE #tmpLotsQtyByDetail
