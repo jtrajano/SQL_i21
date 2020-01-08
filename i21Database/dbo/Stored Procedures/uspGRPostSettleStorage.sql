@@ -9,7 +9,7 @@ AS
 BEGIN TRY
 	--return	
 	SET NOCOUNT ON
-	declare @debug_awesome_ness bit = 1
+	declare @debug_awesome_ness bit = 0
 	----- DEBUG POINT -----
 	if @debug_awesome_ness = 1	 AND 1 = 0
 	begin
@@ -197,7 +197,7 @@ BEGIN TRY
 	
 	----- DEBUG POINT -----
 
-	if @debug_awesome_ness = 1 and 1 = 1
+	if @debug_awesome_ness = 1 and 1 = 0
 	begin
 		select 'Settle storaget ticket information'
 		select * from tblGRSettleStorageTicket where intCustomerStorageId in ( 3375 )	
@@ -215,7 +215,7 @@ BEGIN TRY
 	WHERE CASE WHEN @ysnFromPriceBasisContract = 1 THEN CASE WHEN intSettleStorageId = @intSettleStorageId THEN 1 ELSE 0 END ELSE CASE WHEN intParentSettleStorageId = @intParentSettleStorageId THEN 1 ELSE 0 END END = 1
 
 	----- DEBUG POINT -----
-	if @debug_awesome_ness = 1	and 1 = 1
+	if @debug_awesome_ness = 1	and 1 = 0
 	begin
 		select 'settle storage' , * FROM tblGRSettleStorage
 					WHERE CASE WHEN @ysnFromPriceBasisContract = 1 THEN CASE WHEN intSettleStorageId = @intSettleStorageId THEN 1 ELSE 0 END ELSE CASE WHEN intParentSettleStorageId = @intParentSettleStorageId THEN 1 ELSE 0 END END = 1		
@@ -1925,7 +1925,6 @@ BEGIN TRY
 								on d.intContractDetailId = a.intContractDetailId
 						where intItemType = 3 and d.id is null
 
-					update @SettleVoucherCreate set intContractDetailId = null where intItemType = 3
 
 				end
 				----- DEBUG POINT -----
@@ -2180,7 +2179,7 @@ BEGIN TRY
 																			END
 																				)
 					,[intContractHeaderId]			= case when a.intItemType = 1 then  a.[intContractHeaderId] else null end -- need to set the contract details to null for non item
-					,[intContractDetailId]			= case when a.intItemType = 1 then  a.[intContractDetailId] else null end -- need to set the contract details to null for non item
+					,[intContractDetailId]			= a.[intContractDetailId] -- need to set the contract details to null for non item
 					,[intInventoryReceiptItemId] = 
 														--CASE 
 														--    WHEN ST.ysnDPOwnedType = 0 THEN NULL
@@ -2373,12 +2372,11 @@ BEGIN TRY
 				ORDER BY SST.intSettleStorageTicketId
 					,a.intItemType				
 				 
-
 							 
 				 ---we should delete priced contracts that has a voucher already
 					delete from @voucherPayable 
-						where intVoucherPayableId in (
-							select intVoucherPayableId from @voucherPayable a
+						where intContractDetailId in (
+							select c.intContractDetailId from @voucherPayable a
 								join tblCTContractHeader b 
 									on a.intContractHeaderId = b.intContractHeaderId and b.intPricingTypeId = 1
 								join tblAPBillDetail c
@@ -2386,6 +2384,9 @@ BEGIN TRY
 										and a.intContractDetailId = c.intContractDetailId
 										and c.intCustomerStorageId = a.intCustomerStorageId
 							)
+
+				---we should update the voucher payable to remove the contract detail that has a null contract header
+					update @voucherPayable set intContractDetailId = null where intContractDetailId is not null and intContractHeaderId is null
 
 					if @ysnFromPriceBasisContract = 1
 					begin
@@ -2413,7 +2414,7 @@ BEGIN TRY
 
 				----- DEBUG POINT -----	
 				----- DEBUG POINT -----				 
-				if @debug_awesome_ness = 1	 AND 1 = 1
+				if @debug_awesome_ness = 1	 AND 1 = 0
 				begin
 
 					select 'ct available quantity for voucher', @intContractDetailId					
@@ -3147,7 +3148,7 @@ BEGIN TRY
 							end
 
 							----- DEBUG POINT -----
-							if @debug_awesome_ness = 1	 AND 1 = 1
+							if @debug_awesome_ness = 1	 AND 1 = 0
 							begin
 
 								select 'selected units', @dblSelectedUnits
@@ -3321,7 +3322,7 @@ BEGIN TRY
 			END
 
 			----- DEBUG POINT -----
-			if @debug_awesome_ness = 1 and 1 = 1
+			if @debug_awesome_ness = 1 and 1 = 0
 			begin
 
 				select 'settle voucher create before storage history',* from @SettleVoucherCreate
