@@ -16,6 +16,7 @@ DELETE FROM cte WHERE RowNumber > 1;
    SELECT *, ROW_NUMBER() OVER(PARTITION BY strUPCCode ORDER BY strUPCCode) AS RowNumber
    FROM tblICImportStagingUOM
    WHERE strImportIdentifier = @strIdentifier
+	AND NULLIF(RTRIM(LTRIM(strUPCCode)), '') IS NOT NULL
 )
 DELETE FROM cte WHERE RowNumber > 1;
 
