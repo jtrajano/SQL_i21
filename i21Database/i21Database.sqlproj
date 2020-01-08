@@ -4825,6 +4825,10 @@
     <Build Include="dbo\Views\vyuCMCashGLAccountSetup.sql" />
     <Build Include="dbo\Functions\fnICGetReceiptTotals.sql" />
     <Build Include="dbo\Tables\tblSMApproverGroup.sql" />
+    <Build Include="dbo\Tables\tblICImportStagingUOM.sql" />
+    <Build Include="dbo\Tables\tblICImportStagingItem.sql" />
+    <Build Include="dbo\Tables\tblICImportStagingItemLocation.sql" />
+    <Build Include="dbo\Tables\tblICImportStagingItemPricing.sql" />
     <Build Include="dbo\Tables\tblSMApproverGroupUserSecurity.sql" />
     <Build Include="dbo\Tables\tblSMTransactionLockHistory.sql" />
     <Build Include="dbo\Tables\tblSMSignature.sql" />
@@ -4834,6 +4838,10 @@
     <Build Include="dbo\Tables\tblEMEntitySignature.sql" />
     <Build Include="dbo\Functions\fnICSplitStringToTable.sql" />
     <Build Include="dbo\Stored Procedures\uspICCopyItemLocation.sql" />
+    <Build Include="dbo\Stored Procedures\uspICImportItemsFromStaging.sql" />
+    <Build Include="dbo\Stored Procedures\uspICImportItemLocationsFromStaging.sql" />
+    <Build Include="dbo\Stored Procedures\uspICImportItemUOMsFromStaging.sql" />
+    <Build Include="dbo\Stored Procedures\uspICImportItemPricingsFromStaging.sql" />
     <Build Include="dbo\Stored Procedures\uspPATImportVolumeDetails.sql" />
     <Build Include="dbo\Stored Procedures\uspPATImportStockDetails.sql" />
     <Build Include="dbo\Stored Procedures\uspPATImportStockClassification.sql" />
