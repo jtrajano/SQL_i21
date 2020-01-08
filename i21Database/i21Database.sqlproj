@@ -8296,6 +8296,9 @@
     <Build Include="dbo\Views\vyuAPReceiptClearingGL.sql" />
     <Build Include="dbo\Functions\fnCTGetVoucherPayable.sql" />
     <Build Include="dbo\Tables\tblDBDistributionBurstGroupContact.sql" />
+    <Build Include="dbo\Tables\tblDBDistribution.sql" />
+    <Build Include="dbo\Tables\tblDBDistributionDetailBurstGroup.sql" />
+    <Build Include="dbo\Tables\tblDBDistributionDetailContact.sql" />
     <None Include="Scripts\Post-Deployment\ST\38_FileFieldMapping_Commander_NetworkCards.sql" />
     <Build Include="dbo\Tables\tblIPItemSupplyTarget.sql" />
     <Build Include="dbo\Views\vyuIPGetOpenWeightClaim.sql" />
