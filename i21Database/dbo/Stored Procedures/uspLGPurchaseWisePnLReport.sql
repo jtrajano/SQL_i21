@@ -180,7 +180,7 @@ SELECT
 					(dblInvoicedPValue + (dblDifferenceInFC * dblLotContractSizeInPriceUOM) + dblReservesAValueTotal) + dblInvoicedSValue
 	,dblEffectiveMarginRate = /* Effective Margin / S-Qty */
 						((dblInvoicedPValue + (dblDifferenceInFC * dblLotContractSizeInPriceUOM) + dblReservesAValueTotal) + dblInvoicedSValue)
-							/ dblSAllocatedQtyInPriceUOM
+							/ dblSAllocatedQtyInResUOM
 	,dblHedgePLDifference = /* Effective Hedge PL - Theor Hedge PL */
 							(dblDifferenceInFC * dblLotContractSizeInPriceUOM) - (dblDifferenceInFC * dblPAllocatedQtyInPriceUOM)
 	,dblTotalToBeRecovered = /* Hedge PL Difference + Reserves A Variance */
