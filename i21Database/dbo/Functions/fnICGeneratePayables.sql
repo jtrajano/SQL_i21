@@ -653,7 +653,8 @@ WHERE
 			)
 			AND 1 =  CASE WHEN CD.intPricingTypeId IS NOT NULL AND CD.intPricingTypeId IN (2) THEN 0 ELSE 1 END  --EXLCUDE ALL BASIS
 			AND 1 = CASE WHEN (A.intEntityVendorId = IR.intEntityVendorId AND CD.intPricingTypeId IS NOT NULL AND CD.intPricingTypeId = 5) THEN 0 ELSE 1 END --EXCLUDE DELAYED PRICING TYPE FOR RECEIPT VENDOR
-		)		
+		)	
+		AND ISNULL(A.ysnAllowVoucher, 1) = 1
 	)
 	-- This condition is used to insert the other charges, including the 3rd party vendors, to the payable table. 
 	OR (
@@ -691,6 +692,7 @@ WHERE
 				END = 1
 			)
 		)
+		AND ISNULL(A.ysnAllowVoucher, 1) = 1
 	)
 RETURN
 
