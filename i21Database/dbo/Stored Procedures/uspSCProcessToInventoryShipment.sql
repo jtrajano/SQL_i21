@@ -63,6 +63,7 @@ DECLARE @dblLoopItemContractUnits NUMERIC(38,20)
 DECLARE @dblPrevLoopItemContractId int
 DECLARE @dblLoopItemContractId int
 
+DECLARE @loopLoadDetailId INT
 
 SELECT @intLoadId = intLoadId
 	, @dblTicketFreightRate = dblFreightRate
@@ -121,23 +122,29 @@ BEGIN TRY
 				DECLARE @dblLoopContractUnits NUMERIC(38,20);
 				DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
 				FOR
-				SELECT intContractDetailId, dblUnitsDistributed
+				SELECT intContractDetailId, dblUnitsDistributed,intLoadDetailId
 				FROM @LineItems;
 
 				OPEN intListCursor;
 
 				-- Initial fetch attempt
-				FETCH NEXT FROM intListCursor INTO @intLoopContractId, @dblLoopContractUnits;
+				FETCH NEXT FROM intListCursor INTO @intLoopContractId, @dblLoopContractUnits,@loopLoadDetailId;
 
 				WHILE @@FETCH_STATUS = 0
 				BEGIN
-				   IF ISNULL(@intLoopContractId,0) != 0
-				   BEGIN
-					--    EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoopContractId, @dblLoopContractUnits, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId
-					   EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intLoopContractId, @dblLoopContractUnits, @intEntityId;
-				   END
+					IF ISNULL(@intLoopContractId,0) != 0
+					BEGIN
+						--    EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoopContractId, @dblLoopContractUnits, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId
+						EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intLoopContractId, @dblLoopContractUnits, @intEntityId;
+					END
+
+					IF ISNULL(@loopLoadDetailId,0) != 0 AND @strDistributionOption = 'LOD'
+					BEGIN
+						EXEC dbo.uspSCUpdateTicketLoadUsed @intTicketId,@loopLoadDetailId, @dblLoopContractUnits, @intEntityId;
+					END
+
 				   -- Attempt to fetch next row from cursor
-				   FETCH NEXT FROM intListCursor INTO @intLoopContractId, @dblLoopContractUnits;
+				   FETCH NEXT FROM intListCursor INTO @intLoopContractId, @dblLoopContractUnits,@loopLoadDetailId;
 				END;
 
 				CLOSE intListCursor;
@@ -203,7 +210,7 @@ BEGIN TRY
 						,intSubLocationId
 						,intStorageLocationId
 						,ysnIsStorage
-						,intStorageScheduleTypeId 
+						,intStorageScheduleTypeId
 						,ysnAllowVoucher
 					)
 					EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblRemainingUnitStorage , @intEntityId, @strDistributionOption, NULL
@@ -229,10 +236,10 @@ BEGIN TRY
 								,intLotId
 								,intSubLocationId
 								,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
-								,ysnIsStorage 
+								,ysnIsStorage
 								,ysnAllowVoucher
 							)
-							EXEC dbo.uspSCGetScaleItemForItemShipment 
+							EXEC dbo.uspSCGetScaleItemForItemShipment
 								@intTicketId
 								,@strSourceType
 								,@intUserId
@@ -263,10 +270,10 @@ BEGIN TRY
 					,intLotId
 					,intSubLocationId
 					,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
-					,ysnIsStorage 
+					,ysnIsStorage
 					,ysnAllowVoucher
 				)
-				EXEC dbo.uspSCGetScaleItemForItemShipment 
+				EXEC dbo.uspSCGetScaleItemForItemShipment
 					@intTicketId
 					,@strSourceType
 					,@intUserId
@@ -277,8 +284,8 @@ BEGIN TRY
 					,@strDistributionOption
 					,@LineItems
 
-			-- Validate the items to shipment 
-			EXEC dbo.uspICValidateProcessToInventoryShipment @ItemsForItemShipment; 
+			-- Validate the items to shipment
+			EXEC dbo.uspICValidateProcessToInventoryShipment @ItemsForItemShipment;
 
 			SELECT @totalShipment = COUNT(*) FROM @ItemsForItemShipment;
 			IF (@totalShipment = 0)
@@ -295,7 +302,7 @@ BEGIN TRY
 				dblUnitsRemaining,
 				dblCost,
 				intCurrencyId)
-				EXEC dbo.uspSCGetItemContractsAndAllocate 
+				EXEC dbo.uspSCGetItemContractsAndAllocate
 				 @intTicketId
 				,@intEntityId
 				,@dblNetUnits
@@ -305,9 +312,9 @@ BEGIN TRY
 
 				SET @intLoopContractId = NULL
 
-				SELECT TOP 1 
-					@dblPrevLoopItemContractId = intContractDetailId 
-					,@dblLoopItemContractId = intContractDetailId 
+				SELECT TOP 1
+					@dblPrevLoopItemContractId = intContractDetailId
+					,@dblLoopItemContractId = intContractDetailId
 					,@dblLoopItemContractUnits = dblUnitsDistributed
 				FROM @LineItems ORDER BY intContractDetailId ASC
 
@@ -316,17 +323,17 @@ BEGIN TRY
 					EXEC dbo.uspSCUpdateTicketItemContractUsed @intTicketId, @dblLoopItemContractId, @dblLoopItemContractUnits, @intEntityId;
 
 					SET @dblLoopItemContractId = NULL
-					SELECT TOP 1 
-						@dblPrevLoopItemContractId = intContractDetailId 
-						,@dblLoopItemContractId = intContractDetailId 
+					SELECT TOP 1
+						@dblPrevLoopItemContractId = intContractDetailId
+						,@dblLoopItemContractId = intContractDetailId
 						,@dblLoopItemContractUnits = dblUnitsDistributed
-					FROM @LineItems 
+					FROM @LineItems
 					WHERE intContractDetailId > @dblPrevLoopItemContractId
 					ORDER BY intContractDetailId ASC
 				END
 
 
-				
+
 
 				INSERT INTO @ItemsForItemShipment (
 					intItemId
@@ -346,10 +353,10 @@ BEGIN TRY
 					,intLotId
 					,intSubLocationId
 					,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
-					,ysnIsStorage 
+					,ysnIsStorage
 					,ysnAllowVoucher
 				)
-				EXEC dbo.uspSCGetScaleItemForItemShipment 
+				EXEC dbo.uspSCGetScaleItemForItemShipment
 				@intTicketId
 				,@strSourceType
 				,@intUserId
@@ -386,9 +393,9 @@ BEGIN TRY
 							,intSubLocationId
 							,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
 							,ysnIsStorage
-							,ysnAllowVoucher 
+							,ysnAllowVoucher
 						)
-						EXEC dbo.uspSCGetScaleItemForItemShipment 
+						EXEC dbo.uspSCGetScaleItemForItemShipment
 							@intTicketId
 							,@strSourceType
 							,@intUserId
@@ -399,7 +406,7 @@ BEGIN TRY
 							,@strDistributionOption
 							,@LineItems
 
-					-- Validate the items to receive 
+					-- Validate the items to receive
 					EXEC dbo.uspICValidateProcessToInventoryShipment @ItemsForItemShipment;
 				END
 				ELSE
@@ -412,7 +419,7 @@ BEGIN TRY
 						dblCost,
 						intCurrencyId,
 						intLoadDetailId)
-						EXEC dbo.uspSCGetContractsAndAllocate 
+						EXEC dbo.uspSCGetContractsAndAllocate
 						@intTicketId
 						,@intEntityId
 						,@dblNetUnits
@@ -434,7 +441,7 @@ BEGIN TRY
 
 						WHILE @@FETCH_STATUS = 0
 						BEGIN
-							-- Here we do some kind of action that requires us to 
+							-- Here we do some kind of action that requires us to
 							-- process the table variable row-by-row. This example simply
 							-- uses a PRINT statement as that action (not a very good
 							-- example).
@@ -458,7 +465,7 @@ BEGIN TRY
 									,intSubLocationId
 									,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
 									,ysnIsStorage
-									,intStorageScheduleTypeId 
+									,intStorageScheduleTypeId
 									,ysnAllowVoucher
 								)
 								EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblNetUnits , @intEntityId, @strDistributionOption, @intDPContractId, @intStorageScheduleId
@@ -494,7 +501,7 @@ BEGIN TRY
 						,intSubLocationId
 						,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
 						,ysnIsStorage
-						,intStorageScheduleTypeId 
+						,intStorageScheduleTypeId
 						,ysnAllowVoucher
 					)
 					EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblRemainingUnits , @intEntityId, @strDistributionOption, NULL, @intStorageScheduleId
@@ -509,7 +516,7 @@ BEGIN TRY
 						dblCost,
 						intCurrencyId,
 						intLoadDetailId)
-						EXEC dbo.uspSCGetContractsAndAllocate 
+						EXEC dbo.uspSCGetContractsAndAllocate
 							@intTicketId
 							,@intEntityId
 							,@dblRemainingUnits
@@ -529,7 +536,7 @@ BEGIN TRY
 
 							WHILE @@FETCH_STATUS = 0
 							BEGIN
-							   -- Here we do some kind of action that requires us to 
+							   -- Here we do some kind of action that requires us to
 							   -- process the table variable row-by-row. This example simply
 							   -- uses a PRINT statement as that action (not a very good
 							   -- example).
@@ -566,7 +573,7 @@ BEGIN TRY
 								,intLotId
 								,intSubLocationId
 								,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
-								,ysnIsStorage 
+								,ysnIsStorage
 								,ysnAllowVoucher
 							)
 							EXEC dbo.uspSCGetScaleItemForItemShipment
@@ -600,7 +607,7 @@ BEGIN TRY
 								,intLotId
 								,intSubLocationId
 								,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
-								,ysnIsStorage 
+								,ysnIsStorage
 								,ysnAllowVoucher
 							)
 							EXEC dbo.uspSCGetScaleItemForItemShipment
