@@ -66,12 +66,16 @@ DECLARE @strDistributionOption NVARCHAR(20)
 DECLARE @dblTicketScheduledQty NUMERIC(18,6)
 DECLARE @intTicketContractDetailId INT
 DECLARE @ysnLoadContract BIT
+DECLARE @intTicketEntityId INT
+DECLARE @intInventoryShipmentEntityId INT
 
 DECLARE @intLoopContractDetailId INT
 DECLARE @intLoopId INT
 DECLARE @dblLoopScheduleQty NUMERIC(18,6)
 DECLARE @intLoopCurrentId INT
 DECLARE @UNDISTRIBUTE_NOT_ALLOWED NVARCHAR(100)
+DECLARE @dblLoadUsedQty NUMERIC(18,6)
+DECLARE @dblScheduleQtyToUpdate NUMERIC(18,6)
 
 SET @UNDISTRIBUTE_NOT_ALLOWED = 'Un-distribute ticket with posted invoice is not allowed.'
 declare @intInventoryAdjustmentId int
@@ -88,6 +92,8 @@ BEGIN TRY
 			,@dblTicketScheduledQty = SC.dblScheduleQty
 			,@intTicketContractDetailId = SC.intContractId
 			,@ysnTicketHasSpecialDiscount = ysnHasSpecialDiscount
+			,@intTicketLoadDetailId = intLoadDetailId
+			,@intTicketEntityId = intEntityId
 		FROM tblSCTicket SC
 		WHERE intTicketId = @intTicketId
 
@@ -992,6 +998,31 @@ BEGIN TRY
 									EXEC [dbo].[uspICPostInventoryShipment] 0, 0, @strTransactionId, @intUserId;
 									EXEC [dbo].[uspGRDeleteStorageHistory] @strSourceType = 'InventoryShipment' ,@IntSourceKey = @InventoryShipmentId
 									EXEC [dbo].[uspGRReverseTicketOpenBalance] 'InventoryShipment' , @InventoryShipmentId ,@intUserId;
+
+									---- Update contract schedule if ticket Distribution type is load and link it to IS
+									IF(@strDistributionOption = 'LOD')
+									BEGIN
+										SET @intInventoryShipmentEntityId = 0
+										SELECT TOP 1
+											@intInventoryShipmentEntityId = intEntityCustomerId
+										FROM tblICInventoryShipment
+										WHERE intInventoryShipmentId = @InventoryShipmentId
+
+										SET @dblLoadUsedQty = 0
+										SELECT TOP 1 
+											@dblLoadUsedQty = dblQty
+										FROM tblSCTicketLoadUsed
+										WHERE intTicketId = @intTicketId
+											AND intLoadDetailId = @intTicketLoadDetailId
+											AND intEntityId = @intInventoryShipmentEntityId
+
+										IF @dblLoadUsedQty <> 0
+										BEGIN
+											EXEC uspCTUpdateScheduleQuantityUsingUOM @intTicketContractDetailId, @dblLoadUsedQty, @intUserId, @InventoryShipmentId, 'Inventory Shipment', @intTicketItemUOMId
+										END
+									END
+
+
 									EXEC [dbo].[uspICDeleteInventoryShipment] @InventoryShipmentId, @intEntityId;
 									DELETE tblQMTicketDiscount WHERE intTicketFileId = @InventoryShipmentId AND strSourceType = 'Inventory Shipment'
 
@@ -1010,7 +1041,7 @@ BEGIN TRY
 
 							---- Update contract schedule based on ticket schedule qty
 
-							IF ISNULL(@intTicketContractDetailId, 0) > 0 AND (@strDistributionOption = 'CNT' OR @strDistributionOption = 'LOD')
+							IF ISNULL(@intTicketContractDetailId, 0) > 0 AND (@strDistributionOption = 'CNT')
 							BEGIN
 								-- For Review
 								SET @ysnLoadContract = 0

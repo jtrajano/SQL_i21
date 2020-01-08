@@ -370,16 +370,20 @@ BEGIN TRY
 			BEGIN
 				IF(@strDistributionOption = 'LOD') AND @dblScheduleQty > @dblNetUnits AND @intContractDetailId = @intTicketContractDetailId
 				BEGIN 
-					-- REmove all the remaining scheduled quantity for the LS
-					SET @dblInreaseSchBy  = (@dblScheduleQty - @dblNetUnits) * -1
-					IF(@dblInreaseSchBy <> 0)
+					
+					IF(@dblTicketScheduledQuantity >= @dblScheduleQty)
 					BEGIN
-						EXEC	uspCTUpdateScheduleQuantity 
-								@intContractDetailId	=	@intContractDetailId,
-								@dblQuantityToUpdate	=	@dblInreaseSchBy,
-								@intUserId				=	@intUserId,
-								@intExternalId			=	@intTicketId,
-								@strScreenName			=	'Auto - Scale'
+						-- REmove all the remaining scheduled quantity for the LS
+						SET @dblInreaseSchBy  = (@dblScheduleQty - @dblNetUnits) * -1
+						IF(@dblInreaseSchBy <> 0)
+						BEGIN
+							EXEC	uspCTUpdateScheduleQuantity 
+									@intContractDetailId	=	@intContractDetailId,
+									@dblQuantityToUpdate	=	@dblInreaseSchBy,
+									@intUserId				=	@intUserId,
+									@intExternalId			=	@intTicketId,
+									@strScreenName			=	'Auto - Scale'
+						END
 					END
 				END
 				ELSE
@@ -448,22 +452,30 @@ BEGIN TRY
 			BEGIN
 				IF(@strDistributionOption = 'LOD')
 				BEGIN
-				
+					SET @dblInreaseSchBy = 0
+
 					IF(@intContractDetailId = @intTicketContractDetailId OR @intLoadDetailId IS NOT NULl)
 					BEGIN
-						SET @dblInreaseSchBy  = @dblAvailable - @dblScheduleQty
+						--compare the scheduled units to the processed units if it is less than then adjust the scheduled 
+						IF(@dblScheduleQty < @dblNetUnits)
+						BEGIN
+							SET @dblInreaseSchBy  = @dblNetUnits - @dblScheduleQty
+						END
 					END
 					ELSE
 					BEGIN
 						SET @dblInreaseSchBy  = @dblAvailable
 					END
 
-					EXEC	uspCTUpdateScheduleQuantity 
-							@intContractDetailId	=	@intContractDetailId,
-							@dblQuantityToUpdate	=	@dblInreaseSchBy,
-							@intUserId				=	@intUserId,
-							@intExternalId			=	@intTicketId,
-							@strScreenName			=	'Auto - Scale'
+					IF @dblInreaseSchBy <> 0
+						BEGIN
+						EXEC	uspCTUpdateScheduleQuantity 
+								@intContractDetailId	=	@intContractDetailId,
+								@dblQuantityToUpdate	=	@dblInreaseSchBy,
+								@intUserId				=	@intUserId,
+								@intExternalId			=	@intTicketId,
+								@strScreenName			=	'Auto - Scale'
+					END
 				
 				END
 				ELSE
