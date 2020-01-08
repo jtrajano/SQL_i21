@@ -753,9 +753,9 @@ BEGIN
 					AND t.strBatchId = @strBatchId
 					AND t.dblQty < 0 -- Ensure the Qty is negative. Credit Memo are positive Qtys.  Credit Memo does not ship out but receives stock. 
 
+			-- Or process the Reverasl for the In-Transit Costing 
 			IF (@intSourceInventoryShipmentId IS NOT NULL) 
-			BEGIN 
-				-- Do reversal for the In-Transit Costing 
+			BEGIN 				
 				INSERT INTO @ItemsForInTransitCosting (
 						[intItemId] 
 						,[intItemLocationId] 
@@ -795,18 +795,18 @@ BEGIN
 					,t.[intCurrencyId] 
 					,t.[dblExchangeRate] 
 					,[intTransactionId] = newSi.intInventoryShipmentId
-					,[intTransactionDetailId] = newSi.intSourceInventoryShipmentItemId
+					,[intTransactionDetailId] = newSi.intInventoryShipmentItemId
 					,[strTransactionId] = @strShipmentNumber
 					,t.[intTransactionTypeId] 
 					,t.[intLotId] 
-					,t.[intTransactionId]
-					,t.[strTransactionId]
-					,t.[intTransactionDetailId] 
+					,[intSourceTransactionId] = t.[intTransactionId]
+					,[strSourceTransactionId] = t.[strTransactionId]
+					,[intSourceTransactionDetailId] = t.[intTransactionDetailId] 
 					,[intFobPointId] = @intFobPointId
-					,[intInTransitSourceLocationId] = t.intItemLocationId
-					,[intForexRateTypeId] = t.intForexRateTypeId
-					,[dblForexRate] = t.dblForexRate
-					,[intSourceEntityId] = t.intSourceEntityId
+					,t.intInTransitSourceLocationId
+					,t.intForexRateTypeId
+					,t.dblForexRate
+					,t.intSourceEntityId
 				FROM 
 					tblICInventoryShipment s INNER JOIN tblICInventoryTransaction t
 						ON s.strShipmentNumber = t.strTransactionId
@@ -818,7 +818,7 @@ BEGIN
 				WHERE
 					s.intInventoryShipmentId = @intSourceInventoryShipmentId
 					AND t.ysnIsUnposted = 0
-					AND t.intInTransitSourceLocationId IS NOT NULL 
+					AND t.intInTransitSourceLocationId IS NOT NULL 					
 			END
 
 			IF EXISTS (SELECT TOP 1 1 FROM @ItemsForInTransitCosting)
