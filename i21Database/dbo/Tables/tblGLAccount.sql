@@ -26,8 +26,10 @@ GO
 ALTER TABLE [dbo].[tblGLAccount] ADD  CONSTRAINT [DF_tblGLAccount_strCashFlow]  DEFAULT (N'None') FOR [strCashFlow]
 GO
 
-CREATE NONCLUSTERED INDEX [IX_tblGLAccount_strAccountId]
-    ON [dbo].[tblGLAccount]([strAccountId] ASC);
+CREATE UNIQUE NONCLUSTERED INDEX [IX_tblGLAccount_strAccountId] ON [dbo].[tblGLAccount]
+(
+	[strAccountId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, FILLFACTOR = 70) ON [PRIMARY]
 GO
 
 EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Account Id' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLAccount', @level2type=N'COLUMN',@level2name=N'intAccountId'
