@@ -312,7 +312,9 @@ FROM
 		/* Reserves A */
 		OUTER APPLY 
 			(SELECT dblReservesARateTotal = SUM(ISNULL(CC.dblRate, 0))
-					,dblReservesAValueTotal = SUM(ISNULL(CC.dblAmount, 0))
+					,dblReservesAValueTotal = SUM(CASE WHEN (ISNULL(VCHR.dblTotal, 0) + ISNULL(INVC.dblTotal, 0)) <> 0 
+												THEN (ISNULL(VCHR.dblTotal, 0) + ISNULL(INVC.dblTotal, 0))
+												ELSE ISNULL(CC.dblAmount, 0) END)
 					,dblReservesAVarianceTotal = SUM(CASE WHEN (ISNULL(VCHR.dblTotal, 0) + ISNULL(INVC.dblTotal, 0)) <> 0 
 										THEN (ISNULL(VCHR.dblTotal, 0) + ISNULL(INVC.dblTotal, 0)) - ISNULL(CC.dblAmount, 0) 
 										ELSE 0 END)
@@ -324,7 +326,7 @@ FROM
 												ELSE CC.dblRate END
 								,dblAmount = CASE WHEN CC.strCostMethod = 'Per Unit' THEN 
 													dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId,ToUOM.intItemUOMId,CD.dblQuantity) 
-													* dbo.fnCalculateCostBetweenUOM(CC.intItemUOMId,CToUOM.intItemUOMId,CC.dblRate) / ISNULL(CCUR.intCent, 1)
+													* dbo.fnCalculateCostBetweenUOM(CC.intItemUOMId,TonUOM.intItemUOMId,CC.dblRate) / ISNULL(CCUR.intCent, 1)
 												WHEN CC.strCostMethod = 'Amount' THEN
 													CC.dblRate
 												WHEN CC.strCostMethod = 'Per Container'	THEN
@@ -339,6 +341,8 @@ FROM
 							LEFT JOIN tblICItemUOM CDUOM ON CDUOM.intItemUOMId = CD.intPriceItemUOMId
 							OUTER APPLY (SELECT	TOP 1 intItemUOMId, dblUnitQty FROM	dbo.tblICItemUOM 
 										WHERE intItemId = CC.intItemId AND intUnitMeasureId = CDUOM.intUnitMeasureId) CToUOM
+							OUTER APPLY (SELECT	TOP 1 intItemUOMId, dblUnitQty FROM	dbo.tblICItemUOM 
+									WHERE intItemId = CC.intItemId AND intUnitMeasureId = @intUnitMeasureId) TonUOM
 					WHERE CC.intItemId = I.intItemId AND ALD.intAllocationDetailId = @intAllocationDetailId) CC
 				OUTER APPLY (SELECT dblTotal = SUM(BLD.dblTotal) 
 					FROM tblAPBillDetail BLD 
