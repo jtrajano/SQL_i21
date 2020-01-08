@@ -4,8 +4,15 @@
 	@intUserId INT
 )
 AS
+
 BEGIN TRY
+	
+	SET QUOTED_IDENTIFIER OFF
+	SET ANSI_NULLS ON
 	SET NOCOUNT ON
+	SET XACT_ABORT ON
+	SET ANSI_WARNINGS OFF
+
 
 	DECLARE @ErrMsg AS NVARCHAR(MAX)
 	DECLARE @StorageHistoryStagingTable AS [StorageHistoryStagingTable]
@@ -45,7 +52,7 @@ BEGIN TRY
 		RETURN;
 	END
 	
-	BEGIN TRANSACTION
+	-- BEGIN TRANSACTION	
 		--integration to IC
 		DECLARE @cnt INT = 0
 
@@ -142,7 +149,6 @@ BEGIN TRY
 
 		----START--TRANSACTIONS FOR THE NEW CUSTOMER STORAGE-------
 		DELETE FROM @StorageHistoryStagingTable
-		
 		INSERT INTO @CustomerStorageStagingTable
 		(
 			[intEntityId]				
@@ -765,9 +771,15 @@ BEGIN TRY
 		UPDATE tblGRStorageHistory 
 		SET strTransferTicket = (SELECT strTransferStorageTicket FROM tblGRTransferStorage WHERE intTransferStorageId = @intTransferStorageId) 
 		WHERE intTransferStorageId = @intTransferStorageId
+
+		-- COMMIT TRANSACTION
+
+
 END TRY
 
 BEGIN CATCH
 	SET @ErrMsg = ERROR_MESSAGE()
 	RAISERROR (@ErrMsg,16,1,'WITH NOWAIT')
+
+	-- ROLLBACK TRANSACTION
 END CATCH
