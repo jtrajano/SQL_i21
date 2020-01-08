@@ -233,8 +233,8 @@ BEGIN TRY
 							@ysnFromInvoice 		= 	1  	 
 				END
 				
-				IF ISNULL(@ysnFromReturn, 0) = 0
-				BEGIN
+				-- IF ISNULL(@ysnFromReturn, 0) = 0
+				-- BEGIN
 					EXEC	uspCTUpdateScheduleQuantity
 							@intContractDetailId	=	@intContractDetailId,
 							@dblQuantityToUpdate	=	@dblSchQuantityToUpdate,
@@ -261,7 +261,7 @@ BEGIN TRY
 														, @intExternalId			= @intInvoiceDetailId
 														, @strScreenName			= 'Invoice' 
 						END
-				END
+				-- END
 		END
 
 		IF @ysnDestWtGrd = 1
