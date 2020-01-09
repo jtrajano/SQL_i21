@@ -136,7 +136,7 @@ BEGIN
 			,strProductType
 			,strItemNo
 			,strItemDescription
-			,dblSupplyTarget*100 AS strSupplyTarget
+			,dblSupplyTarget * 100 AS strSupplyTarget
 			,IsNULL([Opening Inventory strMonth1], 0) AS strOIMonth1
 			,IsNULL([Forecasted Consumption strMonth1], 0) AS strFCMonth1
 			,IsNULL([Existing Purchases strMonth1], 0) AS strOPMonth1
@@ -285,8 +285,14 @@ BEGIN
 			SELECT B.strBook
 				,SB.strSubBook
 				,CA.strDescription AS strProductType
-				,IsNULL(MI.strItemNo,I.strItemNo) AS strItemNo
-				,(Case When MI.intItemId is not null Then I.strItemNo+' - '+I.strDescription else NULL  End) AS strItemDescription
+				,IsNULL(MI.strItemNo, I.strItemNo) AS strItemNo
+				,(
+					CASE 
+						WHEN MI.intItemId IS NOT NULL
+							THEN I.strItemNo + ' - ' + I.strDescription
+						ELSE NULL
+						END
+					) AS strItemDescription
 				,Replace(Replace(A.strAttributeName, '<a>+ ', ''), '</a>', '') + ' ' + AV.strFieldName AS strAttributeName
 				,(
 					CASE 
@@ -581,7 +587,7 @@ BEGIN
 				,strProductType
 				,strItemNo
 				,strItemDescription
-				,dblSupplyTarget*100 AS strSupplyTarget
+				,dblSupplyTarget * 100 AS strSupplyTarget
 				,IsNULL([Opening Inventory strMonth1], 0) AS strOIMonth1
 				,IsNULL([Forecasted Consumption strMonth1], 0) AS strFCMonth1
 				,IsNULL([Existing Purchases strMonth1], 0) AS strOPMonth1
@@ -730,8 +736,14 @@ BEGIN
 				SELECT B.strBook
 					,SB.strSubBook
 					,CA.strDescription AS strProductType
-					,IsNULL(MI.strItemNo,I.strItemNo) AS strItemNo
-					,(Case When MI.intItemId is not null Then I.strItemNo+' - '+I.strDescription else NULL  End) AS strItemDescription
+					,IsNULL(MI.strItemNo, I.strItemNo) AS strItemNo
+					,(
+						CASE 
+							WHEN MI.intItemId IS NOT NULL
+								THEN I.strItemNo + ' - ' + I.strDescription
+							ELSE NULL
+							END
+						) AS strItemDescription
 					,Replace(Replace(A.strAttributeName, '<a>+ ', ''), '</a>', '') + ' ' + AV.strFieldName AS strAttributeName
 					,(
 						CASE 
@@ -751,7 +763,7 @@ BEGIN
 					,AV.intMainItemId
 					,I.intItemId
 					,ST.dblSupplyTarget
-					,MI.strItemNo as strMainItemNo
+					,MI.strItemNo AS strMainItemNo
 				FROM tblCTInvPlngReportAttributeValue AV
 				JOIN tblCTInvPlngReportMaster RM ON RM.intInvPlngReportMasterID = AV.intInvPlngReportMasterID
 				JOIN tblCTReportAttribute A ON A.intReportAttributeID = AV.intReportAttributeID
@@ -932,7 +944,6 @@ BEGIN
 						,[Ending Inventory strMonth24]
 						,[Weeks of Supply strMonth24]
 						)) AS PivotTable
-
 		END
 		ELSE
 		BEGIN
@@ -1005,7 +1016,7 @@ BEGIN
 				,ysnSpecificItemDescription
 				)
 			SELECT DISTINCT intItemId
-				,intMainItemId
+				,IsNULL(intMainItemId,intItemId)
 				,CASE 
 					WHEN intItemId <> intMainItemId
 						THEN 1
@@ -1017,6 +1028,25 @@ BEGIN
 					SELECT Item Collate Latin1_General_CI_AS
 					FROM [dbo].[fnSplitString](@strInvPlngReportMasterID, ',')
 					)
+
+			INSERT INTO @tblMFItemDetail (
+				intItemId
+				,intMainItemId
+				,ysnSpecificItemDescription
+				)
+			SELECT IB.intBundleItemId AS intItemId
+				,IB.intItemId AS intMainItemId
+				,0
+			FROM @tblMFItemDetail I
+			LEFT JOIN tblICItemBundle IB ON IB.intItemId = I.intItemId
+			WHERE I.ysnSpecificItemDescription = 0
+				--AND I.intMainItemId IS NULL
+				AND NOT EXISTS (
+					SELECT *
+					FROM @tblMFItemDetail FI
+					WHERE FI.intItemId = IB.intBundleItemId
+					)
+				AND IB.intBundleItemId IS NOT NULL
 
 			INSERT INTO #tblMFDemand (
 				intItemId
@@ -1035,7 +1065,11 @@ BEGIN
 				,sum(dbo.fnCTConvertQuantityToTargetItemUOM(SS.intItemId, IU.intUnitMeasureId, @intUnitMeasureId, SS.dblBalance)) AS dblIntrasitQty
 				,4 AS intAttributeId --Existing Purchases
 				,DATEDIFF(mm, 0, SS.dtmUpdatedAvailabilityDate) + 1 - D.intCurrentMonth AS intMonthId
-				,I.intMainItemId
+				,CASE 
+					WHEN I.ysnSpecificItemDescription = 1
+						THEN I.intMainItemId
+					ELSE NULL
+					END AS intMainItemId
 				,SS.intBookId
 				,SS.intSubBookId
 			FROM @tblMFItemDetail I
@@ -1060,7 +1094,11 @@ BEGIN
 					ELSE I.intMainItemId
 					END
 				,DATEDIFF(mm, 0, SS.dtmUpdatedAvailabilityDate) + 1 - D.intCurrentMonth
-				,I.intMainItemId
+				,CASE 
+					WHEN I.ysnSpecificItemDescription = 1
+						THEN I.intMainItemId
+					ELSE NULL
+					END 
 				,SS.intBookId
 				,SS.intSubBookId
 
@@ -1170,7 +1208,7 @@ BEGIN
 				,strProductType
 				,strItemNo
 				,strItemDescription
-				,dblSupplyTarget*100 AS strSupplyTarget
+				,dblSupplyTarget * 100 AS strSupplyTarget
 				,IsNULL([Opening Inventory strMonth1], 0) AS strOIMonth1
 				,IsNULL([Forecasted Consumption strMonth1], 0) AS strFCMonth1
 				,IsNULL([Existing Purchases strMonth1], 0) AS strOPMonth1
@@ -1319,8 +1357,14 @@ BEGIN
 				SELECT B.strBook
 					,SB.strSubBook
 					,CA.strDescription AS strProductType
-					,IsNULL(MI.strItemNo,I.strItemNo) AS strItemNo
-				,(Case When MI.intItemId is not null Then I.strItemNo+' - '+I.strDescription else NULL  End) AS strItemDescription
+					,IsNULL(MI.strItemNo, I.strItemNo) AS strItemNo
+					,(
+						CASE 
+							WHEN MI.intItemId IS NOT NULL
+								THEN I.strItemNo + ' - ' + I.strDescription
+							ELSE NULL
+							END
+						) AS strItemDescription
 					,Replace(Replace(A.strAttributeName, '<a>+ ', ''), '</a>', '') + ' strMonth' + Ltrim(FD.intMonthId) AS strAttributeName
 					,(
 						CASE 
@@ -1333,7 +1377,8 @@ BEGIN
 					,SB.intSubBookId
 					,FD.intMainItemId
 					,I.intItemId
-					,ST.dblSupplyTarget,MI.strItemNo as strMainItemNo
+					,ST.dblSupplyTarget
+					,MI.strItemNo AS strMainItemNo
 				FROM #tblMFFinalDemand FD
 				JOIN tblCTReportAttribute A ON A.intReportAttributeID = FD.intAttributeId
 				--JOIN tblCTInvPlngReportMaster RM ON RM.intInvPlngReportMasterID = @intReportMasterID

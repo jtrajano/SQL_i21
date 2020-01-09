@@ -8344,6 +8344,7 @@
     <Build Include="dbo\Views\vyuIPGetFutOptTransactionHeader.sql" />
     <Build Include="dbo\Stored Procedures\uspIPFutOptTransactionPopulateStgXML.sql" />
     <Build Include="dbo\Stored Procedures\uspIPFutOptTransactionProcessPreStage.sql" />
+    <Build Include="dbo\Views\vyuIPContractHeaderView.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
