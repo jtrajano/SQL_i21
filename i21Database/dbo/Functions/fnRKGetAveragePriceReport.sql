@@ -68,8 +68,8 @@ BEGIN
 		, strTransactionType
 		, strTransactionStatus
 		, strTransactionNo
-		, intBundleItemId = NULL
-		, strBundleItem = NULL
+		, intBundleItemId = intBundleItemId
+		, strBundleItem = strBundleItem
 		, intItemId
 		, strItemDescription
 		, dtmAvailability
@@ -101,10 +101,13 @@ BEGIN
 			, dblTransactionPrice = ISNULL(dbo.fnRKConvertUOMCurrency('ItemUOM', Detail.intItemUOMId, TonUOM.intItemUOMId, 1, Detail.intCurrencyId, @intCurrencyId, Detail.dblCashPrice, Detail.intContractDetailId), 0)
 			, dblContractDifferential = ISNULL(dbo.fnRKConvertUOMCurrency('ItemUOM', Detail.intBasisUOMId, TonUOM.intItemUOMId, 1, Detail.intCurrencyId, @intCurrencyId, Detail.dblBasis, Detail.intContractDetailId), 0) 
 			, dblFreight = ISNULL(CC.dblAmount, 0.00)
+			, intBundleItemId = Detail.intItemBundleId
+			, strBundleItem = IB.strDescription
 		FROM tblCTContractDetail Detail
 		JOIN tblCTContractHeader Header ON Header.intContractHeaderId = Detail.intContractHeaderId
 		JOIN tblICItem Item ON Item.intItemId = Detail.intItemId
 		JOIN TonUOM ON TonUOM.intCommodityId = Header.intCommodityId
+		LEFT JOIN tblICItemBundle IB ON IB.intItemId = Detail.intItemBundleId
 		LEFT JOIN (
 			SELECT CC.intContractDetailId
 				, dblAmount = SUM(dbo.fnRKConvertUOMCurrency('ItemUOM', CC.intItemUOMId, CCUOM.intItemUOMId, 1, CC.intCurrencyId, @intCurrencyId, dblAmount, CC.intContractDetailId))
@@ -136,6 +139,8 @@ BEGIN
 			, dblTransactionPrice = ISNULL(dbo.fnRKConvertUOMCurrency('ItemUOM', LD.intItemUOMId, TonUOM.intItemUOMId, 1, L.intCurrencyId, @intCurrencyId, LD.dblQuantity, CD.intContractDetailId), 0)
 			, dblContractDifferential = ISNULL(dbo.fnRKConvertUOMCurrency('ItemUOM', LD.intItemUOMId, TonUOM.intItemUOMId, 1, L.intCurrencyId, @intCurrencyId, CD.dblBasis, CD.intContractDetailId), 0)
 			, dblFreight = ISNULL(CC.dblAmount, 0.00)
+			, intBundleItemId = CD.intItemBundleId
+			, strBundleItem = IB.strDescription
 		FROM tblLGLoad L
 		JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId AND L.intPurchaseSale = 1
 		JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = LD.intItemUOMId
@@ -143,6 +148,7 @@ BEGIN
 		JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 		JOIN TonUOM ON TonUOM.intCommodityId = CH.intCommodityId
 		JOIN tblICItem Item ON Item.intItemId = LD.intItemId
+		LEFT JOIN tblICItemBundle IB ON IB.intItemId = CD.intItemBundleId
 		LEFT JOIN (
 			SELECT CC.intContractDetailId
 				, dblAmount = SUM(dbo.fnRKConvertUOMCurrency('ItemUOM', CC.intItemUOMId, CCUOM.intItemUOMId, 1, CC.intCurrencyId, @intCurrencyId, dblAmount, CC.intContractDetailId))
@@ -173,12 +179,15 @@ BEGIN
 			, dblTransactionPrice = ISNULL(dbo.fnRKConvertUOMCurrency('ItemUOM', Lots.intItemUOMId, TonUOM.intItemUOMId, 1, Lots.intDefaultCurrencyId, @intCurrencyId, Lots.dblCashPrice, Detail.intContractDetailId), 0)
 			, dblContractDifferential = ISNULL(dbo.fnRKConvertUOMCurrency('ItemUOM', Lots.intItemUOMId, TonUOM.intItemUOMId, 1, Lots.intDefaultCurrencyId, @intCurrencyId, Lots.dblBasis, Detail.intContractDetailId), 0)
 			, dblFreight = ISNULL(CC.dblAmount, 0.00)
+			, intBundleItemId = Detail.intItemBundleId
+			, strBundleItem = IB.strDescription
 		FROM vyuLGPickOpenInventoryLots Lots
 		JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = Lots.intItemUOMId
 		JOIN tblICItem Item ON Item.intItemId = Lots.intItemId
 		LEFT JOIN tblCTContractDetail Detail ON Detail.intContractDetailId = Lots.intContractDetailId
 		LEFT JOIN tblCTContractHeader Header ON Header.intContractHeaderId = Detail.intContractHeaderId
 		JOIN TonUOM ON TonUOM.intCommodityId = Lots.intCommodityId
+		LEFT JOIN tblICItemBundle IB ON IB.intItemId = Detail.intItemBundleId
 		LEFT JOIN (
 			SELECT CC.intContractDetailId
 				, dblAmount = SUM(dbo.fnRKConvertUOMCurrency('ItemUOM', CC.intItemUOMId, CCUOM.intItemUOMId, 1, CC.intCurrencyId, @intCurrencyId, dblAmount, CC.intContractDetailId))
@@ -206,6 +215,8 @@ BEGIN
 			, dblTransactionPrice = ISNULL(dbo.fnRKConvertUOMCurrency('CommodityUOM', cUOM.intCommodityUnitMeasureId, mtUOM.intCommodityUnitMeasureId, 1, FM.intCurrencyId, @intCurrencyId, DAP.dblNetLongAvg, NULL), 0) 
 			, dblContractDifferential = NULL
 			, dblFreight = NULL
+			, intBundleItemId = NULL
+			, strBundleItem = NULL
 		FROM vyuRKGetDailyAveragePriceDetail DAP
 		JOIN tblRKFutureMarket FM ON FM.intFutureMarketId = DAP.intFutureMarketId
 		JOIN TonUOM ON TonUOM.intCommodityId = DAP.intCommodityId
