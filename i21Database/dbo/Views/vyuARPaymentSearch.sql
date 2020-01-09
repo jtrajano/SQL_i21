@@ -122,6 +122,7 @@ OUTER APPLY (
 				FROM dbo.tblARPaymentDetail WITH (NOLOCK)
 				WHERE intPaymentId = P.intPaymentId
 				  AND intInvoiceId IS NOT NULL
+				  AND dblPayment <> 0
 			) ARDETAILS ON I.intInvoiceId = ARDETAILS.intInvoiceId
 
 			UNION ALL
@@ -133,6 +134,7 @@ OUTER APPLY (
 				FROM dbo.tblARPaymentDetail WITH (NOLOCK)
 				WHERE intPaymentId = P.intPaymentId
 				  AND intBillId IS NOT NULL
+				  AND dblPayment <> 0
 			) BILLDETAILS ON BILL.intBillId = BILLDETAILS.intBillId
 		) T		
 		FOR XML PATH ('')
