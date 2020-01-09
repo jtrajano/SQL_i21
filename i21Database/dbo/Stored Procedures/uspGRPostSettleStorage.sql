@@ -2816,7 +2816,8 @@ BEGIN TRY
 								end
 
 								update a
-									set dblPaidAmount = (b.dblOldCost + isnull(@sum_e, 0)) * a.dblUnits
+									set dblPaidAmount = (b.dblOldCost + isnull(@sum_e, 0)) * a.dblUnits,
+										dblOldCost = b.dblOldCost
 										from tblGRStorageHistory a
 											join @voucherPayable b 
 												on a.intContractHeaderId = b.intContractHeaderId
@@ -2831,9 +2832,11 @@ BEGIN TRY
 										where strType = 'Settlement'								
 							
 								----- DEBUG POINT -----
-								if @debug_awesome_ness = 1 and 1 = 0
+								if @debug_awesome_ness = 1 and 1 = 1
 								begin									
 									select 'qty tracking ',@dblQtyFromCt , @dblTotalVoucheredQuantity , @dblSelectedUnits,  @dblQtyFromCt + @dblTotalVoucheredQuantity 
+
+									select * from tblGRStorageHistory order by intStorageHistoryId desc
 								end
 								----- DEBUG POINT -----														
 
@@ -3037,6 +3040,7 @@ BEGIN TRY
 					,[intBillId]
 					,[intSettleStorageId]
 					,[strVoucher]
+					,[dblOldCost]
 				)
 				SELECT 
 					 [intConcurrencyId]     = 1 
@@ -3054,6 +3058,7 @@ BEGIN TRY
 					,[intBillId]			= CASE WHEN @intVoucherId = 0 THEN NULL ELSE @intVoucherId END
 					,intSettleStorageId		= @intSettleStorageId
 					,strVoucher				= @strVoucher
+					,dblOldCost				= (select top 1 dblOldCost from @voucherPayable where intItemId = CS.intItemId AND dblOldCost > 0)
 				FROM @SettleVoucherCreate SV
 				JOIN tblGRCustomerStorage CS 
 					ON CS.intCustomerStorageId = SV.intCustomerStorageId

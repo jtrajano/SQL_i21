@@ -230,7 +230,14 @@ BEGIN
 														END 													
 													)
 													AS DECIMAL(18,2)) 
-													- sh.dblPaidAmount
+													- (CAST(
+													dbo.fnMultiply(
+														--[Voucher Qty]
+														CASE WHEN B.intWeightUOMId IS NULL THEN B.dblQtyReceived ELSE B.dblNetWeight END
+														--[Voucher Cost]
+														,sh.dblOldCost													
+													)
+													AS DECIMAL(18,2))  )
 			,[intCurrencyId] 					=	@intFunctionalCurrencyId -- It is always in functional currency. 
 			,[intTransactionId]					=	A.intBillId
 			,[intTransactionDetailId] 			=	B.intBillDetailId
@@ -263,7 +270,7 @@ BEGIN
 		INNER JOIN tblSCTicket G ON C.intTicketId = G.intTicketId
 		LEFT JOIN tblICItemUOM voucherCostUOM
 			ON voucherCostUOM.intItemUOMId = ISNULL(B.intCostUOMId, B.intUnitOfMeasureId)
-		WHERE sh.dblPaidAmount != B.dblCost AND B.intCustomerStorageId > 0 AND D.strType = 'Inventory' AND TS.intTransferStorageId IS NULL
+		WHERE (sh.dblOldCost is not null and sh.dblOldCost != B.dblCost) AND B.intCustomerStorageId > 0 AND D.strType = 'Inventory' AND TS.intTransferStorageId IS NULL
 		-- UNION ALL
 		-- --DISCOUNTS
 		-- SELECT
@@ -333,7 +340,7 @@ BEGIN
 														END 													
 													)
 													AS DECIMAL(18,2)) 
-													- sh.dblPaidAmount
+													- (sh.dblPaidAmount)
 			,[intCurrencyId] 					=	@intFunctionalCurrencyId -- It is always in functional currency. 
 			,[intTransactionId]					=	A.intBillId
 			,[intTransactionDetailId] 			=	B.intBillDetailId
