@@ -667,6 +667,7 @@ BEGIN TRY
 					,dblSettleContractUnits
 					,ysnDiscountFromGrossWeight
 					,intPricingTypeId
+					,intContractUOMId
 				)
 				SELECT 
 					 intCustomerStorageId		= CS.intCustomerStorageId
@@ -703,7 +704,8 @@ BEGIN TRY
 													WHEN DCO.strDiscountCalculationOption = 'Gross Weight' THEN 1
 													ELSE 0
 												END
-					,intPricingTypeId				= CD.intPricingTypeId
+					,intPricingTypeId			= CD.intPricingTypeId
+					,intContractUOMId			= SC.intContractUOMId
 				FROM tblGRCustomerStorage CS
 				JOIN tblGRSettleStorageTicket SST 
 					ON SST.intCustomerStorageId = CS.intCustomerStorageId 
