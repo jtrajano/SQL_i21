@@ -13,6 +13,7 @@
 	@beginTransaction	AS NVARCHAR(50)		= NULL,
 	@endTransaction		AS NVARCHAR(50)		= NULL,
 	@exclude			AS NVARCHAR(MAX)	= NULL,
+	@isPricingContract	AS INT				= 0,
 	@successfulCount	AS INT				= 0 OUTPUT,
 	@invalidCount		AS INT				= 0 OUTPUT,
 	@success			AS BIT				= 0 OUTPUT,
@@ -359,82 +360,85 @@ DELETE FROM @adjustedEntries WHERE ROUND(dblNewValue, 2) = 0
 
 --CHARGES COST ADJUSTMENT
 DECLARE @ChargesToAdjust as OtherChargeCostAdjustmentTableType
-INSERT INTO @ChargesToAdjust 
-(
-	[intInventoryReceiptChargeId] 
-	,[dblNewValue] 
-	,[dtmDate] 
-	,[intTransactionId] 
-	,[intTransactionDetailId] 
-	,[strTransactionId] 
-)
-SELECT 
-	[intInventoryReceiptChargeId] = rc.intInventoryReceiptChargeId
-	,[dblNewValue] = --B.dblCost - B.dblOldCost
-			CASE 
-			WHEN ISNULL(rc.dblForexRate, 1) <> 1 THEN 
-			-- Formula: 
-			-- 1. {Voucher Other Charge} minus {IR Other Charge} 
-			-- 2. convert to sub currency cents. 
-			-- 3. and then convert into functional currency. 
-				CAST(
-				((B.dblQtyReceived * B.dblCost)
-					/ ISNULL(r.intSubCurrencyCents, 1) 
-					* ISNULL(rc.dblForexRate, 1)) 
-				AS DECIMAL(18,2))
-				- 
-				CAST(
-				((rc.dblAmount - ISNULL(rc.dblAmountBilled, 0)) 
-					/ ISNULL(r.intSubCurrencyCents, 1) 
-					* ISNULL(rc.dblForexRate, 1) )
-				AS DECIMAL(18,2))
-			WHEN ISNULL(rc.ysnSubCurrency, 0) = 1 THEN 
-			-- Formula: 
-			-- 1. {Voucher Other Charge} minus {IR Other Charge} 
-			-- 2. and then convert into functional currency. 
-			CAST(
-				(
-					(B.dblQtyReceived * B.dblCost)
-					/ ISNULL(r.intSubCurrencyCents, 1) )  
-			AS DECIMAL(18,2))
-				- 
-				CAST(
-				(
-					(rc.dblAmount - ISNULL(rc.dblAmountBilled, 0)) 
-					/ ISNULL(r.intSubCurrencyCents, 1))
-				AS DECIMAL(18,2))
-			ELSE
-			-- Formula: 
-			-- 1. {Voucher Other Charge} minus {IR Other Charge} 
-				CAST(
-				(B.dblQtyReceived * B.dblCost )  
-				AS DECIMAL(18,2))
-				- 
-				CAST(
-				(rc.dblAmount - ISNULL(rc.dblAmountBilled, 0))
-				AS DECIMAL(18,2))
-			END  
-	,[dtmDate] = A.dtmDate
-	,[intTransactionId] = A.intBillId
-	,[intTransactionDetailId] = B.intBillDetailId
-	,[strTransactionId] = A.strBillId
-FROM tblAPBill A INNER JOIN tblAPBillDetail B
-ON A.intBillId = B.intBillId
-INNER JOIN (
-	tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptCharge rc 
-ON r.intInventoryReceiptId = rc.intInventoryReceiptId
-)
-ON rc.intInventoryReceiptChargeId = B.intInventoryReceiptChargeId
-WHERE 
-A.intBillId IN (SELECT intBillId FROM #tmpPostBillData)
-AND B.intInventoryReceiptChargeId IS NOT NULL 
--- AND rc.ysnInventoryCost = 1 --create cost adjustment entries for Inventory only for inventory cost yes
-AND (
-	(B.dblCost <> (CASE WHEN rc.strCostMethod = 'Amount' THEN rc.dblAmount ELSE rc.dblRate END))
-	OR ISNULL(NULLIF(rc.dblForexRate,0),1) <> B.dblRate
-)
-AND A.intTransactionReversed IS NULL
 
+IF @isPricingContract = 0
+BEGIN
+	INSERT INTO @ChargesToAdjust 
+	(
+		[intInventoryReceiptChargeId] 
+		,[dblNewValue] 
+		,[dtmDate] 
+		,[intTransactionId] 
+		,[intTransactionDetailId] 
+		,[strTransactionId] 
+	)
+	SELECT 
+		[intInventoryReceiptChargeId] = rc.intInventoryReceiptChargeId
+		,[dblNewValue] = --B.dblCost - B.dblOldCost
+				CASE 
+				WHEN ISNULL(rc.dblForexRate, 1) <> 1 THEN 
+				-- Formula: 
+				-- 1. {Voucher Other Charge} minus {IR Other Charge} 
+				-- 2. convert to sub currency cents. 
+				-- 3. and then convert into functional currency. 
+					CAST(
+					((B.dblQtyReceived * B.dblCost)
+						/ ISNULL(r.intSubCurrencyCents, 1) 
+						* ISNULL(rc.dblForexRate, 1)) 
+					AS DECIMAL(18,2))
+					- 
+					CAST(
+					((rc.dblAmount - ISNULL(rc.dblAmountBilled, 0)) 
+						/ ISNULL(r.intSubCurrencyCents, 1) 
+						* ISNULL(rc.dblForexRate, 1) )
+					AS DECIMAL(18,2))
+				WHEN ISNULL(rc.ysnSubCurrency, 0) = 1 THEN 
+				-- Formula: 
+				-- 1. {Voucher Other Charge} minus {IR Other Charge} 
+				-- 2. and then convert into functional currency. 
+				CAST(
+					(
+						(B.dblQtyReceived * B.dblCost)
+						/ ISNULL(r.intSubCurrencyCents, 1) )  
+				AS DECIMAL(18,2))
+					- 
+					CAST(
+					(
+						(rc.dblAmount - ISNULL(rc.dblAmountBilled, 0)) 
+						/ ISNULL(r.intSubCurrencyCents, 1))
+					AS DECIMAL(18,2))
+				ELSE
+				-- Formula: 
+				-- 1. {Voucher Other Charge} minus {IR Other Charge} 
+					CAST(
+					(B.dblQtyReceived * B.dblCost )  
+					AS DECIMAL(18,2))
+					- 
+					CAST(
+					(rc.dblAmount - ISNULL(rc.dblAmountBilled, 0))
+					AS DECIMAL(18,2))
+				END  
+		,[dtmDate] = A.dtmDate
+		,[intTransactionId] = A.intBillId
+		,[intTransactionDetailId] = B.intBillDetailId
+		,[strTransactionId] = A.strBillId
+	FROM tblAPBill A INNER JOIN tblAPBillDetail B
+	ON A.intBillId = B.intBillId
+	INNER JOIN (
+		tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptCharge rc 
+	ON r.intInventoryReceiptId = rc.intInventoryReceiptId
+	)
+	ON rc.intInventoryReceiptChargeId = B.intInventoryReceiptChargeId
+	WHERE 
+	A.intBillId IN (SELECT intBillId FROM #tmpPostBillData)
+	AND B.intInventoryReceiptChargeId IS NOT NULL 
+	-- AND rc.ysnInventoryCost = 1 --create cost adjustment entries for Inventory only for inventory cost yes
+	AND (
+		(B.dblCost <> (CASE WHEN rc.strCostMethod = 'Amount' THEN rc.dblAmount ELSE rc.dblRate END))
+		OR ISNULL(NULLIF(rc.dblForexRate,0),1) <> B.dblRate
+	)
+	AND A.intTransactionReversed IS NULL
+END
 -- Remove zero cost adjustments. 
 DELETE FROM @ChargesToAdjust WHERE ROUND(dblNewValue, 2) = 0 
 -- SELECT 
