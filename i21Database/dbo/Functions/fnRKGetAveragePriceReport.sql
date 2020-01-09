@@ -97,9 +97,9 @@ BEGIN
 			, dtmAvailability = Detail.dtmUpdatedAvailabilityDate
 			, Detail.intFutureMarketId
 			, Detail.intFutureMonthId
-			, dblQty = ISNULL(dbo.fnCTConvertQuantityToTargetItemUOM(Detail.intItemId, Detail.intUnitMeasureId, CC.intUnitMeasureId, Detail.dblBalance), 0)
-			, dblTransactionPrice = ISNULL(dbo.fnRKConvertUOMCurrency('ItemUOM', Detail.intItemUOMId, CC.intItemUOMId, 1, Detail.intCurrencyId, @intCurrencyId, Detail.dblCashPrice, Detail.intContractDetailId), 0)
-			, dblContractDifferential = ISNULL(dbo.fnRKConvertUOMCurrency('ItemUOM', Detail.intBasisUOMId, CC.intItemUOMId, 1, Detail.intCurrencyId, @intCurrencyId, Detail.dblBasis, Detail.intContractDetailId), 0) 
+			, dblQty = ISNULL(dbo.fnCTConvertQuantityToTargetItemUOM(Detail.intItemId, Detail.intUnitMeasureId, TonUOM.intUnitMeasureId, Detail.dblBalance), 0)
+			, dblTransactionPrice = ISNULL(dbo.fnRKConvertUOMCurrency('ItemUOM', Detail.intItemUOMId, TonUOM.intItemUOMId, 1, Detail.intCurrencyId, @intCurrencyId, Detail.dblCashPrice, Detail.intContractDetailId), 0)
+			, dblContractDifferential = ISNULL(dbo.fnRKConvertUOMCurrency('ItemUOM', Detail.intBasisUOMId, TonUOM.intItemUOMId, 1, Detail.intCurrencyId, @intCurrencyId, Detail.dblBasis, Detail.intContractDetailId), 0) 
 			, dblFreight = ISNULL(CC.dblAmount, 0.00)
 		FROM tblCTContractDetail Detail
 		JOIN tblCTContractHeader Header ON Header.intContractHeaderId = Detail.intContractHeaderId
@@ -107,9 +107,10 @@ BEGIN
 		JOIN TonUOM ON TonUOM.intCommodityId = Header.intCommodityId
 		LEFT JOIN (
 			SELECT CC.intContractDetailId
-				, dblAmount = SUM(dbo.fnRKConvertUOMCurrency('ItemUOM', CC.intItemUOMId, TonUOM.intItemUOMId, 1, CC.intCurrencyId, @intCurrencyId, dblAmount, CC.intContractDetailId))
+				, dblAmount = SUM(dbo.fnRKConvertUOMCurrency('ItemUOM', CC.intItemUOMId, CCUOM.intItemUOMId, 1, CC.intCurrencyId, @intCurrencyId, dblAmount, CC.intContractDetailId))
 			FROM vyuCTContractCostView CC
 			JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CC.intContractHeaderId
+			JOIN TonUOM CCUOM ON CCUOM.intCommodityId = CH.intCommodityId
 			WHERE UPPER(strItemDescription) LIKE '%FREIGHT%'
 			GROUP BY CC.intContractDetailId
 		) CC ON CC.intContractDetailId = Detail.intContractDetailId
@@ -131,21 +132,23 @@ BEGIN
 			, dtmAvailability = CD.dtmUpdatedAvailabilityDate
 			, CD.intFutureMarketId
 			, CD.intFutureMonthId
-			, dblQty = ISNULL(dbo.[fnCTConvertQuantityToTargetItemUOM](LD.intItemId, ItemUOM.intUnitMeasureId, CC.intUnitMeasureId, LD.dblQuantity), 0)
-			, dblTransactionPrice = ISNULL(dbo.fnRKConvertUOMCurrency('ItemUOM', LD.intItemUOMId, CC.intItemUOMId, 1, L.intCurrencyId, @intCurrencyId, LD.dblQuantity, CD.intContractDetailId), 0)
-			, dblContractDifferential = ISNULL(dbo.fnRKConvertUOMCurrency('ItemUOM', LD.intItemUOMId, CC.intItemUOMId, 1, L.intCurrencyId, @intCurrencyId, CD.dblBasis, CD.intContractDetailId), 0)
+			, dblQty = ISNULL(dbo.[fnCTConvertQuantityToTargetItemUOM](LD.intItemId, ItemUOM.intUnitMeasureId, TonUOM.intUnitMeasureId, LD.dblQuantity), 0)
+			, dblTransactionPrice = ISNULL(dbo.fnRKConvertUOMCurrency('ItemUOM', LD.intItemUOMId, TonUOM.intItemUOMId, 1, L.intCurrencyId, @intCurrencyId, LD.dblQuantity, CD.intContractDetailId), 0)
+			, dblContractDifferential = ISNULL(dbo.fnRKConvertUOMCurrency('ItemUOM', LD.intItemUOMId, TonUOM.intItemUOMId, 1, L.intCurrencyId, @intCurrencyId, CD.dblBasis, CD.intContractDetailId), 0)
 			, dblFreight = ISNULL(CC.dblAmount, 0.00)
 		FROM tblLGLoad L
 		JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId AND L.intPurchaseSale = 1
 		JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = LD.intItemUOMId
 		JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
 		JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+		JOIN TonUOM ON TonUOM.intCommodityId = CH.intCommodityId
 		JOIN tblICItem Item ON Item.intItemId = LD.intItemId
 		LEFT JOIN (
 			SELECT CC.intContractDetailId
-				, dblAmount = SUM(dbo.fnRKConvertUOMCurrency('ItemUOM', CC.intItemUOMId, TonUOM.intItemUOMId, 1, CC.intCurrencyId, @intCurrencyId, dblAmount, CC.intContractDetailId))
+				, dblAmount = SUM(dbo.fnRKConvertUOMCurrency('ItemUOM', CC.intItemUOMId, CCUOM.intItemUOMId, 1, CC.intCurrencyId, @intCurrencyId, dblAmount, CC.intContractDetailId))
 			FROM vyuCTContractCostView CC
 			JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CC.intContractHeaderId
+			JOIN TonUOM CCUOM ON CCUOM.intCommodityId = CH.intCommodityId
 			WHERE UPPER(strItemDescription) LIKE '%FREIGHT%'
 			GROUP BY CC.intContractDetailId
 		) CC ON CC.intContractDetailId = CD.intContractDetailId
@@ -166,7 +169,7 @@ BEGIN
 			, dtmAvailability = Detail.dtmUpdatedAvailabilityDate
 			, Detail.intFutureMarketId
 			, Detail.intFutureMonthId
-			, dblQty = ISNULL(dbo.[fnCTConvertQuantityToTargetItemUOM](Lots.intItemId, ItemUOM.intUnitMeasureId, CC.intUnitMeasureId, Lots.dblBalance), 0)
+			, dblQty = ISNULL(dbo.[fnCTConvertQuantityToTargetItemUOM](Lots.intItemId, ItemUOM.intUnitMeasureId, TonUOM.intUnitMeasureId, Lots.dblBalance), 0)
 			, dblTransactionPrice = ISNULL(dbo.fnRKConvertUOMCurrency('ItemUOM', Lots.intItemUOMId, TonUOM.intItemUOMId, 1, Lots.intDefaultCurrencyId, @intCurrencyId, Lots.dblCashPrice, Detail.intContractDetailId), 0)
 			, dblContractDifferential = ISNULL(dbo.fnRKConvertUOMCurrency('ItemUOM', Lots.intItemUOMId, TonUOM.intItemUOMId, 1, Lots.intDefaultCurrencyId, @intCurrencyId, Lots.dblBasis, Detail.intContractDetailId), 0)
 			, dblFreight = ISNULL(CC.dblAmount, 0.00)
@@ -178,9 +181,10 @@ BEGIN
 		JOIN TonUOM ON TonUOM.intCommodityId = Lots.intCommodityId
 		LEFT JOIN (
 			SELECT CC.intContractDetailId
-				, dblAmount = SUM(dbo.fnRKConvertUOMCurrency('ItemUOM', CC.intItemUOMId, TonUOM.intItemUOMId, 1, CC.intCurrencyId, @intCurrencyId, dblAmount, CC.intContractDetailId))
+				, dblAmount = SUM(dbo.fnRKConvertUOMCurrency('ItemUOM', CC.intItemUOMId, CCUOM.intItemUOMId, 1, CC.intCurrencyId, @intCurrencyId, dblAmount, CC.intContractDetailId))
 			FROM vyuCTContractCostView CC
 			JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CC.intContractHeaderId
+			JOIN TonUOM CCUOM ON CCUOM.intCommodityId = CH.intCommodityId
 			WHERE UPPER(strItemDescription) LIKE '%FREIGHT%'
 			GROUP BY CC.intContractDetailId
 		) CC ON CC.intContractDetailId = Detail.intContractDetailId
