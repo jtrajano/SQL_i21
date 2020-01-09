@@ -8345,6 +8345,10 @@
     <Build Include="dbo\Stored Procedures\uspIPFutOptTransactionPopulateStgXML.sql" />
     <Build Include="dbo\Stored Procedures\uspIPFutOptTransactionProcessPreStage.sql" />
     <Build Include="dbo\Views\vyuIPContractHeaderView.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPFutOptTransactionTransferStgXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPFutOptTransactionProcessStgXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPFutOptTransactionTransferAckXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPFutOptTransactionProcessAckXML.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

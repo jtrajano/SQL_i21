@@ -57,7 +57,6 @@ SELECT T.intFutOptTransactionId
 	,E.strName
 	,BA.strAccountNumber
 	,FM.strFutMarketName
-	--,BC.strProductType
 	,C.strCommodityCode
 	,CL.strLocationName
 	,E1.strName AS strTrader
@@ -74,7 +73,6 @@ FROM tblRKFutOptTransaction T
 LEFT JOIN tblEMEntity E ON E.intEntityId = T.intEntityId
 LEFT JOIN tblRKBrokerageAccount BA ON BA.intBrokerageAccountId = T.intBrokerageAccountId
 LEFT JOIN tblRKFutureMarket FM ON FM.intFutureMarketId = T.intFutureMarketId
---LEFT JOIN tblRKBrokerageCommission BC ON BC.intBrokerageCommissionId = T.intBrokerageCommissionId
 LEFT JOIN tblICCommodity C ON C.intCommodityId = T.intCommodityId
 LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = T.intLocationId
 LEFT JOIN tblEMEntity E1 ON E1.intEntityId = T.intTraderId
