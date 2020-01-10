@@ -32,9 +32,11 @@ SET ANSI_WARNINGS OFF
 	
 
 	--Actuals
-	SELECT 
+	SELECT TOP 1 
 		[Actuals_Id] = 0
-		,[ETSBOLDocNumber] = '1234A'
+		,[ETSBOLDocNumber] = strTicketNumber
+	FROM tblSCTicket
+	WHERE intTicketId = @intTicketId
 
 
 	----Actual
