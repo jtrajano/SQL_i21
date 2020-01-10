@@ -393,7 +393,4 @@
     <None Include="Scripts\Pre-Deployment\11_IC\ImproveValuationReport.sql" />
     <None Include="Scripts\Pre-Deployment\11_IC\FixFKItemPricingLevel.sql" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="Scripts\Pre-Deployment\1_TM\9_DataFix.sql" />
-  </ItemGroup>
 </Project>

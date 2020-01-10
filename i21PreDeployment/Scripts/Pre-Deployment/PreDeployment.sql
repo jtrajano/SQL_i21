@@ -34,7 +34,6 @@
 :r .\1_TM\6_1510_to_1520.sql
 :r .\1_TM\7_DropView.sql
 :r .\1_TM\8_DropFunctions.sql
-:r .\1_TM\9_DataFix.sql
 
 -- CM
 :r .\2_CM\1_CM.sql
