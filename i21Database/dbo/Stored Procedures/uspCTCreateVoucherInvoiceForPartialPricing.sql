@@ -408,7 +408,7 @@ BEGIN TRY
 
 							IF ISNULL(@ysnBillPosted,0) = 1
 							BEGIN
-								EXEC [dbo].[uspAPPostBill] @post = 0,@recap = 0,@isBatch = 0,@param = @intBillId,@userId = @intUserId,@success = @ysnSuccess OUTPUT
+								EXEC [dbo].[uspAPPostBill] @post = 0,@recap = 0,@isBatch = 0,@param = @intBillId,@userId = @intUserId, @isPricingContract = 1,@success = @ysnSuccess OUTPUT
 							END
 
 							INSERT	INTO @voucherDetailReceipt([intInventoryReceiptType], [intInventoryReceiptItemId], [dblQtyReceived], [dblCost])
@@ -475,7 +475,7 @@ BEGIN TRY
 
 							IF ISNULL(@ysnBillPosted,0) = 1
 							BEGIN
-								EXEC [dbo].[uspAPPostBill] @post = 1,@recap = 0,@isBatch = 0,@param = @intBillId,@userId = @intUserId,@success = @ysnSuccess OUTPUT
+								EXEC [dbo].[uspAPPostBill] @post = 1,@recap = 0,@isBatch = 0,@param = @intBillId,@userId = @intUserId, @isPricingContract = 1,@success = @ysnSuccess OUTPUT
 							END
 
 							DELETE FROM @receiptDetails
@@ -655,7 +655,7 @@ BEGIN TRY
 								EXEC [uspAPUpdateVoucherDetailTax] @detailCreated
 								--
 
-								EXEC [dbo].[uspAPPostBill] @post = 1,@recap = 0,@isBatch = 0,@param = @intNewBillId,@userId = @intUserId,@success = @ysnSuccess OUTPUT
+								EXEC [dbo].[uspAPPostBill] @post = 1,@recap = 0,@isBatch = 0,@param = @intNewBillId,@userId = @intUserId, @isPricingContract = 1,@success = @ysnSuccess OUTPUT
 
 								UPDATE	tblICInventoryReceiptItem SET ysnAllowVoucher = 0 WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId
 
@@ -696,7 +696,7 @@ BEGIN TRY
 
 								IF ISNULL(@ysnBillPosted,0) = 1
 								BEGIN
-									EXEC [dbo].[uspAPPostBill] @post = 0,@recap = 0,@isBatch = 0,@param = @intBillId,@userId = @intUserId,@success = @ysnSuccess OUTPUT
+									EXEC [dbo].[uspAPPostBill] @post = 0,@recap = 0,@isBatch = 0,@param = @intBillId,@userId = @intUserId, @isPricingContract = 1,@success = @ysnSuccess OUTPUT
 								END
 								SELECT	@intBillDetailId = intBillDetailId FROM tblAPBillDetail WHERE intBillId = @intBillId AND intContractDetailId = @intContractDetailId AND intInventoryReceiptChargeId IS NULL
 					    
@@ -727,7 +727,7 @@ BEGIN TRY
 
 								IF ISNULL(@ysnBillPosted,0) = 1
 								BEGIN
-									EXEC [dbo].[uspAPPostBill] @post = 1,@recap = 0,@isBatch = 0,@param = @intBillId,@userId = @intUserId,@success = @ysnSuccess OUTPUT
+									EXEC [dbo].[uspAPPostBill] @post = 1,@recap = 0,@isBatch = 0,@param = @intBillId,@userId = @intUserId, @isPricingContract = 1,@success = @ysnSuccess OUTPUT
 								END
 							END
 						END
@@ -778,7 +778,7 @@ BEGIN TRY
 						BEGIN
 								IF ISNULL(@ysnBillPosted,0) = 1 AND ISNULL(@ysnBillPaid,0) = 0
 								BEGIN
-									EXEC [dbo].[uspAPPostBill] @post = 0,@recap = 0,@isBatch = 0,@param = @intBillId,@userId = @intUserId,@success = @ysnSuccess OUTPUT, @batchIdUsed = @batchIdUsed OUTPUT
+									EXEC [dbo].[uspAPPostBill] @post = 0,@recap = 0,@isBatch = 0,@param = @intBillId,@userId = @intUserId, @isPricingContract = 1,@success = @ysnSuccess OUTPUT, @batchIdUsed = @batchIdUsed OUTPUT
 									IF ISNULL(@ysnSuccess, 0) = 0
 									BEGIN
 										SELECT @ErrMsg = strMessage FROM tblAPPostResult WHERE strBatchNumber = @batchIdUsed
@@ -799,7 +799,7 @@ BEGIN TRY
 
 								IF ISNULL(@ysnBillPosted,0) = 1 AND ISNULL(@ysnBillPaid,0) = 0
 								BEGIN
-									EXEC [dbo].[uspAPPostBill] @post = 1,@recap = 0,@isBatch = 0,@param = @intBillId,@userId = @intUserId,@success = @ysnSuccess OUTPUT
+									EXEC [dbo].[uspAPPostBill] @post = 1,@recap = 0,@isBatch = 0,@param = @intBillId,@userId = @intUserId, @isPricingContract = 1,@success = @ysnSuccess OUTPUT
 								END
 						END
 					END
