@@ -156,8 +156,7 @@ SELECT
 	,dblSalesQuantity = CASE WHEN ISNULL(A.strEvaluationMethod,'Site Product') = 'Site Product' THEN 
 									(SELECT SUM(Z.dblQtyShipped) 
 									 FROM #tmpSalesAnalysisTable Z
-									 WHERE Z.intItemId = E.intProduct
-										AND Z.intEntityCustomerId = G.intEntityId
+									 WHERE Z.intEntityCustomerId = G.intEntityId
 										AND Z.intSiteID = E.intSiteID)
 							 WHEN ISNULL(A.strEvaluationMethod,'Site Product') = 'Site Product/Category' THEN 
 									(SELECT SUM(Z.dblQtyShipped) 
@@ -176,8 +175,7 @@ SELECT
 	,dblProfitMargin = CASE WHEN ISNULL(A.strEvaluationMethod,'Site Product') = 'Site Product' THEN 
 									(SELECT SUM(Z.dblMargin) 
 									 FROM #tmpSalesAnalysisTable Z
-									 WHERE Z.intItemId = E.intProduct
-										AND Z.intEntityCustomerId = G.intEntityId
+									 WHERE Z.intEntityCustomerId = G.intEntityId
 										AND Z.intSiteID = E.intSiteID)
 							 WHEN ISNULL(A.strEvaluationMethod,'Site Product') = 'Site Product/Category' THEN 
 									(SELECT SUM(Z.dblMargin) 
