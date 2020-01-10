@@ -685,7 +685,7 @@ BEGIN TRY
 																ELSE ' '+@rtPlus+' '
 																END
 																+  
-																dbo.fnRemoveTrailingZeroes(SQ.dblBasis) + ' ' + SQ.strPriceCurrencyAndUOM + ' '+@rtStrPricing1+' ' + SQ.strFixationBy
+																dbo.fnRemoveTrailingZeroes(SQ.dblBasis) + ' ' + SQ.strPriceCurrencyAndUOM + ' '+@rtStrPricing1+' ' + dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,SQ.strFixationBy)
 																+
 																CASE
 																WHEN dbo.fnCTGetReportLanguage(@intLaguageId) = 'Italian'
@@ -742,8 +742,10 @@ BEGIN TRY
 															when pricingType.strPricingType = 'Basis'
 															then strFutMarketName + ' ' + strFutureMonth + ' ' + CONVERT(VARCHAR, CAST(SQ.dblBasis AS MONEY), 1) +' '+ strBasisCurrency + '/' + strBasisUnitMeasure
 															when pricingType.strPricingType = 'Priced'
-															then 'At ' + CONVERT(VARCHAR, CAST(SQ.dblCashPrice AS MONEY), 1) +' '+ strBasisCurrency + '/' + strBasisUnitMeasure
-															else 'At ' + CONVERT(VARCHAR, CAST(dblBasis AS MONEY), 1) +' '+ strBasisCurrency + '/' + strBasisUnitMeasure
+															--then 'At' + ' ' + CONVERT(VARCHAR, CAST(SQ.dblCashPrice AS MONEY), 1) +' '+ strBasisCurrency + '/' + strBasisUnitMeasure
+															--else 'At' + ' ' + CONVERT(VARCHAR, CAST(dblBasis AS MONEY), 1) +' '+ strBasisCurrency + '/' + strBasisUnitMeasure
+															then dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'At') + ' ' + CONVERT(VARCHAR, CAST(SQ.dblCashPrice AS MONEY), 1) +' '+ strBasisCurrency + '/' + strBasisUnitMeasure
+															else dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'At') + ' ' + CONVERT(VARCHAR, CAST(dblBasis AS MONEY), 1) +' '+ strBasisCurrency + '/' + strBasisUnitMeasure
 															end
 														)
 			,lblGABShipDelv							=	CASE WHEN strPosition = 'Spot' THEN dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Delivery') ELSE dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Shipment') END
