@@ -44,7 +44,7 @@
     [dtmLastDeliveryDate]         DATETIME        DEFAULT 0 NULL,
     [dtmNextDeliveryDate]         DATETIME        DEFAULT 0 NULL,
     [strCountry]                  NVARCHAR (50)   COLLATE Latin1_General_CI_AS DEFAULT ('') NULL,
-    [intFillMethodId]             INT             DEFAULT 0 NOT NULL,
+    [intFillMethodId]             INT             DEFAULT 0 NULL,
     [intHoldReasonID]             INT             DEFAULT 0 NULL,
     [intTaxLocale1]               INT             DEFAULT 0 NULL,
     [intTaxLocale2]               INT             DEFAULT 0 NULL,
