@@ -935,8 +935,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[dblQtyBundleReceived],
 		[dblBundleUnitQty],
 		[strBundleDescription],
-		[dblBundleTotal],
-		[ysnStage]
+		[dblBundleTotal]
 	)
 	OUTPUT inserted.intBillDetailId, inserted.intInventoryReceiptItemId INTO @detailCreated(intBillDetailId, intInventoryReceiptItemId)
 	SELECT
@@ -984,8 +983,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[dblQtyBundleReceived],
 		[dblBundleUnitQty],
 		[strBundleDescription],
-		[dblBundleTotal],
-		[ysnStage] = 1
+		[dblBundleTotal]
 	FROM #tempBillDetail
 
 	--ADD TAXES
