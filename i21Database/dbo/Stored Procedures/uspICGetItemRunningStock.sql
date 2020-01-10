@@ -113,7 +113,7 @@ WHERE
 	t.intItemId = @intItemId
 	AND dbo.fnDateLessThanEquals(t.dtmDate, @dtmDate) = 1
 	AND t.intInTransitSourceLocationId IS NULL
-	AND ISNULL(t.ysnIsUnposted, 0) = 0
+	--AND ISNULL(t.ysnIsUnposted, 0) = 0
 	AND IL.intLocationId = @intLocationId
 	AND (@intSubLocationId IS NULL OR @intSubLocationId = CASE WHEN Lot.intLotId IS NULL THEN t.intSubLocationId ELSE Lot.intSubLocationId END)
 	AND (@intStorageLocationId IS NULL OR @intStorageLocationId = CASE WHEN Lot.intLotId IS NULL THEN t.intStorageLocationId ELSE Lot.intStorageLocationId END)
@@ -152,7 +152,7 @@ WHERE
 	t.intItemId = @intItemId
 	AND IL.intLocationId = @intLocationId
 	AND dbo.fnDateLessThanEquals(t.dtmDate, @dtmDate) = 1
-	AND ISNULL(t.ysnIsUnposted, 0) = 0
+	--AND ISNULL(t.ysnIsUnposted, 0) = 0
 	AND (@intSubLocationId IS NULL OR @intSubLocationId = CASE WHEN t.intLotId IS NULL THEN t.intSubLocationId ELSE Lot.intSubLocationId END)
 	AND (@intStorageLocationId IS NULL OR @intStorageLocationId = CASE WHEN t.intLotId IS NULL THEN t.intStorageLocationId ELSE Lot.intStorageLocationId END)
 	AND @intOwnershipType = 2
