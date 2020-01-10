@@ -68,6 +68,7 @@ DECLARE @intTicketContractDetailId INT
 DECLARE @ysnLoadContract BIT
 DECLARE @intTicketEntityId INT
 DECLARE @intInventoryShipmentEntityId INT
+DECLARE @intInventoryReceiptEntityId INT
 
 DECLARE @intLoopContractDetailId INT
 DECLARE @intLoopId INT
@@ -246,6 +247,31 @@ BEGIN TRY
 							IF ISNULL(@ysnIRPosted, 0) = 1
 								EXEC [dbo].[uspICPostInventoryReceipt] 0, 0, @strTransactionId, @intUserId
 							EXEC [dbo].[uspGRReverseOnReceiptDelete] @InventoryReceiptId
+
+
+							---- Update contract schedule if ticket Distribution type is load and link it to IS
+							IF(@strDistributionOption = 'LOD')
+							BEGIN
+								SET @intInventoryReceiptEntityId = 0
+								SELECT TOP 1
+									@intInventoryReceiptEntityId = intEntityVendorId
+								FROM tblICInventoryReceipt
+								WHERE intInventoryReceiptId = @InventoryReceiptId
+
+								SET @dblLoadUsedQty = 0
+								SELECT TOP 1 
+									@dblLoadUsedQty = dblQty
+								FROM tblSCTicketLoadUsed
+								WHERE intTicketId = @intTicketId
+									AND intLoadDetailId = @intTicketLoadDetailId
+									AND intEntityId = @intInventoryReceiptEntityId
+
+								IF @dblLoadUsedQty <> 0
+								BEGIN
+									EXEC uspCTUpdateScheduleQuantityUsingUOM @intTicketContractDetailId, @dblLoadUsedQty, @intUserId, @InventoryReceiptId, 'Inventory Receipt', @intTicketItemUOMId
+								END
+							END
+
 							EXEC [dbo].[uspICDeleteInventoryReceipt] @InventoryReceiptId, @intUserId
 
 							IF(@ysnTicketHasSpecialDiscount = 1)
@@ -397,7 +423,7 @@ BEGIN TRY
 
 
 						---- Update contract schedule based on ticket schedule qty							
-						IF ISNULL(@intTicketContractDetailId, 0) > 0 AND (@strDistributionOption = 'CNT' OR @strDistributionOption = 'LOD')
+						IF ISNULL(@intTicketContractDetailId, 0) > 0 AND (@strDistributionOption = 'CNT')
 						BEGIN
 							-- For Review
 							SET @ysnLoadContract = 0
