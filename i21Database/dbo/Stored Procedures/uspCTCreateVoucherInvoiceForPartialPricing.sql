@@ -551,6 +551,7 @@ BEGIN TRY
 
 							IF @dblQtyToBill <> @total
 							BEGIN
+<<<<<<< HEAD
 								DELETE FROM @receiptDetails
 								INSERT INTO @receiptDetails
 								(
@@ -575,6 +576,9 @@ BEGIN TRY
 							
 								EXEC uspICUpdateBillQty 
 									@updateDetails = @receiptDetails
+=======
+								EXEC [dbo].[uspAPPostBill] @post = 0,@recap = 0,@isBatch = 0,@param = @intBillId,@userId = @intUserId, @isPricingContract = 1,@success = @ysnSuccess OUTPUT
+>>>>>>> ec2a352c3b... CT-4277
 							END
 
 							-- Add the 'DP/Basis' other charges into the voucher
@@ -642,7 +646,38 @@ BEGIN TRY
 							EXEC [uspAPUpdateVoucherDetailTax] @detailCreated
 							--
 
+<<<<<<< HEAD
 							EXEC [dbo].[uspAPPostBill] @post = 1,@recap = 0,@isBatch = 0,@param = @intNewBillId,@userId = @intUserId,@success = @ysnSuccess OUTPUT
+=======
+							IF ISNULL(@ysnBillPosted,0) = 1
+							BEGIN
+								EXEC [dbo].[uspAPPostBill] @post = 1,@recap = 0,@isBatch = 0,@param = @intBillId,@userId = @intUserId, @isPricingContract = 1,@success = @ysnSuccess OUTPUT
+							END
+
+							DELETE FROM @receiptDetails
+
+							-- DECLARE @dblBillQtyTotal NUMERIC(26,16)
+							-- SELECT @dblBillQtyTotal = SUM(BD.dblQtyReceived)
+							-- FROM tblCTPriceFixationDetailAPAR APAR
+							-- INNER JOIN tblAPBillDetail BD ON APAR.intBillDetailId = BD.intBillDetailId
+							-- WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId AND BD.intBillId = @intBillId
+							-- GROUP BY BD.intInventoryReceiptItemId
+
+							INSERT INTO @receiptDetails
+							(
+								[intInventoryReceiptItemId],
+								[intInventoryReceiptChargeId],
+								[intInventoryShipmentChargeId],
+								[intSourceTransactionNoId],
+								[strSourceTransactionNo],
+								[intItemId],
+								[intToBillUOMId],
+								[dblToBillQty]
+							)
+							SELECT * FROM dbo.fnCTGenerateReceiptDetail(@intInventoryReceiptItemId, @intBillId, @intBillDetailId, @dblQtyToBill, 0)
+
+							EXEC uspICUpdateBillQty @updateDetails = @receiptDetails
+>>>>>>> ec2a352c3b... CT-4277
 
 							UPDATE	tblICInventoryReceiptItem SET ysnAllowVoucher = 0 WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId
 
@@ -675,7 +710,14 @@ BEGIN TRY
 				    
 							SELECT  @ysnBillPosted = ysnPosted, @ysnBillPaid = ysnPaid FROM tblAPBill WHERE intBillId = @intBillId
 							
+<<<<<<< HEAD
 							SELECT	@intReceiptUniqueId = MIN(intReceiptUniqueId) FROM @tblReceipt WHERE intReceiptUniqueId > @intReceiptUniqueId
+=======
+								EXEC [uspAPUpdateVoucherDetailTax] @detailCreated
+								--
+
+								EXEC [dbo].[uspAPPostBill] @post = 1,@recap = 0,@isBatch = 0,@param = @intNewBillId,@userId = @intUserId, @isPricingContract = 1,@success = @ysnSuccess OUTPUT
+>>>>>>> ec2a352c3b... CT-4277
 
 							IF @ysnBillPaid = 1 CONTINUE
 
@@ -689,10 +731,20 @@ BEGIN TRY
 				    
 							--UPDATE	tblAPBillDetail SET  dblQtyOrdered = @dblQtyToBill, dblQtyReceived = @dblQtyToBill,dblNetWeight = dbo.fnCTConvertQtyToTargetItemUOM(intUnitOfMeasureId, intWeightUOMId, @dblQtyToBill) WHERE intBillDetailId = @intBillDetailId
 
+<<<<<<< HEAD
 							IF (ISNULL(@intBillDetailId, 0) <> 0)
 							BEGIN
 								EXEC uspAPUpdateCost @intBillDetailId, @dblFinalPrice, 1
 							END
+=======
+								IF ISNULL(@ysnBillPosted,0) = 1
+								BEGIN
+									EXEC [dbo].[uspAPPostBill] @post = 0,@recap = 0,@isBatch = 0,@param = @intBillId,@userId = @intUserId, @isPricingContract = 1,@success = @ysnSuccess OUTPUT
+								END
+								SELECT	@intBillDetailId = intBillDetailId FROM tblAPBillDetail WHERE intBillId = @intBillId AND intContractDetailId = @intContractDetailId AND intInventoryReceiptChargeId IS NULL
+					    
+								--UPDATE	tblAPBillDetail SET  dblQtyOrdered = @dblQtyToBill, dblQtyReceived = @dblQtyToBill,dblNetWeight = dbo.fnCTConvertQtyToTargetItemUOM(intUnitOfMeasureId, intWeightUOMId, @dblQtyToBill) WHERE intBillDetailId = @intBillDetailId
+>>>>>>> ec2a352c3b... CT-4277
 
 							-- CT-3983
 							DELETE FROM @detailCreated
@@ -712,9 +764,16 @@ BEGIN TRY
 							EXEC [uspAPUpdateVoucherDetailTax] @detailCreated
 							--
 
+<<<<<<< HEAD
 							IF ISNULL(@ysnBillPosted,0) = 1
 							BEGIN
 								EXEC [dbo].[uspAPPostBill] @post = 1,@recap = 0,@isBatch = 0,@param = @intBillId,@userId = @intUserId,@success = @ysnSuccess OUTPUT
+=======
+								IF ISNULL(@ysnBillPosted,0) = 1
+								BEGIN
+									EXEC [dbo].[uspAPPostBill] @post = 1,@recap = 0,@isBatch = 0,@param = @intBillId,@userId = @intUserId, @isPricingContract = 1,@success = @ysnSuccess OUTPUT
+								END
+>>>>>>> ec2a352c3b... CT-4277
 							END
 						END
 					END
@@ -768,8 +827,13 @@ BEGIN TRY
 								EXEC [dbo].[uspAPPostBill] @post = 0,@recap = 0,@isBatch = 0,@param = @intBillId,@userId = @intUserId,@success = @ysnSuccess OUTPUT, @batchIdUsed = @batchIdUsed OUTPUT
 								IF ISNULL(@ysnSuccess, 0) = 0
 								BEGIN
+<<<<<<< HEAD
 									SELECT @ErrMsg = strMessage FROM tblAPPostResult WHERE strBatchNumber = @batchIdUsed
 									IF ISNULL(@ErrMsg, '') != ''
+=======
+									EXEC [dbo].[uspAPPostBill] @post = 0,@recap = 0,@isBatch = 0,@param = @intBillId,@userId = @intUserId, @isPricingContract = 1,@success = @ysnSuccess OUTPUT, @batchIdUsed = @batchIdUsed OUTPUT
+									IF ISNULL(@ysnSuccess, 0) = 0
+>>>>>>> ec2a352c3b... CT-4277
 									BEGIN
 										RAISERROR(@ErrMsg, 11, 1);
 										RETURN;
@@ -784,10 +848,18 @@ BEGIN TRY
 								EXEC uspAPUpdateCost @intBillDetailId, @dblFinalPrice, 1
 							END
 
+<<<<<<< HEAD
 							IF ISNULL(@ysnBillPosted,0) = 1
 							BEGIN
 								EXEC [dbo].[uspAPPostBill] @post = 1,@recap = 0,@isBatch = 0,@param = @intBillId,@userId = @intUserId,@success = @ysnSuccess OUTPUT
 							END
+=======
+								IF ISNULL(@ysnBillPosted,0) = 1
+								BEGIN
+									EXEC [dbo].[uspAPPostBill] @post = 1,@recap = 0,@isBatch = 0,@param = @intBillId,@userId = @intUserId, @isPricingContract = 1,@success = @ysnSuccess OUTPUT
+								END
+						END
+>>>>>>> ec2a352c3b... CT-4277
 					END
 				END
 
