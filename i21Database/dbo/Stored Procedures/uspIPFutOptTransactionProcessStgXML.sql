@@ -546,7 +546,9 @@ BEGIN TRY
 
 				SELECT @intBrokerageCommissionId = t.intBrokerageCommissionId
 				FROM tblRKBrokerageCommission t
-				WHERE t.intBrokerageAccountId = @intBrokerageAccountId
+				JOIN tblRKBrokerageAccount BA ON BA.intBrokerageAccountId = t.intBrokerageAccountId
+					AND BA.intEntityId = @intEntityId
+					AND t.intBrokerageAccountId = @intBrokerageAccountId
 					AND t.intFutureMarketId = @intFutureMarketId
 
 				SELECT @intCommodityId = t.intCommodityId

@@ -5,31 +5,31 @@ BEGIN TRY
 
 	DECLARE @idoc INT
 	DECLARE @ErrMsg NVARCHAR(MAX)
-	DECLARE @intDailyAveragePriceAckStageId INT
+	DECLARE @intFutOptTransactionHeaderAckStageId INT
 	DECLARE @strAckHeaderXML NVARCHAR(MAX)
-	DECLARE @strAckDetailXML NVARCHAR(MAX)
+	DECLARE @strAckFutOptTransactionXML NVARCHAR(MAX)
 	DECLARE @strTransactionType NVARCHAR(MAX)
-	DECLARE @intDailyAveragePriceId INT
-	DECLARE @intDailyAveragePriceRefId INT
+	DECLARE @intFutOptTransactionHeaderId INT
+	DECLARE @intFutOptTransactionHeaderRefId INT
 		,@strRowState NVARCHAR(100)
 		,@intTransactionId INT
 		,@intCompanyId INT
 		,@intTransactionRefId INT
 		,@intCompanyRefId INT
 
-	SELECT @intDailyAveragePriceAckStageId = MIN(intDailyAveragePriceAckStageId)
-	FROM tblRKDailyAveragePriceAckStage
+	SELECT @intFutOptTransactionHeaderAckStageId = MIN(intFutOptTransactionHeaderAckStageId)
+	FROM tblRKFutOptTransactionHeaderAckStage
 	WHERE strMessage = 'Success'
 		AND ISNULL(strFeedStatus, '') = ''
 		AND intMultiCompanyId = @intToCompanyId
 
-	WHILE @intDailyAveragePriceAckStageId > 0
+	WHILE @intFutOptTransactionHeaderAckStageId > 0
 	BEGIN
 		SELECT @strAckHeaderXML = NULL
-			,@strAckDetailXML = NULL
+			,@strAckFutOptTransactionXML = NULL
 			,@strTransactionType = NULL
-			,@intDailyAveragePriceId = NULL
-			,@intDailyAveragePriceRefId = NULL
+			,@intFutOptTransactionHeaderId = NULL
+			,@intFutOptTransactionHeaderRefId = NULL
 			,@strRowState = NULL
 			,@intTransactionId = NULL
 			,@intCompanyId = NULL
@@ -37,22 +37,22 @@ BEGIN TRY
 			,@intCompanyRefId = NULL
 
 		SELECT @strAckHeaderXML = strAckHeaderXML
-			,@strAckDetailXML = strAckDetailXML
+			,@strAckFutOptTransactionXML = strAckFutOptTransactionXML
 			,@strTransactionType = strTransactionType
 			,@strRowState = strRowState
 			,@intTransactionId = intTransactionId
 			,@intCompanyId = intCompanyId
 			,@intTransactionRefId = intTransactionRefId
 			,@intCompanyRefId = intCompanyRefId
-		FROM tblRKDailyAveragePriceAckStage
-		WHERE intDailyAveragePriceAckStageId = @intDailyAveragePriceAckStageId
+		FROM tblRKFutOptTransactionHeaderAckStage
+		WHERE intFutOptTransactionHeaderAckStageId = @intFutOptTransactionHeaderAckStageId
 
 		BEGIN
 			IF ISNULL(@strRowState, '') = 'Delete'
 			BEGIN
-				SELECT @intDailyAveragePriceRefId = intDailyAveragePriceId
-				FROM tblRKDailyAveragePriceAckStage
-				WHERE intDailyAveragePriceAckStageId = @intDailyAveragePriceAckStageId
+				SELECT @intFutOptTransactionHeaderRefId = intFutOptTransactionHeaderId
+				FROM tblRKFutOptTransactionHeaderAckStage
+				WHERE intFutOptTransactionHeaderAckStageId = @intFutOptTransactionHeaderAckStageId
 
 				GOTO ext
 			END
@@ -61,58 +61,58 @@ BEGIN TRY
 			EXEC sp_xml_preparedocument @idoc OUTPUT
 				,@strAckHeaderXML
 
-			SELECT @intDailyAveragePriceId = intDailyAveragePriceId
-				,@intDailyAveragePriceRefId = intDailyAveragePriceRefId
-			FROM OPENXML(@idoc, 'vyuIPGetDailyAveragePrices/vyuIPGetDailyAveragePrice', 2) WITH (
-					intDailyAveragePriceId INT
-					,intDailyAveragePriceRefId INT
+			SELECT @intFutOptTransactionHeaderId = intFutOptTransactionHeaderId
+				,@intFutOptTransactionHeaderRefId = intFutOptTransactionHeaderRefId
+			FROM OPENXML(@idoc, 'vyuIPGetFutOptTransactionHeaders/vyuIPGetFutOptTransactionHeader', 2) WITH (
+					intFutOptTransactionHeaderId INT
+					,intFutOptTransactionHeaderRefId INT
 					)
 
-			UPDATE tblRKDailyAveragePrice
-			SET intDailyAveragePriceRefId = @intDailyAveragePriceId
-			WHERE intDailyAveragePriceId = @intDailyAveragePriceRefId
-				AND intDailyAveragePriceRefId IS NULL
+			--UPDATE tblRKFutOptTransactionHeader
+			--SET intFutOptTransactionHeaderRefId = @intFutOptTransactionHeaderId
+			--WHERE intFutOptTransactionHeaderId = @intFutOptTransactionHeaderRefId
+			--	AND intFutOptTransactionHeaderRefId IS NULL
 
 			EXEC sp_xml_removedocument @idoc
 
 			-----------------------------------Detail-------------------------------------------
 			EXEC sp_xml_preparedocument @idoc OUTPUT
-				,@strAckDetailXML
+				,@strAckFutOptTransactionXML
 
 			UPDATE SD
-			SET SD.intDailyAveragePriceDetailRefId = XMLDetail.intDailyAveragePriceDetailId
-			FROM OPENXML(@idoc, 'vyuIPGetDailyAveragePriceDetails/vyuIPGetDailyAveragePriceDetail', 2) WITH (
-					intDailyAveragePriceDetailId INT
-					,intDailyAveragePriceDetailRefId INT
+			SET SD.intFutOptTransactionRefId = XMLDetail.intFutOptTransactionId
+			FROM OPENXML(@idoc, 'vyuIPGetFutOptTransactions/vyuIPGetFutOptTransaction', 2) WITH (
+					intFutOptTransactionId INT
+					,intFutOptTransactionRefId INT
 					) XMLDetail
-			JOIN tblRKDailyAveragePriceDetail SD ON SD.intDailyAveragePriceDetailId = XMLDetail.intDailyAveragePriceDetailRefId
-			WHERE SD.intDailyAveragePriceId = @intDailyAveragePriceRefId
-				AND SD.intDailyAveragePriceDetailRefId IS NULL
+			JOIN tblRKFutOptTransaction SD ON SD.intFutOptTransactionId = XMLDetail.intFutOptTransactionRefId
+			WHERE SD.intFutOptTransactionHeaderId = @intFutOptTransactionHeaderRefId
+				AND SD.intFutOptTransactionRefId IS NULL
 
 			EXEC sp_xml_removedocument @idoc
 
 			ext:
 
 			---UPDATE Feed Status in Staging
-			UPDATE tblRKDailyAveragePriceStage
+			UPDATE tblRKFutOptTransactionHeaderStage
 			SET strFeedStatus = 'Ack Rcvd'
 				,strMessage = 'Success'
-			WHERE intDailyAveragePriceId = @intDailyAveragePriceRefId
+			WHERE intFutOptTransactionHeaderId = @intFutOptTransactionHeaderRefId
 				AND strFeedStatus = 'Awt Ack'
 
 			---UPDATE Feed Status in Acknowledgement
-			UPDATE tblRKDailyAveragePriceAckStage
+			UPDATE tblRKFutOptTransactionHeaderAckStage
 			SET strFeedStatus = 'Ack Processed'
-			WHERE intDailyAveragePriceAckStageId = @intDailyAveragePriceAckStageId
+			WHERE intFutOptTransactionHeaderAckStageId = @intFutOptTransactionHeaderAckStageId
 		END
 
 		EXECUTE dbo.uspSMInterCompanyUpdateMapping @currentTransactionId = @intTransactionId
 			,@referenceTransactionId = @intTransactionRefId
 			,@referenceCompanyId = @intCompanyRefId
 
-		SELECT @intDailyAveragePriceAckStageId = MIN(intDailyAveragePriceAckStageId)
-		FROM tblRKDailyAveragePriceAckStage
-		WHERE intDailyAveragePriceAckStageId > @intDailyAveragePriceAckStageId
+		SELECT @intFutOptTransactionHeaderAckStageId = MIN(intFutOptTransactionHeaderAckStageId)
+		FROM tblRKFutOptTransactionHeaderAckStage
+		WHERE intFutOptTransactionHeaderAckStageId > @intFutOptTransactionHeaderAckStageId
 			AND strMessage = 'Success'
 			AND ISNULL(strFeedStatus, '') = ''
 			AND intMultiCompanyId = @intToCompanyId
