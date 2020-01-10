@@ -25,8 +25,7 @@ begin
 			from
 				tblTMSite a
 			where
-				a.intFillMethodId is null
-				or a.intFillMethodId not in (
+				a.intFillMethodId not in (
 											 select
 												b.intFillMethodId
 											from
