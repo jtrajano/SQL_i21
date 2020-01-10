@@ -78,8 +78,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[int1099Form],
 		[int1099Category],
 		[intScaleTicketId],
-		[intLocationId],
-		[ysnStage]
+		[intLocationId]
 	)
 	OUTPUT inserted.intBillDetailId, inserted.intInventoryReceiptChargeId INTO @detailCreated(intBillDetailId, intInventoryReceiptChargeId)
 	SELECT DISTINCT
@@ -146,8 +145,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 											ISNULL(H.int1099CategoryId,0)
 										END,
 		[intScaleTicketId]				=	CASE WHEN IR.intSourceType = 1 THEN A.intScaleTicketId ELSE NULL END,
-		[intLocationId]					=	IR.intLocationId,
-		[ysnStage] = 1
+		[intLocationId]					=	IR.intLocationId
 	FROM [vyuICChargesForBilling] A
 	INNER JOIN @voucherDetailReceiptCharge charges
 		ON A.intInventoryReceiptChargeId = charges.intInventoryReceiptChargeId
