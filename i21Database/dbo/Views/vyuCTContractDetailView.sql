@@ -13,7 +13,7 @@ AS
 			CD.strBuyerSeller,					CD.intBillTo,					CD.intFreightRateId,			
 			CD.strFobBasis,						CD.intRailGradeId,				CD.strRemark,
 			CD.dblOriginalQty,					CD.dblBalance,					CD.dblIntransitQty,
-			CD.dblScheduleQty,					CD.strPackingDescription,		CD.intPriceItemUOMId,
+			CD.dblScheduleQty,					CD.strPackingDescription,		intPriceItemUOMId = isnull(CD.intPriceItemUOMId,CD.intItemUOMId),
 			CD.intLoadingPortId,				CD.intDestinationPortId,		CD.strShippingTerm,
 			CD.intShippingLineId,				CD.strVessel,					CD.intDestinationCityId,
 			CD.intShipperId,					CD.intNetWeightUOMId,			CD.strVendorLotID,
