@@ -354,11 +354,11 @@ BEGIN TRY
 								INSERT	INTO @tblToProcess
 								SELECT	@intInventoryReceiptId,
 										@intInventoryReceiptItemId,
-													CASE WHEN @dblTotalIVForSHQty < @dblReceived 
-															THEN @dblTotalIVForSHQty - @dblReceived
+													CASE WHEN @dblTotalIVForSHQty <= @dblReceived 
+															THEN @dblReceived - @dblTotalIVForSHQty
 															ELSE @dblReceived END
 										,@intPriceFixationDetailId
-								SELECT	@dblRemainingQty = @dblRemainingQty - @dblReceived
+								SELECT	@dblRemainingQty = @dblRemainingQty - (CASE WHEN @dblTotalIVForSHQty <= @dblReceived THEN @dblReceived - @dblTotalIVForSHQty ELSE @dblReceived END)
 							END
 						END
 						ELSE
