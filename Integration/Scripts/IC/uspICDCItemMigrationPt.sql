@@ -146,7 +146,15 @@ DECLARE @BaseUnits TABLE (
 	ysnAllowPurchase BIT)
 
 INSERT INTO @BaseUnits(intItemId, intUnitMeasureId, dblUnitQty, strUpcCode, ysnStockUnit, ysnAllowPurchase, ysnAllowSale)
-SELECT inv.intItemId, u.intUnitMeasureId, uom.dblPackQty, uom.strUpcCode, 1 ysnStockUnit, 1 ysnAllowPurchase, 1 ysnAllowSale
+SELECT inv.intItemId, u.intUnitMeasureId, 1,
+--, uom.strUpcCode
+--upccode should not be set for stock unit when there are packing units.
+case when strunit <> strPack then 
+strUpcCode
+else
+null
+end
+, 1 ysnStockUnit, 1 ysnAllowPurchase, 1 ysnAllowSale
 FROM @ItemUoms uom
 	INNER JOIN tblICItem inv ON inv.strItemNo = uom.strItemNo
 	INNER JOIN tblICUnitMeasure u ON UPPER(u.strSymbol) = UPPER(uom.strUnit)
@@ -188,6 +196,17 @@ INSERT (intItemId, intUnitMeasureId, dblUnitQty, strUpcCode, ysnStockUnit, ysnAl
 VALUES(Source.intItemId, Source.intUnitMeasureId, Source.dblUnitQty, Source.strUpcCode, Source.ysnStockUnit, Source.ysnAllowPurchase, Source.ysnAllowSale, Source.intConcurrencyId)
 ;
 
+--upccode should not be set for stock unit when there are packing units.
+--This is alternate solution
+--update iu
+--set strUpcCode = null 
+--from tblICItemUOM iu
+--join tblICItem i on iu.intItemId = i.intItemId
+--join ptitmmst p on p.ptitm_itm_no COLLATE SQL_Latin1_General_CP1_CS_AS = i.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS
+--where strUpcCode is not null
+--and ysnStockUnit = 1
+--and p.ptitm_unit <> p.ptitm_pak_de
+
 ---- =============================== PACK UNITS ================================================================================
 INSERT INTO @PackUnits(intItemId, intUnitMeasureId, dblUnitQty, strUpcCode, ysnStockUnit, ysnAllowPurchase, ysnAllowSale)
 SELECT inv.intItemId, u.intUnitMeasureId, uom.dblPackQty, uom.strUpcCode, 0 ysnStockUnit, 1 ysnAllowPurchase, 1 ysnAllowSale
@@ -201,7 +220,11 @@ MERGE INTO tblICItemUOM AS Target
 USING (
 	SELECT pu.intItemId, pu.intUnitMeasureId, pu.dblUnitQty, pu.strUpcCode, 1 ysnStockUnit, 1 ysnAllowPurchase, 1 ysnAllowSale, 1 intConcurrencyId
 	FROM @PackUnits pu
-) AS Source ON ((Source.strUpcCode = Target.strUpcCode AND Source.strUpcCode IS NOT NULL) OR (Source.strUpcCode IS NULL AND Source.intItemId = Target.intItemId AND Source.intUnitMeasureId = Target.intUnitMeasureId))
+) AS Source ON 
+--no need to check upccode match
+--((Source.strUpcCode = Target.strUpcCode AND Source.strUpcCode IS NOT NULL) OR 
+--(Source.strUpcCode IS NULL AND Source.intItemId = Target.intItemId AND Source.intUnitMeasureId = Target.intUnitMeasureId))
+(Source.intItemId = Target.intItemId AND Source.intUnitMeasureId = Target.intUnitMeasureId)
 WHEN NOT MATCHED THEN
 INSERT (intItemId, intUnitMeasureId, dblUnitQty, strUpcCode, ysnStockUnit, ysnAllowPurchase, ysnAllowSale, intConcurrencyId)
 VALUES(Source.intItemId, Source.intUnitMeasureId, Source.dblUnitQty, Source.strUpcCode, Source.ysnStockUnit, Source.ysnAllowPurchase, Source.ysnAllowSale, Source.intConcurrencyId)
@@ -355,7 +378,35 @@ order by CL.intCompanyLocationId, srt
 -- Section 5
 ------------------------------------------------------------------------------------------------------------------
 --price level 1
---This is the retail price and is imported as standard pricing
+
+INSERT INTO [dbo].[tblICItemPricingLevel] (
+	[intItemId]
+	,[intItemLocationId]
+	,strPriceLevel
+	,intItemUnitMeasureId
+	,dblUnit
+	,strPricingMethod
+	,dblAmountRate
+	,dblUnitPrice
+	,[intConcurrencyId]
+	)
+SELECT inv.intItemId
+	,iloc.intItemLocationId
+	,PL.strPricingLevelName strPricingLevel
+	,(select IU.intItemUOMId 
+	from tblICItemUOM IU join tblICUnitMeasure U on U.intUnitMeasureId = IU.intUnitMeasureId
+	where IU.intItemId = inv.intItemId
+	and U.strSymbol COLLATE SQL_Latin1_General_CP1_CS_AS = itm.ptitm_unit COLLATE SQL_Latin1_General_CP1_CS_AS) uom
+	,1 dblUnit
+	,'None' PricingMethod
+	,0
+	,ptitm_prc1
+	,1 ConcurrencyId
+	FROM ptitmmst AS itm INNER JOIN tblICItem AS inv ON (itm.ptitm_itm_no COLLATE SQL_Latin1_General_CP1_CS_AS = inv.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS)
+	 INNER JOIN tblSMCompanyLocation AS loc ON (itm.ptitm_loc_no COLLATE SQL_Latin1_General_CP1_CS_AS = loc.strLocationNumber COLLATE SQL_Latin1_General_CP1_CS_AS) 
+	 INNER JOIN tblICItemLocation AS iloc ON (loc.intCompanyLocationId = iloc.intLocationId	AND iloc.intItemId = inv.intItemId)
+	 join tblSMCompanyLocationPricingLevel PL on PL.intCompanyLocationId = iloc.intLocationId 
+	 where PL.intSort = 1 and ptitm_prc1 > 0
 ---------------------------------------------------------------------------------------------------------------------
 --price level 2
 INSERT INTO [dbo].[tblICItemPricingLevel] (
@@ -444,5 +495,19 @@ SELECT inv.intItemId
 		JOIN tblICItem IA ON IA.strItemNo = p.ptitm_alt_itm COLLATE SQL_Latin1_General_CP1_CS_AS
 		JOIN tblICItemUOM U ON I.intItemId = U.intItemId AND U.ysnStockUnit = 1
 	WHERE ptitm_alt_itm <>'' AND ptitm_alt_itm <> ptitm_itm_no
+
+
+UPDATE tblICItemUOM SET ysnStockUnit = 0 WHERE dblUnitQty <> 1 AND ysnStockUnit = 1
+UPDATE tblICItemUOM SET ysnStockUnit = 1 WHERE ysnStockUnit = 0 AND dblUnitQty = 1
+UPDATE tblICItemLocation SET intCostingMethod = 1 WHERE intCostingMethod IS NULL
+
+-- import Storage unit #
+update tblICItemLocation
+set strStorageUnitNo = D.ptitm_binloc
+from tblICItemLocation A
+inner join tblICItem B on A.intItemId = B.intItemId
+inner join tblSMCompanyLocation C on A.intLocationId = C.intCompanyLocationId
+inner join ptitmmst D on B.strItemNo = D.ptitm_itm_no collate SQL_Latin1_General_CP1_CS_AS
+ and C.strLocationNumber = D.ptitm_loc_no collate SQL_Latin1_General_CP1_CS_AS
 
 GO
