@@ -522,7 +522,7 @@ BEGIN
 
 	-- Batch Gross
 	INSERT INTO tblSMImportFileRecordMarker (intImportFileHeaderId, strRecordMarker, intRowsToSkip, intPosition, intConcurrencyId) 
-	VALUES (@FileHeaderId, 'Batch Gross', 1, 13, 1)
+	VALUES (@FileHeaderId, 'Batch Gross', 1, 22, 1)
 
 	SET @DetailId = SCOPE_IDENTITY()
 
@@ -564,5 +564,15 @@ BEGIN
 
 	INSERT INTO tblSMImportFileColumnDetail (intImportFileHeaderId, intImportFileRecordMarkerId, intLevel, strTable, strColumnName, ysnActive, intConcurrencyId)
 	VALUES (@FileHeaderId, @DetailId, 8, 'tblCCImportDealerCreditCardReconDetail', 'dblBatchNet', 1, 1)
+
+END
+ELSE
+BEGIN
+	PRINT ('DCC - Conoco Philips Format - Update')
+
+	SELECT @FileHeaderId = intImportFileHeaderId FROM tblSMImportFileHeader WHERE strLayoutTitle = @LayoutTitle 
+
+	-- Batch Gross
+	UPDATE tblSMImportFileRecordMarker SET intRowsToSkip = 1, intPosition = 22 WHERE intImportFileHeaderId = @FileHeaderId AND strRecordMarker = 'Batch Gross'
 
 END
