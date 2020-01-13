@@ -42,7 +42,14 @@ BEGIN TRY
 	WHILE EXISTS(SELECT 1 FROM #ItemBillPosted)
 	BEGIN
 		SELECT TOP 1 @Id = intBillId FROM #ItemBillPosted
-		EXEC [dbo].[uspAPPostBill] @transactionType = 'Contract', @post = 0,@recap = 0,@isBatch = 0,@param = @Id,@userId = @intUserId,@success = @ysnSuccess OUTPUT
+
+		-- Check if paid and printed
+		IF EXISTS(SELECT 1 FROM vyuAPBillPayment WHERE intBillId = @Id)
+		BEGIN
+			EXEC uspAPDeletePayment @Id, @intUserId
+		END
+
+		EXEC [dbo].[uspAPPostBill] @transactionType = 'Contract',@post = 0,@recap = 0,@isBatch = 0,@param = @Id,@userId = @intUserId,@success = @ysnSuccess OUTPUT
 		DELETE #ItemBillPosted WHERE intBillId = @Id
 	END
 
@@ -60,13 +67,16 @@ BEGIN TRY
 	AND		ISNULL(FT.intPriceFixationTicketId, 0)	=   CASE WHEN @intPriceFixationTicketId IS NOT NULL THEN @intPriceFixationTicketId ELSE ISNULL(FT.intPriceFixationTicketId,0) END
 	AND		ISNULL(BL.ysnPosted,0) = 0
 
-	SELECT * FROM #ItemBill
-	SELECT @Id = MIN(Id), @DetailId = MIN(ISNULL(DetailId, BillDetailId)) FROM #ItemBill
-	WHILE ISNULL(@Id,0) > 0
+
+	SELECT @DetailId = MIN(ISNULL(DetailId, BillDetailId)) FROM #ItemBill	
+	WHILE ISNULL(@DetailId,0) > 0
 	BEGIN
-		SELECT @Count = COUNT(*) FROM tblCTPriceFixationDetailAPAR WHERE intBillId = @Id
+		
+		SELECT @Id = Id FROM #ItemBill WHERE ISNULL(DetailId, BillDetailId) = @DetailId
+		SELECT @Count = COUNT(*) FROM tblCTPriceFixationDetailAPAR WHERE intBillId = @DetailId
 		IF @Count > 1--@intPriceFixationTicketId IS NOT NULL AND @Count > 1
 		BEGIN
+		
 			-- UPDATE ITEM BILL QTY
 			SELECT @ItemId = intInventoryReceiptItemId, @Quantity = dblQtyReceived
 			FROM tblAPBillDetail 
@@ -112,6 +122,8 @@ BEGIN TRY
 			-- DELETE VOUCHER IF ALL TICKETS WHERE DELETED
 			IF (SELECT COUNT(*) FROM tblCTPriceFixationDetailAPAR WHERE intBillId = @Id) = 0
 			BEGIN
+			
+				SELECT 'Delete 1', * FROM tblAPBill ORDER BY intBillId DESC
 				EXEC uspAPDeleteVoucher @Id,@intUserId,4
 		
 				--Audit Log
@@ -160,12 +172,11 @@ BEGIN TRY
 			--END
 			--DELETE FROM @tblItemBillDetail
 
-			----------------------------------------			
+			----------------------------------------
 			EXEC uspAPDeleteVoucher @Id,@intUserId,4
-			DELETE FROM tblCTPriceFixationDetailAPAR WHERE intBillId = @Id	
+			DELETE FROM tblCTPriceFixationDetailAPAR WHERE intBillId = @Id
 		END
-
-		SELECT @Id = MIN(Id) FROM #ItemBill WHERE Id > @Id
+		SELECT @DetailId = MIN(ISNULL(DetailId, BillDetailId)) FROM #ItemBill WHERE ISNULL(DetailId, BillDetailId) > @DetailId
 	END
 
 	SELECT @List = NULL
