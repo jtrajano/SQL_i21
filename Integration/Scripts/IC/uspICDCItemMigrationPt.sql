@@ -436,8 +436,11 @@ SELECT inv.intItemId
 	 INNER JOIN tblSMCompanyLocation AS loc ON (itm.ptitm_loc_no COLLATE SQL_Latin1_General_CP1_CS_AS = loc.strLocationNumber COLLATE SQL_Latin1_General_CP1_CS_AS) 
 	 INNER JOIN tblICItemLocation AS iloc ON (loc.intCompanyLocationId = iloc.intLocationId	AND iloc.intItemId = inv.intItemId)
 	 join tblSMCompanyLocationPricingLevel PL on PL.intCompanyLocationId = iloc.intLocationId 
-	 where PL.intSort = 2 and ptitm_prc2 > 0 and ptitm_prc2 <> ptitm_prc1
-
+	 where PL.intSort = 2 and ptitm_prc2 > 0
+	--should not check this. Price levels can have same price
+	--and ptitm_prc2 <> ptitm_prc1
+	and not exists (select 1 from tblICItemPricingLevel l where l.intItemId = inv.intItemId
+	and iloc.intItemLocationId = l.intItemLocationId and l.strPriceLevel = PL.strPricingLevelName)
 --------------------------------------------------------------------------------------------------------------------
 --price level 3
 INSERT INTO [dbo].[tblICItemPricingLevel] (
@@ -466,7 +469,11 @@ SELECT inv.intItemId
 	 INNER JOIN tblSMCompanyLocation AS loc ON (itm.ptitm_loc_no COLLATE SQL_Latin1_General_CP1_CS_AS = loc.strLocationNumber COLLATE SQL_Latin1_General_CP1_CS_AS) 
 	 INNER JOIN tblICItemLocation AS iloc ON (loc.intCompanyLocationId = iloc.intLocationId	AND iloc.intItemId = inv.intItemId)
 	 join tblSMCompanyLocationPricingLevel PL on PL.intCompanyLocationId = iloc.intLocationId 
-	 where PL.intSort = 3 and ptitm_prc3 > 0 and ptitm_prc3 not in (ptitm_prc1,ptitm_prc2)
+	 where PL.intSort = 3 and ptitm_prc3 > 0
+	--should not check this. Price levels can have same price
+     --and ptitm_prc3 not in (ptitm_prc1,ptitm_prc2)
+     and not exists (select 1 from tblICItemPricingLevel l where l.intItemId = inv.intItemId 
+     and  iloc.intItemLocationId = l.intItemLocationId and l.strPriceLevel = PL.strPricingLevelName)
 
 	--===Convert Physical items to bundles in i21
 	UPDATE I 
