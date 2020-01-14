@@ -6,7 +6,7 @@ AS
 		A.dtmDate,
         A.strBatchId COLLATE Latin1_General_CI_AS strBatchId,
         B.strAccountId COLLATE Latin1_General_CI_AS strAccountId,
-        B.strDescription COLLATE Latin1_General_CI_AS strAccountDescription,
+        RTRIM(LTRIM(ISNULL(B.strDescription,''))) COLLATE Latin1_General_CI_AS strAccountDescription,
         C.strAccountGroup COLLATE Latin1_General_CI_AS strAccountGroup,
         C.strAccountType COLLATE Latin1_General_CI_AS strAccountType,
         A.dblDebit,
@@ -26,7 +26,7 @@ AS
         A.dblExchangeRate,
         A.dtmDateEntered,
         A.dtmTransactionDate,
-        A.strJournalLineDescription COLLATE Latin1_General_CI_AS strJournalLineDescription,
+        RTRIM(LTRIM(ISNULL(A.strJournalLineDescription,''))) COLLATE Latin1_General_CI_AS strJournalLineDescription,
             CASE
                 WHEN A.ysnIsUnposted = 0
                 THEN 'Posted'
