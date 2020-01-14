@@ -52,6 +52,7 @@ BEGIN TRY
 	UPDATE tblAPAppliedPrepaidAndDebit SET intBillDetailApplied = NULL  WHERE intBillId = @intBillId
 
 	UPDATE tblGRSettleStorage SET intBillId = NULL WHERE intBillId = @intBillId
+	UPDATE tblGRStorageHistory SET intBillId = NULL WHERE intBillId = @intBillId
 	
 	--clear original transaction if this is a reversal
 	UPDATE A
@@ -72,7 +73,7 @@ BEGIN TRY
 
 	EXEC uspAPUpdateInvoiceNumInGLDetail @invoiceNumber = @vendorOrderNumber, @intBillId = @intBillId
 
-	EXEC uspGRDeleteStorageHistory 'Voucher', @intBillId
+	--EXEC uspGRDeleteStorageHistory 'Voucher', @intBillId
 
 	EXEC uspAPArchiveVoucher @billId = @intBillId
 
