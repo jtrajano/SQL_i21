@@ -92,8 +92,8 @@ INNER JOIN dbo.tblAPBillDetail B
 	ON A.intBillId = B.intBillId
 LEFT JOIN dbo.vyuAPVouchersPaymentInfo A2
 	ON A2.intBillId = A.intBillId
-LEFT JOIN dbo.tblAPBillDetailTax BD 
-	ON BD.intBillDetailId = B.intBillDetailId
+-- LEFT JOIN dbo.tblAPBillDetailTax BD 
+-- 	ON BD.intBillDetailId = B.intBillDetailId
 LEFT JOIN dbo.tblICInventoryReceiptItem IRE 
 	ON B.intInventoryReceiptItemId = IRE.intInventoryReceiptItemId
 LEFT JOIN dbo.tblICInventoryReceipt IR 
@@ -109,7 +109,7 @@ LEFT JOIN dbo.tblAP1099Category D
 LEFT JOIN dbo.tblSMTaxGroup E 
 	ON B.intTaxGroupId = E.intTaxGroupId
 LEFT JOIN dbo.tblSMTaxGroup F 
-	ON BD.intTaxGroupId = F.intTaxGroupId
+	ON B.intTaxGroupId = F.intTaxGroupId
 LEFT JOIN dbo.tblSCTicket SC 
 	ON SC.intInventoryReceiptId = IR.intInventoryReceiptId
 INNER JOIN dbo.tblSMCurrency CUR 
