@@ -149,7 +149,7 @@ INSERT INTO @BaseUnits(intItemId, intUnitMeasureId, dblUnitQty, strUpcCode, ysnS
 SELECT inv.intItemId, u.intUnitMeasureId, 1,
 --, uom.strUpcCode
 --upccode should not be set for stock unit when there are packing units.
-case when strunit <> strPack then 
+case when strUnit <> strPack then 
 strUpcCode
 else
 null
