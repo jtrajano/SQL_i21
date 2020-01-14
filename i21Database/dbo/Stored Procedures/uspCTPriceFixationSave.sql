@@ -480,8 +480,8 @@ BEGIN TRY
 		BEGIN
 			UPDATE	CD
 			SET		CD.dblBasis				=	ISNULL(CD.dblOriginalBasis,0) + ISNULL(dblRollArb,0),
-					CD.intFutureMarketId	=	PF.intOriginalFutureMarketId,
-					CD.intFutureMonthId		=	PF.intOriginalFutureMonthId,
+					CD.intFutureMarketId	=	CD.intFutureMarketId,
+					CD.intFutureMonthId		=	CD.intFutureMonthId,
 					CD.intConcurrencyId		=	CD.intConcurrencyId + 1
 			FROM	tblCTContractDetail	CD
 			JOIN	tblCTPriceFixation	PF	ON	CD.intContractDetailId = PF.intContractDetailId OR CD.intSplitFromId = PF.intContractDetailId
