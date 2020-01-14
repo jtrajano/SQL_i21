@@ -51,6 +51,7 @@ FROM tblICStagingItem si
 		FROM tblICItemLocation xl
 		WHERE xl.intLocationId = @intSourceLocationId
 			AND xl.intLocationId <> sil.intLocationId
+			AND xl.intItemId = si.intItemId
 	) source
 WHERE si.strItemNo = @strIdentifier
 	AND NOT EXISTS(SELECT * FROM tblICItemLocation WHERE intItemId = si.intItemId AND intLocationId = sil.intLocationId)
