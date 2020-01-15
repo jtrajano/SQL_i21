@@ -42,7 +42,9 @@ AS
 			TR.ysnFreezed,
 			CD.dblRatio,
 			FD.dblHedgeNoOfLots AS dblHedgeNoOfLots,
-			FD.intDailyAveragePriceDetailId as  intDailyAveragePriceDetailId
+			FD.intDailyAveragePriceDetailId as  intDailyAveragePriceDetailId,
+			Voucher.strBillId,
+			Voucher.ysnPaid
 
 	FROM	tblCTPriceFixationDetail	FD
 	JOIN	tblCTPriceFixation			PF	ON	PF.intPriceFixationId			=	FD.intPriceFixationId
@@ -55,4 +57,5 @@ AS
 	JOIN	tblEMEntity					EY	ON	EY.intEntityId					=	FD.intBrokerId				LEFT
 	JOIN	tblRKBrokerageAccount		BA	ON	BA.intBrokerageAccountId		=	FD.intBrokerageAccountId	LEFT
 	JOIN	tblRKFutOptTransaction		TR	ON	TR.intFutOptTransactionId		=	FD.intFutOptTransactionId	LEFT
-	JOIN	tblCTContractDetail			CD	ON	CD.intContractDetailId			=	PF.intContractDetailId
+	JOIN	tblCTContractDetail			CD	ON	CD.intContractDetailId			=	PF.intContractDetailId		OUTER	
+	APPLY	dbo.fnCTGetVoucherDetail('fixation', FD.intPriceFixationDetailId) Voucher

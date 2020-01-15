@@ -9,6 +9,8 @@ BEGIN TRY
 	DECLARE	@ErrMsg	NVARCHAR(MAX)
 
 	SELECT	FD.*,
+			Voucher.strBillId,
+			Voucher.ysnPaid,
 
 			PM.strUnitMeasure	AS strPricingUOM,
 			strHedgeCurrency = case when FD.ysnHedge = 1 then CY.strCurrency else null end,
@@ -39,7 +41,8 @@ BEGIN TRY
 	JOIN	tblRKBrokerageAccount		BA	ON	BA.intBrokerageAccountId		=	FD.intBrokerageAccountId	LEFT
 	JOIN	tblRKFutOptTransaction		TR	ON	TR.intFutOptTransactionId		=	FD.intFutOptTransactionId	LEFT
 	JOIN	tblCTContractDetail			CD	ON	CD.intContractDetailId			=	PF.intContractDetailId		LEFT
-	JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId			=	CD.intContractHeaderId
+	JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId			=	CD.intContractHeaderId		OUTER
+	APPLY	dbo.fnCTGetVoucherDetail('fixation', FD.intPriceFixationDetailId) Voucher
 
 END TRY
 

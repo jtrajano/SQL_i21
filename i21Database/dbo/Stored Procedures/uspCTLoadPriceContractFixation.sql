@@ -80,7 +80,11 @@ BEGIN TRY
 		IF OBJECT_ID('tempdb..#MultiPriceFixation') IS NOT NULL  					
 			DROP TABLE #MultiPriceFixation					
 
-		SELECT * INTO #tblCTPriceFixation FROM tblCTPriceFixation WHERE intPriceContractId = @intPriceContractId
+		SELECT * 
+		INTO #tblCTPriceFixation 
+		FROM tblCTPriceFixation P
+		OUTER APPLY dbo.fnCTGetVoucherDetail('price', P.intPriceContractId) B
+		WHERE intPriceContractId = @intPriceContractId
 
 		--INSERT INTO @temp 
 
@@ -111,6 +115,8 @@ BEGIN TRY
 				PF.dblFinalPrice,
 				PF.intFinalPriceUOMId,
 				PF.ysnSplit,
+				PF.strBillId,
+				PF.ysnPaid,
 
 				(SELECT SUM(dblQuantity) FROM tblCTContractDetail WHERE CD.intContractDetailId IN (intContractDetailId)) AS dblQuantity, -- ,intSplitFromId
 				CD.strPriceUOM,
@@ -194,6 +200,9 @@ LEFT	JOIN	tblICItem					SI	ON	SI.intItemId			=	SC.intItemId
 				PF.dblFinalPrice,
 				PF.intFinalPriceUOMId,
 				PF.ysnSplit,
+				PF.strBillId,
+				PF.ysnPaid,
+
 
 				CH.dblQuantity,
 				PM.strUnitMeasure		AS	strPriceUOM,
