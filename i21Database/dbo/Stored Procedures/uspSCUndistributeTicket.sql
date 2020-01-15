@@ -85,6 +85,8 @@ DECLARE @ysnAllInvoiceHasCreditMemo BIT
 DECLARE @strInvoiceNumber AS NVARCHAR(50)
 DECLARE @NeedCreditMemoMessage NVARCHAR(200)
 DECLARE @ysnTicketHasSpecialDiscount BIT
+DECLARE @intInventoryShipmentItemUsed INT
+DECLARE @intInventoryReceiptItemUsed INT
 
 BEGIN TRY
 		SELECT TOP 1
@@ -253,10 +255,15 @@ BEGIN TRY
 							IF(@strDistributionOption = 'LOD')
 							BEGIN
 								SET @intInventoryReceiptEntityId = 0
+								SET @intInventoryReceiptItemUsed = 0
 								SELECT TOP 1
-									@intInventoryReceiptEntityId = intEntityVendorId
-								FROM tblICInventoryReceipt
-								WHERE intInventoryReceiptId = @InventoryReceiptId
+									@intInventoryReceiptEntityId = A.intEntityVendorId
+									,@intInventoryReceiptItemUsed = B.intInventoryReceiptItemId
+								FROM tblICInventoryReceipt A
+								INNER JOIN tblICInventoryReceiptItem B
+									ON A.intInventoryReceiptId = B.intInventoryReceiptId 
+								WHERE A.intInventoryReceiptId = @InventoryReceiptId
+									AND B.intContractDetailId = @intTicketContractDetailId
 
 								SET @dblLoadUsedQty = 0
 								SELECT TOP 1 
@@ -268,7 +275,7 @@ BEGIN TRY
 
 								IF @dblLoadUsedQty <> 0
 								BEGIN
-									EXEC uspCTUpdateScheduleQuantityUsingUOM @intTicketContractDetailId, @dblLoadUsedQty, @intUserId, @InventoryReceiptId, 'Inventory Receipt', @intTicketItemUOMId
+									EXEC uspCTUpdateScheduleQuantityUsingUOM @intTicketContractDetailId, @dblLoadUsedQty, @intUserId, @intInventoryReceiptItemUsed, 'Inventory Receipt', @intTicketItemUOMId
 								END
 							END
 
@@ -1029,10 +1036,15 @@ BEGIN TRY
 									IF(@strDistributionOption = 'LOD')
 									BEGIN
 										SET @intInventoryShipmentEntityId = 0
+										SET @intInventoryShipmentItemUsed = 0
 										SELECT TOP 1
-											@intInventoryShipmentEntityId = intEntityCustomerId
-										FROM tblICInventoryShipment
-										WHERE intInventoryShipmentId = @InventoryShipmentId
+											@intInventoryShipmentEntityId = A.intEntityCustomerId
+											,@intInventoryShipmentItemUsed = B.intInventoryShipmentItemId
+										FROM tblICInventoryShipment A
+										INNER JOIN tblICInventoryShipmentItem B
+											ON A.intInventoryShipmentId = B.intInventoryShipmentId
+										WHERE A.intInventoryShipmentId = @InventoryShipmentId
+											AND B.intLineNo = @intTicketContractDetailId
 
 										SET @dblLoadUsedQty = 0
 										SELECT TOP 1 
@@ -1044,7 +1056,7 @@ BEGIN TRY
 
 										IF @dblLoadUsedQty <> 0
 										BEGIN
-											EXEC uspCTUpdateScheduleQuantityUsingUOM @intTicketContractDetailId, @dblLoadUsedQty, @intUserId, @InventoryShipmentId, 'Inventory Shipment', @intTicketItemUOMId
+											EXEC uspCTUpdateScheduleQuantityUsingUOM @intTicketContractDetailId, @dblLoadUsedQty, @intUserId, @intInventoryShipmentItemUsed, 'Inventory Shipment', @intTicketItemUOMId
 										END
 									END
 
