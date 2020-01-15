@@ -37,6 +37,19 @@
 ), 
 fixation as (
   select 
+    aaa1.intContractDetailId,
+    dblPricedQuantity = (case when aaa1.intPricingTypeId = 1 then aaa1.dblQuantity else sum(bbb.dblQuantity) end)
+  from 
+  tblCTContractDetail aaa1
+    left join tblCTPriceFixation aaa on aaa.intContractDetailId = aaa1.intContractDetailId
+    left join tblCTPriceFixationDetail bbb  on bbb.intPriceFixationId = aaa.intPriceFixationId and bbb.intPriceFixationId = aaa.intPriceFixationId
+  group by 
+    aaa1.intContractDetailId
+  ,aaa1.intPricingTypeId
+  ,aaa1.dblQuantity
+
+  /*
+  select 
     aaa.intContractDetailId, 
     dblPricedQuantity = sum(bbb.dblQuantity) 
   from 
@@ -46,6 +59,7 @@ fixation as (
     bbb.intPriceFixationId = aaa.intPriceFixationId 
   group by 
     aaa.intContractDetailId
+  */
 ), 
 lgallocationS as (
   select 
