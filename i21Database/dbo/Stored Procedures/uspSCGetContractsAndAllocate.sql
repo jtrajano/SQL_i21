@@ -387,15 +387,21 @@ BEGIN TRY
 					END
 					ELSE
 					BEGIN
-						SET @dblInreaseSchBy  = (@dblTicketScheduledQuantity - @dblNetUnits) * -1
-						IF(@dblInreaseSchBy <> 0)
+						SET @dblInreaseSchBy = 0
+						IF @dblTicketScheduledQuantity > @dblNetUnits
 						BEGIN
-							EXEC	uspCTUpdateScheduleQuantity 
-									@intContractDetailId	=	@intContractDetailId,
-									@dblQuantityToUpdate	=	@dblInreaseSchBy,
-									@intUserId				=	@intUserId,
-									@intExternalId			=	@intTicketId,
-									@strScreenName			=	'Auto - Scale'
+							SET @dblInreaseSchBy  = (@dblTicketScheduledQuantity - @dblNetUnits) * -1
+						
+
+							IF(@dblInreaseSchBy <> 0)
+							BEGIN
+								EXEC	uspCTUpdateScheduleQuantity 
+										@intContractDetailId	=	@intContractDetailId,
+										@dblQuantityToUpdate	=	@dblInreaseSchBy,
+										@intUserId				=	@intUserId,
+										@intExternalId			=	@intTicketId,
+										@strScreenName			=	'Auto - Scale'
+							END
 						END
 					END
 				END
