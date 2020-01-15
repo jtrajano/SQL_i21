@@ -2,37 +2,61 @@
 
 AS
 
-SELECT DISTINCT intFutOptTransactionId
-	, (dblNoOfContract-isnull(dblOpenContract,0)) dblOpenContract
+SELECT DISTINCT 
+	intFutOptTransactionId
+	,dblOpenContract  = (dblNoOfContract - isnull(dblMatchedContract,0))
 FROM (
-	SELECT ot.intFutOptTransactionId
-		, sum(ot.dblNoOfContract) dblNoOfContract
-		, (SELECT SUM(CONVERT(int,mf.dblMatchQty))
-			FROM tblRKMatchFuturesPSDetail mf
-			where ot.intFutOptTransactionId = mf.intLFutOptTransactionId) dblOpenContract
+	SELECT 
+		ot.intFutOptTransactionId
+		,dblNoOfContract =  sum(ot.dblNoOfContract)
+		,dblMatchedContract = (SELECT SUM(CONVERT(int,mf.dblMatchQty)) FROM tblRKMatchFuturesPSDetail mf WHERE ot.intFutOptTransactionId = mf.intLFutOptTransactionId)
 	FROM tblRKFutOptTransaction ot
-	where ot.strBuySell = 'Buy' and intInstrumentTypeId = 1
-	GROUP BY intFutOptTransactionId) t
-
-UNION SELECT DISTINCT intFutOptTransactionId
-	, -(dblNoOfContract-isnull(dblOpenContract,0)) dblOpenContract from (
-SELECT ot.intFutOptTransactionId,sum(ot.dblNoOfContract) dblNoOfContract,
-	   (SELECT SUM(CONVERT(int,mf.dblMatchQty)) FROM tblRKMatchFuturesPSDetail mf where ot.intFutOptTransactionId=mf.intSFutOptTransactionId) dblOpenContract
-FROM tblRKFutOptTransaction ot where ot.strBuySell='Sell' and intInstrumentTypeId = 1
-Group by intFutOptTransactionId) t
-
-UNION
-
-SELECT distinct intFutOptTransactionId,(isnull(dblNoOfContract,0)-isnull(dblOpenContract,0)) dblOpenContract from (
-SELECT ot.intFutOptTransactionId,sum(isnull(ot.dblNoOfContract,0)) dblNoOfContract,
-	   (SELECT SUM(CONVERT(int,mf.dblMatchQty)) FROM tblRKOptionsMatchPnS mf where ot.intFutOptTransactionId=mf.intLFutOptTransactionId) dblOpenContract
-FROM tblRKFutOptTransaction ot where ot.strBuySell='Buy' and intInstrumentTypeId = 2
-Group by intFutOptTransactionId) t
+	WHERE ot.strBuySell = 'Buy' AND intInstrumentTypeId = 1
+	GROUP BY intFutOptTransactionId
+) t
 
 UNION 
+SELECT DISTINCT 
+	intFutOptTransactionId
+	,dblOpenContract = -(dblNoOfContract - isnull(dblMatchedContract,0))  
+FROM (
+	SELECT 
+		ot.intFutOptTransactionId
+		,dblNoOfContract = sum(ot.dblNoOfContract) 
+		,dblMatchedContract = (SELECT SUM(CONVERT(int,mf.dblMatchQty)) FROM tblRKMatchFuturesPSDetail mf WHERE ot.intFutOptTransactionId = mf.intSFutOptTransactionId)
+	FROM tblRKFutOptTransaction ot 
+	WHERE ot.strBuySell = 'Sell' AND intInstrumentTypeId = 1
+	GROUP BY intFutOptTransactionId
+) t
 
-SELECT distinct intFutOptTransactionId,-(dblNoOfContract-isnull(dblOpenContract,0)) dblOpenContract from (
-SELECT ot.intFutOptTransactionId,sum(ot.dblNoOfContract) dblNoOfContract,
-	   (SELECT SUM(CONVERT(int,mf.dblMatchQty)) FROM tblRKOptionsMatchPnS mf where ot.intFutOptTransactionId=mf.intSFutOptTransactionId) dblOpenContract
-FROM tblRKFutOptTransaction ot where ot.strBuySell='Sell' and intInstrumentTypeId = 2
-Group by intFutOptTransactionId) t
+UNION
+SELECT DISTINCT 
+	intFutOptTransactionId
+	,dblOpenContract  = (isnull(dblNoOfContract,0) - isnull(dblMatchedContract,0) - isnull(dblExpiredContract,0))
+FROM (
+	SELECT 
+		ot.intFutOptTransactionId
+		,dblNoOfContract = sum(isnull(ot.dblNoOfContract,0))
+		,dblMatchedContract = (SELECT SUM(CONVERT(int,mf.dblMatchQty)) FROM tblRKOptionsMatchPnS mf WHERE ot.intFutOptTransactionId=mf.intLFutOptTransactionId) 
+		,dblExpiredContract = (SELECT SUM(CONVERT(int,ex.dblLots)) FROM tblRKOptionsPnSExpired ex WHERE ot.intFutOptTransactionId=ex.intFutOptTransactionId) 
+	FROM tblRKFutOptTransaction ot 
+	WHERE ot.strBuySell = 'Buy' AND intInstrumentTypeId = 2
+	GROUP BY intFutOptTransactionId
+) t
+
+UNION 
+SELECT DISTINCT 
+	intFutOptTransactionId
+	,dblOpenContract = -(isnull(dblNoOfContract,0) - isnull(dblMatchedContract,0) - isnull(dblExpiredContract,0)) 
+FROM (
+	SELECT 
+		ot.intFutOptTransactionId
+		,dblNoOfContract = sum(ot.dblNoOfContract) 
+		,dblMatchedContract = (SELECT SUM(CONVERT(int,mf.dblMatchQty)) FROM tblRKOptionsMatchPnS mf WHERE ot.intFutOptTransactionId=mf.intSFutOptTransactionId)
+		,dblExpiredContract = (SELECT SUM(CONVERT(int,ex.dblLots)) FROM tblRKOptionsPnSExpired ex WHERE ot.intFutOptTransactionId=ex.intFutOptTransactionId)
+	FROM tblRKFutOptTransaction ot 
+	WHERE ot.strBuySell = 'Sell' AND intInstrumentTypeId = 2
+	GROUP BY intFutOptTransactionId
+) t
+
+
