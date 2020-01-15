@@ -2595,7 +2595,9 @@ BEGIN TRY
 				if @debug_awesome_ness = 1 and 1 = 1
 				begin
 					select 'voucher payable', * from @voucherPayable		
-					select 'create voucher id ', @createdVouchersId		
+					select 'create voucher id ', @createdVouchersId
+					
+					select * from tblAPBill where intBillId = @createdVouchersId			
 					select * from tblAPBillDetail where intBillId = @createdVouchersId	
 				end
 				----- DEBUG POINT -----
@@ -2634,7 +2636,7 @@ BEGIN TRY
 					INNER JOIN @detailCreated ON intBillDetailId = intId
 					WHERE APD.intTaxGroupId IS NULL AND CASE WHEN @ysnDPOwnedType = 1 THEN CASE WHEN intInventoryReceiptChargeId IS NULL THEN 1 ELSE 0 END ELSE 1 END = 1
 					
-					EXEC [uspAPUpdateVoucherDetailTax] @detailCreated
+					--EXEC [uspAPUpdateVoucherDetailTax] @detailCreated
 
 
 					--this will update the cost
@@ -2647,7 +2649,7 @@ BEGIN TRY
 						declare @cur_qty as numeric(18,6)
 
 						----- DEBUG POINT -----
-						if @debug_awesome_ness = 1 and 1 = 0
+						if @debug_awesome_ness = 1 and 1 = 1
 						begin
 							select 'avq qty check'
 							select * from @avqty
@@ -2655,6 +2657,9 @@ BEGIN TRY
 							select * from tblAPBillDetail 
 									where 
 										intBillId = CAST(@createdVouchersId AS INT)
+
+							select * from @detailCreated
+							
 																
 						end
 						----- DEBUG POINT -----
@@ -2710,7 +2715,14 @@ BEGIN TRY
 
 					end
 
+					if @debug_awesome_ness = 1 and 1 = 0 
+					begin
+						select 'this is the data that is being passed to the update voucher detail tas'
+						select * from @detailCreated
 
+					end
+
+					EXEC [uspAPUpdateVoucherDetailTax] @detailCreated
 
 
 
@@ -2812,7 +2824,7 @@ BEGIN TRY
 											-- 		and c.intItemId = b.intItemId 
 											-- 		and c.intTransactionId = d.intSettleStorageId
 											-- 		and c.intTransactionDetailId = d.intSettleStorageTicketId													
-										where strType = 'Settlement'	
+										where strType = 'Settlement'
 								end
 
 								update a
@@ -2836,7 +2848,7 @@ BEGIN TRY
 								begin									
 									select 'qty tracking ',@dblQtyFromCt , @dblTotalVoucheredQuantity , @dblSelectedUnits,  @dblQtyFromCt + @dblTotalVoucheredQuantity 
 
-									select * from tblGRStorageHistory order by intStorageHistoryId desc
+									select * from tblGRStorageHistory where intCustomerStorageId = @intCustomerStorageId order by intStorageHistoryId desc
 								end
 								----- DEBUG POINT -----														
 
@@ -2844,7 +2856,7 @@ BEGIN TRY
 							end
 
 							----- DEBUG POINT -----
-							if @debug_awesome_ness = 1	 AND 1 = 0
+							if @debug_awesome_ness = 1	 AND 1 = 1
 							begin
 
 								select 'selected units', @dblSelectedUnits
