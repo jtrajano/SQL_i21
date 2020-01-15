@@ -3,6 +3,7 @@
 	,@intInventoryShipmentId INT = NULL 
 	,@intEntityUserSecurityId AS INT = NULL 	
 	,@dtmReversalDate DATETIME = NULL 
+	,@intNewInventoryShipmentId AS INT= NULL OUTPUT 
 AS  
   
 SET QUOTED_IDENTIFIER OFF  
@@ -14,7 +15,8 @@ SET ANSI_WARNINGS OFF
 DECLARE 
 	@strNewShipmentNumber AS NVARCHAR(50)
 	,@intCreatedEntityId AS INT 
-	,@intNewInventoryShipmentId AS INT	
+
+SET @intNewInventoryShipmentId = NULL 
 
 SELECT TOP 1 
 	@strNewShipmentNumber = strShipmentNumber + '-R'

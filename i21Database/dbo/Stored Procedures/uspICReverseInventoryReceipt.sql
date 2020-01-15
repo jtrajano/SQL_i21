@@ -3,6 +3,7 @@
 	,@intInventoryReceipt INT = NULL 
 	,@intEntityUserSecurityId AS INT = NULL 	
 	,@dtmReversalDate DATETIME = NULL 
+	,@intNewInventoryReceiptId AS INT = NULL OUTPUT 
 AS  
   
 SET QUOTED_IDENTIFIER OFF  
@@ -14,7 +15,8 @@ SET ANSI_WARNINGS OFF
 DECLARE 
 	@strNewReceiptNumber AS NVARCHAR(50)
 	,@intCreatedEntityId AS INT 
-	,@intNewInventoryReceiptId AS INT
+
+SET @intNewInventoryReceiptId = NULL 
 	
 SELECT TOP 1 
 	@strNewReceiptNumber = strReceiptNumber + '-R'
