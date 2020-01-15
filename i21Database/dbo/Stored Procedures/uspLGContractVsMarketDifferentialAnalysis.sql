@@ -109,7 +109,7 @@ FROM
 						AND SCD.intFutureMarketId = MTMBD.intFutureMarketId
 						AND DATEADD(ms, -3, DATEADD(DD, 1, SCH.dtmContractDate)) >= MTMB.dtmM2MBasisDate
 						AND MTMBD.intContractTypeId = 2
-					 ORDER BY MTMB.dtmM2MBasisDate ASC
+					 ORDER BY MTMB.dtmM2MBasisDate DESC
 					 ) MB
 		/* Payment Terms Adjustment Basis */
 		OUTER APPLY (SELECT TOP 1 PTSA.strMasterRecord, PTSA.dblRate, PTSA.intCurrencyId, PTUOM.intItemUOMId, PTCU.intCent
