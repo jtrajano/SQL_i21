@@ -11,6 +11,6 @@ from tblARAccountStatus ACS
 INNER JOIN 
 	tblARCustomerAccountStatus CAS
 ON ACS.intAccountStatusId = CAS.intAccountStatusId
-INNER JOIN 
+RIGHT JOIN 
 	vyuARCustomerSearch CS
 ON CAS.intEntityCustomerId = CS.intEntityCustomerId
