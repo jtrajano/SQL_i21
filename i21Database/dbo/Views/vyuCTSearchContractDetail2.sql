@@ -37,6 +37,19 @@
 ), 
 fixation as (
   select 
+    aaa1.intContractDetailId,
+    dblPricedQuantity = (case when aaa1.intPricingTypeId = 1 then aaa1.dblQuantity else sum(bbb.dblQuantity) end)
+  from 
+  tblCTContractDetail aaa1
+    left join tblCTPriceFixation aaa on aaa.intContractDetailId = aaa1.intContractDetailId
+    left join tblCTPriceFixationDetail bbb  on bbb.intPriceFixationId = aaa.intPriceFixationId and bbb.intPriceFixationId = aaa.intPriceFixationId
+  group by 
+    aaa1.intContractDetailId
+  ,aaa1.intPricingTypeId
+  ,aaa1.dblQuantity
+
+  /*
+  select 
     aaa.intContractDetailId, 
     dblPricedQuantity = sum(bbb.dblQuantity) 
   from 
@@ -46,6 +59,7 @@ fixation as (
     bbb.intPriceFixationId = aaa.intPriceFixationId 
   group by 
     aaa.intContractDetailId
+  */
 ), 
 lgallocationS as (
   select 
@@ -208,8 +222,8 @@ select
   p.strContractStatus, 
   strShipmentStatus = r.strShipmentStatus, 
   strFinancialStatus = CASE WHEN b.intContractTypeId = 1 THEN CASE WHEN a.ysnFinalPNL = 1 THEN 'Final P&L Created' WHEN a.ysnProvisionalPNL = 1 THEN 'Provisional P&L Created' ELSE CASE WHEN s.intContractDetailId IS NOT NULL THEN 'Purchase Invoice Received' ELSE null END END ELSE a.strFinancialStatus END, 
-  dblPricedQty = case when u.strPricingType = 'Basis' then isnull(t.dblPricedQuantity, 0) else null end, 
-  dblUnPricedQty = case when u.strPricingType = 'Basis' then a.dblQuantity - isnull(t.dblPricedQuantity, 0) else null end, 
+  dblPricedQty = case when u.strPricingType = 'Basis' then isnull(t.dblPricedQuantity, 0) else (case when a.intPricingTypeId = 1 then a.dblQuantity else null end) end, 
+  dblUnPricedQty = case when u.strPricingType = 'Basis' then a.dblQuantity - isnull(t.dblPricedQuantity, 0) else (case when a.intPricingTypeId = 1 then 0.00 else a.dblQuantity end) end, 
   dblActualLots = (
     case when isnull(v.dblUnitQty, 0) = 0 
     or isnull(w.dblUnitQty, 0) = 0 then null when isnull(v.dblUnitQty, 0) = isnull(w.dblUnitQty, 0) then a.dblQuantity else a.dblQuantity * (
