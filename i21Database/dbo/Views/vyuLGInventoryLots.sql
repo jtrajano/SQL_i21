@@ -6,6 +6,7 @@ SELECT DISTINCT intLotId
 	,strItemUOM
 	,intItemWeightUOMId
 	,strWeightUOM
+	,intSubLocationId
 	,strSubLocationName
 	,strStorageLocation
 	,dblGrossWeight
