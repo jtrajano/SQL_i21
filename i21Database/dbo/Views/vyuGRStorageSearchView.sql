@@ -48,6 +48,7 @@ SELECT DISTINCT
 	,dblDiscountUnPaid			  	= ISNULL(CS.dblDiscountsDue,0) - ISNULL(CS.dblDiscountsPaid,0)
 	,dblStorageUnPaid			  	= ISNULL(CS.dblStorageDue,0) - ISNULL(CS.dblStoragePaid,0)
 	,strSplitNumber				  	= EMSplit.strSplitNumber
+	,strSplitDescription			= EMSplit.strDescription
 	--,intContractHeaderId          	= CASE WHEN ST.ysnDPOwnedType = 1 THEN CH.intContractHeaderId ELSE NULL END
  --   ,intContractDetailId		  	= CASE WHEN ST.ysnDPOwnedType = 1  THEN SC.intContractId ELSE NULL END
  --   ,strContractNumber			  	= CASE WHEN ST.ysnDPOwnedType = 1  THEN CH.strContractNumber ELSE NULL END
