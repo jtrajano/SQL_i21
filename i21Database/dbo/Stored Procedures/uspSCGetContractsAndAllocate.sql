@@ -385,6 +385,19 @@ BEGIN TRY
 									@strScreenName			=	'Auto - Scale'
 						END
 					END
+					ELSE
+					BEGIN
+						SET @dblInreaseSchBy  = (@dblTicketScheduledQuantity - @dblNetUnits) * -1
+						IF(@dblInreaseSchBy <> 0)
+						BEGIN
+							EXEC	uspCTUpdateScheduleQuantity 
+									@intContractDetailId	=	@intContractDetailId,
+									@dblQuantityToUpdate	=	@dblInreaseSchBy,
+									@intUserId				=	@intUserId,
+									@intExternalId			=	@intTicketId,
+									@strScreenName			=	'Auto - Scale'
+						END
+					END
 				END
 				ELSE
 				BEGIN
