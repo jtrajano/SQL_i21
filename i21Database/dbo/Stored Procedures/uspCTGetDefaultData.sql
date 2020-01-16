@@ -14,7 +14,8 @@
 	@intCurrencyId			INT = NULL,
 	@intRateTypeId			INT = NULL,
 	@intInvoiceCurrencyId	INT = NULL,
-	@intLoggedInUserId		INT	= NULL
+	@intLoggedInUserId		INT	= NULL,
+	@dtmEndDate				DATETIME = NULL
 AS
 BEGIN
 	DECLARE @intProductTypeId		INT,
@@ -198,10 +199,17 @@ BEGIN
 	IF @strType = 'FutureMonth'
 	BEGIN
 		SELECT TOP 1 intFutureMonthId,REPLACE(strFutureMonth,' ','('+strSymbol+') ') strFutureMonth FROM tblRKFuturesMonth
-		WHERE intFutureMarketId = @intMarketId  AND 
+		WHERE intFutureMarketId = @intMarketId
+		AND CAST(@dtmEndDate AS DATE) <= CAST(dtmLastTradingDate AS DATE)
+		AND CAST(GETDATE() AS DATE) <= CAST(dtmLastTradingDate AS DATE)
+		AND ysnExpired = 0
+		ORDER BY dtmLastTradingDate ASC
+		
+		/*
 		ISNULL(	dtmLastTradingDate, CONVERT(DATETIME,SUBSTRING(LTRIM(year(GETDATE())),1,2)+ LTRIM(intYear)+'-'+SUBSTRING(strFutureMonth,1,3)+'-01')) >= DATEADD(d, 0, DATEDIFF(d, 0, GETDATE()))
 		AND ysnExpired <> 1
 		ORDER BY ISNULL(dtmLastTradingDate, CONVERT(DATETIME,SUBSTRING(LTRIM(year(GETDATE())),1,2)+ LTRIM(intYear)+'-'+SUBSTRING(strFutureMonth,1,3)+'-01')) ASC
+		*/
 	END
 
 	IF @strType = 'FX'
