@@ -5,6 +5,15 @@
 	, @intBackupId INT = NULL OUTPUT 
 AS
 
+-- Create the temp table for the specific items/categories to rebuild
+IF OBJECT_ID('tempdb..#tmpRebuildList') IS NULL  
+BEGIN 
+	CREATE TABLE #tmpRebuildList (
+		intItemId INT NULL 
+		,intCategoryId INT NULL 
+	)
+END 
+
 -- Make the backup header 
 IF @intBackupId IS NULL
 BEGIN 
@@ -13,6 +22,25 @@ BEGIN
 
 	--DECLARE @intBackupId INT
 	SET @intBackupId = SCOPE_IDENTITY()
+END 
+
+-- Insert the collateral items/categories 
+IF EXISTS (SELECT TOP 1 1 FROM #tmpRebuildList WHERE intItemId IS NOT NULL OR intCategoryId IS NOT NULL) 
+BEGIN 
+	INSERT INTO tblICBackupCollateral (
+		intBackupId
+		,strItemNo
+		,strCategoryCode
+	)
+	SELECT 
+		@intBackupId
+		,i.strItemNo
+		,c.strCategoryCode
+	FROM 
+		#tmpRebuildList list LEFT JOIN tblICItem i 
+			ON list.intItemId = i.intItemId
+		LEFT JOIN tblICCategory c
+			ON list.intCategoryId = c.intCategoryId 
 END 
 
 INSERT INTO tblICBackupDetailLot(			
