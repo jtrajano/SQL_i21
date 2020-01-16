@@ -3943,6 +3943,7 @@ BEGIN
 															,AggregrateItemLots.dblTotalNet --Lot Net Wgt or Volume
 															,ReceiptItem.ysnSubCurrency
 															,Receipt.intSubCurrencyCents
+															,DEFAULT
 														)
 														--/ Receipt.intSubCurrencyCents 
 
@@ -3985,6 +3986,7 @@ BEGIN
 															,AggregrateItemLots.dblTotalNet
 															,NULL--ReceiptItem.ysnSubCurrency
 															,NULL--Receipt.intSubCurrencyCents
+															,DEFAULT
 														)
 														-- (B) Other Charge
 														+ 
@@ -4041,6 +4043,7 @@ BEGIN
 								,AggregrateItemLots.dblTotalNet --Lot Net Wgt or Volume
 								,NULL--DetailItem.ysnSubCurrency
 								,NULL--Header.intSubCurrencyCents
+								,DEFAULT
 							)
 						,RebuildInvTrans.intCostingMethod
 				FROM	#tmpICInventoryTransaction RebuildInvTrans INNER JOIN tblICItemLocation ItemLocation 
