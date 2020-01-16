@@ -144,11 +144,14 @@ BEGIN
 	DECLARE @FormattedReceivedQty AS NVARCHAR(50)
 	DECLARE @FormattedLotQty AS NVARCHAR(50)
 	DECLARE @FormattedDifference AS NVARCHAR(50)
+	DECLARE @intSourceType INT = NULL
+	DECLARE @errMsg NVARCHAR(MAX)
 
 	SELECT TOP 1 @strItemNo = Item.strItemNo
 		,@intItemId = Item.intItemId
 		,@dblQuantityShipped = Detail.dblQuantity
 		,@LotQtyInItemUOM = ISNULL(ItemLot.TotalLotQtyInDetailItemUOM, 0)
+		,@intSourceType = LOAD.intSourceType
 	FROM tblLGLoad LOAD
 	INNER JOIN tblLGLoadDetail Detail ON LOAD.intLoadId = Detail.intLoadId
 	INNER JOIN dbo.tblICItem Item ON Item.intItemId = Detail.intItemId
@@ -170,6 +173,20 @@ BEGIN
 	BEGIN
 		IF ISNULL(@strItemNo, '') = ''
 			SET @strItemNo = 'Item with id ' + CAST(@intItemId AS NVARCHAR(50))
+
+		-- 'No Lots selected for {Item}. Please choose a Source Type that supports Lot selection.'
+		IF (@intSourceType NOT IN (5, 6, 7))
+		BEGIN
+			SELECT @errMsg = 'No Lots selected for ' + @strItemNo + '. Please choose a Source Type that supports Lot selection.'
+			RAISERROR(@errMsg, 16, 1);
+		END
+
+		-- 'No Lots selected for {Item}.'
+		IF (@LotQtyInItemUOM = 0)
+		BEGIN
+			SELECT @errMsg = 'No Lots selected for ' + @strItemNo + '. '
+			RAISERROR(@errMsg, 16, 1);
+		END
 
 		-- 'The Qty to Ship for {Item} is {Ship Qty}. Total Lot Quantity is {Total Lot Qty}. The difference is {Calculated difference}.'
 		DECLARE @difference AS NUMERIC(38, 20) = ABS(@dblQuantityShipped - @LotQtyInItemUOM)
