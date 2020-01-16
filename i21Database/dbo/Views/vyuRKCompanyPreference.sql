@@ -39,6 +39,7 @@ SELECT A.*
 								WHEN intMarkExpiredMonthPositionId = 2 THEN 'Spot Month'
 								WHEN intMarkExpiredMonthPositionId = 3 THEN 'Nearby by Roll' END
 	, rv.strRiskView
+	, strTonnageUOM = UOM.strUnitMeasure
 FROM tblRKCompanyPreference A
 LEFT JOIN tblRKInterfaceSystem C ON C.intInterfaceSystemId = A.intInterfaceSystemId
 LEFT JOIN tblSMCurrency D ON D.intCurrencyID = A.intCurrencyId
@@ -65,3 +66,4 @@ LEFT JOIN tblGLAccount GL20 ON GL20.intAccountId = A.intUnrealizedLossOnInventor
 LEFT JOIN tblGLAccount GL21 ON GL21.intAccountId = A.intFuturesGainOrLossRealizedId
 LEFT JOIN tblGLAccount GL22 ON GL22.intAccountId = A.intFuturesGainOrLossRealizedOffsetId
 LEFT JOIN tblRKRiskView rv ON rv.intRiskViewId = A.intRiskViewId
+LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = A.intTonnageUOMId
