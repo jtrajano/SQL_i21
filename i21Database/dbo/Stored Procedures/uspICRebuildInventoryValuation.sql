@@ -130,7 +130,66 @@ BEGIN
 		@dtmRebuildDate
 END
 
---BEGIN TRANSACTION 
+-- Create the temp table for the specific items/categories to rebuild
+IF OBJECT_ID('tempdb..#tmpRebuildList') IS NULL  
+BEGIN 
+	CREATE TABLE #tmpRebuildList (
+		intItemId INT NULL 
+		,intCategoryId INT NULL 
+	)
+END 
+
+IF @intItemId IS NOT NULL 
+BEGIN 
+	INSERT INTO #tmpRebuildList (
+		intItemId
+		,intCategoryId
+	)
+	EXEC uspICGetCollateralItems
+		@dtmStartDate 
+		,@intItemId 
+		,@isPeriodic
+
+
+	INSERT INTO #tmpRebuildList (
+		intItemId
+		,intCategoryId	
+	)
+	SELECT 
+		@intItemId
+		,NULL 
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM #tmpRebuildList WHERE intItemId = @intItemId)
+END 
+
+IF @intCategoryId IS NOT NULL AND @intItemId IS NULL 
+BEGIN 
+	INSERT INTO #tmpRebuildList (
+		intItemId
+		,intCategoryId
+	)
+	EXEC uspICGetCollateralCategories
+		@dtmStartDate 
+		,@intCategoryId 
+		,@isPeriodic
+
+	INSERT INTO #tmpRebuildList (
+		intItemId
+		,intCategoryId	
+	)
+	SELECT 
+		NULL
+		,@intCategoryId
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM #tmpRebuildList WHERE intCategoryId = @intCategoryId)
+END 
+
+IF NOT EXISTS (SELECT TOP 1 1 FROM #tmpRebuildList)
+BEGIN 
+	INSERT INTO #tmpRebuildList (
+		intItemId
+		,intCategoryId
+	)
+	SELECT intItemId = NULL, intCategoryId = NULL 
+END 
 
 -- Backup Inventory transactions 
 BEGIN 
@@ -152,19 +211,18 @@ BEGIN
 							CASE WHEN @isPeriodic = 0 THEN InvTrans.dtmCreated ELSE InvTrans.dtmDate END
 							, @dtmStartDate						
 						) d
+						INNER JOIN #tmpRebuildList list
+							ON InvTrans.intItemId = COALESCE(list.intItemId, InvTrans.intItemId) 
 				WHERE	
-						--dbo.fnDateGreaterThanEquals(							
-						--	CASE WHEN @isPeriodic = 0 THEN InvTrans.dtmCreated ELSE InvTrans.dtmDate END
-						--	, @dtmStartDate
-						--) = 1
 						LotCostBucket.intInventoryLotId = LotOut.intInventoryLotId
-						AND InvTrans.intItemId = ISNULL(@intItemId, InvTrans.intItemId) 
 			)
 	FROM	dbo.tblICInventoryLot LotCostBucket INNER JOIN tblICItem i
 				ON LotCostBucket.intItemId = i.intItemId
-	WHERE	LotCostBucket.intItemId = ISNULL(@intItemId, LotCostBucket.intItemId)
-			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
+			INNER JOIN #tmpRebuildList list2
+				ON LotCostBucket.intItemId  = COALESCE(list2.intItemId, LotCostBucket.intItemId) 
+				AND i.intCategoryId = COALESCE(list2.intCategoryId, i.intCategoryId) 
 
+	
 	UPDATE	FIFOCostBucket
 	SET		dblStockOut = dblStockOut - (
 				SELECT	ISNULL(SUM(FIFOOut.dblQty), 0) 
@@ -174,18 +232,16 @@ BEGIN
 							CASE WHEN @isPeriodic = 0 THEN InvTrans.dtmCreated ELSE InvTrans.dtmDate END
 							, @dtmStartDate						
 						) d
+						INNER JOIN #tmpRebuildList list
+							ON InvTrans.intItemId = COALESCE(list.intItemId, InvTrans.intItemId) 
 				WHERE	
-						--dbo.fnDateGreaterThanEquals(
-						--	CASE WHEN @isPeriodic = 0 THEN InvTrans.dtmCreated ELSE InvTrans.dtmDate END
-						--	, @dtmStartDate
-						--) = 1
 						FIFOCostBucket.intInventoryFIFOId = FIFOOut.intInventoryFIFOId
-						AND InvTrans.intItemId = ISNULL(@intItemId, InvTrans.intItemId) 
 			)
 	FROM	dbo.tblICInventoryFIFO FIFOCostBucket INNER JOIN tblICItem i
 				ON FIFOCostBucket.intItemId = i.intItemId
-	WHERE	FIFOCostBucket.intItemId = ISNULL(@intItemId, FIFOCostBucket.intItemId)
-			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
+			INNER JOIN #tmpRebuildList list2
+				ON FIFOCostBucket.intItemId  = COALESCE(list2.intItemId, FIFOCostBucket.intItemId) 
+				AND i.intCategoryId = COALESCE(list2.intCategoryId, i.intCategoryId) 
 
 	UPDATE	LIFOCostBucket
 	SET		dblStockOut = dblStockOut - (
@@ -196,18 +252,16 @@ BEGIN
 							CASE WHEN @isPeriodic = 0 THEN InvTrans.dtmCreated ELSE InvTrans.dtmDate END
 							, @dtmStartDate					
 						) d
+						INNER JOIN #tmpRebuildList list
+							ON InvTrans.intItemId = COALESCE(list.intItemId, InvTrans.intItemId) 
 				WHERE	
-						--dbo.fnDateGreaterThanEquals(
-						--	CASE WHEN @isPeriodic = 0 THEN InvTrans.dtmCreated ELSE InvTrans.dtmDate END
-						--	, @dtmStartDate
-						--) = 1
 						LIFOCostBucket.intInventoryLIFOId = LIFOOut.intInventoryLIFOId
-						AND InvTrans.intItemId = ISNULL(@intItemId, InvTrans.intItemId) 
 			)
 	FROM	dbo.tblICInventoryLIFO LIFOCostBucket INNER JOIN tblICItem i
 				ON LIFOCostBucket.intItemId = i.intItemId
-	WHERE	LIFOCostBucket.intItemId = ISNULL(@intItemId, LIFOCostBucket.intItemId)
-			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
+			INNER JOIN #tmpRebuildList list2
+				ON LIFOCostBucket.intItemId  = COALESCE(list2.intItemId, LIFOCostBucket.intItemId) 
+				AND i.intCategoryId = COALESCE(list2.intCategoryId, i.intCategoryId) 
 
 	UPDATE	ActualCostBucket
 	SET		dblStockOut = dblStockOut - (
@@ -218,18 +272,16 @@ BEGIN
 							CASE WHEN @isPeriodic = 0 THEN InvTrans.dtmCreated ELSE InvTrans.dtmDate END
 							, @dtmStartDate				
 						) d
+						INNER JOIN #tmpRebuildList list
+							ON InvTrans.intItemId = COALESCE(list.intItemId, InvTrans.intItemId) 
 				WHERE	
-						--dbo.fnDateGreaterThanEquals(
-						--	CASE WHEN @isPeriodic = 0 THEN InvTrans.dtmCreated ELSE InvTrans.dtmDate END
-						--	, @dtmStartDate
-						--) = 1
 						ActualCostBucket.intInventoryActualCostId = ActualCostOut.intInventoryActualCostId
-						AND InvTrans.intItemId = ISNULL(@intItemId, InvTrans.intItemId) 
 			)
 	FROM	dbo.tblICInventoryActualCost ActualCostBucket INNER JOIN tblICItem i
 				ON ActualCostBucket.intItemId = i.intItemId
-	WHERE	ActualCostBucket.intItemId = ISNULL(@intItemId, ActualCostBucket.intItemId)
-			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
+			INNER JOIN #tmpRebuildList list2
+				ON ActualCostBucket.intItemId  = COALESCE(list2.intItemId, ActualCostBucket.intItemId) 
+				AND i.intCategoryId = COALESCE(list2.intCategoryId, i.intCategoryId) 
 END 
 
 -- If stock is received within the date range, then remove also the "out" stock records. 
@@ -243,13 +295,9 @@ BEGIN
 				CASE WHEN @isPeriodic = 0 THEN LotCostBucket.dtmCreated ELSE LotCostBucket.dtmDate END
 				, @dtmStartDate			
 			) d
-	WHERE	
-			--dbo.fnDateGreaterThanEquals(				
-			--	CASE WHEN @isPeriodic = 0 THEN LotCostBucket.dtmCreated ELSE LotCostBucket.dtmDate END
-			--	, @dtmStartDate
-			--) = 1
-			LotCostBucket.intItemId = ISNULL(@intItemId, LotCostBucket.intItemId) 
-			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
+			INNER JOIN #tmpRebuildList list
+				ON LotCostBucket.intItemId  = COALESCE(list.intItemId, LotCostBucket.intItemId) 
+				AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId) 
 
 	DELETE	FIFOOut
 	FROM	dbo.tblICInventoryFIFOOut FIFOOut INNER JOIN dbo.tblICInventoryFIFO FIFOCostBucket
@@ -260,13 +308,9 @@ BEGIN
 				CASE WHEN @isPeriodic = 0 THEN FIFOCostBucket.dtmCreated ELSE FIFOCostBucket.dtmDate END
 				, @dtmStartDate			
 			) d
-	WHERE	
-			--dbo.fnDateGreaterThanEquals(
-			--	CASE WHEN @isPeriodic = 0 THEN FIFOCostBucket.dtmCreated ELSE FIFOCostBucket.dtmDate END
-			--	, @dtmStartDate
-			--) = 1
-			FIFOCostBucket.intItemId = ISNULL(@intItemId, FIFOCostBucket.intItemId) 
-			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
+			INNER JOIN #tmpRebuildList list
+				ON FIFOCostBucket.intItemId  = COALESCE(list.intItemId, FIFOCostBucket.intItemId) 
+				AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId) 
 
 	DELETE	LIFOOut
 	FROM	dbo.tblICInventoryLIFOOut LIFOOut INNER JOIN dbo.tblICInventoryLIFO LIFOCostBucket
@@ -277,13 +321,10 @@ BEGIN
 				CASE WHEN @isPeriodic = 0 THEN LIFOCostBucket.dtmCreated ELSE LIFOCostBucket.dtmDate END
 				, @dtmStartDate			
 			) d
-	WHERE	
-			--dbo.fnDateGreaterThanEquals(
-			--	CASE WHEN @isPeriodic = 0 THEN LIFOCostBucket.dtmCreated ELSE LIFOCostBucket.dtmDate END
-			--	, @dtmStartDate
-			--	) = 1
-			LIFOCostBucket.intItemId = ISNULL(@intItemId, LIFOCostBucket.intItemId) 
-			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
+			INNER JOIN #tmpRebuildList list
+				ON LIFOCostBucket.intItemId  = COALESCE(list.intItemId, LIFOCostBucket.intItemId) 
+				AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId) 
+
 
 	DELETE	ActualCostOut
 	FROM	dbo.tblICInventoryActualCostOut ActualCostOut INNER JOIN dbo.tblICInventoryActualCost ActualCostCostBucket
@@ -294,13 +335,9 @@ BEGIN
 				CASE WHEN @isPeriodic = 0 THEN ActualCostCostBucket.dtmCreated ELSE ActualCostCostBucket.dtmDate END
 				, @dtmStartDate			
 			) d
-	WHERE	
-			--dbo.fnDateGreaterThanEquals(
-			--	CASE WHEN @isPeriodic = 0 THEN ActualCostCostBucket.dtmCreated ELSE ActualCostCostBucket.dtmDate END
-			--	, @dtmStartDate
-			--) = 1
-			ActualCostCostBucket.intItemId = ISNULL(@intItemId, ActualCostCostBucket.intItemId) 
-			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
+			INNER JOIN #tmpRebuildList list
+				ON ActualCostCostBucket.intItemId  = COALESCE(list.intItemId, ActualCostCostBucket.intItemId) 
+				AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId) 
 END 
 
 -- Restore the original costs
@@ -318,15 +355,12 @@ BEGIN
 				CASE WHEN @isPeriodic = 0 THEN t.dtmCreated ELSE t.dtmDate END
 				, @dtmStartDate			
 			) d
+			INNER JOIN #tmpRebuildList list
+				ON t.intItemId  = COALESCE(list.intItemId, t.intItemId) 
+				AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId) 
 	WHERE	
-			--dbo.fnDateGreaterThanEquals(
-			--	CASE WHEN @isPeriodic = 0 THEN t.dtmCreated ELSE t.dtmDate END
-			--	, @dtmStartDate
-			--) = 1
-			t.intItemId = ISNULL(@intItemId, t.intItemId) 
-			AND CostAdjustment.intInventoryCostAdjustmentTypeId = 1 -- Original cost. 
-			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
-
+			CostAdjustment.intInventoryCostAdjustmentTypeId = 1 -- Original cost. 
+			
 	-- FIFO 
 	UPDATE	cb
 	SET		dblCost = costAdjLog.dblCost
@@ -340,14 +374,12 @@ BEGIN
 				CASE WHEN @isPeriodic = 0 THEN t.dtmCreated ELSE t.dtmDate END
 				, @dtmStartDate			
 			) d
+			INNER JOIN #tmpRebuildList list
+				ON t.intItemId  = COALESCE(list.intItemId, t.intItemId) 
+				AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId) 
 	WHERE	
-			--dbo.fnDateGreaterThanEquals(
-			--	CASE WHEN @isPeriodic = 0 THEN t.dtmCreated ELSE t.dtmDate END
-			--	, @dtmStartDate
-			--) = 1
-			t.intItemId = ISNULL(@intItemId, t.intItemId) 
-			AND costAdjLog.intInventoryCostAdjustmentTypeId = 1 -- Original cost. 
-			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
+			costAdjLog.intInventoryCostAdjustmentTypeId = 1 -- Original cost. 
+			
 
 	-- LIFO 
 	UPDATE	cb
@@ -362,14 +394,12 @@ BEGIN
 				CASE WHEN @isPeriodic = 0 THEN t.dtmCreated ELSE t.dtmDate END
 				, @dtmStartDate			
 			) d
+			INNER JOIN #tmpRebuildList list
+				ON t.intItemId  = COALESCE(list.intItemId, t.intItemId) 
+				AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId) 
 	WHERE	
-			--dbo.fnDateGreaterThanEquals(
-			--	CASE WHEN @isPeriodic = 0 THEN t.dtmCreated ELSE t.dtmDate END
-			--	, @dtmStartDate
-			--) = 1
-			t.intItemId = ISNULL(@intItemId, t.intItemId) 
-			AND costAdjLog.intInventoryCostAdjustmentTypeId = 1 -- Original cost. 
-			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
+			costAdjLog.intInventoryCostAdjustmentTypeId = 1 -- Original cost. 
+			
 
 	-- Actual  
 	UPDATE	cb
@@ -384,14 +414,11 @@ BEGIN
 				CASE WHEN @isPeriodic = 0 THEN t.dtmCreated ELSE t.dtmDate END
 				, @dtmStartDate			
 			) d
+			INNER JOIN #tmpRebuildList list
+				ON t.intItemId  = COALESCE(list.intItemId, t.intItemId) 
+				AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId) 
 	WHERE	
-			--dbo.fnDateGreaterThanEquals(
-			--	CASE WHEN @isPeriodic = 0 THEN t.dtmCreated ELSE t.dtmDate END
-			--	, @dtmStartDate
-			--) = 1
-			t.intItemId = ISNULL(@intItemId, t.intItemId) 
-			AND costAdjLog.intInventoryCostAdjustmentTypeId = 1 -- Original cost. 
-			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
+			costAdjLog.intInventoryCostAdjustmentTypeId = 1 -- Original cost. 
 END 
 
 -- Clear the cost adjustments
@@ -405,13 +432,9 @@ BEGIN
 				CASE WHEN @isPeriodic = 0 THEN InvTrans.dtmCreated ELSE InvTrans.dtmDate END
 				, @dtmStartDate			
 			) d
-	WHERE	
-			--dbo.fnDateGreaterThanEquals(
-			--	CASE WHEN @isPeriodic = 0 THEN InvTrans.dtmCreated ELSE InvTrans.dtmDate END
-			--	, @dtmStartDate
-			--) = 1
-			InvTrans.intItemId = ISNULL(@intItemId, i.intItemId) 
-			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
+			INNER JOIN #tmpRebuildList list
+				ON InvTrans.intItemId  = COALESCE(list.intItemId, InvTrans.intItemId) 
+				AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId) 
 
 	DELETE	CostAdjustment
 	FROM	dbo.tblICInventoryFIFOCostAdjustmentLog CostAdjustment INNER JOIN tblICInventoryTransaction InvTrans
@@ -422,13 +445,9 @@ BEGIN
 				CASE WHEN @isPeriodic = 0 THEN InvTrans.dtmCreated ELSE InvTrans.dtmDate END
 				, @dtmStartDate			
 			) d
-	WHERE	
-			--dbo.fnDateGreaterThanEquals(
-			--	CASE WHEN @isPeriodic = 0 THEN InvTrans.dtmCreated ELSE InvTrans.dtmDate END
-			--	, @dtmStartDate
-			--) = 1
-			InvTrans.intItemId = ISNULL(@intItemId, i.intItemId) 
-			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
+			INNER JOIN #tmpRebuildList list
+				ON InvTrans.intItemId  = COALESCE(list.intItemId, InvTrans.intItemId) 
+				AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId) 
 
 	DELETE	CostAdjustment
 	FROM	dbo.tblICInventoryLIFOCostAdjustmentLog CostAdjustment INNER JOIN tblICInventoryTransaction InvTrans
@@ -439,13 +458,9 @@ BEGIN
 				CASE WHEN @isPeriodic = 0 THEN InvTrans.dtmCreated ELSE InvTrans.dtmDate END
 				, @dtmStartDate			
 			) d
-	WHERE	
-			--dbo.fnDateGreaterThanEquals(
-			--	CASE WHEN @isPeriodic = 0 THEN InvTrans.dtmCreated ELSE InvTrans.dtmDate END
-			--	, @dtmStartDate
-			--) = 1
-			InvTrans.intItemId = ISNULL(@intItemId, i.intItemId) 
-			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
+			INNER JOIN #tmpRebuildList list
+				ON InvTrans.intItemId  = COALESCE(list.intItemId, InvTrans.intItemId) 
+				AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId) 
 
 	DELETE	CostAdjustment
 	FROM	dbo.tblICInventoryActualCostAdjustmentLog CostAdjustment INNER JOIN tblICInventoryTransaction InvTrans
@@ -456,13 +471,9 @@ BEGIN
 				CASE WHEN @isPeriodic = 0 THEN InvTrans.dtmCreated ELSE InvTrans.dtmDate END
 				, @dtmStartDate			
 			) d
-	WHERE	
-			--dbo.fnDateGreaterThanEquals(
-			--	CASE WHEN @isPeriodic = 0 THEN InvTrans.dtmCreated ELSE InvTrans.dtmDate END
-			--	, @dtmStartDate
-			--) = 1
-			InvTrans.intItemId = ISNULL(@intItemId, i.intItemId) 
-			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
+			INNER JOIN #tmpRebuildList list
+				ON InvTrans.intItemId  = COALESCE(list.intItemId, InvTrans.intItemId) 
+				AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId) 
 END 
 
 -- Remove the cost adjustment logs if it is posted within the date range. 
@@ -476,13 +487,9 @@ BEGIN
 				CASE WHEN @isPeriodic = 0 THEN cb.dtmCreated ELSE cb.dtmDate END
 				, @dtmStartDate			
 			) d
-	WHERE	
-			--dbo.fnDateGreaterThanEquals(
-			--	CASE WHEN @isPeriodic = 0 THEN cb.dtmCreated ELSE cb.dtmDate END
-			--	, @dtmStartDate
-			--) = 1 
-			i.intItemId = ISNULL(@intItemId, i.intItemId) 
-			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
+			INNER JOIN #tmpRebuildList list
+				ON i.intItemId  = COALESCE(list.intItemId, i.intItemId) 
+				AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId) 
 
 	DELETE	cbLog
 	FROM	tblICInventoryFIFO cb INNER JOIN tblICItem i
@@ -493,13 +500,9 @@ BEGIN
 				CASE WHEN @isPeriodic = 0 THEN cb.dtmCreated ELSE cb.dtmDate END
 				, @dtmStartDate			
 			) d
-	WHERE	
-			--dbo.fnDateGreaterThanEquals(
-			--	CASE WHEN @isPeriodic = 0 THEN cb.dtmCreated ELSE cb.dtmDate END
-			--	, @dtmStartDate
-			--) = 1 
-			i.intItemId = ISNULL(@intItemId, i.intItemId) 
-			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
+			INNER JOIN #tmpRebuildList list
+				ON i.intItemId  = COALESCE(list.intItemId, i.intItemId) 
+				AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId) 
 
 	DELETE	cbLog
 	FROM	tblICInventoryLIFO cb INNER JOIN tblICItem i
@@ -510,13 +513,9 @@ BEGIN
 				CASE WHEN @isPeriodic = 0 THEN cb.dtmCreated ELSE cb.dtmDate END
 				, @dtmStartDate			
 			) d
-	WHERE	
-			--dbo.fnDateGreaterThanEquals(
-			--	CASE WHEN @isPeriodic = 0 THEN cb.dtmCreated ELSE cb.dtmDate END
-			--	, @dtmStartDate
-			--) = 1 
-			i.intItemId = ISNULL(@intItemId, i.intItemId) 
-			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
+			INNER JOIN #tmpRebuildList list
+				ON i.intItemId  = COALESCE(list.intItemId, i.intItemId) 
+				AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId) 
 
 	DELETE	cbLog
 	FROM	tblICInventoryActualCost cb INNER JOIN tblICItem i
@@ -527,13 +526,9 @@ BEGIN
 				CASE WHEN @isPeriodic = 0 THEN cb.dtmCreated ELSE cb.dtmDate END
 				, @dtmStartDate			
 			) d
-	WHERE	
-			--dbo.fnDateGreaterThanEquals(
-			--	CASE WHEN @isPeriodic = 0 THEN cb.dtmCreated ELSE cb.dtmDate END
-			--	, @dtmStartDate
-			--) = 1 
-			i.intItemId = ISNULL(@intItemId, i.intItemId) 
-			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
+			INNER JOIN #tmpRebuildList list
+				ON i.intItemId  = COALESCE(list.intItemId, i.intItemId) 
+				AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId) 
 END 
 
 -- Remove the cost buckets if it is posted within the date range. 
@@ -545,13 +540,10 @@ BEGIN
 				CASE WHEN @isPeriodic = 0 THEN dtmCreated ELSE dtmDate END
 				, @dtmStartDate			
 			) d
-	WHERE	
-			--dbo.fnDateGreaterThanEquals(
-			--	CASE WHEN @isPeriodic = 0 THEN dtmCreated ELSE dtmDate END
-			--	, @dtmStartDate
-			--) = 1 
-			i.intItemId = ISNULL(@intItemId, i.intItemId) 
-			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
+			INNER JOIN #tmpRebuildList list
+				ON i.intItemId  = COALESCE(list.intItemId, i.intItemId) 
+				AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId) 
+
 	
 	DELETE	cb
 	FROM	tblICInventoryFIFO cb INNER JOIN tblICItem i
@@ -560,13 +552,9 @@ BEGIN
 				CASE WHEN @isPeriodic = 0 THEN dtmCreated ELSE dtmDate END
 				, @dtmStartDate			
 			) d
-	WHERE	
-			--dbo.fnDateGreaterThanEquals(
-			--	CASE WHEN @isPeriodic = 0 THEN dtmCreated ELSE dtmDate END
-			--	, @dtmStartDate
-			--) = 1 
-			i.intItemId = ISNULL(@intItemId, i.intItemId) 
-			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
+			INNER JOIN #tmpRebuildList list
+				ON i.intItemId  = COALESCE(list.intItemId, i.intItemId) 
+				AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId) 
 
 	DELETE	cb
 	FROM	tblICInventoryLIFO cb INNER JOIN tblICItem i
@@ -575,13 +563,10 @@ BEGIN
 				CASE WHEN @isPeriodic = 0 THEN dtmCreated ELSE dtmDate END
 				, @dtmStartDate			
 			) d
-	WHERE	
-			--dbo.fnDateGreaterThanEquals(
-			--	CASE WHEN @isPeriodic = 0 THEN dtmCreated ELSE dtmDate END
-			--	, @dtmStartDate
-			--) = 1 
-			i.intItemId = ISNULL(@intItemId, i.intItemId) 
-			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
+			INNER JOIN #tmpRebuildList list
+				ON i.intItemId  = COALESCE(list.intItemId, i.intItemId) 
+				AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId) 
+
 
 	DELETE	cb
 	FROM	tblICInventoryActualCost cb INNER JOIN tblICItem i
@@ -590,13 +575,9 @@ BEGIN
 				CASE WHEN @isPeriodic = 0 THEN dtmCreated ELSE dtmDate END
 				, @dtmStartDate			
 			) d
-	WHERE	
-			--dbo.fnDateGreaterThanEquals(
-			--	CASE WHEN @isPeriodic = 0 THEN dtmCreated ELSE dtmDate END
-			--	, @dtmStartDate
-			--) = 1 
-			i.intItemId = ISNULL(@intItemId, i.intItemId) 
-			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
+			INNER JOIN #tmpRebuildList list
+				ON i.intItemId  = COALESCE(list.intItemId, i.intItemId) 
+				AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId) 
 END 
 
 -- Clear the G/L entries 
@@ -611,13 +592,9 @@ BEGIN
 				CASE WHEN @isPeriodic = 0 THEN InvTrans.dtmCreated ELSE InvTrans.dtmDate END
 				, @dtmStartDate			
 			) d
-	WHERE	
-			--dbo.fnDateGreaterThanEquals(
-			--	CASE WHEN @isPeriodic = 0 THEN InvTrans.dtmCreated ELSE InvTrans.dtmDate END
-			--	, @dtmStartDate
-			--) = 1
-			InvTrans.intItemId = ISNULL(@intItemId, InvTrans.intItemId) 
-			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
+			INNER JOIN #tmpRebuildList list
+				ON InvTrans.intItemId  = COALESCE(list.intItemId, InvTrans.intItemId) 
+				AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId) 
 END 
 
 -- Force the clearing of the cost bucket if the flagged
@@ -698,6 +675,9 @@ BEGIN
 	INTO	#tmpUnOrderedICTransaction
 	FROM	tblICInventoryTransaction t INNER JOIN tblICItem i
 				ON t.intItemId = i.intItemId
+			INNER JOIN #tmpRebuildList list
+				ON t.intItemId  = COALESCE(list.intItemId, t.intItemId) 
+				AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId) 
 			LEFT JOIN tblICInventoryTransactionType ty
 				ON t.intTransactionTypeId = ty.intTransactionTypeId
 	WHERE	1 = CASE	WHEN ty.strName = 'Cost Adjustment' THEN 1 
@@ -709,8 +689,6 @@ BEGIN
 				CASE WHEN @isPeriodic = 0 THEN dtmCreated ELSE dtmDate END
 				, @dtmStartDate
 			) = 1
-			AND t.intItemId = ISNULL(@intItemId, t.intItemId) 
-			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
 
 	-- Backup the created dates. 
 	BEGIN 
@@ -734,13 +712,9 @@ BEGIN
 					CASE WHEN @isPeriodic = 0 THEN t.dtmCreated ELSE t.dtmDate END
 					, @dtmStartDate
 				) d
-		WHERE	
-				--dbo.fnDateGreaterThanEquals(
-				--	CASE WHEN @isPeriodic = 0 THEN t.dtmCreated ELSE t.dtmDate END
-				--	, @dtmStartDate
-				--) = 1
-				t.intItemId = ISNULL(@intItemId, t.intItemId) 
-				AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
+				INNER JOIN #tmpRebuildList list
+					ON t.intItemId  = COALESCE(list.intItemId, t.intItemId) 
+					AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId) 
 	END 
 
 	-- Intialize #tmpICInventoryTransaction
@@ -1074,13 +1048,9 @@ BEGIN
 				CASE WHEN @isPeriodic = 0 THEN dtmCreated ELSE dtmDate END
 				, @dtmStartDate
 			) d_gte
-	WHERE	
-			--dbo.fnDateGreaterThanEquals(
-			--	CASE WHEN @isPeriodic = 0 THEN dtmCreated ELSE dtmDate END
-			--	, @dtmStartDate
-			--) = 1 
-			t.intItemId = ISNULL(@intItemId, t.intItemId) 
-			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
+			INNER JOIN #tmpRebuildList list
+				ON t.intItemId  = COALESCE(list.intItemId, t.intItemId) 
+				AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId) 
 
 	DELETE	t
 	FROM	tblICInventoryLotTransaction t INNER JOIN tblICItem i 
@@ -1089,13 +1059,9 @@ BEGIN
 				CASE WHEN @isPeriodic = 0 THEN dtmCreated ELSE dtmDate END
 				, @dtmStartDate
 			) d_gte
-	WHERE	
-			--dbo.fnDateGreaterThanEquals(
-			--	CASE WHEN @isPeriodic = 0 THEN dtmCreated ELSE dtmDate END
-			--	, @dtmStartDate
-			--) = 1 
-			t.intItemId = ISNULL(@intItemId, t.intItemId) 
-			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
+			INNER JOIN #tmpRebuildList list
+				ON t.intItemId  = COALESCE(list.intItemId, t.intItemId) 
+				AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId) 
 
 	DELETE	m
 	FROM	tblICInventoryStockMovement m INNER JOIN tblICItem i
@@ -1104,21 +1070,22 @@ BEGIN
 				CASE WHEN @isPeriodic = 0 THEN m.dtmCreated ELSE m.dtmDate END
 				, @dtmStartDate
 			) d_gte
+			INNER JOIN #tmpRebuildList list
+				ON m.intItemId  = COALESCE(list.intItemId, m.intItemId) 
+				AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId) 
 	WHERE	
-			--dbo.fnDateGreaterThanEquals(
-			--	CASE WHEN @isPeriodic = 0 THEN m.dtmCreated ELSE m.dtmDate END
-			--	, @dtmStartDate
-			--) = 1 
-			m.intItemId = ISNULL(@intItemId, m.intItemId) 
-			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
-			AND m.intInventoryTransactionId IS NOT NULL
+			m.intInventoryTransactionId IS NOT NULL
 END 
 
 -- Re-update the "Out" quantities one more time to be sure. 
 BEGIN 
 	UPDATE	LotCostBucket
 	SET		dblStockOut = ISNULL(cbOut.dblQty, 0) 
-	FROM	dbo.tblICInventoryLot LotCostBucket		
+	FROM	dbo.tblICInventoryLot LotCostBucket	INNER JOIN tblICItem i
+				ON LotCostBucket.intItemId = i.intItemId
+			INNER JOIN #tmpRebuildList list
+				ON i.intItemId  = COALESCE(list.intItemId, i.intItemId) 
+				AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId) 
 			OUTER APPLY (
 				SELECT	dblQty = SUM(LotOut.dblQty) 
 				FROM	dbo.tblICInventoryLotOut LotOut INNER JOIN tblICInventoryTransaction t
@@ -1126,44 +1093,52 @@ BEGIN
 							
 				WHERE	LotOut.intInventoryLotId = LotCostBucket.intInventoryLotId 
 			) cbOut 
-	WHERE	LotCostBucket.intItemId = ISNULL(@intItemId, LotCostBucket.intItemId)
-			AND LotCostBucket.dblStockIn <> LotCostBucket.dblStockOut
+	WHERE	LotCostBucket.dblStockIn <> LotCostBucket.dblStockOut
 
 	UPDATE	FIFOCostBucket
 	SET		dblStockOut = ISNULL(cbOut.dblQty, 0) 
-	FROM	dbo.tblICInventoryFIFO FIFOCostBucket
+	FROM	dbo.tblICInventoryFIFO FIFOCostBucket INNER JOIN tblICItem i
+				ON FIFOCostBucket.intItemId = i.intItemId
+			INNER JOIN #tmpRebuildList list
+				ON i.intItemId  = COALESCE(list.intItemId, i.intItemId) 
+				AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId) 
 			OUTER APPLY (
 				SELECT	dblQty = SUM(FIFOOut.dblQty)
 				FROM	dbo.tblICInventoryFIFOOut FIFOOut INNER JOIN tblICInventoryTransaction t
 							ON FIFOOut.intInventoryTransactionId = t.intInventoryTransactionId
 				WHERE	FIFOOut.intInventoryFIFOId = FIFOCostBucket.intInventoryFIFOId 
 			) cbOut
-	WHERE	FIFOCostBucket.intItemId = ISNULL(@intItemId, FIFOCostBucket.intItemId)
-			AND FIFOCostBucket.dblStockIn <> FIFOCostBucket.dblStockOut
+	WHERE	FIFOCostBucket.dblStockIn <> FIFOCostBucket.dblStockOut
 
 	UPDATE	LIFOCostBucket
 	SET		dblStockOut = ISNULL(cbOut.dblQty, 0) 
-	FROM	dbo.tblICInventoryLIFO LIFOCostBucket
+	FROM	dbo.tblICInventoryLIFO LIFOCostBucket INNER JOIN tblICItem i
+				ON LIFOCostBucket.intItemId = i.intItemId
+			INNER JOIN #tmpRebuildList list
+				ON i.intItemId  = COALESCE(list.intItemId, i.intItemId) 
+				AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId) 
 			OUTER APPLY (
 				SELECT	dblQty = SUM(LIFOOut.dblQty) 
 				FROM	dbo.tblICInventoryLIFOOut LIFOOut INNER JOIN tblICInventoryTransaction t
 							ON LIFOOut.intInventoryTransactionId = t.intInventoryTransactionId
 				WHERE	LIFOOut.intInventoryLIFOId = LIFOCostBucket.intInventoryLIFOId						
 			) cbOut
-	WHERE	LIFOCostBucket.intItemId = ISNULL(@intItemId, LIFOCostBucket.intItemId)
-			AND LIFOCostBucket.dblStockIn <> LIFOCostBucket.dblStockOut
+	WHERE	LIFOCostBucket.dblStockIn <> LIFOCostBucket.dblStockOut
 
 	UPDATE	ActualCostBucket
 	SET		dblStockOut = ISNULL(cbOut.dblQty, 0) 
-	FROM	dbo.tblICInventoryActualCost ActualCostBucket
+	FROM	dbo.tblICInventoryActualCost ActualCostBucket INNER JOIN tblICItem i
+				ON ActualCostBucket.intItemId = i.intItemId
+			INNER JOIN #tmpRebuildList list
+				ON i.intItemId  = COALESCE(list.intItemId, i.intItemId) 
+				AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId) 
 			OUTER APPLY (
 				SELECT	dblQty = SUM(ActualCostOut.dblQty)
 				FROM	dbo.tblICInventoryActualCostOut ActualCostOut INNER JOIN tblICInventoryTransaction t
 							ON ActualCostOut.intInventoryTransactionId = t.intInventoryTransactionId
 				WHERE	ActualCostOut.intInventoryActualCostId = ActualCostBucket.intInventoryActualCostId 						
 			) cbOut
-	WHERE	ActualCostBucket.intItemId = ISNULL(@intItemId, ActualCostBucket.intItemId)
-			AND ActualCostBucket.dblStockIn <> ActualCostBucket.dblStockOut
+	WHERE	ActualCostBucket.dblStockIn <> ActualCostBucket.dblStockOut
 END 
 
 --------------------------------------------------------------------
@@ -1177,8 +1152,9 @@ BEGIN
 			,l.dblWeightInTransit = 0 
 	FROM	tblICLot l INNER JOIN tblICItem i
 				ON l.intItemId = i.intItemId
-	WHERE	l.intItemId = ISNULL(@intItemId, l.intItemId) 
-			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
+			INNER JOIN #tmpRebuildList list
+				ON i.intItemId  = COALESCE(list.intItemId, i.intItemId) 
+				AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId) 
 
 	UPDATE	UpdateLot
 	SET		UpdateLot.dblQty = (
@@ -1217,16 +1193,18 @@ BEGIN
 			)
 	FROM	tblICLot UpdateLot INNER JOIN tblICItem i
 				ON UpdateLot.intItemId = i.intItemId
-	WHERE	UpdateLot.intItemId = ISNULL(@intItemId, UpdateLot.intItemId) 
-			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
+			INNER JOIN #tmpRebuildList list
+				ON i.intItemId  = COALESCE(list.intItemId, i.intItemId) 
+				AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId) 
 
 	UPDATE	l
 	SET		l.dblWeight = dbo.fnMultiply(ISNULL(l.dblQty, 0), ISNULL(l.dblWeightPerQty, 0)) 	
 			,l.dblWeightInTransit = dbo.fnMultiply(ISNULL(l.dblQtyInTransit, 0), ISNULL(l.dblWeightPerQty, 0)) 	
 	FROM	tblICLot l INNER JOIN tblICItem i
 				ON l.intItemId = i.intItemId
-	WHERE	l.intItemId = ISNULL(@intItemId, l.intItemId) 
-			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
+			INNER JOIN #tmpRebuildList list
+				ON i.intItemId  = COALESCE(list.intItemId, i.intItemId) 
+				AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId) 
 END 
 
 --------------------------------------------------------------------
@@ -1246,6 +1224,9 @@ BEGIN
 	SET		dblLastCost = COALESCE(q.dblFindLastCost, NULLIF(ItemPricing.dblLastCost, 0), negativeStock.dblFindLastCost) 
 	FROM	tblICItemPricing ItemPricing INNER JOIN tblICItem i
 				ON ItemPricing.intItemId = i.intItemId
+			INNER JOIN #tmpRebuildList list
+				ON i.intItemId  = COALESCE(list.intItemId, i.intItemId) 
+				AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId) 
 			INNER JOIN tblICItemUOM StockUOM
 				ON StockUOM.intItemId = ItemPricing.intItemId
 				AND StockUOM.ysnStockUnit = 1
@@ -1277,8 +1258,6 @@ BEGIN
 						AND ISNULL(InvTrans.ysnIsUnposted, 0) = 0
 				ORDER BY InvTrans.intInventoryTransactionId DESC 						
 			) negativeStock
-	WHERE	ItemPricing.intItemId = ISNULL(@intItemId, ItemPricing.intItemId) 
-			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
 
 	UPDATE	tblICItemPricing 
 	SET		dblLastCost = ISNULL(dblLastCost, 0.00) 
@@ -1287,6 +1266,9 @@ BEGIN
 	SET		dblLastCost = COALESCE(q.dblFindLastCost, NULLIF(Lot.dblLastCost, 0), negativeStock.dblFindLastCost) 
 	FROM	tblICLot Lot INNER JOIN tblICItem i
 				ON Lot.intItemId = i.intItemId
+			INNER JOIN #tmpRebuildList list
+				ON i.intItemId  = COALESCE(list.intItemId, i.intItemId) 
+				AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId) 
 			INNER JOIN tblICItemUOM StockUOM
 				ON StockUOM.intItemId = Lot.intItemId
 				AND StockUOM.ysnStockUnit = 1
@@ -1320,8 +1302,6 @@ BEGIN
 						AND ISNULL(InvTrans.ysnIsUnposted, 0) = 0
 				ORDER BY InvTrans.intInventoryTransactionId DESC 
 			) negativeStock
-	WHERE	Lot.intItemId = ISNULL(@intItemId, Lot.intItemId) 
-			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
 
 	UPDATE	tblICLot 
 	SET		dblLastCost = ISNULL(dblLastCost, 0.00) 
@@ -1334,8 +1314,9 @@ BEGIN
 			, ItemPricing.ysnIsPendingUpdate = 1 
 	FROM	dbo.tblICItemPricing ItemPricing INNER JOIN tblICItem i
 				ON ItemPricing.intItemId = i.intItemId
-	WHERE	ItemPricing.intItemId = ISNULL(@intItemId, ItemPricing.intItemId) 
-			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
+			INNER JOIN #tmpRebuildList list
+				ON i.intItemId  = COALESCE(list.intItemId, i.intItemId) 
+				AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId) 
 END 
 
 ------------------------------------------------------------------------------
@@ -1899,13 +1880,14 @@ BEGIN
 								AND t.strTransactionId = Header.strTransferNo
 								AND t.strBatchId = @strBatchId
 								AND t.dblQty < 0
+							INNER JOIN #tmpRebuildList list
+								ON i.intItemId  = COALESCE(list.intItemId, i.intItemId) 
+								AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId) 
 							LEFT JOIN dbo.tblICItemUOM ItemUOM
 								ON t.intItemId = ItemUOM.intItemId
 								AND t.intItemUOMId = ItemUOM.intItemUOMId
 					WHERE	Header.strTransferNo = @strTransactionId
 							AND t.strBatchId = @strBatchId
-							AND Detail.intItemId = ISNULL(@intItemId, Detail.intItemId)
-							AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
 
 					EXEC @intReturnValue = dbo.uspICRepostInTransitCosting
 						@ItemsForInTransitCosting
@@ -1971,6 +1953,9 @@ BEGIN
 								ON Header.intInventoryTransferId = Detail.intInventoryTransferId
 							INNER JOIN tblICItem i
 								ON i.intItemId = Detail.intItemId
+							INNER JOIN #tmpRebuildList list
+								ON i.intItemId  = COALESCE(list.intItemId, i.intItemId) 
+								AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId) 
 							INNER JOIN dbo.tblICInventoryTransaction TransferSource
 								ON TransferSource.intItemId = Detail.intItemId
 								AND TransferSource.intTransactionDetailId = Detail.intInventoryTransferDetailId
@@ -1983,8 +1968,6 @@ BEGIN
 								AND TransferSource.intItemUOMId = ItemUOM.intItemUOMId
 					WHERE	Header.strTransferNo = @strTransactionId
 							AND TransferSource.strBatchId = @strBatchId
-							AND Detail.intItemId = ISNULL(@intItemId, Detail.intItemId)
-							AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
 
 					EXEC @intReturnValue = dbo.uspICRepostCosting
 						@strBatchId
@@ -2253,6 +2236,9 @@ BEGIN
 							ON Adj.intInventoryAdjustmentId = AdjDetail.intInventoryAdjustmentId 
 						INNER JOIN tblICItem i
 							ON i.intItemId = AdjDetail.intItemId 
+						INNER JOIN #tmpRebuildList list
+							ON i.intItemId  = COALESCE(list.intItemId, i.intItemId) 
+							AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId) 
 						LEFT JOIN dbo.tblICItemLocation ItemLocation
 							ON ItemLocation.intLocationId = Adj.intLocationId 
 							AND ItemLocation.intItemId = AdjDetail.intItemId
@@ -2268,8 +2254,6 @@ BEGIN
 							AND ItemPricing.intItemLocationId = ItemLocation.intItemLocationId
 
 				WHERE	Adj.strAdjustmentNo = @strTransactionId
-						AND AdjDetail.intItemId = ISNULL(@intItemId, AdjDetail.intItemId)
-						AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
 
 				-- Reduce the stock from the source lot. 
 				BEGIN 
@@ -2323,6 +2307,9 @@ BEGIN
 							LEFT JOIN (
 								dbo.tblICInventoryAdjustmentDetail AdjDetail INNER JOIN tblICItem i
 									ON AdjDetail.intItemId = i.intItemId
+								INNER JOIN #tmpRebuildList list
+									ON i.intItemId  = COALESCE(list.intItemId, i.intItemId) 
+									AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId) 
 							)
 								ON AdjDetail.intInventoryAdjustmentId = Adj.intInventoryAdjustmentId
 								AND AdjDetail.intInventoryAdjustmentDetailId = RebuildInvTrans.intTransactionDetailId 
@@ -2334,8 +2321,6 @@ BEGIN
 								AND RebuildInvTrans.intItemUOMId = ItemUOM.intItemUOMId
 					WHERE	RebuildInvTrans.strBatchId = @strBatchId
 							AND RebuildInvTrans.dblQty < 0
-							AND AdjDetail.intItemId = ISNULL(@intItemId, AdjDetail.intItemId)
-							AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
 
 					EXEC @intReturnValue = dbo.uspICRepostCosting
 						@strBatchId
@@ -2729,6 +2714,9 @@ BEGIN
 							ON Adj.intInventoryAdjustmentId = AdjDetail.intInventoryAdjustmentId 
 						INNER JOIN tblICItem i
 							ON i.intItemId = AdjDetail.intItemId 
+						INNER JOIN #tmpRebuildList list
+							ON i.intItemId  = COALESCE(list.intItemId, i.intItemId) 
+							AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId) 
 						LEFT JOIN dbo.tblICItemLocation ItemLocation
 							ON ItemLocation.intLocationId = Adj.intLocationId 
 							AND ItemLocation.intItemId = AdjDetail.intItemId
@@ -2744,8 +2732,6 @@ BEGIN
 							AND ItemPricing.intItemLocationId = ItemLocation.intItemLocationId
 
 				WHERE	Adj.strAdjustmentNo = @strTransactionId
-						AND AdjDetail.intItemId = ISNULL(@intItemId, AdjDetail.intItemId)
-						AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
 
 				-- Reduce the stock from the source lot. 
 				BEGIN 
@@ -2799,6 +2785,9 @@ BEGIN
 							LEFT JOIN (
 								dbo.tblICInventoryAdjustmentDetail AdjDetail INNER JOIN tblICItem i
 									ON AdjDetail.intItemId = i.intItemId
+								INNER JOIN #tmpRebuildList list
+									ON i.intItemId  = COALESCE(list.intItemId, i.intItemId) 
+									AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId) 
 							)
 								ON AdjDetail.intInventoryAdjustmentId = Adj.intInventoryAdjustmentId
 								AND AdjDetail.intInventoryAdjustmentDetailId = RebuildInvTrans.intTransactionDetailId 
@@ -2810,8 +2799,6 @@ BEGIN
 								AND RebuildInvTrans.intItemUOMId = ItemUOM.intItemUOMId
 					WHERE	RebuildInvTrans.strBatchId = @strBatchId
 							AND RebuildInvTrans.dblQty < 0
-							AND AdjDetail.intItemId = ISNULL(@intItemId, AdjDetail.intItemId)
-							AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
 
 					EXEC @intReturnValue = dbo.uspICRepostCosting
 						@strBatchId
@@ -2891,6 +2878,10 @@ BEGIN
 							INNER JOIN tblICItem i 
 								ON i.intItemId = AdjDetail.intNewItemId 
 
+							INNER JOIN #tmpRebuildList list
+								ON i.intItemId  = COALESCE(list.intItemId, i.intItemId) 
+								AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId) 
+
 							INNER JOIN dbo.tblICItemLocation NewItemLocation 
 								ON NewItemLocation.intLocationId = Adj.intLocationId 
 								AND NewItemLocation.intItemId = AdjDetail.intNewItemId
@@ -2915,8 +2906,6 @@ BEGIN
 
 					WHERE	Adj.strAdjustmentNo = @strTransactionId
 							AND FromStock.strBatchId = @strBatchId
-							AND AdjDetail.intItemId = ISNULL(@intItemId, AdjDetail.intNewItemId)
-							AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
 
 					IF NOT EXISTS (SELECT TOP 1 1 FROM @ItemsToPost) 
 					BEGIN 
@@ -2983,6 +2972,10 @@ BEGIN
 								INNER JOIN tblICItem i 
 									ON i.intItemId = AdjDetail.intNewItemId 
 
+								INNER JOIN #tmpRebuildList list
+									ON i.intItemId  = COALESCE(list.intItemId, i.intItemId) 
+									AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId) 
+
 								INNER JOIN dbo.tblICItemLocation NewItemLocation 
 									ON NewItemLocation.intLocationId = Adj.intLocationId 
 									AND NewItemLocation.intItemId = AdjDetail.intNewItemId
@@ -3007,8 +3000,6 @@ BEGIN
 
 						WHERE	Adj.strAdjustmentNo = @strTransactionId
 								AND FromStock.strBatchId = @strBatchId
-								AND AdjDetail.intNewItemId = ISNULL(@intItemId, AdjDetail.intNewItemId)
-								AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
 					END
 
 					EXEC @intReturnValue = dbo.uspICRepostCosting
@@ -3032,9 +3023,10 @@ BEGIN
 						SELECT	TOP 1 1
 						FROM	tblICBackupDetailInventoryTransaction b INNER JOIN tblICItem i
 									ON b.intItemId = i.intItemId 
+								INNER JOIN #tmpRebuildList list
+									ON i.intItemId  = COALESCE(list.intItemId, i.intItemId) 
+									AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId) 
 						WHERE	b.intBackupId = @intBackupId 
-								AND b.intItemId = ISNULL(@intItemId, b.intItemId) 
-								AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
 								AND b.strTransactionId = @strTransactionId
 								AND b.intInTransitSourceLocationId IS NOT NULL 
 								AND b.ysnIsUnposted = 0 
@@ -3266,12 +3258,14 @@ BEGIN
 							,[intInTransitSourceLocationId] = t.intItemLocationId
 					FROM	tblICInventoryTransaction t INNER JOIN tblICItem i
 								ON t.intItemId = i.intItemId 
+							INNER JOIN #tmpRebuildList list
+								ON i.intItemId  = COALESCE(list.intItemId, i.intItemId) 
+								AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId) 
+
 					WHERE	t.strTransactionId = @strTransactionId
 							AND t.ysnIsUnposted = 0 
 							AND t.strBatchId = @strBatchId
 							AND t.dblQty < 0 -- Ensure the Qty is negative. 
-							AND t.intItemId = ISNULL(@intItemId, t.intItemId)
-							AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0)
 
 					EXEC @intReturnValue = dbo.uspICRepostInTransitCosting
 						@ItemsForInTransitCosting
@@ -3335,191 +3329,6 @@ BEGIN
 				END 
 			END
 			 				
-			-- Repost 'Credit Memo'
-			--ELSE IF EXISTS (
-			--	SELECT	1 
-			--	FROM	tblICInventoryTransactionType 
-			--	WHERE	intTransactionTypeId = @intTransactionTypeId 
-			--			AND strName IN ('Credit Memo')
-			--	) 
-			--BEGIN 
-			--	INSERT INTO @ItemsToPost (
-			--			intItemId  
-			--			,intItemLocationId 
-			--			,intItemUOMId  
-			--			,dtmDate  
-			--			,dblQty  
-			--			,dblUOMQty  
-			--			,dblCost  
-			--			,dblSalesPrice  
-			--			,intCurrencyId  
-			--			,dblExchangeRate  
-			--			,intTransactionId  
-			--			,intTransactionDetailId  
-			--			,strTransactionId  
-			--			,intTransactionTypeId  
-			--			,intLotId 
-			--			,intSubLocationId
-			--			,intStorageLocationId	
-			--			,strActualCostId 	
-			--			,intForexRateTypeId
-			--			,dblForexRate
-			--			,intCostingMethod
-			--	)
-			--	SELECT 	RebuildInvTrans.intItemId  
-			--			,RebuildInvTrans.intItemLocationId 
-			--			,RebuildInvTrans.intItemUOMId  
-			--			,RebuildInvTrans.dtmDate  
-			--			,RebuildInvTrans.dblQty  
-			--			,ISNULL(ItemUOM.dblUnitQty, RebuildInvTrans.dblUOMQty) 
-			--			,dblCost  = CASE
-			--							WHEN RebuildInvTrans.dblQty < 0 THEN 
-			--								CASE	
-			--										WHEN dbo.fnGetCostingMethod(RebuildInvTrans.intItemId, RebuildInvTrans.intItemLocationId) = @AVERAGECOST THEN 
-			--											dbo.fnGetItemAverageCost(
-			--												RebuildInvTrans.intItemId
-			--												, RebuildInvTrans.intItemLocationId
-			--												, RebuildInvTrans.intItemUOMId
-			--											) 
-			--										ELSE 
-			--											ISNULL(lot.dblLastCost, itemPricing.dblLastCost)
-			--								END 
-
-			--							-- When it is a credit memo:
-			--							--WHEN (RebuildInvTrans.dblQty > 0 AND RebuildInvTrans.strTransactionId LIKE 'SI%') THEN 
-			--							WHEN RebuildInvTrans.dblQty > 0 THEN 											
-			--								CASE	WHEN dbo.fnGetCostingMethod(RebuildInvTrans.intItemId, RebuildInvTrans.intItemLocationId) = @AVERAGECOST THEN 
-			--											-- If using Average Costing, use Ave Cost.
-			--											dbo.fnGetItemAverageCost(
-			--												RebuildInvTrans.intItemId
-			--												, RebuildInvTrans.intItemLocationId
-			--												, RebuildInvTrans.intItemUOMId
-			--											) 
-			--										ELSE
-			--											-- Otherwise, get the last cost. 
-			--											ISNULL(lot.dblLastCost, itemPricing.dblLastCost)
-			--								END 
-
-			--							ELSE 
-			--								RebuildInvTrans.dblCost
-			--						END 
-			--			,RebuildInvTrans.dblSalesPrice  
-			--			,RebuildInvTrans.intCurrencyId  
-			--			,RebuildInvTrans.dblExchangeRate  
-			--			,RebuildInvTrans.intTransactionId  
-			--			,RebuildInvTrans.intTransactionDetailId  
-			--			,RebuildInvTrans.strTransactionId  
-			--			,RebuildInvTrans.intTransactionTypeId  
-			--			,RebuildInvTrans.intLotId 
-			--			,RebuildInvTrans.intSubLocationId
-			--			,RebuildInvTrans.intStorageLocationId
-			--			,RebuildInvTrans.strActualCostId
-			--			,RebuildInvTrans.intForexRateTypeId
-			--			,RebuildInvTrans.dblForexRate
-			--			,RebuildInvTrans.intCostingMethod
-
-			--	FROM	#tmpICInventoryTransaction RebuildInvTrans INNER JOIN tblICItem i
-			--				ON i.intItemId = RebuildInvTrans.intItemId 
-			--			INNER JOIN tblICItemLocation ItemLocation
-			--				ON RebuildInvTrans.intItemLocationId = ItemLocation.intItemLocationId
-			--			LEFT JOIN dbo.tblARInvoice Invoice
-			--				ON Invoice.intInvoiceId = RebuildInvTrans.intTransactionId
-			--				AND Invoice.strInvoiceNumber = RebuildInvTrans.strTransactionId
-			--			LEFT JOIN dbo.tblICItemUOM ItemUOM
-			--				ON RebuildInvTrans.intItemId = ItemUOM.intItemId
-			--				AND RebuildInvTrans.intItemUOMId = ItemUOM.intItemUOMId
-			--			LEFT JOIN dbo.tblICItemUOM StockUOM
-			--				ON StockUOM.intItemId = RebuildInvTrans.intItemId
-			--				AND StockUOM.ysnStockUnit = 1
-			--			OUTER APPLY (
-			--				SELECT
-			--					lot.intLotId
-			--					,dblLastCost = dbo.fnCalculateCostBetweenUOM(StockUOM.intItemUOMId, ItemUOM.intItemUOMId, lot.dblLastCost)
-			--				FROM	
-			--					dbo.tblICLot lot 
-			--				WHERE	
-			--					lot.intLotId = RebuildInvTrans.intLotId 
-			--					AND lot.intItemId = RebuildInvTrans.intItemId
-			--			) lot
-			--			OUTER APPLY (
-			--				SELECT	TOP 1 
-			--						dblLastCost = dbo.fnCalculateCostBetweenUOM(StockUOM.intItemUOMId, ItemUOM.intItemUOMId, p.dblLastCost)
-			--				FROM	tblICItemPricing p 
-			--				WHERE	p.intItemId = RebuildInvTrans.intItemId 
-			--						AND p.intItemLocationId = RebuildInvTrans.intItemLocationId
-			--			) itemPricing
-			--	WHERE	RebuildInvTrans.strBatchId = @strBatchId
-			--			AND RebuildInvTrans.intTransactionId = @intTransactionId
-			--			AND RebuildInvTrans.strTransactionId = @strTransactionId
-			--			AND ItemLocation.intLocationId IS NOT NULL -- It ensures that the item is not In-Transit. 
-			--			AND i.intItemId = ISNULL(@intItemId, i.intItemId)
-			--			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0)
-
-			--	IF EXISTS (SELECT TOP 1 1 FROM @ItemsToPost)
-			--	BEGIN 
-			--		EXEC @intReturnValue = dbo.uspICRepostCosting
-			--			@strBatchId
-			--			,@strAccountToCounterInventory
-			--			,@intEntityUserSecurityId
-			--			,@strGLDescription
-			--			,@ItemsToPost
-			--			,@strTransactionId
-
-			--		IF @intReturnValue <> 0 GOTO _EXIT_WITH_ERROR
-
-			--		SET @intReturnValue = NULL 
-			--		INSERT INTO @GLEntries (
-			--				[dtmDate] 
-			--				,[strBatchId]
-			--				,[intAccountId]
-			--				,[dblDebit]
-			--				,[dblCredit]
-			--				,[dblDebitUnit]
-			--				,[dblCreditUnit]
-			--				,[strDescription]
-			--				,[strCode]
-			--				,[strReference]
-			--				,[intCurrencyId]
-			--				,[dblExchangeRate]
-			--				,[dtmDateEntered]
-			--				,[dtmTransactionDate]
-			--				,[strJournalLineDescription]
-			--				,[intJournalLineNo]
-			--				,[ysnIsUnposted]
-			--				,[intUserId]
-			--				,[intEntityId]
-			--				,[strTransactionId]
-			--				,[intTransactionId]
-			--				,[strTransactionType]
-			--				,[strTransactionForm] 
-			--				,[strModuleName]
-			--				,[intConcurrencyId]
-			--				,[dblDebitForeign]
-			--				,[dblDebitReport]
-			--				,[dblCreditForeign]
-			--				,[dblCreditReport]
-			--				,[dblReportingRate]
-			--				,[dblForeignRate]
-			--				,[strRateType]
-			--		)			
-			--		EXEC @intReturnValue = dbo.uspICCreateGLEntries
-			--			@strBatchId 
-			--			,@strAccountToCounterInventory
-			--			,@intEntityUserSecurityId
-			--			,@strGLDescription
-			--			,NULL 
-			--			,@intItemId -- This is only used when rebuilding the stocks. 
-			--			,@strTransactionId -- This is only used when rebuilding the stocks. 
-			--			,@intCategoryId
-
-			--		IF @intReturnValue <> 0 
-			--		BEGIN 
-			--			--PRINT 'Error found in uspICCreateGLEntries - Credit Memo'
-			--			GOTO _EXIT_WITH_ERROR
-			--		END
-			--	END						
-			--END	
-
 			-- Repost 'Invoice' and 'Credit Memo'
 			ELSE IF EXISTS (
 				SELECT	1 
@@ -3610,6 +3419,10 @@ BEGIN
 						,RebuildInvTrans.intCostingMethod
 				FROM	#tmpICInventoryTransaction RebuildInvTrans INNER JOIN tblICItem i
 							ON RebuildInvTrans.intItemId = i.intItemId 
+						INNER JOIN #tmpRebuildList list
+							ON i.intItemId  = COALESCE(list.intItemId, i.intItemId) 
+							AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId) 
+
 						INNER JOIN tblICItemLocation ItemLocation
 							ON RebuildInvTrans.intItemLocationId = ItemLocation.intItemLocationId
 						LEFT JOIN (
@@ -3644,8 +3457,6 @@ BEGIN
 						--AND RebuildInvTrans.intTransactionId = @intTransactionId
 						--AND RebuildInvTrans.strTransactionId = @strTransactionId
 						AND ItemLocation.intLocationId IS NOT NULL -- It ensures that the item is not In-Transit. 
-						AND i.intItemId = ISNULL(@intItemId, i.intItemId)
-						AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0)
 						AND (
 							1 = 
 								CASE 
@@ -3784,6 +3595,9 @@ BEGIN
 							ON i.intInvoiceId = id.intInvoiceId
 						INNER JOIN tblICItem item
 							ON item.intItemId = id.intItemId
+						INNER JOIN #tmpRebuildList list
+							ON item.intItemId  = COALESCE(list.intItemId, item.intItemId) 
+							AND item.intCategoryId = COALESCE(list.intCategoryId, item.intCategoryId) 
 						INNER JOIN #tmpICInventoryTransaction t
 							ON t.intTransactionId = i.intInvoiceId
 							AND t.intTransactionDetailId = id.intInvoiceDetailId 
@@ -3807,8 +3621,6 @@ BEGIN
 				WHERE	--i.strInvoiceNumber = @strTransactionId
 						--AND i.intInvoiceId = @intTransactionId
 						t.strBatchId = @strBatchId
-						AND item.intItemId = ISNULL(@intItemId, item.intItemId)
-						AND ISNULL(item.intCategoryId, 0) = COALESCE(@intCategoryId, item.intCategoryId, 0)
 						AND (
 							1 = 
 							CASE 
@@ -4051,6 +3863,9 @@ BEGIN
 						LEFT JOIN (
 							dbo.tblICInventoryReceiptItem ReceiptItem INNER JOIN tblICItem i
 								ON ReceiptItem.intItemId = i.intItemId
+							INNER JOIN #tmpRebuildList list
+								ON i.intItemId  = COALESCE(list.intItemId, i.intItemId) 
+								AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId) 
 						)
 							ON ReceiptItem.intInventoryReceiptId = Receipt.intInventoryReceiptId
 							AND ReceiptItem.intInventoryReceiptItemId = RebuildInvTrans.intTransactionDetailId 
@@ -4079,8 +3894,6 @@ BEGIN
 						AND RebuildInvTrans.intTransactionId = @intTransactionId
 						AND RebuildInvTrans.strTransactionId = @strTransactionId
 						AND ItemLocation.intLocationId IS NOT NULL 
-						AND ReceiptItem.intItemId = ISNULL(@intItemId, ReceiptItem.intItemId)
-						AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0)
 				ORDER BY
 					ReceiptItem.intInventoryReceiptItemId ASC 
 
@@ -4965,12 +4778,13 @@ BEGIN
 						,[intInTransitSourceLocationId] = t.intItemLocationId
 				FROM	tblICInventoryTransaction t INNER JOIN tblICItem  i
 							ON t.intItemId = i.intItemId 					
+						INNER JOIN #tmpRebuildList list
+							ON i.intItemId  = COALESCE(list.intItemId, i.intItemId) 
+							AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId) 
 				WHERE	t.strTransactionId = @strTransactionId
 						AND t.ysnIsUnposted = 0 
 						AND t.strBatchId = @strBatchId
 						AND t.dblQty < 0 -- Ensure the Qty is negative. Credit Memo are positive Qtys.  Credit Memo does not ship out but receives stock. 
-						AND t.intItemId = ISNULL(@intItemId, t.intItemId)
-						AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0)
 
 				EXEC @intReturnValue = dbo.uspICRepostInTransitCosting
 					@ItemsForInTransitCosting
@@ -5083,14 +4897,15 @@ BEGIN
 							,[intFobPointId] = t.intFobPointId
 							,[intInTransitSourceLocationId] = t.intInTransitSourceLocationId
 					FROM	#tmpICInventoryTransaction t INNER JOIN tblICItem i 
-								ON i.intItemId = t.intItemId 							
+								ON i.intItemId = t.intItemId 
+							INNER JOIN #tmpRebuildList list
+								ON i.intItemId  = COALESCE(list.intItemId, i.intItemId) 
+								AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId) 								
 							LEFT JOIN dbo.tblICItemUOM ItemUOM
 								ON t.intItemId = ItemUOM.intItemId
 								AND t.intItemUOMId = ItemUOM.intItemUOMId
 					WHERE	t.strTransactionId = @strTransactionId
 							AND t.strBatchId = @strBatchId
-							AND t.intItemId = ISNULL(@intItemId, t.intItemId)
-							AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
 
 					EXEC @intReturnValue = dbo.uspICRepostInTransitCosting
 						@ItemsForInTransitCosting
@@ -5199,11 +5014,12 @@ BEGIN
 						LEFT JOIN (
 							dbo.tblICInventoryReceiptItem ReceiptItem INNER JOIN tblICItem i1
 								ON i1.intItemId = ReceiptItem.intItemId
+							INNER JOIN #tmpRebuildList list
+								ON i1.intItemId  = COALESCE(list.intItemId, i1.intItemId) 
+								AND i1.intCategoryId = COALESCE(list.intCategoryId, i1.intCategoryId) 
 						)
 							ON ReceiptItem.intInventoryReceiptId = Receipt.intInventoryReceiptId
 							AND ReceiptItem.intInventoryReceiptItemId = RebuildInvTrans.intTransactionDetailId 
-							AND ReceiptItem.intItemId = ISNULL(@intItemId, ReceiptItem.intItemId)
-							AND ISNULL(i1.intCategoryId, 0) = COALESCE(@intCategoryId, i1.intCategoryId, 0)
 						LEFT JOIN dbo.tblICInventoryReceiptItemLot ReceiptItemLot
 							ON ReceiptItemLot.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
 							AND ReceiptItemLot.intLotId = RebuildInvTrans.intLotId 
@@ -5213,11 +5029,12 @@ BEGIN
 						LEFT JOIN (
 							dbo.tblICInventoryAdjustmentDetail AdjDetail INNER JOIN tblICItem i2
 								ON i2.intItemId = AdjDetail.intItemId 
+							INNER JOIN #tmpRebuildList list2
+								ON i2.intItemId  = COALESCE(list2.intItemId, i2.intItemId) 
+								AND i2.intCategoryId = COALESCE(list2.intCategoryId, i2.intCategoryId) 
 						)
 							ON AdjDetail.intInventoryAdjustmentId = Adj.intInventoryAdjustmentId
 							AND AdjDetail.intInventoryAdjustmentDetailId = RebuildInvTrans.intTransactionDetailId 
-							AND AdjDetail.intItemId = ISNULL(@intItemId, AdjDetail.intItemId)
-							AND ISNULL(i2.intCategoryId, 0) = COALESCE(@intCategoryId, i2.intCategoryId, 0)
 						LEFT JOIN dbo.tblICItemUOM AdjItemUOM
 							ON AdjItemUOM.intItemId = AdjDetail.intItemId
 							AND AdjItemUOM.intItemUOMId = ISNULL(AdjDetail.intItemUOMId, AdjDetail.intNewItemUOMId) 
@@ -5321,6 +5138,9 @@ BEGIN
 							ON Adj.intInventoryAdjustmentId = AdjDetail.intInventoryAdjustmentId 
 						INNER JOIN tblICItem i
 							ON i.intItemId = AdjDetail.intItemId 
+						INNER JOIN #tmpRebuildList list
+							ON i.intItemId  = COALESCE(list.intItemId, i.intItemId) 
+							AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId) 
 						LEFT JOIN dbo.tblICItemLocation ItemLocation
 							ON ItemLocation.intLocationId = Adj.intLocationId 
 							AND ItemLocation.intItemId = AdjDetail.intItemId
@@ -5335,8 +5155,6 @@ BEGIN
 							ON ItemPricing.intItemId = AdjDetail.intItemId
 							AND ItemPricing.intItemLocationId = ItemLocation.intItemLocationId
 				WHERE	Adj.strAdjustmentNo = @strTransactionId
-						AND AdjDetail.intItemId = ISNULL(@intItemId, AdjDetail.intItemId)
-						AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0)
 
 				INSERT INTO @ItemsToPost (
 						intItemId  
@@ -5432,11 +5250,12 @@ BEGIN
 						LEFT JOIN (
 							dbo.tblICInventoryReceiptItem ReceiptItem INNER JOIN tblICItem i1
 								ON i1.intItemId = ReceiptItem.intItemId
+							INNER JOIN #tmpRebuildList list
+								ON i1.intItemId  = COALESCE(list.intItemId, i1.intItemId) 
+								AND i1.intCategoryId = COALESCE(list.intCategoryId, i1.intCategoryId) 
 						)
 							ON ReceiptItem.intInventoryReceiptId = Receipt.intInventoryReceiptId
 							AND ReceiptItem.intInventoryReceiptItemId = RebuildInvTrans.intTransactionDetailId 
-							AND ReceiptItem.intItemId = ISNULL(@intItemId, ReceiptItem.intItemId)
-							AND ISNULL(i1.intCategoryId, 0) = COALESCE(@intCategoryId, i1.intCategoryId, 0)
 						LEFT JOIN dbo.tblICInventoryReceiptItemLot ReceiptItemLot
 							ON ReceiptItemLot.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
 							AND ReceiptItemLot.intLotId = RebuildInvTrans.intLotId 
@@ -5446,11 +5265,12 @@ BEGIN
 						LEFT JOIN (
 							dbo.tblICInventoryAdjustmentDetail AdjDetail INNER JOIN tblICItem i2
 								ON i2.intItemId = AdjDetail.intItemId 
+							INNER JOIN #tmpRebuildList list2
+								ON i2.intItemId  = COALESCE(list2.intItemId, i2.intItemId) 
+								AND i2.intCategoryId = COALESCE(list2.intCategoryId, i2.intCategoryId) 
 						)
 							ON AdjDetail.intInventoryAdjustmentId = Adj.intInventoryAdjustmentId
 							AND AdjDetail.intInventoryAdjustmentDetailId = RebuildInvTrans.intTransactionDetailId 
-							AND AdjDetail.intItemId = ISNULL(@intItemId, AdjDetail.intItemId)
-							AND ISNULL(i2.intCategoryId, 0) = COALESCE(@intCategoryId, i2.intCategoryId, 0)
 						LEFT JOIN dbo.tblICItemUOM AdjItemUOM
 							ON AdjItemUOM.intItemId = AdjDetail.intItemId
 							AND AdjItemUOM.intItemUOMId = ISNULL(AdjDetail.intItemUOMId, AdjDetail.intNewItemUOMId) 
