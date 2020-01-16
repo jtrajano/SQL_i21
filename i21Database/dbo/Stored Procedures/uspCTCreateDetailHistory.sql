@@ -2,7 +2,8 @@
 	@intContractHeaderId	   INT,
     @intContractDetailId	   INT = NULL,
 	@strComment				   NVARCHAR(100) = NULL,
-	@intSequenceUsageHistoryId INT = NULL
+	@intSequenceUsageHistoryId INT = NULL,
+	@ysnUseContractDate		   BIT = 0
 AS	   
 
 BEGIN TRY
@@ -149,15 +150,15 @@ BEGIN TRY
 			,dblScheduleQty,				dtmHistoryCreated,				dblCashPrice,						strPricingStatus,			intContractBasisId			
 			,intGradeId,					intItemUOMId,					intPositionId,						intPriceItemUOMId,			intTermId			
 			,intWeightId,					intBookId,						intSubBookId,						dblRatio,					strBook
-			,strSubBook,					intSequenceUsageHistoryId		
+			,strSubBook,					intSequenceUsageHistoryId,		dtmDateAdded
 		)
 		OUTPUT	inserted.intSequenceHistoryId INTO @SCOPE_IDENTITY
 		SELECT   
 			 CD.intContractHeaderId,		CD.intContractDetailId,			CH.intContractTypeId,				CH.intCommodityId,		    intEntityId
 			,intContractStatusId,			CD.intCompanyLocationId,		intItemId,							CD.intPricingTypeId,	    CD.intFutureMarketId
-			,CD.intFutureMonthId,			intCurrencyId,					QU.intCommodityUnitMeasureId,		CD.intUnitMeasureId,	    CD.intCurrencyExchangeRateId
-			,dtmStartDate,					dtmEndDate,						CD.dblQuantity,						dblBalance,					CD.dblFutures
-			,dblBasis
+			,CD.intFutureMonthId,			intCurrencyId,					CASE WHEN CD.intUnitMeasureId IS NULL THEN QU.intCommodityUnitMeasureId ELSE NULL END
+			,CD.intUnitMeasureId,			CD.intCurrencyExchangeRateId,   dtmStartDate,						dtmEndDate,						CD.dblQuantity
+			,dblBalance,					CD.dblFutures,					dblBasis
 			,CASE   WHEN	CD.intPricingTypeId	=	1 THEN CD.dblNoOfLots 
 					WHEN    @strComment = 'Pricing Delete' THEN 0 
 					ELSE	ISNULL(PF.dblLotsFixed,0)
@@ -176,7 +177,12 @@ BEGIN TRY
 			 END
 			,dblFinalPrice,					dtmFXValidFrom,					dtmFXValidTo,						dblRate,					CO.strCommodityCode
 			,strContractNumber,				intContractSeq,					CL.strLocationName,					strContractType,		    strPricingType
-			,CD.dblScheduleQty,				GETDATE(),						dblCashPrice
+			,CD.dblScheduleQty,				
+			CASE	WHEN @ysnUseContractDate = 1 
+						THEN ISNULL(CD.dtmCreated, CH.dtmCreated) 
+					ELSE GETDATE() 
+			END
+			,dblCashPrice
 			,CASE   WHEN	CD.intPricingTypeId	=	1 THEN	 'Fully Priced' 
 					WHEN	ISNULL(CD.dblNoOfLots,0) = ISNULL(PF.dblLotsFixed,0) AND CD.intPricingTypeId NOT IN (2,8)	   THEN	 'Fully Priced' 
 					WHEN	ISNULL(CD.dblNoOfLots,0) - ISNULL(PF.dblLotsFixed,0) > 0 
@@ -196,6 +202,10 @@ BEGIN TRY
 			,strBook			  = BK.strBook
 			,strSubBook			  = SB.strSubBook
 			,intSequenceUsageHistoryId	=	@intSequenceUsageHistoryId
+			,CASE	WHEN @ysnUseContractDate = 1 
+						THEN GETDATE()
+					ELSE NULL
+			END
 		FROM	tblCTContractDetail			CD
 		JOIN	tblCTContractHeader			CH  ON  CH.intContractHeaderId	=	CD.intContractHeaderId
 		JOIN	tblICCommodity				CO  ON  CO.intCommodityId		=	CH.intCommodityId
@@ -203,7 +213,7 @@ BEGIN TRY
 		JOIN	tblCTContractType		    CT  ON  CT.intContractTypeId	=	CH.intContractTypeId
 		JOIN	tblCTPricingType		    PT  ON  PT.intPricingTypeId		=	CD.intPricingTypeId
 		JOIN	tblICCommodityUnitMeasure	QU  ON  QU.intCommodityId		=	CH.intCommodityId
-												AND QU.intUnitMeasureId		=	CD.intUnitMeasureId	        
+												AND QU.intUnitMeasureId		=	ISNULL(CD.intUnitMeasureId,QU.intUnitMeasureId)
  LEFT   JOIN	tblCTPriceFixation		    PF  ON  PF.intContractDetailId	=	CD.intContractDetailId
  LEFT	JOIN	tblCTBook					BK	ON BK.intBookId				=	CD.intBookId
  LEFT	JOIN	tblCTSubBook				SB	ON SB.intSubBookId			=	CD.intSubBookId

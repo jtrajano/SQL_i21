@@ -8350,6 +8350,7 @@
     <Build Include="dbo\Stored Procedures\uspIPFutOptTransactionTransferAckXML.sql" />
     <Build Include="dbo\Stored Procedures\uspIPFutOptTransactionProcessAckXML.sql" />
     <Build Include="dbo\Views\vyuICGetCompanyPreference.sql" />
+    <None Include="Scripts\Post-Deployment\CT\2010_AddMissingHistory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

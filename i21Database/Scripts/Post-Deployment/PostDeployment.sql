@@ -373,6 +373,7 @@ print 'BEGIN POST DEPLOYMENT'
 :R .\CT\5_DataFix.sql
 :R .\CT\1920_Add_Accrued_Payables.sql
 :R .\CT\Create_fnCTFormatNumber.sql
+:R .\CT\2010_AddMissingHistory.sql
 
 --Notes Receivable
 :R .\NR\1_NoteTransType.sql
