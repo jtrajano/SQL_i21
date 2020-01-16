@@ -16,6 +16,20 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
+-- Create the temp table for the specific items/categories to rebuild
+IF OBJECT_ID('tempdb..#tmpRebuildList') IS NULL  
+BEGIN 
+	CREATE TABLE #tmpRebuildList (
+		intItemId INT NULL 
+		,intCategoryId INT NULL 
+	)	
+END 
+
+IF NOT EXISTS (SELECT TOP 1 1 FROM #tmpRebuildList)
+BEGIN 
+	INSERT INTO #tmpRebuildList VALUES (@intRebuildItemId, @intRebuildCategoryId) 
+END 
+
 -- Create the variables used by fnGetItemGLAccount
 DECLARE @AccountCategory_Inventory AS NVARCHAR(30) = 'Inventory'
 DECLARE @AccountCategory_Auto_Variance AS NVARCHAR(30) = 'Inventory Adjustment' --'Auto-Variance' -- Auto-variance will no longer be used. It will now use Inventory Adjustment. 
@@ -55,10 +69,11 @@ FROM	(
 					t.intItemId, t.intItemLocationId, t.intTransactionTypeId
 			FROM	dbo.tblICInventoryTransaction t INNER JOIN tblICItem i
 						ON t.intItemId = i.intItemId 
+					INNER JOIN #tmpRebuildList list	
+						ON i.intItemId = COALESCE(list.intItemId, i.intItemId)
+						AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)
 			WHERE	t.strBatchId = @strBatchId
-					AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId) 
 					AND t.strTransactionId = ISNULL(@strRebuildTransactionId, t.strTransactionId)
-					AND ISNULL(i.intCategoryId, 0) = COALESCE(@intRebuildCategoryId, i.intCategoryId, 0) 
 					AND i.strType <> 'Non-Inventory'
 					AND (dbo.fnDateEquals(t.dtmDate, @dtmRebuildDate) = 1 OR @dtmRebuildDate IS NULL) 
 
@@ -149,13 +164,14 @@ BEGIN
 							ON t.intTransactionTypeId = TransType.intTransactionTypeId
 						INNER JOIN tblICItem i
 							ON i.intItemId = t.intItemId
+						INNER JOIN #tmpRebuildList list	
+							ON i.intItemId = COALESCE(list.intItemId, i.intItemId)
+							AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)
 				WHERE	t.strBatchId = @strBatchId
 						AND TransType.intTransactionTypeId IN (@InventoryTransactionTypeId_AutoNegative, @InventoryTransactionTypeId_Auto_Variance_On_Sold_Or_Used_Stock)
-						AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId) 
 						AND t.intItemId = Item.intItemId
 						AND t.dblQty * t.dblCost + t.dblValue <> 0
 						AND t.strTransactionId = ISNULL(@strRebuildTransactionId, t.strTransactionId)
-						AND ISNULL(i.intCategoryId, 0) = COALESCE(@intRebuildCategoryId, i.intCategoryId, 0) 
 						AND (dbo.fnDateEquals(t.dtmDate, @dtmRebuildDate) = 1 OR @dtmRebuildDate IS NULL) 
 			)
 
@@ -208,6 +224,9 @@ FROM	dbo.tblICInventoryTransaction t INNER JOIN dbo.tblICInventoryTransactionTyp
 			ON t.intTransactionTypeId = TransType.intTransactionTypeId
 		INNER JOIN tblICItem i
 			ON i.intItemId = t.intItemId 
+		INNER JOIN #tmpRebuildList list	
+			ON i.intItemId = COALESCE(list.intItemId, i.intItemId)
+			AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)
 		INNER JOIN @GLAccounts GLAccounts
 			ON t.intItemId = GLAccounts.intItemId
 			AND t.intItemLocationId = GLAccounts.intItemLocationId
@@ -215,9 +234,7 @@ FROM	dbo.tblICInventoryTransaction t INNER JOIN dbo.tblICInventoryTransactionTyp
 		INNER JOIN dbo.tblGLAccount
 			ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
 WHERE	t.strBatchId = @strBatchId
-		AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId) 
 		AND t.strTransactionId = ISNULL(@strRebuildTransactionId, t.strTransactionId)
-		AND ISNULL(i.intCategoryId, 0) = COALESCE(@intRebuildCategoryId, i.intCategoryId, 0) 
 		AND (dbo.fnDateEquals(t.dtmDate, @dtmRebuildDate) = 1 OR @dtmRebuildDate IS NULL) 
 ;
 
@@ -275,14 +292,15 @@ AS
 				ON t.intTransactionTypeId = TransType.intTransactionTypeId
 			INNER JOIN tblICItem i
 				ON i.intItemId = t.intItemId
+			INNER JOIN #tmpRebuildList list	
+				ON i.intItemId = COALESCE(list.intItemId, i.intItemId)
+				AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)
 			LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType
 				ON currencyRateType.intCurrencyExchangeRateTypeId = t.intForexRateTypeId
 	WHERE	t.strBatchId = @strBatchId
-			AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId) 
 			AND t.strTransactionId = ISNULL(@strRebuildTransactionId, t.strTransactionId)
 			--AND t.intFobPointId IS NULL -- If there is a value in intFobPointId, then it is for In-Transit costing. Use uspICCreateGLEntriesForInTransitCosting instead of this sp. 
 			AND t.intInTransitSourceLocationId IS NULL -- If there is a value in intInTransitSourceLocationId, then it is for In-Transit costing. Use uspICCreateGLEntriesForInTransitCosting instead of this sp. 
-			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intRebuildCategoryId, i.intCategoryId, 0) 
 			AND (dbo.fnDateEquals(t.dtmDate, @dtmRebuildDate) = 1 OR @dtmRebuildDate IS NULL) 
 )
 -------------------------------------------------------------------------------------------

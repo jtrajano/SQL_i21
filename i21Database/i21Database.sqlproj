@@ -7712,6 +7712,9 @@
     <Build Include="dbo\Functions\fnSCGetDPContract.sql" />
     <Build Include="dbo\Tables\tblSCDeliverySheetContractAdjustment.sql" />
     <Build Include="dbo\Views\vyuAPReceiptClearingGL.sql" />
+    <Build Include="dbo\Stored Procedures\uspICGetCollateralItems.sql" />
+    <Build Include="dbo\Stored Procedures\uspICGetCollateralCategories.sql" />
+    <Build Include="dbo\Tables\tblICBackupCollateral.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

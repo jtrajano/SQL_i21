@@ -16,6 +16,20 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
+-- Create the temp table for the specific items/categories to rebuild
+IF OBJECT_ID('tempdb..#tmpRebuildList') IS NULL  
+BEGIN 
+	CREATE TABLE #tmpRebuildList (
+		intItemId INT NULL 
+		,intCategoryId INT NULL 
+	)	
+END 
+
+IF NOT EXISTS (SELECT TOP 1 1 FROM #tmpRebuildList)
+BEGIN 
+	INSERT INTO #tmpRebuildList VALUES (@intRebuildItemId, @intRebuildCategoryId) 
+END 
+		
 -- Create the variables used by fnGetItemGLAccount
 DECLARE @AccountCategory_Inventory AS NVARCHAR(30) = 'Inventory'
 DECLARE @AccountCategory_Auto_Variance AS NVARCHAR(30) = 'Inventory Adjustment' --'Auto-Variance' -- Auto-variance will no longer be used. It will not use Inventory Adjustment. 
@@ -59,10 +73,11 @@ FROM	(
 					, t.intTransactionTypeId
 			FROM	dbo.tblICInventoryTransaction t INNER JOIN tblICItem i
 						ON t.intItemId = i.intItemId 
+					INNER JOIN #tmpRebuildList list	
+						ON i.intItemId = COALESCE(list.intItemId, i.intItemId)
+						AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)
 			WHERE	t.strBatchId = @strBatchId
-					AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId) 
 					AND t.strTransactionId = ISNULL(@strRebuildTransactionId, t.strTransactionId) 
-					AND ISNULL(i.intCategoryId, 0) = COALESCE(@intRebuildCategoryId, i.intCategoryId, 0) 
 					AND (dbo.fnDateEquals(t.dtmDate, @dtmRebuildDate) = 1 OR @dtmRebuildDate IS NULL) 
 		) Query
 
@@ -151,13 +166,14 @@ BEGIN
 							ON t.intTransactionTypeId = TransType.intTransactionTypeId
 						INNER JOIN tblICItem i
 							ON i.intItemId = t.intItemId 
+						INNER JOIN #tmpRebuildList list	
+							ON i.intItemId = COALESCE(list.intItemId, i.intItemId)
+							AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)
 				WHERE	t.strBatchId = @strBatchId
 						AND TransType.intTransactionTypeId IN (@InventoryTransactionTypeId_AutoNegative)
-						AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId) 
 						AND t.intItemId = Item.intItemId
 						AND t.dblQty * t.dblCost + t.dblValue <> 0
 						AND t.strTransactionId = ISNULL(@strRebuildTransactionId, t.strTransactionId) 
-						AND ISNULL(i.intCategoryId, 0) = COALESCE(@intRebuildCategoryId, i.intCategoryId, 0) 
 						AND (dbo.fnDateEquals(t.dtmDate, @dtmRebuildDate) = 1 OR @dtmRebuildDate IS NULL) 
 			)
 
@@ -208,14 +224,18 @@ SELECT TOP 1
 		@strTransactionForm = TransType.strTransactionForm
 FROM	dbo.tblICInventoryTransaction t INNER JOIN dbo.tblICInventoryTransactionType TransType
 			ON t.intTransactionTypeId = TransType.intTransactionTypeId
+		INNER JOIN tblICItem i 
+			ON t.intItemId = i.intItemId
+		INNER JOIN #tmpRebuildList list	
+			ON i.intItemId = COALESCE(list.intItemId, i.intItemId)
+			AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)
 		INNER JOIN @GLAccounts GLAccounts
 			ON t.intItemId = GLAccounts.intItemId
 			AND t.intItemLocationId = GLAccounts.intItemLocationId
 			AND t.intTransactionTypeId = GLAccounts.intTransactionTypeId
 		INNER JOIN dbo.tblGLAccount
 			ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
-WHERE	t.strBatchId = @strBatchId
-		AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId) 
+WHERE	t.strBatchId = @strBatchId		
 		AND t.strTransactionId = ISNULL(@strRebuildTransactionId, t.strTransactionId) 
 		AND (dbo.fnDateEquals(t.dtmDate, @dtmRebuildDate) = 1 OR @dtmRebuildDate IS NULL) 
 ;
@@ -270,12 +290,13 @@ AS
 				ON t.intTransactionTypeId = TransType.intTransactionTypeId
 			INNER JOIN tblICItem i
 				ON i.intItemId = t.intItemId 
+			INNER JOIN #tmpRebuildList list	
+				ON i.intItemId = COALESCE(list.intItemId, i.intItemId)
+				AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)
 	WHERE	t.strBatchId = @strBatchId
-			AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId) 
 			--AND t.intFobPointId IS NOT NULL 	
 			AND t.intInTransitSourceLocationId IS NOT NULL 
 			AND t.strTransactionId = ISNULL(@strRebuildTransactionId, t.strTransactionId) 
-			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intRebuildCategoryId, i.intCategoryId, 0) 
 			AND (dbo.fnDateEquals(t.dtmDate, @dtmRebuildDate) = 1 OR @dtmRebuildDate IS NULL) 
 )
 -------------------------------------------------------------------------------------------
