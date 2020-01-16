@@ -9,8 +9,8 @@ INSERT INTO tblICItemLocation(
 	, strDescription
 	, intCostingMethod
 	, intAllowNegativeInventory
-	, intSubLocationId
-	, intStorageLocationId
+	-- , intSubLocationId
+	-- , intStorageLocationId
 	, intGrossUOMId
 	, intIssueUOMId
 	, intReceiveUOMId
@@ -28,8 +28,8 @@ SElECT
 	, source.strDescription
 	, source.intCostingMethod
 	, source.intAllowNegativeInventory
-	, source.intSubLocationId
-	, source.intStorageLocationId
+	-- , source.intSubLocationId
+	-- , source.intStorageLocationId
 	, source.intGrossUOMId
 	, source.intIssueUOMId
 	, source.intReceiveUOMId
