@@ -197,7 +197,7 @@ SELECT
     ,[dtmDueDate]                           = NULL
     ,[dtmShipDate]                          = ICIS.[dtmShipDate]
     ,[dtmPostDate]                          = @DateOnly
-    ,[intEntitySalespersonId]               = ARSI.[intEntitySalespersonId]
+    ,[intEntitySalespersonId]               = ch.intSalespersonId
     ,[intFreightTermId]                     = ICIS.[intFreightTermId]
     ,[intShipViaId]                         = ICIS.[intShipViaId]
     ,[intPaymentMethodId]                   = NULL
@@ -335,6 +335,7 @@ INNER JOIN
     vyuARShippedItems ARSI
         ON ICIS.[intInventoryShipmentId] = ARSI.[intInventoryShipmentId] and ARSI.intContractDetailId = ICISI.intLineNo
 LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = ARSI.intContractDetailId 
+left join tblCTContractHeader ch on ch.intContractHeaderId = CD.intContractHeaderId
 WHERE
 ICIS.[intInventoryShipmentId] = @ShipmentId
 --AND (
