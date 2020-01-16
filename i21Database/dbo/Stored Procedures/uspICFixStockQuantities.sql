@@ -19,6 +19,19 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
+-- Create the temp table for the specific items/categories to rebuild
+IF OBJECT_ID('tempdb..#tmpRebuildList') IS NULL  
+BEGIN 
+	CREATE TABLE #tmpRebuildList (
+		intItemId INT NULL 
+		,intCategoryId INT NULL 
+	)	
+END 
+
+IF NOT EXISTS (SELECT TOP 1 1 FROM #tmpRebuildList)
+BEGIN 
+	INSERT INTO #tmpRebuildList VALUES (@intItemId, @intCategoryId) 
+END 
 
 --------------------------------------
 -- Fix the Stock On-Hand
@@ -38,18 +51,18 @@ BEGIN
 	FROM 
 		tblICItemStock s INNER JOIN tblICItem i
 			ON s.intItemId = i.intItemId
-	WHERE
-			ISNULL(@intItemId, i.intItemId) = i.intItemId
-			AND ISNULL(@intCategoryId, i.intCategoryId) = i.intCategoryId
+		INNER JOIN #tmpRebuildList list	
+			ON i.intItemId = COALESCE(list.intItemId, i.intItemId)
+			AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)
 
 	UPDATE tblICItemStockUOM
 	SET dblOnOrder = 0 
 	FROM 
 		tblICItemStockUOM s INNER JOIN tblICItem i
 			ON s.intItemId = i.intItemId
-	WHERE
-			ISNULL(@intItemId, i.intItemId) = i.intItemId
-			AND ISNULL(@intCategoryId, i.intCategoryId) = i.intCategoryId
+		INNER JOIN #tmpRebuildList list	
+			ON i.intItemId = COALESCE(list.intItemId, i.intItemId)
+			AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)
 
 	MERGE	
 	INTO	dbo.tblICItemStock 
@@ -74,9 +87,9 @@ BEGIN
 					OR (dblQtyOrdered > dblQtyReceived AND intOrderStatusId NOT IN (4, 3, 6))--Handle wrong status of PO, greater qty received should be closed status
 			) ItemTransactions INNER JOIN tblICItem i
 				ON ItemTransactions.intItemId = i.intItemId 
-			WHERE
-				ISNULL(@intItemId, i.intItemId) = i.intItemId
-				AND ISNULL(@intCategoryId, i.intCategoryId) = i.intCategoryId
+			INNER JOIN #tmpRebuildList list	
+				ON i.intItemId = COALESCE(list.intItemId, i.intItemId)
+				AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)
 			GROUP BY 
 				ItemTransactions.intItemLocationId
 				, ItemTransactions.intItemId
@@ -143,6 +156,9 @@ BEGIN
 				ON A.intPurchaseId = B.intPurchaseId
 			INNER JOIN tblICItem i 
 				ON i.intItemId = B.intItemId 
+			INNER JOIN #tmpRebuildList list	
+				ON i.intItemId = COALESCE(list.intItemId, i.intItemId)
+				AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)
 			INNER JOIN tblICItemLocation C 
 				ON A.intShipToId = C.intLocationId 
 				AND B.intItemId = C.intItemId
@@ -155,9 +171,7 @@ BEGIN
 						AND iUOM.ysnStockUnit = 1 
 			) StockUOM
 		WHERE 
-			ISNULL(@intItemId, i.intItemId) = i.intItemId
-			AND ISNULL(@intCategoryId, i.intCategoryId) = i.intCategoryId
-			AND (
+			(
 				intOrderStatusId NOT IN (4, 3, 6)
 				OR (dblQtyOrdered > dblQtyReceived AND intOrderStatusId NOT IN (4, 3, 6))--Handle wrong status of PO, greater qty received should be closed status
 			)
@@ -185,12 +199,12 @@ BEGIN
 			INNER JOIN tblICItem i 
 				ON i.intItemId = B.intItemId 
 			INNER JOIN tblICItemLocation C 
-				ON A.intShipToId = C.intLocationId 
-				AND B.intItemId = C.intItemId
+				ON A.intShipToId = C.intLocationId AND B.intItemId = C.intItemId
+			INNER JOIN #tmpRebuildList list	
+				ON i.intItemId = COALESCE(list.intItemId, i.intItemId)
+				AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)
 		WHERE 
-			ISNULL(@intItemId, i.intItemId) = i.intItemId
-			AND ISNULL(@intCategoryId, i.intCategoryId) = i.intCategoryId
-			AND (
+			(
 				intOrderStatusId NOT IN (4, 3, 6)
 				OR (dblQtyOrdered > dblQtyReceived AND intOrderStatusId NOT IN (4, 3, 6))--Handle wrong status of PO, greater qty received should be closed status
 			)
@@ -250,18 +264,18 @@ BEGIN
 	FROM 
 		tblICItemStock s INNER JOIN tblICItem i
 			ON s.intItemId = i.intItemId
-	WHERE 
-		ISNULL(@intItemId, i.intItemId) = i.intItemId
-		AND ISNULL(@intCategoryId, i.intCategoryId) = i.intCategoryId
+		INNER JOIN #tmpRebuildList list	
+			ON i.intItemId = COALESCE(list.intItemId, i.intItemId)
+			AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)
 
 	UPDATE tblICItemStockUOM
 	SET dblInTransitOutbound = 0 
 	FROM 
 		tblICItemStockUOM s INNER JOIN tblICItem i
 			ON s.intItemId = i.intItemId
-	WHERE 
-		ISNULL(@intItemId, i.intItemId) = i.intItemId
-		AND ISNULL(@intCategoryId, i.intCategoryId) = i.intCategoryId
+		INNER JOIN #tmpRebuildList list	
+			ON i.intItemId = COALESCE(list.intItemId, i.intItemId)
+			AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)
 
 	MERGE	
 	INTO	dbo.tblICItemStock 
@@ -273,6 +287,9 @@ BEGIN
 				,dblInTransitOutbound = ISNULL(t.dblQuantity, 0)
 		FROM	tblICItem i INNER JOIN tblICItemLocation il
 					ON i.intItemId = il.intItemId 
+				INNER JOIN #tmpRebuildList list	
+					ON i.intItemId = COALESCE(list.intItemId, i.intItemId)
+					AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)
 				OUTER APPLY (
 					SELECT	dblQuantity = --SUM(dbo.fnCalculateStockUnitQty(t.dblQty, t.dblUOMQty)) 
 								SUM(dbo.fnCalculateQtyBetweenUOM(t.intItemUOMId, stockUOM.intItemUOMId, t.dblQty))
@@ -289,9 +306,6 @@ BEGIN
 							)
 							
 				) t 
-		WHERE
-			ISNULL(@intItemId, i.intItemId) = i.intItemId
-			AND ISNULL(@intCategoryId, i.intCategoryId) = i.intCategoryId
 	) AS StockToUpdate
 		ON ItemStock.intItemId = StockToUpdate.intItemId
 		AND ItemStock.intItemLocationId = StockToUpdate.intItemLocationId
@@ -404,7 +418,10 @@ BEGIN
 				,dblInTransitOutbound = SUM(t.dblQuantity) 
 		FROM	tblICItem i INNER JOIN tblICItemLocation il
 					ON i.intItemId = il.intItemId 
-				INNER JOIN tblICItemUOM uom					
+				INNER JOIN #tmpRebuildList list	
+					ON i.intItemId = COALESCE(list.intItemId, i.intItemId)
+					AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)
+				INNER JOIN tblICItemUOM uom
 					ON uom.intItemId = i.intItemId
 					--AND ISNULL(uom.ysnStockUnit, 0) = 0
 				OUTER APPLY (
@@ -419,9 +436,6 @@ BEGIN
 								,'Invoice'
 							)
 				) t 
-		WHERE
-			ISNULL(@intItemId, i.intItemId) = i.intItemId
-			AND ISNULL(@intCategoryId, i.intCategoryId) = i.intCategoryId
 		GROUP BY 
 			i.intItemId
 			, il.intItemLocationId
@@ -470,18 +484,17 @@ BEGIN
 	SET		dblUnitReserved = 0 
 	FROM	tblICItemStock s INNER JOIN tblICItem i
 				ON s.intItemId = i.intItemId
-	WHERE 
-		ISNULL(@intItemId, i.intItemId) = i.intItemId
-		AND ISNULL(@intCategoryId, i.intCategoryId) = i.intCategoryId
-
+			INNER JOIN #tmpRebuildList list	
+				ON i.intItemId = COALESCE(list.intItemId, i.intItemId)
+				AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)
 
 	UPDATE	s
 	SET		dblUnitReserved = 0 
 	FROM	tblICItemStockUOM s INNER JOIN tblICItem i
 				ON s.intItemId = i.intItemId
-	WHERE 
-		ISNULL(@intItemId, i.intItemId) = i.intItemId
-		AND ISNULL(@intCategoryId, i.intCategoryId) = i.intCategoryId
+			INNER JOIN #tmpRebuildList list	
+				ON i.intItemId = COALESCE(list.intItemId, i.intItemId)
+				AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)
 			
 	INSERT INTO @FixStockReservation (
 			intItemId
@@ -507,9 +520,10 @@ BEGIN
 			,r.intStorageLocationId	 
 	FROM	tblICStockReservation r INNER JOIN tblICItem i 
 				ON r.intItemId = i.intItemId
+			INNER JOIN #tmpRebuildList list	
+				ON i.intItemId = COALESCE(list.intItemId, i.intItemId)
+				AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)
 	WHERE	r.ysnPosted = 0 
-			AND ISNULL(@intItemId, i.intItemId) = i.intItemId
-			AND ISNULL(@intCategoryId, i.intCategoryId) = i.intCategoryId
 	GROUP BY 
 		r.intItemId
 		,r.intItemLocationId

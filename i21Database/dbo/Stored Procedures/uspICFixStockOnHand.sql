@@ -14,23 +14,37 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
+-- Create the temp table for the specific items/categories to rebuild
+IF OBJECT_ID('tempdb..#tmpRebuildList') IS NULL  
+BEGIN 
+	CREATE TABLE #tmpRebuildList (
+		intItemId INT NULL 
+		,intCategoryId INT NULL 
+	)	
+END 
+
+IF NOT EXISTS (SELECT TOP 1 1 FROM #tmpRebuildList)
+BEGIN 
+	INSERT INTO #tmpRebuildList VALUES (@intItemId, @intCategoryId) 
+END 
+
 UPDATE tblICItemStock
 SET dblUnitOnHand = 0
 FROM 
 	tblICItemStock s INNER JOIN tblICItem i 
 		ON s.intItemId  = i.intItemId
-WHERE 
-	ISNULL(@intItemId, i.intItemId) = i.intItemId
-	AND ISNULL(@intCategoryId, i.intCategoryId) = i.intCategoryId
+	INNER JOIN #tmpRebuildList list	
+		ON i.intItemId = COALESCE(list.intItemId, i.intItemId)
+		AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)
 
 UPDATE tblICItemStockUOM
 SET dblOnHand = 0 
 FROM 
 	tblICItemStockUOM s INNER JOIN tblICItem i
 		ON s.intItemId = i.intItemId
-WHERE 
-	ISNULL(@intItemId, i.intItemId) = i.intItemId
-	AND ISNULL(@intCategoryId, i.intCategoryId) = i.intCategoryId
+	INNER JOIN #tmpRebuildList list	
+		ON i.intItemId = COALESCE(list.intItemId, i.intItemId)
+		AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)
 
 -----------------------------------
 -- Update the Item Stock table
@@ -60,20 +74,20 @@ BEGIN
 								END				
 							)
 						
-			FROM	dbo.tblICInventoryTransaction t INNER JOIN tblICItem i
-						ON t.intItemId = i.intItemId 
+			FROM	dbo.tblICInventoryTransaction ItemTransactions INNER JOIN tblICItem i
+						ON ItemTransactions.intItemId = i.intItemId 
 					INNER JOIN tblICItemUOM stockUOM 
 						ON stockUOM.intItemId = i.intItemId 
-						AND stockUOM.ysnStockUnit = 1
+						AND stockUOM.ysnStockUnit = 1						
+					INNER JOIN #tmpRebuildList list	
+						ON i.intItemId = COALESCE(list.intItemId, i.intItemId)
+						AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)
 					LEFT JOIN tblICLot Lot
 						ON t.intLotId = Lot.intLotId
 					LEFT JOIN tblICItemUOM LotItemUOM
 						ON LotItemUOM.intItemUOMId = Lot.intItemUOMId
 					LEFT JOIN tblICItemUOM WeightUOM
 						ON WeightUOM.intItemUOMId = Lot.intWeightUOMId
-			WHERE
-				ISNULL(@intItemId, i.intItemId) = i.intItemId
-				AND ISNULL(@intCategoryId, i.intCategoryId) = i.intCategoryId
 			GROUP BY 
 				t.intItemId
 				, t.intItemLocationId
@@ -140,11 +154,11 @@ BEGIN
 							ON t.intItemId = i.intItemId 
 						INNER JOIN dbo.tblICItemUOM ItemUOM
 							ON t.intItemUOMId = ItemUOM.intItemUOMId
+						INNER JOIN #tmpRebuildList list	
+							ON i.intItemId = COALESCE(list.intItemId, i.intItemId)
+							AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)
 				WHERE	
 						t.intLotId IS NULL 
-						AND ISNULL(@intItemId, i.intItemId) = i.intItemId
-						AND ISNULL(@intCategoryId, i.intCategoryId) = i.intCategoryId
-
 				GROUP BY t.intItemId, t.intItemUOMId, t.intItemLocationId, t.intSubLocationId, t.intStorageLocationId
 		) AS RawStockData
 			ON ItemStockUOM.intItemId = RawStockData.intItemId
@@ -283,10 +297,12 @@ BEGIN
 					,intSubLocationId = Lot.intSubLocationId 
 					,intStorageLocationId = Lot.intStorageLocationId
 					,Qty = Lot.dblQty
-			FROM	dbo.tblICLot Lot INNER JOIN tblICItem i ON Lot.intItemId = i.intItemId
+			FROM	dbo.tblICLot Lot INNER JOIN tblICItem i 
+						ON Lot.intItemId = i.intItemId
+					INNER JOIN #tmpRebuildList list	
+						ON i.intItemId = COALESCE(list.intItemId, i.intItemId)
+						AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)
 			WHERE	Lot.intWeightUOMId IS NOT NULL 
-					AND ISNULL(@intItemId, i.intItemId) = i.intItemId
-					AND ISNULL(@intCategoryId, i.intCategoryId) = i.intCategoryId
 						
 			-- Get the Weight Qty (Lot.intWeightUOMId) 
 			UNION ALL 
@@ -297,12 +313,13 @@ BEGIN
 					,intSubLocationId = Lot.intSubLocationId 
 					,intStorageLocationId = Lot.intStorageLocationId
 					,Qty = Lot.dblWeight
-			FROM	dbo.tblICLot Lot INNER JOIN tblICItem i ON Lot.intItemId = i.intItemId
+			FROM	dbo.tblICLot Lot INNER JOIN tblICItem i 
+						ON Lot.intItemId = i.intItemId
+					INNER JOIN #tmpRebuildList list	
+						ON i.intItemId = COALESCE(list.intItemId, i.intItemId)
+						AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)
 			WHERE	Lot.intWeightUOMId IS NOT NULL 
 					AND Lot.intItemUOMId <> Lot.intWeightUOMId 
-					AND ISNULL(@intItemId, i.intItemId) = i.intItemId
-					AND ISNULL(@intCategoryId, i.intCategoryId) = i.intCategoryId
-
 
 			---- Convert pack to stock unit. 
 			--UNION ALL 
@@ -367,11 +384,12 @@ BEGIN
 					,intSubLocationId = Lot.intSubLocationId 
 					,intStorageLocationId = Lot.intStorageLocationId
 					,Qty = ISNULL(Lot.dblQty, 0) 
-			FROM	dbo.tblICLot Lot INNER JOIN tblICItem i ON Lot.intItemId = i.intItemId
+			FROM	dbo.tblICLot Lot INNER JOIN tblICItem i 
+						ON Lot.intItemId = i.intItemId
+					INNER JOIN #tmpRebuildList list	
+						ON i.intItemId = COALESCE(list.intItemId, i.intItemId)
+						AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)
 			WHERE	Lot.intWeightUOMId IS NULL 
-					AND ISNULL(@intItemId, i.intItemId) = i.intItemId
-					AND ISNULL(@intCategoryId, i.intCategoryId) = i.intCategoryId
-
 
 			----------------------------------------------------------------------------------------
 			---- and then convert the Pack Qty to stock UOM. 

@@ -8351,6 +8351,9 @@
     <Build Include="dbo\Stored Procedures\uspIPFutOptTransactionProcessAckXML.sql" />
     <Build Include="dbo\Views\vyuICGetCompanyPreference.sql" />
     <None Include="Scripts\Post-Deployment\CT\2010_AddMissingHistory.sql" />
+    <Build Include="dbo\Stored Procedures\uspICGetCollateralItems.sql" />
+    <Build Include="dbo\Stored Procedures\uspICGetCollateralCategories.sql" />
+    <Build Include="dbo\Tables\tblICBackupCollateral.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
