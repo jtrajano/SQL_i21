@@ -140,8 +140,8 @@ BEGIN
 	INTO #DapSettlement
 	FROM (
 		SELECT t.*
-			, dblFuturesM2MPlus = dblFuturesM2M + (dblFuturesM2M * 0.10)
-			, dblFuturesM2MMinus = dblFuturesM2M - (dblFuturesM2M * 0.10)
+			, dblFuturesM2MPlus = dblFuturesM2M + (dblFuturesM2M * (dblM2MSimulationPercent / 100))
+			, dblFuturesM2MMinus = dblFuturesM2M - (dblFuturesM2M * (dblM2MSimulationPercent / 100))
 		FROM
 		(
 			SELECT dap.intCommodityId
@@ -259,21 +259,31 @@ BEGIN
 		AND strType = 'ProductType'
 		AND (Balance.dblContracts IS NOT NULL AND Balance.dblInTransit IS NOT NULL AND Balance.dblStock IS NOT NULL AND Balance.dblFutures IS NOT NULL)
 
-	SELECT intRowNum = ROW_NUMBER() OVER(ORDER BY dtmDemandDate)
-		, intCommodityId
-		, dtmDemandDate
-		, intProductTypeId
-		, dblQuantity
-		, dblRunningTotal = SUM(dblQuantity) OVER (ORDER BY dtmDemandDate)
+	SELECT *
+		, dblRunningTotal = SUM(dblQuantity) OVER (ORDER BY intRowNum)
 	INTO #Demand
 	FROM (
-		SELECT i.intCommodityId
-			, DD.dtmDemandDate
-			, dblQuantity = dbo.fnCTConvertQuantityToTargetItemUOM (i.intItemId, iUOM.intUnitMeasureId, @intUnitMeasureId, DD.dblQuantity)
-			, i.intProductTypeId	
-		FROM tblMFDemandDetail DD
-		JOIN tblICItem i ON i.intItemId = DD.intItemId
-		JOIN tblICItemUOM iUOM ON iUOM.intItemUOMId = DD.intItemUOMId
+		SELECT intRowNum = ROW_NUMBER() OVER(ORDER BY dtmDemandDate)
+			, intCommodityId
+			, dtmDemandDate
+			, intProductTypeId
+			, dblQuantity
+		FROM (
+			SELECT i.intCommodityId
+				, DD.dtmDemandDate
+				, dblQuantity = dbo.fnCTConvertQuantityToTargetItemUOM (i.intItemId, iUOM.intUnitMeasureId, @intUnitMeasureId, DD.dblQuantity)
+				, i.intProductTypeId	
+			FROM tblMFDemandDetail DD
+			JOIN tblICItem i ON i.intItemId = DD.intItemId
+			JOIN tblICItemUOM iUOM ON iUOM.intItemUOMId = DD.intItemUOMId
+			WHERE DD.intDemandHeaderId = (
+				SELECT TOP 1 intDemandHeaderId FROM tblMFDemandHeader DH
+				WHERE ISNULL(DH.intBookId, 0) = ISNULL(@BookId, ISNULL(DH.intBookId, 0))
+					AND ISNULL(DH.intSubBookId, 0) = ISNULL(@SubBookId, ISNULL(DH.intSubBookId, 0))
+					AND CAST(FLOOR(CAST(DH.dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(@Date AS FLOAT)) AS DATETIME)
+				ORDER BY DH.dtmDate DESC
+			)
+		) tbl
 	) tbl
 
 	SELECT *
