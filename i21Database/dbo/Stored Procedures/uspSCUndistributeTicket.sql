@@ -77,6 +77,7 @@ DECLARE @intLoopCurrentId INT
 DECLARE @UNDISTRIBUTE_NOT_ALLOWED NVARCHAR(100)
 DECLARE @dblLoadUsedQty NUMERIC(18,6)
 DECLARE @dblScheduleQtyToUpdate NUMERIC(18,6)
+DECLARE @dblContractAvailableQty NUMERIC(38,20)
 
 SET @UNDISTRIBUTE_NOT_ALLOWED = 'Un-distribute ticket with posted invoice is not allowed.'
 declare @intInventoryAdjustmentId int
@@ -272,6 +273,21 @@ BEGIN TRY
 								WHERE intTicketId = @intTicketId
 									AND intLoadDetailId = @intTicketLoadDetailId
 									AND intEntityId = @intInventoryReceiptEntityId
+
+								SET @dblContractAvailableQty = 0
+								SELECT TOP 1 
+									@dblContractAvailableQty = ISNULL(dblAvailableQtyInItemStockUOM,0)
+								FROM vyuCTContractDetailView
+								WHERE intContractDetailId = @intTicketContractDetailId
+
+								IF @dblTicketScheduledQty <= @dblContractAvailableQty
+								BEGIN
+									SET @dblLoadUsedQty = @dblTicketScheduledQty
+								END
+								ELSE
+								BEGIN
+									SET @dblLoadUsedQty = @dblContractAvailableQty
+								END
 
 								IF @dblLoadUsedQty <> 0
 								BEGIN
@@ -1053,6 +1069,22 @@ BEGIN TRY
 										WHERE intTicketId = @intTicketId
 											AND intLoadDetailId = @intTicketLoadDetailId
 											AND intEntityId = @intInventoryShipmentEntityId
+										
+										SET @dblContractAvailableQty = 0
+										SELECT TOP 1 
+											@dblContractAvailableQty = ISNULL(dblAvailableQtyInItemStockUOM,0)
+										FROM vyuCTContractDetailView
+										WHERE intContractDetailId = @intTicketContractDetailId
+
+										IF @dblTicketScheduledQty <= @dblContractAvailableQty
+										BEGIN
+											SET @dblLoadUsedQty = @dblTicketScheduledQty
+										END
+										ELSE
+										BEGIN
+											SET @dblLoadUsedQty = @dblContractAvailableQty
+										END
+										
 
 										IF @dblLoadUsedQty <> 0
 										BEGIN

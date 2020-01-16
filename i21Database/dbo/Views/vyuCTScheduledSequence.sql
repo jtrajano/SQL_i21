@@ -43,6 +43,8 @@ AS
 		WHERE	ISNULL(intInventoryReceiptId,0) = 0
 		AND	ISNULL(intInventoryShipmentId,0) = 0
 		AND	intContractId IS NOT NULL
+		AND intLoadId IS NULL
+		AND intLoadDetailId IS NULL
 
 		UNION ALL
 
