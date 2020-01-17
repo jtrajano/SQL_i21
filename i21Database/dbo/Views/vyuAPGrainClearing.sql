@@ -18,13 +18,13 @@ SELECT
 	
 	,CASE WHEN SS.dblUnpaidUnits != 0 
 		THEN (
-			CASE WHEN ST.intSettleContractId IS NOT NULL THEN ST.dblUnits * ST.dblPrice
+			CASE WHEN ST.intSettleContractId IS NOT NULL THEN CAST(ST.dblUnits * ISNULL(ST.dblCost, ST.dblPrice) as decimal(18, 4))
 			ELSE SS.dblNetSettlement
 			END
 		)
-		ELSE CAST((SS.dblNetSettlement + SS.dblStorageDue + SS.dblDiscountsDue) AS DECIMAL(18,6))
+		ELSE CAST((SS.dblNetSettlement + SS.dblStorageDue + SS.dblDiscountsDue) AS DECIMAL(18,4))
 		END AS dblSettleStorageAmount
-	,CAST(CASE WHEN SS.dblUnpaidUnits != 0 THEN SS.dblUnpaidUnits ELSE SS.dblSettleUnits END AS DECIMAL(18,6)) AS dblSettleStorageQty
+	,CAST(CASE WHEN SS.dblUnpaidUnits != 0 THEN SS.dblUnpaidUnits ELSE SS.dblSettleUnits END AS DECIMAL(18,4)) AS dblSettleStorageQty
 	,CS.intCompanyLocationId AS intLocationId
 	,CL.strLocationName
 	,CAST(0 AS BIT) ysnAllowVoucher
@@ -79,7 +79,7 @@ SELECT
     ,unitMeasure.strUnitMeasure AS strUOM 
 	--,billDetail.dblTotal AS dblVoucherTotal
 	--use the cost of settlement for cost adjustment
-	, isnull(dblOldCost, dblCost) * CAST(CASE 
+	,  CAST(isnull(dblOldCost, billDetail.dblCost) * CASE 
 		WHEN billDetail.intWeightUOMId IS NULL THEN 
 			ISNULL(billDetail.dblQtyReceived, 0) 
 		ELSE 
@@ -89,7 +89,7 @@ SELECT
 			ELSE 
 				ISNULL(billDetail.dblNetWeight, 0) 
 		END
-		END AS DECIMAL(18,6)) as dblVoucherTotal	
+		END AS DECIMAL(18,4)) as dblVoucherTotal	
     ,CAST(CASE 
 		WHEN billDetail.intWeightUOMId IS NULL THEN 
 			ISNULL(billDetail.dblQtyReceived, 0) 
@@ -100,7 +100,7 @@ SELECT
 			ELSE 
 				ISNULL(billDetail.dblNetWeight, 0) 
 		END
-		END AS DECIMAL(18,6)) AS dblVoucherQty
+		END AS DECIMAL(18,4)) AS dblVoucherQty
 	,0 AS dblSettleStorageAmount
 	,0 AS dblSettleStorageQty
 	-- ,CAST(SS.dblNetSettlement AS DECIMAL(18,2)) AS dblSettleStorageAmount
@@ -157,7 +157,7 @@ SELECT
     ,unitMeasure.strUnitMeasure AS strUOM 
 	,0 AS dblVoucherTotal
     ,0 AS dblVoucherQty
-	,CAST(-SS.dblStorageDue AS DECIMAL(18,6)) AS dblSettleStorageAmount
+	,CAST(-SS.dblStorageDue AS DECIMAL(18,2)) AS dblSettleStorageAmount
 	,CASE WHEN SS.dblSettleUnits != 0 THEN  -SS.dblSettleUnits ELSE -SS.dblUnpaidUnits END
 	,CS.intCompanyLocationId
 	,CL.strLocationName
@@ -283,7 +283,7 @@ SELECT
 		WHEN QM.strDiscountChargeType = 'Percent' AND QM.dblDiscountAmount > 0 THEN (QM.dblDiscountAmount * (CASE WHEN ISNULL(SS.dblCashPrice,0) > 0 THEN SS.dblCashPrice ELSE CD.dblCashPrice END)) *  -1
 		WHEN QM.strDiscountChargeType = 'Dollar' AND QM.dblDiscountAmount < 0 THEN (QM.dblDiscountAmount)
 		WHEN QM.strDiscountChargeType = 'Dollar' AND QM.dblDiscountAmount > 0 THEN (QM.dblDiscountAmount * -1)
-	END * (CASE WHEN QM.strCalcMethod = 3 THEN CS.dblGrossQuantity ELSE SST.dblUnits END) AS DECIMAL(18,6))
+	END * (CASE WHEN QM.strCalcMethod = 3 THEN CS.dblGrossQuantity ELSE SST.dblUnits END) AS DECIMAL(18,2))
 	
 	,CASE WHEN QM.strCalcMethod = 3 
 		THEN (CS.dblGrossQuantity * (SST.dblUnits / CS.dblOriginalBalance))--@dblGrossUnits 

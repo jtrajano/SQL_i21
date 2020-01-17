@@ -1580,10 +1580,12 @@ BEGIN TRY
 						FROM tblGRSettleContract SC1
 						INNER JOIN @SettleContract SC2
 							ON SC2.intSettleContractId = SC1.intSettleContractId
+						JOIN tblCTContractDetail a
+							on SC2.intContractDetailId = a.intContractDetailId
 					END
 				end
 				
-
+				
 				--Reduce the On-Storage Quantity
 				IF(@ysnFromPriceBasisContract = 0)		
 				BEGIN
@@ -1656,10 +1658,44 @@ BEGIN TRY
 								,@strBatchId  
 								,'AP Clearing'
 								,@intCreatedUserId
-
+	
 							IF @intReturnValue < 0
 								GOTO SettleStorage_Exit;
+
+
+
 							
+							begin								
+								IF EXISTS(SELECT 1 FROM tblGRSettleContract WHERE intSettleStorageId = @intSettleStorageId)
+								BEGIN
+									UPDATE SC1
+									SET dblCost = (select top 1 dblCost from tblICInventoryTransaction IT
+														where IT.intTransactionId = @intSettleStorageId
+															and IT.intTransactionTypeId = 44
+															and IT.intItemId = a.intItemId
+													)
+									FROM tblGRSettleContract SC1
+									INNER JOIN @SettleContract SC2
+										ON SC2.intSettleContractId = SC1.intSettleContractId
+									JOIN tblCTContractDetail a
+										on SC2.intContractDetailId = a.intContractDetailId
+								END
+							end
+
+							if @debug_awesome_ness = 1 AND 1 = 1
+							begin
+
+								
+								select (select top 1 dblCost from tblICInventoryTransaction IT
+														where IT.intTransactionId = @intSettleStorageId
+															and IT.intTransactionTypeId = 44
+															and IT.intItemId = a.intItemId), 
+								* FROM tblGRSettleContract SC1
+									INNER JOIN @SettleContract SC2
+										ON SC2.intSettleContractId = SC1.intSettleContractId
+									JOIN tblCTContractDetail a
+										on SC2.intContractDetailId = a.intContractDetailId
+							end
 							----- DEBUG POINT -----
 							if @debug_awesome_ness = 1 AND 1 = 0
 							begin
@@ -2220,7 +2256,7 @@ BEGIN TRY
 					,a.intItemType				
 				 
 				----- DEBUG POINT -----				 
-				if @debug_awesome_ness = 1	 AND 1 = 1
+				if @debug_awesome_ness = 1	 AND 1 = 0
 				begin
 									
 					select 'ct available quantity for voucher', @intContractDetailId					
@@ -2592,7 +2628,7 @@ BEGIN TRY
 						END
 					END
 				----- DEBUG POINT -----
-				if @debug_awesome_ness = 1 and 1 = 1
+				if @debug_awesome_ness = 1 and 1 = 0
 				begin
 					select 'voucher payable', * from @voucherPayable		
 					select 'create voucher id ', @createdVouchersId
@@ -2649,7 +2685,7 @@ BEGIN TRY
 						declare @cur_qty as numeric(18,6)
 
 						----- DEBUG POINT -----
-						if @debug_awesome_ness = 1 and 1 = 1
+						if @debug_awesome_ness = 1 and 1 = 0
 						begin
 							select 'avq qty check'
 							select * from @avqty
@@ -2804,7 +2840,7 @@ BEGIN TRY
 										WHERE intSettleStorageId = @intSettleStorageId  and @createdVouchersId is not null
 
 								
-								if @debug_awesome_ness = 1 and 1 = 1
+								if @debug_awesome_ness = 1 and 1 = 0
 								begin
 									select
 											(b.dblOldCost + isnull(@sum_e, 0)) * a.dblUnits,
@@ -2844,7 +2880,7 @@ BEGIN TRY
 										where strType = 'Settlement'								
 							
 								----- DEBUG POINT -----
-								if @debug_awesome_ness = 1 and 1 = 1
+								if @debug_awesome_ness = 1 and 1 = 0
 								begin									
 									select 'qty tracking ',@dblQtyFromCt , @dblTotalVoucheredQuantity , @dblSelectedUnits,  @dblQtyFromCt + @dblTotalVoucheredQuantity 
 
@@ -2856,7 +2892,7 @@ BEGIN TRY
 							end
 
 							----- DEBUG POINT -----
-							if @debug_awesome_ness = 1	 AND 1 = 1
+							if @debug_awesome_ness = 1	 AND 1 = 0
 							begin
 
 								select 'selected units', @dblSelectedUnits
@@ -2867,7 +2903,7 @@ BEGIN TRY
 							----- DEBUG POINT -----
 
 							----- DEBUG POINT -----
-							if @debug_awesome_ness = 1	 AND 1 = 1
+							if @debug_awesome_ness = 1	 AND 1 = 0
 							begin
 								print 'before post bill'
 							end
@@ -2884,7 +2920,7 @@ BEGIN TRY
 								,@success = @success OUTPUT
 							
 							----- DEBUG POINT -----
-							if @debug_awesome_ness = 1	 AND 1 = 1
+							if @debug_awesome_ness = 1	 AND 1 = 0
 							begin
 								print 'end post bill'
 							end
