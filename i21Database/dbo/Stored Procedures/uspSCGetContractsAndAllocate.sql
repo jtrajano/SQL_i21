@@ -413,6 +413,12 @@ BEGIN TRY
 					BEGIN
 						IF(@intContractDetailId = @intTicketContractDetailId)
 						BEGIN
+							IF (@strDistributionOption = 'LOD' AND @dblTicketScheduledQuantity > @dblNetUnits) 
+							BEGIN
+								print 'no adjustment'
+							END
+							ELSE
+							BEGIN
 							-- Adjust the scheduled quantity based on the ticket scheduled and net units
 								EXEC	uspCTUpdateScheduleQuantity 
 										@intContractDetailId	=	@intContractDetailId,
@@ -420,6 +426,7 @@ BEGIN TRY
 										@intUserId				=	@intUserId,
 										@intExternalId			=	@intTicketId,
 										@strScreenName			=	'Auto - Scale'
+							END
 						
 						END
 						ELSE
