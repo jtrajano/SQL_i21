@@ -595,6 +595,7 @@ BEGIN TRY
 			SELECT @intSubBookId = intSubBookId
 			FROM tblCTSubBook
 			WHERE strSubBook = @strSubBook
+			and intBookId = @intBookId
 
 			IF @intSubBookId IS NULL
 				SELECT @intSubBookId = 0

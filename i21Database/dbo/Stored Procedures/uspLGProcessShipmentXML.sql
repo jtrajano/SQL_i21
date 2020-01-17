@@ -1,4 +1,7 @@
-﻿CREATE PROCEDURE dbo.uspLGProcessShipmentXML (@strInfo1 NVARCHAR(MAX) = '' OUTPUT)
+﻿CREATE PROCEDURE dbo.uspLGProcessShipmentXML (
+	@strInfo1 NVARCHAR(MAX) = '' OUTPUT
+	,@ysnDropShip BIT = 0
+	)
 AS
 BEGIN TRY
 	SET NOCOUNT ON
@@ -76,6 +79,9 @@ BEGIN TRY
 		,@strUserName NVARCHAR(50)
 		,@strFinalErrMsg NVARCHAR(MAX) = ''
 		,@strDescription NVARCHAR(MAX)
+		,@intSContractDetailId INT
+		,@intPContractDetailId INT
+		,@intPACompanyLocationId INT
 	DECLARE @tblLGLoadDetail TABLE (intLoadDetailId INT)
 	DECLARE @strItemNo NVARCHAR(50)
 		,@strItemUOM NVARCHAR(50)
@@ -309,9 +315,13 @@ BEGIN TRY
 			BEGIN
 				SET @intPurchaseSale = 1
 			END
-			ELSE
+			ELSE IF (@strTransactionType LIKE '%Outbound%')
 			BEGIN
 				SET @intPurchaseSale = 2
+			END
+			ELSE
+			BEGIN
+				SET @intPurchaseSale = 3
 			END
 
 			SELECT @intLoadRefId = @intLoadId
@@ -455,8 +465,6 @@ BEGIN TRY
 					WHERE ForwardingAgent.strName = @strForwardingAgent
 					)
 			BEGIN
-				
-
 				IF @strErrorMessage <> ''
 				BEGIN
 					SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'ForwardingAgent ' + @strForwardingAgent + ' is not available.'
@@ -508,7 +516,6 @@ BEGIN TRY
 					WHERE DocPresentationVal.strName = @strDocPresentationVal
 					)
 			BEGIN
-				
 				IF @strErrorMessage <> ''
 				BEGIN
 					SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'DocPresentationVal ' + @strDocPresentationVal + ' is not available.'
@@ -526,8 +533,6 @@ BEGIN TRY
 					WHERE InsuranceCurrency.strCurrency = @strInsuranceCurrency
 					)
 			BEGIN
-				
-
 				IF @strErrorMessage <> ''
 				BEGIN
 					SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Insurance Currency ' + @strInsuranceCurrency + ' is not available.'
@@ -545,8 +550,6 @@ BEGIN TRY
 					WHERE ContainerType.strContainerType = @strContainerType
 					)
 			BEGIN
-				
-
 				IF @strErrorMessage <> ''
 				BEGIN
 					SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'ContainerType ' + @strContainerType + ' is not available.'
@@ -564,8 +567,6 @@ BEGIN TRY
 					WHERE EquipmentType.strEquipmentType = @strEquipmentType
 					)
 			BEGIN
-				
-
 				IF @strErrorMessage <> ''
 				BEGIN
 					SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Equipment Type ' + @strEquipmentType + ' is not available.'
@@ -583,8 +584,6 @@ BEGIN TRY
 					WHERE Dispatcher.strUserName = @strDispatcher
 					)
 			BEGIN
-				
-
 				IF @strErrorMessage <> ''
 				BEGIN
 					SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Dispatcher ' + @strDispatcher + ' is not available.'
@@ -602,8 +601,6 @@ BEGIN TRY
 					WHERE Position.strPosition = @strPosition
 					)
 			BEGIN
-				
-
 				IF @strErrorMessage <> ''
 				BEGIN
 					SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Position ' + @strPosition + ' is not available.'
@@ -673,8 +670,6 @@ BEGIN TRY
 			IF @intFreightTermId IS NULL
 				AND @strFreightTerm IS NOT NULL
 			BEGIN
-				
-
 				IF @strErrorMessage <> ''
 				BEGIN
 					SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Freight Term ' + @strFreightTerm + ' is not available.'
@@ -692,8 +687,6 @@ BEGIN TRY
 			IF @intBookId IS NULL
 				AND @strBook IS NOT NULL
 			BEGIN
-				 
-
 				IF @strErrorMessage <> ''
 				BEGIN
 					SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Book ' + @strBook + ' is not available.'
@@ -707,12 +700,11 @@ BEGIN TRY
 			SELECT @intSubBookId = intSubBookId
 			FROM tblCTSubBook
 			WHERE strSubBook = @strSubBook
+				and intBookId=@intBookId
 
 			IF @intSubBookId IS NULL
 				AND @strSubBook IS NOT NULL
 			BEGIN
-				
-
 				IF @strErrorMessage <> ''
 				BEGIN
 					SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Sub Book ' + @strSubBook + ' is not available.'
@@ -971,7 +963,11 @@ BEGIN TRY
 					,dtmDispatchMailSent
 					,dtmCancelDispatchMailSent
 					,intLoadHeaderId
-					,@intSourceType
+					,CASE 
+						WHEN @strTransactionType = 'Drop Shipment'
+							THEN 4
+						ELSE @intSourceType
+						END
 					,@intPositionId
 					,intWeightUnitMeasureId
 					,strBLNumber
@@ -1291,7 +1287,13 @@ BEGIN TRY
 					,dtmDispatchMailSent = x.dtmDispatchMailSent
 					,dtmCancelDispatchMailSent = x.dtmCancelDispatchMailSent
 					,intLoadHeaderId = x.intLoadHeaderId
-					,intSourceType = x.intSourceType
+					,intSourceType = (
+						CASE 
+							WHEN @strTransactionType = 'Drop Shipment'
+								THEN 4
+							ELSE x.intSourceType
+							END
+						)
 					,intPositionId = @intPositionId
 					,intWeightUnitMeasureId = x.intWeightUnitMeasureId
 					,strBLNumber = x.strBLNumber
@@ -1874,11 +1876,8 @@ BEGIN TRY
 								) x
 						LEFT JOIN tblCTContractDetail PCD ON PCD.intContractDetailRefId = x.intSContractDetailId
 						WHERE x.intLoadDetailId = @intLoadDetailId
-							AND 
-								PCD.intContractDetailRefId IS NULL
-								
-								
-						)
+							AND PCD.intContractDetailRefId IS NULL
+						) and @strTransactionType <>'Drop Shipment'
 				BEGIN
 					SELECT @strErrorMessage = 'Contract is not created for the load.'
 
@@ -1887,6 +1886,28 @@ BEGIN TRY
 							,16
 							,1
 							)
+				END
+
+				IF @strTransactionType = 'Drop Shipment'
+				BEGIN
+					SELECT @intSContractDetailId = NULL
+
+					SELECT @intSContractDetailId = SCD.intContractDetailId
+					FROM OPENXML(@idoc, 'vyuLGLoadDetailViews/vyuLGLoadDetailView', 2) WITH ([intPContractDetailId] INT,intLoadDetailId int) x
+					LEFT JOIN tblCTContractDetail SCD ON SCD.intContractDetailRefId = x.intPContractDetailId
+					WHERE x.intLoadDetailId = @intLoadDetailId
+
+					SELECT @intPContractDetailId = NULL
+
+					SELECT @intPContractDetailId = AD.intPContractDetailId
+					FROM tblLGAllocationDetail AD
+					WHERE AD.intSContractDetailId = @intSContractDetailId
+
+					SELECT @intPACompanyLocationId = NULL
+
+					SELECT @intPACompanyLocationId = intCompanyLocationId
+					FROM tblCTContractDetail
+					WHERE intContractDetailId = @intPContractDetailId
 				END
 
 				IF NOT EXISTS (
@@ -1955,9 +1976,17 @@ BEGIN TRY
 						,@intCustomerId
 						,@intCustomerLocationId
 						,@intItemId
-						,PCD.intContractDetailId
+						,CASE 
+							WHEN @strTransactionType = 'Drop Shipment'
+								THEN @intPContractDetailId
+							ELSE PCD.intContractDetailId
+							END AS intPContractDetailId
 						,SCD.intContractDetailId
-						,PCD.intCompanyLocationId
+						,CASE 
+							WHEN @strTransactionType = 'Drop Shipment'
+								THEN @intPACompanyLocationId
+							ELSE PCD.intCompanyLocationId
+							END
 						,@intSCompanyLocationId
 						,x.[dblQuantity]
 						,@intItemUOMId
@@ -2065,9 +2094,19 @@ BEGIN TRY
 						,[intCustomerEntityId] = @intCustomerId
 						,[intCustomerEntityLocationId] = @intCustomerLocationId
 						,[intItemId] = @intItemId
-						,[intPContractDetailId] = PCD.intContractDetailId
+						,[intPContractDetailId] = (
+							CASE 
+								WHEN @strTransactionType = 'Drop Shipment'
+									THEN @intPContractDetailId
+								ELSE PCD.intContractDetailId
+								END
+							)
 						,[intSContractDetailId] = SCD.intContractDetailId
-						,[intPCompanyLocationId] = PCD.intCompanyLocationId
+						,[intPCompanyLocationId] = CASE 
+							WHEN @strTransactionType = 'Drop Shipment'
+								THEN @intPACompanyLocationId
+							ELSE PCD.intCompanyLocationId
+							END
 						,[intSCompanyLocationId] = @intSCompanyLocationId
 						,[dblQuantity] = x.[dblQuantity]
 						,[intItemUOMId] = @intItemUOMId

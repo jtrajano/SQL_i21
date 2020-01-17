@@ -11,6 +11,124 @@ BEGIN
 	DECLARE @intNoOfMonths INT
 		,@strBatch NVARCHAR(MAX) = ''
 		,@strBatchId NVARCHAR(MAX) = ''
+	DECLARE @tblMFItemBook TABLE (
+		intId INT identity(1, 1)
+		,intItemId INT
+		,intBookId INT
+		,intSubBookId INT
+		,strItemNo NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
+		)
+	DECLARE @intId INT
+		,@strItemNo NVARCHAR(MAX)
+		,@intItemId INT
+		,@intBookId INT
+		,@intSubBookId INT
+
+	IF @ysnLoadPlan = 1
+	BEGIN
+		INSERT INTO @tblMFItemBook (
+			intItemId
+			,intBookId
+			,intSubBookId
+			)
+		SELECT DISTINCT AV.intItemId
+			,AV.intBookId
+			,AV.intSubBookId
+		FROM tblMFInvPlngSummaryDetail AV
+		WHERE intInvPlngSummaryId = @intInvPlngSummaryId
+			AND AV.intAttributeId = 2 --Opening Inventory
+			AND IsNumeric(AV.strValue) = 1
+			AND AV.intMainItemId IS NULL
+	END
+	ELSE
+	BEGIN
+		IF @ysnRefreshContract = 0
+		BEGIN
+			INSERT INTO @tblMFItemBook (
+				intItemId
+				,intBookId
+				,intSubBookId
+				)
+			SELECT DISTINCT AV.intMainItemId
+				,RM.intBookId
+				,RM.intSubBookId
+			FROM tblCTInvPlngReportAttributeValue AV
+			JOIN tblCTInvPlngReportMaster RM ON RM.intInvPlngReportMasterID = AV.intInvPlngReportMasterID
+			WHERE AV.intReportAttributeID = 2 --Opening Inventory
+				AND AV.intInvPlngReportMasterID IN (
+					SELECT Item Collate Latin1_General_CI_AS
+					FROM [dbo].[fnSplitString](@strInvPlngReportMasterID, ',')
+					)
+		END
+		ELSE
+		BEGIN
+			INSERT INTO @tblMFItemBook (
+				intItemId
+				,intBookId
+				,intSubBookId
+				)
+			SELECT DISTINCT AV.intItemId
+				,AV.intBookId
+				,AV.intSubBookId
+			FROM tblMFInvPlngSummaryDetail AV
+			WHERE intInvPlngSummaryId = @intInvPlngSummaryId
+				AND AV.intAttributeId = 2 --Opening Inventory
+				AND IsNumeric(AV.strValue) = 1
+				AND AV.intMainItemId IS NULL
+		END
+	END
+
+	SELECT @intId = MIN(intId)
+	FROM @tblMFItemBook
+
+	WHILE @intId IS NOT NULL
+	BEGIN
+		SELECT @intItemId = NULL
+			,@intBookId = NULL
+			,@intSubBookId = NULL
+			,@strItemNo = ''
+
+		SELECT @intItemId = intItemId
+			,@intBookId = intBookId
+			,@intSubBookId = intSubBookId
+		FROM @tblMFItemBook
+		WHERE intId = @intId
+
+		IF EXISTS (
+				SELECT *
+				FROM tblICItemBundle IBundle
+				LEFT JOIN tblICItemBook IBook ON IBook.intItemId = IBundle.intBundleItemId
+					AND IBook.intBookId = @intBookId
+					AND isNULL(IBook.intSubBookId, 0) = IsNULL(@intSubBookId, 0)
+				WHERE IBundle.intItemId = @intItemId
+					AND IBook.intItemId IS NULL
+				)
+		BEGIN
+			SELECT @strItemNo = @strItemNo + I.strItemNo + ' / '
+			FROM tblICItemBundle IBundle
+			JOIN tblICItem I ON I.intItemId = IBundle.intBundleItemId
+			JOIN tblICItemBook IBook ON IBook.intItemId = IBundle.intBundleItemId
+				AND IBook.intBookId = @intBookId
+				AND isNULL(IBook.intSubBookId, 0) = IsNULL(@intSubBookId, 0)
+			WHERE IBundle.intItemId = @intItemId
+		END
+
+		IF @strItemNo IS NULL
+			SELECT @strItemNo = ''
+
+		IF len(@strItemNo) > 0
+		BEGIN
+			SELECT @strItemNo = left(@strItemNo, Len(@strItemNo) - 3)
+
+			UPDATE @tblMFItemBook
+			SET strItemNo = @strItemNo
+			WHERE intId = @intId
+		END
+
+		SELECT @intId = MIN(intId)
+		FROM @tblMFItemBook
+		WHERE intId > @intId
+	END
 
 	IF @ysnLoadPlan = 1
 	BEGIN
@@ -136,7 +254,7 @@ BEGIN
 			,strProductType
 			,strItemNo
 			,strItemDescription
-			,dblSupplyTarget * 100 AS strSupplyTarget
+			,dblSupplyTarget AS strSupplyTarget
 			,IsNULL([Opening Inventory strMonth1], 0) AS strOIMonth1
 			,IsNULL([Forecasted Consumption strMonth1], 0) AS strFCMonth1
 			,IsNULL([Existing Purchases strMonth1], 0) AS strOPMonth1
@@ -290,7 +408,7 @@ BEGIN
 					CASE 
 						WHEN MI.intItemId IS NOT NULL
 							THEN I.strItemNo + ' - ' + I.strDescription
-						ELSE NULL
+						ELSE IB.strItemNo
 						END
 					) AS strItemDescription
 				,Replace(Replace(A.strAttributeName, '<a>+ ', ''), '</a>', '') + ' ' + AV.strFieldName AS strAttributeName
@@ -321,6 +439,9 @@ BEGIN
 			LEFT JOIN tblIPItemSupplyTarget ST ON ST.intBookId = B.intBookId
 				AND IsNULL(ST.intSubBookId, 0) = IsNULL(SB.intSubBookId, 0)
 				AND ST.intItemId = I.intItemId
+			LEFT JOIN @tblMFItemBook IB ON IB.intItemId = AV.intItemId
+				AND IB.intBookId = B.intBookId
+				AND IsNULL(IB.intSubBookId, 0) = IsNULL(SB.intSubBookId, 0)
 			WHERE A.intReportAttributeID IN (
 					2 --Opening Inventory
 					,4 --Existing Purchases
@@ -587,7 +708,7 @@ BEGIN
 				,strProductType
 				,strItemNo
 				,strItemDescription
-				,dblSupplyTarget * 100 AS strSupplyTarget
+				,dblSupplyTarget AS strSupplyTarget
 				,IsNULL([Opening Inventory strMonth1], 0) AS strOIMonth1
 				,IsNULL([Forecasted Consumption strMonth1], 0) AS strFCMonth1
 				,IsNULL([Existing Purchases strMonth1], 0) AS strOPMonth1
@@ -741,7 +862,7 @@ BEGIN
 						CASE 
 							WHEN MI.intItemId IS NOT NULL
 								THEN I.strItemNo + ' - ' + I.strDescription
-							ELSE NULL
+							ELSE IB.strItemNo
 							END
 						) AS strItemDescription
 					,Replace(Replace(A.strAttributeName, '<a>+ ', ''), '</a>', '') + ' ' + AV.strFieldName AS strAttributeName
@@ -780,6 +901,9 @@ BEGIN
 				LEFT JOIN tblIPItemSupplyTarget ST ON ST.intBookId = B.intBookId
 					AND IsNULL(ST.intSubBookId, 0) = IsNULL(SB.intSubBookId, 0)
 					AND ST.intItemId = I.intItemId
+				LEFT JOIN @tblMFItemBook IB ON IB.intItemId = AV.intItemId
+					AND IB.intBookId = B.intBookId
+					AND IsNULL(IB.intSubBookId, 0) = IsNULL(SB.intSubBookId, 0)
 				WHERE A.intReportAttributeID IN (
 						2 --Opening Inventory
 						,4 --Existing Purchases
@@ -1016,7 +1140,7 @@ BEGIN
 				,ysnSpecificItemDescription
 				)
 			SELECT DISTINCT intItemId
-				,IsNULL(intMainItemId,intItemId)
+				,IsNULL(intMainItemId, intItemId)
 				,CASE 
 					WHEN intItemId <> intMainItemId
 						THEN 1
@@ -1098,7 +1222,7 @@ BEGIN
 					WHEN I.ysnSpecificItemDescription = 1
 						THEN I.intMainItemId
 					ELSE NULL
-					END 
+					END
 				,SS.intBookId
 				,SS.intSubBookId
 
@@ -1208,7 +1332,7 @@ BEGIN
 				,strProductType
 				,strItemNo
 				,strItemDescription
-				,dblSupplyTarget * 100 AS strSupplyTarget
+				,dblSupplyTarget AS strSupplyTarget
 				,IsNULL([Opening Inventory strMonth1], 0) AS strOIMonth1
 				,IsNULL([Forecasted Consumption strMonth1], 0) AS strFCMonth1
 				,IsNULL([Existing Purchases strMonth1], 0) AS strOPMonth1
@@ -1362,7 +1486,7 @@ BEGIN
 						CASE 
 							WHEN MI.intItemId IS NOT NULL
 								THEN I.strItemNo + ' - ' + I.strDescription
-							ELSE NULL
+							ELSE IB.strItemNo
 							END
 						) AS strItemDescription
 					,Replace(Replace(A.strAttributeName, '<a>+ ', ''), '</a>', '') + ' strMonth' + Ltrim(FD.intMonthId) AS strAttributeName
@@ -1392,6 +1516,9 @@ BEGIN
 				LEFT JOIN tblIPItemSupplyTarget ST ON ST.intBookId = B.intBookId
 					AND IsNULL(ST.intSubBookId, 0) = IsNULL(SB.intSubBookId, 0)
 					AND ST.intItemId = I.intItemId
+				LEFT JOIN @tblMFItemBook IB ON IB.intItemId = FD.intItemId
+					AND IB.intBookId = B.intBookId
+					AND IsNULL(IB.intSubBookId, 0) = IsNULL(SB.intSubBookId, 0)
 				WHERE IsNumeric(FD.dblQty) = 1
 					--2-Opening Inventory;8-Forecasted Consumption;9-Ending Inventory;13-Existing Purchases;12-Planned Purchases
 				) AS SourceTable
