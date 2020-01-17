@@ -118,6 +118,7 @@ BEGIN
 										FROM tblRKDailyAveragePrice
 										WHERE ISNULL(intBookId, 0) = ISNULL(@BookId, 0) AND ISNULL(intSubBookId, 0) = ISNULL(@SubBookId, 0)
 											AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= @Date
+											AND ISNULL(ysnPosted, 0) = 1
 										ORDER BY dtmDate DESC)
 			AND ISNULL(DAP.intCommodityId, 0) = ISNULL(@CommodityId, 0)
 			AND ISNULL(DAP.intBookId, 0) = ISNULL(@BookId, 0)
