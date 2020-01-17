@@ -931,7 +931,7 @@ BEGIN TRY
 
 							WHILE @@FETCH_STATUS = 0
 							BEGIN
-								IF  @ysnAllInvoiceHasCreditMemo = 1
+								IF  @ysnAllInvoiceHasCreditMemo = 1 AND EXISTS(SELECT TOP 1 1 FROM #tmpShipmentInvoiceDetailIds)
 								BEGIN
 									if (exists ( select top 1 1 from tblGRCompanyPreference where ysnDoNotAllowUndistributePostedInvoice = 1 ))
 									begin
@@ -945,6 +945,10 @@ BEGIN TRY
 								END
 								ELSE
 								BEGIN
+									IF OBJECT_ID (N'tempdb.dbo.#invoiceIdTable') IS NOT NULL
+									BEGIN 
+										DROP TABLE #invoiceIdTable
+									END
 
 									SELECT DISTINCT
 										ARID.intInvoiceId
