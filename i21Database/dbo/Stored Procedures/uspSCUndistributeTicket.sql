@@ -1078,11 +1078,22 @@ BEGIN TRY
 
 										IF @dblTicketScheduledQty <= @dblContractAvailableQty
 										BEGIN
-											SET @dblLoadUsedQty = @dblTicketScheduledQty
+											IF @dblLoadUsedQty < @dblTicketScheduledQty
+											BEGIN
+												SET @dblLoadUsedQty = @dblTicketScheduledQty
+											END
+
+											IF @dblLoadUsedQty > @dblContractAvailableQty
+											BEGIN
+												SET	@dblLoadUsedQty = @dblContractAvailableQty
+											END
 										END
 										ELSE
 										BEGIN
-											SET @dblLoadUsedQty = @dblContractAvailableQty
+											IF @dblLoadUsedQty > @dblContractAvailableQty
+											BEGIN
+												SET @dblLoadUsedQty = @dblContractAvailableQty
+											END
 										END
 										
 
