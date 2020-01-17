@@ -23,6 +23,7 @@ DECLARE @intStorageTypeId INT
 DECLARE @intStorageScheduleId INT
 DECLARE @intShipFromLocationId INT
 DECLARE @intShipFromEntityId INT
+DECLARE @ysnDPOwnedType BIT
 
 BEGIN TRY
 	--check if a storage already exists 
@@ -37,6 +38,8 @@ BEGIN TRY
 		, @intShipFromLocationId	= CS.intShipFromLocationId
 		, @intShipFromEntityId		= CS.intShipFromEntityId
 	FROM @CustomerStorageStagingTable CS	
+
+	SELECT @ysnDPOwnedType = ysnDPOwnedType FROM tblGRStorageType WHERE intStorageScheduleTypeId = @intStorageTypeId
 
 	IF EXISTS(SELECT 1 FROM tblGRCustomerStorage WHERE intEntityId = @intEntityId AND intItemId = @intItemId AND intCompanyLocationId = @intLocationId AND intDeliverySheetId = @intDeliverySheetId AND intStorageTypeId = @intStorageTypeId)
 	BEGIN
@@ -158,7 +161,7 @@ BEGIN TRY
 	SELECT 	[intCustomerStorageId]				= @intCustomerStorageId				
 			,[intTicketId]						= CS.intTicketId
 			,[intDeliverySheetId]				= CS.intDeliverySheetId
-			,[intContractHeaderId]				= CS.intContractHeaderId
+			,[intContractHeaderId]				= CASE WHEN @ysnDPOwnedType = 1 THEN CS.intContractHeaderId ELSE NULL END
 			,[dblUnits]							= CS.dblQuantity
 			,[dtmHistoryDate]					= dbo.fnRemoveTimeOnDate(CS.dtmDeliveryDate)
 			,[strPaidDescription]				= CASE WHEN CS.intDeliverySheetId > 0 THEN 'Generated From Scale Ticket with Delivery Sheet' ELSE 'Generated From Scale' END
