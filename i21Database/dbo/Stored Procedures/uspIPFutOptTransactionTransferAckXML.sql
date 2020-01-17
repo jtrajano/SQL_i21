@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE uspIPFutOptTransactionTransferAckXML @intToCompanyId INT
+﻿CREATE PROCEDURE uspIPFutOptTransactionTransferAckXML
 AS
 BEGIN TRY
 	SET NOCOUNT ON
@@ -7,13 +7,11 @@ BEGIN TRY
 
 	SELECT *
 	FROM tblRKFutOptTransactionHeaderAckStage
-	WHERE intMultiCompanyId = @intToCompanyId
-		AND ISNULL(strFeedStatus, '') = ''
+	WHERE ISNULL(strFeedStatus, '') = ''
 
 	UPDATE tblRKFutOptTransactionHeaderAckStage
 	SET strFeedStatus = 'Ack Sent'
-	WHERE intMultiCompanyId = @intToCompanyId
-		AND ISNULL(strFeedStatus, '') = ''
+	WHERE ISNULL(strFeedStatus, '') = ''
 END TRY
 
 BEGIN CATCH

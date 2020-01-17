@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE uspIPFutOptTransactionProcessAckXML @intToCompanyId INT
+﻿CREATE PROCEDURE uspIPFutOptTransactionProcessAckXML
 AS
 BEGIN TRY
 	SET NOCOUNT ON
@@ -12,6 +12,7 @@ BEGIN TRY
 	DECLARE @intFutOptTransactionHeaderId INT
 	DECLARE @intFutOptTransactionHeaderRefId INT
 		,@strRowState NVARCHAR(100)
+		,@intMultiCompanyId INT
 		,@intTransactionId INT
 		,@intCompanyId INT
 		,@intTransactionRefId INT
@@ -21,7 +22,7 @@ BEGIN TRY
 	FROM tblRKFutOptTransactionHeaderAckStage
 	WHERE strMessage = 'Success'
 		AND ISNULL(strFeedStatus, '') = ''
-		AND intMultiCompanyId = @intToCompanyId
+		--AND intMultiCompanyId = @intToCompanyId
 
 	WHILE @intFutOptTransactionHeaderAckStageId > 0
 	BEGIN
@@ -31,6 +32,7 @@ BEGIN TRY
 			,@intFutOptTransactionHeaderId = NULL
 			,@intFutOptTransactionHeaderRefId = NULL
 			,@strRowState = NULL
+			,@intMultiCompanyId = NULL
 			,@intTransactionId = NULL
 			,@intCompanyId = NULL
 			,@intTransactionRefId = NULL
@@ -40,6 +42,7 @@ BEGIN TRY
 			,@strAckFutOptTransactionXML = strAckFutOptTransactionXML
 			,@strTransactionType = strTransactionType
 			,@strRowState = strRowState
+			,@intMultiCompanyId = intMultiCompanyId
 			,@intTransactionId = intTransactionId
 			,@intCompanyId = intCompanyId
 			,@intTransactionRefId = intTransactionRefId
@@ -79,15 +82,15 @@ BEGIN TRY
 			EXEC sp_xml_preparedocument @idoc OUTPUT
 				,@strAckFutOptTransactionXML
 
-			UPDATE SD
-			SET SD.intFutOptTransactionRefId = XMLDetail.intFutOptTransactionId
-			FROM OPENXML(@idoc, 'vyuIPGetFutOptTransactions/vyuIPGetFutOptTransaction', 2) WITH (
-					intFutOptTransactionId INT
-					,intFutOptTransactionRefId INT
-					) XMLDetail
-			JOIN tblRKFutOptTransaction SD ON SD.intFutOptTransactionId = XMLDetail.intFutOptTransactionRefId
-			WHERE SD.intFutOptTransactionHeaderId = @intFutOptTransactionHeaderRefId
-				AND SD.intFutOptTransactionRefId IS NULL
+			--UPDATE SD
+			--SET SD.intFutOptTransactionRefId = XMLDetail.intFutOptTransactionId
+			--FROM OPENXML(@idoc, 'vyuIPGetFutOptTransactions/vyuIPGetFutOptTransaction', 2) WITH (
+			--		intFutOptTransactionId INT
+			--		,intFutOptTransactionRefId INT
+			--		) XMLDetail
+			--JOIN tblRKFutOptTransaction SD ON SD.intFutOptTransactionId = XMLDetail.intFutOptTransactionRefId
+			--WHERE SD.intFutOptTransactionHeaderId = @intFutOptTransactionHeaderRefId
+			--	AND SD.intFutOptTransactionRefId IS NULL
 
 			EXEC sp_xml_removedocument @idoc
 
@@ -99,6 +102,7 @@ BEGIN TRY
 				,strMessage = 'Success'
 			WHERE intFutOptTransactionHeaderId = @intFutOptTransactionHeaderRefId
 				AND strFeedStatus = 'Awt Ack'
+				AND intMultiCompanyId = @intMultiCompanyId
 
 			---UPDATE Feed Status in Acknowledgement
 			UPDATE tblRKFutOptTransactionHeaderAckStage
@@ -115,7 +119,7 @@ BEGIN TRY
 		WHERE intFutOptTransactionHeaderAckStageId > @intFutOptTransactionHeaderAckStageId
 			AND strMessage = 'Success'
 			AND ISNULL(strFeedStatus, '') = ''
-			AND intMultiCompanyId = @intToCompanyId
+			--AND intMultiCompanyId = @intToCompanyId
 	END
 END TRY
 
