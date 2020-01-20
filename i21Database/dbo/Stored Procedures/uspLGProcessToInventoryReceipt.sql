@@ -503,15 +503,24 @@ BEGIN TRY
 				,[intContractDetailId] = LD.intPContractDetailId
 				,[dtmDate] = GETDATE()
 				,[intShipViaId] = CD.intShipViaId
-				,[dblQty] = ISNULL(LDCL.dblQuantity, LD.dblQuantity)
-				,[intGrossNetUOMId] = COALESCE((SELECT TOP 1 intItemUOMId FROM tblICItemUOM WHERE intItemId = LD.intItemId AND intUnitMeasureId = LC.intWeightUnitMeasureId), 
-											LD.intWeightItemUOMId, CD.intNetWeightUOMId)
-				,[dblGross] = ISNULL(LDCL.dblLinkGrossWt, LD.dblGross)
-				,[dblNet] = ISNULL(LDCL.dblLinkNetWt, LD.dblNet)
+				,[dblQty] = ISNULL(LDCL.dblQuantity, 0) - ISNULL(LDCL.dblReceivedQty, 0)
+				,[intGrossNetUOMId] = COALESCE(LCUOM.intItemUOMId, LD.intWeightItemUOMId, CD.intNetWeightUOMId)
+				,[dblGross] = CASE WHEN ISNULL(LDCL.dblReceivedQty, 0) <> 0 THEN
+								dbo.fnCalculateQtyBetweenUOM(LD.intItemUOMId, COALESCE(LCUOM.intItemUOMId, LD.intWeightItemUOMId, CD.intNetWeightUOMId),
+									ISNULL(LDCL.dblQuantity, 0) - ISNULL(LDCL.dblReceivedQty, 0))
+								ELSE 
+									ISNULL(LDCL.dblLinkGrossWt, 0)
+								END
+				,[dblNet] = CASE WHEN ISNULL(LDCL.dblReceivedQty, 0) <> 0 THEN
+								dbo.fnCalculateQtyBetweenUOM(LD.intItemUOMId, COALESCE(LCUOM.intItemUOMId, LD.intWeightItemUOMId, CD.intNetWeightUOMId),
+									ISNULL(LDCL.dblQuantity, 0) - ISNULL(LDCL.dblReceivedQty, 0))
+								ELSE 
+									ISNULL(LDCL.dblLinkNetWt, 0)
+								END
 				,[dblCost] = ISNULL(AD.dblSeqPrice, ISNULL(LD.dblUnitPrice,0))
 				,[intCostUOMId] = ISNULL(AD.intSeqPriceUOMId,LD.intPriceUOMId)
-				,[intCurrencyId] = CASE WHEN (AD.ysnValidFX = 1) THEN AD.intSeqCurrencyId ELSE ISNULL(LSC.intMainCurrencyId, LSC.intCurrencyID) END
-				,[intSubCurrencyCents] = CASE WHEN (AD.ysnValidFX = 1) THEN SC.intCent ELSE ISNULL(LSC.intCent, 1) END
+				,[intCurrencyId] = CASE WHEN (AD.ysnValidFX = 1) THEN AD.intSeqCurrencyId ELSE COALESCE(LSC.intMainCurrencyId, LSC.intCurrencyID, SC.intMainCurrencyId, SC.intCurrencyID) END
+				,[intSubCurrencyCents] = CASE WHEN (AD.ysnValidFX = 1) THEN SC.intCent ELSE COALESCE(LSC.intCent, SC.intCent, 1) END
 				,[dblExchangeRate] = 1
 				,[intLotId] = NULL
 				,[intSubLocationId] = ISNULL(LW.intSubLocationId, CD.intSubLocationId)
@@ -521,7 +530,7 @@ BEGIN TRY
 				,[intSourceType] = 2
 				,[strSourceId] = L.strLoadNumber
 				,[strSourceScreenName] = 'Contract'
-				,[ysnSubCurrency] = CASE WHEN (AD.ysnValidFX = 1) THEN AD.ysnSeqSubCurrency ELSE LSC.ysnSubCurrency END
+				,[ysnSubCurrency] = CASE WHEN (AD.ysnValidFX = 1) THEN AD.ysnSeqSubCurrency ELSE ISNULL(LSC.ysnSubCurrency, AD.ysnSeqSubCurrency) END
 				,[intForexRateTypeId] = CASE --if contract FX tab is setup
 									 WHEN AD.ysnValidFX = 1 THEN 
 										CASE WHEN (ISNULL(LSC.intMainCurrencyId, LSC.intCurrencyID) = @DefaultCurrencyId AND CD.intInvoiceCurrencyId <> @DefaultCurrencyId) 
@@ -568,6 +577,7 @@ BEGIN TRY
 			LEFT JOIN tblSMCurrency LSC ON LSC.intCurrencyID = LD.intPriceCurrencyId
 			LEFT JOIN tblLGLoadWarehouseContainer LWC ON LWC.intLoadContainerId = LC.intLoadContainerId
 			LEFT JOIN tblLGLoadWarehouse LW ON LW.intLoadWarehouseId = LWC.intLoadWarehouseId
+			OUTER APPLY (SELECT TOP 1 intItemUOMId FROM tblICItemUOM WHERE intItemId = LD.intItemId AND intUnitMeasureId = LC.intWeightUnitMeasureId) LCUOM
 			OUTER APPLY (SELECT	TOP 1  
 						intForexRateTypeId = RD.intRateTypeId
 						,dblFXRate = CASE WHEN ER.intFromCurrencyId = @DefaultCurrencyId  
@@ -579,16 +589,9 @@ BEGIN TRY
 							AND ((ER.intFromCurrencyId = ISNULL(LSC.intMainCurrencyId, LSC.intCurrencyID) AND ER.intToCurrencyId = @DefaultCurrencyId) 
 								OR (ER.intFromCurrencyId = @DefaultCurrencyId AND ER.intToCurrencyId = ISNULL(LSC.intMainCurrencyId, LSC.intCurrencyID)))
 						ORDER BY RD.dtmValidFromDate DESC) FX
-			WHERE CAST((
-						CASE 
-							WHEN ISNULL(LDCL.dblReceivedQty, 0) = 0
-								THEN 0
-							ELSE 1
-							END
-						) AS BIT) = 0
-				AND L.intLoadId = @intLoadId
+			WHERE L.intLoadId = @intLoadId
+				AND (ISNULL(LDCL.dblQuantity, 0) - ISNULL(LDCL.dblReceivedQty, 0)) > 0
 				AND ISNULL(LC.ysnRejected, 0) <> 1
-				AND ISNULL(LDCL.dblReceivedQty,0) = 0
 			ORDER BY LDCL.intLoadDetailContainerLinkId
 		END
 		ELSE
@@ -650,8 +653,8 @@ BEGIN TRY
 				,[dblNet] = LD.dblNet -ISNULL(LD.dblDeliveredNet,0)
 				,[dblCost] = ISNULL(AD.dblSeqPrice, ISNULL(LD.dblUnitPrice,0))
 				,[intCostUOMId] = ISNULL(AD.intSeqPriceUOMId,LD.intPriceUOMId)
-				,[intCurrencyId] = CASE WHEN (AD.ysnValidFX = 1) THEN AD.intSeqCurrencyId ELSE ISNULL(LSC.intMainCurrencyId, LSC.intCurrencyID) END
-				,[intSubCurrencyCents] = CASE WHEN (AD.ysnValidFX = 1) THEN SC.intCent ELSE ISNULL(LSC.intCent, 1) END
+				,[intCurrencyId] = CASE WHEN (AD.ysnValidFX = 1) THEN AD.intSeqCurrencyId ELSE COALESCE(LSC.intMainCurrencyId, LSC.intCurrencyID, SC.intMainCurrencyId, SC.intCurrencyID) END
+				,[intSubCurrencyCents] = CASE WHEN (AD.ysnValidFX = 1) THEN SC.intCent ELSE COALESCE(LSC.intCent, SC.intCent, 1) END
 				,[dblExchangeRate] = 1
 				,[intLotId] = NULL
 				,[intSubLocationId] = ISNULL(CD.intSubLocationId, LD.intPSubLocationId)
