@@ -105,7 +105,7 @@ BEGIN TRY
 		
 		IF @strRowState = 'Delete'
 		BEGIN
-			--EXEC uspCTValidatePriceFixationDetailUpdateDelete @intPriceFixationId = @intPriceFixationId
+			EXEC uspCTValidatePriceFixationDetailUpdateDelete @intPriceFixationId = @intPriceFixationId
 			EXEC uspCTPriceFixationDetailDelete @intPriceFixationId = @intPriceFixationId, @intUserId = @intUserId
 		END
 
@@ -156,7 +156,7 @@ BEGIN TRY
 		
 		IF @strRowState = 'Delete'
 		BEGIN
-			--EXEC uspCTValidatePriceFixationDetailUpdateDelete @intPriceFixationDetailId = @intPriceFixationDetailId
+			EXEC uspCTValidatePriceFixationDetailUpdateDelete @intPriceFixationDetailId = @intPriceFixationDetailId
 			EXEC uspCTPriceFixationDetailDelete @intPriceFixationDetailId = @intPriceFixationDetailId, @intUserId = @intUserId
 		END
 
@@ -189,7 +189,7 @@ BEGIN TRY
 		
 		IF @strRowState = 'Delete'
 		BEGIN
-			--EXEC uspCTValidatePriceFixationDetailUpdateDelete @intPriceFixationTicketId = @intPriceFixationTicketId
+			EXEC uspCTValidatePriceFixationDetailUpdateDelete @intPriceFixationTicketId = @intPriceFixationTicketId
 			EXEC uspCTPriceFixationDetailDelete @intPriceFixationTicketId = @intPriceFixationTicketId, @intUserId = @intUserId
 		END
 				

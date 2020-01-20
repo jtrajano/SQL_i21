@@ -10,6 +10,7 @@ BEGIN TRY
 	DECLARE @ErrMsg		NVARChAR(MAX),
 			@List		NVARChAR(MAX)
 
+	/*
 	SELECT  @List = COALESCE(@List + ',', '') + BL.strBillId
 	FROM	tblCTPriceFixationDetailAPAR	DA LEFT
 	JOIN	vyuCTPriceFixationTicket		FT	ON	FT.intDetailId				=	DA.intBillDetailId
@@ -21,6 +22,7 @@ BEGIN TRY
 	-- Perfomance hit
 	AND		ISNULL(FT.intPriceFixationTicketId, 0)	=   CASE WHEN @intPriceFixationTicketId IS NOT NULL THEN @intPriceFixationTicketId ELSE ISNULL(FT.intPriceFixationTicketId,0) END
 	AND		BL.ysnPosted = 1
+	*/
 
 	SELECT  @List = COALESCE(@List + ',', '') + IV.strInvoiceNumber
 	FROM	tblCTPriceFixationDetailAPAR	DA LEFT
@@ -36,7 +38,7 @@ BEGIN TRY
 
 	IF ISNULL(@List,'') <> ''
 	BEGIN
-		SET @ErrMsg = 'Cannot delete pricing as following Invoices/Vouchers are available. ' + @List + '. Unpost those Invoices/Vouchers to continue delete the price.'
+		SET @ErrMsg = 'Cannot delete pricing as following Invoices are available. ' + @List + '. Unpost those Invoices to continue delete the price.'
 		RAISERROR(@ErrMsg,16,1)
 	END
 
