@@ -95,6 +95,7 @@ SELECT	intInventoryValuationKeyId  = ISNULL(t.intInventoryTransactionId, 0)
 		,strAdjustedTransaction		= t.strRelatedTransactionId
 		,ysnInTransit				= CAST(CASE WHEN t.intInTransitSourceLocationId IS NOT NULL THEN 1 ELSE 0 END AS BIT) 
 		,t.dtmCreated
+		,ScaleView.intTicketId
 FROM 	tblICInventoryTransaction t 
 		INNER JOIN tblICItem i 
 			ON t.intItemId = i.intItemId
