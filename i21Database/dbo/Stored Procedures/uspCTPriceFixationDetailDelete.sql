@@ -213,9 +213,13 @@ BEGIN TRY
 	BEGIN
 		SELECT @Count = COUNT(*) FROM tblCTPriceFixationDetailAPAR WHERE intInvoiceId = @Id
 		IF @Count = 1
+		BEGIN
 			SELECT @DetailId = NULL
+		END
 		ELSE
+		BEGIN
 			DELETE FROM tblCTPriceFixationDetailAPAR WHERE intInvoiceId = @Id AND intInvoiceDetailId = @DetailId
+		END
 
 		EXEC uspARDeleteInvoice @Id,@intUserId,@DetailId
 		SELECT @Id = MIN(Id) FROM #ItemInvoice WHERE Id > @Id
