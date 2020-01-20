@@ -7,6 +7,7 @@ BEGIN TRY
 		,@intTransactionCount INT
 		,@ErrMsg NVARCHAR(MAX)
 		,@strErrorMessage NVARCHAR(MAX)
+	DECLARE @intFutOptTransactionHeaderAckStageId INT
 	DECLARE @intFutOptTransactionHeaderStageId INT
 		,@intFutOptTransactionHeaderId INT
 		,@strHeaderXML NVARCHAR(MAX)
@@ -823,6 +824,7 @@ BEGIN TRY
 
 			INSERT INTO tblRKFutOptTransactionHeaderAckStage (
 				intFutOptTransactionHeaderId
+				,dtmTransactionDate
 				,strAckHeaderXML
 				,strAckFutOptTransactionXML
 				,strRowState
@@ -836,6 +838,7 @@ BEGIN TRY
 				,intCompanyRefId
 				)
 			SELECT @intNewFutOptTransactionHeaderId
+				,@dtmTransactionDate
 				,@strAckHeaderXML
 				,@strAckFutOptTransactionXML
 				,@strRowState
@@ -847,6 +850,8 @@ BEGIN TRY
 				,@intCompanyId
 				,@intTransactionRefId
 				,@intCompanyRefId
+
+			SELECT @intFutOptTransactionHeaderAckStageId = SCOPE_IDENTITY()
 
 			EXECUTE dbo.uspSMInterCompanyUpdateMapping @currentTransactionId = @intTransactionRefId
 				,@referenceTransactionId = @intTransactionId

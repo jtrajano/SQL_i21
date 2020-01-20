@@ -2,6 +2,7 @@
 (
 	intFutOptTransactionHeaderStageId	INT IDENTITY(1,1) PRIMARY KEY, 
 	intFutOptTransactionHeaderId		INT,
+	dtmTransactionDate					DATETIME,
 	strHeaderXML						NVARCHAR(MAX) COLLATE Latin1_General_CI_AS,
 	strFutOptTransactionXML				NVARCHAR(MAX) COLLATE Latin1_General_CI_AS,
 	strRowState							NVARCHAR(100) COLLATE Latin1_General_CI_AS,

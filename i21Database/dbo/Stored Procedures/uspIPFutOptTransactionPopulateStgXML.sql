@@ -13,6 +13,7 @@ BEGIN TRY
 	SET NOCOUNT ON
 
 	DECLARE @ErrMsg NVARCHAR(MAX)
+		,@dtmTransactionDate DATETIME
 		,@strHeaderXML NVARCHAR(MAX)
 		,@strHeaderCondition NVARCHAR(MAX)
 		,@intFutOptTransactionHeaderStageId INT
@@ -30,6 +31,7 @@ BEGIN TRY
 	SET @strLastModifiedUser = NULL
 
 	SELECT @intCompanyId = intCompanyId
+		,@dtmTransactionDate = dtmTransactionDate
 	FROM tblRKFutOptTransactionHeader
 	WHERE intFutOptTransactionHeaderId = @intFutOptTransactionHeaderId
 
@@ -95,6 +97,7 @@ BEGIN TRY
 
 	INSERT INTO tblRKFutOptTransactionHeaderStage (
 		intFutOptTransactionHeaderId
+		,dtmTransactionDate
 		,strHeaderXML
 		,strFutOptTransactionXML
 		,strRowState
@@ -109,6 +112,7 @@ BEGIN TRY
 		,intCompanyId
 		)
 	SELECT intFutOptTransactionHeaderId = @intFutOptTransactionHeaderId
+		,dtmTransactionDate = @dtmTransactionDate
 		,strHeaderXML = @strHeaderXML
 		,strFutOptTransactionXML = @strFutOptTransactionXML
 		,strRowState = @strRowState
