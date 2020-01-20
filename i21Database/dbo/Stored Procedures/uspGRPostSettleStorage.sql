@@ -1993,6 +1993,7 @@ BEGIN TRY
 						where intContractDetailId = a.intContractDetailId
 					) availableQtyForVoucher
 					WHERE availableQtyForVoucher.intContractDetailId is not null and availableQtyForVoucher.intPriceFixationDetailId is not null
+						and a.intItemType = 1
 				
 				----- DEBUG POINT -----
 				if @debug_awesome_ness = 1 and 1 = 0
