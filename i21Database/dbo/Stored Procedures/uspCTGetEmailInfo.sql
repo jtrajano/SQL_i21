@@ -59,6 +59,15 @@ BEGIN
 		INSERT INTO @loop
 		SELECT intContractHeaderId,intEntityId,strContractNumber,intSalespersonId FROM tblCTContractHeader WHERE intContractHeaderId IN (SELECT * FROM  dbo.fnSplitString(@strId,','))
 	END
+	ELSE IF @strMailType = 'Release Instruction'
+	BEGIN
+		SET @routeScreen = 'Contract'
+		INSERT INTO @loop
+		SELECT CD.intContractDetailId,CH.intEntityId,CH.strContractNumber +'-'+ CAST(CD.intContractSeq AS NVARCHAR(10)) ,CH.intSalespersonId 
+		FROM tblCTContractDetail CD
+		INNER JOIN tblCTContractHeader CH ON CD.intContractHeaderId = CH.intContractHeaderId
+		WHERE CD.intContractDetailId IN (SELECT * FROM  dbo.fnSplitString(@strId,','))
+	END
 	ELSE IF @strMailType = 'Price Contract'
 	BEGIN
 		SET @routeScreen = 'PriceContract'
@@ -110,6 +119,12 @@ BEGIN
 		SET @Subject = 'Contract' + ' - ' + @strNumber + ' - Sample Instruction - Your ref. no. ' + @strCustomerContract
 	END
 
+	IF @strMailType = 'Release Instruction'
+	BEGIN
+		SELECT @strCustomerContract = strCustomerContract FROM tblCTContractHeader WHERE intContractHeaderId IN (SELECT TOP 1 Id FROM @loop)
+		SET @Subject = 'Contract' + ' - ' + @strNumber + ' - Release Instruction - Your ref. no. ' + @strCustomerContract
+	END
+
 	IF	@strDefaultContractReport	=	'ContractJDE' AND @strMailType = 'Price Contract'
 	BEGIN
 		SET @strMailType = 'Price Fixation'
@@ -137,6 +152,11 @@ BEGIN
 	BEGIN
 		SELECT  @body += 'please find attached the sample instructions for contract - ' + @strNumber + '(Your ref. no. '+ @strCustomerContract +')'
 	END
+
+	IF @strMailType = 'Release Instruction'
+	BEGIN
+		SELECT  @body += 'please find attached the release instructions for contract - ' + @strNumber + '(Your ref. no. '+ @strCustomerContract +')'
+	END	
 
 	SET @body += '<br>'
 	SET @body +=@strThanks+'<br><br>'

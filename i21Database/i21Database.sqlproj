@@ -8363,6 +8363,7 @@
     <Build Include="dbo\Stored Procedures\uspIPCoverageEntryTransferAckXML.sql" />
     <Build Include="dbo\Stored Procedures\uspIPCoverageEntryProcessAckXML.sql" />
     <Build Include="dbo\Stored Procedures\uspIPCoverageEntryProcessStgXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTReportReleaseInstruction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
