@@ -556,7 +556,7 @@ BEGIN TRY
 	-- 	RAISERROR(@errMessage, 16, 1)
 	-- END
 
-	SELECT TOP 1 @strLink = ISNULL(strReceiptLink, '') FROM #tmpDistributionList WHERE ISNULL(ysnFreightOnly, 0) = 0 AND ISNULL(dblCost, 0) = 0 AND ISNULL(dblPrice, 0) = 0
+	SELECT TOP 1 @strLink = ISNULL(strReceiptLink, '') FROM #tmpDistributionList WHERE strDestination = 'Customer' AND ISNULL(ysnFreightOnly, 0) = 0 AND ISNULL(dblCost, 0) = 0 AND ISNULL(dblPrice, 0) = 0
 	IF ISNULL(@strLink, '') <> ''
 	BEGIN
 		SET @errMessage = 'Cost and Price cannot be zero(0) for Non-Freight-Only Customers. ' + @strLink + ' has a zero(0) cost and price.' 
