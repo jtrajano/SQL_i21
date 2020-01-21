@@ -14,99 +14,113 @@ SELECT
        CASE WHEN LEN(D.strZipCode) <> 0 THEN ', ' + dbo.fnTrimX(D.strZipCode) ELSE '' END)  COLLATE Latin1_General_CI_AS            
     , C2.strFederalTaxId
 	, dblCropInsurance = CASE WHEN A.int1099Form = 1 AND A.int1099Category = 1 --'Crop Insurance Proceeds'     
-		THEN (A.dblTotal + A.dblTax) / B.dblTotal  * ISNULL(B2.dblPayment,A.dbl1099)
+		THEN ((A.dblTotal + A.dblTax) / B.dblTotal  * ISNULL(B2.dblPayment,A.dbl1099))
+			* (CASE WHEN B.intTransactionType = 3 THEN -1 ELSE 1 END)
      ELSE 0 END    
 	, dblDirectSales = CASE WHEN A.int1099Form = 1 AND A.int1099Category = 2--'Direct Sales'     
-		THEN (A.dblTotal + A.dblTax) / B.dblTotal  * ISNULL(B2.dblPayment,A.dbl1099)
+		THEN ((A.dblTotal + A.dblTax) / B.dblTotal  * ISNULL(B2.dblPayment,A.dbl1099))
+			* (CASE WHEN B.intTransactionType = 3 THEN -1 ELSE 1 END)
 	ELSE 0 END    
     , dblParachutePayments = CASE WHEN A.int1099Form = 1 AND A.int1099Category = 3--'Excess Golden Parachute Payments'     
-		 THEN (A.dblTotal + A.dblTax) / B.dblTotal  * ISNULL(B2.dblPayment,A.dbl1099)
+		 THEN ((A.dblTotal + A.dblTax) / B.dblTotal  * ISNULL(B2.dblPayment,A.dbl1099))
+		 		* (CASE WHEN B.intTransactionType = 3 THEN -1 ELSE 1 END)
      ELSE 0 END  
 	, dblFederalIncome = CASE WHEN A.int1099Form = 1 AND A.int1099Category = 4--'Federal Income Tax Withheld'     
-		 THEN (A.dblTotal + A.dblTax) / B.dblTotal  * ISNULL(B2.dblPayment,A.dbl1099)
+		 THEN ((A.dblTotal + A.dblTax) / B.dblTotal  * ISNULL(B2.dblPayment,A.dbl1099))
+		 	* (CASE WHEN B.intTransactionType = 3 THEN -1 ELSE 1 END)
      ELSE 0 END     
     , dblBoatsProceeds = CASE WHEN A.int1099Form = 1 AND A.int1099Category = 5--'Fishing Boat Proceeds '     
-	     THEN (A.dblTotal + A.dblTax) / B.dblTotal  * ISNULL(B2.dblPayment,A.dbl1099)
+	     THEN ((A.dblTotal + A.dblTax) / B.dblTotal  * ISNULL(B2.dblPayment,A.dbl1099))
+		 	* (CASE WHEN B.intTransactionType = 3 THEN -1 ELSE 1 END)
      ELSE 0 END  
     , dblGrossProceedsAtty = CASE WHEN A.int1099Form = 1 AND A.int1099Category = 6--'Gross Proceeds Paid to an Attorney'     
-		THEN (A.dblTotal + A.dblTax) / B.dblTotal  * ISNULL(B2.dblPayment,A.dbl1099)
+		THEN ((A.dblTotal + A.dblTax) / B.dblTotal  * ISNULL(B2.dblPayment,A.dbl1099))
+			* (CASE WHEN B.intTransactionType = 3 THEN -1 ELSE 1 END)
      ELSE 0 END   
 	, dblMedicalPayments = CASE WHEN A.int1099Form = 1 AND A.int1099Category = 7--'Medical and Health Care Payments'     
-		THEN (A.dblTotal + A.dblTax) / B.dblTotal  * ISNULL(B2.dblPayment,A.dbl1099)
+		THEN ((A.dblTotal + A.dblTax) / B.dblTotal  * ISNULL(B2.dblPayment,A.dbl1099))
+			* (CASE WHEN B.intTransactionType = 3 THEN -1 ELSE 1 END)
      ELSE 0 END    
     , dblNonemployeeCompensation = CASE WHEN A.int1099Form = 1 AND A.int1099Category = 8--'Nonemployee Compensation'     
-	    THEN (A.dblTotal + A.dblTax) / B.dblTotal  * ISNULL(B2.dblPayment,A.dbl1099)
+	    THEN ((A.dblTotal + A.dblTax) / B.dblTotal  * ISNULL(B2.dblPayment,A.dbl1099))
+			* (CASE WHEN B.intTransactionType = 3 THEN -1 ELSE 1 END)
      ELSE 0 END  
 	, dblOtherIncome = CASE WHEN A.int1099Form = 1 AND A.int1099Category = 9--'Other Income'     
-		THEN (A.dblTotal + A.dblTax) / B.dblTotal  * ISNULL(B2.dblPayment,A.dbl1099)
+		THEN ((A.dblTotal + A.dblTax) / B.dblTotal  * ISNULL(B2.dblPayment,A.dbl1099))
+			* (CASE WHEN B.intTransactionType = 3 THEN -1 ELSE 1 END)
      ELSE 0 END      
     , dblRents = CASE WHEN A.int1099Form = 1 AND A.int1099Category = 10--'Rents'     
 		THEN (A.dblTotal + A.dblTax) / B.dblTotal  * ISNULL(B2.dblPayment,A.dbl1099)
      ELSE 0 END    
     , dblRoyalties = CASE WHEN A.int1099Form = 1 AND A.int1099Category = 11--'Royalties'     
-		THEN (A.dblTotal + A.dblTax) / B.dblTotal  * ISNULL(B2.dblPayment,A.dbl1099)
+		THEN ((A.dblTotal + A.dblTax) / B.dblTotal  * ISNULL(B2.dblPayment,A.dbl1099))
+			* (CASE WHEN B.intTransactionType = 3 THEN -1 ELSE 1 END)
      ELSE 0 END    
     , dblSubstitutePayments = CASE WHEN A.int1099Form = 1 AND A.int1099Category = 12--'Substitute Payments in Lieu of Dividends or Interest '     
-	    THEN (A.dblTotal + A.dblTax) / B.dblTotal  * ISNULL(B2.dblPayment,A.dbl1099)
+	    THEN ((A.dblTotal + A.dblTax) / B.dblTotal  * ISNULL(B2.dblPayment,A.dbl1099))
+			* (CASE WHEN B.intTransactionType = 3 THEN -1 ELSE 1 END)
      ELSE 0 END    
 	, dbl1099INT = CASE WHEN A.int1099Form = 2--1099 INT
-	    THEN (A.dblTotal + A.dblTax) / B.dblTotal  * ISNULL(B2.dblPayment,A.dbl1099)
+	    THEN ((A.dblTotal + A.dblTax) / B.dblTotal  * ISNULL(B2.dblPayment,A.dbl1099))
+			* (CASE WHEN B.intTransactionType = 3 THEN -1 ELSE 1 END)
      ELSE 0 END  
 	, dbl1099B = CASE WHEN A.int1099Form = 3--1099 B
-	    THEN (A.dblTotal + A.dblTax) / B.dblTotal  * ISNULL(B2.dblPayment,A.dbl1099)
+	    THEN ((A.dblTotal + A.dblTax) / B.dblTotal  * ISNULL(B2.dblPayment,A.dbl1099))
+			* (CASE WHEN B.intTransactionType = 3 THEN -1 ELSE 1 END)
      ELSE 0 END 	 	           
 	, dblOrdinaryDividends = CASE WHEN A.int1099Form = 5 AND A.int1099Category = 0--'OrdinaryDividends'     
-		THEN  (A.dblTotal + A.dblTax)
+		THEN  (A.dblTotal + A.dblTax) * (CASE WHEN B.intTransactionType = 3 THEN -1 ELSE 1 END)
      ELSE 0 END  
 	 , dblQualified = CASE WHEN A.int1099Form = 5 AND A.int1099Category = 1--'Qualified'     
-		THEN (A.dblTotal + A.dblTax) 
+		THEN (A.dblTotal + A.dblTax) * (CASE WHEN B.intTransactionType = 3 THEN -1 ELSE 1 END)
      ELSE 0 END  
 	 , dblCapitalGain = CASE WHEN A.int1099Form = 5 AND A.int1099Category = 2--'CapitalGain'     
-		THEN (A.dblTotal + A.dblTax)
+		THEN (A.dblTotal + A.dblTax) * (CASE WHEN B.intTransactionType = 3 THEN -1 ELSE 1 END)
      ELSE 0 END  
 	 , dblUnrecapGain = CASE WHEN A.int1099Form = 5 AND A.int1099Category = 3--'UnrecapGain'     
-		THEN (A.dblTotal + A.dblTax) 
+		THEN (A.dblTotal + A.dblTax) * (CASE WHEN B.intTransactionType = 3 THEN -1 ELSE 1 END)
      ELSE 0 END
 	, dblSection1202 = CASE WHEN A.int1099Form = 5 AND A.int1099Category = 4--'Section1202'     
-		THEN (A.dblTotal + A.dblTax) 
+		THEN (A.dblTotal + A.dblTax) * (CASE WHEN B.intTransactionType = 3 THEN -1 ELSE 1 END)
      ELSE 0 END
 	, dblCollectibles = CASE WHEN A.int1099Form = 5 AND A.int1099Category = 5--'Collectibles'     
-		THEN (A.dblTotal + A.dblTax) 
+		THEN (A.dblTotal + A.dblTax) * (CASE WHEN B.intTransactionType = 3 THEN -1 ELSE 1 END)
      ELSE 0 END
 	, dblNonDividends = CASE WHEN A.int1099Form = 5 AND A.int1099Category = 6--'NonDividends'     
-		THEN (A.dblTotal + A.dblTax)
+		THEN (A.dblTotal + A.dblTax) * (CASE WHEN B.intTransactionType = 3 THEN -1 ELSE 1 END)
      ELSE 0 END
 	, dblFITW = CASE WHEN A.int1099Form = 5 AND A.int1099Category = 7--'FITW'     
-		THEN (A.dblTotal + A.dblTax) 
+		THEN (A.dblTotal + A.dblTax) * (CASE WHEN B.intTransactionType = 3 THEN -1 ELSE 1 END)
      ELSE 0 END
 	, dblInvestment = CASE WHEN A.int1099Form = 5 AND A.int1099Category = 8--'Investment'     
 		THEN (A.dblTotal + A.dblTax)
      ELSE 0 END
 	, dblForeignTax = CASE WHEN A.int1099Form = 5 AND A.int1099Category = 9--'ForeignTax'     
-		THEN (A.dblTotal + A.dblTax) 
+		THEN (A.dblTotal + A.dblTax) * (CASE WHEN B.intTransactionType = 3 THEN -1 ELSE 1 END)
      ELSE 0 END
 	, dblForeignCountry = CASE WHEN A.int1099Form = 5 AND A.int1099Category = 10--'ForeignCountry'     
-		THEN (A.dblTotal + A.dblTax) 
+		THEN (A.dblTotal + A.dblTax) * (CASE WHEN B.intTransactionType = 3 THEN -1 ELSE 1 END)
      ELSE 0 END   
 	, dblCash = CASE WHEN A.int1099Form = 5 AND A.int1099Category = 11--'Cash Liquidation'     
-		THEN (A.dblTotal + A.dblTax)
+		THEN (A.dblTotal + A.dblTax) * (CASE WHEN B.intTransactionType = 3 THEN -1 ELSE 1 END)
      ELSE 0 END 
 	, dblNonCash = CASE WHEN A.int1099Form = 5 AND A.int1099Category = 12--'Non Cash Liquidation'     
-		THEN (A.dblTotal + A.dblTax) 
+		THEN (A.dblTotal + A.dblTax)  * (CASE WHEN B.intTransactionType = 3 THEN -1 ELSE 1 END)
      ELSE 0 END      
 	, dblExempt = CASE WHEN A.int1099Form = 5 AND A.int1099Category = 13--'Exempt Interest Dividends'     
-		THEN (A.dblTotal + A.dblTax) 
+		THEN (A.dblTotal + A.dblTax)  * (CASE WHEN B.intTransactionType = 3 THEN -1 ELSE 1 END)
      ELSE 0 END
 	, dblPrivate = CASE WHEN A.int1099Form = 5 AND A.int1099Category = 14--'Private Activity Dividends'     
-		THEN (A.dblTotal + A.dblTax) 
+		THEN (A.dblTotal + A.dblTax) * (CASE WHEN B.intTransactionType = 3 THEN -1 ELSE 1 END)
      ELSE 0 END 
 	, dblState = CASE WHEN A.int1099Form = 5 AND A.int1099Category = 15--'State Tax Withheld'     
-		THEN (A.dblTotal + A.dblTax) 
+		THEN (A.dblTotal + A.dblTax) * (CASE WHEN B.intTransactionType = 3 THEN -1 ELSE 1 END)
      ELSE 0 END   
-	, dbl1099 = CASE WHEN patRef.intBillId IS NULL AND A.int1099Form = 4
+	, dbl1099 = (CASE WHEN patRef.intBillId IS NULL AND A.int1099Form = 4
 				THEN (A.dblTotal + A.dblTax) / B.dblTotal  * ISNULL(B2.dblPayment,A.dbl1099)
 				ELSE A.dbl1099
-				END
+				END)
+				* (CASE WHEN B.intTransactionType = 3 THEN -1 ELSE 1 END)
     , intYear = YEAR(ISNULL(B2.dtmDatePaid, B.dtmDate))
 	, A.int1099Form
 	, A.int1099Category
