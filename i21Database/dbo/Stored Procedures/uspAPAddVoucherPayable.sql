@@ -669,7 +669,7 @@ BEGIN
 
 		--UPDATE THE TAX FOR VOUCHER PAYABLE
 		UPDATE A
-			SET A.dblTax = ISNULL(generatedTax.dblTax, A.dblTax), A.intPurchaseTaxGroupId = generatedTax.intTaxGroupId
+			SET A.dblTax = ISNULL(generatedTax.dblTax, A.dblTax), A.intPurchaseTaxGroupId = ISNULL(generatedTax.intTaxGroupId, A.intPurchaseTaxGroupId)
 		FROM tblAPVoucherPayable A
 		INNER JOIN @insertedData B
 			ON A.intVoucherPayableId = B.intNewPayableId
