@@ -143,7 +143,8 @@ AS
 			NM.strBroker,
 			NM.strBrokerAccount,
 			CH.ysnReceivedSignedFixationLetter,
-			AP.strApprovalStatus
+			AP.strApprovalStatus,
+			P.strPositionType
 	FROM		tblCTContractHeader				CH
 	JOIN		vyuCTContractHeaderNotMapped	NM	ON	NM.intContractHeaderId	=	CH.intContractHeaderId
 	OUTER APPLY --dbo.[fnCTGetLastApprovalStatus](CH.intContractHeaderId) strApprovalStatus
@@ -156,3 +157,4 @@ AS
 		WHERE	SC.strNamespace IN ('ContractManagement.view.Contract','ContractManagement.view.Amendments')
 		ORDER BY AP.intApprovalId DESC
 	) AP
+	LEFT JOIN tblCTPosition P ON CH.intPositionId = P.intPositionId
