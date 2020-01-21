@@ -167,19 +167,20 @@ FROM
 		,t3.intItemId
 		,t3.strDiscountCode
 		,t3.strDiscountCodeDescription
-		,t3.dblDiscountAmount * (t1.dblQtyOrdered / t2.dblTotalQty) dblDiscountAmount
-		,t3.dblShrinkPercent * (t1.dblQtyOrdered / t2.dblTotalQty) dblShrinkPercent
+		,t3.dblDiscountAmount --* (t1.dblQtyOrdered / t2.dblTotalQty) dblDiscountAmount
+		,t3.dblShrinkPercent --* (t1.dblQtyOrdered / t2.dblTotalQty) dblShrinkPercent
 		,t3.dblGradeReading
-		,t3.dblAmount * (t1.dblQtyOrdered / t2.dblTotalQty) dblAmount	
+		,t3.dblAmount --* (t1.dblQtyOrdered / t2.dblTotalQty) dblAmount	
 		,t3.intContractDetailId
-		,t3.dblTax * (t1.dblQtyOrdered / t2.dblTotalQty) dblTax
-		,t3.dblNetTotal * (t1.dblQtyOrdered / t2.dblTotalQty) dblNetTotal
+		,t3.dblTax --* (t1.dblQtyOrdered / t2.dblTotalQty) dblTax
+		,t3.dblNetTotal --* (t1.dblQtyOrdered / t2.dblTotalQty) dblNetTotal
 		,t3.strTaxClass
 	FROM (
 			 SELECT 
 				 BillDtl.intBillDetailId
 				,BillDtl.dblQtyOrdered
 				,Bill.intBillId
+				,BillDtl.intInventoryReceiptItemId
 			FROM tblAPBillDetail BillDtl
 			JOIN tblAPBill Bill 
 				ON BillDtl.intBillId = Bill.intBillId
@@ -188,18 +189,18 @@ FROM
 					AND Item.strType <> 'Other Charge'
 			WHERE BillDtl.intContractDetailId IS NOT NULL
 		  ) t1
-	LEFT JOIN (
-			 SELECT 
-				A.intBillId
-				,SUM(dblQtyOrdered) dblTotalQty
-			 FROM tblAPBillDetail A
-			 JOIN tblICItem B 
-				ON A.intItemId = B.intItemId 
-					AND B.strType <> 'Other Charge'
-			 WHERE A.intContractDetailId IS NOT NULL
-			 GROUP BY A.intBillId
-		  ) t2 
-			ON t1.intBillId = t2.intBillId
+	--LEFT JOIN (
+	--		 SELECT 
+	--			A.intBillId
+	--			,SUM(dblQtyOrdered) dblTotalQty
+	--		 FROM tblAPBillDetail A
+	--		 JOIN tblICItem B 
+	--			ON A.intItemId = B.intItemId 
+	--				AND B.strType <> 'Other Charge'
+	--		 WHERE A.intContractDetailId IS NOT NULL
+	--		 GROUP BY A.intBillId
+	--	  ) t2 
+	--		ON t1.intBillId = t2.intBillId
 	LEFT JOIN
 	(
 		SELECT * 
@@ -237,6 +238,7 @@ FROM
 				,dblTax						= BillDtl.dblTax
 				,dblNetTotal				= BillDtl.dblTotal + BillDtl.dblTax
 				,strTaxClass = TaxClass.strTaxClass
+				,BillDtl.intInventoryReceiptItemId
 		FROM tblAPBillDetail BillDtl
 		JOIN tblAPBill Bill 
 			ON BillDtl.intBillId = Bill.intBillId
@@ -298,9 +300,10 @@ FROM
 			,dblTax
 			,dblNetTotal
 			,strTaxClass
+			,intInventoryReceiptItemId
    )t3 
-		ON t3.intBillId = t2.intBillId 
-			AND t3.intBillId = t1.intBillId
+		ON --t3.intBillId = t2.intBillId AND t3.intBillId = t1.intBillId
+				t3.intBillId = t1.intBillId and isnull(t3.intInventoryReceiptItemId, 0) = isnull(t1.intInventoryReceiptItemId, 0)
 	WHERE t3.intItemId IS NOT NULL 
 )t	
 GROUP BY 

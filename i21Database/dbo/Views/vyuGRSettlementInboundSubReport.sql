@@ -10,7 +10,7 @@ AS
 			,intItemId					= BillDtl.intItemId
 			,strDiscountCode			= Item.strShortName 
 			,strDiscountCodeDescription = Item.strItemNo
-			,dblDiscountAmount			= BillDtl.dblCost			
+			,dblDiscountAmount			= round(BillDtl.dblCost, 2) * BillDtl.dblQtyReceived
 			,dblAmount					= BillDtl.dblTotal --+ BillDtl.dblTax
 			,dblTax						= BillDtl.dblTax
 			,Net						= ISNULL(PYMTDTL.dblTotal,0)
