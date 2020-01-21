@@ -434,18 +434,29 @@ BEGIN TRY
 					END
 					ELSE
 					BEGIN
-						SET @dblInreaseSchBy  = @dblNetUnits - ISNULL(@dblScheduleQty,0)
-						IF(@dblInreaseSchBy <> 0)
+						IF (@strDistributionOption = 'LOD')
+						BEGIN
+							SET @dblInreaseSchBy  = @dblNetUnits - ISNULL(@dblScheduleQty,0)
+							IF(@dblInreaseSchBy <> 0)
+							BEGIN
+								EXEC	uspCTUpdateScheduleQuantity 
+										@intContractDetailId	=	@intContractDetailId,
+										@dblQuantityToUpdate	=	@dblInreaseSchBy,
+										@intUserId				=	@intUserId,
+										@intExternalId			=	@intTicketId,
+										@strScreenName			=	'Auto - Scale'
+							END
+						END
+						ELSE
 						BEGIN
 							EXEC	uspCTUpdateScheduleQuantity 
-									@intContractDetailId	=	@intContractDetailId,
-									@dblQuantityToUpdate	=	@dblInreaseSchBy,
-									@intUserId				=	@intUserId,
-									@intExternalId			=	@intTicketId,
-									@strScreenName			=	'Auto - Scale'
+								@intContractDetailId	=	@intContractDetailId,
+								@dblQuantityToUpdate	=	@dblNetUnits,
+								@intUserId				=	@intUserId,
+								@intExternalId			=	@intTicketId,
+								@strScreenName			=	'Auto - Scale'
 						END
 					END
-					
 					
 				END
 			END
@@ -540,6 +551,9 @@ BEGIN TRY
 		IF(@strDistributionOption = 'LOD')
 		BEGIN
 
+			--- Check for multiple contract on same load schedule
+
+			--Insert into Load detail Id list (loaddetail id that are already processed)
 			INSERT INTO @LoadDetailUsedId
 			SELECT @intLoadDetailId
 			WHERE NOT EXISTS(SELECT TOP 1 1 FROM @LoadDetailUsedId WHERE intId = @intLoadDetailId)
@@ -574,6 +588,24 @@ BEGIN TRY
 				,@intContractDetailId = intContractDetailId
 			FROM @LoadDetailTable
 			ORDER BY intLoadDetailId
+
+			
+			IF	ISNULL(@intContractDetailId,0) = 0
+			BEGIN
+
+				--Check if multiple load shipment for a single contract if non then set the distribution to normal contract assignment
+				IF NOT EXISTS(SELECT TOP 1 1 FROM(
+									SELECT 
+										intLoadDetailId
+										,intContractDetailId = CASE WHEN @strInOutFlag = 'I' THEN intPContractDetailId ELSE intSContractDetailId END
+									FROM vyuSCScaleLoadView
+									WHERE ysnInProgress = 0
+										AND NOT EXISTS (SELECT TOP 1 1 FROM  @LoadDetailUsedId WHERE intId = vyuSCScaleLoadView.intLoadDetailId)) A
+								WHERE A.intContractDetailId = @intTicketContractDetailId)
+				BEGIN
+					SET @strDistributionOption = 'CNT'
+				END
+			END
 		END	
 
 		
