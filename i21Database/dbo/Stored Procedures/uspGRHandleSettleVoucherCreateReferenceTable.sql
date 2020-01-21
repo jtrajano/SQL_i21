@@ -12,25 +12,28 @@ AS
 	USING (
 			SELECT	
 			strBatchId = @strBatchId
-			,strOrderType
-			,intCustomerStorageId
-			,intCompanyLocationId
-			,intContractHeaderId
-			,intContractDetailId
-			,dblUnits
-			,dblCashPrice
-			,intItemId
-			,intItemType
-			,IsProcessed
-			,intTicketDiscountId
-			,intPricingTypeId
-			,dblBasis
-			,intContractUOMId
-			,dblCostUnitQty
-			,dblSettleContractUnits
-			,ysnDiscountFromGrossWeight
+			,a.strOrderType
+			,a.intCustomerStorageId
+			,a.intCompanyLocationId
+			,a.intContractHeaderId
+			,a.intContractDetailId
+			,a.dblUnits
+			,a.dblCashPrice
+			,a.intItemId
+			,a.intItemType
+			,a.IsProcessed
+			,a.intTicketDiscountId
+			,a.intPricingTypeId
+			,a.dblBasis
+			,a.intContractUOMId
+			,a.dblCostUnitQty
+			,a.dblSettleContractUnits
+			,a.ysnDiscountFromGrossWeight
+			,ysnItemInventoryCost = b.ysnInventoryCost
 			from
-			@SettleVoucherCreate
+			@SettleVoucherCreate a
+				join tblICItem b
+					on a.intItemId = b.intItemId
 	) AS Source_Query  
 		ON RefTable.intItemId = Source_Query.intItemId
 		and RefTable.strBatchId = Source_Query.strBatchId
@@ -54,6 +57,7 @@ AS
 			,dblCostUnitQty
 			,dblSettleContractUnits
 			,ysnDiscountFromGrossWeight
+			,ysnItemInventoryCost
 		)
 		VALUES (
 			Source_Query.strBatchId
@@ -74,6 +78,7 @@ AS
 			,Source_Query.dblCostUnitQty
 			,Source_Query.dblSettleContractUnits
 			,Source_Query.ysnDiscountFromGrossWeight
+			,Source_Query.ysnItemInventoryCost
 		)		
 	;
 	
