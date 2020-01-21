@@ -370,7 +370,7 @@ BEGIN TRY
 			BEGIN
 				IF(@strDistributionOption = 'LOD') AND @dblScheduleQty > @dblNetUnits AND @intContractDetailId = @intTicketContractDetailId
 				BEGIN 
-					
+					SET @dblInreaseSchBy = 0
 					IF(@dblTicketScheduledQuantity >= @dblScheduleQty)
 					BEGIN
 						-- REmove all the remaining scheduled quantity for the LS
@@ -387,12 +387,37 @@ BEGIN TRY
 					END
 					ELSE
 					BEGIN
-						SET @dblInreaseSchBy = 0
 						IF @dblTicketScheduledQuantity > @dblNetUnits
 						BEGIN
 							SET @dblInreaseSchBy  = (@dblTicketScheduledQuantity - @dblNetUnits) * -1
+						END
 						
+						IF(ISNULL(@dblInreaseSchBy,0) <> 0)
+						BEGIN
+							EXEC	uspCTUpdateScheduleQuantity 
+									@intContractDetailId	=	@intContractDetailId,
+									@dblQuantityToUpdate	=	@dblInreaseSchBy,
+									@intUserId				=	@intUserId,
+									@intExternalId			=	@intTicketId,
+									@strScreenName			=	'Auto - Scale'
+						END
+					END
+				END
+				ELSE
+				BEGIN
 
+					SET @dblInreaseSchBy = 0
+				
+					IF(@intContractDetailId = @intTicketContractDetailId)
+					BEGIN
+						SET @dblInreaseSchBy  = @dblNetUnits - ISNULL(@dblTicketScheduledQuantity,0)
+						IF (@strDistributionOption = 'LOD' AND @dblTicketScheduledQuantity > @dblNetUnits) 
+						BEGIN
+							print 'no adjustment'
+						END
+						ELSE
+						BEGIN
+							-- Adjust the scheduled quantity based on the ticket scheduled and net units
 							IF(@dblInreaseSchBy <> 0)
 							BEGIN
 								EXEC	uspCTUpdateScheduleQuantity 
@@ -403,43 +428,24 @@ BEGIN TRY
 										@strScreenName			=	'Auto - Scale'
 							END
 						END
-					END
-				END
-				ELSE
-				BEGIN
-					
-					SET @dblInreaseSchBy  = @dblNetUnits - ISNULL(@dblTicketScheduledQuantity,0)
-					IF(@dblInreaseSchBy <> 0)
-					BEGIN
-						IF(@intContractDetailId = @intTicketContractDetailId)
-						BEGIN
-							IF (@strDistributionOption = 'LOD' AND @dblTicketScheduledQuantity > @dblNetUnits) 
-							BEGIN
-								print 'no adjustment'
-							END
-							ELSE
-							BEGIN
-							-- Adjust the scheduled quantity based on the ticket scheduled and net units
-								EXEC	uspCTUpdateScheduleQuantity 
-										@intContractDetailId	=	@intContractDetailId,
-										@dblQuantityToUpdate	=	@dblInreaseSchBy,
-										@intUserId				=	@intUserId,
-										@intExternalId			=	@intTicketId,
-										@strScreenName			=	'Auto - Scale'
-							END
+
 						
-						END
-						ELSE
+					
+					END
+					ELSE
+					BEGIN
+						SET @dblInreaseSchBy  = @dblNetUnits - ISNULL(@dblScheduleQty,0)
+						IF(@dblInreaseSchBy <> 0)
 						BEGIN
 							EXEC	uspCTUpdateScheduleQuantity 
 									@intContractDetailId	=	@intContractDetailId,
 									@dblQuantityToUpdate	=	@dblInreaseSchBy,
 									@intUserId				=	@intUserId,
 									@intExternalId			=	@intTicketId,
-									@strScreenName			=	'Scale'
-							
+									@strScreenName			=	'Auto - Scale'
 						END
 					END
+					
 					
 				END
 			END
@@ -485,7 +491,10 @@ BEGIN TRY
 						--compare the scheduled units to the processed units if it is less than then adjust the scheduled 
 						IF(@dblScheduleQty < @dblNetUnits)
 						BEGIN
-							SET @dblInreaseSchBy  = @dblNetUnits - @dblScheduleQty
+							IF((@dblAvailable) > @dblNetUnits)
+							BEGIN
+								SET @dblInreaseSchBy  = @dblNetUnits - @dblScheduleQty
+							END
 						END
 					END
 					ELSE
