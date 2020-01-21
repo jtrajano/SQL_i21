@@ -2,6 +2,8 @@
 (
 	intCoverageEntryStageId	INT IDENTITY(1,1) PRIMARY KEY, 
 	intCoverageEntryId		INT,
+	strBatchName			NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	dtmDate					DATETIME,
 	strHeaderXML			NVARCHAR(MAX) COLLATE Latin1_General_CI_AS,
 	strDetailXML			NVARCHAR(MAX) COLLATE Latin1_General_CI_AS,
 	strRowState				NVARCHAR(100) COLLATE Latin1_General_CI_AS,
@@ -13,5 +15,9 @@
 	intEntityId				INT,
 	intCompanyLocationId	INT,
 	strTransactionType		NVARCHAR(100) COLLATE Latin1_General_CI_AS,
-	intToBookId				INT
+	intToBookId				INT,
+	strFromCompanyName		NVARCHAR(150) COLLATE Latin1_General_CI_AS,
+	ysnMailSent				BIT CONSTRAINT DF_tblRKCoverageEntryStage_ysnMailSent DEFAULT 0,
+	intTransactionId		INT,
+	intCompanyId			INT
 )

@@ -471,6 +471,54 @@ BEGIN
 	END
 END
 
+IF @strMessageType = 'Coverage'
+BEGIN
+	SET @strHeader = '<tr>
+						<th>&nbsp;Batch Name</th>
+						<th>&nbsp;Date</th>
+						<th>&nbsp;Row State</th>
+						<th>&nbsp;From Company</th>
+						<th>&nbsp;Message</th>
+					</tr>'
+
+	IF @strStatus = 'Success'
+	BEGIN
+		SELECT @strDetail = @strDetail + '<tr>
+			   <td>&nbsp;' + ISNULL(strBatchName, '') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(CONVERT(NVARCHAR(20), dtmDate, 106), '') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(strRowState, '') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(strFromCompanyName, '') + '</td>' + 
+			   '<td>&nbsp;' + 'Success' + '</td>
+		</tr>'
+		FROM tblRKCoverageEntryStage WITH (NOLOCK)
+		WHERE ISNULL(strFeedStatus, '') = 'Processed'
+			AND ISNULL(ysnMailSent, 0) = 0
+
+		UPDATE tblRKCoverageEntryStage
+		SET ysnMailSent = 1
+		WHERE ISNULL(strFeedStatus, '') = 'Processed'
+			AND ISNULL(ysnMailSent, 0) = 0
+	END
+	ELSE
+	BEGIN
+		SELECT @strDetail = @strDetail + '<tr>
+			   <td>&nbsp;' + ISNULL(strBatchName, '') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(CONVERT(NVARCHAR(20), dtmDate, 106), '') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(strRowState, '') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(strFromCompanyName, '') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(strMessage, '') + '</td>
+		</tr>'
+		FROM tblRKCoverageEntryStage WITH (NOLOCK)
+		WHERE ISNULL(strFeedStatus, '') = 'Failed'
+			AND ISNULL(ysnMailSent, 0) = 0
+
+		UPDATE tblRKCoverageEntryStage
+		SET ysnMailSent = 1
+		WHERE ISNULL(strFeedStatus, '') = 'Failed'
+			AND ISNULL(ysnMailSent, 0) = 0
+	END
+END
+
 SET @strHtml = REPLACE(@strHtml, '@header', @strHeader)
 SET @strHtml = REPLACE(@strHtml, '@detail', @strDetail)
 SET @strMessage = @strStyle + @strHtml
