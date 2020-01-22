@@ -554,7 +554,7 @@ FROM (
 		 , dblQtyOrdered					= 0 
 		 , dblShipmentQuantity				= (CASE WHEN ICISC.strCostMethod IN ('Amount', 'Percentage') THEN 1 ELSE ISNULL(ICISC.dblQuantity,1) END)
 		 , dblShipmentQtyShippedTotal		= (CASE WHEN ICISC.strCostMethod IN ('Amount', 'Percentage') THEN 1 ELSE ISNULL(ICISC.dblQuantity,1) END)
-		 , dblQtyRemaining					= (CASE WHEN ICISC.strCostMethod IN ('Amount', 'Percentage') THEN 1  ELSE ISNULL(ICISC.dblQuantity,1) END) -    CASE WHEN ARIDCHARGE.intInventoryShipmentChargeId IS NOT NULL THEN ISNULL(ARIDCHARGE.dblQtyShipped,1) ELSE ISNULL(ID.dblQtyShipped, 0) END 
+		 , dblQtyRemaining					= (CASE WHEN ICISC.strCostMethod IN ('Amount', 'Percentage') THEN 1 ELSE ISNULL(ICISC.dblQuantity,1) END) - ISNULL(ID.dblQtyShipped, 0)
 		 , dblPriceUOMQuantity				= (CASE WHEN ICISC.strCostMethod IN ('Amount', 'Percentage') THEN 1 ELSE ISNULL(ICISC.dblQuantity,1) END)
 		 , dblDiscount						= 0 
 		 , dblPrice							= CAST((CASE WHEN ICISC.strCostMethod IN ('Amount', 'Percentage') THEN ISNULL(ICISC.dblAmount,0.000000) ELSE ISNULL(ICISC.dblRate, 0.000000) END) AS DECIMAL(18,6))
@@ -629,17 +629,6 @@ FROM (
 		GROUP BY intInventoryShipmentItemId, strDocumentNumber
 	) ID ON ICISI.intInventoryShipmentItemId = ID.intInventoryShipmentItemId 
 		AND ICIS.strShipmentNumber = ID.strDocumentNumber
-	LEFT OUTER JOIN (
-		SELECT intInventoryShipmentChargeId
-		,strType = Item.strType
-		, dblQtyShipped = SUM(dblQtyShipped)
-		FROM dbo.tblARInvoiceDetail Detail WITH (NOLOCK)
-		INNER JOIN dbo.tblICItem Item
-		ON Detail.intItemId = Item.intItemId
-		WHERE ISNULL(intInventoryShipmentChargeId, 0) <> 0
-		group by intInventoryShipmentChargeId, strType
-	) ARIDCHARGE
-	ON ICISC.intInventoryShipmentChargeId = ARIDCHARGE.intInventoryShipmentChargeId
 	WHERE ISNULL(ICISC.ysnPrice, 0) = 1 
 	  AND ISNULL(ARID.intInventoryShipmentChargeId, 0) = 0
 	  AND ((ISNULL(ICISC.ysnAllowInvoice, 1) = 1 AND ICIS.intSourceType = 1)
