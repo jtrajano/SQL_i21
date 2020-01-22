@@ -106,6 +106,10 @@ BEGIN TRY
 		declare @dblInvoicedPriced numeric(18,6);
 		declare @dblPricedForInvoice numeric(18,6);
 		declare @dblQuantityForInvoice numeric(18,6);
+		declare @intContractDetailItemId int;
+		declare @intContractDetailItemUOMId int;
+		declare @intExistingInvoiceDetailId int;
+		declare @dblExistingQtyShipped numeric(18,6);
 
 	SELECT	@dblCashPrice			=	dblCashPrice, 
 			@intPricingTypeId		=	intPricingTypeId, 
@@ -1431,27 +1435,65 @@ BEGIN TRY
 							intInventoryShipmentItemId = @intInventoryShipmentItemId
 							AND ISNULL(IV.ysnPosted,0) = 0
 
-						SELECT
-							@intInvoiceDetailId = intInvoiceDetailId
-						FROM
+						--Check if there's an Invoice Detail with the same Contract Detail Item, Item UOM and Price
+						--If exists, update the quantity of the existing Invoice Detail else add new line item
+
+						select @intContractDetailItemId = intItemId, @intContractDetailItemUOMId = intItemUOMId from tblCTContractDetail where intContractDetailId = @intContractDetailId
+						select
+							@intExistingInvoiceDetailId = intInvoiceDetailId
+							,@dblExistingQtyShipped = dblQtyShipped
+						from
 							tblARInvoiceDetail
-						WHERE
+						where
 							intInvoiceId = @intInvoiceId
-							AND intContractDetailId = @intContractDetailId
-							AND intInventoryShipmentChargeId IS NULL
+							and intContractDetailId = @intContractDetailId
+							and intItemId = @intContractDetailItemId
+							and intItemUOMId = @intContractDetailItemUOMId
+							and dblPrice = @dblFinalPrice
 
-						print 'add detail to existing invoice';
+						if (isnull(@intExistingInvoiceDetailId,0) > 0)
+						begin
 
-						EXEC uspCTCreateInvoiceDetail
-							@intInvoiceDetailId
-							,@intInventoryShipmentId
-							,@dblQuantityForInvoice
-							,@dblFinalPrice
-							,@intUserId
-							,@intInvoiceDetailId OUTPUT
+							set @dblExistingQtyShipped = (@dblExistingQtyShipped + @dblQuantityForInvoice);
 
-						INSERT INTO tblCTPriceFixationDetailAPAR(intPriceFixationDetailId,intInvoiceId,intInvoiceDetailId,intConcurrencyId)
-						SELECT @intPriceFixationDetailId,@intInvoiceId,@intInvoiceDetailId,1
+							exec uspARUpdateInvoiceDetails 
+								@intInvoiceDetailId		=	@intExistingInvoiceDetailId,
+								@intEntityId			=	@intUserId,
+								@intPriceUOMId			=	@intContractDetailItemUOMId,
+								@dblQtyShipped			=	@dblExistingQtyShipped,
+								@dblPrice				=	@dblFinalPrice
+
+							SELECT @intPriceFixationDetailId,@intInvoiceId,@intExistingInvoiceDetailId,1
+
+						end
+						else
+						begin
+
+							SELECT
+								@intInvoiceDetailId = intInvoiceDetailId
+							FROM
+								tblARInvoiceDetail
+							WHERE
+								intInvoiceId = @intInvoiceId
+								AND intContractDetailId = @intContractDetailId
+								AND intInventoryShipmentChargeId IS NULL
+
+							print 'add detail to existing invoice';
+
+							EXEC uspCTCreateInvoiceDetail
+								@intInvoiceDetailId
+								,@intInventoryShipmentId
+								,@dblQuantityForInvoice
+								,@dblFinalPrice
+								,@intUserId
+								,@intInvoiceDetailId OUTPUT
+
+							INSERT INTO tblCTPriceFixationDetailAPAR(intPriceFixationDetailId,intInvoiceId,intInvoiceDetailId,intConcurrencyId)
+							SELECT @intPriceFixationDetailId,@intInvoiceId,@intInvoiceDetailId,1
+
+						end
+
+
 						
 						--Deduct the quantity from @dblPricedForInvoice and @dblShippedForInvoice
 						set @dblPricedForInvoice = (@dblPricedForInvoice - @dblQuantityForInvoice);
