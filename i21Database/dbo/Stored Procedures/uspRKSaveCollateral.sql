@@ -27,7 +27,8 @@ BEGIN
 				AND d.dblOriginalQuantity = h.dblOrigQty
 				AND d.dblPrice = h.dblPrice
 				AND d.intContractDetailId = h.intContractDetailId
-				AND d.intContractHeaderId = h.intContractHeaderId)
+				AND d.intContractHeaderId = h.intContractHeaderId
+				AND d.intItemId = h.intItemId)
 		BEGIN
 			INSERT INTO @SummaryLog(strTransactionType
 				, intTransactionRecordId
@@ -35,6 +36,7 @@ BEGIN
 				, dtmTransactionDate
 				, intContractHeaderId
 				, intCommodityId
+				, intItemId
 				, intLocationId
 				, dblQty
 				, intEntityId
@@ -46,6 +48,7 @@ BEGIN
 				, dtmTransactionDate = dtmOpenDate
 				, intContractHeaderId = intContractHeaderId
 				, intCommodityId = intCommodityId
+				, intItemId = intItemId
 				, intLocationId = intLocationId
 				, dblQty = dblOriginalQuantity
 				, intEntityId = intEntityId
@@ -62,6 +65,7 @@ BEGIN
 			, intContractDetailId
 			, intContractHeaderId
 			, intCommodityId
+			, intItemId
 			, intLocationId
 			, dblQty
 			, intUserId
@@ -73,6 +77,7 @@ BEGIN
 			, intContractDetailId = CA.intCollateralAdjustmentId
 			, intContractHeaderId = C.intContractHeaderId
 			, intCommodityId = intCommodityId
+			, intItemId = intItemId
 			, intLocationId = intLocationId
 			, dblQty = CA.dblAdjustmentAmount
 			, intUserId = @intUserId

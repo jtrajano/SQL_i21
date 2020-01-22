@@ -8364,6 +8364,8 @@
     <Build Include="dbo\Stored Procedures\uspIPCoverageEntryProcessAckXML.sql" />
     <Build Include="dbo\Stored Procedures\uspIPCoverageEntryProcessStgXML.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportReleaseInstruction.sql" />
+    <Build Include="dbo\Functions\fnRKGetBucketCollateral.sql" />
+    <Build Include="dbo\Views\vyuRKGetSummaryLog.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

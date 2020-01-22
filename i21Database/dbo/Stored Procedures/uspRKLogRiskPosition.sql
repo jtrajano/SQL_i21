@@ -313,6 +313,13 @@ BEGIN
 		---------------------------------------
 		ELSE IF @strTransactionType = 'Collateral'
 		BEGIN
+			SELECT TOP 1 @intFutureMarketId = CD.intFutureMarketId
+				, @intFutureMonthId = CD.intFutureMonthId
+				, @intEntityId = CH.intEntityId
+			FROM tblCTContractDetail CD
+			LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+			WHERE CD.intContractHeaderId = @intContractHeaderId
+
 			INSERT INTO @FinalTable(strBatchId
 				, strTransactionType
 				, intTransactionRecordId
@@ -365,7 +372,7 @@ BEGIN
 				, @intTicketId
 				, @intUserId
 				, @strNotes
-			FROM tblRKCollateral col		
+			FROM tblRKCollateral col	
 			WHERE col.intCollateralId = @intTransactionRecordId
 
 			SET @intContractDetailId = NULL
