@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspMFGetTraceabilityInvoiceFromShipment] @intShipmentId INT
+﻿CREATE PROCEDURE [dbo].[uspMFGetTraceabilityInvoiceFromShipment] (@intShipmentId INT,@intLocationId int=NULL)
 AS
 SET NOCOUNT ON;
 
@@ -25,7 +25,7 @@ JOIN tblICCategory mt ON mt.intCategoryId = i.intCategoryId
 LEFT JOIN tblICItemUOM iu ON ivd.intItemUOMId = iu.intItemUOMId
 LEFT JOIN tblICUnitMeasure um ON iu.intUnitMeasureId = um.intUnitMeasureId
 LEFT JOIN vyuARCustomer c ON iv.intEntityCustomerId = c.[intEntityId]
-WHERE sh.intInventoryShipmentId = @intShipmentId
+WHERE sh.intShipFromLocationId=@intLocationId and sh.intInventoryShipmentId = @intShipmentId
 Group by 
 iv.intInvoiceId
 	,iv.strInvoiceNumber

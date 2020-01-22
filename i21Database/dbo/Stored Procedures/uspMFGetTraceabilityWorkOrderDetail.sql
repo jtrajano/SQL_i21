@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspMFGetTraceabilityWorkOrderDetail] @intLotId INT
 	,@intDirectionId INT
 	,@ysnParentLot BIT = 0
+	,@intLocationId int=NULL
 AS
 SET NOCOUNT ON;
 
@@ -52,7 +53,7 @@ BEGIN
 			JOIN tblICCategory mt ON mt.intCategoryId = i.intCategoryId
 			JOIN tblICItemUOM iu ON w.intItemUOMId = iu.intItemUOMId
 			JOIN tblICUnitMeasure um ON iu.intUnitMeasureId = um.intUnitMeasureId
-			WHERE wi.intLotId IN (
+			WHERE w.intLocationId=@intLocationId and wi.intLotId IN (
 					SELECT intLotId
 					FROM tblICLot
 					WHERE strLotNumber = @strLotNumber
@@ -112,7 +113,7 @@ BEGIN
 			JOIN tblICItemUOM iu ON w.intItemUOMId = iu.intItemUOMId
 			JOIN tblICUnitMeasure um ON iu.intUnitMeasureId = um.intUnitMeasureId
 			JOIN tblICLot l ON wi.intLotId = l.intLotId
-			WHERE l.intParentLotId = @intLotId
+			WHERE w.intLocationId=@intLocationId and l.intParentLotId = @intLotId
 			) t
 		GROUP BY t.strTransactionName
 			,t.intWorkOrderId
@@ -172,7 +173,7 @@ BEGIN
 			JOIN tblICUnitMeasure um ON iu.intUnitMeasureId = um.intUnitMeasureId
 						JOIN tblICItemUOM iu1 ON wi.intItemUOMId = iu1.intItemUOMId
 			JOIN tblICUnitMeasure um1 ON iu1.intUnitMeasureId = um1.intUnitMeasureId
-			WHERE wi.intLotId IN (
+			WHERE w.intLocationId=@intLocationId and wi.intLotId IN (
 					SELECT intLotId
 					FROM tblICLot
 					WHERE strLotNumber = @strLotNumber
@@ -236,7 +237,7 @@ BEGIN
 			JOIN tblICItemUOM iu1 ON wi.intItemUOMId = iu1.intItemUOMId
 			JOIN tblICUnitMeasure um1 ON iu1.intUnitMeasureId = um1.intUnitMeasureId
 			JOIN tblICLot l ON wi.intLotId = l.intLotId
-			WHERE l.intParentLotId = @intLotId
+			WHERE w.intLocationId=@intLocationId and l.intParentLotId = @intLotId
 				AND ISNULL(wi.ysnProductionReversed, 0) = 0
 			) t
 		GROUP BY t.strTransactionName

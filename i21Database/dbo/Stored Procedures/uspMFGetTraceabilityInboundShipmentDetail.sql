@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspMFGetTraceabilityInboundShipmentDetail] @intShipmentId INT
 	,@intDirectionId INT
+	,@intLocationId int=NULL
 AS
 SET NOCOUNT ON;
 
@@ -21,5 +22,5 @@ FROM tblLGLoad l
 JOIN tblLGLoadDetail ld on ld.intLoadId =l.intLoadId
 JOIN tblICItemUOM iu on iu.intItemUOMId =ld.intItemUOMId
 JOIN tblICUnitMeasure um on um.intUnitMeasureId =iu.intUnitMeasureId 
-WHERE l.intLoadId = @intShipmentId
+WHERE IsNULL(l.intCompanyLocationId,@intLocationId)=@intLocationId and l.intLoadId = @intShipmentId
 	AND l.intShipmentType = 1
