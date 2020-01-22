@@ -53,9 +53,21 @@ BEGIN TRY
 		BEGIN
 			IF ISNULL(@strRowState, '') = 'Delete'
 			BEGIN
-				SELECT @intFutOptTransactionHeaderRefId = intFutOptTransactionHeaderId
-				FROM tblRKFutOptTransactionHeaderAckStage
-				WHERE intFutOptTransactionHeaderAckStageId = @intFutOptTransactionHeaderAckStageId
+				EXEC sp_xml_preparedocument @idoc OUTPUT
+					,@strAckHeaderXML
+
+				SELECT @intFutOptTransactionHeaderId = intFutOptTransactionHeaderId
+					,@intFutOptTransactionHeaderRefId = intFutOptTransactionHeaderRefId
+				FROM OPENXML(@idoc, 'vyuIPGetFutOptTransactionHeaders/vyuIPGetFutOptTransactionHeader', 2) WITH (
+						intFutOptTransactionHeaderId INT
+						,intFutOptTransactionHeaderRefId INT
+						)
+
+				--SELECT @intFutOptTransactionHeaderRefId = intFutOptTransactionHeaderId
+				--FROM tblRKFutOptTransactionHeaderAckStage
+				--WHERE intFutOptTransactionHeaderAckStageId = @intFutOptTransactionHeaderAckStageId
+
+				EXEC sp_xml_removedocument @idoc
 
 				GOTO ext
 			END

@@ -50,9 +50,20 @@ BEGIN TRY
 		BEGIN
 			IF ISNULL(@strRowState, '') = 'Delete'
 			BEGIN
-				SELECT @intDailyAveragePriceRefId = intDailyAveragePriceId
-				FROM tblRKDailyAveragePriceAckStage
-				WHERE intDailyAveragePriceAckStageId = @intDailyAveragePriceAckStageId
+				EXEC sp_xml_preparedocument @idoc OUTPUT
+					,@strAckHeaderXML
+
+				SELECT @intDailyAveragePriceId = intDailyAveragePriceId
+					,@intDailyAveragePriceRefId = intDailyAveragePriceRefId
+				FROM OPENXML(@idoc, 'vyuIPGetDailyAveragePrices/vyuIPGetDailyAveragePrice', 2) WITH (
+						intDailyAveragePriceId INT
+						,intDailyAveragePriceRefId INT
+						)
+				--SELECT @intDailyAveragePriceRefId = intDailyAveragePriceId
+				--FROM tblRKDailyAveragePriceAckStage
+				--WHERE intDailyAveragePriceAckStageId = @intDailyAveragePriceAckStageId
+
+				EXEC sp_xml_removedocument @idoc
 
 				GOTO ext
 			END

@@ -1378,13 +1378,24 @@ BEGIN TRY
 
 			IF @strRowState = 'Delete'
 			BEGIN
-				--SELECT @intNewSampleId = @intSampleRefId
-				--	,@strNewSampleNumber = ''
-
 				SELECT @intNewSampleId = intSampleId
 					,@strNewSampleNumber = strSampleNumber
 				FROM tblQMSample
 				WHERE intSampleRefId = @intSampleRefId
+
+				SELECT @strHeaderCondition = 'intSampleId = ' + LTRIM(@intNewSampleId)
+
+				EXEC uspCTGetTableDataInXML 'tblQMSample'
+					,@strHeaderCondition
+					,@strAckHeaderXML OUTPUT
+
+				EXEC uspCTGetTableDataInXML 'tblQMSampleDetail'
+					,@strHeaderCondition
+					,@strAckDetailXML OUTPUT
+
+				EXEC uspCTGetTableDataInXML 'tblQMTestResult'
+					,@strHeaderCondition
+					,@strAckTestResultXML OUTPUT
 
 				DELETE
 				FROM tblQMSample

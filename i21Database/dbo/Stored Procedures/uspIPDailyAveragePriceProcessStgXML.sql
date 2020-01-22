@@ -186,6 +186,16 @@ BEGIN TRY
 				FROM tblRKDailyAveragePrice
 				WHERE intDailyAveragePriceRefId = @intDailyAveragePriceRefId
 
+				SELECT @strHeaderCondition = 'intDailyAveragePriceId = ' + LTRIM(@intNewDailyAveragePriceId)
+
+				EXEC uspCTGetTableDataInXML 'vyuIPGetDailyAveragePrice'
+					,@strHeaderCondition
+					,@strAckHeaderXML OUTPUT
+
+				EXEC uspCTGetTableDataInXML 'vyuIPGetDailyAveragePriceDetail'
+					,@strHeaderCondition
+					,@strAckDetailXML OUTPUT
+
 				DELETE
 				FROM tblRKDailyAveragePrice
 				WHERE intDailyAveragePriceRefId = @intDailyAveragePriceRefId
@@ -391,7 +401,8 @@ BEGIN TRY
 				IF NOT EXISTS (
 						SELECT 1
 						FROM tblRKDailyAveragePriceDetail
-						WHERE intDailyAveragePriceDetailRefId = @intDailyAveragePriceDetailId
+						WHERE intDailyAveragePriceId = @intNewDailyAveragePriceId
+							AND intDailyAveragePriceDetailRefId = @intDailyAveragePriceDetailId
 						)
 				BEGIN
 					INSERT INTO tblRKDailyAveragePriceDetail (

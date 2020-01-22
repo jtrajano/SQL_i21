@@ -49,9 +49,21 @@ BEGIN TRY
 		BEGIN
 			IF ISNULL(@strRowState, '') = 'Delete'
 			BEGIN
-				SELECT @intCoverageEntryRefId = intCoverageEntryId
-				FROM tblRKCoverageEntryAckStage
-				WHERE intCoverageEntryAckStageId = @intCoverageEntryAckStageId
+				EXEC sp_xml_preparedocument @idoc OUTPUT
+					,@strAckHeaderXML
+
+				SELECT @intCoverageEntryId = intCoverageEntryId
+					,@intCoverageEntryRefId = intCoverageEntryRefId
+				FROM OPENXML(@idoc, 'vyuIPGetCoverageEntrys/vyuIPGetCoverageEntry', 2) WITH (
+						intCoverageEntryId INT
+						,intCoverageEntryRefId INT
+						)
+
+				--SELECT @intCoverageEntryRefId = intCoverageEntryId
+				--FROM tblRKCoverageEntryAckStage
+				--WHERE intCoverageEntryAckStageId = @intCoverageEntryAckStageId
+
+				EXEC sp_xml_removedocument @idoc
 
 				GOTO ext
 			END
