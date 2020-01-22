@@ -75,6 +75,13 @@ FROM tblRKStgMatchPnS WHERE intMatchNo = @intMatchNo order by intStgMatchPnSId d
 		RAISERROR('GL Account is not setup.',16,1)
 	END
 
+	
+	DECLARE @strOldBatchId NVARCHAR(50)
+
+	SELECT @strOldBatchId = strBatchId
+	FROM tblRKMatchDerivativesPostRecap WHERE intTransactionId = @intMatchFuturesPSHeaderId
+
+
 	IF (@strBatchId IS NULL)
 	BEGIN
 		EXEC uspSMGetStartingNumber 3, @strBatchId OUT
@@ -139,6 +146,10 @@ FROM tblRKStgMatchPnS WHERE intMatchNo = @intMatchNo order by intStgMatchPnSId d
 	WHERE intTransactionId = @intMatchFuturesPSHeaderId 
 
 	EXEC dbo.uspGLBookEntries @GLEntries,0
+
+	UPDATE	tblGLDetail 
+	SET	ysnIsUnposted = 1 
+	WHERE strBatchId = @strOldBatchId
 
 	UPDATE tblRKMatchFuturesPSHeader
 	SET ysnPosted = 0
