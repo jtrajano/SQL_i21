@@ -2264,8 +2264,7 @@ BEGIN TRY
 													END
 					,[dblCost]						= 
 														case when @doPartialHistory = 1 then
-															case WHEN (intItemType = 2 or intItemType = 3) then a.dblCashPrice
-															else isnull(availableQtyForVoucher.dblCashPrice, a.dblCashPrice) end
+															isnull(availableQtyForVoucher.dblCashPrice, a.dblCashPrice)
 														else
 															CASE
 																when availableQtyForVoucher.intContractDetailId is not null and @ysnFromPriceBasisContract = 1 then
@@ -2459,8 +2458,7 @@ BEGIN TRY
 							
 					,[dblCost]						= 
 														case when @doPartialHistory = 1 then
-															case WHEN (intItemType = 2 or intItemType = 3) then a.dblCashPrice
-															else isnull(availableQtyForVoucher.dblCashPrice, a.dblCashPrice) end
+															isnull(availableQtyForVoucher.dblCashPrice, a.dblCashPrice)
 														else
 															CASE
 																when availableQtyForVoucher.intContractDetailId is not null and @ysnFromPriceBasisContract = 1 then

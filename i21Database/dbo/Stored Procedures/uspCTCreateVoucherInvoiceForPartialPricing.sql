@@ -1292,7 +1292,6 @@ BEGIN TRY
 						and e.intCommodityUnitMeasureId	=	b.intPricingUOMId
 						and f.intItemId = d.intItemId
 						and f.intUnitMeasureId = e.intUnitMeasureId
-						and a.intContractDetailId = @intContractDetailId
 
 				OPEN @pricing
 

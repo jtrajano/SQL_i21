@@ -349,8 +349,11 @@ AS
 				)
 			,0)  AS dblTotalDiscountCost
 			--ISNULL(round(SUM(((SV.dblCashPrice * CASE WHEN ISNULL(SV.dblSettleContractUnits,0) > 0 THEN SV.dblSettleContractUnits ELSE SV.dblUnits END)) ), 2),0)  AS dblTotalDiscountCost
-		FROM tblGRSettleVoucherCreateReferenceTable SV		
-		WHERE intItemType = 3 and SV.strBatchId = @strBatchId and SV.ysnInventoryCost = 1--DISCOUNTS
+		FROM tblGRSettleVoucherCreateReferenceTable SV
+		INNER JOIN tblICItem IC
+			ON IC.intItemId = SV.intItemId
+				AND IC.ysnInventoryCost = 1
+		WHERE intItemType = 3 and SV.strBatchId = @strBatchId --DISCOUNTS
 	) DiscountCost
 	WHERE t.strBatchId = @strBatchId
 		AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId) 

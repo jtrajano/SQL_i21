@@ -113,8 +113,8 @@ BEGIN TRY
 				FROM	tblCTContractDetail
 				WHERE	intContractDetailId	=	@intChildContractDetailId
 
-				SET @XML =	'<root><toUpdate><dblTotalLots>'+STR(@dblChildSeqLots,18,6)+'</dblTotalLots><dblLotsFixed>'+STR(@dblChildSeqLots,18,6)+'</dblLotsFixed>'+
-							CASE WHEN @ysnHedge = 1 THEN '<intLotsHedged>'+STR(@dblChildSeqLots,18,6)+'</intLotsHedged>' ELSE '' END +
+				SET @XML =	'<root><toUpdate><dblTotalLots>'+STR(@dblChildSeqLots)+'</dblTotalLots><dblLotsFixed>'+STR(@dblChildSeqLots)+'</dblLotsFixed>'+
+							CASE WHEN @ysnHedge = 1 THEN '<intLotsHedged>'+STR(@dblChildSeqLots)+'</intLotsHedged>' ELSE '' END +
 							'<intContractDetailId>'+STR(@intChildContractDetailId)+'</intContractDetailId></toUpdate></root>' 
 
 				EXEC uspCTCreateADuplicateRecord 'tblCTPriceFixation',@intPriceFixationId, @intNewPriceFixationId OUTPUT,@XML
@@ -128,14 +128,14 @@ BEGIN TRY
 					
 					EXEC	uspCTGetStartingNumber 'FutOpt Transaction', @strTradeNo OUTPUT
 					SET		@strTradeNo	=	LTRIM(RTRIM(@strTradeNo)) + '-H'
-					SET		@XML =	'<root><toUpdate><dblNoOfContract>'+STR(@dblChildSeqLots,18,6)+'</dblNoOfContract>'+
+					SET		@XML =	'<root><toUpdate><dblNoOfContract>'+STR(@dblChildSeqLots)+'</dblNoOfContract>'+
 									'<dtmTransactionDate>'+@strDate+'</dtmTransactionDate>'+
 									'<dtmFilledDate>'+@strDate+'</dtmFilledDate>'+
 									'<strInternalTradeNo>'+@strTradeNo+'</strInternalTradeNo></toUpdate></root>' 
 
 					EXEC uspCTCreateADuplicateRecord 'tblRKFutOptTransaction',@intFutOptTransactionId, @intNewFutOptTransactionId OUTPUT,@XML
 
-					SET @XML =	'<root><toUpdate><intHedgedLots>'+STR(@dblChildSeqLots,18,6)+'</intHedgedLots>'+
+					SET @XML =	'<root><toUpdate><intHedgedLots>'+STR(@dblChildSeqLots)+'</intHedgedLots>'+
 								'<intFutOptTransactionId>'+STR(@intNewFutOptTransactionId)+'</intFutOptTransactionId>'+
 								'<dtmMatchDate>'+@strDate+'</dtmMatchDate>'+
 								'<intContractDetailId>'+STR(@intChildContractDetailId)+'</intContractDetailId></toUpdate></root>' 
@@ -144,12 +144,12 @@ BEGIN TRY
 				END
 
 				EXEC	uspCTGetStartingNumber 'Price Fixation Trade No', @strTradeNo OUTPUT
-				SET		@XML =	'<root><toUpdate><strTradeNo>'+LTRIM(RTRIM(@strTradeNo))+'</strTradeNo><dblNoOfLots>'+STR(@dblChildSeqLots,18,6)+'</dblNoOfLots>'+
-								'<dblQuantity>'+STR(@dblChildSeqQty,18,6)+'</dblQuantity>'+
+				SET		@XML =	'<root><toUpdate><strTradeNo>'+LTRIM(RTRIM(@strTradeNo))+'</strTradeNo><dblNoOfLots>'+STR(@dblChildSeqLots)+'</dblNoOfLots>'+
+								'<dblQuantity>'+STR(@dblChildSeqQty)+'</dblQuantity>'+
 								--'<dtmFixationDate>'+@strDateWithTime+'</dtmFixationDate>'+
 								CASE WHEN @ysnHedge = 1 THEN '<intFutOptTransactionId>'+STR(@intNewFutOptTransactionId)+'</intFutOptTransactionId>' ELSE '' END +
 								'<intPriceFixationId>'+STR(@intNewPriceFixationId)+'</intPriceFixationId></toUpdate></root>' 
-				
+
 				EXEC uspCTCreateADuplicateRecord 'tblCTPriceFixationDetail',@intPriceFixationDetailId, @intNewPFDetailId OUTPUT,@XML
 
 				UPDATE	tblCTContractDetail SET intSplitFromId = NULL WHERE intContractDetailId =@intChildContractDetailId
