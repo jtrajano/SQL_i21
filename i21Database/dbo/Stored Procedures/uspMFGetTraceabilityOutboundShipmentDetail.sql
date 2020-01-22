@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE uspMFGetTraceabilityOutboundShipmentDetail @intLoadId INT
+﻿CREATE PROCEDURE uspMFGetTraceabilityOutboundShipmentDetail (@intLoadId INT,@intLocationId int=NULL)
 AS
 DECLARE @dblShipQuantity NUMERIC(38, 20)
 DECLARE @strUOM NVARCHAR(50)
@@ -47,4 +47,4 @@ SELECT 'Ship' AS strTransactionName
 	,'OS' AS strType
 FROM tblLGLoad l
 LEFT JOIN vyuARCustomer c ON l.intEntityId = c.[intEntityId]
-WHERE l.intLoadId = @intLoadId
+WHERE IsNULL(l.intCompanyLocationId,@intLocationId)=@intLocationId and l.intLoadId = @intLoadId

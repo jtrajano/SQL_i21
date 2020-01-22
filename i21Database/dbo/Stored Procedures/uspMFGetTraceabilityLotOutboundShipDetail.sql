@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE uspMFGetTraceabilityLotOutboundShipDetail @intLotId INT
 	,@ysnParentLot BIT = 0
+	,@intLocationId int
 AS
 DECLARE @strLotNumber NVARCHAR(50)
 
@@ -31,7 +32,7 @@ IF @ysnParentLot = 0
 	JOIN tblICItemUOM iu ON ldl.intItemUOMId = iu.intItemUOMId
 	JOIN tblICUnitMeasure um ON iu.intUnitMeasureId = um.intUnitMeasureId
 	LEFT JOIN vyuARCustomer c ON l.intEntityId = c.[intEntityId]
-	WHERE ldl.intLotId IN (
+	WHERE IsNULL(l.intCompanyLocationId,0)=@intLocationId  and ldl.intLotId IN (
 			SELECT intLotId
 			FROM tblICLot
 			WHERE strLotNumber = @strLotNumber
@@ -62,5 +63,5 @@ IF @ysnParentLot = 1
 	JOIN tblICItemUOM iu ON ldl.intItemUOMId = iu.intItemUOMId
 	JOIN tblICUnitMeasure um ON iu.intUnitMeasureId = um.intUnitMeasureId
 	LEFT JOIN vyuARCustomer c ON l.intEntityId = c.[intEntityId]
-	WHERE l1.intParentLotId = @intLotId
+	WHERE IsNULL(l.intCompanyLocationId,0)=@intLocationId and l1.intParentLotId = @intLotId
 	ORDER BY l.intLoadId

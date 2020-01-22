@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspMFGetTraceabilityLotShipDetail] @intLotId INT
 	,@ysnParentLot BIT = 0
+	,@intLocationId int=NULL
 AS
 DECLARE @strLotNumber NVARCHAR(50)
 
@@ -31,7 +32,7 @@ IF @ysnParentLot = 0
 	JOIN tblICItemUOM iu ON shi.intItemUOMId = iu.intItemUOMId
 	JOIN tblICUnitMeasure um ON iu.intUnitMeasureId = um.intUnitMeasureId
 	LEFT JOIN vyuARCustomer c ON sh.intEntityCustomerId = c.[intEntityId]
-	WHERE shl.intLotId IN (
+	WHERE sh.intShipFromLocationId= @intLocationId and shl.intLotId IN (
 			SELECT intLotId
 			FROM tblICLot
 			WHERE strLotNumber = @strLotNumber
@@ -73,7 +74,7 @@ IF @ysnParentLot = 1
 	JOIN tblICItemUOM iu ON shi.intItemUOMId = iu.intItemUOMId
 	JOIN tblICUnitMeasure um ON iu.intUnitMeasureId = um.intUnitMeasureId
 	LEFT JOIN vyuARCustomer c ON sh.intEntityCustomerId = c.[intEntityId]
-	WHERE l.intParentLotId = @intLotId
+	WHERE sh.intShipFromLocationId=@intLocationId and l.intParentLotId = @intLotId
 	group by 
 		sh.intInventoryShipmentId
 		,sh.strShipmentNumber
