@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspMFGetTraceabilityWorkOrderInputDetail]
 	@intWorkOrderId int,
 	@ysnParentLot bit=0
+	,@intLocationId int=NULL
 AS
 	If @ysnParentLot=0
 		Select 'Consume' AS strTransactionName,t.intLotId,t.strLotNumber,t.strLotAlias,t.intItemId,t.strItemNo,t.strDescription,
@@ -19,7 +20,7 @@ AS
 		Join tblICCategory mt on mt.intCategoryId=i.intCategoryId
 		Join tblICItemUOM iu on wi.intItemUOMId=iu.intItemUOMId
 		Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
-		Where wi.intWorkOrderId=@intWorkOrderId) t
+		Where w.intLocationId=@intLocationId and wi.intWorkOrderId=@intWorkOrderId) t
 		group by t.strTransactionName,t.intItemId,t.strItemNo,t.strDescription,intCategoryId,t.strCategoryCode,t.intLotId,t.strLotNumber,
 		t.strLotAlias,t.intParentLotId,t.intAttributeTypeId,t.intImageTypeId
 		UNION --Item Tracked
@@ -39,7 +40,7 @@ AS
 		Left Join tblICCategory mt on mt.intCategoryId=i.intCategoryId
 		Left Join tblICItemUOM iu on wi.intItemUOMId=iu.intItemUOMId
 		Left Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
-		Where wi.intWorkOrderId=@intWorkOrderId AND ISNULL(wi.intLotId,0)=0) t
+		Where w.intLocationId=@intLocationId and wi.intWorkOrderId=@intWorkOrderId AND ISNULL(wi.intLotId,0)=0) t
 		group by t.strTransactionName,t.intItemId,t.strItemNo,t.strDescription,intCategoryId,t.strCategoryCode,t.intLotId,t.strLotNumber,
 		t.intAttributeTypeId,t.intImageTypeId
 
@@ -61,6 +62,6 @@ AS
 		Join tblICItemUOM iu on wi.intItemUOMId=iu.intItemUOMId
 		Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
 		Join tblICParentLot pl on l.intParentLotId=pl.intParentLotId
-		Where wi.intWorkOrderId=@intWorkOrderId) t
+		Where w.intLocationId=@intLocationId and wi.intWorkOrderId=@intWorkOrderId) t
 		group by t.strTransactionName,t.intItemId,t.strItemNo,t.strDescription,intCategoryId,t.strCategoryCode,t.intLotId,t.strLotNumber,
 		t.strLotAlias,t.intParentLotId,t.intAttributeTypeId,t.intImageTypeId

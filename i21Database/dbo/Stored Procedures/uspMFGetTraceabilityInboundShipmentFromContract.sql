@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspMFGetTraceabilityInboundShipmentFromContract]
 	@intContractId int
+	,@intLocationId int
 AS
 SET NOCOUNT ON;
 
@@ -9,3 +10,4 @@ s.strUnitMeasure strUOM,
 NULL AS dtmTransactionDate,0 intParentLotId,s.strVendor,'IS' AS strType
 from vyuLGLoadContainerReceiptContracts s Join tblLGLoad l on s.intLoadId=l.intLoadId 
 Where s.intPContractHeaderId=@intContractId AND l.intShipmentType=1
+and IsNULL(l.intCompanyLocationId,@intLocationId)=@intLocationId

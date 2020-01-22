@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE uspMFGetTraceabilityOutboundShipmentLots @intLoadId INT
-	,@ysnParentLot BIT = 0
+	,@ysnParentLot BIT = 0,@intLocationId int=NULL
 AS
 IF @ysnParentLot = 0
 	SELECT 'Ship' AS strTransactionName
@@ -40,7 +40,7 @@ IF @ysnParentLot = 0
 		JOIN tblICCategory mt ON mt.intCategoryId = i.intCategoryId
 		JOIN tblICItemUOM iu ON ldl.intItemUOMId = iu.intItemUOMId
 		JOIN tblICUnitMeasure um ON iu.intUnitMeasureId = um.intUnitMeasureId
-		WHERE l.intLoadId  = @intLoadId
+		WHERE IsNULL(l.intCompanyLocationId,@intLocationId)=@intLocationId and l.intLoadId  = @intLoadId
 		) t
 	GROUP BY t.strTransactionName
 		,t.intItemId
@@ -94,7 +94,7 @@ IF @ysnParentLot = 1
 		JOIN tblICCategory mt ON mt.intCategoryId = i.intCategoryId
 		JOIN tblICItemUOM iu ON ldl.intItemUOMId = iu.intItemUOMId
 		JOIN tblICUnitMeasure um ON iu.intUnitMeasureId = um.intUnitMeasureId
-		WHERE l.intLoadId = @intLoadId
+		WHERE IsNULL(l.intCompanyLocationId,@intLocationId)=@intLocationId and l.intLoadId = @intLoadId
 		) t
 	GROUP BY t.strTransactionName
 		,t.intItemId
