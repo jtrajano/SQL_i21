@@ -336,7 +336,7 @@ BEGIN TRY
 					END
 					ELSE
 					BEGIN
-						EXEC	uspICConvertReceiptToVoucher @intInventoryReceiptId,@intUserId, @intNewBillId OUTPUT
+						EXEC	uspICConvertReceiptToVoucher @intReceiptId = @intInventoryReceiptId, @intEntityUserSecurityId = @intUserId, @intContractDetailId = @intContractDetailId, @intBillId = @intNewBillId OUTPUT
 
 						INSERT INTO @tblCreatedTransaction VALUES (@intNewBillId)
 												

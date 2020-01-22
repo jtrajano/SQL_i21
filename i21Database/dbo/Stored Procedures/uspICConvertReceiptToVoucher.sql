@@ -3,7 +3,8 @@
 	@intEntityUserSecurityId INT,
 	@intBillId INT OUTPUT,
 	@strBillIds NVARCHAR(MAX) = NULL OUTPUT,
-	@intScreenId INT = NULL
+	@intScreenId INT = NULL,
+	@intContractDetailId INT = NULL
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -107,6 +108,7 @@ BEGIN
 					ON Item.intItemId = ri.intItemId
 		WHERE	r.ysnPosted = 1
 				AND r.intInventoryReceiptId = @intReceiptId
+				AND (ri.intContractDetailId = @intContractDetailId OR @intContractDetailId IS NULL) 
 				AND ABS(ri.dblBillQty) < ABS(ri.dblOpenReceive)
 				AND ri.intOwnershipType = @Own
 				AND Item.strType <> 'Bundle'
