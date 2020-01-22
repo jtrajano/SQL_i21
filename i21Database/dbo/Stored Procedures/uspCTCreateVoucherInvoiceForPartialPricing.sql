@@ -95,7 +95,6 @@ BEGIN TRY
 			@dblInventoryShipmentItemLoadApplied	NUMERIC(18, 6),
 			@intShipmentInvoiceDetailId		INT,
 			@dtmFixationDate				DATE,
-			@dtmCurrentDate					DATE = GETDATE(),
 			@detailCreated					Id;
 
 		declare @intPriceContractId int;
@@ -543,9 +542,9 @@ BEGIN TRY
 									tblAPBill 
 								SET		
 									strVendorOrderNumber = @strVendorOrderNumber
-									, dtmDate = @dtmCurrentDate
-									, dtmDueDate = @dtmCurrentDate
-									, dtmBillDate = @dtmCurrentDate
+									, dtmDate = @dtmFixationDate
+									, dtmDueDate = @dtmFixationDate
+									, dtmBillDate = @dtmFixationDate 
 								WHERE 
 									intBillId = @intNewBillId
 							
