@@ -412,7 +412,7 @@ BEGIN
 	INNER JOIN tblCTContractType CT ON CH.intContractTypeId = CT.intContractTypeId
 	INNER JOIN vyuCTEntity E ON E.intEntityId = CH.intEntityId and E.strEntityType = (CASE WHEN CH.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END)
 	inner join tblICCommodityUnitMeasure m on m.intCommodityId = CH.intCommodityId and m.ysnStockUnit=1
-	WHERE B.ysnPosted = 1
+	-- WHERE B.ysnPosted = 1
 	GROUP BY CH.intContractHeaderId
 	,CD.intContractDetailId
 	,BD.intBillDetailId
