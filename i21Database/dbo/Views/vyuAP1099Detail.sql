@@ -13,7 +13,8 @@ SELECT
 	,patron.strStockStatus
 	,voucher.strVendorOrderNumber
 	,(voucherDetail.dblTotal / ISNULL(NULLIF(voucher.dblTotal, 0),1)) * ISNULL(voucher.dblPayment,0) AS dblPayment
-	,voucherDetail.dbl1099 AS dbl1099Amount
+	--1099 in voucher details should be positive is line item is positive
+	,voucherDetail.dbl1099 * (CASE WHEN voucher.intTransactionType = 3 THEN -1 ELSE 1 END) AS dbl1099Amount
 	,voucher.strComment
 	,item.strItemNo
 	,item.strDescription AS strItemDescription
