@@ -1,7 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspCTBeforeInvoiceDelete]
 	@intInvoiceId	 INT,
 	@intUserId		 INT, -- User Who is deleting the Invoice.
-	@intInvoiceDetailId INT null
+	@intInvoiceDetailId INT = null
 AS
 
 BEGIN TRY
