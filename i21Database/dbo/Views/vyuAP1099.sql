@@ -50,7 +50,8 @@ SELECT
 			* (CASE WHEN B.intTransactionType = 3 THEN -1 ELSE 1 END)
      ELSE 0 END      
     , dblRents = CASE WHEN A.int1099Form = 1 AND A.int1099Category = 10--'Rents'     
-		THEN (A.dblTotal + A.dblTax) / B.dblTotal  * ISNULL(B2.dblPayment,A.dbl1099)
+		THEN ((A.dblTotal + A.dblTax) / B.dblTotal  * ISNULL(B2.dblPayment,A.dbl1099))
+			* (CASE WHEN B.intTransactionType = 3 THEN -1 ELSE 1 END)
      ELSE 0 END    
     , dblRoyalties = CASE WHEN A.int1099Form = 1 AND A.int1099Category = 11--'Royalties'     
 		THEN ((A.dblTotal + A.dblTax) / B.dblTotal  * ISNULL(B2.dblPayment,A.dbl1099))
