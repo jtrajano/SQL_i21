@@ -363,7 +363,7 @@ SELECT TOP 100 PERCENT * FROM (
     LEFT JOIN tblAPBasisAdvanceCommodity basisCommodity ON basisCommodity.intCommodityId = ticket.intCommodityId
     LEFT JOIN tblAPBasisAdvanceStaging staging 
         ON staging.intContractDetailId = ctd.intContractDetailId
-            AND staging.intInventoryReceiptItemId = ticketTrans.intInventoryReceiptItemId
+            AND ISNULL(staging.intInventoryReceiptItemId,-1) = ISNULL(ticketTrans.intInventoryReceiptItemId,-1)
             AND staging.intTicketId = ticketTrans.intTicketId
      OUTER APPLY (
         SELECT
