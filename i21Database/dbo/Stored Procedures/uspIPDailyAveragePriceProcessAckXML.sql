@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE uspIPDailyAveragePriceProcessAckXML @intToCompanyId INT
+﻿CREATE PROCEDURE uspIPDailyAveragePriceProcessAckXML --@intToCompanyId INT
 AS
 BEGIN TRY
 	SET NOCOUNT ON
@@ -21,7 +21,7 @@ BEGIN TRY
 	FROM tblRKDailyAveragePriceAckStage
 	WHERE strMessage = 'Success'
 		AND ISNULL(strFeedStatus, '') = ''
-		AND intMultiCompanyId = @intToCompanyId
+		--AND intMultiCompanyId = @intToCompanyId
 
 	WHILE @intDailyAveragePriceAckStageId > 0
 	BEGIN
@@ -126,7 +126,7 @@ BEGIN TRY
 		WHERE intDailyAveragePriceAckStageId > @intDailyAveragePriceAckStageId
 			AND strMessage = 'Success'
 			AND ISNULL(strFeedStatus, '') = ''
-			AND intMultiCompanyId = @intToCompanyId
+			--AND intMultiCompanyId = @intToCompanyId
 	END
 END TRY
 
