@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspMFGetTraceabilitySalesOrderFromShipment]
-	@intShipmentId int
+	@intShipmentId int,@intLocationId int=NULL
 AS
 SET NOCOUNT ON;
 
@@ -16,4 +16,4 @@ Join tblICCategory mt on mt.intCategoryId=i.intCategoryId
 Left Join tblICItemUOM iu on sd.intItemUOMId=iu.intItemUOMId
 Left Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
 Left Join vyuARCustomer c on so.intEntityCustomerId=c.[intEntityId]
-Where sh.intInventoryShipmentId=@intShipmentId
+Where sh.intShipFromLocationId=@intLocationId and sh.intInventoryShipmentId=@intShipmentId
