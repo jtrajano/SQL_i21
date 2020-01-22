@@ -104,7 +104,7 @@ BEGIN
 					AND IBook.intItemId IS NULL
 				)
 		BEGIN
-			SELECT @strItemNo = @strItemNo + I.strItemNo + ' / '
+			SELECT @strItemNo = @strItemNo + I.strItemNo +' - '+I.strDescription + ' / '
 			FROM tblICItemBundle IBundle
 			JOIN tblICItem I ON I.intItemId = IBundle.intBundleItemId
 			JOIN tblICItemBook IBook ON IBook.intItemId = IBundle.intBundleItemId
