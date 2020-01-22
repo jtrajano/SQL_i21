@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspMFGetTraceabilityReceiptDetail]
-	@intInventoryReceiptId int
+	@intInventoryReceiptId int,@intLocationId int=NULL
 AS
 
 SET NOCOUNT ON;
@@ -18,4 +18,4 @@ Select DISTINCT 'Receipt' AS strTransactionName,rh.intInventoryReceiptId,rh.strR
 rh.dtmReceiptDate AS dtmTransactionDate,v.strName AS strVendor,'R' AS strType
 from tblICInventoryReceipt rh
 Left Join vyuAPVendor v on rh.intEntityVendorId=v.[intEntityId]
-Where rh.intInventoryReceiptId=@intInventoryReceiptId
+Where IsNULL(rh.intLocationId,@intLocationId) =@intLocationId and rh.intInventoryReceiptId=@intInventoryReceiptId

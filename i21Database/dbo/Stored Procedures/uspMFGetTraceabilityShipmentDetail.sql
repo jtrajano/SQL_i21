@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspMFGetTraceabilityShipmentDetail] @intInventoryShipmentId INT
+﻿CREATE PROCEDURE [dbo].[uspMFGetTraceabilityShipmentDetail] (@intInventoryShipmentId INT,@intLocationId int=NULL)
 AS
 DECLARE @dblShipQuantity NUMERIC(38, 20)
 DECLARE @strUOM NVARCHAR(50)
@@ -28,4 +28,4 @@ SELECT 'Ship' AS strTransactionName
 	,'S' AS strType
 FROM tblICInventoryShipment sh
 LEFT JOIN vyuARCustomer c ON sh.intEntityCustomerId = c.[intEntityId]
-WHERE sh.intInventoryShipmentId = @intInventoryShipmentId
+WHERE sh.intShipFromLocationId=@intLocationId and sh.intInventoryShipmentId = @intInventoryShipmentId
