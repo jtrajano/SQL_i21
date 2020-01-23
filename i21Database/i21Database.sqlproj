@@ -8369,6 +8369,7 @@
     <Build Include="dbo\Stored Procedures\uspSTGenerateVendorRebate.sql" />
     <Build Include="dbo\Stored Procedures\uspCTUpdateBasisComponents.sql" />
     <Build Include="dbo\User Defined Types\BasisComponent.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGUpdateAllocatedBasisComponent.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
