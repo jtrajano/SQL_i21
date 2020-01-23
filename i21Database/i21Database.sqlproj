@@ -8370,6 +8370,10 @@
     <Build Include="dbo\Stored Procedures\uspCTUpdateBasisComponents.sql" />
     <Build Include="dbo\User Defined Types\BasisComponent.sql" />
     <Build Include="dbo\Stored Procedures\uspLGUpdateAllocatedBasisComponent.sql" />
+    <Build Include="dbo\Tables\tblRKOptionsMatchPnSHeaderStage.sql" />
+    <Build Include="dbo\Tables\tblRKOptionsMatchPnSHeaderAckStage.sql" />
+    <Build Include="dbo\Views\vyuIPGetOptionsMatchPnS.sql" />
+    <Build Include="dbo\Views\vyuIPGetOptionsPnSExpired.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
