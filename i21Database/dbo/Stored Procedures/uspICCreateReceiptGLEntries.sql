@@ -23,6 +23,26 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
+-- Create the temp table for the specific items/categories to rebuild
+IF OBJECT_ID('tempdb..#tmpRebuildList') IS NULL  
+BEGIN
+	CREATE TABLE #tmpRebuildList
+	(
+		intItemId INT NULL 
+		,
+		intCategoryId INT NULL
+	)
+END
+
+IF NOT EXISTS (SELECT TOP 1
+	1
+FROM #tmpRebuildList)
+BEGIN
+	INSERT INTO #tmpRebuildList
+	VALUES
+		(@intRebuildItemId, @intRebuildCategoryId)
+END
+
 -- Create the variables used by fnGetItemGLAccount
 DECLARE @AccountCategory_Inventory AS NVARCHAR(30) = 'Inventory'
 DECLARE @AccountCategory_Adjustment AS NVARCHAR(30) = 'Inventory Adjustment'
@@ -62,16 +82,17 @@ FROM (
 					, intItemLocationId 
 					, intTransactionTypeId
 	FROM (
-																								SELECT DISTINCT
+									SELECT DISTINCT
 				t.intItemId
 						, t.intItemLocationId 
 						, t.intTransactionTypeId
 			FROM dbo.tblICInventoryTransaction t INNER JOIN tblICItem i
 				ON t.intItemId = i.intItemId
+				INNER JOIN #tmpRebuildList list
+				ON i.intItemId = COALESCE(list.intItemId, i.intItemId)
+					AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)
 			WHERE	t.strBatchId = @strBatchId
 				AND t.strTransactionId = ISNULL(@strRebuildTransactionId, t.strTransactionId)
-				AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId)
-				AND ISNULL(i.intCategoryId, 0) = COALESCE(@intRebuildCategoryId, i.intCategoryId, 0)
 				AND i.strType <> 'Non-Inventory'
 		UNION ALL
 			SELECT DISTINCT
@@ -80,11 +101,12 @@ FROM (
 						, t.intTransactionTypeId
 			FROM dbo.tblICInventoryTransaction t INNER JOIN tblICItem i
 				ON t.intItemId = i.intItemId
+				INNER JOIN #tmpRebuildList list
+				ON i.intItemId = COALESCE(list.intItemId, i.intItemId)
+					AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)
 			WHERE	t.strBatchId = @strBatchId
 				AND t.strTransactionId = ISNULL(@strRebuildTransactionId, t.strTransactionId)
-				AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId)
 				AND t.intInTransitSourceLocationId IS NOT NULL
-				AND ISNULL(i.intCategoryId, 0) = COALESCE(@intRebuildCategoryId, i.intCategoryId, 0)
 				AND i.strType <> 'Non-Inventory'
 		UNION ALL
 			SELECT DISTINCT
@@ -93,12 +115,13 @@ FROM (
 						, @InventoryTransactionTypeId_AutoVariance
 			FROM dbo.tblICInventoryTransaction t INNER JOIN tblICItem i
 				ON t.intItemId = i.intItemId
+				INNER JOIN #tmpRebuildList list
+				ON i.intItemId = COALESCE(list.intItemId, i.intItemId)
+					AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)
 			WHERE	t.strBatchId = @strBatchId
 				AND t.strTransactionId = ISNULL(@strRebuildTransactionId, t.strTransactionId)
-				AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId)
 				AND t.intItemLocationId IS NOT NULL
 				AND t.intInTransitSourceLocationId IS NULL
-				AND ISNULL(i.intCategoryId, 0) = COALESCE(@intRebuildCategoryId, i.intCategoryId, 0)
 				AND i.strType <> 'Non-Inventory'
 			) InnerQuery
 		) Query
@@ -189,12 +212,13 @@ BEGIN
 			ON t.intTransactionTypeId = TransType.intTransactionTypeId
 			INNER JOIN tblICItem i
 			ON i.intItemId = t.intItemId
+			INNER JOIN #tmpRebuildList list
+			ON i.intItemId = COALESCE(list.intItemId, i.intItemId)
+				AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)
 		WHERE	t.strBatchId = @strBatchId
 			AND TransType.intTransactionTypeId IN (@InventoryTransactionTypeId_AutoVariance, @InventoryTransactionTypeId_Auto_Variance_On_Sold_Or_Used_Stock)
-			AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId)
 			AND t.intItemId = Item.intItemId
 			AND t.dblQty * t.dblCost + t.dblValue <> 0
-			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intRebuildCategoryId, i.intCategoryId, 0) 
 			)
 
 	SELECT TOP 1
@@ -247,6 +271,9 @@ FROM dbo.tblICInventoryTransaction t INNER JOIN dbo.tblICInventoryTransactionTyp
 	ON t.intTransactionTypeId = TransType.intTransactionTypeId
 	INNER JOIN tblICItem i
 	ON i.intItemId = t.intItemId
+	INNER JOIN #tmpRebuildList list
+	ON i.intItemId = COALESCE(list.intItemId, i.intItemId)
+		AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)
 	INNER JOIN @GLAccounts GLAccounts
 	ON t.intItemId = GLAccounts.intItemId
 		AND t.intItemLocationId = GLAccounts.intItemLocationId
@@ -254,8 +281,6 @@ FROM dbo.tblICInventoryTransaction t INNER JOIN dbo.tblICInventoryTransactionTyp
 	INNER JOIN dbo.tblGLAccount
 	ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
 WHERE	t.strBatchId = @strBatchId
-	AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId)
-	AND ISNULL(i.intCategoryId, 0) = COALESCE(@intRebuildCategoryId, i.intCategoryId, 0)
 ;
 
 -- Get the functional currency
@@ -292,6 +317,7 @@ WITH
 	--,dblAddOnCostFromOtherCharge
 	, intSourceEntityId
 	, intCommodityId
+	, intReference
 	)
 	AS
 	(
@@ -335,22 +361,20 @@ WITH
 			--,dblAddOnCostFromOtherCharge = t.dblQty * dbo.fnGetOtherChargesFromInventoryReceipt(ri.intInventoryReceiptItemId)		
 			, t.intSourceEntityId
 			, i.intCommodityId
+			, intReference = CAST(1 AS TINYINT)
 			FROM dbo.tblICInventoryTransaction t
 				INNER JOIN dbo.tblICInventoryTransactionType TransType
-				ON 
-				t.intTransactionTypeId = TransType.intTransactionTypeId
+				ON t.intTransactionTypeId = TransType.intTransactionTypeId
 				INNER JOIN tblICItem i
 				ON i.intItemId = t.intItemId
 				INNER JOIN #tmpRebuildList list
 				ON i.intItemId = COALESCE(list.intItemId, i.intItemId)
 					AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)
 				INNER JOIN tblICInventoryReceipt r
-				ON 
-				r.strReceiptNumber = t.strTransactionId
+				ON r.strReceiptNumber = t.strTransactionId
 					AND r.intInventoryReceiptId = t.intTransactionId
 				LEFT JOIN tblICInventoryReceiptItem ri
-				ON 
-				ri.intInventoryReceiptId = r.intInventoryReceiptId
+				ON ri.intInventoryReceiptId = r.intInventoryReceiptId
 					AND ri.intInventoryReceiptItemId = t.intTransactionDetailId
 			OUTER APPLY (
 				SELECT dblTotalNet = SUM(
@@ -365,11 +389,8 @@ WITH
 				WHERE	ReceiptItem.intInventoryReceiptItemId = ri.intInventoryReceiptItemId
 			) AggregrateItemLots
 				LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType
-				ON 
-				currencyRateType.intCurrencyExchangeRateTypeId = t.intForexRateTypeId
+				ON currencyRateType.intCurrencyExchangeRateTypeId = t.intForexRateTypeId
 			WHERE	t.strBatchId = @strBatchId
-				AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId)
-				AND ISNULL(i.intCategoryId, 0) = COALESCE(@intRebuildCategoryId, i.intCategoryId, 0)
 
 			-- Resolve the 0.01 discrepancy between the inventory transaction value and the receipt line total. 
 		UNION ALL
@@ -501,9 +522,6 @@ WITH
 			WHERE	
 			ri.[dblRecomputeLineTotal] - topRi.dblLineTotal <> 0
 
-
-
-
 		UNION ALL
 			SELECT
 				dtmDate = t.dtmDate
@@ -606,11 +624,15 @@ WITH
 			, dblLineTotal = NULL 
 			, t.intSourceEntityId
 			, i.intCommodityId
+			, intReference = CAST(3 AS TINYINT)
 			FROM dbo.tblICInventoryTransaction t
 				INNER JOIN dbo.tblICInventoryTransactionType TransType
 				ON TransType.intTransactionTypeId = t.intTransactionTypeId
 				INNER JOIN tblICItem i
 				ON i.intItemId = t.intItemId
+				INNER JOIN #tmpRebuildList list
+				ON i.intItemId = COALESCE(list.intItemId, i.intItemId)
+					AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)
 				INNER JOIN tblICInventoryReceipt r
 				ON  r.strReceiptNumber = t.strTransactionId
 					AND r.intInventoryReceiptId = t.intTransactionId
@@ -640,8 +662,6 @@ WITH
 
 			WHERE	t.strBatchId = @strBatchId
 				AND t.intInTransitSourceLocationId IS NULL
-				AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId)
-				AND ISNULL(i.intCategoryId, 0) = COALESCE(@intRebuildCategoryId, i.intCategoryId, 0)
 				AND t.dblQty < 0
 				AND
 				-- Cost Bucket Value
@@ -673,6 +693,10 @@ WITH
 -------------------------------------------------------------------------------------------
 -- This part is for the usual G/L entries for the Receipt Line Total
 -------------------------------------------------------------------------------------------
+/*
+	Debit ........... Inventory
+	Credit .............................. AP Clearing
+*/
 	SELECT
 		dtmDate						= ForGLEntries_CTE.dtmDate
 		, strBatchId					= @strBatchId
@@ -970,6 +994,10 @@ UNION ALL
 -----------------------------------------------------------------------------------
 -- This part is for the Auto Variance on Used or Sold Stock
 -----------------------------------------------------------------------------------
+/*
+	Debit ........... Inventory
+	Credit .............................. COGS (Auto Variance)
+*/
 UNION ALL
 	SELECT
 		dtmDate						= ForGLEntries_CTE.dtmDate
@@ -1116,6 +1144,10 @@ UNION ALL
 -----------------------------------------------------------------------------------
 -- This part is for the Auto-Variance 
 -----------------------------------------------------------------------------------
+/*
+	Debit ........... Inventory
+	Credit .............................. COGS (Auto Variance)
+*/
 UNION ALL
 	SELECT
 		dtmDate						= ForGLEntries_CTE.dtmDate
@@ -1265,6 +1297,10 @@ UNION ALL
 -----------------------------------------------------------------------------------
 -- This part is for variance because of the stock returns. 
 -----------------------------------------------------------------------------------
+/*
+	Debit ........... Inventory
+	Credit .............................. COGS (Auto Variance)
+*/
 UNION ALL
 	SELECT
 		dtmDate						= ForGLEntries_CTE.dtmDate
@@ -1586,5 +1622,6 @@ UNION ALL
 			,@InventoryTransactionTypeId_RevalueSold
 			,@InventoryTransactionTypeId_Auto_Variance_On_Sold_Or_Used_Stock
 		)
-		AND ISNULL(dblValue, 0) <> 0 
+		AND ISNULL(dblValue, 0) <> 0
+		AND ForGLEntries_CTE.intReference = 2
 ;
