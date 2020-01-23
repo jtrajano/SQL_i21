@@ -415,6 +415,7 @@ BEGIN TRY
 						,dblSwitchPL
 						,dblOptionsPL
 						,dblNetLongAvg
+						,dblSettlementPrice
 						,intBrokerId
 						,intConcurrencyId
 						,intDailyAveragePriceDetailRefId
@@ -428,6 +429,7 @@ BEGIN TRY
 						,dblSwitchPL
 						,dblOptionsPL
 						,dblNetLongAvg
+						,dblSettlementPrice
 						,@intBrokerId
 						,1
 						,@intDailyAveragePriceDetailId
@@ -437,6 +439,7 @@ BEGIN TRY
 							,dblSwitchPL NUMERIC(18, 6)
 							,dblOptionsPL NUMERIC(18, 6)
 							,dblNetLongAvg NUMERIC(18, 6)
+							,dblSettlementPrice NUMERIC(18, 6)
 							,intDailyAveragePriceDetailId INT
 							) x
 					WHERE x.intDailyAveragePriceDetailId = @intDailyAveragePriceDetailId
@@ -453,6 +456,7 @@ BEGIN TRY
 						,dblSwitchPL = x.dblSwitchPL
 						,dblOptionsPL = x.dblOptionsPL
 						,dblNetLongAvg = x.dblNetLongAvg
+						,dblSettlementPrice = x.dblSettlementPrice
 						,intBrokerId = @intBrokerId
 					FROM OPENXML(@idoc, 'vyuIPGetDailyAveragePriceDetails/vyuIPGetDailyAveragePriceDetail', 2) WITH (
 							dblNoOfLots NUMERIC(18, 6)
@@ -460,6 +464,7 @@ BEGIN TRY
 							,dblSwitchPL NUMERIC(18, 6)
 							,dblOptionsPL NUMERIC(18, 6)
 							,dblNetLongAvg NUMERIC(18, 6)
+							,dblSettlementPrice NUMERIC(18, 6)
 							,intDailyAveragePriceDetailId INT
 							) x
 					JOIN tblRKDailyAveragePriceDetail D ON D.intDailyAveragePriceDetailRefId = x.intDailyAveragePriceDetailId
