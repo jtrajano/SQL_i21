@@ -30,9 +30,21 @@ BEGIN
 	IF @intPostToGLId = 1
 	BEGIN
 		SELECT 
-			@intFuturesGainOrLossRealized = @intFuturesGainOrLossRealized 
-			,@intFuturesGainOrLossRealizedOffset = @intFuturesGainOrLossRealizedOffset
+			@intFuturesGainOrLossRealized = intFuturesGainOrLossRealizedId 
+			,@intFuturesGainOrLossRealizedOffset = intFuturesGainOrLossRealizedOffsetId
 		FROM tblRKCompanyPreference
+
+		SELECT 
+			@strFuturesGainOrLossRealized = strAccountId 
+			,@strFuturesGainOrLossRealizedDescription = strDescription
+		FROM tblGLAccount 
+		WHERE intAccountId = @intFuturesGainOrLossRealized
+	
+		SELECT 
+			@strFuturesGainOrLossRealizedOffset = strAccountId 
+			,@strFuturesGainOrLossRealizedOffsetDescription = strDescription
+		FROM tblGLAccount 
+		WHERE intAccountId = @intFuturesGainOrLossRealizedOffset
 	END
 	ELSE
 	BEGIN
