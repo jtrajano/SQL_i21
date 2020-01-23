@@ -541,16 +541,19 @@ BEGIN TRY
 
 							IF (@intNewBillId IS NOT NULL AND @intNewBillId > 0)
 							BEGIN
-							
-								UPDATE	
-									tblAPBill 
-								SET		
-									strVendorOrderNumber = @strVendorOrderNumber
-									, dtmDate = @dtmFixationDate
-									, dtmDueDate = @dtmFixationDate
-									, dtmBillDate = @dtmFixationDate 
-								WHERE 
-									intBillId = @intNewBillId
+
+								IF EXISTS(SELECT TOP 1 1 FROM tblAPBill WHERE intBillId = @intNewBillId AND dtmDate < @dtmFixationDate)
+								BEGIN
+									UPDATE	
+										tblAPBill 
+									SET		
+										strVendorOrderNumber = @strVendorOrderNumber
+										, dtmDate = @dtmFixationDate
+										, dtmDueDate = @dtmFixationDate
+										, dtmBillDate = @dtmFixationDate 
+									WHERE 
+										intBillId = @intNewBillId
+								END
 							
 								DECLARE @total DECIMAL(18,6)
 								SELECT TOP 1 
