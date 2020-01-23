@@ -17,7 +17,8 @@
 	@invalidCount		AS INT				= 0 OUTPUT,
 	@success			AS BIT				= 0 OUTPUT,
 	@batchIdUsed		AS NVARCHAR(40)		= NULL OUTPUT,
-	@recapId			AS NVARCHAR(250)	= NEWID OUTPUT
+	@recapId			AS NVARCHAR(250)	= NEWID OUTPUT,
+	@isPricingContract	AS INT				= 0
 AS
 
 SET QUOTED_IDENTIFIER OFF
