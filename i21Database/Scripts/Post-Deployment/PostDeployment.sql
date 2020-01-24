@@ -552,6 +552,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\TF\DefaultData\AR_Arkansas.sql
 :r .\TF\DefaultData\AR_Arkansas.sql
 :r .\TF\DefaultData\CO_Colorado.sql
+:r .\TF\DefaultData\TN_Tennessee.sql
 
 --Integration
 :R .\IP\1_MasterTables.sql
