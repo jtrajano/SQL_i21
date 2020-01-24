@@ -351,9 +351,9 @@ BEGIN
 		, dblBalanceInv NUMERIC(24,10)
 		, strTransactionId NVARCHAR(50)
 		, intTransactionId INT
-		, strDistribution NVARCHAR(10)
+		, strDistribution NVARCHAR(50)
 		, dblSalesInTransit NUMERIC(24,10)
-		, strTransactionType NVARCHAR(50)
+		, strTransactionType NVARCHAR(100)
 		, intCommodityId INT
 	)
 
