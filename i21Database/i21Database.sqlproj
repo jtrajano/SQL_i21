@@ -8374,6 +8374,7 @@
     <Build Include="dbo\Tables\tblRKOptionsMatchPnSHeaderAckStage.sql" />
     <Build Include="dbo\Views\vyuIPGetOptionsMatchPnS.sql" />
     <Build Include="dbo\Views\vyuIPGetOptionsPnSExpired.sql" />
+    <None Include="Scripts\Post-Deployment\CT\2010_ContractSummaryLog.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
