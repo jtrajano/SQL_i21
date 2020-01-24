@@ -1,5 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspAPGLBalance]
 	@UserId INT,
+	@dateFrom DATETIME = NULL,
+	@dateTo DATETIME = NULL,
 	@balance DECIMAL(18,6) OUTPUT,
 	@logKey NVARCHAR(100) OUTPUT
 AS
@@ -12,6 +14,9 @@ SET ANSI_WARNINGS OFF
 
 DECLARE @key NVARCHAR(100) = NEWID()
 DECLARE @logDate DATETIME = GETDATE()
+DECLARE @from DATETIME = CASE WHEN @dateFrom IS NULL THEN '1/1/1900' ELSE @dateFrom END;
+DECLARE @to DATETIME = CASE WHEN @dateTo IS NULL THEN GETDATE() ELSE @dateTo END;
+
 SET @logKey = @key;
 
 DECLARE @log TABLE
@@ -38,6 +43,7 @@ INNER JOIN tblGLAccount B ON A.intAccountId = B.intAccountId
 INNER JOIN vyuGLAccountDetail D ON A.intAccountId = D.intAccountId
 WHERE D.intAccountCategoryId IN (@prepaymentCategory, @intPayablesCategory)
 AND A.ysnIsUnposted = 0
+AND DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) BETWEEN @from AND @to
 GROUP BY B.strAccountId
 --,A.strJournalLineDescription,A.strTransactionId
 
