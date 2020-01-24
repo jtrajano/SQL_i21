@@ -2395,8 +2395,8 @@ BEGIN TRY
 							END
 						,@intMachineId
 						,@intStageLocationId
-						,@dblUpperToleranceReqQty
-						,@dblLowerToleranceReqQty
+						,Round(@dblUpperToleranceReqQty,@intNoOfDecimalPlacesOnConsumption)
+						,Round(@dblLowerToleranceReqQty,@intNoOfDecimalPlacesOnConsumption)
 						,@intMainItemId
 				END
 				ELSE
@@ -2404,8 +2404,8 @@ BEGIN TRY
 					UPDATE tblMFProductionSummary
 					SET dblConsumedQuantity = dblConsumedQuantity + @dblReqQty
 						,intStageLocationId = @intStageLocationId
-						,dblUpperToleranceQty = @dblUpperToleranceReqQty
-						,dblLowerToleranceQty = @dblLowerToleranceReqQty
+						,dblUpperToleranceQty = Round(@dblUpperToleranceReqQty,@intNoOfDecimalPlacesOnConsumption)
+						,dblLowerToleranceQty = Round(@dblLowerToleranceReqQty,@intNoOfDecimalPlacesOnConsumption)
 					WHERE intWorkOrderId = @intWorkOrderId
 						AND intItemId = @intLotItemId
 						AND IsNULL(intMachineId, 0) = CASE 
