@@ -461,7 +461,10 @@ END
 			WHERE si.intInventoryShipmentId = @InventoryShipmentId AND s.intOrderType = 1
 	*/
 
-	EXEC @intInvoiceId = dbo.uspARCreateInvoiceFromShipment @InventoryShipmentId, @intUserId, NULL, 0, 1;
+	IF ISNULL(@InventoryShipmentId, 0) != 0 AND ISNULL(@strWhereFinalizedWeight, 'Origin') = 'Origin' AND ISNULL(@strWhereFinalizedGrade, 'Origin') = 'Origin' 
+	BEGIN
+		EXEC @intInvoiceId = dbo.uspARCreateInvoiceFromShipment @InventoryShipmentId, @intUserId, NULL, 0, 1;
+	END
 
 	WHILE ISNULL(@_intContractDetailId,0) > 0
 	BEGIN
