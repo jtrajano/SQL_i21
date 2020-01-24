@@ -418,7 +418,6 @@ AS
 									,AggregrateItemLots.dblTotalNet
 									,ri.ysnSubCurrency
 									,r.intSubCurrencyCents
-									,DEFAULT
 								)
 								,2 
 							)
