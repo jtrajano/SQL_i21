@@ -838,8 +838,8 @@ BEGIN
 				JOIN tblCTContractDetail cd ON cd.intContractDetailId = pf.intContractDetailId
 				INNER JOIN tblCTContractHeader ch ON ch.intContractHeaderId = cd.intContractHeaderId
 				INNER JOIN tblICCommodityUnitMeasure cum ON cum.intCommodityId = ch.intCommodityId AND cum.ysnDefault = 1
-				WHERE cd.intContractDetailId = @intContractHeaderId
-					AND cd.intContractHeaderId = @intContractDetailId
+				WHERE cd.intContractDetailId = @intContractDetailId
+					AND cd.intContractHeaderId = @intContractHeaderId
 			END
 
 			EXEC uspCTLogContractBalance @cbLog, 0
