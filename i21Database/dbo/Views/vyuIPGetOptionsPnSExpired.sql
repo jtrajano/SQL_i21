@@ -9,5 +9,6 @@ SELECT E.intOptionsPnSExpiredId
 	,E.intOptionsPnSExpiredRefId
 	,E.intConcurrencyId
 	,FOT.strInternalTradeNo
+	,FOT.intBookId
 FROM tblRKOptionsPnSExpired E
 LEFT JOIN tblRKFutOptTransaction FOT ON FOT.intFutOptTransactionId = E.intFutOptTransactionId

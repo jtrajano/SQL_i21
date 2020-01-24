@@ -8375,6 +8375,10 @@
     <Build Include="dbo\Views\vyuIPGetOptionsMatchPnS.sql" />
     <Build Include="dbo\Views\vyuIPGetOptionsPnSExpired.sql" />
     <None Include="Scripts\Post-Deployment\CT\2010_ContractSummaryLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPOptionsPnSProcessPreStage.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPOptionsPnSPopulateStgXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPOptionsPnSTransferStgXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPOptionsPnSProcessStgXML.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
