@@ -710,7 +710,7 @@ CREATE TRIGGER [dbo].[trgCTContractDetail]
 					begin
 						set @dblComputedQuantity = @dblQuantity - (@dblRunningDetailQuantityApplied-@dblDetailQuantityApplied);
 						print @dblComputedQuantity;
-						update tblCTPriceFixationDetail set dblQuantityAppliedAndPriced = @dblComputedQuantity where intPriceFixationDetailId = @intPriceFixationDetailId;
+						update tblCTPriceFixationDetail set dblQuantityAppliedAndPriced = case when @dblComputedQuantity < 0 then 0 else @dblComputedQuantity end where intPriceFixationDetailId = @intPriceFixationDetailId;
 					end
 				end
 
