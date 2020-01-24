@@ -5433,7 +5433,7 @@ BEGIN
 	ORDER BY 
 		fyp.dtmStartDate ASC 
 
-	EXEC dbo.[uspICSearchInventoryValuationSummary] @strPeriod
+	EXEC dbo.[uspICSearchInventoryValuationSummary] @strPeriod, @intUserId
 END
 
 
