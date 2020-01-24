@@ -45,10 +45,10 @@ WHERE intContractDetailId = @intSContractDetailId
 UPDATE RB
 SET RB.dblRate = CASE WHEN ISNULL(RB.dblRate, 0) = 0 THEN
 						CASE WHEN (I.intCostUOMId IS NULL) 
-							THEN I.dblAmount / @intSubCurrencyCents
+							THEN I.dblAmount * @intSubCurrencyCents
 						WHEN (I.intCostUOMId <> BUOM.intItemUOMId) 
-							THEN dbo.fnCalculateCostBetweenUOM(I.intCostUOMId, BUOM.intItemUOMId, I.dblAmount) / @intSubCurrencyCents
-						ELSE RB.dblRate END 
+							THEN dbo.fnCalculateCostBetweenUOM(I.intCostUOMId, BUOM.intItemUOMId, I.dblAmount) * @intSubCurrencyCents
+						ELSE I.dblAmount * @intSubCurrencyCents END 
 					ELSE RB.dblRate END
 	,RB.intItemUOMId = BUOM.intItemUOMId
 FROM #tmpReserveB RB
