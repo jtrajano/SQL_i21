@@ -64,6 +64,8 @@ DECLARE @dblTicketScheduleQuantity AS NUMERIC(18,6)
 DECLARE @dblLoopAdjustedScheduleQuantity NUMERIC (38,20)  
 DECLARE @strTicketDistributionOption NVARCHAR(3)
 DECLARE @intTicketLoadDetailId INT  
+DECLARE @_intContractDetailId INT
+DECLARE @__intContractDetailId INT
 
 SELECT @ysnUpdateContractWeightGrade  = CASE WHEN intContractId IS NULL AND strDistributionOption = 'CNT' AND (intWeightId IS NULL AND intGradeId IS NULL ) THEN 1 ELSE 0 END FROM tblSCTicket WHERE intTicketId = @intTicketId
 IF (@ysnUpdateContractWeightGrade = 1)
@@ -407,9 +409,13 @@ IF (@total = 0)
 
 SELECT TOP 1 @strDistributionOption = strSourceTransactionId FROM @ItemsForItemShipment WHERE (strSourceTransactionId = 'LOD' OR strSourceTransactionId = 'CNT');
 IF @strDistributionOption = 'CNT' OR @strDistributionOption = 'LOD'
+BEGIN
  	SET @intOrderId = 1
+END
 ELSE
+BEGIN
  	SET @intOrderId = 4
+END
 
 	EXEC dbo.uspSCAddScaleTicketToItemShipment @intTicketId ,@intUserId ,@ItemsForItemShipment ,@intEntityId ,@intOrderId ,@InventoryShipmentId OUTPUT;
 
@@ -419,13 +425,19 @@ ELSE
 
 	EXEC dbo.uspICPostInventoryShipment 1, 0, @strTransactionId, @intUserId;
 
-	SELECT @intContractDetailId = MIN(si.intLineNo)
+	SELECT 
+		@intContractDetailId = MIN(si.intLineNo)
     FROM tblICInventoryShipment s 
-    JOIN tblICInventoryShipmentItem si ON si.intInventoryShipmentId = s.intInventoryShipmentId
+    JOIN tblICInventoryShipmentItem si 
+		ON si.intInventoryShipmentId = s.intInventoryShipmentId
     WHERE si.intInventoryShipmentId = @InventoryShipmentId AND s.intOrderType = 1
+
+	SET @_intContractDetailId = @intContractDetailId
+	SET @__intContractDetailId = @intContractDetailId
  
  
 	--INVOICE intergration
+	/*
 	SELECT @intPricingTypeId = CTD.intPricingTypeId FROM tblICInventoryShipmentItem ISI 
 	LEFT JOIN tblCTContractDetail CTD ON CTD.intContractDetailId = ISI.intLineNo
 	WHERE intInventoryShipmentId = @InventoryShipmentId
@@ -447,6 +459,30 @@ ELSE
 			JOIN tblICInventoryShipmentItem si ON si.intInventoryShipmentId = s.intInventoryShipmentId
 			join tblARInvoiceDetail id on id.intInventoryShipmentItemId = si.intInventoryShipmentItemId
 			WHERE si.intInventoryShipmentId = @InventoryShipmentId AND s.intOrderType = 1
+	*/
+
+	EXEC @intInvoiceId = dbo.uspARCreateInvoiceFromShipment @InventoryShipmentId, @intUserId, NULL, 0, 1;
+
+	WHILE ISNULL(@_intContractDetailId,0) > 0
+	BEGIN
+
+		IF EXISTS(SELECT TOP 1 1 FROM tblCTPriceFixation WHERE intContractDetailId = @_intContractDetailId)
+		BEGIN
+			EXEC uspCTCreateVoucherInvoiceForPartialPricing @_intContractDetailId, @intUserId
+		END
+
+
+		SET @_intContractDetailId = NULL
+
+		SELECT 
+			@_intContractDetailId = MIN(si.intLineNo)
+		FROM tblICInventoryShipment s 
+		JOIN tblICInventoryShipmentItem si ON si.intInventoryShipmentId = s.intInventoryShipmentId
+		WHERE si.intInventoryShipmentId = @InventoryShipmentId AND s.intOrderType = 1
+			AND ISNULL(intLineNo,0) > @__intContractDetailId
+
+		SET @__intContractDetailId = @_intContractDetailId
+	END
 
 	EXEC dbo.uspSMAuditLog 
 		@keyValue			= @intTicketId				-- Primary Key Value of the Ticket. 
