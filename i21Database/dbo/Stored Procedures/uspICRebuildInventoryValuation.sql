@@ -1459,7 +1459,7 @@ BEGIN
 									END 
 								WHEN @strTransactionForm IN ('Consume', 'Produce') THEN 
 									'Work in Progress'			
-								WHEN @strTransactionForm IN ('Settle Storage', 'Storage Settlement') THEN 
+								WHEN @strTransactionForm IN ('Settle Storage', 'Storage Settlement', 'Transfer Storage') THEN 
 									'AP Clearing'
 								WHEN @strTransactionForm = 'Storage Measurement Reading' THEN
 									'Inventory Adjustment'
