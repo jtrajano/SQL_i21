@@ -461,6 +461,11 @@ BEGIN TRY
 							BEGIN
 								EXEC uspCTUpdateScheduleQuantityUsingUOM @intTicketContractDetailId, @dblTicketScheduledQty, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId
 							END
+							ELSE
+							BEGIN
+								SET @dblTicketScheduledQty = 1
+								EXEC uspCTUpdateScheduleQuantityUsingUOM @intTicketContractDetailId, @dblTicketScheduledQty, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId
+							END
 						END
 
 						EXEC [dbo].[uspSCUpdateTicketStatus] @intTicketId, 1;
@@ -779,9 +784,12 @@ BEGIN TRY
 
 								IF(ISNULL(@ysnLoadContract,0) = 0)
 								BEGIN
-									UPDATE tblCTContractDetail
-									SET dblScheduleQty = ISNULL(dblScheduleQty,0) + @dblTicketScheduledQty
-									WHERE intContractDetailId = @intTicketContractDetailId
+									EXEC uspCTUpdateScheduleQuantityUsingUOM @intTicketContractDetailId, @dblTicketScheduledQty, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId
+								END
+								ELSE
+								BEGIN
+									SET @dblTicketScheduledQty = 1
+									EXEC uspCTUpdateScheduleQuantityUsingUOM @intTicketContractDetailId, @dblTicketScheduledQty, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId
 								END
 							END
 						END
@@ -1134,6 +1142,11 @@ BEGIN TRY
 
 								IF(ISNULL(@ysnLoadContract,0) = 0)
 								BEGIN
+									EXEC uspCTUpdateScheduleQuantityUsingUOM @intTicketContractDetailId, @dblTicketScheduledQty, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId
+								END
+								ELSE
+								BEGIN
+									SET @dblTicketScheduledQty = 1
 									EXEC uspCTUpdateScheduleQuantityUsingUOM @intTicketContractDetailId, @dblTicketScheduledQty, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId
 								END
 							END
