@@ -64,8 +64,7 @@ FROM
 												END
 											) +
 											( 
-												CASE 
-													WHEN Bill.intTransactionType = 2 then 0
+												CASE 													
 													WHEN BillDtl.intInventoryReceiptItemId IS NOT NULL THEN ISNULL(tblOtherCharge.dblTotal,0) 
 													ELSE ISNULL(BillByReceipt.dblTotal, 0) --+ ISNULL(BillByReceiptManuallyAdded.dblTotal, 0)
 												END
@@ -249,7 +248,7 @@ FROM
 		,InboundDiscount				= ISNULL(tblOtherCharge.dblTotal, 0)
 		,InboundNetDue					= SUM(case WHEN Bill.intTransactionType = 2 then 0 else BillDtl.dblTotal end ) + 
 											SUM(case WHEN Bill.intTransactionType = 2 then 0 else BillDtl.dblTax end ) + 
-											ISNULL(case WHEN Bill.intTransactionType = 2 then 0  else tblOtherCharge.dblTotal end , 0)
+											ISNULL(tblOtherCharge.dblTotal, 0)
 		,OutboundNetWeight				= 0 
 		,OutboundGrossDollars			= 0 
 		,OutboundTax		            = 0
