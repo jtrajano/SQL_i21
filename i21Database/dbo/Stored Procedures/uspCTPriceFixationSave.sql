@@ -582,7 +582,7 @@ BEGIN TRY
 		
 		EXEC	uspCTSequencePriceChanged @intContractDetailId, @intUserId, 'Price Contract', 0
 
-		EXEC	uspCTCreateDetailHistory	@intContractHeaderId,@intContractDetailId
+		EXEC	uspCTCreateDetailHistory	@intContractHeaderId = @intContractHeaderId, @intContractDetailId = @intContractDetailId, @strProcess = 'Price Fixation'
 		
 		/*CT-3569 - this will create amendment for newly added sequence from partial pricing SPLIT function.*/
 		  if (ISNULL(@ysnSplit,0) = 1 )
