@@ -156,7 +156,7 @@ FROM
 		AND RI.intOrderId = CH.intContractHeaderId
 		AND L.intPurchaseSale IN (1, 3)
 	LEFT JOIN tblLGWeightClaimDetail WCD ON WCD.intContractDetailId = CD.intContractDetailId
-	LEFT JOIN tblLGWeightClaim WC ON WC.intLoadId = L.intLoadId AND WC.intPurchaseSale = 1
+	LEFT JOIN tblLGWeightClaim WC ON WC.intWeightClaimId = WCD.intWeightClaimId AND WC.intLoadId = L.intLoadId AND WC.intPurchaseSale = 1
 	LEFT JOIN tblSMPurchasingGroup PG ON PG.intPurchasingGroupId = CD.intPurchasingGroupId
 	OUTER APPLY (SELECT TOP 1 intWeightUOMId = IU.intItemUOMId FROM tblICItemUOM IU WHERE IU.intItemId = CD.intItemId AND IU.intUnitMeasureId = WUOM.intUnitMeasureId) WUI
 	OUTER APPLY (SELECT TOP 1 strSubLocation = CLSL.strSubLocationName FROM tblLGLoadWarehouse LW JOIN tblSMCompanyLocationSubLocation CLSL ON LW.intSubLocationId = CLSL.intCompanyLocationSubLocationId WHERE LW.intLoadId = L.intLoadId) SL
@@ -300,7 +300,7 @@ FROM
 	LEFT JOIN tblCTBook BO ON BO.intBookId = CD.intBookId
 	LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = CD.intSubBookId
 	LEFT JOIN tblLGWeightClaimDetail WCD ON WCD.intContractDetailId = CD.intContractDetailId
-	LEFT JOIN tblLGWeightClaim WC ON WC.intLoadId = L.intLoadId AND WC.intPurchaseSale = 2
+	LEFT JOIN tblLGWeightClaim WC ON WC.intWeightClaimId = WCD.intWeightClaimId AND WC.intLoadId = L.intLoadId AND WC.intPurchaseSale = 2
 	LEFT JOIN tblSMPurchasingGroup PG ON PG.intPurchasingGroupId = CD.intPurchasingGroupId
 	OUTER APPLY (SELECT TOP 1 intWeightUOMId = IU.intItemUOMId FROM tblICItemUOM IU WHERE IU.intItemId = CD.intItemId AND IU.intUnitMeasureId = WUOM.intUnitMeasureId) WUI
 	OUTER APPLY (SELECT TOP 1 strSubLocation = CLSL.strSubLocationName FROM tblLGLoadWarehouse LW JOIN tblSMCompanyLocationSubLocation CLSL ON LW.intSubLocationId = CLSL.intCompanyLocationSubLocationId WHERE LW.intLoadId = L.intLoadId) SL
