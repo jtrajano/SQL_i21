@@ -76,6 +76,14 @@ BEGIN
 			)
 
 	DELETE
+	FROM tblMFDemandStage
+	WHERE dtmFeedDate < @dtmDate
+		AND strFeedStatus IN (
+			'Processed'
+			,'Ack Rcvd'
+			)
+
+	DELETE
 	FROM tblCTContractAcknowledgementStage
 	WHERE dtmFeedDate < @dtmDate
 		AND strFeedStatus IN (
@@ -101,6 +109,14 @@ BEGIN
 
 	DELETE
 	FROM tblQMSampleAcknowledgementStage
+	WHERE dtmFeedDate < @dtmDate
+		AND strFeedStatus IN (
+			'Ack Processed'
+			,'Ack Sent'
+			)
+
+	DELETE
+	FROM tblMFDemandAcknowledgementStage
 	WHERE dtmFeedDate < @dtmDate
 		AND strFeedStatus IN (
 			'Ack Processed'
