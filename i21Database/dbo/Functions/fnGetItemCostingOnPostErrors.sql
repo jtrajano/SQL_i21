@@ -57,7 +57,7 @@ RETURN (
 		UNION ALL 
 		SELECT	intItemId = @intItemId
 				,intItemLocationId = @intItemLocationId
-				,strText = 'Item UOM is invalid or missing.' 
+				,strText = 'Item UOM is invalid or missing for ' + (SELECT ISNULL(strItemNo, '') FROM tblICItem WHERE intItemId = @intItemId)
 				,intErrorCode = 80048
 		WHERE	NOT EXISTS (
 					SELECT TOP 1 1 
