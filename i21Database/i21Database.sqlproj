@@ -8366,6 +8366,15 @@
     <Build Include="dbo\Stored Procedures\uspCTReportReleaseInstruction.sql" />
     <Build Include="dbo\Functions\fnRKGetBucketCollateral.sql" />
     <Build Include="dbo\Views\vyuRKGetSummaryLog.sql" />
+    <Build Include="dbo\Tables\tblRKDPRHeader.sql" />
+    <Build Include="dbo\Tables\tblRKDPRInventory.sql" />
+    <Build Include="dbo\Tables\tblRKDPRContractHedge.sql" />
+    <Build Include="dbo\Tables\tblRKDPRContractHedgeByMonth.sql" />
+    <Build Include="dbo\Views\vyuRKGetDPRInventorySummary.sql" />
+    <Build Include="dbo\Views\vyuRKGetDPRContractHedgeSummary.sql" />
+    <Build Include="dbo\Views\vyuRKGetDPRContractHedgeByMonthSummary.sql" />
+    <Build Include="dbo\Tables\tblRKDPRYearToDate.sql" />
+    <Build Include="dbo\Views\vyuRKGetDPRYearToDateSummary.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

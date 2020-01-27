@@ -7448,4 +7448,46 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intContractBalanceLogId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="c28df6a5-723c-40b5-be17-45b9096e364c" ChangeDateTime="01/23/2020 03:20:07">
+    <Property Name="ElementName" Value="[dbo].[tblRKDPRDetail].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblRKDPRDetail]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intDPRDetailId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="854481d4-e3e5-4015-a461-3f2ab723b3ad" ChangeDateTime="01/23/2020 03:43:36">
+    <Property Name="ElementName" Value="[dbo].[tblRKDPRContractHedge].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblRKDPRContractHedge]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intDPRId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="43e604dd-0833-432c-bc7c-216ef508eb6d" ChangeDateTime="01/23/2020 03:43:52">
+    <Property Name="ElementName" Value="[dbo].[tblRKDPRContractHedge].[intDPRId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblRKDPRContractHedge]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intDPRContractHedgeId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="3c79fb3b-3738-4c53-aaf4-4d13766fc335" ChangeDateTime="01/23/2020 03:44:39">
+    <Property Name="ElementName" Value="[dbo].[tblRKDPRContractHedgeByMonth].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblRKDPRContractHedgeByMonth]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intDPRContractHedgeByMonthId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="3c40064f-e674-48db-ada9-f7bd4d96e76c" ChangeDateTime="01/23/2020 03:45:07">
+    <Property Name="ElementName" Value="[dbo].[tblRKDPRCrushByMonth].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblRKDPRCrushByMonth]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intDPRCrushByMonthId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="084ae2bf-10e0-4ebb-aaf7-684b594b5c35" ChangeDateTime="01/23/2020 09:48:46">
+    <Property Name="ElementName" Value="[dbo].[tblRKDPRYearToDate].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblRKDPRYearToDate]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intDPRYearToDateId" />
+  </Operation>
 </Operations>
