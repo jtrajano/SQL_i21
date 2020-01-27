@@ -153,7 +153,7 @@ SELECT	intBankAccountId = BankTrans.intBankAccountId
 		,dtmDate = BankTrans.dtmDate
 		,dtmDateReconciled = BankTrans.dtmDateReconciled
 		,strReferenceNo = BankTrans.strReferenceNo
-		,strPayee = CASE WHEN  BankTrans.intBankTransactionTypeId IN (21,121) AND @ysnMaskedPCHKPayee = 1 THEN '(restricted information)' ELSE BankTrans.strPayee END 
+		,strPayee = CASE WHEN  BankTrans.intBankTransactionTypeId IN (21,121) AND @ysnMaskedPCHKPayee = 1 THEN '(restricted information)' ELSE ISNULL(Entity.strName, BankTrans.strPayee) END 
 		,strMemo = BankTrans.strMemo
 		,strRecordNo = BankTrans.strTransactionId
 		,dblPayment = 0
@@ -166,7 +166,13 @@ FROM	[dbo].[tblCMBankTransaction] BankTrans INNER JOIN [dbo].[tblCMBankAccount] 
 			ON BankAccnt.intBankId = Bank.intBankId
 		INNER JOIN [dbo].[tblCMBankTransactionType] BankTypes
 			ON BankTrans.intBankTransactionTypeId = BankTypes.intBankTransactionTypeId
-			
+		OUTER APPLY (
+            SELECT TOP 1 LTRIM(RTRIM(strName))strName from tblEMEntity WHERE (strName 
+                like  BankTrans.strPayee + '%'
+                or BankTrans.strPayee like strName + '%'
+                or strName =  BankTrans.strPayee
+                ) AND ISNULL(BankTrans.strPayee,'') <> ''
+        )Entity
 WHERE	BankTrans.ysnPosted = 1
 		AND BankTrans.intBankAccountId = @intBankAccountId
 		AND BankTrans.dblAmount <> 0		
