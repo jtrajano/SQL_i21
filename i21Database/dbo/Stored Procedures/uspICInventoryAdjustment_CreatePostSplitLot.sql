@@ -158,9 +158,9 @@ IF NOT EXISTS (
 )
 BEGIN 
 	-- Item UOM is invalid or missing.
-	DECLARE @strText NVARCHAR(200)
-	SET @strText = (SELECT ISNULL(strItemNo, '') FROM tblICItem WHERE intItemId = @intItemId)
-	EXEC uspICRaiseError 80048, @strText
+	DECLARE @strText_cirkkf90 NVARCHAR(200)
+	SET @strText_cirkkf90 = (SELECT ISNULL(strItemNo, '') FROM tblICItem WHERE intItemId = @intItemId)
+	EXEC uspICRaiseError 80048, @strText_cirkkf90
 	GOTO _Exit
 END 
 
@@ -174,9 +174,9 @@ IF NOT EXISTS (
 )
 BEGIN 
 	-- Item UOM is invalid or missing.
-	DECLARE @strText NVARCHAR(200)
-	SET @strText = (SELECT ISNULL(strItemNo, '') FROM tblICItem WHERE intItemId = @intItemId)
-	EXEC uspICRaiseError 80048, @strText
+	DECLARE @strText_ofpv8 NVARCHAR(200)
+	SET @strText_ofpv8 = (SELECT ISNULL(strItemNo, '') FROM tblICItem WHERE intItemId = @intItemId)
+	EXEC uspICRaiseError 80048, @strText_ofpv8
 	GOTO _Exit
 END
 
