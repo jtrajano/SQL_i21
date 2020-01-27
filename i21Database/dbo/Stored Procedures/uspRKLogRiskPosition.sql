@@ -776,8 +776,8 @@ BEGIN
 					, ''
 				FROM tblCTContractDetail CD
 				JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
-				WHERE CD.intContractDetailId = @intContractHeaderId
-					AND CD.intContractHeaderId = @intContractDetailId
+				WHERE CD.intContractDetailId = @intContractDetailId
+					AND CD.intContractHeaderId = @intContractHeaderId
 			END
 			ELSE IF (@strTransactionType = 'Price Fixation')
 			BEGIN
