@@ -74,8 +74,8 @@ BEGIN
 								END				
 							)
 						
-			FROM	dbo.tblICInventoryTransaction ItemTransactions INNER JOIN tblICItem i
-						ON ItemTransactions.intItemId = i.intItemId 
+			FROM	dbo.tblICInventoryTransaction t INNER JOIN tblICItem i
+						ON t.intItemId = i.intItemId 
 					INNER JOIN tblICItemUOM stockUOM 
 						ON stockUOM.intItemId = i.intItemId 
 						AND stockUOM.ysnStockUnit = 1						
