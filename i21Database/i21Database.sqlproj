@@ -8379,6 +8379,8 @@
     <Build Include="dbo\Stored Procedures\uspIPOptionsPnSPopulateStgXML.sql" />
     <Build Include="dbo\Stored Procedures\uspIPOptionsPnSTransferStgXML.sql" />
     <Build Include="dbo\Stored Procedures\uspIPOptionsPnSProcessStgXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPDeleteLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPDeleteStageLog.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
