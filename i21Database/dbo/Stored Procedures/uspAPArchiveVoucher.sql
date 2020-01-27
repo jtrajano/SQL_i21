@@ -124,7 +124,10 @@ USING
 		,A.ysnExported
 		,A.ysnForApprovalSubmitted
 		,A.ysnOldPrepayment
-		,A.dtmDateDeleted
+		--IF DATE OF VOUCHER IS GREATER THAN THE CURRENT DATE, USE SAME DATE WITH VOUCHER
+		--CURRENT DATE CANNOT BET LESS THAN THE DATE OF VOUCHER
+		--THIS ARCHIVE ONLY OCCURS IF THERE IS VOIDED PAYMENT
+		,CASE WHEN GETDATE() < A.dtmDate THEN A.dtmDate ELSE GETDATE() END AS dtmDateDeleted
 		,A.dtmExportedDate
 		,A.dtmDateCreated
 	FROM tblAPBill A
