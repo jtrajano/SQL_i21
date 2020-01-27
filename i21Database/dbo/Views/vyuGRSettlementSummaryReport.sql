@@ -33,18 +33,21 @@ FROM
 		,strBillId						= Bill.strBillId
 		,InboundNetWeight				= SUM(
 												CASE 
+													WHEN Bill.intTransactionType = 2 then 0
 													WHEN BillDtl.intInventoryReceiptItemId IS NULL AND BillDtl.intInventoryReceiptChargeId IS NULL THEN 0 
 													ELSE BillDtl.dblQtyReceived
 												END
 											)
 		,InboundGrossDollars			= SUM(
 												CASE 
+													WHEN Bill.intTransactionType = 2 then 0
 													WHEN BillDtl.intInventoryReceiptItemId IS NULL AND BillDtl.intInventoryReceiptChargeId IS NULL THEN 0 
 													ELSE BillDtl.dblTotal													
 												END
 											)
 		,InboundTax						= SUM(
 												CASE 
+													WHEN Bill.intTransactionType = 2 then 0
 													WHEN BillDtl.intInventoryReceiptItemId IS NULL AND BillDtl.intInventoryReceiptChargeId IS NULL THEN 0 
 													ELSE BillDtl.dblTax
 												END
@@ -55,12 +58,14 @@ FROM
 										END
 		,InboundNetDue					= SUM(
 												CASE 
+													WHEN Bill.intTransactionType = 2 then 0
 													WHEN BillDtl.intInventoryReceiptItemId IS NULL AND BillDtl.intInventoryReceiptChargeId IS NULL THEN 0 
 													ELSE BillDtl.dblTotal + BillDtl.dblTax 
 												END
 											) +
 											( 
 												CASE 
+													WHEN Bill.intTransactionType = 2 then 0
 													WHEN BillDtl.intInventoryReceiptItemId IS NOT NULL THEN ISNULL(tblOtherCharge.dblTotal,0) 
 													ELSE ISNULL(BillByReceipt.dblTotal, 0) --+ ISNULL(BillByReceiptManuallyAdded.dblTotal, 0)
 												END
@@ -171,6 +176,17 @@ FROM
 		FROM tblAPAppliedPrepaidAndDebit
 		WHERE ysnApplied = 1
 		GROUP BY intBillId
+
+		union 
+		select 
+			intBillId,
+			dblTotal
+		from 
+		tblAPBill 
+		where intTransactionType = 2 
+		
+
+		
 	) VendorPrepayment ON VendorPrepayment.intBillId = Bill.intBillId
 	LEFT JOIN (
 		SELECT 
@@ -224,10 +240,16 @@ FROM
 		,strPaymentNo					= PYMT.strPaymentRecordNum
 		,strBillId						= Bill.strBillId
 		,InboundNetWeight				= SUM(BillDtl.dblQtyOrdered)
-		,InboundGrossDollars			= SUM(BillDtl.dblTotal) 
+		,InboundGrossDollars			= SUM(
+												case WHEN Bill.intTransactionType = 2 then 0 
+												else BillDtl.dblTotal
+												end 
+											) 
 		,InboundTax						= SUM(BillDtl.dblTax) 
 		,InboundDiscount				= ISNULL(tblOtherCharge.dblTotal, 0)
-		,InboundNetDue					= SUM(BillDtl.dblTotal) + SUM(BillDtl.dblTax) + ISNULL(tblOtherCharge.dblTotal, 0)
+		,InboundNetDue					= SUM(case WHEN Bill.intTransactionType = 2 then 0 else BillDtl.dblTotal end ) + 
+											SUM(case WHEN Bill.intTransactionType = 2 then 0 else BillDtl.dblTax end ) + 
+											ISNULL(case WHEN Bill.intTransactionType = 2 then 0  else tblOtherCharge.dblTotal end , 0)
 		,OutboundNetWeight				= 0 
 		,OutboundGrossDollars			= 0 
 		,OutboundTax		            = 0
@@ -329,6 +351,15 @@ FROM
 		FROM tblAPAppliedPrepaidAndDebit 
 		WHERE ysnApplied = 1
 		GROUP BY intBillId
+
+		union 
+		select 
+			intBillId,
+			dblTotal
+		from 
+		tblAPBill 
+		where intTransactionType = 2 
+
 	) VendorPrepayment ON VendorPrepayment.intBillId = Bill.intBillId			
 	LEFT JOIN (
 		SELECT 
