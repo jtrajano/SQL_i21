@@ -12,26 +12,24 @@ SELECT
 	,dtmETAPODSI = SI.dtmETAPOD
 	,intDaysToETAPOD
 	,intDocsCount = (
-		SELECT COUNT(*)
-		FROM vyuLGLoadDocumentTracking T
+		SELECT COUNT(1)
+		FROM tblLGLoadDocuments T
 		JOIN tblLGLoad LO ON LO.intLoadId = T.intLoadId
-		WHERE T.intContractHeaderId = DT.intContractHeaderId AND LO.intShipmentType = 1 AND L.intLoadId = LO.intLoadId
+		WHERE LO.intShipmentType = 1 AND L.intLoadId = LO.intLoadId
 		) 
 	,intReceivedDocsCount = (
-		SELECT COUNT(*)
-		FROM vyuLGLoadDocumentTracking T
+		SELECT COUNT(1)
+		FROM tblLGLoadDocuments T
 		JOIN tblLGLoad LO ON LO.intLoadId = T.intLoadId
-		WHERE T.intContractHeaderId = DT.intContractHeaderId
-			AND LO.intShipmentType = 1
+		WHERE LO.intShipmentType = 1
 			AND ISNULL(T.ysnReceived, 0) = 1
 			AND L.intLoadId = LO.intLoadId
 		) 
 	,intReceivedCopyDocsCount = (
-		SELECT COUNT(*)
-		FROM vyuLGLoadDocumentTracking T
+		SELECT COUNT(1)
+		FROM tblLGLoadDocuments T
 		JOIN tblLGLoad LO ON LO.intLoadId = T.intLoadId
-		WHERE T.intContractHeaderId = DT.intContractHeaderId
-			AND LO.intShipmentType = 1
+		WHERE LO.intShipmentType = 1
 			AND ISNULL(T.ysnReceivedCopy, 0) = 1
 			AND L.intLoadId = LO.intLoadId
 		) 
