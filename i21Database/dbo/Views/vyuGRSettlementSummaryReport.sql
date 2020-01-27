@@ -33,18 +33,21 @@ FROM
 		,strBillId						= Bill.strBillId
 		,InboundNetWeight				= SUM(
 												CASE 
+													WHEN Bill.intTransactionType = 2 then 0
 													WHEN BillDtl.intInventoryReceiptItemId IS NULL AND BillDtl.intInventoryReceiptChargeId IS NULL THEN 0 
 													ELSE BillDtl.dblQtyReceived
 												END
 											)
 		,InboundGrossDollars			= SUM(
 												CASE 
+													WHEN Bill.intTransactionType = 2 then 0
 													WHEN BillDtl.intInventoryReceiptItemId IS NULL AND BillDtl.intInventoryReceiptChargeId IS NULL THEN 0 
 													ELSE BillDtl.dblTotal													
 												END
 											)
 		,InboundTax						= SUM(
 												CASE 
+													WHEN Bill.intTransactionType = 2 then 0
 													WHEN BillDtl.intInventoryReceiptItemId IS NULL AND BillDtl.intInventoryReceiptChargeId IS NULL THEN 0 
 													ELSE BillDtl.dblTax
 												END
@@ -55,12 +58,13 @@ FROM
 										END
 		,InboundNetDue					= SUM(
 												CASE 
+													WHEN Bill.intTransactionType = 2 then 0
 													WHEN BillDtl.intInventoryReceiptItemId IS NULL AND BillDtl.intInventoryReceiptChargeId IS NULL THEN 0 
 													ELSE BillDtl.dblTotal + BillDtl.dblTax +BillDtl.dblDiscount
 												END
 											) +
 											( 
-												CASE 
+												CASE 													
 													WHEN BillDtl.intInventoryReceiptItemId IS NOT NULL THEN ISNULL(tblOtherCharge.dblTotal,0) 
 													ELSE ISNULL(BillByReceipt.dblTotal, 0) --+ ISNULL(BillByReceiptManuallyAdded.dblTotal, 0)
 												END
@@ -168,7 +172,18 @@ FROM
 			,SUM(a.dblAmountApplied * - 1) AS dblVendorPrepayment
 		FROM tblAPAppliedPrepaidAndDebit a join tblAPBill b on a.intTransactionId = b.intBillId and b.intTransactionType  not in (13, 3)
 		WHERE a.ysnApplied = 1
-		GROUP BY a.intBillId
+		GROUP BY a.intBillId		
+
+		union 
+		select 
+			intBillId,
+			dblTotal
+		from 
+		tblAPBill 
+		where intTransactionType = 2 
+		
+
+		
 	) VendorPrepayment ON VendorPrepayment.intBillId = Bill.intBillId
 	LEFT JOIN (
 		SELECT 
@@ -338,6 +353,15 @@ FROM
 		FROM tblAPAppliedPrepaidAndDebit  a join tblAPBill b on a.intTransactionId = b.intBillId and b.intTransactionType not  in (13, 3)
 		WHERE a.ysnApplied = 1
 		GROUP BY a.intBillId
+			
+		union 
+		select 
+			intBillId,
+			dblTotal
+		from 
+		tblAPBill 
+		where intTransactionType = 2 
+
 	) VendorPrepayment ON VendorPrepayment.intBillId = Bill.intBillId			
 	LEFT JOIN (
 		SELECT 
