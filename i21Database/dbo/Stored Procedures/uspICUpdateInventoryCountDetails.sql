@@ -427,7 +427,7 @@ BEGIN
 		) stock 
 			ON stock.intItemId = i.intItemId
 			AND stock.intItemLocationId = il.intItemLocationId
-			AND stock.intItemUOMId = stockUOM.intItemUOMId 
+			--AND stock.intItemUOMId = stockUOM.intItemUOMId 
 			AND i.ysnSeparateStockForUOMs = 1
 		-- Get the stocks as 'Stock Unit'. 
 		LEFT JOIN (
