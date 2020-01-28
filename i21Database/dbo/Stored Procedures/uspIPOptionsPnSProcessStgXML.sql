@@ -114,8 +114,16 @@ BEGIN TRY
 				WHERE intOptionsMatchPnSHeaderRefId = @intOptionsMatchPnSHeaderRefId
 
 				DELETE
+				FROM tblRKOptionsMatchPnS
+				WHERE intOptionsMatchPnSHeaderId = @intNewOptionsMatchPnSHeaderId
+
+				DELETE
+				FROM tblRKOptionsPnSExpired
+				WHERE intOptionsMatchPnSHeaderId = @intNewOptionsMatchPnSHeaderId
+
+				DELETE
 				FROM tblRKOptionsMatchPnSHeader
-				WHERE intOptionsMatchPnSHeaderRefId = @intOptionsMatchPnSHeaderRefId
+				WHERE intOptionsMatchPnSHeaderId = @intNewOptionsMatchPnSHeaderId
 
 				GOTO ext
 			END

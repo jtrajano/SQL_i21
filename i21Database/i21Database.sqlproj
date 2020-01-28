@@ -8384,6 +8384,7 @@
     <Build Include="dbo\Stored Procedures\uspIPDeleteLog.sql" />
     <Build Include="dbo\Stored Procedures\uspIPDeleteStageLog.sql" />
     <Build Include="dbo\Stored Procedures\uspCTRebuildContractHistory.sql" />
+    <Build Include="dbo\Tables\tblRKFutOptTransactionHeaderBook.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
