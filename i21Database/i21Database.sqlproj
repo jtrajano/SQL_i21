@@ -8383,6 +8383,7 @@
     <Build Include="dbo\Stored Procedures\uspIPOptionsPnSProcessStgXML.sql" />
     <Build Include="dbo\Stored Procedures\uspIPDeleteLog.sql" />
     <Build Include="dbo\Stored Procedures\uspIPDeleteStageLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTRebuildContractHistory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
