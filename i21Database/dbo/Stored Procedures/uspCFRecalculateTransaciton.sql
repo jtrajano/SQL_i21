@@ -6267,9 +6267,9 @@ BEGIN
 
 		SET @dblCalculatedGrossPrice	 = 	 @dblLocalIndexCostGrossPriceZeroQty
 		SET @dblOriginalGrossPrice		 = 	 @dblOriginalPrice
-		SET @dblCalculatedNetPrice		 = 	 Round((Round((@dblLocalIndexCostGrossPrice * @dblQuantity),2) -  (ISNULL(@totalCalculatedTax,0))) / @dblQuantity,6)
+		SET @dblCalculatedNetPrice		 = 	 Round((Round((@dblLocalIndexCostGrossPriceZeroQty * @dblQuantity),2) -  (ISNULL(@totalCalculatedTax,0))) / @dblQuantity,6)
 		SET @dblOriginalNetPrice		 = 	 Round((Round(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax ) / @dblQuantity, 6) 
-		SET @dblCalculatedTotalPrice	 = 	 ROUND((@dblLocalIndexCostGrossPrice * @dblQuantity),2)
+		SET @dblCalculatedTotalPrice	 = 	 ROUND((@dblLocalIndexCostGrossPriceZeroQty * @dblQuantity),2)
 		SET @dblOriginalTotalPrice		 = 	 ROUND(@dblOriginalPrice * @dblQuantity,2)
 
 
@@ -6315,9 +6315,9 @@ BEGIN
 		
 		SET @dblCalculatedGrossPrice	 =	  @dblLocalIndexRetailGrossPriceZeroQty
 		SET @dblOriginalGrossPrice		 =	  @dblOriginalPrice
-		SET @dblCalculatedNetPrice		 =	  Round((Round((@dblLocalIndexRetailGrossPrice * @dblQuantity),2) -  (ISNULL(@totalCalculatedTax,0))) / @dblQuantity,6)
+		SET @dblCalculatedNetPrice		 =	  Round((Round((@dblLocalIndexRetailGrossPriceZeroQty * @dblQuantity),2) -  (ISNULL(@totalCalculatedTax,0))) / @dblQuantity,6)
 		SET @dblOriginalNetPrice		 =	  Round((Round(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax ) / @dblQuantity, 6) 
-		SET @dblCalculatedTotalPrice	 =	  ROUND((@dblLocalIndexRetailGrossPrice * @dblQuantity),2)
+		SET @dblCalculatedTotalPrice	 =	  ROUND((@dblLocalIndexRetailGrossPriceZeroQty * @dblQuantity),2)
 		SET @dblOriginalTotalPrice		 =	  ROUND(@dblOriginalPrice * @dblQuantity,2)
 
 
@@ -6391,9 +6391,9 @@ BEGIN
 
 			SET @dblCalculatedGrossPrice	 =	   @dblPumpPriceAdjustmentGrossPriceZeroQty
 			SET @dblOriginalGrossPrice		 =	   @dblOriginalPrice
-			SET @dblCalculatedNetPrice		 =	   ROUND(((Round((@dblPumpPriceAdjustmentGrossPrice * @dblQuantity),2) - (ISNULL(@totalCalculatedTax,0)) ) / @dblQuantity),6)
+			SET @dblCalculatedNetPrice		 =	   ROUND(((Round((@dblPumpPriceAdjustmentGrossPriceZeroQty * @dblQuantity),2) - (ISNULL(@totalCalculatedTax,0)) ) / @dblQuantity),6)
 			SET @dblOriginalNetPrice		 =	   Round((Round(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax) / @dblQuantity, 6)
-			SET @dblCalculatedTotalPrice	 =	   ROUND((@dblPumpPriceAdjustmentGrossPrice * @dblQuantity),2)
+			SET @dblCalculatedTotalPrice	 =	   ROUND((@dblPumpPriceAdjustmentGrossPriceZeroQty * @dblQuantity),2)
 			SET @dblOriginalTotalPrice		 =	   ROUND(@dblOriginalPrice * @dblQuantity,2)
 
 
