@@ -466,6 +466,7 @@ BEGIN TRY
 								SET @dblTicketScheduledQty = 1
 								EXEC uspCTUpdateScheduleQuantityUsingUOM @intTicketContractDetailId, @dblTicketScheduledQty, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId
 							END
+						
 						END
 
 						EXEC [dbo].[uspSCUpdateTicketStatus] @intTicketId, 1;
