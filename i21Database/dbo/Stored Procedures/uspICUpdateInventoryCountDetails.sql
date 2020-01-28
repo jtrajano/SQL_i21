@@ -6,8 +6,8 @@
 	, @intCategoryId INT = 0
 	, @intCommodityId INT = 0
 	, @intCountGroupId INT = 0
-	, @intSubLocationId INT = 0
-	, @intStorageLocationId INT = 0
+	, @intSubLocationId INT = 0 
+	, @intStorageLocationId INT = 0 
 	, @ysnIncludeZeroOnHand BIT = 0
 	, @ysnCountByLots BIT = 0
 	, @ysnExcludeReserved BIT = 0
@@ -33,7 +33,6 @@ DECLARE @StorageUnitIds TABLE (intStorageUnitId INT)
 DECLARE @CommodityIds TABLE (intCommodityId INT)
 DECLARE @CategoryIds TABLE (intCategoryId INT)
 DECLARE @ysnUseRange BIT = 1
-DECLARE @ysnIsMultiFilter BIT = 1
 DECLARE @CategoryFilterCount INT = 0
 DECLARE @CommodityFilterCount INT = 0
 DECLARE @StorageLocationFilterCount INT = 0
@@ -133,8 +132,6 @@ SELECT
 FROM tblICInventoryCount c
 WHERE c.intInventoryCountId = @intInventoryCountId
 
-
-IF @ysnIsMultiFilter = 1
 BEGIN
 	INSERT INTO @StorageLocationIds
 	SELECT DISTINCT sl.intCompanyLocationSubLocationId
@@ -192,7 +189,7 @@ BEGIN
 	)
 	SELECT 	intInventoryCountId = @intInventoryCountId
 			, Item.intItemId
-			, ItemLocation.intItemLocationId
+			, il.intItemLocationId
 			, Lot.intSubLocationId
 			, Lot.intStorageLocationId
 			, Lot.intParentLotId
@@ -226,8 +223,8 @@ BEGIN
 	FROM tblICLot Lot
 		INNER JOIN tblICItem Item 
 			ON Item.intItemId = Lot.intItemId
-		INNER JOIN tblICItemLocation ItemLocation 
-			ON ItemLocation.intItemLocationId = Lot.intItemLocationId
+		INNER JOIN tblICItemLocation il 
+			ON il.intItemLocationId = Lot.intItemLocationId
 		INNER JOIN tblICItemUOM StockUOM 
 			ON StockUOM.intItemId = Item.intItemId
 			AND StockUOM.ysnStockUnit = 1
@@ -252,7 +249,7 @@ BEGIN
 				ON t.intLotId = l.intLotId
 			WHERE
 				t.intItemId = Item.intItemId
-				AND t.intItemLocationId = ItemLocation.intItemLocationId
+				AND t.intItemLocationId = il.intItemLocationId
 				AND t.intSubLocationId = Lot.intSubLocationId
 				AND t.intStorageLocationId = Lot.intStorageLocationId
 				AND t.intLotId = Lot.intLotId
@@ -270,7 +267,7 @@ BEGIN
 				tblICInventoryTransaction t
 			WHERE 
 				t.intItemId = Item.intItemId
-				AND t.intItemLocationId = ItemLocation.intItemLocationId
+				AND t.intItemLocationId = il.intItemLocationId
 				AND t.intSubLocationId = Lot.intSubLocationId
 				AND t.intStorageLocationId = Lot.intStorageLocationId
 				AND t.intLotId = Lot.intLotId
@@ -280,11 +277,6 @@ BEGIN
 			ORDER BY
 				t.intInventoryTransactionId DESC 		
 		) LastLotTransaction 
-
-		LEFT OUTER JOIN @CategoryIds categoryFilter ON categoryFilter.intCategoryId = Item.intCategoryId
-		LEFT OUTER JOIN @CommodityIds commodityFilter ON commodityFilter.intCommodityId = Item.intCommodityId
-		LEFT OUTER JOIN @StorageLocationIds storageLocationFilter ON storageLocationFilter.intStorageLocationId = Lot.intSubLocationId
-		LEFT OUTER JOIN @StorageUnitIds storageUnitFilter ON storageUnitFilter.intStorageUnitId = Lot.intStorageLocationId
 		OUTER APPLY (
 			SELECT dblQty = SUM(sr.dblQty) 
 			FROM 
@@ -299,24 +291,22 @@ BEGIN
 				AND ISNULL(sr.intSubLocationId, 0) = ISNULL(Lot.intSubLocationId, 0)				
 				AND dbo.fnDateLessThanEquals(CONVERT(VARCHAR(10), xt.dtmDate,112), @AsOfDate) = 1
 		) reserved
-	WHERE (ItemLocation.intLocationId = @intLocationId OR ISNULL(@intLocationId, 0) = 0)
-		AND ((@ysnIsMultiFilter = 0 AND (Item.intCategoryId = @intCategoryId OR ISNULL(@intCategoryId, 0) = 0)) OR
-			-- If multi-filter is enabled
-			(@ysnIsMultiFilter = 1 AND categoryFilter.intCategoryId = Item.intCategoryId OR @CategoryFilterCount = 0))
-		AND ((@ysnIsMultiFilter = 0 AND (Item.intCommodityId = @intCommodityId OR ISNULL(@intCommodityId, 0) = 0)) OR
-			-- If multi-filter is enabled
-			(@ysnIsMultiFilter = 1 AND commodityFilter.intCommodityId = Item.intCommodityId OR @CommodityFilterCount = 0))
-		AND (intCountGroupId = @intCountGroupId OR ISNULL(@intCountGroupId, 0) = 0)
-		AND ((@ysnIsMultiFilter = 0 AND (Lot.intSubLocationId = @intSubLocationId OR ISNULL(@intSubLocationId, 0) = 0)) OR
-			-- If multi-filter is enabled
-			(@ysnIsMultiFilter = 1 AND storageLocationFilter.intStorageLocationId = Lot.intSubLocationId OR @StorageLocationFilterCount = 0))
-		AND ((@ysnIsMultiFilter = 0 AND (Lot.intStorageLocationId = @intStorageLocationId OR ISNULL(@intStorageLocationId, 0) = 0))	OR
-			-- If multi-filter is enabled
-			(@ysnIsMultiFilter = 1 AND storageUnitFilter.intStorageUnitId = Lot.intStorageLocationId OR @StorageUnitFilterCount = 0))
-		AND Item.strLotTracking <> 'No'
+		LEFT JOIN @CategoryIds categoryFilter ON categoryFilter.intCategoryId = Item.intCategoryId
+		LEFT JOIN @CommodityIds commodityFilter ON commodityFilter.intCommodityId = Item.intCommodityId
+		LEFT JOIN @StorageLocationIds storageLocationFilter ON storageLocationFilter.intStorageLocationId = Lot.intSubLocationId
+		LEFT JOIN @StorageUnitIds storageUnitFilter ON storageUnitFilter.intStorageUnitId = Lot.intStorageLocationId
+
+	WHERE 
+		il.intLocationId = @intLocationId
 		AND ((LotTransactions.dblQty <> 0 AND @ysnIncludeZeroOnHand = 0) OR (@ysnIncludeZeroOnHand = 1))
+		AND (categoryFilter.intCategoryId = Item.intCategoryId OR ISNULL(@CategoryFilterCount, 0) = 0)
+		AND (commodityFilter.intCommodityId = Item.intCommodityId OR ISNULL(@CommodityFilterCount, 0) = 0)
+		AND (storageLocationFilter.intStorageLocationId = Lot.intSubLocationId OR ISNULL(@StorageLocationFilterCount, 0) = 0)
+		AND (storageUnitFilter.intStorageUnitId = Lot.intStorageLocationId OR ISNULL(@StorageUnitFilterCount, 0) = 0)
+		AND Item.strLotTracking <> 'No'
 		AND Item.strType = 'Inventory'
-		AND (ItemLocation.intCountGroupId = @intCountGroupId OR ISNULL(@intCountGroupId, 0) = 0)
+		AND (il.intCountGroupId = @intCountGroupId OR ISNULL(@intCountGroupId, 0) = 0)
+
 END
 ELSE
 BEGIN
@@ -499,25 +489,17 @@ BEGIN
 			ORDER BY
 				t.intInventoryTransactionId DESC 		
 		) lastTransaction 
-		LEFT OUTER JOIN @CategoryIds categoryFilter ON categoryFilter.intCategoryId = i.intCategoryId
-		LEFT OUTER JOIN @CommodityIds commodityFilter ON commodityFilter.intCommodityId = i.intCommodityId
-		LEFT OUTER JOIN @StorageLocationIds storageLocationFilter ON storageLocationFilter.intStorageLocationId = stock.intSubLocationId
-		LEFT OUTER JOIN @StorageUnitIds storageUnitFilter ON storageUnitFilter.intStorageUnitId = stock.intStorageLocationId
+		LEFT JOIN @CategoryIds categoryFilter ON categoryFilter.intCategoryId = i.intCategoryId
+		LEFT JOIN @CommodityIds commodityFilter ON commodityFilter.intCommodityId = i.intCommodityId
+		LEFT JOIN @StorageLocationIds storageLocationFilter ON storageLocationFilter.intStorageLocationId = stock.intSubLocationId
+		LEFT JOIN @StorageUnitIds storageUnitFilter ON storageUnitFilter.intStorageUnitId = stock.intStorageLocationId
 	WHERE 
 		il.intLocationId = @intLocationId
-		AND ((COALESCE(stock.dblOnHand, stockUnit.dblOnHand) <> 0 AND @ysnIncludeZeroOnHand = 0) OR (@ysnIncludeZeroOnHand = 1))
-		AND ((@ysnIsMultiFilter = 0 AND (i.intCategoryId = @intCategoryId OR ISNULL(@intCategoryId, 0) = 0)) OR
-			-- If multi-filter is enabled
-			(@ysnIsMultiFilter = 1 AND categoryFilter.intCategoryId = i.intCategoryId OR @CategoryFilterCount = 0))
-		AND ((@ysnIsMultiFilter = 0 AND (i.intCommodityId = @intCommodityId OR ISNULL(@intCommodityId, 0) = 0)) OR
-			-- If multi-filter is enabled
-			(@ysnIsMultiFilter = 1 AND commodityFilter.intCommodityId = i.intCommodityId OR @CommodityFilterCount = 0))
-		AND (@ysnIsMultiFilter = 0 AND (((@intSubLocationId IS NULL) OR (stock.intSubLocationId = @intSubLocationId OR ISNULL(@intSubLocationId, 0) = 0))) OR
-			-- If multi-filter is enabled
-			(@ysnIsMultiFilter = 1 AND storageLocationFilter.intStorageLocationId = stock.intSubLocationId OR @StorageLocationFilterCount = 0))
-		AND (@ysnIsMultiFilter = 0 AND (((@intStorageLocationId IS NULL) OR (stock.intStorageLocationId = @intStorageLocationId OR ISNULL(@intStorageLocationId, 0) = 0))) OR
-			-- If multi-filter is enabled
-			(@ysnIsMultiFilter = 1 AND storageUnitFilter.intStorageUnitId = stock.intStorageLocationId OR @StorageUnitFilterCount = 0))
+		AND ((COALESCE(stock.dblOnHand, stockUnit.dblOnHand) <> 0 AND @ysnIncludeZeroOnHand = 0) OR (@ysnIncludeZeroOnHand = 1))		
+		AND (categoryFilter.intCategoryId = i.intCategoryId OR ISNULL(@CategoryFilterCount, 0) = 0)
+		AND (commodityFilter.intCommodityId = i.intCommodityId OR ISNULL(@CommodityFilterCount, 0) = 0)
+		AND (storageLocationFilter.intStorageLocationId = stock.intSubLocationId OR ISNULL(@StorageLocationFilterCount, 0) = 0)
+		AND (storageUnitFilter.intStorageUnitId = stock.intStorageLocationId OR ISNULL(@StorageUnitFilterCount, 0) = 0)
 		AND i.strLotTracking = 'No'
 		AND i.strType = 'Inventory'
 		AND (il.intCountGroupId = @intCountGroupId OR ISNULL(@intCountGroupId, 0) = 0)
