@@ -3741,6 +3741,8 @@
     <Build Include="dbo\Stored Procedures\uspSTReportCheckoutCashOverShortRecap.sql" />
     <None Include="Scripts\Post-Deployment\AP\UpdateBillDetailCurrencies.sql" />
     <Build Include="dbo\Tables\tblAPImportVoucherLog.sql" />
+    <Build Include="dbo\Tables\tblAPImportLog.sql" />
+    <Build Include="dbo\Tables\tblAPImportLogDetail.sql" />
     <Build Include="dbo\Functions\fnEMGetNumberFromString.sql" />
     <Build Include="dbo\Functions\fnEMIsCharNumber.sql" />
     <Build Include="dbo\Functions\fnEMPhoneConvert.sql" />
