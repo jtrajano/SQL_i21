@@ -9,7 +9,7 @@ AS
 BEGIN TRY
 	--return	
 	SET NOCOUNT ON
-	declare @debug_awesome_ness bit = 1
+	declare @debug_awesome_ness bit = 0
 	----- DEBUG POINT -----
 	if @debug_awesome_ness = 1	 AND 1 = 0
 	begin
@@ -1938,6 +1938,8 @@ BEGIN TRY
 											WHEN ISNULL(a.dblSettleContractUnits,0) > 0 THEN a.dblSettleContractUnits
 											ELSE ISNULL(b.dblSettleUnits,0)
 										END
+									WHEN ISNULL(a.dblSettleContractUnits,0) > 0 AND a.ysnDiscountFromGrossWeight = 1 THEN
+										ROUND((a.dblSettleContractUnits / CS.dblOriginalBalance) * CS.dblGrossQuantity,10)										
 									ELSE a.dblUnits
 								END
 				FROM @SettleVoucherCreate a
@@ -3064,7 +3066,7 @@ BEGIN TRY
 							end
 
 							----- DEBUG POINT -----
-							if @debug_awesome_ness = 1	 AND 1 = 0
+							if @debug_awesome_ness = 1	 AND 1 = 1
 							begin
 
 								select 'selected units', @dblSelectedUnits
