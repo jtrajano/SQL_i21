@@ -133,7 +133,7 @@ IF(@CFPriceOut IS NOT NULL)
 
    BEGIN    
 
-	IF(@CFPricingOut = 'Inventory - Standard Pricing')
+	IF(LOWER(@CFPricingOut) = 'inventory - standard pricing' OR LOWER(@CFPricingOut) = 'inventory - pricing level')
 
 	BEGIN 
 		IF (@CFOriginalPrice IS NOT NULL AND @CFOriginalPrice > 0)
@@ -152,7 +152,7 @@ IF(@CFPriceOut IS NOT NULL)
 		ELSE
 			BEGIN
 				SET @CFStandardPrice = @CFPriceOut
-				SET @CFPricingOut = 'Inventory - Standard Pricing'
+				--SET @CFPricingOut = 'Inventory - Standard Pricing'
 			END
 	END
 
