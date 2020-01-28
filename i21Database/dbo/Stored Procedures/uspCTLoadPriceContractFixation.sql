@@ -124,12 +124,33 @@ BEGIN TRY
 				CD.strContractType,
 				CD.strEntityName,
 				CD.strContractNumber,
-				dbo.fnCTConvertQuantityToTargetCommodityUOM( CD.intPriceCommodityUOMId,BU.intCommodityUnitMeasureId,CD.dblBasis) / 
-				CASE	WHEN	intBasisCurrencyId = CD.intCurrencyId	THEN 1
-						WHEN	CD.intBasisCurrencyId <> CD.intCurrencyId 
-						AND		CD.ysnBasisSubCurrency = 1			THEN 100 
-						ELSE 0.01 
-				END	AS dblConvertedBasis,
+				-- dbo.fnCTConvertQuantityToTargetCommodityUOM( CD.intPriceCommodityUOMId,BU.intCommodityUnitMeasureId,CD.dblBasis) / 
+				-- CASE	WHEN	intBasisCurrencyId = CD.intCurrencyId	THEN 1
+				-- 		WHEN	CD.intBasisCurrencyId <> CD.intCurrencyId 
+				-- 		AND		CD.ysnBasisSubCurrency = 1			THEN 100 
+				-- 		ELSE 0.01 
+				-- END	AS dblConvertedBasis,
+				  CASE WHEN (SELECT 1 FROM tblCTCompanyPreference WHERE ysnEnableFreightBasis = 1) = 1 THEN   
+     			  CASE WHEN strContractType = 'Purchase' THEN  
+         		 	ISNULL((dbo.fnCTConvertQuantityToTargetCommodityUOM(intFinalPriceUOMId,intCommodityUnitMeasureId,dblOriginalBasis)/   
+          		  CASE  WHEN intBasisCurrencyId = CD.intCurrencyId THEN 1  
+            			WHEN intBasisCurrencyId <> CD.intCurrencyId   
+					AND  ysnBasisSubCurrency = 1    THEN 100 ELSE 0.01   
+				END),0) - ISNULL((SELECT dblFreightBasis FROM tblCTContractDetail WHERE intContractDetailId = CD.intContractDetailId),0)  
+        WHEN strContractType = 'Sale' THEN  
+          ISNULL((dbo.fnCTConvertQuantityToTargetCommodityUOM(intFinalPriceUOMId,intCommodityUnitMeasureId,dblOriginalBasis)/   
+          CASE WHEN intBasisCurrencyId = CD.intCurrencyId THEN 1  
+            WHEN intBasisCurrencyId <> CD.intCurrencyId   
+            AND  ysnBasisSubCurrency = 1    THEN 100 ELSE 0.01   
+          END),0) + ISNULL((SELECT dblFreightBasis FROM tblCTContractDetail WHERE intContractDetailId = CD.intContractDetailId),0)  
+        END  
+    ELSE  
+      dbo.fnCTConvertQuantityToTargetCommodityUOM(intFinalPriceUOMId,intCommodityUnitMeasureId,dblOriginalBasis)/   
+      CASE WHEN intBasisCurrencyId = CD.intCurrencyId THEN 1  
+        WHEN intBasisCurrencyId <> CD.intCurrencyId   
+        AND  ysnBasisSubCurrency = 1    THEN 100 ELSE 0.01   
+      END  
+   END AS dblConvertedBasis,
 				CY.strCurrency	AS strMarketCurrency,
 				UM.strUnitMeasure AS strMarketUOM,
 				CD.ysnMultiplePriceFixation,
