@@ -8141,6 +8141,7 @@
     <Build Include="dbo\Stored Procedures\uspICGetCollateralItems.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetCollateralCategories.sql" />
     <Build Include="dbo\Tables\tblICBackupCollateral.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTRebuildContractHistory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
