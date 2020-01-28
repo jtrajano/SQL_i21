@@ -1060,6 +1060,7 @@ BEGIN TRY
 					,strExternalEntity
 					,strExternalContractNumber
 					,ysnReceivedSignedFixationLetter
+					,ysnReadOnlyInterCoContract
 					)
 				OUTPUT INSERTED.intEntityId
 				INTO @MyTableVar
@@ -1120,6 +1121,7 @@ BEGIN TRY
 					,strExternalEntity
 					,strExternalContractNumber
 					,IsNULL(ysnReceivedSignedFixationLetter, 0)
+					,1 AS ysnReadOnlyInterCoContract
 				FROM OPENXML(@idoc, 'vyuIPContractHeaderViews/vyuIPContractHeaderView', 2) WITH (
 						strEntityName NVARCHAR(100) Collate Latin1_General_CI_AS
 						,dtmContractDate DATETIME
@@ -1302,6 +1304,7 @@ BEGIN TRY
 						,CH.intInvoiceTypeId = CH1.intInvoiceTypeId
 						,CH.intArbitrationId = CH1.intArbitrationId
 						,CH.intCountryId = CH1.intCountryId
+						,CH.ysnReadOnlyInterCoContract=1
 					FROM tblCTContractHeader CH
 					JOIN #tmpContractHeader CH1 ON CH.intContractHeaderRefId = CH1.intContractHeaderRefId
 					WHERE CH.intContractHeaderRefId = @intContractHeaderRefId
