@@ -1,7 +1,7 @@
 CREATE VIEW vyuLGGetOpenWeightClaim
 AS
 SELECT TOP 100 PERCENT Convert(INT, ROW_NUMBER() OVER (
-			ORDER BY intLoadId
+			ORDER BY (Select 1)
 			)) AS intKeyColumn
 	,dblClaimableAmount = ROUND(CASE WHEN (((dblClaimableWt * dblSeqPriceInWeightUOM) / CASE WHEN ysnSeqSubCurrency = 1 THEN 100 ELSE 1 END) < 0)
 								THEN ((dblClaimableWt * dblSeqPriceInWeightUOM) / CASE WHEN ysnSeqSubCurrency = 1 THEN 100 ELSE 1 END) * - 1
@@ -75,9 +75,9 @@ FROM
 		,strBook = BO.strBook
 		,intSubBookId = CD.intSubBookId
 		,strSubBook = SB.strSubBook
-		,strReferenceNumber = WC.strReferenceNumber
-		,dtmTransDate = WC.dtmTransDate
-		,dtmActualWeighingDate = WC.dtmActualWeighingDate
+		,strReferenceNumber = NULL
+		,dtmTransDate = NULL
+		,dtmActualWeighingDate = NULL
 		,strItemNo = I.strItemNo
 		,strCommodityCode = C.strCommodityCode
 		,strContractItemNo = CONI.strContractItemNo
@@ -155,9 +155,10 @@ FROM
 		AND RI.intLineNo = LD.intPContractDetailId
 		AND RI.intOrderId = CH.intContractHeaderId
 		AND L.intPurchaseSale IN (1, 3)
-	LEFT JOIN tblLGWeightClaimDetail WCD ON WCD.intContractDetailId = CD.intContractDetailId
-	LEFT JOIN tblLGWeightClaim WC ON WC.intWeightClaimId = WCD.intWeightClaimId AND WC.intLoadId = L.intLoadId AND WC.intPurchaseSale = 1
 	LEFT JOIN tblSMPurchasingGroup PG ON PG.intPurchasingGroupId = CD.intPurchasingGroupId
+	OUTER APPLY (SELECT TOP 1 intWeightClaimId = WC.intWeightClaimId 
+		FROM tblLGWeightClaim WC INNER JOIN tblLGWeightClaimDetail WCD ON WC.intWeightClaimId = WCD.intWeightClaimDetailId 
+		WHERE WCD.intContractDetailId = CD.intContractDetailId AND WC.intLoadId = L.intLoadId AND WC.intPurchaseSale = 1) WC
 	OUTER APPLY (SELECT TOP 1 intWeightUOMId = IU.intItemUOMId FROM tblICItemUOM IU WHERE IU.intItemId = CD.intItemId AND IU.intUnitMeasureId = WUOM.intUnitMeasureId) WUI
 	OUTER APPLY (SELECT TOP 1 strSubLocation = CLSL.strSubLocationName FROM tblLGLoadWarehouse LW JOIN tblSMCompanyLocationSubLocation CLSL ON LW.intSubLocationId = CLSL.intCompanyLocationSubLocationId WHERE LW.intLoadId = L.intLoadId) SL
 	CROSS APPLY (SELECT intCount = COUNT(*) FROM tblLGLoadDetailContainerLink WHERE intLoadDetailId = LD.intLoadDetailId) CLCT
@@ -234,9 +235,9 @@ FROM
 		,strBook = BO.strBook
 		,intSubBookId = CD.intSubBookId
 		,strSubBook = SB.strSubBook
-		,strReferenceNumber = WC.strReferenceNumber
-		,dtmTransDate = WC.dtmTransDate
-		,dtmActualWeighingDate = WC.dtmActualWeighingDate
+		,strReferenceNumber = NULL
+		,dtmTransDate = NULL
+		,dtmActualWeighingDate = NULL
 		,strItemNo = I.strItemNo
 		,strCommodityCode = C.strCommodityCode
 		,strContractItemNo = CONI.strContractItemNo
@@ -299,9 +300,10 @@ FROM
 	LEFT JOIN tblCTAssociation ASN ON ASN.intAssociationId = CH.intAssociationId
 	LEFT JOIN tblCTBook BO ON BO.intBookId = CD.intBookId
 	LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = CD.intSubBookId
-	LEFT JOIN tblLGWeightClaimDetail WCD ON WCD.intContractDetailId = CD.intContractDetailId
-	LEFT JOIN tblLGWeightClaim WC ON WC.intWeightClaimId = WCD.intWeightClaimId AND WC.intLoadId = L.intLoadId AND WC.intPurchaseSale = 2
 	LEFT JOIN tblSMPurchasingGroup PG ON PG.intPurchasingGroupId = CD.intPurchasingGroupId
+	OUTER APPLY (SELECT TOP 1 intWeightClaimId = WC.intWeightClaimId 
+		FROM tblLGWeightClaim WC INNER JOIN tblLGWeightClaimDetail WCD ON WC.intWeightClaimId = WCD.intWeightClaimDetailId 
+		WHERE WCD.intContractDetailId = CD.intContractDetailId AND WC.intLoadId = L.intLoadId AND WC.intPurchaseSale = 2) WC
 	OUTER APPLY (SELECT TOP 1 intWeightUOMId = IU.intItemUOMId FROM tblICItemUOM IU WHERE IU.intItemId = CD.intItemId AND IU.intUnitMeasureId = WUOM.intUnitMeasureId) WUI
 	OUTER APPLY (SELECT TOP 1 strSubLocation = CLSL.strSubLocationName FROM tblLGLoadWarehouse LW JOIN tblSMCompanyLocationSubLocation CLSL ON LW.intSubLocationId = CLSL.intCompanyLocationSubLocationId WHERE LW.intLoadId = L.intLoadId) SL
 	CROSS APPLY (SELECT intCount = COUNT(*) FROM tblLGLoadDetailContainerLink WHERE intLoadDetailId = LD.intLoadDetailId) CLCT
