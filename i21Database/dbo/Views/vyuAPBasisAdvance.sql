@@ -355,10 +355,8 @@ SELECT TOP 100 PERCENT * FROM (
     LEFT JOIN tblAPBasisAdvanceFuture basisFutures 
         ON basisFutures.intFutureMarketId = futureMarket.intFutureMarketId AND basisFutures.intMonthId = futureMonth.intFutureMonthId
     LEFT JOIN tblAPBasisAdvanceCommodity basisCommodity ON basisCommodity.intCommodityId = ticket.intCommodityId
-    LEFT JOIN tblAPBasisAdvanceStaging staging 
-        ON staging.intContractDetailId = ctd.intContractDetailId
-            AND ISNULL(staging.intInventoryReceiptItemId,-1) = ISNULL(ticketTrans.intInventoryReceiptItemId,-1)
-            AND staging.intTicketId = ticketTrans.intTicketId
+    LEFT JOIN tblAPBasisAdvanceStaging staging ON staging.intContractDetailId = ctd.intContractDetailId
+                                    AND staging.intTicketId = ticket.intTicketId
      OUTER APPLY (
         SELECT
             SUM(taxData.dblTax) AS dblTax
