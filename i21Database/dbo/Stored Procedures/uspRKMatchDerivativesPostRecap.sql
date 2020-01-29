@@ -98,13 +98,13 @@ BEGIN
 	SELECT 
 		dtmPostDate = GETDATE()
 		,strBatchId = NULL
-		,intAccountId =  CASE WHEN ISNULL(dblNetPL,0) >= 0 THEN @intFuturesGainOrLossRealized ELSE @intFuturesGainOrLossRealizedOffset END
-		,strAccountId =  CASE WHEN ISNULL(dblNetPL,0) >= 0 THEN @strFuturesGainOrLossRealized ELSE @strFuturesGainOrLossRealizedOffset END
-		,dblDebit =  CASE WHEN ISNULL(dblNetPL,0) <= 0 THEN ABS(dblNetPL) ELSE 0.00 END
+		,intAccountId =  @intFuturesGainOrLossRealized
+		,strAccountId =   @strFuturesGainOrLossRealized 
+		,dblDebit =  CASE WHEN ISNULL(dblNetPL,0) >= 0 THEN 0.00 ELSE ABS(dblNetPL) END
 		,dblCredit = CASE WHEN ISNULL(dblNetPL,0) >= 0 THEN ABS(dblNetPL) ELSE 0.00 END
-		,dblDebitUnit =  CASE WHEN ISNULL(dblNetPL,0) <= 0 THEN ABS(dblMatchQty) ELSE 0.00 END
+		,dblDebitUnit =  CASE WHEN ISNULL(dblNetPL,0) >= 0 THEN 0.00 ELSE ABS(dblMatchQty) END
 		,dblCreditUnit = CASE WHEN ISNULL(dblNetPL,0) >= 0 THEN ABS(dblMatchQty) ELSE 0.00 END
-		,strAccountDescription = CASE WHEN ISNULL(dblNetPL,0) >= 0 THEN @strFuturesGainOrLossRealizedDescription ELSE @strFuturesGainOrLossRealizedOffsetDescription END
+		,strAccountDescription =  @strFuturesGainOrLossRealizedDescription 
 		,intCurrencyId
 		,dblExchangeRate = 0.00
 		,dtmTransactionDate = dtmMatchDate
@@ -131,13 +131,13 @@ BEGIN
 	SELECT 
 		dtmPostDate = GETDATE()
 		,strBatchId = NULL
-		,intAccountId =  CASE WHEN ISNULL(dblNetPL,0) <= 0 THEN @intFuturesGainOrLossRealized ELSE @intFuturesGainOrLossRealizedOffset END
-		,strAccountId =  CASE WHEN ISNULL(dblNetPL,0) <= 0 THEN @strFuturesGainOrLossRealized ELSE @strFuturesGainOrLossRealizedOffset END
-		,dblDebit =  CASE WHEN ISNULL(dblNetPL,0) >= 0 THEN ABS(dblNetPL) ELSE 0.00 END
-		,dblCredit = CASE WHEN ISNULL(dblNetPL,0) <= 0 THEN ABS(dblNetPL) ELSE 0.00 END
-		,dblDebitUnit =  CASE WHEN ISNULL(dblNetPL,0) >= 0 THEN ABS(dblMatchQty) ELSE 0.00 END
+		,intAccountId =   @intFuturesGainOrLossRealizedOffset 
+		,strAccountId =   @strFuturesGainOrLossRealizedOffset 
+		,dblDebit =  CASE WHEN ISNULL(dblNetPL,0) <= 0 THEN 0.00 ELSE ABS(dblNetPL) END
+		,dblCredit = CASE WHEN ISNULL(dblNetPL,0) <= 0 THEN ABS(dblNetPL) ELSE 0.00  END
+		,dblDebitUnit =  CASE WHEN ISNULL(dblNetPL,0) <= 0 THEN 0.00 ELSE ABS(dblMatchQty) END
 		,dblCreditUnit = CASE WHEN ISNULL(dblNetPL,0) <= 0 THEN ABS(dblMatchQty) ELSE 0.00 END
-		,strAccountDescription = CASE WHEN ISNULL(dblNetPL,0) <= 0 THEN @strFuturesGainOrLossRealizedDescription ELSE @strFuturesGainOrLossRealizedOffsetDescription END
+		,strAccountDescription =  @strFuturesGainOrLossRealizedOffsetDescription
 		,intCurrencyId
 		,dblExchangeRate = 0.00
 		,dtmTransactionDate = dtmMatchDate
