@@ -23,10 +23,10 @@ strCustomerAddress =
 CHK.intBankTransactionTypeId, 
 INV.strInvoiceNumber,dtmDetailDate = INV.dtmDate, 
 strComment = INV.strComments,
-dblDetailAmount = INV.dblInvoiceTotal, 
 PYMT.dtmDatePaid,
-dblDiscount = PYMTDTL.dblDiscount, 
-dblNet = CASE WHEN INV.intPaymentId IS NULL  THEN PYMTDTL.dblPayment ELSE INV.dblInvoiceTotal END,
+dblDetailAmount =  PYMTDTL.dblPayment,
+dblDiscount = ISNULL(PYMTDTL.dblDiscount,0), 
+dblNet = PYMTDTL.dblPayment - ISNULL(PYMTDTL.dblDiscount,0),
 strMessage = 'The following items(s) will be presented to ' + 
 CHK.strPayeeBankName + ' account ending ' + ISNULL (RIGHT(RTRIM (COALESCE (CHK.strPayeeBankAccountNumber,
 CHK.strPayeeBankAccountNumber COLLATE Latin1_General_CI_AS, N'')), 4), '') + ' on ' + CONVERT (VARCHAR, PYMT.dtmDatePaid,107), 
