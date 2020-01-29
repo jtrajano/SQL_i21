@@ -210,6 +210,9 @@ SELECT
 	,str1099B = CASE WHEN EXISTS(SELECT 1 FROM B1099 WHERE 1 = (CASE WHEN @form1099Param = 0 OR @form1099Param = 3 THEN 1 ELSE 0 END)) THEN 'X' ELSE NULL END
 	,str1099PATR = CASE WHEN EXISTS(SELECT 1 FROM PATR1099 WHERE 1 = (CASE WHEN @form1099Param = 0 OR @form1099Param = 4 THEN 1 ELSE 0 END)) THEN 'X' ELSE NULL END   
 	,str1099DIV = CASE WHEN EXISTS(SELECT 1 FROM DIV1099 WHERE 1 = (CASE WHEN @form1099Param = 0 OR @form1099Param = 5 THEN 1 ELSE 0 END)) THEN 'X' ELSE NULL END   
+	,B.strContactName
+	,B.strContactPhone
+	,B.strContactEmail
 FROM tblSMCompanySetup A,
 (
 	SELECT 
@@ -232,6 +235,7 @@ FROM tblSMCompanySetup A,
 		*
 	FROM DIV1099 WHERE 1 = (CASE WHEN @form1099Param = 0 OR @form1099Param = 5 THEN 1 ELSE 0 END)
 ) Data1099
+,tblAP1099Threshold B
 GROUP BY intYear
 ,strEin  
 ,strAddress  
@@ -241,3 +245,6 @@ GROUP BY intYear
 ,strCompanyName
 ,strYear
 ,strPhone
+,B.strContactName
+,B.strContactPhone
+,B.strContactEmail
