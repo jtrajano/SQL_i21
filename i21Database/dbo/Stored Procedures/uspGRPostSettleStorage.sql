@@ -1656,18 +1656,26 @@ BEGIN TRY
 				end
 				----- DEBUG POINT -----
 
-				--UPDATE the price in tblGRSettleContract
-				IF EXISTS(SELECT 1 FROM tblGRSettleContract WHERE intSettleStorageId = @intSettleStorageId)
-				BEGIN
-					UPDATE SC1
-					SET dblPrice = CASE
-										WHEN SC2.strPricingType <> 'Basis' THEN SC2.dblCashPrice
-										ELSE @dblFutureMarkePrice + SC2.dblBasis
-									END
-					FROM tblGRSettleContract SC1
-					INNER JOIN @SettleContract SC2
-						ON SC2.intSettleContractId = SC1.intSettleContractId
-				END
+				-- we should only execute the update price in the tblGRSettleContract upon settlement and not per pricing
+				-- that field is being used in the ap clearing report and i think even if there is no report 
+				-- we should not update it for every pricing.
+				-- Mon PG 
+				if @ysnFromPriceBasisContract = 0 
+				begin
+					--UPDATE the price in tblGRSettleContract
+					IF EXISTS(SELECT 1 FROM tblGRSettleContract WHERE intSettleStorageId = @intSettleStorageId)
+					BEGIN
+						UPDATE SC1
+						SET dblPrice = CASE
+											WHEN SC2.strPricingType <> 'Basis' THEN SC2.dblCashPrice
+											ELSE @dblFutureMarkePrice + SC2.dblBasis
+										END
+						FROM tblGRSettleContract SC1
+						INNER JOIN @SettleContract SC2
+							ON SC2.intSettleContractId = SC1.intSettleContractId
+					END
+				end
+				
 
 				--Reduce the On-Storage Quantity
 				IF(@ysnFromPriceBasisContract = 0)		
@@ -2251,7 +2259,9 @@ BEGIN TRY
 															
 					,[dblOldCost]					=  case when @ysnFromPriceBasisContract = 0 then null 
 														else 
-															case WHEN a.[intContractHeaderId] IS NOT NULL AND @ysnFromPriceBasisContract = 1 and (@dblQtyFromCt = @dblSelectedUnits) THEN 															
+															case WHEN a.[intContractHeaderId] IS NOT NULL AND @ysnFromPriceBasisContract = 1 
+															--and (@dblQtyFromCt = @dblSelectedUnits) 
+															THEN 															
 																(select dblCost from tblICInventoryTransaction IT
 																	where IT.intTransactionId = @intSettleStorageId
 																		and IT.intTransactionTypeId = 44
@@ -2469,52 +2479,26 @@ BEGIN TRY
 															END
 														end					
 															
-					,[dblOldCost]					=  case when @ysnFromPriceBasisContract = 0 then null 
+					,[dblOldCost]					=  case when @ysnFromPriceBasisContract = 0 and CS.intStorageTypeId != 2 then null 
 														else 
-															case WHEN a.[intContractHeaderId] IS NOT NULL AND @ysnFromPriceBasisContract = 1 and (@dblQtyFromCt = @dblSelectedUnits) THEN 															
+															case WHEN a.[intContractHeaderId] IS NOT NULL AND @ysnFromPriceBasisContract = 1 
+																--and (@dblQtyFromCt = @dblSelectedUnits) 
+															THEN 															
 																(select dblCost from tblICInventoryTransaction IT
 																	where IT.intTransactionId = @intSettleStorageId
 																		and IT.intTransactionTypeId = 44
 																		and IT.intItemId = a.intItemId
 																)
-																--IT.dblCost--RI.dblUnitCost --dbo.fnCTConvertQtyToTargetItemUOM(a.intContractUOMId,RI.intCostUOMId, RI.dblUnitCost)
+																
+																WHEN CS.intStorageTypeId = 2 THEN 
+																(select dblCost from tblICInventoryTransaction IT
+																inner join tblGRStorageHistory STH
+																	on STH.intTransferStorageId = IT.intTransactionId
+																	where  IT.intTransactionTypeId = 56	
+																		and IT.intItemId = a.intItemId and STH.strType = 'Transfer')
 															else null end
-														end									
-					,[dblCostUnitQty]				= ISNULL(a.dblCostUnitQty,1)
-					,[intCostUOMId]					= CASE
-														WHEN @origdblSpotUnits > 0 THEN @intCashPriceUOMId 
-														WHEN a.[intContractHeaderId] IS NOT NULL THEN a.intContractUOMId
-														ELSE b.intItemUOMId
-													END
-					,[dblNetWeight]					= case when @doPartialHistory = 1 then
-															case WHEN @ysnFromPriceBasisContract = 1 and (intItemType = 2 or intItemType = 3)
-																	then a.dblUnits
-																WHEN (intItemType = 2 or intItemType = 3)
-																	then a.dblUnits
-																when availableQtyForVoucher.dblAvailableQuantity >  a.dblUnits then a.dblUnits 
-																else isnull(availableQtyForVoucher.dblAvailableQuantity, @dblQtyFromCt) end
-														else
-															CASE 
-																WHEN a.intPricingTypeId = 2 and availableQtyForVoucher.intContractDetailId is not null
-																	THEN availableQtyForVoucher.dblAvailableQuantity -- @dblQtyFromCt 																
-																WHEN @origdblSpotUnits > 0 
-																	THEN ROUND(dbo.fnCalculateQtyBetweenUOM(b.intItemUOMId,@intCashPriceUOMId,a.dblUnits),6) 
-																WHEN a.intPricingTypeId = 1 and @ysnFromPriceBasisContract = 1 
-																	then a.dblUnits -- @dblTotalVoucheredQuantity
-																WHEN @ysnFromPriceBasisContract = 1 and (intItemType = 2 or intItemType = 3)
-																	then a.dblUnits
-																ELSE 
-																		case when @ysnFromPriceBasisContract = 1 and  availableQtyForVoucher.intContractDetailId is null  and c.strType = 'Inventory' then 0
-																		when @ysnFromPriceBasisContract = 1  AND (@dblQtyFromCt + @dblTotalVoucheredQuantity) > a.dblUnits 
-																			THEN a.dblUnits - @dblTotalVoucheredQuantity
-																		when @ysnFromPriceBasisContract = 1  AND (@dblQtyFromCt + @dblTotalVoucheredQuantity) < a.dblUnits 
-																			THEN @dblQtyFromCt - a.dblUnits
-																		else 
-																			a.dblUnits
-																		end
-															END
-														end	
-
+														end						
+					
 						FROM @SettleVoucherCreate a
 							JOIN tblICItemUOM b 
 								ON b.intItemId = a.intItemId 
