@@ -17,9 +17,9 @@ strCustomerAddress =
 INV.strInvoiceNumber,
 dtmDetailDate = INV.dtmDate, 
 strComment = INV.strComments,
-dblDetailAmount =  PYMTDTL.dblPayment,
+dblDetailAmount =  PYMTDTL.dblInvoiceTotal,
 dblDiscount = ISNULL(PYMTDTL.dblDiscount,0), 
-dblNet = PYMTDTL.dblPayment - ISNULL(PYMTDTL.dblDiscount,0),
+dblNet = PYMTDTL.dblPayment,
 strMessage = 'The following items(s) will be presented to ' + CHK.strPayeeBankName + ' account ending ' + ISNULL (RIGHT(RTRIM (COALESCE (CHK.strPayeeBankAccountNumber,CHK.strPayeeBankAccountNumber COLLATE Latin1_General_CI_AS, N'')), 4), '') + ' on ' + CONVERT (VARCHAR, PYMT.dtmDatePaid,107), 
 strBankAccountNo = STUFF (ACCT.strBankAccountNo, 1, LEN(ACCT.strBankAccountNo) - 4, REPLICATE ('x', LEN(ACCT.strBankAccountNo) - 4)),
 PYMTDTL.intPaymentDetailId
