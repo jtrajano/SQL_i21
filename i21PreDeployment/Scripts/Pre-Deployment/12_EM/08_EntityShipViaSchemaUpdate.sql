@@ -27,6 +27,8 @@ BEGIN
 
 	END
 
+
+
 	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEMEntityLocation')
 	BEGIN
 		IF NOT EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEMEntityLocation' and [COLUMN_NAME] = 'ysnDefaultContact')
@@ -75,7 +77,7 @@ BEGIN
 		INSERT INTO @ShipViaConstraint
 		SELECT
 				''ALTER TABLE '' + R.TABLE_NAME + '' DROP CONSTRAINT ['' + R.CONSTRAINT_NAME + '']''
-				+ '' ; UPDATE B SET B.'' + R.COLUMN_NAME + '' = A.intEntityShipViaId FROM tblSMShipVia A JOIN '' + R.TABLE_NAME + '' B ON A.intShipViaID = B.'' + R.COLUMN_NAME   Stement
+				+ '' ; UPDATE B SET B.'' + R.COLUMN_NAME + '' = A.intEntityShipViaId FROM tblSMShipVia A JOIN '' + R.TABLE_NAME + '' B ON A.intEntityId = B.'' + R.COLUMN_NAME   Stement
 			FROM INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE U
 			INNER JOIN INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS FK
 				ON U.CONSTRAINT_CATALOG = FK.UNIQUE_CONSTRAINT_CATALOG
@@ -95,8 +97,11 @@ BEGIN
 
 		SELECT * INTO #TmpShipVia FROM tblSMShipVia
 
-		ALTER TABLE #TmpShipVia 
-		ADD intEntityId INT
+		IF EXISTS (SELECT * FROM TempDB.INFORMATION_SCHEMA.COLUMNS WHERE COLUMN_NAME = ''intEntityId'' AND TABLE_NAME = ''#TmpShipVia'')
+		BEGIN
+			ALTER TABLE #TmpShipVia 
+			ADD intEntityId INT
+		END
 
 		DECLARE @StartingNumber NVARCHAR(MAX)
 		DECLARE @EntityId int
@@ -115,11 +120,19 @@ BEGIN
 		WHILE EXISTS ( SELECT TOP 1 1 FROM  #TmpShipVia where intEntityId is null)
 		BEGIN 
 			SET @CurStatement = ''''
-			SELECT TOP 1 @CurShipViaId = intShipViaID FROM #TmpShipVia where intEntityId is null
+
+			IF NOT EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = ''tblSMShipVia'' and [COLUMN_NAME] = ''intShipViaID'')
+			BEGIN
+				SELECT TOP 1 @CurShipViaId = intEntityId FROM #TmpShipVia where intEntityId is null
+			END
+			ELSE
+				BEGIN
+					SELECT TOP 1 @CurShipViaId = intEntityId FROM #TmpShipVia where intEntityId is null
+				END
 
 			EXEC uspSMGetStartingNumber 43, @StartingNumber output
 		
-			select @Name = strShipVia from #TmpShipVia WHERE intShipViaID = @CurShipViaId 
+			select @Name = strShipVia from #TmpShipVia WHERE intEntityId = @CurShipViaId 
 
 			INSERT INTO tblEMEntity(strName,strEntityNo,strContactNumber)
 			VALUES (@Name, @StartingNumber, '''')
@@ -134,7 +147,7 @@ BEGIN
 			select @Address = strAddress, 
 					@City = strCity, 
 					@State = strState, 
-					@ZipCode = strZipCode from #TmpShipVia WHERE intShipViaID = @CurShipViaId
+					@ZipCode = strZipCode from #TmpShipVia WHERE intEntityId = @CurShipViaId
 
 			INSERT INTO tblEMEntityLocation(intEntityId, strLocationName,strAddress,strCity,strState,strZipCode,ysnDefaultLocation )
 			select @EntityId, @Name,@Address,@City,@State,@ZipCode,1
@@ -146,12 +159,12 @@ BEGIN
 			VALUES(@EntityId, @EntityContactId, 1 ,0 ) 
 		
 
-			UPDATE #TmpShipVia set  intEntityId = @EntityId WHERE intShipViaID = @CurShipViaId
+			UPDATE #TmpShipVia set  intEntityId = @EntityId WHERE intEntityId = @CurShipViaId
 
 			SET @CurStatement = ''
 			UPDATE A SET A.intEntityShipViaId  = '' + CAST(@EntityId AS NVARCHAR) + ''
 				FROM tblSMShipVia A
-					WHERE  A.intShipViaID = '' + CAST(@CurShipViaId AS NVARCHAR) 
+					WHERE  A.intEntityId = '' + CAST(@CurShipViaId AS NVARCHAR) 
 
 			EXEC (@CurStatement)
 
