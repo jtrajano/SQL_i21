@@ -293,7 +293,7 @@ BEGIN
 														END 													
 													)
 													AS DECIMAL(18,2)) 
-													- isnull(SC.dblPrice, 0)
+													- isnull(sh.dblPaidAmount, 0)
 			,[intCurrencyId] 					=	@intFunctionalCurrencyId -- It is always in functional currency. 
 			,[intTransactionId]					=	A.intBillId
 			,[intTransactionDetailId] 			=	B.intBillDetailId
