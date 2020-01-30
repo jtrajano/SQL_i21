@@ -189,7 +189,7 @@ BEGIN TRY
 					--Insert to the load used table
 					IF ISNULL(@intLoopLoadDetailId,0) != 0 AND @strDistributionOption = 'LOD'
 					BEGIN
-						EXEC dbo.uspSCUpdateTicketLoadUsed @intTicketId,@intLoopLoadDetailId, 0, @intEntityId;	
+						EXEC dbo.uspSCUpdateTicketLoadUsed @intTicketId,@intLoopLoadDetailId, @dblLoopContractUnits, @intEntityId;	
 					END
 				
 					FETCH NEXT FROM intListCursor INTO @intLoopContractId, @dblLoopContractUnits,@intLoopLoadDetailId;
