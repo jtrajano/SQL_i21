@@ -373,6 +373,7 @@ BEGIN
         AND P.[intInvoiceId] IS NOT NULL
         AND ISNULL(P.[dblWriteOffAmount], 0) <> @ZeroDecimal
 		AND 0 < ISNULL(P.[dblWriteOffAmount], 0)
+        AND I.strInvoiceNumber LIKE '%COP%'
 
     INSERT INTO #ARInvalidPaymentData
         ([intTransactionId]
