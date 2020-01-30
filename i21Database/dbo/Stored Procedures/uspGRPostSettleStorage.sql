@@ -3141,7 +3141,7 @@ BEGIN TRY
 							end
 							----- DEBUG POINT -----
 
-							IF @ysnFromTransferStorage = 0
+							--IF @ysnFromTransferStorage = 0
 							EXEC [dbo].[uspAPPostBill] 
 								 @post = 1
 								,@recap = 0
