@@ -9,8 +9,8 @@ CREATE TABLE [dbo].[tblSTLotteryGame] (
     [intEndingNumber]   INT              NULL,
     [intTicketPerPack]  INT              NULL,
     [dtmExpirationDate] DATETIME         NULL,
-    [dblInventoryCost]  NUMERIC (18, 15) NULL,
-    [dblTicketValue]    NUMERIC (18, 15) NULL,
+    [dblInventoryCost]  NUMERIC (18, 6) NULL,
+    [dblTicketValue]    NUMERIC (18, 6) NULL,
     [intConcurrencyId]  INT              NOT NULL,
     CONSTRAINT [PK_tblSTLotteryGame] PRIMARY KEY CLUSTERED ([intLotteryGameId] ASC),
     CONSTRAINT [FK_tblSTLotteryGame_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [dbo].[tblICItem] ([intItemId])
