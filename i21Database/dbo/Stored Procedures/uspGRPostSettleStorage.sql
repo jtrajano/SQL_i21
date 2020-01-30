@@ -2277,15 +2277,16 @@ BEGIN TRY
 													END
 					,[dblCost]						= 
 														case when @doPartialHistory = 1 then
-															isnull(availableQtyForVoucher.dblCashPrice, a.dblCashPrice)
+															case WHEN (intItemType = 2 or intItemType = 3) then a.dblCashPrice
+															else isnull(availableQtyForVoucher.dblCashPrice, a.dblCashPrice) end
 														else
 															CASE
 																when availableQtyForVoucher.intContractDetailId is not null and @ysnFromPriceBasisContract = 1 then
-																	ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(a.intContractUOMId,b.intItemUOMId, availableQtyForVoucher.dblCashPrice),0)
+																	dbo.fnCTConvertQtyToTargetItemUOM(a.intContractUOMId,b.intItemUOMId, availableQtyForVoucher.dblCashPrice)
 																WHEN a.[intContractHeaderId] IS NOT NULL THEN dbo.fnCTConvertQtyToTargetItemUOM(a.intContractUOMId,b.intItemUOMId,a.dblCashPrice)
 																ELSE a.dblCashPrice
 															END
-														end					
+														end				
 															
 					,[dblOldCost]					=  case when @ysnFromPriceBasisContract = 0 and CS.intStorageTypeId != 2 then null 
 														else 
@@ -2471,7 +2472,8 @@ BEGIN TRY
 							
 					,[dblCost]						= 
 														case when @doPartialHistory = 1 then
-															isnull(availableQtyForVoucher.dblCashPrice, a.dblCashPrice)
+															case WHEN (intItemType = 2 or intItemType = 3) then a.dblCashPrice
+															else isnull(availableQtyForVoucher.dblCashPrice, a.dblCashPrice) end
 														else
 															CASE
 																when availableQtyForVoucher.intContractDetailId is not null and @ysnFromPriceBasisContract = 1 then
@@ -2479,7 +2481,7 @@ BEGIN TRY
 																WHEN a.[intContractHeaderId] IS NOT NULL THEN dbo.fnCTConvertQtyToTargetItemUOM(a.intContractUOMId,b.intItemUOMId,a.dblCashPrice)
 																ELSE a.dblCashPrice
 															END
-														end					
+														end			
 															
 					,[dblOldCost]					=  case when @ysnFromPriceBasisContract = 0 and CS.intStorageTypeId != 2 then null 
 														else 
@@ -2877,7 +2879,7 @@ BEGIN TRY
 						END
 					END
 				----- DEBUG POINT -----
-				if @debug_awesome_ness = 1 and 1 = 0
+				if @debug_awesome_ness = 1 and 1 = 1
 				begin
 					select 'voucher payable', * from @voucherPayable		
 					select 'create voucher id ', @createdVouchersId

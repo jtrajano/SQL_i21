@@ -250,11 +250,32 @@ FROM
 		intPaymentId					= PYMT.intPaymentId
 		,strPaymentNo					= PYMT.strPaymentRecordNum
 		,strBillId						= Bill.strBillId
-		,InboundNetWeight				= 0
-		,InboundGrossDollars			= 0
-		,InboundTax						= 0
+		,InboundNetWeight				= SUM(
+												CASE 
+													WHEN Bill.intTransactionType = 2 then 0
+													ELSE BillDtl.dblQtyReceived
+												END
+											)
+		,InboundGrossDollars			= SUM(
+												CASE 
+													WHEN Bill.intTransactionType = 2 then 0
+													ELSE BillDtl.dblTotal													
+												END
+											)
+		,InboundTax						= SUM(
+												CASE 
+													WHEN Bill.intTransactionType = 2 then 0
+													ELSE BillDtl.dblTax
+												END
+											)
 		,InboundDiscount				= 0
-		,InboundNetDue					= 0
+		,InboundNetDue					= SUM(
+												CASE 
+													WHEN Bill.intTransactionType = 2 then 0
+													WHEN BillDtl.intInventoryReceiptItemId IS NULL AND BillDtl.intInventoryReceiptChargeId IS NULL THEN 0 
+													ELSE BillDtl.dblTotal + BillDtl.dblTax +BillDtl.dblDiscount
+												END
+											) 
 		,OutboundNetWeight				= 0 
 		,OutboundGrossDollars			= 0 
 		,OutboundTax		            = 0
