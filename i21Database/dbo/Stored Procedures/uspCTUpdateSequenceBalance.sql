@@ -40,7 +40,8 @@ BEGIN TRY
 	 if (@ysnLoad = 1 and @ysnFromInvoice = convert(bit,1)) 
 	 begin
 		set @dblQuantityToUpdate = (convert(numeric(18,6),convert(int,@dblQuantityToUpdate))/@dblQuantityPerLoad);
-		set @dblQuantityToUpdate = convert(int,@dblQuantityToUpdate);
+		--set @dblQuantityToUpdate = convert(int,@dblQuantityToUpdate);
+		set @dblQuantityToUpdate = convert(int,(case when @dblQuantityToUpdate > 0 and @dblQuantityToUpdate < 1 then 1 else @dblQuantityToUpdate end));
 	 end
 	
 	SELECT	@dblTransactionQuantity	=	- @dblQuantityToUpdate
