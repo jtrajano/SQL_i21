@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE uspICMonthlyCategoryStockRebuild
 	@strCategoryCode AS NVARCHAR(50) 
-
+	,@dtmCustomDate AS DATETIME 
 AS 
 BEGIN TRY 	
 
@@ -11,7 +11,10 @@ BEGIN TRY
 
 	BEGIN 
 		-- Get the start of previous month 
-		SET @dtmStartMonth = DATEADD(month, -1, DATEADD(month, DATEDIFF(month, 0, GETDATE()), 0)) 
+		SET @dtmStartMonth = ISNULL(
+				@dtmCustomDate
+				, DATEADD(month, -1, DATEADD(month, DATEDIFF(month, 0, GETDATE()), 0))
+			) 
 
 		-- Get the last rebuild date for all items 
 		SELECT TOP 1 
@@ -55,6 +58,13 @@ BEGIN TRY
 				FLOOR(CAST(t.dtmCreated AS FLOAT)) > FLOOR(CAST(@dtmLastRebuild AS FLOAT))
 				OR @dtmLastRebuild IS NULL 
 			)
+
+		IF	@dtmCustomDate IS NOT NULL 
+			AND @dtmStartDate IS NOT NULL 
+			AND @dtmStartDate < @dtmCustomDate
+		BEGIN 
+			SET @dtmStartDate = @dtmCustomDate
+		END 
 
 		-- Find the out-of-sequence date within the month. 		
 		BEGIN 
