@@ -142,7 +142,7 @@ BEGIN TRY
 		WHERE	intCommodityId		=	@intCommodityId 
 		AND		intUnitMeasureId	=	@intUnitMeasureId
 
-		IF @intPricingTypeId IN (2,8) AND @strAction <> 'Delete'
+		IF @intPricingTypeId IN (2,8,3) AND isnull(@strAction,'') <> 'Delete'
 		BEGIN
 			UPDATE tblCTContractDetail SET dblOriginalBasis = dblBasis WHERE intContractDetailId = @intContractDetailId
 		END
@@ -154,8 +154,8 @@ BEGIN TRY
 			SET		CD.dblBasis				=	ISNULL(CD.dblOriginalBasis,0),
 					CD.intFutureMarketId	=	PF.intOriginalFutureMarketId,
 					CD.intFutureMonthId		=	PF.intOriginalFutureMonthId,
-					CD.intPricingTypeId		=	CASE WHEN CH.intPricingTypeId <> 8 THEN 2 ELSE 8 END,
-					CD.dblFutures			=	NULL,
+					CD.intPricingTypeId		=	CASE WHEN CH.intPricingTypeId = 8 THEN 8 WHEN CH.intPricingTypeId = 3 THEN 3 ELSE 2 END,
+					CD.dblFutures			=	CASE WHEN CH.intPricingTypeId = 3 THEN CD.dblFutures ELSE null END,
 					CD.dblCashPrice			=	NULL,
 					CD.dblTotalCost			=	NULL,
 					CD.intConcurrencyId		=	CD.intConcurrencyId + 1
@@ -556,8 +556,8 @@ BEGIN TRY
 		ELSE
 		BEGIN
 			UPDATE	CD
-			SET		CD.intPricingTypeId		=	CASE WHEN CH.intPricingTypeId <> 8 THEN 2 ELSE 8 END,
-					CD.dblFutures			=	NULL,
+			SET		CD.intPricingTypeId		=	CASE WHEN CH.intPricingTypeId = 8 THEN 8 WHEN CH.intPricingTypeId = 3 THEN 3 ELSE 2 END,
+					CD.dblFutures			=	CASE WHEN CH.intPricingTypeId = 3 THEN CD.dblFutures ELSE null END,
 					CD.dblCashPrice			=	NULL,	
 					CD.dblTotalCost			=	NULL,
 					CD.intConcurrencyId		=	CD.intConcurrencyId + 1
