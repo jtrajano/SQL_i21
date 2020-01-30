@@ -56,6 +56,9 @@ BEGIN TRY
 	DECLARE @intLoadId	INT
 	DECLARE @LoadContractsDetailId Id
 	DECLARE @LoadDetailUsedId Id
+    DECLARE @dtmTicketDate             DATETIME
+    DECLARE @intTicketSclaeSetupId    INT
+
 	DECLARE @strEntityNo NVARCHAR(200)
 	DECLARE @errorMessage NVARCHAR(500)
 	
@@ -101,6 +104,9 @@ BEGIN TRY
 		, @UseScheduleForAvlCalc = CASE WHEN intStorageScheduleTypeId = -6 THEN 0 ELSE 1 END 
 		,@intTicketLoadDetailId = intLoadDetailId
 		,@dblTicketScheduledQuantity = dblScheduleQty
+		,@locationId		=	intProcessingLocationId
+		,@dtmTicketDate  = dtmTicketDateTime
+        ,@intTicketSclaeSetupId = intScaleSetupId
 	FROM tblSCTicket 
 	WHERE intTicketId = @intTicketId
 
@@ -111,9 +117,8 @@ BEGIN TRY
 				RAISERROR ('Ticket is deleted by other user.',16,1,'WITH NOWAIT')  
 			END
 			
-			SELECT	@intItemId		=	intItemId,
-					@strInOutFlag	=	strInOutFlag,
-					@locationId		=	intProcessingLocationId
+			SELECT	@intItemId		=	intItemId
+					,@strInOutFlag	=	strInOutFlag
 			FROM	tblSCTicket
 			WHERE	intTicketId		=	@intTicketId
 
@@ -171,14 +176,25 @@ BEGIN TRY
 	---DP 
 	IF	@ysnDP = 1 AND ISNULL(@intContractDetailId,0) = 0
 	BEGIN
-		SELECT	TOP	1	@intContractDetailId	=	intContractDetailId
-		FROM	vyuCTContractDetailView CD
-		WHERE	CD.intContractTypeId	=	CASE WHEN @strInOutFlag = 'I' THEN 1 ELSE 2 END
-		AND		CD.intEntityId			=	@intEntityId
-		AND		CD.intItemId			=	@intItemId
-		AND		CD.intPricingTypeId		=	5
-		AND		CD.ysnAllowedToShow		=	1
-		ORDER BY CD.dtmStartDate DESC
+		-- SELECT	TOP	1	@intContractDetailId	=	intContractDetailId
+		-- FROM	vyuCTContractDetailView CD
+		-- WHERE	CD.intContractTypeId	=	CASE WHEN @strInOutFlag = 'I' THEN 1 ELSE 2 END
+		-- AND		CD.intEntityId			=	@intEntityId
+		-- AND		CD.intItemId			=	@intItemId
+		-- AND		CD.intPricingTypeId		=	5
+		-- AND		CD.ysnAllowedToShow		=	1
+		-- ORDER BY CD.dtmStartDate DESC
+
+		IF(ISNULL((SELECT TOP 1 intAllowOtherLocationContracts FROM tblSCScaleSetup WHERE intScaleSetupId = @intTicketSclaeSetupId),0) = 2)
+        BEGIN
+            SELECT    TOP    1    @intContractDetailId    =    intContractDetailId
+            FROM fnSCGetDPContract(@locationId,@intEntityId,@intItemId,'I',@dtmTicketDate)
+        END
+        ELSE
+        BEGIN
+            SELECT    TOP    1    @intContractDetailId    =    intContractDetailId
+            FROM fnSCGetDPContract(NULL,@intEntityId,@intItemId,'I',@dtmTicketDate)
+        END
 
 		IF	ISNULL(@intContractDetailId,0) = 0
 		BEGIN
@@ -354,44 +370,91 @@ BEGIN TRY
 			BEGIN
 				IF(@strDistributionOption = 'LOD') AND @dblScheduleQty > @dblNetUnits AND @intContractDetailId = @intTicketContractDetailId
 				BEGIN 
-					-- REmove all the remaining scheduled quantity for the LS
-					SET @dblInreaseSchBy  = (@dblScheduleQty - @dblNetUnits) * -1
-					IF(@dblInreaseSchBy <> 0)
+					SET @dblInreaseSchBy = 0
+					IF(@dblTicketScheduledQuantity >= @dblScheduleQty)
 					BEGIN
-						EXEC	uspCTUpdateScheduleQuantity 
-								@intContractDetailId	=	@intContractDetailId,
-								@dblQuantityToUpdate	=	@dblInreaseSchBy,
-								@intUserId				=	@intUserId,
-								@intExternalId			=	@intTicketId,
-								@strScreenName			=	'Auto - Scale'
-					END
-				END
-				ELSE
-				BEGIN
-					
-					SET @dblInreaseSchBy  = @dblNetUnits - ISNULL(@dblTicketScheduledQuantity,0)
-					IF(@dblInreaseSchBy <> 0)
-					BEGIN
-						IF(@intContractDetailId = @intTicketContractDetailId)
-						BEGIN
-							-- Adjust the scheduled quantity based on the ticket scheduled and net units
-								EXEC	uspCTUpdateScheduleQuantity 
-										@intContractDetailId	=	@intContractDetailId,
-										@dblQuantityToUpdate	=	@dblInreaseSchBy,
-										@intUserId				=	@intUserId,
-										@intExternalId			=	@intTicketId,
-										@strScreenName			=	'Auto - Scale'
-						
-						END
-						ELSE
+						-- REmove all the remaining scheduled quantity for the LS
+						SET @dblInreaseSchBy  = (@dblScheduleQty - @dblNetUnits) * -1
+						IF(@dblInreaseSchBy <> 0)
 						BEGIN
 							EXEC	uspCTUpdateScheduleQuantity 
 									@intContractDetailId	=	@intContractDetailId,
 									@dblQuantityToUpdate	=	@dblInreaseSchBy,
 									@intUserId				=	@intUserId,
 									@intExternalId			=	@intTicketId,
-									@strScreenName			=	'Scale'
-							
+									@strScreenName			=	'Auto - Scale'
+						END
+					END
+					ELSE
+					BEGIN
+						IF @dblTicketScheduledQuantity > @dblNetUnits
+						BEGIN
+							SET @dblInreaseSchBy  = (@dblTicketScheduledQuantity - @dblNetUnits) * -1
+						END
+						
+						IF(ISNULL(@dblInreaseSchBy,0) <> 0)
+						BEGIN
+							EXEC	uspCTUpdateScheduleQuantity 
+									@intContractDetailId	=	@intContractDetailId,
+									@dblQuantityToUpdate	=	@dblInreaseSchBy,
+									@intUserId				=	@intUserId,
+									@intExternalId			=	@intTicketId,
+									@strScreenName			=	'Auto - Scale'
+						END
+					END
+				END
+				ELSE
+				BEGIN
+
+					SET @dblInreaseSchBy = 0
+				
+					IF(@intContractDetailId = @intTicketContractDetailId)
+					BEGIN
+						SET @dblInreaseSchBy  = @dblNetUnits - ISNULL(@dblTicketScheduledQuantity,0)
+						IF (@strDistributionOption = 'LOD' AND @dblTicketScheduledQuantity > @dblNetUnits) 
+						BEGIN
+							print 'no adjustment'
+						END
+						ELSE
+						BEGIN
+							-- Adjust the scheduled quantity based on the ticket scheduled and net units
+							IF(@dblInreaseSchBy <> 0)
+							BEGIN
+								EXEC	uspCTUpdateScheduleQuantity 
+										@intContractDetailId	=	@intContractDetailId,
+										@dblQuantityToUpdate	=	@dblInreaseSchBy,
+										@intUserId				=	@intUserId,
+										@intExternalId			=	@intTicketId,
+										@strScreenName			=	'Auto - Scale'
+							END
+						END
+
+						
+					
+					END
+					ELSE
+					BEGIN
+						IF (@strDistributionOption = 'LOD')
+						BEGIN
+							SET @dblInreaseSchBy  = @dblNetUnits - ISNULL(@dblScheduleQty,0)
+							IF(@dblInreaseSchBy <> 0)
+							BEGIN
+								EXEC	uspCTUpdateScheduleQuantity 
+										@intContractDetailId	=	@intContractDetailId,
+										@dblQuantityToUpdate	=	@dblInreaseSchBy,
+										@intUserId				=	@intUserId,
+										@intExternalId			=	@intTicketId,
+										@strScreenName			=	'Auto - Scale'
+							END
+						END
+						ELSE
+						BEGIN
+							EXEC	uspCTUpdateScheduleQuantity 
+								@intContractDetailId	=	@intContractDetailId,
+								@dblQuantityToUpdate	=	@dblNetUnits,
+								@intUserId				=	@intUserId,
+								@intExternalId			=	@intTicketId,
+								@strScreenName			=	'Auto - Scale'
 						END
 					END
 					
@@ -432,22 +495,33 @@ BEGIN TRY
 			BEGIN
 				IF(@strDistributionOption = 'LOD')
 				BEGIN
-				
+					SET @dblInreaseSchBy = 0
+
 					IF(@intContractDetailId = @intTicketContractDetailId OR @intLoadDetailId IS NOT NULl)
 					BEGIN
-						SET @dblInreaseSchBy  = @dblAvailable - @dblScheduleQty
+						--compare the scheduled units to the processed units if it is less than then adjust the scheduled 
+						IF(@dblScheduleQty < @dblNetUnits)
+						BEGIN
+							IF((@dblAvailable) > @dblNetUnits)
+							BEGIN
+								SET @dblInreaseSchBy  = @dblNetUnits - @dblScheduleQty
+							END
+						END
 					END
 					ELSE
 					BEGIN
 						SET @dblInreaseSchBy  = @dblAvailable
 					END
 
-					EXEC	uspCTUpdateScheduleQuantity 
-							@intContractDetailId	=	@intContractDetailId,
-							@dblQuantityToUpdate	=	@dblInreaseSchBy,
-							@intUserId				=	@intUserId,
-							@intExternalId			=	@intTicketId,
-							@strScreenName			=	'Auto - Scale'
+					IF @dblInreaseSchBy <> 0
+						BEGIN
+						EXEC	uspCTUpdateScheduleQuantity 
+								@intContractDetailId	=	@intContractDetailId,
+								@dblQuantityToUpdate	=	@dblInreaseSchBy,
+								@intUserId				=	@intUserId,
+								@intExternalId			=	@intTicketId,
+								@strScreenName			=	'Auto - Scale'
+					END
 				
 				END
 				ELSE
@@ -477,6 +551,9 @@ BEGIN TRY
 		IF(@strDistributionOption = 'LOD')
 		BEGIN
 
+			--- Check for multiple contract on same load schedule
+
+			--Insert into Load detail Id list (loaddetail id that are already processed)
 			INSERT INTO @LoadDetailUsedId
 			SELECT @intLoadDetailId
 			WHERE NOT EXISTS(SELECT TOP 1 1 FROM @LoadDetailUsedId WHERE intId = @intLoadDetailId)
@@ -511,6 +588,24 @@ BEGIN TRY
 				,@intContractDetailId = intContractDetailId
 			FROM @LoadDetailTable
 			ORDER BY intLoadDetailId
+
+			
+			IF	ISNULL(@intContractDetailId,0) = 0
+			BEGIN
+
+				--Check if multiple load shipment for a single contract if non then set the distribution to normal contract assignment
+				IF NOT EXISTS(SELECT TOP 1 1 FROM(
+									SELECT 
+										intLoadDetailId
+										,intContractDetailId = CASE WHEN @strInOutFlag = 'I' THEN intPContractDetailId ELSE intSContractDetailId END
+									FROM vyuSCScaleLoadView
+									WHERE ysnInProgress = 0
+										AND NOT EXISTS (SELECT TOP 1 1 FROM  @LoadDetailUsedId WHERE intId = vyuSCScaleLoadView.intLoadDetailId)) A
+								WHERE A.intContractDetailId = @intTicketContractDetailId)
+				BEGIN
+					SET @strDistributionOption = 'CNT'
+				END
+			END
 		END	
 
 		

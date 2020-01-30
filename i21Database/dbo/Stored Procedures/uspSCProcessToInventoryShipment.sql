@@ -58,6 +58,7 @@ DECLARE @intInventoryShipmentItemId AS INT
 		,@intContractDetailId INT
 		,@ysnPriceFixation BIT = 0;
 DECLARE @intTicketLoadDetailId INT
+DECLARE @loopLoadDetailId INT
 
 SELECT @intLoadId = intLoadId
 	, @dblTicketFreightRate = dblFreightRate
@@ -115,23 +116,29 @@ BEGIN TRY
 				DECLARE @dblLoopContractUnits NUMERIC(38,20);
 				DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
 				FOR
-				SELECT intContractDetailId, dblUnitsDistributed
+				SELECT intContractDetailId, dblUnitsDistributed,intLoadDetailId
 				FROM @LineItems;
 
 				OPEN intListCursor;
 
 				-- Initial fetch attempt
-				FETCH NEXT FROM intListCursor INTO @intLoopContractId, @dblLoopContractUnits;
+				FETCH NEXT FROM intListCursor INTO @intLoopContractId, @dblLoopContractUnits,@loopLoadDetailId;
 
 				WHILE @@FETCH_STATUS = 0
 				BEGIN
-				   IF ISNULL(@intLoopContractId,0) != 0
-				   BEGIN
-					--    EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoopContractId, @dblLoopContractUnits, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId
-					   EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intLoopContractId, @dblLoopContractUnits, @intEntityId;
-				   END
+					IF ISNULL(@intLoopContractId,0) != 0
+					BEGIN
+						--    EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoopContractId, @dblLoopContractUnits, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId
+						EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intLoopContractId, @dblLoopContractUnits, @intEntityId;
+					END
+
+					IF ISNULL(@loopLoadDetailId,0) != 0 AND @strDistributionOption = 'LOD'
+					BEGIN
+						EXEC dbo.uspSCUpdateTicketLoadUsed @intTicketId,@loopLoadDetailId, @dblLoopContractUnits, @intEntityId;	
+					END
+
 				   -- Attempt to fetch next row from cursor
-				   FETCH NEXT FROM intListCursor INTO @intLoopContractId, @dblLoopContractUnits;
+				   FETCH NEXT FROM intListCursor INTO @intLoopContractId, @dblLoopContractUnits,@loopLoadDetailId;
 				END;
 
 				CLOSE intListCursor;
