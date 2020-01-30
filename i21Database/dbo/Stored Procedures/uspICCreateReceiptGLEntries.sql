@@ -372,8 +372,6 @@ AS
 			LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType
 				ON currencyRateType.intCurrencyExchangeRateTypeId = t.intForexRateTypeId
 	WHERE	t.strBatchId = @strBatchId
-			AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId) 
-			AND ISNULL(i.intCategoryId, 0) = COALESCE(@intRebuildCategoryId, i.intCategoryId, 0) 
 
 	-- Resolve the 0.01 discrepancy between the inventory transaction value and the receipt line total. 
 	UNION ALL
@@ -442,6 +440,9 @@ AS
 						ON ri.intInventoryReceiptId = r.intInventoryReceiptId
 					INNER JOIN tblICItem i 
 						ON ri.intItemId = i.intItemId
+					INNER JOIN #tmpRebuildList list	
+						ON i.intItemId = COALESCE(list.intItemId, i.intItemId)
+						AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)
 					INNER JOIN tblICInventoryTransaction t 
 						ON t.intTransactionId = r.intInventoryReceiptId
 						AND t.strTransactionId = r.strReceiptNumber
@@ -460,8 +461,6 @@ AS
 					) AggregrateItemLots
 				WHERE
 					t.strBatchId = @strBatchId
-					AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId) 
-					AND ISNULL(i.intCategoryId, 0) = COALESCE(@intRebuildCategoryId, i.intCategoryId, 0) 
 				GROUP BY
 					i.strItemNo
 					,ri.intInventoryReceiptItemId
