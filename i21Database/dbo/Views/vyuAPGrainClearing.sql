@@ -170,9 +170,9 @@ LEFT JOIN tblGRSettleContract ST
 	ON ST.intSettleStorageId = SS.intSettleStorageId AND ST.intContractDetailId = billDetail.intContractDetailId
 LEFT JOIN tblCTContractDetail CT
 	ON CT.intContractDetailId = ST.intContractDetailId
-WHERE bill.ysnPosted = 1
+WHERE 
 --AND SS.strStorageTicket IN ('STR-56/1')
-AND glAccnt.intAccountCategoryId = 45
+glAccnt.intAccountCategoryId = 45
 UNION ALL --Charges
 SELECT 
 	CS.intEntityId AS intEntityVendorId
@@ -286,9 +286,9 @@ LEFT JOIN
         ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId
 )
     ON itemUOM.intItemUOMId = CS.intItemUOMId
-WHERE bill.ysnPosted = 1
+WHERE 
 --AND SS.strStorageTicket = 'STR-49/3'
-AND glAccnt.intAccountCategoryId = 45
+glAccnt.intAccountCategoryId = 45
 UNION ALL --DISCOUNTS
 SELECT 
 	CS.intEntityId AS intEntityVendorId
@@ -442,8 +442,8 @@ LEFT JOIN
         ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId
 )
     ON itemUOM.intItemUOMId = billDetail.intUnitOfMeasureId
-WHERE bill.ysnPosted = 1
-AND EXISTS (
+WHERE 
+EXISTS (
 	SELECT 1
 	FROM tblQMTicketDiscount QM
 	INNER JOIN tblGRDiscountScheduleCode DSC
