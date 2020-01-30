@@ -8386,6 +8386,8 @@
     <Build Include="dbo\Stored Procedures\uspCTRebuildContractHistory.sql" />
     <Build Include="dbo\Tables\tblRKFutOptTransactionHeaderBook.sql" />
     <Build Include="dbo\Tables\tblRKOptionsMatchPnSHeaderBook.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFProcessRecipes.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPStageSAPRecipe.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

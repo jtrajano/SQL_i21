@@ -1,707 +1,1633 @@
-﻿CREATE PROCEDURE [dbo].[uspMFImportRecipes]
-	@strSessionId NVARCHAR(50) = '',
-	@strImportType NVARCHAR(50),
-	@intUserId int=1
+﻿CREATE PROCEDURE [dbo].[uspMFImportRecipes] @strSessionId NVARCHAR(50) = ''
+	,@strImportType NVARCHAR(50)
+	,@intUserId INT = 1
 AS
+DECLARE @intMinId INT
+DECLARE @intItemId INT
+DECLARE @intVersionNo INT
+DECLARE @strRecipeName NVARCHAR(250)
+DECLARE @strItemNo NVARCHAR(50)
+DECLARE @intLocationId INT
+DECLARE @strLocationName NVARCHAR(50)
+DECLARE @intRecipeId INT
+DECLARE @intRecipeDetailItemId INT
+DECLARE @strRecipeDetailItemNo NVARCHAR(50)
+DECLARE @intRecipeItemId INT
+DECLARE @intRecipeTypeId INT
+DECLARE @intSubstituteItemId INT
+DECLARE @strSubstituteItemNo NVARCHAR(50)
+DECLARE @intRecipeSubstituteItemId INT
+DECLARE @intCustomerId INT
+DECLARE @strCustomer NVARCHAR(250)
+DECLARE @intFarmFieldId INT
+DECLARE @strFarmNumber NVARCHAR(250)
+DECLARE @intInputItemUOMId INT
+DECLARE @intSubstituteItemUOMId INT
+DECLARE @dblRecipeDetailCalculatedQty NUMERIC(18, 6)
+DECLARE @dblRecipeDetailUpperTolerance NUMERIC(18, 6)
+DECLARE @dblRecipeDetailLowerTolerance NUMERIC(18, 6)
 
-Declare @intMinId int
-Declare @intItemId int
-Declare @intVersionNo int
-Declare @strRecipeName NVARCHAR(250)
-Declare @strItemNo NVARCHAR(50)
-Declare @intLocationId int
-Declare @strLocationName NVARCHAR(50)
-Declare @intRecipeId int
-Declare @intRecipeDetailItemId int
-Declare @strRecipeDetailItemNo nvarchar(50)
-Declare @intRecipeItemId int
-Declare @intRecipeTypeId int
-Declare @intSubstituteItemId int
-Declare @strSubstituteItemNo nvarchar(50)
-Declare @intRecipeSubstituteItemId int
-Declare @intCustomerId int
-Declare @strCustomer nvarchar(250)
-Declare @intFarmFieldId int
-Declare @strFarmNumber nvarchar(250)
-Declare @intInputItemUOMId int
-Declare @intSubstituteItemUOMId int
-Declare @dblRecipeDetailCalculatedQty numeric(18,6)
-Declare @dblRecipeDetailUpperTolerance numeric(18,6)
-Declare @dblRecipeDetailLowerTolerance numeric(18,6)
+--Recipe Delete
+IF @strImportType = 'Recipe Delete'
+BEGIN
+	SELECT @intMinId = MIN(intRecipeStageId)
+	FROM tblMFRecipeStage
+	WHERE strSessionId = @strSessionId
+		AND ISNULL(strMessage, '') = ''
+		AND strTransactionType = 'RECIPE_DELETE'
+
+	WHILE @intMinId IS NOT NULL
+	BEGIN
+		SELECT @strRecipeName = NULL
+			,@strItemNo = NULL
+			,@intVersionNo = NULL
+			,@strLocationName = NULL
+			,@intItemId = NULL
+			,@intLocationId = NULL
+
+		SELECT @strRecipeName = strRecipeName
+			,@strItemNo = strItemNo
+			,@intVersionNo = [strVersionNo]
+			,@strLocationName = strLocationName
+		FROM tblMFRecipeStage
+		WHERE intRecipeStageId = @intMinId
+
+		SELECT @intItemId = intItemId
+		FROM tblICItem
+		WHERE strItemNo = @strItemNo
+
+		SELECT @intLocationId = intCompanyLocationId
+		FROM tblSMCompanyLocation
+		WHERE strLocationName = @strLocationName
+
+		BEGIN TRY
+			IF ISNULL(@strItemNo, '') <> '' --Production Recipe
+				DELETE
+				FROM tblMFRecipe
+				WHERE intItemId = @intItemId
+					AND intVersionNo = @intVersionNo
+					AND intLocationId = @intLocationId
+			ELSE --Virtual Recipe
+				DELETE
+				FROM tblMFRecipe
+				WHERE strName = @strRecipeName
+				AND intLocationId = @intLocationId
+
+			UPDATE tblMFRecipeStage
+			SET strMessage = 'Success'
+			WHERE intRecipeStageId = @intMinId
+		END TRY
+
+		BEGIN CATCH
+			UPDATE tblMFRecipeStage
+			SET strMessage = ERROR_MESSAGE()
+			WHERE intRecipeStageId = @intMinId
+		END CATCH
+
+		SELECT @intMinId = MIN(intRecipeStageId)
+		FROM tblMFRecipeStage
+		WHERE intRecipeStageId > @intMinId
+			AND strSessionId = @strSessionId
+			AND ISNULL(strMessage, '') = ''
+			AND strTransactionType = 'RECIPE_DELETE'
+	END
+END
+
+--Recipe Item Delete
+IF @strImportType = 'Recipe Item Delete'
+BEGIN
+	SELECT @intMinId = MIN(intRecipeItemStageId)
+	FROM tblMFRecipeItemStage
+	WHERE strSessionId = @strSessionId
+		AND ISNULL(strMessage, '') = ''
+		AND strRowState = 'D'
+
+	--Delete recipe item
+	WHILE @intMinId IS NOT NULL
+	BEGIN
+		SET @intItemId = NULL
+		SET @intVersionNo = NULL
+		SET @strRecipeName = ''
+		SET @intLocationId = NULL
+		SET @intRecipeId = NULL
+		SET @intRecipeDetailItemId = NULL
+		SET @strRecipeDetailItemNo = ''
+		SET @intRecipeItemId = NULL
+		SET @intRecipeTypeId = NULL
+
+		SELECT @strRecipeName = strRecipeName
+			,@strItemNo = strRecipeHeaderItemNo
+			,@intVersionNo = [strVersionNo]
+			,@strLocationName = strLocationName
+			,@strRecipeDetailItemNo = strRecipeItemNo
+		FROM tblMFRecipeItemStage
+		WHERE intRecipeItemStageId = @intMinId
+
+		SELECT @intItemId = intItemId
+		FROM tblICItem
+		WHERE strItemNo = @strItemNo
+
+		SELECT @intLocationId = intCompanyLocationId
+		FROM tblSMCompanyLocation
+		WHERE strLocationName = @strLocationName
+
+		SELECT @intRecipeDetailItemId = intItemId
+		FROM tblICItem
+		WHERE strItemNo = @strRecipeDetailItemNo
+
+		IF ISNULL(@strItemNo, '') <> '' --Production Recipe
+			SELECT TOP 1 @intRecipeId = intRecipeId
+				,@intRecipeTypeId = intRecipeTypeId
+				,@intLocationId = intLocationId
+			FROM tblMFRecipe
+			WHERE intItemId = @intItemId
+				AND intVersionNo = @intVersionNo
+				AND intLocationId = @intLocationId
+		ELSE --Virtual Recipe
+			SELECT TOP 1 @intRecipeId = intRecipeId
+				,@intRecipeTypeId = intRecipeTypeId
+				,@intLocationId = intLocationId
+			FROM tblMFRecipe
+			WHERE strName = @strRecipeName
+				AND intLocationId = @intLocationId
+
+		IF @intRecipeId IS NULL
+		BEGIN
+			UPDATE tblMFRecipeItemStage
+			SET strMessage = 'No recipe found to Delete items.'
+			WHERE intRecipeItemStageId = @intMinId
+
+			GOTO NEXT_RECIPEITEM_DELETE
+		END
+
+		BEGIN TRY
+			DELETE
+			FROM tblMFRecipeItem
+			WHERE intRecipeId = @intRecipeId
+				AND intItemId = @intRecipeDetailItemId
+
+			UPDATE tblMFRecipeItemStage
+			SET strMessage = 'Success'
+			WHERE intRecipeItemStageId = @intMinId
+		END TRY
+
+		BEGIN CATCH
+			UPDATE tblMFRecipeItemStage
+			SET strMessage = ERROR_MESSAGE()
+			WHERE intRecipeItemStageId = @intMinId
+		END CATCH
+
+		NEXT_RECIPEITEM_DELETE:
+
+		SELECT @intMinId = MIN(intRecipeItemStageId)
+		FROM tblMFRecipeItemStage
+		WHERE intRecipeItemStageId > @intMinId
+			AND strSessionId = @strSessionId
+			AND ISNULL(strMessage, '') = ''
+			AND strRowState = 'D'
+	END
+END
 
 --Recipe
-If @strImportType='Recipe'
-Begin
+IF @strImportType = 'Recipe'
+BEGIN
 	--Recipe Name is required
-	Update tblMFRecipeStage Set strMessage='Recipe Name is required' 
-	Where ISNULL(strRecipeName,'')='' AND ISNULL(strItemNo,'')='' 
-	AND strSessionId=@strSessionId AND ISNULL(strMessage,'')=''	
-	
+	UPDATE tblMFRecipeStage
+	SET strMessage = 'Recipe Name is required'
+	WHERE ISNULL(strRecipeName, '') = ''
+		AND ISNULL(strItemNo, '') = ''
+		AND strSessionId = @strSessionId
+		AND ISNULL(strMessage, '') = ''
+
 	--Invalid Item
-	Update tblMFRecipeStage Set strMessage='Invalid Item' 
-	Where strItemNo not in (Select strItemNo From tblICItem) AND ISNULL(strItemNo,'')<>'' 
-	AND strSessionId=@strSessionId AND ISNULL(strMessage,'')=''
+	UPDATE tblMFRecipeStage
+	SET strMessage = 'Invalid Item'
+	WHERE strItemNo NOT IN (
+			SELECT strItemNo
+			FROM tblICItem
+			)
+		AND ISNULL(strItemNo, '') <> ''
+		AND strSessionId = @strSessionId
+		AND ISNULL(strMessage, '') = ''
 
 	--Invalid Qty
-	Update tblMFRecipeStage Set strMessage='Quantity should be greater than 0' 
-	Where (ISNUMERIC(ISNULL([strQuantity],0))=0 OR ISNULL(CAST([strQuantity] as numeric(18,6)),0)<=0) 
-	AND strSessionId=@strSessionId AND ISNULL(strMessage,'')=''	
+	UPDATE tblMFRecipeStage
+	SET strMessage = 'Quantity should be greater than 0'
+	WHERE (
+			ISNUMERIC(ISNULL([strQuantity], 0)) = 0
+			OR ISNULL(CAST([strQuantity] AS NUMERIC(18, 6)), 0) <= 0
+			)
+		AND strSessionId = @strSessionId
+		AND ISNULL(strMessage, '') = ''
 
 	--UOM is required
-	Update tblMFRecipeStage Set strMessage='UOM is required' 
-	Where ISNULL(strUOM,'')='' AND ISNULL(strItemNo,'')='' AND strSessionId=@strSessionId AND ISNULL(strMessage,'')=''	
+	UPDATE tblMFRecipeStage
+	SET strMessage = 'UOM is required'
+	WHERE ISNULL(strUOM, '') = ''
+		AND ISNULL(strItemNo, '') = ''
+		AND strSessionId = @strSessionId
+		AND ISNULL(strMessage, '') = ''
 
 	--Invalid UOM
-	Update tblMFRecipeStage Set strMessage='Invalid UOM' 
-	Where strUOM not in (Select strUnitMeasure From tblICUnitMeasure) AND ISNULL(strUOM,'')<>'' AND ISNULL(strItemNo,'')='' 
-	AND strSessionId=@strSessionId AND ISNULL(strMessage,'')=''
+	UPDATE tblMFRecipeStage
+	SET strMessage = 'Invalid UOM'
+	WHERE strUOM NOT IN (
+			SELECT strUnitMeasure
+			FROM tblICUnitMeasure
+			)
+		AND ISNULL(strUOM, '') <> ''
+		AND ISNULL(strItemNo, '') = ''
+		AND strSessionId = @strSessionId
+		AND ISNULL(strMessage, '') = ''
 
 	--Location is required
-	Update tblMFRecipeStage Set strMessage='Location is required' 
-	Where ISNULL(strLocationName,'')='' AND ISNULL(strItemNo,'')<>'' AND strSessionId=@strSessionId AND ISNULL(strMessage,'')=''	
+	UPDATE tblMFRecipeStage
+	SET strMessage = 'Location is required'
+	WHERE ISNULL(strLocationName, '') = ''
+		AND ISNULL(strItemNo, '') <> ''
+		AND strSessionId = @strSessionId
+		AND ISNULL(strMessage, '') = ''
 
 	--Invalid Location
-	Update tblMFRecipeStage Set strMessage='Invalid Location' 
-	Where strLocationName not in (Select strLocationName From tblSMCompanyLocation) AND ISNULL(strLocationName,'')<>'' 
-	AND strSessionId=@strSessionId AND ISNULL(strMessage,'')=''
+	UPDATE tblMFRecipeStage
+	SET strMessage = 'Invalid Location'
+	WHERE strLocationName NOT IN (
+			SELECT strLocationName
+			FROM tblSMCompanyLocation
+			)
+		AND ISNULL(strLocationName, '') <> ''
+		AND strSessionId = @strSessionId
+		AND ISNULL(strMessage, '') = ''
 
 	--Invalid Version
-	Update tblMFRecipeStage Set strMessage='Invalid Version No'
-	Where (ISNUMERIC(ISNULL([strVersionNo],0))=0 OR CHARINDEX('.',ISNULL([strVersionNo],0))>0 OR [strVersionNo]='0')
-	AND strSessionId=@strSessionId AND ISNULL(strMessage,'')=''	
+	UPDATE tblMFRecipeStage
+	SET strMessage = 'Invalid Version No'
+	WHERE (
+			ISNUMERIC(ISNULL([strVersionNo], 0)) = 0
+			OR CHARINDEX('.', ISNULL([strVersionNo], 0)) > 0
+			OR [strVersionNo] = '0'
+			)
+		AND strSessionId = @strSessionId
+		AND ISNULL(strMessage, '') = ''
 
 	--Invalid Recipe Type
-	Update tblMFRecipeStage Set strMessage='Invalid Recipe Type' 
-	Where strRecipeType not in (Select strName From tblMFRecipeType) AND ISNULL(strRecipeType,'')<>'' 
-	AND strSessionId=@strSessionId AND ISNULL(strMessage,'')=''
+	UPDATE tblMFRecipeStage
+	SET strMessage = 'Invalid Recipe Type'
+	WHERE strRecipeType NOT IN (
+			SELECT strName
+			FROM tblMFRecipeType
+			)
+		AND ISNULL(strRecipeType, '') <> ''
+		AND strSessionId = @strSessionId
+		AND ISNULL(strMessage, '') = ''
 
 	--Invalid Manufacturing Process
-	Update tblMFRecipeStage Set strMessage='Invalid Manufacturing Process' 
-	Where strManufacturingProcess not in (Select strProcessName From tblMFManufacturingProcess) AND ISNULL(strManufacturingProcess,'')<>'' 
-	AND strSessionId=@strSessionId AND ISNULL(strMessage,'')=''
+	UPDATE tblMFRecipeStage
+	SET strMessage = 'Invalid Manufacturing Process'
+	WHERE strManufacturingProcess NOT IN (
+			SELECT strProcessName
+			FROM tblMFManufacturingProcess
+			)
+		AND ISNULL(strManufacturingProcess, '') <> ''
+		AND strSessionId = @strSessionId
+		AND ISNULL(strMessage, '') = ''
 
 	--Invalid Customer
-	Update tblMFRecipeStage Set strMessage='Invalid Customer' 
-	Where strCustomer not in (Select strCustomer From vyuARCustomer) AND ISNULL(strCustomer,'')<>'' 
-	AND strSessionId=@strSessionId AND ISNULL(strMessage,'')=''
+	UPDATE tblMFRecipeStage
+	SET strMessage = 'Invalid Customer'
+	WHERE strCustomer NOT IN (
+			SELECT strCustomer
+			FROM vyuARCustomer
+			)
+		AND ISNULL(strCustomer, '') <> ''
+		AND strSessionId = @strSessionId
+		AND ISNULL(strMessage, '') = ''
 
 	--Invalid Farm
-	Update tblMFRecipeStage Set strMessage='Invalid Farm' 
-	Where strFarm not in (Select strFarm From tblEMEntityFarm) AND ISNULL(strFarm,'')<>'' 
-	AND strSessionId=@strSessionId AND ISNULL(strMessage,'')=''
+	UPDATE tblMFRecipeStage
+	SET strMessage = 'Invalid Farm'
+	WHERE strFarm NOT IN (
+			SELECT strFarm
+			FROM tblEMEntityFarm
+			)
+		AND ISNULL(strFarm, '') <> ''
+		AND strSessionId = @strSessionId
+		AND ISNULL(strMessage, '') = ''
 
 	--Invalid Cost Type
-	Update tblMFRecipeStage Set strMessage='Invalid Cost Type' 
-	Where strCostType not in (Select strName From tblMFCostType) AND ISNULL(strCostType,'')<>'' 
-	AND strSessionId=@strSessionId AND ISNULL(strMessage,'')=''
+	UPDATE tblMFRecipeStage
+	SET strMessage = 'Invalid Cost Type'
+	WHERE strCostType NOT IN (
+			SELECT strName
+			FROM tblMFCostType
+			)
+		AND ISNULL(strCostType, '') <> ''
+		AND strSessionId = @strSessionId
+		AND ISNULL(strMessage, '') = ''
 
 	--Invalid Margin By
-	Update tblMFRecipeStage Set strMessage='Invalid Margin By' 
-	Where strMarginBy not in (Select strName From tblMFMarginBy) AND ISNULL(strMarginBy,'')<>'' 
-	AND strSessionId=@strSessionId AND ISNULL(strMessage,'')=''
+	UPDATE tblMFRecipeStage
+	SET strMessage = 'Invalid Margin By'
+	WHERE strMarginBy NOT IN (
+			SELECT strName
+			FROM tblMFMarginBy
+			)
+		AND ISNULL(strMarginBy, '') <> ''
+		AND strSessionId = @strSessionId
+		AND ISNULL(strMessage, '') = ''
 
 	--Invalid Margin
-	Update tblMFRecipeStage Set strMessage='Invalid Margin / Margin cannot be negative' 
-	Where (ISNUMERIC(ISNULL([strMargin],0))=0 OR ISNULL(CAST([strMargin] as numeric(18,6)),0)<0) 
-	AND strSessionId=@strSessionId AND ISNULL(strMessage,'')=''
+	UPDATE tblMFRecipeStage
+	SET strMessage = 'Invalid Margin / Margin cannot be negative'
+	WHERE (
+			ISNUMERIC(ISNULL([strMargin], 0)) = 0
+			OR ISNULL(CAST([strMargin] AS NUMERIC(18, 6)), 0) < 0
+			)
+		AND strSessionId = @strSessionId
+		AND ISNULL(strMessage, '') = ''
 
 	--Invalid Discount
-	Update tblMFRecipeStage Set strMessage='Invalid Discount / Discount cannot be negative' 
-	Where (ISNUMERIC(ISNULL([strDiscount],0))=0 OR ISNULL(CAST([strDiscount] as numeric(18,6)),0)<0) 
-	AND strSessionId=@strSessionId AND ISNULL(strMessage,'')=''
+	UPDATE tblMFRecipeStage
+	SET strMessage = 'Invalid Discount / Discount cannot be negative'
+	WHERE (
+			ISNUMERIC(ISNULL([strDiscount], 0)) = 0
+			OR ISNULL(CAST([strDiscount] AS NUMERIC(18, 6)), 0) < 0
+			)
+		AND strSessionId = @strSessionId
+		AND ISNULL(strMessage, '') = ''
 
 	--Invalid One Line Print
-	Update tblMFRecipeStage Set strMessage='Invalid One Line Print' 
-	Where strOneLinePrint not in (Select strName From tblMFOneLinePrint) AND ISNULL(strOneLinePrint,'')<>'' 
-	AND strSessionId=@strSessionId AND ISNULL(strMessage,'')=''
+	UPDATE tblMFRecipeStage
+	SET strMessage = 'Invalid One Line Print'
+	WHERE strOneLinePrint NOT IN (
+			SELECT strName
+			FROM tblMFOneLinePrint
+			)
+		AND ISNULL(strOneLinePrint, '') <> ''
+		AND strSessionId = @strSessionId
+		AND ISNULL(strMessage, '') = ''
 
 	--Set Default Values
 	--Recipe Name
-	Update tblMFRecipeStage Set strRecipeName=strItemNo
-	Where ISNULL(strRecipeName,'')='' AND ISNULL(strItemNo,'')<>'' 
-	AND strSessionId=@strSessionId AND ISNULL(strMessage,'')=''	
+	UPDATE tblMFRecipeStage
+	SET strRecipeName = strItemNo
+	WHERE ISNULL(strRecipeName, '') = ''
+		AND ISNULL(strItemNo, '') <> ''
+		AND strSessionId = @strSessionId
+		AND ISNULL(strMessage, '') = ''
 
 	--Recipe Type
-	Update tblMFRecipeStage Set strRecipeType='By Quantity'
-	Where ISNULL(strRecipeType,'')='' 
-	AND strSessionId=@strSessionId AND ISNULL(strMessage,'')=''	
+	UPDATE tblMFRecipeStage
+	SET strRecipeType = 'By Quantity'
+	WHERE ISNULL(strRecipeType, '') = ''
+		AND strSessionId = @strSessionId
+		AND ISNULL(strMessage, '') = ''
 
-	Select @intMinId=MIN(intRecipeStageId) From tblMFRecipeStage Where strSessionId=@strSessionId AND ISNULL(strMessage,'')=''	
+	SELECT @intMinId = MIN(intRecipeStageId)
+	FROM tblMFRecipeStage
+	WHERE strSessionId = @strSessionId
+		AND ISNULL(strMessage, '') = ''
 
 	--Insert/Update recipe
-	While (@intMinId is not null)
-	Begin
-		Set @intItemId=NULL
-		Set @intVersionNo=NULL
-		Set @strRecipeName=''
-		Set @intLocationId=null
-		Set @strLocationName=''
-		Set @intRecipeId=null
-		Set @strCustomer=null
-		Set @intCustomerId=null
-		Set @strFarmNumber=null
-		Set @intFarmFieldId=null
+	WHILE (@intMinId IS NOT NULL)
+	BEGIN
+		SET @intItemId = NULL
+		SET @intVersionNo = NULL
+		SET @strRecipeName = ''
+		SET @intLocationId = NULL
+		SET @strLocationName = ''
+		SET @intRecipeId = NULL
+		SET @strCustomer = NULL
+		SET @intCustomerId = NULL
+		SET @strFarmNumber = NULL
+		SET @intFarmFieldId = NULL
 
 		--Margin By
-		Update tblMFRecipeStage Set strMarginBy='Amount'
-		Where ISNULL(strMarginBy,'')='' AND ISNULL(CAST([strMargin] as numeric(18,6)),0)>0
-		AND strSessionId=@strSessionId AND ISNULL(strMessage,'')=''	AND intRecipeStageId=@intMinId	
+		UPDATE tblMFRecipeStage
+		SET strMarginBy = 'Amount'
+		WHERE ISNULL(strMarginBy, '') = ''
+			AND ISNULL(CAST([strMargin] AS NUMERIC(18, 6)), 0) > 0
+			AND strSessionId = @strSessionId
+			AND ISNULL(strMessage, '') = ''
+			AND intRecipeStageId = @intMinId
 
-		Select @strRecipeName=strRecipeName,@strItemNo=strItemNo,@intVersionNo=[strVersionNo],@strLocationName=strLocationName,@strCustomer=strCustomer,@strFarmNumber=strFarm 
-		From tblMFRecipeStage Where intRecipeStageId=@intMinId
-		Select @intItemId=intItemId From tblICItem Where strItemNo=@strItemNo
-		Select @intLocationId=intCompanyLocationId From tblSMCompanyLocation Where strLocationName=@strLocationName
-		Select TOP 1 @intCustomerId=intEntityId From vyuARCustomer Where strName=@strCustomer
-		Select TOP 1 @intFarmFieldId=intFarmFieldId From tblEMEntityFarm Where intEntityId=@intCustomerId AND strFarmNumber=@strFarmNumber
+		SELECT @strRecipeName = strRecipeName
+			,@strItemNo = strItemNo
+			,@intVersionNo = [strVersionNo]
+			,@strLocationName = strLocationName
+			,@strCustomer = strCustomer
+			,@strFarmNumber = strFarm
+		FROM tblMFRecipeStage
+		WHERE intRecipeStageId = @intMinId
 
-		If ISNULL(@strFarmNumber,'')<>'' AND @intFarmFieldId is null
-		Begin
-			Update tblMFRecipeStage Set strMessage='Farm does not belong to customer.' Where intRecipeStageId=@intMinId
-			GOTO NEXT_RECIPE			
-		End
+		SELECT @intItemId = intItemId
+		FROM tblICItem
+		WHERE strItemNo = @strItemNo
 
-		If ISNULL(@strItemNo,'')<>'' --Production Recipe
-			Select TOP 1 @intRecipeId=intRecipeId From tblMFRecipe Where intItemId=@intItemId AND intVersionNo=@intVersionNo AND intLocationId=@intLocationId 
-		Else --Virtual Recipe
-			Select TOP 1 @intRecipeId=intRecipeId From tblMFRecipe Where strName=@strRecipeName
+		SELECT @intLocationId = intCompanyLocationId
+		FROM tblSMCompanyLocation
+		WHERE strLocationName = @strLocationName
 
-		If @intRecipeId is null --insert
-		Begin
-			Insert Into tblMFRecipe(strName,intItemId,dblQuantity,intItemUOMId,intLocationId,intVersionNo,intRecipeTypeId,intManufacturingProcessId,ysnActive,
-									intCustomerId,intFarmId,intCostTypeId,intMarginById,dblMargin,dblDiscount,intMarginUOMId,intOneLinePrintId,
-									intCreatedUserId,dtmCreated,intLastModifiedUserId,dtmLastModified)
-			Select TOP 1 s.strRecipeName,i.intItemId,s.[strQuantity],iu.intItemUOMId,cl.intCompanyLocationId,s.[strVersionNo],rt.intRecipeTypeId,mp.intManufacturingProcessId,0,
-									@intCustomerId,@intFarmFieldId,ct.intCostTypeId,m.intMarginById,s.[strMargin],s.[strDiscount],um.intUnitMeasureId,p.intOneLinePrintId,
-									@intUserId,GETDATE(),@intUserId,GETDATE()
-			From tblMFRecipeStage s
-			Left Join tblICItem i on s.strItemNo=i.strItemNo
-			Left Join tblICItemUOM iu  on i.intItemId=iu.intItemId AND iu.ysnStockUnit=1
-			Left Join tblSMCompanyLocation cl on s.strLocationName=cl.strLocationName
-			Left Join tblMFRecipeType rt on s.strRecipeType=rt.strName
-			Left Join tblMFManufacturingProcess mp on s.strManufacturingProcess=mp.strProcessName
-			Left Join tblMFCostType ct on s.strCostType=ct.strName
-			Left Join tblMFMarginBy m on s.strMarginBy=m.strName
-			Left Join tblICUnitMeasure um on s.strUOM=um.strUnitMeasure
-			Left Join tblMFOneLinePrint p on s.strOneLinePrint=p.strName
-			Where s.intRecipeStageId=@intMinId
+		SELECT TOP 1 @intCustomerId = intEntityId
+		FROM vyuARCustomer
+		WHERE strName = @strCustomer
 
-			Select @intRecipeId=SCOPE_IDENTITY()
+		SELECT TOP 1 @intFarmFieldId = intFarmFieldId
+		FROM tblEMEntityFarm
+		WHERE intEntityId = @intCustomerId
+			AND strFarmNumber = @strFarmNumber
+
+		IF ISNULL(@strFarmNumber, '') <> ''
+			AND @intFarmFieldId IS NULL
+		BEGIN
+			UPDATE tblMFRecipeStage
+			SET strMessage = 'Farm does not belong to customer.'
+			WHERE intRecipeStageId = @intMinId
+
+			GOTO NEXT_RECIPE
+		END
+
+		IF ISNULL(@strItemNo, '') <> '' --Production Recipe
+			SELECT TOP 1 @intRecipeId = intRecipeId
+			FROM tblMFRecipe
+			WHERE intItemId = @intItemId
+				AND intVersionNo = @intVersionNo
+				AND intLocationId = @intLocationId
+		ELSE --Virtual Recipe
+			SELECT TOP 1 @intRecipeId = intRecipeId
+			FROM tblMFRecipe
+			WHERE strName = @strRecipeName
+
+		IF @intRecipeId IS NULL --insert
+		BEGIN
+			INSERT INTO tblMFRecipe (
+				strName
+				,intItemId
+				,dblQuantity
+				,intItemUOMId
+				,intLocationId
+				,intVersionNo
+				,intRecipeTypeId
+				,intManufacturingProcessId
+				,ysnActive
+				,intCustomerId
+				,intFarmId
+				,intCostTypeId
+				,intMarginById
+				,dblMargin
+				,dblDiscount
+				,intMarginUOMId
+				,intOneLinePrintId
+				,intCreatedUserId
+				,dtmCreated
+				,intLastModifiedUserId
+				,dtmLastModified
+				,dtmValidFrom
+				,dtmValidTo
+				)
+			SELECT TOP 1 s.strRecipeName
+				,i.intItemId
+				,s.[strQuantity]
+				,iu.intItemUOMId
+				,cl.intCompanyLocationId
+				,s.[strVersionNo]
+				,rt.intRecipeTypeId
+				,mp.intManufacturingProcessId
+				,0
+				,@intCustomerId
+				,@intFarmFieldId
+				,ct.intCostTypeId
+				,m.intMarginById
+				,s.[strMargin]
+				,s.[strDiscount]
+				,um.intUnitMeasureId
+				,p.intOneLinePrintId
+				,@intUserId
+				,GETDATE()
+				,@intUserId
+				,GETDATE()
+				,s.dtmValidFrom
+				,s.dtmValidTo
+			FROM tblMFRecipeStage s
+			LEFT JOIN tblICItem i ON s.strItemNo = i.strItemNo
+			LEFT JOIN tblICItemUOM iu ON i.intItemId = iu.intItemId
+				AND iu.ysnStockUnit = 1
+			LEFT JOIN tblSMCompanyLocation cl ON s.strLocationName = cl.strLocationName
+			LEFT JOIN tblMFRecipeType rt ON s.strRecipeType = rt.strName
+			LEFT JOIN tblMFManufacturingProcess mp ON s.strManufacturingProcess = mp.strProcessName
+			LEFT JOIN tblMFCostType ct ON s.strCostType = ct.strName
+			LEFT JOIN tblMFMarginBy m ON s.strMarginBy = m.strName
+			LEFT JOIN tblICUnitMeasure um ON s.strUOM = um.strUnitMeasure
+			LEFT JOIN tblMFOneLinePrint p ON s.strOneLinePrint = p.strName
+			WHERE s.intRecipeStageId = @intMinId
+
+			SELECT @intRecipeId = SCOPE_IDENTITY()
 
 			--Add Default Output Item for production recipe
-			If ISNULL(@strItemNo,'')<>''
-				Insert Into tblMFRecipeItem(intRecipeId,intItemId,strDescription,dblQuantity,dblCalculatedQuantity,intItemUOMId,intRecipeItemTypeId,strItemGroupName,
-											dblUpperTolerance,dblLowerTolerance,dblCalculatedUpperTolerance,dblCalculatedLowerTolerance,dblShrinkage,ysnScaled,
-											intConsumptionMethodId,intStorageLocationId,dtmValidFrom,dtmValidTo,ysnYearValidationRequired,
-											ysnMinorIngredient,ysnOutputItemMandatory,dblScrap,ysnConsumptionRequired,dblCostAllocationPercentage,intMarginById,dblMargin,
-											ysnCostAppliedAtInvoice,intCommentTypeId,strDocumentNo,intSequenceNo,ysnPartialFillConsumption,
-											intCreatedUserId,dtmCreated,intLastModifiedUserId,dtmLastModified)
-				Select TOP 1 @intRecipeId,@intItemId,'',s.[strQuantity],0,iu.intItemUOMId,2,'',0,0,s.[strQuantity],s.[strQuantity],0,0,null,null,null,null,0,
-										0,1,0,1,100,null,0,0,null,null,null,1,@intUserId,GETDATE(),@intUserId,GETDATE()
-				From tblMFRecipeStage s
-				Left Join tblICItem i on s.strItemNo=i.strItemNo
-				Left Join tblICItemUOM iu  on i.intItemId=iu.intItemId AND iu.ysnStockUnit=1
-				Where s.intRecipeStageId=@intMinId
+			IF ISNULL(@strItemNo, '') <> ''
+				INSERT INTO tblMFRecipeItem (
+					intRecipeId
+					,intItemId
+					,strDescription
+					,dblQuantity
+					,dblCalculatedQuantity
+					,intItemUOMId
+					,intRecipeItemTypeId
+					,strItemGroupName
+					,dblUpperTolerance
+					,dblLowerTolerance
+					,dblCalculatedUpperTolerance
+					,dblCalculatedLowerTolerance
+					,dblShrinkage
+					,ysnScaled
+					,intConsumptionMethodId
+					,intStorageLocationId
+					,dtmValidFrom
+					,dtmValidTo
+					,ysnYearValidationRequired
+					,ysnMinorIngredient
+					,ysnOutputItemMandatory
+					,dblScrap
+					,ysnConsumptionRequired
+					,dblCostAllocationPercentage
+					,intMarginById
+					,dblMargin
+					,ysnCostAppliedAtInvoice
+					,intCommentTypeId
+					,strDocumentNo
+					,intSequenceNo
+					,ysnPartialFillConsumption
+					,intCreatedUserId
+					,dtmCreated
+					,intLastModifiedUserId
+					,dtmLastModified
+					)
+				SELECT TOP 1 @intRecipeId
+					,@intItemId
+					,''
+					,s.[strQuantity]
+					,0
+					,iu.intItemUOMId
+					,2
+					,''
+					,0
+					,0
+					,s.[strQuantity]
+					,s.[strQuantity]
+					,0
+					,0
+					,NULL
+					,NULL
+					,NULL
+					,NULL
+					,0
+					,0
+					,1
+					,0
+					,1
+					,100
+					,NULL
+					,0
+					,0
+					,NULL
+					,NULL
+					,NULL
+					,1
+					,@intUserId
+					,GETDATE()
+					,@intUserId
+					,GETDATE()
+				FROM tblMFRecipeStage s
+				LEFT JOIN tblICItem i ON s.strItemNo = i.strItemNo
+				LEFT JOIN tblICItemUOM iu ON i.intItemId = iu.intItemId
+					AND iu.ysnStockUnit = 1
+				WHERE s.intRecipeStageId = @intMinId
+		END
+		ELSE
+		BEGIN --update
+			UPDATE r
+			SET r.strName = t.strRecipeName
+				,r.dblQuantity = t.[strQuantity]
+				,r.intManufacturingProcessId = t.intManufacturingProcessId
+				,r.intCustomerId = @intCustomerId
+				,r.intFarmId = @intFarmFieldId
+				,r.intCostTypeId = t.intCostTypeId
+				,r.intMarginById = t.intMarginById
+				,r.dblMargin = t.[strMargin]
+				,r.dblDiscount = t.[strDiscount]
+				,r.intMarginUOMId = t.intUnitMeasureId
+				,r.intOneLinePrintId = t.intOneLinePrintId
+				,r.intLastModifiedUserId = @intUserId
+				,r.dtmLastModified = GETDATE()
+				,r.dtmValidFrom =t.dtmValidFrom
+				,r.dtmValidTo =t.dtmValidTo
+			FROM tblMFRecipe r
+			CROSS JOIN (
+				SELECT TOP 1 s.strRecipeName
+					,i.intItemId
+					,s.[strQuantity]
+					,iu.intItemUOMId
+					,cl.intCompanyLocationId
+					,s.[strVersionNo]
+					,rt.intRecipeTypeId
+					,mp.intManufacturingProcessId
+					,ct.intCostTypeId
+					,m.intMarginById
+					,s.[strMargin]
+					,s.[strDiscount]
+					,um.intUnitMeasureId
+					,p.intOneLinePrintId
+					,s.dtmValidFrom 
+					,s.dtmValidTo
+				FROM tblMFRecipeStage s
+				LEFT JOIN tblICItem i ON s.strItemNo = i.strItemNo
+				LEFT JOIN tblICItemUOM iu ON i.intItemId = iu.intItemId
+					AND iu.ysnStockUnit = 1
+				LEFT JOIN tblSMCompanyLocation cl ON s.strLocationName = cl.strLocationName
+				LEFT JOIN tblMFRecipeType rt ON s.strRecipeType = rt.strName
+				LEFT JOIN tblMFManufacturingProcess mp ON s.strManufacturingProcess = mp.strProcessName
+				LEFT JOIN tblMFCostType ct ON s.strCostType = ct.strName
+				LEFT JOIN tblMFMarginBy m ON s.strMarginBy = m.strName
+				LEFT JOIN tblICUnitMeasure um ON s.strUOM = um.strUnitMeasure
+				LEFT JOIN tblMFOneLinePrint p ON s.strOneLinePrint = p.strName
+				WHERE s.intRecipeStageId = @intMinId
+				) t
+			WHERE r.intRecipeId = @intRecipeId
+		END
 
-		End
-		Else
-		Begin --update
-			Update r
-			Set r.strName=t.strRecipeName,
-				r.dblQuantity=t.[strQuantity],
-				r.intManufacturingProcessId=t.intManufacturingProcessId,
-				r.intCustomerId=@intCustomerId,
-				r.intFarmId=@intFarmFieldId,
-				r.intCostTypeId=t.intCostTypeId,
-				r.intMarginById=t.intMarginById,
-				r.dblMargin=t.[strMargin],
-				r.dblDiscount=t.[strDiscount],
-				r.intMarginUOMId=t.intUnitMeasureId,
-				r.intOneLinePrintId=t.intOneLinePrintId,
-				r.intLastModifiedUserId=@intUserId,
-				r.dtmLastModified=GETDATE()
-			From tblMFRecipe r Cross Join
-			(
-			Select TOP 1 s.strRecipeName,i.intItemId,s.[strQuantity],iu.intItemUOMId,cl.intCompanyLocationId,s.[strVersionNo],rt.intRecipeTypeId,mp.intManufacturingProcessId,
-									ct.intCostTypeId,m.intMarginById,s.[strMargin],s.[strDiscount],um.intUnitMeasureId,p.intOneLinePrintId
-			From tblMFRecipeStage s
-			Left Join tblICItem i on s.strItemNo=i.strItemNo
-			Left Join tblICItemUOM iu  on i.intItemId=iu.intItemId AND iu.ysnStockUnit=1
-			Left Join tblSMCompanyLocation cl on s.strLocationName=cl.strLocationName
-			Left Join tblMFRecipeType rt on s.strRecipeType=rt.strName
-			Left Join tblMFManufacturingProcess mp on s.strManufacturingProcess=mp.strProcessName
-			Left Join tblMFCostType ct on s.strCostType=ct.strName
-			Left Join tblMFMarginBy m on s.strMarginBy=m.strName
-			Left Join tblICUnitMeasure um on s.strUOM=um.strUnitMeasure
-			Left Join tblMFOneLinePrint p on s.strOneLinePrint=p.strName
-			Where s.intRecipeStageId=@intMinId
-			) t
-			Where r.intRecipeId=@intRecipeId
-		End
-
-		Update tblMFRecipeStage Set strMessage='Success' Where intRecipeStageId=@intMinId
+		UPDATE tblMFRecipeStage
+		SET strMessage = 'Success'
+		WHERE intRecipeStageId = @intMinId
 
 		NEXT_RECIPE:
-		Select @intMinId=MIN(intRecipeStageId) From tblMFRecipeStage Where intRecipeStageId > @intMinId AND strSessionId=@strSessionId AND ISNULL(strMessage,'')=''	
-	End
 
-	Update tblMFRecipeStage Set strMessage='Skipped' Where strSessionId=@strSessionId AND ISNULL(strMessage,'')=''	
-End
+		SELECT @intMinId = MIN(intRecipeStageId)
+		FROM tblMFRecipeStage
+		WHERE intRecipeStageId > @intMinId
+			AND strSessionId = @strSessionId
+			AND ISNULL(strMessage, '') = ''
+	END
+
+	UPDATE tblMFRecipeStage
+	SET strMessage = 'Skipped'
+	WHERE strSessionId = @strSessionId
+		AND ISNULL(strMessage, '') = ''
+END
 
 --Recipe Item
-If @strImportType='Recipe Item'
-Begin
-	
+IF @strImportType = 'Recipe Item'
+BEGIN
 	--Recipe Name is required
-	Update tblMFRecipeItemStage Set strMessage='Recipe Name is required' 
-	Where ISNULL(strRecipeName,'')='' AND ISNULL(strRecipeHeaderItemNo,'')='' 
-	AND strSessionId=@strSessionId AND ISNULL(strMessage,'')=''	
-	
+	UPDATE tblMFRecipeItemStage
+	SET strMessage = 'Recipe Name is required'
+	WHERE ISNULL(strRecipeName, '') = ''
+		AND ISNULL(strRecipeHeaderItemNo, '') = ''
+		AND strSessionId = @strSessionId
+		AND ISNULL(strMessage, '') = ''
+
 	--Invalid Header Item
-	Update tblMFRecipeItemStage Set strMessage='Invalid Recipe Header Item' 
-	Where strRecipeHeaderItemNo not in (Select strItemNo From tblICItem) AND ISNULL(strRecipeHeaderItemNo,'')<>'' AND strSessionId=@strSessionId AND ISNULL(strMessage,'')=''
+	UPDATE tblMFRecipeItemStage
+	SET strMessage = 'Invalid Recipe Header Item'
+	WHERE strRecipeHeaderItemNo NOT IN (
+			SELECT strItemNo
+			FROM tblICItem
+			)
+		AND ISNULL(strRecipeHeaderItemNo, '') <> ''
+		AND strSessionId = @strSessionId
+		AND ISNULL(strMessage, '') = ''
 
 	--Invalid Version No
-	Update tblMFRecipeItemStage Set strMessage='Invalid Version No'
-	Where (ISNUMERIC(ISNULL([strVersionNo],0))=0 OR CHARINDEX('.',ISNULL([strVersionNo],0))>0 OR [strVersionNo]='0')
-	AND strSessionId=@strSessionId AND ISNULL(strMessage,'')=''	
+	UPDATE tblMFRecipeItemStage
+	SET strMessage = 'Invalid Version No'
+	WHERE (
+			ISNUMERIC(ISNULL([strVersionNo], 0)) = 0
+			OR CHARINDEX('.', ISNULL([strVersionNo], 0)) > 0
+			OR [strVersionNo] = '0'
+			)
+		AND strSessionId = @strSessionId
+		AND ISNULL(strMessage, '') = ''
 
 	--Invalid Detail Item
-	Update tblMFRecipeItemStage Set strMessage='Invalid Recipe Detail Item' 
-	Where ISNULL(strRecipeItemNo,'') not in (Select strItemNo From tblICItem) AND strSessionId=@strSessionId AND ISNULL(strMessage,'')=''
+	UPDATE tblMFRecipeItemStage
+	SET strMessage = 'Invalid Recipe Detail Item'
+	WHERE ISNULL(strRecipeItemNo, '') NOT IN (
+			SELECT strItemNo
+			FROM tblICItem
+			)
+		AND strSessionId = @strSessionId
+		AND ISNULL(strMessage, '') = ''
 
 	--Invalid Qty
-	Update s Set s.strMessage='Quantity should be greater than 0' 
-	From tblMFRecipeItemStage s Join tblICItem i on s.strRecipeItemNo=i.strItemNo 
-	Where (ISNUMERIC(s.[strQuantity])=0 OR ISNULL(CAST(s.[strQuantity] as numeric(18,6)),0)<=0) AND i.strType not in ('Other Charge','Comment')
-	AND s.strSessionId=@strSessionId AND ISNULL(s.strMessage,'')=''	
+	UPDATE s
+	SET s.strMessage = 'Quantity should be greater than 0'
+	FROM tblMFRecipeItemStage s
+	JOIN tblICItem i ON s.strRecipeItemNo = i.strItemNo
+	WHERE (
+			ISNUMERIC(s.[strQuantity]) = 0
+			OR ISNULL(CAST(s.[strQuantity] AS NUMERIC(18, 6)), 0) <= 0
+			)
+		AND i.strType NOT IN (
+			'Other Charge'
+			,'Comment'
+			)
+		AND s.strSessionId = @strSessionId
+		AND ISNULL(s.strMessage, '') = ''
 
 	--UOM is required
-	Update s Set s.strMessage='UOM is required' 
-	From tblMFRecipeItemStage s Join tblICItem i on s.strRecipeItemNo=i.strItemNo 
-	Where ISNULL(strUOM,'')='' AND i.strType not in ('Other Charge','Comment')
-	AND s.strSessionId=@strSessionId AND ISNULL(s.strMessage,'')=''	
+	UPDATE s
+	SET s.strMessage = 'UOM is required'
+	FROM tblMFRecipeItemStage s
+	JOIN tblICItem i ON s.strRecipeItemNo = i.strItemNo
+	WHERE ISNULL(strUOM, '') = ''
+		AND i.strType NOT IN (
+			'Other Charge'
+			,'Comment'
+			)
+		AND s.strSessionId = @strSessionId
+		AND ISNULL(s.strMessage, '') = ''
 
 	--Invalid UOM
-	Update s Set s.strMessage='Invalid UOM' 
-	From tblMFRecipeItemStage s Join tblICItem i on s.strRecipeItemNo=i.strItemNo 
-	Where ISNULL(strUOM,'')<>'' AND strUOM not in (Select strUnitMeasure From tblICUnitMeasure) AND i.strType not in ('Other Charge','Comment')
-	AND strSessionId=@strSessionId AND ISNULL(strMessage,'')=''
+	UPDATE s
+	SET s.strMessage = 'Invalid UOM'
+	FROM tblMFRecipeItemStage s
+	JOIN tblICItem i ON s.strRecipeItemNo = i.strItemNo
+	WHERE ISNULL(strUOM, '') <> ''
+		AND strUOM NOT IN (
+			SELECT strUnitMeasure
+			FROM tblICUnitMeasure
+			)
+		AND i.strType NOT IN (
+			'Other Charge'
+			,'Comment'
+			)
+		AND strSessionId = @strSessionId
+		AND ISNULL(strMessage, '') = ''
 
 	--Invalid Recipe Item Type
-	Update tblMFRecipeItemStage Set strMessage='Invalid Recipe Item Type (Possible values: INPUT,OUTPUT)' 
-	Where strRecipeItemType not in (Select strName From tblMFRecipeItemType) AND ISNULL(strRecipeItemType,'')<>'' 
-	AND strSessionId=@strSessionId AND ISNULL(strMessage,'')=''
+	UPDATE tblMFRecipeItemStage
+	SET strMessage = 'Invalid Recipe Item Type (Possible values: INPUT,OUTPUT)'
+	WHERE strRecipeItemType NOT IN (
+			SELECT strName
+			FROM tblMFRecipeItemType
+			)
+		AND ISNULL(strRecipeItemType, '') <> ''
+		AND strSessionId = @strSessionId
+		AND ISNULL(strMessage, '') = ''
 
 	--Invalid Upper Tolerance
-	Update tblMFRecipeItemStage Set strMessage='Invalid Upper Tolerance/Upper Tolerance cannot be negative' 
-	Where (ISNUMERIC(ISNULL([strUpperTolerance],0))=0 OR ISNULL(CAST([strUpperTolerance] as numeric(18,6)),0)<0) 
-	AND strSessionId=@strSessionId AND ISNULL(strMessage,'')=''
+	UPDATE tblMFRecipeItemStage
+	SET strMessage = 'Invalid Upper Tolerance/Upper Tolerance cannot be negative'
+	WHERE (
+			ISNUMERIC(ISNULL([strUpperTolerance], 0)) = 0
+			OR ISNULL(CAST([strUpperTolerance] AS NUMERIC(18, 6)), 0) < 0
+			)
+		AND strSessionId = @strSessionId
+		AND ISNULL(strMessage, '') = ''
 
 	--Invalid Lower Tolerance
-	Update tblMFRecipeItemStage Set strMessage='Invalid Lower Tolerance/Lower Tolerance cannot be negative' 
-	Where (ISNUMERIC(ISNULL([strLowerTolerance],0))=0 OR ISNULL(CAST([strLowerTolerance] as numeric(18,6)),0)<0) 
-	AND strSessionId=@strSessionId AND ISNULL(strMessage,'')=''
+	UPDATE tblMFRecipeItemStage
+	SET strMessage = 'Invalid Lower Tolerance/Lower Tolerance cannot be negative'
+	WHERE (
+			ISNUMERIC(ISNULL([strLowerTolerance], 0)) = 0
+			OR ISNULL(CAST([strLowerTolerance] AS NUMERIC(18, 6)), 0) < 0
+			)
+		AND strSessionId = @strSessionId
+		AND ISNULL(strMessage, '') = ''
 
 	--Invalid Shrinkage
-	Update tblMFRecipeItemStage Set strMessage='Invalid Shrinkage/Shrinkage cannot be negative' 
-	Where (ISNUMERIC(ISNULL([strShrinkage],0))=0 OR ISNULL(CAST([strShrinkage] as numeric(18,6)),0)<0) 
-	AND strSessionId=@strSessionId AND ISNULL(strMessage,'')=''
+	UPDATE tblMFRecipeItemStage
+	SET strMessage = 'Invalid Shrinkage/Shrinkage cannot be negative'
+	WHERE (
+			ISNUMERIC(ISNULL([strShrinkage], 0)) = 0
+			OR ISNULL(CAST([strShrinkage] AS NUMERIC(18, 6)), 0) < 0
+			)
+		AND strSessionId = @strSessionId
+		AND ISNULL(strMessage, '') = ''
 
 	--Invalid Scale
-	Update tblMFRecipeItemStage Set strMessage='Invalid Scale (Possible values: 1,0)' 
-	Where ISNULL([strScaled],'') NOT IN ('1','0') AND ISNULL([strScaled],'')<>''
-	AND strSessionId=@strSessionId AND ISNULL(strMessage,'')=''
+	UPDATE tblMFRecipeItemStage
+	SET strMessage = 'Invalid Scale (Possible values: 1,0)'
+	WHERE ISNULL([strScaled], '') NOT IN (
+			'1'
+			,'0'
+			)
+		AND ISNULL([strScaled], '') <> ''
+		AND strSessionId = @strSessionId
+		AND ISNULL(strMessage, '') = ''
 
 	--Invalid Consumption Method
-	Update tblMFRecipeItemStage Set strMessage='Invalid Consumption Method (Possible values: By Lot,By Location,FIFO,None)' 
-	Where strConsumptionMethod not in (Select strName From tblMFConsumptionMethod) AND ISNULL(strConsumptionMethod,'')<>'' 
-	AND strSessionId=@strSessionId AND ISNULL(strMessage,'')=''
+	UPDATE tblMFRecipeItemStage
+	SET strMessage = 'Invalid Consumption Method (Possible values: By Lot,By Location,FIFO,None)'
+	WHERE strConsumptionMethod NOT IN (
+			SELECT strName
+			FROM tblMFConsumptionMethod
+			)
+		AND ISNULL(strConsumptionMethod, '') <> ''
+		AND strSessionId = @strSessionId
+		AND ISNULL(strMessage, '') = ''
 
 	--Invalid Storage Location
-	Update tblMFRecipeItemStage Set strMessage='Invalid Storage Location' 
-	Where strStorageLocation not in (Select strName From tblICStorageLocation) AND ISNULL(strStorageLocation,'')<>'' 
-	AND strSessionId=@strSessionId AND ISNULL(strMessage,'')=''
+	UPDATE tblMFRecipeItemStage
+	SET strMessage = 'Invalid Storage Location'
+	WHERE strStorageLocation NOT IN (
+			SELECT strName
+			FROM tblICStorageLocation
+			)
+		AND ISNULL(strStorageLocation, '') <> ''
+		AND strSessionId = @strSessionId
+		AND ISNULL(strMessage, '') = ''
 
 	--Invalid Valid From
-	Update tblMFRecipeItemStage Set strMessage='Invalid Valid From (YYYY-MM-DD)' 
-	Where ISDATE(ISNULL([strValidFrom],''))=0 AND ISNULL([strValidFrom],'')<>'' 
-	AND strSessionId=@strSessionId AND ISNULL(strMessage,'')=''
+	UPDATE tblMFRecipeItemStage
+	SET strMessage = 'Invalid Valid From (YYYY-MM-DD)'
+	WHERE ISDATE(ISNULL([strValidFrom], '')) = 0
+		AND ISNULL([strValidFrom], '') <> ''
+		AND strSessionId = @strSessionId
+		AND ISNULL(strMessage, '') = ''
 
 	--Invalid Valid To
-	Update tblMFRecipeItemStage Set strMessage='Invalid Valid To (YYYY-MM-DD)' 
-	Where ISDATE(ISNULL([strValidTo],''))=0 AND ISNULL([strValidTo],'')<>'' 
-	AND strSessionId=@strSessionId AND ISNULL(strMessage,'')=''
+	UPDATE tblMFRecipeItemStage
+	SET strMessage = 'Invalid Valid To (YYYY-MM-DD)'
+	WHERE ISDATE(ISNULL([strValidTo], '')) = 0
+		AND ISNULL([strValidTo], '') <> ''
+		AND strSessionId = @strSessionId
+		AND ISNULL(strMessage, '') = ''
 
 	--Invalid Year Validation
-	Update tblMFRecipeItemStage Set strMessage='Invalid Year Validation (Possible values: 1,0)' 
-	Where ISNULL([strYearValidationRequired],'') NOT IN ('1','0') AND ISNULL([strYearValidationRequired],'')<>''
-	AND strSessionId=@strSessionId AND ISNULL(strMessage,'')=''
+	UPDATE tblMFRecipeItemStage
+	SET strMessage = 'Invalid Year Validation (Possible values: 1,0)'
+	WHERE ISNULL([strYearValidationRequired], '') NOT IN (
+			'1'
+			,'0'
+			)
+		AND ISNULL([strYearValidationRequired], '') <> ''
+		AND strSessionId = @strSessionId
+		AND ISNULL(strMessage, '') = ''
 
 	--Invalid Minor Ingredient
-	Update tblMFRecipeItemStage Set strMessage='Invalid Minor Ingredient (Possible values: 1,0)' 
-	Where ISNULL([strMinorIngredient],'') NOT IN ('1','0') AND ISNULL([strMinorIngredient],'')<>''
-	AND strSessionId=@strSessionId AND ISNULL(strMessage,'')=''
+	UPDATE tblMFRecipeItemStage
+	SET strMessage = 'Invalid Minor Ingredient (Possible values: 1,0)'
+	WHERE ISNULL([strMinorIngredient], '') NOT IN (
+			'1'
+			,'0'
+			)
+		AND ISNULL([strMinorIngredient], '') <> ''
+		AND strSessionId = @strSessionId
+		AND ISNULL(strMessage, '') = ''
 
 	--Invalid Output Item Mandatory
-	Update tblMFRecipeItemStage Set strMessage='Invalid Output Item Mandatory (Possible values: 1,0)' 
-	Where ISNULL([strOutputItemMandatory],'') NOT IN ('1','0') AND ISNULL([strOutputItemMandatory],'')<>''
-	AND strSessionId=@strSessionId AND ISNULL(strMessage,'')=''
+	UPDATE tblMFRecipeItemStage
+	SET strMessage = 'Invalid Output Item Mandatory (Possible values: 1,0)'
+	WHERE ISNULL([strOutputItemMandatory], '') NOT IN (
+			'1'
+			,'0'
+			)
+		AND ISNULL([strOutputItemMandatory], '') <> ''
+		AND strSessionId = @strSessionId
+		AND ISNULL(strMessage, '') = ''
 
 	--Invalid Scrap
-	Update tblMFRecipeItemStage Set strMessage='Invalid Scrap / Scrap cannot be negative' 
-	Where (ISNUMERIC(ISNULL([strScrap],0))=0 OR ISNULL(CAST([strScrap] as numeric(18,6)),0)<0) 
-	AND strSessionId=@strSessionId AND ISNULL(strMessage,'')=''
+	UPDATE tblMFRecipeItemStage
+	SET strMessage = 'Invalid Scrap / Scrap cannot be negative'
+	WHERE (
+			ISNUMERIC(ISNULL([strScrap], 0)) = 0
+			OR ISNULL(CAST([strScrap] AS NUMERIC(18, 6)), 0) < 0
+			)
+		AND strSessionId = @strSessionId
+		AND ISNULL(strMessage, '') = ''
 
 	--Invalid Consumption Required
-	Update tblMFRecipeItemStage Set strMessage='Invalid Consumption Required (Possible values: 1,0)' 
-	Where ISNULL([strConsumptionRequired],'') NOT IN ('1','0') AND ISNULL([strConsumptionRequired],'')<>''
-	AND strSessionId=@strSessionId AND ISNULL(strMessage,'')=''
+	UPDATE tblMFRecipeItemStage
+	SET strMessage = 'Invalid Consumption Required (Possible values: 1,0)'
+	WHERE ISNULL([strConsumptionRequired], '') NOT IN (
+			'1'
+			,'0'
+			)
+		AND ISNULL([strConsumptionRequired], '') <> ''
+		AND strSessionId = @strSessionId
+		AND ISNULL(strMessage, '') = ''
 
 	--Invalid Cost Allocation Percentage
-	Update tblMFRecipeItemStage Set strMessage='Invalid Cost Allocation Percentage / Cost Allocation Percentage cannot be negative' 
-	Where (ISNUMERIC(ISNULL([strCostAllocationPercentage],0))=0 OR ISNULL(CAST([strCostAllocationPercentage] as numeric(18,6)),0)<0) 
-	AND strSessionId=@strSessionId AND ISNULL(strMessage,'')=''
+	UPDATE tblMFRecipeItemStage
+	SET strMessage = 'Invalid Cost Allocation Percentage / Cost Allocation Percentage cannot be negative'
+	WHERE (
+			ISNUMERIC(ISNULL([strCostAllocationPercentage], 0)) = 0
+			OR ISNULL(CAST([strCostAllocationPercentage] AS NUMERIC(18, 6)), 0) < 0
+			)
+		AND strSessionId = @strSessionId
+		AND ISNULL(strMessage, '') = ''
 
 	--Invalid Margin By
-	Update tblMFRecipeItemStage Set strMessage='Invalid Margin By' 
-	Where strMarginBy not in (Select strName From tblMFMarginBy) AND ISNULL(strMarginBy,'')<>'' 
-	AND strSessionId=@strSessionId AND ISNULL(strMessage,'')=''
+	UPDATE tblMFRecipeItemStage
+	SET strMessage = 'Invalid Margin By'
+	WHERE strMarginBy NOT IN (
+			SELECT strName
+			FROM tblMFMarginBy
+			)
+		AND ISNULL(strMarginBy, '') <> ''
+		AND strSessionId = @strSessionId
+		AND ISNULL(strMessage, '') = ''
 
 	--Invalid Margin
-	Update tblMFRecipeItemStage Set strMessage='Invalid Margin / Margin cannot be negative' 
-	Where (ISNUMERIC(ISNULL([strMargin],0))=0 OR ISNULL(CAST([strMargin] as numeric(18,6)),0)<0)  
-	AND strSessionId=@strSessionId AND ISNULL(strMessage,'')=''
+	UPDATE tblMFRecipeItemStage
+	SET strMessage = 'Invalid Margin / Margin cannot be negative'
+	WHERE (
+			ISNUMERIC(ISNULL([strMargin], 0)) = 0
+			OR ISNULL(CAST([strMargin] AS NUMERIC(18, 6)), 0) < 0
+			)
+		AND strSessionId = @strSessionId
+		AND ISNULL(strMessage, '') = ''
 
 	--Invalid Cost Applied At Invoice
-	Update tblMFRecipeItemStage Set strMessage='Invalid Cost Applied At Invoice (Possible values: 1,0)' 
-	Where ISNULL([strCostAppliedAtInvoice],'') NOT IN ('1','0') AND ISNULL([strCostAppliedAtInvoice],'')<>''
-	AND strSessionId=@strSessionId AND ISNULL(strMessage,'')=''
+	UPDATE tblMFRecipeItemStage
+	SET strMessage = 'Invalid Cost Applied At Invoice (Possible values: 1,0)'
+	WHERE ISNULL([strCostAppliedAtInvoice], '') NOT IN (
+			'1'
+			,'0'
+			)
+		AND ISNULL([strCostAppliedAtInvoice], '') <> ''
+		AND strSessionId = @strSessionId
+		AND ISNULL(strMessage, '') = ''
 
 	--Invalid Comment Type
-	Update tblMFRecipeItemStage Set strMessage='Invalid Comment Type' 
-	Where strCommentType not in (Select strName From tblMFCommentType) AND ISNULL(strCommentType,'')<>'' 
-	AND strSessionId=@strSessionId AND ISNULL(strMessage,'')=''
+	UPDATE tblMFRecipeItemStage
+	SET strMessage = 'Invalid Comment Type'
+	WHERE strCommentType NOT IN (
+			SELECT strName
+			FROM tblMFCommentType
+			)
+		AND ISNULL(strCommentType, '') <> ''
+		AND strSessionId = @strSessionId
+		AND ISNULL(strMessage, '') = ''
 
 	--Invalid Partial Fill Consumption
-	Update tblMFRecipeItemStage Set strMessage='Invalid Partial Fill Consumption (Possible values: 1,0)' 
-	Where ISNULL([strPartialFillConsumption],'') NOT IN ('1','0') AND ISNULL([strPartialFillConsumption],'')<>''
-	AND strSessionId=@strSessionId AND ISNULL(strMessage,'')=''
+	UPDATE tblMFRecipeItemStage
+	SET strMessage = 'Invalid Partial Fill Consumption (Possible values: 1,0)'
+	WHERE ISNULL([strPartialFillConsumption], '') NOT IN (
+			'1'
+			,'0'
+			)
+		AND ISNULL([strPartialFillConsumption], '') <> ''
+		AND strSessionId = @strSessionId
+		AND ISNULL(strMessage, '') = ''
 
 	--Set Default Values
 	--Recipe Item Type
-	Update tblMFRecipeItemStage Set strRecipeItemType='INPUT'
-	Where ISNULL(strRecipeItemType,'')='' 
-	AND strSessionId=@strSessionId AND ISNULL(strMessage,'')=''	
+	UPDATE tblMFRecipeItemStage
+	SET strRecipeItemType = 'INPUT'
+	WHERE ISNULL(strRecipeItemType, '') = ''
+		AND strSessionId = @strSessionId
+		AND ISNULL(strMessage, '') = ''
 
 	--Consumption Method
-	Update tblMFRecipeItemStage Set strConsumptionMethod='By Lot'
-	Where ISNULL(strConsumptionMethod,'')='' AND strRecipeItemType='INPUT'
-	AND strSessionId=@strSessionId AND ISNULL(strMessage,'')=''
+	UPDATE tblMFRecipeItemStage
+	SET strConsumptionMethod = 'By Lot'
+	WHERE ISNULL(strConsumptionMethod, '') = ''
+		AND strRecipeItemType = 'INPUT'
+		AND strSessionId = @strSessionId
+		AND ISNULL(strMessage, '') = ''
 
 	--Comment Type
-	Update s Set s.strCommentType='General'
-	From tblMFRecipeItemStage s Join tblICItem i on s.strRecipeItemNo=i.strItemNo 
-	Where ISNULL(strCommentType,'')='' AND i.strType='Comment'
-	AND s.strSessionId=@strSessionId AND ISNULL(s.strMessage,'')=''	
+	UPDATE s
+	SET s.strCommentType = 'General'
+	FROM tblMFRecipeItemStage s
+	JOIN tblICItem i ON s.strRecipeItemNo = i.strItemNo
+	WHERE ISNULL(strCommentType, '') = ''
+		AND i.strType = 'Comment'
+		AND s.strSessionId = @strSessionId
+		AND ISNULL(s.strMessage, '') = ''
 
 	--Set Comment as Item Desc if empty
-	Update s Set s.strDescription=i.strDescription
-	From tblMFRecipeItemStage s Join tblICItem i on s.strRecipeItemNo=i.strItemNo 
-	Where ISNULL(s.strDescription,'')='' AND i.strType='Comment'
-	AND s.strSessionId=@strSessionId AND ISNULL(s.strMessage,'')=''	
+	UPDATE s
+	SET s.strDescription = i.strDescription
+	FROM tblMFRecipeItemStage s
+	JOIN tblICItem i ON s.strRecipeItemNo = i.strItemNo
+	WHERE ISNULL(s.strDescription, '') = ''
+		AND i.strType = 'Comment'
+		AND s.strSessionId = @strSessionId
+		AND ISNULL(s.strMessage, '') = ''
 
 	--Quantity=0,UOM=null for Other Charge,Comment items
-	Update s Set s.[strQuantity]=0,s.strUOM=null
-	From tblMFRecipeItemStage s Join tblICItem i on s.strRecipeItemNo=i.strItemNo 
-	Where i.strType in ('Other Charge','Comment')
-	AND s.strSessionId=@strSessionId AND ISNULL(s.strMessage,'')=''	
+	UPDATE s
+	SET s.[strQuantity] = 0
+		,s.strUOM = NULL
+	FROM tblMFRecipeItemStage s
+	JOIN tblICItem i ON s.strRecipeItemNo = i.strItemNo
+	WHERE i.strType IN (
+			'Other Charge'
+			,'Comment'
+			)
+		AND s.strSessionId = @strSessionId
+		AND ISNULL(s.strMessage, '') = ''
 
-	Select @intMinId=MIN(intRecipeItemStageId) From tblMFRecipeItemStage Where strSessionId=@strSessionId AND ISNULL(strMessage,'')=''	
+	SELECT @intMinId = MIN(intRecipeItemStageId)
+	FROM tblMFRecipeItemStage
+	WHERE strSessionId = @strSessionId
+		AND ISNULL(strMessage, '') = ''
 
 	--Insert/Update recipe item
-	While (@intMinId is not null)
-	Begin
-		Set @intItemId=NULL
-		Set @intVersionNo=NULL
-		Set @strRecipeName=''
-		Set @intLocationId=null
-		Set @intRecipeId=null
-		Set @intRecipeDetailItemId=null
-		Set @strRecipeDetailItemNo=''
-		Set @intRecipeItemId=null
-		Set @intRecipeTypeId=null
-		Select @strLocationName=NULL
+	WHILE (@intMinId IS NOT NULL)
+	BEGIN
+		SET @intItemId = NULL
+		SET @intVersionNo = NULL
+		SET @strRecipeName = ''
+		SET @intLocationId = NULL
+		SET @intRecipeId = NULL
+		SET @intRecipeDetailItemId = NULL
+		SET @strRecipeDetailItemNo = ''
+		SET @intRecipeItemId = NULL
+		SET @intRecipeTypeId = NULL
+
+		SELECT @strLocationName = NULL
 
 		--Margin By
-		Update tblMFRecipeItemStage Set strMarginBy='Amount'
-		Where ISNULL(strMarginBy,'')='' AND ISNULL(CAST([strMargin] as numeric(18,6)),0)>0
-		AND strSessionId=@strSessionId AND ISNULL(strMessage,'')=''	AND intRecipeItemStageId=@intMinId	
+		UPDATE tblMFRecipeItemStage
+		SET strMarginBy = 'Amount'
+		WHERE ISNULL(strMarginBy, '') = ''
+			AND ISNULL(CAST([strMargin] AS NUMERIC(18, 6)), 0) > 0
+			AND strSessionId = @strSessionId
+			AND ISNULL(strMessage, '') = ''
+			AND intRecipeItemStageId = @intMinId
 
 		--Valid From
-		Update tblMFRecipeItemStage Set [strValidFrom]=CONVERT(VARCHAR,YEAR(GETDATE())) + '-01-01'
-		Where ISNULL([strValidFrom],'')=''
-		AND strSessionId=@strSessionId AND ISNULL(strMessage,'')=''	AND intRecipeItemStageId=@intMinId	
+		UPDATE tblMFRecipeItemStage
+		SET [strValidFrom] = CONVERT(VARCHAR, YEAR(GETDATE())) + '-01-01'
+		WHERE ISNULL([strValidFrom], '') = ''
+			AND strSessionId = @strSessionId
+			AND ISNULL(strMessage, '') = ''
+			AND intRecipeItemStageId = @intMinId
 
 		--Valid To
-		Update tblMFRecipeItemStage Set [strValidTo]=CONVERT(VARCHAR,YEAR(GETDATE())) + '-12-31'
-		Where ISNULL([strValidTo],'')=''
-		AND strSessionId=@strSessionId AND ISNULL(strMessage,'')=''	AND intRecipeItemStageId=@intMinId	
+		UPDATE tblMFRecipeItemStage
+		SET [strValidTo] = CONVERT(VARCHAR, YEAR(GETDATE())) + '-12-31'
+		WHERE ISNULL([strValidTo], '') = ''
+			AND strSessionId = @strSessionId
+			AND ISNULL(strMessage, '') = ''
+			AND intRecipeItemStageId = @intMinId
 
-		Select @strRecipeName=strRecipeName,@strItemNo=strRecipeHeaderItemNo,@intVersionNo=[strVersionNo],@strLocationName=strLocationName,@strRecipeDetailItemNo=strRecipeItemNo
-		From tblMFRecipeItemStage Where intRecipeItemStageId=@intMinId
-		Select @intItemId=intItemId From tblICItem Where strItemNo=@strItemNo
-		Select @intLocationId=intCompanyLocationId From tblSMCompanyLocation Where strLocationName=@strLocationName
-		Select @intRecipeDetailItemId=intItemId From tblICItem Where strItemNo=@strRecipeDetailItemNo
+		SELECT @strRecipeName = strRecipeName
+			,@strItemNo = strRecipeHeaderItemNo
+			,@intVersionNo = [strVersionNo]
+			,@strLocationName = strLocationName
+			,@strRecipeDetailItemNo = strRecipeItemNo
+		FROM tblMFRecipeItemStage
+		WHERE intRecipeItemStageId = @intMinId
 
-		If ISNULL(@strItemNo,'')<>'' --Production Recipe
-			Select TOP 1 @intRecipeId=intRecipeId,@intRecipeTypeId=intRecipeTypeId,@intLocationId=intLocationId From tblMFRecipe Where intItemId=@intItemId AND intVersionNo=@intVersionNo and intLocationId=@intLocationId
-		Else --Virtual Recipe
-			Select TOP 1 @intRecipeId=intRecipeId,@intRecipeTypeId=intRecipeTypeId,@intLocationId=intLocationId From tblMFRecipe Where strName=@strRecipeName and intLocationId=@intLocationId
+		SELECT @intItemId = intItemId
+		FROM tblICItem
+		WHERE strItemNo = @strItemNo
 
-		If @intRecipeId is null
-		Begin
-			Update tblMFRecipeItemStage Set strMessage='No recipe found to add items.' Where intRecipeItemStageId=@intMinId
+		SELECT @intLocationId = intCompanyLocationId
+		FROM tblSMCompanyLocation
+		WHERE strLocationName = @strLocationName
+
+		SELECT @intRecipeDetailItemId = intItemId
+		FROM tblICItem
+		WHERE strItemNo = @strRecipeDetailItemNo
+
+		IF ISNULL(@strItemNo, '') <> '' --Production Recipe
+			SELECT TOP 1 @intRecipeId = intRecipeId
+				,@intRecipeTypeId = intRecipeTypeId
+				,@intLocationId = intLocationId
+			FROM tblMFRecipe
+			WHERE intItemId = @intItemId
+				AND intVersionNo = @intVersionNo
+				AND intLocationId = @intLocationId
+		ELSE --Virtual Recipe
+			SELECT TOP 1 @intRecipeId = intRecipeId
+				,@intRecipeTypeId = intRecipeTypeId
+				,@intLocationId = intLocationId
+			FROM tblMFRecipe
+			WHERE strName = @strRecipeName
+				AND intLocationId = @intLocationId
+
+		IF @intRecipeId IS NULL
+		BEGIN
+			UPDATE tblMFRecipeItemStage
+			SET strMessage = 'No recipe found to add items.'
+			WHERE intRecipeItemStageId = @intMinId
+
 			GOTO NEXT_RECIPEITEM
-		End
+		END
 
-		Select TOp 1 @intRecipeItemId=intRecipeItemId from tblMFRecipeItem Where intRecipeId=@intRecipeId AND intItemId=@intRecipeDetailItemId
+		SELECT TOP 1 @intRecipeItemId = intRecipeItemId
+		FROM tblMFRecipeItem
+		WHERE intRecipeId = @intRecipeId
+			AND intItemId = @intRecipeDetailItemId
 
-		If @intRecipeItemId is null --insert
-		Begin
-			Insert Into tblMFRecipeItem(intRecipeId,intItemId,strDescription,dblQuantity,dblCalculatedQuantity,intItemUOMId,intRecipeItemTypeId,strItemGroupName,
-										dblUpperTolerance,dblLowerTolerance,dblCalculatedUpperTolerance,dblCalculatedLowerTolerance,dblShrinkage,ysnScaled,
-										intConsumptionMethodId,intStorageLocationId,dtmValidFrom,dtmValidTo,ysnYearValidationRequired,
-										ysnMinorIngredient,ysnOutputItemMandatory,dblScrap,ysnConsumptionRequired,dblCostAllocationPercentage,intMarginById,dblMargin,
-										ysnCostAppliedAtInvoice,intCommentTypeId,strDocumentNo,intSequenceNo,ysnPartialFillConsumption,
-										intCreatedUserId,dtmCreated,intLastModifiedUserId,dtmLastModified)
-			Select @intRecipeId,i.intItemId,CASE WHEN ct.intCommentTypeId>0 THEN s.strDescription ELSE '' END,s.[strQuantity],CASE WHEN s.strRecipeItemType='OUTPUT' THEN 0 ELSE dbo.fnMFCalculateRecipeItemQuantity(rt.intRecipeItemTypeId,s.[strQuantity],ISNULL(s.[strShrinkage],0)) END,iu.intItemUOMId,rt.intRecipeItemTypeId,s.strItemGroupName,
-									s.[strUpperTolerance],s.[strLowerTolerance],dbo.fnMFCalculateRecipeItemUpperTolerance(@intRecipeTypeId,s.[strQuantity],ISNULL(s.[strShrinkage],0),ISNULL(s.[strUpperTolerance],0)),dbo.fnMFCalculateRecipeItemLowerTolerance(@intRecipeTypeId,s.[strQuantity],ISNULL(s.[strShrinkage],0),ISNULL(s.[strLowerTolerance],0)),ISNULL(s.[strShrinkage],0),ISNULL(s.[strScaled],1),
-									CASE WHEN i.strType in ('Other Charge','Comment') THEN 4 Else cm.intConsumptionMethodId End intConsumptionMethodId,sl.intStorageLocationId,s.[strValidFrom],s.[strValidTo],ISNULL(s.[strYearValidationRequired],0),
-									ISNULL(s.[strMinorIngredient],0),CASE WHEN i.intItemId=@intItemId THEN 1 ELSE ISNULL(s.[strOutputItemMandatory],0) END,ISNULL(s.[strScrap],0),CASE WHEN i.intItemId=@intItemId THEN 1 ELSE ISNULL(s.[strConsumptionRequired],0) END,ISNULL(s.[strCostAllocationPercentage],0),m.intMarginById,s.[strMargin],
-									ISNULL(s.[strCostAppliedAtInvoice],0),ct.intCommentTypeId,s.strDocumentNo,null,ISNULL(s.[strPartialFillConsumption],1),
-									@intUserId,GETDATE(),@intUserId,GETDATE()
-			From tblMFRecipeItemStage s
-			Left Join tblICItem i on s.strRecipeItemNo=i.strItemNo
-			Left Join tblICUnitMeasure um on um.strUnitMeasure=s.strUOM
-			Left Join tblICItemUOM iu  on i.intItemId=iu.intItemId AND iu.intUnitMeasureId=um.intUnitMeasureId
-			Left Join tblMFRecipeItemType rt on s.strRecipeItemType=rt.strName
-			Left Join tblMFConsumptionMethod cm on s.strConsumptionMethod=cm.strName
-			Left Join tblICStorageLocation sl on sl.strName=s.strStorageLocation AND sl.intLocationId=@intLocationId
-			Left Join tblMFMarginBy m on s.strMarginBy=m.strName
-			Left Join tblMFCommentType ct on s.strCommentType=ct.strName
-			Where s.intRecipeItemStageId=@intMinId
-		End
-		Else
-		Begin --update
-			Update ri
-			Set ri.strDescription=t.strDescription,
-				ri.dblQuantity=t.[strQuantity],
-				ri.dblCalculatedQuantity=t.dblCalculatedQuantity,
-				ri.intItemUOMId=t.intItemUOMId,
-				ri.intRecipeItemTypeId=t.intRecipeItemTypeId,
-				ri.strItemGroupName=t.strItemGroupName,
-				ri.dblUpperTolerance=t.[strUpperTolerance],
-				ri.dblLowerTolerance=t.[strLowerTolerance],
-				ri.dblCalculatedUpperTolerance=t.dblCalculatedUpperTolerance,
-				ri.dblCalculatedLowerTolerance=t.dblCalculatedLowerTolerance,
-				ri.dblShrinkage=t.dblShrinkage,
-				ri.ysnScaled=t.ysnScaled,
-				ri.intConsumptionMethodId=t.intConsumptionMethodId,
-				ri.intStorageLocationId=t.intStorageLocationId,
-				ri.dtmValidFrom=t.[strValidFrom],
-				ri.dtmValidTo=t.[strValidTo],
-				ri.ysnYearValidationRequired=t.ysnYearValidationRequired,
-				ri.ysnMinorIngredient=t.ysnMinorIngredient,
-				ri.ysnOutputItemMandatory=t.ysnOutputItemMandatory,
-				ri.dblScrap=t.dblScrap,
-				ri.ysnConsumptionRequired=t.ysnConsumptionRequired,
-				ri.dblCostAllocationPercentage=t.dblCostAllocationPercentage,
-				ri.intMarginById=t.intMarginById,
-				ri.dblMargin=t.[strMargin],
-				ri.ysnCostAppliedAtInvoice=t.ysnCostAppliedAtInvoice,
-				ri.intCommentTypeId=t.intCommentTypeId,
-				ri.strDocumentNo=t.strDocumentNo,
-				ri.intSequenceNo=t.intSequenceNo,
-				ri.ysnPartialFillConsumption=t.ysnPartialFillConsumption,
-				ri.intLastModifiedUserId=@intUserId,
-				ri.dtmLastModified=GETDATE()
-			From tblMFRecipeItem ri Cross Join
-			(
-			Select TOP 1 i.intItemId,CASE WHEN ct.intCommentTypeId>0 THEN s.strDescription ELSE '' END AS strDescription,s.[strQuantity],CASE WHEN s.strRecipeItemType='OUTPUT' THEN 0 ELSE dbo.fnMFCalculateRecipeItemQuantity(rt.intRecipeItemTypeId,s.[strQuantity],ISNULL(s.[strShrinkage],0)) END dblCalculatedQuantity,iu.intItemUOMId,rt.intRecipeItemTypeId,s.strItemGroupName,
-									s.[strUpperTolerance],s.[strLowerTolerance],dbo.fnMFCalculateRecipeItemUpperTolerance(@intRecipeTypeId,s.[strQuantity],ISNULL(s.[strShrinkage],0),ISNULL(s.[strUpperTolerance],0)) dblCalculatedUpperTolerance,dbo.fnMFCalculateRecipeItemLowerTolerance(@intRecipeTypeId,s.[strQuantity],ISNULL(s.[strShrinkage],0),ISNULL(s.[strLowerTolerance],0)) dblCalculatedLowerTolerance,ISNULL(s.[strShrinkage],0) dblShrinkage,ISNULL(s.[strScaled],1) ysnScaled,
-									CASE WHEN i.strType in ('Other Charge','Comment') THEN 4 Else cm.intConsumptionMethodId End intConsumptionMethodId,sl.intStorageLocationId,s.[strValidFrom],s.[strValidTo],ISNULL(s.[strYearValidationRequired],0) ysnYearValidationRequired,
-									ISNULL(s.[strMinorIngredient],0) ysnMinorIngredient,CASE WHEN i.intItemId=@intItemId THEN 1 ELSE ISNULL(s.[strOutputItemMandatory],0) END ysnOutputItemMandatory,ISNULL(s.[strScrap],0) dblScrap,CASE WHEN i.intItemId=@intItemId THEN 1 ELSE ISNULL(s.[strConsumptionRequired],0) END ysnConsumptionRequired,ISNULL(s.[strCostAllocationPercentage],0) dblCostAllocationPercentage,m.intMarginById,s.[strMargin],
-									ISNULL(s.[strCostAppliedAtInvoice],0) ysnCostAppliedAtInvoice,ct.intCommentTypeId,s.strDocumentNo,null intSequenceNo,ISNULL(s.[strPartialFillConsumption],1) ysnPartialFillConsumption
-			From tblMFRecipeItemStage s
-			Left Join tblICItem i on s.strRecipeItemNo=i.strItemNo
-			Left Join tblICUnitMeasure um on um.strUnitMeasure=s.strUOM
-			Left Join tblICItemUOM iu  on i.intItemId=iu.intItemId AND iu.intUnitMeasureId=um.intUnitMeasureId
-			Left Join tblMFRecipeItemType rt on s.strRecipeItemType=rt.strName
-			Left Join tblMFConsumptionMethod cm on s.strConsumptionMethod=cm.strName
-			Left Join tblICStorageLocation sl on sl.strName=s.strStorageLocation AND sl.intLocationId=@intLocationId
-			Left Join tblMFMarginBy m on s.strMarginBy=m.strName
-			Left Join tblMFCommentType ct on s.strCommentType=ct.strName
-			Where s.intRecipeItemStageId=@intMinId
-			) t
-			Where ri.intRecipeItemId=@intRecipeItemId
-		End
+		IF @intRecipeItemId IS NULL --insert
+		BEGIN
+			INSERT INTO tblMFRecipeItem (
+				intRecipeId
+				,intItemId
+				,strDescription
+				,dblQuantity
+				,dblCalculatedQuantity
+				,intItemUOMId
+				,intRecipeItemTypeId
+				,strItemGroupName
+				,dblUpperTolerance
+				,dblLowerTolerance
+				,dblCalculatedUpperTolerance
+				,dblCalculatedLowerTolerance
+				,dblShrinkage
+				,ysnScaled
+				,intConsumptionMethodId
+				,intStorageLocationId
+				,dtmValidFrom
+				,dtmValidTo
+				,ysnYearValidationRequired
+				,ysnMinorIngredient
+				,ysnOutputItemMandatory
+				,dblScrap
+				,ysnConsumptionRequired
+				,dblCostAllocationPercentage
+				,intMarginById
+				,dblMargin
+				,ysnCostAppliedAtInvoice
+				,intCommentTypeId
+				,strDocumentNo
+				,intSequenceNo
+				,ysnPartialFillConsumption
+				,intCreatedUserId
+				,dtmCreated
+				,intLastModifiedUserId
+				,dtmLastModified
+				)
+			SELECT @intRecipeId
+				,i.intItemId
+				,CASE 
+					WHEN ct.intCommentTypeId > 0
+						THEN s.strDescription
+					ELSE ''
+					END
+				,s.[strQuantity]
+				,CASE 
+					WHEN s.strRecipeItemType = 'OUTPUT'
+						THEN 0
+					ELSE dbo.fnMFCalculateRecipeItemQuantity(rt.intRecipeItemTypeId, s.[strQuantity], ISNULL(s.[strShrinkage], 0))
+					END
+				,iu.intItemUOMId
+				,rt.intRecipeItemTypeId
+				,s.strItemGroupName
+				,s.[strUpperTolerance]
+				,s.[strLowerTolerance]
+				,dbo.fnMFCalculateRecipeItemUpperTolerance(@intRecipeTypeId, s.[strQuantity], ISNULL(s.[strShrinkage], 0), ISNULL(s.[strUpperTolerance], 0))
+				,dbo.fnMFCalculateRecipeItemLowerTolerance(@intRecipeTypeId, s.[strQuantity], ISNULL(s.[strShrinkage], 0), ISNULL(s.[strLowerTolerance], 0))
+				,ISNULL(s.[strShrinkage], 0)
+				,ISNULL(s.[strScaled], 1)
+				,CASE 
+					WHEN i.strType IN (
+							'Other Charge'
+							,'Comment'
+							)
+						THEN 4
+					ELSE cm.intConsumptionMethodId
+					END intConsumptionMethodId
+				,sl.intStorageLocationId
+				,s.[strValidFrom]
+				,s.[strValidTo]
+				,ISNULL(s.[strYearValidationRequired], 0)
+				,ISNULL(s.[strMinorIngredient], 0)
+				,CASE 
+					WHEN i.intItemId = @intItemId
+						THEN 1
+					ELSE ISNULL(s.[strOutputItemMandatory], 0)
+					END
+				,ISNULL(s.[strScrap], 0)
+				,CASE 
+					WHEN i.intItemId = @intItemId
+						THEN 1
+					ELSE ISNULL(s.[strConsumptionRequired], 0)
+					END
+				,ISNULL(s.[strCostAllocationPercentage], 0)
+				,m.intMarginById
+				,s.[strMargin]
+				,ISNULL(s.[strCostAppliedAtInvoice], 0)
+				,ct.intCommentTypeId
+				,s.strDocumentNo
+				,NULL
+				,ISNULL(s.[strPartialFillConsumption], 1)
+				,@intUserId
+				,GETDATE()
+				,@intUserId
+				,GETDATE()
+			FROM tblMFRecipeItemStage s
+			LEFT JOIN tblICItem i ON s.strRecipeItemNo = i.strItemNo
+			LEFT JOIN tblICUnitMeasure um ON um.strUnitMeasure = s.strUOM
+			LEFT JOIN tblICItemUOM iu ON i.intItemId = iu.intItemId
+				AND iu.intUnitMeasureId = um.intUnitMeasureId
+			LEFT JOIN tblMFRecipeItemType rt ON s.strRecipeItemType = rt.strName
+			LEFT JOIN tblMFConsumptionMethod cm ON s.strConsumptionMethod = cm.strName
+			LEFT JOIN tblICStorageLocation sl ON sl.strName = s.strStorageLocation
+				AND sl.intLocationId = @intLocationId
+			LEFT JOIN tblMFMarginBy m ON s.strMarginBy = m.strName
+			LEFT JOIN tblMFCommentType ct ON s.strCommentType = ct.strName
+			WHERE s.intRecipeItemStageId = @intMinId
+		END
+		ELSE
+		BEGIN --update
+			UPDATE ri
+			SET ri.strDescription = t.strDescription
+				,ri.dblQuantity = t.[strQuantity]
+				,ri.dblCalculatedQuantity = t.dblCalculatedQuantity
+				,ri.intItemUOMId = t.intItemUOMId
+				,ri.intRecipeItemTypeId = t.intRecipeItemTypeId
+				,ri.strItemGroupName = t.strItemGroupName
+				,ri.dblUpperTolerance = t.[strUpperTolerance]
+				,ri.dblLowerTolerance = t.[strLowerTolerance]
+				,ri.dblCalculatedUpperTolerance = t.dblCalculatedUpperTolerance
+				,ri.dblCalculatedLowerTolerance = t.dblCalculatedLowerTolerance
+				,ri.dblShrinkage = t.dblShrinkage
+				,ri.ysnScaled = t.ysnScaled
+				,ri.intConsumptionMethodId = t.intConsumptionMethodId
+				,ri.intStorageLocationId = t.intStorageLocationId
+				,ri.dtmValidFrom = t.[strValidFrom]
+				,ri.dtmValidTo = t.[strValidTo]
+				,ri.ysnYearValidationRequired = t.ysnYearValidationRequired
+				,ri.ysnMinorIngredient = t.ysnMinorIngredient
+				,ri.ysnOutputItemMandatory = t.ysnOutputItemMandatory
+				,ri.dblScrap = t.dblScrap
+				,ri.ysnConsumptionRequired = t.ysnConsumptionRequired
+				,ri.dblCostAllocationPercentage = t.dblCostAllocationPercentage
+				,ri.intMarginById = t.intMarginById
+				,ri.dblMargin = t.[strMargin]
+				,ri.ysnCostAppliedAtInvoice = t.ysnCostAppliedAtInvoice
+				,ri.intCommentTypeId = t.intCommentTypeId
+				,ri.strDocumentNo = t.strDocumentNo
+				,ri.intSequenceNo = t.intSequenceNo
+				,ri.ysnPartialFillConsumption = t.ysnPartialFillConsumption
+				,ri.intLastModifiedUserId = @intUserId
+				,ri.dtmLastModified = GETDATE()
+			FROM tblMFRecipeItem ri
+			CROSS JOIN (
+				SELECT TOP 1 i.intItemId
+					,CASE 
+						WHEN ct.intCommentTypeId > 0
+							THEN s.strDescription
+						ELSE ''
+						END AS strDescription
+					,s.[strQuantity]
+					,CASE 
+						WHEN s.strRecipeItemType = 'OUTPUT'
+							THEN 0
+						ELSE dbo.fnMFCalculateRecipeItemQuantity(rt.intRecipeItemTypeId, s.[strQuantity], ISNULL(s.[strShrinkage], 0))
+						END dblCalculatedQuantity
+					,iu.intItemUOMId
+					,rt.intRecipeItemTypeId
+					,s.strItemGroupName
+					,s.[strUpperTolerance]
+					,s.[strLowerTolerance]
+					,dbo.fnMFCalculateRecipeItemUpperTolerance(@intRecipeTypeId, s.[strQuantity], ISNULL(s.[strShrinkage], 0), ISNULL(s.[strUpperTolerance], 0)) dblCalculatedUpperTolerance
+					,dbo.fnMFCalculateRecipeItemLowerTolerance(@intRecipeTypeId, s.[strQuantity], ISNULL(s.[strShrinkage], 0), ISNULL(s.[strLowerTolerance], 0)) dblCalculatedLowerTolerance
+					,ISNULL(s.[strShrinkage], 0) dblShrinkage
+					,ISNULL(s.[strScaled], 1) ysnScaled
+					,CASE 
+						WHEN i.strType IN (
+								'Other Charge'
+								,'Comment'
+								)
+							THEN 4
+						ELSE cm.intConsumptionMethodId
+						END intConsumptionMethodId
+					,sl.intStorageLocationId
+					,s.[strValidFrom]
+					,s.[strValidTo]
+					,ISNULL(s.[strYearValidationRequired], 0) ysnYearValidationRequired
+					,ISNULL(s.[strMinorIngredient], 0) ysnMinorIngredient
+					,CASE 
+						WHEN i.intItemId = @intItemId
+							THEN 1
+						ELSE ISNULL(s.[strOutputItemMandatory], 0)
+						END ysnOutputItemMandatory
+					,ISNULL(s.[strScrap], 0) dblScrap
+					,CASE 
+						WHEN i.intItemId = @intItemId
+							THEN 1
+						ELSE ISNULL(s.[strConsumptionRequired], 0)
+						END ysnConsumptionRequired
+					,ISNULL(s.[strCostAllocationPercentage], 0) dblCostAllocationPercentage
+					,m.intMarginById
+					,s.[strMargin]
+					,ISNULL(s.[strCostAppliedAtInvoice], 0) ysnCostAppliedAtInvoice
+					,ct.intCommentTypeId
+					,s.strDocumentNo
+					,NULL intSequenceNo
+					,ISNULL(s.[strPartialFillConsumption], 1) ysnPartialFillConsumption
+				FROM tblMFRecipeItemStage s
+				LEFT JOIN tblICItem i ON s.strRecipeItemNo = i.strItemNo
+				LEFT JOIN tblICUnitMeasure um ON um.strUnitMeasure = s.strUOM
+				LEFT JOIN tblICItemUOM iu ON i.intItemId = iu.intItemId
+					AND iu.intUnitMeasureId = um.intUnitMeasureId
+				LEFT JOIN tblMFRecipeItemType rt ON s.strRecipeItemType = rt.strName
+				LEFT JOIN tblMFConsumptionMethod cm ON s.strConsumptionMethod = cm.strName
+				LEFT JOIN tblICStorageLocation sl ON sl.strName = s.strStorageLocation
+					AND sl.intLocationId = @intLocationId
+				LEFT JOIN tblMFMarginBy m ON s.strMarginBy = m.strName
+				LEFT JOIN tblMFCommentType ct ON s.strCommentType = ct.strName
+				WHERE s.intRecipeItemStageId = @intMinId
+				) t
+			WHERE ri.intRecipeItemId = @intRecipeItemId
+		END
 
-		Update tblMFRecipeItemStage Set strMessage='Success' Where intRecipeItemStageId=@intMinId
+		UPDATE tblMFRecipeItemStage
+		SET strMessage = 'Success'
+		WHERE intRecipeItemStageId = @intMinId
 
 		--Mark Recipe as Active if it has Input Items
-		If (Select Count(1) From tblMFRecipeItem Where intRecipeId=@intRecipeId AND intRecipeItemTypeId=1)>1
-			Update tblMFRecipe Set ysnActive=1 Where intRecipeId=@intRecipeId
+		IF (
+				SELECT Count(1)
+				FROM tblMFRecipeItem
+				WHERE intRecipeId = @intRecipeId
+					AND intRecipeItemTypeId = 1
+				) > 1
+			UPDATE tblMFRecipe
+			SET ysnActive = 1
+			WHERE intRecipeId = @intRecipeId
 
 		NEXT_RECIPEITEM:
-		Select @intMinId=MIN(intRecipeItemStageId) From tblMFRecipeItemStage Where intRecipeItemStageId > @intMinId AND strSessionId=@strSessionId AND ISNULL(strMessage,'')=''	
-	End
 
-	Update tblMFRecipeItemStage Set strMessage='Skipped' Where strSessionId=@strSessionId AND ISNULL(strMessage,'')=''	
-End
+		SELECT @intMinId = MIN(intRecipeItemStageId)
+		FROM tblMFRecipeItemStage
+		WHERE intRecipeItemStageId > @intMinId
+			AND strSessionId = @strSessionId
+			AND ISNULL(strMessage, '') = ''
+	END
+
+	UPDATE tblMFRecipeItemStage
+	SET strMessage = 'Skipped'
+	WHERE strSessionId = @strSessionId
+		AND ISNULL(strMessage, '') = ''
+END
 
 --Recipe Substitute Item
-If @strImportType='Recipe Substitute Item'
-Begin
-	
+IF @strImportType = 'Recipe Substitute Item'
+BEGIN
 	--Recipe Name is required
-	Update tblMFRecipeSubstituteItemStage Set strMessage='Recipe Name is required' 
-	Where ISNULL(strRecipeName,'')='' AND ISNULL(strRecipeHeaderItemNo,'')='' 
-	AND strSessionId=@strSessionId AND ISNULL(strMessage,'')=''	
-	
+	UPDATE tblMFRecipeSubstituteItemStage
+	SET strMessage = 'Recipe Name is required'
+	WHERE ISNULL(strRecipeName, '') = ''
+		AND ISNULL(strRecipeHeaderItemNo, '') = ''
+		AND strSessionId = @strSessionId
+		AND ISNULL(strMessage, '') = ''
+
 	--Invalid Header Item
-	Update tblMFRecipeSubstituteItemStage Set strMessage='Invalid Recipe Header Item' 
-	Where strRecipeHeaderItemNo not in (Select strItemNo From tblICItem) AND ISNULL(strRecipeHeaderItemNo,'')<>'' 
-	AND strSessionId=@strSessionId AND ISNULL(strMessage,'')=''
+	UPDATE tblMFRecipeSubstituteItemStage
+	SET strMessage = 'Invalid Recipe Header Item'
+	WHERE strRecipeHeaderItemNo NOT IN (
+			SELECT strItemNo
+			FROM tblICItem
+			)
+		AND ISNULL(strRecipeHeaderItemNo, '') <> ''
+		AND strSessionId = @strSessionId
+		AND ISNULL(strMessage, '') = ''
 
 	--Invalid Version No
-	Update tblMFRecipeSubstituteItemStage Set strMessage='Invalid Version No'
-	Where (ISNUMERIC(ISNULL([strVersionNo],0))=0 OR CHARINDEX('.',ISNULL([strVersionNo],0))>0 OR [strVersionNo]='0')
-	AND strSessionId=@strSessionId AND ISNULL(strMessage,'')=''	
+	UPDATE tblMFRecipeSubstituteItemStage
+	SET strMessage = 'Invalid Version No'
+	WHERE (
+			ISNUMERIC(ISNULL([strVersionNo], 0)) = 0
+			OR CHARINDEX('.', ISNULL([strVersionNo], 0)) > 0
+			OR [strVersionNo] = '0'
+			)
+		AND strSessionId = @strSessionId
+		AND ISNULL(strMessage, '') = ''
 
 	--Invalid Detail Item
-	Update tblMFRecipeSubstituteItemStage Set strMessage='Invalid Recipe Detail Item' 
-	Where ISNULL(strRecipeItemNo,'') not in (Select strItemNo From tblICItem) AND strSessionId=@strSessionId AND ISNULL(strMessage,'')=''
+	UPDATE tblMFRecipeSubstituteItemStage
+	SET strMessage = 'Invalid Recipe Detail Item'
+	WHERE ISNULL(strRecipeItemNo, '') NOT IN (
+			SELECT strItemNo
+			FROM tblICItem
+			)
+		AND strSessionId = @strSessionId
+		AND ISNULL(strMessage, '') = ''
 
 	--Invalid Substitute Item
-	Update tblMFRecipeSubstituteItemStage Set strMessage='Invalid Substitute Item' 
-	Where ISNULL(strSubstituteItemNo,'') not in (Select strItemNo From tblICItem) AND strSessionId=@strSessionId AND ISNULL(strMessage,'')=''
+	UPDATE tblMFRecipeSubstituteItemStage
+	SET strMessage = 'Invalid Substitute Item'
+	WHERE ISNULL(strSubstituteItemNo, '') NOT IN (
+			SELECT strItemNo
+			FROM tblICItem
+			)
+		AND strSessionId = @strSessionId
+		AND ISNULL(strMessage, '') = ''
 
 	--Invalid Substitute Ratio
-	Update tblMFRecipeSubstituteItemStage Set strMessage='Invalid Substitute Ratio/Substitute Ratio cannot be negative' 
-	Where (ISNUMERIC([strSubstituteRatio])=0 OR ISNULL(CAST([strSubstituteRatio] as numeric(18,6)),0)<0) 
-	AND strSessionId=@strSessionId AND ISNULL(strMessage,'')=''
+	UPDATE tblMFRecipeSubstituteItemStage
+	SET strMessage = 'Invalid Substitute Ratio/Substitute Ratio cannot be negative'
+	WHERE (
+			ISNUMERIC([strSubstituteRatio]) = 0
+			OR ISNULL(CAST([strSubstituteRatio] AS NUMERIC(18, 6)), 0) < 0
+			)
+		AND strSessionId = @strSessionId
+		AND ISNULL(strMessage, '') = ''
 
 	--Invalid Max Substitute Ratio
-	Update tblMFRecipeSubstituteItemStage Set strMessage='Invalid Max Substitute/Max Substitute Ratio cannot be negative' 
-	Where (ISNUMERIC([strMaxSubstituteRatio])=0 OR ISNULL(CAST([strMaxSubstituteRatio] as numeric(18,6)),0)<0) 
-	AND strSessionId=@strSessionId AND ISNULL(strMessage,'')=''
+	UPDATE tblMFRecipeSubstituteItemStage
+	SET strMessage = 'Invalid Max Substitute/Max Substitute Ratio cannot be negative'
+	WHERE (
+			ISNUMERIC([strMaxSubstituteRatio]) = 0
+			OR ISNULL(CAST([strMaxSubstituteRatio] AS NUMERIC(18, 6)), 0) < 0
+			)
+		AND strSessionId = @strSessionId
+		AND ISNULL(strMessage, '') = ''
 
-	Select @intMinId=MIN(intRecipeSubstituteItemStageId) From tblMFRecipeSubstituteItemStage Where strSessionId=@strSessionId AND ISNULL(strMessage,'')=''	
+	SELECT @intMinId = MIN(intRecipeSubstituteItemStageId)
+	FROM tblMFRecipeSubstituteItemStage
+	WHERE strSessionId = @strSessionId
+		AND ISNULL(strMessage, '') = ''
 
 	--Insert/Update recipe sub item
-	While (@intMinId is not null)
-	Begin
-		Set @intItemId=NULL
-		Set @intVersionNo=NULL
-		Set @strRecipeName=''
-		Set @intLocationId=null
-		Set @intRecipeId=null
-		Set @intRecipeDetailItemId=null
-		Set @strRecipeDetailItemNo=''
-		Set @intRecipeItemId=null
-		Set @intRecipeSubstituteItemId=null
-		Set @intRecipeTypeId=null
-		Set @intSubstituteItemId=null
-		Set @strSubstituteItemNo=null
-		Set @intInputItemUOMId=null
-		Set @intSubstituteItemUOMId=null
-		Set @dblRecipeDetailCalculatedQty=null
-		Set @dblRecipeDetailUpperTolerance=null
-		Set @dblRecipeDetailLowerTolerance=null
-		Select @strLocationName=NULL
+	WHILE (@intMinId IS NOT NULL)
+	BEGIN
+		SET @intItemId = NULL
+		SET @intVersionNo = NULL
+		SET @strRecipeName = ''
+		SET @intLocationId = NULL
+		SET @intRecipeId = NULL
+		SET @intRecipeDetailItemId = NULL
+		SET @strRecipeDetailItemNo = ''
+		SET @intRecipeItemId = NULL
+		SET @intRecipeSubstituteItemId = NULL
+		SET @intRecipeTypeId = NULL
+		SET @intSubstituteItemId = NULL
+		SET @strSubstituteItemNo = NULL
+		SET @intInputItemUOMId = NULL
+		SET @intSubstituteItemUOMId = NULL
+		SET @dblRecipeDetailCalculatedQty = NULL
+		SET @dblRecipeDetailUpperTolerance = NULL
+		SET @dblRecipeDetailLowerTolerance = NULL
 
-		Select @strRecipeName=strRecipeName,@strItemNo=strRecipeHeaderItemNo,@intVersionNo=[strVersionNo],@strLocationName=strLocationName,@strRecipeDetailItemNo=strRecipeItemNo,@strSubstituteItemNo=strSubstituteItemNo
-		From tblMFRecipeSubstituteItemStage Where intRecipeSubstituteItemStageId=@intMinId
-		Select @intItemId=intItemId From tblICItem Where strItemNo=@strItemNo
-		Select @intLocationId=intCompanyLocationId From tblSMCompanyLocation Where strLocationName=@strLocationName
-		Select @intRecipeDetailItemId=intItemId From tblICItem Where strItemNo=@strRecipeDetailItemNo
-		Select @intSubstituteItemId=intItemId From tblICItem Where strItemNo=@strSubstituteItemNo
+		SELECT @strLocationName = NULL
 
-		If ISNULL(@strItemNo,'')<>'' --Production Recipe
-			Select TOP 1 @intRecipeId=intRecipeId,@intRecipeTypeId=intRecipeTypeId,@intLocationId=intLocationId From tblMFRecipe Where intItemId=@intItemId AND intVersionNo=@intVersionNo and intLocationId=@intLocationId
-		Else --Virtual Recipe
-			Select TOP 1 @intRecipeId=intRecipeId,@intRecipeTypeId=intRecipeTypeId,@intLocationId=intLocationId From tblMFRecipe Where strName=@strRecipeName and intLocationId=@intLocationId
+		SELECT @strRecipeName = strRecipeName
+			,@strItemNo = strRecipeHeaderItemNo
+			,@intVersionNo = [strVersionNo]
+			,@strLocationName = strLocationName
+			,@strRecipeDetailItemNo = strRecipeItemNo
+			,@strSubstituteItemNo = strSubstituteItemNo
+		FROM tblMFRecipeSubstituteItemStage
+		WHERE intRecipeSubstituteItemStageId = @intMinId
 
-		If @intRecipeId is null
-		Begin
-			Update tblMFRecipeSubstituteItemStage Set strMessage='No recipe found to add items.' Where intRecipeSubstituteItemStageId=@intMinId
+		SELECT @intItemId = intItemId
+		FROM tblICItem
+		WHERE strItemNo = @strItemNo
+
+		SELECT @intLocationId = intCompanyLocationId
+		FROM tblSMCompanyLocation
+		WHERE strLocationName = @strLocationName
+
+		SELECT @intRecipeDetailItemId = intItemId
+		FROM tblICItem
+		WHERE strItemNo = @strRecipeDetailItemNo
+
+		SELECT @intSubstituteItemId = intItemId
+		FROM tblICItem
+		WHERE strItemNo = @strSubstituteItemNo
+
+		IF ISNULL(@strItemNo, '') <> '' --Production Recipe
+			SELECT TOP 1 @intRecipeId = intRecipeId
+				,@intRecipeTypeId = intRecipeTypeId
+				,@intLocationId = intLocationId
+			FROM tblMFRecipe
+			WHERE intItemId = @intItemId
+				AND intVersionNo = @intVersionNo
+				AND intLocationId = @intLocationId
+		ELSE --Virtual Recipe
+			SELECT TOP 1 @intRecipeId = intRecipeId
+				,@intRecipeTypeId = intRecipeTypeId
+				,@intLocationId = intLocationId
+			FROM tblMFRecipe
+			WHERE strName = @strRecipeName
+				AND intLocationId = @intLocationId
+
+		IF @intRecipeId IS NULL
+		BEGIN
+			UPDATE tblMFRecipeSubstituteItemStage
+			SET strMessage = 'No recipe found to add items.'
+			WHERE intRecipeSubstituteItemStageId = @intMinId
+
 			GOTO NEXT_SUBITEM
-		End
+		END
 
-		Select TOp 1 @intRecipeItemId=intRecipeItemId,@intInputItemUOMId=intItemUOMId,@dblRecipeDetailCalculatedQty=dblCalculatedQuantity,
-		@dblRecipeDetailUpperTolerance=dblUpperTolerance,@dblRecipeDetailLowerTolerance=dblLowerTolerance
-		from tblMFRecipeItem Where intRecipeId=@intRecipeId AND intItemId=@intRecipeDetailItemId
+		SELECT TOP 1 @intRecipeItemId = intRecipeItemId
+			,@intInputItemUOMId = intItemUOMId
+			,@dblRecipeDetailCalculatedQty = dblCalculatedQuantity
+			,@dblRecipeDetailUpperTolerance = dblUpperTolerance
+			,@dblRecipeDetailLowerTolerance = dblLowerTolerance
+		FROM tblMFRecipeItem
+		WHERE intRecipeId = @intRecipeId
+			AND intItemId = @intRecipeDetailItemId
 
-		If @intRecipeItemId is null
-		Begin
-			Update tblMFRecipeSubstituteItemStage Set strMessage='No recipe detail item found to add substitute items.' Where intRecipeSubstituteItemStageId=@intMinId
+		IF @intRecipeItemId IS NULL
+		BEGIN
+			UPDATE tblMFRecipeSubstituteItemStage
+			SET strMessage = 'No recipe detail item found to add substitute items.'
+			WHERE intRecipeSubstituteItemStageId = @intMinId
+
 			GOTO NEXT_SUBITEM
-		End
+		END
 
 		--Get the Sub Item's Item UOM Id corresponding to the input item
-		Select TOP 1 @intSubstituteItemUOMId=iu1.intItemUOMId 
-		From tblICItemUOM iu Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
-		Join tblICItemUOM iu1 on iu1.intUnitMeasureId=iu.intUnitMeasureId AND iu1.intItemId=@intSubstituteItemId
-		Where iu.intItemUOMId=@intInputItemUOMId
+		SELECT TOP 1 @intSubstituteItemUOMId = iu1.intItemUOMId
+		FROM tblICItemUOM iu
+		JOIN tblICUnitMeasure um ON iu.intUnitMeasureId = um.intUnitMeasureId
+		JOIN tblICItemUOM iu1 ON iu1.intUnitMeasureId = iu.intUnitMeasureId
+			AND iu1.intItemId = @intSubstituteItemId
+		WHERE iu.intItemUOMId = @intInputItemUOMId
 
-		If @intSubstituteItemUOMId is null
-		Begin
-			Update tblMFRecipeSubstituteItemStage Set strMessage='UOM not found for substitute items.' Where intRecipeSubstituteItemStageId=@intMinId
+		IF @intSubstituteItemUOMId IS NULL
+		BEGIN
+			UPDATE tblMFRecipeSubstituteItemStage
+			SET strMessage = 'UOM not found for substitute items.'
+			WHERE intRecipeSubstituteItemStageId = @intMinId
+
 			GOTO NEXT_SUBITEM
-		End
+		END
 
-		Select TOP 1 @intRecipeSubstituteItemId=intRecipeSubstituteItemId from tblMFRecipeSubstituteItem Where intRecipeId=@intRecipeId AND intRecipeItemId=@intRecipeItemId AND intSubstituteItemId=@intSubstituteItemId
+		SELECT TOP 1 @intRecipeSubstituteItemId = intRecipeSubstituteItemId
+		FROM tblMFRecipeSubstituteItem
+		WHERE intRecipeId = @intRecipeId
+			AND intRecipeItemId = @intRecipeItemId
+			AND intSubstituteItemId = @intSubstituteItemId
 
-		If @intRecipeSubstituteItemId is null --insert
-		Begin
-			Insert Into tblMFRecipeSubstituteItem(intRecipeItemId,intRecipeId,intItemId,intSubstituteItemId,dblQuantity,intItemUOMId,dblSubstituteRatio,dblMaxSubstituteRatio,
-										dblCalculatedUpperTolerance,dblCalculatedLowerTolerance,intRecipeItemTypeId,
-										intCreatedUserId,dtmCreated,intLastModifiedUserId,dtmLastModified)
-			Select  @intRecipeItemId,@intRecipeId,@intRecipeDetailItemId,i.intItemId,
-									dbo.fnMFCalculateRecipeSubItemQuantity(@dblRecipeDetailCalculatedQty,s.[strSubstituteRatio],s.[strMaxSubstituteRatio]),@intSubstituteItemUOMId,s.[strSubstituteRatio],s.[strMaxSubstituteRatio],
-									dbo.fnMFCalculateRecipeSubItemUpperTolerance(dbo.fnMFCalculateRecipeSubItemQuantity(@dblRecipeDetailCalculatedQty,s.[strSubstituteRatio],s.[strMaxSubstituteRatio]),@dblRecipeDetailUpperTolerance),
-									dbo.fnMFCalculateRecipeSubItemLowerTolerance(dbo.fnMFCalculateRecipeSubItemQuantity(@dblRecipeDetailCalculatedQty,s.[strSubstituteRatio],s.[strMaxSubstituteRatio]),@dblRecipeDetailLowerTolerance),1,
-									@intUserId,GETDATE(),@intUserId,GETDATE()
-			From tblMFRecipeSubstituteItemStage s
-			Left Join tblICItem i on s.strSubstituteItemNo=i.strItemNo
-			Where s.intRecipeSubstituteItemStageId=@intMinId
-		End
-		Else
-		Begin --update
-			Update rs
-			Set rs.dblQuantity=t.dblQuantity,
-				rs.dblSubstituteRatio=t.[strSubstituteRatio],
-				rs.dblMaxSubstituteRatio=t.[strMaxSubstituteRatio],
-				rs.dblCalculatedUpperTolerance=t.dblUpperTolerance,
-				rs.dblCalculatedLowerTolerance=t.dblLowerTolerance,
-				rs.intLastModifiedUserId=@intUserId,
-				rs.dtmLastModified=GETDATE()
-			From tblMFRecipeSubstituteItem rs Cross Join
-			(
-			Select TOP 1 dbo.fnMFCalculateRecipeSubItemQuantity(@dblRecipeDetailCalculatedQty,s.[strSubstituteRatio],s.[strMaxSubstituteRatio]) dblQuantity,s.[strSubstituteRatio],s.[strMaxSubstituteRatio],
-					dbo.fnMFCalculateRecipeSubItemUpperTolerance(dbo.fnMFCalculateRecipeSubItemQuantity(@dblRecipeDetailCalculatedQty,s.[strSubstituteRatio],s.[strMaxSubstituteRatio]),@dblRecipeDetailUpperTolerance) dblUpperTolerance,
-					dbo.fnMFCalculateRecipeSubItemLowerTolerance(dbo.fnMFCalculateRecipeSubItemQuantity(@dblRecipeDetailCalculatedQty,s.[strSubstituteRatio],s.[strMaxSubstituteRatio]),@dblRecipeDetailLowerTolerance) dblLowerTolerance
-			From tblMFRecipeSubstituteItemStage s
-			Where s.intRecipeSubstituteItemStageId=@intMinId
-			) t
-			Where rs.intRecipeSubstituteItemId=@intRecipeSubstituteItemId
-		End
+		IF @intRecipeSubstituteItemId IS NULL --insert
+		BEGIN
+			INSERT INTO tblMFRecipeSubstituteItem (
+				intRecipeItemId
+				,intRecipeId
+				,intItemId
+				,intSubstituteItemId
+				,dblQuantity
+				,intItemUOMId
+				,dblSubstituteRatio
+				,dblMaxSubstituteRatio
+				,dblCalculatedUpperTolerance
+				,dblCalculatedLowerTolerance
+				,intRecipeItemTypeId
+				,intCreatedUserId
+				,dtmCreated
+				,intLastModifiedUserId
+				,dtmLastModified
+				)
+			SELECT @intRecipeItemId
+				,@intRecipeId
+				,@intRecipeDetailItemId
+				,i.intItemId
+				,dbo.fnMFCalculateRecipeSubItemQuantity(@dblRecipeDetailCalculatedQty, s.[strSubstituteRatio], s.[strMaxSubstituteRatio])
+				,@intSubstituteItemUOMId
+				,s.[strSubstituteRatio]
+				,s.[strMaxSubstituteRatio]
+				,dbo.fnMFCalculateRecipeSubItemUpperTolerance(dbo.fnMFCalculateRecipeSubItemQuantity(@dblRecipeDetailCalculatedQty, s.[strSubstituteRatio], s.[strMaxSubstituteRatio]), @dblRecipeDetailUpperTolerance)
+				,dbo.fnMFCalculateRecipeSubItemLowerTolerance(dbo.fnMFCalculateRecipeSubItemQuantity(@dblRecipeDetailCalculatedQty, s.[strSubstituteRatio], s.[strMaxSubstituteRatio]), @dblRecipeDetailLowerTolerance)
+				,1
+				,@intUserId
+				,GETDATE()
+				,@intUserId
+				,GETDATE()
+			FROM tblMFRecipeSubstituteItemStage s
+			LEFT JOIN tblICItem i ON s.strSubstituteItemNo = i.strItemNo
+			WHERE s.intRecipeSubstituteItemStageId = @intMinId
+		END
+		ELSE
+		BEGIN --update
+			UPDATE rs
+			SET rs.dblQuantity = t.dblQuantity
+				,rs.dblSubstituteRatio = t.[strSubstituteRatio]
+				,rs.dblMaxSubstituteRatio = t.[strMaxSubstituteRatio]
+				,rs.dblCalculatedUpperTolerance = t.dblUpperTolerance
+				,rs.dblCalculatedLowerTolerance = t.dblLowerTolerance
+				,rs.intLastModifiedUserId = @intUserId
+				,rs.dtmLastModified = GETDATE()
+			FROM tblMFRecipeSubstituteItem rs
+			CROSS JOIN (
+				SELECT TOP 1 dbo.fnMFCalculateRecipeSubItemQuantity(@dblRecipeDetailCalculatedQty, s.[strSubstituteRatio], s.[strMaxSubstituteRatio]) dblQuantity
+					,s.[strSubstituteRatio]
+					,s.[strMaxSubstituteRatio]
+					,dbo.fnMFCalculateRecipeSubItemUpperTolerance(dbo.fnMFCalculateRecipeSubItemQuantity(@dblRecipeDetailCalculatedQty, s.[strSubstituteRatio], s.[strMaxSubstituteRatio]), @dblRecipeDetailUpperTolerance) dblUpperTolerance
+					,dbo.fnMFCalculateRecipeSubItemLowerTolerance(dbo.fnMFCalculateRecipeSubItemQuantity(@dblRecipeDetailCalculatedQty, s.[strSubstituteRatio], s.[strMaxSubstituteRatio]), @dblRecipeDetailLowerTolerance) dblLowerTolerance
+				FROM tblMFRecipeSubstituteItemStage s
+				WHERE s.intRecipeSubstituteItemStageId = @intMinId
+				) t
+			WHERE rs.intRecipeSubstituteItemId = @intRecipeSubstituteItemId
+		END
 
-		Update tblMFRecipeSubstituteItemStage Set strMessage='Success' Where intRecipeSubstituteItemStageId=@intMinId
+		UPDATE tblMFRecipeSubstituteItemStage
+		SET strMessage = 'Success'
+		WHERE intRecipeSubstituteItemStageId = @intMinId
 
 		NEXT_SUBITEM:
-		Select @intMinId=MIN(intRecipeSubstituteItemStageId) From tblMFRecipeSubstituteItemStage Where intRecipeSubstituteItemStageId > @intMinId AND strSessionId=@strSessionId AND ISNULL(strMessage,'')=''	
-	End
 
-	Update tblMFRecipeSubstituteItemStage Set strMessage='Skipped' Where strSessionId=@strSessionId AND ISNULL(strMessage,'')=''	
-End
+		SELECT @intMinId = MIN(intRecipeSubstituteItemStageId)
+		FROM tblMFRecipeSubstituteItemStage
+		WHERE intRecipeSubstituteItemStageId > @intMinId
+			AND strSessionId = @strSessionId
+			AND ISNULL(strMessage, '') = ''
+	END
+
+	UPDATE tblMFRecipeSubstituteItemStage
+	SET strMessage = 'Skipped'
+	WHERE strSessionId = @strSessionId
+		AND ISNULL(strMessage, '') = ''
+END
