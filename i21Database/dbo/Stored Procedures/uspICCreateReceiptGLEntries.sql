@@ -1287,4 +1287,5 @@ WHERE	ForGLEntries_CTE.intTransactionTypeId NOT IN (
 			,@InventoryTransactionTypeId_Auto_Variance_On_Sold_Or_Used_Stock
 		)
 		AND ISNULL(dblValue, 0) <> 0 
+		AND ForGLEntries_CTE.intReference = 2
 ;
