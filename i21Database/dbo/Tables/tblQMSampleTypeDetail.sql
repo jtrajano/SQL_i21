@@ -5,7 +5,8 @@
 	[intAttributeId] INT NOT NULL,
 	[intConcurrencyId] INT NULL CONSTRAINT [DF_tblQMSampleTypeDetail_intConcurrencyId] DEFAULT 0, 
 	[ysnIsMandatory] BIT NOT NULL CONSTRAINT [DF_tblQMSampleTypeDetail_ysnIsMandatory] DEFAULT 0, 
-	
+	intSampleTypeDetailRefId INT,
+
 	[intCreatedUserId] [int] NULL,
 	[dtmCreated] [datetime] NULL CONSTRAINT [DF_tblQMSampleTypeDetail_dtmCreated] DEFAULT GetDate(),
 	[intLastModifiedUserId] [int] NULL,

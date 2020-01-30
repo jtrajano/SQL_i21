@@ -11,6 +11,7 @@
 	[dblLowValue] NUMERIC(18, 6) NULL,
 	[dblHighValue] NUMERIC(18, 6) NULL,
 	[intUnitMeasureId] INT NULL, 
+	intPropertyValidityPeriodRefId INT,
 
 	[intCreatedUserId] [int] NULL,
 	[dtmCreated] [datetime] NULL CONSTRAINT [DF_tblQMPropertyValidityPeriod_dtmCreated] DEFAULT GetDate(),

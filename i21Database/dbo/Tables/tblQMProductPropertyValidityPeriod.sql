@@ -13,6 +13,7 @@
 	[intUnitMeasureId] INT NULL, 
 	[strFormula] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
 	[strFormulaParser] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
+	intProductPropertyValidityPeriodRefId INT,
 
 	[intCreatedUserId] [int] NULL,
 	[dtmCreated] [datetime] NULL CONSTRAINT [DF_tblQMProductPropertyValidityPeriod_dtmCreated] DEFAULT GetDate(),

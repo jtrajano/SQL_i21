@@ -12,6 +12,7 @@
 	[intBondedApprovalLotStatusId] INT, 
 	[intBondedRejectionLotStatusId] INT, 
 	[intUnitMeasureId] INT, 
+	intProductRefId INT,
 
 	[intCreatedUserId] [int] NULL,
 	[dtmCreated] [datetime] NULL CONSTRAINT [DF_tblQMProduct_dtmCreated] DEFAULT GetDate(),

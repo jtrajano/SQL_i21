@@ -8388,6 +8388,9 @@
     <Build Include="dbo\Tables\tblRKOptionsMatchPnSHeaderBook.sql" />
     <Build Include="dbo\Stored Procedures\uspMFProcessRecipes.sql" />
     <Build Include="dbo\Stored Procedures\uspIPStageSAPRecipe.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPInterCompanyPreStageAttribute.sql" />
+    <Build Include="dbo\Tables\tblQMAttributePreStage.sql" />
+    <Build Include="dbo\Tables\tblQMAttributeStage.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

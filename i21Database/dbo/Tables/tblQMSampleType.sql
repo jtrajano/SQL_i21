@@ -13,6 +13,7 @@
 	[intRejectionLotStatusId] INT, 
 	[intBondedApprovalLotStatusId] INT, 
 	[intBondedRejectionLotStatusId] INT, 
+	intSampleTypeRefId INT,
 
 	[intCreatedUserId] [int] NULL,
 	[dtmCreated] [datetime] NULL CONSTRAINT [DF_tblQMSampleType_dtmCreated] DEFAULT GetDate(),

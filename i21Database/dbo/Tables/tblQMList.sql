@@ -4,7 +4,8 @@
 	[intConcurrencyId] INT NULL CONSTRAINT [DF_tblQMList_intConcurrencyId] DEFAULT 0, 
 	[strListName] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
 	[strSQL] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
-	
+	intListRefId INT,
+
 	[intCreatedUserId] [int] NULL,
 	[dtmCreated] [datetime] NULL CONSTRAINT [DF_tblQMList_dtmCreated] DEFAULT GetDate(),
 	[intLastModifiedUserId] [int] NULL,

@@ -5,6 +5,7 @@
 	[intConcurrencyId] INT NULL CONSTRAINT [DF_tblQMConditionalProperty_intConcurrencyId] DEFAULT 0, 
 	[intOnSuccessPropertyId] INT NULL, 
 	[intOnFailurePropertyId] INT NULL, 
+	intConditionalPropertyRefId INT,
 
 	[intCreatedUserId] [int] NULL,
 	[dtmCreated] [datetime] NULL CONSTRAINT [DF_tblQMConditionalProperty_dtmCreated] DEFAULT GetDate(),

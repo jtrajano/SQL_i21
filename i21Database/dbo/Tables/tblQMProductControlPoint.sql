@@ -5,6 +5,7 @@
 	[intProductId] INT NOT NULL, 
 	[intControlPointId] INT NOT NULL, 
 	[intSampleTypeId] INT,
+	intProductControlPointRefId INT,
 
 	[intCreatedUserId] [int] NULL,
 	[dtmCreated] [datetime] NULL CONSTRAINT [DF_tblQMProductControlPoint_dtmCreated] DEFAULT GetDate(),

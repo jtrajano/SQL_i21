@@ -5,6 +5,7 @@
 	[intConcurrencyId] INT NULL CONSTRAINT [DF_tblQMProductPropertyFormulaProperty_intConcurrencyId] DEFAULT 0, 
 	[intTestId] INT NULL, 
 	[intPropertyId] INT NULL, 
+	intProductPropertyFormulaPropertyRefId INT,
 
 	[intCreatedUserId] [int] NULL,
 	[dtmCreated] [datetime] NULL CONSTRAINT [DF_tblQMProductPropertyFormulaProperty_dtmCreated] DEFAULT GetDate(),
