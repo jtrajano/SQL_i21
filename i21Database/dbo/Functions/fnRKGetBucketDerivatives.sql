@@ -58,21 +58,22 @@ BEGIN
 			,strCommodityCode
 			,strInternalTradeNo = strTransactionNumber
 			,strLocationName
-			,dblContractSize
+			,dblContractSize = CAST(ISNULL(mf.dblContractSize, 0.00) AS NUMERIC(24, 20))
 			,intOrigUOMId
 			,strFutureMarket
 			,strFutureMonth
-			,strOptionMonth = ''
-			,dblStrike = NULL
-			,strOptionType = ''
-			,strInstrumentType = ''
-			,strBrokerAccount = ''
-			,strBroker = ''
-			,strBuySell = ''
-			,ysnPreCrush = NULL
+			,strOptionMonth = mf.strOptionMonth
+			,dblStrike = CAST(ISNULL(mf.dblStrike, 0.00) AS NUMERIC(24, 20))
+			,strOptionType = mf.strOptionType
+			,strInstrumentType = mf.strInstrumentType
+			,strBrokerAccount = mf.strBrokerAccount
+			,strBroker = mf.strBroker
+			,strBuySell = mf.strBuySell
+			,ysnPreCrush = CAST(ISNULL(mf.ysnPreCrush, 0) AS BIT)
 			,strNotes
-			,strBrokerTradeNo = ''
+			,strBrokerTradeNo = mf.strBrokerTradeNo
 		FROM vyuRKGetSummaryLog c
+		CROSS APPLY dbo.fnRKGetMiscFieldPivotDerivative(c.strMiscField) mf
 		WHERE strTransactionType IN ('Derivatives', 'Match Derivatives')
 			AND CONVERT(DATETIME, CONVERT(VARCHAR(10), c.dtmCreatedDate, 110), 110) <= CONVERT(DATETIME, @dtmDate)
 			AND c.intCommodityId = @intCommodityId
