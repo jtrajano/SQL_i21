@@ -8391,6 +8391,21 @@
     <Build Include="dbo\Stored Procedures\uspIPInterCompanyPreStageAttribute.sql" />
     <Build Include="dbo\Tables\tblQMAttributePreStage.sql" />
     <Build Include="dbo\Tables\tblQMAttributeStage.sql" />
+    <Build Include="dbo\Tables\tblQMListPreStage.sql" />
+    <Build Include="dbo\Tables\tblQMListStage.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPInterCompanyPreStageList.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPInterCompanyPreStageSampleType.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPInterCompanyPreStageProperty.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPInterCompanyPreStageTest.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPInterCompanyPreStageProduct.sql" />
+    <Build Include="dbo\Tables\tblQMSampleTypePreStage.sql" />
+    <Build Include="dbo\Tables\tblQMSampleTypeStage.sql" />
+    <Build Include="dbo\Tables\tblQMPropertyPreStage.sql" />
+    <Build Include="dbo\Tables\tblQMPropertyStage.sql" />
+    <Build Include="dbo\Tables\tblQMTestPreStage.sql" />
+    <Build Include="dbo\Tables\tblQMTestStage.sql" />
+    <Build Include="dbo\Tables\tblQMProductPreStage.sql" />
+    <Build Include="dbo\Tables\tblQMProductStage.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
