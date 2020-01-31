@@ -710,7 +710,8 @@ BEGIN
 	RAISERROR(@ErrorMessage, 16, 1);
 	RETURN 0;
 END	
-	
+
+--TAX ENTRIES	
 DECLARE	 @LineItemTaxEntries	LineItemTaxDetailStagingTable
 		,@CurrentErrorMessage NVARCHAR(250)
 		,@CreatedIvoices NVARCHAR(MAX)
@@ -764,20 +765,15 @@ INNER JOIN tblSOSalesOrderDetailTax SOSODT ON EFI.[intTempDetailIdForTaxes] = SO
 ORDER BY EFI.[intSalesOrderDetailId] ASC
 	   , SOSODT.[intSalesOrderDetailTaxId] ASC
 
---GET EXISTING INVOICE FOR BATCH SCALE
-SELECT TOP 1 @intContractShipToLocationId = CD.intShipToId
+--GET DISTINCT SHIP TO FROM CONTRACT DETAIL
+UPDATE IE
+SET intShipToLocationId = ISNULL(CD.intShipToId, @intShipToLocationId)
+  , strComments			= ISNULL(IE.strComments, '') + ' Contract #' + ISNULL(CH.strContractNumber, '')
 FROM @EntriesForInvoice IE
 INNER JOIN tblCTContractDetail CD ON IE.intContractDetailId = CD.intContractDetailId
-WHERE CD.intContractDetailId IS NOT NULL
-  AND CD.intShipToId IS NOT NULL
-
-IF ISNULL(@intContractShipToLocationId, 0) <> 0
-	BEGIN
-		SET @intShipToLocationId = @intContractShipToLocationId
-
-		UPDATE @EntriesForInvoice
-		SET intShipToLocationId = @intContractShipToLocationId		
-	END
+INNER JOIN tblCTContractHeader CH ON CD.intContractHeaderId = CH.intContractHeaderId
+WHERE IE.intContractDetailId IS NOT NULL
+  AND ISNULL(CD.intShipToId, 0) <> @intShipToLocationId
 
 SELECT @intExistingInvoiceId = dbo.fnARGetInvoiceForBatch(@EntityCustomerId, @intShipToLocationId)
 
