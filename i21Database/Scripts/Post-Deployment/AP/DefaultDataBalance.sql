@@ -5,11 +5,11 @@ begin
 	PRINT 'ADDING DEFAULT DATA'
 	declare @o1 DECIMAL(18,6)
 	declare @o2 NVARCHAR(100)
-	exec [uspAPBalance] 1, @o1 output, @o2 output	
+	exec [uspAPBalance] 1, DEFAULT, DEFAULT, @o1 output, @o2 output	
 	
 	declare @p1 DECIMAL(18,6)
 	declare @p2 NVARCHAR(100)
-	exec uspAPGLBalance 1, @p1 output, @p2 output	
+	exec uspAPGLBalance 1, DEFAULT, DEFAULT, @p1 output, @p2 output	
 	
 	
 	INSERT INTO tblAPBalance(dblGLBalance, dblAPBalance, ysnBalance) select null, null, null
