@@ -183,7 +183,7 @@ DECLARE @grainVoucherTotal TABLE(strSettleStorage NVARCHAR(50), dblTotal DECIMAL
 AS (
     SELECT
         strStorageTicket,
-        SUM(dblTotal) AS dblTotal
+        SUM(dblVoucherTotal) AS dblTotal
     FROM 
     (
         SELECT
@@ -222,7 +222,7 @@ AS (
         -- UNION ALL
 
     ) tmp
-    GROUP BY strSettleStorage
+    GROUP BY strStorageTicket
 )
 
 
