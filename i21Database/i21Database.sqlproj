@@ -8375,6 +8375,7 @@
     <Build Include="dbo\Views\vyuRKGetDPRContractHedgeByMonthSummary.sql" />
     <Build Include="dbo\Tables\tblRKDPRYearToDate.sql" />
     <Build Include="dbo\Views\vyuRKGetDPRYearToDateSummary.sql" />
+    <Build Include="dbo\Functions\fnRKGetBucketDerivatives.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
