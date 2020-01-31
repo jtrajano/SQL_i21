@@ -37,7 +37,7 @@ CREATE TABLE [dbo].[tblCTContractCost](
 	[intContractCostRefId]		INT,
 	[ysnFromBasisComponent]					BIT NULL,
 	CONSTRAINT [PK_tblCTContractCost_intContractCostId] PRIMARY KEY CLUSTERED ([intContractCostId] ASC),
-	CONSTRAINT [FK_tblCTContractCost_tblCTContractDetail_intContractDetailId] FOREIGN KEY ([intContractDetailId]) REFERENCES [tblCTContractDetail]([intContractDetailId]) ON DELETE CASCADE,
+	--CONSTRAINT [FK_tblCTContractCost_tblCTContractDetail_intContractDetailId] FOREIGN KEY ([intContractDetailId]) REFERENCES [tblCTContractDetail]([intContractDetailId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblCTContractCost_tblEMEntity_intVendorId_intEntityId] FOREIGN KEY ([intVendorId]) REFERENCES [tblEMEntity](intEntityId),
 	CONSTRAINT [FK_tblCTContractCost_tblICItemUOM_intItemUOMId] FOREIGN KEY ([intItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]),
 	CONSTRAINT [FK_tblCTContractCost_tblSMCurrency_intCurrencyId] FOREIGN KEY ([intCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID]),
@@ -61,5 +61,35 @@ CREATE NONCLUSTERED INDEX [NonClusteredIndex_tblCTContractCost_002] ON [dbo].tbl
 (
 	[intContractDetailId] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)
+
+GO
+
+CREATE TRIGGER [dbo].[trgCTContractCostInstedOfDelete]
+	ON [dbo].[tblCTContractCost]
+	INSTEAD OF DELETE
+AS
+BEGIN
+
+	DECLARE @ID TABLE( Id INT)
+	INSERT INTO @ID (Id) VALUES(0)
+	INSERT INTO @ID (Id) VALUES(1)
+
+	DECLARE @ysnBasisComponent BIT
+	
+	SELECT TOP 1 @ysnBasisComponent = CASE WHEN ISNULL(ysnBasisComponentPurchase,0) = 1 OR ISNULL(ysnBasisComponentSales,0) = 1 THEN 1 ELSE 0 END
+	FROM tblCTCompanyPreference
+
+	IF @ysnBasisComponent = 1
+	BEGIN
+		DELETE FROM @ID WHERE Id = 1
+	END
+	
+	DELETE CC
+	FROM   [tblCTContractCost] CC
+	JOIN   deleted D
+	ON     CC.intContractCostId = D.intContractCostId
+	WHERE ISNULL(CC.ysnBasis,0) IN (SELECT Id FROM @ID)
+
+END
 
 GO
