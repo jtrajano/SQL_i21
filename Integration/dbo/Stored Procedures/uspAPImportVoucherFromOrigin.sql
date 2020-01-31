@@ -137,7 +137,7 @@ DECLARE @gl DECIMAL(18,6);
 DECLARE @balLog NVARCHAR(100);
 
 EXEC uspAPBalance @UserId = 1, @balance = @ap OUT, @logKey = @balLog OUT;
-EXEC uspAPGLBalance @UserId = 1, @balance = @gl OUT, @logKey = @balLog OUT;
+EXEC uspAPGLBalance @UserId = 1, @dateFrom = DEFAULT, @dateTo = DEFAULT, @balance = @gl OUT, @logKey = @balLog OUT;
 
 IF @ap != @gl 
 BEGIN
