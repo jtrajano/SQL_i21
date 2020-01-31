@@ -328,6 +328,9 @@ INSERT INTO tblAPBillDetail
 	[intAccountId],
 	[dblTotal],
 	[dblCost],
+	[dbl1099],
+	[int1099Form],
+	[int1099Category],
 	[intLineNo]
 )
 SELECT 
@@ -381,16 +384,54 @@ SELECT
 										THEN -(ABS(ISNULL(NULLIF(C.apegl_gl_un,0),1))) --when line total is negative, get the cost by dividing to negative as well
 										ELSE ISNULL(NULLIF(C.apegl_gl_un,0),1) 
 									END),
+	[dbl1099]				=	(CASE WHEN (A.dblTotal > 0 AND C2.aptrx_1099_amt > 0)
+								THEN 
+									(
+										((CASE WHEN C2.aptrx_trans_type IN ('C','A') THEN ISNULL(C.apegl_gl_amt, C2.aptrx_net_amt) * -1 ELSE ISNULL(C.apegl_gl_amt, C2.aptrx_net_amt) END)
+											/
+											(A.dblTotal)
+										)
+										*
+										A.dblTotal
+									)
+								ELSE 0 END), --COMPUTE WITHHELD ONLY IF TOTAL IS POSITIVE
+	[int1099Form]			=	(CASE WHEN C2.aptrx_1099_amt > 0 
+										THEN (
+											CASE WHEN entity.str1099Form = '1099-MISC' THEN 1
+													WHEN entity.str1099Form = '1099-INT' THEN 2
+													WHEN entity.str1099Form = '1099-B' THEN 3
+													WHEN entity.str1099Form = '1099-PATR' THEN 4
+													WHEN entity.str1099Form = '1099-DIV' THEN 5
+											ELSE 0 END
+										)
+										ELSE 0 
+								END),
+	[int1099Category]		=	(CASE WHEN C2.aptrx_1099_amt > 0 
+										THEN ( 
+											CASE WHEN entity.str1099Form = '1099-MISC' THEN category1099.int1099CategoryId
+													WHEN entity.str1099Form = '1099-INT' THEN category1099.int1099CategoryId
+													WHEN entity.str1099Form = '1099-B' THEN category1099.int1099CategoryId
+													WHEN entity.str1099Form = '1099-PATR' THEN categoryPATR.int1099CategoryId
+													WHEN entity.str1099Form = '1099-DIV' THEN categoryDIV.int1099CategoryId
+											ELSE 0 END
+										)
+										ELSE 0 
+								END),
 	[intLineNo]				=	C.apegl_dist_no
 FROM tblAPBill A
 	INNER JOIN tblAPVendor B
 		ON A.intEntityVendorId = B.intEntityId
+	INNER JOIN tblEMEntity entity
+		ON B.intEntityId = entity.intEntityId
 	INNER JOIN #tmpVoucherTransactions tmpCreatedVouchers ON A.intBillId = tmpCreatedVouchers.intBillId
 	INNER JOIN (tmp_aptrxmstImport C2 INNER JOIN tmp_apeglmstImport C 
 					ON C2.aptrx_ivc_no = C.apegl_ivc_no 
 					AND C2.aptrx_vnd_no = C.apegl_vnd_no)
 		ON A.strVendorOrderNumber COLLATE Latin1_General_CS_AS = C2.aptrx_ivc_no
 		AND B.strVendorId COLLATE Latin1_General_CS_AS = C2.aptrx_vnd_no
+	LEFT JOIN tblAP1099Category category ON category.strCategory = C.str1099Type
+	LEFT JOIN tblAP1099PATRCategory categoryPATR ON categoryPATR.strCategory = C.str1099Type
+	LEFT JOIN tblAP1099DIVCategory categoryDIV ON categoryDIV.strCategory = C.str1099Type
 ORDER BY C.apegl_dist_no
 
 SET @totalInsertedBillDetail = @@ROWCOUNT;
