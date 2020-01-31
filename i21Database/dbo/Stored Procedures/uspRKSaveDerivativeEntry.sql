@@ -33,25 +33,29 @@ BEGIN
 			, dblPrice
 			, intEntityId
 			, intUserId
-			, strNotes)
+			, strNotes
+			, intCommodityUOMId)
 		SELECT strTransactionType = 'Derivatives'
-			, intTransactionRecordId = intFutOptTransactionId
-			, strTransactionNumber = strInternalTradeNo
-			, dtmTransactionDate = dtmTransactionDate
-			, intContractDetailId = intContractDetailId
-			, intContractHeaderId = intContractHeaderId
-			, intCommodityId = intCommodityId
-			, intLocationId = intLocationId
-			, intBookId = intBookId
-			, intSubBookId = intSubBookId
-			, intFutureMarketId = intFutureMarketId
-			, intFutureMonthId = intFutureMonthId
-			, dblNoOfLots = dblNoOfContract
-			, dblPrice = dblPrice
-			, intEntityId = intEntityId
+			, intTransactionRecordId = der.intFutOptTransactionId
+			, strTransactionNumber = der.strInternalTradeNo
+			, dtmTransactionDate = der.dtmTransactionDate
+			, intContractDetailId = der.intContractDetailId
+			, intContractHeaderId = der.intContractHeaderId
+			, intCommodityId = der.intCommodityId
+			, intLocationId = der.intLocationId
+			, intBookId = der.intBookId
+			, intSubBookId = der.intSubBookId
+			, intFutureMarketId = der.intFutureMarketId
+			, intFutureMonthId = der.intFutureMonthId
+			, dblNoOfLots = der.dblNoOfContract
+			, dblPrice = der.dblPrice
+			, intEntityId = der.intEntityId
 			, intUserId = @intUserId
-			, strNotes = ''
-		FROM #tmpDerivative
+			, strNotes = der.strReference
+			, intCommodityUOMId = cUOM.intCommodityUnitMeasureId
+		FROM #tmpDerivative der
+		JOIN tblRKFutureMarket m ON m.intFutureMarketId = der.intFutureMarketId
+		LEFT JOIN tblICCommodityUnitMeasure cUOM ON cUOM.intCommodityId = der.intCommodityId AND cUOM.intUnitMeasureId = m.intUnitMeasureId
 	END
 	ELSE
 	BEGIN
