@@ -262,6 +262,142 @@ FROM @voucherTotal A
 INNER JOIN @voucherGLTotal B ON A.strReceiptNumber = B.strReceiptNumber
 WHERE (A.dblTotal + B.dblTotal) != 0
 
+--RECEIPT GL VS VOUCHER GL
+SELECT 
+	A.strTransactionNumber,
+	A.dblClearingAmount,
+	B.dblTotal
+FROM (
+SELECT  
+   B.intEntityVendorId  
+--    ,B.intInventoryReceiptItemId
+   ,B.strTransactionNumber  
+   ,SUM(B.dblReceiptTotal) AS dblReceiptTotal
+   ,SUM(B.dblReceiptQty) AS dblReceiptQty
+   ,SUM(B.dblVoucherTotal) AS dblVoucherTotal  
+   ,SUM(B.dblVoucherQty) AS dblVoucherQty  
+   ,SUM(B.dblReceiptQty)  -  SUM(B.dblVoucherQty) AS dblClearingQty 
+   ,SUM(B.dblReceiptTotal) - SUM(B.dblVoucherTotal) AS dblClearingAmount 
+   ,B.intLocationId  
+   ,B.strLocationName
+  FROM (
+     SELECT  
+      dtmDate  
+      ,intEntityVendorId  
+      ,strTransactionNumber  
+      ,intInventoryReceiptId  
+    --   ,intInventoryReceiptItemId  
+    --   ,intItemId  
+      ,intBillId  
+      ,strBillId  
+      ,intBillDetailId  
+      ,dblVoucherTotal  
+      ,dblVoucherQty  
+      ,dblReceiptTotal  
+      ,dblReceiptQty  
+      ,intLocationId  
+      ,strLocationName  
+     FROM vyuAPReceiptClearing  
+	 WHERE strAccountId = '30200-90-80'
+	 --AND strTransactionNumber = 'INVRCT-1'
+  ) B  
+  GROUP BY   
+   intEntityVendorId  
+--    ,intInventoryReceiptItemId
+   ,strTransactionNumber  
+--    ,intItemId  
+   ,intLocationId  
+   ,strLocationName
+  --HAVING (SUM(B.dblReceiptQty) - SUM(B.dblVoucherQty)) != 0 OR (SUM(B.dblReceiptTotal) - SUM(B.dblVoucherTotal)) != 0
+  ) A
+  LEFT JOIN (
+	SELECT
+		strReceiptNumber,
+		SUM(dblTotal) AS dblTotal
+	FROM (
+		SELECT
+			E2.strReceiptNumber,
+			D.strAccountId,
+			SUM(dblCredit - dblDebit) AS dblTotal
+		FROM tblGLDetail A
+		INNER JOIN tblAPBill B ON A.strTransactionId = B.strBillId
+		INNER JOIN tblAPBillDetail C ON B.intBillId = C.intBillId AND C.intBillDetailId = A.intJournalLineNo
+		INNER JOIN vyuGLAccountDetail D ON C.intAccountId = D.intAccountId
+		INNER JOIN (tblICInventoryReceiptItem E INNER JOIN tblICInventoryReceipt E2 ON E.intInventoryReceiptId = E2.intInventoryReceiptId)
+			ON C.intInventoryReceiptItemId = E.intInventoryReceiptItemId
+		WHERE 
+			A.ysnIsUnposted = 0
+		AND D.intAccountCategoryId = 45
+		AND (A.strModuleName = 'Accounts Payable')
+		AND (C.intInventoryReceiptItemId > 0 OR C.intInventoryReceiptChargeId > 0)
+		--AND A.strTransactionId = 'BL-24728'
+		AND D.strAccountId = '30200-90-80'
+		GROUP BY E2.strReceiptNumber, D.strAccountId
+		UNION ALL --TAX
+		SELECT
+			E2.strReceiptNumber,
+			D.strAccountId,
+			SUM(dblCredit - dblDebit) AS dblTotal
+		FROM tblGLDetail A
+		INNER JOIN tblAPBill B ON A.strTransactionId = B.strBillId
+		INNER JOIN (tblAPBillDetail C INNER JOIN tblAPBillDetailTax C2 
+						ON C.intBillDetailId = C2.intBillDetailId)
+		ON B.intBillId = C.intBillId AND A.intJournalLineNo = C2.intBillDetailTaxId
+		INNER JOIN vyuGLAccountDetail D ON A.intAccountId = D.intAccountId
+		INNER JOIN (tblICInventoryReceiptItem E INNER JOIN tblICInventoryReceipt E2 ON E.intInventoryReceiptId = E2.intInventoryReceiptId)
+			ON C.intInventoryReceiptItemId = E.intInventoryReceiptItemId
+		WHERE 
+			A.ysnIsUnposted = 0
+		AND D.intAccountCategoryId = 45
+		AND (A.strModuleName = 'Accounts Payable')
+		AND (C.intInventoryReceiptItemId > 0 OR C.intInventoryReceiptChargeId > 0)
+		--AND A.strTransactionId = 'BL-24728'
+		AND D.strAccountId = '30200-90-80'
+		GROUP BY E2.strReceiptNumber, D.strAccountId
+		UNION ALL --COST ADJUSTMENT
+		SELECT
+			E2.strReceiptNumber,
+			D.strAccountId,
+			SUM(dblCredit - dblDebit) AS dblTotal
+		FROM tblGLDetail A
+		INNER JOIN tblAPBill B ON A.strTransactionId = B.strBillId
+		INNER JOIN tblAPBillDetail C ON B.intBillId = C.intBillId --AND C.intBillDetailId = A.intJournalLineNo
+		INNER JOIN vyuGLAccountDetail D ON A.intAccountId = D.intAccountId
+		INNER JOIN (tblICInventoryReceiptItem E INNER JOIN tblICInventoryReceipt E2	
+						ON E.intInventoryReceiptId = E2.intInventoryReceiptId
+					INNER JOIN tblICInventoryTransaction E3 ON E2.intInventoryReceiptId = E3.intRelatedTransactionId)
+			ON C.intInventoryReceiptItemId = E.intInventoryReceiptItemId AND A.intJournalLineNo = E3.intInventoryTransactionId
+		WHERE 
+			A.ysnIsUnposted = 0
+		AND D.intAccountCategoryId = 45
+		AND A.strModuleName = 'Inventory'
+		AND A.strCode = 'ICA'
+		AND D.strAccountId = '30200-90-80'
+		AND (C.intInventoryReceiptItemId > 0 OR C.intInventoryReceiptChargeId > 0)
+		--AND A.strTransactionId = 'BL-24935'
+		GROUP BY E2.strReceiptNumber, D.strAccountId
+		UNION ALL
+		SELECT
+			--A.dtmDate,
+			A.strTransactionId,
+			B.strAccountId,
+			SUM(dblCredit - dblDebit)
+		FROM tblGLDetail A
+		INNER JOIN vyuGLAccountDetail B
+		ON A.intAccountId = B.intAccountId
+		WHERE B.intAccountCategoryId = 45
+		AND A.ysnIsUnposted = 0
+		AND A.strModuleName = 'Inventory'
+		AND B.strAccountId = '30200-90-80'
+		--AND A.strTransactionId = 'INVRCT-12'
+		--AND DATEADD(dd, DATEDIFF(dd, 0,A.dtmDate), 0) BETWEEN @start AND @end
+		--AND A.strDescription NOT LIKE '%Charges from%'
+		--GROUP BY A.strTransactionId, A.dtmDate
+		GROUP BY A.strTransactionId, B.strAccountId
+	) tmp
+	GROUP BY strReceiptNumber
+  ) B ON A.strTransactionNumber = B.strReceiptNumber
+  WHERE A.dblClearingAmount != B.dblTotal OR B.dblTotal IS NULL
 
 --OLD
 -- --Result of this should be all 0
