@@ -429,9 +429,9 @@ SELECT
 									ELSE 0 END),
 	[int1099Category]		=	(CASE WHEN C2.apivc_1099_amt > 0 
 									THEN ( 
-											CASE WHEN entity.str1099Form = '1099-MISC' THEN category1099.int1099CategoryId
-													WHEN entity.str1099Form = '1099-INT' THEN category1099.int1099CategoryId
-													WHEN entity.str1099Form = '1099-B' THEN category1099.int1099CategoryId
+											CASE WHEN entity.str1099Form = '1099-MISC' THEN category.int1099CategoryId
+													WHEN entity.str1099Form = '1099-INT' THEN category.int1099CategoryId
+													WHEN entity.str1099Form = '1099-B' THEN category.int1099CategoryId
 													WHEN entity.str1099Form = '1099-PATR' THEN categoryPATR.int1099CategoryId
 													WHEN entity.str1099Form = '1099-DIV' THEN categoryDIV.int1099CategoryId
 											ELSE 0 END
@@ -449,9 +449,9 @@ INNER JOIN (tmp_apivcmstImport C2 INNER JOIN tmp_aphglmstImport C
 			AND C2.apivc_vnd_no = C.aphgl_vnd_no)
 ON A.strVendorOrderNumber COLLATE Latin1_General_CS_AS = C2.apivc_ivc_no
 	AND B.strVendorId COLLATE Latin1_General_CS_AS = C2.apivc_vnd_no
-LEFT JOIN tblAP1099Category category ON category.strCategory = C.str1099Type
-	LEFT JOIN tblAP1099PATRCategory categoryPATR ON categoryPATR.strCategory = C.str1099Type
-	LEFT JOIN tblAP1099DIVCategory categoryDIV ON categoryDIV.strCategory = C.str1099Type
+LEFT JOIN tblAP1099Category category ON category.strCategory = entity.str1099Type
+	LEFT JOIN tblAP1099PATRCategory categoryPATR ON categoryPATR.strCategory = entity.str1099Type
+	LEFT JOIN tblAP1099DIVCategory categoryDIV ON categoryDIV.strCategory = entity.str1099Type
 ORDER BY C.aphgl_dist_no
 
 SET @totalInsertedBillDetail = @@ROWCOUNT;
