@@ -481,18 +481,41 @@ SELECT
 										A.dblTotal
 									)
 								ELSE 0 END), --COMPUTE WITHHELD ONLY IF TOTAL IS POSITIVE
-	[int1099Form]			=	(CASE WHEN C2.apivc_1099_amt > 0 THEN 1 ELSE 0 END),
-	[int1099Category]		=	(CASE WHEN C2.apivc_1099_amt > 0 THEN 8 ELSE 0 END),
+	[int1099Form]			=	(CASE WHEN C2.apivc_1099_amt > 0 
+									THEN (
+											CASE WHEN entity.str1099Form = '1099-MISC' THEN 1
+													WHEN entity.str1099Form = '1099-INT' THEN 2
+													WHEN entity.str1099Form = '1099-B' THEN 3
+													WHEN entity.str1099Form = '1099-PATR' THEN 4
+													WHEN entity.str1099Form = '1099-DIV' THEN 5
+											ELSE 0 END
+										) 
+									ELSE 0 END),
+	[int1099Category]		=	(CASE WHEN C2.apivc_1099_amt > 0 
+									THEN ( 
+											CASE WHEN entity.str1099Form = '1099-MISC' THEN category1099.int1099CategoryId
+													WHEN entity.str1099Form = '1099-INT' THEN category1099.int1099CategoryId
+													WHEN entity.str1099Form = '1099-B' THEN category1099.int1099CategoryId
+													WHEN entity.str1099Form = '1099-PATR' THEN categoryPATR.int1099CategoryId
+													WHEN entity.str1099Form = '1099-DIV' THEN categoryDIV.int1099CategoryId
+											ELSE 0 END
+										)
+									ELSE 0 END),
 	[intLineNo]				=	ISNULL(C.aphgl_dist_no, 0)
 FROM tblAPBill A
 INNER JOIN tblAPVendor B
 	ON A.intEntityVendorId = B.intEntityId
+INNER JOIN tblEMEntity entity
+		ON B.intEntityId = entity.intEntityId
 INNER JOIN #tmpVouchersWithRecordNumber tmpCreatedVouchers ON A.intBillId = tmpCreatedVouchers.intBillId
 INNER JOIN (tmp_apivcmstImport C2 INNER JOIN tmp_aphglmstImport C 
 			ON C2.apivc_ivc_no = C.aphgl_ivc_no 
 			AND C2.apivc_vnd_no = C.aphgl_vnd_no)
 ON A.strVendorOrderNumber COLLATE Latin1_General_CS_AS = C2.apivc_ivc_no
 	AND B.strVendorId COLLATE Latin1_General_CS_AS = C2.apivc_vnd_no
+LEFT JOIN tblAP1099Category category ON category.strCategory = C.str1099Type
+LEFT JOIN tblAP1099PATRCategory categoryPATR ON categoryPATR.strCategory = C.str1099Type
+LEFT JOIN tblAP1099DIVCategory categoryDIV ON categoryDIV.strCategory = C.str1099Type
 OUTER APPLY(
 	SELECT SUM(aphgl_gl_amt) dblTotal FROM aphglmst C3
 	WHERE C2.apivc_ivc_no = C3.aphgl_ivc_no 
