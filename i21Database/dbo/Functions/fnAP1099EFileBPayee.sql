@@ -23,7 +23,7 @@ BEGIN
 		+ CASE WHEN @corrected = 1 THEN '1' ELSE ' ' END
 		+ SPACE(4)
 		+ '1'
-		+ ISNULL(NULLIF(A.strFederalTaxId,''),SPACE(9)) -- 12-20
+		+ ISNULL(LEFT(REPLACE(A.strFederalTaxId, '-', ''),9),SPACE(9)) -- 12-20
 		+ dbo.fnTrimX(A.strVendorId) + SPACE(20 - LEN(dbo.fnTrimX(A.strVendorId))) -- 21-40
 		+ SPACE(4) -- 41-44
 		+ SPACE(10) -- 45-54
