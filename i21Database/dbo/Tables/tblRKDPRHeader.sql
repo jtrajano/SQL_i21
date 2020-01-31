@@ -11,6 +11,7 @@
     [intCommodityId] INT NULL, 
     [intItemId] INT NULL, 
     [intLocationId] INT NULL, 
+	[ysnCrush] BIT NULL DEFAULT((0)),
     [intConcurrencyId] INT NULL DEFAULT ((1)), 
     CONSTRAINT [PK_tblRKDPRHeader] PRIMARY KEY ([intDPRHeaderId])
 )

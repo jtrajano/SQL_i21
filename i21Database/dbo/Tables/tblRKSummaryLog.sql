@@ -28,5 +28,9 @@
 	intTicketId INT NULL,
 	intUserId INT NULL, 
 	strNotes NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL,
+	strMiscField NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
+    [ysnNegate] BIT NULL DEFAULT ((0)), 
+    [intRefSummaryLogId] INT NULL, 
+    [intConcurrencyId] INT NULL DEFAULT ((1)), 
     CONSTRAINT [PK_tblRKSummaryLog] PRIMARY KEY ([intSummaryLogId])
 )

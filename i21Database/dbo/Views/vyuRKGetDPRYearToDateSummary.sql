@@ -2,12 +2,12 @@
 
 AS
 
-SELECT intRowId = ROW_NUMBER() OVER (ORDER BY intSeqId DESC)
+SELECT intRowId = CAST(ROW_NUMBER() OVER (ORDER BY intSeqId DESC) AS INT)
 	, intDPRHeaderId
 	, strCommodityCode
 	, strType
 	, strFieldName
-	, dblTotal
+	, dblTotal = CAST(dblTotal AS DECIMAL(24, 10))
 FROM (
 	SELECT intSeqId = (SELECT TOP 1 intDPRYearToDateId FROM tblRKDPRYearToDate x
 					WHERE x.intDPRHeaderId = t.intDPRHeaderId

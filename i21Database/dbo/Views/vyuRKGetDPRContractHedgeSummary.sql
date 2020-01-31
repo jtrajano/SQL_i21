@@ -2,12 +2,12 @@
 
 AS
 
-SELECT intRowId = ROW_NUMBER() OVER (PARTITION BY strCommodityCode, strType ORDER BY intSeqNo DESC)
+SELECT intRowId = CAST(ROW_NUMBER() OVER (ORDER BY intSeqNo DESC) AS INT)
 	, intDPRHeaderId
 	, strCommodityCode
-	, intSeqNo
+	, intSeqNo = CAST(intSeqNo AS INT)
 	, strType
-	, dblTotal = ISNULL(SUM(ISNULL(dblTotal, 0.00)), 0.00)
+	, dblTotal = CAST(ISNULL(SUM(ISNULL(dblTotal, 0.00)), 0.00) AS DECIMAL(24, 10))
 FROM tblRKDPRContractHedge
 GROUP BY intDPRHeaderId
 	, strCommodityCode

@@ -8376,6 +8376,11 @@
     <Build Include="dbo\Tables\tblRKDPRYearToDate.sql" />
     <Build Include="dbo\Views\vyuRKGetDPRYearToDateSummary.sql" />
     <Build Include="dbo\Functions\fnRKGetBucketDerivatives.sql" />
+    <Build Include="dbo\Functions\fnRKGetMiscFieldPivotDerivative.sql" />
+    <Build Include="dbo\Functions\fnRKGetMiscFieldTable.sql" />
+    <Build Include="dbo\Functions\fnRKConvertMiscFieldString.sql" />
+    <Build Include="dbo\User Defined Types\RKMiscField.sql" />
+    <Build Include="dbo\Views\vyuRKGetDPRHeader.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -42,6 +42,9 @@ SELECT SL.intSummaryLogId
 	, SL.intTicketId
 	, SL.intUserId
 	, SL.strNotes
+	, SL.ysnNegate
+	, SL.intRefSummaryLogId
+	, SL.strMiscField
 FROM tblRKSummaryLog SL
 LEFT JOIN tblSMCompanyLocation Loc ON Loc.intCompanyLocationId = SL.intLocationId
 LEFT JOIN tblICCommodity Commodity ON Commodity.intCommodityId = SL.intCommodityId

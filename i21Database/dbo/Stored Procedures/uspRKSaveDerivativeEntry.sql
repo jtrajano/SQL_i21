@@ -24,6 +24,7 @@ BEGIN
 			, intContractDetailId
 			, intContractHeaderId
 			, intCommodityId
+			, intLocationId
 			, intBookId
 			, intSubBookId
 			, intFutureMarketId
@@ -40,6 +41,7 @@ BEGIN
 			, intContractDetailId = intContractDetailId
 			, intContractHeaderId = intContractHeaderId
 			, intCommodityId = intCommodityId
+			, intLocationId = intLocationId
 			, intBookId = intBookId
 			, intSubBookId = intSubBookId
 			, intFutureMarketId = intFutureMarketId

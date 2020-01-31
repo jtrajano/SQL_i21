@@ -1,12 +1,12 @@
 ﻿CREATE VIEW [dbo].[vyuRKGetDPRInventorySummary]
 	AS
 
-SELECT intRowId = ROW_NUMBER() OVER (PARTITION BY strCommodityCode, strSeqHeader ORDER BY intSeqId DESC)
+SELECT intRowId = CAST(ROW_NUMBER() OVER (ORDER BY intSeqId DESC) AS INT)
 	, intDPRHeaderId
 	, strCommodityCode
-	, intSeqId
+	, intSeqId = CAST(intSeqId AS INT)
 	, strSeqHeader
-	, dblTotal = ISNULL(SUM(ISNULL(dblTotal, 0.00)), 0.00)
+	, dblTotal = CAST(ISNULL(SUM(ISNULL(dblTotal, 0.00)), 0.00) AS DECIMAL(24, 10))
 FROM tblRKDPRInventory
 GROUP BY intDPRHeaderId
 	, strCommodityCode

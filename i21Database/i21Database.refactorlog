@@ -7490,4 +7490,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intDPRYearToDateId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="21796d99-6bfc-4e1e-9e01-eebaf8fae311" ChangeDateTime="01/30/2020 03:07:32">
+    <Property Name="ElementName" Value="[dbo].[tblRKSummaryLogHelper].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblRKSummaryLogHelper]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intSummaryLogHelperId" />
+  </Operation>
 </Operations>

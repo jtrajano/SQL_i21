@@ -61,7 +61,12 @@ BEGIN
 		, intEntityId INT NULL
 		, intTicketId INT NULL
 		, intUserId INT NULL
-		, strNotes NVARCHAR(250) NULL)
+		, strNotes NVARCHAR(250) NULL
+		, ysnNegate BIT NULL
+		, intRefSummaryLogId INT NULL
+		, strMiscField NVARCHAR(MAX))
+
+	DECLARE @LogHelper AS RKMiscField
 
 	SELECT * INTO #tmpSummaryLogs FROM @SummaryLogs
 
@@ -214,8 +219,10 @@ BEGIN
 					, intEntityId
 					, intTicketId
 					, intUserId
-					, strNotes)
-				SELECT strBatchId
+					, strNotes
+					, ysnNegate
+					, intRefSummaryLogId)
+				SELECT @strBatchId
 					, strTransactionType
 					, intTransactionRecordId
 					, strTransactionNumber
@@ -240,7 +247,9 @@ BEGIN
 					, intEntityId
 					, intTicketId
 					, @intUserId
-					, '(Negate previous value)' + ISNULL(strNotes, '')
+					, strNotes
+					, 1
+					, intSummaryLogId
 				FROM #tmpPrevLog
 			END
 		END
@@ -250,6 +259,54 @@ BEGIN
 		---------------------------------------
 		IF @strTransactionType = 'Derivatives'
 		BEGIN
+			DECLARE @strBuySell NVARCHAR(50)
+				, @dblContractSize NUMERIC(24, 10)
+				, @strOptionMonth NVARCHAR(50)
+				, @dblStrike NUMERIC(24, 10)
+				, @strOptionType NVARCHAR(50)
+				, @strInstrumentType NVARCHAR(50)
+				, @strBrokerAccount NVARCHAR(50)
+				, @strBroker NVARCHAR(50)
+				, @intFutOptTransactionHeaderId INT
+				, @ysnPreCrush BIT
+				, @strBrokerTradeNo NVARCHAR(50)
+			
+			SELECT TOP 1 @strBuySell = der.strBuySell
+				, @dblContractSize = m.dblContractSize
+				, @strOptionMonth = om.strFutureMonth
+				, @dblStrike = der.dblStrike
+				, @strOptionType = der.strOptionType
+				, @strInstrumentType = CASE WHEN (der.[intInstrumentTypeId] = 1) THEN N'Futures'
+								WHEN (der.[intInstrumentTypeId] = 2) THEN N'Options'
+								WHEN (der.[intInstrumentTypeId] = 3) THEN N'Currency Contract' END COLLATE Latin1_General_CI_AS
+				, @strBrokerAccount = BA.strAccountNumber
+				, @strBroker = e.strName
+				, @intFutOptTransactionHeaderId = der.intFutOptTransactionHeaderId
+				, @ysnPreCrush = der.ysnPreCrush
+				, @strBrokerTradeNo = der.strBrokerTradeNo
+			FROM tblRKFutOptTransaction der
+			JOIN tblRKFutureMarket m ON m.intFutureMarketId = der.intFutureMarketId
+			LEFT JOIN tblICCommodityUnitMeasure cUOM ON cUOM.intCommodityId = der.intCommodityId AND cUOM.intUnitMeasureId = m.intUnitMeasureId
+			LEFT JOIN tblRKFuturesMonth om ON om.intFutureMonthId = der.intOptionMonthId
+			LEFT JOIN tblRKBrokerageAccount AS BA ON BA.intBrokerageAccountId = der.intBrokerageAccountId
+			LEFT JOIN tblEMEntity e ON e.intEntityId = der.intEntityId
+			WHERE der.intFutOptTransactionId = @intTransactionRecordId
+
+			INSERT INTO @LogHelper(intRowId, strFieldName, strValue)
+			SELECT intRowId = ROW_NUMBER() OVER (ORDER BY strFieldName),  * FROM (
+				SELECT strFieldName = 'strBuySell', strValue = @strBuySell
+				UNION ALL SELECT 'dblContractSize', CAST(@dblContractSize AS NVARCHAR)
+				UNION ALL SELECT 'strOptionMonth', @strOptionMonth
+				UNION ALL SELECT 'dblStrike', CAST(@dblStrike AS NVARCHAR)
+				UNION ALL SELECT 'strOptionType', @strOptionType
+				UNION ALL SELECT 'strInstrumentType', @strInstrumentType
+				UNION ALL SELECT 'strBrokerAccount', @strBrokerAccount
+				UNION ALL SELECT 'strBroker', @strBroker
+				UNION ALL SELECT 'intFutOptTransactionHeaderId', CAST(@intFutOptTransactionHeaderId AS NVARCHAR)
+				UNION ALL SELECT 'ysnPreCrush', CAST(@ysnPreCrush AS NVARCHAR)
+				UNION ALL SELECT 'strBrokerTradeNo', @strBrokerTradeNo
+			) t WHERE ISNULL(strValue, '') != ''
+			
 			INSERT INTO @FinalTable(strBatchId
 				, strTransactionType
 				, intTransactionRecordId
@@ -275,8 +332,9 @@ BEGIN
 				, intEntityId
 				, intTicketId
 				, intUserId
-				, strNotes)
-			SELECT TOP 1 @strBatchId
+				, strNotes
+				, strMiscField)
+			SELECT @strBatchId
 				, @strTransactionType
 				, @intTransactionRecordId
 				, @strTransactionNumber
@@ -292,20 +350,19 @@ BEGIN
 				, intOrigUOMId = @intCommodityUOMId
 				, @intBookId
 				, @intSubBookId
-				, intLocationId = NULL
-				, strInOut = CASE WHEN UPPER(der.strBuySell) = 'BUY' THEN 'IN' ELSE 'OUT' END
-				, dblOrigNoOfLots = @dblNoOfLots * CASE WHEN UPPER(der.strBuySell) = 'BUY' THEN 1 ELSE -1 END
-				, dblContractSize = m.dblContractSize
-				, dblOrigQty = @dblNoOfLots * m.dblContractSize * CASE WHEN UPPER(der.strBuySell) = 'BUY' THEN 1 ELSE -1 END
+				, @intLocationId
+				, strInOut = CASE WHEN UPPER(@strBuySell) = 'BUY' THEN 'IN' ELSE 'OUT' END
+				, dblOrigNoOfLots = @dblNoOfLots * CASE WHEN UPPER(@strBuySell) = 'BUY' THEN 1 ELSE -1 END
+				, dblContractSize = @dblContractSize
+				, dblOrigQty = @dblNoOfLots * @dblContractSize * CASE WHEN UPPER(@strBuySell) = 'BUY' THEN 1 ELSE -1 END
 				, dblPrice = @dblPrice
 				, @intEntityId
 				, @intTicketId
 				, @intUserId
 				, @strNotes
-			FROM tblRKFutOptTransaction der
-			JOIN tblRKFutureMarket m ON m.intFutureMarketId = der.intFutureMarketId
-			LEFT JOIN tblICCommodityUnitMeasure cUOM ON cUOM.intCommodityId = der.intCommodityId AND cUOM.intUnitMeasureId = m.intUnitMeasureId
-			WHERE der.intFutOptTransactionId = @intTransactionRecordId
+				, dbo.fnRKConvertMiscFieldString(@LogHelper)
+
+			DELETE FROM @LogHelper
 		END
 
 		---------------------------------------
@@ -854,6 +911,13 @@ BEGIN
 		------------------------------
 		------------------------------
 
+		------------------------
+		---- Process strNotes --
+		------------------------
+		--IF (ISNULL(@strNotes, '') != '')
+		--BEGIN
+		--	IF (CHARINDEX('', @strNotes))
+		--END
 		
 		DROP TABLE #tmpPrevLog
 
@@ -886,7 +950,10 @@ BEGIN
 		, intEntityId
 		, intTicketId
 		, intUserId
-		, strNotes)
+		, strNotes
+		, ysnNegate
+		, intRefSummaryLogId
+		, strMiscField)
 	SELECT strBatchId
 		, dtmCreatedDate = CASE WHEN @Rebuild = 1 THEN dtmTransactionDate ELSE GETDATE() END
 		, strTransactionType
@@ -913,6 +980,9 @@ BEGIN
 		, intTicketId
 		, intUserId
 		, strNotes
+		, ysnNegate
+		, intRefSummaryLogId
+		, strMiscField
 	FROM @FinalTable
 
 	DROP TABLE #tmpSummaryLogs
