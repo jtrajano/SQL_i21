@@ -293,8 +293,8 @@ BEGIN TRY
 				
 
 		SELECT	@intContractHeaderId = CD.intContractHeaderId,
-				@dblBalance		=	dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,@intScaleUOMId,CD.dblBalance),
-				@dblQuantity	=	dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,@intScaleUOMId,CD.dblQuantity),
+				@dblBalance		=	dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId,@intScaleUOMId,CD.dblBalance),
+				@dblQuantity	=	dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId,@intScaleUOMId,CD.dblQuantity),
 				@dblCost		=	CASE	WHEN	CD.intPricingTypeId = 2
 											THEN	ISNULL(dblSeqBasis,0)
 											WHEN	CD.intPricingTypeId = 3
@@ -302,8 +302,8 @@ BEGIN TRY
 											ELSE	ISNULL(CD.dblCashPrice,0)
 									END,
 				@dblAvailable	=	CASE	WHEN	@UseScheduleForAvlCalc = 1 --OR @intContractDetailId <> @intTicketContractDetailId
-											THEN	dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,@intScaleUOMId,ISNULL(CD.dblBalance,0) - ISNULL(CD.dblScheduleQty,0))
-											ELSE	dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,@intScaleUOMId,ISNULL(CD.dblBalance,0))
+											THEN	dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId,@intScaleUOMId,ISNULL(CD.dblBalance,0) - ISNULL(CD.dblScheduleQty,0))
+											ELSE	dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId,@intScaleUOMId,ISNULL(CD.dblBalance,0))
 									END,
 				@ysnUnlimitedQuantity = CH.ysnUnlimitedQuantity,
 				@intItemUOMId	=	CD.intItemUOMId,
@@ -315,12 +315,12 @@ BEGIN TRY
 		CROSS  APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
 		WHERE	CD.intContractDetailId = @intContractDetailId
 
-		SELECT @dblNetUnitsToCompare = dbo.fnCTConvertQtyToTargetItemUOM(@intScaleUOMId,@intItemUOMId,@dblNetUnits)
+		SELECT @dblNetUnitsToCompare = dbo.fnCalculateQtyBetweenUOM(@intScaleUOMId,@intItemUOMId,@dblNetUnits)
 
 		IF @ysnDP = 1
 		BEGIN
 
-			SELECT @dblNetUnits = dbo.fnCTConvertQtyToTargetItemUOM(@intScaleUOMId,@intItemUOMId,@dblNetUnits)			
+			SELECT @dblNetUnits = dbo.fnCalculateQtyBetweenUOM(@intScaleUOMId,@intItemUOMId,@dblNetUnits)			
 			
 			INSERT	INTO @Processed SELECT @intContractDetailId,0,NULL,@dblCost,0,NULL
 
@@ -328,8 +328,6 @@ BEGIN TRY
 
 			BREAK
 		END
-		
-		SET @dblNetUnits = @dblNetUnitsToCompare
 
 		/*Fixes for CT-3365 always accept ticket if contract is load base and with remaining load balance*/
 		IF @ysnLoad = 1-- AND @intStorageScheduleTypeId = -6
@@ -346,6 +344,10 @@ BEGIN TRY
 				GOTO CONTINUEISH
 			END
 		END
+		
+		SET @dblNetUnits = @dblNetUnitsToCompare
+
+	
 		IF NOT (@dblAvailable > 0 OR (@strDistributionOption = 'CNT' AND @intContractDetailId = @intTicketContractDetailId AND (@dblAvailable + ISNULL(@dblTicketScheduledQuantity,0)) > 0 ))
 		BEGIN
 			INSERT	INTO @Processed (intContractDetailId,ysnIgnore) SELECT @intContractDetailId,1
