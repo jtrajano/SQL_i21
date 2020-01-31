@@ -138,6 +138,7 @@
 [intTransUsedBy] INT NULL,
 [intShipmentType] INT NULL,
 [intLoadShippingInstructionId]  INT NULL,
+[intLoadReversalId] INT NULL,
 [strExternalShipmentNumber]  NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 [ysn4cRegistration] [bit] NULL,
 [ysnInvoice] [bit] NULL,
