@@ -52,6 +52,7 @@ BEGIN TRY
 			@locationId				INT
 
 	DECLARE @dblTicketScheduledQuantity NUMERIC(18,6)
+	DECLARE @_dblTicketScheduledQuantity NUMERIC(18,6)
 	DECLARE @intTicketLoadDetailId	INT
 	DECLARE @intLoadId	INT
 	DECLARE @LoadContractsDetailId Id
@@ -104,6 +105,7 @@ BEGIN TRY
 		, @UseScheduleForAvlCalc = CASE WHEN intStorageScheduleTypeId = -6 THEN 0 ELSE 1 END 
 		,@intTicketLoadDetailId = intLoadDetailId
 		,@dblTicketScheduledQuantity = dblScheduleQty
+		,@_dblTicketScheduledQuantity = dblScheduleQty
 		,@locationId		=	intProcessingLocationId
 		,@dtmTicketDate  = dtmTicketDateTime
         ,@intTicketSclaeSetupId = intScaleSetupId
@@ -293,8 +295,8 @@ BEGIN TRY
 				
 
 		SELECT	@intContractHeaderId = CD.intContractHeaderId,
-				@dblBalance		=	dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId,@intScaleUOMId,CD.dblBalance),
-				@dblQuantity	=	dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId,@intScaleUOMId,CD.dblQuantity),
+				@dblBalance		=	CD.dblBalance, --dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId,@intScaleUOMId,CD.dblBalance),
+				@dblQuantity	=	CD.dblQuantity,--dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId,@intScaleUOMId,CD.dblQuantity),
 				@dblCost		=	CASE	WHEN	CD.intPricingTypeId = 2
 											THEN	ISNULL(dblSeqBasis,0)
 											WHEN	CD.intPricingTypeId = 3
@@ -302,8 +304,8 @@ BEGIN TRY
 											ELSE	ISNULL(CD.dblCashPrice,0)
 									END,
 				@dblAvailable	=	CASE	WHEN	@UseScheduleForAvlCalc = 1 --OR @intContractDetailId <> @intTicketContractDetailId
-											THEN	dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId,@intScaleUOMId,ISNULL(CD.dblBalance,0) - ISNULL(CD.dblScheduleQty,0))
-											ELSE	dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId,@intScaleUOMId,ISNULL(CD.dblBalance,0))
+											THEN	ISNULL(CD.dblBalance,0) - ISNULL(CD.dblScheduleQty,0)--dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId,@intScaleUOMId,ISNULL(CD.dblBalance,0) - ISNULL(CD.dblScheduleQty,0))
+											ELSE	ISNULL(CD.dblBalance,0)--dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId,@intScaleUOMId,ISNULL(CD.dblBalance,0))
 									END,
 				@ysnUnlimitedQuantity = CH.ysnUnlimitedQuantity,
 				@intItemUOMId	=	CD.intItemUOMId,
@@ -316,6 +318,9 @@ BEGIN TRY
 		WHERE	CD.intContractDetailId = @intContractDetailId
 
 		SELECT @dblNetUnitsToCompare = dbo.fnCalculateQtyBetweenUOM(@intScaleUOMId,@intItemUOMId,@dblNetUnits)
+		SET @dblTicketScheduledQuantity = dbo.fnCalculateQtyBetweenUOM(@intScaleUOMId,@intItemUOMId,@_dblTicketScheduledQuantity)
+
+		SET @dblNetUnits = @dblNetUnitsToCompare
 
 		IF @ysnDP = 1
 		BEGIN
@@ -334,7 +339,14 @@ BEGIN TRY
 		BEGIN
 			IF @dblBalanceLoad > 0
 			BEGIN
-				INSERT	INTO @Processed SELECT @intContractDetailId,@dblNetUnits,NULL,@dblCost,0,NULL
+				INSERT	INTO @Processed 
+				SELECT @intContractDetailId
+					,dbo.fnCalculateQtyBetweenUOM(@intItemUOMId,@intScaleUOMId,@dblNetUnits)
+					,NULL
+					,@dblCost
+					,0
+					,NULL
+
 				SELECT @dblNetUnits = 0
 				BREAK
 			END
@@ -345,7 +357,7 @@ BEGIN TRY
 			END
 		END
 		
-		SET @dblNetUnits = @dblNetUnitsToCompare
+		
 
 	
 		IF NOT (@dblAvailable > 0 OR (@strDistributionOption = 'CNT' AND @intContractDetailId = @intTicketContractDetailId AND (@dblAvailable + ISNULL(@dblTicketScheduledQuantity,0)) > 0 ))
@@ -357,7 +369,14 @@ BEGIN TRY
 		IF	@dblNetUnits <= @dblAvailable OR @ysnUnlimitedQuantity = 1
 			OR (@strDistributionOption = 'CNT' AND @intContractDetailId = @intTicketContractDetailId AND @dblNetUnits <= (@dblAvailable + ISNULL(@dblTicketScheduledQuantity,0)) )
 		BEGIN
-			INSERT	INTO @Processed SELECT @intContractDetailId,@dblNetUnits,NULL,@dblCost,0,@intLoadDetailId
+			INSERT	INTO @Processed 
+			SELECT @intContractDetailId
+				,dbo.fnCalculateQtyBetweenUOM(@intItemUOMId,@intScaleUOMId,@dblNetUnits)
+				,NULL
+				,@dblCost
+				,0
+				,@intLoadDetailId
+
 			IF (@ysnAutoIncreaseQty = 1 OR @ysnAutoIncreaseSchQty = 1) AND  @dblScheduleQty < @dblNetUnits AND @intTicketContractDetailId = @intContractDetailId
 			BEGIN
 				SET @dblInreaseSchBy  = @dblNetUnits - @dblScheduleQty
@@ -489,7 +508,14 @@ BEGIN TRY
 						@intExternalId			=	@intTicketId,
 						@strScreenName			=	'Auto - Scale'
 
-				INSERT	INTO @Processed SELECT @intContractDetailId,@dblNetUnits,NULL,@dblCost,0,@intLoadDetailId
+				INSERT	INTO @Processed 
+				SELECT @intContractDetailId
+					,dbo.fnCalculateQtyBetweenUOM(@intItemUOMId,@intScaleUOMId,@dblNetUnits)
+					,NULL
+					,@dblCost
+					,0
+					,@intLoadDetailId
+				
 				SELECT	@dblNetUnits = 0
 				BREAK
 			END		
@@ -539,7 +565,13 @@ BEGIN TRY
 								@strScreenName			=	'Auto - Scale'
 					END
 				END
-				INSERT	INTO @Processed SELECT @intContractDetailId,@dblAvailable,NULL,@dblCost,0,@intLoadDetailId
+				INSERT	INTO @Processed 
+				SELECT @intContractDetailId
+					,dbo.fnCalculateQtyBetweenUOM(@intItemUOMId,@intScaleUOMId,@dblAvailable)
+					,NULL
+					,@dblCost
+					,0
+					,@intLoadDetailId
 
 				SELECT	@dblNetUnits	=	@dblNetUnits - @dblAvailable			
 			END
@@ -648,6 +680,8 @@ BEGIN TRY
 			ORDER 
 			BY		CD.dtmStartDate, CD.intContractDetailId ASC
 		END
+
+		SET @dblNetUnits = dbo.fnCalculateQtyBetweenUOM(@intItemUOMId,@intScaleUOMId,@dblAvailable)
 	END	
 	
 	UPDATE	@Processed SET dblUnitsRemaining = @dblNetUnits
