@@ -49,6 +49,7 @@ BEGIN
 				, cUOM.intCommodityUnitMeasureId
 				, strNotes = strNotes
 			FROM vyuRKGetFutOptTransactionHistory der
+			JOIN tblRKFutureMarket m ON m.intFutureMarketId = der.intFutureMarketId
 			LEFT JOIN tblICCommodityUnitMeasure cUOM ON cUOM.intCommodityId = der.intCommodityId AND cUOM.intUnitMeasureId = m.intUnitMeasureId
 
 			EXEC uspRKLogRiskPosition @ExistingHistory, 1
@@ -79,22 +80,25 @@ BEGIN
 				, intUserId
 				, strNotes)
 			SELECT strTransactionType = 'Match Derivatives'
-				, intTransactionRecordId = intFutOptTransactionId
-				, strTransactionNumber = strInternalTradeNo
-				, dtmTransactionDate = dtmTransactionDate
-				, intContractDetailId = intContractDetailId
-				, intContractHeaderId = intContractHeaderId
-				, intCommodityId = intCommodityId
-				, intBookId = intBookId
-				, intSubBookId = intSubBookId
-				, intFutureMarketId = intFutureMarketId
-				, intFutureMonthId = intFutureMonthId
-				, dblNoOfLots = dblNewNoOfLots
-				, dblPrice = dblPrice
-				, intEntityId = intEntityId
+				, intTransactionRecordId = history.intLFutOptTransactionId
+				, strTransactionNumber = de.strInternalTradeNo
+				, dtmTransactionDate = history.dtmMatchDate
+				, intContractDetailId = history.intMatchFuturesPSDetailId
+				, intContractHeaderId = history.intMatchFuturesPSHeaderId
+				, intCommodityId = de.intCommodityId
+				, intBookId = de.intBookId
+				, intSubBookId = de.intSubBookId
+				, intFutureMarketId = de.intFutureMarketId
+				, intFutureMonthId = de.intFutureMonthId
+				, dblNoOfLots = de.dblNoOfContract - dbo.fnRKGetMatchedQtyAsOf(de.intFutOptTransactionId, history.dtmMatchDate)
+				, dblPrice = de.dblPrice
+				, intEntityId = de.intEntityId
 				, intUserId = intUserId
 				, strNotes = ''
-			FROM vyuRKGetFutOptTransactionHistory
+			FROM tblRKMatchDerivativesHistory history
+			LEFT JOIN tblRKMatchFuturesPSHeader header ON header.intMatchFuturesPSHeaderId = history.intMatchFuturesPSHeaderId
+			LEFT JOIN tblRKMatchFuturesPSDetail detail ON detail.intMatchFuturesPSDetailId = history.intMatchFuturesPSDetailId
+			LEFT JOIN tblRKFutOptTransaction de ON de.intFutOptTransactionId = history.intLFutOptTransactionId
 
 			EXEC uspRKLogRiskPosition @ExistingHistory, 1
 

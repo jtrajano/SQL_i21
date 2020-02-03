@@ -8382,6 +8382,7 @@
     <Build Include="dbo\User Defined Types\RKMiscField.sql" />
     <Build Include="dbo\Views\vyuRKGetDPRHeader.sql" />
     <Build Include="dbo\Stored Procedures\uspRKRebuildSummaryLog.sql" />
+    <Build Include="dbo\Functions\fnRKGetMatchedQtyAsOf.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

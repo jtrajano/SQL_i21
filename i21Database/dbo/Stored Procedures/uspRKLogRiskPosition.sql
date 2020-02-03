@@ -937,6 +937,7 @@ BEGIN
 		, intFutureMonthId
 		, intFutOptTransactionId
 		, intCommodityId
+		, intLocationId
 		, intItemId
 		, intProductTypeId
 		, intOrigUOMId
@@ -966,6 +967,7 @@ BEGIN
 		, intFutureMonthId
 		, intFutOptTransactionId
 		, intCommodityId
+		, intLocationId
 		, intItemId
 		, intProductTypeId
 		, intOrigUOMId
