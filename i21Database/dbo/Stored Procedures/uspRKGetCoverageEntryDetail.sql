@@ -11,16 +11,20 @@ AS
 
 BEGIN
 
---DECLARE @Date DATETIME = GETDATE()
+--DECLARE @Date DATETIME = '2020-02-03'
 --	, @CommodityId INT = 1
 --	, @UOMType NVARCHAR(50) = 'By Quantity'
 --	, @UOMId INT = 4
---	, @BookId INT = NULL
---	, @SubBookId INT = NULL
+--	, @BookId INT = 0
+--	, @SubBookId INT = 0
 --	, @Decimal INT = 4
 
 	DECLARE @intUnitMeasureId INT
 	SET @Date = CAST(FLOOR(CAST(@Date AS FLOAT)) AS DATETIME)
+	IF (@BookId = 0)
+		SET @BookId = NULL
+	IF (@SubBookId = 0)
+		SET @SubBookId = NULL
 
 	DECLARE @strUnitMeasure NVARCHAR(100)
 
@@ -210,7 +214,12 @@ BEGIN
 				, dblFuturesM2M = dap.dblM2M
 			FROM vyuRKGetDailyAveragePriceDetail dap
 			JOIN tblRKCommodityMarketMapping MAT ON MAT.intFutureMarketId = dap.intFutureMarketId
-			WHERE dap.intDailyAveragePriceId = (SELECT TOP 1 intDailyAveragePriceId FROM tblRKDailyAveragePrice WHERE ysnPosted = 1 AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= @Date ORDER BY dtmDate DESC)
+			WHERE dap.intDailyAveragePriceId = (SELECT TOP 1 intDailyAveragePriceId
+												FROM tblRKDailyAveragePrice
+												WHERE ysnPosted = 1 AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= @Date
+													AND ISNULL(tblRKDailyAveragePrice.intBookId, 0) = ISNULL(@BookId, ISNULL(tblRKDailyAveragePrice.intBookId, 0))
+													AND ISNULL(tblRKDailyAveragePrice.intSubBookId, 0) = ISNULL(@SubBookId, ISNULL(tblRKDailyAveragePrice.intSubBookId, 0))
+												ORDER BY dtmDate DESC)
 		) t
 		JOIN tblRKFutureMarket FM ON FM.intFutureMarketId = t.intFutureMarketId
 	) t
@@ -242,6 +251,8 @@ BEGIN
 		AND dblOpenContract <> 0
 		AND ((strOptionType = 'Call' AND dblLastSettle > dblStrike) OR
 			(strOptionType = 'Put' AND dblLastSettle < dblStrike))
+		AND ISNULL(DER.intBookId, 0) = ISNULL(@BookId, ISNULL(DER.intBookId, 0))
+		AND ISNULL(DER.intSubBookId, 0) = ISNULL(@SubBookId, ISNULL(DER.intSubBookId, 0))
 	GROUP BY DER.intCommodityId
 
 	DECLARE @FinalTable AS TABLE(intRowId INT
