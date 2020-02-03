@@ -11,72 +11,7 @@ BEGIN
 		AND strFeedStatus = 'Processed'
 
 	DELETE
-	FROM tblCTPriceContractPreStage
-	WHERE dtmFeedDate < @dtmDate
-		AND strFeedStatus = 'Processed'
-
-	DELETE
-	FROM tblLGIntrCompLogisticsPreStg
-	WHERE dtmFeedDate < @dtmDate
-		AND strFeedStatus = 'Processed'
-
-	DELETE
-	FROM tblMFDemandPreStage
-	WHERE dtmFeedDate < @dtmDate
-		AND strFeedStatus = 'Processed'
-
-	DELETE
-	FROM tblQMSamplePreStage
-	WHERE dtmFeedDate < @dtmDate
-		AND strFeedStatus = 'Processed'
-
-	DELETE
-	FROM tblICItemPreStage
-	WHERE dtmFeedDate < @dtmDate
-		AND strFeedStatus = 'Processed'
-
-	DELETE
 	FROM tblCTContractStage
-	WHERE dtmFeedDate < @dtmDate
-		AND strFeedStatus IN (
-			'Processed'
-			,'Ack Rcvd'
-			)
-
-	DELETE
-	FROM tblCTPriceContractStage
-	WHERE dtmFeedDate < @dtmDate
-		AND strFeedStatus IN (
-			'Processed'
-			,'Ack Rcvd'
-			)
-
-	DELETE
-	FROM tblLGIntrCompLogisticsStg
-	WHERE dtmFeedDate < @dtmDate
-		AND strFeedStatus IN (
-			'Processed'
-			,'Ack Rcvd'
-			)
-
-	DELETE
-	FROM tblQMSampleStage
-	WHERE dtmFeedDate < @dtmDate
-		AND strFeedStatus IN (
-			'Processed'
-			,'Ack Rcvd'
-			)
-
-	DELETE
-	FROM tblICItemStage
-	WHERE dtmFeedDate < @dtmDate
-		AND strFeedStatus IN (
-			'Processed'
-			,'Ack Rcvd'
-			)
-
-	DELETE
-	FROM tblMFDemandStage
 	WHERE dtmFeedDate < @dtmDate
 		AND strFeedStatus IN (
 			'Processed'
@@ -92,11 +27,37 @@ BEGIN
 			)
 
 	DELETE
+	FROM tblCTPriceContractPreStage
+	WHERE dtmFeedDate < @dtmDate
+		AND strFeedStatus = 'Processed'
+
+	DELETE
+	FROM tblCTPriceContractStage
+	WHERE dtmFeedDate < @dtmDate
+		AND strFeedStatus IN (
+			'Processed'
+			,'Ack Rcvd'
+			)
+
+	DELETE
 	FROM tblCTPriceContractAcknowledgementStage
 	WHERE dtmFeedDate < @dtmDate
 		AND strFeedStatus IN (
 			'Ack Processed'
 			,'Ack Sent'
+			)
+
+	DELETE
+	FROM tblLGIntrCompLogisticsPreStg
+	WHERE dtmFeedDate < @dtmDate
+		AND strFeedStatus = 'Processed'
+
+	DELETE
+	FROM tblLGIntrCompLogisticsStg
+	WHERE dtmFeedDate < @dtmDate
+		AND strFeedStatus IN (
+			'Processed'
+			,'Ack Rcvd'
 			)
 
 	DELETE
@@ -108,11 +69,16 @@ BEGIN
 			)
 
 	DELETE
-	FROM tblQMSampleAcknowledgementStage
+	FROM tblMFDemandPreStage
+	WHERE dtmFeedDate < @dtmDate
+		AND strFeedStatus = 'Processed'
+
+	DELETE
+	FROM tblMFDemandStage
 	WHERE dtmFeedDate < @dtmDate
 		AND strFeedStatus IN (
-			'Ack Processed'
-			,'Ack Sent'
+			'Processed'
+			,'Ack Rcvd'
 			)
 
 	DELETE
@@ -121,6 +87,40 @@ BEGIN
 		AND strFeedStatus IN (
 			'Ack Processed'
 			,'Ack Sent'
+			)
+
+	DELETE
+	FROM tblQMSamplePreStage
+	WHERE dtmFeedDate < @dtmDate
+		AND strFeedStatus = 'Processed'
+
+	DELETE
+	FROM tblQMSampleStage
+	WHERE dtmFeedDate < @dtmDate
+		AND strFeedStatus IN (
+			'Processed'
+			,'Ack Rcvd'
+			)
+
+	DELETE
+	FROM tblQMSampleAcknowledgementStage
+	WHERE dtmFeedDate < @dtmDate
+		AND strFeedStatus IN (
+			'Ack Processed'
+			,'Ack Sent'
+			)
+
+	DELETE
+	FROM tblICItemPreStage
+	WHERE dtmFeedDate < @dtmDate
+		AND strFeedStatus = 'Processed'
+
+	DELETE
+	FROM tblICItemStage
+	WHERE dtmFeedDate < @dtmDate
+		AND strFeedStatus IN (
+			'Processed'
+			,'Ack Rcvd'
 			)
 
 	DELETE
@@ -268,5 +268,125 @@ BEGIN
 		AND strFeedStatus IN (
 			'Ack Processed'
 			,'Ack Sent'
+			)
+
+	DELETE
+	FROM tblRKDailyAveragePricePreStage
+	WHERE dtmFeedDate < @dtmDate
+		AND strFeedStatus = 'Processed'
+
+	DELETE
+	FROM tblRKDailyAveragePriceStage
+	WHERE dtmFeedDate < @dtmDate
+		AND strFeedStatus IN (
+			'Processed'
+			,'Ack Rcvd'
+			)
+
+	DELETE
+	FROM tblRKDailyAveragePriceAckStage
+	WHERE dtmFeedDate < @dtmDate
+		AND strFeedStatus IN (
+			'Ack Processed'
+			,'Ack Sent'
+			)
+
+	DELETE
+	FROM tblRKOptionsMatchPnSHeaderPreStage
+	WHERE dtmFeedDate < @dtmDate
+		AND strFeedStatus = 'Processed'
+
+	DELETE
+	FROM tblRKOptionsMatchPnSHeaderStage
+	WHERE dtmFeedDate < @dtmDate
+		AND strFeedStatus IN (
+			'Processed'
+			,'Ack Rcvd'
+			)
+
+	DELETE
+	FROM tblRKOptionsMatchPnSHeaderAckStage
+	WHERE dtmFeedDate < @dtmDate
+		AND strFeedStatus IN (
+			'Ack Processed'
+			,'Ack Sent'
+			)
+
+	DELETE
+	FROM tblQMAttributePreStage
+	WHERE dtmFeedDate < @dtmDate
+		AND strFeedStatus = 'Processed'
+
+	DELETE
+	FROM tblQMAttributeStage
+	WHERE dtmFeedDate < @dtmDate
+		AND strFeedStatus IN (
+			'Processed'
+			,'Ack Rcvd'
+			)
+
+	DELETE
+	FROM tblQMListPreStage
+	WHERE dtmFeedDate < @dtmDate
+		AND strFeedStatus = 'Processed'
+
+	DELETE
+	FROM tblQMListStage
+	WHERE dtmFeedDate < @dtmDate
+		AND strFeedStatus IN (
+			'Processed'
+			,'Ack Rcvd'
+			)
+
+	DELETE
+	FROM tblQMSampleTypePreStage
+	WHERE dtmFeedDate < @dtmDate
+		AND strFeedStatus = 'Processed'
+
+	DELETE
+	FROM tblQMSampleTypeStage
+	WHERE dtmFeedDate < @dtmDate
+		AND strFeedStatus IN (
+			'Processed'
+			,'Ack Rcvd'
+			)
+
+	DELETE
+	FROM tblQMPropertyPreStage
+	WHERE dtmFeedDate < @dtmDate
+		AND strFeedStatus = 'Processed'
+
+	DELETE
+	FROM tblQMPropertyStage
+	WHERE dtmFeedDate < @dtmDate
+		AND strFeedStatus IN (
+			'Processed'
+			,'Ack Rcvd'
+			)
+
+	DELETE
+	FROM tblQMTestPreStage
+	WHERE dtmFeedDate < @dtmDate
+		AND strFeedStatus = 'Processed'
+
+	DELETE
+	FROM tblQMTestStage
+	WHERE dtmFeedDate < @dtmDate
+		AND strFeedStatus IN (
+			'Processed'
+			,'Ack Rcvd'
+			)
+
+	DELETE
+	FROM tblQMProductPreStage
+	WHERE dtmFeedDate < @dtmDate
+		AND strFeedStatus = 'Processed'
+
+	DELETE
+	FROM tblQMProductStage
+	WHERE dtmFeedDate < @dtmDate
+		AND strFeedStatus IN (
+			'Processed'
+			,'Ack Rcvd'
 			)
 END
