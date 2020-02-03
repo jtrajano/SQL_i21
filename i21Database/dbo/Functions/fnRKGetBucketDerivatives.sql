@@ -8,6 +8,7 @@ RETURNS @returntable TABLE
 (
 	intFutOptTransactionId INT
 	, dblOpenContract NUMERIC(18,6)
+	, intCommodityId INT
 	, strCommodityCode NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, strInternalTradeNo NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, strLocationName NVARCHAR(100) COLLATE Latin1_General_CI_AS
@@ -33,6 +34,7 @@ BEGIN
 	SELECT 
 		intFutOptTransactionId 
 		,dblOpenContract
+		,intCommodityId
 		,strCommodityCode
 		,strInternalTradeNo
 		,strLocationName
@@ -55,15 +57,16 @@ BEGIN
 			intRowNum = ROW_NUMBER() OVER (PARTITION BY c.intTransactionRecordId ORDER BY c.intSummaryLogId DESC)
 			,intFutOptTransactionId = intTransactionRecordId
 			,dblOpenContract = dblOrigNoOfLots
+			,intCommodityId
 			,strCommodityCode
 			,strInternalTradeNo = strTransactionNumber
 			,strLocationName
-			,dblContractSize = CAST(ISNULL(mf.dblContractSize, 0.00) AS NUMERIC(24, 20))
+			,dblContractSize = CAST(ISNULL(mf.dblContractSize, 0.00) AS NUMERIC(24, 10))
 			,intOrigUOMId
 			,strFutureMarket
 			,strFutureMonth
 			,strOptionMonth = mf.strOptionMonth
-			,dblStrike = CAST(ISNULL(mf.dblStrike, 0.00) AS NUMERIC(24, 20))
+			,dblStrike = CAST(ISNULL(mf.dblStrike, 0.00) AS NUMERIC(24, 10))
 			,strOptionType = mf.strOptionType
 			,strInstrumentType = mf.strInstrumentType
 			,strBrokerAccount = mf.strBrokerAccount
@@ -76,7 +79,7 @@ BEGIN
 		CROSS APPLY dbo.fnRKGetMiscFieldPivotDerivative(c.strMiscField) mf
 		WHERE strTransactionType IN ('Derivatives', 'Match Derivatives')
 			AND CONVERT(DATETIME, CONVERT(VARCHAR(10), c.dtmCreatedDate, 110), 110) <= CONVERT(DATETIME, @dtmDate)
-			AND c.intCommodityId = @intCommodityId
+			AND ISNULL(c.intCommodityId,0) = ISNULL(@intCommodityId, ISNULL(c.intCommodityId, 0)) 
 			AND ISNULL(intEntityId, 0) = ISNULL(@intVendorId, ISNULL(intEntityId, 0))
 	) t WHERE intRowNum = 1
 
