@@ -14,10 +14,8 @@ BEGIN TRY
 		,@intMultiCompanyId INT
 		,@strUserName NVARCHAR(100)
 	DECLARE @strListName NVARCHAR(50)
-		,@strCreatedUserName NVARCHAR(100)
 		,@strAttributeName NVARCHAR(50)
 	DECLARE @intListId INT
-		,@intCreatedUserId INT
 		,@intLastModifiedUserId INT
 		,@intNewAttributeId INT
 		,@intAttributeRefId INT
@@ -55,15 +53,12 @@ BEGIN TRY
 				,@strHeaderXML
 
 			SELECT @strListName = NULL
-				,@strCreatedUserName = NULL
 				,@strAttributeName = NULL
 
 			SELECT @strListName = strListName
-				,@strCreatedUserName = strCreatedUserName
 				,@strAttributeName = strAttributeName
 			FROM OPENXML(@idoc, 'vyuIPGetAttributes/vyuIPGetAttribute', 2) WITH (
 					strListName NVARCHAR(50) Collate Latin1_General_CI_AS
-					,strCreatedUserName NVARCHAR(100) Collate Latin1_General_CI_AS
 					,strAttributeName NVARCHAR(50) Collate Latin1_General_CI_AS
 					) x
 
@@ -83,34 +78,12 @@ BEGIN TRY
 						)
 			END
 
-			IF @strCreatedUserName IS NOT NULL
-				AND NOT EXISTS (
-					SELECT 1
-					FROM tblEMEntity t
-					WHERE t.strName = @strCreatedUserName
-					)
-			BEGIN
-				SELECT @strErrorMessage = 'Created User ' + @strCreatedUserName + ' is not available.'
-
-				RAISERROR (
-						@strErrorMessage
-						,16
-						,1
-						)
-			END
-
 			SELECT @intListId = NULL
-				,@intCreatedUserId = NULL
 				,@intLastModifiedUserId = NULL
 
 			SELECT @intListId = t.intListId
 			FROM tblQMList t
 			WHERE t.strListName = @strListName
-
-			SELECT @intCreatedUserId = t.intEntityId
-			FROM tblEMEntity t
-			WHERE t.strName = @strCreatedUserName
-				AND t.strEntityNo <> ''
 
 			SELECT @intLastModifiedUserId = t.intEntityId
 			FROM tblEMEntity t
@@ -181,7 +154,7 @@ BEGIN TRY
 					,@intListId
 					,strAttributeValue
 					,intListItemId
-					,@intCreatedUserId
+					,@intLastModifiedUserId
 					,dtmCreated
 					,@intLastModifiedUserId
 					,dtmLastModified
