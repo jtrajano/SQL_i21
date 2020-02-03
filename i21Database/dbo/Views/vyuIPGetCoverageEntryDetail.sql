@@ -9,7 +9,7 @@ SELECT CD.intCoverageEntryDetailId
 	,CD.dblInTransit
 	,CD.dblStock
 	,CD.dblOpenFutures
-	,CD.intMonthsCovered
+	,CD.dblMonthsCovered
 	,CD.dblAveragePrice
 	,CD.dblOptionsCovered
 	,CD.dblFuturesM2M

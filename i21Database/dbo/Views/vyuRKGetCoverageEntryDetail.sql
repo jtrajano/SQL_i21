@@ -23,7 +23,7 @@ SELECT Header.intCoverageEntryId
 	, dblTotalPhysical = (Detail.dblOpenContract + Detail.dblInTransit + Detail.dblStock)
     , Detail.dblOpenFutures
 	, dblTotalPosition = (Detail.dblOpenContract + Detail.dblInTransit + Detail.dblStock + Detail.dblOpenFutures)
-    , Detail.intMonthsCovered
+    , Detail.dblMonthsCovered
     , Detail.dblAveragePrice
     , Detail.dblOptionsCovered
     , Detail.dblFuturesM2M

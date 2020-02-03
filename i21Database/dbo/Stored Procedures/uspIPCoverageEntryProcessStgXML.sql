@@ -444,7 +444,7 @@ BEGIN TRY
 						,dblInTransit
 						,dblStock
 						,dblOpenFutures
-						,intMonthsCovered
+						,dblMonthsCovered
 						,dblAveragePrice
 						,dblOptionsCovered
 						,dblFuturesM2M
@@ -459,7 +459,7 @@ BEGIN TRY
 						,dblInTransit
 						,dblStock
 						,dblOpenFutures
-						,intMonthsCovered
+						,dblMonthsCovered
 						,dblAveragePrice
 						,dblOptionsCovered
 						,dblFuturesM2M
@@ -470,7 +470,7 @@ BEGIN TRY
 							,dblInTransit NUMERIC(18, 6)
 							,dblStock NUMERIC(18, 6)
 							,dblOpenFutures NUMERIC(18, 6)
-							,intMonthsCovered INT
+							,dblMonthsCovered NUMERIC(18, 6)
 							,dblAveragePrice NUMERIC(18, 6)
 							,dblOptionsCovered NUMERIC(18, 6)
 							,dblFuturesM2M NUMERIC(18, 6)
@@ -489,7 +489,7 @@ BEGIN TRY
 						,dblInTransit = x.dblInTransit
 						,dblStock = x.dblStock
 						,dblOpenFutures = x.dblOpenFutures
-						,intMonthsCovered = x.intMonthsCovered
+						,dblMonthsCovered = x.dblMonthsCovered
 						,dblAveragePrice = x.dblAveragePrice
 						,dblOptionsCovered = x.dblOptionsCovered
 						,dblFuturesM2M = x.dblFuturesM2M
@@ -498,7 +498,7 @@ BEGIN TRY
 							,dblInTransit NUMERIC(18, 6)
 							,dblStock NUMERIC(18, 6)
 							,dblOpenFutures NUMERIC(18, 6)
-							,intMonthsCovered INT
+							,dblMonthsCovered NUMERIC(18, 6)
 							,dblAveragePrice NUMERIC(18, 6)
 							,dblOptionsCovered NUMERIC(18, 6)
 							,dblFuturesM2M NUMERIC(18, 6)

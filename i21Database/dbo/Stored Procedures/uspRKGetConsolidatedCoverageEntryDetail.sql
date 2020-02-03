@@ -17,7 +17,7 @@ BEGIN
 		, dblTotalPhysical NUMERIC(24, 10)
 		, dblOpenFutures NUMERIC(24, 10)
 		, dblTotalPosition NUMERIC(24, 10)
-		, intMonthsCovered INT
+		, dblMonthsCovered NUMERIC(24, 10)
 		, dblAveragePrice NUMERIC(24, 10)
 		, dblOptionsCovered NUMERIC(24, 10)
 		, dblFuturesM2M NUMERIC(24, 10)
@@ -45,7 +45,7 @@ BEGIN
 			, dblTotalPhysical
 			, dblOpenFutures
 			, dblTotalPosition
-			, intMonthsCovered
+			, dblMonthsCovered
 			, dblAveragePrice
 			, dblOptionsCovered
 			, dblFuturesM2M
@@ -70,7 +70,7 @@ BEGIN
 		, dblTotalPhysical = SUM(ISNULL(dblTotalPhysical, 0))
 		, dblOpenFutures = SUM(ISNULL(dblOpenFutures, 0))
 		, dblTotalPosition = SUM(ISNULL(dblTotalPosition, 0))
-		, intMonthsCovered = SUM(ISNULL(intMonthsCovered, 0))
+		, dblMonthsCovered = SUM(ISNULL(dblMonthsCovered, 0))
 		, dblAveragePrice = SUM(ISNULL(dblAveragePrice, 0))
 		, dblOptionsCovered = SUM(ISNULL(dblOptionsCovered, 0))
 		, dblFuturesM2M = SUM(ISNULL(dblFuturesM2M, 0))
