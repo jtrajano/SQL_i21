@@ -30,19 +30,34 @@ FROM (
 		 , strPaymentMethod			= SMPM.strPaymentMethod
 		 , strPaymentSource			= CASE WHEN POSEOD.strEODNo IS NULL THEN 'Manual Entry' ELSE 'POS' END COLLATE Latin1_General_CI_AS
 		 , strEODNumber				= POSEOD.strEODNo
-		 , strDrawerName			= POSDRAWER.strPOSDrawerName
-		 , ysnCompleted				= POSEOD.ysnClosed
+		 , strDrawerName			= POSEOD.strPOSDrawerName
+		 , ysnCompleted				= CAST(1 AS BIT)
 	FROM tblARPayment PAYMENT
 	LEFT OUTER JOIN tblSMPaymentMethod SMPM ON PAYMENT.intPaymentMethodId = SMPM.intPaymentMethodID
 	LEFT OUTER JOIN tblCMUndepositedFund CM ON PAYMENT.intPaymentId = CM.intSourceTransactionId 
 										   AND PAYMENT.strRecordNumber = CM.strSourceTransactionId 
 										   AND CM.strSourceSystem = 'AR'
-	LEFT OUTER JOIN tblARPaymentDetail PAYMENTDETAILS ON PAYMENT.intPaymentId = PAYMENTDETAILS.intPaymentId
-	LEFT OUTER JOIN tblARPOSPayment POSPAYMENT ON POSPAYMENT.intPaymentId = PAYMENT.intPaymentId
-	LEFT OUTER JOIN tblARPOS POS ON PAYMENTDETAILS.intInvoiceId = POS.intInvoiceId AND POSPAYMENT.intPOSPaymentId IS NOT NULL
-	LEFT OUTER JOIN tblARPOSLog POSLOG ON POS.intPOSLogId = POSLOG.intPOSLogId
-	LEFT OUTER JOIN tblARPOSEndOfDay POSEOD ON POSLOG.intPOSEndOfDayId = POSEOD.intPOSEndOfDayId
-	LEFT OUTER JOIN tblSMCompanyLocationPOSDrawer POSDRAWER ON POSEOD.intCompanyLocationPOSDrawerId = POSDRAWER.intCompanyLocationPOSDrawerId
+	OUTER APPLY (
+		SELECT strEODNo = (
+				STUFF((
+					SELECT ', ' + POSEOD.strEODNo
+					FROM tblARPOSPayment POSPAYMENT
+					INNER JOIN tblARPOSEndOfDay POSEOD ON POSPAYMENT.intPOSEndOfDayId = POSEOD.intPOSEndOfDayId
+					WHERE POSPAYMENT.intPaymentId = PAYMENT.intPaymentId
+					FOR XML PATH('')
+				), 1, 2, '')
+			)
+		 , strPOSDrawerName = (
+				STUFF((
+					SELECT ', ' + POSDRAWER.strPOSDrawerName
+					FROM tblARPOSPayment POSPAYMENT
+					INNER JOIN tblARPOSEndOfDay POSEOD ON POSPAYMENT.intPOSEndOfDayId = POSEOD.intPOSEndOfDayId
+					INNER JOIN tblSMCompanyLocationPOSDrawer POSDRAWER ON POSEOD.intCompanyLocationPOSDrawerId = POSDRAWER.intCompanyLocationPOSDrawerId
+					WHERE POSPAYMENT.intPaymentId = PAYMENT.intPaymentId
+					FOR XML PATH('')
+				), 1, 2, '')
+			)
+	) POSEOD	
 	WHERE PAYMENT.ysnPosted = 1
 	  AND PAYMENT.ysnProcessedToNSF = 0
 	  AND PAYMENT.intAccountId IS NOT NULL
