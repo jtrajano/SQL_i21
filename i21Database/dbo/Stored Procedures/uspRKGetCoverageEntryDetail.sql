@@ -15,7 +15,7 @@ BEGIN
 --	, @CommodityId INT = 1
 --	, @UOMType NVARCHAR(50) = 'By Quantity'
 --	, @UOMId INT = 4
---	, @BookId INT = 1
+--	, @BookId INT = NULL
 --	, @SubBookId INT = NULL
 --	, @Decimal INT = 4
 
@@ -23,6 +23,15 @@ BEGIN
 	SET @Date = CAST(FLOOR(CAST(@Date AS FLOAT)) AS DATETIME)
 
 	DECLARE @strUnitMeasure NVARCHAR(100)
+
+	DECLARE @Balances AS TABLE (intBookId INT
+		, intSubBookId INT
+		, intCommodityId INT
+		, intProductTypeId INT
+		, dblContracts NUMERIC(24, 20)
+		, dblInTransit NUMERIC(24, 20)
+		, dblStock NUMERIC(24, 20)
+		, dblFutures NUMERIC(24, 20)) 
 
 	IF (ISNULL(@UOMId, 0) = 0)
 	BEGIN
@@ -37,7 +46,7 @@ BEGIN
 	END
 	
 	SELECT intBookId, intSubBookId, intCommodityId, intProductTypeId, dblContracts = ISNULL([Contracts], 0), dblInTransit = ISNULL([In-Transit], 0), dblStock = ISNULL([Stock], 0), dblFutures = ISNULL([Futures], 0)
-	INTO #tmpBalances
+	INTO #tmpTempBalances
 	FROM (
 		SELECT strType = 'Contracts'
 			, Detail.intBookId
@@ -55,8 +64,8 @@ BEGIN
 			AND Header.intContractTypeId = 1
 			AND ISNULL(Header.intCommodityId, 0) = ISNULL(@CommodityId, 0)
 			--AND CAST(FLOOR(CAST(Detail.dtmEndDate AS FLOAT)) AS DATETIME) <= @Date
-			AND ISNULL(Detail.intBookId, 0) = ISNULL(@BookId, 0)
-			AND ISNULL(Detail.intSubBookId, 0) = ISNULL(@SubBookId, 0)
+			AND ISNULL(Detail.intBookId, 0) = ISNULL(@BookId, ISNULL(Detail.intBookId, 0))
+			AND ISNULL(Detail.intSubBookId, 0) = ISNULL(@SubBookId, ISNULL(Detail.intSubBookId, 0))
 		GROUP BY Detail.intBookId
 			, Detail.intSubBookId
 			, Header.intCommodityId
@@ -79,8 +88,8 @@ BEGIN
 			AND L.intShipmentType = 1
 			AND ISNULL(CH.intCommodityId, 0) = ISNULL(@CommodityId, 0)
 			--AND CAST(FLOOR(CAST(L.dtmDispatchedDate AS FLOAT)) AS DATETIME) <= @Date
-			AND ISNULL(L.intBookId, 0) = ISNULL(@BookId, 0)
-			AND ISNULL(L.intSubBookId, 0) = ISNULL(@SubBookId, 0)
+			AND ISNULL(L.intBookId, 0) = ISNULL(@BookId, ISNULL(L.intBookId, 0))
+			AND ISNULL(L.intSubBookId, 0) = ISNULL(@SubBookId, ISNULL(L.intSubBookId, 0))
 		GROUP BY L.intBookId
 			, L.intSubBookId
 			, CH.intCommodityId
@@ -97,8 +106,8 @@ BEGIN
 		JOIN tblICItem Item ON Item.intItemId = Lots.intItemId
 		WHERE ISNULL(Lots.intCommodityId, 0) = ISNULL(@CommodityId, 0)
 			--AND CAST(FLOOR(CAST(dtmEndDate AS FLOAT)) AS DATETIME) <= @Date
-			AND ISNULL(Lots.intBookId, 0) = ISNULL(@BookId, 0)
-			AND ISNULL(Lots.intSubBookId, 0) = ISNULL(@SubBookId, 0)
+			AND ISNULL(Lots.intBookId, 0) = ISNULL(@BookId, ISNULL(Lots.intBookId, 0))
+			AND ISNULL(Lots.intSubBookId, 0) = ISNULL(@SubBookId, ISNULL(Lots.intSubBookId, 0))
 		GROUP BY Lots.intBookId
 			, Lots.intSubBookId
 			, Lots.intCommodityId
@@ -116,13 +125,14 @@ BEGIN
 		JOIN tblICCommodityUnitMeasure CUOM ON CUOM.intUnitMeasureId = FM.intUnitMeasureId AND CUOM.intCommodityId = MAT.intCommodityId
 		WHERE intDailyAveragePriceId = (SELECT TOP 1 intDailyAveragePriceId
 										FROM tblRKDailyAveragePrice
-										WHERE ISNULL(intBookId, 0) = ISNULL(@BookId, 0) AND ISNULL(intSubBookId, 0) = ISNULL(@SubBookId, 0)
+										WHERE ISNULL(intBookId, 0) = ISNULL(@BookId, ISNULL(intBookId, 0))
+											AND ISNULL(intSubBookId, 0) = ISNULL(@SubBookId, ISNULL(intSubBookId, 0))
 											AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= @Date
 											AND ISNULL(ysnPosted, 0) = 1
 										ORDER BY dtmDate DESC)
 			AND ISNULL(DAP.intCommodityId, 0) = ISNULL(@CommodityId, 0)
-			AND ISNULL(DAP.intBookId, 0) = ISNULL(@BookId, 0)
-			AND ISNULL(DAP.intSubBookId, 0) = ISNULL(@SubBookId, 0)
+			AND ISNULL(DAP.intBookId, 0) = ISNULL(@BookId, ISNULL(DAP.intBookId, 0))
+			AND ISNULL(DAP.intSubBookId, 0) = ISNULL(@SubBookId, ISNULL(DAP.intSubBookId, 0))
 		GROUP BY DAP.intBookId
 			, DAP.intSubBookId
 			, DAP.intCommodityId
@@ -132,6 +142,51 @@ BEGIN
 		SUM(dblBalance)
 		FOR strType IN ([Contracts], [In-Transit], [Stock], [Futures])
 	) tblPivot
+
+	IF (ISNULL(@BookId, '') = '' AND ISNULL(@SubBookId, '') = '')
+	BEGIN
+		INSERT INTO @Balances
+		SELECT intBookId = NULL
+			, intSubBookId = NULL
+			, intCommodityId
+			, intProductTypeId
+			, dblContracts = SUM(ISNULL(dblContracts, 0.00))
+			, dblInTransit = SUM(ISNULL(dblInTransit, 0.00))
+			, dblStock = SUM(ISNULL(dblStock, 0.00))
+			, dblFutures = SUM(ISNULL(dblFutures, 0.00))
+		FROM #tmpTempBalances
+		GROUP BY intCommodityId
+			, intProductTypeId
+	END
+	ELSE IF (ISNULL(@BookId, '') <> '' AND ISNULL(@SubBookId, '') = '')
+	BEGIN
+		INSERT INTO @Balances
+		SELECT intBookId
+			, intSubBookId = NULL
+			, intCommodityId
+			, intProductTypeId
+			, dblContracts = SUM(ISNULL(dblContracts, 0.00))
+			, dblInTransit = SUM(ISNULL(dblInTransit, 0.00))
+			, dblStock = SUM(ISNULL(dblStock, 0.00))
+			, dblFutures = SUM(ISNULL(dblFutures, 0.00))
+		FROM #tmpTempBalances
+		GROUP BY intCommodityId
+			, intProductTypeId
+			, intBookId
+	END
+	ELSE
+	BEGIN
+		INSERT INTO @Balances
+		SELECT intBookId
+			, intSubBookId
+			, intCommodityId
+			, intProductTypeId
+			, dblContracts
+			, dblInTransit
+			, dblStock
+			, dblFutures
+		FROM #tmpTempBalances
+	END
 
 	SELECT intCommodityId
 		, intProductTypeId
@@ -234,7 +289,7 @@ BEGIN
 		, dblM2MPlus10 = ds.dblFuturesM2MPlus
 		, dblM2MMinus10 = ds.dblFuturesM2MMinus
 	FROM tblICCommodityAttribute ComAtt
-	LEFT JOIN #tmpBalances Balance ON Balance.intCommodityId = ComAtt.intCommodityId AND ComAtt.intCommodityAttributeId = Balance.intProductTypeId
+	LEFT JOIN @Balances Balance ON Balance.intCommodityId = ComAtt.intCommodityId AND ComAtt.intCommodityAttributeId = Balance.intProductTypeId
 	LEFT JOIN tblCTBook Book ON Book.intBookId = Balance.intBookId
 	LEFT JOIN tblCTSubBook SubBook ON SubBook.intSubBookId = Balance.intSubBookId
 	LEFT JOIN (
@@ -261,10 +316,11 @@ BEGIN
 		AND (Balance.dblContracts IS NOT NULL AND Balance.dblInTransit IS NOT NULL AND Balance.dblStock IS NOT NULL AND Balance.dblFutures IS NOT NULL)
 
 	SELECT *
-		, dblRunningTotal = SUM(dblQuantity) OVER (ORDER BY intRowNum)
+		, dblRunningTotal = SUM(dblQuantity) OVER (PARTITION BY intProductTypeId ORDER BY intRowNum)
+		, intProductTypeIndex = ROW_NUMBER() OVER (PARTITION BY intProductTypeId ORDER BY intRowNum)
 	INTO #Demand
 	FROM (
-		SELECT intRowNum = ROW_NUMBER() OVER(ORDER BY dtmDemandDate)
+		SELECT intRowNum = ROW_NUMBER() OVER(ORDER BY intProductTypeId, dtmDemandDate)
 			, intCommodityId
 			, dtmDemandDate
 			, intProductTypeId
@@ -283,10 +339,10 @@ BEGIN
 					AND ISNULL(DH.intSubBookId, 0) = ISNULL(@SubBookId, ISNULL(DH.intSubBookId, 0))
 					AND CAST(FLOOR(CAST(DH.dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(@Date AS FLOAT)) AS DATETIME)
 				ORDER BY DH.dtmDate DESC
-			)
+			) 
 		) tbl
-	) tbl
-
+	) tbl 
+	
 	SELECT *
 	INTO #iterateTable
 	FROM @FinalTable
@@ -302,7 +358,7 @@ BEGIN
 		, @optionsCovered NUMERIC(24, 10)
 		, @dblDemand NUMERIC(24,10)
 		, @dblDifference NUMERIC(24,10) = 0
-
+		
 	WHILE EXISTS(SELECT TOP 1 1 FROM #iterateTable)
 	BEGIN
 		SELECT TOP 1 @rowId = intRowId
@@ -310,20 +366,23 @@ BEGIN
 			, @dblOption = dblTotalOption
 			, @intProductType = intProductTypeId
 		FROM #iterateTable i
-
+		
 		SELECT @dblRunningBalance = 0
-			, @monthsCovered = 0
 			, @startOption = 0
 			, @dblDemand = 0
 
+		SELECT  @monthsCovered = COUNT(intProductTypeId)
+		FROM #Demand
+		WHERE intProductTypeId = @intProductType
+		
 		SELECT TOP 1 @dblRunningBalance = dblRunningTotal
-			, @monthsCovered = intRowNum
-			, @startOption = intRowNum
+			, @monthsCovered = intProductTypeIndex
+			, @startOption = intProductTypeIndex
 			, @dblDemand = dblQuantity
 		FROM #Demand
 		WHERE dblRunningTotal >= @dblPosition
 			AND intProductTypeId = @intProductType
-		ORDER BY dtmDemandDate
+		ORDER BY intRowNum
 
 		IF (ISNULL(@dblRunningBalance, 0) <> 0)
 		BEGIN
@@ -344,15 +403,15 @@ BEGIN
 				SET @optionsCovered = @dblDifference / @dblDemand
 				SET @dblDifference = @dblOption - @dblDifference
 			END
-
+			
 			IF (@dblDifference <> 0)
 			BEGIN
-				SELECT TOP 1 @dblRunningBalance = dblRunningTotal, @endOption = intRowNum, @dblDemand = dblQuantity FROM #Demand
+				SELECT TOP 1 @dblRunningBalance = dblRunningTotal, @endOption = intProductTypeIndex, @dblDemand = dblQuantity FROM #Demand
 				WHERE dblRunningTotal >= (@dblPosition + @dblOption)
 					AND intProductTypeId = @intProductType
-				ORDER BY dtmDemandDate
-
-				IF (@dblRunningBalance > (@dblPosition + @dblOption))
+				ORDER BY intRowNum
+				
+				IF (@startOption <> @endOption) AND (@dblRunningBalance > (@dblPosition + @dblOption))
 				BEGIN
 					SET @endOption -= 1
 					SET @endOption -= @startOption
@@ -360,9 +419,8 @@ BEGIN
 					SET @dblDifference = (@dblPosition + @dblOption) - (@dblRunningBalance - @dblDemand)
 					SET @optionsCovered += @dblDifference / @dblDemand
 					SET @dblDifference = 0
+					SET @optionsCovered += @endOption
 				END
-
-				SET @optionsCovered += @endOption
 			END
 		END
 		ELSE
@@ -403,5 +461,5 @@ BEGIN
 	DROP TABLE #DapSettlement
 	DROP TABLE #iterateTable
 	DROP TABLE #Demand
-	DROP TABLE #tmpBalances
+	DROP TABLE #tmpTempBalances
 END
