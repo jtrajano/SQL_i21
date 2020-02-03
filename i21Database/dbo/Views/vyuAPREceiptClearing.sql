@@ -94,6 +94,7 @@ LEFT JOIN
 LEFT JOIN vyuAPReceiptClearingGL APClearing
     ON APClearing.strTransactionId = receipt.strReceiptNumber
         AND APClearing.intItemId = receiptItem.intItemId
+        AND APClearing.intTransactionDetailId = receiptItem.intInventoryReceiptItemId
 -- OUTER APPLY (
 -- 	SELECT 
 --     TOP 1
