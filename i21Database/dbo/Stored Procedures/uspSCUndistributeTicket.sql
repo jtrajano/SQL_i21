@@ -1111,7 +1111,7 @@ BEGIN TRY
 									END
 
 
-									EXEC [dbo].[uspICDeleteInventoryShipment] @InventoryShipmentId, @intEntityId;
+								EXEC [dbo].[uspICDeleteInventoryShipment] @InventoryShipmentId, @intUserId;
 									DELETE tblQMTicketDiscount WHERE intTicketFileId = @InventoryShipmentId AND strSourceType = 'Inventory Shipment'
 
 								END
