@@ -8412,6 +8412,10 @@
     <Build Include="dbo\Stored Procedures\uspIPAttributeTransferStgXML.sql" />
     <Build Include="dbo\Stored Procedures\uspIPAttributeProcessStgXML.sql" />
     <Build Include="dbo\Stored Procedures\uspCTItemContractUpdateRemainingDollarValue.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPListProcessPreStage.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPListPopulateStgXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPListTransferStgXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPListProcessStgXML.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
