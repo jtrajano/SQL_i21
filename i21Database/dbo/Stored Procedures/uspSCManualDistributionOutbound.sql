@@ -68,7 +68,7 @@ DECLARE @intTicketLoadDetailId INT
 DECLARE @_intContractDetailId INT
 DECLARE @__intContractDetailId INT
 DECLARE @_intContractItemUom INT
-DECLARE @intScaleUOMId INT
+
 
 SELECT @ysnUpdateContractWeightGrade  = CASE WHEN intContractId IS NULL AND strDistributionOption = 'CNT' AND (intWeightId IS NULL AND intGradeId IS NULL ) THEN 1 ELSE 0 END FROM tblSCTicket WHERE intTicketId = @intTicketId
 IF (@ysnUpdateContractWeightGrade = 1)
@@ -102,12 +102,6 @@ SELECT @intTicketItemUOMId = intItemUOMIdTo
 FROM vyuSCTicketScreenView where intTicketId = @intTicketId
 
 
-SELECT  TOP 1
-		@intScaleUOMId			=	IU.intItemUOMId
-FROM    tblICItemUOM	IU    
-JOIN	tblSCTicket		SC	ON	SC.intItemId = IU.intItemId  
-WHERE   SC.intTicketId = @intTicketId AND IU.ysnStockUnit = 1
-
 
 BEGIN TRY
 DECLARE @intId INT;
@@ -135,7 +129,7 @@ OPEN intListCursor;
 			FROM tblCTContractDetail
 			WHERE intContractDetailId = @intContractDetailId
 
-			SET @dblTicketScheduleQuantity = dbo.fnCalculateQtyBetweenUOM(@intScaleUOMId,@_intContractItemUom,@_dblTicketScheduleQuantity)
+			SET @dblTicketScheduleQuantity = dbo.fnCalculateQtyBetweenUOM(@intTicketItemUOMId,@_intContractItemUom,@_dblTicketScheduleQuantity)
 
 			IF @ysnIsStorage = 0 AND ISNULL(@intStorageScheduleTypeId, 0) <= 0
 				BEGIN
