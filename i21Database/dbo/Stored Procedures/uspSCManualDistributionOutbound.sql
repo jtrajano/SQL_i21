@@ -61,11 +61,14 @@ DECLARE @intStorageScheduleId AS INT
 DECLARE @intLoadContractDetailId INT  
 DECLARE @intTicketContractDetailId INT  
 DECLARE @dblTicketScheduleQuantity AS NUMERIC(18,6)
+DECLARE @_dblTicketScheduleQuantity AS NUMERIC(18,6)
 DECLARE @dblLoopAdjustedScheduleQuantity NUMERIC (38,20)  
 DECLARE @strTicketDistributionOption NVARCHAR(3)
 DECLARE @intTicketLoadDetailId INT  
 DECLARE @_intContractDetailId INT
 DECLARE @__intContractDetailId INT
+DECLARE @_intContractItemUom INT
+DECLARE @intScaleUOMId INT
 
 SELECT @ysnUpdateContractWeightGrade  = CASE WHEN intContractId IS NULL AND strDistributionOption = 'CNT' AND (intWeightId IS NULL AND intGradeId IS NULL ) THEN 1 ELSE 0 END FROM tblSCTicket WHERE intTicketId = @intTicketId
 IF (@ysnUpdateContractWeightGrade = 1)
@@ -93,9 +96,18 @@ SELECT @intTicketItemUOMId = intItemUOMIdTo
 	, @intLoadId = intLoadId
 	,@strTicketDistributionOption  = strDistributionOption
 	, @dblTicketScheduleQuantity = ISNULL(dblScheduleQty,0)
+	, @_dblTicketScheduleQuantity = ISNULL(dblScheduleQty,0)
 	, @intTicketContractDetailId = intContractId
 	, @intTicketLoadDetailId = intLoadDetailId
 FROM vyuSCTicketScreenView where intTicketId = @intTicketId
+
+
+SELECT  TOP 1
+		@intScaleUOMId			=	IU.intItemUOMId
+FROM    tblICItemUOM	IU    
+JOIN	tblSCTicket		SC	ON	SC.intItemId = IU.intItemId  
+WHERE   SC.intTicketId = @intTicketId AND IU.ysnStockUnit = 1
+
 
 BEGIN TRY
 DECLARE @intId INT;
@@ -116,6 +128,14 @@ OPEN intListCursor;
 		BEGIN
 			IF ISNULL(@intStorageScheduleTypeId,0) > 0
 				SELECT	@ysnDPStorage = ST.ysnDPOwnedType, @ysnCustomerStorage = ysnCustomerStorage FROM dbo.tblGRStorageType ST WHERE ST.intStorageScheduleTypeId = @intStorageScheduleTypeId
+
+			
+			SELECT TOP 1
+				@_intContractItemUom = intItemUOMId
+			FROM tblCTContractDetail
+			WHERE intContractDetailId = @intContractDetailId
+
+			SET @dblTicketScheduleQuantity = dbo.fnCalculateQtyBetweenUOM(@intScaleUOMId,@_intContractItemUom,@_dblTicketScheduleQuantity)
 
 			IF @ysnIsStorage = 0 AND ISNULL(@intStorageScheduleTypeId, 0) <= 0
 				BEGIN
@@ -140,6 +160,7 @@ OPEN intListCursor;
 
 								EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intLoopContractId, @dblLoopContractUnits, @intEntityId;  
 							END  
+
 							
 					
 							EXEC dbo.uspSCUpdateTicketLoadUsed @intTicketId, @intLoadDetailId, @dblLoopContractUnits, @intEntityId;   
