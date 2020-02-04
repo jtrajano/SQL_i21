@@ -11,7 +11,7 @@ AS
 
 BEGIN
 
---DECLARE @Date DATETIME = '2020-02-03'
+--DECLARE @Date DATETIME = '2020-02-04'
 --	, @CommodityId INT = 1
 --	, @UOMType NVARCHAR(50) = 'By Quantity'
 --	, @UOMId INT = 4
@@ -28,14 +28,14 @@ BEGIN
 
 	DECLARE @strUnitMeasure NVARCHAR(100)
 
-	DECLARE @Balances AS TABLE (intBookId INT
-		, intSubBookId INT
-		, intCommodityId INT
-		, intProductTypeId INT
-		, dblContracts NUMERIC(24, 20)
-		, dblInTransit NUMERIC(24, 20)
-		, dblStock NUMERIC(24, 20)
-		, dblFutures NUMERIC(24, 20)) 
+	DECLARE @Balances AS TABLE (intBookId INT NULL
+		, intSubBookId INT NULL
+		, intCommodityId INT NULL
+		, intProductTypeId INT NULL
+		, dblContracts NUMERIC(24, 10)
+		, dblInTransit NUMERIC(24, 10)
+		, dblStock NUMERIC(24, 10)
+		, dblFutures NUMERIC(24, 10)) 
 
 	IF (ISNULL(@UOMId, 0) = 0)
 	BEGIN
@@ -48,7 +48,7 @@ BEGIN
 	BEGIN
 		SET @intUnitMeasureId = @UOMId
 	END
-	
+
 	SELECT intBookId, intSubBookId, intCommodityId, intProductTypeId, dblContracts = ISNULL([Contracts], 0), dblInTransit = ISNULL([In-Transit], 0), dblStock = ISNULL([Stock], 0), dblFutures = ISNULL([Futures], 0)
 	INTO #tmpTempBalances
 	FROM (
