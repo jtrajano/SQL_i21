@@ -121,8 +121,8 @@ SELECT
 	, ri.dblUnitCost
 	, strCostUOM = ri.strCostUOM
 	, strCost = dbo.fnICFormatNumber(ri.dblUnitCost) + ' ' + ri.strCostUOM
-	, strTax = dbo.fnICFormatNumber(r.dblTotalTax)
-	, dblTax = r.dblTotalTax
+	, strTax = dbo.fnICFormatNumber(ri.dblTax)
+	, dblTax = ri.dblTax 
 	, strCurrency = c.strCurrency
 	, strStorageLocation = sl.strSubLocationName
 	, strStorageUnit = su.strName
