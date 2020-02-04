@@ -15,6 +15,25 @@ DECLARE
 	,@maxLoop AS INT = 20
 	,@loop AS INT = 1
 
+IF OBJECT_ID('tempdb..#tmpCollateralItemsOverride') IS NULL  
+BEGIN 
+	CREATE TABLE #tmpCollateralItemsOverride (
+		intItemId INT NULL 
+		,intCategoryId INT NULL 
+	)
+END 
+
+IF EXISTS (SELECT TOP 1 1 FROM #tmpCollateralItemsOverride)
+BEGIN 
+	SELECT DISTINCT 
+		intItemId = NULL, c.intCategoryId
+	FROM 
+		#tmpCollateralItemsOverride o INNER JOIN tblICCategory c
+			ON c.intCategoryId = o.intCategoryId
+
+	RETURN 0; 
+END
+
 -- Create the temp table
 IF OBJECT_ID('tempdb..#tmpCollateralCategories') IS NULL  
 BEGIN 
