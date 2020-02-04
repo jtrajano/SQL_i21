@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspCFInvoiceReportSummary](
-	@UserId NVARCHAR(MAX)
+	@UserId NVARCHAR(MAX),
+	@StatementType NVARCHAR(MAX)
 )
 AS
 BEGIN 
@@ -53,6 +54,6 @@ BEGIN
 		,@UserId			
 	FROM
 	vyuCFInvoiceReportSummary
-	WHERE intTransactionId IN (SELECT intTransactionId FROM tblCFInvoiceReportTempTable WHERE strUserId = @UserId)
+	WHERE intTransactionId IN (SELECT intTransactionId FROM tblCFInvoiceReportTempTable WHERE strUserId = @UserId AND LOWER(strStatementType) =  LOWER(@StatementType))
 
 END

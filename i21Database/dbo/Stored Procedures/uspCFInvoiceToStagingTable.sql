@@ -114,15 +114,14 @@ BEGIN TRY
 	-----------------------------------------------------------
 	-- EXECUTING THIS SP's WILL INSERT RECORDS ON TEMP TABLES--
 	-----------------------------------------------------------
-	DELETE FROM tblCFInvoiceReportTempTable	WHERE strUserId = @UserId 
-	EXEC "dbo"."uspCFInvoiceReport"			@xmlParam	=	@xmlParam , @UserId = @UserId 
+	DELETE FROM tblCFInvoiceReportTempTable	WHERE strUserId = @UserId AND LOWER(strStatementType) =  LOWER(@StatementType)
+	EXEC "dbo"."uspCFInvoiceReport"			@xmlParam	=	@xmlParam , @UserId = @UserId, @StatementType = @StatementType
 	
-	DELETE FROM tblCFInvoiceSummaryTempTable WHERE strUserId = @UserId 
-	EXEC "dbo"."uspCFInvoiceReportSummary"@UserId = @UserId 
+	DELETE FROM tblCFInvoiceSummaryTempTable WHERE strUserId = @UserId AND LOWER(strStatementType) =  LOWER(@StatementType)
+	EXEC "dbo"."uspCFInvoiceReportSummary" @UserId = @UserId , @StatementType = @StatementType
 
-	DELETE FROM tblCFInvoiceDiscountTempTable WHERE strUserId = @UserId
-	EXEC "dbo"."uspCFInvoiceReportDiscount" @UserId = @UserId
-
+	DELETE FROM tblCFInvoiceDiscountTempTable WHERE strUserId = @UserId 
+	EXEC "dbo"."uspCFInvoiceReportDiscount" @UserId = @UserId , @StatementType = @StatementType
 
 	-- INSERT CALCULATED INVOICES TO STAGING TABLE --
 	-----------------------------------------------------------
