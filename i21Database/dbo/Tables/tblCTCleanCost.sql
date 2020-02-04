@@ -21,6 +21,8 @@
 	[dtmExportProvPrice] DATETIME NULL,
 	[ysnExported] BIT NULL,
 	[dtmExported] DATETIME NULL,
+	[dblShippedWeight] NUMERIC(18,6),
+	[dblFranchise] NUMERIC(18,6),
 	
 	CONSTRAINT [PK_tblCTCleanCost_intCleanCostId] PRIMARY KEY CLUSTERED ([intCleanCostId] ASC),
 	CONSTRAINT [UK_tblCTCleanCost_strReferenceNumber] UNIQUE ([strReferenceNumber]),
