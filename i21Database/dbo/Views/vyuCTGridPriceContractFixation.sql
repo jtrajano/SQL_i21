@@ -73,7 +73,8 @@ AS
 				CD.dblRatio,
 				CD.dblAppliedQty,
 				CD.strBook,
-				CD.strSubBook
+				CD.strSubBook,
+				CD.dblFutures
 
 		FROM	tblCTPriceFixation	PF
 		JOIN	vyuCTContractSequence		CD	ON	CD.intContractDetailId	=	PF.intContractDetailId
@@ -145,7 +146,8 @@ LEFT	JOIN	tblICItem					SI	ON	SI.intItemId			=	SC.intItemId
 				CD.dblRatio,
 				CD.dblAppliedQty,
 				BK.strBook,
-				SB.strSubBook
+				SB.strSubBook,
+				CD.dblFutures
 
 		FROM	tblCTPriceFixation	PF	
 		JOIN	tblICCommodityUnitMeasure	CU	ON	CU.intCommodityUnitMeasureId	=	PF.intFinalPriceUOMId 
