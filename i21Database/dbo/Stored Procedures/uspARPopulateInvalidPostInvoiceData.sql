@@ -17,18 +17,9 @@ DECLARE	@ZeroBit BIT
 SET @OneBit = CAST(1 AS BIT)
 SET @ZeroBit = CAST(0 AS BIT)
 
---IF(OBJECT_ID('tempdb..#ARInvalidInvoiceData') IS NULL)
---BEGIN
---	CREATE TABLE #ARInvalidInvoiceData
---		([intInvoiceId]				INT				NOT NULL
---		,[strInvoiceNumber]			NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
---		,[strTransactionType]		NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
---		,[intInvoiceDetailId]		INT				NULL
---		,[intItemId]				INT				NULL
---		,[strBatchId]				NVARCHAR(40)	COLLATE Latin1_General_CI_AS	NULL
---		,[strPostingError]			NVARCHAR(MAX)	COLLATE Latin1_General_CI_AS	NULL)
---END
-
+--IC Reserve Stock
+IF @Recap = @ZeroBit	
+	EXEC dbo.uspARPostItemResevation
 
 IF @Post = @OneBit
 BEGIN
