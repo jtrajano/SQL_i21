@@ -105,6 +105,7 @@ BEGIN TRY
 		, @UseScheduleForAvlCalc = CASE WHEN intStorageScheduleTypeId = -6 THEN 0 ELSE 1 END 
 		,@intTicketLoadDetailId = intLoadDetailId
 		,@dblTicketScheduledQuantity = dblScheduleQty
+		,@_dblTicketScheduledQuantity = dblScheduleQty
 		,@locationId		=	intProcessingLocationId
 		,@dtmTicketDate  = dtmTicketDateTime
         ,@intTicketSclaeSetupId = intScaleSetupId
