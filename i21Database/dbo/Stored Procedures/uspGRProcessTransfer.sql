@@ -1161,12 +1161,19 @@ BEGIN
 		--update tblGRTransferStorageSplit's intCustomerStorageId
 		UPDATE A
 		SET A.intTransferToCustomerStorageId = B.intToCustomerStorageId
-			,A.intContractDetailId = CT.intContractDetailId
+			,A.intContractDetailId = CASE WHEN ST.ysnDPOwnedType = 1 THEN 
+										CASE 
+											WHEN A.intContractDetailId IS NULL THEN CT.intContractDetailId 
+											ELSE A.intContractDetailId
+										END
+									ELSE NULL END
 		FROM tblGRTransferStorageSplit A		
 		INNER JOIN @newCustomerStorageIds B
 			ON B.intTransferStorageSplitId = A.intTransferStorageSplitId
 		INNER JOIN tblGRCustomerStorage CS
 			ON CS.intCustomerStorageId = B.intToCustomerStorageId
+		INNER JOIN tblGRStorageType ST
+			ON ST.intStorageScheduleTypeId = A.intStorageTypeId
 		OUTER APPLY (
 			SELECT TOP 1 intContractDetailId
 			FROM vyuCTGetContractForScaleTicket
@@ -1177,10 +1184,16 @@ BEGIN
 				AND ysnEarlyDayPassed = 1
 				AND intContractTypeId = 1
 				AND ysnAllowedToShow = 1
-		) CT		
+		) CT
 		
 		SET @cnt = 0
-		SET @cnt = (SELECT COUNT(*) FROM tblGRTransferStorageSplit WHERE intTransferStorageId = @intTransferStorageId AND intContractDetailId IS NULL)
+		SET @cnt = (SELECT COUNT(*) 
+					FROM tblGRTransferStorageSplit TSS
+					INNER JOIN tblGRStorageType ST
+						ON ST.intStorageScheduleTypeId = TSS.intStorageTypeId
+					WHERE intTransferStorageId = @intTransferStorageId 
+						AND ST.ysnDPOwnedType = 1
+						AND intContractDetailId IS NULL)
 
 		DECLARE c CURSOR LOCAL STATIC READ_ONLY FORWARD_ONLY
 		FOR
