@@ -8411,6 +8411,7 @@
     <Build Include="dbo\Stored Procedures\uspIPAttributePopulateStgXML.sql" />
     <Build Include="dbo\Stored Procedures\uspIPAttributeTransferStgXML.sql" />
     <Build Include="dbo\Stored Procedures\uspIPAttributeProcessStgXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTItemContractUpdateRemainingDollarValue.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
