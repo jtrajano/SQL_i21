@@ -6,6 +6,7 @@ RETURNS @returntable TABLE
 (
 	strBuySell NVARCHAR(50)
 	, dblContractSize NUMERIC(24, 10)
+	, intOptionMonthId INT
 	, strOptionMonth NVARCHAR(50)
 	, dblStrike NUMERIC(24, 10)
 	, strOptionType NVARCHAR(50)
@@ -58,6 +59,7 @@ BEGIN
 		INSERT INTO @returntable
 		SELECT [strBuySell]
 			, [dblContractSize]
+			, [intOptionMonthId]
 			, [strOptionMonth]
 			, [dblStrike]
 			, [strOptionType]
@@ -76,6 +78,7 @@ BEGIN
 			MIN(strValue)
 			FOR strFieldName IN (strBuySell
 				, dblContractSize
+				, intOptionMonthId
 				, strOptionMonth
 				, dblStrike
 				, strOptionType

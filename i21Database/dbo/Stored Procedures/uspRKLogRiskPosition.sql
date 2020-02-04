@@ -261,6 +261,7 @@ BEGIN
 		BEGIN
 			DECLARE @strBuySell NVARCHAR(50)
 				, @dblContractSize NUMERIC(24, 10)
+				, @intOptionMonthId INT
 				, @strOptionMonth NVARCHAR(50)
 				, @dblStrike NUMERIC(24, 10)
 				, @strOptionType NVARCHAR(50)
@@ -273,7 +274,8 @@ BEGIN
 			
 			SELECT TOP 1 @strBuySell = der.strBuySell
 				, @dblContractSize = m.dblContractSize
-				, @strOptionMonth = om.strFutureMonth
+				, @intOptionMonthId = der.intOptionMonthId
+				, @strOptionMonth = om.strOptionMonth
 				, @dblStrike = der.dblStrike
 				, @strOptionType = der.strOptionType
 				, @strInstrumentType = CASE WHEN (der.[intInstrumentTypeId] = 1) THEN N'Futures'
@@ -287,7 +289,7 @@ BEGIN
 			FROM tblRKFutOptTransaction der
 			JOIN tblRKFutureMarket m ON m.intFutureMarketId = der.intFutureMarketId
 			LEFT JOIN tblICCommodityUnitMeasure cUOM ON cUOM.intCommodityId = der.intCommodityId AND cUOM.intUnitMeasureId = m.intUnitMeasureId
-			LEFT JOIN tblRKFuturesMonth om ON om.intFutureMonthId = der.intOptionMonthId
+			LEFT JOIN tblRKOptionsMonth om ON om.intOptionMonthId = der.intOptionMonthId
 			LEFT JOIN tblRKBrokerageAccount AS BA ON BA.intBrokerageAccountId = der.intBrokerageAccountId
 			LEFT JOIN tblEMEntity e ON e.intEntityId = der.intEntityId
 			WHERE der.intFutOptTransactionId = @intTransactionRecordId
@@ -296,6 +298,7 @@ BEGIN
 			SELECT intRowId = ROW_NUMBER() OVER (ORDER BY strFieldName),  * FROM (
 				SELECT strFieldName = 'strBuySell', strValue = @strBuySell
 				UNION ALL SELECT 'dblContractSize', CAST(@dblContractSize AS NVARCHAR)
+				UNION ALL SELECT 'intOptionMonthId', CAST(@intOptionMonthId AS NVARCHAR)
 				UNION ALL SELECT 'strOptionMonth', @strOptionMonth
 				UNION ALL SELECT 'dblStrike', CAST(@dblStrike AS NVARCHAR)
 				UNION ALL SELECT 'strOptionType', @strOptionType
@@ -544,7 +547,7 @@ BEGIN
 				, @intBookId
 				, @intSubBookId
 				, @intLocationId
-				, strInOut = CASE WHEN ISNULL(@dblQty, 0) >= 0 THEN 'IN' ELSE 'OUT' END
+				, strInOut = 'IN' 
 				, dblOrigQty = @dblQty
 				, dblPrice = @dblPrice
 				, @intEntityId
@@ -556,10 +559,68 @@ BEGIN
 			WHERE IRI.intInventoryReceiptItemId = @intTransactionRecordId
 		END
 
+		----------------------------------------------
+		------------- Inventory Shipment --------------
+		----------------------------------------------
+		ELSE IF @strTransactionType = 'Inventory Shipment'
+		BEGIN
+			INSERT INTO @FinalTable(strBatchId
+				, strTransactionType
+				, intTransactionRecordId
+				, strTransactionNumber
+				, dtmTransactionDate
+				, intContractDetailId
+				, intContractHeaderId
+				, intFutureMarketId
+				, intFutureMonthId
+				, intFutOptTransactionId
+				, intCommodityId
+				, intItemId
+				, intProductTypeId
+				, intOrigUOMId
+				, intBookId
+				, intSubBookId
+				, intLocationId
+				, strInOut
+				, dblOrigQty
+				, dblPrice
+				, intEntityId
+				, intTicketId
+				, intUserId
+				, strNotes)
+			SELECT TOP 1 @strBatchId
+				, @strTransactionType
+				, @intTransactionRecordId
+				, @strTransactionNumber
+				, @dtmTransactionDate
+				, @intContractDetailId
+				, @intContractHeaderId
+				, @intFutureMarketId
+				, @intFutureMonthId
+				, @intTransactionRecordId
+				, @intCommodityId
+				, @intItemId
+				, intProductTypeId = I.intProductTypeId
+				, intOrigUOMId = @intCommodityUOMId
+				, @intBookId
+				, @intSubBookId
+				, @intLocationId
+				, strInOut =  'OUT'
+				, dblOrigQty = @dblQty * -1
+				, dblPrice = @dblPrice
+				, @intEntityId
+				, @intTicketId
+				, @intUserId
+				, @strNotes
+			FROM tblICInventoryShipmentItem ISI
+			LEFT JOIN tblICItem I ON I.intItemId = ISI.intItemId
+			WHERE ISI.intInventoryShipmentItemId = @intTransactionRecordId
+		END
+
 		------------------------------------
 		------------- Voucher --------------
 		------------------------------------
-		ELSE IF @strTransactionType = ''
+		ELSE IF @strTransactionType = 'Bill'
 		BEGIN
 			INSERT INTO @FinalTable(strBatchId
 				, strTransactionType
@@ -672,7 +733,7 @@ BEGIN
 		---------------------------------------
 		------------- Invoice --------------
 		---------------------------------------
-		ELSE IF @strTransactionType = ''
+		ELSE IF @strTransactionType = 'Invoice'
 		BEGIN
 			INSERT INTO @FinalTable(strBatchId
 				, strTransactionType

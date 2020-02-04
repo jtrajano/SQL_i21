@@ -16,6 +16,7 @@ RETURNS @returntable TABLE
 	, intOrigUOMId INT
 	, strFutureMarket NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, strFutureMonth NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	, intOptionMonthId INT
 	, strOptionMonth NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, dblStrike NUMERIC(24,10)
 	, strOptionType NVARCHAR(100) COLLATE Latin1_General_CI_AS
@@ -42,6 +43,7 @@ BEGIN
 		,intOrigUOMId
 		,strFutureMarket
 		,strFutureMonth
+		,intOptionMonthId
 		,strOptionMonth
 		,dblStrike 
 		,strOptionType
@@ -65,6 +67,7 @@ BEGIN
 			,intOrigUOMId
 			,strFutureMarket
 			,strFutureMonth
+			,intOptionMonthId = mf.intOptionMonthId
 			,strOptionMonth = mf.strOptionMonth
 			,dblStrike = CAST(ISNULL(mf.dblStrike, 0.00) AS NUMERIC(24, 10))
 			,strOptionType = mf.strOptionType
