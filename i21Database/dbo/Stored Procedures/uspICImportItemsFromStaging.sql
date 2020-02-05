@@ -1,4 +1,4 @@
-CREATE PROCEDURE uspICImportItemsFromStaging @strIdentifier NVARCHAR(100)
+CREATE PROCEDURE uspICImportItemsFromStaging @strIdentifier NVARCHAR(100), @intDataSourceId INT = 2
 AS
 
 DELETE FROM tblICImportStagingItem WHERE strImportIdentifier <> @strIdentifier
@@ -183,26 +183,26 @@ SELECT
 	, dblUserGroupFee				= s.dblUserGroupFeePercentage
 	, dblWeightTolerance			= s.dblWgtTolerancePercentage
 	, dblOverReceiveTolerance		= s.dblOverReceiveTolerancePercentage
-	, ysnLandedCost					= s.ysnLandedCost
+	, ysnLandedCost					= ISNULL(s.ysnLandedCost, 0)
 	, strLeadTime					= s.strLeadTime
-	, ysnTaxable					= s.ysnTaxable
+	, ysnTaxable					= ISNULL(s.ysnTaxable, 0)
 	, strKeywords					= s.strKeywords
 	, dblCaseQty					= s.dblCaseQty
-	, dtmDateShip					= s.dtmDateShip					
-	, dblTaxExempt					= s.dblTaxExempt					
-	, ysnDropShip					= s.ysnDropShip					
-	, ysnCommisionable				= s.ysnCommissionable				
-	, ysnSpecialCommission			= s.ysnSpecialCommission			
-	, ysnTankRequired				= s.ysnTankRequired				
-	, ysnAvailableTM				= s.ysnAvailableforTM				
-	, dblDefaultFull				= s.dblDefaultPercentageFull				
-	, dblMaintenanceRate			= s.dblRate			
-	, strNACSCategory				= s.strNACSCategory				
-	, ysnReceiptCommentRequired		= s.ysnReceiptCommentReq		
+	, dtmDateShip					= s.dtmDateShip
+	, dblTaxExempt					= s.dblTaxExempt
+	, ysnDropShip					= ISNULL(s.ysnDropShip, 0)
+	, ysnCommisionable				= ISNULL(s.ysnCommissionable, 0)
+	, ysnSpecialCommission			= ISNULL(s.ysnSpecialCommission, 0)
+	, ysnTankRequired				= s.ysnTankRequired
+	, ysnAvailableTM				= s.ysnAvailableforTM
+	, dblDefaultFull				= s.dblDefaultPercentageFull
+	, dblMaintenanceRate			= s.dblRate
+	, strNACSCategory				= s.strNACSCategory
+	, ysnReceiptCommentRequired		= s.ysnReceiptCommentReq
 	, intPatronageCategoryDirectId	= ds.intPatronageCategoryId
 	, intPatronageCategoryId		= p.intPatronageCategoryId
-	, intPhysicalItem				= ph.intItemId		
-	, strVolumeRebateGroup			= s.strVolumeRebateGroup			
+	, intPhysicalItem				= ph.intItemId
+	, strVolumeRebateGroup			= s.strVolumeRebateGroup
 	, intIngredientTag				= ing.intTagId
 	, intMedicationTag				= med.intTagId
 	, intRINFuelTypeId				= rin.intRinFuelCategoryId
@@ -325,9 +325,9 @@ WHEN MATCHED THEN
 	UPDATE SET
 		  strItemNo = source.strItemNo
 		, strType = source.strType
-		, strInventoryTracking = 
-			CASE WHEN ISNULL(source.strLotTracking, 'No') = 'No' THEN 
-				CASE WHEN source.strType IN ('Inventory', 'Raw Material', 'Finished Good') THEN 'Item Level' ELSE 'None' END 
+		, strInventoryTracking =
+			CASE WHEN ISNULL(source.strLotTracking, 'No') = 'No' THEN
+				CASE WHEN source.strType IN ('Inventory', 'Raw Material', 'Finished Good') THEN 'Item Level' ELSE 'None' END
 			ELSE 'Lot Level' END
 		, strDescription = source.strDescription
 		, strStatus = source.strStatus
@@ -453,13 +453,14 @@ WHEN NOT MATCHED THEN
 		, intRINFuelTypeId
 		, strFuelInspectFee
 		, dtmDateCreated
+		, intDataSourceId
 	)
 	VALUES
 	(
 		  strItemNo
 		, strType
-		, CASE WHEN ISNULL(strLotTracking, 'No') = 'No' THEN 
-				CASE WHEN strType IN ('Inventory', 'Raw Material', 'Finished Good') THEN 'Item Level' ELSE 'None' END 
+		, CASE WHEN ISNULL(strLotTracking, 'No') = 'No' THEN
+				CASE WHEN strType IN ('Inventory', 'Raw Material', 'Finished Good') THEN 'Item Level' ELSE 'None' END
 			ELSE 'Lot Level' END
 		, strDescription
 		, strStatus
@@ -520,6 +521,7 @@ WHEN NOT MATCHED THEN
 		, intRINFuelTypeId
 		, strFuelInspectFee
 		, dtmDateCreated
+		, @intDataSourceId
 	)
 	OUTPUT deleted.strItemNo, $action, inserted.strItemNo INTO #output;
 ;
@@ -533,8 +535,8 @@ WHERE l.strUniqueId = @strIdentifier
 DECLARE @TotalImported INT
 DECLARE @LogId INT
 
-SELECT @LogId = intImportLogId, @TotalImported = ISNULL(intRowsImported, 0) + ISNULL(intRowsUpdated, 0) 
-FROM tblICImportLog 
+SELECT @LogId = intImportLogId, @TotalImported = ISNULL(intRowsImported, 0) + ISNULL(intRowsUpdated, 0)
+FROM tblICImportLog
 WHERE strUniqueId = @strIdentifier
 
 IF @TotalImported = 0 AND @LogId IS NOT NULL

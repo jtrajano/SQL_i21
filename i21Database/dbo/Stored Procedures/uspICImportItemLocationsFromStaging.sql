@@ -1,4 +1,4 @@
-CREATE PROCEDURE uspICImportItemLocationsFromStaging @strIdentifier NVARCHAR(100)
+CREATE PROCEDURE uspICImportItemLocationsFromStaging @strIdentifier NVARCHAR(100), @intDataSourceId INT = 2
 AS
 
 DELETE FROM tblICImportStagingItemLocation WHERE strImportIdentifier <> @strIdentifier
@@ -384,6 +384,7 @@ INSERT
 	, intGrossUOMId				
 	, dtmDateCreated			
 	, intCreatedByUserId
+	, intDataSourceId
 )
 VALUES
 (
@@ -441,6 +442,7 @@ VALUES
 	, intGrossUOMId				
 	, dtmDateCreated			
 	, intCreatedByUserId
+	, @intDataSourceId
 )
 OUTPUT deleted.intItemId, $action, inserted.intItemId INTO #output;
 

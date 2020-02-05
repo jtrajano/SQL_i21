@@ -1,4 +1,4 @@
-CREATE PROCEDURE uspICImportItemUOMsFromStaging @strIdentifier NVARCHAR(100)
+CREATE PROCEDURE uspICImportItemUOMsFromStaging @strIdentifier NVARCHAR(100), @intDataSourceId INT = 2
 AS
 
 DELETE FROM tblICImportStagingUOM WHERE strImportIdentifier <> @strIdentifier
@@ -159,7 +159,8 @@ WHEN NOT MATCHED THEN
 		ysnAllowPurchase,
 		ysnAllowSale,
 		dtmDateCreated, 
-		intCreatedByUserId
+		intCreatedByUserId,
+		intDataSourceId
 	)
 	VALUES
 	(
@@ -178,7 +179,8 @@ WHEN NOT MATCHED THEN
 		ysnAllowPurchase,
 		ysnAllowSale,
 		dtmDateCreated, 
-		intCreatedByUserId
+		intCreatedByUserId,
+		@intDataSourceId
 	)
 	OUTPUT deleted.intItemId, $action, inserted.intItemId INTO #output;
 
