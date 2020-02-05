@@ -38,25 +38,15 @@ FROM (
 										   AND PAYMENT.strRecordNumber = CM.strSourceTransactionId 
 										   AND CM.strSourceSystem = 'AR'
 	OUTER APPLY (
-		SELECT strEODNo = (
-				STUFF((
-					SELECT ', ' + POSEOD.strEODNo
-					FROM tblARPOSPayment POSPAYMENT
-					INNER JOIN tblARPOSEndOfDay POSEOD ON POSPAYMENT.intPOSEndOfDayId = POSEOD.intPOSEndOfDayId
-					WHERE POSPAYMENT.intPaymentId = PAYMENT.intPaymentId
-					FOR XML PATH('')
-				), 1, 2, '')
-			)
-		 , strPOSDrawerName = (
-				STUFF((
-					SELECT ', ' + POSDRAWER.strPOSDrawerName
-					FROM tblARPOSPayment POSPAYMENT
-					INNER JOIN tblARPOSEndOfDay POSEOD ON POSPAYMENT.intPOSEndOfDayId = POSEOD.intPOSEndOfDayId
-					INNER JOIN tblSMCompanyLocationPOSDrawer POSDRAWER ON POSEOD.intCompanyLocationPOSDrawerId = POSDRAWER.intCompanyLocationPOSDrawerId
-					WHERE POSPAYMENT.intPaymentId = PAYMENT.intPaymentId
-					FOR XML PATH('')
-				), 1, 2, '')
-			)
+		SELECT TOP 1 strEODNo = POSEOD.strEODNo
+					, strPOSDrawerName = POSDRAWER.strPOSDrawerName
+		FROM tblARPaymentDetail PD
+		INNER JOIN tblARInvoice I ON I.intInvoiceId = PD.intInvoiceId AND I.strType = 'POS' AND I.ysnPosted = 1
+		INNER JOIN tblARPOS POS ON I.intInvoiceId = POS.intInvoiceId 
+		INNER JOIN tblARPOSLog POSLOG ON POS.intPOSLogId = POSLOG.intPOSLogId
+		INNER JOIN tblARPOSEndOfDay POSEOD ON POSLOG.intPOSEndOfDayId = POSEOD.intPOSEndOfDayId
+		INNER JOIN tblSMCompanyLocationPOSDrawer POSDRAWER ON POSEOD.intCompanyLocationPOSDrawerId = POSDRAWER.intCompanyLocationPOSDrawerId
+		WHERE PD.intPaymentId = PAYMENT.intPaymentId
 	) POSEOD	
 	WHERE PAYMENT.ysnPosted = 1
 	  AND PAYMENT.ysnProcessedToNSF = 0
