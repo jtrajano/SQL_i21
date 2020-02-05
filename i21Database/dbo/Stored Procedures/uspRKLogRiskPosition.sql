@@ -35,6 +35,13 @@ BEGIN
 		, @intEntityId INT
 		, @ysnDelete BIT
 		, @strNotes NVARCHAR(250)
+		, @strInOut NVARCHAR(50)
+		, @dblContractSize NUMERIC(24, 10)
+		, @strInstrumentType NVARCHAR(50)
+		, @strBrokerAccount NVARCHAR(50)
+		, @strBroker NVARCHAR(50)
+		, @ysnPreCrush BIT
+		, @strBrokerTradeNo NVARCHAR(50)
 
 	DECLARE @FinalTable AS TABLE (strBatchId NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL
 		, strTransactionType NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL
@@ -260,17 +267,11 @@ BEGIN
 		IF @strTransactionType = 'Derivatives'
 		BEGIN
 			DECLARE @strBuySell NVARCHAR(50)
-				, @dblContractSize NUMERIC(24, 10)
 				, @intOptionMonthId INT
 				, @strOptionMonth NVARCHAR(50)
 				, @dblStrike NUMERIC(24, 10)
 				, @strOptionType NVARCHAR(50)
-				, @strInstrumentType NVARCHAR(50)
-				, @strBrokerAccount NVARCHAR(50)
-				, @strBroker NVARCHAR(50)
 				, @intFutOptTransactionHeaderId INT
-				, @ysnPreCrush BIT
-				, @strBrokerTradeNo NVARCHAR(50)
 			
 			SELECT TOP 1 @strBuySell = der.strBuySell
 				, @dblContractSize = m.dblContractSize
@@ -358,6 +359,110 @@ BEGIN
 				, dblOrigNoOfLots = @dblNoOfLots 
 				, dblContractSize = @dblContractSize
 				, dblOrigQty = @dblNoOfLots * @dblContractSize 
+				, dblPrice = @dblPrice
+				, @intEntityId
+				, @intTicketId
+				, @intUserId
+				, @strNotes
+				, dbo.fnRKConvertMiscFieldString(@LogHelper)
+
+			DELETE FROM @LogHelper
+		END
+
+		---------------------------------------
+		--------- MATCH DERIVATIVES -----------
+		---------------------------------------
+		ELSE IF @strTransactionType = 'Match Derivatives'
+		BEGIN
+			DECLARE @intMatchDerivativesHeaderId INT = @intContractHeaderId
+				, @intMatchDerivativesDetailId INT = @intContractDetailId
+				, @intMatchNo INT
+
+			SET @strInOut = @strNotes
+			SET @intContractHeaderId = NULL
+			SET @intContractDetailId = NULL
+			SET @strNotes = ''
+
+			SELECT TOP 1 @strBuySell = der.strBuySell
+				, @dblContractSize = m.dblContractSize
+				, @intOptionMonthId = der.intOptionMonthId
+				, @strOptionMonth = om.strOptionMonth
+				, @dblStrike = der.dblStrike
+				, @strOptionType = der.strOptionType
+				, @strInstrumentType = CASE WHEN (der.[intInstrumentTypeId] = 1) THEN N'Futures'
+								WHEN (der.[intInstrumentTypeId] = 2) THEN N'Options'
+								WHEN (der.[intInstrumentTypeId] = 3) THEN N'Currency Contract' END COLLATE Latin1_General_CI_AS
+				, @strBrokerAccount = BA.strAccountNumber
+				, @strBroker = e.strName
+				, @intFutOptTransactionHeaderId = der.intFutOptTransactionHeaderId
+				, @ysnPreCrush = der.ysnPreCrush
+				, @strBrokerTradeNo = der.strBrokerTradeNo
+			FROM tblRKFutOptTransaction der
+			JOIN tblRKFutureMarket m ON m.intFutureMarketId = der.intFutureMarketId
+			LEFT JOIN tblICCommodityUnitMeasure cUOM ON cUOM.intCommodityId = der.intCommodityId AND cUOM.intUnitMeasureId = m.intUnitMeasureId
+			LEFT JOIN tblRKOptionsMonth om ON om.intOptionMonthId = der.intOptionMonthId
+			LEFT JOIN tblRKBrokerageAccount AS BA ON BA.intBrokerageAccountId = der.intBrokerageAccountId
+			LEFT JOIN tblEMEntity e ON e.intEntityId = der.intEntityId
+			WHERE der.intFutOptTransactionId = @intTransactionRecordId
+
+			SELECT TOP 1 @intMatchNo = intMatchNo FROM tblRKMatchFuturesPSHeader WHERE intMatchFuturesPSHeaderId = @intMatchDerivativesHeaderId
+			SELECT TOP 1 @dblContractSize = dblContractSize FROM tblRKFutureMarket WHERE intFutureMarketId = @intFutureMarketId
+
+			INSERT INTO @LogHelper(intRowId, strFieldName, strValue)
+			SELECT intRowId = ROW_NUMBER() OVER (ORDER BY strFieldName),  * FROM (
+				SELECT strFieldName = 'intMatchDerivativesHeaderId', strValue = CAST(@intMatchDerivativesHeaderId AS NVARCHAR)
+				UNION ALL SELECT 'intMatchDerivativesDetailId', CAST(@intMatchDerivativesDetailId AS NVARCHAR)
+				UNION ALL SELECT 'intMatchNo', CAST(@intMatchNo AS NVARCHAR)
+			) t WHERE ISNULL(strValue, '') != ''
+			
+			INSERT INTO @FinalTable(strBatchId
+				, strTransactionType
+				, intTransactionRecordId
+				, strTransactionNumber
+				, dtmTransactionDate
+				, intContractDetailId
+				, intContractHeaderId
+				, intFutureMarketId
+				, intFutureMonthId
+				, intFutOptTransactionId
+				, intCommodityId
+				, intItemId
+				, intProductTypeId
+				, intOrigUOMId
+				, intBookId
+				, intSubBookId
+				, intLocationId
+				, strInOut
+				, dblOrigNoOfLots
+				, dblContractSize
+				, dblOrigQty
+				, dblPrice
+				, intEntityId
+				, intTicketId
+				, intUserId
+				, strNotes
+				, strMiscField)
+			SELECT @strBatchId
+				, @strTransactionType
+				, @intTransactionRecordId
+				, @strTransactionNumber
+				, @dtmTransactionDate
+				, @intContractDetailId
+				, @intContractHeaderId
+				, @intFutureMarketId
+				, @intFutureMonthId
+				, @intTransactionRecordId
+				, @intCommodityId
+				, @intItemId
+				, intProductTypeId = NULL
+				, intOrigUOMId = @intCommodityUOMId
+				, @intBookId
+				, @intSubBookId
+				, @intLocationId
+				, strInOut = @strInOut
+				, dblOrigNoOfLots = @dblNoOfLots
+				, dblContractSize = @dblContractSize
+				, dblOrigQty = @dblNoOfLots * @dblContractSize
 				, dblPrice = @dblPrice
 				, @intEntityId
 				, @intTicketId

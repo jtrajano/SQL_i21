@@ -70,35 +70,101 @@ BEGIN
 				, intContractDetailId
 				, intContractHeaderId
 				, intCommodityId
+				, intLocationId
 				, intBookId
 				, intSubBookId
 				, intFutureMarketId
 				, intFutureMonthId
+				, strNotes
 				, dblNoOfLots
 				, dblPrice
 				, intEntityId
 				, intUserId
-				, strNotes)
-			SELECT strTransactionType = 'Match Derivatives'
-				, intTransactionRecordId = history.intLFutOptTransactionId
-				, strTransactionNumber = de.strInternalTradeNo
-				, dtmTransactionDate = history.dtmMatchDate
-				, intContractDetailId = history.intMatchFuturesPSDetailId
-				, intContractHeaderId = history.intMatchFuturesPSHeaderId
-				, intCommodityId = de.intCommodityId
-				, intBookId = de.intBookId
-				, intSubBookId = de.intSubBookId
-				, intFutureMarketId = de.intFutureMarketId
-				, intFutureMonthId = de.intFutureMonthId
-				, dblNoOfLots = de.dblNoOfContract - dbo.fnRKGetMatchedQtyAsOf(de.intFutOptTransactionId, history.dtmMatchDate)
-				, dblPrice = de.dblPrice
-				, intEntityId = de.intEntityId
-				, intUserId = intUserId
-				, strNotes = ''
-			FROM tblRKMatchDerivativesHistory history
-			LEFT JOIN tblRKMatchFuturesPSHeader header ON header.intMatchFuturesPSHeaderId = history.intMatchFuturesPSHeaderId
-			LEFT JOIN tblRKMatchFuturesPSDetail detail ON detail.intMatchFuturesPSDetailId = history.intMatchFuturesPSDetailId
-			LEFT JOIN tblRKFutOptTransaction de ON de.intFutOptTransactionId = history.intLFutOptTransactionId
+				, intCommodityUOMId)
+			SELECT strTransactionType
+				, intTransactionRecordId
+				, strTransactionNumber
+				, dtmTransactionDate
+				, intContractDetailId
+				, intContractHeaderId
+				, intCommodityId
+				, intLocationId
+				, intBookId
+				, intSubBookId
+				, intFutureMarketId
+				, intFutureMonthId
+				, strNotes
+				, dblNoOfLots
+				, dblPrice
+				, intEntityId
+				, intUserId
+				, intCommodityUOMId
+			FROM (
+				SELECT strTransactionType = 'Match Derivatives'
+					, intTransactionRecordId = history.intLFutOptTransactionId
+					, strTransactionNumber = de.strInternalTradeNo
+					, dtmTransactionDate = history.dtmMatchDate
+					, intContractDetailId = history.intMatchFuturesPSDetailId
+					, intContractHeaderId = history.intMatchFuturesPSHeaderId
+					, intCommodityId = de.intCommodityId
+					, de.intLocationId
+					, intBookId = de.intBookId
+					, intSubBookId = de.intSubBookId
+					, intFutureMarketId = de.intFutureMarketId
+					, intFutureMonthId = de.intFutureMonthId
+					, strNotes = 'IN'
+					, dblNoOfLots = history.dblMatchQty
+					, dblPrice = de.dblPrice
+					, intEntityId = de.intEntityId
+					, intUserId = e.intEntityId
+					, intCommodityUOMId = cUOM.intCommodityUnitMeasureId
+					, intMatchDerivativeHistoryId
+				FROM tblRKMatchDerivativesHistory history
+				JOIN tblRKMatchFuturesPSHeader header ON header.intMatchFuturesPSHeaderId = history.intMatchFuturesPSHeaderId
+				JOIN tblRKMatchFuturesPSDetail detail ON detail.intMatchFuturesPSDetailId = history.intMatchFuturesPSDetailId
+				JOIN tblRKFutOptTransaction de ON de.intFutOptTransactionId = history.intLFutOptTransactionId
+				LEFT JOIN tblRKFutureMarket FutMarket ON FutMarket.intFutureMarketId = de.intFutureMarketId
+				LEFT JOIN tblICCommodityUnitMeasure cUOM ON cUOM.intCommodityId = de.intCommodityId AND cUOM.intUnitMeasureId = FutMarket.intUnitMeasureId
+				LEFT JOIN (
+					SELECT strUserName = e.strName
+						, e.intEntityId
+					FROM tblEMEntity e
+					JOIN tblEMEntityType et ON et.intEntityId = e.intEntityId AND et.strType = 'User'
+				) e ON e.strUserName = history.strUserName
+
+				UNION ALL SELECT strTransactionType = 'Match Derivatives'
+					, intTransactionRecordId = history.intSFutOptTransactionId
+					, strTransactionNumber = de.strInternalTradeNo
+					, dtmTransactionDate = history.dtmMatchDate
+					, intContractDetailId = history.intMatchFuturesPSDetailId
+					, intContractHeaderId = history.intMatchFuturesPSHeaderId
+					, intCommodityId = de.intCommodityId
+					, intLocationId
+					, intBookId = de.intBookId
+					, intSubBookId = de.intSubBookId
+					, intFutureMarketId = de.intFutureMarketId
+					, intFutureMonthId = de.intFutureMonthId
+					, strNotes = 'OUT'
+					, dblNoOfLots = history.dblMatchQty * - 1
+					, dblPrice = de.dblPrice
+					, intEntityId = de.intEntityId
+					, intUserId = e.intEntityId
+					, intCommodityUOMId = cUOM.intCommodityUnitMeasureId
+					, intMatchDerivativeHistoryId
+				FROM tblRKMatchDerivativesHistory history
+				JOIN tblRKMatchFuturesPSHeader header ON header.intMatchFuturesPSHeaderId = history.intMatchFuturesPSHeaderId
+				JOIN tblRKMatchFuturesPSDetail detail ON detail.intMatchFuturesPSDetailId = history.intMatchFuturesPSDetailId
+				JOIN tblRKFutOptTransaction de ON de.intFutOptTransactionId = history.intSFutOptTransactionId
+				LEFT JOIN tblRKFutureMarket FutMarket ON FutMarket.intFutureMarketId = de.intFutureMarketId
+				LEFT JOIN tblICCommodityUnitMeasure cUOM ON cUOM.intCommodityId = de.intCommodityId AND cUOM.intUnitMeasureId = FutMarket.intUnitMeasureId
+				LEFT JOIN (
+					SELECT strUserName = e.strName
+						, e.intEntityId
+					FROM tblEMEntity e
+					JOIN tblEMEntityType et ON et.intEntityId = e.intEntityId AND et.strType = 'User'
+				) e ON e.strUserName = history.strUserName
+			) tbl
+			ORDER BY intMatchDerivativeHistoryId
 
 			EXEC uspRKLogRiskPosition @ExistingHistory, 1
 

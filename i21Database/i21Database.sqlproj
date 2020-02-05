@@ -8383,6 +8383,8 @@
     <Build Include="dbo\Views\vyuRKGetDPRHeader.sql" />
     <Build Include="dbo\Stored Procedures\uspRKRebuildSummaryLog.sql" />
     <Build Include="dbo\Functions\fnRKGetMatchedQtyAsOf.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKSaveMatchDerivative.sql" />
+    <Build Include="dbo\Views\vyuRKGetMatchDerivativesFromSummaryLog.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
