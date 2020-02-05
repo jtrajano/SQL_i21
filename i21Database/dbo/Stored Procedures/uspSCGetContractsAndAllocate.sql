@@ -684,7 +684,7 @@ BEGIN TRY
 			BY		CD.dtmStartDate, CD.intContractDetailId ASC
 		END
 
-		SET @dblNetUnits = dbo.fnCalculateQtyBetweenUOM(@intItemUOMId,@intScaleUOMId,@dblAvailable)
+		SET @dblNetUnits = dbo.fnCalculateQtyBetweenUOM(@intItemUOMId,@intScaleUOMId,@dblNetUnits)
 	END	
 	
 	UPDATE	@Processed SET dblUnitsRemaining = @dblNetUnits
