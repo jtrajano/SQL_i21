@@ -8416,6 +8416,8 @@
     <Build Include="dbo\Stored Procedures\uspIPListPopulateStgXML.sql" />
     <Build Include="dbo\Stored Procedures\uspIPListTransferStgXML.sql" />
     <Build Include="dbo\Stored Procedures\uspIPListProcessStgXML.sql" />
+    <Build Include="dbo\Tables\tblARInvoicePreStage.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPInterCompanyPreStageInvoice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
