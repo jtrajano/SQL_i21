@@ -115,12 +115,12 @@ FROM
 		SELECT 
 			SUM(dblAmount) dblTotal
 			,strId
-			,intBillDetailId
+			--,intBillDetailId
 		FROM vyuGRSettlementSubReport
-		GROUP BY strId, intBillDetailId
+		GROUP BY strId--, intBillDetailId
 	) tblOtherCharge
 		ON tblOtherCharge.strId = Bill.strBillId 
-			and BillDtl.intBillDetailId = tblOtherCharge.intBillDetailId
+			--and BillDtl.intBillDetailId = tblOtherCharge.intBillDetailId
 	-- LEFT JOIN (
 	-- 	SELECT 
 	-- 		A.intBillId
@@ -274,7 +274,7 @@ FROM
 		,InboundNetDue					= SUM(
 												CASE 
 													WHEN Bill.intTransactionType = 2 then 0													
-													ELSE BillDtl.dblTotal + BillDtl.dblTax + tblOtherCharge.dblTotal
+													ELSE BillDtl.dblTotal + BillDtl.dblTax + isnull(tblOtherCharge.dblTotal, 0)
 												END
 											) 
 		,OutboundNetWeight				= 0 
@@ -304,10 +304,7 @@ FROM
 											ELSE NULL 
 										END
 		,lblPartialPrepayment			= 'Basis Adv/Debit Memo' COLLATE Latin1_General_CI_AS
-		,dblPartialPrepayment			= CASE 
-											WHEN ISNULL(BasisPayment.dblVendorPrepayment,0) <> 0 THEN BasisPayment.dblVendorPrepayment--PartialPayment.dblTotals 
-											ELSE NULL 
-										END
+		,dblPartialPrepayment			= sum(ISNULL(BasisPayment.dblVendorPrepayment,0))
 		,CheckAmount				    = PYMT.dblAmountPaid 		    
 	FROM tblAPPayment PYMT 
 	JOIN tblAPPaymentDetail PYMTDTL	
@@ -323,13 +320,13 @@ FROM
 		SELECT 
 			SUM(dblAmount) dblTotal
 			,strId
-			,intBillDetailId
+			--,intBillDetailId
 		FROM vyuGRSettlementSubReport
 		GROUP BY strId
-			,intBillDetailId
+			--,intBillDetailId
 	) tblOtherCharge
 		ON tblOtherCharge.strId = Bill.strBillId
-			and BillDtl.intBillDetailId = tblOtherCharge.intBillDetailId
+			--and BillDtl.intBillDetailId = tblOtherCharge.intBillDetailId
 	-- LEFT JOIN (
 	-- 	SELECT 
 	-- 		A.intBillId
@@ -431,7 +428,7 @@ FROM
 		,PartialPayment.dblPayment
 		,PartialPayment.dblTotals
 		,PYMT.dblAmountPaid	
-		,BasisPayment.dblVendorPrepayment					
+		--,BasisPayment.dblVendorPrepayment					
 ) t
 GROUP BY 			
 	intPaymentId	
@@ -450,7 +447,7 @@ GROUP BY
 	,lblFactorTax				 
 	,dblPartialPrepaymentSubTotal
 	,lblPartialPrepayment		 
-	,dblPartialPrepayment		 
+	--,dblPartialPrepayment		 
 	,CheckAmount
 GO
 
