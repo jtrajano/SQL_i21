@@ -75,6 +75,7 @@ SELECT
 	, intContractSeq 				= ContractDetail.intContractSeq
 	, strLotCondition				= ICPreference.strLotCondition
 	, intLoadDetailContainerLinkId	= LoadContainerLink.intLoadDetailContainerLinkId 
+	, intAllowZeroCostTypeId = ItemLocation.intAllowZeroCostTypeId 
 FROM tblLGLoad Load
 	INNER JOIN tblLGLoadDetail LoadDetail ON LoadDetail.intLoadId = Load.intLoadId
 	INNER JOIN tblLGLoadDetailContainerLink LoadContainerLink ON LoadDetail.intLoadDetailId = LoadContainerLink.intLoadDetailId
@@ -94,6 +95,7 @@ FROM tblLGLoad Load
 	LEFT JOIN dbo.tblICItemUOM CostUOM ON CostUOM.intItemUOMId = dbo.fnGetMatchingItemUOMId(LoadDetail.intItemId, ISNULL(ContractDetail.intPriceItemUOMId, ContractDetail.intAdjItemUOMId))
 	LEFT JOIN dbo.tblICUnitMeasure CostUnitMeasure ON CostUnitMeasure.intUnitMeasureId = CostUOM.intUnitMeasureId
 	INNER JOIN tblICItem Item ON Item.intItemId = LoadDetail.intItemId
+	INNER JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemId = Item.intItemId AND ItemLocation.intLocationId = Load.intCompanyLocationId
 	INNER JOIN tblEMEntity Entity ON Entity.intEntityId = Contract.intEntityId 
 	LEFT OUTER JOIN tblCTWeightGrade WeightGrade ON WeightGrade.intWeightGradeId = Contract.intWeightId
 	LEFT OUTER JOIN tblSMCurrency ContractDetailCurrency ON ContractDetailCurrency.intCurrencyID = ContractDetail.intCurrencyId
