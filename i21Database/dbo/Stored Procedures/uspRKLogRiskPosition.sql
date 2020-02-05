@@ -109,7 +109,7 @@ BEGIN
 			, @ysnDelete = ysnDelete
 		FROM #tmpSummaryLogs
 
-		SELECT TOP 1 * INTO #tmpPrevLog FROM tblRKSummaryLog WHERE strTransactionType = @strTransactionType AND intTransactionRecordId = @intTransactionRecordId
+		SELECT TOP 1 * INTO #tmpPrevLog FROM tblRKSummaryLog WHERE strTransactionType = @strTransactionType AND intTransactionRecordId = @intTransactionRecordId AND ysnNegate = 0
 		ORDER BY intSummaryLogId DESC
 
 		-- Insert Delete Entry
@@ -158,7 +158,7 @@ BEGIN
 				, intBookId
 				, intSubBookId
 				, intLocationId
-				, CASE WHEN strInOut = 'IN' THEN 'OUT' ELSE 'IN' END
+				, strInOut 
 				, dblOrigNoOfLots * -1
 				, dblContractSize
 				, dblOrigQty * -1
@@ -239,7 +239,7 @@ BEGIN
 					, intBookId
 					, intSubBookId
 					, intLocationId
-					, CASE WHEN strInOut = 'IN' THEN 'OUT' ELSE 'IN' END
+					, strInOut
 					, dblOrigNoOfLots * -1
 					, dblContractSize
 					, dblOrigQty * -1
@@ -355,9 +355,9 @@ BEGIN
 				, @intSubBookId
 				, @intLocationId
 				, strInOut = CASE WHEN UPPER(@strBuySell) = 'BUY' THEN 'IN' ELSE 'OUT' END
-				, dblOrigNoOfLots = @dblNoOfLots * CASE WHEN UPPER(@strBuySell) = 'BUY' THEN 1 ELSE -1 END
+				, dblOrigNoOfLots = @dblNoOfLots 
 				, dblContractSize = @dblContractSize
-				, dblOrigQty = @dblNoOfLots * @dblContractSize * CASE WHEN UPPER(@strBuySell) = 'BUY' THEN 1 ELSE -1 END
+				, dblOrigQty = @dblNoOfLots * @dblContractSize 
 				, dblPrice = @dblPrice
 				, @intEntityId
 				, @intTicketId
@@ -502,9 +502,18 @@ BEGIN
 		END
 
 		----------------------------------------------
-		------------- Inventory Receipt --------------
+		------------- Inventory --------------
 		----------------------------------------------
-		ELSE IF @strTransactionType = 'Inventory Receipt'
+		ELSE IF @strTransactionType = 'Inventory Receipt' 
+			 OR @strTransactionType = 'Inventory Shipment'
+			 OR @strTransactionType = 'Inventory Transfer'
+			 OR @strTransactionType = 'Invoice'
+			 OR @strTransactionType = 'Consume'
+			 OR @strTransactionType = 'Produce'
+			 OR @strTransactionType like 'Inventory Adjustment%'
+			 OR @strTransactionType = 'Sales In-Transit'
+			 OR @strTransactionType = 'Purchase In-Transit'
+
 		BEGIN
 			INSERT INTO @FinalTable(strBatchId
 				, strTransactionType
@@ -531,7 +540,7 @@ BEGIN
 				, intUserId
 				, strNotes)
 			SELECT TOP 1 @strBatchId
-				, @strTransactionType
+				, strTransactionType = CASE WHEN @strTransactionType LIKE 'Inventory Adjustment%' THEN 'Inventory Adjustment' ELSE @strTransactionType END
 				, @intTransactionRecordId
 				, @strTransactionNumber
 				, @dtmTransactionDate
@@ -542,79 +551,31 @@ BEGIN
 				, @intTransactionRecordId
 				, @intCommodityId
 				, @intItemId
-				, intProductTypeId = I.intProductTypeId
+				, intProductTypeId = NULL--I.intProductTypeId
 				, intOrigUOMId = @intCommodityUOMId
 				, @intBookId
 				, @intSubBookId
 				, @intLocationId
-				, strInOut = 'IN' 
+				, strInOut = CASE 
+						WHEN @strTransactionType = 'Inventory Receipt' OR
+							 @strTransactionType = 'Produce' 
+							THEN 'IN' 
+						WHEN @strTransactionType = 'Inventory Shipment' OR
+							 @strTransactionType = 'Invoice' OR
+							 @strTransactionType = 'Consume' 
+							THEN 'OUT'
+						WHEN @strTransactionType = 'Inventory Transfer' OR
+							 @strTransactionType like 'Inventory Adjustment%' OR
+							 @strTransactionType = 'Sales In-Transit' OR
+							 @strTransactionType = 'Purchase In-Transit'
+							THEN CASE WHEN ISNULL(@dblQty, 0) >= 0 THEN 'IN' ELSE 'OUT' END
+						ELSE '' END
 				, dblOrigQty = @dblQty
 				, dblPrice = @dblPrice
 				, @intEntityId
 				, @intTicketId
 				, @intUserId
 				, @strNotes
-			FROM tblICInventoryReceiptItem IRI
-			LEFT JOIN tblICItem I ON I.intItemId = IRI.intItemId
-			WHERE IRI.intInventoryReceiptItemId = @intTransactionRecordId
-		END
-
-		----------------------------------------------
-		------------- Inventory Shipment --------------
-		----------------------------------------------
-		ELSE IF @strTransactionType = 'Inventory Shipment'
-		BEGIN
-			INSERT INTO @FinalTable(strBatchId
-				, strTransactionType
-				, intTransactionRecordId
-				, strTransactionNumber
-				, dtmTransactionDate
-				, intContractDetailId
-				, intContractHeaderId
-				, intFutureMarketId
-				, intFutureMonthId
-				, intFutOptTransactionId
-				, intCommodityId
-				, intItemId
-				, intProductTypeId
-				, intOrigUOMId
-				, intBookId
-				, intSubBookId
-				, intLocationId
-				, strInOut
-				, dblOrigQty
-				, dblPrice
-				, intEntityId
-				, intTicketId
-				, intUserId
-				, strNotes)
-			SELECT TOP 1 @strBatchId
-				, @strTransactionType
-				, @intTransactionRecordId
-				, @strTransactionNumber
-				, @dtmTransactionDate
-				, @intContractDetailId
-				, @intContractHeaderId
-				, @intFutureMarketId
-				, @intFutureMonthId
-				, @intTransactionRecordId
-				, @intCommodityId
-				, @intItemId
-				, intProductTypeId = I.intProductTypeId
-				, intOrigUOMId = @intCommodityUOMId
-				, @intBookId
-				, @intSubBookId
-				, @intLocationId
-				, strInOut =  'OUT'
-				, dblOrigQty = @dblQty * -1
-				, dblPrice = @dblPrice
-				, @intEntityId
-				, @intTicketId
-				, @intUserId
-				, @strNotes
-			FROM tblICInventoryShipmentItem ISI
-			LEFT JOIN tblICItem I ON I.intItemId = ISI.intItemId
-			WHERE ISI.intInventoryShipmentItemId = @intTransactionRecordId
 		END
 
 		------------------------------------
@@ -728,64 +689,6 @@ BEGIN
 				, @intTicketId
 				, @intUserId
 				, @strNotes
-		END
-
-		---------------------------------------
-		------------- Invoice --------------
-		---------------------------------------
-		ELSE IF @strTransactionType = 'Invoice'
-		BEGIN
-			INSERT INTO @FinalTable(strBatchId
-				, strTransactionType
-				, intTransactionRecordId
-				, strTransactionNumber
-				, dtmTransactionDate
-				, intContractDetailId
-				, intContractHeaderId
-				, intFutureMarketId
-				, intFutureMonthId
-				, intFutOptTransactionId
-				, intCommodityId
-				, intItemId
-				, intProductTypeId
-				, intOrigUOMId
-				, intBookId
-				, intSubBookId
-				, intLocationId
-				, strInOut
-				, dblOrigQty
-				, dblPrice
-				, intEntityId
-				, intTicketId
-				, intUserId
-				, strNotes)
-			SELECT TOP 1 @strBatchId
-				, @strTransactionType
-				, @intTransactionRecordId
-				, @strTransactionNumber
-				, @dtmTransactionDate
-				, @intContractDetailId
-				, @intContractHeaderId
-				, @intFutureMarketId
-				, @intFutureMonthId
-				, @intTransactionRecordId
-				, @intCommodityId
-				, @intItemId
-				, intProductTypeId = I.intProductTypeId
-				, intOrigUOMId = @intCommodityUOMId
-				, @intBookId
-				, @intSubBookId
-				, @intLocationId
-				, strInOut = CASE WHEN ISNULL(@dblQty, 0) >= 0 THEN 'OUT' ELSE 'IN' END
-				, dblOrigQty = @dblQty
-				, dblPrice = @dblPrice
-				, @intEntityId
-				, @intTicketId
-				, @intUserId
-				, @strNotes
-			FROM tblARInvoiceDetail ID
-			LEFT JOIN tblICItem I ON I.intItemId = ID.intItemId
-			WHERE ID.intInvoiceDetailId = @intTransactionRecordId
 		END
 
 		---------------------------------------
