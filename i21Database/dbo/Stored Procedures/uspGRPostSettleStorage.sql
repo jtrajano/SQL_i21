@@ -2268,6 +2268,7 @@ BEGIN TRY
 															else isnull(availableQtyForVoucher.dblCashPrice, a.dblCashPrice) end
 														else
 															CASE
+																WHEN (intItemType = 2 or intItemType = 3) then  a.dblCashPrice
 																when availableQtyForVoucher.intContractDetailId is not null and @ysnFromPriceBasisContract = 1 then
 																	ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(a.intContractUOMId,b.intItemUOMId, availableQtyForVoucher.dblCashPrice),0)
 																WHEN a.[intContractHeaderId] IS NOT NULL THEN dbo.fnCTConvertQtyToTargetItemUOM(a.intContractUOMId,b.intItemUOMId,a.dblCashPrice)
