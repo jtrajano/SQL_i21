@@ -268,12 +268,11 @@ FROM
 													ELSE BillDtl.dblTax
 												END
 											)
-		,InboundDiscount				= 0
+		,InboundDiscount				= ISNULL(tblOtherCharge.dblTotal,0) 
 		,InboundNetDue					= SUM(
 												CASE 
-													WHEN Bill.intTransactionType = 2 then 0
-													WHEN BillDtl.intInventoryReceiptItemId IS NULL AND BillDtl.intInventoryReceiptChargeId IS NULL THEN 0 
-													ELSE BillDtl.dblTotal + BillDtl.dblTax +BillDtl.dblDiscount
+													WHEN Bill.intTransactionType = 2 then 0													
+													ELSE BillDtl.dblTotal + BillDtl.dblTax + tblOtherCharge.dblTotal
 												END
 											) 
 		,OutboundNetWeight				= 0 
