@@ -155,6 +155,7 @@ FROM (
 			, ysnIsBasket = CAST(0 AS BIT)
 			, item.strBundleType
 			, d.intOwnershipType 
+			, intAllowZeroCostTypeId = toLocation.intAllowZeroCostTypeId 
 	FROM	dbo.tblICInventoryTransfer h INNER JOIN tblICInventoryTransferDetail d 
 				ON h.intInventoryTransferId = d.intInventoryTransferId
 	
