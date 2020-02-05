@@ -34,6 +34,7 @@ CREATE TABLE [dbo].[tblCTItemContractHeader](
 
 	[intShipToLocationId]				[int] NULL, 
 	[dblDollarValue]					[numeric](18, 6) NULL,
+	[dblAppliedDollarValue]				[numeric](18, 6) NULL,
 	[dblRemainingDollarValue]			[numeric](18, 6) NULL,
 
 	--[strShipToLocationName]				[nvarchar](50) NULL,

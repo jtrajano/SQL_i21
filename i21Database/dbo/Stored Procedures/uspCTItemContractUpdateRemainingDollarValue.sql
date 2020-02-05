@@ -13,8 +13,11 @@ BEGIN TRY
 	DECLARE 
 			@strItemContractNumber		NVARCHAR(50),
 			@dblDollarValue				numeric(18,6),
+			@dblAppliedDollarValue		numeric(18,6),
 			@dblRemainingDollarValue	numeric(18,6),
 			@dblNewRemainingDollarValue	numeric(18,6),
+			@dblNewAppliedDollarValue	numeric(18,6),
+			@strContractCategoryId		NVARCHAR(50),
 			@ErrMsg						NVARCHAR(MAX)
 
 	IF NOT EXISTS(select * from tblCTItemContractHeader where intItemContractHeaderId = @intItemContractHeaderId)
@@ -28,13 +31,21 @@ BEGIN TRY
 	SELECT
 		@strItemContractNumber = H.strContractNumber
 		,@dblDollarValue = isnull(H.dblDollarValue,0)
+		,@dblAppliedDollarValue = isnull(H.dblAppliedDollarValue,0)
 		,@dblRemainingDollarValue = isnull(H.dblRemainingDollarValue,0)
+		,@strContractCategoryId = H.strContractCategoryId
 	FROM
 		tblCTItemContractHeader H
 	WHERE
 		H.intItemContractHeaderId = @intItemContractHeaderId
 
+	if (@strContractCategoryId <> 'Dollar')
+	BEGIN
+		goto DontUpdateNonDollarContract;
+	end
+
 	SET @dblNewRemainingDollarValue = @dblRemainingDollarValue + @dblValueToUpdate;
+	SET @dblNewAppliedDollarValue = @dblDollarValue - @dblNewRemainingDollarValue;
 
 	-- VALIDATION #1
 	IF (@dblNewRemainingDollarValue < 0)
@@ -70,8 +81,11 @@ BEGIN TRY
 	-- UPDATE ITEM CONTRACT
 	UPDATE 	tblCTItemContractHeader
 	SET		dblRemainingDollarValue			=	ISNULL(@dblNewRemainingDollarValue,0),
+			dblAppliedDollarValue			=	isnull(@dblNewAppliedDollarValue,0),
 			intConcurrencyId				=	intConcurrencyId + 1
 	WHERE	intItemContractHeaderId			=	@intItemContractHeaderId
+
+	DontUpdateNonDollarContract:
 
 
 END TRY
