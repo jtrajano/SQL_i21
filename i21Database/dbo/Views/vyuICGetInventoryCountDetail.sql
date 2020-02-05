@@ -38,8 +38,8 @@ SELECT InvCountDetail.intInventoryCountDetailId,
     InvCountDetail.dblNewCost,
 
 	InvCountDetail.intItemLocationId,
-	[Location].intCompanyLocationId,
-	[Location].strLocationName,
+	intCompanyLocationId = ISNULL([Location].intCompanyLocationId, [CountGroupLocation].intCompanyLocationId),
+	strLocationName = ISNULL([Location].strLocationName, [CountGroupLocation].strLocationName),
 	InvCountDetail.intSubLocationId,
 	SubLocation.strSubLocationName,
 	InvCountDetail.intStorageLocationId,
@@ -85,8 +85,9 @@ FROM tblICInventoryCountDetail InvCountDetail
 	INNER JOIN tblICInventoryCount InvCount ON InvCount.intInventoryCountId = InvCountDetail.intInventoryCountId
 	LEFT JOIN tblICItem Item ON Item.intItemId = InvCountDetail.intItemId
 	LEFT JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemLocationId = InvCountDetail.intItemLocationId
-	LEFT JOIN tblSMCompanyLocation [Location] ON [Location].intCompanyLocationId = ISNULL(ItemLocation.intLocationId, InvCount.intLocationId) 
+	LEFT JOIN tblSMCompanyLocation [Location] ON [Location].intCompanyLocationId = ItemLocation.intLocationId
 	LEFT JOIN tblICCountGroup CountGroup ON CountGroup.intCountGroupId = InvCountDetail.intCountGroupId	
+	LEFT JOIN tblSMCompanyLocation [CountGroupLocation] ON [CountGroupLocation].intCompanyLocationId = InvCount.intLocationId AND InvCountDetail.intCountGroupId IS NOT NULL 
 	LEFT JOIN tblICCategory Category ON Category.intCategoryId = Item.intCategoryId		
 	LEFT JOIN tblSMCompanyLocationSubLocation SubLocation ON SubLocation.intCompanyLocationSubLocationId = InvCountDetail.intSubLocationId
 	LEFT JOIN tblICStorageLocation StorageLocation ON StorageLocation.intStorageLocationId = InvCountDetail.intStorageLocationId
