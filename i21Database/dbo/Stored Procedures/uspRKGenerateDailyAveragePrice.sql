@@ -506,22 +506,6 @@ BEGIN
 														ORDER BY dtmDate DESC)
 			WHERE ISNULL(RefDetail.dblNoOfLots, 0) <> 0
 
-			UPDATE tblRKDailyAveragePriceDetailTransaction
-			SET dblNoOfContract = dblOpenContract + dblSellContract
-			FROM (
-					SELECT intDailyAveragePriceDetailId
-						, dblOpenContract = SUM((CASE WHEN strBuySell = 'Buy' AND strTransactionType = 'DailyAveragePrice' THEN dblNewNoOfContract ELSE 0 END))
-						, dblSellContract = SUM((CASE WHEN strBuySell = 'Sell' THEN dblNewNoOfContract ELSE 0 END))
-					FROM (
-						SELECT *
-							, dblNewNoOfContract = CASE WHEN strInstrumentType = 'Futures' THEN dblNoOfContract ELSE 0 END
-						FROM tblRKDailyAveragePriceDetailTransaction
-					) tblRKDailyAveragePriceDetailTransaction
-					WHERE intDailyAveragePriceDetailId IN (SELECT intDailyAveragePriceDetailId FROM tblRKDailyAveragePriceDetail WHERE intDailyAveragePriceId = @intDailyAveragePriceId)
-					GROUP BY intDailyAveragePriceDetailId
-			) tblPatch
-			WHERE tblPatch.intDailyAveragePriceDetailId = tblRKDailyAveragePriceDetailTransaction.intDailyAveragePriceDetailId AND tblRKDailyAveragePriceDetailTransaction.strTransactionType = 'DailyAveragePrice'
-
 			UPDATE tblRKDailyAveragePriceDetail
 			SET dblAverageLongPrice = tblPatch.dblAvgLongPrice
 				, dblNoOfLots = tblPatch.dblNoOfLots
@@ -542,6 +526,21 @@ BEGIN
 					WHERE intDailyAveragePriceDetailId IN (SELECT intDailyAveragePriceDetailId FROM tblRKDailyAveragePriceDetail WHERE intDailyAveragePriceId = @intDailyAveragePriceId)
 					GROUP BY intDailyAveragePriceDetailId
 				) t
+			) tblPatch
+			WHERE tblPatch.intDailyAveragePriceDetailId = tblRKDailyAveragePriceDetail.intDailyAveragePriceDetailId
+
+			UPDATE tblRKDailyAveragePriceDetail
+			SET dblNoOfLots = dblNoOfLots + dblSellContract
+			FROM (
+					SELECT intDailyAveragePriceDetailId
+						, dblSellContract = SUM((CASE WHEN strBuySell = 'Sell' THEN dblNewNoOfContract ELSE 0 END))
+					FROM (
+						SELECT *
+							, dblNewNoOfContract = CASE WHEN strInstrumentType = 'Futures' THEN dblNoOfContract ELSE 0 END
+						FROM tblRKDailyAveragePriceDetailTransaction
+					) tblRKDailyAveragePriceDetailTransaction
+					WHERE intDailyAveragePriceDetailId IN (SELECT intDailyAveragePriceDetailId FROM tblRKDailyAveragePriceDetail WHERE intDailyAveragePriceId = @intDailyAveragePriceId)
+					GROUP BY intDailyAveragePriceDetailId
 			) tblPatch
 			WHERE tblPatch.intDailyAveragePriceDetailId = tblRKDailyAveragePriceDetail.intDailyAveragePriceDetailId
 
