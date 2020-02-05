@@ -74,9 +74,9 @@ AS
 	, strMarkings               = LogisticsView.strMarks
 	, Item.strBundleType 
 	, intContractSeq 			= LogisticsView.intPContractSeq
-	, strLotCondition			= ICPreference.strLotCondition
-	
+	, strLotCondition			= ICPreference.strLotCondition	
 	, intLoadDetailContainerLinkId = LogisticsView.intLoadDetailContainerLinkId 
+	, intAllowZeroCostTypeId	= ItemLocation.intAllowZeroCostTypeId 
 	FROM vyuLGLoadContainerReceiptContracts LogisticsView
 		LEFT JOIN dbo.tblSMCurrency Currency
 		ON Currency.strCurrency = ISNULL(LogisticsView.strCurrency, LogisticsView.strMainCurrency)
