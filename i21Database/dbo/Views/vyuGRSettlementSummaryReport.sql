@@ -115,10 +115,12 @@ FROM
 		SELECT 
 			SUM(dblAmount) dblTotal
 			,strId
+			,intBillDetailId
 		FROM vyuGRSettlementSubReport
-		GROUP BY strId
+		GROUP BY strId, intBillDetailId
 	) tblOtherCharge
-		ON tblOtherCharge.strId = Bill.strBillId
+		ON tblOtherCharge.strId = Bill.strBillId 
+			and BillDtl.intBillDetailId = tblOtherCharge.intBillDetailId
 	-- LEFT JOIN (
 	-- 	SELECT 
 	-- 		A.intBillId
@@ -321,10 +323,13 @@ FROM
 		SELECT 
 			SUM(dblAmount) dblTotal
 			,strId
+			,intBillDetailId
 		FROM vyuGRSettlementSubReport
 		GROUP BY strId
+			,intBillDetailId
 	) tblOtherCharge
 		ON tblOtherCharge.strId = Bill.strBillId
+			and BillDtl.intBillDetailId = tblOtherCharge.intBillDetailId
 	-- LEFT JOIN (
 	-- 	SELECT 
 	-- 		A.intBillId
@@ -445,5 +450,8 @@ GROUP BY
 	,lblFactorTax				 
 	,dblPartialPrepaymentSubTotal
 	,lblPartialPrepayment		 
-	--,dblPartialPrepayment		 
+	,dblPartialPrepayment		 
 	,CheckAmount
+GO
+
+
