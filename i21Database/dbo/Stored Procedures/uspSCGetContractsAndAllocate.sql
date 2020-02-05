@@ -318,7 +318,10 @@ BEGIN TRY
 		WHERE	CD.intContractDetailId = @intContractDetailId
 
 		SELECT @dblNetUnitsToCompare = dbo.fnCalculateQtyBetweenUOM(@intScaleUOMId,@intItemUOMId,@dblNetUnits)
-		SET @dblTicketScheduledQuantity = dbo.fnCalculateQtyBetweenUOM(@intScaleUOMId,@intItemUOMId,@_dblTicketScheduledQuantity)
+		IF(@strDistributionOption <> 'LOD') 
+		BEGIN
+			SET @dblTicketScheduledQuantity = dbo.fnCalculateQtyBetweenUOM(@intScaleUOMId,@intItemUOMId,@_dblTicketScheduledQuantity)
+		END
 
 		SET @dblNetUnits = @dblNetUnitsToCompare
 
