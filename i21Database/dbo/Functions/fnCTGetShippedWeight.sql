@@ -11,7 +11,7 @@ BEGIN
 
 	DECLARE @dblShippedWeight NUMERIC(38,20)
 	
-	SELECT @dblShippedWeight = dblGross
+	SELECT @dblShippedWeight = dblNet
 	FROM tblLGLoadDetail
 	WHERE intLoadDetailId = @intLoadDetailId
 
