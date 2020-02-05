@@ -303,7 +303,7 @@ FROM
 			,intInventoryReceiptItemId
    )t3 
 		ON --t3.intBillId = t2.intBillId AND t3.intBillId = t1.intBillId
-				t3.intBillId = t1.intBillId and t3.intInventoryReceiptItemId = t1.intInventoryReceiptItemId
+				t3.intBillId = t1.intBillId and isnull(t3.intInventoryReceiptItemId, 0) = isnull(t1.intInventoryReceiptItemId, 0)
 	WHERE t3.intItemId IS NOT NULL 
 )t	
 GROUP BY 
