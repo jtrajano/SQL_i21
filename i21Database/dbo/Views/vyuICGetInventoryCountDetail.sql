@@ -83,9 +83,9 @@ SELECT InvCountDetail.intInventoryCountDetailId,
 	ItemLocation.strStorageUnitNo
 FROM tblICInventoryCountDetail InvCountDetail	
 	INNER JOIN tblICInventoryCount InvCount ON InvCount.intInventoryCountId = InvCountDetail.intInventoryCountId
-	INNER JOIN tblICItem Item ON Item.intItemId = InvCountDetail.intItemId
-	INNER JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemLocationId = InvCountDetail.intItemLocationId
-	INNER JOIN tblSMCompanyLocation [Location] ON [Location].intCompanyLocationId = ItemLocation.intLocationId
+	LEFT JOIN tblICItem Item ON Item.intItemId = InvCountDetail.intItemId
+	LEFT JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemLocationId = InvCountDetail.intItemLocationId
+	LEFT JOIN tblSMCompanyLocation [Location] ON [Location].intCompanyLocationId = ISNULL(ItemLocation.intLocationId, InvCount.intLocationId) 
 	LEFT JOIN tblICCountGroup CountGroup ON CountGroup.intCountGroupId = InvCountDetail.intCountGroupId	
 	LEFT JOIN tblICCategory Category ON Category.intCategoryId = Item.intCategoryId		
 	LEFT JOIN tblSMCompanyLocationSubLocation SubLocation ON SubLocation.intCompanyLocationSubLocationId = InvCountDetail.intSubLocationId
