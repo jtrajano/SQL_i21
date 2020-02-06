@@ -19,6 +19,10 @@ BEGIN
 	IF @dtmAOPToDate = '1900-01-01' SET @dtmAOPToDate = GETDATE()
 	IF @strEntityName = '-1' SET @strEntityName = NULL
 	IF @strLocationName = '-1' SET @strLocationName = NULL
+
+	DECLARE @ysnUseM2MDate BIT
+	
+	SELECT TOP 1 @ysnUseM2MDate = ISNULL(ysnUseM2MDate, 0) FROM tblRKCompanyPreference
 	
 	DECLARE @strCurrency NVARCHAR(100)
 		, @strUnitMeasure NVARCHAR(100)
@@ -174,7 +178,7 @@ BEGIN
 														ELSE CASE WHEN ISNULL(cd.intProducerId, 0) = 0 THEN ch.intEntityId
 																	ELSE CASE WHEN ISNULL(cd.ysnClaimsToProducer, 0) = 1 THEN cd.intProducerId
 																				ELSE ch.intEntityId END END END
-			WHERE ISNULL(cd.dtmM2MDate, GETDATE()) BETWEEN @dtmFromDate AND @dtmToDate
+			WHERE ISNULL(CASE WHEN @ysnUseM2MDate = 1 THEN cd.dtmM2MDate ELSE ch.dtmContractDate END, GETDATE()) BETWEEN @dtmFromDate AND @dtmToDate
 				AND ch.intCommodityId = @intCommodityId
 				AND strName = CASE WHEN ISNULL(@strEntityName, '') = '' THEN strName ELSE @strEntityName END
 				AND ISNULL(cd.intBookId, 0) = CASE WHEN ISNULL(@intBookId, 0) = 0 THEN ISNULL(cd.intBookId, 0) ELSE @intBookId END
