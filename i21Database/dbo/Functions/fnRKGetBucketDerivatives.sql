@@ -74,14 +74,14 @@ BEGIN
 	FROM (
 		SELECT 
 			intRowNum = ROW_NUMBER() OVER (PARTITION BY c.intTransactionRecordId ORDER BY c.intSummaryLogId DESC)
-			,intFutOptTransactionId = intTransactionRecordId
-			,dblOpenContract = dblOrigNoOfLots - md.dblOrigNoOfLots
+			,intFutOptTransactionId = c.intTransactionRecordId
+			,dblOpenContract = c.dblOrigNoOfLots - md.dblOrigNoOfLots
 			,intCommodityId
 			,strCommodityCode
 			,strInternalTradeNo = strTransactionNumber
 			,strLocationName
 			,dblContractSize = CAST(ISNULL(mf.dblContractSize, 0.00) AS NUMERIC(24, 10))
-			,intOrigUOMId
+			,c.intOrigUOMId
 			,strFutureMarket
 			,strFutureMonth
 			,intOptionMonthId = mf.intOptionMonthId
