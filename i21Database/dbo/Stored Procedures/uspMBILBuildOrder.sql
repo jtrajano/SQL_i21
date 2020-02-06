@@ -75,6 +75,7 @@ SELECT DISTINCT intDispatchId
 	, intLocationId
 FROM #Dispatch
 WHERE intDriverId = @intDriverId AND strOrderStatus = 'Generated'
+		AND intTermId IN (SELECT intTermID from tblSMTerm)
 
 -- ++++++ CREATE ORDER's ITEM LIST ++++++ --
 INSERT INTO tblMBILOrderItem(intOrderId
