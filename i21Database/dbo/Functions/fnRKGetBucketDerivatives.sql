@@ -104,7 +104,6 @@ BEGIN
 			AND ISNULL(c.intCommodityId,0) = ISNULL(@intCommodityId, ISNULL(c.intCommodityId, 0)) 
 			AND ISNULL(intEntityId, 0) = ISNULL(@intVendorId, ISNULL(intEntityId, 0))
 
-		UNION ALL SELECT * FROM tb
 	) t WHERE intRowNum = 1
 
 
