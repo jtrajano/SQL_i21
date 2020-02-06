@@ -193,7 +193,7 @@ BEGIN
 														ELSE CASE WHEN ISNULL(cd.intProducerId, 0) = 0 THEN ch.intEntityId
 																ELSE CASE WHEN ISNULL(cd.ysnClaimsToProducer, 0) = 1 THEN cd.intProducerId ELSE ch.intEntityId END END END
 			JOIN vyuRKSourcingContractDetail sc ON sc.intContractDetailId = cd.intContractDetailId
-			WHERE ISNULL(cd.dtmM2MDate, GETDATE()) BETWEEN @dtmFromDate AND @dtmToDate
+			WHERE ISNULL(cd.dtmStartDate, GETDATE()) BETWEEN @dtmFromDate AND @dtmToDate
 				AND ch.intCommodityId = @intCommodityId
 				AND ISNULL(strName, '') = CASE WHEN ISNULL(@strEntityName, '') = '' THEN ISNULL(strName, '') ELSE @strEntityName END
 				AND ISNULL(strOrigin, '') = CASE WHEN ISNULL(@strOrigin, '') = '' THEN ISNULL(strOrigin, '') ELSE @strOrigin END

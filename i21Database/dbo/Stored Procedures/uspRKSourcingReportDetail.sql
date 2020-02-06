@@ -174,7 +174,7 @@ BEGIN
 														ELSE CASE WHEN ISNULL(cd.intProducerId, 0) = 0 THEN ch.intEntityId
 																	ELSE CASE WHEN ISNULL(cd.ysnClaimsToProducer, 0) = 1 THEN cd.intProducerId
 																				ELSE ch.intEntityId END END END
-			WHERE ISNULL(cd.dtmM2MDate, GETDATE()) BETWEEN @dtmFromDate AND @dtmToDate
+			WHERE ISNULL(cd.dtmStartDate, GETDATE()) BETWEEN @dtmFromDate AND @dtmToDate
 				AND ch.intCommodityId = @intCommodityId
 				AND strName = CASE WHEN ISNULL(@strEntityName, '') = '' THEN strName ELSE @strEntityName END
 				AND ISNULL(cd.intBookId, 0) = CASE WHEN ISNULL(@intBookId, 0) = 0 THEN ISNULL(cd.intBookId, 0) ELSE @intBookId END
