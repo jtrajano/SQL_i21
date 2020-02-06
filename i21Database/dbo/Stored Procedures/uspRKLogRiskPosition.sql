@@ -90,6 +90,38 @@ BEGIN
 
 	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpSummaryLogs)
 	BEGIN
+		SELECT @intId = NULL
+			, @strBatchId = NULL
+			, @strTransactionType = NULL
+			, @intTransactionRecordId = NULL
+			, @strTransactionNumber = NULL
+			, @dtmTransactionDate = NULL
+			, @intContractDetailId = NULL
+			, @intContractHeaderId = NULL
+			, @intTicketId = NULL
+			, @intCommodityId = NULL
+			, @intCommodityUOMId = NULL
+			, @intItemId = NULL
+			, @intBookId = NULL
+			, @intSubBookId = NULL
+			, @intLocationId = NULL
+			, @intFutureMarketId = NULL
+			, @intFutureMonthId = NULL
+			, @dblNoOfLots = NULL
+			, @dblQty = NULL
+			, @dblPrice = NULL
+			, @intUserId = NULL
+			, @intEntityId = NULL
+			, @ysnDelete = NULL
+			, @strNotes = NULL
+			, @strInOut = NULL
+			, @dblContractSize = NULL
+			, @strInstrumentType = NULL
+			, @strBrokerAccount = NULL
+			, @strBroker = NULL
+			, @ysnPreCrush = NULL
+			, @strBrokerTradeNo = NULL
+
 		SELECT TOP 1 @intId = intId
 			, @strBatchId = strBatchId
 			, @strTransactionType = strTransactionType
@@ -197,7 +229,7 @@ BEGIN
 		END
 
 		-- Log counter entry to negate previous value
-		IF (@strTransactionType IN ('Derivatives', 'Collateral', 'Collateral Adjustments'))
+		IF (@strTransactionType IN ('Derivatives', 'Match Derivatives', 'Collateral', 'Collateral Adjustments'))
 		BEGIN
 			IF EXISTS(SELECT TOP 1 1 FROM #tmpPrevLog)
 			BEGIN
@@ -298,7 +330,6 @@ BEGIN
 			INSERT INTO @LogHelper(intRowId, strFieldName, strValue)
 			SELECT intRowId = ROW_NUMBER() OVER (ORDER BY strFieldName),  * FROM (
 				SELECT strFieldName = 'strBuySell', strValue = @strBuySell
-				UNION ALL SELECT 'dblContractSize', CAST(@dblContractSize AS NVARCHAR)
 				UNION ALL SELECT 'intOptionMonthId', CAST(@intOptionMonthId AS NVARCHAR)
 				UNION ALL SELECT 'strOptionMonth', @strOptionMonth
 				UNION ALL SELECT 'dblStrike', CAST(@dblStrike AS NVARCHAR)
@@ -385,16 +416,11 @@ BEGIN
 
 			SELECT TOP 1 @strBuySell = der.strBuySell
 				, @dblContractSize = m.dblContractSize
-				, @intOptionMonthId = der.intOptionMonthId
-				, @strOptionMonth = om.strOptionMonth
-				, @dblStrike = der.dblStrike
-				, @strOptionType = der.strOptionType
 				, @strInstrumentType = CASE WHEN (der.[intInstrumentTypeId] = 1) THEN N'Futures'
 								WHEN (der.[intInstrumentTypeId] = 2) THEN N'Options'
 								WHEN (der.[intInstrumentTypeId] = 3) THEN N'Currency Contract' END COLLATE Latin1_General_CI_AS
 				, @strBrokerAccount = BA.strAccountNumber
 				, @strBroker = e.strName
-				, @intFutOptTransactionHeaderId = der.intFutOptTransactionHeaderId
 				, @ysnPreCrush = der.ysnPreCrush
 				, @strBrokerTradeNo = der.strBrokerTradeNo
 			FROM tblRKFutOptTransaction der
@@ -406,13 +432,19 @@ BEGIN
 			WHERE der.intFutOptTransactionId = @intTransactionRecordId
 
 			SELECT TOP 1 @intMatchNo = intMatchNo FROM tblRKMatchFuturesPSHeader WHERE intMatchFuturesPSHeaderId = @intMatchDerivativesHeaderId
-			SELECT TOP 1 @dblContractSize = dblContractSize FROM tblRKFutureMarket WHERE intFutureMarketId = @intFutureMarketId
 
 			INSERT INTO @LogHelper(intRowId, strFieldName, strValue)
 			SELECT intRowId = ROW_NUMBER() OVER (ORDER BY strFieldName),  * FROM (
 				SELECT strFieldName = 'intMatchDerivativesHeaderId', strValue = CAST(@intMatchDerivativesHeaderId AS NVARCHAR)
 				UNION ALL SELECT 'intMatchDerivativesDetailId', CAST(@intMatchDerivativesDetailId AS NVARCHAR)
 				UNION ALL SELECT 'intMatchNo', CAST(@intMatchNo AS NVARCHAR)
+				UNION ALL SELECT 'strBuySell', @strBuySell
+				UNION ALL SELECT 'strInstrumentType', @strInstrumentType
+				UNION ALL SELECT 'strBrokerAccount', @strBrokerAccount
+				UNION ALL SELECT 'strBroker', @strBroker
+				UNION ALL SELECT 'intFutOptTransactionHeaderId', CAST(@intFutOptTransactionHeaderId AS NVARCHAR)
+				UNION ALL SELECT 'ysnPreCrush', CAST(@ysnPreCrush AS NVARCHAR)
+				UNION ALL SELECT 'strBrokerTradeNo', @strBrokerTradeNo
 			) t WHERE ISNULL(strValue, '') != ''
 			
 			INSERT INTO @FinalTable(strBatchId

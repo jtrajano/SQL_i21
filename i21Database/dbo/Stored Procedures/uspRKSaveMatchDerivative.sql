@@ -11,8 +11,19 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 BEGIN
-	--SELECT * INTO #tmpDerivative FROM tblRKFutOptTransaction WHERE intFutOptTransactionId = @intFutOptTransactionId
-	--SELECT TOP 1 * INTO #History FROM tblRKSummaryLog WHERE intTransactionRecordId = @intFutOptTransactionId AND strTransactionType = 'Derivatives' ORDER BY dtmCreatedDate DESC
+	SELECT h.intMatchFuturesPSHeaderId
+		, h.intMatchNo
+		, h.dtmMatchDate
+		, d.intMatchFuturesPSDetailId
+		, d.intLFutOptTransactionId
+		, d.intSFutOptTransactionId
+		, d.dblMatchQty
+	INTO #tmpDerivative
+	FROM tblRKMatchFuturesPSHeader h
+	LEFT JOIN tblRKMatchFuturesPSDetail d ON d.intMatchFuturesPSHeaderId = h.intMatchFuturesPSHeaderId
+	WHERE h.intMatchFuturesPSHeaderId = @intMatchFuturesPSHeaderId
+
+	SELECT * INTO #History FROM vyuRKGetMatchDerivativesFromSummaryLog WHERE intMatchDerivativesHeaderId = @intMatchFuturesPSHeaderId AND strTransactionType = 'Match Derivatives' ORDER BY dtmCreatedDate DESC
 	DECLARE @SummaryLog AS RKSummaryLog
 	
 	--IF EXISTS(SELECT TOP 1 1 FROM #tmpDerivative)

@@ -30,6 +30,23 @@ RETURNS @returntable TABLE
 )
 AS
 BEGIN
+	; WITH MatchDerivatives (
+		intTransactionRecordId
+		, intOrigUOMId
+		, dblOrigNoOfLots
+		, dblOrigQty
+	) AS (
+		SELECT intTransactionRecordId
+			, intOrigUOMId
+			, dblOrigNoOfLots = SUM(dblOrigNoOfLots)
+			, dblOrigQty = SUM(dblOrigQty)
+		FROM vyuRKGetSummaryLog sl
+		WHERE strTransactionType = 'Match Derivatives'
+			AND CAST(FLOOR(CAST(dtmCreatedDate AS FLOAT)) AS DATETIME) <= @dtmDate
+			AND CAST(FLOOR(CAST(dtmTransactionDate AS FLOAT)) AS DATETIME) <= @dtmDate
+		GROUP BY intTransactionRecordId
+			, intOrigUOMId
+	)
 
 	INSERT @returntable	
 	SELECT 
@@ -58,7 +75,7 @@ BEGIN
 		SELECT 
 			intRowNum = ROW_NUMBER() OVER (PARTITION BY c.intTransactionRecordId ORDER BY c.intSummaryLogId DESC)
 			,intFutOptTransactionId = intTransactionRecordId
-			,dblOpenContract = dblOrigNoOfLots
+			,dblOpenContract = dblOrigNoOfLots - md.dblOrigNoOfLots
 			,intCommodityId
 			,strCommodityCode
 			,strInternalTradeNo = strTransactionNumber
@@ -80,7 +97,8 @@ BEGIN
 			,strBrokerTradeNo = mf.strBrokerTradeNo
 		FROM vyuRKGetSummaryLog c
 		CROSS APPLY dbo.fnRKGetMiscFieldPivotDerivative(c.strMiscField) mf
-		WHERE strTransactionType IN ('Derivatives', 'Match Derivatives')
+		LEFT JOIN MatchDerivatives md ON md.intTransactionRecordId = c.intTransactionRecordId
+		WHERE strTransactionType IN ('Derivatives')
 			AND CONVERT(DATETIME, CONVERT(VARCHAR(10), c.dtmCreatedDate, 110), 110) <= CONVERT(DATETIME, @dtmDate)
 			AND ISNULL(c.intCommodityId,0) = ISNULL(@intCommodityId, ISNULL(c.intCommodityId, 0)) 
 			AND ISNULL(intEntityId, 0) = ISNULL(@intVendorId, ISNULL(intEntityId, 0))

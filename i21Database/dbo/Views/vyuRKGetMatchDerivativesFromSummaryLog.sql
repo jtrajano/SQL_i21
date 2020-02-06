@@ -2,31 +2,53 @@
 
 AS
 
-SELECT strTransactionType
+SELECT intSummaryLogId
+	, strTransactionType
 	, intTransactionRecordId
 	, strTransactionNumber
+	, dtmCreatedDate
 	, dtmTransactionDate
 	, intFutureMarketId
+	, strFutureMarket
 	, intFutureMonthId
+	, strFutureMonth
 	, intFutOptTransactionId
 	, intCommodityId
+	, strCommodityCode
 	, intOrigUOMId
 	, intBookId
+	, strBook
 	, intSubBookId
+	, strSubBook
 	, intLocationId
-	, dblOrigNoOfLots = SUM(dblOrigNoOfLots)
+	, strLocationName
+	, dblOrigNoOfLots
 	, dblContractSize
-	, dblOrigQty = SUM(dblOrigQty)
+	, dblOrigQty
 	, dblPrice
 	, intEntityId
 	, intUserId
 	, intMatchNo
 	, intMatchDerivativesHeaderId
-FROM tblRKSummaryLog sl
+	, intMatchDerivativesDetailId
+	, strBuySell
+	, strInstrumentType
+	, strBrokerAccount
+	, strBroker
+	, ysnPreCrush = CAST(ISNULL(ysnPreCrush, 0) AS BIT)
+	, strBrokerTradeNo
+	, strNotes
+FROM vyuRKGetSummaryLog sl
 CROSS APPLY (
 	SELECT [intMatchDerivativesHeaderId]
 		, [intMatchDerivativesDetailId]
 		, [intMatchNo]
+		, [strBuySell]
+		, [strInstrumentType]
+		, [strBrokerAccount]
+		, [strBroker]
+		, [ysnPreCrush]
+		, [strBrokerTradeNo]
 	FROM (
 		SELECT strFieldName
 			, strValue 
@@ -36,25 +58,13 @@ CROSS APPLY (
 		MIN(strValue)
 		FOR strFieldName IN ([intMatchDerivativesHeaderId]
 			, [intMatchDerivativesDetailId]
-			, [intMatchNo])
+			, [intMatchNo]
+			, [strBuySell]
+			, [strInstrumentType]
+			, [strBrokerAccount]
+			, [strBroker]
+			, [ysnPreCrush]
+			, [strBrokerTradeNo])
 	) AS pivot_table
 ) pt
 WHERE strTransactionType = 'Match Derivatives'
-GROUP BY strTransactionType
-	, intTransactionRecordId
-	, strTransactionNumber
-	, dtmTransactionDate
-	, intFutureMarketId
-	, intFutureMonthId
-	, intFutOptTransactionId
-	, intCommodityId
-	, intOrigUOMId
-	, intBookId
-	, intSubBookId
-	, intLocationId
-	, dblContractSize
-	, dblPrice
-	, intEntityId
-	, intUserId
-	, intMatchNo
-	, intMatchDerivativesHeaderId
