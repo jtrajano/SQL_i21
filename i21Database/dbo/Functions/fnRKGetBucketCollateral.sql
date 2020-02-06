@@ -98,12 +98,14 @@ BEGIN
 					, dblAdjustmentAmount = dblOrigQty
 				FROM vyuRKGetSummaryLog Adj
 				WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmTransactionDate, 110), 110) <= CONVERT(DATETIME, @dtmDate)
+					AND CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmCreatedDate, 110), 110) <= CONVERT(DATETIME, @dtmDate)
 					AND strTransactionType = 'Collateral Adjustment'
 			) t WHERE intRowNum = 1		
 			GROUP BY intCollateralId
 		) ca ON c.intTransactionRecordId = ca.intCollateralId
 		JOIN tblRKCollateral Col ON Col.intCollateralId = c.intTransactionRecordId
 		WHERE strTransactionType = 'Collateral'
+			AND CONVERT(DATETIME, CONVERT(VARCHAR(10), c.dtmTransactionDate, 110), 110) <= CONVERT(DATETIME, @dtmDate)
 			AND CONVERT(DATETIME, CONVERT(VARCHAR(10), c.dtmCreatedDate, 110), 110) <= CONVERT(DATETIME, @dtmDate)
 			AND c.intCommodityId = @intCommodityId
 			AND ISNULL(intEntityId, 0) = ISNULL(@intVendorId, ISNULL(intEntityId, 0))

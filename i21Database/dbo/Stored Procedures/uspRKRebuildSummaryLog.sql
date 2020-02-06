@@ -3,8 +3,12 @@
 AS
 
 BEGIN
+	--IF EXISTS (SELECT TOP 1 1 FROM tblRKCompanyPreference WHERE ysnAllowRebuildSummaryLog = 0)
+	--BEGIN
+	--	RAISERROR('You are not allowed to rebuild the Summary Log!', 16, 1)
+	--END
 
-	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblRKSummaryLog') AND (SELECT TOP 1 ysnAllowRebuildSummaryLog FROM tblRKCompanyPreference) = 1
+	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblRKSummaryLog')
 	BEGIN
 		DECLARE @ExistingHistory AS RKSummaryLog
 		
@@ -194,7 +198,9 @@ BEGIN
 			, intCommodityId = intCommodityId
 			, intLocationId = intLocationId
 			, dblQty = dblOriginalQuantity
-			, intUserId = (SELECT TOP 1  intEntityId FROM tblEMEntity e INNER JOIN tblRKCollateralHistory colhis on colhis.strUserName = e.strName where colhis.intCollateralId = a.intCollateralId and colhis.strAction = 'ADD')
+			, intUserId = (SELECT TOP 1 e.intEntityId
+							FROM (tblEMEntity e LEFT JOIN tblEMEntityType et ON et.intEntityId = e.intEntityId AND et.strType = 'User')
+							INNER JOIN tblRKCollateralHistory colhis on colhis.strUserName = e.strName where colhis.intCollateralId = a.intCollateralId and colhis.strAction = 'ADD')
 			, strNotes = strType + ' Collateral'
 		FROM tblRKCollateral a
 		
@@ -218,7 +224,9 @@ BEGIN
 			, intCommodityId = intCommodityId
 			, intLocationId = intLocationId
 			, dblQty = CA.dblAdjustmentAmount
-			, intUserId = (SELECT TOP 1  intEntityId FROM tblEMEntity e INNER JOIN tblRKCollateralHistory colhis on colhis.strUserName = e.strName where colhis.intCollateralId = C.intCollateralId and colhis.strAction = 'ADD')
+			, intUserId = (SELECT TOP 1 e.intEntityId
+							FROM (tblEMEntity e LEFT JOIN tblEMEntityType et ON et.intEntityId = e.intEntityId AND et.strType = 'User')
+							INNER JOIN tblRKCollateralHistory colhis on colhis.strUserName = e.strName where colhis.intCollateralId = a.intCollateralId and colhis.strAction = 'ADD')
 			, strNotes = strType + ' Collateral'
 		FROM tblRKCollateralAdjustment CA
 		JOIN tblRKCollateral C ON C.intCollateralId = CA.intCollateralId
