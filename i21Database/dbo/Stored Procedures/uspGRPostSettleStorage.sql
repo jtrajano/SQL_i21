@@ -1690,10 +1690,12 @@ BEGIN TRY
 						FROM tblGRSettleContract SC1
 						INNER JOIN @SettleContract SC2
 							ON SC2.intSettleContractId = SC1.intSettleContractId
+						JOIN tblCTContractDetail a
+							on SC2.intContractDetailId = a.intContractDetailId
 					END
 				end
 				
-
+				
 				--Reduce the On-Storage Quantity
 				IF(@ysnFromPriceBasisContract = 0)		
 				BEGIN
@@ -1766,10 +1768,44 @@ BEGIN TRY
 								,@strBatchId  
 								,'AP Clearing'
 								,@intCreatedUserId
-
+	
 							IF @intReturnValue < 0
 								GOTO SettleStorage_Exit;
+
+
+
 							
+							begin								
+								IF EXISTS(SELECT 1 FROM tblGRSettleContract WHERE intSettleStorageId = @intSettleStorageId)
+								BEGIN
+									UPDATE SC1
+									SET dblCost = (select top 1 dblCost from tblICInventoryTransaction IT
+														where IT.intTransactionId = @intSettleStorageId
+															and IT.intTransactionTypeId = 44
+															and IT.intItemId = a.intItemId
+													)
+									FROM tblGRSettleContract SC1
+									INNER JOIN @SettleContract SC2
+										ON SC2.intSettleContractId = SC1.intSettleContractId
+									JOIN tblCTContractDetail a
+										on SC2.intContractDetailId = a.intContractDetailId
+								END
+							end
+
+							if @debug_awesome_ness = 1 AND 1 = 1
+							begin
+
+								
+								select (select top 1 dblCost from tblICInventoryTransaction IT
+														where IT.intTransactionId = @intSettleStorageId
+															and IT.intTransactionTypeId = 44
+															and IT.intItemId = a.intItemId), 
+								* FROM tblGRSettleContract SC1
+									INNER JOIN @SettleContract SC2
+										ON SC2.intSettleContractId = SC1.intSettleContractId
+									JOIN tblCTContractDetail a
+										on SC2.intContractDetailId = a.intContractDetailId
+							end
 							----- DEBUG POINT -----
 							if @debug_awesome_ness = 1 AND 1 = 0
 							begin
@@ -3100,7 +3136,8 @@ BEGIN TRY
 								end
 
 								update a
-									set dblPaidAmount = (b.dblOldCost + isnull(@sum_e, 0)) * a.dblUnits
+									set dblPaidAmount = (b.dblOldCost + isnull(@sum_e, 0)) * a.dblUnits,
+										dblOldCost = b.dblOldCost
 										from tblGRStorageHistory a
 											join @voucherPayable b 
 												on a.intContractHeaderId = b.intContractHeaderId
@@ -3328,6 +3365,7 @@ BEGIN TRY
 					,[intBillId]
 					,[intSettleStorageId]
 					,[strVoucher]
+					,[dblOldCost]
 				)
 				SELECT 
 					 [intConcurrencyId]     = 1 
@@ -3345,6 +3383,7 @@ BEGIN TRY
 					,[intBillId]			= CASE WHEN @intVoucherId = 0 THEN NULL ELSE @intVoucherId END
 					,intSettleStorageId		= @intSettleStorageId
 					,strVoucher				= @strVoucher
+					,dblOldCost				= (select top 1 dblOldCost from @voucherPayable where intItemId = CS.intItemId AND dblOldCost > 0)
 				FROM @SettleVoucherCreate SV
 				JOIN tblGRCustomerStorage CS 
 					ON CS.intCustomerStorageId = SV.intCustomerStorageId
