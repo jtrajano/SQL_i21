@@ -8434,6 +8434,10 @@
     <Build Include="dbo\Stored Procedures\uspIPPropertyPopulateStgXML.sql" />
     <Build Include="dbo\Stored Procedures\uspIPPropertyTransferStgXML.sql" />
     <Build Include="dbo\Stored Procedures\uspIPPropertyProcessStgXML.sql" />
+    <Build Include="dbo\Tables\tblMFRecipePreStage.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFPopulateRecipePreStage.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFProcessPreStageRecipe.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPGenerateSAPRecipeIDOC.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
