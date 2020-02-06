@@ -38,8 +38,8 @@ BEGIN
 	) AS (
 		SELECT intTransactionRecordId
 			, intOrigUOMId
-			, dblOrigNoOfLots = SUM(dblOrigNoOfLots)
-			, dblOrigQty = SUM(dblOrigQty)
+			, dblOrigNoOfLots = SUM(ISNULL(dblOrigNoOfLots, 0))
+			, dblOrigQty = SUM(ISNULL(dblOrigQty, 0))
 		FROM vyuRKGetSummaryLog sl
 		WHERE strTransactionType = 'Match Derivatives'
 			AND CAST(FLOOR(CAST(dtmCreatedDate AS FLOAT)) AS DATETIME) <= @dtmDate
@@ -75,12 +75,12 @@ BEGIN
 		SELECT 
 			intRowNum = ROW_NUMBER() OVER (PARTITION BY c.intTransactionRecordId ORDER BY c.intSummaryLogId DESC)
 			,intFutOptTransactionId = c.intTransactionRecordId
-			,dblOpenContract = c.dblOrigNoOfLots - md.dblOrigNoOfLots
+			,dblOpenContract = ISNULL(c.dblOrigNoOfLots, 0) - ISNULL(md.dblOrigNoOfLots, 0)
 			,intCommodityId
 			,strCommodityCode
 			,strInternalTradeNo = strTransactionNumber
 			,strLocationName
-			,dblContractSize = CAST(ISNULL(mf.dblContractSize, 0.00) AS NUMERIC(24, 10))
+			,dblContractSize = CAST(ISNULL(c.dblContractSize, 0.00) AS NUMERIC(24, 10))
 			,c.intOrigUOMId
 			,strFutureMarket
 			,strFutureMonth
