@@ -570,7 +570,7 @@ FROM (
   	-- ,CASE WHEN DATEDIFF(dayofyear,r.dtmReceiptDate,GETDATE())<=0   
    	-- 	THEN 0  
   	-- ELSE ISNULL(DATEDIFF(dayofyear,r.dtmReceiptDate,GETDATE()),0) END AS intAging  
-	,CASE WHEN DATEDIFF(dayofyear,r.dtmReceiptDate,GETDATE())>0 AND DATEDIFF(dayofyear,r.dtmReceiptDate,GETDATE())<=30 
+	,CASE WHEN DATEDIFF(dayofyear,r.dtmReceiptDate,GETDATE())>=0 AND DATEDIFF(dayofyear,r.dtmReceiptDate,GETDATE())<=30 
 		THEN SUM(tmpAPOpenClearing.dblClearingAmount)
 		ELSE 0 
 	END AS dbl1, 
@@ -614,7 +614,7 @@ FROM
  --CHARGES  
  SELECT  
 	tmpAPOpenClearing.intEntityVendorId,
-   CASE WHEN DATEDIFF(dayofyear,r.dtmReceiptDate,GETDATE())>0 AND DATEDIFF(dayofyear,r.dtmReceiptDate,GETDATE())<=30 
+   CASE WHEN DATEDIFF(dayofyear,r.dtmReceiptDate,GETDATE())>=0 AND DATEDIFF(dayofyear,r.dtmReceiptDate,GETDATE())<=30 
 		THEN SUM(tmpAPOpenClearing.dblClearingAmount)
 		ELSE 0 
 	END AS dbl1, 
@@ -657,7 +657,7 @@ FROM
  --SHIPMENT CHARGES  
  SELECT  
   tmpAPOpenClearing.intEntityVendorId 
-  ,	CASE WHEN DATEDIFF(dayofyear,r.dtmShipDate,GETDATE())>0 AND DATEDIFF(dayofyear,r.dtmShipDate,GETDATE())<=30 
+  ,	CASE WHEN DATEDIFF(dayofyear,r.dtmShipDate,GETDATE())>=0 AND DATEDIFF(dayofyear,r.dtmShipDate,GETDATE())<=30 
 		THEN SUM(tmpAPOpenClearing.dblClearingAmount) 
 		ELSE 0 
 	END AS dbl1, 
@@ -694,7 +694,7 @@ FROM
  --LOAD TRANSACTION ITEM
  SELECT 
  	tmpAPOpenClearing.intEntityVendorId 
-  ,	CASE WHEN DATEDIFF(dayofyear,load.dtmPostedDate,GETDATE())>0 AND DATEDIFF(dayofyear,load.dtmPostedDate,GETDATE())<=30 
+  ,	CASE WHEN DATEDIFF(dayofyear,load.dtmPostedDate,GETDATE())>=0 AND DATEDIFF(dayofyear,load.dtmPostedDate,GETDATE())<=30 
 		THEN SUM(tmpAPOpenClearing.dblClearingAmount) 
 		ELSE 0 
 	END AS dbl1, 
@@ -731,7 +731,7 @@ FROM
  --LOAD COST TRANSACTION ITEM
  SELECT  
   	tmpAPOpenClearing.intEntityVendorId ,
-	CASE WHEN DATEDIFF(dayofyear,load.dtmPostedDate,GETDATE())>0 AND DATEDIFF(dayofyear,load.dtmPostedDate,GETDATE())<=30 
+	CASE WHEN DATEDIFF(dayofyear,load.dtmPostedDate,GETDATE())>=0 AND DATEDIFF(dayofyear,load.dtmPostedDate,GETDATE())<=30 
 		THEN SUM(tmpAPOpenClearing.dblClearingAmount)
 	ELSE 0 
 	END AS dbl1, 
@@ -768,7 +768,7 @@ FROM
  --SETTLE STORAGE
  SELECT  
  tmpAPOpenClearing.intEntityVendorId
-  ,	CASE WHEN DATEDIFF(dayofyear,CS.dtmDeliveryDate,GETDATE())>0 AND DATEDIFF(dayofyear,CS.dtmDeliveryDate,GETDATE())<=30 
+  ,	CASE WHEN DATEDIFF(dayofyear,CS.dtmDeliveryDate,GETDATE())>=0 AND DATEDIFF(dayofyear,CS.dtmDeliveryDate,GETDATE())<=30 
 		THEN SUM(tmpAPOpenClearing.dblClearingAmount)
 		ELSE 0 
 	END AS dbl1, 
@@ -807,7 +807,7 @@ INNER JOIN tblGRSettleStorage SS
  --PATRONAGE
  SELECT  
  tmpAPOpenClearing.intEntityVendorId
-  ,	CASE WHEN DATEDIFF(dayofyear,refund.dtmRefundDate,GETDATE())>0 AND DATEDIFF(dayofyear,refund.dtmRefundDate,GETDATE())<=30 
+  ,	CASE WHEN DATEDIFF(dayofyear,refund.dtmRefundDate,GETDATE())>=0 AND DATEDIFF(dayofyear,refund.dtmRefundDate,GETDATE())<=30 
 		THEN SUM(tmpAPOpenClearing.dblClearingAmount)
 		ELSE 0 
 	END AS dbl1, 
