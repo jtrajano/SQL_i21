@@ -412,13 +412,13 @@ BEGIN
 				,intFutureMarketId = NULL
 				,intFutureMonthId = NULL
 				,dblNoOfLots = NULL
-				,dblQty = t.dblQty
-				,dblPrice = t.dblCost
+				,dblQty = SUM(t.dblQty)
+				,dblPrice = AVG(t.dblCost)
 				,intEntityId = v.intEntityId
 				,ysnDelete = 0
 				,intUserId = t.intCreatedEntityId
 				,strNotes = t.strDescription
-				,t.intInventoryTransactionId
+				,intInventoryTransactionId  = MIN(t.intInventoryTransactionId)
 			FROM	
 				tblICInventoryTransaction t inner join vyuICGetInventoryValuation v 
 					ON t.intInventoryTransactionId = v.intInventoryTransactionId
@@ -429,8 +429,25 @@ BEGIN
 			WHERE
 				t.dblQty <> 0 
 				AND v.ysnInTransit = 1
-				AND v.strTransactionType IN ('Inventory Shipment', 'Invoice')
+				AND v.strTransactionType IN ('Inventory Shipment', 'Outbound Shipment', 'Invoice')
 				AND ISNULL(t.ysnIsUnposted,0) = 0
+			GROUP BY 
+				t.strBatchId
+				,v.strTransactionType
+				,t.intTransactionDetailId
+				,t.intTransactionId
+				,t.strTransactionId
+				,t.dtmDate
+				,v.intTicketId
+				,v.intCommodityId
+				,cum.intCommodityUnitMeasureId
+				,t.intItemId
+				,v.intLocationId
+				,v.intEntityId
+				,t.intCreatedEntityId
+				,t.strDescription
+				,v.intSubLocationId
+				,v.intStorageLocationId
 
 			UNION ALL
 			SELECT 
@@ -451,13 +468,13 @@ BEGIN
 				,intFutureMarketId = NULL
 				,intFutureMonthId = NULL
 				,dblNoOfLots = NULL
-				,dblQty = t.dblQty
-				,dblPrice = t.dblCost
+				,dblQty = SUM(t.dblQty)
+				,dblPrice = AVG(t.dblCost)
 				,intEntityId = v.intEntityId
 				,ysnDelete = 0
 				,intUserId = t.intCreatedEntityId
 				,strNotes = t.strDescription
-				,t.intInventoryTransactionId
+				,intInventoryTransactionId  = MIN(t.intInventoryTransactionId)
 			FROM	
 				tblICInventoryTransaction t inner join vyuICGetInventoryValuation v 
 					ON t.intInventoryTransactionId = v.intInventoryTransactionId
@@ -468,47 +485,25 @@ BEGIN
 			WHERE
 				t.dblQty <> 0 
 				AND v.ysnInTransit = 1
-				AND v.strTransactionType IN ('Inventory Receipt', 'Outbound Shipment')
+				AND v.strTransactionType IN ('Inventory Receipt')
 				AND ISNULL(t.ysnIsUnposted,0) = 0
-
-			UNION ALL
-			SELECT 
-				strBatchId = t.strBatchId
-				,strTransactionType = 'Purchase In-Transit'
-				,intTransactionRecordId = ISNULL(t.intTransactionDetailId, t.intTransactionId) 
-				,strTransactionNumber = t.strTransactionId
-				,dtmTransactionDate = t.dtmDate
-				,intContractDetailId = NULL
-				,intContractHeaderId = NULL
-				,intTicketId = v.intTicketId
-				,intCommodityId = v.intCommodityId
-				,intCommodityUOMId = cum.intCommodityUnitMeasureId
-				,intItemId = t.intItemId
-				,intBookId = NULL
-				,intSubBookId = NULL
-				,intLocationId = v.intLocationId
-				,intFutureMarketId = NULL
-				,intFutureMonthId = NULL
-				,dblNoOfLots = NULL
-				,dblQty = t.dblQty
-				,dblPrice = t.dblCost
-				,intEntityId = v.intEntityId
-				,ysnDelete = 0
-				,intUserId = t.intCreatedEntityId
-				,strNotes = t.strDescription
-				,t.intInventoryTransactionId
-			FROM	
-				tblICInventoryTransaction t inner join vyuICGetInventoryValuation v 
-					ON t.intInventoryTransactionId = v.intInventoryTransactionId
-				INNER JOIN tblICUnitMeasure u
-					ON u.strUnitMeasure = v.strUOM
-				INNER JOIN tblICCommodityUnitMeasure cum
-					ON cum.intCommodityId = v.intCommodityId AND cum.intUnitMeasureId = u.intUnitMeasureId
-			WHERE
-				t.dblQty <> 0 
-				AND v.ysnInTransit = 1
-				AND v.strTransactionType IN ('Inventory Receipt', 'Outbound Shipment')
-				AND ISNULL(t.ysnIsUnposted,0) = 0
+			GROUP BY 
+				t.strBatchId
+				,v.strTransactionType
+				,t.intTransactionDetailId
+				,t.intTransactionId
+				,t.strTransactionId
+				,t.dtmDate
+				,v.intTicketId
+				,v.intCommodityId
+				,cum.intCommodityUnitMeasureId
+				,t.intItemId
+				,v.intLocationId
+				,v.intEntityId
+				,t.intCreatedEntityId
+				,t.strDescription
+				,v.intSubLocationId
+				,v.intStorageLocationId
 
 		) t
 		ORDER BY intInventoryTransactionId

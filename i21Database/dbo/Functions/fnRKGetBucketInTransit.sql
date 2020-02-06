@@ -1,4 +1,4 @@
-﻿CREATE FUNCTION [dbo].[fnRKGetBucketCompanyOwned]
+﻿CREATE FUNCTION [dbo].[fnRKGetBucketInTransit]
 (
 	@dtmDate DATETIME,
 	@intCommodityId INT,
@@ -44,7 +44,7 @@ BEGIN
 		,intOrigUOMId
 	FROM (
 		SELECT 
-			intRowNum = ROW_NUMBER() OVER (PARTITION BY c.intTransactionRecordId, c.strInOut, c.ysnNegate ORDER BY c.intSummaryLogId DESC)
+			intRowNum = ROW_NUMBER() OVER (PARTITION BY c.intTransactionRecordId ORDER BY c.intSummaryLogId DESC)
 			,dtmCreatedDate
 			,dtmTransactionDate
 			,dblTotal = c.dblOrigQty
@@ -61,7 +61,7 @@ BEGIN
 			,intTransactionRecordId
 			,intOrigUOMId
 		FROM vyuRKGetSummaryLog c
-		WHERE strTransactionType IN ('Inventory Receipt', 'Inventory Shipment', 'Inventory Transfer', 'Inventory Adjustment', 'Outbound Shipment', 'Invoice', 'Produce', 'Consume') 
+		WHERE strTransactionType IN ('Sales In-Transit', 'Purchase In-Transit') 
 			AND CONVERT(DATETIME, CONVERT(VARCHAR(10), c.dtmCreatedDate, 110), 110) <= CONVERT(DATETIME, @dtmDate)
 			AND CONVERT(DATETIME, CONVERT(VARCHAR(10), c.dtmTransactionDate, 110), 110) <= CONVERT(DATETIME, @dtmDate)
 			AND ISNULL(c.intCommodityId,0) = ISNULL(@intCommodityId, ISNULL(c.intCommodityId, 0)) 
