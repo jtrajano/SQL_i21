@@ -8385,6 +8385,7 @@
     <Build Include="dbo\Functions\fnRKGetMatchedQtyAsOf.sql" />
     <Build Include="dbo\Stored Procedures\uspRKSaveMatchDerivative.sql" />
     <Build Include="dbo\Views\vyuRKGetMatchDerivativesFromSummaryLog.sql" />
+    <Build Include="dbo\Functions\fnRKGetBucketCompanyOwned.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

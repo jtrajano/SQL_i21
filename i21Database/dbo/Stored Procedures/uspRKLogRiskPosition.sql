@@ -645,6 +645,7 @@ BEGIN
 			 OR @strTransactionType = 'Inventory Shipment'
 			 OR @strTransactionType = 'Inventory Transfer'
 			 OR @strTransactionType = 'Invoice'
+			 OR @strTransactionType = 'Outbound Shipment'
 			 OR @strTransactionType = 'Consume'
 			 OR @strTransactionType = 'Produce'
 			 OR @strTransactionType like 'Inventory Adjustment%'
@@ -699,6 +700,7 @@ BEGIN
 							THEN 'IN' 
 						WHEN @strTransactionType = 'Inventory Shipment' OR
 							 @strTransactionType = 'Invoice' OR
+							 @strTransactionType  = 'Outbound Shipment' OR
 							 @strTransactionType = 'Consume' 
 							THEN 'OUT'
 						WHEN @strTransactionType = 'Inventory Transfer' OR
