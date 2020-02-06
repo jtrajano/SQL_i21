@@ -232,7 +232,7 @@ INTO #APPAYMENTDETAILS
 FROM dbo.tblAPPaymentDetail APPD WITH (NOLOCK)
 INNER JOIN (
 	SELECT intPaymentId
-		 , dblAmountPaid
+		 , dblAmountPaid = -dblAmountPaid
 	FROM dbo.tblAPPayment WITH (NOLOCK)
 	WHERE ysnPosted = 1
 	  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
@@ -563,7 +563,7 @@ LEFT JOIN (
 	UNION ALL 
 
 	SELECT PD.intInvoiceId
-		 , dblTotalPayment		= SUM(ISNULL(dblPayment, 0)) + SUM(ISNULL(dblDiscount, 0)) - SUM(ISNULL(dblInterest, 0))
+		 , dblTotalPayment		= -(SUM(ISNULL(dblPayment, 0)) + SUM(ISNULL(dblDiscount, 0)) - SUM(ISNULL(dblInterest, 0)))
 	FROM dbo.tblAPPaymentDetail PD WITH (NOLOCK)
 	INNER JOIN (
 		SELECT intPaymentId
