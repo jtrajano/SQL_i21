@@ -520,7 +520,7 @@ LEFT JOIN (
 		 , P.intPaymentId
 		 , strRecordNumber	= strPaymentRecordNum
 		 , P.dtmDatePaid
-		 , dblTotalPayment	= ISNULL(dblPayment, 0) + ISNULL(dblDiscount, 0) - ISNULL(dblInterest, 0)
+		 , dblTotalPayment	= -(ISNULL(dblPayment, 0) + ISNULL(dblDiscount, 0) - ISNULL(dblInterest, 0))
 	FROM dbo.tblAPPaymentDetail PD WITH (NOLOCK)
 	INNER JOIN (
 		SELECT intPaymentId
