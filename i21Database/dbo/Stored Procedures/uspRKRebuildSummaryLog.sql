@@ -226,7 +226,7 @@ BEGIN
 			, dblQty = CA.dblAdjustmentAmount
 			, intUserId = (SELECT TOP 1 e.intEntityId
 							FROM (tblEMEntity e LEFT JOIN tblEMEntityType et ON et.intEntityId = e.intEntityId AND et.strType = 'User')
-							INNER JOIN tblRKCollateralHistory colhis on colhis.strUserName = e.strName where colhis.intCollateralId = a.intCollateralId and colhis.strAction = 'ADD')
+							INNER JOIN tblRKCollateralHistory colhis on colhis.strUserName = e.strName where colhis.intCollateralId = C.intCollateralId and colhis.strAction = 'ADD')
 			, strNotes = strType + ' Collateral'
 		FROM tblRKCollateralAdjustment CA
 		JOIN tblRKCollateral C ON C.intCollateralId = CA.intCollateralId
