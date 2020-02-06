@@ -8420,6 +8420,13 @@
     <Build Include="dbo\Stored Procedures\uspIPInterCompanyPreStageInvoice.sql" />
     <Build Include="dbo\Functions\fnCTGetShippedWeight.sql" />
     <Build Include="dbo\Functions\fnCTGetFranchisePercent.sql" />
+    <Build Include="dbo\Views\vyuIPGetSampleTypeUserRole.sql" />
+    <Build Include="dbo\Views\vyuIPGetSampleTypeDetail.sql" />
+    <Build Include="dbo\Views\vyuIPGetSampleType.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPSampleTypeProcessPreStage.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPSampleTypeProcessStgXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPSampleTypeTransferStgXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPSampleTypePopulateStgXML.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
