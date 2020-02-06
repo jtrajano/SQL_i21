@@ -24,8 +24,8 @@ BEGIN
        END
        ELSE
        BEGIN
-              UPDATE tblSCDeviceInterfaceFile SET strDeviceData = @strDeviceData , dtmScaleTime = GETDATE(), intDeviceType = @intDeviceType
-              WHERE intDeviceInterfaceFileId = @intDeviceInterfaceFileId  
+              UPDATE tblSCDeviceInterfaceFile SET strDeviceData = @strDeviceData , dtmScaleTime = GETDATE()
+              WHERE intDeviceInterfaceFileId = @intDeviceInterfaceFileId  AND intDeviceType = @intDeviceType 
 
 			  SET @ReturnValue = @intDeviceInterfaceFileId
        END
