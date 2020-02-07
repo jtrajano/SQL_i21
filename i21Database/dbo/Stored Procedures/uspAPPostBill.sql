@@ -537,7 +537,7 @@ BEGIN
 		strComments,
 		SourceCreditUnit.Value,
 		SourceDebitUnit.Value,
-		intCommodityId,
+		commodity.intCommodityId,
 		intSourceLocationId	
 	FROM dbo.fnAPCreateBillGLEntries(@validBillIds, @userId, @batchId) A
 	CROSS APPLY dbo.fnGetDebit(ISNULL(A.dblDebit, 0) - ISNULL(A.dblCredit, 0)) Debit
@@ -548,6 +548,7 @@ BEGIN
 	CROSS APPLY dbo.fnGetCredit(ISNULL(A.dblDebitUnit, 0) - ISNULL(A.dblCreditUnit, 0))  CreditUnit
 	CROSS APPLY dbo.fnGetDebit(ISNULL(A.dblSourceUnitDebit, 0) - ISNULL(A.dblSourceUnitCredit, 0)) SourceDebitUnit
 	CROSS APPLY dbo.fnGetCredit(ISNULL(A.dblSourceUnitDebit, 0) - ISNULL(A.dblSourceUnitCredit, 0))  SourceCreditUnit
+	OUTER APPLY dbo.fnAPGetVoucherCommodity(A.intTransactionId) commodity
 	ORDER BY intTransactionId
 
 	-- Call the Item's Cost Adjustment
@@ -1487,7 +1488,6 @@ ELSE
 			,[dblDebitForeign]
 			,[dblCreditForeign]
 			,[strRateType]
-			
 		)
 		SELECT
 			[strTransactionId]
@@ -1517,7 +1517,7 @@ ELSE
 			,C.strAccountGroup
 			,DebitForeign.Value
 			,CreditForeign.Value
-			,forex.[strCurrencyExchangeRateType]           
+			,forex.[strCurrencyExchangeRateType]  
 		FROM @GLEntries A
 		INNER JOIN dbo.tblGLAccount B 
 			ON A.intAccountId = B.intAccountId
