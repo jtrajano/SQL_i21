@@ -11,6 +11,9 @@ BEGIN
 		, @strBatchId NVARCHAR(100) 
 		, @dtmTransactionDate DATETIME
 		, @strTransactionType NVARCHAR(100)
+		, @strTransactionReference NVARCHAR(100)
+		, @intTransactionReferenceId INT
+		, @strTransactionReferenceNo NVARCHAR(100)
 		, @intContractDetailId INT
 		, @intContractHeaderId INT
 		, @intContractTypeId INT
@@ -39,6 +42,9 @@ BEGIN
 	DECLARE @FinalTable AS TABLE (strBatchId NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL
 		, [dtmTransactionDate] DATETIME
 		, [strTransactionType] NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL
+		, [strTransactionReference] NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL
+		, [intTransactionReferenceId] INT NOT NULL
+		, [strTransactionReferenceNo] NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL
 		, [intContractDetailId] INT NOT NULL
 		, [intContractHeaderId] INT NOT NULL
 		, [intContractTypeId] INT NOT NULL
@@ -67,10 +73,13 @@ BEGIN
 		, [intRefContractBalanceId] INT NULL)
 
 	DECLARE @PrevLog AS TABLE ([intContractBalanceLogId] INT
-		, [strBatchId] NVARCHAR (100) NULL
+		, [strBatchId] NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL
 		, [dtmTransactionDate] DATETIME
 		, [dtmCreatedDate] DATETIME
-		, [strTransactionType] NVARCHAR (100)NULL
+		, [strTransactionType] NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL
+		, [strTransactionReference] NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL
+		, [intTransactionReferenceId] INT NOT NULL
+		, [strTransactionReferenceNo] NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL
 		, [intContractDetailId] INT NOT NULL
 		, [intContractHeaderId] INT NOT NULL
 		, [intContractTypeId] INT NOT NULL
@@ -94,7 +103,7 @@ BEGIN
 		, [intContractStatusId] INT NOT NULL
 		, [intBookId] INT NULL
 		, [intSubBookId] INT NULL
-		, [strNotes] NVARCHAR(100) NULL
+		, [strNotes] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
 		, [ysnNegated] BIT DEFAULT((0)) NULL
 		, [intRefContractBalanceId] INT NULL)
 
@@ -104,6 +113,9 @@ BEGIN
 			, @strBatchId = strBatchId
 			, @dtmTransactionDate = dtmTransactionDate
 			, @strTransactionType = strTransactionType
+			, @strTransactionReference = strTransactionReference
+			, @intTransactionReferenceId = intTransactionReferenceId
+			, @strTransactionReferenceNo = strTransactionReferenceNo
 			, @intContractDetailId = intContractDetailId
 			, @intContractHeaderId = intContractHeaderId
 			, @intContractTypeId = intContractTypeId
@@ -133,6 +145,10 @@ BEGIN
 		SELECT * INTO #tmpPrevLogList
 		FROM tblCTContractBalanceLog
 		WHERE intContractDetailId = @intContractDetailId
+			AND strTransactionType = @strTransactionType
+			AND strTransactionReference = @strTransactionReference
+			AND intTransactionReferenceId = @intTransactionReferenceId
+			AND strTransactionReferenceNo = @strTransactionReferenceNo
 			AND ISNULL(ysnNegated, 0) = 0 
 		ORDER BY intContractBalanceLogId ASC
 
@@ -191,6 +207,9 @@ BEGIN
 			INSERT INTO @FinalTable(strBatchId
 				, dtmTransactionDate
 				, strTransactionType
+				, strTransactionReference
+				, intTransactionReferenceId
+				, strTransactionReferenceNo
 				, intContractDetailId
 				, intContractHeaderId
 				, intContractTypeId
@@ -220,6 +239,9 @@ BEGIN
 			SELECT strBatchId
 				, dtmTransactionDate
 				, strTransactionType
+				, strTransactionReference
+				, intTransactionReferenceId
+				, strTransactionReferenceNo
 				, intContractDetailId
 				, intContractHeaderId
 				, intContractTypeId
@@ -253,6 +275,9 @@ BEGIN
 		INSERT INTO @FinalTable(strBatchId
 			, dtmTransactionDate
 			, strTransactionType
+			, strTransactionReference
+			, intTransactionReferenceId
+			, strTransactionReferenceNo
 			, intContractDetailId
 			, intContractHeaderId
 			, intContractTypeId
@@ -280,6 +305,9 @@ BEGIN
 		SELECT strBatchId
 			, dtmTransactionDate
 			, strTransactionType
+			, strTransactionReference
+			, intTransactionReferenceId
+			, strTransactionReferenceNo
 			, intContractDetailId
 			, intContractHeaderId
 			, intContractTypeId
@@ -315,6 +343,9 @@ BEGIN
 		, dtmTransactionDate
 		, dtmCreatedDate
 		, strTransactionType
+		, strTransactionReference
+		, intTransactionReferenceId
+		, strTransactionReferenceNo
 		, intContractDetailId
 		, intContractHeaderId
 		, intContractTypeId
@@ -345,6 +376,9 @@ BEGIN
 		, dtmTransactionDate
 		, dtmCreatedDate = CASE WHEN @Rebuild = 1 THEN dtmTransactionDate ELSE GETDATE() END
 		, strTransactionType
+		, strTransactionReference
+		, intTransactionReferenceId
+		, strTransactionReferenceNo
 		, intContractDetailId
 		, intContractHeaderId
 		, intContractTypeId

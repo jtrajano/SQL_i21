@@ -888,10 +888,13 @@ BEGIN
 		BEGIN
 			DECLARE @cbLog AS CTContractBalanceLog
 
-			IF (@strTransactionType = 'Contract Sequence')
+			IF (@strTransactionType = 'Price Fixation')
 			BEGIN
 				INSERT INTO @cbLog (strBatchId
 					, strTransactionType
+					, strTransactionReference
+					, intTransactionReferenceId
+					, strTransactionReferenceNo
 					, intContractDetailId
 					, intContractHeaderId
 					, intContractTypeId
@@ -917,7 +920,79 @@ BEGIN
 					, intSubBookId
 					, strNotes)		
 				SELECT @strBatchId
-					, @strTransactionType
+					, 'Contract Balance'
+					, strTransactionReference = 'Price Fixation'
+					, intTransactionReferenceId = fd.intPriceFixationDetailId
+					, strTransactionReferenceNo = pc.strPriceContractNo
+					, @intContractDetailId
+					, @intContractHeaderId
+					, intContractTypeId
+					, intEntityId
+					, ch.intCommodityId
+					, intItemId
+					, cd.intCompanyLocationId
+					, cd.intPricingTypeId
+					, cd.intFutureMarketId
+					, cd.intFutureMonthId
+					, cd.dblBasis
+					, cd.dblFutures
+					, intQtyUOMId = cd.intUnitMeasureId
+					, intQtyCurrencyId = cd.intCurrencyId
+					, cd.intBasisUOMId
+					, cd.intBasisCurrencyId
+					, intPriceUOMId = cd.intPriceItemUOMId
+					, dtmStartDate
+					, dtmEndDate
+					, dblQty = @dblQty
+					, intContractStatusId
+					, cd.intBookId
+					, cd.intSubBookId
+					, ''
+				FROM tblCTPriceFixationDetail fd
+				JOIN tblCTPriceFixation pf ON pf.intPriceFixationId = fd.intPriceFixationId
+				JOIN tblCTPriceContract pc ON pc.intPriceContractId = pf.intPriceContractId
+				JOIN tblCTContractDetail cd ON cd.intContractDetailId = pf.intContractDetailId
+				INNER JOIN tblCTContractHeader ch ON ch.intContractHeaderId = cd.intContractHeaderId
+				INNER JOIN tblICCommodityUnitMeasure cum ON cum.intCommodityId = ch.intCommodityId AND cum.ysnDefault = 1
+				WHERE cd.intContractDetailId = @intContractHeaderId
+					AND cd.intContractHeaderId = @intContractDetailId
+			END
+			ELSE
+			BEGIN
+				INSERT INTO @cbLog (strBatchId
+					, strTransactionType
+					, strTransactionReference
+					, intTransactionReferenceId
+					, strTransactionReferenceNo
+					, intContractDetailId
+					, intContractHeaderId
+					, intContractTypeId
+					, intEntityId
+					, intCommodityId
+					, intItemId
+					, intLocationId
+					, intPricingTypeId
+					, intFutureMarketId
+					, intFutureMonthId
+					, dblBasis
+					, dblFutures
+					, intQtyUOMId
+					, intQtyCurrencyId
+					, intBasisUOMId
+					, intBasisCurrencyId
+					, intPriceUOMId
+					, dtmStartDate
+					, dtmEndDate
+					, dblQty
+					, intContractStatusId
+					, intBookId
+					, intSubBookId
+					, strNotes)		
+				SELECT @strBatchId
+					, 'Contract Balance'
+					, strTransactionReference = @strTransactionType
+					, intTransactionReferenceId = @intTransactionRecordId
+					, strTransactionReferenceNo = @strTransactionNumber
 					, @intContractDetailId
 					, @intContractHeaderId				
 					, intContractTypeId
@@ -946,82 +1021,16 @@ BEGIN
 				JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 				WHERE CD.intContractDetailId = @intContractHeaderId
 					AND CD.intContractHeaderId = @intContractDetailId
-			END
-			ELSE IF (@strTransactionType = 'Price Fixation')
-			BEGIN
-				INSERT INTO @cbLog (strBatchId
-					, strTransactionType
-					, intContractDetailId
-					, intContractHeaderId
-					, intContractTypeId
-					, intEntityId
-					, intCommodityId
-					, intItemId
-					, intLocationId
-					, intPricingTypeId
-					, intFutureMarketId
-					, intFutureMonthId
-					, dblBasis
-					, dblFutures
-					, intQtyUOMId
-					, intQtyCurrencyId
-					, intBasisUOMId
-					, intBasisCurrencyId
-					, intPriceUOMId
-					, dtmStartDate
-					, dtmEndDate
-					, dblQty
-					, intContractStatusId
-					, intBookId
-					, intSubBookId
-					, strNotes)		
-				SELECT @strBatchId
-					, @strTransactionType
-					, @intContractDetailId
-					, @intContractHeaderId
-					, intContractTypeId
-					, intEntityId
-					, ch.intCommodityId
-					, intItemId
-					, cd.intCompanyLocationId
-					, cd.intPricingTypeId
-					, cd.intFutureMarketId
-					, cd.intFutureMonthId
-					, cd.dblBasis
-					, cd.dblFutures
-					, intQtyUOMId = cd.intUnitMeasureId
-					, intQtyCurrencyId = cd.intCurrencyId
-					, cd.intBasisUOMId
-					, cd.intBasisCurrencyId
-					, intPriceUOMId = cd.intPriceItemUOMId
-					, dtmStartDate
-					, dtmEndDate
-					, dblQty = @dblQty
-					, intContractStatusId
-					, cd.intBookId
-					, cd.intSubBookId
-					, ''
-				FROM tblCTPriceFixationDetail fd
-				JOIN tblCTPriceFixation pf ON pf.intPriceFixationId = fd.intPriceFixationId
-				JOIN tblCTContractDetail cd ON cd.intContractDetailId = pf.intContractDetailId
-				INNER JOIN tblCTContractHeader ch ON ch.intContractHeaderId = cd.intContractHeaderId
-				INNER JOIN tblICCommodityUnitMeasure cum ON cum.intCommodityId = ch.intCommodityId AND cum.ysnDefault = 1
-				WHERE cd.intContractDetailId = @intContractHeaderId
-					AND cd.intContractHeaderId = @intContractDetailId
+
+				---------------------------------------------
+				-- Process Purchase/Sales Basis Deliveries --
+				---------------------------------------------
 			END
 
 			EXEC uspCTLogContractBalance @cbLog, 0
 		END
 		------------------------------
 		------------------------------
-
-		------------------------
-		---- Process strNotes --
-		------------------------
-		--IF (ISNULL(@strNotes, '') != '')
-		--BEGIN
-		--	IF (CHARINDEX('', @strNotes))
-		--END
 		
 		DROP TABLE #tmpPrevLog
 
