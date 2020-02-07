@@ -20,7 +20,7 @@ AS
 			JOIN tblAPPaymentDetail PYMTDTL 
 				ON PYMT.intPaymentId = PYMTDTL.intPaymentId
 			JOIN tblAPBill Bill	
-				ON PYMTDTL.intBillId = Bill.intBillId and intTransactionType = 1
+				ON PYMTDTL.intBillId = Bill.intBillId --and intTransactionType = 1
 			JOIN tblAPBillDetail BillDtl
 				ON BillDtl.intBillId = Bill.intBillId
 			JOIN tblICItem Item 

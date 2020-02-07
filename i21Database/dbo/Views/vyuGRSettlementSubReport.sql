@@ -95,7 +95,7 @@ FROM
 				,strTaxClass = TaxClass.strTaxClass
 		FROM tblAPBillDetail BillDtl
 		JOIN tblAPBill Bill 
-			ON BillDtl.intBillId = Bill.intBillId and Bill.intTransactionType = 1
+			ON BillDtl.intBillId = Bill.intBillId --and Bill.intTransactionType = 1
 		JOIN tblICItem Item 
 			ON BillDtl.intItemId = Item.intItemId
 		LEFT JOIN vyuAPBillDetailTax Tax 
@@ -241,7 +241,7 @@ FROM
 				,BillDtl.intInventoryReceiptItemId
 		FROM tblAPBillDetail BillDtl
 		JOIN tblAPBill Bill 
-			ON BillDtl.intBillId = Bill.intBillId and Bill.intTransactionType = 1
+			ON BillDtl.intBillId = Bill.intBillId --and Bill.intTransactionType = 1
 		JOIN tblICItem Item 
 			ON BillDtl.intItemId = Item.intItemId
 		LEFT JOIN vyuAPBillDetailTax Tax 
