@@ -91,7 +91,9 @@ END
 -- Check for invalid item UOM 
 IF EXISTS (SELECT TOP 1 1 FROM #FoundErrors WHERE intErrorCode = 80048)
 BEGIN 
-	EXEC uspICRaiseError 80048; 
+	DECLARE @strText_ytuf932e NVARCHAR(200)
+	SET @strText_ytuf932e = (SELECT ISNULL(strItemNo, '') FROM tblICItem WHERE intItemId = @intItemId)
+	EXEC uspICRaiseError 80048, @strText_ytuf932e
 	RETURN -1
 END 
 

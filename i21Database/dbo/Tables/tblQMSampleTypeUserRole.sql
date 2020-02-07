@@ -4,6 +4,7 @@
 	[intSampleTypeId] INT NOT NULL, 
 	[intUserRoleID] INT NOT NULL,
 	[intConcurrencyId] INT NULL CONSTRAINT [DF_tblQMSampleTypeUserRole_intConcurrencyId] DEFAULT 0,
+	intSampleTypeUserRoleRefId INT,
 	
 	[intCreatedUserId] [int] NULL,
 	[dtmCreated] [datetime] NULL CONSTRAINT [DF_tblQMSampleTypeUserRole_dtmCreated] DEFAULT GetDate(),

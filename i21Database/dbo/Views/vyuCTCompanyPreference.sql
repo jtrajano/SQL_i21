@@ -70,6 +70,7 @@ AS
 			,CP.ysnAllowBasisComponentToAccrue
 			,CP.ysnAutoCreateDerivative
 			,CP.ysnEnableItemContracts
+   			,CP.ysnAllowNonInventoryOnItemContracts  
 			,CP.ysnDocumentByBookAndSubBook
 			,CP.ysnUpdatedAvailabilityPurchase
 			,CP.ysnUpdatedAvailabilitySales

@@ -132,7 +132,7 @@ BEGIN
 												1 
 										  END 
 			,[dtmExpiryDate]			= SourceLot.dtmExpiryDate
-			,[strLotAlias]				= SourceLot.strLotAlias
+			,[strLotAlias]				= ISNULL(TargetLot.strLotAlias, SourceLot.strLotAlias) -- If target lot exists, keep the same alias. 
 			,[intLotStatusId]			= SourceLot.intLotStatusId
 										-- If target lot exists, and qty or weight is not zero, then do not overwrite the parent lot info. 
 			,[intParentLotId]			= --ISNULL(TargetLot.intParentLotId, SourceLot.intParentLotId)

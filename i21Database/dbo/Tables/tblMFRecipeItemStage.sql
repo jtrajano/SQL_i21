@@ -35,5 +35,7 @@
 	[strMessage] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	[strSessionId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL DEFAULT '',
 	[intRowNo] INT Default 0,
+	strRowState NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	intRecipeItemId int,
 	CONSTRAINT [PK_tblMFRecipeItemStage_intRecipeItemStageId] PRIMARY KEY ([intRecipeItemStageId]),
 )

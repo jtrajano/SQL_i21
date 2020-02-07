@@ -12,20 +12,7 @@ BEGIN TRY
 	DECLARE @strToTransactionType NVARCHAR(100)
 		,@intPriceContractPreStageId INT
 		,@intPriceContractId INT
-
-	SELECT @intToCompanyId = TC.intToCompanyId
-		,@intToEntityId = TC.intEntityId
-		,@strInsert = TC.strInsert
-		,@strUpdate = TC.strUpdate
-		,@strDelete = TC.strDelete
-		,@strToTransactionType = TT1.strTransactionType
-	FROM tblSMInterCompanyTransactionConfiguration TC
-	JOIN tblSMInterCompanyTransactionType TT ON TT.intInterCompanyTransactionTypeId = TC.intFromTransactionTypeId
-	JOIN tblSMInterCompanyTransactionType TT1 ON TT1.intInterCompanyTransactionTypeId = TC.intToTransactionTypeId
-	WHERE TT.strTransactionType IN (
-			'Purchase Price Fixation'
-			,'Sales Price Fixation'
-			)
+		,@intContractHeaderId INT
 
 	SELECT @intPriceContractPreStageId = MIN(intPriceContractPreStageId)
 	FROM tblCTPriceContractPreStage
@@ -33,9 +20,39 @@ BEGIN TRY
 
 	WHILE @intPriceContractPreStageId IS NOT NULL
 	BEGIN
+		SELECT @intPriceContractId = NULL
+			,@intToCompanyId = NULL
+			,@intToEntityId = NULL
+			,@strInsert = NULL
+			,@strUpdate = NULL
+			,@strDelete = NULL
+			,@strToTransactionType = NULL
+			,@intContractHeaderId = NULL
+
 		SELECT @intPriceContractId = intPriceContractId
 		FROM tblCTPriceContractPreStage
 		WHERE intPriceContractPreStageId = @intPriceContractPreStageId
+
+		SELECT @intContractHeaderId = intContractHeaderId
+		FROM tblCTPriceFixation
+		WHERE intPriceContractId = @intPriceContractId
+
+		SELECT @intToCompanyId = TC.intToCompanyId
+			,@intToEntityId = TC.intEntityId
+			,@strInsert = TC.strInsert
+			,@strUpdate = TC.strUpdate
+			,@strDelete = TC.strDelete
+			,@strToTransactionType = TT1.strTransactionType
+		FROM tblSMInterCompanyTransactionConfiguration TC
+		JOIN tblSMInterCompanyTransactionType TT ON TT.intInterCompanyTransactionTypeId = TC.intFromTransactionTypeId
+		JOIN tblSMInterCompanyTransactionType TT1 ON TT1.intInterCompanyTransactionTypeId = TC.intToTransactionTypeId
+		JOIN tblCTContractHeader CH ON CH.intCompanyId = TC.intFromCompanyId
+			AND CH.intBookId = TC.intToBookId
+		WHERE TT.strTransactionType IN (
+				'Purchase Price Fixation'
+				,'Sales Price Fixation'
+				)
+			AND CH.intContractHeaderId = @intContractHeaderId
 
 		IF EXISTS (
 				SELECT 1

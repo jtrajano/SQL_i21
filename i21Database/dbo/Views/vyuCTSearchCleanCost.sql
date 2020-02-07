@@ -22,6 +22,8 @@ AS
 			CC.dtmExportProvPrice,
 			CC.ysnExported,
 			CC.dtmExported,
+			CC.dblShippedWeight,
+			CC.dblFranchisePercent,
 
 			EY.strName strEntityName,
 			CH.strContractNumber + ' - ' +LTRIM(CD.intContractSeq)	AS	strSequenceNumber,

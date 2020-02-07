@@ -12,7 +12,8 @@
 	[ysnAutoCapture] BIT NOT NULL CONSTRAINT [DF_tblQMTest_ysnAutoCapture] DEFAULT 0, 
 	[ysnIgnoreSubSample] BIT NOT NULL CONSTRAINT [DF_tblQMTest_ysnIgnoreSubSample] DEFAULT 0, 
 	[ysnActive] BIT NOT NULL CONSTRAINT [DF_tblQMTest_ysnActive] DEFAULT 1, 
-	
+	intTestRefId INT,
+
 	[intCreatedUserId] [int] NULL,
 	[dtmCreated] [datetime] NULL CONSTRAINT [DF_tblQMTest_dtmCreated] DEFAULT GetDate(),
 	[intLastModifiedUserId] [int] NULL,

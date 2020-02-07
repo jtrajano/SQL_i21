@@ -17,9 +17,9 @@ strCustomerAddress =
 INV.strInvoiceNumber,
 dtmDetailDate = INV.dtmDate, 
 strComment = INV.strComments,
-dblDetailAmount = INV.dblInvoiceTotal, 
-dblDiscount = PYMTDTL.dblDiscount, 
-dblNet = CASE WHEN INV.intPaymentId IS NULL  THEN PYMTDTL.dblPayment ELSE INV.dblInvoiceTotal END,
+dblDetailAmount =  PYMTDTL.dblInvoiceTotal,
+dblDiscount = ISNULL(PYMTDTL.dblDiscount,0), 
+dblNet = PYMTDTL.dblPayment,
 strMessage = 'The following items(s) will be presented to ' + CHK.strPayeeBankName + ' account ending ' + ISNULL (RIGHT(RTRIM (COALESCE (CHK.strPayeeBankAccountNumber,CHK.strPayeeBankAccountNumber COLLATE Latin1_General_CI_AS, N'')), 4), '') + ' on ' + CONVERT (VARCHAR, PYMT.dtmDatePaid,107), 
 strBankAccountNo = STUFF (ACCT.strBankAccountNo, 1, LEN(ACCT.strBankAccountNo) - 4, REPLICATE ('x', LEN(ACCT.strBankAccountNo) - 4)),
 PYMTDTL.intPaymentDetailId
@@ -33,4 +33,3 @@ LEFT JOIN tblEMEntity ENTITY ON CHK.intEntityId = ENTITY.intEntityId
 LEFT JOIN tblEMEntityLocation LOCATION ON CHK.intEntityCustomerId = LOCATION.intEntityId AND ysnDefaultLocation = 1 
 LEFT JOIN tblSMCompanySetup COMPANY ON COMPANY.intCompanySetupID = (SElECT TOP 1 intCompanySetupID FROM tblSMCompanySetup) 
 LEFT JOIN vyuCMBankAccount ACCT ON ACCT.intBankAccountId = BA.intBankAccountId
-		

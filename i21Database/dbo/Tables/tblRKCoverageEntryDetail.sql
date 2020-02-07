@@ -9,7 +9,7 @@
     [dblInTransit] NUMERIC(18, 6) NULL, 
     [dblStock] NUMERIC(18, 6) NULL, 
     [dblOpenFutures] NUMERIC(18, 6) NULL, 
-    [intMonthsCovered] INT NULL, 
+    [dblMonthsCovered] NUMERIC(18, 6) NULL, 
     [dblAveragePrice] NUMERIC(18, 6) NULL, 
     [dblOptionsCovered] NUMERIC(18, 6) NULL, 
     [dblFuturesM2M] NUMERIC(18, 6) NULL, 

@@ -24,6 +24,7 @@
 	intTransactionCount [int] DEFAULT 0 NOT NULL,
 	intUserId [int] NOT NULL,
 	intEntityId [int] NOT NULL,
+	strRunOn NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL,
 	[intConcurrencyId] INT CONSTRAINT [DF_tblCFUsageExceptionAlertStaging_intConcurrencyId] DEFAULT ((1)) NULL,
     CONSTRAINT [PK_tblCFUsageExceptionAlertStaging] PRIMARY KEY CLUSTERED ([intUsageExceptionAlertStagingId] ASC),
  );

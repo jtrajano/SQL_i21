@@ -186,6 +186,16 @@ BEGIN TRY
 				FROM tblRKDailyAveragePrice
 				WHERE intDailyAveragePriceRefId = @intDailyAveragePriceRefId
 
+				SELECT @strHeaderCondition = 'intDailyAveragePriceId = ' + LTRIM(@intNewDailyAveragePriceId)
+
+				EXEC uspCTGetTableDataInXML 'vyuIPGetDailyAveragePrice'
+					,@strHeaderCondition
+					,@strAckHeaderXML OUTPUT
+
+				EXEC uspCTGetTableDataInXML 'vyuIPGetDailyAveragePriceDetail'
+					,@strHeaderCondition
+					,@strAckDetailXML OUTPUT
+
 				DELETE
 				FROM tblRKDailyAveragePrice
 				WHERE intDailyAveragePriceRefId = @intDailyAveragePriceRefId
@@ -391,7 +401,8 @@ BEGIN TRY
 				IF NOT EXISTS (
 						SELECT 1
 						FROM tblRKDailyAveragePriceDetail
-						WHERE intDailyAveragePriceDetailRefId = @intDailyAveragePriceDetailId
+						WHERE intDailyAveragePriceId = @intNewDailyAveragePriceId
+							AND intDailyAveragePriceDetailRefId = @intDailyAveragePriceDetailId
 						)
 				BEGIN
 					INSERT INTO tblRKDailyAveragePriceDetail (
@@ -404,6 +415,7 @@ BEGIN TRY
 						,dblSwitchPL
 						,dblOptionsPL
 						,dblNetLongAvg
+						,dblSettlementPrice
 						,intBrokerId
 						,intConcurrencyId
 						,intDailyAveragePriceDetailRefId
@@ -417,6 +429,7 @@ BEGIN TRY
 						,dblSwitchPL
 						,dblOptionsPL
 						,dblNetLongAvg
+						,dblSettlementPrice
 						,@intBrokerId
 						,1
 						,@intDailyAveragePriceDetailId
@@ -426,6 +439,7 @@ BEGIN TRY
 							,dblSwitchPL NUMERIC(18, 6)
 							,dblOptionsPL NUMERIC(18, 6)
 							,dblNetLongAvg NUMERIC(18, 6)
+							,dblSettlementPrice NUMERIC(18, 6)
 							,intDailyAveragePriceDetailId INT
 							) x
 					WHERE x.intDailyAveragePriceDetailId = @intDailyAveragePriceDetailId
@@ -442,6 +456,7 @@ BEGIN TRY
 						,dblSwitchPL = x.dblSwitchPL
 						,dblOptionsPL = x.dblOptionsPL
 						,dblNetLongAvg = x.dblNetLongAvg
+						,dblSettlementPrice = x.dblSettlementPrice
 						,intBrokerId = @intBrokerId
 					FROM OPENXML(@idoc, 'vyuIPGetDailyAveragePriceDetails/vyuIPGetDailyAveragePriceDetail', 2) WITH (
 							dblNoOfLots NUMERIC(18, 6)
@@ -449,6 +464,7 @@ BEGIN TRY
 							,dblSwitchPL NUMERIC(18, 6)
 							,dblOptionsPL NUMERIC(18, 6)
 							,dblNetLongAvg NUMERIC(18, 6)
+							,dblSettlementPrice NUMERIC(18, 6)
 							,intDailyAveragePriceDetailId INT
 							) x
 					JOIN tblRKDailyAveragePriceDetail D ON D.intDailyAveragePriceDetailRefId = x.intDailyAveragePriceDetailId

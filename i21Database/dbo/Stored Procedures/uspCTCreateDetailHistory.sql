@@ -3,14 +3,15 @@
     @intContractDetailId	   INT = NULL,
 	@strComment				   NVARCHAR(100) = NULL,
 	@intSequenceUsageHistoryId INT = NULL,
-	@ysnUseContractDate		   BIT = 0
+	@ysnUseContractDate		   BIT = 0,
+	@strProcess				   NVARCHAR(50) = ''
 AS	   
 
 BEGIN TRY
-		DECLARE @ErrMsg					NVARCHAR(MAX)
-		DECLARE @intApprovalListId		INT
-		DECLARE @intLastModifiedById	INT
-		DECLARE @ysnAmdWoAppvl			BIT,
+		DECLARE @ErrMsg					NVARCHAR(MAX),
+				@intApprovalListId		INT,
+				@intLastModifiedById	INT,
+				@ysnAmdWoAppvl			BIT,
 				@intSequenceHistoryId	INT,
 				@intPrevHistoryId		iNT,
 				@dblPrevQty				NUMERIC(18,6),
@@ -24,7 +25,9 @@ BEGIN TRY
 				@dblPrevCashPrice		NUMERIC(18,6),
 				@dblFutures				NUMERIC(18,6),
 				@dblBasis				NUMERIC(18,6),
-				@dblCashPrice			NUMERIC(18,6)
+				@dblCashPrice			NUMERIC(18,6),
+				@ExistingHistory		AS RKSummaryLog,
+				@strTransactionType		NVARCHAR(50)
 
 	
 		DECLARE @tblHeader AS TABLE 
@@ -669,6 +672,49 @@ BEGIN TRY
 		   AND CurrentRow.intContractDetailId = PreviousRow.intContractDetailId
 		END     
 	END
+
+	SELECT @strTransactionType = CASE 
+									WHEN @strProcess = 'Price Fixation' THEN 'Price Fixation'
+									ELSE 'Contract'
+								 END
+
+	INSERT INTO @ExistingHistory(strTransactionType
+		, intTransactionRecordId
+		, strTransactionNumber
+		, dtmTransactionDate
+		, intContractDetailId
+		, intContractHeaderId
+		, intCommodityId
+		, intBookId
+		, intSubBookId
+		, intFutureMarketId
+		, intFutureMonthId
+		, dblNoOfLots
+		, dblPrice
+		, intEntityId
+		, intUserId
+		, strNotes)
+	SELECT strTransactionType = @strTransactionType
+		, intTransactionRecordId = intContractDetailId
+		, strTransactionNumber = strContractNumber + '-' + CAST(intContractSeq AS NVARCHAR(10))
+		, dtmTransactionDate = dtmHistoryCreated
+		, intContractDetailId = intContractDetailId
+		, intContractHeaderId = intContractHeaderId
+		, intCommodityId = intCommodityId
+		, intBookId = intBookId
+		, intSubBookId = intSubBookId
+		, intFutureMarketId = intFutureMarketId
+		, intFutureMonthId = intFutureMonthId
+		, dblNoOfLots = dblLotsPriced
+		, dblPrice = dblFinalPrice
+		, intEntityId = intEntityId
+		, intUserId = intUserId
+		, strNotes = ''
+	FROM tblCTSequenceHistory SH
+	INNER JOIN @SCOPE_IDENTITY NR ON SH.intSequenceHistoryId = NR.intSequenceHistoryId
+	ORDER BY NR.intSequenceHistoryId ASC
+
+	EXEC uspRKLogRiskPosition @ExistingHistory, 1
 
 END TRY
 

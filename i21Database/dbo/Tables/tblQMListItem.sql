@@ -6,7 +6,8 @@
 	[strListItemName] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
 	[ysnIsDefault] BIT NOT NULL CONSTRAINT [DF_tblQMListItem_ysnIsDefault] DEFAULT 0, 
 	[ysnActive] BIT NOT NULL CONSTRAINT [DF_tblQMListItem_ysnActive] DEFAULT 0, 
-	
+	intListItemRefId INT,
+
 	[intCreatedUserId] [int] NULL,
 	[dtmCreated] [datetime] NULL CONSTRAINT [DF_tblQMListItem_dtmCreated] DEFAULT GetDate(),
 	[intLastModifiedUserId] [int] NULL,

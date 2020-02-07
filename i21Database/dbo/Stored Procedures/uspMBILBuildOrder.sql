@@ -75,6 +75,7 @@ SELECT DISTINCT intDispatchId
 	, intLocationId
 FROM #Dispatch
 WHERE intDriverId = @intDriverId AND strOrderStatus = 'Generated'
+		AND intTermId IN (SELECT intTermID from tblSMTerm)
 
 -- ++++++ CREATE ORDER's ITEM LIST ++++++ --
 INSERT INTO tblMBILOrderItem(intOrderId
@@ -130,7 +131,6 @@ DECLARE  @MBILOrderId					INT				= NULL
 		,@CurrencyExchangeRate			NUMERIC(18,6)	= NULL
 
 
-
 CREATE TABLE #tempOrderTaxCode (
 	[intTransactionDetailTaxId]	INT
 	,[intInvoiceDetailId]		INT
@@ -147,6 +147,7 @@ CREATE TABLE #tempOrderTaxCode (
 	,[dblAdjustedTax]			NUMERIC(18, 6)
 	,[dblBaseAdjustedTax]		NUMERIC(18, 6)
 	,[intSalesTaxAccountId]		INT
+	,[intSalesTaxExemptionAccountId] INT
 	,[ysnSeparateOnInvoice]		BIT
 	,[ysnCheckoffTax]			BIT
 	,[strTaxCode]				NVARCHAR(MAX)
@@ -158,6 +159,7 @@ CREATE TABLE #tempOrderTaxCode (
 	,[intUnitMeasureId]			INT
 	,[strUnitMeasure]			NVARCHAR(MAX)
 	,[strTaxClass]				NVARCHAR(MAX)
+	,[ysnAddToCost]				BIT
 );
 
 WHILE EXISTS(SELECT 1 FROM #tempDriverOrder)
@@ -183,6 +185,7 @@ BEGIN
 				,@CurrencyExchangeRate			= NULL
 			FROM #tempDriverOrder
 
+
 	INSERT INTO #tempOrderTaxCode ([intTransactionDetailTaxId]
 									,[intInvoiceDetailId]
 									,[intTaxGroupMasterId]
@@ -198,6 +201,7 @@ BEGIN
 									,[dblAdjustedTax]
 									,[dblBaseAdjustedTax]
 									,[intSalesTaxAccountId]
+									,[intSalesTaxExemptionAccountId]
 									,[ysnSeparateOnInvoice]
 									,[ysnCheckoffTax]
 									,[strTaxCode]
@@ -208,7 +212,8 @@ BEGIN
 									,[strNotes]
 									,[intUnitMeasureId]
 									,[strUnitMeasure]
-									,[strTaxClass])
+									,[strTaxClass]
+									,[ysnAddToCost])
 	EXEC uspARGetItemTaxes @ItemId
 						  ,@LocationId
 						  ,@CustomerId

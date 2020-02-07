@@ -376,6 +376,7 @@ print 'BEGIN POST DEPLOYMENT'
 :R .\CT\1920_Add_Accrued_Payables.sql
 :R .\CT\Create_fnCTFormatNumber.sql
 :R .\CT\2010_AddMissingHistory.sql
+:R .\CT\2010_ContractSummaryLog.sql
 
 --Notes Receivable
 :R .\NR\1_NoteTransType.sql
@@ -551,6 +552,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\TF\DefaultData\AR_Arkansas.sql
 :r .\TF\DefaultData\AR_Arkansas.sql
 :r .\TF\DefaultData\CO_Colorado.sql
+:r .\TF\DefaultData\TN_Tennessee.sql
 
 --Integration
 :R .\IP\1_MasterTables.sql

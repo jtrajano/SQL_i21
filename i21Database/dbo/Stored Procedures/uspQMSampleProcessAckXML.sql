@@ -55,9 +55,23 @@ BEGIN TRY
 		BEGIN
 			IF ISNULL(@strRowState, '') = 'Delete'
 			BEGIN
-				SELECT @intSampleRefId = intSampleId
-				FROM tblQMSampleAcknowledgementStage
-				WHERE intSampleAcknowledgementStageId = @intSampleAcknowledgementStageId
+				EXEC sp_xml_preparedocument @idoc OUTPUT
+					,@strAckHeaderXML
+
+				SELECT @intSampleId = intSampleId
+					,@intSampleRefId = intSampleRefId
+					,@strSampleNumber = strSampleNumber
+				FROM OPENXML(@idoc, 'tblQMSamples/tblQMSample', 2) WITH (
+						intSampleId INT
+						,intSampleRefId INT
+						,strSampleNumber NVARCHAR(100)
+						)
+				
+				--SELECT @intSampleRefId = intSampleId
+				--FROM tblQMSampleAcknowledgementStage
+				--WHERE intSampleAcknowledgementStageId = @intSampleAcknowledgementStageId
+
+				EXEC sp_xml_removedocument @idoc
 
 				GOTO ext
 			END

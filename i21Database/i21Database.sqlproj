@@ -435,6 +435,7 @@
     <Build Include="dbo\Stored Procedures\uspGLPostFiscalYear.sql" />
     <Build Include="dbo\Stored Procedures\uspGLConsolidate.sql" />
     <Build Include="dbo\Stored Procedures\uspGLConsolidateSubsidiary.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPExportPO.sql" />
     <Build Include="dbo\Stored Procedures\uspAPPostBill.sql" />
     <Build Include="dbo\Stored Procedures\uspAPPostBillBatch.sql" />
     <Build Include="dbo\Stored Procedures\uspRMInsertDynamicParameterFields.sql" />
@@ -3740,6 +3741,8 @@
     <Build Include="dbo\Stored Procedures\uspSTReportCheckoutCashOverShortRecap.sql" />
     <None Include="Scripts\Post-Deployment\AP\UpdateBillDetailCurrencies.sql" />
     <Build Include="dbo\Tables\tblAPImportVoucherLog.sql" />
+    <Build Include="dbo\Tables\tblAPImportLog.sql" />
+    <Build Include="dbo\Tables\tblAPImportLogDetail.sql" />
     <Build Include="dbo\Functions\fnEMGetNumberFromString.sql" />
     <Build Include="dbo\Functions\fnEMIsCharNumber.sql" />
     <Build Include="dbo\Functions\fnEMPhoneConvert.sql" />
@@ -8387,6 +8390,77 @@
     <Build Include="dbo\Views\vyuRKGetMatchDerivativesFromSummaryLog.sql" />
     <Build Include="dbo\Functions\fnRKGetBucketCompanyOwned.sql" />
     <Build Include="dbo\Functions\fnRKGetBucketInTransit.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTRebatePreviewSubmissionNew.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTGenerateVendorRebate.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTUpdateBasisComponents.sql" />
+    <Build Include="dbo\User Defined Types\BasisComponent.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGUpdateAllocatedBasisComponent.sql" />
+    <Build Include="dbo\Tables\tblRKOptionsMatchPnSHeaderStage.sql" />
+    <Build Include="dbo\Tables\tblRKOptionsMatchPnSHeaderAckStage.sql" />
+    <Build Include="dbo\Views\vyuIPGetOptionsMatchPnS.sql" />
+    <Build Include="dbo\Views\vyuIPGetOptionsPnSExpired.sql" />
+    <None Include="Scripts\Post-Deployment\CT\2010_ContractSummaryLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPOptionsPnSProcessPreStage.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPOptionsPnSPopulateStgXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPOptionsPnSTransferStgXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPOptionsPnSProcessStgXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPDeleteLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPDeleteStageLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTRebuildContractHistory.sql" />
+    <Build Include="dbo\Tables\tblRKFutOptTransactionHeaderBook.sql" />
+    <Build Include="dbo\Tables\tblRKOptionsMatchPnSHeaderBook.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFProcessRecipes.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPStageSAPRecipe.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPInterCompanyPreStageAttribute.sql" />
+    <Build Include="dbo\Tables\tblQMAttributePreStage.sql" />
+    <Build Include="dbo\Tables\tblQMAttributeStage.sql" />
+    <Build Include="dbo\Tables\tblQMListPreStage.sql" />
+    <Build Include="dbo\Tables\tblQMListStage.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPInterCompanyPreStageList.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPInterCompanyPreStageSampleType.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPInterCompanyPreStageProperty.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPInterCompanyPreStageTest.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPInterCompanyPreStageProduct.sql" />
+    <Build Include="dbo\Tables\tblQMSampleTypePreStage.sql" />
+    <Build Include="dbo\Tables\tblQMSampleTypeStage.sql" />
+    <Build Include="dbo\Tables\tblQMPropertyPreStage.sql" />
+    <Build Include="dbo\Tables\tblQMPropertyStage.sql" />
+    <Build Include="dbo\Tables\tblQMTestPreStage.sql" />
+    <Build Include="dbo\Tables\tblQMTestStage.sql" />
+    <Build Include="dbo\Tables\tblQMProductPreStage.sql" />
+    <Build Include="dbo\Tables\tblQMProductStage.sql" />
+    <Build Include="dbo\Views\vyuIPGetAttribute.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPAttributeProcessPreStage.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPAttributePopulateStgXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPAttributeTransferStgXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPAttributeProcessStgXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTItemContractUpdateRemainingDollarValue.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPListProcessPreStage.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPListPopulateStgXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPListTransferStgXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPListProcessStgXML.sql" />
+    <Build Include="dbo\Tables\tblARInvoicePreStage.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPInterCompanyPreStageInvoice.sql" />
+    <Build Include="dbo\Functions\fnCTGetShippedWeight.sql" />
+    <Build Include="dbo\Functions\fnCTGetFranchisePercent.sql" />
+    <Build Include="dbo\Views\vyuIPGetSampleTypeUserRole.sql" />
+    <Build Include="dbo\Views\vyuIPGetSampleTypeDetail.sql" />
+    <Build Include="dbo\Views\vyuIPGetSampleType.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPSampleTypeProcessPreStage.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPSampleTypeProcessStgXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPSampleTypeTransferStgXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPSampleTypePopulateStgXML.sql" />
+    <Build Include="dbo\Views\vyuIPGetProperty.sql" />
+    <Build Include="dbo\Views\vyuIPGetPropertyValidityPeriod.sql" />
+    <Build Include="dbo\Views\vyuIPGetConditionalProperty.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPPropertyProcessPreStage.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPPropertyPopulateStgXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPPropertyTransferStgXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPPropertyProcessStgXML.sql" />
+    <Build Include="dbo\Tables\tblMFRecipePreStage.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFPopulateRecipePreStage.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFProcessPreStageRecipe.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPGenerateSAPRecipeIDOC.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -8810,5 +8884,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\TF\DefaultData\CO_Colorado.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\TN_Tennessee.sql" />
   </ItemGroup>
 </Project>

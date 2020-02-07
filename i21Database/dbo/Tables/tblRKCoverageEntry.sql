@@ -12,5 +12,6 @@
 	[ysnPosted] BIT NULL DEFAULT ((0)),
 	[intCoverageEntryRefId] INT NULL,
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
-    CONSTRAINT [PK_tblRKCoverageEntry] PRIMARY KEY ([intCoverageEntryId]) 
+    CONSTRAINT [PK_tblRKCoverageEntry] PRIMARY KEY ([intCoverageEntryId]), 
+    CONSTRAINT [AK_tblRKCoverageEntry_strBatchName] UNIQUE ([strBatchName]) 
 )

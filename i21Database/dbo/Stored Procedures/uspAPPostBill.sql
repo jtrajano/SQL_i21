@@ -17,7 +17,8 @@
 	@invalidCount		AS INT				= 0 OUTPUT,
 	@success			AS BIT				= 0 OUTPUT,
 	@batchIdUsed		AS NVARCHAR(40)		= NULL OUTPUT,
-	@recapId			AS NVARCHAR(250)	= NEWID OUTPUT
+	@recapId			AS NVARCHAR(250)	= NEWID OUTPUT,
+	@isPricingContract	AS INT				= 0
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -534,8 +535,8 @@ BEGIN
 	    strRateType ,
 		strDocument,
 		strComments,
-		dblSourceUnitCredit,
-		dblSourceUnitDebit,
+		SourceCreditUnit.Value,
+		SourceDebitUnit.Value,
 		intCommodityId,
 		intSourceLocationId	
 	FROM dbo.fnAPCreateBillGLEntries(@validBillIds, @userId, @batchId) A
@@ -545,6 +546,8 @@ BEGIN
 	CROSS APPLY dbo.fnGetCredit(ISNULL(A.dblDebitForeign, 0) - ISNULL(A.dblCreditForeign, 0))  CreditForeign
 	CROSS APPLY dbo.fnGetDebit(ISNULL(A.dblDebitUnit, 0) - ISNULL(A.dblCreditUnit, 0)) DebitUnit
 	CROSS APPLY dbo.fnGetCredit(ISNULL(A.dblDebitUnit, 0) - ISNULL(A.dblCreditUnit, 0))  CreditUnit
+	CROSS APPLY dbo.fnGetDebit(ISNULL(A.dblSourceUnitDebit, 0) - ISNULL(A.dblSourceUnitCredit, 0)) SourceDebitUnit
+	CROSS APPLY dbo.fnGetCredit(ISNULL(A.dblSourceUnitDebit, 0) - ISNULL(A.dblSourceUnitCredit, 0))  SourceCreditUnit
 	ORDER BY intTransactionId
 
 	-- Call the Item's Cost Adjustment

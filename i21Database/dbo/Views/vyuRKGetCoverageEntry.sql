@@ -21,5 +21,4 @@ FROM tblRKCoverageEntry Header
 LEFT JOIN tblCTBook Book ON Book.intBookId = Header.intBookId
 LEFT JOIN tblCTSubBook SubBook ON SubBook.intSubBookId = Header.intSubBookId
 LEFT JOIN tblICCommodity Commodity ON Commodity.intCommodityId = Header.intCommodityId
-LEFT JOIN tblICCommodityUnitMeasure CommodityUOM ON CommodityUOM.intCommodityUnitMeasureId = Header.intUOMId
-LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = CommodityUOM.intUnitMeasureId
+LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = Header.intUOMId

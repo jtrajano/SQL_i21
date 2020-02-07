@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspCFInvoiceReport](
 	 @xmlParam NVARCHAR(MAX)=null
 	,@UserId NVARCHAR(MAX)
+	,@StatementType NVARCHAR(MAX)
 )
 AS
 BEGIN
@@ -924,6 +925,7 @@ BEGIN
 		,ysnShowDriverPinDescriptionOnly
 		,ysnPageBreakByPrimarySortOrder
 		,ysnSummaryByDeptDriverPinProd
+		,strStatementType
 		)
 		SELECT
 		 intCustomerGroupId			
@@ -1024,6 +1026,7 @@ BEGIN
 		,ysnShowDriverPinDescriptionOnly
 		,ysnPageBreakByPrimarySortOrder
 		,ysnSummaryByDeptDriverPinProd
+		,@StatementType
 		FROM @tblCFTempInvoiceReport
 
 	END

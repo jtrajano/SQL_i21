@@ -199,7 +199,9 @@ BEGIN
 	)
 	BEGIN 
 		-- Item UOM is invalid or missing.
-		EXEC uspICRaiseError 80048;
+		DECLARE @strText_gtd9 NVARCHAR(200)
+		SET @strText_gtd9 = (SELECT ISNULL(strItemNo, '') FROM tblICItem WHERE intItemId = @intItemId)
+		EXEC uspICRaiseError 80048, @strText_gtd9
 		GOTO _Exit
 	END 
 END 

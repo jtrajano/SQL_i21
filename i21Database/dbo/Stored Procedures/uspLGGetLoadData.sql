@@ -18,27 +18,17 @@ BEGIN
 		SELECT * FROM (
 			SELECT L.*
 				,strType = CASE L.intPurchaseSale
-					WHEN 1
-						THEN 'Inbound'
-					WHEN 2
-						THEN 'Outbound'
-					WHEN 3
-						THEN 'Drop Ship'
-					END
+							WHEN 1 THEN 'Inbound'
+							WHEN 2 THEN 'Outbound'
+							WHEN 3 THEN 'Drop Ship' END
 				,strEquipmentType = EQ.strEquipmentType
 				,strPosition = P.strPosition
 				,strPositionType = P.strPositionType
 				,strHauler = Hauler.strName
 				,strWeightUnitMeasure = UM.strUnitMeasure
-				,strScaleTicketNo = CASE 
-					WHEN IsNull(L.intTicketId, 0) <> 0
-						THEN CAST(ST.strTicketNumber AS VARCHAR(100))
-					ELSE CASE 
-							WHEN IsNull(L.intLoadHeaderId, 0) <> 0
-								THEN TR.strTransaction
-							ELSE NULL
-							END
-					END
+				,strScaleTicketNo = CASE WHEN IsNull(L.intTicketId, 0) <> 0 THEN ST.strTicketNumber
+										WHEN IsNull(L.intLoadHeaderId, 0) <> 0 THEN TR.strTransaction
+										ELSE NULL END
 				,intGenerateReferenceNumber = GL.intReferenceNumber
 				,intNumberOfLoads = GL.intNumberOfLoads
 				,strDispatcher = SE.strUserName
@@ -48,28 +38,28 @@ BEGIN
 				,CU.strCurrency
 				,CONT.strContainerType
 				,intLeadTime = ISNULL(DPort.intLeadTime, 0)
-				,ShippingLine.strName AS strShippingLine
-				,SLSC.strOwner AS strServiceContractOwner
-				,Terminal.strName AS strTerminal
-				,ForwardingAgent.strName AS strForwardingAgent
-				,Insurer.strName AS strInsurer
-				,Currency.strCurrency AS strInsuranceCurrency
-				,BLDraftToBeSent.strName AS strBLDraftToBeSent
-				,NP.strName AS strDocPresentationVal 
-				,ETAPODRC.strReasonCodeDescription AS strETAPODReasonCode
-				,ETAPOLRC.strReasonCodeDescription AS strETAPOLReasonCode
-				,ETSPOLRC.strReasonCodeDescription AS strETSPOLReasonCode
-				,DemurrageCurrency.strCurrency AS strDemurrageCurrency
-				,DespatchCurrency.strCurrency AS strDespatchCurrency
-				,LoadingUnit.strUnitMeasure AS strLoadingUnitMeasure
-				,DischargeUnit.strUnitMeasure AS strDischargeUnitMeasure
-				,Driver.strName AS strDriver
-				,DENSE_RANK() OVER (
-					ORDER BY L.intLoadId DESC
-					) intRankNo
+				,strShippingLine = ShippingLine.strName
+				,strServiceContractOwner = SLSC.strOwner
+				,strTerminal = Terminal.strName
+				,strForwardingAgent = ForwardingAgent.strName
+				,strInsurer = Insurer.strName
+				,strInsuranceCurrency = Currency.strCurrency
+				,strBLDraftToBeSent = BLDraftToBeSent.strName
+				,strDocPresentationVal = NP.strName 
+				,strETAPODReasonCode = ETAPODRC.strReasonCodeDescription
+				,strETAPOLReasonCode = ETAPOLRC.strReasonCodeDescription
+				,strETSPOLReasonCode = ETSPOLRC.strReasonCodeDescription
+				,strDemurrageCurrency = DemurrageCurrency.strCurrency
+				,strDespatchCurrency = DespatchCurrency.strCurrency
+				,strLoadingUnitMeasure = LoadingUnit.strUnitMeasure
+				,strDischargeUnitMeasure = DischargeUnit.strUnitMeasure
+				,strDriver = Driver.strName
+				,intRankNo = DENSE_RANK() OVER (ORDER BY L.intLoadId DESC) 
 				,BO.strBook
 				,SB.strSubBook
 				,INC.intInsuranceCalculatorId
+				,strReversedFromLoadNumber = LSRF.strLoadNumber
+				,strReversedOnLoadNumber = LSRO.strLoadNumber
 			FROM tblLGLoad L
 			LEFT JOIN tblLGGenerateLoad GL ON GL.intGenerateLoadId = L.intGenerateLoadId
 			LEFT JOIN tblEMEntity Hauler ON Hauler.intEntityId = L.intHaulerEntityId
@@ -87,6 +77,8 @@ BEGIN
 			LEFT JOIN tblLGLoad LSI ON LSI.intLoadId = L.intLoadShippingInstructionId
 			LEFT JOIN tblSMUserSecurity SE ON SE.intEntityId = L.intDispatcherId
 			LEFT JOIN tblLGLoad SI ON SI.intLoadId = L.intLoadShippingInstructionId
+			LEFT JOIN tblLGLoad LSRF ON LSRF.intLoadId = L.intLoadReversalSourceId
+			OUTER APPLY (SELECT TOP 1 intLoadId, strLoadNumber FROM tblLGLoad WHERE intLoadReversalSourceId = L.intLoadId) LSRO
 			LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = L.intFreightTermId
 			LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = L.intCurrencyId
 			LEFT JOIN tblSMCurrency Currency ON Currency.intCurrencyID = L.intInsuranceCurrencyId
@@ -119,13 +111,9 @@ BEGIN
 	BEGIN
 		SELECT L.*
 			,strType = CASE L.intPurchaseSale
-				WHEN 1
-					THEN 'Inbound'
-				WHEN 2
-					THEN 'Outbound'
-				WHEN 3
-					THEN 'Drop Ship'
-				END
+						WHEN 1 THEN 'Inbound'
+						WHEN 2 THEN 'Outbound'
+						WHEN 3 THEN 'Drop Ship' END
 			,strEquipmentType = EQ.strEquipmentType
 			,strPosition = P.strPosition
 			,strPositionType = P.strPositionType
@@ -149,25 +137,27 @@ BEGIN
 			,CU.strCurrency
 			,CONT.strContainerType
 			,intLeadTime = ISNULL(DPort.intLeadTime, 0)
-			,ShippingLine.strName AS strShippingLine		
-			,SLSC.strOwner AS strServiceContractOwner	
-			,Terminal.strName AS strTerminal
-			,ForwardingAgent.strName AS strForwardingAgent
-			,Insurer.strName AS strInsurer
-			,Currency.strCurrency AS strInsuranceCurrency
-			,BLDraftToBeSent.strName AS strBLDraftToBeSent
-			,NP.strName AS strDocPresentationVal  
-			,ETAPODRC.strReasonCodeDescription AS strETAPODReasonCode
-			,ETAPOLRC.strReasonCodeDescription AS strETAPOLReasonCode
-			,ETSPOLRC.strReasonCodeDescription AS strETSPOLReasonCode
-			,DemurrageCurrency.strCurrency AS strDemurrageCurrency
-			,DespatchCurrency.strCurrency AS strDespatchCurrency
-			,LoadingUnit.strUnitMeasure AS strLoadingUnitMeasure
-			,DischargeUnit.strUnitMeasure AS strDischargeUnitMeasure
-			,Driver.strName AS strDriver
+			,strShippingLine = ShippingLine.strName		
+			,strServiceContractOwner = SLSC.strOwner	
+			,strTerminal = Terminal.strName
+			,strForwardingAgent = ForwardingAgent.strName
+			,strInsurer = Insurer.strName
+			,strInsuranceCurrency = Currency.strCurrency
+			,strBLDraftToBeSent = BLDraftToBeSent.strName
+			,strDocPresentationVal = NP.strName  
+			,strETAPODReasonCode = ETAPODRC.strReasonCodeDescription
+			,strETAPOLReasonCode = ETAPOLRC.strReasonCodeDescription
+			,strETSPOLReasonCode = ETSPOLRC.strReasonCodeDescription
+			,strDemurrageCurrency = DemurrageCurrency.strCurrency
+			,strDespatchCurrency = DespatchCurrency.strCurrency
+			,strLoadingUnitMeasure = LoadingUnit.strUnitMeasure
+			,strDischargeUnitMeasure = DischargeUnit.strUnitMeasure
+			,strDriver = Driver.strName
 			,BO.strBook
 			,SB.strSubBook
 			,INC.intInsuranceCalculatorId
+			,strReversedFromLoadNumber = LSRF.strLoadNumber
+			,strReversedOnLoadNumber = LSRO.strLoadNumber
 		FROM tblLGLoad L
 		LEFT JOIN tblLGGenerateLoad GL ON GL.intGenerateLoadId = L.intGenerateLoadId
 		LEFT JOIN tblEMEntity Hauler ON Hauler.intEntityId = L.intHaulerEntityId
@@ -183,6 +173,8 @@ BEGIN
 		LEFT JOIN tblSCTicket ST ON ST.intTicketId = L.intTicketId
 		LEFT JOIN tblTRLoadHeader TR ON TR.intLoadHeaderId = L.intLoadHeaderId
 		LEFT JOIN tblLGLoad LSI ON LSI.intLoadId = L.intLoadShippingInstructionId
+		LEFT JOIN tblLGLoad LSRF ON LSRF.intLoadId = L.intLoadReversalSourceId
+		OUTER APPLY (SELECT TOP 1 intLoadId, strLoadNumber FROM tblLGLoad WHERE intLoadReversalSourceId = L.intLoadId) LSRO
 		LEFT JOIN tblSMUserSecurity SE ON SE.intEntityId = L.intDispatcherId
 		LEFT JOIN tblLGLoad SI ON SI.intLoadId = L.intLoadShippingInstructionId
 		LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = L.intFreightTermId

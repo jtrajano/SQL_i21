@@ -14,6 +14,7 @@ BEGIN TRY
 		,@intUserId INT
 		,@intDailyAveragePricePreStageId INT
 		,@strFromCompanyName NVARCHAR(150)
+		,@intBookId INT
 	DECLARE @tblRKDailyAveragePricePreStage TABLE (intDailyAveragePricePreStageId INT)
 
 	INSERT INTO @tblRKDailyAveragePricePreStage (intDailyAveragePricePreStageId)
@@ -38,6 +39,7 @@ BEGIN TRY
 		WHERE intDailyAveragePricePreStageId = @intDailyAveragePricePreStageId
 
 		SELECT TOP 1 @strFromCompanyName = strName
+			,@intBookId = intBookId
 		FROM tblIPMultiCompany
 		WHERE ysnParent = 1
 
@@ -53,6 +55,7 @@ BEGIN TRY
 				WHERE ISNULL(t.ysnPosted, 0) = 1
 					AND t.intDailyAveragePriceId = @intDailyAveragePriceId
 					AND t.intBookId IS NOT NULL
+					AND t.intBookId <> @intBookId
 				)
 		BEGIN
 			EXEC uspIPDailyAveragePricePopulateStgXML @intDailyAveragePriceId

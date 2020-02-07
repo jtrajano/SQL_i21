@@ -33,6 +33,9 @@ CREATE TABLE [dbo].[tblCTItemContractHeader](
 	[ysnMailSent]						[bit] NOT NULL DEFAULT ((0)),
 
 	[intShipToLocationId]				[int] NULL, 
+	[dblDollarValue]					[numeric](18, 6) NULL,
+	[dblAppliedDollarValue]				[numeric](18, 6) NULL,
+	[dblRemainingDollarValue]			[numeric](18, 6) NULL,
 
 	--[strShipToLocationName]				[nvarchar](50) NULL,
 	--[strShipToAddress]					[nvarchar](MAX) NULL,

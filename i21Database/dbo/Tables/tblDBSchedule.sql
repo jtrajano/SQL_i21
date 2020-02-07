@@ -11,7 +11,7 @@
 	[ysnSaturday]				[bit] NULL,
 	[ysnSunday]					[bit] NULL,
 	[intDayOfMonth]				[int] NULL,
-	[dtmRunTime]				DATE NULL,
+	[dtmRunTime]				DATETIME NULL,
 	[intConcurrencyId]			[int] DEFAULT 1,
 
 	CONSTRAINT [PK_tblDBSchedule] PRIMARY KEY CLUSTERED ([intScheduleId] ASC),

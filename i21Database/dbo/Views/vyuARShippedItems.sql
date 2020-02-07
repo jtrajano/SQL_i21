@@ -555,7 +555,7 @@ FROM (
 		 , dblQtyOrdered					= 0 
 		 , dblShipmentQuantity				= (CASE WHEN ICISC.strCostMethod IN ('Amount', 'Percentage') THEN 1 ELSE ISNULL(ICISC.dblQuantity,1) END)
 		 , dblShipmentQtyShippedTotal		= (CASE WHEN ICISC.strCostMethod IN ('Amount', 'Percentage') THEN 1 ELSE ISNULL(ICISC.dblQuantity,1) END)
-		 , dblQtyRemaining					= (CASE WHEN ICISC.strCostMethod IN ('Amount', 'Percentage') THEN 1 ELSE ISNULL(ICISC.dblQuantity,1) END) - ISNULL(ID.dblQtyShipped, 0)
+		 , dblQtyRemaining					= (CASE WHEN ICISC.strCostMethod IN ('Amount', 'Percentage') THEN 1  ELSE ISNULL(ICISC.dblQuantity,1) END) -    CASE WHEN ARIDCHARGE.intInventoryShipmentChargeId IS NOT NULL THEN ISNULL(ARIDCHARGE.dblQtyShipped,1) ELSE ISNULL(ID.dblQtyShipped, 0) END 
 		 , dblPriceUOMQuantity				= (CASE WHEN ICISC.strCostMethod IN ('Amount', 'Percentage') THEN 1 ELSE ISNULL(ICISC.dblQuantity,1) END)
 		 , dblDiscount						= 0 
 		 , dblPrice							= CAST((CASE WHEN ICISC.strCostMethod IN ('Amount', 'Percentage') THEN ISNULL(ICISC.dblAmount,0.000000) ELSE ISNULL(ICISC.dblRate, 0.000000) END) AS DECIMAL(18,6))
@@ -622,6 +622,12 @@ FROM (
 		FROM dbo.tblARInvoiceDetail WITH (NOLOCK)
 		WHERE ISNULL(intInventoryShipmentChargeId, 0) = 0
 	) ARID ON ICISC.intInventoryShipmentChargeId = ARID.intInventoryShipmentChargeId
+	LEFT JOIN (
+		SELECT intInventoryShipmentChargeId
+			 , dblQtyShipped
+		FROM dbo.tblARInvoiceDetail WITH (NOLOCK)
+		WHERE ISNULL(intInventoryShipmentChargeId, 0) <> 0
+	) ARIDCHARGE ON ICISC.intInventoryShipmentChargeId = ARIDCHARGE.intInventoryShipmentChargeId
 	LEFT OUTER JOIN (
 		SELECT intInventoryShipmentItemId
 			 , dblQtyShipped = SUM(dblQtyShipped)
@@ -632,6 +638,7 @@ FROM (
 		AND ICIS.strShipmentNumber = ID.strDocumentNumber
 	WHERE ISNULL(ARID.intInventoryShipmentChargeId, 0) = 0
 	  AND ICISC.intEntityVendorId IS NULL
+	  AND ISNULL(ICISC.ysnPrice, 0) = 1
 	  AND ((ISNULL(ICISC.ysnAllowInvoice, 1) = 1 AND ICIS.intSourceType = 1)
 			OR
 			ICIS.intSourceType <> 1

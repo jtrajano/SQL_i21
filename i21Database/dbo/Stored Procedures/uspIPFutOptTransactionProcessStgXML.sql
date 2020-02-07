@@ -122,6 +122,16 @@ BEGIN TRY
 				FROM tblRKFutOptTransactionHeader
 				WHERE intFutOptTransactionHeaderRefId = @intFutOptTransactionHeaderRefId
 
+				SELECT @strHeaderCondition = 'intFutOptTransactionHeaderId = ' + LTRIM(@intNewFutOptTransactionHeaderId)
+
+				EXEC uspCTGetTableDataInXML 'vyuIPGetFutOptTransactionHeader'
+					,@strHeaderCondition
+					,@strAckHeaderXML OUTPUT
+
+				EXEC uspCTGetTableDataInXML 'vyuIPGetFutOptTransaction'
+					,@strHeaderCondition
+					,@strAckFutOptTransactionXML OUTPUT
+
 				DELETE
 				FROM tblRKFutOptTransactionHeader
 				WHERE intFutOptTransactionHeaderRefId = @intFutOptTransactionHeaderRefId

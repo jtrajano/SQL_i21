@@ -26,7 +26,7 @@ SELECT @ysnMaskedPCHKPayee = ysnMaskEmployeeName from tblPRCompanyPreference
 		,dtmDate = BT.dtmDate
 		,dtmDateReconciled = BT.dtmDateReconciled
 		,strReferenceNo = BT.strReferenceNo
-		,strPayee = CASE WHEN  BT.intBankTransactionTypeId IN (21,121) AND @ysnMaskedPCHKPayee = 1 THEN '(restricted information)' ELSE BT.strPayee END 
+		,strPayee = CASE WHEN  BT.intBankTransactionTypeId IN (21,121) AND @ysnMaskedPCHKPayee = 1 THEN '(restricted information)' ELSE ISNULL(Entity.strName, BT.strPayee) END 
 		,strMemo = BT.strMemo
 		,strRecordNo = BT.strTransactionId
 		,dblAmount = ABS(BT.dblAmount)
@@ -42,4 +42,14 @@ SELECT @ysnMaskedPCHKPayee = ysnMaskEmployeeName from tblPRCompanyPreference
 		cross apply dbo.fnCMGetReconGridResult(@intBankAccountId,@dtmStatementDate,q.ysnPayment,q.ysnCheckVoid,q.ysnClr, q.ysnClrOrig, q.ysnCheckVoidOrig) b
 		WHERE intTransactionId = BT.intTransactionId
 	)P
+	OUTER APPLY (
+		SELECT TOP 1 LTRIM(RTRIM(strName))strName from tblEMEntity 
+		WHERE 
+			(
+				strName LIKE  BT.strPayee + '%'
+				OR BT.strPayee LIKE strName + '%'
+				OR strName =  BT.strPayee
+			) 
+		AND ISNULL(BT.strPayee,'') <> ''
+    )Entity
 	

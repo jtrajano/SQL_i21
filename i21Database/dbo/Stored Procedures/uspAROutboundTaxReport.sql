@@ -14,41 +14,49 @@ IF LTRIM(RTRIM(@xmlParam)) = ''
         SET @xmlParam = NULL        
 	END
 
+IF OBJECT_ID('tempdb..#STATUSCODES') IS NOT NULL DROP TABLE #STATUSCODES
+IF OBJECT_ID('tempdb..#INVOICES') IS NOT NULL DROP TABLE #INVOICES
+IF OBJECT_ID('tempdb..#CUSTOMERS') IS NOT NULL DROP TABLE #CUSTOMERS
+IF OBJECT_ID('tempdb..#ITEMS') IS NOT NULL DROP TABLE #ITEMS
+IF OBJECT_ID('tempdb..#COMPANYLOCATIONS') IS NOT NULL DROP TABLE #COMPANYLOCATIONS
+IF OBJECT_ID('tempdb..#CATEGORIES') IS NOT NULL DROP TABLE #CATEGORIES
+IF OBJECT_ID('tempdb..#TYPES') IS NOT NULL DROP TABLE #TYPES
+
 -- Declare the variables.
-DECLARE	@ZeroBit        BIT
-       ,@OneBit         BIT
-       ,@ZeroDecimal    DECIMAL(18,6)
-
-SET @ZeroDecimal = CAST(0.000000 AS DECIMAL(18,6))
-SET @OneBit = CAST(1 AS BIT)
-SET @ZeroBit = CAST(0 AS BIT)
-
-DECLARE 
-	    @strTaxCode             NVARCHAR(100)
+DECLARE @strTaxCode             NVARCHAR(100)
 	  , @strState               NVARCHAR(100)
 	  , @strTaxClass            NVARCHAR(100)
 	  , @strTaxClassType        NVARCHAR(100)
 	  , @strTaxGroup            NVARCHAR(100)
-	  , @strSubTotalBy          NVARCHAR(100)
-	  , @strIncludeExemptOnly   NVARCHAR(100)
+	  , @strSubTotalBy          NVARCHAR(100)	= 'Tax Group'
+	  , @strIncludeExemptOnly   NVARCHAR(100)	= 'No'
 	  , @ysnInvoiceDetail       BIT
 	  , @xmlDocumentId          INT
 	  , @fieldname              NVARCHAR(50)
       , @UserName               NVARCHAR(150)
 	  , @strCompanyName         NVARCHAR(100)
 	  , @strCompanyAddress      NVARCHAR(500)
+	  , @strAccountStatusCode	NVARCHAR(500)
+	  , @strCustomerName		NVARCHAR(100)
+	  , @strLocationNumber		NVARCHAR(100)
+	  , @strType				NVARCHAR(100)
+	  , @strItemNo				NVARCHAR(100)
+	  , @strCategoryCode		NVARCHAR(100)
+	  , @strSalespersonName		NVARCHAR(100)
+	  , @strInvoiceNumber		NVARCHAR(100)		
+	  , @ZeroBit				BIT				= CAST(0 AS BIT)
+	  , @OneBit					BIT				= CAST(1 AS BIT)
+	  , @ZeroDecimal			DECIMAL(18, 6)	= CAST(0 AS DECIMAL(18,6))
+	  , @dtmDateFrom			DATETIME
+	  , @dtmDateTo				DATETIME
+	  , @strcondition			NVARCHAR(100)
 
-
-SET @strSubTotalBy = 'Tax Group'
-SET @strIncludeExemptOnly = 'No'
-SELECT TOP 1 
-       @strCompanyName    = strCompanyName
-     , @strCompanyAddress = dbo.fnARFormatCustomerAddress(NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, NULL) COLLATE Latin1_General_CI_AS
- FROM dbo.tblSMCompanySetup WITH (NOLOCK)
-
+SELECT TOP 1 @strCompanyName    = strCompanyName
+		   , @strCompanyAddress = dbo.fnARFormatCustomerAddress(NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, NULL) COLLATE Latin1_General_CI_AS
+FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 		
 -- Create a table variable to hold the XML data. 		
-DECLARE @Parameters TABLE (
+DECLARE @temp_xml_table TABLE (
         [id]         INT IDENTITY(1,1)
       , [fieldname]  NVARCHAR(50)
       , [condition]  NVARCHAR(20)
@@ -64,445 +72,203 @@ DECLARE @Parameters TABLE (
 EXEC sp_xml_preparedocument @xmlDocumentId OUTPUT, @xmlParam
 
 -- Insert the XML to the xml table. 		
-INSERT INTO @Parameters
+INSERT INTO @temp_xml_table
 SELECT *
-  FROM OPENXML(@xmlDocumentId, 'xmlparam/filters/filter', 2)
-  WITH (
-       [fieldname]  NVARCHAR(50)
-     , [condition]  NVARCHAR(20)
-     , [from]       NVARCHAR(100)
-     , [to]         NVARCHAR(100)
-     , [join]       NVARCHAR(10)
-     , [begingroup] NVARCHAR(50)
-     , [endgroup]   NVARCHAR(50)
-     , [datatype]   NVARCHAR(50)
-       )
-
--- Gather the variables values from the xml table.
-SELECT TOP 1
-       @strTaxCode = REPLACE(ISNULL([from], ''), '''''', '''')
-  FROM @Parameters
- WHERE [fieldname] = 'strTaxCode'
- ORDER BY [id]
-
-SELECT TOP 1
-       @strState = REPLACE(ISNULL([from], ''), '''''', '''')
-  FROM @Parameters
- WHERE [fieldname] = 'strState'
- ORDER BY [id]
-
-SELECT TOP 1
-       @strTaxClassType = REPLACE(ISNULL([from], ''), '''''', '''')
-  FROM @Parameters
- WHERE [fieldname] = 'strTaxReportType'
- ORDER BY [id]
-
-SELECT TOP 1
-       @strTaxClass = REPLACE(ISNULL([from], ''), '''''', '''')
-  FROM @Parameters
- WHERE [fieldname] = 'strTaxClass'
- ORDER BY [id]
-
-SELECT TOP 1
-       @strTaxGroup = REPLACE(ISNULL([from], ''), '''''', '''')
-  FROM @Parameters
- WHERE [fieldname] = 'strTaxGroup'
- ORDER BY [id]
-
-SELECT TOP 1
-       @strSubTotalBy = REPLACE(ISNULL([from], 'Tax Group'), '''''', '''')
-  FROM @Parameters
- WHERE [fieldname] = 'strSubTotalBy'
- ORDER BY [id]
-
-SELECT TOP 1
-       @strIncludeExemptOnly = REPLACE(ISNULL([from], 'No'), '''''', '''')
-  FROM @Parameters
- WHERE [fieldname] = 'strIncludeExemptOnly'
- ORDER BY [id]
-
-SELECT TOP 1
-       @ysnInvoiceDetail = [from] 
-  FROM @Parameters
- WHERE [fieldname] = 'ysnInvoiceDetail'
- ORDER BY [id]
-
-
-DECLARE @Query AS NVARCHAR(MAX)
-      , @Id    AS INT
-      , @MinId AS INT
-      , @MaxId AS INT
-
-DECLARE @TempParameters TABLE (
-        [id]         INT
-      , [fieldname]  NVARCHAR(50)
-      , [condition]  NVARCHAR(20)
-      , [from]       NVARCHAR(100)
-      , [to]         NVARCHAR(100)
-      , [join]       NVARCHAR(10)
-      , [begingroup] NVARCHAR(50)
-      , [endgroup]   NVARCHAR(50)
-      , [datatype]   NVARCHAR(50)
+FROM OPENXML(@xmlDocumentId, 'xmlparam/filters/filter', 2)
+WITH (
+	  [fieldname]  NVARCHAR(50)
+    , [condition]  NVARCHAR(20)
+    , [from]       NVARCHAR(100)
+    , [to]         NVARCHAR(100)
+    , [join]       NVARCHAR(10)
+    , [begingroup] NVARCHAR(50)
+    , [endgroup]   NVARCHAR(50)
+    , [datatype]   NVARCHAR(50)
 )
 
-SET FMTONLY OFF
-IF OBJECT_ID('tempdb..#STATUSCODES') IS NOT NULL DROP TABLE #STATUSCODES
-CREATE TABLE #STATUSCODES([intAccountStatusId] INT, [strAccountStatusCode] CHAR(1) COLLATE Latin1_General_CI_AS, [intEntityCustomerId] INT)
-DELETE FROM @TempParameters
-INSERT INTO @TempParameters
-SELECT *
-  FROM @Parameters
- WHERE [fieldname] = 'strAccountStatusCode'
- ORDER BY [id]
+-- Gather the variables values from the xml table.
+SELECT TOP 1 @strTaxCode = REPLACE(ISNULL([from], ''), '''''', '''')
+FROM @temp_xml_table
+WHERE [fieldname] = 'strTaxCode'
 
-DECLARE @strAccountStatusCodeFilter AS NVARCHAR(MAX)
-      , @AccountStatusFiltered      AS BIT
-SET @AccountStatusFiltered = @ZeroBit
-SET @strAccountStatusCodeFilter = NULL
-SET @Id = NULL
-SELECT @MinId = MIN([id]), @MaxId = MAX([id]) FROM @TempParameters
-WHILE EXISTS(SELECT NULL FROM @TempParameters)
+SELECT TOP 1 @strState = REPLACE(ISNULL([from], ''), '''''', '''')
+FROM @temp_xml_table
+WHERE [fieldname] = 'strState'
+
+SELECT TOP 1 @strTaxClassType = REPLACE(ISNULL([from], ''), '''''', '''')
+FROM @temp_xml_table
+WHERE [fieldname] = 'strTaxReportType'
+
+SELECT TOP 1 @strTaxClass = REPLACE(ISNULL([from], ''), '''''', '''')
+FROM @temp_xml_table
+WHERE [fieldname] = 'strTaxClass'
+
+SELECT TOP 1 @strTaxGroup = REPLACE(ISNULL([from], ''), '''''', '''')
+FROM @temp_xml_table
+WHERE [fieldname] = 'strTaxGroup'
+
+SELECT TOP 1 @strSubTotalBy = REPLACE(ISNULL([from], 'Tax Group'), '''''', '''')
+FROM @temp_xml_table
+WHERE [fieldname] = 'strSubTotalBy'
+
+SELECT TOP 1 @strIncludeExemptOnly = REPLACE(ISNULL([from], 'No'), '''''', '''')
+FROM @temp_xml_table
+WHERE [fieldname] = 'strIncludeExemptOnly'
+
+SELECT TOP 1 @ysnInvoiceDetail = [from] 
+FROM @temp_xml_table
+WHERE [fieldname] = 'ysnInvoiceDetail'
+
+SELECT TOP 1 @strAccountStatusCode = REPLACE(ISNULL([from], ''), '''''', '''')
+FROM @temp_xml_table
+WHERE [fieldname] = 'strAccountStatusCode'
+
+SELECT TOP 1 @strCustomerName = REPLACE(ISNULL([from], ''), '''''', '''')
+FROM @temp_xml_table
+WHERE [fieldname] = 'strCustomerName'
+
+SELECT TOP 1 @strLocationNumber = REPLACE(ISNULL([from], ''), '''''', '''')
+FROM @temp_xml_table
+WHERE [fieldname] = 'strLocationNumber'
+
+SELECT TOP 1 @strType = REPLACE(ISNULL([from], ''), '''''', '''')
+FROM @temp_xml_table
+WHERE [fieldname] = 'strType'
+
+SELECT TOP 1 @strItemNo = REPLACE(ISNULL([from], ''), '''''', '''')
+FROM @temp_xml_table
+WHERE [fieldname] = 'strItemNo'
+
+SELECT TOP 1 @strCategoryCode = REPLACE(ISNULL([from], ''), '''''', '''')
+FROM @temp_xml_table
+WHERE [fieldname] = 'strCategoryCode'
+
+SELECT TOP 1 @strSalespersonName = REPLACE(ISNULL([from], ''), '''''', '''')
+FROM @temp_xml_table
+WHERE [fieldname] = 'strSalespersonName'
+
+SELECT TOP 1 @strInvoiceNumber = REPLACE(ISNULL([from], ''), '''''', '''')
+FROM @temp_xml_table
+WHERE [fieldname] = 'strInvoiceNumber'
+
+SELECT @dtmDateFrom		= CAST(CASE WHEN ISNULL([from], '') <> '' THEN [from] ELSE CAST(-53690 AS DATETIME) END AS DATETIME)
+ 	 , @dtmDateTo		= CAST(CASE WHEN ISNULL([to], '') <> '' THEN [to] ELSE GETDATE() END AS DATETIME)
+     , @strcondition	= [condition]
+FROM @temp_xml_table 
+WHERE [fieldname] = 'dtmDate'
+
+IF @dtmDateTo IS NOT NULL
+	SET @dtmDateTo = CAST(FLOOR(CAST(@dtmDateTo AS FLOAT)) AS DATETIME)	
+ELSE 			  
+	SET @dtmDateTo = CAST(FLOOR(CAST(GETDATE() AS FLOAT)) AS DATETIME)
+
+IF @dtmDateFrom IS NOT NULL
+	SET @dtmDateFrom = CAST(FLOOR(CAST(@dtmDateFrom AS FLOAT)) AS DATETIME)	
+ELSE 			  
+	SET @dtmDateFrom = CAST(-53690 AS DATETIME)
+
+--#CUSTOMERS
+SELECT intEntityCustomerId  	= C.intEntityId 
+	 , strCustomerNumber		= C.strCustomerNumber
+	 , strCustomerName      	= EC.strName
+INTO #CUSTOMERS
+FROM dbo.tblARCustomer C WITH (NOLOCK)
+INNER JOIN (
+	SELECT intEntityId
+			, strName
+	FROM dbo.tblEMEntity WITH (NOLOCK)
+	WHERE (@strCustomerName IS NULL OR strName = @strCustomerName)
+) EC ON C.intEntityId = EC.intEntityId
+
+--#ACCOUNTSTATUS
+IF @strAccountStatusCode IS NOT NULL
     BEGIN
-        SELECT TOP 1
-               @Id                         = [id]
-             , @strAccountStatusCodeFilter = (CASE WHEN [id] = @MinId THEN '' ELSE @strAccountStatusCodeFilter END) + [dbo].[fnARParseReportParameter]('[strAccountStatusCode]', [condition], [from], [to], (CASE WHEN [id] = @MaxId THEN '' ELSE [join] END), [datatype])
-          FROM @TempParameters
-         ORDER BY [id]
-
-		DELETE FROM @TempParameters WHERE [id] = @Id
+        DELETE FROM #CUSTOMERS
+        WHERE intEntityCustomerId NOT IN (
+            SELECT DISTINCT intEntityCustomerId
+            FROM dbo.tblARCustomerAccountStatus CAS WITH (NOLOCK)
+            INNER JOIN tblARAccountStatus AAS WITH (NOLOCK) ON CAS.intAccountStatusId = AAS.intAccountStatusId
+            WHERE AAS.strAccountStatusCode = @strAccountStatusCode
+        )
     END
 
-SET @strAccountStatusCodeFilter = '(' + @strAccountStatusCodeFilter + ')'
-IF LTRIM(RTRIM(ISNULL(@strAccountStatusCodeFilter, ''))) <> '' SET @AccountStatusFiltered = @OneBit
-SET @Query = '
-        INSERT INTO #STATUSCODES([intAccountStatusId], [strAccountStatusCode], [intEntityCustomerId])
-        SELECT S.[intAccountStatusId], S.[strAccountStatusCode], CAS.intEntityCustomerId
-          FROM dbo.tblARAccountStatus S WITH (NOLOCK)
-               INNER JOIN (
-                           SELECT MIN(intAccountStatusId) intAccountStatusId, intEntityCustomerId
-						     FROM tblARCustomerAccountStatus WITH (NOLOCK)
-                            GROUP BY intEntityCustomerId
-                          ) CAS 
-                               ON S.intAccountStatusId = CAS.intAccountStatusId 
-'
-+
-ISNULL(('WHERE ' + @strAccountStatusCodeFilter), '')
+--#LOCATIONS
+SELECT intCompanyLocationId
+	 , strLocationName
+	 , strLocationNumber
+INTO #LOCATIONS
+FROM dbo.tblSMCompanyLocation WITH (NOLOCK)
+WHERE (@strLocationNumber IS NULL OR strLocationNumber = @strLocationNumber)
 
-EXECUTE(@Query);
+--#CATEGORIES
+SELECT intCategoryId
+	 , strCategoryCode
+	 , strDescription
+INTO #CATEGORIES
+FROM dbo.tblICCategory WITH (NOLOCK)
+WHERE (@strCategoryCode IS NULL OR strCategoryCode = @strCategoryCode)
 
-IF OBJECT_ID('tempdb..#CUSTOMERS') IS NOT NULL DROP TABLE #CUSTOMERS
-CREATE TABLE #CUSTOMERS(
-    [intEntityCustomerId]   INT PRIMARY KEY,
-    [strCustomerNumber]     NVARCHAR(15)  COLLATE Latin1_General_CI_AS,
-    [strCustomerName]       NVARCHAR(150) COLLATE Latin1_General_CI_AS,
-    [strAccountStatusCode]  CHAR(1) COLLATE Latin1_General_CI_AS)
+--#ITEMS
+SELECT I.intItemId
+	 , I.strItemNo
+	 , C.*
+INTO #ITEMS
+FROM dbo.tblICItem I WITH (NOLOCK)
+INNER JOIN #CATEGORIES C ON I.intCategoryId = C.intCategoryId
+WHERE (@strItemNo IS NULL OR strItemNo = @strItemNo)
 
-DELETE FROM @TempParameters
-INSERT INTO @TempParameters
-SELECT *
-  FROM @Parameters
- WHERE [fieldname] = 'strCustomerName'
- ORDER BY [id]
+--#TYPES
+SELECT strInvoiceSource
+INTO #TYPES
+FROM dbo.fnARGetInvoiceSourceList()
+WHERE (@strType IS NULL OR strInvoiceSource = @strType)
 
-DECLARE @strCustomerNameFilter AS NVARCHAR(MAX)
-SET @strCustomerNameFilter = NULL
-SET @Id = NULL
-SELECT @MinId = MIN([id]), @MaxId = MAX([id]) FROM @TempParameters
-WHILE EXISTS(SELECT NULL FROM @TempParameters)
-    BEGIN
-        SELECT TOP 1
-               @Id                    = [id]
-             , @strCustomerNameFilter = (CASE WHEN [id] = @MinId THEN '' ELSE @strCustomerNameFilter END) + [dbo].[fnARParseReportParameter]('strName', [condition], [from], [to], (CASE WHEN [id] = @MaxId THEN '' ELSE [join] END), [datatype])
-          FROM @TempParameters
-         ORDER BY [id]
-
-		DELETE FROM @TempParameters WHERE [id] = @Id
-    END
-
-SET @strCustomerNameFilter = '(' + @strCustomerNameFilter + ')'
-SET @Query = '
-        INSERT INTO #CUSTOMERS([intEntityCustomerId], [strCustomerNumber], [strCustomerName], [strAccountStatusCode])
-        SELECT C.intEntityId, C.strCustomerNumber, E.strName, SC.[strAccountStatusCode]
-          FROM tblARCustomer C WITH (NOLOCK) 
-               INNER JOIN (
-                          SELECT intEntityId, strName
-                            FROM dbo.tblEMEntity WITH (NOLOCK)'
-+
-ISNULL(('                  WHERE ' + @strCustomerNameFilter), '')
-+
-'                          ) E ON C.intEntityId = E.intEntityId
-               LEFT OUTER JOIN #STATUSCODES SC
-                               ON SC.[intEntityCustomerId] = C.intEntityId
-         WHERE (' + (CASE WHEN @AccountStatusFiltered = @OneBit THEN '1' ELSE '0' END) + ' = 1 AND SC.[intAccountStatusId] IS NOT NULL)
-            OR ' + (CASE WHEN @AccountStatusFiltered = @OneBit THEN '1' ELSE '0' END) + ' = 0
-'
-
-EXECUTE(@Query);
-
-
-IF OBJECT_ID('tempdb..#COMPANYLOCATIONS') IS NOT NULL DROP TABLE #COMPANYLOCATIONS
-CREATE TABLE #COMPANYLOCATIONS ([intCompanyLocationId] INT PRIMARY KEY, [strCompanyNumber] NVARCHAR(3) COLLATE Latin1_General_CI_AS)
-DELETE FROM @TempParameters
-INSERT INTO @TempParameters
-SELECT *
-  FROM @Parameters
- WHERE [fieldname] = 'strLocationNumber'
- ORDER BY [id]
-
-DECLARE @strLocationNumberFilter AS NVARCHAR(MAX)
-SET @strLocationNumberFilter = NULL
-SET @Id = NULL
-SELECT @MinId = MIN([id]), @MaxId = MAX([id]) FROM @TempParameters
-WHILE EXISTS(SELECT NULL FROM @TempParameters)
-    BEGIN
-        SELECT TOP 1
-               @Id                      = [id]
-             , @strLocationNumberFilter = (CASE WHEN [id] = @MinId THEN '' ELSE @strLocationNumberFilter END) + [dbo].[fnARParseReportParameter]('strLocationNumber', [condition], [from], [to], (CASE WHEN [id] = @MaxId THEN '' ELSE [join] END), [datatype])
-          FROM @TempParameters
-         ORDER BY [id]
-
-		DELETE FROM @TempParameters WHERE [id] = @Id
-    END
-
-SET @strLocationNumberFilter = '(' + @strLocationNumberFilter + ')'
-SET @Query = '
-        INSERT INTO #COMPANYLOCATIONS([intCompanyLocationId], [strCompanyNumber])
-        SELECT intCompanyLocationId, strLocationNumber
-          FROM dbo.tblSMCompanyLocation WITH (NOLOCK)
-'
-+
-ISNULL(('       WHERE ' + @strLocationNumberFilter), '')
-
-EXECUTE(@Query);
-
-
-IF OBJECT_ID('tempdb..#TYPES') IS NOT NULL DROP TABLE #TYPES
-CREATE TABLE #TYPES ([strType] NVARCHAR(100) COLLATE Latin1_General_CI_AS PRIMARY KEY)
-DELETE FROM @TempParameters
-INSERT INTO @TempParameters
-SELECT *
-  FROM @Parameters
- WHERE [fieldname] = 'strType'
- ORDER BY [id]
-
-DECLARE @strTypeFilter AS NVARCHAR(MAX)
-SET @strTypeFilter = NULL
-SET @Id = NULL
-SELECT @MinId = MIN([id]), @MaxId = MAX([id]) FROM @TempParameters
-WHILE EXISTS(SELECT NULL FROM @TempParameters)
-    BEGIN
-        SELECT TOP 1
-               @Id            = [id]
-             , @strTypeFilter = (CASE WHEN [id] = @MinId THEN '' ELSE @strTypeFilter END) + [dbo].[fnARParseReportParameter]('[strInvoiceSource]', [condition], [from], [to], (CASE WHEN [id] = @MaxId THEN '' ELSE [join] END), [datatype])
-          FROM @TempParameters
-         ORDER BY [id]
-
-		DELETE FROM @TempParameters WHERE [id] = @Id
-    END
-
-SET @strTypeFilter = '(' + @strTypeFilter + ')'
-SET @Query = '
-        INSERT INTO #TYPES([strType])
-        SELECT [strInvoiceSource]
-          FROM [dbo].[fnARGetInvoiceSourceList]()
-'
-+
-ISNULL(('       WHERE ' + @strTypeFilter), '')
-
-EXECUTE(@Query);
-
-
-IF OBJECT_ID('tempdb..#ITEMS') IS NOT NULL DROP TABLE #ITEMS
-CREATE TABLE #ITEMS ([intItemId] INT PRIMARY KEY, [strItemNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS, [intCategoryId] INT)
-DELETE FROM @TempParameters
-INSERT INTO @TempParameters
-SELECT *
-  FROM @Parameters
- WHERE [fieldname] = 'strItemNo'
- ORDER BY [id]
-
-DECLARE @strItemNoFilter AS NVARCHAR(MAX)
-SET @strItemNoFilter = NULL
-SET @Id = NULL
-SELECT @MinId = MIN([id]), @MaxId = MAX([id]) FROM @TempParameters
-WHILE EXISTS(SELECT NULL FROM @TempParameters)
-    BEGIN
-        SELECT TOP 1
-               @Id              = [id]
-             , @strItemNoFilter = (CASE WHEN [id] = @MinId THEN '' ELSE @strItemNoFilter END) + [dbo].[fnARParseReportParameter]('[strItemNo]', [condition], [from], [to], (CASE WHEN [id] = @MaxId THEN '' ELSE [join] END), [datatype])
-          FROM @TempParameters
-         ORDER BY [id]
-
-		DELETE FROM @TempParameters WHERE [id] = @Id
-    END
-
-SET @strItemNoFilter = '(' + @strItemNoFilter + ')'
-SET @Query = '
-        INSERT INTO #ITEMS([intItemId], [strItemNo], [intCategoryId])
-        SELECT [intItemId], [strItemNo], [intCategoryId]
-          FROM dbo.tblICItem WITH (NOLOCK)
-'
-+
-ISNULL(('WHERE ' + @strItemNoFilter), '')
-
-EXECUTE(@Query);
-
-
-IF OBJECT_ID('tempdb..#CATEGORIES') IS NOT NULL DROP TABLE #CATEGORIES
-CREATE TABLE #CATEGORIES([intCategoryId] INT PRIMARY KEY, [strCategoryCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS)
-DELETE FROM @TempParameters
-INSERT INTO @TempParameters
-SELECT *
-  FROM @Parameters
- WHERE [fieldname] = 'strCategoryCode'
- ORDER BY [id]
-
-DECLARE @strCategoryCodeFilter AS NVARCHAR(MAX)
-SET @strCategoryCodeFilter = NULL
-SET @Id = NULL
-SELECT @MinId = MIN([id]), @MaxId = MAX([id]) FROM @TempParameters
-WHILE EXISTS(SELECT NULL FROM @TempParameters)
-    BEGIN
-        SELECT TOP 1
-               @Id                    = [id]
-             , @strCategoryCodeFilter = (CASE WHEN [id] = @MinId THEN '' ELSE @strCategoryCodeFilter END) + [dbo].[fnARParseReportParameter]('[strCategoryCode]', [condition], [from], [to], (CASE WHEN [id] = @MaxId THEN '' ELSE [join] END), [datatype])
-          FROM @TempParameters
-         ORDER BY [id]
-
-		DELETE FROM @TempParameters WHERE [id] = @Id
-    END
-
-SET @strCategoryCodeFilter = '(' + @strCategoryCodeFilter + ')'
-SET @Query = '
-        INSERT INTO #CATEGORIES([intCategoryId], [strCategoryCode])
-        SELECT [intCategoryId], [strCategoryCode]
-          FROM dbo.tblICCategory WITH (NOLOCK)
-'
-+
-ISNULL(('WHERE ' + @strCategoryCodeFilter), '')
-
-EXECUTE(@Query);
-
-
-DELETE FROM @TempParameters
-INSERT INTO @TempParameters
-SELECT *
-  FROM @Parameters
- WHERE [fieldname] = 'dtmDate'
- ORDER BY [id]
-
-DECLARE @dtmDateFilter AS NVARCHAR(MAX)
-SET @dtmDateFilter = NULL
-SET @Id = NULL
-SELECT @MinId = MIN([id]), @MaxId = MAX([id]) FROM @TempParameters
-WHILE EXISTS(SELECT NULL FROM @TempParameters)
-    BEGIN
-        SELECT TOP 1
-               @Id            = [id]
-             , @dtmDateFilter = (CASE WHEN [id] = @MinId THEN '' ELSE @dtmDateFilter END) + [dbo].[fnARParseReportParameter]('I.dtmDate', [condition], [from], [to], (CASE WHEN [id] = @MaxId THEN '' ELSE [join] END), [datatype])
-          FROM @TempParameters
-         ORDER BY [id]
-
-		DELETE FROM @TempParameters WHERE [id] = @Id
-    END
-SET @dtmDateFilter = '(' + @dtmDateFilter + ')'
-
-DELETE FROM @TempParameters
-INSERT INTO @TempParameters
-SELECT *
-  FROM @Parameters
- WHERE [fieldname] = 'strSalespersonName'
- ORDER BY [id]
-
-DECLARE @strSalespersonNameFilter AS NVARCHAR(MAX)
-SET @strSalespersonNameFilter = NULL
-SET @Id = NULL
-SELECT @MinId = MIN([id]), @MaxId = MAX([id]) FROM @TempParameters
-WHILE EXISTS(SELECT NULL FROM @TempParameters)
-    BEGIN
-        SELECT TOP 1
-               @Id            = [id]
-             , @strSalespersonNameFilter = (CASE WHEN [id] = @MinId THEN '' ELSE @strSalespersonNameFilter END) + [dbo].[fnARParseReportParameter]('S.strName', [condition], [from], [to], (CASE WHEN [id] = @MaxId THEN '' ELSE [join] END), [datatype])
-          FROM @TempParameters
-         ORDER BY [id]
-
-		DELETE FROM @TempParameters WHERE [id] = @Id
-    END
-SET @strSalespersonNameFilter = '(' + @strSalespersonNameFilter + ')'
-
---CREATE TABLE #INVOICES
-IF OBJECT_ID('tempdb..#INVOICES') IS NOT NULL DROP TABLE #INVOICES
-CREATE TABLE #INVOICES
-    ([intInvoiceId]         INT PRIMARY KEY,
-    [strInvoiceNumber]      NVARCHAR(25)  COLLATE Latin1_General_CI_AS NOT NULL,
-	[strType]               NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL,
-    [strSalespersonName]    NVARCHAR(150) COLLATE Latin1_General_CI_AS NULL,
-    [dtmDate]               DATETIME                                   NULL)
-
-DELETE FROM @TempParameters
-INSERT INTO @TempParameters
-SELECT *
-  FROM @Parameters
- WHERE [fieldname] = 'strInvoiceNumber'
- ORDER BY [id]
-
-DECLARE @strInvoiceNumberFilter AS NVARCHAR(MAX)
-SET @strInvoiceNumberFilter = NULL
-SET @Id = NULL
-SELECT @MinId = MIN([id]), @MaxId = MAX([id]) FROM @TempParameters
-WHILE EXISTS(SELECT NULL FROM @TempParameters)
-    BEGIN
-        SELECT TOP 1
-               @Id                     = [id]
-             , @strInvoiceNumberFilter = (CASE WHEN [id] = @MinId THEN '' ELSE @strInvoiceNumberFilter END) + [dbo].[fnARParseReportParameter]('I.strInvoiceNumber', [condition], [from], [to], (CASE WHEN [id] = @MaxId THEN '' ELSE [join] END), [datatype])
-          FROM @TempParameters
-         ORDER BY [id]
-
-		DELETE FROM @TempParameters WHERE [id] = @Id
-    END
-
-SET @strInvoiceNumberFilter = '(' + @strInvoiceNumberFilter + ')'
-SET @Query = '
-        INSERT INTO #INVOICES([intInvoiceId], [strInvoiceNumber], [strType], [strSalespersonName], [dtmDate])
-        SELECT I.intInvoiceId, I.strInvoiceNumber, I.strType, S.strName, I.dtmDate
-          FROM dbo.tblARInvoice I WITH (NOLOCK)
-               LEFT OUTER JOIN (
-                               SELECT SP.intEntityId, E.strName
-                                 FROM tblARSalesperson SP WITH (NOLOCK)
-                                      INNER JOIN tblEMEntity E
-                                                 ON SP.intEntityId = E.intEntityId
-                               ) S ON I.intEntitySalespersonId = S.intEntityId
-'
-+
-ISNULL(('WHERE ' + @strInvoiceNumberFilter), '')
-+
-ISNULL(('  AND ' + @dtmDateFilter), '')
-+
-ISNULL(('  AND ' + @strSalespersonNameFilter), '')
-
-EXECUTE(@Query);
+--#INVOICES
+SELECT intInvoiceId				= I.intInvoiceId
+	 , strInvoiceNumber			= I.strInvoiceNumber
+	 , strType					= I.strType
+	 , dtmDate					= I.dtmDate
+	 , intEntityCustomerId		= C.intEntityCustomerId
+	 , strCustomerNumber		= C.strCustomerNumber
+	 , strCustomerName			= C.strCustomerName
+	 , intCompanyLocationId		= L.intCompanyLocationId
+	 , strLocationNumber		= L.strLocationNumber
+	 , intEntitySalespersonId	= SP.intEntityId
+	 , strSalespersonName		= SP.strName
+INTO #INVOICES
+FROM dbo.tblARInvoice I
+INNER JOIN #CUSTOMERS C ON I.intEntityCustomerId = C.intEntityCustomerId
+INNER JOIN #LOCATIONS L ON I.intCompanyLocationId = L.intCompanyLocationId
+INNER JOIN #TYPES T ON I.strType = T.strInvoiceSource
+LEFT JOIN (
+	SELECT intEntityId
+		 , strName
+	FROM dbo.tblEMEntity
+	WHERE (@strSalespersonName IS NULL OR strName = @strSalespersonName)
+) SP ON I.intEntitySalespersonId = SP.intEntityId
+WHERE I.dtmDate BETWEEN @dtmDateFrom AND @dtmDateTo
+  AND (@strInvoiceNumber IS NULL OR strInvoiceNumber = @strInvoiceNumber)
 
 IF @strSubTotalBy = 'Tax Group'
 BEGIN
-    SELECT
-           [strInvoiceNumber]             = I.[strInvoiceNumber]
+    SELECT [strInvoiceNumber]             = I.[strInvoiceNumber]
          , [intInvoiceId]                 = I.[intInvoiceId]
          , [intInvoiceDetailId]           = OT.[intInvoiceDetailId]
-         , [intEntityCustomerId]          = C.[intEntityCustomerId]
+         , [intEntityCustomerId]          = I.[intEntityCustomerId]
          , [strType]                      = I.[strType]
-         , [strCustomerNumber]            = C.[strCustomerNumber]
-         , [strCustomerName]              = C.[strCustomerName]
-         , [strAccountStatusCode]         = C.[strAccountStatusCode]
-         , [strCompanyNumber]             = CL.[strCompanyNumber]
+         , [strCustomerNumber]            = I.[strCustomerNumber]
+         , [strCustomerName]              = I.[strCustomerName]
+         , [strAccountStatusCode]         = ''--C.[strAccountStatusCode]
+         , [strCompanyNumber]             = I.[strLocationNumber]
          , [strCompanyName]               = @strCompanyName
          , [strCompanyAddress]            = @strCompanyAddress
          , [strSalespersonName]           = I.[strSalespersonName]
          , [dtmDate]                      = I.[dtmDate]
-         , [intUserId]                    = null
+         , [intUserId]                    = NULL
          , [strUserName]                  = @UserName
-         , [strItemNo]                    = ICI.[strItemNo]
-         , [strItemDescription]           = (CASE WHEN UPPER(LTRIM(RTRIM(ICI.[strItemNo]))) = UPPER(LTRIM(RTRIM(OT.[strItemDescription]))) THEN ICI.[strItemNo] ELSE LTRIM(RTRIM(ICI.[strItemNo])) + ' (' + LTRIM(RTRIM(OT.[strItemDescription])) + ')' END)
-         , [strCategoryCode]              = ICC.[strCategoryCode]
+         , [strItemNo]                    = ITEM.[strItemNo]
+         , [strItemDescription]           = (CASE WHEN UPPER(LTRIM(RTRIM(ITEM.[strItemNo]))) = UPPER(LTRIM(RTRIM(OT.[strItemDescription]))) THEN ITEM.[strItemNo] ELSE LTRIM(RTRIM(ITEM.[strItemNo])) + ' (' + LTRIM(RTRIM(OT.[strItemDescription])) + ')' END)
+         , [strCategoryCode]              = ITEM.[strCategoryCode]
          , [dblQtyShipped]                = OT.[dblQtyShipped]
          , [dblPrice]                     = OT.[dblPrice]
          , [dblTotalTax]                  = OT.[dblTotalTax]
@@ -547,7 +313,10 @@ BEGIN
          , [dblSSTOnStateOtherTax]        = OT.[dblSSTOnStateOtherTax]
          , [dblSSTOnTonnageTax]           = OT.[dblSSTOnTonnageTax]
       FROM (
-           SELECT intTaxGroupId, strTaxGroup, intInvoiceDetailId, intInvoiceId
+           SELECT intTaxGroupId
+			    , strTaxGroup
+				, intInvoiceDetailId
+				, intInvoiceId
                 , MIN(intEntityCustomerId) AS intEntityCustomerId
                 , MIN(intCompanyLocationId) AS intCompanyLocationId
                 , MIN(intItemId) AS intItemId
@@ -585,7 +354,7 @@ BEGIN
                 , SUM(dblSSTOnStateExciseTax) AS dblSSTOnStateExciseTax
                 , SUM(dblSSTOnStateOtherTax) AS dblSSTOnStateOtherTax
                 , SUM(dblSSTOnTonnageTax) AS dblSSTOnTonnageTax
-             FROM vyuAROutboundTaxReport WITH (NOLOCK)
+            FROM vyuAROutboundTaxReport WITH (NOLOCK)
             WHERE (@strState IS NULL OR strState LIKE '%'+ @strState +'%')
               AND (@strTaxGroup IS NULL OR strTaxGroup LIKE '%' + @strTaxGroup + '%')
               AND (
@@ -617,43 +386,33 @@ BEGIN
                   )
             GROUP BY intTaxGroupId, strTaxGroup, intInvoiceDetailId, intInvoiceId
            ) OT
-             INNER JOIN #CUSTOMERS C 
-                        ON OT.intEntityCustomerId = C.intEntityCustomerId
-             INNER JOIN #COMPANYLOCATIONS CL
-                        ON OT.intCompanyLocationId = CL.intCompanyLocationId
-             INNER JOIN #INVOICES I
-                        ON OT.intInvoiceId = I.intInvoiceId
-             INNER JOIN #TYPES T
-                        ON I.strType = T.strType
-             INNER JOIN #ITEMS ICI
-                        ON OT.[intItemId] = ICI.[intItemId]
-             INNER JOIN #CATEGORIES ICC
-                        ON ICI.[intCategoryId] = ICC.[intCategoryId]
-		 ORDER BY OT.strTaxGroup, OT.intInvoiceId, OT.intInvoiceDetailId
+        INNER JOIN #INVOICES I ON OT.intInvoiceId = I.intInvoiceId
+        INNER JOIN #ITEMS ITEM ON OT.[intItemId] = ITEM.[intItemId]
+		ORDER BY OT.strTaxGroup, OT.intInvoiceId, OT.intInvoiceDetailId
+
     RETURN 1;
 END
 
 IF @strSubTotalBy = 'Customer'
 BEGIN
-    SELECT
-           [strInvoiceNumber]             = I.[strInvoiceNumber]
+    SELECT [strInvoiceNumber]             = I.[strInvoiceNumber]
          , [intInvoiceId]                 = I.[intInvoiceId]
          , [intInvoiceDetailId]           = OT.[intInvoiceDetailId]
          , [intEntityCustomerId]          = C.[intEntityCustomerId]
          , [strType]                      = I.[strType]
-         , [strCustomerNumber]            = C.[strCustomerNumber]
-         , [strCustomerName]              = C.[strCustomerName]
-         , [strAccountStatusCode]         = C.[strAccountStatusCode]
-         , [strCompanyNumber]             = CL.[strCompanyNumber]
+         , [strCustomerNumber]            = I.[strCustomerNumber]
+         , [strCustomerName]              = I.[strCustomerName]
+         , [strAccountStatusCode]         = ''--I.[strAccountStatusCode]
+         , [strCompanyNumber]             = I.[strCompanyNumber]
          , [strCompanyName]               = @strCompanyName
          , [strCompanyAddress]            = @strCompanyAddress
          , [strSalespersonName]           = I.[strSalespersonName]
          , [dtmDate]                      = I.[dtmDate]
-         , [intUserId]                    = null
+         , [intUserId]                    = NULL
          , [strUserName]                  = @UserName
-         , [strItemNo]                    = ICI.[strItemNo]
-         , [strItemDescription]           = (CASE WHEN UPPER(LTRIM(RTRIM(ICI.[strItemNo]))) = UPPER(LTRIM(RTRIM(OT.[strItemDescription]))) THEN ICI.[strItemNo] ELSE LTRIM(RTRIM(ICI.[strItemNo])) + ' (' + LTRIM(RTRIM(OT.[strItemDescription])) + ')' END)
-         , [strCategoryCode]              = ICC.[strCategoryCode]
+         , [strItemNo]                    = ITEM.[strItemNo]
+         , [strItemDescription]           = (CASE WHEN UPPER(LTRIM(RTRIM(ITEM.[strItemNo]))) = UPPER(LTRIM(RTRIM(OT.[strItemDescription]))) THEN ITEM.[strItemNo] ELSE LTRIM(RTRIM(ITEM.[strItemNo])) + ' (' + LTRIM(RTRIM(OT.[strItemDescription])) + ')' END)
+         , [strCategoryCode]              = ITEM.[strCategoryCode]
          , [dblQtyShipped]                = OT.[dblQtyShipped]
          , [dblPrice]                     = OT.[dblPrice]
          , [dblTotalTax]                  = OT.[dblTotalTax]
@@ -665,7 +424,7 @@ BEGIN
          , [strTaxCode]                   = '' --OT.[strTaxCode]
          , [strState]                     = '' --OT.[strState]
          , [strTaxClass]                  = '' --OT.[strTaxClass]
-         , [strGrouping]                  = C.[strCustomerName]
+         , [strGrouping]                  = I.[strCustomerName]
          , [strGroupingLabel]             = 'Customer : '
          , [ysnInvoiceDetail]             = @ysnInvoiceDetail
          , [dblCheckoffTax]               = OT.[dblCheckoffTax]
@@ -698,7 +457,9 @@ BEGIN
          , [dblSSTOnStateOtherTax]        = OT.[dblSSTOnStateOtherTax]
          , [dblSSTOnTonnageTax]           = OT.[dblSSTOnTonnageTax]
       FROM (
-           SELECT intEntityCustomerId, intInvoiceDetailId, intInvoiceId
+           SELECT intEntityCustomerId
+			    , intInvoiceDetailId
+				, intInvoiceId
                 , MIN(intCompanyLocationId) AS intCompanyLocationId
                 , MIN(intItemId) AS intItemId
                 , MIN(strItemDescription) AS strItemDescription
@@ -737,7 +498,7 @@ BEGIN
                 , SUM(dblSSTOnStateExciseTax) AS dblSSTOnStateExciseTax
                 , SUM(dblSSTOnStateOtherTax) AS dblSSTOnStateOtherTax
                 , SUM(dblSSTOnTonnageTax) AS dblSSTOnTonnageTax
-             FROM vyuAROutboundTaxReport WITH (NOLOCK)
+            FROM vyuAROutboundTaxReport WITH (NOLOCK)
             WHERE (@strState IS NULL OR strState LIKE '%'+ @strState +'%')
               AND (@strTaxGroup IS NULL OR strTaxGroup LIKE '%' + @strTaxGroup + '%')
               AND (
@@ -767,45 +528,34 @@ BEGIN
                         AND ((ysnInvalidSetup = @ZeroBit AND ysnTaxExempt = @OneBit) OR ysnManualTaxExempt = @OneBit)
 					   )
                   )
-            GROUP BY intEntityCustomerId, intInvoiceDetailId, intInvoiceId
-           ) OT
-             INNER JOIN #CUSTOMERS C 
-                        ON OT.intEntityCustomerId = C.intEntityCustomerId
-             INNER JOIN #COMPANYLOCATIONS CL
-                        ON OT.intCompanyLocationId = CL.intCompanyLocationId
-             INNER JOIN #INVOICES I
-                        ON OT.intInvoiceId = I.intInvoiceId
-             INNER JOIN #TYPES T
-                        ON I.strType = T.strType
-             INNER JOIN #ITEMS ICI
-                        ON OT.[intItemId] = ICI.[intItemId]
-             INNER JOIN #CATEGORIES ICC
-                        ON ICI.[intCategoryId] = ICC.[intCategoryId]
-		 ORDER BY C.strCustomerName, OT.intInvoiceId, OT.intInvoiceDetailId
+				GROUP BY intEntityCustomerId, intInvoiceDetailId, intInvoiceId
+			) OT
+            INNER JOIN #INVOICES I ON OT.intInvoiceId = I.intInvoiceId
+            INNER JOIN #ITEMS ITEM ON OT.[intItemId] = ITEM.[intItemId]
+		 ORDER BY I.strCustomerName, OT.intInvoiceId, OT.intInvoiceDetailId
     RETURN 1;
 END
 
 IF @strSubTotalBy = 'Tax Code'
 BEGIN
-    SELECT
-           [strInvoiceNumber]             = I.[strInvoiceNumber]
+    SELECT [strInvoiceNumber]             = I.[strInvoiceNumber]
          , [intInvoiceId]                 = I.[intInvoiceId]
          , [intInvoiceDetailId]           = OT.[intInvoiceDetailId]
          , [intEntityCustomerId]          = C.[intEntityCustomerId]
          , [strType]                      = I.[strType]
-         , [strCustomerNumber]            = C.[strCustomerNumber]
-         , [strCustomerName]              = C.[strCustomerName]
-         , [strAccountStatusCode]         = C.[strAccountStatusCode]
-         , [strCompanyNumber]             = CL.[strCompanyNumber]
+         , [strCustomerNumber]            = I.[strCustomerNumber]
+         , [strCustomerName]              = I.[strCustomerName]
+         , [strAccountStatusCode]         = I.[strAccountStatusCode]
+         , [strCompanyNumber]             = I.[strCompanyNumber]
          , [strCompanyName]               = @strCompanyName
          , [strCompanyAddress]            = @strCompanyAddress
          , [strSalespersonName]           = I.[strSalespersonName]
          , [dtmDate]                      = I.[dtmDate]
-         , [intUserId]                    = null
+         , [intUserId]                    = NULL
          , [strUserName]                  = @UserName
-         , [strItemNo]                    = ICI.[strItemNo]
-         , [strItemDescription]           = (CASE WHEN UPPER(LTRIM(RTRIM(ICI.[strItemNo]))) = UPPER(LTRIM(RTRIM(OT.[strItemDescription]))) THEN ICI.[strItemNo] ELSE LTRIM(RTRIM(ICI.[strItemNo])) + ' (' + LTRIM(RTRIM(OT.[strItemDescription])) + ')' END)
-         , [strCategoryCode]              = ICC.[strCategoryCode]
+         , [strItemNo]                    = ITEM.[strItemNo]
+         , [strItemDescription]           = (CASE WHEN UPPER(LTRIM(RTRIM(ITEM.[strItemNo]))) = UPPER(LTRIM(RTRIM(OT.[strItemDescription]))) THEN ITEM.[strItemNo] ELSE LTRIM(RTRIM(ITEM.[strItemNo])) + ' (' + LTRIM(RTRIM(OT.[strItemDescription])) + ')' END)
+         , [strCategoryCode]              = ITEM.[strCategoryCode]
          , [dblQtyShipped]                = OT.[dblQtyShipped]
          , [dblPrice]                     = OT.[dblPrice]
          , [dblTotalTax]                  = OT.[dblTotalTax]
@@ -850,7 +600,10 @@ BEGIN
          , [dblSSTOnStateOtherTax]        = OT.[dblSSTOnStateOtherTax]
          , [dblSSTOnTonnageTax]           = OT.[dblSSTOnTonnageTax]
       FROM (
-           SELECT intTaxCodeId, strTaxCode, intInvoiceDetailId, intInvoiceId
+           SELECT intTaxCodeId
+				, strTaxCode
+				, intInvoiceDetailId
+				, intInvoiceId
                 , MIN(intEntityCustomerId) AS intEntityCustomerId
                 , MIN(intCompanyLocationId) AS intCompanyLocationId
                 , MIN(intItemId) AS intItemId
@@ -890,7 +643,7 @@ BEGIN
                 , SUM(dblSSTOnStateExciseTax) AS dblSSTOnStateExciseTax
                 , SUM(dblSSTOnStateOtherTax) AS dblSSTOnStateOtherTax
                 , SUM(dblSSTOnTonnageTax) AS dblSSTOnTonnageTax
-             FROM vyuAROutboundTaxReport WITH (NOLOCK)
+            FROM vyuAROutboundTaxReport WITH (NOLOCK)
             WHERE (@strState IS NULL OR strState LIKE '%'+ @strState +'%')
               AND (@strTaxGroup IS NULL OR strTaxGroup LIKE '%' + @strTaxGroup + '%')
               AND (
@@ -920,20 +673,10 @@ BEGIN
                         AND ((ysnInvalidSetup = @ZeroBit AND ysnTaxExempt = @OneBit) OR ysnManualTaxExempt = @OneBit)
 					   )
                   )
-            GROUP BY intTaxCodeId, strTaxCode, intInvoiceDetailId, intInvoiceId
-           ) OT
-             INNER JOIN #CUSTOMERS C 
-                        ON OT.intEntityCustomerId = C.intEntityCustomerId
-             INNER JOIN #COMPANYLOCATIONS CL
-                        ON OT.intCompanyLocationId = CL.intCompanyLocationId
-             INNER JOIN #INVOICES I
-                        ON OT.intInvoiceId = I.intInvoiceId
-             INNER JOIN #TYPES T
-                        ON I.strType = T.strType
-             INNER JOIN #ITEMS ICI
-                        ON OT.[intItemId] = ICI.[intItemId]
-             INNER JOIN #CATEGORIES ICC
-                        ON ICI.[intCategoryId] = ICC.[intCategoryId]
+				GROUP BY intTaxCodeId, strTaxCode, intInvoiceDetailId, intInvoiceId
+			) OT
+            INNER JOIN #INVOICES I ON OT.intInvoiceId = I.intInvoiceId
+            INNER JOIN #ITEMS ITEM ON OT.[intItemId] = ITEM.[intItemId]
 		 ORDER BY OT.strTaxCode, OT.intInvoiceId, OT.intInvoiceDetailId
     RETURN 1;
 END

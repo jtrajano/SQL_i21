@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE uspIPDailyAveragePriceProcessAckXML @intToCompanyId INT
+﻿CREATE PROCEDURE uspIPDailyAveragePriceProcessAckXML --@intToCompanyId INT
 AS
 BEGIN TRY
 	SET NOCOUNT ON
@@ -21,7 +21,7 @@ BEGIN TRY
 	FROM tblRKDailyAveragePriceAckStage
 	WHERE strMessage = 'Success'
 		AND ISNULL(strFeedStatus, '') = ''
-		AND intMultiCompanyId = @intToCompanyId
+		--AND intMultiCompanyId = @intToCompanyId
 
 	WHILE @intDailyAveragePriceAckStageId > 0
 	BEGIN
@@ -50,9 +50,20 @@ BEGIN TRY
 		BEGIN
 			IF ISNULL(@strRowState, '') = 'Delete'
 			BEGIN
-				SELECT @intDailyAveragePriceRefId = intDailyAveragePriceId
-				FROM tblRKDailyAveragePriceAckStage
-				WHERE intDailyAveragePriceAckStageId = @intDailyAveragePriceAckStageId
+				EXEC sp_xml_preparedocument @idoc OUTPUT
+					,@strAckHeaderXML
+
+				SELECT @intDailyAveragePriceId = intDailyAveragePriceId
+					,@intDailyAveragePriceRefId = intDailyAveragePriceRefId
+				FROM OPENXML(@idoc, 'vyuIPGetDailyAveragePrices/vyuIPGetDailyAveragePrice', 2) WITH (
+						intDailyAveragePriceId INT
+						,intDailyAveragePriceRefId INT
+						)
+				--SELECT @intDailyAveragePriceRefId = intDailyAveragePriceId
+				--FROM tblRKDailyAveragePriceAckStage
+				--WHERE intDailyAveragePriceAckStageId = @intDailyAveragePriceAckStageId
+
+				EXEC sp_xml_removedocument @idoc
 
 				GOTO ext
 			END
@@ -115,7 +126,7 @@ BEGIN TRY
 		WHERE intDailyAveragePriceAckStageId > @intDailyAveragePriceAckStageId
 			AND strMessage = 'Success'
 			AND ISNULL(strFeedStatus, '') = ''
-			AND intMultiCompanyId = @intToCompanyId
+			--AND intMultiCompanyId = @intToCompanyId
 	END
 END TRY
 

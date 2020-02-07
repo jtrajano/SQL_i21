@@ -212,11 +212,14 @@ FROM
 		,strCommodity = COM.strCommodityCode
 		,strPClient = V.strName
 		,strSClient = C.strName
-		,dblPAllocatedQty = dbo.fnCalculateQtyBetweenUOM (PUOM.intItemUOMId, ToWUOM.intItemUOMId, ALD.dblPAllocatedQty)
-		,dblSAllocatedQty = dbo.fnCalculateQtyBetweenUOM (SUOM.intItemUOMId, ToWUOM.intItemUOMId, ALD.dblSAllocatedQty)
-		,dblPAllocatedQtyInPriceUOM = dbo.fnCalculateQtyBetweenUOM (PUOM.intItemUOMId, PCD.intPriceItemUOMId, ALD.dblPAllocatedQty)
-		,dblSAllocatedQtyInPriceUOM = dbo.fnCalculateQtyBetweenUOM (SUOM.intItemUOMId, SCD.intPriceItemUOMId, ALD.dblSAllocatedQty)
-		,dblSAllocatedQtyInResUOM = dbo.fnCalculateQtyBetweenUOM (SUOM.intItemUOMId, ToUOM.intItemUOMId, ALD.dblSAllocatedQty)
+		,dblPAllocatedQty = ISNULL(VCHR.dblNetShippedWt, dbo.fnCalculateQtyBetweenUOM (PUOM.intItemUOMId, ToWUOM.intItemUOMId, ALD.dblPAllocatedQty))
+		,dblSAllocatedQty = ISNULL(INVC.dblNetShippedWt, dbo.fnCalculateQtyBetweenUOM (SUOM.intItemUOMId, ToWUOM.intItemUOMId, ALD.dblSAllocatedQty))
+		,dblPAllocatedQtyInPriceUOM = ISNULL(dbo.fnCalculateQtyBetweenUOM (ToWUOM.intItemUOMId, PCD.intPriceItemUOMId, VCHR.dblNetShippedWt), 
+											dbo.fnCalculateQtyBetweenUOM (PUOM.intItemUOMId, PCD.intPriceItemUOMId, ALD.dblPAllocatedQty))
+		,dblSAllocatedQtyInPriceUOM = ISNULL(dbo.fnCalculateQtyBetweenUOM (ToWUOM.intItemUOMId, SCD.intPriceItemUOMId, INVC.dblNetShippedWt), 
+										dbo.fnCalculateQtyBetweenUOM (SUOM.intItemUOMId, SCD.intPriceItemUOMId, ALD.dblSAllocatedQty))
+		,dblSAllocatedQtyInResUOM = ISNULL(dbo.fnCalculateQtyBetweenUOM (ToWUOM.intItemUOMId, ToUOM.intItemUOMId, INVC.dblNetShippedWt), 
+										dbo.fnCalculateQtyBetweenUOM (SUOM.intItemUOMId, ToUOM.intItemUOMId, ALD.dblSAllocatedQty))
 		,dblPTerminalPrice = /* P-Terminal Price */
 							ISNULL(PCD.dblFutures, 0)
 		,dblSTerminalPrice = /* S-Terminal Price */
@@ -246,8 +249,8 @@ FROM
 								+ ISNULL(RA.dblReservesARateTotal, 0) 
 								+ ISNULL(RB.dblReservesBRateTotal, 0) 
 		,dblTonnageCheck = /* P-Qty - S-Qty */
-						dbo.fnCalculateQtyBetweenUOM (PUOM.intItemUOMId, ToWUOM.intItemUOMId, ALD.dblPAllocatedQty) 
-						- dbo.fnCalculateQtyBetweenUOM (SUOM.intItemUOMId, ToWUOM.intItemUOMId, ALD.dblSAllocatedQty)
+						ISNULL(VCHR.dblNetShippedWt, dbo.fnCalculateQtyBetweenUOM (PUOM.intItemUOMId, ToWUOM.intItemUOMId, ALD.dblPAllocatedQty))
+						- ISNULL(INVC.dblNetShippedWt, dbo.fnCalculateQtyBetweenUOM (SUOM.intItemUOMId, ToWUOM.intItemUOMId, ALD.dblSAllocatedQty))
 		,dblTotalMargin = /* Reserves B Total in Absolute Value */ 
 							ABS(RB.dblReservesBValueTotal)
 		,dblReservesATotalVariance = RA.dblReservesAVarianceTotal * -1
@@ -288,25 +291,33 @@ FROM
 		/* Purchase Value */
 		OUTER APPLY 
 			(SELECT 
-				dblTotalCost = SUM(CASE WHEN BL.intTransactionType IN (3, 11) 
-										THEN (BLD.dblTotal * -1) 
-										ELSE BLD.dblTotal END)
-			FROM tblAPBillDetail BLD 
-				INNER JOIN tblAPBill BL ON BL.intBillId = BLD.intBillId
+				dblTotalCost = SUM(BLD.dblTotal)
+				,dblNetShippedWt = SUM(BLD.dblQtyReceived)
+			FROM 
+				(SELECT bl.intBillId, bld.intItemId, bld.intContractDetailId, bl.ysnPosted, bl.intTransactionType
+					,dblTotal = bld.dblTotal * CASE WHEN bl.intTransactionType IN (3, 11) THEN -1 ELSE 1 END
+					,dblQtyReceived = dbo.fnCalculateQtyBetweenUOM (intUnitOfMeasureId, ToWUOM.intItemUOMId, dblQtyReceived) 
+									* CASE WHEN bl.intTransactionType IN (3, 11) THEN -1 ELSE 1 END
+					FROM tblAPBillDetail bld
+					INNER JOIN tblAPBill bl on bl.intBillId = bld.intBillId) BLD
 				INNER JOIN tblICItem BLDI ON BLDI.intItemId = BLD.intItemId
-			WHERE (BL.ysnPosted = 1 OR BL.intTransactionType = 11) 
+			WHERE (BLD.ysnPosted = 1 OR BLD.intTransactionType = 11) 
 				AND BLD.intContractDetailId = PCD.intContractDetailId
 				AND BLDI.intCategoryId NOT IN (CP.intPnLReportReserveACategoryId, CP.intPnLReportReserveBCategoryId)) VCHR
 		/* Sales Value */
 		OUTER APPLY 
 			(SELECT 
-				dblTotalCost = SUM(CASE WHEN IV.strTransactionType IN ('Credit Memo') 
-										THEN (IVD.dblTotal * -1) 
-										ELSE IVD.dblTotal END)
-			FROM tblARInvoiceDetail IVD 
-				INNER JOIN tblARInvoice IV ON IV.intInvoiceId = IVD.intInvoiceId
+				dblTotalCost = SUM(dblTotal)
+				,dblNetShippedWt = SUM(dblQtyShipped)
+			FROM 
+				(SELECT ivd.intInvoiceId, ivd.intItemId, ivd.intContractDetailId, iv.ysnPosted
+					,dblTotal = dblTotal * CASE WHEN iv.strTransactionType IN ('Credit Memo') THEN -1 ELSE 1 END
+					,dblQtyShipped = dbo.fnCalculateQtyBetweenUOM (intItemUOMId, ToWUOM.intItemUOMId, dblQtyShipped) 
+									* CASE WHEN iv.strTransactionType IN ('Credit Memo') THEN -1 ELSE 1 END
+					FROM tblARInvoiceDetail ivd
+					INNER JOIN tblARInvoice iv on iv.intInvoiceId = ivd.intInvoiceId) IVD 
 				INNER JOIN tblICItem IVDI ON IVDI.intItemId = IVD.intItemId
-			WHERE IV.ysnPosted = 1 
+			WHERE IVD.ysnPosted = 1 
 				AND IVD.intContractDetailId = SCD.intContractDetailId
 				AND IVDI.intCategoryId NOT IN (CP.intPnLReportReserveACategoryId, CP.intPnLReportReserveBCategoryId)) INVC
 		/* Reserves A */

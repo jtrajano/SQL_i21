@@ -736,6 +736,12 @@ IF(OBJECT_ID('tempdb..#ARPaymentGLEntries') IS NOT NULL)
         [dbo].[fnGetGLEntriesErrors](@GLEntries, @post)
 
 
+	DECLARE @InvalidGLTransactionID NVARCHAR(100)
+	DECLARE @InvalidGLModule NVARCHAR(100) 
+	SELECT TOP 1 @InvalidGLTransactionID = [strTransactionId], @InvalidGLModule = strModuleName  FROM @InvalidGLEntries
+	UPDATE @InvalidGLEntries SET strTransactionId = @InvalidGLTransactionID, strModuleName = @InvalidGLModule WHERE strTransactionId IS NULL
+
+
     DECLARE @invalidGLCount INT
 	SET @invalidGLCount = ISNULL((SELECT COUNT(DISTINCT[strTransactionId]) FROM @InvalidGLEntries), 0)
 	SET @totalRecords = @totalRecords - @invalidGLCount    

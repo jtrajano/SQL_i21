@@ -12,6 +12,7 @@
 	[strFormulaField] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
 	[strIsMandatory] NVARCHAR(20) COLLATE Latin1_General_CI_AS DEFAULT 'No', 
 	[ysnPrintInLabel] BIT NOT NULL CONSTRAINT [DF_tblQMProductProperty_ysnPrintInLabel] DEFAULT 0,
+	intProductPropertyRefId INT,
 
 	[intCreatedUserId] [int] NULL,
 	[dtmCreated] [datetime] NULL CONSTRAINT [DF_tblQMProductProperty_dtmCreated] DEFAULT GetDate(),

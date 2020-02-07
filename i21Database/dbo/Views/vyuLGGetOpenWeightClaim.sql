@@ -1,7 +1,7 @@
 CREATE VIEW vyuLGGetOpenWeightClaim
 AS
 SELECT TOP 100 PERCENT Convert(INT, ROW_NUMBER() OVER (
-			ORDER BY intLoadId
+			ORDER BY (Select 1)
 			)) AS intKeyColumn
 	,dblClaimableAmount = ROUND(CASE WHEN (((dblClaimableWt * dblSeqPriceInWeightUOM) / CASE WHEN ysnSeqSubCurrency = 1 THEN 100 ELSE 1 END) < 0)
 								THEN ((dblClaimableWt * dblSeqPriceInWeightUOM) / CASE WHEN ysnSeqSubCurrency = 1 THEN 100 ELSE 1 END) * - 1
@@ -66,8 +66,8 @@ FROM
 		,intSeqCurrencyId = AD.intSeqCurrencyId
 		,intSeqPriceUOMId = ISNULL(CD.intPriceItemUOMId,CD.intAdjItemUOMId)
 		,intSeqBasisCurrencyId = AD.intSeqBasisCurrencyId
-		,strSeqBasisCurrency = AD.strSeqBasisCurrency 
-		,ysnSeqSubCurrency = AD.ysnSeqBasisSubCurrency
+		,strSeqBasisCurrency = BCUR.strCurrency 
+		,ysnSeqSubCurrency = BCUR.ysnSubCurrency
 		,dblSeqPriceInWeightUOM = dbo.fnCTConvertQtyToTargetItemUOM(WUI.intWeightUOMId, ISNULL(CD.intPriceItemUOMId,CD.intAdjItemUOMId), AD.dblSeqPrice)
 		,intItemId = CD.intItemId
 		,intContractDetailId = CD.intContractDetailId
@@ -75,14 +75,14 @@ FROM
 		,strBook = BO.strBook
 		,intSubBookId = CD.intSubBookId
 		,strSubBook = SB.strSubBook
-		,strReferenceNumber = WC.strReferenceNumber
-		,dtmTransDate = WC.dtmTransDate
-		,dtmActualWeighingDate = WC.dtmActualWeighingDate
+		,strReferenceNumber = NULL
+		,dtmTransDate = NULL
+		,dtmActualWeighingDate = NULL
 		,strItemNo = I.strItemNo
-		,strCommodityCode = C.strCommodityCode
+		,strCommodityCode = I.strCommodityCode
 		,strContractItemNo = CONI.strContractItemNo
 		,strContractItemName = CONI.strContractItemName
-		,strOrigin = ISNULL(OG.strCountry, OG2.strCountry)
+		,strOrigin = ISNULL(OG.strCountry, I.strCountry)
 		,dblSeqPriceConversionFactoryWeightUOM = dbo.fnCTConvertQtyToTargetItemUOM(WUI.intWeightUOMId, ISNULL(CD.intPriceItemUOMId,CD.intAdjItemUOMId), 1)
 		,intContractBasisId = CH.intFreightTermId
 		,strContractBasis = CB.strContractBasis
@@ -96,72 +96,41 @@ FROM
 	JOIN tblICUnitMeasure WUOM ON WUOM.intUnitMeasureId = L.intWeightUnitMeasureId
 	JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = intPContractDetailId
-	JOIN (SELECT
-			intContractDetailId = CD.intContractDetailId
-			,intSeqPriceUOMId = ISNULL(CD.intAdjItemUOMId,CD.intPriceItemUOMId)
-			,strSeqPriceUOM = ISNULL(FM.strUnitMeasure, UM.strUnitMeasure)
-			,intSeqCurrencyId = COALESCE(CYT.intCurrencyID, CYF.intCurrencyID, MCY.intCurrencyID, CY.intCurrencyID)
-			,strSeqCurrency = COALESCE(CYT.strCurrency, CYF.strCurrency, MCY.strCurrency, CY.strCurrency)
-			,intSeqBasisCurrencyId = COALESCE(CYT.intCurrencyID, CYF.intCurrencyID, CY.intCurrencyID)
-			,strSeqBasisCurrency = COALESCE(CYT.strCurrency, CYF.strCurrency, CY.strCurrency)
-			,ysnSeqBasisSubCurrency = COALESCE(CYT.ysnSubCurrency, CYF.ysnSubCurrency, CY.ysnSubCurrency)
-			,dblSeqPrice = CD.dblCashPrice * (CASE WHEN (CYXT.intToCurrencyId IS NOT NULL) THEN 1 / ISNULL(CD.dblRate, 1) 
-												/ CASE WHEN CY.ysnSubCurrency = 1 THEN 100 ELSE 1 END 
-												ELSE ISNULL(CD.dblRate, 1) END)
-		FROM tblCTContractDetail CD
-			LEFT JOIN tblICItemUOM IU ON IU.intItemUOMId = CD.intPriceItemUOMId
-			LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
-			LEFT JOIN tblICItemUOM FU ON ISNULL(CD.ysnUseFXPrice,0) = 1 AND CD.intCurrencyExchangeRateId IS NOT NULL AND CD.dblRate IS NOT NULL AND CD.intFXPriceUOMId IS NOT NULL AND FU.intItemUOMId = CD.intFXPriceUOMId
-			LEFT JOIN tblICUnitMeasure FM ON FM.intUnitMeasureId = FU.intUnitMeasureId
-			LEFT JOIN tblSMCurrency CY ON CY.intCurrencyID = CD.intCurrencyId
-			LEFT JOIN tblSMCurrency MCY ON MCY.intCurrencyID = CY.intMainCurrencyId
-			LEFT JOIN tblSMCurrencyExchangeRate CYXF 
-				ON ISNULL(CD.ysnUseFXPrice,0) = 1 AND CD.intCurrencyExchangeRateId IS NOT NULL AND CD.dblRate IS NOT NULL AND CD.intFXPriceUOMId IS NOT NULL
-				AND CYXF.intCurrencyExchangeRateId = CD.intCurrencyExchangeRateId 
-				AND CYXF.intFromCurrencyId = ISNULL(CY.intMainCurrencyId, CY.intCurrencyID)
-			LEFT JOIN tblSMCurrency CYF ON CYF.intCurrencyID = CYXF.intToCurrencyId
-			LEFT JOIN tblSMCurrencyExchangeRate CYXT 
-				ON ISNULL(CD.ysnUseFXPrice,0) = 1 AND CD.intCurrencyExchangeRateId IS NOT NULL AND CD.dblRate IS NOT NULL AND CD.intFXPriceUOMId IS NOT NULL
-				AND CYXT.intCurrencyExchangeRateId = CD.intCurrencyExchangeRateId 
-				AND CYXT.intToCurrencyId = ISNULL(CY.intMainCurrencyId, CY.intCurrencyID)
-			LEFT JOIN tblSMCurrency CYT ON CYT.intCurrencyID = CYXT.intFromCurrencyId) AD ON AD.intContractDetailId = CD.intContractDetailId
+	JOIN vyuLGAdditionalColumnForContractDetailView AD ON AD.intContractDetailId = CD.intContractDetailId
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 	JOIN tblEMEntity EM ON EM.intEntityId = CH.intEntityId
 	JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = CH.intWeightId
-	JOIN tblICItem I ON I.intItemId = CD.intItemId
-	JOIN tblICCommodity C ON C.intCommodityId = I.intCommodityId
+	CROSS APPLY (SELECT TOP 1 
+					I.intItemId
+					,I.strItemNo
+					,C.strCommodityCode 
+					,OG2.strCountry
+				 FROM tblICItem I 
+					INNER JOIN tblICCommodity C ON C.intCommodityId = I.intCommodityId
+					LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = I.intOriginId
+					LEFT JOIN tblSMCountry OG2 ON OG2.intCountryID = CA.intCountryID
+				 WHERE intItemId = CD.intItemId) I
+	LEFT JOIN tblSMCurrency BCUR ON BCUR.intCurrencyID = AD.intSeqBasisCurrencyId
 	LEFT JOIN tblSMFreightTerms CB ON CB.intFreightTermId = CH.intFreightTermId
 	LEFT JOIN tblEMEntity EMPH ON EMPH.intEntityId = CH.intProducerId
 	LEFT JOIN tblEMEntity EMPD ON EMPD.intEntityId = CD.intProducerId
-	LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = I.intOriginId AND CA.strType = 'Origin'
 	LEFT JOIN tblICItemContract CONI ON CONI.intItemId = I.intItemId AND CD.intItemContractId = CONI.intItemContractId
 	LEFT JOIN tblSMCountry OG ON OG.intCountryID = CONI.intCountryId
-	LEFT JOIN tblSMCountry OG2 ON OG2.intCountryID = CA.intCountryID
 	LEFT JOIN tblCTAssociation ASN ON ASN.intAssociationId = CH.intAssociationId
 	LEFT JOIN tblCTBook BO ON BO.intBookId = CD.intBookId
 	LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = CD.intSubBookId
-	LEFT JOIN (
-		SELECT SUM(ReceiptItem.dblNet) dblNet
-			,ReceiptItem.intSourceId
-			,ReceiptItem.intLineNo
-			,ReceiptItem.intOrderId
-		FROM tblICInventoryReceiptItem ReceiptItem
-		JOIN tblICInventoryReceipt RI ON RI.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
-		WHERE RI.strReceiptType <> 'Inventory Return'
-		GROUP BY ReceiptItem.intSourceId
-			,ReceiptItem.intLineNo
-			,ReceiptItem.intOrderId
-		) RI ON RI.intSourceId = LD.intLoadDetailId
-		AND RI.intLineNo = LD.intPContractDetailId
-		AND RI.intOrderId = CH.intContractHeaderId
-		AND L.intPurchaseSale IN (1, 3)
-	LEFT JOIN tblLGWeightClaimDetail WCD ON WCD.intContractDetailId = CD.intContractDetailId
-	LEFT JOIN tblLGWeightClaim WC ON WC.intLoadId = L.intLoadId AND WC.intPurchaseSale = 1
 	LEFT JOIN tblSMPurchasingGroup PG ON PG.intPurchasingGroupId = CD.intPurchasingGroupId
+	OUTER APPLY (SELECT TOP 1 intWeightClaimId = WC.intWeightClaimId 
+		FROM tblLGWeightClaim WC INNER JOIN tblLGWeightClaimDetail WCD ON WC.intWeightClaimId = WCD.intWeightClaimDetailId 
+		WHERE WCD.intContractDetailId = CD.intContractDetailId AND WC.intLoadId = L.intLoadId AND WC.intPurchaseSale = 1) WC
 	OUTER APPLY (SELECT TOP 1 intWeightUOMId = IU.intItemUOMId FROM tblICItemUOM IU WHERE IU.intItemId = CD.intItemId AND IU.intUnitMeasureId = WUOM.intUnitMeasureId) WUI
 	OUTER APPLY (SELECT TOP 1 strSubLocation = CLSL.strSubLocationName FROM tblLGLoadWarehouse LW JOIN tblSMCompanyLocationSubLocation CLSL ON LW.intSubLocationId = CLSL.intCompanyLocationSubLocationId WHERE LW.intLoadId = L.intLoadId) SL
-	CROSS APPLY (SELECT intCount = COUNT(*) FROM tblLGLoadDetailContainerLink WHERE intLoadDetailId = LD.intLoadDetailId) CLCT
-	CROSS APPLY (SELECT dblLinkNetWt = SUM(dblLinkNetWt) FROM tblLGLoadDetailContainerLink WHERE intLoadDetailId = LD.intLoadDetailId) CLNW
+	OUTER APPLY (SELECT intCount = COUNT(*) FROM tblLGLoadDetailContainerLink WHERE intLoadDetailId = LD.intLoadDetailId) CLCT
+	OUTER APPLY (SELECT dblLinkNetWt = SUM(dblLinkNetWt) FROM tblLGLoadDetailContainerLink WHERE intLoadDetailId = LD.intLoadDetailId) CLNW
+	CROSS APPLY (SELECT dblNet = SUM(IRI.dblNet) FROM tblICInventoryReceipt IR 
+					JOIN tblICInventoryReceiptItem IRI ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
+					WHERE IRI.intSourceId = LD.intLoadDetailId AND IRI.intLineNo = CD.intContractDetailId
+						AND IRI.intOrderId = CH.intContractHeaderId AND IR.strReceiptType <> 'Inventory Return') RI
 	CROSS APPLY (SELECT dblIRNet = SUM(IRI.dblNet) FROM tblICInventoryReceipt IR 
 					JOIN tblICInventoryReceiptItem IRI ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
 					WHERE IRI.intSourceId = LD.intLoadDetailId AND IRI.intLineNo = CD.intContractDetailId
@@ -225,8 +194,8 @@ FROM
 		,intSeqCurrencyId = AD.intSeqCurrencyId
 		,intSeqPriceUOMId = AD.intSeqPriceUOMId
 		,intSeqBasisCurrencyId = AD.intSeqBasisCurrencyId
-		,strSeqBasisCurrency = AD.strSeqBasisCurrency 
-		,ysnSeqSubCurrency = AD.ysnSeqBasisSubCurrency
+		,strSeqBasisCurrency = BCUR.strCurrency 
+		,ysnSeqSubCurrency = BCUR.ysnSubCurrency
 		,dblSeqPriceInWeightUOM = dbo.fnCTConvertQtyToTargetItemUOM(WUI.intWeightUOMId, ISNULL(CD.intPriceItemUOMId,CD.intAdjItemUOMId), AD.dblSeqPrice)
 		,intItemId = CD.intItemId
 		,intContractDetailId = CD.intContractDetailId
@@ -234,14 +203,14 @@ FROM
 		,strBook = BO.strBook
 		,intSubBookId = CD.intSubBookId
 		,strSubBook = SB.strSubBook
-		,strReferenceNumber = WC.strReferenceNumber
-		,dtmTransDate = WC.dtmTransDate
-		,dtmActualWeighingDate = WC.dtmActualWeighingDate
+		,strReferenceNumber = NULL
+		,dtmTransDate = NULL
+		,dtmActualWeighingDate = NULL
 		,strItemNo = I.strItemNo
-		,strCommodityCode = C.strCommodityCode
+		,strCommodityCode = I.strCommodityCode
 		,strContractItemNo = CONI.strContractItemNo
 		,strContractItemName = CONI.strContractItemName
-		,strOrigin = ISNULL(OG.strCountry, OG2.strCountry)
+		,strOrigin = ISNULL(OG.strCountry, I.strCountry)
 		,dblSeqPriceConversionFactoryWeightUOM = dbo.fnCTConvertQtyToTargetItemUOM(WUI.intWeightUOMId, AD.intSeqPriceUOMId, 1)
 		,intContractBasisId = CH.intFreightTermId
 		,strContractBasis = CB.strContractBasis
@@ -255,57 +224,37 @@ FROM
 	JOIN tblICUnitMeasure WUOM ON WUOM.intUnitMeasureId = L.intWeightUnitMeasureId
 	JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = intSContractDetailId
-	JOIN (SELECT
-			intContractDetailId = CD.intContractDetailId
-			,intSeqPriceUOMId = ISNULL(CD.intAdjItemUOMId,CD.intPriceItemUOMId)
-			,strSeqPriceUOM = ISNULL(FM.strUnitMeasure, UM.strUnitMeasure)
-			,intSeqCurrencyId = COALESCE(CYT.intCurrencyID, CYF.intCurrencyID, MCY.intCurrencyID, CY.intCurrencyID)
-			,strSeqCurrency = COALESCE(CYT.strCurrency, CYF.strCurrency, MCY.strCurrency, CY.strCurrency)
-			,intSeqBasisCurrencyId = COALESCE(CYT.intCurrencyID, CYF.intCurrencyID, CY.intCurrencyID)
-			,strSeqBasisCurrency = COALESCE(CYT.strCurrency, CYF.strCurrency, CY.strCurrency)
-			,ysnSeqBasisSubCurrency = COALESCE(CYT.ysnSubCurrency, CYF.ysnSubCurrency, CY.ysnSubCurrency)
-			,dblSeqPrice = CD.dblCashPrice * (CASE WHEN (CYXT.intToCurrencyId IS NOT NULL) THEN 1 / ISNULL(CD.dblRate, 1) 
-									/ CASE WHEN CY.ysnSubCurrency = 1 THEN 100 ELSE 1 END 
-									ELSE ISNULL(CD.dblRate, 1) END)
-		FROM tblCTContractDetail CD
-			LEFT JOIN tblICItemUOM IU ON IU.intItemUOMId = CD.intPriceItemUOMId
-			LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
-			LEFT JOIN tblICItemUOM FU ON ISNULL(CD.ysnUseFXPrice,0) = 1 AND CD.intCurrencyExchangeRateId IS NOT NULL AND CD.dblRate IS NOT NULL AND CD.intFXPriceUOMId IS NOT NULL AND FU.intItemUOMId = CD.intFXPriceUOMId
-			LEFT JOIN tblICUnitMeasure FM ON FM.intUnitMeasureId = FU.intUnitMeasureId
-			LEFT JOIN tblSMCurrency CY ON CY.intCurrencyID = CD.intCurrencyId
-			LEFT JOIN tblSMCurrency MCY ON MCY.intCurrencyID = CY.intMainCurrencyId
-			LEFT JOIN tblSMCurrencyExchangeRate CYXF 
-				ON ISNULL(CD.ysnUseFXPrice,0) = 1 AND CD.intCurrencyExchangeRateId IS NOT NULL AND CD.dblRate IS NOT NULL AND CD.intFXPriceUOMId IS NOT NULL
-				AND CYXF.intCurrencyExchangeRateId = CD.intCurrencyExchangeRateId 
-				AND CYXF.intFromCurrencyId = ISNULL(CY.intMainCurrencyId, CY.intCurrencyID)
-			LEFT JOIN tblSMCurrency CYF ON CYF.intCurrencyID = CYXF.intToCurrencyId
-			LEFT JOIN tblSMCurrencyExchangeRate CYXT 
-				ON ISNULL(CD.ysnUseFXPrice,0) = 1 AND CD.intCurrencyExchangeRateId IS NOT NULL AND CD.dblRate IS NOT NULL AND CD.intFXPriceUOMId IS NOT NULL
-				AND CYXT.intCurrencyExchangeRateId = CD.intCurrencyExchangeRateId 
-				AND CYXT.intToCurrencyId = ISNULL(CY.intMainCurrencyId, CY.intCurrencyID)
-			LEFT JOIN tblSMCurrency CYT ON CYT.intCurrencyID = CYXT.intFromCurrencyId) AD ON AD.intContractDetailId = CD.intContractDetailId
+	JOIN vyuLGAdditionalColumnForContractDetailView AD ON AD.intContractDetailId = CD.intContractDetailId
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 	JOIN tblEMEntity EM ON EM.intEntityId = CH.intEntityId
 	JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = CH.intWeightId
-	JOIN tblICItem I ON I.intItemId = CD.intItemId
-	JOIN tblICCommodity C ON C.intCommodityId = I.intCommodityId
+	CROSS APPLY (SELECT TOP 1 
+					I.intItemId
+					,I.strItemNo
+					,C.strCommodityCode 
+					,OG2.strCountry
+				 FROM tblICItem I 
+					INNER JOIN tblICCommodity C ON C.intCommodityId = I.intCommodityId
+					LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = I.intOriginId
+					LEFT JOIN tblSMCountry OG2 ON OG2.intCountryID = CA.intCountryID
+				 WHERE intItemId = CD.intItemId) I
+	LEFT JOIN tblSMCurrency BCUR ON BCUR.intCurrencyID = AD.intSeqBasisCurrencyId
 	LEFT JOIN tblSMFreightTerms CB ON CB.intFreightTermId = CH.intFreightTermId
 	LEFT JOIN tblEMEntity EMPH ON EMPH.intEntityId = CH.intProducerId
 	LEFT JOIN tblEMEntity EMPD ON EMPD.intEntityId = CD.intProducerId
-	LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = I.intOriginId
 	LEFT JOIN tblICItemContract CONI ON CONI.intItemId = I.intItemId AND CD.intItemContractId = CONI.intItemContractId
 	LEFT JOIN tblSMCountry OG ON OG.intCountryID = CONI.intCountryId
-	LEFT JOIN tblSMCountry OG2 ON OG2.intCountryID = CA.intCountryID
 	LEFT JOIN tblCTAssociation ASN ON ASN.intAssociationId = CH.intAssociationId
 	LEFT JOIN tblCTBook BO ON BO.intBookId = CD.intBookId
 	LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = CD.intSubBookId
-	LEFT JOIN tblLGWeightClaimDetail WCD ON WCD.intContractDetailId = CD.intContractDetailId
-	LEFT JOIN tblLGWeightClaim WC ON WC.intLoadId = L.intLoadId AND WC.intPurchaseSale = 2
 	LEFT JOIN tblSMPurchasingGroup PG ON PG.intPurchasingGroupId = CD.intPurchasingGroupId
+	OUTER APPLY (SELECT TOP 1 intWeightClaimId = WC.intWeightClaimId 
+		FROM tblLGWeightClaim WC INNER JOIN tblLGWeightClaimDetail WCD ON WC.intWeightClaimId = WCD.intWeightClaimDetailId 
+		WHERE WCD.intContractDetailId = CD.intContractDetailId AND WC.intLoadId = L.intLoadId AND WC.intPurchaseSale = 2) WC
 	OUTER APPLY (SELECT TOP 1 intWeightUOMId = IU.intItemUOMId FROM tblICItemUOM IU WHERE IU.intItemId = CD.intItemId AND IU.intUnitMeasureId = WUOM.intUnitMeasureId) WUI
 	OUTER APPLY (SELECT TOP 1 strSubLocation = CLSL.strSubLocationName FROM tblLGLoadWarehouse LW JOIN tblSMCompanyLocationSubLocation CLSL ON LW.intSubLocationId = CLSL.intCompanyLocationSubLocationId WHERE LW.intLoadId = L.intLoadId) SL
-	CROSS APPLY (SELECT intCount = COUNT(*) FROM tblLGLoadDetailContainerLink WHERE intLoadDetailId = LD.intLoadDetailId) CLCT
-	CROSS APPLY (SELECT dblLinkNetWt = SUM(dblLinkNetWt) FROM tblLGLoadDetailContainerLink WHERE intLoadDetailId = LD.intLoadDetailId) CLNW
+	OUTER APPLY (SELECT intCount = COUNT(*) FROM tblLGLoadDetailContainerLink WHERE intLoadDetailId = LD.intLoadDetailId) CLCT
+	OUTER APPLY (SELECT dblLinkNetWt = SUM(dblLinkNetWt) FROM tblLGLoadDetailContainerLink WHERE intLoadDetailId = LD.intLoadDetailId) CLNW
 	WHERE L.intPurchaseSale IN (2, 3)
 		AND L.intShipmentStatus IN (6, 11)
 		AND WC.intWeightClaimId IS NULL

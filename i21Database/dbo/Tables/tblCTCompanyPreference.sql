@@ -67,6 +67,7 @@
 	ysnUniqueEntityReference BIT,
 	ysnAutoCreateDerivative BIT,
 	ysnEnableItemContracts	BIT NULL DEFAULT 0,
+	ysnAllowNonInventoryOnItemContracts	BIT NULL DEFAULT 0,
 	ysnAllowBasisComponentToAccrue BIT NOT NULL DEFAULT 0,
 	ysnUpdatedAvailabilityPurchase BIT NOT NULL DEFAULT 0,
 	ysnUpdatedAvailabilitySales BIT NOT NULL DEFAULT 0,

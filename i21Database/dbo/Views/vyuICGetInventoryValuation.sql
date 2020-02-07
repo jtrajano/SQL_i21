@@ -36,7 +36,11 @@ SELECT	intInventoryValuationKeyId  = ISNULL(t.intInventoryTransactionId, 0)
 													WHEN shipment.intSourceType = 4 THEN 'Delivery Sheet'
 													ELSE ''
 												END
-											ELSE ''
+											ELSE 
+												CASE WHEN InventoryTransfer.intSourceType = 3 AND InventoryTransfer.intInventoryTransferDetailId IS NOT NULL 
+													AND t.strTransactionForm = 'Inventory Transfer' 
+												THEN 'Transport'
+												ELSE '' END
 										END COLLATE Latin1_General_CI_AS
 		,strSourceNumber			= CASE 
 										WHEN receipt.intInventoryReceiptId IS NOT NULL THEN
@@ -57,7 +61,11 @@ SELECT	intInventoryValuationKeyId  = ISNULL(t.intInventoryTransactionId, 0)
 												ELSE ''
 											END
 										ELSE
-											''
+											CASE WHEN InventoryTransfer.intSourceType = 3 
+												AND InventoryTransfer.intInventoryTransferDetailId IS NOT NULL 
+												AND t.strTransactionForm = 'Inventory Transfer' 
+											THEN InventoryTransfer.strSourceNumber
+											ELSE '' END
 										END
 		,strTransactionType			= (CASE WHEN ty.strName IN ('Invoice', 'Credit Memo') THEN isnull(invoice.strTransactionType, ty.strName) ELSE ty.strName END)
 		,t.strTransactionForm		
@@ -117,6 +125,42 @@ FROM 	tblICInventoryTransaction t
 		LEFT JOIN tblICStorageLocation strgLoc 
 			ON strgLoc.intStorageLocationId = t.intStorageLocationId
 
+		LEFT OUTER JOIN (
+			SELECT
+				  td.intInventoryTransferDetailId,
+				  t.intSourceType
+				, strTransferNo = t.strTransferNo
+				, strSourceNumber = CASE t.intSourceType
+					WHEN 1 THEN sourceTicket.strSourceNumber 
+					WHEN 2 THEN LGShipmentSource.strSourceNumber
+					WHEN 3 THEN transportSource.strSourceNumber 
+					ELSE NULL END
+			FROM tblICInventoryTransfer t
+				INNER JOIN tblICInventoryTransferDetail td ON td.intInventoryTransferId = t.intInventoryTransferId
+				INNER JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = td.intItemUOMId
+				INNER JOIN tblICUnitMeasure M ON M.intUnitMeasureId = ItemUOM.intUnitMeasureId
+				OUTER APPLY (
+					SELECT TOP 1 strSourceNumber = s1.strTicketNumber
+					FROM tblSCTicket s1
+					WHERE s1.intTicketId = td.intSourceId
+						AND t.intSourceType = 1
+				) sourceTicket
+				OUTER APPLY (
+					SELECT TOP 1 strSourceNumber = CAST(ISNULL(s2.intTrackingNumber, 'Inbound Shipment not found!') AS NVARCHAR(50))
+					FROM tblLGShipment s2
+					WHERE s2.intShipmentId = td.intSourceId
+						AND t.intSourceType = 2
+				) LGShipmentSource
+				OUTER APPLY (
+					SELECT TOP 1 strSourceNumber = CAST(ISNULL(s3header.strTransaction, 'Transport not found!') AS NVARCHAR(50))
+					FROM tblTRLoadReceipt s3
+						INNER JOIN tblTRLoadHeader s3header ON s3header.intLoadHeaderId = s3.intLoadHeaderId
+					WHERE s3.intLoadReceiptId = td.intSourceId
+						AND t.intSourceType = 3
+				) transportSource
+
+		) InventoryTransfer ON InventoryTransfer.intInventoryTransferDetailId = t.intTransactionDetailId		
+			AND t.intTransactionTypeId = 12
 		LEFT JOIN tblSMCompanyLocation [location]
 			ON [location].intCompanyLocationId = t.intCompanyLocationId
 

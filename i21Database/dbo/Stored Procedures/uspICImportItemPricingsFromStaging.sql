@@ -1,4 +1,4 @@
-CREATE PROCEDURE uspICImportItemPricingsFromStaging @strIdentifier NVARCHAR(100)
+CREATE PROCEDURE uspICImportItemPricingsFromStaging @strIdentifier NVARCHAR(100), @intDataSourceId INT = 2
 AS
 
 DELETE FROM tblICImportStagingItemPricing WHERE strImportIdentifier <> @strIdentifier
@@ -118,7 +118,8 @@ WHEN NOT MATCHED THEN
 		, dblAverageCost		
 		, dblDefaultGrossPrice	
 		, dtmDateCreated		
-		, intCreatedByUserId	
+		, intCreatedByUserId
+		, intDataSourceId
 	)
 	VALUES
 	(
@@ -133,7 +134,8 @@ WHEN NOT MATCHED THEN
 		, dblAverageCost		
 		, dblDefaultGrossPrice	
 		, dtmDateCreated		
-		, intCreatedByUserId	
+		, intCreatedByUserId
+		, @intDataSourceId
 	)
 	OUTPUT deleted.intItemId, $action, inserted.intItemId INTO #output;
 
@@ -155,6 +157,25 @@ BEGIN
 	INSERT INTO tblICImportLogDetail(intImportLogId, intRecordNo, strAction, strValue, strMessage, strStatus, strType, intConcurrencyId)
 	SELECT @LogId, 0, 'Import finished.', ' ', 'Nothing was imported', 'Success', 'Warning', 1
 END
+
+-- Sync Pricing to Location to make sure all locations have corresponding price
+DECLARE @intItemId INT
+DECLARE @intUserId INT
+DECLARE cur CURSOR FOR
+SELECT DISTINCT intItemId, intCreatedByUserId FROM #tmp
+
+OPEN cur
+
+FETCH NEXT FROM cur INTO @intItemId, @intUserId
+
+WHILE @@FETCH_STATUS = 0
+BEGIN
+	EXEC dbo.uspICSyncItemLocationPricing @intItemId = @intItemId, @intUserId = @intUserId
+	FETCH NEXT FROM cur INTO @intItemId, @intUserId
+END
+
+CLOSE cur
+DEALLOCATE cur
 
 DROP TABLE #tmp
 DROP TABLE #output

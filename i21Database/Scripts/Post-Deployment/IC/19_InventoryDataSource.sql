@@ -14,6 +14,8 @@ USING	(
 		SELECT	id = 1 ,strType = 'CStore'
 		UNION ALL
 		SELECT id = 2, strType = 'Import CSV'
+		UNION ALL
+		SELECT id = 3, strType = 'i21 RESTful API'
 ) AS DataSourceTypes
 	ON  ICDataSource.intDataSourceId = DataSourceTypes.id
 

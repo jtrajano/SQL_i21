@@ -9,4 +9,5 @@
 	,intTransactionRefId INT
 	,intCompanyRefId INT
 	,strMessage NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
+	,dtmFeedDate DATETIME DEFAULT GETDATE()
 	)

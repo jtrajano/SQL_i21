@@ -7,13 +7,13 @@ SELECT
 	, ReceiptItem.intOrderId
 	, Receipt.strReceiptType
 	, Receipt.intSourceType
-	, [Contract].dblAvailableQty
-	, [Contract].ysnLoad
-	, [Contract].strERPPONumber
-	, [Contract].strERPItemNumber
-	, [Contract].strOrigin
-	, [Contract].strPurchasingGroup
-	, [Contract].strINCOShipTerm
+	, dblAvailableQty = [Contract].dblAvailableQty
+	, ysnLoad = [Contract].ysnLoad
+	, strERPPONumber = [Contract].strERPPONumber
+	, strERPItemNumber = [Contract].strERPItemNumber
+	, strOrigin =[Contract].strOrigin
+	, strPurchasingGroup = [Contract].strPurchasingGroup
+	, strINCOShipTerm = [Contract].strINCOShipTerm
 	, strSourceType = 
 		CASE 
 			WHEN Receipt.intSourceType = 0 THEN 'None'
@@ -286,7 +286,45 @@ FROM tblICInventoryReceiptItem ReceiptItem
 		WHERE intCustomerStorageId = ReceiptItem.intSourceId 
 			AND Receipt.intSourceType = 4
 	) GrainStorage
-	LEFT JOIN vyuICGetInventoryTransferDetail InventoryTransfer ON InventoryTransfer.intInventoryTransferDetailId = ReceiptItem.intInventoryTransferDetailId
+	--LEFT JOIN vyuICGetInventoryTransferDetail InventoryTransfer ON InventoryTransfer.intInventoryTransferDetailId = ReceiptItem.intInventoryTransferDetailId
+	--	AND Receipt.strReceiptType = 'Transfer Order'
+	LEFT OUTER JOIN (
+		SELECT
+			  td.intInventoryTransferDetailId
+			, strTransferNo = t.strTransferNo
+			, strSourceNumber = CASE t.intSourceType
+				WHEN 1 THEN sourceTicket.strSourceNumber 
+				WHEN 2 THEN LGShipmentSource.strSourceNumber
+				WHEN 3 THEN transportSource.strSourceNumber 
+				ELSE NULL END
+			, strUnitMeasure = M.strUnitMeasure
+			, dblQuantity = td.dblQuantity
+			, dblItemUOMCF = ItemUOM.dblUnitQty
+		FROM tblICInventoryTransfer t
+			INNER JOIN tblICInventoryTransferDetail td ON td.intInventoryTransferId = t.intInventoryTransferId
+			INNER JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = td.intItemUOMId
+			INNER JOIN tblICUnitMeasure M ON M.intUnitMeasureId = ItemUOM.intUnitMeasureId
+			OUTER APPLY (
+				SELECT TOP 1 strSourceNumber = s1.strTicketNumber
+				FROM tblSCTicket s1
+				WHERE s1.intTicketId = td.intSourceId
+					AND t.intSourceType = 1
+			) sourceTicket
+			OUTER APPLY (
+				SELECT TOP 1 strSourceNumber = CAST(ISNULL(s2.intTrackingNumber, 'Inbound Shipment not found!') AS NVARCHAR(50))
+				FROM tblLGShipment s2
+				WHERE s2.intShipmentId = td.intSourceId
+					AND t.intSourceType = 2
+			) LGShipmentSource
+			OUTER APPLY (
+				SELECT TOP 1 strSourceNumber = CAST(ISNULL(s3header.strTransaction, 'Transport not found!') AS NVARCHAR(50))
+				FROM tblTRLoadReceipt s3
+					INNER JOIN tblTRLoadHeader s3header ON s3header.intLoadHeaderId = s3.intLoadHeaderId
+				WHERE s3.intLoadReceiptId = td.intSourceId
+					AND t.intSourceType = 3
+			) transportSource
+
+	) InventoryTransfer ON InventoryTransfer.intInventoryTransferDetailId = ReceiptItem.intInventoryTransferDetailId
 		AND Receipt.strReceiptType = 'Transfer Order'
 	OUTER APPLY (
 		SELECT

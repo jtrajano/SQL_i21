@@ -284,10 +284,10 @@ BEGIN
 	DECLARE @tblResult TABLE (Id INT IDENTITY
 		, dtmDate DATETIME
 		, dblTotal NUMERIC(18,6)
-		, strTransactionType NVARCHAR(50)
+		, strTransactionType NVARCHAR(100)
 		, strTransactionId NVARCHAR(50)
 		, intTransactionId INT
-		, strDistribution NVARCHAR(10)
+		, strDistribution NVARCHAR(50)
 		, strOwnership NVARCHAR(20))
 
 	INSERT INTO @tblResult (dtmDate
@@ -387,8 +387,8 @@ BEGIN
 		, dblBalanceInv NUMERIC(18,6)
 		, strTransactionId NVARCHAR(50)
 		, intTransactionId INT
-		, strDistribution NVARCHAR(10)
-		, strTransactionType NVARCHAR(50)
+		, strDistribution NVARCHAR(50)
+		, strTransactionType NVARCHAR(100)
 		, strOwnership NVARCHAR(20))
 			
 	;WITH N1 (N) AS (SELECT 1 FROM (VALUES (1), (1), (1), (1), (1), (1), (1), (1), (1), (1)) n (N)),

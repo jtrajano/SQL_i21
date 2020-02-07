@@ -82,6 +82,10 @@ BEGIN TRY
 		,@intSContractDetailId INT
 		,@intPContractDetailId INT
 		,@intPACompanyLocationId INT
+		,@intVendorEntityId INT
+		,@intPContractHeaderId INT
+		,@strCustomerContract NVARCHAR(50)
+
 	DECLARE @tblLGLoadDetail TABLE (intLoadDetailId INT)
 	DECLARE @strItemNo NVARCHAR(50)
 		,@strItemUOM NVARCHAR(50)
@@ -700,7 +704,7 @@ BEGIN TRY
 			SELECT @intSubBookId = intSubBookId
 			FROM tblCTSubBook
 			WHERE strSubBook = @strSubBook
-				and intBookId=@intBookId
+				AND intBookId = @intBookId
 
 			IF @intSubBookId IS NULL
 				AND @strSubBook IS NOT NULL
@@ -1877,7 +1881,8 @@ BEGIN TRY
 						LEFT JOIN tblCTContractDetail PCD ON PCD.intContractDetailRefId = x.intSContractDetailId
 						WHERE x.intLoadDetailId = @intLoadDetailId
 							AND PCD.intContractDetailRefId IS NULL
-						) and @strTransactionType <>'Drop Shipment'
+						)
+					AND @strTransactionType <> 'Drop Shipment'
 				BEGIN
 					SELECT @strErrorMessage = 'Contract is not created for the load.'
 
@@ -1893,7 +1898,10 @@ BEGIN TRY
 					SELECT @intSContractDetailId = NULL
 
 					SELECT @intSContractDetailId = SCD.intContractDetailId
-					FROM OPENXML(@idoc, 'vyuLGLoadDetailViews/vyuLGLoadDetailView', 2) WITH ([intPContractDetailId] INT,intLoadDetailId int) x
+					FROM OPENXML(@idoc, 'vyuLGLoadDetailViews/vyuLGLoadDetailView', 2) WITH (
+							[intPContractDetailId] INT
+							,intLoadDetailId INT
+							) x
 					LEFT JOIN tblCTContractDetail SCD ON SCD.intContractDetailRefId = x.intPContractDetailId
 					WHERE x.intLoadDetailId = @intLoadDetailId
 
@@ -1904,10 +1912,18 @@ BEGIN TRY
 					WHERE AD.intSContractDetailId = @intSContractDetailId
 
 					SELECT @intPACompanyLocationId = NULL
+						,@intPContractHeaderId = NULL
 
 					SELECT @intPACompanyLocationId = intCompanyLocationId
+						,@intPContractHeaderId = intContractHeaderId
 					FROM tblCTContractDetail
 					WHERE intContractDetailId = @intPContractDetailId
+
+					SELECT @intVendorEntityId = NULL,@strCustomerContract=NULL
+
+					SELECT @intVendorEntityId = intEntityId,@strCustomerContract=strCustomerContract
+					FROM tblCTContractHeader
+					WHERE intContractHeaderId = @intPContractHeaderId
 				END
 
 				IF NOT EXISTS (
@@ -1971,7 +1987,11 @@ BEGIN TRY
 						)
 					SELECT 1 AS [intConcurrencyId]
 						,@intNewLoadId
-						,PCH.intEntityId
+						,CASE 
+							WHEN @strTransactionType = 'Drop Shipment'
+								THEN @intVendorEntityId
+							ELSE PCH.intEntityId
+							END
 						,@intVendorLocationId
 						,@intCustomerId
 						,@intCustomerLocationId
@@ -2016,7 +2036,9 @@ BEGIN TRY
 						,x.[strLoadDirectionMsg]
 						,x.[ysnUpdateLoadDirections]
 						,x.[ysnPrintLoadDirections]
-						,PCH.strCustomerContract
+						,CASE 
+							WHEN @strTransactionType = 'Drop Shipment'
+								THEN @strCustomerContract Else PCH.strCustomerContract End
 						,x.[strCustomerReference]
 						--,[intAllocationDetailId]
 						--,[intPickLotDetailId]
@@ -2089,7 +2111,11 @@ BEGIN TRY
 				BEGIN
 					UPDATE LD
 					SET [intConcurrencyId] = LD.[intConcurrencyId] + 1
-						,[intVendorEntityId] = PCH.intEntityId
+						,[intVendorEntityId] = CASE 
+							WHEN @strTransactionType = 'Drop Shipment'
+								THEN @intVendorEntityId
+							ELSE PCH.intEntityId
+							END
 						,[intVendorEntityLocationId] = @intVendorLocationId
 						,[intCustomerEntityId] = @intCustomerId
 						,[intCustomerEntityLocationId] = @intCustomerLocationId
@@ -2136,7 +2162,9 @@ BEGIN TRY
 						,[strLoadDirectionMsg] = x.[strLoadDirectionMsg]
 						,[ysnUpdateLoadDirections] = x.[ysnUpdateLoadDirections]
 						,[ysnPrintLoadDirections] = x.[ysnPrintLoadDirections]
-						,[strVendorReference] = PCH.strCustomerContract
+						,[strVendorReference] = CASE 
+							WHEN @strTransactionType = 'Drop Shipment'
+								THEN @strCustomerContract Else PCH.strCustomerContract End
 						,[strCustomerReference] = x.[strCustomerReference]
 						--,[intAllocationDetailId]
 						--,[intPickLotDetailId]

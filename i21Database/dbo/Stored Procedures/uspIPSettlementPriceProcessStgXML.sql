@@ -265,7 +265,8 @@ BEGIN TRY
 				IF NOT EXISTS (
 						SELECT 1
 						FROM tblRKFutSettlementPriceMarketMap
-						WHERE intFutSettlementPriceMonthRefId = @intFutSettlementPriceMonthId
+						WHERE intFutureSettlementPriceId = @intNewFutureSettlementPriceId
+							AND intFutSettlementPriceMonthRefId = @intFutSettlementPriceMonthId
 						)
 				BEGIN
 					INSERT INTO tblRKFutSettlementPriceMarketMap (

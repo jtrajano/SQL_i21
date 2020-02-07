@@ -15,3 +15,6 @@
 	CONSTRAINT [PK_tblIPLog_intLogId] PRIMARY KEY ([intLogId]), 
 	CONSTRAINT [FK_tblIPLog_tblIPProcess_intProcessId] FOREIGN KEY ([intProcessId]) REFERENCES [tblIPProcess]([intProcessId]) ON DELETE CASCADE,
 )
+Go
+CREATE NONCLUSTERED INDEX IX_tblIPLog_dtmDate ON tblIPLog (dtmDate)
+Go

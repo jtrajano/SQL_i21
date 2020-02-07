@@ -8,6 +8,7 @@
 	[intListId] INT, 
 	[strAttributeValue] NVARCHAR(50) COLLATE Latin1_General_CI_AS, 
 	[intListItemId] INT, 
+	intAttributeRefId INT,
 	
 	[intCreatedUserId] [int] NULL,
 	[dtmCreated] [datetime] NULL CONSTRAINT [DF_tblQMAttribute_dtmCreated] DEFAULT GetDate(),
