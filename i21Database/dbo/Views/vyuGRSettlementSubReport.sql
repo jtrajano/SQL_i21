@@ -23,8 +23,8 @@ FROM
 		,t3.intItemId
 		,t3.strDiscountCode
 		,t3.strDiscountCodeDescription
-		,t3.dblDiscountAmount * (t1.dblQtyOrdered / t2.dblTotalQty) dblDiscountAmount
-		,t3.dblShrinkPercent * (t1.dblQtyOrdered / t2.dblTotalQty) dblShrinkPercent
+		,t3.dblDiscountAmount dblDiscountAmount -- * (t1.dblQtyOrdered / t2.dblTotalQty) 
+		,t3.dblShrinkPercent  dblShrinkPercent -- * (t1.dblQtyOrdered / t2.dblTotalQty)
 		,t3.dblGradeReading
 		,t3.dblAmount * (t1.dblQtyOrdered / t2.dblTotalQty) dblAmount	
 		,t3.intContractDetailId
@@ -95,7 +95,7 @@ FROM
 				,strTaxClass = TaxClass.strTaxClass
 		FROM tblAPBillDetail BillDtl
 		JOIN tblAPBill Bill 
-			ON BillDtl.intBillId = Bill.intBillId
+			ON BillDtl.intBillId = Bill.intBillId and Bill.intTransactionType = 1
 		JOIN tblICItem Item 
 			ON BillDtl.intItemId = Item.intItemId
 		LEFT JOIN vyuAPBillDetailTax Tax 
@@ -241,7 +241,7 @@ FROM
 				,BillDtl.intInventoryReceiptItemId
 		FROM tblAPBillDetail BillDtl
 		JOIN tblAPBill Bill 
-			ON BillDtl.intBillId = Bill.intBillId
+			ON BillDtl.intBillId = Bill.intBillId and Bill.intTransactionType = 1
 		JOIN tblICItem Item 
 			ON BillDtl.intItemId = Item.intItemId
 		LEFT JOIN vyuAPBillDetailTax Tax 
