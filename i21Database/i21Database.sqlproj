@@ -8420,6 +8420,24 @@
     <Build Include="dbo\Stored Procedures\uspIPInterCompanyPreStageInvoice.sql" />
     <Build Include="dbo\Functions\fnCTGetShippedWeight.sql" />
     <Build Include="dbo\Functions\fnCTGetFranchisePercent.sql" />
+    <Build Include="dbo\Views\vyuIPGetSampleTypeUserRole.sql" />
+    <Build Include="dbo\Views\vyuIPGetSampleTypeDetail.sql" />
+    <Build Include="dbo\Views\vyuIPGetSampleType.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPSampleTypeProcessPreStage.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPSampleTypeProcessStgXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPSampleTypeTransferStgXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPSampleTypePopulateStgXML.sql" />
+    <Build Include="dbo\Views\vyuIPGetProperty.sql" />
+    <Build Include="dbo\Views\vyuIPGetPropertyValidityPeriod.sql" />
+    <Build Include="dbo\Views\vyuIPGetConditionalProperty.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPPropertyProcessPreStage.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPPropertyPopulateStgXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPPropertyTransferStgXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPPropertyProcessStgXML.sql" />
+    <Build Include="dbo\Tables\tblMFRecipePreStage.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFPopulateRecipePreStage.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFProcessPreStageRecipe.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPGenerateSAPRecipeIDOC.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

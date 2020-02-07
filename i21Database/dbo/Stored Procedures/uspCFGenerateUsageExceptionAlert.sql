@@ -3,7 +3,8 @@
 	@strNetworks NVARCHAR(MAX) = '',
 	@dtmTransactionFrom DATETIME = NULL,
 	@dtmTransactionTo DATETIME = NULL,
-	@intCustomerEntityId INT = NULL
+	@intCustomerEntityId INT = NULL,
+	@strRunTo NVARCHAR(MAX) = ''
 )
 AS
 BEGIN
@@ -17,11 +18,23 @@ BEGIN
 	DECLARE @strTransactionFrom NVARCHAR(25)
 	DECLARE @strTransactionTo NVARCHAR(25)
 	DECLARE @customerWhereClause NVARCHAR(MAX) = ''
+	DECLARE @postedWhereClause NVARCHAR(MAX) = ''
+
+	
 
 
 	-------Convert date to string 
 	SELECT @strTransactionFrom = CONVERT(NVARCHAR(25), ISNULL(@dtmTransactionFrom,'1/1/1900'),121) 
 		   ,@strTransactionTo = CONVERT(NVARCHAR(25), ISNULL(@dtmTransactionTo,'1/1/9999'),121) 
+
+	IF(LOWER(ISNULL(@strRunTo,'')) = 'posted')
+	BEGIN
+		SET @postedWhereClause = ' AND ISNULL(ysnPosted,0) = 1'
+	END
+	ELSE IF(LOWER(ISNULL(@strRunTo,'')) = 'unposted')
+	BEGIN
+		SET @postedWhereClause = ' AND ISNULL(ysnPosted,0) = 0'
+	END
 
 	-------Check for network parameter
 	IF(ISNULL(@strNetworks,'') <> '')
@@ -49,6 +62,7 @@ BEGIN
 			AND DATEADD(dd, DATEDIFF(dd, 0, dtmTransactionDate), 0) <= ''' + @strTransactionTo + '''' 
 			+ @networkWhereClause 
 			+ @customerWhereClause
+			+ @postedWhereClause
 		)
 	
 	IF OBJECT_ID('tempdb..#CustomerTransactionCount') IS NOT NULL DROP TABLE #CustomerTransactionCount
@@ -87,6 +101,7 @@ BEGIN
 		,blbMessageBody
 		,strFullAddress
 		,intEntityId
+		,strRunOn
 	)
 	SELECT 
 		strCustomerNumber = B.strCustomerNumber
@@ -114,6 +129,7 @@ BEGIN
 						  FROM [dbo].[fnCFGetDefaultCommentTable](NULL, B.intEntityId, 'CF Alerts', NULL, 'Header', NULL, 1))
 		,strFullAddress = B.strAddress
 		,intEntityId = B.intEntityId
+		,@strRunTo
 	FROM vyuCFUsageExceptionAlertTransaction B
 	INNER JOIN #CustomerTransactionCount C
 		ON B.strCustomerNumber = C.strCustomerNumber

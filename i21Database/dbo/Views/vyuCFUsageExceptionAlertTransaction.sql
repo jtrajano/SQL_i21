@@ -21,6 +21,7 @@ SELECT
 	,intTransactionId = cfTransaction.intTransactionId
 	,strAddress = dbo.fnARFormatCustomerAddress(NULL, NULL, emcuslocation.strLocationName, emcuslocation.strAddress, emcuslocation.strCity, emcuslocation.strState, emcuslocation.strZipCode, emcuslocation.strCountry, NULL, 0) 
 	,intEntityId = cfcustomer.intEntityId
+	,ysnPosted = cfTransaction.ysnPosted
 FROM dbo.tblCFTransaction cfTransaction 
 LEFT JOIN tblCFNetwork cfnetwork
 	ON cfnetwork.intNetworkId = cfTransaction.intNetworkId
