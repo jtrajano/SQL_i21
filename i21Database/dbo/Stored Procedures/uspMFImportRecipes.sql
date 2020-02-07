@@ -383,6 +383,22 @@ BEGIN
 		AND strSessionId = @strSessionId
 		AND ISNULL(strMessage, '') = ''
 
+	--Invalid Valid From
+	UPDATE tblMFRecipeStage
+	SET strMessage = 'Invalid Valid From (YYYY-MM-DD)'
+	WHERE ISDATE(ISNULL([strValidFrom], '')) = 0
+		AND ISNULL([strValidFrom], '') <> ''
+		AND strSessionId = @strSessionId
+		AND ISNULL(strMessage, '') = ''
+
+	--Invalid Valid To
+	UPDATE tblMFRecipeStage
+	SET strMessage = 'Invalid Valid To (YYYY-MM-DD)'
+	WHERE ISDATE(ISNULL([strValidTo], '')) = 0
+		AND ISNULL([strValidTo], '') <> ''
+		AND strSessionId = @strSessionId
+		AND ISNULL(strMessage, '') = ''
+
 	SELECT @intMinId = MIN(intRecipeStageId)
 	FROM tblMFRecipeStage
 	WHERE strSessionId = @strSessionId

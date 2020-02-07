@@ -43,6 +43,22 @@ BEGIN
 		FROM dbo.tblMFRecipeStage
 		WHERE intRecipeStageId = @intRecipeStageId
 
+		IF @strTransactionType IN (
+				'RECIPE_UPDATE'
+				,'RECIPE_DELETE'
+				)
+			AND NOT EXISTS (
+				SELECT *
+				FROM tblMFRecipeStage
+				WHERE strRecipeName = @strRecipeName
+					AND strItemNo = @strItemNo
+					AND strTransactionType = 'RECIPE_CREATE'
+					AND strMessage = 'Success'
+				)
+		BEGIN
+			GOTO NextRecipe
+		END
+
 		SELECT @strHeaderXML = '<ROOT><CTRL_POINT>' + '<DOC_NO>' + Ltrim(@intRecipeStageId) + '</DOC_NO>' + '<MSG_TYPE>' + Ltrim(strTransactionType) + '</MSG_TYPE>' + '<SENDER>i21</SENDER>' + '<RECEIVER>ERP</RECEIVER>' + '</CTRL_POINT>' + '<HEADER>' + '<RECIPE_NAME>' + IsNULL(strRecipeName, '') + '</RECIPE_NAME>' + '<LOCATION_NO>' + IsNULL(strLocationName, '') + '</LOCATION_NO>' + '<ITEM_NO>' + strItemNo + '</ITEM_NO>' + '<QUANTITY>' + strQuantity + '</QUANTITY>' + '<QUANTITY_UOM>' + strUOM + '</QUANTITY_UOM>' + '<VERSION>' + strVersionNo + '</VERSION>' + '<VALID_FROM>' + IsNULL(Convert(CHAR, strValidFrom, 112), '') + '</VALID_FROM>' + '<VALID_TO>' + IsNULL(Convert(CHAR, strValidTo, 112), '') + '</VALID_TO>' + '<PROCESS_NAME>' + IsNULL(strManufacturingProcess, '') + '</PROCESS_NAME>' + '<CREATE_DATE>' + IsNULL(Convert(CHAR, dtmCreated, 112), '') + '</CREATE_DATE>' + '<CREATED_BY>' + IsNULL(strCreatedBy, '') + '</CREATED_BY>' + '<TRACKING_NO>' + IsNULL(strSessionId, '') + '</TRACKING_NO>' + '</HEADER>'
 		FROM dbo.tblMFRecipeStage
 		WHERE strSessionId = @strSessionId
@@ -76,12 +92,20 @@ BEGIN
 		SET strMessage = 'Success'
 		WHERE strSessionId = @strSessionId
 
+		IF EXISTS (
+				SELECT *
+				FROM @tblOutput
+				)
+		BEGIN
+			BREAK
+		END
+
+		NextRecipe:
+
 		SELECT @intRecipeStageId = MIN(intRecipeStageId)
 		FROM dbo.tblMFRecipeStage
 		WHERE strMessage IS NULL
 			AND intRecipeStageId > @intRecipeStageId
-
-		SELECT @intRecipeStageId = NULL
 	END
 
 	SELECT IsNULL(strContractFeedIds, '0') AS id

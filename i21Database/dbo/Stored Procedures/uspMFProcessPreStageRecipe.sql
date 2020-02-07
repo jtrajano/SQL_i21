@@ -20,6 +20,7 @@ BEGIN TRY
 		FROM tblMFRecipePreStage
 		WHERE strFeedStatus IS NULL
 			AND intRecipeId = @intRecipeId
+			and (strRecipeRowState='Delete' or strRecipeItemRowState='Delete')
 
 	WHILE @intRecipePreStageId IS NOT NULL
 	BEGIN
