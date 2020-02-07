@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE uspICMonthlyCategoryStockRebuild
 	@strCategoryCode AS NVARCHAR(50) 
-	,@dtmCustomDate AS DATETIME 
+	,@dtmCustomDate AS DATETIME = NULL 
 AS 
 BEGIN TRY 	
 
@@ -34,7 +34,7 @@ BEGIN TRY
 		FROM 
 			tblICBackup 
 		WHERE
-			strCategoryCode = @strCategoryCode			
+			(strCategoryCode = @strCategoryCode OR @strCategoryCode IS NULL)			
 			AND @dtmLastRebuild IS NULL 
 			AND (intBackupId > @intBackupId OR @intBackupId IS NULL) 
 		ORDER BY 
@@ -49,7 +49,7 @@ BEGIN TRY
 			INNER JOIN tblICCategory c
 				ON c.intCategoryId = i.intCategoryId
 		WHERE
-			c.strCategoryCode = @strCategoryCode
+			(c.strCategoryCode = @strCategoryCode OR @strCategoryCode IS NULL)
 			AND t.dblQty <> 0 
 			AND t.dblValue = 0  
 			AND FLOOR(CAST(t.dtmDate AS FLOAT)) < FLOOR(CAST(@dtmStartMonth AS FLOAT))
@@ -81,7 +81,7 @@ BEGIN TRY
 						INNER JOIN tblICCategory c
 							ON c.intCategoryId = i.intCategoryId
 					WHERE
-						c.strCategoryCode = @strCategoryCode
+						(c.strCategoryCode = @strCategoryCode OR @strCategoryCode IS NULL) 
 						AND t.dblQty <> 0 
 						AND t.dblValue = 0  
 						AND FLOOR(CAST(t.dtmDate AS FLOAT)) >= FLOOR(CAST(ISNULL(@dtmStartDate, @dtmStartMonth) AS FLOAT))
