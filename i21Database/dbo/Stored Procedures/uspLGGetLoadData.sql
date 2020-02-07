@@ -77,7 +77,7 @@ BEGIN
 			LEFT JOIN tblLGLoad LSI ON LSI.intLoadId = L.intLoadShippingInstructionId
 			LEFT JOIN tblSMUserSecurity SE ON SE.intEntityId = L.intDispatcherId
 			LEFT JOIN tblLGLoad SI ON SI.intLoadId = L.intLoadShippingInstructionId
-			LEFT JOIN tblLGLoad LSRF ON LOADRF.intLoadId = L.intLoadReversalSourceId
+			LEFT JOIN tblLGLoad LSRF ON LSRF.intLoadId = L.intLoadReversalSourceId
 			OUTER APPLY (SELECT TOP 1 intLoadId, strLoadNumber FROM tblLGLoad WHERE intLoadReversalSourceId = L.intLoadId) LSRO
 			LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = L.intFreightTermId
 			LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = L.intCurrencyId
@@ -173,7 +173,7 @@ BEGIN
 		LEFT JOIN tblSCTicket ST ON ST.intTicketId = L.intTicketId
 		LEFT JOIN tblTRLoadHeader TR ON TR.intLoadHeaderId = L.intLoadHeaderId
 		LEFT JOIN tblLGLoad LSI ON LSI.intLoadId = L.intLoadShippingInstructionId
-		LEFT JOIN tblLGLoad LSRF ON LOADRF.intLoadId = L.intLoadReversalSourceId
+		LEFT JOIN tblLGLoad LSRF ON LSRF.intLoadId = L.intLoadReversalSourceId
 		OUTER APPLY (SELECT TOP 1 intLoadId, strLoadNumber FROM tblLGLoad WHERE intLoadReversalSourceId = L.intLoadId) LSRO
 		LEFT JOIN tblSMUserSecurity SE ON SE.intEntityId = L.intDispatcherId
 		LEFT JOIN tblLGLoad SI ON SI.intLoadId = L.intLoadShippingInstructionId
