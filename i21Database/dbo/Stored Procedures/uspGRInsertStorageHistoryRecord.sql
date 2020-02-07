@@ -78,6 +78,71 @@ BEGIN TRY
 
     SELECT @intStorageHistoryId = SCOPE_IDENTITY();
 
+	-----------------------------------------
+	-- Call Risk Module's Summary Log sp
+	-----------------------------------------
+	BEGIN 
+		DECLARE @SummaryLogs AS RKSummaryLog 
+		INSERT INTO @SummaryLogs ( 
+			  strBatchId
+			, strTransactionType
+			, intTransactionRecordId 
+			, strTransactionNumber 
+			, dtmTransactionDate 
+			, intContractDetailId 
+			, intContractHeaderId 
+			, intTicketId 
+			, intCommodityId 
+			, intCommodityUOMId 
+			, intItemId 
+			, intBookId 
+			, intSubBookId 
+			, intLocationId 
+			, intFutureMarketId 
+			, intFutureMonthId 
+			, dblNoOfLots 
+			, dblQty 
+			, dblPrice 
+			, intEntityId 
+			, ysnDelete 
+			, intUserId 
+			, strNotes  
+		)
+		SELECT 
+			  strBatchId = t.strBatchId
+			, strTransactionType = t.strTransactionForm
+			, intTransactionRecordId = s.intSettleStorageId
+			, strTransactionNumber = t.strTransactionId
+			, dtmTransactionDate = t.dtmDate
+			, intContractDetailId = sc.intContractDetailId
+			, intContractHeaderId = h.intContractHeaderId
+			, intTicketId = h.intTicketId
+			, intCommodityId = i.intCommodityId
+			, intCommodityUOMId = u.intUnitMeasureId
+			, intItemId = t.intItemId
+			, intBookId = NULL
+			, intSubBookId = NULL
+			, intLocationId = il.intLocationId
+			, intFutureMarketId = NULL
+			, intFutureMonthId = NULL
+			, dblNoOfLots = NULL
+			, dblQty = t.dblQty
+			, dblPrice = t.dblCost
+			, intEntityId = s.intEntityId
+			, ysnDelete = 0
+			, intUserId = h.intUserId
+			, strNotes = t.strDescription
+		FROM tblICInventoryTransaction t
+			INNER JOIN @StorageHistoryData h ON t.intTransactionId = h.intSettleStorageId
+			INNER JOIN tblGRSettleStorage s ON s.intSettleStorageId = h.intSettleStorageId
+			INNER JOIN tblICItem i ON i.intItemId = t.intItemId
+			INNER JOIN tblICItemUOM iu ON iu.intItemUOMId = t.intItemUOMId
+			INNER JOIN tblICUnitMeasure u ON u.intUnitMeasureId = iu.intUnitMeasureId
+			INNER JOIN tblICItemLocation il ON il.intItemLocationId = t.intItemLocationId
+			LEFT OUTER JOIN tblGRSettleContract sc ON sc.intSettleStorageId = s.intSettleStorageId
+		WHERE t.intTransactionTypeId = 44 -- Magic string for Settle Storage
+	END
+
     IF @intStorageHistoryId IS NULL 
 	BEGIN
 		RAISERROR('Unable to get Identity value from Storage History', 16, 1);
