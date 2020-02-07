@@ -62,8 +62,8 @@ BEGIN TRY
 			,strQuantity
 			,strUOM
 			,strVersionNo
-			,dtmValidFrom
-			,dtmValidTo
+			,strValidFrom
+			,strValidTo
 			,strManufacturingProcess
 			,dtmCreated
 			,strSessionId
@@ -71,6 +71,7 @@ BEGIN TRY
 			,strTransactionType
 			,intRecipeId
 			,strRecipeRowState
+			,ysnImport
 			)
 		SELECT R.strName
 			,CL.strLocationName
@@ -93,6 +94,7 @@ BEGIN TRY
 				END
 			,@intRecipeId
 			,@strRecipeRowState
+			,0 AS ysnImport
 		FROM tblMFRecipe R
 		JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = R.intLocationId
 		JOIN tblICItem I ON I.intItemId = R.intItemId
@@ -161,7 +163,7 @@ BEGIN TRY
 		JOIN tblICItemUOM IU ON IU.intItemUOMId = RI.intItemUOMId
 		JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
 		JOIN tblMFManufacturingProcess P ON P.intManufacturingProcessId = R.intManufacturingProcessId
-		JOIN tblMFRecipeType RT ON RT.intRecipeTypeId = R.intRecipeTypeId
+		JOIN tblMFRecipeItemType RT ON RT.intRecipeItemTypeId = RI.intRecipeItemTypeId
 		LEFT JOIN tblMFConsumptionMethod CM ON CM.intConsumptionMethodId = RI.intConsumptionMethodId
 		LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = RI.intStorageLocationId
 		WHERE R.intRecipeId = @intRecipeId

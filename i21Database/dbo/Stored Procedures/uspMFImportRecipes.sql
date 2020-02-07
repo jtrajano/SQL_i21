@@ -506,8 +506,8 @@ BEGIN
 				,GETDATE()
 				,@intUserId
 				,GETDATE()
-				,s.dtmValidFrom
-				,s.dtmValidTo
+				,s.strValidFrom
+				,s.strValidTo
 			FROM tblMFRecipeStage s
 			LEFT JOIN tblICItem i ON s.strItemNo = i.strItemNo
 			LEFT JOIN tblICItemUOM iu ON i.intItemId = iu.intItemId
@@ -619,8 +619,8 @@ BEGIN
 				,r.intOneLinePrintId = t.intOneLinePrintId
 				,r.intLastModifiedUserId = @intUserId
 				,r.dtmLastModified = GETDATE()
-				,r.dtmValidFrom =t.dtmValidFrom
-				,r.dtmValidTo =t.dtmValidTo
+				,r.dtmValidFrom =t.strValidFrom
+				,r.dtmValidTo =t.strValidTo
 			FROM tblMFRecipe r
 			CROSS JOIN (
 				SELECT TOP 1 s.strRecipeName
@@ -637,8 +637,8 @@ BEGIN
 					,s.[strDiscount]
 					,um.intUnitMeasureId
 					,p.intOneLinePrintId
-					,s.dtmValidFrom 
-					,s.dtmValidTo
+					,s.strValidFrom 
+					,s.strValidTo
 				FROM tblMFRecipeStage s
 				LEFT JOIN tblICItem i ON s.strItemNo = i.strItemNo
 				LEFT JOIN tblICItemUOM iu ON i.intItemId = iu.intItemId

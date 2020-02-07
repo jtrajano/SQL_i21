@@ -21,11 +21,12 @@
 	[strMessage] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	[strSessionId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL DEFAULT '',
 	[intRowNo] INT Default 0,
-	dtmValidFrom Datetime,
-	dtmValidTo Datetime,
+	strValidFrom NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	strValidTo NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	strTransactionType nvarchar(50) COLLATE Latin1_General_CI_AS,
 	strCreatedBy nvarchar(50) COLLATE Latin1_General_CI_AS,
 	intRecipeId int,
 	strRecipeRowState nvarchar(50) COLLATE Latin1_General_CI_AS,
+	ysnImport Bit Constraint DF_tblMFRecipeStage_ysnImport Default 1,
 	CONSTRAINT [PK_tblMFRecipeStage_intRecipeStageId] PRIMARY KEY ([intRecipeStageId])
 )
