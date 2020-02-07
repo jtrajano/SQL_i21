@@ -8439,6 +8439,11 @@
     <Build Include="dbo\Stored Procedures\uspMFPopulateRecipePreStage.sql" />
     <Build Include="dbo\Stored Procedures\uspMFProcessPreStageRecipe.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateSAPRecipeIDOC.sql" />
+    <Build Include="dbo\Views\vyuIPGetTestProperty.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPTestProcessPreStage.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPTestPopulateStgXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPTestTransferStgXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPTestProcessStgXML.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
