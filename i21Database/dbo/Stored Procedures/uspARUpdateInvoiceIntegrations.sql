@@ -59,6 +59,12 @@ BEGIN TRY
 					WHERE intInvoiceId = @intInvoiceId
 					AND intItemContractHeaderId IS NOT NULL
 				END
+
+			EXEC dbo.uspIPInterCompanyPreStageInvoice @intInvoiceId, 'Deleted', @intUserId
+		END
+	ELSE IF NOT EXISTS (SELECT TOP 1 NULL FROM tblARInvoicePreStage WHERE intInvoiceId = @intInvoiceId AND strRowState = 'Deleted')
+		BEGIN
+			EXEC dbo.uspIPInterCompanyPreStageInvoice @intInvoiceId, 'Added', @intUserId
 		END
 		
 	EXEC dbo.[uspARUpdatePricingHistory] 2, @intInvoiceId, @intUserId
@@ -74,7 +80,7 @@ BEGIN TRY
 	EXEC dbo.[uspARUpdateItemContractOnInvoice] @intInvoiceId, @ForDelete, @intUserId
 	IF @ForDelete = 1 EXEC dbo.[uspCTBeforeInvoiceDelete] @intInvoiceId, @intUserId
 	EXEC dbo.[uspARUpdateReturnedInvoice] @intInvoiceId, @ForDelete, @intUserId 
-	EXEC dbo.[uspARUpdateInvoiceAccruals] @intInvoiceId
+	EXEC dbo.[uspARUpdateInvoiceAccruals] @intInvoiceId	
 
 	INSERT INTO @InvoiceIds(intHeaderId) SELECT @intInvoiceId
 	EXEC dbo.[uspARUpdateInvoiceTransactionHistory] @InvoiceIds

@@ -932,6 +932,24 @@ IF @IntegrationLogId IS NULL
 		FROM #ARPostInvoiceHeader
 	END
 
+--INTER COMPANY PRE-STAGE
+DECLARE @tblInterCompany 	AS Id
+DECLARE @strRowState		NVARCHAR(50) = (CASE WHEN @Post = 1 THEN 'Posted' ELSE 'Unposted' END)
+
+INSERT INTO @tblInterCompany
+SELECT DISTINCT intInvoiceId
+FROM #ARPostInvoiceHeader
+
+WHILE EXISTS (SELECT TOP 1 NULL FROM @tblInterCompany)
+	BEGIN
+		DECLARE @intInterCompanyInvoiceId INT
+		SELECT TOP 1 @intInterCompanyInvoiceId = intId FROM @tblInterCompany
+
+		EXEC dbo.uspIPInterCompanyPreStageInvoice @intInterCompanyInvoiceId, @strRowState, @UserId
+
+		DELETE FROM @tblInterCompany WHERE intId = @intInterCompanyInvoiceId
+	END
+
 --AUDIT LOG
 DECLARE @InvoiceLog dbo.[AuditLogStagingTable]
 DELETE FROM @InvoiceLog
