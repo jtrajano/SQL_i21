@@ -846,7 +846,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM #POSTRANSACTIONS)
 			FROM #POSPAYMENTS POSP
 			INNER JOIN #POSTRANSACTIONS POS ON POSP.intPOSId = POS.intPOSId
 			WHERE POSP.strPaymentMethod IN ('Cash', 'Check')
-			   AND POS.strPOSType = 'Return'
+			   AND POS.strPOSType = 'Returned'
 
 			UPDATE tblARPOSEndOfDay
 			SET dblExpectedEndingBalance = ISNULL(dblExpectedEndingBalance, 0) + ISNULL(@dblCashReceipt, 0)
