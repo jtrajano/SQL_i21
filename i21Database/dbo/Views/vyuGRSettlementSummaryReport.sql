@@ -115,12 +115,12 @@ FROM
 		SELECT 
 			SUM(dblAmount) dblTotal
 			,strId
-			--,intBillDetailId
-		FROM vyuGRSettlementSubReport
-		GROUP BY strId--, intBillDetailId
+			,intBillDetailId
+		FROM vyuGRSettlementSubReport 
+		GROUP BY strId, intBillDetailId
 	) tblOtherCharge
 		ON tblOtherCharge.strId = Bill.strBillId 
-			--and BillDtl.intBillDetailId = tblOtherCharge.intBillDetailId
+			and BillDtl.intBillDetailId = tblOtherCharge.intBillDetailId
 	-- LEFT JOIN (
 	-- 	SELECT 
 	-- 		A.intBillId
@@ -134,13 +134,15 @@ FROM
 	-- 	ON tblOtherCharge.intBillId = Bill.intBillId
 	LEFT JOIN (
 		SELECT 
-			intBillId
-			,intInventoryReceiptItemId
-			,SUM(dblTotal) dblTotal
-		FROM tblAPBillDetail
-		WHERE intInventoryReceiptChargeId IS NOT NULL
-		GROUP BY intBillId
-			,intInventoryReceiptItemId
+			a.intBillId
+			,a.intInventoryReceiptItemId
+			,SUM(a.dblTotal) dblTotal
+		FROM tblAPBillDetail a 
+			join tblAPBill  b
+				on a.intBillId = b.intBillId and b.intTransactionType = 1
+		WHERE a.intInventoryReceiptChargeId IS NOT NULL
+		GROUP BY a.intBillId
+			,a.intInventoryReceiptItemId
 	) BillByReceipt ON BillByReceipt.intBillId = BillDtl.intBillId
 		AND BillByReceipt.intInventoryReceiptItemId = BillDtl.intInventoryReceiptItemId
 	LEFT JOIN (
@@ -320,13 +322,13 @@ FROM
 		SELECT 
 			SUM(dblAmount) dblTotal
 			,strId
-			--,intBillDetailId
+			,intBillDetailId
 		FROM vyuGRSettlementSubReport
 		GROUP BY strId
-			--,intBillDetailId
+			,intBillDetailId
 	) tblOtherCharge
 		ON tblOtherCharge.strId = Bill.strBillId
-			--and BillDtl.intBillDetailId = tblOtherCharge.intBillDetailId
+			and BillDtl.intBillDetailId = tblOtherCharge.intBillDetailId
 	-- LEFT JOIN (
 	-- 	SELECT 
 	-- 		A.intBillId
