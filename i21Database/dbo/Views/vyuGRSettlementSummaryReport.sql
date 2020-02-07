@@ -139,7 +139,7 @@ FROM
 			,SUM(a.dblTotal) dblTotal
 		FROM tblAPBillDetail a 
 			join tblAPBill  b
-				on a.intBillId = b.intBillId and b.intTransactionType = 1
+				on a.intBillId = b.intBillId --and b.intTransactionType = 1
 		WHERE a.intInventoryReceiptChargeId IS NOT NULL
 		GROUP BY a.intBillId
 			,a.intInventoryReceiptItemId
