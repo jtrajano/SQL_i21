@@ -173,7 +173,7 @@ BEGIN TRY
 		SELECT 
 			  strBatchId = t.strBatchId
 			, strTransactionType = h.strType
-			, intTransactionRecordId = h.intCustomerStorageId
+			, intTransactionRecordId = h.intTransferStorageId
 			, strTransactionNumber = t.strTransactionId
 			, dtmTransactionDate = t.dtmDate
 			, intContractDetailId = ct.intContractDetailId
@@ -195,8 +195,8 @@ BEGIN TRY
 			, intUserId = h.intUserId
 			, strNotes = t.strDescription
 		FROM tblICInventoryTransaction t
-			INNER JOIN @StorageHistoryData h ON t.intTransactionId = h.intCustomerStorageId
-			INNER JOIN tblGRTransferStorageReference sr ON sr.intToCustomerStorageId = h.intCustomerStorageId
+			INNER JOIN @StorageHistoryData h ON t.intTransactionId = h.intTransferStorageId
+			INNER JOIN tblGRTransferStorageReference sr ON sr.intTransferStorageId = h.intTransferStorageId
 			INNER JOIN tblICItem i ON i.intItemId = t.intItemId
 			INNER JOIN tblICItemUOM iu ON iu.intItemUOMId = t.intItemUOMId
 			INNER JOIN tblICUnitMeasure u ON u.intUnitMeasureId = iu.intUnitMeasureId
