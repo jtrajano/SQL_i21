@@ -72,6 +72,7 @@
 [ysnMatchItemAllocation] [bit] NULL, 
 [ysnMatchFuturesAllocation] [bit] NULL,
 [ysnMatchBookAllocation] [bit] NULL,
+[ysnAllowInvoiceForPartialPriced] [bit] NULL DEFAULT ((0)),
 [intPnLReportReserveACategoryId] INT NULL,
 [intPnLReportReserveBCategoryId] INT NULL,
 [intPurchaseContractBasisItemId] INT NULL,
