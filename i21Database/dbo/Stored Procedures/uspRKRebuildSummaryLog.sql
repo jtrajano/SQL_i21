@@ -316,45 +316,6 @@ BEGIN
 				,intFutureMarketId = NULL
 				,intFutureMonthId = NULL
 				,dblNoOfLots = NULL
-				,dblQty = t.dblQty
-				,dblPrice = t.dblCost
-				,intEntityId = v.intEntityId
-				,ysnDelete = 0
-				,intUserId = t.intCreatedEntityId
-				,strNotes = t.strDescription
-				,t.intInventoryTransactionId
-			FROM	
-				tblICInventoryTransaction t inner join vyuICGetInventoryValuation v 
-					ON t.intInventoryTransactionId = v.intInventoryTransactionId
-				INNER JOIN tblICUnitMeasure u
-					ON u.strUnitMeasure = v.strUOM
-				INNER JOIN tblICCommodityUnitMeasure cum
-					ON cum.intCommodityId = v.intCommodityId AND cum.intUnitMeasureId = u.intUnitMeasureId
-			WHERE
-				t.dblQty <> 0 
-				AND v.ysnInTransit = 0
-				AND ISNULL(t.ysnIsUnposted,0) = 0
-				AND v.strTransactionType NOT IN ( 'Consume', 'Produce', 'Outbound Shipment', 'Inventory Adjustment - Lot Merge')
-
-			UNION ALL
-			SELECT 
-				strBatchId = t.strBatchId
-				,strTransactionType = v.strTransactionType
-				,intTransactionRecordId = ISNULL(t.intTransactionDetailId, t.intTransactionId) 
-				,strTransactionNumber = t.strTransactionId
-				,dtmTransactionDate = t.dtmDate
-				,intContractDetailId = NULL
-				,intContractHeaderId = NULL
-				,intTicketId = v.intTicketId
-				,intCommodityId = v.intCommodityId
-				,intCommodityUOMId = cum.intCommodityUnitMeasureId
-				,intItemId = t.intItemId
-				,intBookId = NULL
-				,intSubBookId = NULL
-				,intLocationId = v.intLocationId
-				,intFutureMarketId = NULL
-				,intFutureMonthId = NULL
-				,dblNoOfLots = NULL
 				,dblQty = SUM(t.dblQty)
 				,dblPrice = AVG(t.dblCost)
 				,intEntityId = v.intEntityId
@@ -374,7 +335,6 @@ BEGIN
 				t.dblQty <> 0 
 				AND v.ysnInTransit = 0
 				AND ISNULL(t.ysnIsUnposted,0) = 0
-				AND v.strTransactionType IN ( 'Consume', 'Produce', 'Outbound Shipment',  'Inventory Adjustment - Lot Merge')
 			GROUP BY 
 				t.strBatchId
 				,v.strTransactionType
@@ -485,7 +445,7 @@ BEGIN
 			WHERE
 				t.dblQty <> 0 
 				AND v.ysnInTransit = 1
-				AND v.strTransactionType IN ('Inventory Receipt')
+				AND v.strTransactionType IN ('Inventory Receipt', 'Inventory Transfer with Shipment')
 				AND ISNULL(t.ysnIsUnposted,0) = 0
 			GROUP BY 
 				t.strBatchId

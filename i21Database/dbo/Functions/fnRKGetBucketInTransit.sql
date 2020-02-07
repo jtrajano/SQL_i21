@@ -44,7 +44,7 @@ BEGIN
 		,intOrigUOMId
 	FROM (
 		SELECT 
-			intRowNum = ROW_NUMBER() OVER (PARTITION BY c.intTransactionRecordId ORDER BY c.intSummaryLogId DESC)
+			intRowNum = ROW_NUMBER() OVER (PARTITION BY c.intTransactionRecordId, c.strTransactionType, c.strTransactionNumber ORDER BY c.intSummaryLogId DESC)
 			,dtmCreatedDate
 			,dtmTransactionDate
 			,dblTotal = c.dblOrigQty

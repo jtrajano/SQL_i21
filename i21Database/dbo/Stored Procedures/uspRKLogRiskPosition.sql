@@ -644,6 +644,7 @@ BEGIN
 		ELSE IF @strTransactionType = 'Inventory Receipt' 
 			 OR @strTransactionType = 'Inventory Shipment'
 			 OR @strTransactionType = 'Inventory Transfer'
+			 OR @strTransactionType = 'Inventory Transfer with Shipment'
 			 OR @strTransactionType = 'Invoice'
 			 OR @strTransactionType = 'Outbound Shipment'
 			 OR @strTransactionType = 'Consume'
