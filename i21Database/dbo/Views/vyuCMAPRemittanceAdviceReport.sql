@@ -26,12 +26,13 @@ SELECT CHK.dtmDate
 		, strComment = BILL.strComment
 		, dblDetailAmount = 
 			CASE WHEN BILL.intTransactionType IN (2,3) -- Debit Memo , Prepayment (DM, VPRE)
-			THEN BILL.dblPayment * - 1 
-			ELSE BILL.dblPayment END
+			THEN PYMTDTL.dblTotal * - 1 
+			ELSE PYMTDTL.dblTotal END
 		, dblDiscount = PYMTDTL.dblDiscount
-		, dblNet = CASE WHEN BILL.intTransactionType IN (2,3) -- Debit Memo , Prepayment (DM, VPRE)
-			THEN BILL.dblTotal * - 1 
-			ELSE BILL.dblTotal END
+		, dblNet = 
+		CASE WHEN BILL.intTransactionType IN (2,3) -- Debit Memo , Prepayment (DM, VPRE)
+			THEN PYMTDTL.dblPayment * - 1 
+			ELSE PYMTDTL.dblPayment END
 		, strBankAccountNo = STUFF(ACCT.strBankAccountNo, 1, LEN (ACCT.strBankAccountNo) - 4
 		, REPLICATE ('x', LEN (ACCT.strBankAccountNo) - 4))
 		, strMessage = 'The following items(s) will be presented to ' + 
