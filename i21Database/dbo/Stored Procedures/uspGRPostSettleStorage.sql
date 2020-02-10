@@ -194,6 +194,29 @@ BEGIN TRY
 
 	SET @dtmDate = GETDATE()
 	SET @intParentSettleStorageId = @intSettleStorageId	
+
+	-- this will check if there will be an over settlement for a ticket
+
+	select @intCustomerStorageId = intCustomerStorageId 
+		from tblGRSettleStorageTicket 
+			where intSettleStorageId = @intParentSettleStorageId
+
+	if @ysnFromPriceBasisContract = 0 and exists(select 1 from (
+			select sum(a.dblUnits) as dblUnitsSummed, a.intCustomerStorageId from tblGRSettleStorageTicket  a
+				join tblGRSettleStorage b
+					on a.intSettleStorageId= b.intSettleStorageId 
+						and b.intParentSettleStorageId is null	
+				where a.intCustomerStorageId = @intCustomerStorageId 
+			group by a.intCustomerStorageId
+		) a
+		join tblGRCustomerStorage b 
+			on a.intCustomerStorageId = b.intCustomerStorageId 
+			and a.dblUnitsSummed > b.dblOriginalBalance
+	)
+	begin
+		RAISERROR('There is no more open units available for settlement. Please check the available units for settlement and try again.',16,1,1)
+		RETURN;
+	end
 	
 	----- DEBUG POINT -----
 
