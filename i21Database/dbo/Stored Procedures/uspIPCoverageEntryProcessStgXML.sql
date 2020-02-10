@@ -228,6 +228,7 @@ BEGIN TRY
 						SELECT 1
 						FROM tblRKCoverageEntry
 						WHERE intCoverageEntryRefId = @intCoverageEntryRefId
+							AND intBookId = @intBookId
 						)
 					SELECT @strRowState = 'Added'
 				ELSE
@@ -241,6 +242,7 @@ BEGIN TRY
 					,@dtmDate = dtmDate
 				FROM tblRKCoverageEntry
 				WHERE intCoverageEntryRefId = @intCoverageEntryRefId
+					AND intBookId = @intBookId
 
 				SELECT @strHeaderCondition = 'intCoverageEntryId = ' + LTRIM(@intNewCoverageEntryId)
 
@@ -255,6 +257,7 @@ BEGIN TRY
 				DELETE
 				FROM tblRKCoverageEntry
 				WHERE intCoverageEntryRefId = @intCoverageEntryRefId
+					AND intBookId = @intBookId
 
 				GOTO ext
 			END
@@ -317,12 +320,14 @@ BEGIN TRY
 						,ysnPosted BIT
 						) x
 				WHERE tblRKCoverageEntry.intCoverageEntryRefId = @intCoverageEntryRefId
+					AND tblRKCoverageEntry.intBookId = @intBookId
 
 				SELECT @intNewCoverageEntryId = intCoverageEntryId
 					,@strBatchName = strBatchName
 					,@dtmDate = dtmDate
 				FROM tblRKCoverageEntry
 				WHERE intCoverageEntryRefId = @intCoverageEntryRefId
+					AND intBookId = @intBookId
 			END
 
 			EXEC sp_xml_removedocument @idoc
@@ -539,6 +544,7 @@ BEGIN TRY
 			--SELECT @intCompanyRefId = intCompanyId
 			--FROM tblRKCoverageEntry
 			--WHERE intCoverageEntryId = @intNewCoverageEntryId
+			--	AND intBookId = @intBookId
 			-- Audit Log
 			IF (@intNewCoverageEntryId > 0)
 			BEGIN
