@@ -15,6 +15,7 @@ BEGIN TRY
 		,@intDailyAveragePricePreStageId INT
 		,@strFromCompanyName NVARCHAR(150)
 		,@intBookId INT
+		,@intDeleteBookId INT
 	DECLARE @tblRKDailyAveragePricePreStage TABLE (intDailyAveragePricePreStageId INT)
 
 	INSERT INTO @tblRKDailyAveragePricePreStage (intDailyAveragePricePreStageId)
@@ -31,10 +32,12 @@ BEGIN TRY
 			,@strRowState = NULL
 			,@intUserId = NULL
 			,@intToCompanyId = NULL
+			,@intDeleteBookId = NULL
 
 		SELECT @intDailyAveragePriceId = intDailyAveragePriceId
 			,@strRowState = strRowState
 			,@intUserId = intUserId
+			,@intDeleteBookId = intBookId
 		FROM tblRKDailyAveragePricePreStage
 		WHERE intDailyAveragePricePreStageId = @intDailyAveragePricePreStageId
 
@@ -47,6 +50,13 @@ BEGIN TRY
 		FROM tblRKDailyAveragePrice DAP
 		JOIN tblIPMultiCompany MC ON MC.intBookId = DAP.intBookId
 			AND DAP.intDailyAveragePriceId = @intDailyAveragePriceId
+
+		IF @strRowState = 'Delete'
+		BEGIN
+			SELECT TOP 1 @intToCompanyId = MC.intCompanyId
+			FROM tblIPMultiCompany MC
+			WHERE MC.intBookId = @intDeleteBookId
+		END
 
 		-- Process only Posted transaction
 		IF EXISTS (

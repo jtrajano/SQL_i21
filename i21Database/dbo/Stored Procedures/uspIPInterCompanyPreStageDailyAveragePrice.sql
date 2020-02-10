@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE uspIPInterCompanyPreStageDailyAveragePrice @intDailyAveragePriceId INT
 	,@strRowState NVARCHAR(50) = NULL
 	,@intUserId INT = NULL
+	,@intBookId INT = NULL
 AS
 BEGIN TRY
 	SET NOCOUNT ON
@@ -14,12 +15,14 @@ BEGIN TRY
 
 	INSERT INTO tblRKDailyAveragePricePreStage (
 		intDailyAveragePriceId
+		,intBookId
 		,strRowState
 		,intUserId
 		,strFeedStatus
 		,strMessage
 		)
 	SELECT @intDailyAveragePriceId
+		,@intBookId
 		,@strRowState
 		,@intUserId
 		,''
