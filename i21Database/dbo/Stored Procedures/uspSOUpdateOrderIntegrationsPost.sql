@@ -29,11 +29,5 @@ IF @ysnForDelete = 1 OR @ysnForUnship = 1
 	BEGIN
 		EXEC dbo.[uspMFUnReservePickListBySalesOrder] @intSalesOrderId
 	END
-ELSE IF @ysnForDelete = 0
-	BEGIN
-		EXEC dbo.uspARAutoBlendSalesOrderItems @intSalesOrderId = @SalesOrderId, @intUserId = @UserId
-	END
-
---DELETE FROM [tblARTransactionDetail] WHERE [intTransactionId] = @intSalesOrderId AND [strTransactionType] IN ('Order', 'Quote')
 
 GO
