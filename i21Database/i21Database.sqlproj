@@ -7620,6 +7620,7 @@
     <Build Include="dbo\Stored Procedures\uspICGetBundleComponents2.sql" />
     <Build Include="dbo\Functions\fnICLotQtyAsOf.sql" />
     <Build Include="dbo\Views\vyuICInventoryAdjustmentSourceLink.sql" />
+    <Build Include="dbo\Views\vyuICGetInvalidBundleItemUom.sql" />
     <Build Include="dbo\Functions\fnDateFromParts.sql" />
     <Build Include="dbo\Views\vyuHDTimeEntryDailySummary.sql" />
     <Build Include="dbo\Functions\fnPRRounding.sql" />
