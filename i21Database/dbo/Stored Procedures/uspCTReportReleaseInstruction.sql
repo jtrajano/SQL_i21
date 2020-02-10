@@ -126,13 +126,14 @@ BEGIN TRY
 													  	ISNULL(', '+CASE WHEN LTRIM(RTRIM(EV.strEntityState)) = ''   THEN NULL ELSE LTRIM(RTRIM(EV.strEntityState))   END,'') + 
 													  	ISNULL(', '+CASE WHEN LTRIM(RTRIM(EV.strEntityZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(EV.strEntityZipCode)) END,'') + 
 													  	ISNULL(', '+CASE WHEN LTRIM(RTRIM(EV.strEntityCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(EV.strEntityCountry)) END,'')
-			,strLocationWithDate					=	CL.strLocationName+', '+ CONVERT (VARCHAR,CH.dtmContractDate,106)
+			,strLocationWithDate					=	CL.strLocationName+', '+ CONVERT (VARCHAR,getdate(),106)
 			,strCustomerContract					=	CH.strCustomerContract
 			,strStraussText1						=	'<p>Pls arrange for pre-shipment samples for the above mentioned consignment. Samples of 250 grams per lot should be drawn and sent by Courier <span style="text-decoration: underline;"><strong>21 days prior</strong></span> to shipment to the below stated address.</p>'
 			,strCompanyName							=	@strCompanyName
 			,strCurrentUser							=	@strCurrentUser
 			,strReportTitle							=   (case when POS.strPositionType = 'Shipment' then 'RELEASE INSTRUCTIONS' when POS.strPositionType = 'Spot' then 'RELEASE INSTRUCTIONS' else '' end)
 			,strPositionLabel						=   (case when POS.strPositionType = 'Shipment' then 'Shipment' when POS.strPositionType = 'Spot' then 'Delivery' else '' end)
+			,strContractCondition2					=	isnull(FT.strFreightTerm,'') + ', ' + isnull(SL.strSubLocationName,'') + ', ' + isnull(SL.strCity,'') + ', ' + isnull(WG.strWeightGradeDesc,'')
 			,strContractCondtion					=	FT.strFreightTerm + ', ' + CCC.strCity + ', ' + CCN.strCountry + ', ' + WG.strWeightGradeDesc
 			,strContractCondtionDeliveryDesc		=	(select top 1 a.strConditionDescription from tblCTContractCondition a, tblCTCondition b where a.intContractHeaderId = CH.intContractHeaderId and b.intConditionId = a.intConditionId and b.strConditionName like '%_DELIVERY_RELEASE_INSTRUCTION')
 			,strContractCondtionShipmentDesc		=	(select top 1 a.strConditionDescription from tblCTContractCondition a, tblCTCondition b where a.intContractHeaderId = CH.intContractHeaderId and b.intConditionId = a.intConditionId and b.strConditionName like '%_SHIPMENT_RELEASE_INSTRUCTION')
@@ -162,6 +163,7 @@ LEFT	JOIN	tblSMCity						CCC	WITH (NOLOCK)	ON	CCC.intCityId			=	CH.intINCOLocati
 LEFT	JOIN	tblSMCountry					CCN	WITH (NOLOCK)	ON	CCN.intCountryID		=	CH.intCountryId
 LEFT	JOIN	tblCTWeightGrade				WG	WITH (NOLOCK)	ON	WG.intWeightGradeId		=	CH.intWeightId
 LEFT	JOIN	tblEMEntity						ES	WITH (NOLOCK)	ON	ES.intEntityId			=	CD.intShippingLineId
+LEFT	JOIN	tblSMCompanyLocationSubLocation		SL	ON	SL.intCompanyLocationSubLocationId	=		CH.intWarehouseId					
 WHERE	CD.intContractDetailId	=	@intContractDetailId
 
 
