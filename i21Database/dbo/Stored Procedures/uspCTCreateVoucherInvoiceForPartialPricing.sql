@@ -744,76 +744,76 @@ BEGIN TRY
 					SELECT	@intReceiptUniqueId = MIN(intReceiptUniqueId)  FROM @tblReceipt WHERE intReceiptUniqueId > @intReceiptUniqueId		
 				END
 
-				-- SELECT @intPriceFixationDetailAPARId = MIN(intPriceFixationDetailAPARId) FROM tblCTPriceFixationDetailAPAR WHERE intPriceFixationDetailId = @intPriceFixationDetailId
+				SELECT @intPriceFixationDetailAPARId = MIN(intPriceFixationDetailAPARId) FROM tblCTPriceFixationDetailAPAR WHERE intPriceFixationDetailId = @intPriceFixationDetailId
 
-				-- WHILE ISNULL(@intPriceFixationDetailAPARId,0) > 0
-				-- BEGIN
+				WHILE ISNULL(@intPriceFixationDetailAPARId,0) > 0
+				BEGIN
 
-				-- 	SELECT	@intBillId = NULL, @intBillDetailId = NULL
+					SELECT	@intBillId = NULL, @intBillDetailId = NULL
 
-				-- 	SELECT	@intBillId = intBillId, 
-				-- 			@intBillDetailId = intBillDetailId 
-				-- 	FROM	tblCTPriceFixationDetailAPAR 
-				-- 	WHERE	intPriceFixationDetailAPARId = @intPriceFixationDetailAPARId
+					SELECT	@intBillId = intBillId, 
+							@intBillDetailId = intBillDetailId 
+					FROM	tblCTPriceFixationDetailAPAR 
+					WHERE	intPriceFixationDetailAPARId = @intPriceFixationDetailAPARId
 
-				-- 	SELECT  @dblTotal = SUM(dblTotal) FROM tblAPBillDetail WHERE intBillDetailId = @intBillDetailId
+					SELECT  @dblTotal = SUM(dblTotal) FROM tblAPBillDetail WHERE intBillDetailId = @intBillDetailId
 					
-				-- 	SELECT  @ysnBillPosted = ysnPosted, @strBillId = strBillId FROM tblAPBill WHERE intBillId = @intBillId
+					SELECT  @ysnBillPosted = ysnPosted, @strBillId = strBillId FROM tblAPBill WHERE intBillId = @intBillId
 					
-				-- 	SELECT  @intBillQtyUOMId = intUnitOfMeasureId,
-				-- 			@dblTotalBillQty = dblQtyReceived,
-				-- 			@dblTotalIVForPFQty   = dbo.fnCTConvertQtyToTargetItemUOM(@intItemUOMId,@intBillQtyUOMId,@dblPriceFixedQty),
-				-- 			@dblVoucherPrice = dblCost
-				-- 	FROM    tblAPBillDetail 
-				-- 	WHERE   intBillDetailId = @intBillDetailId AND intInventoryReceiptChargeId IS NULL
+					SELECT  @intBillQtyUOMId = intUnitOfMeasureId,
+							@dblTotalBillQty = dblQtyReceived,
+							@dblTotalIVForPFQty   = dbo.fnCTConvertQtyToTargetItemUOM(@intItemUOMId,@intBillQtyUOMId,@dblPriceFixedQty),
+							@dblVoucherPrice = dblCost
+					FROM    tblAPBillDetail 
+					WHERE   intBillDetailId = @intBillDetailId AND intInventoryReceiptChargeId IS NULL
 
-				-- 	IF  @dblVoucherPrice	<>	@dblFinalPrice
-				-- 	BEGIN
-				-- 		IF @ysnBillPosted = 1
-				-- 		BEGIN
-				-- 			SELECT @strPostedAPAR = ISNULL(@strPostedAPAR + ',','') + @strBillId
-				-- 		END
+					IF  @dblVoucherPrice	<>	@dblFinalPrice
+					BEGIN
+						IF @ysnBillPosted = 1
+						BEGIN
+							SELECT @strPostedAPAR = ISNULL(@strPostedAPAR + ',','') + @strBillId
+						END
 
-				-- 		EXEC	[dbo].[uspSMTransactionCheckIfRequiredApproval]
-				-- 						@type					=	N'AccountsPayable.view.Voucher',
-				-- 						@transactionEntityId	=	@intEntityId,
-				-- 						@currentUserEntityId	=	@intUserId,
-				-- 						@locationId				=	@intCompanyLocationId,
-				-- 						@amount					=	@dblTotal,
-				-- 						@requireApproval		=	@ysnRequireApproval OUTPUT
+						EXEC	[dbo].[uspSMTransactionCheckIfRequiredApproval]
+										@type					=	N'AccountsPayable.view.Voucher',
+										@transactionEntityId	=	@intEntityId,
+										@currentUserEntityId	=	@intUserId,
+										@locationId				=	@intCompanyLocationId,
+										@amount					=	@dblTotal,
+										@requireApproval		=	@ysnRequireApproval OUTPUT
 
-				-- 		IF  ISNULL(@ysnRequireApproval , 0) = 0
-				-- 		BEGIN
-				-- 				IF ISNULL(@ysnBillPosted,0) = 1
-				-- 				BEGIN
-				-- 					EXEC [dbo].[uspAPPostBill] @post = 0,@recap = 0,@isBatch = 0,@param = @intBillId,@userId = @intUserId,@success = @ysnSuccess OUTPUT, @batchIdUsed = @batchIdUsed OUTPUT
-				-- 					IF ISNULL(@ysnSuccess, 0) = 0
-				-- 					BEGIN
-				-- 						SELECT @ErrMsg = strMessage FROM tblAPPostResult WHERE strBatchNumber = @batchIdUsed
-				-- 						IF ISNULL(@ErrMsg, '') != ''
-				-- 						BEGIN
-				-- 							RAISERROR(@ErrMsg, 11, 1);
-				-- 							RETURN;
-				-- 						END
-				-- 					END
-				-- 				END
+						IF  ISNULL(@ysnRequireApproval , 0) = 0
+						BEGIN
+								IF ISNULL(@ysnBillPosted,0) = 1
+								BEGIN
+									EXEC [dbo].[uspAPPostBill] @post = 0,@recap = 0,@isBatch = 0,@param = @intBillId,@userId = @intUserId,@success = @ysnSuccess OUTPUT, @batchIdUsed = @batchIdUsed OUTPUT
+									IF ISNULL(@ysnSuccess, 0) = 0
+									BEGIN
+										SELECT @ErrMsg = strMessage FROM tblAPPostResult WHERE strBatchNumber = @batchIdUsed
+										IF ISNULL(@ErrMsg, '') != ''
+										BEGIN
+											RAISERROR(@ErrMsg, 11, 1);
+											RETURN;
+										END
+									END
+								END
 
-				-- 				--UPDATE tblAPBillDetail SET dblQtyOrdered = @dblTotalIVForPFQty, dblQtyReceived = @dblTotalIVForPFQty WHERE intBillDetailId = @intBillDetailId
+								--UPDATE tblAPBillDetail SET dblQtyOrdered = @dblTotalIVForPFQty, dblQtyReceived = @dblTotalIVForPFQty WHERE intBillDetailId = @intBillDetailId
 
-				-- 				IF (ISNULL(@intBillDetailId, 0) <> 0)
-				-- 				BEGIN
-				-- 					EXEC uspAPUpdateCost @intBillDetailId, @dblFinalPrice, 1
-				-- 				END
+								IF (ISNULL(@intBillDetailId, 0) <> 0)
+								BEGIN
+									EXEC uspAPUpdateCost @intBillDetailId, @dblFinalPrice, 1
+								END
 
-				-- 				IF ISNULL(@ysnBillPosted,0) = 1
-				-- 				BEGIN
-				-- 					EXEC [dbo].[uspAPPostBill] @post = 1,@recap = 0,@isBatch = 0,@param = @intBillId,@userId = @intUserId,@success = @ysnSuccess OUTPUT
-				-- 				END
-				-- 		END
-				-- 	END
+								IF ISNULL(@ysnBillPosted,0) = 1
+								BEGIN
+									EXEC [dbo].[uspAPPostBill] @post = 1,@recap = 0,@isBatch = 0,@param = @intBillId,@userId = @intUserId,@success = @ysnSuccess OUTPUT
+								END
+						END
+					END
 
-				-- 	SELECT @intPriceFixationDetailAPARId = MIN(intPriceFixationDetailAPARId) FROM tblCTPriceFixationDetailAPAR WHERE intPriceFixationDetailId = @intPriceFixationDetailId AND intPriceFixationDetailAPARId > @intPriceFixationDetailAPARId
-				-- END
+					SELECT @intPriceFixationDetailAPARId = MIN(intPriceFixationDetailAPARId) FROM tblCTPriceFixationDetailAPAR WHERE intPriceFixationDetailId = @intPriceFixationDetailId AND intPriceFixationDetailAPARId > @intPriceFixationDetailAPARId
+				END
 			END
 
 			/*
