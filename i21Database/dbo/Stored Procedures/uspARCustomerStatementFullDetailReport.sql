@@ -538,7 +538,7 @@ SELECT intRowId 				= CONVERT(INT, ROW_NUMBER() OVER (ORDER BY STATEMENTREPORT.d
 	, dblQuantity				= STATEMENTREPORT.dblQuantity
 	, dblInvoiceDetailTotal		= STATEMENTREPORT.dblInvoiceDetailTotal
 	, dblInvoiceTotal			= STATEMENTREPORT.dblAmount
-	, dblRunningBalance			= SUM(CASE WHEN STATEMENTREPORT.strTransactionType IN (''Customer Budget'', ''Invoices'', ''Invoice Detail'') 
+	, dblRunningBalance			= SUM(CASE WHEN STATEMENTREPORT.strTransactionType IN (''Customer Budget'', ''Invoices'') 
 											AND ISNULL(STATEMENTREPORT.strType, '''') <> ''CF Invoice'' 
 											AND ((STATEMENTREPORT.intPaymentId IS NULL OR (STATEMENTREPORT.intPaymentId IS NOT NULL AND ISNULL(STATEMENTREPORT.strInvoiceType, '''') = ''Overpayment'')))
 									      THEN 0 
