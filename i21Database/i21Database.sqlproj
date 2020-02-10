@@ -2008,6 +2008,7 @@
     <Build Include="dbo\Functions\fnGetItemStockUOM.sql" />
     <Build Include="dbo\Stored Procedures\uspICFixStockQuantities.sql" />
     <Build Include="dbo\Stored Procedures\uspICFixStorageQty.sql" />
+    <Build Include="dbo\Stored Procedures\uspICFixBundleInvalidUOMs.sql" />
     <Build Include="dbo\Tables\tblICFixLog.sql" />
     <Build Include="dbo\Stored Procedures\uspPRUpdateEmployeeTax.sql" />
     <Build Include="dbo\Stored Procedures\uspPRUpdateEmployeeEarning.sql" />
