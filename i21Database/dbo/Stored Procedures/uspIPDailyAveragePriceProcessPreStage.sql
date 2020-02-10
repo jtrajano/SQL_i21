@@ -56,7 +56,7 @@ BEGIN TRY
 					AND t.intDailyAveragePriceId = @intDailyAveragePriceId
 					AND t.intBookId IS NOT NULL
 					AND t.intBookId <> @intBookId
-				)
+				) OR @strRowState = 'Delete'
 		BEGIN
 			EXEC uspIPDailyAveragePricePopulateStgXML @intDailyAveragePriceId
 				,@intToEntityId
