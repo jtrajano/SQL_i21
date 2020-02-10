@@ -15,7 +15,7 @@ SELECT
 ,ddming = ISNULL(A.dblLastGalsInTank,0)
 ,ddonhg = 0
 ,dmusab = ISNULL(A.dblTotalCapacity,0)
-,ddkfac = ISNULL(A.dblBurnRate,0.00) 
+,ddkfac = CASE WHEN CAST(ISNULL(A.dblBurnRate,0.00) AS NUMERIC(18,2)) > 99.99 THEN 99.99 ELSE CAST(ISNULL(A.dblBurnRate,0.00) AS NUMERIC(18,2)) END
 ,ddwill = LEFT(ISNULL(E.strFillMethod,''), 1)
 ,dmdate = ISNULL(CONVERT(VARCHAR,A.dtmLastDeliveryDate,112),'00000000')  COLLATE Latin1_General_CI_AS 
 ,dmetype =	CASE (SELECT TOP 1 strOwnership FROM tblTMDevice WHERE intDeviceId IN 
