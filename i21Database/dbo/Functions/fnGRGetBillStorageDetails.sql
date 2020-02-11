@@ -33,6 +33,7 @@ RETURNS @returnTable TABLE
 	,[dblNewStorageBilled]			DECIMAL(18,6)		NOT NULL	DEFAULT 0
 	,[dblStorageDueAmount]			DECIMAL(18,6)		NOT NULL	DEFAULT 0
 	,[dblFlatFeeTotal]				DECIMAL(18,6)		NOT NULL	DEFAULT 0
+	,[ysnDSPosted]					BIT 				NOT NULL	DEFAULT 0
 )
 AS
 BEGIN
@@ -182,6 +183,7 @@ BEGIN
 		,dblNewStorageBilled = ISNULL(CS.dblStoragePaid,0) + SV.dblStorageDuePerUnit --New Storage Billed (storage paid + additional charge)
 		,dblStorageDueAmount = ((SV.dblStorageDueTotalPerUnit + SV.dblStorageDuePerUnit) * CS.dblOpenBalance) + SV.dblFlatFeeTotal --Storage Due Amount ((units x additional storage) + flat fee)
 		,SV.dblFlatFeeTotal
+		,ysnDSPosted = ISNULL(DS.ysnPost, 1)
 	FROM tblGRCustomerStorage CS
 	INNER JOIN @BillStorageValues SV
 		ON SV.intCustomerStorageId = CS.intCustomerStorageId
@@ -194,7 +196,9 @@ BEGIN
 	INNER JOIN tblGRStorageScheduleRule SR
 		ON SR.intStorageScheduleRuleId = CS.intStorageScheduleId
 	INNER JOIN tblICItem IC
-		ON IC.intItemId = CS.intItemId	
+		ON IC.intItemId = CS.intItemId		
+	LEFT JOIN tblSCDeliverySheet DS
+    	ON DS.intDeliverySheetId = CS.intDeliverySheetId --AND (@ysnExcludeNotPostedDS IS NULL OR (@ysnExcludeNotPostedDS = 1 and DS.ysnPost = 1))
 	WHERE CS.intEntityId = CASE WHEN @intEntityId > 0 THEN @intEntityId ELSE CS.intEntityId END
 		AND ((ISNULL(CS.dblStorageDue,0) - ISNULL(CS.dblStoragePaid,0)) + SV.dblStorageDuePerUnit) > 0
 	ORDER BY EM.strName, CL.strLocationName		
