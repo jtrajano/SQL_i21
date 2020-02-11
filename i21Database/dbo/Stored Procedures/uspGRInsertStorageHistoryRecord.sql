@@ -142,7 +142,7 @@ BEGIN TRY
 			INNER JOIN tblICUnitMeasure u ON u.intUnitMeasureId = iu.intUnitMeasureId
 			INNER JOIN tblICItemLocation il ON il.intItemLocationId = t.intItemLocationId
 			LEFT OUTER JOIN tblGRSettleContract sc ON sc.intSettleStorageId = s.intSettleStorageId
-		WHERE t.intTransactionTypeId = 44 -- Magic string for Settle Storage
+		WHERE t.intTransactionTypeId = 44 -- Transaction Type Id for Settle Storage
 
 		-- Storage Transfer
 		INSERT INTO @SummaryLogs ( 
@@ -207,7 +207,7 @@ BEGIN TRY
 			INNER JOIN tblICItemLocation il ON il.intItemLocationId = t.intItemLocationId
 			INNER JOIN tblGRTransferStorageSplit spt ON spt.intTransferStorageSplitId = sr.intTransferStorageSplitId
 			LEFT OUTER JOIN tblCTContractDetail ct ON ct.intContractDetailId = spt.intContractDetailId
-		WHERE t.intTransactionTypeId = 56 -- Magic string for Transfer Storage
+		WHERE t.intTransactionTypeId = 56 -- Transaction Type Id for Transfer Storage
 
 		-- Split Storage Transfer
 		INSERT INTO @SummaryLogs ( 
@@ -270,7 +270,7 @@ BEGIN TRY
 			INNER JOIN tblICItemUOM iu ON iu.intItemUOMId = t.intItemUOMId
 			INNER JOIN tblICUnitMeasure u ON u.intUnitMeasureId = iu.intUnitMeasureId
 			INNER JOIN tblICItemLocation il ON il.intItemLocationId = t.intItemLocationId
-		WHERE t.intTransactionTypeId = 56 -- Magic string for Transfer Storage
+		WHERE t.intTransactionTypeId = 56 -- Transaction Type Id for Transfer Storage
 
 		EXEC uspRKLogRiskPosition @SummaryLogs
 	END
