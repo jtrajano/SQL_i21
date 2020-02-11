@@ -146,10 +146,8 @@ BEGIN
 		FROM tblCTContractBalanceLog
 		WHERE intContractDetailId = @intContractDetailId
 			AND strTransactionType = @strTransactionType
-			AND strTransactionReference = @strTransactionReference
-			AND intTransactionReferenceId = @intTransactionReferenceId
-			AND strTransactionReferenceNo = @strTransactionReferenceNo
 			AND ISNULL(ysnNegated, 0) = 0 
+			AND intRefContractBalanceId NOT IN (SELECT intContractBalanceLogId FROM tblCTContractBalanceLog WHERE ysnNegated = 1)
 		ORDER BY intContractBalanceLogId ASC
 
 		IF (SELECT COUNT(*) FROM #tmpPrevLogList ) > 1
@@ -236,7 +234,7 @@ BEGIN
 				, strNotes
 				, ysnNegated
 				, intRefContractBalanceId)
-			SELECT strBatchId
+			SELECT @strBatchId
 				, dtmTransactionDate
 				, strTransactionType
 				, strTransactionReference
@@ -265,7 +263,7 @@ BEGIN
 				, intContractStatusId
 				, intBookId
 				, intSubBookId
-				, strNotes = '(Negate previous value)' + ISNULL(strNotes, '')
+				, strNotes = ISNULL(strNotes, '')
 				, ysnNegated = 1
 				, intRefContractBalanceId = intContractBalanceLogId
 			FROM @PrevLog

@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspRKLogRiskPosition]
 	@SummaryLogs RKSummaryLog READONLY
 	, @Rebuild BIT = 0
+	, @LogContracts BIT = 1
 	
 AS
 
@@ -884,7 +885,7 @@ BEGIN
 		------------------------------
 		-- Process Contract Balance --
 		------------------------------
-		IF (ISNULL(@intContractDetailId, 0) <> 0)
+		IF (ISNULL(@intContractDetailId, 0) <> 0 AND @LogContracts = 1)
 		BEGIN
 			DECLARE @cbLog AS CTContractBalanceLog
 

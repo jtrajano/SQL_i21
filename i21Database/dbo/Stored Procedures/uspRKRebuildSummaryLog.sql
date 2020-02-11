@@ -11,6 +11,51 @@ BEGIN
 	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblRKSummaryLog')
 	BEGIN
 		DECLARE @ExistingHistory AS RKSummaryLog
+
+		--=======================================
+		--				Contracts
+		--=======================================
+		PRINT 'Populate RK Summary Log - Contract'
+		
+		INSERT INTO @ExistingHistory(strTransactionType
+			, intTransactionRecordId
+			, strTransactionNumber
+			, dtmTransactionDate
+			, intContractDetailId
+			, intContractHeaderId
+			, intCommodityId
+			, intBookId
+			, intSubBookId
+			, intFutureMarketId
+			, intFutureMonthId
+			, dblNoOfLots
+			, dblPrice
+			, intEntityId
+			, intUserId
+			, strNotes)
+		SELECT strTransactionType = 'Contract'
+			, intTransactionRecordId = intContractDetailId
+			, strTransactionNumber = strContractNumber + '-' + CAST(intContractSeq AS NVARCHAR(10))
+			, dtmTransactionDate = dtmHistoryCreated
+			, intContractDetailId = intContractDetailId
+			, intContractHeaderId = intContractHeaderId
+			, intCommodityId = intCommodityId
+			, intBookId = intBookId
+			, intSubBookId = intSubBookId
+			, intFutureMarketId = intFutureMarketId
+			, intFutureMonthId = intFutureMonthId
+			, dblNoOfLots = dblLotsPriced
+			, dblPrice = dblFinalPrice
+			, intEntityId = intEntityId
+			, intUserId = intUserId
+			, strNotes = ''
+		FROM tblCTSequenceHistory
+		ORDER BY dtmTransactionDate ASC
+
+		EXEC uspRKLogRiskPosition @ExistingHistory, 1, 1
+		--uspCTLogContractBalance
+
+		PRINT 'End Populate RK Summary Log - Contract'
 		
 		--=======================================
 		--				DERIVATIVES
@@ -57,7 +102,7 @@ BEGIN
 		JOIN tblRKFutureMarket m ON m.intFutureMarketId = der.intFutureMarketId
 		LEFT JOIN tblICCommodityUnitMeasure cUOM ON cUOM.intCommodityId = der.intCommodityId AND cUOM.intUnitMeasureId = m.intUnitMeasureId
 
-		EXEC uspRKLogRiskPosition @ExistingHistory, 1
+		EXEC uspRKLogRiskPosition @ExistingHistory, 1, 0
 
 		PRINT 'End Populate RK Summary Log - Derivatives'
 		DELETE FROM @ExistingHistory
@@ -469,7 +514,7 @@ BEGIN
 		ORDER BY intInventoryTransactionId
 	
  
-		EXEC uspRKLogRiskPosition @ExistingHistory, 1
+		EXEC uspRKLogRiskPosition @ExistingHistory, 1, 0
 
 		PRINT 'End Populate RK Summary Log - Inventory'
 		
