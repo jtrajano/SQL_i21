@@ -8446,6 +8446,7 @@
     <Build Include="dbo\Stored Procedures\uspIPTestPopulateStgXML.sql" />
     <Build Include="dbo\Stored Procedures\uspIPTestTransferStgXML.sql" />
     <Build Include="dbo\Stored Procedures\uspIPTestProcessStgXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspICFixOtherChargeBilledQty.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
