@@ -27,7 +27,8 @@ BEGIN TRY
 		,@UpdatedIvoices NVARCHAR(MAX)
 	DECLARE @EntriesForInvoice AS InvoiceIntegrationStagingTable
 	DECLARE @TaxDetails AS LineItemTaxDetailStagingTable
-	
+	DECLARE @StorageHistoryStagingTable AS [StorageHistoryStagingTable]
+	DECLARE @intStorageHistoryId INT
 	DECLARE @voucherDetailNonInventory AS VoucherDetailNonInventory
 	DECLARE @intCreatedBillId INT
 	DECLARE @ysnInventoryCost BIT = 0;
@@ -299,31 +300,60 @@ BEGIN TRY
 			BEGIN
 				COMMIT TRANSACTION
 
-				INSERT INTO [dbo].[tblGRStorageHistory] 
+				INSERT INTO @StorageHistoryStagingTable
 				(
-					[intConcurrencyId]
-					,[intCustomerStorageId]
-					,[intInvoiceId]
-					,[dblUnits]
-					,[dtmHistoryDate]
-					,[dblPaidAmount]
-					,[strType]
-					,[strUserName]
-					,[intUserId]
+					intCustomerStorageId
+					, intUserId
+					, ysnPost
+					, intTransactionTypeId
+					, strType
+					, dblUnits
+					, intInvoiceId
+					, dtmHistoryDate
+					, intSettleStorageId
+					, dblPaidAmount
 				)
-				SELECT 
-					 [intConcurrencyId] = 1
-					,[intCustomerStorageId] = ARD.intCustomerStorageId
-					,[intInvoiceId] = AR.intInvoiceId
-					,[dblUnits] = ARD.dblQtyOrdered
-					,[dtmHistoryDate] = GetDATE()
-					,[dblPaidAmount] = ARD.dblPrice
-					,[strType] = 'Generated Discount Invoice'
-					,[strUserName] = NULL
-					,[intUserId] = @UserKey
+				SELECT
+					  ARD.intCustomerStorageId
+					, @UserKey
+					, 1
+					, 33 -- Transaction Type Id for Invoice
+					, 'Generated Discount Invoice'
+					, ARD.dblQtyOrdered
+					, AR.intInvoiceId
+					, GETDATE()
+					, NULL
+					, ARD.dblPrice
 				FROM tblARInvoice AR
-				JOIN tblARInvoiceDetail ARD ON ARD.intInvoiceId = AR.intInvoiceId
+					INNER JOIN tblARInvoiceDetail ARD ON ARD.intInvoiceId = AR.intInvoiceId
 				WHERE AR.intInvoiceId = CONVERT(INT, @CreatedIvoices)
+				EXEC uspGRInsertStorageHistoryRecord @StorageHistoryStagingTable, @intStorageHistoryId OUTPUT
+
+				-- INSERT INTO [dbo].[tblGRStorageHistory] 
+				-- (
+				-- 	[intConcurrencyId]
+				-- 	,[intCustomerStorageId]
+				-- 	,[intInvoiceId]
+				-- 	,[dblUnits]
+				-- 	,[dtmHistoryDate]
+				-- 	,[dblPaidAmount]
+				-- 	,[strType]
+				-- 	,[strUserName]
+				-- 	,[intUserId]
+				-- )
+				-- SELECT 
+				-- 	 [intConcurrencyId] = 1
+				-- 	,[intCustomerStorageId] = ARD.intCustomerStorageId
+				-- 	,[intInvoiceId] = AR.intInvoiceId
+				-- 	,[dblUnits] = ARD.dblQtyOrdered
+				-- 	,[dtmHistoryDate] = GetDATE()
+				-- 	,[dblPaidAmount] = ARD.dblPrice
+				-- 	,[strType] = 'Generated Discount Invoice'
+				-- 	,[strUserName] = NULL
+				-- 	,[intUserId] = @UserKey
+				-- FROM tblARInvoice AR
+				-- JOIN tblARInvoiceDetail ARD ON ARD.intInvoiceId = AR.intInvoiceId
+				-- WHERE AR.intInvoiceId = CONVERT(INT, @CreatedIvoices)
 
 				;WITH SRC
 				AS (
@@ -411,29 +441,59 @@ BEGIN TRY
 						JOIN tblICItemUOM ItemUOM ON ItemUOM.intUnitMeasureId=CU.intUnitMeasureId
 						WHERE AP.[intBillId]=@intCreatedBillId AND BD.intEntityId = @EntityId AND BD.intCompanyLocationId = @LocationId AND BD.IsProcessed = 0
 
-					INSERT INTO [dbo].[tblGRStorageHistory] 
+					INSERT INTO @StorageHistoryStagingTable
 					(
-						 [intConcurrencyId]
-						,[intCustomerStorageId]
-						,[intBillId]					
-						,[dblUnits]
-						,[dtmHistoryDate]
-						,[dblPaidAmount]
-						,[strType]
-						,[strUserName]
-						,[intUserId]
+						intCustomerStorageId
+						, intUserId
+						, ysnPost
+						, intTransactionTypeId
+						, strType
+						, dblUnits
+						, intBillId
+						, dtmHistoryDate
+						, intSettleStorageId
+						, dblPaidAmount
 					)
-					SELECT 
-						 [intConcurrencyId] = 1
-						,[intCustomerStorageId] =intCustomerStorageId
-						,[intBillId]=@intCreatedBillId						
-						,[dblUnits] = dblOpenBalance
-						,[dtmHistoryDate] = GetDATE()
-						,[dblPaidAmount] =CASE WHEN dblDiscountUnpaid <0 THEN -dblDiscountUnpaid ELSE dblDiscountUnpaid END
-						,[strType] = 'Generated Bill'
-						,[strUserName] = NULL
-						,[intUserId] = @UserKey
-					FROM @BillDiscounts WHERE intEntityId = @EntityId AND intCompanyLocationId = @LocationId AND IsProcessed = 0
+					SELECT
+						  intCustomerStorageId
+						, @UserKey
+						, 1
+						, 27 -- Transaction Type Id for Bill (Voucher)
+						, 'Generated Bill'
+						, dblOpenBalance
+						, @intCreatedBillId
+						, GETDATE()
+						, NULL
+						, CASE WHEN dblDiscountUnpaid < 0 THEN -dblDiscountUnpaid ELSE dblDiscountUnpaid END
+					FROM @BillDiscounts
+					WHERE intEntityId = @EntityId
+						AND intCompanyLocationId = @LocationId
+						AND IsProcessed = 0
+					EXEC uspGRInsertStorageHistoryRecord @StorageHistoryStagingTable, @intStorageHistoryId OUTPUT
+
+					-- INSERT INTO [dbo].[tblGRStorageHistory] 
+					-- (
+					-- 	 [intConcurrencyId]
+					-- 	,[intCustomerStorageId]
+					-- 	,[intBillId]					
+					-- 	,[dblUnits]
+					-- 	,[dtmHistoryDate]
+					-- 	,[dblPaidAmount]
+					-- 	,[strType]
+					-- 	,[strUserName]
+					-- 	,[intUserId]
+					-- )
+					-- SELECT 
+					-- 	 [intConcurrencyId] = 1
+					-- 	,[intCustomerStorageId] =intCustomerStorageId
+					-- 	,[intBillId]=@intCreatedBillId						
+					-- 	,[dblUnits] = dblOpenBalance
+					-- 	,[dtmHistoryDate] = GetDATE()
+					-- 	,[dblPaidAmount] =CASE WHEN dblDiscountUnpaid <0 THEN -dblDiscountUnpaid ELSE dblDiscountUnpaid END
+					-- 	,[strType] = 'Generated Bill'
+					-- 	,[strUserName] = NULL
+					-- 	,[intUserId] = @UserKey
+					-- FROM @BillDiscounts WHERE intEntityId = @EntityId AND intCompanyLocationId = @LocationId AND IsProcessed = 0
 					
 					
 					 

@@ -54,6 +54,8 @@ BEGIN TRY
 	DECLARE @intDefaultCurrencyId INT
 	DECLARE @intTermId INT
 	DECLARE @ItemDescription NVARCHAR(100)
+	DECLARE @StorageHistoryStagingTable AS [StorageHistoryStagingTable]
+	DECLARE @intStorageHistoryId INT
 	
 	DECLARE @SellOffsite AS TABLE 
 	(
@@ -240,32 +242,57 @@ BEGIN TRY
 					SET dblOpenBalance = dblOpenBalance - @dblStorageUnits
 					WHERE intCustomerStorageId = @intCustomerStorageId
 
-					INSERT INTO [dbo].[tblGRStorageHistory] (
-						[intConcurrencyId]
-						,[intCustomerStorageId]
-						,[intInvoiceId]
-						,[intContractHeaderId]
-						,[dblUnits]
-						,[dtmHistoryDate]
-						,[strType]
-						,[strUserName]
-						,[intUserId]
-						,[intEntityId]
-						,[strSettleTicket]
-						)
-					VALUES (
-						1
-						,@intCustomerStorageId
-						,NULL
-						,@intContractHeaderId
-						,@dblStorageUnits
-						,GETDATE()
-						,'Settlement'
-						,NULL
-						,@UserKey
-						,@ContractEntityId
-						,@strOffsiteTicket
-						)
+				INSERT INTO @StorageHistoryStagingTable
+				(
+					  intCustomerStorageId
+					, intUserId
+					, ysnPost
+					, intTransactionTypeId
+					, strType
+					, dblUnits
+					, intContractHeaderId
+					, dtmHistoryDate
+					, intSettleStorageId
+					, dblPaidAmount
+				)
+				SELECT
+					  @intCustomerStorageId
+					, @UserKey
+					, 1
+					, 33 -- Transaction Type Id for Invoice
+					, 'Settlement'
+					, @dblStorageUnits
+					, @intContractHeaderId
+					, GETDATE()
+					, NULL
+					, NULL
+				EXEC uspGRInsertStorageHistoryRecord @StorageHistoryStagingTable, @intStorageHistoryId OUTPUT
+					-- INSERT INTO [dbo].[tblGRStorageHistory] (
+					-- 	[intConcurrencyId]
+					-- 	,[intCustomerStorageId]
+					-- 	,[intInvoiceId]
+					-- 	,[intContractHeaderId]
+					-- 	,[dblUnits]
+					-- 	,[dtmHistoryDate]
+					-- 	,[strType]
+					-- 	,[strUserName]
+					-- 	,[intUserId]
+					-- 	,[intEntityId]
+					-- 	,[strSettleTicket]
+					-- 	)
+					-- VALUES (
+					-- 	1
+					-- 	,@intCustomerStorageId
+					-- 	,NULL
+					-- 	,@intContractHeaderId
+					-- 	,@dblStorageUnits
+					-- 	,GETDATE()
+					-- 	,'Settlement'
+					-- 	,NULL
+					-- 	,@UserKey
+					-- 	,@ContractEntityId
+					-- 	,@strOffsiteTicket
+					-- 	)
 
 					INSERT INTO @OffSiteInvoiceCreate (
 						intCustomerStorageId
@@ -296,32 +323,58 @@ BEGIN TRY
 					SET dblOpenBalance = dblOpenBalance - @dblContractUnits
 					WHERE intCustomerStorageId = @intCustomerStorageId
 
-					INSERT INTO [dbo].[tblGRStorageHistory] (
-						[intConcurrencyId]
-						,[intCustomerStorageId]
-						,[intInvoiceId]
-						,[intContractHeaderId]
-						,[dblUnits]
-						,[dtmHistoryDate]
-						,[strType]
-						,[strUserName]
-						,[intUserId]
-						,[intEntityId]
-						,[strSettleTicket]
-						)
-					VALUES (
-						1
-						,@intCustomerStorageId
-						,NULL
-						,@intContractHeaderId
-						,@dblContractUnits
-						,GETDATE()
-						,'Settlement'
-						,NULL
-						,@UserKey
-						,@ContractEntityId
-						,@strOffsiteTicket
-						)
+					INSERT INTO @StorageHistoryStagingTable
+					(
+						intCustomerStorageId
+						, intUserId
+						, ysnPost
+						, intTransactionTypeId
+						, strType
+						, dblUnits
+						, intContractHeaderId
+						, dtmHistoryDate
+						, intSettleStorageId
+						, dblPaidAmount
+					)
+					SELECT
+						@intCustomerStorageId
+						, @UserKey
+						, 1
+						, 33 -- Transaction Type Id for Invoice
+						, 'Settlement'
+						, @dblContractUnits
+						, @intContractHeaderId
+						, GETDATE()
+						, NULL
+						, NULL
+					EXEC uspGRInsertStorageHistoryRecord @StorageHistoryStagingTable, @intStorageHistoryId OUTPUT
+
+					-- INSERT INTO [dbo].[tblGRStorageHistory] (
+					-- 	[intConcurrencyId]
+					-- 	,[intCustomerStorageId]
+					-- 	,[intInvoiceId]
+					-- 	,[intContractHeaderId]
+					-- 	,[dblUnits]
+					-- 	,[dtmHistoryDate]
+					-- 	,[strType]
+					-- 	,[strUserName]
+					-- 	,[intUserId]
+					-- 	,[intEntityId]
+					-- 	,[strSettleTicket]
+					-- 	)
+					-- VALUES (
+					-- 	1
+					-- 	,@intCustomerStorageId
+					-- 	,NULL
+					-- 	,@intContractHeaderId
+					-- 	,@dblContractUnits
+					-- 	,GETDATE()
+					-- 	,'Settlement'
+					-- 	,NULL
+					-- 	,@UserKey
+					-- 	,@ContractEntityId
+					-- 	,@strOffsiteTicket
+					-- 	)
 
 					INSERT INTO @OffSiteInvoiceCreate (
 						intCustomerStorageId
@@ -364,32 +417,58 @@ BEGIN TRY
 
 				SET @dblSpotUnits = @dblSpotUnits - @dblStorageUnits
 
-				INSERT INTO [dbo].[tblGRStorageHistory] (
-					[intConcurrencyId]
-					,[intCustomerStorageId]
-					,[intInvoiceId]
-					,[intContractHeaderId]
-					,[dblUnits]
-					,[dtmHistoryDate]
-					,[strType]
-					,[strUserName]
-					,[intUserId]
-					,[intEntityId]
-					,[strSettleTicket]
-					)
-				VALUES (
-					1
-					,@intCustomerStorageId
-					,NULL
-					,NULL
-					,@dblStorageUnits
-					,GETDATE()
-					,'Settlement'
-					,NULL
-					,@UserKey
-					,NULL
-					,@strOffsiteTicket
-					)
+				INSERT INTO @StorageHistoryStagingTable
+				(
+					intCustomerStorageId
+					, intUserId
+					, ysnPost
+					, intTransactionTypeId
+					, strType
+					, dblUnits
+					, intContractHeaderId
+					, dtmHistoryDate
+					, intSettleStorageId
+					, dblPaidAmount
+				)
+				SELECT
+					@intCustomerStorageId
+					, @UserKey
+					, 1
+					, 33 -- Transaction Type Id for Invoice
+					, 'Settlement'
+					, @dblStorageUnits
+					, NULL
+					, GETDATE()
+					, NULL
+					, NULL
+				EXEC uspGRInsertStorageHistoryRecord @StorageHistoryStagingTable, @intStorageHistoryId OUTPUT
+
+				-- INSERT INTO [dbo].[tblGRStorageHistory] (
+				-- 	[intConcurrencyId]
+				-- 	,[intCustomerStorageId]
+				-- 	,[intInvoiceId]
+				-- 	,[intContractHeaderId]
+				-- 	,[dblUnits]
+				-- 	,[dtmHistoryDate]
+				-- 	,[strType]
+				-- 	,[strUserName]
+				-- 	,[intUserId]
+				-- 	,[intEntityId]
+				-- 	,[strSettleTicket]
+				-- 	)
+				-- VALUES (
+				-- 	1
+				-- 	,@intCustomerStorageId
+				-- 	,NULL
+				-- 	,NULL
+				-- 	,@dblStorageUnits
+				-- 	,GETDATE()
+				-- 	,'Settlement'
+				-- 	,NULL
+				-- 	,@UserKey
+				-- 	,NULL
+				-- 	,@strOffsiteTicket
+				-- 	)
 
 				INSERT INTO @OffSiteInvoiceCreate (
 					intCustomerStorageId
@@ -414,32 +493,58 @@ BEGIN TRY
 				SET dblOpenBalance = dblOpenBalance - @dblSpotUnits
 				WHERE intCustomerStorageId = @intCustomerStorageId
 
-				INSERT INTO [dbo].[tblGRStorageHistory] (
-					[intConcurrencyId]
-					,[intCustomerStorageId]
-					,[intInvoiceId]
-					,[intContractHeaderId]
-					,[dblUnits]
-					,[dtmHistoryDate]
-					,[strType]
-					,[strUserName]
-					,[intUserId]
-					,[intEntityId]
-					,[strSettleTicket]
-					)
-				VALUES (
-					1
-					,@intCustomerStorageId
-					,NULL
-					,NULL
-					,@dblSpotUnits
-					,GETDATE()
-					,'Settlement'
-					,NULL
-					,@UserKey
-					,NULL
-					,@strOffsiteTicket
-					)
+				
+				INSERT INTO @StorageHistoryStagingTable
+				(
+					intCustomerStorageId
+					, intUserId
+					, ysnPost
+					, intTransactionTypeId
+					, strType
+					, dblUnits
+					, intContractHeaderId
+					, dtmHistoryDate
+					, intSettleStorageId
+					, dblPaidAmount
+				)
+				SELECT
+					@intCustomerStorageId
+					, @UserKey
+					, 1
+					, 33 -- Transaction Type Id for Invoice
+					, 'Settlement'
+					, @dblSpotUnits
+					, NULL
+					, GETDATE()
+					, NULL
+					, NULL
+				EXEC uspGRInsertStorageHistoryRecord @StorageHistoryStagingTable, @intStorageHistoryId OUTPUT
+				-- INSERT INTO [dbo].[tblGRStorageHistory] (
+				-- 	[intConcurrencyId]
+				-- 	,[intCustomerStorageId]
+				-- 	,[intInvoiceId]
+				-- 	,[intContractHeaderId]
+				-- 	,[dblUnits]
+				-- 	,[dtmHistoryDate]
+				-- 	,[strType]
+				-- 	,[strUserName]
+				-- 	,[intUserId]
+				-- 	,[intEntityId]
+				-- 	,[strSettleTicket]
+				-- 	)
+				-- VALUES (
+				-- 	1
+				-- 	,@intCustomerStorageId
+				-- 	,NULL
+				-- 	,NULL
+				-- 	,@dblSpotUnits
+				-- 	,GETDATE()
+				-- 	,'Settlement'
+				-- 	,NULL
+				-- 	,@UserKey
+				-- 	,NULL
+				-- 	,@strOffsiteTicket
+				-- 	)
 
 				INSERT INTO @OffSiteInvoiceCreate (
 					intCustomerStorageId
@@ -652,30 +757,62 @@ BEGIN TRY
 	BEGIN
 		COMMIT TRANSACTION
 
-		INSERT INTO [dbo].[tblGRStorageHistory] 
+		INSERT INTO @StorageHistoryStagingTable
 		(
-			[intConcurrencyId]
-			,[intCustomerStorageId]
-			,[intInvoiceId]
-			,[dblUnits]
-			,[dtmHistoryDate]
-			,[dblPaidAmount]
-			,[strType]
-			,[strUserName]
-			,[intUserId]
+			  intCustomerStorageId
+			, intUserId
+			, ysnPost
+			, intTransactionTypeId
+			, strType
+			, dblUnits
+			, intContractHeaderId
+			, dtmHistoryDate
+			, intSettleStorageId
+			, dblPaidAmount
+			, intInvoiceId
 		)
-		SELECT [intConcurrencyId] = 1
-			,[intCustomerStorageId] = ARD.intCustomerStorageId
-			,[intInvoiceId] = AR.intInvoiceId
-			,[dblUnits] = ARD.dblQtyOrdered
-			,[dtmHistoryDate] = GetDATE()
-			,[dblPaidAmount] = ARD.dblPrice
-			,[strType] = 'Generated Invoice'
-			,[strUserName] = NULL
-			,[intUserId] = @UserKey
+		SELECT
+			  ARD.intCustomerStorageId
+			, @UserKey
+			, 1
+			, 33 -- Transaction Type for Invoice
+			, 'Generated Invoice'
+			, ARD.dblQtyOrdered
+			, NULL
+			, GETDATE()
+			, NULL
+			, ARD.dblPrice
+			, AR.intInvoiceId
 		FROM tblARInvoice AR
-		JOIN tblARInvoiceDetail ARD ON ARD.intInvoiceId = AR.intInvoiceId
+			INNER JOIN tblARInvoiceDetail ARD ON ARD.intInvoiceId = AR.intInvoiceId
 		WHERE AR.intInvoiceId = CONVERT(INT, @CreatedIvoices)
+
+		EXEC uspGRInsertStorageHistoryRecord @StorageHistoryStagingTable, @intStorageHistoryId OUTPUT
+
+		-- INSERT INTO [dbo].[tblGRStorageHistory] 
+		-- (
+		-- 	[intConcurrencyId]
+		-- 	,[intCustomerStorageId]
+		-- 	,[intInvoiceId]
+		-- 	,[dblUnits]
+		-- 	,[dtmHistoryDate]
+		-- 	,[dblPaidAmount]
+		-- 	,[strType]
+		-- 	,[strUserName]
+		-- 	,[intUserId]
+		-- )
+		-- SELECT [intConcurrencyId] = 1
+		-- 	,[intCustomerStorageId] = ARD.intCustomerStorageId
+		-- 	,[intInvoiceId] = AR.intInvoiceId
+		-- 	,[dblUnits] = ARD.dblQtyOrdered
+		-- 	,[dtmHistoryDate] = GetDATE()
+		-- 	,[dblPaidAmount] = ARD.dblPrice
+		-- 	,[strType] = 'Generated Invoice'
+		-- 	,[strUserName] = NULL
+		-- 	,[intUserId] = @UserKey
+		-- FROM tblARInvoice AR
+		-- JOIN tblARInvoiceDetail ARD ON ARD.intInvoiceId = AR.intInvoiceId
+		-- WHERE AR.intInvoiceId = CONVERT(INT, @CreatedIvoices)
 
 		UPDATE tblGRSellOffsite
 		SET ysnPosted = 1

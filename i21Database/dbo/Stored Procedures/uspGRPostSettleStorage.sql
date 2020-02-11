@@ -3320,50 +3320,86 @@ BEGIN TRY
 			--7. HiStory Creation
 			IF(@ysnFromPriceBasisContract = 0)	
 			BEGIN
-				INSERT INTO [dbo].[tblGRStorageHistory] 
+				DECLARE @StorageHistoryStagingTable AS [StorageHistoryStagingTable]
+				DECLARE @intStorageHistoryId INT
+				INSERT INTO @StorageHistoryStagingTable
 				(
-					[intConcurrencyId]
-					,[intCustomerStorageId]
-					,[intContractHeaderId]
-					,[dblUnits]
-					,[dtmHistoryDate]
-					,[strType]
-					,[strUserName]
-					,[intUserId]
-					,[intEntityId]
-					,[strSettleTicket]
-					,[intTransactionTypeId]
-					,[dblPaidAmount]
-					,[intBillId]
-					,[intSettleStorageId]
-					,[strVoucher]
+					  intCustomerStorageId
+					, intUserId
+					, ysnPost
+					, intTransactionTypeId
+					, strType
+					, dblUnits
+					, intContractHeaderId
+					, dtmHistoryDate
+					, intSettleStorageId
+					, dblPaidAmount
+					, intBillId
 				)
-				SELECT 
-					 [intConcurrencyId]     = 1 
-					,[intCustomerStorageId] = SV.[intCustomerStorageId]
-					,[intContractHeaderId]  = SV.[intContractHeaderId]
-					,[dblUnits]				= dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId,IU.intUnitMeasureId,CS.intUnitMeasureId,SV.[dblUnits])--case when @doPartialHistory = 1 then @dblSelectedUnits else  dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId,IU.intUnitMeasureId,CS.intUnitMeasureId,SV.[dblUnits]) end
-					,[dtmHistoryDate]		= GETDATE()
-					,[strType]				= 'Settlement'
-					,[strUserName]			= NULL
-					,[intUserId]		 	= @intCreatedUserId
-					,[intEntityId]			= @EntityId
-					,[strSettleTicket]		= @TicketNo
-					,[intTransactionTypeId]	= 4 
-					,[dblPaidAmount]		= SV.dblCashPrice
-					,[intBillId]			= CASE WHEN @intVoucherId = 0 THEN NULL ELSE @intVoucherId END
-					,intSettleStorageId		= @intSettleStorageId
-					,strVoucher				= @strVoucher
+				SELECT
+					  SV.intCustomerStorageId
+					, @intCreatedUserId
+					, 1
+					, 4
+					, 'Settlement'
+					, dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId,IU.intUnitMeasureId,CS.intUnitMeasureId,SV.[dblUnits])
+					, SV.intContractHeaderId
+					, GETDATE()
+					, @intSettleStorageId
+					, SV.dblCashPrice
+					, CASE WHEN @intVoucherId = 0 THEN NULL ELSE @intVoucherId END
 				FROM @SettleVoucherCreate SV
-				JOIN tblGRCustomerStorage CS 
-					ON CS.intCustomerStorageId = SV.intCustomerStorageId
-				-- JOIN tblICCommodityUnitMeasure CU 
-				-- 	ON CU.intCommodityId = CS.intCommodityId 
-				-- 		AND CU.ysnStockUnit = 1
-				JOIN tblICItemUOM IU
-					ON IU.intItemId = CS.intItemId
+					INNER JOIN tblGRCustomerStorage CS ON CS.intCustomerStorageId = SV.intCustomerStorageId
+					INNER JOIN tblICItemUOM IU ON IU.intItemId = CS.intItemId
 						AND IU.ysnStockUnit = 1
 				WHERE SV.intItemType = 1
+
+				EXEC uspGRInsertStorageHistoryRecord @StorageHistoryStagingTable, @intStorageHistoryId OUTPUT
+
+				--INSERT INTO [dbo].[tblGRStorageHistory] 
+				--(
+				--	[intConcurrencyId]
+				--	,[intCustomerStorageId]
+				--	,[intContractHeaderId]
+				--	,[dblUnits]
+				--	,[dtmHistoryDate]
+				--	,[strType]
+				--	,[strUserName]
+				--	,[intUserId]
+				--	,[intEntityId]
+				--	,[strSettleTicket]
+				--	,[intTransactionTypeId]
+				--	,[dblPaidAmount]
+				--	,[intBillId]
+				--	,[intSettleStorageId]
+				--	,[strVoucher]
+				--)
+				--SELECT 
+				--	 [intConcurrencyId]     = 1 
+				--	,[intCustomerStorageId] = SV.[intCustomerStorageId]
+				--	,[intContractHeaderId]  = SV.[intContractHeaderId]
+				--	,[dblUnits]				= dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId,IU.intUnitMeasureId,CS.intUnitMeasureId,SV.[dblUnits])--case when @doPartialHistory = 1 then @dblSelectedUnits else  dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId,IU.intUnitMeasureId,CS.intUnitMeasureId,SV.[dblUnits]) end
+				--	,[dtmHistoryDate]		= GETDATE()
+				--	,[strType]				= 'Settlement'
+				--	,[strUserName]			= NULL
+				--	,[intUserId]		 	= @intCreatedUserId
+				--	,[intEntityId]			= @EntityId
+				--	,[strSettleTicket]		= @TicketNo
+				--	,[intTransactionTypeId]	= 4 
+				--	,[dblPaidAmount]		= SV.dblCashPrice
+				--	,[intBillId]			= CASE WHEN @intVoucherId = 0 THEN NULL ELSE @intVoucherId END
+				--	,intSettleStorageId		= @intSettleStorageId
+				--	,strVoucher				= @strVoucher
+				--FROM @SettleVoucherCreate SV
+				--JOIN tblGRCustomerStorage CS 
+				--	ON CS.intCustomerStorageId = SV.intCustomerStorageId
+				---- JOIN tblICCommodityUnitMeasure CU 
+				---- 	ON CU.intCommodityId = CS.intCommodityId 
+				---- 		AND CU.ysnStockUnit = 1
+				--JOIN tblICItemUOM IU
+				--	ON IU.intItemId = CS.intItemId
+				--		AND IU.ysnStockUnit = 1
+				--WHERE SV.intItemType = 1
 
 				if @doPartialHistory = 1
 				begin

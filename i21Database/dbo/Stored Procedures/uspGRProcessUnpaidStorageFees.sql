@@ -27,7 +27,8 @@ BEGIN TRY
 	DECLARE @EntriesForInvoice AS InvoiceIntegrationStagingTable
 	DECLARE @TaxDetails AS LineItemTaxDetailStagingTable
 	DECLARE @intBillFeeKey INT
-
+	DECLARE @StorageHistoryStagingTable AS [StorageHistoryStagingTable]
+	DECLARE @intStorageHistoryId INT
 	SET @dtmDate = GETDATE()
 
 	DECLARE @BillFees AS TABLE 
@@ -286,33 +287,65 @@ BEGIN TRY
 			BEGIN
 				COMMIT TRANSACTION
 
-				INSERT INTO [dbo].[tblGRStorageHistory] 
+				INSERT INTO @StorageHistoryStagingTable
 				(
-					[intConcurrencyId]
-					,[intCustomerStorageId]
-					,[intInvoiceId]
-					,[dblUnits]
-					,[dtmHistoryDate]
-					,[dblPaidAmount]
-					,[strType]
-					,[strUserName]
-					,[intUserId]
+					intCustomerStorageId
+					, intUserId
+					, ysnPost
+					, intTransactionTypeId
+					, strType
+					, dblUnits
+					, intInvoiceId
+					, dtmHistoryDate
+					, intSettleStorageId
+					, dblPaidAmount
 				)
-				SELECT 
-					 [intConcurrencyId] = 1
-					,[intCustomerStorageId] = ARD.intCustomerStorageId
-					,[intInvoiceId] = AR.intInvoiceId
-					,[dblUnits] = dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CU.intUnitMeasureId, CS.intUnitMeasureId, ARD.dblQtyOrdered)
-					,[dtmHistoryDate] = GetDATE()
-					,[dblPaidAmount] = ARD.dblPrice
-					,[strType] = 'Generated Fee Invoice'
-					,[strUserName] = NULL
-					,[intUserId] = @UserKey
+				SELECT
+					  ARD.intCustomerStorageId
+					, @UserKey
+					, 1
+					, 33 -- Transaction Type Id for Invoice
+					, 'Generated Fee Invoice'
+					, dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CU.intUnitMeasureId, CS.intUnitMeasureId, ARD.dblQtyOrdered)
+					, AR.intInvoiceId
+					, GETDATE()
+					, NULL
+					, ARD.dblPrice
 				FROM tblARInvoice AR
-				JOIN tblARInvoiceDetail ARD ON ARD.intInvoiceId = AR.intInvoiceId
-				JOIN tblGRCustomerStorage CS ON CS.intCustomerStorageId = ARD.intCustomerStorageId
-				JOIN tblICCommodityUnitMeasure CU ON CU.intCommodityId = CS.intCommodityId AND CU.ysnStockUnit = 1
+					INNER JOIN tblARInvoiceDetail ARD ON ARD.intInvoiceId = AR.intInvoiceId
+					INNER JOIN tblGRCustomerStorage CS ON CS.intCustomerStorageId = ARD.intCustomerStorageId
+					INNER JOIN tblICCommodityUnitMeasure CU ON CU.intCommodityId = CS.intCommodityId
+						AND CU.ysnStockUnit = 1
 				WHERE AR.intInvoiceId = CONVERT(INT, @CreatedIvoices)
+				EXEC uspGRInsertStorageHistoryRecord @StorageHistoryStagingTable, @intStorageHistoryId OUTPUT
+
+				-- INSERT INTO [dbo].[tblGRStorageHistory] 
+				-- (
+				-- 	[intConcurrencyId]
+				-- 	,[intCustomerStorageId]
+				-- 	,[intInvoiceId]
+				-- 	,[dblUnits]
+				-- 	,[dtmHistoryDate]
+				-- 	,[dblPaidAmount]
+				-- 	,[strType]
+				-- 	,[strUserName]
+				-- 	,[intUserId]
+				-- )
+				-- SELECT 
+				-- 	 [intConcurrencyId] = 1
+				-- 	,[intCustomerStorageId] = ARD.intCustomerStorageId
+				-- 	,[intInvoiceId] = AR.intInvoiceId
+				-- 	,[dblUnits] = dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CU.intUnitMeasureId, CS.intUnitMeasureId, ARD.dblQtyOrdered)
+				-- 	,[dtmHistoryDate] = GetDATE()
+				-- 	,[dblPaidAmount] = ARD.dblPrice
+				-- 	,[strType] = 'Generated Fee Invoice'
+				-- 	,[strUserName] = NULL
+				-- 	,[intUserId] = @UserKey
+				-- FROM tblARInvoice AR
+				-- JOIN tblARInvoiceDetail ARD ON ARD.intInvoiceId = AR.intInvoiceId
+				-- JOIN tblGRCustomerStorage CS ON CS.intCustomerStorageId = ARD.intCustomerStorageId
+				-- JOIN tblICCommodityUnitMeasure CU ON CU.intCommodityId = CS.intCommodityId AND CU.ysnStockUnit = 1
+				-- WHERE AR.intInvoiceId = CONVERT(INT, @CreatedIvoices)
 
 				UPDATE CS
 				SET CS.dblFeesPaid = CS.dblFeesDue
