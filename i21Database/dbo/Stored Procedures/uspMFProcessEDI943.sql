@@ -281,6 +281,48 @@ BEGIN TRY
 				SELECT @strErrorMessage = @strErrorMessage + ' Inventory Receipt is already posted for the order number ' + @strOrderNo + '. '
 			END
 
+			IF EXISTS (
+					SELECT *
+					FROM @tblMFItem I
+					Left JOIN tblICItemLocation IL on IL.intItemId=I.intItemId and IL.ysnOpenPricePLU =1
+					Where IL.ysnOpenPricePLU is null
+					)
+			BEGIN
+				SELECT @strItemNo = ''
+
+				SELECT @strItemNo = @strItemNo + strItemNo + ', '
+				FROM @tblMFItem I
+					Left JOIN tblICItemLocation IL on IL.intItemId=I.intItemId and IL.ysnOpenPricePLU =1
+					Where IL.ysnOpenPricePLU is null
+
+				IF len(@strItemNo) > 0
+					SELECT @strItemNo = Left(@strItemNo, len(@strItemNo) - 1)
+
+				SELECT @strErrorMessage = @strErrorMessage + ' EDI Default Location is not configured for the item(s) ' + @strItemNo + ' in the item location configuration.'
+			END
+
+			IF EXISTS (
+					SELECT I.intItemId
+					FROM @tblMFItem I
+					JOIN tblICItemLocation IL on IL.intItemId=I.intItemId and IL.ysnOpenPricePLU =1
+					Group by I.intItemId
+					Having Count(*)>1
+					)
+			BEGIN
+				SELECT @strItemNo = ''
+
+				SELECT @strItemNo = @strItemNo + strItemNo + ', '
+				FROM @tblMFItem I
+				JOIN tblICItemLocation IL on IL.intItemId=I.intItemId and IL.ysnOpenPricePLU =1
+				Group by I.strItemNo
+				Having Count(*)>1
+
+				IF len(@strItemNo) > 0
+					SELECT @strItemNo = Left(@strItemNo, len(@strItemNo) - 1)
+
+				SELECT @strErrorMessage = @strErrorMessage + ' Multiple EDI Default Location is configured for the item(s) ' + @strItemNo + ' in the item location configuration.'
+			END
+
 			IF @strErrorMessage <> ''
 			BEGIN
 				RAISERROR (
@@ -854,7 +896,7 @@ BEGIN TRY
 			FROM tblMFEDI943 EDI
 			JOIN tblICItem I ON I.strItemNo = EDI.strVendorItemNumber
 			JOIN tblICItemLocation IL ON IL.intItemId = I.intItemId
-				AND IL.intLocationId IS NOT NULL
+				AND IL.intLocationId IS NOT NULL and IL.ysnOpenPricePLU =1
 			JOIN tblEMEntityLocation EL ON 1 = 1
 				AND EL.intEntityLocationId = @intEntityLocationId
 			JOIN tblICItemUOM IU ON I.intItemId = IU.intItemId
@@ -960,7 +1002,7 @@ BEGIN TRY
 			FROM tblMFEDI943 EDI
 			JOIN tblICItem I ON I.strItemNo = EDI.strVendorItemNumber
 			JOIN tblICItemLocation IL ON IL.intItemId = I.intItemId
-				AND IL.intLocationId IS NOT NULL
+				AND IL.intLocationId IS NOT NULL and IL.ysnOpenPricePLU=1
 			JOIN tblEMEntityLocation EL ON 1 = 1
 				AND EL.intEntityLocationId = @intEntityLocationId
 			JOIN tblICItemUOM IU ON I.intItemId = IU.intItemId
