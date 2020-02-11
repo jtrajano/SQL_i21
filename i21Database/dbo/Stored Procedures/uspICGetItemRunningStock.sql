@@ -342,10 +342,10 @@ SELECT
 	, strStorageLocationName		= strgLoc.strName
 	, intOwnershipType				= @intOwnershipType
 	, strOwnershipType				= dbo.fnICGetOwnershipType(@intOwnershipType)
-	, dblRunningAvailableQty		= t.dblQty 
-	, dblRunningReservedQty			= ISNULL(reserved.dblQty, 0)
-	, dblRunningAvailableQtyNoReserved = ISNULL(t.dblQty, 0) - ISNULL(reserved.dblQty, 0)
-	, dblStorageAvailableQty		= t.dblUnitStorage
+	, dblRunningAvailableQty		= ROUND(t.dblQty, 6)
+	, dblRunningReservedQty			= ROUND(ISNULL(reserved.dblQty, 0), 6)
+	, dblRunningAvailableQtyNoReserved = ROUND(ISNULL(t.dblQty, 0) - ISNULL(reserved.dblQty, 0), 6) 
+	, dblStorageAvailableQty		= ROUND(t.dblUnitStorage, 6) 
 	, dblCost = 
 			CASE 
 				-- Get the average cost. 
