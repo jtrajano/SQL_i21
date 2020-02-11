@@ -6,12 +6,14 @@ SELECT strItemNo
 	,dblPlannedPurchaseQty
 	,dblUnAllocatedPurchaseQty
 	,dblPlannedPurchaseQty - dblUnAllocatedPurchaseQty AS dblDifference
+	,dtmStartDate
 FROM (
 	SELECT I.strItemNo
 		,'UnAllocated Purchase' strAttributeName
 		,Left(DATENAME(mm, DateAdd(m, 2, SS.dtmStartDate)), 3) + ' ' + Right(DATENAME(YY, DateAdd(m, 2, SS.dtmStartDate)), 2) AS strMonth
 		,0 AS dblPlannedPurchaseQty
 		,sum(dbo.fnCTConvertQuantityToTargetItemUOM(SS.intItemId, IU.intUnitMeasureId, PS.intUnitMeasureId, SS.dblBalance)) AS dblUnAllocatedPurchaseQty
+		,DateAdd(m, 2, SS.dtmStartDate) as dtmStartDate
 	FROM dbo.tblMFInvPlngSummaryDetail SD
 	JOIN dbo.tblMFInvPlngSummary PS ON PS.intInvPlngSummaryId = SD.intInvPlngSummaryId
 		AND SD.intMainItemId IS NOT NULL
@@ -32,7 +34,7 @@ FROM (
 			)
 	GROUP BY I.strItemNo
 		,Left(DATENAME(mm, DateAdd(m, 2, SS.dtmStartDate)), 3) + ' ' + Right(DATENAME(YY, DateAdd(m, 2, SS.dtmStartDate)), 2)
-	
+		,DateAdd(m, 2, SS.dtmStartDate)
 	UNION
 	
 	SELECT I.strItemNo
@@ -40,6 +42,7 @@ FROM (
 		,Left(DATENAME(mm, DateAdd(m, 2, SS.dtmStartDate)), 3) + ' ' + Right(DATENAME(YY, DateAdd(m, 2, SS.dtmStartDate)), 2) AS strMonth
 		,0 AS dblPlannedPurchaseQty
 		,sum(dbo.fnCTConvertQuantityToTargetItemUOM(SS.intItemId, IU.intUnitMeasureId, PS.intUnitMeasureId, SS.dblBalance)) AS dblUnAllocatedPurchaseQty
+		,DateAdd(m, 2, SS.dtmStartDate) as dtmStartDate
 	FROM dbo.tblMFInvPlngSummaryDetail SD
 	JOIN dbo.tblMFInvPlngSummary PS ON PS.intInvPlngSummaryId = SD.intInvPlngSummaryId
 		AND SD.intMainItemId IS NULL
@@ -68,7 +71,7 @@ FROM (
 			)
 	GROUP BY I.strItemNo
 		,Left(DATENAME(mm, DateAdd(m, 2, SS.dtmStartDate)), 3) + ' ' + Right(DATENAME(YY, DateAdd(m, 2, SS.dtmStartDate)), 2)
-	
+		,DateAdd(m, 2, SS.dtmStartDate)
 	UNION
 	
 	SELECT I.strItemNo
@@ -76,6 +79,7 @@ FROM (
 		,SD1.strValue AS strMonth
 		,SD.strValue
 		,0 AS dblUnAllocatedPurchaseQty
+		,Convert(Datetime,'01 '+ SD1.strValue)
 	FROM tblMFInvPlngSummaryDetail SD
 	JOIN tblICItem I ON I.intItemId = SD.intItemId
 	JOIN tblCTReportAttribute RA ON RA.intReportAttributeID = SD.intAttributeId
