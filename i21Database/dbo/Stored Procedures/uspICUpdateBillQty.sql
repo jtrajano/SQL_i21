@@ -143,7 +143,7 @@ IF EXISTS(
 			ON Item.intItemId = UpdateTbl.intItemId
 	WHERE 
 		UpdateTbl.intInventoryReceiptChargeId IS NOT NULL 
-		AND UpdateTbl.intInventoryReceiptItemId IS NOT NULL 
+		--AND UpdateTbl.intInventoryReceiptItemId IS NOT NULL 
 		AND UpdateTbl.dblToBillQty <> 0
 		AND ReceiptCharge.intEntityVendorId = UpdateTbl.intEntityVendorId
 )
