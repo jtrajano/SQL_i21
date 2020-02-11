@@ -8448,6 +8448,13 @@
     <Build Include="dbo\Stored Procedures\uspIPTestProcessStgXML.sql" />
     <Build Include="dbo\Stored Procedures\uspICFixOtherChargeBilledQty.sql" />
     <Build Include="dbo\Views\vyuMFInvPlngSummaryDetail.sql" />
+    <Build Include="dbo\Views\vyuIPGetProductPropertyFormulaProperty.sql" />
+    <Build Include="dbo\Views\vyuIPGetConditionalProductProperty.sql" />
+    <Build Include="dbo\Views\vyuIPGetProductPropertyValidityPeriod.sql" />
+    <Build Include="dbo\Views\vyuIPGetProductProperty.sql" />
+    <Build Include="dbo\Views\vyuIPGetProductTest.sql" />
+    <Build Include="dbo\Views\vyuIPGetProductControlPoint.sql" />
+    <Build Include="dbo\Views\vyuIPGetProduct.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
