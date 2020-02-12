@@ -8147,6 +8147,7 @@
     <Build Include="dbo\Stored Procedures\uspAPDiagnoseGrainClearing.sql" />
     <Build Include="dbo\Stored Procedures\uspAPDiagnoseLoadClearing.sql" />
     <Build Include="dbo\Stored Procedures\uspICFixOtherChargeBilledQty.sql" />
+    <Build Include="dbo\Views\vyuSTUnpostedItemSales.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
