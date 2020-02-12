@@ -8455,6 +8455,7 @@
     <Build Include="dbo\Views\vyuIPGetProductTest.sql" />
     <Build Include="dbo\Views\vyuIPGetProductControlPoint.sql" />
     <Build Include="dbo\Views\vyuIPGetProduct.sql" />
+    <Build Include="dbo\Views\vyuSTUnpostedItemSales.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
