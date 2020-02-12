@@ -232,8 +232,6 @@ SELECT -- Load Header
 		L.intShipmentType,
 		L.strExternalShipmentNumber,
 		strShippingInstructionNumber = LOADSI.strLoadNumber,
-		strReversedFromLoadNumber = LOADRF.strLoadNumber,
-		strReversedOnLoadNumber = LOADRO.strLoadNumber,
 		L.dtmStuffingDate
 FROM tblLGLoad L
 LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = L.intWeightUnitMeasureId
@@ -254,9 +252,8 @@ LEFT JOIN tblLGEquipmentType EQ ON EQ.intEquipmentTypeId = L.intEquipmentTypeId
 LEFT JOIN tblSMUserSecurity US ON US.[intEntityId] = L.intDispatcherId
 LEFT JOIN tblCTPosition P ON L.intPositionId = P.intPositionId
 LEFT JOIN tblLGLoad LOADSI ON LOADSI.intLoadId = L.intLoadShippingInstructionId
-LEFT JOIN tblLGLoad LOADRF ON LOADRF.intLoadId = L.intLoadReversalSourceId
-OUTER APPLY (SELECT TOP 1 intLoadId, strLoadNumber FROM tblLGLoad WHERE intLoadReversalSourceId = L.intLoadId) LOADRO
-OUTER APPLY (SELECT TOP 1 intLeadTime FROM tblSMCity DPort WHERE DPort.strCity = L.strDestinationPort AND DPort.ysnPort = 1) DPort
+OUTER APPLY (SELECT TOP 1 intLeadTime FROM tblSMCity DPort 
+						 WHERE DPort.strCity = L.strDestinationPort AND DPort.ysnPort = 1) DPort
 OUTER APPLY (SELECT TOP 1 strOwner FROM tblLGShippingLineServiceContractDetail SLSCD
 			 INNER JOIN tblLGShippingLineServiceContract SLSC ON SLSCD.intShippingLineServiceContractId = SLSC.intShippingLineServiceContractId
 			 WHERE SLSC.intEntityId = L.intShippingLineEntityId AND SLSCD.strServiceContractNumber = L.strServiceContractNumber) SLSC
