@@ -155,6 +155,7 @@ BEGIN TRY
 		,intTruckDriverReferenceId = SC.intTruckDriverReferenceId
 		,ysnImpactInventory = CASE WHEN ISNULL(CustomerFreight.ysnFreightOnly, 0) = 1 THEN 0 ELSE 1 END
 		,strBOLNumberDetail  = DD.strBillOfLading
+		,ysnBlended = CASE WHEN BlendIngredient.intLoadDistributionDetailId IS NULL THEN 0 ELSE 1 END
 	INTO #tmpSourceTable
 	FROM tblTRLoadHeader TL
 	LEFT JOIN tblTRLoadDistributionHeader DH ON DH.intLoadHeaderId = TL.intLoadHeaderId
@@ -819,6 +820,7 @@ BEGIN TRY
 		,[intTruckDriverReferenceId]
 		,[ysnImpactInventory]
 		,[strBOLNumberDetail]
+		,[ysnBlended]
 	)
 	SELECT
 		 [strSourceTransaction]					= TR.strSourceTransaction
@@ -900,6 +902,7 @@ BEGIN TRY
 		,intTruckDriverReferenceId				= TR.intTruckDriverReferenceId
 		,ysnImpactInventory                     = ISNULL(TR.ysnImpactInventory, 0)
 		,strBOLNumberDetail						= TR.strBOLNumberDetail
+		,ysnBlended								= TR.ysnBlended
 	FROM #tmpSourceTableFinal TR
 	ORDER BY TR.intLoadDistributionDetailId, intId DESC
 
