@@ -553,30 +553,78 @@ BEGIN TRY
 								@intExternalId			=	@intTicketId,
 								@strScreenName			=	'Auto - Scale'
 					END
-				
+					
+					INSERT	INTO @Processed 
+					SELECT @intContractDetailId
+						,dbo.fnCalculateQtyBetweenUOM(@intItemUOMId,@intScaleUOMId,@dblAvailable)
+						,NULL
+						,@dblCost
+						,0
+						,@intLoadDetailId
+
+					SELECT	@dblNetUnits	=	@dblNetUnits - @dblAvailable			
 				END
 				ELSE
 				BEGIN
-					IF @intDistributionMethod = 1 AND @dblScheduleQty < @dblAvailable AND @ysnAutoIncreaseSchQty = 1
+					--Check contract if it's the same as the ticket contract
+					IF(@intContractDetailId = @intTicketContractDetailId)
 					BEGIN
-						SET @dblInreaseSchBy  = @dblAvailable - @dblScheduleQty
-						EXEC	uspCTUpdateScheduleQuantity 
-								@intContractDetailId	=	@intContractDetailId,
-								@dblQuantityToUpdate	=	@dblInreaseSchBy,
-								@intUserId				=	@intUserId,
-								@intExternalId			=	@intTicketId,
-								@strScreenName			=	'Auto - Scale'
+						IF(@dblTicketScheduledQuantity + @dblAvailable) <= @dblNetUnits
+						BEGIN
+							SET @dblInreaseSchBy  = @dblAvailable
+							IF(@dblInreaseSchBy > 0)
+							BEGIN
+								EXEC	uspCTUpdateScheduleQuantity 
+										@intContractDetailId	=	@intContractDetailId,
+										@dblQuantityToUpdate	=	@dblInreaseSchBy,
+										@intUserId				=	@intUserId,
+										@intExternalId			=	@intTicketId,
+										@strScreenName			=	'Auto - Scale'
+							END
+							--reuse variable to sum the ticket schedule and available
+							SET @dblInreaseSchBy  = @dblTicketScheduledQuantity + @dblAvailable
+							INSERT	INTO @Processed 
+							SELECT @intContractDetailId
+								,dbo.fnCalculateQtyBetweenUOM(@intItemUOMId,@intScaleUOMId,@dblInreaseSchBy)
+								,NULL
+								,@dblCost
+								,0
+								,@intLoadDetailId
+
+							SELECT	@dblNetUnits	=	@dblNetUnits - @dblInreaseSchBy
+
+						END
+						ELSE
+						BEGIN
+							PRINT 'This should not happen'
+						END
+					END
+					ELSE
+					BEGIN
+						--IF @intDistributionMethod = 1 AND @dblScheduleQty < @dblAvailable AND @ysnAutoIncreaseSchQty = 1
+						
+						SET @dblInreaseSchBy  = @dblAvailable
+						IF @dblAvailable > 0
+						BEGIN
+							EXEC	uspCTUpdateScheduleQuantity 
+									@intContractDetailId	=	@intContractDetailId,
+									@dblQuantityToUpdate	=	@dblInreaseSchBy,
+									@intUserId				=	@intUserId,
+									@intExternalId			=	@intTicketId,
+									@strScreenName			=	'Auto - Scale'
+					
+							INSERT	INTO @Processed 
+							SELECT @intContractDetailId
+								,dbo.fnCalculateQtyBetweenUOM(@intItemUOMId,@intScaleUOMId,@dblAvailable)
+								,NULL
+								,@dblCost
+								,0
+								,@intLoadDetailId
+
+							SELECT	@dblNetUnits	=	@dblNetUnits - @dblAvailable			
+						END
 					END
 				END
-				INSERT	INTO @Processed 
-				SELECT @intContractDetailId
-					,dbo.fnCalculateQtyBetweenUOM(@intItemUOMId,@intScaleUOMId,@dblAvailable)
-					,NULL
-					,@dblCost
-					,0
-					,@intLoadDetailId
-
-				SELECT	@dblNetUnits	=	@dblNetUnits - @dblAvailable			
 			END
 		END
 		
