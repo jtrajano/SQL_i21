@@ -258,7 +258,6 @@ BEGIN
 				WHERE  ((FromType.ysnDPOwnedType = 0 AND ToType.ysnDPOwnedType = 1) OR (FromType.ysnDPOwnedType = 1 AND ToType.ysnDPOwnedType = 0)) AND SR.intTransferStorageId = @intTransferStorageId
 				ORDER BY dtmTransferStorageDate
 
-
 				DECLARE @cursorId INT
 
 				DECLARE _CURSOR CURSOR
@@ -393,6 +392,8 @@ BEGIN
 								,dblCredit		= dblDebit
 									,dblCreditUnit  = dblDebitUnit
 
+
+
 							INSERT INTO @GLEntries 
 							(
 								 [dtmDate] 
@@ -427,9 +428,12 @@ BEGIN
 								,[dblReportingRate]	
 								,[dblForeignRate]
 								,[strRateType]
+								,[intSourceEntityId]
+								,[intCommodityId]
 							)
 							EXEC dbo.uspICUnpostCosting @intTransferStorageId,@strTransferStorageId,@strBatchId,@intUserId,0	
-							 							
+							 	
+				
 							EXEC dbo.uspICUnpostStorage @intTransferStorageId,@strTransferStorageId,@strBatchId,@intUserId,0
 							IF EXISTS (SELECT TOP 1 1 FROM @GLEntries)
 							BEGIN 
