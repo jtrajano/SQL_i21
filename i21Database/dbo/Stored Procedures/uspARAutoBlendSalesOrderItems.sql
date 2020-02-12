@@ -50,7 +50,7 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #UNBLENDEDITEMS)
 			  , @intStorageLocationId	INT = NULL
 			  , @dblQtyOrdered			NUMERIC(18, 6) = 0
 			  , @dblMaxQtyToProduce		NUMERIC(18, 6) = 0
-			  , @dtmDate				DATETIME = NULL
+			--   , @dtmDate				DATETIME = NULL
 
 		SELECT TOP 1 @intSalesOrderDetailId = intSalesOrderDetailId
 				   , @intItemId				= intItemId			 
@@ -59,7 +59,7 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #UNBLENDEDITEMS)
 				   , @intSubLocationId		= intSubLocationId
 				   , @intStorageLocationId	= intStorageLocationId
 				   , @dblQtyOrdered			= dblQtyOrdered
-				   , @dtmDate				= dtmDate
+				--    , @dtmDate				= dtmDate
 		FROM #UNBLENDEDITEMS
 		ORDER BY intSalesOrderDetailId
 
@@ -75,7 +75,7 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #UNBLENDEDITEMS)
 											  , @intStorageLocationId	= @intStorageLocationId
 											  , @intUserId				= @intUserId
 											  , @dblMaxQtyToProduce		= @dblMaxQtyToProduce OUT
-											  , @dtmDate				= @dtmDate
+											--   , @dtmDate				= @dtmDate
 
 					IF ISNULL(@dblMaxQtyToProduce, 0) > 0
 						BEGIN
@@ -88,7 +88,7 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #UNBLENDEDITEMS)
 													  , @intStorageLocationId	= @intStorageLocationId
 													  , @intUserId				= @intUserId
 													  , @dblMaxQtyToProduce		= @dblMaxQtyToProduce OUT
-													  , @dtmDate				= @dtmDate
+													--   , @dtmDate				= @dtmDate
 						END
 						END
 					ELSE
