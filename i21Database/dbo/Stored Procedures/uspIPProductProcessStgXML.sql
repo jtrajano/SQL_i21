@@ -7,57 +7,59 @@ BEGIN TRY
 		,@intTransactionCount INT
 		,@ErrMsg NVARCHAR(MAX)
 		,@strErrorMessage NVARCHAR(MAX)
-	DECLARE @intSampleTypeStageId INT
-		,@intSampleTypeId INT
+	DECLARE @intProductStageId INT
+		,@intProductId INT
 		,@strHeaderXML NVARCHAR(MAX)
 		,@strRowState NVARCHAR(MAX)
 		,@intMultiCompanyId INT
 		,@strUserName NVARCHAR(100)
-	DECLARE @strSampleTypeName NVARCHAR(50)
-		,@strControlPointName NVARCHAR(50)
-		,@strSampleLabelName NVARCHAR(100)
+	DECLARE @strProductValue NVARCHAR(50)
 		,@strApprovalLotStatus NVARCHAR(50)
 		,@strRejectionLotStatus NVARCHAR(50)
 		,@strBondedApprovalLotStatus NVARCHAR(50)
 		,@strBondedRejectionLotStatus NVARCHAR(50)
-		,@intControlPointId INT
-		,@intSampleLabelId INT
+		,@strUnitMeasure NVARCHAR(50)
+		,@intProductTypeId INT
+		,@intProductValueId INT
 		,@intApprovalLotStatusId INT
 		,@intRejectionLotStatusId INT
 		,@intBondedApprovalLotStatusId INT
 		,@intBondedRejectionLotStatusId INT
+		,@intUnitMeasureId INT
 	DECLARE @intLastModifiedUserId INT
-		,@intNewSampleTypeId INT
-		,@intSampleTypeRefId INT
-	DECLARE @strSampleTypeDetailXML NVARCHAR(MAX)
-		,@intSampleTypeDetailId INT
-	DECLARE @strAttributeName NVARCHAR(50)
-		,@intAttributeId INT
+		,@intNewProductId INT
+		,@intProductRefId INT
+	DECLARE @strProductControlPointXML NVARCHAR(MAX)
+		,@intProductControlPointId INT
+	DECLARE @strSampleTypeName NVARCHAR(50)
+		,@strControlPointName NVARCHAR(50)
+		,@intSampleTypeId INT
+		,@intControlPointId INT
 
-	SELECT @intSampleTypeStageId = MIN(intSampleTypeStageId)
-	FROM tblQMSampleTypeStage
+	SELECT @intProductStageId = MIN(intProductStageId)
+	FROM tblQMProductStage
 	WHERE ISNULL(strFeedStatus, '') = ''
 
-	WHILE @intSampleTypeStageId > 0
+	WHILE @intProductStageId > 0
 	BEGIN
-		SELECT @intSampleTypeId = NULL
+		SELECT @intProductId = NULL
 			,@strHeaderXML = NULL
 			,@strRowState = NULL
 			,@intMultiCompanyId = NULL
 			,@strUserName = NULL
-			,@strSampleTypeDetailXML = NULL
+			,@strProductControlPointXML = NULL
 
-		SELECT @intSampleTypeId = intSampleTypeId
+		SELECT @intProductId = intProductId
 			,@strHeaderXML = strHeaderXML
-			,@strSampleTypeDetailXML = strSampleTypeDetailXML
+			,@strProductControlPointXML = strProductControlPointXML
 			,@strRowState = strRowState
 			,@intMultiCompanyId = intMultiCompanyId
 			,@strUserName = strUserName
-		FROM tblQMSampleTypeStage
-		WHERE intSampleTypeStageId = @intSampleTypeStageId
+		FROM tblQMProductStage
+		WHERE intProductStageId = @intProductStageId
 
 		BEGIN TRY
-			SELECT @intSampleTypeRefId = @intSampleTypeId
+			SELECT @intProductRefId = @intProductId
 
 			SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -68,45 +70,40 @@ BEGIN TRY
 			EXEC sp_xml_preparedocument @idoc OUTPUT
 				,@strHeaderXML
 
-			SELECT @strSampleTypeName = NULL
-				,@strControlPointName = NULL
-				,@strSampleLabelName = NULL
+			SELECT @strProductValue = NULL
 				,@strApprovalLotStatus = NULL
 				,@strRejectionLotStatus = NULL
 				,@strBondedApprovalLotStatus = NULL
 				,@strBondedRejectionLotStatus = NULL
-				,@intControlPointId = NULL
-				,@intSampleLabelId = NULL
+				,@strUnitMeasure = NULL
+				,@intProductTypeId = NULL
+				,@intProductValueId = NULL
 				,@intApprovalLotStatusId = NULL
 				,@intRejectionLotStatusId = NULL
 				,@intBondedApprovalLotStatusId = NULL
 				,@intBondedRejectionLotStatusId = NULL
+				,@intUnitMeasureId = NULL
 
-			SELECT @strSampleTypeName = strSampleTypeName
-				,@strControlPointName = strControlPointName
-				,@strSampleLabelName = strSampleLabelName
+			SELECT @strProductValue = strProductValue
 				,@strApprovalLotStatus = strApprovalLotStatus
 				,@strRejectionLotStatus = strRejectionLotStatus
 				,@strBondedApprovalLotStatus = strBondedApprovalLotStatus
 				,@strBondedRejectionLotStatus = strBondedRejectionLotStatus
-			FROM OPENXML(@idoc, 'vyuIPGetSampleTypes/vyuIPGetSampleType', 2) WITH (
-					strSampleTypeName NVARCHAR(50)
-					,strControlPointName NVARCHAR(50)
-					,strSampleLabelName NVARCHAR(100)
+				,@strUnitMeasure = strUnitMeasure
+				,@intProductTypeId = intProductTypeId
+			FROM OPENXML(@idoc, 'vyuIPGetProducts/vyuIPGetProduct', 2) WITH (
+					strProductValue NVARCHAR(50)
 					,strApprovalLotStatus NVARCHAR(50)
 					,strRejectionLotStatus NVARCHAR(50)
 					,strBondedApprovalLotStatus NVARCHAR(50)
 					,strBondedRejectionLotStatus NVARCHAR(50)
+					,strUnitMeasure NVARCHAR(50)
+					,intProductTypeId INT
 					) x
 
-			IF @strControlPointName IS NOT NULL
-				AND NOT EXISTS (
-					SELECT 1
-					FROM tblQMControlPoint t
-					WHERE t.strControlPointName = @strControlPointName
-					)
+			IF @strProductValue IS NULL
 			BEGIN
-				SELECT @strErrorMessage = 'Control Point ' + @strControlPointName + ' is not available.'
+				SELECT @strErrorMessage = 'Product Value cannot be empty.'
 
 				RAISERROR (
 						@strErrorMessage
@@ -115,20 +112,42 @@ BEGIN TRY
 						)
 			END
 
-			IF @strSampleLabelName IS NOT NULL
-				AND NOT EXISTS (
-					SELECT 1
-					FROM tblQMSampleLabel t
-					WHERE t.strSampleLabelName = @strSampleLabelName
-					)
+			IF @intProductTypeId = 1
 			BEGIN
-				SELECT @strErrorMessage = 'Sample Label ' + @strSampleLabelName + ' is not available.'
-
-				RAISERROR (
-						@strErrorMessage
-						,16
-						,1
+				IF @strProductValue IS NOT NULL
+					AND NOT EXISTS (
+						SELECT 1
+						FROM tblICCategory t
+						WHERE t.strCategoryCode = @strProductValue
 						)
+				BEGIN
+					SELECT @strErrorMessage = 'Category ' + @strProductValue + ' is not available.'
+
+					RAISERROR (
+							@strErrorMessage
+							,16
+							,1
+							)
+				END
+			END
+
+			IF @intProductTypeId = 2
+			BEGIN
+				IF @strProductValue IS NOT NULL
+					AND NOT EXISTS (
+						SELECT 1
+						FROM tblICItem t
+						WHERE t.strItemNo = @strProductValue
+						)
+				BEGIN
+					SELECT @strErrorMessage = 'Item No. ' + @strProductValue + ' is not available.'
+
+					RAISERROR (
+							@strErrorMessage
+							,16
+							,1
+							)
+				END
 			END
 
 			IF @strApprovalLotStatus IS NOT NULL
@@ -195,13 +214,35 @@ BEGIN TRY
 						)
 			END
 
-			SELECT @intControlPointId = t.intControlPointId
-			FROM tblQMControlPoint t
-			WHERE t.strControlPointName = @strControlPointName
+			IF @strUnitMeasure IS NOT NULL
+				AND NOT EXISTS (
+					SELECT 1
+					FROM tblICUnitMeasure t
+					WHERE t.strUnitMeasure = @strUnitMeasure
+					)
+			BEGIN
+				SELECT @strErrorMessage = 'UOM ' + @strUnitMeasure + ' is not available.'
 
-			SELECT @intSampleLabelId = t.intSampleLabelId
-			FROM tblQMSampleLabel t
-			WHERE t.strSampleLabelName = @strSampleLabelName
+				RAISERROR (
+						@strErrorMessage
+						,16
+						,1
+						)
+			END
+
+			IF @intProductTypeId = 1
+			BEGIN
+				SELECT @intProductValueId = t.intCategoryId
+				FROM tblICCategory t
+				WHERE t.strCategoryCode = @strProductValue
+			END
+
+			IF @intProductTypeId = 2
+			BEGIN
+				SELECT @intProductValueId = t.intItemId
+				FROM tblICItem t
+				WHERE t.strItemNo = @strProductValue
+			END
 
 			SELECT @intApprovalLotStatusId = t.intLotStatusId
 			FROM tblICLotStatus t
@@ -218,6 +259,10 @@ BEGIN TRY
 			SELECT @intBondedRejectionLotStatusId = t.intLotStatusId
 			FROM tblICLotStatus t
 			WHERE t.strSecondaryStatus = @strBondedRejectionLotStatus
+
+			SELECT @intUnitMeasureId = t.intUnitMeasureId
+			FROM tblICUnitMeasure t
+			WHERE t.strUnitMeasure = @strUnitMeasure
 
 			SELECT @intLastModifiedUserId = t.intEntityId
 			FROM tblEMEntity t
@@ -245,8 +290,8 @@ BEGIN TRY
 			BEGIN
 				IF NOT EXISTS (
 						SELECT 1
-						FROM tblQMSampleType
-						WHERE intSampleTypeRefId = @intSampleTypeRefId
+						FROM tblQMProduct
+						WHERE intProductRefId = @intProductRefId
 						)
 					SELECT @strRowState = 'Added'
 				ELSE
@@ -255,134 +300,131 @@ BEGIN TRY
 
 			IF @strRowState = 'Delete'
 			BEGIN
-				SELECT @intNewSampleTypeId = @intSampleTypeRefId
-					,@strSampleTypeName = @strSampleTypeName
+				SELECT @intNewProductId = @intProductRefId
+					,@strProductValue = @strProductValue
 
 				DELETE
-				FROM tblQMSampleType
-				WHERE intSampleTypeRefId = @intSampleTypeRefId
+				FROM tblQMProduct
+				WHERE intProductRefId = @intProductRefId
 
 				GOTO ext
 			END
 
 			IF @strRowState = 'Added'
 			BEGIN
-				INSERT INTO tblQMSampleType (
+				INSERT INTO tblQMProduct (
 					intConcurrencyId
-					,strSampleTypeName
-					,strDescription
-					,intControlPointId
-					,ysnFinalApproval
-					,strApprovalBase
-					,intSampleLabelId
-					,ysnAdjustInventoryQtyBySampleQty
+					,intProductTypeId
+					,intProductValueId
+					,strDirections
+					,strNote
+					,ysnActive
 					,intApprovalLotStatusId
 					,intRejectionLotStatusId
 					,intBondedApprovalLotStatusId
 					,intBondedRejectionLotStatusId
+					,intUnitMeasureId
 					,intCreatedUserId
 					,dtmCreated
 					,intLastModifiedUserId
 					,dtmLastModified
-					,intSampleTypeRefId
+					,intProductRefId
 					)
 				SELECT 1
-					,strSampleTypeName
-					,strDescription
-					,@intControlPointId
-					,ysnFinalApproval
-					,strApprovalBase
-					,@intSampleLabelId
-					,ysnAdjustInventoryQtyBySampleQty
+					,intProductTypeId
+					,@intProductValueId
+					,strDirections
+					,strNote
+					,ysnActive
 					,@intApprovalLotStatusId
 					,@intRejectionLotStatusId
 					,@intBondedApprovalLotStatusId
 					,@intBondedRejectionLotStatusId
+					,@intUnitMeasureId
 					,@intLastModifiedUserId
 					,dtmCreated
 					,@intLastModifiedUserId
 					,dtmLastModified
-					,@intSampleTypeRefId
-				FROM OPENXML(@idoc, 'vyuIPGetSampleTypes/vyuIPGetSampleType', 2) WITH (
-						strSampleTypeName NVARCHAR(50)
-						,strDescription NVARCHAR(100)
-						,ysnFinalApproval BIT
-						,strApprovalBase NVARCHAR(50)
-						,ysnAdjustInventoryQtyBySampleQty BIT
+					,@intProductRefId
+				FROM OPENXML(@idoc, 'vyuIPGetProducts/vyuIPGetProduct', 2) WITH (
+						intProductTypeId INT
+						,strDirections NVARCHAR(1000)
+						,strNote NVARCHAR(500)
+						,ysnActive BIT
 						,dtmCreated DATETIME
 						,dtmLastModified DATETIME
 						)
 
-				SELECT @intNewSampleTypeId = SCOPE_IDENTITY()
+				SELECT @intNewProductId = SCOPE_IDENTITY()
 			END
 
 			IF @strRowState = 'Modified'
 			BEGIN
-				UPDATE tblQMSampleType
+				UPDATE tblQMProduct
 				SET intConcurrencyId = intConcurrencyId + 1
-					,strSampleTypeName = x.strSampleTypeName
-					,strDescription = x.strDescription
-					,intControlPointId = @intControlPointId
-					,ysnFinalApproval = x.ysnFinalApproval
-					,strApprovalBase = x.strApprovalBase
-					,intSampleLabelId = @intSampleLabelId
-					,ysnAdjustInventoryQtyBySampleQty = x.ysnAdjustInventoryQtyBySampleQty
+					,intProductValueId = @intProductValueId
+					,strDirections = x.strDirections
+					,strNote = x.strNote
+					,ysnActive = x.ysnActive
 					,intApprovalLotStatusId = @intApprovalLotStatusId
 					,intRejectionLotStatusId = @intRejectionLotStatusId
 					,intBondedApprovalLotStatusId = @intBondedApprovalLotStatusId
 					,intBondedRejectionLotStatusId = @intBondedRejectionLotStatusId
+					,intUnitMeasureId = @intUnitMeasureId
 					,intLastModifiedUserId = @intLastModifiedUserId
 					,dtmLastModified = x.dtmLastModified
-				FROM OPENXML(@idoc, 'vyuIPGetSampleTypes/vyuIPGetSampleType', 2) WITH (
-						strSampleTypeName NVARCHAR(50)
-						,strDescription NVARCHAR(100)
-						,ysnFinalApproval BIT
-						,strApprovalBase NVARCHAR(50)
-						,ysnAdjustInventoryQtyBySampleQty BIT
+				FROM OPENXML(@idoc, 'vyuIPGetProducts/vyuIPGetProduct', 2) WITH (
+						strDirections NVARCHAR(1000)
+						,strNote NVARCHAR(500)
+						,ysnActive BIT
 						,dtmLastModified DATETIME
 						) x
-				WHERE tblQMSampleType.intSampleTypeRefId = @intSampleTypeRefId
+				WHERE tblQMProduct.intProductRefId = @intProductRefId
 
-				SELECT @intNewSampleTypeId = intSampleTypeId
-				FROM tblQMSampleType
-				WHERE intSampleTypeRefId = @intSampleTypeRefId
+				SELECT @intNewProductId = intProductId
+				FROM tblQMProduct
+				WHERE intProductRefId = @intProductRefId
 			END
 
 			EXEC sp_xml_removedocument @idoc
 
-			------------------------------------Sample Type Detail--------------------------------------------
+			------------------------------------Product Control Point--------------------------------------------
 			EXEC sp_xml_preparedocument @idoc OUTPUT
-				,@strSampleTypeDetailXML
+				,@strProductControlPointXML
 
-			DECLARE @tblQMSampleTypeDetail TABLE (intSampleTypeDetailId INT)
+			DECLARE @tblQMProductControlPoint TABLE (intProductControlPointId INT)
 
-			INSERT INTO @tblQMSampleTypeDetail (intSampleTypeDetailId)
-			SELECT intSampleTypeDetailId
-			FROM OPENXML(@idoc, 'vyuIPGetSampleTypeDetails/vyuIPGetSampleTypeDetail', 2) WITH (intSampleTypeDetailId INT)
+			INSERT INTO @tblQMProductControlPoint (intProductControlPointId)
+			SELECT intProductControlPointId
+			FROM OPENXML(@idoc, 'vyuIPGetProductControlPoints/vyuIPGetProductControlPoint', 2) WITH (intProductControlPointId INT)
 
-			SELECT @intSampleTypeDetailId = MIN(intSampleTypeDetailId)
-			FROM @tblQMSampleTypeDetail
+			SELECT @intProductControlPointId = MIN(intProductControlPointId)
+			FROM @tblQMProductControlPoint
 
-			WHILE @intSampleTypeDetailId IS NOT NULL
+			WHILE @intProductControlPointId IS NOT NULL
 			BEGIN
-				SELECT @strAttributeName = NULL
-					,@intAttributeId = NULL
+				SELECT @strSampleTypeName = NULL
+					,@strControlPointName = NULL
+					,@intSampleTypeId = NULL
+					,@intControlPointId = NULL
 
-				SELECT @strAttributeName = strAttributeName
-				FROM OPENXML(@idoc, 'vyuIPGetSampleTypeDetails/vyuIPGetSampleTypeDetail', 2) WITH (
-						strAttributeName NVARCHAR(50) Collate Latin1_General_CI_AS
-						,intSampleTypeDetailId INT
+				SELECT @strSampleTypeName = strSampleTypeName
+					,@strControlPointName = strControlPointName
+				FROM OPENXML(@idoc, 'vyuIPGetProductControlPoints/vyuIPGetProductControlPoint', 2) WITH (
+						strSampleTypeName NVARCHAR(50) Collate Latin1_General_CI_AS
+						,strControlPointName NVARCHAR(50) Collate Latin1_General_CI_AS
+						,intProductControlPointId INT
 						) SD
-				WHERE intSampleTypeDetailId = @intSampleTypeDetailId
+				WHERE intProductControlPointId = @intProductControlPointId
 
-				IF @strAttributeName IS NOT NULL
+				IF @strSampleTypeName IS NOT NULL
 					AND NOT EXISTS (
 						SELECT 1
-						FROM tblQMAttribute t
-						WHERE t.strAttributeName = @strAttributeName
+						FROM tblQMSampleType t
+						WHERE t.strSampleTypeName = @strSampleTypeName
 						)
 				BEGIN
-					SELECT @strErrorMessage = 'Attribute Name ' + @strAttributeName + ' is not available.'
+					SELECT @strErrorMessage = 'Sample Type ' + @strSampleTypeName + ' is not available.'
 
 					RAISERROR (
 							@strErrorMessage
@@ -391,87 +433,105 @@ BEGIN TRY
 							)
 				END
 
-				SELECT @intAttributeId = t.intAttributeId
-				FROM tblQMAttribute t
-				WHERE t.strAttributeName = @strAttributeName
+				IF @strControlPointName IS NOT NULL
+					AND NOT EXISTS (
+						SELECT 1
+						FROM tblQMControlPoint t
+						WHERE t.strControlPointName = @strControlPointName
+						)
+				BEGIN
+					SELECT @strErrorMessage = 'Control Point ' + @strControlPointName + ' is not available.'
+
+					RAISERROR (
+							@strErrorMessage
+							,16
+							,1
+							)
+				END
+
+				SELECT @intSampleTypeId = t.intSampleTypeId
+				FROM tblQMSampleType t
+				WHERE t.strSampleTypeName = @strSampleTypeName
+
+				SELECT @intControlPointId = t.intControlPointId
+				FROM tblQMControlPoint t
+				WHERE t.strControlPointName = @strControlPointName
 
 				IF NOT EXISTS (
 						SELECT 1
-						FROM tblQMSampleTypeDetail
-						WHERE intSampleTypeId = @intNewSampleTypeId
-							AND intSampleTypeDetailRefId = @intSampleTypeDetailId
+						FROM tblQMProductControlPoint
+						WHERE intProductId = @intNewProductId
+							AND intProductControlPointRefId = @intProductControlPointId
 						)
 				BEGIN
-					INSERT INTO tblQMSampleTypeDetail (
-						intSampleTypeId
-						,intAttributeId
-						,intConcurrencyId
-						,ysnIsMandatory
+					INSERT INTO tblQMProductControlPoint (
+						intConcurrencyId
+						,intProductId
+						,intControlPointId
+						,intSampleTypeId
 						,intCreatedUserId
 						,dtmCreated
 						,intLastModifiedUserId
 						,dtmLastModified
-						,intSampleTypeDetailRefId
+						,intProductControlPointRefId
 						)
-					SELECT @intNewSampleTypeId
-						,@intAttributeId
-						,1
-						,ysnIsMandatory
+					SELECT 1
+						,@intNewProductId
+						,@intControlPointId
+						,@intSampleTypeId
 						,@intLastModifiedUserId
 						,dtmCreated
 						,@intLastModifiedUserId
 						,dtmLastModified
-						,@intSampleTypeDetailId
-					FROM OPENXML(@idoc, 'vyuIPGetSampleTypeDetails/vyuIPGetSampleTypeDetail', 2) WITH (
-							ysnIsMandatory BIT
-							,dtmCreated DATETIME
+						,@intProductControlPointId
+					FROM OPENXML(@idoc, 'vyuIPGetProductControlPoints/vyuIPGetProductControlPoint', 2) WITH (
+							dtmCreated DATETIME
 							,dtmLastModified DATETIME
-							,intSampleTypeDetailId INT
+							,intProductControlPointId INT
 							) x
-					WHERE x.intSampleTypeDetailId = @intSampleTypeDetailId
+					WHERE x.intProductControlPointId = @intProductControlPointId
 				END
 				ELSE
 				BEGIN
-					UPDATE tblQMSampleTypeDetail
+					UPDATE tblQMProductControlPoint
 					SET intConcurrencyId = intConcurrencyId + 1
-						,intAttributeId = @intAttributeId
-						,ysnIsMandatory = x.ysnIsMandatory
+						,intControlPointId = @intControlPointId
+						,intSampleTypeId = @intSampleTypeId
 						,intLastModifiedUserId = @intLastModifiedUserId
 						,dtmLastModified = x.dtmLastModified
-					FROM OPENXML(@idoc, 'vyuIPGetSampleTypeDetails/vyuIPGetSampleTypeDetail', 2) WITH (
-							ysnIsMandatory BIT
-							,dtmLastModified DATETIME
-							,intSampleTypeDetailId INT
+					FROM OPENXML(@idoc, 'vyuIPGetProductControlPoints/vyuIPGetProductControlPoint', 2) WITH (
+							dtmLastModified DATETIME
+							,intProductControlPointId INT
 							) x
-					JOIN tblQMSampleTypeDetail D ON D.intSampleTypeDetailRefId = x.intSampleTypeDetailId
-						AND D.intSampleTypeId = @intNewSampleTypeId
-					WHERE x.intSampleTypeDetailId = @intSampleTypeDetailId
+					JOIN tblQMProductControlPoint D ON D.intProductControlPointRefId = x.intProductControlPointId
+						AND D.intProductId = @intNewProductId
+					WHERE x.intProductControlPointId = @intProductControlPointId
 				END
 
-				SELECT @intSampleTypeDetailId = MIN(intSampleTypeDetailId)
-				FROM @tblQMSampleTypeDetail
-				WHERE intSampleTypeDetailId > @intSampleTypeDetailId
+				SELECT @intProductControlPointId = MIN(intProductControlPointId)
+				FROM @tblQMProductControlPoint
+				WHERE intProductControlPointId > @intProductControlPointId
 			END
 
 			DELETE
-			FROM tblQMSampleTypeDetail
-			WHERE intSampleTypeId = @intNewSampleTypeId
-				AND intSampleTypeDetailRefId NOT IN (
-					SELECT intSampleTypeDetailId
-					FROM @tblQMSampleTypeDetail
+			FROM tblQMProductControlPoint
+			WHERE intProductId = @intNewProductId
+				AND intProductControlPointRefId NOT IN (
+					SELECT intProductControlPointId
+					FROM @tblQMProductControlPoint
 					)
 
 			ext:
 
 			EXEC sp_xml_removedocument @idoc
 
-			UPDATE tblQMSampleTypeStage
+			UPDATE tblQMProductStage
 			SET strFeedStatus = 'Processed'
 				,strMessage = 'Success'
-			WHERE intSampleTypeStageId = @intSampleTypeStageId
+			WHERE intProductStageId = @intProductStageId
 
 			-- Audit Log
-			IF (@intNewSampleTypeId > 0)
+			IF (@intNewProductId > 0)
 			BEGIN
 				DECLARE @StrDescription AS NVARCHAR(MAX)
 
@@ -479,27 +539,27 @@ BEGIN TRY
 				BEGIN
 					SELECT @StrDescription = 'Created '
 
-					EXEC uspSMAuditLog @keyValue = @intNewSampleTypeId
+					EXEC uspSMAuditLog @keyValue = @intNewProductId
 						,@screenName = 'Quality.view.QualityTemplate'
 						,@entityId = @intLastModifiedUserId
 						,@actionType = 'Created'
 						,@actionIcon = 'small-new-plus'
 						,@changeDescription = @StrDescription
 						,@fromValue = ''
-						,@toValue = @strSampleTypeName
+						,@toValue = @strProductValue
 				END
 				ELSE IF @strRowState = 'Modified'
 				BEGIN
 					SELECT @StrDescription = 'Updated '
 
-					EXEC uspSMAuditLog @keyValue = @intNewSampleTypeId
+					EXEC uspSMAuditLog @keyValue = @intNewProductId
 						,@screenName = 'Quality.view.QualityTemplate'
 						,@entityId = @intLastModifiedUserId
 						,@actionType = 'Updated'
 						,@actionIcon = 'small-tree-modified'
 						,@changeDescription = @StrDescription
 						,@fromValue = ''
-						,@toValue = @strSampleTypeName
+						,@toValue = @strProductValue
 				END
 			END
 
@@ -517,15 +577,15 @@ BEGIN TRY
 				AND @intTransactionCount = 0
 				ROLLBACK TRANSACTION
 
-			UPDATE tblQMSampleTypeStage
+			UPDATE tblQMProductStage
 			SET strFeedStatus = 'Failed'
 				,strMessage = @ErrMsg
-			WHERE intSampleTypeStageId = @intSampleTypeStageId
+			WHERE intProductStageId = @intProductStageId
 		END CATCH
 
-		SELECT @intSampleTypeStageId = MIN(intSampleTypeStageId)
-		FROM tblQMSampleTypeStage
-		WHERE intSampleTypeStageId > @intSampleTypeStageId
+		SELECT @intProductStageId = MIN(intProductStageId)
+		FROM tblQMProductStage
+		WHERE intProductStageId > @intProductStageId
 			AND ISNULL(strFeedStatus, '') = ''
 	END
 END TRY
