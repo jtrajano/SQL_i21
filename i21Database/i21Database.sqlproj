@@ -7369,6 +7369,7 @@
     <Build Include="dbo\Stored Procedures\uspSCUpdateDeliverySheetDate.sql" />
     <Build Include="dbo\Tables\tblARInvoiceTaxReportStagingTable.sql" />
     <Build Include="dbo\Stored Procedures\uspARInvoiceDetailTaxReport.sql" />
+    <Build Include="dbo\Views\vyuAPReceiptClearingGL.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
