@@ -11,11 +11,11 @@ AS
 			WHEN SCT.strTicketStatus = 'S' THEN 'STARTED' 
 			WHEN SCT.strTicketStatus = 'I' THEN 'IN TRANSIT'
 			WHEN SCT.strTicketStatus = 'D' THEN 'DELIVERED'  
-			WHEN SCT.strTicketStatus = 'H'  THEN
-			CASE
-				wHEN SCT.ysnDeliverySheetPost = 1 THEN 'COMPLETED' 
-				ELSE 'HOLD'
-			END
+			WHEN SCT.strTicketStatus = 'H'  THEN 'HOLD'
+			--CASE
+			--	wHEN SCT.ysnDeliverySheetPost = 1 THEN 'COMPLETED' 
+			--	ELSE 'HOLD'
+			--END
 		END) COLLATE Latin1_General_CI_AS AS strTicketStatusDescription
 	   ,SCT.strTicketStatus
        ,SCT.strTicketNumber
@@ -169,8 +169,8 @@ AS
 	   ,IC.strItemNo AS strItemNumber
 	   --,EMDriver.strName AS strDriverName
      ,SCT.dtmImportedDate
-	 ,tblSMShipViaTrailer.strTrailerLicenseNumber
 	 ,ContractsApplied.strContractsApplied
+    ,SCT.strTrailerId
   from tblSCTicket SCT
 	LEFT JOIN tblEMEntity EMEntity on EMEntity.intEntityId = SCT.intEntityId
 	LEFT JOIN tblEMEntitySplit EMSplit on [EMSplit].intSplitId = SCT.intSplitId
@@ -192,7 +192,6 @@ AS
 	LEFT JOIN tblICItem IC ON IC.intItemId = SCT.intItemId
    LEFT JOIN tblEMEntityLocation EMLocation on EMLocation.intEntityLocationId = SCT.intFarmFieldId
 	--LEFT JOIN tblEMEntity EMDriver ON EMDriver.intEntityId = SCT.intEntityContactId
-	LEFT JOIN tblSMShipViaTrailer on SCT.intEntityShipViaTrailerId = tblSMShipViaTrailer.intEntityShipViaTrailerId
 	LEFT JOIN tblCTContractDetail CTD ON SCT.intContractId = CTD.intContractDetailId
 	LEFT JOIN tblCTContractHeader CTH ON CTH.intContractHeaderId = CTD.intContractHeaderId
 	OUTER APPLY(
