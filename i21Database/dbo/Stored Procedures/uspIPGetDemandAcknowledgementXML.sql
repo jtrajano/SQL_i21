@@ -1,4 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspIPGetDemandAcknowledgementXML]
+(@intCompanyId int)
 AS
 BEGIN TRY
 	SET NOCOUNT ON
@@ -8,10 +9,13 @@ BEGIN TRY
 	SELECT *
 	FROM tblMFDemandAcknowledgementStage
 	WHERE ISNULL(strFeedStatus, '') = ''
+	AND intCompanyId=@intCompanyId
 
 	UPDATE tblMFDemandAcknowledgementStage
 	SET strFeedStatus = 'Ack Sent'
 	WHERE ISNULL(strFeedStatus, '') = ''
+	AND intCompanyId=@intCompanyId
+
 END TRY
 
 BEGIN CATCH

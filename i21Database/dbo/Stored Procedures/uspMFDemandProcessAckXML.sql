@@ -8,7 +8,9 @@ BEGIN TRY
 		,@intTransactionRefId INT
 		,@intCompanyRefId INT
 		,@ErrMsg NVARCHAR(MAX)
-		,@intDemandAcknowledgementStageId int
+		,@intDemandAcknowledgementStageId INT
+		,@intInvPlngReportMasterRefId INT
+		,@intInvPlngReportMasterId INT
 
 	SELECT @intDemandAcknowledgementStageId = MIN(intDemandAcknowledgementStageId)
 	FROM tblMFDemandAcknowledgementStage
@@ -21,13 +23,22 @@ BEGIN TRY
 			,@intCompanyId = NULL
 			,@intTransactionRefId = NULL
 			,@intCompanyRefId = NULL
+			,@intInvPlngReportMasterRefId = NULL
+			,@intInvPlngReportMasterId = NULL
 
 		SELECT @intTransactionId = intTransactionId
 			,@intCompanyId = intCompanyId
 			,@intTransactionRefId = intTransactionRefId
 			,@intCompanyRefId = intCompanyRefId
+			,@intInvPlngReportMasterRefId = intInvPlngReportMasterRefId
+			,@intInvPlngReportMasterId = intInvPlngReportMasterId
 		FROM tblMFDemandAcknowledgementStage
 		WHERE intDemandAcknowledgementStageId = @intDemandAcknowledgementStageId
+
+		UPDATE tblCTInvPlngReportMaster
+		SET intInvPlngReportMasterRefID = @intInvPlngReportMasterId
+		WHERE intInvPlngReportMasterID = @intInvPlngReportMasterRefId
+			AND intInvPlngReportMasterRefID IS NULL
 
 		EXECUTE dbo.uspSMInterCompanyUpdateMapping @currentTransactionId = @intTransactionId
 			,@referenceTransactionId = @intTransactionRefId
