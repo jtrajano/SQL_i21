@@ -8456,6 +8456,10 @@
     <Build Include="dbo\Views\vyuIPGetProductControlPoint.sql" />
     <Build Include="dbo\Views\vyuIPGetProduct.sql" />
     <Build Include="dbo\Views\vyuSTUnpostedItemSales.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProductProcessPreStage.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProductPopulateStgXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProductTransferStgXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProductProcessStgXML.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
