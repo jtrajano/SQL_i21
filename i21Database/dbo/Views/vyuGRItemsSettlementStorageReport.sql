@@ -19,26 +19,34 @@ INNER JOIN (
 						, Item.strItemNo
 						, dblQtyReceived = dbo.fnCTConvertQtyToTargetItemUOM(BD.intUnitOfMeasureId, ItemUOM.intItemUOMId, BD.dblQtyReceived)
 						, SD.strDistributionType
-						, SD.intStorageScheduleTypeId
+						, ISNULL(SD.intStorageScheduleTypeId, -99999999 ) AS intStorageScheduleTypeId
 						, ItemUOM.intUnitMeasureId
-				FROM tblAPBillDetail BD
+				FROM tblICItem Item 
+				JOIN tblAPBillDetail BD
+					ON BD.intItemId = Item.intItemId						
+						AND Item.strType = 'Inventory'
+						AND Item.ysnUseWeighScales = 1
+						and BD.dblQtyReceived > 1			
 				JOIN tblAPBill Bill 
 					ON BD.intBillId = Bill.intBillId
 				LEFT JOIN tblAPPaymentDetail PD 
-					ON BD.intBillId = PD.intBillId
-				LEFT JOIN tblICItem Item 
-					ON BD.intItemId = Item.intItemId						
+					ON BD.intBillId = PD.intBillId				
 				LEFT JOIN tblICItemUOM ItemUOM 
 					ON Item.intItemId = ItemUOM.intItemId
 						AND ItemUOM.ysnStockUnit = 1		
-				LEFT JOIN vyuSCGetScaleDistribution SD 
-					ON (BD.intInventoryReceiptItemId = SD.intInventoryReceiptItemId 
-						OR BD.intCustomerStorageId = SD.intCustomerStorageId)
+
+				outer apply (
+							select strDistributionType, intStorageScheduleTypeId from  vyuSCGetScaleDistribution 
+								where ( BD.intInventoryReceiptItemId = intInventoryReceiptItemId 
+									OR BD.intCustomerStorageId = intCustomerStorageId
+									) and strDistributionType IS NOT NULL 
+										AND intStorageScheduleTypeId is not null
+						)  SD 
+
+
+
 				WHERE	PD.dblAmountDue = 0
-						AND Item.strType = 'Inventory'
-						AND Item.ysnUseWeighScales = 1
-						AND SD.strDistributionType IS NOT NULL
-						AND BD.dblQtyReceived > 1
+
 				GROUP BY 
 						BD.intItemId
 						, Bill.intEntityVendorId

@@ -69,11 +69,19 @@ BEGIN TRY
 		)
 
 		UPDATE tblCTPriceFixationDetailAPAR SET intBillDetailId = NULL , intBillId = NULL WHERE intBillId = @intBillId
+		
+
+		-- we need to set this to null so that it will not be deleted
+		-- the only time we will not delete this is when a pricing is deleted,
+		-- other scenario SHOULD delete the history
+		-- Mon
+		update tblGRStorageHistory set intBillId = null Where intBillId=@intBillId 
 	END
 	--WILL REVERT FIRST THE APPLIED BILL 
 	UPDATE tblAPAppliedPrepaidAndDebit SET intBillDetailApplied = NULL  WHERE intBillId = @intBillId
 	UPDATE tblGRSettleStorage SET intBillId = NULL WHERE intBillId = @intBillId
-
+	UPDATE tblGRStorageHistory SET intBillId = NULL WHERE intBillId = @intBillId
+	
 	--clear original transaction if this is a reversal
 	UPDATE A
 		SET A.intTransactionReversed = NULL
@@ -93,7 +101,7 @@ BEGIN TRY
 
 	EXEC uspAPUpdateInvoiceNumInGLDetail @invoiceNumber = @vendorOrderNumber, @intBillId = @intBillId
 
-	EXEC uspGRDeleteStorageHistory 'Voucher', @intBillId
+	--EXEC uspGRDeleteStorageHistory 'Voucher', @intBillId
 
 	EXEC uspAPArchiveVoucher @billId = @intBillId
 

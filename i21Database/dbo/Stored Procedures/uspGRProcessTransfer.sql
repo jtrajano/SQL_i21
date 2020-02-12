@@ -4,12 +4,17 @@
 	@intUserId INT
 )
 AS
+ 
 BEGIN
 	SET QUOTED_IDENTIFIER OFF
 	SET ANSI_NULLS ON
 	SET NOCOUNT ON
 	SET XACT_ABORT ON
 	SET ANSI_WARNINGS OFF	
+
+	--debug point--
+	declare @debug_point bit = 0
+	--debug point
 
 	DECLARE @ErrMsg AS NVARCHAR(MAX)
 	DECLARE @StorageHistoryStagingTable AS [StorageHistoryStagingTable]	
@@ -404,7 +409,8 @@ BEGIN
 					,IL.intItemLocationId 
 					,ToStorage.intItemUOMId
 					,dtmTransferStorageDate
-					,dbo.fnCTConvertQuantityToTargetItemUOM(ToStorage.intItemId, IU.intUnitMeasureId, ToStorage.intUnitMeasureId, SR.dblUnitQty) * CASE WHEN (FromType.ysnDPOwnedType = 0 AND ToType.ysnDPOwnedType = 1) THEN -1 ELSE 1 END
+					,dbo.fnCTConvertQuantityToTargetItemUOM(ToStorage.intItemId, IU.intUnitMeasureId, ToStorage.intUnitMeasureId, SR.dblUnitQty) 
+						* CASE WHEN (FromType.ysnDPOwnedType = 0 AND ToType.ysnDPOwnedType = 1) THEN -1 ELSE 1 END
 					,IU.dblUnitQty
 					,0
 					,dblSalesPrice = 0
@@ -438,6 +444,18 @@ BEGIN
 				WHERE  ((FromType.ysnDPOwnedType = 0 AND ToType.ysnDPOwnedType = 1) OR (FromType.ysnDPOwnedType = 1 AND ToType.ysnDPOwnedType = 0)) AND SR.intTransferStorageId = @intTransferStorageId
 				ORDER BY dtmTransferStorageDate
 
+				--debug point
+				if @debug_point = 1  and 1 = 0
+				begin
+					select 'fresh item to post '
+					select * from @ItemsToPost
+					select 'transfer storage reference '
+					select * from tblGRTransferStorageReference SR
+						where SR.intTransferStorageId = @intTransferStorageId
+					select 'transfer storage reference '
+
+				end
+				--debug point
 
 				DECLARE @cursorId INT
 
@@ -453,7 +471,9 @@ BEGIN
 						DECLARE @DummyGLEntries AS RecapTableType;
 						DECLARE @Entry as ItemCostingTableType;
 						DECLARE @dblCost AS DECIMAL(24,10);
+						DECLARE @dblOriginalCost AS DECIMAL(24,10);
 						DECLARE @dblDiscountCost AS DECIMAL(24,10);
+						DECLARE @dblUnits AS DECIMAL(24,10);
 						DECLARE @strBatchId AS NVARCHAR(40);
 						IF OBJECT_ID('tempdb..#tblICItemRunningStock') IS NOT NULL DROP TABLE  #tblICItemRunningStock
 						CREATE TABLE #tblICItemRunningStock(
@@ -494,7 +514,7 @@ BEGIN
 
 
 						SELECT @intItemId = ITP.intItemId,@intLocationId = IL.intLocationId,@intSubLocationId = ITP.intSubLocationId, @intStorageLocationId = ITP.intStorageLocationId, @dtmDate = ITP.dtmDate, @intOwnerShipId = CASE WHEN ITP.ysnIsStorage = 1 THEN 2 ELSE 1 END
-							
+							,@dblUnits = ITP.dblQty
 						FROM @ItemsToPost ITP
 						INNER JOIN tblICItem I
 							ON ITP.intItemId = I.intItemId
@@ -523,21 +543,24 @@ BEGIN
 						END
 
 						SET @dblCost =ISNULL(@dblSettlementPrice,0) + ISNULL(@dblBasisCost,0)
-						
+						set @dblOriginalCost = @dblCost
+
 						DECLARE @OtherChargesDetail AS TABLE(
 							intOtherChargesDetailId INT IDENTITY(1, 1)
 							,strOrderType NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 							,intCustomerStorageId INT
 							,intCompanyLocationId INT
 							,dblUnits DECIMAL(24, 10)
-							,dblCashPrice DECIMAL(24, 10)
+							,dblCashPrice DECIMAL(36, 20)
 							,dblExactCashPrice DECIMAL (24,10)
 							,intItemId INT NULL
 							,intItemType INT NULL
 							,IsProcessed BIT
 							,intTicketDiscountId INT NULL
 							,ysnDiscountFromGrossWeight BIT NULL
+							,ysnIsPercent bit null
 						)
+						delete from @OtherChargesDetail
 						INSERT INTO @OtherChargesDetail
 						(
 							intCustomerStorageId
@@ -550,6 +573,7 @@ BEGIN
 							,IsProcessed
 							,intTicketDiscountId
 							,ysnDiscountFromGrossWeight
+							,ysnIsPercent
 						)
 						SELECT 
 							 intCustomerStorageId		= CS.intCustomerStorageId
@@ -558,7 +582,8 @@ BEGIN
 															WHEN DCO.strDiscountCalculationOption = 'Gross Weight' THEN 
 																CASE WHEN CS.dblGrossQuantity IS NULL THEN SR.dblUnitQty
 																ELSE
-																	ROUND((SR.dblUnitQty / CS.dblOriginalBalance) * CS.dblGrossQuantity,10)
+																	--(SR.dblUnitQty / CS.dblOriginalBalance) * 
+																	ROUND((CS.dblGrossQuantity  * (isnull(SR.dblSplitPercent, 100) / 100)) ,10)
 																END
 															ELSE SR.dblUnitQty
 														END
@@ -579,6 +604,7 @@ BEGIN
 															WHEN DCO.strDiscountCalculationOption = 'Gross Weight' THEN 1
 															ELSE 0
 														END
+							,ysnIsPercent				=  CASE WHEN QM.strDiscountChargeType = 'Percent' THEN 1 ELSE 0 END
 							FROM @ItemsToPost ITP
 							JOIN tblGRTransferStorageReference SR
 							  ON ITP.intTransactionId = SR.intTransferStorageId
@@ -597,22 +623,89 @@ BEGIN
 							ON DCO.intDiscountCalculationOptionId = DSC.intDiscountCalculationOptionId
 							JOIN tblICItem DItem 
 							ON DItem.intItemId = DSC.intItemId
-							WHERE (ISNULL(QM.dblDiscountDue, 0) - ISNULL(QM.dblDiscountPaid, 0)) <> 0
+							WHERE (ISNULL(QM.dblDiscountDue, 0) - ISNULL(QM.dblDiscountPaid, 0)) <> 0 and ITP.intId = @cursorId
 							
+						
+
+						--debug point--
+						if @debug_point = 1  and 1 = 0
+						begin
+							select 'start item to post'
+							select * from @ItemsToPost
+							select 'end item to post '
+
+							select 'start debug point other charges detail'
+							select * from @OtherChargesDetail
+							select 'end debug point other charges detail'
+
+							select
+							CS.dblGrossQuantity * (isnull(SR.dblSplitPercent, 100) / 100),
+							dblCashPrice				= CASE 
+															WHEN QM.strDiscountChargeType = 'Percent'
+																		THEN (dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, IU.intUnitMeasureId, CS.intUnitMeasureId, ISNULL(QM.dblDiscountPaid, 0)) - dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId,	IU.intUnitMeasureId, CS.intUnitMeasureId, ISNULL(QM.dblDiscountDue, 0)))
+																			*
+																			@dblCost
+															ELSE --Dollar
+																dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, IU.intUnitMeasureId, CS.intUnitMeasureId, ISNULL(QM.dblDiscountPaid, 0)) - dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, IU.intUnitMeasureId, CS.intUnitMeasureId, ISNULL(QM.dblDiscountDue, 0))
+														END,
+							QM.strDiscountChargeType,
+							QM.dblDiscountPaid,
+							QM.dblDiscountDue,
+							dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, IU.intUnitMeasureId, CS.intUnitMeasureId, ISNULL(QM.dblDiscountPaid, 0)),
+							dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, IU.intUnitMeasureId, CS.intUnitMeasureId, ISNULL(QM.dblDiscountDue, 0)),
+							@dblCost
+
+							FROM @ItemsToPost ITP
+							JOIN tblGRTransferStorageReference SR
+							  ON ITP.intTransactionId = SR.intTransferStorageId
+							 AND ITP. intTransactionDetailId = SR.intTransferStorageSplitId
+							JOIN tblGRCustomerStorage CS
+								ON SR.intSourceCustomerStorageId = CS.intCustomerStorageId
+							JOIN tblICItemUOM IU
+							ON IU.intItemId = CS.intItemId
+								AND IU.ysnStockUnit = 1
+							JOIN tblQMTicketDiscount QM 
+							ON QM.intTicketFileId = CS.intCustomerStorageId 
+								AND QM.strSourceType = 'Storage'
+							JOIN tblGRDiscountScheduleCode DSC
+							ON DSC.intDiscountScheduleCodeId = QM.intDiscountScheduleCodeId
+							JOIN tblGRDiscountCalculationOption DCO
+							ON DCO.intDiscountCalculationOptionId = DSC.intDiscountCalculationOptionId
+							JOIN tblICItem DItem 
+							ON DItem.intItemId = DSC.intItemId
+							WHERE (ISNULL(QM.dblDiscountDue, 0) - ISNULL(QM.dblDiscountPaid, 0)) <> 0 and ITP.intId = @cursorId
+
+
+
+						end
+						--debug point--
+
+
 						SELECT @dblCost = @dblCost + ISNULL(SUM(dblCashPrice),0) FROM @OtherChargesDetail OCD 
 						INNER JOIN tblICItem IC
 							ON IC.intItemId = OCD.intItemId
 						WHERE IC.ysnInventoryCost = 1
 
-
 						update @OtherChargesDetail set dblExactCashPrice = ROUND(dblUnits*dblCashPrice,2)
 
-						SELECT @dblDiscountCost = ISNULL(SUM(dblExactCashPrice),0) FROM @OtherChargesDetail OCD 
+						SELECT @dblDiscountCost = ISNULL(SUM(round(dblUnits*dblCashPrice, 2)),0) FROM @OtherChargesDetail OCD 
 						INNER JOIN tblICItem IC
 							ON IC.intItemId = OCD.intItemId
 						WHERE IC.ysnInventoryCost = 1
+
+						--debug point 
+						if @debug_point = 1 and 1 = 0
+						begin
+							select 'start checking variable data used in the query below'
+							select @dblCost, @dblDiscountCost
+							select * from @OtherChargesDetail
+							select 'end checking variable used '
+						end
+						--debug point
+
 						DELETE FROM @Entry
 						DELETE FROM @GLEntries
+						DELETE FROM @GLForItem
 						INSERT INTO @Entry 
 						(
 							intItemId
@@ -635,7 +728,7 @@ BEGIN
 							,ysnIsStorage
 							,intStorageScheduleTypeId
 						)
-						SELECT intItemId,intItemLocationId,intItemUOMId,dtmDate,dblQty,dblUOMQty,@dblCost,dblSalesPrice,intCurrencyId,dblExchangeRate,intTransactionId,intTransactionDetailId,strTransactionId,intTransactionTypeId,intLotId,intSubLocationId,intStorageLocationId,ysnIsStorage,intStorageScheduleTypeId 
+						SELECT intItemId,intItemLocationId,intItemUOMId,dtmDate,dblQty,dblUOMQty,@dblOriginalCost,dblSalesPrice,intCurrencyId,dblExchangeRate,intTransactionId,intTransactionDetailId,strTransactionId,intTransactionTypeId,intLotId,intSubLocationId,intStorageLocationId,ysnIsStorage,intStorageScheduleTypeId 
 						FROM @ItemsToPost WHERE intId = @cursorId
 
 						INSERT INTO @GLForItem
@@ -662,6 +755,18 @@ BEGIN
 						)
 						SELECT intItemId,intItemLocationId,intItemUOMId,dtmDate,dblQty,dblUOMQty,@dblDiscountCost,dblSalesPrice,intCurrencyId,dblExchangeRate,intTransactionId,intTransactionDetailId,strTransactionId,intTransactionTypeId,intLotId,intSubLocationId,intStorageLocationId,ysnIsStorage,intStorageScheduleTypeId 
 						FROM @ItemsToPost WHERE intId = @cursorId
+
+
+						IF @debug_point = 1 and 1 = 0
+						begin
+							select 'start checking the quantity for the entry temp table'
+								
+								select dblQty, * from @Entry
+							
+							select 'end checking the quantity for the entry temp table'
+						end
+
+
 						IF(SELECT dblQty FROM @Entry) > 0
 						BEGIN
 							UPDATE @Entry
@@ -706,6 +811,40 @@ BEGIN
 							)
 							EXEC	dbo.uspICPostCosting @Entry,@strBatchId,'AP Clearing',@intUserId
 
+
+							--debug point 
+							if @debug_point = 1  and 1 = 0
+							begin
+								select 'start dummy gl entries'
+								select * from @DummyGLEntries
+								select 'end dummy gl entries'
+
+								select 'start gl for item'
+								select * from @GLForItem
+								select 'end gl for item'
+								
+								select 'start entry'
+								select * from @Entry
+								select 'end entry ssss' 
+							end
+							--debug point
+
+							--debug point--
+							if @debug_point = 1 and 1 = 0
+							begin
+								select 'start checking the gl entries for transfer'
+
+								EXEC dbo.uspGRCreateItemGLEntriesTransfer
+								@strBatchId
+								,@GLForItem
+								,'AP Clearing'
+								,1
+
+								select 'end checking the gl entries for transfer'
+							end
+							--debug point--
+
+
 							INSERT INTO @GLEntries 
 							(
 								 [dtmDate] 
@@ -747,6 +886,14 @@ BEGIN
 								,'AP Clearing'
 								,1
 
+							--debug point--
+							if @debug_point = 1 and 1 = 1
+							begin
+								select 'start checking the gl entries for transfer storage 1'
+								EXEC [dbo].[uspGRCreateGLEntriesForTransferStorage] @intTransferStorageId,@strBatchId,@dblOriginalCost,1
+								select 'end checking the gl entries for transfer storage'
+							end
+							--debug point--
 							INSERT INTO @GLEntries 
 							(
 								 [dtmDate] 
@@ -782,7 +929,15 @@ BEGIN
 								,[dblForeignRate]
 								,[strRateType]
 							)
-							EXEC [dbo].[uspGRCreateGLEntriesForTransferStorage] @intTransferStorageId,@strBatchId,@dblCost,1
+							EXEC [dbo].[uspGRCreateGLEntriesForTransferStorage] @intTransferStorageId,@strBatchId,@dblOriginalCost,1
+
+
+							if @debug_point = 1 and 1 = 0
+							begin
+								select 'start checking gl entries before booking'
+								select * from @GLEntries
+								select 'end checking gl entries before booking'
+							end
 
 							IF EXISTS (SELECT TOP 1 1 FROM @GLEntries)
 							BEGIN 
@@ -841,6 +996,62 @@ BEGIN
 							)
 							EXEC	dbo.uspICPostCosting @Entry,@strBatchId,'AP Clearing',@intUserId
 							--Used total discount cost on @GLForItem to get the correct decimal
+
+							--debug point 
+							if @debug_point = 1
+							begin
+								if 1 = 0
+								begin
+									select 'start gl for item'
+									select * from @GLForItem
+									select 'end gl for item'
+
+								
+								
+									select 'start entry'
+									select * from @Entry
+									select 'end entry'
+
+									
+									select 'start create item gl entries transfer '
+									EXEC dbo.uspGRCreateItemGLEntriesTransfer
+									@strBatchId
+									,@GLForItem
+									,'AP Clearing'
+									,1
+								end
+
+
+
+								select 'dummy gl'
+								select * from @GLForItem
+								select ''
+			SELECT	t.*
+	FROM dbo.tblICInventoryTransaction t 
+	INNER JOIN dbo.tblICInventoryTransactionType TransType
+		ON t.intTransactionTypeId = TransType.intTransactionTypeId
+	INNER JOIN tblICItem i
+		ON i.intItemId = t.intItemId
+	LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType
+		ON currencyRateType.intCurrencyExchangeRateTypeId = t.intForexRateTypeId
+	OUTER APPLY (
+		SELECT 
+			SV.dblCost as dblTotalDiscountCost
+		FROM @GLForItem SV
+	) DiscountCost
+	WHERE t.strBatchId = @strBatchId
+		--AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId) 
+		--AND ISNULL(i.intCategoryId, 0) = COALESCE(@intRebuildCategoryId, i.intCategoryId, 0) 
+		AND t.intInTransitSourceLocationId IS NULL -- If there is a value in intInTransitSourceLocationId, then it is for In-Transit costing. Use uspICCreateGLEntriesForInTransitCosting instead of this sp.
+
+
+		
+								select 'end create item gl entries transfer '
+
+							end
+							--debug point
+
+
 							INSERT INTO @GLEntries 
 							(
 								 [dtmDate] 
@@ -882,6 +1093,14 @@ BEGIN
 								,'AP Clearing'
 								,1
 
+							--debug point--
+							if @debug_point = 1 and 1 = 0
+							begin
+								select 'start checking the gl entries for transfer storage'
+								EXEC [dbo].[uspGRCreateGLEntriesForTransferStorage] @intTransferStorageId,@strBatchId,@dblOriginalCost,1
+								select 'end checking the gl entries for transfer storage'
+							end
+
 							INSERT INTO @GLEntries 
 							(
 								 [dtmDate] 
@@ -917,7 +1136,7 @@ BEGIN
 								,[dblForeignRate]
 								,[strRateType]
 							)
-							EXEC [dbo].[uspGRCreateGLEntriesForTransferStorage] @intTransferStorageId,@strBatchId,@dblCost,1
+							EXEC [dbo].[uspGRCreateGLEntriesForTransferStorage] @intTransferStorageId,@strBatchId,@dblOriginalCost,1
 
 							IF EXISTS (SELECT TOP 1 1 FROM @GLEntries)
 							BEGIN 

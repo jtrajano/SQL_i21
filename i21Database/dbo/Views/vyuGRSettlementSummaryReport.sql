@@ -23,7 +23,7 @@ SELECT
 	,lblFactorTax				    = lblFactorTax				 
 	,dblPartialPrepaymentSubTotal   = dblPartialPrepaymentSubTotal
 	,lblPartialPrepayment		    = lblPartialPrepayment		 
-	,dblPartialPrepayment		    = dblPartialPrepayment		 
+	,dblPartialPrepayment		    = sum(isnull(dblPartialPrepayment, 0))
 	,CheckAmount				    = CheckAmount				 			
 FROM 
 (
@@ -33,18 +33,21 @@ FROM
 		,strBillId						= Bill.strBillId
 		,InboundNetWeight				= SUM(
 												CASE 
+													WHEN Bill.intTransactionType = 2 then 0
 													WHEN BillDtl.intInventoryReceiptItemId IS NULL AND BillDtl.intInventoryReceiptChargeId IS NULL THEN 0 
 													ELSE BillDtl.dblQtyReceived
 												END
 											)
 		,InboundGrossDollars			= SUM(
 												CASE 
+													WHEN Bill.intTransactionType = 2 then 0
 													WHEN BillDtl.intInventoryReceiptItemId IS NULL AND BillDtl.intInventoryReceiptChargeId IS NULL THEN 0 
 													ELSE BillDtl.dblTotal													
 												END
 											)
 		,InboundTax						= SUM(
 												CASE 
+													WHEN Bill.intTransactionType = 2 then 0
 													WHEN BillDtl.intInventoryReceiptItemId IS NULL AND BillDtl.intInventoryReceiptChargeId IS NULL THEN 0 
 													ELSE BillDtl.dblTax
 												END
@@ -55,12 +58,13 @@ FROM
 										END
 		,InboundNetDue					= SUM(
 												CASE 
+													WHEN Bill.intTransactionType = 2 then 0
 													WHEN BillDtl.intInventoryReceiptItemId IS NULL AND BillDtl.intInventoryReceiptChargeId IS NULL THEN 0 
 													ELSE BillDtl.dblTotal + BillDtl.dblTax +BillDtl.dblDiscount
 												END
 											) +
 											( 
-												CASE 
+												CASE 													
 													WHEN BillDtl.intInventoryReceiptItemId IS NOT NULL THEN ISNULL(tblOtherCharge.dblTotal,0) 
 													ELSE ISNULL(BillByReceipt.dblTotal, 0) --+ ISNULL(BillByReceiptManuallyAdded.dblTotal, 0)
 												END
@@ -93,7 +97,7 @@ FROM
 										END
 		,lblPartialPrepayment			= 'Basis Adv/Debit Memo' COLLATE Latin1_General_CI_AS
 		,dblPartialPrepayment		  = CASE 
-											WHEN ISNULL(PartialPayment.dblPayment, 0) <> 0 THEN PartialPayment.dblPayment -- PartialPayment.dblTotals 
+											WHEN ISNULL(BasisPayment.dblVendorPrepayment, 0) <> 0 THEN BasisPayment.dblVendorPrepayment -- PartialPayment.dblTotals 
 											ELSE NULL 
 										END
 		,CheckAmount				  = PYMT.dblAmountPaid
@@ -111,10 +115,12 @@ FROM
 		SELECT 
 			SUM(dblAmount) dblTotal
 			,strId
-		FROM vyuGRSettlementSubReport
-		GROUP BY strId
+			,intBillDetailId
+		FROM vyuGRSettlementSubReport 
+		GROUP BY strId, intBillDetailId
 	) tblOtherCharge
-		ON tblOtherCharge.strId = Bill.strBillId
+		ON tblOtherCharge.strId = Bill.strBillId 
+			and BillDtl.intBillDetailId = tblOtherCharge.intBillDetailId
 	-- LEFT JOIN (
 	-- 	SELECT 
 	-- 		A.intBillId
@@ -128,13 +134,15 @@ FROM
 	-- 	ON tblOtherCharge.intBillId = Bill.intBillId
 	LEFT JOIN (
 		SELECT 
-			intBillId
-			,intInventoryReceiptItemId
-			,SUM(dblTotal) dblTotal
-		FROM tblAPBillDetail
-		WHERE intInventoryReceiptChargeId IS NOT NULL
-		GROUP BY intBillId
-			,intInventoryReceiptItemId
+			a.intBillId
+			,a.intInventoryReceiptItemId
+			,SUM(a.dblTotal) dblTotal
+		FROM tblAPBillDetail a 
+			join tblAPBill  b
+				on a.intBillId = b.intBillId --and b.intTransactionType = 1
+		WHERE a.intInventoryReceiptChargeId IS NOT NULL
+		GROUP BY a.intBillId
+			,a.intInventoryReceiptItemId
 	) BillByReceipt ON BillByReceipt.intBillId = BillDtl.intBillId
 		AND BillByReceipt.intInventoryReceiptItemId = BillDtl.intInventoryReceiptItemId
 	LEFT JOIN (
@@ -164,11 +172,22 @@ FROM
 	) ScaleDiscountTax ON ScaleDiscountTax.intPaymentId = PYMT.intPaymentId			 
 	LEFT JOIN (
 		SELECT 
-			intBillId
-			,SUM(dblAmountApplied * - 1) AS dblVendorPrepayment
-		FROM tblAPAppliedPrepaidAndDebit
-		WHERE ysnApplied = 1
-		GROUP BY intBillId
+			a.intBillId
+			,SUM(a.dblAmountApplied * - 1) AS dblVendorPrepayment
+		FROM tblAPAppliedPrepaidAndDebit a join tblAPBill b on a.intTransactionId = b.intBillId and b.intTransactionType  not in (13, 3)
+		WHERE a.ysnApplied = 1
+		GROUP BY a.intBillId		
+
+		union 
+		select 
+			intBillId,
+			dblTotal
+		from 
+		tblAPBill 
+		where intTransactionType = 2 
+		
+
+		
 	) VendorPrepayment ON VendorPrepayment.intBillId = Bill.intBillId
 	LEFT JOIN (
 		SELECT 
@@ -188,7 +207,19 @@ FROM
 		WHERE APD.intBillId IS NOT NULL and (APB.intTransactionType = 13 OR APB.intTransactionType = 3)
 		GROUP BY intPaymentId
 		HAVING SUM(APD.dblTotal) <> SUM(APD.dblPayment)
+
+
+
+
 	) PartialPayment ON PartialPayment.intPaymentId = PYMT.intPaymentId
+	LEFT JOIN (
+		SELECT
+			a.intBillId
+			,SUM(a.dblAmountApplied* -1) AS dblVendorPrepayment 
+		FROM tblAPAppliedPrepaidAndDebit  a join tblAPBill b on a.intTransactionId = b.intBillId and b.intTransactionType in (13, 3)
+		WHERE a.ysnApplied = 1
+		GROUP BY a.intBillId
+	) BasisPayment ON BasisPayment.intBillId = Bill.intBillId	
 	WHERE (
 			BillDtl.intInventoryReceiptChargeId IS NOT NULL
 			OR BillDtl.intInventoryReceiptItemId IS NOT NULL
@@ -212,6 +243,7 @@ FROM
 		,BillDtl.intInventoryReceiptItemId
 		,tblOtherCharge.dblTotal
 		,BillDtl.intInventoryReceiptChargeId
+		,BasisPayment.dblVendorPrepayment
 	--------------------------------------------------------
 	-- SCALE --> Storage --> Settle Storage
 	--------------------------------------------------------
@@ -222,11 +254,31 @@ FROM
 		intPaymentId					= PYMT.intPaymentId
 		,strPaymentNo					= PYMT.strPaymentRecordNum
 		,strBillId						= Bill.strBillId
-		,InboundNetWeight				= 0
-		,InboundGrossDollars			= 0
-		,InboundTax						= 0
-		,InboundDiscount				= 0
-		,InboundNetDue					= 0
+		,InboundNetWeight				= SUM(
+												CASE 
+													WHEN Bill.intTransactionType = 2 then 0
+													ELSE BillDtl.dblQtyReceived
+												END
+											)
+		,InboundGrossDollars			= SUM(
+												CASE 
+													WHEN Bill.intTransactionType = 2 then 0
+													ELSE BillDtl.dblTotal													
+												END
+											)
+		,InboundTax						= SUM(
+												CASE 
+													WHEN Bill.intTransactionType = 2 then 0
+													ELSE BillDtl.dblTax
+												END
+											)
+		,InboundDiscount				= ISNULL(tblOtherCharge.dblTotal,0) 
+		,InboundNetDue					= SUM(
+												CASE 
+													WHEN Bill.intTransactionType = 2 then 0													
+													ELSE BillDtl.dblTotal + BillDtl.dblTax + isnull(tblOtherCharge.dblTotal, 0)
+												END
+											) 
 		,OutboundNetWeight				= 0 
 		,OutboundGrossDollars			= 0 
 		,OutboundTax		            = 0
@@ -254,10 +306,7 @@ FROM
 											ELSE NULL 
 										END
 		,lblPartialPrepayment			= 'Basis Adv/Debit Memo' COLLATE Latin1_General_CI_AS
-		,dblPartialPrepayment			= CASE 
-											WHEN ISNULL(PartialPayment.dblPayment,0) <> 0 THEN PartialPayment.dblPayment--PartialPayment.dblTotals 
-											ELSE NULL 
-										END
+		,dblPartialPrepayment			= sum(ISNULL(BasisPayment.dblVendorPrepayment,0))
 		,CheckAmount				    = PYMT.dblAmountPaid 		    
 	FROM tblAPPayment PYMT 
 	JOIN tblAPPaymentDetail PYMTDTL	
@@ -273,10 +322,13 @@ FROM
 		SELECT 
 			SUM(dblAmount) dblTotal
 			,strId
+			,intBillDetailId
 		FROM vyuGRSettlementSubReport
 		GROUP BY strId
+			,intBillDetailId
 	) tblOtherCharge
 		ON tblOtherCharge.strId = Bill.strBillId
+			and BillDtl.intBillDetailId = tblOtherCharge.intBillDetailId
 	-- LEFT JOIN (
 	-- 	SELECT 
 	-- 		A.intBillId
@@ -320,11 +372,20 @@ FROM
 	) ScaleDiscountTax ON ScaleDiscountTax.intPaymentId = PYMT.intPaymentId			
 	LEFT JOIN (
 		SELECT
-			intBillId
-			,SUM(dblAmountApplied* -1) AS dblVendorPrepayment 
-		FROM tblAPAppliedPrepaidAndDebit 
-		WHERE ysnApplied = 1
-		GROUP BY intBillId
+			a.intBillId
+			,SUM(a.dblAmountApplied* -1) AS dblVendorPrepayment 
+		FROM tblAPAppliedPrepaidAndDebit  a join tblAPBill b on a.intTransactionId = b.intBillId and b.intTransactionType not  in (13, 3)
+		WHERE a.ysnApplied = 1
+		GROUP BY a.intBillId
+			
+		union 
+		select 
+			intBillId,
+			dblTotal
+		from 
+		tblAPBill 
+		where intTransactionType = 2 
+
 	) VendorPrepayment ON VendorPrepayment.intBillId = Bill.intBillId			
 	LEFT JOIN (
 		SELECT 
@@ -345,6 +406,14 @@ FROM
 		GROUP BY intPaymentId
 		HAVING SUM(APD.dblTotal) <> SUM(APD.dblPayment)
 	) PartialPayment ON PartialPayment.intPaymentId = PYMT.intPaymentId
+	LEFT JOIN (
+		SELECT
+			a.intBillId
+			,SUM(a.dblAmountApplied* -1) AS dblVendorPrepayment 
+		FROM tblAPAppliedPrepaidAndDebit  a join tblAPBill b on a.intTransactionId = b.intBillId and b.intTransactionType  in (13, 3)
+		WHERE a.ysnApplied = 1
+		GROUP BY a.intBillId
+	) BasisPayment ON BasisPayment.intBillId = Bill.intBillId	
 	WHERE Item.strType <> 'Other Charge' 
 		AND (intInventoryReceiptChargeId IS NULL AND BillDtl.intInventoryReceiptItemId IS NULL)
 	GROUP BY 
@@ -360,7 +429,8 @@ FROM
 		,PartialPayment.dblPayment
 		,PartialPayment.dblPayment
 		,PartialPayment.dblTotals
-		,PYMT.dblAmountPaid						
+		,PYMT.dblAmountPaid	
+		--,BasisPayment.dblVendorPrepayment					
 ) t
 GROUP BY 			
 	intPaymentId	
@@ -379,5 +449,8 @@ GROUP BY
 	,lblFactorTax				 
 	,dblPartialPrepaymentSubTotal
 	,lblPartialPrepayment		 
-	,dblPartialPrepayment		 
+	--,dblPartialPrepayment		 
 	,CheckAmount
+GO
+
+
