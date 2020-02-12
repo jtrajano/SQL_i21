@@ -53,8 +53,9 @@ SELECT
 							ISNULL((SELECT TOP 1 _chk.dblATMEndBalanceCalculated
 							FROM tblSTCheckoutHeader _chk
 							WHERE _chk.intStoreId = vst.intStoreId
-								AND _chk.intCheckoutId < chk.intCheckoutId
-							ORDER BY _chk.intCheckoutId DESC), 0)
+								AND ((_chk.dtmCheckoutDate < chk.dtmCheckoutDate) 
+								OR  (_chk.dtmCheckoutDate = chk.dtmCheckoutDate  AND _chk.intShiftNo < chk.intShiftNo))
+							ORDER BY _chk.dtmCheckoutDate DESC), 0)
 						)
 	  
 	  ,chk.[dblATMReplenished]
@@ -67,8 +68,9 @@ SELECT
 											ISNULL((SELECT TOP 1 _chk.dblATMEndBalanceCalculated
 											FROM tblSTCheckoutHeader _chk
 											WHERE _chk.intStoreId = vst.intStoreId
-												AND _chk.intCheckoutId < chk.intCheckoutId
-											ORDER BY _chk.intCheckoutId DESC), 0) 
+												AND ((_chk.dtmCheckoutDate < chk.dtmCheckoutDate) 
+												OR  (_chk.dtmCheckoutDate = chk.dtmCheckoutDate  AND _chk.intShiftNo < chk.intShiftNo))
+											ORDER BY _chk.dtmCheckoutDate DESC), 0)
 										
 											- 
 										
@@ -85,8 +87,9 @@ SELECT
 																		ISNULL((SELECT TOP 1 _chk.dblATMEndBalanceCalculated
 																		FROM tblSTCheckoutHeader _chk
 																		WHERE _chk.intStoreId = vst.intStoreId
-																			AND _chk.intCheckoutId < chk.intCheckoutId
-																		ORDER BY _chk.intCheckoutId DESC), 0) 
+																			AND ((_chk.dtmCheckoutDate < chk.dtmCheckoutDate) 
+																			OR  (_chk.dtmCheckoutDate = chk.dtmCheckoutDate  AND _chk.intShiftNo < chk.intShiftNo))
+																		ORDER BY _chk.dtmCheckoutDate DESC), 0)
 										
 																		- 
 										
@@ -95,12 +98,21 @@ SELECT
 																 )
 
       --,chk.[dblChangeFundBegBalance]
-	  ,dblChangeFundBegBalance = (
+	  --,dblChangeFundBegBalance = (
+			--						ISNULL((SELECT TOP 1 ISNULL(_chk.dblChangeFundEndBalance, 0)
+			--						FROM tblSTCheckoutHeader _chk
+			--						WHERE _chk.intStoreId = vst.intStoreId
+			--							AND _chk.intCheckoutId < chk.intCheckoutId
+			--						ORDER BY _chk.intCheckoutId DESC), 0)
+			--					)
+
+	,dblChangeFundBegBalance = (
 									ISNULL((SELECT TOP 1 ISNULL(_chk.dblChangeFundEndBalance, 0)
 									FROM tblSTCheckoutHeader _chk
 									WHERE _chk.intStoreId = vst.intStoreId
-										AND _chk.intCheckoutId < chk.intCheckoutId
-									ORDER BY _chk.intCheckoutId DESC), 0)
+										AND ((_chk.dtmCheckoutDate < chk.dtmCheckoutDate) 
+										OR  (_chk.dtmCheckoutDate = chk.dtmCheckoutDate  AND _chk.intShiftNo < chk.intShiftNo))
+									ORDER BY _chk.dtmCheckoutDate DESC), 0)
 								)
 
       --,chk.[dblChangeFundEndBalance]
