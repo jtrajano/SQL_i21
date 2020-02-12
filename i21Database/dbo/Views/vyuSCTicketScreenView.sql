@@ -235,14 +235,13 @@
 	,Basis.ysnRestricted AS ysnBasisAdvancedRestricted
 	,APPayment.dblPayment
 	,intSourceType as intLoadSourceType
-	,tblSMShipViaTrailer.strTrailerLicenseNumber
-	,tblSMShipViaTrailer.intEntityShipViaTrailerId
 	,strTicketSealNumber
 	,SCT.intLoadDetailId
 	,SCT.intCropYearId
 	,CYR.strCropYear
 	,SCT.ysnHasSpecialDiscount
 	,SCT.ysnSpecialGradePosted
+  	,SCT.strTrailerId
   FROM tblSCTicket SCT
 	LEFT JOIN tblSCTicketPool SCTPool on SCTPool.intTicketPoolId = SCT.intTicketPoolId
 	LEFT JOIN tblSCScaleSetup SCSetup on SCSetup.intScaleSetupId = SCT.intScaleSetupId
@@ -331,7 +330,6 @@
 		GROUP BY intScaleTicketId
 	) APPayment
 		ON APPayment.intScaleTicketId = SCT.intTicketId
-	LEFT JOIN tblSMShipViaTrailer on SCT.intEntityShipViaTrailerId = tblSMShipViaTrailer.intEntityShipViaTrailerId
 	outer apply ( SELECT TOP 1 TSN.intTicketId,SCN.strSealNumber strTicketSealNumber FROM tblSCTicketSealNumber TSN INNER JOIN tblSCSealNumber SCN ON SCN.intSealNumberId = TSN.intSealNumberId where TSN.intTicketId = SCT.intTicketId) TSCN 
 	left join tblCTCropYear CYR
 		on CYR.intCropYearId = SCT.intCropYearId
