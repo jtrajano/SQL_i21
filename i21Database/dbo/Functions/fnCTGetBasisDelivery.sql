@@ -324,12 +324,13 @@ BEGIN
 		ON CD.intContractDetailId = OC.intContractDetailId and CD.intContractHeaderId = OC.intContractHeaderId
 	INNER JOIN tblICInventoryReceiptItem ReceiptItem ON CD.intContractDetailId = ReceiptItem.intLineNo
 	INNER JOIN tblICInventoryReceipt Receipt ON Receipt.strReceiptType = 'Purchase Contract'
+	INNER JOIN tblICItemLocation ItemLocation ON ItemLocation.intLocationId = Receipt.intLocationId AND ReceiptItem.intItemId = ItemLocation.intItemId
 		AND ReceiptItem.intInventoryReceiptId = Receipt.intInventoryReceiptId
 	INNER JOIN tblICInventoryTransaction InvTran ON Receipt.intInventoryReceiptId = InvTran.intTransactionId
 		AND ReceiptItem.intInventoryReceiptId = InvTran.intTransactionId
 		AND ReceiptItem.intInventoryReceiptItemId = InvTran.intTransactionDetailId
 		AND InvTran.strTransactionForm = 'Inventory Receipt'
-		AND InvTran.intTransactionTypeId = 4
+		AND InvTran.intTransactionTypeId = 4 AND InvTran.intItemLocationId = ItemLocation.intItemLocationId
 	INNER JOIN tblICCommodity C ON CH.intCommodityId = C.intCommodityId
 	INNER JOIN tblCTContractType CT ON CH.intContractTypeId = CT.intContractTypeId
 	INNER JOIN vyuCTEntity E ON E.intEntityId = CH.intEntityId and E.strEntityType = (CASE WHEN CH.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END)

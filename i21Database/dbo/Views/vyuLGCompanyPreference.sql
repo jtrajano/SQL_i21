@@ -169,6 +169,7 @@ SELECT CP.intCompanyPreferenceId
 	,CP.ysnMatchItemAllocation
 	,CP.ysnMatchFuturesAllocation
 	,CP.ysnMatchBookAllocation
+	,CP.ysnAllowInvoiceForPartialPriced
 	,CP.intPnLReportReserveACategoryId
 	,strReserveACategory = RA.strCategoryCode
 	,CP.intPnLReportReserveBCategoryId

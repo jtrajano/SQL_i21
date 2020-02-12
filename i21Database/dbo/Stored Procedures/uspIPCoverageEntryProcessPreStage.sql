@@ -53,7 +53,7 @@ BEGIN TRY
 				WHERE ISNULL(t.ysnPosted, 0) = 1
 					AND t.intCoverageEntryId = @intCoverageEntryId
 					AND t.intBookId IS NOT NULL
-				)
+				) OR @strRowState = 'Delete'
 		BEGIN
 			EXEC uspIPCoverageEntryPopulateStgXML @intCoverageEntryId
 				,@intToEntityId

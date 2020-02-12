@@ -48,6 +48,8 @@ BEGIN TRY
 	DECLARE @intDiscountScheduleId INT
 	DECLARE @intCurrencyId INT
 	DECLARE @UserKey INT
+	DECLARE @StorageHistoryStagingTable AS [StorageHistoryStagingTable]
+	DECLARE @intStorageHistoryId INT
 	--DECLARE @UserName NVARCHAR(100)
 	DECLARE @strDiscountCode NVARCHAR(3)
 		,@strDiscountCodeDescription NVARCHAR(20)
@@ -211,25 +213,45 @@ BEGIN TRY
 		)
 
 		--History
-		INSERT INTO [dbo].[tblGRStorageHistory] 
+		INSERT INTO @StorageHistoryStagingTable
 		(
-			[intConcurrencyId]
-			,[intCustomerStorageId]
-			,[dblUnits]
-			,[dtmHistoryDate]
-			,[strPaidDescription]
-			,[strType]
-			,[strUserName]
-			,[intUserId]
+			intCustomerStorageId
+			, intUserId
+			, ysnPost
+			, intTransactionTypeId
+			, strType
+			, dblUnits
+			, dtmHistoryDate
 		)
-		SELECT 1
-			,@intCustomerStorageId
-			,@NewdblOpenBalance
-			,GETDATE()
-			,'Added by Storage Maintenance'
-			,'NEW'
-			,NULL
-			,@UserKey
+		SELECT
+			  @intCustomerStorageId
+			, @UserKey
+			, 1
+			, 55 -- Transaction Type Id for Maintain Storage
+			, 'Added by Storage Maintenance'
+			, @NewdblOpenBalance
+			, GETDATE()
+
+		EXEC uspGRInsertStorageHistoryRecord @StorageHistoryStagingTable, @intStorageHistoryId OUTPUT
+		-- INSERT INTO [dbo].[tblGRStorageHistory] 
+		-- (
+		-- 	[intConcurrencyId]
+		-- 	,[intCustomerStorageId]
+		-- 	,[dblUnits]
+		-- 	,[dtmHistoryDate]
+		-- 	,[strPaidDescription]
+		-- 	,[strType]
+		-- 	,[strUserName]
+		-- 	,[intUserId]
+		-- )
+		-- SELECT 1
+		-- 	,@intCustomerStorageId
+		-- 	,@NewdblOpenBalance
+		-- 	,GETDATE()
+		-- 	,'Added by Storage Maintenance'
+		-- 	,'NEW'
+		-- 	,NULL
+		-- 	,@UserKey
 	END
 	ELSE
 	BEGIN
@@ -295,225 +317,420 @@ BEGIN TRY
 		--1.Orginal Balance adjustment
 		IF @OlddblOriginalBalance <> @NewdblOriginalBalance
 		BEGIN
-			INSERT INTO [dbo].[tblGRStorageHistory] 
+			INSERT INTO @StorageHistoryStagingTable
 			(
-				[intConcurrencyId]
-				,[intCustomerStorageId]
-				,[dblUnits]
-				,[dtmHistoryDate]
-				,[strPaidDescription]
-				,[strType]
-				,[strUserName]
-				,[intUserId]
+				intCustomerStorageId
+				, intUserId
+				, ysnPost
+				, intTransactionTypeId
+				, strType
+				, dblUnits
+				, dtmHistoryDate
 			)
-			SELECT 1
-				,@intCustomerStorageId
-				,(@NewdblOriginalBalance - @OlddblOriginalBalance)
-				,GETDATE()
-				,CASE 
+			SELECT
+					@intCustomerStorageId
+				, @UserKey
+				, 1
+				, 55 -- Transaction Type Id for Maintain Storage
+				, CASE 
 					WHEN @NewdblOriginalBalance > @OlddblOriginalBalance
 						THEN 'Original Units Increased'
 					ELSE 'Original Units Decreased'
 					END
-				,'ADJUSTMENT'
-				,NULL
-				,@UserKey
+				, (@NewdblOriginalBalance - @OlddblOriginalBalance)
+				, GETDATE()
+
+			EXEC uspGRInsertStorageHistoryRecord @StorageHistoryStagingTable, @intStorageHistoryId OUTPUT
+
+			-- INSERT INTO [dbo].[tblGRStorageHistory] 
+			-- (
+			-- 	[intConcurrencyId]
+			-- 	,[intCustomerStorageId]
+			-- 	,[dblUnits]
+			-- 	,[dtmHistoryDate]
+			-- 	,[strPaidDescription]
+			-- 	,[strType]
+			-- 	,[strUserName]
+			-- 	,[intUserId]
+			-- )
+			-- SELECT 1
+			-- 	,@intCustomerStorageId
+			-- 	,(@NewdblOriginalBalance - @OlddblOriginalBalance)
+			-- 	,GETDATE()
+			-- 	,CASE 
+			-- 		WHEN @NewdblOriginalBalance > @OlddblOriginalBalance
+			-- 			THEN 'Original Units Increased'
+			-- 		ELSE 'Original Units Decreased'
+			-- 		END
+			-- 	,'ADJUSTMENT'
+			-- 	,NULL
+			-- 	,@UserKey
 		END
 
 		--2.Open Balance adjustment
 		IF @OlddblOpenBalance <> @NewdblOpenBalance
 		BEGIN
-			INSERT INTO [dbo].[tblGRStorageHistory] 
+			INSERT INTO @StorageHistoryStagingTable
 			(
-				[intConcurrencyId]
-				,[intCustomerStorageId]
-				,[dblUnits]
-				,[dtmHistoryDate]
-				,[strPaidDescription]
-				,[strType]
-				,[strUserName]
-				,[intUserId]
+				intCustomerStorageId
+				, intUserId
+				, ysnPost
+				, intTransactionTypeId
+				, strType
+				, dblUnits
+				, dtmHistoryDate
 			)
-			SELECT 1
-				,@intCustomerStorageId
-				,(@NewdblOpenBalance - @OlddblOpenBalance)
-				,GETDATE()
-				,CASE 
+			SELECT
+					@intCustomerStorageId
+				, @UserKey
+				, 1
+				, 55 -- Transaction Type Id for Maintain Storage
+				, CASE 
 					WHEN @NewdblOpenBalance > @OlddblOpenBalance
 						THEN 'Available Units Increased'
 					ELSE 'Available Units Decreased'
 					END
-				,'ADJUSTMENT'
-				,NULL
-				,@UserKey
+				, (@NewdblOpenBalance - @OlddblOpenBalance)
+				, GETDATE()
+
+			EXEC uspGRInsertStorageHistoryRecord @StorageHistoryStagingTable, @intStorageHistoryId OUTPUT
+
+			-- INSERT INTO [dbo].[tblGRStorageHistory] 
+			-- (
+			-- 	[intConcurrencyId]
+			-- 	,[intCustomerStorageId]
+			-- 	,[dblUnits]
+			-- 	,[dtmHistoryDate]
+			-- 	,[strPaidDescription]
+			-- 	,[strType]
+			-- 	,[strUserName]
+			-- 	,[intUserId]
+			-- )
+			-- SELECT 1
+			-- 	,@intCustomerStorageId
+			-- 	,(@NewdblOpenBalance - @OlddblOpenBalance)
+			-- 	,GETDATE()
+			-- 	,CASE 
+			-- 		WHEN @NewdblOpenBalance > @OlddblOpenBalance
+			-- 			THEN 'Available Units Increased'
+			-- 		ELSE 'Available Units Decreased'
+			-- 		END
+			-- 	,'ADJUSTMENT'
+			-- 	,NULL
+			-- 	,@UserKey
 		END
 
 		--3.Insurance Rate Change		
 		IF @OlddblInsuranceRate <> @NewdblInsuranceRate
 		BEGIN
-			INSERT INTO [dbo].[tblGRStorageHistory] 
+			INSERT INTO @StorageHistoryStagingTable
 			(
-				[intConcurrencyId]
-				,[intCustomerStorageId]
-				,[dblUnits]
-				,[dtmHistoryDate]
-				,[strPaidDescription]
-				,[strType]
-				,[strUserName]
-				,[intUserId]
+				intCustomerStorageId
+				, intUserId
+				, ysnPost
+				, intTransactionTypeId
+				, strType
+				, dblUnits
+				, dtmHistoryDate
 			)
-			SELECT 1
-				,@intCustomerStorageId
-				,(@NewdblInsuranceRate - @OlddblInsuranceRate)
-				,GETDATE()
-				,'Insurance Rate changed from ' + LTRIM(@OlddblInsuranceRate)
-				,'ADJUSTMENT'
-				,NULL
-				,@UserKey
+			SELECT
+					@intCustomerStorageId
+				, @UserKey
+				, 1
+				, 55 -- Transaction Type Id for Maintain Storage
+				, 'Insurance Rate changed from ' + LTRIM(@OlddblInsuranceRate)
+				, (@NewdblInsuranceRate - @OlddblInsuranceRate)
+				, GETDATE()
+
+			EXEC uspGRInsertStorageHistoryRecord @StorageHistoryStagingTable, @intStorageHistoryId OUTPUT
+			-- INSERT INTO [dbo].[tblGRStorageHistory] 
+			-- (
+			-- 	[intConcurrencyId]
+			-- 	,[intCustomerStorageId]
+			-- 	,[dblUnits]
+			-- 	,[dtmHistoryDate]
+			-- 	,[strPaidDescription]
+			-- 	,[strType]
+			-- 	,[strUserName]
+			-- 	,[intUserId]
+			-- )
+			-- SELECT 1
+			-- 	,@intCustomerStorageId
+			-- 	,(@NewdblInsuranceRate - @OlddblInsuranceRate)
+			-- 	,GETDATE()
+			-- 	,'Insurance Rate changed from ' + LTRIM(@OlddblInsuranceRate)
+			-- 	,'ADJUSTMENT'
+			-- 	,NULL
+			-- 	,@UserKey
 		END
 
 		--4.Storage Due Adjustment		
 		IF @OlddblStorageDue <> @NewdblStorageDue
 		BEGIN
-			INSERT INTO [dbo].[tblGRStorageHistory] 
+			INSERT INTO @StorageHistoryStagingTable
 			(
-				[intConcurrencyId]
-				,[intCustomerStorageId]
-				,[dblUnits]
-				,[dtmHistoryDate]
-				,[strPaidDescription]
-				,[strType]
-				,[strUserName]
-				,[intUserId]
+				intCustomerStorageId
+				, intUserId
+				, ysnPost
+				, intTransactionTypeId
+				, strType
+				, dblUnits
+				, dtmHistoryDate
 			)
-			SELECT 1
-				,@intCustomerStorageId
-				,(@NewdblStorageDue - @OlddblStorageDue)
-				,GETDATE()
-				,'Storage Due Adjustment'
-				,'ADJUSTMENT'
-				,NULL
-				,@UserKey
+			SELECT
+					@intCustomerStorageId
+				, @UserKey
+				, 1
+				, 55 -- Transaction Type Id for Maintain Storage
+				, 'Storage Due Adjustment'
+				, (@NewdblStorageDue - @OlddblStorageDue)
+				, GETDATE()
+
+			EXEC uspGRInsertStorageHistoryRecord @StorageHistoryStagingTable, @intStorageHistoryId OUTPUT
+
+			-- INSERT INTO [dbo].[tblGRStorageHistory] 
+			-- (
+			-- 	[intConcurrencyId]
+			-- 	,[intCustomerStorageId]
+			-- 	,[dblUnits]
+			-- 	,[dtmHistoryDate]
+			-- 	,[strPaidDescription]
+			-- 	,[strType]
+			-- 	,[strUserName]
+			-- 	,[intUserId]
+			-- )
+			-- SELECT 1
+			-- 	,@intCustomerStorageId
+			-- 	,(@NewdblStorageDue - @OlddblStorageDue)
+			-- 	,GETDATE()
+			-- 	,'Storage Due Adjustment'
+			-- 	,'ADJUSTMENT'
+			-- 	,NULL
+			-- 	,@UserKey
 		END
 
 		--5.Storage Paid Adjustment				
 		IF @OlddblStoragePaid <> @NewdblStoragePaid
 		BEGIN
-			INSERT INTO [dbo].[tblGRStorageHistory] 
+			INSERT INTO @StorageHistoryStagingTable
 			(
-				[intConcurrencyId]
-				,[intCustomerStorageId]
-				,[dblUnits]
-				,[dtmHistoryDate]
-				,[strPaidDescription]
-				,[strType]
-				,[strUserName]
-				,[intUserId]
+				intCustomerStorageId
+				, intUserId
+				, ysnPost
+				, intTransactionTypeId
+				, strType
+				, dblUnits
+				, dtmHistoryDate
 			)
-			SELECT 1
-				,@intCustomerStorageId
-				,(@NewdblStoragePaid - @OlddblStoragePaid)
-				,GETDATE()
-				,'Storage Paid Adjustment'
-				,'ADJUSTMENT'
-				,NULL
-				,@UserKey
+			SELECT
+					@intCustomerStorageId
+				, @UserKey
+				, 1
+				, 55 -- Transaction Type Id for Maintain Storage
+				, 'Storage Paid Adjustment'
+				, (@NewdblStoragePaid - @OlddblStoragePaid)
+				, GETDATE()
+
+			EXEC uspGRInsertStorageHistoryRecord @StorageHistoryStagingTable, @intStorageHistoryId OUTPUT
+
+			-- INSERT INTO [dbo].[tblGRStorageHistory] 
+			-- (
+			-- 	[intConcurrencyId]
+			-- 	,[intCustomerStorageId]
+			-- 	,[dblUnits]
+			-- 	,[dtmHistoryDate]
+			-- 	,[strPaidDescription]
+			-- 	,[strType]
+			-- 	,[strUserName]
+			-- 	,[intUserId]
+			-- )
+			-- SELECT 1
+			-- 	,@intCustomerStorageId
+			-- 	,(@NewdblStoragePaid - @OlddblStoragePaid)
+			-- 	,GETDATE()
+			-- 	,'Storage Paid Adjustment'
+			-- 	,'ADJUSTMENT'
+			-- 	,NULL
+			-- 	,@UserKey
 		END
 
 		--6.Fees Due Adjustment
 		IF @OlddblFeesDue <> @NewdblFeesDue
 		BEGIN
-			INSERT INTO [dbo].[tblGRStorageHistory] 
+			INSERT INTO @StorageHistoryStagingTable
 			(
-				[intConcurrencyId]
-				,[intCustomerStorageId]
-				,[dblUnits]
-				,[dtmHistoryDate]
-				,[strPaidDescription]
-				,[strType]
-				,[strUserName]
-				,[intUserId]
+				intCustomerStorageId
+				, intUserId
+				, ysnPost
+				, intTransactionTypeId
+				, strType
+				, dblUnits
+				, dtmHistoryDate
 			)
-			SELECT 1
-				,@intCustomerStorageId
-				,(@NewdblFeesDue - @OlddblFeesDue)
-				,GETDATE()
-				,'Fees Due Adjustment'
-				,'ADJUSTMENT'
-				,NULL
-				,@UserKey
+			SELECT
+				  @intCustomerStorageId
+				, @UserKey
+				, 1
+				, 55 -- Transaction Type Id for Maintain Storage
+				, 'Fees Due Adjustment'
+				, (@NewdblFeesDue - @OlddblFeesDue)
+				, GETDATE()
+
+			EXEC uspGRInsertStorageHistoryRecord @StorageHistoryStagingTable, @intStorageHistoryId OUTPUT
+
+			-- INSERT INTO [dbo].[tblGRStorageHistory] 
+			-- (
+			-- 	[intConcurrencyId]
+			-- 	,[intCustomerStorageId]
+			-- 	,[dblUnits]
+			-- 	,[dtmHistoryDate]
+			-- 	,[strPaidDescription]
+			-- 	,[strType]
+			-- 	,[strUserName]
+			-- 	,[intUserId]
+			-- )
+			-- SELECT 1
+			-- 	,@intCustomerStorageId
+			-- 	,(@NewdblFeesDue - @OlddblFeesDue)
+			-- 	,GETDATE()
+			-- 	,'Fees Due Adjustment'
+			-- 	,'ADJUSTMENT'
+			-- 	,NULL
+			-- 	,@UserKey
 		END
 
 		--7.Fees Paid Adjustment
 		IF @OlddblFeesPaid <> @NewdblFeesPaid
 		BEGIN
-			INSERT INTO [dbo].[tblGRStorageHistory] 
+			INSERT INTO @StorageHistoryStagingTable
 			(
-				[intConcurrencyId]
-				,[intCustomerStorageId]
-				,[dblUnits]
-				,[dtmHistoryDate]
-				,[strPaidDescription]
-				,[strType]
-				,[strUserName]
-				,[intUserId]
+				intCustomerStorageId
+				, intUserId
+				, ysnPost
+				, intTransactionTypeId
+				, strType
+				, dblUnits
+				, dtmHistoryDate
 			)
-			SELECT 1
-				,@intCustomerStorageId
-				,(@NewdblFeesPaid - @OlddblFeesPaid)
-				,GETDATE()
-				,'Fees Paid Adjustment'
-				,'ADJUSTMENT'
-				,NULL
-				,@UserKey
+			SELECT
+				  @intCustomerStorageId
+				, @UserKey
+				, 1
+				, 55 -- Transaction Type Id for Maintain Storage
+				, 'Fees Paid Adjustment'
+				, (@NewdblFeesPaid - @OlddblFeesPaid)
+				, GETDATE()
+
+			EXEC uspGRInsertStorageHistoryRecord @StorageHistoryStagingTable, @intStorageHistoryId OUTPUT
+			-- INSERT INTO [dbo].[tblGRStorageHistory] 
+			-- (
+			-- 	[intConcurrencyId]
+			-- 	,[intCustomerStorageId]
+			-- 	,[dblUnits]
+			-- 	,[dtmHistoryDate]
+			-- 	,[strPaidDescription]
+			-- 	,[strType]
+			-- 	,[strUserName]
+			-- 	,[intUserId]
+			-- )
+			-- SELECT 1
+			-- 	,@intCustomerStorageId
+			-- 	,(@NewdblFeesPaid - @OlddblFeesPaid)
+			-- 	,GETDATE()
+			-- 	,'Fees Paid Adjustment'
+			-- 	,'ADJUSTMENT'
+			-- 	,NULL
+			-- 	,@UserKey
 		END
 
 		--8.Discount Due Adjustment
 		IF @OlddblDiscountsDue <> @NewdblDiscountsDue
 		BEGIN
-			INSERT INTO [dbo].[tblGRStorageHistory] 
+			INSERT INTO @StorageHistoryStagingTable
 			(
-				[intConcurrencyId]
-				,[intCustomerStorageId]
-				,[dblUnits]
-				,[dtmHistoryDate]
-				,[strPaidDescription]
-				,[strType]
-				,[strUserName]
-				,[intUserId]
+				intCustomerStorageId
+				, intUserId
+				, ysnPost
+				, intTransactionTypeId
+				, strType
+				, dblUnits
+				, dtmHistoryDate
 			)
-			SELECT 1
-				,@intCustomerStorageId
-				,(@NewdblDiscountsDue - @OlddblDiscountsDue)
-				,GETDATE()
-				,'Discount Due Adjustment'
-				,'ADJUSTMENT'
-				,NULL
-				,@UserKey
+			SELECT
+				  @intCustomerStorageId
+				, @UserKey
+				, 1
+				, 55 -- Transaction Type Id for Maintain Storage
+				, 'Discount Due Adjustment'
+				, (@NewdblDiscountsDue - @OlddblDiscountsDue)
+				, GETDATE()
+
+			EXEC uspGRInsertStorageHistoryRecord @StorageHistoryStagingTable, @intStorageHistoryId OUTPUT
+
+			-- INSERT INTO [dbo].[tblGRStorageHistory] 
+			-- (
+			-- 	[intConcurrencyId]
+			-- 	,[intCustomerStorageId]
+			-- 	,[dblUnits]
+			-- 	,[dtmHistoryDate]
+			-- 	,[strPaidDescription]
+			-- 	,[strType]
+			-- 	,[strUserName]
+			-- 	,[intUserId]
+			-- )
+			-- SELECT 1
+			-- 	,@intCustomerStorageId
+			-- 	,(@NewdblDiscountsDue - @OlddblDiscountsDue)
+			-- 	,GETDATE()
+			-- 	,'Discount Due Adjustment'
+			-- 	,'ADJUSTMENT'
+			-- 	,NULL
+			-- 	,@UserKey
 		END
 
 		--9.Discount Paid Adjustment
 		IF @OlddblDiscountsPaid <> @NewdblDiscountsPaid
 		BEGIN
-			INSERT INTO [dbo].[tblGRStorageHistory] 
+			INSERT INTO @StorageHistoryStagingTable
 			(
-				[intConcurrencyId]
-				,[intCustomerStorageId]
-				,[dblUnits]
-				,[dtmHistoryDate]
-				,[strPaidDescription]
-				,[strType]
-				,[strUserName]
-				,[intUserId]
+				intCustomerStorageId
+				, intUserId
+				, ysnPost
+				, intTransactionTypeId
+				, strType
+				, dblUnits
+				, dtmHistoryDate
 			)
-			SELECT 1
-				,@intCustomerStorageId
-				,(@NewdblDiscountsPaid - @OlddblDiscountsPaid)
-				,GETDATE()
-				,'Discount Paid Adjustment'
-				,'ADJUSTMENT'
-				,NULL
-				,@UserKey
+			SELECT
+				  @intCustomerStorageId
+				, @UserKey
+				, 1
+				, 55 -- Transaction Type Id for Maintain Storage
+				, 'Discount Paid Adjustment'
+				, (@NewdblDiscountsPaid - @OlddblDiscountsPaid)
+				, GETDATE()
+
+			EXEC uspGRInsertStorageHistoryRecord @StorageHistoryStagingTable, @intStorageHistoryId OUTPUT
+
+			-- INSERT INTO [dbo].[tblGRStorageHistory] 
+			-- (
+			-- 	[intConcurrencyId]
+			-- 	,[intCustomerStorageId]
+			-- 	,[dblUnits]
+			-- 	,[dtmHistoryDate]
+			-- 	,[strPaidDescription]
+			-- 	,[strType]
+			-- 	,[strUserName]
+			-- 	,[intUserId]
+			-- )
+			-- SELECT 1
+			-- 	,@intCustomerStorageId
+			-- 	,(@NewdblDiscountsPaid - @OlddblDiscountsPaid)
+			-- 	,GETDATE()
+			-- 	,'Discount Paid Adjustment'
+			-- 	,'ADJUSTMENT'
+			-- 	,NULL
+			-- 	,@UserKey
 		END
 	END
 

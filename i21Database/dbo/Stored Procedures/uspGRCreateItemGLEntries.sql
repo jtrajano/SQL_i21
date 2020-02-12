@@ -19,10 +19,10 @@ SET ANSI_WARNINGS OFF
 
 	declare @debug_awesome_ness bit = 0
 	
-	if exists( select top 1 1 from @SettleVoucherCreate where intSettleVoucherKey > 7)
-	begin
-		set @debug_awesome_ness = 0
-	end
+	--if exists( select top 1 1 from @SettleVoucherCreate where intSettleVoucherKey > 7)
+	--begin
+	--	set @debug_awesome_ness = 0
+	--end
 	if @debug_awesome_ness = 1	
 	begin
 		
@@ -243,7 +243,7 @@ begin
 		,t.strTransactionId
 		,t.dblQty
 		,t.dblUOMQty
-		,dblCost = t.dblCost - dbo.fnDivide(DiscountCost.dblTotalDiscountCost, isnull(@dblSelectedUnits, t.dblQty) ) 
+		,dblCost = t.dblCost - dbo.fnDivide(DiscountCost.dblTotalDiscountCost, t.dblQty ) 
 		,DiscountCost.dblTotalDiscountCost
 		, t.dblQty
 		,dblItemCost = t.dblCost
@@ -268,11 +268,8 @@ begin
 	OUTER APPLY (
 		SELECT 
 			ISNULL(round(SUM(((SV.dblCashPrice * CASE WHEN ISNULL(SV.dblSettleContractUnits,0) > 0 THEN SV.dblSettleContractUnits ELSE SV.dblUnits END)) ), 2),0)  AS dblTotalDiscountCost
-		FROM tblGRSettleVoucherCreateReferenceTable SV
-		INNER JOIN tblICItem IC
-			ON IC.intItemId = SV.intItemId
-				AND IC.ysnInventoryCost = 1
-		WHERE intItemType = 3 and SV.strBatchId = @strBatchId --DISCOUNTS
+		FROM tblGRSettleVoucherCreateReferenceTable SV	
+		WHERE intItemType = 3 and SV.strBatchId = @strBatchId and SV.ysnItemInventoryCost = 1--DISCOUNTS
 	) DiscountCost
 	WHERE t.strBatchId = @strBatchId
 		AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId) 
@@ -340,16 +337,17 @@ AS
 			ISNULL(
 				SUM(
 					ROUND(
-						SV.dblCashPrice * CASE WHEN ISNULL(SV.dblSettleContractUnits,0) > 0 THEN SV.dblSettleContractUnits ELSE SV.dblUnits END
+						SV.dblCashPrice * CASE 
+								WHEN ISNULL(SV.dblSettleContractUnits,0) > 0 AND ysnDiscountFromGrossWeight = 0 THEN SV.dblSettleContractUnits 
+						ELSE 
+							SV.dblUnits 
+						END
 					, 2)
 				)
 			,0)  AS dblTotalDiscountCost
 			--ISNULL(round(SUM(((SV.dblCashPrice * CASE WHEN ISNULL(SV.dblSettleContractUnits,0) > 0 THEN SV.dblSettleContractUnits ELSE SV.dblUnits END)) ), 2),0)  AS dblTotalDiscountCost
-		FROM tblGRSettleVoucherCreateReferenceTable SV
-		INNER JOIN tblICItem IC
-			ON IC.intItemId = SV.intItemId
-				AND IC.ysnInventoryCost = 1
-		WHERE intItemType = 3 and SV.strBatchId = @strBatchId --DISCOUNTS
+		FROM tblGRSettleVoucherCreateReferenceTable SV		
+		WHERE intItemType = 3 and SV.strBatchId = @strBatchId and SV.ysnItemInventoryCost = 1--DISCOUNTS
 	) DiscountCost
 	WHERE t.strBatchId = @strBatchId
 		AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId) 

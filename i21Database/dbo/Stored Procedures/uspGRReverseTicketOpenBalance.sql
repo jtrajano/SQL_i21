@@ -5,7 +5,8 @@
 AS
 BEGIN TRY
 	SET NOCOUNT ON
-
+	DECLARE @StorageHistoryStagingTable AS [StorageHistoryStagingTable]
+	DECLARE @intStorageHistoryId INT
 	DECLARE @ErrMsg NVARCHAR(MAX)
 	--DECLARE @strUserName NVARCHAR(40)
 	DECLARE @strType NVARCHAR(100)
@@ -33,33 +34,63 @@ BEGIN TRY
 		FROM tblGRCustomerStorage CS
 		JOIN tblGRStorageHistory SH  ON SH.intCustomerStorageId = CS.intCustomerStorageId AND SH.intInventoryShipmentId=@IntSourceKey AND SH.strType=@strType AND SH.intInventoryReceiptId IS NULL
 
-		INSERT INTO [dbo].[tblGRStorageHistory] 
+		INSERT INTO @StorageHistoryStagingTable
 		(
-			 [intConcurrencyId]
-			,[intCustomerStorageId]
-			,[intTicketId]
-			,[intInvoiceId]
-			,[intInventoryShipmentId]
-			,[dblUnits]
-			,[dtmHistoryDate]
-			,[dblPaidAmount]
-			,[strType]
-			,[strUserName]
-			,[intUserId]
+			intCustomerStorageId
+			, intUserId
+			, ysnPost
+			, intTransactionTypeId
+			, strType
+			, dblUnits
+			, intInvoiceId
+			, dtmHistoryDate
+			, intInventoryShipmentId
+			, intTicketId
 		)
-		SELECT 
-			 [intConcurrencyId] = 1
-			,[intCustomerStorageId] = intCustomerStorageId
-			,[intTicketId] = intTicketId
-			,[intInvoiceId]=intInvoiceId
-			,[intInventoryShipmentId] = intInventoryShipmentId
-			,[dblUnits] = dblUnits
-			,[dtmHistoryDate] = GetDATE()
-			,[dblPaidAmount] = NULL 
-			,[strType] = 'Reverse By Inventory Shipment'
-			,[strUserName] = NULL
-			,[intUserId] = @intUserId
-		FROM tblGRStorageHistory WHERE intInventoryShipmentId=@IntSourceKey AND strType=@strType AND intInventoryReceiptId IS NULL
+		SELECT
+			  intCustomerStorageId
+			, @intUserId
+			, 0
+			, @intTransactionTypeId--10 -- Transaction Type Id for Inventory Adjustment - Quantity
+			, 'Reverse By Inventory Shipment'
+			, dblUnits
+			, intInvoiceId
+			, GETDATE()
+			, intInventoryShipmentId
+			, intTicketId
+		FROM tblGRStorageHistory
+		WHERE intInventoryShipmentId = @IntSourceKey
+			AND strType = @strType
+			AND intInventoryReceiptId IS NULL
+		EXEC uspGRInsertStorageHistoryRecord @StorageHistoryStagingTable, @intStorageHistoryId OUTPUT
+		
+		-- INSERT INTO [dbo].[tblGRStorageHistory] 
+		-- (
+		-- 	 [intConcurrencyId]
+		-- 	,[intCustomerStorageId]
+		-- 	,[intTicketId]
+		-- 	,[intInvoiceId]
+		-- 	,[intInventoryShipmentId]
+		-- 	,[dblUnits]
+		-- 	,[dtmHistoryDate]
+		-- 	,[dblPaidAmount]
+		-- 	,[strType]
+		-- 	,[strUserName]
+		-- 	,[intUserId]
+		-- )
+		-- SELECT 
+		-- 	 [intConcurrencyId] = 1
+		-- 	,[intCustomerStorageId] = intCustomerStorageId
+		-- 	,[intTicketId] = intTicketId
+		-- 	,[intInvoiceId]=intInvoiceId
+		-- 	,[intInventoryShipmentId] = intInventoryShipmentId
+		-- 	,[dblUnits] = dblUnits
+		-- 	,[dtmHistoryDate] = GetDATE()
+		-- 	,[dblPaidAmount] = NULL 
+		-- 	,[strType] = 'Reverse By Inventory Shipment'
+		-- 	,[strUserName] = NULL
+		-- 	,[intUserId] = @intUserId
+		-- FROM tblGRStorageHistory WHERE intInventoryShipmentId=@IntSourceKey AND strType=@strType AND intInventoryReceiptId IS NULL
 
 		INSERT INTO @ItemCostingTableType 
 		(
@@ -107,33 +138,62 @@ BEGIN TRY
 		FROM tblGRCustomerStorage CS
 		JOIN tblGRStorageHistory SH  ON SH.intCustomerStorageId = CS.intCustomerStorageId AND SH.intTicketId=@IntSourceKey AND SH.strType=@strType AND SH.intInventoryReceiptId IS NULL 
 
-		INSERT INTO [dbo].[tblGRStorageHistory] 
+		INSERT INTO @StorageHistoryStagingTable
 		(
-			 [intConcurrencyId]
-			,[intCustomerStorageId]
-			,[intTicketId]
-			,[intInvoiceId]
-			,[intInventoryShipmentId]
-			,[dblUnits]
-			,[dtmHistoryDate]
-			,[dblPaidAmount]
-			,[strType]
-			,[strUserName]
-			,[intUserId]
+			intCustomerStorageId
+			, intUserId
+			, ysnPost
+			, intTransactionTypeId
+			, strType
+			, dblUnits
+			, intInventoryShipmentId
+			, dtmHistoryDate
+			, intInvoiceId
+			, intTicketId
 		)
-		SELECT 
-			 [intConcurrencyId] = 1
-			,[intCustomerStorageId] = intCustomerStorageId
-			,[intTicketId] = intTicketId
-			,[intInvoiceId]=intInvoiceId
-			,[intInventoryShipmentId] = intInventoryShipmentId
-			,[dblUnits] = dblUnits
-			,[dtmHistoryDate] = GetDATE()
-			,[dblPaidAmount] = NULL 
-			,[strType] = 'Reverse By Scale'
-			,[strUserName] = NULL
-			,[intUserId] = @intUserId
-		FROM tblGRStorageHistory WHERE intTicketId=@IntSourceKey AND strType=@strType AND intInventoryReceiptId IS NULL
+		SELECT
+			  intCustomerStorageId
+			, @intUserId
+			, 0
+			, @intTransactionTypeId -- Transaction Type Id for Invoice
+			, 'Reverse By Scale'
+			, dblUnits
+			, intInventoryShipmentId
+			, GETDATE()
+			, intInvoiceId
+			, intTicketId
+		FROM tblGRStorageHistory
+		WHERE intTicketId = @IntSourceKey
+			AND strType = @strType
+			AND intInventoryReceiptId IS NULL
+		EXEC uspGRInsertStorageHistoryRecord @StorageHistoryStagingTable, @intStorageHistoryId OUTPUT
+		-- INSERT INTO [dbo].[tblGRStorageHistory] 
+		-- (
+		-- 	 [intConcurrencyId]
+		-- 	,[intCustomerStorageId]
+		-- 	,[intTicketId]
+		-- 	,[intInvoiceId]
+		-- 	,[intInventoryShipmentId]
+		-- 	,[dblUnits]
+		-- 	,[dtmHistoryDate]
+		-- 	,[dblPaidAmount]
+		-- 	,[strType]
+		-- 	,[strUserName]
+		-- 	,[intUserId]
+		-- )
+		-- SELECT 
+		-- 	 [intConcurrencyId] = 1
+		-- 	,[intCustomerStorageId] = intCustomerStorageId
+		-- 	,[intTicketId] = intTicketId
+		-- 	,[intInvoiceId]=intInvoiceId
+		-- 	,[intInventoryShipmentId] = intInventoryShipmentId
+		-- 	,[dblUnits] = dblUnits
+		-- 	,[dtmHistoryDate] = GetDATE()
+		-- 	,[dblPaidAmount] = NULL 
+		-- 	,[strType] = 'Reverse By Scale'
+		-- 	,[strUserName] = NULL
+		-- 	,[intUserId] = @intUserId
+		-- FROM tblGRStorageHistory WHERE intTicketId=@IntSourceKey AND strType=@strType AND intInventoryReceiptId IS NULL
 
 		INSERT INTO @ItemCostingTableType 
 		(
@@ -181,33 +241,62 @@ BEGIN TRY
 		FROM tblGRCustomerStorage CS
 		JOIN tblGRStorageHistory SH  ON SH.intCustomerStorageId = CS.intCustomerStorageId AND SH.intInvoiceId=@IntSourceKey AND SH.strType=@strType AND SH.intInventoryReceiptId IS NULL
 
-		INSERT INTO [dbo].[tblGRStorageHistory] 
+		INSERT INTO @StorageHistoryStagingTable
 		(
-			 [intConcurrencyId]
-			,[intCustomerStorageId]
-			,[intTicketId]
-			,[intInvoiceId]
-			,[intInventoryShipmentId]
-			,[dblUnits]
-			,[dtmHistoryDate]
-			,[dblPaidAmount]
-			,[strType]
-			,[strUserName]
-			,[intUserId]
+			intCustomerStorageId
+			, intUserId
+			, ysnPost
+			, intTransactionTypeId
+			, strType
+			, dblUnits
+			, intInventoryShipmentId
+			, dtmHistoryDate
+			, intInvoiceId
+			, intTicketId
 		)
-		SELECT 
-			 [intConcurrencyId] = 1
-			,[intCustomerStorageId] = intCustomerStorageId
-			,[intTicketId] = intTicketId
-			,[intInvoiceId]=intInvoiceId
-			,[intInventoryShipmentId] = intInventoryShipmentId
-			,[dblUnits] = dblUnits
-			,[dtmHistoryDate] = GetDATE()
-			,[dblPaidAmount] = NULL 
-			,[strType] = 'Reverse By Invoice'
-			,[strUserName] = NULL
-			,[intUserId] = @intUserId
-		FROM tblGRStorageHistory WHERE intInvoiceId=@IntSourceKey AND strType=@strType AND intInventoryReceiptId IS NULL
+		SELECT
+			  intCustomerStorageId
+			, @intUserId
+			, 0
+			, @intTransactionTypeId -- Transaction Type Id for Invoice
+			, 'Reverse By Invoice'
+			, dblUnits
+			, intInventoryShipmentId
+			, GETDATE()
+			, intInvoiceId
+			, intTicketId
+		FROM tblGRStorageHistory
+		WHERE intInvoiceId = @IntSourceKey
+			AND strType = @strType
+			AND intInventoryReceiptId IS NULL
+		EXEC uspGRInsertStorageHistoryRecord @StorageHistoryStagingTable, @intStorageHistoryId OUTPUT
+		-- INSERT INTO [dbo].[tblGRStorageHistory] 
+		-- (
+		-- 	 [intConcurrencyId]
+		-- 	,[intCustomerStorageId]
+		-- 	,[intTicketId]
+		-- 	,[intInvoiceId]
+		-- 	,[intInventoryShipmentId]
+		-- 	,[dblUnits]
+		-- 	,[dtmHistoryDate]
+		-- 	,[dblPaidAmount]
+		-- 	,[strType]
+		-- 	,[strUserName]
+		-- 	,[intUserId]
+		-- )
+		-- SELECT 
+		-- 	 [intConcurrencyId] = 1
+		-- 	,[intCustomerStorageId] = intCustomerStorageId
+		-- 	,[intTicketId] = intTicketId
+		-- 	,[intInvoiceId]=intInvoiceId
+		-- 	,[intInventoryShipmentId] = intInventoryShipmentId
+		-- 	,[dblUnits] = dblUnits
+		-- 	,[dtmHistoryDate] = GetDATE()
+		-- 	,[dblPaidAmount] = NULL 
+		-- 	,[strType] = 'Reverse By Invoice'
+		-- 	,[strUserName] = NULL
+		-- 	,[intUserId] = @intUserId
+		-- FROM tblGRStorageHistory WHERE intInvoiceId=@IntSourceKey AND strType=@strType AND intInventoryReceiptId IS NULL
 
 		INSERT INTO @ItemCostingTableType 
 		(

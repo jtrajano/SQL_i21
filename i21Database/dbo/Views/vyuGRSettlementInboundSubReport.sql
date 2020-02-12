@@ -10,7 +10,7 @@ AS
 			,intItemId					= BillDtl.intItemId
 			,strDiscountCode			= Item.strShortName 
 			,strDiscountCodeDescription = Item.strItemNo
-			,dblDiscountAmount			= BillDtl.dblCost			
+			,dblDiscountAmount			= round(BillDtl.dblCost, 2)-- * BillDtl.dblQtyReceived
 			,dblAmount					= BillDtl.dblTotal --+ BillDtl.dblTax
 			,dblTax						= BillDtl.dblTax
 			,Net						= ISNULL(PYMTDTL.dblTotal,0)
@@ -20,7 +20,7 @@ AS
 			JOIN tblAPPaymentDetail PYMTDTL 
 				ON PYMT.intPaymentId = PYMTDTL.intPaymentId
 			JOIN tblAPBill Bill	
-				ON PYMTDTL.intBillId = Bill.intBillId
+				ON PYMTDTL.intBillId = Bill.intBillId --and intTransactionType = 1
 			JOIN tblAPBillDetail BillDtl
 				ON BillDtl.intBillId = Bill.intBillId
 			JOIN tblICItem Item 

@@ -67,7 +67,6 @@ OUTER APPLY (
 LEFT JOIN tblEMEntityLocation emcuslocation
 	ON cfcustomer.intEntityId = emcuslocation.intEntityId
 		AND emcuslocation.ysnDefaultLocation = 1
-WHERE cfTransaction.ysnPosted = 1
 GO
 
 

@@ -476,7 +476,7 @@ END
 			WHERE si.intInventoryShipmentId = @InventoryShipmentId AND s.intOrderType = 1
 	*/
 
-	IF ISNULL(@InventoryShipmentId, 0) != 0 AND ISNULL(@strWhereFinalizedWeight, 'Origin') = 'Origin' AND ISNULL(@strWhereFinalizedGrade, 'Origin') = 'Origin' AND EXISTS(SELECT TOP 1 1 FROM tblICInventoryShipmentItem WHERE intInventoryShipmentId = @InventoryShipmentId AND ysnAllowInvoice = 1)
+	IF ISNULL(@InventoryShipmentId, 0) != 0 AND EXISTS(SELECT TOP 1 1 FROM tblICInventoryShipmentItem WHERE ysnAllowInvoice = 1 AND intInventoryShipmentId = @InventoryShipmentId)
 	BEGIN
 		EXEC @intInvoiceId = dbo.uspARCreateInvoiceFromShipment @InventoryShipmentId, @intUserId, NULL, 0, 1;
 	END

@@ -48,8 +48,8 @@ BEGIN TRY
 				,strQuantity
 				,strUOM
 				,strVersionNo
-				,dtmValidFrom
-				,dtmValidTo
+				,strValidFrom
+				,strValidTo
 				,strManufacturingProcess
 				,dtmCreated
 				,strSessionId

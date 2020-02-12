@@ -150,12 +150,12 @@ BEGIN
 	
 	IF @strMailType = 'Sample Instruction'
 	BEGIN
-		SELECT  @body += 'please find attached the sample instructions for contract - ' + @strNumber + '(Your ref. no. '+ @strCustomerContract +')'
+		SELECT  @body += 'Please find attached the sample instructions for contract - ' + @strNumber + '(Your ref. no. '+ @strCustomerContract +')'
 	END
 
 	IF @strMailType = 'Release Instruction'
 	BEGIN
-		SELECT  @body += 'please find attached the release instructions for contract - ' + @strNumber + '(Your ref. no. '+ @strCustomerContract +')'
+		SELECT  @body += 'Please find attached the release instructions for contract - ' + @strNumber + '(Your ref. no. '+ @strCustomerContract +')'
 	END	
 
 	SET @body += '<br>'

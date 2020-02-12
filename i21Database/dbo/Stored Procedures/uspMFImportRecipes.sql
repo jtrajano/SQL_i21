@@ -383,6 +383,22 @@ BEGIN
 		AND strSessionId = @strSessionId
 		AND ISNULL(strMessage, '') = ''
 
+	--Invalid Valid From
+	UPDATE tblMFRecipeStage
+	SET strMessage = 'Invalid Valid From (YYYY-MM-DD)'
+	WHERE ISDATE(ISNULL([strValidFrom], '')) = 0
+		AND ISNULL([strValidFrom], '') <> ''
+		AND strSessionId = @strSessionId
+		AND ISNULL(strMessage, '') = ''
+
+	--Invalid Valid To
+	UPDATE tblMFRecipeStage
+	SET strMessage = 'Invalid Valid To (YYYY-MM-DD)'
+	WHERE ISDATE(ISNULL([strValidTo], '')) = 0
+		AND ISNULL([strValidTo], '') <> ''
+		AND strSessionId = @strSessionId
+		AND ISNULL(strMessage, '') = ''
+
 	SELECT @intMinId = MIN(intRecipeStageId)
 	FROM tblMFRecipeStage
 	WHERE strSessionId = @strSessionId
@@ -506,8 +522,8 @@ BEGIN
 				,GETDATE()
 				,@intUserId
 				,GETDATE()
-				,s.dtmValidFrom
-				,s.dtmValidTo
+				,s.strValidFrom
+				,s.strValidTo
 			FROM tblMFRecipeStage s
 			LEFT JOIN tblICItem i ON s.strItemNo = i.strItemNo
 			LEFT JOIN tblICItemUOM iu ON i.intItemId = iu.intItemId
@@ -619,8 +635,8 @@ BEGIN
 				,r.intOneLinePrintId = t.intOneLinePrintId
 				,r.intLastModifiedUserId = @intUserId
 				,r.dtmLastModified = GETDATE()
-				,r.dtmValidFrom =t.dtmValidFrom
-				,r.dtmValidTo =t.dtmValidTo
+				,r.dtmValidFrom =t.strValidFrom
+				,r.dtmValidTo =t.strValidTo
 			FROM tblMFRecipe r
 			CROSS JOIN (
 				SELECT TOP 1 s.strRecipeName
@@ -637,8 +653,8 @@ BEGIN
 					,s.[strDiscount]
 					,um.intUnitMeasureId
 					,p.intOneLinePrintId
-					,s.dtmValidFrom 
-					,s.dtmValidTo
+					,s.strValidFrom 
+					,s.strValidTo
 				FROM tblMFRecipeStage s
 				LEFT JOIN tblICItem i ON s.strItemNo = i.strItemNo
 				LEFT JOIN tblICItemUOM iu ON i.intItemId = iu.intItemId

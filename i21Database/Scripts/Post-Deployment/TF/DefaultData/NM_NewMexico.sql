@@ -643,20 +643,20 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '2A', strType = 'Ethanol', strState = 'NM', strStatus = 'Include', intMasterId = 31581
 	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '2A', strType = 'Gasoline', strState = 'NM', strStatus = 'Include', intMasterId = 31580
 	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '2A', strType = 'Special Fuel', strState = 'NM', strStatus = 'Include', intMasterId = 31582
-	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '3', strType = 'Ethanol', strState = 'NM', strStatus = 'Include', intMasterId = 31584
-	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '3', strType = 'Gasoline', strState = 'NM', strStatus = 'Include', intMasterId = 31583
-	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '3', strType = 'Special Fuel', strState = 'NM', strStatus = 'Include', intMasterId = 31585
+	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '3', strType = 'Ethanol', strState = 'NM', strStatus = 'Exclude', intMasterId = 31584
+	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '3', strType = 'Gasoline', strState = 'NM', strStatus = 'Exclude', intMasterId = 31583
+	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '3', strType = 'Special Fuel', strState = 'NM', strStatus = 'Exclude', intMasterId = 31585
 	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '4', strType = 'Ethanol', strState = 'NM', strStatus = 'Include', intMasterId = 31587
 	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '4', strType = 'Gasoline', strState = 'NM', strStatus = 'Include', intMasterId = 31586
 	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '4', strType = 'Special Fuel', strState = 'NM', strStatus = 'Include', intMasterId = 31588
-	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '5A', strType = 'Ethanol', strState = 'NM', strStatus = 'Include', intMasterId = 31590
-	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '5A', strType = 'Gasoline', strState = 'NM', strStatus = 'Include', intMasterId = 31589
-	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '5A', strType = 'Special Fuel', strState = 'NM', strStatus = 'Include', intMasterId = 31591
+	--UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '5A', strType = 'Ethanol', strState = 'NM', strStatus = 'Include', intMasterId = 31590
+	--UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '5A', strType = 'Gasoline', strState = 'NM', strStatus = 'Include', intMasterId = 31589
+	--UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '5A', strType = 'Special Fuel', strState = 'NM', strStatus = 'Include', intMasterId = 31591
 	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '6J', strType = 'Special Fuel', strState = 'NM', strStatus = 'Include', intMasterId = 31592
 	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '7', strType = 'Ethanol', strState = 'NM', strStatus = 'Exclude', intMasterId = 31602
 	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '7', strType = 'Gasoline', strState = 'NM', strStatus = 'Exclude', intMasterId = 31601
 	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '7', strType = 'Special Fuel', strState = 'NM', strStatus = 'Exclude', intMasterId = 31595
-	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '9', strType = 'Special Fuel', strState = 'NM', strStatus = 'Include', intMasterId = 31598
+	--UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'Form 41306', strScheduleCode = '9', strType = 'Special Fuel', strState = 'NM', strStatus = 'Include', intMasterId = 31598
 	
 	INSERT INTO @ValidDestinationStates(
 		intValidDestinationStateId

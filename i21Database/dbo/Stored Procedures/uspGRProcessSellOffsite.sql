@@ -51,6 +51,8 @@ BEGIN TRY
 	DECLARE @dblSpotCashPrice DECIMAL(24, 10)
 	DECLARE @InventoryStockUOMKey INT
 	DECLARE @InventoryStockUOM NVARCHAR(50)
+	DECLARE @StorageHistoryStagingTable AS [StorageHistoryStagingTable]
+	DECLARE @intStorageHistoryId INT
 
 	--Storage Charge Variables
 	DECLARE @intExternalId INT
@@ -314,32 +316,57 @@ BEGIN TRY
 					WHERE intCustomerStorageId = @intCustomerStorageId
 
 					--CREATE History For Storage Ticket
-					INSERT INTO [dbo].[tblGRStorageHistory] (
-						[intConcurrencyId]
-						,[intCustomerStorageId]
-						,[intInvoiceId]
-						,[intContractHeaderId]
-						,[dblUnits]
-						,[dtmHistoryDate]
-						,[strType]
-						,[strUserName]
-						,[intUserId]
-						,[intEntityId]
-						,[strSettleTicket]
-						)
-					VALUES (
-						1
-						,@intCustomerStorageId
-						,NULL
-						,@intContractHeaderId
-						,@dblStorageUnits
-						,GETDATE()
-						,'Settlement'
-						,NULL
-						,@UserKey
-						,@ContractEntityId
-						,@strOffsiteTicket
-						)
+					INSERT INTO @StorageHistoryStagingTable
+					(
+						intCustomerStorageId
+						, intUserId
+						, ysnPost
+						, intTransactionTypeId
+						, strType
+						, dblUnits
+						, intContractHeaderId
+						, dtmHistoryDate
+						, intSettleStorageId
+						, dblPaidAmount
+					)
+					SELECT
+						@intCustomerStorageId
+						, @UserKey
+						, 1
+						, 33 -- Transaction Type Id for Invoice
+						, 'Settlement'
+						, @dblStorageUnits
+						, @intContractHeaderId
+						, GETDATE()
+						, NULL
+						, NULL
+					EXEC uspGRInsertStorageHistoryRecord @StorageHistoryStagingTable, @intStorageHistoryId OUTPUT
+					-- INSERT INTO [dbo].[tblGRStorageHistory] (
+					-- 	[intConcurrencyId]
+					-- 	,[intCustomerStorageId]
+					-- 	,[intInvoiceId]
+					-- 	,[intContractHeaderId]
+					-- 	,[dblUnits]
+					-- 	,[dtmHistoryDate]
+					-- 	,[strType]
+					-- 	,[strUserName]
+					-- 	,[intUserId]
+					-- 	,[intEntityId]
+					-- 	,[strSettleTicket]
+					-- 	)
+					-- VALUES (
+					-- 	1
+					-- 	,@intCustomerStorageId
+					-- 	,NULL
+					-- 	,@intContractHeaderId
+					-- 	,@dblStorageUnits
+					-- 	,GETDATE()
+					-- 	,'Settlement'
+					-- 	,NULL
+					-- 	,@UserKey
+					-- 	,@ContractEntityId
+					-- 	,@strOffsiteTicket
+					-- 	)
 						
 					  INSERT INTO @OffSiteInvoiceCreate(intCustomerStorageId,intContractHeaderId,intContractDetailId,dblUnits,dblCashPrice)
 					  SELECT @intCustomerStorageId,@intContractHeaderId,@intContractDetailId,@dblStorageUnits,@dblCashPrice
@@ -369,32 +396,58 @@ BEGIN TRY
 					SET dblOpenBalance = dblOpenBalance - @dblContractUnits
 					WHERE intCustomerStorageId = @intCustomerStorageId
 
-					INSERT INTO [dbo].[tblGRStorageHistory] (
-						[intConcurrencyId]
-						,[intCustomerStorageId]
-						,[intInvoiceId]
-						,[intContractHeaderId]
-						,[dblUnits]
-						,[dtmHistoryDate]
-						,[strType]
-						,[strUserName]
-						,[intUserId]
-						,[intEntityId]
-						,[strSettleTicket]
-						)
-					VALUES (
-						1
-						,@intCustomerStorageId
-						,NULL
-						,@intContractHeaderId
-						,@dblContractUnits
-						,GETDATE()
-						,'Settlement'
-						,NULL
-						,@UserKey
-						,@ContractEntityId
-						,@strOffsiteTicket
-						)
+					INSERT INTO @StorageHistoryStagingTable
+					(
+						intCustomerStorageId
+						, intUserId
+						, ysnPost
+						, intTransactionTypeId
+						, strType
+						, dblUnits
+						, intContractHeaderId
+						, dtmHistoryDate
+						, intSettleStorageId
+						, dblPaidAmount
+					)
+					SELECT
+						@intCustomerStorageId
+						, @UserKey
+						, 1
+						, 33 -- Transaction Type Id for Invoice
+						, 'Settlement'
+						, @dblContractUnits
+						, @intContractHeaderId
+						, GETDATE()
+						, NULL
+						, NULL
+					EXEC uspGRInsertStorageHistoryRecord @StorageHistoryStagingTable, @intStorageHistoryId OUTPUT
+
+					-- INSERT INTO [dbo].[tblGRStorageHistory] (
+					-- 	[intConcurrencyId]
+					-- 	,[intCustomerStorageId]
+					-- 	,[intInvoiceId]
+					-- 	,[intContractHeaderId]
+					-- 	,[dblUnits]
+					-- 	,[dtmHistoryDate]
+					-- 	,[strType]
+					-- 	,[strUserName]
+					-- 	,[intUserId]
+					-- 	,[intEntityId]
+					-- 	,[strSettleTicket]
+					-- 	)
+					-- VALUES (
+					-- 	1
+					-- 	,@intCustomerStorageId
+					-- 	,NULL
+					-- 	,@intContractHeaderId
+					-- 	,@dblContractUnits
+					-- 	,GETDATE()
+					-- 	,'Settlement'
+					-- 	,NULL
+					-- 	,@UserKey
+					-- 	,@ContractEntityId
+					-- 	,@strOffsiteTicket
+					-- 	)
 						
 					INSERT INTO @OffSiteInvoiceCreate(intCustomerStorageId,intContractHeaderId,intContractDetailId,dblUnits,dblCashPrice)
 					SELECT @intCustomerStorageId,@intContractHeaderId,@intContractDetailId,@dblContractUnits,@dblCashPrice
@@ -492,34 +545,59 @@ BEGIN TRY
 				WHERE intCustomerStorageId = @intCustomerStorageId
 
 				--CREATE History For Storage Ticket
-				INSERT INTO [dbo].[tblGRStorageHistory] 
+				INSERT INTO @StorageHistoryStagingTable
 				(
-					[intConcurrencyId]
-					,[intCustomerStorageId]
-					,[intInvoiceId]
-					,[intContractHeaderId]
-					,[dblUnits]
-					,[dtmHistoryDate]
-					,[strType]
-					,[strUserName]
-					,[intUserId]
-					,[intEntityId]
-					,[strSettleTicket]
-				 )
-				VALUES 
-				 (
-					1
-					,@intCustomerStorageId
-					,NULL
-					,NULL
-					,@dblStorageUnits
-					,GETDATE()
-					,'Settlement'
-					,NULL
-					,@UserKey
-					,NULL
-					,@strOffsiteTicket
-				  )				  
+					intCustomerStorageId
+					, intUserId
+					, ysnPost
+					, intTransactionTypeId
+					, strType
+					, dblUnits
+					, intContractHeaderId
+					, dtmHistoryDate
+					, intSettleStorageId
+					, dblPaidAmount
+				)
+				SELECT
+					@intCustomerStorageId
+					, @UserKey
+					, 1
+					, 33 -- Transaction Type Id for Invoice
+					, 'Settlement'
+					, @dblStorageUnits
+					, NULL
+					, GETDATE()
+					, NULL
+					, NULL
+				EXEC uspGRInsertStorageHistoryRecord @StorageHistoryStagingTable, @intStorageHistoryId OUTPUT
+				-- INSERT INTO [dbo].[tblGRStorageHistory] 
+				-- (
+				-- 	[intConcurrencyId]
+				-- 	,[intCustomerStorageId]
+				-- 	,[intInvoiceId]
+				-- 	,[intContractHeaderId]
+				-- 	,[dblUnits]
+				-- 	,[dtmHistoryDate]
+				-- 	,[strType]
+				-- 	,[strUserName]
+				-- 	,[intUserId]
+				-- 	,[intEntityId]
+				-- 	,[strSettleTicket]
+				--  )
+				-- VALUES 
+				--  (
+				-- 	1
+				-- 	,@intCustomerStorageId
+				-- 	,NULL
+				-- 	,NULL
+				-- 	,@dblStorageUnits
+				-- 	,GETDATE()
+				-- 	,'Settlement'
+				-- 	,NULL
+				-- 	,@UserKey
+				-- 	,NULL
+				-- 	,@strOffsiteTicket
+				--   )				  
 				  INSERT INTO @OffSiteInvoiceCreate(intCustomerStorageId,intContractHeaderId,intContractDetailId,dblUnits,dblCashPrice)
 				  SELECT @intCustomerStorageId,NULL,NULL,@dblStorageUnits,@dblSpotCashPrice
 					
@@ -532,34 +610,59 @@ BEGIN TRY
 				WHERE intCustomerStorageId = @intCustomerStorageId
 
 				--CREATE History For Storage Ticket
-				INSERT INTO [dbo].[tblGRStorageHistory] 
+				INSERT INTO @StorageHistoryStagingTable
 				(
-					[intConcurrencyId]
-					,[intCustomerStorageId]
-					,[intInvoiceId]
-					,[intContractHeaderId]
-					,[dblUnits]
-					,[dtmHistoryDate]
-					,[strType]
-					,[strUserName]
-					,[intUserId]
-					,[intEntityId]
-					,[strSettleTicket]
+					intCustomerStorageId
+					, intUserId
+					, ysnPost
+					, intTransactionTypeId
+					, strType
+					, dblUnits
+					, intContractHeaderId
+					, dtmHistoryDate
+					, intSettleStorageId
+					, dblPaidAmount
 				)
-				VALUES 
-				(
-					1
-					,@intCustomerStorageId
-					,NULL
-					,NULL
-					,@dblSpotUnits
-					,GETDATE()
-					,'Settlement'
-					,NULL
-					,@UserKey
-					,NULL
-					,@strOffsiteTicket
-				 )
+				SELECT
+					@intCustomerStorageId
+					, @UserKey
+					, 1
+					, 33 -- Transaction Type Id for Invoice
+					, 'Settlement'
+					, @dblSpotUnits
+					, NULL
+					, GETDATE()
+					, NULL
+					, NULL
+				EXEC uspGRInsertStorageHistoryRecord @StorageHistoryStagingTable, @intStorageHistoryId OUTPUT
+				-- INSERT INTO [dbo].[tblGRStorageHistory] 
+				-- (
+				-- 	[intConcurrencyId]
+				-- 	,[intCustomerStorageId]
+				-- 	,[intInvoiceId]
+				-- 	,[intContractHeaderId]
+				-- 	,[dblUnits]
+				-- 	,[dtmHistoryDate]
+				-- 	,[strType]
+				-- 	,[strUserName]
+				-- 	,[intUserId]
+				-- 	,[intEntityId]
+				-- 	,[strSettleTicket]
+				-- )
+				-- VALUES 
+				-- (
+				-- 	1
+				-- 	,@intCustomerStorageId
+				-- 	,NULL
+				-- 	,NULL
+				-- 	,@dblSpotUnits
+				-- 	,GETDATE()
+				-- 	,'Settlement'
+				-- 	,NULL
+				-- 	,@UserKey
+				-- 	,NULL
+				-- 	,@strOffsiteTicket
+				--  )
 				 
 				INSERT INTO @OffSiteInvoiceCreate(intCustomerStorageId,intContractHeaderId,intContractDetailId,dblUnits,dblCashPrice)
 				SELECT @intCustomerStorageId,NULL,NULL,@dblSpotUnits,@dblSpotCashPrice	
@@ -749,31 +852,62 @@ BEGIN TRY
 		IF (@ErrorMessage IS NULL)
 		BEGIN					
 			COMMIT TRANSACTION			
-			INSERT INTO [dbo].[tblGRStorageHistory] 
+
+			INSERT INTO @StorageHistoryStagingTable
 			(
-				 [intConcurrencyId]
-				,[intCustomerStorageId]							
-				,[intInvoiceId]							
-				,[dblUnits]
-				,[dtmHistoryDate]
-				,[dblPaidAmount]							
-				,[strType]
-				,[strUserName]							
-				,[intUserId]
+				intCustomerStorageId
+				, intUserId
+				, ysnPost
+				, intTransactionTypeId
+				, strType
+				, dblUnits
+				, intContractHeaderId
+				, dtmHistoryDate
+				, intSettleStorageId
+				, dblPaidAmount
+				, intInvoiceId
 			)
-			SELECT 
-				 [intConcurrencyId] = 1
-				,[intCustomerStorageId] = ARD.intCustomerStorageId														
-				,[intInvoiceId] = AR.intInvoiceId							
-				,[dblUnits] = ARD.dblQtyOrdered
-				,[dtmHistoryDate] = GetDATE()
-				,[dblPaidAmount] = ARD.dblPrice							
-				,[strType] = 'Generated Invoice'
-				,[strUserName] = NULL
-				,[intUserId] = @UserKey
+			SELECT
+				ARD.intCustomerStorageId
+				, @UserKey
+				, 1
+				, 33 -- Transaction Type Id for Invoice
+				, 'Generated Invoice'
+				, ARD.dblQtyOrdered
+				, NULL
+				, GETDATE()
+				, NULL
+				, ARD.dblPrice
+				, AR.intInvoiceId
 			FROM tblARInvoice AR
-			JOIN tblARInvoiceDetail ARD ON ARD.intInvoiceId = AR.intInvoiceId
-			WHERE AR.intInvoiceId = CONVERT(INT,@CreatedIvoices)
+				INNER JOIN tblARInvoiceDetail ARD ON ARD.intInvoiceId = AR.intInvoiceId
+			WHERE AR.intInvoiceId = CONVERT(INT, @CreatedIvoices)
+			EXEC uspGRInsertStorageHistoryRecord @StorageHistoryStagingTable, @intStorageHistoryId OUTPUT
+			-- INSERT INTO [dbo].[tblGRStorageHistory] 
+			-- (
+			-- 	 [intConcurrencyId]
+			-- 	,[intCustomerStorageId]							
+			-- 	,[intInvoiceId]							
+			-- 	,[dblUnits]
+			-- 	,[dtmHistoryDate]
+			-- 	,[dblPaidAmount]							
+			-- 	,[strType]
+			-- 	,[strUserName]							
+			-- 	,[intUserId]
+			-- )
+			-- SELECT 
+			-- 	 [intConcurrencyId] = 1
+			-- 	,[intCustomerStorageId] = ARD.intCustomerStorageId														
+			-- 	,[intInvoiceId] = AR.intInvoiceId							
+			-- 	,[dblUnits] = ARD.dblQtyOrdered
+			-- 	,[dtmHistoryDate] = GetDATE()
+			-- 	,[dblPaidAmount] = ARD.dblPrice							
+			-- 	,[strType] = 'Generated Invoice'
+			-- 	,[strUserName] = NULL
+			-- 	,[intUserId] = @UserKey
+			-- FROM tblARInvoice AR
+			-- JOIN tblARInvoiceDetail ARD ON ARD.intInvoiceId = AR.intInvoiceId
+			-- WHERE AR.intInvoiceId = CONVERT(INT,@CreatedIvoices)
 								   
 				
 		END

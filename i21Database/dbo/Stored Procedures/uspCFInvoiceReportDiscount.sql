@@ -305,7 +305,7 @@ BEGIN
 			,vyu.strTermCode				
 		FROM vyuCFInvoiceDiscount vyu
 		INNER JOIN tblCFInvoiceReportTempTable temp
-		ON vyu.intTransactionId = temp.intTransactionId
+		ON vyu.intTransactionId = temp.intTransactionId AND strUserId = @UserId AND LOWER(strStatementType) =  LOWER(@StatementType)
 		WHERE temp.intTransactionId IN (SELECT intTransactionId FROM tblCFInvoiceReportTempTable WHERE strUserId = @UserId AND LOWER(strStatementType) =  LOWER(@StatementType))
 		-----------------MAIN QUERY------------------
 

@@ -1,13 +1,4 @@
-﻿/**
-* This function will centralize the validation for each items. This is used prior to posting a transaction. 
-* 
-* Sample usage: 
-*
-*	SELECT	B.*
-*	FROM	tblICItemLocation A CROSS APPLY dbo.fnGetItemCostingOnPostInTransitErrors(A.intItemId, A.intLocationId, A.intItemUOMId, A.dblQty) B
-* 
-*/
-CREATE FUNCTION fnGetItemCostingOnPostInTransitErrors (
+﻿CREATE FUNCTION fnGetItemCostingOnPostInTransitErrors (
 	@intItemId AS INT
 	, @intItemLocationId AS INT
 	, @intItemUOMId AS INT
@@ -19,6 +10,15 @@ CREATE FUNCTION fnGetItemCostingOnPostInTransitErrors (
 )
 RETURNS TABLE 
 AS
+/**
+* This function will centralize the validation for each items. This is used prior to posting a transaction. 
+* 
+* Sample usage: 
+*
+*	SELECT	B.*
+*	FROM	tblICItemLocation A CROSS APPLY dbo.fnGetItemCostingOnPostInTransitErrors(A.intItemId, A.intLocationId, A.intItemUOMId, A.dblQty) B
+* 
+*/
 RETURN (
 	
 	SELECT DISTINCT * 
@@ -51,7 +51,8 @@ RETURN (
 		UNION ALL 
 		SELECT	intItemId = @intItemId
 				,intItemLocationId = @intItemLocationId
-				,strText = 'Item UOM is invalid or missing for ' + (SELECT ISNULL(strItemNo, '') FROM tblICItem WHERE intItemId = @intItemId)
+				,strText = 'Item UOM is invalid or missing for <b>' + (SELECT ISNULL(strItemNo, '') FROM tblICItem WHERE intItemId = @intItemId) + '</b>.'
+					+ ISNULL((SELECT TOP 1 ' Make sure the UOM of this item is also properly set up in <b>"' + strBundleItemNo + '"</b> bundle.' FROM vyuICGetInvalidBundleItemUom WHERE intBundleItemId = @intItemId), '')
 				,intErrorCode = 80048
 		WHERE	NOT EXISTS (
 					SELECT TOP 1 1 

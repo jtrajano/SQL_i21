@@ -44,7 +44,8 @@ DECLARE @ysnIsStorage AS INT
 DECLARE @intContractHeaderId INT
 DECLARE @strLotTracking NVARCHAR(4000)
 DECLARE @dblAvailableGrainOpenBalance DECIMAL(24, 10)
-
+DECLARE @StorageHistoryStagingTable AS [StorageHistoryStagingTable]
+DECLARE @intStorageHistoryId INT
 DECLARE @ErrorMessage NVARCHAR(4000);
 DECLARE @ErrorSeverity INT;
 DECLARE @ErrorState INT;
@@ -332,38 +333,63 @@ BEGIN TRY
 		RETURN;
 	END
 
-	INSERT INTO [dbo].[tblGRStorageHistory]
-		   ([intConcurrencyId]
-		   ,[intCustomerStorageId]
-		   ,[intDeliverySheetId]
-		   ,[intInventoryReceiptId]
-		   ,[intInvoiceId]
-		   ,[intContractHeaderId]
-		   ,[dblUnits]
-		   ,[dtmHistoryDate]
-		   ,[dblPaidAmount]
-		   ,[strPaidDescription]
-		   ,[dblCurrencyRate]
-		   ,[strType]
-		   ,[strUserName]
-		   ,[intUserId]
-		   ,[intTransactionTypeId])
-	VALUES
-		   (1
-		   ,@intCustomerStorageId
-		   ,@intDeliverySheetId
-		   ,NULL
-		   ,NULL
-		   ,@intContractHeaderId
-		   ,@dblNetUnits
-		   ,dbo.fnRemoveTimeOnDate((SELECT dtmDeliverySheetDate FROM tblSCDeliverySheet WHERE intDeliverySheetId = @intDeliverySheetId))
-		   ,0
-		   ,'Generated From Delivery Sheet'
-		   ,1
-		   ,'From Delivery Sheet'
-		   ,NULL
-		   ,@intUserId
-		   ,5)
+	INSERT INTO @StorageHistoryStagingTable
+	(
+		intCustomerStorageId
+		, intUserId
+		, ysnPost
+		, intTransactionTypeId
+		, strType
+		, dblUnits
+		, dtmHistoryDate
+		, intContractHeaderId
+		, intDeliverySheetId
+	)
+	SELECT
+		  @intCustomerStorageId
+		, @intUserId
+		, 1
+		, 53 -- Transaction Type Id for Delivery Sheet
+		, 'Generated From Delivery Sheet'
+		, @dblNetUnits
+		, dbo.fnRemoveTimeOnDate((SELECT dtmDeliverySheetDate FROM tblSCDeliverySheet WHERE intDeliverySheetId = @intDeliverySheetId))
+		, @intContractHeaderId
+		, @intDeliverySheetId
+
+	EXEC uspGRInsertStorageHistoryRecord @StorageHistoryStagingTable, @intStorageHistoryId OUTPUT
+
+	-- INSERT INTO [dbo].[tblGRStorageHistory]
+	-- 	   ([intConcurrencyId]
+	-- 	   ,[intCustomerStorageId]
+	-- 	   ,[intDeliverySheetId]
+	-- 	   ,[intInventoryReceiptId]
+	-- 	   ,[intInvoiceId]
+	-- 	   ,[intContractHeaderId]
+	-- 	   ,[dblUnits]
+	-- 	   ,[dtmHistoryDate]
+	-- 	   ,[dblPaidAmount]
+	-- 	   ,[strPaidDescription]
+	-- 	   ,[dblCurrencyRate]
+	-- 	   ,[strType]
+	-- 	   ,[strUserName]
+	-- 	   ,[intUserId]
+	-- 	   ,[intTransactionTypeId])
+	-- VALUES
+	-- 	   (1
+	-- 	   ,@intCustomerStorageId
+	-- 	   ,@intDeliverySheetId
+	-- 	   ,NULL
+	-- 	   ,NULL
+	-- 	   ,@intContractHeaderId
+	-- 	   ,@dblNetUnits
+	-- 	   ,dbo.fnRemoveTimeOnDate((SELECT dtmDeliverySheetDate FROM tblSCDeliverySheet WHERE intDeliverySheetId = @intDeliverySheetId))
+	-- 	   ,0
+	-- 	   ,'Generated From Delivery Sheet'
+	-- 	   ,1
+	-- 	   ,'From Delivery Sheet'
+	-- 	   ,NULL
+	-- 	   ,@intUserId
+	-- 	   ,5)
 	
 	SET @intHoldCustomerStorageId = NULL
 	SELECT @intHoldCustomerStorageId = SD.intTicketFileId from tblQMTicketDiscount SD 
