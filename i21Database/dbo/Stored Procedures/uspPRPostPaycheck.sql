@@ -119,7 +119,7 @@ BEGIN
 		,[strMemo]					= ''
 		,[strReferenceNo]			= ''
 		,[dtmCheckPrinted]			= NULL
-		,[ysnCheckToBePrinted]		= 1
+		,[ysnCheckToBePrinted]		= 0
 		,[ysnCheckVoid]				= 0
 		,[ysnPosted]				= 0
 		,[strLink]					= ''
