@@ -144,7 +144,6 @@ BEGIN
 				INNER JOIN tblCTContractDetail CT
 					ON CT.intContractDetailId = IRI.intContractDetailId
 				WHERE intInventoryReceiptId = @intInventoryReceiptId and CT.intPricingTypeId = 2
-					AND ysnAllowVoucher = 0
 				GROUP BY intInventoryReceiptId,IRI.intContractDetailId
 
 				IF(@ysnHasBasisContract = 1)
@@ -168,7 +167,6 @@ BEGIN
 						WHERE ri.intInventoryReceiptId = @intInventoryReceiptId 
 							AND r.strReceiptType = 'Purchase Contract' 
 							AND ri.intContractDetailId > @_intLoopContractDetailId
-							AND ysnAllowVoucher = 0
 
 						-- select @intBillId = intBillId from tblAPBillDetail where intInventoryReceiptItemId in (
 						-- 	select ri.intInventoryReceiptItemId
