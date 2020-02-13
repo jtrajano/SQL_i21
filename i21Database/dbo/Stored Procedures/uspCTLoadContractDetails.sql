@@ -36,6 +36,18 @@ BEGIN TRY
 	JOIN tblICInventoryShipment Shipment ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId AND Shipment.intOrderType = 1
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = ShipmentItem.intLineNo AND CD.intContractHeaderId = ShipmentItem.intOrderId
 	WHERE Shipment.ysnPosted = 1 AND ShipmentItem.intOrderId = @intContractHeaderId
+	and ShipmentItem.intInventoryShipmentItemId not in (
+		select
+			id.intInventoryShipmentItemId
+		from
+			tblARInvoiceDetail id
+			,tblARInvoice i
+		where
+			id.intInventoryShipmentItemId = ShipmentItem.intInventoryShipmentItemId
+			and i.intInvoiceId = id.intInvoiceId
+			and i.strTransactionType = 'Credit Memo'
+			and isnull(i.ysnPosted, convert(bit,0)) = convert(bit,1)
+	)
 	GROUP BY ShipmentItem.intOrderId,ShipmentItem.intLineNo
 
 	INSERT INTO @tblBill(intContractDetailId,dblQuantity)
