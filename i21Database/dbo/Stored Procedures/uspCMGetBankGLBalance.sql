@@ -1,7 +1,5 @@
-﻿//**
-Last Modified 02-13-2020 
-GL-7471 Bank Transfer Foreign Exchange -- this will reflect get the balance based on bank's currency. This is for Bank Recon screen.
-**//
+﻿--Last Modified 02-13-2020 
+--GL-7471 Bank Transfer Foreign Exchange -- this will reflect get the balance based on bank's currency. This is for Bank Recon screen.
 CREATE PROCEDURE [dbo].[uspCMGetBankGLBalance]
 	@intBankAccountId INT = NULL,
 	@dtmDate AS DATETIME = NULL
