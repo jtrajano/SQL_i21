@@ -78,7 +78,8 @@ AS
 						FT.intFreightTermId,
 						FT.strFreightTerm,
 						BE.strName					AS strBroker,
-						BA.strAccountNumber			AS strBrokerAccount
+						BA.strAccountNumber			AS strBrokerAccount,
+						intCommodityFutureMarketId = CY.intFutureMarketId
 
 				FROM	tblCTContractHeader						CH	
 				
