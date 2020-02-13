@@ -16,6 +16,8 @@ BEGIN
 		, @strTransactionReferenceNo NVARCHAR(100)
 		, @intContractDetailId INT
 		, @intContractHeaderId INT
+		, @strContractNumber NVARCHAR (50)
+		, @intContractSeq INT
 		, @intContractTypeId INT
 		, @intEntityId INT
 		, @intCommodityId INT
@@ -58,6 +60,8 @@ BEGIN
 		, [strTransactionReferenceNo] NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL
 		, [intContractDetailId] INT NOT NULL
 		, [intContractHeaderId] INT NOT NULL
+		, [strContractNumber] NVARCHAR (50)
+		, [intContractSeq] INT
 		, [intContractTypeId] INT NOT NULL
 		, [intEntityId] INT NOT NULL
 		, [intCommodityId] INT NOT NULL
@@ -130,6 +134,8 @@ BEGIN
 			, @intContractDetailId = intContractDetailId
 			, @intContractHeaderId = intContractHeaderId
 			, @intContractTypeId = intContractTypeId
+			, @strContractNumber = strContractNumber
+			, @intContractSeq = intContractSeq
 			, @intEntityId = intEntityId
 			, @intCommodityId = intCommodityId
 			, @intItemId = intItemId
@@ -289,6 +295,8 @@ BEGIN
 			, strTransactionReferenceNo
 			, intContractDetailId
 			, intContractHeaderId
+			, strContractNumber
+			, intContractSeq
 			, intContractTypeId
 			, intEntityId
 			, intCommodityId
@@ -319,6 +327,8 @@ BEGIN
 			, strTransactionReferenceNo
 			, intContractDetailId
 			, intContractHeaderId
+			, strContractNumber
+			, intContractSeq
 			, intContractTypeId
 			, intEntityId
 			, intCommodityId
@@ -357,6 +367,8 @@ BEGIN
 		, strTransactionReferenceNo
 		, intContractDetailId
 		, intContractHeaderId
+		, strContractNumber
+		, intContractSeq
 		, intContractTypeId
 		, intEntityId
 		, intCommodityId
@@ -390,6 +402,8 @@ BEGIN
 		, strTransactionReferenceNo
 		, intContractDetailId
 		, intContractHeaderId
+		, strContractNumber
+		, intContractSeq
 		, intContractTypeId
 		, intEntityId
 		, intCommodityId

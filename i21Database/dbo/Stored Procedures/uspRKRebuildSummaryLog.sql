@@ -187,7 +187,7 @@ BEGIN
 			union all
 			select  
 				1 AS Row_Num
-				, dtmTransactionDate = dbo.fnRemoveTimeOnDate(dtmScreenDate)
+				, dtmTransactionDate = dbo.fnRemoveTimeOnDate(dtmTransactionDate)
 				, sh.intContractHeaderId
 				, sh.intContractDetailId
 				, dblQty = (case when isnull(cd.intNoOfLoad,0) = 0 then suh.dblTransactionQuantity 
@@ -280,6 +280,8 @@ BEGIN
 			, strTransactionReferenceNo
 			, intContractDetailId
 			, intContractHeaderId
+			, strContractNumber
+			, intContractSeq
 			, intContractTypeId
 			, intEntityId
 			, intCommodityId
@@ -310,6 +312,8 @@ BEGIN
 			, strTransactionReferenceNo
 			, intContractDetailId
 			, intContractHeaderId
+			, strContractNumber
+			, intContractSeq
 			, intContractTypeId
 			, intEntityId
 			, intCommodityId
@@ -336,7 +340,7 @@ BEGIN
 		ORDER BY dtmTransactionDate,  intContractDetailId, intOrderBy
 
 
-		EXEC uspCTLogContractBalance @cbLog, 0
+		EXEC uspCTLogContractBalance @cbLog, 1
 
 		PRINT 'End Populate RK Summary Log - Contract'
 		
