@@ -157,7 +157,7 @@ BEGIN
 					BEGIN
 						IF EXISTS(SELECT TOP 1 1 FROM tblCTPriceFixation WHERE intContractDetailId = @intContractDetailId)
 						BEGIN
-							EXEC uspCTCreateVoucherInvoiceForPartialPricing @intContractDetailId, @intUserId
+							EXEC uspCTCreateVoucherInvoiceForPartialPricing @intContractDetailId = @intContractDetailId, @intUserId = @intUserId, @intTransactionId = @intBillId
 						END
 
 						SET @intContractDetailId = NULL
