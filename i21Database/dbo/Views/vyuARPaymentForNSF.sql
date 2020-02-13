@@ -15,12 +15,13 @@ SELECT intTransactionId		= P.intPaymentId
 	 , ysnInvoicePrepayment	= P.ysnInvoicePrepayment
 FROM dbo.tblARPayment P WITH (NOLOCK)
 INNER JOIN dbo.tblEMEntity E WITH (NOLOCK) ON P.intEntityCustomerId = E.intEntityId
+INNER JOIN dbo.tblSMPaymentMethod SM WITH (NOLOCK) ON P.intPaymentMethodId = SM.intPaymentMethodID
 INNER JOIN dbo.tblCMUndepositedFund UF WITH (NOLOCK) ON P.intPaymentId = UF.intSourceTransactionId
 											        AND P.strRecordNumber = UF.strSourceTransactionId
 INNER JOIN dbo.tblCMBankTransactionDetail BTD WITH (NOLOCK) ON UF.intUndepositedFundId = BTD.intUndepositedFundId
 WHERE P.ysnProcessedToNSF = 0
   AND P.ysnPosted = 1
-  AND P.strPaymentMethod IN ('Check', 'eCheck', 'ACH')
+  AND SM.strPaymentMethod IN ('Check', 'eCheck', 'ACH', 'Manual Credit Card', 'Credit Card')
 
 UNION ALL
 
@@ -47,4 +48,4 @@ WHERE I.ysnProcessedToNSF = 0
   AND I.ysnPosted = 1
   AND I.intPaymentMethodId IS NOT NULL
   AND I.strTransactionType = 'Cash'
-  AND SM.strPaymentMethod IN ('Check', 'eCheck', 'ACH')
+  AND SM.strPaymentMethod IN ('Check', 'eCheck', 'ACH', 'Manual Credit Card', 'Credit Card')
