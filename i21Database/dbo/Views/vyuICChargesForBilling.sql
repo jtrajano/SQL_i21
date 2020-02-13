@@ -31,7 +31,7 @@ SELECT
 													END 
 	,[dblQuantityBilled]						=	0
 	,[intLineNo]								=	1
-	,[intInventoryReceiptItemId]				=	ISNULL(ChargesLink.intInventoryReceiptItemId, ComputedChargesLink.intInventoryReceiptItemId) 
+	,[intInventoryReceiptItemId]				=	ChargesLink.intInventoryReceiptItemId --ISNULL(ChargesLink.intInventoryReceiptItemId, ComputedChargesLink.intInventoryReceiptItemId) 
 	,[intInventoryReceiptChargeId]				=	ReceiptCharge.intInventoryReceiptChargeId
 	,[dblUnitCost]								=	
 													CASE 
@@ -125,34 +125,35 @@ FROM
 		ON CostUOM.intUnitMeasureId = ItemCostUOM.intUnitMeasureId	
 
 	OUTER APPLY (
-		SELECT	A.intInventoryReceiptItemId
+		SELECT	TOP 1
+				A.intInventoryReceiptItemId
 				,A.intOwnershipType
-				,c = COUNT(1) 
+				--,c = COUNT(1) 
 		FROM	tblICInventoryReceiptItem A		
 		WHERE	A.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId
 				AND A.strChargesLink = ReceiptCharge.strChargesLink
-		GROUP BY A.intInventoryReceiptItemId
-				,A.intOwnershipType
-		HAVING	COUNT(1) = 1 
+		--GROUP BY A.intInventoryReceiptItemId
+		--		,A.intOwnershipType
+		--HAVING	COUNT(1) = 1 
 
 	) ChargesLink  
 
-	OUTER APPLY (
-		SELECT	A.intInventoryReceiptChargeId				
-				,c = COUNT(1) 
-		FROM	tblICInventoryReceiptChargePerItem A 
-		WHERE	A.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId
-		GROUP BY 
-				A.intInventoryReceiptChargeId
-		HAVING	COUNT(1) = 1 
+	--OUTER APPLY (
+	--	SELECT	A.intInventoryReceiptChargeId				
+	--			,c = COUNT(1) 
+	--	FROM	tblICInventoryReceiptChargePerItem A 
+	--	WHERE	A.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId
+	--	GROUP BY 
+	--			A.intInventoryReceiptChargeId
+	--	HAVING	COUNT(1) = 1 
 
-	) ChargesPerItem 
+	--) ChargesPerItem 
 
-	OUTER APPLY (
-		SELECT	B.intInventoryReceiptItemId
-		FROM	tblICInventoryReceiptChargePerItem B
-		WHERE	B.intInventoryReceiptChargeId = ChargesPerItem.intInventoryReceiptChargeId
-	) ComputedChargesLink
+	--OUTER APPLY (
+	--	SELECT	B.intInventoryReceiptItemId
+	--	FROM	tblICInventoryReceiptChargePerItem B
+	--	WHERE	B.intInventoryReceiptChargeId = ChargesPerItem.intInventoryReceiptChargeId
+	--) ComputedChargesLink
 
 	OUTER APPLY dbo.fnICGetScaleTicketIdForReceiptCharge(Receipt.intInventoryReceiptId, Receipt.strReceiptNumber) ScaleTicket
 	OUTER APPLY dbo.fnICGetShipmentScheduleIdForReceiptCharge(Receipt.intInventoryReceiptId, Receipt.strReceiptNumber) LG
@@ -210,7 +211,7 @@ SELECT
 													END 
 	,[dblQuantityBilled]						=	0
 	,[intLineNo]								=	1
-	,[intInventoryReceiptItemId]				=	ISNULL(ChargesLink.intInventoryReceiptItemId, ComputedChargesLink.intInventoryReceiptItemId)
+	,[intInventoryReceiptItemId]				=	ChargesLink.intInventoryReceiptItemId --ISNULL(ChargesLink.intInventoryReceiptItemId, ComputedChargesLink.intInventoryReceiptItemId)
 	,[intInventoryReceiptChargeId]				=	ReceiptCharge.intInventoryReceiptChargeId
 	,[dblUnitCost]								=	
 													CASE 
@@ -303,34 +304,35 @@ FROM tblICInventoryReceiptCharge ReceiptCharge INNER JOIN tblICItem Item
 		ON CostUOM.intUnitMeasureId = ItemCostUOM.intUnitMeasureId	
 
 	OUTER APPLY (
-		SELECT	A.intInventoryReceiptItemId
+		SELECT	TOP 1
+				A.intInventoryReceiptItemId
 				,A.intOwnershipType
-				,c = COUNT(1) 
+				--,c = COUNT(1) 
 		FROM	tblICInventoryReceiptItem A		
 		WHERE	A.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId
 				AND A.strChargesLink = ReceiptCharge.strChargesLink
-		GROUP BY A.intInventoryReceiptItemId		
-				,A.intOwnershipType
-		HAVING	COUNT(1) = 1 
+		--GROUP BY A.intInventoryReceiptItemId		
+		--		,A.intOwnershipType
+		--HAVING	COUNT(1) = 1 
 
 	) ChargesLink
 
-	OUTER APPLY (
-		SELECT	A.intInventoryReceiptChargeId
-				,c = COUNT(1) 
-		FROM	tblICInventoryReceiptChargePerItem A 
-		WHERE	A.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId
-		GROUP BY 
-				A.intInventoryReceiptChargeId
-		HAVING	COUNT(1) = 1 
+	--OUTER APPLY (
+	--	SELECT	A.intInventoryReceiptChargeId
+	--			,c = COUNT(1) 
+	--	FROM	tblICInventoryReceiptChargePerItem A 
+	--	WHERE	A.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId
+	--	GROUP BY 
+	--			A.intInventoryReceiptChargeId
+	--	HAVING	COUNT(1) = 1 
 
-	) ChargesPerItem 
+	--) ChargesPerItem 
 
-	OUTER APPLY (
-		SELECT	B.intInventoryReceiptItemId
-		FROM	tblICInventoryReceiptChargePerItem B
-		WHERE	B.intInventoryReceiptChargeId = ChargesPerItem.intInventoryReceiptChargeId
-	) ComputedChargesLink
+	--OUTER APPLY (
+	--	SELECT	B.intInventoryReceiptItemId
+	--	FROM	tblICInventoryReceiptChargePerItem B
+	--	WHERE	B.intInventoryReceiptChargeId = ChargesPerItem.intInventoryReceiptChargeId
+	--) ComputedChargesLink
 
 	OUTER APPLY dbo.fnICGetScaleTicketIdForReceiptCharge(Receipt.intInventoryReceiptId, Receipt.strReceiptNumber) ScaleTicket
 	OUTER APPLY dbo.fnICGetShipmentScheduleIdForReceiptCharge(Receipt.intInventoryReceiptId, Receipt.strReceiptNumber) LG
