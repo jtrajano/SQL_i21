@@ -182,9 +182,33 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
 		IF ISNULL(@ysnFromSalesOrder, 0) = 0
 			BEGIN		
 				UPDATE ID
-				SET dblQtyShipped	= ISNULL(CASE WHEN ISI.dblDestinationQuantity > CTD.dblOriginalQty THEN CTD.dblOriginalQty ELSE ISI.dblDestinationQuantity END, ISI.dblQuantity)
-				  , dblUnitQuantity	= ISNULL(CASE WHEN ISI.dblDestinationQuantity > CTD.dblOriginalQty THEN CTD.dblOriginalQty ELSE ISI.dblDestinationQuantity END, ISI.dblQuantity)
-				  , @dblQtyOverAged	= @dblNetWeight - ISNULL(CASE WHEN ISI.dblDestinationQuantity > CTD.dblOriginalQty THEN CTD.dblOriginalQty ELSE ISI.dblDestinationQuantity END, ISI.dblQuantity)
+				SET dblQtyShipped	= ISNULL(CASE WHEN ISI.dblDestinationQuantity > CTD.dblOriginalQty 
+												THEN CTD.dblOriginalQty 
+												ELSE 
+													CASE WHEN ISI.dblQuantity < ISI.dblDestinationQuantity AND ISI.dblDestinationQuantity > (CTD.dblBalance + ISI.dblQuantity)
+														THEN ISI.dblQuantity + CTD.dblBalance
+														ELSE ISI.dblDestinationQuantity
+													END
+											END
+									, ISI.dblQuantity)
+				  , dblUnitQuantity	= ISNULL(CASE WHEN ISI.dblDestinationQuantity > CTD.dblOriginalQty 
+												THEN CTD.dblOriginalQty 
+												ELSE 
+													CASE WHEN ISI.dblQuantity < ISI.dblDestinationQuantity AND ISI.dblDestinationQuantity > (CTD.dblBalance + ISI.dblQuantity)
+														THEN ISI.dblQuantity + CTD.dblBalance
+														ELSE ISI.dblDestinationQuantity
+													END
+											END
+									, ISI.dblQuantity)
+				  , @dblQtyOverAged	= @dblNetWeight - ISNULL(CASE WHEN ISI.dblDestinationQuantity > CTD.dblOriginalQty 
+												THEN CTD.dblOriginalQty 
+												ELSE 
+													CASE WHEN ISI.dblQuantity < ISI.dblDestinationQuantity AND ISI.dblDestinationQuantity > (CTD.dblBalance + ISI.dblQuantity)
+														THEN ISI.dblQuantity + CTD.dblBalance
+														ELSE ISI.dblDestinationQuantity
+													END
+											END
+									, ISI.dblQuantity)
 				FROM tblARInvoiceDetail ID
 				INNER JOIN tblICInventoryShipmentItem ISI ON ID.intInventoryShipmentItemId = ISI.intInventoryShipmentItemId AND ID.intTicketId = ISI.intSourceId
 				INNER JOIN tblCTContractDetail CTD ON ID.intContractDetailId = CTD.intContractDetailId AND ID.intContractHeaderId = CTD.intContractHeaderId
@@ -508,12 +532,12 @@ IF EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILSTOADD)
 			, intItemWeightUOMId				= CASE WHEN ISNULL(IDTOADD.ysnCharge, 0) = 0 THEN ID.intItemWeightUOMId ELSE NULL END
 			, intContractDetailId				= IDTOADD.intContractDetailId
 			, intContractHeaderId				= IDTOADD.intContractHeaderId
-			, intTicketId						= IDTOADD.intTicketId
+			, intTicketId						= CASE WHEN IDTOADD.intContractDetailId IS NOT NULL AND ISNULL(@ysnFromSalesOrder, 0) = 0 THEN NULL ELSE IDTOADD.intTicketId END
 			, intTaxGroupId						= ID.intTaxGroupId
 			, dblCurrencyExchangeRate			= ID.dblCurrencyExchangeRate
 			, strAddonDetailKey					= CASE WHEN ISNULL(ID.ysnAddonParent, 0) = 1 THEN @strAddOnKey ELSE NULL END
 			, ysnAddonParent					= ISNULL(ID.ysnAddonParent, 0)
-			, intInventoryShipmentItemId		= @intInventoryShipmentItemId
+			, intInventoryShipmentItemId		= CASE WHEN IDTOADD.intContractDetailId IS NOT NULL AND ISNULL(@ysnFromSalesOrder, 0) = 0 THEN NULL ELSE @intInventoryShipmentItemId END
 			, intStorageLocationId				= ID.intStorageLocationId
 			, intSubLocationId					= ID.intSubLocationId
 			, intCompanyLocationSubLocationId	= ID.intCompanyLocationSubLocationId
