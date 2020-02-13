@@ -8478,6 +8478,7 @@
     <Build Include="dbo\Views\vyuIPGetProductControlPoint.sql" />
     <Build Include="dbo\Views\vyuIPGetProduct.sql" />
     <Build Include="dbo\Views\vyuSTUnpostedItemSales.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGenerateDPR.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
