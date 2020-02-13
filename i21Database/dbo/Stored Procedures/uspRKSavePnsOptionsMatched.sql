@@ -121,7 +121,8 @@ BEGIN TRY
 	
 	SELECT @intOptionsMatchPnSHeaderId = SCOPE_IDENTITY();
 	---------------Matched Record Insert ----------------
-	SELECT @strTranNo = ISNULL(MAX(CONVERT(INT, strTranNo)), 0) FROM tblRKOptionsMatchPnS
+	DECLARE @MaxRow INT
+	SELECT @strTranNo = ISNULL(MAX(CONVERT(INT, strTranNo)), 0), @MaxRow = MAX(ISNULL(intOptionsMatchPnSHeaderId, 0)) FROM tblRKOptionsMatchPnS
 	
 	INSERT INTO tblRKOptionsMatchPnS (intOptionsMatchPnSHeaderId
 		, strTranNo
@@ -171,9 +172,24 @@ BEGIN TRY
 		, @strName
 	FROM tblRKOptionsMatchPnS
 	WHERE strTranNo = @strTranNoPNS
+
+	DECLARE @newRowId INT
+	SELECT DISTINCT intOptionsMatchPnSHeaderId INTO #tmpNewRows FROM tblRKOptionsMatchPnS WHERE intOptionsMatchPnSHeaderId > @MaxRow
+	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpNewRows)
+	BEGIN
+		SELECT TOP 1 @newRowId = intOptionsMatchPnSHeaderId FROM #tmpNewRows
+
+		EXEC uspIPInterCompanyPreStageOptionsPnS @intOptionsMatchPnSHeaderId = @newRowId
+			, @strRowState = 'Added'
+			, @intUserId = @intUserId
+
+		DELETE FROM #tmpNewRows WHERE intOptionsMatchPnSHeaderId = @newRowId
+	END
+
+	DROP TABLE #tmpNewRows
 	
 	---------------Expired Record Insert ----------------
-	DECLARE @MaxRow INT
+	SET @MaxRow = NULL
 	SELECT @strExpiredTranNo = ISNULL(MAX(CONVERT(INT, strTranNo)), 0), @MaxRow = MAX(ISNULL(intOptionsPnSExpiredId, 0)) FROM tblRKOptionsPnSExpired
 	
 	INSERT INTO tblRKOptionsPnSExpired (intOptionsMatchPnSHeaderId
@@ -194,7 +210,7 @@ BEGIN TRY
 		, [dblLots] numeric(18,6)
 		, [intFutOptTransactionId] INT)
 
-	DECLARE @newRowId INT
+	SET @newRowId = NULL
 	SELECT DISTINCT intOptionsMatchPnSHeaderId INTO #tmpNewRows FROM tblRKOptionsPnSExpired WHERE intOptionsPnSExpiredId > @MaxRow
 	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpNewRows)
 	BEGIN
@@ -206,6 +222,8 @@ BEGIN TRY
 
 		DELETE FROM #tmpNewRows WHERE intOptionsMatchPnSHeaderId = @newRowId
 	END
+
+	DROP TABLE #tmpNewRows
 	
 	---------------Exercised/Assigned Record Insert ----------------
 	DECLARE @tblExercisedAssignedDetail TABLE (RowNumber INT IDENTITY(1,1)
