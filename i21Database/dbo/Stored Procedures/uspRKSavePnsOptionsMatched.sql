@@ -174,19 +174,19 @@ BEGIN TRY
 	WHERE strTranNo = @strTranNoPNS
 
 	DECLARE @newRowId INT
-	SELECT DISTINCT intOptionsMatchPnSHeaderId INTO #tmpNewRows FROM tblRKOptionsMatchPnS WHERE intOptionsMatchPnSHeaderId > @MaxRow
-	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpNewRows)
+	SELECT DISTINCT intOptionsMatchPnSHeaderId INTO #tmpNewMatched FROM tblRKOptionsMatchPnS WHERE intOptionsMatchPnSHeaderId > @MaxRow
+	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpNewMatched)
 	BEGIN
-		SELECT TOP 1 @newRowId = intOptionsMatchPnSHeaderId FROM #tmpNewRows
+		SELECT TOP 1 @newRowId = intOptionsMatchPnSHeaderId FROM #tmpNewMatched
 
 		EXEC uspIPInterCompanyPreStageOptionsPnS @intOptionsMatchPnSHeaderId = @newRowId
 			, @strRowState = 'Added'
 			, @intUserId = @intUserId
 
-		DELETE FROM #tmpNewRows WHERE intOptionsMatchPnSHeaderId = @newRowId
+		DELETE FROM #tmpNewMatched WHERE intOptionsMatchPnSHeaderId = @newRowId
 	END
 
-	DROP TABLE #tmpNewRows
+	DROP TABLE #tmpNewMatched
 	
 	---------------Expired Record Insert ----------------
 	SET @MaxRow = NULL
@@ -211,19 +211,19 @@ BEGIN TRY
 		, [intFutOptTransactionId] INT)
 
 	SET @newRowId = NULL
-	SELECT DISTINCT intOptionsMatchPnSHeaderId INTO #tmpNewRows FROM tblRKOptionsPnSExpired WHERE intOptionsPnSExpiredId > @MaxRow
-	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpNewRows)
+	SELECT DISTINCT intOptionsMatchPnSHeaderId INTO #tmpNewExpired FROM tblRKOptionsPnSExpired WHERE intOptionsPnSExpiredId > @MaxRow
+	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpNewExpired)
 	BEGIN
-		SELECT TOP 1 @newRowId = intOptionsMatchPnSHeaderId FROM #tmpNewRows
+		SELECT TOP 1 @newRowId = intOptionsMatchPnSHeaderId FROM #tmpNewExpired
 
 		EXEC uspIPInterCompanyPreStageOptionsPnS @intOptionsMatchPnSHeaderId = @newRowId
 			, @strRowState = 'Added'
 			, @intUserId = @intUserId
 
-		DELETE FROM #tmpNewRows WHERE intOptionsMatchPnSHeaderId = @newRowId
+		DELETE FROM #tmpNewExpired WHERE intOptionsMatchPnSHeaderId = @newRowId
 	END
 
-	DROP TABLE #tmpNewRows
+	DROP TABLE #tmpNewExpired
 	
 	---------------Exercised/Assigned Record Insert ----------------
 	DECLARE @tblExercisedAssignedDetail TABLE (RowNumber INT IDENTITY(1,1)
