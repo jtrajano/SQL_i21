@@ -143,7 +143,8 @@ AS
 			NM.strBroker,
 			NM.strBrokerAccount,
 			CH.ysnReceivedSignedFixationLetter,
-			AP.strApprovalStatus
+			AP.strApprovalStatus,
+			intCommodityFutureMarketId = NM.intCommodityFutureMarketId
 	FROM		tblCTContractHeader				CH
 	JOIN		vyuCTContractHeaderNotMapped	NM	ON	NM.intContractHeaderId	=	CH.intContractHeaderId
 	OUTER APPLY --dbo.[fnCTGetLastApprovalStatus](CH.intContractHeaderId) strApprovalStatus
