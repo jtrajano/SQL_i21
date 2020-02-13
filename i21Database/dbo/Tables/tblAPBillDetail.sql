@@ -9,6 +9,7 @@
 	[intCostUOMId]    INT             NULL ,
 	[intWeightUOMId]    INT             NULL ,
 	[intBundletUOMId]    INT             NULL ,
+	[intInvoiceDetailRefId]    INT             NULL ,
 	[intItemId]    INT             NULL,
 	[intInventoryReceiptItemId]    INT             NULL,
 	[intDeferredVoucherId]			INT				NULL,
