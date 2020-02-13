@@ -8117,9 +8117,6 @@
     <Build Include="dbo\Functions\fnCTFormatNumber.sql" />
     <Build Include="dbo\Tables\tblGROldTransactionMapping.sql" />
     <Build Include="dbo\Stored Procedures\uspAPForceCompletePayable.sql" />
-    <Build Include="dbo\Stored Procedures\uspICGetCollateralItems.sql" />
-    <Build Include="dbo\Stored Procedures\uspICGetCollateralCategories.sql" />
-    <Build Include="dbo\Tables\tblICBackupCollateral.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
