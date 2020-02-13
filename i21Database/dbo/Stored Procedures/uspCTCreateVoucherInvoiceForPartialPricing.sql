@@ -2,7 +2,8 @@ CREATE PROCEDURE [dbo].[uspCTCreateVoucherInvoiceForPartialPricing]
 		
 	@intContractDetailId	INT,
 	@intUserId				INT = NULL,
-	@ysnDoUpdateCost		BIT = 0
+	@ysnDoUpdateCost		BIT = 0,
+	@intTransactionId		INT = NULL
 	
 AS
 
@@ -521,24 +522,37 @@ BEGIN TRY
 						END
 						ELSE
 						BEGIN
-							UPDATE	
-								tblICInventoryReceiptItem 
-							SET 
-								ysnAllowVoucher = 1 
-							WHERE 
-								intInventoryReceiptItemId = @intInventoryReceiptItemId
+
+							IF @intTransactionId IS NOT NULL
+							BEGIN
+								DELETE	FROM @voucherDetailReceipt
+								SET @intNewBillId = @intTransactionId
+
+								INSERT	INTO @voucherDetailReceipt([intInventoryReceiptType], [intInventoryReceiptItemId], [dblQtyReceived], [dblCost])
+								SELECT	2,@intInventoryReceiptItemId, @dblQtyToBill, @dblFinalPrice
+								EXEC	uspAPCreateVoucherDetailReceipt @intNewBillId,@voucherDetailReceipt
+							END
+							ELSE
+							BEGIN
+								UPDATE
+									tblICInventoryReceiptItem
+								SET
+									ysnAllowVoucher = 1
+								WHERE
+									intInventoryReceiptItemId = @intInventoryReceiptItemId
 													
-							EXEC uspICConvertReceiptToVoucher 
-								@intInventoryReceiptId
-								,@intUserId
-								, @intNewBillId OUTPUT
+								EXEC uspICConvertReceiptToVoucher
+									@intInventoryReceiptId
+									,@intUserId
+									, @intNewBillId OUTPUT
+							END
 
 							INSERT INTO @tblCreatedTransaction VALUES (@intNewBillId)
 
 							IF (@intNewBillId IS NOT NULL AND @intNewBillId > 0)
 							BEGIN
 
-								IF EXISTS(SELECT TOP 1 1 FROM tblAPBill WHERE intBillId = @intNewBillId AND dtmDate < @dtmFixationDate)
+								IF EXISTS(SELECT TOP 1 1 FROM tblAPBill WHERE intBillId = @intNewBillId AND dtmDate < @dtmFixationDate AND @intTransactionId IS NULL)
 								BEGIN
 									UPDATE	
 										tblAPBill 
