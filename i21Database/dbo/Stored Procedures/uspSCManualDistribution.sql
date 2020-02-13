@@ -194,6 +194,7 @@ OPEN intListCursor;
 								,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
 								,ysnIsStorage
 								,strSourceTransactionId  
+								,intStorageScheduleTypeId
 								,ysnAllowVoucher
 							)SELECT 
 								intItemId
@@ -215,6 +216,7 @@ OPEN intListCursor;
 								,intStorageLocationId
 								,ysnIsStorage
 								,strDistributionOption 
+								,intStorageScheduleTypeId = @intStorageScheduleTypeId
 								,ysnAllowVoucher
 							FROM @LineItem
 							where intId = @intId
@@ -241,6 +243,7 @@ OPEN intListCursor;
 								,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
 								,ysnIsStorage
 								,strSourceTransactionId
+								,intStorageScheduleTypeId 
 								,ysnAllowVoucher  
 							)SELECT 
 								intItemId
@@ -262,6 +265,7 @@ OPEN intListCursor;
 								,intStorageLocationId
 								,ysnIsStorage
 								,strDistributionOption 
+								,intStorageScheduleTypeId = @intStorageScheduleTypeId
 								,ysnAllowVoucher
 							FROM @LineItem
 							where intId = @intId
@@ -360,6 +364,7 @@ OPEN intListCursor;
 						,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
 						,ysnIsStorage
 						,strSourceTransactionId
+						,intStorageScheduleTypeId
 						,ysnAllowVoucher
 					)
 					EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblLoopContractUnits , @intEntityId, @strDistributionOption, NULL , @intStorageScheduleId
