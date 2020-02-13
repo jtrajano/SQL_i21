@@ -66,6 +66,8 @@ SELECT
 		,cat.strDescription strCategory
 		,cat.intCategoryId
 		,com.intCommodityId
+		,receiptItemLot.strCargoNo
+		,receiptItemLot.strWarrantNo
 FROM	tblICInventoryReceiptItemLot receiptItemLot
 		INNER JOIN tblICInventoryReceiptItem item 
 			ON item.intInventoryReceiptItemId = receiptItemLot.intInventoryReceiptItemId

@@ -70,7 +70,8 @@ SELECT Receipt.intInventoryReceiptId
 	, Receipt.dblTotalNet
 	, Receipt.dblGrandTotal
 	, permission.intEntityContactId
-	, Receipt.dtmCreated 
+	, Receipt.dtmCreated
+	, Receipt.strInternalComments
 FROM tblICInventoryReceipt Receipt
 	LEFT JOIN vyuAPVendor Vendor ON Vendor.[intEntityId] = Receipt.intEntityVendorId
 	LEFT JOIN vyuAPVendor ShipFromEntity ON ShipFromEntity.[intEntityId] = Receipt.intShipFromEntityId
