@@ -4,7 +4,7 @@ CREATE FUNCTION [dbo].[fnCTGetBasisDelivery]
 (
 	@dtmDate DATE = NULL
 )
-RETURNS @Transaction TABLE 
+RETURNS @Transaction TABLE /
 (  
 	-- Filtering Values
 	intUniqueId		        INT IDENTITY(1,1),
