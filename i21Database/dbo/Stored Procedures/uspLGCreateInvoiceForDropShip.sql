@@ -32,32 +32,29 @@ BEGIN
 		RETURN 0;
 	END
 
-	IF ((SELECT TOP 1 ISNULL(ysnAllowInvoiceForPartialPriced, 0) FROM tblLGCompanyPreference) = 0)
+	IF EXISTS (SELECT TOP 1 1 FROM 
+				tblCTContractDetail CD
+				JOIN tblLGLoadDetail LD ON CD.intContractDetailId = LD.intSContractDetailId
+				JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId 
+				WHERE L.intLoadId = @intLoadId AND CD.intPricingTypeId NOT IN (1, 6))
 	BEGIN
-		IF EXISTS (SELECT TOP 1 1 FROM 
-					tblCTContractDetail CD
-					JOIN tblLGLoadDetail LD ON CD.intContractDetailId = LD.intSContractDetailId
-					JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId 
-					WHERE L.intLoadId = @intLoadId AND CD.intPricingTypeId NOT IN (1, 6))
-		BEGIN
-			SELECT TOP 1 
-				@strInvoiceNumber = CH.strContractNumber,
-				@strLoadNumber = CAST(CD.intContractSeq AS nvarchar(10))
-			FROM 
-			tblCTContractDetail CD
-			JOIN tblCTContractHeader CH ON CD.intContractHeaderId = CH.intContractHeaderId
-			JOIN tblLGLoadDetail LD ON CD.intContractDetailId = LD.intSContractDetailId
-			JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId 
-			WHERE L.intLoadId = @intLoadId AND CD.intPricingTypeId NOT IN (1, 6)
+		SELECT TOP 1 
+			@strInvoiceNumber = CH.strContractNumber,
+			@strLoadNumber = CAST(CD.intContractSeq AS nvarchar(10))
+		FROM 
+		tblCTContractDetail CD
+		JOIN tblCTContractHeader CH ON CD.intContractHeaderId = CH.intContractHeaderId
+		JOIN tblLGLoadDetail LD ON CD.intContractDetailId = LD.intSContractDetailId
+		JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId 
+		WHERE L.intLoadId = @intLoadId AND CD.intPricingTypeId NOT IN (1, 6)
 
-			DECLARE @ErrorMessageNotPriced NVARCHAR(250)
+		DECLARE @ErrorMessageNotPriced NVARCHAR(250)
 
-			SET @ErrorMessageNotPriced = 'Contract No. ' + @strInvoiceNumber + '/' + @strLoadNumber + ' is not Priced. Unable to create Invoice.';
+		SET @ErrorMessageNotPriced = 'Contract No. ' + @strInvoiceNumber + '/' + @strLoadNumber + ' is not Priced. Unable to create Invoice.';
 
-			RAISERROR(@ErrorMessageNotPriced, 16, 1);
-			RETURN 0;
+		RAISERROR(@ErrorMessageNotPriced, 16, 1);
+		RETURN 0;
 
-		END
 	END
 
 	DECLARE  @ZeroDecimal		DECIMAL(18,6)

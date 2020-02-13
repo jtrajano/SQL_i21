@@ -168,7 +168,6 @@ SELECT CP.intCompanyPreferenceId
 	,CP.ysnMatchItemAllocation
 	,CP.ysnMatchFuturesAllocation
 	,CP.ysnMatchBookAllocation
-	,CP.ysnAllowInvoiceForPartialPriced
 FROM tblLGCompanyPreference CP
 LEFT JOIN tblICCommodity CO ON CO.intCommodityId = CP.intCommodityId
 LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = CP.intWeightUOMId
