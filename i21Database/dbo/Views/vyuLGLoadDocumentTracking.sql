@@ -234,12 +234,12 @@ JOIN tblCTContractDetail CD ON CD.intContractDetailId = (
 			END
 		)
 JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
-JOIN tblICItem I ON I.intItemId = CD.intItemId
+JOIN tblICItem I ON I.intItemId = LD.intItemId
 JOIN tblLGLoadDocuments LDOC ON LDOC.intLoadId = L.intLoadId
 JOIN tblICDocument DOC ON DOC.intDocumentId = LDOC.intDocumentId
-LEFT JOIN tblEMEntity Customer ON Customer.intEntityId = LD.intCustomerEntityId
-LEFT JOIN tblEMEntity Vendor ON Vendor.intEntityId = LD.intVendorEntityId
 LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = L.intWeightUnitMeasureId
+OUTER APPLY (SELECT TOP 1 strName FROM tblEMEntity Customer WHERE Customer.intEntityId = LD.intCustomerEntityId) Customer
+OUTER APPLY (SELECT TOP 1 strName FROM tblEMEntity Vendor WHERE Vendor.intEntityId = LD.intVendorEntityId) Vendor
 LEFT JOIN tblEMEntity Hauler ON Hauler.intEntityId = L.intHaulerEntityId
 LEFT JOIN tblEMEntity Driver ON Driver.intEntityId = L.intDriverEntityId
 LEFT JOIN tblEMEntity Terminal ON Terminal.intEntityId = L.intTerminalEntityId
