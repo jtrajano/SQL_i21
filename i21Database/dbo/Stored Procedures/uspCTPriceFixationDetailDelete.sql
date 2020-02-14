@@ -73,9 +73,10 @@ BEGIN TRY
 	BEGIN
 		
 		SELECT @Id = Id FROM #ItemBill WHERE ISNULL(DetailId, BillDetailId) = @DetailId
-		SELECT @Count = COUNT(*) FROM tblCTPriceFixationDetailAPAR WHERE intBillId = @DetailId
-		IF @Count > 1--@intPriceFixationTicketId IS NOT NULL AND @Count > 1
-		BEGIN
+		SELECT @Count = COUNT(*) FROM tblCTPriceFixationDetailAPAR WHERE intBillDetailId = @DetailId
+		
+		IF @Count > 0--@intPriceFixationTicketId IS NOT NULL AND @Count > 1
+		BEGIN	
 		
 			-- UPDATE ITEM BILL QTY
 			SELECT @ItemId = intInventoryReceiptItemId, @Quantity = dblQtyReceived
