@@ -11,6 +11,7 @@ BEGIN
 	SET XACT_ABORT ON
 	SET ANSI_WARNINGS OFF	
 
+	DECLARE @enable_debug bit = 0
 	DECLARE @ErrMsg AS NVARCHAR(MAX)
 	DECLARE @intTransferContractDetailId INT
 	DECLARE @dblTransferUnits NUMERIC(18,6)
@@ -88,7 +89,7 @@ BEGIN
 		) AS (
 			SELECT 
 				intTransferContractDetailId		= TSplit.intContractDetailId,
-				dblTransferUnits				= -(TSplit.dblUnits),
+				dblTransferUnits				= case when TSplit.intStorageTypeId = 2 then TSplit.dblUnits  else -(TSplit.dblUnits) end,
 				intSourceItemUOMId				= TransferStorage.intItemUOMId,
 				intCustomerStorageId			= TSplit.intTransferToCustomerStorageId
 			FROM tblGRTransferStorageSplit TSplit
@@ -107,6 +108,11 @@ BEGIN
 		OPEN c;
 
 		FETCH c INTO @intTransferContractDetailId, @dblTransferUnits, @intSourceItemUOMId, @intCustomerStorageId
+		if @enable_debug = 1	
+		begin
+		
+			select 'check contract details transfercontractdetail,transferunits,customerstorageid,sourceitemuom', @intTransferContractDetailId,@dblTransferUnits,@intCustomerStorageId,@intSourceItemUOMId
+		end
 
 		WHILE @@FETCH_STATUS = 0 AND @cnt > 0
 		BEGIN
@@ -386,11 +392,15 @@ BEGIN
 								,[strRateType]
 							)
 							EXEC [dbo].[uspGRCreateGLEntriesForTransferStorage] @intTransferStorageId,@strBatchId,0,1,@intEntityId
-							UPDATE @GLEntries 
-							SET dblDebit		= dblCredit
-								,dblDebitUnit	= dblCreditUnit
-								,dblCredit		= dblDebit
-									,dblCreditUnit  = dblDebitUnit
+
+							IF(select dblQty from @Entry) < 0
+							BEGIN
+								UPDATE @GLEntries 
+								SET dblDebit		= dblCredit
+									,dblDebitUnit	= dblCreditUnit
+									,dblCredit		= dblDebit
+										,dblCreditUnit  = dblDebitUnit
+							END
 
 
 

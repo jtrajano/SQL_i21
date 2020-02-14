@@ -880,11 +880,12 @@ BEGIN
 								,[dblForeignRate]
 								,[strRateType]
 							)
-							EXEC dbo.uspGRCreateItemGLEntriesTransfer
-								@strBatchId
-								,@GLForItem
-								,'AP Clearing'
-								,1
+							EXEC [dbo].[uspGRCreateGLEntriesForTransferStorage] @intTransferStorageId,@strBatchId,@dblCost,1
+							UPDATE @GLEntries 
+							SET dblDebit		= dblCredit
+								,dblDebitUnit	= dblCreditUnit
+								,dblCredit		= dblDebit
+									,dblCreditUnit  = dblDebitUnit
 
 							--debug point--
 							if @debug_point = 1 and 1 = 1
@@ -929,7 +930,11 @@ BEGIN
 								,[dblForeignRate]
 								,[strRateType]
 							)
-							EXEC [dbo].[uspGRCreateGLEntriesForTransferStorage] @intTransferStorageId,@strBatchId,@dblOriginalCost,1
+							EXEC dbo.uspGRCreateItemGLEntriesTransfer
+								@strBatchId
+								,@GLForItem
+								,'AP Clearing'
+								,1
 
 
 							if @debug_point = 1 and 1 = 0
