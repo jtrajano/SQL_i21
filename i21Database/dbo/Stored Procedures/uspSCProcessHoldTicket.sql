@@ -18,6 +18,7 @@ SET ANSI_WARNINGS OFF
 DECLARE @ErrorMessage NVARCHAR(4000);
 DECLARE @ErrorSeverity INT;
 DECLARE @ErrorState INT;
+DECLARE @SummaryLogs AS RKSummaryLog
 
 DECLARE @ErrMsg	NVARCHAR(MAX)
 	,@InTransitTableType AS InTransitTableType
@@ -57,7 +58,7 @@ BEGIN
 						,[intTransactionId]		= @intTicketId
 						,[strTransactionId]		= SC.strTicketNumber
 						,[intTransactionTypeId] = 52
-				FROM	tblSCTicket SC 
+				FROM	tblSCTicket SC
 				INNER JOIN dbo.tblICItemLocation ICIL ON ICIL.intItemId = SC.intItemId AND ICIL.intLocationId = SC.intProcessingLocationId
 				WHERE SC.intTicketId = @intTicketId
 			END
@@ -85,26 +86,26 @@ BEGIN
 						,[intTransactionId]		= @intTicketId
 						,[strTransactionId]		= SC.strTicketNumber
 						,[intTransactionTypeId] = 52
-				FROM	tblSCTicket SC 
+				FROM	tblSCTicket SC
 				INNER JOIN dbo.tblICItemLocation ICIL ON ICIL.intItemId = SC.intItemId AND ICIL.intLocationId = SC.intProcessingLocationId
 				WHERE SC.intTicketId = @intTicketId
 
 				INSERT INTO @ItemsForInTransitCosting (
-					[intItemId] 
-					,[intItemLocationId] 
-					,[intItemUOMId] 
-					,[dtmDate] 
-					,[dblQty] 
-					,[dblUOMQty] 
+					[intItemId]
+					,[intItemLocationId]
+					,[intItemUOMId]
+					,[dtmDate]
+					,[dblQty]
+					,[dblUOMQty]
 					,[dblCost]
-					,[intCurrencyId]  
-					,[intTransactionId] 
-					,[intTransactionDetailId] 
-					,[strTransactionId] 
-					,[intSourceTransactionId] 
+					,[intCurrencyId]
+					,[intTransactionId]
+					,[intTransactionDetailId]
+					,[strTransactionId]
+					,[intSourceTransactionId]
 					,[intSourceTransactionDetailId]
-					,[strSourceTransactionId] 
-					,[intInTransitSourceLocationId] 
+					,[strSourceTransactionId]
+					,[intInTransitSourceLocationId]
 					,[intTransactionTypeId]
 				)
 				SELECT
@@ -115,7 +116,7 @@ BEGIN
 					,[dblQty]							= SC.dblNetUnits
 					,[dblUOMQty]						= SC.dblConvertedUOMQty
 					,[dblCost]							= 0
-					,[intCurrencyId]					= SC.intCurrencyId 
+					,[intCurrencyId]					= SC.intCurrencyId
 					,[intTransactionId]					= SC.intTicketId
 					,[intTransactionDetailId]			= NULL
 					,[strTransactionId]					= SC.strTicketNumber
@@ -124,7 +125,7 @@ BEGIN
 					,[strSourceTransactionId]			= SC.strTicketNumber
 					,[intInTransitSourceLocationId]		= ICIL.intItemLocationId
 					,[intTransactionTypeId]				= 52
-				FROM vyuSCTicketScreenView SC 
+				FROM vyuSCTicketScreenView SC
 				INNER JOIN dbo.tblICItemLocation ICIL ON ICIL.intItemId = SC.intItemId AND ICIL.intLocationId = SC.intProcessingLocationId
 				WHERE SC.intTicketId = @intTicketId
 			END
@@ -132,21 +133,21 @@ BEGIN
 	ELSE
 	BEGIN
 		IF EXISTS (SELECT intDeliverySheetId FROM tblSCDeliverySheet WHERE intDeliverySheetId = @intDeliverySheetId AND ysnPost = 1)
-		BEGIN 
+		BEGIN
 			IF ISNULL(@ysnPost , 0) = 1
 			BEGIN
 				RAISERROR('Unable to distribute, Delivery Sheet already posted.', 11, 1);
 				RETURN;
 			END
-			ELSE 
+			ELSE
 			BEGIN
 				RAISERROR('Undistribute the delivery sheet first to undistribute this ticket', 11, 1);
 				RETURN;
 			END
-			
+
 		END
 		IF(@strInOutFlag = 'O' AND @strDistributionOption = 'HLD')
-			BEGIN				
+			BEGIN
 				INSERT INTO @ItemReservationTableType (
 					[intItemId]
 					,[intItemLocationId]
@@ -170,7 +171,7 @@ BEGIN
 					,[intTransactionId]		= SCD.intDeliverySheetId
 					,[strTransactionId]		= SCD.strDeliverySheetNumber
 					,[intTransactionTypeId] = 52
-				FROM tblSCDeliverySheet SCD 
+				FROM tblSCDeliverySheet SCD
 				INNER JOIN dbo.tblICItemLocation ICIL ON ICIL.intItemId = SCD.intItemId AND ICIL.intLocationId = SCD.intCompanyLocationId
 				INNER JOIN tblSCTicket SC ON SC.intDeliverySheetId = SCD.intDeliverySheetId
 				WHERE  SC.intDeliverySheetId = @intDeliverySheetId AND SC.intTicketId = @intTicketId
@@ -200,28 +201,28 @@ BEGIN
 					,[intTransactionId]		= SCD.intDeliverySheetId
 					,[strTransactionId]		= SCD.strDeliverySheetNumber
 					,[intTransactionTypeId] = 1
-				FROM tblSCDeliverySheet SCD 
+				FROM tblSCDeliverySheet SCD
 				INNER JOIN dbo.tblICItemLocation ICIL ON ICIL.intItemId = SCD.intItemId AND ICIL.intLocationId = SCD.intCompanyLocationId
 				INNER JOIN tblSCTicket SC ON SC.intDeliverySheetId = SCD.intDeliverySheetId
 				WHERE  SC.intDeliverySheetId = @intDeliverySheetId AND SC.intTicketId = @intTicketId
 
 
 				INSERT INTO @ItemsForInTransitCosting (
-					[intItemId] 
-					,[intItemLocationId] 
-					,[intItemUOMId] 
-					,[dtmDate] 
-					,[dblQty] 
-					,[dblUOMQty] 
+					[intItemId]
+					,[intItemLocationId]
+					,[intItemUOMId]
+					,[dtmDate]
+					,[dblQty]
+					,[dblUOMQty]
 					,[dblCost]
-					,[intCurrencyId]  
-					,[intTransactionId] 
-					,[intTransactionDetailId] 
-					,[strTransactionId] 
-					,[intSourceTransactionId] 
+					,[intCurrencyId]
+					,[intTransactionId]
+					,[intTransactionDetailId]
+					,[strTransactionId]
+					,[intSourceTransactionId]
 					,[intSourceTransactionDetailId]
-					,[strSourceTransactionId] 
-					,[intInTransitSourceLocationId] 
+					,[strSourceTransactionId]
+					,[intInTransitSourceLocationId]
 					,[intTransactionTypeId]
 				)
 				SELECT
@@ -232,7 +233,7 @@ BEGIN
 					,[dblQty]							= SC.dblNetUnits
 					,[dblUOMQty]						= SC.dblConvertedUOMQty
 					,[dblCost]							= 0
-					,[intCurrencyId]					= SC.intCurrencyId 
+					,[intCurrencyId]					= SC.intCurrencyId
 					,[intTransactionId]					= SC.intDeliverySheetId
 					,[intTransactionDetailId]			= NULL
 					,[strTransactionId]					= SC.strDeliverySheetNumber
@@ -241,17 +242,17 @@ BEGIN
 					,[strSourceTransactionId]			= SC.strDeliverySheetNumber
 					,[intInTransitSourceLocationId]		= ICIL.intItemLocationId
 					,[intTransactionTypeId]				= 53
-				FROM vyuSCTicketScreenView SC 
+				FROM vyuSCTicketScreenView SC
 				INNER JOIN dbo.tblICItemLocation ICIL ON ICIL.intItemId = SC.intItemId AND ICIL.intLocationId = SC.intProcessingLocationId
 				WHERE SC.intDeliverySheetId = @intDeliverySheetId AND SC.intTicketId = @intTicketId
 			END
-		
+
 	END
 END
 
 BEGIN TRY
-	BEGIN 
-		DECLARE @intTransctionTypeId AS VARCHAR(MAX)		
+	BEGIN
+		DECLARE @intTransctionTypeId AS VARCHAR(MAX)
 		SELECT TOP 1 @intTransctionTypeId = intTransactionTypeId,@intTransactionId = intTransactionId FROM @ItemReservationTableType
 		IF(@strInOutFlag = 'O' and @strDistributionOption = 'HLD')
 			BEGIN
@@ -264,9 +265,9 @@ BEGIN TRY
 			BEGIN
 				EXEC dbo.uspICIncreaseInTransitInBoundQty @InTransitTableType;
 			END
-		
-		
-		EXEC dbo.uspSMGetStartingNumber 3, @strBatchId OUTPUT, @intLocationId   
+
+
+		EXEC dbo.uspSMGetStartingNumber 3, @strBatchId OUTPUT, @intLocationId
 
 		IF(@strInOutFlag = 'O' and @strDistributionOption = 'HLD' and @ysnPost = 0)
 			BEGIN
@@ -279,7 +280,7 @@ BEGIN TRY
 				BEGIN
 					EXEC dbo.uspICPostInTransitCosting @ItemsForInTransitCosting, @strBatchId, NULL, @intUserId
 				END
-		
+
 				IF @ysnPost = 0
 				BEGIN
 					SELECT @strTransactionId = strTransactionId, @intTransactionId = intTransactionId FROM @ItemsForInTransitCosting
@@ -287,11 +288,175 @@ BEGIN TRY
 					UPDATE tblSCTicket SET strTicketStatus = 'R' WHERE intTicketId = @intTicketId
 				END
 			END
+
+		INSERT INTO @SummaryLogs
+		(
+			  strBatchId
+			, strTransactionType
+			, intTransactionRecordId
+			, strTransactionNumber
+			, dtmTransactionDate
+			, intContractDetailId
+			, intContractHeaderId
+			, intTicketId
+			, intCommodityId
+			, intCommodityUOMId
+			, intItemId
+			, intBookId
+			, intSubBookId
+			, intLocationId
+			, intFutureMarketId
+			, intFutureMonthId
+			, dblNoOfLots
+			, dblQty
+			, dblPrice
+			, intEntityId
+			, ysnDelete
+			, intUserId
+			, strNotes
+		)
+		SELECT
+			  strBatchId = @strBatchId
+			, strTransactionType = r.intTransactionTypeId
+			, intTransactionRecordId = r.intTransactionId
+			, strTransactionNumber = r.strTransactionId
+			, dtmTransactionDate = r.dtmDate
+			, intContractDetailId = NULL
+			, intContractHeaderId = NULL
+			, intTicketId = @intTicketId
+			, intCommodityId = c.intCommodityId
+			, intCommodityUOMId = r.intItemUOMId
+			, intItemId = r.intItemId
+			, intBookId = NULL
+			, intSubBookId = NULL
+			, intLocationId = @intLocationId
+			, intFutureMarketId = NULL
+			, intFutureMonthId = NULL
+			, dblNoOfLots = NULL
+			, dblQty = r.dblQty
+			, dblPrice = @dblNetUnits
+			, intEntityId = @intEntityId
+			, ysnDelete = 0
+			, intUserId = @intUserId
+			, strNotes = NULL
+		FROM @ItemReservationTableType r
+			INNER JOIN tblICItem i ON i.intItemId = r.intItemId
+			LEFT OUTER JOIN tblICCommodity c ON c.intCommodityId = i.intCommodityId
+
+		INSERT INTO @SummaryLogs
+		(
+			  strBatchId
+			, strTransactionType
+			, intTransactionRecordId
+			, strTransactionNumber
+			, dtmTransactionDate
+			, intContractDetailId
+			, intContractHeaderId
+			, intTicketId
+			, intCommodityId
+			, intCommodityUOMId
+			, intItemId
+			, intBookId
+			, intSubBookId
+			, intLocationId
+			, intFutureMarketId
+			, intFutureMonthId
+			, dblNoOfLots
+			, dblQty
+			, dblPrice
+			, intEntityId
+			, ysnDelete
+			, intUserId
+			, strNotes
+		)
+		SELECT
+			  strBatchId = @strBatchId
+			, strTransactionType = r.intTransactionTypeId
+			, intTransactionRecordId = r.intTransactionId
+			, strTransactionNumber = r.strTransactionId
+			, dtmTransactionDate = r.dtmTransactionDate
+			, intContractDetailId = NULL
+			, intContractHeaderId = NULL
+			, intTicketId = @intTicketId
+			, intCommodityId = c.intCommodityId
+			, intCommodityUOMId = r.intItemUOMId
+			, intItemId = r.intItemId
+			, intBookId = NULL
+			, intSubBookId = NULL
+			, intLocationId = @intLocationId
+			, intFutureMarketId = NULL
+			, intFutureMonthId = NULL
+			, dblNoOfLots = NULL
+			, dblQty = r.dblQty
+			, dblPrice = @dblNetUnits
+			, intEntityId = @intEntityId
+			, ysnDelete = 0
+			, intUserId = @intUserId
+			, strNotes = NULL
+		FROM @InTransitTableType r
+			INNER JOIN tblICItem i ON i.intItemId = r.intItemId
+			LEFT OUTER JOIN tblICCommodity c ON c.intCommodityId = i.intCommodityId
+
+		INSERT INTO @SummaryLogs
+		(
+			  strBatchId
+			, strTransactionType
+			, intTransactionRecordId
+			, strTransactionNumber
+			, dtmTransactionDate
+			, intContractDetailId
+			, intContractHeaderId
+			, intTicketId
+			, intCommodityId
+			, intCommodityUOMId
+			, intItemId
+			, intBookId
+			, intSubBookId
+			, intLocationId
+			, intFutureMarketId
+			, intFutureMonthId
+			, dblNoOfLots
+			, dblQty
+			, dblPrice
+			, intEntityId
+			, ysnDelete
+			, intUserId
+			, strNotes
+		)
+		SELECT
+		      strBatchId = @strBatchId
+			, strTransactionType = r.intTransactionTypeId
+			, intTransactionRecordId = r.intTransactionId
+			, strTransactionNumber = r.strTransactionId
+			, dtmTransactionDate = r.dtmDate
+			, intContractDetailId = NULL
+			, intContractHeaderId = NULL
+			, intTicketId = r.intTransactionId
+			, intCommodityId = c.intCommodityId
+			, intCommodityUOMId = r.intItemUOMId
+			, intItemId = r.intItemId
+			, intBookId = NULL
+			, intSubBookId = NULL
+			, intLocationId = @intLocationId
+			, intFutureMarketId = NULL
+			, intFutureMonthId = NULL
+			, dblNoOfLots = NULL
+			, dblQty = r.dblQty
+			, dblPrice = @dblNetUnits
+			, intEntityId = @intEntityId
+			, ysnDelete = 0
+			, intUserId = @intUserId
+			, strNotes = NULL
+		FROM @ItemsForInTransitCosting r
+			INNER JOIN tblICItem i ON i.intItemId = r.intItemId
+			LEFT OUTER JOIN tblICCommodity c ON c.intCommodityId = i.intCommodityId
+
+		EXEC uspRKLogRiskPosition @SummaryLogs
 	END
 _Exit:
 END TRY
 BEGIN CATCH
-	SELECT 
+	SELECT
 		@ErrorMessage = ERROR_MESSAGE(),
 		@ErrorSeverity = ERROR_SEVERITY(),
 		@ErrorState = ERROR_STATE();
