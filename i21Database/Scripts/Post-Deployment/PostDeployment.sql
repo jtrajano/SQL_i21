@@ -569,6 +569,9 @@ print 'BEGIN POST DEPLOYMENT'
 :R .\RM\01_MasterScript.sql
 :R .\RM\02_DataFix.sql
 
+-- Scale Ticket
+:R .\SC\Populate_Risk_Summary_Log.sql
+
 --FRM
 :r .\SM\2010_DefaultAdminUser.sql
 
