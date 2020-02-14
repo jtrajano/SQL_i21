@@ -11,7 +11,9 @@ SET ANSI_WARNINGS OFF
 -- Sanitize the @xmlParam 
 IF LTRIM(RTRIM(@xmlParam)) = ''
     BEGIN 
-        SET @xmlParam = NULL        
+        SET @xmlParam = NULL
+
+        SELECT * FROM tblARTaxStagingTable
 	END
 
 IF OBJECT_ID('tempdb..#STATUSCODES') IS NOT NULL DROP TABLE #STATUSCODES
