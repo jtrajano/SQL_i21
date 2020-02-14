@@ -80,6 +80,7 @@ DECLARE @dblLoopAdjustedScheduleQuantity NUMERIC (38,20)
 DECLARE @strTicketDistributionOption NVARCHAR(3)
 DECLARE @ysnTicketHasSpecialDiscount BIT
 DECLARE @ysnTicketSpecialGradePosted BIT
+DECLARE @ysnLoadContract BIT
 
 SELECT	
 	@intTicketItemUOMId = UOM.intItemUOMId
@@ -142,27 +143,36 @@ OPEN intListCursor;
 							IF ISNULL(@intLoopContractId,0) <> 0 AND @strTicketDistributionOption = 'CNT' AND @intTicketContractDetailId = @intLoopContractId  
 							BEGIN  
 								-- EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoopContractId, @dblLoopContractUnits, @intUserId, @intTicketId, 'Auto - Scale', @intTicketItemUOMId  
-								
-								IF(@dblLoopContractUnits > @dblTicketScheduleQuantity )
-								BEGIN
-									SET @dblLoopAdjustedScheduleQuantity = @dblLoopContractUnits - @dblTicketScheduleQuantity
-								END
-								ELSE
-								BEGIN
-									SET @dblLoopAdjustedScheduleQuantity = (@dblTicketScheduleQuantity - @dblLoopContractUnits) * -1
-								END
-								
 
-								IF @dblLoopAdjustedScheduleQuantity <> 0
+								SET @ysnLoadContract = 0
+								SELECT TOP 1 @ysnLoadContract = ysnLoad 
+								FROM tblCTContractHeader A
+								INNER JOIN tblCTContractDetail B
+									ON A.intContractHeaderId = B.intContractHeaderId
+								WHERE B.intContractDetailId = @intLoopContractId
+								
+								IF(@ysnLoadContract = 0)
 								BEGIN
-									EXEC	uspCTUpdateScheduleQuantity 
-									@intContractDetailId	=	@intLoopContractId,
-									@dblQuantityToUpdate	=	@dblLoopAdjustedScheduleQuantity,
-									@intUserId				=	@intUserId,
-									@intExternalId			=	@intTicketId,
-									@strScreenName			=	'Auto - Scale'
-								END
+									IF(@dblLoopContractUnits > @dblTicketScheduleQuantity )
+									BEGIN
+										SET @dblLoopAdjustedScheduleQuantity = @dblLoopContractUnits - @dblTicketScheduleQuantity
+									END
+									ELSE
+									BEGIN
+										SET @dblLoopAdjustedScheduleQuantity = (@dblTicketScheduleQuantity - @dblLoopContractUnits) * -1
+									END
+									
 
+									IF @dblLoopAdjustedScheduleQuantity <> 0
+									BEGIN
+										EXEC	uspCTUpdateScheduleQuantity 
+										@intContractDetailId	=	@intLoopContractId,
+										@dblQuantityToUpdate	=	@dblLoopAdjustedScheduleQuantity,
+										@intUserId				=	@intUserId,
+										@intExternalId			=	@intTicketId,
+										@strScreenName			=	'Auto - Scale'
+									END
+								END
 								
 							END 
 							ELSE
