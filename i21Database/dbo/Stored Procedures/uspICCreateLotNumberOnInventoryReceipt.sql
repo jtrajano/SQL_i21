@@ -295,6 +295,8 @@ BEGIN
 			,strCertificateId
 			,strTrackingNumber
 			,strWarehouseRefNo
+			,strCargoNo
+			,strWarrantNo
 			,intSourceType
 	)
 	SELECT	intLotId				= ItemLot.intLotId
@@ -349,6 +351,8 @@ BEGIN
 			,strCertificateId		= ItemLot.strCertificateId
 			,strTrackingNumber		= ItemLot.strTrackingNumber
 			,strWarehouseRefNo		= ItemLot.strWarehouseRefNo
+			,strCargoNo				= ItemLot.strCargoNo
+			,strCargoNo				= ItemLot.strWarrantNo
 			,intSourceType			= Receipt.intSourceType
 	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 				ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId

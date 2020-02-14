@@ -77,6 +77,8 @@ SELECT
 	,receiptItem.intCategoryId
 	,receiptItem.intCommodityId
 	,permission.intEntityContactId
+	,receiptItemLot.strCargoNo
+	,receiptItemLot.strWarrantNo
 FROM tblICInventoryReceiptItemLot receiptItemLot
 LEFT JOIN vyuICGetInventoryReceiptItem receiptItem ON receiptItem.intInventoryReceiptItemId = receiptItemLot.intInventoryReceiptItemId
 LEFT JOIN vyuICGetInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = receiptItem.intInventoryReceiptId

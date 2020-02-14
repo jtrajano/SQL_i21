@@ -1111,4 +1111,7 @@ IF @ForDelete = 0
 BEGIN
 	-- Recalculate Totals
 	EXEC dbo.uspICInventoryReceiptCalculateTotals @ReceiptId = @ReceiptId, @ForceRecalc = 0
+
+	-- Updates cargo #, warrant #, etc.
+	EXEC dbo.uspICInventoryReceiptUpdateInternalComments @ReceiptId = @ReceiptId, @UserId = @UserId
 END

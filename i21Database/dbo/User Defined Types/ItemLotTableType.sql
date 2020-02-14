@@ -223,5 +223,7 @@ CREATE TYPE [dbo].[ItemLotTableType] AS TABLE
 	,[strCertificateId]			NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 	,[strTrackingNumber]		NVARCHAR(255) COLLATE Latin1_General_CI_AS NULL	 
 	,[strWarehouseRefNo]		NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+	,[strCargoNo]		NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+	,[strWarrantNo]		NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 	,[intSourceType]			INT NULL 
 )
