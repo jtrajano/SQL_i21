@@ -517,7 +517,8 @@ BEGIN TRY
 				IF NOT EXISTS (
 						SELECT 1
 						FROM tblQMSampleTypeUserRole
-						WHERE intSampleTypeUserRoleRefId = @intSampleTypeUserRoleId
+						WHERE intSampleTypeId = @intNewSampleTypeId
+							AND intSampleTypeUserRoleRefId = @intSampleTypeUserRoleId
 						)
 				BEGIN
 					INSERT INTO tblQMSampleTypeUserRole (

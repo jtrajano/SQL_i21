@@ -35,6 +35,27 @@ BEGIN TRY
 		,@strControlPointName NVARCHAR(50)
 		,@intSampleTypeId INT
 		,@intControlPointId INT
+	DECLARE @strProductTestXML NVARCHAR(MAX)
+		,@intProductTestId INT
+	DECLARE @strTestName NVARCHAR(50)
+		,@intTestId INT
+	DECLARE @strProductPropertyXML NVARCHAR(MAX)
+		,@intProductPropertyId INT
+	DECLARE @strPPTestName NVARCHAR(50)
+		,@strPPPropertyName NVARCHAR(100)
+		,@intPPTestId INT
+		,@intPPPropertyId INT
+	DECLARE @strProductPropertyValidityPeriodXML NVARCHAR(MAX)
+		,@intProductPropertyValidityPeriodId INT
+	DECLARE @strPPVUnitMeasure NVARCHAR(50)
+		,@intPPVUnitMeasureId INT
+
+	-- Using to identify the Product Property Id
+	DECLARE @TestName NVARCHAR(50)
+		,@PropertyName NVARCHAR(100)
+		,@TestId INT
+		,@PropertyId INT
+		,@ProductPropertyId INT
 
 	SELECT @intProductStageId = MIN(intProductStageId)
 	FROM tblQMProductStage
@@ -48,10 +69,20 @@ BEGIN TRY
 			,@intMultiCompanyId = NULL
 			,@strUserName = NULL
 			,@strProductControlPointXML = NULL
+			,@intProductControlPointId = NULL
+			,@strProductTestXML = NULL
+			,@intProductTestId = NULL
+			,@strProductPropertyXML = NULL
+			,@intProductPropertyId = NULL
+			,@strProductPropertyValidityPeriodXML = NULL
+			,@intProductPropertyValidityPeriodId = NULL
 
 		SELECT @intProductId = intProductId
 			,@strHeaderXML = strHeaderXML
 			,@strProductControlPointXML = strProductControlPointXML
+			,@strProductTestXML = strProductTestXML
+			,@strProductPropertyXML = strProductPropertyXML
+			,@strProductPropertyValidityPeriodXML = strProductPropertyValidityPeriodXML
 			,@strRowState = strRowState
 			,@intMultiCompanyId = intMultiCompanyId
 			,@strUserName = strUserName
@@ -520,6 +551,462 @@ BEGIN TRY
 					SELECT intProductControlPointId
 					FROM @tblQMProductControlPoint
 					)
+
+			EXEC sp_xml_removedocument @idoc
+
+			------------------------------------Product Test--------------------------------------------
+			EXEC sp_xml_preparedocument @idoc OUTPUT
+				,@strProductTestXML
+
+			DECLARE @tblQMProductTest TABLE (intProductTestId INT)
+
+			INSERT INTO @tblQMProductTest (intProductTestId)
+			SELECT intProductTestId
+			FROM OPENXML(@idoc, 'vyuIPGetProductTests/vyuIPGetProductTest', 2) WITH (intProductTestId INT)
+
+			SELECT @intProductTestId = MIN(intProductTestId)
+			FROM @tblQMProductTest
+
+			WHILE @intProductTestId IS NOT NULL
+			BEGIN
+				SELECT @strTestName = NULL
+					,@intTestId = NULL
+
+				SELECT @strTestName = strTestName
+				FROM OPENXML(@idoc, 'vyuIPGetProductTests/vyuIPGetProductTest', 2) WITH (
+						strTestName NVARCHAR(50) Collate Latin1_General_CI_AS
+						,intProductTestId INT
+						) SD
+				WHERE intProductTestId = @intProductTestId
+
+				IF @strTestName IS NOT NULL
+					AND NOT EXISTS (
+						SELECT 1
+						FROM tblQMTest t
+						WHERE t.strTestName = @strTestName
+						)
+				BEGIN
+					SELECT @strErrorMessage = 'Test Name ' + @strTestName + ' is not available.'
+
+					RAISERROR (
+							@strErrorMessage
+							,16
+							,1
+							)
+				END
+
+				SELECT @intTestId = t.intTestId
+				FROM tblQMTest t
+				WHERE t.strTestName = @strTestName
+
+				IF NOT EXISTS (
+						SELECT 1
+						FROM tblQMProductTest
+						WHERE intProductId = @intNewProductId
+							AND intProductTestRefId = @intProductTestId
+						)
+				BEGIN
+					INSERT INTO tblQMProductTest (
+						intConcurrencyId
+						,intProductId
+						,intTestId
+						,intProductTestRefId
+						,intCreatedUserId
+						,dtmCreated
+						,intLastModifiedUserId
+						,dtmLastModified
+						)
+					SELECT
+					1
+					,@intNewProductId
+					,@intTestId
+					,@intProductTestId
+					,@intLastModifiedUserId
+					,dtmCreated
+					,@intLastModifiedUserId
+					,dtmLastModified
+					FROM OPENXML(@idoc, 'vyuIPGetProductTests/vyuIPGetProductTest', 2) WITH (
+							dtmCreated DATETIME
+							,dtmLastModified DATETIME
+							,intProductTestId INT
+							) x
+					WHERE x.intProductTestId = @intProductTestId
+				END
+				ELSE
+				BEGIN
+					UPDATE tblQMProductTest
+					SET intConcurrencyId = intConcurrencyId + 1
+					,intTestId = @intTestId
+					,intLastModifiedUserId = @intLastModifiedUserId
+					,dtmLastModified = x.dtmLastModified
+					FROM OPENXML(@idoc, 'vyuIPGetProductTests/vyuIPGetProductTest', 2) WITH (
+							dtmLastModified DATETIME
+							,intProductTestId INT
+							) x
+					JOIN tblQMProductTest D ON D.intProductTestRefId = x.intProductTestId
+						AND D.intProductId = @intNewProductId
+					WHERE x.intProductTestId = @intProductTestId
+				END
+
+				SELECT @intProductTestId = MIN(intProductTestId)
+				FROM @tblQMProductTest
+				WHERE intProductTestId > @intProductTestId
+			END
+
+			DELETE
+			FROM tblQMProductTest
+			WHERE intProductId = @intNewProductId
+				AND intProductTestRefId NOT IN (
+					SELECT intProductTestId
+					FROM @tblQMProductTest
+					)
+
+			EXEC sp_xml_removedocument @idoc
+
+			------------------------------------Product Property--------------------------------------------
+			EXEC sp_xml_preparedocument @idoc OUTPUT
+				,@strProductPropertyXML
+
+			DECLARE @tblQMProductProperty TABLE (intProductPropertyId INT)
+
+			INSERT INTO @tblQMProductProperty (intProductPropertyId)
+			SELECT intProductPropertyId
+			FROM OPENXML(@idoc, 'vyuIPGetProductPropertys/vyuIPGetProductProperty', 2) WITH (intProductPropertyId INT)
+
+			SELECT @intProductPropertyId = MIN(intProductPropertyId)
+			FROM @tblQMProductProperty
+
+			WHILE @intProductPropertyId IS NOT NULL
+			BEGIN
+				SELECT @strPPTestName = NULL
+					,@strPPPropertyName = NULL
+					,@intPPTestId = NULL
+					,@intPPPropertyId = NULL
+
+				SELECT @strPPTestName = strTestName
+					,@strPPPropertyName = strPropertyName
+				FROM OPENXML(@idoc, 'vyuIPGetProductPropertys/vyuIPGetProductProperty', 2) WITH (
+						strTestName NVARCHAR(50) Collate Latin1_General_CI_AS
+						,strPropertyName NVARCHAR(100) Collate Latin1_General_CI_AS
+						,intProductPropertyId INT
+						) SD
+				WHERE intProductPropertyId = @intProductPropertyId
+
+				IF @strPPTestName IS NOT NULL
+					AND NOT EXISTS (
+						SELECT 1
+						FROM tblQMTest t
+						WHERE t.strTestName = @strPPTestName
+						)
+				BEGIN
+					SELECT @strErrorMessage = 'PP Test Name ' + @strPPTestName + ' is not available.'
+
+					RAISERROR (
+							@strErrorMessage
+							,16
+							,1
+							)
+				END
+
+				IF @strPPPropertyName IS NOT NULL
+					AND NOT EXISTS (
+						SELECT 1
+						FROM tblQMProperty t
+						WHERE t.strPropertyName = @strPPPropertyName
+						)
+				BEGIN
+					SELECT @strErrorMessage = 'PP Property Name ' + @strPPPropertyName + ' is not available.'
+
+					RAISERROR (
+							@strErrorMessage
+							,16
+							,1
+							)
+				END
+
+				SELECT @intPPTestId = t.intTestId
+				FROM tblQMTest t
+				WHERE t.strTestName = @strPPTestName
+
+				SELECT @intPPPropertyId = t.intPropertyId
+				FROM tblQMProperty t
+				WHERE t.strPropertyName = @strPPPropertyName
+
+				IF NOT EXISTS (
+						SELECT 1
+						FROM tblQMProductProperty
+						WHERE intProductId = @intNewProductId
+							AND intProductPropertyRefId = @intProductPropertyId
+						)
+				BEGIN
+					INSERT INTO tblQMProductProperty (
+					intConcurrencyId
+					,intProductId
+					,intTestId
+					,intPropertyId
+					,strFormulaParser
+					,strComputationMethod
+					,intSequenceNo
+					,intComputationTypeId
+					,strFormulaField
+					,strIsMandatory
+					,ysnPrintInLabel
+					,intProductPropertyRefId
+					,intCreatedUserId
+					,dtmCreated
+					,intLastModifiedUserId
+					,dtmLastModified
+						)
+					SELECT 1
+					,@intNewProductId
+					,@intPPTestId
+					,@intPPPropertyId
+					,strFormulaParser
+					,strComputationMethod
+					,intSequenceNo
+					,intComputationTypeId
+					,strFormulaField
+					,strIsMandatory
+					,ysnPrintInLabel
+					,@intProductPropertyId
+					,@intLastModifiedUserId
+					,dtmCreated
+					,@intLastModifiedUserId
+					,dtmLastModified
+					FROM OPENXML(@idoc, 'vyuIPGetProductPropertys/vyuIPGetProductProperty', 2) WITH (
+							strFormulaParser NVARCHAR(MAX)
+							,strComputationMethod NVARCHAR(30)
+							,intSequenceNo INT
+							,intComputationTypeId INT
+							,strFormulaField NVARCHAR(MAX)
+							,strIsMandatory NVARCHAR(20)
+							,ysnPrintInLabel BIT
+							,dtmCreated DATETIME
+							,dtmLastModified DATETIME
+							,intProductPropertyId INT
+							) x
+					WHERE x.intProductPropertyId = @intProductPropertyId
+				END
+				ELSE
+				BEGIN
+					UPDATE tblQMProductProperty
+					SET intConcurrencyId = intConcurrencyId + 1
+						,intTestId = @intPPTestId
+						,intPropertyId = @intPPPropertyId
+						,strFormulaParser = x.strFormulaParser
+						,strComputationMethod = x.strComputationMethod
+						,intSequenceNo = x.intSequenceNo
+						,intComputationTypeId = x.intComputationTypeId
+						,strFormulaField = x.strFormulaField
+						,strIsMandatory = x.strIsMandatory
+						,ysnPrintInLabel = x.ysnPrintInLabel
+						,intLastModifiedUserId = @intLastModifiedUserId
+						,dtmLastModified = x.dtmLastModified
+					FROM OPENXML(@idoc, 'vyuIPGetProductPropertys/vyuIPGetProductProperty', 2) WITH (
+							strFormulaParser NVARCHAR(MAX)
+							,strComputationMethod NVARCHAR(30)
+							,intSequenceNo INT
+							,intComputationTypeId INT
+							,strFormulaField NVARCHAR(MAX)
+							,strIsMandatory NVARCHAR(20)
+							,ysnPrintInLabel BIT
+							,dtmLastModified DATETIME
+							,intProductPropertyId INT
+							) x
+					JOIN tblQMProductProperty D ON D.intProductPropertyRefId = x.intProductPropertyId
+						AND D.intProductId = @intNewProductId
+					WHERE x.intProductPropertyId = @intProductPropertyId
+				END
+
+				SELECT @intProductPropertyId = MIN(intProductPropertyId)
+				FROM @tblQMProductProperty
+				WHERE intProductPropertyId > @intProductPropertyId
+			END
+
+			DELETE
+			FROM tblQMProductProperty
+			WHERE intProductId = @intNewProductId
+				AND intProductPropertyRefId NOT IN (
+					SELECT intProductPropertyId
+					FROM @tblQMProductProperty
+					)
+
+			EXEC sp_xml_removedocument @idoc
+
+			------------------------------------Product Property Validity Period--------------------------------------------
+			EXEC sp_xml_preparedocument @idoc OUTPUT
+				,strProductPropertyValidityPeriodXML
+
+			DECLARE @tblQMProductPropertyValidityPeriod TABLE (intProductPropertyValidityPeriodId INT)
+
+			INSERT INTO @tblQMProductPropertyValidityPeriod (intProductPropertyValidityPeriodId)
+			SELECT intProductPropertyValidityPeriodId
+			FROM OPENXML(@idoc, 'vyuIPGetProductPropertyValidityPeriods/vyuIPGetProductPropertyValidityPeriod', 2) WITH (intProductPropertyValidityPeriodId INT)
+
+			SELECT @intProductPropertyValidityPeriodId = MIN(intProductPropertyValidityPeriodId)
+			FROM @tblQMProductPropertyValidityPeriod
+
+			WHILE @intProductPropertyValidityPeriodId IS NOT NULL
+			BEGIN
+				SELECT @strPPVUnitMeasure = NULL
+					,@intPPVUnitMeasureId = NULL
+					,@TestName = NULL
+					,@PropertyName = NULL
+					,@TestId = NULL
+					,@PropertyId = NULL
+					,@ProductPropertyId = NULL
+
+				SELECT @strPPVUnitMeasure = strUnitMeasure
+					,@TestName = strTestName
+					,@PropertyName = strPropertyName
+				FROM OPENXML(@idoc, 'vyuIPGetProductPropertyValidityPeriods/vyuIPGetProductPropertyValidityPeriod', 2) WITH (
+						strUnitMeasure NVARCHAR(50) Collate Latin1_General_CI_AS
+						,strTestName NVARCHAR(50) Collate Latin1_General_CI_AS
+						,strPropertyName NVARCHAR(100) Collate Latin1_General_CI_AS
+						,intProductPropertyValidityPeriodId INT
+						) SD
+				WHERE intProductPropertyValidityPeriodId = @intProductPropertyValidityPeriodId
+
+				IF @strPPVUnitMeasure IS NOT NULL
+					AND NOT EXISTS (
+						SELECT 1
+						FROM tblICUnitMeasure t
+						WHERE t.strUnitMeasure = @strPPVUnitMeasure
+						)
+				BEGIN
+					SELECT @strErrorMessage = 'PPV UOM ' + @strPPVUnitMeasure + ' is not available.'
+
+					RAISERROR (
+							@strErrorMessage
+							,16
+							,1
+							)
+				END
+
+				SELECT @intPPVUnitMeasureId = t.intUnitMeasureId
+				FROM tblICUnitMeasure t
+				WHERE t.strUnitMeasure = @strPPVUnitMeasure
+
+				SELECT @TestId = t.intTestId
+				FROM tblQMTest t
+				WHERE t.strTestName = @TestName
+
+				SELECT @PropertyId = t.intPropertyId
+				FROM tblQMProperty t
+				WHERE t.strPropertyName = @PropertyName
+
+				SELECT @ProductPropertyId = intProductPropertyId
+				FROM tblQMProductProperty t
+				WHERE t.intProductId = @intNewProductId
+					AND t.intTestId = @TestId
+					AND t.intPropertyId = @PropertyId
+
+				IF NOT EXISTS (
+						SELECT 1
+						FROM tblQMProductPropertyValidityPeriod
+						WHERE intProductPropertyId = @ProductPropertyId
+							AND intProductPropertyValidityPeriodRefId = @intProductPropertyValidityPeriodId
+						)
+				BEGIN
+					INSERT INTO tblQMProductPropertyValidityPeriod (
+					intConcurrencyId
+					,intProductPropertyId
+					,dtmValidFrom
+					,dtmValidTo
+					,strPropertyRangeText
+					,dblMinValue
+					,dblMaxValue
+					,dblLowValue
+					,dblHighValue
+					,intUnitMeasureId
+					,strFormula
+					,strFormulaParser
+					,intProductPropertyValidityPeriodRefId
+					,intCreatedUserId
+					,dtmCreated
+					,intLastModifiedUserId
+					,dtmLastModified
+						)
+					SELECT 1
+					,@ProductPropertyId
+					,dtmValidFrom
+					,dtmValidTo
+					,strPropertyRangeText
+					,dblMinValue
+					,dblMaxValue
+					,dblLowValue
+					,dblHighValue
+					,@intPPVUnitMeasureId
+					,strFormula
+					,strFormulaParser
+					,@intProductPropertyValidityPeriodId
+					,@intLastModifiedUserId
+					,dtmCreated
+					,@intLastModifiedUserId
+					,dtmLastModified
+					FROM OPENXML(@idoc, 'vyuIPGetProductPropertyValidityPeriods/vyuIPGetProductPropertyValidityPeriod', 2) WITH (
+							dtmValidFrom DATETIME
+							,dtmValidTo DATETIME
+							,strPropertyRangeText NVARCHAR(MAX)
+							,dblMinValue NUMERIC(18, 6)
+							,dblMaxValue NUMERIC(18, 6)
+							,dblLowValue NUMERIC(18, 6)
+							,dblHighValue NUMERIC(18, 6)
+							,strFormula NVARCHAR(MAX)
+							,strFormulaParser NVARCHAR(MAX)
+							,dtmCreated DATETIME
+							,dtmLastModified DATETIME
+							,intProductPropertyValidityPeriodId INT
+							) x
+					WHERE x.intProductPropertyValidityPeriodId = @intProductPropertyValidityPeriodId
+				END
+				ELSE
+				BEGIN
+					UPDATE tblQMProductPropertyValidityPeriod
+					SET intConcurrencyId = intConcurrencyId + 1
+						,dtmValidFrom = x.dtmValidFrom
+						,dtmValidTo = x.dtmValidTo
+						,strPropertyRangeText = x.strPropertyRangeText
+						,dblMinValue = x.dblMinValue
+						,dblMaxValue = x.dblMaxValue
+						,dblLowValue = x.dblLowValue
+						,dblHighValue = x.dblHighValue
+						,intUnitMeasureId = @intPPVUnitMeasureId
+						,strFormula = x.strFormula
+						,strFormulaParser = x.strFormulaParser
+						,intLastModifiedUserId = @intLastModifiedUserId
+						,dtmLastModified = x.dtmLastModified
+					FROM OPENXML(@idoc, 'vyuIPGetProductPropertyValidityPeriods/vyuIPGetProductPropertyValidityPeriod', 2) WITH (
+								dtmValidFrom DATETIME
+								,dtmValidTo DATETIME
+								,strPropertyRangeText NVARCHAR(MAX)
+								,dblMinValue NUMERIC(18, 6)
+								,dblMaxValue NUMERIC(18, 6)
+								,dblLowValue NUMERIC(18, 6)
+								,dblHighValue NUMERIC(18, 6)
+								,strFormula NVARCHAR(MAX)
+								,strFormulaParser NVARCHAR(MAX)
+								,dtmLastModified DATETIME
+								,intProductPropertyValidityPeriodId INT
+							) x
+					JOIN tblQMProductPropertyValidityPeriod D ON D.intProductPropertyValidityPeriodRefId = x.intProductPropertyValidityPeriodId
+						AND D.intProductPropertyId = @ProductPropertyId
+					WHERE x.intProductPropertyValidityPeriodId = @intProductPropertyValidityPeriodId
+				END
+
+				SELECT @intProductPropertyValidityPeriodId = MIN(intProductPropertyValidityPeriodId)
+				FROM @tblQMProductPropertyValidityPeriod
+				WHERE intProductPropertyValidityPeriodId > @intProductPropertyValidityPeriodId
+			END
+
+			DELETE
+			FROM tblQMProductPropertyValidityPeriod
+			WHERE intProductPropertyId = @ProductPropertyId
+				AND intProductPropertyValidityPeriodRefId NOT IN (
+					SELECT intProductPropertyValidityPeriodId
+					FROM @tblQMProductPropertyValidityPeriod
+					)
+
 
 			ext:
 
