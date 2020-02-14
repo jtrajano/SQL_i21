@@ -116,13 +116,18 @@ BEGIN
 					EXECUTE [dbo].[uspTRGetRackPrice] 
 						@dtmPullDate
 						,0
-						,@intVendorId
+						,@intSupplyPointId
 						,@intPullProductId
 						,@dblUnitCost OUTPUT
 				END
 				ELSE
 				BEGIN
 					SET @strGrossNet = 'Gross'
+
+					SELECT @dblUnitCost = dblReceiveLastCost 
+					FROM vyuICGetItemStock WHERE intItemId = @intPullProductId 
+					AND intLocationId = @intVendorCompanyLocationId 
+					AND strType NOT IN ('Other Charge','Bundle','Kit','Service','Sofware')
 				END
 
 				-- RECEIPT
@@ -340,7 +345,7 @@ BEGIN
 					END
 
 					UPDATE tblTRLoadDistributionDetail SET dblUnits = @dblSum WHERE intLoadDistributionDetailId = @intLoadDistributionDetailId
-					
+
 					FETCH NEXT FROM @CursorDistributionDetailTran INTO @intDDPullProductId, @intDDDropProductId, @dblDDDropGross, @dblDDDropNet, @strDDBillOfLading, @strDDGrossNet
 				END
 				CLOSE @CursorDistributionDetailTran
