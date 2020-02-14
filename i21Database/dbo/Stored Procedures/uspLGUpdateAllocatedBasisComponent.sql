@@ -72,22 +72,5 @@ OUTER APPLY (SELECT dblBasisTotal = SUM(dblRate) FROM tblCTContractCost
 			WHERE ysnBasis = 1 AND intContractDetailId = @intSContractDetailId) BS
 WHERE SCD.intContractDetailId = @intSContractDetailId
 
-/* Update Purchase Contract Basis Item with Reserves B Total */
-UPDATE PCC
-SET dblRate = RB.dblTotal
-FROM tblCTContractCost PCC
-OUTER APPLY (SELECT dblTotal = SUM(dblRate) FROM #tmpReserveB) RB 
-WHERE intContractDetailId = @intPContractDetailId
-	AND intItemId = @intPContractBasisItemId
-
-/* Recalculate Purchase Basis Total and Contract Cash Price*/
-UPDATE PCD
-	SET dblBasis = BS.dblBasisTotal
-		,dblCashPrice = PCD.dblFutures + BS.dblBasisTotal
-FROM tblCTContractDetail PCD
-OUTER APPLY (SELECT dblBasisTotal = SUM(dblRate) FROM tblCTContractCost 
-			WHERE intItemId = @intPContractBasisItemId AND intContractDetailId = @intPContractDetailId) BS
-WHERE intContractDetailId = @intPContractDetailId
-
 GO
 
