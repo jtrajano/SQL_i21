@@ -250,6 +250,7 @@ SELECT intEntityCustomerId		= C.intEntityCustomerId
 	 , intEntityUserId			= @intEntityUserIdLocal
 	 , strInvoiceNumber			= TRANSACTIONS.strTransactionNumber
 	 , dtmDate					= TRANSACTIONS.dtmDate
+	 , dtmDueDate				= TRANSACTIONS.dtmDueDate
 	 , dtmAsOfDate				= @dtmDateToLocal
 	 , dblAmount				= TRANSACTIONS.dblAmount
 	 , dblQuantity				= TRANSACTIONS.dblQuantity	     
@@ -281,6 +282,7 @@ LEFT JOIN (
 		 , dblQuantity				= DETAIL.dblQuantity * dbo.fnARGetInvoiceAmountMultiplier(I.strTransactionType)
 		 , dblInvoiceDetailTotal	= DETAIL.dblLineTotal * dbo.fnARGetInvoiceAmountMultiplier(I.strTransactionType)
 		 , dtmDate					= I.dtmDate
+		 , dtmDueDate				= I.dtmDueDate
 	FROM dbo.tblARInvoice I WITH (NOLOCK)
 	INNER JOIN #COMPANYLOCATIONS CL ON I.intCompanyLocationId = CL.intCompanyLocationId
 	LEFT JOIN (
@@ -322,6 +324,7 @@ LEFT JOIN (
 		 , dblQuantity				= NULL
 		 , dblInvoiceDetailTotal	= I.dblInvoiceTotal * dbo.fnARGetInvoiceAmountMultiplier(I.strTransactionType)
 		 , dtmDate					= I.dtmDate
+		 , dtmDueDate				= I.dtmDueDate
 	FROM dbo.tblARInvoice I WITH (NOLOCK)
 	INNER JOIN #COMPANYLOCATIONS CL ON I.intCompanyLocationId = CL.intCompanyLocationId
 	WHERE I.ysnPosted = 1
@@ -349,6 +352,7 @@ LEFT JOIN (
 		 , dblQuantity				= NULL
 		 , dblInvoiceDetailTotal	= (P.dblAmountPaid - ISNULL(PD.dblInterest, 0) + ISNULL(PD.dblDiscount, 0)) * -1
 		 , dtmDate					= P.dtmDatePaid
+		 , dtmDueDate				= NULL
 	FROM dbo.tblARPayment P WITH (NOLOCK)
 	LEFT JOIN (
 		SELECT intPaymentId
@@ -378,6 +382,7 @@ IF @ysnIncludeBudgetLocal = 1
 			 , intEntityUserId			= @intEntityUserIdLocal
 			 , strInvoiceNumber			= NULL
 			 , dtmDate					= CB.dtmBudgetDate
+			 , dtmDueDate				= DATEADD(DAY, -1, DATEADD(MONTH, 1, CB.dtmBudgetDate))
 			 , dtmAsOfDate				= @dtmDateToLocal
 			 , dblAmount				= CB.dblBudgetAmount - CB.dblAmountPaid
 			 , dblQuantity				= NULL
@@ -411,6 +416,7 @@ SELECT intEntityCustomerId		= C.intEntityCustomerId
 	 , strInvoiceNumber			= NULL
 	 , dtmDate					= @dtmDateFromLocal
 	 , dtmAsOfDate				= @dtmDateToLocal
+	 , dtmDueDate				= NULL
 	 , dblAmount				= ISNULL(BB.dblTotalAR, 0.000000)
 	 , dblQuantity				= NULL
 	 , dblInvoiceDetailTotal	= ISNULL(BB.dblTotalAR, 0.000000)
@@ -437,6 +443,22 @@ UPDATE SET dtmLastStatementDate = SOURCE.dtmLastStatementDate, dblLastStatement 
 WHEN NOT MATCHED BY TARGET THEN
 INSERT (strEntityNo, dtmLastStatementDate, dblLastStatement)
 VALUES (strCustomerNumber, dtmLastStatementDate, dblLastStatement);
+
+--ADDITIONAL FILTERS
+IF @ysnPrintOnlyPastDueLocal = 1
+    BEGIN
+        DELETE FROM #STATEMENTREPORT WHERE DATEDIFF(DAYOFYEAR, dtmDueDate, @dtmDateToLocal) <= 0 AND strTransactionType <> 'Beginning Balance'
+		UPDATE #AGINGSUMMARY 
+		SET dblFuture 	= 0
+		  , dbl0Days 	= 0
+		  , dblTotalAR 	= ISNULL(dblTotalAR, 0) - ISNULL(dbl0Days, 0) - ISNULL(dblFuture, 0)
+    END
+
+IF @ysnPrintZeroBalanceLocal = 0
+    BEGIN
+        DELETE FROM #STATEMENTREPORT WHERE ((((ABS(dblAmount) * 10000) - CONVERT(FLOAT, (ABS(dblAmount) * 10000))) <> 0) OR ISNULL(dblAmount, 0) = 0) AND ISNULL(strTransactionType, '') NOT IN ('Balance Forward', 'Customer Budget')
+		DELETE FROM #AGINGSUMMARY WHERE (((ABS(dblTotalAR) * 10000) - CONVERT(FLOAT, (ABS(dblTotalAR) * 10000))) <> 0) OR ISNULL(dblTotalAR, 0) = 0
+    END
 
 --INSERT INTO STATEMENT STAGING
 DELETE FROM tblARCustomerStatementStagingTable WHERE intEntityUserId = @intEntityUserIdLocal AND strStatementFormat = 'Full Details - No Card Lock' 
