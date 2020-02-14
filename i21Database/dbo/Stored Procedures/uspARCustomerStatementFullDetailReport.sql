@@ -352,7 +352,7 @@ LEFT JOIN (
 		 , dblQuantity				= NULL
 		 , dblInvoiceDetailTotal	= (P.dblAmountPaid - ISNULL(PD.dblInterest, 0) + ISNULL(PD.dblDiscount, 0)) * -1
 		 , dtmDate					= P.dtmDatePaid
-		 , dtmDueDate				= NULL
+		 , dtmDueDate				= P.dtmDatePaid
 	FROM dbo.tblARPayment P WITH (NOLOCK)
 	LEFT JOIN (
 		SELECT intPaymentId
@@ -456,7 +456,7 @@ IF @ysnPrintOnlyPastDueLocal = 1
 
 IF @ysnPrintZeroBalanceLocal = 0
     BEGIN
-        DELETE FROM #STATEMENTREPORT WHERE ((((ABS(dblAmount) * 10000) - CONVERT(FLOAT, (ABS(dblAmount) * 10000))) <> 0) OR ISNULL(dblAmount, 0) = 0) AND ISNULL(strTransactionType, '') NOT IN ('Balance Forward', 'Customer Budget')
+        DELETE FROM #STATEMENTREPORT WHERE ((((ABS(dblAmount) * 10000) - CONVERT(FLOAT, (ABS(dblAmount) * 10000))) <> 0) OR ISNULL(dblAmount, 0) = 0) AND ISNULL(strTransactionType, '') NOT IN ('Beginning Balance', 'Customer Budget')
 		DELETE FROM #AGINGSUMMARY WHERE (((ABS(dblTotalAR) * 10000) - CONVERT(FLOAT, (ABS(dblTotalAR) * 10000))) <> 0) OR ISNULL(dblTotalAR, 0) = 0
     END
 
@@ -549,7 +549,7 @@ INNER JOIN (
 		 , strAccountNumber		 
 	FROM vyuARCustomerSearch
 ) CUSTOMER ON STATEMENTREPORT.intEntityCustomerId = CUSTOMER.intEntityCustomerId
-LEFT JOIN #AGINGSUMMARY AGING ON STATEMENTREPORT.intEntityCustomerId = AGING.intEntityCustomerId	
+INNER JOIN #AGINGSUMMARY AGING ON STATEMENTREPORT.intEntityCustomerId = AGING.intEntityCustomerId	
 ORDER BY STATEMENTREPORT.dtmDate'
 
 EXEC sp_executesql @query
