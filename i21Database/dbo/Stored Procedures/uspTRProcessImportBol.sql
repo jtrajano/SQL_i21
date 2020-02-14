@@ -120,6 +120,10 @@ BEGIN
 						,@intPullProductId
 						,@dblUnitCost OUTPUT
 				END
+				ELSE
+				BEGIN
+					SET @strGrossNet = 'Gross'
+				END
 
 				-- RECEIPT
 				INSERT INTO tblTRLoadReceipt (intLoadHeaderId, 
