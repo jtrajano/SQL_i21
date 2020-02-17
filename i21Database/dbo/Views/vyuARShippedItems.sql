@@ -323,7 +323,7 @@ FROM (
 	     --, dblPrice							= CAST((CASE WHEN ISNULL(LGICSHIPMENT.intShipmentId,0) <> 0 OR ARCC.intContractDetailId IS NOT NULL THEN ISNULL(ARCC.dblCashPrice, ARCC.dblUnitPrice) ELSE ICISI.dblConvertedPrice END) AS DECIMAL(18,6))
 		 , dblPrice							= CAST((CASE WHEN ISNULL(LGICSHIPMENT.intShipmentId,0) <> 0 OR ARCC.intContractDetailId IS NOT NULL THEN CASE WHEN ARCC.intItemUOMId IS NULL THEN ISNULL(ARCC.dblCashPrice, ARCC.dblUnitPrice) ELSE ARCC.dblUnitPrice END ELSE ICISI.dblConvertedPrice END) AS DECIMAL(18,6))
 		 , dblUnitPrice						= CAST((CASE WHEN ISNULL(LGICSHIPMENT.intShipmentId,0) <> 0 OR ARCC.intContractDetailId IS NOT NULL THEN ISNULL(ARCC.dblUnitPrice, ARCC.dblCashPrice) ELSE ICISI.dblUnitPrice END) AS DECIMAL(18,6))
-	     , dblShipmentUnitPrice				= CAST((CASE WHEN ISNULL(LGICSHIPMENT.intShipmentId,0) <> 0 OR ARCC.intContractDetailId IS NOT NULL THEN ISNULL(ARCC.dblOrderPrice,ISNULL(ARCC.dblUnitPrice, ARCC.dblCashPrice)) ELSE ICISI.dblConvertedPrice END) AS DECIMAL(18,6))
+	     , dblShipmentUnitPrice				= CAST((CASE WHEN ISNULL(LGICSHIPMENT.intShipmentId,0) <> 0 OR ARCC.intContractDetailId IS NOT NULL THEN CASE WHEN ARCC.intItemUOMId IS NULL THEN ISNULL(ARCC.dblOrderPrice,ISNULL(ARCC.dblUnitPrice, ARCC.dblCashPrice)) ELSE ARCC.dblUnitPrice END ELSE ICISI.dblConvertedPrice END) AS DECIMAL(18,6))
 	     , strPricing						= ''	     
 	     , strVFDDocumentNumber				= NULL
 	     , dblTotalTax						= 0.000000
