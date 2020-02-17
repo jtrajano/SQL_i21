@@ -50,7 +50,7 @@ SELECT
       
 	  --,chk.[dblATMBegBalance]
       ,dblATMBegBalance = (
-							ISNULL((SELECT TOP 1 _chk.dblATMEndBalanceCalculated
+							ISNULL((SELECT TOP 1 _chk.dblATMEndBalanceActual
 							FROM tblSTCheckoutHeader _chk
 							WHERE _chk.intStoreId = vst.intStoreId
 								AND ((_chk.dtmCheckoutDate < chk.dtmCheckoutDate) 
