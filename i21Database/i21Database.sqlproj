@@ -8460,6 +8460,8 @@
     <Build Include="dbo\Stored Procedures\uspIPProductPopulateStgXML.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProductTransferStgXML.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProductProcessStgXML.sql" />
+    <Build Include="dbo\Views\vyuSTUnpostedPumpTotals.sql" />
+    <Build Include="dbo\Views\vyuSTUnpostedItemMovements.sql" />    
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
