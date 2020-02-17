@@ -24,4 +24,4 @@ GROUP BY intContractHeaderId
 	   , intCurrencyId
 	   , strCurrency    
 
-HAVING SUM(ISNULL(dblAvailableQty, 0)) > 0 
+-- HAVING SUM(ISNULL(dblAvailableQty, 0)) > 0 
