@@ -63,7 +63,27 @@ BEGIN TRY
 		FROM tblRKOptionsMatchPnS p
 		JOIN @tblMatchedDelete m on p.strTranNo = m.strTranNo
 		
+		SELECT DISTINCT intOptionsMatchPnSHeaderId
+		INTO #tmpMatchDeleted
+		FROM tblRKOptionsMatchPnS WHERE CONVERT(INT, strTranNo) IN (SELECT CONVERT(INT, strTranNo) FROM @tblMatchedDelete)
+		
+		DECLARE @intMatchDeletedId INT
+
+		WHILE EXISTS (SELECT TOP 1 1 FROM #tmpMatchDeleted)
+		BEGIN
+			SELECT TOP 1 @intMatchDeletedId = intOptionsMatchPnSHeaderId FROM #tmpMatchDeleted
+
+			EXEC uspIPInterCompanyPreStageOptionsPnS @intOptionsMatchPnSHeaderId = @intMatchDeletedId
+				, @strRowState = 'Modified'
+				, @intUserId = @intUserId
+
+			DELETE FROM #tmpMatchDeleted WHERE intOptionsMatchPnSHeaderId = @intMatchDeletedId
+		END
+		
+		DROP TABLE #tmpMatchDeleted
+
 		DELETE FROM tblRKOptionsMatchPnS WHERE CONVERT(INT, strTranNo) IN (SELECT CONVERT(INT, strTranNo) FROM @tblMatchedDelete)
+
 	END
 	------------------------- END Delete Matched ---------------------
 	
@@ -80,6 +100,25 @@ BEGIN TRY
 		
 	IF EXISTS(SELECT TOP 1 1 FROM @tblExpiredDelete)
 	BEGIN
+		SELECT DISTINCT intOptionsMatchPnSHeaderId
+		INTO #tmpExpireDeleted
+		FROM tblRKOptionsMatchPnS WHERE CONVERT(INT, strTranNo) IN (SELECT CONVERT(INT, strTranNo) FROM @tblExpiredDelete)
+		
+		DECLARE @intExpireDeletedId INT
+
+		WHILE EXISTS (SELECT TOP 1 1 FROM #tmpExpireDeleted)
+		BEGIN
+			SELECT TOP 1 @intExpireDeletedId = intOptionsMatchPnSHeaderId FROM #tmpExpireDeleted
+
+			EXEC uspIPInterCompanyPreStageOptionsPnS @intOptionsMatchPnSHeaderId = @intExpireDeletedId
+				, @strRowState = 'Modified'
+				, @intUserId = @intUserId
+
+			DELETE FROM #tmpExpireDeleted WHERE intOptionsMatchPnSHeaderId = @intExpireDeletedId
+		END
+		
+		DROP TABLE #tmpExpireDeleted
+
 		DELETE FROM tblRKOptionsPnSExpired WHERE CONVERT(INT, strTranNo) IN (SELECT CONVERT(INT, strTranNo) FROM @tblExpiredDelete)
 
 	END
