@@ -300,8 +300,8 @@ BEGIN
 		intInventoryCountId = @intInventoryCountId
 		, intItemId = il.intItemId
 		, intItemLocationId = COALESCE(stock.intItemLocationId, il.intItemLocationId)
-		, intSubLocationId = CASE WHEN stock.intItemId IS NULL THEN il.intSubLocationId ELSE stock.intSubLocationId END 
-		, intStorageLocationId = CASE WHEN stock.intItemId IS NULL THEN il.intStorageLocationId ELSE stock.intStorageLocationId END
+		, intSubLocationId = CASE WHEN hasExistingStock.intItemId IS NULL THEN il.intSubLocationId ELSE stock.intSubLocationId END 
+		, intStorageLocationId = CASE WHEN hasExistingStock.intItemId IS NULL THEN il.intStorageLocationId ELSE stock.intStorageLocationId END
 		, intLotId = NULL
 		, dblSystemCount = ISNULL(stockUnit.dblOnHand, 0)-- SUM(COALESCE(stock.dblOnHand, 0.00))
 		, dblLastCost =  
