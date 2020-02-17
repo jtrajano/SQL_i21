@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspSTGenerateCSV]
+﻿CREATE PROCEDURE [dbo].[uspSTGenerateCSV] 
 	@intVendorId int,
 	@strStoreIdList NVARCHAR(MAX),
 	@dtmBeginningDate datetime,
