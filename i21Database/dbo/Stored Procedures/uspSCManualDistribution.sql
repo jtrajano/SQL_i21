@@ -138,18 +138,19 @@ OPEN intListCursor;
 						END  
 						ELSE  
 						BEGIN  
+							SET @ysnLoadContract = 0
+							SELECT TOP 1 @ysnLoadContract = ysnLoad 
+							FROM tblCTContractHeader A
+							INNER JOIN tblCTContractDetail B
+								ON A.intContractHeaderId = B.intContractHeaderId
+							WHERE B.intContractDetailId = @intLoopContractId
 
 							-- do not schedule if the contract is the same as the ticket contract since this is already scheduled upon saving the ticket
 							IF ISNULL(@intLoopContractId,0) <> 0 AND @strTicketDistributionOption = 'CNT' AND @intTicketContractDetailId = @intLoopContractId  
 							BEGIN  
 								-- EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoopContractId, @dblLoopContractUnits, @intUserId, @intTicketId, 'Auto - Scale', @intTicketItemUOMId  
 
-								SET @ysnLoadContract = 0
-								SELECT TOP 1 @ysnLoadContract = ysnLoad 
-								FROM tblCTContractHeader A
-								INNER JOIN tblCTContractDetail B
-									ON A.intContractHeaderId = B.intContractHeaderId
-								WHERE B.intContractDetailId = @intLoopContractId
+								
 								
 								IF(@ysnLoadContract = 0)
 								BEGIN
@@ -177,7 +178,14 @@ OPEN intListCursor;
 							END 
 							ELSE
 							BEGIN
-								EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoopContractId, @dblLoopContractUnits, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId  
+								IF (@ysnLoadContract = 0)
+								BEGIN
+									EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoopContractId, @dblLoopContractUnits, @intUserId, @intTicketId, 'Auto - Scale', @intTicketItemUOMId  
+								END
+								ELSE
+								BEGIN
+									EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoopContractId, 1, @intUserId, @intTicketId, 'Auto - Scale', @intTicketItemUOMId  
+								END
 							END 
 
 							EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intLoopContractId, @dblLoopContractUnits, @intEntityId;  
