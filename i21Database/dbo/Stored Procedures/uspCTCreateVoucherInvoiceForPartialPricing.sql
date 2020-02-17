@@ -1345,6 +1345,12 @@ BEGIN TRY
 					set @dblPricedForInvoice = 0;
 					set @dblInvoicedPriced = isnull(@dblInvoicedPriced,0.00);
 
+					-- if load based use the invoiced qty as priced qty
+					if isnull(@ysnLoad,0) = 1
+					begin
+						set @dblPriced = case when @dblInvoicedPriced > 0 then @dblInvoicedPriced else @dblShippedForInvoice end
+					end
+
 					--Check if Priced Detail has remaining quantity. If no, skip Pricing Loop
 					if (@dblPriced = @dblInvoicedPriced)
 					begin
