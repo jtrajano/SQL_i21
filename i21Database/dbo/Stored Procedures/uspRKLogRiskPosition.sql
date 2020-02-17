@@ -899,6 +899,7 @@ BEGIN
 					, intContractDetailId
 					, intContractHeaderId
 					, intContractTypeId
+					, intContractSeq
 					, intEntityId
 					, intCommodityId
 					, intItemId
@@ -928,6 +929,7 @@ BEGIN
 					, @intContractDetailId
 					, @intContractHeaderId
 					, intContractTypeId
+					, intContractSeq
 					, intEntityId
 					, ch.intCommodityId
 					, intItemId
@@ -968,6 +970,7 @@ BEGIN
 					, intContractDetailId
 					, intContractHeaderId
 					, intContractTypeId
+					, intContractSeq
 					, intEntityId
 					, intCommodityId
 					, intItemId
@@ -997,6 +1000,7 @@ BEGIN
 					, @intContractDetailId
 					, @intContractHeaderId				
 					, intContractTypeId
+					, intContractSeq
 					, intEntityId
 					, intCommodityId
 					, intItemId

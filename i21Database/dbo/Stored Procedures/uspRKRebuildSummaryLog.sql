@@ -270,7 +270,7 @@ BEGIN
 		INNER JOIN tblCTContractDetail CD on CD.intContractDetailId = t.intContractDetailId
 		INNER JOIN tblICCommodity C  on C.intCommodityId = CH.intCommodityId
 		WHERE Row_Num = 1
-		ORDER BY dtmTransactionDate,  t.intContractDetailId, intOrderBy
+		ORDER BY dtmTransactionDate, CD.intContractDetailId, intOrderBy
 
 		INSERT INTO @cbLog (strBatchId
 			, dtmTransactionDate
