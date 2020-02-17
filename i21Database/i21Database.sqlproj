@@ -8480,6 +8480,7 @@
     <Build Include="dbo\Views\vyuSTUnpostedItemSales.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGenerateDPR.sql" />
     <Build Include="dbo\Functions\fnRKGetBucketContractBalance.sql" />
+    <Build Include="dbo\Functions\fnRKGetBucketBasisDeliveries.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

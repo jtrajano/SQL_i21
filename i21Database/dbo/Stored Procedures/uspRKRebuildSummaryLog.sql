@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspRKRebuildSummaryLog]
+﻿ALTER PROCEDURE [dbo].[uspRKRebuildSummaryLog]
 	@intCurrentUserId INT	
 AS
 
@@ -343,6 +343,215 @@ BEGIN
 		EXEC uspCTLogContractBalance @cbLog, 1
 
 		PRINT 'End Populate RK Summary Log - Contract'
+		DELETE FROM @cbLog
+
+		--=======================================
+		--				BASIS DELIVERIES
+		--=======================================
+		PRINT 'Populate RK Summary Log - Basis Deliveries'
+
+		select  
+			dtmTransactionDate = dbo.fnRemoveTimeOnDate(dtmTransactionDate)
+			, sh.intContractHeaderId
+			, sh.intContractDetailId
+			, sh.strContractNumber
+			, sh.intContractSeq
+			, sh.intEntityId
+			, ch.intCommodityId
+			, sh.intItemId
+			, sh.intCompanyLocationId
+			, dblQty = (case when isnull(cd.intNoOfLoad,0) = 0 then suh.dblTransactionQuantity 
+							else suh.dblTransactionQuantity * cd.dblQuantityPerLoad end) * -1
+			, intQtyUOMId = ch.intCommodityUOMId
+			, sh.intPricingTypeId
+			, sh.strPricingType
+			, strTransactionType = strScreenName
+			, intTransactionId = suh.intExternalId
+			, strTransactionId = suh.strNumber
+			, sh.intContractStatusId
+			, ch.intContractTypeId
+		into #tblBasisDeliveries
+		from vyuCTSequenceUsageHistory suh
+			inner join tblCTSequenceHistory sh on sh.intSequenceUsageHistoryId = suh.intSequenceUsageHistoryId
+			inner join tblCTContractDetail cd on cd.intContractDetailId = sh.intContractDetailId
+			inner join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
+		where strFieldName = 'Balance'
+		and sh.strPricingStatus = 'Unpriced'
+		and sh.strPricingType = 'Basis'
+
+		SELECT * 
+		INTO #tblFinalBasisDeliveries 
+		FROM (
+
+			select
+				strTransactionType =  CASE WHEN intContractTypeId = 1 THEN 'Purchase Basis Deliveries' ELSE 'Sales Basis Deliveries' END 
+				, dtmTransactionDate
+				, intContractHeaderId
+				, intContractDetailId
+				, strContractNumber
+				, intContractSeq
+				, intContractTypeId
+				, intContractStatusId
+				, intCommodityId
+				, intItemId
+				, intEntityId
+				, intCompanyLocationId
+				, dblQty
+				, intQtyUOMId
+				, intPricingTypeId
+				, strPricingType
+				, strTransactionReference = strTransactionType
+				, intTransactionReferenceId = intTransactionId
+				, strTransactionReferenceNo = strTransactionId
+			from #tblBasisDeliveries
+
+			union all
+			select 
+				 strType  = 'Purchase Basis Deliveries'
+				, b.dtmBillDate
+				, bd.intContractHeaderId
+				, bd.intContractDetailId
+				, ba.strContractNumber
+				, ba.intContractSeq
+				, ba.intContractTypeId
+				, ba.intContractStatusId
+				, ba.intCommodityId
+				, ba.intItemId
+				, ba.intEntityId
+				, ba.intCompanyLocationId
+				, dblQty =  bd.dblQtyReceived  * -1
+				, intItemUOMId = bd.intUnitOfMeasureId
+				, intPricingTypeId = 2
+				, strPricingType = 'Basis'
+				, strTransactionType = 'Voucher'
+				, intTransactionId = bd.intBillDetailId
+				, strTransactionId = b.strBillId
+			from tblAPBillDetail bd
+			inner join tblAPBill b on b.intBillId = bd.intBillId
+			inner join #tblBasisDeliveries ba on ba.intTransactionId = bd.intInventoryReceiptItemId and ba.strTransactionType <> 'Load Schedule' and ba.intContractTypeId = 1
+	
+			union all
+			select 
+				 strType  = 'Purchase Basis Deliveries'
+				, b.dtmBillDate
+				, bd.intContractHeaderId
+				, bd.intContractDetailId
+				, ba.strContractNumber
+				, ba.intContractSeq
+				, ba.intContractTypeId
+				, ba.intContractStatusId
+				, ba.intCommodityId
+				, ba.intItemId
+				, ba.intEntityId
+				, ba.intCompanyLocationId
+				, dblQty =  bd.dblQtyReceived  * -1
+				, intItemUOMId = bd.intUnitOfMeasureId
+				, intPricingTypeId = 2
+				, strPricingType = 'Basis'
+				, strTransactionType = 'Voucher'
+				, intTransactionId = bd.intBillDetailId
+				, strTransactionId = b.strBillId
+			from tblAPBillDetail bd
+			inner join tblAPBill b on b.intBillId = bd.intBillId
+			inner join #tblBasisDeliveries ba on ba.intTransactionId = bd.intLoadDetailId and ba.strTransactionType = 'Load Schedule' and ba.intContractTypeId = 1
+
+			union all
+			select 
+				 strType  = 'Sales Basis Deliveries'
+				, i.dtmDate
+				, id.intContractHeaderId
+				, id.intContractDetailId
+				, ba.strContractNumber
+				, ba.intContractSeq
+				, ba.intContractTypeId
+				, ba.intContractStatusId
+				, ba.intCommodityId
+				, ba.intItemId
+				, ba.intEntityId
+				, ba.intCompanyLocationId
+				, dblQty =  id.dblQtyShipped  * -1
+				, intItemUOMId = id.intItemUOMId
+				, intPricingTypeId = 2
+				, strPricingType = 'Basis'
+				, strTransactionType = 'Invoice'
+				, intTransactionId = id.intInvoiceDetailId
+				, strTransactionId = i.strInvoiceNumber
+			from tblARInvoiceDetail id
+			inner join tblARInvoice i on i.intInvoiceId = id.intInvoiceId
+			inner join #tblBasisDeliveries ba on ba.intTransactionId = id.intInventoryShipmentItemId and ba.strTransactionType <> 'Load Schedule' and ba.intContractTypeId = 2
+	
+			union all
+			select 
+				 strType  = 'Sales Basis Deliveries'
+				, i.dtmDate
+				, id.intContractHeaderId
+				, id.intContractDetailId
+				, ba.strContractNumber
+				, ba.intContractSeq
+				, ba.intContractTypeId
+				, ba.intContractStatusId
+				, ba.intCommodityId
+				, ba.intItemId
+				, ba.intEntityId
+				, ba.intCompanyLocationId
+				, dblQty =  id.dblQtyShipped  * -1
+				, intItemUOMId = id.intItemUOMId
+				, intPricingTypeId = 2
+				, strPricingType = 'Basis'
+				, strTransactionType = 'Invoice'
+				, intTransactionId = id.intInvoiceDetailId
+				, strTransactionId = i.strInvoiceNumber
+			from tblARInvoiceDetail id
+			inner join tblARInvoice i on i.intInvoiceId = id.intInvoiceId
+			inner join #tblBasisDeliveries ba on ba.intTransactionId = id.intLoadDetailId and ba.strTransactionType = 'Load Schedule' and ba.intContractTypeId = 2
+
+		) t
+
+		INSERT INTO @cbLog (strBatchId
+			, dtmTransactionDate
+			, strTransactionType
+			, strTransactionReference
+			, intTransactionReferenceId
+			, strTransactionReferenceNo
+			, intContractDetailId
+			, intContractHeaderId
+			, strContractNumber
+			, intContractSeq
+			, intContractTypeId
+			, intEntityId
+			, intCommodityId
+			, intItemId
+			, intLocationId
+			, dblQty
+			, intQtyUOMId
+			, intPricingTypeId
+			, intContractStatusId
+		)
+		SELECT 
+			strBatch = NULL
+			, dtmTransactionDate
+			, strTransactionType
+			, strTransactionReference
+			, intTransactionReferenceId
+			, strTransactionReferenceNo
+			, intContractDetailId
+			, intContractHeaderId
+			, strContractNumber
+			, intContractSeq
+			, intContractTypeId
+			, intEntityId
+			, intCommodityId
+			, intItemId
+			, intCompanyLocationId
+			, dblQty
+			, intQtyUOMId
+			, intPricingTypeId
+			, intContractStatusId
+		FROM #tblFinalBasisDeliveries 
+
+		EXEC uspCTLogContractBalance @cbLog, 1
+
+		PRINT 'End Populate RK Summary Log - Basis Deliveries'
 		
 		--=======================================
 		--				DERIVATIVES
