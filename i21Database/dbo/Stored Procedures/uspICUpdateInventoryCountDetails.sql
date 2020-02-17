@@ -333,8 +333,8 @@ BEGIN
 		intInventoryCountId = @intInventoryCountId
 		, intItemId = il.intItemId
 		, intItemLocationId = COALESCE(stock.intItemLocationId, il.intItemLocationId)
-		, intSubLocationId = stock.intSubLocationId
-		, intStorageLocationId = stock.intStorageLocationId
+		, intSubLocationId = CASE WHEN hasExistingStock.intItemId IS NULL THEN il.intSubLocationId ELSE stock.intSubLocationId END 
+		, intStorageLocationId = CASE WHEN hasExistingStock.intItemId IS NULL THEN il.intStorageLocationId ELSE stock.intStorageLocationId END
 		, intLotId = NULL
 		, dblSystemCount = 		
 			CASE
@@ -489,18 +489,33 @@ BEGIN
 			ORDER BY
 				t.intInventoryTransactionId DESC 		
 		) lastTransaction 
-		LEFT JOIN @CategoryIds categoryFilter ON categoryFilter.intCategoryId = i.intCategoryId
-		LEFT JOIN @CommodityIds commodityFilter ON commodityFilter.intCommodityId = i.intCommodityId
-		LEFT JOIN @StorageLocationIds storageLocationFilter ON storageLocationFilter.intStorageLocationId = stock.intSubLocationId
-		LEFT JOIN @StorageUnitIds storageUnitFilter ON storageUnitFilter.intStorageUnitId = stock.intStorageLocationId
+		OUTER APPLY (
+			SELECT	TOP 1 v.intItemId
+			FROM	vyuICGetItemStockSummary v
+			WHERE	dbo.fnDateLessThanEquals(v.dtmDate, @AsOfDate) = 1
+					AND v.intItemId = i.intItemId
+					AND v.intItemLocationId = il.intItemLocationId
+					AND (v.intSubLocationId = il.intSubLocationId OR il.intSubLocationId IS NULL)
+					AND (v.intStorageLocationId = il.intStorageLocationId OR il.intStorageLocationId IS NULL) 			
+		) hasExistingStock 
+		LEFT JOIN @CategoryIds categoryFilter ON 1 = 1
+		LEFT JOIN @CommodityIds commodityFilter ON 1 = 1 
+		LEFT JOIN @StorageLocationIds storageLocationFilter ON 1 = 1 
+		LEFT JOIN @StorageUnitIds storageUnitFilter ON 1 = 1	
 	WHERE 
 		il.intLocationId = @intLocationId
 		AND ((COALESCE(stock.dblOnHand, stockUnit.dblOnHand) <> 0 AND @ysnIncludeZeroOnHand = 0) OR (@ysnIncludeZeroOnHand = 1))		
-		AND (categoryFilter.intCategoryId = i.intCategoryId OR ISNULL(@CategoryFilterCount, 0) = 0)
-		AND (commodityFilter.intCommodityId = i.intCommodityId OR ISNULL(@CommodityFilterCount, 0) = 0)
-		AND (storageLocationFilter.intStorageLocationId = stock.intSubLocationId OR ISNULL(@StorageLocationFilterCount, 0) = 0)
-		AND (storageUnitFilter.intStorageUnitId = stock.intStorageLocationId OR ISNULL(@StorageUnitFilterCount, 0) = 0)
 		AND i.strLotTracking = 'No'
 		AND i.strType = 'Inventory'
 		AND (il.intCountGroupId = @intCountGroupId OR ISNULL(@intCountGroupId, 0) = 0)
+		AND (i.intCategoryId = categoryFilter.intCategoryId OR ISNULL(@CategoryFilterCount, 0) = 0)
+		AND (i.intCommodityId = commodityFilter.intCommodityId OR ISNULL(@CommodityFilterCount, 0) = 0)
+		AND (
+			(stock.intSubLocationId = storageLocationFilter.intStorageLocationId OR ISNULL(@StorageLocationFilterCount, 0) = 0)
+			OR (hasExistingStock.intItemId IS NULL AND il.intSubLocationId = storageLocationFilter.intStorageLocationId)				
+		)
+		AND (
+			(stock.intStorageLocationId = storageUnitFilter.intStorageUnitId OR ISNULL(@StorageUnitFilterCount, 0) = 0)
+			OR (hasExistingStock.intItemId IS NULL AND il.intStorageLocationId = storageUnitFilter.intStorageUnitId)		
+		)
 END
