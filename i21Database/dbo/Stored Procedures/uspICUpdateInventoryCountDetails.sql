@@ -32,7 +32,6 @@ DECLARE @StorageUnitIds TABLE (intStorageUnitId INT)
 DECLARE @CommodityIds TABLE (intCommodityId INT)
 DECLARE @CategoryIds TABLE (intCategoryId INT)
 DECLARE @ysnUseRange BIT = 1
-DECLARE @ysnIsMultiFilter BIT = 1
 DECLARE @CategoryFilterCount INT = 0
 DECLARE @CommodityFilterCount INT = 0
 DECLARE @StorageLocationFilterCount INT = 0
@@ -132,8 +131,6 @@ SELECT
 FROM tblICInventoryCount c
 WHERE c.intInventoryCountId = @intInventoryCountId
 
-
-IF @ysnIsMultiFilter = 1
 BEGIN
 	INSERT INTO @StorageLocationIds
 	SELECT DISTINCT sl.intCompanyLocationSubLocationId
@@ -265,24 +262,16 @@ BEGIN
 			ORDER BY 
 				t.intInventoryTransactionId DESC 
 		) LastLotTransaction
-		LEFT OUTER JOIN @CategoryIds categoryFilter ON categoryFilter.intCategoryId = Item.intCategoryId
-		LEFT OUTER JOIN @CommodityIds commodityFilter ON commodityFilter.intCommodityId = Item.intCommodityId
-		LEFT OUTER JOIN @StorageLocationIds storageLocationFilter ON storageLocationFilter.intStorageLocationId = Lot.intSubLocationId
-		LEFT OUTER JOIN @StorageUnitIds storageUnitFilter ON storageUnitFilter.intStorageUnitId = Lot.intStorageLocationId
+		LEFT JOIN @CategoryIds categoryFilter ON 1 = 1
+		LEFT JOIN @CommodityIds commodityFilter ON 1 = 1
+		LEFT JOIN @StorageLocationIds storageLocationFilter ON 1 = 1
+		LEFT JOIN @StorageUnitIds storageUnitFilter ON 1 = 1
 	WHERE (ItemLocation.intLocationId = @intLocationId OR ISNULL(@intLocationId, 0) = 0)
-		AND ((@ysnIsMultiFilter = 0 AND (Item.intCategoryId = @intCategoryId OR ISNULL(@intCategoryId, 0) = 0)) OR
-			-- If multi-filter is enabled
-			(@ysnIsMultiFilter = 1 AND categoryFilter.intCategoryId = Item.intCategoryId OR @CategoryFilterCount = 0))
-		AND ((@ysnIsMultiFilter = 0 AND (Item.intCommodityId = @intCommodityId OR ISNULL(@intCommodityId, 0) = 0)) OR
-			-- If multi-filter is enabled
-			(@ysnIsMultiFilter = 1 AND commodityFilter.intCommodityId = Item.intCommodityId OR @CommodityFilterCount = 0))
+		AND (Item.intCategoryId = categoryFilter.intCategoryId OR ISNULL(@CategoryFilterCount, 0) = 0)
+		AND (Item.intCommodityId = commodityFilter.intCommodityId OR ISNULL(@CommodityFilterCount, 0) = 0)
+		AND (Lot.intSubLocationId = storageLocationFilter.intStorageLocationId OR ISNULL(@StorageLocationFilterCount, 0) = 0)
+		AND (Lot.intStorageLocationId = storageUnitFilter.intStorageUnitId OR ISNULL(@StorageUnitFilterCount,0) = 0)
 		AND (intCountGroupId = @intCountGroupId OR ISNULL(@intCountGroupId, 0) = 0)
-		AND ((@ysnIsMultiFilter = 0 AND (Lot.intSubLocationId = @intSubLocationId OR ISNULL(@intSubLocationId, 0) = 0)) OR
-			-- If multi-filter is enabled
-			(@ysnIsMultiFilter = 1 AND storageLocationFilter.intStorageLocationId = Lot.intSubLocationId OR @StorageLocationFilterCount = 0))
-		AND ((@ysnIsMultiFilter = 0 AND (Lot.intStorageLocationId = @intStorageLocationId OR ISNULL(@intStorageLocationId, 0) = 0))	OR
-			-- If multi-filter is enabled
-			(@ysnIsMultiFilter = 1 AND storageUnitFilter.intStorageUnitId = Lot.intStorageLocationId OR @StorageUnitFilterCount = 0))
 		AND Item.strLotTracking <> 'No'
 		AND ((LotTransactions.dblQty <> 0 AND @ysnIncludeZeroOnHand = 0) OR (@ysnIncludeZeroOnHand = 1))
 		AND Item.strType IN ('Inventory', 'Raw Material', 'Finished Good')
@@ -311,8 +300,8 @@ BEGIN
 		intInventoryCountId = @intInventoryCountId
 		, intItemId = il.intItemId
 		, intItemLocationId = COALESCE(stock.intItemLocationId, il.intItemLocationId)
-		, intSubLocationId = stock.intSubLocationId
-		, intStorageLocationId = stock.intStorageLocationId
+		, intSubLocationId = CASE WHEN stock.intItemId IS NULL THEN il.intSubLocationId ELSE stock.intSubLocationId END 
+		, intStorageLocationId = CASE WHEN stock.intItemId IS NULL THEN il.intStorageLocationId ELSE stock.intStorageLocationId END
 		, intLotId = NULL
 		, dblSystemCount = ISNULL(stockUnit.dblOnHand, 0)-- SUM(COALESCE(stock.dblOnHand, 0.00))
 		, dblLastCost =  
@@ -342,12 +331,14 @@ BEGIN
 		, intSort = 1
 		, NULL
 	FROM tblICItemLocation il
-		INNER JOIN tblICItemPricing p ON p.intItemLocationId = il.intItemLocationId
-			AND p.intItemId = il.intItemId
 		INNER JOIN tblICItemUOM stockUOM 
 			ON stockUOM.intItemId = il.intItemId
 			AND stockUOM.ysnStockUnit = 1
-		INNER JOIN tblICItem i ON i.intItemId = il.intItemId
+		INNER JOIN tblICItem i 
+			ON i.intItemId = il.intItemId
+		LEFT JOIN tblICItemPricing p 
+			ON p.intItemLocationId = il.intItemLocationId
+			AND p.intItemId = il.intItemId
 		LEFT JOIN (
 			SELECT	intItemId
 					,intItemUOMId
@@ -401,32 +392,39 @@ BEGIN
 			WHERE	i.intItemId = FIFO.intItemId 
 					AND il.intItemLocationId = FIFO.intItemLocationId 
 					AND dblStockIn - dblStockOut > 0
-					AND dbo.fnDateLessThanEquals(dtmDate, @AsOfDate) = 1 
+					AND dbo.fnDateLessThanEquals(dtmDate, @AsOfDate) = 1	
 			ORDER BY dtmDate ASC
 		) FIFO 
 		OUTER APPLY(
 			SELECT MAX(dblAverageCost) dblCost
 			FROM [dbo].[fnGetItemAverageCostTable](i.intItemId, @AsOfDate)
 		) AVERAGE
-		LEFT OUTER JOIN @CategoryIds categoryFilter ON categoryFilter.intCategoryId = i.intCategoryId
-		LEFT OUTER JOIN @CommodityIds commodityFilter ON commodityFilter.intCommodityId = i.intCommodityId
-		LEFT OUTER JOIN @StorageLocationIds storageLocationFilter ON storageLocationFilter.intStorageLocationId = stock.intSubLocationId
-		LEFT OUTER JOIN @StorageUnitIds storageUnitFilter ON storageUnitFilter.intStorageUnitId = stock.intStorageLocationId
+		OUTER APPLY (
+			SELECT	TOP 1 v.intItemId
+			FROM	vyuICGetItemStockSummary v
+			WHERE	dbo.fnDateLessThanEquals(v.dtmDate, @AsOfDate) = 1
+					AND v.intItemId = i.intItemId
+					AND v.intItemLocationId = il.intItemLocationId
+					AND (v.intSubLocationId = il.intSubLocationId OR il.intSubLocationId IS NULL)
+					AND (v.intStorageLocationId = il.intStorageLocationId OR il.intStorageLocationId IS NULL) 			
+		) hasExistingStock 
+		LEFT JOIN @CategoryIds categoryFilter ON 1 = 1
+		LEFT JOIN @CommodityIds commodityFilter ON 1 = 1 
+		LEFT JOIN @StorageLocationIds storageLocationFilter ON 1 = 1 
+		LEFT JOIN @StorageUnitIds storageUnitFilter ON 1 = 1		 
 	WHERE il.intLocationId = @intLocationId
-		AND ((stock.dblOnHand <> 0 AND @ysnIncludeZeroOnHand = 0) OR (@ysnIncludeZeroOnHand = 1))
-		AND ((@ysnIsMultiFilter = 0 AND (i.intCategoryId = @intCategoryId OR ISNULL(@intCategoryId, 0) = 0)) OR
-			-- If multi-filter is enabled
-			(@ysnIsMultiFilter = 1 AND categoryFilter.intCategoryId = i.intCategoryId OR @CategoryFilterCount = 0))
-		AND ((@ysnIsMultiFilter = 0 AND (i.intCommodityId = @intCommodityId OR ISNULL(@intCommodityId, 0) = 0)) OR
-			-- If multi-filter is enabled
-			(@ysnIsMultiFilter = 1 AND commodityFilter.intCommodityId = i.intCommodityId OR @CommodityFilterCount = 0))
-		AND (@ysnIsMultiFilter = 0 AND (((@intSubLocationId IS NULL) OR (stock.intSubLocationId = @intSubLocationId OR ISNULL(@intSubLocationId, 0) = 0))) OR
-			-- If multi-filter is enabled
-			(@ysnIsMultiFilter = 1 AND storageLocationFilter.intStorageLocationId = stock.intSubLocationId OR @StorageLocationFilterCount = 0))
-		AND (@ysnIsMultiFilter = 0 AND (((@intStorageLocationId IS NULL) OR (stock.intStorageLocationId = @intStorageLocationId OR ISNULL(@intStorageLocationId, 0) = 0))) OR
-			-- If multi-filter is enabled
-			(@ysnIsMultiFilter = 1 AND storageUnitFilter.intStorageUnitId = stock.intStorageLocationId OR @StorageUnitFilterCount = 0))
+		AND ((stock.dblOnHand <> 0 AND @ysnIncludeZeroOnHand = 0) OR (@ysnIncludeZeroOnHand = 1))		
 		AND i.strLotTracking = 'No'
 		AND i.strType IN ('Inventory', 'Raw Material', 'Finished Good')
 		AND (il.intCountGroupId = @intCountGroupId OR ISNULL(@intCountGroupId, 0) = 0)
+		AND (i.intCategoryId = categoryFilter.intCategoryId OR ISNULL(@CategoryFilterCount, 0) = 0)
+		AND (i.intCommodityId = commodityFilter.intCommodityId OR ISNULL(@CommodityFilterCount, 0) = 0)
+		AND (
+			(stock.intSubLocationId = storageLocationFilter.intStorageLocationId OR ISNULL(@StorageLocationFilterCount, 0) = 0)
+			OR (hasExistingStock.intItemId IS NULL AND il.intSubLocationId = storageLocationFilter.intStorageLocationId)				
+		)
+		AND (
+			(stock.intStorageLocationId = storageUnitFilter.intStorageUnitId OR ISNULL(@StorageUnitFilterCount, 0) = 0)
+			OR (hasExistingStock.intItemId IS NULL AND il.intStorageLocationId = storageUnitFilter.intStorageUnitId)		
+		)
 END
