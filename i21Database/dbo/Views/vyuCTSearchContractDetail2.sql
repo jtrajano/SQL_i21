@@ -208,8 +208,14 @@ select
   p.strContractStatus, 
   strShipmentStatus = r.strShipmentStatus, 
   strFinancialStatus = CASE WHEN b.intContractTypeId = 1 THEN CASE WHEN a.ysnFinalPNL = 1 THEN 'Final P&L Created' WHEN a.ysnProvisionalPNL = 1 THEN 'Provisional P&L Created' ELSE CASE WHEN s.intContractDetailId IS NOT NULL THEN 'Purchase Invoice Received' ELSE null END END ELSE a.strFinancialStatus END, 
-  dblPricedQty = case when u.strPricingType = 'Basis' then isnull(t.dblPricedQuantity, 0) else null end, 
-  dblUnPricedQty = case when u.strPricingType = 'Basis' then a.dblQuantity - isnull(t.dblPricedQuantity, 0) else null end, 
+  dblPricedQty = case when a.intPricingTypeId = 2 or t.dblPricedQuantity is not null
+                        then isnull(t.dblPricedQuantity, 0)
+                      else a.dblQuantity
+                  end,
+  dblUnPricedQty = case when a.intPricingTypeId = 2 or t.dblPricedQuantity is not null
+                          then a.dblQuantity - isnull(t.dblPricedQuantity, 0)
+                        else 0.00
+                   end, 
   dblActualLots = (
     case when isnull(v.dblUnitQty, 0) = 0 
     or isnull(w.dblUnitQty, 0) = 0 then null when isnull(v.dblUnitQty, 0) = isnull(w.dblUnitQty, 0) then a.dblQuantity else a.dblQuantity * (
