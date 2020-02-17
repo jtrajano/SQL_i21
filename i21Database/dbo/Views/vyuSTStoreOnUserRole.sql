@@ -13,19 +13,20 @@ SELECT DISTINCT
 	 , intNumberOfShifts			= ISNULL(Store.intNumberOfShifts, 0)
 
 	 -- Will be used to load Beg Balance in checkout
-	 , dblEndingBalanceATMFund		= (
-										ISNULL((SELECT TOP 1 dblATMEndBalanceCalculated
-										FROM tblSTCheckoutHeader
-										WHERE intStoreId = Store.intStoreId
-										ORDER BY intCheckoutId DESC), 0)
-									)
+	 , dblEndingBalanceATMFund		= ISNULL(
+	 (SELECT TOP 1 dblATMEndBalanceActual 
+	 FROM tblSTCheckoutHeader 
+	 where dtmCheckoutDate = (SELECT MAX(dtmCheckoutDate) FROM tblSTCheckoutHeader where intStoreId = Store.intStoreId) 
+	 and intStoreId = Store.intStoreId order by intShiftNo desc)  , 0)
+									
+									
 	 -- Will be used to load Beg Balance in checkout
-	 , dblEndingBalanceChangeFund	= (
-										ISNULL((SELECT TOP 1 dblChangeFundEndBalance
-										FROM tblSTCheckoutHeader
-										WHERE intStoreId = Store.intStoreId
-										ORDER BY intCheckoutId DESC), 0)
-								    )
+	 , dblEndingBalanceChangeFund	= ISNULL(
+	 (SELECT TOP 1 dblChangeFundEndBalance 
+	 FROM tblSTCheckoutHeader 
+	 where dtmCheckoutDate = (SELECT MAX(dtmCheckoutDate) FROM tblSTCheckoutHeader where intStoreId = Store.intStoreId) 
+	 and intStoreId = Store.intStoreId order by intShiftNo desc) , 0)
+								    
 
 	 , Store.strRegisterCheckoutDataEntry
 	 , HS.intHandheldScannerId
