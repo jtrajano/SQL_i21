@@ -25,6 +25,8 @@ BEGIN TRY
 	DECLARE @intToSubBookId INT
 		,@ysnReplicationEnabled BIT
 		,@strDelete nvarchar(50)
+		,@intSContractDetailId int
+		,@intContractHeaderId int 
 
 	IF @strRowState = 'Delete'
 	BEGIN
@@ -83,6 +85,14 @@ BEGIN TRY
 			WHERE CTTF.strTransactionType = @strTransactionType
 			)
 	BEGIN
+		Select @intSContractDetailId=intSContractDetailId
+		from tblLGLoadDetail
+		Where intLoadId=@intLoadId
+
+		Select @intContractHeaderId=intContractHeaderId
+		from tblCTContractDetail
+		Where intContractDetailId=@intSContractDetailId
+
 		SELECT @strFromTransactionType = CTTF.strTransactionType --strFromTransactionType
 			,@intFromCompanyId = intFromCompanyId
 			,@intFromProfitCenterId = intFromBookId
@@ -98,7 +108,10 @@ BEGIN TRY
 		FROM tblSMInterCompanyTransactionConfiguration CTC
 		JOIN [tblSMInterCompanyTransactionType] CTTF ON CTC.[intFromTransactionTypeId] = CTTF.intInterCompanyTransactionTypeId -- WHERE strFromTransactionType = @strTransactionType
 		JOIN [tblSMInterCompanyTransactionType] CTTT ON CTC.[intToTransactionTypeId] = CTTT.intInterCompanyTransactionTypeId -- WHERE strFromTransactionType = @strTransactionType
-		WHERE CTTF.strTransactionType = @strTransactionType
+		JOIN tblCTContractHeader CH ON CH.intCompanyId = CTC.intFromCompanyId
+				AND CH.intBookId = CTC.intFromBookId
+			WHERE CTTF.strTransactionType = @strTransactionType
+				AND CH.intContractHeaderId = @intContractHeaderId
 
 		IF @strInsert = 'Insert'
 			AND @strRowState = 'Added'
