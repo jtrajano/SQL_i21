@@ -199,7 +199,10 @@ BEGIN
 				@intDropProductId INT = NULL,
 				@intLoadDistributionHeaderId INT = NULL,
 				@strDestination NVARCHAR(20) = NULL,
-				@intSalePerson INT = NULL
+				@intSalePerson INT = NULL,
+				@ysnToBulkPlant BIT = NULL,
+				@intCustomerOrLocation INT = NULL,
+				@intShipToOrLocation INT = NULL
 
 
 			OPEN @CursorDistributionTran
@@ -209,7 +212,16 @@ BEGIN
 
 				-- GET DESTINATION TYPE
 				SET @strDestination = CASE WHEN @intCustomerId IS NULL THEN 'Location' ELSE 'Customer' END
+			
+				-- BULK LOCATION
+				SET @ysnToBulkPlant =  CASE WHEN @intCustomerId IS NULL THEN 1 ELSE 0 END
 
+				-- SET CUSTOMER OR COMPANY LOCATION
+				SET @intCustomerOrLocation = CASE WHEN @strDestination = 'Customer' THEN @intCustomerId ELSE @intCustomerCompanyLocationId END  
+
+				-- SET SHIP TO OR COMPANY LOCATION
+				SET @intShipToOrLocation = CASE WHEN @strDestination = 'Customer' THEN @intShipToId ELSE @intCustomerCompanyLocationId END
+		
 				-- GET SALES PERSON
 				SELECT @intSalePerson = intSalespersonId from vyuEMEntityCustomerSearch WHERE intEntityId = @intCustomerId
 				
@@ -249,12 +261,13 @@ BEGIN
 					SUM(LD.dblDropGross) dblDropGross ,
 					SUM(LD.dblDropNet) dblDropNet,
 					LD.strBillOfLading,
+					LD.strReceiptZipCode,
 					LD.strGrossNet
 				FROM tblTRImportLoadDetail LD WHERE LD.ysnValid = 1 
 				AND LD.intLoadHeaderId = @intLoadHeaderId 
 				AND LD.intLoadDistributionHeaderId = @intLoadDistributionHeaderId
 				AND LD.intPullProductId <> LD.intDropProductId
-				GROUP BY LD.intPullProductId, LD.intDropProductId, LD.strBillOfLading, LD.strGrossNet
+				GROUP BY LD.intPullProductId, LD.intDropProductId, LD.strBillOfLading, LD.strReceiptZipCode, LD.strGrossNet
 
 				DECLARE @intDDPullProductId INT = NULL,
 					@intDDDropProductId INT = NULL,
@@ -263,14 +276,15 @@ BEGIN
 					@strDDBillOfLading NVARCHAR(50) = NULL,
 					@intDDLoadReceiptId INT = NULL,
 					@intLoadDistributionDetailId INT = NULL,
+					@strBlendReceiptZipCode NVARCHAR(50) = NULL,
 					@strDDGrossNet NVARCHAR(20) = NULL,
 					@ysnMain BIT = 1,
 					@dblSum NUMERIC(18, 6) = 0
 
 				OPEN @CursorDistributionDetailTran
-				FETCH NEXT FROM @CursorDistributionDetailTran INTO @intDDPullProductId, @intDDDropProductId, @dblDDDropGross, @dblDDDropNet, @strDDBillOfLading, @strDDGrossNet
+				FETCH NEXT FROM @CursorDistributionDetailTran INTO @intDDPullProductId, @intDDDropProductId, @dblDDDropGross, @dblDDDropNet, @strDDBillOfLading, @strBlendReceiptZipCode, @strDDGrossNet
 				WHILE @@FETCH_STATUS = 0
-				BEGIN
+				BEGIN	
 					IF(@ysnMain = 1)
 					BEGIN
 						INSERT INTO tblTRLoadDistributionDetail(intLoadDistributionHeaderId, 
@@ -306,13 +320,17 @@ BEGIN
 
 						SET @ysnMain = 0
 					END
-						
+					
 					DECLARE @dblPercentage NUMERIC(18, 6) = NULL,
 						@intRecipeItemId INT = NULL
+						
 					SELECT @intRecipeItemId = RI.intRecipeItemId, @dblPercentage = RI.dblQuantity FROM tblMFRecipe R 
 					INNER JOIN tblMFRecipeItem RI ON RI.intRecipeId = R.intRecipeId
-					WHERE R.intItemId = @intDDDropProductId AND RI.intItemId = @intDDPullProductId AND R.ysnActive = 1
+					WHERE R.intItemId = @intDDDropProductId 
+					AND RI.intItemId = @intDDPullProductId 
+					AND R.ysnActive = 1
 					AND RI.intRecipeItemTypeId = 1
+					AND R.intLocationId = @intCustomerCompanyLocationId
 
 					IF(@dblPercentage IS NOT NULL)
 					BEGIN
@@ -344,13 +362,66 @@ BEGIN
 							1)
 					END
 
-					UPDATE tblTRLoadDistributionDetail SET dblUnits = @dblSum WHERE intLoadDistributionDetailId = @intLoadDistributionDetailId
+					IF(@intRecipeItemId IS NULL)
+					BEGIN
+						DECLARE @strDistributionLocationName NVARCHAR(500) = NULL,
+							@strDistributionItemName NVARCHAR(500) = NULL
+						
+						SELECT @strDistributionLocationName = strLocationName from tblSMCompanyLocation where intCompanyLocationId = @intCustomerCompanyLocationId
+						SELECT @strDistributionItemName = strItemNo FROM tblICItem WHERE intItemId = @intDDDropProductId
 
-					FETCH NEXT FROM @CursorDistributionDetailTran INTO @intDDPullProductId, @intDDDropProductId, @dblDDDropGross, @dblDDDropNet, @strDDBillOfLading, @strDDGrossNet
+						DECLARE @strMessageNoBlend NVARCHAR(100) = 'There is no Recipe for Distribution Bulk Location ' + @strDistributionLocationName + ' for Item ' + @strDistributionItemName
+
+						UPDATE tblTRImportLoadDetail SET strMessage = CASE WHEN @intRecipeItemId IS NULL THEN 
+						(CASE WHEN strMessage like '%There is no Recipe for Distribution Bulk Location%' THEN strMessage ELSE dbo.fnTRMessageConcat(strMessage, @strMessageNoBlend)  END) ELSE 
+							strMessage
+						END
+						WHERE intImportLoadId = @intImportLoadId 
+						AND intLoadDistributionHeaderId = @intLoadDistributionHeaderId
+						AND intDropProductId = @intDDDropProductId
+						AND ysnValid = 1
+					END
+					
+					-- FREIGHT RATE & SURCHARGE - RECEIPT
+					DECLARE @dblBlendReceiptGallon DECIMAL(18,6) = NULL,
+						@dblBlendFreightRateDistribution DECIMAL(18,6),
+						@dblBlendFreightRateReceipt DECIMAL(18,6),
+						@dblBlendSurchargeReceipt DECIMAL(18,6),
+						@dblBlendSurchargeDistribution DECIMAL(18,6),
+						@ysnBlendFreightInPrice BIT,
+						@ysnBlendFreightOnly BIT
+
+					EXECUTE [dbo].[uspTRGetCustomerFreight]
+						@intCustomerOrLocation -- Customer / Company Location
+						,@intDDDropProductId -- Distribution Item
+						,@strBlendReceiptZipCode -- Supply Point
+						,@intCarrierId -- Ship Via
+						,@intShipToOrLocation -- Ship To
+						,@dblRawValue -- Receipt Qty
+						,@dblSum -- Distiribution Qty
+						,@dtmPullDate
+						,@dtmPullDate
+						,@ysnToBulkPlant
+						,@dblBlendFreightRateDistribution OUTPUT
+						,@dblBlendFreightRateReceipt OUTPUT
+						,@dblBlendSurchargeReceipt OUTPUT
+						,@dblBlendSurchargeDistribution OUTPUT
+						,@ysnBlendFreightInPrice OUTPUT
+						,@ysnBlendFreightOnly OUTPUT
+
+					UPDATE tblTRLoadDistributionDetail SET dblUnits = @dblSum, dblFreightRate = @dblBlendFreightRateDistribution 
+					WHERE intLoadDistributionDetailId = @intLoadDistributionDetailId
+
+					UPDATE tblTRLoadReceipt SET dblFreightRate = @dblBlendFreightRateReceipt, dblPurSurcharge = @dblBlendSurchargeReceipt 
+					WHERE intLoadHeaderId = @intLoadHeaderId 
+					AND intItemId = @intDDPullProductId
+
+					FETCH NEXT FROM @CursorDistributionDetailTran INTO @intDDPullProductId, @intDDDropProductId, @dblDDDropGross, @dblDDDropNet, @strDDBillOfLading, @strBlendReceiptZipCode, @strDDGrossNet
 				END
 				CLOSE @CursorDistributionDetailTran
 				DEALLOCATE @CursorDistributionDetailTran
 				-- DISTRIBUTION DETAIL - BLENDING - END
+
 
 				-- DISTRIBUTION DETAIL - NON BLENDING - START
 				DECLARE @CursorDistributionDetailNonBlendTran AS CURSOR
@@ -399,7 +470,6 @@ BEGIN
 
 					-- FREIGHT RATE & SURCHARGE - RECEIPT
 					DECLARE @dblReceiptGallon DECIMAL(18,6) = NULL,
-						@ysnToBulkPlant BIT = 0,
 						@dblFreightRateDistribution DECIMAL(18,6),
 						@dblFreightRateReceipt DECIMAL(18,6),
 						@dblSurchargeReceipt DECIMAL(18,6),
@@ -409,10 +479,6 @@ BEGIN
 
 					IF(@intNonBlendDropProductId IS NOT NULL AND @intCarrierId IS NOT NULL)
 					BEGIN
-						IF(@intCustomerId IS NULL)
-						BEGIN
-							SET @ysnToBulkPlant = 1
-						END
 
 						IF(@strNonBlendGrossNet = 'Gross')
 						BEGIN
@@ -424,11 +490,11 @@ BEGIN
 						END
 
 						EXECUTE [dbo].[uspTRGetCustomerFreight]
-							@intCustomerId -- Customer
+							@intCustomerOrLocation  -- Customer / Company Location
 							,@intDropProductId -- Receipt Item
 							,@strNonBlendReceiptZipCode -- Supply Point
 							,@intCarrierId -- Ship Via
-							,@intShipToId -- Ship To
+							,@intShipToOrLocation -- Ship To
 							,@dblReceiptGallon
 							,@dblReceiptGallon
 							,@dtmPullDate
