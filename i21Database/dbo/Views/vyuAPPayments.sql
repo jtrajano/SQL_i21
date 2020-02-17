@@ -31,7 +31,8 @@ SELECT
 	D1.strName,
 	ISNULL(E.ysnClr,0) AS ysnClear,
 	F.strPaymentMethod,
-	entityGroup.strEntityGroupName
+	entityGroup.strEntityGroupName,
+	G.strCurrency
 	FROM dbo.tblAPPayment A
 		LEFT JOIN dbo.tblCMBankAccount B
 			ON A.intBankAccountId = B.intBankAccountId
@@ -43,6 +44,7 @@ SELECT
 			ON A.strPaymentRecordNum = E.strTransactionId
 		LEFT JOIN dbo.tblSMPaymentMethod F
 			ON A.intPaymentMethodId = F.intPaymentMethodID
+		LEFT JOIN  dbo.tblSMCurrency G on G.intCurrencyID = A.intCurrencyId
 		OUTER APPLY (
 			SELECT TOP 1
 				eg.strEntityGroupName,
