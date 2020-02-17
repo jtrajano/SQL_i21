@@ -269,14 +269,8 @@ BEGIN
 	WHERE (ItemLocation.intLocationId = @intLocationId OR ISNULL(@intLocationId, 0) = 0)
 		AND (Item.intCategoryId = categoryFilter.intCategoryId OR ISNULL(@CategoryFilterCount, 0) = 0)
 		AND (Item.intCommodityId = commodityFilter.intCommodityId OR ISNULL(@CommodityFilterCount, 0) = 0)
-		AND (
-			Lot.intSubLocationId = storageLocationFilter.intStorageLocationId OR ISNULL(@StorageLocationFilterCount, 0) = 0
-			OR (LotTransactions.dblQty IS NULL AND ItemLocation.intSubLocationId = storageLocationFilter.intStorageLocationId)	
-		)
-		AND (
-			Lot.intStorageLocationId = storageUnitFilter.intStorageUnitId OR ISNULL(@StorageUnitFilterCount,0) = 0
-			OR (LotTransactions.dblQty IS NULL AND ItemLocation.intStorageLocationId = storageUnitFilter.intStorageUnitId)		
-		)
+		AND (Lot.intSubLocationId = storageLocationFilter.intStorageLocationId OR ISNULL(@StorageLocationFilterCount, 0) = 0)
+		AND (Lot.intStorageLocationId = storageUnitFilter.intStorageUnitId OR ISNULL(@StorageUnitFilterCount,0) = 0)
 		AND (intCountGroupId = @intCountGroupId OR ISNULL(@intCountGroupId, 0) = 0)
 		AND Item.strLotTracking <> 'No'
 		AND ((LotTransactions.dblQty <> 0 AND @ysnIncludeZeroOnHand = 0) OR (@ysnIncludeZeroOnHand = 1))
@@ -405,6 +399,15 @@ BEGIN
 			SELECT MAX(dblAverageCost) dblCost
 			FROM [dbo].[fnGetItemAverageCostTable](i.intItemId, @AsOfDate)
 		) AVERAGE
+		OUTER APPLY (
+			SELECT	TOP 1 v.intItemId
+			FROM	vyuICGetItemStockSummary v
+			WHERE	dbo.fnDateLessThanEquals(v.dtmDate, @AsOfDate) = 1
+					AND v.intItemId = i.intItemId
+					AND v.intItemLocationId = il.intItemLocationId
+					AND (v.intSubLocationId = il.intSubLocationId OR il.intSubLocationId IS NULL)
+					AND (v.intStorageLocationId = il.intStorageLocationId OR il.intStorageLocationId IS NULL) 			
+		) hasExistingStock 
 		LEFT JOIN @CategoryIds categoryFilter ON 1 = 1
 		LEFT JOIN @CommodityIds commodityFilter ON 1 = 1 
 		LEFT JOIN @StorageLocationIds storageLocationFilter ON 1 = 1 
@@ -418,10 +421,10 @@ BEGIN
 		AND (i.intCommodityId = commodityFilter.intCommodityId OR ISNULL(@CommodityFilterCount, 0) = 0)
 		AND (
 			(stock.intSubLocationId = storageLocationFilter.intStorageLocationId OR ISNULL(@StorageLocationFilterCount, 0) = 0)
-			OR (stock.intItemId IS NULL AND il.intSubLocationId = storageLocationFilter.intStorageLocationId)				
+			OR (hasExistingStock.intItemId IS NULL AND il.intSubLocationId = storageLocationFilter.intStorageLocationId)				
 		)
 		AND (
 			(stock.intStorageLocationId = storageUnitFilter.intStorageUnitId OR ISNULL(@StorageUnitFilterCount, 0) = 0)
-			OR (stock.intItemId IS NULL AND il.intStorageLocationId = storageUnitFilter.intStorageUnitId)		
+			OR (hasExistingStock.intItemId IS NULL AND il.intStorageLocationId = storageUnitFilter.intStorageUnitId)		
 		)
 END
