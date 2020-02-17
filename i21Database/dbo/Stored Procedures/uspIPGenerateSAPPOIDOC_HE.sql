@@ -129,6 +129,27 @@ FROM tblSMCurrency
 WHERE strCurrency = 'USD'
 
 UPDATE CF
+SET ysnMaxPrice = (
+		SELECT TOP 1 CF1.ysnMaxPrice
+		FROM tblCTContractFeed CF1
+		WHERE CF1.intContractHeaderId = CF.intContractHeaderId
+		ORDER BY intContractFeedId ASC
+		)
+	,strPurchasingGroup = (
+		SELECT TOP 1 CF1.strPurchasingGroup
+		FROM tblCTContractFeed CF1
+		WHERE CF1.intContractHeaderId = CF.intContractHeaderId
+			AND CF1.strItemNo = CF.strItemNo
+			AND IsNULL(CF1.strPurchasingGroup, '') <> ''
+		ORDER BY intContractFeedId ASC
+		)
+OUTPUT inserted.intContractHeaderId
+	,inserted.ysnMaxPrice
+INTO @tblRollUpContract
+FROM tblCTContractFeed CF
+WHERE ISNULL(strFeedStatus, '') = ''
+
+UPDATE CF
 SET strRowState = 'MODIFIED'
 FROM tblCTContractFeed CF
 JOIN tblCTContractFeed CF1 ON CF1.intContractHeaderId = CF.intContractHeaderId
@@ -154,27 +175,6 @@ WHERE ISNULL(CF.strFeedStatus, '') = ''
 UPDATE tblCTContractFeed
 SET strFeedStatus = ''
 WHERE strFeedStatus = 'Hold'
-
-UPDATE CF
-SET ysnMaxPrice = (
-		SELECT TOP 1 CF1.ysnMaxPrice
-		FROM tblCTContractFeed CF1
-		WHERE CF1.intContractHeaderId = CF.intContractHeaderId
-		ORDER BY intContractFeedId ASC
-		)
-	,strPurchasingGroup = (
-		SELECT TOP 1 CF1.strPurchasingGroup
-		FROM tblCTContractFeed CF1
-		WHERE CF1.intContractHeaderId = CF.intContractHeaderId
-			AND CF1.strItemNo = CF.strItemNo
-			AND IsNULL(CF1.strPurchasingGroup, '') <> ''
-		ORDER BY intContractFeedId ASC
-		)
-OUTPUT inserted.intContractHeaderId
-	,inserted.ysnMaxPrice
-INTO @tblRollUpContract
-FROM tblCTContractFeed CF
-WHERE ISNULL(strFeedStatus, '') = ''
 
 INSERT INTO @tblRollUpFinalContract
 SELECT DISTINCT intContractHeaderId
