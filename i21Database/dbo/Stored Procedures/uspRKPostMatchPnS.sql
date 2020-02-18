@@ -1,4 +1,4 @@
-﻿ALTER PROCEDURE [dbo].[uspRKPostMatchPnS]
+﻿CREATE PROCEDURE [dbo].[uspRKPostMatchPnS]
 	@intMatchNo INT
 	, @dblGrossPL NUMERIC(24, 10)
 	, @dblNetPnL NUMERIC(24, 10)
