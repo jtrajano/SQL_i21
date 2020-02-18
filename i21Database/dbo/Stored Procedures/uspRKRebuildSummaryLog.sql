@@ -1,4 +1,4 @@
-﻿ALTER PROCEDURE [dbo].[uspRKRebuildSummaryLog]
+﻿CREATE PROCEDURE [dbo].[uspRKRebuildSummaryLog]
 	@intCurrentUserId INT	
 AS
 
