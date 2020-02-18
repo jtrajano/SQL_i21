@@ -8470,6 +8470,7 @@
     <Build Include="dbo\Views\vyuSTCigaretteRebateProgramDistrict.sql" />
     <Build Include="dbo\Views\vyuSTCigaretteRebateProgramRegion.sql" />
     <Build Include="dbo\Views\vyuSTCigaretteRebateProgramStore.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCCheckTicketContractAfterManualDistribution.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
