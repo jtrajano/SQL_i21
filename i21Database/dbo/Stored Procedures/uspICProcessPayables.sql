@@ -76,7 +76,7 @@ SET ANSI_WARNINGS OFF
 			 GP.[intEntityVendorId]			
 			,GP.[intTransactionType]
 			,GP.[intLocationId]	
-			,[intShipToId] = GP.intShipFromId	
+			,[intShipToId] = GP.[intLocationId]	
 			,[intShipFromId] = GP.intShipFromId	 		
 			,[intShipFromEntityId] = GP.intShipFromEntityId
 			,[intPayToAddressId] = GP.intPayToAddressId
