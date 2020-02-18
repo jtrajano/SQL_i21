@@ -8109,6 +8109,7 @@
     <Build Include="dbo\Functions\fnCTFormatNumber.sql" />
     <Build Include="dbo\Tables\tblGROldTransactionMapping.sql" />
     <Build Include="dbo\Stored Procedures\uspAPForceCompletePayable.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCCheckTicketContractAfterManualDistribution.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
