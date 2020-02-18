@@ -10,7 +10,7 @@ BEGIN
 	SET NOCOUNT ON
 	SET XACT_ABORT ON
 	SET ANSI_WARNINGS OFF	
-
+	declare @d_a_v as bit
 	DECLARE @ErrMsg AS NVARCHAR(MAX)
 	DECLARE @intTransferContractDetailId INT
 	DECLARE @dblTransferUnits NUMERIC(18,6)
