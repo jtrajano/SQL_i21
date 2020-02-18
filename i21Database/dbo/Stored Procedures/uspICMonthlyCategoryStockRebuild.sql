@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE uspICMonthlyCategoryStockRebuild
 	@strCategoryCode AS NVARCHAR(50) 
-	,@dtmCustomDate AS DATETIME 
+	,@dtmCustomDate AS DATETIME = NULL 
 AS 
 BEGIN TRY 	
 
