@@ -8150,6 +8150,7 @@
     <Build Include="dbo\Views\vyuSTUnpostedItemSales.sql" />
     <Build Include="dbo\Views\vyuSTUnpostedPumpTotals.sql" />
     <Build Include="dbo\Views\vyuSTUnpostedItemMovements.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCCheckTicketContractAfterManualDistribution.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
