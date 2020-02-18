@@ -18,11 +18,17 @@ BEGIN TRY
 		,@strObjectName NVARCHAR(50)
 		,@strLastModifiedUser NVARCHAR(100)
 		,@strAdditionalInfo NVARCHAR(MAX)
+		,@strDisplayName NVARCHAR(100)
 
 	SET @intFreightRateMatrixStageId = NULL
 	SET @strHeaderXML = NULL
 	SET @strHeaderCondition = NULL
 	SET @strLastModifiedUser = NULL
+	SET @strDisplayName = NULL
+
+	SELECT @strDisplayName = strServiceContractNo + ' - ' + CONVERT(NVARCHAR, dtmDate, 103)
+	FROM tblLGFreightRateMatrix
+	WHERE intFreightRateMatrixId = @intFreightRateMatrixId
 
 	-------------------------Header-----------------------------------------------------------
 	SELECT @strHeaderCondition = 'intFreightRateMatrixId = ' + LTRIM(@intFreightRateMatrixId)
@@ -63,6 +69,7 @@ BEGIN TRY
 
 	INSERT INTO tblLGFreightRateMatrixStage (
 		intFreightRateMatrixId
+		,strDisplayName
 		,strHeaderXML
 		,strRowState
 		,strUserName
@@ -73,6 +80,7 @@ BEGIN TRY
 		,intToBookId
 		)
 	SELECT intFreightRateMatrixId = @intFreightRateMatrixId
+		,strDisplayName = @strDisplayName
 		,strHeaderXML = @strHeaderXML
 		,strRowState = @strRowState
 		,strUserName = @strLastModifiedUser

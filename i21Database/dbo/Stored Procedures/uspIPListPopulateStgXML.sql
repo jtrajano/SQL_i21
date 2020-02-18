@@ -19,11 +19,17 @@ BEGIN TRY
 		,@strLastModifiedUser NVARCHAR(100)
 		,@strAdditionalInfo NVARCHAR(MAX)
 		,@strListItemXML NVARCHAR(MAX)
+		,@strListName NVARCHAR(50)
 
 	SET @intListStageId = NULL
 	SET @strHeaderXML = NULL
 	SET @strHeaderCondition = NULL
 	SET @strLastModifiedUser = NULL
+	SET @strListName = NULL
+
+	SELECT @strListName = strListName
+	FROM tblQMList
+	WHERE intListId = @intListId
 
 	-------------------------Header-----------------------------------------------------------
 	SELECT @strHeaderCondition = 'intListId = ' + LTRIM(@intListId)
@@ -76,6 +82,7 @@ BEGIN TRY
 
 	INSERT INTO tblQMListStage (
 		intListId
+		,strListName
 		,strHeaderXML
 		,strListItemXML
 		,strRowState
@@ -87,6 +94,7 @@ BEGIN TRY
 		,intToBookId
 		)
 	SELECT intListId = @intListId
+		,strListName = @strListName
 		,strHeaderXML = @strHeaderXML
 		,strListItemXML = @strListItemXML
 		,strRowState = @strRowState

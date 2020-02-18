@@ -18,11 +18,17 @@ BEGIN TRY
 		,@strObjectName NVARCHAR(50)
 		,@strLastModifiedUser NVARCHAR(100)
 		,@strAdditionalInfo NVARCHAR(MAX)
+		,@strOptionMonth NVARCHAR(20)
 
 	SET @intOptionMonthStageId = NULL
 	SET @strHeaderXML = NULL
 	SET @strHeaderCondition = NULL
 	SET @strLastModifiedUser = NULL
+	SET @strOptionMonth = NULL
+
+	SELECT @strOptionMonth = strOptionMonth
+	FROM tblRKOptionsMonth
+	WHERE intOptionMonthId = @intOptionMonthId
 
 	-------------------------Header-----------------------------------------------------------
 	SELECT @strHeaderCondition = 'intOptionMonthId = ' + LTRIM(@intOptionMonthId)
@@ -63,6 +69,7 @@ BEGIN TRY
 
 	INSERT INTO tblRKOptionsMonthStage (
 		intOptionMonthId
+		,strOptionMonth
 		,strHeaderXML
 		,strRowState
 		,strUserName
@@ -73,6 +80,7 @@ BEGIN TRY
 		,intToBookId
 		)
 	SELECT intOptionMonthId = @intOptionMonthId
+		,strOptionMonth = @strOptionMonth
 		,strHeaderXML = @strHeaderXML
 		,strRowState = @strRowState
 		,strUserName = @strLastModifiedUser

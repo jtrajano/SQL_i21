@@ -20,11 +20,17 @@ BEGIN TRY
 		,@strAdditionalInfo NVARCHAR(MAX)
 		,@strPropertyValidityPeriodXML NVARCHAR(MAX)
 		,@strConditionalPropertyXML NVARCHAR(MAX)
+		,@strPropertyName NVARCHAR(100)
 
 	SET @intPropertyStageId = NULL
 	SET @strHeaderXML = NULL
 	SET @strHeaderCondition = NULL
 	SET @strLastModifiedUser = NULL
+	SET @strPropertyName = NULL
+
+	SELECT @strPropertyName = strPropertyName
+	FROM tblQMProperty
+	WHERE intPropertyId = @intPropertyId
 
 	-------------------------Header-----------------------------------------------------------
 	SELECT @strHeaderCondition = 'intPropertyId = ' + LTRIM(@intPropertyId)
@@ -88,6 +94,7 @@ BEGIN TRY
 
 	INSERT INTO tblQMPropertyStage (
 		intPropertyId
+		,strPropertyName
 		,strHeaderXML
 		,strPropertyValidityPeriodXML
 		,strConditionalPropertyXML
@@ -100,6 +107,7 @@ BEGIN TRY
 		,intToBookId
 		)
 	SELECT intPropertyId = @intPropertyId
+		,strPropertyName = @strPropertyName
 		,strHeaderXML = @strHeaderXML
 		,strPropertyValidityPeriodXML = @strPropertyValidityPeriodXML
 		,strConditionalPropertyXML = @strConditionalPropertyXML

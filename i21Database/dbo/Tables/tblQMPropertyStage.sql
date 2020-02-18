@@ -15,5 +15,6 @@
 	intEntityId						INT,
 	intCompanyLocationId			INT,
 	strTransactionType				NVARCHAR(100) COLLATE Latin1_General_CI_AS,
-	intToBookId						INT
+	intToBookId						INT,
+	ysnMailSent						BIT CONSTRAINT DF_tblQMPropertyStage_ysnMailSent DEFAULT 0
 )

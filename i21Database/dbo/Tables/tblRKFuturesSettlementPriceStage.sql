@@ -2,6 +2,7 @@
 (
 	intFutureSettlementPriceStageId	INT IDENTITY(1,1) PRIMARY KEY, 
 	intFutureSettlementPriceId		INT,
+	strDisplayName					NVARCHAR(100) COLLATE Latin1_General_CI_AS,
 	strHeaderXML					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS,
 	strFutSettlementPriceXML		NVARCHAR(MAX) COLLATE Latin1_General_CI_AS,
 	strOptSettlementPriceXML		NVARCHAR(MAX) COLLATE Latin1_General_CI_AS,
@@ -14,5 +15,6 @@
 	intEntityId						INT,
 	intCompanyLocationId			INT,
 	strTransactionType				NVARCHAR(100) COLLATE Latin1_General_CI_AS,
-	intToBookId						INT
+	intToBookId						INT,
+	ysnMailSent						BIT CONSTRAINT DF_tblRKFuturesSettlementPriceStage_ysnMailSent DEFAULT 0
 )

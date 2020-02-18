@@ -20,11 +20,17 @@ BEGIN TRY
 		,@strAdditionalInfo NVARCHAR(MAX)
 		,@strSampleTypeDetailXML NVARCHAR(MAX)
 		,@strSampleTypeUserRoleXML NVARCHAR(MAX)
+		,@strSampleTypeName NVARCHAR(50)
 
 	SET @intSampleTypeStageId = NULL
 	SET @strHeaderXML = NULL
 	SET @strHeaderCondition = NULL
 	SET @strLastModifiedUser = NULL
+	SET @strSampleTypeName = NULL
+
+	SELECT @strSampleTypeName = strSampleTypeName
+	FROM tblQMSampleType
+	WHERE intSampleTypeId = @intSampleTypeId
 
 	-------------------------Header-----------------------------------------------------------
 	SELECT @strHeaderCondition = 'intSampleTypeId = ' + LTRIM(@intSampleTypeId)
@@ -88,6 +94,7 @@ BEGIN TRY
 
 	INSERT INTO tblQMSampleTypeStage (
 		intSampleTypeId
+		,strSampleTypeName
 		,strHeaderXML
 		,strSampleTypeDetailXML
 		,strSampleTypeUserRoleXML
@@ -100,6 +107,7 @@ BEGIN TRY
 		,intToBookId
 		)
 	SELECT intSampleTypeId = @intSampleTypeId
+		,strSampleTypeName = @strSampleTypeName
 		,strHeaderXML = @strHeaderXML
 		,strSampleTypeDetailXML = @strSampleTypeDetailXML
 		,strSampleTypeUserRoleXML = @strSampleTypeUserRoleXML

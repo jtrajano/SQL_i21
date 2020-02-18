@@ -19,11 +19,17 @@ BEGIN TRY
 		,@strLastModifiedUser NVARCHAR(100)
 		,@strAdditionalInfo NVARCHAR(MAX)
 		,@strTestPropertyXML NVARCHAR(MAX)
+		,@strTestName NVARCHAR(50)
 
 	SET @intTestStageId = NULL
 	SET @strHeaderXML = NULL
 	SET @strHeaderCondition = NULL
 	SET @strLastModifiedUser = NULL
+	SET @strTestName = NULL
+
+	SELECT @strTestName = strTestName
+	FROM tblQMTest
+	WHERE intTestId = @intTestId
 
 	-------------------------Header-----------------------------------------------------------
 	SELECT @strHeaderCondition = 'intTestId = ' + LTRIM(@intTestId)
@@ -76,6 +82,7 @@ BEGIN TRY
 
 	INSERT INTO tblQMTestStage (
 		intTestId
+		,strTestName
 		,strHeaderXML
 		,strTestPropertyXML
 		,strRowState
@@ -87,6 +94,7 @@ BEGIN TRY
 		,intToBookId
 		)
 	SELECT intTestId = @intTestId
+		,strTestName = @strTestName
 		,strHeaderXML = @strHeaderXML
 		,strTestPropertyXML = @strTestPropertyXML
 		,strRowState = @strRowState

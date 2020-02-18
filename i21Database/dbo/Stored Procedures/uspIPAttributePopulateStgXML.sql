@@ -18,11 +18,17 @@ BEGIN TRY
 		,@strObjectName NVARCHAR(50)
 		,@strLastModifiedUser NVARCHAR(100)
 		,@strAdditionalInfo NVARCHAR(MAX)
+		,@strAttributeName NVARCHAR(50)
 
 	SET @intAttributeStageId = NULL
 	SET @strHeaderXML = NULL
 	SET @strHeaderCondition = NULL
 	SET @strLastModifiedUser = NULL
+	SET @strAttributeName = NULL
+
+	SELECT @strAttributeName = strAttributeName
+	FROM tblQMAttribute
+	WHERE intAttributeId = @intAttributeId
 
 	-------------------------Header-----------------------------------------------------------
 	SELECT @strHeaderCondition = 'intAttributeId = ' + LTRIM(@intAttributeId)
@@ -63,6 +69,7 @@ BEGIN TRY
 
 	INSERT INTO tblQMAttributeStage (
 		intAttributeId
+		,strAttributeName
 		,strHeaderXML
 		,strRowState
 		,strUserName
@@ -73,6 +80,7 @@ BEGIN TRY
 		,intToBookId
 		)
 	SELECT intAttributeId = @intAttributeId
+		,strAttributeName = @strAttributeName
 		,strHeaderXML = @strHeaderXML
 		,strRowState = @strRowState
 		,strUserName = @strLastModifiedUser

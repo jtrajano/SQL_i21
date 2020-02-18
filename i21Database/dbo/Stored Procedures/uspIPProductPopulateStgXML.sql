@@ -24,11 +24,21 @@ BEGIN TRY
 		,@strProductPropertyValidityPeriodXML NVARCHAR(MAX)
 		,@strConditionalProductPropertyXML NVARCHAR(MAX)
 		,@strProductPropertyFormulaPropertyXML NVARCHAR(MAX)
+		,@strProductName NVARCHAR(50)
 
 	SET @intProductStageId = NULL
 	SET @strHeaderXML = NULL
 	SET @strHeaderCondition = NULL
 	SET @strLastModifiedUser = NULL
+	SET @strProductName = NULL
+
+	SELECT @strProductName = COALESCE(C.strCategoryCode, I.strItemNo)
+	FROM tblQMProduct P
+	LEFT JOIN tblICCategory C ON C.intCategoryId = P.intProductValueId
+		AND P.intProductTypeId = 1
+	LEFT JOIN tblICItem I ON I.intItemId = P.intProductValueId
+		AND P.intProductTypeId = 2
+	WHERE intProductId = @intProductId
 
 	-------------------------Header-----------------------------------------------------------
 	SELECT @strHeaderCondition = 'intProductId = ' + LTRIM(@intProductId)
@@ -136,6 +146,7 @@ BEGIN TRY
 
 	INSERT INTO tblQMProductStage (
 		intProductId
+		,strProductName
 		,strHeaderXML
 		,strProductControlPointXML
 		,strProductTestXML
@@ -152,6 +163,7 @@ BEGIN TRY
 		,intToBookId
 		)
 	SELECT intProductId = @intProductId
+		,strProductName = @strProductName
 		,strHeaderXML = @strHeaderXML
 		,strProductControlPointXML = @strProductControlPointXML
 		,strProductTestXML = @strProductTestXML

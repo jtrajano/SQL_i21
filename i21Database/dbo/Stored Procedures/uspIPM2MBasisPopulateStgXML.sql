@@ -19,11 +19,17 @@ BEGIN TRY
 		,@strLastModifiedUser NVARCHAR(100)
 		,@strAdditionalInfo NVARCHAR(MAX)
 		,@strDetailXML NVARCHAR(MAX)
+		,@strDisplayName NVARCHAR(100)
 
 	SET @intM2MBasisStageId = NULL
 	SET @strHeaderXML = NULL
 	SET @strHeaderCondition = NULL
 	SET @strLastModifiedUser = NULL
+	SET @strDisplayName = NULL
+
+	SELECT @strDisplayName = CONVERT(NVARCHAR, dtmM2MBasisDate, 120)
+	FROM tblRKM2MBasis
+	WHERE intM2MBasisId = @intM2MBasisId
 
 	-------------------------Header-----------------------------------------------------------
 	SELECT @strHeaderCondition = 'intM2MBasisId = ' + LTRIM(@intM2MBasisId)
@@ -76,6 +82,7 @@ BEGIN TRY
 
 	INSERT INTO tblRKM2MBasisStage (
 		intM2MBasisId
+		,strDisplayName
 		,strHeaderXML
 		,strBasisDetailXML
 		,strRowState
@@ -87,6 +94,7 @@ BEGIN TRY
 		,intToBookId
 		)
 	SELECT intM2MBasisId = @intM2MBasisId
+		,strDisplayName = @strDisplayName
 		,strHeaderXML = @strHeaderXML
 		,strBasisDetailXML = @strDetailXML
 		,strRowState = @strRowState
