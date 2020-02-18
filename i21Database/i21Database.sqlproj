@@ -188,6 +188,7 @@
     <Folder Include="Scripts\Post-Deployment\PAT\18.3\" />
     <Folder Include="Scripts\Post-Deployment\MB" />
     <Folder Include="Scripts\Post-Deployment\ET" />
+    <Folder Include="Scripts\Post-Deployment\SC\" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPBill.sql" />
@@ -8470,6 +8471,7 @@
     <Build Include="dbo\Views\vyuSTCigaretteRebateProgramDistrict.sql" />
     <Build Include="dbo\Views\vyuSTCigaretteRebateProgramRegion.sql" />
     <Build Include="dbo\Views\vyuSTCigaretteRebateProgramStore.sql" />
+    <Build Include="dbo\Views\vyuCTSearchContractPriced.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
