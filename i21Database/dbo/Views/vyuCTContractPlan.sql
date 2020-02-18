@@ -26,6 +26,13 @@ AS
 			CP.ysnActive,
 			CP.intConcurrencyId,
 			CP.intContractBasisId,
+			CP.intInsuranceById,
+			CP.intArbitrationId,
+			CP.strInternalComment,
+			CP.strPrintableRemarks,
+			CP.intContainerTypeId,
+			CP.strFixationBy,
+			CP.strReference,
 			CY.strCommodityCode,
 			CY.ysnExchangeTraded,
 			SP.strName					AS	strSalesperson,
@@ -41,7 +48,10 @@ AS
 			strContractBasis = CB.strFreightTerm,
 			strINCOLocationType = CB.strINCOLocationType,
 			IM.strItemNo,
-			CL.strLocationName
+			CL.strLocationName,
+			IB.strInsuranceBy,
+			CQ.strContainerType,
+			CT.strCity					AS strArbitration
 
 	FROM	tblCTContractPlan		CP	LEFT
 	JOIN	tblEMEntity				SP	ON	SP.intEntityId				=		CP.intSalespersonId					LEFT
@@ -57,4 +67,7 @@ AS
 	JOIN	tblCTCropYear			YR	ON	YR.intCropYearId			=		CP.intCropYearId					LEFT
 	JOIN	tblCTPricingType		PT	ON	PT.intPricingTypeId			=		CP.intPricingTypeId					LEFT			
 	JOIN	tblICItem				IM	ON	IM.intItemId				=		CP.intItemId						LEFT
-	JOIN	tblSMCompanyLocation	CL	ON	CL.intCompanyLocationId		=		CP.intCompanyLocationId				
+	JOIN	tblSMCompanyLocation	CL	ON	CL.intCompanyLocationId		=		CP.intCompanyLocationId				LEFT
+	JOIN	tblCTInsuranceBy		IB	ON	CP.intInsuranceById			=		IB.intInsuranceById					LEFT
+	JOIN	tblSMCity				CT	ON	CP.intArbitrationId			=		CT.intCityId
+	OUTER	APPLY	dbo.fnCTGetSeqContainerInfo(CP.intCommodityId,CP.intContainerTypeId,dbo.[fnCTGetSeqDisplayField](CP.intContractPlanId,'ContractPlan')) CQ

@@ -1,4 +1,4 @@
-﻿CREATE PROC uspRKMatchDerivativesGLDetailPreview
+﻿CREATE PROCEDURE uspRKMatchDerivativesGLDetailPreview
 	@intMatchFuturesPSHeaderId INT
 
 AS
@@ -23,5 +23,5 @@ BEGIN
 		, strTransactionId
 		, intTransactionId
 	FROM tblRKMatchDerivativesPostRecap
-	WHERE intTransactionId = @intMatchFuturesPSHeaderId order by strTransactionId,strTransactionType
+	WHERE intTransactionId = @intMatchFuturesPSHeaderId ORDER BY strTransactionId,strTransactionType
 END

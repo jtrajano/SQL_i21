@@ -51,8 +51,8 @@ SELECT DE.intFutOptTransactionId
 	, intHedgeContractId = CASE WHEN PFD.intPriceFixationId IS NOT NULL THEN PFD.intPriceFixationId
 							WHEN CF.intContractFuturesId IS NOT NULL THEN CFHeader.intContractHeaderId
 							ELSE NULL END
-	, strHedgeContract = CASE WHEN PFD.intPriceFixationId IS NOT NULL THEN PriceHeader.strContractNumber + '-' + CAST(PriceDetail.intContractSeq AS NVARCHAR(10))
-							WHEN CF.intContractFuturesId IS NOT NULL THEN CFHeader.strContractNumber + '-' + CAST(CFDetail.intContractSeq AS NVARCHAR(10))
+	, strHedgeContract = CASE WHEN PFD.intPriceFixationId IS NOT NULL THEN PriceHeader.strContractNumber + ISNULL('-' + CAST(PriceDetail.intContractSeq AS NVARCHAR(10)), '')
+							WHEN CF.intContractFuturesId IS NOT NULL THEN CFHeader.strContractNumber + ISNULL('-' + CAST(CFDetail.intContractSeq AS NVARCHAR(10)), '')
 							ELSE NULL END
 FROM tblRKFutOptTransaction DE
 LEFT JOIN tblEMEntity AS e ON DE.intEntityId = e.intEntityId

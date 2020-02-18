@@ -114,7 +114,11 @@ FROM (
 			,stockAsOfDate.dblQty
 			,lastCostAsOfDate.dblCost
 			,dblQtyReceived = qtyReceived.dblQty
-			,dblQtySold = ISNULL(qtyShipped.dblQty,0) + ISNULL(qtySold.dblQty,0)
+			,dblQtySold = 
+				ISNULL(qtyShipped.dblQty, 0) 
+				+ ISNULL(qtySold.dblQty, 0) 
+				+ ISNULL(qtyItemMovements.dblQty, 0) 
+				+ ISNULL(qtyPumpTotals.dblQty, 0)
 			,intRank = ROW_NUMBER() OVER( PARTITION BY i.intItemId ORDER BY i.strItemNo DESC) 
 		FROM 
 			tblICItem i INNER JOIN tblICItemLocation il 
@@ -289,7 +293,81 @@ FROM (
 				WHERE
 					c.intInventoryCountId = @intInventoryCountId		
 			) qtySold
+
+			OUTER APPLY (
+				SELECT 
+					itemMovements.* 
+				FROM 
+					tblICInventoryCount c
+					OUTER APPLY (
+						SELECT 
+							dblQty = SUM (
+								dbo.fnCalculateQtyBetweenUOM(
+									v.intItemUOMId
+									, sUOM.intItemUOMId
+									, v.dblQuantity
+								) 
+							) 
+						FROM
+							vyuSTUnpostedItemMovements v 
+							INNER JOIN tblICItem i 
+								ON i.intItemId = v.intItemId
+							CROSS APPLY (
+								SELECT TOP 1 
+									sUOM.intItemUOMId
+								FROM 
+									tblICItemUOM sUOM
+								WHERE
+									sUOM.intItemId = v.intItemId
+									AND sUOM.ysnStockUnit = 1				
+							) sUOM	
+						WHERE
+							v.intItemId = i.intItemId
+							AND v.intCompanyLocationId = il.intLocationId					
+							AND dbo.fnDateEquals(v.dtmCheckoutDate, c.dtmCountDate) = 1
+
+					) itemMovements
+				WHERE
+					c.intInventoryCountId = @intInventoryCountId		
+			) qtyItemMovements
 		
+			OUTER APPLY (
+				SELECT 
+					itemMovements.* 
+				FROM 
+					tblICInventoryCount c
+					OUTER APPLY (
+						SELECT 
+							dblQty = SUM (
+								dbo.fnCalculateQtyBetweenUOM(
+									v.intItemUOMId
+									, sUOM.intItemUOMId
+									, v.dblQuantity
+								) 
+							) 
+						FROM
+							vyuSTUnpostedPumpTotals v 
+							INNER JOIN tblICItem i 
+								ON i.intItemId = v.intItemId
+							CROSS APPLY (
+								SELECT TOP 1 
+									sUOM.intItemUOMId
+								FROM 
+									tblICItemUOM sUOM
+								WHERE
+									sUOM.intItemId = v.intItemId
+									AND sUOM.ysnStockUnit = 1				
+							) sUOM	
+						WHERE
+							v.intItemId = i.intItemId
+							AND v.intCompanyLocationId = il.intLocationId					
+							AND dbo.fnDateEquals(v.dtmCheckoutDate, c.dtmCountDate) = 1
+
+					) itemMovements
+				WHERE
+					c.intInventoryCountId = @intInventoryCountId		
+			) qtyPumpTotals
+
 		WHERE 
 			il.intLocationId = @intLocationId
 			AND il.intCountGroupId = @intCountGroupId 
@@ -354,7 +432,11 @@ FROM (
 			countGroup.intCountGroupId
 			,stockAsOfDate.dblQty			
 			,dblQtyReceived = qtyReceived.dblQty
-			,dblQtySold = ISNULL(qtyShipped.dblQty, 0) + ISNULL(qtySold.dblQty, 0)
+			,dblQtySold = 
+				ISNULL(qtyShipped.dblQty, 0) 
+				+ ISNULL(qtySold.dblQty, 0) 
+				+ ISNULL(qtyItemMovements.dblQty, 0) 
+				+ ISNULL(qtyPumpTotals.dblQty, 0)
 			,intRank = ROW_NUMBER() OVER( PARTITION BY countGroup.intCountGroupId ORDER BY countGroup.intCountGroupId DESC) 
 		FROM 
 			vyuICGetCountGroup countGroup
@@ -496,6 +578,84 @@ FROM (
 				WHERE
 					c.intInventoryCountId = @intInventoryCountId		
 			) qtySold
+
+			OUTER APPLY (
+				SELECT 
+					itemMovements.* 
+				FROM 
+					tblICInventoryCount c
+					OUTER APPLY (
+						SELECT 
+							dblQty = SUM (
+								dbo.fnCalculateQtyBetweenUOM(
+									v.intItemUOMId
+									, sUOM.intItemUOMId
+									, v.dblQuantity
+								) 
+							) 
+						FROM
+							vyuSTUnpostedItemMovements v 
+							INNER JOIN tblICItem i 
+								ON i.intItemId = v.intItemId
+							INNER JOIN tblICItemLocation il
+								ON il.intItemId = i.intItemId								
+								AND v.intCompanyLocationId = il.intLocationId
+							CROSS APPLY (
+								SELECT TOP 1 
+									sUOM.intItemUOMId
+								FROM 
+									tblICItemUOM sUOM
+								WHERE
+									sUOM.intItemId = v.intItemId
+									AND sUOM.ysnStockUnit = 1				
+							) sUOM	
+						WHERE
+							il.intCountGroupId = countGroup.intCountGroupId							
+							AND dbo.fnDateEquals(v.dtmCheckoutDate, c.dtmCountDate) = 1
+
+					) itemMovements
+				WHERE
+					c.intInventoryCountId = @intInventoryCountId		
+			) qtyItemMovements
+
+			OUTER APPLY (
+				SELECT 
+					itemMovements.* 
+				FROM 
+					tblICInventoryCount c
+					OUTER APPLY (
+						SELECT 
+							dblQty = SUM (
+								dbo.fnCalculateQtyBetweenUOM(
+									v.intItemUOMId
+									, sUOM.intItemUOMId
+									, v.dblQuantity
+								) 
+							) 
+						FROM
+							vyuSTUnpostedPumpTotals v 
+							INNER JOIN tblICItem i 
+								ON i.intItemId = v.intItemId
+							INNER JOIN tblICItemLocation il
+								ON il.intItemId = i.intItemId								
+								AND v.intCompanyLocationId = il.intLocationId
+							CROSS APPLY (
+								SELECT TOP 1 
+									sUOM.intItemUOMId
+								FROM 
+									tblICItemUOM sUOM
+								WHERE
+									sUOM.intItemId = v.intItemId
+									AND sUOM.ysnStockUnit = 1				
+							) sUOM	
+						WHERE
+							il.intCountGroupId = countGroup.intCountGroupId							
+							AND dbo.fnDateEquals(v.dtmCheckoutDate, c.dtmCountDate) = 1
+
+					) itemMovements
+				WHERE
+					c.intInventoryCountId = @intInventoryCountId		
+			) qtyPumpTotals
 		
 		WHERE 
 			countGroup.intCountWithGroupId = @intCountGroupId			

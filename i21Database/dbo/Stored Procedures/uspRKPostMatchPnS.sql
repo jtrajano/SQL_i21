@@ -21,13 +21,10 @@ BEGIN TRY
 		, @strBatchId NVARCHAR(100)
 		, @intCommodityId INT
 
-	DECLARE @tblResult  TABLE (
-		Result nvarchar(max)
-	)
+	DECLARE @tblResult TABLE (Result NVARCHAR(MAX))
 	
-	SELECT TOP 1 
-		@intMatchFuturesPSHeaderId = intMatchFuturesPSHeaderId
-		,@intCommodityId = intCommodityId
+	SELECT TOP 1 @intMatchFuturesPSHeaderId = intMatchFuturesPSHeaderId
+		, @intCommodityId = intCommodityId
 	FROM tblRKMatchFuturesPSHeader WHERE intMatchNo = @intMatchNo
 	
 	SELECT @dblGrossPL = SUM(dblGrossPL)
@@ -57,7 +54,7 @@ BEGIN TRY
 
 	IF EXISTS (SELECT TOP 1 1 FROM tblSMCurrency WHERE intCurrencyID = @intCurrencyId)
 	BEGIN
-		IF EXISTS (SELECT  TOP 1 1 FROM tblSMCurrency WHERE intCurrencyID = @intCurrencyId AND ysnSubCurrency = 1)
+		IF EXISTS (SELECT TOP 1 1 FROM tblSMCurrency WHERE intCurrencyID = @intCurrencyId AND ysnSubCurrency = 1)
 		BEGIN
 			SELECT @intCurrencyId = intMainCurrencyId
 			FROM tblSMCurrency
@@ -71,8 +68,6 @@ BEGIN TRY
 	WHERE intCurrencyID = @intCurrencyId
 
 	--GL Account Validation
-
-	
 	SELECT * INTO #tmpPostRecap
 	FROM tblRKMatchDerivativesPostRecap 
 	WHERE intTransactionId = @intMatchFuturesPSHeaderId
@@ -80,145 +75,130 @@ BEGIN TRY
 	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpPostRecap)
 	BEGIN
 		DECLARE @intMatchDerivativesPostRecapId INT
-				,@intAccountId INT
+			, @intAccountId INT
 
-		SELECT TOP 1 
-			@intMatchDerivativesPostRecapId = intMatchDerivativesPostRecapId
-			,@intAccountId = intAccountId
+		SELECT TOP 1 @intMatchDerivativesPostRecapId = intMatchDerivativesPostRecapId
+			, @intAccountId = intAccountId
 		FROM #tmpPostRecap
 
 		DECLARE @intFuturesGainOrLossRealized INT
-				,@intFuturesGainOrLossRealizedOffset INT
-				,@strFuturesGainOrLossRealized NVARCHAR(100)
-				,@strFuturesGainOrLossRealizedOffset NVARCHAR(100)
-				,@strFuturesGainOrLossRealizedDescription NVARCHAR(100)
-				,@strFuturesGainOrLossRealizedOffsetDescription NVARCHAR(100)
+			, @intFuturesGainOrLossRealizedOffset INT
+			, @strFuturesGainOrLossRealized NVARCHAR(100)
+			, @strFuturesGainOrLossRealizedOffset NVARCHAR(100)
+			, @strFuturesGainOrLossRealizedDescription NVARCHAR(100)
+			, @strFuturesGainOrLossRealizedOffsetDescription NVARCHAR(100)
 
 		IF (SELECT intPostToGLId FROM tblRKCompanyPreference) = 1
 		BEGIN
-			
-
-			SELECT 
-				@intFuturesGainOrLossRealized =  intFuturesGainOrLossRealizedId
-				,@intFuturesGainOrLossRealizedOffset = intFuturesGainOrLossRealizedOffsetId
+			SELECT @intFuturesGainOrLossRealized = intFuturesGainOrLossRealizedId
+				, @intFuturesGainOrLossRealizedOffset = intFuturesGainOrLossRealizedOffsetId
 			FROM tblRKCompanyPreference
 
-			IF ISNULL(@intFuturesGainOrLossRealized,0) = 0 
+			IF ISNULL(@intFuturesGainOrLossRealized, 0) = 0 
 			BEGIN
 				INSERT INTO @tblResult(Result)
 				VALUES('Futures Gain or Loss Realized cannot be blank. Please set up the default account(s) in Company Configuration Risk Management GL Account tab.')
 			END
 			ELSE
 			BEGIN
-				IF ISNULL(@intAccountId,0) = 0
+				IF ISNULL(@intAccountId, 0) = 0
 				BEGIN
-					SELECT 
-						@strFuturesGainOrLossRealized = strAccountId 
-						,@strFuturesGainOrLossRealizedDescription = strDescription
+					SELECT @strFuturesGainOrLossRealized = strAccountId
+						, @strFuturesGainOrLossRealizedDescription = strDescription
 					FROM tblGLAccount 
 					WHERE intAccountId = @intFuturesGainOrLossRealized
 
 					UPDATE tblRKMatchDerivativesPostRecap
 					SET intAccountId = @intFuturesGainOrLossRealized
-						,strAccountId = @strFuturesGainOrLossRealized
-						,strAccountDescription = @strFuturesGainOrLossRealizedDescription
-					WHERE dblCredit <> 0 and intMatchDerivativesPostRecapId = @intMatchDerivativesPostRecapId
+						, strAccountId = @strFuturesGainOrLossRealized
+						, strAccountDescription = @strFuturesGainOrLossRealizedDescription
+					WHERE dblCredit <> 0 AND intMatchDerivativesPostRecapId = @intMatchDerivativesPostRecapId
 				END
 			END
 
-			IF ISNULL(@intFuturesGainOrLossRealizedOffset,0) = 0 
+			IF ISNULL(@intFuturesGainOrLossRealizedOffset, 0) = 0 
 			BEGIN
 				INSERT INTO @tblResult(Result)
 				VALUES('Futures Gain or Loss Realized Offset cannot be blank. Please set up the default account(s) in Company Configuration Risk Management GL Account tab.')
 			END
 			ELSE
 			BEGIN
-				IF ISNULL(@intAccountId,0) = 0
+				IF ISNULL(@intAccountId, 0) = 0
 				BEGIN
-					SELECT 
-						@strFuturesGainOrLossRealizedOffset = strAccountId 
-						,@strFuturesGainOrLossRealizedOffsetDescription = strDescription
+					SELECT @strFuturesGainOrLossRealizedOffset = strAccountId 
+						, @strFuturesGainOrLossRealizedOffsetDescription = strDescription
 					FROM tblGLAccount 
 					WHERE intAccountId = @intFuturesGainOrLossRealizedOffset
 
 					UPDATE tblRKMatchDerivativesPostRecap
 					SET intAccountId = @intFuturesGainOrLossRealizedOffset
-						,strAccountId = @strFuturesGainOrLossRealizedOffset
-						,strAccountDescription = @strFuturesGainOrLossRealizedOffsetDescription
-					WHERE dblDebit <> 0 and intMatchDerivativesPostRecapId = @intMatchDerivativesPostRecapId
+						, strAccountId = @strFuturesGainOrLossRealizedOffset
+						, strAccountDescription = @strFuturesGainOrLossRealizedOffsetDescription
+					WHERE dblDebit <> 0 AND intMatchDerivativesPostRecapId = @intMatchDerivativesPostRecapId
 				END
 			END
 		END
 		ELSE
 		BEGIN
+			SELECT @intFuturesGainOrLossRealized = dbo.fnGetCommodityGLAccountM2M(DEFAULT, @intCommodityId, 'Futures Gain or Loss Realized')
+			SELECT @intFuturesGainOrLossRealizedOffset = dbo.fnGetCommodityGLAccountM2M(DEFAULT, @intCommodityId, 'Futures Gain or Loss Realized Offset')
 
-			SELECT @intFuturesGainOrLossRealized =  dbo.fnGetCommodityGLAccountM2M(DEFAULT,@intCommodityId,'Futures Gain or Loss Realized')
-			SELECT @intFuturesGainOrLossRealizedOffset =  dbo.fnGetCommodityGLAccountM2M(DEFAULT,@intCommodityId,'Futures Gain or Loss Realized Offset')
-
-			IF ISNULL(@intFuturesGainOrLossRealized,0) = 0 
+			IF ISNULL(@intFuturesGainOrLossRealized, 0) = 0 
 			BEGIN
 				INSERT INTO @tblResult(Result)
 				VALUES('Futures Gain or Loss Realized cannot be blank. Please set up the default account(s) in Commodity GL Accounts M2M tab.')
 			END
 			ELSE
 			BEGIN
-				IF ISNULL(@intAccountId,0) = 0
+				IF ISNULL(@intAccountId, 0) = 0
 				BEGIN
-					SELECT 
-						@strFuturesGainOrLossRealized = strAccountId 
-						,@strFuturesGainOrLossRealizedDescription = strDescription
+					SELECT @strFuturesGainOrLossRealized = strAccountId 
+						, @strFuturesGainOrLossRealizedDescription = strDescription
 					FROM tblGLAccount 
 					WHERE intAccountId = @intFuturesGainOrLossRealized
 
 					UPDATE tblRKMatchDerivativesPostRecap
 					SET intAccountId = @intFuturesGainOrLossRealized
-						,strAccountId = @strFuturesGainOrLossRealized
-						,strAccountDescription = @strFuturesGainOrLossRealizedDescription
-					WHERE dblCredit <> 0 and intMatchDerivativesPostRecapId = @intMatchDerivativesPostRecapId
+						, strAccountId = @strFuturesGainOrLossRealized
+						, strAccountDescription = @strFuturesGainOrLossRealizedDescription
+					WHERE dblCredit <> 0 AND intMatchDerivativesPostRecapId = @intMatchDerivativesPostRecapId
 				END
 			END
 
-			IF ISNULL(@intFuturesGainOrLossRealizedOffset,0) = 0 
+			IF ISNULL(@intFuturesGainOrLossRealizedOffset, 0) = 0 
 			BEGIN
 				INSERT INTO @tblResult(Result)
 				VALUES('Futures Gain or Loss Realized Offset cannot be blank. Please set up the default account(s) in Commodity GL Accounts M2M tab.')
 			END
 			ELSE
 			BEGIN
-				IF ISNULL(@intAccountId,0) = 0
+				IF ISNULL(@intAccountId, 0) = 0
 				BEGIN
-					SELECT 
-						@strFuturesGainOrLossRealizedOffset = strAccountId 
-						,@strFuturesGainOrLossRealizedOffsetDescription = strDescription
+					SELECT @strFuturesGainOrLossRealizedOffset = strAccountId 
+						, @strFuturesGainOrLossRealizedOffsetDescription = strDescription
 					FROM tblGLAccount 
 					WHERE intAccountId = @intFuturesGainOrLossRealizedOffset
 
 					UPDATE tblRKMatchDerivativesPostRecap
 					SET intAccountId = @intFuturesGainOrLossRealizedOffset
-						,strAccountId = @strFuturesGainOrLossRealizedOffset
-						,strAccountDescription = @strFuturesGainOrLossRealizedOffsetDescription
-					WHERE dblDebit <> 0 and intMatchDerivativesPostRecapId = @intMatchDerivativesPostRecapId
+						, strAccountId = @strFuturesGainOrLossRealizedOffset
+						, strAccountDescription = @strFuturesGainOrLossRealizedOffsetDescription
+					WHERE dblDebit <> 0 AND intMatchDerivativesPostRecapId = @intMatchDerivativesPostRecapId
 				END
 			END
-
 		END
 
 		Delete_Routine:
-			DELETE FROM #tmpPostRecap WHERE intMatchDerivativesPostRecapId = @intMatchDerivativesPostRecapId
+		
+		DELETE FROM #tmpPostRecap WHERE intMatchDerivativesPostRecapId = @intMatchDerivativesPostRecapId
 	END
-
-
-
-
-	IF (SELECT COUNT(Result) FROM @tblResult) > 0  
+	
+	IF (SELECT COUNT(Result) FROM @tblResult) > 0 
 	BEGIN
-		SELECT DISTINCT * from @tblResult
-
+		SELECT DISTINCT * FROM @tblResult
 		GOTO Exit_Routine
 	END
-
-
-
+	
 	BEGIN TRANSACTION
 
 	INSERT INTO tblRKStgMatchPnS (intConcurrencyId
@@ -264,7 +244,7 @@ BEGIN TRY
 		, ''
 		, @BrokerName
 		, @BrokerAccount
-		, GETDATE()
+		, dtmMatchDate
 		, @strUserName
 		, @strBook
 		, @strSubBook
@@ -274,79 +254,75 @@ BEGIN TRY
 	FROM tblRKMatchFuturesPSHeader h
 	WHERE intMatchNo = @intMatchNo
 
-
 	IF (@strBatchId IS NULL)
 	BEGIN
 		EXEC uspSMGetStartingNumber 3, @strBatchId OUT
 	END
 
-
-	INSERT INTO @GLEntries (
-		 [dtmDate]
-		,[strBatchId]
-		,[intAccountId]
-		,[dblDebit]
-		,[dblCredit]
-		,[dblDebitUnit]
-		,[dblCreditUnit]
-		,[strDescription]
-		,[intCurrencyId]
-		,[dtmTransactionDate]
-		,[strTransactionId]
-		,[intTransactionId]
-		,[strTransactionType]
-		,[strTransactionForm]
-		,[strModuleName]
-		,[intConcurrencyId]
-		,[dblExchangeRate]
-		,[dtmDateEntered]
-		,[ysnIsUnposted]
-		,[strCode]
-		,[strReference]  
-		,[intEntityId]
-		,[intUserId]      
-		,[intSourceLocationId]
-		,[intSourceUOMId]
-		,[intCommodityId]
-		)
-	SELECT 
-		dtmPostDate
-		,@strBatchId
-		,intAccountId
-		,ROUND(dblDebit,2)
-		,ROUND(dblCredit,2)
-		,ROUND(dblDebitUnit,2)
-		,ROUND(dblCreditUnit,2)
-		,strAccountDescription
-		,intCurrencyId
-		,dtmTransactionDate
-		,strTransactionId
-		,intTransactionId
-		,strTransactionType
-		,strTransactionForm
-		,strModuleName
-		,intConcurrencyId
-		,dblExchangeRate
-		,dtmDateEntered
-		,ysnIsUnposted
-		,strCode
-		,strReference
-		,intEntityId
-		,intUserId
-		,intSourceLocationId
-		,intSourceUOMId
-		,intCommodityId
+	INSERT INTO @GLEntries (dtmDate
+		, strBatchId
+		, intAccountId
+		, dblDebit
+		, dblCredit
+		, dblDebitUnit
+		, dblCreditUnit
+		, strDescription
+		, intCurrencyId
+		, dtmTransactionDate
+		, strTransactionId
+		, intTransactionId
+		, strTransactionType
+		, strTransactionForm
+		, strModuleName
+		, intConcurrencyId
+		, dblExchangeRate
+		, dtmDateEntered
+		, ysnIsUnposted
+		, strCode
+		, strReference
+		, intEntityId
+		, intUserId
+		, intSourceLocationId
+		, intSourceUOMId
+		, intCommodityId)
+	SELECT dtmPostDate
+		, @strBatchId
+		, intAccountId
+		, ROUND(dblDebit, 2)
+		, ROUND(dblCredit, 2)
+		, ROUND(dblDebitUnit, 2)
+		, ROUND(dblCreditUnit, 2)
+		, strAccountDescription
+		, intCurrencyId
+		, dtmTransactionDate
+		, strTransactionId
+		, intTransactionId
+		, strTransactionType
+		, strTransactionForm
+		, strModuleName
+		, intConcurrencyId
+		, dblExchangeRate
+		, dtmDateEntered
+		, ysnIsUnposted
+		, strCode
+		, strReference
+		, intEntityId
+		, intUserId
+		, intSourceLocationId
+		, intSourceUOMId
+		, intCommodityId
 	FROM tblRKMatchDerivativesPostRecap
 	WHERE intTransactionId = @intMatchFuturesPSHeaderId 
 
-	EXEC dbo.uspGLBookEntries @GLEntries,1
+	EXEC dbo.uspGLBookEntries @GLEntries, 1
 
 	UPDATE tblRKMatchFuturesPSHeader
 	SET ysnPosted = 1
 	WHERE intMatchNo = @intMatchNo
 
 	UPDATE tblRKMatchDerivativesPostRecap
-	SET ysnIsUnposted = 1, strBatchId = @strBatchId
+	SET ysnIsUnposted = 1
+		, strBatchId = @strBatchId
 	WHERE intTransactionId = @intMatchFuturesPSHeaderId
 
 	COMMIT TRAN

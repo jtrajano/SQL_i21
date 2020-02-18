@@ -89,41 +89,6 @@ BEGIN TRY
 			IF @intTransactionCount = 0
 				BEGIN TRANSACTION
 
-			IF EXISTS (
-					SELECT *
-					FROM tblCTInvPlngReportMaster RM
-					JOIN tblMFInvPlngSummaryBatch SB ON SB.intInvPlngReportMasterID = RM.intInvPlngReportMasterID
-					WHERE RM.intInvPlngReportMasterRefID = @intInvPlngReportMasterID
-					)
-			BEGIN
-				IF @strErrorMessage <> ''
-				BEGIN
-					SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Demand summary exists.'
-				END
-				ELSE
-				BEGIN
-					SELECT @strErrorMessage = 'Demand summary exists.'
-				END
-			END
-
-			IF @strErrorMessage <> ''
-			BEGIN
-				RAISERROR (
-						@strErrorMessage
-						,16
-						,1
-						)
-			END
-
-			IF @strRowState = 'Delete'
-			BEGIN
-				DELETE
-				FROM tblCTInvPlngReportMaster
-				WHERE intInvPlngReportMasterRefID = @intInvPlngReportMasterID
-
-				GOTO ext
-			END
-
 			------------------Header------------------------------------------------------
 			EXEC sp_xml_preparedocument @idoc OUTPUT
 				,@strReportMasterXML
@@ -277,15 +242,6 @@ BEGIN TRY
 				END
 			END
 
-			IF @strErrorMessage <> ''
-			BEGIN
-				RAISERROR (
-						@strErrorMessage
-						,16
-						,1
-						)
-			END
-
 			SELECT @intCategoryId = NULL
 
 			SELECT @intUnitMeasureId = NULL
@@ -310,6 +266,45 @@ BEGIN TRY
 			FROM tblCTSubBook SB
 			WHERE strSubBook = @strSubBook
 				AND intBookId = @intBookId
+
+			IF EXISTS (
+					SELECT *
+					FROM tblCTInvPlngReportMaster RM
+					JOIN tblMFInvPlngSummaryBatch SB ON SB.intInvPlngReportMasterID = RM.intInvPlngReportMasterID
+					WHERE RM.intInvPlngReportMasterRefID = @intInvPlngReportMasterID
+						AND RM.intBookId = @intBookId
+						AND IsNULL(RM.intSubBookId, 0) = IsNULL(@intSubBookId, 0)
+					)
+			BEGIN
+				IF @strErrorMessage <> ''
+				BEGIN
+					SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Demand summary exists.'
+				END
+				ELSE
+				BEGIN
+					SELECT @strErrorMessage = 'Demand summary exists.'
+				END
+			END
+
+			IF @strErrorMessage <> ''
+			BEGIN
+				RAISERROR (
+						@strErrorMessage
+						,16
+						,1
+						)
+			END
+
+			IF @strRowState = 'Delete'
+			BEGIN
+				DELETE
+				FROM tblCTInvPlngReportMaster
+				WHERE intInvPlngReportMasterRefID = @intInvPlngReportMasterID
+					AND intBookId = @intBookId
+					AND IsNULL(intSubBookId, 0) = IsNULL(@intSubBookId, 0)
+
+				GOTO ext
+			END
 
 			SELECT @intReportMasterID = NULL
 
@@ -349,11 +344,15 @@ BEGIN TRY
 					SELECT *
 					FROM tblCTInvPlngReportMaster
 					WHERE intInvPlngReportMasterRefID = @intInvPlngReportMasterID
+						AND intBookId = @intBookId
+						AND IsNULL(intSubBookId, 0) = IsNULL(@intSubBookId, 0)
 					)
 			BEGIN
 				DELETE
 				FROM tblCTInvPlngReportMaster
 				WHERE intInvPlngReportMasterRefID = @intInvPlngReportMasterID
+					AND intBookId = @intBookId
+					AND IsNULL(intSubBookId, 0) = IsNULL(@intSubBookId, 0)
 			END
 
 			INSERT INTO tblCTInvPlngReportMaster (
@@ -595,7 +594,7 @@ BEGIN TRY
 			SELECT @intSubBookId = intSubBookId
 			FROM tblCTSubBook
 			WHERE strSubBook = @strSubBook
-			and intBookId = @intBookId
+				AND intBookId = @intBookId
 
 			IF @intSubBookId IS NULL
 				SELECT @intSubBookId = 0
@@ -624,9 +623,9 @@ BEGIN TRY
 					) x
 			JOIN tblICItem I ON I.strItemNo = x.strItemNo
 
-			EXEC sp_xml_removedocument @idoc
-
 			ext:
+
+			EXEC sp_xml_removedocument @idoc
 
 			UPDATE tblMFDemandStage
 			SET strFeedStatus = 'Processed'

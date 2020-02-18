@@ -119,7 +119,7 @@ BEGIN
 		,[strMemo]					= ''
 		,[strReferenceNo]			= ''
 		,[dtmCheckPrinted]			= NULL
-		,[ysnCheckToBePrinted]		= 1
+		,[ysnCheckToBePrinted]		= 0
 		,[ysnCheckVoid]				= 0
 		,[ysnPosted]				= 0
 		,[strLink]					= ''
@@ -812,6 +812,14 @@ BEGIN
 	RAISERROR('Cannot find the transaction.', 11, 1)
 	GOTO Post_Rollback
 END 
+
+
+IF (dbo.isOpenAccountingDateByModule(@dtmDate,'Payroll') = 0 AND @ysnRecap = 0)
+BEGIN
+	-- Unable to find an open fiscal year period to match the transaction date.
+	RAISERROR('Unable to find an open fiscal year period for Payroll module to match the transaction date.', 11, 1)
+	GOTO Post_Rollback
+END
 
 -- Validate the date against the FY Periods
 IF EXISTS (SELECT 1 WHERE [dbo].isOpenAccountingDate(@dtmDate) = 0) AND @ysnRecap = 0

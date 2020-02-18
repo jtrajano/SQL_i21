@@ -63,9 +63,16 @@ BEGIN
 		JOIN	tblICUnitMeasure	UM ON UM.intUnitMeasureId = IU.intUnitMeasureId 
 		WHERE	intItemUOMId = @intId
 
-	ELSE IF @strTable = 'Origin'
+	ELSE IF @strTable = 'Origin' OR @strTable = 'ContractPlan'
 	BEGIN	  
-		SELECT @intItemId = intItemId,@intItemContractId = intItemContractId FROM tblCTContractDetail WHERE intContractDetailId = @intId
+		IF @strTable = 'ORIGIN'
+		BEGIN
+			SELECT @intItemId = intItemId,@intItemContractId = intItemContractId FROM tblCTContractDetail WHERE intContractDetailId = @intId
+		END
+		ELSE
+		BEGIN
+			SELECT @intItemId = intItemId,@intItemContractId = NULL FROM tblCTContractPlan WHERE intContractPlanId = @intId
+		END		
 		  
 		IF @intItemContractId IS NOT NULL
 		BEGIN

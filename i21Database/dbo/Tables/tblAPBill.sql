@@ -5,6 +5,7 @@
     [intTermsId]           INT             NOT NULL DEFAULT 0,
     [intTransactionReversed]				INT             NULL ,
 	[intCommodityId]				INT             NULL ,
+	[intInvoiceRefId]				INT             NULL ,
 	[intCompanyId]				INT             NULL ,
 	[intBankInfoId]				INT             NULL ,
 	[intBookId]	INT NULL,

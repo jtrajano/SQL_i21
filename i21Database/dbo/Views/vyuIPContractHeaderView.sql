@@ -110,6 +110,7 @@ SELECT CH.intContractHeaderId
 	,dbo.fnCTGetContractStatuses(CH.intContractHeaderId) COLLATE Latin1_General_CI_AS AS strStatuses
 	,SP.intAttachmentSignatureId
 	,NM.strArbitration
+	,SB.strSubBook 
 FROM tblCTContractHeader CH
 JOIN vyuCTContractHeaderNotMapped NM ON NM.intContractHeaderId = CH.intContractHeaderId
 JOIN vyuCTEntity EY ON EY.intEntityId = CH.intEntityId
@@ -137,4 +138,4 @@ LEFT JOIN tblEMEntity UE ON UE.intEntityId = CH.intLastModifiedById
 LEFT JOIN tblEMEntity PE ON PE.intEntityId = CH.intCounterPartyId
 LEFT JOIN tblICCommodityUnitMeasure CM ON CM.intCommodityUnitMeasureId = CH.intCommodityUOMId
 LEFT JOIN tblICUnitMeasure U2 ON U2.intUnitMeasureId = CM.intUnitMeasureId
-
+Left JOIN tblCTSubBook SB on SB.intSubBookId =CH.intSubBookId 

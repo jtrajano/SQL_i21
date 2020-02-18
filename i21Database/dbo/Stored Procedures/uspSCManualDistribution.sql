@@ -80,6 +80,7 @@ DECLARE @dblLoopAdjustedScheduleQuantity NUMERIC (38,20)
 DECLARE @strTicketDistributionOption NVARCHAR(3)
 DECLARE @ysnTicketHasSpecialDiscount BIT
 DECLARE @ysnTicketSpecialGradePosted BIT
+DECLARE @ysnLoadContract BIT
 
 SELECT	
 	@intTicketItemUOMId = UOM.intItemUOMId
@@ -137,37 +138,54 @@ OPEN intListCursor;
 						END  
 						ELSE  
 						BEGIN  
+							SET @ysnLoadContract = 0
+							SELECT TOP 1 @ysnLoadContract = ysnLoad 
+							FROM tblCTContractHeader A
+							INNER JOIN tblCTContractDetail B
+								ON A.intContractHeaderId = B.intContractHeaderId
+							WHERE B.intContractDetailId = @intLoopContractId
 
 							-- do not schedule if the contract is the same as the ticket contract since this is already scheduled upon saving the ticket
 							IF ISNULL(@intLoopContractId,0) <> 0 AND @strTicketDistributionOption = 'CNT' AND @intTicketContractDetailId = @intLoopContractId  
 							BEGIN  
 								-- EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoopContractId, @dblLoopContractUnits, @intUserId, @intTicketId, 'Auto - Scale', @intTicketItemUOMId  
-								
-								IF(@dblLoopContractUnits > @dblTicketScheduleQuantity )
-								BEGIN
-									SET @dblLoopAdjustedScheduleQuantity = @dblLoopContractUnits - @dblTicketScheduleQuantity
-								END
-								ELSE
-								BEGIN
-									SET @dblLoopAdjustedScheduleQuantity = (@dblTicketScheduleQuantity - @dblLoopContractUnits) * -1
-								END
-								
 
-								IF @dblLoopAdjustedScheduleQuantity <> 0
+								
+								
+								IF(@ysnLoadContract = 0)
 								BEGIN
-									EXEC	uspCTUpdateScheduleQuantity 
-									@intContractDetailId	=	@intLoopContractId,
-									@dblQuantityToUpdate	=	@dblLoopAdjustedScheduleQuantity,
-									@intUserId				=	@intUserId,
-									@intExternalId			=	@intTicketId,
-									@strScreenName			=	'Auto - Scale'
-								END
+									IF(@dblLoopContractUnits > @dblTicketScheduleQuantity )
+									BEGIN
+										SET @dblLoopAdjustedScheduleQuantity = @dblLoopContractUnits - @dblTicketScheduleQuantity
+									END
+									ELSE
+									BEGIN
+										SET @dblLoopAdjustedScheduleQuantity = (@dblTicketScheduleQuantity - @dblLoopContractUnits) * -1
+									END
+									
 
+									IF @dblLoopAdjustedScheduleQuantity <> 0
+									BEGIN
+										EXEC	uspCTUpdateScheduleQuantity 
+										@intContractDetailId	=	@intLoopContractId,
+										@dblQuantityToUpdate	=	@dblLoopAdjustedScheduleQuantity,
+										@intUserId				=	@intUserId,
+										@intExternalId			=	@intTicketId,
+										@strScreenName			=	'Auto - Scale'
+									END
+								END
 								
 							END 
 							ELSE
 							BEGIN
-								EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoopContractId, @dblLoopContractUnits, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId  
+								IF (@ysnLoadContract = 0)
+								BEGIN
+									EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoopContractId, @dblLoopContractUnits, @intUserId, @intTicketId, 'Auto - Scale', @intTicketItemUOMId  
+								END
+								ELSE
+								BEGIN
+									EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoopContractId, 1, @intUserId, @intTicketId, 'Auto - Scale', @intTicketItemUOMId  
+								END
 							END 
 
 							EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intLoopContractId, @dblLoopContractUnits, @intEntityId;  
@@ -194,6 +212,7 @@ OPEN intListCursor;
 								,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
 								,ysnIsStorage
 								,strSourceTransactionId  
+								,intStorageScheduleTypeId
 								,ysnAllowVoucher
 							)SELECT 
 								intItemId
@@ -215,6 +234,7 @@ OPEN intListCursor;
 								,intStorageLocationId
 								,ysnIsStorage
 								,strDistributionOption 
+								,intStorageScheduleTypeId = @intStorageScheduleTypeId
 								,ysnAllowVoucher
 							FROM @LineItem
 							where intId = @intId
@@ -241,6 +261,7 @@ OPEN intListCursor;
 								,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
 								,ysnIsStorage
 								,strSourceTransactionId
+								,intStorageScheduleTypeId 
 								,ysnAllowVoucher  
 							)SELECT 
 								intItemId
@@ -262,6 +283,7 @@ OPEN intListCursor;
 								,intStorageLocationId
 								,ysnIsStorage
 								,strDistributionOption 
+								,intStorageScheduleTypeId = @intStorageScheduleTypeId
 								,ysnAllowVoucher
 							FROM @LineItem
 							where intId = @intId
@@ -360,6 +382,7 @@ OPEN intListCursor;
 						,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
 						,ysnIsStorage
 						,strSourceTransactionId
+						,intStorageScheduleTypeId
 						,ysnAllowVoucher
 					)
 					EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblLoopContractUnits , @intEntityId, @strDistributionOption, NULL , @intStorageScheduleId

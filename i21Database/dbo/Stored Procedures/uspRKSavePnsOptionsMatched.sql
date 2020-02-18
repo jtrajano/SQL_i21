@@ -63,7 +63,27 @@ BEGIN TRY
 		FROM tblRKOptionsMatchPnS p
 		JOIN @tblMatchedDelete m on p.strTranNo = m.strTranNo
 		
+		SELECT DISTINCT intOptionsMatchPnSHeaderId
+		INTO #tmpMatchDeleted
+		FROM tblRKOptionsMatchPnS WHERE CONVERT(INT, strTranNo) IN (SELECT CONVERT(INT, strTranNo) FROM @tblMatchedDelete)
+		
+		DECLARE @intMatchDeletedId INT
+
+		WHILE EXISTS (SELECT TOP 1 1 FROM #tmpMatchDeleted)
+		BEGIN
+			SELECT TOP 1 @intMatchDeletedId = intOptionsMatchPnSHeaderId FROM #tmpMatchDeleted
+
+			EXEC uspIPInterCompanyPreStageOptionsPnS @intOptionsMatchPnSHeaderId = @intMatchDeletedId
+				, @strRowState = 'Modified'
+				, @intUserId = @intUserId
+
+			DELETE FROM #tmpMatchDeleted WHERE intOptionsMatchPnSHeaderId = @intMatchDeletedId
+		END
+		
+		DROP TABLE #tmpMatchDeleted
+
 		DELETE FROM tblRKOptionsMatchPnS WHERE CONVERT(INT, strTranNo) IN (SELECT CONVERT(INT, strTranNo) FROM @tblMatchedDelete)
+
 	END
 	------------------------- END Delete Matched ---------------------
 	
@@ -80,6 +100,25 @@ BEGIN TRY
 		
 	IF EXISTS(SELECT TOP 1 1 FROM @tblExpiredDelete)
 	BEGIN
+		SELECT DISTINCT intOptionsMatchPnSHeaderId
+		INTO #tmpExpireDeleted
+		FROM tblRKOptionsMatchPnS WHERE CONVERT(INT, strTranNo) IN (SELECT CONVERT(INT, strTranNo) FROM @tblExpiredDelete)
+		
+		DECLARE @intExpireDeletedId INT
+
+		WHILE EXISTS (SELECT TOP 1 1 FROM #tmpExpireDeleted)
+		BEGIN
+			SELECT TOP 1 @intExpireDeletedId = intOptionsMatchPnSHeaderId FROM #tmpExpireDeleted
+
+			EXEC uspIPInterCompanyPreStageOptionsPnS @intOptionsMatchPnSHeaderId = @intExpireDeletedId
+				, @strRowState = 'Modified'
+				, @intUserId = @intUserId
+
+			DELETE FROM #tmpExpireDeleted WHERE intOptionsMatchPnSHeaderId = @intExpireDeletedId
+		END
+		
+		DROP TABLE #tmpExpireDeleted
+
 		DELETE FROM tblRKOptionsPnSExpired WHERE CONVERT(INT, strTranNo) IN (SELECT CONVERT(INT, strTranNo) FROM @tblExpiredDelete)
 
 	END
@@ -121,7 +160,8 @@ BEGIN TRY
 	
 	SELECT @intOptionsMatchPnSHeaderId = SCOPE_IDENTITY();
 	---------------Matched Record Insert ----------------
-	SELECT @strTranNo = ISNULL(MAX(CONVERT(INT, strTranNo)), 0) FROM tblRKOptionsMatchPnS
+	DECLARE @MaxRow INT
+	SELECT @strTranNo = ISNULL(MAX(CONVERT(INT, strTranNo)), 0), @MaxRow = MAX(ISNULL(intOptionsMatchPnSHeaderId, 0)) FROM tblRKOptionsMatchPnS
 	
 	INSERT INTO tblRKOptionsMatchPnS (intOptionsMatchPnSHeaderId
 		, strTranNo
@@ -171,9 +211,24 @@ BEGIN TRY
 		, @strName
 	FROM tblRKOptionsMatchPnS
 	WHERE strTranNo = @strTranNoPNS
+
+	DECLARE @newRowId INT
+	SELECT DISTINCT intOptionsMatchPnSHeaderId INTO #tmpNewMatched FROM tblRKOptionsMatchPnS WHERE intOptionsMatchPnSHeaderId > @MaxRow
+	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpNewMatched)
+	BEGIN
+		SELECT TOP 1 @newRowId = intOptionsMatchPnSHeaderId FROM #tmpNewMatched
+
+		EXEC uspIPInterCompanyPreStageOptionsPnS @intOptionsMatchPnSHeaderId = @newRowId
+			, @strRowState = 'Added'
+			, @intUserId = @intUserId
+
+		DELETE FROM #tmpNewMatched WHERE intOptionsMatchPnSHeaderId = @newRowId
+	END
+
+	DROP TABLE #tmpNewMatched
 	
 	---------------Expired Record Insert ----------------
-	DECLARE @MaxRow INT
+	SET @MaxRow = NULL
 	SELECT @strExpiredTranNo = ISNULL(MAX(CONVERT(INT, strTranNo)), 0), @MaxRow = MAX(ISNULL(intOptionsPnSExpiredId, 0)) FROM tblRKOptionsPnSExpired
 	
 	INSERT INTO tblRKOptionsPnSExpired (intOptionsMatchPnSHeaderId
@@ -194,18 +249,20 @@ BEGIN TRY
 		, [dblLots] numeric(18,6)
 		, [intFutOptTransactionId] INT)
 
-	DECLARE @newRowId INT
-	SELECT DISTINCT intOptionsMatchPnSHeaderId INTO #tmpNewRows FROM tblRKOptionsPnSExpired WHERE intOptionsPnSExpiredId > @MaxRow
-	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpNewRows)
+	SET @newRowId = NULL
+	SELECT DISTINCT intOptionsMatchPnSHeaderId INTO #tmpNewExpired FROM tblRKOptionsPnSExpired WHERE intOptionsPnSExpiredId > @MaxRow
+	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpNewExpired)
 	BEGIN
-		SELECT TOP 1 @newRowId = intOptionsMatchPnSHeaderId FROM #tmpNewRows
+		SELECT TOP 1 @newRowId = intOptionsMatchPnSHeaderId FROM #tmpNewExpired
 
 		EXEC uspIPInterCompanyPreStageOptionsPnS @intOptionsMatchPnSHeaderId = @newRowId
 			, @strRowState = 'Added'
 			, @intUserId = @intUserId
 
-		DELETE FROM #tmpNewRows WHERE intOptionsMatchPnSHeaderId = @newRowId
+		DELETE FROM #tmpNewExpired WHERE intOptionsMatchPnSHeaderId = @newRowId
 	END
+
+	DROP TABLE #tmpNewExpired
 	
 	---------------Exercised/Assigned Record Insert ----------------
 	DECLARE @tblExercisedAssignedDetail TABLE (RowNumber INT IDENTITY(1,1)

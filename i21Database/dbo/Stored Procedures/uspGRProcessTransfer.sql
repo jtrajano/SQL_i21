@@ -511,6 +511,24 @@ BEGIN
 							,@dblBasisCost DECIMAL(18,6)
 							,@dblSettlementPrice DECIMAL(18,6)
 							,@strRKError VARCHAR(MAX)
+							,@ysnDPtoOtherStorage BIT
+
+						--Check if Transfer is DP To Other Storage (Disregard Risk Error)
+						SELECT 
+							@ysnDPtoOtherStorage = CASE WHEN FromStorage.intStorageTypeId = 2 AND ToStorage.intStorageTypeId != 2 THEN 1 ELSE 0 END
+						FROM tblGRTransferStorageReference SR
+						INNER JOIN tblGRCustomerStorage FromStorage
+							ON FromStorage.intCustomerStorageId = SR.intSourceCustomerStorageId
+						INNER JOIN tblGRStorageType FromType
+							ON FromType.intStorageScheduleTypeId = FromStorage.intStorageTypeId
+						INNER JOIN tblGRCustomerStorage ToStorage
+							ON ToStorage.intCustomerStorageId = SR.intToCustomerStorageId
+						INNER JOIN tblGRStorageType ToType
+							ON ToType.intStorageScheduleTypeId = ToStorage.intStorageTypeId
+						INNER JOIN tblGRTransferStorage TS
+							ON SR.intTransferStorageId = TS.intTransferStorageId
+						WHERE  ((FromType.ysnDPOwnedType = 0 AND ToType.ysnDPOwnedType = 1) OR (FromType.ysnDPOwnedType = 1 AND ToType.ysnDPOwnedType = 0)) AND SR.intTransferStorageId = @intTransferStorageId
+						ORDER BY dtmTransferStorageDate
 
 
 						SELECT @intItemId = ITP.intItemId,@intLocationId = IL.intLocationId,@intSubLocationId = ITP.intSubLocationId, @intStorageLocationId = ITP.intStorageLocationId, @dtmDate = ITP.dtmDate, @intOwnerShipId = CASE WHEN ITP.ysnIsStorage = 1 THEN 2 ELSE 1 END
@@ -535,6 +553,7 @@ BEGIN
 							ON IL.intItemLocationId = ITP.intItemLocationId
 						WHERE intId = @cursorId
 
+						IF @ysnDPtoOtherStorage = 0
 						SELECT @strRKError = CASE WHEN ISNULL(@dblBasisCost,0) = 0 AND ISNULL(@dblSettlementPrice,0) = 0 THEN 'Basis and Settlement Price' WHEN  ISNULL(@dblBasisCost,0) = 0 THEN 'Basis Price' WHEN ISNULL(@dblSettlementPrice,0) = 0 THEN 'Settlement Price' END +  ' in risk management is not available.'
 
 						IF @strRKError IS NOT NULL
@@ -880,11 +899,12 @@ BEGIN
 								,[dblForeignRate]
 								,[strRateType]
 							)
-							EXEC dbo.uspGRCreateItemGLEntriesTransfer
-								@strBatchId
-								,@GLForItem
-								,'AP Clearing'
-								,1
+							EXEC [dbo].[uspGRCreateGLEntriesForTransferStorage] @intTransferStorageId,@strBatchId,@dblCost,1
+							UPDATE @GLEntries 
+							SET dblDebit		= dblCredit
+								,dblDebitUnit	= dblCreditUnit
+								,dblCredit		= dblDebit
+									,dblCreditUnit  = dblDebitUnit
 
 							--debug point--
 							if @debug_point = 1 and 1 = 1
@@ -929,7 +949,11 @@ BEGIN
 								,[dblForeignRate]
 								,[strRateType]
 							)
-							EXEC [dbo].[uspGRCreateGLEntriesForTransferStorage] @intTransferStorageId,@strBatchId,@dblOriginalCost,1
+							EXEC dbo.uspGRCreateItemGLEntriesTransfer
+								@strBatchId
+								,@GLForItem
+								,'AP Clearing'
+								,1
 
 
 							if @debug_point = 1 and 1 = 0
@@ -1156,12 +1180,19 @@ BEGIN
 		--update tblGRTransferStorageSplit's intCustomerStorageId
 		UPDATE A
 		SET A.intTransferToCustomerStorageId = B.intToCustomerStorageId
-			,A.intContractDetailId = CT.intContractDetailId
+			,A.intContractDetailId = CASE WHEN ST.ysnDPOwnedType = 1 THEN 
+										CASE 
+											WHEN A.intContractDetailId IS NULL THEN CT.intContractDetailId 
+											ELSE A.intContractDetailId
+										END
+									ELSE NULL END
 		FROM tblGRTransferStorageSplit A		
 		INNER JOIN @newCustomerStorageIds B
 			ON B.intTransferStorageSplitId = A.intTransferStorageSplitId
 		INNER JOIN tblGRCustomerStorage CS
 			ON CS.intCustomerStorageId = B.intToCustomerStorageId
+		INNER JOIN tblGRStorageType ST
+			ON ST.intStorageScheduleTypeId = A.intStorageTypeId
 		OUTER APPLY (
 			SELECT TOP 1 intContractDetailId
 			FROM vyuCTGetContractForScaleTicket
@@ -1172,10 +1203,16 @@ BEGIN
 				AND ysnEarlyDayPassed = 1
 				AND intContractTypeId = 1
 				AND ysnAllowedToShow = 1
-		) CT		
+		) CT
 		
 		SET @cnt = 0
-		SET @cnt = (SELECT COUNT(*) FROM tblGRTransferStorageSplit WHERE intTransferStorageId = @intTransferStorageId AND intContractDetailId IS NULL)
+		SET @cnt = (SELECT COUNT(*) 
+					FROM tblGRTransferStorageSplit TSS
+					INNER JOIN tblGRStorageType ST
+						ON ST.intStorageScheduleTypeId = TSS.intStorageTypeId
+					WHERE intTransferStorageId = @intTransferStorageId 
+						AND ST.ysnDPOwnedType = 1
+						AND intContractDetailId IS NULL)
 
 		DECLARE c CURSOR LOCAL STATIC READ_ONLY FORWARD_ONLY
 		FOR

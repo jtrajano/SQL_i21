@@ -10,7 +10,7 @@ BEGIN
 	SET NOCOUNT ON
 	SET XACT_ABORT ON
 	SET ANSI_WARNINGS OFF	
-
+	declare @d_a_v as bit
 	DECLARE @ErrMsg AS NVARCHAR(MAX)
 	DECLARE @intTransferContractDetailId INT
 	DECLARE @dblTransferUnits NUMERIC(18,6)
@@ -107,6 +107,11 @@ BEGIN
 		OPEN c;
 
 		FETCH c INTO @intTransferContractDetailId, @dblTransferUnits, @intSourceItemUOMId, @intCustomerStorageId
+		if @d_a_v = 1 and 1 = 0
+		begin
+		
+			select 'check contract details transfercontractdetail,transferunits,customerstorageid,sourceitemuom', @intTransferContractDetailId,@dblTransferUnits,@intCustomerStorageId,@intSourceItemUOMId
+		end
 
 		WHILE @@FETCH_STATUS = 0 AND @cnt > 0
 		BEGIN
@@ -386,11 +391,15 @@ BEGIN
 								,[strRateType]
 							)
 							EXEC [dbo].[uspGRCreateGLEntriesForTransferStorage] @intTransferStorageId,@strBatchId,0,1,@intEntityId
-							UPDATE @GLEntries 
-							SET dblDebit		= dblCredit
-								,dblDebitUnit	= dblCreditUnit
-								,dblCredit		= dblDebit
-									,dblCreditUnit  = dblDebitUnit
+
+							IF(select dblQty from @Entry) < 0
+							BEGIN
+								UPDATE @GLEntries 
+								SET dblDebit		= dblCredit
+									,dblDebitUnit	= dblCreditUnit
+									,dblCredit		= dblDebit
+										,dblCreditUnit  = dblDebitUnit
+							END
 
 
 

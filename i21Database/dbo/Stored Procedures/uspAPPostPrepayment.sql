@@ -338,7 +338,7 @@ BEGIN
 			[strAmountInWords] = dbo.fnConvertNumberToWord(A.dblAmountPaid),
 			[strMemo] = A.strNotes,
 			[strReferenceNo] = CASE WHEN (SELECT strPaymentMethod FROM tblSMPaymentMethod WHERE intPaymentMethodID = A.intPaymentMethodId) = 'Cash' THEN 'Cash' ELSE A.strPaymentInfo END,
-			[ysnCheckToBePrinted] = 1,
+			[ysnCheckToBePrinted] = 0,
 			[ysnCheckVoid] = 0,
 			[ysnPosted] = 1,
 			[strLink] = @batchId,
