@@ -118,7 +118,7 @@ BEGIN
 
 		IF len(@strItemNo) > 0
 		BEGIN
-			SELECT @strItemNo = left(@strItemNo, Len(@strItemNo) - 3)
+			SELECT @strItemNo = left(@strItemNo, Len(@strItemNo) - 2)
 
 			UPDATE @tblMFItemBook
 			SET strItemNo = @strItemNo
