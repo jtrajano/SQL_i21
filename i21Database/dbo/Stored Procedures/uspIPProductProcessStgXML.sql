@@ -150,6 +150,7 @@ BEGIN TRY
 					) x
 
 			IF @strProductValue IS NULL
+				AND @strRowState <> 'Delete'
 			BEGIN
 				SELECT @strErrorMessage = 'Product Value cannot be empty.'
 
