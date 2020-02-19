@@ -94,31 +94,31 @@ BEGIN
 		FROM @tblMFItemBook
 		WHERE intId = @intId
 
-		IF EXISTS (
-				SELECT *
-				FROM tblICItemBundle IBundle
-				LEFT JOIN tblICItemBook IBook ON IBook.intItemId = IBundle.intBundleItemId
-					AND IBook.intBookId = @intBookId
-					AND isNULL(IBook.intSubBookId, 0) = IsNULL(@intSubBookId, 0)
-				WHERE IBundle.intItemId = @intItemId
-					AND IBook.intItemId IS NULL
-				)
-		BEGIN
-			SELECT @strItemNo = @strItemNo + I.strItemNo +' - '+I.strDescription + ' / '
+		--IF EXISTS (
+		--		SELECT *
+		--		FROM tblICItemBundle IBundle
+		--		LEFT JOIN tblICItemBook IBook ON IBook.intItemId = IBundle.intBundleItemId
+		--			AND IBook.intBookId = @intBookId
+		--			AND isNULL(IBook.intSubBookId, 0) = IsNULL(@intSubBookId, 0)
+		--		WHERE IBundle.intItemId = @intItemId
+		--			AND IBook.intItemId IS NULL
+		--		)
+		--BEGIN
+			SELECT @strItemNo = @strItemNo + I.strItemNo +' - '+IsNULL(I.strShortName,'') + ' / '
 			FROM tblICItemBundle IBundle
 			JOIN tblICItem I ON I.intItemId = IBundle.intBundleItemId
 			JOIN tblICItemBook IBook ON IBook.intItemId = IBundle.intBundleItemId
 				AND IBook.intBookId = @intBookId
 				AND isNULL(IBook.intSubBookId, 0) = IsNULL(@intSubBookId, 0)
 			WHERE IBundle.intItemId = @intItemId
-		END
+		--END
 
 		IF @strItemNo IS NULL
 			SELECT @strItemNo = ''
 
 		IF len(@strItemNo) > 0
 		BEGIN
-			SELECT @strItemNo = left(@strItemNo, Len(@strItemNo) - 3)
+			SELECT @strItemNo = left(@strItemNo, Len(@strItemNo) - 2)
 
 			UPDATE @tblMFItemBook
 			SET strItemNo = @strItemNo
@@ -407,7 +407,7 @@ BEGIN
 				,(
 					CASE 
 						WHEN MI.intItemId IS NOT NULL
-							THEN I.strItemNo + ' - ' + I.strDescription
+							THEN I.strItemNo + ' - ' + IsNULL(I.strShortName,'')
 						ELSE IB.strItemNo
 						END
 					) AS strItemDescription
@@ -861,7 +861,7 @@ BEGIN
 					,(
 						CASE 
 							WHEN MI.intItemId IS NOT NULL
-								THEN I.strItemNo + ' - ' + I.strDescription
+								THEN I.strItemNo + ' - ' + IsNULL(I.strShortName,'')
 							ELSE IB.strItemNo
 							END
 						) AS strItemDescription
@@ -1485,7 +1485,7 @@ BEGIN
 					,(
 						CASE 
 							WHEN MI.intItemId IS NOT NULL
-								THEN I.strItemNo + ' - ' + I.strDescription
+								THEN I.strItemNo + ' - ' + IsNULL(I.strShortName,'')
 							ELSE IB.strItemNo
 							END
 						) AS strItemDescription

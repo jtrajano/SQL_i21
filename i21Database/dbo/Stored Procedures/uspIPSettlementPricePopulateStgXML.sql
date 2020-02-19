@@ -20,11 +20,17 @@ BEGIN TRY
 		,@strAdditionalInfo NVARCHAR(MAX)
 		,@strFutSettlementPriceXML NVARCHAR(MAX)
 		,@strOptSettlementPriceXML NVARCHAR(MAX)
+		,@strDisplayName NVARCHAR(100)
 
 	SET @intFutureSettlementPriceStageId = NULL
 	SET @strHeaderXML = NULL
 	SET @strHeaderCondition = NULL
 	SET @strLastModifiedUser = NULL
+	SET @strDisplayName = NULL
+
+	SELECT @strDisplayName = CONVERT(NVARCHAR, dtmPriceDate, 120)
+	FROM tblRKFuturesSettlementPrice
+	WHERE intFutureSettlementPriceId = @intFutureSettlementPriceId
 
 	-------------------------Header-----------------------------------------------------------
 	SELECT @strHeaderCondition = 'intFutureSettlementPriceId = ' + LTRIM(@intFutureSettlementPriceId)
@@ -88,6 +94,7 @@ BEGIN TRY
 
 	INSERT INTO tblRKFuturesSettlementPriceStage (
 		intFutureSettlementPriceId
+		,strDisplayName
 		,strHeaderXML
 		,strFutSettlementPriceXML
 		,strOptSettlementPriceXML
@@ -100,6 +107,7 @@ BEGIN TRY
 		,intToBookId
 		)
 	SELECT intFutureSettlementPriceId = @intFutureSettlementPriceId
+		,strDisplayName = @strDisplayName
 		,strHeaderXML = @strHeaderXML
 		,strFutSettlementPriceXML = @strFutSettlementPriceXML
 		,strOptSettlementPriceXML = @strOptSettlementPriceXML

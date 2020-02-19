@@ -18,11 +18,17 @@ BEGIN TRY
 		,@strObjectName NVARCHAR(50)
 		,@strLastModifiedUser NVARCHAR(100)
 		,@strAdditionalInfo NVARCHAR(MAX)
+		,@strFutureMonth NVARCHAR(20)
 
 	SET @intFutureMonthStageId = NULL
 	SET @strHeaderXML = NULL
 	SET @strHeaderCondition = NULL
 	SET @strLastModifiedUser = NULL
+	SET @strFutureMonth = NULL
+
+	SELECT @strFutureMonth = strFutureMonth
+	FROM tblRKFuturesMonth
+	WHERE intFutureMonthId = @intFutureMonthId
 
 	-------------------------Header-----------------------------------------------------------
 	SELECT @strHeaderCondition = 'intFutureMonthId = ' + LTRIM(@intFutureMonthId)
@@ -63,6 +69,7 @@ BEGIN TRY
 
 	INSERT INTO tblRKFuturesMonthStage (
 		intFutureMonthId
+		,strFutureMonth
 		,strHeaderXML
 		,strRowState
 		,strUserName
@@ -73,6 +80,7 @@ BEGIN TRY
 		,intToBookId
 		)
 	SELECT intFutureMonthId = @intFutureMonthId
+		,strFutureMonth = @strFutureMonth
 		,strHeaderXML = @strHeaderXML
 		,strRowState = @strRowState
 		,strUserName = @strLastModifiedUser

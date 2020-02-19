@@ -102,7 +102,7 @@ BEGIN TRY
 	BEGIN
 		SELECT DISTINCT intOptionsMatchPnSHeaderId
 		INTO #tmpExpireDeleted
-		FROM tblRKOptionsMatchPnS WHERE CONVERT(INT, strTranNo) IN (SELECT CONVERT(INT, strTranNo) FROM @tblExpiredDelete)
+		FROM tblRKOptionsPnSExpired WHERE CONVERT(INT, strTranNo) IN (SELECT CONVERT(INT, strTranNo) FROM @tblExpiredDelete)
 		
 		DECLARE @intExpireDeletedId INT
 
