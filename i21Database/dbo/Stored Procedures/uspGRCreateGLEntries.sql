@@ -180,6 +180,8 @@ BEGIN
 		,[intTicketDiscountId]			   INT
 		,[dblUnits] 					   DECIMAL(24,10)
 		,[dblConvertedUnits] 				DECIMAL(24,10)
+		,ysnGross							BIT
+		,[dblOriginalUnits] 				DECIMAL(24,10)
 	)
 
 	INSERT INTO @tblOtherCharges
@@ -201,7 +203,9 @@ BEGIN
 		,[ysnPrice]
 		,[intTicketDiscountId]
 		,[dblUnits]
-		,[dblConvertedUnits] 	
+		,[dblConvertedUnits] 
+		,ysnGross
+		,[dblOriginalUnits]
 	)
 	--Discounts
 	SELECT
@@ -278,6 +282,8 @@ BEGIN
 		,[intTicketDiscountId]				= QM.intTicketDiscountId
 		,[dblUnits]							= CASE WHEN QM.strCalcMethod = 3 THEN @dblGrossUnits ELSE @dblUnits END
 		,[dblConvertedUnits]				= CASE WHEN QM.strCalcMethod = 3 THEN @dblGrossUnits ELSE @dblConvertedUnits END
+		,ysnGross							= CASE WHEN QM.strCalcMethod = 3 THEN 1 ELSE 0 END
+		,dblOriginalQty						= CASE WHEN QM.strCalcMethod = 3 THEN @dblUnits ELSE null END
 	FROM tblGRSettleStorageTicket SST
 	JOIN tblGRSettleStorage SS 
 		ON SS.intSettleStorageId = SST.intSettleStorageId
@@ -340,6 +346,8 @@ BEGIN
 		,[intTicketDiscountId]				= NULL
 		,[dblUnits]							= @dblUnits
 		,[dblConvertedUnits]				= @dblConvertedUnits
+		,ysnGross							= 0
+		,dblOriginalUnit					= null
 	FROM tblGRSettleStorage SS
 	JOIN tblICItem IC 
 		ON 1 = 1
@@ -433,7 +441,7 @@ BEGIN
 		,intChargeItemLocation			 = ChargeItemLocation.intItemLocationId
 		,intTransactionId				 = @intSettleStorageId
 		,strTransactionId				 = @strTransactionId
-		,dblCost						 = CS.dblRate
+		,dblCost						 = case when CS.ysnGross = 1 then ((CS.dblRate / CS.dblUnits) * CS.dblOriginalUnits) else CS.dblRate end
 		,intTransactionTypeId			 = 44
 		,intCurrencyId					 = CS.intCurrencyId
 		,dblExchangeRate				 = 1
