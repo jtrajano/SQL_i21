@@ -335,7 +335,7 @@ SELECT
     ,[intLoadDetailId]                  = NULL
     ,[intShipmentId]                    = NULL
     ,[intTicketId]                      = NULL
-    ,[intDiscountAccountId]             = @DiscountAccountId
+    ,[intDiscountAccountId]             = ISNULL(SMCL.intSalesDiscounts, @DiscountAccountId)
     ,[intCustomerStorageId]             = NULL
     ,[intStorageScheduleTypeId]         = NULL
     ,[intSubLocationId]                 = NULL
@@ -352,24 +352,17 @@ SELECT
                                                 ELSE ARI.[strTransactionType] + ' for ' + ISNULL(ARC.strName, '')
                                             END		
     
-FROM
-    tblARInvoice ARI
-INNER JOIN
-    (
+FROM tblARInvoice ARI
+INNER JOIN (
     SELECT C.[intEntityId], EM.strName, [strCustomerNumber], C.[ysnActive], [dblCreditLimit] FROM tblARCustomer C WITH(NoLock)
     INNER JOIN tblEMEntity EM ON C.intEntityId = EM.intEntityId
-    ) ARC
-        ON ARI.[intEntityCustomerId] = ARC.[intEntityId]
-LEFT OUTER JOIN
-    (
-    SELECT [intCompanyLocationId], [strLocationName], [intUndepositedFundsId], [intAPAccount], [intFreightIncome], [intProfitCenter], [intSalesAccount] FROM tblSMCompanyLocation  WITH(NoLock)
-    ) SMCL
-        ON ARI.[intCompanyLocationId] = SMCL.[intCompanyLocationId]
-LEFT OUTER JOIN
-    (
+) ARC ON ARI.[intEntityCustomerId] = ARC.[intEntityId]
+LEFT OUTER JOIN (
+    SELECT [intCompanyLocationId], [strLocationName], [intUndepositedFundsId], [intAPAccount], [intFreightIncome], [intProfitCenter], [intSalesAccount], [intSalesDiscounts] FROM tblSMCompanyLocation  WITH(NoLock)
+) SMCL ON ARI.[intCompanyLocationId] = SMCL.[intCompanyLocationId]
+LEFT OUTER JOIN (
     SELECT [intTransactionId] FROM vyuARForApprovalTransction  WITH (NOLOCK) WHERE [strScreenName] = 'Invoice'
-    ) FAT
-        ON ARI.[intInvoiceId] = FAT.[intTransactionId]
+) FAT ON ARI.[intInvoiceId] = FAT.[intTransactionId]
 WHERE
 	NOT EXISTS(SELECT NULL FROM #ARPostInvoiceHeader IH WHERE IH.[intInvoiceId] = ARI.[intInvoiceId])
     AND (
@@ -683,7 +676,7 @@ SELECT
     ,[intLoadDetailId]                  = NULL
     ,[intShipmentId]                    = NULL
     ,[intTicketId]                      = NULL
-    ,[intDiscountAccountId]             = @DiscountAccountId
+    ,[intDiscountAccountId]             = ISNULL(SMCL.intSalesDiscounts, @DiscountAccountId)
     ,[intCustomerStorageId]             = NULL
     ,[intStorageScheduleTypeId]         = NULL
     ,[intSubLocationId]                 = NULL
@@ -721,7 +714,7 @@ INNER JOIN
         ON ARI.[intEntityCustomerId] = ARC.[intEntityId]
 LEFT OUTER JOIN
     (
-    SELECT [intCompanyLocationId], [strLocationName], [intUndepositedFundsId], [intAPAccount], [intFreightIncome], [intProfitCenter], [intSalesAccount] FROM tblSMCompanyLocation  WITH(NoLock)
+    SELECT [intCompanyLocationId], [strLocationName], [intUndepositedFundsId], [intAPAccount], [intFreightIncome], [intProfitCenter], [intSalesAccount], [intSalesDiscounts] FROM tblSMCompanyLocation  WITH(NoLock)
     ) SMCL
         ON ARI.[intCompanyLocationId] = SMCL.[intCompanyLocationId]
 LEFT OUTER JOIN
@@ -1017,7 +1010,7 @@ SELECT
     ,[intLoadDetailId]                  = NULL
     ,[intShipmentId]                    = NULL
     ,[intTicketId]                      = NULL
-    ,[intDiscountAccountId]             = @DiscountAccountId
+    ,[intDiscountAccountId]             = ISNULL(SMCL.intSalesDiscounts, @DiscountAccountId)
     ,[intCustomerStorageId]             = NULL
     ,[intStorageScheduleTypeId]         = NULL
     ,[intSubLocationId]                 = NULL
@@ -1053,7 +1046,7 @@ INNER JOIN
         ON ARI.[intEntityCustomerId] = ARC.[intEntityId]
 LEFT OUTER JOIN
     (
-    SELECT [intCompanyLocationId], [strLocationName], [intUndepositedFundsId], [intAPAccount], [intFreightIncome], [intProfitCenter], [intSalesAccount] FROM tblSMCompanyLocation  WITH(NoLock)
+    SELECT [intCompanyLocationId], [strLocationName], [intUndepositedFundsId], [intAPAccount], [intFreightIncome], [intProfitCenter], [intSalesAccount], [intSalesDiscounts] FROM tblSMCompanyLocation  WITH(NoLock)
     ) SMCL
         ON ARI.[intCompanyLocationId] = SMCL.[intCompanyLocationId]
 LEFT OUTER JOIN
@@ -1351,7 +1344,7 @@ SELECT
     ,[intLoadDetailId]                  = ARID.[intLoadDetailId]
     ,[intShipmentId]                    = ARID.[intShipmentId]
     ,[intTicketId]                      = ARID.[intTicketId]
-    ,[intDiscountAccountId]             = @DiscountAccountId
+    ,[intDiscountAccountId]             = ISNULL(SMCL.intSalesDiscounts, @DiscountAccountId)
     ,[intCustomerStorageId]             = ARID.[intCustomerStorageId]
     ,[intStorageScheduleTypeId]         = ARID.[intStorageScheduleTypeId]
     ,[intSubLocationId]                 = ISNULL(ARID.[intCompanyLocationSubLocationId], (CASE WHEN ICI.[ysnAutoBlend] = 1 THEN ICIL.[intSubLocationId] ELSE ISNULL(ARID.[intCompanyLocationSubLocationId], ARID.[intSubLocationId]) END))
@@ -1366,6 +1359,7 @@ SELECT
     ,[strDescription]                   = ISNULL(GL.strDescription, '') + ' Item: ' + ISNULL(ARID.strItemDescription, '') + ', Qty: ' + CAST(CAST(ARID.dblQtyShipped AS NUMERIC(18, 2)) AS nvarchar(100)) + ', Price: ' + CAST(CAST(ARID.dblPrice AS NUMERIC(18, 2)) AS nvarchar(100))
 FROM #ARPostInvoiceHeader ARI
 INNER JOIN tblARInvoiceDetail ARID ON ARI.[intInvoiceId] = ARID.[intInvoiceId]
+INNER JOIN tblSMCompanyLocation SMCL ON ARI.[intCompanyLocationId] = SMCL.[intCompanyLocationId]
 INNER JOIN (
     SELECT [intItemId], [strItemNo], [strType], [strDescription], [ysnAutoBlend], [intCategoryId] FROM tblICItem WITH(NoLock)
 ) ICI ON ARID.[intItemId] = ICI.[intItemId]
@@ -1746,7 +1740,7 @@ SELECT
     ,[intLoadDetailId]                  = ARID.[intLoadDetailId]
     ,[intShipmentId]                    = ARID.[intShipmentId]
     ,[intTicketId]                      = ARID.[intTicketId]
-    ,[intDiscountAccountId]             = @DiscountAccountId
+    ,[intDiscountAccountId]             = ISNULL(SMCL.intSalesDiscounts, @DiscountAccountId)
     ,[intCustomerStorageId]             = ARID.[intCustomerStorageId]
     ,[intStorageScheduleTypeId]         = ARID.[intStorageScheduleTypeId]
     ,[intSubLocationId]                 = ISNULL(ARID.[intCompanyLocationSubLocationId], (CASE WHEN ICI.[ysnAutoBlend] = 1 THEN ICIL.[intSubLocationId] ELSE ISNULL(ARID.[intCompanyLocationSubLocationId], ARID.[intSubLocationId]) END))
@@ -1762,6 +1756,7 @@ SELECT
     
 FROM #ARPostInvoiceHeader ARI
 INNER JOIN tblARInvoiceDetail ARID ON ARI.[intInvoiceId] = ARID.[intInvoiceId]
+INNER JOIN tblSMCompanyLocation SMCL ON ARI.[intCompanyLocationId] = SMCL.[intCompanyLocationId]
 INNER JOIN (
     SELECT [intItemId], [strItemNo], [strType], [strDescription], [ysnAutoBlend], [intCategoryId] FROM tblICItem WITH(NoLock)
 ) ICI ON ARID.[intItemId] = ICI.[intItemId]
@@ -2064,7 +2059,7 @@ SELECT
     ,[intLoadDetailId]                  = ARID.[intLoadDetailId]
     ,[intShipmentId]                    = ARID.[intShipmentId]
     ,[intTicketId]                      = ARID.[intTicketId]
-    ,[intDiscountAccountId]             = @DiscountAccountId
+    ,[intDiscountAccountId]             = ISNULL(SMCL.intSalesDiscounts, @DiscountAccountId)
     ,[intCustomerStorageId]             = ARID.[intCustomerStorageId]
     ,[intStorageScheduleTypeId]         = ARID.[intStorageScheduleTypeId]
     ,[intSubLocationId]                 = ISNULL(ARID.[intCompanyLocationSubLocationId], ARID.[intSubLocationId])
@@ -2079,6 +2074,7 @@ SELECT
     ,[strDescription]                   = ISNULL(GL.strDescription, '') + ' Item: ' + ISNULL(ARID.strItemDescription, '') + ', Qty: ' + CAST(CAST(ARID.dblQtyShipped AS NUMERIC(18, 2)) AS nvarchar(100)) + ', Price: ' + CAST(CAST(ARID.dblPrice AS NUMERIC(18, 2)) AS nvarchar(100))		
 FROM #ARPostInvoiceHeader ARI
 INNER JOIN tblARInvoiceDetail ARID ON ARI.[intInvoiceId] = ARID.[intInvoiceId]
+INNER JOIN tblSMCompanyLocation SMCL ON ARI.[intCompanyLocationId] = SMCL.[intCompanyLocationId]
 LEFT OUTER JOIN (
     SELECT [intCurrencyExchangeRateTypeId], [strCurrencyExchangeRateType] FROM tblSMCurrencyExchangeRateType WITH(NoLock)
 ) SMCERT ON ARID.[intCurrencyExchangeRateTypeId] = SMCERT.[intCurrencyExchangeRateTypeId]
