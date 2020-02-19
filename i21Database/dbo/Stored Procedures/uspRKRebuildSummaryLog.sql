@@ -717,6 +717,102 @@ BEGIN
 		DELETE FROM @ExistingHistory
 
 		--=======================================
+		--			Option Derivatives
+		--=======================================
+		PRINT 'Populate RK Summary Log - Option Derivatives'
+		
+		INSERT INTO @ExistingHistory(strTransactionType
+			, intTransactionRecordId
+			, strTransactionNumber
+			, dtmTransactionDate
+			, intContractDetailId
+			, intContractHeaderId
+			, intCommodityId
+			, intLocationId
+			, intBookId
+			, intSubBookId
+			, intFutureMarketId
+			, intFutureMonthId
+			, strNotes
+			, dblNoOfLots
+			, dblPrice
+			, intEntityId
+			, intUserId
+			, intCommodityUOMId)
+		SELECT strTransactionType
+			, intTransactionRecordId
+			, strTransactionNumber
+			, dtmTransactionDate
+			, intContractDetailId
+			, intContractHeaderId
+			, intCommodityId
+			, intLocationId
+			, intBookId
+			, intSubBookId
+			, intFutureMarketId
+			, intFutureMonthId
+			, strNotes
+			, dblNoOfLots
+			, dblPrice
+			, intEntityId
+			, intUserId
+			, intCommodityUOMId
+		FROM (
+			SELECT strTransactionType = 'Expired Options'
+				, intTransactionRecordId = detail.intFutOptTransactionId
+				, strTransactionNumber = de.strInternalTradeNo
+				, dtmTransactionDate = detail.dtmExpiredDate
+				, intContractDetailId = detail.intOptionsPnSExpiredId
+				, intContractHeaderId = header.intOptionsMatchPnSHeaderId
+				, intCommodityId = de.intCommodityId
+				, de.intLocationId
+				, intBookId = de.intBookId
+				, intSubBookId = de.intSubBookId
+				, intFutureMarketId = de.intFutureMarketId
+				, intFutureMonthId = de.intFutureMonthId
+				, strNotes = CASE WHEN de.strBuySell = 'Buy' THEN 'IN' ELSE 'OUT' END
+				, dblNoOfLots = detail.dblLots * - 1
+				, dblPrice = de.dblPrice
+				, intEntityId = de.intEntityId
+				, intUserId = @intCurrentUserId
+				, intCommodityUOMId = cUOM.intCommodityUnitMeasureId
+			FROM tblRKOptionsPnSExpired detail
+			JOIN tblRKOptionsMatchPnSHeader header ON header.intOptionsMatchPnSHeaderId = detail.intOptionsMatchPnSHeaderId
+			JOIN tblRKFutOptTransaction de ON de.intFutOptTransactionId = detail.intFutOptTransactionId
+			LEFT JOIN tblRKFutureMarket FutMarket ON FutMarket.intFutureMarketId = de.intFutureMarketId
+			LEFT JOIN tblICCommodityUnitMeasure cUOM ON cUOM.intCommodityId = de.intCommodityId AND cUOM.intUnitMeasureId = FutMarket.intUnitMeasureId
+
+			UNION ALL SELECT strTransactionType = 'Excercised/Assigned Options'
+				, intTransactionRecordId = detail.intFutOptTransactionId
+				, strTransactionNumber = de.strInternalTradeNo
+				, dtmTransactionDate = detail.dtmTranDate
+				, intContractDetailId = detail.intOptionsPnSExercisedAssignedId
+				, intContractHeaderId = header.intOptionsMatchPnSHeaderId
+				, intCommodityId = de.intCommodityId
+				, de.intLocationId
+				, intBookId = de.intBookId
+				, intSubBookId = de.intSubBookId
+				, intFutureMarketId = de.intFutureMarketId
+				, intFutureMonthId = de.intFutureMonthId
+				, strNotes = CASE WHEN de.strBuySell = 'Buy' THEN 'IN' ELSE 'OUT' END
+				, dblNoOfLots = detail.dblLots * - 1
+				, dblPrice = de.dblPrice
+				, intEntityId = de.intEntityId
+				, intUserId = @intCurrentUserId
+				, intCommodityUOMId = cUOM.intCommodityUnitMeasureId
+			FROM tblRKOptionsPnSExercisedAssigned detail
+			JOIN tblRKOptionsMatchPnSHeader header ON header.intOptionsMatchPnSHeaderId = detail.intOptionsMatchPnSHeaderId
+			JOIN tblRKFutOptTransaction de ON de.intFutOptTransactionId = detail.intFutOptTransactionId
+			LEFT JOIN tblRKFutureMarket FutMarket ON FutMarket.intFutureMarketId = de.intFutureMarketId
+			LEFT JOIN tblICCommodityUnitMeasure cUOM ON cUOM.intCommodityId = de.intCommodityId AND cUOM.intUnitMeasureId = FutMarket.intUnitMeasureId
+		) tbl
+
+		EXEC uspRKLogRiskPosition @ExistingHistory, 1
+
+		PRINT 'End Populate RK Summary Log'
+		DELETE FROM @ExistingHistory
+
+		--=======================================
 		--				COLLATERAL
 		--=======================================
 		PRINT 'Populate RK Summary Log - Collateral'
