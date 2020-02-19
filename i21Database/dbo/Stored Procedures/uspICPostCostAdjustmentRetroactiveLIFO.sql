@@ -250,7 +250,8 @@ BEGIN
 	WHERE	@InventoryTransactionStartId IS NOT NULL 
 	-- Negative Stocks 
 	UNION ALL 
-	SELECT	-cbOut.intInventoryTransactionId
+	SELECT	DISTINCT
+			-cbOut.intInventoryTransactionId
 			,2 
 	FROM	tblICInventoryLIFOOut cbOut 
 	WHERE	cbOut.intInventoryLIFOId = @CostBucketId			
