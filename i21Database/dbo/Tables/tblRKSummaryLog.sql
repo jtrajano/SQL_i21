@@ -3,8 +3,11 @@
 	intSummaryLogId INT IDENTITY NOT NULL,
 	strBatchId NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL,
 	dtmCreatedDate DATETIME NULL DEFAULT(GETDATE()),
+	strBucketType NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL,
 	strTransactionType NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL,
-	intTransactionRecordId INT NOT NULL,
+	intTransactionRecordId INT NULL,
+	intTransactionRecordHeaderId INT NULL,
+	strDistributionType NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL,
 	strTransactionNumber NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL,
 	dtmTransactionDate DATETIME NOT NULL,
 	intContractDetailId INT NULL,
@@ -34,3 +37,5 @@
     [intConcurrencyId] INT NULL DEFAULT ((1)), 
     CONSTRAINT [PK_tblRKSummaryLog] PRIMARY KEY ([intSummaryLogId])
 )
+
+GO

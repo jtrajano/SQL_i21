@@ -11,9 +11,23 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 BEGIN	
-	SELECT * INTO #tmpCollateral FROM tblRKCollateral WHERE intCollateralId = @intCollateralId
+	SELECT col.*
+		, con.*
+	INTO #tmpCollateral
+	FROM tblRKCollateral col
+	CROSS APPLY (SELECT TOP 1 CD.intFutureMarketId
+					, CD.intFutureMonthId
+					, CH.intEntityId
+				FROM tblCTContractDetail CD
+				LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+				WHERE CD.intContractHeaderId = col.intContractHeaderId) con
+	WHERE intCollateralId = @intCollateralId
+
+
 	SELECT * INTO #History FROM tblRKSummaryLog WHERE intTransactionRecordId = @intCollateralId AND strTransactionType = 'Collateral'
 	DECLARE @SummaryLog AS RKSummaryLog
+
+	
 	
 	IF EXISTS(SELECT TOP 1 1 FROM #tmpCollateral)
 	BEGIN
@@ -30,8 +44,11 @@ BEGIN
 				AND d.intContractHeaderId = h.intContractHeaderId
 				AND d.intItemId = h.intItemId)
 		BEGIN
-			INSERT INTO @SummaryLog(strTransactionType
+			INSERT INTO @SummaryLog(strBucketType
+				, strTransactionType
 				, intTransactionRecordId
+				, intTransactionRecordHeaderId
+				, strDistributionType
 				, strTransactionNumber
 				, dtmTransactionDate
 				, intContractHeaderId
@@ -41,9 +58,15 @@ BEGIN
 				, dblQty
 				, intEntityId
 				, intUserId
-				, strNotes)
-			SELECT strTransactionType = 'Collateral'
+				, strNotes
+				, intFutureMarketId
+				, intFutureMonthId
+				, intEntityId)
+			SELECT strBucketType = 'Collateral'
+				, strTransactionType = 'Collateral'
 				, intTransactionRecordId = intCollateralId
+				, intTransactionRecordHeaderId = NULL
+				, strDistributionType = strType
 				, strTransactionNumber = strReceiptNo
 				, dtmTransactionDate = dtmOpenDate
 				, intContractHeaderId = intContractHeaderId
@@ -53,13 +76,19 @@ BEGIN
 				, dblQty = dblOriginalQuantity
 				, intEntityId = intEntityId
 				, intUserId = @intUserId
-				, strNotes = strType + ' Collateral'
+				, strComments
+				, intFutureMarketId
+				, intFutureMonthId
+				, intEntityId
 			FROM #tmpCollateral
 		END
 
 		-- Collateral Adjustments
-		INSERT INTO @SummaryLog(strTransactionType
+		INSERT INTO @SummaryLog(strBucketType
+			, strTransactionType
 			, intTransactionRecordId
+			, intTransactionRecordHeaderId
+			, strDistributionType
 			, strTransactionNumber
 			, dtmTransactionDate
 			, intContractDetailId
@@ -69,23 +98,31 @@ BEGIN
 			, intLocationId
 			, dblQty
 			, intUserId
-			, strNotes)
-		SELECT strTransactionType = 'Collateral Adjustments'
-			, intTransactionRecordId = C.intCollateralId
+			, strNotes
+			, intFutureMarketId
+			, intFutureMonthId
+			, intEntityId)
+		SELECT strBucketType = 'Collateral'
+			, strTransactionType = 'Collateral Adjustments'
+			, intTransactionRecordId = CA.intCollateralAdjustmentId
+			, intTransactionRecordHeaderId = C.intCollateralId
+			, strDistributionType = strType
 			, strTransactionNumber = strAdjustmentNo
 			, dtmTransactionDate = dtmAdjustmentDate
-			, intContractDetailId = CA.intCollateralAdjustmentId
+			, intContractDetailId = NULL
 			, intContractHeaderId = C.intContractHeaderId
 			, intCommodityId = intCommodityId
 			, intItemId = intItemId
 			, intLocationId = intLocationId
 			, dblQty = CA.dblAdjustmentAmount
 			, intUserId = @intUserId
-			, strNotes = strType + ' Collateral'
+			, strNotes = CA.strComments
+			, intFutureMarketId
+			, intFutureMonthId
+			, intEntityId
 		FROM tblRKCollateralAdjustment CA
-		JOIN tblRKCollateral C ON C.intCollateralId = CA.intCollateralId
-		WHERE C.intCollateralId = @intCollateralId
-			AND intCollateralAdjustmentId NOT IN (SELECT DISTINCT adj.intCollateralAdjustmentId
+		JOIN #tmpCollateral C ON C.intCollateralId = CA.intCollateralId
+		WHERE intCollateralAdjustmentId NOT IN (SELECT DISTINCT adj.intCollateralAdjustmentId
 				FROM tblRKCollateralAdjustment adj
 				JOIN tblRKSummaryLog history ON history.intTransactionRecordId = adj.intCollateralId AND strTransactionType = 'Collateral Adjustments'
 					AND adj.dtmAdjustmentDate = history.dtmTransactionDate

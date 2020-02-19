@@ -79,7 +79,7 @@ BEGIN
 			, c.strCommodityCode
 			, intCommodityUnitMeasureId = c.intOrigUOMId
 			, intCompanyLocationId = c.intLocationId
-			, intContractTypeId = CASE WHEN c.strNotes = 'Purchase Collateral' THEN 1 ELSE 2 END
+			, intContractTypeId = CASE WHEN c.strDistributionType = 'Purchase' THEN 1 ELSE 2 END
 			, c.intLocationId
 			, intEntityId
 			, c.intFutureMarketId
@@ -92,9 +92,9 @@ BEGIN
 			SELECT intCollateralId
 				, dblAdjustmentAmount = SUM(dblAdjustmentAmount)
 			FROM (
-				SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY Adj.intContractDetailId ORDER BY Adj.intSummaryLogId DESC)
-					, intCollateralAdjustmentId = intContractDetailId
-					, intCollateralId = intTransactionRecordId
+				SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY Adj.intTransactionRecordId ORDER BY Adj.intSummaryLogId DESC)
+					, intCollateralAdjustmentId = intTransactionRecordId
+					, intCollateralId = intTransactionRecordHeaderId
 					, dblAdjustmentAmount = dblOrigQty
 				FROM vyuRKGetSummaryLog Adj
 				WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmTransactionDate, 110), 110) <= CONVERT(DATETIME, @dtmDate)
@@ -102,7 +102,7 @@ BEGIN
 					AND strTransactionType = 'Collateral Adjustment'
 			) t WHERE intRowNum = 1		
 			GROUP BY intCollateralId
-		) ca ON c.intTransactionRecordId = ca.intCollateralId
+		) ca ON c.intTransactionRecordHeaderId = ca.intCollateralId
 		JOIN tblRKCollateral Col ON Col.intCollateralId = c.intTransactionRecordId
 		WHERE strTransactionType = 'Collateral'
 			AND CONVERT(DATETIME, CONVERT(VARCHAR(10), c.dtmTransactionDate, 110), 110) <= CONVERT(DATETIME, @dtmDate)

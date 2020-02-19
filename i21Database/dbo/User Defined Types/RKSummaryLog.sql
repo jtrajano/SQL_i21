@@ -1,8 +1,11 @@
 ﻿CREATE TYPE [dbo].[RKSummaryLog] AS TABLE (
 	intId INT IDENTITY PRIMARY KEY CLUSTERED
 	, strBatchId NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL
+	, strBucketType NVARCHAR (100) COLLATE Latin1_General_CI_AS NOT NULL
 	, strTransactionType NVARCHAR (100) COLLATE Latin1_General_CI_AS NOT NULL
-	, intTransactionRecordId INT NOT NULL
+	, intTransactionRecordId INT NULL
+	, intTransactionRecordHeaderId INT NULL
+	, strDistributionType NVARCHAR (100) COLLATE Latin1_General_CI_AS NOT NULL
 	, strTransactionNumber NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL
 	, dtmTransactionDate DATETIME
 	, intContractDetailId INT NULL
@@ -19,8 +22,10 @@
 	, dblNoOfLots DECIMAL(24, 10) NULL DEFAULT((0))
 	, dblQty DECIMAL(24, 10) NULL DEFAULT((0))
 	, dblPrice DECIMAL(24, 10) NULL DEFAULT((0))
+	, dblContractSize DECIMAL(24, 10) NULL DEFAULT((0))
 	, intEntityId INT NULL
 	, ysnDelete BIT NULL DEFAULT((0))
 	, intUserId INT NULL
 	, strNotes NVARCHAR(250) NULL
+	, strMiscFields NVARCHAR(MAX) NULL
 )

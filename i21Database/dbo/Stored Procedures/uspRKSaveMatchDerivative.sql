@@ -30,6 +30,48 @@ BEGIN TRY
 	SELECT * INTO #History FROM vyuRKGetMatchDerivativesFromSummaryLog WHERE intMatchDerivativesHeaderId = @intMatchFuturesPSHeaderId AND strTransactionType = 'Match Derivatives' ORDER BY dtmCreatedDate DESC
 	DECLARE @SummaryLog AS RKSummaryLog
 	
+	--DECLARE @intMatchDerivativesHeaderId INT = @intContractHeaderId
+			--	, @intMatchDerivativesDetailId INT = @intContractDetailId
+			--	, @intMatchNo INT
+
+			--SET @strInOut = @strNotes
+			--SET @intContractHeaderId = NULL
+			--SET @intContractDetailId = NULL
+			--SET @strNotes = ''
+
+			--SELECT TOP 1 @strBuySell = der.strBuySell
+			--	, @dblContractSize = m.dblContractSize
+			--	, @strInstrumentType = CASE WHEN (der.[intInstrumentTypeId] = 1) THEN N'Futures'
+			--					WHEN (der.[intInstrumentTypeId] = 2) THEN N'Options'
+			--					WHEN (der.[intInstrumentTypeId] = 3) THEN N'Currency Contract' END COLLATE Latin1_General_CI_AS
+			--	, @strBrokerAccount = BA.strAccountNumber
+			--	, @strBroker = e.strName
+			--	, @ysnPreCrush = der.ysnPreCrush
+			--	, @strBrokerTradeNo = der.strBrokerTradeNo
+			--FROM tblRKFutOptTransaction der
+			--JOIN tblRKFutureMarket m ON m.intFutureMarketId = der.intFutureMarketId
+			--LEFT JOIN tblICCommodityUnitMeasure cUOM ON cUOM.intCommodityId = der.intCommodityId AND cUOM.intUnitMeasureId = m.intUnitMeasureId
+			--LEFT JOIN tblRKOptionsMonth om ON om.intOptionMonthId = der.intOptionMonthId
+			--LEFT JOIN tblRKBrokerageAccount AS BA ON BA.intBrokerageAccountId = der.intBrokerageAccountId
+			--LEFT JOIN tblEMEntity e ON e.intEntityId = der.intEntityId
+			--WHERE der.intFutOptTransactionId = @intTransactionRecordId
+
+			--SELECT TOP 1 @intMatchNo = intMatchNo FROM tblRKMatchFuturesPSHeader WHERE intMatchFuturesPSHeaderId = @intMatchDerivativesHeaderId
+
+			--INSERT INTO @LogHelper(intRowId, strFieldName, strValue)
+			--SELECT intRowId = ROW_NUMBER() OVER (ORDER BY strFieldName),  * FROM (
+			--	SELECT strFieldName = 'intMatchDerivativesHeaderId', strValue = CAST(@intMatchDerivativesHeaderId AS NVARCHAR)
+			--	UNION ALL SELECT 'intMatchDerivativesDetailId', CAST(@intMatchDerivativesDetailId AS NVARCHAR)
+			--	UNION ALL SELECT 'intMatchNo', CAST(@intMatchNo AS NVARCHAR)
+			--	UNION ALL SELECT 'strBuySell', @strBuySell
+			--	UNION ALL SELECT 'strInstrumentType', @strInstrumentType
+			--	UNION ALL SELECT 'strBrokerAccount', @strBrokerAccount
+			--	UNION ALL SELECT 'strBroker', @strBroker
+			--	UNION ALL SELECT 'intFutOptTransactionHeaderId', CAST(@intFutOptTransactionHeaderId AS NVARCHAR)
+			--	UNION ALL SELECT 'ysnPreCrush', CAST(@ysnPreCrush AS NVARCHAR)
+			--	UNION ALL SELECT 'strBrokerTradeNo', @strBrokerTradeNo
+			--) t WHERE ISNULL(strValue, '') != ''
+
 	IF EXISTS(SELECT TOP 1 1 FROM #tmpDerivative)
 	BEGIN
 		INSERT INTO @SummaryLog(strTransactionType

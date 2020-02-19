@@ -5,8 +5,11 @@ AS
 SELECT SL.intSummaryLogId
 	, SL.strBatchId
 	, SL.dtmCreatedDate
+	, SL.strBucketType
 	, SL.strTransactionType
 	, SL.intTransactionRecordId
+	, SL.intTransactionRecordHeaderId
+	, SL.strDistributionType
 	, SL.strTransactionNumber
 	, SL.dtmTransactionDate
 	, SL.intContractDetailId

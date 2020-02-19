@@ -14,8 +14,11 @@ SET ANSI_WARNINGS OFF
 BEGIN	
 	DECLARE @intId INT
 		, @strBatchId NVARCHAR(100)
+		, @strBucketType NVARCHAR(100)
 		, @strTransactionType NVARCHAR(100)
 		, @intTransactionRecordId INT
+		, @intTransactionRecordHeaderId INT
+		, @strDistributionType NVARCHAR(100)
 		, @strTransactionNumber NVARCHAR(100)
 		, @dtmTransactionDate DATETIME
 		, @intContractDetailId INT
@@ -32,21 +35,20 @@ BEGIN
 		, @dblNoOfLots DECIMAL(24, 10)
 		, @dblQty DECIMAL(24, 10)
 		, @dblPrice DECIMAL(24, 10)
+		, @dblContractSize DECIMAL(24, 10)
 		, @intUserId INT
 		, @intEntityId INT
 		, @ysnDelete BIT
 		, @strNotes NVARCHAR(250)
 		, @strInOut NVARCHAR(50)
-		, @dblContractSize NUMERIC(24, 10)
-		, @strInstrumentType NVARCHAR(50)
-		, @strBrokerAccount NVARCHAR(50)
-		, @strBroker NVARCHAR(50)
-		, @ysnPreCrush BIT
-		, @strBrokerTradeNo NVARCHAR(50)
+		, @strMiscFields NVARCHAR(MAX)
 
 	DECLARE @FinalTable AS TABLE (strBatchId NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL
+		, strBucketType NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL
 		, strTransactionType NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL
-		, intTransactionRecordId INT NOT NULL
+		, intTransactionRecordId INT NULL
+		, intTransactionRecordHeaderId INT NULL
+		, strDistributionType NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL
 		, strTransactionNumber NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL
 		, dtmTransactionDate DATETIME NOT NULL
 		, intContractDetailId INT NULL
@@ -72,9 +74,7 @@ BEGIN
 		, strNotes NVARCHAR(250) NULL
 		, ysnNegate BIT NULL
 		, intRefSummaryLogId INT NULL
-		, strMiscField NVARCHAR(MAX))
-
-	DECLARE @LogHelper AS RKMiscField
+		, strMiscFields NVARCHAR(MAX))
 
 	SELECT * INTO #tmpSummaryLogs FROM @SummaryLogs
 
@@ -93,8 +93,11 @@ BEGIN
 	BEGIN
 		SELECT @intId = NULL
 			, @strBatchId = NULL
+			, @strBucketType = NULL
 			, @strTransactionType = NULL
 			, @intTransactionRecordId = NULL
+			, @intTransactionRecordHeaderId = NULL
+			, @strDistributionType = NULL
 			, @strTransactionNumber = NULL
 			, @dtmTransactionDate = NULL
 			, @intContractDetailId = NULL
@@ -111,22 +114,21 @@ BEGIN
 			, @dblNoOfLots = NULL
 			, @dblQty = NULL
 			, @dblPrice = NULL
+			, @dblContractSize = NULL
 			, @intUserId = NULL
 			, @intEntityId = NULL
 			, @ysnDelete = NULL
 			, @strNotes = NULL
-			, @strInOut = NULL
-			, @dblContractSize = NULL
-			, @strInstrumentType = NULL
-			, @strBrokerAccount = NULL
-			, @strBroker = NULL
-			, @ysnPreCrush = NULL
-			, @strBrokerTradeNo = NULL
+			, @strInOut = NULL			
+			, @strMiscFields = NULL
 
 		SELECT TOP 1 @intId = intId
 			, @strBatchId = strBatchId
+			, @strBucketType = strBucketType
 			, @strTransactionType = strTransactionType
 			, @intTransactionRecordId = intTransactionRecordId
+			, @intTransactionRecordHeaderId = intTransactionRecordHeaderId
+			, @strDistributionType = strDistributionType
 			, @strTransactionNumber = strTransactionNumber
 			, @dtmTransactionDate = dtmTransactionDate
 			, @intContractDetailId = intContractDetailId
@@ -143,21 +145,32 @@ BEGIN
 			, @dblNoOfLots = dblNoOfLots
 			, @dblQty = dblQty
 			, @dblPrice = dblPrice
+			, @dblContractSize = dblContractSize
 			, @intUserId = intUserId
 			, @intEntityId = intEntityId
 			, @strNotes = strNotes
 			, @ysnDelete = ysnDelete
+			, @strMiscFields = strMiscFields
 		FROM #tmpSummaryLogs
 
-		SELECT TOP 1 * INTO #tmpPrevLog FROM tblRKSummaryLog WHERE strTransactionType = @strTransactionType AND intTransactionRecordId = @intTransactionRecordId AND ysnNegate = 0
+		SELECT TOP 1 *
+		INTO #tmpPrevLog
+		FROM tblRKSummaryLog
+		WHERE strBucketType = @strBucketType
+			AND strTransactionType = @strTransactionType
+			AND intTransactionRecordId = @intTransactionRecordId
+			AND ysnNegate = 0
 		ORDER BY intSummaryLogId DESC
 
 		-- Insert Delete Entry
 		IF (ISNULL(@ysnDelete, 0) = 1)
 		BEGIN
 			INSERT INTO @FinalTable(strBatchId
+				, strBucketType
 				, strTransactionType
 				, intTransactionRecordId
+				, intTransactionRecordHeaderId
+				, strDistributionType
 				, strTransactionNumber
 				, dtmTransactionDate
 				, intContractDetailId
@@ -180,10 +193,14 @@ BEGIN
 				, intEntityId
 				, intTicketId
 				, intUserId
-				, strNotes)
+				, strNotes
+				, strMiscFields)
 			SELECT strBatchId
+				, strBucketType
 				, strTransactionType
 				, intTransactionRecordId
+				, intTransactionRecordHeaderId
+				, strDistributionType
 				, strTransactionNumber
 				, dtmTransactionDate
 				, intContractDetailId
@@ -207,6 +224,7 @@ BEGIN
 				, intTicketId
 				, @intUserId
 				, 'Delete Record'
+				, strMiscFields
 			FROM #tmpPrevLog
 			CONTINUE
 		END
@@ -215,7 +233,9 @@ BEGIN
 		IF EXISTS(SELECT TOP 1 1
 			FROM #tmpPrevLog
 			WHERE intTransactionRecordId = @intTransactionRecordId
+				AND strBucketType = @strBucketType
 				AND strTransactionType = @strTransactionType
+				AND strDistributionType = @strDistributionType
 				AND intCommodityId = @intCommodityId
 				AND intFutureMarketId = @intFutureMarketId
 				AND intFutureMonthId = @intFutureMonthId
@@ -235,8 +255,11 @@ BEGIN
 			IF EXISTS(SELECT TOP 1 1 FROM #tmpPrevLog)
 			BEGIN
 				INSERT INTO @FinalTable(strBatchId
+					, strBucketType
 					, strTransactionType
 					, intTransactionRecordId
+					, intTransactionRecordHeaderId
+					, strDistributionType
 					, strTransactionNumber
 					, dtmTransactionDate
 					, intContractDetailId
@@ -261,10 +284,14 @@ BEGIN
 					, intUserId
 					, strNotes
 					, ysnNegate
-					, intRefSummaryLogId)
+					, intRefSummaryLogId
+					, strMiscFields)
 				SELECT @strBatchId
+					, strBucketType
 					, strTransactionType
 					, intTransactionRecordId
+					, intTransactionRecordHeaderId
+					, strDistributionType
 					, strTransactionNumber
 					, dtmTransactionDate
 					, intContractDetailId
@@ -290,6 +317,7 @@ BEGIN
 					, strNotes
 					, 1
 					, intSummaryLogId
+					, strMiscField
 				FROM #tmpPrevLog
 			END
 		END
@@ -299,53 +327,12 @@ BEGIN
 		---------------------------------------
 		IF @strTransactionType = 'Derivatives'
 		BEGIN
-			DECLARE @strBuySell NVARCHAR(50)
-				, @intOptionMonthId INT
-				, @strOptionMonth NVARCHAR(50)
-				, @dblStrike NUMERIC(24, 10)
-				, @strOptionType NVARCHAR(50)
-				, @intFutOptTransactionHeaderId INT
-			
-			SELECT TOP 1 @strBuySell = der.strBuySell
-				, @dblContractSize = m.dblContractSize
-				, @intOptionMonthId = der.intOptionMonthId
-				, @strOptionMonth = om.strOptionMonth
-				, @dblStrike = der.dblStrike
-				, @strOptionType = der.strOptionType
-				, @strInstrumentType = CASE WHEN (der.[intInstrumentTypeId] = 1) THEN N'Futures'
-								WHEN (der.[intInstrumentTypeId] = 2) THEN N'Options'
-								WHEN (der.[intInstrumentTypeId] = 3) THEN N'Currency Contract' END COLLATE Latin1_General_CI_AS
-				, @strBrokerAccount = BA.strAccountNumber
-				, @strBroker = e.strName
-				, @intFutOptTransactionHeaderId = der.intFutOptTransactionHeaderId
-				, @ysnPreCrush = der.ysnPreCrush
-				, @strBrokerTradeNo = der.strBrokerTradeNo
-			FROM tblRKFutOptTransaction der
-			JOIN tblRKFutureMarket m ON m.intFutureMarketId = der.intFutureMarketId
-			LEFT JOIN tblICCommodityUnitMeasure cUOM ON cUOM.intCommodityId = der.intCommodityId AND cUOM.intUnitMeasureId = m.intUnitMeasureId
-			LEFT JOIN tblRKOptionsMonth om ON om.intOptionMonthId = der.intOptionMonthId
-			LEFT JOIN tblRKBrokerageAccount AS BA ON BA.intBrokerageAccountId = der.intBrokerageAccountId
-			LEFT JOIN tblEMEntity e ON e.intEntityId = der.intEntityId
-			WHERE der.intFutOptTransactionId = @intTransactionRecordId
-
-			INSERT INTO @LogHelper(intRowId, strFieldName, strValue)
-			SELECT intRowId = ROW_NUMBER() OVER (ORDER BY strFieldName),  * FROM (
-				SELECT strFieldName = 'strBuySell', strValue = @strBuySell
-				UNION ALL SELECT 'intOptionMonthId', CAST(@intOptionMonthId AS NVARCHAR)
-				UNION ALL SELECT 'strOptionMonth', @strOptionMonth
-				UNION ALL SELECT 'dblStrike', CAST(@dblStrike AS NVARCHAR)
-				UNION ALL SELECT 'strOptionType', @strOptionType
-				UNION ALL SELECT 'strInstrumentType', @strInstrumentType
-				UNION ALL SELECT 'strBrokerAccount', @strBrokerAccount
-				UNION ALL SELECT 'strBroker', @strBroker
-				UNION ALL SELECT 'intFutOptTransactionHeaderId', CAST(@intFutOptTransactionHeaderId AS NVARCHAR)
-				UNION ALL SELECT 'ysnPreCrush', CAST(@ysnPreCrush AS NVARCHAR)
-				UNION ALL SELECT 'strBrokerTradeNo', @strBrokerTradeNo
-			) t WHERE ISNULL(strValue, '') != ''
-			
 			INSERT INTO @FinalTable(strBatchId
+				, strBucketType
 				, strTransactionType
 				, intTransactionRecordId
+				, intTransactionRecordHeaderId
+				, strDistributionType
 				, strTransactionNumber
 				, dtmTransactionDate
 				, intContractDetailId
@@ -371,8 +358,11 @@ BEGIN
 				, strNotes
 				, strMiscField)
 			SELECT @strBatchId
+				, @strBucketType
 				, @strTransactionType
 				, @intTransactionRecordId
+				, @intTransactionRecordHeaderId
+				, @strDistributionType
 				, @strTransactionNumber
 				, @dtmTransactionDate
 				, @intContractDetailId
@@ -387,18 +377,16 @@ BEGIN
 				, @intBookId
 				, @intSubBookId
 				, @intLocationId
-				, strInOut = CASE WHEN UPPER(@strBuySell) = 'BUY' THEN 'IN' ELSE 'OUT' END
+				, strInOut = CASE WHEN UPPER(@strDistributionType) = 'BUY' THEN 'IN' ELSE 'OUT' END
 				, dblOrigNoOfLots = @dblNoOfLots 
-				, dblContractSize = @dblContractSize
-				, dblOrigQty = @dblNoOfLots * @dblContractSize 
+				, @dblContractSize
+				, dblOrigQty = @dblQty
 				, dblPrice = @dblPrice
 				, @intEntityId
 				, @intTicketId
 				, @intUserId
 				, @strNotes
-				, dbo.fnRKConvertMiscFieldString(@LogHelper)
-
-			DELETE FROM @LogHelper
+				, @strMiscFields
 		END
 
 		---------------------------------------
@@ -406,48 +394,6 @@ BEGIN
 		---------------------------------------
 		ELSE IF @strTransactionType = 'Match Derivatives'
 		BEGIN
-			DECLARE @intMatchDerivativesHeaderId INT = @intContractHeaderId
-				, @intMatchDerivativesDetailId INT = @intContractDetailId
-				, @intMatchNo INT
-
-			SET @strInOut = @strNotes
-			SET @intContractHeaderId = NULL
-			SET @intContractDetailId = NULL
-			SET @strNotes = ''
-
-			SELECT TOP 1 @strBuySell = der.strBuySell
-				, @dblContractSize = m.dblContractSize
-				, @strInstrumentType = CASE WHEN (der.[intInstrumentTypeId] = 1) THEN N'Futures'
-								WHEN (der.[intInstrumentTypeId] = 2) THEN N'Options'
-								WHEN (der.[intInstrumentTypeId] = 3) THEN N'Currency Contract' END COLLATE Latin1_General_CI_AS
-				, @strBrokerAccount = BA.strAccountNumber
-				, @strBroker = e.strName
-				, @ysnPreCrush = der.ysnPreCrush
-				, @strBrokerTradeNo = der.strBrokerTradeNo
-			FROM tblRKFutOptTransaction der
-			JOIN tblRKFutureMarket m ON m.intFutureMarketId = der.intFutureMarketId
-			LEFT JOIN tblICCommodityUnitMeasure cUOM ON cUOM.intCommodityId = der.intCommodityId AND cUOM.intUnitMeasureId = m.intUnitMeasureId
-			LEFT JOIN tblRKOptionsMonth om ON om.intOptionMonthId = der.intOptionMonthId
-			LEFT JOIN tblRKBrokerageAccount AS BA ON BA.intBrokerageAccountId = der.intBrokerageAccountId
-			LEFT JOIN tblEMEntity e ON e.intEntityId = der.intEntityId
-			WHERE der.intFutOptTransactionId = @intTransactionRecordId
-
-			SELECT TOP 1 @intMatchNo = intMatchNo FROM tblRKMatchFuturesPSHeader WHERE intMatchFuturesPSHeaderId = @intMatchDerivativesHeaderId
-
-			INSERT INTO @LogHelper(intRowId, strFieldName, strValue)
-			SELECT intRowId = ROW_NUMBER() OVER (ORDER BY strFieldName),  * FROM (
-				SELECT strFieldName = 'intMatchDerivativesHeaderId', strValue = CAST(@intMatchDerivativesHeaderId AS NVARCHAR)
-				UNION ALL SELECT 'intMatchDerivativesDetailId', CAST(@intMatchDerivativesDetailId AS NVARCHAR)
-				UNION ALL SELECT 'intMatchNo', CAST(@intMatchNo AS NVARCHAR)
-				UNION ALL SELECT 'strBuySell', @strBuySell
-				UNION ALL SELECT 'strInstrumentType', @strInstrumentType
-				UNION ALL SELECT 'strBrokerAccount', @strBrokerAccount
-				UNION ALL SELECT 'strBroker', @strBroker
-				UNION ALL SELECT 'intFutOptTransactionHeaderId', CAST(@intFutOptTransactionHeaderId AS NVARCHAR)
-				UNION ALL SELECT 'ysnPreCrush', CAST(@ysnPreCrush AS NVARCHAR)
-				UNION ALL SELECT 'strBrokerTradeNo', @strBrokerTradeNo
-			) t WHERE ISNULL(strValue, '') != ''
-			
 			INSERT INTO @FinalTable(strBatchId
 				, strTransactionType
 				, intTransactionRecordId
@@ -501,9 +447,7 @@ BEGIN
 				, @intTicketId
 				, @intUserId
 				, @strNotes
-				, dbo.fnRKConvertMiscFieldString(@LogHelper)
-
-			DELETE FROM @LogHelper
+				, @strMiscFields
 		END
 
 		---------------------------------------
@@ -511,13 +455,6 @@ BEGIN
 		---------------------------------------
 		ELSE IF @strTransactionType = 'Collateral'
 		BEGIN
-			SELECT TOP 1 @intFutureMarketId = CD.intFutureMarketId
-				, @intFutureMonthId = CD.intFutureMonthId
-				, @intEntityId = CH.intEntityId
-			FROM tblCTContractDetail CD
-			LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
-			WHERE CD.intContractHeaderId = @intContractHeaderId
-
 			INSERT INTO @FinalTable(strBatchId
 				, strTransactionType
 				, intTransactionRecordId
@@ -572,8 +509,6 @@ BEGIN
 				, @strNotes
 			FROM tblRKCollateral col	
 			WHERE col.intCollateralId = @intTransactionRecordId
-
-			SET @intContractDetailId = NULL
 		END
 
 		---------------------------------------
