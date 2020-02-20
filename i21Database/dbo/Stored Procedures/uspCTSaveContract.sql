@@ -338,12 +338,19 @@ BEGIN TRY
 
 		SELECT @dblLotsFixed = NULL,@intPriceFixationId = NULL
 		SELECT @dblLotsFixed = dblLotsFixed,@intPriceFixationId = intPriceFixationId FROM tblCTPriceFixation WHERE intContractDetailId = @intContractDetailId
+
+		IF @dblLotsFixed IS NOT NULL AND @dblNoOfLots IS NOT NULL AND @dblNoOfLots < @dblLotsFixed
+		BEGIN
+			UPDATE tblCTPriceFixation SET dblLotsFixed = @dblNoOfLots WHERE intContractDetailId = @intContractDetailId
+			SET @dblLotsFixed = @dblNoOfLots
+		END
+		
 		IF	@dblLotsFixed IS NOT NULL AND @dblNoOfLots IS NOT NULL AND @dblNoOfLots = @dblLotsFixed AND
 			EXISTS(SELECT * FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId AND intPricingTypeId IN (2,8))
 		BEGIN
 			UPDATE	tblCTPriceFixation SET dblTotalLots = @dblNoOfLots WHERE intPriceFixationId = @intPriceFixationId
 			EXEC	[uspCTPriceFixationSave] @intPriceFixationId, '', @intLastModifiedById
-		END
+		END		
 		
 		-- ADD DERIVATIVES
 		EXEC uspCTManageDerivatives @intContractDetailId
@@ -354,10 +361,17 @@ BEGIN TRY
 	IF ISNULL(@ysnMultiplePriceFixation,0) = 0
 	BEGIN
 		UPDATE	PF
-		SET		PF.[dblTotalLots] = (SELECT SUM(dblNoOfLots) FROM tblCTContractDetail WHERE intContractDetailId = CD.intContractDetailId OR ISNULL(intSplitFromId,0) = CD.intContractDetailId)
+		SET		PF.[dblTotalLots] = (SELECT SUM(dblNoOfLots) FROM tblCTContractDetail WHERE intContractDetailId = CD.intContractDetailId)-- OR ISNULL(intSplitFromId,0) = CD.intContractDetailId)
 		FROM	tblCTPriceFixation	PF
 		JOIN	tblCTContractDetail CD ON CD.intContractDetailId = PF.intContractDetailId
 		WHERE	CD.intContractHeaderId = @intContractHeaderId
+
+		UPDATE b SET dblNoOfLots = (b.dblQuantity / d.dblContractSize)
+		FROM tblCTPriceFixation a
+		INNER JOIN tblCTPriceFixationDetail b ON a.intPriceFixationId =  b.intPriceFixationId
+		INNER JOIN tblCTContractDetail c ON a.intContractDetailId = c.intContractDetailId
+		INNER JOIN vyuRKMarketDetail d ON c.intFutureMarketId = d.intFutureMarketId
+		WHERE a.intContractHeaderId = @intContractHeaderId
 	END
 	ELSE
 	BEGIN
