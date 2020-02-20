@@ -224,7 +224,7 @@ BEGIN
 				, intTicketId
 				, @intUserId
 				, 'Delete Record'
-				, strMiscFields
+				, strMiscField
 			FROM #tmpPrevLog
 			CONTINUE
 		END
@@ -250,7 +250,7 @@ BEGIN
 		END
 
 		-- Log counter entry to negate previous value
-		IF (@strTransactionType IN ('Derivatives', 'Match Derivatives', 'Collateral', 'Collateral Adjustments'))
+		IF (@strTransactionType IN ('Derivative Entry', 'Match Derivatives', 'Collateral', 'Collateral Adjustments'))
 		BEGIN
 			IF EXISTS(SELECT TOP 1 1 FROM #tmpPrevLog)
 			BEGIN
@@ -325,7 +325,7 @@ BEGIN
 		---------------------------------------
 		------------ DERIVATIVES --------------
 		---------------------------------------
-		IF @strTransactionType = 'Derivatives'
+		IF @strTransactionType = 'Derivative Entry'
 		BEGIN
 			INSERT INTO @FinalTable(strBatchId
 				, strBucketType
@@ -356,7 +356,7 @@ BEGIN
 				, intTicketId
 				, intUserId
 				, strNotes
-				, strMiscField)
+				, strMiscFields)
 			SELECT @strBatchId
 				, @strBucketType
 				, @strTransactionType
@@ -395,8 +395,11 @@ BEGIN
 		ELSE IF @strTransactionType = 'Match Derivatives'
 		BEGIN
 			INSERT INTO @FinalTable(strBatchId
+				, strBucketType
 				, strTransactionType
 				, intTransactionRecordId
+				, intTransactionRecordHeaderId
+				, strDistributionType
 				, strTransactionNumber
 				, dtmTransactionDate
 				, intContractDetailId
@@ -420,10 +423,13 @@ BEGIN
 				, intTicketId
 				, intUserId
 				, strNotes
-				, strMiscField)
+				, strMiscFields)
 			SELECT @strBatchId
+				, @strBucketType
 				, @strTransactionType
 				, @intTransactionRecordId
+				, @intTransactionRecordHeaderId
+				, @strDistributionType
 				, @strTransactionNumber
 				, @dtmTransactionDate
 				, @intContractDetailId
@@ -456,8 +462,11 @@ BEGIN
 		ELSE IF @strTransactionType = 'Collateral'
 		BEGIN
 			INSERT INTO @FinalTable(strBatchId
+				, strBucketType
 				, strTransactionType
 				, intTransactionRecordId
+				, intTransactionRecordHeaderId
+				, strDistributionType
 				, strTransactionNumber
 				, dtmTransactionDate
 				, intContractDetailId
@@ -482,8 +491,11 @@ BEGIN
 				, intUserId
 				, strNotes)
 			SELECT TOP 1 @strBatchId
+				, @strBucketType
 				, @strTransactionType
 				, @intTransactionRecordId
+				, @intTransactionRecordHeaderId
+				, @strDistributionType
 				, @strTransactionNumber
 				, @dtmTransactionDate
 				, @intContractDetailId
@@ -517,8 +529,11 @@ BEGIN
 		ELSE IF @strTransactionType = 'Collateral Adjustments'
 		BEGIN
 			INSERT INTO @FinalTable(strBatchId
+				, strBucketType
 				, strTransactionType
 				, intTransactionRecordId
+				, intTransactionRecordHeaderId
+				, strDistributionType
 				, strTransactionNumber
 				, dtmTransactionDate
 				, intContractDetailId
@@ -543,8 +558,11 @@ BEGIN
 				, intUserId
 				, strNotes)
 			SELECT TOP 1 @strBatchId
+				, @strBucketType
 				, @strTransactionType
 				, @intTransactionRecordId
+				, @intTransactionRecordHeaderId
+				, @strDistributionType
 				, @strTransactionNumber
 				, @dtmTransactionDate
 				, @intContractDetailId
@@ -574,25 +592,20 @@ BEGIN
 			SET @intContractDetailId = NULL
 		END
 
-		----------------------------------------------
+		--------------------------------------
 		------------- Inventory --------------
-		----------------------------------------------
-		ELSE IF @strTransactionType = 'Inventory Receipt' 
-			 OR @strTransactionType = 'Inventory Shipment'
-			 OR @strTransactionType = 'Inventory Transfer'
-			 OR @strTransactionType = 'Inventory Transfer with Shipment'
-			 OR @strTransactionType = 'Invoice'
-			 OR @strTransactionType = 'Outbound Shipment'
-			 OR @strTransactionType = 'Consume'
-			 OR @strTransactionType = 'Produce'
-			 OR @strTransactionType like 'Inventory Adjustment%'
-			 OR @strTransactionType = 'Sales In-Transit'
-			 OR @strTransactionType = 'Purchase In-Transit'
+		--------------------------------------
+		ELSE IF @strBucketType = 'Company Owned'
+			 OR @strBucketType = 'Sales In-Transit'
+			 OR @strBucketType = 'Purchase In-Transit'
 
 		BEGIN
 			INSERT INTO @FinalTable(strBatchId
+				, strBucketType
 				, strTransactionType
 				, intTransactionRecordId
+				, intTransactionRecordHeaderId
+				, strDistributionType
 				, strTransactionNumber
 				, dtmTransactionDate
 				, intContractDetailId
@@ -615,8 +628,11 @@ BEGIN
 				, intUserId
 				, strNotes)
 			SELECT TOP 1 @strBatchId
+				, @strBucketType
 				, strTransactionType = CASE WHEN @strTransactionType LIKE 'Inventory Adjustment%' THEN 'Inventory Adjustment' ELSE @strTransactionType END
 				, @intTransactionRecordId
+				, @intTransactionRecordHeaderId
+				, @strDistributionType
 				, @strTransactionNumber
 				, @dtmTransactionDate
 				, @intContractDetailId
@@ -632,6 +648,9 @@ BEGIN
 				, @intSubBookId
 				, @intLocationId
 				, strInOut = CASE 
+						WHEN @strBucketType = 'Sales In-Transit' OR
+							 @strBucketType = 'Purchase In-Transit'
+							THEN CASE WHEN ISNULL(@dblQty, 0) >= 0 THEN 'IN' ELSE 'OUT' END
 						WHEN @strTransactionType = 'Inventory Receipt' OR
 							 @strTransactionType = 'Produce' 
 							THEN 'IN' 
@@ -641,11 +660,71 @@ BEGIN
 							 @strTransactionType = 'Consume' 
 							THEN 'OUT'
 						WHEN @strTransactionType = 'Inventory Transfer' OR
-							 @strTransactionType like 'Inventory Adjustment%' OR
-							 @strTransactionType = 'Sales In-Transit' OR
-							 @strTransactionType = 'Purchase In-Transit'
+							 @strTransactionType like 'Inventory Adjustment%'
 							THEN CASE WHEN ISNULL(@dblQty, 0) >= 0 THEN 'IN' ELSE 'OUT' END
 						ELSE '' END
+				, dblOrigQty = @dblQty
+				, dblPrice = @dblPrice
+				, @intEntityId
+				, @intTicketId
+				, @intUserId
+				, @strNotes
+		END
+
+		--------------------------------------
+		----------- Customer Owned -----------
+		--------------------------------------
+		ELSE IF @strBucketType = 'Customer Owned'
+
+		BEGIN
+			INSERT INTO @FinalTable(strBatchId
+				, strBucketType
+				, strTransactionType
+				, intTransactionRecordId
+				, intTransactionRecordHeaderId
+				, strDistributionType
+				, strTransactionNumber
+				, dtmTransactionDate
+				, intContractDetailId
+				, intContractHeaderId
+				, intFutureMarketId
+				, intFutureMonthId
+				, intFutOptTransactionId
+				, intCommodityId
+				, intItemId
+				, intProductTypeId
+				, intOrigUOMId
+				, intBookId
+				, intSubBookId
+				, intLocationId
+				, strInOut
+				, dblOrigQty
+				, dblPrice
+				, intEntityId
+				, intTicketId
+				, intUserId
+				, strNotes)
+			SELECT TOP 1 @strBatchId
+				, @strBucketType
+				, @strTransactionType
+				, @intTransactionRecordId
+				, @intTransactionRecordHeaderId
+				, @strDistributionType
+				, @strTransactionNumber
+				, @dtmTransactionDate
+				, @intContractDetailId
+				, @intContractHeaderId
+				, @intFutureMarketId
+				, @intFutureMonthId
+				, @intTransactionRecordId
+				, @intCommodityId
+				, @intItemId
+				, intProductTypeId = NULL--I.intProductTypeId
+				, intOrigUOMId = @intCommodityUOMId
+				, @intBookId
+				, @intSubBookId
+				, @intLocationId
+				, strInOut = CASE WHEN ISNULL(@dblQty, 0) >= 0 THEN 'IN' ELSE 'OUT' END
 				, dblOrigQty = @dblQty
 				, dblPrice = @dblPrice
 				, @intEntityId
@@ -980,8 +1059,11 @@ BEGIN
 
 	INSERT INTO tblRKSummaryLog(strBatchId
 		, dtmCreatedDate
+		, strBucketType
 		, strTransactionType
 		, intTransactionRecordId
+		, intTransactionRecordHeaderId
+		, strDistributionType
 		, strTransactionNumber
 		, dtmTransactionDate
 		, intContractDetailId
@@ -1010,8 +1092,11 @@ BEGIN
 		, strMiscField)
 	SELECT strBatchId
 		, dtmCreatedDate = CASE WHEN @Rebuild = 1 THEN dtmTransactionDate ELSE GETDATE() END
+		, strBucketType
 		, strTransactionType
 		, intTransactionRecordId
+		, intTransactionRecordHeaderId
+		, strDistributionType
 		, strTransactionNumber
 		, dtmTransactionDate
 		, intContractDetailId
@@ -1037,7 +1122,7 @@ BEGIN
 		, strNotes
 		, ysnNegate
 		, intRefSummaryLogId
-		, strMiscField
+		, strMiscFields
 	FROM @FinalTable
 
 	DROP TABLE #tmpSummaryLogs

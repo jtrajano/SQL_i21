@@ -49,7 +49,7 @@ SELECT DISTINCT TOP 100 PERCENT
 	,intInvoiceId						= SH.intInvoiceId
 	,strInvoice							= Inv.strInvoiceNumber
 	,intSettleStorageId					= SH.intSettleStorageId
-	,strSettleTicket					= SettleStorage.strStorageTicket
+	,strSettleTicket					= SH.strStorageTicket
 	,intBillId							= SH.intBillId
 	,strVoucher							= Bill.strBillId
 	,intContractHeaderId				= SH.intContractHeaderId

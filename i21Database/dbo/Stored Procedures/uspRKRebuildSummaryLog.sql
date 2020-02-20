@@ -558,8 +558,12 @@ BEGIN
 		--=======================================
 		PRINT 'Populate RK Summary Log - Derivatives'
 		
-		INSERT INTO @ExistingHistory(strTransactionType
+		INSERT INTO @ExistingHistory(
+			  strBucketType
+			, strTransactionType
 			, intTransactionRecordId
+			, intTransactionRecordHeaderId
+			, strDistributionType
 			, strTransactionNumber
 			, dtmTransactionDate
 			, intContractDetailId
@@ -576,8 +580,12 @@ BEGIN
 			, intLocationId
 			, intCommodityUOMId
 			, strNotes)
-		SELECT strTransactionType = 'Derivatives'
+		SELECT
+			  strBucketType = 'Derivatives' 
+			, strTransactionType = 'Derivative Entry'
 			, intTransactionRecordId = der.intFutOptTransactionId
+			, intTransactionRecordHeaderId = der.intFutOptTransactionHeaderId
+			, strDistributionType = der.strNewBuySell
 			, strTransactionNumber = der.strInternalTradeNo
 			, dtmTransactionDate = der.dtmTransactionDate
 			, intContractDetailId = der.intContractDetailId
@@ -608,8 +616,12 @@ BEGIN
 		--=======================================
 		PRINT 'Populate RK Summary Log - Match Derivatives'
 		
-		INSERT INTO @ExistingHistory(strTransactionType
+		INSERT INTO @ExistingHistory(
+			  strBucketType
+			, strTransactionType
 			, intTransactionRecordId
+			, intTransactionRecordHeaderId
+			, strDistributionType
 			, strTransactionNumber
 			, dtmTransactionDate
 			, intContractDetailId
@@ -626,8 +638,12 @@ BEGIN
 			, intEntityId
 			, intUserId
 			, intCommodityUOMId)
-		SELECT strTransactionType
+		SELECT
+			  strBucketType = 'Derivatives'
+			, strTransactionType
 			, intTransactionRecordId
+			, intTransactionRecordHeaderId
+			, strDistributionType
 			, strTransactionNumber
 			, dtmTransactionDate
 			, intContractDetailId
@@ -647,6 +663,8 @@ BEGIN
 		FROM (
 			SELECT strTransactionType = 'Match Derivatives'
 				, intTransactionRecordId = history.intLFutOptTransactionId
+				, intTransactionRecordHeaderId = de.intFutOptTransactionHeaderId
+				, strDistributionType  = de.strBuySell
 				, strTransactionNumber = de.strInternalTradeNo
 				, dtmTransactionDate = history.dtmMatchDate
 				, intContractDetailId = history.intMatchFuturesPSDetailId
@@ -679,6 +697,8 @@ BEGIN
 
 			UNION ALL SELECT strTransactionType = 'Match Derivatives'
 				, intTransactionRecordId = history.intSFutOptTransactionId
+				, intTransactionRecordHeaderId = de.intFutOptTransactionHeaderId
+				, strDistributionType  = de.strBuySell
 				, strTransactionNumber = de.strInternalTradeNo
 				, dtmTransactionDate = history.dtmMatchDate
 				, intContractDetailId = history.intMatchFuturesPSDetailId
@@ -713,7 +733,7 @@ BEGIN
 
 		EXEC uspRKLogRiskPosition @ExistingHistory, 1
 
-		PRINT 'End Populate RK Summary Log'
+		PRINT 'End Populate RK Summary Log - Match Derivatives'
 		DELETE FROM @ExistingHistory
 
 		--=======================================
@@ -721,8 +741,12 @@ BEGIN
 		--=======================================
 		PRINT 'Populate RK Summary Log - Option Derivatives'
 		
-		INSERT INTO @ExistingHistory(strTransactionType
+		INSERT INTO @ExistingHistory(
+			  strBucketType
+			, strTransactionType
 			, intTransactionRecordId
+			, intTransactionRecordHeaderId
+			, strDistributionType
 			, strTransactionNumber
 			, dtmTransactionDate
 			, intContractDetailId
@@ -739,8 +763,12 @@ BEGIN
 			, intEntityId
 			, intUserId
 			, intCommodityUOMId)
-		SELECT strTransactionType
+		SELECT
+			  strBucketType = 'Derivatives' 
+			, strTransactionType
 			, intTransactionRecordId
+			, intTransactionRecordHeaderId
+			, strDistributionType
 			, strTransactionNumber
 			, dtmTransactionDate
 			, intContractDetailId
@@ -760,6 +788,8 @@ BEGIN
 		FROM (
 			SELECT strTransactionType = 'Expired Options'
 				, intTransactionRecordId = detail.intFutOptTransactionId
+				, intTransactionRecordHeaderId = de.intFutOptTransactionHeaderId
+				, strDistributionType = de.strBuySell
 				, strTransactionNumber = de.strInternalTradeNo
 				, dtmTransactionDate = detail.dtmExpiredDate
 				, intContractDetailId = detail.intOptionsPnSExpiredId
@@ -784,6 +814,8 @@ BEGIN
 
 			UNION ALL SELECT strTransactionType = 'Excercised/Assigned Options'
 				, intTransactionRecordId = detail.intFutOptTransactionId
+				, intTransactionRecordHeaderId = de.intFutOptTransactionHeaderId
+				, strDistributionType = de.strBuySell
 				, strTransactionNumber = de.strInternalTradeNo
 				, dtmTransactionDate = detail.dtmTranDate
 				, intContractDetailId = detail.intOptionsPnSExercisedAssignedId
@@ -809,7 +841,7 @@ BEGIN
 
 		EXEC uspRKLogRiskPosition @ExistingHistory, 1
 
-		PRINT 'End Populate RK Summary Log'
+		PRINT 'End Populate RK Summary Log - Option Derivatives'
 		DELETE FROM @ExistingHistory
 
 		--=======================================
@@ -817,8 +849,12 @@ BEGIN
 		--=======================================
 		PRINT 'Populate RK Summary Log - Collateral'
 		
-		INSERT INTO @ExistingHistory(strTransactionType
+		INSERT INTO @ExistingHistory(
+			  strBucketType
+			, strTransactionType
 			, intTransactionRecordId
+			, intTransactionRecordHeaderId
+			, strDistributionType
 			, strTransactionNumber
 			, dtmTransactionDate
 			, intContractHeaderId
@@ -827,8 +863,12 @@ BEGIN
 			, dblQty
 			, intUserId
 			, strNotes)
-		SELECT strTransactionType = 'Collateral'
+		SELECT
+			  strBucketType = 'Collateral' 
+			, strTransactionType = 'Collateral'
 			, intTransactionRecordId = intCollateralId
+			, intTransactionRecordHeaderId = intCollateralId
+			, strDistributionType = strType
 			, strTransactionNumber = strReceiptNo
 			, dtmTransactionDate = dtmOpenDate
 			, intContractHeaderId = intContractHeaderId
@@ -841,8 +881,12 @@ BEGIN
 			, strNotes = strType + ' Collateral'
 		FROM tblRKCollateral a
 		
-		INSERT INTO @ExistingHistory(strTransactionType
+		INSERT INTO @ExistingHistory(
+			  strBucketType
+			, strTransactionType
 			, intTransactionRecordId
+			, intTransactionRecordHeaderId
+			, strDistributionType
 			, strTransactionNumber
 			, dtmTransactionDate
 			, intContractDetailId
@@ -852,8 +896,12 @@ BEGIN
 			, dblQty
 			, intUserId
 			, strNotes)
-		SELECT strTransactionType = 'Collateral Adjustments'
-			, intTransactionRecordId = C.intCollateralId
+		SELECT
+			  strBucketType = 'Collateral'  
+			, strTransactionType = 'Collateral Adjustments'
+			, intTransactionRecordId = CA.intCollateralAdjustmentId
+			, intTransactionRecordHeaderId = C.intCollateralId
+			, strDistributionType = C.strType
 			, strTransactionNumber = strAdjustmentNo
 			, dtmTransactionDate = dtmAdjustmentDate
 			, intContractDetailId = CA.intCollateralAdjustmentId
@@ -887,8 +935,11 @@ BEGIN
 		
 		INSERT INTO @ExistingHistory (	
 			strBatchId
+			,strBucketType
 			,strTransactionType
 			,intTransactionRecordId 
+			,intTransactionRecordHeaderId
+			,strDistributionType
 			,strTransactionNumber 
 			,dtmTransactionDate 
 			,intContractDetailId 
@@ -912,8 +963,11 @@ BEGIN
 		)
 		SELECT
 			strBatchId
+			,strBucketType
 			,strTransactionType
 			,intTransactionRecordId 
+			,intTransactionRecordHeaderId 
+			,strDistributionType = ''
 			,strTransactionNumber 
 			,dtmTransactionDate 
 			,intContractDetailId 
@@ -937,8 +991,10 @@ BEGIN
 		FROM (
 			SELECT 
 				strBatchId = t.strBatchId
+				,strBucketType = 'Company Owned'
 				,strTransactionType = v.strTransactionType
-				,intTransactionRecordId = ISNULL(t.intTransactionDetailId, t.intTransactionId) 
+				,intTransactionRecordId = t.intTransactionDetailId
+				,intTransactionRecordHeaderId = t.intTransactionId 
 				,strTransactionNumber = t.strTransactionId
 				,dtmTransactionDate = t.dtmDate
 				,intContractDetailId = NULL
@@ -993,8 +1049,10 @@ BEGIN
 			UNION ALL
 			SELECT 
 				strBatchId = t.strBatchId
+				,strBucketType = 'Company Owned'
 				,strTransactionType = v.strTransactionType
-				,intTransactionRecordId = ISNULL(t.intTransactionDetailId, t.intTransactionId) 
+				,intTransactionRecordId = t.intTransactionDetailId
+				,intTransactionRecordHeaderId = t.intTransactionId 
 				,strTransactionNumber = t.strTransactionId
 				,dtmTransactionDate = t.dtmDate
 				,intContractDetailId = iri.intContractDetailId
@@ -1053,8 +1111,10 @@ BEGIN
 			UNION ALL
 			SELECT 
 				strBatchId = t.strBatchId
+				,strBucketType = 'Company Owned'
 				,strTransactionType = v.strTransactionType
-				,intTransactionRecordId = ISNULL(t.intTransactionDetailId, t.intTransactionId) 
+				,intTransactionRecordId = t.intTransactionDetailId
+				,intTransactionRecordHeaderId = t.intTransactionId 
 				,strTransactionNumber = t.strTransactionId
 				,dtmTransactionDate = t.dtmDate
 				,intContractDetailId = isi.intLineNo
@@ -1113,8 +1173,10 @@ BEGIN
 			UNION ALL
 			SELECT 
 				strBatchId = t.strBatchId
-				,strTransactionType = 'Sales In-Transit'
-				,intTransactionRecordId = ISNULL(t.intTransactionDetailId, t.intTransactionId) 
+				,strBucketType = 'Sales In-Transit'
+				,strTransactionType = v.strTransactionType
+				,intTransactionRecordId = t.intTransactionDetailId
+				,intTransactionRecordHeaderId = t.intTransactionId 
 				,strTransactionNumber = t.strTransactionId
 				,dtmTransactionDate = t.dtmDate
 				,intContractDetailId = NULL
@@ -1169,8 +1231,10 @@ BEGIN
 			UNION ALL
 			SELECT 
 				strBatchId = t.strBatchId
-				,strTransactionType = 'Purchase In-Transit'
-				,intTransactionRecordId = ISNULL(t.intTransactionDetailId, t.intTransactionId) 
+				,strBucketType = 'Purchase In-Transit'
+				,strTransactionType = v.strTransactionType
+				,intTransactionRecordId = t.intTransactionDetailId
+				,intTransactionRecordHeaderId = t.intTransactionId 
 				,strTransactionNumber = t.strTransactionId
 				,dtmTransactionDate = t.dtmDate
 				,intContractDetailId = NULL
@@ -1226,8 +1290,173 @@ BEGIN
 		ORDER BY intInventoryTransactionId
 	
 		EXEC uspRKLogRiskPosition @ExistingHistory, 1, 0
-
 		PRINT 'End Populate RK Summary Log - Inventory'
+		DELETE FROM @ExistingHistory
+
+		--=======================================
+		--				CUSTOMER OWNED
+		--=======================================
+		PRINT 'Populate RK Summary Log - Customer Owned'
+		
+		SELECT 
+			 dtmHistoryDate = CONVERT(DATETIME, CONVERT(VARCHAR(10), sh.dtmHistoryDate, 110), 110)
+			, strBucketType = 'Customer Owned'
+			, strTransactionType = CASE WHEN intTransactionTypeId IN(1,5) THEN
+												CASE WHEN sh.intInventoryReceiptId IS NOT NULL THEN 'Inventory Receipt'
+													 WHEN sh.intInventoryShipmentId IS NOT NULL THEN 'Inventory Shipment'
+													 ELSE 'NONE'
+												END
+											 WHEN intTransactionTypeId = 3 THEN
+												'Transfer Storage'
+											 WHEN intTransactionTypeId = 4 THEN
+												'Settle Storage'
+											 WHEN intTransactionTypeId = 9 THEN
+												'Inventory Adjustment'
+											END
+			, intTransactionHeaderRecordId = CASE WHEN intTransactionTypeId IN(1,5)THEN
+												CASE WHEN sh.intInventoryReceiptId IS NOT NULL THEN sh.intInventoryReceiptId
+													 WHEN sh.intInventoryShipmentId IS NOT NULL THEN sh.intInventoryShipmentId
+													 ELSE NULL
+												END
+											 WHEN intTransactionTypeId = 3 THEN
+												sh.intTransferStorageId
+											 WHEN intTransactionTypeId = 4 THEN
+												sh.intSettleStorageId
+											 WHEN intTransactionTypeId = 9 THEN
+												sh.intInventoryAdjustmentId
+											END
+			, strTransactioneNo = CASE WHEN intTransactionTypeId IN(1,5) THEN
+												CASE WHEN sh.intInventoryReceiptId IS NOT NULL THEN sh.strReceiptNumber
+													 WHEN sh.intInventoryShipmentId IS NOT NULL THEN sh.strShipmentNumber
+													 ELSE NULL
+												END
+											 WHEN intTransactionTypeId = 3 THEN
+												sh.strTransferTicket
+											 WHEN intTransactionTypeId = 4 THEN
+												sh.strSettleTicket
+											 WHEN intTransactionTypeId = 9 THEN
+												sh.strAdjustmentNo
+											END
+
+			, sh.intContractHeaderId
+			, cs.intCommodityId
+			, cs.intItemId
+			, cs.intItemUOMId
+			, sh.intCompanyLocationId
+			, dblQty = (CASE WHEN sh.strType ='Reduced By Inventory Shipment' OR sh.strType = 'Settlement' THEN - sh.dblUnits ELSE sh.dblUnits END)
+			, strInOut = (CASE WHEN sh.strType ='Reduced By Inventory Shipment' OR sh.strType = 'Settlement' THEN 'OUT' ELSE CASE WHEN sh.dblUnits < 0 THEN 'OUT' ELSE 'IN' END END)
+			, sh.intTicketId
+			, cs.intEntityId
+			, strDistributionType = st.strStorageTypeDescription
+			, st.strStorageTypeCode
+			, intStorageHistoryId
+		INTO #tmpCustomerOwned
+		FROM vyuGRStorageHistory sh
+			JOIN tblGRCustomerStorage cs ON cs.intCustomerStorageId = sh.intCustomerStorageId
+			JOIN tblGRStorageType st ON st.intStorageScheduleTypeId = cs.intStorageTypeId and ysnDPOwnedType = 0
+	
+		UNION ALL
+		SELECT 
+			 dtmHistoryDate = CONVERT(DATETIME, CONVERT(VARCHAR(10), sh.dtmHistoryDate, 110), 110)
+			, strBucketType = 'Delayed Pricing'
+			, strTransactionType = CASE WHEN intTransactionTypeId IN(1,5) THEN
+												CASE WHEN sh.intInventoryReceiptId IS NOT NULL THEN 'Inventory Receipt'
+													 WHEN sh.intInventoryShipmentId IS NOT NULL THEN 'Inventory Shipment'
+													 ELSE 'NONE'
+												END
+											 WHEN intTransactionTypeId = 3 THEN
+												'Transfer Storage'
+											 WHEN intTransactionTypeId = 4 THEN
+												'Settle Storage'
+											 WHEN intTransactionTypeId = 9 THEN
+												'Inventory Adjustment'
+											END
+			, intTransactionHeaderRecordId = CASE WHEN intTransactionTypeId IN(1,5)THEN
+												CASE WHEN sh.intInventoryReceiptId IS NOT NULL THEN sh.intInventoryReceiptId
+													 WHEN sh.intInventoryShipmentId IS NOT NULL THEN sh.intInventoryShipmentId
+													 ELSE NULL
+												END
+											 WHEN intTransactionTypeId = 3 THEN
+												sh.intTransferStorageId
+											 WHEN intTransactionTypeId = 4 THEN
+												sh.intSettleStorageId
+											 WHEN intTransactionTypeId = 9 THEN
+												sh.intInventoryAdjustmentId
+											END
+			, strTransactioneNo = CASE WHEN intTransactionTypeId IN(1,5) THEN
+												CASE WHEN sh.intInventoryReceiptId IS NOT NULL THEN sh.strReceiptNumber
+													 WHEN sh.intInventoryShipmentId IS NOT NULL THEN sh.strShipmentNumber
+													 ELSE NULL
+												END
+											 WHEN intTransactionTypeId = 3 THEN
+												sh.strTransferTicket
+											 WHEN intTransactionTypeId = 4 THEN
+												sh.strSettleTicket
+											 WHEN intTransactionTypeId = 9 THEN
+												sh.strAdjustmentNo
+											END
+
+			, sh.intContractHeaderId
+			, cs.intCommodityId
+			, cs.intItemId
+			, cs.intItemUOMId
+			, sh.intCompanyLocationId
+			, dblQty = (CASE WHEN sh.strType ='Reduced By Inventory Shipment' OR sh.strType = 'Settlement' THEN - sh.dblUnits ELSE sh.dblUnits END)
+			, strInOut = (CASE WHEN sh.strType ='Reduced By Inventory Shipment' OR sh.strType = 'Settlement' THEN 'OUT' ELSE CASE WHEN sh.dblUnits < 0 THEN 'OUT' ELSE 'IN' END END)
+			, sh.intTicketId
+			, cs.intEntityId
+			, strDistributionType = st.strStorageTypeDescription
+			, st.strStorageTypeCode
+			, intStorageHistoryId
+		FROM vyuGRStorageHistory sh
+			JOIN tblGRCustomerStorage cs ON cs.intCustomerStorageId = sh.intCustomerStorageId
+			JOIN tblGRStorageType st ON st.intStorageScheduleTypeId = cs.intStorageTypeId and ysnDPOwnedType = 1
+
+		INSERT INTO @ExistingHistory (	
+			strBatchId
+			,strBucketType
+			,strTransactionType
+			,intTransactionRecordId 
+			,intTransactionRecordHeaderId
+			,strDistributionType
+			,strTransactionNumber 
+			,dtmTransactionDate 
+			,intContractHeaderId 
+			,intTicketId 
+			,intCommodityId 
+			,intCommodityUOMId 
+			,intItemId 
+			,intLocationId 
+			,dblQty 
+			,intEntityId 
+			,intUserId 
+			,strNotes 	
+		)
+		SELECT
+			 strBatchId = NULL
+			,strBucketType
+			,strTransactionType
+			,intTransactionRecordId = NULL
+			,intTransactionHeaderRecordId
+			,strDistributionType
+			,strTransactioneNo
+			,dtmHistoryDate
+			,intContractHeaderId
+			,intTicketId
+			,intCommodityId
+			,intItemUOMId
+			,intItemId
+			,intCompanyLocationId
+			,dblQty
+			,intEntityId
+			,@intCurrentUserId
+			,strNotes = (CASE WHEN intTransactionHeaderRecordId IS NULL THEN 'Actual transaction was deleted historically.' ELSE NULL END)
+		FROM #tmpCustomerOwned co
+		ORDER BY dtmHistoryDate, intStorageHistoryId
+	
+		EXEC uspRKLogRiskPosition @ExistingHistory, 1, 0
+		PRINT 'End Populate RK Summary Log - Customer Owned'
+		DELETE FROM @ExistingHistory
 		
 	--Update ysnAllowRebuildSummaryLog to FALSE
 	UPDATE tblRKCompanyPreference SET ysnAllowRebuildSummaryLog = 0
