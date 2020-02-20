@@ -10,6 +10,7 @@
     [intSubstituteProductID]   INT             DEFAULT 0 NULL,
     [dblPrice]                 NUMERIC (18, 6) DEFAULT 0 NULL,
     [dblTotal]                 NUMERIC (18, 6) DEFAULT 0 NULL,
+    [dblRegularPrice]                 NUMERIC (18, 6) DEFAULT 0 NULL,
     [dtmRequestedDate]         DATETIME        DEFAULT 0 NULL,
     [intPriority]              INT             DEFAULT 0 NULL,
     [strComments]              NVARCHAR (200)  COLLATE Latin1_General_CI_AS DEFAULT ('') NULL,
