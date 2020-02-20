@@ -1430,7 +1430,8 @@ BEGIN
 			,dblQty 
 			,intEntityId 
 			,intUserId 
-			,strNotes 	
+			,strNotes
+			,strMiscFields 	
 		)
 		SELECT
 			 strBatchId = NULL
@@ -1451,6 +1452,7 @@ BEGIN
 			,intEntityId
 			,@intCurrentUserId
 			,strNotes = (CASE WHEN intTransactionHeaderRecordId IS NULL THEN 'Actual transaction was deleted historically.' ELSE NULL END)
+			,strMiscFields = '{strStorageTypeCode = "'+ strStorageTypeCode +'"}'
 		FROM #tmpCustomerOwned co
 		ORDER BY dtmHistoryDate, intStorageHistoryId
 	

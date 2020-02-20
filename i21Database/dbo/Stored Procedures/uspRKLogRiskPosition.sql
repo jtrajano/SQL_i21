@@ -706,7 +706,8 @@ BEGIN
 				, intEntityId
 				, intTicketId
 				, intUserId
-				, strNotes)
+				, strNotes
+				, strMiscFields)
 			SELECT TOP 1 @strBatchId
 				, @strBucketType
 				, @strTransactionType
@@ -734,6 +735,7 @@ BEGIN
 				, @intTicketId
 				, @intUserId
 				, @strNotes
+				, @strMiscFields
 		END
 
 		------------------------------------
