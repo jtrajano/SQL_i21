@@ -672,8 +672,11 @@ BEGIN
 		ELSE IF @strTransactionType = 'Bill'
 		BEGIN
 			INSERT INTO @FinalTable(strBatchId
+				, strBucketType
 				, strTransactionType
 				, intTransactionRecordId
+				, intTransactionRecordHeaderId
+				, strDistributionType
 				, strTransactionNumber
 				, dtmTransactionDate
 				, intContractDetailId
@@ -696,8 +699,11 @@ BEGIN
 				, intUserId
 				, strNotes)
 			SELECT TOP 1 @strBatchId
+				, @strBucketType
 				, @strTransactionType
 				, @intTransactionRecordId
+				, @intTransactionRecordHeaderId
+				, @strDistributionType
 				, @strTransactionNumber
 				, @dtmTransactionDate
 				, @intContractDetailId
@@ -730,8 +736,11 @@ BEGIN
 		ELSE IF @strTransactionType = ''
 		BEGIN
 			INSERT INTO @FinalTable(strBatchId
+				, strBucketType
 				, strTransactionType
 				, intTransactionRecordId
+				, intTransactionRecordHeaderId
+				, strDistributionType
 				, strTransactionNumber
 				, dtmTransactionDate
 				, intContractDetailId
@@ -754,8 +763,11 @@ BEGIN
 				, intUserId
 				, strNotes)
 			SELECT TOP 1 @strBatchId
+				, @strBucketType
 				, @strTransactionType
 				, @intTransactionRecordId
+				, @intTransactionRecordHeaderId
+				, @strDistributionType
 				, @strTransactionNumber
 				, @dtmTransactionDate
 				, @intContractDetailId

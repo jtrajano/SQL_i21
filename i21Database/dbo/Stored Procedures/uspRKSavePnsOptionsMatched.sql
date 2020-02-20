@@ -459,6 +459,7 @@ BEGIN TRY
 			, intFutOptTransactionId = detail.intFutOptTransactionId
 			, intTransactionRecordId = detail.intOptionsPnSExercisedAssignedId
 			, intTransactionRecordHeaderId = header.intOptionsMatchPnSHeaderId
+			, strDistributionType = de.strBuySell
 			, strTransactionNumber = de.strInternalTradeNo
 			, dtmTransactionDate = detail.dtmTranDate
 			, intCommodityId = de.intCommodityId
