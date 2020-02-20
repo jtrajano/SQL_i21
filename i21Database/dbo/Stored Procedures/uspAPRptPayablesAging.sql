@@ -254,8 +254,8 @@ END
 ELSE
 BEGIN
 	--SET @dateFrom = CONVERT(VARCHAR(10), '1/1/1900', 110)
-	SET @dateTo = CONVERT(VARCHAR(10), '1/1/2100', 110)
-	--SET @dateTo = GETDATE()
+	--SET @dateTo = CONVERT(VARCHAR(10), '1/1/2100', 110)
+	SET @dateTo = GETDATE()
 	SET @dtmDateFilter =  '(SELECT ''' + CONVERT(VARCHAR(10), GETDATE(), 101) +''')';
 END
 
@@ -624,10 +624,10 @@ SET @query = '
 		AND D.strAccountCategory = ''AP Account''
 ) MainQuery'
 
--- IF @dateTo IS NOT NULL
--- BEGIN
--- 	SET @query = REPLACE(@query, 'GETDATE()', '''' + CONVERT(VARCHAR(10), @dateTo, 110) + '''');
--- END
+IF @dateTo IS NOT NULL
+BEGIN
+	SET @query = REPLACE(@query, 'GETDATE()', '''' + CONVERT(VARCHAR(10), @dateTo, 110) + '''');
+END
 
 IF ISNULL(@filter,'') != ''
 BEGIN
