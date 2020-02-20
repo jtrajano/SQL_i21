@@ -1,7 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblSTCigaretteRebatePrograms]
 (
     [intCigaretteRebateProgramId] INT NOT NULL IDENTITY,
-    [strStoreIdList] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NOT NULL,
+    [strStoreIdList] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
     [intEntityVendorId] INT NULL,   
     [dtmStartDate] DATETIME NULL,
     [dtmEndDate] DATETIME NULL,
