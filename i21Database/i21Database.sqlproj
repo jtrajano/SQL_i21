@@ -8498,6 +8498,7 @@
     <Build Include="dbo\Functions\fnRKGetBucketBasisDeliveries.sql" />
     <Build Include="dbo\Functions\fnRKGetBucketCustomerOwned.sql" />
     <Build Include="dbo\Functions\fnRKGetBucketDelayedPricing.sql" />
+    <Build Include="dbo\Stored Procedures\uspICFixICvsGLAmountDisrecpany.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
