@@ -506,7 +506,10 @@ SET @query = '
 	) MainQuery 
 '
 
---SET @query = REPLACE(@query, 'GETDATE()', '''' + CONVERT(VARCHAR(10), @dateTo, 110) + '''');
+IF @dateTo IS NOT NULL
+BEGIN
+	SET @query = REPLACE(@query, 'GETDATE()', '''' + CONVERT(VARCHAR(10), @dateTo, 110) + '''');
+END
 
 IF ISNULL(@filter,'') != ''
 BEGIN
