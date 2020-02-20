@@ -44,7 +44,7 @@ BEGIN
 		,intOrigUOMId
 	FROM (
 		SELECT 
-			intRowNum = ROW_NUMBER() OVER (PARTITION BY c.intTransactionRecordId, c.strTransactionType, c.strTransactionNumber ORDER BY c.intSummaryLogId DESC)
+			intRowNum = ROW_NUMBER() OVER (PARTITION BY c.intTransactionRecordId, c.strBucketType, c.strTransactionType, c.strTransactionNumber ORDER BY c.intSummaryLogId DESC)
 			,dtmCreatedDate
 			,dtmTransactionDate
 			,dblTotal = c.dblOrigQty
@@ -61,7 +61,7 @@ BEGIN
 			,intTransactionRecordId
 			,intOrigUOMId
 		FROM vyuRKGetSummaryLog c
-		WHERE strTransactionType IN ('Sales In-Transit', 'Purchase In-Transit') 
+		WHERE strBucketType IN ('Sales In-Transit', 'Purchase In-Transit') 
 			AND CONVERT(DATETIME, CONVERT(VARCHAR(10), c.dtmCreatedDate, 110), 110) <= CONVERT(DATETIME, @dtmDate)
 			AND CONVERT(DATETIME, CONVERT(VARCHAR(10), c.dtmTransactionDate, 110), 110) <= CONVERT(DATETIME, @dtmDate)
 			AND ISNULL(c.intCommodityId,0) = ISNULL(@intCommodityId, ISNULL(c.intCommodityId, 0)) 

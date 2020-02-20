@@ -8496,6 +8496,8 @@
     <Build Include="dbo\Stored Procedures\uspRKGenerateDPR.sql" />
     <Build Include="dbo\Functions\fnRKGetBucketContractBalance.sql" />
     <Build Include="dbo\Functions\fnRKGetBucketBasisDeliveries.sql" />
+    <Build Include="dbo\Functions\fnRKGetBucketCustomerOwned.sql" />
+    <Build Include="dbo\Functions\fnRKGetBucketDelayedPricing.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

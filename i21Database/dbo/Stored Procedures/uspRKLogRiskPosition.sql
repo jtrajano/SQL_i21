@@ -602,9 +602,10 @@ BEGIN
 		END
 
 		--------------------------------------
-		----------- Customer Owned -----------
+		----------- Customer Storage ---------
 		--------------------------------------
-		ELSE IF @strBucketType = 'Customer Owned'
+		ELSE IF @strBucketType = 'Customer Owned' OR
+				@strBucketType = 'Delayed Pricing'
 
 		BEGIN
 			INSERT INTO @FinalTable(strBatchId
