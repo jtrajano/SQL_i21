@@ -154,3 +154,31 @@ CREATE NONCLUSTERED INDEX [IX_tblAPBillDetail_voucherPayable]
 								,intInventoryShipmentChargeId
 								,intLoadDetailId DESC);
 GO
+CREATE TRIGGER trgLogVoucherDetailRisk
+ON dbo.tblAPBillDetail
+AFTER INSERT, UPDATE, DELETE
+AS 
+BEGIN
+    SET NOCOUNT ON;
+
+    --
+    -- Check if this is an INSERT, UPDATE or DELETE Action.
+    -- 
+    DECLARE @action as char(1);
+
+    SET @action = 'I'; -- Set Action to Insert by default.
+    IF EXISTS(SELECT * FROM DELETED)
+    BEGIN
+        SET @action = 
+            CASE
+                WHEN EXISTS(SELECT * FROM INSERTED) THEN 'U' -- Set Action to Updated.
+                ELSE 'D' -- Set Action to Deleted.       
+            END
+    END
+    ELSE 
+        IF NOT EXISTS(SELECT * FROM INSERTED) RETURN; -- Nothing updated or inserted.
+		ELSE
+			RETURN;
+END
+
+GO
