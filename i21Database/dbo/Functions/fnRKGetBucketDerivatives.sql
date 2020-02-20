@@ -44,7 +44,7 @@ BEGIN
 		WHERE strTransactionType = 'Match Derivatives'
 			AND CAST(FLOOR(CAST(dtmCreatedDate AS FLOAT)) AS DATETIME) <= @dtmDate
 			AND CAST(FLOOR(CAST(dtmTransactionDate AS FLOAT)) AS DATETIME) <= @dtmDate
-		GROUP BY intTransactionRecordId
+		GROUP BY intFutOptTransactionId
 			, intOrigUOMId
 	),
 	OptionsLifecycle (
@@ -61,7 +61,7 @@ BEGIN
 		WHERE strTransactionType = 'Options Lifecycle'
 			AND CAST(FLOOR(CAST(dtmCreatedDate AS FLOAT)) AS DATETIME) <= @dtmDate
 			AND CAST(FLOOR(CAST(dtmTransactionDate AS FLOAT)) AS DATETIME) <= @dtmDate
-		GROUP BY intTransactionRecordId
+		GROUP BY intFutOptTransactionId
 			, intOrigUOMId
 		HAVING SUM(ISNULL(dblOrigNoOfLots, 0)) > 0
 	)

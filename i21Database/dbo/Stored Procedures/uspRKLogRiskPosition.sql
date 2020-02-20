@@ -328,7 +328,7 @@ BEGIN
 		---------------------------------------
 		------------ DERIVATIVES --------------
 		---------------------------------------
-		IF @strTransactionType = 'Derivative Entry'
+		IF (@strTransactionType = 'Derivative Entry' OR @strTransactionType = 'Match Derivatives' OR @strTransactionType = 'Options Lifecycle')
 		BEGIN
 			INSERT INTO @FinalTable(strBatchId
 				, strBucketType
@@ -383,74 +383,7 @@ BEGIN
 				, strInOut = CASE WHEN UPPER(@strDistributionType) = 'BUY' THEN 'IN' ELSE 'OUT' END
 				, dblOrigNoOfLots = @dblNoOfLots 
 				, @dblContractSize
-				, dblOrigQty = @dblQty
-				, dblPrice = @dblPrice
-				, @intEntityId
-				, @intTicketId
-				, @intUserId
-				, @strNotes
-				, @strMiscFields
-		END
-
-		---------------------------------------
-		--------- MATCH DERIVATIVES -----------
-		---------------------------------------
-		ELSE IF @strTransactionType = 'Match Derivatives'
-		BEGIN
-			INSERT INTO @FinalTable(strBatchId
-				, strBucketType
-				, strTransactionType
-				, intTransactionRecordId
-				, intTransactionRecordHeaderId
-				, strDistributionType
-				, strTransactionNumber
-				, dtmTransactionDate
-				, intContractDetailId
-				, intContractHeaderId
-				, intFutureMarketId
-				, intFutureMonthId
-				, intFutOptTransactionId
-				, intCommodityId
-				, intItemId
-				, intProductTypeId
-				, intOrigUOMId
-				, intBookId
-				, intSubBookId
-				, intLocationId
-				, strInOut
-				, dblOrigNoOfLots
-				, dblContractSize
-				, dblOrigQty
-				, dblPrice
-				, intEntityId
-				, intTicketId
-				, intUserId
-				, strNotes
-				, strMiscFields)
-			SELECT @strBatchId
-				, @strBucketType
-				, @strTransactionType
-				, @intTransactionRecordId
-				, @intTransactionRecordHeaderId
-				, @strDistributionType
-				, @strTransactionNumber
-				, @dtmTransactionDate
-				, @intContractDetailId
-				, @intContractHeaderId
-				, @intFutureMarketId
-				, @intFutureMonthId
-				, @intFutOptTransactionId
-				, @intCommodityId
-				, @intItemId
-				, intProductTypeId = NULL
-				, intOrigUOMId = @intCommodityUOMId
-				, @intBookId
-				, @intSubBookId
-				, @intLocationId
-				, strInOut = @strInOut
-				, dblOrigNoOfLots = @dblNoOfLots
-				, dblContractSize = @dblContractSize
-				, dblOrigQty = @dblNoOfLots * @dblContractSize
+				, dblOrigQty = ISNULL(@dblQty, @dblNoOfLots * @dblContractSize)
 				, dblPrice = @dblPrice
 				, @intEntityId
 				, @intTicketId
@@ -513,17 +446,15 @@ BEGIN
 				, @intBookId
 				, @intSubBookId
 				, @intLocationId
-				, strInOut = CASE WHEN UPPER(col.strType) = 'PURCHASE' THEN 'IN' ELSE 'OUT' END
+				, strInOut = CASE WHEN UPPER(@strDistributionType) = 'PURCHASE' THEN 'IN' ELSE 'OUT' END
 				, dblOrigNoOfLots = 0
 				, dblContractSize = 0
-				, dblOrigQty = @dblQty * CASE WHEN UPPER(col.strType) = 'PURCHASE' THEN 1 ELSE -1 END
+				, dblOrigQty = @dblQty * CASE WHEN UPPER(@strDistributionType) = 'PURCHASE' THEN 1 ELSE -1 END
 				, dblPrice = @dblPrice
 				, @intEntityId
 				, @intTicketId
 				, @intUserId
 				, @strNotes
-			FROM tblRKCollateral col	
-			WHERE col.intCollateralId = @intTransactionRecordId
 		END
 
 		---------------------------------------
@@ -580,19 +511,15 @@ BEGIN
 				, @intBookId
 				, @intSubBookId
 				, @intLocationId
-				, strInOut = CASE WHEN UPPER(col.strType) = 'SALE' THEN 'IN' ELSE 'OUT' END
+				, strInOut = CASE WHEN UPPER(@strDistributionType) = 'SALE' THEN 'IN' ELSE 'OUT' END
 				, dblOrigNoOfLots = 0
 				, dblContractSize = 0
-				, dblOrigQty = @dblQty * CASE WHEN UPPER(col.strType) = 'SALE' THEN 1 ELSE -1 END
+				, dblOrigQty = @dblQty * CASE WHEN UPPER(@strDistributionType) = 'SALE' THEN 1 ELSE -1 END
 				, dblPrice = @dblPrice
 				, @intEntityId
 				, @intTicketId
 				, @intUserId
 				, @strNotes
-			FROM tblRKCollateral col		
-			WHERE col.intCollateralId = @intTransactionRecordId
-
-			SET @intContractDetailId = NULL
 		END
 
 		--------------------------------------

@@ -44,7 +44,7 @@ BEGIN
 		, ysnPreCrush = der.ysnPreCrush
 		, strBrokerTradeNo = der.strBrokerTradeNo
 	INTO #tmpDerivative
-	FROM tblRKFutOptTransaction
+	FROM tblRKFutOptTransaction der
 	JOIN tblRKFutureMarket m ON m.intFutureMarketId = der.intFutureMarketId
 	LEFT JOIN tblICCommodityUnitMeasure cUOM ON cUOM.intCommodityId = der.intCommodityId AND cUOM.intUnitMeasureId = m.intUnitMeasureId
 	LEFT JOIN tblRKOptionsMonth om ON om.intOptionMonthId = der.intOptionMonthId
@@ -86,7 +86,7 @@ BEGIN
 
 		INSERT INTO @LogHelper(intRowId, strFieldName, strValue)
 		SELECT intRowId = ROW_NUMBER() OVER (ORDER BY strFieldName),  * FROM (
-			SELECT strFieldName = 'intOptionMonthId', CAST(@intOptionMonthId AS NVARCHAR)
+			SELECT strFieldName = 'intOptionMonthId', strValue = CAST(@intOptionMonthId AS NVARCHAR)
 			UNION ALL SELECT 'strOptionMonth', @strOptionMonth
 			UNION ALL SELECT 'dblStrike', CAST(@dblStrike AS NVARCHAR)
 			UNION ALL SELECT 'strOptionType', @strOptionType
