@@ -284,14 +284,14 @@ set l.dblReorderPoint = itm.ptitm_re_order
 ,l.dblMinOrder = itm.ptitm_min_ord_qty
 ,l.strStorageUnitNo = itm.ptitm_binloc
 ,l.intStorageLocationId = 
-(select s.intStorageLocationId from tblICStorageLocation s 
+(select TOP 1 s.intStorageLocationId from tblICStorageLocation s 
 join tblSMCompanyLocationSubLocation sl on sl.intCompanyLocationSubLocationId = s.intSubLocationId
 join tblSMCompanyLocation l on sl.intCompanyLocationId = l.intCompanyLocationId
 where s.strName COLLATE SQL_Latin1_General_CP1_CS_AS = itm.ptitm_binloc COLLATE SQL_Latin1_General_CP1_CS_AS
 and l.strLocationNumber COLLATE SQL_Latin1_General_CP1_CS_AS = itm.ptitm_loc_no COLLATE SQL_Latin1_General_CP1_CS_AS 
 ) 
 ,l.intSubLocationId =
-(select s.intSubLocationId from tblICStorageLocation s 
+(select TOP 1 s.intSubLocationId from tblICStorageLocation s 
 join tblSMCompanyLocationSubLocation sl on sl.intCompanyLocationSubLocationId = s.intSubLocationId
 join tblSMCompanyLocation l on sl.intCompanyLocationId = l.intCompanyLocationId
 where s.strName COLLATE SQL_Latin1_General_CP1_CS_AS = itm.ptitm_binloc COLLATE SQL_Latin1_General_CP1_CS_AS
@@ -389,6 +389,7 @@ INSERT INTO [dbo].[tblICItemPricingLevel] (
 	,strPricingMethod
 	,dblAmountRate
 	,dblUnitPrice
+	, intCompanyLocationPricingLevelId
 	,[intConcurrencyId]
 	)
 SELECT inv.intItemId
@@ -402,6 +403,7 @@ SELECT inv.intItemId
 	,'None' PricingMethod
 	,0
 	,ptitm_prc1
+	,PL.intCompanyLocationPricingLevelId
 	,1 ConcurrencyId
 	FROM ptitmmst AS itm INNER JOIN tblICItem AS inv ON (itm.ptitm_itm_no COLLATE SQL_Latin1_General_CP1_CS_AS = inv.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS)
 	 INNER JOIN tblSMCompanyLocation AS loc ON (itm.ptitm_loc_no COLLATE SQL_Latin1_General_CP1_CS_AS = loc.strLocationNumber COLLATE SQL_Latin1_General_CP1_CS_AS) 
@@ -419,6 +421,7 @@ INSERT INTO [dbo].[tblICItemPricingLevel] (
 	,strPricingMethod
 	,dblAmountRate
 	,dblUnitPrice
+	, intCompanyLocationPricingLevelId
 	,[intConcurrencyId]
 	)
 SELECT inv.intItemId
@@ -431,6 +434,7 @@ SELECT inv.intItemId
 	,'None' PricingMethod
 	,0
 	,ptitm_prc2
+	,PL.intCompanyLocationPricingLevelId
 	,1 ConcurrencyId
 	FROM ptitmmst AS itm INNER JOIN tblICItem AS inv ON (itm.ptitm_itm_no COLLATE SQL_Latin1_General_CP1_CS_AS = inv.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS)
 	 INNER JOIN tblSMCompanyLocation AS loc ON (itm.ptitm_loc_no COLLATE SQL_Latin1_General_CP1_CS_AS = loc.strLocationNumber COLLATE SQL_Latin1_General_CP1_CS_AS) 
@@ -452,6 +456,7 @@ INSERT INTO [dbo].[tblICItemPricingLevel] (
 	,strPricingMethod
 	,dblAmountRate
 	,dblUnitPrice
+	, intCompanyLocationPricingLevelId
 	,[intConcurrencyId]
 	)
 SELECT inv.intItemId
@@ -464,6 +469,7 @@ SELECT inv.intItemId
 	,'None' PricingMethod
 	,0
 	,ptitm_prc3
+	,PL.intCompanyLocationPricingLevelId
 	,1 ConcurrencyId
 	FROM ptitmmst AS itm INNER JOIN tblICItem AS inv ON (itm.ptitm_itm_no COLLATE SQL_Latin1_General_CP1_CS_AS = inv.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS)
 	 INNER JOIN tblSMCompanyLocation AS loc ON (itm.ptitm_loc_no COLLATE SQL_Latin1_General_CP1_CS_AS = loc.strLocationNumber COLLATE SQL_Latin1_General_CP1_CS_AS) 
