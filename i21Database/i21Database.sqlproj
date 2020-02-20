@@ -8151,6 +8151,7 @@
     <Build Include="dbo\Views\vyuSTUnpostedPumpTotals.sql" />
     <Build Include="dbo\Views\vyuSTUnpostedItemMovements.sql" />
     <Build Include="dbo\Stored Procedures\uspSCCheckTicketContractAfterManualDistribution.sql" />
+    <Build Include="dbo\Stored Procedures\uspICFixICvsGLAmountDisrecpany.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
