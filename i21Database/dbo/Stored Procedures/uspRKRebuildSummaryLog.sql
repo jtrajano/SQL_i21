@@ -1027,7 +1027,7 @@ BEGIN
 				t.dblQty <> 0 
 				AND v.ysnInTransit = 0
 				AND ISNULL(t.ysnIsUnposted,0) = 0
-				AND v.strTransactionType NOT IN ('Inventory Receipt','Inventory Shipment')
+				AND v.strTransactionType NOT IN ('Inventory Receipt','Inventory Shipment', 'Storage Settlement')
 			GROUP BY 
 				t.strBatchId
 				,v.strTransactionType
@@ -1350,6 +1350,7 @@ BEGIN
 			, strDistributionType = st.strStorageTypeDescription
 			, st.strStorageTypeCode
 			, intStorageHistoryId
+			, ysnReceiptedStorage
 		INTO #tmpCustomerOwned
 		FROM vyuGRStorageHistory sh
 			JOIN tblGRCustomerStorage cs ON cs.intCustomerStorageId = sh.intCustomerStorageId
@@ -1408,9 +1409,35 @@ BEGIN
 			, strDistributionType = st.strStorageTypeDescription
 			, st.strStorageTypeCode
 			, intStorageHistoryId
+			, ysnReceiptedStorage
 		FROM vyuGRStorageHistory sh
 			JOIN tblGRCustomerStorage cs ON cs.intCustomerStorageId = sh.intCustomerStorageId
 			JOIN tblGRStorageType st ON st.intStorageScheduleTypeId = cs.intStorageTypeId and ysnDPOwnedType = 1
+		
+		UNION ALL
+		SELECT 
+			 dtmHistoryDate = CONVERT(DATETIME, CONVERT(VARCHAR(10), sh.dtmHistoryDate, 110), 110)
+			, strBucketType = 'Company Owned'
+			, strTransactionType = 'Storage Settlement'
+			, intTransactionHeaderRecordId = sh.intSettleStorageId
+			, strTransactioneNo = sh.strSettleTicket
+			, sh.intContractHeaderId
+			, cs.intCommodityId
+			, cs.intItemId
+			, cs.intItemUOMId
+			, sh.intCompanyLocationId
+			, dblQty = (CASE WHEN sh.strType = 'Reverse Settlement' THEN - sh.dblUnits ELSE sh.dblUnits END)
+			, strInOut = (CASE WHEN  sh.strType = 'Reverse Settlement' THEN 'OUT' ELSE  'IN'  END)
+			, sh.intTicketId
+			, cs.intEntityId
+			, strDistributionType = st.strStorageTypeDescription
+			, st.strStorageTypeCode
+			, intStorageHistoryId
+			, ysnReceiptedStorage
+		FROM vyuGRStorageHistory sh
+			JOIN tblGRCustomerStorage cs ON cs.intCustomerStorageId = sh.intCustomerStorageId
+			JOIN tblGRStorageType st ON st.intStorageScheduleTypeId = cs.intStorageTypeId and ysnDPOwnedType = 0
+		WHERE sh.intTransactionTypeId = 4
 
 		INSERT INTO @ExistingHistory (	
 			strBatchId
@@ -1452,7 +1479,7 @@ BEGIN
 			,intEntityId
 			,@intCurrentUserId
 			,strNotes = (CASE WHEN intTransactionHeaderRecordId IS NULL THEN 'Actual transaction was deleted historically.' ELSE NULL END)
-			,strMiscFields = '{strStorageTypeCode = "'+ strStorageTypeCode +'"}'
+			,strMiscFields = '{strStorageTypeCode = "'+ strStorageTypeCode +'"} {ysnReceiptedStorage = "' + CAST(ysnReceiptedStorage AS NVARCHAR) +'"}' 
 		FROM #tmpCustomerOwned co
 		ORDER BY dtmHistoryDate, intStorageHistoryId
 	

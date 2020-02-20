@@ -6,7 +6,8 @@
 )
 RETURNS @returntable TABLE
 (
-	 dtmCreateDate DATETIME
+	  strBucketType NVARCHAR(50) COLLATE Latin1_General_CI_AS
+	, dtmCreateDate DATETIME
 	, dtmTransactionDate DATETIME
 	, dblTotal NUMERIC(18,6)
 	, intEntityId INT
@@ -27,7 +28,8 @@ BEGIN
 
 	INSERT @returntable	
 	SELECT
-		 dtmCreatedDate
+		strBucketType
+		,dtmCreatedDate
 		,dtmTransactionDate  
 		,dblTotal
 		,intEntityId
@@ -45,6 +47,7 @@ BEGIN
 	FROM (
 		SELECT 
 			intRowNum = ROW_NUMBER() OVER (PARTITION BY c.intTransactionRecordId, c.strBucketType, c.strTransactionType, c.strTransactionNumber ORDER BY c.intSummaryLogId DESC)
+			,c.strBucketType
 			,dtmCreatedDate
 			,dtmTransactionDate
 			,dblTotal = c.dblOrigQty

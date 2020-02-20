@@ -590,7 +590,8 @@ BEGIN
 							 @strTransactionType = 'Consume' 
 							THEN 'OUT'
 						WHEN @strTransactionType = 'Inventory Transfer' OR
-							 @strTransactionType like 'Inventory Adjustment%'
+							 @strTransactionType like 'Inventory Adjustment%' OR
+							 @strTransactionType = 'Storage Settlement'
 							THEN CASE WHEN ISNULL(@dblQty, 0) >= 0 THEN 'IN' ELSE 'OUT' END
 						ELSE '' END
 				, dblOrigQty = @dblQty
