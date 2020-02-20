@@ -10,6 +10,7 @@
 	, dtmTransactionDate DATETIME
 	, intContractDetailId INT NULL
 	, intContractHeaderId INT NULL
+	, intFutOptTransactionId INT NULL
 	, intTicketId INT NULL
 	, intCommodityId INT NULL
 	, intCommodityUOMId INT NULL

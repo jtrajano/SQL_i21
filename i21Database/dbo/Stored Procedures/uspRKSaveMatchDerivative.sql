@@ -23,145 +23,199 @@ BEGIN TRY
 		, d.intSFutOptTransactionId
 		, d.dblMatchQty
 	INTO #tmpDerivative
-	FROM tblRKMatchFuturesPSHeader h
-	JOIN tblRKMatchFuturesPSDetail d ON d.intMatchFuturesPSHeaderId = h.intMatchFuturesPSHeaderId
+	FROM tblRKMatchFuturesPSDetail d
+	JOIN tblRKMatchFuturesPSHeader h ON h.intMatchFuturesPSHeaderId = d.intMatchFuturesPSHeaderId
 	WHERE h.intMatchFuturesPSHeaderId = @intMatchFuturesPSHeaderId
-
-	SELECT * INTO #History FROM vyuRKGetMatchDerivativesFromSummaryLog WHERE intMatchDerivativesHeaderId = @intMatchFuturesPSHeaderId AND strTransactionType = 'Match Derivatives' ORDER BY dtmCreatedDate DESC
-	DECLARE @SummaryLog AS RKSummaryLog
 	
-	--DECLARE @intMatchDerivativesHeaderId INT = @intContractHeaderId
-			--	, @intMatchDerivativesDetailId INT = @intContractDetailId
-			--	, @intMatchNo INT
+	SELECT * INTO #History FROM vyuRKGetMatchDerivativesFromSummaryLog WHERE intMatchDerivativesHeaderId = @intMatchFuturesPSHeaderId AND strTransactionType = 'Match Derivatives' ORDER BY dtmCreatedDate DESC
+	
+	DECLARE @SummaryLog AS RKSummaryLog
+	DECLARE @LogHelper AS RKMiscField
 
-			--SET @strInOut = @strNotes
-			--SET @intContractHeaderId = NULL
-			--SET @intContractDetailId = NULL
-			--SET @strNotes = ''
-
-			--SELECT TOP 1 @strBuySell = der.strBuySell
-			--	, @dblContractSize = m.dblContractSize
-			--	, @strInstrumentType = CASE WHEN (der.[intInstrumentTypeId] = 1) THEN N'Futures'
-			--					WHEN (der.[intInstrumentTypeId] = 2) THEN N'Options'
-			--					WHEN (der.[intInstrumentTypeId] = 3) THEN N'Currency Contract' END COLLATE Latin1_General_CI_AS
-			--	, @strBrokerAccount = BA.strAccountNumber
-			--	, @strBroker = e.strName
-			--	, @ysnPreCrush = der.ysnPreCrush
-			--	, @strBrokerTradeNo = der.strBrokerTradeNo
-			--FROM tblRKFutOptTransaction der
-			--JOIN tblRKFutureMarket m ON m.intFutureMarketId = der.intFutureMarketId
-			--LEFT JOIN tblICCommodityUnitMeasure cUOM ON cUOM.intCommodityId = der.intCommodityId AND cUOM.intUnitMeasureId = m.intUnitMeasureId
-			--LEFT JOIN tblRKOptionsMonth om ON om.intOptionMonthId = der.intOptionMonthId
-			--LEFT JOIN tblRKBrokerageAccount AS BA ON BA.intBrokerageAccountId = der.intBrokerageAccountId
-			--LEFT JOIN tblEMEntity e ON e.intEntityId = der.intEntityId
-			--WHERE der.intFutOptTransactionId = @intTransactionRecordId
-
-			--SELECT TOP 1 @intMatchNo = intMatchNo FROM tblRKMatchFuturesPSHeader WHERE intMatchFuturesPSHeaderId = @intMatchDerivativesHeaderId
-
-			--INSERT INTO @LogHelper(intRowId, strFieldName, strValue)
-			--SELECT intRowId = ROW_NUMBER() OVER (ORDER BY strFieldName),  * FROM (
-			--	SELECT strFieldName = 'intMatchDerivativesHeaderId', strValue = CAST(@intMatchDerivativesHeaderId AS NVARCHAR)
-			--	UNION ALL SELECT 'intMatchDerivativesDetailId', CAST(@intMatchDerivativesDetailId AS NVARCHAR)
-			--	UNION ALL SELECT 'intMatchNo', CAST(@intMatchNo AS NVARCHAR)
-			--	UNION ALL SELECT 'strBuySell', @strBuySell
-			--	UNION ALL SELECT 'strInstrumentType', @strInstrumentType
-			--	UNION ALL SELECT 'strBrokerAccount', @strBrokerAccount
-			--	UNION ALL SELECT 'strBroker', @strBroker
-			--	UNION ALL SELECT 'intFutOptTransactionHeaderId', CAST(@intFutOptTransactionHeaderId AS NVARCHAR)
-			--	UNION ALL SELECT 'ysnPreCrush', CAST(@ysnPreCrush AS NVARCHAR)
-			--	UNION ALL SELECT 'strBrokerTradeNo', @strBrokerTradeNo
-			--) t WHERE ISNULL(strValue, '') != ''
+	DECLARE @strInstrumentType NVARCHAR(50)
+		, @strBrokerAccount NVARCHAR(50)
+		, @strBroker NVARCHAR(50)
+		, @ysnPreCrush BIT
+		, @strBrokerTradeNo NVARCHAR(50)
+		, @strInternalTradeNo NVARCHAR(50)
 
 	IF EXISTS(SELECT TOP 1 1 FROM #tmpDerivative)
 	BEGIN
-		INSERT INTO @SummaryLog(strTransactionType
+		SELECT strBucketType
+			, strTransactionType
 			, intTransactionRecordId
+			, intTransactionRecordHeaderId
+			, strDistributionType
 			, strTransactionNumber
 			, dtmTransactionDate
-			, intContractDetailId
-			, intContractHeaderId
+			, intFutOptTransactionId
 			, intCommodityId
 			, intLocationId
 			, intBookId
 			, intSubBookId
 			, intFutureMarketId
 			, intFutureMonthId
-			, strNotes
-			, dblNoOfLots
-			, dblPrice
-			, intEntityId
-			, intUserId
-			, intCommodityUOMId)
-		SELECT strTransactionType
-			, intTransactionRecordId
-			, strTransactionNumber
-			, dtmTransactionDate
-			, intContractDetailId
-			, intContractHeaderId
-			, intCommodityId
-			, intLocationId
-			, intBookId
-			, intSubBookId
-			, intFutureMarketId
-			, intFutureMonthId
-			, strNotes
 			, dblNoOfLots
 			, dblPrice
 			, intEntityId
 			, intUserId
 			, intCommodityUOMId
+			, dblContractSize
+			, strInstrumentType
+			, strBrokerAccount
+			, strBroker
+			, ysnPreCrush
+			, strBrokerTradeNo
+			, strInternalTradeNo
+		INTO #tmpFinalList
 		FROM (
-			SELECT strTransactionType = 'Match Derivatives'
-				, intTransactionRecordId = detail.intLFutOptTransactionId
-				, strTransactionNumber = de.strInternalTradeNo
-				, dtmTransactionDate = header.dtmMatchDate
-				, intContractDetailId = detail.intMatchFuturesPSDetailId
-				, intContractHeaderId = header.intMatchFuturesPSHeaderId
+			SELECT strBucketType = 'Derivatives'
+				, strTransactionType = 'Match Derivatives'
+				, intTransactionRecordId = md.intMatchFuturesPSDetailId
+				, intTransactionRecordHeaderId = md.intMatchFuturesPSHeaderId
+				, strTransactionNumber = md.intMatchNo
+				, dtmTransactionDate = md.dtmMatchDate
+				, intFutOptTransactionId = md.intLFutOptTransactionId
 				, intCommodityId = de.intCommodityId
 				, de.intLocationId
 				, intBookId = de.intBookId
 				, intSubBookId = de.intSubBookId
 				, intFutureMarketId = de.intFutureMarketId
 				, intFutureMonthId = de.intFutureMonthId
-				, strNotes = 'IN'
-				, dblNoOfLots = detail.dblMatchQty
+				, strDistributionType = de.strBuySell
+				, dblNoOfLots = md.dblMatchQty
 				, dblPrice = de.dblPrice
 				, intEntityId = de.intEntityId
 				, intUserId = @intUserId
 				, intCommodityUOMId = cUOM.intCommodityUnitMeasureId
-			FROM tblRKMatchFuturesPSDetail detail
-			JOIN tblRKMatchFuturesPSHeader header ON header.intMatchFuturesPSHeaderId = detail.intMatchFuturesPSHeaderId
-			JOIN tblRKFutOptTransaction de ON de.intFutOptTransactionId = detail.intLFutOptTransactionId
+				, dblContractSize = FutMarket.dblContractSize
+				, strInstrumentType = CASE WHEN (de.intInstrumentTypeId = 1) THEN N'Futures'
+								WHEN (de.intInstrumentTypeId = 2) THEN N'Options'
+								WHEN (de.intInstrumentTypeId = 3) THEN N'Currency Contract' END COLLATE Latin1_General_CI_AS
+				, strBrokerAccount = BA.strAccountNumber
+				, strBroker = e.strName
+				, ysnPreCrush = de.ysnPreCrush
+				, strBrokerTradeNo = de.strBrokerTradeNo
+				, de.strInternalTradeNo
+			FROM #tmpDerivative md
+			JOIN tblRKFutOptTransaction de ON de.intFutOptTransactionId = md.intLFutOptTransactionId
 			LEFT JOIN tblRKFutureMarket FutMarket ON FutMarket.intFutureMarketId = de.intFutureMarketId
 			LEFT JOIN tblICCommodityUnitMeasure cUOM ON cUOM.intCommodityId = de.intCommodityId AND cUOM.intUnitMeasureId = FutMarket.intUnitMeasureId
-			WHERE detail.intLFutOptTransactionId IN (SELECT DISTINCT intLFutOptTransactionId FROM #tmpDerivative)			
+			LEFT JOIN tblRKOptionsMonth om ON om.intOptionMonthId = de.intOptionMonthId
+			LEFT JOIN tblRKBrokerageAccount AS BA ON BA.intBrokerageAccountId = de.intBrokerageAccountId
+			LEFT JOIN tblEMEntity e ON e.intEntityId = de.intEntityId
 
-			UNION ALL SELECT strTransactionType = 'Match Derivatives'
-				, intTransactionRecordId = detail.intSFutOptTransactionId
-				, strTransactionNumber = de.strInternalTradeNo
-				, dtmTransactionDate = header.dtmMatchDate
-				, intContractDetailId = detail.intMatchFuturesPSDetailId
-				, intContractHeaderId = header.intMatchFuturesPSHeaderId
+			UNION ALL SELECT strBucketType = 'Derivatives'
+				, strTransactionType = 'Match Derivatives'
+				, intTransactionRecordId = md.intMatchFuturesPSDetailId
+				, intTransactionRecordHeaderId = md.intMatchFuturesPSHeaderId
+				, strTransactionNumber = md.intMatchNo
+				, dtmTransactionDate = md.dtmMatchDate
+				, intFutOptTransactionId = md.intSFutOptTransactionId
 				, intCommodityId = de.intCommodityId
 				, intLocationId
 				, intBookId = de.intBookId
 				, intSubBookId = de.intSubBookId
 				, intFutureMarketId = de.intFutureMarketId
 				, intFutureMonthId = de.intFutureMonthId
-				, strNotes = 'OUT'
-				, dblNoOfLots = detail.dblMatchQty * - 1
+				, strDistributionType = de.strBuySell
+				, dblNoOfLots = md.dblMatchQty * - 1
 				, dblPrice = de.dblPrice
 				, intEntityId = de.intEntityId
 				, intUserId = @intUserId
 				, intCommodityUOMId = cUOM.intCommodityUnitMeasureId
-			FROM tblRKMatchDerivativesHistory detail
-			JOIN tblRKMatchFuturesPSHeader header ON header.intMatchFuturesPSHeaderId = detail.intMatchFuturesPSHeaderId
-			JOIN tblRKFutOptTransaction de ON de.intFutOptTransactionId = detail.intSFutOptTransactionId
+				, dblContractSize = FutMarket.dblContractSize
+				, strInstrumentType = CASE WHEN (de.intInstrumentTypeId = 1) THEN N'Futures'
+								WHEN (de.intInstrumentTypeId = 2) THEN N'Options'
+								WHEN (de.intInstrumentTypeId = 3) THEN N'Currency Contract' END COLLATE Latin1_General_CI_AS
+				, strBrokerAccount = BA.strAccountNumber
+				, strBroker = e.strName
+				, ysnPreCrush = de.ysnPreCrush
+				, strBrokerTradeNo = de.strBrokerTradeNo
+				, de.strInternalTradeNo
+			FROM #tmpDerivative md
+			JOIN tblRKFutOptTransaction de ON de.intFutOptTransactionId = md.intSFutOptTransactionId
 			LEFT JOIN tblRKFutureMarket FutMarket ON FutMarket.intFutureMarketId = de.intFutureMarketId
 			LEFT JOIN tblICCommodityUnitMeasure cUOM ON cUOM.intCommodityId = de.intCommodityId AND cUOM.intUnitMeasureId = FutMarket.intUnitMeasureId
-			WHERE detail.intSFutOptTransactionId IN (SELECT DISTINCT intSFutOptTransactionId FROM #tmpDerivative)
+			LEFT JOIN tblRKOptionsMonth om ON om.intOptionMonthId = de.intOptionMonthId
+			LEFT JOIN tblRKBrokerageAccount AS BA ON BA.intBrokerageAccountId = de.intBrokerageAccountId
+			LEFT JOIN tblEMEntity e ON e.intEntityId = de.intEntityId
 		) tbl
-		ORDER BY intMatchDerivativeHistoryId
+
+		DECLARE @intDetailId INT
+		WHILE EXISTS (SELECT TOP 1 1 FROM #tmpFinalList)
+		BEGIN
+			SELECT TOP 1 @intDetailId = intTransactionRecordId
+				, @strInstrumentType = strInstrumentType
+				, @strBrokerAccount = strBrokerAccount
+				, @strBroker = strBroker
+				, @ysnPreCrush = ysnPreCrush
+				, @strBrokerTradeNo = strBrokerTradeNo
+				, @strInternalTradeNo = strInternalTradeNo
+			FROM #tmpFinalList
+
+			INSERT INTO @LogHelper(intRowId, strFieldName, strValue)
+			SELECT intRowId = ROW_NUMBER() OVER (ORDER BY strFieldName),  * FROM (
+				SELECT strFieldName = 'strInternalTradeNo', strValue = @strInternalTradeNo				
+				UNION ALL SELECT 'strInstrumentType', @strInstrumentType
+				UNION ALL SELECT 'strBrokerAccount', @strBrokerAccount
+				UNION ALL SELECT 'strBroker', @strBroker
+				UNION ALL SELECT 'ysnPreCrush', CAST(@ysnPreCrush AS NVARCHAR)
+				UNION ALL SELECT 'strBrokerTradeNo', @strBrokerTradeNo
+			) t WHERE ISNULL(strValue, '') != ''
+
+			INSERT INTO @SummaryLog(strBucketType
+				, strTransactionType
+				, intTransactionRecordId
+				, intTransactionRecordHeaderId
+				, strDistributionType
+				, strTransactionNumber
+				, dtmTransactionDate
+				, intFutOptTransactionId
+				, intCommodityId
+				, intLocationId
+				, intBookId
+				, intSubBookId
+				, intFutureMarketId
+				, intFutureMonthId
+				, strNotes
+				, dblNoOfLots
+				, dblPrice
+				, dblContractSize
+				, intEntityId
+				, intUserId
+				, intCommodityUOMId
+				, strMiscFields)
+			SELECT strBucketType
+				, strTransactionType
+				, intTransactionRecordId
+				, intTransactionRecordHeaderId
+				, strDistributionType
+				, strTransactionNumber
+				, dtmTransactionDate
+				, intFutOptTransactionId
+				, intCommodityId
+				, intLocationId
+				, intBookId
+				, intSubBookId
+				, intFutureMarketId
+				, intFutureMonthId
+				, strNotes
+				, dblNoOfLots
+				, dblPrice
+				, dblContractSize
+				, intEntityId
+				, intUserId
+				, intCommodityUOMId
+				, strMiscFields = dbo.fnRKConvertMiscFieldString(@LogHelper)
+			FROM #tmpFinalList WHERE intTransactionRecordId = @intDetailId
+
+			DELETE FROM @LogHelper
+
+			DELETE FROM #tmpFinalList WHERE intTransactionRecordId = @intDetailId
+		END
+
+		DROP TABLE #tmpFinalList
 	END
 	ELSE
 	BEGIN

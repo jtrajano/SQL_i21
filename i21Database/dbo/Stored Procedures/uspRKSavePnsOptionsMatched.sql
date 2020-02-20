@@ -317,12 +317,14 @@ BEGIN TRY
 
 	DROP TABLE #tmpNewExpired
 	
-	INSERT INTO @SummaryLog(strTransactionType
+	INSERT INTO @SummaryLog(strBucketType
+		, strTransactionType
+		, intFutOptTransactionId
 		, intTransactionRecordId
+		, intTransactionRecordHeaderId
+		, strDistributionType
 		, strTransactionNumber
-		, dtmTransactionDate
-		, intContractDetailId
-		, intContractHeaderId
+		, dtmTransactionDate		
 		, intCommodityId
 		, intLocationId
 		, intBookId
@@ -332,24 +334,28 @@ BEGIN TRY
 		, strNotes
 		, dblNoOfLots
 		, dblPrice
+		, dblContractSize
 		, intEntityId
 		, intUserId
 		, intCommodityUOMId)
-	SELECT strTransactionType = 'Expired Options'
-		, intTransactionRecordId = detail.intFutOptTransactionId
+	SELECT strBucketType = 'Derivatives'
+		, strTransactionType = 'Options Lifecycle'
+		, intFutOptTransactionId = detail.intFutOptTransactionId
+		, intTransactionRecordId = detail.intOptionsPnSExpiredId
+		, intTransactionRecordHeaderId = header.intOptionsMatchPnSHeaderId
+		, strDistributionType = de.strBuySell
 		, strTransactionNumber = de.strInternalTradeNo
-		, dtmTransactionDate = detail.dtmExpiredDate
-		, intContractDetailId = detail.intOptionsPnSExpiredId
-		, intContractHeaderId = header.intOptionsMatchPnSHeaderId
+		, dtmTransactionDate = detail.dtmExpiredDate		
 		, intCommodityId = de.intCommodityId
 		, de.intLocationId
 		, intBookId = de.intBookId
 		, intSubBookId = de.intSubBookId
 		, intFutureMarketId = de.intFutureMarketId
 		, intFutureMonthId = de.intFutureMonthId
-		, strNotes = CASE WHEN de.strBuySell = 'Buy' THEN 'IN' ELSE 'OUT' END
-		, dblNoOfLots = detail.dblLots * - 1
+		, strNotes = 'Expire Options'
+		, dblNoOfLots = detail.dblLots
 		, dblPrice = de.dblPrice
+		, dblContractSize
 		, intEntityId = de.intEntityId
 		, intUserId = @intUserId
 		, intCommodityUOMId = cUOM.intCommodityUnitMeasureId
@@ -427,12 +433,14 @@ BEGIN TRY
 		
 		SELECT @intOptionsPnSExercisedAssignedId = SCOPE_IDENTITY()
 
-		INSERT INTO @SummaryLog(strTransactionType
+		INSERT INTO @SummaryLog(strBucketType
+			, strTransactionType
+			, intFutOptTransactionId
 			, intTransactionRecordId
+			, intTransactionRecordHeaderId
+			, strDistributionType
 			, strTransactionNumber
 			, dtmTransactionDate
-			, intContractDetailId
-			, intContractHeaderId
 			, intCommodityId
 			, intLocationId
 			, intBookId
@@ -442,24 +450,27 @@ BEGIN TRY
 			, strNotes
 			, dblNoOfLots
 			, dblPrice
+			, dblContractSize
 			, intEntityId
 			, intUserId
 			, intCommodityUOMId)
-		SELECT strTransactionType = 'Excercised/Assigned Options'
-			, intTransactionRecordId = detail.intFutOptTransactionId
+		SELECT strBucketType = 'Derivatives'
+			, strTransactionType = 'Options Lifecycle'
+			, intFutOptTransactionId = detail.intFutOptTransactionId
+			, intTransactionRecordId = detail.intOptionsPnSExercisedAssignedId
+			, intTransactionRecordHeaderId = header.intOptionsMatchPnSHeaderId
 			, strTransactionNumber = de.strInternalTradeNo
 			, dtmTransactionDate = detail.dtmTranDate
-			, intContractDetailId = detail.intOptionsPnSExercisedAssignedId
-			, intContractHeaderId = header.intOptionsMatchPnSHeaderId
 			, intCommodityId = de.intCommodityId
 			, de.intLocationId
 			, intBookId = de.intBookId
 			, intSubBookId = de.intSubBookId
 			, intFutureMarketId = de.intFutureMarketId
 			, intFutureMonthId = de.intFutureMonthId
-			, strNotes = CASE WHEN de.strBuySell = 'Buy' THEN 'IN' ELSE 'OUT' END
-			, dblNoOfLots = detail.dblLots * - 1
+			, strNotes = 'Excercised/Assigned Options'
+			, dblNoOfLots = detail.dblLots
 			, dblPrice = de.dblPrice
+			, dblContractSize
 			, intEntityId = de.intEntityId
 			, intUserId = @intUserId
 			, intCommodityUOMId = cUOM.intCommodityUnitMeasureId

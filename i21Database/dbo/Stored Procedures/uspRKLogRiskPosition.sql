@@ -23,6 +23,7 @@ BEGIN
 		, @dtmTransactionDate DATETIME
 		, @intContractDetailId INT
 		, @intContractHeaderId INT
+		, @intFutOptTransactionId INT
 		, @intTicketId INT
 		, @intCommodityId INT
 		, @intCommodityUOMId INT
@@ -102,6 +103,7 @@ BEGIN
 			, @dtmTransactionDate = NULL
 			, @intContractDetailId = NULL
 			, @intContractHeaderId = NULL
+			, @intFutOptTransactionId = NULL
 			, @intTicketId = NULL
 			, @intCommodityId = NULL
 			, @intCommodityUOMId = NULL
@@ -133,6 +135,7 @@ BEGIN
 			, @dtmTransactionDate = dtmTransactionDate
 			, @intContractDetailId = intContractDetailId
 			, @intContractHeaderId = intContractHeaderId
+			, @intFutOptTransactionId = intFutOptTransactionId
 			, @intTicketId = intTicketId
 			, @intCommodityId = intCommodityId
 			, @intCommodityUOMId = intCommodityUOMId
@@ -369,7 +372,7 @@ BEGIN
 				, @intContractHeaderId
 				, @intFutureMarketId
 				, @intFutureMonthId
-				, @intTransactionRecordId
+				, @intFutOptTransactionId
 				, @intCommodityId
 				, @intItemId
 				, intProductTypeId = NULL
@@ -436,7 +439,7 @@ BEGIN
 				, @intContractHeaderId
 				, @intFutureMarketId
 				, @intFutureMonthId
-				, @intTransactionRecordId
+				, @intFutOptTransactionId
 				, @intCommodityId
 				, @intItemId
 				, intProductTypeId = NULL

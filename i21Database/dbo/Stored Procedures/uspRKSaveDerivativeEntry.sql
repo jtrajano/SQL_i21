@@ -106,6 +106,7 @@ BEGIN
 			, dtmTransactionDate
 			, intContractDetailId
 			, intContractHeaderId
+			, intFutOptTransactionId
 			, intCommodityId
 			, intLocationId
 			, intBookId
@@ -130,6 +131,7 @@ BEGIN
 			, dtmTransactionDate = der.dtmTransactionDate
 			, intContractDetailId = der.intContractDetailId
 			, intContractHeaderId = der.intContractHeaderId
+			, intFutOptTransactionId = der.intFutOptTransactionId
 			, intCommodityId = der.intCommodityId
 			, intLocationId = der.intLocationId
 			, intBookId = der.intBookId
