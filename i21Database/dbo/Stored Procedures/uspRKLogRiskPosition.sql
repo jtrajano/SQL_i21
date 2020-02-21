@@ -579,20 +579,18 @@ BEGIN
 				, @intLocationId
 				, strInOut = CASE 
 						WHEN @strBucketType = 'Sales In-Transit' OR
-							 @strBucketType = 'Purchase In-Transit'
+							 @strBucketType = 'Purchase In-Transit' OR
+							 @strTransactionType = 'Inventory Receipt' OR
+							 @strTransactionType = 'Produce' OR
+							 @strTransactionType = 'Inventory Transfer' OR
+							 @strTransactionType like 'Inventory Adjustment%' OR
+							 @strTransactionType = 'Storage Settlement'
 							THEN CASE WHEN ISNULL(@dblQty, 0) >= 0 THEN 'IN' ELSE 'OUT' END
-						WHEN @strTransactionType = 'Inventory Receipt' OR
-							 @strTransactionType = 'Produce' 
-							THEN 'IN' 
 						WHEN @strTransactionType = 'Inventory Shipment' OR
 							 @strTransactionType = 'Invoice' OR
 							 @strTransactionType  = 'Outbound Shipment' OR
 							 @strTransactionType = 'Consume' 
-							THEN 'OUT'
-						WHEN @strTransactionType = 'Inventory Transfer' OR
-							 @strTransactionType like 'Inventory Adjustment%' OR
-							 @strTransactionType = 'Storage Settlement'
-							THEN CASE WHEN ISNULL(@dblQty, 0) >= 0 THEN 'IN' ELSE 'OUT' END
+							THEN CASE WHEN ISNULL(@dblQty, 0) >= 0 THEN 'OUT' ELSE 'IN' END
 						ELSE '' END
 				, dblOrigQty = @dblQty
 				, dblPrice = @dblPrice
