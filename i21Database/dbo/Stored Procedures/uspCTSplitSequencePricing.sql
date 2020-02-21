@@ -105,7 +105,8 @@ BEGIN TRY
 		SELECT	@intChildContractDetailId = MIN(intContractDetailId) 
 		FROM	tblCTContractDetail 
 		WHERE	intSplitFromId			=	@intContractDetailId
-		
+		AND intPricingTypeId = 1
+
 		WHILE	ISNULL(@intChildContractDetailId,0) > 0
 		BEGIN
 				SELECT	@dblChildSeqLots	=	dblNoOfLots,
@@ -157,7 +158,9 @@ BEGIN TRY
 				SELECT	@intChildContractDetailId = MIN(intContractDetailId) 
 				FROM	tblCTContractDetail 
 				WHERE	intSplitFromId		=	@intContractDetailId
-		END					
+				AND intPricingTypeId = 1
+		END				
+
 END TRY
 
 BEGIN CATCH
