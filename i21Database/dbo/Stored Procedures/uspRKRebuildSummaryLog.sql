@@ -1341,7 +1341,7 @@ BEGIN
 			, sh.intContractHeaderId
 			, cs.intCommodityId
 			, cs.intItemId
-			, cs.intItemUOMId
+			, cum.intCommodityUnitMeasureId
 			, sh.intCompanyLocationId
 			, dblQty = (CASE WHEN sh.strType ='Reduced By Inventory Shipment' OR sh.strType = 'Settlement' THEN - sh.dblUnits ELSE sh.dblUnits END)
 			, strInOut = (CASE WHEN sh.strType ='Reduced By Inventory Shipment' OR sh.strType = 'Settlement' THEN 'OUT' ELSE CASE WHEN sh.dblUnits < 0 THEN 'OUT' ELSE 'IN' END END)
@@ -1355,6 +1355,8 @@ BEGIN
 		FROM vyuGRStorageHistory sh
 			JOIN tblGRCustomerStorage cs ON cs.intCustomerStorageId = sh.intCustomerStorageId
 			JOIN tblGRStorageType st ON st.intStorageScheduleTypeId = cs.intStorageTypeId and ysnDPOwnedType = 0
+			JOIN tblICItemUOM iuom on iuom.intItemUOMId = cs.intItemUOMId
+			JOIN tblICCommodityUnitMeasure cum on cum.intUnitMeasureId = iuom.intUnitMeasureId and cum.intCommodityId = cs.intCommodityId
 	
 		UNION ALL
 		SELECT 
@@ -1400,7 +1402,7 @@ BEGIN
 			, sh.intContractHeaderId
 			, cs.intCommodityId
 			, cs.intItemId
-			, cs.intItemUOMId
+			, cum.intCommodityUnitMeasureId
 			, sh.intCompanyLocationId
 			, dblQty = (CASE WHEN sh.strType ='Reduced By Inventory Shipment' OR sh.strType = 'Settlement' THEN - sh.dblUnits ELSE sh.dblUnits END)
 			, strInOut = (CASE WHEN sh.strType ='Reduced By Inventory Shipment' OR sh.strType = 'Settlement' THEN 'OUT' ELSE CASE WHEN sh.dblUnits < 0 THEN 'OUT' ELSE 'IN' END END)
@@ -1413,6 +1415,8 @@ BEGIN
 		FROM vyuGRStorageHistory sh
 			JOIN tblGRCustomerStorage cs ON cs.intCustomerStorageId = sh.intCustomerStorageId
 			JOIN tblGRStorageType st ON st.intStorageScheduleTypeId = cs.intStorageTypeId and ysnDPOwnedType = 1
+			JOIN tblICItemUOM iuom on iuom.intItemUOMId = cs.intItemUOMId
+			JOIN tblICCommodityUnitMeasure cum on cum.intUnitMeasureId = iuom.intUnitMeasureId and cum.intCommodityId = cs.intCommodityId
 		
 		UNION ALL
 		SELECT 
@@ -1424,7 +1428,7 @@ BEGIN
 			, sh.intContractHeaderId
 			, cs.intCommodityId
 			, cs.intItemId
-			, cs.intItemUOMId
+			, cum.intCommodityUnitMeasureId
 			, sh.intCompanyLocationId
 			, dblQty = (CASE WHEN sh.strType = 'Reverse Settlement' THEN - sh.dblUnits ELSE sh.dblUnits END)
 			, strInOut = (CASE WHEN  sh.strType = 'Reverse Settlement' THEN 'OUT' ELSE  'IN'  END)
@@ -1437,6 +1441,8 @@ BEGIN
 		FROM vyuGRStorageHistory sh
 			JOIN tblGRCustomerStorage cs ON cs.intCustomerStorageId = sh.intCustomerStorageId
 			JOIN tblGRStorageType st ON st.intStorageScheduleTypeId = cs.intStorageTypeId and ysnDPOwnedType = 0
+			JOIN tblICItemUOM iuom on iuom.intItemUOMId = cs.intItemUOMId
+			JOIN tblICCommodityUnitMeasure cum on cum.intUnitMeasureId = iuom.intUnitMeasureId and cum.intCommodityId = cs.intCommodityId
 		WHERE sh.intTransactionTypeId = 4
 
 		INSERT INTO @ExistingHistory (	
@@ -1472,7 +1478,7 @@ BEGIN
 			,intContractHeaderId
 			,intTicketId
 			,intCommodityId
-			,intItemUOMId
+			,intCommodityUnitMeasureId
 			,intItemId
 			,intCompanyLocationId
 			,dblQty
