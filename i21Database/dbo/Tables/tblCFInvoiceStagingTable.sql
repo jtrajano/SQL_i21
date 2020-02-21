@@ -160,6 +160,7 @@
     [ysnShowDriverPinDescriptionOnly] BIT             NULL,
 	[ysnPageBreakByPrimarySortOrder]  BIT			  NULL,
 	[ysnSummaryByDeptDriverPinProd]   BIT			  NULL,
+    [strProductDescriptionForTotals]  NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     CONSTRAINT [UserAndTransactionIdAndStatementType] UNIQUE NONCLUSTERED ([intTransactionId] ASC, [strUserId] ASC, [strStatementType] ASC) WITH (FILLFACTOR = 70)
 );
 
