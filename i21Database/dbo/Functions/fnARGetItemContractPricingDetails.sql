@@ -37,7 +37,7 @@ DECLARE @dblPrice				NUMERIC(18,6)
 	  , @strItemContractUOM		NVARCHAR(50)
 	  , @intTermId				INT
 	  , @dblZeroDecimal			NUMERIC(18,6) = 0.000000
-	  , @ysnLimitLocation		BIT = 0
+	  , @ysnLimitLocation		BIT = 0	
 
 SET @dtmTransactionDate = ISNULL(@dtmTransactionDate, GETDATE())	
 SELECT TOP 1 @ysnLimitLocation = ISNULL(ysnLimitCTByLocation, 0) FROM tblCTCompanyPreference
@@ -60,8 +60,8 @@ SELECT TOP 1 @dblPrice					= ICS.dblPrice
 		   , @intTermId					= ICS.intTermId
 FROM vyuARItemContractSequenceSearch ICS
 WHERE ICS.intEntityCustomerId = @intCustomerId
-	AND ICS.intItemContractHeaderId = @intItemContractHeaderId
-	AND ICS.intItemContractDetailId = @intItemContractDetailId
+	AND (@intItemContractHeaderId IS NULL OR ICS.intItemContractHeaderId = @intItemContractHeaderId)
+	AND (@intItemContractDetailId IS NULL OR ICS.intItemContractDetailId = @intItemContractDetailId)
 	AND ICS.intItemId = @intItemId
 	AND (ISNULL(@ysnLimitLocation, 0) = 0 OR ICS.intCompanyLocationId = @intLocationId)
 	AND (ISNULL(@intItemUOMId, 0) = 0 OR ICS.[intItemUOMId] = @intItemUOMId)		

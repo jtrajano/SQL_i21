@@ -298,7 +298,7 @@ DECLARE	 @Price							NUMERIC(18,6)
 		
 	END
 
-	IF NOT(@CustomerPricingOnly = 1 OR @ExcludeContractPricing = 1) AND @ItemPricingOnly = 0 AND @ysnFromItemSelection = 0 AND @ItemContractDetailId IS NOT NULL
+	IF NOT(@CustomerPricingOnly = 1 OR @ExcludeContractPricing = 1) AND @ItemPricingOnly = 0 AND @ysnFromItemSelection = 0
 	BEGIN		
 		--Item Contract Price		
 		SELECT TOP 1
