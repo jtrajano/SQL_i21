@@ -8917,9 +8917,6 @@
     <None Include="Scripts\Post-Deployment\GR\ImportSettleStorageBillDetail.sql" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Scripts\Post-Deployment\GR\Populate_Risk_Summary_Log.sql" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Scripts\Post-Deployment\CT\1920_Add_Accrued_Payables.sql" />
   </ItemGroup>
   <ItemGroup>
