@@ -1313,7 +1313,7 @@ BEGIN
 											 WHEN intTransactionTypeId = 9 THEN
 												'Inventory Adjustment'
 											END
-			, intTransactionHeaderRecordId = CASE WHEN intTransactionTypeId IN(1,5)THEN
+			, intTransactionRecordId = CASE WHEN intTransactionTypeId IN(1,5)THEN
 												CASE WHEN sh.intInventoryReceiptId IS NOT NULL THEN sh.intInventoryReceiptId
 													 WHEN sh.intInventoryShipmentId IS NOT NULL THEN sh.intInventoryShipmentId
 													 ELSE NULL
@@ -1374,7 +1374,7 @@ BEGIN
 											 WHEN intTransactionTypeId = 9 THEN
 												'Inventory Adjustment'
 											END
-			, intTransactionHeaderRecordId = CASE WHEN intTransactionTypeId IN(1,5)THEN
+			, intTransactionRecordId = CASE WHEN intTransactionTypeId IN(1,5)THEN
 												CASE WHEN sh.intInventoryReceiptId IS NOT NULL THEN sh.intInventoryReceiptId
 													 WHEN sh.intInventoryShipmentId IS NOT NULL THEN sh.intInventoryShipmentId
 													 ELSE NULL
@@ -1423,7 +1423,7 @@ BEGIN
 			 dtmHistoryDate = CONVERT(DATETIME, CONVERT(VARCHAR(10), sh.dtmHistoryDate, 110), 110)
 			, strBucketType = 'Company Owned'
 			, strTransactionType = 'Storage Settlement'
-			, intTransactionHeaderRecordId = sh.intSettleStorageId
+			, intTransactionRecordId = sh.intSettleStorageId
 			, strTransactioneNo = sh.strSettleTicket
 			, sh.intContractHeaderId
 			, cs.intCommodityId
@@ -1450,7 +1450,6 @@ BEGIN
 			,strBucketType
 			,strTransactionType
 			,intTransactionRecordId 
-			,intTransactionRecordHeaderId
 			,strDistributionType
 			,strTransactionNumber 
 			,dtmTransactionDate 
@@ -1470,8 +1469,7 @@ BEGIN
 			 strBatchId = NULL
 			,strBucketType
 			,strTransactionType
-			,intTransactionRecordId = NULL
-			,intTransactionHeaderRecordId
+			,intTransactionRecordId
 			,strDistributionType
 			,strTransactioneNo
 			,dtmHistoryDate
@@ -1484,7 +1482,7 @@ BEGIN
 			,dblQty
 			,intEntityId
 			,@intCurrentUserId
-			,strNotes = (CASE WHEN intTransactionHeaderRecordId IS NULL THEN 'Actual transaction was deleted historically.' ELSE NULL END)
+			,strNotes = (CASE WHEN intTransactionRecordId IS NULL THEN 'Actual transaction was deleted historically.' ELSE NULL END)
 			,strMiscFields = '{strStorageTypeCode = "'+ strStorageTypeCode +'"} {ysnReceiptedStorage = "' + CAST(ysnReceiptedStorage AS NVARCHAR) +'"}' 
 		FROM #tmpCustomerOwned co
 		ORDER BY dtmHistoryDate, intStorageHistoryId
