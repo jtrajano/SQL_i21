@@ -434,6 +434,8 @@ BEGIN TRY
 									AND intContractDetailId = @intContractDetailId 
 									AND intInventoryReceiptChargeId IS NULL
 							ORDER BY intBillDetailId DESC 
+							--UPDATING OF QUANTITY Manual
+							UPDATE tblAPBillDetail SET dblQtyOrdered = @dblReceived WHERE intBillDetailId = @intBillDetailId
 					    
 							-- Add the 'DP/Basis' other charges into the voucher
 							BEGIN 
