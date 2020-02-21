@@ -42,7 +42,8 @@ BEGIN TRY
 	BEGIN
 		IF (@ysnCancel = 1)
 		BEGIN
-			IF EXISTS (SELECT 1 FROM tblLGLoad WHERE intLoadId = @intLoadId AND ysnPosted = 1)
+			IF EXISTS (SELECT 1 FROM tblLGLoad WHERE intLoadId = @intLoadId AND ysnPosted = 1) 
+				AND NOT EXISTS (SELECT TOP 1 1 FROM tblRKCompanyPreference WHERE ysnImposeReversalTransaction = 1)
 			BEGIN
 				RAISERROR ('Shipment is already posted. Cannot cancel.',11,1)
 			END
@@ -136,6 +137,12 @@ BEGIN TRY
 				EXEC [uspLGCreateLoadIntegrationLog] @intLoadId = @intLoadShippingInstructionId
 					,@strRowState = 'Added'
 					,@intShipmentType = 2
+			END
+
+			/* Perform Reversal */
+			IF EXISTS(SELECT TOP 1 1 FROM tblRKCompanyPreference WHERE ISNULL(ysnImposeReversalTransaction, 0) = 1)
+			BEGIN
+				EXEC uspLGPostLoadSchedule @intLoadId, @intEntityUserSecurityId, 1
 			END
 		END
 		ELSE

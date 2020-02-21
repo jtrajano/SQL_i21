@@ -23,6 +23,12 @@ BEGIN
 	SET @intFunctionalCurrencyId = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
 END
 
+--Check if Cancelled
+BEGIN
+	DECLARE @ysnCancel AS BIT
+	SELECT @ysnCancel = ISNULL(ysnCancelled, 0) FROM tblLGLoad WHERE intLoadId = @intInventoryShipmentId
+END
+
 -- Validate 
 BEGIN
 	-- Check for invalid location for the Other Charge item. 
@@ -255,7 +261,7 @@ BEGIN
 			,intChargeItemLocation = ChargeItemLocation.intItemLocationId
 			,intTransactionId = Shipment.intLoadId
 			,strTransactionId = Shipment.strLoadNumber
-			,dblCost = ShipmentCharges.dblAmount
+			,dblCost = ShipmentCharges.dblAmount * CASE WHEN (@ysnCancel = 1) THEN -1 ELSE 1 END
 			,intTransactionTypeId = @intTransactionTypeId
 			,intCurrencyId = ISNULL(ShipmentCharges.intCurrencyId, Shipment.intCurrencyId)
 			,dblExchangeRate = ISNULL(1, 1)
@@ -540,12 +546,12 @@ BEGIN
 		,[strBatchId]
 		,[intAccountId]
 		,[dblDebit] = CASE 
-			WHEN @ysnPost = 1
+			WHEN @ysnPost = 1 AND @ysnCancel = 0
 				THEN [dblDebit]
 			ELSE [dblCredit]
 			END
 		,[dblCredit] = CASE 
-			WHEN @ysnPost = 1
+			WHEN @ysnPost = 1 AND @ysnCancel = 0
 				THEN [dblCredit]
 			ELSE [dblDebit]
 			END
@@ -574,13 +580,13 @@ BEGIN
 		,[strModuleName]
 		,[intConcurrencyId]
 		,[dblDebitForeign] = CASE 
-			WHEN @ysnPost = 1
+			WHEN @ysnPost = 1 AND @ysnCancel = 0
 				THEN [dblDebitForeign]
 			ELSE [dblCreditForeign]
 			END
 		,[dblDebitReport]
 		,[dblCreditForeign] = CASE 
-			WHEN @ysnPost = 1
+			WHEN @ysnPost = 1 AND @ysnCancel = 0
 				THEN [dblCreditForeign]
 			ELSE [dblDebitForeign]
 			END

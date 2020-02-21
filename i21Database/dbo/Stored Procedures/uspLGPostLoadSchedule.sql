@@ -14,10 +14,12 @@ BEGIN TRY
 	DECLARE @intSourceType INT
 	DECLARE @strInvoiceNo NVARCHAR(1000)
 	DECLARE @strMsg NVARCHAR(MAX)
+	DECLARE @ysnCancel BIT
 
 	SELECT @intPurchaseSale = intPurchaseSale
 		  ,@strLoadNumber = strLoadNumber
 		  ,@intSourceType = intSourceType
+		  ,@ysnCancel = ISNULL(ysnCancelled, 0)
 	FROM tblLGLoad
 	WHERE intLoadId = @intLoadId
 
@@ -84,49 +86,57 @@ BEGIN TRY
 
 			IF(@ysnPost = 0)
 			BEGIN
-				UPDATE tblLGLoad SET intShipmentStatus = 2, ysnPosted = @ysnPost, dtmPostedDate = NULL WHERE intLoadId = @intLoadId
+				UPDATE tblLGLoad SET intShipmentStatus = 2, ysnPosted = @ysnPost, dtmPostedDate = NULL WHERE intLoadId = @intLoadId AND @ysnCancel = 0
 			END
 			ELSE 
 			BEGIN
-				UPDATE tblLGLoad SET intShipmentStatus = 3, ysnPosted = @ysnPost, dtmPostedDate = GETDATE() WHERE intLoadId = @intLoadId
+				UPDATE tblLGLoad SET intShipmentStatus = 3, ysnPosted = @ysnPost, dtmPostedDate = GETDATE() WHERE intLoadId = @intLoadId AND @ysnCancel = 0
 			END
 
-			EXEC dbo.uspLGProcessPayables @intLoadId, NULL, @ysnPost, @intEntityUserSecurityId
+			IF (@ysnCancel = 1) 
+				EXEC dbo.uspLGProcessPayables @intLoadId, NULL, 0, @intEntityUserSecurityId
+			ELSE
+				EXEC dbo.uspLGProcessPayables @intLoadId, NULL, @ysnPost, @intEntityUserSecurityId
+
 		END
 		ELSE IF @intPurchaseSale = 2
 		BEGIN
-				IF EXISTS (
-						SELECT TOP 1 1
-						FROM tblLGLoad L
-						JOIN tblARInvoice I ON L.intLoadId = I.intLoadId
-						WHERE L.intLoadId = @intLoadId
-						AND I.ysnReturned = 0 and I.strTransactionType <> 'Credit Memo'
-						)
-				BEGIN
-					SELECT TOP 1 @strInvoiceNo = I.strInvoiceNumber
+			IF EXISTS (
+					SELECT TOP 1 1
 					FROM tblLGLoad L
 					JOIN tblARInvoice I ON L.intLoadId = I.intLoadId
 					WHERE L.intLoadId = @intLoadId
-						AND I.ysnReturned = 0 and I.strTransactionType <> 'Credit Memo'
+					AND I.ysnReturned = 0 and I.strTransactionType <> 'Credit Memo'
+					)
+			BEGIN
+				SELECT TOP 1 @strInvoiceNo = I.strInvoiceNumber
+				FROM tblLGLoad L
+				JOIN tblARInvoice I ON L.intLoadId = I.intLoadId
+				WHERE L.intLoadId = @intLoadId
+					AND I.ysnReturned = 0 and I.strTransactionType <> 'Credit Memo'
 
-					SET @strMsg = 'Invoice ' + @strInvoiceNo + ' has been generated for ' + @strLoadNumber + '. Cannot unpost. Please delete the invoice and try again.';
+				SET @strMsg = 'Invoice ' + @strInvoiceNo + ' has been generated for ' + @strLoadNumber + '. Cannot unpost. Please delete the invoice and try again.';
 
-					RAISERROR (@strMsg,16,1);
+				RAISERROR (@strMsg,16,1);
 
-					RETURN 0;
-				END
+				RETURN 0;
+			END
 
-				EXEC uspLGPostInventoryShipment 
-						@ysnPost = @ysnPost
-					   ,@strTransactionId = @strLoadNumber
-					   ,@intEntityUserSecurityId = @intEntityUserSecurityId
+			EXEC uspLGPostInventoryShipment 
+					@ysnPost = @ysnPost
+					,@strTransactionId = @strLoadNumber
+					,@intEntityUserSecurityId = @intEntityUserSecurityId
 
-				IF(@ysnPost = 0)
-				BEGIN
-					UPDATE tblLGLoad SET intShipmentStatus = 1, ysnPosted = @ysnPost, dtmPostedDate = GETDATE() WHERE intLoadId = @intLoadId
-				END
+			IF(@ysnPost = 0)
+			BEGIN
+				UPDATE tblLGLoad SET intShipmentStatus = 1, ysnPosted = @ysnPost, dtmPostedDate = GETDATE() WHERE intLoadId = @intLoadId AND @ysnCancel = 0
+			END
 
-			EXEC dbo.uspLGProcessPayables @intLoadId, NULL, @ysnPost, @intEntityUserSecurityId
+			IF (@ysnCancel = 1) 
+				EXEC dbo.uspLGProcessPayables @intLoadId, NULL, 0, @intEntityUserSecurityId
+			ELSE
+				EXEC dbo.uspLGProcessPayables @intLoadId, NULL, @ysnPost, @intEntityUserSecurityId
+
 		END
 		ELSE IF @intPurchaseSale = 3
 		BEGIN
@@ -152,8 +162,12 @@ BEGIN TRY
 					ELSE 1
 					END
 			WHERE intLoadId = @intLoadId
+				AND @ysnCancel = 0
 
-			EXEC dbo.uspLGProcessPayables @intLoadId, NULL, @ysnPost, @intEntityUserSecurityId
+			IF (@ysnCancel = 1) 
+				EXEC dbo.uspLGProcessPayables @intLoadId, NULL, 0, @intEntityUserSecurityId
+			ELSE
+				EXEC dbo.uspLGProcessPayables @intLoadId, NULL, @ysnPost, @intEntityUserSecurityId
 		END
 	END
 END TRY
