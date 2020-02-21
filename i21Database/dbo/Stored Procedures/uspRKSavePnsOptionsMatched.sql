@@ -214,7 +214,7 @@ BEGIN TRY
 	SELECT @intOptionsMatchPnSHeaderId = SCOPE_IDENTITY();
 	---------------Matched Record Insert ----------------
 	DECLARE @MaxRow INT
-	SELECT @strTranNo = ISNULL(MAX(CONVERT(INT, strTranNo)), 0), @MaxRow = MAX(ISNULL(intMatchOptionsPnSId, 0)) FROM tblRKOptionsMatchPnS
+	SELECT @strTranNo = ISNULL(MAX(CONVERT(INT, strTranNo)), 0), @MaxRow = ISNULL(MAX(ISNULL(intMatchOptionsPnSId, 0)), 0) FROM tblRKOptionsMatchPnS
 	
 	INSERT INTO tblRKOptionsMatchPnS (intOptionsMatchPnSHeaderId
 		, strTranNo
@@ -282,7 +282,7 @@ BEGIN TRY
 	
 	---------------Expired Record Insert ----------------
 	SET @MaxRow = NULL
-	SELECT @strExpiredTranNo = ISNULL(MAX(CONVERT(INT, strTranNo)), 0), @MaxRow = MAX(ISNULL(intOptionsPnSExpiredId, 0)) FROM tblRKOptionsPnSExpired
+	SELECT @strExpiredTranNo = ISNULL(MAX(CONVERT(INT, strTranNo)), 0), @MaxRow = ISNULL(MAX(ISNULL(intOptionsPnSExpiredId, 0)), 0) FROM tblRKOptionsPnSExpired
 	
 	INSERT INTO tblRKOptionsPnSExpired (intOptionsMatchPnSHeaderId
 		, strTranNo
