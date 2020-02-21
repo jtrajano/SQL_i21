@@ -790,7 +790,7 @@ BEGIN TRY
 															SQ.strBasisCurrency + ' ' + dbo.fnCTChangeNumericScale(SQ.dblCashPrice,2) + '/'+ SQ.strBasisUnitMeasure +' at '+ SQ.strFixationBy+'''s option prior to first notice day of '+strFutureMonthYear+' or on presentation of documents,whichever is earlier.'
 														END
 			--,strStraussCondition					=	CB.strFreightTerm + '('+CB.strDescription+')' + ' ' + strDestinationPointName + ' ' + W1.strWeightGradeDesc
-			,strStraussCondition     = CB.strFreightTerm + '('+CB.strDescription+')' + ' ' + isnull(strDestinationPointName,'') + ' ' + isnull(W1.strWeightGradeDesc,'')  
+			,strStraussCondition     				= 	CB.strFreightTerm + '('+CB.strDescription+')' + ' ' + isnull(CT.strCity,'') + ' ' + isnull(W1.strWeightGradeDesc,'')  
 			,strStraussApplicableLaw				=	@strApplicableLaw
 			,strStraussContract						=	'In accordance with '+AN.strComment+' (latest edition)'
 			--,strStrussOtherCondition				=	W2.strWeightGradeDesc +  CHAR(13)+CHAR(10) + @strGeneralCondition
