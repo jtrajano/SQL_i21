@@ -49,7 +49,7 @@ DECLARE @tblCustomers		TABLE (
 	  intEntityCustomerId	INT
 	, strCustomerName		NVARCHAR(200) COLLATE Latin1_General_CI_AS
 	, strCustomerNumber		NVARCHAR(200) COLLATE Latin1_General_CI_AS
-	, strCustomerAddress	NVARCHAR(500) COLLATE Latin1_General_CI_AS
+	, strCustomerAddress	NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
 )
 
 IF(OBJECT_ID('tempdb..#TRANSACTIONS') IS NOT NULL)
@@ -390,7 +390,7 @@ IF ISNULL(@strCustomerIds, '') <> ''
 		SELECT intEntityCustomerId	= C.intEntityId
 			 , strCustomerName		= C.strName
 			 , strCustomerNumber	= C.strCustomerNumber
-			 , strCustomerAddress	= C.strAddress
+			 , strCustomerAddress	= dbo.fnARFormatCustomerAddress(C.strPhone, C.strEmail, C.strBillToLocationName, C.strBillToAddress, C.strBillToCity, C.strBillToState, C.strBillToZipCode, C.strBillToCountry, NULL, 0)
 		FROM vyuARCustomerSearch C
 		INNER JOIN dbo.fnGetRowsFromDelimitedValues(@strCustomerIds) DV ON C.intEntityId = DV.intID
 	END
@@ -405,7 +405,7 @@ ELSE
 		SELECT intEntityCustomerId	= C.intEntityId
 			 , strCustomerName		= C.strName
 			 , strCustomerNumber	= C.strCustomerNumber
-			 , strCustomerAddress	= C.strAddress
+			 , strCustomerAddress	= dbo.fnARFormatCustomerAddress(C.strPhone, C.strEmail, C.strBillToLocationName, C.strBillToAddress, C.strBillToCity, C.strBillToState, C.strBillToZipCode, C.strBillToCountry, NULL, 0)
 		FROM vyuARCustomerSearch C
 	END
 

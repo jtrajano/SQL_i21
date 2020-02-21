@@ -24,9 +24,9 @@ BEGIN TRY
 	DECLARE @intToBookId INT
 	DECLARE @intToSubBookId INT
 		,@ysnReplicationEnabled BIT
-		,@strDelete nvarchar(50)
-		,@intSContractDetailId int
-		,@intContractHeaderId int 
+		,@strDelete NVARCHAR(50)
+		,@intSContractDetailId INT
+		,@intContractHeaderId INT
 
 	IF @strRowState = 'Delete'
 	BEGIN
@@ -34,9 +34,23 @@ BEGIN TRY
 		INSERT INTO tblLGIntrCompLogisticsStg (
 			intLoadId
 			,strRowState
+			,strTransactionType
+			,intMultiCompanyId
+			,intToCompanyLocationId
+			,intToBookId
+			,intTransactionId
+			,intCompanyId
 			)
-		SELECT @intLoadId
+		SELECT TOP 1 @intLoadId
 			,@strRowState
+			,strTransactionType
+			,intMultiCompanyId
+			,intToCompanyLocationId
+			,intToBookId
+			,intTransactionId
+			,intCompanyId
+		FROM tblLGIntrCompLogisticsStg
+		WHERE intLoadId = @intLoadId
 
 		RETURN
 	END
@@ -85,13 +99,17 @@ BEGIN TRY
 			WHERE CTTF.strTransactionType = @strTransactionType
 			)
 	BEGIN
-		Select @intSContractDetailId=intSContractDetailId
-		from tblLGLoadDetail
-		Where intLoadId=@intLoadId
+		SELECT @intSContractDetailId = CASE 
+				WHEN @strTransactionType = 'Inbound Shipment'
+					THEN intPContractDetailId
+				ELSE intSContractDetailId
+				END
+		FROM tblLGLoadDetail
+		WHERE intLoadId = @intLoadId
 
-		Select @intContractHeaderId=intContractHeaderId
-		from tblCTContractDetail
-		Where intContractDetailId=@intSContractDetailId
+		SELECT @intContractHeaderId = intContractHeaderId
+		FROM tblCTContractDetail
+		WHERE intContractDetailId = @intSContractDetailId
 
 		SELECT @strFromTransactionType = CTTF.strTransactionType --strFromTransactionType
 			,@intFromCompanyId = intFromCompanyId
@@ -101,7 +119,7 @@ BEGIN TRY
 			,@intToProfitCenterId = intToBookId
 			,@strInsert = strInsert
 			,@strUpdate = strUpdate
-			,@strDelete=strDelete
+			,@strDelete = strDelete
 			,@intToCompanyLocationId = intCompanyLocationId
 			,@intToBookId = intToBookId
 			,@intToSubBookId = @intToSubBookId
@@ -109,9 +127,9 @@ BEGIN TRY
 		JOIN [tblSMInterCompanyTransactionType] CTTF ON CTC.[intFromTransactionTypeId] = CTTF.intInterCompanyTransactionTypeId -- WHERE strFromTransactionType = @strTransactionType
 		JOIN [tblSMInterCompanyTransactionType] CTTT ON CTC.[intToTransactionTypeId] = CTTT.intInterCompanyTransactionTypeId -- WHERE strFromTransactionType = @strTransactionType
 		JOIN tblCTContractHeader CH ON CH.intCompanyId = CTC.intFromCompanyId
-				AND CH.intBookId = CTC.intFromBookId
-			WHERE CTTF.strTransactionType = @strTransactionType
-				AND CH.intContractHeaderId = @intContractHeaderId
+			AND CH.intBookId = CTC.intFromBookId
+		WHERE CTTF.strTransactionType = @strTransactionType
+			AND CH.intContractHeaderId = @intContractHeaderId
 
 		IF @strInsert = 'Insert'
 			AND @strRowState = 'Added'
@@ -173,19 +191,19 @@ BEGIN TRY
 			ELSE
 			BEGIN
 				INSERT INTO tblLGIntrCompLogisticsPreStg (
-						intLoadId
-						,strRowState
-						,strToTransactionType
-						,intToCompanyId
-						,intToCompanyLocationId
-						,intToBookId
-						)
-					SELECT @intLoadId
-						,@strRowState
-						,@strToTransactionType
-						,@intToCompanyId
-						,@intToCompanyLocationId
-						,@intToBookId
+					intLoadId
+					,strRowState
+					,strToTransactionType
+					,intToCompanyId
+					,intToCompanyLocationId
+					,intToBookId
+					)
+				SELECT @intLoadId
+					,@strRowState
+					,@strToTransactionType
+					,@intToCompanyId
+					,@intToCompanyLocationId
+					,@intToBookId
 			END
 		END
 

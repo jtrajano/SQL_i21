@@ -214,7 +214,7 @@ BEGIN TRY
 	SELECT @intOptionsMatchPnSHeaderId = SCOPE_IDENTITY();
 	---------------Matched Record Insert ----------------
 	DECLARE @MaxRow INT
-	SELECT @strTranNo = ISNULL(MAX(CONVERT(INT, strTranNo)), 0), @MaxRow = MAX(ISNULL(intOptionsMatchPnSHeaderId, 0)) FROM tblRKOptionsMatchPnS
+	SELECT @strTranNo = ISNULL(MAX(CONVERT(INT, strTranNo)), 0), @MaxRow = MAX(ISNULL(intMatchOptionsPnSId, 0)) FROM tblRKOptionsMatchPnS
 	
 	INSERT INTO tblRKOptionsMatchPnS (intOptionsMatchPnSHeaderId
 		, strTranNo

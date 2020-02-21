@@ -22,6 +22,7 @@ SELECT
 	A.strVendorOrderNumber,
 	A.intBillId,
 	A.dtmDate,
+	A.dtmDateCreated,
 	A.ysnPosted,
 	B.intBillDetailId,
 	A.intEntityVendorId,

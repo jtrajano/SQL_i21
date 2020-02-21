@@ -48,10 +48,10 @@ SELECT DE.intFutOptTransactionId
 	, strHedgeType = CASE WHEN PFD.intPriceFixationId IS NOT NULL THEN 'Price Contract'
 							WHEN CF.intContractFuturesId IS NOT NULL THEN 'Contract Futures'
 							ELSE NULL END
-	, intHedgeContractId = CASE WHEN PFD.intPriceFixationId IS NOT NULL THEN PFD.intPriceFixationId
+	, intHedgeContractId = CASE WHEN PF.intPriceContractId IS NOT NULL THEN PF.intPriceContractId
 							WHEN CF.intContractFuturesId IS NOT NULL THEN CFHeader.intContractHeaderId
 							ELSE NULL END
-	, strHedgeContract = CASE WHEN PFD.intPriceFixationId IS NOT NULL THEN PriceHeader.strContractNumber + ISNULL('-' + CAST(PriceDetail.intContractSeq AS NVARCHAR(10)), '')
+	, strHedgeContract = CASE WHEN PF.intPriceContractId IS NOT NULL THEN PriceHeader.strContractNumber + ISNULL('-' + CAST(PriceDetail.intContractSeq AS NVARCHAR(10)), '')
 							WHEN CF.intContractFuturesId IS NOT NULL THEN CFHeader.strContractNumber + ISNULL('-' + CAST(CFDetail.intContractSeq AS NVARCHAR(10)), '')
 							ELSE NULL END
 FROM tblRKFutOptTransaction DE
