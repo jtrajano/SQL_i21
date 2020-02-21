@@ -1309,7 +1309,7 @@ BEGIN
 											 WHEN intTransactionTypeId = 3 THEN
 												'Transfer Storage'
 											 WHEN intTransactionTypeId = 4 THEN
-												'Settle Storage'
+												'Storage Settlement'
 											 WHEN intTransactionTypeId = 9 THEN
 												'Inventory Adjustment'
 											END
@@ -1370,7 +1370,7 @@ BEGIN
 											 WHEN intTransactionTypeId = 3 THEN
 												'Transfer Storage'
 											 WHEN intTransactionTypeId = 4 THEN
-												'Settle Storage'
+												'Storage Settlement'
 											 WHEN intTransactionTypeId = 9 THEN
 												'Inventory Adjustment'
 											END
