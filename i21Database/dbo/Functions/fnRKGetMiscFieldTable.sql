@@ -28,15 +28,15 @@ BEGIN
 		BEGIN
 			SET @intEnd = CHARINDEX('}', @strTemp)
 		
-			SET @statement = TRIM(SUBSTRING(@strTemp, @intBegin + 1, @intEnd - 2))
+			SET @statement = dbo.fnTrim(SUBSTRING(@strTemp, @intBegin + 1, @intEnd - 2))
 			SET @colEnd = CHARINDEX('=', @statement)
-			SET @Column = TRIM(LEFT(@statement, @colEnd - 1))
+			SET @Column = dbo.fnTrim(LEFT(@statement, @colEnd - 1))
 		
 			SET @valBegin = CHARINDEX('"', @statement, @colEnd) + 1
 			SET @valEnd = CHARINDEX('"', @statement, @valBegin)
-			SET @Value = TRIM(SUBSTRING(@statement, @valBegin, @valEnd - @valBegin))
+			SET @Value = dbo.fnTrim(SUBSTRING(@statement, @valBegin, @valEnd - @valBegin))
 
-			SET @strTemp = TRIM(RIGHT(@strTemp, LEN(@strTemp) - @intEnd))
+			SET @strTemp = dbo.fnTrim(RIGHT(@strTemp, LEN(@strTemp) - @intEnd))
 			SET @intBegin = CHARINDEX('{', @strTemp)
 
 			INSERT @returntable
