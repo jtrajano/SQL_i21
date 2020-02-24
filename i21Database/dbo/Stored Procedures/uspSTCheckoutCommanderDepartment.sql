@@ -1,7 +1,9 @@
 ﻿CREATE PROCEDURE [dbo].[uspSTCheckoutCommanderDepartment]
-	@intCheckoutId INT,
-	@strStatusMsg NVARCHAR(250) OUTPUT,
-	@intCountRows INT OUTPUT
+	@intCheckoutId							INT,
+	@UDT_TransDept							StagingCommanderDepartment		READONLY,
+	@ysnSuccess								BIT				OUTPUT,
+	@strMessage								NVARCHAR(1000)	OUTPUT,
+	@intCountRows							INT				OUTPUT
 AS
 BEGIN
 	BEGIN TRY
@@ -17,7 +19,7 @@ BEGIN
 		-- ==================================================================================================================  
 		-- Start Validate if Department xml file matches the Mapping on i21 
 		-- ------------------------------------------------------------------------------------------------------------------
-		IF NOT EXISTS(SELECT TOP 1 1 FROM #tempCheckoutInsert)
+		IF NOT EXISTS(SELECT TOP 1 1 FROM @UDT_TransDept)
 			BEGIN
 					-- Add to error logging
 					INSERT INTO tblSTCheckoutErrorLogs 
@@ -40,7 +42,7 @@ BEGIN
 					)
 
 					SET @intCountRows = 0
-					SET @strStatusMsg = 'Commander Department XML file did not match the layout mapping'
+					SET @strMessage = 'Commander Department XML file did not match the layout mapping'
 
 					GOTO ExitWithCommit
 			END
@@ -68,21 +70,21 @@ BEGIN
 			strErrorType			= 'NO MATCHING TAG'
 			, strErrorMessage		= 'No Matching Register Department Setup in Category'
 			, strRegisterTag		= 'deptBase sysid'
-			, strRegisterTagValue	= ISNULL(Chk.deptBasesysid, '')
+			, strRegisterTagValue	= ISNULL(Chk.strSysId, '')
 			, intCheckoutId			= @intCheckoutId
 			, intConcurrencyId		= 1
-		FROM #tempCheckoutInsert Chk
-		WHERE ISNULL(Chk.deptBasesysid, '') NOT IN
+		FROM @UDT_TransDept Chk
+		WHERE ISNULL(Chk.strSysId, '') NOT IN
 		(
 			SELECT DISTINCT 
 				tbl.strXmlRegisterMerchandiseCode
 			FROM
 			(
 				SELECT DISTINCT
-					Chk.deptBasesysid AS strXmlRegisterMerchandiseCode
-				FROM #tempCheckoutInsert Chk
+					Chk.strSysId AS strXmlRegisterMerchandiseCode
+				FROM @UDT_TransDept Chk
 				JOIN dbo.tblICCategoryLocation Cat 
-					ON CAST(ISNULL(Chk.deptBasesysid, '') AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS = CAST(Cat.intRegisterDepartmentId AS NVARCHAR(50))
+					ON CAST(ISNULL(Chk.strSysId, '') AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS = CAST(Cat.intRegisterDepartmentId AS NVARCHAR(50))
 				LEFT JOIN dbo.tblICItem I 
 					ON Cat.intGeneralItemId = I.intItemId
 				JOIN dbo.tblICItemLocation IL 
@@ -92,14 +94,14 @@ BEGIN
 				JOIN dbo.tblSTStore S 
 					ON S.intCompanyLocationId = CL.intCompanyLocationId
 				WHERE S.intStoreId = @intStoreId
-					AND ISNULL(Chk.deptBasesysid, '') != ''
-					AND CAST(ISNULL(Chk.netSalescount, 0) AS INT) != 0
-					AND CAST(ISNULL(Chk.netSalesamount, 0) AS DECIMAL(18, 6)) != 0.000000
+					AND ISNULL(Chk.strSysId, '') != ''
+					AND CAST(ISNULL(Chk.intNetSaleCount, 0) AS INT) != 0
+					AND CAST(ISNULL(Chk.dblNetSaleAmount, 0) AS DECIMAL(18, 6)) != 0.000000
 			) AS tbl
 		)
-			AND ISNULL(Chk.deptBasesysid, '') != ''
-			AND CAST(ISNULL(Chk.netSalescount, 0) AS INT) != 0
-			AND CAST(ISNULL(Chk.netSalesamount, 0) AS DECIMAL(18, 6)) != 0.000000
+			AND ISNULL(Chk.strSysId, '') != ''
+			AND CAST(ISNULL(Chk.intNetSaleCount, 0) AS INT) != 0
+			AND CAST(ISNULL(Chk.dblNetSaleAmount, 0) AS DECIMAL(18, 6)) != 0.000000
 
 		-- ------------------------------------------------------------------------------------------------------------------  
 		-- END Get Error logs. Check Register XML that is not configured in i21.  
@@ -113,42 +115,42 @@ BEGIN
 				INSERT INTO dbo.tblSTCheckoutDepartmetTotals
 				SELECT @intCheckoutId [intCheckoutId]
 					, Cat.intCategoryId [intCategoryId]
-					, ISNULL(Chk.netSalesamount, 0) [dblTotalSalesAmountRaw]
-					, ISNULL(Chk.netSalesamount, 0) [dblRegisterSalesAmountRaw]
+					, ISNULL(Chk.dblNetSaleAmount, 0) [dblTotalSalesAmountRaw]
+					, ISNULL(Chk.dblNetSaleAmount, 0) [dblRegisterSalesAmountRaw]
 					--, (
 					--	CASE 
 					--		WHEN (S.strReportDepartmentAtGrossOrNet) = 'G' -- Gross
-					--			THEN ISNULL(CAST(Chk.netSalesamount AS DECIMAL(18,6)),0)
+					--			THEN ISNULL(CAST(Chk.dblNetSaleAmount AS DECIMAL(18,6)),0)
 					--		WHEN (S.strReportDepartmentAtGrossOrNet) = 'N' -- Net
-					--			THEN ISNULL(CAST(Chk.netSalesamount AS DECIMAL(18,6)),0) + ISNULL(CAST(Chk.totalamount AS DECIMAL(18,6)),0) -- totalamount = Discount Amount
-					--																  + ISNULL(CAST(Chk.promotionsamount AS DECIMAL(18,6)),0) 
-					--																  + ISNULL(CAST(Chk.refundsamount AS DECIMAL(18,6)),0)
+					--			THEN ISNULL(CAST(Chk.dblNetSaleAmount AS DECIMAL(18,6)),0) + ISNULL(CAST(Chk.dblTotalAmount AS DECIMAL(18,6)),0) -- dblTotalAmount = Discount Amount
+					--																  + ISNULL(CAST(Chk.dblPromotionAmount AS DECIMAL(18,6)),0) 
+					--																  + ISNULL(CAST(Chk.dblRefundAmount AS DECIMAL(18,6)),0)
 					--    END
 					--  ) [dblTotalSalesAmountComputed]
 					, [dblTotalSalesAmountComputed] = (
 														CASE 
 															WHEN (S.strReportDepartmentAtGrossOrNet) = 'G' -- Gross
-																THEN CAST(ISNULL(Chk.deptInfogrossSales, 0) AS DECIMAL(18,6))
+																THEN CAST(ISNULL(Chk.dblDeptInfoGrossSale, 0) AS DECIMAL(18,6))
 															WHEN (S.strReportDepartmentAtGrossOrNet) = 'N' -- Net
-																THEN ISNULL(CAST(Chk.netSalesamount AS DECIMAL(18,6)),0)
+																THEN ISNULL(CAST(Chk.dblNetSaleAmount AS DECIMAL(18,6)),0)
 																										  
 														END
 													  )
 					, 0 [dblRegisterSalesAmountComputed]
 					, '' [strDepartmentTotalsComment]
-					, CAST(Chk.promotionscount AS INT) [intPromotionalDiscountsCount]
-					, CAST(Chk.promotionsamount AS DECIMAL(18,6)) [dblPromotionalDiscountAmount]
-					, CAST(Chk.totalcount AS INT) [intManagerDiscountCount]
-					--, CAST(Chk.totalamount AS DECIMAL(18,6)) [dblManagerDiscountAmount]
+					, CAST(Chk.intPromotionCount AS INT) [intPromotionalDiscountsCount]
+					, CAST(Chk.dblPromotionAmount AS DECIMAL(18,6)) [dblPromotionalDiscountAmount]
+					, CAST(Chk.intTotalCount AS INT) [intManagerDiscountCount]
+					--, CAST(Chk.dblTotalAmount AS DECIMAL(18,6)) [dblManagerDiscountAmount]
 					, [dblManagerDiscountAmount] = CASE
-														WHEN (ISNULL(CAST(Chk.totalamount AS DECIMAL(18,6)), 0))  >  0
-															THEN (ISNULL(CAST(Chk.totalamount AS DECIMAL(18,6)), 0)) * -1
+														WHEN (ISNULL(CAST(Chk.dblTotalAmount AS DECIMAL(18,6)), 0))  >  0
+															THEN (ISNULL(CAST(Chk.dblTotalAmount AS DECIMAL(18,6)), 0)) * -1
 														ELSE 0
 												END
-					, CAST(Chk.refundscount AS INT) [intRefundCount]
-					, CAST(Chk.refundsamount AS DECIMAL(18,6)) [dblRefundAmount]
-					, CAST(CAST(Chk.netSalesitemCount AS DECIMAL) AS INT) [intItemsSold]
-					, CAST(Chk.netSalescount AS INT) [intTotalSalesCount]
+					, CAST(Chk.intRefundCount AS INT) [intRefundCount]
+					, CAST(Chk.dblRefundAmount AS DECIMAL(18,6)) [dblRefundAmount]
+					, CAST(CAST(Chk.dblNetSaleItemCount AS DECIMAL) AS INT) [intItemsSold]
+					, CAST(Chk.intNetSaleCount AS INT) [intTotalSalesCount]
 					, 0 [dblTaxAmount1]
 					, 0 [dblTaxAmount2]
 					, 0 [dblTaxAmount3]
@@ -158,9 +160,9 @@ BEGIN
 					, 0 [dblTotalLotterySalesAmountComputed]
 					, NULL [intLotteryItemsSold]
 					, 0 [ysnLotteryItemAdded]
-				FROM #tempCheckoutInsert Chk
+				FROM @UDT_TransDept Chk
 				JOIN dbo.tblICCategoryLocation Cat 
-					ON CAST(ISNULL(Chk.deptBasesysid, '') AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS = CAST(Cat.intRegisterDepartmentId AS NVARCHAR(50))
+					ON CAST(ISNULL(Chk.strSysId, '') AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS = CAST(Cat.intRegisterDepartmentId AS NVARCHAR(50))
 				--JOIN dbo.tblICItem I ON I.intCategoryId = Cat.intCategoryId
 				LEFT JOIN dbo.tblICItem I 
 					ON Cat.intGeneralItemId = I.intItemId
@@ -171,49 +173,49 @@ BEGIN
 				JOIN dbo.tblSTStore S 
 					ON S.intCompanyLocationId = CL.intCompanyLocationId
 				WHERE S.intStoreId = @intStoreId
-					AND CAST(ISNULL(Chk.netSalescount, 0) AS INT) != 0
-					AND CAST(ISNULL(Chk.netSalesamount, 0) AS DECIMAL(18, 6)) != 0.000000
+					AND CAST(ISNULL(Chk.intNetSaleCount, 0) AS INT) != 0
+					AND CAST(ISNULL(Chk.dblNetSaleAmount, 0) AS DECIMAL(18, 6)) != 0.000000
 
 			END
 		ELSE
 			BEGIN
 				UPDATE DT  
-				SET	[dblTotalSalesAmountRaw]		= ISNULL(Chk.netSalesamount, 0)
-					, [dblRegisterSalesAmountRaw]	= ISNULL(Chk.netSalesamount, 0)
+				SET	[dblTotalSalesAmountRaw]		= ISNULL(Chk.dblNetSaleAmount, 0)
+					, [dblRegisterSalesAmountRaw]	= ISNULL(Chk.dblNetSaleAmount, 0)
 					, [dblTotalSalesAmountComputed] = (
 														CASE 
 															WHEN (S.strReportDepartmentAtGrossOrNet) = 'G' -- Gross
-																--THEN ISNULL(CAST(Chk.netSalesamount AS DECIMAL(18,6)),0)
-																THEN CAST(ISNULL(Chk.deptInfogrossSales, 0) AS DECIMAL(18,6))
+																--THEN ISNULL(CAST(Chk.dblNetSaleAmount AS DECIMAL(18,6)),0)
+																THEN CAST(ISNULL(Chk.dblDeptInfoGrossSale, 0) AS DECIMAL(18,6))
 															WHEN (S.strReportDepartmentAtGrossOrNet) = 'N' -- Net
-																THEN ISNULL(CAST(Chk.netSalesamount AS DECIMAL(18,6)),0)
-																--THEN ISNULL(CAST(Chk.netSalesamount AS DECIMAL(18,6)),0) + ( ISNULL(CAST(Chk.totalamount AS DECIMAL(18,6)),0) -- totalamount = Discount Amount
-																--												         + ISNULL(CAST(Chk.promotionsamount AS DECIMAL(18,6)),0) 
-																--													     + ISNULL(CAST(Chk.refundsamount AS DECIMAL(18,6)),0) )
+																THEN ISNULL(CAST(Chk.dblNetSaleAmount AS DECIMAL(18,6)),0)
+																--THEN ISNULL(CAST(Chk.dblNetSaleAmount AS DECIMAL(18,6)),0) + ( ISNULL(CAST(Chk.dblTotalAmount AS DECIMAL(18,6)),0) -- dblTotalAmount = Discount Amount
+																--												         + ISNULL(CAST(Chk.dblPromotionAmount AS DECIMAL(18,6)),0) 
+																--													     + ISNULL(CAST(Chk.dblRefundAmount AS DECIMAL(18,6)),0) )
 																										  
 														END
 													  )
-					, [intPromotionalDiscountsCount] = ISNULL(CAST(Chk.promotionscount AS INT),0) 
-					, [dblPromotionalDiscountAmount] = ISNULL(CAST(Chk.promotionsamount AS DECIMAL(18,6)),0) 
-					, [intManagerDiscountCount]		 = ISNULL(CAST(Chk.totalcount AS INT),0) 
-					--, [dblManagerDiscountAmount] = ISNULL(CAST(Chk.totalamount AS DECIMAL(18,6)), 0) 
+					, [intPromotionalDiscountsCount] = ISNULL(CAST(Chk.intPromotionCount AS INT),0) 
+					, [dblPromotionalDiscountAmount] = ISNULL(CAST(Chk.dblPromotionAmount AS DECIMAL(18,6)),0) 
+					, [intManagerDiscountCount]		 = ISNULL(CAST(Chk.intTotalCount AS INT),0) 
+					--, [dblManagerDiscountAmount] = ISNULL(CAST(Chk.dblTotalAmount AS DECIMAL(18,6)), 0) 
 					, [dblManagerDiscountAmount]	= CASE
-														WHEN (ISNULL(CAST(Chk.totalamount AS DECIMAL(18,6)), 0))  >  0
-															THEN (ISNULL(CAST(Chk.totalamount AS DECIMAL(18,6)), 0)) * -1
+														WHEN (ISNULL(CAST(Chk.dblTotalAmount AS DECIMAL(18,6)), 0))  >  0
+															THEN (ISNULL(CAST(Chk.dblTotalAmount AS DECIMAL(18,6)), 0)) * -1
 														ELSE 0
 													END
-					, [intRefundCount]				= ISNULL(CAST(Chk.refundscount AS INT), 0) 
-					, [dblRefundAmount]				= ISNULL(CAST(Chk.refundsamount AS DECIMAL(18,6)), 0) 
-					, [intItemsSold]				= ISNULL(CAST(CAST(Chk.netSalesitemCount AS DECIMAL) AS INT), 0) 
-					, [intTotalSalesCount]			= ISNULL(CAST(Chk.netSalescount AS INT), 0) 
+					, [intRefundCount]				= ISNULL(CAST(Chk.intRefundCount AS INT), 0) 
+					, [dblRefundAmount]				= ISNULL(CAST(Chk.dblRefundAmount AS DECIMAL(18,6)), 0) 
+					, [intItemsSold]				= ISNULL(CAST(CAST(Chk.dblNetSaleItemCount AS DECIMAL) AS INT), 0) 
+					, [intTotalSalesCount]			= ISNULL(CAST(Chk.intNetSaleCount AS INT), 0) 
 					, [intItemId]					= I.intItemId
 				FROM tblSTCheckoutDepartmetTotals DT
 				JOIN tblICCategory Cat 
 					ON DT.intCategoryId = Cat.intCategoryId
 				JOIN tblICCategoryLocation CatLoc 
 					ON Cat.intCategoryId = CatLoc.intCategoryId
-				JOIN #tempCheckoutInsert Chk 
-					ON CAST(ISNULL(Chk.deptBasesysid, '') AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS = CAST(CatLoc.intRegisterDepartmentId AS NVARCHAR(50))
+				JOIN @UDT_TransDept Chk 
+					ON CAST(ISNULL(Chk.strSysId, '') AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS = CAST(CatLoc.intRegisterDepartmentId AS NVARCHAR(50))
 				LEFT JOIN dbo.tblICItem I 
 					ON CatLoc.intGeneralItemId = I.intItemId
 				JOIN dbo.tblICItemLocation IL 
@@ -224,10 +226,14 @@ BEGIN
 					ON S.intCompanyLocationId = CL.intCompanyLocationId
 				WHERE DT.intCheckoutId = @intCheckoutId 
 					AND S.intStoreId = @intStoreId
-					AND CAST(ISNULL(Chk.netSalescount, 0) AS INT) != 0
-					AND CAST(ISNULL(Chk.netSalesamount, 0) AS DECIMAL(18, 6)) != 0.000000
+					AND CAST(ISNULL(Chk.intNetSaleCount, 0) AS INT) != 0
+					AND CAST(ISNULL(Chk.dblNetSaleAmount, 0) AS DECIMAL(18, 6)) != 0.000000
 
+				
 			END
+
+
+		
 
 		-- Update Register Amount
 		UPDATE dbo.tblSTCheckoutDepartmetTotals 
@@ -235,7 +241,7 @@ BEGIN
 		WHERE intCheckoutId = @intCheckoutId
 
 		SET @intCountRows = 1
-		SET @strStatusMsg = 'Success'
+		SET @strMessage = 'Success'
 
 		-- COMMIT
 		GOTO ExitWithCommit
@@ -244,7 +250,7 @@ BEGIN
 
 	BEGIN CATCH
 		SET @intCountRows = 0
-		SET @strStatusMsg = ERROR_MESSAGE()
+		SET @strMessage = ERROR_MESSAGE()
 		
 		-- ROLLBACK
 		GOTO ExitWithRollback
