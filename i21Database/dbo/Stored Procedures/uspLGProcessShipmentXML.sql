@@ -158,10 +158,10 @@ BEGIN TRY
 		,@strItemUnitMeasure NVARCHAR(50)
 		,@strWeightUnitMeasure NVARCHAR(50)
 		,@intLotId INT
-						,@strHBook NVARCHAR(50)
-				,@strHSubBook NVARCHAR(50)
-								,@intHBookId int
-				,@intHSubBookId int
+		,@strHBook NVARCHAR(50)
+		,@strHSubBook NVARCHAR(50)
+		,@intHBookId INT
+		,@intHSubBookId INT
 	DECLARE @tempLoadDetail TABLE (
 		intLoadDetailId INT NOT NULL
 		,intConcurrencyId INT NOT NULL
@@ -276,10 +276,10 @@ BEGIN TRY
 				,@strUserName = NULL
 				,@intTransactionId = NULL
 				,@intCompanyId = NULL
-				,@strHBook=NULL
-				,@strHSubBook=NULL
-				,@intHBookId =NULL
-				,@intHSubBookId =NULL
+				,@strHBook = NULL
+				,@strHSubBook = NULL
+				,@intHBookId = NULL
+				,@intHSubBookId = NULL
 
 			SELECT @intLoadId = intLoadId
 				,@strLoadNumber = strLoadNumber
@@ -308,12 +308,10 @@ BEGIN TRY
 				,@intCompanyLocationId = intToCompanyLocationId
 				,@intTransactionId = intTransactionId
 				,@intCompanyId = intCompanyId
-				,@strHBook=strBook
-				,@strHSubBook=strSubBook
+				,@strHBook = strBook
+				,@strHSubBook = strSubBook
 			FROM tblLGIntrCompLogisticsStg
 			WHERE intId = @intId
-
-			
 
 			SELECT @strInfo1 = @strInfo1 + @strLoadNumber + ','
 
@@ -784,13 +782,13 @@ BEGIN TRY
 			IF @strRowState = 'Delete'
 			BEGIN
 				SELECT @intHBookId = intBookId
-			FROM tblCTBook
-			WHERE strBook = @strHBook
+				FROM tblCTBook
+				WHERE strBook = @strHBook
 
-			SELECT @intHSubBookId = intSubBookId
-			FROM tblCTSubBook
-			WHERE strSubBook = @strHSubBook
-				AND intBookId = @intHBookId
+				SELECT @intHSubBookId = intSubBookId
+				FROM tblCTSubBook
+				WHERE strSubBook = @strHSubBook
+					AND intBookId = @intHBookId
 
 				DELETE
 				FROM tblLGLoad
@@ -3980,6 +3978,8 @@ BEGIN TRY
 				,@intCompanyId
 				,@intTransactionRefId
 				,@intCompanyRefId
+
+			NextTransaction:
 
 			UPDATE tblLGIntrCompLogisticsStg
 			SET strFeedStatus = 'Processed'
