@@ -376,7 +376,6 @@ print 'BEGIN POST DEPLOYMENT'
 :R .\CT\1920_Add_Accrued_Payables.sql
 :R .\CT\Create_fnCTFormatNumber.sql
 :R .\CT\2010_AddMissingHistory.sql
-:R .\CT\2010_ContractSummaryLog.sql
 
 --Notes Receivable
 :R .\NR\1_NoteTransType.sql
@@ -394,7 +393,6 @@ print 'BEGIN POST DEPLOYMENT'
 :R .\GR\ContractPrice.sql
 :R .\GR\SC_ScaleLVControlIntegration.sql
 :R .\GR\ImportSettleStorageBillDetail.sql
-:R .\GR\Populate_Risk_Summary_Log.sql
 
 --Manufacturing
 :R .\MF\1_MasterTables.sql

@@ -3,7 +3,6 @@ CREATE PROCEDURE [dbo].[uspLGUpdateInboundIntransitQty]
 	,@ysnInventorize AS BIT
 	,@ysnUnShip AS BIT	
 	,@intEntityUserSecurityId INT = NULL
-
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -17,11 +16,16 @@ DECLARE @ErrorSeverity INT;
 DECLARE @ErrorState INT;
 DECLARE @ErrMsg NVARCHAR(MAX);
 DECLARE @ysnDirectShip BIT;
+DECLARE @ysnCancel BIT;
 DECLARE @strAuditLogActionType NVARCHAR(MAX)
 
 DECLARE @ItemsToIncreaseInTransitInBound AS InTransitTableType,
         @total as int;
 BEGIN TRY
+
+	SELECT @ysnDirectShip = CASE WHEN intSourceType = 3 THEN 1 ELSE 0 END 
+		,@ysnCancel = ISNULL(ysnCancelled, 0)
+	FROM tblLGLoad S WHERE intLoadId=@intLoadId
 
 -- Insert Entries to Stagging table that needs to processed from Inbound Shipments
 	INSERT INTO @ItemsToIncreaseInTransitInBound (
@@ -43,10 +47,9 @@ BEGIN TRY
 	  ,NULL
 	  ,ISNULL(LW.intSubLocationId, LD.intPSubLocationId)
 	  ,NULL
-	  ,CASE 
-	   WHEN @ysnUnShip = 0
-		THEN LD.dblQuantity
-		ELSE - LD.dblQuantity
+	  ,CASE WHEN (@ysnUnShip = 1 OR @ysnCancel = 1)
+		THEN -LD.dblQuantity
+		ELSE LD.dblQuantity
 	   END
 	  ,LD.intLoadId
 	  ,CAST(L.strLoadNumber AS VARCHAR(100))
@@ -65,8 +68,6 @@ BEGIN TRY
 		RETURN;
 	END
 
-	SELECT @ysnDirectShip = CASE WHEN intSourceType = 3 THEN 1 ELSE 0 END FROM tblLGLoad S WHERE intLoadId=@intLoadId
-
 	IF (@ysnDirectShip <> 1)
 	BEGIN
 		EXEC dbo.uspICIncreaseInTransitInBoundQty @ItemsToIncreaseInTransitInBound;
@@ -74,30 +75,27 @@ BEGIN TRY
 
 	IF (@ysnInventorize = 1)
 	BEGIN
-			UPDATE tblLGLoad SET ysnPosted = 1, dtmPostedDate=GETDATE() WHERE intLoadId = @intLoadId
+		UPDATE tblLGLoad SET ysnPosted = 1, dtmPostedDate=GETDATE() WHERE intLoadId = @intLoadId AND @ysnCancel = 0
 	END
 
 	IF (@ysnInventorize = 0)
 	BEGIN
-			UPDATE tblLGLoad SET ysnPosted = 0, dtmPostedDate=NULL WHERE intLoadId = @intLoadId
+		UPDATE tblLGLoad SET ysnPosted = 0, dtmPostedDate=NULL WHERE intLoadId = @intLoadId AND @ysnCancel = 0
 	END
 
-	IF(ISNULL(@ysnInventorize,0) = 1)
+	IF (@ysnCancel = 0)
 	BEGIN
-		SET @strAuditLogActionType  = 'Posted'
-	END 
-	ELSE 
-	BEGIN
-		SET @strAuditLogActionType  = 'Unposted'
-	END
+		SELECT @strAuditLogActionType = CASE WHEN ISNULL(@ysnInventorize,0) = 1 THEN 'Posted'
+											ELSE 'Unposted' END
 
-	EXEC uspSMAuditLog	
-			@keyValue	=	@intLoadId,
-			@screenName =	'Logistics.view.ShipmentSchedule',
-			@entityId	=	@intEntityUserSecurityId,
-			@actionType =	@strAuditLogActionType,
-			@actionIcon =	'small-tree-modified',
-			@details	=	''
+		EXEC uspSMAuditLog	
+				@keyValue	=	@intLoadId,
+				@screenName =	'Logistics.view.ShipmentSchedule',
+				@entityId	=	@intEntityUserSecurityId,
+				@actionType =	@strAuditLogActionType,
+				@actionIcon =	'small-tree-modified',
+				@details	=	''
+	END
 
 END TRY
 BEGIN CATCH

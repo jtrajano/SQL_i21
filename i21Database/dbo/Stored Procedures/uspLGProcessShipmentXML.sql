@@ -85,7 +85,6 @@ BEGIN TRY
 		,@intVendorEntityId INT
 		,@intPContractHeaderId INT
 		,@strCustomerContract NVARCHAR(50)
-
 	DECLARE @tblLGLoadDetail TABLE (intLoadDetailId INT)
 	DECLARE @strItemNo NVARCHAR(50)
 		,@strItemUOM NVARCHAR(50)
@@ -940,6 +939,8 @@ BEGIN TRY
 						SELECT TOP 1 intContractDetailId
 						FROM tblCTContractDetail CD
 						WHERE intContractDetailRefId = x.intContractDetailId
+							AND intBookId = @intBookId
+							AND IsNULL(intSubBookId, 0) = IsNULL(@intSubBookId, 0)
 						) AS intContractDetailId
 					,strComments
 					,@intHaulerId
@@ -1264,6 +1265,8 @@ BEGIN TRY
 						SELECT TOP 1 intContractDetailId
 						FROM tblCTContractDetail CD
 						WHERE intContractDetailRefId = x.intContractDetailId
+							AND intBookId = @intBookId
+							AND IsNULL(intSubBookId, 0) = IsNULL(@intSubBookId, 0)
 						)
 					,strComments = x.strComments
 					,intHaulerEntityId = @intHaulerId
@@ -1562,6 +1565,8 @@ BEGIN TRY
 						) x
 				JOIN tblLGLoad L ON L.intLoadRefId = x.intLoadId
 				WHERE L.intLoadRefId = @intLoadRefId
+					AND L.intBookId = @intBookId
+					AND IsNULL(L.intSubBookId, 0) = IsNULL(@intSubBookId, 0)
 			END
 
 			EXEC sp_xml_removedocument @idoc
@@ -1879,6 +1884,8 @@ BEGIN TRY
 								,intLoadDetailId INT
 								) x
 						LEFT JOIN tblCTContractDetail PCD ON PCD.intContractDetailRefId = x.intSContractDetailId
+							AND intBookId = @intBookId
+							AND IsNULL(intSubBookId, 0) = IsNULL(@intSubBookId, 0)
 						WHERE x.intLoadDetailId = @intLoadDetailId
 							AND PCD.intContractDetailRefId IS NULL
 						)
@@ -1903,6 +1910,8 @@ BEGIN TRY
 							,intLoadDetailId INT
 							) x
 					LEFT JOIN tblCTContractDetail SCD ON SCD.intContractDetailRefId = x.intPContractDetailId
+						AND intBookId = @intBookId
+						AND IsNULL(intSubBookId, 0) = IsNULL(@intSubBookId, 0)
 					WHERE x.intLoadDetailId = @intLoadDetailId
 
 					SELECT @intPContractDetailId = NULL
@@ -1919,17 +1928,22 @@ BEGIN TRY
 					FROM tblCTContractDetail
 					WHERE intContractDetailId = @intPContractDetailId
 
-					SELECT @intVendorEntityId = NULL,@strCustomerContract=NULL
+					SELECT @intVendorEntityId = NULL
+						,@strCustomerContract = NULL
 
-					SELECT @intVendorEntityId = intEntityId,@strCustomerContract=strCustomerContract
+					SELECT @intVendorEntityId = intEntityId
+						,@strCustomerContract = strCustomerContract
 					FROM tblCTContractHeader
 					WHERE intContractHeaderId = @intPContractHeaderId
 				END
 
 				IF NOT EXISTS (
 						SELECT *
-						FROM tblLGLoadDetail
+						FROM tblLGLoadDetail LD
+						JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
 						WHERE intLoadDetailRefId = @intLoadDetailId
+							AND L.intBookId = @intBookId
+							AND IsNULL(L.intSubBookId, 0) = IsNULL(@intSubBookId, 0)
 						)
 				BEGIN
 					INSERT INTO tblLGLoadDetail (
@@ -2038,7 +2052,9 @@ BEGIN TRY
 						,x.[ysnPrintLoadDirections]
 						,CASE 
 							WHEN @strTransactionType = 'Drop Shipment'
-								THEN @strCustomerContract Else PCH.strCustomerContract End
+								THEN @strCustomerContract
+							ELSE PCH.strCustomerContract
+							END
 						,x.[strCustomerReference]
 						--,[intAllocationDetailId]
 						--,[intPickLotDetailId]
@@ -2103,8 +2119,12 @@ BEGIN TRY
 							,intLoadDetailId INT
 							) x
 					LEFT JOIN tblCTContractDetail PCD ON PCD.intContractDetailRefId = x.intSContractDetailId
+						AND PCD.intBookId = @intBookId
+						AND IsNULL(PCD.intSubBookId, 0) = IsNULL(@intSubBookId, 0)
 					LEFT JOIN tblCTContractDetail SCD ON SCD.intContractDetailRefId = x.intPContractDetailId
-					LEFT JOIN tblCTContractHeader PCH ON PCH.intContractHeaderId = PCD.intContractHeaderId
+						AND SCD.intBookId = @intBookId
+						AND IsNULL(SCD.intSubBookId, 0) = IsNULL(@intSubBookId, 0)
+					LEFT JOIN tblCTContractHeader PCH ON PCH.intContractHeaderId = IsNULL(PCD.intContractHeaderId, SCD.intContractHeaderId)
 					WHERE x.intLoadDetailId = @intLoadDetailId
 				END
 				ELSE
@@ -2164,7 +2184,9 @@ BEGIN TRY
 						,[ysnPrintLoadDirections] = x.[ysnPrintLoadDirections]
 						,[strVendorReference] = CASE 
 							WHEN @strTransactionType = 'Drop Shipment'
-								THEN @strCustomerContract Else PCH.strCustomerContract End
+								THEN @strCustomerContract
+							ELSE PCH.strCustomerContract
+							END
 						,[strCustomerReference] = x.[strCustomerReference]
 						--,[intAllocationDetailId]
 						--,[intPickLotDetailId]
@@ -2229,8 +2251,12 @@ BEGIN TRY
 							,intLoadDetailId INT
 							) x ON x.intLoadDetailId = LD.intLoadDetailRefId
 					LEFT JOIN tblCTContractDetail PCD ON PCD.intContractDetailRefId = x.intSContractDetailId
+						AND PCD.intBookId = @intBookId
+						AND IsNULL(PCD.intSubBookId, 0) = IsNULL(@intSubBookId, 0)
 					LEFT JOIN tblCTContractDetail SCD ON SCD.intContractDetailRefId = x.intPContractDetailId
-					LEFT JOIN tblCTContractHeader PCH ON PCH.intContractHeaderId = PCD.intContractHeaderId
+						AND SCD.intBookId = @intBookId
+						AND IsNULL(SCD.intSubBookId, 0) = IsNULL(@intSubBookId, 0)
+					LEFT JOIN tblCTContractHeader PCH ON PCH.intContractHeaderId = IsNULL(PCD.intContractHeaderId, SCD.intContractHeaderId)
 					WHERE x.intLoadDetailId = @intLoadDetailId
 				END
 
@@ -2374,8 +2400,10 @@ BEGIN TRY
 
 				IF NOT EXISTS (
 						SELECT *
-						FROM tblLGLoadDetailLot
+						FROM tblLGLoadDetailLot LDL
+						JOIN tblLGLoadDetail LD on LD.intLoadDetailId =LDL.intLoadDetailId
 						WHERE intLoadDetailLotRefId = @intLoadDetailLotId
+						and LD.intLoadId=@intNewLoadId
 						)
 				BEGIN
 					INSERT INTO tblLGLoadDetailLot (
@@ -2395,7 +2423,9 @@ BEGIN TRY
 					SELECT (
 							SELECT TOP 1 LD.intLoadDetailId
 							FROM tblLGLoadDetail LD
+							JOIN tblLGLoad L on L.intLoadId=LD.intLoadId
 							WHERE LD.intLoadDetailRefId = x.intLoadDetailId
+							AND L.intLoadId=@intNewLoadId
 							)
 						,@intLotId
 						,[dblLotQuantity]
@@ -3060,14 +3090,16 @@ BEGIN TRY
 			SELECT 1 AS [intConcurrencyId]
 				,@intNewLoadId
 				,(
-					SELECT [intLoadContainerId]
+					SELECT TOP 1 [intLoadContainerId]
 					FROM tblLGLoadContainer
 					WHERE intLoadContainerRefId = x.intLoadContainerId
+					AND intLoadId =@intNewLoadId
 					)
 				,(
-					SELECT [intLoadDetailId]
+					SELECT TOP 1 [intLoadDetailId]
 					FROM tblLGLoadDetail
 					WHERE intLoadDetailRefId = x.intLoadDetailId
+					AND intLoadId =@intNewLoadId
 					)
 				,x.[dblQuantity]
 				,IU.[intItemUOMId]
@@ -3121,14 +3153,16 @@ BEGIN TRY
 			UPDATE tblLGLoadDetailContainerLink
 			SET [intConcurrencyId] = LDCL.intConcurrencyId + 1
 				,[intLoadContainerId] = (
-					SELECT [intLoadContainerId]
+					SELECT TOP 1 [intLoadContainerId]
 					FROM tblLGLoadContainer
 					WHERE intLoadContainerRefId = x.intLoadContainerId
+					AND intLoadId =@intNewLoadId
 					)
 				,[intLoadDetailId] = (
-					SELECT [intLoadDetailId]
+					SELECT TOP 1 [intLoadDetailId]
 					FROM tblLGLoadDetail
 					WHERE intLoadDetailRefId = x.intLoadDetailId
+					AND intLoadId =@intNewLoadId
 					)
 				,[dblQuantity] = x.[dblQuantity]
 				,[intItemUOMId] = IU.[intItemUOMId]
@@ -3347,7 +3381,9 @@ BEGIN TRY
 				,(
 					SELECT TOP 1 [intLoadDetailLotId]
 					FROM tblLGLoadDetailLot LDL
+					JOIN tblLGLoadDetail LD on LD.intLoadDetailId =LDL.intLoadDetailId 
 					WHERE LDL.intLoadDetailLotRefId = x.intLoadDetailLotId
+					AND LD.intLoadId =@intNewLoadId
 					)
 				,[dblPrice]
 				,CU.[intCurrencyID]
@@ -3395,7 +3431,9 @@ BEGIN TRY
 				,[intLoadDetailLotId] = (
 					SELECT TOP 1 [intLoadDetailLotId]
 					FROM tblLGLoadDetailLot LDL
+					JOIN tblLGLoadDetail LD on LD.intLoadDetailId =LDL.intLoadDetailId 
 					WHERE LDL.intLoadDetailLotRefId = x.intLoadDetailLotId
+					AND LD.intLoadId =@intNewLoadId
 					)
 				,[dblPrice] = x.[dblPrice]
 				,[intPriceCurrencyId] = CU.[intCurrencyID]
@@ -3607,6 +3645,7 @@ BEGIN TRY
 					SELECT TOP 1 [intLoadWarehouseId]
 					FROM tblLGLoadWarehouse LW
 					WHERE LW.[intLoadWarehouseRefId] = x.[intLoadWarehouseId]
+					and intLoadId=@intNewLoadId 
 					)
 				,x.[strCategory]
 				,x.[strActivity]
@@ -3731,11 +3770,13 @@ BEGIN TRY
 					SELECT TOP 1 [intLoadWarehouseId]
 					FROM tblLGLoadWarehouse LW
 					WHERE LW.intLoadWarehouseRefId = x.intLoadWarehouseId
+					and intLoadId=@intNewLoadId 
 					)
 				,(
 					SELECT TOP 1 [intLoadContainerId]
 					FROM tblLGLoadContainer LC
 					WHERE LC.intLoadContainerRefId = x.intLoadContainerId
+					and intLoadId=@intNewLoadId 
 					)
 				,[intLoadWarehouseContainerId]
 			FROM OPENXML(@idoc, 'vyuLGLoadWarehouseContainerViews/vyuLGLoadWarehouseServicesContainer', 2) WITH (
@@ -3757,11 +3798,13 @@ BEGIN TRY
 					SELECT TOP 1 [intLoadWarehouseId]
 					FROM tblLGLoadWarehouse LW
 					WHERE LW.intLoadWarehouseRefId = x.intLoadWarehouseId
+					and intLoadId=@intNewLoadId 
 					)
 				,[intLoadContainerId] = (
 					SELECT TOP 1 [intLoadContainerId]
 					FROM tblLGLoadContainer LC
 					WHERE LC.intLoadContainerRefId = x.intLoadContainerId
+					and intLoadId=@intNewLoadId 
 					)
 			FROM OPENXML(@idoc, 'vyuLGLoadWarehouseContainerViews/vyuLGLoadWarehouseServicesContainer', 2) WITH (
 					[intLoadWarehouseId] INT

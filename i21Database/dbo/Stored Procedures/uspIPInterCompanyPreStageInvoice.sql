@@ -11,6 +11,7 @@ BEGIN TRY
 	FROM tblARInvoicePreStage
 	WHERE ISNULL(strFeedStatus, '') = ''
 		AND intInvoiceId = @intInvoiceId
+		AND strRowState ='Modified'
 
 	INSERT INTO tblARInvoicePreStage (
 		intInvoiceId

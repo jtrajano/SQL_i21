@@ -4,6 +4,7 @@
 	, @strScreenName NVARCHAR(100) = NULL
 	, @intUserId INT = NULL
 	, @action NVARCHAR(20)
+	, @ysnLogRiskSummary BIT = 1
 
 AS
 
@@ -11,6 +12,8 @@ BEGIN TRY
 	DECLARE @ErrMsg NVARCHAR(MAX)
 		, @strUserName NVARCHAR(100)
 		, @strOldBuySell NVARCHAR(10)
+
+	DECLARE @SummaryLog AS RKSummaryLog
 
 	SELECT TOP 1 @strUserName = strName FROM tblEMEntity WHERE intEntityId = @intUserId
 
@@ -103,9 +106,36 @@ BEGIN TRY
 				and intFutOptTransactionId NOT IN (SELECT intFutOptTransactionId FROM tblRKFutOptTransactionHistory WHERE intFutOptTransactionHeaderId = @intFutOptTransactionHeaderId AND strAction = 'DELETE')
 			) tbl
 		)	--This filter will look into the history table to check entries that does not have delete entry.
+
+
+		IF (ISNULL(@ysnLogRiskSummary, 1) = 1)
+		BEGIN
+			IF (@action = 'DELETE')
+			BEGIN
+				INSERT INTO @SummaryLog(strTransactionType
+					, intTransactionRecordId
+					, ysnDelete
+					, intUserId
+					, strNotes)
+				SELECT strTransactionType = 'Derivatives'
+					, intTransactionRecordId = intFutOptTransactionId
+					, ysnDelete = 1
+					, intUserId = @intUserId
+					, strNotes = 'Delete record'
+				FROM tblRKFutOptTransaction
+				WHERE intFutOptTransactionId IN (
+					SELECT DISTINCT intFutOptTransactionId FROM (
+						SELECT DISTINCT intFutOptTransactionId, strAction FROM tblRKFutOptTransactionHistory
+						WHERE intFutOptTransactionHeaderId = @intFutOptTransactionHeaderId
+						and intFutOptTransactionId NOT IN (SELECT intFutOptTransactionId FROM tblRKFutOptTransactionHistory WHERE intFutOptTransactionHeaderId = @intFutOptTransactionHeaderId AND strAction = 'DELETE')
+					) tbl
+				)
+			END
+		END
 	END
 	ELSE
-	-- Create the entry for Derivative Entry History
+	BEGIN
+		-- Create the entry for Derivative Entry History
 		INSERT INTO tblRKFutOptTransactionHistory (intFutOptTransactionHeaderId
 			, strSelectedInstrumentType
 			, intFutOptTransactionId
@@ -187,6 +217,70 @@ BEGIN TRY
 		LEFT JOIN tblRKBrokerageAccount BA ON BA.intBrokerageAccountId = T.intBrokerageAccountId
 		LEFT JOIN tblRKOptionsMonth OM ON OM.intOptionMonthId = T.intOptionMonthId
 		WHERE T.intFutOptTransactionId = @intFutOptTransactionId
+
+		IF (ISNULL(@ysnLogRiskSummary, 1) = 1)
+		BEGIN
+			IF (@action = 'DELETE')
+			BEGIN
+				INSERT INTO @SummaryLog(strTransactionType
+				, intTransactionRecordId
+				, ysnDelete
+				, intUserId
+				, strNotes)
+			SELECT strTransactionType = 'Derivatives'
+				, intTransactionRecordId = @intFutOptTransactionId
+				, ysnDelete = 1
+				, intUserId = @intUserId
+				, strNotes = 'Delete record'
+			END
+			ELSE
+			BEGIN
+				INSERT INTO @SummaryLog(strTransactionType
+					, intTransactionRecordId
+					, strTransactionNumber
+					, dtmTransactionDate
+					, intContractDetailId
+					, intContractHeaderId
+					, intCommodityId
+					, intLocationId
+					, intBookId
+					, intSubBookId
+					, intFutureMarketId
+					, intFutureMonthId
+					, dblNoOfLots
+					, dblPrice
+					, intEntityId
+					, intUserId
+					, strNotes
+					, intCommodityUOMId)
+				SELECT strTransactionType = 'Derivatives'
+					, intTransactionRecordId = der.intFutOptTransactionId
+					, strTransactionNumber = der.strInternalTradeNo
+					, dtmTransactionDate = der.dtmTransactionDate
+					, intContractDetailId = der.intContractDetailId
+					, intContractHeaderId = der.intContractHeaderId
+					, intCommodityId = der.intCommodityId
+					, intLocationId = der.intLocationId
+					, intBookId = der.intBookId
+					, intSubBookId = der.intSubBookId
+					, intFutureMarketId = der.intFutureMarketId
+					, intFutureMonthId = der.intFutureMonthId
+					, dblNoOfLots = der.dblNoOfContract
+					, dblPrice = der.dblPrice
+					, intEntityId = der.intEntityId
+					, intUserId = @intUserId
+					, strNotes = der.strReference
+					, intCommodityUOMId = cUOM.intCommodityUnitMeasureId
+				FROM tblRKFutOptTransaction der
+				JOIN tblRKFutureMarket m ON m.intFutureMarketId = der.intFutureMarketId
+				LEFT JOIN tblICCommodityUnitMeasure cUOM ON cUOM.intCommodityId = der.intCommodityId AND cUOM.intUnitMeasureId = m.intUnitMeasureId
+			END
+		END
+	END
+
+	EXEC uspRKLogRiskPosition @SummaryLog, 0, 1
+
+	
 END TRY
 BEGIN CATCH
 	SET @ErrMsg = ERROR_MESSAGE()

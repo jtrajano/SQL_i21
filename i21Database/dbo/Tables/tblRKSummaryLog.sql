@@ -3,10 +3,13 @@
 	intSummaryLogId INT IDENTITY NOT NULL,
 	strBatchId NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL,
 	dtmCreatedDate DATETIME NULL DEFAULT(GETDATE()),
-	strTransactionType NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL,
-	intTransactionRecordId INT NOT NULL,
-	strTransactionNumber NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL,
-	dtmTransactionDate DATETIME NOT NULL,
+	strBucketType NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	strTransactionType NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+	intTransactionRecordId INT NULL,
+	intTransactionRecordHeaderId INT NULL,
+	strDistributionType NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+	strTransactionNumber NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+	dtmTransactionDate DATETIME NULL,
 	intContractDetailId INT NULL,
 	intContractHeaderId INT NULL,
 	intFutureMarketId INT NULL,
@@ -28,5 +31,11 @@
 	intTicketId INT NULL,
 	intUserId INT NULL, 
 	strNotes NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL,
+	strMiscField NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
+    [ysnNegate] BIT NULL DEFAULT ((0)), 
+    [intRefSummaryLogId] INT NULL, 
+    [intConcurrencyId] INT NULL DEFAULT ((1)), 
     CONSTRAINT [PK_tblRKSummaryLog] PRIMARY KEY ([intSummaryLogId])
 )
+
+GO

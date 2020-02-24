@@ -229,6 +229,7 @@ BEGIN TRY
 						END
 					END
 					,strSourceTransactionId  = @strDistributionOption
+					,intStorageScheduleTypeId = @intGRStorageId
 					,ysnAllowVoucher = 0
 			FROM	dbo.tblSCTicket ScaleTicket
 					INNER JOIN tblICItemUOM ItemUOM ON ScaleTicket.intItemId = ItemUOM.intItemId
@@ -492,6 +493,7 @@ BEGIN TRY
 				END
 			END
 			,strSourceTransactionId  = @strDistributionOption
+			,intStorageScheduleTypeId = @intGRStorageId
 			,ysnAllowVoucher = 0
 	FROM	dbo.tblSCTicket ScaleTicket
 			INNER JOIN tblICItemUOM ItemUOM ON ScaleTicket.intItemId = ItemUOM.intItemId

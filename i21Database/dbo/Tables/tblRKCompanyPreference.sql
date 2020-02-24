@@ -74,6 +74,7 @@
 	[ysnUseM2MDate] BIT NULL DEFAULT((0)),
 	[ysnDisableHistoricalDerivative] BIT NULL DEFAULT((0)),
 	[intTonnageUOMId] INT NULL,
+	[ysnAllowRebuildSummaryLog] BIT NOT NULL DEFAULT((1)),
     CONSTRAINT [PK_tblRKCompanyPreference_intCompanyPreferenceId] PRIMARY KEY ([intCompanyPreferenceId]), 
 	CONSTRAINT [FK_tblRKCompanyPreference_tblSMCurrency_intCurrencyId] FOREIGN KEY([intCurrencyId])REFERENCES [dbo].[tblSMCurrency] ([intCurrencyID]),
 	CONSTRAINT [FK_tblRKCompanyPreference_tblRKInterfaceSystem_intCurrencyId] FOREIGN KEY([intInterfaceSystemId])REFERENCES [dbo].[tblRKInterfaceSystem] ([intInterfaceSystemId]),

@@ -19,6 +19,8 @@ BEGIN TRY
 	DECLARE @strAuditLogActionType NVARCHAR(MAX)
 	DECLARE	@dblScheduleQty	NUMERIC(18,6)
 	DECLARE	@intNoOfLoad	INT
+	DECLARE @ysnPosted BIT
+	DECLARE @strLoadNumber NVARCHAR(MAX)
 	DECLARE @tblLoadDetail TABLE (intLoadDetailRecordId INT Identity(1, 1)
 								 ,intLoadDetailId INT
 								 ,intPContractDetailId INT
@@ -26,7 +28,9 @@ BEGIN TRY
 								 ,dblLoadDetailQuantity NUMERIC(18, 6))
 
 	SELECT @intPurchaseSale = intPurchaseSale,
-		   @intShipmentType = ISNULL(@intShipmentType,intShipmentType)
+		   @intShipmentType = ISNULL(@intShipmentType,intShipmentType),
+		   @ysnPosted = ISNULL(ysnPosted, 0),
+		   @strLoadNumber = strLoadNumber
 	FROM tblLGLoad
 	WHERE intLoadId = @intLoadId
 
@@ -42,10 +46,68 @@ BEGIN TRY
 	BEGIN
 		IF (@ysnCancel = 1)
 		BEGIN
-			IF EXISTS (SELECT 1 FROM tblLGLoad WHERE intLoadId = @intLoadId AND ysnPosted = 1)
+
+			IF EXISTS (SELECT TOP 1 1 FROM tblRKCompanyPreference WHERE ysnImposeReversalTransaction = 1)
 			BEGIN
-				RAISERROR ('Shipment is already posted. Cannot cancel.',11,1)
+				DECLARE @strTransactionNo NVARCHAR(100)
+				/* Validations to Reverse related transactions */
+
+				--Validate if Load has posted Weight Claim
+				IF EXISTS (SELECT TOP 1 1 FROM tblLGWeightClaim WHERE intLoadId = @intLoadId AND ysnPosted = 1)
+				BEGIN
+					SELECT TOP 1 @strTransactionNo = tblLGWeightClaim.strReferenceNumber 
+					FROM tblLGWeightClaim WHERE intLoadId = @intLoadId
+
+					SET @strErrMsg = 'Weight Claim ' + @strTransactionNo + ' has been created for ' + @strLoadNumber 
+									+ '. Cannot cancel.'
+
+					RAISERROR (@strErrMsg,16,1);
+
+					RETURN 0;
+				END
+
+				--Validate if Invoice exists
+				IF EXISTS (
+					SELECT TOP 1 1
+					FROM tblLGLoad L
+					JOIN tblARInvoice I ON L.intLoadId = I.intLoadId
+					WHERE L.intLoadId = @intLoadId
+					AND I.ysnReturned = 0 and I.strTransactionType <> 'Credit Memo'
+					)
+				BEGIN
+					SELECT TOP 1 @strTransactionNo = I.strInvoiceNumber
+					FROM tblLGLoad L
+					JOIN tblARInvoice I ON L.intLoadId = I.intLoadId
+					WHERE L.intLoadId = @intLoadId
+						AND I.ysnReturned = 0 and I.strTransactionType <> 'Credit Memo'
+
+					SET @strErrMsg = 'Invoice ' + @strTransactionNo + ' has been generated for ' + @strLoadNumber 
+						+ '. Cannot cancel.';
+
+					RAISERROR (@strErrMsg,16,1);
+
+					RETURN 0;
+				END
+
+				--Validate if Voucher exists
+				IF EXISTS(SELECT TOP 1 1 FROM tblAPBillDetail BD 
+				JOIN tblLGLoadDetail LD ON BD.intLoadDetailId = LD.intLoadDetailId
+				WHERE LD.intLoadId = @intLoadId)
+				BEGIN
+					SET @strErrMsg = 'Voucher was already created for ' + @strLoadNumber + '. Cannot cancel.';
+
+					RAISERROR(@strErrMsg, 16, 1);
+					RETURN 0;
+				END
 			END
+			ELSE
+			BEGIN
+				IF EXISTS (SELECT 1 FROM tblLGLoad WHERE intLoadId = @intLoadId AND ysnPosted = 1) 
+				BEGIN
+					RAISERROR ('Shipment is already posted. Cannot cancel.',11,1)
+				END
+			END
+
 
 			SELECT @intMinLoadDetailId = MIN(intLoadDetailId)
 			FROM @tblLoadDetail
@@ -136,6 +198,12 @@ BEGIN TRY
 				EXEC [uspLGCreateLoadIntegrationLog] @intLoadId = @intLoadShippingInstructionId
 					,@strRowState = 'Added'
 					,@intShipmentType = 2
+			END
+
+			/* Perform Reversal */
+			IF EXISTS(SELECT TOP 1 1 FROM tblRKCompanyPreference WHERE ISNULL(ysnImposeReversalTransaction, 0) = 1)
+			BEGIN
+				EXEC uspLGPostLoadSchedule @intLoadId, @intEntityUserSecurityId, 1
 			END
 		END
 		ELSE

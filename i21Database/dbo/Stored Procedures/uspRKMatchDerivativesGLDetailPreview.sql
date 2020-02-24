@@ -8,7 +8,10 @@ BEGIN
 	
 	SELECT @ysnPosted = ISNULL(ysnPosted, 0) FROM tblRKMatchFuturesPSHeader WHERE intMatchFuturesPSHeaderId = @intMatchFuturesPSHeaderId
 
-	EXEC uspRKMatchDerivativesPostRecap @intMatchFuturesPSHeaderId, 1
+	IF (@ysnPosted = 0)
+	BEGIN
+		EXEC uspRKMatchDerivativesPostRecap @intMatchFuturesPSHeaderId, 1
+	END
 	
 	SELECT CONVERT(INT, ROW_NUMBER() OVER (ORDER BY strAccountId ASC)) intRowNum
 		, intAccountId
