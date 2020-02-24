@@ -26,6 +26,7 @@ BEGIN TRY
 		,@intBondedApprovalLotStatusId INT
 		,@intBondedRejectionLotStatusId INT
 		,@intUnitMeasureId INT
+		,@ysnActive BIT
 	DECLARE @intLastModifiedUserId INT
 		,@intNewProductId INT
 		,@intProductRefId INT
@@ -131,6 +132,7 @@ BEGIN TRY
 				,@intBondedApprovalLotStatusId = NULL
 				,@intBondedRejectionLotStatusId = NULL
 				,@intUnitMeasureId = NULL
+				,@ysnActive = NULL
 
 			SELECT @strProductValue = strProductValue
 				,@strApprovalLotStatus = strApprovalLotStatus
@@ -139,6 +141,7 @@ BEGIN TRY
 				,@strBondedRejectionLotStatus = strBondedRejectionLotStatus
 				,@strUnitMeasure = strUnitMeasure
 				,@intProductTypeId = intProductTypeId
+				,@ysnActive = ysnActive
 			FROM OPENXML(@idoc, 'vyuIPGetProducts/vyuIPGetProduct', 2) WITH (
 					strProductValue NVARCHAR(50)
 					,strApprovalLotStatus NVARCHAR(50)
@@ -147,6 +150,7 @@ BEGIN TRY
 					,strBondedRejectionLotStatus NVARCHAR(50)
 					,strUnitMeasure NVARCHAR(50)
 					,intProductTypeId INT
+					,ysnActive BIT
 					) x
 
 			IF @strProductValue IS NULL
@@ -433,6 +437,22 @@ BEGIN TRY
 				SELECT @intNewProductId = intProductId
 				FROM tblQMProduct
 				WHERE intProductRefId = @intProductRefId
+			END
+
+			IF @ysnActive = 1
+			BEGIN
+				UPDATE P
+				SET P.ysnActive = 0
+				FROM tblQMProduct P
+				JOIN tblQMProductControlPoint PC ON PC.intProductId = P.intProductId
+				WHERE P.intProductTypeId = @intProductTypeId
+					AND P.intProductValueId = @intProductValueId
+					AND P.intProductId <> @intNewProductId
+					AND PC.intSampleTypeId IN (
+						SELECT PC1.intSampleTypeId
+						FROM tblQMProductControlPoint PC1
+						WHERE PC1.intProductId = @intNewProductId
+						)
 			END
 
 			EXEC sp_xml_removedocument @idoc
