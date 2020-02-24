@@ -785,7 +785,7 @@ BEGIN TRY
 			FROM tblCTBook
 			WHERE strBook = @strHBook
 
-			SELECT @intHSubBookId = intHSubBookId
+			SELECT @intHSubBookId = intSubBookId
 			FROM tblCTSubBook
 			WHERE strSubBook = @strHSubBook
 				AND intBookId = @intHBookId
