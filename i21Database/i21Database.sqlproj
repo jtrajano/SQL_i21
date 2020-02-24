@@ -8152,6 +8152,7 @@
     <Build Include="dbo\Stored Procedures\uspICLogRiskPositionFromInTransit.sql" />
     <Build Include="dbo\Stored Procedures\uspAPLogVoucherDetailRisk.sql" />
     <Build Include="dbo\Tables\tblRKLogAction.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPLogPaymentRisk.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

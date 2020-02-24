@@ -872,6 +872,9 @@ BEGIN
 	) payments
 	INNER JOIN tblAPPaymentDetail B ON payments.intId = B.intPaymentId
 	EXEC uspAPUpdateVoucherHistory @paymentDetailIds = @voucherHistory, @post = @post
+
+	DECLARE @remove BIT = ~@post;
+	EXEC uspAPLogPaymentRisk @payVoucherDetailIds = voucherHistory, @remove = @remove
 END
 
 IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpPayablePostData')) DROP TABLE #tmpPayablePostData
