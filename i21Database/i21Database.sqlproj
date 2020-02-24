@@ -8501,6 +8501,7 @@
     <Build Include="dbo\Functions\fnRKGetBucketCustomerOwned.sql" />
     <Build Include="dbo\Functions\fnRKGetBucketDelayedPricing.sql" />
     <Build Include="dbo\Stored Procedures\uspICFixICvsGLAmountDisrecpany.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPLogPaymentRisk.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
