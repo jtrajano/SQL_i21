@@ -542,7 +542,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILSTOADD)
 			, dblCurrencyExchangeRate			= ID.dblCurrencyExchangeRate
 			, strAddonDetailKey					= CASE WHEN ISNULL(ID.ysnAddonParent, 0) = 1 THEN @strAddOnKey ELSE NULL END
 			, ysnAddonParent					= ISNULL(ID.ysnAddonParent, 0)
-			, intInventoryShipmentItemId		= CASE WHEN IDTOADD.intContractDetailId IS NOT NULL AND ISNULL(@ysnFromSalesOrder, 0) = 0 THEN NULL ELSE @intInventoryShipmentItemId END
+			, intInventoryShipmentItemId		= @intInventoryShipmentItemId-- CASE WHEN IDTOADD.intContractDetailId IS NOT NULL AND ISNULL(@ysnFromSalesOrder, 0) = 0 THEN NULL ELSE @intInventoryShipmentItemId END
 			, intStorageLocationId				= ID.intStorageLocationId
 			, intSubLocationId					= ID.intSubLocationId
 			, intCompanyLocationSubLocationId	= ID.intCompanyLocationSubLocationId
