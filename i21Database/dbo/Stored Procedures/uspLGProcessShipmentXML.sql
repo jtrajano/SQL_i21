@@ -903,7 +903,7 @@ BEGIN TRY
 					,intTransportationMode
 					,intShipmentStatus
 					,ysnPosted
-					,dtmPostedDate
+					--,dtmPostedDate
 					,intTransUsedBy
 					,intShipmentType
 					,intLoadShippingInstructionId
@@ -1061,8 +1061,8 @@ BEGIN TRY
 					,strDischargePerUnit
 					,intTransportationMode
 					,intShipmentStatus
-					,ysnPosted
-					,dtmPostedDate
+					,0 As ysnPosted
+					--,dtmPostedDate
 					,intTransUsedBy
 					,intShipmentType
 					,intLoadShippingInstructionId
@@ -1389,8 +1389,8 @@ BEGIN TRY
 					,strDischargePerUnit = x.strDischargePerUnit
 					,intTransportationMode = x.intTransportationMode
 					,intShipmentStatus = x.intShipmentStatus
-					,ysnPosted = x.ysnPosted
-					,dtmPostedDate = x.dtmPostedDate
+					--,ysnPosted = x.ysnPosted
+					--,dtmPostedDate = x.dtmPostedDate
 					,intTransUsedBy = x.intTransUsedBy
 					,intShipmentType = x.intShipmentType
 					,intLoadShippingInstructionId = x.intLoadShippingInstructionId
