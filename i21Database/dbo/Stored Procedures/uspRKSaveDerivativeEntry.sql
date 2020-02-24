@@ -124,28 +124,28 @@ BEGIN
 			, strMiscFields)
 		SELECT strBucketType = 'Derivatives'
 			, strTransactionType = 'Derivatives'
-			, intTransactionRecordId = der.intFutOptTransactionId
+			, intTransactionRecordId = der.intTransactionRecordId
 			, intTransactionRecordHeaderId = der.intFutOptTransactionHeaderId
 			, strDistributionType = strBuySell
-			, strTransactionNumber = der.strInternalTradeNo
+			, strTransactionNumber = der.strTransactionNumber
 			, dtmTransactionDate = der.dtmTransactionDate
 			, intContractDetailId = der.intContractDetailId
 			, intContractHeaderId = der.intContractHeaderId
-			, intFutOptTransactionId = der.intFutOptTransactionId
+			, intFutOptTransactionId = der.intTransactionRecordId
 			, intCommodityId = der.intCommodityId
 			, intLocationId = der.intLocationId
 			, intBookId = der.intBookId
 			, intSubBookId = der.intSubBookId
 			, intFutureMarketId = der.intFutureMarketId
 			, intFutureMonthId = der.intFutureMonthId
-			, dblNoOfLots = der.dblNoOfContract
+			, dblNoOfLots = der.dblNoOfLots
 			, dblPrice = der.dblPrice
 			, dblContractSize = der.dblContractSize
-			, dblQty = der.dblNoOfContract * dblContractSize
+			, dblQty = der.dblNoOfLots * dblContractSize
 			, intEntityId = der.intEntityId
 			, intUserId = @intUserId
-			, strNotes = der.strReference
-			, intCommodityUOMId = cUOM.intCommodityUnitMeasureId
+			, strNotes = der.strNotes
+			, intCommodityUOMId = der.intCommodityUOMId
 			, strMiscFields = dbo.fnRKConvertMiscFieldString(@LogHelper)
 		FROM #tmpDerivative der
 		
