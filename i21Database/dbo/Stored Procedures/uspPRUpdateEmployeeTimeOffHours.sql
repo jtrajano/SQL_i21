@@ -67,13 +67,13 @@ INTO #tmpEmployees
 FROM tblPREmployee E 
 LEFT JOIN tblPREmployeeTimeOff T
 	ON E.intEntityId = T.intEntityEmployeeId
-LEFT JOIN (SELECT TOP 1 intPaycheckId
+LEFT JOIN (SELECT intPaycheckId
 				,intEntityEmployeeId
 				,ysnPosted
 				,ysnVoid
 				,dtmDateFrom
 				,dtmDateTo 
-			FROM tblPRPaycheck WHERE intPaycheckId = @intPaycheckId) P
+			FROM tblPRPaycheck ) P
 	ON E.intEntityId = P.intEntityEmployeeId
 WHERE E.intEntityId = ISNULL(@intEntityEmployeeId, E.intEntityId)
 	AND T.intTypeTimeOffId = @intTypeTimeOffId
