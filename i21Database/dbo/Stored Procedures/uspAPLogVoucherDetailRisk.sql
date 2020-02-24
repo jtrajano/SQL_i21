@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspAPLogVoucherDetailRisk]
-	@voucherDetailIds AS Id,
+	@voucherDetailIds AS Id READONLY,
 	@remove BIT = 0
 AS
 
@@ -15,42 +15,46 @@ BEGIN
 
 	INSERT INTO @rkSummaryLog(
 		strBatchId,
-		dtmCreatedDate,
 		strBucketType,
 		strTransactionType,
 		intTransactionRecordId,
-		intTransactionHeaderRecordId,
+		intTransactionRecordHeaderId,
+		intContractDetailId,
+		intContractHeaderId,
 		strDistributionType,
 		strTransactionNumber,
 		dtmTransactionDate,
 		intCommodityId,
 		intItemId,
-		intOrigUOMId,
+		intCommodityUOMId,
 		intLocationId,
-		dblOrigQty,
+		dblQty,
 		dblPrice,
 		intEntityId,
 		intUserId,
+		intTicketId,
 		strMiscFields
 	)
 	SELECT 
 		strBatchId = NULL
-		, dtmCreatedDate = b.dtmDateCreated
 		, strBucketType = 'Accounts Payables'
 		, strTransactionType = 'Bill'
 		, intTransactionRecordId = bd.intBillDetailId
-		, intTransactionHeaderRecordId = bd.intBillId
+		, intTransactionRecordHeaderId = bd.intBillId
+		, intContractDetailId = bd.intContractDetailId
+		, intContractHeaderId = bd.intContractHeaderId
 		, strDistributionType = ''
 		, strTransactionNumber = b.strBillId
 		, dtmTransactionDate = b.dtmBillDate 
 		, c.intCommodityId
 		, bd.intItemId
-		, intOrigUOMId = cum.intCommodityUnitMeasureId
+		, intCommodityUOMId = cum.intCommodityUnitMeasureId
 		, intLocationId = b.intShipToId
-		, dblOrigQty = CASE WHEN @remove = 1 THEN -bd.dblQtyReceived ELSE bd.dblQtyReceived END
+		, dblQty = CASE WHEN @remove = 1 THEN -bd.dblQtyReceived ELSE bd.dblQtyReceived END
 		, dblPrice = CASE WHEN @remove = 1 THEN -b.dblTotal ELSE b.dblTotal END
 		, intEntityId = b.intEntityVendorId
-		, intUserId = b.intUserId
+		, intUserId = b.intEntityId
+		, intTicketId = bd.intScaleTicketId
 		, strMiscFields = '{intInventoryReceiptItemId = "'+ CAST(ISNULL(bd.intInventoryReceiptItemId,'') AS NVARCHAR) +'"} {intLoadDetailId = "' + CAST(ISNULL(bd.intLoadDetailId,'') AS NVARCHAR) +'"}'
 	FROM tblAPBill b
 	INNER JOIN tblAPBillDetail bd ON bd.intBillId = b.intBillId
