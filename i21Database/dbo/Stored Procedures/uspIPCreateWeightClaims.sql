@@ -81,11 +81,7 @@ BEGIN TRY
 		,intPartyEntityId
 		,dblSeqPrice
 		,intSeqCurrencyId
-		,(dbo.[fnCTConvertQuantityToTargetItemUOM](WC.intItemId, intWeightUnitMeasureId, IU.intUnitMeasureId, ABS((dblWeightLoss) + dblFranchiseWt)) * dblSeqPrice) / CASE 
-			WHEN CU.ysnSubCurrency = 1
-				THEN 100
-			ELSE 1
-			END
+		,dblClaimableAmount
 		,intSeqPriceUOMId
 		,NULL
 		,NULL
@@ -94,9 +90,7 @@ BEGIN TRY
 		,NULL
 		,dblFranchise
 		,dblSeqPriceConversionFactoryWeightUOM
-	FROM vyuIPGetOpenWeightClaim WC
-	JOIN tblSMCurrency CU ON CU.intCurrencyID = WC.intSeqCurrencyId
-	JOIN tblICItemUOM IU ON IU.intItemUOMId = WC.intSeqPriceUOMId
+	FROM vyuLGGetOpenWeightClaim WC
 	WHERE intLoadId = @intLoadId
 
 	SELECT @strDescription = 'Created from system : ' + @strNewWeightClaimReferenceNo
