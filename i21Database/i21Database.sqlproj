@@ -7718,6 +7718,7 @@
     <Build Include="dbo\Stored Procedures\uspICGetCollateralCategories.sql" />
     <Build Include="dbo\Tables\tblICBackupCollateral.sql" />
     <Build Include="dbo\Stored Procedures\uspICFixICvsGLAmountDisrecpany.sql" />
+    <Build Include="dbo\Functions\fnGRCalculateStorageUnits.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
