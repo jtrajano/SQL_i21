@@ -215,7 +215,7 @@ BEGIN TRY
 		JOIN	tblSMCompanyLocation	    CL  ON  CL.intCompanyLocationId =	CD.intCompanyLocationId
 		JOIN	tblCTContractType		    CT  ON  CT.intContractTypeId	=	CH.intContractTypeId
 		JOIN	tblCTPricingType		    PT  ON  PT.intPricingTypeId		=	CD.intPricingTypeId
-		JOIN	tblICCommodityUnitMeasure	QU  ON  QU.intCommodityId		=	CH.intCommodityId
+ LEFT	JOIN	tblICCommodityUnitMeasure	QU  ON  QU.intCommodityId		=	CH.intCommodityId
 												AND QU.intUnitMeasureId		=	ISNULL(CD.intUnitMeasureId,QU.intUnitMeasureId)
  LEFT   JOIN	tblCTPriceFixation		    PF  ON  PF.intContractDetailId	=	CD.intContractDetailId
  LEFT	JOIN	tblCTBook					BK	ON BK.intBookId				=	CD.intBookId
