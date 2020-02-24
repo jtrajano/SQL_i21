@@ -36,6 +36,16 @@ DECLARE @ProductProperty TABLE (
 	,intProductPropertyId INT
 	,intSequenceNo INT
 	)
+DECLARE @InterCompanyExistingTemplates TABLE (
+	intProductId INT
+	)
+DECLARE @ICintProductId INT
+
+-- Add all the existing templates
+INSERT INTO @InterCompanyExistingTemplates (intProductId)
+SELECT DISTINCT intProductId
+FROM tblQMProductTest
+WHERE intTestId = @intTestId
 
 -- Delete the properties which are not available in Test
 DELETE
@@ -270,4 +280,18 @@ BEGIN
 	SELECT @intRowNo = MIN(intRowNo)
 	FROM @ExistingTemplatesSeqNo
 	WHERE intRowNo > @intRowNo
+END
+
+SELECT @ICintProductId = MIN(intProductId)
+FROM @InterCompanyExistingTemplates
+
+WHILE @ICintProductId IS NOT NULL
+BEGIN
+	EXEC uspIPInterCompanyPreStageProduct @ICintProductId
+		,'Modified'
+		,@intUserId
+
+	SELECT @ICintProductId = MIN(intProductId)
+	FROM @InterCompanyExistingTemplates
+	WHERE intProductId > @ICintProductId
 END
