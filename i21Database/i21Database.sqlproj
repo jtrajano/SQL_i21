@@ -8125,6 +8125,8 @@
     <Build Include="dbo\Tables\tblICBackupCollateral.sql" />
 	<Build Include="dbo\Stored Procedures\uspICCreateReturnGLEntriesForNonStockItems.sql" />
     <Build Include="dbo\Stored Procedures\uspSTRecalculateReturnLottery.sql" />
+
+  	<Build Include="dbo\Functions\fnGRCalculateStorageUnits.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
