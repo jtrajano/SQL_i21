@@ -6173,13 +6173,13 @@ BEGIN
 		
 			IF(@ysnReRunCalcTax = 0)
 			BEGIN
-				SET @dblPrice = [dbo].[fnRoundBanker](([dbo].[fnRoundBanker](@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax) / @dblQuantity, 6) + ISNULL(@dblAdjustments,0)
+				SET @dblPrice = ROUND((ROUND(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax) / @dblQuantity, 6) + ISNULL(@dblAdjustments,0)
 				SET @ysnReRunCalcTax = 1
 				GOTO TAXCOMPUTATION
 			END
 
 			DECLARE @dblImportFileGrossPriceZeroQty NUMERIC(18,6)
-			SET @dblImportFileGrossPriceZeroQty = [dbo].[fnRoundBanker](ISNULL(@dblPrice,0) + [dbo].[fnRoundBanker]((@totalCalculatedTaxZeroQuantity / @dblZeroQuantity),6), 6)
+			SET @dblImportFileGrossPriceZeroQty = ROUND(ISNULL(@dblPrice,0) + ROUND((@totalCalculatedTaxZeroQuantity / @dblZeroQuantity),6), 6)
 
 			IF(ISNULL(@ysnForceRounding,0) = 1) 
 			BEGIN
@@ -6189,20 +6189,20 @@ BEGIN
 
 			SET @dblCalculatedGrossPrice	 = @dblImportFileGrossPriceZeroQty
 			SET @dblOriginalGrossPrice		 = @dblOriginalPrice
-			SET @dblCalculatedNetPrice		 = [dbo].[fnRoundBanker]((([dbo].[fnRoundBanker]((@dblImportFileGrossPriceZeroQty * @dblQuantity),2) - (ISNULL(@totalCalculatedTax,0)) ) / @dblQuantity),6)
-			SET @dblOriginalNetPrice		 = [dbo].[fnRoundBanker](([dbo].[fnRoundBanker](@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax) / @dblQuantity, 6)
-			SET @dblCalculatedTotalPrice	 = [dbo].[fnRoundBanker]((@dblImportFileGrossPriceZeroQty * @dblQuantity),2)
-			SET @dblOriginalTotalPrice		 = [dbo].[fnRoundBanker](@dblOriginalPrice * @dblQuantity,2)
+			SET @dblCalculatedNetPrice		 = ROUND(((ROUND((@dblImportFileGrossPriceZeroQty * @dblQuantity),2) - (ISNULL(@totalCalculatedTax,0)) ) / @dblQuantity),6)
+			SET @dblOriginalNetPrice		 = ROUND((ROUND(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax) / @dblQuantity, 6)
+			SET @dblCalculatedTotalPrice	 = ROUND((@dblImportFileGrossPriceZeroQty * @dblQuantity),2)
+			SET @dblOriginalTotalPrice		 = ROUND(@dblOriginalPrice * @dblQuantity,2)
 
 			SET @dblQuoteGrossPrice			 = @dblCalculatedGrossPrice
-			SET @dblQuoteNetPrice			 = [dbo].[fnRoundBanker]((([dbo].[fnRoundBanker]((@dblQuoteGrossPrice * @dblZeroQuantity),2) - (ISNULL(@totalCalculatedTaxZeroQuantity,0)) ) / @dblZeroQuantity),6)
+			SET @dblQuoteNetPrice			 = ROUND(((ROUND((@dblQuoteGrossPrice * @dblZeroQuantity),2) - (ISNULL(@totalCalculatedTaxZeroQuantity,0)) ) / @dblZeroQuantity),6)
 
 		END
 	
 	ELSE IF @strPriceMethod = 'Posted Trans from CSV'
 	BEGIN
 			DECLARE @dblPostedTranGrossPrice NUMERIC(18,6)
-			SET @dblPostedTranGrossPrice =  ROUND ([dbo].[fnRoundBanker](([dbo].[fnRoundBanker](@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax) / @dblQuantity, 6) + ISNULL(@dblAdjustments,0) + [dbo].[fnRoundBanker]((ISNULL(@totalCalculatedTax,0) / @dblQuantity),6),6)
+			SET @dblPostedTranGrossPrice =  ROUND (ROUND((ROUND(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax) / @dblQuantity, 6) + ISNULL(@dblAdjustments,0) + ROUND((ISNULL(@totalCalculatedTax,0) / @dblQuantity),6),6)
 			SET @dblImportFileGrossPrice = @dblPostedTranGrossPrice
 
 			IF(ISNULL(@ysnForceRounding,0) = 1) 
@@ -6213,13 +6213,13 @@ BEGIN
 
 			SET @dblCalculatedGrossPrice	 = @dblImportFileGrossPrice
 			SET @dblOriginalGrossPrice		 = @dblOriginalPrice
-			SET @dblCalculatedNetPrice		 = [dbo].[fnRoundBanker]((([dbo].[fnRoundBanker]((@dblImportFileGrossPrice * @dblQuantity),2) - (ISNULL(@totalCalculatedTax,0)) ) / @dblQuantity),6)
-			SET @dblOriginalNetPrice		 = [dbo].[fnRoundBanker](([dbo].[fnRoundBanker](@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax) / @dblQuantity, 6)
-			SET @dblCalculatedTotalPrice	 = [dbo].[fnRoundBanker]((@dblImportFileGrossPrice * @dblQuantity),2)
-			SET @dblOriginalTotalPrice		 = [dbo].[fnRoundBanker](@dblOriginalPrice * @dblQuantity,2)
+			SET @dblCalculatedNetPrice		 = ROUND(((ROUND((@dblImportFileGrossPrice * @dblQuantity),2) - (ISNULL(@totalCalculatedTax,0)) ) / @dblQuantity),6)
+			SET @dblOriginalNetPrice		 = ROUND((ROUND(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax) / @dblQuantity, 6)
+			SET @dblCalculatedTotalPrice	 = ROUND((@dblImportFileGrossPrice * @dblQuantity),2)
+			SET @dblOriginalTotalPrice		 = ROUND(@dblOriginalPrice * @dblQuantity,2)
 
 			SET @dblQuoteGrossPrice			 = @dblCalculatedGrossPrice
-			SET @dblQuoteNetPrice			 = [dbo].[fnRoundBanker]((([dbo].[fnRoundBanker]((@dblQuoteGrossPrice * @dblQuantity),2) - (ISNULL(@totalCalculatedTax,0)) ) / @dblQuantity),6)
+			SET @dblQuoteNetPrice			 = ROUND(((ROUND((@dblQuoteGrossPrice * @dblQuantity),2) - (ISNULL(@totalCalculatedTax,0)) ) / @dblQuantity),6)
 	END
 	ELSE IF @strPriceMethod = 'Network Cost'
 		BEGIN
@@ -6241,23 +6241,23 @@ BEGIN
 
 		SET @dblCalculatedGrossPrice	 = 	 @dblNetworkCostGrossPrice
 		SET @dblOriginalGrossPrice		 = 	 @dblPrice
-		SET @dblCalculatedNetPrice		 = 	 [dbo].[fnRoundBanker]((([dbo].[fnRoundBanker]((@dblNetworkCostGrossPrice * @dblQuantity),2) - (ISNULL(@totalCalculatedTax,0))) / @dblQuantity),6)
-		SET @dblOriginalNetPrice		 = 	 [dbo].[fnRoundBanker]((([dbo].[fnRoundBanker]((@dblPrice * @dblQuantity),2) - (ISNULL(@totalOriginalTax,0))) / @dblQuantity),6)
-		SET @dblCalculatedTotalPrice	 = 	 [dbo].[fnRoundBanker]((@dblNetworkCostGrossPrice * @dblQuantity),2)
-		SET @dblOriginalTotalPrice		 = 	 [dbo].[fnRoundBanker](@dblPrice * @dblQuantity,2)
+		SET @dblCalculatedNetPrice		 = 	 ROUND(((ROUND((@dblNetworkCostGrossPrice * @dblQuantity),2) - (ISNULL(@totalCalculatedTax,0))) / @dblQuantity),6)
+		SET @dblOriginalNetPrice		 = 	 ROUND(((ROUND((@dblPrice * @dblQuantity),2) - (ISNULL(@totalOriginalTax,0))) / @dblQuantity),6)
+		SET @dblCalculatedTotalPrice	 = 	 ROUND((@dblNetworkCostGrossPrice * @dblQuantity),2)
+		SET @dblOriginalTotalPrice		 = 	 ROUND(@dblPrice * @dblQuantity,2)
 
 		SET @dblQuoteGrossPrice			 = @dblCalculatedGrossPrice
-		SET @dblQuoteNetPrice			 = [dbo].[fnRoundBanker]((([dbo].[fnRoundBanker]((@dblQuoteGrossPrice * @dblQuantity),2) - (ISNULL(@totalCalculatedTax,0))) / @dblQuantity),6)
+		SET @dblQuoteNetPrice			 = ROUND(((ROUND((@dblQuoteGrossPrice * @dblQuantity),2) - (ISNULL(@totalCalculatedTax,0))) / @dblQuantity),6)
 
 	END
 	ELSE IF (LOWER(@strPriceBasis) = 'index cost')
 		BEGIN
 
 		DECLARE @dblLocalIndexCostGrossPrice NUMERIC(18,6)
-		SET @dblLocalIndexCostGrossPrice = [dbo].[fnRoundBanker]((@dblAdjustmentWithIndex + [dbo].[fnRoundBanker]((@totalCalculatedTax / @dblQuantity),6)),6)
+		SET @dblLocalIndexCostGrossPrice = ROUND((@dblAdjustmentWithIndex + ROUND((@totalCalculatedTax / @dblQuantity),6)),6)
 
 		DECLARE @dblLocalIndexCostGrossPriceZeroQty NUMERIC(18,6)
-		SET @dblLocalIndexCostGrossPriceZeroQty = [dbo].[fnRoundBanker]((@dblAdjustmentWithIndex + [dbo].[fnRoundBanker]((@totalCalculatedTaxZeroQuantity / @dblZeroQuantity),6)  ),6)
+		SET @dblLocalIndexCostGrossPriceZeroQty = ROUND((@dblAdjustmentWithIndex + ROUND((@totalCalculatedTaxZeroQuantity / @dblZeroQuantity),6)  ),6)
 
 		IF(ISNULL(@ysnForceRounding,0) = 1) 
 		BEGIN
@@ -6267,14 +6267,14 @@ BEGIN
 
 		SET @dblCalculatedGrossPrice	 = 	 @dblLocalIndexCostGrossPriceZeroQty
 		SET @dblOriginalGrossPrice		 = 	 @dblOriginalPrice
-		SET @dblCalculatedNetPrice		 = 	 [dbo].[fnRoundBanker](([dbo].[fnRoundBanker]((@dblLocalIndexCostGrossPriceZeroQty * @dblQuantity),2) -  (ISNULL(@totalCalculatedTax,0))) / @dblQuantity,6)
-		SET @dblOriginalNetPrice		 = 	 [dbo].[fnRoundBanker](([dbo].[fnRoundBanker](@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax ) / @dblQuantity, 6) 
-		SET @dblCalculatedTotalPrice	 = 	 [dbo].[fnRoundBanker]((@dblLocalIndexCostGrossPriceZeroQty * @dblQuantity),2)
-		SET @dblOriginalTotalPrice		 = 	 [dbo].[fnRoundBanker](@dblOriginalPrice * @dblQuantity,2)
+		SET @dblCalculatedNetPrice		 = 	 ROUND((ROUND((@dblLocalIndexCostGrossPriceZeroQty * @dblQuantity),2) -  (ISNULL(@totalCalculatedTax,0))) / @dblQuantity,6)
+		SET @dblOriginalNetPrice		 = 	 ROUND((ROUND(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax ) / @dblQuantity, 6) 
+		SET @dblCalculatedTotalPrice	 = 	 ROUND((@dblLocalIndexCostGrossPriceZeroQty * @dblQuantity),2)
+		SET @dblOriginalTotalPrice		 = 	 ROUND(@dblOriginalPrice * @dblQuantity,2)
 
 
 		SET @dblQuoteGrossPrice			 = @dblCalculatedGrossPrice
-		SET @dblQuoteNetPrice			 =  [dbo].[fnRoundBanker](([dbo].[fnRoundBanker]((@dblQuoteGrossPrice * @dblZeroQuantity),2) -  (ISNULL(@totalCalculatedTaxZeroQuantity,0))) / @dblZeroQuantity,6)
+		SET @dblQuoteNetPrice			 =  ROUND((ROUND((@dblQuoteGrossPrice * @dblZeroQuantity),2) -  (ISNULL(@totalCalculatedTaxZeroQuantity,0))) / @dblZeroQuantity,6)
 
 		
 	END
@@ -6289,8 +6289,8 @@ BEGIN
 		IF(@ysnReRunCalcTax = 0)
 			BEGIN
 				
-				SET @dblLocalIndexRetailGrossPrice = [dbo].[fnRoundBanker]((@dblAdjustmentWithIndex - [dbo].[fnRoundBanker]((@totalCalculatedTaxExempt / @dblQuantity),6) + [dbo].[fnRoundBanker]((ISNULL(@dblSpecialTax,0) / @dblQuantity),6) ),6)
-				SET @dblLocalIndexRetailGrossPriceZeroQty = [dbo].[fnRoundBanker]((@dblAdjustmentWithIndex - [dbo].[fnRoundBanker]((@totalCalculatedTaxExemptZeroQuantity/ @dblZeroQuantity),6)+ [dbo].[fnRoundBanker]((ISNULL(@dblSpecialTaxZeroQty,0) / @dblZeroQuantity),6) ),6)
+				SET @dblLocalIndexRetailGrossPrice = ROUND((@dblAdjustmentWithIndex - ROUND((@totalCalculatedTaxExempt / @dblQuantity),6) + ROUND((ISNULL(@dblSpecialTax,0) / @dblQuantity),6) ),6)
+				SET @dblLocalIndexRetailGrossPriceZeroQty = ROUND((@dblAdjustmentWithIndex - ROUND((@totalCalculatedTaxExemptZeroQuantity/ @dblZeroQuantity),6)+ ROUND((ISNULL(@dblSpecialTaxZeroQty,0) / @dblZeroQuantity),6) ),6)
 
 				SET @dblPrice100kQty = @dblLocalIndexRetailGrossPriceZeroQty
 				SET @dblPriceQty = @dblLocalIndexRetailGrossPrice
@@ -6315,14 +6315,14 @@ BEGIN
 		
 		SET @dblCalculatedGrossPrice	 =	  @dblLocalIndexRetailGrossPriceZeroQty
 		SET @dblOriginalGrossPrice		 =	  @dblOriginalPrice
-		SET @dblCalculatedNetPrice		 =	  [dbo].[fnRoundBanker](([dbo].[fnRoundBanker]((@dblLocalIndexRetailGrossPriceZeroQty * @dblQuantity),2) -  (ISNULL(@totalCalculatedTax,0))) / @dblQuantity,6)
-		SET @dblOriginalNetPrice		 =	  [dbo].[fnRoundBanker](([dbo].[fnRoundBanker](@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax ) / @dblQuantity, 6) 
-		SET @dblCalculatedTotalPrice	 =	  [dbo].[fnRoundBanker]((@dblLocalIndexRetailGrossPriceZeroQty * @dblQuantity),2)
-		SET @dblOriginalTotalPrice		 =	  [dbo].[fnRoundBanker](@dblOriginalPrice * @dblQuantity,2)
+		SET @dblCalculatedNetPrice		 =	  ROUND((ROUND((@dblLocalIndexRetailGrossPriceZeroQty * @dblQuantity),2) -  (ISNULL(@totalCalculatedTax,0))) / @dblQuantity,6)
+		SET @dblOriginalNetPrice		 =	  ROUND((ROUND(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax ) / @dblQuantity, 6) 
+		SET @dblCalculatedTotalPrice	 =	  ROUND((@dblLocalIndexRetailGrossPriceZeroQty * @dblQuantity),2)
+		SET @dblOriginalTotalPrice		 =	  ROUND(@dblOriginalPrice * @dblQuantity,2)
 
 
 		SET @dblQuoteGrossPrice			 = @dblCalculatedGrossPrice
-		SET @dblQuoteNetPrice			 =   [dbo].[fnRoundBanker](([dbo].[fnRoundBanker]((@dblQuoteGrossPrice * @dblZeroQuantity),2) -  (ISNULL(@totalCalculatedTaxZeroQuantity,0))) / @dblZeroQuantity,6)
+		SET @dblQuoteNetPrice			 =   ROUND((ROUND((@dblQuoteGrossPrice * @dblZeroQuantity),2) -  (ISNULL(@totalCalculatedTaxZeroQuantity,0))) / @dblZeroQuantity,6)
 
 	
 	END
@@ -6331,7 +6331,7 @@ BEGIN
 		BEGIN
 
 		DECLARE @dblLocalIndexFixedGrossPrice NUMERIC(18,6)
-		SET @dblLocalIndexFixedGrossPrice = [dbo].[fnRoundBanker](@dblAdjustmentWithIndex,6)
+		SET @dblLocalIndexFixedGrossPrice = ROUND(@dblAdjustmentWithIndex,6)
 
 		IF(ISNULL(@ysnForceRounding,0) = 1) 
 		BEGIN
@@ -6341,13 +6341,13 @@ BEGIN
 
 		SET @dblCalculatedGrossPrice	 =	  @dblLocalIndexFixedGrossPrice
 		SET @dblOriginalGrossPrice		 =	  @dblOriginalPrice
-		SET @dblCalculatedNetPrice		 =	  [dbo].[fnRoundBanker](([dbo].[fnRoundBanker]((@dblLocalIndexFixedGrossPrice * @dblQuantity),2) -  (ISNULL(@totalCalculatedTax,0))) / @dblQuantity,6)
-		SET @dblOriginalNetPrice		 =	  [dbo].[fnRoundBanker](([dbo].[fnRoundBanker](@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax ) / @dblQuantity, 6) 
-		SET @dblCalculatedTotalPrice	 =	  [dbo].[fnRoundBanker]((@dblLocalIndexFixedGrossPrice * @dblQuantity),2)
-		SET @dblOriginalTotalPrice		 =	  [dbo].[fnRoundBanker](@dblOriginalPrice * @dblQuantity,2)
+		SET @dblCalculatedNetPrice		 =	  ROUND((ROUND((@dblLocalIndexFixedGrossPrice * @dblQuantity),2) -  (ISNULL(@totalCalculatedTax,0))) / @dblQuantity,6)
+		SET @dblOriginalNetPrice		 =	  ROUND((ROUND(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax ) / @dblQuantity, 6) 
+		SET @dblCalculatedTotalPrice	 =	  ROUND((@dblLocalIndexFixedGrossPrice * @dblQuantity),2)
+		SET @dblOriginalTotalPrice		 =	  ROUND(@dblOriginalPrice * @dblQuantity,2)
 
 		SET @dblQuoteGrossPrice			 =	 @dblCalculatedGrossPrice
-		SET @dblQuoteNetPrice			 =   [dbo].[fnRoundBanker](([dbo].[fnRoundBanker]((@dblQuoteGrossPrice * @dblZeroQuantity),2) -  (ISNULL(@totalCalculatedTaxZeroQuantity,0))) / @dblZeroQuantity,6)
+		SET @dblQuoteNetPrice			 =   ROUND((ROUND((@dblQuoteGrossPrice * @dblZeroQuantity),2) -  (ISNULL(@totalCalculatedTaxZeroQuantity,0))) / @dblZeroQuantity,6)
 		
 
 	END
@@ -6362,10 +6362,10 @@ BEGIN
 		BEGIN
 
 			DECLARE @dblPumpPriceAdjustmentGrossPrice NUMERIC(18,6)
-			SET @dblPumpPriceAdjustmentGrossPrice = [dbo].[fnRoundBanker](((ISNULL(@dblAdjustments,0) +  ISNULL(@dblOriginalPrice,0))- [dbo].[fnRoundBanker]((@totalCalculatedTaxExempt / @dblQuantity),6) + [dbo].[fnRoundBanker]((ISNULL(@dblSpecialTax,0) / @dblQuantity),6) ),6)
+			SET @dblPumpPriceAdjustmentGrossPrice = ROUND(((ISNULL(@dblAdjustments,0) +  ISNULL(@dblOriginalPrice,0))- ROUND((@totalCalculatedTaxExempt / @dblQuantity),6) + ROUND((ISNULL(@dblSpecialTax,0) / @dblQuantity),6) ),6)
 
 			DECLARE @dblPumpPriceAdjustmentGrossPriceZeroQty NUMERIC(18,6)
-			SET @dblPumpPriceAdjustmentGrossPriceZeroQty = [dbo].[fnRoundBanker](((@dblAdjustments +  @dblOriginalPrice)- [dbo].[fnRoundBanker]((@totalCalculatedTaxExemptZeroQuantity/ @dblZeroQuantity),6) + [dbo].[fnRoundBanker]((ISNULL(@dblSpecialTaxZeroQty,0) / @dblZeroQuantity),6) ),6)
+			SET @dblPumpPriceAdjustmentGrossPriceZeroQty = ROUND(((@dblAdjustments +  @dblOriginalPrice)- ROUND((@totalCalculatedTaxExemptZeroQuantity/ @dblZeroQuantity),6) + ROUND((ISNULL(@dblSpecialTaxZeroQty,0) / @dblZeroQuantity),6) ),6)
 
 
 			IF(@ysnReRunCalcTax = 0)
@@ -6391,14 +6391,14 @@ BEGIN
 
 			SET @dblCalculatedGrossPrice	 =	   @dblPumpPriceAdjustmentGrossPriceZeroQty
 			SET @dblOriginalGrossPrice		 =	   @dblOriginalPrice
-			SET @dblCalculatedNetPrice		 =	   [dbo].[fnRoundBanker]((([dbo].[fnRoundBanker]((@dblPumpPriceAdjustmentGrossPriceZeroQty * @dblQuantity),2) - (ISNULL(@totalCalculatedTax,0)) ) / @dblQuantity),6)
-			SET @dblOriginalNetPrice		 =	   [dbo].[fnRoundBanker](([dbo].[fnRoundBanker](@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax) / @dblQuantity, 6)
-			SET @dblCalculatedTotalPrice	 =	   [dbo].[fnRoundBanker]((@dblPumpPriceAdjustmentGrossPriceZeroQty * @dblQuantity),2)
-			SET @dblOriginalTotalPrice		 =	   [dbo].[fnRoundBanker](@dblOriginalPrice * @dblQuantity,2)
+			SET @dblCalculatedNetPrice		 =	   ROUND(((ROUND((@dblPumpPriceAdjustmentGrossPriceZeroQty * @dblQuantity),2) - (ISNULL(@totalCalculatedTax,0)) ) / @dblQuantity),6)
+			SET @dblOriginalNetPrice		 =	   ROUND((ROUND(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax) / @dblQuantity, 6)
+			SET @dblCalculatedTotalPrice	 =	   ROUND((@dblPumpPriceAdjustmentGrossPriceZeroQty * @dblQuantity),2)
+			SET @dblOriginalTotalPrice		 =	   ROUND(@dblOriginalPrice * @dblQuantity,2)
 
 
 			SET @dblQuoteGrossPrice			 =	 @dblCalculatedGrossPrice
-			SET @dblQuoteNetPrice			 =   [dbo].[fnRoundBanker](([dbo].[fnRoundBanker]((@dblQuoteGrossPrice * @dblZeroQuantity),2) -  (ISNULL(@totalCalculatedTaxZeroQuantity,0))) / @dblZeroQuantity,6)
+			SET @dblQuoteNetPrice			 =   ROUND((ROUND((@dblQuoteGrossPrice * @dblZeroQuantity),2) -  (ISNULL(@totalCalculatedTaxZeroQuantity,0))) / @dblZeroQuantity,6)
 		
 		END
 	END
@@ -6416,7 +6416,7 @@ BEGIN
 			END
 
 			DECLARE @dblTransferCostGrossPriceZeroQty NUMERIC(18,6)
-			SET @dblTransferCostGrossPriceZeroQty = [dbo].[fnRoundBanker](ISNULL(@dblPrice,0) + [dbo].[fnRoundBanker]((@totalCalculatedTaxZeroQuantity / @dblZeroQuantity),6), 6)
+			SET @dblTransferCostGrossPriceZeroQty = ROUND(ISNULL(@dblPrice,0) + ROUND((@totalCalculatedTaxZeroQuantity / @dblZeroQuantity),6), 6)
 
 			IF(ISNULL(@ysnForceRounding,0) = 1) 
 			BEGIN
@@ -6426,10 +6426,10 @@ BEGIN
 
 			SET @dblCalculatedGrossPrice	 =	   @dblTransferCostGrossPriceZeroQty
 			SET @dblOriginalGrossPrice		 =	   @dblGrossTransferCost
-			SET @dblCalculatedNetPrice		 =	   [dbo].[fnRoundBanker]((([dbo].[fnRoundBanker]((@dblTransferCostGrossPriceZeroQty * @dblQuantity),2) - (ISNULL(@totalCalculatedTax,0)) ) / @dblQuantity),6)
+			SET @dblCalculatedNetPrice		 =	   ROUND(((ROUND((@dblTransferCostGrossPriceZeroQty * @dblQuantity),2) - (ISNULL(@totalCalculatedTax,0)) ) / @dblQuantity),6)
 			SET @dblOriginalNetPrice		 =	   @dblNetTransferCost
-			SET @dblCalculatedTotalPrice	 =	   [dbo].[fnRoundBanker]((@dblTransferCostGrossPriceZeroQty * @dblQuantity),2)
-			SET @dblOriginalTotalPrice		 =	   [dbo].[fnRoundBanker](@dblGrossTransferCost * @dblQuantity,2)
+			SET @dblCalculatedTotalPrice	 =	   ROUND((@dblTransferCostGrossPriceZeroQty * @dblQuantity),2)
+			SET @dblOriginalTotalPrice		 =	   ROUND(@dblGrossTransferCost * @dblQuantity,2)
 
 			SET @dblQuoteGrossPrice			 =	 @dblCalculatedGrossPrice
 			SET @dblQuoteNetPrice			 =   @dblCalculatedNetPrice
@@ -6440,22 +6440,22 @@ BEGIN
 		BEGIN
 
 		DECLARE @dblContractGrossPrice NUMERIC(18,6)
-		SET @dblContractGrossPrice = [dbo].[fnRoundBanker]((@dblPrice + @dblAdjustments + [dbo].[fnRoundBanker]((@totalCalculatedTax / @dblQuantity),6)),6)
+		SET @dblContractGrossPrice = ROUND((@dblPrice + @dblAdjustments + ROUND((@totalCalculatedTax / @dblQuantity),6)),6)
 
 		DECLARE @dblContractGrossPriceZeroQty NUMERIC(18,6)
-		SET @dblContractGrossPriceZeroQty = [dbo].[fnRoundBanker]((@dblPrice + @dblAdjustments + [dbo].[fnRoundBanker]((@totalCalculatedTaxZeroQuantity / @dblZeroQuantity),6)  ),6)
+		SET @dblContractGrossPriceZeroQty = ROUND((@dblPrice + @dblAdjustments + ROUND((@totalCalculatedTaxZeroQuantity / @dblZeroQuantity),6)  ),6)
 
 
 		SET @dblCalculatedGrossPrice	 = 	 @dblContractGrossPriceZeroQty
 		SET @dblOriginalGrossPrice		 = 	 @dblOriginalPrice
 		SET @dblCalculatedNetPrice		 = 	 @dblPrice
-		SET @dblOriginalNetPrice		 = 	 [dbo].[fnRoundBanker](([dbo].[fnRoundBanker](@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax ) / @dblQuantity, 6) 
+		SET @dblOriginalNetPrice		 = 	 ROUND((ROUND(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax ) / @dblQuantity, 6) 
 		SET @dblCalculatedTotalPrice	 = 	 [dbo].[fnRoundBanker]((@dblContractGrossPrice * @dblQuantity),2)
 		SET @dblOriginalTotalPrice		 = 	 [dbo].[fnRoundBanker](@dblOriginalPrice * @dblQuantity,2)
 
 
 		SET @dblQuoteGrossPrice			 = @dblCalculatedGrossPrice
-		SET @dblQuoteNetPrice			 =  [dbo].[fnRoundBanker](([dbo].[fnRoundBanker]((@dblQuoteGrossPrice * @dblZeroQuantity),2) -  (ISNULL(@totalCalculatedTaxZeroQuantity,0))) / @dblZeroQuantity,6)
+		SET @dblQuoteNetPrice			 =  ROUND((ROUND((@dblQuoteGrossPrice * @dblZeroQuantity),2) -  (ISNULL(@totalCalculatedTaxZeroQuantity,0))) / @dblZeroQuantity,6)
 
 		
 	END
@@ -6471,12 +6471,13 @@ BEGIN
 				GOTO TAXCOMPUTATION
 			END
 			ELSE
+			-- SPECIAL PRICING--
 			BEGIN
 
-					SET @dblCalculatedGrossPrice	 =	   @dblPrice + [dbo].[fnRoundBanker]((@totalCalculatedTaxZeroQuantity / @dblZeroQuantity) ,6)
+					SET @dblCalculatedGrossPrice	 =	   @dblPrice + ROUND((@totalCalculatedTaxZeroQuantity / @dblZeroQuantity) ,6)
 					SET @dblOriginalGrossPrice		 =	   @dblOriginalPrice
 					SET @dblCalculatedNetPrice		 =	   @dblPrice
-					SET @dblOriginalNetPrice		 =	   [dbo].[fnRoundBanker](([dbo].[fnRoundBanker](@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax ) / @dblQuantity, 6)
+					SET @dblOriginalNetPrice		 =	   ROUND((ROUND(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax ) / @dblQuantity, 6)
 					SET @dblCalculatedTotalPrice	 =	   [dbo].[fnRoundBanker](@dblPrice * @dblQuantity,2) + @totalCalculatedTax
 					SET @dblOriginalTotalPrice		 =	   [dbo].[fnRoundBanker](@dblOriginalPrice * @dblQuantity,2)
 
@@ -7027,18 +7028,18 @@ BEGIN
 
 			----UPDATE @tblTransactionPrice 
 			----SET 
-			----dblCalculatedAmount = [dbo].[fnRoundBanker]((@dblCalculatedGrossPrice * @dblQuantity),2) 
-			----,dblOriginalAmount = [dbo].[fnRoundBanker]((@dblOriginalGrossPrice * @dblQuantity),2)
+			----dblCalculatedAmount = ROUND((@dblCalculatedGrossPrice * @dblQuantity),2) 
+			----,dblOriginalAmount = ROUND((@dblOriginalGrossPrice * @dblQuantity),2)
 			----WHERE strTransactionPriceId = 'Total Amount'
 
 
 			--UPDATE tblCFTransaction
 			--SET 
-			--dblCalculatedTotalPrice = [dbo].[fnRoundBanker]((@dblCalculatedGrossPrice * @dblQuantity),2) 
-			--,dblOriginalTotalPrice = [dbo].[fnRoundBanker]((@dblOriginalGrossPrice * @dblQuantity),2)
+			--dblCalculatedTotalPrice = ROUND((@dblCalculatedGrossPrice * @dblQuantity),2) 
+			--,dblOriginalTotalPrice = ROUND((@dblOriginalGrossPrice * @dblQuantity),2)
 			--WHERE intTransactionId = @intTransactionId
 			
-			----UPDATE @tblTransactionPrice SET dblOriginalAmount = [dbo].[fnRoundBanker]((@dblOriginalGrossPrice * @dblQuantity),2) WHERE strTransactionPriceId = 'Total Amount'
+			----UPDATE @tblTransactionPrice SET dblOriginalAmount = ROUND((@dblOriginalGrossPrice * @dblQuantity),2) WHERE strTransactionPriceId = 'Total Amount'
 
 
 			
