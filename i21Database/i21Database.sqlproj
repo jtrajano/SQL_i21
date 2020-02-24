@@ -8503,6 +8503,7 @@
     <Build Include="dbo\Views\vyuCTPriceContractApproverView.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportPriceFixationStrauss.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportContractS2018.sql" />
+    <Build Include="dbo\Functions\fnGRCalculateStorageUnits.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
