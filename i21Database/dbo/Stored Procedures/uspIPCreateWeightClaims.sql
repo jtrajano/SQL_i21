@@ -3,7 +3,8 @@ AS
 BEGIN TRY
 	DECLARE @ErrMsg NVARCHAR(MAX)
 		,@strNewWeightClaimReferenceNo NVARCHAR(50)
-		--,@intNewWeightClaimId INT
+		,@intUserId INT
+		,@strDescription nvarchar(50)
 
 	SET @strNewWeightClaimReferenceNo = NULL
 
@@ -97,6 +98,17 @@ BEGIN TRY
 	JOIN tblSMCurrency CU ON CU.intCurrencyID = WC.intSeqCurrencyId
 	JOIN tblICItemUOM IU ON IU.intItemUOMId = WC.intSeqPriceUOMId
 	WHERE intLoadId = @intLoadId
+
+	SELECT @strDescription = 'Created from system : ' + @strNewWeightClaimReferenceNo
+
+	EXEC uspSMAuditLog @keyValue = @intNewWeightClaimId
+		,@screenName = 'Logistics.view.WeightClaims'
+		,@entityId = @intUserId
+		,@actionType = 'Created'
+		,@actionIcon = 'small-new-plus'
+		,@changeDescription = @strDescription
+		,@fromValue = ''
+		,@toValue = @strNewWeightClaimReferenceNo
 
 END TRY
 

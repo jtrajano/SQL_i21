@@ -30,6 +30,7 @@ BEGIN TRY
 	SELECT @strHeaderCondition = 'intWeightClaimId = ' + LTRIM(@intWeightClaimId)
 
 	SELECT @strReferenceNumber = strReferenceNumber
+			,@intCompanyId=intCompanyId
 	FROM tblLGWeightClaim
 	WHERE intWeightClaimId = @intWeightClaimId
 

@@ -8,6 +8,8 @@
 	,intToCompanyId INT
 	,intToCompanyLocationId INT
 	,intToBookId INT
+	,strBook NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	,strSubBook NVARCHAR(100) COLLATE Latin1_General_CI_AS 
 	)
 
 

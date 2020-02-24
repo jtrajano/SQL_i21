@@ -27,6 +27,10 @@ BEGIN TRY
 		,@strDelete NVARCHAR(50)
 		,@intSContractDetailId INT
 		,@intContractHeaderId INT
+		,@strBook NVARCHAR(100)
+		,@strSubBook NVARCHAR(100)
+		,@intBookId INT
+		,@intSubBookId INT
 
 	IF @strRowState = 'Delete'
 	BEGIN
@@ -38,18 +42,18 @@ BEGIN TRY
 			,intMultiCompanyId
 			,intToCompanyLocationId
 			,intToBookId
-			,intTransactionId
-			,intCompanyId
+			,strBook
+			,strSubBook
 			)
 		SELECT TOP 1 @intLoadId
 			,@strRowState
-			,strTransactionType
-			,intMultiCompanyId
+			,strToTransactionType
+			,intToCompanyId
 			,intToCompanyLocationId
 			,intToBookId
-			,intTransactionId
-			,intCompanyId
-		FROM tblLGIntrCompLogisticsStg
+			,strBook
+			,strSubBook
+		FROM tblLGIntrCompLogisticsPreStg
 		WHERE intLoadId = @intLoadId
 
 		RETURN
@@ -83,8 +87,18 @@ BEGIN TRY
 				THEN 'Vessel Nomination'
 			ELSE ''
 			END
+		,@intBookId = intBookId
+		,@intSubBookId = intSubBookId
 	FROM tblLGLoad
 	WHERE intLoadId = @intLoadId
+
+	SELECT @strBook = strBook
+	FROM tblCTBook
+	WHERE intBookId = @intBookId
+
+	SELECT @strSubBook = strSubBook
+	FROM @strSubBook
+	WHERE intSubBookId = @intSubBookId
 
 	SET @strTransactionType = @strPurchaseSale + ' ' + @strShipmentType
 
@@ -160,6 +174,8 @@ BEGIN TRY
 						,intToCompanyId
 						,intToCompanyLocationId
 						,intToBookId
+						,strBook
+						,strSubBook
 						)
 					SELECT @intLoadId
 						,@strRowState
@@ -167,6 +183,8 @@ BEGIN TRY
 						,@intToCompanyId
 						,@intToCompanyLocationId
 						,@intToBookId
+						,@strBook
+						,@strSubBook
 				END
 			END
 		END
@@ -197,6 +215,8 @@ BEGIN TRY
 					,intToCompanyId
 					,intToCompanyLocationId
 					,intToBookId
+					,strBook
+					,strSubBook
 					)
 				SELECT @intLoadId
 					,@strRowState
@@ -204,6 +224,8 @@ BEGIN TRY
 					,@intToCompanyId
 					,@intToCompanyLocationId
 					,@intToBookId
+					,@strBook
+					,@strSubBook
 			END
 		END
 

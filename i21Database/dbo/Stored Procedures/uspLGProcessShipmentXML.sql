@@ -158,6 +158,10 @@ BEGIN TRY
 		,@strItemUnitMeasure NVARCHAR(50)
 		,@strWeightUnitMeasure NVARCHAR(50)
 		,@intLotId INT
+						,@strHBook NVARCHAR(50)
+				,@strHSubBook NVARCHAR(50)
+								,@intHBookId int
+				,@intHSubBookId int
 	DECLARE @tempLoadDetail TABLE (
 		intLoadDetailId INT NOT NULL
 		,intConcurrencyId INT NOT NULL
@@ -272,6 +276,10 @@ BEGIN TRY
 				,@strUserName = NULL
 				,@intTransactionId = NULL
 				,@intCompanyId = NULL
+				,@strHBook=NULL
+				,@strHSubBook=NULL
+				,@intHBookId =NULL
+				,@intHSubBookId =NULL
 
 			SELECT @intLoadId = intLoadId
 				,@strLoadNumber = strLoadNumber
@@ -300,8 +308,12 @@ BEGIN TRY
 				,@intCompanyLocationId = intToCompanyLocationId
 				,@intTransactionId = intTransactionId
 				,@intCompanyId = intCompanyId
+				,@strHBook=strBook
+				,@strHSubBook=strSubBook
 			FROM tblLGIntrCompLogisticsStg
 			WHERE intId = @intId
+
+			
 
 			SELECT @strInfo1 = @strInfo1 + @strLoadNumber + ','
 
@@ -766,6 +778,26 @@ BEGIN TRY
 
 			IF @intTransactionCount = 0
 				BEGIN TRANSACTION
+
+			IF @strRowState = 'Delete'
+			BEGIN
+				SELECT @intHBookId = intBookId
+			FROM tblCTBook
+			WHERE strBook = @strHBook
+
+			SELECT @intHSubBookId = intHSubBookId
+			FROM tblCTSubBook
+			WHERE strSubBook = @strHSubBook
+				AND intBookId = @intHBookId
+
+				DELETE
+				FROM tblLGLoad
+				WHERE intLoadRefId = @intLoadRefId
+					AND intBookId = @intHBookId
+					AND IsNULL(intSubBookId, 0) = IsNULL(@intHSubBookId, 0)
+
+				GOTO NextTransaction
+			END
 
 			IF @intNewLoadId IS NULL
 			BEGIN
@@ -2401,9 +2433,9 @@ BEGIN TRY
 				IF NOT EXISTS (
 						SELECT *
 						FROM tblLGLoadDetailLot LDL
-						JOIN tblLGLoadDetail LD on LD.intLoadDetailId =LDL.intLoadDetailId
+						JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = LDL.intLoadDetailId
 						WHERE intLoadDetailLotRefId = @intLoadDetailLotId
-						and LD.intLoadId=@intNewLoadId
+							AND LD.intLoadId = @intNewLoadId
 						)
 				BEGIN
 					INSERT INTO tblLGLoadDetailLot (
@@ -2423,9 +2455,9 @@ BEGIN TRY
 					SELECT (
 							SELECT TOP 1 LD.intLoadDetailId
 							FROM tblLGLoadDetail LD
-							JOIN tblLGLoad L on L.intLoadId=LD.intLoadId
+							JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
 							WHERE LD.intLoadDetailRefId = x.intLoadDetailId
-							AND L.intLoadId=@intNewLoadId
+								AND L.intLoadId = @intNewLoadId
 							)
 						,@intLotId
 						,[dblLotQuantity]
@@ -3093,13 +3125,13 @@ BEGIN TRY
 					SELECT TOP 1 [intLoadContainerId]
 					FROM tblLGLoadContainer
 					WHERE intLoadContainerRefId = x.intLoadContainerId
-					AND intLoadId =@intNewLoadId
+						AND intLoadId = @intNewLoadId
 					)
 				,(
 					SELECT TOP 1 [intLoadDetailId]
 					FROM tblLGLoadDetail
 					WHERE intLoadDetailRefId = x.intLoadDetailId
-					AND intLoadId =@intNewLoadId
+						AND intLoadId = @intNewLoadId
 					)
 				,x.[dblQuantity]
 				,IU.[intItemUOMId]
@@ -3156,13 +3188,13 @@ BEGIN TRY
 					SELECT TOP 1 [intLoadContainerId]
 					FROM tblLGLoadContainer
 					WHERE intLoadContainerRefId = x.intLoadContainerId
-					AND intLoadId =@intNewLoadId
+						AND intLoadId = @intNewLoadId
 					)
 				,[intLoadDetailId] = (
 					SELECT TOP 1 [intLoadDetailId]
 					FROM tblLGLoadDetail
 					WHERE intLoadDetailRefId = x.intLoadDetailId
-					AND intLoadId =@intNewLoadId
+						AND intLoadId = @intNewLoadId
 					)
 				,[dblQuantity] = x.[dblQuantity]
 				,[intItemUOMId] = IU.[intItemUOMId]
@@ -3381,9 +3413,9 @@ BEGIN TRY
 				,(
 					SELECT TOP 1 [intLoadDetailLotId]
 					FROM tblLGLoadDetailLot LDL
-					JOIN tblLGLoadDetail LD on LD.intLoadDetailId =LDL.intLoadDetailId 
+					JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = LDL.intLoadDetailId
 					WHERE LDL.intLoadDetailLotRefId = x.intLoadDetailLotId
-					AND LD.intLoadId =@intNewLoadId
+						AND LD.intLoadId = @intNewLoadId
 					)
 				,[dblPrice]
 				,CU.[intCurrencyID]
@@ -3431,9 +3463,9 @@ BEGIN TRY
 				,[intLoadDetailLotId] = (
 					SELECT TOP 1 [intLoadDetailLotId]
 					FROM tblLGLoadDetailLot LDL
-					JOIN tblLGLoadDetail LD on LD.intLoadDetailId =LDL.intLoadDetailId 
+					JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = LDL.intLoadDetailId
 					WHERE LDL.intLoadDetailLotRefId = x.intLoadDetailLotId
-					AND LD.intLoadId =@intNewLoadId
+						AND LD.intLoadId = @intNewLoadId
 					)
 				,[dblPrice] = x.[dblPrice]
 				,[intPriceCurrencyId] = CU.[intCurrencyID]
@@ -3645,7 +3677,7 @@ BEGIN TRY
 					SELECT TOP 1 [intLoadWarehouseId]
 					FROM tblLGLoadWarehouse LW
 					WHERE LW.[intLoadWarehouseRefId] = x.[intLoadWarehouseId]
-					and intLoadId=@intNewLoadId 
+						AND intLoadId = @intNewLoadId
 					)
 				,x.[strCategory]
 				,x.[strActivity]
@@ -3770,13 +3802,13 @@ BEGIN TRY
 					SELECT TOP 1 [intLoadWarehouseId]
 					FROM tblLGLoadWarehouse LW
 					WHERE LW.intLoadWarehouseRefId = x.intLoadWarehouseId
-					and intLoadId=@intNewLoadId 
+						AND intLoadId = @intNewLoadId
 					)
 				,(
 					SELECT TOP 1 [intLoadContainerId]
 					FROM tblLGLoadContainer LC
 					WHERE LC.intLoadContainerRefId = x.intLoadContainerId
-					and intLoadId=@intNewLoadId 
+						AND intLoadId = @intNewLoadId
 					)
 				,[intLoadWarehouseContainerId]
 			FROM OPENXML(@idoc, 'vyuLGLoadWarehouseContainerViews/vyuLGLoadWarehouseServicesContainer', 2) WITH (
@@ -3798,13 +3830,13 @@ BEGIN TRY
 					SELECT TOP 1 [intLoadWarehouseId]
 					FROM tblLGLoadWarehouse LW
 					WHERE LW.intLoadWarehouseRefId = x.intLoadWarehouseId
-					and intLoadId=@intNewLoadId 
+						AND intLoadId = @intNewLoadId
 					)
 				,[intLoadContainerId] = (
 					SELECT TOP 1 [intLoadContainerId]
 					FROM tblLGLoadContainer LC
 					WHERE LC.intLoadContainerRefId = x.intLoadContainerId
-					and intLoadId=@intNewLoadId 
+						AND intLoadId = @intNewLoadId
 					)
 			FROM OPENXML(@idoc, 'vyuLGLoadWarehouseContainerViews/vyuLGLoadWarehouseServicesContainer', 2) WITH (
 					[intLoadWarehouseId] INT
