@@ -44,7 +44,9 @@ BEGIN TRY
 		,@intPaymentMethodId INT
 		,@intLoadId INT
 		,@intNewWeightClaimId2 INT
+		,@strReferenceNumber NVARCHAR(50)
 
+	--,@strNewWeightClaimReferenceNo nvarchar(50)
 	SELECT @intWeightClaimStageId = MIN(intWeightClaimStageId)
 	FROM tblLGWeightClaimStage
 	WHERE ISNULL(strFeedStatus, '') = ''
@@ -280,6 +282,21 @@ BEGIN TRY
 						) x
 
 				SELECT @intNewWeightClaimId = SCOPE_IDENTITY()
+
+				SELECT @strReferenceNumber = strReferenceNumber
+				FROM tblLGWeightClaim
+				WHERE intWeightClaimId = @intNewWeightClaimId
+
+				SELECT @strDescription = 'Created from inter company : ' + @strReferenceNumber
+
+				EXEC uspSMAuditLog @keyValue = @intNewWeightClaimId
+					,@screenName = 'Logistics.view.WeightClaims'
+					,@entityId = @intUserId
+					,@actionType = 'Created'
+					,@actionIcon = 'small-new-plus'
+					,@changeDescription = @strDescription
+					,@fromValue = ''
+					,@toValue = @strReferenceNumber
 			END
 			ELSE
 			BEGIN
@@ -323,6 +340,10 @@ BEGIN TRY
 					AND intBookId = @intBookId
 					AND IsNULL(intSubBookId, 0) = IsNULL(@intSubBookId, 0)
 			END
+
+			SELECT @intCompanyRefId = intCompanyId
+			FROM tblLGWeightClaim
+			WHERE intWeightClaimId = @intNewWeightClaimId
 
 			EXEC sp_xml_removedocument @idoc
 
@@ -786,6 +807,9 @@ BEGIN TRY
 			---**********************************************
 			---**********************************************
 			--Outbound WeightClaim
+			EXEC uspSMGetStartingNumber 114
+				,@strReferenceNumber OUTPUT
+
 			IF NOT EXISTS (
 					SELECT *
 					FROM tblLGWeightClaim
@@ -811,7 +835,7 @@ BEGIN TRY
 					,intWeightClaimRefId
 					)
 				SELECT intConcurrencyId
-					,strReferenceNumber
+					,@strReferenceNumber
 					,dtmTransDate
 					,intLoadId
 					,strComments
@@ -828,12 +852,21 @@ BEGIN TRY
 				WHERE intWeightClaimId = @intNewWeightClaimId
 
 				SELECT @intNewWeightClaimId2 = SCOPE_IDENTITY()
+
+				EXEC uspSMAuditLog @keyValue = @intNewWeightClaimId2
+					,@screenName = 'Logistics.view.WeightClaims'
+					,@entityId = @intUserId
+					,@actionType = 'Created'
+					,@actionIcon = 'small-new-plus'
+					,@changeDescription = @strDescription
+					,@fromValue = ''
+					,@toValue = @strReferenceNumber
 			END
 			ELSE
 			BEGIN
 				UPDATE WC
 				SET intConcurrencyId = WC1.intConcurrencyId + 1
-					,strReferenceNumber = WC1.strReferenceNumber
+					--,strReferenceNumber = WC1.strReferenceNumber
 					,dtmTransDate = WC1.dtmTransDate
 					,intLoadId = WC1.intLoadId
 					,strComments = WC1.strComments
