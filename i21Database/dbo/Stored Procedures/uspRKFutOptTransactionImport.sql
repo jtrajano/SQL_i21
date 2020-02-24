@@ -157,6 +157,10 @@ BEGIN TRY
 				, @intUserId = @intEntityUserId
 				, @action = 'ADD'
 
+			EXEC uspIPInterCompanyPreStageFutOptTransaction @intFutOptTransactionHeaderId = @intFutOptTransactionHeaderId
+				, @strRowState = 'Added'
+				, @intUserId = @intEntityUserId
+
 			DELETE FROM  #temp WHERE strInternalTradeNo = @id
 		END
 	END
