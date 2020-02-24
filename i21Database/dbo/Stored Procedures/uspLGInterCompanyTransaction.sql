@@ -97,7 +97,7 @@ BEGIN TRY
 	WHERE intBookId = @intBookId
 
 	SELECT @strSubBook = strSubBook
-	FROM @strSubBook
+	FROM tblCTSubBook
 	WHERE intSubBookId = @intSubBookId
 
 	SET @strTransactionType = @strPurchaseSale + ' ' + @strShipmentType
