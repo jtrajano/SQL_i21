@@ -33,7 +33,11 @@ SELECT DISTINCT
 	,dblUnpaidUnits				= SS.dblUnpaidUnits
 	,dblSettleUnits				= SS.dblSettleUnits
 	,dblDiscountsDue			= SS.dblDiscountsDue
-	,dblNetSettlement			= SS.dblNetSettlement
+	,dblNetSettlement			= case when SS.intParentSettleStorageId is not null and Bill.intBillId is not null then
+										SS.dblSelectedUnits
+									else
+										SS.dblNetSettlement
+									end
 	,intCreatedUserId			= SS.intCreatedUserId
 	,strUserName				= Entity.strUserName
 	,dtmCreated					= SS.dtmCreated
