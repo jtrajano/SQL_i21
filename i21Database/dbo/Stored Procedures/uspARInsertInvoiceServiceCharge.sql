@@ -2,6 +2,7 @@
 	@ysnRecap					BIT = 0,
 	@batchId					NVARCHAR(100) = NULL,
 	@intEntityCustomerId		INT = 0,
+	@intEntityUserId			INT = 0,
 	@intCompanyLocationId		INT = 0,
 	@intCurrencyId				INT = 0,
 	@intARAccountId				INT = 0,
@@ -131,7 +132,7 @@ AS
 				,NULL
 				,@intARAccountId
 				,[intFreightTermId]
-				,[intEntityId]
+				,@intEntityUserId
 				,[intShipToId]
 				,[strShipToLocationName]
 				,[strShipToAddress]
