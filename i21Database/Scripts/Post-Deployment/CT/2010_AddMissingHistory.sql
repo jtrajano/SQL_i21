@@ -7,9 +7,8 @@
 	SELECT DISTINCT a.intContractHeaderId, c.strContractNumber
 	INTO #TempContractHeaders
 	FROM tblCTContractDetail a
-	LEFT JOIN tblCTSequenceHistory b ON a.intContractHeaderId = b.intContractHeaderId
 	INNER JOIN tblCTContractHeader c ON a.intContractHeaderId = c.intContractHeaderId
-	WHERE b.intContractHeaderId IS NULL
+	WHERE intContractDetailId NOT IN (SELECT intContractDetailId FROM tblCTSequenceHistory)
 	ORDER BY a.intContractHeaderId ASC
 
 	DECLARE @currentId INT
