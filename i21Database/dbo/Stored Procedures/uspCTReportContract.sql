@@ -297,11 +297,20 @@ BEGIN TRY
 	WHERE	CD.intContractHeaderId	=	@intContractHeaderId
 	AND		UPPER(DM.strConditionName)	=	'APPLICABLE LAW'
 
-	SELECT	@strGeneralCondition = dbo.[fnCTGetTranslation]('ContractManagement.view.Condition',CD.intConditionId,@intLaguageId,'Description',DM.strConditionDesc)
-	FROM	tblCTContractCondition	CD  WITH (NOLOCK)
-	JOIN	tblCTCondition			DM	WITH (NOLOCK) ON DM.intConditionId = CD.intConditionId	
-	WHERE	CD.intContractHeaderId	=	@intContractHeaderId
-	AND		UPPER(DM.strConditionName)	=	'GENERAL CONDITION'
+	SELECT	@strGeneralCondition = STUFF(								
+			(
+					SELECT	--CHAR(13)+CHAR(10) + 
+							'  </br>' + dbo.[fnCTGetTranslation]('ContractManagement.view.Condition',CD.intConditionId,1,'Description',DM.strConditionDesc)
+					FROM	tblCTContractCondition	CD  WITH (NOLOCK)
+					JOIN	tblCTCondition			DM	WITH (NOLOCK) ON DM.intConditionId = CD.intConditionId	
+					WHERE	CD.intContractHeaderId	=	CH.intContractHeaderId	AND (UPPER(DM.strConditionName)	= 'GENERAL CONDITION' OR UPPER(DM.strConditionName) LIKE	'%GENERAL_CONDITION')
+					ORDER BY DM.intConditionId		
+					FOR XML PATH(''), TYPE				
+			   ).value('.','varchar(max)')
+			   ,1,2, ''						
+			)
+	FROM	tblCTContractHeader CH WITH (NOLOCK)						
+	WHERE	CH.intContractHeaderId = @intContractHeaderId
 
 	IF EXISTS
 	(
@@ -795,7 +804,7 @@ BEGIN TRY
 			,strStraussContract						=	'In accordance with '+AN.strComment+' (latest edition)'
 			--,strStrussOtherCondition				=	W2.strWeightGradeDesc +  CHAR(13)+CHAR(10) + @strGeneralCondition
 		   --,strStrussOtherCondition    = isnull(W2.strWeightGradeDesc,'') +  CHAR(13)+CHAR(10) + isnull(@strGeneralCondition,'')    
-		   ,strStrussOtherCondition    = '<span style="font-family:Arial;font-size:13px;">' + isnull(W2.strWeightGradeDesc,'') +  '</br>' + isnull(@strGeneralCondition,'') + '</span>'
+		   ,strStrussOtherCondition    = '<span style="font-family:Arial;font-size:13px;">' + isnull(W2.strWeightGradeDesc,'') +  isnull(@strGeneralCondition,'') + '</span>'
 			--,strStraussShipment						=	REPLACE(CONVERT (VARCHAR,GETDATE(),107),LTRIM(DAY (GETDATE())) + ', ' ,'') + ' shipment at '+ SQ.strFixationBy+'''s option'
 		   --,strStraussShipment      = REPLACE(CONVERT (VARCHAR,GETDATE(),107),LTRIM(DAY (GETDATE())) + ', ' ,'') + ' shipment'    
 		   ,strStraussShipment      = substring(CONVERT(VARCHAR,SQ.dtmEndDate,107),1,4) + substring(CONVERT(VARCHAR,SQ.dtmEndDate,107),9,4) + (case when PO.strPositionType = 'Spot' then ' delivery' else ' shipment' end) 
