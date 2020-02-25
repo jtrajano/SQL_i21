@@ -6152,7 +6152,8 @@ BEGIN
 	SET @dblNetTransferCostZeroQuantity = ISNULL(@dblGrossTransferCost,0) - (ISNULL(@totalOriginalTaxZeroQuantity,0) / ISNULL(@dblZeroQuantity,0))
 	
 
-
+	
+	DECLARE @dblNetTotalAmount NUMERIC(18,6)
 	DECLARE @dblCalculatedGrossPrice	 numeric(18,6)
 	DECLARE @dblOriginalGrossPrice		 numeric(18,6)
 	DECLARE @dblCalculatedNetPrice		 numeric(18,6)
@@ -6439,23 +6440,41 @@ BEGIN
 	ELSE IF (LOWER(@strPriceMethod) = 'contracts')
 		BEGIN
 
-		DECLARE @dblContractGrossPrice NUMERIC(18,6)
-		SET @dblContractGrossPrice = ROUND((@dblPrice + @dblAdjustments + ROUND((@totalCalculatedTax / @dblQuantity),6)),6)
+		
+		SET @dblNetTotalAmount = [dbo].[fnRoundBanker](((@dblPrice + @dblAdjustments) * @dblQuantity) ,2) 
+					
+		SET @dblCalculatedTotalPrice	 =	   @dblNetTotalAmount + @totalCalculatedTax
+		SET @dblCalculatedGrossPrice	 =	   ROUND((@dblCalculatedTotalPrice / @dblQuantity),6)
+		SET @dblCalculatedNetPrice		 =	   @dblPrice
 
-		DECLARE @dblContractGrossPriceZeroQty NUMERIC(18,6)
-		SET @dblContractGrossPriceZeroQty = ROUND((@dblPrice + @dblAdjustments + ROUND((@totalCalculatedTaxZeroQuantity / @dblZeroQuantity),6)  ),6)
-
-
-		SET @dblCalculatedGrossPrice	 = 	 @dblContractGrossPriceZeroQty
 		SET @dblOriginalGrossPrice		 = 	 @dblOriginalPrice
-		SET @dblCalculatedNetPrice		 = 	 @dblPrice
 		SET @dblOriginalNetPrice		 = 	 ROUND((ROUND(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax ) / @dblQuantity, 6) 
-		SET @dblCalculatedTotalPrice	 = 	 [dbo].[fnRoundBanker]((@dblContractGrossPrice * @dblQuantity),2)
 		SET @dblOriginalTotalPrice		 = 	 [dbo].[fnRoundBanker](@dblOriginalPrice * @dblQuantity,2)
 
+		SET @dblQuoteGrossPrice			 =	 @dblCalculatedGrossPrice
+		SET @dblQuoteNetPrice			 =   @dblPrice
 
-		SET @dblQuoteGrossPrice			 = @dblCalculatedGrossPrice
-		SET @dblQuoteNetPrice			 =  ROUND((ROUND((@dblQuoteGrossPrice * @dblZeroQuantity),2) -  (ISNULL(@totalCalculatedTaxZeroQuantity,0))) / @dblZeroQuantity,6)
+
+		--old computation 022520--
+		--changed for CF-2498--
+
+			--DECLARE @dblContractGrossPrice NUMERIC(18,6)
+			--SET @dblContractGrossPrice = ROUND((@dblPrice + @dblAdjustments + ROUND((@totalCalculatedTax / @dblQuantity),6)),6)
+
+			--DECLARE @dblContractGrossPriceZeroQty NUMERIC(18,6)
+			--SET @dblContractGrossPriceZeroQty = ROUND((@dblPrice + @dblAdjustments + ROUND((@totalCalculatedTaxZeroQuantity / @dblZeroQuantity),6)  ),6)
+
+			--SET @dblCalculatedGrossPrice	 = 	 @dblContractGrossPriceZeroQty
+			--SET @dblOriginalGrossPrice		 = 	 @dblOriginalPrice
+			--SET @dblCalculatedNetPrice		 = 	 @dblPrice
+			--SET @dblOriginalNetPrice		 = 	 ROUND((ROUND(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax ) / @dblQuantity, 6) 
+			--SET @dblCalculatedTotalPrice	 = 	 [dbo].[fnRoundBanker]((@dblContractGrossPrice * @dblQuantity),2)
+			--SET @dblOriginalTotalPrice		 = 	 [dbo].[fnRoundBanker](@dblOriginalPrice * @dblQuantity,2)
+
+		--old computation 022520--
+
+
+		
 
 		
 	END
@@ -6474,16 +6493,31 @@ BEGIN
 			-- SPECIAL PRICING--
 			BEGIN
 
-					SET @dblCalculatedGrossPrice	 =	   @dblPrice + ROUND((@totalCalculatedTaxZeroQuantity / @dblZeroQuantity) ,6)
-					SET @dblOriginalGrossPrice		 =	   @dblOriginalPrice
+
+					SET @dblNetTotalAmount = [dbo].[fnRoundBanker]((@dblPrice * @dblQuantity) ,2) 
+					
+					SET @dblCalculatedTotalPrice	 =	   @dblNetTotalAmount + @totalCalculatedTax
+					SET @dblCalculatedGrossPrice	 =	   ROUND((@dblCalculatedTotalPrice / @dblQuantity),6)
 					SET @dblCalculatedNetPrice		 =	   @dblPrice
+
+					SET @dblOriginalGrossPrice		 =	   @dblOriginalPrice
 					SET @dblOriginalNetPrice		 =	   ROUND((ROUND(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax ) / @dblQuantity, 6)
-					SET @dblCalculatedTotalPrice	 =	   [dbo].[fnRoundBanker](@dblPrice * @dblQuantity,2) + @totalCalculatedTax
 					SET @dblOriginalTotalPrice		 =	   [dbo].[fnRoundBanker](@dblOriginalPrice * @dblQuantity,2)
 
 
 					SET @dblQuoteGrossPrice			 =	 @dblCalculatedGrossPrice
 					SET @dblQuoteNetPrice			 =   @dblPrice
+
+
+					--old computation 022520--
+					--changed for CF-2498--
+						--SET @dblCalculatedGrossPrice	 =	   @dblPrice + ROUND((@totalCalculatedTaxZeroQuantity / @dblZeroQuantity) ,6)
+						--SET @dblOriginalGrossPrice		 =	   @dblOriginalPrice
+						--SET @dblCalculatedNetPrice		 =	   @dblPrice
+						--SET @dblOriginalNetPrice		 =	   ROUND((ROUND(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax ) / @dblQuantity, 6)
+						--SET @dblCalculatedTotalPrice	 =	   [dbo].[fnRoundBanker](@dblPrice * @dblQuantity,2) + @totalCalculatedTax
+						--SET @dblOriginalTotalPrice		 =	   [dbo].[fnRoundBanker](@dblOriginalPrice * @dblQuantity,2)
+					--old computation 022520--
 
 
 			END
