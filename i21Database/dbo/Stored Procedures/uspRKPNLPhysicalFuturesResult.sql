@@ -274,7 +274,7 @@ BEGIN
 				, dblFX = ISNULL(dbo.fnCTGetCurrencyExchangeRate(CC.intContractCostId, 1), 1)
 				, dblBooked = NULL
 				, dblBookedPrice = NULL
-				, dblAccounting = BL.dblAccounting * -1
+				, dblAccounting = (BL.dblAccounting / (CD.dblQuantity / AD.dblPAllocatedQty)) * -1
 				, CH.dtmContractDate
 				, strType = CC.strCostMethod
 				, dblTranValue = CASE WHEN CC.strCostMethod = 'Amount' THEN CC.dblRate / CD.dblQuantity * AD.dblPAllocatedQty WHEN CC.strCostMethod = 'Per Unit' THEN CC.dblRate * AD.dblPAllocatedQty ELSE dblTranValue END * -1
