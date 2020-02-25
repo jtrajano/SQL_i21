@@ -229,10 +229,9 @@ BEGIN TRY
 				,@intBankAccountId INT
 				,@intCurrencyExchangeRateTypeId INT
 
-			DELETE
-			FROM tblRKFutOptTransaction
-			WHERE intFutOptTransactionHeaderId = @intNewFutOptTransactionHeaderId
-
+			--DELETE
+			--FROM tblRKFutOptTransaction
+			--WHERE intFutOptTransactionHeaderId = @intNewFutOptTransactionHeaderId
 			WHILE @intFutOptTransactionId IS NOT NULL
 			BEGIN
 				SELECT @strName = NULL
@@ -623,154 +622,259 @@ BEGIN TRY
 				FROM tblSMCurrencyExchangeRateType t
 				WHERE t.strCurrencyExchangeRateType = @strCurrencyExchangeRateType
 
-				INSERT INTO tblRKFutOptTransaction (
-					intFutOptTransactionHeaderId
-					,intConcurrencyId
-					,dtmTransactionDate
-					,intEntityId
-					,intBrokerageAccountId
-					,intFutureMarketId
-					,dblCommission
-					,intBrokerageCommissionId
-					,intInstrumentTypeId
-					,intCommodityId
-					,intLocationId
-					,intTraderId
-					,intCurrencyId
-					,strInternalTradeNo
-					,strBrokerTradeNo
-					,strBuySell
-					,dblNoOfContract
-					,intFutureMonthId
-					,intOptionMonthId
-					,strOptionType
-					,dblStrike
-					,dblPrice
-					,strReference
-					,strStatus
-					,dtmFilledDate
-					,strReserveForFix
-					,intBookId
-					,intSubBookId
-					,ysnOffset
-					,intBankId
-					,intBankAccountId
-					--,intContractDetailId
-					--,intContractHeaderId
-					,intSelectedInstrumentTypeId
-					,intCurrencyExchangeRateTypeId
-					,strFromCurrency
-					,strToCurrency
-					,dtmMaturityDate
-					,dblContractAmount
-					,dblExchangeRate
-					,dblMatchAmount
-					,dblAllocatedAmount
-					,dblUnAllocatedAmount
-					,dblSpotRate
-					,ysnLiquidation
-					,ysnSwap
-					,strRefSwapTradeNo
-					--,intRefFutOptTransactionId
-					,dtmCreateDateTime
-					,ysnFreezed
-					,intRollingMonthId
-					,intFutOptTransactionRefId
-					,ysnPreCrush
-					)
-				SELECT @intNewFutOptTransactionHeaderId
-					,1
-					,dtmTransactionDate
-					,@intEntityId
-					,@intBrokerageAccountId
-					,@intFutureMarketId
-					,dblCommission
-					,@intBrokerageCommissionId
-					,intInstrumentTypeId
-					,@intCommodityId
-					,@intLocationId
-					,@intTraderId
-					,@intCurrencyId
-					,strInternalTradeNo
-					,strBrokerTradeNo
-					,strBuySell
-					,dblNoOfContract
-					,@intFutureMonthId
-					,@intOptionMonthId
-					,strOptionType
-					,dblStrike
-					,dblPrice
-					,strReference
-					,strStatus
-					,dtmFilledDate
-					,strReserveForFix
-					,@intBookId
-					,@intSubBookId
-					,ysnOffset
-					,@intBankId
-					,@intBankAccountId
-					--,intContractDetailId
-					--,intContractHeaderId
-					,intSelectedInstrumentTypeId
-					,@intCurrencyExchangeRateTypeId
-					,strFromCurrency
-					,strToCurrency
-					,dtmMaturityDate
-					,dblContractAmount
-					,dblExchangeRate
-					,dblMatchAmount
-					,dblAllocatedAmount
-					,dblUnAllocatedAmount
-					,dblSpotRate
-					,ysnLiquidation
-					,ysnSwap
-					,strRefSwapTradeNo
-					--,intRefFutOptTransactionId
-					,dtmCreateDateTime
-					,ysnFreezed
-					,@intRollingMonthId
-					,@intFutOptTransactionId
-					,ysnPreCrush
-				FROM OPENXML(@idoc, 'vyuIPGetFutOptTransactions/vyuIPGetFutOptTransaction', 2) WITH (
-						dtmTransactionDate DATETIME
-						,dblCommission NUMERIC(18, 6)
-						,intInstrumentTypeId INT
-						,strInternalTradeNo NVARCHAR(10)
-						,strBrokerTradeNo NVARCHAR(50)
-						,strBuySell NVARCHAR(10)
-						,dblNoOfContract NUMERIC(18, 6)
-						,strOptionType NVARCHAR(10)
-						,dblStrike NUMERIC(18, 6)
-						,dblPrice NUMERIC(18, 6)
-						,strReference NVARCHAR(250)
-						,strStatus NVARCHAR(250)
-						,dtmFilledDate DATETIME
-						,strReserveForFix NVARCHAR(50)
-						,ysnOffset BIT
-						,intSelectedInstrumentTypeId INT
-						,strFromCurrency NVARCHAR(50)
-						,strToCurrency NVARCHAR(50)
-						,dtmMaturityDate DATETIME
-						,dblContractAmount NUMERIC(18, 6)
-						,dblExchangeRate NUMERIC(18, 6)
-						,dblMatchAmount NUMERIC(18, 6)
-						,dblAllocatedAmount NUMERIC(18, 6)
-						,dblUnAllocatedAmount NUMERIC(18, 6)
-						,dblSpotRate NUMERIC(18, 6)
-						,ysnLiquidation BIT
-						,ysnSwap BIT
-						,strRefSwapTradeNo NVARCHAR(50)
-						,dtmCreateDateTime DATETIME
-						,ysnFreezed BIT
-						,ysnPreCrush BIT
-						,intFutOptTransactionId INT
-						) x
-				WHERE x.intFutOptTransactionId = @intFutOptTransactionId
+				IF NOT EXISTS (
+						SELECT 1
+						FROM tblRKFutOptTransaction
+						WHERE intFutOptTransactionHeaderId = @intNewFutOptTransactionHeaderId
+							AND intFutOptTransactionRefId = @intFutOptTransactionId
+						)
+				BEGIN
+					INSERT INTO tblRKFutOptTransaction (
+						intFutOptTransactionHeaderId
+						,intConcurrencyId
+						,dtmTransactionDate
+						,intEntityId
+						,intBrokerageAccountId
+						,intFutureMarketId
+						,dblCommission
+						,intBrokerageCommissionId
+						,intInstrumentTypeId
+						,intCommodityId
+						,intLocationId
+						,intTraderId
+						,intCurrencyId
+						,strInternalTradeNo
+						,strBrokerTradeNo
+						,strBuySell
+						,dblNoOfContract
+						,intFutureMonthId
+						,intOptionMonthId
+						,strOptionType
+						,dblStrike
+						,dblPrice
+						,strReference
+						,strStatus
+						,dtmFilledDate
+						,strReserveForFix
+						,intBookId
+						,intSubBookId
+						,ysnOffset
+						,intBankId
+						,intBankAccountId
+						--,intContractDetailId
+						--,intContractHeaderId
+						,intSelectedInstrumentTypeId
+						,intCurrencyExchangeRateTypeId
+						,strFromCurrency
+						,strToCurrency
+						,dtmMaturityDate
+						,dblContractAmount
+						,dblExchangeRate
+						,dblMatchAmount
+						,dblAllocatedAmount
+						,dblUnAllocatedAmount
+						,dblSpotRate
+						,ysnLiquidation
+						,ysnSwap
+						,strRefSwapTradeNo
+						--,intRefFutOptTransactionId
+						,dtmCreateDateTime
+						,ysnFreezed
+						,intRollingMonthId
+						,intFutOptTransactionRefId
+						,ysnPreCrush
+						)
+					SELECT @intNewFutOptTransactionHeaderId
+						,1
+						,dtmTransactionDate
+						,@intEntityId
+						,@intBrokerageAccountId
+						,@intFutureMarketId
+						,dblCommission
+						,@intBrokerageCommissionId
+						,intInstrumentTypeId
+						,@intCommodityId
+						,@intLocationId
+						,@intTraderId
+						,@intCurrencyId
+						,strInternalTradeNo
+						,strBrokerTradeNo
+						,strBuySell
+						,dblNoOfContract
+						,@intFutureMonthId
+						,@intOptionMonthId
+						,strOptionType
+						,dblStrike
+						,dblPrice
+						,strReference
+						,strStatus
+						,dtmFilledDate
+						,strReserveForFix
+						,@intBookId
+						,@intSubBookId
+						,ysnOffset
+						,@intBankId
+						,@intBankAccountId
+						--,intContractDetailId
+						--,intContractHeaderId
+						,intSelectedInstrumentTypeId
+						,@intCurrencyExchangeRateTypeId
+						,strFromCurrency
+						,strToCurrency
+						,dtmMaturityDate
+						,dblContractAmount
+						,dblExchangeRate
+						,dblMatchAmount
+						,dblAllocatedAmount
+						,dblUnAllocatedAmount
+						,dblSpotRate
+						,ysnLiquidation
+						,ysnSwap
+						,strRefSwapTradeNo
+						--,intRefFutOptTransactionId
+						,dtmCreateDateTime
+						,ysnFreezed
+						,@intRollingMonthId
+						,@intFutOptTransactionId
+						,ysnPreCrush
+					FROM OPENXML(@idoc, 'vyuIPGetFutOptTransactions/vyuIPGetFutOptTransaction', 2) WITH (
+							dtmTransactionDate DATETIME
+							,dblCommission NUMERIC(18, 6)
+							,intInstrumentTypeId INT
+							,strInternalTradeNo NVARCHAR(10)
+							,strBrokerTradeNo NVARCHAR(50)
+							,strBuySell NVARCHAR(10)
+							,dblNoOfContract NUMERIC(18, 6)
+							,strOptionType NVARCHAR(10)
+							,dblStrike NUMERIC(18, 6)
+							,dblPrice NUMERIC(18, 6)
+							,strReference NVARCHAR(250)
+							,strStatus NVARCHAR(250)
+							,dtmFilledDate DATETIME
+							,strReserveForFix NVARCHAR(50)
+							,ysnOffset BIT
+							,intSelectedInstrumentTypeId INT
+							,strFromCurrency NVARCHAR(50)
+							,strToCurrency NVARCHAR(50)
+							,dtmMaturityDate DATETIME
+							,dblContractAmount NUMERIC(18, 6)
+							,dblExchangeRate NUMERIC(18, 6)
+							,dblMatchAmount NUMERIC(18, 6)
+							,dblAllocatedAmount NUMERIC(18, 6)
+							,dblUnAllocatedAmount NUMERIC(18, 6)
+							,dblSpotRate NUMERIC(18, 6)
+							,ysnLiquidation BIT
+							,ysnSwap BIT
+							,strRefSwapTradeNo NVARCHAR(50)
+							,dtmCreateDateTime DATETIME
+							,ysnFreezed BIT
+							,ysnPreCrush BIT
+							,intFutOptTransactionId INT
+							) x
+					WHERE x.intFutOptTransactionId = @intFutOptTransactionId
+				END
+				ELSE
+				BEGIN
+					UPDATE tblRKFutOptTransaction
+					SET intConcurrencyId = intConcurrencyId + 1
+						,dtmTransactionDate = x.dtmTransactionDate
+						,intEntityId = @intEntityId
+						,intBrokerageAccountId = @intBrokerageAccountId
+						,intFutureMarketId = @intFutureMarketId
+						,dblCommission = x.dblCommission
+						,intBrokerageCommissionId = @intBrokerageCommissionId
+						,intInstrumentTypeId = x.intInstrumentTypeId
+						,intCommodityId = @intCommodityId
+						,intLocationId = @intLocationId
+						,intTraderId = @intTraderId
+						,intCurrencyId = @intCurrencyId
+						,strInternalTradeNo = x.strInternalTradeNo
+						,strBrokerTradeNo = x.strBrokerTradeNo
+						,strBuySell = x.strBuySell
+						,dblNoOfContract = x.dblNoOfContract
+						,intFutureMonthId = @intFutureMonthId
+						,intOptionMonthId = @intOptionMonthId
+						,strOptionType = x.strOptionType
+						,dblStrike = x.dblStrike
+						,dblPrice = x.dblPrice
+						,strReference = x.strReference
+						,strStatus = x.strStatus
+						,dtmFilledDate = x.dtmFilledDate
+						,strReserveForFix = x.strReserveForFix
+						,intBookId = @intBookId
+						,intSubBookId = @intSubBookId
+						,ysnOffset = x.ysnOffset
+						,intBankId = @intBankId
+						,intBankAccountId = @intBankAccountId
+						,intSelectedInstrumentTypeId = x.intSelectedInstrumentTypeId
+						,intCurrencyExchangeRateTypeId = @intCurrencyExchangeRateTypeId
+						,strFromCurrency = x.strFromCurrency
+						,strToCurrency = x.strToCurrency
+						,dtmMaturityDate = x.dtmMaturityDate
+						,dblContractAmount = x.dblContractAmount
+						,dblExchangeRate = x.dblExchangeRate
+						,dblMatchAmount = x.dblMatchAmount
+						,dblAllocatedAmount = x.dblAllocatedAmount
+						,dblUnAllocatedAmount = x.dblUnAllocatedAmount
+						,dblSpotRate = x.dblSpotRate
+						,ysnLiquidation = x.ysnLiquidation
+						,ysnSwap = x.ysnSwap
+						,strRefSwapTradeNo = x.strRefSwapTradeNo
+						,dtmCreateDateTime = x.dtmCreateDateTime
+						,ysnFreezed = x.ysnFreezed
+						,intRollingMonthId = @intRollingMonthId
+						,ysnPreCrush = x.ysnPreCrush
+					FROM OPENXML(@idoc, 'vyuIPGetFutOptTransactions/vyuIPGetFutOptTransaction', 2) WITH (
+							dtmTransactionDate DATETIME
+							,dblCommission NUMERIC(18, 6)
+							,intInstrumentTypeId INT
+							,strInternalTradeNo NVARCHAR(10)
+							,strBrokerTradeNo NVARCHAR(50)
+							,strBuySell NVARCHAR(10)
+							,dblNoOfContract NUMERIC(18, 6)
+							,strOptionType NVARCHAR(10)
+							,dblStrike NUMERIC(18, 6)
+							,dblPrice NUMERIC(18, 6)
+							,strReference NVARCHAR(250)
+							,strStatus NVARCHAR(250)
+							,dtmFilledDate DATETIME
+							,strReserveForFix NVARCHAR(50)
+							,ysnOffset BIT
+							,intSelectedInstrumentTypeId INT
+							,strFromCurrency NVARCHAR(50)
+							,strToCurrency NVARCHAR(50)
+							,dtmMaturityDate DATETIME
+							,dblContractAmount NUMERIC(18, 6)
+							,dblExchangeRate NUMERIC(18, 6)
+							,dblMatchAmount NUMERIC(18, 6)
+							,dblAllocatedAmount NUMERIC(18, 6)
+							,dblUnAllocatedAmount NUMERIC(18, 6)
+							,dblSpotRate NUMERIC(18, 6)
+							,ysnLiquidation BIT
+							,ysnSwap BIT
+							,strRefSwapTradeNo NVARCHAR(50)
+							,dtmCreateDateTime DATETIME
+							,ysnFreezed BIT
+							,ysnPreCrush BIT
+							,intFutOptTransactionId INT
+							) x
+					JOIN tblRKFutOptTransaction D ON D.intFutOptTransactionRefId = x.intFutOptTransactionId
+						AND D.intFutOptTransactionHeaderId = @intNewFutOptTransactionHeaderId
+					WHERE x.intFutOptTransactionId = @intFutOptTransactionId
+				END
 
 				SELECT @intFutOptTransactionId = MIN(intFutOptTransactionId)
 				FROM @tblRKFutOptTransaction
 				WHERE intFutOptTransactionId > @intFutOptTransactionId
 			END
+
+			DELETE
+			FROM tblRKFutOptTransaction
+			WHERE intFutOptTransactionHeaderId = @intNewFutOptTransactionHeaderId
+				AND intFutOptTransactionRefId NOT IN (
+					SELECT intFutOptTransactionId
+					FROM @tblRKFutOptTransaction
+					)
 
 			SELECT @strHeaderCondition = 'intFutOptTransactionHeaderId = ' + LTRIM(@intNewFutOptTransactionHeaderId)
 
