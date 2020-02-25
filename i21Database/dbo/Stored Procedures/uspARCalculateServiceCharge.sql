@@ -507,7 +507,20 @@ AS
 
 							DELETE FROM @tempTblTypeServiceCharge WHERE ISNULL(dblAmountDue, @zeroDecimal) = @zeroDecimal OR ISNULL(dblTotalAmount, @zeroDecimal) = @zeroDecimal
 
-							EXEC dbo.uspARInsertInvoiceServiceCharge @isRecap, @batchId, @entityId, @locationId, @currencyId, @arAccountId, @scAccountId, @asOfDate, @calculation, @serviceChargeDate, @serviceChargePostDate, @tblTypeServiceCharge, @tempTblTypeServiceCharge
+							EXEC dbo.uspARInsertInvoiceServiceCharge @ysnRecap					= @isRecap
+																   , @batchId					= @batchId
+																   , @intEntityCustomerId		= @entityId
+																   , @intEntityUserId			= @intEntityUserId
+																   , @intCompanyLocationId		= @locationId
+																   , @intCurrencyId				= @currencyId
+																   , @intARAccountId			= @arAccountId
+																   , @intSCAccountId			= @scAccountId
+																   , @dtmAsOfDate				= @asOfDate
+																   , @strCalculation			= @calculation
+																   , @dtmServiceChargeDate		= @serviceChargeDate
+																   , @dtmServiceChargePostDate	= @serviceChargePostDate
+																   , @tblTypeServiceCharge		= @tblTypeServiceCharge
+																   , @tblTypeServiceChargeByCB	= @tempTblTypeServiceCharge
 
 							DELETE FROM @tblTypeServiceCharge WHERE intEntityCustomerId = @entityId
 						END
@@ -518,4 +531,3 @@ AS
 
 	SET @totalAmount = ISNULL(@totalAmount, 0)
 	DROP TABLE #tmpCustomers
-GO
