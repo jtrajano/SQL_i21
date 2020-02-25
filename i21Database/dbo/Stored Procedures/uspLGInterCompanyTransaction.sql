@@ -105,26 +105,29 @@ BEGIN TRY
 	SELECT @ysnReplicationEnabled = IsNULL(ysnReplicationEnabled, 1)
 	FROM tblIPCompanyPreference
 
+	SELECT @intSContractDetailId = CASE 
+			WHEN @strTransactionType = 'Inbound Shipment'
+				THEN intPContractDetailId
+			ELSE intSContractDetailId
+			END
+	FROM tblLGLoadDetail
+	WHERE intLoadId = @intLoadId
+
+	SELECT @intContractHeaderId = intContractHeaderId
+	FROM tblCTContractDetail
+	WHERE intContractDetailId = @intSContractDetailId
+
 	IF EXISTS (
 			SELECT 1
 			FROM tblSMInterCompanyTransactionConfiguration CTC
 			JOIN [tblSMInterCompanyTransactionType] CTTF ON CTC.[intFromTransactionTypeId] = CTTF.intInterCompanyTransactionTypeId
 			JOIN [tblSMInterCompanyTransactionType] CTTT ON CTC.[intToTransactionTypeId] = CTTT.intInterCompanyTransactionTypeId
+			JOIN tblCTContractHeader CH ON CH.intCompanyId = CTC.intFromCompanyId
+				AND CH.intBookId = CTC.intFromBookId
 			WHERE CTTF.strTransactionType = @strTransactionType
+				AND CH.intContractHeaderId = @intContractHeaderId
 			)
 	BEGIN
-		SELECT @intSContractDetailId = CASE 
-				WHEN @strTransactionType = 'Inbound Shipment'
-					THEN intPContractDetailId
-				ELSE intSContractDetailId
-				END
-		FROM tblLGLoadDetail
-		WHERE intLoadId = @intLoadId
-
-		SELECT @intContractHeaderId = intContractHeaderId
-		FROM tblCTContractDetail
-		WHERE intContractDetailId = @intSContractDetailId
-
 		SELECT @strFromTransactionType = CTTF.strTransactionType --strFromTransactionType
 			,@intFromCompanyId = intFromCompanyId
 			,@intFromProfitCenterId = intFromBookId
