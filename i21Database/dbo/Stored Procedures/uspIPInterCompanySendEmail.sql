@@ -77,7 +77,7 @@ BEGIN
 		WHERE ISNULL(strFeedStatus, '') = 'Processed'
 			AND ISNULL(ysnMailSent, 0) = 0
 	END
-	ELSE
+	ELSE IF @strStatus = 'Failure'
 	BEGIN
 		SELECT @strDetail = @strDetail + '<tr>
 			   <td>&nbsp;' + ISNULL(strNewSampleNumber, '') + '</td>' + 
@@ -110,7 +110,7 @@ BEGIN
 	BEGIN
 		SELECT @strDetail = @strDetail + '<tr>
 			   <td>&nbsp;' + ISNULL(S.strAverageNo, '') + '</td>' + 
-			   '<td>&nbsp;' + ISNULL(DAP.dtmDate, '') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(CONVERT(NVARCHAR(20), DAP.dtmDate, 106), '') + '</td>' + 
 			   '<td>&nbsp;' + ISNULL(S.strFromCompanyName, '') + '</td>' + 
 			   '<td>&nbsp;' + 'Success' + '</td>
 		</tr>'
@@ -124,11 +124,11 @@ BEGIN
 		WHERE ISNULL(strFeedStatus, '') = 'Processed'
 			AND ISNULL(ysnMailSent, 0) = 0
 	END
-	ELSE
+	ELSE IF @strStatus = 'Failure'
 	BEGIN
 		SELECT @strDetail = @strDetail + '<tr>
 			   <td>&nbsp;' + ISNULL(S.strAverageNo, '') + '</td>' + 
-			   '<td>&nbsp;' + ISNULL(DAP.dtmDate, '') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(CONVERT(NVARCHAR(20), DAP.dtmDate, 106), '') + '</td>' + 
 			   '<td>&nbsp;' + ISNULL(S.strFromCompanyName, '') + '</td>' + 
 			   '<td>&nbsp;' + ISNULL(S.strMessage, '') + '</td>
 		</tr>'
@@ -171,7 +171,7 @@ BEGIN
 		WHERE ISNULL(strFeedStatus, '') = 'Processed'
 			AND ISNULL(ysnMailSent, 0) = 0
 	END
-	ELSE
+	ELSE IF @strStatus = 'Failure'
 	BEGIN
 		SELECT @strDetail = @strDetail + '<tr>
 			   <td>&nbsp;' + ISNULL(S.strContractNumber, '') + '</td>' + 
@@ -218,7 +218,7 @@ BEGIN
 		WHERE ISNULL(strFeedStatus, '') = 'Processed'
 			AND ISNULL(ysnMailSent, 0) = 0
 	END
-	ELSE
+	ELSE IF @strStatus = 'Failure'
 	BEGIN
 		SELECT @strDetail = @strDetail + '<tr>
 			   <td>&nbsp;' + ISNULL(S.strPriceContractNo, '') + '</td>' + 
@@ -265,7 +265,7 @@ BEGIN
 		WHERE ISNULL(strFeedStatus, '') = 'Processed'
 			AND ISNULL(ysnMailSent, 0) = 0
 	END
-	ELSE
+	ELSE IF @strStatus = 'Failure'
 	BEGIN
 		SELECT @strDetail = @strDetail + '<tr>
 			   <td>&nbsp;' + ISNULL(S.strLoadNumber, '') + '</td>' + 
@@ -312,7 +312,7 @@ BEGIN
 		WHERE ISNULL(strFeedStatus, '') = 'Processed'
 			AND ISNULL(ysnMailSent, 0) = 0
 	END
-	ELSE
+	ELSE IF @strStatus = 'Failure'
 	BEGIN
 		SELECT @strDetail = @strDetail + '<tr>
 			   <td>&nbsp;' + ISNULL(S.strInvPlngReportName, '') + '</td>' + 
@@ -359,7 +359,7 @@ BEGIN
 		WHERE ISNULL(strFeedStatus, '') = 'Processed'
 			AND ISNULL(ysnMailSent, 0) = 0
 	END
-	ELSE
+	ELSE IF @strStatus = 'Failure'
 	BEGIN
 		SELECT @strDetail = @strDetail + '<tr>
 			   <td>&nbsp;' + ISNULL(S.strReferenceNumber, '') + '</td>' + 
@@ -391,31 +391,31 @@ BEGIN
 	IF @strStatus = 'Success'
 	BEGIN
 		SELECT @strDetail = @strDetail + '<tr>
-			   <td>&nbsp;' + ISNULL(CONVERT(NVARCHAR,intFutOptTransactionHeaderId),'') + '</td>' + 
-			   '<td>&nbsp;' + ISNULL(CONVERT(NVARCHAR(20), dtmTransactionDate, 106), '') + '</td>' + 
-			   '<td>&nbsp;' + ISNULL(strFromCompanyName, '') + '</td>' + 
+			   <td>&nbsp;' + ISNULL(CONVERT(NVARCHAR,S.intFutOptTransactionHeaderId),'') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(CONVERT(NVARCHAR(20), S.dtmTransactionDate, 106), '') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(S.strFromCompanyName, '') + '</td>' + 
 			   '<td>&nbsp;' + 'Success' + '</td>
 		</tr>'
-		FROM tblRKFutOptTransactionHeaderStage WITH (NOLOCK)
-		WHERE ISNULL(strFeedStatus, '') = 'Processed'
-			AND ISNULL(ysnMailSent, 0) = 0
+		FROM tblRKFutOptTransactionHeaderStage S WITH (NOLOCK)
+		WHERE ISNULL(S.strFeedStatus, '') = 'Processed'
+			AND ISNULL(S.ysnMailSent, 0) = 0
 
 		UPDATE tblRKFutOptTransactionHeaderStage
 		SET ysnMailSent = 1
 		WHERE ISNULL(strFeedStatus, '') = 'Processed'
 			AND ISNULL(ysnMailSent, 0) = 0
 	END
-	ELSE
+	ELSE IF @strStatus = 'Failure'
 	BEGIN
 		SELECT @strDetail = @strDetail + '<tr>
-			   <td>&nbsp;' + ISNULL(CONVERT(NVARCHAR,intFutOptTransactionHeaderId),'') + '</td>' + 
-			   '<td>&nbsp;' + ISNULL(CONVERT(NVARCHAR(20), dtmTransactionDate, 106), '') + '</td>' + 
-			   '<td>&nbsp;' + ISNULL(strFromCompanyName, '') + '</td>' + 
-			   '<td>&nbsp;' + ISNULL(strMessage, '') + '</td>
+			   <td>&nbsp;' + ISNULL(CONVERT(NVARCHAR,S.intFutOptTransactionHeaderId),'') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(CONVERT(NVARCHAR(20), S.dtmTransactionDate, 106), '') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(S.strFromCompanyName, '') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(S.strMessage, '') + '</td>
 		</tr>'
-		FROM tblRKFutOptTransactionHeaderStage WITH (NOLOCK)
-		WHERE ISNULL(strFeedStatus, '') = 'Failed'
-			AND ISNULL(ysnMailSent, 0) = 0
+		FROM tblRKFutOptTransactionHeaderStage S WITH (NOLOCK)
+		WHERE ISNULL(S.strFeedStatus, '') = 'Failed'
+			AND ISNULL(S.ysnMailSent, 0) = 0
 
 		UPDATE tblRKFutOptTransactionHeaderStage
 		SET ysnMailSent = 1
@@ -452,7 +452,7 @@ BEGIN
 		WHERE ISNULL(strFeedStatus, '') = 'Processed'
 			AND ISNULL(ysnMailSent, 0) = 0
 	END
-	ELSE
+	ELSE IF @strStatus = 'Failure'
 	BEGIN
 		SELECT @strDetail = @strDetail + '<tr>
 			   <td>&nbsp;' + ISNULL(strBatchName, '') + '</td>' + 
@@ -496,7 +496,7 @@ BEGIN
 		WHERE ISNULL(strFeedStatus, '') = 'Processed'
 			AND ISNULL(ysnMailSent, 0) = 0
 	END
-	ELSE
+	ELSE IF @strStatus = 'Failure'
 	BEGIN
 		SELECT @strDetail = @strDetail + '<tr>
 			   <td>&nbsp;' + ISNULL(CONVERT(NVARCHAR,intOptionsMatchPnSHeaderId),'') + '</td>' + 
