@@ -761,6 +761,8 @@ BEGIN TRY
 				,@intCompanyRefId = intCompanyId
 			FROM tblLGLoad
 			WHERE intLoadRefId = @intLoadRefId
+			AND intBookId =@intBookId
+			AND IsNULL(intSubBookId,0) =IsNULL(@intSubBookId,0) 
 
 			SELECT @intTransactionCount = @@TRANCOUNT
 

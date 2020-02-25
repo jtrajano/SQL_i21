@@ -55,7 +55,7 @@ BEGIN TRY
 		,@strCertificationXML NVARCHAR(MAX)
 		,@intToBookId INT
 	DECLARE @MyTableVar TABLE (intUserId INT);
-	DECLARE @strSalespersonId NVARCHAR(3)
+	DECLARE @strSalespersonId NVARCHAR(100)
 		,@strCommodityCode NVARCHAR(50)
 		,@strHeaderUnitMeasure NVARCHAR(50)
 		,@strCropYear NVARCHAR(30)
@@ -549,7 +549,7 @@ BEGIN TRY
 					,@ysnApproval = NULL
 					,@strSubBook=NULL
 
-				SELECT @strSalespersonId = strSalespersonId
+				SELECT @strSalespersonId = strSalesperson
 					,@strCommodityCode = strCommodityCode
 					,@strHeaderUnitMeasure = strHeaderUnitMeasure
 					,@strCropYear = strCropYear
@@ -569,7 +569,7 @@ BEGIN TRY
 					,@ysnApproval = ysnApproval
 					,@strSubBook=strSubBook
 				FROM OPENXML(@idoc, 'vyuIPContractHeaderViews/vyuIPContractHeaderView', 2) WITH (
-						strSalespersonId NVARCHAR(3) Collate Latin1_General_CI_AS
+						strSalesperson NVARCHAR(100) Collate Latin1_General_CI_AS
 						,strCommodityCode NVARCHAR(50) Collate Latin1_General_CI_AS
 						,strHeaderUnitMeasure NVARCHAR(50) Collate Latin1_General_CI_AS
 						,strCropYear NVARCHAR(30) Collate Latin1_General_CI_AS
@@ -629,8 +629,9 @@ BEGIN TRY
 				IF @strSalespersonId IS NOT NULL
 					AND NOT EXISTS (
 						SELECT 1
-						FROM tblARSalesperson SP
-						WHERE SP.strSalespersonId = @strSalespersonId
+						FROM vyuCTEntity SP
+						WHERE SP.strEntityName = @strSalespersonId
+						and SP.strEntityType ='Salesperson'
 						)
 				BEGIN
 					IF @strErrorMessage <> ''
@@ -906,8 +907,9 @@ BEGIN TRY
 					AND CM.intCommodityId = @intCommodityId
 
 				SELECT @intSalespersonId = intEntityId
-				FROM tblARSalesperson SP
-				WHERE SP.strSalespersonId = @strSalespersonId
+				FROM vyuCTEntity SP
+				WHERE SP.strEntityName = @strSalespersonId
+				and SP.strEntityType ='Salesperson'
 
 				SELECT @intCropYearId = intCropYearId
 				FROM tblCTCropYear YR
