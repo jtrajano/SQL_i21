@@ -29,7 +29,8 @@ INNER JOIN (tblAPPayment C INNER JOIN tblAPPaymentDetail C2 ON C.intPaymentId = 
 ON B.intBillId = C2.intBillId
 INNER JOIN #tmpPayables D ON C.intPaymentId = D.intPaymentId
 LEFT JOIN tblPATRefundCustomer patRef ON patRef.intBillId = B.intBillId
-WHERE A.int1099Form > 0
+WHERE A.int1099Form > 0 
+AND B.intTransactionType != 2
 
 IF @transCount = 0 COMMIT TRANSACTION
 
