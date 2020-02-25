@@ -1338,9 +1338,8 @@ BEGIN
 			ON TSS.intTransferStorageSplitId = SR.intTransferStorageSplitId
 		LEFT JOIN tblCTContractDetail CD
 			ON CD.intContractDetailId = TSS.intContractDetailId
-		WHERE  FromType.ysnDPOwnedType = 1 AND ToType.ysnDPOwnedType = 1
-		AND SR.intTransferStorageId = @intTransferStorageId
-
+		WHERE SR.intTransferStorageId = @intTransferStorageId
+		-- FromType.ysnDPOwnedType = 1 AND ToType.ysnDPOwnedType = 1 AND 
 		EXEC uspGRInsertStorageHistoryRecord @StorageHistoryStagingTable, @intStorageHistoryId
 		--integration to IC
 		SET @cnt = 0
