@@ -870,7 +870,7 @@ BEGIN
 					, intFromCommodityUnitMeasureId
 					, 'Delayed Pricing' COLLATE Latin1_General_CI_AS
 				FROM (
-					SELECT DISTINCT intTicketId
+					SELECT intTicketId
 						, strTicketType
 						, strTicketNumber
 						, dblTotal = dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId, @intCommodityUnitMeasureId, (ISNULL(dblBalance,0)))
