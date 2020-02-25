@@ -34,7 +34,7 @@ BEGIN
 		, dblFutureImpact NUMERIC(24, 10))
 	
 	INSERT INTO @ContractImpact
-	SELECT *
+	SELECT DISTINCT *
 		, dblFutureImpact = ((ISNULL(dblLatestSettlementPrice, 0) - ISNULL(dblPrice, 0)) * (ISNULL(dblNoOfLots, 0) * ISNULL(dblContractSize, 0))) / CASE WHEN ysnSubCurrency = 1 THEN 100 ELSE 1 END
 	FROM (
 		SELECT DISTINCT TP.strContractType
@@ -175,15 +175,15 @@ BEGIN
 		, dblLatestSettlementPrice
 		, dblFutureImpact)
 	SELECT strContractType = 'Total'
-		, strFutureMonth
+		, strFutureMonth = SUBSTRING(strFutureMonth,0,CHARINDEX(' -',strFutureMonth))
 		, dblNoOfLots = SUM(dblNoOfLots)
 		, dblPrice = SUM(dblPrice)
 		, dblLatestSettlementPrice = MAX(dblLatestSettlementPrice)
 		, dblFutureImpact = SUM(dblFutureImpact)
 	FROM @ContractImpact
 	WHERE ISNULL(strFutureMonth, '') <> ''
-	GROUP BY strFutureMonth
-	ORDER BY CASE WHEN ISNULL(strFutureMonth, '') = '' THEN '' ELSE CONVERT(DATETIME, '01 ' + LEFT(strFutureMonth, 6)) END ASC
+	GROUP BY SUBSTRING(strFutureMonth,0,CHARINDEX(' -',strFutureMonth))
+	ORDER BY CASE WHEN ISNULL(SUBSTRING(strFutureMonth,0,CHARINDEX(' -',strFutureMonth)), '') = '' THEN '' ELSE CONVERT(DATETIME, '01 ' + LEFT(SUBSTRING(strFutureMonth,0,CHARINDEX(' -',strFutureMonth)), 6)) END ASC
 	
 	SELECT intRowNum
 		, strContractType

@@ -233,7 +233,7 @@ BEGIN
 	SELECT DISTINCT 'Gross Profit - USD'
 		, @dblQty
 		, (@dblUSDInvoice + @dblUSDPurchase)
-		, @dblAllocatedQtyUSD * (@dblSaleBasis - @dblPurchaseBasis)
+		, @dblQty * ROUND((@dblSaleBasis - @dblPurchaseBasis),2)
 		, ((@dblUSDInvoice - @dblUSDPurchase) - ((@dblSaleBasisUSD - @dblPurchaseBasisUSD) * @dblAllocatedQtyUSD))
 	FROM @Result
 
@@ -305,7 +305,7 @@ BEGIN
 	SELECT 'Total Costs USD'
 		, @dblQty
 		, @POCostUSD + @SOCostUSD
-		, SUM(dblBasis) * @dblAllocatedQtyUSD
+		, ROUND(SUM(dblBasis),2) * @dblQty
 		, SUM(dblCostUSD) * @dblAllocatedQtyUSD
 	FROM @Result
 	WHERE strContractType IN ('PO Costs', 'SO Costs')
