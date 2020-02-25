@@ -139,7 +139,7 @@ OPEN intListCursor;
 						ELSE  
 						BEGIN  
 							SET @ysnLoadContract = 0
-							SELECT TOP 1 @ysnLoadContract = ysnLoad 
+							SELECT TOP 1 @ysnLoadContract = ISNULL(ysnLoad,0)
 							FROM tblCTContractHeader A
 							INNER JOIN tblCTContractDetail B
 								ON A.intContractHeaderId = B.intContractHeaderId
