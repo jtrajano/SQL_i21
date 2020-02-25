@@ -128,7 +128,7 @@ OPEN intListCursor;
 			SELECT TOP 1
 				@_intContractItemUom = intItemUOMId
 			FROM tblCTContractDetail
-			WHERE intContractDetailId = @intContractDetailId
+			WHERE intContractDetailId = @intLoopContractId
 
 			SET @dblTicketScheduleQuantity = dbo.fnCalculateQtyBetweenUOM(@intTicketItemUOMId,@_intContractItemUom,@_dblTicketScheduleQuantity)
 
@@ -187,7 +187,7 @@ OPEN intListCursor;
 						BEGIN  
 
 							SET @ysnLoadContract = 0
-							SELECT TOP 1 @ysnLoadContract = ysnLoad 
+							SELECT TOP 1 @ysnLoadContract = ISNULL(ysnLoad,0) 
 							FROM tblCTContractHeader A
 							INNER JOIN tblCTContractDetail B
 								ON A.intContractHeaderId = B.intContractHeaderId
