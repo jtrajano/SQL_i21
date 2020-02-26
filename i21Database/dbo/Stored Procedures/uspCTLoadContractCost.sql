@@ -20,7 +20,7 @@ AS
 				CH.strContractNumber,
 				CH.dtmContractDate,
 				MY.strCurrency	AS	strMainCurrency,
-				CASE	WHEN	CC.strCostMethod = 'Per Unit'	THEN 
+				(CASE	WHEN	CC.strCostMethod = 'Per Unit'	THEN 
 							dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,QU.intUnitMeasureId,CM.intUnitMeasureId,CD.dblQuantity)*CC.dblRate
 						WHEN	CC.strCostMethod = 'Amount' THEN
 							CC.dblRate
@@ -28,7 +28,7 @@ AS
 							(CC.dblRate * (case when isnull(CD.intNumberOfContainers,1) = 0 then 1 else isnull(CD.intNumberOfContainers,1) end))
 						WHEN	CC.strCostMethod = 'Percentage' THEN 
 							dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,QU.intUnitMeasureId,PU.intUnitMeasureId,CD.dblQuantity)*CD.dblCashPrice*CC.dblRate/100
-				END   dblAmount,
+				END)  / (case when isnull(CY.ysnSubCurrency,convert(bit,0)) = convert(bit,1) then isnull(CY.intCent,1) else 1 end)  dblAmount,
 				RT.strCurrencyExchangeRateType
 
 	FROM		tblCTContractCost	CC
