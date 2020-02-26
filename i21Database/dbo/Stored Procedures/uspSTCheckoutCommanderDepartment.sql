@@ -43,6 +43,7 @@ BEGIN
 
 					SET @intCountRows = 0
 					SET @strMessage = 'Commander Department XML file did not match the layout mapping'
+					SET @ysnSuccess = 0
 
 					GOTO ExitWithCommit
 			END
@@ -242,6 +243,7 @@ BEGIN
 
 		SET @intCountRows = 1
 		SET @strMessage = 'Success'
+		SET @ysnSuccess = 1
 
 		-- COMMIT
 		GOTO ExitWithCommit
@@ -251,6 +253,7 @@ BEGIN
 	BEGIN CATCH
 		SET @intCountRows = 0
 		SET @strMessage = ERROR_MESSAGE()
+		SET @ysnSuccess = 0
 		
 		-- ROLLBACK
 		GOTO ExitWithRollback

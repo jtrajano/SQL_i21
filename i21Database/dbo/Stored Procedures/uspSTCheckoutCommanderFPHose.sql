@@ -1,7 +1,9 @@
 ﻿CREATE PROCEDURE [dbo].[uspSTCheckoutCommanderFPHose]
-	@intCheckoutId Int,
-	@strStatusMsg NVARCHAR(250) OUTPUT,
-	@intCountRows int OUTPUT
+	@intCheckoutId							INT,
+	@UDT_TranFPHose							StagingCommanderFPHose		READONLY,
+	@ysnSuccess								BIT				OUTPUT,
+	@strMessage								NVARCHAR(1000)	OUTPUT,
+	@intCountRows							INT				OUTPUT
 AS
 BEGIN
 	BEGIN TRY
@@ -9,12 +11,31 @@ BEGIN
 		DECLARE @intStoreId Int
 		Select @intStoreId = intStoreId from dbo.tblSTCheckoutHeader Where intCheckoutId = @intCheckoutId
 
+		DECLARE @UDT_TranFPHose2  AS StagingCommanderFPHose
+
+		INSERT INTO @UDT_TranFPHose2
+		(
+			 [intRowCount] 								
+			,[strFuelProdBaseNAXMLFuelGradeID] 			
+			,[dblFuelInfoAmount]                         
+			,[dblFuelInfoCount]                          
+			,[dblFuelInfoVolume]                         
+		)
+		SELECT 
+			[intRowCount] 								
+			,[strFuelProdBaseNAXMLFuelGradeID] 			
+			,[dblFuelInfoAmount]                         
+			,[dblFuelInfoCount]                          
+			,[dblFuelInfoVolume]     
+		FROM 
+		@UDT_TranFPHose
+
 		BEGIN TRANSACTION
 
 		-- ==================================================================================================================  
 		-- Start Validate if FPHose xml file matches the Mapping from i21 
 		-- ------------------------------------------------------------------------------------------------------------------
-		IF NOT EXISTS(SELECT TOP 1 1 FROM #tempCheckoutInsert)
+		IF NOT EXISTS(SELECT TOP 1 1 FROM @UDT_TranFPHose2)
 			BEGIN
 					-- Add to error logging
 					INSERT INTO tblSTCheckoutErrorLogs 
@@ -37,7 +58,8 @@ BEGIN
 					)
 
 					SET @intCountRows = 0
-					SET @strStatusMsg = 'Commander FPHose XML file did not match the layout mapping'
+					SET @strMessage = 'Commander FPHose XML file did not match the layout mapping'
+					SET @ysnSuccess = 0
 
 					-- ROLLBACK
 					GOTO ExitWithCommit
@@ -53,7 +75,7 @@ BEGIN
 
 		-- ================================================================================================================== 
 		-- Get Error logs. Check Register XML that is not configured in i21
-		-- Compare <fuelProdBaseNAXMLFuelGradeID> tag of (RegisterXML) and (Inventory->Item->Item Location->strPassportFuelId1, strPassportFuelId2 or strPassportFueldId3)
+		-- Compare <strFuelProdBaseNAXMLFuelGradeID> tag of (RegisterXML) and (Inventory->Item->Item Location->strPassportFuelId1, strPassportFuelId2 or strPassportFueldId3)
 		-- ------------------------------------------------------------------------------------------------------------------ 
 		INSERT INTO tblSTCheckoutErrorLogs 
 		(
@@ -68,21 +90,21 @@ BEGIN
 			'NO MATCHING TAG' as strErrorType
 			, 'No Matching Fuel Grade in Inventory' as strErrorMessage
 			, 'NAXMLFuelGradeID' as strRegisterTag
-			, ISNULL(Chk.fuelProdBaseNAXMLFuelGradeID, '') AS strRegisterTagValue
+			, ISNULL(Chk.strFuelProdBaseNAXMLFuelGradeID, '') AS strRegisterTagValue
 			, @intCheckoutId
 			, 1
-		FROM #tempCheckoutInsert Chk
-		WHERE ISNULL(Chk.fuelProdBaseNAXMLFuelGradeID, '') NOT IN
+		FROM @UDT_TranFPHose2 Chk
+		WHERE ISNULL(Chk.strFuelProdBaseNAXMLFuelGradeID, '') NOT IN
 		(
 			SELECT DISTINCT 
 				tbl.strXmlRegisterFuelGradeID
 			FROM
 			(
 				SELECT DISTINCT
-					Chk.fuelProdBaseNAXMLFuelGradeID AS strXmlRegisterFuelGradeID
-				FROM #tempCheckoutInsert Chk
+					Chk.strFuelProdBaseNAXMLFuelGradeID AS strXmlRegisterFuelGradeID
+				FROM @UDT_TranFPHose2 Chk
 				JOIN dbo.tblICItemLocation IL 
-					ON ISNULL(Chk.fuelProdBaseNAXMLFuelGradeID, '') COLLATE Latin1_General_CI_AS IN (ISNULL(IL.strPassportFuelId1, ''), ISNULL(IL.strPassportFuelId2, ''), ISNULL(IL.strPassportFuelId3, ''))
+					ON ISNULL(Chk.strFuelProdBaseNAXMLFuelGradeID, '') COLLATE Latin1_General_CI_AS IN (ISNULL(IL.strPassportFuelId1, ''), ISNULL(IL.strPassportFuelId2, ''), ISNULL(IL.strPassportFuelId3, ''))
 				JOIN dbo.tblICItem I 
 					ON I.intItemId = IL.intItemId
 				JOIN dbo.tblICItemUOM UOM 
@@ -92,23 +114,28 @@ BEGIN
 				JOIN dbo.tblSTStore S 
 					ON S.intCompanyLocationId = CL.intCompanyLocationId
 				WHERE S.intStoreId = @intStoreId
-				AND ISNULL(Chk.fuelProdBaseNAXMLFuelGradeID, '') != ''
+				AND ISNULL(Chk.strFuelProdBaseNAXMLFuelGradeID, '') != ''
 			) AS tbl
 		)
-		AND ISNULL(Chk.fuelProdBaseNAXMLFuelGradeID, '') != ''
+		AND ISNULL(Chk.strFuelProdBaseNAXMLFuelGradeID, '') != ''
 
 
 		-- ------------------------------------------------------------------------------------------------------------------  
 		-- END Get Error logs. Check Register XML that is not configured in i21.  
 		-- ==================================================================================================================
 
+		
+		--Select * FROM @UDT_TranFPHose2
+
 
 		--Update values that are '' empty
-		Update #tempCheckoutInsert
-		Set fuelInfovolume = 1
-		WHERE fuelInfovolume IS NULL OR fuelInfovolume = '' OR fuelInfovolume = '0'
+		--Handled in API side
 
-		Select * FROM #tempCheckoutInsert
+		--Update @UDT_TranFPHose2
+		--Set dblFuelInfoVolume = 1
+		--WHERE dblFuelInfoVolume IS NULL OR dblFuelInfoVolume = '' OR dblFuelInfoVolume = '0'
+
+
 
 		-- Company Currency Decimal
 		DECLARE @intCompanyCurrencyDecimal INT
@@ -137,14 +164,14 @@ BEGIN
 					, [intPumpCardCouponId]			= UOM.intItemUOMId
 					, [intCategoryId]			    = I.intCategoryId
 					, [strDescription]				= I.strDescription
-					, [dblPrice]					= CAST((ISNULL(CAST(Chk.fuelInfoamount as decimal(18,6)),0) / ISNULL(CAST(Chk.fuelInfovolume as decimal(18,6)),1)) AS DECIMAL(18,6))
-					, [dblQuantity]					= ISNULL(CAST(Chk.fuelInfovolume as decimal(18,6)), 0)
-					, [dblAmount]					= CAST(((CAST((ISNULL(CAST(Chk.fuelInfoamount as decimal(18,6)),0) / ISNULL(CAST(Chk.fuelInfovolume as decimal(18,6)),1)) AS DECIMAL(18,6))) * (ISNULL(CAST(Chk.fuelInfovolume as decimal(18,6)), 0))) AS DECIMAL(18,6))
+					, [dblPrice]					= CAST((ISNULL(CAST(Chk.dblFuelInfoAmount as decimal(18,6)),0) / ISNULL(CAST(Chk.dblFuelInfoVolume as decimal(18,6)),1)) AS DECIMAL(18,6))
+					, [dblQuantity]					= ISNULL(CAST(Chk.dblFuelInfoVolume as decimal(18,6)), 0)
+					, [dblAmount]					= CAST(((CAST((ISNULL(CAST(Chk.dblFuelInfoAmount as decimal(18,6)),0) / ISNULL(CAST(Chk.dblFuelInfoVolume as decimal(18,6)),1)) AS DECIMAL(18,6))) * (ISNULL(CAST(Chk.dblFuelInfoVolume as decimal(18,6)), 0))) AS DECIMAL(18,6))
 					, [intConcurrencyId]			= 0
-				 FROM #tempCheckoutInsert Chk
+				 FROM @UDT_TranFPHose2 Chk
 				 JOIN dbo.tblICItemLocation IL 
-					ON ISNULL(Chk.fuelProdBaseNAXMLFuelGradeID, '') COLLATE Latin1_General_CI_AS IN (ISNULL(IL.strPassportFuelId1, ''), ISNULL(IL.strPassportFuelId2, ''), ISNULL(IL.strPassportFuelId3, ''))
-					AND Chk.fuelInfoamount <> '0'
+					ON ISNULL(Chk.strFuelProdBaseNAXMLFuelGradeID, '') COLLATE Latin1_General_CI_AS IN (ISNULL(IL.strPassportFuelId1, ''), ISNULL(IL.strPassportFuelId2, ''), ISNULL(IL.strPassportFuelId3, ''))
+					AND Chk.dblFuelInfoAmount <> '0'
 				 --JOIN dbo.tblICItemLocation IL ON ISNULL(Chk.FuelGradeID, '') COLLATE Latin1_General_CI_AS = CASE 
 					--																							WHEN ISNULL(IL.strPassportFuelId1, '') <> '' 
 					--																								THEN IL.strPassportFuelId1
@@ -169,9 +196,9 @@ BEGIN
 
 					--SELECT ISNULL(Chk.FuelGradeSalesAmount, 0), ISNULL(Chk.FuelGradeSalesVolume, 0), ISNULL(Chk.FuelGradeSalesAmount, 0), CPT.* 
 					UPDATE CPT
-					SET CPT.[dblPrice] = ISNULL(NULLIF(CAST(Chk.fuelInfoamount AS DECIMAL(18,6)), 0) / NULLIF(CAST(Chk.fuelInfovolume AS DECIMAL(18,6)),0),0)
-						, CPT.[dblQuantity] = CAST(ISNULL(Chk.fuelInfovolume, 0) AS DECIMAL(18,6))
-						, CPT.[dblAmount] = (ISNULL(NULLIF(CAST(Chk.fuelInfoamount AS DECIMAL(18,6)), 0) / NULLIF(CAST(Chk.fuelInfovolume AS DECIMAL(18,6)),0),0)) * CAST(ISNULL(Chk.fuelInfovolume, 0) AS DECIMAL(18,6))
+					SET CPT.[dblPrice] = ISNULL(NULLIF(CAST(Chk.dblFuelInfoAmount AS DECIMAL(18,6)), 0) / NULLIF(CAST(Chk.dblFuelInfoVolume AS DECIMAL(18,6)),0),0)
+						, CPT.[dblQuantity] = CAST(ISNULL(Chk.dblFuelInfoVolume, 0) AS DECIMAL(18,6))
+						, CPT.[dblAmount] = (ISNULL(NULLIF(CAST(Chk.dblFuelInfoAmount AS DECIMAL(18,6)), 0) / NULLIF(CAST(Chk.dblFuelInfoVolume AS DECIMAL(18,6)),0),0)) * CAST(ISNULL(Chk.dblFuelInfoVolume, 0) AS DECIMAL(18,6))
 					FROM dbo.tblSTCheckoutPumpTotals CPT
 					INNER JOIN tblSTCheckoutHeader CH
 						ON CPT.intCheckoutId = CH.intCheckoutId
@@ -184,16 +211,17 @@ BEGIN
 					INNER JOIN dbo.tblICItemLocation IL 
 						ON Item.intItemId = IL.intItemId
 						AND ST.intCompanyLocationId = IL.intLocationId
-					INNER JOIN #tempCheckoutInsert Chk
-						ON ISNULL(Chk.fuelProdBaseNAXMLFuelGradeID, '') COLLATE Latin1_General_CI_AS IN (ISNULL(IL.strPassportFuelId1, ''), ISNULL(IL.strPassportFuelId2, ''), ISNULL(IL.strPassportFuelId3, ''))
-						AND Chk.fuelInfoamount <> '0'
+					INNER JOIN @UDT_TranFPHose2 Chk
+						ON ISNULL(Chk.strFuelProdBaseNAXMLFuelGradeID, '') COLLATE Latin1_General_CI_AS IN (ISNULL(IL.strPassportFuelId1, ''), ISNULL(IL.strPassportFuelId2, ''), ISNULL(IL.strPassportFuelId3, ''))
+						AND Chk.dblFuelInfoAmount <> '0'
 					WHERE CPT.intCheckoutId = @intCheckoutId
 			END
 
 
 
 		SET @intCountRows = 1
-		SET @strStatusMsg = 'Success'
+		SET @strMessage = 'Success'
+		SET @ysnSuccess = 1
 
 		-- COMMIT
 		GOTO ExitWithCommit
@@ -201,7 +229,8 @@ BEGIN
 
 	BEGIN CATCH
 		SET @intCountRows = 0
-		SET @strStatusMsg = ERROR_MESSAGE()
+		SET @strMessage = ERROR_MESSAGE()
+		SET @ysnSuccess = 0
 
 		-- ROLLBACK
 		GOTO ExitWithRollback

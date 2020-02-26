@@ -7,85 +7,56 @@
 AS
 BEGIN
 
-	SET ANSI_WARNINGS OFF;
-	SET NOCOUNT ON;
-    DECLARE @InitTranCount INT;
-    SET @InitTranCount = @@TRANCOUNT
-	DECLARE @Savepoint NVARCHAR(32) = SUBSTRING(('uspSTCheckoutCommanderTax' + CONVERT(VARCHAR, @InitTranCount)), 1, 32)
+	--SET NOCOUNT ON
+    SET XACT_ABORT ON
        
-	BEGIN TRY
+	   BEGIN TRY
               
-			  
-		IF @InitTranCount = 0
-			BEGIN
-				BEGIN TRANSACTION
-			END
-
-		ELSE
-			BEGIN
-				SAVE TRANSACTION @Savepoint
-			END
+			  BEGIN TRANSACTION
 
 
-		-- ==================================================================================================================  
-		-- Start Validate if Translog xml file matches the Mapping on i21 
-		-- ------------------------------------------------------------------------------------------------------------------
-		IF NOT EXISTS(SELECT TOP 1 1 FROM @UDT_TransTax)
-		BEGIN
-				-- Add to error logging
-				INSERT INTO tblSTCheckoutErrorLogs 
-				(
-					strErrorType
-					, strErrorMessage 
-					, strRegisterTag
-					, strRegisterTagValue
-					, intCheckoutId
-					, intConcurrencyId
-				)
-				VALUES
-				(
-					'XML LAYOUT MAPPING'
-					, 'Commander Translog XML file did not match the layout mapping'
-					, ''
-					, ''
-					, @intCheckoutId
-					, 1
-				)
 
-				SET @intCountRows = 0
-				SET @strMessage = 'Commander Translog XML file did not match the layout mapping'
-
-				GOTO ExitWithCommit
-		END
-		-- ------------------------------------------------------------------------------------------------------------------
-		-- End Validate if Translog xml file matches the Mapping on i21   
-		-- ==================================================================================================================
+			  DECLARE @intStoreId int
+              SELECT @intStoreId = intStoreId
+              FROM dbo.tblSTCheckoutHeader
+              WHERE intCheckoutId = @intCheckoutId
 
 
-		-- COUNT
-		DECLARE @intTableRowCount AS INT = 0
-		SELECT @intTableRowCount = COUNT(*) FROM @UDT_TransTax
+			-- ==================================================================================================================  
+			-- Start Validate if Tax xml file matches the Mapping on i21 
+			-- ------------------------------------------------------------------------------------------------------------------
+			IF NOT EXISTS(SELECT TOP 1 1 FROM @UDT_TransTax)
+				BEGIN
+						-- Add to error logging
+						INSERT INTO tblSTCheckoutErrorLogs 
+						(
+							strErrorType
+							, strErrorMessage 
+							, strRegisterTag
+							, strRegisterTagValue
+							, intCheckoutId
+							, intConcurrencyId
+						)
+						VALUES
+						(
+							'XML LAYOUT MAPPING'
+							, 'Commander Tax XML file did not match the layout mapping'
+							, ''
+							, ''
+							, @intCheckoutId
+							, 1
+						)
 
-		IF(@intTableRowCount > 0)
-			BEGIN
+						SET @intCountRows = 0
+						SET @strMessage = 'Commander Tax XML file did not match the layout mapping'
+						SET @ysnSuccess = 0
 
-				--Get StoreId
-				DECLARE @intStoreId			INT,
-						@strRegisterClass	NVARCHAR(50),
-						@intRegisterClassId INT
+						GOTO ExitWithCommit
+				END
+			-- ------------------------------------------------------------------------------------------------------------------
+			-- End Validate if Tax xml file matches the Mapping on i21   
+			-- ==================================================================================================================
 
-				SELECT
-					@intStoreId			= chk.intStoreId,
-					@strRegisterClass	= r.strRegisterClass,
-					@intRegisterClassId = setup.intRegisterSetupId
-				FROM tblSTCheckoutHeader chk
-				INNER JOIN tblSTStore st
-					ON chk.intStoreId = st.intStoreId
-				INNER JOIN tblSTRegister r
-					ON st.intRegisterId = r.intRegisterId
-				INNER JOIN tblSTRegisterSetup setup
-					ON r.strRegisterClass = setup.strRegisterClass
-				WHERE chk.intCheckoutId = @intCheckoutId
 
 
 			  -- ================================================================================================================== 
@@ -133,33 +104,8 @@ BEGIN
 
 			  
 
-				--INSERT INTO tblSTCheckoutSalesTaxTotals
-				--(
-				--	 dblTotalTax		   
-				--	,dblTaxableSales	   
-				--	,dblTaxExemptSales	          
-				--	,intCheckoutId		   
-				--)
-				--SELECT
-				--	 CAST(ISNULL(Chk.dblTaxInfoNetTax, 0) AS DECIMAL(18,6))
-				--	,CAST(ISNULL(Chk.dblTaxInfoTaxableSales, 0) AS DECIMAL(18,6))         
-				--	,CAST(ISNULL(Chk.dblTaxInfoTaxExemptSales, 0) AS DECIMAL(18,6))  
-				--	,@intCheckoutId
-				--FROM 
-				--@UDT_TransTax Chk
 
-				---- Tax FILE
-				--  UPDATE STT
-				--  SET dblTotalTax		= CAST(ISNULL(Chk.dblTaxInfoNetTax, 0) AS DECIMAL(18,6))
-				--  --SET dblTotalTax		= CAST(ISNULL(Chk.taxInfosalesTax, 0) AS DECIMAL(18,6)) http://jira.irelyserver.com/browse/ST-1587
-				--	, dblTaxableSales	= CAST(ISNULL(Chk.dblTaxInfoTaxableSales, 0) AS DECIMAL(18,6))         
-				--	, dblTaxExemptSales = CAST(ISNULL(Chk.dblTaxInfoTaxExemptSales, 0) AS DECIMAL(18,6))  
-				--  FROM @UDT_TransTax Chk
-				--  INNER JOIN dbo.tblSTCheckoutSalesTaxTotals STT
-				--	ON ISNULL(Chk.strSysId, '') COLLATE DATABASE_DEFAULT = STT.strTaxNo
-				--  WHERE STT.intCheckoutId = @intCheckoutId
-				--	AND CAST(ISNULL(Chk.dblTaxRateBaseTaxRate, 0) AS DECIMAL(18,6)) != 0.000000
-
+				-- Tax FILE
 				  UPDATE STT
 				  SET dblTotalTax		= CAST(ISNULL(Chk.dblTaxInfoNetTax, 0) AS DECIMAL(18,6))
 				  --SET dblTotalTax		= CAST(ISNULL(Chk.taxInfosalesTax, 0) AS DECIMAL(18,6)) http://jira.irelyserver.com/browse/ST-1587
@@ -171,73 +117,42 @@ BEGIN
 				  WHERE STT.intCheckoutId = @intCheckoutId
 					AND CAST(ISNULL(Chk.dblTaxRateBaseTaxRate, 0) AS DECIMAL(18,6)) != 0.000000
 
-
               -- Difference between Passport and Radiant
               -- 1. Passport does not have 'TenderTransactionsCount' tag in MSM register file
               -- 2. Passport does not have Lottery Winners MOP in tblSTRegister (Register screen)
 
               SET @intCountRows = 1
-              --SET @strStatusMsg = 'Success'
+              SET @strMessage = 'Success'
+			  SET @ysnSuccess = 1
 
 			  --PRINT 'SUCCESS'
 
               -- COMMIT
 			  GOTO ExitWithCommit
+       END TRY
 
- END
+       BEGIN CATCH
+			SET @intCountRows = 0
+			SET @strMessage = ERROR_MESSAGE()
+			SET @ysnSuccess = 0
 
-
-	END TRY
-	BEGIN CATCH
-		SET @ysnSuccess = CAST(0 AS BIT)
-		SET @strMessage = 'End script error: ' + ERROR_MESSAGE()
-
-		GOTO ExitWithRollback
+			-- ROLLBACK
+			GOTO ExitWithRollback
 	END CATCH
 END
 
 
-
-
-
-
-
 ExitWithCommit:
-	IF @InitTranCount = 0
-		BEGIN
-			COMMIT TRANSACTION
-		END
-
+	-- Commit Transaction
+	COMMIT TRANSACTION --@TransactionName
 	GOTO ExitPost
-
-
+	
 
 ExitWithRollback:
-
-		IF @InitTranCount = 0
-			BEGIN
-				IF ((XACT_STATE()) <> 0)
-				BEGIN
-					SET @strMessage = @strMessage + '. Will Rollback Transaction.'
-
-					ROLLBACK TRANSACTION
-				END
-			END
-
-		ELSE
-			BEGIN
-				IF ((XACT_STATE()) <> 0)
-					BEGIN
-						SET @strMessage = @strMessage + '. Will Rollback to Save point.'
-
-						ROLLBACK TRANSACTION @Savepoint
-					END
-			END
-
-
-
-
-
-
-
+    -- Rollback Transaction here
+	IF @@TRANCOUNT > 0
+		BEGIN
+			ROLLBACK TRANSACTION --@TransactionName
+		END
+	
 ExitPost:
