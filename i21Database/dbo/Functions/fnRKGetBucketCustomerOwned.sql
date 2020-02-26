@@ -28,6 +28,7 @@ RETURNS @returntable TABLE
 	, intContractHeaderId INT
 	, intOrigUOMId INT
 	, strNotes NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
+	, ysnReceiptedStorage BIT
 )
 AS
 BEGIN
@@ -56,6 +57,7 @@ BEGIN
 		,intContractHeaderId
 		,intOrigUOMId
 		,strNotes
+		,ysnReceiptedStorage
 	FROM (
 		SELECT 
 			intRowNum = ROW_NUMBER() OVER (PARTITION BY sl.intTransactionRecordId, sl.intTransactionRecordHeaderId, sl.intContractHeaderId, sl.strInOut, sl.ysnNegate, sl.strTransactionType, sl.strTransactionNumber ORDER BY sl.intSummaryLogId DESC)
@@ -81,16 +83,21 @@ BEGIN
 			,intContractHeaderId
 			,intOrigUOMId
 			,strNotes
+			,a.ysnReceiptedStorage
 		FROM vyuRKGetSummaryLog sl
 		CROSS APPLY (
 			SELECT 
 				strStorageTypeCode
+				,ysnReceiptedStorage
 			FROM (
 				select * from dbo.fnRKGetMiscFieldTable(sl.strMiscField)
 			) t
 			PIVOT (
 				min(strValue)
-				FOR strFieldName IN (strStorageTypeCode)
+				FOR strFieldName IN (
+					strStorageTypeCode
+					,ysnReceiptedStorage
+					)
 			) AS pt
 		) a
 		WHERE strBucketType = 'Customer Owned'
