@@ -1,7 +1,9 @@
 ﻿CREATE PROCEDURE [dbo].[uspSTCheckoutCommanderPLU]
-	@intCheckoutId INT,
-	@strStatusMsg NVARCHAR(250) OUTPUT,
-	@intCountRows INT OUTPUT
+	@intCheckoutId							INT,
+	@UDT_TranPLU							StagingCommanderPlu		READONLY,
+	@ysnSuccess								BIT				OUTPUT,
+	@strMessage								NVARCHAR(1000)	OUTPUT,
+	@intCountRows							INT				OUTPUT
 AS
 BEGIN
 	BEGIN TRY
@@ -20,93 +22,97 @@ BEGIN
 
 
 
-		DECLARE @tblTemp TABLE
-		(
-			intRowCount											INT,
-			intperiodsysid										INT,
-			strperiodperiodType									NVARCHAR(50),
-			strperiodname										NVARCHAR(50),
-			intperiodperiodSeqNum								INT,
-			dtmperiodperiodBeginDate							DATETIME,
-			dtmperiodperiodEndDate								DATETIME,
-			strpluPdperiod										NVARCHAR(50),
-			intpluPdsite										INT,
-			dblpluInfosalePrice									DECIMAL(18, 6),
-			dblpluInfooriginalPrice								DECIMAL(18, 6),
-			strpluInforeasonCode								NVARCHAR(150),
-			dblpluInfopercentOfSales							DECIMAL(18, 6),
-			strpluBaseupc										NVARCHAR(20),
-			intpluBasemodifier									INT,
-			strpluBasename										NVARCHAR(150),
-			intnetSalescount									INT,
-			dblnetSalesamount									NVARCHAR(150),
-			dblnetSalesitemCount								DECIMAL(18, 6),
-			dblDiscount											DECIMAL(18, 6),
-			intRegisterUpcCode									BIGINT
-		)
+		--DECLARE #tblTemp TABLE
+		--(
+		--	intRowCount											INT,
+		--	intperiodsysid										INT,
+		--	strperiodperiodType									NVARCHAR(50),
+		--	strperiodname										NVARCHAR(50),
+		--	intperiodperiodSeqNum								INT,
+		--	dtmperiodperiodBeginDate							DATETIME,
+		--	dtmperiodperiodEndDate								DATETIME,
+		--	strpluPdperiod										NVARCHAR(50),
+		--	intpluPdsite										INT,
+		--	dblpluInfosalePrice									DECIMAL(18, 6),
+		--	dblpluInfooriginalPrice								DECIMAL(18, 6),
+		--	strpluInforeasonCode								NVARCHAR(150),
+		--	dblpluInfopercentOfSales							DECIMAL(18, 6),
+		--	strpluBaseupc										NVARCHAR(20),
+		--	intpluBasemodifier									INT,
+		--	strpluBasename										NVARCHAR(150),
+		--	intnetSalescount									INT,
+		--	dblnetSalesamount									NVARCHAR(150),
+		--	dblnetSalesitemCount								DECIMAL(18, 6),
+		--	dblDiscount											DECIMAL(18, 6),
+		--	intRegisterUpcCode									BIGINT
+		--)
 
 		
 		BEGIN TRY
-			INSERT INTO @tblTemp
-			(
-				intRowCount,
-				intperiodsysid,
-				strperiodperiodType,
-				strperiodname,
-				intperiodperiodSeqNum,
-				dtmperiodperiodBeginDate,
-				dtmperiodperiodEndDate,
-				strpluPdperiod,
-				intpluPdsite,
-				dblpluInfosalePrice,
-				dblpluInfooriginalPrice,
-				strpluInforeasonCode,
-				dblpluInfopercentOfSales,
-				strpluBaseupc,
-				intpluBasemodifier,
-				strpluBasename,
-				intnetSalescount,
-				dblnetSalesamount,
-				dblnetSalesitemCount,
-				dblDiscount,
-				intRegisterUpcCode
-			)
+			--INSERT INTO #tblTemp
+			--(
+			--	intRowCount,
+			--	intperiodsysid,
+			--	strperiodperiodType,
+			--	strperiodname,
+			--	intperiodperiodSeqNum,
+			--	dtmperiodperiodBeginDate,
+			--	dtmperiodperiodEndDate,
+			--	strpluPdperiod,
+			--	intpluPdsite,
+			--	dblpluInfosalePrice,
+			--	dblpluInfooriginalPrice,
+			--	strpluInforeasonCode,
+			--	dblpluInfopercentOfSales,
+			--	strpluBaseupc,
+			--	intpluBasemodifier,
+			--	strpluBasename,
+			--	intnetSalescount,
+			--	dblnetSalesamount,
+			--	dblnetSalesitemCount,
+			--	dblDiscount,
+			--	intRegisterUpcCode
+			--)
+			--USE TEMP TABLE FOR PERFORMANCE--
+			print 1
 			SELECT 
 				intRowCount					= CAST(temp.intRowCount AS INT),
-				intperiodsysid				= CAST(temp.periodsysid AS INT),
-				strperiodperiodType			= ISNULL(temp.periodperiodType, ''),
-				strperiodname				= ISNULL(temp.periodname, ''),
-				intperiodperiodSeqNum		= CAST(temp.periodperiodSeqNum AS INT),
-				dtmperiodperiodBeginDate	= CAST(REPLACE(LEFT (temp.periodperiodBeginDate, LEN (temp.periodperiodBeginDate)-6), 'T', ' ') AS DATETIME),
-				dtmperiodperiodEndDate		= CAST(REPLACE(LEFT (temp.periodperiodEndDate, LEN (temp.periodperiodEndDate)-6), 'T', ' ') AS DATETIME),
-				strpluPdperiod				= ISNULL(temp.pluPdperiod	, ''),
-				intpluPdsite				= CAST(temp.pluPdsite AS INT),
-				dblpluInfosalePrice			= CAST(temp.pluInfosalePrice AS DECIMAL(18, 6)),
-				dblpluInfooriginalPrice		= CAST(temp.pluInfooriginalPrice AS DECIMAL(18, 6)),
-				strpluInforeasonCode		= ISNULL(temp.pluInforeasonCode, ''),
-				dblpluInfopercentOfSales	= CAST(temp.pluInfopercentOfSales AS DECIMAL(18, 6)),
-				strpluBaseupc				= ISNULL(temp.pluBaseupc, ''),
-				intpluBasemodifier			= CAST(temp.pluBasemodifier AS INT),
-				strpluBasename				= ISNULL(temp.pluBasename, ''),
-				intnetSalescount			= CAST(temp.netSalescount AS INT),
-				--dblnetSalesamount			= CAST(temp.netSalesamount AS DECIMAL(18, 6)),
+				intperiodsysid				= CAST(temp.strPeriodSysId AS INT),
+				strperiodperiodType			= CAST(ISNULL(temp.strPeriodPeriodType, '') AS NVARCHAR(MAX)),
+				strperiodname				= CAST(ISNULL(temp.strPeriodName, '')AS NVARCHAR(MAX)),
+				intperiodperiodSeqNum		= CAST(temp.intPeriodPeriodSeqNum AS INT),
+				dtmperiodperiodBeginDate	= CAST(REPLACE(LEFT (temp.strPeriodPeriodBeginDate, LEN (temp.strPeriodPeriodBeginDate)-6), 'T', ' ') AS DATETIME),
+				dtmperiodperiodEndDate		= CAST(REPLACE(LEFT (temp.strPeriodPeriodEndDate, LEN (temp.strPeriodPeriodEndDate)-6), 'T', ' ') AS DATETIME),
+				strpluPdperiod				= CAST(ISNULL(temp.strPluPdPeriod	, '')AS NVARCHAR(MAX)),
+				intpluPdsite				= CAST(temp.intPluPdSite AS INT),
+				dblpluInfosalePrice			= CAST(temp.dblPluInfoSalePrice AS DECIMAL(18, 6)),
+				dblpluInfooriginalPrice		= CAST(temp.dblPluInfoOriginalPrice AS DECIMAL(18, 6)),
+				strpluInforeasonCode		= CAST(ISNULL(temp.strPluInfoReasonCode, '')AS NVARCHAR(MAX)),
+				dblpluInfopercentOfSales	= CAST(temp.dblPluInfoPercentOfSales AS DECIMAL(18, 6)),
+				strpluBaseupc				= CAST(ISNULL(temp.intPluBaseUPC, '')AS NVARCHAR(MAX)),
+				intpluBasemodifier			= CAST(temp.intPluBaseModifier AS INT),
+				strpluBasename				= CAST(ISNULL(temp.strPluBaseName, '')AS NVARCHAR(MAX)),
+				intnetSalescount			= CAST(temp.intNetSalesCount AS INT),
+				--dblnetSalesamount			= CAST(temp.dblNetSalesAmount AS DECIMAL(18, 6)),
 				dblnetSalesamount			= CASE
-												WHEN (ISNULL(temp.pluInforeasonCode, '')  =  'DISCOUNT_SALE')
-													THEN (CAST(temp.pluInfooriginalPrice AS DECIMAL(18, 6))  *  CAST(temp.netSalesitemCount AS DECIMAL(18, 6)))
-												ELSE CAST(temp.netSalesamount AS DECIMAL(18, 6))
+												WHEN (ISNULL(temp.strPluInfoReasonCode, '')  =  'DISCOUNT_SALE')
+													THEN (CAST(temp.dblPluInfoOriginalPrice AS DECIMAL(18, 6))  *  CAST(temp.dblNetSalesItemCount AS DECIMAL(18, 6)))
+												ELSE CAST(temp.dblNetSalesAmount AS DECIMAL(18, 6))
 											END,
-				dblnetSalesitemCount		= CAST(temp.netSalesitemCount AS DECIMAL(18, 6)),
+				dblnetSalesitemCount		= CAST(temp.dblNetSalesItemCount AS DECIMAL(18, 6)),
 				dblDiscount					= CASE
-												WHEN ISNULL(temp.pluInforeasonCode, '')  =  'DISCOUNT_SALE'
-													THEN -(CAST(temp.pluInfooriginalPrice AS DECIMAL(18, 6))   -   CAST(temp.pluInfosalePrice AS DECIMAL(18, 6))) -- Convert to Negative since COMMANDER has a discount of positive
+												WHEN ISNULL(temp.strPluInfoReasonCode, '')  =  'DISCOUNT_SALE'
+													THEN -(CAST(temp.dblPluInfoOriginalPrice AS DECIMAL(18, 6))   -   CAST(temp.dblPluInfoSalePrice AS DECIMAL(18, 6))) -- Convert to Negative since COMMANDER has a discount of positive
 												ELSE 0
 											END,
-				intRegisterUpcCode			= CONVERT(NUMERIC(32, 0),CAST(temp.pluBaseupc AS FLOAT)) -- Remove Leading Zeros on COMMANDER xml,
-			FROM #tempCheckoutInsert temp
+				intRegisterUpcCode			= CONVERT(NUMERIC(32, 0),CAST(temp.intPluBaseUPC AS FLOAT)) -- Remove Leading Zeros on COMMANDER xml,
+			INTO #tblTemp
+			FROM @UDT_TranPLU temp
+
 
 			-- Remove last digit(check digit)
 			-- Assumption is COMMANDER xml has check digit
-			UPDATE @tblTemp
+			UPDATE #tblTemp
 			SET intRegisterUpcCode = CASE
 										WHEN (strpluBaseupc IS NOT NULL AND strpluBaseupc != '' AND LEN(strpluBaseupc) = 14 AND SUBSTRING(strpluBaseupc, 1, 1) = '0')
 											THEN LEFT (intRegisterUpcCode, LEN (intRegisterUpcCode)-1) -- Remove Check digit on last character
@@ -115,7 +121,7 @@ BEGIN
 		END TRY
 		BEGIN CATCH
 			SET @intCountRows = 0
-			SET @strStatusMsg = 'COMMANDER PLU - Insert to temporary table: ' + ERROR_MESSAGE()
+			SET @strMessage = 'COMMANDER PLU - Insert to temporary table: ' + ERROR_MESSAGE()
 
 			GOTO ExitWithRollback
 		END CATCH
@@ -125,7 +131,7 @@ BEGIN
 		-- ==================================================================================================================  
 		-- Start Validate if PLU xml file matches the Mapping on i21 
 		-- ------------------------------------------------------------------------------------------------------------------
-		IF NOT EXISTS(SELECT TOP 1 1 FROM @tblTemp)
+		IF NOT EXISTS(SELECT TOP 1 1 FROM #tblTemp)
 			BEGIN
 					-- Add to error logging
 					INSERT INTO tblSTCheckoutErrorLogs 
@@ -148,7 +154,8 @@ BEGIN
 					)
 
 					SET @intCountRows = 0
-					SET @strStatusMsg = 'Commander PLU XML file did not match the layout mapping'
+					SET @strMessage = 'Commander PLU XML file did not match the layout mapping'
+					SET @ysnSuccess = 0
 
 					GOTO ExitWithCommit
 			END
@@ -164,6 +171,7 @@ BEGIN
 		-- Get Error logs. Check Register XML that is not configured in i21
 		-- Compare <upc> tag of (RegisterXML) and (Inventory->Item->strUpcCode, strLongUPCCode)
 		-- ------------------------------------------------------------------------------------------------------------------ 
+		print 1
 		INSERT INTO tblSTCheckoutErrorLogs 
 		(
 			strErrorType
@@ -180,7 +188,7 @@ BEGIN
 			, strRegisterTagValue	= LEFT(Chk.strpluBaseupc, LEN (Chk.strpluBaseupc)-1) -- Remove Check digit on last character
 			, intCheckoutId			= @intCheckoutId
 			, intConcurrencyId		= 1
-		FROM @tblTemp Chk
+		FROM #tblTemp Chk
 		WHERE Chk.intRegisterUpcCode NOT IN
 		(
 			SELECT DISTINCT
@@ -212,39 +220,41 @@ BEGIN
 		-- ==================================================================================================================
 		-- Start: Insert to temporary table
 		-- ==================================================================================================================
-		DECLARE @tblTempForCalculation TABLE
-		(
-			intCalculationId			INT	NOT NULL IDENTITY,
-			intCheckoutId				INT,
-			SalesQuantity				INT,
-			DiscountAmount				DECIMAL(18, 6),
-			PromotionAmount				DECIMAL(18, 6),
-			RefundAmount				DECIMAL(18, 6),
-			RefundCount					INT,
-			SalesAmount					DECIMAL(18, 6),
-			ActualSalesPrice			DECIMAL(18, 6),
-			POSCode						NVARCHAR(15),
-			intPOSCode					BIGINT,
-			dblAveragePrice				DECIMAL(18, 6),
-			dblAveragePriceWthDiscounts	DECIMAL(18, 6)
-		)
+		--DECLARE #tblTempForCalculation TABLE
+		--(
+		--	intCalculationId			INT	NOT NULL IDENTITY,
+		--	intCheckoutId				INT,
+		--	SalesQuantity				INT,
+		--	DiscountAmount				DECIMAL(18, 6),
+		--	PromotionAmount				DECIMAL(18, 6),
+		--	RefundAmount				DECIMAL(18, 6),
+		--	RefundCount					INT,
+		--	SalesAmount					DECIMAL(18, 6),
+		--	ActualSalesPrice			DECIMAL(18, 6),
+		--	POSCode						NVARCHAR(15),
+		--	intPOSCode					BIGINT,
+		--	dblAveragePrice				DECIMAL(18, 6),
+		--	dblAveragePriceWthDiscounts	DECIMAL(18, 6)
+		--)
 
-		INSERT INTO @tblTempForCalculation
-		(
-			intCheckoutId,
-			SalesQuantity,
-			DiscountAmount,
-			PromotionAmount,
-			SalesAmount,
-			RefundAmount,
-			RefundCount,
-			ActualSalesPrice,
-			POSCode,
-			intPOSCode,
-			dblAveragePrice,
-			dblAveragePriceWthDiscounts
-		)
+		print 3
+		--INSERT INTO #tblTempForCalculation
+		--(
+		--	intCheckoutId,
+		--	SalesQuantity,
+		--	DiscountAmount,
+		--	PromotionAmount,
+		--	SalesAmount,
+		--	RefundAmount,
+		--	RefundCount,
+		--	ActualSalesPrice,
+		--	POSCode,
+		--	intPOSCode,
+		--	dblAveragePrice,
+		--	dblAveragePriceWthDiscounts
+		--)
 		SELECT 
+			ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) as intCalculationId,
 			intCheckoutId					= @intCheckoutId,
 			SalesQuantity					= CAST(ISNULL(CAST(dblnetSalesitemCount AS DECIMAL(18, 6)) ,0) AS INT),
 			--DiscountAmount					= 0, -- Commander has No Discount in PLU xml //CAST(DiscountAmount AS DECIMAL(18,6)),
@@ -266,8 +276,8 @@ BEGIN
 													THEN 0
 												ELSE ISNULL( NULLIF( CAST(dblnetSalesamount AS DECIMAL(18, 6)) ,0) , 0) /   CAST(CAST(dblnetSalesitemCount AS DECIMAL(18, 6)) AS INT)
 											END
-
-		FROM @tblTemp
+		INTO #tblTempForCalculation
+		FROM #tblTemp
 		-- ==================================================================================================================
 		-- End: Insert to temporary table
 		-- ==================================================================================================================
@@ -315,7 +325,7 @@ BEGIN
 			  , dblItemStandardCost = NULL --ISNULL(CAST(P.dblStandardCost AS DECIMAL(18,6)),0)
 			  , intConcurrencyId	= 1
 			  , intCalculationId	= TempChk.intCalculationId
-			FROM @tblTempForCalculation TempChk
+			FROM #tblTempForCalculation TempChk
 			WHERE TempChk.intPOSCode NOT IN
 			(
 				SELECT DISTINCT
@@ -384,7 +394,7 @@ BEGIN
 			  , dblItemStandardCost = ISNULL(CAST(P.dblStandardCost AS DECIMAL(18,6)),0)
 			  , intConcurrencyId	= 1
 			  , intCalculationId	= TempChk.intCalculationId
-			FROM @tblTempForCalculation TempChk
+			FROM #tblTempForCalculation TempChk
 			INNER JOIN tblICItemUOM UOM
 				ON TempChk.intPOSCode = UOM.intUpcCode
 			INNER JOIN dbo.tblICItem I 
@@ -443,7 +453,7 @@ BEGIN
 			  , dblItemStandardCost = ISNULL(CAST(P.dblStandardCost AS DECIMAL(18,6)),0)
 			  , intConcurrencyId	= 1
 			  , intCalculationId	=TempChk.intCalculationId
-			FROM @tblTempForCalculation TempChk
+			FROM #tblTempForCalculation TempChk
 			INNER JOIN tblICItemUOM UOM
 				ON TempChk.intPOSCode = UOM.intUpcCode
 			INNER JOIN dbo.tblICItem I 
@@ -626,7 +636,7 @@ BEGIN
 														END
 											END),
 					[intConcurrencyId]		= 1
-				FROM @tblTempForCalculation TempChk
+				FROM #tblTempForCalculation TempChk
 				INNER JOIN tblSTCheckoutItemMovements im
 					ON TempChk.intCalculationId = im.intCalculationId
 					AND TempChk.intCheckoutId = im.intCheckoutId
@@ -663,7 +673,7 @@ BEGIN
 													THEN TempChk.dblAveragePriceWthDiscounts
 											END
 
-				--FROM @tblTempForCalculation TmpChk
+				--FROM #tblTempForCalculation TmpChk
 				--INNER JOIN
 				--(
 				--	SELECT intItemUOMId
@@ -724,7 +734,8 @@ BEGIN
 
 
 		SET @intCountRows = 1
-		SET @strStatusMsg = 'Success'
+		SET @strMessage = 'Success'
+		SET @ysnSuccess = 1 
 
 
 		-- COMMIT
@@ -734,7 +745,8 @@ BEGIN
 
 	BEGIN CATCH
 		SET @intCountRows = 0
-		SET @strStatusMsg = ERROR_MESSAGE()
+		SET @strMessage = ERROR_MESSAGE()
+		SET @ysnSuccess = 0
 
 		
 		-- ROLLBACK
@@ -756,3 +768,4 @@ ExitWithRollback:
 		END
 	
 ExitPost:
+
