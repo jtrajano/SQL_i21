@@ -14,3 +14,4 @@
 	[intPromotionCount]                         INT					NULL,
 	[dblPromotionAmount]                        NUMERIC(18,6)		NULL
 )
+
