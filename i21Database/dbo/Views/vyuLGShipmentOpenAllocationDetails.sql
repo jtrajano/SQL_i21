@@ -90,6 +90,7 @@ FROM (
 		JOIN tblLGLoad L ON L.intLoadId = SP.intLoadId
 			AND L.intPurchaseSale = 3
 			AND L.intShipmentType = 1
+			AND ISNULL(L.ysnCancelled, 0) = 0
 		GROUP BY SP.intAllocationDetailId
 		) LD ON AD.intAllocationDetailId = LD.intAllocationDetailId
 	LEFT JOIN (
@@ -216,6 +217,7 @@ FROM (
 		JOIN tblLGLoad L ON L.intLoadId = SP.intLoadId
 			AND L.intPurchaseSale = 3
 			AND L.intShipmentType = 2
+			AND ISNULL(L.ysnCancelled, 0) = 0
 		GROUP BY SP.intAllocationDetailId
 		) LD ON AD.intAllocationDetailId = LD.intAllocationDetailId
 	LEFT JOIN (
