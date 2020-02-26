@@ -80,6 +80,20 @@ BEGIN TRY
 		RETURN;
 	END
 
+	--Inactive Vendor
+	IF EXISTS(SELECT TOP 1 1 
+		FROM tblAPVendor A
+		INNER JOIN @voucherPayables B ON A.intEntityId = B.intEntityVendorId
+		WHERE ysnPymtCtrlActive = 0)
+	BEGIN
+		SET @error =  'The vendor payment control is inactive.';
+		IF @throwError = 1
+		BEGIN
+			RAISERROR(@error, 16, 1);
+		END
+		RETURN;
+	END
+
 	-- IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpVoucherHeader')) DROP TABLE #tmpVoucherHeader
 	-- --FILTER VoucherPayables BASE ON THE # OF HEADER TO CREATE
 	-- --WILL USE THE FILTERED DATA TO CREATE HEADER
