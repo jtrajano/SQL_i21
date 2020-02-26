@@ -1294,13 +1294,15 @@ FROM
 	OUTER APPLY fnGetItemTaxComputationForVendor(A.intItemId, A.intEntityVendorId, A.dtmDate, A.dblUnitCost, 1, (CASE WHEN VST.intTaxGroupId > 0 THEN VST.intTaxGroupId
 																													  WHEN CL.intTaxGroupId  > 0 THEN CL.intTaxGroupId 
 																													  WHEN EL.intTaxGroupId > 0  THEN EL.intTaxGroupId ELSE 0 END), CL.intCompanyLocationId, D1.intShipFromId , 0, 0, NULL, 0, NULL, NULL, NULL, NULL) Taxes
-	OUTER APPLY 
-	(
-		SELECT intEntityVendorId FROM tblAPBillDetail BD
-		LEFT JOIN dbo.tblAPBill B ON BD.intBillId = B.intBillId
-		WHERE BD.intInventoryShipmentChargeId = A.intInventoryShipmentChargeId
+	-- OUTER APPLY 
+	-- (
+	-- 	SELECT intEntityVendorId FROM tblAPBillDetail BD
+	-- 	LEFT JOIN dbo.tblAPBill B ON BD.intBillId = B.intBillId
+	-- 	WHERE BD.intInventoryShipmentChargeId = A.intInventoryShipmentChargeId
 
-	) Billed
+	-- ) Billed
+	-- The exclusion of data is not working in this sub query
+	-- Excluding of data when there is a voucher is already part of the vyuICShipmentChargesForBilling
 	OUTER APPLY 
 	(
 		SELECT SUM(ISNULL(H.dblQtyReceived,0)) AS dblQty FROM tblAPBillDetail H 
@@ -1309,7 +1311,7 @@ FROM
 		GROUP BY H.intInventoryShipmentChargeId
 			
 	) Qty
-	WHERE A.[intEntityVendorId] NOT IN (Billed.intEntityVendorId) OR (A.dblOrderQty > 0)
+	WHERE (A.dblOrderQty != 0)
 
 	UNION ALL
 	SELECT [intEntityVendorId] = I.intEntityCustomerId
