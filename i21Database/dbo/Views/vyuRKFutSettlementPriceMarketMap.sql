@@ -16,6 +16,7 @@ SELECT
 	,M2M.strRecordName as strM2MBatch
 	,M2M.dtmTransactionUpTo as dtmM2MDate
 	,SPMM.ysnImported
+	,dtmFutureMonthOrderBy = CONVERT(DATETIME, LEFT(FM.strFutureMonth, 4) + '20' + CONVERT(NVARCHAR(2), FM.intYear))
 FROM tblRKFutSettlementPriceMarketMap SPMM
 INNER JOIN tblRKFuturesMonth FM ON SPMM.intFutureMonthId = FM.intFutureMonthId
 LEFT JOIN tblRKM2MInquiryLatestMarketPrice ILMP ON SPMM.intFutSettlementPriceMonthId = ILMP.intFutSettlementPriceMonthId
