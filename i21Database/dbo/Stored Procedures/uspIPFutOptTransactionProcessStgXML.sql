@@ -898,6 +898,9 @@ BEGIN TRY
 			IF (@intNewFutOptTransactionHeaderId > 0)
 			BEGIN
 				DECLARE @StrDescription AS NVARCHAR(MAX)
+				DECLARE @toValue NVARCHAR(255)
+
+				SELECT @toValue = CONVERT(NVARCHAR, @dtmTransactionDate)
 
 				IF @strRowState = 'Added'
 				BEGIN
@@ -910,7 +913,7 @@ BEGIN TRY
 						,@actionIcon = 'small-new-plus'
 						,@changeDescription = @StrDescription
 						,@fromValue = ''
-						,@toValue = @dtmTransactionDate
+						,@toValue = @toValue
 				END
 				ELSE IF @strRowState = 'Modified'
 				BEGIN
@@ -923,7 +926,7 @@ BEGIN TRY
 						,@actionIcon = 'small-tree-modified'
 						,@changeDescription = @StrDescription
 						,@fromValue = ''
-						,@toValue = @dtmTransactionDate
+						,@toValue = @toValue
 				END
 			END
 
@@ -967,9 +970,20 @@ BEGIN TRY
 
 			SELECT @intFutOptTransactionHeaderAckStageId = SCOPE_IDENTITY()
 
-			EXECUTE dbo.uspSMInterCompanyUpdateMapping @currentTransactionId = @intTransactionRefId
-				,@referenceTransactionId = @intTransactionId
-				,@referenceCompanyId = @intCompanyId
+			IF @intTransactionRefId IS NULL
+			BEGIN
+				RAISERROR (
+							'Current Transaction Id is not available.'
+							,16
+							,1
+							)
+			END
+			ELSE
+			BEGIN
+				EXECUTE dbo.uspSMInterCompanyUpdateMapping @currentTransactionId = @intTransactionRefId
+					,@referenceTransactionId = @intTransactionId
+					,@referenceCompanyId = @intCompanyId
+			END
 
 			UPDATE tblRKFutOptTransactionHeaderStage
 			SET strFeedStatus = 'Processed'
