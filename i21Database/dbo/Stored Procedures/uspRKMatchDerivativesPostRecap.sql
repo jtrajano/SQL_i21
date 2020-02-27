@@ -85,7 +85,7 @@ BEGIN
 		, intSourceLocationId
 		, intSourceUOMId
 		, intCommodityId)
-	SELECT dtmPostDate = GETDATE()
+	SELECT dtmPostDate = H.dtmMatchDate
 		, strBatchId = NULL
 		, intAccountId = @intFuturesGainOrLossRealized
 		, strAccountId = ISNULL(@strFuturesGainOrLossRealized , 'Invalid Account Id')
@@ -116,7 +116,7 @@ BEGIN
 	WHERE H.intMatchFuturesPSHeaderId = @intMatchFuturesPSHeaderId
 
 	--Offset
-	UNION ALL SELECT dtmPostDate = GETDATE()
+	UNION ALL SELECT dtmPostDate = H.dtmMatchDate
 		, strBatchId = NULL
 		, intAccountId = @intFuturesGainOrLossRealizedOffset 
 		, strAccountId = ISNULL(@strFuturesGainOrLossRealizedOffset , 'Invalid Account Id')
