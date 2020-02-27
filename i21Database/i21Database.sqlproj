@@ -8502,6 +8502,8 @@
     <Build Include="dbo\Functions\fnGRCalculateStorageUnits.sql" />
     <Build Include="dbo\Tables\tblAPImportVoucherLassus.sql" />
     <Build Include="dbo\Stored Procedures\uspAPImportVoucherLassus.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPImportVoucherLassusSas.sql" />
+    <Build Include="dbo\Tables\tblAPImportVoucherLassusSas.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
