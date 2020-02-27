@@ -325,35 +325,41 @@ BEGIN
 	WHERE ISNULL(ComAtt.intCommodityId, 0) = ISNULL(@CommodityId, 0)
 		AND strType = 'ProductType'
 		AND (Balance.dblContracts IS NOT NULL AND Balance.dblInTransit IS NOT NULL AND Balance.dblStock IS NOT NULL AND Balance.dblFutures IS NOT NULL)
-
-	SELECT *
-		, dblRunningTotal = SUM(dblQuantity) OVER (PARTITION BY intProductTypeId ORDER BY intRowNum)
-		, intProductTypeIndex = ROW_NUMBER() OVER (PARTITION BY intProductTypeId ORDER BY intRowNum)
-	INTO #Demand
-	FROM (
-		SELECT intRowNum = ROW_NUMBER() OVER(ORDER BY intProductTypeId, dtmDemandDate)
-			, intCommodityId
-			, dtmDemandDate
-			, intProductTypeId
-			, dblQuantity
-		FROM (
-			SELECT i.intCommodityId
-				, DD.dtmDemandDate
-				, dblQuantity = dbo.fnCTConvertQuantityToTargetItemUOM (i.intItemId, iUOM.intUnitMeasureId, @intUnitMeasureId, DD.dblQuantity)
-				, i.intProductTypeId	
-			FROM tblMFDemandDetail DD
-			JOIN tblICItem i ON i.intItemId = DD.intItemId
-			JOIN tblICItemUOM iUOM ON iUOM.intItemUOMId = DD.intItemUOMId
-			WHERE DD.intDemandHeaderId = (
-				SELECT TOP 1 intDemandHeaderId FROM tblMFDemandHeader DH
-				WHERE ISNULL(DH.intBookId, 0) = ISNULL(@BookId, ISNULL(DH.intBookId, 0))
-					AND ISNULL(DH.intSubBookId, 0) = ISNULL(@SubBookId, ISNULL(DH.intSubBookId, 0))
-					AND CAST(FLOOR(CAST(DH.dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(@Date AS FLOAT)) AS DATETIME)
-				ORDER BY DH.dtmDate DESC
-			) 
-		) tbl
-	) tbl 
 	
+	SELECT intRowNum = ROW_NUMBER() OVER(ORDER BY intProductTypeId, dtmDemandDate)
+		, intCommodityId
+		, dtmDemandDate
+		, intProductTypeId
+		, dblQuantity
+	INTO #DemandDetail
+	FROM (
+		SELECT i.intCommodityId
+			, DD.dtmDemandDate
+			, dblQuantity = dbo.fnCTConvertQuantityToTargetItemUOM (i.intItemId, iUOM.intUnitMeasureId, @intUnitMeasureId, DD.dblQuantity)
+			, i.intProductTypeId	
+		FROM tblMFDemandDetail DD
+		JOIN tblICItem i ON i.intItemId = DD.intItemId
+		JOIN tblICItemUOM iUOM ON iUOM.intItemUOMId = DD.intItemUOMId
+		WHERE DD.intDemandHeaderId = (
+			SELECT TOP 1 intDemandHeaderId FROM tblMFDemandHeader DH
+			WHERE ISNULL(DH.intBookId, 0) = ISNULL(@BookId, ISNULL(DH.intBookId, 0))
+				AND ISNULL(DH.intSubBookId, 0) = ISNULL(@SubBookId, ISNULL(DH.intSubBookId, 0))
+				AND CAST(FLOOR(CAST(DH.dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(@Date AS FLOAT)) AS DATETIME)
+			ORDER BY DH.dtmDate DESC
+		) 
+	) tbl
+
+	SELECT tbl.*
+		, dblRunningTotal
+		, intProductTypeIndex = ROW_NUMBER() OVER (PARTITION BY tbl.intProductTypeId ORDER BY intRowNum)
+	INTO #Demand
+	FROM #DemandDetail tbl
+	CROSS APPLY (
+		SELECT dblRunningTotal = ISNULL(SUM(dblQuantity), 0)
+		FROM #DemandDetail dd
+		WHERE dd.intRowNum <= tbl.intRowNum
+	) RT
+
 	SELECT *
 	INTO #iterateTable
 	FROM @FinalTable
@@ -472,5 +478,6 @@ BEGIN
 	DROP TABLE #DapSettlement
 	DROP TABLE #iterateTable
 	DROP TABLE #Demand
+	DROP TABLE #DemandDetail
 	DROP TABLE #tmpTempBalances
 END
