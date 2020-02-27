@@ -4,13 +4,13 @@
 	[strInvoiceNumber] NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NOT NULL,
 	[intVoucherType] TINYINT,
 	[strReference] NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
-	[dtmDate] NVARCHAR(500) NOT NULL,
+	[dtmDate] NVARCHAR(500) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strVendorId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL,
-	[dblTotal] DECIMAL(18,2) NOT NULL,
-	[strDateOrAccount] NVARCHAR(500) NOT NULL,
-	[strDetailInfo] NVARCHAR(500) NOT NULL,
-	[dblDebit] DECIMAL(18,2) NOT NULL,
-	[dblCredit] DECIMAL(18,2) NOT NULL,
+	[dblTotal] NVARCHAR(500) COLLATE Latin1_General_CI_AS NOT NULL,
+	[strDateOrAccount] NVARCHAR(500) COLLATE Latin1_General_CI_AS NOT NULL,
+	[strDetailInfo] NVARCHAR(500) COLLATE Latin1_General_CI_AS NOT NULL,
+	[dblDebit] NVARCHAR(500) COLLATE Latin1_General_CI_AS NOT NULL,
+	[dblCredit] NVARCHAR(500) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strItemDescription] NVARCHAR (500)  COLLATE Latin1_General_CI_AS NOT NULL
 )
 GO
