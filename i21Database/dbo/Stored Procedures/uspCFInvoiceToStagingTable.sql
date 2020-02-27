@@ -607,6 +607,51 @@ BEGIN TRY
 	--) AS cfMiscOdom
 	-----------------------------------------------------------
 	WHERE cfInvRpt.strUserId = @UserId 
+
+
+
+	--AZ TAX--
+	DECLARE @intAZTaxCodeId INT 
+	SELECT TOP 1 @intAZTaxCodeId = intAZTaxCodeId FROM tblCFCompanyPreference
+
+	IF(ISNULL(@intAZTaxCodeId,0) != 0)
+	BEGIN
+
+		DECLARE @intTaxCodeId INT
+		DECLARE @ysnExempt BIT
+
+
+		DECLARE @tblTransWithAZtax TABLE
+		(
+			intTransactionId INT		
+		)	
+
+		INSERT INTO @tblTransWithAZtax ( intTransactionId )
+		SELECT intTransactionId FROM tblCFTransactionTax WHERE (ISNULL(tblCFTransactionTax.ysnTaxExempt,0) = 1 AND tblCFTransactionTax.intTaxCodeId = @intAZTaxCodeId)
+
+
+		UPDATE tblCFInvoiceStagingTable
+		SET strProductDescriptionForTotals = strItemDescription + '- Light Class'
+		WHERE intTransactionId IN (SELECT intTransactionId FROM @tblTransWithAZtax)
+		AND LOWER(strStatementType) =  LOWER(@StatementType)
+
+	
+		UPDATE tblCFInvoiceStagingTable
+		SET strProductDescriptionForTotals = strItemDescription
+		WHERE intTransactionId NOT IN (SELECT intTransactionId FROM @tblTransWithAZtax)
+		AND LOWER(strStatementType) =  LOWER(@StatementType)
+
+	END
+	ELSE
+	BEGIN
+		UPDATE tblCFInvoiceStagingTable
+		SET strProductDescriptionForTotals = strItemDescription
+		WHERE intTransactionId NOT IN (SELECT intTransactionId FROM @tblTransWithAZtax)
+		AND LOWER(strStatementType) =  LOWER(@StatementType)
+	END 
+	--AZ TAX--
+
+
 	--AND cfInvRptSum.strUserId = @UserId
 	--AND cfInvRptDcnt.strUserId = @UserId
 

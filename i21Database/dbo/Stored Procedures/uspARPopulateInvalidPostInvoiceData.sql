@@ -355,21 +355,7 @@ BEGIN
 		,[intItemId]			= I.[intItemId]
 		,[strBatchId]			= I.[strBatchId]
 		,[strPostingError]		= CASE WHEN GLA.[intAccountId] IS NULL THEN ' The Receivable Discount account assigned to item ' + I.[strItemNo] + ' is not valid.' ELSE 'Receivable Discount account was not set up for item ' + I.[strItemNo] END
-	FROM 
-		#ARPostInvoiceDetail I	
-	--INNER JOIN dbo.tblARInvoiceDetail ARID
-	--		ON I.[intInvoiceId] = ARID.[intInvoiceId]
-	--LEFT OUTER JOIN #ARInvoiceItemAccount  IST
-	--		ON ARID.[intItemId] = IST.[intItemId] 
-	--		AND I.[intCompanyLocationId] = IST.[intLocationId] 
-	--LEFT OUTER JOIN dbo.tblICItem  IT
-	--		ON ARID.[intItemId] = IT.[intItemId]
-	--LEFT OUTER JOIN dbo.tblGLAccount GLA
-	--		ON ISNULL(IST.[intDiscountAccountId], I.[intDiscountAccountId]) = GLA.[intAccountId]		 
-	--WHERE
-	--	((ISNULL(IST.[intDiscountAccountId],0) = 0  AND  ISNULL(I.[intDiscountAccountId],0) = 0) OR GLA.[intAccountId] IS NULL)
-	--	AND ARID.[dblDiscount] <> 0		
-	--	AND ISNULL(IT.[strType],'') <> 'Comment'	
+	FROM #ARPostInvoiceDetail I	
 	LEFT OUTER JOIN #ARInvoiceItemAccount  IST
 			ON I.[intItemId] = IST.[intItemId] 
 			AND I.[intCompanyLocationId] = IST.[intLocationId] 

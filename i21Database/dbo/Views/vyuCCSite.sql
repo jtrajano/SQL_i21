@@ -23,6 +23,7 @@ SELECT A.intSiteId
 				FROM tblEMEntityToContact I 
 				LEFT JOIN tblEMEntity J ON J.intEntityId = I.intEntityContactId
 				WHERE I.intEntityId = A.intEntityId
+				AND J.strEmailDistributionOption LIKE '%Dealer CC Notification%'
 			) Contact
 		FOR XML PATH('')),1,1,''
 	)

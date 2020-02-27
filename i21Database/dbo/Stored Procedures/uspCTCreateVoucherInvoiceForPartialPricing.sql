@@ -434,6 +434,8 @@ BEGIN TRY
 									AND intContractDetailId = @intContractDetailId 
 									AND intInventoryReceiptChargeId IS NULL
 							ORDER BY intBillDetailId DESC 
+							--UPDATING OF QUANTITY Manual
+							UPDATE tblAPBillDetail SET dblQtyOrdered = @dblReceived WHERE intBillDetailId = @intBillDetailId
 					    
 							-- Add the 'DP/Basis' other charges into the voucher
 							BEGIN 
@@ -1348,6 +1350,12 @@ BEGIN TRY
 					
 					set @dblPricedForInvoice = 0;
 					set @dblInvoicedPriced = isnull(@dblInvoicedPriced,0.00);
+
+					-- if load based use the invoiced qty as priced qty
+					if isnull(@ysnLoad,0) = 1
+					begin
+						set @dblPriced = case when @dblInvoicedPriced > 0 then @dblInvoicedPriced else @dblShippedForInvoice end
+					end
 
 					--Check if Priced Detail has remaining quantity. If no, skip Pricing Loop
 					if (@dblPriced = @dblInvoicedPriced)

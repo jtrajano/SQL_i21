@@ -30,6 +30,7 @@ SET ANSI_WARNINGS OFF
 		--set @dblCashPriceFromCt = 9.55
 	end
 
+DECLARE @dblGrossUnits AS DECIMAL(24,10) = null
 
 -- Create the variables used by fnGetItemGLAccount
 DECLARE @AccountCategory_Inventory AS NVARCHAR(30) = 'Inventory'
@@ -227,6 +228,8 @@ if @ysnForRebuild = 0
 
 ;
 
+select @dblGrossUnits = dblUnits from @SettleVoucherCreate where ysnDiscountFromGrossWeight = 1
+
 
 if @debug_awesome_ness = 1
 begin
@@ -312,7 +315,11 @@ AS
 		,t.strTransactionId
 		,t.dblQty
 		,t.dblUOMQty
-		,dblCost = t.dblCost - dbo.fnDivide(DiscountCost.dblTotalDiscountCost, isnull(@dblSelectedUnits, t.dblQty) ) 
+		,dblCost = t.dblCost 
+				- (
+					dbo.fnDivide(DiscountCost.dblTotalDiscountCost, isnull(@dblSelectedUnits, t.dblQty) ) 
+				  + dbo.fnDivide(DiscountCostGross.dblTotalDiscountCost, isnull(@dblGrossUnits, t.dblQty) ) 
+				  )
 		,dblItemCost = t.dblCost
 		,t.dblValue
 		,t.intTransactionTypeId
@@ -337,18 +344,45 @@ AS
 			ISNULL(
 				SUM(
 					ROUND(
-						SV.dblCashPrice * CASE 
-								WHEN ISNULL(SV.dblSettleContractUnits,0) > 0 AND ysnDiscountFromGrossWeight = 0 THEN SV.dblSettleContractUnits 
-						ELSE 
-							SV.dblUnits 
-						END
-					, 2)
-				)
-			,0)  AS dblTotalDiscountCost
+						(SV.dblCashPrice * 
+							CASE WHEN ISNULL(SV.dblSettleContractUnits,0) > 0 
+								THEN
+									SV.dblSettleContractUnits												
+								ELSE 									
+									SV.dblUnits
+							END)									 
+					, 2) 
+				) 
+			,0)  AS  dblTotalDiscountCost
 			--ISNULL(round(SUM(((SV.dblCashPrice * CASE WHEN ISNULL(SV.dblSettleContractUnits,0) > 0 THEN SV.dblSettleContractUnits ELSE SV.dblUnits END)) ), 2),0)  AS dblTotalDiscountCost
 		FROM tblGRSettleVoucherCreateReferenceTable SV		
 		WHERE intItemType = 3 and SV.strBatchId = @strBatchId and SV.ysnItemInventoryCost = 1--DISCOUNTS
+			and SV.ysnDiscountFromGrossWeight = 0
 	) DiscountCost
+
+	OUTER APPLY (
+		SELECT 
+			ISNULL(
+				SUM(
+					ROUND(
+						(SV.dblCashPrice * 
+							CASE WHEN ISNULL(SV.dblSettleContractUnits,0) > 0 
+								THEN
+									((SV.dblSettleContractUnits / @dblSelectedUnits) * @dblGrossUnits ) 
+								ELSE
+									((SV.dblUnits  / @dblSelectedUnits) * @dblGrossUnits) 
+									
+							END)									 
+					, 2) 
+				) 
+			,0)  AS  dblTotalDiscountCost
+			--ISNULL(round(SUM(((SV.dblCashPrice * CASE WHEN ISNULL(SV.dblSettleContractUnits,0) > 0 THEN SV.dblSettleContractUnits ELSE SV.dblUnits END)) ), 2),0)  AS dblTotalDiscountCost
+		FROM tblGRSettleVoucherCreateReferenceTable SV		
+		WHERE intItemType = 3 and SV.strBatchId = @strBatchId and SV.ysnItemInventoryCost = 1--DISCOUNTS
+			and SV.ysnDiscountFromGrossWeight = 1
+	) DiscountCostGross
+
+
 	WHERE t.strBatchId = @strBatchId
 		AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId) 
 		AND ISNULL(i.intCategoryId, 0) = COALESCE(@intRebuildCategoryId, i.intCategoryId, 0) 

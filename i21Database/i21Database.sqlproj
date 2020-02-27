@@ -8150,6 +8150,9 @@
     <Build Include="dbo\Views\vyuSTUnpostedItemSales.sql" />
     <Build Include="dbo\Views\vyuSTUnpostedPumpTotals.sql" />
     <Build Include="dbo\Views\vyuSTUnpostedItemMovements.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCCheckTicketContractAfterManualDistribution.sql" />
+    <Build Include="dbo\Stored Procedures\uspICFixICvsGLAmountDisrecpany.sql" />
+    <Build Include="dbo\Functions\fnGRCalculateStorageUnits.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

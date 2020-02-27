@@ -7,6 +7,7 @@ SELECT LR.intLoadReceiptId
 	, TM.strVendorId strTerminalId
 	, LR.intSupplyPointId
 	, SP.strSupplyPoint strSupplyPoint
+	, SP.intEntityLocationId 
 	, SP.strGrossOrNet
 	, LR.intCompanyLocationId
 	, CL.strLocationName

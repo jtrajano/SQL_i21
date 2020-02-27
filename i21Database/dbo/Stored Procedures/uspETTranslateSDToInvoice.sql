@@ -347,7 +347,8 @@ BEGIN
 				--TM----------------------------------------------------------------------------------------------------------------------------
 				--Get Site Id 
 				SET @intSiteId = ( SELECT TOP 1 intSiteID	FROM tblTMCustomer A INNER JOIN tblTMSite B ON A.intCustomerID = B.intCustomerID
-															WHERE intCustomerNumber = @intCustomerEntityId AND B.intSiteNumber = CAST(@strSiteNumber AS INT))
+															WHERE intCustomerNumber = @intCustomerEntityId AND B.intSiteNumber = CAST( REPLACE(@strSiteNumber, '.', '') AS INT)
+															)
 				----------------------------------------------------------------------------------------------------------------------------
 
 			---Insert/Create Invoice 
