@@ -41,15 +41,18 @@ BEGIN
 		intCommodityId
 		, intUnitMeasureId
 		, intItemUOMId
+		, intItemId
 	) AS (
 		SELECT intCommodityId
 			, intUnitMeasureId
 			, intItemUOMId
+			, intItemId
 		FROM (
-			SELECT intRowId = ROW_NUMBER() OVER (PARTITION BY intCommodityId ORDER BY ItemUOM.intUnitMeasureId DESC)
+			SELECT intRowId = ROW_NUMBER() OVER (PARTITION BY intCommodityId, Item.intItemId ORDER BY ItemUOM.intUnitMeasureId DESC)
 				, intCommodityId
 				, ItemUOM.intUnitMeasureId
 				, ItemUOM.intItemUOMId
+				, Item.intItemId
 			FROM tblICItemUOM ItemUOM
 			JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
 			JOIN tblICItem Item ON Item.intItemId = ItemUOM.intItemId
@@ -106,14 +109,14 @@ BEGIN
 		FROM tblCTContractDetail Detail
 		JOIN tblCTContractHeader Header ON Header.intContractHeaderId = Detail.intContractHeaderId
 		JOIN tblICItem Item ON Item.intItemId = Detail.intItemId
-		JOIN TonUOM ON TonUOM.intCommodityId = Header.intCommodityId
+		JOIN TonUOM ON TonUOM.intCommodityId = Header.intCommodityId AND TonUOM.intItemId = Detail.intItemId
 		LEFT JOIN tblICItemBundle IB ON IB.intItemId = Detail.intItemBundleId
 		LEFT JOIN (
 			SELECT CC.intContractDetailId
 				, dblAmount = SUM(dbo.fnRKConvertUOMCurrency('ItemUOM', CC.intItemUOMId, CCUOM.intItemUOMId, 1, CC.intCurrencyId, @intCurrencyId, dblAmount, CC.intContractDetailId))
 			FROM vyuCTContractCostView CC
 			JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CC.intContractHeaderId
-			JOIN TonUOM CCUOM ON CCUOM.intCommodityId = CH.intCommodityId
+			JOIN TonUOM CCUOM ON CCUOM.intCommodityId = CH.intCommodityId AND CCUOM.intItemId = CC.intItemId
 			WHERE UPPER(strItemDescription) LIKE '%FREIGHT%'
 			GROUP BY CC.intContractDetailId
 		) CC ON CC.intContractDetailId = Detail.intContractDetailId
@@ -121,7 +124,6 @@ BEGIN
 			AND Detail.intPricingTypeId = 1
 			AND Detail.dblBalance <> 0
 			AND Header.intContractTypeId = 1
-			AND CAST(FLOOR(CAST(Detail.dtmEndDate AS FLOAT)) AS DATETIME) <= @dtmDate
 	
 		UNION ALL SELECT DISTINCT CH.intCommodityId
 			, L.intBookId
@@ -146,7 +148,7 @@ BEGIN
 		JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = LD.intItemUOMId
 		JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
 		JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
-		JOIN TonUOM ON TonUOM.intCommodityId = CH.intCommodityId
+		JOIN TonUOM ON TonUOM.intCommodityId = CH.intCommodityId AND TonUOM.intItemId = L.intItemId
 		JOIN tblICItem Item ON Item.intItemId = LD.intItemId
 		LEFT JOIN tblICItemBundle IB ON IB.intItemId = CD.intItemBundleId
 		LEFT JOIN (
@@ -154,14 +156,13 @@ BEGIN
 				, dblAmount = SUM(dbo.fnRKConvertUOMCurrency('ItemUOM', CC.intItemUOMId, CCUOM.intItemUOMId, 1, CC.intCurrencyId, @intCurrencyId, dblAmount, CC.intContractDetailId))
 			FROM vyuCTContractCostView CC
 			JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CC.intContractHeaderId
-			JOIN TonUOM CCUOM ON CCUOM.intCommodityId = CH.intCommodityId
+			JOIN TonUOM CCUOM ON CCUOM.intCommodityId = CH.intCommodityId AND CCUOM.intItemId = CC.intItemId
 			WHERE UPPER(strItemDescription) LIKE '%FREIGHT%'
 			GROUP BY CC.intContractDetailId
 		) CC ON CC.intContractDetailId = CD.intContractDetailId
 		WHERE L.ysnPosted = 1
 			AND L.intShipmentStatus <> 10
 			AND L.intShipmentType = 1
-			AND CAST(FLOOR(CAST(L.dtmDispatchedDate AS FLOAT)) AS DATETIME) <= @dtmDate
 
 		UNION ALL SELECT DISTINCT Header.intCommodityId
 			, Lots.intBookId
@@ -186,18 +187,17 @@ BEGIN
 		JOIN tblICItem Item ON Item.intItemId = Lots.intItemId
 		LEFT JOIN tblCTContractDetail Detail ON Detail.intContractDetailId = Lots.intContractDetailId
 		LEFT JOIN tblCTContractHeader Header ON Header.intContractHeaderId = Detail.intContractHeaderId
-		JOIN TonUOM ON TonUOM.intCommodityId = Lots.intCommodityId
+		JOIN TonUOM ON TonUOM.intCommodityId = Lots.intCommodityId AND TonUOM.intItemId = Item.intItemId
 		LEFT JOIN tblICItemBundle IB ON IB.intItemId = Detail.intItemBundleId
 		LEFT JOIN (
 			SELECT CC.intContractDetailId
 				, dblAmount = SUM(dbo.fnRKConvertUOMCurrency('ItemUOM', CC.intItemUOMId, CCUOM.intItemUOMId, 1, CC.intCurrencyId, @intCurrencyId, dblAmount, CC.intContractDetailId))
 			FROM vyuCTContractCostView CC
 			JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CC.intContractHeaderId
-			JOIN TonUOM CCUOM ON CCUOM.intCommodityId = CH.intCommodityId
+			JOIN TonUOM CCUOM ON CCUOM.intCommodityId = CH.intCommodityId AND CCUOM.intItemId = CC.intItemId
 			WHERE UPPER(strItemDescription) LIKE '%FREIGHT%'
 			GROUP BY CC.intContractDetailId
 		) CC ON CC.intContractDetailId = Detail.intContractDetailId
-		WHERE CAST(FLOOR(CAST(Lots.dtmEndDate AS FLOAT)) AS DATETIME) <= @dtmDate
 		
 		UNION ALL  SELECT DISTINCT DAP.intCommodityId
 			, DAP.intBookId
@@ -219,15 +219,47 @@ BEGIN
 			, strBundleItem = NULL
 		FROM vyuRKGetDailyAveragePriceDetail DAP
 		JOIN tblRKFutureMarket FM ON FM.intFutureMarketId = DAP.intFutureMarketId
-		JOIN TonUOM ON TonUOM.intCommodityId = DAP.intCommodityId
+		CROSS APPLY (SELECT TOP 1 intCommodityId
+						, intUnitMeasureId
+						, intItemUOMId
+					FROM TonUOM
+					WHERE TonUOM.intCommodityId = DAP.intCommodityId) TonUOM
 		JOIN tblICCommodityUnitMeasure cUOM ON cUOM.intCommodityId = DAP.intCommodityId
 			AND cUOM.intUnitMeasureId = FM.intUnitMeasureId
 		JOIN tblICCommodityUnitMeasure mtUOM ON mtUOM.intCommodityId = DAP.intCommodityId
-			AND cUOM.intUnitMeasureId = TonUOM.intUnitMeasureId
+			AND mtUOM.intUnitMeasureId = TonUOM.intUnitMeasureId
 		WHERE intDailyAveragePriceId = (SELECT TOP 1 intDailyAveragePriceId
 										FROM tblRKDailyAveragePrice
 										WHERE CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= @dtmDate
 										ORDER BY dtmDate DESC)
+
+		UNION ALL SELECT DISTINCT i.intCommodityId
+			, DH.intBookId
+			, DH.intSubBookId
+			, intProductTypeId = i.intProductTypeId
+			, strTransactionType = 'Demand'
+			, strTransactionStatus = ''
+			, strTransactionNo = DH.strDemandNo
+			, intItemId = i.intItemId
+			, strItemDescription = i.strDescription
+			, dtmAvailability = DD.dtmDemandDate
+			, intFutureMarketId = NULL
+			, intFutureMonthId = NULL
+			, dblQty = ISNULL(dbo.fnCTConvertQuantityToTargetCommodityUOM(cUOM.intCommodityUnitMeasureId, mtUOM.intCommodityUnitMeasureId, DD.dblQuantity), 0)
+			, dblTransactionPrice = NULL
+			, dblContractDifferential = NULL
+			, dblFreight = NULL
+			, intBundleItemId = NULL
+			, strBundleItem = NULL
+		FROM tblMFDemandDetail DD
+		LEFT JOIN tblMFDemandHeader DH ON DH.intDemandHeaderId = DD.intDemandHeaderId
+		LEFT JOIN tblICItemUOM iUOM ON iUOM.intItemUOMId = DD.intItemUOMId
+		JOIN tblICItem i ON i.intItemId = DD.intItemId
+		JOIN TonUOM ON TonUOM.intCommodityId = i.intCommodityId AND TonUOM.intItemId = DD.intItemId
+		JOIN tblICCommodityUnitMeasure cUOM ON cUOM.intCommodityId = i.intCommodityId
+			AND cUOM.intUnitMeasureId = iUOM.intUnitMeasureId
+		JOIN tblICCommodityUnitMeasure mtUOM ON mtUOM.intCommodityId = i.intCommodityId
+			AND mtUOM.intUnitMeasureId = TonUOM.intUnitMeasureId
 	) t
 	LEFT JOIN tblCTBook book ON book.intBookId = t.intBookId
 	LEFT JOIN tblCTSubBook subBook ON subBook.intSubBookId = t.intSubBookId
@@ -247,11 +279,15 @@ BEGIN
 		JOIN tblRKFuturesSettlementPrice SP ON SP.intFutureSettlementPriceId = SPD.intFutureSettlementPriceId
 		JOIN tblRKCommodityMarketMapping CMM ON CMM.intCommodityMarketId = SP.intCommodityMarketId
 		JOIN tblRKFutureMarket FM ON FM.intFutureMarketId = SP.intFutureMarketId
-		JOIN TonUOM ON TonUOM.intCommodityId = CMM.intCommodityId
+		CROSS APPLY (SELECT TOP 1 intCommodityId
+						, intUnitMeasureId
+						, intItemUOMId
+					FROM TonUOM
+					WHERE TonUOM.intCommodityId = CMM.intCommodityId) TonUOM
 		JOIN tblICCommodityUnitMeasure cUOM ON cUOM.intCommodityId = CMM.intCommodityId
 			AND cUOM.intUnitMeasureId = FM.intUnitMeasureId
 		JOIN tblICCommodityUnitMeasure mtUOM ON mtUOM.intCommodityId = CMM.intCommodityId
-			AND cUOM.intUnitMeasureId = TonUOM.intUnitMeasureId
+			AND mtUOM.intUnitMeasureId = TonUOM.intUnitMeasureId
 		WHERE CAST(FLOOR(CAST(SP.dtmPriceDate AS FLOAT)) AS DATETIME) <= @Date
 	) LastSettle ON LastSettle.intFutureMarketId = t.intFutureMarketId
 		AND LastSettle.intFutureMonthId = t.intFutureMonthId
@@ -268,11 +304,15 @@ BEGIN
 			, B.dtmM2MBasisDate
 		FROM tblRKM2MBasisDetail BD
 		JOIN tblRKM2MBasis B ON B.intM2MBasisId = BD.intM2MBasisId
-		JOIN TonUOM ON TonUOM.intCommodityId = BD.intCommodityId
+		CROSS APPLY (SELECT TOP 1 intCommodityId
+						, intUnitMeasureId
+						, intItemUOMId
+					FROM TonUOM
+					WHERE TonUOM.intCommodityId = BD.intCommodityId) TonUOM
 		JOIN tblICCommodityUnitMeasure cUOM ON cUOM.intCommodityId = BD.intCommodityId
 			AND cUOM.intUnitMeasureId = BD.intUnitMeasureId
 		JOIN tblICCommodityUnitMeasure mtUOM ON mtUOM.intCommodityId = BD.intCommodityId
-			AND cUOM.intUnitMeasureId = TonUOM.intUnitMeasureId
+			AND mtUOM.intUnitMeasureId = TonUOM.intUnitMeasureId
 		WHERE CAST(FLOOR(CAST(B.dtmM2MBasisDate AS FLOAT)) AS DATETIME) <= @Date
 	) BasisEntry ON BasisEntry.intFutureMarketId = t.intFutureMarketId
 		AND BasisEntry.intFutureMonthId = t.intFutureMonthId
