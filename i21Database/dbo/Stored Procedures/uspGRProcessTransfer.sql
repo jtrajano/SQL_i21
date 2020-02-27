@@ -1302,7 +1302,6 @@ BEGIN
 			,[intTransactionTypeId]
 			,[strPaidDescription]
 			,[strType]
-			,[intInventoryReceiptId]
 		)
 		SELECT DISTINCT	
 		     [intCustomerStorageId]	= SR.intToCustomerStorageId
@@ -1315,7 +1314,6 @@ BEGIN
 			,[intTransactionTypeId]	= 3
 			,[strPaidDescription]	= 'Generated from Transfer Storage'
 			,[strType]				= 'From Transfer'
-			,[intInventoryReceiptId] = SourceHistory.intInventoryReceiptId
 		FROM tblGRTransferStorageReference SR
 		INNER JOIN tblGRCustomerStorage FromStorage
 			ON FromStorage.intCustomerStorageId = SR.intSourceCustomerStorageId
