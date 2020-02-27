@@ -972,8 +972,10 @@ BEGIN TRY
 
 			IF @intTransactionRefId IS NULL
 			BEGIN
+				SELECT @strErrorMessage = 'Current Transaction Id is not available. '
+
 				RAISERROR (
-							'Current Transaction Id is not available.'
+							@strErrorMessage
 							,16
 							,1
 							)
