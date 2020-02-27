@@ -22,6 +22,7 @@ BEGIN TRY
 		,@intCompanyId int
 		,@intTransactionId int
 		,@intContractScreenId int
+		,@strApproverXML nvarchar(MAX)
 
 	SET @intPriceContractStageId = NULL
 	SET @strPriceContractNo = NULL
@@ -90,6 +91,19 @@ BEGIN TRY
 		,NULL
 		,NULL
 
+	---------------------------------------------Approver------------------------------------------
+	SELECT @strApproverXML = NULL
+		,@strObjectName = NULL
+
+	SELECT @strObjectName = 'vyuCTPriceContractApproverView'
+
+	EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
+		,@strPriceContractCondition
+		,@strApproverXML OUTPUT
+		,NULL
+		,NULL
+
+
 	---------------------------------------------PriceFixationDetail-----------------------------------------------
 	SET @strPriceFixationDetailXML = NULL
 	SET @strPriceFixationCondition = NULL
@@ -123,6 +137,7 @@ BEGIN TRY
 		,strRowState
 		,strPriceFixationXML
 		,strPriceFixationDetailXML
+		,strApproverXML
 		,intEntityId
 		,strTransactionType
 		,intMultiCompanyId
@@ -135,6 +150,7 @@ BEGIN TRY
 		,strRowState = @strRowState
 		,strPriceFixationXML = @strPriceFixationXML
 		,strPriceFixationDetailXML = @strPriceFixationDetailXML
+		,strApproverXML=@strApproverXML
 		,intEntityId = @intToEntityId
 		,strTransactionType = @strToTransactionType
 		,intMultiCompanyId = @intToCompanyId

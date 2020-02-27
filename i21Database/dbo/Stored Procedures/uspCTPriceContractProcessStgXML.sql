@@ -115,6 +115,7 @@ BEGIN TRY
 		,@intTransactionRefId INT
 		,@intCompanyRefId INT
 		,@strDescription NVARCHAR(100)
+		,@strApproverXML NVARCHAR(MAX)
 
 	SELECT @intPriceContractStageId = MIN(intPriceContractStageId)
 	FROM tblCTPriceContractStage
@@ -137,12 +138,14 @@ BEGIN TRY
 		SET @strTransactionType = NULL
 		SET @intTransactionId = NULL
 		SET @intCompanyId = NULL
+		SET @strApproverXML = NULL
 
 		SELECT @intPriceContractId = intPriceContractId
 			,@strPriceContractNo = strPriceContractNo
 			,@strPriceContractXML = strPriceContractXML
 			,@strPriceFixationXML = strPriceFixationXML
 			,@strPriceFixationDetailXML = strPriceFixationDetailXML
+			,@strApproverXML = strApproverXML
 			,@strReference = strReference
 			,@strRowState = strRowState
 			,@strFeedStatus = strFeedStatus
@@ -606,6 +609,7 @@ BEGIN TRY
 						SELECT @strErrorMessage = 'Currency ' + @strCurrency + ' is not available.'
 					END
 				END
+
 				IF @strErrorMessage <> ''
 				BEGIN
 					RAISERROR (
@@ -753,7 +757,7 @@ BEGIN TRY
 						,@strCommodityCode = NULL
 						,@strFutMarketName = NULL
 						,@strFutureMonth = NULL
-						,@strErrorMessage=''
+						,@strErrorMessage = ''
 
 					SELECT @strFinalPriceUOM = strFinalPriceUOM
 						,@strAgreedItemUOM = strAgreedItemUOM
@@ -890,13 +894,13 @@ BEGIN TRY
 					END
 
 					IF @strErrorMessage <> ''
-				BEGIN
-					RAISERROR (
-							@strErrorMessage
-							,16
-							,1
-							)
-				END
+					BEGIN
+						RAISERROR (
+								@strErrorMessage
+								,16
+								,1
+								)
+					END
 
 					DELETE PF
 					FROM tblCTPriceFixation PF
@@ -1524,6 +1528,44 @@ BEGIN TRY
 
 				EXEC uspCTSavePriceContract @intNewPriceContractId
 					,@strHedgeXML
+
+				EXEC sp_xml_removedocument @idoc
+
+				EXEC sp_xml_preparedocument @idoc OUTPUT
+					,@strApproverXML
+
+				SELECT @intPriceFixationId = NULL
+					,@intContractHeaderId = NULL
+
+				SELECT @intPriceFixationId = intPriceFixationId
+					,@intContractHeaderId = intContractHeaderId
+				FROM tblCTPriceFixation
+				WHERE PF.intPriceContractId = @intNewPriceContractId
+
+				DELETE
+				FROM tblCTIntrCompApproval
+				WHERE intContractHeaderId = @intContractHeaderId
+					AND intPriceFixationId = @intPriceFixationId
+
+				INSERT INTO tblCTIntrCompApproval (
+					intContractHeaderId
+					,intPriceFixationId
+					,strName
+					,strUserName
+					,strScreen
+					,intConcurrencyId
+					)
+				SELECT @intContractHeaderId
+					,@intPriceFixationId
+					,strName
+					,strUserName
+					,strScreenName
+					,1 AS intConcurrencyId
+				FROM OPENXML(@idoc, 'vyuCTContractApproverViews/vyuCTContractApproverView', 2) WITH (
+						strName NVARCHAR(100) Collate Latin1_General_CI_AS
+						,strUserName NVARCHAR(100) Collate Latin1_General_CI_AS
+						,strScreenName NVARCHAR(250) Collate Latin1_General_CI_AS
+						) x
 
 				EXEC sp_xml_removedocument @idoc
 
