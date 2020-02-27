@@ -75,15 +75,6 @@ BEGIN TRY
 			IF @intTransactionCount = 0
 				BEGIN TRANSACTION
 
-			IF @strRowState = 'Delete'
-			BEGIN
-				DELETE
-				FROM tblLGWeightClaim
-				WHERE intWeightClaimRefId = @intWeightClaimId
-
-				GOTO x
-			END
-
 			------------------Header------------------------------------------------------
 			EXEC sp_xml_preparedocument @idoc OUTPUT
 				,@strWeightClaimXML
@@ -98,22 +89,6 @@ BEGIN TRY
 					,strPaymentMethod NVARCHAR(50) Collate Latin1_General_CI_AS
 					,intLoadId INT
 					) x
-
-			IF NOT EXISTS (
-					SELECT *
-					FROM tblLGLoad
-					WHERE intLoadRefId = @intLoadId
-					)
-			BEGIN
-				IF @strErrorMessage <> ''
-				BEGIN
-					SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Unable to find Outbound shipment.'
-				END
-				ELSE
-				BEGIN
-					SELECT @strErrorMessage = 'Unable to find Outbound shipment.'
-				END
-			END
 
 			IF @strBook IS NOT NULL
 				AND NOT EXISTS (
@@ -189,6 +164,24 @@ BEGIN TRY
 			FROM tblCTSubBook SB
 			WHERE strSubBook = @strSubBook
 
+			IF NOT EXISTS (
+					SELECT *
+					FROM tblLGLoad
+					WHERE intLoadRefId = @intLoadId
+						AND intBookId = @intBookId
+						AND IsNULL(intSubBookId, 0) = IsNULL(@intSubBookId, 0)
+					)
+			BEGIN
+				IF @strErrorMessage <> ''
+				BEGIN
+					SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Unable to find Outbound shipment.'
+				END
+				ELSE
+				BEGIN
+					SELECT @strErrorMessage = 'Unable to find Outbound shipment.'
+				END
+			END
+
 			SELECT @intPaymentMethodId = intPaymentMethodID
 			FROM tblSMPaymentMethod PM
 			WHERE PM.strPaymentMethod = @strPaymentMethod
@@ -215,11 +208,27 @@ BEGIN TRY
 					FROM tblSMUserSecurity
 			END
 
+			IF @strRowState = 'Delete'
+			BEGIN
+				DELETE
+				FROM tblLGWeightClaim
+				WHERE intWeightClaimRefId = @intWeightClaimId
+					AND intBookId = @intBookId
+					AND IsNULL(intSubBookId, 0) = IsNULL(@intSubBookId, 0)
+
+				GOTO x
+			END
+
+			EXEC uspSMGetStartingNumber 114
+				,@strReferenceNumber OUTPUT
+
 			--Inbound Weight Claim
 			IF NOT EXISTS (
 					SELECT *
 					FROM tblLGWeightClaim
 					WHERE intWeightClaimRefId = @intWeightClaimId
+						AND intBookId = @intBookId
+						AND IsNULL(intSubBookId, 0) = IsNULL(@intSubBookId, 0)
 					)
 			BEGIN
 				INSERT INTO tblLGWeightClaim (
@@ -239,12 +248,14 @@ BEGIN TRY
 					,intWeightClaimRefId
 					)
 				SELECT 1 intConcurrencyId
-					,strReferenceNumber
+					,@strReferenceNumber
 					,dtmTransDate
 					,(
 						SELECT intLoadId
 						FROM tblLGLoad
 						WHERE intLoadRefId = x.intLoadId
+							AND intBookId = @intBookId
+							AND IsNULL(intSubBookId, 0) = IsNULL(@intSubBookId, 0)
 						) AS intLoadId
 					,strComments
 					,dtmETAPOD
@@ -274,12 +285,13 @@ BEGIN TRY
 			BEGIN
 				UPDATE tblLGWeightClaim
 				SET intConcurrencyId = tblLGWeightClaim.intConcurrencyId + 1
-					,strReferenceNumber = x.strReferenceNumber
 					,dtmTransDate = x.dtmTransDate
 					,intLoadId = (
 						SELECT intLoadId
 						FROM tblLGLoad
 						WHERE intLoadRefId = x.intLoadId
+							AND intBookId = @intBookId
+							AND IsNULL(intSubBookId, 0) = IsNULL(@intSubBookId, 0)
 						)
 					,strComments = x.strComments
 					,dtmETAPOD = x.dtmETAPOD
@@ -302,10 +314,14 @@ BEGIN TRY
 						,intPurchaseSale INT
 						) x
 				WHERE tblLGWeightClaim.intWeightClaimRefId = @intWeightClaimId
+					AND intBookId = @intBookId
+					AND IsNULL(intSubBookId, 0) = IsNULL(@intSubBookId, 0)
 
 				SELECT @intNewWeightClaimId = intWeightClaimId
 				FROM tblLGWeightClaim
 				WHERE intWeightClaimRefId = @intWeightClaimId
+					AND intBookId = @intBookId
+					AND IsNULL(intSubBookId, 0) = IsNULL(@intSubBookId, 0)
 			END
 
 			EXEC sp_xml_removedocument @idoc
@@ -774,6 +790,8 @@ BEGIN TRY
 					SELECT *
 					FROM tblLGWeightClaim
 					WHERE intWeightClaimRefId = @intNewWeightClaimId
+						AND intBookId = @intBookId
+						AND IsNULL(intSubBookId, 0) = IsNULL(@intSubBookId, 0)
 					)
 			BEGIN
 				INSERT INTO tblLGWeightClaim (
@@ -829,11 +847,15 @@ BEGIN TRY
 					,intPaymentMethodId = WC1.intPaymentMethodId
 				FROM tblLGWeightClaim WC
 				JOIN tblLGWeightClaim WC1 ON WC.intWeightClaimRefId = WC1.intWeightClaimId
+					AND WC.intBookId = @intBookId
+					AND IsNULL(WC.intSubBookId, 0) = IsNULL(@intSubBookId, 0)
 				WHERE WC1.intWeightClaimId = @intNewWeightClaimId
 
 				SELECT @intNewWeightClaimId2 = intWeightClaimId
 				FROM tblLGWeightClaim
 				WHERE intWeightClaimRefId = @intNewWeightClaimId
+					AND intBookId = @intBookId
+					AND IsNULL(intSubBookId, 0) = IsNULL(@intSubBookId, 0)
 			END
 
 			DELETE
@@ -877,9 +899,13 @@ BEGIN TRY
 				,[dblClaimableWt]
 				,(
 					SELECT TOP 1 CH.intEntityId
-					FROM tblCTContractDetail CD
+					FROM tblLGAllocationDetail AD
+					JOIN tblLGAllocationHeader AH ON AH.intAllocationHeaderId = AD.intAllocationHeaderId
+					JOIN tblCTContractDetail CD ON CD.intContractDetailId = AD.intSContractDetailId
 					JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
-					WHERE CD.intContractDetailRefId = WCD.intContractDetailId
+					WHERE AD.intPContractDetailId = WCD.intContractDetailId
+						AND AH.intBookId = @intBookId
+						AND IsNULL(AH.intSubBookId, 0) = IsNULL(@intSubBookId, 0)
 					) AS [intPartyEntityId]
 				,[dblUnitPrice]
 				,[intCurrencyId]
@@ -888,9 +914,12 @@ BEGIN TRY
 				,[dblAdditionalCost]
 				,[ysnNoClaim]
 				,(
-					SELECT TOP 1 CD.intContractDetailId
-					FROM tblCTContractDetail CD
-					WHERE CD.intContractDetailRefId = WCD.intContractDetailId
+					SELECT TOP 1 AD.intSContractDetailId
+					FROM tblLGAllocationDetail AD
+					JOIN tblLGAllocationHeader AH ON AH.intAllocationHeaderId = AD.intAllocationHeaderId
+					WHERE AD.intPContractDetailId = WCD.intContractDetailId
+						AND AH.intBookId = @intBookId
+						AND IsNULL(AH.intSubBookId, 0) = IsNULL(@intSubBookId, 0)
 					) AS intContractDetailId
 				,[intBillId]
 				,[intInvoiceId]
