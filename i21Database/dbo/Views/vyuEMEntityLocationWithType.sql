@@ -42,7 +42,7 @@ SELECT intEntityLocationId			= EL.intEntityLocationId
 	 , intTaxGroupId				= EL.intTaxGroupId
 	 , strTaxGroup					= TG.strTaxGroup
 	 , intSupplyPointId				= SP.intSupplyPointId
-	 , intSalespersonId				= SALESPERSON.intEntityId
+	 , intSalespersonId				= ISNULL(EL.intSalespersonId, CUSTOMER.intSalespersonId)
 	 , strSalespersonId				= SALESPERSON.strSalespersonId
 	 , strSalesPersonName			= SALESPERSON.strSalesPersonName
 FROM tblEMEntityLocation EL
@@ -53,6 +53,7 @@ LEFT JOIN tblTFTerminalControlNumber TCN ON TCN.intTerminalControlNumberId = SP.
 LEFT JOIN tblTRSupplyPoint RPSP ON SP.intSupplyPointId = SP.intRackPriceSupplyPointId
 LEFT JOIN tblEMEntityLocation SPEL ON SPEL.intEntityLocationId = RPSP.intEntityLocationId
 LEFT JOIN tblSMTaxGroup TG ON TG.intTaxGroupId = EL.intTaxGroupId
+LEFT JOIN tblARCustomer CUSTOMER ON EL.intEntityId = CUSTOMER.intEntityId
 LEFT JOIN (
 	SELECT S.intEntityId
 		 , strSalespersonId	    = CASE WHEN ISNULL(S.strSalespersonId, '') = '' THEN ST.strEntityNo ELSE S.strSalespersonId END
@@ -64,4 +65,4 @@ LEFT JOIN (
 			 , strEntityNo
 		FROM dbo.tblEMEntity WITH (NOLOCK)
 	) ST on S.intEntityId = ST.intEntityId
-) SALESPERSON ON SALESPERSON.intEntityId = EL.intSalespersonId
+) SALESPERSON ON SALESPERSON.intEntityId = ISNULL(EL.intSalespersonId, CUSTOMER.intSalespersonId)
