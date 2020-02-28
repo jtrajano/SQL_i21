@@ -19,6 +19,7 @@
 	[ysnVFDAcknowledged]	BIT NOT NULL DEFAULT(1),
 	--OrganicType
 	[intOrganicType]		INT NOT NULL DEFAULT(1),
+
 	
 	--LastName
 	strLastName				NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL,	
@@ -46,5 +47,7 @@
 	strWebsite				NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL,
 	--Comment
 	strComment				NVARCHAR(0100) COLLATE Latin1_General_CI_AS NOT NULL,
+
+	strLicenseNo			NVARCHAR(20)    COLLATE Latin1_General_CI_AS 	NULL,
 	
 )
