@@ -8494,6 +8494,7 @@
     <Build Include="dbo\Views\vyuSTCigaretteRebateProgramRegion.sql" />
     <Build Include="dbo\Views\vyuSTCigaretteRebateProgramStore.sql" />
     <Build Include="dbo\Stored Procedures\uspSCCheckTicketContractAfterManualDistribution.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPLogVoucherDetailRisk.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGenerateDPR.sql" />
     <Build Include="dbo\Functions\fnRKGetBucketContractBalance.sql" />
     <Build Include="dbo\Functions\fnRKGetBucketBasisDeliveries.sql" />
@@ -8503,6 +8504,7 @@
     <Build Include="dbo\Functions\fnGRCalculateStorageUnits.sql" />
     <Build Include="dbo\Views\vyuCTPriceContractApproverView.sql" />
     <Build Include="dbo\Stored Procedures\uspAPLogVoucherDetailRisk.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPLogPaymentRisk.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
