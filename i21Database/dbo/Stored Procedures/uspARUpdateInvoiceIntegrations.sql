@@ -20,6 +20,10 @@ DECLARE @intInvoiceId				INT
 	  , @ysnFromItemContract		BIT
 	  , @InvoiceIds					InvoiceId
 
+DECLARE @dblCTPrepaidValue NUMERIC(18, 6),
+		@intCTPrepaidTransDetailId INT
+
+
 SET @intTranCount = @@trancount;
 
 BEGIN TRY
@@ -54,10 +58,23 @@ BEGIN TRY
 			--UPDATE PREPAID ITEM CONTRACT
 			IF ISNULL(@ysnFromItemContract, 0) <> 0
 				BEGIN
+				
+
+
 					SELECT TOP 1 @intItemContractHeaderId = intItemContractHeaderId
+								 ,@dblCTPrepaidValue = ABS(dblTotal)
+								 ,@intCTPrepaidTransDetailId =  intInvoiceDetailId
 					FROM tblARInvoiceDetail
 					WHERE intInvoiceId = @intInvoiceId
 					AND intItemContractHeaderId IS NOT NULL
+
+
+					EXEC uspCTItemContractUpdateRemainingDollarValue
+						 @intItemContractHeaderId  =  @intItemContractHeaderId    --> Item Conract Header Id
+						,@dblValueToUpdate  	   =  @dblCTPrepaidValue          --> Value to update (negative on create / positive on delete or void (return))
+						,@intUserId   			   =  @intUserId                  --> current User Id
+						,@intTransactionDetailId   =  @intCTPrepaidTransDetailId  --> Transaction Id
+						,@strScreenName 		   = 'Prepayment'   		      --> Screen Name
 				END
 
 			EXEC dbo.uspIPInterCompanyPreStageInvoice @intInvoiceId, 'Deleted', @intUserId
@@ -67,7 +84,31 @@ BEGIN TRY
 			IF EXISTS (SELECT TOP 1 NULL FROM tblARInvoicePreStage WHERE intInvoiceId = @intInvoiceId AND strRowState = 'Added')
 				EXEC dbo.uspIPInterCompanyPreStageInvoice @intInvoiceId, 'Modified', @intUserId
 			ELSE
+			  BEGIN
+			  	--UPDATE PREPAID ITEM CONTRACT
+			IF ISNULL(@ysnFromItemContract, 0) <> 0
+				BEGIN
+					
+				
+
+					SELECT TOP 1 @intItemContractHeaderId = intItemContractHeaderId
+								 ,@dblCTPrepaidValue = -1 * ABS(dblTotal)
+								 ,@intCTPrepaidTransDetailId =  intInvoiceDetailId
+					FROM tblARInvoiceDetail
+					WHERE intInvoiceId = @intInvoiceId
+					AND intItemContractHeaderId IS NOT NULL
+
+
+					EXEC uspCTItemContractUpdateRemainingDollarValue
+							@intItemContractHeaderId  =  @intItemContractHeaderId    --> Item Conract Header Id
+							,@dblValueToUpdate  	  =  @dblCTPrepaidValue          --> Value to update (negative on create / positive on delete or void (return))
+							,@intUserId   			  =  @intUserId                  --> current User Id
+							,@intTransactionDetailId  =  @intCTPrepaidTransDetailId  --> Transaction Id
+							,@strScreenName 		  = 'Prepayment'   			     --> Screen Name
+				END
 				EXEC dbo.uspIPInterCompanyPreStageInvoice @intInvoiceId, 'Added', @intUserId
+
+			  END 	
 		END
 		
 	EXEC dbo.[uspARUpdatePricingHistory] 2, @intInvoiceId, @intUserId
