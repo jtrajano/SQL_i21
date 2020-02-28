@@ -174,7 +174,10 @@ INSERT INTO @InvoicesToGenerate (
     ,[ysnAddonParent]
 	,[ysnConvertToStockUOM]
     ,[dblAddOnQuantity]
-)
+	,[strAcresApplied]					
+	,[strNutrientAnalysis]				
+	,[strBillingMethod]					
+	,[strApplicatorLicense])
 SELECT
 	 [intId]							= [intId]
 	,[strTransactionType]				= [strTransactionType]
@@ -322,6 +325,10 @@ SELECT
     ,[ysnAddonParent]                   = [ysnAddonParent]
 	,[ysnConvertToStockUOM]				= [ysnConvertToStockUOM]
     ,[dblAddOnQuantity]                 = [dblAddOnQuantity]
+	,[strAcresApplied]					= [strAcresApplied]
+	,[strNutrientAnalysis]				= [strNutrientAnalysis]	
+	,[strBillingMethod]					= [strBillingMethod]
+	,[strApplicatorLicense]				= [strApplicatorLicense]
 FROM
 	@InvoiceEntries 
 
@@ -1258,7 +1265,11 @@ CREATE TABLE #CustomerInvoice
 	,[strSourceId]					NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NULL
 	,[ysnPost]						BIT												NULL
 	,[ysnUpdateAvailableDiscount]	BIT												NULL
-	,[ysnRecap]						BIT												NULL)
+	,[ysnRecap]						BIT												NULL
+	,[strAcresApplied]				NVARCHAR(10)    COLLATE Latin1_General_CI_AS 	NULL
+	,[strNutrientAnalysis]			NVARCHAR(50)    COLLATE Latin1_General_CI_AS 	NULL
+	,[strBillingMethod]				NVARCHAR(100)   COLLATE Latin1_General_CI_AS 	NULL
+	,[strApplicatorLicense]			NVARCHAR(20)    COLLATE Latin1_General_CI_AS 	NULL)
 
 INSERT INTO #CustomerInvoice
 	([intInvoiceId]
@@ -1360,7 +1371,11 @@ INSERT INTO #CustomerInvoice
 	,[strSourceId]
 	,[ysnPost]
 	,[ysnUpdateAvailableDiscount]
-	,[ysnRecap])
+	,[ysnRecap]
+	,[strAcresApplied]				
+	,[strNutrientAnalysis]		
+	,[strBillingMethod]			
+	,[strApplicatorLicense]	)
 SELECT
 	 [intInvoiceId]					= NULL
 	,[strInvoiceNumber]				= CASE WHEN ITG.ysnUseOriginIdAsInvoiceNumber = 1 AND RTRIM(LTRIM(ISNULL(ITG.strInvoiceOriginId,''))) <> '' THEN RTRIM(LTRIM(ITG.strInvoiceOriginId)) ELSE NULL END
@@ -1465,6 +1480,10 @@ SELECT
 	,[ysnPost]						= ITG.[ysnPost]
 	,[ysnUpdateAvailableDiscount]	= ITG.[ysnUpdateAvailableDiscount]
 	,[ysnRecap]						= ITG.[ysnRecap]
+	,[strAcresApplied]				= ITG.[strAcresApplied]
+	,[strNutrientAnalysis]			= ITG.[strNutrientAnalysis]
+	,[strBillingMethod]				= ITG.[strBillingMethod]
+	,[strApplicatorLicense]			= ITG.[strApplicatorLicense]
 FROM	
 	@InvoicesToGenerate ITG --WITH (NOLOCK)
 --INNER JOIN
@@ -1639,6 +1658,10 @@ USING
 		,[ysnPost]
 		,[ysnUpdateAvailableDiscount]
 		,[ysnRecap]
+		,[strAcresApplied]				
+		,[strNutrientAnalysis]			
+		,[strBillingMethod]				
+		,[strApplicatorLicense]			
 	FROM
 		#CustomerInvoice
 	)
@@ -1735,6 +1758,10 @@ INSERT(
 	,[intTruckDriverId]
 	,[intTruckDriverReferenceId]
 	,[intConcurrencyId]
+	,[strAcresApplied]				
+	,[strNutrientAnalysis]		
+	,[strBillingMethod]			
+	,[strApplicatorLicense]		
 	)
 VALUES(
 	 [strInvoiceNumber]
@@ -1826,6 +1853,10 @@ VALUES(
 	,[intTruckDriverId]
 	,[intTruckDriverReferenceId]
 	,[intConcurrencyId]
+	,[strAcresApplied]				
+	,[strNutrientAnalysis]			
+	,[strBillingMethod]				
+	,[strApplicatorLicense]			
 )
 	OUTPUT  
 			@IntegrationLogId						--[intIntegrationLogId]

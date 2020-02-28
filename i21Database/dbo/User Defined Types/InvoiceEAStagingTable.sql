@@ -14,6 +14,10 @@ CREATE TYPE [dbo].[InvoiceEAStagingTable] AS TABLE
 	,[strInvoiceOriginId]					NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL	
 	,[strComments]							NVARCHAR(500)	COLLATE Latin1_General_CI_AS	NULL	
 	,[ysnImpactInventory]					BIT												NULL        -- Default(1) Impact Inventory
+	,[strAcresApplied]						NVARCHAR(10)    COLLATE Latin1_General_CI_AS 	NULL
+	,[strNutrientAnalysis]					NVARCHAR(50)    COLLATE Latin1_General_CI_AS 	NULL
+	,[strBillingMethod]						NVARCHAR(100)   COLLATE Latin1_General_CI_AS 	NULL
+	,[strApplicatorLicense]					NVARCHAR(20)    COLLATE Latin1_General_CI_AS 	NULL
 
 	--Detail																																															
     ,[strItemNo]							NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NULL
