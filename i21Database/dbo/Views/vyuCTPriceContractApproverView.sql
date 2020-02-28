@@ -1,6 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuCTPriceContractApproverView]
 AS
-SELECT Distinct A.intTransactionId AS intPriceContractId
+SELECT Distinct B.intRecordId AS intPriceContractId
 	,E.strName
 	,US.strUserName AS strUserName
 	,S.strScreenName

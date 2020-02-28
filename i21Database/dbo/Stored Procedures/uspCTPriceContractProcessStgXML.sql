@@ -1540,7 +1540,7 @@ BEGIN TRY
 				SELECT @intPriceFixationId = intPriceFixationId
 					,@intContractHeaderId = intContractHeaderId
 				FROM tblCTPriceFixation
-				WHERE PF.intPriceContractId = @intNewPriceContractId
+				WHERE intPriceContractId = @intNewPriceContractId
 
 				DELETE
 				FROM tblCTIntrCompApproval
@@ -1559,9 +1559,9 @@ BEGIN TRY
 					,@intPriceFixationId
 					,strName
 					,strUserName
-					,strScreenName
+					,'Price Contract' strScreenName
 					,1 AS intConcurrencyId
-				FROM OPENXML(@idoc, 'vyuCTContractApproverViews/vyuCTContractApproverView', 2) WITH (
+				FROM OPENXML(@idoc, 'vyuCTPriceContractApproverViews/vyuCTPriceContractApproverView', 2) WITH (
 						strName NVARCHAR(100) Collate Latin1_General_CI_AS
 						,strUserName NVARCHAR(100) Collate Latin1_General_CI_AS
 						,strScreenName NVARCHAR(250) Collate Latin1_General_CI_AS
