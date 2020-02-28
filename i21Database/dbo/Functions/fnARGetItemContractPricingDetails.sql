@@ -65,7 +65,7 @@ WHERE ICS.intEntityCustomerId = @intCustomerId
 	AND ICS.intItemId = @intItemId
 	AND (ISNULL(@ysnLimitLocation, 0) = 0 OR ICS.intCompanyLocationId = @intLocationId)
 	AND (ISNULL(@intItemUOMId, 0) = 0 OR ICS.[intItemUOMId] = @intItemUOMId)		
-	AND (ISNULL(@dblOriginalQuantity, @dblZeroDecimal) + ICS.dblAvailable > @dblZeroDecimal)
+	AND ISNULL(ICS.dblAvailable, 0) > @dblZeroDecimal
 	AND ISNULL(ICS.dblBalance, 0) > @dblZeroDecimal
 	AND ICS.dtmContractDate <= CAST(@dtmTransactionDate AS DATE)
 	AND ICS.dtmDeliveryDate <= CAST(@dtmTransactionDate AS DATE)
