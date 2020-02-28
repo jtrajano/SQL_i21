@@ -95,7 +95,7 @@ WHERE
 	t.intItemId = @intItemId
 	AND dbo.fnDateLessThanEquals(t.dtmDate, @dtmDate) = 1
 	AND t.intInTransitSourceLocationId IS NULL
-	AND ISNULL(t.ysnIsUnposted, 0) = 0
+	--AND ISNULL(t.ysnIsUnposted, 0) = 0
 	AND IL.intLocationId = @intLocationId
 	AND (@intSubLocationId IS NULL OR @intSubLocationId = CASE WHEN Lot.intLotId IS NULL THEN t.intSubLocationId ELSE Lot.intSubLocationId END)
 	AND (@intStorageLocationId IS NULL OR @intStorageLocationId = CASE WHEN Lot.intLotId IS NULL THEN t.intStorageLocationId ELSE Lot.intStorageLocationId END)
@@ -133,7 +133,7 @@ WHERE
 	t.intItemId = @intItemId
 	AND IL.intLocationId = @intLocationId
 	AND dbo.fnDateLessThanEquals(t.dtmDate, @dtmDate) = 1
-	AND ISNULL(t.ysnIsUnposted, 0) = 0
+	--AND ISNULL(t.ysnIsUnposted, 0) = 0
 	AND (@intSubLocationId IS NULL OR @intSubLocationId = CASE WHEN t.intLotId IS NULL THEN t.intSubLocationId ELSE Lot.intSubLocationId END)
 	AND (@intStorageLocationId IS NULL OR @intStorageLocationId = CASE WHEN t.intLotId IS NULL THEN t.intStorageLocationId ELSE Lot.intStorageLocationId END)
 	AND @intOwnershipType = 2
@@ -234,8 +234,8 @@ SELECT
 	, strStorageLocationName		= strgLoc.strName
 	, intOwnershipType				= @intOwnershipType
 	, strOwnershipType				= dbo.fnICGetOwnershipType(@intOwnershipType)
-	, dblRunningAvailableQty		= t.dblQty 
-	, dblStorageAvailableQty		= t.dblUnitStorage
+	, dblRunningAvailableQty		= ROUND(t.dblQty, 6)
+	, dblStorageAvailableQty		= ROUND(t.dblUnitStorage, 6) 
 	, dblCost = CASE 
 				WHEN CostMethod.intCostingMethodId = 1 THEN dbo.fnGetItemAverageCost(i.intItemId, ItemLocation.intItemLocationId, CASE WHEN @intSubLocationId IS NULL OR @intStorageLocationId IS NULL THEN stock.intItemUOMId ELSE ItemUOM.intItemUOMId END)
 				WHEN CostMethod.intCostingMethodId = 2 THEN dbo.fnCalculateCostBetweenUOM(FIFO.intItemUOMId, StockUOM.intItemUOMId, FIFO.dblCost)

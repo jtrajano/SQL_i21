@@ -2006,6 +2006,7 @@
     <Build Include="dbo\Functions\fnGetItemStockUOM.sql" />
     <Build Include="dbo\Stored Procedures\uspICFixStockQuantities.sql" />
     <Build Include="dbo\Stored Procedures\uspICFixStorageQty.sql" />
+    <Build Include="dbo\Stored Procedures\uspICFixBundleInvalidUOMs.sql" />
     <Build Include="dbo\Tables\tblICFixLog.sql" />
     <Build Include="dbo\Stored Procedures\uspPRUpdateEmployeeTax.sql" />
     <Build Include="dbo\Stored Procedures\uspPRUpdateEmployeeEarning.sql" />
@@ -7615,6 +7616,7 @@
     <Build Include="dbo\Stored Procedures\uspICGetBundleComponents2.sql" />
     <Build Include="dbo\Functions\fnICLotQtyAsOf.sql" />
     <Build Include="dbo\Views\vyuICInventoryAdjustmentSourceLink.sql" />
+    <Build Include="dbo\Views\vyuICGetInvalidBundleItemUom.sql" />
     <Build Include="dbo\Functions\fnDateFromParts.sql" />
     <Build Include="dbo\Views\vyuHDTimeEntryDailySummary.sql" />
     <Build Include="dbo\Functions\fnPRRounding.sql" />
@@ -8113,6 +8115,9 @@
     <Build Include="dbo\Stored Procedures\uspTRProcessImportDtn.sql" />
     <Build Include="dbo\Tables\tblTRCrossReferenceDtn.sql" />
     <Build Include="dbo\Views\vyuTRCrossReferenceDtn.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCGetTicketShipExpressExport.sql" />
+    <Build Include="dbo\Tables\tblSCCertificateOfAnalysis.sql" />
+    <Build Include="dbo\Tables\tblSCTicketCertificateOfAnalysis.sql" />
     <Build Include="dbo\Tables\tblSCInventoryReceiptAllowVoucherTracker.sql" />
     <Build Include="dbo\Views\vyuAPUnknownPayables.sql" />
     <Build Include="dbo\Views\vyuCTEntityContainer.sql" />
@@ -8135,6 +8140,24 @@
     <None Include="Scripts\Post-Deployment\CT\Create_fnCTFormatNumber.sql" />
     <Build Include="dbo\Functions\fnCTFormatNumber.sql" />
     <Build Include="dbo\Tables\tblGROldTransactionMapping.sql" />
+    <Build Include="dbo\Stored Procedures\uspICGetCollateralItems.sql" />
+    <Build Include="dbo\Stored Procedures\uspICGetCollateralCategories.sql" />
+    <Build Include="dbo\Tables\tblICBackupCollateral.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTRebuildContractHistory.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPDiagnoseGrainClearing.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPDiagnoseLoadClearing.sql" />
+    <Build Include="dbo\Stored Procedures\uspICFixOtherChargeBilledQty.sql" />
+    <Build Include="dbo\Views\vyuSTUnpostedItemSales.sql" />
+    <Build Include="dbo\Views\vyuSTUnpostedPumpTotals.sql" />
+    <Build Include="dbo\Views\vyuSTUnpostedItemMovements.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCCheckTicketContractAfterManualDistribution.sql" />
+    <Build Include="dbo\Stored Procedures\uspICFixICvsGLAmountDisrecpany.sql" />
+    <Build Include="dbo\Functions\fnGRCalculateStorageUnits.sql" />
+    <Build Include="dbo\User Defined Types\StagingCommanderDepartment.sql" />
+    <Build Include="dbo\User Defined Types\StagingCommanderFPHose.sql" />
+    <Build Include="dbo\User Defined Types\StagingCommanderPlu.sql" />
+    <Build Include="dbo\User Defined Types\StagingCommanderSummary.sql" />
+    <Build Include="dbo\User Defined Types\StagingCommanderTax.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

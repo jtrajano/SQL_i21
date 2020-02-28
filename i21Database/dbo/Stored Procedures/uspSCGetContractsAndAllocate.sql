@@ -52,6 +52,7 @@ BEGIN TRY
 			@locationId				INT
 
 	DECLARE @dblTicketScheduledQuantity NUMERIC(18,6)
+	DECLARE @_dblTicketScheduledQuantity NUMERIC(18,6)
 	DECLARE @intTicketLoadDetailId	INT
 	DECLARE @intLoadId	INT
 	DECLARE @LoadContractsDetailId Id
@@ -104,6 +105,7 @@ BEGIN TRY
 		, @UseScheduleForAvlCalc = CASE WHEN intStorageScheduleTypeId = -6 THEN 0 ELSE 1 END 
 		,@intTicketLoadDetailId = intLoadDetailId
 		,@dblTicketScheduledQuantity = dblScheduleQty
+		,@_dblTicketScheduledQuantity = dblScheduleQty
 		,@locationId		=	intProcessingLocationId
 		,@dtmTicketDate  = dtmTicketDateTime
         ,@intTicketSclaeSetupId = intScaleSetupId
@@ -293,8 +295,8 @@ BEGIN TRY
 				
 
 		SELECT	@intContractHeaderId = CD.intContractHeaderId,
-				@dblBalance		=	dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,@intScaleUOMId,CD.dblBalance),
-				@dblQuantity	=	dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,@intScaleUOMId,CD.dblQuantity),
+				@dblBalance		=	CD.dblBalance, --dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId,@intScaleUOMId,CD.dblBalance),
+				@dblQuantity	=	CD.dblQuantity,--dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId,@intScaleUOMId,CD.dblQuantity),
 				@dblCost		=	CASE	WHEN	CD.intPricingTypeId = 2
 											THEN	ISNULL(dblSeqBasis,0)
 											WHEN	CD.intPricingTypeId = 3
@@ -302,8 +304,8 @@ BEGIN TRY
 											ELSE	ISNULL(CD.dblCashPrice,0)
 									END,
 				@dblAvailable	=	CASE	WHEN	@UseScheduleForAvlCalc = 1 --OR @intContractDetailId <> @intTicketContractDetailId
-											THEN	dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,@intScaleUOMId,ISNULL(CD.dblBalance,0) - ISNULL(CD.dblScheduleQty,0))
-											ELSE	dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,@intScaleUOMId,ISNULL(CD.dblBalance,0))
+											THEN	ISNULL(CD.dblBalance,0) - ISNULL(CD.dblScheduleQty,0)--dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId,@intScaleUOMId,ISNULL(CD.dblBalance,0) - ISNULL(CD.dblScheduleQty,0))
+											ELSE	ISNULL(CD.dblBalance,0)--dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId,@intScaleUOMId,ISNULL(CD.dblBalance,0))
 									END,
 				@ysnUnlimitedQuantity = CH.ysnUnlimitedQuantity,
 				@intItemUOMId	=	CD.intItemUOMId,
@@ -315,12 +317,18 @@ BEGIN TRY
 		CROSS  APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
 		WHERE	CD.intContractDetailId = @intContractDetailId
 
-		SELECT @dblNetUnitsToCompare = dbo.fnCTConvertQtyToTargetItemUOM(@intScaleUOMId,@intItemUOMId,@dblNetUnits)
+		SELECT @dblNetUnitsToCompare = dbo.fnCalculateQtyBetweenUOM(@intScaleUOMId,@intItemUOMId,@dblNetUnits)
+		IF(@strDistributionOption <> 'LOD') 
+		BEGIN
+			SET @dblTicketScheduledQuantity = dbo.fnCalculateQtyBetweenUOM(@intScaleUOMId,@intItemUOMId,@_dblTicketScheduledQuantity)
+		END
+
+		SET @dblNetUnits = @dblNetUnitsToCompare
 
 		IF @ysnDP = 1
 		BEGIN
 
-			SELECT @dblNetUnits = dbo.fnCTConvertQtyToTargetItemUOM(@intScaleUOMId,@intItemUOMId,@dblNetUnits)			
+			SELECT @dblNetUnits = dbo.fnCalculateQtyBetweenUOM(@intScaleUOMId,@intItemUOMId,@dblNetUnits)			
 			
 			INSERT	INTO @Processed SELECT @intContractDetailId,0,NULL,@dblCost,0,NULL
 
@@ -328,15 +336,20 @@ BEGIN TRY
 
 			BREAK
 		END
-		
-		SET @dblNetUnits = @dblNetUnitsToCompare
 
 		/*Fixes for CT-3365 always accept ticket if contract is load base and with remaining load balance*/
 		IF @ysnLoad = 1-- AND @intStorageScheduleTypeId = -6
 		BEGIN
 			IF @dblBalanceLoad > 0
 			BEGIN
-				INSERT	INTO @Processed SELECT @intContractDetailId,@dblNetUnits,NULL,@dblCost,0,NULL
+				INSERT	INTO @Processed 
+				SELECT @intContractDetailId
+					,dbo.fnCalculateQtyBetweenUOM(@intItemUOMId,@intScaleUOMId,@dblNetUnits)
+					,NULL
+					,@dblCost
+					,0
+					,NULL
+
 				SELECT @dblNetUnits = 0
 				BREAK
 			END
@@ -346,6 +359,10 @@ BEGIN TRY
 				GOTO CONTINUEISH
 			END
 		END
+		
+		
+
+	
 		IF NOT (@dblAvailable > 0 OR (@strDistributionOption = 'CNT' AND @intContractDetailId = @intTicketContractDetailId AND (@dblAvailable + ISNULL(@dblTicketScheduledQuantity,0)) > 0 ))
 		BEGIN
 			INSERT	INTO @Processed (intContractDetailId,ysnIgnore) SELECT @intContractDetailId,1
@@ -355,7 +372,14 @@ BEGIN TRY
 		IF	@dblNetUnits <= @dblAvailable OR @ysnUnlimitedQuantity = 1
 			OR (@strDistributionOption = 'CNT' AND @intContractDetailId = @intTicketContractDetailId AND @dblNetUnits <= (@dblAvailable + ISNULL(@dblTicketScheduledQuantity,0)) )
 		BEGIN
-			INSERT	INTO @Processed SELECT @intContractDetailId,@dblNetUnits,NULL,@dblCost,0,@intLoadDetailId
+			INSERT	INTO @Processed 
+			SELECT @intContractDetailId
+				,dbo.fnCalculateQtyBetweenUOM(@intItemUOMId,@intScaleUOMId,@dblNetUnits)
+				,NULL
+				,@dblCost
+				,0
+				,@intLoadDetailId
+
 			IF (@ysnAutoIncreaseQty = 1 OR @ysnAutoIncreaseSchQty = 1) AND  @dblScheduleQty < @dblNetUnits AND @intTicketContractDetailId = @intContractDetailId
 			BEGIN
 				SET @dblInreaseSchBy  = @dblNetUnits - @dblScheduleQty
@@ -370,7 +394,7 @@ BEGIN TRY
 			BEGIN
 				IF(@strDistributionOption = 'LOD') AND @dblScheduleQty > @dblNetUnits AND @intContractDetailId = @intTicketContractDetailId
 				BEGIN 
-					
+					SET @dblInreaseSchBy = 0
 					IF(@dblTicketScheduledQuantity >= @dblScheduleQty)
 					BEGIN
 						-- REmove all the remaining scheduled quantity for the LS
@@ -385,33 +409,76 @@ BEGIN TRY
 									@strScreenName			=	'Auto - Scale'
 						END
 					END
-				END
-				ELSE
-				BEGIN
-					
-					SET @dblInreaseSchBy  = @dblNetUnits - ISNULL(@dblTicketScheduledQuantity,0)
-					IF(@dblInreaseSchBy <> 0)
+					ELSE
 					BEGIN
-						IF(@intContractDetailId = @intTicketContractDetailId)
+						IF @dblTicketScheduledQuantity > @dblNetUnits
 						BEGIN
-							-- Adjust the scheduled quantity based on the ticket scheduled and net units
-								EXEC	uspCTUpdateScheduleQuantity 
-										@intContractDetailId	=	@intContractDetailId,
-										@dblQuantityToUpdate	=	@dblInreaseSchBy,
-										@intUserId				=	@intUserId,
-										@intExternalId			=	@intTicketId,
-										@strScreenName			=	'Auto - Scale'
-						
+							SET @dblInreaseSchBy  = (@dblTicketScheduledQuantity - @dblNetUnits) * -1
 						END
-						ELSE
+						
+						IF(ISNULL(@dblInreaseSchBy,0) <> 0)
 						BEGIN
 							EXEC	uspCTUpdateScheduleQuantity 
 									@intContractDetailId	=	@intContractDetailId,
 									@dblQuantityToUpdate	=	@dblInreaseSchBy,
 									@intUserId				=	@intUserId,
 									@intExternalId			=	@intTicketId,
-									@strScreenName			=	'Scale'
-							
+									@strScreenName			=	'Auto - Scale'
+						END
+					END
+				END
+				ELSE
+				BEGIN
+
+					SET @dblInreaseSchBy = 0
+				
+					IF(@intContractDetailId = @intTicketContractDetailId)
+					BEGIN
+						SET @dblInreaseSchBy  = @dblNetUnits - ISNULL(@dblTicketScheduledQuantity,0)
+						IF (@strDistributionOption = 'LOD' AND @dblTicketScheduledQuantity > @dblNetUnits) 
+						BEGIN
+							print 'no adjustment'
+						END
+						ELSE
+						BEGIN
+							-- Adjust the scheduled quantity based on the ticket scheduled and net units
+							IF(@dblInreaseSchBy <> 0)
+							BEGIN
+								EXEC	uspCTUpdateScheduleQuantity 
+										@intContractDetailId	=	@intContractDetailId,
+										@dblQuantityToUpdate	=	@dblInreaseSchBy,
+										@intUserId				=	@intUserId,
+										@intExternalId			=	@intTicketId,
+										@strScreenName			=	'Auto - Scale'
+							END
+						END
+
+						
+					
+					END
+					ELSE
+					BEGIN
+						IF (@strDistributionOption = 'LOD')
+						BEGIN
+							SET @dblInreaseSchBy  = @dblNetUnits - ISNULL(@dblScheduleQty,0)
+							IF(@dblInreaseSchBy <> 0)
+							BEGIN
+								EXEC	uspCTUpdateScheduleQuantity 
+										@intContractDetailId	=	@intContractDetailId,
+										@dblQuantityToUpdate	=	@dblInreaseSchBy,
+										@intUserId				=	@intUserId,
+										@intExternalId			=	@intTicketId,
+										@strScreenName			=	'Auto - Scale'
+							END
+						END
+						ELSE
+						BEGIN
+							EXEC	uspCTUpdateScheduleQuantity 
+								@intContractDetailId	=	@intContractDetailId,
+								@dblQuantityToUpdate	=	@dblNetUnits,
+								@intUserId				=	@intUserId,
+								@intExternalId			=	@intTicketId,
+								@strScreenName			=	'Auto - Scale'
 						END
 					END
 					
@@ -444,7 +511,14 @@ BEGIN TRY
 						@intExternalId			=	@intTicketId,
 						@strScreenName			=	'Auto - Scale'
 
-				INSERT	INTO @Processed SELECT @intContractDetailId,@dblNetUnits,NULL,@dblCost,0,@intLoadDetailId
+				INSERT	INTO @Processed 
+				SELECT @intContractDetailId
+					,dbo.fnCalculateQtyBetweenUOM(@intItemUOMId,@intScaleUOMId,@dblNetUnits)
+					,NULL
+					,@dblCost
+					,0
+					,@intLoadDetailId
+				
 				SELECT	@dblNetUnits = 0
 				BREAK
 			END		
@@ -459,7 +533,10 @@ BEGIN TRY
 						--compare the scheduled units to the processed units if it is less than then adjust the scheduled 
 						IF(@dblScheduleQty < @dblNetUnits)
 						BEGIN
-							SET @dblInreaseSchBy  = @dblNetUnits - @dblScheduleQty
+							IF((@dblAvailable) > @dblNetUnits)
+							BEGIN
+								SET @dblInreaseSchBy  = @dblNetUnits - @dblScheduleQty
+							END
 						END
 					END
 					ELSE
@@ -476,24 +553,78 @@ BEGIN TRY
 								@intExternalId			=	@intTicketId,
 								@strScreenName			=	'Auto - Scale'
 					END
-				
+					
+					INSERT	INTO @Processed 
+					SELECT @intContractDetailId
+						,dbo.fnCalculateQtyBetweenUOM(@intItemUOMId,@intScaleUOMId,@dblAvailable)
+						,NULL
+						,@dblCost
+						,0
+						,@intLoadDetailId
+
+					SELECT	@dblNetUnits	=	@dblNetUnits - @dblAvailable			
 				END
 				ELSE
 				BEGIN
-					IF @intDistributionMethod = 1 AND @dblScheduleQty < @dblAvailable AND @ysnAutoIncreaseSchQty = 1
+					--Check contract if it's the same as the ticket contract
+					IF(@intContractDetailId = @intTicketContractDetailId)
 					BEGIN
-						SET @dblInreaseSchBy  = @dblAvailable - @dblScheduleQty
-						EXEC	uspCTUpdateScheduleQuantity 
-								@intContractDetailId	=	@intContractDetailId,
-								@dblQuantityToUpdate	=	@dblInreaseSchBy,
-								@intUserId				=	@intUserId,
-								@intExternalId			=	@intTicketId,
-								@strScreenName			=	'Auto - Scale'
+						IF(@dblTicketScheduledQuantity + @dblAvailable) <= @dblNetUnits
+						BEGIN
+							SET @dblInreaseSchBy  = @dblAvailable
+							IF(@dblInreaseSchBy > 0)
+							BEGIN
+								EXEC	uspCTUpdateScheduleQuantity 
+										@intContractDetailId	=	@intContractDetailId,
+										@dblQuantityToUpdate	=	@dblInreaseSchBy,
+										@intUserId				=	@intUserId,
+										@intExternalId			=	@intTicketId,
+										@strScreenName			=	'Auto - Scale'
+							END
+							--reuse variable to sum the ticket schedule and available
+							SET @dblInreaseSchBy  = @dblTicketScheduledQuantity + @dblAvailable
+							INSERT	INTO @Processed 
+							SELECT @intContractDetailId
+								,dbo.fnCalculateQtyBetweenUOM(@intItemUOMId,@intScaleUOMId,@dblInreaseSchBy)
+								,NULL
+								,@dblCost
+								,0
+								,@intLoadDetailId
+
+							SELECT	@dblNetUnits	=	@dblNetUnits - @dblInreaseSchBy
+
+						END
+						ELSE
+						BEGIN
+							PRINT 'This should not happen'
+						END
+					END
+					ELSE
+					BEGIN
+						--IF @intDistributionMethod = 1 AND @dblScheduleQty < @dblAvailable AND @ysnAutoIncreaseSchQty = 1
+						
+						SET @dblInreaseSchBy  = @dblAvailable
+						IF @dblAvailable > 0
+						BEGIN
+							EXEC	uspCTUpdateScheduleQuantity 
+									@intContractDetailId	=	@intContractDetailId,
+									@dblQuantityToUpdate	=	@dblInreaseSchBy,
+									@intUserId				=	@intUserId,
+									@intExternalId			=	@intTicketId,
+									@strScreenName			=	'Auto - Scale'
+					
+							INSERT	INTO @Processed 
+							SELECT @intContractDetailId
+								,dbo.fnCalculateQtyBetweenUOM(@intItemUOMId,@intScaleUOMId,@dblAvailable)
+								,NULL
+								,@dblCost
+								,0
+								,@intLoadDetailId
+
+							SELECT	@dblNetUnits	=	@dblNetUnits - @dblAvailable			
+						END
 					END
 				END
-				INSERT	INTO @Processed SELECT @intContractDetailId,@dblAvailable,NULL,@dblCost,0,@intLoadDetailId
-
-				SELECT	@dblNetUnits	=	@dblNetUnits - @dblAvailable			
 			END
 		END
 		
@@ -505,6 +636,9 @@ BEGIN TRY
 		IF(@strDistributionOption = 'LOD')
 		BEGIN
 
+			--- Check for multiple contract on same load schedule
+
+			--Insert into Load detail Id list (loaddetail id that are already processed)
 			INSERT INTO @LoadDetailUsedId
 			SELECT @intLoadDetailId
 			WHERE NOT EXISTS(SELECT TOP 1 1 FROM @LoadDetailUsedId WHERE intId = @intLoadDetailId)
@@ -539,6 +673,24 @@ BEGIN TRY
 				,@intContractDetailId = intContractDetailId
 			FROM @LoadDetailTable
 			ORDER BY intLoadDetailId
+
+			
+			IF	ISNULL(@intContractDetailId,0) = 0
+			BEGIN
+
+				--Check if multiple load shipment for a single contract if non then set the distribution to normal contract assignment
+				IF NOT EXISTS(SELECT TOP 1 1 FROM(
+									SELECT 
+										intLoadDetailId
+										,intContractDetailId = CASE WHEN @strInOutFlag = 'I' THEN intPContractDetailId ELSE intSContractDetailId END
+									FROM vyuSCScaleLoadView
+									WHERE ysnInProgress = 0
+										AND NOT EXISTS (SELECT TOP 1 1 FROM  @LoadDetailUsedId WHERE intId = vyuSCScaleLoadView.intLoadDetailId)) A
+								WHERE A.intContractDetailId = @intTicketContractDetailId)
+				BEGIN
+					SET @strDistributionOption = 'CNT'
+				END
+			END
 		END	
 
 		
@@ -579,6 +731,8 @@ BEGIN TRY
 			ORDER 
 			BY		CD.dtmStartDate, CD.intContractDetailId ASC
 		END
+
+		SET @dblNetUnits = dbo.fnCalculateQtyBetweenUOM(@intItemUOMId,@intScaleUOMId,@dblNetUnits)
 	END	
 	
 	UPDATE	@Processed SET dblUnitsRemaining = @dblNetUnits

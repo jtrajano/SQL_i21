@@ -1,5 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspAPBalance]
 	@UserId INT,
+	@dateFrom DATETIME = NULL,
+	@dateTo DATETIME = NULL,
 	@balance DECIMAL(18,6) OUTPUT,
 	@logKey NVARCHAR(100) OUTPUT
 AS
@@ -12,6 +14,8 @@ SET ANSI_WARNINGS OFF
 
 DECLARE @key NVARCHAR(100) = NEWID()
 DECLARE @logDate DATETIME = GETDATE()
+DECLARE @from DATETIME = CASE WHEN @dateFrom IS NULL THEN '1/1/1900' ELSE @dateFrom END;
+DECLARE @to DATETIME = CASE WHEN @dateTo IS NULL THEN GETDATE() ELSE @dateTo END;
 SET @logKey = @key;
 
 DECLARE @log TABLE
@@ -47,13 +51,19 @@ SELECT * FROM (
 			SELECT 
 			intBillId
 			,CAST((SUM(tmpAPPayables.dblTotal) + SUM(tmpAPPayables.dblInterest) - SUM(tmpAPPayables.dblAmountPaid) - SUM(tmpAPPayables.dblDiscount)) AS DECIMAL(18,2)) AS dblAmountDue
-			FROM (SELECT * FROM dbo.vyuAPPayables) tmpAPPayables 
+			FROM (
+				SELECT * FROM dbo.vyuAPPayables
+				WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) BETWEEN @from AND @to
+			) tmpAPPayables 
 			GROUP BY intBillId
 			UNION ALL
 			SELECT 
 			intBillId
 			,CAST((SUM(tmpAPPayables2.dblTotal) + SUM(tmpAPPayables2.dblInterest) - SUM(tmpAPPayables2.dblAmountPaid) - SUM(tmpAPPayables2.dblDiscount)) AS DECIMAL(18,2)) AS dblAmountDue
-			FROM (SELECT * FROM dbo.vyuAPPrepaidPayables) tmpAPPayables2 
+			FROM (
+				SELECT * FROM dbo.vyuAPPrepaidPayables
+				WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) BETWEEN @from AND @to
+			) tmpAPPayables2 
 			GROUP BY intBillId
 		) AS tmpAgingSummaryTotal
 		LEFT JOIN dbo.tblAPBill A
@@ -67,9 +77,9 @@ SELECT * FROM (
 			,D.strAccountId
 			,CAST((SUM(A.dblTotal) + SUM(A.dblInterest) - SUM(A.dblAmountPaid) - SUM(A.dblDiscount)) AS DECIMAL(18,2)) AS dblAmountDue
 		FROM vyuAPSalesForPayables A
-		-- LEFT JOIN tblARInvoice B ON A.intInvoiceId = B.intInvoiceId 
-		LEFT JOIN dbo.vyuGLAccountDetail D ON A.intAccountId = D.intAccountId
+		LEFT JOIN dbo.vyuGLAccountDetail D ON  A.intAccountId = D.intAccountId
 		WHERE D.strAccountCategory = 'AP Account' --there are old data where cash refund have been posted to non AP account
+		AND DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) BETWEEN @from AND @to
 		GROUP BY A.intInvoiceId, A.intAccountId, D.strAccountId
 		UNION ALL
 		SELECT
@@ -132,3 +142,5 @@ SELECT
 FROM @log
 
 RETURN
+
+GO

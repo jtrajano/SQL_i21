@@ -13,7 +13,7 @@ AS
 			CD.strBuyerSeller,					CD.intBillTo,					CD.intFreightRateId,			
 			CD.strFobBasis,						CD.intRailGradeId,				CD.strRemark,
 			CD.dblOriginalQty,					CD.dblBalance,					CD.dblIntransitQty,
-			CD.dblScheduleQty,					CD.strPackingDescription,		CD.intPriceItemUOMId,
+			CD.dblScheduleQty,					CD.strPackingDescription,		intPriceItemUOMId = isnull(CD.intPriceItemUOMId,CD.intItemUOMId),
 			CD.intLoadingPortId,				CD.intDestinationPortId,		CD.strShippingTerm,
 			CD.intShippingLineId,				CD.strVessel,					CD.intDestinationCityId,
 			CD.intShipperId,					CD.intNetWeightUOMId,			CD.strVendorLotID,
@@ -66,6 +66,7 @@ AS
 			dbo.fnCTConvertQtyToTargetItemUOM(CD.intNetWeightUOMId,CD.intItemUOMId,1)							AS	dblWeightToQtyConvFactor,
 			dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intNetWeightUOMId,ISNULL(CD.dblBalance,0)		
 																		      -	ISNULL(CD.dblScheduleQty,0))	AS	dblAvailableNetWeight,
+			CD.dblBalanceLoad - ISNULL(CD.dblScheduleLoad, 0) AS dblAvailableLoad,
 			CD.dblFutures	/ CASE WHEN ISNULL(CU.intCent,0) = 0 THEN 1 ELSE CU.intCent END						AS	dblMainFutures,
 			CD.dblBasis		/ CASE WHEN ISNULL(CU.intCent,0) = 0 THEN 1 ELSE CU.intCent END						AS	dblMainBasis,
 			CD.dblCashPrice / CASE WHEN ISNULL(CU.intCent,0) = 0 THEN 1 ELSE CU.intCent END						AS	dblMainCashPrice,

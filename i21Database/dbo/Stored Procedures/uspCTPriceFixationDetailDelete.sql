@@ -17,7 +17,9 @@ BEGIN TRY
 			@BillDetailId	INT,
 			@ItemId			INT,
 			@Quantity		NUMERIC(18,6),
-			@ysnSuccess		BIT;
+			@ysnSuccess		BIT,
+			@intContractHeaderId int,
+			@intCOntractDetailId int;
 	
 	DECLARE @tblItemBillDetail TABLE
 	(
@@ -28,12 +30,17 @@ BEGIN TRY
 	)
 
 	-- UNPOST BILL
-	SELECT intBillId 
-	INTO #ItemBillPosted
-	FROM tblAPBill 
-	WHERE intBillId IN (SELECT intBillId FROM tblAPBillDetail 
-										WHERE intContractDetailId IN (SELECT intContractDetailId FROM tblCTPriceFixation 
-																							WHERE intPriceFixationId = @intPriceFixationId)) AND ysnPosted = 1
+	SELECT  DISTINCT BL.intBillId
+	INTO	#ItemBillPosted
+	FROM	tblCTPriceFixationDetailAPAR	DA	LEFT
+	JOIN    vyuCTPriceFixationTicket        FT	ON  FT.intDetailId				=   DA.intBillDetailId
+	JOIN	tblCTPriceFixationDetail		FD	ON	FD.intPriceFixationDetailId =	DA.intPriceFixationDetailId
+	JOIN	tblCTPriceFixation				PF	ON	PF.intPriceFixationId		=	FD.intPriceFixationId
+	JOIN	tblAPBill						BL	ON	BL.intBillId				=	DA.intBillId
+	WHERE	BL.ysnPosted =	1
+	AND		PF.intPriceFixationId =	ISNULL(@intPriceFixationId, PF.intPriceFixationId)
+	AND		FD.intPriceFixationDetailId	= ISNULL(@intPriceFixationDetailId,FD.intPriceFixationDetailId)
+
 	WHILE EXISTS(SELECT 1 FROM #ItemBillPosted)
 	BEGIN
 		SELECT TOP 1 @Id = intBillId FROM #ItemBillPosted
@@ -55,13 +62,13 @@ BEGIN TRY
 	AND		ISNULL(FT.intPriceFixationTicketId, 0)	=   CASE WHEN @intPriceFixationTicketId IS NOT NULL THEN @intPriceFixationTicketId ELSE ISNULL(FT.intPriceFixationTicketId,0) END
 	AND		ISNULL(BL.ysnPosted,0) = 0
 
-	
-	SELECT @Id = MIN(Id), @DetailId = MIN(DetailId) FROM #ItemBill
+	SELECT * FROM #ItemBill
+	SELECT @Id = MIN(Id), @DetailId = MIN(ISNULL(DetailId, BillDetailId)) FROM #ItemBill
 	WHILE ISNULL(@Id,0) > 0
 	BEGIN
-		SELECT @Count = COUNT(*) FROM tblCTPriceFixationDetailAPAR WHERE intBillId = @Id
-		IF @intPriceFixationTicketId IS NOT NULL AND @Count > 1
-		BEGIN
+		SELECT @Count = COUNT(*) FROM tblCTPriceFixationDetailAPAR WHERE intBillId = @Id 
+		IF @Count > 1--@intPriceFixationTicketId IS NOT NULL AND @Count > 1 
+		BEGIN 
 			-- UPDATE ITEM BILL QTY
 			SELECT @ItemId = intInventoryReceiptItemId, @Quantity = dblQtyReceived
 			FROM tblAPBillDetail 
@@ -84,10 +91,10 @@ BEGIN TRY
 
 			EXEC uspICUpdateBillQty @updateDetails = @receiptDetails	
 			-----------------------------------------
-
-			
+			-- CT-4094	
+			DELETE FROM tblCTPriceFixationDetailAPAR WHERE intBillId = @Id AND intBillDetailId = @DetailId
 			DELETE FROM tblAPBillDetail WHERE intBillDetailId = @DetailId
-
+			
 			INSERT INTO @voucherIds			
 			SELECT @DetailId
 
@@ -105,7 +112,7 @@ BEGIN TRY
 			@details = @details
 
 			-- DELETE VOUCHER IF ALL TICKETS WHERE DELETED
-			IF (SELECT COUNT(*) FROM tblCTPriceFixationDetailAPAR WHERE intBillId = @Id) = 1
+			IF (SELECT COUNT(*) FROM tblCTPriceFixationDetailAPAR WHERE intBillId = @Id) = 0
 			BEGIN
 				EXEC uspAPDeleteVoucher @Id,@intUserId,4
 		
@@ -116,10 +123,7 @@ BEGIN TRY
 				@actionType = 'Deleted',
 				@actionIcon = 'small-tree-deleted',
 				@keyValue = @Id
-			END
-
-			-- CT-4094	
-			DELETE FROM tblCTPriceFixationDetailAPAR WHERE intBillId = @Id AND intBillDetailId = @DetailId
+			END	
 		END
 		ELSE
 		BEGIN
@@ -168,7 +172,7 @@ BEGIN TRY
 
 	SELECT @List = NULL
 
-	SELECT  DA.intInvoiceId AS Id, FT.intDetailId AS DetailId
+	SELECT  DA.intInvoiceId AS Id, isnull(FT.intDetailId,DA.intInvoiceDetailId) AS DetailId
 	INTO	#ItemInvoice
 	FROM	tblCTPriceFixationDetailAPAR	DA	LEFT
 	JOIN    vyuCTPriceFixationTicket        FT	ON  FT.intDetailId				=   DA.intInvoiceDetailId
@@ -181,14 +185,41 @@ BEGIN TRY
 	AND		ISNULL(FT.intPriceFixationTicketId, 0)	=   CASE WHEN @intPriceFixationTicketId IS NOT NULL THEN @intPriceFixationTicketId ELSE ISNULL(FT.intPriceFixationTicketId,0) END
 	AND		ISNULL(IV.ysnPosted,0) = 0
 
+	 if (@intPriceFixationId is null or @intPriceFixationId < 1)
+	 begin
+		select @intPriceFixationId = intPriceFixationId from tblCTPriceFixationDetail where intPriceFixationDetailId = @intPriceFixationDetailId;
+	 end
+
+	UPDATE	CD
+	SET		CD.dblBasis				=	ISNULL(CD.dblOriginalBasis,0),
+			CD.intFutureMarketId	=	PF.intOriginalFutureMarketId,
+			CD.intFutureMonthId		=	PF.intOriginalFutureMonthId,
+			CD.intPricingTypeId		=	CASE WHEN CH.intPricingTypeId <> 8 THEN 2 ELSE 8 END,
+			CD.dblFutures			=	NULL,
+			CD.dblCashPrice			=	NULL,
+			CD.dblTotalCost			=	NULL,
+			CD.intConcurrencyId		=	CD.intConcurrencyId + 1
+	FROM	tblCTContractDetail	CD
+	JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId
+	JOIN	tblCTPriceFixation	PF	ON	CD.intContractDetailId = PF.intContractDetailId OR CD.intSplitFromId = PF.intContractDetailId
+	AND EXISTS(SELECT * FROM tblCTPriceFixation WHERE intContractDetailId = ISNULL(CD.intContractDetailId,0))
+	WHERE	PF.intPriceFixationId	=	@intPriceFixationId
+
+	select @intContractHeaderId = intContractHeaderId, @intCOntractDetailId = intContractDetailId from tblCTPriceFixation where intPriceFixationId = @intPriceFixationId;
+	exec uspCTCreateDetailHistory @intContractHeaderId,@intCOntractDetailId,null,null;
+
 	SELECT @Id = MIN(Id), @DetailId = MIN(DetailId) FROM #ItemInvoice
 	WHILE ISNULL(@Id,0) > 0
 	BEGIN
 		SELECT @Count = COUNT(*) FROM tblCTPriceFixationDetailAPAR WHERE intInvoiceId = @Id
 		IF @Count = 1
+		BEGIN
 			SELECT @DetailId = NULL
+		END
 		ELSE
+		BEGIN
 			DELETE FROM tblCTPriceFixationDetailAPAR WHERE intInvoiceId = @Id AND intInvoiceDetailId = @DetailId
+		END
 
 		EXEC uspARDeleteInvoice @Id,@intUserId,@DetailId
 		SELECT @Id = MIN(Id) FROM #ItemInvoice WHERE Id > @Id

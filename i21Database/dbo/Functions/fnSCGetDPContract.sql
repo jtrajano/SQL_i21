@@ -28,7 +28,7 @@ BEGIN
 			AND	CD.intItemId			=	@intItemId
 			AND	CD.intPricingTypeId		=	5
 			AND	CD.ysnAllowedToShow		=	1
-			AND	CD.dtmStartDate < @dtmTransactionDate
+			AND	CD.dtmStartDate <= @dtmTransactionDate
 		ORDER BY CD.dtmStartDate DESC
 	END
 	ELSE
@@ -47,6 +47,7 @@ BEGIN
 		AND		CD.intPricingTypeId		=	5
 		AND		CD.ysnAllowedToShow		=	1
 		AND 	CD.intCompanyLocationId = 	@intLocationId
+		AND		CD.dtmStartDate <= @dtmTransactionDate
 		ORDER BY CD.dtmStartDate DESC
 	END
 	RETURN

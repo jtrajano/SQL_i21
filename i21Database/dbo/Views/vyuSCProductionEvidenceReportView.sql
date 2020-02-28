@@ -166,7 +166,7 @@
 	LEFT JOIN tblICCommodity ICCommodity ON ICCommodity.intCommodityId = SC.intCommodityId
 	LEFT JOIN tblEMEntity EM 
 		on IR.intEntityVendorId = EM.intEntityId
-	LEFT JOIN tblEMEntityLocation EMLocation ON EMLocation.intEntityId = IR.intEntityId AND EMLocation.ysnDefaultLocation = 1
+	LEFT JOIN tblEMEntityLocation EMLocation ON EMLocation.intEntityId = IR.intEntityVendorId AND EMLocation.ysnDefaultLocation = 1
 	LEFT JOIN vyuEMSearchShipVia vyuEMSearchShipVia on vyuEMSearchShipVia.intEntityId = SC.intHaulerId
 	LEFT JOIN tblEMEntitySplit tblEMEntitySplit on tblEMEntitySplit.intSplitId = DS.intSplitId
 	LEFT JOIN tblSMCompanyLocation tblSMCompanyLocation on tblSMCompanyLocation.intCompanyLocationId = SC.intProcessingLocationId

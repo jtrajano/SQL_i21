@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspCFInvoiceReportDiscount](
-	@UserId NVARCHAR(MAX)
+	@UserId NVARCHAR(MAX),
+	@StatementType NVARCHAR(MAX)
 )
 AS
 BEGIN
@@ -304,8 +305,8 @@ BEGIN
 			,vyu.strTermCode				
 		FROM vyuCFInvoiceDiscount vyu
 		INNER JOIN tblCFInvoiceReportTempTable temp
-		ON vyu.intTransactionId = temp.intTransactionId
-		WHERE temp.intTransactionId IN (SELECT intTransactionId FROM tblCFInvoiceReportTempTable WHERE strUserId = @UserId)
+		ON vyu.intTransactionId = temp.intTransactionId AND strUserId = @UserId AND LOWER(strStatementType) =  LOWER(@StatementType)
+		WHERE temp.intTransactionId IN (SELECT intTransactionId FROM tblCFInvoiceReportTempTable WHERE strUserId = @UserId AND LOWER(strStatementType) =  LOWER(@StatementType))
 		-----------------MAIN QUERY------------------
 
 		

@@ -2,6 +2,7 @@
 	@intLotId int,
 	@intDirectionId int,
 	@ysnParentLot bit=0
+	,@intLocationId int=NULL
 AS
 
 SET NOCOUNT ON;
@@ -28,7 +29,8 @@ Begin
 		Join tblICCategory mt on mt.intCategoryId=i.intCategoryId
 		Join tblICItemUOM iu on wi.intItemUOMId=iu.intItemUOMId
 		Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
-		Where wi.intLotId IN (Select intLotId From tblICLot Where strLotNumber=@strLotNumber 
+		Where w.intLocationId=@intLocationId 
+			and wi.intLotId IN (Select intLotId From tblICLot Where strLotNumber=@strLotNumber 
 		--and intLotId in (Select intLotId From tblICInventoryReceiptItemLot)
 		--and strLotNumber in (Select b.strLotNumber From tblICInventoryReceiptItemLot a join tblICLot b on a.intLotId=b.intLotId)
 		)) t
@@ -51,7 +53,7 @@ Begin
 		Join tblICItemUOM iu on wi.intItemUOMId=iu.intItemUOMId
 		Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
 		Join tblICParentLot pl on l.intParentLotId=pl.intParentLotId
-		Where l.intParentLotId=@intLotId) t
+		Where w.intLocationId=@intLocationId and l.intParentLotId=@intLotId) t
 		group by t.strTransactionName,t.intItemId,t.strItemNo,t.strDescription,t.intCategoryId,t.strCategoryCode,t.intLotId,t.strLotNumber,t.strLotAlias,t.intParentLotId
 	--ELSE
 	--	Select 'Receipt' AS strTransactionName,l.intLotId,l.strLotNumber,l.strLotAlias,i.strItemNo,i.strDescription,
@@ -88,7 +90,7 @@ Begin
 		Join tblICCategory mt on mt.intCategoryId=i.intCategoryId
 		Join tblICItemUOM iu on wi.intItemUOMId=iu.intItemUOMId
 		Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
-		Where wi.intLotId IN (Select intLotId From tblICLot Where strLotNumber=@strLotNumber) AND ISNULL(wi.ysnProductionReversed,0)=0) t
+		Where w.intLocationId=@intLocationId and wi.intLotId IN (Select intLotId From tblICLot Where strLotNumber=@strLotNumber) AND ISNULL(wi.ysnProductionReversed,0)=0) t
 		group by t.strTransactionName,t.intItemId,t.strItemNo,t.strDescription,t.intCategoryId,t.strCategoryCode,t.strLotNumber,t.strLotAlias,t.intParentLotId
 
 		If Exists(Select 1 from tblMFWorkOrderProducedLot where intLotId IN (Select intSplitFromLotId From tblICLot Where strLotNumber=@strLotNumber) AND ISNULL(ysnProductionReversed,0)=0) AND @ysnParentLot=0
@@ -105,7 +107,7 @@ Begin
 		Join tblICCategory mt on mt.intCategoryId=i.intCategoryId
 		Join tblICItemUOM iu on IA.intItemUOMId=iu.intItemUOMId
 		Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
-		Where IA.intDestinationLotId IN (Select intLotId From tblICLot Where strLotNumber=@strLotNumber)) t
+		Where IA.intLocationId=@intLocationId and IA.intDestinationLotId IN (Select intLotId From tblICLot Where strLotNumber=@strLotNumber)) t
 		group by t.strTransactionName,t.intItemId,t.strItemNo,t.strDescription,t.intCategoryId,t.strCategoryCode,t.intLotId,t.strLotNumber,t.strLotAlias,t.intParentLotId
 
 
@@ -125,7 +127,7 @@ Begin
 		Join tblICCategory mt on mt.intCategoryId=i.intCategoryId
 		Join tblICItemUOM iu on l.intItemUOMId=iu.intItemUOMId
 		Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
-		Where rl.intLotId IN (Select intLotId From tblICLot Where strLotNumber=@strLotNumber)) t
+		Where IsNULL(r.intLocationId,@intLocationId)=@intLocationId and rl.intLotId IN (Select intLotId From tblICLot Where strLotNumber=@strLotNumber)) t
 		group by t.strTransactionName,t.intItemId,t.strItemNo,t.strDescription,t.intCategoryId,t.strCategoryCode,t.intLotId,t.strLotNumber,t.strLotAlias,t.intParentLotId
 
 	If Exists(Select 1 from tblMFWorkOrderProducedLot where intLotId in (Select intLotId From tblICLot Where intParentLotId=@intLotId) AND ISNULL(ysnProductionReversed,0)=0) AND @ysnParentLot=1
@@ -145,6 +147,6 @@ Begin
 		Join tblICItemUOM iu on wi.intItemUOMId=iu.intItemUOMId
 		Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
 		Join tblICParentLot pl on l.intParentLotId=pl.intParentLotId
-		Where l.intParentLotId=@intLotId AND ISNULL(wi.ysnProductionReversed,0)=0) t
+		Where w.intLocationId=@intLocationId and l.intParentLotId=@intLotId AND ISNULL(wi.ysnProductionReversed,0)=0) t
 		group by t.strTransactionName,t.intItemId,t.strItemNo,t.strDescription,t.intCategoryId,t.strCategoryCode,t.intLotId,t.strLotNumber,t.strLotAlias,t.intParentLotId
 End

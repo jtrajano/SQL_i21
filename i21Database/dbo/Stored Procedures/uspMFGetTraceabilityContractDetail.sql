@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspMFGetTraceabilityContractDetail] @intContractId INT
 	,@intDirectionId INT
 	,@intItemId int=NULL
+	,@intLocationId int=NULL
 AS
 SET NOCOUNT ON;
 
@@ -22,7 +23,7 @@ SELECT 'Contract' AS strTransactionName
 FROM tblCTContractDetail CD
 JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 JOIN tblICItem i ON CD.intItemId = i.intItemId
-WHERE CD.intContractHeaderId = @intContractId
+WHERE CD.intCompanyLocationId=@intLocationId and CD.intContractHeaderId = @intContractId
 and CD.intItemId =IsNULL(@intItemId,CD.intItemId)
 GROUP BY CD.intContractHeaderId
 	,CH.strContractNumber

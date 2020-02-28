@@ -51,7 +51,7 @@ BEGIN TRY
 			DELETE FROM tblARInvoiceDetail 
 			WHERE intInvoiceDetailId = @InvoiceDetailId
 
-			EXEC [dbo].[uspARUpdateInvoiceIntegrations] @InvoiceId = @InvoiceId, @ForDelete = 1, @UserId = @UserEntityID
+			EXEC [dbo].[uspARUpdateInvoiceIntegrations] @InvoiceId = @InvoiceId, @ForDelete = 1, @UserId = @UserEntityID, @InvoiceDetailId = @InvoiceDetailId
 
 			--AUDIT LOG
 			DECLARE @details NVARCHAR(max) = '{"change": "tblARInvoiceDetail", "iconCls": "small-tree-grid","changeDescription": "Details", "children": [{"action": "Deleted", "change": "Deleted-Record: '+CAST(@InvoiceDetailId as varchar(15))+'", "keyValue": '+CAST(@InvoiceDetailId as varchar(15))+', "iconCls": "small-new-minus", "leaf": true}]}';

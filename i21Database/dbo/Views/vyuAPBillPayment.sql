@@ -30,7 +30,7 @@ intId
 ,Payments.strBatchId
 ,A2.strPaymentInfoKey
 FROM dbo.tblAPBill A
-INNER JOIN dbo.fnAPGetVouchersPaymentInfo() A2
+LEFT JOIN dbo.vyuAPVouchersPaymentInfo A2
 	ON A2.intBillId = A.intBillId
 INNER JOIN 
 (

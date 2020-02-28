@@ -7,7 +7,10 @@ AS
 			,UH.intContractSeq
 			,UH.dtmTransactionDate
 			,UH.strScreenName
-			,ISNULL(UH.strNumber,AP.strNumber) strNumber
+			,strNumber = CASE WHEN UH.strScreenName = 'Scale' THEN ISNULL(AP.strNumber,UH.strNumber) 
+							ELSE ISNULL(UH.strNumber,AP.strNumber) 
+							END
+						
 			,UH.strFieldName
 			,UH.dblOldValue
 			,UH.dblTransactionQuantity

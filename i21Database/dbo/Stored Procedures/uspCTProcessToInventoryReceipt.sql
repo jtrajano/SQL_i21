@@ -100,7 +100,7 @@ AS
 				dblGross					=	dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intNetWeightUOMId,ISNULL(CD.dblBalance,0)-ISNULL(CD.dblScheduleQty,0)),
 				dblNet						=	dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intNetWeightUOMId,ISNULL(CD.dblBalance,0)-ISNULL(CD.dblScheduleQty,0)),
 				dblCost						=	CASE	WHEN	CD.intPricingTypeId = 2 
-														THEN	dbo.fnRKGetLatestClosingPrice(CD.intFutureMarketId,CD.intFutureMonthId,GETDATE()) + 
+														THEN	ISNULL(dbo.fnRKGetLatestClosingPrice(CD.intFutureMarketId,CD.intFutureMonthId,GETDATE()), 0) + 
 																dbo.fnCTConvertQtyToTargetItemUOM(IU.intItemUOMId,CD.intBasisUOMId, CD.dblBasis)
 														ELSE	dbo.fnCTConvertQtyToTargetItemUOM(IU.intItemUOMId,CD.intPriceItemUOMId, AD.dblSeqPrice)
 												END,

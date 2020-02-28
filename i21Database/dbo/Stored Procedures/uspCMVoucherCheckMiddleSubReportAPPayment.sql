@@ -136,7 +136,7 @@ WITH Invoices AS(
 ) 
 SELECT
 a.*
-,b.strTerm
+,b.strTermCode
 ,c.strCurrency
 FROM Invoices a
 LEFT JOIN tblSMTerm b on a.intTermsId = b.intTermID

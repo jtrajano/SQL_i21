@@ -56,7 +56,7 @@ BEGIN
 		,[strAmountInWords]         
 		,[strMemo]                  
 		,[strReferenceNo]           
-		,[ysnCheckToBePrinted]      
+		--,[ysnCheckToBePrinted]      
 		,[ysnCheckVoid]             
 		,[ysnPosted]                
 		,[strLink]                  
@@ -91,7 +91,7 @@ BEGIN
 		[strAmountInWords] = dbo.fnConvertNumberToWord(A.dblAmountPaid),
 		[strMemo] = A.strNotes,
 		[strReferenceNo] = CASE WHEN (SELECT strPaymentMethod FROM tblSMPaymentMethod WHERE intPaymentMethodID = A.intPaymentMethodId) = 'Cash' THEN 'Cash' ELSE A.strPaymentInfo END,
-		[ysnCheckToBePrinted] = CASE WHEN LOWER((SELECT strPaymentMethod FROM tblSMPaymentMethod WHERE intPaymentMethodID = A.intPaymentMethodId)) = 'Cash' THEN 0 ELSE 1 END,
+		--[ysnCheckToBePrinted] = CASE WHEN LOWER((SELECT strPaymentMethod FROM tblSMPaymentMethod WHERE intPaymentMethodID = A.intPaymentMethodId)) = 'Cash' THEN 0 ELSE 1 END,
 		[ysnCheckVoid] = 0,
 		[ysnPosted] = 1,
 		[strLink] = @batchId,

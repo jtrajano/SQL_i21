@@ -37,26 +37,26 @@ BEGIN TRY
 
 	IF @CurrentAPBalance IS NULL
 	BEGIN
-		EXEC [uspAPBalance] @userId, @o1 OUTPUT, @o2 OUTPUT	
+		EXEC [uspAPBalance] @userId, DEFAULT, DEFAULT, @o1 OUTPUT, @o2 OUTPUT	
 		
 		UPDATE tblAPBalance SET dblAPBalance = @o1
 	END
 
 	IF @CurrentGLBalance IS NULL
 	BEGIN
-		EXEC uspAPGLBalance @userId, @p1 OUTPUT, @p2 OUTPUT	
+		EXEC uspAPGLBalance @userId, DEFAULT, DEFAULT, @p1 OUTPUT, @p2 OUTPUT	
 		
 		UPDATE tblAPBalance SET dblGLBalance = @p1
 	END
 
 	IF @APBalance IS NULL AND @GLBalance IS NULL
 	BEGIN
-		EXEC [uspAPBalance] @userId, @o1 OUTPUT, @o2 OUTPUT	
+		EXEC [uspAPBalance] @userId, DEFAULT, DEFAULT, @o1 OUTPUT, @o2 OUTPUT	
 		
 		UPDATE tblAPBalance SET dblAPBalance = @o1
 
 			
-		EXEC uspAPGLBalance @userId, @p1 OUTPUT, @p2 OUTPUT	
+		EXEC uspAPGLBalance @userId, DEFAULT, DEFAULT,  @p1 OUTPUT, @p2 OUTPUT	
 		
 		UPDATE tblAPBalance SET dblGLBalance = @p1
 	END
@@ -76,7 +76,7 @@ BEGIN TRY
 	IF @CurrentAPBalance != @CurrentGLBalance
 	BEGIN
 		--Double check if really NOT balance using usual script of checking the balance
-		EXEC [uspAPBalance] @userId, @o1 OUTPUT, @o2 OUTPUT	
+		EXEC [uspAPBalance] @userId, DEFAULT, DEFAULT, @o1 OUTPUT, @o2 OUTPUT	
 		
 		UPDATE tblAPBalance SET dblAPBalance = @o1
 

@@ -2,6 +2,7 @@
 	,@intDirectionId INT
 	,@ysnParentLot BIT = 0
 	,@ysnDetail BIT=0
+	,@intLocationId int=NULL
 AS
 DECLARE @strLotNumber NVARCHAR(50)
 
@@ -34,7 +35,7 @@ BEGIN
 		JOIN tblMFInventoryAdjustment IA ON IA.intDestinationLotId = l.intLotId and IA.intTransactionTypeId=19
 		JOIN tblICItemUOM iu ON IA.intItemUOMId = iu.intItemUOMId
 		JOIN tblICUnitMeasure um ON iu.intUnitMeasureId = um.intUnitMeasureId
-		WHERE IA.intSourceLotId = @intLotId
+		WHERE IA.intLocationId=@intLocationId and IA.intSourceLotId = @intLotId
 
 	IF @ysnParentLot = 1
 		SELECT 'Merge' AS strTransactionName
@@ -60,7 +61,7 @@ BEGIN
 		JOIN tblMFInventoryAdjustment IA ON IA.intDestinationLotId = l.intLotId and IA.intTransactionTypeId=19
 		JOIN tblICItemUOM iu ON IA.intItemUOMId = iu.intItemUOMId
 		JOIN tblICUnitMeasure um ON iu.intUnitMeasureId = um.intUnitMeasureId
-		WHERE IA.intSourceLotId = @intLotId
+		WHERE IA.intLocationId=@intLocationId and IA.intSourceLotId = @intLotId
 END
 
 IF @intDirectionId = 2
@@ -88,7 +89,7 @@ BEGIN
 		JOIN tblMFInventoryAdjustment IA ON IA.intSourceLotId = l.intLotId and IA.intTransactionTypeId=19
 		JOIN tblICItemUOM iu ON IA.intItemUOMId = iu.intItemUOMId
 		JOIN tblICUnitMeasure um ON iu.intUnitMeasureId = um.intUnitMeasureId
-		WHERE IA.intDestinationLotId = @intLotId
+		WHERE IA.intLocationId=@intLocationId and IA.intDestinationLotId = @intLotId
 		Group by l.intLotId
 			,l.strLotNumber
 			,l.strLotAlias
@@ -162,7 +163,7 @@ BEGIN
 		JOIN tblMFInventoryAdjustment IA ON IA.intSourceLotId = l.intLotId and IA.intTransactionTypeId=19
 		JOIN tblICItemUOM iu ON IA.intItemUOMId = iu.intItemUOMId
 		JOIN tblICUnitMeasure um ON iu.intUnitMeasureId = um.intUnitMeasureId
-		WHERE IA.intDestinationLotId = @intLotId
+		WHERE IA.intLocationId=@intLocationId and IA.intDestinationLotId = @intLotId
 
 		/*UNION
 		
@@ -214,5 +215,5 @@ BEGIN
 		JOIN tblMFInventoryAdjustment IA ON IA.intSourceLotId = l.intLotId and IA.intTransactionTypeId=19
 		JOIN tblICItemUOM iu ON IA.intItemUOMId = iu.intItemUOMId
 		JOIN tblICUnitMeasure um ON iu.intUnitMeasureId = um.intUnitMeasureId
-		WHERE IA.intDestinationLotId = @intLotId
+		WHERE IA.intLocationId=@intLocationId and IA.intDestinationLotId = @intLotId
 END

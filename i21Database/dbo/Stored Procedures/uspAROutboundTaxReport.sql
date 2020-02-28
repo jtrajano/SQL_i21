@@ -11,7 +11,9 @@ SET ANSI_WARNINGS OFF
 -- Sanitize the @xmlParam 
 IF LTRIM(RTRIM(@xmlParam)) = ''
     BEGIN 
-        SET @xmlParam = NULL        
+        SET @xmlParam = NULL
+
+        SELECT * FROM tblARTaxStagingTable
 	END
 
 IF OBJECT_ID('tempdb..#STATUSCODES') IS NOT NULL DROP TABLE #STATUSCODES
@@ -398,12 +400,12 @@ BEGIN
     SELECT [strInvoiceNumber]             = I.[strInvoiceNumber]
          , [intInvoiceId]                 = I.[intInvoiceId]
          , [intInvoiceDetailId]           = OT.[intInvoiceDetailId]
-         , [intEntityCustomerId]          = C.[intEntityCustomerId]
+         , [intEntityCustomerId]          = I.[intEntityCustomerId]
          , [strType]                      = I.[strType]
          , [strCustomerNumber]            = I.[strCustomerNumber]
          , [strCustomerName]              = I.[strCustomerName]
          , [strAccountStatusCode]         = ''--I.[strAccountStatusCode]
-         , [strCompanyNumber]             = I.[strCompanyNumber]
+         , [strCompanyNumber]             = I.[strLocationNumber]
          , [strCompanyName]               = @strCompanyName
          , [strCompanyAddress]            = @strCompanyAddress
          , [strSalespersonName]           = I.[strSalespersonName]
@@ -541,12 +543,12 @@ BEGIN
     SELECT [strInvoiceNumber]             = I.[strInvoiceNumber]
          , [intInvoiceId]                 = I.[intInvoiceId]
          , [intInvoiceDetailId]           = OT.[intInvoiceDetailId]
-         , [intEntityCustomerId]          = C.[intEntityCustomerId]
+         , [intEntityCustomerId]          = I.[intEntityCustomerId]
          , [strType]                      = I.[strType]
          , [strCustomerNumber]            = I.[strCustomerNumber]
          , [strCustomerName]              = I.[strCustomerName]
-         , [strAccountStatusCode]         = I.[strAccountStatusCode]
-         , [strCompanyNumber]             = I.[strCompanyNumber]
+         , [strAccountStatusCode]         = NULL--I.[strAccountStatusCode]
+         , [strCompanyNumber]             = I.[strLocationNumber]
          , [strCompanyName]               = @strCompanyName
          , [strCompanyAddress]            = @strCompanyAddress
          , [strSalespersonName]           = I.[strSalespersonName]

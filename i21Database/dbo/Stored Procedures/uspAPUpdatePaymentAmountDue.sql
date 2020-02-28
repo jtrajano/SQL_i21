@@ -18,13 +18,21 @@ DECLARE @interest DECIMAL(18,2) = 0;
 
 IF @post = 0
 BEGIN
+	--IN 19.2 CONSIDER THAT THE PAYMENT DETAIL RECORD, THE DM AND PREPAID OFFSET IS NEGATIVE
 	UPDATE tblAPPaymentDetail
 	SET --compute discount/interest if there is any
 		@discount = CASE WHEN C.intTransactionType = 1 
-						THEN dbo.fnGetDiscountBasedOnTerm(A.dtmDatePaid, C.dtmBillDate, C.intTermsId, (C.dblAmountDue + B.dblPayment + B.dblDiscount - B.dblInterest))
+						THEN dbo.fnGetDiscountBasedOnTerm(A.dtmDatePaid, C.dtmBillDate, C.intTermsId, 
+								(
+									--GET THE AMOUNT DUE ON VOUCHER FOR ACCURACY OF VALUE
+									(C.dblAmountDue * (CASE WHEN B.ysnOffset = 1 THEN -1 ELSE 1 END)) 
+									+ B.dblPayment + B.dblDiscount - B.dblInterest)
+								)
 					ELSE 0 END,
 		@interest = CASE WHEN C.intTransactionType = 1
-						THEN dbo.fnGetInterestBasedOnTerm((C.dblAmountDue + B.dblPayment + B.dblDiscount - B.dblInterest), C.dtmBillDate, A.dtmDatePaid, NULL, C.intTermsId)
+						THEN dbo.fnGetInterestBasedOnTerm(
+									((C.dblAmountDue * (CASE WHEN B.ysnOffset = 1 THEN -1 ELSE 1 END)) + B.dblPayment + B.dblDiscount - B.dblInterest)
+									,C.dtmBillDate, A.dtmDatePaid, NULL, C.intTermsId)
 					ELSE 0 END,
 		tblAPPaymentDetail.dblAmountDue = (CASE WHEN B.dblAmountDue = 0 
 												THEN CAST((B.dblDiscount + B.dblPayment - B.dblInterest) AS DECIMAL(18,2))

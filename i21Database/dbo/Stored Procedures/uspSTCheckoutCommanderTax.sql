@@ -1,7 +1,9 @@
 ﻿CREATE PROCEDURE [dbo].[uspSTCheckoutCommanderTax]
-	@intCheckoutId INT,
-	@strStatusMsg NVARCHAR(250) OUTPUT,
-	@intCountRows INT OUTPUT
+	@intCheckoutId							INT,
+	@UDT_TransTax							StagingCommanderTax		READONLY,
+	@ysnSuccess								BIT				OUTPUT,
+	@strMessage								NVARCHAR(1000)	OUTPUT,
+	@intCountRows							INT				OUTPUT
 AS
 BEGIN
 
@@ -23,7 +25,7 @@ BEGIN
 			-- ==================================================================================================================  
 			-- Start Validate if Tax xml file matches the Mapping on i21 
 			-- ------------------------------------------------------------------------------------------------------------------
-			IF NOT EXISTS(SELECT TOP 1 1 FROM #tempCheckoutInsert)
+			IF NOT EXISTS(SELECT TOP 1 1 FROM @UDT_TransTax)
 				BEGIN
 						-- Add to error logging
 						INSERT INTO tblSTCheckoutErrorLogs 
@@ -46,7 +48,8 @@ BEGIN
 						)
 
 						SET @intCountRows = 0
-						SET @strStatusMsg = 'Commander Tax XML file did not match the layout mapping'
+						SET @strMessage = 'Commander Tax XML file did not match the layout mapping'
+						SET @ysnSuccess = 0
 
 						GOTO ExitWithCommit
 				END
@@ -73,27 +76,27 @@ BEGIN
 					strErrorType			= 'NO MATCHING TAG'
 					, strErrorMessage		= 'No Matching Register Tax Code'
 					, strRegisterTag		= 'taxrateBase sysid'
-					, strRegisterTagValue	= ISNULL(Chk.taxrateBasesysid, '')
+					, strRegisterTagValue	= ISNULL(Chk.strSysId, '')
 					, intCheckoutId			= @intCheckoutId
 					, intConcurrencyId		= 1
-				FROM #tempCheckoutInsert Chk
-				WHERE ISNULL(Chk.taxrateBasesysid, '') NOT IN
+				FROM @UDT_TransTax Chk
+				WHERE ISNULL(Chk.strSysId, '') NOT IN
 				(
 					SELECT DISTINCT 
 						tbl.strXmlRegisterTaxLevelID
 					FROM
 					(
 						SELECT DISTINCT
-							Chk.taxrateBasesysid AS strXmlRegisterTaxLevelID
-						FROM #tempCheckoutInsert Chk
+							Chk.strSysId AS strXmlRegisterTaxLevelID
+						FROM @UDT_TransTax Chk
 						JOIN tblSTCheckoutSalesTaxTotals STT
-							ON ISNULL(Chk.taxrateBasesysid, '') COLLATE DATABASE_DEFAULT = STT.strTaxNo
+							ON ISNULL(Chk.strSysId, '') COLLATE DATABASE_DEFAULT = STT.strTaxNo
 						WHERE STT.intCheckoutId = @intCheckoutId
-							AND ISNULL(Chk.taxrateBasesysid, '') != ''
+							AND ISNULL(Chk.strSysId, '') != ''
 							--AND CAST(ISNULL(Chk.taxrateBasetaxRate, 0) AS DECIMAL(18,6)) != 0.000000
 					) AS tbl
 				)
-					AND ISNULL(Chk.taxrateBasesysid, '') != ''
+					AND ISNULL(Chk.strSysId, '') != ''
 					--AND CAST(ISNULL(Chk.taxrateBasetaxRate, 0) AS DECIMAL(18,6)) != 0.000000
 				-- ------------------------------------------------------------------------------------------------------------------  
 				-- END Get Error logs. Check Register XML that is not configured in i21.  
@@ -104,22 +107,23 @@ BEGIN
 
 				-- Tax FILE
 				  UPDATE STT
-				  SET dblTotalTax		= CAST(ISNULL(Chk.taxInfonetTax, 0) AS DECIMAL(18,6))
+				  SET dblTotalTax		= CAST(ISNULL(Chk.dblTaxInfoNetTax, 0) AS DECIMAL(18,6))
 				  --SET dblTotalTax		= CAST(ISNULL(Chk.taxInfosalesTax, 0) AS DECIMAL(18,6)) http://jira.irelyserver.com/browse/ST-1587
-					, dblTaxableSales	= CAST(ISNULL(Chk.taxInfotaxableSales, 0) AS DECIMAL(18,6))         
-					, dblTaxExemptSales = CAST(ISNULL(Chk.taxInfotaxExemptSales, 0) AS DECIMAL(18,6))  
-				  FROM #tempCheckoutInsert Chk
+					, dblTaxableSales	= CAST(ISNULL(Chk.dblTaxInfoTaxableSales, 0) AS DECIMAL(18,6))         
+					, dblTaxExemptSales = CAST(ISNULL(Chk.dblTaxInfoTaxExemptSales, 0) AS DECIMAL(18,6))  
+				  FROM @UDT_TransTax Chk
 				  INNER JOIN dbo.tblSTCheckoutSalesTaxTotals STT
-					ON ISNULL(Chk.taxrateBasesysid, '') COLLATE DATABASE_DEFAULT = STT.strTaxNo
+					ON ISNULL(Chk.strSysId, '') COLLATE DATABASE_DEFAULT = STT.strTaxNo
 				  WHERE STT.intCheckoutId = @intCheckoutId
-					AND CAST(ISNULL(Chk.taxrateBasetaxRate, 0) AS DECIMAL(18,6)) != 0.000000
+					AND CAST(ISNULL(Chk.dblTaxRateBaseTaxRate, 0) AS DECIMAL(18,6)) != 0.000000
 
               -- Difference between Passport and Radiant
               -- 1. Passport does not have 'TenderTransactionsCount' tag in MSM register file
               -- 2. Passport does not have Lottery Winners MOP in tblSTRegister (Register screen)
 
               SET @intCountRows = 1
-              SET @strStatusMsg = 'Success'
+              SET @strMessage = 'Success'
+			  SET @ysnSuccess = 1
 
 			  --PRINT 'SUCCESS'
 
@@ -129,7 +133,8 @@ BEGIN
 
        BEGIN CATCH
 			SET @intCountRows = 0
-			SET @strStatusMsg = ERROR_MESSAGE()
+			SET @strMessage = ERROR_MESSAGE()
+			SET @ysnSuccess = 0
 
 			-- ROLLBACK
 			GOTO ExitWithRollback

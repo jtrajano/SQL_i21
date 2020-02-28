@@ -232,7 +232,7 @@ INTO #APPAYMENTDETAILS
 FROM dbo.tblAPPaymentDetail APPD WITH (NOLOCK)
 INNER JOIN (
 	SELECT intPaymentId
-		 , dblAmountPaid
+		 , dblAmountPaid = -dblAmountPaid
 	FROM dbo.tblAPPayment WITH (NOLOCK)
 	WHERE ysnPosted = 1
 	  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
@@ -240,8 +240,8 @@ INNER JOIN (
 WHERE intInvoiceId IS NOT NULL
 
 --#FORGIVENSERVICECHARGE
-SELECT I.intInvoiceId
-	 , I.strInvoiceNumber
+SELECT SC.intInvoiceId
+	 , SC.strInvoiceNumber
 INTO #FORGIVENSERVICECHARGE 
 FROM tblARInvoice I
 INNER JOIN @tblCustomers C ON I.intEntityCustomerId = C.intEntityCustomerId
@@ -253,6 +253,9 @@ WHERE I.strInvoiceOriginId IS NOT NULL
   AND SC.strTransactionType = 'Invoice'
   AND SC.strType = 'Service Charge'
   AND SC.ysnForgiven = 1
+
+
+
 
 --#POSTEDINVOICES
 SELECT I.intInvoiceId
@@ -280,7 +283,7 @@ WHERE ysnPosted = 1
 	AND ysnCancelled = 0	
 	AND strTransactionType <> 'Cash Refund'
 	AND ( 
-		(SC.intInvoiceId IS NULL AND ((I.strType = 'Service Charge' AND (@ysnFromBalanceForward = 0 AND @dtmDateToLocal < CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmForgiveDate))))) OR (I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0))))
+		(SC.intInvoiceId IS NULL AND ((I.strType = 'Service Charge' AND (@ysnFromBalanceForward = 0 AND @dtmDateToLocal < CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmForgiveDate))))) OR (I.strType = 'Service Charge') OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0))))
 		OR 
 		SC.intInvoiceId IS NOT NULL
 	)
@@ -372,10 +375,10 @@ WHERE ysnPosted = 1
   AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
 
 --REMOVE SERVICE CHARGE THAT WAS ALREADY CAUGHT IN BALANCE FORWARD
-IF (@ysnFromBalanceForward = 0 AND @dtmBalanceForwardDate IS NOT NULL)
-BEGIN
-	DELETE FROM #POSTEDINVOICES WHERE strType = 'Service Charge' AND ysnForgiven = 1 AND @dtmBalanceForwardDate < dtmForgiveDate
-END
+-- IF (@ysnFromBalanceForward = 0 AND @dtmBalanceForwardDate IS NOT NULL)
+-- BEGIN
+-- 	DELETE FROM #POSTEDINVOICES WHERE strType = 'Service Charge' AND ysnForgiven = 1 AND @dtmBalanceForwardDate < dtmForgiveDate
+-- END
 	
 DELETE FROM tblARCustomerAgingStagingTable WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Summary'
 INSERT INTO tblARCustomerAgingStagingTable (
@@ -563,7 +566,7 @@ LEFT JOIN (
 	UNION ALL 
 
 	SELECT PD.intInvoiceId
-		 , dblTotalPayment		= SUM(ISNULL(dblPayment, 0)) + SUM(ISNULL(dblDiscount, 0)) - SUM(ISNULL(dblInterest, 0))
+		 , dblTotalPayment		= -(SUM(ISNULL(dblPayment, 0)) + SUM(ISNULL(dblDiscount, 0)) - SUM(ISNULL(dblInterest, 0)))
 	FROM dbo.tblAPPaymentDetail PD WITH (NOLOCK)
 	INNER JOIN (
 		SELECT intPaymentId

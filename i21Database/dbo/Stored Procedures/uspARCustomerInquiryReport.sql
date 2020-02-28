@@ -67,6 +67,9 @@ CREATE TABLE #CUSTOMERINQUIRY (
 
 DECLARE @strCustomerIds NVARCHAR(100) = NULL
 
+SET @intEntityCustomerId = NULLIF(@intEntityCustomerId, 0)
+SET @intEntityUserId 	 = ISNULL(@intEntityUserId, 1)
+
 IF @intEntityCustomerId IS NOT NULL
 	SET @strCustomerIds = CAST(@intEntityCustomerId AS NVARCHAR(100))
 

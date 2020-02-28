@@ -104,25 +104,25 @@ UPDATE #tmpEmployees
 							ELSE CAST(DATEADD(Q, 1,CAST(DATEADD(Q, DATEDIFF(Q, 17, GETDATE()), 0) AS DATE)) AS DATE)
 							END
 						WHEN (#tmpEmployees.strAwardPeriod = 'End of Quarter') THEN
-							CASE WHEN ETO.dtmLastAward IS NOT NULL THEN 
+							CASE WHEN dtmLastAward IS NOT NULL THEN 
 								CAST(DATEADD(D, -1, DATEADD(Q, DATEDIFF(Q, 0, GETDATE()) + 1, 0)) AS DATE)
 							ELSE 
 								CAST(DATEADD(Q, 1, CAST(DATEADD(D, -1, DATEADD(Q, DATEDIFF(Q, 0, GETDATE()) + 1, 0)) AS DATE)) AS DATE)
 							END
 						WHEN (#tmpEmployees.strAwardPeriod = 'Start of Year') THEN
-							CASE WHEN (ETO.dtmLastAward) < (DATEADD(YY, DATEDIFF(YY, 0, GETDATE()), 0)) THEN
+							CASE WHEN (dtmLastAward) < (DATEADD(YY, DATEDIFF(YY, 0, GETDATE()), 0)) THEN
 								CAST(DATEADD(YY, DATEDIFF(YY,0,GETDATE()), 0) AS DATE)
 							ELSE 
 								CAST(DATEADD(YY, DATEDIFF(YY,0,GETDATE()) + 1, 0) AS DATE)
 							END
 						WHEN (#tmpEmployees.strAwardPeriod = 'End of Year') THEN
-							CASE WHEN (ETO.dtmLastAward) < (DATEADD(YY, DATEDIFF(YY,0,GETDATE()), -1)) THEN
+							CASE WHEN (dtmLastAward) < (DATEADD(YY, DATEDIFF(YY,0,GETDATE()), -1)) THEN
 								CAST(DATEADD(YY, DATEDIFF(YY,0,GETDATE()), -1) AS DATE)
 							ELSE 
 								CAST(DATEADD(YY, DATEDIFF(YY,0,GETDATE()) + 1, -1) AS DATE)
 							END
 						WHEN (#tmpEmployees.strAwardPeriod = 'Anniversary Date') THEN
-							CASE WHEN (ETO.dtmLastAward) < (DATEADD(YY, DATEDIFF(YY,0,getdate()), 0)) THEN
+							CASE WHEN (dtmLastAward) < (DATEADD(YY, DATEDIFF(YY,0,getdate()), 0)) THEN
 								CAST(DATEADD(YY, YEAR(GETDATE()) - YEAR(#tmpEmployees.dtmDateHired), #tmpEmployees.dtmDateHired) AS DATE)
 							ELSE 
 								CAST(DATEADD(YY, YEAR(GETDATE()) - YEAR(#tmpEmployees.dtmDateHired) + 1, #tmpEmployees.dtmDateHired) AS DATE)
@@ -130,9 +130,9 @@ UPDATE #tmpEmployees
 						WHEN (#tmpEmployees.strAwardPeriod = 'Paycheck') THEN #tmpEmployees.dtmDateHired
 						ELSE NULL 
 					END
-FROM tblPREmployeeTimeOff ETO
-	WHERE intEntityEmployeeId = @intEntityEmployeeId
-		AND intTypeTimeOffId = @intTypeTimeOffId
+	--FROM tblPREmployeeTimeOff ETO
+	--WHERE intEntityEmployeeId = @intEntityEmployeeId
+	--	AND intTypeTimeOffId = @intTypeTimeOffId
 
 UPDATE #tmpEmployees 
 	--Calculate Total Accrued Hours

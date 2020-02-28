@@ -117,8 +117,10 @@ FROM (
 		, ContractView.intFreightTermId
 		, ContractView.strFreightTerm
 		, ContractView.intContractSeq
+		, intAllowZeroCostTypeId = ItemLocation.intAllowZeroCostTypeId 
 	FROM vyuCTContractAddOrdersLookup ContractView
         INNER JOIN vyuPODetails POView ON POView.intContractDetailId = ContractView.intContractDetailId
+		INNER JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemId = POView.intItemId AND ItemLocation.intLocationId = POView.intLocationId 
 		LEFT JOIN dbo.tblICItemUOM ItemUOM ON ContractView.intItemUOMId = ItemUOM.intItemUOMId
 		LEFT JOIN dbo.tblICUnitMeasure ItemUnitMeasure ON ItemUnitMeasure.intUnitMeasureId = ItemUOM.intUnitMeasureId
 		LEFT JOIN dbo.tblICItemUOM GrossNetUOM ON ContractView.intNetWeightUOMId = GrossNetUOM.intItemUOMId

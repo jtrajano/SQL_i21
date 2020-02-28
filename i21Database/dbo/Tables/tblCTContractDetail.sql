@@ -710,7 +710,7 @@ CREATE TRIGGER [dbo].[trgCTContractDetail]
 					begin
 						set @dblComputedQuantity = @dblQuantity - (@dblRunningDetailQuantityApplied-@dblDetailQuantityApplied);
 						print @dblComputedQuantity;
-						update tblCTPriceFixationDetail set dblQuantityAppliedAndPriced = @dblComputedQuantity where intPriceFixationDetailId = @intPriceFixationDetailId;
+						update tblCTPriceFixationDetail set dblQuantityAppliedAndPriced = case when @dblComputedQuantity < 0 then 0 else @dblComputedQuantity end where intPriceFixationDetailId = @intPriceFixationDetailId;
 					end
 				end
 
@@ -740,3 +740,19 @@ CREATE TRIGGER [dbo].[trgCTContractDetail]
 	begin catch
 		rollback transaction;
 	end catch
+GO
+
+CREATE TRIGGER [dbo].[trgCTContractDetailDelete]
+	ON [dbo].[tblCTContractDetail]
+    AFTER DELETE
+AS
+BEGIN	
+	ALTER TABLE tblCTContractCost DISABLE TRIGGER trgCTContractCostInstedOfDelete
+
+	DELETE FROM tblCTContractCost 
+	WHERE intContractDetailId IN (SELECT intContractDetailId FROM DELETED)
+
+	ALTER TABLE tblCTContractCost ENABLE TRIGGER trgCTContractCostInstedOfDelete
+END
+
+GO

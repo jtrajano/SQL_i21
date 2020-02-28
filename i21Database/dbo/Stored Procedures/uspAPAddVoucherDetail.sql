@@ -286,15 +286,44 @@ SELECT
 FROM dbo.fnAPGetPayableKeyInfo(@voucherDetails)
 
 --UPDATE THE QTY BASE ON THE QTY BILLED ON STAGING
+DECLARE @qtyToBill DECIMAL(38,15);
+DECLARE @qtyBilled DECIMAL(38,15);
+DECLARE @qtyToBillFromDev DECIMAL(38,15);
 UPDATE A
-	SET A.dblQtyOrdered = A.dblQtyOrdered - ISNULL(vp.dblQuantityBilled,0),
-		A.dblQtyReceived = A.dblQtyReceived - ISNULL(
+	SET 
+		@qtyToBill = ISNULL(
+							CASE WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1
+								THEN (CASE WHEN ctDetail.intContractDetailId IS NOT NULL
+										THEN dbo.fnCalculateQtyBetweenUOM(A.intUnitOfMeasureId, ctDetail.intItemUOMId, vp.dblQuantityToBill)
+									ELSE vp.dblQuantityToBill END)
+							ELSE vp.dblQuantityToBill END
+							,0),
+		@qtyBilled = ISNULL(
 							CASE WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1
 								THEN (CASE WHEN ctDetail.intContractDetailId IS NOT NULL
 										THEN dbo.fnCalculateQtyBetweenUOM(A.intUnitOfMeasureId, ctDetail.intItemUOMId, vp.dblQuantityBilled)
 									ELSE vp.dblQuantityBilled END)
 							ELSE vp.dblQuantityBilled END
 							,0),
+		@qtyToBillFromDev = ISNULL(
+							CASE WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1
+								THEN (CASE WHEN ctDetail.intContractDetailId IS NOT NULL
+										THEN dbo.fnCalculateQtyBetweenUOM(A.intUnitOfMeasureId, ctDetail.intItemUOMId, A.dblQtyReceived)
+									ELSE A.dblQtyReceived END)
+							ELSE A.dblQtyReceived END
+							,0),
+		--LESS THE QTY BILLED ON THE QTY RECEIVED SENT FOR BILLING
+		--A.dblQtyOrdered = A.dblQtyOrdered - ISNULL(vp.dblQuantityBilled,0),
+		A.dblQtyReceived =  --IF dblQtyReceived EQUALS TO REMAINING QTY TO BILL (dblQuantityToBill), DO NOT SUBTRACT FROM dblQuantityBilled
+							--MEANING, THE INTEGRATED DEV ALREADY SENT THE REMAINING QTY TO VOUCHER
+							CASE 
+								WHEN A.dblQtyReceived >= @qtyToBill 
+								THEN @qtyToBill
+							ELSE
+								--IF LESS THAN THE REMAINING QTY TO BILL,
+								--JUST USE IT
+								@qtyToBillFromDev
+							END,
 		A.dblTax = ISNULL(vp.dblTax, A.dblTax), --UPDATE THE TAX IF WE GENERATED IT
 		A.intTaxGroupId = ISNULL(vp.intPurchaseTaxGroupId, A.intTaxGroupId)
 FROM #tmpVoucherPayableData A

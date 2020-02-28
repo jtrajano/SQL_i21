@@ -42,7 +42,10 @@ GO
 	WHERE strPrefix = N' ' AND strTransactionType = N'CPE Receipt' AND strModule = 'Ticket Management'	
 
 	UPDATE tblSMStartingNumber SET strPrefix = N''
-	WHERE strPrefix = N' ' AND strTransactionType = N'Delivery Sheet' AND strModule = 'Ticket Management'	
+	WHERE strPrefix = N' ' AND strTransactionType = N'Delivery Sheet' AND strModule = 'Ticket Management'
+
+	UPDATE tblSMStartingNumber SET strModule = 'Accounts Payable'
+	WHERE strModule = 'Purchasing'	
 GO
 	PRINT N'BEGIN DELETE OF TRANSACTION'
 

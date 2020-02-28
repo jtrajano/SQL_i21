@@ -174,7 +174,7 @@ BEGIN
 														ELSE CASE WHEN ISNULL(cd.intProducerId, 0) = 0 THEN ch.intEntityId
 																	ELSE CASE WHEN ISNULL(cd.ysnClaimsToProducer, 0) = 1 THEN cd.intProducerId
 																				ELSE ch.intEntityId END END END
-			WHERE ISNULL(cd.dtmM2MDate, GETDATE()) BETWEEN @dtmFromDate AND @dtmToDate
+			WHERE ISNULL(ch.dtmContractDate, GETDATE()) BETWEEN @dtmFromDate AND @dtmToDate
 				AND ch.intCommodityId = @intCommodityId
 				AND strName = CASE WHEN ISNULL(@strEntityName, '') = '' THEN strName ELSE @strEntityName END
 				AND ISNULL(cd.intBookId, 0) = CASE WHEN ISNULL(@intBookId, 0) = 0 THEN ISNULL(cd.intBookId, 0) ELSE @intBookId END
@@ -270,8 +270,7 @@ BEGIN
 				, dblFuturesPrice = CONVERT(NUMERIC(18,6), dbo.[fnCTConvertQuantityToTargetItemUOM](cd.intItemId, @intUnitMeasureId, i.intUnitMeasureId
 																				, dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId, @intCurrencyId, ISNULL(dblFuturesPrice, 0), NULL, NULL, NULL)))
 				, dblSettlementPrice = CONVERT(NUMERIC(18,6), dbo.[fnCTConvertQuantityToTargetItemUOM](cd.intItemId, @intUnitMeasureId, m.intUnitMeasureId
-																				, ISNULL(dblSettlementPrice, 0) * ISNULL(dbo.[fnRKGetCurrencyConvertion] (m.intCurrencyId, @intCurrencyId), 1))
-										/ CASE WHEN ISNULL(c.ysnSubCurrency, 0) = 1 THEN c.intCent ELSE 1 END)
+																				, ISNULL(dblSettlementPrice, 0) * ISNULL(dbo.[fnRKGetCurrencyConvertion] (m.intCurrencyId, @intCurrencyId), 1)))
 				, dblBasis = CONVERT(NUMERIC(18,6), dbo.[fnCTConvertQuantityToTargetItemUOM](cd.intItemId, @intUnitMeasureId, j.intUnitMeasureId
 																				, dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId, @intCurrencyId, ISNULL(t.dblBasis, 0), NULL, intBasisCurrencyId, NULL)))
 				, t.dblRatio

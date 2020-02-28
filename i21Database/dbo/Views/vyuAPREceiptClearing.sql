@@ -94,6 +94,7 @@ LEFT JOIN
 LEFT JOIN vyuAPReceiptClearingGL APClearing
     ON APClearing.strTransactionId = receipt.strReceiptNumber
         AND APClearing.intItemId = receiptItem.intItemId
+        AND APClearing.intTransactionDetailId = receiptItem.intInventoryReceiptItemId
 -- OUTER APPLY (
 -- 	SELECT 
 --     TOP 1
@@ -435,7 +436,7 @@ LEFT JOIN vyuAPReceiptClearingGL APClearing
 -- 		AND APClearing.intItemId = receiptItem.intItemId
 WHERE 
     billDetail.intInventoryReceiptItemId IS NOT NULL
-AND bill.ysnPosted = 1
+-- AND bill.ysnPosted = 1
 AND billDetail.intInventoryReceiptChargeId IS NULL
 AND 1 = (CASE WHEN receipt.intSourceType = 2 AND ft.intFreightTermId > 0 AND ft.strFobPoint = 'Origin' THEN 0 ELSE 1 END) --Inbound Shipment
 AND receipt.strReceiptType != 'Transfer Order'

@@ -5,7 +5,7 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, [intEntityId], in
 , * 
 FROM (
 	SELECT 	
-		intLocationId
+		POView.intLocationId
 		, intEntityId = POView.intEntityVendorId
 		, strVendorId
 		, strVendorName = strName
@@ -30,9 +30,9 @@ FROM (
 		, intCommodityId
 		, intContainerId = NULL
 		, strContainer = NULL
-		, intSubLocationId
+		, POView.intSubLocationId
 		, strSubLocationName
-		, intStorageLocationId
+		, POView.intStorageLocationId
 		, strStorageLocationName = strStorageName
 		, intOrderUOMId = intUnitOfMeasureId
 		, strOrderUOM = ItemUnitMeasure.strUnitMeasure
@@ -74,7 +74,12 @@ FROM (
 		, POView.strFreightTerm
 		, POView.strBundleType
 		, strLotCondition = ICPreference.strLotCondition
-	FROM	vyuPODetails POView LEFT JOIN dbo.tblICItemUOM ItemUOM
+		, intAllowZeroCostTypeId = ItemLocation.intAllowZeroCostTypeId 
+	FROM	vyuPODetails POView			
+			INNER JOIN tblICItemLocation ItemLocation 
+				ON ItemLocation.intItemId = POView.intItemId 
+				AND ItemLocation.intLocationId = POView.intLocationId 
+			LEFT JOIN dbo.tblICItemUOM ItemUOM
 				ON POView.intUnitOfMeasureId = ItemUOM.intItemUOMId
 			LEFT JOIN dbo.tblICUnitMeasure ItemUnitMeasure
 				ON ItemUnitMeasure.intUnitMeasureId = ItemUOM.intUnitMeasureId

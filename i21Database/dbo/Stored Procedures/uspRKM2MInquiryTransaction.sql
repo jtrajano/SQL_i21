@@ -37,6 +37,7 @@ BEGIN
 	DECLARE @intMarkExpiredMonthPositionId INT
 	DECLARE @ysnIncludeDerivatives BIT
 	DECLARE @ysnIncludeInTransitM2M BIT
+	DECLARE @ysnEnterSeparateMarketBasisDifferentialsForBuyVsSell BIT
 
 	SELECT TOP 1 @dtmPriceDate = dtmM2MBasisDate FROM tblRKM2MBasis WHERE intM2MBasisId = @intM2MBasisId
 
@@ -47,6 +48,7 @@ BEGIN
 		, @intMarkExpiredMonthPositionId = intMarkExpiredMonthPositionId
 		, @ysnIncludeDerivatives = ysnIncludeDerivatives
 		, @ysnIncludeInTransitM2M = ysnIncludeInTransitM2M
+		, @ysnEnterSeparateMarketBasisDifferentialsForBuyVsSell = ysnEnterSeparateMarketBasisDifferentialsForBuyVsSell
 	FROM tblRKCompanyPreference
 
 	SELECT TOP 1 @dtmSettlemntPriceDate = dtmPriceDate FROM tblRKFuturesSettlementPrice WHERE intFutureSettlementPriceId = @intFutureSettlementPriceId
@@ -863,7 +865,10 @@ BEGIN
 			, dblMarketRatio = ISNULL((SELECT TOP 1 dblRatio FROM #tmpM2MBasisDetail tmp
 										WHERE tmp.intFutureMarketId = ISNULL(cd.intFutureMarketId, tmp.intFutureMarketId)
 											AND tmp.intItemId = ISNULL(cd.intItemId, tmp.intItemId)
-											AND tmp.intContractTypeId = ISNULL(cd.intContractTypeId, tmp.intContractTypeId)
+											AND tmp.intContractTypeId =  CASE WHEN @ysnEnterSeparateMarketBasisDifferentialsForBuyVsSell = 1
+														THEN CASE WHEN ISNULL(tmp.intContractTypeId,0) = 0 THEN tmp.intContractTypeId ELSE cd.intContractTypeId END
+														ELSE tmp.intContractTypeId
+														END 
 											AND tmp.intCompanyLocationId = ISNULL(cd.intCompanyLocationId, tmp.intCompanyLocationId)
 											AND tmp.strPeriodTo = CASE WHEN @ysnEnterForwardCurveForMarketBasisDifferential = 1
 																			THEN CASE WHEN tmp.strPeriodTo = '' THEN tmp.strPeriodTo ELSE dbo.fnRKFormatDate(cd.dtmEndDate,'MMM yyyy') END
@@ -872,7 +877,10 @@ BEGIN
 			, dblMarketBasis1 = ISNULL((SELECT TOP 1 dblMarketBasis FROM #tmpM2MBasisDetail tmp
 										WHERE tmp.intFutureMarketId = ISNULL(cd.intFutureMarketId, tmp.intFutureMarketId)
 											AND tmp.intItemId = ISNULL(cd.intItemId, tmp.intItemId)
-											AND tmp.intContractTypeId = ISNULL(cd.intContractTypeId, tmp.intContractTypeId)
+											AND tmp.intContractTypeId =  CASE WHEN @ysnEnterSeparateMarketBasisDifferentialsForBuyVsSell = 1
+														THEN CASE WHEN ISNULL(tmp.intContractTypeId,0) = 0 THEN tmp.intContractTypeId ELSE cd.intContractTypeId END
+														ELSE tmp.intContractTypeId
+														END 
 											AND tmp.intCompanyLocationId = ISNULL(cd.intCompanyLocationId, tmp.intCompanyLocationId)
 											AND tmp.strPeriodTo = CASE WHEN @ysnEnterForwardCurveForMarketBasisDifferential = 1
 																			THEN CASE WHEN tmp.strPeriodTo = '' THEN tmp.strPeriodTo ELSE dbo.fnRKFormatDate(cd.dtmEndDate,'MMM yyyy') END
@@ -881,7 +889,10 @@ BEGIN
 			, dblMarketCashPrice = ISNULL((SELECT TOP 1 dblMarketBasis FROM #tmpM2MBasisDetail tmp
 										WHERE tmp.intFutureMarketId = ISNULL(cd.intFutureMarketId, tmp.intFutureMarketId)
 											AND tmp.intItemId = ISNULL(cd.intItemId, tmp.intItemId)
-											AND tmp.intContractTypeId = ISNULL(cd.intContractTypeId, tmp.intContractTypeId)
+											AND tmp.intContractTypeId =  CASE WHEN @ysnEnterSeparateMarketBasisDifferentialsForBuyVsSell = 1
+														THEN CASE WHEN ISNULL(tmp.intContractTypeId,0) = 0 THEN tmp.intContractTypeId ELSE cd.intContractTypeId END
+														ELSE tmp.intContractTypeId
+														END 
 											AND tmp.intCompanyLocationId = ISNULL(cd.intCompanyLocationId, tmp.intCompanyLocationId)
 											AND tmp.strPeriodTo = CASE WHEN @ysnEnterForwardCurveForMarketBasisDifferential = 1
 																			THEN CASE WHEN tmp.strPeriodTo = '' THEN tmp.strPeriodTo ELSE dbo.fnRKFormatDate(cd.dtmEndDate,'MMM yyyy') END
@@ -890,7 +901,10 @@ BEGIN
 			, intMarketBasisUOM = ISNULL((SELECT TOP 1 intMarketBasisUOM FROM #tmpM2MBasisDetail tmp
 										WHERE tmp.intFutureMarketId = ISNULL(cd.intFutureMarketId, tmp.intFutureMarketId)
 											AND tmp.intItemId = ISNULL(cd.intItemId, tmp.intItemId)
-											AND tmp.intContractTypeId = ISNULL(cd.intContractTypeId, tmp.intContractTypeId)
+											AND tmp.intContractTypeId =  CASE WHEN @ysnEnterSeparateMarketBasisDifferentialsForBuyVsSell = 1
+														THEN CASE WHEN ISNULL(tmp.intContractTypeId,0) = 0 THEN tmp.intContractTypeId ELSE cd.intContractTypeId END
+														ELSE tmp.intContractTypeId
+														END 
 											AND tmp.intCompanyLocationId = ISNULL(cd.intCompanyLocationId, tmp.intCompanyLocationId)
 											AND tmp.strPeriodTo = CASE WHEN @ysnEnterForwardCurveForMarketBasisDifferential = 1
 																			THEN CASE WHEN tmp.strPeriodTo = '' THEN tmp.strPeriodTo ELSE dbo.fnRKFormatDate(cd.dtmEndDate,'MMM yyyy') END
@@ -899,7 +913,10 @@ BEGIN
 			, intMarketBasisCurrencyId = ISNULL((SELECT TOP 1 intMarketBasisCurrencyId FROM #tmpM2MBasisDetail tmp
 										WHERE tmp.intFutureMarketId = ISNULL(cd.intFutureMarketId, tmp.intFutureMarketId)
 											AND tmp.intItemId = ISNULL(cd.intItemId, tmp.intItemId)
-											AND tmp.intContractTypeId = ISNULL(cd.intContractTypeId, tmp.intContractTypeId)
+											AND tmp.intContractTypeId =  CASE WHEN @ysnEnterSeparateMarketBasisDifferentialsForBuyVsSell = 1
+														THEN CASE WHEN ISNULL(tmp.intContractTypeId,0) = 0 THEN tmp.intContractTypeId ELSE cd.intContractTypeId END
+														ELSE tmp.intContractTypeId
+														END 
 											AND tmp.intCompanyLocationId = ISNULL(cd.intCompanyLocationId, tmp.intCompanyLocationId)
 											AND tmp.strPeriodTo = CASE WHEN @ysnEnterForwardCurveForMarketBasisDifferential = 1
 																			THEN CASE WHEN tmp.strPeriodTo = '' THEN tmp.strPeriodTo ELSE dbo.fnRKFormatDate(cd.dtmEndDate,'MMM yyyy') END

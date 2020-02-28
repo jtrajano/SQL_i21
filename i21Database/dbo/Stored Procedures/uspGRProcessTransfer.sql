@@ -409,7 +409,8 @@ BEGIN
 					,IL.intItemLocationId 
 					,ToStorage.intItemUOMId
 					,dtmTransferStorageDate
-					,dbo.fnCTConvertQuantityToTargetItemUOM(ToStorage.intItemId, IU.intUnitMeasureId, ToStorage.intUnitMeasureId, SR.dblUnitQty) * CASE WHEN (FromType.ysnDPOwnedType = 0 AND ToType.ysnDPOwnedType = 1) THEN -1 ELSE 1 END
+					,dbo.fnCTConvertQuantityToTargetItemUOM(ToStorage.intItemId, IU.intUnitMeasureId, ToStorage.intUnitMeasureId, SR.dblUnitQty) 
+						* CASE WHEN (FromType.ysnDPOwnedType = 0 AND ToType.ysnDPOwnedType = 1) THEN -1 ELSE 1 END
 					,IU.dblUnitQty
 					,0
 					,dblSalesPrice = 0
@@ -446,6 +447,8 @@ BEGIN
 				--debug point
 				if @debug_point = 1  and 1 = 0
 				begin
+					select 'fresh item to post '
+					select * from @ItemsToPost
 					select 'transfer storage reference '
 					select * from tblGRTransferStorageReference SR
 						where SR.intTransferStorageId = @intTransferStorageId
@@ -470,6 +473,7 @@ BEGIN
 						DECLARE @dblCost AS DECIMAL(24,10);
 						DECLARE @dblOriginalCost AS DECIMAL(24,10);
 						DECLARE @dblDiscountCost AS DECIMAL(24,10);
+						DECLARE @dblUnits AS DECIMAL(24,10);
 						DECLARE @strBatchId AS NVARCHAR(40);
 						IF OBJECT_ID('tempdb..#tblICItemRunningStock') IS NOT NULL DROP TABLE  #tblICItemRunningStock
 						CREATE TABLE #tblICItemRunningStock(
@@ -510,7 +514,7 @@ BEGIN
 
 
 						SELECT @intItemId = ITP.intItemId,@intLocationId = IL.intLocationId,@intSubLocationId = ITP.intSubLocationId, @intStorageLocationId = ITP.intStorageLocationId, @dtmDate = ITP.dtmDate, @intOwnerShipId = CASE WHEN ITP.ysnIsStorage = 1 THEN 2 ELSE 1 END
-							
+							,@dblUnits = ITP.dblQty
 						FROM @ItemsToPost ITP
 						INNER JOIN tblICItem I
 							ON ITP.intItemId = I.intItemId
@@ -578,7 +582,8 @@ BEGIN
 															WHEN DCO.strDiscountCalculationOption = 'Gross Weight' THEN 
 																CASE WHEN CS.dblGrossQuantity IS NULL THEN SR.dblUnitQty
 																ELSE
-																	ROUND((SR.dblUnitQty / CS.dblOriginalBalance) * CS.dblGrossQuantity,10)
+																	--(SR.dblUnitQty / CS.dblOriginalBalance) * 
+																	ROUND((CS.dblGrossQuantity  * (isnull(SR.dblSplitPercent, 100) / 100)) ,10)
 																END
 															ELSE SR.dblUnitQty
 														END
@@ -634,10 +639,10 @@ BEGIN
 							select 'end debug point other charges detail'
 
 							select
-
+							CS.dblGrossQuantity * (isnull(SR.dblSplitPercent, 100) / 100),
 							dblCashPrice				= CASE 
 															WHEN QM.strDiscountChargeType = 'Percent'
-																		THEN (dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, IU.intUnitMeasureId, CS.intUnitMeasureId, ISNULL(QM.dblDiscountPaid, 0)) - dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, IU.intUnitMeasureId, CS.intUnitMeasureId, ISNULL(QM.dblDiscountDue, 0)))
+																		THEN (dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, IU.intUnitMeasureId, CS.intUnitMeasureId, ISNULL(QM.dblDiscountPaid, 0)) - dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId,	IU.intUnitMeasureId, CS.intUnitMeasureId, ISNULL(QM.dblDiscountDue, 0)))
 																			*
 																			@dblCost
 															ELSE --Dollar
@@ -683,7 +688,7 @@ BEGIN
 
 						update @OtherChargesDetail set dblExactCashPrice = ROUND(dblUnits*dblCashPrice,2)
 
-						SELECT @dblDiscountCost = ISNULL(SUM(dblUnits*dblCashPrice),0) FROM @OtherChargesDetail OCD 
+						SELECT @dblDiscountCost = ISNULL(SUM(round(dblUnits*dblCashPrice, 2)),0) FROM @OtherChargesDetail OCD 
 						INNER JOIN tblICItem IC
 							ON IC.intItemId = OCD.intItemId
 						WHERE IC.ysnInventoryCost = 1
@@ -750,6 +755,18 @@ BEGIN
 						)
 						SELECT intItemId,intItemLocationId,intItemUOMId,dtmDate,dblQty,dblUOMQty,@dblDiscountCost,dblSalesPrice,intCurrencyId,dblExchangeRate,intTransactionId,intTransactionDetailId,strTransactionId,intTransactionTypeId,intLotId,intSubLocationId,intStorageLocationId,ysnIsStorage,intStorageScheduleTypeId 
 						FROM @ItemsToPost WHERE intId = @cursorId
+
+
+						IF @debug_point = 1 and 1 = 0
+						begin
+							select 'start checking the quantity for the entry temp table'
+								
+								select dblQty, * from @Entry
+							
+							select 'end checking the quantity for the entry temp table'
+						end
+
+
 						IF(SELECT dblQty FROM @Entry) > 0
 						BEGIN
 							UPDATE @Entry
@@ -798,6 +815,10 @@ BEGIN
 							--debug point 
 							if @debug_point = 1  and 1 = 0
 							begin
+								select 'start dummy gl entries'
+								select * from @DummyGLEntries
+								select 'end dummy gl entries'
+
 								select 'start gl for item'
 								select * from @GLForItem
 								select 'end gl for item'
@@ -859,16 +880,17 @@ BEGIN
 								,[dblForeignRate]
 								,[strRateType]
 							)
-							EXEC dbo.uspGRCreateItemGLEntriesTransfer
-								@strBatchId
-								,@GLForItem
-								,'AP Clearing'
-								,1
+							EXEC [dbo].[uspGRCreateGLEntriesForTransferStorage] @intTransferStorageId,@strBatchId,@dblCost,1
+							UPDATE @GLEntries 
+							SET dblDebit		= dblCredit
+								,dblDebitUnit	= dblCreditUnit
+								,dblCredit		= dblDebit
+									,dblCreditUnit  = dblDebitUnit
 
 							--debug point--
-							if @debug_point = 1 and 1 = 0
+							if @debug_point = 1 and 1 = 1
 							begin
-								select 'start checking the gl entries for transfer storage'
+								select 'start checking the gl entries for transfer storage 1'
 								EXEC [dbo].[uspGRCreateGLEntriesForTransferStorage] @intTransferStorageId,@strBatchId,@dblOriginalCost,1
 								select 'end checking the gl entries for transfer storage'
 							end
@@ -908,7 +930,19 @@ BEGIN
 								,[dblForeignRate]
 								,[strRateType]
 							)
-							EXEC [dbo].[uspGRCreateGLEntriesForTransferStorage] @intTransferStorageId,@strBatchId,@dblOriginalCost,1
+							EXEC dbo.uspGRCreateItemGLEntriesTransfer
+								@strBatchId
+								,@GLForItem
+								,'AP Clearing'
+								,1
+
+
+							if @debug_point = 1 and 1 = 0
+							begin
+								select 'start checking gl entries before booking'
+								select * from @GLEntries
+								select 'end checking gl entries before booking'
+							end
 
 							IF EXISTS (SELECT TOP 1 1 FROM @GLEntries)
 							BEGIN 
@@ -1127,12 +1161,19 @@ BEGIN
 		--update tblGRTransferStorageSplit's intCustomerStorageId
 		UPDATE A
 		SET A.intTransferToCustomerStorageId = B.intToCustomerStorageId
-			,A.intContractDetailId = CT.intContractDetailId
+			,A.intContractDetailId = CASE WHEN ST.ysnDPOwnedType = 1 THEN 
+										CASE 
+											WHEN A.intContractDetailId IS NULL THEN CT.intContractDetailId 
+											ELSE A.intContractDetailId
+										END
+									ELSE NULL END
 		FROM tblGRTransferStorageSplit A		
 		INNER JOIN @newCustomerStorageIds B
 			ON B.intTransferStorageSplitId = A.intTransferStorageSplitId
 		INNER JOIN tblGRCustomerStorage CS
 			ON CS.intCustomerStorageId = B.intToCustomerStorageId
+		INNER JOIN tblGRStorageType ST
+			ON ST.intStorageScheduleTypeId = A.intStorageTypeId
 		OUTER APPLY (
 			SELECT TOP 1 intContractDetailId
 			FROM vyuCTGetContractForScaleTicket
@@ -1143,10 +1184,16 @@ BEGIN
 				AND ysnEarlyDayPassed = 1
 				AND intContractTypeId = 1
 				AND ysnAllowedToShow = 1
-		) CT		
+		) CT
 		
 		SET @cnt = 0
-		SET @cnt = (SELECT COUNT(*) FROM tblGRTransferStorageSplit WHERE intTransferStorageId = @intTransferStorageId AND intContractDetailId IS NULL)
+		SET @cnt = (SELECT COUNT(*) 
+					FROM tblGRTransferStorageSplit TSS
+					INNER JOIN tblGRStorageType ST
+						ON ST.intStorageScheduleTypeId = TSS.intStorageTypeId
+					WHERE intTransferStorageId = @intTransferStorageId 
+						AND ST.ysnDPOwnedType = 1
+						AND intContractDetailId IS NULL)
 
 		DECLARE c CURSOR LOCAL STATIC READ_ONLY FORWARD_ONLY
 		FOR
@@ -1291,9 +1338,8 @@ BEGIN
 			ON TSS.intTransferStorageSplitId = SR.intTransferStorageSplitId
 		LEFT JOIN tblCTContractDetail CD
 			ON CD.intContractDetailId = TSS.intContractDetailId
-		WHERE  FromType.ysnDPOwnedType = 1 AND ToType.ysnDPOwnedType = 1
-		AND SR.intTransferStorageId = @intTransferStorageId
-
+		WHERE SR.intTransferStorageId = @intTransferStorageId
+		-- FromType.ysnDPOwnedType = 1 AND ToType.ysnDPOwnedType = 1 AND 
 		EXEC uspGRInsertStorageHistoryRecord @StorageHistoryStagingTable, @intStorageHistoryId
 		--integration to IC
 		SET @cnt = 0

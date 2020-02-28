@@ -63,7 +63,11 @@ SELECT
 	,dtmDate			= dbo.fnRemoveTimeOnDate(dtmDate)
 	,dblQty				= CASE 
 							WHEN Lot.intWeightUOMId IS NULL THEN dbo.fnCalculateQtyBetweenUOM(t.intItemUOMId, Lot.intItemUOMId, t.dblQty) 
-							ELSE dbo.fnDivide(t.dblQty, Lot.dblWeightPerQty) 
+							ELSE --dbo.fnDivide(t.dblQty, Lot.dblWeightPerQty) 
+								dbo.fnDivide(
+									dbo.fnCalculateQtyBetweenUOM(t.intItemUOMId, Lot.intWeightUOMId, t.dblQty) 
+									,Lot.dblWeightPerQty
+								)
 						END
 	,dblUnitStorage		= CAST(0 AS NUMERIC(38, 20))
 	,dblLastCost = dbo.fnCalculateCostBetweenUOM(iu.intItemUOMId, Lot.intItemUOMId, Lot.dblLastCost)

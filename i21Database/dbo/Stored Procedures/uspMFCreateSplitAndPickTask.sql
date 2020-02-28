@@ -56,6 +56,11 @@ BEGIN TRY
 		FROM tblICLot
 		WHERE intLotId = @intLotId
 	END
+	Else
+	Begin
+		Select @dblSplitAndPickQty=@dblSplitAndPickWeight
+		Select @intWeightUOMId=@intItemUOMId
+	End
 
 	INSERT INTO tblMFTask (
 		intConcurrencyId

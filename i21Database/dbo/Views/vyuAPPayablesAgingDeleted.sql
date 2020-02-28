@@ -123,7 +123,7 @@ WHERE A.ysnPosted = 1
 	AND A.ysnPrepay = 0 --EXCLUDE THE PREPAYMENT
 UNION ALL --THIS WILL REMOVE THE DELETED DATA WHEN THERE IS NO DATE FILTER
 SELECT 
-	A.dtmDateCreated --USE THE DATE CREATED FOR THE NEGATIVE SO REMOVE THE DELETED DATA WHEN NO DATE FILTER PROVIDED
+	A.dtmDateDeleted --USE THE DATE DELETED FOR THE NEGATIVE SO REMOVE THE DELETED DATA WHEN NO DATE FILTER PROVIDED
 	, A.intBillId 
 	, A.strBillId 
 	, 0 AS dblAmountPaid 
@@ -155,7 +155,7 @@ LEFT JOIN dbo.tblGLAccount F ON  A.intAccountId = F.intAccountId
 WHERE A.ysnPosted = 0 AND intTransactionType NOT IN (7, 2, 12, 13)  AND A.ysnOrigin = 0
 UNION ALL --Taxes, Separate the tax and use the detail tax to match with GL calculation
 SELECT 
-	A.dtmDateCreated	
+	A.dtmDateDeleted	
 	, A.intBillId 
 	, A.strBillId 
 	, 0 AS dblAmountPaid 
@@ -176,7 +176,7 @@ SELECT
 	, A.intAccountId
 	, F.strAccountId
 	, EC.strClass
-	, 5 AS intCount
+	, 4 AS intCount
 	-- ,'Taxes' AS [Info]
 FROM dbo.tblAPBillArchive A
 INNER JOIN (dbo.tblAPVendor C1 INNER JOIN dbo.tblEMEntity C2 ON C1.[intEntityId] = C2.intEntityId)

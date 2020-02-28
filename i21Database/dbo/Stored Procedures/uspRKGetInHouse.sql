@@ -284,10 +284,10 @@ BEGIN
 	DECLARE @tblResult TABLE (Id INT IDENTITY
 		, dtmDate DATETIME
 		, dblTotal NUMERIC(18,6)
-		, strTransactionType NVARCHAR(50)
+		, strTransactionType NVARCHAR(100)
 		, strTransactionId NVARCHAR(50)
 		, intTransactionId INT
-		, strDistribution NVARCHAR(10)
+		, strDistribution NVARCHAR(50)
 		, strOwnership NVARCHAR(20))
 
 	INSERT INTO @tblResult (dtmDate
@@ -324,10 +324,12 @@ BEGIN
 		,strTransactionType
 		,strTransactionId 
 		,intTransactionId
-		,strStorageTypeCode = CASE WHEN dblTotal < 0 THEN SS.strFromStorageTypeDescription ELSE SS.strToStorageTypeDescription END
+		,strStorageTypeCode = CASE WHEN dblTotal < 0 THEN STFr.strStorageTypeCode ELSE STTo.strStorageTypeCode END
 		,strOwnership
 	FROM #invQty Inv
 	inner join vyuGRTransferStorageSearchView SS ON Inv.intTransactionId = SS.intTransferStorageId
+	left join tblGRStorageType STFr ON SS.intFromStorageTypeId = STFr.intStorageScheduleTypeId
+	left join tblGRStorageType STTo ON SS.intToStorageTypeId = STTo.intStorageScheduleTypeId
 	WHERE Inv.strTransactionType = 'Transfer Storage'
 	
 	INSERT INTO @tblResult (dtmDate
@@ -385,8 +387,8 @@ BEGIN
 		, dblBalanceInv NUMERIC(18,6)
 		, strTransactionId NVARCHAR(50)
 		, intTransactionId INT
-		, strDistribution NVARCHAR(10)
-		, strTransactionType NVARCHAR(50)
+		, strDistribution NVARCHAR(50)
+		, strTransactionType NVARCHAR(100)
 		, strOwnership NVARCHAR(20))
 			
 	;WITH N1 (N) AS (SELECT 1 FROM (VALUES (1), (1), (1), (1), (1), (1), (1), (1), (1), (1)) n (N)),

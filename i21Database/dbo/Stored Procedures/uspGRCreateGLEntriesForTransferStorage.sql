@@ -5,6 +5,10 @@ CREATE PROCEDURE [dbo].[uspGRCreateGLEntriesForTransferStorage]
 	,@ysnPost AS BIT
 	,@intTransactionTypeId INT = 56
 AS
+
+--DEBUG POINT
+declare @debug_awesome bit = 0
+--DEBUG POINT
 BEGIN TRY
 BEGIN
 	DECLARE
@@ -67,6 +71,12 @@ BEGIN
 			AND intCommodityId IS NULL
 	END
 
+	select  @intInventoryItemUOMId = intItemUOMId 
+		from tblICInventoryTransaction 
+			where intItemId = @InventoryItemId 
+				and strBatchId = @strBatchId
+
+
 	--Inventory Item
 	SELECT 
 		 @LocationId			= CS.intCompanyLocationId
@@ -76,7 +86,12 @@ BEGIN
 		,@intCurrencyId			= CS.intCurrencyId
 		,@InventoryItemId		= CS.intItemId  
 		,@dblUnits				= SR.dblUnitQty--dbo.fnCalculateQtyBetweenUOM(CS.intItemUOMId, isnull(@intInventoryItemUOMId, CS.intItemUOMId) , SST.dblUnits) 
-		,@dblGrossUnits			= CS.dblGrossQuantity
+		,@dblGrossUnits			= ( 
+									dbo.fnMultiply(
+											case when @intInventoryItemUOMId is not null then dbo.fnCalculateQtyBetweenUOM(@intCSInventoryItemUOMId, (@intInventoryItemUOMId), CS.dblGrossQuantity) else  CS.dblGrossQuantity end
+										, dbo.fnDivide(isnull(SR.dblSplitPercent, 100),	100)
+										)
+									)
 		,@intCSInventoryItemUOMId = CS.intItemUOMId
 	FROM tblGRTransferStorageReference SR
 	JOIN tblGRCustomerStorage CS 
@@ -84,10 +99,21 @@ BEGIN
 	WHERE SR.intTransferStorageId = @intTransferStorageId
 	
 
-	select  @intInventoryItemUOMId = intItemUOMId 
-		from tblICInventoryTransaction 
-			where intItemId = @InventoryItemId 
-				and strBatchId = @strBatchId
+	if @debug_awesome = 1 and 1 = 1
+	begin
+		select 
+			CS.dblGrossQuantity, 
+			@intCSInventoryItemUOMId, 
+			@intInventoryItemUOMId,
+		case when @intInventoryItemUOMId is not null then dbo.fnCalculateQtyBetweenUOM(@intCSInventoryItemUOMId, (@intInventoryItemUOMId), CS.dblGrossQuantity) else  CS.dblGrossQuantity end
+			,CS.intItemUOMId
+			,SR.*
+		FROM tblGRTransferStorageReference SR
+		JOIN tblGRCustomerStorage CS 
+			ON SR.intSourceCustomerStorageId = CS.intCustomerStorageId
+		WHERE SR.intTransferStorageId = @intTransferStorageId
+	end
+	
 			
 	
 	if @intInventoryItemUOMId is not null
@@ -251,7 +277,33 @@ BEGIN
 		AND ISNULL(CS.dblStorageDue,0) > 0 
 		AND IC.intItemId = @intStorageChargeItemId
 
-
+	--print 'easdgs'
+	if @debug_awesome = 1 and 1 = 0
+	begin
+		select ' start other charge', @dblGrossUnits
+		select * from @tblOtherCharges
+		select ' end other charge'
+				
+		select * 
+		FROM  tblGRTransferStorageReference SR
+			JOIN tblGRCustomerStorage CS
+				ON SR.intSourceCustomerStorageId = CS.intCustomerStorageId
+			JOIN tblICItem IC
+				ON IC.intItemId = CS.intItemId
+			JOIN tblICItemUOM IU
+				ON IU.intItemId = CS.intItemId
+					AND IU.ysnStockUnit = 1
+			JOIN tblQMTicketDiscount QM 
+				ON QM.intTicketFileId = CS.intCustomerStorageId 
+					AND QM.strSourceType = 'Storage'
+			JOIN tblGRDiscountScheduleCode DSC
+				ON DSC.intDiscountScheduleCodeId = QM.intDiscountScheduleCodeId
+			JOIN tblGRDiscountCalculationOption DCO
+				ON DCO.intDiscountCalculationOptionId = DSC.intDiscountCalculationOptionId
+			JOIN tblICItem DItem 
+				ON DItem.intItemId = DSC.intItemId
+			WHERE (ISNULL(QM.dblDiscountDue, 0) - ISNULL(QM.dblDiscountPaid, 0)) <> 0 and SR.intTransferStorageId = @intTransferStorageId
+	end	
 	
 	DECLARE @InventoryCostCharges AS TABLE
 	(
@@ -434,7 +486,18 @@ BEGIN
 		AND EXISTS(SELECT 1 FROM @tblOtherCharges WHERE ysnInventoryCost = 1)
 
 
+	--debug point
 
+	if @debug_awesome = 1 and 1 = 1 
+	begin
+		select 'inventory cost information'
+
+		select * from @InventoryCostCharges
+		
+		select 'inventory cost information'
+	end
+
+	--debug point
 
 
 	DECLARE @OtherChargesGLAccounts AS dbo.ItemOtherChargesGLAccount;
@@ -501,11 +564,11 @@ BEGIN
 		 ,[strBatchId]             
 		 ,[intAccountId]           
 		 ,[dblDebit] = CASE 
-							WHEN (t.dblDebit) <> 0 THEN ROUND(ABS(t.dblCost * t.dblConvertedUnits),2)
+							WHEN (t.dblDebit) <> 0 THEN ROUND(ABS(t.dblCost * t.dblConvertedUnits), 2)
 							ELSE 0 
 						END             
 		 ,[dblCredit] = CASE 
-							WHEN (t.dblCredit) <> 0 THEN ROUND(ABS(t.dblCost * t.dblConvertedUnits),2)
+							WHEN (t.dblCredit) <> 0 THEN ROUND(ABS(t.dblCost * t.dblConvertedUnits), 2)
 							ELSE 0 
 						END             
 		 ,[dblDebitUnit]           

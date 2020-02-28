@@ -96,7 +96,7 @@ SELECT
 	  A.dtmDate AS dtmDate 
 	, A.intBillId  
 	, A.strBillId
-	, CAST(A.dblPayment * prepaidDetail.dblRate AS DECIMAL(18,2))  AS dblAmountPaid     
+	, CAST(A.dblTotal * prepaidDetail.dblRate AS DECIMAL(18,2))  AS dblAmountPaid     
 	, dblTotal = 0 
 	, dblAmountDue = 0 
 	, A.dblWithheld
@@ -108,7 +108,7 @@ SELECT
 	, A.dtmDueDate 
 	, A.ysnPosted 
 	, A.ysnPaid
-	, A.intAccountId
+	, prepaidDetail.intAccountId
 	, F.strAccountId
 	, EC.strClass
 	, 1
@@ -116,13 +116,13 @@ FROM dbo.tblAPBill A
 LEFT JOIN (dbo.tblAPVendor D INNER JOIN dbo.tblEMEntity D2 ON D.[intEntityId] = D2.intEntityId)
  	ON A.[intEntityVendorId] = D.[intEntityId]
 LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = D2.intEntityClassId	
-LEFT JOIN dbo.tblGLAccount F ON  A.intAccountId = F.intAccountId
 OUTER APPLY (
 	SELECT TOP 1
-		bd.dblRate
+		bd.dblRate, bd.intAccountId
 	FROM tblAPBillDetail bd
 	WHERE bd.intBillId = A.intBillId
 ) prepaidDetail		
+LEFT JOIN dbo.tblGLAccount F ON  prepaidDetail.intAccountId = F.intAccountId
  WHERE A.ysnPosted = 1
 	AND A.intTransactionType IN (2, 13)
 	AND NOT EXISTS (

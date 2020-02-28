@@ -93,7 +93,11 @@ DECLARE @intLoopLoadItemUOMId INT
 DECLARE @intTicketContractDetailId INT
 DECLARE @ysnTicketHasSpecialDiscount BIT
 DECLARE @ysnTicketSpecialGradePosted BIT
-
+DECLARE @intTicketEntityId INT
+DECLARE @intTicketDeliverySheetId INT
+DECLARE @intDeliverySheetEntityId INT
+DECLARE @intDeliverySheetItemId INT
+DECLARE @intDeliverySheetLocationId INT
    
 
 DECLARE @ErrMsg              NVARCHAR(MAX),
@@ -119,6 +123,9 @@ DECLARE @ErrMsg              NVARCHAR(MAX),
 		, @ysnTicketHasSpecialDiscount = ysnHasSpecialDiscount
 		, @ysnTicketSpecialGradePosted = ysnSpecialGradePosted
 		, @strInOutFlag = strInOutFlag
+		, @intTicketItemUOMId = ST.intItemUOMIdTo
+		, @intTicketEntityId = ST.intEntityId
+		, @intTicketDeliverySheetId = intDeliverySheetId
 FROM dbo.tblSCTicket ST WHERE
 ST.intTicketId = @intTicketId
 
@@ -133,6 +140,23 @@ BEGIN TRY
 			RAISERROR('Unable to find load details. Try Again.', 11, 1);
 			GOTO _Exit
 		END
+
+		IF(ISNULL(@intTicketDeliverySheetId,0) > 0)
+		BEGIN
+			SELECT TOP 1 
+				@intDeliverySheetEntityId = intEntityId
+				,@intDeliverySheetItemId = intItemId
+				,@intDeliverySheetLocationId = intCompanyLocationId
+			FROM tblSCDeliverySheet
+			WHERE intDeliverySheetId = @intTicketDeliverySheetId
+
+			IF(@intDeliverySheetEntityId <> @intTicketEntityId OR @intDeliverySheetItemId <> @intItemId OR @intDeliverySheetLocationId <> @intLocationId)
+			BEGIN
+				RAISERROR('Ticket Entity, Item or Location does not match with the selected Delivery Sheet. Please check the Delivery sheet and re-select it again.', 11, 1);
+				GOTO _Exit
+			END
+		END
+
 
 		IF @strDistributionOption = 'CNT' OR @strDistributionOption = 'LOD'
 		BEGIN

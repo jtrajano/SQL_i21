@@ -59,7 +59,7 @@ SELECT
 		ELSE uom.strUnitMeasure
 	END AS strUOM,
 	ISNULL(CD.intContractSeq,0) AS intSequenceId,
-	ISNULL(L.strLoadNumber,ICS.strSourceNumber) AS strLoadNumber,
+	ISNULL(L.strLoadNumber,receiptLoad.strLoadNumber) AS strLoadNumber,
 	um.strUnitMeasure AS strCostUOM,
 	B.dblNetWeight,
 	B.dblDiscount,
@@ -92,8 +92,8 @@ INNER JOIN dbo.tblAPBillDetail B
 	ON A.intBillId = B.intBillId
 LEFT JOIN dbo.vyuAPVouchersPaymentInfo A2
 	ON A2.intBillId = A.intBillId
-LEFT JOIN dbo.tblAPBillDetailTax BD 
-	ON BD.intBillDetailId = B.intBillDetailId
+-- LEFT JOIN dbo.tblAPBillDetailTax BD 
+-- 	ON BD.intBillDetailId = B.intBillDetailId
 LEFT JOIN dbo.tblICInventoryReceiptItem IRE 
 	ON B.intInventoryReceiptItemId = IRE.intInventoryReceiptItemId
 LEFT JOIN dbo.tblICInventoryReceipt IR 
@@ -109,7 +109,7 @@ LEFT JOIN dbo.tblAP1099Category D
 LEFT JOIN dbo.tblSMTaxGroup E 
 	ON B.intTaxGroupId = E.intTaxGroupId
 LEFT JOIN dbo.tblSMTaxGroup F 
-	ON BD.intTaxGroupId = F.intTaxGroupId
+	ON B.intTaxGroupId = F.intTaxGroupId
 LEFT JOIN dbo.tblSCTicket SC 
 	ON SC.intInventoryReceiptId = IR.intInventoryReceiptId
 INNER JOIN dbo.tblSMCurrency CUR 
@@ -147,9 +147,13 @@ LEFT JOIN dbo.tblSMPurchasingGroup PG
 	ON PG.intPurchasingGroupId = CD.intPurchasingGroupId
 LEFT JOIN tblCTContractBasis CB
 	ON CB.intContractBasisId = CH.intContractBasisId
-LEFT JOIN vyuICGetReceiptItemSource ICS 
-     ON ICS.intInventoryReceiptItemId = IRE.intInventoryReceiptItemId AND ICS.strSourceType = 'Inbound Shipment'   
+-- LEFT JOIN vyuICGetReceiptItemSource ICS 
+--      ON ICS.intInventoryReceiptItemId = IRE.intInventoryReceiptItemId AND ICS.strSourceType = 'Inbound Shipment'   
 LEFT JOIN tblICInventoryShipmentCharge ISC 
 	ON ISC.intInventoryShipmentChargeId = B.intInventoryShipmentChargeId
 LEFT JOIN tblICInventoryShipment ISS 
 	ON ISC.intInventoryShipmentId = ISS.intInventoryShipmentId
+LEFT JOIN (tblLGLoad receiptLoad INNER JOIN tblLGLoadDetail receiptLoadDetail ON receiptLoad.intLoadId = receiptLoadDetail.intLoadId)
+	ON receiptLoadDetail.intLoadDetailId = IRE.intSourceId 
+			AND IR.intSourceType = 2
+			AND (IR.strReceiptType = 'Purchase Contract' OR IR.strReceiptType = 'Inventory Return')

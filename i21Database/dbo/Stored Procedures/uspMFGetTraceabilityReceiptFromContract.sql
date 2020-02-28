@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspMFGetTraceabilityReceiptFromContract]
 	@intContractId int
+	,@intLocationId int
 AS
 SET NOCOUNT ON;
 
@@ -14,4 +15,4 @@ Join tblICCategory mt on mt.intCategoryId=i.intCategoryId
 Left Join tblICItemUOM iu on ri.intUnitMeasureId=iu.intItemUOMId
 Left Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
 Left Join vyuAPVendor v on rh.intEntityVendorId=v.[intEntityId]
-Where ri.intOrderId=@intContractId
+Where IsNULL(rh.intLocationId,@intLocationId)=@intLocationId and ri.intOrderId=@intContractId

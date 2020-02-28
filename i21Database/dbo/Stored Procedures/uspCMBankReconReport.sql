@@ -109,14 +109,15 @@ SELECT	intBankAccountId				= BankAccnt.intBankAccountId
 		,strCbkNo						= BankAccnt.strCbkNo
 		,strBankName					= Bank.strBankName
 		,strGLAccountId					= GL.strAccountId
-		,dblGLBalance					= [dbo].[fnGetBankGLBalance](BankAccnt.intBankAccountId, @dtmStatementDate) 
-		,dblBankAccountBalance			= [dbo].[fnCMGetBankBalance](BankAccnt.intBankAccountId, @dtmStatementDate)
-		,dblPriorReconEndingBalance		= [dbo].[fnGetBankBeginningBalance](BankAccnt.intBankAccountId, @dtmStatementDate)
-		,dblClearedPayments				= ClearedPayment.totalAmount
-		,dblClearedDeposits				= ClearedDeposit.totalAmount
-		,dblBankStatementEndingBalance	= [dbo].[fnGetBankCurrentEndingBalance](BankAccnt.intBankAccountId, @dtmStatementDate)
-		,dblUnclearedPayments			= UnClearedPayment.totalAmount
-		,dblUnclearedDeposits			= UnClearedDeposit.totalAmount
+		,dblGLBalance					= isnull([dbo].[fnGetBankGLBalance](BankAccnt.intBankAccountId, @dtmStatementDate),0)
+		,dblBankAccountBalance			= isnull([dbo].[fnCMGetBankBalance](BankAccnt.intBankAccountId, @dtmStatementDate),0)
+		,dblPriorReconEndingBalance		= isnull([dbo].[fnGetBankBeginningBalance](BankAccnt.intBankAccountId, @dtmStatementDate),0)
+		,dblClearedPayments				= isnull(ClearedPayment.totalAmount,0)
+		,dblClearedDeposits				= isnull(ClearedDeposit.totalAmount,0)
+		,dblBankStatementEndingBalance	= isnull([dbo].[fnGetBankCurrentEndingBalance](BankAccnt.intBankAccountId, @dtmStatementDate),0)
+		,dblUnclearedPayments			= isnull(UnClearedPayment.totalAmount,0)
+		,dblUnclearedPaymentsNotVoidYet	= isnull(UnClearedPaymentNotVoidYet.totalAmount,0)
+		,dblUnclearedDeposits			= isnull(UnClearedDeposit.totalAmount,0)
 		,strCompanyName
 FROM	dbo.tblCMBankAccount BankAccnt INNER JOIN dbo.tblCMBank Bank
 			ON BankAccnt.intBankId = Bank.intBankId
@@ -136,5 +137,9 @@ OUTER APPLY (
 OUTER APPLY (
 	SELECT totalAmount FROM DEBIT_CREDIT WHERE strDescription = 'DepositNotClearedNotVoid'
 )UnClearedDeposit
+
+OUTER APPLY (
+	SELECT totalAmount FROM DEBIT_CREDIT WHERE strDescription = 'PaymentNotClearedNotVoidYet'
+)UnClearedPaymentNotVoidYet
 WHERE	BankAccnt.intBankAccountId = @intBankAccountId
 		AND @dtmStatementDate IS NOT NULL

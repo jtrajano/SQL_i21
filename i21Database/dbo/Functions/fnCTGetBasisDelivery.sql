@@ -324,12 +324,14 @@ BEGIN
 		ON CD.intContractDetailId = OC.intContractDetailId and CD.intContractHeaderId = OC.intContractHeaderId
 	INNER JOIN tblICInventoryReceiptItem ReceiptItem ON CD.intContractDetailId = ReceiptItem.intLineNo
 	INNER JOIN tblICInventoryReceipt Receipt ON Receipt.strReceiptType = 'Purchase Contract'
+
+	INNER JOIN tblICItemLocation ItemLocation ON ItemLocation.intLocationId = Receipt.intLocationId AND ReceiptItem.intItemId = ItemLocation.intItemId 
 		AND ReceiptItem.intInventoryReceiptId = Receipt.intInventoryReceiptId
 	INNER JOIN tblICInventoryTransaction InvTran ON Receipt.intInventoryReceiptId = InvTran.intTransactionId
 		AND ReceiptItem.intInventoryReceiptId = InvTran.intTransactionId
 		AND ReceiptItem.intInventoryReceiptItemId = InvTran.intTransactionDetailId
 		AND InvTran.strTransactionForm = 'Inventory Receipt'
-		AND InvTran.intTransactionTypeId = 4
+		AND InvTran.intTransactionTypeId = 4 AND InvTran.intItemLocationId = ItemLocation.intItemLocationId
 	INNER JOIN tblICCommodity C ON CH.intCommodityId = C.intCommodityId
 	INNER JOIN tblCTContractType CT ON CH.intContractTypeId = CT.intContractTypeId
 	INNER JOIN vyuCTEntity E ON E.intEntityId = CH.intEntityId and E.strEntityType = (CASE WHEN CH.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END)
@@ -400,18 +402,19 @@ BEGIN
 		,OC.intHeaderUnitMeasureId
 		,OC.strHeaderUnitMeasure
 	FROM tblCTContractDetail CD
+	inner join tblICItem item on item.intItemId = CD.intItemId and item.strType = 'Inventory'
 	INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 		AND CH.intContractTypeId = 1
 	JOIN @OpenBasisContract OC
 		ON CD.intContractDetailId = OC.intContractDetailId and CD.intContractHeaderId = OC.intContractHeaderId
 	INNER JOIN tblAPBillDetail BD ON BD.intContractDetailId  = CD.intContractDetailId AND BD.intContractSeq IS NOT NULL--  and BD.intInventoryReceiptItemId is not null
 		AND BD.intItemId = CD.intItemId
-	INNER JOIN tblAPBill B ON B.intBillId = BD.intBillId
+	INNER JOIN tblAPBill B ON B.intBillId = BD.intBillId and B.intTransactionType = 1
 	INNER JOIN tblICCommodity C ON CH.intCommodityId = C.intCommodityId
 	INNER JOIN tblCTContractType CT ON CH.intContractTypeId = CT.intContractTypeId
 	INNER JOIN vyuCTEntity E ON E.intEntityId = CH.intEntityId and E.strEntityType = (CASE WHEN CH.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END)
 	inner join tblICCommodityUnitMeasure m on m.intCommodityId = CH.intCommodityId and m.ysnStockUnit=1
-	WHERE B.ysnPosted = 1
+	-- WHERE B.ysnPosted = 1
 	GROUP BY CH.intContractHeaderId
 	,CD.intContractDetailId
 	,BD.intBillDetailId
@@ -694,7 +697,7 @@ BEGIN
 									TIR.dtmDate <= T.dtmDate and 
 									TIR.intTransactionKey < T.intTransactionKey AND 
 									TIR.intContractDetailId = CD.intContractDetailId AND 
-									TIR.strTransactionType in ('Voucher', 'Inventory Receipt')
+									TIR.strTransactionType in ('Voucher', 'Inventory Receipt', 'Settle Storage')
 									)
 	) as RunningBalanceSource
 

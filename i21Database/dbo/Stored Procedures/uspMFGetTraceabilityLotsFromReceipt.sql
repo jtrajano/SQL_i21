@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspMFGetTraceabilityLotsFromReceipt]
 	@intReceiptId int,
 	@ysnParentLot bit=0
+	,@intLocationId int
 AS
 SET NOCOUNT ON;
 
@@ -20,7 +21,7 @@ If @ysnParentLot=0
 	Left Join tblICItemUOM iu1 on l.intWeightUOMId=iu1.intItemUOMId
 	Left Join tblICUnitMeasure um1 on iu1.intUnitMeasureId=um1.intUnitMeasureId
 	Left Join vyuAPVendor v on rh.intEntityVendorId=v.[intEntityId]
-	Where rh.intInventoryReceiptId=@intReceiptId
+	Where IsNULL(rh.intLocationId,@intLocationId)=@intLocationId and rh.intInventoryReceiptId=@intReceiptId
 
 If @ysnParentLot=1
 	Select TOP 1 'Receipt' AS strTransactionName,l.intLotId,l.strLotNumber,l.strLotAlias,i.intItemId,i.strItemNo,i.strDescription,
@@ -38,5 +39,5 @@ If @ysnParentLot=1
 	Left Join tblICItemUOM iu1 on l.intWeightUOMId=iu1.intItemUOMId
 	Left Join tblICUnitMeasure um1 on iu1.intUnitMeasureId=um1.intUnitMeasureId
 	Left Join vyuAPVendor v on rh.intEntityVendorId=v.[intEntityId]
-	Where rh.intInventoryReceiptId=@intReceiptId
+	Where IsNULL(rh.intLocationId,@intLocationId)=@intLocationId and rh.intInventoryReceiptId=@intReceiptId
 
