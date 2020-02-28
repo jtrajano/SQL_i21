@@ -150,7 +150,7 @@ BEGIN
 			[intCustomerStorageId]	= SourceSplit.intSourceCustomerStorageId
 			,[intTransferStorageId]	= SourceSplit.intTransferStorageId
 			,[intContractHeaderId]	= CD.intContractHeaderId
-			,[dblUnits]				= -(TransferStorageSplit.dblUnits)
+			,[dblUnits]				= -(SourceSplit.dblOriginalUnits * (TransferStorageSplit.dblSplitPercent / 100))
 			,[dtmHistoryDate]		= GETDATE()
 			,[intUserId]			= @intUserId
 			,[ysnPost]				= 1
@@ -226,7 +226,7 @@ BEGIN
 			,[intDiscountScheduleId]			= CS.intDiscountScheduleId
 			,[dblTotalPriceShrink]				= CS.dblTotalPriceShrink		
 			,[dblTotalWeightShrink]				= CS.dblTotalWeightShrink		
-			,[dblQuantity]						= TransferStorageSplit.dblUnits
+			,[dblQuantity]						= SourceStorage.dblOriginalUnits * (TransferStorageSplit.dblSplitPercent / 100)
 			,[dtmDeliveryDate]					= CS.dtmDeliveryDate
 			,[dtmZeroBalanceDate]				= CS.dtmZeroBalanceDate			
 			,[strDPARecieptNumber]				= CS.strDPARecieptNumber		
@@ -256,9 +256,9 @@ BEGIN
 			,[intTicketId]						= CS.intTicketId
 			,[intDeliverySheetId]				= CS.intDeliverySheetId
 			,[ysnTransferStorage]				= 1
-			,[dblGrossQuantity]					= ROUND(((TransferStorageSplit.dblUnits) / CS.dblOriginalBalance) * CS.dblGrossQuantity,@intDecimalPrecision)
+			,[dblGrossQuantity]					= ROUND(((SourceStorage.dblOriginalUnits * (TransferStorageSplit.dblSplitPercent / 100)) / CS.dblOriginalBalance) * CS.dblGrossQuantity,@intDecimalPrecision)
 			,[intSourceCustomerStorageId]		= CS.intCustomerStorageId
-			,[dblUnitQty]						= TransferStorageSplit.dblUnits
+			,[dblUnitQty]						= SourceStorage.dblOriginalUnits * (TransferStorageSplit.dblSplitPercent / 100)
 			,[intSplitPercent]					= TransferStorageSplit.dblSplitPercent
 		FROM tblGRCustomerStorage CS
 		INNER JOIN tblGRTransferStorageSourceSplit SourceStorage
