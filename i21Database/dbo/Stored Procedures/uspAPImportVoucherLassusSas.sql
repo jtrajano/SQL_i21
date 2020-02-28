@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspAPImportVoucherLassusSas]
 	@file NVARCHAR(500),
 	@userId INT,
+	@intVendorId INT,
 	@importLogId INT OUTPUT
 AS
 
@@ -22,7 +23,7 @@ DECLARE @totalIssues INT;
 -- SET @path = SUBSTRING(@file, 0, @lastindex + 1)
 SET @errorFile = REPLACE(@file, 'csv', 'txt');
 
-DELETE FROM tblAPImportVoucherLassus
+DELETE FROM tblAPImportVoucherLassusSas
 
 SET @sql = 'BULK INSERT tblAPImportVoucherLassusSas FROM ''' + @file + ''' WITH
         (
@@ -39,51 +40,20 @@ EXEC(@sql)
 DECLARE @voucherTotal DECIMAL(18,2);
 
 SELECT
-	DENSE_RANK() OVER(ORDER BY A.strInvoiceNumber, A.strVendorId) AS intPartitionId,
+	DENSE_RANK() OVER(ORDER BY A.strInvoiceNumber, C.intEntityId) AS intPartitionId,
 	intEntityVendorId	=	C.intEntityId,
-	strVendorId			=	A.strVendorId,
-    intTransactionType	=	CAST(
-							CASE A.intVoucherType
-								WHEN '1' THEN 1
-								WHEN '5' THEN 3
-							ELSE NULL
-							END AS INT),
-	intVoucherType		=	A.intVoucherType,
-	dtmDate				=	CONVERT(DATETIME, SUBSTRING(A.dtmDate,1,2) + '/'+SUBSTRING(A.dtmDate,3,2) + '/'+SUBSTRING(A.dtmDate,5,4)),
-	dtmVoucherDate		=	CONVERT(DATETIME, SUBSTRING(A.strDateOrAccount,1,2) + '/'+SUBSTRING(A.strDateOrAccount,3,2) + '/'+SUBSTRING(A.strDateOrAccount,5,4)),
-    dblQuantityToBill	=	CAST(
-							CASE details.strDetailInfo
-								WHEN '2' THEN -1
-								WHEN '6' THEN 1
-							ELSE NULL
-							END AS INT),
-	strDetailInfo		=	details.strDetailInfo,
-    dblCost				=	ABS(CAST(details.dblCredit AS DECIMAL(18,2)) - CAST(details.dblDebit AS DECIMAL(18,2))),
-	intAccountId		=	details.intAccountId,
-	strDateOrAccount	=	details.strDateOrAccount,
-	strReference		=	A.strReference,
-	strVendorOrderNumber=	A.strInvoiceNumber,
-	strMiscDescription	=	details.strItemDescription
+	dtmDate				=	CAST(A.dtmDate AS DATETIME),
+    dblQuantityToBill	=	1,
+    dblCost				=	ABS(A.dblAmount),
+	intAccountId		=	accnt.intAccountId,
+	strGLAccount		=	A.strGLAccount,
+	strVendorOrderNumber=	A.strInvoiceNumber
 INTO #tmpConvertedLassusSasData
 FROM tblAPImportVoucherLassusSas A
-LEFT JOIN tblAPVendor C ON A.strVendorId = C.strVendorId
-OUTER APPLY (
-	SELECT
-		strDetailInfo,
-		strDateOrAccount,
-		dblDebit,
-		dblCredit,
-		strItemDescription,
-		D.intAccountId
-	FROM tblAPImportVoucherLassus B
-	LEFT JOIN tblGLAccount D ON B.strDateOrAccount = D.strAccountId
-	WHERE 
-		B.strIdentity = 'D'
-	AND A.strInvoiceNumber = B.strInvoiceNumber
-	AND A.strVendorId = B.strVendorId
-) details
+CROSS APPLY tblAPVendor C
+LEFT JOIN tblGLAccount accnt ON accnt.strAccountId = A.strGLAccount
 WHERE 
-	A.strIdentity = 'H'
+	C.intEntityId = @intVendorId
 
 DECLARE @voucherPayables AS VoucherPayable
 INSERT INTO @voucherPayables
@@ -96,28 +66,21 @@ INSERT INTO @voucherPayables
     dblQuantityToBill,
     dblCost,
 	intAccountId,
-	strReference,
-	strVendorOrderNumber,
-	strMiscDescription
+	strVendorOrderNumber
 )
 SELECT
 	intPartitionId,
     intEntityVendorId,
-    intTransactionType,
+    1,
 	dtmDate,
 	dblQuantityToBill,
     dblQuantityToBill,
     dblCost,
 	intAccountId,
-	strReference,
-	strVendorOrderNumber,
-	strMiscDescription
-FROM #tmpConvertedLassusData A
+	strVendorOrderNumber
+FROM #tmpConvertedLassusSasData A
 WHERE 
-	A.intEntityVendorId > 0
-AND A.intAccountId > 0
-AND (A.intTransactionType > 0)
-AND (A.dblQuantityToBill != 0)
+	A.intAccountId > 0
 
 DECLARE @createdVoucher NVARCHAR(MAX);
 EXEC uspAPCreateVoucher @voucherPayables = @voucherPayables, @userId = @userId, @throwError = 1, @createdVouchersId = @createdVoucher OUT
@@ -127,12 +90,9 @@ INSERT INTO @vouchers SELECT [intID] FROM [dbo].fnGetRowsFromDelimitedValues(@cr
 SET @totalVoucherCreated = @@ROWCOUNT;
 
 SELECT @totalIssues = COUNT(*)
-FROM #tmpConvertedLassusData A
+FROM #tmpConvertedLassusSasData A
 WHERE 
-	A.intEntityVendorId IS NULL
-OR A.intTransactionType IS NULL
-OR (A.dblQuantityToBill IS NULL)
-OR (A.intAccountId IS NULL)
+	A.intAccountId IS NULL
 
 --LOG SUCCESS
 DECLARE @logId INT;
@@ -174,7 +134,7 @@ BEGIN
 	INNER JOIN tblAPBill B ON A.intBillId = B.intBillId
 END
 
-IF @totalIssues >0
+IF @totalIssues > 0
 BEGIN
 	IF @totalVoucherCreated <= 0
 	BEGIN
@@ -196,12 +156,9 @@ BEGIN
 			GETDATE(),
 			@totalVoucherCreated,
 			@totalIssues
-		FROM #tmpConvertedLassusData A
+		FROM #tmpConvertedLassusSasData A
 		WHERE 
-			A.intEntityVendorId IS NULL
-		OR A.intTransactionType IS NULL
-		OR (A.dblQuantityToBill IS NULL)
-		OR (A.intAccountId IS NULL)
+			A.intAccountId IS NULL
 
 		SET @logId = SCOPE_IDENTITY();
 
@@ -216,18 +173,12 @@ BEGIN
 	SELECT
 		@logId,
 		CASE
-			WHEN A.intEntityVendorId IS NULL THEN 'No vendor found for ' + A.strVendorId
-			WHEN A.intTransactionType IS NULL THEN 'Invalid transaction indicator for ' + CAST(A.intVoucherType AS NVARCHAR)
-			WHEN A.dblQuantityToBill IS NULL THEN 'Invalid distribution type ' + A.strDetailInfo
-			WHEN A.intAccountId IS NULL THEN 'No account id found for ' + A.strDateOrAccount
+			WHEN A.intAccountId IS NULL THEN 'No account id found for ' + A.strGLAccount
 		ELSE NULL
 		END
-	FROM #tmpConvertedLassusData A
+	FROM #tmpConvertedLassusSasData A
 	WHERE 
-		A.intEntityVendorId IS NULL
-	OR A.intTransactionType IS NULL
-	OR (A.dblQuantityToBill IS NULL)
-	OR (A.intAccountId IS NULL)
+		A.intAccountId IS NULL
 
 END
 
