@@ -3356,10 +3356,13 @@ BEGIN
 															, RebuildInvTrans.intItemUOMId
 														) 
 													ELSE 
-														dbo.fnCalculateCostBetweenUOM (
-															StockUOM.intItemUOMId
-															,RebuildInvTrans.intItemUOMId
-															,ISNULL(lot.dblLastCost, itemPricing.dblLastCost) 
+														ISNULL(
+															dbo.fnCalculateCostBetweenUOM (
+																StockUOM.intItemUOMId
+																,RebuildInvTrans.intItemUOMId
+																,ISNULL(lot.dblLastCost, itemPricing.dblLastCost) 
+															)
+															, RebuildInvTrans.dblCost 
 														)
 											END 
 
