@@ -8153,6 +8153,11 @@
     <Build Include="dbo\Stored Procedures\uspSCCheckTicketContractAfterManualDistribution.sql" />
     <Build Include="dbo\Stored Procedures\uspICFixICvsGLAmountDisrecpany.sql" />
     <Build Include="dbo\Functions\fnGRCalculateStorageUnits.sql" />
+    <Build Include="dbo\User Defined Types\StagingCommanderDepartment.sql" />
+    <Build Include="dbo\User Defined Types\StagingCommanderFPHose.sql" />
+    <Build Include="dbo\User Defined Types\StagingCommanderPlu.sql" />
+    <Build Include="dbo\User Defined Types\StagingCommanderSummary.sql" />
+    <Build Include="dbo\User Defined Types\StagingCommanderTax.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
