@@ -44,19 +44,19 @@ FROM
 		,strWeightUOM = WUOM.strUnitMeasure
 		,intWeightId = CH.intWeightId
 		,strWeightGradeDesc = WG.strWeightGradeDesc
-		,dblShippedNetWt = (CASE WHEN (CLCT.intCount) > 0 THEN (CLNW.dblLinkNetWt) ELSE LD.dblNet END - ISNULL(IRN.dblIRNet, 0))
+		,dblShippedNetWt = (CASE WHEN (CLNW.dblLinkNetWt IS NOT NULL) THEN (CLNW.dblLinkNetWt) ELSE LD.dblNet END - ISNULL(IRN.dblIRNet, 0))
 		,dblReceivedNetWt = (RI.dblNet - ISNULL(IRN.dblIRNet, 0))
 		,dblFranchisePercent = WG.dblFranchise
 		,dblFranchise = WG.dblFranchise / 100
-		,dblFranchiseWt = CASE WHEN (CASE WHEN (CLCT.intCount > 0) THEN (CLNW.dblLinkNetWt) ELSE LD.dblNet END * WG.dblFranchise / 100) <> 0.0
-							THEN ((CASE WHEN (CLCT.intCount > 0) THEN (CLNW.dblLinkNetWt) ELSE LD.dblNet END - ISNULL(IRN.dblIRNet, 0)) * WG.dblFranchise / 100)
+		,dblFranchiseWt = CASE WHEN (CASE WHEN (CLNW.dblLinkNetWt IS NOT NULL) THEN (CLNW.dblLinkNetWt) ELSE LD.dblNet END * WG.dblFranchise / 100) <> 0.0
+							THEN ((CASE WHEN (CLNW.dblLinkNetWt IS NOT NULL) THEN (CLNW.dblLinkNetWt) ELSE LD.dblNet END - ISNULL(IRN.dblIRNet, 0)) * WG.dblFranchise / 100)
 						ELSE 0.0 END
-		,dblWeightLoss = CASE WHEN (RI.dblNet - CASE WHEN (CLCT.intCount > 0) THEN (CLNW.dblLinkNetWt) ELSE LD.dblNet END) < 0.0
-							THEN (RI.dblNet - CASE WHEN (CLCT.intCount) > 0 THEN (CLNW.dblLinkNetWt) ELSE LD.dblNet END)
-						ELSE (RI.dblNet - CASE WHEN (CLCT.intCount) > 0 THEN (CLNW.dblLinkNetWt) ELSE LD.dblNet END) END
-		,dblClaimableWt = CASE WHEN ((RI.dblNet - CASE WHEN (CLCT.intCount) > 0 THEN (CLNW.dblLinkNetWt) ELSE LD.dblNet END) + (LD.dblNet * WG.dblFranchise / 100)) < 0.0
-							THEN ((RI.dblNet - CASE WHEN (CLCT.intCount) > 0 THEN (CLNW.dblLinkNetWt) ELSE LD.dblNet END) + (LD.dblNet * WG.dblFranchise / 100))
-							ELSE (RI.dblNet - CASE WHEN (CLCT.intCount) > 0 THEN (CLNW.dblLinkNetWt) ELSE LD.dblNet END)
+		,dblWeightLoss = CASE WHEN (RI.dblNet - CASE WHEN (CLNW.dblLinkNetWt IS NOT NULL) THEN (CLNW.dblLinkNetWt) ELSE LD.dblNet END) < 0.0
+							THEN (RI.dblNet - CASE WHEN (CLNW.dblLinkNetWt IS NOT NULL) THEN (CLNW.dblLinkNetWt) ELSE LD.dblNet END)
+						ELSE (RI.dblNet - CASE WHEN (CLNW.dblLinkNetWt IS NOT NULL) THEN (CLNW.dblLinkNetWt) ELSE LD.dblNet END) END
+		,dblClaimableWt = CASE WHEN ((RI.dblNet - CASE WHEN (CLNW.dblLinkNetWt IS NOT NULL) THEN (CLNW.dblLinkNetWt) ELSE LD.dblNet END) + (LD.dblNet * WG.dblFranchise / 100)) < 0.0
+							THEN ((RI.dblNet - CASE WHEN (CLNW.dblLinkNetWt IS NOT NULL) THEN (CLNW.dblLinkNetWt) ELSE LD.dblNet END) + (LD.dblNet * WG.dblFranchise / 100))
+							ELSE (RI.dblNet - CASE WHEN (CLNW.dblLinkNetWt IS NOT NULL) THEN (CLNW.dblLinkNetWt) ELSE LD.dblNet END)
 						END
 		,intWeightClaimId = WC.intWeightClaimId
 		,ysnWeightClaimed = CAST(CASE WHEN IsNull(WC.intWeightClaimId, 0) <> 0 THEN 1 ELSE 0 END AS BIT)
@@ -68,8 +68,8 @@ FROM
 		,intSeqBasisCurrencyId = AD.intSeqBasisCurrencyId
 		,strSeqBasisCurrency = BCUR.strCurrency 
 		,ysnSeqSubCurrency = BCUR.ysnSubCurrency
-		,dblSeqPriceInWeightUOM = dbo.fnCTConvertQtyToTargetItemUOM(WUI.intWeightUOMId, ISNULL(CD.intPriceItemUOMId,CD.intAdjItemUOMId), AD.dblSeqPrice)
-		,intItemId = CD.intItemId
+		,dblSeqPriceInWeightUOM = (WUI.dblUnitQty / PUI.dblUnitQty) * AD.dblSeqPrice
+		,intItemId = LD.intItemId
 		,intContractDetailId = CD.intContractDetailId
 		,intBookId = CD.intBookId
 		,strBook = BO.strBook
@@ -83,7 +83,7 @@ FROM
 		,strContractItemNo = CONI.strContractItemNo
 		,strContractItemName = CONI.strContractItemName
 		,strOrigin = ISNULL(OG.strCountry, I.strCountry)
-		,dblSeqPriceConversionFactoryWeightUOM = dbo.fnCTConvertQtyToTargetItemUOM(WUI.intWeightUOMId, ISNULL(CD.intPriceItemUOMId,CD.intAdjItemUOMId), 1)
+		,dblSeqPriceConversionFactoryWeightUOM = (WUI.dblUnitQty / PUI.dblUnitQty)
 		,intContractBasisId = CH.intFreightTermId
 		,strContractBasis = CB.strContractBasis
 		,strERPPONumber = CD.strERPPONumber
@@ -122,10 +122,10 @@ FROM
 	LEFT JOIN tblSMPurchasingGroup PG ON PG.intPurchasingGroupId = CD.intPurchasingGroupId
 	OUTER APPLY (SELECT TOP 1 intWeightClaimId = WC.intWeightClaimId 
 		FROM tblLGWeightClaim WC INNER JOIN tblLGWeightClaimDetail WCD ON WC.intWeightClaimId = WCD.intWeightClaimDetailId 
-		WHERE WCD.intContractDetailId = CD.intContractDetailId AND WC.intLoadId = L.intLoadId AND WC.intPurchaseSale = 1) WC
-	OUTER APPLY (SELECT TOP 1 intWeightUOMId = IU.intItemUOMId FROM tblICItemUOM IU WHERE IU.intItemId = CD.intItemId AND IU.intUnitMeasureId = WUOM.intUnitMeasureId) WUI
+		WHERE WCD.intContractDetailId = LD.intPContractDetailId AND WC.intLoadId = L.intLoadId AND WC.intPurchaseSale = 1) WC
+	OUTER APPLY (SELECT TOP 1 intWeightUOMId = IU.intItemUOMId, dblUnitQty FROM tblICItemUOM IU WHERE IU.intItemId = CD.intItemId AND IU.intUnitMeasureId = WUOM.intUnitMeasureId) WUI
+	OUTER APPLY (SELECT TOP 1 intPriceUOMId = IU.intItemUOMId, dblUnitQty FROM tblICItemUOM IU WHERE IU.intItemUOMId = AD.intSeqPriceUOMId) PUI
 	OUTER APPLY (SELECT TOP 1 strSubLocation = CLSL.strSubLocationName FROM tblLGLoadWarehouse LW JOIN tblSMCompanyLocationSubLocation CLSL ON LW.intSubLocationId = CLSL.intCompanyLocationSubLocationId WHERE LW.intLoadId = L.intLoadId) SL
-	OUTER APPLY (SELECT intCount = COUNT(*) FROM tblLGLoadDetailContainerLink WHERE intLoadDetailId = LD.intLoadDetailId) CLCT
 	OUTER APPLY (SELECT dblLinkNetWt = SUM(dblLinkNetWt) FROM tblLGLoadDetailContainerLink WHERE intLoadDetailId = LD.intLoadDetailId) CLNW
 	CROSS APPLY (SELECT dblNet = SUM(IRI.dblNet) FROM tblICInventoryReceipt IR 
 					JOIN tblICInventoryReceiptItem IRI ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
@@ -138,7 +138,7 @@ FROM
 	WHERE L.intPurchaseSale IN (1, 3)
 		AND ((L.intPurchaseSale = 1 AND L.intShipmentStatus = 4) OR (L.intPurchaseSale <> 1 AND L.intShipmentStatus IN (6,11)))
 		AND WC.intWeightClaimId IS NULL
-		AND ISNULL(LD.ysnNoClaim, 0) = 0
+		AND LD.ysnNoClaim IS NULL OR LD.ysnNoClaim = 0
 	
 	UNION ALL
 
@@ -196,7 +196,7 @@ FROM
 		,intSeqBasisCurrencyId = AD.intSeqBasisCurrencyId
 		,strSeqBasisCurrency = BCUR.strCurrency 
 		,ysnSeqSubCurrency = BCUR.ysnSubCurrency
-		,dblSeqPriceInWeightUOM = dbo.fnCTConvertQtyToTargetItemUOM(WUI.intWeightUOMId, ISNULL(CD.intPriceItemUOMId,CD.intAdjItemUOMId), AD.dblSeqPrice)
+		,dblSeqPriceInWeightUOM = (WUI.dblUnitQty / PUI.dblUnitQty) * AD.dblSeqPrice
 		,intItemId = CD.intItemId
 		,intContractDetailId = CD.intContractDetailId
 		,intBookId = CD.intBookId
@@ -211,7 +211,7 @@ FROM
 		,strContractItemNo = CONI.strContractItemNo
 		,strContractItemName = CONI.strContractItemName
 		,strOrigin = ISNULL(OG.strCountry, I.strCountry)
-		,dblSeqPriceConversionFactoryWeightUOM = dbo.fnCTConvertQtyToTargetItemUOM(WUI.intWeightUOMId, AD.intSeqPriceUOMId, 1)
+		,dblSeqPriceConversionFactoryWeightUOM = (WUI.dblUnitQty / PUI.dblUnitQty)
 		,intContractBasisId = CH.intFreightTermId
 		,strContractBasis = CB.strContractBasis
 		,strERPPONumber = CD.strERPPONumber
@@ -251,12 +251,13 @@ FROM
 	OUTER APPLY (SELECT TOP 1 intWeightClaimId = WC.intWeightClaimId 
 		FROM tblLGWeightClaim WC INNER JOIN tblLGWeightClaimDetail WCD ON WC.intWeightClaimId = WCD.intWeightClaimDetailId 
 		WHERE WCD.intContractDetailId = CD.intContractDetailId AND WC.intLoadId = L.intLoadId AND WC.intPurchaseSale = 2) WC
-	OUTER APPLY (SELECT TOP 1 intWeightUOMId = IU.intItemUOMId FROM tblICItemUOM IU WHERE IU.intItemId = CD.intItemId AND IU.intUnitMeasureId = WUOM.intUnitMeasureId) WUI
+	OUTER APPLY (SELECT TOP 1 intWeightUOMId = IU.intItemUOMId, dblUnitQty FROM tblICItemUOM IU WHERE IU.intItemId = CD.intItemId AND IU.intUnitMeasureId = WUOM.intUnitMeasureId) WUI
+	OUTER APPLY (SELECT TOP 1 intPriceUOMId = IU.intItemUOMId, dblUnitQty FROM tblICItemUOM IU WHERE IU.intItemUOMId = AD.intSeqPriceUOMId) PUI
 	OUTER APPLY (SELECT TOP 1 strSubLocation = CLSL.strSubLocationName FROM tblLGLoadWarehouse LW JOIN tblSMCompanyLocationSubLocation CLSL ON LW.intSubLocationId = CLSL.intCompanyLocationSubLocationId WHERE LW.intLoadId = L.intLoadId) SL
 	OUTER APPLY (SELECT intCount = COUNT(*) FROM tblLGLoadDetailContainerLink WHERE intLoadDetailId = LD.intLoadDetailId) CLCT
 	OUTER APPLY (SELECT dblLinkNetWt = SUM(dblLinkNetWt) FROM tblLGLoadDetailContainerLink WHERE intLoadDetailId = LD.intLoadDetailId) CLNW
 	WHERE L.intPurchaseSale IN (2, 3)
 		AND L.intShipmentStatus IN (6, 11)
 		AND WC.intWeightClaimId IS NULL
-		AND ISNULL(LD.ysnNoClaim, 0) = 0
+		AND LD.ysnNoClaim IS NULL OR LD.ysnNoClaim = 0
 	) t1
