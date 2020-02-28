@@ -1,35 +1,38 @@
-﻿
-CREATE PROCEDURE [dbo].[uspCFGetItemPrice]    
+﻿CREATE PROCEDURE [dbo].[uspCFGetItemPrice]    
 
- @CFItemId				INT    
-,@CFCustomerId			INT     
-,@CFLocationId			INT    
-,@CFItemUOMId			INT				= NULL    
-,@CFTransactionDate		DATETIME		= NULL    
-,@CFQuantity			NUMERIC(18,6)    
-,@CFPriceOut			NUMERIC(18,6)	= NULL OUTPUT    
-,@CFPricingOut			NVARCHAR(250)	= NULL OUTPUT    
-,@CFStandardPrice		NUMERIC(18,6)	= 0.0
-,@CFTransactionType		NVARCHAR(MAX)
-,@CFNetworkId			INT
-,@CFSiteId				INT
-,@CFPriceBasis			NVARCHAR(250)	= NULL OUTPUT  
-,@CFContractHeaderId	INT				= NULL OUTPUT
-,@CFContractDetailId	INT				= NULL OUTPUT
-,@CFContractNumber		NVARCHAR(MAX)	= NULL OUTPUT
-,@CFContractSeq			INT				= NULL OUTPUT
-,@CFAvailableQuantity	NUMERIC(18,6)   = NULL OUTPUT 
-,@CFTransferCost		NUMERIC(18,6)   = NULL
-,@CFOriginalPrice		NUMERIC(18,6)   = NULL OUTPUT
-,@CFCreditCard			BIT				= 0
-,@CFPostedOrigin		BIT				= 0
-,@CFPostedCSV			BIT				= 0
-,@CFPriceProfileId		INT				= NULL OUTPUT
-,@CFPriceProfileDetailId INT			= NULL OUTPUT
-,@CFPriceIndexId		INT				= NULL OUTPUT
-,@CFSiteGroupId			INT				= NULL
-,@CFPriceRuleGroup		INT				= NULL
-,@CFAdjustmentRate		NUMERIC(18,6)	= NULL OUTPUT
+ @CFItemId					INT    
+,@CFCustomerId				INT     
+,@CFLocationId				INT    
+,@CFItemUOMId				INT				= NULL    
+,@CFTransactionDate			DATETIME		= NULL    
+,@CFQuantity				NUMERIC(18,6)    
+,@CFPriceOut				NUMERIC(18,6)	= NULL OUTPUT    
+,@CFPricingOut				NVARCHAR(250)	= NULL OUTPUT    
+,@CFStandardPrice			NUMERIC(18,6)	= 0.0
+,@CFTransactionType			NVARCHAR(MAX)
+,@CFNetworkId				INT
+,@CFSiteId					INT
+,@CFPriceBasis				NVARCHAR(250)	= NULL OUTPUT  
+,@CFContractHeaderId		INT				= NULL OUTPUT
+,@CFContractDetailId		INT				= NULL OUTPUT
+,@CFContractNumber			NVARCHAR(MAX)	= NULL OUTPUT
+,@CFContractSeq				INT				= NULL OUTPUT
+,@CFItemContractHeaderId	INT				= NULL OUTPUT
+,@CFItemContractDetailId	INT				= NULL OUTPUT
+,@CFItemContractNumber		NVARCHAR(MAX)	= NULL OUTPUT
+,@CFItemContractSeq			INT				= NULL OUTPUT
+,@CFAvailableQuantity		NUMERIC(18,6)   = NULL OUTPUT 
+,@CFTransferCost			NUMERIC(18,6)   = NULL
+,@CFOriginalPrice			NUMERIC(18,6)   = NULL OUTPUT
+,@CFCreditCard				BIT				= 0
+,@CFPostedOrigin			BIT				= 0
+,@CFPostedCSV				BIT				= 0
+,@CFPriceProfileId			INT				= NULL OUTPUT
+,@CFPriceProfileDetailId	INT				= NULL OUTPUT
+,@CFPriceIndexId			INT				= NULL OUTPUT
+,@CFSiteGroupId				INT				= NULL
+,@CFPriceRuleGroup			INT				= NULL
+,@CFAdjustmentRate			NUMERIC(18,6)	= NULL OUTPUT
 
 AS
 
@@ -111,23 +114,27 @@ DECLARE @currency INT
 EXEC @currency = dbo.fnSMGetDefaultCurrency 'FUNCTIONAL'
 
 EXEC [uspARGetItemPrice] 
- @ItemUOMId = @CFItemUOMId
-,@TransactionDate = @CFTransactionDate
-,@ItemId = @CFItemId    
-,@CustomerId = @CFCustomerId    
-,@LocationId = @CFLocationId    
-,@Quantity = @CFQuantity    
-,@CurrencyId = @currency
-,@ItemPricingOnly = @CFItemPricingOnly
-,@Price = @CFPriceOut OUTPUT  
-,@Pricing = @CFPricingOut OUTPUT
-,@ContractHeaderId = @CFContractHeaderId OUTPUT
-,@ContractDetailId = @CFContractDetailId OUTPUT
-,@ContractNumber = @CFContractNumber OUTPUT
-,@ContractSeq = @CFContractSeq OUTPUT  
-,@AvailableQuantity = @CFAvailableQuantity OUTPUT
-,@AllowQtyToExceedContract = 1
-,@InvoiceType = 'CF Tran'
+ @ItemUOMId					= @CFItemUOMId
+,@TransactionDate			= @CFTransactionDate
+,@ItemId					= @CFItemId    
+,@CustomerId				= @CFCustomerId    
+,@LocationId				= @CFLocationId    
+,@Quantity					= @CFQuantity    
+,@CurrencyId				= @currency
+,@ItemPricingOnly			= @CFItemPricingOnly
+,@Price						= @CFPriceOut OUTPUT  
+,@Pricing					= @CFPricingOut OUTPUT
+,@ContractHeaderId			= @CFContractHeaderId OUTPUT
+,@ContractDetailId			= @CFContractDetailId OUTPUT
+,@ContractNumber			= @CFContractNumber OUTPUT
+,@ContractSeq				= @CFContractSeq OUTPUT  
+,@ItemContractHeaderId		= @CFItemContractHeaderId  OUTPUT
+,@ItemContractDetailId		= @CFItemContractDetailId  OUTPUT
+,@ItemContractNumber		= @CFItemContractNumber	  OUTPUT
+,@ItemContractSeq			= @CFItemContractSeq		  OUTPUT
+,@AvailableQuantity			= @CFAvailableQuantity OUTPUT
+,@AllowQtyToExceedContract	= 1
+,@InvoiceType				= 'CF Tran'
 
 IF(@CFPriceOut IS NOT NULL) 
 

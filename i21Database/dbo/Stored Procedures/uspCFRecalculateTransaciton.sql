@@ -100,6 +100,10 @@ BEGIN
 	DECLARE @intContractDetailId			INT
 	DECLARE @strContractNumber				NVARCHAR(MAX)
 	DECLARE @intContractSeq					INT
+	DECLARE @intItemContractHeaderId		INT	
+	DECLARE @intItemContractDetailId		INT
+	DECLARE @strItemContractNumber			NVARCHAR(MAX)
+	DECLARE @intItemContractSeq				INT
 	DECLARE @dblAvailableQuantity			NUMERIC(18,6)
 
 	DECLARE @intTransactionId				INT
@@ -463,7 +467,11 @@ BEGIN
 	@CFPriceIndexId				=	@intPriceIndexId 			output,
 	@CFSiteGroupId				= 	@intSiteGroupId,				
 	@CFPriceRuleGroup			=	@intPriceRuleGroup,
-	@CFAdjustmentRate			=	@dblAdjustmentRate			output
+	@CFAdjustmentRate			=	@dblAdjustmentRate			output,
+	@CFItemContractHeaderId		=	@intItemContractHeaderId	output,
+	@CFItemContractDetailId		=	@intItemContractDetailId	output,
+	@CFItemContractNumber		=	@strItemContractNumber		output,
+	@CFItemContractSeq			=	@intItemContractSeq			output
 
 	
 	IF(@transactionContractDetailId > 0)
@@ -6437,6 +6445,24 @@ BEGIN
 
 		END
 	END
+	ELSE IF (LOWER(@strPriceMethod) = 'item contracts')
+		BEGIN
+
+		
+		SET @dblNetTotalAmount = [dbo].[fnRoundBanker](((@dblPrice + @dblAdjustments) * @dblQuantity) ,2) 
+					
+		SET @dblCalculatedTotalPrice	 =	   @dblNetTotalAmount + @totalCalculatedTax
+		SET @dblCalculatedGrossPrice	 =	   ROUND((@dblCalculatedTotalPrice / @dblQuantity),6)
+		SET @dblCalculatedNetPrice		 =	   @dblPrice
+
+		SET @dblOriginalGrossPrice		 = 	 @dblOriginalPrice
+		SET @dblOriginalNetPrice		 = 	 ROUND((ROUND(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax ) / @dblQuantity, 6) 
+		SET @dblOriginalTotalPrice		 = 	 [dbo].[fnRoundBanker](@dblOriginalPrice * @dblQuantity,2)
+
+		SET @dblQuoteGrossPrice			 =	 @dblCalculatedGrossPrice
+		SET @dblQuoteNetPrice			 =   @dblPrice
+
+	END
 	ELSE IF (LOWER(@strPriceMethod) = 'contracts')
 		BEGIN
 
@@ -7084,6 +7110,8 @@ BEGIN
 			,strPriceMethod			   = @strPriceMethod		
 			,intContractId			   = @intContractHeaderId
 			,intContractDetailId	   = @intContractDetailId
+			,intItemContractId		   = @intItemContractHeaderId
+			,intItemContractDetailId   = @intItemContractDetailId
 			,strPriceBasis			   = @strPriceBasis			
 			,intPriceProfileId		   = @intPriceProfileId		
 			,intPriceIndexId 		   = @intPriceIndexId 		
@@ -7540,6 +7568,10 @@ BEGIN
 			,intContractDetailId	
 			,strContractNumber		
 			,intContractSeq		
+			,intItemContractHeaderId	
+			,intItemContractDetailId	
+			,strItemContractNumber		
+			,intItemContractSeq		
 			,strPriceBasis	
 			,intPriceProfileId	
 			,intPriceIndexId 	
@@ -7591,6 +7623,10 @@ BEGIN
 			,@intContractDetailId		 AS intContractDetailId	
 			,@strContractNumber			 AS strContractNumber		
 			,@intContractSeq			 AS intContractSeq		
+			,@intItemContractHeaderId	 AS intItemContractHeaderId	
+			,@intItemContractDetailId	 AS intItemContractDetailId	
+			,@strItemContractNumber		 AS strItemContractNumber		
+			,@intItemContractSeq		 AS intItemContractSeq		
 			,@strPriceBasis				 AS strPriceBasis	
 			,@intPriceProfileId			 AS intPriceProfileId	
 			,@intPriceIndexId 			 AS intPriceIndexId 	
@@ -7644,6 +7680,10 @@ BEGIN
 			,@intContractDetailId		AS intContractDetailId	
 			,@strContractNumber			AS strContractNumber		
 			,@intContractSeq			AS intContractSeq		
+			,@intItemContractHeaderId	AS intItemContractHeaderId	
+			,@intItemContractDetailId	AS intItemContractDetailId	
+			,@strItemContractNumber		AS strItemContractNumber		
+			,@intItemContractSeq		AS intItemContractSeq		
 			,@strPriceBasis				AS strPriceBasis	
 			,@intPriceProfileId			AS intPriceProfileId	
 			,@intPriceIndexId 			AS intPriceIndexId 	
@@ -7850,5 +7890,3 @@ BEGIN
 			,1
 			,@currentErrorText
 	END
-
-	

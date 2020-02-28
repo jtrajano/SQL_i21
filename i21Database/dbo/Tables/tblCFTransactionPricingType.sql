@@ -47,7 +47,11 @@
     [dblCalculatedPumpPrice]  NUMERIC (18, 6) NULL,
     [dblOriginalPumpPrice]    NUMERIC (18, 6) NULL,
     [ysnExpensed]             BIT             NULL,
-    [intExpensedItemId]       INT             NULL
+    [intExpensedItemId]       INT             NULL,
+    [intItemContractHeaderId] INT             NULL,
+    [intItemContractDetailId] INT             NULL,
+    [strItemContractNumber]   NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS  NULL,
+    [intItemContractSeq]      INT             NULL,
 );
 
 
