@@ -37,7 +37,7 @@ BEGIN
 		strBatchId = NULL
 		, dtmCreatedDate = b.dtmDateCreated
 		, strBucketType = 'Accounts Payables'
-		, strTransactionType = 'Voucher'
+		, strTransactionType = 'Bill'
 		, intTransactionRecordId = bd.intBillDetailId
 		, intTransactionHeaderRecordId = bd.intBillId
 		, strDistributionType = ''
@@ -54,6 +54,7 @@ BEGIN
 		, strMiscFields = '{intInventoryReceiptItemId = "'+ CAST(ISNULL(bd.intInventoryReceiptItemId,'') AS NVARCHAR) +'"} {intLoadDetailId = "' + CAST(ISNULL(bd.intLoadDetailId,'') AS NVARCHAR) +'"}'
 	FROM tblAPBill b
 	INNER JOIN tblAPBillDetail bd ON bd.intBillId = b.intBillId
+	INNER JOIN @voucherDetailIds bd2 ON bd.intBillDetailId = bd2.intId
 	CROSS APPLY (
 		SELECT * FROM dbo.fnAPGetVoucherCommodity(b.intBillId)
 	) c
