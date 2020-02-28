@@ -143,14 +143,7 @@ BEGIN TRY
 				END
 			END
 
-			IF @strErrorMessage <> ''
-			BEGIN
-				RAISERROR (
-						@strErrorMessage
-						,16
-						,1
-						)
-			END
+
 
 			SELECT @intBookId = NULL
 
@@ -183,7 +176,14 @@ BEGIN TRY
 					SELECT @strErrorMessage = 'Unable to find Outbound shipment.'
 				END
 			END
-
+			IF @strErrorMessage <> ''
+			BEGIN
+				RAISERROR (
+						@strErrorMessage
+						,16
+						,1
+						)
+			END
 			SELECT @intPaymentMethodId = intPaymentMethodID
 			FROM tblSMPaymentMethod PM
 			WHERE PM.strPaymentMethod = @strPaymentMethod

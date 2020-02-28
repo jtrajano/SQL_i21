@@ -971,14 +971,14 @@ BEGIN TRY
 							,ysnToBeAgreed
 							,dblSettlementPrice
 							,dblAgreedAmount
-							,@intAgreedItemUOMId
+							,@intCommodityUnitMeasureId2
 							,dblPolPct
 							,dblPriceWORollArb
 							,dblRollArb
 							,dblPolSummary
 							,dblAdditionalCost
 							,dblFinalPrice
-							,@intFinalPriceUOMId
+							,@intCommodityUnitMeasureId
 							,ysnSplit
 							,intPriceFixationId
 						FROM OPENXML(@idoc, 'vyuIPPriceFixations/vyuIPPriceFixation', 2) WITH (
@@ -1045,14 +1045,14 @@ BEGIN TRY
 							,ysnToBeAgreed = x.ysnToBeAgreed
 							,dblSettlementPrice = x.dblSettlementPrice
 							,dblAgreedAmount = x.dblAgreedAmount
-							,intAgreedItemUOMId = @intAgreedItemUOMId
+							,intAgreedItemUOMId = @intCommodityUnitMeasureId2
 							,dblPolPct = x.dblPolPct
 							,dblPriceWORollArb = x.dblPriceWORollArb
 							,dblRollArb = x.dblRollArb
 							,dblPolSummary = x.dblPolSummary
 							,dblAdditionalCost = x.dblAdditionalCost
 							,dblFinalPrice = x.dblFinalPrice
-							,intFinalPriceUOMId = @intFinalPriceUOMId
+							,intFinalPriceUOMId = @intCommodityUnitMeasureId
 							,ysnSplit = x.ysnSplit
 						FROM tblCTPriceFixation PF
 						JOIN OPENXML(@idoc, 'vyuIPPriceFixations/vyuIPPriceFixation', 2) WITH (
