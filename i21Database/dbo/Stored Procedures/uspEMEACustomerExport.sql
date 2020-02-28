@@ -29,7 +29,6 @@ INSERT INTO tblAREACustomerExport (
 	, strEmail
 	, strWebsite
 	, strComment
-	, strLicenseApplicator
 )
 SELECT intEntityId			= intId
 	, strEntityNo			= LTRIM(RTRIM(Id))
@@ -54,7 +53,6 @@ SELECT intEntityId			= intId
 	, strEmail				= LTRIM(RTRIM(Email))
 	, strWebsite			= LTRIM(RTRIM(Website))
 	, strComment			= LTRIM(RTRIM(Comment))
-	, strLicenseApplicator  = LicenseApplicator
 FROM vyuEMEAExportCustomer 
 WHERE (CAST(ModifiedDate AS DATE) BETWEEN @dtmFrom AND @dtmTo) OR (@dtmFrom IS NULL OR @dtmTo IS NULL)
 

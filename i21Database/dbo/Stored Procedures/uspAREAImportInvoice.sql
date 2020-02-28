@@ -22,10 +22,6 @@ INSERT INTO @InvoiceEntries (
 	, strInvoiceOriginId
 	, strComments
 	, ysnImpactInventory
-	, strAcresApplied		
-	, strNutrientAnalysis	
-	, strBillingMethod		
-	, strApplicatorLicense	
 
 	, intItemId
 	, intItemUOMId
@@ -55,10 +51,6 @@ SELECT intId				= I.intId
 	, strInvoiceOriginId	= I.strInvoiceOriginId
 	, strComments			= I.strComments
 	, ysnImpactInventory	= I.ysnImpactInventory
-	, strAcresApplied		= I.strAcresApplied
-	, strNutrientAnalysis	= I.strNutrientAnalysis
-	, strBillingMethod		= I.strBillingMethod
-	, strApplicatorLicense	= I.strApplicatorLicense
 
 	, intItemId				= ITEM.intItemId
 	, intItemUOMId			= IUOM.intItemUOMId
