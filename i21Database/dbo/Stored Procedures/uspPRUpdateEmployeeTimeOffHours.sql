@@ -107,11 +107,19 @@ BEGIN
 													ON EE.intEmployeeAccrueTimeOffId = ET.intTypeTimeOffId 
 														AND ET.intEntityEmployeeId = P.intEntityEmployeeId 
 												WHERE 
-													((#tmpEmployees.intPaycheckId IS NOT NULL AND P.intPaycheckId = #tmpEmployees.intPaycheckId)
-													OR (#tmpEmployees.intPaycheckId IS NULL AND P.ysnPosted = 1 
-														AND P.dtmDateTo > #tmpEmployees.dtmLastAward AND P.dtmDateTo <= #tmpEmployees.dtmNextAward))
-													  AND P.intEntityEmployeeId = #tmpEmployees.intEntityId
-													  AND EE.intEmployeeAccrueTimeOffId = @intTypeTimeOffId), 0)
+														(	
+														--(#tmpEmployees.intPaycheckId IS NOT NULL AND P.intPaycheckId = #tmpEmployees.intPaycheckId)
+														--OR 
+														(
+														--#tmpEmployees.intPaycheckId IS NULL AND 
+														P.ysnPosted = 1 AND P.dtmDateTo > #tmpEmployees.dtmLastAward AND P.dtmDateTo <= #tmpEmployees.dtmNextAward)
+														)
+														
+														AND P.intEntityEmployeeId = #tmpEmployees.intEntityId
+														AND EE.intEmployeeAccrueTimeOffId = @intTypeTimeOffId
+													  ), 0)
+
+
 								WHEN (strPeriod = 'Day') THEN 
 									DATEDIFF(DD, dtmLastAward, dtmNextAward) / ISNULL(NULLIF(dblPerPeriod, 0), 1)
 								WHEN (strPeriod = 'Week') THEN 
@@ -124,7 +132,7 @@ BEGIN
 									CASE WHEN (DATEDIFF(YY, dtmLastAward, dtmNextAward) <= 0) THEN 1 ELSE (DATEDIFF(YY, dtmLastAward, dtmNextAward)) END
 										/ ISNULL(NULLIF(dblPerPeriod, 0), 1)
 								ELSE 0
-							END * dblRate * dblRateFactor * CASE WHEN (ysnPaycheckPosted = 0) THEN -1 ELSE 1 END
+							END * dblRate * dblRateFactor ---* CASE WHEN (ysnPaycheckPosted = 0) THEN -1 ELSE 1 END -->>> earned hours get negative when paycheck unposted
 						ELSE 0
 					END
 
