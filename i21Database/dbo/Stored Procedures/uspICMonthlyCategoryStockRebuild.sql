@@ -34,8 +34,8 @@ BEGIN TRY
 		FROM 
 			tblICBackup 
 		WHERE
-			strCategoryCode = @strCategoryCode			
-			AND (@dtmLastRebuild IS NULL OR FLOOR(CAST(dtmStart AS FLOAT)) > FLOOR(CAST(@dtmLastRebuild AS FLOAT)))
+			(strCategoryCode = @strCategoryCode OR @strCategoryCode IS NULL)			
+			AND (@dtmLastRebuild IS NULL OR FLOOR(CAST(dtmStart AS FLOAT)) > FLOOR(CAST(@dtmLastRebuild AS FLOAT)))			
 			AND (intBackupId > @intBackupId OR @intBackupId IS NULL) 
 		ORDER BY 
 			intBackupId DESC 			
