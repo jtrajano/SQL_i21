@@ -58,7 +58,7 @@ BEGIN TRY
 				)
 			OUTPUT INSERTED.strRecipeName
 			INTO @tblIPRecipeName
-			SELECT Distinct RECIPE_NAME
+			SELECT DISTINCT RECIPE_NAME
 				,LOCATION_NO
 				,ITEM_NO
 				,QUANTITY
@@ -66,12 +66,15 @@ BEGIN TRY
 				,[VERSION]
 				,VALID_FROM
 				,VALID_TO
-				,PROCESS_NAME
+				,IsNULL(PROCESS_NAME, (
+						SELECT TOP 1 strProcessName
+						FROM tblMFManufacturingProcess
+						))
 				,CREATE_DATE
 				,DOC_NO
 				,'By Quantity'
 				,MSG_TYPE
-			FROM OPENXML(@idoc, 'root/HEADER', 2) WITH (
+			FROM OPENXML(@idoc, 'ROOT/HEADER', 2) WITH (
 					RECIPE_NAME NVARCHAR(250)
 					,LOCATION_NO NVARCHAR(50)
 					,ITEM_NO NVARCHAR(50)
@@ -127,7 +130,7 @@ BEGIN TRY
 				,DOC_NO
 				,ROW_STATE
 				,SEQUENCE_NO
-			FROM OPENXML(@idoc, 'root/LINE_ITEMS/LINE_ITEM', 2) WITH (
+			FROM OPENXML(@idoc, 'ROOT/LINE_ITEMS/LINE_ITEM', 2) WITH (
 					RECIPE_NAME NVARCHAR(250) '../../HEADER/RECIPE_NAME'
 					,LOCATION_NO NVARCHAR(50) '../../HEADER/LOCATION_NO'
 					--,HEADER_ITEM_NO NVARCHAR(50) '../../HEADER/HEADER_ITEM_NO'
@@ -145,16 +148,16 @@ BEGIN TRY
 					,STORAGE_LOCATION NVARCHAR(50)
 					,DOC_NO INT '../../CTRL_POINT/DOC_NO'
 					,ROW_STATE NVARCHAR(50)
-					,SEQUENCE_NO int
+					,SEQUENCE_NO INT
 					) x
 
 			UPDATE tblMFRecipeItemStage
 			SET strRecipeHeaderItemNo = x.ITEM_NO
-			FROM OPENXML(@idoc, 'root/HEADER', 2) WITH (
+			FROM OPENXML(@idoc, 'ROOT/HEADER', 2) WITH (
 					ITEM_NO NVARCHAR(50)
-					,DOC_NO INT '../CTRL_POINT/DOC_NO'
+					,DOC_NO NVARCHAR(50) '../CTRL_POINT/DOC_NO'
 					) x
-			JOIN tblMFRecipeItemStage RI ON RI.strSessionId = x.DOC_NO
+			JOIN tblMFRecipeItemStage RI ON RI.strSessionId = x.DOC_NO collate Latin1_General_CI_AS
 
 			--Move to Archive
 			INSERT INTO tblIPIDOCXMLArchive (
@@ -232,4 +235,3 @@ BEGIN CATCH
 			,'WITH NOWAIT'
 			)
 END CATCH
-
