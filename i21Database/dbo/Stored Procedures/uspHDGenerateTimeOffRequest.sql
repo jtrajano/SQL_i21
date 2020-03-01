@@ -93,41 +93,24 @@ BEGIN
 					begin
 						set @intFixEightHours = @dblRequest;
 					end
-					
-					--time off was edited, update the record
-					if exists (select 1 from tblHDTimeOffRequest where intPREntityEmployeeId = @intEntityEmployeeId and intPRTimeOffRequestId = @intTimeOffRequestId)
-					begin
-						UPDATE [dbo].[tblHDTimeOffRequest] 
-						SET 
-							[dtmPRDate] = @dtmPRDate,
-							[strPRDayName] = @strPRDayName,
-							[dblPRRequest] = @intFixEightHours,
-							[intPRNoOfDays] = @intNoOfDays,
-							[intConcurrencyId] = [intConcurrencyId] + 1
-						WHERE 
-						intPRTimeOffRequestId = @intTimeOffRequestId
-					end
-					else
-					begin
-						INSERT INTO [dbo].[tblHDTimeOffRequest]
-								   ([intPRTimeOffRequestId]
-								   ,[intPREntityEmployeeId]
-								   ,[strPRRequestId]
-								   ,[dtmPRDate]
-								   ,[strPRDayName]
-								   ,[dblPRRequest]
-								   ,[intPRNoOfDays]
-								   ,[intConcurrencyId])
-							 VALUES
-								   (@intTimeOffRequestId
-								   ,@intEntityEmployeeId
-								   ,@strRequestId
-								   ,@dtmPRDate
-								   ,@strPRDayName
-								   ,@intFixEightHours
-								   ,@intNoOfDays
-								   ,1)
-					end
+					INSERT INTO [dbo].[tblHDTimeOffRequest]
+							   ([intPRTimeOffRequestId]
+							   ,[intPREntityEmployeeId]
+							   ,[strPRRequestId]
+							   ,[dtmPRDate]
+							   ,[strPRDayName]
+							   ,[dblPRRequest]
+							   ,[intPRNoOfDays]
+							   ,[intConcurrencyId])
+						 VALUES
+							   (@intTimeOffRequestId
+							   ,@intEntityEmployeeId
+							   ,@strRequestId
+							   ,@dtmPRDate
+							   ,@strPRDayName
+							   ,@intFixEightHours
+							   ,@intNoOfDays
+							   ,1)
 				end
 
 			end
@@ -147,40 +130,24 @@ BEGIN
 
 				if not exists (select * from tblHDTimeOffRequest where intPREntityEmployeeId = @intEntityEmployeeId and dtmPRDate = @dtmPRDate)
 				begin
-				--time off was edited, update the record
-					if exists (select 1 from tblHDTimeOffRequest where intPREntityEmployeeId = @intEntityEmployeeId and intPRTimeOffRequestId = @intTimeOffRequestId)
-					begin
-						UPDATE [dbo].[tblHDTimeOffRequest] 
-						SET 
-							[dtmPRDate] = @dtmPRDate,
-							[strPRDayName] = @strPRDayName,
-							[dblPRRequest] = @intFixEightHours,
-							[intPRNoOfDays] = @intNoOfDays,
-							[intConcurrencyId] = [intConcurrencyId] + 1
-						WHERE 
-						intPRTimeOffRequestId = @intTimeOffRequestId
-					end
-					else
-					begin
-						INSERT INTO [dbo].[tblHDTimeOffRequest]
-								   ([intPRTimeOffRequestId]
-								   ,[intPREntityEmployeeId]
-								   ,[strPRRequestId]
-								   ,[dtmPRDate]
-								   ,[strPRDayName]
-								   ,[dblPRRequest]
-								   ,[intPRNoOfDays]
-								   ,[intConcurrencyId])
-							 VALUES
-								   (@intTimeOffRequestId
-								   ,@intEntityEmployeeId
-								   ,@strRequestId
-								   ,@dtmPRDate
-								   ,@strPRDayName
-								   ,@dblRequest
-								   ,@intNoOfDays
-								   ,1)
-					end
+					INSERT INTO [dbo].[tblHDTimeOffRequest]
+							   ([intPRTimeOffRequestId]
+							   ,[intPREntityEmployeeId]
+							   ,[strPRRequestId]
+							   ,[dtmPRDate]
+							   ,[strPRDayName]
+							   ,[dblPRRequest]
+							   ,[intPRNoOfDays]
+							   ,[intConcurrencyId])
+						 VALUES
+							   (@intTimeOffRequestId
+							   ,@intEntityEmployeeId
+							   ,@strRequestId
+							   ,@dtmPRDate
+							   ,@strPRDayName
+							   ,@dblRequest
+							   ,@intNoOfDays
+							   ,1)
 				end
 
 			end
