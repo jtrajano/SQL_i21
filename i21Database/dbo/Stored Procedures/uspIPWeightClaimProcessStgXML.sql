@@ -645,13 +645,13 @@ BEGIN TRY
 				END
 
 				SELECT @dblUnitPriceInSupplierContract = AD.dblSeqPrice
-					,@dblClaimAmountInSupplierContract = abs(Round( (WUI.dblUnitQty / PUI.dblUnitQty) * AD.dblSeqPrice / (
+					,@dblClaimAmountInSupplierContract =  (WUI.dblUnitQty / PUI.dblUnitQty) * AD.dblSeqPrice / (
 								CASE 
 									WHEN ysnSeqSubCurrency = 1
 										THEN 100
 									ELSE 1
 									END
-								), 2))
+								)
 				FROM tblLGLoad L
 				JOIN tblICUnitMeasure WUOM ON WUOM.intUnitMeasureId = L.intWeightUnitMeasureId
 					AND L.intLoadRefId = @intLoadId
@@ -791,7 +791,7 @@ BEGIN TRY
 					) AS [intPartyEntityId]
 				,dblUnitPriceInSupplierContract
 				,[intCurrencyId]
-				,ABS([dblClaimableWt] * dblClaimAmountInSupplierContract)
+				,ABS(Round([dblClaimableWt] * dblClaimAmountInSupplierContract,2))
 				,[intPriceItemUOMId]
 				,[dblAdditionalCost]
 				,[ysnNoClaim]
