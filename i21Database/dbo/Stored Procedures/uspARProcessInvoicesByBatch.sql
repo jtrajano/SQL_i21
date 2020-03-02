@@ -102,6 +102,11 @@ BEGIN TRY
 		,[ysnForUpdate]					BIT												NULL
 		,[ysnRecap]						BIT												NULL
 		,[ysnPost]						BIT												NULL
+		,[strAcresApplied]				NVARCHAR(10)    COLLATE Latin1_General_CI_AS 	NULL
+		,[strNutrientAnalysis]			NVARCHAR(50)    COLLATE Latin1_General_CI_AS 	NULL
+		,[strBillingMethod]				NVARCHAR(100)   COLLATE Latin1_General_CI_AS 	NULL
+		,[strApplicatorLicense]			NVARCHAR(50)    COLLATE Latin1_General_CI_AS 	NULL
+
 	)
 	
 	DECLARE  @QueryString AS VARCHAR(MAX)
@@ -264,6 +269,11 @@ BEGIN
 		,[ysnPost]
 		,[ysnUpdateAvailableDiscount]
 		,[strImportFormat]
+		,[strAcresApplied]		
+		,[strNutrientAnalysis]	
+		,[strBillingMethod]		
+		,[strApplicatorLicense]	
+
 		,[intInvoiceDetailId]
 		,[intItemId]
 		,[intPrepayTypeId]
@@ -403,6 +413,11 @@ BEGIN
 		,[ysnPost]							= IE.[ysnPost]
 		,[ysnUpdateAvailableDiscount]		= IE.[ysnUpdateAvailableDiscount]
 		,[strImportFormat]					= IE.[strImportFormat]
+	    ,[strAcresApplied]					= IE.[strAcresApplied]
+		,[strNutrientAnalysis]				= IE.[strNutrientAnalysis]	
+		,[strBillingMethod]					= IE.[strBillingMethod]
+		,[strApplicatorLicense]				= IE.[strApplicatorLicense]
+
 
 		,[intInvoiceDetailId]				= IE.[intInvoiceDetailId]
 		,[intItemId]						= (CASE WHEN @GroupingOption = 0 THEN IE.[intItemId] ELSE NULL END) 
