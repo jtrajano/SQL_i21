@@ -85,21 +85,21 @@ BEGIN
 							'NO MATCHING TAG' as strErrorType
 							, 'No Matching Register MOP in Payment Options' as strErrorMessage
 							, 'mopInfo sysid' as strRegisterTag
-							, ISNULL(Chk.strSysid, '') AS strRegisterTagValue
+							, ISNULL(Chk.strSysId, '') AS strRegisterTagValue
 							, @intCheckoutId
 							, 1
 						FROM @UDT_TransSummary Chk
-						WHERE ISNULL(Chk.strSysid, '') NOT IN
+						WHERE ISNULL(Chk.strSysId, '') NOT IN
 						(
 							SELECT DISTINCT 
 								tbl.strXmlRegisterMiscellaneousSummarySubCodeModifier
 							FROM
 							(
 								SELECT DISTINCT
-									Chk.strSysid AS strXmlRegisterMiscellaneousSummarySubCodeModifier
+									Chk.strSysId AS strXmlRegisterMiscellaneousSummarySubCodeModifier
 								FROM @UDT_TransSummary Chk
 								JOIN tblSTPaymentOption PO 
-									ON ISNULL(Chk.strSysid, '') COLLATE DATABASE_DEFAULT = PO.strRegisterMop
+									ON ISNULL(Chk.strSysId, '') COLLATE DATABASE_DEFAULT = PO.strRegisterMop
 								JOIN tblSTStore Store 
 									ON Store.intStoreId = PO.intStoreId
 								JOIN tblSTCheckoutPaymentOptions CPO 
@@ -107,12 +107,12 @@ BEGIN
 								WHERE Store.intStoreId = @intStoreId
 									--AND Chk.MiscellaneousSummaryCode = 'sales' 
 									--AND Chk.MiscellaneousSummarySubCode = 'MOP'
-									AND ISNULL(Chk.strSysid, '') != ''
+									AND ISNULL(Chk.strSysId, '') != ''
 							) AS tbl
 						)
 						--AND Chk.MiscellaneousSummaryCode = 'sales' 
 						--AND Chk.MiscellaneousSummarySubCode = 'MOP'
-						AND ISNULL(Chk.strSysid, '') != ''
+						AND ISNULL(Chk.strSysId, '') != ''
 					END
 				-- ==================================================================================================================  
 				-- [END] Get Error logs. Check Register XML that is not configured in i21.  
@@ -164,7 +164,7 @@ BEGIN
                      , dblAmount			= ISNULL(chk.dblMopInfoAmount, 0)
             FROM @UDT_TransSummary chk
             INNER JOIN tblSTPaymentOption PO 
-				ON ISNULL(chk.strSysid, '') COLLATE DATABASE_DEFAULT = PO.strRegisterMop
+				ON ISNULL(chk.strSysId, '') COLLATE DATABASE_DEFAULT = PO.strRegisterMop
             INNER JOIN tblSTStore Store 
 				ON Store.intStoreId = PO.intStoreId
             INNER JOIN tblSTCheckoutPaymentOptions CPO 
