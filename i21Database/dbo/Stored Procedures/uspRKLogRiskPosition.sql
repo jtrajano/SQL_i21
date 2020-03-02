@@ -156,6 +156,9 @@ BEGIN
 			, @strMiscFields = strMiscFields
 		FROM #tmpSummaryLogs
 
+		IF OBJECT_ID('tempdb..#tmpPrevLog') IS NOT NULL
+			DROP TABLE #tmpPrevLog
+
 		SELECT TOP 1 *
 		INTO #tmpPrevLog
 		FROM tblRKSummaryLog
@@ -229,6 +232,10 @@ BEGIN
 				, 'Delete Record'
 				, strMiscField
 			FROM #tmpPrevLog
+
+			DELETE FROM #tmpSummaryLogs
+			WHERE intId = @intId
+
 			CONTINUE
 		END
 
@@ -249,6 +256,10 @@ BEGIN
 				AND intContractHeaderId = @intContractHeaderId
 				AND intTicketId = @intTicketId)
 		BEGIN
+
+			DELETE FROM #tmpSummaryLogs
+			WHERE intId = @intId
+			
 			CONTINUE
 		END
 
@@ -995,7 +1006,6 @@ BEGIN
 		------------------------------
 		------------------------------
 		
-		DROP TABLE #tmpPrevLog
 
 		DELETE FROM #tmpSummaryLogs
 		WHERE intId = @intId
