@@ -1,6 +1,8 @@
-﻿CREATE PROC [dbo].[uspRKM2MGLPost]  
-		@intM2MInquiryId INT
+﻿CREATE PROCEDURE uspRKM2MGLPost
+	@intM2MInquiryId INT
+
 AS
+
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
@@ -9,629 +11,349 @@ SET ANSI_WARNINGS OFF
 
 BEGIN TRY
 	DECLARE @GLEntries AS RecapTableType
-	DECLARE @batchId NVARCHAR(100)
-	DECLARE @strBatchId NVARCHAR(100)
-	DECLARE @ErrMsg NVARCHAR(Max)
+		, @batchId NVARCHAR(100)
+		, @strBatchId NVARCHAR(100)
+		, @ErrMsg NVARCHAR(MAX)
+		, @intCommodityId INT
+		, @intLocationId INT
+		, @dtmCurrenctGLPostDate DATETIME
+		, @dtmPreviousGLPostDate DATETIME
+		, @dtmGLReverseDate DATETIME
+		, @dtmPreviousGLReverseDate DATETIME
+		, @strPreviousBatchId NVARCHAR(100)
+		, @strCommodityCode NVARCHAR(100)
 
-DECLARE @intCommodityId int
-DECLARE @dtmCurrenctGLPostDate DATETIME
-DECLARE @dtmPreviousGLPostDate DATETIME
-DECLARE @dtmGLReverseDate DATETIME
-DECLARE @dtmPreviousGLReverseDate DATETIME
-DECLARE @strPreviousBatchId NVARCHAR(100)
+	SELECT @intCommodityId = intCommodityId
+		, @dtmCurrenctGLPostDate = dtmGLPostDate
+		, @dtmGLReverseDate = dtmGLReverseDate 
+		, @intLocationId = intCompanyLocationId
+	FROM tblRKM2MInquiry 
+	WHERE intM2MInquiryId = @intM2MInquiryId
 
-SELECT 
-	 @intCommodityId = intCommodityId
-	,@dtmCurrenctGLPostDate = dtmGLPostDate
-	,@dtmGLReverseDate=dtmGLReverseDate 
-FROM tblRKM2MInquiry 
-WHERE intM2MInquiryId=@intM2MInquiryId
+	SELECT @strCommodityCode = strCommodityCode
+	FROM tblICCommodity WHERE intCommodityId = @intCommodityId
 
-SELECT TOP 1 
-	 @dtmPreviousGLPostDate = dtmGLPostDate
-	,@dtmPreviousGLReverseDate = dtmGLReverseDate
-FROM tblRKM2MInquiry 
-WHERE ysnPost=1 and intCommodityId=@intCommodityId ORDER BY dtmGLPostDate DESC
+	SELECT TOP 1 @dtmPreviousGLPostDate = dtmGLPostDate
+		, @dtmPreviousGLReverseDate = dtmGLReverseDate
+	FROM tblRKM2MInquiry 
+	WHERE ysnPost = 1 AND intCommodityId = @intCommodityId
+	ORDER BY dtmGLPostDate DESC
 
-IF (@dtmGLReverseDate IS NULL)
-BEGIN
-RAISERROR('Please save the record before posting.',16,1)
-END
-
-IF (convert(datetime,@dtmCurrenctGLPostDate) <= convert(datetime,@dtmPreviousGLReverseDate))
-BEGIN
-RAISERROR('GL Post Date cannot be less than or equal to the previous post date',16,1)
-END
-
---IF EXISTS(SELECT 1 FROM tblRKCompanyPreference WHERE ISNULL(intUnrealizedGainOnBasisId,0) = 0)
---RAISERROR('Unrealized Gain On Basis cannot be blank. Please set up the default account(s) in Company Configuration Risk Management tab.',16,1)
---IF EXISTS(SELECT * FROM tblRKCompanyPreference WHERE ISNULL(intUnrealizedGainOnFuturesId,0) = 0)
---RAISERROR('Unrealized Gain On Futures cannot be blank. Please set up the default account(s) in Company Configuration Risk Management tab.',16,1)
---IF EXISTS(SELECT * FROM tblRKCompanyPreference WHERE ISNULL(intUnrealizedGainOnCashId,0) = 0)
---RAISERROR('Unrealized Gain On Cash cannot be blank. Please set up the default account(s) in Company Configuration Risk Management tab.',16,1)
---IF EXISTS(SELECT * FROM tblRKCompanyPreference WHERE ISNULL(intUnrealizedLossOnBasisId,0) = 0)
---RAISERROR('Unrealized Loss On Basis cannot be blank. Please set up the default account(s) in Company Configuration Risk Management tab.',16,1)
---IF EXISTS(SELECT * FROM tblRKCompanyPreference WHERE ISNULL(intUnrealizedLossOnFuturesId,0) = 0)
---RAISERROR('Unrealized Loss On Futures cannot be blank. Please set up the default account(s) in Company Configuration Risk Management tab.',16,1)
---IF EXISTS(SELECT * FROM tblRKCompanyPreference WHERE ISNULL(intUnrealizedLossOnCashId,0) = 0)
---RAISERROR('Unrealized Loss On Cash cannot be blank. Please set up the default account(s) in Company Configuration Risk Management tab.',16,1)
---IF EXISTS(SELECT * FROM tblRKCompanyPreference WHERE ISNULL(intUnrealizedGainOnInventoryBasisIOSId,0) = 0)
---RAISERROR('Unrealized Gain On Inventory Basis IOS cannot be blank. Please set up the default account(s) in Company Configuration Risk Management tab.',16,1)
---IF EXISTS(SELECT * FROM tblRKCompanyPreference WHERE ISNULL(intUnrealizedGainOnInventoryFuturesIOSId,0) = 0)
---RAISERROR('Unrealized Gain On Inventory Futures IOS cannot be blank. Please set up the default account(s) in Company Configuration Risk Management tab.',16,1)
---IF EXISTS(SELECT * FROM tblRKCompanyPreference WHERE ISNULL(intUnrealizedGainOnInventoryCashIOSId,0) = 0)
---RAISERROR('Unrealized Gain On Inventory Cash IOS cannot be blank. Please set up the default account(s) in Company Configuration Risk Management tab.',16,1)
---IF EXISTS(SELECT * FROM tblRKCompanyPreference WHERE ISNULL(intUnrealizedLossOnInventoryBasisIOSId,0) = 0)
---RAISERROR('Unrealized Loss On Inventory Basis IOS cannot be blank. Please set up the default account(s) in Company Configuration Risk Management tab.',16,1)
---IF EXISTS(SELECT * FROM tblRKCompanyPreference WHERE ISNULL(intUnrealizedLossOnInventoryFuturesIOSId,0) = 0)
---RAISERROR('Unrealized Loss On Inventory Futures IOS cannot be blank. Please set up the default account(s) in Company Configuration Risk Management tab.',16,1)
---IF EXISTS(SELECT * FROM tblRKCompanyPreference WHERE ISNULL(intUnrealizedLossOnInventoryCashIOSId,0) = 0)
---RAISERROR('Unrealized Loss On Inventory Cash IOS cannot be blank. Please set up the default account(s) in Company Configuration Risk Management tab.',16,1)
---IF EXISTS(SELECT * FROM tblRKCompanyPreference WHERE ISNULL(intUnrealizedGainOnInventoryIntransitIOSId,0) = 0)
---RAISERROR('Unrealized Gain On Inventory Intransit IOS cannot be blank. Please set up the default account(s) in Company Configuration Risk Management tab.',16,1)
---IF EXISTS(SELECT * FROM tblRKCompanyPreference WHERE ISNULL(intUnrealizedLossOnInventoryIntransitIOSId,0) = 0)
---RAISERROR('Unrealized Gain On Inventory Intransit IOS cannot be blank. Please set up the default account(s) in Company Configuration Risk Management tab.',16,1)
-
---============================================================
--- SETUP VALIDATION
---=============================================================
-
-SELECT * INTO #tmpPostRecap
-FROM tblRKM2MPostRecap 
-WHERE intM2MInquiryId = @intM2MInquiryId
-
-DECLARE @tblResult  TABLE (
-	Result nvarchar(200)
-)
-
-
-WHILE EXISTS (SELECT TOP 1 1 FROM #tmpPostRecap)
-BEGIN
-
-	DECLARE @strTransactionId NVARCHAR(50)
-			,@intTransactionId INT
-			,@strContractNumber NVARCHAR(50)
-			,@intContractSeq NVARCHAR(20)
-			,@intUsedCommodityId INT
-			,@intUseCompanyLocationId INT
-			,@strCommodityCode NVARCHAR(100)
-			,@intM2MTransactionId INT
-			,@strTransactionType NVARCHAR(100)
-			,@dblAmount NUMERIC(18,6)
-			,@intAccountId INT
-
-	SELECT TOP 1 
-		@intM2MTransactionId = intM2MTransactionId
-		,@strTransactionId = strTransactionId
-		,@intTransactionId = intTransactionId
-		,@strTransactionType = strTransactionType
-		,@dblAmount = (dblDebit + dblCredit)
-		,@intAccountId = intAccountId
-	FROM #tmpPostRecap
-
-	
-	IF @strTransactionType = 'Mark To Market-Futures Derivative' OR @strTransactionType = 'Mark To Market-Futures Derivative Offset'
+	IF (@dtmGLReverseDate IS NULL)
 	BEGIN
-
-		--Get the used Commodity and Location in the Derivative Entry
-		SELECT 
-			@intUsedCommodityId = DE.intCommodityId
-			,@strCommodityCode = C.strCommodityCode
-			,@intUseCompanyLocationId = DE.intLocationId 
-		FROM tblRKFutOptTransaction  DE
-			INNER JOIN tblICCommodity C ON DE.intCommodityId = C.intCommodityId
-		WHERE strInternalTradeNo = @strTransactionId
-
+		RAISERROR('Please save the record before posting.', 16, 1)
 	END
-	ELSE
+	IF (CONVERT(DATETIME, @dtmCurrenctGLPostDate) <= CONVERT(DATETIME, @dtmPreviousGLReverseDate))
 	BEGIN
+		RAISERROR('GL Post Date cannot be less than or equal to the previous post date', 16, 1)
+	END
 
-		--Parse strTransactionId to get strContractNumber and intContractSeq
-		--Before dash(-) is the contract number after that is the contract sequence
-		SET @strContractNumber = SUBSTRING(@strTransactionId,0,CHARINDEX('-',@strTransactionId))
-		-- SET @intContractSeq = SUBSTRING(@strTransactionId,CHARINDEX('-',@strTransactionId) + 1,LEN(@strTransactionId) - CHARINDEX('-',@strTransactionId)) 
-		SET @intContractSeq = RIGHT(@strTransactionId , CHARINDEX ('-',REVERSE(@strTransactionId))-1)
+	DECLARE @GLAccounts TABLE(strCategory NVARCHAR(100)
+		, intAccountId INT
+		, strAccountNo NVARCHAR(20) COLLATE Latin1_General_CI_AS
+		, ysnHasError BIT
+		, strErrorMessage NVARCHAR(250) COLLATE Latin1_General_CI_AS)
 
-		--Get the used Commodity and Location in the Contract
-		SELECT 
-			@intUsedCommodityId = H.intCommodityId
-			,@strCommodityCode = C.strCommodityCode
-			,@intUseCompanyLocationId = D.intCompanyLocationId 
-		FROM tblCTContractHeader  H
-			INNER JOIN tblCTContractDetail D ON H.intContractHeaderId = D.intContractHeaderId
-			INNER JOIN tblICCommodity C ON H.intCommodityId = C.intCommodityId
-		WHERE D.intContractDetailId = @intTransactionId 
+	INSERT INTO @GLAccounts
+	EXEC uspRKGetGLAccountsForPosting @intCommodityId = @intCommodityId
+		, @intLocationId = @intLocationId
+
+	--============================================================
+	-- SETUP VALIDATION
+	--=============================================================
+	SELECT * INTO #tmpPostRecap
+	FROM tblRKM2MPostRecap 
+	WHERE intM2MInquiryId = @intM2MInquiryId
+
+	DECLARE @tblResult TABLE (Result NVARCHAR(200))
+
+	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpPostRecap)
+	BEGIN
+		DECLARE @strTransactionId NVARCHAR(50)
+			, @intTransactionId INT
+			, @strContractNumber NVARCHAR(50)
+			, @intContractSeq NVARCHAR(20)
+			, @intM2MTransactionId INT
+			, @strTransactionType NVARCHAR(100)
+			, @dblAmount NUMERIC(18, 6)
+			, @intAccountId INT
+			, @strAccountNo NVARCHAR(MAX)
+			, @ysnHasError BIT
+			, @strErrorMessage NVARCHAR(MAX)
+		
+		SELECT TOP 1 @intM2MTransactionId = intM2MTransactionId
+			, @strTransactionId = strTransactionId
+			, @intTransactionId = intTransactionId
+			, @strTransactionType = strTransactionType
+			, @dblAmount = (dblDebit + dblCredit)
 			
+		FROM #tmpPostRecap
 
-	END
-
-	IF @intUsedCommodityId IS NULL
-	BEGIN
-		SELECT @intUsedCommodityId = intCommodityId FROM tblRKM2MInquiry WHERE intM2MInquiryId = @intM2MInquiryId
-	END
-
-	DECLARE @strPrimaryAccountCode NVARCHAR(50)
-			,@strLocationAccountCode NVARCHAR(50)
-			,@strLOBAccountCode NVARCHAR(50)
-			,@intAccountIdFromCompPref INT
-			,@strAccountNumberToBeUse NVARCHAR(50)
-			,@strErrorMessage NVARCHAR(200)
-			,@intAccountIdFromCommodityGL INT
-
-	IF (SELECT intPostToGLId FROM tblRKCompanyPreference) = 1
-	BEGIN
-		SELECT @intAccountIdFromCompPref = (CASE WHEN @strTransactionType = 'Mark To Market-Basis' OR @strTransactionType = 'Mark To Market-Basis Intransit' THEN
-													case when isnull(@dblAmount,0) >= 0 then compPref.intUnrealizedGainOnBasisId else compPref.intUnrealizedLossOnBasisId end
-												 WHEN @strTransactionType = 'Mark To Market-Basis Offset' OR @strTransactionType = 'Mark To Market-Basis Intransit Offset' THEN
-													case when isnull(@dblAmount,0) >= 0 then compPref.intUnrealizedGainOnInventoryBasisIOSId else compPref.intUnrealizedLossOnInventoryBasisIOSId end
-												 WHEN @strTransactionType = 'Mark To Market-Futures Derivative' OR @strTransactionType = 'Mark To Market-Futures'  OR @strTransactionType = 'Mark To Market-Futures Intransit' THEN
-													case when isnull(@dblAmount,0) >= 0 then compPref.intUnrealizedGainOnFuturesId else compPref.intUnrealizedLossOnFuturesId end
-												 WHEN @strTransactionType = 'Mark To Market-Futures Derivative Offset' OR @strTransactionType = 'Mark To Market-Futures Offset' OR @strTransactionType = 'Mark To Market-Futures Intransit Offset' THEN
-													case when isnull(@dblAmount,0) >= 0 then compPref.intUnrealizedGainOnInventoryFuturesIOSId else compPref.intUnrealizedLossOnInventoryFuturesIOSId end
-												 WHEN @strTransactionType = 'Mark To Market-Cash' OR @strTransactionType = 'Mark To Market-Cash Intransit' OR @strTransactionType = 'Mark To Market-Cash Inventory' THEN
-													case when isnull(@dblAmount,0) >= 0 then compPref.intUnrealizedGainOnCashId else compPref.intUnrealizedLossOnCashId end
-												 WHEN @strTransactionType = 'Mark To Market-Cash Offset' OR @strTransactionType = 'Mark To Market-Futures Intransit Offset' THEN
-													case when isnull(@dblAmount,0) >= 0 then compPref.intUnrealizedGainOnInventoryCashIOSId else compPref.intUnrealizedLossOnInventoryCashIOSId end
-												 WHEN @strTransactionType = 'Mark To Market-Ratio' THEN
-													case when isnull(@dblAmount,0) >= 0 then compPref.intUnrealizedGainOnRatioId else compPref.intUnrealizedLossOnRatioId end
-												 WHEN @strTransactionType = 'Mark To Market-Ratio Offset' THEN
-													case when isnull(@dblAmount,0) >= 0 then compPref.intUnrealizedGainOnInventoryRatioIOSId else compPref.intUnrealizedLossOnInventoryRatioIOSId end
-												 WHEN @strTransactionType = 'Mark To Market-Cash Inventory Offset'
-														THEN CASE WHEN ISNULL(@dblAmount,0) >= 0 THEN compPref.intUnrealizedGainOnInventoryIOSId ELSE compPref.intUnrealizedLossOnInventoryIOSId END
-												 ELSE
-													0
-											END)
-		FROM tblRKCompanyPreference compPref
-
-		IF ISNULL(@intAccountIdFromCompPref,0) = 0
+		IF (@strTransactionType = 'Mark To Market-Basis' OR @strTransactionType = 'Mark To Market-Basis Intransit')
 		BEGIN
-			GOTO No_GL_Setup_In_Comp_Pref
+			IF (ISNULL(@dblAmount, 0) >= 0)
+			BEGIN
+				SELECT TOP 1 @intAccountId = intAccountId
+					, @strAccountNo = strAccountNo
+					, @ysnHasError = ysnHasError
+					, @strErrorMessage = strErrorMessage
+				FROM @GLAccounts WHERE strCategory = 'intUnrealizedGainOnBasisId'
+			END
+			ELSE
+			BEGIN
+				SELECT TOP 1 @intAccountId = intAccountId
+					, @strAccountNo = strAccountNo
+					, @ysnHasError = ysnHasError
+					, @strErrorMessage = strErrorMessage
+				FROM @GLAccounts WHERE strCategory = 'intUnrealizedLossOnBasisId'
+			END
 		END
-	END
-	ELSE
-	BEGIN
-
-		SELECT @intAccountIdFromCommodityGL = (CASE WHEN @strTransactionType = 'Mark To Market-Basis' OR @strTransactionType = 'Mark To Market-Basis Intransit' THEN
-													case when isnull(@dblAmount,0) >= 0 then  dbo.fnGetCommodityGLAccountM2M(DEFAULT,@intUsedCommodityId,'Unrealized Gain on Basis') 
-														else  dbo.fnGetCommodityGLAccountM2M(DEFAULT,@intUsedCommodityId,'Unrealized Loss on Basis') end
-												 WHEN @strTransactionType = 'Mark To Market-Basis Offset' OR @strTransactionType = 'Mark To Market-Basis Intransit Offset' THEN
-													case when isnull(@dblAmount,0) >= 0 then  dbo.fnGetCommodityGLAccountM2M(DEFAULT,@intUsedCommodityId,'Unrealized Gain on Basis (Inventory Offset)') 
-														else  dbo.fnGetCommodityGLAccountM2M(DEFAULT,@intUsedCommodityId,'Unrealized Loss on Basis (Inventory Offset)') end
-												 WHEN @strTransactionType = 'Mark To Market-Futures Derivative' OR @strTransactionType = 'Mark To Market-Futures'  OR @strTransactionType = 'Mark To Market-Futures Intransit' THEN
-													case when isnull(@dblAmount,0) >= 0 then dbo.fnGetCommodityGLAccountM2M(DEFAULT,@intUsedCommodityId,'Unrealized Gain on Futures') 
-														else dbo.fnGetCommodityGLAccountM2M(DEFAULT,@intUsedCommodityId,'Unrealized Loss on Futures') end
-												 WHEN @strTransactionType = 'Mark To Market-Futures Derivative Offset' OR @strTransactionType = 'Mark To Market-Futures Offset' OR @strTransactionType = 'Mark To Market-Futures Intransit Offset' THEN
-													case when isnull(@dblAmount,0) >= 0 then dbo.fnGetCommodityGLAccountM2M(DEFAULT,@intUsedCommodityId,'Unrealized Gain on Futures (Inventory Offset)')
-														else dbo.fnGetCommodityGLAccountM2M(DEFAULT,@intUsedCommodityId,'Unrealized Loss on Futures (Inventory Offset)') end
-												 WHEN @strTransactionType = 'Mark To Market-Cash' OR @strTransactionType = 'Mark To Market-Cash Intransit' OR @strTransactionType = 'Mark To Market-Cash Inventory' THEN
-													case when isnull(@dblAmount,0) >= 0 then dbo.fnGetCommodityGLAccountM2M(DEFAULT,@intUsedCommodityId,'Unrealized Gain on Cash') 
-														else dbo.fnGetCommodityGLAccountM2M(DEFAULT,@intUsedCommodityId,'Unrealized Loss on Cash') end
-												 WHEN @strTransactionType = 'Mark To Market-Cash Offset' OR @strTransactionType = 'Mark To Market-Futures Intransit Offset' THEN
-													case when isnull(@dblAmount,0) >= 0 then dbo.fnGetCommodityGLAccountM2M(DEFAULT,@intUsedCommodityId,'Unrealized Gain on Cash (Inventory Offset)')
-														else dbo.fnGetCommodityGLAccountM2M(DEFAULT,@intUsedCommodityId,'Unrealized Loss on Cash (Inventory Offset)') end
-												 WHEN @strTransactionType = 'Mark To Market-Ratio' THEN
-													case when isnull(@dblAmount,0) >= 0 then dbo.fnGetCommodityGLAccountM2M(DEFAULT,@intUsedCommodityId,'Unrealized Gain on Ratio')
-														else dbo.fnGetCommodityGLAccountM2M(DEFAULT,@intUsedCommodityId,'Unrealized Loss on Ratio') end
-												 WHEN @strTransactionType = 'Mark To Market-Ratio Offset' THEN
-													case when isnull(@dblAmount,0) >= 0 then dbo.fnGetCommodityGLAccountM2M(DEFAULT,@intUsedCommodityId,'Unrealized Gain on Ratio (Inventory Offset)')
-														else dbo.fnGetCommodityGLAccountM2M(DEFAULT,@intUsedCommodityId,'Unrealized Loss on Ratio (Inventory Offset)') end
-												 WHEN @strTransactionType = 'Mark To Market-Cash Inventory Offset'
-														THEN CASE WHEN ISNULL(@dblAmount,0) >= 0 THEN dbo.fnGetCommodityGLAccountM2M(DEFAULT,@intUsedCommodityId,'Unrealized Gain on Inventory (Inventory Offset)')
-															ELSE dbo.fnGetCommodityGLAccountM2M(DEFAULT,@intUsedCommodityId,'Unrealized Loss on Inventory (Inventory Offset)') END
-												 ELSE
-													0
-											END)
-
-		GOTO No_GL_Setup_In_Commodity
-	END
-
-	--Get the account code for Primary
-	SET @strPrimaryAccountCode = ''
-	select 
-	@strPrimaryAccountCode = acct.[Primary Account]
-	from vyuGLAccountView acct
-	WHERE
-	 acct.intAccountId = @intAccountIdFromCompPref
-
-
-	--Get the account code for Location
-	SET @strLocationAccountCode = ''
-	SELECT 
-	@strLocationAccountCode = acctSgmt.strCode
-	FROM tblSMCompanyLocation compLoc
-	LEFT OUTER JOIN tblGLAccountSegment acctSgmt ON compLoc.intProfitCenter = acctSgmt.intAccountSegmentId
-	WHERE intCompanyLocationId = @intUseCompanyLocationId
-
-	--If LOB is setup on GL Account Structure. intStructureType 5 is equal to Line of Bussiness on default data
-	IF EXISTS (SELECT TOP 1 1 FROM tblGLAccountStructure WHERE intStructureType = 5)
-	BEGIN
-
-		--Check if there is LOB setup for commodity
-		IF NOT EXISTS (SELECT TOP 1 * FROM tblICCommodity com INNER JOIN tblSMLineOfBusiness lob ON com.intLineOfBusinessId = lob.intLineOfBusinessId WHERE intCommodityId = @intUsedCommodityId)
+		ELSE IF (@strTransactionType = 'Mark To Market-Basis Offset' OR @strTransactionType = 'Mark To Market-Basis Intransit Offset')
 		BEGIN
-			GOTO No_LOB_Setup
+			IF (ISNULL(@dblAmount, 0) >= 0)
+			BEGIN
+				SELECT TOP 1 @intAccountId = intAccountId
+					, @strAccountNo = strAccountNo
+					, @ysnHasError = ysnHasError
+					, @strErrorMessage = strErrorMessage
+				FROM @GLAccounts WHERE strCategory = 'intUnrealizedGainOnInventoryBasisIOSId'
+			END
+			ELSE
+			BEGIN
+				SELECT TOP 1 @intAccountId = intAccountId
+					, @strAccountNo = strAccountNo
+					, @ysnHasError = ysnHasError
+					, @strErrorMessage = strErrorMessage
+				FROM @GLAccounts WHERE strCategory = 'intUnrealizedLossOnInventoryBasisIOSId'
+			END
 		END
-
-		--Get the account code for LOB
-		SET @strLOBAccountCode = ''
-		SELECT 
-		@strLOBAccountCode = acctSgmt.strCode
-		FROM tblICCommodity com
-		INNER JOIN tblSMLineOfBusiness lob ON com.intLineOfBusinessId = lob.intLineOfBusinessId
-		LEFT OUTER JOIN tblGLAccountSegment acctSgmt ON lob.intSegmentCodeId = acctSgmt.intAccountSegmentId
-		WHERE intCommodityId = @intUsedCommodityId
-
-		IF ISNULL(@strLOBAccountCode,'') = ''
+		ELSE IF (@strTransactionType = 'Mark To Market-Futures Derivative' OR @strTransactionType = 'Mark To Market-Futures'  OR @strTransactionType = 'Mark To Market-Futures Intransit')
 		BEGIN
-			GOTO No_LOB_Segment
+			IF (ISNULL(@dblAmount, 0) >= 0)
+			BEGIN
+				SELECT TOP 1 @intAccountId = intAccountId
+					, @strAccountNo = strAccountNo
+					, @ysnHasError = ysnHasError
+					, @strErrorMessage = strErrorMessage
+				FROM @GLAccounts WHERE strCategory = 'intUnrealizedGainOnFuturesId'
+			END
+			ELSE
+			BEGIN
+				SELECT TOP 1 @intAccountId = intAccountId
+					, @strAccountNo = strAccountNo
+					, @ysnHasError = ysnHasError
+					, @strErrorMessage = strErrorMessage
+				FROM @GLAccounts WHERE strCategory = 'intUnrealizedLossOnFuturesId'
+			END
 		END
-
-		--Build the account number with LOB
-		SET @strAccountNumberToBeUse = ''
-
-		IF ISNULL(@strPrimaryAccountCode,'') <> '' AND ISNULL(@strLocationAccountCode,'') <> '' AND ISNULL(@strLOBAccountCode,'') <> '' 
+		ELSE IF (@strTransactionType = 'Mark To Market-Futures Derivative Offset' OR @strTransactionType = 'Mark To Market-Futures Offset' OR @strTransactionType = 'Mark To Market-Futures Intransit Offset')
 		BEGIN
-			SET @strAccountNumberToBeUse =  @strPrimaryAccountCode +'-'+ @strLocationAccountCode +'-'+ @strLOBAccountCode
+			IF (ISNULL(@dblAmount, 0) >= 0)
+			BEGIN
+				SELECT TOP 1 @intAccountId = intAccountId
+					, @strAccountNo = strAccountNo
+					, @ysnHasError = ysnHasError
+					, @strErrorMessage = strErrorMessage
+				FROM @GLAccounts WHERE strCategory = 'intUnrealizedGainOnInventoryFuturesIOSId'
+			END
+			ELSE
+			BEGIN
+				SELECT TOP 1 @intAccountId = intAccountId
+					, @strAccountNo = strAccountNo
+					, @ysnHasError = ysnHasError
+					, @strErrorMessage = strErrorMessage
+				FROM @GLAccounts WHERE strCategory = 'intUnrealizedLossOnInventoryFuturesIOSId'
+			END
 		END
-	END 
-	ELSE
-	BEGIN
-		--Build the account number without LOB
-		SET @strAccountNumberToBeUse = ''
-
-		IF ISNULL(@strPrimaryAccountCode,'') <> '' AND ISNULL(@strLocationAccountCode,'') <> ''
+		ELSE IF (@strTransactionType = 'Mark To Market-Cash' OR @strTransactionType = 'Mark To Market-Cash Intransit' OR @strTransactionType = 'Mark To Market-Cash Inventory')
 		BEGIN
-			SET @strAccountNumberToBeUse =  @strPrimaryAccountCode +'-'+ @strLocationAccountCode
+			IF (ISNULL(@dblAmount, 0) >= 0)
+			BEGIN
+				SELECT TOP 1 @intAccountId = intAccountId
+					, @strAccountNo = strAccountNo
+					, @ysnHasError = ysnHasError
+					, @strErrorMessage = strErrorMessage
+				FROM @GLAccounts WHERE strCategory = 'intUnrealizedGainOnCashId'
+			END
+			ELSE
+			BEGIN
+				SELECT TOP 1 @intAccountId = intAccountId
+					, @strAccountNo = strAccountNo
+					, @ysnHasError = ysnHasError
+					, @strErrorMessage = strErrorMessage
+				FROM @GLAccounts WHERE strCategory = 'intUnrealizedLossOnCashId'
+			END
 		END
-	END
+		ELSE IF (@strTransactionType = 'Mark To Market-Cash Offset' OR @strTransactionType = 'Mark To Market-Futures Intransit Offset')
+		BEGIN
+			IF (ISNULL(@dblAmount, 0) >= 0)
+			BEGIN
+				SELECT TOP 1 @intAccountId = intAccountId
+					, @strAccountNo = strAccountNo
+					, @ysnHasError = ysnHasError
+					, @strErrorMessage = strErrorMessage
+				FROM @GLAccounts WHERE strCategory = 'intUnrealizedGainOnInventoryCashIOSId'
+			END
+			ELSE
+			BEGIN
+				SELECT TOP 1 @intAccountId = intAccountId
+					, @strAccountNo = strAccountNo
+					, @ysnHasError = ysnHasError
+					, @strErrorMessage = strErrorMessage
+				FROM @GLAccounts WHERE strCategory = 'intUnrealizedLossOnInventoryCashIOSId'
+			END
+		END
+		ELSE IF (@strTransactionType = 'Mark To Market-Ratio')
+		BEGIN
+			IF (ISNULL(@dblAmount, 0) >= 0)
+			BEGIN
+				SELECT TOP 1 @intAccountId = intAccountId
+					, @strAccountNo = strAccountNo
+					, @ysnHasError = ysnHasError
+					, @strErrorMessage = strErrorMessage
+				FROM @GLAccounts WHERE strCategory = 'intUnrealizedGainOnRatioId'
+			END
+			ELSE
+			BEGIN
+				SELECT TOP 1 @intAccountId = intAccountId
+					, @strAccountNo = strAccountNo
+					, @ysnHasError = ysnHasError
+					, @strErrorMessage = strErrorMessage
+				FROM @GLAccounts WHERE strCategory = 'intUnrealizedLossOnRatioId'
+			END
+		END
+		ELSE IF (@strTransactionType = 'Mark To Market-Ratio Offset')
+		BEGIN
+			IF (ISNULL(@dblAmount, 0) >= 0)
+			BEGIN
+				SELECT TOP 1 @intAccountId = intAccountId
+					, @strAccountNo = strAccountNo
+					, @ysnHasError = ysnHasError
+					, @strErrorMessage = strErrorMessage
+				FROM @GLAccounts WHERE strCategory = 'intUnrealizedGainOnInventoryRatioIOSId'
+			END
+			ELSE
+			BEGIN
+				SELECT TOP 1 @intAccountId = intAccountId
+					, @strAccountNo = strAccountNo
+					, @ysnHasError = ysnHasError
+					, @strErrorMessage = strErrorMessage
+				FROM @GLAccounts WHERE strCategory = 'intUnrealizedLossOnInventoryRatioIOSId'
+			END
+		END
+		ELSE IF (@strTransactionType = 'Mark To Market-Cash Inventory Offset')
+		BEGIN
+			IF (ISNULL(@dblAmount, 0) >= 0)
+			BEGIN
+				SELECT TOP 1 @intAccountId = intAccountId
+					, @strAccountNo = strAccountNo
+					, @ysnHasError = ysnHasError
+					, @strErrorMessage = strErrorMessage
+				FROM @GLAccounts WHERE strCategory = 'intUnrealizedGainOnInventoryIOSId'
+			END
+			ELSE
+			BEGIN
+				SELECT TOP 1 @intAccountId = intAccountId
+					, @strAccountNo = strAccountNo
+					, @ysnHasError = ysnHasError
+					, @strErrorMessage = strErrorMessage
+				FROM @GLAccounts WHERE strCategory = 'intUnrealizedLossOnInventoryIOSId'
+			END
+		END
 
-	--Check if GL Account Number exists. If not throw an error.
-	IF NOT EXISTS (SELECT TOP 1 1 FROM tblGLAccount WHERE strAccountId = ISNULL(@strAccountNumberToBeUse,''))
-	BEGIN
-		INSERT INTO @tblResult(Result)
-		VALUES('GL Account Number ' + @strAccountNumberToBeUse + ' does not exist.')
-		GOTO Delete_Routine
-	END
-	ELSE
-	BEGIN
-		DECLARE @intAccountIdToBeUse INT
-		SELECT TOP 1 @intAccountIdToBeUse = intAccountId FROM tblGLAccount WHERE strAccountId = ISNULL(@strAccountNumberToBeUse,'')
-		
-		--Update the Post Recap table to the right GL Account
-		UPDATE tblRKM2MPostRecap SET
-			intAccountId = @intAccountIdToBeUse
-			,strAccountId = @strAccountNumberToBeUse
-		WHERE intM2MTransactionId = @intM2MTransactionId
-
-		GOTO Delete_Routine
-	END
-	
-
-No_GL_Setup_In_Comp_Pref:
-	IF @strTransactionType = 'Mark To Market-Basis' OR @strTransactionType = 'Mark To Market-Basis Intransit' 
-	BEGIN
-		IF isnull(@dblAmount,0) >= 0 
-		BEGIN 
-			SET @strErrorMessage = 'Unrealized Gain On Basis cannot be blank. Please set up the default account(s) in Company Configuration Risk Management GL Account tab.'
+		IF (@ysnHasError = 1)
+		BEGIN
+			INSERT INTO @tblResult(Result)
+			VALUES(@strErrorMessage)
 		END
 		ELSE
 		BEGIN
-			SET @strErrorMessage = 'Unrealized Loss On Basis cannot be blank. Please set up the default account(s) in Company Configuration Risk Management GL Account tab.'
-		END
-	END
-	IF @strTransactionType = 'Mark To Market-Basis Offset' OR @strTransactionType = 'Mark To Market-Basis Intransit Offset' 
-	BEGIN
-		IF isnull(@dblAmount,0) >= 0 
-		BEGIN 
-			SET @strErrorMessage = 'Unrealized Gain On Basis (Inventory Offset) cannot be blank. Please set up the default account(s) in Company Configuration Risk Management GL Account tab.'
-		END
-		ELSE
-		BEGIN
-			SET @strErrorMessage = 'Unrealized Loss On Basis (Inventory Offset) cannot be blank. Please set up the default account(s) in Company Configuration Risk Management GL Account tab.'
-		END
-		
-	END	
-	IF @strTransactionType = 'Mark To Market-Futures Derivative' OR @strTransactionType = 'Mark To Market-Futures'  OR @strTransactionType = 'Mark To Market-Futures Intransit'
-	BEGIN
-		IF isnull(@dblAmount,0) >= 0 
-		BEGIN 
-			SET @strErrorMessage = 'Unrealized Gain On Futures cannot be blank. Please set up the default account(s) in Company Configuration Risk Management GL Account tab.'
-		END
-		ELSE
-		BEGIN
-			SET @strErrorMessage = 'Unrealized Loss On Futures cannot be blank. Please set up the default account(s) in Company Configuration Risk Management GL Account tab.'
-		END
-	END
-	IF @strTransactionType = 'Mark To Market-Futures Derivative Offset' OR @strTransactionType = 'Mark To Market-Futures Offset' OR @strTransactionType = 'Mark To Market-Futures Intransit Offset'
-	BEGIN
-		IF isnull(@dblAmount,0) >= 0 
-		BEGIN 
-			SET @strErrorMessage = 'Unrealized Gain On Futures (Inventory Offset) cannot be blank. Please set up the default account(s) in Company Configuration Risk Management GL Account tab.'
-		END
-		ELSE
-		BEGIN
-			SET @strErrorMessage = 'Unrealized Loss On Futures (Inventory Offset) cannot be blank. Please set up the default account(s) in Company Configuration Risk Management GL Account tab.'
-		END
-	END	
-	IF @strTransactionType = 'Mark To Market-Cash' OR @strTransactionType = 'Mark To Market-Cash Intransit' 
-	BEGIN
-		IF isnull(@dblAmount,0) >= 0 
-		BEGIN 
-			SET @strErrorMessage = 'Unrealized Gain On Cash cannot be blank. Please set up the default account(s) in Company Configuration Risk Management GL Account tab.'
-		END
-		ELSE
-		BEGIN
-			SET @strErrorMessage = 'Unrealized Loss On Cash cannot be blank. Please set up the default account(s) in Company Configuration Risk Management GL Account tab.'
-		END
-	END
-	IF @strTransactionType = 'Mark To Market-Cash Offset' OR @strTransactionType = 'Mark To Market-Futures Intransit Offset'
-	BEGIN
-		IF isnull(@dblAmount,0) >= 0 
-		BEGIN 
-			SET @strErrorMessage = 'Unrealized Gain On Cash (Inventory Offset) cannot be blank. Please set up the default account(s) in Company Configuration Risk Management GL Account tab.'
-		END
-		ELSE
-		BEGIN
-			SET @strErrorMessage = 'Unrealized Loss On Cash (Inventory Offset) cannot be blank. Please set up the default account(s) in Company Configuration Risk Management GL Account tab.'
-		END
-	END	
-	IF @strTransactionType = 'Mark To Market-Ratio'
-	BEGIN
-		IF isnull(@dblAmount,0) >= 0 
-		BEGIN 
-			SET @strErrorMessage = 'Unrealized Gain On Ratio cannot be blank. Please set up the default account(s) in Company Configuration Risk Management GL Account tab.'
-		END
-		ELSE
-		BEGIN
-			SET @strErrorMessage = 'Unrealized Loss On Ratio cannot be blank. Please set up the default account(s) in Company Configuration Risk Management GL Account tab.'
-		END
-	END
-	IF @strTransactionType = 'Mark To Market-Ratio Offset' 
-	BEGIN
-		IF isnull(@dblAmount,0) >= 0 
-		BEGIN 
-			SET @strErrorMessage = 'Unrealized Gain On Ratio (Inventory Offset) cannot be blank. Please set up the default account(s) in Company Configuration Risk Management GL Account tab.'
-		END
-		ELSE
-		BEGIN
-			SET @strErrorMessage = 'Unrealized Loss On Ratio (Inventory Offset) cannot be blank. Please set up the default account(s) in Company Configuration Risk Management GL Account tab.'
-		END
-	END	
-
-	INSERT INTO @tblResult(Result)
-	VALUES(@strErrorMessage)
-
-	GOTO Delete_Routine
-
-No_GL_Setup_In_Commodity:
-	IF ISNULL(@intAccountIdFromCommodityGL,0) <> 0
-	BEGIN
-		
-		IF ISNULL(@intAccountId,0) = 0
-		BEGIN
-			SELECT @strAccountNumberToBeUse = strAccountId FROM tblGLAccount WHERe intAccountId = @intAccountIdFromCommodityGL
-
-			UPDATE tblRKM2MPostRecap SET
-				intAccountId = @intAccountIdFromCommodityGL
-				,strAccountId = @strAccountNumberToBeUse
+			UPDATE tblRKM2MPostRecap
+			SET intAccountId = @intAccountId
+				, strAccountId = @strAccountNo
 			WHERE intM2MTransactionId = @intM2MTransactionId
 		END
 
-		GOTO Delete_Routine
-	END
-	
-	IF (@strTransactionType = 'Mark To Market-Basis' OR @strTransactionType = 'Mark To Market-Basis Intransit' ) 
-	BEGIN
-		IF isnull(@dblAmount,0) >= 0 
-		BEGIN 
-			SET @strErrorMessage = 'Unrealized Gain On Basis cannot be blank. Please set up the default account(s) in Commodity GL Accounts M2M tab.'
-		END
-		ELSE
-		BEGIN
-			SET @strErrorMessage = 'Unrealized Loss On Basis cannot be blank. Please set up the default account(s) in Commodity GL Accounts M2M tab.'
-		END
+		DELETE FROM #tmpPostRecap WHERE intM2MTransactionId = @intM2MTransactionId
 	END
 
-	IF (@strTransactionType = 'Mark To Market-Basis Offset' OR @strTransactionType = 'Mark To Market-Basis Intransit Offset') 
+	IF (SELECT COUNT(Result) FROM @tblResult) > 0  
 	BEGIN
-		IF isnull(@dblAmount,0) >= 0 
-		BEGIN 
-			SET @strErrorMessage = 'Unrealized Gain On Basis (Inventory Offset) cannot be blank. Please set up the default account(s) in Commodity GL Accounts M2M tab.'
-		END
-		ELSE
-		BEGIN
-			SET @strErrorMessage = 'Unrealized Loss On Basis (Inventory Offset) cannot be blank. Please set up the default account(s) in Commodity GL Accounts M2M tab.'
-		END
-		
-	END	
+		SELECT DISTINCT * from @tblResult
 
-	IF (@strTransactionType = 'Mark To Market-Futures Derivative' OR @strTransactionType = 'Mark To Market-Futures'  OR @strTransactionType = 'Mark To Market-Futures Intransit')
-	BEGIN
-		IF isnull(@dblAmount,0) >= 0 
-		BEGIN 
-			SET @strErrorMessage = 'Unrealized Gain On Futures cannot be blank. Please set up the default account(s) in Commodity GL Accounts M2M tab.'
-		END
-		ELSE
-		BEGIN
-			SET @strErrorMessage = 'Unrealized Loss On Futures cannot be blank. Please set up the default account(s) in Commodity GL Accounts M2M tab.'
-		END
+		GOTO Exit_Routine
 	END
 
-	IF (@strTransactionType = 'Mark To Market-Futures Derivative Offset' OR @strTransactionType = 'Mark To Market-Futures Offset' OR @strTransactionType = 'Mark To Market-Futures Intransit Offset') 
-	BEGIN
-		IF isnull(@dblAmount,0) >= 0 
-		BEGIN 
-			SET @strErrorMessage = 'Unrealized Gain On Futures (Inventory Offset) cannot be blank. Please set up the default account(s) in Commodity GL Accounts M2M tab.'
-		END
-		ELSE
+	BEGIN TRANSACTION
+		IF (@batchId IS NULL)
 		BEGIN
-			SET @strErrorMessage = 'Unrealized Loss On Futures (Inventory Offset) cannot be blank. Please set up the default account(s) in Commodity GL Accounts M2M tab.'
+			EXEC uspSMGetStartingNumber 3, @batchId OUT
 		END
-	END	
 
-	IF (@strTransactionType = 'Mark To Market-Cash' OR @strTransactionType = 'Mark To Market-Cash Intransit') 
-	BEGIN
-		IF isnull(@dblAmount,0) >= 0 
-		BEGIN 
-			SET @strErrorMessage = 'Unrealized Gain On Cash cannot be blank. Please set up the default account(s) in Commodity GL Accounts M2M tab.'
-		END
-		ELSE
-		BEGIN
-			SET @strErrorMessage = 'Unrealized Loss On Cash cannot be blank. Please set up the default account(s) in Commodity GL Accounts M2M tab.'
-		END
-	END
+		SET @strBatchId = @batchId
 
-	IF (@strTransactionType = 'Mark To Market-Cash Offset' OR @strTransactionType = 'Mark To Market-Futures Intransit Offset') 
-	BEGIN
-		IF isnull(@dblAmount,0) >= 0 
-		BEGIN 
-			SET @strErrorMessage = 'Unrealized Gain On Cash (Inventory Offset) cannot be blank. Please set up the default account(s) in Commodity GL Accounts M2M tab.'
-		END
-		ELSE
-		BEGIN
-			SET @strErrorMessage = 'Unrealized Loss On Cash (Inventory Offset) cannot be blank. Please set up the default account(s) in Commodity GL Accounts M2M tab.'
-		END
-	END	
+		INSERT INTO @GLEntries (
+			 [dtmDate]
+			,[strBatchId]
+			,[intAccountId]
+			,[dblDebit]
+			,[dblCredit]
+			,[dblDebitUnit]
+			,[dblCreditUnit]
+			,[strDescription]
+			,[intCurrencyId]
+			,[dtmTransactionDate]
+			,[strTransactionId]
+			,[intTransactionId]
+			,[strTransactionType]
+			,[strTransactionForm]
+			,[strModuleName]
+			,[intConcurrencyId]
+			,[dblExchangeRate]
+			,[dtmDateEntered]
+			,[ysnIsUnposted]
+			,[strCode]
+			,[strReference]  
+			,[intEntityId]
+			,[intUserId]      
+			,[intSourceLocationId]
+			,[intSourceUOMId]
+			)
+		SELECT [dtmDate]
+			,@batchId
+			,[intAccountId]
+			,ROUND([dblDebit],2)
+			,ROUND([dblCredit],2)
+			,ROUND([dblDebitUnit],2)
+			,ROUND([dblCreditUnit],2)
+			,[strDescription]
+			,[intCurrencyId]
+			,[dtmTransactionDate]
+			,[strTransactionId]
+			,[intTransactionId]
+			,'Mark To Market'--[strTransactionType]
+			,[strTransactionForm]
+			,[strModuleName]
+			,[intConcurrencyId]
+			,[dblExchangeRate]
+			,GETDATE() --[dtmDateEntered]
+			,[ysnIsUnposted]
+			,'RK'
+			,[strReference]  
+			,[intEntityId]
+			,[intUserId]  
+			,[intSourceLocationId]
+			,[intSourceUOMId]
+		FROM tblRKM2MPostRecap
+		WHERE intM2MInquiryId = @intM2MInquiryId
 
-	IF (@strTransactionType = 'Mark To Market-Ratio')
-	BEGIN
-		IF isnull(@dblAmount,0) >= 0 
-		BEGIN 
-			SET @strErrorMessage = 'Unrealized Gain On Ratio cannot be blank. Please set up the default account(s) in Commodity GL Accounts M2M tab.'
-		END
-		ELSE
-		BEGIN
-			SET @strErrorMessage = 'Unrealized Loss On Ratio cannot be blank. Please set up the default account(s) in Commodity GL Accounts M2M tab.'
-		END
-	END
+		EXEC dbo.uspGLBookEntries @GLEntries,1 --@ysnPost
 
-	IF (@strTransactionType = 'Mark To Market-Ratio Offset') 
-	BEGIN
-		IF isnull(@dblAmount,0) >= 0 
-		BEGIN 
-			SET @strErrorMessage = 'Unrealized Gain On Ratio (Inventory Offset) cannot be blank. Please set up the default account(s) in Commodity GL Accounts M2M tab.'
-		END
-		ELSE
-		BEGIN
-			SET @strErrorMessage = 'Unrealized Loss On Ratio (Inventory Offset) cannot be blank. Please set up the default account(s) in Commodity GL Accounts M2M tab.'
-		END
-	END	
-
-	IF @strTransactionType = 'Mark To Market-Cash Inventory Offset' 
-	BEGIN
-		IF isnull(@dblAmount,0) >= 0 
-		BEGIN 
-			SET @strErrorMessage = 'Unrealized Gain On Inventory (Inventory Offset) cannot be blank. Please set up the default account(s) in Commodity GL Accounts M2M tab.'
-		END
-		ELSE
-		BEGIN
-			SET @strErrorMessage = 'Unrealized Loss On Inventory (Inventory Offset) cannot be blank. Please set up the default account(s) in Commodity GL Accounts M2M tab.'
-		END
-	END	
-
-	INSERT INTO @tblResult(Result)
-	VALUES(@strErrorMessage)
-
-	GOTO Delete_Routine
+		UPDATE tblRKM2MPostRecap SET ysnIsUnposted=1,strBatchId=@strBatchId WHERE intM2MInquiryId = @intM2MInquiryId
+		UPDATE tblRKM2MInquiry SET ysnPost=1,dtmPostedDateTime=getdate(),strBatchId=@batchId,dtmUnpostedDateTime=null WHERE intM2MInquiryId = @intM2MInquiryId
 
 
-No_LOB_Segment:
-	INSERT INTO @tblResult(Result)
-	VALUES('Segment is missing on  Line of Business setup for commodity: ' + @strCommodityCode)
-
-	GOTO Delete_Routine
-
-No_LOB_Setup:
-	INSERT INTO @tblResult(Result)
-	VALUES('No Line of Business setup for commodity ' + @strCommodityCode)
-
-	GOTO Delete_Routine
-
-
-Delete_Routine:
-	DELETE FROM #tmpPostRecap WHERE intM2MTransactionId = @intM2MTransactionId
-
-END
-
-IF (SELECT COUNT(Result) FROM @tblResult) > 0  
-BEGIN
-	SELECT DISTINCT * from @tblResult
-
-	GOTO Exit_Routine
-END
-
-
-
-BEGIN TRANSACTION
-	IF (@batchId IS NULL)
-	BEGIN
-		EXEC uspSMGetStartingNumber 3, @batchId OUT
-	END
-
-	SET @strBatchId = @batchId
-
-	INSERT INTO @GLEntries (
-		 [dtmDate]
-		,[strBatchId]
-		,[intAccountId]
-		,[dblDebit]
-		,[dblCredit]
-		,[dblDebitUnit]
-		,[dblCreditUnit]
-		,[strDescription]
-		,[intCurrencyId]
-		,[dtmTransactionDate]
-		,[strTransactionId]
-		,[intTransactionId]
-		,[strTransactionType]
-		,[strTransactionForm]
-		,[strModuleName]
-		,[intConcurrencyId]
-		,[dblExchangeRate]
-		,[dtmDateEntered]
-		,[ysnIsUnposted]
-		,[strCode]
-		,[strReference]  
-		,[intEntityId]
-		,[intUserId]      
-		,[intSourceLocationId]
-		,[intSourceUOMId]
-		)
-	SELECT [dtmDate]
-		,@batchId
-		,[intAccountId]
-		,ROUND([dblDebit],2)
-		,ROUND([dblCredit],2)
-		,ROUND([dblDebitUnit],2)
-		,ROUND([dblCreditUnit],2)
-		,[strDescription]
-		,[intCurrencyId]
-		,[dtmTransactionDate]
-		,[strTransactionId]
-		,[intTransactionId]
-		,'Mark To Market'--[strTransactionType]
-		,[strTransactionForm]
-		,[strModuleName]
-		,[intConcurrencyId]
-		,[dblExchangeRate]
-		,GETDATE() --[dtmDateEntered]
-		,[ysnIsUnposted]
-		,'RK'
-		,[strReference]  
-		,[intEntityId]
-		,[intUserId]  
-		,[intSourceLocationId]
-		,[intSourceUOMId]
-	FROM tblRKM2MPostRecap
-	WHERE intM2MInquiryId = @intM2MInquiryId
-
-	EXEC dbo.uspGLBookEntries @GLEntries,1 --@ysnPost
-
-	UPDATE tblRKM2MPostRecap SET ysnIsUnposted=1,strBatchId=@strBatchId WHERE intM2MInquiryId = @intM2MInquiryId
-	UPDATE tblRKM2MInquiry SET ysnPost=1,dtmPostedDateTime=getdate(),strBatchId=@batchId,dtmUnpostedDateTime=null WHERE intM2MInquiryId = @intM2MInquiryId
-
-
-	--Post Reversal using the reversal date
+		--Post Reversal using the reversal date
 	
 		DECLARE @ReverseGLEntries AS RecapTableType,
 				@strReversalBatchId AS NVARCHAR(100)
@@ -707,12 +429,7 @@ BEGIN CATCH
 		ROLLBACK TRANSACTION
 	IF @ErrMsg != ''
 	BEGIN
-		RAISERROR (
-				@ErrMsg
-				,16
-				,1
-				,'WITH NOWAIT'
-				)
+		RAISERROR (@ErrMsg, 16, 1, 'WITH NOWAIT')
 	END
 END CATCH
 

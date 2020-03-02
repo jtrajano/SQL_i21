@@ -7,56 +7,47 @@ BEGIN
 
 	DECLARE @intPostToGLId INT
 		, @intCommodityId INT
+		, @intLocationId INT
 		, @intFuturesGainOrLossRealized INT
 		, @intFuturesGainOrLossRealizedOffset INT
 		, @strFuturesGainOrLossRealized NVARCHAR(100)
 		, @strFuturesGainOrLossRealizedOffset NVARCHAR(100)
-		, @strFuturesGainOrLossRealizedDescription NVARCHAR(100)
-		, @strFuturesGainOrLossRealizedOffsetDescription NVARCHAR(100)
+		, @strFuturesGainOrLossRealizedDescription NVARCHAR(250)
+		, @strFuturesGainOrLossRealizedOffsetDescription NVARCHAR(250)
 		, @strType NVARCHAR(50)
 	
 	SELECT @intCommodityId = intCommodityId
 		, @strType = strType
+		, @intLocationId = intCompanyLocationId
 	FROM tblRKMatchFuturesPSHeader
 	WHERE intMatchFuturesPSHeaderId = @intMatchFuturesPSHeaderId
 	
 	IF @strType = 'Roll' RETURN
-	
-	SELECT @intPostToGLId = intPostToGLId
-	FROM tblRKCompanyPreference
-	
-	IF @intPostToGLId = 1
-	BEGIN
-		SELECT @intFuturesGainOrLossRealized = intFuturesGainOrLossRealizedId
-			, @intFuturesGainOrLossRealizedOffset = intFuturesGainOrLossRealizedOffsetId
-		FROM tblRKCompanyPreference
-		
-		SELECT @strFuturesGainOrLossRealized = strAccountId
-			, @strFuturesGainOrLossRealizedDescription = strDescription
-		FROM tblGLAccount
-		WHERE intAccountId = @intFuturesGainOrLossRealized
-		
-		SELECT @strFuturesGainOrLossRealizedOffset = strAccountId
-			, @strFuturesGainOrLossRealizedOffsetDescription = strDescription
-		FROM tblGLAccount
-		WHERE intAccountId = @intFuturesGainOrLossRealizedOffset
-	END
-	ELSE
-	BEGIN
-		SELECT @intFuturesGainOrLossRealized = dbo.fnGetCommodityGLAccountM2M(DEFAULT, @intCommodityId, 'Futures Gain or Loss Realized')
-		SELECT @intFuturesGainOrLossRealizedOffset = dbo.fnGetCommodityGLAccountM2M(DEFAULT, @intCommodityId, 'Futures Gain or Loss Realized Offset')
 
-		SELECT @strFuturesGainOrLossRealized = strAccountId
-			, @strFuturesGainOrLossRealizedDescription = strDescription
-		FROM tblGLAccount 
-		WHERE intAccountId = @intFuturesGainOrLossRealized
-	
-		SELECT @strFuturesGainOrLossRealizedOffset = strAccountId
-			, @strFuturesGainOrLossRealizedOffsetDescription = strDescription
-		FROM tblGLAccount 
-		WHERE intAccountId = @intFuturesGainOrLossRealizedOffset
-	END
+	DECLARE @GLAccounts TABLE(strCategory NVARCHAR(100)
+		, intAccountId INT
+		, strAccountNo NVARCHAR(20) COLLATE Latin1_General_CI_AS
+		, ysnHasError BIT
+		, strErrorMessage NVARCHAR(250) COLLATE Latin1_General_CI_AS)
 
+	INSERT INTO @GLAccounts
+	EXEC uspRKGetGLAccountsForPosting @intCommodityId = @intCommodityId
+		, @intLocationId = @intLocationId
+
+	SELECT TOP 1 @intFuturesGainOrLossRealized = rk.intAccountId
+		, @strFuturesGainOrLossRealized = strAccountNo
+		, @strFuturesGainOrLossRealizedDescription = CASE WHEN ysnHasError = 1 THEN strErrorMessage ELSE gl.strDescription END
+	FROM @GLAccounts rk
+	LEFT JOIN tblGLAccount gl ON gl.intAccountId = rk.intAccountId
+	WHERE strCategory = 'intFuturesGainOrLossRealizedId'
+
+	SELECT TOP 1 @intFuturesGainOrLossRealizedOffset = rk.intAccountId
+		, @strFuturesGainOrLossRealizedOffset = strAccountNo
+		, @strFuturesGainOrLossRealizedOffsetDescription = CASE WHEN ysnHasError = 1 THEN strErrorMessage ELSE gl.strDescription END
+	FROM @GLAccounts rk
+	LEFT JOIN tblGLAccount gl ON gl.intAccountId = rk.intAccountId
+	WHERE strCategory = 'intFuturesGainOrLossRealizedOffsetId'
+	
 	DELETE FROM tblRKMatchDerivativesPostRecap WHERE intTransactionId = @intMatchFuturesPSHeaderId
 
 	INSERT INTO tblRKMatchDerivativesPostRecap (dtmPostDate
@@ -93,7 +84,7 @@ BEGIN
 		, dblCredit = CASE WHEN ISNULL(dblNetPL, 0) >= 0 THEN ABS(dblNetPL) ELSE 0.00 END
 		, dblDebitUnit = CASE WHEN ISNULL(dblNetPL, 0) >= 0 THEN 0.00 ELSE ABS(dblMatchQty) END
 		, dblCreditUnit = CASE WHEN ISNULL(dblNetPL, 0) >= 0 THEN ABS(dblMatchQty) ELSE 0.00 END
-		, strAccountDescription = ISNULL(@strFuturesGainOrLossRealizedDescription , 'No Account Id setup on Company Configuration for Futures Gain or Loss Realized')
+		, strAccountDescription = @strFuturesGainOrLossRealizedDescription
 		, intCurrencyId
 		, dblExchangeRate = 0.00
 		, dtmTransactionDate = dtmMatchDate
@@ -124,7 +115,7 @@ BEGIN
 		, dblCredit = CASE WHEN ISNULL(dblNetPL, 0) <= 0 THEN ABS(dblNetPL) ELSE 0.00 END
 		, dblDebitUnit = CASE WHEN ISNULL(dblNetPL, 0) <= 0 THEN 0.00 ELSE ABS(dblMatchQty) END
 		, dblCreditUnit = CASE WHEN ISNULL(dblNetPL, 0) <= 0 THEN ABS(dblMatchQty) ELSE 0.00 END
-		, strAccountDescription = ISNULL(@strFuturesGainOrLossRealizedDescription , 'No Account Id setup on Company Configuration for Futures Gain or Loss Realized Offset')
+		, strAccountDescription = @strFuturesGainOrLossRealizedDescription
 		, intCurrencyId
 		, dblExchangeRate = 0.00
 		, dtmTransactionDate = dtmMatchDate
