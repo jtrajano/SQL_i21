@@ -1259,7 +1259,19 @@ VALUES(
 
 	IF ISNULL(@IntegrationLogId, 0) <> 0
 		EXEC [uspARInsertInvoiceIntegrationLogDetail] @IntegrationLogEntries = @IntegrationLog
-			
+
+	UPDATE ILD 
+	SET strMessage = 'Available quantity for the contract ' + CTH.strContractNumber + ' and sequence + ' + CAST(CTD.intContractSeq AS NVARCHAR(50)) + ' + is ' + CAST(ISNULL(CTD.dblBalance - CTD.dblScheduleQty, 0) AS NVARCHAR(50)) + ', which is insufficient to Save/Post a quantity of ' + CAST(ID.dblQtyShipped AS NVARCHAR(50)) + '.' 
+	  , ysnSuccess = 0
+	FROM tblARInvoiceIntegrationLogDetail ILD
+	INNER JOIN tblARInvoiceDetail ID ON ILD.intInvoiceId = ID.intInvoiceId
+	INNER JOIN tblCTContractDetail CTD ON ID.[intContractDetailId] = CTD.[intContractDetailId]
+	INNER JOIN tblCTContractHeader CTH ON CTD.[intContractHeaderId] = CTH.[intContractHeaderId]
+	WHERE intIntegrationLogId = @IntegrationLogId
+	AND ID.intContractDetailId IS NOT NULL
+	AND ILD.strTransactionType = 'Invoice'
+	AND ISNULL(ID.[dblQtyShipped], 0) > ISNULL(CTD.dblBalance - CTD.dblScheduleQty, 0)
+
 END TRY
 BEGIN CATCH
 	IF ISNULL(@RaiseError,0) = 0
