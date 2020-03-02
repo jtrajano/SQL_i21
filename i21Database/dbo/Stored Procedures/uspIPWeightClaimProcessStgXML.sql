@@ -791,7 +791,7 @@ BEGIN TRY
 					) AS [intPartyEntityId]
 				,dblUnitPriceInSupplierContract
 				,[intCurrencyId]
-				,[dblClaimableWt] * dblClaimAmountInSupplierContract
+				,ABS([dblClaimableWt] * dblClaimAmountInSupplierContract)
 				,[intPriceItemUOMId]
 				,[dblAdditionalCost]
 				,[ysnNoClaim]
