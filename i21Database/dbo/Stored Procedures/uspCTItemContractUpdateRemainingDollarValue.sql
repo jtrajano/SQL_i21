@@ -31,20 +31,27 @@ BEGIN TRY
 	SELECT
 		@strItemContractNumber = H.strContractNumber
 		,@dblDollarValue = isnull(H.dblDollarValue,0)
-		,@dblAppliedDollarValue = isnull(H.dblAppliedDollarValue,0)
+		--,@dblAppliedDollarValue = isnull(H.dblAppliedDollarValue,0)
+		,@dblAppliedDollarValue = sum(isnull(ID.dblTotal,0))
 		,@dblRemainingDollarValue = isnull(H.dblRemainingDollarValue,0)
 		,@strContractCategoryId = H.strContractCategoryId
 	FROM
 		tblCTItemContractHeader H
+		left join tblARInvoiceDetail ID on ID.intItemContractHeaderId = H.intItemContractHeaderId
 	WHERE
 		H.intItemContractHeaderId = @intItemContractHeaderId
+	GROUP BY
+		H.strContractNumber
+		,H.dblDollarValue
+		,H.dblRemainingDollarValue
+		,H.strContractCategoryId
 
 	if (@strContractCategoryId <> 'Dollar')
 	BEGIN
 		goto DontUpdateNonDollarContract;
 	end
 
-	SET @dblNewRemainingDollarValue = @dblRemainingDollarValue + @dblValueToUpdate;
+	SET @dblNewRemainingDollarValue = @dblDollarValue - @dblAppliedDollarValue;
 	SET @dblNewAppliedDollarValue = @dblDollarValue - @dblNewRemainingDollarValue;
 
 	-- VALIDATION #1
