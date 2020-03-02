@@ -786,6 +786,8 @@ BEGIN TRY
 					JOIN tblCTContractDetail CD1 ON CD1.intContractDetailId = AD.intPContractDetailId
 					JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD1.intContractHeaderId
 					WHERE CD.intContractDetailRefId = IA.intContractDetailId
+					AND CD.intBookId = @intBookId
+					AND IsNULL(CD.intSubBookId, 0) = IsNULL(@intSubBookId, 0)
 					) AS [intPartyEntityId]
 				,dblUnitPriceInSupplierContract
 				,[intCurrencyId]
@@ -798,6 +800,8 @@ BEGIN TRY
 					FROM tblCTContractDetail CD
 					JOIN tblLGAllocationDetail AD ON AD.intSContractDetailId = CD.intContractDetailId
 					WHERE CD.intContractDetailRefId = IA.intContractDetailId
+					AND CD.intBookId = @intBookId
+					AND IsNULL(CD.intSubBookId, 0) = IsNULL(@intSubBookId, 0)
 					) AS intContractDetailId
 				,[intBillId]
 				,[intInvoiceId]
