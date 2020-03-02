@@ -178,7 +178,6 @@ BEGIN TRY
 				, intSubBookId
 				, intFutureMarketId
 				, intFutureMonthId
-				, strNotes
 				, dblNoOfLots
 				, dblPrice
 				, dblContractSize
@@ -200,7 +199,6 @@ BEGIN TRY
 				, intSubBookId
 				, intFutureMarketId
 				, intFutureMonthId
-				, strNotes
 				, dblNoOfLots
 				, dblPrice
 				, dblContractSize
