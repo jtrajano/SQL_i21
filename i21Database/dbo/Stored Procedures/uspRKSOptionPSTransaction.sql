@@ -97,12 +97,15 @@ FROM (
 			, ''as MTM
 			, ot.intOptionMonthId
 			, ot.intFutureMarketId
-			, isnull((SELECT TOP 1 dblDelta  FROM tblRKFuturesSettlementPrice sp
-					JOIN tblRKOptSettlementPriceMarketMap spm ON sp.intFutureSettlementPriceId=spm.intFutureSettlementPriceId
-						AND sp.intFutureMarketId=ot.intFutureMarketId AND spm.intOptionMonthId= ot.intOptionMonthId
-						and ot.dblStrike=spm.dblStrike and spm.intTypeId= (case when ot.strOptionType='Put' then 1 else 2 end)
-						AND CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmPriceDate, 110), 110) <= CONVERT(DATETIME, CONVERT(VARCHAR(10), @dtmPositionAsOf, 110), 110)
-					ORDER BY 1 desc),0) as dblDelta
+			, dblDelta = ISNULL((SELECT TOP 1 dblDelta
+											FROM tblRKFuturesSettlementPrice sp
+											JOIN tblRKOptSettlementPriceMarketMap spm ON sp.intFutureSettlementPriceId = spm.intFutureSettlementPriceId
+												AND sp.intFutureMarketId = ot.intFutureMarketId 
+												AND spm.intOptionMonthId = ot.intOptionMonthId
+												AND spm.dblStrike = ot.dblStrike
+												AND spm.intTypeId = (CASE WHEN ot.strOptionType = 'Put' THEN 1 ELSE 2 END)
+												AND CAST(FLOOR(CAST(sp.dtmPriceDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(@dtmPositionAsOf AS FLOAT)) AS DATETIME)
+											ORDER BY sp.dtmPriceDate DESC), 0)
 			, '' as DeltaHedge
 			, um.strUnitMeasure as strHedgeUOM
 			, CASE WHEN strBuySell ='Buy' Then 'B' else 'S' End strBuySell
