@@ -50,7 +50,7 @@ SELECT
 	,strContactName
 	,strContactPhone
 	,strContactPhoneExt
-	,strContactEmail
+	,ISNULL(strContactEmail,'')  strContactEmail
 	,strContactFax
 	,strPreparerCode
 	,strAgentIndicatorCode
@@ -83,11 +83,11 @@ SELECT
 	,strEmploymentCode
 	,strTaxJurisdictionCode
 	,ysnThirdPartySickPay
-	,strEmployerContactName
+	,ISNULL(strEmployerContactName,'') strEmployerContactName  
 	,strEmployerContactPhone
 	,strEmployerContactPhoneExt
 	,strEmployerContactFax
-	,strEmployerContactEmail
+	,ISNULL(strEmployerContactEmail, '') strEmployerContactEmail
 	,intConcurrencyId
 FROM
 	tblPRElectronicFilingW2
