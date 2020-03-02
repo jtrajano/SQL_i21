@@ -122,6 +122,18 @@ AND (A.dblQuantityToBill != 0)
 DECLARE @createdVoucher NVARCHAR(MAX);
 EXEC uspAPCreateVoucher @voucherPayables = @voucherPayables, @userId = @userId, @throwError = 1, @createdVouchersId = @createdVoucher OUT
 
+DECLARE @batchIdUsed NVARCHAR(50);
+DECLARE @failedPostCount INT;
+
+EXEC uspAPPostBill
+	@post				= 1,
+	@recap				= 0,
+	@isBatch			= 1,
+	@param				= @createdVoucher,
+	@userId				= @userId,
+	@invalidCount		= @failedPostCount OUTPUT,
+	@batchIdUsed		= @batchIdUsed OUTPUT
+
 INSERT INTO @vouchers SELECT [intID] FROM [dbo].fnGetRowsFromDelimitedValues(@createdVoucher) WHERE intID > 0
 
 SET @totalVoucherCreated = @@ROWCOUNT;
@@ -228,6 +240,22 @@ BEGIN
 	OR A.intTransactionType IS NULL
 	OR (A.dblQuantityToBill IS NULL)
 	OR (A.intAccountId IS NULL)
+END
 
+--LOG THE FAILED POSTING
+IF @failedPostCount > 0
+BEGIN
+	INSERT INTO tblAPImportLogDetail
+	(
+		intImportLogId,
+		strEventDescription
+	)
+	SELECT 
+		@logId,
+		A.strDescription
+	FROM tblGLPostResult A
+	WHERE 
+		A.strBatchId = @batchIdUsed
+	AND A.strDescription NOT LIKE '%success%'
 END
 
