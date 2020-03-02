@@ -55,7 +55,7 @@ DECLARE @STARTING_NUMBER_BATCH AS INT = 3
 	,@intAttributeTypeId INT
 	,@strLocationName AS NVARCHAR(50)
 	,@intOtherChargeItemLocationId INT
-	,@intWorkOrderProducedLotId int
+	,@intWorkOrderProducedLotId INT
 DECLARE @tblMFLot TABLE (
 	intRecordId INT Identity(1, 1)
 	,intLotId INT
@@ -127,8 +127,8 @@ BEGIN
 		AND RI.intRecipeItemTypeId = 2
 		AND RI.intItemId = @intItemId
 
-		if @dblPercentage is null
-		select @dblPercentage=100
+	IF @dblPercentage IS NULL
+		SELECT @dblPercentage = 100
 
 	INSERT INTO @tblMFOtherChargeItem
 	SELECT RI.intRecipeItemId
@@ -412,8 +412,23 @@ BEGIN
 			)
 		AND ISNULL(@ysnRecap, 0) = 0
 	BEGIN
-		EXEC dbo.uspGLBookEntries @GLEntries
-			,@ysnPost
+		IF EXISTS (
+				SELECT *
+				FROM tblMFWorkOrderRecipeItem WRI
+				JOIN tblICItem I ON I.intItemId = WRI.intItemId
+				WHERE I.strType = 'Other Charge'
+					AND WRI.intWorkOrderId = @intWorkOrderId
+				)
+		BEGIN
+			EXEC dbo.uspGLBookEntries @GLEntries
+				,@ysnPost
+				,1
+		END
+		ELSE
+		BEGIN
+			EXEC dbo.uspGLBookEntries @GLEntries
+				,@ysnPost
+		END
 	END
 
 	IF @dblOtherCharges IS NOT NULL
@@ -425,11 +440,14 @@ BEGIN
 		FROM tblMFWorkOrderRecipe
 		WHERE intWorkOrderId = @intWorkOrderId
 
-		Update tblMFWorkOrderProducedLot SEt dblOtherCharges =0 Where intWorkOrderId =@intWorkOrderId 
+		UPDATE tblMFWorkOrderProducedLot
+		SET dblOtherCharges = 0
+		WHERE intWorkOrderId = @intWorkOrderId
 
-		Select Top 1 @intWorkOrderProducedLotId =intWorkOrderProducedLotId 
-		from tblMFWorkOrderProducedLot 
-		Where intWorkOrderId =@intWorkOrderId and ysnProductionReversed =0
+		SELECT TOP 1 @intWorkOrderProducedLotId = intWorkOrderProducedLotId
+		FROM tblMFWorkOrderProducedLot
+		WHERE intWorkOrderId = @intWorkOrderId
+			AND ysnProductionReversed = 0
 	END
 
 	SELECT @intRecipeItemId = MIN(intRecipeItemId)
@@ -567,15 +585,15 @@ BEGIN
 				,ysnPrice = 0
 				,ysnInventoryCost = 0
 
-				Update tblMFWorkOrderProducedLot 
-				Set dblOtherCharges =IsNULL(dblOtherCharges,0) +(
+			UPDATE tblMFWorkOrderProducedLot
+			SET dblOtherCharges = IsNULL(dblOtherCharges, 0) + (
 					CASE 
 						WHEN @intRecipeItemUOMId = @intProduceUOMKey
 							THEN @dblOtherCharges * @dblProduceQty
 						ELSE @dblOtherCharges * @dblWeight
 						END
-					) 
-				Where intWorkOrderProducedLotId=@intWorkOrderProducedLotId
+					)
+			WHERE intWorkOrderProducedLotId = @intWorkOrderProducedLotId
 
 			DELETE
 			FROM @GLEntries
@@ -703,8 +721,23 @@ BEGIN
 					)
 				AND ISNULL(@ysnRecap, 0) = 0
 			BEGIN
-				EXEC dbo.uspGLBookEntries @GLEntries
-					,@ysnPost
+				IF EXISTS (
+						SELECT *
+						FROM tblMFWorkOrderRecipeItem WRI
+						JOIN tblICItem I ON I.intItemId = WRI.intItemId
+						WHERE I.strType = 'Other Charge'
+							AND WRI.intWorkOrderId = @intWorkOrderId
+						)
+				BEGIN
+					EXEC dbo.uspGLBookEntries @GLEntries
+						,@ysnPost
+						,1
+				END
+				ELSE
+				BEGIN
+					EXEC dbo.uspGLBookEntries @GLEntries
+						,@ysnPost
+				END
 			END
 		END
 
