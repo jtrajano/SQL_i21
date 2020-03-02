@@ -14,5 +14,5 @@ SELECT A.intAttributeId
 	,A.dtmLastModified
 	,A.intAttributeRefId
 	,L.strListName
-FROM tblQMAttribute A
-LEFT JOIN tblQMList L ON L.intListId = A.intListId
+FROM tblQMAttribute A WITH (NOLOCK)
+LEFT JOIN tblQMList L WITH (NOLOCK) ON L.intListId = A.intListId

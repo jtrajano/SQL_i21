@@ -6,4 +6,4 @@ SELECT T.intFutOptTransactionHeaderId
 	,T.intSelectedInstrumentTypeId
 	,T.strSelectedInstrumentType
 	,T.intFutOptTransactionHeaderRefId
-FROM tblRKFutOptTransactionHeader T
+FROM tblRKFutOptTransactionHeader T WITH (NOLOCK)

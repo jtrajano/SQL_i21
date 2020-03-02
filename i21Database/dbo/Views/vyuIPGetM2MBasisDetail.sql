@@ -31,15 +31,15 @@ SELECT MD.intM2MBasisDetailId
 	,PT.strPricingType
 	,CT.strContractType
 	,UOM.strUnitMeasure
-FROM tblRKM2MBasis M
-JOIN tblRKM2MBasisDetail MD ON MD.intM2MBasisId = M.intM2MBasisId
-LEFT JOIN tblICCommodity C ON C.intCommodityId = MD.intCommodityId
-LEFT JOIN tblICItem I ON I.intItemId = MD.intItemId
-LEFT JOIN tblRKFutureMarket FM ON FM.intFutureMarketId = MD.intFutureMarketId
-LEFT JOIN tblRKFuturesMonth FMON ON FMON.intFutureMonthId = MD.intFutureMonthId
-LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = MD.intCompanyLocationId
-LEFT JOIN tblARMarketZone MZ ON MZ.intMarketZoneId = MD.intMarketZoneId
-LEFT JOIN tblSMCurrency CUR ON CUR.intCurrencyID = MD.intCurrencyId
-LEFT JOIN tblCTPricingType PT ON PT.intPricingTypeId = MD.intPricingTypeId
-LEFT JOIN tblCTContractType CT ON CT.intContractTypeId = MD.intContractTypeId
-LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = MD.intUnitMeasureId
+FROM tblRKM2MBasis M WITH (NOLOCK)
+JOIN tblRKM2MBasisDetail MD WITH (NOLOCK) ON MD.intM2MBasisId = M.intM2MBasisId
+LEFT JOIN tblICCommodity C WITH (NOLOCK) ON C.intCommodityId = MD.intCommodityId
+LEFT JOIN tblICItem I WITH (NOLOCK) ON I.intItemId = MD.intItemId
+LEFT JOIN tblRKFutureMarket FM WITH (NOLOCK) ON FM.intFutureMarketId = MD.intFutureMarketId
+LEFT JOIN tblRKFuturesMonth FMON WITH (NOLOCK) ON FMON.intFutureMonthId = MD.intFutureMonthId
+LEFT JOIN tblSMCompanyLocation CL WITH (NOLOCK) ON CL.intCompanyLocationId = MD.intCompanyLocationId
+LEFT JOIN tblARMarketZone MZ WITH (NOLOCK) ON MZ.intMarketZoneId = MD.intMarketZoneId
+LEFT JOIN tblSMCurrency CUR WITH (NOLOCK) ON CUR.intCurrencyID = MD.intCurrencyId
+LEFT JOIN tblCTPricingType PT WITH (NOLOCK) ON PT.intPricingTypeId = MD.intPricingTypeId
+LEFT JOIN tblCTContractType CT WITH (NOLOCK) ON CT.intContractTypeId = MD.intContractTypeId
+LEFT JOIN tblICUnitMeasure UOM WITH (NOLOCK) ON UOM.intUnitMeasureId = MD.intUnitMeasureId

@@ -18,7 +18,7 @@ BEGIN TRY
 		,@intCompanyRefId INT
 
 	SELECT @intCoverageEntryAckStageId = MIN(intCoverageEntryAckStageId)
-	FROM tblRKCoverageEntryAckStage
+	FROM tblRKCoverageEntryAckStage WITH (NOLOCK)
 	WHERE strMessage = 'Success'
 		AND ISNULL(strFeedStatus, '') = ''
 
@@ -43,7 +43,7 @@ BEGIN TRY
 			,@intCompanyId = intCompanyId
 			,@intTransactionRefId = intTransactionRefId
 			,@intCompanyRefId = intCompanyRefId
-		FROM tblRKCoverageEntryAckStage
+		FROM tblRKCoverageEntryAckStage WITH (NOLOCK)
 		WHERE intCoverageEntryAckStageId = @intCoverageEntryAckStageId
 
 		BEGIN
@@ -122,7 +122,7 @@ BEGIN TRY
 		--	,@referenceCompanyId = @intCompanyRefId
 
 		SELECT @intCoverageEntryAckStageId = MIN(intCoverageEntryAckStageId)
-		FROM tblRKCoverageEntryAckStage
+		FROM tblRKCoverageEntryAckStage WITH (NOLOCK)
 		WHERE intCoverageEntryAckStageId > @intCoverageEntryAckStageId
 			AND strMessage = 'Success'
 			AND ISNULL(strFeedStatus, '') = ''

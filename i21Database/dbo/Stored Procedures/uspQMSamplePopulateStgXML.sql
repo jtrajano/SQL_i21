@@ -31,15 +31,15 @@ BEGIN TRY
 
 	SELECT @strSampleNumber = strSampleNumber
 		,@intCompanyId = intCompanyId
-	FROM tblQMSample
+	FROM tblQMSample WITH (NOLOCK)
 	WHERE intSampleId = @intSampleId
 
 	SELECT @intScreenId = intScreenId
-	FROM tblSMScreen
+	FROM tblSMScreen WITH (NOLOCK)
 	WHERE strNamespace = 'Quality.view.QualitySample'
  
 	SELECT @intTransactionId = intTransactionId 
-	FROM tblSMTransaction
+	FROM tblSMTransaction WITH (NOLOCK)
 	WHERE intRecordId = @intSampleId
 		AND intScreenId = @intScreenId
 

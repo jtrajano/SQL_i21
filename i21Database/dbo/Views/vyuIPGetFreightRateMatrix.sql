@@ -22,7 +22,7 @@ SELECT F.intFreightRateMatrixId
 	,C.strCurrency
 	,CT.strContainerType
 	,E.strName
-FROM tblLGFreightRateMatrix F
-JOIN tblSMCurrency C ON C.intCurrencyID = F.intCurrencyId
-JOIN tblLGContainerType CT ON CT.intContainerTypeId = F.intContainerTypeId
-JOIN tblEMEntity E ON E.intEntityId = F.intEntityId
+FROM tblLGFreightRateMatrix F WITH (NOLOCK)
+LEFT JOIN tblSMCurrency C WITH (NOLOCK) ON C.intCurrencyID = F.intCurrencyId
+LEFT JOIN tblLGContainerType CT WITH (NOLOCK) ON CT.intContainerTypeId = F.intContainerTypeId
+LEFT JOIN tblEMEntity E WITH (NOLOCK) ON E.intEntityId = F.intEntityId

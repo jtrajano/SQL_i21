@@ -16,8 +16,8 @@ SELECT C.intCoverageEntryId
 	,B.strBook
 	,SB.strSubBook
 	,COM.strCommodityCode
-FROM tblRKCoverageEntry C
-LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = C.intUOMId
-LEFT JOIN tblCTBook B ON B.intBookId = C.intBookId
-LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = C.intSubBookId
-LEFT JOIN tblICCommodity COM ON COM.intCommodityId = C.intCommodityId
+FROM tblRKCoverageEntry C WITH (NOLOCK)
+LEFT JOIN tblICUnitMeasure UOM WITH (NOLOCK) ON UOM.intUnitMeasureId = C.intUOMId
+LEFT JOIN tblCTBook B WITH (NOLOCK) ON B.intBookId = C.intBookId
+LEFT JOIN tblCTSubBook SB WITH (NOLOCK) ON SB.intSubBookId = C.intSubBookId
+LEFT JOIN tblICCommodity COM WITH (NOLOCK) ON COM.intCommodityId = C.intCommodityId

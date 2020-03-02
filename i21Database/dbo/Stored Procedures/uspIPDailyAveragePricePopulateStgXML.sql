@@ -33,15 +33,15 @@ BEGIN TRY
 
 	SELECT @strAverageNo = strAverageNo
 		,@intCompanyId = intCompanyId
-	FROM tblRKDailyAveragePrice
+	FROM tblRKDailyAveragePrice WITH (NOLOCK)
 	WHERE intDailyAveragePriceId = @intDailyAveragePriceId
 
 	SELECT @intScreenId = intScreenId
-	FROM tblSMScreen
+	FROM tblSMScreen WITH (NOLOCK)
 	WHERE strNamespace = 'RiskManagement.view.DailyAveragePrice'
  
 	SELECT @intTransactionId = intTransactionId 
-	FROM tblSMTransaction
+	FROM tblSMTransaction WITH (NOLOCK)
 	WHERE intRecordId = @intDailyAveragePriceId
 		AND intScreenId = @intScreenId
 

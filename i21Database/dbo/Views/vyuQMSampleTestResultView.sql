@@ -55,14 +55,14 @@ SELECT TR.intTestResultId
 	,P1.strPropertyName AS strParentPropertyName
 	,LI.strListItemName AS strTestListItemName
 	,PRTI.strItemNo AS strPropertyItemNo
-FROM tblQMTestResult TR
-JOIN tblQMSample S ON S.intSampleId = TR.intSampleId
-JOIN tblQMTest T ON T.intTestId = TR.intTestId
-JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
-JOIN tblQMProduct PRD ON PRD.intProductId = TR.intProductId
-LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = TR.intUnitMeasureId
-LEFT JOIN tblQMProperty P1 ON P1.intPropertyId = TR.intParentPropertyId
-LEFT JOIN tblQMListItem LI ON LI.intListItemId = TR.intListItemId
-LEFT JOIN tblICItem PRTI ON PRTI.intItemId = TR.intPropertyItemId
-LEFT JOIN tblICItem PRDI ON PRDI.intItemId = PRD.intProductValueId
-LEFT JOIN tblICCategory PRDC ON PRDC.intCategoryId = PRD.intProductValueId
+FROM tblQMTestResult TR WITH (NOLOCK)
+JOIN tblQMSample S WITH (NOLOCK) ON S.intSampleId = TR.intSampleId
+JOIN tblQMTest T WITH (NOLOCK) ON T.intTestId = TR.intTestId
+JOIN tblQMProperty P WITH (NOLOCK) ON P.intPropertyId = TR.intPropertyId
+JOIN tblQMProduct PRD WITH (NOLOCK) ON PRD.intProductId = TR.intProductId
+LEFT JOIN tblICUnitMeasure UOM WITH (NOLOCK) ON UOM.intUnitMeasureId = TR.intUnitMeasureId
+LEFT JOIN tblQMProperty P1 WITH (NOLOCK) ON P1.intPropertyId = TR.intParentPropertyId
+LEFT JOIN tblQMListItem LI WITH (NOLOCK) ON LI.intListItemId = TR.intListItemId
+LEFT JOIN tblICItem PRTI WITH (NOLOCK) ON PRTI.intItemId = TR.intPropertyItemId
+LEFT JOIN tblICItem PRDI WITH (NOLOCK) ON PRDI.intItemId = PRD.intProductValueId
+LEFT JOIN tblICCategory PRDC WITH (NOLOCK) ON PRDC.intCategoryId = PRD.intProductValueId

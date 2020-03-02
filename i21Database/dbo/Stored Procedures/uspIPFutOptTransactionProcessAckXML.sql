@@ -19,7 +19,7 @@ BEGIN TRY
 		,@intCompanyRefId INT
 
 	SELECT @intFutOptTransactionHeaderAckStageId = MIN(intFutOptTransactionHeaderAckStageId)
-	FROM tblRKFutOptTransactionHeaderAckStage
+	FROM tblRKFutOptTransactionHeaderAckStage WITH (NOLOCK)
 	WHERE strMessage = 'Success'
 		AND ISNULL(strFeedStatus, '') = ''
 		--AND intMultiCompanyId = @intToCompanyId
@@ -47,7 +47,7 @@ BEGIN TRY
 			,@intCompanyId = intCompanyId
 			,@intTransactionRefId = intTransactionRefId
 			,@intCompanyRefId = intCompanyRefId
-		FROM tblRKFutOptTransactionHeaderAckStage
+		FROM tblRKFutOptTransactionHeaderAckStage WITH (NOLOCK)
 		WHERE intFutOptTransactionHeaderAckStageId = @intFutOptTransactionHeaderAckStageId
 
 		BEGIN
@@ -127,7 +127,7 @@ BEGIN TRY
 			,@referenceCompanyId = @intCompanyRefId
 
 		SELECT @intFutOptTransactionHeaderAckStageId = MIN(intFutOptTransactionHeaderAckStageId)
-		FROM tblRKFutOptTransactionHeaderAckStage
+		FROM tblRKFutOptTransactionHeaderAckStage WITH (NOLOCK)
 		WHERE intFutOptTransactionHeaderAckStageId > @intFutOptTransactionHeaderAckStageId
 			AND strMessage = 'Success'
 			AND ISNULL(strFeedStatus, '') = ''

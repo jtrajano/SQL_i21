@@ -28,7 +28,7 @@ BEGIN TRY
 	SET @strDisplayName = NULL
 
 	SELECT @strDisplayName = CONVERT(NVARCHAR, dtmM2MBasisDate, 120)
-	FROM tblRKM2MBasis
+	FROM tblRKM2MBasis WITH (NOLOCK)
 	WHERE intM2MBasisId = @intM2MBasisId
 
 	-------------------------Header-----------------------------------------------------------

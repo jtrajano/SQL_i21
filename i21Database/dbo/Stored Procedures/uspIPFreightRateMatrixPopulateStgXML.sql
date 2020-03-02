@@ -27,7 +27,7 @@ BEGIN TRY
 	SET @strDisplayName = NULL
 
 	SELECT @strDisplayName = strServiceContractNo + ' - ' + CONVERT(NVARCHAR, dtmDate, 103)
-	FROM tblLGFreightRateMatrix
+	FROM tblLGFreightRateMatrix WITH (NOLOCK)
 	WHERE intFreightRateMatrixId = @intFreightRateMatrixId
 
 	-------------------------Header-----------------------------------------------------------

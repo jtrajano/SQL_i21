@@ -19,8 +19,8 @@ SELECT D.intDailyAveragePriceDetailId
 	,FMON.ysnExpired
 	,C.strCommodityCode
 	,B.strName
-FROM tblRKDailyAveragePriceDetail D
-LEFT JOIN tblRKFutureMarket FM ON FM.intFutureMarketId = D.intFutureMarketId
-LEFT JOIN tblRKFuturesMonth FMON ON FMON.intFutureMonthId = D.intFutureMonthId
-LEFT JOIN tblICCommodity C ON C.intCommodityId = D.intCommodityId
-LEFT JOIN tblEMEntity B ON B.intEntityId = D.intBrokerId
+FROM tblRKDailyAveragePriceDetail D WITH (NOLOCK)
+LEFT JOIN tblRKFutureMarket FM WITH (NOLOCK) ON FM.intFutureMarketId = D.intFutureMarketId
+LEFT JOIN tblRKFuturesMonth FMON WITH (NOLOCK) ON FMON.intFutureMonthId = D.intFutureMonthId
+LEFT JOIN tblICCommodity C WITH (NOLOCK) ON C.intCommodityId = D.intCommodityId
+LEFT JOIN tblEMEntity B WITH (NOLOCK) ON B.intEntityId = D.intBrokerId

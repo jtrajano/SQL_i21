@@ -18,7 +18,7 @@ BEGIN TRY
 
 	INSERT INTO @tblRKCoverageEntryPreStage (intCoverageEntryPreStageId)
 	SELECT intCoverageEntryPreStageId
-	FROM tblRKCoverageEntryPreStage
+	FROM tblRKCoverageEntryPreStage WITH (NOLOCK)
 	WHERE ISNULL(strFeedStatus, '') = ''
 
 	SELECT @intCoverageEntryPreStageId = MIN(intCoverageEntryPreStageId)
@@ -34,22 +34,22 @@ BEGIN TRY
 		SELECT @intCoverageEntryId = intCoverageEntryId
 			,@strRowState = strRowState
 			,@intUserId = intUserId
-		FROM tblRKCoverageEntryPreStage
+		FROM tblRKCoverageEntryPreStage WITH (NOLOCK)
 		WHERE intCoverageEntryPreStageId = @intCoverageEntryPreStageId
 
 		SELECT TOP 1 @intToCompanyId = intCompanyId
-		FROM tblIPMultiCompany
+		FROM tblIPMultiCompany WITH (NOLOCK)
 		WHERE ysnParent = 1
 
 		SELECT TOP 1 @strFromCompanyName = MC.strName
-		FROM tblRKCoverageEntry C
-		JOIN tblIPMultiCompany MC ON MC.intBookId = C.intBookId
+		FROM tblRKCoverageEntry C WITH (NOLOCK)
+		JOIN tblIPMultiCompany MC WITH (NOLOCK) ON MC.intBookId = C.intBookId
 			AND C.intCoverageEntryId = @intCoverageEntryId
 
 		-- Process only Posted transaction
 		IF EXISTS (
 				SELECT 1
-				FROM tblRKCoverageEntry t
+				FROM tblRKCoverageEntry t WITH (NOLOCK)
 				WHERE ISNULL(t.ysnPosted, 0) = 1
 					AND t.intCoverageEntryId = @intCoverageEntryId
 					AND t.intBookId IS NOT NULL

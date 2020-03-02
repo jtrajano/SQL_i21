@@ -18,7 +18,7 @@ SELECT CD.intCoverageEntryDetailId
 	,B.strBook
 	,SB.strSubBook
 	,CA.strDescription AS strProductType
-FROM tblRKCoverageEntryDetail CD
-LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = CD.intProductTypeId
-LEFT JOIN tblCTBook B ON B.intBookId = CD.intBookId
-LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = CD.intSubBookId
+FROM tblRKCoverageEntryDetail CD WITH (NOLOCK)
+LEFT JOIN tblICCommodityAttribute CA WITH (NOLOCK) ON CA.intCommodityAttributeId = CD.intProductTypeId
+LEFT JOIN tblCTBook B WITH (NOLOCK) ON B.intBookId = CD.intBookId
+LEFT JOIN tblCTSubBook SB WITH (NOLOCK) ON SB.intSubBookId = CD.intSubBookId

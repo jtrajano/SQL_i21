@@ -19,6 +19,6 @@ SELECT PP.intProductPropertyId
 	,PP.intProductPropertyRefId
 	,T.strTestName
 	,P.strPropertyName
-FROM tblQMProductProperty PP
-LEFT JOIN tblQMTest T ON T.intTestId = PP.intTestId
-LEFT JOIN tblQMProperty P ON P.intPropertyId = PP.intPropertyId
+FROM tblQMProductProperty PP WITH (NOLOCK)
+LEFT JOIN tblQMTest T WITH (NOLOCK) ON T.intTestId = PP.intTestId
+LEFT JOIN tblQMProperty P WITH (NOLOCK) ON P.intPropertyId = PP.intPropertyId

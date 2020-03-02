@@ -17,7 +17,7 @@ BEGIN TRY
 
 	INSERT INTO @tblQMProductPreStage (intProductPreStageId)
 	SELECT intProductPreStageId
-	FROM tblQMProductPreStage
+	FROM tblQMProductPreStage WITH (NOLOCK)
 	WHERE ISNULL(strFeedStatus, '') = ''
 
 	SELECT @intProductPreStageId = MIN(intProductPreStageId)
@@ -32,7 +32,7 @@ BEGIN TRY
 		SELECT @intProductId = intProductId
 			,@strRowState = strRowState
 			,@intUserId = intUserId
-		FROM tblQMProductPreStage
+		FROM tblQMProductPreStage WITH (NOLOCK)
 		WHERE intProductPreStageId = @intProductPreStageId
 
 		EXEC uspIPProductPopulateStgXML @intProductId

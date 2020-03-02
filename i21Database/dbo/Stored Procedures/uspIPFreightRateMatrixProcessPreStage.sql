@@ -17,7 +17,7 @@ BEGIN TRY
 
 	INSERT INTO @tblLGFreightRateMatrixPreStage (intFreightRateMatrixPreStageId)
 	SELECT intFreightRateMatrixPreStageId
-	FROM tblLGFreightRateMatrixPreStage
+	FROM tblLGFreightRateMatrixPreStage WITH (NOLOCK)
 	WHERE ISNULL(strFeedStatus, '') = ''
 
 	SELECT @intFreightRateMatrixPreStageId = MIN(intFreightRateMatrixPreStageId)
@@ -32,13 +32,13 @@ BEGIN TRY
 		SELECT @intFreightRateMatrixId = intFreightRateMatrixId
 			,@strRowState = strRowState
 			,@intUserId = intUserId
-		FROM tblLGFreightRateMatrixPreStage
+		FROM tblLGFreightRateMatrixPreStage WITH (NOLOCK)
 		WHERE intFreightRateMatrixPreStageId = @intFreightRateMatrixPreStageId
 
 		-- Check to process only 'General' type
 		IF EXISTS (
 				SELECT 1
-				FROM tblLGFreightRateMatrix t
+				FROM tblLGFreightRateMatrix t WITH (NOLOCK)
 				WHERE t.intType = 2
 					AND t.intFreightRateMatrixId = @intFreightRateMatrixId
 				) OR @strRowState = 'Delete'

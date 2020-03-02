@@ -29,7 +29,7 @@ BEGIN TRY
 	SET @strDisplayName = NULL
 
 	SELECT @strDisplayName = CONVERT(NVARCHAR, dtmPriceDate, 120)
-	FROM tblRKFuturesSettlementPrice
+	FROM tblRKFuturesSettlementPrice WITH (NOLOCK)
 	WHERE intFutureSettlementPriceId = @intFutureSettlementPriceId
 
 	-------------------------Header-----------------------------------------------------------

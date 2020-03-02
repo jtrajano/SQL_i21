@@ -6,7 +6,7 @@ BEGIN TRY
 	DECLARE @ErrMsg NVARCHAR(MAX)
 
 	SELECT *
-	FROM tblQMPropertyStage
+	FROM tblQMPropertyStage WITH (NOLOCK)
 	WHERE intMultiCompanyId = @intToCompanyId
 		AND ISNULL(strFeedStatus, '') = ''
 

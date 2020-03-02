@@ -22,6 +22,6 @@ SELECT P.intPropertyId
 	,P.intPropertyRefId
 	,L.strListName
 	,I.strItemNo
-FROM tblQMProperty P
-LEFT JOIN tblQMList L ON L.intListId = P.intListId
-LEFT JOIN tblICItem I ON I.intItemId = P.intItemId
+FROM tblQMProperty P WITH (NOLOCK)
+LEFT JOIN tblQMList L WITH (NOLOCK) ON L.intListId = P.intListId
+LEFT JOIN tblICItem I WITH (NOLOCK) ON I.intItemId = P.intItemId

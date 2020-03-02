@@ -20,7 +20,7 @@ BEGIN TRY
 		,@intCompanyRefId INT
 
 	SELECT @intSampleAcknowledgementStageId = MIN(intSampleAcknowledgementStageId)
-	FROM tblQMSampleAcknowledgementStage
+	FROM tblQMSampleAcknowledgementStage WITH (NOLOCK)
 	WHERE strMessage = 'Success'
 		AND ISNULL(strFeedStatus, '') = ''
 		AND intMultiCompanyId = @intToCompanyId
@@ -49,7 +49,7 @@ BEGIN TRY
 			,@intCompanyId = intCompanyId
 			,@intTransactionRefId = intTransactionRefId
 			,@intCompanyRefId = intCompanyRefId
-		FROM tblQMSampleAcknowledgementStage
+		FROM tblQMSampleAcknowledgementStage WITH (NOLOCK)
 		WHERE intSampleAcknowledgementStageId = @intSampleAcknowledgementStageId
 
 		BEGIN
@@ -149,7 +149,7 @@ BEGIN TRY
 			,@referenceCompanyId = @intCompanyRefId
 
 		SELECT @intSampleAcknowledgementStageId = MIN(intSampleAcknowledgementStageId)
-		FROM tblQMSampleAcknowledgementStage
+		FROM tblQMSampleAcknowledgementStage WITH (NOLOCK)
 		WHERE intSampleAcknowledgementStageId > @intSampleAcknowledgementStageId
 			AND strMessage = 'Success'
 			AND ISNULL(strFeedStatus, '') = ''

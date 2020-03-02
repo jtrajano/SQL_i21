@@ -23,13 +23,13 @@ SELECT P.intProductId
 	,LS2.strSecondaryStatus AS strBondedApprovalLotStatus
 	,LS3.strSecondaryStatus AS strBondedRejectionLotStatus
 	,UOM.strUnitMeasure
-FROM tblQMProduct P
-LEFT JOIN tblICCategory C ON C.intCategoryId = P.intProductValueId
+FROM tblQMProduct P WITH (NOLOCK)
+LEFT JOIN tblICCategory C WITH (NOLOCK) ON C.intCategoryId = P.intProductValueId
 	AND P.intProductTypeId = 1
-LEFT JOIN tblICItem I ON I.intItemId = P.intProductValueId
+LEFT JOIN tblICItem I WITH (NOLOCK) ON I.intItemId = P.intProductValueId
 	AND P.intProductTypeId = 2
-LEFT JOIN tblICLotStatus LS ON LS.intLotStatusId = P.intApprovalLotStatusId
-LEFT JOIN tblICLotStatus LS1 ON LS1.intLotStatusId = P.intRejectionLotStatusId
-LEFT JOIN tblICLotStatus LS2 ON LS2.intLotStatusId = P.intBondedApprovalLotStatusId
-LEFT JOIN tblICLotStatus LS3 ON LS3.intLotStatusId = P.intBondedRejectionLotStatusId
-LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = P.intUnitMeasureId
+LEFT JOIN tblICLotStatus LS WITH (NOLOCK) ON LS.intLotStatusId = P.intApprovalLotStatusId
+LEFT JOIN tblICLotStatus LS1 WITH (NOLOCK) ON LS1.intLotStatusId = P.intRejectionLotStatusId
+LEFT JOIN tblICLotStatus LS2 WITH (NOLOCK) ON LS2.intLotStatusId = P.intBondedApprovalLotStatusId
+LEFT JOIN tblICLotStatus LS3 WITH (NOLOCK) ON LS3.intLotStatusId = P.intBondedRejectionLotStatusId
+LEFT JOIN tblICUnitMeasure UOM WITH (NOLOCK) ON UOM.intUnitMeasureId = P.intUnitMeasureId
