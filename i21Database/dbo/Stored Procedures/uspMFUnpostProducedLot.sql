@@ -27,21 +27,18 @@ BEGIN TRY
 		,@intManufacturingProcessId INT
 		,@intAttributeTypeId INT
 		,@STARTING_NUMBER_BATCH AS INT = 3
-		,@intWorkOrderProducedLotId int
-		,@intLocationId int
-		,@dtmTransactionDate datetime
+		,@intWorkOrderProducedLotId INT
+		,@intLocationId INT
+		,@dtmTransactionDate DATETIME
 		,@dblQty2 NUMERIC(38, 20)
 
-	Select @dtmTransactionDate=GETDATE()
+	SELECT @dtmTransactionDate = GETDATE()
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXML
 
 	SELECT @intWorkOrderId = intWorkOrderId
 		,@intLotId = intLotId
-
-		
-
 		,@intBatchId = intBatchId
 		,@intUserId = intUserId
 	FROM OPENXML(@idoc, 'root', 2) WITH (
@@ -60,10 +57,10 @@ BEGIN TRY
 		,@intItemId = intItemId
 		,@intStorageLocationId = intStorageLocationId
 		,@intLotId = intLotId
-		,@intWorkOrderProducedLotId=intWorkOrderProducedLotId
-		,@dblQty = dblPhysicalCount 
-		,@intItemUOMId = intPhysicalItemUOMId 
-				,@dblWeight = dblQuantity
+		,@intWorkOrderProducedLotId = intWorkOrderProducedLotId
+		,@dblQty = dblPhysicalCount
+		,@intItemUOMId = intPhysicalItemUOMId
+		,@dblWeight = dblQuantity
 		,@intWeightUOMId = intItemUOMId
 	FROM dbo.tblMFWorkOrderProducedLot
 	WHERE intLotId = @intLotId
@@ -91,7 +88,7 @@ BEGIN TRY
 
 	SELECT @strWorkOrderNo = strWorkOrderNo
 		,@intManufacturingProcessId = intManufacturingProcessId
-		,@intLocationId=intLocationId
+		,@intLocationId = intLocationId
 	FROM tblMFWorkOrder
 	WHERE intWorkOrderId = @intWorkOrderId
 
@@ -154,7 +151,7 @@ BEGIN TRY
 		,[strRateType]
 		,[intSourceEntityId]
 		,[intCommodityId]
-	)
+		)
 	EXEC dbo.uspICUnpostCosting @intBatchId
 		,@strWorkOrderNo
 		,@strBatchId
@@ -162,8 +159,25 @@ BEGIN TRY
 		,0
 
 	IF ISNULL(@ysnRecap, 0) = 0
-		EXEC dbo.uspGLBookEntries @GLEntries
-			,0
+	BEGIN
+		IF EXISTS (
+				SELECT *
+				FROM tblMFWorkOrderRecipeItem WRI
+				JOIN tblICItem I ON I.intItemId = WRI.intItemId
+				WHERE I.strType = 'Other Charge'
+					AND WRI.intWorkOrderId = @intWorkOrderId
+				)
+		BEGIN
+			EXEC dbo.uspGLBookEntries @GLEntries
+				,0
+				,1
+		END
+		ELSE
+		BEGIN
+			EXEC dbo.uspGLBookEntries @GLEntries
+				,0
+		END
+	END
 
 	IF @intAttributeTypeId = 2
 	BEGIN
@@ -175,43 +189,41 @@ BEGIN TRY
 		SET ysnProductionReversed = 1
 		WHERE intWorkOrderId = @intWorkOrderId
 
-		Select @dblQty2=-@dblQty
+		SELECT @dblQty2 = - @dblQty
 
 		EXEC dbo.uspMFAdjustInventory @dtmDate = @dtmTransactionDate
-		,@intTransactionTypeId = 9
-		,@intItemId = @intItemId
-		,@intSourceLotId = @intLotId
-		,@intDestinationLotId = NULL
-		,@dblQty = @dblQty2
-		,@intItemUOMId = @intItemUOMId
-		,@intOldItemId = NULL
-		,@dtmOldExpiryDate = NULL
-		,@dtmNewExpiryDate = NULL
-		,@intOldLotStatusId = NULL
-		,@intNewLotStatusId = NULL
-		,@intUserId = @intUserId
-		,@strNote = NULL
-		,@strReason = NULL
-		,@intLocationId = @intLocationId
-		,@intInventoryAdjustmentId = NULL
-		,@intStorageLocationId = @intStorageLocationId
-		,@intDestinationStorageLocationId = NULL
-		,@intWorkOrderInputLotId = NULL
-		,@intWorkOrderProducedLotId = @intWorkOrderProducedLotId
-		,@intWorkOrderId = @intWorkOrderId
+			,@intTransactionTypeId = 9
+			,@intItemId = @intItemId
+			,@intSourceLotId = @intLotId
+			,@intDestinationLotId = NULL
+			,@dblQty = @dblQty2
+			,@intItemUOMId = @intItemUOMId
+			,@intOldItemId = NULL
+			,@dtmOldExpiryDate = NULL
+			,@dtmNewExpiryDate = NULL
+			,@intOldLotStatusId = NULL
+			,@intNewLotStatusId = NULL
+			,@intUserId = @intUserId
+			,@strNote = NULL
+			,@strReason = NULL
+			,@intLocationId = @intLocationId
+			,@intInventoryAdjustmentId = NULL
+			,@intStorageLocationId = @intStorageLocationId
+			,@intDestinationStorageLocationId = NULL
+			,@intWorkOrderInputLotId = NULL
+			,@intWorkOrderProducedLotId = @intWorkOrderProducedLotId
+			,@intWorkOrderId = @intWorkOrderId
 	END
 
 	IF @dblQty > 0
 	BEGIN
 		--DECLARE @tblMFWorkOrderConsumedLot TABLE (intWorkOrderConsumedLotId INT);
-
 		--DELETE
 		--FROM tblMFWorkOrderConsumedLot
 		--OUTPUT deleted.intWorkOrderConsumedLotId
 		--INTO @tblMFWorkOrderConsumedLot
 		--WHERE intWorkOrderId = @intWorkOrderId
 		--	AND intBatchId = @intBatchId
-
 		IF @intAttributeTypeId = 2
 		BEGIN
 			INSERT INTO tblMFInventoryAdjustment (
@@ -244,45 +256,41 @@ BEGIN TRY
 				,IA.intWorkOrderId
 			FROM tblMFInventoryAdjustment IA
 			JOIN tblMFWorkOrderConsumedLot WC ON IA.intWorkOrderConsumedLotId = WC.intWorkOrderConsumedLotId
-			Where WC.intWorkOrderId = @intWorkOrderId
-			AND WC.intBatchId = @intBatchId
+			WHERE WC.intWorkOrderId = @intWorkOrderId
+				AND WC.intBatchId = @intBatchId
 		END
-
-		--UPDATE dbo.tblMFWorkOrderProducedLot
-		--SET dblQuantity = @dblWeight
-		--	,intItemUOMId = @intWeightUOMId
-		--	,dblPhysicalCount = @dblQty
-		--	,intPhysicalItemUOMId = @intItemUOMId
-		--	,dblWeightPerUnit = @dblWeight / @dblQty
-		--WHERE intWorkOrderId = @intWorkOrderId
-		--	AND intBatchId = @intBatchId
-
-		--SELECT @dblWeightPerUnit = @dblWeight / @dblQty
-
-		--EXEC dbo.uspMFPickWorkOrder @intWorkOrderId = @intWorkOrderId
-		--	,@dblProduceQty = @dblWeight
-		--	,@intProduceUOMId = @intWeightUOMId
-		--	,@intBatchId = @intBatchId
-		--	,@intUserId = @intUserId
-		--	,@dblUnitQty = @dblWeightPerUnit
-		--	,@ysnProducedQtyByWeight = 1
-
-		--EXEC [dbo].uspMFPostConsumptionProduction @intWorkOrderId = @intWorkOrderId
-		--	,@intItemId = @intItemId
-		--	,@strLotNumber = @strLotNumber
-		--	,@dblWeight = @dblWeight
-		--	,@intWeightUOMId = @intWeightUOMId
-		--	,@dblUnitQty = @dblWeightPerUnit
-		--	,@dblQty = @dblQty
-		--	,@intItemUOMId = @intItemUOMId
-		--	,@intUserId = @intUserId
-		--	,@intBatchId = @intBatchId
-		--	,@intLotId = @intLotId OUTPUT
-		--	,@strLotAlias = @strWorkOrderNo
-		--	,@strVendorLotNo = NULL
-		--	,@strParentLotNumber = NULL
-		--	,@intStorageLocationId = @intStorageLocationId
-		--	,@dtmProductionDate = @dtmDate
+				--UPDATE dbo.tblMFWorkOrderProducedLot
+				--SET dblQuantity = @dblWeight
+				--	,intItemUOMId = @intWeightUOMId
+				--	,dblPhysicalCount = @dblQty
+				--	,intPhysicalItemUOMId = @intItemUOMId
+				--	,dblWeightPerUnit = @dblWeight / @dblQty
+				--WHERE intWorkOrderId = @intWorkOrderId
+				--	AND intBatchId = @intBatchId
+				--SELECT @dblWeightPerUnit = @dblWeight / @dblQty
+				--EXEC dbo.uspMFPickWorkOrder @intWorkOrderId = @intWorkOrderId
+				--	,@dblProduceQty = @dblWeight
+				--	,@intProduceUOMId = @intWeightUOMId
+				--	,@intBatchId = @intBatchId
+				--	,@intUserId = @intUserId
+				--	,@dblUnitQty = @dblWeightPerUnit
+				--	,@ysnProducedQtyByWeight = 1
+				--EXEC [dbo].uspMFPostConsumptionProduction @intWorkOrderId = @intWorkOrderId
+				--	,@intItemId = @intItemId
+				--	,@strLotNumber = @strLotNumber
+				--	,@dblWeight = @dblWeight
+				--	,@intWeightUOMId = @intWeightUOMId
+				--	,@dblUnitQty = @dblWeightPerUnit
+				--	,@dblQty = @dblQty
+				--	,@intItemUOMId = @intItemUOMId
+				--	,@intUserId = @intUserId
+				--	,@intBatchId = @intBatchId
+				--	,@intLotId = @intLotId OUTPUT
+				--	,@strLotAlias = @strWorkOrderNo
+				--	,@strVendorLotNo = NULL
+				--	,@strParentLotNumber = NULL
+				--	,@intStorageLocationId = @intStorageLocationId
+				--	,@dtmProductionDate = @dtmDate
 	END
 
 	IF ISNULL(@ysnRecap, 0) = 1

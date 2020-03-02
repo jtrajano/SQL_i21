@@ -315,9 +315,25 @@ BEGIN TRY
 				FROM @GLEntries
 				)
 		BEGIN
-			EXEC uspGLBookEntries 
-				@GLEntries
-				,0
+
+			IF EXISTS (
+						SELECT *
+						FROM tblMFWorkOrderRecipeItem WRI
+						JOIN tblICItem I ON I.intItemId = WRI.intItemId
+						WHERE I.strType = 'Other Charge'
+							AND WRI.intWorkOrderId = @intWorkOrderId
+						)
+				BEGIN
+					EXEC dbo.uspGLBookEntries @GLEntries
+						,0
+						,1
+				END
+				ELSE
+				BEGIN
+					EXEC dbo.uspGLBookEntries @GLEntries
+						,0
+				END
+
 		END
 	END
 
@@ -409,9 +425,25 @@ BEGIN TRY
 			,@intUserId
 			,0
 
-		EXEC dbo.uspGLBookEntries 
-			@GLEntries
-			,0
+
+		IF EXISTS (
+						SELECT *
+						FROM tblMFWorkOrderRecipeItem WRI
+						JOIN tblICItem I ON I.intItemId = WRI.intItemId
+						WHERE I.strType = 'Other Charge'
+							AND WRI.intWorkOrderId = @intWorkOrderId
+						)
+				BEGIN
+					EXEC dbo.uspGLBookEntries @GLEntries
+						,0
+						,1
+				END
+				ELSE
+				BEGIN
+					EXEC dbo.uspGLBookEntries @GLEntries
+						,0
+				END
+
 
 		SELECT @intWorkOrderProducedLotTransactionId = MIN(intWorkOrderProducedLotTransactionId)
 		FROM tblMFWorkOrderProducedLotTransaction PL
@@ -489,8 +521,23 @@ BEGIN TRY
 				FROM @GLEntries
 				)
 		BEGIN
-			EXEC dbo.uspGLBookEntries @GLEntries
-				,0
+			IF EXISTS (
+						SELECT *
+						FROM tblMFWorkOrderRecipeItem WRI
+						JOIN tblICItem I ON I.intItemId = WRI.intItemId
+						WHERE I.strType = 'Other Charge'
+							AND WRI.intWorkOrderId = @intWorkOrderId
+						)
+				BEGIN
+					EXEC dbo.uspGLBookEntries @GLEntries
+						,0
+						,1
+				END
+				ELSE
+				BEGIN
+					EXEC dbo.uspGLBookEntries @GLEntries
+						,0
+				END
 		END
 
 		DECLARE @tblMFWorkOrderConsumedLot TABLE (intWorkOrderConsumedLotId INT);
@@ -659,8 +706,23 @@ BEGIN TRY
 				,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
 				,@intUserId
 
-			EXEC dbo.uspGLBookEntries @GLEntries
-				,1
+			IF EXISTS (
+						SELECT *
+						FROM tblMFWorkOrderRecipeItem WRI
+						JOIN tblICItem I ON I.intItemId = WRI.intItemId
+						WHERE I.strType = 'Other Charge'
+							AND WRI.intWorkOrderId = @intWorkOrderId
+						)
+				BEGIN
+					EXEC dbo.uspGLBookEntries @GLEntries
+						,1
+						,1
+				END
+				ELSE
+				BEGIN
+					EXEC dbo.uspGLBookEntries @GLEntries
+						,1
+				END
 
 			DELETE
 			FROM tblMFWorkOrderConsumedLot
