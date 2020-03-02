@@ -25,7 +25,7 @@ CREATE PROCEDURE [dbo].[uspMFPostProduction] @ysnPost BIT = 0
 	,@intLoadDistributionDetailId INT = NULL
 	,@dblUnitCost NUMERIC(38, 20) = NULL
 	,@strNotes NVARCHAR(MAX) = NULL
-	,@intLotStatusId INT=NULL
+	,@intLotStatusId INT = NULL
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -63,7 +63,6 @@ DECLARE @STARTING_NUMBER_BATCH AS INT = 3
 	,@strProduceBatchId NVARCHAR(40)
 	,@intManufacturingCellId INT
 	,@ysnLifeTimeByEndOfMonth INT
-	
 
 SET @strProduceBatchId = ISNULL(@strBatchId, '') + '-P'
 
@@ -163,7 +162,6 @@ BEGIN
 		SELECT @dblNewCost = [dbo].[fnMFGetTotalStockValueFromTransactionBatch](@intTransactionId, @strBatchId)
 
 		SET @dblNewCost = ABS(@dblNewCost)
-
 		----For Blend use WorkOrder Qty
 		--IF EXISTS (
 		--		SELECT 1
@@ -178,7 +176,7 @@ BEGIN
 		--			WHERE intWorkOrderId = @intWorkOrderId
 		--			)
 		--ELSE
-			SET @dblNewUnitCost = ABS(@dblNewCost) / @dblProduceQty
+		SET @dblNewUnitCost = ABS(@dblNewCost) / @dblProduceQty
 	END
 END
 
@@ -204,10 +202,10 @@ BEGIN
 		,RI.intItemId
 		,SUM((
 				CASE 
-						WHEN intCostDriverId = 2
-							THEN  ISNULL(P.dblStandardCost, 0)
-						ELSE ISNULL(P.dblStandardCost, 0) * ISNULL(RI.dblCostRate, 0)
-						END
+					WHEN intCostDriverId = 2
+						THEN ISNULL(P.dblStandardCost, 0)
+					ELSE ISNULL(P.dblStandardCost, 0) * ISNULL(RI.dblCostRate, 0)
+					END
 				) / R.dblQuantity)
 	FROM dbo.tblMFWorkOrderRecipeItem RI
 	JOIN dbo.tblMFWorkOrderRecipe R ON R.intWorkOrderId = RI.intWorkOrderId
@@ -597,8 +595,25 @@ BEGIN
 				FROM @GLEntries
 				)
 			AND ISNULL(@ysnRecap, 0) = 0
-			EXEC dbo.uspGLBookEntries @GLEntries
-				,@ysnPost
+		BEGIN
+			IF EXISTS (
+					SELECT *
+					FROM tblMFWorkOrderRecipeItem WRI
+					JOIN tblICItem I ON I.intItemId = WRI.intItemId
+					WHERE I.strType = 'Other Charge'
+						AND WRI.intWorkOrderId = @intWorkOrderId
+					)
+			BEGIN
+				EXEC dbo.uspGLBookEntries @GLEntries
+					,@ysnPost
+					,1
+			END
+			ELSE
+			BEGIN
+				EXEC dbo.uspGLBookEntries @GLEntries
+					,@ysnPost
+			END
+		END
 	END
 
 	SELECT @intRecipeItemId = MIN(intRecipeItemId)
@@ -844,8 +859,25 @@ BEGIN
 	END
 
 	IF ISNULL(@ysnRecap, 0) = 0
-		EXEC dbo.uspGLBookEntries @GLEntries
-			,@ysnPost
+	BEGIN
+		IF EXISTS (
+				SELECT *
+				FROM tblMFWorkOrderRecipeItem WRI
+				JOIN tblICItem I ON I.intItemId = WRI.intItemId
+				WHERE I.strType = 'Other Charge'
+					AND WRI.intWorkOrderId = @intWorkOrderId
+				)
+		BEGIN
+			EXEC dbo.uspGLBookEntries @GLEntries
+				,@ysnPost
+				,1
+		END
+		ELSE
+		BEGIN
+			EXEC dbo.uspGLBookEntries @GLEntries
+				,@ysnPost
+		END
+	END
 
 	DROP TABLE #tmpBlendIngredients
 
