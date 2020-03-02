@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE uspMFUnpostCycleCount (@strXML NVARCHAR(MAX))
+﻿Create PROCEDURE uspMFUnpostCycleCount (@strXML NVARCHAR(MAX))
 AS
 BEGIN TRY
 	DECLARE @intWorkOrderId INT
@@ -39,12 +39,10 @@ BEGIN TRY
 		,@ysnCostEnabled BIT
 		,@intWOItemUOMId INT
 		,@intUnitMeasureId INT
-
 	DECLARE @intReturnValue AS INT
 	DECLARE @unpostCostAdjustment AS ItemCostAdjustmentTableType
 	DECLARE @strBatchIdForUnpost AS NVARCHAR(50)
 	DECLARE @strErrorMessage AS NVARCHAR(4000)
-
 
 	SELECT TOP 1 @ysnCostEnabled = ysnCostEnabled
 	FROM tblMFCompanyPreference
@@ -243,8 +241,7 @@ BEGIN TRY
 			AND t.strTransactionId = t.strRelatedTransactionId
 			AND t.strTransactionId = @strWorkOrderNo
 
-		EXEC @intReturnValue = uspICPostCostAdjustment
-			@ItemsToAdjust = @unpostCostAdjustment
+		EXEC @intReturnValue = uspICPostCostAdjustment @ItemsToAdjust = @unpostCostAdjustment
 			,@strBatchId = @strBatchIdForUnpost
 			,@intEntityUserSecurityId = @userId
 			,@ysnPost = 0
@@ -298,8 +295,7 @@ BEGIN TRY
 			,intSourceEntityId
 			,intCommodityId
 			)
-		EXEC dbo.uspICCreateGLEntriesOnCostAdjustment 
-			@strBatchId = @strBatchIdForUnpost
+		EXEC dbo.uspICCreateGLEntriesOnCostAdjustment @strBatchId = @strBatchIdForUnpost
 			,@intEntityUserSecurityId = @intUserId
 			,@strGLDescription = ''
 			,@ysnPost = 0
@@ -315,9 +311,23 @@ BEGIN TRY
 				FROM @GLEntries
 				)
 		BEGIN
-			EXEC uspGLBookEntries 
-				@GLEntries
-				,0
+			IF EXISTS (
+					SELECT *
+					FROM tblMFWorkOrderRecipeItem WRI
+					JOIN tblICItem I ON I.intItemId = WRI.intItemId
+					WHERE I.strType = 'Other Charge'
+						AND WRI.intWorkOrderId = @intWorkOrderId
+					)
+			BEGIN
+				EXEC dbo.uspGLBookEntries @GLEntries
+					,0
+					,1
+			END
+			ELSE
+			BEGIN
+				EXEC dbo.uspGLBookEntries @GLEntries
+					,0
+			END
 		END
 	END
 
@@ -402,16 +412,29 @@ BEGIN TRY
 			,[intSourceEntityId]
 			,[intCommodityId]
 			)
-		EXEC dbo.uspICUnpostCosting 
-			@intTransactionId
+		EXEC dbo.uspICUnpostCosting @intTransactionId
 			,@strAdjustmentNo
 			,@strBatchId
 			,@intUserId
-			,0
 
-		EXEC dbo.uspGLBookEntries 
-			@GLEntries
-			,0
+
+		IF EXISTS (
+				SELECT *
+				FROM tblMFWorkOrderRecipeItem WRI
+				JOIN tblICItem I ON I.intItemId = WRI.intItemId
+				WHERE I.strType = 'Other Charge'
+					AND WRI.intWorkOrderId = @intWorkOrderId
+				)
+		BEGIN
+			EXEC dbo.uspGLBookEntries @GLEntries
+				,0
+				,1
+		END
+		ELSE
+		BEGIN
+			EXEC dbo.uspGLBookEntries @GLEntries
+				,0
+		END 
 
 		SELECT @intWorkOrderProducedLotTransactionId = MIN(intWorkOrderProducedLotTransactionId)
 		FROM tblMFWorkOrderProducedLotTransaction PL
@@ -477,8 +500,7 @@ BEGIN TRY
 			,[intSourceEntityId]
 			,[intCommodityId]
 			)
-		EXEC dbo.uspICUnpostCosting 
-			@intBatchId
+		EXEC dbo.uspICUnpostCosting @intBatchId
 			,@strWorkOrderNo
 			,@strBatchIdForUnpost --@strBatchId
 			,@intUserId
@@ -489,8 +511,23 @@ BEGIN TRY
 				FROM @GLEntries
 				)
 		BEGIN
-			EXEC dbo.uspGLBookEntries @GLEntries
-				,0
+			IF EXISTS (
+					SELECT *
+					FROM tblMFWorkOrderRecipeItem WRI
+					JOIN tblICItem I ON I.intItemId = WRI.intItemId
+					WHERE I.strType = 'Other Charge'
+						AND WRI.intWorkOrderId = @intWorkOrderId
+					)
+			BEGIN
+				EXEC dbo.uspGLBookEntries @GLEntries
+					,0
+					,1
+			END
+			ELSE
+			BEGIN
+				EXEC dbo.uspGLBookEntries @GLEntries
+					,0
+			END
 		END
 
 		DECLARE @tblMFWorkOrderConsumedLot TABLE (intWorkOrderConsumedLotId INT);
@@ -533,7 +570,7 @@ BEGIN TRY
 			,intWorkOrderConsumedLotId
 			,dtmBusinessDate
 			,intBusinessShiftId
-			,intWorkOrderId 
+			,intWorkOrderId
 			)
 		SELECT dtmDate
 			,intTransactionTypeId
@@ -653,14 +690,28 @@ BEGIN TRY
 				,[intSourceEntityId]
 				,[intCommodityId]
 				)
-			EXEC dbo.uspICPostCosting 
-				@ItemsForPost
+			EXEC dbo.uspICPostCosting @ItemsForPost
 				,@strBatchId
 				,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
 				,@intUserId
 
-			EXEC dbo.uspGLBookEntries @GLEntries
-				,1
+			IF EXISTS (
+					SELECT *
+					FROM tblMFWorkOrderRecipeItem WRI
+					JOIN tblICItem I ON I.intItemId = WRI.intItemId
+					WHERE I.strType = 'Other Charge'
+						AND WRI.intWorkOrderId = @intWorkOrderId
+					)
+			BEGIN
+				EXEC dbo.uspGLBookEntries @GLEntries
+					,1
+					,1
+			END
+			ELSE
+			BEGIN
+				EXEC dbo.uspGLBookEntries @GLEntries
+					,1
+			END
 
 			DELETE
 			FROM tblMFWorkOrderConsumedLot
@@ -732,8 +783,7 @@ BEGIN TRY
 		FROM dbo.tblICStorageLocation
 		WHERE intStorageLocationId = @intConsumptionStorageLocationId
 
-		EXEC dbo.uspICCreateStockReservation 
-			@ItemsToReserve
+		EXEC dbo.uspICCreateStockReservation @ItemsToReserve
 			,@intWorkOrderId
 			,@intInventoryTransactionType
 
@@ -775,8 +825,7 @@ BEGIN TRY
 			,WI.intItemIssuedUOMId
 			,L.strLotNumber
 
-		EXEC dbo.uspICCreateStockReservation 
-			@ItemsToReserve
+		EXEC dbo.uspICCreateStockReservation @ItemsToReserve
 			,@intWorkOrderId
 			,@intInventoryTransactionType
 	END
@@ -805,3 +854,5 @@ BEGIN CATCH
 			)
 END CATCH
 GO
+
+
