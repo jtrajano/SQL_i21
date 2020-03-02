@@ -113,9 +113,9 @@ BEGIN TRY
 													ELSE 0
 										   END)) + ' per ' + strPriceUOM + ' ' + strCurrency
 			,strPriceZee				 = CASE	
-													WHEN intPricingTypeId IN (1,6)	THEN	dbo.fnCTChangeNumericScale(ISNULL(dblCashPrice,0),@intDecimalDPR)
-													WHEN intPricingTypeId = 2		THEN	dbo.fnCTChangeNumericScale(ISNULL(dblBasis,0),@intDecimalDPR)
-													WHEN intPricingTypeId = 3		THEN	dbo.fnCTChangeNumericScale(ISNULL(dblFutures,0),@intDecimalDPR)
+													WHEN intPricingTypeId IN (1,6)	THEN	dbo.fnCTChangeNumericScale(ISNULL(dblCashPrice,0),4)
+													WHEN intPricingTypeId = 2		THEN	dbo.fnCTChangeNumericScale(ISNULL(dblBasis,0),4)
+													WHEN intPricingTypeId = 3		THEN	dbo.fnCTChangeNumericScale(ISNULL(dblFutures,0),4)
 													ELSE '0'
 											END
 											+ ' ' + strPriceUOM + ' ' + strCurrency
