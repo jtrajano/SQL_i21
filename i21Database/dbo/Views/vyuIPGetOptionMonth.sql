@@ -15,8 +15,8 @@ SELECT O.intOptionMonthId
 	  ,FM.strFutMarketName
 	  ,C.strCommodityCode
 	  ,F.strFutureMonth
-FROM tblRKOptionsMonth O
-JOIN tblRKFutureMarket FM ON FM.intFutureMarketId = O.intFutureMarketId
-JOIN tblRKCommodityMarketMapping CMM ON CMM.intCommodityMarketId = O.intCommodityMarketId
-JOIN tblICCommodity C ON C.intCommodityId = CMM.intCommodityId
-JOIN tblRKFuturesMonth F ON F.intFutureMonthId = O.intFutureMonthId
+FROM tblRKOptionsMonth O WITH (NOLOCK)
+LEFT JOIN tblRKFutureMarket FM WITH (NOLOCK) ON FM.intFutureMarketId = O.intFutureMarketId
+LEFT JOIN tblRKCommodityMarketMapping CMM WITH (NOLOCK) ON CMM.intCommodityMarketId = O.intCommodityMarketId
+LEFT JOIN tblICCommodity C WITH (NOLOCK) ON C.intCommodityId = CMM.intCommodityId
+LEFT JOIN tblRKFuturesMonth F WITH (NOLOCK) ON F.intFutureMonthId = O.intFutureMonthId

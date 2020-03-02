@@ -10,5 +10,5 @@ SELECT PT.intProductTestId
 	,PT.dtmLastModified
 	,PT.intProductTestRefId
 	,T.strTestName
-FROM tblQMProductTest PT
-LEFT JOIN tblQMTest T ON T.intTestId = PT.intTestId
+FROM tblQMProductTest PT WITH (NOLOCK)
+LEFT JOIN tblQMTest T WITH (NOLOCK) ON T.intTestId = PT.intTestId

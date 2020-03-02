@@ -32,15 +32,15 @@ BEGIN TRY
 
 	SELECT @intCompanyId = intCompanyId
 		,@dtmTransactionDate = dtmTransactionDate
-	FROM tblRKFutOptTransactionHeader
+	FROM tblRKFutOptTransactionHeader WITH (NOLOCK)
 	WHERE intFutOptTransactionHeaderId = @intFutOptTransactionHeaderId
 
 	SELECT @intScreenId = intScreenId
-	FROM tblSMScreen
+	FROM tblSMScreen WITH (NOLOCK)
 	WHERE strNamespace = 'RiskManagement.view.DerivativeEntry'
  
 	SELECT @intTransactionId = intTransactionId 
-	FROM tblSMTransaction
+	FROM tblSMTransaction WITH (NOLOCK)
 	WHERE intRecordId = @intFutOptTransactionHeaderId
 		AND intScreenId = @intScreenId
 

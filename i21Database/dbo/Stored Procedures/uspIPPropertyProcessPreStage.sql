@@ -17,7 +17,7 @@ BEGIN TRY
 
 	INSERT INTO @tblQMPropertyPreStage (intPropertyPreStageId)
 	SELECT intPropertyPreStageId
-	FROM tblQMPropertyPreStage
+	FROM tblQMPropertyPreStage WITH (NOLOCK)
 	WHERE ISNULL(strFeedStatus, '') = ''
 
 	SELECT @intPropertyPreStageId = MIN(intPropertyPreStageId)
@@ -32,7 +32,7 @@ BEGIN TRY
 		SELECT @intPropertyId = intPropertyId
 			,@strRowState = strRowState
 			,@intUserId = intUserId
-		FROM tblQMPropertyPreStage
+		FROM tblQMPropertyPreStage WITH (NOLOCK)
 		WHERE intPropertyPreStageId = @intPropertyPreStageId
 
 		EXEC uspIPPropertyPopulateStgXML @intPropertyId

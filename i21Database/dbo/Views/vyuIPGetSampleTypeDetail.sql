@@ -11,5 +11,5 @@ SELECT STD.intSampleTypeDetailId
 	,STD.dtmLastModified
 	,STD.intSampleTypeDetailRefId
 	,A.strAttributeName
-FROM tblQMSampleTypeDetail STD
-LEFT JOIN tblQMAttribute A ON A.intAttributeId = STD.intAttributeId
+FROM tblQMSampleTypeDetail STD WITH (NOLOCK)
+LEFT JOIN tblQMAttribute A WITH (NOLOCK) ON A.intAttributeId = STD.intAttributeId

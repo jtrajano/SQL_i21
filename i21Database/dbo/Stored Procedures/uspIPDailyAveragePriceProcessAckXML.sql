@@ -18,7 +18,7 @@ BEGIN TRY
 		,@intCompanyRefId INT
 
 	SELECT @intDailyAveragePriceAckStageId = MIN(intDailyAveragePriceAckStageId)
-	FROM tblRKDailyAveragePriceAckStage
+	FROM tblRKDailyAveragePriceAckStage WITH (NOLOCK)
 	WHERE strMessage = 'Success'
 		AND ISNULL(strFeedStatus, '') = ''
 		--AND intMultiCompanyId = @intToCompanyId
@@ -44,7 +44,7 @@ BEGIN TRY
 			,@intCompanyId = intCompanyId
 			,@intTransactionRefId = intTransactionRefId
 			,@intCompanyRefId = intCompanyRefId
-		FROM tblRKDailyAveragePriceAckStage
+		FROM tblRKDailyAveragePriceAckStage WITH (NOLOCK)
 		WHERE intDailyAveragePriceAckStageId = @intDailyAveragePriceAckStageId
 
 		BEGIN
@@ -122,7 +122,7 @@ BEGIN TRY
 			,@referenceCompanyId = @intCompanyRefId
 
 		SELECT @intDailyAveragePriceAckStageId = MIN(intDailyAveragePriceAckStageId)
-		FROM tblRKDailyAveragePriceAckStage
+		FROM tblRKDailyAveragePriceAckStage WITH (NOLOCK)
 		WHERE intDailyAveragePriceAckStageId > @intDailyAveragePriceAckStageId
 			AND strMessage = 'Success'
 			AND ISNULL(strFeedStatus, '') = ''

@@ -19,7 +19,7 @@ BEGIN TRY
 
 	INSERT INTO @tblRKOptionsMatchPnSHeaderPreStage (intOptionsMatchPnSHeaderPreStageId)
 	SELECT intOptionsMatchPnSHeaderPreStageId
-	FROM tblRKOptionsMatchPnSHeaderPreStage
+	FROM tblRKOptionsMatchPnSHeaderPreStage WITH (NOLOCK)
 	WHERE ISNULL(strFeedStatus, '') = ''
 
 	SELECT @intOptionsMatchPnSHeaderPreStageId = MIN(intOptionsMatchPnSHeaderPreStageId)
@@ -41,11 +41,11 @@ BEGIN TRY
 			SELECT @intOptionsMatchPnSHeaderId = intOptionsMatchPnSHeaderId
 				,@strRowState = strRowState
 				,@intUserId = intUserId
-			FROM tblRKOptionsMatchPnSHeaderPreStage
+			FROM tblRKOptionsMatchPnSHeaderPreStage WITH (NOLOCK)
 			WHERE intOptionsMatchPnSHeaderPreStageId = @intOptionsMatchPnSHeaderPreStageId
 
 			SELECT TOP 1 @strFromCompanyName = strName
-			FROM tblIPMultiCompany
+			FROM tblIPMultiCompany WITH (NOLOCK)
 			WHERE ysnParent = 1
 
 			DECLARE @ToCompanyList TABLE (
@@ -68,16 +68,16 @@ BEGIN TRY
 				,CASE 
 					WHEN EXISTS (
 							SELECT 1
-							FROM tblRKOptionsMatchPnSHeaderBook
+							FROM tblRKOptionsMatchPnSHeaderBook WITH (NOLOCK)
 							WHERE intOptionsMatchPnSHeaderId = @intOptionsMatchPnSHeaderId
 								AND intBookId = MC.intBookId
 							)
 						THEN 'Modified'
 					ELSE 'Added'
 					END
-			FROM tblRKOptionsMatchPnS M
-			JOIN tblRKFutOptTransaction FOT ON FOT.intFutOptTransactionId = M.intLFutOptTransactionId
-			JOIN tblIPMultiCompany MC ON MC.intBookId = FOT.intBookId
+			FROM tblRKOptionsMatchPnS M WITH (NOLOCK)
+			JOIN tblRKFutOptTransaction FOT WITH (NOLOCK) ON FOT.intFutOptTransactionId = M.intLFutOptTransactionId
+			JOIN tblIPMultiCompany MC WITH (NOLOCK) ON MC.intBookId = FOT.intBookId
 				AND MC.ysnParent = 0
 			WHERE M.intOptionsMatchPnSHeaderId = @intOptionsMatchPnSHeaderId
 
@@ -89,16 +89,16 @@ BEGIN TRY
 				,CASE 
 					WHEN EXISTS (
 							SELECT 1
-							FROM tblRKOptionsMatchPnSHeaderBook
+							FROM tblRKOptionsMatchPnSHeaderBook WITH (NOLOCK)
 							WHERE intOptionsMatchPnSHeaderId = @intOptionsMatchPnSHeaderId
 								AND intBookId = MC.intBookId
 							)
 						THEN 'Modified'
 					ELSE 'Added'
 					END
-			FROM tblRKOptionsPnSExpired E
-			JOIN tblRKFutOptTransaction FOT ON FOT.intFutOptTransactionId = E.intFutOptTransactionId
-			JOIN tblIPMultiCompany MC ON MC.intBookId = FOT.intBookId
+			FROM tblRKOptionsPnSExpired E WITH (NOLOCK)
+			JOIN tblRKFutOptTransaction FOT WITH (NOLOCK) ON FOT.intFutOptTransactionId = E.intFutOptTransactionId
+			JOIN tblIPMultiCompany MC WITH (NOLOCK) ON MC.intBookId = FOT.intBookId
 				AND MC.ysnParent = 0
 			WHERE E.intOptionsMatchPnSHeaderId = @intOptionsMatchPnSHeaderId
 				AND NOT EXISTS (
@@ -113,14 +113,14 @@ BEGIN TRY
 				)
 			SELECT DISTINCT MC.intCompanyId
 				,'Delete'
-			FROM tblRKOptionsMatchPnSHeaderBook TB
-			JOIN tblIPMultiCompany MC ON MC.intBookId = TB.intBookId
+			FROM tblRKOptionsMatchPnSHeaderBook TB WITH (NOLOCK)
+			JOIN tblIPMultiCompany MC WITH (NOLOCK) ON MC.intBookId = TB.intBookId
 				AND MC.ysnParent = 0
 			WHERE TB.intOptionsMatchPnSHeaderId = @intOptionsMatchPnSHeaderId
 				AND NOT EXISTS (
 					SELECT 1
-					FROM tblRKOptionsMatchPnS M
-					JOIN tblRKFutOptTransaction FOT ON FOT.intFutOptTransactionId = M.intLFutOptTransactionId
+					FROM tblRKOptionsMatchPnS M WITH (NOLOCK)
+					JOIN tblRKFutOptTransaction FOT WITH (NOLOCK) ON FOT.intFutOptTransactionId = M.intLFutOptTransactionId
 					WHERE M.intOptionsMatchPnSHeaderId = @intOptionsMatchPnSHeaderId
 						AND FOT.intBookId = TB.intBookId
 					)
@@ -136,14 +136,14 @@ BEGIN TRY
 				)
 			SELECT DISTINCT MC.intCompanyId
 				,'Delete'
-			FROM tblRKOptionsMatchPnSHeaderBook TB
-			JOIN tblIPMultiCompany MC ON MC.intBookId = TB.intBookId
+			FROM tblRKOptionsMatchPnSHeaderBook TB WITH (NOLOCK)
+			JOIN tblIPMultiCompany MC WITH (NOLOCK) ON MC.intBookId = TB.intBookId
 				AND MC.ysnParent = 0
 			WHERE TB.intOptionsMatchPnSHeaderId = @intOptionsMatchPnSHeaderId
 				AND NOT EXISTS (
 					SELECT 1
-					FROM tblRKOptionsPnSExpired E
-					JOIN tblRKFutOptTransaction FOT ON FOT.intFutOptTransactionId = E.intFutOptTransactionId
+					FROM tblRKOptionsPnSExpired E WITH (NOLOCK)
+					JOIN tblRKFutOptTransaction FOT WITH (NOLOCK) ON FOT.intFutOptTransactionId = E.intFutOptTransactionId
 					WHERE E.intOptionsMatchPnSHeaderId = @intOptionsMatchPnSHeaderId
 						AND FOT.intBookId = TB.intBookId
 					)
@@ -172,7 +172,7 @@ BEGIN TRY
 
 				SELECT @intToBookId = intBookId
 					,@intToCompanyId = intCompanyId
-				FROM tblIPMultiCompany
+				FROM tblIPMultiCompany WITH (NOLOCK)
 				WHERE intCompanyId = @intCompanyId
 
 				EXEC uspIPOptionsPnSPopulateStgXML @intOptionsMatchPnSHeaderId

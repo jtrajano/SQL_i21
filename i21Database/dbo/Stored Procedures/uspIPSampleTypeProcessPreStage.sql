@@ -17,7 +17,7 @@ BEGIN TRY
 
 	INSERT INTO @tblQMSampleTypePreStage (intSampleTypePreStageId)
 	SELECT intSampleTypePreStageId
-	FROM tblQMSampleTypePreStage
+	FROM tblQMSampleTypePreStage WITH (NOLOCK)
 	WHERE ISNULL(strFeedStatus, '') = ''
 
 	SELECT @intSampleTypePreStageId = MIN(intSampleTypePreStageId)
@@ -32,7 +32,7 @@ BEGIN TRY
 		SELECT @intSampleTypeId = intSampleTypeId
 			,@strRowState = strRowState
 			,@intUserId = intUserId
-		FROM tblQMSampleTypePreStage
+		FROM tblQMSampleTypePreStage WITH (NOLOCK)
 		WHERE intSampleTypePreStageId = @intSampleTypePreStageId
 
 		EXEC uspIPSampleTypePopulateStgXML @intSampleTypeId

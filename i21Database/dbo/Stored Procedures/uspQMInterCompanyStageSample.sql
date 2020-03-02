@@ -20,7 +20,7 @@ BEGIN TRY
 
 	INSERT INTO @tblQMSamplePreStage (intSamplePreStageId)
 	SELECT intSamplePreStageId
-	FROM tblQMSamplePreStage
+	FROM tblQMSamplePreStage WITH (NOLOCK)
 	WHERE strFeedStatus = ''
 
 	SELECT @intSamplePreStageId = MIN(intSamplePreStageId)
@@ -33,7 +33,7 @@ BEGIN TRY
 
 		SELECT @intSampleId = intSampleId
 			,@strRowState = strRowState
-		FROM tblQMSamplePreStage
+		FROM tblQMSamplePreStage WITH (NOLOCK)
 		WHERE intSamplePreStageId = @intSamplePreStageId
 
 		IF ISNULL(@intParent, 0) = 0
@@ -53,9 +53,9 @@ BEGIN TRY
 
 		IF EXISTS (
 				SELECT 1
-				FROM tblSMInterCompanyTransactionConfiguration TC
-				JOIN tblSMInterCompanyTransactionType TT ON TT.intInterCompanyTransactionTypeId = TC.intFromTransactionTypeId
-				JOIN tblSMInterCompanyTransactionType TT1 ON TT1.intInterCompanyTransactionTypeId = TC.intToTransactionTypeId
+				FROM tblSMInterCompanyTransactionConfiguration TC WITH (NOLOCK)
+				JOIN tblSMInterCompanyTransactionType TT WITH (NOLOCK) ON TT.intInterCompanyTransactionTypeId = TC.intFromTransactionTypeId
+				JOIN tblSMInterCompanyTransactionType TT1 WITH (NOLOCK) ON TT1.intInterCompanyTransactionTypeId = TC.intToTransactionTypeId
 				WHERE TT.strTransactionType = 'Quality Sample'
 					AND TT1.strTransactionType = 'Quality Sample'
 				)
@@ -69,16 +69,16 @@ BEGIN TRY
 				,@intCompanyLocationId = TC.intCompanyLocationId
 				,@intToBookId = TC.intToBookId
 				,@strFromCompanyName = MC.strCompanyName
-			FROM tblSMInterCompanyTransactionConfiguration TC
-			JOIN tblSMInterCompanyTransactionType TT ON TT.intInterCompanyTransactionTypeId = TC.intFromTransactionTypeId
-			JOIN tblSMInterCompanyTransactionType TT1 ON TT1.intInterCompanyTransactionTypeId = TC.intToTransactionTypeId
-			JOIN tblQMSample S ON S.intCompanyId = TC.intFromCompanyId
+			FROM tblSMInterCompanyTransactionConfiguration TC WITH (NOLOCK)
+			JOIN tblSMInterCompanyTransactionType TT WITH (NOLOCK) ON TT.intInterCompanyTransactionTypeId = TC.intFromTransactionTypeId
+			JOIN tblSMInterCompanyTransactionType TT1 WITH (NOLOCK) ON TT1.intInterCompanyTransactionTypeId = TC.intToTransactionTypeId
+			JOIN tblQMSample S WITH (NOLOCK) ON S.intCompanyId = TC.intFromCompanyId
 				AND S.intBookId = CASE 
 					WHEN S.ysnParent = 0
 						THEN TC.intFromBookId
 					ELSE TC.intToBookId
 					END
-			JOIN tblSMMultiCompany MC ON MC.intMultiCompanyId = CASE 
+			JOIN tblSMMultiCompany MC WITH (NOLOCK) ON MC.intMultiCompanyId = CASE 
 					WHEN S.ysnParent = 0
 						THEN TC.intFromCompanyId
 					ELSE TC.intToCompanyId
@@ -95,7 +95,7 @@ BEGIN TRY
 
 				IF EXISTS (
 						SELECT 1
-						FROM tblQMSample
+						FROM tblQMSample WITH (NOLOCK)
 						WHERE intSampleId = @intSampleId
 							AND intConcurrencyId = 1
 						)
@@ -116,7 +116,7 @@ BEGIN TRY
 			BEGIN
 				IF EXISTS (
 						SELECT 1
-						FROM tblQMSample
+						FROM tblQMSample WITH (NOLOCK)
 						WHERE intSampleId = @intSampleId
 							AND intConcurrencyId > 1
 						)

@@ -17,7 +17,7 @@ BEGIN TRY
 
 	INSERT INTO @tblRKFuturesSettlementPricePreStage (intFutureSettlementPricePreStageId)
 	SELECT intFutureSettlementPricePreStageId
-	FROM tblRKFuturesSettlementPricePreStage
+	FROM tblRKFuturesSettlementPricePreStage WITH (NOLOCK)
 	WHERE ISNULL(strFeedStatus, '') = ''
 
 	SELECT @intFutureSettlementPricePreStageId = MIN(intFutureSettlementPricePreStageId)
@@ -32,7 +32,7 @@ BEGIN TRY
 		SELECT @intFutureSettlementPriceId = intFutureSettlementPriceId
 			,@strRowState = strRowState
 			,@intUserId = intUserId
-		FROM tblRKFuturesSettlementPricePreStage
+		FROM tblRKFuturesSettlementPricePreStage WITH (NOLOCK)
 		WHERE intFutureSettlementPricePreStageId = @intFutureSettlementPricePreStageId
 
 		EXEC uspIPSettlementPricePopulateStgXML @intFutureSettlementPriceId

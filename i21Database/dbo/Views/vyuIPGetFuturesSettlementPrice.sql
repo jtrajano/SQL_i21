@@ -9,7 +9,7 @@ SELECT FSP.intFutureSettlementPriceId
 	,FSP.intFutureSettlementPriceRefId
 	,M.strFutMarketName
 	,C.strCommodityCode
-FROM tblRKFuturesSettlementPrice FSP
-JOIN tblRKFutureMarket M ON M.intFutureMarketId = FSP.intFutureMarketId
-JOIN tblRKCommodityMarketMapping MM ON MM.intCommodityMarketId = FSP.intCommodityMarketId
-JOIN tblICCommodity C ON C.intCommodityId = MM.intCommodityId
+FROM tblRKFuturesSettlementPrice FSP WITH (NOLOCK)
+LEFT JOIN tblRKFutureMarket M WITH (NOLOCK) ON M.intFutureMarketId = FSP.intFutureMarketId
+LEFT JOIN tblRKCommodityMarketMapping MM WITH (NOLOCK) ON MM.intCommodityMarketId = FSP.intCommodityMarketId
+LEFT JOIN tblICCommodity C WITH (NOLOCK) ON C.intCommodityId = MM.intCommodityId

@@ -15,7 +15,7 @@ SELECT SD.intSampleDetailId
 	,S.intSampleRefId
 	,A.strAttributeName
 	,LI.strListItemName
-FROM tblQMSample S
-JOIN tblQMSampleDetail SD ON SD.intSampleId = S.intSampleId
-JOIN tblQMAttribute A ON A.intAttributeId = SD.intAttributeId
-LEFT JOIN tblQMListItem LI ON LI.intListItemId = SD.intListItemId
+FROM tblQMSample S WITH (NOLOCK)
+JOIN tblQMSampleDetail SD WITH (NOLOCK) ON SD.intSampleId = S.intSampleId
+JOIN tblQMAttribute A WITH (NOLOCK) ON A.intAttributeId = SD.intAttributeId
+LEFT JOIN tblQMListItem LI WITH (NOLOCK) ON LI.intListItemId = SD.intListItemId

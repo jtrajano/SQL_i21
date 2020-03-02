@@ -27,7 +27,7 @@ BEGIN TRY
 	SET @strFutureMonth = NULL
 
 	SELECT @strFutureMonth = strFutureMonth
-	FROM tblRKFuturesMonth
+	FROM tblRKFuturesMonth WITH (NOLOCK)
 	WHERE intFutureMonthId = @intFutureMonthId
 
 	-------------------------Header-----------------------------------------------------------

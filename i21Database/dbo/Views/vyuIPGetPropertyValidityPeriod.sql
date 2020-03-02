@@ -17,5 +17,5 @@ SELECT PVP.intPropertyValidityPeriodId
 	,PVP.dtmLastModified
 	,PVP.intPropertyValidityPeriodRefId
 	,UOM.strUnitMeasure
-FROM tblQMPropertyValidityPeriod PVP
-LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = PVP.intUnitMeasureId
+FROM tblQMPropertyValidityPeriod PVP WITH (NOLOCK)
+LEFT JOIN tblICUnitMeasure UOM WITH (NOLOCK) ON UOM.intUnitMeasureId = PVP.intUnitMeasureId

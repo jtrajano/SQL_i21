@@ -132,7 +132,7 @@ BEGIN TRY
 		,@intCompanyRefId INT
 
 	SELECT @intSampleStageId = MIN(intSampleStageId)
-	FROM tblQMSampleStage
+	FROM tblQMSampleStage WITH (NOLOCK)
 	WHERE ISNULL(strFeedStatus, '') = ''
 		AND intMultiCompanyId = @intToCompanyId
 
@@ -177,7 +177,7 @@ BEGIN TRY
 			,@intToBookId = intToBookId
 			,@intTransactionId = intTransactionId
 			,@intCompanyId = intCompanyId
-		FROM tblQMSampleStage
+		FROM tblQMSampleStage WITH (NOLOCK)
 		WHERE intSampleStageId = @intSampleStageId
 
 		BEGIN TRY
@@ -307,7 +307,7 @@ BEGIN TRY
 			IF @strSampleTypeName IS NOT NULL
 				AND NOT EXISTS (
 					SELECT 1
-					FROM tblQMSampleType ST
+					FROM tblQMSampleType ST WITH (NOLOCK)
 					WHERE ST.strSampleTypeName = @strSampleTypeName
 					)
 			BEGIN
@@ -327,7 +327,7 @@ BEGIN TRY
 				BEGIN
 					IF NOT EXISTS (
 							SELECT 1
-							FROM tblICItem t
+							FROM tblICItem t WITH (NOLOCK)
 							WHERE t.strItemNo = @strProductValue
 							)
 					BEGIN
@@ -344,7 +344,7 @@ BEGIN TRY
 				BEGIN
 					IF NOT EXISTS (
 							SELECT 1
-							FROM tblICInventoryReceipt t
+							FROM tblICInventoryReceipt t WITH (NOLOCK)
 							WHERE t.strReceiptNumber = @strProductValue
 							)
 					BEGIN
@@ -361,7 +361,7 @@ BEGIN TRY
 				BEGIN
 					IF NOT EXISTS (
 							SELECT 1
-							FROM tblICInventoryShipment t
+							FROM tblICInventoryShipment t WITH (NOLOCK)
 							WHERE t.strShipmentNumber = @strProductValue
 							)
 					BEGIN
@@ -378,7 +378,7 @@ BEGIN TRY
 				BEGIN
 					IF NOT EXISTS (
 							SELECT 1
-							FROM tblICLot t
+							FROM tblICLot t WITH (NOLOCK)
 							WHERE t.strLotNumber = @strProductValue
 							)
 					BEGIN
@@ -395,7 +395,7 @@ BEGIN TRY
 				BEGIN
 					IF NOT EXISTS (
 							SELECT 1
-							FROM tblCTContractDetail t
+							FROM tblCTContractDetail t WITH (NOLOCK)
 							WHERE t.intContractDetailId = @strProductValue
 							)
 					BEGIN
@@ -412,7 +412,7 @@ BEGIN TRY
 				BEGIN
 					IF NOT EXISTS (
 							SELECT 1
-							FROM tblLGLoadDetailContainerLink t
+							FROM tblLGLoadDetailContainerLink t WITH (NOLOCK)
 							WHERE t.intLoadDetailContainerLinkId = @strProductValue
 							)
 					BEGIN
@@ -429,7 +429,7 @@ BEGIN TRY
 				BEGIN
 					IF NOT EXISTS (
 							SELECT 1
-							FROM tblLGLoadDetail t
+							FROM tblLGLoadDetail t WITH (NOLOCK)
 							WHERE t.intLoadDetailId = @strProductValue
 							)
 					BEGIN
@@ -446,7 +446,7 @@ BEGIN TRY
 				BEGIN
 					IF NOT EXISTS (
 							SELECT 1
-							FROM tblICParentLot t
+							FROM tblICParentLot t WITH (NOLOCK)
 							WHERE t.strParentLotNumber = @strProductValue
 							)
 					BEGIN
@@ -463,7 +463,7 @@ BEGIN TRY
 				BEGIN
 					IF NOT EXISTS (
 							SELECT 1
-							FROM tblMFWorkOrder t
+							FROM tblMFWorkOrder t WITH (NOLOCK)
 							WHERE t.strWorkOrderNo = @strProductValue
 							)
 					BEGIN
@@ -481,7 +481,7 @@ BEGIN TRY
 			IF @strSampleStatus IS NOT NULL
 				AND NOT EXISTS (
 					SELECT 1
-					FROM tblQMSampleStatus SS
+					FROM tblQMSampleStatus SS WITH (NOLOCK)
 					WHERE SS.strSecondaryStatus = @strSampleStatus
 					)
 			BEGIN
@@ -497,7 +497,7 @@ BEGIN TRY
 			IF @strPreviousSampleStatus IS NOT NULL
 				AND NOT EXISTS (
 					SELECT 1
-					FROM tblQMSampleStatus SS
+					FROM tblQMSampleStatus SS WITH (NOLOCK)
 					WHERE SS.strSecondaryStatus = @strPreviousSampleStatus
 					)
 			BEGIN
@@ -513,7 +513,7 @@ BEGIN TRY
 			IF @strItemNo IS NOT NULL
 				AND NOT EXISTS (
 					SELECT 1
-					FROM tblICItem I
+					FROM tblICItem I WITH (NOLOCK)
 					WHERE I.strItemNo = @strItemNo
 					)
 			BEGIN
@@ -529,7 +529,7 @@ BEGIN TRY
 			IF @strContractItemName IS NOT NULL
 				AND NOT EXISTS (
 					SELECT 1
-					FROM tblICItemContract IC
+					FROM tblICItemContract IC WITH (NOLOCK)
 					WHERE IC.strContractItemName = @strContractItemName
 					)
 			BEGIN
@@ -545,7 +545,7 @@ BEGIN TRY
 			IF @strLotStatus IS NOT NULL
 				AND NOT EXISTS (
 					SELECT 1
-					FROM tblICLotStatus LS
+					FROM tblICLotStatus LS WITH (NOLOCK)
 					WHERE LS.strSecondaryStatus = @strLotStatus
 					)
 			BEGIN
@@ -584,8 +584,8 @@ BEGIN TRY
 			IF @strTestedByName IS NOT NULL
 				AND NOT EXISTS (
 					SELECT 1
-					FROM tblEMEntity t
-					JOIN tblEMEntityType ET ON ET.intEntityId = t.intEntityId
+					FROM tblEMEntity t WITH (NOLOCK)
+					JOIN tblEMEntityType ET WITH (NOLOCK) ON ET.intEntityId = t.intEntityId
 					WHERE ET.strType = 'User'
 						AND t.strName = @strTestedByName
 						AND t.strEntityNo <> ''
@@ -603,7 +603,7 @@ BEGIN TRY
 			IF @strSampleUOM IS NOT NULL
 				AND NOT EXISTS (
 					SELECT 1
-					FROM tblICUnitMeasure UOM
+					FROM tblICUnitMeasure UOM WITH (NOLOCK)
 					WHERE UOM.strUnitMeasure = @strSampleUOM
 					)
 			BEGIN
@@ -619,7 +619,7 @@ BEGIN TRY
 			IF @strRepresentingUOM IS NOT NULL
 				AND NOT EXISTS (
 					SELECT 1
-					FROM tblICUnitMeasure UOM
+					FROM tblICUnitMeasure UOM WITH (NOLOCK)
 					WHERE UOM.strUnitMeasure = @strRepresentingUOM
 					)
 			BEGIN
@@ -635,7 +635,7 @@ BEGIN TRY
 			IF @strSubLocationName IS NOT NULL
 				AND NOT EXISTS (
 					SELECT 1
-					FROM tblSMCompanyLocationSubLocation CS
+					FROM tblSMCompanyLocationSubLocation CS WITH (NOLOCK)
 					WHERE CS.strSubLocationName = @strSubLocationName
 					)
 			BEGIN
@@ -651,7 +651,7 @@ BEGIN TRY
 			IF @strBundleItemNo IS NOT NULL
 				AND NOT EXISTS (
 					SELECT 1
-					FROM tblICItem I
+					FROM tblICItem I WITH (NOLOCK)
 					WHERE I.strItemNo = @strBundleItemNo
 					)
 			BEGIN
@@ -667,7 +667,7 @@ BEGIN TRY
 			IF @strShiftName IS NOT NULL
 				AND NOT EXISTS (
 					SELECT 1
-					FROM tblMFShift S
+					FROM tblMFShift S WITH (NOLOCK)
 					WHERE S.strShiftName = @strShiftName
 					)
 			BEGIN
@@ -683,7 +683,7 @@ BEGIN TRY
 			IF @strLocationName IS NOT NULL
 				AND NOT EXISTS (
 					SELECT 1
-					FROM tblSMCompanyLocation CL
+					FROM tblSMCompanyLocation CL WITH (NOLOCK)
 					WHERE CL.strLocationName = @strLocationName
 					)
 			BEGIN
@@ -699,7 +699,7 @@ BEGIN TRY
 			IF @strReceiptNumber IS NOT NULL
 				AND NOT EXISTS (
 					SELECT 1
-					FROM tblICInventoryReceipt IR
+					FROM tblICInventoryReceipt IR WITH (NOLOCK)
 					WHERE IR.strReceiptNumber = @strReceiptNumber
 					)
 			BEGIN
@@ -715,7 +715,7 @@ BEGIN TRY
 			IF @strInvShipmentNumber IS NOT NULL
 				AND NOT EXISTS (
 					SELECT 1
-					FROM tblICInventoryShipment INVS
+					FROM tblICInventoryShipment INVS WITH (NOLOCK)
 					WHERE INVS.strShipmentNumber = @strInvShipmentNumber
 					)
 			BEGIN
@@ -731,7 +731,7 @@ BEGIN TRY
 			IF @strWorkOrderNo IS NOT NULL
 				AND NOT EXISTS (
 					SELECT 1
-					FROM tblMFWorkOrder W
+					FROM tblMFWorkOrder W WITH (NOLOCK)
 					WHERE W.strWorkOrderNo = @strWorkOrderNo
 					)
 			BEGIN
@@ -747,7 +747,7 @@ BEGIN TRY
 			IF @strStorageLocationName IS NOT NULL
 				AND NOT EXISTS (
 					SELECT 1
-					FROM tblICStorageLocation SL
+					FROM tblICStorageLocation SL WITH (NOLOCK)
 					WHERE SL.strName = @strStorageLocationName
 					)
 			BEGIN
@@ -763,7 +763,7 @@ BEGIN TRY
 			IF @strBook IS NOT NULL
 				AND NOT EXISTS (
 					SELECT 1
-					FROM tblCTBook B
+					FROM tblCTBook B WITH (NOLOCK)
 					WHERE B.strBook = @strBook
 					)
 			BEGIN
@@ -779,7 +779,7 @@ BEGIN TRY
 			IF @strSubBook IS NOT NULL
 				AND NOT EXISTS (
 					SELECT 1
-					FROM tblCTSubBook SB
+					FROM tblCTSubBook SB WITH (NOLOCK)
 					WHERE SB.strSubBook = @strSubBook
 					)
 			BEGIN
@@ -795,8 +795,8 @@ BEGIN TRY
 			IF @strForwardingAgentName IS NOT NULL
 				AND NOT EXISTS (
 					SELECT 1
-					FROM tblEMEntity t
-					JOIN tblEMEntityType ET ON ET.intEntityId = t.intEntityId
+					FROM tblEMEntity t WITH (NOLOCK)
+					JOIN tblEMEntityType ET WITH (NOLOCK) ON ET.intEntityId = t.intEntityId
 					WHERE ET.strType = 'Forwarding Agent'
 						AND t.strName = @strForwardingAgentName
 						AND t.strEntityNo <> ''
@@ -818,7 +818,7 @@ BEGIN TRY
 				BEGIN
 					IF NOT EXISTS (
 							SELECT 1
-							FROM tblSMCompanyLocation CL
+							FROM tblSMCompanyLocation CL WITH (NOLOCK)
 							WHERE CL.strLocationName = @strSentByValue
 							)
 					BEGIN
@@ -835,8 +835,8 @@ BEGIN TRY
 				BEGIN
 					IF NOT EXISTS (
 							SELECT 1
-							FROM tblEMEntity t
-							JOIN tblEMEntityType ET ON ET.intEntityId = t.intEntityId
+							FROM tblEMEntity t WITH (NOLOCK)
+							JOIN tblEMEntityType ET WITH (NOLOCK) ON ET.intEntityId = t.intEntityId
 							WHERE ET.strType = 'Forwarding Agent'
 								AND t.strName = @strSentByValue
 								AND t.strEntityNo <> ''
@@ -855,8 +855,8 @@ BEGIN TRY
 				BEGIN
 					IF NOT EXISTS (
 							SELECT 1
-							FROM tblEMEntity t
-							JOIN tblEMEntityType ET ON ET.intEntityId = t.intEntityId
+							FROM tblEMEntity t WITH (NOLOCK)
+							JOIN tblEMEntityType ET WITH (NOLOCK) ON ET.intEntityId = t.intEntityId
 							WHERE ET.strType = 'Vendor'
 								AND t.strName = @strSentByValue
 								AND t.strEntityNo <> ''
@@ -875,8 +875,8 @@ BEGIN TRY
 				BEGIN
 					IF NOT EXISTS (
 							SELECT 1
-							FROM tblEMEntity t
-							JOIN tblEMEntityType ET ON ET.intEntityId = t.intEntityId
+							FROM tblEMEntity t WITH (NOLOCK)
+							JOIN tblEMEntityType ET WITH (NOLOCK) ON ET.intEntityId = t.intEntityId
 							WHERE ET.strType = 'User'
 								AND t.strName = @strSentByValue
 								AND t.strEntityNo <> ''
@@ -909,7 +909,7 @@ BEGIN TRY
 			BEGIN
 				IF NOT EXISTS (
 						SELECT 1
-						FROM tblCTContractDetail t
+						FROM tblCTContractDetail t WITH (NOLOCK)
 						WHERE t.intContractDetailId = @intContractDetailRefId
 						)
 				BEGIN
@@ -927,7 +927,7 @@ BEGIN TRY
 				BEGIN
 					IF NOT EXISTS (
 							SELECT 1
-							FROM tblLGAllocationDetail t
+							FROM tblLGAllocationDetail t WITH (NOLOCK)
 							WHERE t.intSContractDetailId = @intContractDetailRefId
 							)
 					BEGIN
@@ -958,7 +958,7 @@ BEGIN TRY
 			BEGIN
 				IF NOT EXISTS (
 						SELECT 1
-						FROM tblLGLoadDetailContainerLink t
+						FROM tblLGLoadDetailContainerLink t WITH (NOLOCK)
 						WHERE t.intLoadDetailContainerLinkId = @intLoadDetailContainerLinkRefId
 						)
 				BEGIN
@@ -988,7 +988,7 @@ BEGIN TRY
 			BEGIN
 				IF NOT EXISTS (
 						SELECT 1
-						FROM tblLGLoadDetail t
+						FROM tblLGLoadDetail t WITH (NOLOCK)
 						WHERE t.intLoadDetailId = @intLoadDetailRefId
 						)
 				BEGIN
@@ -1005,7 +1005,7 @@ BEGIN TRY
 			IF @strCountry IS NOT NULL
 				AND NOT EXISTS (
 					SELECT 1
-					FROM tblSMCountry C
+					FROM tblSMCountry C WITH (NOLOCK)
 					WHERE C.strCountry = @strCountry
 					)
 			BEGIN
@@ -1089,27 +1089,27 @@ BEGIN TRY
 				,@intLastModifiedUserId = NULL
 
 			SELECT @intSampleTypeId = t.intSampleTypeId
-			FROM tblQMSampleType t
+			FROM tblQMSampleType t WITH (NOLOCK)
 			WHERE t.strSampleTypeName = @strSampleTypeName
 
 			SELECT @intSampleStatusId = t.intSampleStatusId
-			FROM tblQMSampleStatus t
+			FROM tblQMSampleStatus t WITH (NOLOCK)
 			WHERE t.strSecondaryStatus = @strSampleStatus
 
 			SELECT @intPreviousSampleStatusId = t.intSampleStatusId
-			FROM tblQMSampleStatus t
+			FROM tblQMSampleStatus t WITH (NOLOCK)
 			WHERE t.strSecondaryStatus = @strPreviousSampleStatus
 
 			SELECT @intItemId = t.intItemId
-			FROM tblICItem t
+			FROM tblICItem t WITH (NOLOCK)
 			WHERE t.strItemNo = @strItemNo
 
 			SELECT @intItemContractId = t.intItemContractId
-			FROM tblICItemContract t
+			FROM tblICItemContract t WITH (NOLOCK)
 			WHERE t.strContractItemName = @strContractItemName
 
 			SELECT @intLotStatusId = t.intLotStatusId
-			FROM tblICLotStatus t
+			FROM tblICLotStatus t WITH (NOLOCK)
 			WHERE t.strSecondaryStatus = @strLotStatus
 
 			--SELECT @intEntityId = t.intEntityId
@@ -1123,63 +1123,63 @@ BEGIN TRY
 			--	AND t.strEntityNo <> ''
 
 			SELECT @intTestedById = t.intEntityId
-			FROM tblEMEntity t
-			JOIN tblEMEntityType ET ON ET.intEntityId = t.intEntityId
+			FROM tblEMEntity t WITH (NOLOCK)
+			JOIN tblEMEntityType ET WITH (NOLOCK) ON ET.intEntityId = t.intEntityId
 			WHERE ET.strType = 'User'
 				AND t.strName = @strTestedByName
 				AND t.strEntityNo <> ''
 
 			SELECT @intSampleUOMId = t.intUnitMeasureId
-			FROM tblICUnitMeasure t
+			FROM tblICUnitMeasure t WITH (NOLOCK)
 			WHERE t.strUnitMeasure = @strSampleUOM
 
 			SELECT @intRepresentingUOMId = t.intUnitMeasureId
-			FROM tblICUnitMeasure t
+			FROM tblICUnitMeasure t WITH (NOLOCK)
 			WHERE t.strUnitMeasure = @strRepresentingUOM
 
 			SELECT @intCompanyLocationSubLocationId = t.intCompanyLocationSubLocationId
-			FROM tblSMCompanyLocationSubLocation t
+			FROM tblSMCompanyLocationSubLocation t WITH (NOLOCK)
 			WHERE t.strSubLocationName = @strSubLocationName
 
 			SELECT @intItemBundleId = t.intItemId
-			FROM tblICItem t
+			FROM tblICItem t WITH (NOLOCK)
 			WHERE t.strItemNo = @strBundleItemNo
 
 			SELECT @intShiftId = t.intShiftId
-			FROM tblMFShift t
+			FROM tblMFShift t WITH (NOLOCK)
 			WHERE t.strShiftName = @strShiftName
 
 			SELECT @intLocationId = t.intCompanyLocationId
-			FROM tblSMCompanyLocation t
+			FROM tblSMCompanyLocation t WITH (NOLOCK)
 			WHERE t.strLocationName = @strLocationName
 
 			SELECT @intInventoryReceiptId = t.intInventoryReceiptId
-			FROM tblICInventoryReceipt t
+			FROM tblICInventoryReceipt t WITH (NOLOCK)
 			WHERE t.strReceiptNumber = @strReceiptNumber
 
 			SELECT @intInventoryShipmentId = t.intInventoryShipmentId
-			FROM tblICInventoryShipment t
+			FROM tblICInventoryShipment t WITH (NOLOCK)
 			WHERE t.strShipmentNumber = @strInvShipmentNumber
 
 			SELECT @intWorkOrderId = t.intWorkOrderId
-			FROM tblMFWorkOrder t
+			FROM tblMFWorkOrder t WITH (NOLOCK)
 			WHERE t.strWorkOrderNo = @strWorkOrderNo
 
 			SELECT @intStorageLocationId = t.intStorageLocationId
-			FROM tblICStorageLocation t
+			FROM tblICStorageLocation t WITH (NOLOCK)
 			WHERE t.strName = @strStorageLocationName
 
 			SELECT @intBookId = t.intBookId
-			FROM tblCTBook t
+			FROM tblCTBook t WITH (NOLOCK)
 			WHERE t.strBook = @strBook
 
 			SELECT @intSubBookId = t.intSubBookId
-			FROM tblCTSubBook t
+			FROM tblCTSubBook t WITH (NOLOCK)
 			WHERE t.strSubBook = @strSubBook
 
 			SELECT @intForwardingAgentId = t.intEntityId
-			FROM tblEMEntity t
-			JOIN tblEMEntityType ET ON ET.intEntityId = t.intEntityId
+			FROM tblEMEntity t WITH (NOLOCK)
+			JOIN tblEMEntityType ET WITH (NOLOCK) ON ET.intEntityId = t.intEntityId
 			WHERE ET.strType = 'Forwarding Agent'
 				AND t.strName = @strForwardingAgentName
 				AND t.strEntityNo <> ''
@@ -1187,14 +1187,14 @@ BEGIN TRY
 			IF @strSentBy = 'Self'
 			BEGIN
 				SELECT @intSentById = t.intCompanyLocationId
-				FROM tblSMCompanyLocation t
+				FROM tblSMCompanyLocation t WITH (NOLOCK)
 				WHERE t.strLocationName = @strSentByValue
 			END
 			ELSE IF @strSentBy = 'Forwarding Agent'
 			BEGIN
 				SELECT @intSentById = t.intEntityId
-				FROM tblEMEntity t
-				JOIN tblEMEntityType ET ON ET.intEntityId = t.intEntityId
+				FROM tblEMEntity t WITH (NOLOCK)
+				JOIN tblEMEntityType ET WITH (NOLOCK) ON ET.intEntityId = t.intEntityId
 				WHERE ET.strType = 'Forwarding Agent'
 					AND t.strName = @strSentByValue
 					AND t.strEntityNo <> ''
@@ -1202,8 +1202,8 @@ BEGIN TRY
 			ELSE IF @strSentBy = 'Seller'
 			BEGIN
 				SELECT @intSentById = t.intEntityId
-				FROM tblEMEntity t
-				JOIN tblEMEntityType ET ON ET.intEntityId = t.intEntityId
+				FROM tblEMEntity t WITH (NOLOCK)
+				JOIN tblEMEntityType ET WITH (NOLOCK) ON ET.intEntityId = t.intEntityId
 				WHERE ET.strType = 'Vendor'
 					AND t.strName = @strSentByValue
 					AND t.strEntityNo <> ''
@@ -1211,8 +1211,8 @@ BEGIN TRY
 			ELSE IF @strSentBy = 'Users'
 			BEGIN
 				SELECT @intSentById = t.intEntityId
-				FROM tblEMEntity t
-				JOIN tblEMEntityType ET ON ET.intEntityId = t.intEntityId
+				FROM tblEMEntity t WITH (NOLOCK)
+				JOIN tblEMEntityType ET WITH (NOLOCK) ON ET.intEntityId = t.intEntityId
 				WHERE ET.strType = 'User'
 					AND t.strName = @strSentByValue
 					AND t.strEntityNo <> ''
@@ -1221,63 +1221,63 @@ BEGIN TRY
 			IF @intProductTypeId = 2
 			BEGIN
 				SELECT @intProductValueId = t.intItemId
-				FROM tblICItem t
+				FROM tblICItem t WITH (NOLOCK)
 				WHERE t.strItemNo = @strProductValue
 			END
 			ELSE IF @intProductTypeId = 3
 			BEGIN
 				SELECT @intProductValueId = t.intInventoryReceiptId
-				FROM tblICInventoryReceipt t
+				FROM tblICInventoryReceipt t WITH (NOLOCK)
 				WHERE t.strReceiptNumber = @strProductValue
 			END
 			ELSE IF @intProductTypeId = 4
 			BEGIN
 				SELECT @intProductValueId = t.intInventoryShipmentId
-				FROM tblICInventoryShipment t
+				FROM tblICInventoryShipment t WITH (NOLOCK)
 				WHERE t.strShipmentNumber = @strProductValue
 			END
 			ELSE IF @intProductTypeId = 6
 			BEGIN
 				SELECT @intProductValueId = t.intLotId
-				FROM tblICLot t
+				FROM tblICLot t WITH (NOLOCK)
 				WHERE t.strLotNumber = @strProductValue
 					AND t.intStorageLocationId = @intStorageLocationId
 			END
 			ELSE IF @intProductTypeId = 8
 			BEGIN
 				SELECT @intProductValueId = t.intContractDetailId
-				FROM tblCTContractDetail t
+				FROM tblCTContractDetail t WITH (NOLOCK)
 				WHERE t.intContractDetailId = @strProductValue
 
 				IF @ysnParent = 0
 				BEGIN
 					SELECT @intProductValueId = t.intPContractDetailId
-					FROM tblLGAllocationDetail t
+					FROM tblLGAllocationDetail t WITH (NOLOCK)
 					WHERE t.intSContractDetailId = @intContractDetailRefId
 				END
 			END
 			ELSE IF @intProductTypeId = 9
 			BEGIN
 				SELECT @intProductValueId = t.intLoadDetailContainerLinkId
-				FROM tblLGLoadDetailContainerLink t
+				FROM tblLGLoadDetailContainerLink t WITH (NOLOCK)
 				WHERE t.intLoadDetailContainerLinkId = @strProductValue
 			END
 			ELSE IF @intProductTypeId = 10
 			BEGIN
 				SELECT @intProductValueId = t.intLoadDetailId
-				FROM tblLGLoadDetail t
+				FROM tblLGLoadDetail t WITH (NOLOCK)
 				WHERE t.intLoadDetailId = @strProductValue
 			END
 			ELSE IF @intProductTypeId = 11
 			BEGIN
 				SELECT @intProductValueId = t.intParentLotId
-				FROM tblICParentLot t
+				FROM tblICParentLot t WITH (NOLOCK)
 				WHERE t.strParentLotNumber = @strProductValue
 			END
 			ELSE IF @intProductTypeId = 12
 			BEGIN
 				SELECT @intProductValueId = t.intWorkOrderId
-				FROM tblMFWorkOrder t
+				FROM tblMFWorkOrder t WITH (NOLOCK)
 				WHERE t.strWorkOrderNo = @strProductValue
 			END
 
@@ -1285,17 +1285,17 @@ BEGIN TRY
 			BEGIN
 				SELECT @intContractDetailId = t.intContractDetailId
 					,@intEntityId = CH.intEntityId
-				FROM tblCTContractDetail t
-				JOIN tblCTContractHeader CH ON CH.intContractHeaderId = t.intContractHeaderId
+				FROM tblCTContractDetail t WITH (NOLOCK)
+				JOIN tblCTContractHeader CH WITH (NOLOCK) ON CH.intContractHeaderId = t.intContractHeaderId
 				WHERE t.intContractDetailId = @intContractDetailRefId
 
 				IF @ysnParent = 0
 				BEGIN
 					SELECT @intContractDetailId = t.intPContractDetailId
 						,@intEntityId = CH.intEntityId
-					FROM tblLGAllocationDetail t
-					JOIN tblCTContractDetail CD ON CD.intContractDetailId = t.intPContractDetailId
-					JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+					FROM tblLGAllocationDetail t WITH (NOLOCK)
+					JOIN tblCTContractDetail CD WITH (NOLOCK) ON CD.intContractDetailId = t.intPContractDetailId
+					JOIN tblCTContractHeader CH WITH (NOLOCK) ON CH.intContractHeaderId = CD.intContractHeaderId
 					WHERE t.intSContractDetailId = @intContractDetailRefId
 				END
 			END
@@ -1304,7 +1304,7 @@ BEGIN TRY
 			BEGIN
 				SELECT @intLoadDetailContainerLinkId = t.intLoadDetailContainerLinkId
 					,@intLoadContainerId = t.intLoadContainerId
-				FROM tblLGLoadDetailContainerLink t
+				FROM tblLGLoadDetailContainerLink t WITH (NOLOCK)
 				WHERE t.intLoadDetailContainerLinkId = @intLoadDetailContainerLinkRefId
 			END
 
@@ -1312,17 +1312,17 @@ BEGIN TRY
 			BEGIN
 				SELECT @intLoadDetailId = t.intLoadDetailId
 					,@intLoadId = t.intLoadId
-				FROM tblLGLoadDetail t
+				FROM tblLGLoadDetail t WITH (NOLOCK)
 				WHERE t.intLoadDetailId = @intLoadDetailRefId
 			END
 
 			SELECT @intCountryID = intCountryID
-			FROM tblSMCountry t
+			FROM tblSMCountry t WITH (NOLOCK)
 			WHERE t.strCountry = @strCountry
 
 			SELECT @intCreatedUserId = t.intEntityId
-			FROM tblEMEntity t
-			JOIN tblEMEntityType ET ON ET.intEntityId = t.intEntityId
+			FROM tblEMEntity t WITH (NOLOCK)
+			JOIN tblEMEntityType ET WITH (NOLOCK) ON ET.intEntityId = t.intEntityId
 			WHERE ET.strType = 'User'
 				AND t.strName = @strCreatedUser
 				AND t.strEntityNo <> ''
@@ -1331,20 +1331,20 @@ BEGIN TRY
 			BEGIN
 				IF EXISTS (
 						SELECT 1
-						FROM tblSMUserSecurity
+						FROM tblSMUserSecurity WITH (NOLOCK)
 						WHERE strUserName = 'irelyadmin'
 						)
 					SELECT TOP 1 @intCreatedUserId = intEntityId
-					FROM tblSMUserSecurity
+					FROM tblSMUserSecurity WITH (NOLOCK)
 					WHERE strUserName = 'irelyadmin'
 				ELSE
 					SELECT TOP 1 @intCreatedUserId = intEntityId
-					FROM tblSMUserSecurity
+					FROM tblSMUserSecurity WITH (NOLOCK)
 			END
 
 			SELECT @intLastModifiedUserId = t.intEntityId
-			FROM tblEMEntity t
-			JOIN tblEMEntityType ET ON ET.intEntityId = t.intEntityId
+			FROM tblEMEntity t WITH (NOLOCK)
+			JOIN tblEMEntityType ET WITH (NOLOCK) ON ET.intEntityId = t.intEntityId
 			WHERE ET.strType = 'User'
 				AND t.strName = @strLastModifiedUser
 				AND t.strEntityNo <> ''
@@ -1353,22 +1353,22 @@ BEGIN TRY
 			BEGIN
 				IF EXISTS (
 						SELECT 1
-						FROM tblSMUserSecurity
+						FROM tblSMUserSecurity WITH (NOLOCK)
 						WHERE strUserName = 'irelyadmin'
 						)
 					SELECT TOP 1 @intLastModifiedUserId = intEntityId
-					FROM tblSMUserSecurity
+					FROM tblSMUserSecurity WITH (NOLOCK)
 					WHERE strUserName = 'irelyadmin'
 				ELSE
 					SELECT TOP 1 @intLastModifiedUserId = intEntityId
-					FROM tblSMUserSecurity
+					FROM tblSMUserSecurity WITH (NOLOCK)
 			END
 
 			IF @strRowState <> 'Delete'
 			BEGIN
 				IF NOT EXISTS (
 						SELECT 1
-						FROM tblQMSample
+						FROM tblQMSample WITH (NOLOCK)
 						WHERE intSampleRefId = @intSampleRefId
 						)
 					SELECT @strRowState = 'Added'
@@ -1380,7 +1380,7 @@ BEGIN TRY
 			BEGIN
 				SELECT @intNewSampleId = intSampleId
 					,@strNewSampleNumber = strSampleNumber
-				FROM tblQMSample
+				FROM tblQMSample WITH (NOLOCK)
 				WHERE intSampleRefId = @intSampleRefId
 
 				SELECT @strHeaderCondition = 'intSampleId = ' + LTRIM(@intNewSampleId)
@@ -1663,7 +1663,7 @@ BEGIN TRY
 
 				SELECT @intNewSampleId = intSampleId
 					,@strNewSampleNumber = strSampleNumber
-				FROM tblQMSample
+				FROM tblQMSample WITH (NOLOCK)
 				WHERE intSampleRefId = @intSampleRefId
 			END
 
@@ -1699,7 +1699,7 @@ BEGIN TRY
 				IF @strAttributeName IS NOT NULL
 					AND NOT EXISTS (
 						SELECT 1
-						FROM tblQMAttribute t
+						FROM tblQMAttribute t WITH (NOLOCK)
 						WHERE t.strAttributeName = @strAttributeName
 						)
 				BEGIN
@@ -1715,7 +1715,7 @@ BEGIN TRY
 				IF @strListItemName IS NOT NULL
 					AND NOT EXISTS (
 						SELECT 1
-						FROM tblQMListItem t
+						FROM tblQMListItem t WITH (NOLOCK)
 						WHERE t.strListItemName = @strListItemName
 						)
 				BEGIN
@@ -1732,16 +1732,16 @@ BEGIN TRY
 					,@intListItemId = NULL
 
 				SELECT @intAttributeId = t.intAttributeId
-				FROM tblQMAttribute t
+				FROM tblQMAttribute t WITH (NOLOCK)
 				WHERE t.strAttributeName = @strAttributeName
 
 				SELECT @intListItemId = t.intListItemId
-				FROM tblQMListItem t
+				FROM tblQMListItem t WITH (NOLOCK)
 				WHERE t.strListItemName = @strListItemName
 
 				IF NOT EXISTS (
 						SELECT 1
-						FROM tblQMSampleDetail
+						FROM tblQMSampleDetail WITH (NOLOCK)
 						WHERE intSampleDetailRefId = @intSampleDetailId
 						)
 				BEGIN
@@ -1869,7 +1869,7 @@ BEGIN TRY
 					BEGIN
 						IF NOT EXISTS (
 								SELECT 1
-								FROM tblICCategory t
+								FROM tblICCategory t WITH (NOLOCK)
 								WHERE t.strCategoryCode = @strTemplateProductValue
 								)
 						BEGIN
@@ -1886,7 +1886,7 @@ BEGIN TRY
 					BEGIN
 						IF NOT EXISTS (
 								SELECT 1
-								FROM tblICItem t
+								FROM tblICItem t WITH (NOLOCK)
 								WHERE t.strItemNo = @strTemplateProductValue
 								)
 						BEGIN
@@ -1904,7 +1904,7 @@ BEGIN TRY
 				IF @strTestName IS NOT NULL
 					AND NOT EXISTS (
 						SELECT 1
-						FROM tblQMTest t
+						FROM tblQMTest t WITH (NOLOCK)
 						WHERE t.strTestName = @strTestName
 						)
 				BEGIN
@@ -1920,7 +1920,7 @@ BEGIN TRY
 				IF @strPropertyName IS NOT NULL
 					AND NOT EXISTS (
 						SELECT 1
-						FROM tblQMProperty t
+						FROM tblQMProperty t WITH (NOLOCK)
 						WHERE t.strPropertyName = @strPropertyName
 						)
 				BEGIN
@@ -1936,7 +1936,7 @@ BEGIN TRY
 				IF @strUnitMeasure IS NOT NULL
 					AND NOT EXISTS (
 						SELECT 1
-						FROM tblICUnitMeasure t
+						FROM tblICUnitMeasure t WITH (NOLOCK)
 						WHERE t.strUnitMeasure = @strUnitMeasure
 						)
 				BEGIN
@@ -1952,7 +1952,7 @@ BEGIN TRY
 				IF @strParentPropertyName IS NOT NULL
 					AND NOT EXISTS (
 						SELECT 1
-						FROM tblQMProperty t
+						FROM tblQMProperty t WITH (NOLOCK)
 						WHERE t.strPropertyName = @strParentPropertyName
 						)
 				BEGIN
@@ -1968,7 +1968,7 @@ BEGIN TRY
 				IF @strTestListItemName IS NOT NULL
 					AND NOT EXISTS (
 						SELECT 1
-						FROM tblQMListItem t
+						FROM tblQMListItem t WITH (NOLOCK)
 						WHERE t.strListItemName = @strTestListItemName
 						)
 				BEGIN
@@ -1984,7 +1984,7 @@ BEGIN TRY
 				IF @strPropertyItemNo IS NOT NULL
 					AND NOT EXISTS (
 						SELECT 1
-						FROM tblICItem t
+						FROM tblICItem t WITH (NOLOCK)
 						WHERE t.strItemNo = @strPropertyItemNo
 						)
 				BEGIN
@@ -2011,38 +2011,38 @@ BEGIN TRY
 				IF @intTemplateProductTypeId = 1
 				BEGIN
 					SELECT @intTemplateProductValueId = t.intCategoryId
-					FROM tblICCategory t
+					FROM tblICCategory t WITH (NOLOCK)
 					WHERE t.strCategoryCode = @strTemplateProductValue
 				END
 				ELSE IF @intTemplateProductTypeId = 2
 				BEGIN
 					SELECT @intTemplateProductValueId = t.intItemId
-					FROM tblICItem t
+					FROM tblICItem t WITH (NOLOCK)
 					WHERE t.strItemNo = @strTemplateProductValue
 				END
 
 				SELECT @intTestId = t.intTestId
-				FROM tblQMTest t
+				FROM tblQMTest t WITH (NOLOCK)
 				WHERE t.strTestName = @strTestName
 
 				SELECT @intPropertyId = t.intPropertyId
-				FROM tblQMProperty t
+				FROM tblQMProperty t WITH (NOLOCK)
 				WHERE t.strPropertyName = @strPropertyName
 
 				SELECT @intUnitMeasureId = t.intUnitMeasureId
-				FROM tblICUnitMeasure t
+				FROM tblICUnitMeasure t WITH (NOLOCK)
 				WHERE t.strUnitMeasure = @strUnitMeasure
 
 				SELECT @intParentPropertyId = t.intPropertyId
-				FROM tblQMProperty t
+				FROM tblQMProperty t WITH (NOLOCK)
 				WHERE t.strPropertyName = @strParentPropertyName
 
 				SELECT @intTestListItemId = t.intListItemId
-				FROM tblQMListItem t
+				FROM tblQMListItem t WITH (NOLOCK)
 				WHERE t.strListItemName = @strTestListItemName
 
 				SELECT @intPropertyItemId = t.intItemId
-				FROM tblICItem t
+				FROM tblICItem t WITH (NOLOCK)
 				WHERE t.strItemNo = @strPropertyItemNo
 
 				IF @intPropertyId IS NOT NULL
@@ -2050,7 +2050,7 @@ BEGIN TRY
 					AND @dtmValidTo IS NOT NULL
 				BEGIN
 					SELECT @intPropertyValidityPeriodId = intPropertyValidityPeriodId
-					FROM tblQMPropertyValidityPeriod
+					FROM tblQMPropertyValidityPeriod WITH (NOLOCK)
 					WHERE intPropertyId = @intPropertyId
 						AND DATEPART(mm, dtmValidFrom) = DATEPART(mm, @dtmValidFrom)
 						AND DATEPART(dd, dtmValidFrom) = DATEPART(dd, @dtmValidFrom)
@@ -2064,8 +2064,8 @@ BEGIN TRY
 					OR @intTemplateProductTypeId = 5
 				BEGIN
 					SELECT @intProductId = P.intProductId
-					FROM tblQMProduct P
-					JOIN tblQMProductControlPoint PC ON PC.intProductId = P.intProductId
+					FROM tblQMProduct P WITH (NOLOCK)
+					JOIN tblQMProductControlPoint PC WITH (NOLOCK) ON PC.intProductId = P.intProductId
 						AND PC.intSampleTypeId = @intSampleTypeId
 					WHERE P.intProductTypeId = @intTemplateProductTypeId
 						AND P.ysnActive = 1
@@ -2077,8 +2077,8 @@ BEGIN TRY
 					AND @intTemplateProductValueId IS NOT NULL
 				BEGIN
 					SELECT @intProductId = P.intProductId
-					FROM tblQMProduct P
-					JOIN tblQMProductControlPoint PC ON PC.intProductId = P.intProductId
+					FROM tblQMProduct P WITH (NOLOCK)
+					JOIN tblQMProductControlPoint PC WITH (NOLOCK) ON PC.intProductId = P.intProductId
 						AND PC.intSampleTypeId = @intSampleTypeId
 					WHERE P.intProductTypeId = @intTemplateProductTypeId
 						AND P.intProductValueId = @intTemplateProductValueId
@@ -2103,12 +2103,12 @@ BEGIN TRY
 					AND @dtmValidTo IS NOT NULL
 				BEGIN
 					SELECT @intProductPropertyValidityPeriodId = PPV.intProductPropertyValidityPeriodId
-					FROM tblQMProduct PRD
-					JOIN tblQMProductProperty PP ON PP.intProductId = PRD.intProductId
+					FROM tblQMProduct PRD WITH (NOLOCK)
+					JOIN tblQMProductProperty PP WITH (NOLOCK) ON PP.intProductId = PRD.intProductId
 						AND PRD.intProductId = @intProductId
 						AND PP.intTestId = @intTestId
 						AND PP.intPropertyId = @intPropertyId
-					JOIN tblQMProductPropertyValidityPeriod PPV ON PPV.intProductPropertyId = PP.intProductPropertyId
+					JOIN tblQMProductPropertyValidityPeriod PPV WITH (NOLOCK) ON PPV.intProductPropertyId = PP.intProductPropertyId
 						AND DATEPART(mm, dtmValidFrom) = DATEPART(mm, @dtmValidFrom)
 						AND DATEPART(dd, dtmValidFrom) = DATEPART(dd, @dtmValidFrom)
 						AND DATEPART(mm, dtmValidTo) = DATEPART(mm, @dtmValidTo)
@@ -2128,7 +2128,7 @@ BEGIN TRY
 
 				IF NOT EXISTS (
 						SELECT 1
-						FROM tblQMTestResult
+						FROM tblQMTestResult WITH (NOLOCK)
 						WHERE intTestResultRefId = @intTestResultId
 						)
 				BEGIN
@@ -2301,7 +2301,7 @@ BEGIN TRY
 			ext:
 
 			SELECT @intCompanyRefId = intCompanyId
-			FROM tblQMSample
+			FROM tblQMSample WITH (NOLOCK)
 			WHERE intSampleId = @intNewSampleId
 
 			IF (@intNewSampleId > 0)
@@ -2309,11 +2309,11 @@ BEGIN TRY
 				DECLARE @StrDescription AS NVARCHAR(MAX)
 
 				SELECT @strFromBook = B.strBook
-				FROM tblSMInterCompanyTransactionConfiguration TC
-				JOIN tblSMInterCompanyTransactionType TT ON TT.intInterCompanyTransactionTypeId = TC.intFromTransactionTypeId
+				FROM tblSMInterCompanyTransactionConfiguration TC WITH (NOLOCK)
+				JOIN tblSMInterCompanyTransactionType TT WITH (NOLOCK) ON TT.intInterCompanyTransactionTypeId = TC.intFromTransactionTypeId
 					AND TT.strTransactionType = 'Quality Sample'
 					AND TC.intToBookId = @intToBookId
-				JOIN tblCTBook B ON B.intBookId = TC.intFromBookId
+				JOIN tblCTBook B WITH (NOLOCK) ON B.intBookId = TC.intFromBookId
 
 				IF @strRowState = 'Added'
 				BEGIN
@@ -2344,11 +2344,11 @@ BEGIN TRY
 			END
 
 			SELECT @intScreenId = intScreenId
-			FROM tblSMScreen
+			FROM tblSMScreen WITH (NOLOCK)
 			WHERE strNamespace = 'Quality.view.QualitySample'
 
 			SELECT @intTransactionRefId = intTransactionId
-			FROM tblSMTransaction
+			FROM tblSMTransaction WITH (NOLOCK)
 			WHERE intRecordId = @intNewSampleId
 				AND intScreenId = @intScreenId
 
@@ -2422,7 +2422,7 @@ BEGIN TRY
 		END CATCH
 
 		SELECT @intSampleStageId = MIN(intSampleStageId)
-		FROM tblQMSampleStage
+		FROM tblQMSampleStage WITH (NOLOCK)
 		WHERE intSampleStageId > @intSampleStageId
 			AND ISNULL(strFeedStatus, '') = ''
 			AND intMultiCompanyId = @intToCompanyId

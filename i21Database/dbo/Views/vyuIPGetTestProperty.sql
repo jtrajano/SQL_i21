@@ -12,5 +12,5 @@ SELECT TP.intTestPropertyId
 	,TP.dtmLastModified
 	,TP.intTestPropertyRefId
 	,P.strPropertyName
-FROM tblQMTestProperty TP
-LEFT JOIN tblQMProperty P ON P.intPropertyId = TP.intPropertyId
+FROM tblQMTestProperty TP WITH (NOLOCK)
+LEFT JOIN tblQMProperty P WITH (NOLOCK) ON P.intPropertyId = TP.intPropertyId

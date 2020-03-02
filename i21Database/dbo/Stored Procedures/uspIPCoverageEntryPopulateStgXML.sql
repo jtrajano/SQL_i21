@@ -35,15 +35,15 @@ BEGIN TRY
 
 	SELECT @strBatchName = strBatchName
 		,@dtmDate = dtmDate
-	FROM tblRKCoverageEntry
+	FROM tblRKCoverageEntry WITH (NOLOCK)
 	WHERE intCoverageEntryId = @intCoverageEntryId
 
 	SELECT @intScreenId = intScreenId
-	FROM tblSMScreen
+	FROM tblSMScreen WITH (NOLOCK)
 	WHERE strNamespace = 'RiskManagement.view.CoverageReport'
 
 	SELECT @intTransactionId = intTransactionId
-	FROM tblSMTransaction
+	FROM tblSMTransaction WITH (NOLOCK)
 	WHERE intRecordId = @intCoverageEntryId
 		AND intScreenId = @intScreenId
 

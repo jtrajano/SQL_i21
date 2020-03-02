@@ -29,7 +29,7 @@ BEGIN TRY
 	SET @strSampleTypeName = NULL
 
 	SELECT @strSampleTypeName = strSampleTypeName
-	FROM tblQMSampleType
+	FROM tblQMSampleType WITH (NOLOCK)
 	WHERE intSampleTypeId = @intSampleTypeId
 
 	-------------------------Header-----------------------------------------------------------

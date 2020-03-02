@@ -12,6 +12,6 @@ SELECT PC.intProductControlPointId
 	,PC.intProductControlPointRefId
 	,ST.strSampleTypeName
 	,CP.strControlPointName
-FROM tblQMProductControlPoint PC
-LEFT JOIN tblQMSampleType ST ON ST.intSampleTypeId = PC.intSampleTypeId
-LEFT JOIN tblQMControlPoint CP ON CP.intControlPointId = ST.intControlPointId
+FROM tblQMProductControlPoint PC WITH (NOLOCK)
+LEFT JOIN tblQMSampleType ST WITH (NOLOCK) ON ST.intSampleTypeId = PC.intSampleTypeId
+LEFT JOIN tblQMControlPoint CP WITH (NOLOCK) ON CP.intControlPointId = ST.intControlPointId

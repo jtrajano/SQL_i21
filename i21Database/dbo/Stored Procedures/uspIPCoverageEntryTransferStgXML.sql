@@ -6,7 +6,7 @@ BEGIN TRY
 	DECLARE @ErrMsg NVARCHAR(MAX)
 
 	SELECT *
-	FROM tblRKCoverageEntryStage
+	FROM tblRKCoverageEntryStage WITH (NOLOCK)
 	WHERE ISNULL(strFeedStatus, '') = ''
 
 	UPDATE tblRKCoverageEntryStage

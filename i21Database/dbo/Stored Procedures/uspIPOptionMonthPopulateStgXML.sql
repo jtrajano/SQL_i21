@@ -27,7 +27,7 @@ BEGIN TRY
 	SET @strOptionMonth = NULL
 
 	SELECT @strOptionMonth = strOptionMonth
-	FROM tblRKOptionsMonth
+	FROM tblRKOptionsMonth WITH (NOLOCK)
 	WHERE intOptionMonthId = @intOptionMonthId
 
 	-------------------------Header-----------------------------------------------------------

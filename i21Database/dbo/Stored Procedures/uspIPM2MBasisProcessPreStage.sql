@@ -17,7 +17,7 @@ BEGIN TRY
 
 	INSERT INTO @tblRKM2MBasisPreStage (intM2MBasisPreStageId)
 	SELECT intM2MBasisPreStageId
-	FROM tblRKM2MBasisPreStage
+	FROM tblRKM2MBasisPreStage WITH (NOLOCK)
 	WHERE ISNULL(strFeedStatus, '') = ''
 
 	SELECT @intM2MBasisPreStageId = MIN(intM2MBasisPreStageId)
@@ -32,7 +32,7 @@ BEGIN TRY
 		SELECT @intM2MBasisId = intM2MBasisId
 			,@strRowState = strRowState
 			,@intUserId = intUserId
-		FROM tblRKM2MBasisPreStage
+		FROM tblRKM2MBasisPreStage WITH (NOLOCK)
 		WHERE intM2MBasisPreStageId = @intM2MBasisPreStageId
 
 		EXEC uspIPM2MBasisPopulateStgXML @intM2MBasisId

@@ -69,19 +69,19 @@ SELECT T.intFutOptTransactionId
 	,BANK.strBankName
 	,BAA.strBankAccountNo
 	,CE.strCurrencyExchangeRateType
-FROM tblRKFutOptTransaction T
-LEFT JOIN tblEMEntity E ON E.intEntityId = T.intEntityId
-LEFT JOIN tblRKBrokerageAccount BA ON BA.intBrokerageAccountId = T.intBrokerageAccountId
-LEFT JOIN tblRKFutureMarket FM ON FM.intFutureMarketId = T.intFutureMarketId
-LEFT JOIN tblICCommodity C ON C.intCommodityId = T.intCommodityId
-LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = T.intLocationId
-LEFT JOIN tblEMEntity E1 ON E1.intEntityId = T.intTraderId
-LEFT JOIN tblSMCurrency CUR ON CUR.intCurrencyID = T.intCurrencyId
-LEFT JOIN tblRKFuturesMonth FUT ON FUT.intFutureMonthId = T.intFutureMonthId
-LEFT JOIN tblRKOptionsMonth OM ON OM.intOptionMonthId = T.intOptionMonthId
-LEFT JOIN tblCTBook B ON B.intBookId = T.intBookId
-LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = T.intSubBookId
-LEFT JOIN tblCMBank BANK ON BANK.intBankId = T.intBankId
-LEFT JOIN tblCMBankAccount BAA ON BAA.intBankAccountId = T.intBankAccountId
-LEFT JOIN tblSMCurrencyExchangeRateType CE ON CE.intCurrencyExchangeRateTypeId = T.intCurrencyExchangeRateTypeId
-LEFT JOIN tblRKFuturesMonth FUT1 ON FUT1.intFutureMonthId = T.intRollingMonthId
+FROM tblRKFutOptTransaction T WITH (NOLOCK)
+LEFT JOIN tblEMEntity E WITH (NOLOCK) ON E.intEntityId = T.intEntityId
+LEFT JOIN tblRKBrokerageAccount BA WITH (NOLOCK) ON BA.intBrokerageAccountId = T.intBrokerageAccountId
+LEFT JOIN tblRKFutureMarket FM WITH (NOLOCK) ON FM.intFutureMarketId = T.intFutureMarketId
+LEFT JOIN tblICCommodity C WITH (NOLOCK) ON C.intCommodityId = T.intCommodityId
+LEFT JOIN tblSMCompanyLocation CL WITH (NOLOCK) ON CL.intCompanyLocationId = T.intLocationId
+LEFT JOIN tblEMEntity E1 WITH (NOLOCK) ON E1.intEntityId = T.intTraderId
+LEFT JOIN tblSMCurrency CUR WITH (NOLOCK) ON CUR.intCurrencyID = T.intCurrencyId
+LEFT JOIN tblRKFuturesMonth FUT WITH (NOLOCK) ON FUT.intFutureMonthId = T.intFutureMonthId
+LEFT JOIN tblRKOptionsMonth OM WITH (NOLOCK) ON OM.intOptionMonthId = T.intOptionMonthId
+LEFT JOIN tblCTBook B WITH (NOLOCK) ON B.intBookId = T.intBookId
+LEFT JOIN tblCTSubBook SB WITH (NOLOCK) ON SB.intSubBookId = T.intSubBookId
+LEFT JOIN tblCMBank BANK WITH (NOLOCK) ON BANK.intBankId = T.intBankId
+LEFT JOIN tblCMBankAccount BAA WITH (NOLOCK) ON BAA.intBankAccountId = T.intBankAccountId
+LEFT JOIN tblSMCurrencyExchangeRateType CE WITH (NOLOCK) ON CE.intCurrencyExchangeRateTypeId = T.intCurrencyExchangeRateTypeId
+LEFT JOIN tblRKFuturesMonth FUT1 WITH (NOLOCK) ON FUT1.intFutureMonthId = T.intRollingMonthId

@@ -15,6 +15,6 @@ SELECT M.intMatchOptionsPnSId
 	,FOT.strInternalTradeNo AS strLongInternalTradeNo
 	,FOT1.strInternalTradeNo AS strShortInternalTradeNo
 	,FOT.intBookId
-FROM tblRKOptionsMatchPnS M
-LEFT JOIN tblRKFutOptTransaction FOT ON FOT.intFutOptTransactionId = M.intLFutOptTransactionId
-LEFT JOIN tblRKFutOptTransaction FOT1 ON FOT1.intFutOptTransactionId = M.intSFutOptTransactionId
+FROM tblRKOptionsMatchPnS M WITH (NOLOCK)
+LEFT JOIN tblRKFutOptTransaction FOT WITH (NOLOCK) ON FOT.intFutOptTransactionId = M.intLFutOptTransactionId
+LEFT JOIN tblRKFutOptTransaction FOT1 WITH (NOLOCK) ON FOT1.intFutOptTransactionId = M.intSFutOptTransactionId
