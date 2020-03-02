@@ -497,6 +497,7 @@ BEGIN TRY
 			,strBuyerRefNo							= CASE WHEN CH.intContractTypeId = 1 THEN CH.strContractNumber ELSE CH.strCustomerContract END
 			,strSellerRefNo							= CASE WHEN CH.intContractTypeId = 2 THEN CH.strContractNumber ELSE CH.strCustomerContract END
 			,strContractNumber						= CH.strContractNumber
+			,strContractNumberStrauss				= CH.strContractNumber + (case when LEN(LTRIM(RTRIM(ISNULL(@strAmendedColumns,'')))) = 0 then '' else ' - AMENDMENT' end)
 			,strCustomerContract					= CH.strCustomerContract
 			,strContractBasis						= CB.strFreightTerm
 			,strContractBasisDesc					= CB.strFreightTerm+' '+CASE WHEN CB.strINCOLocationType = 'City' THEN CT.strCity ELSE SL.strSubLocationName END
