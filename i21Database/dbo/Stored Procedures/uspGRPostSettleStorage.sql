@@ -2455,7 +2455,10 @@ BEGIN TRY
 															
 					,[dblOldCost]					=  case when @ysnFromPriceBasisContract = 0 and CS.intStorageTypeId != 2 then null 
 														else 
-															case WHEN a.[intContractHeaderId] IS NOT NULL AND @ysnFromPriceBasisContract = 1 
+															case 
+															when (a.intContractHeaderId is not null and a.intPricingTypeId = 1) or
+																(@origdblSpotUnits > 0) then null
+															WHEN a.[intContractHeaderId] IS NOT NULL AND @ysnFromPriceBasisContract = 1 
 															--and (@dblQtyFromCt = @dblSelectedUnits) 
 															THEN 															
 																(
@@ -3058,9 +3061,20 @@ BEGIN TRY
 				----- DEBUG POINT -----
 				if @debug_awesome_ness = 1 and 1 = 1
 				begin
-					select 'voucher payable', * from @voucherPayable		
-					select 'create voucher id ', @createdVouchersId		
-					select * from tblAPBillDetail where intBillId = @createdVouchersId	
+					if 1 = 0 
+					begin
+						select 'voucher payable', * from @voucherPayable		
+						select 'create voucher id ', @createdVouchersId				
+						
+						
+					end
+
+					if 1 = 1 
+					begin
+						select * from tblAPBill where intBillId = @createdVouchersId			
+						select dblOldCost, * from tblAPBillDetail where intBillId = @createdVouchersId	
+						select * from dbo.[fnAPGetVoucherDetailDebitEntry] ( @createdVouchersId)
+					end 
 				end
 				----- DEBUG POINT -----
 
@@ -3388,9 +3402,16 @@ BEGIN TRY
 						*/
 						
 						insert into tblCTPriceFixationDetailAPAR(intPriceFixationDetailId, intBillId, intBillDetailId, intConcurrencyId)
-						select intPriceFixationDetailId, @intVoucherId, intBillDetailId, 1  from @avqty where intBillDetailId is not null and intPriceFixationDetailId is not null
+						select intPriceFixationDetailId, @intVoucherId, intBillDetailId, 1  from @avqty a 
+							join tblCTContractDetail b
+								on b.intContractDetailId = a.intContractDetailId
+							join tblCTContractHeader c
+								on c.intContractHeaderId = b.intContractHeaderId
+									and c.intPricingTypeId = 1		
+						where intBillDetailId is not null and intPriceFixationDetailId is not null
+
 						----- DEBUG POINT -----
-						if @debug_awesome_ness = 1 and 1 = 0
+						if @debug_awesome_ness = 1 and 1 = 1
 						begin
 							select 'available qty', * from @avqty
 							select top 5 'contract fixation detail ap ar', * from tblCTPriceFixationDetailAPAR order by intPriceFixationDetailAPARId desc
@@ -3439,9 +3460,31 @@ BEGIN TRY
 						,@dblCost 					= dblCost
 					FROM @tblDepletion
 					WHERE intDepletionKey = @intDepletionKey
+					
 
+					
 					IF @intPricingTypeId = 5
 					BEGIN
+
+						declare @dblCurrentContractBalance DECIMAL(24, 10)
+						select @dblCurrentContractBalance = dblBalance 
+							from tblCTContractDetail where intContractDetailId = @intContractDetailId
+						
+						
+						if @debug_awesome_ness = 1 and 1 = 1
+						begin
+							select 'contract detail' as [contract detail]
+							select @intContractDetailId, @dblUnits
+							select @dblCurrentContractBalance, @dblUnits
+						end
+						
+							
+						if( (@dblCurrentContractBalance) + (@dblUnits)  < 0.01)
+						begin
+							set @dblUnits = @dblCurrentContractBalance
+						end
+						
+
 						IF (SELECT dblDetailQuantity FROM vyuCTContractDetailView WHERE intContractDetailId = @intContractDetailId) > 0
 						EXEC uspCTUpdateSequenceQuantityUsingUOM 
 							 @intContractDetailId = @intContractDetailId
