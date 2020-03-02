@@ -20,8 +20,11 @@ DECLARE @intInvoiceId				INT
 	  , @ysnFromItemContract		BIT
 	  , @InvoiceIds					InvoiceId
 
-DECLARE @dblCTPrepaidValue NUMERIC(18, 6),
-		@intCTPrepaidTransDetailId INT
+
+--For Prepaid Contract Update
+DECLARE @dblValueToUpdate NUMERIC(18, 6),
+		@intTransactionDetailId INT,
+		@strScreenName NVARCHAR(50) = 'Prepayment' 
 
 
 SET @intTranCount = @@trancount;
@@ -42,75 +45,52 @@ BEGIN TRY
 	FROM tblARInvoice 
 	WHERE intInvoiceId = @InvoiceId
 
+
+
+
 	IF @strTransactionType = 'Proforma Invoice'
 		RETURN
 
 	EXEC dbo.[uspARUpdateProvisionalOnStandardInvoice] @intInvoiceId, @ForDelete, @intUserId
 
+	
+    --FOR PREPAID ITEM CONTRACT
+	SELECT TOP 1 
+		 @intItemContractHeaderId    = intItemContractHeaderId
+		,@dblValueToUpdate         = ABS(dblTotal)
+		,@intTransactionDetailId = intInvoiceDetailId
+	FROM tblARInvoiceDetail
+	WHERE intInvoiceId = @intInvoiceId
+	AND intItemContractHeaderId IS NOT NULL	
+
 	IF @ForDelete = 1
 		BEGIN
+			--IF PREPAID ITEM CONTRACT--Use FOR UPDATING PREPAID CONTRACT
+			SET @dblValueToUpdate  = ABS(@dblValueToUpdate)
+
 			IF @strTransactionType IN ('Credit Memo', 'Credit Note') AND @intOriginalInvoiceId IS NOT NULL
 				UPDATE tblARInvoice SET ysnCancelled = 0 WHERE intInvoiceId = @intOriginalInvoiceId
 
 			IF ISNULL(@intSalesOrderId, 0) <> 0
 				EXEC dbo.uspSOUpdateReservedStock @intSalesOrderId, 0
-
-			--UPDATE PREPAID ITEM CONTRACT
-			IF ISNULL(@ysnFromItemContract, 0) <> 0
-				BEGIN
-				
-
-
-					SELECT TOP 1 @intItemContractHeaderId = intItemContractHeaderId
-								 ,@dblCTPrepaidValue = ABS(dblTotal)
-								 ,@intCTPrepaidTransDetailId =  intInvoiceDetailId
-					FROM tblARInvoiceDetail
-					WHERE intInvoiceId = @intInvoiceId
-					AND intItemContractHeaderId IS NOT NULL
-
-
-					EXEC uspCTItemContractUpdateRemainingDollarValue
-						 @intItemContractHeaderId  =  @intItemContractHeaderId    --> Item Conract Header Id
-						,@dblValueToUpdate  	   =  @dblCTPrepaidValue          --> Value to update (negative on create / positive on delete or void (return))
-						,@intUserId   			   =  @intUserId                  --> current User Id
-						,@intTransactionDetailId   =  @intCTPrepaidTransDetailId  --> Transaction Id
-						,@strScreenName 		   = 'Prepayment'   		      --> Screen Name
-				END
-
 			EXEC dbo.uspIPInterCompanyPreStageInvoice @intInvoiceId, 'Deleted', @intUserId
 		END
 	ELSE IF NOT EXISTS (SELECT TOP 1 NULL FROM tblARInvoicePreStage WHERE intInvoiceId = @intInvoiceId AND strRowState = 'Deleted')
 		BEGIN
+			--IF PREPAID ITEM CONTRACT
+		    SET @dblValueToUpdate  = -1 * ABS(@dblValueToUpdate)  
+
 			IF EXISTS (SELECT TOP 1 NULL FROM tblARInvoicePreStage WHERE intInvoiceId = @intInvoiceId AND strRowState = 'Added')
 				EXEC dbo.uspIPInterCompanyPreStageInvoice @intInvoiceId, 'Modified', @intUserId
 			ELSE
-			  BEGIN
-			  	--UPDATE PREPAID ITEM CONTRACT
-			IF ISNULL(@ysnFromItemContract, 0) <> 0
-				BEGIN
-					
-				
-
-					SELECT TOP 1 @intItemContractHeaderId = intItemContractHeaderId
-								 ,@dblCTPrepaidValue = -1 * ABS(dblTotal)
-								 ,@intCTPrepaidTransDetailId =  intInvoiceDetailId
-					FROM tblARInvoiceDetail
-					WHERE intInvoiceId = @intInvoiceId
-					AND intItemContractHeaderId IS NOT NULL
-
-
-					EXEC uspCTItemContractUpdateRemainingDollarValue
-							@intItemContractHeaderId  =  @intItemContractHeaderId    --> Item Conract Header Id
-							,@dblValueToUpdate  	  =  @dblCTPrepaidValue          --> Value to update (negative on create / positive on delete or void (return))
-							,@intUserId   			  =  @intUserId                  --> current User Id
-							,@intTransactionDetailId  =  @intCTPrepaidTransDetailId  --> Transaction Id
-							,@strScreenName 		  = 'Prepayment'   			     --> Screen Name
-				END
 				EXEC dbo.uspIPInterCompanyPreStageInvoice @intInvoiceId, 'Added', @intUserId
-
-			  END 	
 		END
-		
+
+	--UPDATE PREPAID ITEM CONTRACT
+	IF ISNULL(@ysnFromItemContract, 0) <> 0
+	BEGIN
+		EXEC uspCTItemContractUpdateRemainingDollarValue @intItemContractHeaderId,  @dblValueToUpdate, @intUserId, @intTransactionDetailId , @strScreenName
+	END	
 	EXEC dbo.[uspARUpdatePricingHistory] 2, @intInvoiceId, @intUserId
 	EXEC dbo.[uspSOUpdateOrderShipmentStatus] @intInvoiceId, 'Invoice', @ForDelete
 	IF @ForDelete = 0 EXEC dbo.[uspARUpdateRemoveSalesOrderStatus] @intInvoiceId
