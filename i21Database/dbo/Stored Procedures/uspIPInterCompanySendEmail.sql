@@ -115,7 +115,7 @@ BEGIN
 			   '<td>&nbsp;' + 'Success' + '</td>
 		</tr>'
 		FROM tblRKDailyAveragePriceStage S WITH (NOLOCK)
-		JOIN tblRKDailyAveragePrice DAP ON DAP.intDailyAveragePriceId = S.intDailyAveragePriceId
+		JOIN tblRKDailyAveragePrice DAP WITH (NOLOCK) ON DAP.intDailyAveragePriceId = S.intDailyAveragePriceId
 		WHERE ISNULL(strFeedStatus, '') = 'Processed'
 			AND ISNULL(ysnMailSent, 0) = 0
 
@@ -133,7 +133,7 @@ BEGIN
 			   '<td>&nbsp;' + ISNULL(S.strMessage, '') + '</td>
 		</tr>'
 		FROM tblRKDailyAveragePriceStage S WITH (NOLOCK)
-		JOIN tblRKDailyAveragePrice DAP ON DAP.intDailyAveragePriceId = S.intDailyAveragePriceId
+		JOIN tblRKDailyAveragePrice DAP WITH (NOLOCK) ON DAP.intDailyAveragePriceId = S.intDailyAveragePriceId
 		WHERE ISNULL(strFeedStatus, '') = 'Failed'
 			AND ISNULL(ysnMailSent, 0) = 0
 
@@ -162,7 +162,7 @@ BEGIN
 			   '<td>&nbsp;' + 'Success' + '</td>
 		</tr>'
 		FROM tblCTContractStage S WITH (NOLOCK)
-		Left JOIN tblIPMultiCompany MC on MC.intCompanyId=S.intCompanyId
+		Left JOIN tblIPMultiCompany MC WITH (NOLOCK) on MC.intCompanyId=S.intCompanyId
 		WHERE ISNULL(S.strFeedStatus, '') = 'Processed'
 			AND ISNULL(S.ysnMailSent, 0) = 0
 
@@ -180,7 +180,7 @@ BEGIN
 			   '<td>&nbsp;' + ISNULL(S.strMessage, '') + '</td>
 		</tr>'
 		FROM tblCTContractStage S WITH (NOLOCK)
-		Left JOIN tblIPMultiCompany MC on MC.intCompanyId=S.intCompanyId
+		Left JOIN tblIPMultiCompany MC WITH (NOLOCK) on MC.intCompanyId=S.intCompanyId
 		WHERE ISNULL(S.strFeedStatus, '') = 'Failed'
 			AND ISNULL(S.ysnMailSent, 0) = 0
 
@@ -209,7 +209,7 @@ BEGIN
 			   '<td>&nbsp;' + 'Success' + '</td>
 		</tr>'
 		FROM tblCTPriceContractStage S WITH (NOLOCK)
-		Left JOIN tblIPMultiCompany MC on MC.intCompanyId=S.intCompanyId
+		Left JOIN tblIPMultiCompany MC WITH (NOLOCK) on MC.intCompanyId=S.intCompanyId
 		WHERE ISNULL(S.strFeedStatus, '') = 'Processed'
 			AND ISNULL(S.ysnMailSent, 0) = 0
 
@@ -227,7 +227,7 @@ BEGIN
 			   '<td>&nbsp;' + ISNULL(S.strMessage, '') + '</td>
 		</tr>'
 		FROM tblCTPriceContractStage S WITH (NOLOCK)
-		Left JOIN tblIPMultiCompany MC on MC.intCompanyId=S.intCompanyId
+		Left JOIN tblIPMultiCompany MC WITH (NOLOCK) on MC.intCompanyId=S.intCompanyId
 		WHERE ISNULL(S.strFeedStatus, '') = 'Failed'
 			AND ISNULL(S.ysnMailSent, 0) = 0
 
@@ -256,7 +256,7 @@ BEGIN
 			   '<td>&nbsp;' + 'Success' + '</td>
 		</tr>'
 		FROM tblLGIntrCompLogisticsStg S WITH (NOLOCK)
-		Left JOIN tblIPMultiCompany MC on MC.intCompanyId=S.intCompanyId
+		Left JOIN tblIPMultiCompany MC WITH (NOLOCK) on MC.intCompanyId=S.intCompanyId
 		WHERE ISNULL(S.strFeedStatus, '') = 'Processed'
 			AND ISNULL(S.ysnMailSent, 0) = 0
 
@@ -274,7 +274,7 @@ BEGIN
 			   '<td>&nbsp;' + ISNULL(S.strMessage, '') + '</td>
 		</tr>'
 		FROM tblLGIntrCompLogisticsStg S WITH (NOLOCK)
-		Left JOIN tblIPMultiCompany MC on MC.intCompanyId=S.intCompanyId
+		Left JOIN tblIPMultiCompany MC WITH (NOLOCK) on MC.intCompanyId=S.intCompanyId
 		WHERE ISNULL(S.strFeedStatus, '') = 'Failed'
 			AND ISNULL(S.ysnMailSent, 0) = 0
 
@@ -303,7 +303,7 @@ BEGIN
 			   '<td>&nbsp;' + 'Success' + '</td>
 		</tr>'
 		FROM tblMFDemandStage S WITH (NOLOCK)
-		Left JOIN tblIPMultiCompany MC on MC.intCompanyId=S.intCompanyId
+		Left JOIN tblIPMultiCompany MC WITH (NOLOCK) on MC.intCompanyId=S.intCompanyId
 		WHERE ISNULL(S.strFeedStatus, '') = 'Processed'
 			AND ISNULL(S.ysnMailSent, 0) = 0
 
@@ -321,7 +321,7 @@ BEGIN
 			   '<td>&nbsp;' + ISNULL(S.strMessage, '') + '</td>
 		</tr>'
 		FROM tblMFDemandStage S WITH (NOLOCK)
-		Left JOIN tblIPMultiCompany MC on MC.intCompanyId=S.intCompanyId
+		Left JOIN tblIPMultiCompany MC WITH (NOLOCK) on MC.intCompanyId=S.intCompanyId
 		WHERE ISNULL(S.strFeedStatus, '') = 'Failed'
 			AND ISNULL(S.ysnMailSent, 0) = 0
 
@@ -350,7 +350,7 @@ BEGIN
 			   '<td>&nbsp;' + 'Success' + '</td>
 		</tr>'
 		FROM tblLGWeightClaimStage S WITH (NOLOCK)
-		Left JOIN tblIPMultiCompany MC on MC.intCompanyId=S.intCompanyId
+		Left JOIN tblIPMultiCompany MC WITH (NOLOCK) on MC.intCompanyId=S.intCompanyId
 		WHERE ISNULL(S.strFeedStatus, '') = 'Processed'
 			AND ISNULL(S.ysnMailSent, 0) = 0
 
@@ -368,7 +368,7 @@ BEGIN
 			   '<td>&nbsp;' + ISNULL(S.strMessage, '') + '</td>
 		</tr>'
 		FROM tblLGWeightClaimStage S WITH (NOLOCK)
-		Left JOIN tblIPMultiCompany MC on MC.intCompanyId=S.intCompanyId
+		Left JOIN tblIPMultiCompany MC WITH (NOLOCK) on MC.intCompanyId=S.intCompanyId
 		WHERE ISNULL(S.strFeedStatus, '') = 'Failed'
 			AND ISNULL(S.ysnMailSent, 0) = 0
 
