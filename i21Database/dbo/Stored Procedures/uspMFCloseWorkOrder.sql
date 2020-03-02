@@ -621,8 +621,23 @@ BEGIN TRY
 					FROM @GLEntries
 					)
 			BEGIN
-				EXEC uspGLBookEntries @GLEntries
-					,1
+				IF EXISTS (
+						SELECT *
+						FROM tblMFWorkOrderRecipeItem WRI
+						JOIN tblICItem I ON I.intItemId = WRI.intItemId
+						WHERE I.strType = 'Other Charge'
+							AND WRI.intWorkOrderId = @intWorkOrderId
+						)
+				BEGIN
+					EXEC dbo.uspGLBookEntries @GLEntries
+						,1
+						,1
+				END
+				ELSE
+				BEGIN
+					EXEC dbo.uspGLBookEntries @GLEntries
+						,1
+				END
 			END
 
 			UPDATE tblMFWorkOrder
