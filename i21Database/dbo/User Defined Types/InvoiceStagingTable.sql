@@ -97,6 +97,10 @@ CREATE TYPE [dbo].[InvoiceStagingTable] AS TABLE
 	,[ysnUpdateAvailableDiscount]			BIT												NULL		-- If [ysnUpdateAvailableDiscount] = 1 > Updates existing Posted/Unposted Invoice Available Discount Amount
 	,[ysnAccrueLicense]						BIT												NULL		-- If [ysnAccrueLicense] = 1 > License amount will be accrued upon posting
 	,[ysnInsertDetail]						BIT												NULL		-- If [ysnInsertDetail] = 1 > Line Item details included in the UDT will also be inserted when uspARCreateCustomerInvoices is called
+	,[strAcresApplied]						NVARCHAR(10)    COLLATE Latin1_General_CI_AS 	NULL
+	,[strNutrientAnalysis]					NVARCHAR(50)    COLLATE Latin1_General_CI_AS 	NULL
+	,[strBillingMethod]						NVARCHAR(100)   COLLATE Latin1_General_CI_AS 	NULL
+	,[strApplicatorLicense]					NVARCHAR(50)    COLLATE Latin1_General_CI_AS 	NULL
 
 	--Detail																																															
 	,[intInvoiceDetailId]					INT												NULL		-- Invoice Detail Id(Insert new Invoice if NULL, else Update existing)
