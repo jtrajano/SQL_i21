@@ -78,6 +78,7 @@
     [strFeeDescription]						NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [strFee]								NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [strInvoiceFormat]						NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+    [strProductDescriptionForTotals]		NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [dtmTransactionDate]					DATETIME        NULL,
     [dtmDate]								DATETIME        NULL,
     [dtmPostedDate]							DATETIME        NULL,
