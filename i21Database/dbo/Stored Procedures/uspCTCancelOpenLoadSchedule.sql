@@ -20,12 +20,12 @@ BEGIN TRY
 	INSERT  INTO @OpenLoad
 	SELECT	LO.intLoadId
 	FROM	tblLGLoad			LO
-	JOIN	tblLGLoadDetail		LD	ON	LD.intLoadId			=	LO.intLoadId
-	JOIN	tblCTContractDetail	CD	ON	CD.intContractDetailId	=	ISNULL(LD.intSContractDetailId,LD.intPContractDetailId)
+	JOIN	tblLGLoadDetail		LD	ON	LD.intLoadId			=	LO.intLoadId and ISNULL(LD.intSContractDetailId,LD.intPContractDetailId) = @intContractDetailId
+	--JOIN	tblCTContractDetail	CD	ON	CD.intContractDetailId	=	ISNULL(LD.intSContractDetailId,LD.intPContractDetailId)
 	WHERE	intTicketId IS NULL 
 	AND		LO.intShipmentStatus IN (1, 7)
 	AND		LO.intShipmentType <> 2
-	AND		CD.intContractHeaderId	=	@intContractHeaderId
+	--AND		CD.intContractHeaderId	=	@intContractHeaderId
 
 	SELECT @intLoadId = MIN(intLoadId) FROM @OpenLoad
 	
