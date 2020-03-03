@@ -188,6 +188,7 @@ SELECT
 	,[dblForexRate]					= ARID.[dblCurrencyExchangeRate]
 	,[intLinkedItem]				= ICS.intChildItemLinkId
 FROM #ARPostInvoiceDetail ARID
+INNER JOIN tblICItem ITEM ON ARID.intItemId = ITEM.intItemId
 INNER JOIN (	
 	SELECT ICIS.[intInventoryShipmentId]		
 		 , ICIS.[strShipmentNumber]		
@@ -224,6 +225,7 @@ WHERE ISNULL(ARID.[intLoadDetailId], 0) = 0
   AND ((ARID.[strType] <> 'Provisional' AND ARID.[ysnFromProvisional] = 0) OR (ARID.[strType] = 'Provisional' AND ARID.[ysnProvisionalWithGL] = 1))
   AND ARID.[strTransactionType] <> 'Credit Memo'
   AND ISNULL(ARIDL.[intInvoiceDetailLotId],0) = 0
+  AND ISNULL(ITEM.strLotTracking, 'No') = 'No'
 
 UNION ALL
 
