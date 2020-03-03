@@ -1277,7 +1277,7 @@ VALUES(
 		EXEC [uspARInsertInvoiceIntegrationLogDetail] @IntegrationLogEntries = @IntegrationLog
 
 	UPDATE ILD 
-	SET strMessage = 'Available quantity for the contract ' + CTH.strContractNumber + ' and sequence ' + CAST(CTD.intContractSeq AS NVARCHAR(50)) + ' is ' + CAST(ISNULL(CAST(CTD.dblBalance - CTD.dblScheduleQty AS NUMERIC(18, 6)), 0) AS NVARCHAR(50)) + ', which is insufficient to Save/Post a quantity of ' + CAST(CAST(ID.dblQtyShipped AS NUMERIC(18, 6)) AS NVARCHAR(50)) + '.' 
+	SET strMessage = 'Available quantity for the contract ' + CTH.strContractNumber + ' and sequence ' + CAST(CTD.intContractSeq AS NVARCHAR(50)) + ' is ' + CAST(CAST(ISNULL(CTD.dblBalance, 0) - ISNULL(CTD.dblScheduleQty, 0) AS NUMERIC(18, 6)) AS NVARCHAR(50)) + ', which is insufficient to Save/Post a quantity of ' + CAST(CAST(ID.dblQtyShipped AS NUMERIC(18, 6)) AS NVARCHAR(50)) + '.' 
 	  , ysnSuccess = 0
 	FROM tblARInvoiceIntegrationLogDetail ILD
 	INNER JOIN tblARInvoiceDetail ID ON ILD.intInvoiceId = ID.intInvoiceId
@@ -1286,7 +1286,7 @@ VALUES(
 	WHERE intIntegrationLogId = @IntegrationLogId
 	AND ID.intContractDetailId IS NOT NULL
 	AND ILD.strTransactionType = 'Invoice'
-	AND ISNULL(ID.[dblQtyShipped], 0) > ISNULL(CTD.dblBalance - CTD.dblScheduleQty, 0)
+	AND ISNULL(ID.[dblQtyShipped], 0) > ISNULL(CTD.dblBalance, 0) - ISNULL(CTD.dblScheduleQty, 0)
 
 END TRY
 BEGIN CATCH
