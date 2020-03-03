@@ -110,7 +110,7 @@ BEGIN
 		JOIN tblCTContractHeader Header ON Header.intContractHeaderId = Detail.intContractHeaderId
 		JOIN tblICItem Item ON Item.intItemId = Detail.intItemId
 		JOIN TonUOM ON TonUOM.intCommodityId = Header.intCommodityId AND TonUOM.intItemId = Detail.intItemId
-		LEFT JOIN tblICItemBundle IB ON IB.intItemId = Detail.intItemBundleId
+		LEFT JOIN tblICItem IB ON IB.intItemId = Detail.intItemBundleId
 		LEFT JOIN (
 			SELECT CC.intContractDetailId
 				, dblAmount = SUM(dbo.fnRKConvertUOMCurrency('ItemUOM', CC.intItemUOMId, CCUOM.intItemUOMId, 1, CC.intCurrencyId, @intCurrencyId, dblAmount, CC.intContractDetailId))
@@ -148,9 +148,9 @@ BEGIN
 		JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = LD.intItemUOMId
 		JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
 		JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
-		JOIN TonUOM ON TonUOM.intCommodityId = CH.intCommodityId AND TonUOM.intItemId = L.intItemId
+		JOIN TonUOM ON TonUOM.intCommodityId = CH.intCommodityId AND TonUOM.intItemId = LD.intItemId
 		JOIN tblICItem Item ON Item.intItemId = LD.intItemId
-		LEFT JOIN tblICItemBundle IB ON IB.intItemId = CD.intItemBundleId
+		LEFT JOIN tblICItem IB ON IB.intItemId = CD.intItemBundleId
 		LEFT JOIN (
 			SELECT CC.intContractDetailId
 				, dblAmount = SUM(dbo.fnRKConvertUOMCurrency('ItemUOM', CC.intItemUOMId, CCUOM.intItemUOMId, 1, CC.intCurrencyId, @intCurrencyId, dblAmount, CC.intContractDetailId))
@@ -188,7 +188,7 @@ BEGIN
 		LEFT JOIN tblCTContractDetail Detail ON Detail.intContractDetailId = Lots.intContractDetailId
 		LEFT JOIN tblCTContractHeader Header ON Header.intContractHeaderId = Detail.intContractHeaderId
 		JOIN TonUOM ON TonUOM.intCommodityId = Lots.intCommodityId AND TonUOM.intItemId = Item.intItemId
-		LEFT JOIN tblICItemBundle IB ON IB.intItemId = Detail.intItemBundleId
+		LEFT JOIN tblICItem IB ON IB.intItemId = Detail.intItemBundleId
 		LEFT JOIN (
 			SELECT CC.intContractDetailId
 				, dblAmount = SUM(dbo.fnRKConvertUOMCurrency('ItemUOM', CC.intItemUOMId, CCUOM.intItemUOMId, 1, CC.intCurrencyId, @intCurrencyId, dblAmount, CC.intContractDetailId))
