@@ -1996,7 +1996,7 @@ BEGIN TRY
 						,SUM(dblUnits) dblSettleUnits 
 					FROM @SettleVoucherCreate 
 					WHERE intItemType = 1 
-						AND (intPricingTypeId = 1 OR intPricingTypeId IS NULL)
+						AND (intPricingTypeId = 1 OR intPricingTypeId = 6 OR intPricingTypeId IS NULL)
 					GROUP BY intCustomerStorageId
 				)b ON b.intCustomerStorageId = a.intCustomerStorageId
 				INNER JOIN tblGRCustomerStorage CS
@@ -2083,11 +2083,11 @@ BEGIN TRY
 													else isnull(availableQtyForVoucher.dblAvailableQuantity, @dblQtyFromCt) end
 											else
 												CASE 
-													WHEN (a.intPricingTypeId = 2 or a.intPricingTypeId = 1 ) and availableQtyForVoucher.intContractDetailId is not null and availableQtyForVoucher.dblAvailableQuantity > 0
+													WHEN (a.intPricingTypeId = 2 or a.intPricingTypeId in (1, 6) ) and availableQtyForVoucher.intContractDetailId is not null and availableQtyForVoucher.dblAvailableQuantity > 0
 														THEN availableQtyForVoucher.dblAvailableQuantity -- @dblQtyFromCt 																		
 													WHEN @origdblSpotUnits > 0 
 														THEN ROUND(dbo.fnCalculateQtyBetweenUOM(b.intItemUOMId,@intCashPriceUOMId,a.dblUnits),6) 
-													WHEN a.intPricingTypeId = 1 and @ysnFromPriceBasisContract = 1 
+													WHEN a.intPricingTypeId  in (1, 6) and @ysnFromPriceBasisContract = 1 
 														then a.dblUnits -- @dblTotalVoucheredQuantity
 													WHEN @ysnFromPriceBasisContract = 1 and (intItemType = 2 or intItemType = 3)
 														then a.dblUnits
@@ -2252,11 +2252,11 @@ BEGIN TRY
 																else isnull(availableQtyForVoucher.dblAvailableQuantity, @dblQtyFromCt) end
 														else
 															CASE 
-																WHEN (a.intPricingTypeId = 2 or a.intPricingTypeId = 1 ) and availableQtyForVoucher.intContractDetailId is not null and availableQtyForVoucher.dblAvailableQuantity > 0
+																WHEN (a.intPricingTypeId = 2 or a.intPricingTypeId in (1, 6) ) and availableQtyForVoucher.intContractDetailId is not null and availableQtyForVoucher.dblAvailableQuantity > 0
 																	THEN availableQtyForVoucher.dblAvailableQuantity -- @dblQtyFromCt 																		
 																WHEN @origdblSpotUnits > 0 
 																	THEN ROUND(dbo.fnCalculateQtyBetweenUOM(b.intItemUOMId,@intCashPriceUOMId,a.dblUnits),6) 
-																WHEN a.intPricingTypeId = 1 and @ysnFromPriceBasisContract = 1 
+																WHEN a.intPricingTypeId in (1, 6) and @ysnFromPriceBasisContract = 1 
 																	then a.dblUnits -- @dblTotalVoucheredQuantity
 																WHEN @ysnFromPriceBasisContract = 1 and (intItemType = 2 or intItemType = 3)
 																	then a.dblUnits
@@ -2327,11 +2327,11 @@ BEGIN TRY
 																else isnull(availableQtyForVoucher.dblAvailableQuantity, @dblQtyFromCt) end
 														else
 															CASE 
-																WHEN (a.intPricingTypeId = 2 or a.intPricingTypeId = 1 ) and availableQtyForVoucher.intContractDetailId is not null and availableQtyForVoucher.dblAvailableQuantity > 0
+																WHEN (a.intPricingTypeId = 2 or a.intPricingTypeId in (1, 6) ) and availableQtyForVoucher.intContractDetailId is not null and availableQtyForVoucher.dblAvailableQuantity > 0
 																	THEN availableQtyForVoucher.dblAvailableQuantity -- @dblQtyFromCt 																
 																WHEN @origdblSpotUnits > 0 
 																	THEN ROUND(dbo.fnCalculateQtyBetweenUOM(b.intItemUOMId,@intCashPriceUOMId,a.dblUnits),6) 
-																WHEN a.intPricingTypeId = 1 and @ysnFromPriceBasisContract = 1 
+																WHEN a.intPricingTypeId in (1, 6) and @ysnFromPriceBasisContract = 1 
 																	then a.dblUnits -- @dblTotalVoucheredQuantity
 																WHEN @ysnFromPriceBasisContract = 1 and (intItemType = 2 or intItemType = 3)
 																	then a.dblUnits
@@ -2394,7 +2394,7 @@ BEGIN TRY
 					AND SST.intSettleStorageId = @intSettleStorageId
 				AND CASE WHEN (a.intPricingTypeId = 2 AND ISNULL(@dblCashPriceFromCt,0) = 0) THEN 0 ELSE 1 END = 1
 				and (	a.intContractDetailId is null or  
-						CH.intPricingTypeId = 1 or
+						CH.intPricingTypeId in (1, 6) or
 							(CH.intPricingTypeId = 2 and 
 								a.intContractDetailId is not null 
 								and availableQtyForVoucher.dblAvailableQuantity > 0)
@@ -2409,7 +2409,7 @@ BEGIN TRY
 						where intContractDetailId in (
 							select c.intContractDetailId from @voucherPayable a
 								join tblCTContractHeader b 
-									on a.intContractHeaderId = b.intContractHeaderId and b.intPricingTypeId = 1
+									on a.intContractHeaderId = b.intContractHeaderId and b.intPricingTypeId in (1, 6)
 								join tblAPBillDetail c
 									on a.intContractHeaderId = c.intContractHeaderId
 										and a.intContractDetailId = c.intContractDetailId
@@ -2548,7 +2548,7 @@ BEGIN TRY
 								AND SST.intSettleStorageId = @intSettleStorageId
 							AND CASE WHEN (a.intPricingTypeId = 2 AND ISNULL(@dblCashPriceFromCt,0) = 0) THEN 0 ELSE 1 END = 1
 							and (	a.intContractDetailId is null or  
-									CH.intPricingTypeId = 1 or
+									CH.intPricingTypeId in (1, 6) or
 										(CH.intPricingTypeId = 2 and 
 											a.intContractDetailId is not null 
 											and isnull(availableQtyForVoucher.dblAvailableQuantity, 0) > 0)
@@ -2975,7 +2975,7 @@ BEGIN TRY
 								@cur_bid = null
 							from @avqty where ysnApplied is null
 							
-							if exists(select top 1 1 from tblCTContractDetail where intContractDetailId = @cur_cid and intPricingTypeId  in( 1 , 2) )
+							if exists(select top 1 1 from tblCTContractDetail where intContractDetailId = @cur_cid and intPricingTypeId  in( 1 , 2, 6) )
 							begin
 								if @debug_awesome_ness = 1 and 1 = 0
 								begin
