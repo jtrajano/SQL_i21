@@ -342,6 +342,7 @@ BEGIN TRY
 		,strFeeDescription
 		,strFee
 		,strInvoiceFormat
+		,strProductDescriptionForTotals
 		,dtmTransactionDate
 		,dtmDate
 		,dtmPostedDate
@@ -493,6 +494,7 @@ BEGIN TRY
 		,strFeeDescription
 		,strFee
 		,strInvoiceFormat
+		,strProductDescriptionForTotals
 		,dtmTransactionDate
 		,dtmDate
 		,dtmPostedDate

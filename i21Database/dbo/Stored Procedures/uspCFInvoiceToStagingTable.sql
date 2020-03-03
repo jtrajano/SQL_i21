@@ -634,12 +634,14 @@ BEGIN TRY
 		SET strProductDescriptionForTotals = strItemDescription + '- Light Class'
 		WHERE intTransactionId IN (SELECT intTransactionId FROM @tblTransWithAZtax)
 		AND LOWER(strStatementType) =  LOWER(@StatementType)
+		AND LOWER(strUserId) = Lower(@UserId)
 
 	
 		UPDATE tblCFInvoiceStagingTable
 		SET strProductDescriptionForTotals = strItemDescription
 		WHERE intTransactionId NOT IN (SELECT intTransactionId FROM @tblTransWithAZtax)
 		AND LOWER(strStatementType) =  LOWER(@StatementType)
+		AND LOWER(strUserId) = Lower(@UserId)
 
 	END
 	ELSE
