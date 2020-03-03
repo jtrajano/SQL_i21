@@ -2253,6 +2253,7 @@ BEGIN TRY
 														else
 															CASE 
 																WHEN (a.intPricingTypeId = 2 or a.intPricingTypeId in (1, 6) ) and availableQtyForVoucher.intContractDetailId is not null and availableQtyForVoucher.dblAvailableQuantity > 0
+																	and intItemType = 1
 																	THEN availableQtyForVoucher.dblAvailableQuantity -- @dblQtyFromCt 																		
 																WHEN @origdblSpotUnits > 0 
 																	THEN ROUND(dbo.fnCalculateQtyBetweenUOM(b.intItemUOMId,@intCashPriceUOMId,a.dblUnits),6) 
@@ -2325,6 +2326,7 @@ BEGIN TRY
 														else
 															CASE 
 																WHEN (a.intPricingTypeId = 2 or a.intPricingTypeId in (1, 6) ) and availableQtyForVoucher.intContractDetailId is not null and availableQtyForVoucher.dblAvailableQuantity > 0
+																and intItemType = 1
 																	THEN availableQtyForVoucher.dblAvailableQuantity -- @dblQtyFromCt 																
 																WHEN @origdblSpotUnits > 0 
 																	THEN ROUND(dbo.fnCalculateQtyBetweenUOM(b.intItemUOMId,@intCashPriceUOMId,a.dblUnits),6) 
@@ -2502,8 +2504,48 @@ BEGIN TRY
 																	where  IT.intTransactionTypeId = 56	
 																		and IT.intItemId = a.intItemId and STH.strType = 'Transfer')
 															else null end
-														end						
-					
+														end		
+					,[dblQuantityToBill]			= case when @doPartialHistory = 1 then
+															case WHEN @ysnFromPriceBasisContract = 1 and (intItemType = 2 or intItemType = 3)
+																	then a.dblUnits
+																WHEN (intItemType = 2 or intItemType = 3)
+																	then a.dblUnits
+																when availableQtyForVoucher.dblAvailableQuantity >  a.dblUnits then a.dblUnits																	
+																WHEN @origdblSpotUnits > 0 THEN ROUND(dbo.fnCalculateQtyBetweenUOM(b.intItemUOMId,@intCashPriceUOMId,a.dblUnits),6) 
+																else isnull(availableQtyForVoucher.dblAvailableQuantity, @dblQtyFromCt) end
+														else
+															CASE 
+																WHEN (a.intPricingTypeId = 2 or a.intPricingTypeId = 1 ) and 
+																	availableQtyForVoucher.intContractDetailId is not null and 
+																	availableQtyForVoucher.dblAvailableQuantity > 0
+																	and intItemType = 1
+																	THEN availableQtyForVoucher.dblAvailableQuantity -- @dblQtyFromCt 																		
+																WHEN @origdblSpotUnits > 0 
+																	THEN ROUND(dbo.fnCalculateQtyBetweenUOM(b.intItemUOMId,@intCashPriceUOMId,a.dblUnits),6) 
+																WHEN a.intPricingTypeId = 1 and @ysnFromPriceBasisContract = 1 
+																	then a.dblUnits -- @dblTotalVoucheredQuantity
+																WHEN @ysnFromPriceBasisContract = 1 and (intItemType = 2 or intItemType = 3)
+																	then a.dblUnits
+																ELSE 
+																		case when @ysnFromPriceBasisContract = 1 and  availableQtyForVoucher.intContractDetailId is null  and c.strType = 'Inventory' then 0
+																		when @ysnFromPriceBasisContract = 1  AND (@dblQtyFromCt + @dblTotalVoucheredQuantity) > a.dblUnits 
+																			THEN a.dblUnits - @dblTotalVoucheredQuantity
+																		when @ysnFromPriceBasisContract = 1  AND (@dblQtyFromCt + @dblTotalVoucheredQuantity) < a.dblUnits 
+																			THEN @dblQtyFromCt - a.dblUnits
+																		else 
+																			a.dblUnits
+																		end
+															END
+														end				
+						,case when @ysnFromPriceBasisContract = 1 and  availableQtyForVoucher.intContractDetailId is null  and c.strType = 'Inventory' then 0
+																		when @ysnFromPriceBasisContract = 1  AND (@dblQtyFromCt + @dblTotalVoucheredQuantity) > a.dblUnits 
+																			THEN a.dblUnits - @dblTotalVoucheredQuantity
+																		when @ysnFromPriceBasisContract = 1  AND (@dblQtyFromCt + @dblTotalVoucheredQuantity) < a.dblUnits 
+																			THEN @dblQtyFromCt - a.dblUnits
+																		else 
+																			a.dblUnits
+																		end
+							,availableQtyForVoucher.dblAvailableQuantity
 						FROM @SettleVoucherCreate a
 							JOIN tblICItemUOM b 
 								ON b.intItemId = a.intItemId 
