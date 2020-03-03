@@ -262,6 +262,7 @@ INNER JOIN (
 		 , ICISI.[intInventoryShipmentItemId]
 		 , ICISI.[intChildItemLinkId]
 		 , ICISI.[intDestinationWeightId]
+		 , ICISI.[intDestinationGradeId]
 		 , ICISI.[ysnDestinationWeightsAndGrades]
 	FROM tblICInventoryShipmentItem ICISI WITH (NOLOCK)  
 	INNER JOIN tblICInventoryShipment ICIS WITH (NOLOCK) ON ICISI.intInventoryShipmentId = ICIS.intInventoryShipmentId
@@ -273,17 +274,13 @@ INNER JOIN (
 		, [intLotId]
 	FROM tblARInvoiceDetailLot ARIDL		
 ) ARIDL	ON ARIDL.[intInvoiceDetailId] = ARID.[intInvoiceDetailId]
-CROSS APPLY (
-	SELECT TOP 1 IT.* 
-	FROM tblICInventoryTransaction IT 
-	WHERE IT.[intTransactionId] = ICS.[intInventoryShipmentId] 
-	  AND IT.[strTransactionId] = ICS.[strShipmentNumber] 
-	  AND IT.[intTransactionDetailId] = ICS.[intInventoryShipmentItemId]
-	  AND IT.[intItemId] = ARID.[intItemId]
-	  AND IT.[ysnIsUnposted] = 0
-	  AND IT.[intLotId] = ARIDL.[intLotId]
-	  AND ISNULL(IT.[intInTransitSourceLocationId], 0) <> 0 
-) ICIT
+INNER JOIN tblICInventoryTransaction ICIT ON ICIT.[intTransactionId] = ICS.[intInventoryShipmentId] 
+										 AND ICIT.[strTransactionId] = ICS.[strShipmentNumber] 
+										 AND ICIT.[intTransactionDetailId] = ICS.[intInventoryShipmentItemId]
+										 AND ICIT.[intItemId] = ARID.[intItemId]
+										 AND ICIT.[ysnIsUnposted] = 0
+										 AND ICIT.[intLotId] = ARIDL.[intLotId]
+										 AND ISNULL(ICIT.[intInTransitSourceLocationId], 0) <> 0 
 LEFT JOIN (
 	SELECT intContractDetailId  = CPF.intContractDetailId
 		, intContractHeaderId	= CPF.intContractHeaderId 
