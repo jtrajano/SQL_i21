@@ -40,11 +40,12 @@ EXEC(@sql)
 DECLARE @voucherTotal DECIMAL(18,2);
 
 SELECT
-	DENSE_RANK() OVER(ORDER BY A.strInvoiceNumber, C.intEntityId) AS intPartitionId,
+	DENSE_RANK() OVER(ORDER BY A.strInvoiceNumber, C.intEntityId, A.strDistributionType) AS intPartitionId,
 	intEntityVendorId	=	C.intEntityId,
 	dtmDate				=	CAST(A.dtmDate AS DATETIME),
     dblQuantityToBill	=	1,
     dblCost				=	ABS(A.dblAmount),
+	dblAmount			=	A.dblAmount,
 	intAccountId		=	accnt.intAccountId,
 	strGLAccount		=	A.strGLAccount,
 	strVendorOrderNumber=	A.strInvoiceNumber
@@ -54,6 +55,7 @@ CROSS APPLY tblAPVendor C
 LEFT JOIN tblGLAccount accnt ON accnt.strAccountId = A.strGLAccount
 WHERE 
 	C.intEntityId = @intVendorId
+AND A.strDistributionType = 'PURCH'
 
 DECLARE @voucherPayables AS VoucherPayable
 INSERT INTO @voucherPayables
@@ -71,12 +73,12 @@ INSERT INTO @voucherPayables
 SELECT
 	intPartitionId,
     intEntityVendorId,
-    1,
+    CASE WHEN CAST(A.dblAmount AS DECIMAL(18,2)) < 0 THEN 3 ELSE 1 END,
 	dtmDate,
 	dblQuantityToBill,
     dblQuantityToBill,
     dblCost,
-	intAccountId,
+	intAccountI d,
 	strVendorOrderNumber
 FROM #tmpConvertedLassusSasData A
 WHERE 
