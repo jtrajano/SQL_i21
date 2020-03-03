@@ -1091,6 +1091,31 @@ BEGIN
 		END 		
 	END 
 
+	-- Update the Transfer Detail with the Weighted Average. 
+	BEGIN 
+		UPDATE tfd	
+		SET 
+			tfd.dblCost = 
+				dbo.fnCalculateCostBetweenUOM(
+					stockUOM.intItemUOMId
+					,tfd.intItemUOMId
+					,dbo.fnICGetTransWeightedAveCost(
+						tf.strTransferNo
+						,tf.intInventoryTransferId
+						,tfd.intInventoryTransferDetailId
+						,DEFAULT 
+					)
+				)
+		FROM 
+			tblICInventoryTransfer tf INNER JOIN tblICInventoryTransferDetail tfd
+				ON tf.intInventoryTransferId = tfd.intInventoryTransferId
+			INNER JOIN tblICItemUOM stockUOM
+				ON stockUOM.intItemId = tfd.intItemId
+				AND stockUOM.ysnStockUnit = 1
+		WHERE
+			tf.strTransferNo = @strTransactionId
+	END 
+
 	COMMIT TRAN @TransactionName
 END 
 
