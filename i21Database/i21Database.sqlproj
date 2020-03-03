@@ -3466,6 +3466,10 @@
     <Build Include="dbo\Tables\tblMFUserPrinterMap.sql" />
     <Build Include="dbo\Views\vyuQMSampleTypeControlPoint.sql" />
     <Build Include="dbo\Stored Procedures\uspICReportInventoryShipment.sql" />
+    <Build Include="dbo\Stored Procedures\uspICAdjustmentSubLedgerGLPostPreview.sql" />
+    <Build Include="dbo\Stored Procedures\uspICAdjustmentSummaryGLPostPreview.sql" />
+    <Build Include="dbo\Stored Procedures\uspICAdjustmentJournalGLPostPreview.sql" />
+    <Build Include="dbo\Stored Procedures\uspICAdjustmentGLPostPreview.sql" />
     <Build Include="dbo\Views\vyuEME2C2Role.sql" />
     <Build Include="dbo\Views\vyuSMMasterContactMenu.sql" />
     <Build Include="dbo\Tables\tblCFImportFromCSVLog.sql" />
