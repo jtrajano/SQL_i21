@@ -337,7 +337,7 @@ INNER JOIN
 LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = ARSI.intContractDetailId 
 left join tblCTContractHeader ch on ch.intContractHeaderId = CD.intContractHeaderId
 WHERE
-ICIS.[intInventoryShipmentId] = @ShipmentId
+ICIS.[intInventoryShipmentId] = @ShipmentId AND ARSI.strTransactionType = 'Inventory Shipment'
 --AND (
 --		(CD.intContractDetailId <> @intContractDetailId AND CD.dblCashPrice IS NOT NULL) 
 --			OR 
