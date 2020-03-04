@@ -767,15 +767,17 @@ ORDER BY EFI.[intSalesOrderDetailId] ASC
 
 --GET DISTINCT SHIP TO FROM CONTRACT DETAIL
 UPDATE IE
-SET intShipToLocationId = ISNULL(CD.intShipToId, @intShipToLocationId)
-  , strComments			= ISNULL(IE.strComments, '') + ' Contract #' + ISNULL(CH.strContractNumber, '')
+SET intShipToLocationId 			= ISNULL(CD.intShipToId, @intShipToLocationId)
+  , strComments						= ISNULL(IE.strComments, '') + ' Contract #' + ISNULL(CH.strContractNumber, '')
+  , @intContractShipToLocationId	= ISNULL(CD.intShipToId, @intShipToLocationId)
 FROM @EntriesForInvoice IE
 INNER JOIN tblCTContractDetail CD ON IE.intContractDetailId = CD.intContractDetailId
 INNER JOIN tblCTContractHeader CH ON CD.intContractHeaderId = CH.intContractHeaderId
 WHERE IE.intContractDetailId IS NOT NULL
   AND ISNULL(CD.intShipToId, 0) <> @intShipToLocationId
 
-SELECT @intExistingInvoiceId = dbo.fnARGetInvoiceForBatch(@EntityCustomerId, @intShipToLocationId)
+SET @intContractShipToLocationId = ISNULL(@intContractShipToLocationId, @intShipToLocationId) 
+SELECT @intExistingInvoiceId = dbo.fnARGetInvoiceForBatch(@EntityCustomerId, @intContractShipToLocationId)
 
 --CREATE INVOICE IF THERE's NONE
 IF ISNULL(@intExistingInvoiceId, 0) = 0
