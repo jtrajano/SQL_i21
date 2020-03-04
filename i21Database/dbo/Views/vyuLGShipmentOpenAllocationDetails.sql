@@ -66,6 +66,9 @@ FROM (
 		,BO.strBook
 		,AH.intSubBookId
 		,SB.strSubBook
+		,strOriginPort = ISNULL(SLP.strCity, PLP.strCity)
+		,strDestinationPort = ISNULL(SDP.strCity, PDP.strCity)
+		,strDestinationCity = ISNULL(SDC.strCity, PDC.strCity)
 		,intShipmentType = 1
 	FROM tblLGAllocationDetail AD
 	JOIN tblLGAllocationHeader AH ON AH.intAllocationHeaderId = AD.intAllocationHeaderId
@@ -113,6 +116,12 @@ FROM (
 	LEFT JOIN tblSMCountry CP ON CP.intCountryID = CAP.intCountryID
 	LEFT JOIN tblICCommodityAttribute CAS ON CAS.intCommodityAttributeId = ITS.intOriginId
 	LEFT JOIN tblSMCountry CS ON CS.intCountryID = CAS.intCountryID
+	LEFT JOIN tblSMCity PLP ON PLP.intCityId = CDP.intLoadingPortId
+	LEFT JOIN tblSMCity PDP ON PDP.intCityId = CDP.intDestinationPortId
+	LEFT JOIN tblSMCity PDC ON PDC.intCityId = CDP.intDestinationCityId
+	LEFT JOIN tblSMCity SLP ON SLP.intCityId = CDS.intLoadingPortId
+	LEFT JOIN tblSMCity SDP ON SDP.intCityId = CDS.intDestinationPortId
+	LEFT JOIN tblSMCity SDC ON SDC.intCityId = CDS.intDestinationCityId
 	LEFT JOIN tblCTBook BO ON BO.intBookId = AH.intBookId
 	LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = AH.intSubBookId
 	WHERE ((AD.dblPAllocatedQty - IsNull(LD.dblPShippedQuantity, 0) + IsNull(PL.dblLotPickedQty, 0)) > 0)
@@ -193,6 +202,9 @@ FROM (
 		,BO.strBook
 		,AH.intSubBookId
 		,SB.strSubBook
+		,strOriginPort = ISNULL(SLP.strCity, PLP.strCity)
+		,strDestinationPort = ISNULL(SDP.strCity, PDP.strCity)
+		,strDestinationCity = ISNULL(SDC.strCity, PDC.strCity)
 		,intShipmentType = 2
 	FROM tblLGAllocationDetail AD
 	JOIN tblLGAllocationHeader AH ON AH.intAllocationHeaderId = AD.intAllocationHeaderId
@@ -240,6 +252,12 @@ FROM (
 	LEFT JOIN tblSMCountry CP ON CP.intCountryID = CAP.intCountryID
 	LEFT JOIN tblICCommodityAttribute CAS ON CAS.intCommodityAttributeId = ITS.intOriginId
 	LEFT JOIN tblSMCountry CS ON CS.intCountryID = CAS.intCountryID
+	LEFT JOIN tblSMCity PLP ON PLP.intCityId = CDP.intLoadingPortId
+	LEFT JOIN tblSMCity PDP ON PDP.intCityId = CDP.intDestinationPortId
+	LEFT JOIN tblSMCity PDC ON PDC.intCityId = CDP.intDestinationCityId
+	LEFT JOIN tblSMCity SLP ON SLP.intCityId = CDS.intLoadingPortId
+	LEFT JOIN tblSMCity SDP ON SDP.intCityId = CDS.intDestinationPortId
+	LEFT JOIN tblSMCity SDC ON SDC.intCityId = CDS.intDestinationCityId
 	LEFT JOIN tblCTBook BO ON BO.intBookId = AH.intBookId
 	LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = AH.intSubBookId
 	WHERE ((AD.dblPAllocatedQty - IsNull(LD.dblPShippedQuantity, 0) + IsNull(PL.dblLotPickedQty, 0)) > 0)
