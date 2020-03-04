@@ -61,7 +61,7 @@ BEGIN
 		WHEN @msgId = 80045 THEN 'Post Preview is not applicable when doing an inventory transfer for the same location.'
 		WHEN @msgId = 80046 THEN 'Unable to generate the Inventory Receipt. An error stopped the process from Inbound Shipment to Inventory Receipt.'
 		WHEN @msgId = 80047 THEN 'The Qty to Ship for %s is %f. Total Lot Quantity is %f. The difference is %f.'
-		WHEN @msgId = 80048 THEN 'Item UOM is invalid or missing.'
+		WHEN @msgId = 80048 THEN 'Item UOM is invalid or missing for %s.'
 		WHEN @msgId = 80049 THEN 'Item %s is missing a Stock Unit. Please check the Unit of Measure setup.'
 		WHEN @msgId = 80050 THEN 'Unable to calculate %s as %s is not found in %s > UOM setup.'
 		WHEN @msgId = 80051 THEN 'Cyclic situation found. Unable to compute surcharge because %s depends on %s and vice-versa.'

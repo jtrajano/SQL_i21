@@ -7368,6 +7368,7 @@
     <Build Include="dbo\Stored Procedures\uspSCUpdateDeliverySheetDate.sql" />
     <Build Include="dbo\Views\vyuARPaymentForNSF.sql" />
     <Build Include="dbo\Views\vyuAPReceiptClearingGL.sql" />
+    <Build Include="dbo\Views\vyuICGetInvalidBundleItemUom.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

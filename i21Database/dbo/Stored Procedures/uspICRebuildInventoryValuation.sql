@@ -3320,10 +3320,13 @@ BEGIN
 															, RebuildInvTrans.intItemUOMId
 														) 
 													ELSE 
-														dbo.fnCalculateCostBetweenUOM (
-															StockUOM.intItemUOMId
-															,RebuildInvTrans.intItemUOMId
-															,ISNULL(lot.dblLastCost, itemPricing.dblLastCost) 
+														ISNULL(
+															dbo.fnCalculateCostBetweenUOM (
+																StockUOM.intItemUOMId
+																,RebuildInvTrans.intItemUOMId
+																,ISNULL(lot.dblLastCost, itemPricing.dblLastCost) 
+															)
+															, RebuildInvTrans.dblCost 
 														)
 											END 
 
@@ -3824,6 +3827,23 @@ BEGIN
 				FROM	tblICInventoryReceipt r
 				WHERE	r.intInventoryReceiptId = @intTransactionId
 						AND r.strReceiptNumber = @strTransactionId
+
+				-- Update currency fields to functional currency. 
+				BEGIN 
+					UPDATE	itemCost
+					SET		dblExchangeRate = 1
+							,dblForexRate = 1
+							,intCurrencyId = @intFunctionalCurrencyId
+					FROM	@ItemsToPost itemCost
+					WHERE	ISNULL(itemCost.intCurrencyId, @intFunctionalCurrencyId) = @intFunctionalCurrencyId 
+
+					UPDATE	itemCost
+					SET		dblCost = dbo.fnMultiply(dblCost, ISNULL(dblForexRate, 1)) 
+							,dblSalesPrice = dbo.fnMultiply(dblSalesPrice, ISNULL(dblForexRate, 1)) 
+							,dblValue = dbo.fnMultiply(dblValue, ISNULL(dblForexRate, 1)) 
+					FROM	@ItemsToPost itemCost
+					WHERE	itemCost.intCurrencyId <> @intFunctionalCurrencyId 
+				END
 
 				--IF @strTransactionType = 'Inventory Receipt'
 				--BEGIN 
