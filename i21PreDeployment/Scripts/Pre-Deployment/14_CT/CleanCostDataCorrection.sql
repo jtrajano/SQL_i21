@@ -8,9 +8,29 @@ GO
 IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES
            WHERE TABLE_NAME = N'tblCTContractPlan')
 BEGIN
- exec sp_executesql N'UPDATE tblCTContractPlan SET intWeightId = NULL WHERE intWeightId NOT IN (SELECT intWeightGradeId FROM tblCTWeightGrade)'
- exec sp_executesql N'UPDATE tblCTContractPlan SET intGradeId = NULL WHERE intGradeId NOT IN (SELECT intWeightGradeId FROM tblCTWeightGrade)'
- END
+	exec sp_executesql N'UPDATE tblCTContractPlan SET intWeightId = NULL WHERE intWeightId NOT IN (SELECT intWeightGradeId FROM tblCTWeightGrade)'
+	exec sp_executesql N'UPDATE tblCTContractPlan SET intGradeId = NULL WHERE intGradeId NOT IN (SELECT intWeightGradeId FROM tblCTWeightGrade)'
+	--exec('update tblCTContractPlan set intContractBasisId = null where intContractBasisId not in (select intContractBasisId from tblCTContractBasis)');
+	IF (OBJECT_ID('dbo.FK_tblCTContractPlan_tblCTContractBasis_intContractBasisId', 'F') IS NOT NULL)
+	BEGIN
+	    ALTER TABLE tblCTContractPlan DROP CONSTRAINT FK_tblCTContractPlan_tblCTContractBasis_intContractBasisId;
+	END
+
+	exec('
+		update
+			a
+		set a.intContractBasisId = c.intFreightTermId
+		from
+			tblCTContractPlan a
+			,tblCTContractBasis b
+			,tblSMFreightTerms c
+		where
+			b.intContractBasisId = a.intContractBasisId
+			and c.strFreightTerm = b.strContractBasis
+	');
+
+	exec('update tblCTContractPlan set intContractBasisId = null where intContractBasisId not in (select intFreightTermId from tblSMFreightTerms)');
+END
 
  IF EXISTS(SELECT * FROM sys.columns  WHERE name = N'intPricingStatus' AND object_id = OBJECT_ID(N'tblCTContractDetail'))
 BEGIN
