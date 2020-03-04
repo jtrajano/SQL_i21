@@ -380,7 +380,7 @@ BEGIN TRANSACTION
 		UPDATE tblSTLotteryBook 
 		SET 
 			dblQuantityRemaining = dblQuantity,
-			strStatus = 'In Active'
+			strStatus = 'Inactive'
 		FROM 
 		tblSTReturnLottery
 		WHERE intReturnLotteryId = @Id AND tblSTReturnLottery.intLotteryBookId = tblSTLotteryBook.intLotteryBookId
