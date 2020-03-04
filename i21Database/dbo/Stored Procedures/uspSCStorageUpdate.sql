@@ -163,6 +163,7 @@ BEGIN TRY
 							,intSubLocationId = ScaleTicket.intSubLocationId
 							,intStorageLocationId = ScaleTicket.intStorageLocationId
 							,ysnIsStorage = CASE WHEN GR.strOwnedPhysicalStock = 'Customer' THEN 1 ELSE 0 END
+							,strSourceTransactionId = @strDistributionOption
 							,intStorageScheduleTypeId = @intStorageTypeId
 							,ysnAllowVoucher = 0
 					FROM	dbo.tblSCTicket ScaleTicket
@@ -229,6 +230,7 @@ BEGIN TRY
 						END
 					END
 					,strSourceTransactionId  = @strDistributionOption
+					,intStorageScheduleTypeId = @intGRStorageId
 					,ysnAllowVoucher = 0
 			FROM	dbo.tblSCTicket ScaleTicket
 					INNER JOIN tblICItemUOM ItemUOM ON ScaleTicket.intItemId = ItemUOM.intItemId
@@ -492,6 +494,7 @@ BEGIN TRY
 				END
 			END
 			,strSourceTransactionId  = @strDistributionOption
+			,intStorageScheduleTypeId = @intGRStorageId
 			,ysnAllowVoucher = 0
 	FROM	dbo.tblSCTicket ScaleTicket
 			INNER JOIN tblICItemUOM ItemUOM ON ScaleTicket.intItemId = ItemUOM.intItemId
