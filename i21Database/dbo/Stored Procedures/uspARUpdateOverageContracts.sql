@@ -4,6 +4,7 @@
 	, @intUserId			INT 
 	, @dblNetWeight			NUMERIC(18, 6) = 0
 	, @ysnFromSalesOrder	BIT = 0
+	, @ysnFromImport		BIT = 0
 AS
 
 DECLARE @tblInvoiceIds				InvoiceId
@@ -140,7 +141,7 @@ INNER JOIN (
 ) I ON ID.intItemId = I.intItemId 
 WHERE intInvoiceId = @intInvoiceId
 
-IF ISNULL(@strInvalidItem, '') <> '' AND ISNULL(@ysnFromSalesOrder, 0) = 0
+IF ISNULL(@strInvalidItem, '') <> '' AND ISNULL(@ysnFromSalesOrder, 0) = 0 AND ISNULL(@ysnFromImport, 0) = 0
 	BEGIN
 		DECLARE @strErrorMsg NVARCHAR(MAX) = 'Item ' + @strInvalidItem + ' doesn''t have UOM setup for ' + @strUnitMeasure + '.'
 
@@ -179,7 +180,7 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
 		FROM #INVOICEDETAILS
 
 		--UPDATE INVOICE DETAIL QTY SHIPPED = AVAILABLE CONTRACT QTY
-		IF ISNULL(@ysnFromSalesOrder, 0) = 0
+		IF ISNULL(@ysnFromSalesOrder, 0) = 0 AND ISNULL(@ysnFromImport, 0) = 0
 			BEGIN		
 				UPDATE ID
 				SET dblQtyShipped	= ISNULL(CASE WHEN ISI.dblDestinationQuantity > CTD.dblOriginalQty 
@@ -276,6 +277,17 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
 				  , dblUnitQuantity	= ISNULL(dbo.fnCalculateQtyBetweenUOM(@intScaleUOMId, ID.intItemUOMId, @dblNetWeight), 0)
 				  , @dblQtyOverAged	= 0
 				FROM tblARInvoiceDetail ID
+				WHERE ID.intInvoiceDetailId = @intInvoiceDetailId
+			END
+		ELSE IF ISNULL(@ysnFromImport, 0) = 1 AND @intContractDetailId IS NOT NULL
+			BEGIN
+				UPDATE ID
+				SET dblQtyShipped 	= CASE WHEN ISNULL(ID.[dblQtyShipped], 0) > ISNULL(CTD.dblBalance, 0) - ISNULL(CTD.dblScheduleQty, 0) THEN ISNULL(CTD.dblBalance, 0) - ISNULL(CTD.dblScheduleQty, 0) ELSE ID.[dblQtyShipped] END
+				  , dblUnitQuantity = CASE WHEN ISNULL(ID.[dblQtyShipped], 0) > ISNULL(CTD.dblBalance, 0) - ISNULL(CTD.dblScheduleQty, 0) THEN ISNULL(CTD.dblBalance, 0) - ISNULL(CTD.dblScheduleQty, 0) ELSE ID.[dblQtyShipped] END
+				  , dblQtyOrdered 	= CASE WHEN ISNULL(ID.[dblQtyShipped], 0) > ISNULL(CTD.dblBalance, 0) - ISNULL(CTD.dblScheduleQty, 0) THEN ISNULL(CTD.dblBalance, 0) - ISNULL(CTD.dblScheduleQty, 0) ELSE ID.[dblQtyShipped] END
+				  , @dblQtyOverAged = CASE WHEN ISNULL(ID.[dblQtyShipped], 0) > ISNULL(CTD.dblBalance, 0) - ISNULL(CTD.dblScheduleQty, 0) THEN ID.[dblQtyShipped] - ISNULL(CTD.dblBalance, 0) - ISNULL(CTD.dblScheduleQty, 0) ELSE 0 END
+				FROM tblARInvoiceDetail ID
+				INNER JOIN tblCTContractDetail CTD ON ID.intContractDetailId = CTD.intContractDetailId
 				WHERE ID.intInvoiceDetailId = @intInvoiceDetailId
 			END
 
@@ -625,7 +637,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILSTOADD)
 	END
 
 --UPDATE INVOICE INTEGRATION
-WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEIDS)
+WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEIDS) AND ISNULL(@ysnFromImport, 0) = 0
 	BEGIN
 		DECLARE @intInvoiceToUpdate INT = NULL
 			  , @intEntityUserId	INT = NULL
