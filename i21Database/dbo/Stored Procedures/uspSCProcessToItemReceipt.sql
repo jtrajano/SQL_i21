@@ -300,6 +300,7 @@ BEGIN TRY
 					,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
 					,ysnIsStorage
 					,strSourceTransactionId 
+					,intStorageScheduleTypeId
 					,ysnAllowVoucher 
 				)
 				EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblRemainingUnits , @intEntityId, @strDistributionOption, NULL
@@ -486,6 +487,7 @@ BEGIN TRY
 								,intStorageLocationId
 								,ysnIsStorage
 								,strSourceTransactionId 
+								,intStorageScheduleTypeId
 								,ysnAllowVoucher 
 							)
 							EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblNetUnits , @intEntityId, @strDistributionOption, @intDPContractId, @intStorageScheduleId
@@ -520,6 +522,7 @@ BEGIN TRY
 							,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
 							,ysnIsStorage
 							,strSourceTransactionId 
+							,intStorageScheduleTypeId
 							,ysnAllowVoucher
 					)
 					EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblNetUnits , @intEntityId, @strDistributionOption, NULL, @intStorageScheduleId
