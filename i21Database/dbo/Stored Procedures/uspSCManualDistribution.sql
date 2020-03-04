@@ -151,7 +151,6 @@ OPEN intListCursor;
 								-- EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoopContractId, @dblLoopContractUnits, @intUserId, @intTicketId, 'Auto - Scale', @intTicketItemUOMId  
 
 								
-								
 								IF(@ysnLoadContract = 0)
 								BEGIN
 									IF(@dblLoopContractUnits > @dblTicketScheduleQuantity )
@@ -349,6 +348,7 @@ OPEN intListCursor;
 								,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
 								,ysnIsStorage
 								,strSourceTransactionId
+								,intStorageScheduleTypeId
 								,ysnAllowVoucher  
 							)
 							EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblLoopContractUnits , @intEntityId, @strDistributionOption, @intDPContractId, @intStorageScheduleId
