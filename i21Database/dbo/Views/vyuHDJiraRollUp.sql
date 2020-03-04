@@ -3,6 +3,7 @@
 		select
 			intId = ROW_NUMBER() over (order by strKey)
 			,intProjectId
+			,intCustomerId
 			,strProjectName
 			,dtmCreated
 			,dtmGoLive
@@ -28,6 +29,7 @@
 		(
 			select distinct
 				a.intProjectId
+				,a.intCustomerId
 				,a.strProjectName
 				,a.dtmCreated
 				,a.dtmGoLive
