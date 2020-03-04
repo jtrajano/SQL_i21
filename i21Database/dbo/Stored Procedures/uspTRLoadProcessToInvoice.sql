@@ -655,6 +655,7 @@ BEGIN TRY
 		,[intTempDetailIdForTaxes]
 		,[ysnImpactInventory]
 		,[strBOLNumberDetail]
+		,[ysnBlended]
 	)
 	SELECT 
 		0 AS intId
@@ -736,6 +737,7 @@ BEGIN TRY
 		,[intTempDetailIdForTaxes]				= IE.intTempDetailIdForTaxes
 		,[ysnImpactInventory]					= IE.ysnImpactInventory
 		,[strBOLNumberDetail]					= IE.strBOLNumberDetail
+		,[ysnBlended]							= IE.ysnBlended
 	FROM #tmpSourceTableFinal IE
 	INNER JOIN tblICItem Item ON Item.intItemId = @intFreightItemId
 	WHERE ISNULL(IE.dblFreightRate, 0) != 0 AND IE.ysnFreightInPrice != 1
@@ -985,7 +987,8 @@ BEGIN TRY
 			,[ysnVirtualMeterReading]
 			,[ysnClearDetailTaxes]					
 			,[intTempDetailIdForTaxes]
-			,[strBOLNumberDetail])
+			,[strBOLNumberDetail]
+			,[ysnBlended])
 		SELECT 
 			[strSourceTransaction]					= IE.strSourceTransaction
 			,[intSourceId]							= IE.intSourceId
@@ -1062,6 +1065,7 @@ BEGIN TRY
 			,[ysnClearDetailTaxes]					= IE.ysnClearDetailTaxes
 			,[intTempDetailIdForTaxes]				= IE.intTempDetailIdForTaxes
 			,[strBOLNumberDetail]					= IE.strBOLNumberDetail 
+			,[ysnBlended]							= IE.ysnBlended
 		FROM #tmpSourceTableFinal IE
 		INNER JOIN tblICItem Item ON Item.intItemId = @intSurchargeItemId
 		WHERE ISNULL(IE.dblFreightRate, 0) != 0
