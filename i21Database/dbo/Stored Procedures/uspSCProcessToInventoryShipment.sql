@@ -204,6 +204,7 @@ BEGIN TRY
 					,intSubLocationId
 					,intStorageLocationId
 					,ysnIsStorage
+					,strSourceTransactionId 
 					,intStorageScheduleTypeId 
 					,ysnAllowVoucher
 				)
@@ -382,6 +383,7 @@ BEGIN TRY
 								,intSubLocationId
 								,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
 								,ysnIsStorage
+								,strSourceTransactionId 
 								,intStorageScheduleTypeId 
 								,ysnAllowVoucher
 							)
@@ -418,6 +420,7 @@ BEGIN TRY
 					,intSubLocationId
 					,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
 					,ysnIsStorage
+					,strSourceTransactionId 
 					,intStorageScheduleTypeId 
 					,ysnAllowVoucher
 				)
