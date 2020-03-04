@@ -40,7 +40,7 @@ RETURNS TABLE AS RETURN
 		,[intScaleTicketId]					=	B.intScaleTicketId
 		,[intInventoryReceiptItemId]		=	B.intInventoryReceiptItemId
 		,[intInventoryReceiptChargeId]		=	B.intInventoryReceiptChargeId
-		,[intInventoryShipmentItemId]		=	NULL
+		,[intInventoryShipmentItemId]		=	B.intItemId
 		,[intInventoryShipmentChargeId]		=	B.intInventoryShipmentChargeId
 		,[intLoadShipmentId]				=	B.intLoadId
 		,[intLoadShipmentDetailId]			=	B.intLoadDetailId

@@ -25,16 +25,24 @@ BEGIN TRY
 	END
 
 	SELECT	
-			@dblPLoadScheduledQty = IsNull((SELECT SUM(Load.dblQuantity) FROM tblLGLoad Load LEFT JOIN tblLGGenerateLoad GL ON GL.intGenerateLoadId = Load.intGenerateLoadId AND IsNull(Load.dblDeliveredQuantity, 0) <= 0 Group By GL.intAllocationDetailId, Load.intContractDetailId Having GL.intAllocationDetailId = AD.intAllocationDetailId AND Load.intContractDetailId = AD.intPContractDetailId), 0.0),
-			@dblSLoadScheduledQty = IsNull((SELECT SUM(Load.dblQuantity) FROM tblLGLoad Load LEFT JOIN tblLGGenerateLoad GL ON GL.intGenerateLoadId = Load.intGenerateLoadId AND IsNull(Load.dblDeliveredQuantity, 0) <= 0 Group By GL.intAllocationDetailId, Load.intContractDetailId Having GL.intAllocationDetailId = AD.intAllocationDetailId AND Load.intContractDetailId = AD.intSContractDetailId), 0.0),
-			@dblPLoadDeliveredQty = IsNull((SELECT SUM(Load.dblDeliveredQuantity) FROM tblLGLoad Load LEFT JOIN tblLGGenerateLoad GL ON GL.intGenerateLoadId = Load.intGenerateLoadId AND IsNull(Load.dblDeliveredQuantity, 0) > 0 Group By GL.intAllocationDetailId, Load.intContractDetailId Having GL.intAllocationDetailId = AD.intAllocationDetailId AND Load.intContractDetailId = AD.intPContractDetailId), 0.0),
-			@dblSLoadDeliveredQty = IsNull((SELECT SUM(Load.dblDeliveredQuantity) FROM tblLGLoad Load LEFT JOIN tblLGGenerateLoad GL ON GL.intGenerateLoadId = Load.intGenerateLoadId AND IsNull(Load.dblDeliveredQuantity, 0) > 0 Group By GL.intAllocationDetailId, Load.intContractDetailId Having GL.intAllocationDetailId = AD.intAllocationDetailId AND Load.intContractDetailId = AD.intSContractDetailId), 0.0),
+			@dblPLoadScheduledQty = IsNull((SELECT SUM(Load.dblQuantity) FROM tblLGLoad Load LEFT JOIN tblLGGenerateLoad GL ON GL.intGenerateLoadId = Load.intGenerateLoadId AND IsNull(Load.dblDeliveredQuantity, 0) <= 0 
+											Group By GL.intAllocationDetailId, Load.intContractDetailId Having GL.intAllocationDetailId = AD.intAllocationDetailId AND Load.intContractDetailId = AD.intPContractDetailId), 0.0),
+			@dblSLoadScheduledQty = IsNull((SELECT SUM(Load.dblQuantity) FROM tblLGLoad Load LEFT JOIN tblLGGenerateLoad GL ON GL.intGenerateLoadId = Load.intGenerateLoadId AND IsNull(Load.dblDeliveredQuantity, 0) <= 0 
+											Group By GL.intAllocationDetailId, Load.intContractDetailId Having GL.intAllocationDetailId = AD.intAllocationDetailId AND Load.intContractDetailId = AD.intSContractDetailId), 0.0),
+			@dblPLoadDeliveredQty = IsNull((SELECT SUM(Load.dblDeliveredQuantity) FROM tblLGLoad Load LEFT JOIN tblLGGenerateLoad GL ON GL.intGenerateLoadId = Load.intGenerateLoadId AND IsNull(Load.dblDeliveredQuantity, 0) > 0 
+											Group By GL.intAllocationDetailId, Load.intContractDetailId Having GL.intAllocationDetailId = AD.intAllocationDetailId AND Load.intContractDetailId = AD.intPContractDetailId), 0.0),
+			@dblSLoadDeliveredQty = IsNull((SELECT SUM(Load.dblDeliveredQuantity) FROM tblLGLoad Load LEFT JOIN tblLGGenerateLoad GL ON GL.intGenerateLoadId = Load.intGenerateLoadId AND IsNull(Load.dblDeliveredQuantity, 0) > 0 
+											Group By GL.intAllocationDetailId, Load.intContractDetailId Having GL.intAllocationDetailId = AD.intAllocationDetailId AND Load.intContractDetailId = AD.intSContractDetailId), 0.0),
 
-			@dblPLotPickedQty	  = IsNull((SELECT SUM(PL.dblLotPickedQty) FROM tblLGPickLotDetail PL Group By PL.intAllocationDetailId Having PL.intAllocationDetailId = AD.intAllocationDetailId), 0.0),
-			@dblSLotPickedQty	  = IsNull((SELECT SUM(PL.dblSalePickedQty) FROM tblLGPickLotDetail PL Group By PL.intAllocationDetailId Having PL.intAllocationDetailId = AD.intAllocationDetailId), 0.0),
+			@dblPLotPickedQty	  = IsNull((SELECT SUM(PL.dblLotPickedQty) FROM tblLGPickLotDetail PL 
+											Group By PL.intAllocationDetailId Having PL.intAllocationDetailId = AD.intAllocationDetailId), 0.0),
+			@dblSLotPickedQty	  = IsNull((SELECT SUM(PL.dblSalePickedQty) FROM tblLGPickLotDetail PL 
+											Group By PL.intAllocationDetailId Having PL.intAllocationDetailId = AD.intAllocationDetailId), 0.0),
 
-			@dblPDropShippedQty	  = ISNULL((SELECT SUM(ISNULL(dblQuantity,0)) FROM tblLGLoadDetail WHERE intAllocationDetailId = AD.intAllocationDetailId), 0.0),
-			@dblSDropShippedQty	  = ISNULL((SELECT SUM(ISNULL(dblQuantity,0)) FROM tblLGLoadDetail WHERE intAllocationDetailId = AD.intAllocationDetailId), 0.0),
+			@dblPDropShippedQty	  = ISNULL((SELECT SUM(ISNULL(LD.dblQuantity,0)) FROM tblLGLoadDetail LD INNER JOIN tblLGLoad L ON LD.intLoadId = L.intLoadId 
+											WHERE intShipmentType = 1 AND intAllocationDetailId = AD.intAllocationDetailId), 0.0),
+			@dblSDropShippedQty	  = ISNULL((SELECT SUM(ISNULL(LD.dblQuantity,0)) FROM tblLGLoadDetail LD INNER JOIN tblLGLoad L ON LD.intLoadId = L.intLoadId 
+											WHERE intShipmentType = 1 AND intAllocationDetailId = AD.intAllocationDetailId), 0.0),
 
 			@dblPWeightPerUnit	  = IsNull([dbo].fnLGGetItemUnitConversion (CTP.intItemId, CTP.intItemUOMId, AH.intWeightUnitMeasureId), 0.0),
 			@dblSWeightPerUnit	  = IsNull([dbo].fnLGGetItemUnitConversion (CTS.intItemId, CTS.intItemUOMId, AH.intWeightUnitMeasureId), 0.0),
