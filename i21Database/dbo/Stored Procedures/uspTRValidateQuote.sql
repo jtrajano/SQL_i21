@@ -127,15 +127,12 @@ BEGIN
 			SET @ysnValid = 0
 			RETURN
 		END
-
-		-- TR-1461
-		-- ELSE IF ((SELECT SUM(dblTax) FROM @tmpQuoteTaxDetail WHERE strType = 'QUOTE') <> (SELECT SUM(dblTax) FROM @tmpQuoteTaxDetail WHERE strType = 'SETUP'))
-		-- BEGIN
-		-- 	RAISERROR('Quote cannot be Confirmed because Customer Location''s current Tax Group has changed since this Quote was created',16,1)
-		-- 	SET @ysnValid = 0
-		-- 	RETURN
-		-- END
-		
+		ELSE IF ((SELECT SUM(dblTax) FROM @tmpQuoteTaxDetail WHERE strType = 'QUOTE') <> (SELECT SUM(dblTax) FROM @tmpQuoteTaxDetail WHERE strType = 'SETUP'))
+		BEGIN
+			RAISERROR('Quote cannot be Confirmed because Customer Location''s current Tax Group has changed since this Quote was created',16,1)
+			SET @ysnValid = 0
+			RETURN
+		END
 
 		FETCH NEXT FROM @CursorQuoteDetail INTO @intItemId, @intShipToLocationId, @intSpecialPriceId, @intTaxGroupId
 	END
