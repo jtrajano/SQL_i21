@@ -21,22 +21,20 @@ FROM (
 		, dblNetPosition = DAP.dblNoOfLots - ISNULL(SalesContracts.dblNoOfLots, 0)
 	FROM vyuRKGetDailyAveragePriceDetail DAP
 	LEFT JOIN (
-		SELECT 
-			  intBookId
-			, intSubBookId
+		SELECT intBookId
+			--, intSubBookId
 			, intFutureMarketId
 			, intFutureMonthId
 			, intCommodityId
 			, dblNoOfLots = SUM(dblBalanceNoOfLots)
 		FROM vyuCTSearchPriceContract WHERE intContractTypeId = 2 AND dblBalanceNoOfLots > 0 
-		GROUP BY
-			intBookId
-			, intSubBookId
+		GROUP BY intBookId
+			--, intSubBookId
 			, intFutureMarketId
 			, intFutureMonthId
 			, intCommodityId
 	) SalesContracts ON SalesContracts.intBookId = DAP.intBookId
-		AND SalesContracts.intSubBookId = DAP.intSubBookId
+		--AND SalesContracts.intSubBookId = DAP.intSubBookId
 		AND SalesContracts.intFutureMarketId = DAP.intFutureMarketId
 		AND SalesContracts.intFutureMonthId = DAP.intFutureMonthId
 		AND SalesContracts.intCommodityId = DAP.intCommodityId
@@ -48,3 +46,4 @@ FROM (
 											WHERE ysnPosted = 1
 										) t WHERE intRowNum = 1)
 )t
+GO
