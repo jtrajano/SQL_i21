@@ -163,6 +163,7 @@ BEGIN TRY
 							,intSubLocationId = ScaleTicket.intSubLocationId
 							,intStorageLocationId = ScaleTicket.intStorageLocationId
 							,ysnIsStorage = CASE WHEN GR.strOwnedPhysicalStock = 'Customer' THEN 1 ELSE 0 END
+							,strSourceTransactionId = @strDistributionOption
 							,intStorageScheduleTypeId = @intStorageTypeId
 							,ysnAllowVoucher = 0
 					FROM	dbo.tblSCTicket ScaleTicket

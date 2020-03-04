@@ -422,6 +422,7 @@ OPEN intListCursor;
 						,intSubLocationId
 						,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
 						,ysnIsStorage
+						,strSourceTransactionId
 						,intStorageScheduleTypeId
 						,ysnAllowVoucher
 					)
