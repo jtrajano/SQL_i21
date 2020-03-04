@@ -7720,6 +7720,7 @@
     <Build Include="dbo\Tables\tblICBackupCollateral.sql" />
     <Build Include="dbo\Functions\fnGRCalculateStorageUnits.sql" />
     <Build Include="dbo\Tables\tblGROldTransactionMapping.sql" />
+    <Build Include="dbo\Views\vyuCTContractBasis.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
