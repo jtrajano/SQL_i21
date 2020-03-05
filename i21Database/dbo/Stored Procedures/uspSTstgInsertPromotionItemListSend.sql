@@ -281,7 +281,7 @@ BEGIN
 												FROM tblSTstgPassportPricebookItemListILT33
 												WHERE strUniqueGuid = @strUniqueGuid
 												FOR XML PATH(''), TYPE
-											) AS [ItemListMaintenance]
+											) AS [ItemMaintenance]
 										FOR XML PATH('NAXML-MaintenanceRequest'),TYPE
 								) AS VARCHAR(MAX))
 								SET @strGeneratedXML = REPLACE(@strGeneratedXML, '><', '>' + CHAR(13) + '<')
