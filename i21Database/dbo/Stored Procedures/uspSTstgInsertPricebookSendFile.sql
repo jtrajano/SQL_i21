@@ -368,7 +368,7 @@ BEGIN
 																END,
 	
 							[strICPOSCodeFormatFormat]			= PCF.strPosCodeFormat,
-							[strICPOSCode]						= IUOM.strLongUPCCode, -- IF PASSPORT DO NOT include check digit
+							[strICPOSCode]						= PCF.strUPCwthOrwthOutCheckDigit, --IUOM.strLongUPCCode, -- IF PASSPORT DO NOT include check digit
 							[strICPOSCodeModifier]				= '0',
 
 							[strITTDataActiveFlgValue]			= CASE 
@@ -560,7 +560,7 @@ BEGIN
 															ORDER BY ITTDetail.strICPOSCode ASC
 															FOR XML PATH('ITTDetail'), TYPE
 														)
-													FOR XML PATH('ItemListMaintenance'), TYPE
+													FOR XML PATH('ItemMaintenance'), TYPE
 												)
 											FROM 
 											(
