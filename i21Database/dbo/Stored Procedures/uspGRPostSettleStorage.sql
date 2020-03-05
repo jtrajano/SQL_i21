@@ -506,7 +506,8 @@ BEGIN TRY
 					ysnApplied bit null,
 					id int identity(1,1),
 					intBillDetailId int null,
-					dblContractUnitGuard DECIMAL(24, 10)
+					dblContractUnitGuard DECIMAL(24, 10),
+					intPricingTypeId int null
 
 				)
 				delete from @avqty				
@@ -517,7 +518,8 @@ BEGIN TRY
 						intPriceFixationDetailId,
 						dblCashPrice,
 						ContractEntityId,
-						dblContractUnits
+						dblContractUnits,
+						intPricingTypeId
 					)
 				select 
 						a.intContractDetailId, 
@@ -531,7 +533,8 @@ BEGIN TRY
 						b.intPriceFixationDetailId ,
 						case when b.intPriceFixationDetailId is not null then b.dblCashPrice else c.dblCashPrice end,
 						ContractEntityId,
-						dblContractUnits
+						dblContractUnits,
+						c.intPricingTypeId
 				from (
 						select distinct intContractDetailId, ContractEntityId, dblContractUnits from @SettleContract
 					) a
@@ -2081,11 +2084,11 @@ BEGIN TRY
 				FROM @SettleVoucherCreate a
 					outer apply(
 						select  
-							 intContractDetailId,	intPriceFixationDetailId, dblCashPrice, dblAvailableQuantity						
+							 intContractDetailId,	intPriceFixationDetailId, dblCashPrice, dblAvailableQuantity, intPricingTypeId						
 							from @avqty 
 						where intContractDetailId = a.intContractDetailId
 					) availableQtyForVoucher
-					WHERE availableQtyForVoucher.intContractDetailId is not null and availableQtyForVoucher.intPriceFixationDetailId is not null
+					WHERE availableQtyForVoucher.intContractDetailId is not null and (availableQtyForVoucher.intPriceFixationDetailId is not null or availableQtyForVoucher.intPricingTypeId = 1 )
 						and a.intItemType = 1
 				
 				----- DEBUG POINT -----
@@ -2111,11 +2114,11 @@ BEGIN TRY
 				FROM @SettleVoucherCreate a
 				cross apply(
 					select top 1 
-						intContractDetailId,	intPriceFixationDetailId, dblCashPrice, dblAvailableQuantity						
+						intContractDetailId,	intPriceFixationDetailId, dblCashPrice, dblAvailableQuantity, intPricingTypeId
 						from @avqty  
 					where intContractDetailId = a.intContractDetailId order by intPriceFixationDetailId desc
 				) availableQtyForVoucher
-				WHERE a.strOrderType = 'Contract' and availableQtyForVoucher.intContractDetailId is not null and availableQtyForVoucher.intPriceFixationDetailId is not null
+				WHERE a.strOrderType = 'Contract' and availableQtyForVoucher.intContractDetailId is not null and ( availableQtyForVoucher.intPriceFixationDetailId is not null or availableQtyForVoucher.intPricingTypeId = 1 )
 				and isnull(@dblQtyFromCt, 0) <= 0
 				
 				----- DEBUG POINT -----
@@ -2551,7 +2554,7 @@ BEGIN TRY
 					ON CD.intContractHeaderId = CH.intContractHeaderId
 				left join (
 					select						
-						intContractDetailId,	intPriceFixationDetailId, dblCashPrice, dblAvailableQuantity, dblContractUnits						
+						intContractDetailId,	intPriceFixationDetailId, dblCashPrice, dblAvailableQuantity, dblContractUnits, intPricingTypeId						
 						from @avqty  			
 						--from vyuCTAvailableQuantityForVoucher 					
 				) availableQtyForVoucher
@@ -2567,6 +2570,7 @@ BEGIN TRY
 				AND CASE WHEN (a.intPricingTypeId = 2 AND ISNULL(@dblCashPriceFromCt,0) = 0) THEN 0 ELSE 1 END = 1
 				and (	a.intContractDetailId is null or  
 						CH.intPricingTypeId in (1, 6) or
+							(CH.intPricingTypeId = 3 and availableQtyForVoucher.intPricingTypeId = 1) or
 							(CH.intPricingTypeId = 2 and 
 								a.intContractDetailId is not null 
 								and availableQtyForVoucher.dblAvailableQuantity > 0)
