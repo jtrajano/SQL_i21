@@ -1301,7 +1301,7 @@ SELECT
     ,[intAllowNegativeInventory]        = ICIL.[intAllowNegativeInventory]
     ,[ysnStockTracking]					= @OneBit
     ,[intItemLocationId]                = ICIL.[intItemLocationId]
-    ,[dblLastCost]                      = ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARID.[intItemUOMId], ISNULL(ICSUOM.[intItemUOMId], ARID.[intItemUOMId]), ICIP.[dblLastCost]), @ZeroDecimal) --ICIP.[dblLastCost]
+    ,[dblLastCost]                      = ICIP.[dblLastCost]
     ,[intCategoryId]                    = ICI.[intCategoryId]
     ,[ysnRetailValuation]				= ICC.[ysnRetailValuation]
     ,[dblPrice]                         = ARID.[dblPrice]
@@ -1637,7 +1637,7 @@ SELECT
     ,[intAllowNegativeInventory]        = ICIL.[intAllowNegativeInventory]
     ,[ysnStockTracking]					= @ZeroBit
     ,[intItemLocationId]                = ICIL.[intItemLocationId]
-    ,[dblLastCost]                      = ICIP.[dblLastCost] * ICIU.[dblUnitQty]
+    ,[dblLastCost]                      = ICIP.[dblLastCost]
     ,[intCategoryId]                    = ICI.[intCategoryId]
     ,[ysnRetailValuation]				= ICC.[ysnRetailValuation]
     ,[dblPrice]                         = ARID.[dblPrice]
