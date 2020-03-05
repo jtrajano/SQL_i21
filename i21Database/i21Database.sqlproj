@@ -8518,6 +8518,8 @@
     <Build Include="dbo\Stored Procedures\uspAPImportVoucherLassus.sql" />
     <Build Include="dbo\Stored Procedures\uspAPImportVoucherLassusSas.sql" />
     <Build Include="dbo\Tables\tblAPImportVoucherLassusSas.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPGenerateSAPPOIDOC_ST.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessSAPAcknowledgement_ST.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
