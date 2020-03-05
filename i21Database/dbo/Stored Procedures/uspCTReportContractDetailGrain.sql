@@ -8,7 +8,8 @@ BEGIN TRY
 	
 	DECLARE @ErrMsg					NVARCHAR(MAX),
 			@intContractDetailId	INT,
-			@intDecimalDPR			INT = 0
+			@intDecimalDPR			INT = 0,
+			@intQuantityDecimals			INT = 2
     
 	DECLARE @ContractDetailGrain AS TABLE 
 	(
@@ -38,6 +39,8 @@ BEGIN TRY
 		,strQuantityZee						NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 		,strPriceRoth						NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 	)
+
+	set @intQuantityDecimals = isnull((select top 1 intQuantityDecimals from tblCTCompanyPreference),2);
 
 	SELECT @intContractDetailId = MIN(intContractDetailId)
 	FROM    vyuCTContractDetailView DV
@@ -113,9 +116,9 @@ BEGIN TRY
 													ELSE 0
 										   END)) + ' per ' + strPriceUOM + ' ' + strCurrency
 			,strPriceZee				 = CASE	
-													WHEN intPricingTypeId IN (1,6)	THEN	dbo.fnCTChangeNumericScale(ISNULL(dblCashPrice,0),@intDecimalDPR)
-													WHEN intPricingTypeId = 2		THEN	dbo.fnCTChangeNumericScale(ISNULL(dblBasis,0),@intDecimalDPR)
-													WHEN intPricingTypeId = 3		THEN	dbo.fnCTChangeNumericScale(ISNULL(dblFutures,0),@intDecimalDPR)
+													WHEN intPricingTypeId IN (1,6)	THEN	dbo.fnCTChangeNumericScale(ISNULL(dblCashPrice,0),@intQuantityDecimals)
+													WHEN intPricingTypeId = 2		THEN	dbo.fnCTChangeNumericScale(ISNULL(dblBasis,0),@intQuantityDecimals)
+													WHEN intPricingTypeId = 3		THEN	dbo.fnCTChangeNumericScale(ISNULL(dblFutures,0),@intQuantityDecimals)
 													ELSE '0'
 											END
 											+ ' ' + strPriceUOM + ' ' + strCurrency
