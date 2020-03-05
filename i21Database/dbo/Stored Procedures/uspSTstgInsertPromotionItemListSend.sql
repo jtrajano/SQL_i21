@@ -196,7 +196,7 @@ BEGIN
 							[ItemListID]							= PIL.intPromoItemListNo, 
 							[ItemListDescription]					= ISNULL(PIL.strPromoItemListDescription, ''), 
 							[POSCodeFormatFormat]					= PCF.strPosCodeFormat, 
-							[POSCode]								= PCF.strLongUPCCode, -- PASSPORT does not include check digit --PCF.strUPCwthOrwthOutCheckDigit,
+							[POSCode]								= PCF.strUPCwthOrwthOutCheckDigit, --PCF.strLongUPCCode, -- PASSPORT does not include check digit --PCF.strUPCwthOrwthOutCheckDigit,
 							[strUniqueGuid]							= @strUniqueGuid
 						FROM tblICItem I
 						INNER JOIN tblICItemLocation IL 
