@@ -196,7 +196,7 @@ BEGIN
 							[ItemListID]							= PIL.intPromoItemListNo, 
 							[ItemListDescription]					= ISNULL(PIL.strPromoItemListDescription, ''), 
 							[POSCodeFormatFormat]					= PCF.strPosCodeFormat, 
-							[POSCode]								= PCF.strLongUPCCode, -- PASSPORT does not include check digit --PCF.strUPCwthOrwthOutCheckDigit,
+							[POSCode]								= PCF.strUPCwthOrwthOutCheckDigit --PCF.strLongUPCCode, -- PASSPORT does not include check digit --PCF.strUPCwthOrwthOutCheckDigit,
 							[strUniqueGuid]							= @strUniqueGuid
 						FROM tblICItem I
 						INNER JOIN tblICItemLocation IL 
@@ -281,7 +281,7 @@ BEGIN
 												FROM tblSTstgPassportPricebookItemListILT33
 												WHERE strUniqueGuid = @strUniqueGuid
 												FOR XML PATH(''), TYPE
-											) AS [ItemListMaintenance]
+											) AS [ItemMaintenance]
 										FOR XML PATH('NAXML-MaintenanceRequest'),TYPE
 								) AS VARCHAR(MAX))
 								SET @strGeneratedXML = REPLACE(@strGeneratedXML, '><', '>' + CHAR(13) + '<')
