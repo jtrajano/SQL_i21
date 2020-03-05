@@ -17,16 +17,15 @@ DECLARE @intInvoiceId				INT
 	  , @intSalesOrderId			INT
 	  , @intItemContractHeaderId	INT
 	  , @strTransactionType			NVARCHAR(25)
+	  , @strBatchId					NVARCHAR(100)
 	  , @ysnFromItemContract		BIT
 	  , @InvoiceIds					InvoiceId
-
 
 --For Prepaid Contract Update
 DECLARE @dblValueToUpdate NUMERIC(18, 6),
 		@intTransactionDetailId INT,
 		@strScreenName NVARCHAR(50) = 'Prepayment',
 		@strRowState  NVARCHAR(50)
-
 
 SET @intTranCount = @@trancount;
 
@@ -39,21 +38,18 @@ BEGIN TRY
 	SET @intInvoiceId = @InvoiceId
 	SET @intUserId = @UserId
 
-	SELECT TOP 1 @intOriginalInvoiceId = intOriginalInvoiceId
-			, @intSalesOrderId = intSalesOrderId
-			, @strTransactionType = strTransactionType
-			, @ysnFromItemContract = ISNULL(ysnFromItemContract, 0)
+	SELECT TOP 1 @intOriginalInvoiceId 	= intOriginalInvoiceId
+			   , @intSalesOrderId 		= intSalesOrderId
+			   , @strTransactionType 	= strTransactionType
+			   , @ysnFromItemContract 	= ISNULL(ysnFromItemContract, 0)
+			   , @strBatchId			= strBatchId
 	FROM tblARInvoice 
 	WHERE intInvoiceId = @InvoiceId
-
-
-
 
 	IF @strTransactionType = 'Proforma Invoice'
 		RETURN
 
 	EXEC dbo.[uspARUpdateProvisionalOnStandardInvoice] @intInvoiceId, @ForDelete, @intUserId
-
 	
     --FOR PREPAID ITEM CONTRACT
 	SELECT TOP 1 
@@ -114,10 +110,20 @@ BEGIN TRY
 	EXEC dbo.[uspARUpdateReturnedInvoice] @intInvoiceId, @ForDelete, @intUserId 
 	EXEC dbo.[uspARUpdateInvoiceAccruals] @intInvoiceId	
 
-	INSERT INTO @InvoiceIds(intHeaderId) SELECT @intInvoiceId
+	INSERT INTO @InvoiceIds(
+		  intHeaderId
+		, ysnForDelete
+		, strBatchId
+	) 
+	SELECT intHeaderId	= @intInvoiceId
+		 , ysnForDelete	= ISNULL(@ForDelete, 0)
+		 , strBatchId	= @strBatchId
+
 	EXEC dbo.[uspARUpdateInvoiceTransactionHistory] @InvoiceIds
+	EXEC dbo.[uspARLogRiskPosition] @InvoiceIds, @UserId
+
 	IF @ForDelete = 1
-	EXEC [dbo].[uspGRDeleteStorageHistory] 'Invoice',@InvoiceId
+		EXEC [dbo].[uspGRDeleteStorageHistory] 'Invoice',@InvoiceId
 
 	DELETE FROM [tblARTransactionDetail] WHERE [intTransactionId] = @intInvoiceId AND [strTransactionType] = (SELECT TOP 1 [strTransactionType] FROM tblARInvoice WHERE intInvoiceId = @intInvoiceId)
 
