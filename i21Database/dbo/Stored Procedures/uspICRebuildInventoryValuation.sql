@@ -856,8 +856,8 @@ BEGIN
 				WHEN priorityTransaction.strTransactionId IS NOT NULL THEN 
 					-CAST(REPLACE(strBatchId, 'BATCH-', '') AS INT)
 				ELSE
-					1
-			END ASC 
+					NULL
+			END DESC 
 			,CASE 
 				WHEN priorityTransaction.strTransactionId IS NOT NULL THEN 1 
 				WHEN dblQty > 0 AND strTransactionForm NOT IN ('Invoice', 'Inventory Shipment') THEN 2 
