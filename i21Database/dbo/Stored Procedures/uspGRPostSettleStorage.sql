@@ -2420,8 +2420,19 @@ BEGIN TRY
 									on a.intContractHeaderId = c.intContractHeaderId
 										and a.intContractDetailId = c.intContractDetailId
 										and c.intCustomerStorageId = a.intCustomerStorageId
+								join tblAPBill d
+									on c.intBillId = d.intBillId
+										and d.strVendorOrderNumber = @TicketNo
 							)
-
+							
+				
+				--debug point
+				if @debug_awesome_ness = 1 and 1 = 1
+				begin
+					select 'freshly add voucher payable'
+					select * from @voucherPayable
+				end
+				--debug point
 				---we should update the voucher payable to remove the contract detail that has a null contract header
 					update @voucherPayable set intContractDetailId = null where intContractDetailId is not null and intContractHeaderId is null
 
