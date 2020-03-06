@@ -11,7 +11,7 @@ FROM (
 	SELECT I.strItemNo
 		,'UnAllocated Purchase' strAttributeName
 		,Left(DATENAME(mm, DateAdd(m, 2, SS.dtmStartDate)), 3) + ' ' + Right(DATENAME(YY, DateAdd(m, 2, SS.dtmStartDate)), 2) AS strMonth
-		,0 AS dblPlannedPurchaseQty
+		,Convert(Decimal(26,12),0.0) AS dblPlannedPurchaseQty
 		,sum(dbo.fnCTConvertQuantityToTargetItemUOM(SS.intItemId, IU.intUnitMeasureId, PS.intUnitMeasureId, SS.dblBalance)) AS dblUnAllocatedPurchaseQty
 		,DateAdd(m, 2, SS.dtmStartDate) as dtmStartDate
 	FROM dbo.tblMFInvPlngSummaryDetail SD
@@ -40,7 +40,7 @@ FROM (
 	SELECT I.strItemNo
 		,'UnAllocated Purchase' strAttributeName
 		,Left(DATENAME(mm, DateAdd(m, 2, SS.dtmStartDate)), 3) + ' ' + Right(DATENAME(YY, DateAdd(m, 2, SS.dtmStartDate)), 2) AS strMonth
-		,0 AS dblPlannedPurchaseQty
+		,0.0 AS dblPlannedPurchaseQty
 		,sum(dbo.fnCTConvertQuantityToTargetItemUOM(SS.intItemId, IU.intUnitMeasureId, PS.intUnitMeasureId, SS.dblBalance)) AS dblUnAllocatedPurchaseQty
 		,DateAdd(m, 2, SS.dtmStartDate) as dtmStartDate
 	FROM dbo.tblMFInvPlngSummaryDetail SD
@@ -77,7 +77,7 @@ FROM (
 		,RA.strAttributeName
 		,SD1.strValue AS strMonth
 		,SD.strValue
-		,0 AS dblUnAllocatedPurchaseQty
+		,0.0 AS dblUnAllocatedPurchaseQty
 		,Convert(Datetime,'01 '+ SD1.strValue)
 	FROM tblMFInvPlngSummaryDetail SD
 	JOIN tblICItem I ON I.intItemId = SD.intItemId
