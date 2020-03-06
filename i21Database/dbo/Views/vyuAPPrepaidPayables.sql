@@ -75,7 +75,7 @@ FROM dbo.tblAPPayment  A
 LEFT JOIN dbo.tblCMBankTransaction E
 	ON A.strPaymentRecordNum = E.strTransactionId
 LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = D2.intEntityClassId
-LEFT JOIN dbo.tblGLAccount F ON  B.intAccountId = F.intAccountId
+LEFT JOIN dbo.vyuGLAccountDetail F ON  B.intAccountId = F.intAccountId
 OUTER APPLY (
 	SELECT TOP 1
 		bd.dblRate
@@ -85,10 +85,11 @@ OUTER APPLY (
  WHERE A.ysnPosted = 1  
 	AND C.ysnPosted = 1
 	AND C.intTransactionType IN (2, 13)
-	AND A.ysnPrepay = 1
+	-- AND A.ysnPrepay = 1
 	AND NOT EXISTS (
 		SELECT 1 FROM vyuAPPaidOriginPrepaid originPrepaid WHERE originPrepaid.intBillId = C.intBillId
 	)
+	AND F.intAccountCategoryId = 1
 UNION ALL
 --VENDOR PREPAYMENT PAYMENT TRANSACTION (this will remove the positive part and leave the negative part)
 --HANDLE THOSE ORIGIN PREPAYMENT THAT HAS BEEN IMPORTED UNPAID AND PAID IN i21 BUT DO NOT HAVE PAYMENT TRANSACTION (ysnPrepay = 1)
@@ -237,7 +238,7 @@ FROM dbo.tblAPPayment  A
 LEFT JOIN dbo.tblCMBankTransaction E
 	ON A.strPaymentRecordNum = E.strTransactionId
 LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = D2.intEntityClassId	
-LEFT JOIN dbo.tblGLAccount F ON  B.intAccountId = F.intAccountId
+LEFT JOIN dbo.vyuGLAccountDetail F ON  B.intAccountId = F.intAccountId
 OUTER APPLY (
 	SELECT TOP 1
 		bd.dblRate
@@ -247,10 +248,11 @@ OUTER APPLY (
  WHERE A.ysnPosted = 1  
 	AND C.ysnPosted = 1
 	AND C.intTransactionType IN (2, 13)
-	AND A.ysnPrepay = 0
+	-- AND A.ysnPrepay = 0
 	AND NOT EXISTS (
-	SELECT 1 FROM vyuAPPaidOriginPrepaid originPrepaid WHERE originPrepaid.intBillId = B.intBillId
-)
+		SELECT 1 FROM vyuAPPaidOriginPrepaid originPrepaid WHERE originPrepaid.intBillId = B.intBillId
+	)
+	AND F.intAccountCategoryId != 1
 UNION ALL --APPLIED PREPAYMENT
 SELECT
 	A.dtmDate
