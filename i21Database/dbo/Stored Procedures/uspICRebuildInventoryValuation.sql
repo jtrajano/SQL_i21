@@ -801,13 +801,16 @@ BEGIN
 				,intSortByQty = 
 					CASE 
 						WHEN priorityTransaction.strTransactionId IS NOT NULL THEN 1 
-						WHEN dblQty > 0 AND strTransactionForm NOT IN ('Invoice', 'Inventory Shipment') THEN 2 
-						WHEN dblQty < 0 AND strTransactionForm = 'Inventory Shipment' THEN 3
-						WHEN dblQty > 0 AND strTransactionForm = 'Inventory Shipment' THEN 4
-						WHEN dblQty < 0 AND strTransactionForm = 'Invoice' THEN 5
-						WHEN dblValue <> 0 THEN 6
-						ELSE 7
-					END    
+						WHEN dblQty > 0 AND ty.strName IN ('Inventory Adjustment - Opening Inventory') THEN 2 
+						WHEN dblQty > 0 AND t.strTransactionForm NOT IN ('Invoice', 'Inventory Shipment', 'Inventory Count', 'Credit Memo') THEN 3 
+						WHEN dblQty < 0 AND t.strTransactionForm = 'Inventory Shipment' THEN 4
+						WHEN dblQty > 0 AND t.strTransactionForm = 'Inventory Shipment' THEN 5
+						WHEN dblQty < 0 AND t.strTransactionForm = 'Invoice' THEN 6
+						WHEN dblQty > 0 AND t.strTransactionForm = 'Credit Memo' THEN 7
+						WHEN t.strTransactionForm IN ('Inventory Count') THEN 10
+						WHEN dblValue <> 0 THEN 8
+						ELSE 9
+					END 
 				,intItemId
 				,intItemLocationId
 				,intInTransitSourceLocationId
@@ -826,13 +829,13 @@ BEGIN
 				,t.strTransactionId
 				,intTransactionDetailId
 				,strBatchId
-				,intTransactionTypeId
+				,t.intTransactionTypeId
 				,intLotId
 				,ysnIsUnposted
 				,intRelatedInventoryTransactionId
 				,intRelatedTransactionId
 				,strRelatedTransactionId
-				,strTransactionForm
+				,t.strTransactionForm
 				,intCostingMethod
 				,dtmCreated
 				,strDescription
@@ -850,6 +853,8 @@ BEGIN
 				,intFobPointId
 		FROM	#tmpUnOrderedICTransaction t LEFT JOIN #tmpPriorityTransactions priorityTransaction
 					ON t.strTransactionId = priorityTransaction.strTransactionId
+				LEFT JOIN tblICInventoryTransactionType  ty
+					ON t.intTransactionTypeId = ty.intTransactionTypeId
 		ORDER BY 
 			DATEADD(dd, DATEDIFF(dd, 0, dtmDate), 0) ASC			
 			,CASE 
@@ -860,13 +865,16 @@ BEGIN
 			END DESC 
 			,CASE 
 				WHEN priorityTransaction.strTransactionId IS NOT NULL THEN 1 
-				WHEN dblQty > 0 AND strTransactionForm NOT IN ('Invoice', 'Inventory Shipment') THEN 2 
-				WHEN dblQty < 0 AND strTransactionForm = 'Inventory Shipment' THEN 3
-				WHEN dblQty > 0 AND strTransactionForm = 'Inventory Shipment' THEN 4
-				WHEN dblQty < 0 AND strTransactionForm = 'Invoice' THEN 5
-				WHEN dblValue <> 0 THEN 6
-				ELSE 7
-			END   
+				WHEN dblQty > 0 AND ty.strName IN ('Inventory Adjustment - Opening Inventory') THEN 2 
+				WHEN dblQty > 0 AND t.strTransactionForm NOT IN ('Invoice', 'Inventory Shipment', 'Inventory Count', 'Credit Memo') THEN 3 
+				WHEN dblQty < 0 AND t.strTransactionForm = 'Inventory Shipment' THEN 4
+				WHEN dblQty > 0 AND t.strTransactionForm = 'Inventory Shipment' THEN 5
+				WHEN dblQty < 0 AND t.strTransactionForm = 'Invoice' THEN 6
+				WHEN dblQty > 0 AND t.strTransactionForm = 'Credit Memo' THEN 7
+				WHEN t.strTransactionForm IN ('Inventory Count') THEN 10
+				WHEN dblValue <> 0 THEN 8
+				ELSE 9
+			END  
 			ASC 
 			,CASE 
 				WHEN priorityTransaction.strTransactionId IS NULL THEN 
