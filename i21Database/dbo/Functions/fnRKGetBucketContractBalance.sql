@@ -6,7 +6,8 @@
 )
 RETURNS @returntable TABLE
 (
-	 dtmCreateDate DATETIME
+	 intContractBalanceLogId INT
+	, dtmCreateDate DATETIME
 	, dtmTransactionDate DATETIME
 	, strTransactionType  NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, strTransactionReference   NVARCHAR(100) COLLATE Latin1_General_CI_AS
@@ -45,7 +46,8 @@ BEGIN
 
 	INSERT @returntable	
 	SELECT
-		 dtmTransactionDate
+		 intContractBalanceLogId
+		, dtmTransactionDate
 		, dtmCreatedDate 
 		, strTransactionType
 		, strTransactionReference
@@ -79,8 +81,9 @@ BEGIN
 		, intSubBookId
 		, strNotes
 	FROM (
-		SELECT 
-			 dtmTransactionDate
+		SELECT
+			 intContractBalanceLogId 
+			, dtmTransactionDate
 			, dtmCreatedDate 
 			, strTransactionType
 			, strTransactionReference
