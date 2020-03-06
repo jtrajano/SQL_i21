@@ -60,56 +60,7 @@ IF NOT EXISTS(SELECT TOP 1 NULL FROM @IIDs)
 
 --Contracts
 	DECLARE @ItemsFromInvoice AS dbo.[InvoiceItemTableType]
-	INSERT INTO @ItemsFromInvoice (
-		 [intInvoiceId]
-		,[strInvoiceNumber]
-		,[intEntityCustomerId]
-		,[dtmDate]
-		,[intCurrencyId]
-		,[intCompanyLocationId]
-		,[intDistributionHeaderId]
-		,[intTransactionId]
-		-- Detail 
-		,[intInvoiceDetailId]
-		,[intItemId]
-		,[strItemNo]
-		,[strItemDescription]
-		,[intSCInvoiceId]
-		,[strSCInvoiceNumber]
-		,[intItemUOMId]
-		,[dblQtyOrdered]
-		,[dblQtyShipped]
-		,[dblDiscount]
-		,[dblPrice]
-		,[dblTotalTax]
-		,[dblTotal]
-		,[intServiceChargeAccountId]
-		,[intInventoryShipmentItemId]
-		,[intSalesOrderDetailId]
-		,[intShipmentPurchaseSalesContractId]
-		,[intSiteId]
-		,[strBillingBy]
-		,[dblPercentFull]
-		,[dblNewMeterReading]
-		,[dblPreviousMeterReading]
-		,[dblConversionFactor]
-		,[intPerformerId]
-		,[intContractHeaderId]
-		,[strContractNumber]
-		,[strMaintenanceType]
-		,[strFrequency]
-		,[dtmMaintenanceDate]
-		,[dblMaintenanceAmount]
-		,[dblLicenseAmount]
-		,[intContractDetailId]
-		,[intTicketId]
-		,[intTicketHoursWorkedId]
-		,[intCustomerStorageId]
-		,[intSiteDetailId]
-		,[intLoadDetailId]
-		,[intOriginalInvoiceDetailId]
-		,[ysnLeaseBilling]
-	)
+	INSERT INTO @ItemsFromInvoice
 	SELECT
 		-- Header
 		 [intInvoiceId]								= I.[intInvoiceId]
@@ -187,11 +138,38 @@ EXEC dbo.[uspCTInvoicePosted] @ItemsFromInvoice, @UserId
 --Prepaids
 EXEC dbo.[uspARUpdatePrepaymentsAndCreditMemos] @InvoiceIds = @IIDs
 
---LOG RISK SUMMARY POSITION
-EXEC dbo.uspARLogRiskPosition @InvoiceIds, @UserId
+
+--Committed
+--EXEC dbo.[uspARUpdateCommitted] @intTransactionId, @ysnPost, @intUserId, 1
 
 --Stock Reservation
 EXEC dbo.[uspARUpdateLineItemsReservedStock] @InvoiceIds = @IIDs
+
+----In Transit Outbound Quantities 
+--EXEC dbo.[uspARUpdateInTransit] @intTransactionId, @ysnPost, 0
+
+
+------Update LG - Load Shipment
+--EXEC dbo.[uspLGUpdateLoadShipmentOnInvoicePost]
+--	@InvoiceId	= @intTransactionId
+--	,@Post		= @ysnPost
+--	,@LoadId	= @LoadId
+--	,@UserId	= @intUserId
+
+------Patronage
+--DECLARE	@successfulCount INT
+--		,@invalidCount INT
+--		,@success BIT
+		
+
+--EXEC [dbo].[uspPATInvoiceToCustomerVolume]
+--	 @intEntityCustomerId	= @EntityCustomerId
+--	,@intInvoiceId			= @intTransactionId
+--	,@ysnPosted				= @ysnPost
+--	,@successfulCount		= @successfulCount OUTPUT
+--	,@invalidCount			= @invalidCount OUTPUT
+--	,@success				= @success OUTPUT
+
 
 DELETE FROM @InvoiceLog
 INSERT INTO @InvoiceLog(

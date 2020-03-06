@@ -914,24 +914,6 @@ FROM tblARPrepaidAndCredit A
 INNER JOIN #ARPostInvoiceHeader B ON A.intInvoiceId = B.intInvoiceId 
 WHERE ysnApplied = 0
 
---LOG RISK SUMMARY POSITION
-DELETE FROM @Invoices
-INSERT INTO @Invoices (
-	  strBatchId
-	, intHeaderId
-	, ysnDelete
-	, ysnPost
-	, ysnFromPosting
-)
-SELECT strBatchId		= @BatchId
-	, intHeaderId		= intInvoiceId
-	, ysnDelete			= CAST(0 AS BIT)
-	, ysnPost			= @Post
-	, ysnFromPosting	= CAST(1 AS BIT)
-FROM #ARPostInvoiceHeader
-
-EXEC dbo.uspARLogRiskPosition @Invoices, @UserId
-
 --POST RESULT
 IF @IntegrationLogId IS NULL
 	BEGIN
