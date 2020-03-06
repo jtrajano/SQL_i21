@@ -179,7 +179,7 @@ OPEN intListCursor;
 									SET @dblLoopAdjustedScheduleQuantity = (@dblTicketScheduleQuantity - @dblLoopContractUnits) * -1
 								END
 								
-								IF(@ysnLoadContract = 1)
+								IF(ysnLoadContract = 1)
 								BEGIN
 									SET @dblLoopAdjustedScheduleQuantity = -1
 								END
