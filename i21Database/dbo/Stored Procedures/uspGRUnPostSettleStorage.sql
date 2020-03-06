@@ -517,6 +517,16 @@ BEGIN TRY
 			END
 
 			DELETE FROM tblGRSettleStorage WHERE intSettleStorageId = @intSettleStorageId
+
+			---This is just to insure that the parent is delete if there is no child in existence
+			IF @isParentSettleStorage = 0
+			BEGIN
+				IF NOT EXISTS(SELECT 1 FROM tblGRSettleStorage WHERE intParentSettleStorageId = @intParentSettleStorageId)
+				BEGIN				
+					DELETE FROM tblGRSettleStorage WHERE intSettleStorageId = @intParentSettleStorageId
+				END
+			END
+
 			--5. Removing Voucher
 			BEGIN
 			IF @BillId IS NOT NULL
