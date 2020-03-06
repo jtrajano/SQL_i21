@@ -5,6 +5,7 @@ SELECT
 	CAST(ROW_NUMBER() OVER(ORDER BY (SELECT 1)) AS INT) AS intId
 	,voucher.dtmDateCreated
 	,voucher.dtmDate
+	,FP.strPeriod
 	,voucher.dtmDatePaid
 	,commodity.strCommodityCode
 	,voucher.intBillId
@@ -46,6 +47,8 @@ LEFT JOIN dbo.tblICCommodity commodity ON item.intCommodityId = commodity.intCom
 LEFT JOIN tblAP1099Category category ON category.int1099CategoryId = voucherDetail.int1099Category
 LEFT JOIN tblAP1099PATRCategory categoryPATR ON categoryPATR.int1099CategoryId = voucherDetail.int1099Category
 LEFT JOIN tblAP1099DIVCategory categoryDIV ON categoryDIV.int1099CategoryId = voucherDetail.int1099Category
+LEFT JOIN dbo.tblGLFiscalYearPeriod FP
+			ON voucher.dtmDate BETWEEN FP.dtmStartDate AND FP.dtmEndDate OR voucher.dtmDate = FP.dtmStartDate OR voucher.dtmDate = FP.dtmEndDate
 OUTER APPLY (
 		SELECT STUFF(
 			(SELECT 

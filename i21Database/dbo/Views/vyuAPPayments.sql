@@ -8,6 +8,7 @@ SELECT
 	ISNULL(A.dblWithheld,0) AS dblWithheld,
 	A.dtmDatePaid ,
 	A.dtmDateCreated,
+	FP.strPeriod,
 	A.intAccountId ,
 	A.intBankAccountId ,
 	A.intCurrencyId ,
@@ -45,6 +46,8 @@ SELECT
 		LEFT JOIN dbo.tblSMPaymentMethod F
 			ON A.intPaymentMethodId = F.intPaymentMethodID
 		LEFT JOIN  dbo.tblSMCurrency G on G.intCurrencyID = A.intCurrencyId
+		LEFT JOIN dbo.tblGLFiscalYearPeriod FP
+			ON A.dtmDatePaid BETWEEN FP.dtmStartDate AND FP.dtmEndDate OR A.dtmDatePaid = FP.dtmStartDate OR A.dtmDatePaid = FP.dtmEndDate
 		OUTER APPLY (
 			SELECT TOP 1
 				eg.strEntityGroupName,
