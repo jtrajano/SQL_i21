@@ -275,6 +275,7 @@ BEGIN
 		AND Item.strLotTracking <> 'No'
 		AND ((LotTransactions.dblQty <> 0 AND @ysnIncludeZeroOnHand = 0) OR (@ysnIncludeZeroOnHand = 1))
 		AND Item.strType IN ('Inventory', 'Raw Material', 'Finished Good')
+		AND Item.strStatus NOT IN ('Discontinued')
 		AND (ItemLocation.intCountGroupId = @intCountGroupId OR ISNULL(@intCountGroupId, 0) = 0)
 END
 ELSE
@@ -415,6 +416,7 @@ BEGIN
 	WHERE il.intLocationId = @intLocationId
 		AND ((stock.dblOnHand <> 0 AND @ysnIncludeZeroOnHand = 0) OR (@ysnIncludeZeroOnHand = 1))		
 		AND i.strLotTracking = 'No'
+		AND i.strStatus NOT IN ('Discontinued')
 		AND i.strType IN ('Inventory', 'Raw Material', 'Finished Good')
 		AND (il.intCountGroupId = @intCountGroupId OR ISNULL(@intCountGroupId, 0) = 0)
 		AND (i.intCategoryId = categoryFilter.intCategoryId OR ISNULL(@CategoryFilterCount, 0) = 0)
