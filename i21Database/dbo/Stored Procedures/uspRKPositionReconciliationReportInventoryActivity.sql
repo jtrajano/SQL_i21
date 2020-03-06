@@ -18,17 +18,9 @@ BEGIN
 
 	DECLARE @InHouse TABLE (Id INT identity(1,1)
 		, dtmDate datetime
-		, dblInvIn NUMERIC(24,10)
-		, dblInvOut NUMERIC(24,10)
-		, dblAdjustments NUMERIC(24,10)
-		, dblInventoryCount NUMERIC(24,10)
-		, dblBalanceInv NUMERIC(24,10)
-		, dblBalanceCompanyOwned NUMERIC(24,10)
-		, dblBalanceCustomerOwned NUMERIC(24,10)
+		, dblTotal NUMERIC(24,10)
 		, strTransactionId NVARCHAR(50)
 		, intTransactionId INT
-		, strDistribution NVARCHAR(10)
-		, dblSalesInTransit NUMERIC(24,10)
 		, strTransactionType NVARCHAR(50)
 		, intCommodityId INT
 		, strCommodityCode NVARCHAR(100)
@@ -57,30 +49,37 @@ BEGIN
 		FROM #tempCommodity
 		
 		INSERT INTO @InHouse (dtmDate
-			, dblInvIn
-			, dblInvOut
-			, dblAdjustments
-			, dblInventoryCount
+			, dblTotal
 			, strTransactionId
 			, intTransactionId
-			, strDistribution
-			, dblBalanceInv
-			, dblBalanceCompanyOwned
-			, dblBalanceCustomerOwned
-			, dblSalesInTransit
 			, strTransactionType
 			, intCommodityId
+			, strCommodityCode
 			, strOwnership
 		)
-		EXEC uspRKGetInHouse
-			 @dtmFromTransactionDate  = @dtmFromTransactionDate
-			, @dtmToTransactionDate  = @dtmToTransactionDate
-			, @intCommodityId  = @intCommodityId
-			, @intItemId  = null
-			, @strPositionIncludes  = NULL
-			, @intLocationId  = NULL
+		SELECT
+			dtmTransactionDate
+			,dblTotal
+			,strTransactionNumber
+			,intTransactionRecordId
+			,strTransactionType
+			,intCommodityId
+			,strCommodityCode
+			,strOwnership = 'Company Owned'
+		FROM dbo.fnRKGetBucketCompanyOwned(@dtmToTransactionDate, @intCommodityId, NULL)
 
-		UPDATE @InHouse SET strCommodityCode = @strCommodityCode WHERE intCommodityId = @intCommodityId
+		UNION ALL
+		SELECT
+			dtmTransactionDate
+			,dblTotal
+			,strTransactionNumber
+			,intTransactionRecordId
+			,strTransactionType
+			,intCommodityId
+			,strCommodityCode
+			,strOwnership = 'Customer Owned'
+		FROM dbo.fnRKGetBucketCustomerOwned(@dtmToTransactionDate, @intCommodityId, NULL)
+
 
 		DELETE FROM #tempCommodity WHERE intCommodityId = @intCommodityId
 	END 
@@ -88,21 +87,15 @@ BEGIN
 	SELECT  
 		intRowNum = CONVERT(INT, ROW_NUMBER() OVER (ORDER BY dtmDate, Id ASC))
 		,dtmTransactionDate =  dtmDate
-		,dblInvIn = CASE 
-						WHEN dblAdjustments IS NOT NULL AND dblAdjustments > 0 THEN 
-							dblAdjustments 
-						WHEN dblInventoryCount IS NOT NULL AND dblInventoryCount > 0 THEN 
-							dblInventoryCount 
+		,dblInvIn = CASE WHEN dblTotal > 0 THEN
+							dblTotal
 						ELSE 
-							ISNULL(dblInvIn,0) 
+							0
 					END
-		,dblInvOut = CASE 
-						WHEN dblAdjustments IS NOT NULL AND dblAdjustments < 0 THEN 
-							ABS(dblAdjustments)
-						WHEN dblInventoryCount IS NOT NULL AND dblInventoryCount < 0 THEN 
-							ABS(dblInventoryCount)
-						ELSE
-							ISNULL(dblInvOut,0)
+		,dblInvOut = CASE WHEN dblTotal < 0 THEN
+							dblTotal * -1
+						ELSE 
+							0
 					END
 		,strTransactionType
 		,strTransactionId
@@ -111,15 +104,7 @@ BEGIN
 		,strOwnership
 	INTO #tmpInventoryActivity
 	FROM @InHouse
-	WHERE (dtmDate IS NOT NULL
-		AND dblInvIn IS NOT NULL
-		OR dblInvOut IS NOT NULL
-		OR dblAdjustments IS NOT NULL
-		OR dblInventoryCount IS NOT NULL
-		OR strTransactionId IS NOT NULL
-		OR intTransactionId IS NOT NULL
-		OR strDistribution IS NOT NULL)
-
+	WHERE dtmDate between @dtmFromTransactionDate and @dtmToTransactionDate
 
 	SELECT	intRowNum, dtmTransactionDate 
 	INTO #tempDateRange
@@ -157,11 +142,25 @@ BEGIN
 			,@dblCustomerOwnedEndBalance NUMERIC(18,6)
 
 	SELECT 
-		@dblInvBalanceForward =  SUM(ISNULL(dblBalanceInv,0))
-		,@dblCompanyOwnedBalanceForward = SUM(ISNULL(dblBalanceCompanyOwned,0))
-		,@dblCustomerOwnedBalanceForward = SUM(ISNULL(dblBalanceCustomerOwned,0))
+		@dblInvBalanceForward =  SUM(ISNULL(dblTotal,0))
 	FROM @InHouse
-	WHERE dtmDate IS NULL
+	WHERE dtmDate < @dtmFromTransactionDate
+	AND strOwnership IN('Company Owned', 'Customer Owned')
+
+	SELECT 
+		@dblCompanyOwnedBalanceForward = SUM(ISNULL(dblTotal,0))
+	FROM @InHouse
+	WHERE dtmDate < @dtmFromTransactionDate
+	AND strOwnership IN('Company Owned')
+
+	SELECT 
+		@dblCustomerOwnedBalanceForward = SUM(ISNULL(dblTotal,0))
+	FROM @InHouse
+	WHERE dtmDate < @dtmFromTransactionDate
+	AND strOwnership IN('Customer Owned')
+
+	
+		
 	
 	IF NOT EXISTS (SELECT TOP 1 * FROM #tempDateRange)
 	BEGIN

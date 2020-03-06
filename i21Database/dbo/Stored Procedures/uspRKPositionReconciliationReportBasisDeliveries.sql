@@ -9,15 +9,15 @@ AS
 
 BEGIN
 
-	DECLARE @strContractType NVARCHAR(50) = ''
+	DECLARE @strTransactionType NVARCHAR(50) = ''
 
 	IF @intContractTypeId = 1
 	BEGIN
-		SET @strContractType = 'Purchase'
+		SET @strTransactionType = 'Purchase Basis Deliveries'
 	END
 	ELSE
 	BEGIN
-		SET @strContractType = 'Sale'
+		SET @strTransactionType = 'Sales Basis Deliveries'
 	END
 
 	DECLARE @Commodity AS TABLE (
@@ -75,21 +75,21 @@ BEGIN
 			,strCommodityCode
 		)
 		SELECT
-			dtmDate
-			,dblQuantity
-			,dblRunningBalance  
-			,strTransactionId
-			,intTransactionId
+			dtmCreateDate
+			,dblQuantity = dblQty
+			,dblRunningBalance  = NULL
+			,strTransactionId = strTransactionReferenceNo
+			,intTransactionId = intTransactionReferenceId
 			,strContractSeq = strContractNumber + '-' + CONVERT(NVARCHAR(10),intContractSeq)
 			,intContractHeaderId
-			,strTransactionType
+			,strTransactionType = strTransactionReference
 			,intCommodityId
 			,strCommodityCode
 			
 		FROM 
-			dbo.fnCTGetBasisDelivery(@dtmToTransactionDate)
+			dbo.fnRKGetBucketBasisDeliveries(@dtmToTransactionDate,@intCommodityId, NULL)
 		WHERE intCommodityId = @intCommodityId
-		AND strContractType = @strContractType
+		AND strTransactionType  = @strTransactionType
 
 		DELETE FROM #tempCommodity WHERE intCommodityId = @intCommodityId
 	END 

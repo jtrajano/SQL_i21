@@ -18,7 +18,6 @@ BEGIN
 
 	DECLARE @tblDerivativeHistory TABLE (Id INT identity(1,1)
 		,dtmTransactionDate DATE
-		,dtmFilledDate DATE
 		,dblBuy  NUMERIC(18,6)
 		,dblSell  NUMERIC(18,6)
 		,strInternalTradeNo NVARCHAR(100) COLLATE Latin1_General_CI_AS
@@ -26,7 +25,7 @@ BEGIN
 		,intFutOptTransactionHeaderId INT
 		,ysnPreCrush BIT
 		,strCommodityCode NVARCHAR(100) COLLATE Latin1_General_CI_AS
-		,strAction NVARCHAR(100) COLLATE Latin1_General_CI_AS)
+		,strTransactionType NVARCHAR(100) COLLATE Latin1_General_CI_AS)
 	
 	
 	DECLARE @intCommodityId INT
@@ -52,7 +51,6 @@ BEGIN
 		FROM #tempCommodity
 		
 		INSERT INTO @tblDerivativeHistory (dtmTransactionDate 
-			,dtmFilledDate
 			,dblBuy
 			,dblSell
 			,strInternalTradeNo
@@ -60,82 +58,81 @@ BEGIN
 			,intFutOptTransactionHeaderId
 			,ysnPreCrush
 			,strCommodityCode
-			,strAction)
+			,strTransactionType)
 		SELECT 
 			dtmTransactionDate 
-			,dtmFilledDate
 			,dblBuy
 			,dblSell
 			,strInternalTradeNo
-			,intFutOptTransactionId
-			,intFutOptTransactionHeaderId
+			,intFutOptTransactionId = intTransactionRecordId
+			,intFutOptTransactionHeaderId = intTransactionRecordHeaderId
 			,ysnPreCrush
 			,@strCommodityCode
-			,strAction
+			,strTransactionType
 		FROM (
-			select
-				Row_Number() OVER (PARTITION BY H.dtmTransactionDate, H.intFutOptTransactionId, H.strAction, strNewBuySell ORDER BY  H.intFutOptTransactionHistoryId ASC, H.dtmTransactionDate ASC ) AS Row_Num 
-				,H.dtmTransactionDate
-				,H.dtmFilledDate
-				,dblBuy = CASE WHEN strNewBuySell = 'Buy' THEN  dblLotBalance * dblContractSize ELSE 0 END
-				,dblSell = CASE WHEN strNewBuySell = 'Sell' THEN dblLotBalance  * dblContractSize ELSE 0 END
-				,H.strInternalTradeNo
-				,H.intFutOptTransactionId
-				,H.intFutOptTransactionHeaderId
-				,H.strAction
-				,ysnPreCrush = ISNULL(T.ysnPreCrush,0)
-			from vyuRKGetFutOptTransactionHistory  H
-				left join tblRKFutOptTransaction T on H.intFutOptTransactionId = T.intFutOptTransactionId
-			where 
-			H.intCommodityId = @intCommodityId
-			and ISNULL(T.intCommodityId,@intCommodityId) = @intCommodityId --There are instance of history change for commodity, we need to do this
-			and H.strInstrumentType = 'Futures'
-			and dblLotBalance <> 0
+				SELECT * FROM (
+					SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY sl.intTransactionRecordId ORDER BY sl.intSummaryLogId DESC)
+						,dtmTransactionDate
+						,dblBuy = CASE WHEN strDistributionType = 'Buy' THEN  dblOrigNoOfLots * dblContractSize ELSE 0 END
+						,dblSell = CASE WHEN strDistributionType = 'Sell' THEN  dblOrigNoOfLots * dblContractSize ELSE 0 END
+						,strInternalTradeNo = strTransactionNumber
+						,intTransactionRecordId
+						,intTransactionRecordHeaderId
+						,mf.ysnPreCrush
+						,strCommodityCode
+						,strTransactionType = sl.strTransactionType
+						FROM vyuRKGetSummaryLog sl
+						CROSS APPLY dbo.fnRKGetMiscFieldPivotDerivative(sl.strMiscField) mf
+						WHERE strTransactionType IN ('Derivative Entry')
+							AND CONVERT(DATETIME, CONVERT(VARCHAR(10), sl.dtmCreatedDate, 110), 110) <= CONVERT(DATETIME, @dtmToTransactionDate)
+							AND CONVERT(DATETIME, CONVERT(VARCHAR(10), sl.dtmTransactionDate, 110), 110) <= CONVERT(DATETIME, @dtmToTransactionDate)
+							AND ISNULL(sl.intCommodityId,0) = ISNULL(@intCommodityId, ISNULL(sl.intCommodityId, 0)) 
 
-			--Match Derivatives Buy
-			UNION ALL
-			SELECT
-				1 AS Row_Num 
-				, MD.dtmMatchDate
-				, MD.dtmMatchDate
-				, dblBuy = (ABS(SUM(MD.dblMatchQty)) * -1) * dblContractSize 
-				, dblSell = 0
-				, D.strInternalTradeNo
-				, MD.intLFutOptTransactionId
-				, D.intFutOptTransactionHeaderId
-				, 'MATCH'
-				,ysnPreCrush = ISNULL(D.ysnPreCrush,0)
-			FROM tblRKMatchDerivativesHistory MD
-			LEFT JOIN tblRKFutOptTransaction D ON D.intFutOptTransactionId = MD.intLFutOptTransactionId
-			LEFT JOIN tblRKFutureMarket FM ON FM.intFutureMarketId = D.intFutureMarketId
-			WHERE CAST(FLOOR(CAST(MD.dtmMatchDate AS FLOAT)) AS DATETIME) >= '01-01-1900'
-				AND CAST(FLOOR(CAST(MD.dtmMatchDate AS FLOAT)) AS DATETIME) <= @dtmToTransactionDate
-				AND intCommodityId = @intCommodityId
-			GROUP BY MD.intLFutOptTransactionId, intMatchFuturesPSDetailId, MD.dtmMatchDate, dblContractSize, strInternalTradeNo, intFutOptTransactionHeaderId,ysnPreCrush
+					) t WHERE intRowNum = 1
 
-			--Match Derivatives Sell
-			UNION ALL
-			SELECT
-				1 AS Row_Num 
-				, MD.dtmMatchDate
-				, MD.dtmMatchDate
-				, dblBuy = 0
-				, dblSell = (ABS(SUM(MD.dblMatchQty))) * dblContractSize 
-				, D.strInternalTradeNo
-				, MD.intSFutOptTransactionId
-				, D.intFutOptTransactionHeaderId
-				, 'MATCH'
-				,ysnPreCrush = ISNULL(D.ysnPreCrush,0)
-			FROM tblRKMatchDerivativesHistory MD
-			LEFT JOIN tblRKFutOptTransaction D ON D.intFutOptTransactionId = MD.intSFutOptTransactionId
-			LEFT JOIN tblRKFutureMarket FM ON FM.intFutureMarketId = D.intFutureMarketId
-			WHERE CAST(FLOOR(CAST(MD.dtmMatchDate AS FLOAT)) AS DATETIME) >= '01-01-1900'
-				AND CAST(FLOOR(CAST(MD.dtmMatchDate AS FLOAT)) AS DATETIME) <= @dtmToTransactionDate
-				AND intCommodityId = @intCommodityId
-			GROUP BY MD.intSFutOptTransactionId, intMatchFuturesPSDetailId, MD.dtmMatchDate, dblContractSize, strInternalTradeNo, intFutOptTransactionHeaderId,ysnPreCrush
+					UNION ALL
+					SELECT * FROM (
+						SELECT  intRowNum = ROW_NUMBER() OVER (PARTITION BY sl.strDistributionType, sl.dtmTransactionDate ORDER BY sl.intSummaryLogId DESC)
+						,dtmTransactionDate
+						,dblBuy = CASE WHEN strDistributionType = 'Buy' THEN  (dblOrigNoOfLots * -1) * dblContractSize ELSE 0 END
+						,dblSell = CASE WHEN strDistributionType = 'Sell' THEN  (dblOrigNoOfLots * -1) * dblContractSize ELSE 0 END
+						,strInternalTradeNo = strTransactionNumber
+						,intTransactionRecordId
+						,intTransactionRecordHeaderId
+						,mf.ysnPreCrush
+						,strCommodityCode
+						,strTransactionType = sl.strTransactionType
+						FROM vyuRKGetSummaryLog sl
+						CROSS APPLY dbo.fnRKGetMiscFieldPivotDerivative(sl.strMiscField) mf
+						WHERE strTransactionType = 'Match Derivatives'
+							AND CAST(FLOOR(CAST(dtmCreatedDate AS FLOAT)) AS DATETIME) <= @dtmToTransactionDate
+							AND CAST(FLOOR(CAST(dtmTransactionDate AS FLOAT)) AS DATETIME) <= @dtmToTransactionDate
+							AND ISNULL(sl.intCommodityId,0) = ISNULL(@intCommodityId, ISNULL(sl.intCommodityId, 0)) 
 
+					) t WHERE intRowNum = 1
+
+
+					UNION ALL
+					SELECT * FROM (
+						SELECT  intRowNum = ROW_NUMBER() OVER (PARTITION BY sl.strDistributionType, sl.dtmTransactionDate ORDER BY sl.intSummaryLogId DESC)
+						,dtmTransactionDate
+						,dblBuy = CASE WHEN strDistributionType = 'Buy' THEN  (dblOrigNoOfLots * -1) * dblContractSize ELSE 0 END
+						,dblSell = CASE WHEN strDistributionType = 'Sell' THEN  (dblOrigNoOfLots * -1) * dblContractSize ELSE 0 END
+						,strInternalTradeNo = strTransactionNumber
+						,intTransactionRecordId
+						,intTransactionRecordHeaderId
+						,mf.ysnPreCrush
+						,strCommodityCode
+						,strTransactionType = sl.strTransactionType
+						FROM vyuRKGetSummaryLog sl
+						CROSS APPLY dbo.fnRKGetMiscFieldPivotDerivative(sl.strMiscField) mf
+						WHERE strTransactionType = 'Options Lifecycle'
+							AND CAST(FLOOR(CAST(dtmCreatedDate AS FLOAT)) AS DATETIME) <= @dtmToTransactionDate
+							AND CAST(FLOOR(CAST(dtmTransactionDate AS FLOAT)) AS DATETIME) <= @dtmToTransactionDate
+							AND ISNULL(sl.intCommodityId,0) = ISNULL(@intCommodityId, ISNULL(sl.intCommodityId, 0)) 
+
+					) t WHERE intRowNum = 1
 		) t
-		WHERE Row_Num = 1
 		ORDER BY  dtmTransactionDate, intFutOptTransactionId
 
 		DELETE FROM #tempCommodity WHERE intCommodityId = @intCommodityId
@@ -149,15 +146,15 @@ BEGIN
 		,dblFuturesSell =  CASE WHEN ysnPreCrush = 0 THEN dblSell ELSE 0 END
 		,dblCrushBuy = CASE WHEN ysnPreCrush = 1 THEN dblBuy ELSE 0 END
 		,dblCrushSell =  CASE WHEN ysnPreCrush = 1 THEN dblSell ELSE 0 END
+		,strTransactionType
 		,strTransactionId = strInternalTradeNo
 		,intTransactionId = intFutOptTransactionId
 		,intFutOptTransactionHeaderId
 		,strCommodityCode
-		,strAction
 	INTO #tmpDerivativeActivity
 	FROM @tblDerivativeHistory
 	WHERE dtmTransactionDate BETWEEN @dtmFromTransactionDate AND @dtmToTransactionDate
-	AND dtmFilledDate BETWEEN @dtmFromTransactionDate AND @dtmToTransactionDate
+	--AND dtmFilledDate BETWEEN @dtmFromTransactionDate AND @dtmToTransactionDate
 
 	SELECT	intRowNum, dtmTransactionDate 
 	INTO #tempDateRange
@@ -274,7 +271,7 @@ BEGIN
 		,dblCrushBuy
 		,dblCrushSell
 		,dblCruEndBalance
-		,strTransactionType = 'Derivative'
+		,strTransactionType
 		,strTransactionId
 		,intTransactionId
 		,intFutOptTransactionHeaderId
@@ -283,7 +280,6 @@ BEGIN
 		,dblFutEndBalForSummary
 		,dblCruBegBalForSummary
 		,dblCruEndBalForSummary
-		,strAction
 	FROM #tmpDerivativeActivity IA
 	FULL JOIN @tblRunningBalance RB on RB.intRowNum = IA.intRowNum
 	ORDER BY IA.dtmTransactionDate
