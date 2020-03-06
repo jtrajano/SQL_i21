@@ -131,7 +131,7 @@ OPEN intListCursor;
 						IF(@strDistributionOption = 'LOD' AND @intLoadDetailId > 0)  
 						BEGIN  
 							--get contract Detail Id of the load detail  
-							SELECT @intLoadContractDetailId = intSContractDetailId FROM tblLGLoadDetail WHERE intLoadDetailId = @intLoadDetailId  
+							SELECT @intLoadContractDetailId = intPContractDetailId FROM tblLGLoadDetail WHERE intLoadDetailId = @intLoadDetailId  
 							
 							IF(@intLoopContractId = @intLoadContractDetailId)  
 							BEGIN   
