@@ -137,14 +137,7 @@ OPEN intListCursor;
 
 					IF @strDistributionOption = 'CNT' OR @strDistributionOption = 'LOD'
 					BEGIN
-						-- IF ISNULL(@intLoopContractId,0) != 0 AND @strDistributionOption = 'CNT'
-						-- EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoopContractId, @dblLoopContractUnits, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId
-						-- EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intLoopContractId, @dblLoopContractUnits, @intEntityId;
-
-						-- IF(@strDistributionOption = 'LOD' AND @intLoadDetailId > 0)
-						-- BEGIN
-						-- 	EXEC dbo.uspSCUpdateTicketLoadUsed @intTicketId, @intLoadDetailId, @dblLoopContractUnits, @intEntityId;	
-						-- END
+		
 
 						SET @ysnLoadContract = 0
 							SELECT TOP 1 @ysnLoadContract = ISNULL(ysnLoad,0) 
@@ -162,43 +155,45 @@ OPEN intListCursor;
 							BEGIN   
 
 								EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intLoopContractId, @dblLoopContractUnits, @intEntityId;  
-							END  
-
-							
+							END 
 					
 							EXEC dbo.uspSCUpdateTicketLoadUsed @intTicketId, @intLoadDetailId, @dblLoopContractUnits, @intEntityId;   
-
-							IF(@intLoadDetailId = @intTicketLoadDetailId)
+						
+							IF(@ysnLoadContract = 0)
 							BEGIN
-								IF(@dblLoopContractUnits > @dblTicketScheduleQuantity )
+								IF(@intLoadDetailId = @intTicketLoadDetailId)
 								BEGIN
-									SET @dblLoopAdjustedScheduleQuantity = @dblLoopContractUnits - @dblTicketScheduleQuantity
-								END
-								ELSE
-								BEGIN
-									SET @dblLoopAdjustedScheduleQuantity = (@dblTicketScheduleQuantity - @dblLoopContractUnits) * -1
-								END
-								
-								IF(@ysnLoadContract = 1)
-								BEGIN
-									SET @dblLoopAdjustedScheduleQuantity = -1
-								END
+									IF(@dblLoopContractUnits > @dblTicketScheduleQuantity )
+									BEGIN
+										SET @dblLoopAdjustedScheduleQuantity = @dblLoopContractUnits - @dblTicketScheduleQuantity
+									END
+									ELSE
+									BEGIN
+										SET @dblLoopAdjustedScheduleQuantity = (@dblTicketScheduleQuantity - @dblLoopContractUnits) * -1
+									END
 
-								IF @dblLoopAdjustedScheduleQuantity <> 0
+									IF @dblLoopAdjustedScheduleQuantity <> 0
+									BEGIN
+										EXEC	uspCTUpdateScheduleQuantity 
+										@intContractDetailId	=	@intLoopContractId,
+										@dblQuantityToUpdate	=	@dblLoopAdjustedScheduleQuantity,
+										@intUserId				=	@intUserId,
+										@intExternalId			=	@intTicketId,
+										@strScreenName			=	'Auto - Scale'
+									END
+								END
+							END
+							ELSE
+							BEGIN
+								IF(@intLoadDetailId = @intTicketLoadDetailId)
 								BEGIN
-									EXEC	uspCTUpdateScheduleQuantity 
-									@intContractDetailId	=	@intLoopContractId,
-									@dblQuantityToUpdate	=	@dblLoopAdjustedScheduleQuantity,
-									@intUserId				=	@intUserId,
-									@intExternalId			=	@intTicketId,
-									@strScreenName			=	'Auto - Scale'
+									-- no scheduling of load based contract since load shipment already have the schedule 
+									print 'no scheduling of load based'
 								END
 							END
 						END  
 						ELSE  
 						BEGIN  
-
-							
 
 							-- do not schedule if the contract is the same as the ticket contract since this is already scheduled upon saving the ticket. Only adjust
 							IF ISNULL(@intLoopContractId,0) <> 0 AND @strTicketDistributionOption = 'CNT' AND @intTicketContractDetailId = @intLoopContractId  
