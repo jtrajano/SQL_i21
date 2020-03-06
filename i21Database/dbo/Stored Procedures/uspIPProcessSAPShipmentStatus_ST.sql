@@ -34,15 +34,6 @@ BEGIN TRY
 		,@dtmOldETA DATETIME
 		,@strDetails NVARCHAR(MAX)
 
-	--DECLARE @tblLoadDetail TABLE (
-	--	intDetailRecordId INT IDENTITY(1, 1)
-	--	,intContractDetailId INT
-	--	,intContractHeaderId INT
-	--	)
-	--DECLARE @intMinLoadDetailRecordId INT
-	--DECLARE @intContractDetailId INT
-	--DECLARE @intContractHeaderId INT
-	--DECLARE @intApprovedById INT
 	SELECT @intMinRowNo = Min(intStageShipmentStatusId)
 	FROM tblIPShipmentStatusStage WITH (NOLOCK)
 
@@ -166,8 +157,6 @@ BEGIN TRY
 				WHERE intLoadId = @intLoadId
 					AND intShipmentStatus = 3
 
-				-- Send LS Update to Inter Company - James
-
 				SELECT @dtmNewArrivedInPort = L.dtmArrivedInPort
 					,@dtmNewCustomsReleased = L.dtmCustomsReleased
 					,@ysnNewArrivedInPort = L.ysnArrivedInPort
@@ -213,24 +202,12 @@ BEGIN TRY
 						,dtmETAPOD = @dtmETA
 					WHERE intLoadId = @intLoadId
 
-					INSERT INTO tblLGETATracking (
-						intLoadId
-						,strTrackingType
-						,dtmETAPOD
-						,dtmModifiedOn
-						)
-					VALUES (
-						@intLoadId
-						,'ETA POD'
-						,@dtmETA
-						,GETDATE()
-						)
+					-- To set Contract Updated Availability Date and send Contract Update feed to SAP
+					EXEC uspLGCreateLoadIntegrationLog @intLoadId = @intLoadId
+						,@strRowState = 'Modified'
+						,@intShipmentType = 1
 
-					-- Call LG Script to set updated availability date - Arman
-
-					-- Send Contract Update feed to SAP - James
-
-					-- Send LS Update to Inter Company - James
+					-- To send LS Update to Inter Company
 					EXEC uspLGInterCompanyTransaction @intLoadId = @intLoadId
 						,@strRowState = 'Modified'
 
@@ -248,45 +225,6 @@ BEGIN TRY
 				END
 			END
 
-			-- Set planned availability date and send a feed to SAP
-			--DELETE
-			--FROM @tblLoadDetail
-			--INSERT INTO @tblLoadDetail (
-			--	intContractDetailId
-			--	,intContractHeaderId
-			--	)
-			--SELECT CD.intContractDetailId
-			--	,CD.intContractHeaderId
-			--FROM tblCTContractDetail CD
-			--JOIN tblLGLoadDetail LD ON LD.intPContractDetailId = CD.intContractDetailId
-			--	AND LD.intLoadId = @intLoadId
-			--	AND CD.dtmPlannedAvailabilityDate <> @dtmETA
-			--SELECT @intMinLoadDetailRecordId = MIN(intDetailRecordId)
-			--FROM @tblLoadDetail
-			--WHILE (ISNULL(@intMinLoadDetailRecordId, 0) > 0)
-			--BEGIN
-			--	SET @intContractDetailId = NULL
-			--	SET @intContractHeaderId = NULL
-			--	SET @intApprovedById = NULL
-			--	SELECT @intContractDetailId = intContractDetailId
-			--		,@intContractHeaderId = intContractHeaderId
-			--	FROM @tblLoadDetail
-			--	WHERE intDetailRecordId = @intMinLoadDetailRecordId
-			--	SELECT TOP 1 @intApprovedById = intApprovedById
-			--	FROM tblCTApprovedContract
-			--	WHERE intContractDetailId = @intContractDetailId
-			--	ORDER BY 1 DESC
-			--	UPDATE tblCTContractDetail
-			--	SET dtmPlannedAvailabilityDate = @dtmETA
-			--		,intConcurrencyId = intConcurrencyId + 1
-			--	WHERE intContractDetailId = @intContractDetailId
-			--	EXEC uspCTContractApproved @intContractHeaderId = @intContractHeaderId
-			--		,@intApprovedById = @intApprovedById
-			--		,@intContractDetailId = @intContractDetailId
-			--	SELECT @intMinLoadDetailRecordId = MIN(intDetailRecordId)
-			--	FROM @tblLoadDetail
-			--	WHERE intDetailRecordId > @intMinLoadDetailRecordId
-			--END
 			--Move to Archive
 			INSERT INTO tblIPShipmentStatusArchive (
 				strContractNumber
@@ -367,9 +305,9 @@ BEGIN TRY
 			WHERE intStageShipmentStatusId = @intMinRowNo
 		END CATCH
 
-		SELECT @intMinRowNo = Min(intStageShipmentETAId)
-		FROM tblIPShipmentETAStage WITH (NOLOCK)
-		WHERE intStageShipmentETAId > @intMinRowNo
+		SELECT @intMinRowNo = Min(intStageShipmentStatusId)
+		FROM tblIPShipmentStatusStage WITH (NOLOCK)
+		WHERE intStageShipmentStatusId > @intMinRowNo
 	END
 
 	IF ISNULL(@strFinalErrMsg, '') <> ''
