@@ -1101,67 +1101,380 @@ END
 -----------------------------------------
 BEGIN 
 	DECLARE @SummaryLogs AS RKSummaryLog 
+		,@strTransactionType AS NVARCHAR(500) 
+		,@strBucketType_CompanyOwned AS NVARCHAR(50) = 'Company Owned'
+		,@strBucketType_SalesInTransit AS NVARCHAR(50) = 'Sales In-Transit'
+		,@strBucketType_PurchaseInTransit AS NVARCHAR(50) = 'Purchase In-Transit'
 
-	INSERT INTO @SummaryLogs (	
-		strBatchId
-		,strTransactionType
-		,intTransactionRecordId 
-		,strTransactionNumber 
-		,dtmTransactionDate 
-		,intContractDetailId 
-		,intContractHeaderId 
-		,intTicketId 
-		,intCommodityId 
-		,intCommodityUOMId 
-		,intItemId 
-		,intBookId 
-		,intSubBookId 
-		,intLocationId 
-		,intFutureMarketId 
-		,intFutureMonthId 
-		,dblNoOfLots 
-		,dblQty 
-		,dblPrice 
-		,intEntityId 
-		,ysnDelete 
-		,intUserId 
-		,strNotes 	
-	)
-	SELECT 
-		strBatchId = t.strBatchId
-		,strTransactionType = v.strTransactionType
-		,intTransactionRecordId = t.intTransactionDetailId
-		,strTransactionNumber = t.strTransactionId
-		,dtmTransactionDate = t.dtmDate
-		,intContractDetailId = NULL
-		,intContractHeaderId = NULL
-		,intTicketId = v.intTicketId
-		,intCommodityId = v.intCommodityId
-		,intCommodityUOMId = u.intUnitMeasureId
-		,intItemId = t.intItemId
-		,intBookId = NULL
-		,intSubBookId = NULL
-		,intLocationId = v.intLocationId
-		,intFutureMarketId = NULL
-		,intFutureMonthId = NULL
-		,dblNoOfLots = NULL
-		,dblQty = t.dblQty
-		,dblPrice = t.dblCost
-		,intEntityId = v.intEntityId
-		,ysnDelete = 0
-		,intUserId = @intEntityUserSecurityId
-		,strNotes = t.strDescription
-	FROM	
-		tblICInventoryTransaction t inner join vyuICGetInventoryValuation v 
-			ON t.intInventoryTransactionId = v.intInventoryTransactionId
-		INNER JOIN tblICItemUOM iu
-			ON iu.intItemUOMId = t.intItemUOMId
-		INNER JOIN tblICUnitMeasure u
-			ON u.intUnitMeasureId = iu.intUnitMeasureId
-	WHERE
-		t.strTransactionId = @strTransactionId
-		AND t.strBatchId = @strBatchId
-		AND t.dblQty <> 0 
+	SET @intInventoryTransactionId = NULL 
+	SELECT	TOP 1 
+			@intInventoryTransactionId = t.intInventoryTransactionId
+			,@strTransactionType = ty.strName 
+	FROM	dbo.tblICInventoryTransaction t INNER JOIN tblICInventoryTransactionType ty
+				ON t.intTransactionTypeId = ty.intTransactionTypeId
+	WHERE	strBatchId = @strBatchId
+			AND ISNULL(ysnIsUnposted, 0) = 0 
+
+	IF (@strTransactionType NOT IN ('Inventory Receipt','Inventory Shipment', 'Storage Settlement'))
+	BEGIN 
+		INSERT INTO @SummaryLogs (	
+			strBatchId
+			,strBucketType
+			,strTransactionType
+			,intTransactionRecordId 
+			,strTransactionNumber 
+			,dtmTransactionDate 
+			,intContractDetailId 
+			,intContractHeaderId 
+			,intTicketId 
+			,intCommodityId 
+			,intCommodityUOMId 
+			,intItemId 
+			,intBookId 
+			,intSubBookId 
+			,intLocationId 
+			,intFutureMarketId 
+			,intFutureMonthId 
+			,dblNoOfLots 
+			,dblQty 
+			,dblPrice 
+			,intEntityId 
+			,ysnDelete 
+			,intUserId 
+			,strNotes
+			--,intInventoryTransactionId
+		)
+		SELECT 
+			strBatchId = t.strBatchId
+			,strBucketType = @strBucketType_CompanyOwned
+			,strTransactionType = v.strTransactionType
+			,intTransactionRecordId = t.intTransactionDetailId
+			,strTransactionNumber = t.strTransactionId
+			,dtmTransactionDate = t.dtmDate
+			,intContractDetailId = NULL
+			,intContractHeaderId = NULL
+			,intTicketId = v.intTicketId
+			,intCommodityId = v.intCommodityId
+			,intCommodityUOMId = u.intUnitMeasureId
+			,intItemId = t.intItemId
+			,intBookId = NULL
+			,intSubBookId = NULL
+			,intLocationId = v.intLocationId
+			,intFutureMarketId = NULL
+			,intFutureMonthId = NULL
+			,dblNoOfLots = NULL
+			,dblQty = t.dblQty
+			,dblPrice = t.dblCost
+			,intEntityId = v.intEntityId
+			,ysnDelete = 0
+			,intUserId = @intEntityUserSecurityId
+			,strNotes = t.strDescription
+			--,intInventoryTransactionId = t.intInventoryTransactionId
+		FROM	
+			tblICInventoryTransaction t inner join vyuICGetInventoryValuation v 
+				ON t.intInventoryTransactionId = v.intInventoryTransactionId
+			INNER JOIN tblICItemUOM iu
+				ON iu.intItemUOMId = t.intItemUOMId
+			INNER JOIN tblICUnitMeasure u
+				ON u.intUnitMeasureId = iu.intUnitMeasureId
+		WHERE
+			t.strTransactionId = @strTransactionId
+			AND t.strBatchId = @strBatchId
+			AND t.dblQty <> 0 
+			AND v.ysnInTransit = 0
+			AND ISNULL(t.ysnIsUnposted,0) = 0
+			AND v.strTransactionType NOT IN ('Inventory Receipt','Inventory Shipment', 'Storage Settlement')
+	END
+
+	IF (@strTransactionType = 'Inventory Receipt')
+	BEGIN 
+		INSERT INTO @SummaryLogs (	
+			strBatchId
+			,strBucketType
+			,strTransactionType
+			,intTransactionRecordId 
+			,strTransactionNumber 
+			,dtmTransactionDate 
+			,intContractDetailId 
+			,intContractHeaderId 
+			,intTicketId 
+			,intCommodityId 
+			,intCommodityUOMId 
+			,intItemId 
+			,intBookId 
+			,intSubBookId 
+			,intLocationId 
+			,intFutureMarketId 
+			,intFutureMonthId 
+			,dblNoOfLots 
+			,dblQty 
+			,dblPrice 
+			,intEntityId 
+			,ysnDelete 
+			,intUserId 
+			,strNotes 	
+			--,intInventoryTransactionId 
+		)
+		SELECT 
+			strBatchId = t.strBatchId
+			,strBucketType = @strBucketType_CompanyOwned
+			,strTransactionType = v.strTransactionType
+			,intTransactionRecordId = t.intTransactionDetailId
+			,strTransactionNumber = t.strTransactionId
+			,dtmTransactionDate = t.dtmDate
+			,intContractDetailId = iri.intContractDetailId
+			,intContractHeaderId = iri.intContractHeaderId
+			,intTicketId = v.intTicketId
+			,intCommodityId = v.intCommodityId
+			,intCommodityUOMId = u.intUnitMeasureId
+			,intItemId = t.intItemId
+			,intBookId = NULL
+			,intSubBookId = NULL
+			,intLocationId = v.intLocationId
+			,intFutureMarketId = NULL
+			,intFutureMonthId = NULL
+			,dblNoOfLots = NULL
+			,dblQty = t.dblQty
+			,dblPrice = t.dblCost
+			,intEntityId = v.intEntityId
+			,ysnDelete = 0
+			,intUserId = @intEntityUserSecurityId
+			,strNotes = t.strDescription
+			--,intInventoryTransactionId = t.intInventoryTransactionId
+		FROM	
+			tblICInventoryTransaction t inner join vyuICGetInventoryValuation v 
+				ON t.intInventoryTransactionId = v.intInventoryTransactionId
+			INNER JOIN tblICItemUOM iu
+				ON iu.intItemUOMId = t.intItemUOMId
+			INNER JOIN tblICUnitMeasure u
+				ON u.intUnitMeasureId = iu.intUnitMeasureId
+			INNER JOIN tblICInventoryReceiptItem iri 
+				ON iri.intInventoryReceiptItemId = t.intTransactionDetailId	
+				AND iri.intInventoryReceiptId = t.intTransactionId
+		WHERE
+			t.strTransactionId = @strTransactionId
+			AND t.strBatchId = @strBatchId
+			AND t.dblQty <> 0 
+			AND v.ysnInTransit = 0
+			AND ISNULL(t.ysnIsUnposted,0) = 0
+			AND v.strTransactionType = 'Inventory Receipt'
+	END 
+
+	IF (@strTransactionType = 'Inventory Shipment')
+	BEGIN 
+		INSERT INTO @SummaryLogs (	
+			strBatchId
+			,strBucketType
+			,strTransactionType
+			,intTransactionRecordId 
+			,strTransactionNumber 
+			,dtmTransactionDate 
+			,intContractDetailId 
+			,intContractHeaderId 
+			,intTicketId 
+			,intCommodityId 
+			,intCommodityUOMId 
+			,intItemId 
+			,intBookId 
+			,intSubBookId 
+			,intLocationId 
+			,intFutureMarketId 
+			,intFutureMonthId 
+			,dblNoOfLots 
+			,dblQty 
+			,dblPrice 
+			,intEntityId 
+			,ysnDelete 
+			,intUserId 
+			,strNotes 	
+			--,intInventoryTransactionId 
+		)
+		SELECT 
+			strBatchId = t.strBatchId
+			,strBucketType = @strBucketType_CompanyOwned
+			,strTransactionType = v.strTransactionType
+			,intTransactionRecordId = t.intTransactionDetailId
+			,strTransactionNumber = t.strTransactionId
+			,dtmTransactionDate = t.dtmDate
+			,intContractDetailId = isi.intLineNo
+			,intContractHeaderId = isi.intOrderId 
+			,intTicketId = v.intTicketId
+			,intCommodityId = v.intCommodityId
+			,intCommodityUOMId = u.intUnitMeasureId
+			,intItemId = t.intItemId
+			,intBookId = NULL
+			,intSubBookId = NULL
+			,intLocationId = v.intLocationId
+			,intFutureMarketId = NULL
+			,intFutureMonthId = NULL
+			,dblNoOfLots = NULL
+			,dblQty = t.dblQty
+			,dblPrice = t.dblCost
+			,intEntityId = v.intEntityId
+			,ysnDelete = 0
+			,intUserId = @intEntityUserSecurityId
+			,strNotes = t.strDescription
+			--,intInventoryTransactionId = t.intInventoryTransactionId
+		FROM	
+			tblICInventoryTransaction t inner join vyuICGetInventoryValuation v 
+				ON t.intInventoryTransactionId = v.intInventoryTransactionId
+			INNER JOIN tblICItemUOM iu
+				ON iu.intItemUOMId = t.intItemUOMId
+			INNER JOIN tblICUnitMeasure u
+				ON u.intUnitMeasureId = iu.intUnitMeasureId
+			INNER JOIN tblICInventoryShipmentItem isi 
+				ON isi.intInventoryShipmentItemId = t.intTransactionDetailId	
+				AND isi.intInventoryShipmentId = t.intTransactionId
+		WHERE
+			t.strTransactionId = @strTransactionId
+			AND t.strBatchId = @strBatchId
+			AND t.dblQty <> 0 
+			AND v.ysnInTransit = 0
+			AND ISNULL(t.ysnIsUnposted,0) = 0
+			AND v.strTransactionType = 'Inventory Shipment'
+	END 
+
+	IF (@strTransactionType IN ('Inventory Shipment', 'Outbound Shipment', 'Invoice'))
+	BEGIN 
+		INSERT INTO @SummaryLogs (	
+			strBatchId
+			,strBucketType
+			,strTransactionType
+			,intTransactionRecordId 
+			,strTransactionNumber 
+			,dtmTransactionDate 
+			,intContractDetailId 
+			,intContractHeaderId 
+			,intTicketId 
+			,intCommodityId 
+			,intCommodityUOMId 
+			,intItemId 
+			,intBookId 
+			,intSubBookId 
+			,intLocationId 
+			,intFutureMarketId 
+			,intFutureMonthId 
+			,dblNoOfLots 
+			,dblQty 
+			,dblPrice 
+			,intEntityId 
+			,ysnDelete 
+			,intUserId 
+			,strNotes 	
+			--,intInventoryTransactionId 
+		)
+		SELECT 
+			strBatchId = t.strBatchId
+			,strBucketType = @strBucketType_SalesInTransit
+			,strTransactionType = v.strTransactionType
+			,intTransactionRecordId = t.intTransactionDetailId
+			,strTransactionNumber = t.strTransactionId
+			,dtmTransactionDate = t.dtmDate
+			,intContractDetailId = NULL 
+			,intContractHeaderId = NULL 
+			,intTicketId = v.intTicketId
+			,intCommodityId = v.intCommodityId
+			,intCommodityUOMId = u.intUnitMeasureId
+			,intItemId = t.intItemId
+			,intBookId = NULL
+			,intSubBookId = NULL
+			,intLocationId = v.intLocationId
+			,intFutureMarketId = NULL
+			,intFutureMonthId = NULL
+			,dblNoOfLots = NULL
+			,dblQty = t.dblQty
+			,dblPrice = t.dblCost
+			,intEntityId = v.intEntityId
+			,ysnDelete = 0
+			,intUserId = @intEntityUserSecurityId
+			,strNotes = t.strDescription
+			--,intInventoryTransactionId = t.intInventoryTransactionId
+		FROM	
+			tblICInventoryTransaction t inner join vyuICGetInventoryValuation v 
+				ON t.intInventoryTransactionId = v.intInventoryTransactionId
+			INNER JOIN tblICItemUOM iu
+				ON iu.intItemUOMId = t.intItemUOMId
+			INNER JOIN tblICUnitMeasure u
+				ON u.intUnitMeasureId = iu.intUnitMeasureId
+		WHERE
+			t.strTransactionId = @strTransactionId
+			AND t.strBatchId = @strBatchId
+			AND t.dblQty <> 0 
+			AND v.ysnInTransit = 1
+			AND ISNULL(t.ysnIsUnposted,0) = 0
+			AND v.strTransactionType IN ('Inventory Shipment', 'Outbound Shipment', 'Invoice')
+	END 
+
+	IF (@strTransactionType IN ('Inventory Receipt', 'Inventory Transfer with Shipment'))
+	BEGIN 
+		INSERT INTO @SummaryLogs (	
+			strBatchId
+			,strBucketType
+			,strTransactionType
+			,intTransactionRecordId 
+			,strTransactionNumber 
+			,dtmTransactionDate 
+			,intContractDetailId 
+			,intContractHeaderId 
+			,intTicketId 
+			,intCommodityId 
+			,intCommodityUOMId 
+			,intItemId 
+			,intBookId 
+			,intSubBookId 
+			,intLocationId 
+			,intFutureMarketId 
+			,intFutureMonthId 
+			,dblNoOfLots 
+			,dblQty 
+			,dblPrice 
+			,intEntityId 
+			,ysnDelete 
+			,intUserId 
+			,strNotes 	
+			--,intInventoryTransactionId 
+		)
+		SELECT 
+			strBatchId = t.strBatchId
+			,strBucketType = @strBucketType_PurchaseInTransit
+			,strTransactionType = v.strTransactionType
+			,intTransactionRecordId = t.intTransactionDetailId
+			,strTransactionNumber = t.strTransactionId
+			,dtmTransactionDate = t.dtmDate
+			,intContractDetailId = NULL 
+			,intContractHeaderId = NULL 
+			,intTicketId = v.intTicketId
+			,intCommodityId = v.intCommodityId
+			,intCommodityUOMId = u.intUnitMeasureId
+			,intItemId = t.intItemId
+			,intBookId = NULL
+			,intSubBookId = NULL
+			,intLocationId = v.intLocationId
+			,intFutureMarketId = NULL
+			,intFutureMonthId = NULL
+			,dblNoOfLots = NULL
+			,dblQty = t.dblQty
+			,dblPrice = t.dblCost
+			,intEntityId = v.intEntityId
+			,ysnDelete = 0
+			,intUserId = @intEntityUserSecurityId
+			,strNotes = t.strDescription
+			--,intInventoryTransactionId = t.intInventoryTransactionId
+		FROM	
+			tblICInventoryTransaction t inner join vyuICGetInventoryValuation v 
+				ON t.intInventoryTransactionId = v.intInventoryTransactionId
+			INNER JOIN tblICItemUOM iu
+				ON iu.intItemUOMId = t.intItemUOMId
+			INNER JOIN tblICUnitMeasure u
+				ON u.intUnitMeasureId = iu.intUnitMeasureId
+		WHERE
+			t.strTransactionId = @strTransactionId
+			AND t.strBatchId = @strBatchId
+			AND t.dblQty <> 0 
+			AND v.ysnInTransit = 1
+			AND ISNULL(t.ysnIsUnposted,0) = 0
+			AND v.strTransactionType IN ('Inventory Receipt', 'Inventory Transfer with Shipment')
+	END 
 
 	EXEC uspRKLogRiskPosition @SummaryLogs
 END 
