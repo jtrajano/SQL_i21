@@ -943,6 +943,7 @@ BEGIN
 			,ysnDelete 
 			,intUserId 
 			,strNotes
+			,strDistributionType 
 			--,intInventoryTransactionId
 		)
 		SELECT 
@@ -970,6 +971,7 @@ BEGIN
 			,ysnDelete = 0
 			,intUserId = @intEntityUserSecurityId
 			,strNotes = t.strDescription
+			,strDistributionType = ''
 			--,intInventoryTransactionId = t.intInventoryTransactionId
 		FROM	
 			tblICInventoryTransaction t inner join vyuICGetInventoryValuation v 
@@ -1014,6 +1016,7 @@ BEGIN
 			,ysnDelete 
 			,intUserId 
 			,strNotes 	
+			,strDistributionType 
 			--,intInventoryTransactionId 
 		)
 		SELECT 
@@ -1041,6 +1044,7 @@ BEGIN
 			,ysnDelete = 0
 			,intUserId = @intEntityUserSecurityId
 			,strNotes = t.strDescription
+			,strDistributionType = ''
 			--,intInventoryTransactionId = t.intInventoryTransactionId
 		FROM	
 			tblICInventoryTransaction t inner join vyuICGetInventoryValuation v 
@@ -1088,6 +1092,7 @@ BEGIN
 			,ysnDelete 
 			,intUserId 
 			,strNotes 	
+			,strDistributionType 
 			--,intInventoryTransactionId 
 		)
 		SELECT 
@@ -1115,6 +1120,7 @@ BEGIN
 			,ysnDelete = 0
 			,intUserId = @intEntityUserSecurityId
 			,strNotes = t.strDescription
+			,strDistributionType = ''
 			--,intInventoryTransactionId = t.intInventoryTransactionId
 		FROM	
 			tblICInventoryTransaction t inner join vyuICGetInventoryValuation v 
@@ -1162,6 +1168,7 @@ BEGIN
 			,ysnDelete 
 			,intUserId 
 			,strNotes 	
+			,strDistributionType 
 			--,intInventoryTransactionId 
 		)
 		SELECT 
@@ -1189,6 +1196,7 @@ BEGIN
 			,ysnDelete = 0
 			,intUserId = @intEntityUserSecurityId
 			,strNotes = t.strDescription
+			,strDistributionType = ''
 			--,intInventoryTransactionId = t.intInventoryTransactionId
 		FROM	
 			tblICInventoryTransaction t inner join vyuICGetInventoryValuation v 
@@ -1233,6 +1241,7 @@ BEGIN
 			,ysnDelete 
 			,intUserId 
 			,strNotes 	
+			,strDistributionType 
 			--,intInventoryTransactionId 
 		)
 		SELECT 
@@ -1260,6 +1269,7 @@ BEGIN
 			,ysnDelete = 0
 			,intUserId = @intEntityUserSecurityId
 			,strNotes = t.strDescription
+			,strDistributionType = ''
 			--,intInventoryTransactionId = t.intInventoryTransactionId
 		FROM	
 			tblICInventoryTransaction t inner join vyuICGetInventoryValuation v 
