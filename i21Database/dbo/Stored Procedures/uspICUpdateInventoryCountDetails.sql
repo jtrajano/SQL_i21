@@ -306,7 +306,7 @@ BEGIN
 		AND Item.strLotTracking <> 'No'
 		AND Item.strType = 'Inventory'
 		AND (il.intCountGroupId = @intCountGroupId OR ISNULL(@intCountGroupId, 0) = 0)
-
+		AND Item.strStatus NOT IN ('Discontinued')
 END
 ELSE
 BEGIN
@@ -507,6 +507,7 @@ BEGIN
 		AND ((COALESCE(stock.dblOnHand, stockUnit.dblOnHand) <> 0 AND @ysnIncludeZeroOnHand = 0) OR (@ysnIncludeZeroOnHand = 1))		
 		AND i.strLotTracking = 'No'
 		AND i.strType = 'Inventory'
+		AND i.strStatus NOT IN ('Discontinued')
 		AND (il.intCountGroupId = @intCountGroupId OR ISNULL(@intCountGroupId, 0) = 0)
 		AND (i.intCategoryId = categoryFilter.intCategoryId OR ISNULL(@CategoryFilterCount, 0) = 0)
 		AND (i.intCommodityId = commodityFilter.intCommodityId OR ISNULL(@CommodityFilterCount, 0) = 0)
