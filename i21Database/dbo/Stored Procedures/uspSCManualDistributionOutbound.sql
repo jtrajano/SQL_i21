@@ -181,7 +181,7 @@ OPEN intListCursor;
 								
 								IF(ysnLoadContract = 1)
 								BEGIN
-									SET @dblLoopAdjustedScheduleQuantity = -1
+									@dblLoopAdjustedScheduleQuantity = -1
 								END
 
 								IF @dblLoopAdjustedScheduleQuantity <> 0
