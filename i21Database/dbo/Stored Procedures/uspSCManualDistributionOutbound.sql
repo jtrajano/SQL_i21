@@ -134,6 +134,7 @@ OPEN intListCursor;
 
 			IF @ysnIsStorage = 0 AND ISNULL(@intStorageScheduleTypeId, 0) <= 0
 				BEGIN
+
 					IF @strDistributionOption = 'CNT' OR @strDistributionOption = 'LOD'
 					BEGIN
 						-- IF ISNULL(@intLoopContractId,0) != 0 AND @strDistributionOption = 'CNT'
@@ -144,6 +145,13 @@ OPEN intListCursor;
 						-- BEGIN
 						-- 	EXEC dbo.uspSCUpdateTicketLoadUsed @intTicketId, @intLoadDetailId, @dblLoopContractUnits, @intEntityId;	
 						-- END
+
+						SET @ysnLoadContract = 0
+							SELECT TOP 1 @ysnLoadContract = ISNULL(ysnLoad,0) 
+							FROM tblCTContractHeader A
+							INNER JOIN tblCTContractDetail B
+								ON A.intContractHeaderId = B.intContractHeaderId
+							WHERE B.intContractDetailId = @intLoopContractId
 
 						IF(@strDistributionOption = 'LOD' AND @intLoadDetailId > 0)  
 						BEGIN  
@@ -171,6 +179,10 @@ OPEN intListCursor;
 									SET @dblLoopAdjustedScheduleQuantity = (@dblTicketScheduleQuantity - @dblLoopContractUnits) * -1
 								END
 								
+								IF(ysnLoadContract = 1)
+								BEGIN
+									@dblLoopAdjustedScheduleQuantity = -1
+								END
 
 								IF @dblLoopAdjustedScheduleQuantity <> 0
 								BEGIN
@@ -186,12 +198,7 @@ OPEN intListCursor;
 						ELSE  
 						BEGIN  
 
-							SET @ysnLoadContract = 0
-							SELECT TOP 1 @ysnLoadContract = ISNULL(ysnLoad,0) 
-							FROM tblCTContractHeader A
-							INNER JOIN tblCTContractDetail B
-								ON A.intContractHeaderId = B.intContractHeaderId
-							WHERE B.intContractDetailId = @intLoopContractId
+							
 
 							-- do not schedule if the contract is the same as the ticket contract since this is already scheduled upon saving the ticket. Only adjust
 							IF ISNULL(@intLoopContractId,0) <> 0 AND @strTicketDistributionOption = 'CNT' AND @intTicketContractDetailId = @intLoopContractId  
