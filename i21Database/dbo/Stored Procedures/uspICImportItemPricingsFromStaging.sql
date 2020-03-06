@@ -86,7 +86,8 @@ USING
 	, dblAverageCost		
 	, dblDefaultGrossPrice	
 	, dtmDateCreated		
-	, intCreatedByUserId	
+	, intCreatedByUserId
+	, intImportFlagInternal
 	FROM #tmp s
 ) AS source ON target.intItemId = source.intItemId
 	AND target.intItemLocationId = source.intItemLocationId
@@ -104,6 +105,7 @@ WHEN MATCHED THEN
 		, dblDefaultGrossPrice	= source.dblDefaultGrossPrice
 		, dtmDateModified = GETUTCDATE()
 		, intModifiedByUserId = source.intCreatedByUserId
+		, intImportFlagInternal = 1
 WHEN NOT MATCHED THEN
 	INSERT
 	(
@@ -118,7 +120,8 @@ WHEN NOT MATCHED THEN
 		, dblAverageCost		
 		, dblDefaultGrossPrice	
 		, dtmDateCreated		
-		, intCreatedByUserId	
+		, intCreatedByUserId
+		, intImportFlagInternal
 	)
 	VALUES
 	(
@@ -133,9 +136,12 @@ WHEN NOT MATCHED THEN
 		, dblAverageCost		
 		, dblDefaultGrossPrice	
 		, dtmDateCreated		
-		, intCreatedByUserId	
+		, intCreatedByUserId
+		, 1
 	)
 	OUTPUT deleted.intItemId, $action, inserted.intItemId INTO #output;
+
+EXEC dbo.uspICUpdateItemImportedPricingLevel
 
 UPDATE l
 SET l.intRowsImported = (SELECT COUNT(*) FROM #output WHERE strAction = 'INSERT')
