@@ -328,6 +328,7 @@ BEGIN
 			,intItemId   
 			,intItemLocationId 
 			,intItemUOMId 
+			,intLotId
 			,intSubLocationId 
 			,intStorageLocationId 
 			,strTransactionId
@@ -342,6 +343,7 @@ BEGIN
 			,intItemId			= intItemId
 			,intItemLocationId  = intItemLocationId
 			,intItemUOMId		= intItemUOMId
+			,intLotId			= intLotId
 			,intSubLocationId	= intSubLocationId
 			,intStorageLocationId = intStorageLocationId 
 			,strTransactionId	= strTransactionId

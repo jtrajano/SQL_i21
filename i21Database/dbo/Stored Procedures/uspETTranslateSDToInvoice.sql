@@ -75,6 +75,7 @@ BEGIN
 	--DECLARE @ysnProcessNextAsHeader					BIT
 	DECLARE @intContractDetailId					INT
 	DECLARE @intTaxCodeId							INT
+	DECLARE @ysnTaxExempt							BIT
 	DECLARE @intTaxClassId							INT
 	DECLARE	@strPONumber						    NVARCHAR(50)
 	DECLARE @ShipViaId INT
@@ -493,6 +494,7 @@ BEGIN
 							,@strDetailTypeTax				  = strDetailType
 							,@strContractNumberTax			  = strContractNumber
 							,@intTaxCodeId  = intTaxCodeId
+							,@ysnTaxExempt = ysnTaxExempt
 						FROM #tmpLineTax
 						
 						ORDER BY intLineItem ASC
@@ -534,6 +536,7 @@ BEGIN
 								,@AdjustedTax			= @dblTotalTax
 								,@Notes					= @strItemDescriptionTax
 								,@TaxAdjusted		    = 0
+								,@TaxExempt				= @ysnTaxExempt
 								,@ErrorMessage			= @strErrorMessage OUTPUT
 
 							delete from #tmpLineTax where intImportSDToInvoiceId =  @intImportSDToInvoiceIdTax

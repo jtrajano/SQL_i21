@@ -3,9 +3,11 @@ CREATE PROCEDURE uspICImportAdjustmentsFromStaging
 AS
 BEGIN
 
-DECLARE @Adjustments TABLE(strAdjustmentNo NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL, intLocationId INT, intAdjustmentType INT, dtmAdjustmentDate DATETIME, strDescription NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL)
-INSERT INTO @Adjustments(strAdjustmentNo, intLocationId, intAdjustmentType, dtmAdjustmentDate, strDescription)
-SELECT a.strAdjustmentNo, c.intCompanyLocationId, a.intAdjustmentType, a.dtmDate, a.strDescription
+DECLARE @Adjustments TABLE(strAdjustmentNo NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL, intLocationId INT, intAdjustmentType INT, dtmAdjustmentDate DATETIME, 
+	strDescription NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
+	[strIntegrationDocNo] NVARCHAR(150) COLLATE Latin1_General_CI_AS NULL)
+INSERT INTO @Adjustments(strAdjustmentNo, intLocationId, intAdjustmentType, dtmAdjustmentDate, strDescription, strIntegrationDocNo)
+SELECT a.strAdjustmentNo, c.intCompanyLocationId, a.intAdjustmentType, a.dtmDate, a.strDescription, a.strIntegrationDocNo
 FROM tblICStagingAdjustment a
 	INNER JOIN tblSMCompanyLocation c ON c.strLocationNumber = a.strLocationName
 
@@ -15,6 +17,7 @@ DECLARE @dtmAdjustmentDate DATETIME
 DECLARE @strDescription NVARCHAR(200)
 DECLARE @strAdjustmentNo NVARCHAR(200)
 DECLARE @strTempAdjustmentNo NVARCHAR(200)
+DECLARE @strIntegrationDocNo NVARCHAR(200)
 DECLARE @intAdjustmentId INT
 
 DECLARE @Logs TABLE (strError NVARCHAR(500), strField NVARCHAR(100), strValue NVARCHAR(500), intLineNumber INT, intLinePosition INT, strLogLevel NVARCHAR(50))
@@ -28,18 +31,18 @@ WHERE c.intCompanyLocationId IS NULL
 
 DECLARE cur CURSOR LOCAL FAST_FORWARD
 FOR
-SELECT strAdjustmentNo, intLocationId, intAdjustmentType, dtmAdjustmentDate, strDescription FROM @Adjustments
+SELECT strAdjustmentNo, intLocationId, intAdjustmentType, dtmAdjustmentDate, strDescription, strIntegrationDocNo FROM @Adjustments
 
 OPEN cur
 
-FETCH NEXT FROM cur INTO @strTempAdjustmentNo, @intLocationId, @intAdjustmentType, @dtmAdjustmentDate, @strDescription
+FETCH NEXT FROM cur INTO @strTempAdjustmentNo, @intLocationId, @intAdjustmentType, @dtmAdjustmentDate, @strDescription, @strIntegrationDocNo
 
 WHILE @@FETCH_STATUS = 0
 BEGIN
 	EXEC dbo.uspSMGetStartingNumber 30, @strAdjustmentNo OUTPUT, @intLocationId
 	
-	INSERT INTO tblICInventoryAdjustment(strAdjustmentNo, intLocationId, intAdjustmentType, dtmAdjustmentDate, strDescription, intCreatedByUserId, dtmDateCreated, strDataSource)
-	VALUES(@strTempAdjustmentNo, @intLocationId, @intAdjustmentType, @dtmAdjustmentDate, @strDescription, @intUserId, GETDATE(),  'JSON Import')
+	INSERT INTO tblICInventoryAdjustment(strAdjustmentNo, intLocationId, intAdjustmentType, dtmAdjustmentDate, strDescription, intCreatedByUserId, dtmDateCreated, strDataSource, strIntegrationDocNo)
+	VALUES(@strTempAdjustmentNo, @intLocationId, @intAdjustmentType, @dtmAdjustmentDate, @strDescription, @intUserId, GETDATE(),  'JSON Import', @strIntegrationDocNo)
 	
 	SET @intAdjustmentId = SCOPE_IDENTITY()
 
@@ -82,7 +85,7 @@ BEGIN
 	WHERE sad.strAdjustmentNo = @strTempAdjustmentNo
 		AND item.intItemId IS NULL
 
-	FETCH NEXT FROM cur INTO @strTempAdjustmentNo, @intLocationId, @intAdjustmentType, @dtmAdjustmentDate, @strDescription
+	FETCH NEXT FROM cur INTO @strTempAdjustmentNo, @intLocationId, @intAdjustmentType, @dtmAdjustmentDate, @strDescription, @strIntegrationDocNo
 END
 
 CLOSE cur
