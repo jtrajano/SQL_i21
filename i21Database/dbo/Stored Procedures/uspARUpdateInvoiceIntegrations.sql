@@ -39,7 +39,10 @@ BEGIN TRY
 	WHERE intInvoiceId = @InvoiceId
 
 	IF @strTransactionType = 'Proforma Invoice'
-		RETURN
+		BEGIN
+			COMMIT
+			RETURN
+		END
 
 	EXEC dbo.[uspARUpdateProvisionalOnStandardInvoice] @intInvoiceId, @ForDelete, @intUserId
 
