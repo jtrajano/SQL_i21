@@ -6,7 +6,11 @@
 	@vendorFrom NVARCHAR(100) = NULL,
 	@vendorTo NVARCHAR(100) = NULL
 )
-RETURNS NVARCHAR(1500)
+RETURNS @returnTable TABLE
+(
+	C NVARCHAR(1500)
+	,intCount INT
+)
 AS
 BEGIN
 	
@@ -159,6 +163,9 @@ BEGIN
 		+ SPACE(241)
 		+ CHAR(13) + CHAR(10)
 
-	RETURN @endOfDEV;
+	INSERT INTO @returnTable
+	SELECT @endOfDEV, @totalPayees
+	
+	RETURN;
 
 END
