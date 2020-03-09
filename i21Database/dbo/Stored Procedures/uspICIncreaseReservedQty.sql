@@ -305,22 +305,26 @@ BEGIN
 			,intItemId   
 			,intItemLocationId 
 			,intItemUOMId 
+			,intLotId
 			,intSubLocationId 
 			,intStorageLocationId 
 			,strTransactionId
 			,dblQty
 			,intConcurrencyId
+			,dtmDateCreated
 	)
 	SELECT 
 			intItemStockTypeId	= @stockType_Reserved
 			,intItemId			= intItemId
 			,intItemLocationId  = intItemLocationId
 			,intItemUOMId		= intItemUOMId
+			,intLotId			= intLotId
 			,intSubLocationId	= intSubLocationId
 			,intStorageLocationId = intStorageLocationId 
 			,strTransactionId	= strTransactionId
 			,dblQty				= dblQty
 			,intConcurrencyId	= 1
+			,dtmDateCreated		= GETDATE()
 	FROM	@ItemsToIncreaseReserve cp 
 	WHERE	ISNULL(dblQty, 0) <> 0 
 END 

@@ -21,6 +21,7 @@ CREATE TABLE [dbo].[tblICItemStockDetail]
 	,[intItemId] INT NOT NULL
 	,[intItemLocationId] INT NOT NULL
 	,[intItemUOMId] INT NOT NULL
+	,[intLotId] INT NULL
 	,[intSubLocationId] INT NULL
 	,[intStorageLocationId] INT NULL
 	,[strTransactionId] NVARCHAR (50) COLLATE Latin1_General_CI_AS NOT NULL

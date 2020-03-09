@@ -104,6 +104,7 @@ INSERT INTO dbo.tblICStockReservation (
 		,intSubLocationId
 		,intStorageLocationId
 		,intConcurrencyId
+		,dtmDateCreated
 )
 SELECT	intItemId						= Items.intItemId
 		,intLocationId					= ItemLocation.intLocationId
@@ -118,6 +119,7 @@ SELECT	intItemId						= Items.intItemId
 		,intSubLocationId				= Items.intSubLocationId
 		,intStorageLocationId			= Items.intStorageLocationId
 		,intConcurrencyId				= 1
+		,dtmDateCreated					= GETDATE() 
 FROM	@ItemsToReserveAggregrate Items INNER JOIN dbo.tblICItemLocation ItemLocation
 			ON Items.intItemLocationId = ItemLocation.intItemLocationId
 
