@@ -8519,6 +8519,13 @@
     <Build Include="dbo\Tables\tblIPInvReceiptItemArchive.sql" />
     <Build Include="dbo\Stored Procedures\uspIPStageSAPReceipt_ST.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessSAPReceipt_ST.sql" />
+    <Build Include="dbo\Tables\tblIPSampleStage.sql" />
+    <Build Include="dbo\Tables\tblIPSampleError.sql" />
+    <Build Include="dbo\Tables\tblIPSampleArchive.sql" />
+    <Build Include="dbo\Tables\tblIPSampleTestResultStage.sql" />
+    <Build Include="dbo\Tables\tblIPSampleTestResultError.sql" />
+    <Build Include="dbo\Tables\tblIPSampleTestResultArchive.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPStageSAPSample_ST.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
