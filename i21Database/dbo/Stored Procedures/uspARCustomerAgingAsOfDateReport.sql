@@ -240,8 +240,8 @@ INNER JOIN (
 WHERE intInvoiceId IS NOT NULL
 
 --#FORGIVENSERVICECHARGE
-SELECT I.intInvoiceId
-	 , I.strInvoiceNumber
+SELECT SC.intInvoiceId
+	 , SC.strInvoiceNumber
 INTO #FORGIVENSERVICECHARGE 
 FROM tblARInvoice I
 INNER JOIN @tblCustomers C ON I.intEntityCustomerId = C.intEntityCustomerId
@@ -372,10 +372,10 @@ WHERE ysnPosted = 1
   AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
 
 --REMOVE SERVICE CHARGE THAT WAS ALREADY CAUGHT IN BALANCE FORWARD
-IF (@ysnFromBalanceForward = 0 AND @dtmBalanceForwardDate IS NOT NULL)
-BEGIN
-	DELETE FROM #POSTEDINVOICES WHERE strType = 'Service Charge' AND ysnForgiven = 1 AND @dtmBalanceForwardDate < dtmForgiveDate
-END
+-- IF (@ysnFromBalanceForward = 0 AND @dtmBalanceForwardDate IS NOT NULL)
+-- BEGIN
+-- 	DELETE FROM #POSTEDINVOICES WHERE strType = 'Service Charge' AND ysnForgiven = 1 AND @dtmBalanceForwardDate < dtmForgiveDate
+-- END
 	
 DELETE FROM tblARCustomerAgingStagingTable WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Summary'
 INSERT INTO tblARCustomerAgingStagingTable (
