@@ -33,6 +33,7 @@ Type the overview for the table here.
         [intCreatedByUserId] INT NULL,
         [intModifiedByUserId] INT NULL,
 		[intDataSourceId] TINYINT NULL,
+		[intImportFlagInternal] INT NULL,
 		CONSTRAINT [PK_tblICItemPricing] PRIMARY KEY ([intItemPricingId]), 
 		CONSTRAINT [FK_tblICItemPricing_tblICItemLocation] FOREIGN KEY ([intItemLocationId]) REFERENCES [tblICItemLocation]([intItemLocationId]) ON DELETE CASCADE, 
 		CONSTRAINT [FK_tblICItemPricing_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]), 

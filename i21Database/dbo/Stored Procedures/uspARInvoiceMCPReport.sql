@@ -129,7 +129,7 @@ SELECT strCompanyName			= COMPANY.strCompanyName
 	 , dblInvoiceTotal			= ISNULL(INV.dblInvoiceTotal, 0)
 	 , dblAmountDue				= ISNULL(INV.dblAmountDue, 0)
 	 , dblInvoiceTax			= ISNULL(INV.dblTax, 0)
-	 , strComments				= CASE WHEN INV.strType = 'Tank Delivery'
+	 , strComments				= CASE WHEN INV.strType = 'Tank Delivery' OR SELECTEDINV.strInvoiceFormat = 'Format 5 - Honstein'
 	 									THEN dbo.fnEliminateHTMLTags(ISNULL(INV.strComments, ''), 0)
 	   								  	ELSE dbo.fnEliminateHTMLTags(ISNULL(INV.strFooterComments, ''), 0)
 								  END

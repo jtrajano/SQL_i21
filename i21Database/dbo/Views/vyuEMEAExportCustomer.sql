@@ -26,6 +26,7 @@ SELECT [intId] 				= a.intEntityId
 	 , [ModifiedDate]		= COALESCE(c.dtmDateModified, c.dtmDateCreated)
 	 , [Comment]			= ''
 	 , [LicenseApplicator] 	= g.strLicenseNo 
+	 , [LicenseExpirationDate] = g.dtmExpirationDate
 FROM tblEMEntity a
 INNER JOIN tblEMEntityType b ON a.intEntityId = b.intEntityId and b.strType = 'Customer'
 INNER JOIN tblARCustomer c ON a.intEntityId = c.intEntityId

@@ -6,11 +6,11 @@
 )
 RETURNS @returntable TABLE
 (
-	intContractBalanceLogId INT
-	 , dtmTransactionDate DATETIME
+	 intContractBalanceLogId INT
 	, dtmCreateDate DATETIME
-	, strTransactionType NVARCHAR(100) COLLATE Latin1_General_CI_AS
-	, strTransactionReference NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	, dtmTransactionDate DATETIME
+	, strTransactionType  NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	, strTransactionReference   NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, intTransactionReferenceId INT
 	, strTransactionReferenceNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
 	, intContractDetailId INT
@@ -58,8 +58,9 @@ AS
 BEGIN
 
 	INSERT @returntable	
-	SELECT intContractBalanceLogId
-		 , dtmTransactionDate
+	SELECT
+		 intContractBalanceLogId
+		, dtmTransactionDate
 		, dtmCreatedDate 
 		, strTransactionType
 		, strTransactionReference
@@ -106,7 +107,8 @@ BEGIN
 		, strBasisCurrency
 		, strNotes
 	FROM (
-		SELECT intContractBalanceLogId 
+		SELECT
+			 intContractBalanceLogId 
 			, dtmTransactionDate
 			, dtmCreatedDate 
 			, strTransactionType

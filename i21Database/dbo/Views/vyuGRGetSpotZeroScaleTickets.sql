@@ -18,7 +18,7 @@ SELECT DISTINCT
 	FROM tblSCTicket SC
 	LEFT JOIN tblSCTicketSplit TS
 		ON TS.intTicketId = SC.intTicketId 
-			AND TS.intStorageScheduleTypeId = -3 
+			--AND TS.intStorageScheduleTypeId = -3 
 			AND TS.intCustomerId NOT IN (SELECT intEntityId FROM tblGRUnPricedSpotTicket  WHERE intTicketId = SC.intTicketId)
 	JOIN tblICItem Item	
 		ON Item.intItemId = SC.intItemId
@@ -47,6 +47,7 @@ SELECT DISTINCT
 WHERE ISNULL(SC.dblUnitPrice,0) = 0 
 	AND ISNULL(SC.dblUnitBasis,0) = 0
 	AND SC.intStorageScheduleTypeId IN(-3,-4)	-- Spot,Split
+	AND (TS.intTicketSplitId is null or (TS.intTicketSplitId is not null and TS.strDistributionOption = 'SPT'))
 	AND SC.strTicketStatus = 'C'
 	AND CASE WHEN (lower(Wght.strWhereFinalized) = 'destination' and lower(Grd.strWhereFinalized) = 'destination') THEN SC.ysnDestinationWeightGradePost ELSE 1 END = 1
 	AND (CASE WHEN TicketType.strInOutIndicator='I' 

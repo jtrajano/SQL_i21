@@ -1,23 +1,38 @@
 ﻿CREATE VIEW [dbo].[vyuICGetSubLocationBinDetails]
 AS
 SELECT
-	  intItemId					= sm.intItemId
+	  intItemId					= i.intItemId
 	, intCompanyLocationId		= il.intLocationId
 	, intItemLocationId			= il.intItemLocationId
-	, intSubLocationId			= sm.intSubLocationId
-	, strSubLocationName		= sc.strSubLocationName
+	, intSubLocationId			= CASE WHEN (i.ysnSeparateStockForUOMs = 1 AND i.strLotTracking = 'No') THEN stockUOM1.intSubLocationId ELSE stockUOM2.intSubLocationId END 								
+	, strSubLocationName		= CASE WHEN (i.ysnSeparateStockForUOMs = 1 AND i.strLotTracking = 'No') THEN stockUOM1.strSubLocationName ELSE stockUOM2.strSubLocationName END 
 	, intStorageLocationId		= sl.intStorageLocationId
 	, strLocation				= c.strLocationName
 	, strStorageLocation		= sl.strName
 	, strItemNo					= i.strItemNo
 	, strItemDescription		= i.strDescription
 	, strItemUOM				= um.strUnitMeasure
-	, dblStock					= ISNULL(sm.dblOnHand, 0) + ISNULL(sm.dblUnitStorage, 0)
+	, dblStock					= 
+			CASE 
+				WHEN i.ysnSeparateStockForUOMs = 1 AND i.strLotTracking = 'No' THEN 
+					ISNULL(stockUOM1.dblOnHand, 0) + ISNULL(stockUOM1.dblUnitStorage, 0) 
+				ELSE 
+					ISNULL(stockUOM2.dblOnHand, 0) + ISNULL(stockUOM2.dblUnitStorage, 0) 
+			END 								
 	, dblCapacity				= sl.dblCapacity
 	, dblAvailable				= 
 			CASE 
 				WHEN ISNULL(sl.dblCapacity, 0) > 0 THEN 
-					ISNULL(sl.dblCapacity, 0) - ISNULL(sm.dblOnHand, 0) - ISNULL(sm.dblUnitStorage, 0)
+					CASE 
+						WHEN i.ysnSeparateStockForUOMs = 1 AND i.strLotTracking = 'No' THEN 
+							ISNULL(sl.dblCapacity, 0) 
+							- ISNULL(stockUOM1.dblOnHand, 0) 
+							- ISNULL(stockUOM1.dblUnitStorage, 0) 
+						ELSE 
+							ISNULL(sl.dblCapacity, 0) 
+							- ISNULL(stockUOM2.dblOnHand, 0) 
+							- ISNULL(stockUOM2.dblUnitStorage, 0) 
+					END 
 				ELSE	
 					0.00
 			END
@@ -25,39 +40,65 @@ SELECT
 	, i.strStatus
 FROM 
 	tblICItem i 
-	INNER JOIN tblICItemLocation il 
-		ON il.intItemId = i.intItemId		
-	INNER JOIN tblSMCompanyLocation c ON c.intCompanyLocationId = il.intLocationId
-	INNER JOIN tblICItemUOM im 
-		ON im.intItemUOMId = i.intItemId 
-		AND im.ysnStockUnit = 1
+	INNER JOIN tblICItemUOM stockUOM 
+		ON stockUOM.intItemId = i.intItemId 
+		AND stockUOM.ysnStockUnit = 1
 	INNER JOIN tblICUnitMeasure um 
-		ON um.intUnitMeasureId = im.intUnitMeasureId
-	CROSS APPLY (
-		SELECT 
-				dblOnHand = SUM(dbo.fnCalculateQtyBetweenUOM(sm.intItemUOMId, im.intItemUOMId, ISNULL(sm.dblOnHand, 0)))
-				,dblUnitStorage = SUM(dbo.fnCalculateQtyBetweenUOM(sm.intItemUOMId, im.intItemUOMId, ISNULL(sm.dblUnitStorage, 0)))
-				,sm.intItemId
-				,sm.intItemLocationId
-				,sm.intSubLocationId
-				,sm.intStorageLocationId
-		FROM 
-			tblICItemStockUOM sm
-			INNER JOIN tblICItemUOM im 
-				ON im.intItemUOMId = sm.intItemId 
-				AND im.ysnStockUnit = 1
-		WHERE		
-			sm.intItemId = i.intItemId	
-			AND sm.intItemLocationId = il.intItemLocationId
-		GROUP BY
-			sm.intItemId
-			,sm.intItemLocationId
-			,sm.intSubLocationId
-			,sm.intStorageLocationId
-	) sm
+		ON um.intUnitMeasureId = stockUOM.intUnitMeasureId
+	INNER JOIN tblICItemLocation il 
+		ON il.intItemId = i.intItemId
+		AND il.intLocationId IS NOT NULL 		
+	INNER JOIN tblSMCompanyLocation c 
+		ON c.intCompanyLocationId = il.intLocationId
 
-	LEFT JOIN tblSMCompanyLocationSubLocation sc ON 
-		sc.intCompanyLocationSubLocationId = sm.intSubLocationId
+	OUTER APPLY (
+		SELECT 
+				dblOnHand = SUM(dbo.fnCalculateQtyBetweenUOM(sm.intItemUOMId, stockUOM2.intItemUOMId, ISNULL(sm.dblOnHand, 0)))						
+				,dblUnitStorage = SUM(dbo.fnCalculateQtyBetweenUOM(sm.intItemUOMId, stockUOM2.intItemUOMId, ISNULL(sm.dblUnitStorage, 0)))						
+				,sm.intSubLocationId
+				,sc.strSubLocationName
+		FROM 
+			tblICItemStockUOM sm 
+			INNER JOIN tblICItemUOM stockUOM2 
+				ON stockUOM2.intItemId = sm.intItemId
+				AND stockUOM2.ysnStockUnit = 1				
+			LEFT JOIN tblSMCompanyLocationSubLocation sc ON 
+				sc.intCompanyLocationSubLocationId = sm.intSubLocationId
+		WHERE		
+			sm.intItemLocationId = il.intItemLocationId
+			AND sm.intItemId = il.intItemId
+			AND sm.intSubLocationId IS NOT NULL 
+			AND i.ysnSeparateStockForUOMs = 1
+			AND (i.strLotTracking = 'No' OR i.strLotTracking IS NULL) 
+		GROUP BY
+			sm.intSubLocationId
+			,sc.strSubLocationName
+	) stockUOM1
+
+	OUTER APPLY (
+		SELECT 
+				dblOnHand = SUM(ISNULL(sm.dblOnHand, 0))
+				,dblUnitStorage = SUM(ISNULL(sm.dblUnitStorage, 0))
+				,sm.intSubLocationId
+				,sc.strSubLocationName
+		FROM 
+			tblICItemStockUOM sm 
+			LEFT JOIN tblSMCompanyLocationSubLocation sc ON 
+				sc.intCompanyLocationSubLocationId = sm.intSubLocationId
+		WHERE		
+			sm.intItemLocationId = il.intItemLocationId
+			AND sm.intItemId = il.intItemId
+			AND sm.intSubLocationId IS NOT NULL 
+			AND sm.intItemUOMId = stockUOM.intItemUOMId
+			AND (
+				ISNULL(i.ysnSeparateStockForUOMs, 1) = 0 
+				OR i.strLotTracking Like 'Yes%' 
+			)
+			
+		GROUP BY
+			sm.intSubLocationId
+			,sc.strSubLocationName
+	) stockUOM2
 
 	OUTER APPLY (
 		SELECT 
@@ -65,11 +106,11 @@ FROM
 			,sl.intStorageLocationId
 			,sl.strName 
 		FROM 
-			tblICStorageLocation sl
+			tblICStorageLocation sl inner join tblICItemStockUOM sm
+				ON sl.intStorageLocationId = sm.intStorageLocationId
 		WHERE
-			sl.intItemId = i.intItemId
-			AND sl.intLocationId = il.intLocationId
-			AND sl.intStorageLocationId = sm.intStorageLocationId
+			sm.intItemId = i.intItemId	
+			AND sm.intItemLocationId = il.intItemLocationId
 		GROUP BY 
 			sl.intStorageLocationId
 			,sl.strName 	

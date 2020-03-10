@@ -51,12 +51,7 @@ SELECT
 	intVoucherType		=	A.intVoucherType,
 	dtmDate				=	CONVERT(DATETIME, SUBSTRING(A.dtmDate,1,2) + '/'+SUBSTRING(A.dtmDate,3,2) + '/'+SUBSTRING(A.dtmDate,5,4)),
 	dtmVoucherDate		=	CONVERT(DATETIME, SUBSTRING(A.strDateOrAccount,1,2) + '/'+SUBSTRING(A.strDateOrAccount,3,2) + '/'+SUBSTRING(A.strDateOrAccount,5,4)),
-    dblQuantityToBill	=	CAST(
-							CASE details.strDetailInfo
-								WHEN '2' THEN -1
-								WHEN '6' THEN 1
-							ELSE NULL
-							END AS INT),
+    dblQuantityToBill	=	1,
 	strDetailInfo		=	details.strDetailInfo,
     dblCost				=	ABS(CAST(details.dblCredit AS DECIMAL(18,2)) - CAST(details.dblDebit AS DECIMAL(18,2))),
 	intAccountId		=	details.intAccountId,
@@ -79,6 +74,7 @@ OUTER APPLY (
 	LEFT JOIN tblGLAccount D ON B.strDateOrAccount = D.strAccountId
 	WHERE 
 		B.strIdentity = 'D'
+	AND B.strDetailInfo = '6'
 	AND A.strInvoiceNumber = B.strInvoiceNumber
 	AND A.strVendorId = B.strVendorId
 ) details
@@ -98,7 +94,8 @@ INSERT INTO @voucherPayables
 	intAccountId,
 	strReference,
 	strVendorOrderNumber,
-	strMiscDescription
+	strMiscDescription,
+	ysnStage
 )
 SELECT
 	intPartitionId,
@@ -111,7 +108,8 @@ SELECT
 	intAccountId,
 	strReference,
 	strVendorOrderNumber,
-	strMiscDescription
+	strMiscDescription,
+	0
 FROM #tmpConvertedLassusData A
 WHERE 
 	A.intEntityVendorId > 0

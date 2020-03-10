@@ -23,7 +23,7 @@ BEGIN TRY
 	LEFT OUTER JOIN tblGLAccount GLAccount 
 		ON GLAccount.intAccountId = CHPO.intAccountId 
 	WHERE CHPO.intCheckoutId =  @intCheckoutId
-  
+  	AND CHPO.dblAmount > 0
     
 END TRY
 

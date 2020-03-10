@@ -4123,6 +4123,8 @@
     <Build Include="dbo\User Defined Types\OrderDetailInformation.sql" />
     <Build Include="dbo\User Defined Types\OrderHeaderInformation.sql" />
     <Build Include="dbo\Functions\fnICIsShrinkableUOM.sql" />
+    <Build Include="dbo\Functions\fnICCalculatePrice.sql" />
+    <Build Include="dbo\Functions\fnICCalculateSalePriceLevel.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateItemComponent.sql" />
     <Build Include="dbo\Stored Procedures\uspSOUpdateItemComponent.sql" />
     <Build Include="dbo\Tables\tblARInvoiceDetailComponent.sql" />
@@ -4269,6 +4271,7 @@
     <Build Include="dbo\Stored Procedures\uspRKSettlementPriceImport.sql" />
     <Build Include="dbo\Stored Procedures\uspRKSettlementPriceImportValidate.sql" />
     <Build Include="dbo\Stored Procedures\uspICValidateReceiptItemLocations.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUpdateItemImportedPricingLevel.sql" />
     <Build Include="dbo\Tables\tblCRMStatus.sql" />
     <Build Include="dbo\Tables\tblCRMType.sql" />
     <Build Include="dbo\Tables\tblCRMPriority.sql" />
@@ -8515,6 +8518,20 @@
     <Build Include="dbo\Stored Procedures\uspAPImportVoucherLassus.sql" />
     <Build Include="dbo\Stored Procedures\uspAPImportVoucherLassusSas.sql" />
     <Build Include="dbo\Tables\tblAPImportVoucherLassusSas.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPGenerateSAPPOIDOC_ST.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessSAPAcknowledgement_ST.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPStageSAPShipmentStatus_ST.sql" />
+    <Build Include="dbo\Tables\tblIPShipmentStatusStage.sql" />
+    <Build Include="dbo\Tables\tblIPShipmentStatusError.sql" />
+    <Build Include="dbo\Tables\tblIPShipmentStatusArchive.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessSAPShipmentStatus_ST.sql" />
+    <Build Include="dbo\Tables\tblIPSampleStage.sql" />
+    <Build Include="dbo\Tables\tblIPSampleError.sql" />
+    <Build Include="dbo\Tables\tblIPSampleArchive.sql" />
+    <Build Include="dbo\Tables\tblIPSampleTestResultStage.sql" />
+    <Build Include="dbo\Tables\tblIPSampleTestResultError.sql" />
+    <Build Include="dbo\Tables\tblIPSampleTestResultArchive.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPStageSAPSample_ST.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

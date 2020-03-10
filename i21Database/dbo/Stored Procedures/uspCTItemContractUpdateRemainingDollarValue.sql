@@ -4,7 +4,9 @@
 	@dblValueToUpdate			NUMERIC(18,6),
 	@intUserId					INT,
 	@intTransactionDetailId		INT,
-	@strScreenName				NVARCHAR(50)
+	@strScreenName				NVARCHAR(50),
+	@strRowState				NVARCHAR(50),
+	@intInvoiceId				INT
 
 AS
 
@@ -28,23 +30,48 @@ BEGIN TRY
 
 	BEGINING:
 
-	SELECT
-		@strItemContractNumber = H.strContractNumber
-		,@dblDollarValue = isnull(H.dblDollarValue,0)
-		--,@dblAppliedDollarValue = isnull(H.dblAppliedDollarValue,0)
-		,@dblAppliedDollarValue = sum(isnull(ID.dblTotal,0))
-		,@dblRemainingDollarValue = isnull(H.dblRemainingDollarValue,0)
-		,@strContractCategoryId = H.strContractCategoryId
-	FROM
-		tblCTItemContractHeader H
-		left join tblARInvoiceDetail ID on ID.intItemContractHeaderId = H.intItemContractHeaderId
-	WHERE
-		H.intItemContractHeaderId = @intItemContractHeaderId
-	GROUP BY
-		H.strContractNumber
-		,H.dblDollarValue
-		,H.dblRemainingDollarValue
-		,H.strContractCategoryId
+	if (@strRowState = 'delete')
+	BEGIN
+		SELECT
+				@strItemContractNumber = H.strContractNumber
+				,@dblDollarValue = isnull(H.dblDollarValue,0)
+				--,@dblAppliedDollarValue = isnull(H.dblAppliedDollarValue,0)
+				,@dblAppliedDollarValue = sum(isnull(ID.dblTotal,0))
+				,@dblRemainingDollarValue = isnull(H.dblRemainingDollarValue,0)
+				,@strContractCategoryId = H.strContractCategoryId
+			FROM
+				tblCTItemContractHeader H
+				left join tblARInvoiceDetail ID on ID.intItemContractHeaderId = H.intItemContractHeaderId and ID.intInvoiceId <> @intInvoiceId
+			WHERE
+				H.intItemContractHeaderId = @intItemContractHeaderId
+			GROUP BY
+				H.strContractNumber
+				,H.dblDollarValue
+				,H.dblRemainingDollarValue
+				,H.strContractCategoryId
+	end
+	else
+	BEGIN
+		SELECT
+			@strItemContractNumber = H.strContractNumber
+			,@dblDollarValue = isnull(H.dblDollarValue,0)
+			--,@dblAppliedDollarValue = isnull(H.dblAppliedDollarValue,0)
+			,@dblAppliedDollarValue = sum(isnull(ID.dblTotal,0))
+			,@dblRemainingDollarValue = isnull(H.dblRemainingDollarValue,0)
+			,@strContractCategoryId = H.strContractCategoryId
+		FROM
+			tblCTItemContractHeader H
+			left join tblARInvoiceDetail ID on ID.intItemContractHeaderId = H.intItemContractHeaderId
+		WHERE
+			H.intItemContractHeaderId = @intItemContractHeaderId
+		GROUP BY
+			H.strContractNumber
+			,H.dblDollarValue
+			,H.dblRemainingDollarValue
+			,H.strContractCategoryId
+	end
+
+
 
 	if (@strContractCategoryId <> 'Dollar')
 	BEGIN

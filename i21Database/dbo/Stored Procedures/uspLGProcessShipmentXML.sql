@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE dbo.uspLGProcessShipmentXML (
 	@strInfo1 NVARCHAR(MAX) = '' OUTPUT
 	,@ysnDropShip BIT = 0
+	,@intMultiCompanyId int
 	)
 AS
 BEGIN TRY
@@ -27,7 +28,7 @@ BEGIN TRY
 		,@strFeedStatus NVARCHAR(MAX)
 		,@dtmFeedDate DATETIME
 		,@strMessage NVARCHAR(MAX)
-		,@intMultiCompanyId INT
+		--,@intMultiCompanyId INT
 		,@intReferenceId INT
 		,@intEntityId INT
 		,@strTransactionType NVARCHAR(MAX)
@@ -209,6 +210,7 @@ BEGIN TRY
 	SELECT @intId = MIN(intId)
 	FROM tblLGIntrCompLogisticsStg
 	WHERE strFeedStatus IS NULL
+	AND intMultiCompanyId=@intMultiCompanyId
 
 	WHILE @intId > 0
 	BEGIN
@@ -231,7 +233,7 @@ BEGIN TRY
 				,@strFeedStatus = NULL
 				,@dtmFeedDate = NULL
 				,@strMessage = NULL
-				,@intMultiCompanyId = NULL
+				--,@intMultiCompanyId = NULL
 				,@intReferenceId = NULL
 				,@intEntityId = NULL
 				,@strTransactionType = NULL
@@ -300,7 +302,7 @@ BEGIN TRY
 				,@strFeedStatus = strFeedStatus
 				,@dtmFeedDate = dtmFeedDate
 				,@strMessage = strMessage
-				,@intMultiCompanyId = intMultiCompanyId
+				--,@intMultiCompanyId = intMultiCompanyId
 				,@intReferenceId = intReferenceId
 				,@intEntityId = intEntityId
 				,@strTransactionType = strTransactionType
@@ -4011,6 +4013,7 @@ BEGIN TRY
 		FROM tblLGIntrCompLogisticsStg
 		WHERE intId > @intId
 			AND IsNULL(strFeedStatus, '') = ''
+			AND intMultiCompanyId=@intMultiCompanyId
 	END
 
 	IF @strTransactionType IN (

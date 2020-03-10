@@ -300,7 +300,7 @@ BEGIN TRY
 			,@intEntityUserSecurityId = @intUserId
 			,@strGLDescription = ''
 			,@ysnPost = 0
-			,@AccountCategory_Cost_Adjustment = 'Work In Progress'
+			,@AccountCategory_Cost_Adjustment = 'Inventory Adjustment'
 			,@strTransactionId = @strWorkOrderNo
 
 		-- Flag it as unposted. 
