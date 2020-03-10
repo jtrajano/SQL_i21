@@ -324,6 +324,7 @@ BEGIN TRY
 				,intFamilyId_Original INT NULL 
 				,intClassId_Original INT NULL 
 				,intProductCodeId_Original INT NULL 
+				,intIssueUOMId_Original INT NULL 
 				,intVendorId_Original INT NULL 
 				,intMinimumAge_Original INT NULL 
 				,dblMinOrder_Original NUMERIC(18, 6) NULL 
@@ -356,6 +357,7 @@ BEGIN TRY
 				,intFamilyId_New INT NULL 
 				,intClassId_New INT NULL 
 				,intProductCodeId_New INT NULL 
+				,intIssueUOMId_New INT NULL 
 				,intVendorId_New INT NULL 
 				,intMinimumAge_New INT NULL 
 				,dblMinOrder_New NUMERIC(18, 6) NULL 

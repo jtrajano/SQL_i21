@@ -29,6 +29,7 @@
 	,@intFamilyId INT = NULL 
 	,@intClassId INT = NULL 
 	,@intProductCodeId INT = NULL 
+	,@intIssueUOMId INT = NULL 
 	,@intVendorId INT = NULL 
 	,@intMinimumAge INT = NULL 
 	,@dblMinOrder NUMERIC(18, 6) = NULL 
@@ -40,11 +41,6 @@
 	,@intEntityUserSecurityId AS INT 
 AS
 
-SET QUOTED_IDENTIFIER OFF
-SET ANSI_NULLS ON
-SET NOCOUNT ON
-SET XACT_ABORT ON
-SET ANSI_WARNINGS OFF
 
 -- Create the temp table used for filtering. 
 IF OBJECT_ID('tempdb..#tmpUpdateItemForCStore_Location') IS NULL  
@@ -101,6 +97,7 @@ IF OBJECT_ID('tempdb..#tmpUpdateItemLocationForCStore_itemLocationAuditLog') IS 
 		,intFamilyId_Original INT NULL 
 		,intClassId_Original INT NULL 
 		,intProductCodeId_Original INT NULL 
+		,intIssueUOMId_Original INT NULL 
 		,intVendorId_Original INT NULL 
 		,intMinimumAge_Original INT NULL 
 		,dblMinOrder_Original NUMERIC(18, 6) NULL 
@@ -133,6 +130,7 @@ IF OBJECT_ID('tempdb..#tmpUpdateItemLocationForCStore_itemLocationAuditLog') IS 
 		,intFamilyId_New INT NULL 
 		,intClassId_New INT NULL 
 		,intProductCodeId_New INT NULL 
+		,intIssueUOMId_New INT NULL 
 		,intVendorId_New INT NULL 
 		,intMinimumAge_New INT NULL 
 		,dblMinOrder_New NUMERIC(18, 6) NULL 
@@ -143,6 +141,7 @@ IF OBJECT_ID('tempdb..#tmpUpdateItemLocationForCStore_itemLocationAuditLog') IS 
 		,strDescription_New NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
 	)
 ;
+
 
 -- Update the Standard Cost and Retail Price in the Item Pricing table. 
 BEGIN 
@@ -173,6 +172,7 @@ BEGIN
 		, intFamilyId_Original
 		, intClassId_Original
 		, intProductCodeId_Original
+		, intIssueUOMId_Original
 		, intVendorId_Original
 		, intMinimumAge_Original
 		, dblMinOrder_Original
@@ -205,6 +205,7 @@ BEGIN
 		, intFamilyId_New
 		, intClassId_New
 		, intProductCodeId_New
+		, intIssueUOMId_New
 		, intVendorId_New
 		, intMinimumAge_New
 		, dblMinOrder_New
@@ -240,6 +241,7 @@ BEGIN
 			, [Changes].intFamilyId_Original
 			, [Changes].intClassId_Original
 			, [Changes].intProductCodeId_Original
+			, [Changes].intIssueUOMId_Original
 			, [Changes].intVendorId_Original
 			, [Changes].intMinimumAge_Original
 			, [Changes].dblMinOrder_Original
@@ -272,6 +274,7 @@ BEGIN
 			, [Changes].intFamilyId_New
 			, [Changes].intClassId_New
 			, [Changes].intProductCodeId_New
+			, [Changes].intIssueUOMId_New
 			, [Changes].intVendorId_New
 			, [Changes].intMinimumAge_New
 			, [Changes].dblMinOrder_New
@@ -367,6 +370,7 @@ BEGIN
 							,intFamilyId = ISNULL(@intFamilyId, itemLocation.intFamilyId) 
 							,intClassId = ISNULL(@intClassId, itemLocation.intClassId) 
 							,intProductCodeId = ISNULL(@intProductCodeId, itemLocation.intProductCodeId) 
+							,intIssueUOMId = ISNULL(@intIssueUOMId, itemLocation.intIssueUOMId) 
 							,intVendorId = ISNULL(@intVendorId, itemLocation.intVendorId) 
 							,intMinimumAge = ISNULL(@intMinimumAge, itemLocation.intMinimumAge) 
 							,dblMinOrder = ISNULL(@dblMinOrder, itemLocation.dblMinOrder) 
@@ -405,6 +409,7 @@ BEGIN
 						, deleted.intFamilyId
 						, deleted.intClassId
 						, deleted.intProductCodeId
+						, deleted.intIssueUOMId
 						, deleted.intVendorId
 						, deleted.intMinimumAge
 						, deleted.dblMinOrder
@@ -437,6 +442,7 @@ BEGIN
 						, inserted.intFamilyId
 						, inserted.intClassId
 						, inserted.intProductCodeId
+						, inserted.intIssueUOMId
 						, inserted.intVendorId
 						, inserted.intMinimumAge
 						, inserted.dblMinOrder
@@ -473,6 +479,7 @@ BEGIN
 				, intFamilyId_Original
 				, intClassId_Original
 				, intProductCodeId_Original
+				, intIssueUOMId_Original
 				, intVendorId_Original
 				, intMinimumAge_Original
 				, dblMinOrder_Original
@@ -505,6 +512,7 @@ BEGIN
 				, intFamilyId_New
 				, intClassId_New
 				, intProductCodeId_New
+				,intIssueUOMId_New
 				, intVendorId_New
 				, intMinimumAge_New
 				, dblMinOrder_New
@@ -550,6 +558,7 @@ BEGIN
 		,@auditLog_intFamilyId_Original INT
 		,@auditLog_intClassId_Original INT
 		,@auditLog_intProductCodeId_Original INT
+		,@auditLog_intIssueUOMId_Original INT
 		,@auditLog_intVendorId_Original INT
 		,@auditLog_intMinimumAge_Original INT
 		,@auditLog_dblMinOrder_Original NUMERIC(18, 6)
@@ -582,6 +591,7 @@ BEGIN
 		,@auditLog_intFamilyId_New INT
 		,@auditLog_intClassId_New INT
 		,@auditLog_intProductCodeId_New INT
+		,@auditLog_intIssueUOMId_New INT
 		,@auditLog_intVendorId_New INT
 		,@auditLog_intMinimumAge_New INT 
 		,@auditLog_dblMinOrder_New NUMERIC(18, 6)
@@ -621,6 +631,7 @@ BEGIN
 			,intFamilyId_Original
 			,intClassId_Original
 			,intProductCodeId_Original
+			,intIssueUOMId_Original
 			,intVendorId_Original
 			,intMinimumAge_Original 
 			,dblMinOrder_Original 
@@ -653,6 +664,7 @@ BEGIN
 			,intFamilyId_New 
 			,intClassId_New 
 			,intProductCodeId_New 
+			,intIssueUOMId_New 
 			,intVendorId_New 
 			,intMinimumAge_New 
 			,dblMinOrder_New 
@@ -692,6 +704,7 @@ BEGIN
 		,@auditLog_intFamilyId_Original 
 		,@auditLog_intClassId_Original 
 		,@auditLog_intProductCodeId_Original 
+		,@auditLog_intIssueUOMId_Original 
 		,@auditLog_intVendorId_Original 
 		,@auditLog_intMinimumAge_Original 
 		,@auditLog_dblMinOrder_Original 
@@ -724,6 +737,7 @@ BEGIN
 		,@auditLog_intFamilyId_New 
 		,@auditLog_intClassId_New 
 		,@auditLog_intProductCodeId_New 
+		,@auditLog_intIssueUOMId_New 
 		,@auditLog_intVendorId_New 
 		,@auditLog_intMinimumAge_New 
 		,@auditLog_dblMinOrder_New 
@@ -1013,6 +1027,18 @@ BEGIN
 				,@toValue = @auditLog_intProductCodeId_New
 		END
 
+		IF ISNULL(@auditLog_intIssueUOMId_Original, 0) <> ISNULL(@auditLog_intIssueUOMId_New, 0)
+		BEGIN 
+			EXEC dbo.uspSMAuditLog 
+				@keyValue = @auditLog_intItemLocationId
+				,@screenName = 'Inventory.view.ItemLocation'
+				,@entityId = @intEntityUserSecurityId
+				,@actionType = @auditLog_actionType
+				,@changeDescription = 'C-Store updates the Issue UOM Id'
+				,@fromValue = @auditLog_intIssueUOMId_Original
+				,@toValue = @auditLog_intIssueUOMId_New
+		END
+
 		IF ISNULL(@auditLog_intVendorId_Original, 0) <> ISNULL(@auditLog_intVendorId_New, 0)
 		BEGIN 
 			EXEC dbo.uspSMAuditLog 
@@ -1137,6 +1163,7 @@ BEGIN
 			,@auditLog_intFamilyId_Original 
 			,@auditLog_intClassId_Original 
 			,@auditLog_intProductCodeId_Original 
+			,@auditLog_intIssueUOMId_Original 
 			,@auditLog_intVendorId_Original 
 			,@auditLog_intMinimumAge_Original 
 			,@auditLog_dblMinOrder_Original 
@@ -1169,6 +1196,7 @@ BEGIN
 			,@auditLog_intFamilyId_New 
 			,@auditLog_intClassId_New 
 			,@auditLog_intProductCodeId_New 
+			,@auditLog_intIssueUOMId_New 
 			,@auditLog_intVendorId_New 
 			,@auditLog_intMinimumAge_New 
 			,@auditLog_dblMinOrder_New 

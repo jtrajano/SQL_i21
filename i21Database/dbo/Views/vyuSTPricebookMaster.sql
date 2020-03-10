@@ -1,4 +1,4 @@
-﻿CREATE VIEW dbo.vyuSTPricebookMaster
+﻿CREATE VIEW [dbo].[vyuSTPricebookMaster]
 AS
 SELECT DISTINCT
 	ItemLoc.intItemLocationId AS intUniqueId
@@ -49,6 +49,15 @@ SELECT DISTINCT
 	-- tblSMCompanyLocation
 	, CompanyLoc.intCompanyLocationId
 	, CompanyLoc.strLocationName
+
+	-- Product Code
+	, strProductCode = ProductCode.strRegProdCode
+	, intProductCodeId = ItemLoc.intProductCodeId
+
+	--SalesUOM
+	,strSaleUOM = IssueUOM.strUnitMeasure
+	,ItemLoc.intIssueUOMId
+
 FROM dbo.tblICItem AS Item 
 INNER JOIN tblICItemLocation ItemLoc
 	ON Item.intItemId = ItemLoc.intItemId
@@ -73,8 +82,11 @@ LEFT JOIN dbo.tblEMEntity Vendor
 LEFT JOIN dbo.tblICItemVendorXref VendorXref
 	ON Item.intItemId = VendorXref.intItemId
 	AND ItemLoc.intItemLocationId = VendorXref.intItemLocationId
+LEFT JOIN tblSTSubcategoryRegProd ProductCode 
+	ON ProductCode.intRegProdId = ItemLoc.intProductCodeId
+LEFT JOIN vyuICGetItemUOM IssueUOM 
+	ON IssueUOM.intItemUOMId = ItemLoc.intIssueUOMId
 WHERE Uom.ysnStockUnit = 1
-
 
 
 --LEFT JOIN 
@@ -138,3 +150,6 @@ WHERE Uom.ysnStockUnit = 1
 --) VendorXref
 --	ON Item.intItemId = VendorXref.intItemId
 --	AND VendorXref.rn = 1
+GO
+
+

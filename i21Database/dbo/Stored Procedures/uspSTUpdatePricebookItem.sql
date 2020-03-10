@@ -215,6 +215,7 @@ BEGIN
 						,intFamilyId_Original INT NULL 
 						,intClassId_Original INT NULL 
 						,intProductCodeId_Original INT NULL 
+						,intIssueUOMId_Original INT NULL 
 						,intVendorId_Original INT NULL 
 						,intMinimumAge_Original INT NULL 
 						,dblMinOrder_Original NUMERIC(18, 6) NULL 
@@ -247,6 +248,7 @@ BEGIN
 						,intFamilyId_New INT NULL 
 						,intClassId_New INT NULL 
 						,intProductCodeId_New INT NULL 
+						,intIssueUOMId_New INT NULL 
 						,intVendorId_New INT NULL 
 						,intMinimumAge_New INT NULL 
 						,dblMinOrder_New NUMERIC(18, 6) NULL 
@@ -283,8 +285,22 @@ BEGIN
 					, dblStandardCost		NUMERIC(38,20)
 					, dblLastCost			NUMERIC(38,20)
 					, dblSalePrice			NUMERIC(38,20)
+					, intIssueUOMId			INT
+					, intProductCodeId		INT
+					
 				)
 			END
+
+			-- temp table for ItemLocation
+			BEGIN
+				DECLARE @tblItemLocation TABLE (
+					intItemLocationId		INT
+					, intIssueUOMId			INT
+					, intProductCodeId		INT
+					
+				)
+			END
+
 
 
 			-- ============================================================================================================================
@@ -477,6 +493,24 @@ BEGIN
 					WHERE Item.intItemId = @intItemId
 						AND Uom.ysnStockUnit = 1
 
+					
+					--GET PRODUCT CODE AND UOM ON GRID
+					INSERT INTO @tblItemLocation
+					(
+						  intItemLocationId
+						, intProductCodeId		
+						, intIssueUOMId	
+
+					)
+					SELECT 
+						  intItemPricingId	= udt.intItemLocationId
+						, intProductCodeId	= udt.intProductCodeId
+						, intIssueUOMId		= udt.intIssueUOMId
+					FROM @UDTItemPricing udt
+
+					SELECT '@UDTItemPricing' ,* FROM @UDTItemPricing
+					SELECT '@tblItemLocation',* FROM @tblItemLocation
+
 
 					-- ITEM LOCATION
 					BEGIN TRY
@@ -495,7 +529,11 @@ BEGIN
 										, family.strSubcategoryId
 										, class.intSubcategoryId
 										, entity.strName AS strVendorName
+										--,stagingItemLoc.intIssueUOMId
+										--,stagingItemLoc.intProductCodeId
 									FROM tblICItemLocation itemLoc
+									--INNER JOIN @tblItemLocation stagingItemLoc
+									--	ON	stagingItemLoc.intItemLocationId = itemLoc.intItemLocationId
 									INNER JOIN tblICItem item
 										ON itemLoc.intItemId = item.intItemId
 									LEFT JOIN tblSTSubcategory family
@@ -510,14 +548,27 @@ BEGIN
 						-- ===============================================
 						-- [END] - PREVIEW IF DEBUG (ITEM LOCATION)
 						-- ===============================================
+						DECLARE @intItemLocLoopItemLocationId		 INT
+						DECLARE @intItemLocLoopProductCodeId		 INT
+						DECLARE @intItemLocLoopIssueUOMId			 INT
+
+						WHILE EXISTS(SELECT TOP 1 1 FROM @tblItemLocation)
+						BEGIN
+							SELECT TOP 1 
+							 @intItemLocLoopItemLocationId	= intItemLocationId
+							,@intItemLocLoopProductCodeId	= intProductCodeId	
+							,@intItemLocLoopIssueUOMId		= intIssueUOMId	
+							FROM @tblItemLocation
 
 
-						EXEC [dbo].[uspICUpdateItemLocationForCStore]
-							@strUpcCode					= @strUpcCodeFilter 
+							EXEC [dbo].[uspICUpdateItemLocationForCStore]
+							--PARAMETER--
+							 @strUpcCode				= @strUpcCodeFilter 
 							,@strDescription			= @strNewItemDescription 
 							,@dblRetailPriceFrom		= NULL  
 							,@dblRetailPriceTo			= NULL 
-							,@intItemLocationId			= NULL
+							,@intItemLocationId			= @intItemLocLoopItemLocationId
+							--PARAMETER--
 
 							,@ysnTaxFlag1				= NULL 
 							,@ysnTaxFlag2				= NULL
@@ -541,7 +592,8 @@ BEGIN
 							,@ysnCountBySINo			= NULL
 							,@intFamilyId				= @intFamilyId
 							,@intClassId				= @intClassId
-							,@intProductCodeId			= NULL
+							,@intProductCodeId			= @intItemLocLoopProductCodeId
+							,@intIssueUOMId				= @intItemLocLoopIssueUOMId
 							,@intVendorId				= @intVendorId
 							,@intMinimumAge				= NULL
 							,@dblMinOrder				= NULL
@@ -552,6 +604,18 @@ BEGIN
 							,@strItemLocationDescription = NULL --@strPOSDescription 
 
 							,@intEntityUserSecurityId = @intEntityId
+
+
+
+
+							DELETE @tblItemLocation 
+							WHERE intItemLocationId	= @intItemLocLoopItemLocationId	
+							AND intProductCodeId	= @intItemLocLoopProductCodeId	
+							AND intIssueUOMId		= @intItemLocLoopIssueUOMId		
+
+						END
+
+						
 
 
 						-- ===============================================
@@ -867,6 +931,8 @@ BEGIN
 								, dblStandardCost	
 								, dblLastCost
 								, dblSalePrice
+								, intProductCodeId		
+								, intIssueUOMId	
 
 							)
 							SELECT 
@@ -875,6 +941,8 @@ BEGIN
 								, dblStandardCost	= udt.dblStandardCost
 								, dblLastCost		= udt.dblLastCost
 								, dblSalePrice		= udt.dblSalePrice
+								, intProductCodeId	= udt.intProductCodeId
+								, intIssueUOMId		= udt.intIssueUOMId
 							FROM @UDTItemPricing udt
 
 							--TEST
@@ -885,7 +953,8 @@ BEGIN
 									, @dblLoopStandardCost	AS NUMERIC(38,20)
 									, @dblLoopLastCost		AS NUMERIC(38,20)
 									, @dblLoopSalePrice		AS NUMERIC(38,20)
-
+							        , @intLoopIssueUOMId		AS INT
+							        , @intLoopProductCodeId		AS INT
 
 
 
@@ -898,6 +967,8 @@ BEGIN
 										, @dblLoopStandardCost	= CAST(temp.dblStandardCost AS NUMERIC(38, 20))
 										, @dblLoopLastCost		= CAST(temp.dblLastCost AS NUMERIC(38, 20))
 										, @dblLoopSalePrice		= CAST(temp.dblSalePrice AS NUMERIC(38, 20))
+										, @intLoopIssueUOMId		= temp.intIssueUOMId
+										, @intLoopProductCodeId		= temp.intProductCodeId
 									FROM @tblItemPricing temp
 
 
@@ -946,6 +1017,16 @@ BEGIN
 												, @dblRetailPrice			= @dblLoopSalePrice 
 												, @dblLastCost				= @dblLoopLastCost
 												, @intEntityUserSecurityId	= @intEntityId
+
+
+												
+												--SELECT tblICItemLocation.* FROM tblICItemLocation
+												--INNER JOIN tblICItemPricing  
+												--ON tblICItemPricing.intItemLocationId = tblICItemPricing.intItemLocationId
+												--WHERE tblICItemPricing.intItemPricingId = @intLoopItemPricingId
+												--AND tblICItemPricing.intItemId = @intItemId
+												
+
 
 											-- Remove
 											DELETE FROM @tblItemPricing WHERE intItemPricingId = @intLoopItemPricingId

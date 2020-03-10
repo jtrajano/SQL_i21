@@ -19,7 +19,7 @@ DECLARE @intDataSourceId_CStore AS TINYINT = 1
 SELECT @intItemId = intItemId FROM tblICItem WHERE strItemNo = @strItemNo
 
 -- If NULL, item does not exists. It is safe to create a new item record. 
-IF @intItemId IS NULL 
+IF ISNULL(@intItemId,0) = 0
 BEGIN 
 	INSERT INTO tblICItem (
 		strItemNo
@@ -65,4 +65,4 @@ BEGIN
 			,@fromValue = NULL 
 			,@toValue = NULL 
 	END
-END 
+END
