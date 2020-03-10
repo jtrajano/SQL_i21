@@ -240,8 +240,8 @@ INNER JOIN (
 WHERE intInvoiceId IS NOT NULL
 
 --#FORGIVENSERVICECHARGE
-SELECT SC.intInvoiceId
-	 , SC.strInvoiceNumber
+SELECT I.intInvoiceId
+	 , I.strInvoiceNumber
 INTO #FORGIVENSERVICECHARGE 
 FROM tblARInvoice I
 INNER JOIN @tblCustomers C ON I.intEntityCustomerId = C.intEntityCustomerId
@@ -253,9 +253,6 @@ WHERE I.strInvoiceOriginId IS NOT NULL
   AND SC.strTransactionType = 'Invoice'
   AND SC.strType = 'Service Charge'
   AND SC.ysnForgiven = 1
-
-
-
 
 --#POSTEDINVOICES
 SELECT I.intInvoiceId
