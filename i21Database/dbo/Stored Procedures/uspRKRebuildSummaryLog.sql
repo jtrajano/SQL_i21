@@ -361,7 +361,7 @@ BEGIN
 			, sh.intItemId
 			, sh.intCompanyLocationId
 			, dblQty = (case when isnull(cd.intNoOfLoad,0) = 0 then suh.dblTransactionQuantity 
-							else suh.dblTransactionQuantity * cd.dblQuantityPerLoad end) * -1
+							else suh.dblTransactionQuantity * si.dblQuantity end) * -1
 			, intQtyUOMId = ch.intCommodityUOMId
 			, sh.intPricingTypeId
 			, sh.strPricingType
@@ -375,9 +375,73 @@ BEGIN
 			inner join tblCTSequenceHistory sh on sh.intSequenceUsageHistoryId = suh.intSequenceUsageHistoryId
 			inner join tblCTContractDetail cd on cd.intContractDetailId = sh.intContractDetailId
 			inner join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
+			inner join tblICInventoryShipmentItem si on si.intInventoryShipmentItemId = suh.intExternalId
 		where strFieldName = 'Balance'
-		and sh.strPricingStatus = 'Unpriced'
+		and sh.strPricingStatus  IN ('Unpriced','Partially Priced')
 		and sh.strPricingType = 'Basis'
+		and suh.strScreenName = 'Inventory Shipment'
+
+		union all
+		select  
+			dtmTransactionDate = dbo.fnRemoveTimeOnDate(dtmTransactionDate)
+			, sh.intContractHeaderId
+			, sh.intContractDetailId
+			, sh.strContractNumber
+			, sh.intContractSeq
+			, sh.intEntityId
+			, ch.intCommodityId
+			, sh.intItemId
+			, sh.intCompanyLocationId
+			, dblQty = (case when isnull(cd.intNoOfLoad,0) = 0 then suh.dblTransactionQuantity 
+							else suh.dblTransactionQuantity * ri.dblReceived end) * -1
+			, intQtyUOMId = ch.intCommodityUOMId
+			, sh.intPricingTypeId
+			, sh.strPricingType
+			, strTransactionType = strScreenName
+			, intTransactionId = suh.intExternalId
+			, strTransactionId = suh.strNumber
+			, sh.intContractStatusId
+			, ch.intContractTypeId
+		from vyuCTSequenceUsageHistory suh
+			inner join tblCTSequenceHistory sh on sh.intSequenceUsageHistoryId = suh.intSequenceUsageHistoryId
+			inner join tblCTContractDetail cd on cd.intContractDetailId = sh.intContractDetailId
+			inner join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
+			inner join tblICInventoryReceiptItem ri on ri.intInventoryReceiptItemId = suh.intExternalId
+		where strFieldName = 'Balance'
+		and sh.strPricingStatus  IN ('Unpriced','Partially Priced')
+		and sh.strPricingType = 'Basis'
+		and suh.strScreenName = 'Inventory Receipt'
+
+		union all
+		select  
+			dtmTransactionDate = dbo.fnRemoveTimeOnDate(dtmTransactionDate)
+			, sh.intContractHeaderId
+			, sh.intContractDetailId
+			, sh.strContractNumber
+			, sh.intContractSeq
+			, sh.intEntityId
+			, ch.intCommodityId
+			, sh.intItemId
+			, sh.intCompanyLocationId
+			, dblQty = (case when isnull(cd.intNoOfLoad,0) = 0 then suh.dblTransactionQuantity 
+							else suh.dblTransactionQuantity * ld.dblQuantity end) * -1
+			, intQtyUOMId = ch.intCommodityUOMId
+			, sh.intPricingTypeId
+			, sh.strPricingType
+			, strTransactionType = strScreenName
+			, intTransactionId = suh.intExternalId
+			, strTransactionId = suh.strNumber
+			, sh.intContractStatusId
+			, ch.intContractTypeId
+		from vyuCTSequenceUsageHistory suh
+			inner join tblCTSequenceHistory sh on sh.intSequenceUsageHistoryId = suh.intSequenceUsageHistoryId
+			inner join tblCTContractDetail cd on cd.intContractDetailId = sh.intContractDetailId
+			inner join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
+			inner join tblLGLoadDetail ld on ld.intLoadDetailId = suh.intExternalId
+		where strFieldName = 'Balance'
+		and sh.strPricingStatus  IN ('Unpriced','Partially Priced')
+		and sh.strPricingType = 'Basis'
+		and suh.strScreenName = 'Load Schedule'
 
 		SELECT * 
 		INTO #tblFinalBasisDeliveries 
@@ -409,8 +473,8 @@ BEGIN
 			select 
 				 strType  = 'Purchase Basis Deliveries'
 				, b.dtmBillDate
-				, bd.intContractHeaderId
-				, bd.intContractDetailId
+				, ba.intContractHeaderId
+				, ba.intContractDetailId
 				, ba.strContractNumber
 				, ba.intContractSeq
 				, ba.intContractTypeId
@@ -434,8 +498,8 @@ BEGIN
 			select 
 				 strType  = 'Purchase Basis Deliveries'
 				, b.dtmBillDate
-				, bd.intContractHeaderId
-				, bd.intContractDetailId
+				, ba.intContractHeaderId
+				, ba.intContractDetailId
 				, ba.strContractNumber
 				, ba.intContractSeq
 				, ba.intContractTypeId
@@ -459,8 +523,8 @@ BEGIN
 			select 
 				 strType  = 'Sales Basis Deliveries'
 				, i.dtmDate
-				, id.intContractHeaderId
-				, id.intContractDetailId
+				, ba.intContractHeaderId
+				, ba.intContractDetailId
 				, ba.strContractNumber
 				, ba.intContractSeq
 				, ba.intContractTypeId
@@ -484,8 +548,8 @@ BEGIN
 			select 
 				 strType  = 'Sales Basis Deliveries'
 				, i.dtmDate
-				, id.intContractHeaderId
-				, id.intContractDetailId
+				, ba.intContractHeaderId
+				, ba.intContractDetailId
 				, ba.strContractNumber
 				, ba.intContractSeq
 				, ba.intContractTypeId
@@ -574,12 +638,14 @@ BEGIN
 			, intFutureMarketId
 			, intFutureMonthId
 			, dblNoOfLots
+			, dblContractSize
 			, dblPrice
 			, intEntityId
 			, intUserId
 			, intLocationId
 			, intCommodityUOMId
-			, strNotes)
+			, strNotes
+			, strMiscFields)
 		SELECT
 			  strBucketType = 'Derivatives' 
 			, strTransactionType = 'Derivative Entry'
@@ -596,12 +662,24 @@ BEGIN
 			, intFutureMarketId = der.intFutureMarketId
 			, intFutureMonthId = der.intFutureMonthId
 			, dblNoOfLots = der.dblNewNoOfLots
+			, dblContractSize = m.dblContractSize
 			, dblPrice = der.dblPrice
 			, intEntityId = der.intEntityId
 			, intUserId = der.intUserId
 			, der.intLocationId
 			, cUOM.intCommodityUnitMeasureId
 			, strNotes = strNotes
+			, strMiscFields = N'{intOptionMonthId = "'+ ISNULL(CAST(intOptionMonthId AS NVARCHAR),'') +'"}'
+								+ ' {strOptionMonth = "'+ ISNULL(strOptionMonth,'') +'"}'
+								+ ' {dblStrike = "'+ CAST(ISNULL(dblStrike,0) AS NVARCHAR) +'"}'
+								+ ' {strOptionType = "'+ ISNULL(strOptionType,'') +'"}'
+								+ ' {strInstrumentType = "'+ ISNULL(strInstrumentType,'') +'"}'
+								+ ' {intBrokerageAccountId = "'+ ISNULL(intBrokerId,'') +'"}'
+								+ ' {strBrokerAccount = "'+ ISNULL(strBrokerAccount,'') +'"}'
+								+ ' {strBroker = "'+ ISNULL(strBroker,'') +'"}'
+								+ ' {strBuySell = "'+ ISNULL(strNewBuySell,'') +'"}'
+								+ ' {ysnPreCrush = "' + CAST(ISNULL(ysnPreCrush,0) AS NVARCHAR) +'"}'
+								+ ' {strBrokerTradeNo = "'+ ISNULL(strBrokerTradeNo,'') +'"}'
 		FROM vyuRKGetFutOptTransactionHistory der
 		JOIN tblRKFutureMarket m ON m.intFutureMarketId = der.intFutureMarketId
 		LEFT JOIN tblICCommodityUnitMeasure cUOM ON cUOM.intCommodityId = der.intCommodityId AND cUOM.intUnitMeasureId = m.intUnitMeasureId
@@ -634,10 +712,12 @@ BEGIN
 			, intFutureMonthId
 			, strNotes
 			, dblNoOfLots
+			, dblContractSize
 			, dblPrice
 			, intEntityId
 			, intUserId
-			, intCommodityUOMId)
+			, intCommodityUOMId
+			, strMiscFields)
 		SELECT
 			  strBucketType = 'Derivatives'
 			, strTransactionType
@@ -656,10 +736,12 @@ BEGIN
 			, intFutureMonthId
 			, strNotes
 			, dblNoOfLots
+			, dblContractSize
 			, dblPrice
 			, intEntityId
 			, intUserId
 			, intCommodityUOMId
+			, strMiscFields
 		FROM (
 			SELECT strTransactionType = 'Match Derivatives'
 				, intTransactionRecordId = history.intLFutOptTransactionId
@@ -677,11 +759,13 @@ BEGIN
 				, intFutureMonthId = de.intFutureMonthId
 				, strNotes = 'IN'
 				, dblNoOfLots = history.dblMatchQty
+				, dblContractSize = FutMarket.dblContractSize
 				, dblPrice = de.dblPrice
 				, intEntityId = de.intEntityId
 				, intUserId = e.intEntityId
 				, intCommodityUOMId = cUOM.intCommodityUnitMeasureId
 				, intMatchDerivativeHistoryId
+				, strMiscFields =  '{ysnPreCrush = "' + CAST(ISNULL(ysnPreCrush,0) AS NVARCHAR) +'"}'
 			FROM tblRKMatchDerivativesHistory history
 			JOIN tblRKMatchFuturesPSHeader header ON header.intMatchFuturesPSHeaderId = history.intMatchFuturesPSHeaderId
 			JOIN tblRKMatchFuturesPSDetail detail ON detail.intMatchFuturesPSDetailId = history.intMatchFuturesPSDetailId
@@ -711,11 +795,13 @@ BEGIN
 				, intFutureMonthId = de.intFutureMonthId
 				, strNotes = 'OUT'
 				, dblNoOfLots = history.dblMatchQty * - 1
+				, dblContractSize = FutMarket.dblContractSize
 				, dblPrice = de.dblPrice
 				, intEntityId = de.intEntityId
 				, intUserId = e.intEntityId
 				, intCommodityUOMId = cUOM.intCommodityUnitMeasureId
 				, intMatchDerivativeHistoryId
+				, strMiscFields =  '{ysnPreCrush = "' + CAST(ISNULL(ysnPreCrush,0) AS NVARCHAR) +'"}'
 			FROM tblRKMatchDerivativesHistory history
 			JOIN tblRKMatchFuturesPSHeader header ON header.intMatchFuturesPSHeaderId = history.intMatchFuturesPSHeaderId
 			JOIN tblRKMatchFuturesPSDetail detail ON detail.intMatchFuturesPSDetailId = history.intMatchFuturesPSDetailId
@@ -759,10 +845,12 @@ BEGIN
 			, intFutureMonthId
 			, strNotes
 			, dblNoOfLots
+			, dblContractSize
 			, dblPrice
 			, intEntityId
 			, intUserId
-			, intCommodityUOMId)
+			, intCommodityUOMId
+			, strMiscFields)
 		SELECT
 			  strBucketType = 'Derivatives' 
 			, strTransactionType
@@ -781,10 +869,12 @@ BEGIN
 			, intFutureMonthId
 			, strNotes
 			, dblNoOfLots
+			, dblContractSize
 			, dblPrice
 			, intEntityId
 			, intUserId
 			, intCommodityUOMId
+			, strMiscFields
 		FROM (
 			SELECT strTransactionType = 'Expired Options'
 				, intTransactionRecordId = detail.intFutOptTransactionId
@@ -802,10 +892,12 @@ BEGIN
 				, intFutureMonthId = de.intFutureMonthId
 				, strNotes = CASE WHEN de.strBuySell = 'Buy' THEN 'IN' ELSE 'OUT' END
 				, dblNoOfLots = detail.dblLots * - 1
+				, dblContractSize = FutMarket.dblContractSize
 				, dblPrice = de.dblPrice
 				, intEntityId = de.intEntityId
 				, intUserId = @intCurrentUserId
 				, intCommodityUOMId = cUOM.intCommodityUnitMeasureId
+				, strMiscFields =  '{ysnPreCrush = "' + CAST(ISNULL(ysnPreCrush,0) AS NVARCHAR) +'"}'
 			FROM tblRKOptionsPnSExpired detail
 			JOIN tblRKOptionsMatchPnSHeader header ON header.intOptionsMatchPnSHeaderId = detail.intOptionsMatchPnSHeaderId
 			JOIN tblRKFutOptTransaction de ON de.intFutOptTransactionId = detail.intFutOptTransactionId
@@ -828,10 +920,12 @@ BEGIN
 				, intFutureMonthId = de.intFutureMonthId
 				, strNotes = CASE WHEN de.strBuySell = 'Buy' THEN 'IN' ELSE 'OUT' END
 				, dblNoOfLots = detail.dblLots * - 1
+				, dblContractSize = FutMarket.dblContractSize
 				, dblPrice = de.dblPrice
 				, intEntityId = de.intEntityId
 				, intUserId = @intCurrentUserId
 				, intCommodityUOMId = cUOM.intCommodityUnitMeasureId
+				, strMiscFields =  '{ysnPreCrush = "' + CAST(ISNULL(ysnPreCrush,0) AS NVARCHAR) +'"}'
 			FROM tblRKOptionsPnSExercisedAssigned detail
 			JOIN tblRKOptionsMatchPnSHeader header ON header.intOptionsMatchPnSHeaderId = detail.intOptionsMatchPnSHeaderId
 			JOIN tblRKFutOptTransaction de ON de.intFutOptTransactionId = detail.intFutOptTransactionId
