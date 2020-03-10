@@ -549,7 +549,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILSTOADD)
 			, intItemWeightUOMId				= CASE WHEN ISNULL(IDTOADD.ysnCharge, 0) = 0 THEN ID.intItemWeightUOMId ELSE NULL END
 			, intContractDetailId				= IDTOADD.intContractDetailId
 			, intContractHeaderId				= IDTOADD.intContractHeaderId
-			, intTicketId						= CASE WHEN IDTOADD.intContractDetailId IS NOT NULL AND ISNULL(@ysnFromSalesOrder, 0) = 0 THEN NULL ELSE IDTOADD.intTicketId END
+			, intTicketId						= @intTicketId-- CASE WHEN IDTOADD.intContractDetailId IS NOT NULL AND ISNULL(@ysnFromSalesOrder, 0) = 0 THEN NULL ELSE IDTOADD.intTicketId END
 			, intTaxGroupId						= ID.intTaxGroupId
 			, dblCurrencyExchangeRate			= ID.dblCurrencyExchangeRate
 			, strAddonDetailKey					= CASE WHEN ISNULL(ID.ysnAddonParent, 0) = 1 THEN @strAddOnKey ELSE NULL END
