@@ -11,9 +11,10 @@ BEGIN TRY
 		atm.intItemId,
 		atm.dblItemAmount,
 		item.strItemNo,
+		atm.intSequence,
 		SUM(atm.dblItemAmount) OVER() AS dblTotalAmount 
 	FROM vyuSTCheckoutATMFund atm
-	INNER JOIN tblICItem item
+	LEFT JOIN tblICItem item
 		ON atm.intItemId = item.intItemId
 	WHERE intCheckoutId = @intCheckoutId
 	GROUP BY
@@ -21,7 +22,9 @@ BEGIN TRY
 		atm.strType,
 		atm.intItemId,
 		atm.dblItemAmount,
-		item.strItemNo
+		item.strItemNo,
+		atm.intSequence
+	ORDER BY atm.intSequence   
 
 END TRY
 BEGIN CATCH
