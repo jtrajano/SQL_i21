@@ -8735,7 +8735,6 @@
     <None Include="Scripts\Post-Deployment\AR\DefaultData\35_UpdateInvoiceFromProvisional.sql" />
     <Build Include="dbo\Functions\fnHDCoalesceJiraTickets.sql" />
     <None Include="dbo\Stored Procedures\uspPOFixReceivedQty.sql" />
-    <None Include="Scripts\Post-Deployment\GL\DefaultData\1t_InsertTrialBalanceData.sql" />
     <Build Include="dbo\Views\vyuAP1099MISCYear.sql" />
     <Build Include="dbo\Views\vyuAP1099INTYear.sql" />
     <Build Include="dbo\Views\vyuAP1099BYear.sql" />

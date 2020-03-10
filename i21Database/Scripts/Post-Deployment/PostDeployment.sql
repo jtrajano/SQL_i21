@@ -223,7 +223,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\GL\DefaultData\1q_InsertOriginMapping.sql
 :r .\GL\DefaultData\1r_UpdateModuleCategory.sql
 :r .\GL\DefaultData\1s_UpdateChartDescription.sql
-:r .\GL\DefaultData\1t_InsertTrialBalanceData.sql
+:r .\GL\DefaultData\1u_InsertDefaultDataSync.sql
 
 -- Financial Report Designer
 :r .\FRD\FRDEntryDataFix.sql
