@@ -782,7 +782,14 @@ SELECT
 	,[strItemNo]					= ID.[strItemNo]
 	,[strItemDescription]			= ID.[strItemDescription]			
 	,[intItemUOMId]					= ID.[intItemUOMId]					
-	,[dblQtyShipped]				= CASE WHEN ID.[strTransactionType] = 'Credit Memo' AND ID.[intLoadDetailId] IS NOT NULL AND ISNULL(CH.[ysnLoad], 0) = 1 THEN 1 ELSE ID.[dblQtyShipped] END * (CASE WHEN ID.[ysnPost] = 0 THEN -@OneDecimal ELSE @OneDecimal END) * (CASE WHEN ID.[ysnIsInvoicePositive] = 0 THEN -@OneDecimal ELSE @OneDecimal END)
+	,[dblQtyShipped]				= CASE WHEN ID.[strTransactionType] = 'Credit Memo' AND ID.[intLoadDetailId] IS NOT NULL AND ISNULL(CH.[ysnLoad], 0) = 1 
+										   THEN 1 
+										   ELSE 
+												CASE WHEN ID.intInventoryShipmentItemId IS NOT NULL AND ISI.[intDestinationGradeId] IS NOT NULL AND ISI.[intDestinationWeightId] IS NOT NULL AND ID.[dblQtyShipped] > ISNULL(ISI.dblQuantity, 0)
+												     THEN ID.[dblQtyShipped] - ISNULL(ISI.dblQuantity, 0)
+													 ELSE ID.[dblQtyShipped] 
+												END
+									  END * (CASE WHEN ID.[ysnPost] = 0 THEN -@OneDecimal ELSE @OneDecimal END) * (CASE WHEN ID.[ysnIsInvoicePositive] = 0 THEN -@OneDecimal ELSE @OneDecimal END)
 	,[dblDiscount]					= ID.[dblDiscount]					
 	,[dblPrice]						= ID.[dblPrice]						
 	,[dblTotal]						= ID.[dblTotal]						
