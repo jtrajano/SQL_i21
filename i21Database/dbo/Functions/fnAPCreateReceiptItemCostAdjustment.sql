@@ -273,7 +273,7 @@ BEGIN
 		LEFT JOIN tblGRSettleContract SC
 			on SC.intSettleStorageId = C3.intSettleStorageId
 				and B.intContractDetailId = SC.intContractDetailId
-		WHERE sh.dblPaidAmount != B.dblCost AND B.intCustomerStorageId > 0 AND D.strType = 'Inventory'
+		WHERE (sh.dblOldCost is not null and sh.dblOldCost != B.dblCost) AND B.intCustomerStorageId > 0 AND D.strType = 'Inventory'
 			and SC.intSettleStorageId is null
 		UNION ALL
 		--SETTLE STORAGE
@@ -342,7 +342,7 @@ BEGIN
 		---
 		LEFT JOIN tblICItemUOM voucherCostUOM
 			ON voucherCostUOM.intItemUOMId = ISNULL(B.intCostUOMId, B.intUnitOfMeasureId)		
-		WHERE B.intCustomerStorageId > 0 AND D.strType = 'Inventory' and sh.dblPaidAmount != B.dblCost
+		WHERE B.intCustomerStorageId > 0 AND D.strType = 'Inventory' and (sh.dblOldCost is not null and sh.dblOldCost != B.dblCost)
 			
 			
 		-- UNION ALL
@@ -447,7 +447,7 @@ BEGIN
 		INNER JOIN tblSCTicket G ON C.intTicketId = G.intTicketId
 		LEFT JOIN tblICItemUOM voucherCostUOM
 			ON voucherCostUOM.intItemUOMId = ISNULL(B.intCostUOMId, B.intUnitOfMeasureId)
-		WHERE sh.dblPaidAmount != B.dblCost AND B.intCustomerStorageId > 0 AND D.strType = 'Inventory'
+		WHERE (sh.dblOldCost is not null and sh.dblOldCost != B.dblCost) AND B.intCustomerStorageId > 0 AND D.strType = 'Inventory'
 
 	RETURN;
 END
