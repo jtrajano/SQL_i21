@@ -58,7 +58,8 @@ AS
 		SE.strName COLLATE Latin1_General_CI_AS strSourceEntity,
 		strSourceDocumentId COLLATE Latin1_General_CI_AS strSourceDocumentId,
 		SE.strEntityNo COLLATE Latin1_General_CI_AS strSourceEntityNo,
-        A.intSourceEntityId
+        A.intSourceEntityId,
+        A.strPeriod
      FROM tblGLDetail AS A
 	 LEFT JOIN tblGLAccount AS B ON A.intAccountId = B.intAccountId
 	 LEFT JOIN tblGLAccountGroup AS C ON C.intAccountGroupId = B.intAccountGroupId

@@ -49,6 +49,7 @@
 	-- new columns GL-3550	
 	[strDocument] NVARCHAR(255) COLLATE Latin1_General_CI_AS NULL,
 	[strComments] NVARCHAR(255) COLLATE Latin1_General_CI_AS NULL,
+    [strPeriod] NVARCHAR(50)  COLLATE Latin1_General_CI_AS NULL,
     CONSTRAINT [PK_tblGL] PRIMARY KEY CLUSTERED ([intGLDetailId] ASC),
     CONSTRAINT [FK_tblGL_tblGLAccount] FOREIGN KEY ([intAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
     CONSTRAINT [FK_tblGLDetail_tblSMMultiCompany] FOREIGN KEY([intMultiCompanyId]) REFERENCES [dbo].[tblSMMultiCompany] ([intMultiCompanyId])

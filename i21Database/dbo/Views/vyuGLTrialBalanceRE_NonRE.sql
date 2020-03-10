@@ -23,6 +23,7 @@ ISNULL(U.strUOMCode,'')strUOMCode,
 ISNULL(A.ysnActive,0) ysnActive,
 period.dtmStartDate dtmDateFrom,
 period.dtmEndDate dtmDateTo,
+period.strPeriod,
 B.intGLFiscalYearPeriodId
 FROM tblGLAccount A
 LEFT JOIN BeginningBalance B ON A.intAccountId = B.intAccountId

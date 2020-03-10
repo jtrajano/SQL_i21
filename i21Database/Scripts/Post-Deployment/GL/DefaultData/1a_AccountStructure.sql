@@ -1,18 +1,10 @@
 GO
-	PRINT N'BEGIN INSERT DEFAULT ACCOUNT STRUCTURE'
+	PRINT N'BEGIN INSERT DEFAULT DATA SYNC FOR GL'
 GO
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountStructure WHERE strType = N'Primary') AND NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccount)
-	BEGIN
-		INSERT [dbo].[tblGLAccountStructure] ([intStructureType], [strStructureName], [strType], [intLength], [strMask], [intSort], [ysnBuild], [intConcurrencyId], [intStartingPosition], [intOriginLength], [strOtherSoftwareColumn]) VALUES (1, N'Primary Account', N'Primary', 5, N'0', 0, 1, 1, 4, NULL, NULL)
-	END
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountStructure WHERE strType = N'Divider' and strStructureName = N'Hypen/Separator') AND NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccount)
-	BEGIN
-		INSERT [dbo].[tblGLAccountStructure] ([intStructureType], [strStructureName], [strType], [intLength], [strMask], [intSort], [ysnBuild], [intConcurrencyId], [intStartingPosition], [intOriginLength], [strOtherSoftwareColumn]) VALUES (2, N'Hypen/Separator', N'Divider', 1, N'-', 1, 0, 1, 0, NULL, NULL)
-	END
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountStructure WHERE strType = N'Segment' and strStructureName = N'Location') AND NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccount)
-	BEGIN
-		INSERT [dbo].[tblGLAccountStructure] ([intStructureType], [strStructureName], [strType], [intLength], [strMask], [intSort], [ysnBuild], [intConcurrencyId], [intStartingPosition], [intOriginLength], [strOtherSoftwareColumn]) VALUES (3, N'Location', N'Segment', 4, N'0', 2, 1, 1, 5, NULL, NULL)
-	END
+IF NOT EXISTS (SELECT TOP 1 1 FROM tblGLDataSync WHERE strSyncName = 'tblGLDetail_FiscalPeriod')
+	insert into tblGLDataSync VALUES( 'tblGLDetail_FiscalPeriod', 0)
+IF NOT EXISTS (SELECT TOP 1 1 FROM tblGLDataSync WHERE strSyncName = 'tblGLDetail_FiscalPeriod')	
+	insert into tblGLDataSync VALUES( 'tblGLTrialBalance_FiscalPeriod', 0)
 GO
-	PRINT N'END INSERT DEFAULT ACCOUNT STRUCTURE'
+	PRINT N'END INSERT DEFAULT DATA SYNC FOR GL'
 GO
