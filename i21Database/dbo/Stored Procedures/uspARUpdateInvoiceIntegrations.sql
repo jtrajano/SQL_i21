@@ -40,7 +40,9 @@ BEGIN TRY
 
 	IF @strTransactionType = 'Proforma Invoice'
 		BEGIN
-			COMMIT
+			IF @intTranCount = 0
+				COMMIT TRANSACTION
+
 			RETURN
 		END
 
