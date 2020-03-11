@@ -1,6 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblARInvoiceReportStagingTable] (
     [intInvoiceId]      				INT             NULL,
 	[intCompanyLocationId]				INT             NULL,
+	[intEntityCustomerId]				INT				NULL,
 	[intEntityUserId]					INT				NULL,
 	[intInvoiceDetailId]				INT				NULL,
 	[intTaxCodeId]						INT				NULL,
