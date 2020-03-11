@@ -86,7 +86,7 @@ BEGIN
 		, dblCreditUnit = CASE WHEN ISNULL(dblNetPL, 0) >= 0 THEN ABS(dblMatchQty) ELSE 0.00 END
 		, strAccountDescription = @strFuturesGainOrLossRealizedDescription
 		, intCurrencyId
-		, dblExchangeRate = 0.00
+		, dblExchangeRate = 1.00
 		, dtmTransactionDate = dtmMatchDate
 		, strTransactionId = H.intMatchNo
 		, intTransactionId = H.intMatchFuturesPSHeaderId
@@ -117,7 +117,7 @@ BEGIN
 		, dblCreditUnit = CASE WHEN ISNULL(dblNetPL, 0) <= 0 THEN ABS(dblMatchQty) ELSE 0.00 END
 		, strAccountDescription = @strFuturesGainOrLossRealizedDescription
 		, intCurrencyId
-		, dblExchangeRate = 0.00
+		, dblExchangeRate = 1.00
 		, dtmTransactionDate = dtmMatchDate
 		, strTransactionId = H.intMatchNo
 		, intTransactionId = H.intMatchFuturesPSHeaderId
