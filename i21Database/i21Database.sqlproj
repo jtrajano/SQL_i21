@@ -8504,6 +8504,11 @@
     <Build Include="dbo\Stored Procedures\uspICCreateReturnGLEntriesForNonStockItems.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportPriceFixationStrauss.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportContractS2018.sql" />
+    <Build Include="dbo\Tables\tblARInvoiceStage.sql" />
+    <Build Include="dbo\Views\vyuIPGetInvoice.sql" />
+    <Build Include="dbo\Views\vyuIPGetInvoiceDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspARInvoicePopulateStgXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspARInvoiceTransferStgXML.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
