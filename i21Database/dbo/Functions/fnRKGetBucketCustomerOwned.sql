@@ -18,6 +18,8 @@ RETURNS @returntable TABLE
 	, strLocationName NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, intItemId INT
 	, strItemNo NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	, intCategoryId INT 
+	, strCategoryCode NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, intCommodityId INT
 	, strCommodityCode NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, strTransactionNumber NVARCHAR(100) COLLATE Latin1_General_CI_AS
@@ -29,75 +31,113 @@ RETURNS @returntable TABLE
 	, intOrigUOMId INT
 	, strNotes NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
 	, ysnReceiptedStorage BIT
+	, intTypeId INT
+	, strStorageType NVARCHAR(50) COLLATE Latin1_General_CI_AS
+	, intDeliverySheetId INT
+	, strTicketStatus NVARCHAR(50) COLLATE Latin1_General_CI_AS
+	, strOwnedPhysicalStock NVARCHAR(50) COLLATE Latin1_General_CI_AS
+	, strStorageTypeDescription NVARCHAR(50) COLLATE Latin1_General_CI_AS
+	, ysnActive BIT
+	, ysnExternal BIT
 )
 AS
 BEGIN
-
 	INSERT @returntable	
-	SELECT
-		 intSummaryLogId 
-		,dtmCreatedDate
-		,dtmTransactionDate  
-		,strDistributionType
-		,strStorageTypeCode
-		,dblTotal
-		,intEntityId
-		,strEntityName
-		,intLocationId
-		,strLocationName
-		,intItemId
-		,strItemNo
-		,intCommodityId
-		,strCommodityCode
-		,strTransactionNumber
-		,strTransactionType
-		,intTransactionRecordId
-		,intTransactionRecordHeaderId
-		,strContractNumber
-		,intContractHeaderId
-		,intOrigUOMId
-		,strNotes
-		,ysnReceiptedStorage
+	SELECT intSummaryLogId 
+		, dtmCreatedDate
+		, dtmTransactionDate  
+		, strDistributionType
+		, strStorageTypeCode
+		, dblTotal
+		, intEntityId
+		, strEntityName
+		, intLocationId
+		, strLocationName
+		, intItemId
+		, strItemNo
+		, intCategoryId
+		, strCategoryCode
+		, intCommodityId
+		, strCommodityCode
+		, strTransactionNumber
+		, strTransactionType
+		, intTransactionRecordId
+		, intTransactionRecordHeaderId
+		, strContractNumber
+		, intContractHeaderId
+		, intOrigUOMId
+		, strNotes
+		, ysnReceiptedStorage
+		, intTypeId
+		, strStorageType
+		, intDeliverySheetId
+		, strTicketStatus
+		, strOwnedPhysicalStock
+		, strStorageTypeDescription
+		, ysnActive
+		, ysnExternal
 	FROM (
-		SELECT 
-			intRowNum = ROW_NUMBER() OVER (PARTITION BY sl.intTransactionRecordId, sl.intTransactionRecordHeaderId, sl.intContractHeaderId, sl.strInOut, sl.ysnNegate, sl.strTransactionType, sl.strTransactionNumber ORDER BY sl.intSummaryLogId DESC)
-			,sl.intSummaryLogId
-			,dtmCreatedDate
-			,dtmTransactionDate
-			,strDistributionType
-			,a.strStorageTypeCode
-			,dblTotal = sl.dblOrigQty
-			,intEntityId
-			,strEntityName
-			,intLocationId
-			,strLocationName
-			,intItemId
-			,strItemNo
-			,intCommodityId
-			,strCommodityCode
-			,strTransactionNumber
-			,strTransactionType
-			,intTransactionRecordId
-			,intTransactionRecordHeaderId
-			,strContractNumber
-			,intContractHeaderId
-			,intOrigUOMId
-			,strNotes
-			,a.ysnReceiptedStorage
+		SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY sl.intTransactionRecordId, sl.intTransactionRecordHeaderId, sl.intContractHeaderId, sl.strInOut, sl.ysnNegate, sl.strTransactionType, sl.strTransactionNumber ORDER BY sl.intSummaryLogId DESC)
+			, sl.intSummaryLogId
+			, dtmCreatedDate
+			, dtmTransactionDate
+			, strDistributionType
+			, a.strStorageTypeCode
+			, dblTotal = sl.dblOrigQty
+			, intEntityId
+			, strEntityName
+			, intLocationId
+			, strLocationName
+			, intItemId
+			, strItemNo
+			, intCategoryId
+			, strCategoryCode
+			, intCommodityId
+			, strCommodityCode
+			, strTransactionNumber
+			, strTransactionType
+			, intTransactionRecordId
+			, intTransactionRecordHeaderId
+			, strContractNumber
+			, intContractHeaderId
+			, intOrigUOMId
+			, strNotes
+			, ysnReceiptedStorage
+			, intTypeId
+			, strStorageType
+			, intDeliverySheetId
+			, strTicketStatus
+			, strOwnedPhysicalStock
+			, strStorageTypeDescription
+			, ysnActive
+			, ysnExternal = ISNULL(ysnExternal, 0)
 		FROM vyuRKGetSummaryLog sl
 		CROSS APPLY (
-			SELECT 
-				strStorageTypeCode
-				,ysnReceiptedStorage
+			SELECT strStorageTypeCode
+				, ysnReceiptedStorage
+				, intTypeId
+				, strStorageType
+				, intDeliverySheetId
+				, strTicketStatus
+				, strOwnedPhysicalStock
+				, strStorageTypeDescription
+				, ysnActive
+				, ysnExternal
 			FROM (
-				select * from dbo.fnRKGetMiscFieldTable(sl.strMiscField)
+				SELECT * FROM dbo.fnRKGetMiscFieldTable(sl.strMiscField)
 			) t
 			PIVOT (
-				min(strValue)
-				FOR strFieldName IN (
-					strStorageTypeCode
-					,ysnReceiptedStorage
-					)
+				MIN(strValue)
+				FOR strFieldName IN (strStorageTypeCode
+					, ysnReceiptedStorage
+					, intTypeId
+					, strStorageType
+					, intDeliverySheetId
+					, strTicketStatus
+					, strOwnedPhysicalStock
+					, strStorageTypeDescription
+					, ysnActive
+					, ysnExternal)
 			) AS pt
 		) a
 		WHERE strBucketType = 'Customer Owned'
@@ -107,8 +147,5 @@ BEGIN
 			AND ISNULL(sl.intEntityId, 0) = ISNULL(@intVendorId, ISNULL(sl.intEntityId, 0))
 	) t WHERE intRowNum = 1
 	
-
-
-RETURN
-
+	RETURN
 END
