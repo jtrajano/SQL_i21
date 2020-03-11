@@ -10,6 +10,7 @@ RETURNS @returntable TABLE
 	, dblStrike NUMERIC(24, 10)
 	, strOptionType NVARCHAR(50)
 	, strInstrumentType NVARCHAR(50)
+	, intBrokerageAccountId INT
 	, strBrokerAccount NVARCHAR(50)
 	, strBroker NVARCHAR(50)
 	, intFutOptTransactionHeaderId INT
@@ -62,6 +63,7 @@ BEGIN
 			, [dblStrike]
 			, [strOptionType]
 			, [strInstrumentType]
+			, [intBrokerageAccountId]
 			, [strBrokerAccount]
 			, [strBroker]
 			, [intFutOptTransactionHeaderId]
@@ -80,6 +82,7 @@ BEGIN
 				, dblStrike
 				, strOptionType
 				, strInstrumentType
+				, intBrokerageAccountId
 				, strBrokerAccount
 				, strBroker
 				, intFutOptTransactionHeaderId

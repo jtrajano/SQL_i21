@@ -28,8 +28,9 @@ RETURNS @returntable TABLE
 	, intEntityId INT
 	, intFutureMarketId INT
 	, intFutureMonthId INT
-	, strFutMarketName NVARCHAR(100)
+	, strFutureMarket NVARCHAR(100)
 	, strFutureMonth NVARCHAR(100)
+	, dtmEndDate DATETIME
 	, ysnIncludeInPriceRiskAndCompanyTitled BIT
 )
 AS
@@ -59,6 +60,7 @@ BEGIN
 		, intFutureMonthId
 		, strFutureMarket
 		, strFutureMonth
+		, dtmEndDate
 		, ysnIncludeInPriceRiskAndCompanyTitled 
 	FROM (
 		SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY c.intTransactionRecordId ORDER BY c.intSummaryLogId DESC)
@@ -86,6 +88,7 @@ BEGIN
 			, c.intFutureMonthId
 			, c.strFutureMarket
 			, c.strFutureMonth
+			, cd.dtmEndDate
 			, Col.ysnIncludeInPriceRiskAndCompanyTitled
 		FROM vyuRKGetSummaryLog c
 		LEFT JOIN (
@@ -104,6 +107,9 @@ BEGIN
 			GROUP BY intCollateralId
 		) ca ON c.intTransactionRecordHeaderId = ca.intCollateralId
 		JOIN tblRKCollateral Col ON Col.intCollateralId = c.intTransactionRecordId
+		CROSS APPLY (
+			SELECT TOP 1 dtmEndDate FROM tblCTContractDetail WHERE intContractHeaderId = c.intContractHeaderId AND intContractStatusId <> 3
+		) cd
 		WHERE strTransactionType = 'Collateral'
 			AND CONVERT(DATETIME, CONVERT(VARCHAR(10), c.dtmTransactionDate, 110), 110) <= CONVERT(DATETIME, @dtmDate)
 			AND CONVERT(DATETIME, CONVERT(VARCHAR(10), c.dtmCreatedDate, 110), 110) <= CONVERT(DATETIME, @dtmDate)

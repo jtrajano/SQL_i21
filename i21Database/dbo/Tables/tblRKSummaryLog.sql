@@ -29,6 +29,7 @@
 	dblPrice DECIMAL(24, 10) NULL DEFAULT((0)),
 	intEntityId INT NULL,
 	intTicketId INT NULL,
+	intCurrencyId INT NULL,
 	intUserId INT NULL, 
 	strNotes NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL,
 	strMiscField NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,

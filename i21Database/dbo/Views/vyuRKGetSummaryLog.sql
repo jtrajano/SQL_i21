@@ -19,6 +19,7 @@ SELECT SL.intSummaryLogId
 	, strFutureMarket = fMar.strFutMarketName
 	, SL.intFutureMonthId
 	, fMon.strFutureMonth
+	, fMon.dtmFutureMonthsDate
 	, SL.intFutOptTransactionId
 	, SL.intCommodityId
 	, Commodity.strCommodityCode
@@ -29,6 +30,7 @@ SELECT SL.intSummaryLogId
 	, strItemDescription = Item.strDescription
 	, SL.intProductTypeId
 	, SL.intOrigUOMId
+	, UOM.strUnitMeasure
 	, SL.intBookId
 	, Book.strBook
 	, SL.intSubBookId
@@ -43,11 +45,16 @@ SELECT SL.intSummaryLogId
 	, SL.intEntityId
 	, strEntityName = E.strName
 	, SL.intTicketId
+	, t.strTicketNumber
 	, SL.intUserId
 	, SL.strNotes
 	, SL.ysnNegate
 	, SL.intRefSummaryLogId
 	, SL.strMiscField
+	, dtmStartDate
+	, dtmEndDate
+	, SL.intCurrencyId
+	, strCurrency
 FROM tblRKSummaryLog SL
 LEFT JOIN tblSMCompanyLocation Loc ON Loc.intCompanyLocationId = SL.intLocationId
 LEFT JOIN tblICCommodity Commodity ON Commodity.intCommodityId = SL.intCommodityId
@@ -56,6 +63,11 @@ LEFT JOIN tblICCategory Cat ON Cat.intCategoryId = Item.intCategoryId
 LEFT JOIN tblCTBook Book ON Book.intBookId = SL.intBookId
 LEFT JOIN tblCTSubBook SubBook ON SubBook.intSubBookId = SL.intSubBookId
 LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = SL.intContractHeaderId
+LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = SL.intContractDetailId
 LEFT JOIN tblRKFutureMarket fMar ON fMar.intFutureMarketId = SL.intFutureMarketId
 LEFT JOIN tblRKFuturesMonth fMon ON fMon.intFutureMonthId = SL.intFutureMonthId
 LEFT JOIN tblEMEntity E ON E.intEntityId = SL.intEntityId
+LEFT JOIN tblSCTicket t ON t.intTicketId = SL.intTicketId
+LEFT JOIN tblICCommodityUnitMeasure cUOM ON cUOM.intCommodityUnitMeasureId = SL.intOrigUOMId
+LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = cUOM.intUnitMeasureId
+LEFT JOIN tblSMCurrency cur ON cur.intCurrencyID = SL.intCurrencyId

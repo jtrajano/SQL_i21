@@ -38,11 +38,14 @@ BEGIN
 		, strInstrumentType = CASE WHEN (der.[intInstrumentTypeId] = 1) THEN N'Futures'
 						WHEN (der.[intInstrumentTypeId] = 2) THEN N'Options'
 						WHEN (der.[intInstrumentTypeId] = 3) THEN N'Currency Contract' END COLLATE Latin1_General_CI_AS
+		, der.intBrokerageAccountId
 		, strBrokerAccount = BA.strAccountNumber
 		, strBroker = e.strName
 		, intFutOptTransactionHeaderId = der.intFutOptTransactionHeaderId
 		, ysnPreCrush = der.ysnPreCrush
 		, strBrokerTradeNo = der.strBrokerTradeNo
+		, m.intCurrencyId
+		, cur.strCurrency
 	INTO #tmpDerivative
 	FROM tblRKFutOptTransaction der
 	JOIN tblRKFutureMarket m ON m.intFutureMarketId = der.intFutureMarketId
@@ -50,6 +53,7 @@ BEGIN
 	LEFT JOIN tblRKOptionsMonth om ON om.intOptionMonthId = der.intOptionMonthId
 	LEFT JOIN tblRKBrokerageAccount AS BA ON BA.intBrokerageAccountId = der.intBrokerageAccountId
 	LEFT JOIN tblEMEntity e ON e.intEntityId = der.intEntityId
+	LEFT JOIN tblSMCurrency cur ON cur.intCurrencyID = m.intCurrencyId
 	WHERE intFutOptTransactionId = @intFutOptTransactionId
 
 	SELECT TOP 1 * INTO #History FROM tblRKSummaryLog WHERE intTransactionRecordId = @intFutOptTransactionId AND strTransactionType = 'Derivatives' ORDER BY dtmCreatedDate DESC
@@ -67,6 +71,7 @@ BEGIN
 			, @intFutOptTransactionHeaderId INT
 			, @dblContractSize NUMERIC(24, 10)
 			, @strInstrumentType NVARCHAR(50)
+			, @intBrokerageAccountId INT
 			, @strBrokerAccount NVARCHAR(50)
 			, @strBroker NVARCHAR(50)
 			, @ysnPreCrush BIT
@@ -91,6 +96,7 @@ BEGIN
 			UNION ALL SELECT 'dblStrike', CAST(@dblStrike AS NVARCHAR)
 			UNION ALL SELECT 'strOptionType', @strOptionType
 			UNION ALL SELECT 'strInstrumentType', @strInstrumentType
+			UNION ALL SELECT 'intBrokerageAccountId', @intBrokerageAccountId
 			UNION ALL SELECT 'strBrokerAccount', @strBrokerAccount
 			UNION ALL SELECT 'strBroker', @strBroker
 			UNION ALL SELECT 'ysnPreCrush', CAST(@ysnPreCrush AS NVARCHAR)
@@ -109,6 +115,7 @@ BEGIN
 			, intFutOptTransactionId
 			, intCommodityId
 			, intLocationId
+			, intCurrencyId
 			, intBookId
 			, intSubBookId
 			, intFutureMarketId
@@ -134,6 +141,7 @@ BEGIN
 			, intFutOptTransactionId = der.intTransactionRecordId
 			, intCommodityId = der.intCommodityId
 			, intLocationId = der.intLocationId
+			, intCurrencyId = der.intCurrencyId
 			, intBookId = der.intBookId
 			, intSubBookId = der.intSubBookId
 			, intFutureMarketId = der.intFutureMarketId
@@ -147,8 +155,7 @@ BEGIN
 			, strNotes = der.strNotes
 			, intCommodityUOMId = der.intCommodityUOMId
 			, strMiscFields = dbo.fnRKConvertMiscFieldString(@LogHelper)
-		FROM #tmpDerivative der
-		
+		FROM #tmpDerivative der		
 	END
 	ELSE
 	BEGIN

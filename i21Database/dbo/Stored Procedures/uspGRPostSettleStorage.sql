@@ -378,7 +378,7 @@ BEGIN TRY
 			)
 			SELECT 
 				 intSettleStorageTicketId = SST.intSettleStorageTicketId
-				,intCustomerStorageId	  = SST.intCustomerStorageId
+				,intCustomerStorageId	  	= SST.intCustomerStorageId
 				,dblStorageUnits          = SST.dblUnits
 				,dblRemainingUnits        = SST.dblUnits
 				,dblOpenBalance           = CS.dblOpenBalance
@@ -393,11 +393,12 @@ BEGIN TRY
 				ON CS.intCustomerStorageId = SST.intCustomerStorageId
 			OUTER APPLY (
 				SELECT DISTINCT
-					intContractHeaderId
-				FROM tblGRStorageHistory
+					CH.intContractHeaderId
+				FROM tblGRStorageHistory SH
+				INNER JOIN tblCTContractHeader CH
+					ON CH.intContractHeaderId = SH.intContractHeaderId
+						AND CH.intPricingTypeId = 5
 				WHERE intCustomerStorageId = CS.intCustomerStorageId
-					AND intContractHeaderId IS NOT NULL
-					AND intInventoryReceiptId IS NOT NULL
 			) SH 
 			WHERE SST.intSettleStorageId = @intSettleStorageId 
 				AND SST.dblUnits > 0
@@ -3201,7 +3202,8 @@ BEGIN TRY
 
 				IF @dblVoucherTotal > 0 AND EXISTS(SELECT NULL FROM @voucherPayable DS INNER JOIN tblICItem I on I.intItemId = DS.intItemId WHERE I.strType = 'Inventory'  and dblOrderQty <> 0)
 				BEGIN
-				EXEC uspAPCreateVoucher @voucherPayable, @voucherPayableTax, @intCreatedUserId, 1, @ErrMsg, @createdVouchersId OUTPUT
+					update @voucherPayable set ysnStage = 0
+					EXEC uspAPCreateVoucher @voucherPayable, @voucherPayableTax, @intCreatedUserId, 1, @ErrMsg, @createdVouchersId OUTPUT
 				END
 				ELSE 
 					IF(EXISTS(SELECT NULL FROM @voucherPayable DS INNER JOIN tblICItem I on I.intItemId = DS.intItemId WHERE I.strType = 'Inventory' and dblOrderQty <> 0))

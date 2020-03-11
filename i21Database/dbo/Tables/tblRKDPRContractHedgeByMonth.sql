@@ -27,7 +27,7 @@
     [intCategoryId] INT NULL,
     [strCategory] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
     [intFutureMarketId] INT NULL,
-    [strFutMarketName] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+    [strFutureMarket] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
     [intFutureMonthId] INT NULL,
     [strFutureMonth] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
     [strDeliveryDate] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,

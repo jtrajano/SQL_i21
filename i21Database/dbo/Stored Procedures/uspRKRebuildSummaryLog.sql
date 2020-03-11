@@ -77,8 +77,8 @@ BEGIN
 				, sh.intContractStatusId
 				, intOrderBy = 1
 			from tblCTSequenceHistory sh
-			inner join tblCTContractDetail cd on cd.intContractDetailId = sh.intContractDetailId
-			inner join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
+			inner join tblCTContractDetail cd ON cd.intContractDetailId = sh.intContractDetailId
+			inner join tblCTContractHeader ch ON ch.intContractHeaderId = cd.intContractHeaderId
 			where intSequenceUsageHistoryId is null and strPricingStatus not in ( 'Partially Priced', 'Fully Priced')
 
 			union
@@ -102,8 +102,8 @@ BEGIN
 				, sh.intContractStatusId
 				, intOrderBy = 1
 			from tblCTSequenceHistory sh
-			inner join tblCTContractDetail cd on cd.intContractDetailId = sh.intContractDetailId
-			inner join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
+			inner join tblCTContractDetail cd ON cd.intContractDetailId = sh.intContractDetailId
+			inner join tblCTContractHeader ch ON ch.intContractHeaderId = cd.intContractHeaderId
 			where intSequenceUsageHistoryId is null 
 
 			union all --HTA (Priced) decrease
@@ -127,8 +127,8 @@ BEGIN
 				, a.intContractStatusId
 				, intOrderBy = 1
 			from tblCTSequenceHistory a
-			INNER JOIN tblCTSequenceHistory b on a.intContractDetailId = b.intContractDetailId
-			INNER JOIN tblCTContractDetail cd on cd.intContractDetailId = a.intContractDetailId
+			INNER JOIN tblCTSequenceHistory b ON a.intContractDetailId = b.intContractDetailId
+			INNER JOIN tblCTContractDetail cd ON cd.intContractDetailId = a.intContractDetailId
 			AND a.intPricingTypeId = 1 AND b.intPricingTypeId = 3
 			group by 
 				a.dblQuantity,
@@ -166,8 +166,8 @@ BEGIN
 				, b.intContractStatusId
 				, intOrderBy = 4
 			from tblCTSequenceHistory a
-			INNER JOIN tblCTSequenceHistory b on a.intContractDetailId = b.intContractDetailId
-			INNER JOIN tblCTContractDetail cd on cd.intContractDetailId = a.intContractDetailId
+			INNER JOIN tblCTSequenceHistory b ON a.intContractDetailId = b.intContractDetailId
+			INNER JOIN tblCTContractDetail cd ON cd.intContractDetailId = a.intContractDetailId
 			AND a.intPricingTypeId = 3 AND b.intPricingTypeId = 1
 			group by 
 				b.dblQuantity,
@@ -206,9 +206,9 @@ BEGIN
 				, sh.intContractStatusId
 				, intOrderBy = 2
 			from vyuCTSequenceUsageHistory suh
-			inner join tblCTSequenceHistory sh on sh.intSequenceUsageHistoryId = suh.intSequenceUsageHistoryId
-			inner join tblCTContractDetail cd on cd.intContractDetailId = sh.intContractDetailId
-			inner join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
+			inner join tblCTSequenceHistory sh ON sh.intSequenceUsageHistoryId = suh.intSequenceUsageHistoryId
+			inner join tblCTContractDetail cd ON cd.intContractDetailId = sh.intContractDetailId
+			inner join tblCTContractHeader ch ON ch.intContractHeaderId = cd.intContractHeaderId
 			where strFieldName = 'Balance'
 
 			union all
@@ -235,7 +235,7 @@ BEGIN
 			JOIN	tblCTPriceFixation		 pf	ON	pf.intPriceFixationId =	fd.intPriceFixationId
 			JOIN	tblCTPriceContract pc ON pc.intPriceContractId = pf.intPriceContractId
 			JOIN tblCTContractDetail		 cd ON cd.intContractDetailId = pf.intContractDetailId
-			inner join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
+			inner join tblCTContractHeader ch ON ch.intContractHeaderId = cd.intContractHeaderId
 			WHERE (fd.dblQuantity - fd.dblQuantityAppliedAndPriced) <> 0
 
 			union all
@@ -262,13 +262,13 @@ BEGIN
 			JOIN	tblCTPriceFixation		 pf	ON	pf.intPriceFixationId =	fd.intPriceFixationId
 			JOIN	tblCTPriceContract pc ON pc.intPriceContractId = pf.intPriceContractId
 			JOIN tblCTContractDetail		 cd ON cd.intContractDetailId = pf.intContractDetailId
-			inner join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
+			inner join tblCTContractHeader ch ON ch.intContractHeaderId = cd.intContractHeaderId
 			WHERE (fd.dblQuantity - fd.dblQuantityAppliedAndPriced) <> 0
 
 		) t
-		INNER JOIN tblCTContractHeader CH on CH.intContractHeaderId = t.intContractHeaderId 
-		INNER JOIN tblCTContractDetail CD on CD.intContractDetailId = t.intContractDetailId
-		INNER JOIN tblICCommodity C  on C.intCommodityId = CH.intCommodityId
+		INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = t.intContractHeaderId 
+		INNER JOIN tblCTContractDetail CD ON CD.intContractDetailId = t.intContractDetailId
+		INNER JOIN tblICCommodity C  ON C.intCommodityId = CH.intCommodityId
 		WHERE Row_Num = 1
 		ORDER BY dtmTransactionDate, CD.intContractDetailId, intOrderBy
 
@@ -361,7 +361,7 @@ BEGIN
 			, sh.intItemId
 			, sh.intCompanyLocationId
 			, dblQty = (case when isnull(cd.intNoOfLoad,0) = 0 then suh.dblTransactionQuantity 
-							else suh.dblTransactionQuantity * cd.dblQuantityPerLoad end) * -1
+							else suh.dblTransactionQuantity * si.dblQuantity end) * -1
 			, intQtyUOMId = ch.intCommodityUOMId
 			, sh.intPricingTypeId
 			, sh.strPricingType
@@ -372,12 +372,76 @@ BEGIN
 			, ch.intContractTypeId
 		into #tblBasisDeliveries
 		from vyuCTSequenceUsageHistory suh
-			inner join tblCTSequenceHistory sh on sh.intSequenceUsageHistoryId = suh.intSequenceUsageHistoryId
-			inner join tblCTContractDetail cd on cd.intContractDetailId = sh.intContractDetailId
-			inner join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
+			inner join tblCTSequenceHistory sh ON sh.intSequenceUsageHistoryId = suh.intSequenceUsageHistoryId
+			inner join tblCTContractDetail cd ON cd.intContractDetailId = sh.intContractDetailId
+			inner join tblCTContractHeader ch ON ch.intContractHeaderId = cd.intContractHeaderId
+			inner join tblICInventoryShipmentItem si ON si.intInventoryShipmentItemId = suh.intExternalId
 		where strFieldName = 'Balance'
-		and sh.strPricingStatus = 'Unpriced'
+		and sh.strPricingStatus  IN ('Unpriced','Partially Priced')
 		and sh.strPricingType = 'Basis'
+		and suh.strScreenName = 'Inventory Shipment'
+
+		union all
+		select  
+			dtmTransactionDate = dbo.fnRemoveTimeOnDate(dtmTransactionDate)
+			, sh.intContractHeaderId
+			, sh.intContractDetailId
+			, sh.strContractNumber
+			, sh.intContractSeq
+			, sh.intEntityId
+			, ch.intCommodityId
+			, sh.intItemId
+			, sh.intCompanyLocationId
+			, dblQty = (case when isnull(cd.intNoOfLoad,0) = 0 then suh.dblTransactionQuantity 
+							else suh.dblTransactionQuantity * ri.dblReceived end) * -1
+			, intQtyUOMId = ch.intCommodityUOMId
+			, sh.intPricingTypeId
+			, sh.strPricingType
+			, strTransactionType = strScreenName
+			, intTransactionId = suh.intExternalId
+			, strTransactionId = suh.strNumber
+			, sh.intContractStatusId
+			, ch.intContractTypeId
+		from vyuCTSequenceUsageHistory suh
+			inner join tblCTSequenceHistory sh ON sh.intSequenceUsageHistoryId = suh.intSequenceUsageHistoryId
+			inner join tblCTContractDetail cd ON cd.intContractDetailId = sh.intContractDetailId
+			inner join tblCTContractHeader ch ON ch.intContractHeaderId = cd.intContractHeaderId
+			inner join tblICInventoryReceiptItem ri ON ri.intInventoryReceiptItemId = suh.intExternalId
+		where strFieldName = 'Balance'
+		and sh.strPricingStatus  IN ('Unpriced','Partially Priced')
+		and sh.strPricingType = 'Basis'
+		and suh.strScreenName = 'Inventory Receipt'
+
+		union all
+		select  
+			dtmTransactionDate = dbo.fnRemoveTimeOnDate(dtmTransactionDate)
+			, sh.intContractHeaderId
+			, sh.intContractDetailId
+			, sh.strContractNumber
+			, sh.intContractSeq
+			, sh.intEntityId
+			, ch.intCommodityId
+			, sh.intItemId
+			, sh.intCompanyLocationId
+			, dblQty = (case when isnull(cd.intNoOfLoad,0) = 0 then suh.dblTransactionQuantity 
+							else suh.dblTransactionQuantity * ld.dblQuantity end) * -1
+			, intQtyUOMId = ch.intCommodityUOMId
+			, sh.intPricingTypeId
+			, sh.strPricingType
+			, strTransactionType = strScreenName
+			, intTransactionId = suh.intExternalId
+			, strTransactionId = suh.strNumber
+			, sh.intContractStatusId
+			, ch.intContractTypeId
+		from vyuCTSequenceUsageHistory suh
+			inner join tblCTSequenceHistory sh ON sh.intSequenceUsageHistoryId = suh.intSequenceUsageHistoryId
+			inner join tblCTContractDetail cd ON cd.intContractDetailId = sh.intContractDetailId
+			inner join tblCTContractHeader ch ON ch.intContractHeaderId = cd.intContractHeaderId
+			inner join tblLGLoadDetail ld ON ld.intLoadDetailId = suh.intExternalId
+		where strFieldName = 'Balance'
+		and sh.strPricingStatus  IN ('Unpriced','Partially Priced')
+		and sh.strPricingType = 'Basis'
+		and suh.strScreenName = 'Load Schedule'
 
 		SELECT * 
 		INTO #tblFinalBasisDeliveries 
@@ -409,8 +473,8 @@ BEGIN
 			select 
 				 strType  = 'Purchase Basis Deliveries'
 				, b.dtmBillDate
-				, bd.intContractHeaderId
-				, bd.intContractDetailId
+				, ba.intContractHeaderId
+				, ba.intContractDetailId
 				, ba.strContractNumber
 				, ba.intContractSeq
 				, ba.intContractTypeId
@@ -427,15 +491,15 @@ BEGIN
 				, intTransactionId = bd.intBillDetailId
 				, strTransactionId = b.strBillId
 			from tblAPBillDetail bd
-			inner join tblAPBill b on b.intBillId = bd.intBillId
-			inner join #tblBasisDeliveries ba on ba.intTransactionId = bd.intInventoryReceiptItemId and ba.strTransactionType <> 'Load Schedule' and ba.intContractTypeId = 1
+			inner join tblAPBill b ON b.intBillId = bd.intBillId
+			inner join #tblBasisDeliveries ba ON ba.intTransactionId = bd.intInventoryReceiptItemId and ba.strTransactionType <> 'Load Schedule' and ba.intContractTypeId = 1
 	
 			union all
 			select 
 				 strType  = 'Purchase Basis Deliveries'
 				, b.dtmBillDate
-				, bd.intContractHeaderId
-				, bd.intContractDetailId
+				, ba.intContractHeaderId
+				, ba.intContractDetailId
 				, ba.strContractNumber
 				, ba.intContractSeq
 				, ba.intContractTypeId
@@ -452,15 +516,15 @@ BEGIN
 				, intTransactionId = bd.intBillDetailId
 				, strTransactionId = b.strBillId
 			from tblAPBillDetail bd
-			inner join tblAPBill b on b.intBillId = bd.intBillId
-			inner join #tblBasisDeliveries ba on ba.intTransactionId = bd.intLoadDetailId and ba.strTransactionType = 'Load Schedule' and ba.intContractTypeId = 1
+			inner join tblAPBill b ON b.intBillId = bd.intBillId
+			inner join #tblBasisDeliveries ba ON ba.intTransactionId = bd.intLoadDetailId and ba.strTransactionType = 'Load Schedule' and ba.intContractTypeId = 1
 
 			union all
 			select 
 				 strType  = 'Sales Basis Deliveries'
 				, i.dtmDate
-				, id.intContractHeaderId
-				, id.intContractDetailId
+				, ba.intContractHeaderId
+				, ba.intContractDetailId
 				, ba.strContractNumber
 				, ba.intContractSeq
 				, ba.intContractTypeId
@@ -477,15 +541,15 @@ BEGIN
 				, intTransactionId = id.intInvoiceDetailId
 				, strTransactionId = i.strInvoiceNumber
 			from tblARInvoiceDetail id
-			inner join tblARInvoice i on i.intInvoiceId = id.intInvoiceId
-			inner join #tblBasisDeliveries ba on ba.intTransactionId = id.intInventoryShipmentItemId and ba.strTransactionType <> 'Load Schedule' and ba.intContractTypeId = 2
+			inner join tblARInvoice i ON i.intInvoiceId = id.intInvoiceId
+			inner join #tblBasisDeliveries ba ON ba.intTransactionId = id.intInventoryShipmentItemId and ba.strTransactionType <> 'Load Schedule' and ba.intContractTypeId = 2
 	
 			union all
 			select 
 				 strType  = 'Sales Basis Deliveries'
 				, i.dtmDate
-				, id.intContractHeaderId
-				, id.intContractDetailId
+				, ba.intContractHeaderId
+				, ba.intContractDetailId
 				, ba.strContractNumber
 				, ba.intContractSeq
 				, ba.intContractTypeId
@@ -502,8 +566,8 @@ BEGIN
 				, intTransactionId = id.intInvoiceDetailId
 				, strTransactionId = i.strInvoiceNumber
 			from tblARInvoiceDetail id
-			inner join tblARInvoice i on i.intInvoiceId = id.intInvoiceId
-			inner join #tblBasisDeliveries ba on ba.intTransactionId = id.intLoadDetailId and ba.strTransactionType = 'Load Schedule' and ba.intContractTypeId = 2
+			inner join tblARInvoice i ON i.intInvoiceId = id.intInvoiceId
+			inner join #tblBasisDeliveries ba ON ba.intTransactionId = id.intLoadDetailId and ba.strTransactionType = 'Load Schedule' and ba.intContractTypeId = 2
 
 		) t
 
@@ -574,12 +638,14 @@ BEGIN
 			, intFutureMarketId
 			, intFutureMonthId
 			, dblNoOfLots
+			, dblContractSize
 			, dblPrice
 			, intEntityId
 			, intUserId
 			, intLocationId
 			, intCommodityUOMId
-			, strNotes)
+			, strNotes
+			, strMiscFields)
 		SELECT
 			  strBucketType = 'Derivatives' 
 			, strTransactionType = 'Derivative Entry'
@@ -596,12 +662,24 @@ BEGIN
 			, intFutureMarketId = der.intFutureMarketId
 			, intFutureMonthId = der.intFutureMonthId
 			, dblNoOfLots = der.dblNewNoOfLots
+			, dblContractSize = m.dblContractSize
 			, dblPrice = der.dblPrice
 			, intEntityId = der.intEntityId
 			, intUserId = der.intUserId
 			, der.intLocationId
 			, cUOM.intCommodityUnitMeasureId
 			, strNotes = strNotes
+			, strMiscFields = '{intOptionMonthId = "' + ISNULL(CAST(intOptionMonthId AS NVARCHAR), '') +'"}'
+								+ ' {strOptionMonth = "' + ISNULL(strOptionMonth, '') +'"}'
+								+ ' {dblStrike = "' + CAST(ISNULL(dblStrike,0) AS NVARCHAR) +'"}'
+								+ ' {strOptionType = "' + ISNULL(strOptionType, '') +'"}'
+								+ ' {strInstrumentType = "' + ISNULL(strInstrumentType, '') +'"}'
+								+ ' {intBrokerageAccountId = "' + ISNULL(CAST(intBrokerId AS NVARCHAR), '') +'"}'
+								+ ' {strBrokerAccount = "' + ISNULL(strBrokerAccount, '') +'"}'
+								+ ' {strBroker = "' + ISNULL(strBroker, '') +'"}'
+								+ ' {strBuySell = "' + ISNULL(strNewBuySell, '') +'"}'
+								+ ' {ysnPreCrush = "' + CAST(ISNULL(ysnPreCrush,0) AS NVARCHAR) +'"}'
+								+ ' {strBrokerTradeNo = "' + ISNULL(strBrokerTradeNo, '') +'"}'
 		FROM vyuRKGetFutOptTransactionHistory der
 		JOIN tblRKFutureMarket m ON m.intFutureMarketId = der.intFutureMarketId
 		LEFT JOIN tblICCommodityUnitMeasure cUOM ON cUOM.intCommodityId = der.intCommodityId AND cUOM.intUnitMeasureId = m.intUnitMeasureId
@@ -634,10 +712,12 @@ BEGIN
 			, intFutureMonthId
 			, strNotes
 			, dblNoOfLots
+			, dblContractSize
 			, dblPrice
 			, intEntityId
 			, intUserId
-			, intCommodityUOMId)
+			, intCommodityUOMId
+			, strMiscFields)
 		SELECT
 			  strBucketType = 'Derivatives'
 			, strTransactionType
@@ -656,10 +736,12 @@ BEGIN
 			, intFutureMonthId
 			, strNotes
 			, dblNoOfLots
+			, dblContractSize
 			, dblPrice
 			, intEntityId
 			, intUserId
 			, intCommodityUOMId
+			, strMiscFields
 		FROM (
 			SELECT strTransactionType = 'Match Derivatives'
 				, intTransactionRecordId = history.intLFutOptTransactionId
@@ -677,11 +759,13 @@ BEGIN
 				, intFutureMonthId = de.intFutureMonthId
 				, strNotes = 'IN'
 				, dblNoOfLots = history.dblMatchQty
+				, dblContractSize = FutMarket.dblContractSize
 				, dblPrice = de.dblPrice
 				, intEntityId = de.intEntityId
 				, intUserId = e.intEntityId
 				, intCommodityUOMId = cUOM.intCommodityUnitMeasureId
 				, intMatchDerivativeHistoryId
+				, strMiscFields =  '{ysnPreCrush = "' + CAST(ISNULL(ysnPreCrush,0) AS NVARCHAR) +'"}'
 			FROM tblRKMatchDerivativesHistory history
 			JOIN tblRKMatchFuturesPSHeader header ON header.intMatchFuturesPSHeaderId = history.intMatchFuturesPSHeaderId
 			JOIN tblRKMatchFuturesPSDetail detail ON detail.intMatchFuturesPSDetailId = history.intMatchFuturesPSDetailId
@@ -711,11 +795,13 @@ BEGIN
 				, intFutureMonthId = de.intFutureMonthId
 				, strNotes = 'OUT'
 				, dblNoOfLots = history.dblMatchQty * - 1
+				, dblContractSize = FutMarket.dblContractSize
 				, dblPrice = de.dblPrice
 				, intEntityId = de.intEntityId
 				, intUserId = e.intEntityId
 				, intCommodityUOMId = cUOM.intCommodityUnitMeasureId
 				, intMatchDerivativeHistoryId
+				, strMiscFields =  '{ysnPreCrush = "' + CAST(ISNULL(ysnPreCrush,0) AS NVARCHAR) +'"}'
 			FROM tblRKMatchDerivativesHistory history
 			JOIN tblRKMatchFuturesPSHeader header ON header.intMatchFuturesPSHeaderId = history.intMatchFuturesPSHeaderId
 			JOIN tblRKMatchFuturesPSDetail detail ON detail.intMatchFuturesPSDetailId = history.intMatchFuturesPSDetailId
@@ -759,10 +845,12 @@ BEGIN
 			, intFutureMonthId
 			, strNotes
 			, dblNoOfLots
+			, dblContractSize
 			, dblPrice
 			, intEntityId
 			, intUserId
-			, intCommodityUOMId)
+			, intCommodityUOMId
+			, strMiscFields)
 		SELECT
 			  strBucketType = 'Derivatives' 
 			, strTransactionType
@@ -781,10 +869,12 @@ BEGIN
 			, intFutureMonthId
 			, strNotes
 			, dblNoOfLots
+			, dblContractSize
 			, dblPrice
 			, intEntityId
 			, intUserId
 			, intCommodityUOMId
+			, strMiscFields
 		FROM (
 			SELECT strTransactionType = 'Expired Options'
 				, intTransactionRecordId = detail.intFutOptTransactionId
@@ -802,10 +892,12 @@ BEGIN
 				, intFutureMonthId = de.intFutureMonthId
 				, strNotes = CASE WHEN de.strBuySell = 'Buy' THEN 'IN' ELSE 'OUT' END
 				, dblNoOfLots = detail.dblLots * - 1
+				, dblContractSize = FutMarket.dblContractSize
 				, dblPrice = de.dblPrice
 				, intEntityId = de.intEntityId
 				, intUserId = @intCurrentUserId
 				, intCommodityUOMId = cUOM.intCommodityUnitMeasureId
+				, strMiscFields =  '{ysnPreCrush = "' + CAST(ISNULL(ysnPreCrush,0) AS NVARCHAR) +'"}'
 			FROM tblRKOptionsPnSExpired detail
 			JOIN tblRKOptionsMatchPnSHeader header ON header.intOptionsMatchPnSHeaderId = detail.intOptionsMatchPnSHeaderId
 			JOIN tblRKFutOptTransaction de ON de.intFutOptTransactionId = detail.intFutOptTransactionId
@@ -828,10 +920,12 @@ BEGIN
 				, intFutureMonthId = de.intFutureMonthId
 				, strNotes = CASE WHEN de.strBuySell = 'Buy' THEN 'IN' ELSE 'OUT' END
 				, dblNoOfLots = detail.dblLots * - 1
+				, dblContractSize = FutMarket.dblContractSize
 				, dblPrice = de.dblPrice
 				, intEntityId = de.intEntityId
 				, intUserId = @intCurrentUserId
 				, intCommodityUOMId = cUOM.intCommodityUnitMeasureId
+				, strMiscFields =  '{ysnPreCrush = "' + CAST(ISNULL(ysnPreCrush,0) AS NVARCHAR) +'"}'
 			FROM tblRKOptionsPnSExercisedAssigned detail
 			JOIN tblRKOptionsMatchPnSHeader header ON header.intOptionsMatchPnSHeaderId = detail.intOptionsMatchPnSHeaderId
 			JOIN tblRKFutOptTransaction de ON de.intFutOptTransactionId = detail.intFutOptTransactionId
@@ -877,7 +971,7 @@ BEGIN
 			, dblQty = dblOriginalQuantity
 			, intUserId = (SELECT TOP 1 e.intEntityId
 							FROM (tblEMEntity e LEFT JOIN tblEMEntityType et ON et.intEntityId = e.intEntityId AND et.strType = 'User')
-							INNER JOIN tblRKCollateralHistory colhis on colhis.strUserName = e.strName where colhis.intCollateralId = a.intCollateralId and colhis.strAction = 'ADD')
+							INNER JOIN tblRKCollateralHistory colhis ON colhis.strUserName = e.strName where colhis.intCollateralId = a.intCollateralId and colhis.strAction = 'ADD')
 			, strNotes = strType + ' Collateral'
 		FROM tblRKCollateral a
 		
@@ -911,7 +1005,7 @@ BEGIN
 			, dblQty = CA.dblAdjustmentAmount
 			, intUserId = (SELECT TOP 1 e.intEntityId
 							FROM (tblEMEntity e LEFT JOIN tblEMEntityType et ON et.intEntityId = e.intEntityId AND et.strType = 'User')
-							INNER JOIN tblRKCollateralHistory colhis on colhis.strUserName = e.strName where colhis.intCollateralId = C.intCollateralId and colhis.strAction = 'ADD')
+							INNER JOIN tblRKCollateralHistory colhis ON colhis.strUserName = e.strName where colhis.intCollateralId = C.intCollateralId and colhis.strAction = 'ADD')
 			, strNotes = strType + ' Collateral'
 		FROM tblRKCollateralAdjustment CA
 		JOIN tblRKCollateral C ON C.intCollateralId = CA.intCollateralId
@@ -1298,46 +1392,29 @@ BEGIN
 		--=======================================
 		PRINT 'Populate RK Summary Log - Customer Owned'
 		
-		SELECT 
-			 dtmHistoryDate = CONVERT(DATETIME, CONVERT(VARCHAR(10), sh.dtmHistoryDate, 110), 110)
+		SELECT dtmDeliveryDate = (CASE WHEN sh.strType = 'Transfer' THEN RIGHT(CONVERT(VARCHAR(11), sh.dtmHistoryDate, 106), 8) ELSE RIGHT(CONVERT(VARCHAR(11), cs.dtmDeliveryDate, 106), 8) END) COLLATE Latin1_General_CI_AS
 			, strBucketType = 'Customer Owned'
-			, strTransactionType = CASE WHEN intTransactionTypeId IN(1,5) THEN
-												CASE WHEN sh.intInventoryReceiptId IS NOT NULL THEN 'Inventory Receipt'
+			, strTransactionType = CASE WHEN intTransactionTypeId IN (1, 5)
+											THEN CASE WHEN sh.intInventoryReceiptId IS NOT NULL THEN 'Inventory Receipt'
 													 WHEN sh.intInventoryShipmentId IS NOT NULL THEN 'Inventory Shipment'
-													 ELSE 'NONE'
-												END
-											 WHEN intTransactionTypeId = 3 THEN
-												'Transfer Storage'
-											 WHEN intTransactionTypeId = 4 THEN
-												'Storage Settlement'
-											 WHEN intTransactionTypeId = 9 THEN
-												'Inventory Adjustment'
-											END
-			, intTransactionRecordId = CASE WHEN intTransactionTypeId IN(1,5)THEN
-												CASE WHEN sh.intInventoryReceiptId IS NOT NULL THEN sh.intInventoryReceiptId
-													 WHEN sh.intInventoryShipmentId IS NOT NULL THEN sh.intInventoryShipmentId
-													 ELSE NULL
-												END
-											 WHEN intTransactionTypeId = 3 THEN
-												sh.intTransferStorageId
-											 WHEN intTransactionTypeId = 4 THEN
-												sh.intSettleStorageId
-											 WHEN intTransactionTypeId = 9 THEN
-												sh.intInventoryAdjustmentId
-											END
-			, strTransactioneNo = CASE WHEN intTransactionTypeId IN(1,5) THEN
-												CASE WHEN sh.intInventoryReceiptId IS NOT NULL THEN sh.strReceiptNumber
-													 WHEN sh.intInventoryShipmentId IS NOT NULL THEN sh.strShipmentNumber
-													 ELSE NULL
-												END
-											 WHEN intTransactionTypeId = 3 THEN
-												sh.strTransferTicket
-											 WHEN intTransactionTypeId = 4 THEN
-												sh.strSettleTicket
-											 WHEN intTransactionTypeId = 9 THEN
-												sh.strAdjustmentNo
-											END
-
+													 ELSE 'NONE' END
+										WHEN intTransactionTypeId = 3 THEN 'Transfer Storage'
+										WHEN intTransactionTypeId = 4 THEN 'Storage Settlement'
+										WHEN intTransactionTypeId = 9 THEN 'Inventory Adjustment' END
+			, intTransactionRecordId = CASE WHEN intTransactionTypeId IN (1, 5)
+												THEN CASE WHEN sh.intInventoryReceiptId IS NOT NULL THEN sh.intInventoryReceiptId
+														WHEN sh.intInventoryShipmentId IS NOT NULL THEN sh.intInventoryShipmentId
+														ELSE NULL END
+											WHEN intTransactionTypeId = 3 THEN sh.intTransferStorageId
+											WHEN intTransactionTypeId = 4 THEN sh.intSettleStorageId
+											WHEN intTransactionTypeId = 9 THEN sh.intInventoryAdjustmentId END
+			, strTransactioneNo = CASE WHEN intTransactionTypeId IN (1, 5)
+											THEN CASE WHEN sh.intInventoryReceiptId IS NOT NULL THEN sh.strReceiptNumber
+													WHEN sh.intInventoryShipmentId IS NOT NULL THEN sh.strShipmentNumber
+													ELSE NULL END
+									WHEN intTransactionTypeId = 3 THEN sh.strTransferTicket
+									WHEN intTransactionTypeId = 4 THEN sh.strSettleTicket
+									WHEN intTransactionTypeId = 9 THEN sh.strAdjustmentNo END
 			, sh.intContractHeaderId
 			, cs.intCommodityId
 			, cs.intItemId
@@ -1351,54 +1428,48 @@ BEGIN
 			, st.strStorageTypeCode
 			, intStorageHistoryId
 			, ysnReceiptedStorage
+			, intTypeId = intTransactionTypeId
+			, cs.strStorageType
+			, cs.intDeliverySheetId
+			, t.strTicketStatus
+			, st.ysnDPOwnedType
+			, st.strOwnedPhysicalStock
+			, st.strStorageTypeDescription
+			, st.ysnActive
+			, sl.ysnExternal
 		INTO #tmpCustomerOwned
 		FROM vyuGRStorageHistory sh
-			JOIN tblGRCustomerStorage cs ON cs.intCustomerStorageId = sh.intCustomerStorageId
-			JOIN tblGRStorageType st ON st.intStorageScheduleTypeId = cs.intStorageTypeId and ysnDPOwnedType = 0
-			JOIN tblICItemUOM iuom on iuom.intItemUOMId = cs.intItemUOMId
-			JOIN tblICCommodityUnitMeasure cum on cum.intUnitMeasureId = iuom.intUnitMeasureId and cum.intCommodityId = cs.intCommodityId
+		JOIN tblGRCustomerStorage cs ON cs.intCustomerStorageId = sh.intCustomerStorageId
+		JOIN tblGRStorageType st ON st.intStorageScheduleTypeId = cs.intStorageTypeId and ysnDPOwnedType = 0
+		JOIN tblICItemUOM iuom ON iuom.intItemUOMId = cs.intItemUOMId
+		JOIN tblICCommodityUnitMeasure cum ON cum.intUnitMeasureId = iuom.intUnitMeasureId and cum.intCommodityId = cs.intCommodityId
+		LEFT JOIN tblSCTicket t ON t.intTicketId = sh.intTicketId
+		LEFT JOIN tblSMCompanyLocationSubLocation sl ON sl.intCompanyLocationSubLocationId = t.intSubLocationId AND sl.intCompanyLocationId = t.intProcessingLocationId
 	
 		UNION ALL
-		SELECT 
-			 dtmHistoryDate = CONVERT(DATETIME, CONVERT(VARCHAR(10), sh.dtmHistoryDate, 110), 110)
+		SELECT dtmDeliveryDate = (CASE WHEN sh.strType = 'Transfer' THEN RIGHT(CONVERT(VARCHAR(11), sh.dtmHistoryDate, 106), 8) ELSE RIGHT(CONVERT(VARCHAR(11), cs.dtmDeliveryDate, 106), 8) END) COLLATE Latin1_General_CI_AS
 			, strBucketType = 'Delayed Pricing'
-			, strTransactionType = CASE WHEN intTransactionTypeId IN(1,5) THEN
-												CASE WHEN sh.intInventoryReceiptId IS NOT NULL THEN 'Inventory Receipt'
+			, strTransactionType = CASE WHEN intTransactionTypeId IN (1, 5)
+											THEN CASE WHEN sh.intInventoryReceiptId IS NOT NULL THEN 'Inventory Receipt'
 													 WHEN sh.intInventoryShipmentId IS NOT NULL THEN 'Inventory Shipment'
-													 ELSE 'NONE'
-												END
-											 WHEN intTransactionTypeId = 3 THEN
-												'Transfer Storage'
-											 WHEN intTransactionTypeId = 4 THEN
-												'Storage Settlement'
-											 WHEN intTransactionTypeId = 9 THEN
-												'Inventory Adjustment'
-											END
-			, intTransactionRecordId = CASE WHEN intTransactionTypeId IN(1,5)THEN
-												CASE WHEN sh.intInventoryReceiptId IS NOT NULL THEN sh.intInventoryReceiptId
-													 WHEN sh.intInventoryShipmentId IS NOT NULL THEN sh.intInventoryShipmentId
-													 ELSE NULL
-												END
-											 WHEN intTransactionTypeId = 3 THEN
-												sh.intTransferStorageId
-											 WHEN intTransactionTypeId = 4 THEN
-												sh.intSettleStorageId
-											 WHEN intTransactionTypeId = 9 THEN
-												sh.intInventoryAdjustmentId
-											END
-			, strTransactioneNo = CASE WHEN intTransactionTypeId IN(1,5) THEN
-												CASE WHEN sh.intInventoryReceiptId IS NOT NULL THEN sh.strReceiptNumber
-													 WHEN sh.intInventoryShipmentId IS NOT NULL THEN sh.strShipmentNumber
-													 ELSE NULL
-												END
-											 WHEN intTransactionTypeId = 3 THEN
-												sh.strTransferTicket
-											 WHEN intTransactionTypeId = 4 THEN
-												sh.strSettleTicket
-											 WHEN intTransactionTypeId = 9 THEN
-												sh.strAdjustmentNo
-											END
-
+													 ELSE 'NONE' END
+										WHEN intTransactionTypeId = 3 THEN 'Transfer Storage'
+										WHEN intTransactionTypeId = 4 THEN 'Storage Settlement'
+										WHEN intTransactionTypeId = 9 THEN 'Inventory Adjustment' END
+			, intTransactionRecordId = CASE WHEN intTransactionTypeId IN (1, 5)
+												THEN CASE WHEN sh.intInventoryReceiptId IS NOT NULL THEN sh.intInventoryReceiptId
+														WHEN sh.intInventoryShipmentId IS NOT NULL THEN sh.intInventoryShipmentId
+														ELSE NULL END
+											WHEN intTransactionTypeId = 3 THEN sh.intTransferStorageId
+											WHEN intTransactionTypeId = 4 THEN sh.intSettleStorageId
+											WHEN intTransactionTypeId = 9 THEN sh.intInventoryAdjustmentId END
+			, strTransactioneNo = CASE WHEN intTransactionTypeId IN (1, 5)
+											THEN CASE WHEN sh.intInventoryReceiptId IS NOT NULL THEN sh.strReceiptNumber
+													WHEN sh.intInventoryShipmentId IS NOT NULL THEN sh.strShipmentNumber
+													ELSE NULL END
+									WHEN intTransactionTypeId = 3 THEN sh.strTransferTicket
+									WHEN intTransactionTypeId = 4 THEN sh.strSettleTicket
+									WHEN intTransactionTypeId = 9 THEN sh.strAdjustmentNo END
 			, sh.intContractHeaderId
 			, cs.intCommodityId
 			, cs.intItemId
@@ -1412,15 +1483,25 @@ BEGIN
 			, st.strStorageTypeCode
 			, intStorageHistoryId
 			, ysnReceiptedStorage
+			, intTypeId = intTransactionTypeId
+			, cs.strStorageType
+			, cs.intDeliverySheetId
+			, t.strTicketStatus
+			, st.ysnDPOwnedType
+			, st.strOwnedPhysicalStock
+			, st.strStorageTypeDescription
+			, st.ysnActive
+			, sl.ysnExternal
 		FROM vyuGRStorageHistory sh
-			JOIN tblGRCustomerStorage cs ON cs.intCustomerStorageId = sh.intCustomerStorageId
-			JOIN tblGRStorageType st ON st.intStorageScheduleTypeId = cs.intStorageTypeId and ysnDPOwnedType = 1
-			JOIN tblICItemUOM iuom on iuom.intItemUOMId = cs.intItemUOMId
-			JOIN tblICCommodityUnitMeasure cum on cum.intUnitMeasureId = iuom.intUnitMeasureId and cum.intCommodityId = cs.intCommodityId
+		JOIN tblGRCustomerStorage cs ON cs.intCustomerStorageId = sh.intCustomerStorageId
+		JOIN tblGRStorageType st ON st.intStorageScheduleTypeId = cs.intStorageTypeId and ysnDPOwnedType = 1
+		JOIN tblICItemUOM iuom ON iuom.intItemUOMId = cs.intItemUOMId
+		JOIN tblICCommodityUnitMeasure cum ON cum.intUnitMeasureId = iuom.intUnitMeasureId and cum.intCommodityId = cs.intCommodityId
+		LEFT JOIN tblSCTicket t ON t.intTicketId = sh.intTicketId
+		LEFT JOIN tblSMCompanyLocationSubLocation sl ON sl.intCompanyLocationSubLocationId = t.intSubLocationId AND sl.intCompanyLocationId = t.intProcessingLocationId
 		
 		UNION ALL
-		SELECT 
-			 dtmHistoryDate = CONVERT(DATETIME, CONVERT(VARCHAR(10), sh.dtmHistoryDate, 110), 110)
+		SELECT dtmDeliveryDate = (CASE WHEN sh.strType = 'Transfer' THEN RIGHT(CONVERT(VARCHAR(11), sh.dtmHistoryDate, 106), 8) ELSE RIGHT(CONVERT(VARCHAR(11), cs.dtmDeliveryDate, 106), 8) END) COLLATE Latin1_General_CI_AS
 			, strBucketType = 'Company Owned'
 			, strTransactionType = 'Storage Settlement'
 			, intTransactionRecordId = sh.intSettleStorageId
@@ -1431,61 +1512,78 @@ BEGIN
 			, cum.intCommodityUnitMeasureId
 			, sh.intCompanyLocationId
 			, dblQty = (CASE WHEN sh.strType = 'Reverse Settlement' THEN - sh.dblUnits ELSE sh.dblUnits END)
-			, strInOut = (CASE WHEN  sh.strType = 'Reverse Settlement' THEN 'OUT' ELSE  'IN'  END)
+			, strInOut = (CASE WHEN sh.strType = 'Reverse Settlement' THEN 'OUT' ELSE 'IN' END)
 			, sh.intTicketId
 			, cs.intEntityId
 			, strDistributionType = st.strStorageTypeDescription
 			, st.strStorageTypeCode
 			, intStorageHistoryId
 			, ysnReceiptedStorage
+			, intTypeId = intTransactionTypeId
+			, cs.strStorageType
+			, cs.intDeliverySheetId
+			, t.strTicketStatus
+			, st.ysnDPOwnedType
+			, st.strOwnedPhysicalStock
+			, st.strStorageTypeDescription
+			, st.ysnActive
+			, sl.ysnExternal
 		FROM vyuGRStorageHistory sh
-			JOIN tblGRCustomerStorage cs ON cs.intCustomerStorageId = sh.intCustomerStorageId
-			JOIN tblGRStorageType st ON st.intStorageScheduleTypeId = cs.intStorageTypeId and ysnDPOwnedType = 0
-			JOIN tblICItemUOM iuom on iuom.intItemUOMId = cs.intItemUOMId
-			JOIN tblICCommodityUnitMeasure cum on cum.intUnitMeasureId = iuom.intUnitMeasureId and cum.intCommodityId = cs.intCommodityId
+		JOIN tblGRCustomerStorage cs ON cs.intCustomerStorageId = sh.intCustomerStorageId
+		JOIN tblGRStorageType st ON st.intStorageScheduleTypeId = cs.intStorageTypeId and ysnDPOwnedType = 0
+		JOIN tblICItemUOM iuom ON iuom.intItemUOMId = cs.intItemUOMId
+		JOIN tblICCommodityUnitMeasure cum ON cum.intUnitMeasureId = iuom.intUnitMeasureId and cum.intCommodityId = cs.intCommodityId
+		LEFT JOIN tblSCTicket t ON t.intTicketId = sh.intTicketId
+		LEFT JOIN tblSMCompanyLocationSubLocation sl ON sl.intCompanyLocationSubLocationId = t.intSubLocationId AND sl.intCompanyLocationId = t.intProcessingLocationId
 		WHERE sh.intTransactionTypeId = 4
 
-		INSERT INTO @ExistingHistory (	
-			strBatchId
-			,strBucketType
-			,strTransactionType
-			,intTransactionRecordId 
-			,strDistributionType
-			,strTransactionNumber 
-			,dtmTransactionDate 
-			,intContractHeaderId 
-			,intTicketId 
-			,intCommodityId 
-			,intCommodityUOMId 
-			,intItemId 
-			,intLocationId 
-			,dblQty 
-			,intEntityId 
-			,intUserId 
-			,strNotes
-			,strMiscFields 	
-		)
-		SELECT
-			 strBatchId = NULL
-			,strBucketType
-			,strTransactionType
-			,intTransactionRecordId
-			,strDistributionType
-			,strTransactioneNo
-			,dtmHistoryDate
-			,intContractHeaderId
-			,intTicketId
-			,intCommodityId
-			,intCommodityUnitMeasureId
-			,intItemId
-			,intCompanyLocationId
-			,dblQty
-			,intEntityId
-			,@intCurrentUserId
-			,strNotes = (CASE WHEN intTransactionRecordId IS NULL THEN 'Actual transaction was deleted historically.' ELSE NULL END)
-			,strMiscFields = '{strStorageTypeCode = "'+ strStorageTypeCode +'"} {ysnReceiptedStorage = "' + CAST(ysnReceiptedStorage AS NVARCHAR) +'"}' 
+		INSERT INTO @ExistingHistory (strBatchId
+			, strBucketType
+			, strTransactionType
+			, intTransactionRecordId 
+			, strDistributionType
+			, strTransactionNumber 
+			, dtmTransactionDate 
+			, intContractHeaderId 
+			, intTicketId 
+			, intCommodityId 
+			, intCommodityUOMId 
+			, intItemId 
+			, intLocationId 
+			, dblQty 
+			, intEntityId 
+			, intUserId 
+			, strNotes
+			, strMiscFields)
+		SELECT strBatchId = NULL
+			, strBucketType
+			, strTransactionType
+			, intTransactionRecordId
+			, strDistributionType
+			, strTransactioneNo
+			, dtmDeliveryDate
+			, intContractHeaderId
+			, intTicketId
+			, intCommodityId
+			, intCommodityUnitMeasureId
+			, intItemId
+			, intCompanyLocationId
+			, dblQty
+			, intEntityId
+			, @intCurrentUserId
+			, strNotes = (CASE WHEN intTransactionRecordId IS NULL THEN 'Actual transaction was deleted historically.' ELSE NULL END)
+			, strMiscFields = CASE WHEN ISNULL(strStorageTypeCode, '') = '' THEN '' ELSE '{ strStorageTypeCode = "' + strStorageTypeCode + '" }' END
+								+ CASE WHEN ISNULL(ysnReceiptedStorage, '') = '' THEN '' ELSE '{ ysnReceiptedStorage = "' + CAST(ysnReceiptedStorage AS NVARCHAR) + '" }' END
+								+ CASE WHEN ISNULL(intTypeId, '') = '' THEN '' ELSE '{ intTypeId = "' + CAST(intTypeId AS NVARCHAR) + '" }' END
+								+ CASE WHEN ISNULL(strStorageType, '') = '' THEN '' ELSE '{ strStorageType = "' + strStorageType + '" }' END
+								+ CASE WHEN ISNULL(intDeliverySheetId, '') = '' THEN '' ELSE '{ intDeliverySheetId = "' + CAST(intDeliverySheetId AS NVARCHAR) + '" }' END
+								+ CASE WHEN ISNULL(strTicketStatus, '') = '' THEN '' ELSE '{ strTicketStatus = "' + strTicketStatus + '" }' END
+								+ CASE WHEN ISNULL(strOwnedPhysicalStock, '') = '' THEN '' ELSE '{ strOwnedPhysicalStock = "' + strOwnedPhysicalStock + '" }' END
+								+ CASE WHEN ISNULL(strStorageTypeDescription, '') = '' THEN '' ELSE '{ strStorageTypeDescription = "' + strStorageTypeDescription + '" }' END
+								+ CASE WHEN ISNULL(ysnActive, '') = '' THEN '' ELSE '{ ysnActive = "' + CAST(ysnActive AS NVARCHAR) + '" }' END
+								+ CASE WHEN ISNULL(ysnExternal, '') = '' THEN '' ELSE '{ ysnExternal = "' + CAST(ysnExternal AS NVARCHAR) + '" }' END
 		FROM #tmpCustomerOwned co
-		ORDER BY dtmHistoryDate, intStorageHistoryId
+		ORDER BY dtmDeliveryDate, intStorageHistoryId
 	
 		EXEC uspRKLogRiskPosition @ExistingHistory, 1, 0
 		PRINT 'End Populate RK Summary Log - Customer Owned'
@@ -1500,7 +1598,7 @@ BEGIN
 
 	SElECT @strCurrentUserName = strName FROM tblEMEntity WHERE intEntityId = @intCurrentUserId
 
-	PRINT 'Rebuild by User: ' + @strCurrentUserName + ' on ' + CAST(GETDATE() AS NVARCHAR(100))
+	PRINT 'Rebuild by User: ' + @strCurrentUserName + ' ON ' + CAST(GETDATE() AS NVARCHAR(100))
 
 	
 	END
