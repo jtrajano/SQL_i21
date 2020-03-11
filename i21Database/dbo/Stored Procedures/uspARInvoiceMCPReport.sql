@@ -32,6 +32,7 @@ INSERT INTO tblARInvoiceReportStagingTable (
 	   strCompanyName
 	 , strCompanyAddress
 	 , intInvoiceId
+	 , intEntityCustomerId
 	 , strInvoiceNumber
 	 , strTransactionType
 	 , dtmDate
@@ -85,6 +86,7 @@ INSERT INTO tblARInvoiceReportStagingTable (
 SELECT strCompanyName			= COMPANY.strCompanyName
 	 , strCompanyAddress		= COMPANY.strCompanyAddress
 	 , intInvoiceId				= INV.intInvoiceId
+	 , intEntityCustomerId		= INV.intEntityCustomerId
 	 , strInvoiceNumber			= INV.strInvoiceNumber
 	 , strTransactionType		= INV.strTransactionType
 	 , dtmDate					= CAST(INV.dtmDate AS DATE)
@@ -129,7 +131,7 @@ SELECT strCompanyName			= COMPANY.strCompanyName
 	 , dblInvoiceTotal			= ISNULL(INV.dblInvoiceTotal, 0)
 	 , dblAmountDue				= ISNULL(INV.dblAmountDue, 0)
 	 , dblInvoiceTax			= ISNULL(INV.dblTax, 0)
-	 , strComments				= CASE WHEN INV.strType = 'Tank Delivery' OR SELECTEDINV.strInvoiceFormat = 'Format 5 - Honstein'
+	 , strComments				= CASE WHEN INV.strType = 'Tank Delivery'
 	 									THEN dbo.fnEliminateHTMLTags(ISNULL(INV.strComments, ''), 0)
 	   								  	ELSE dbo.fnEliminateHTMLTags(ISNULL(INV.strFooterComments, ''), 0)
 								  END
@@ -285,3 +287,16 @@ OUTER APPLY (
 	WHERE DETAIL.intInvoiceId = INV.intInvoiceId
 		AND DETAIL.intTicketId IS NOT NULL
 ) TICKETDETAILS
+
+UPDATE STAGING
+SET strComments = ISNULL(MESSAGES.strMessage, '')
+FROM tblARInvoiceReportStagingTable STAGING
+CROSS APPLY (
+	SELECT TOP 1 strMessage
+	FROM tblEMEntityMessage EM
+	WHERE EM.strMessageType = 'Invoice'
+	  AND EM.intEntityId = STAGING.intEntityCustomerId
+) MESSAGES
+WHERE STAGING.intEntityUserId = @intEntityUserId
+  AND STAGING.strRequestId = @strRequestId
+  AND STAGING.strInvoiceFormat = 'Format 5 - Honstein'
