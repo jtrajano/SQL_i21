@@ -58,6 +58,7 @@
 [intTerminalEntityId] INT NULL,
 [intShippingLineEntityId] INT NULL,
 [strServiceContractNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+[strFreightInfo] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 [strPackingDescription] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 [strMVessel] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 [strMVoyageNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
