@@ -1,665 +1,425 @@
 ﻿CREATE PROCEDURE [dbo].[uspGRCreateSettleStorage]
-	 @intSettleStorageId INT	
+@intSettleStorageId INT	
 AS
 BEGIN TRY
 	SET NOCOUNT ON
-
 	DECLARE @ErrMsg NVARCHAR(MAX)
-	DECLARE @intCreatedUserId INT
-	DECLARE @EntityId INT
-	DECLARE @ItemId INT
-	DECLARE @TicketNo NVARCHAR(20)
-	DECLARE @SettleStorageKey INT
-	DECLARE @SettleContractKey INT
-	DECLARE @intSettleStorageTicketId INT
+	DECLARE @intSettleStorageKey INT
 	DECLARE @intCustomerStorageId INT
-	DECLARE @dblStorageUnits DECIMAL(24, 10)
-	DECLARE @strProcessType NVARCHAR(30)
-	DECLARE @strUpdateType NVARCHAR(30)
-	DECLARE @strStorageAdjustment NVARCHAR(50)
-	DECLARE @dtmCalculateStorageThrough DATETIME
-	DECLARE @dblAdjustPerUnit DECIMAL(24, 10)
-	DECLARE @dblStorageDuePerUnit DECIMAL(24, 10)
-	DECLARE @dblStorageDueAmount DECIMAL(24, 10)
-	DECLARE @dblStorageDueTotalPerUnit DECIMAL(24, 10)
-	DECLARE @dblStorageDueTotalAmount DECIMAL(24, 10)
-	DECLARE @dblStorageBilledPerUnit DECIMAL(24, 10)
-	DECLARE @dblStorageBilledAmount DECIMAL(24, 10)
-	DECLARE @dblFlatFeeTotal		DECIMAL(24, 10)
-	DECLARE @dblTicketStorageDue DECIMAL(24, 10)
+	DECLARE @dblRemainingUnits DECIMAL(18,6)
+	DECLARE @dblRemainingSpotUnits DECIMAL(18,6)
+	DECLARE @dblContractRemainingUnits DECIMAL(18,6)
 	DECLARE @intContractDetailId INT
-	DECLARE @dblContractUnits DECIMAL(24, 10)
-	DECLARE @intPricingTypeId INT
-	DECLARE @dblContractBasis DECIMAL(24, 10)
-	DECLARE @dblCashPrice DECIMAL(24, 10)
-	DECLARE @dblSpotUnits DECIMAL(24, 10)
-	DECLARE @dblSpotCashPrice DECIMAL(24, 10)
-	DECLARE @intSettleVoucherKey INT
-	DECLARE @strOrderType NVARCHAR(50)
-	DECLARE @dblUnits DECIMAL(24, 10)
-	DECLARE @dblUnitsByOrderType DECIMAL(24, 10)
-	DECLARE @dblDiscountUnpaid DECIMAL(24, 10)
-	DECLARE @dblUnpaidUnits DECIMAL(24, 10)
-	DECLARE @dblContractAmount DECIMAL(24, 10)
-	DECLARE @NewSettleStorageId INT
-	DECLARE @Counter INT
-	DECLARE @intItemUOMId INT
-	DECLARE @strCalcMethod VARCHAR(MAX)
-	DECLARE @dblGrossQuantity DECIMAL(24,10)
-	DECLARE @dblOpenBalance DECIMAL(24,10)
+	DECLARE @intContractPricingTypeId INT
+	DECLARE @dblCashPrice DECIMAL(18,6)
+	DECLARE @intCompanyLocationId INT
+	DECLARE @intNewSettleStorageId INT
+	DECLARE @intSettleContractId INT
+	DECLARE @dblFutures DECIMAL(18,6)
+	DECLARE @dblBasis DECIMAL(18,6)
+	DECLARE @dblSpotCashPrice DECIMAL(18,6)
+	DECLARE @dblTotalUnitsForSettle DECIMAL(18,6)
+	DECLARE @strType NVARCHAR(20)
 
-	SET @Counter = 1 
+	DECLARE @SettleStorageToSave AS TABLE 
+	(
+		intSettleStorageKey INT IDENTITY(1, 1)
+		,intCustomerStorageId INT
+		,dblSpotUnits DECIMAL(18,6)
+		,dblFutures DECIMAL(18,6)
+		,dblBasis DECIMAL(18,6)
+		,dblSpotCashPrice DECIMAL(18,6)
+		,intContractDetailId INT
+		,dblContractUnits DECIMAL(18,6)
+		,dblCashPrice DECIMAL(18,6)
+		,intContractPricingTypeId INT
+		,isSaved BIT
+	)
 
-	SELECT 
-		 @intCreatedUserId			 = intCreatedUserId
-		,@EntityId					 = intEntityId
-		,@ItemId					 = intItemId
-		,@TicketNo				     = strStorageTicket
-		,@strStorageAdjustment		 = strStorageAdjustment
-		,@dtmCalculateStorageThrough = dtmCalculateStorageThrough
-		,@dblAdjustPerUnit			 = dblAdjustPerUnit
-		,@dblSpotUnits				 = dblSpotUnits
-		,@dblSpotCashPrice			 = dblCashPrice
-		,@intItemUOMId				 = intItemUOMId
-	FROM tblGRSettleStorage
-	WHERE intSettleStorageId = @intSettleStorageId
-
-	SET @strUpdateType = 'estimate'
-	SET @strProcessType = CASE 
-								WHEN @strStorageAdjustment IN ('No additional','Override') THEN 'Unpaid'
-								ELSE 'calculate'
-						  END
+	DECLARE @MainSettleStorageToSave AS TABLE 
+	(
+		intSettleStorageKey INT IDENTITY(1, 1)
+		,intCustomerStorageId INT
+		,dblSpotUnits DECIMAL(18,6)
+		,dblContractUnits DECIMAL(18,6)
+		,intContractDetailId INT --for basis contract only
+		,strType NVARCHAR(20)
+	)
 
 	DECLARE @SettleStorage AS TABLE 
 	(
-		 intSettleStorageKey INT IDENTITY(1, 1)
+		intSettleStorageKey INT IDENTITY(1, 1)
 		,intSettleStorageTicketId INT
 		,intCustomerStorageId INT
-		,dblStorageUnits DECIMAL(24, 10)
-		,dblRemainingUnits DECIMAL(24, 10)
+		,dblRemainingUnits DECIMAL(18,6)
+		,dblRemainingSpotUnits DECIMAL(18,6)
+		,dblFutures DECIMAL(18,6)
+		,dblBasis DECIMAL(18,6)
+		,dblCashPrice DECIMAL(18,6)
 	)
 
 	DECLARE @SettleContract AS TABLE 
-	(
-		intSettleContractKey INT IDENTITY(1, 1)
-		,intSettleContractId INT
+	(	
+		intSettleContractId INT
 		,intContractDetailId INT
-		,dblContractUnits DECIMAL(24, 10)
-		,dblCashPrice DECIMAL(24, 10)
+		,dblContractRemaningUnits DECIMAL(18,6)
+		,dblCashPrice DECIMAL(18,6)
 		,intPricingTypeId INT
-		,dblBasis DECIMAL(24, 10)
-	)
-	
-	DECLARE @SettleVoucherCreate AS TABLE 
-	(
-		 intSettleVoucherKey INT IDENTITY(1, 1)
-		,strOrderType NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
-		,intCustomerStorageId INT
-		,intContractDetailId INT NULL
-		,dblUnits DECIMAL(24, 10)
-		,dblCashPrice DECIMAL(24, 10)
-		,intItemId INT NULL
-		,intItemType INT NULL
-		,IsProcessed BIT
-		,intTicketDiscountId INT NULL
-		,intPricingTypeId INT
-		,dblBasis DECIMAL(24, 10)
 	)
 
-	INSERT INTO @SettleStorage 
+	INSERT INTO @SettleStorage
 	(
 		 intSettleStorageTicketId
 		,intCustomerStorageId
-		,dblStorageUnits
 		,dblRemainingUnits
+		,dblRemainingSpotUnits
+		,dblFutures
+		,dblBasis
+		,dblCashPrice
 	)
 	SELECT 
-		 intSettleStorageTicketId = SST.intSettleStorageTicketId
-		,intCustomerStorageId	  = SST.intCustomerStorageId
-		,dblStorageUnits		  = SST.dblUnits
-		,dblRemainingUnits		  = SST.dblUnits
-	FROM tblGRSettleStorageTicket SST	
-	WHERE SST.intSettleStorageId = @intSettleStorageId AND SST.dblUnits > 0
-	ORDER BY SST.intSettleStorageTicketId
+		 intSettleStorageTicketId	= SST.intSettleStorageTicketId
+		,intCustomerStorageId		= SST.intCustomerStorageId
+		,dblRemainingUnits			= SST.dblUnits
+		,dblRemainingSpotUnits		= SS.dblSpotUnits
+		,dblFutures					= SS.dblFuturesPrice
+		,dblBasis					= SS.dblFuturesBasis
+		,dblCashPrice				= SS.dblCashPrice
+	FROM tblGRSettleStorageTicket SST
+	INNER JOIN tblGRSettleStorage SS
+		ON SS.intSettleStorageId = SST.intSettleStorageId
+	WHERE SS.intSettleStorageId = @intSettleStorageId
 
 	INSERT INTO @SettleContract 
 	(
-		 intSettleContractId
+		intSettleContractId
 		,intContractDetailId
-		,dblContractUnits
+		,dblContractRemaningUnits
 		,dblCashPrice
 		,intPricingTypeId
-		,dblBasis
 	)
-	SELECT 
-		 intSettleContractId = SSC.intSettleContractId
-		,intContractDetailId = SSC.intContractDetailId
-		,dblContractUnits	 = SSC.dblUnits
-		,dblCashPrice		 = CD.dblCashPriceInItemStockUOM
-		,intPricingTypeId	 = CD.intPricingTypeId
-		,dblBasis			 = CD.dblBasisInItemStockUOM
+	SELECT
+		intSettleContractId			= intSettleContractId
+		,intContractDetailId		= SSC.intContractDetailId
+		,dblContractRemaningUnits	= SSC.dblUnits
+		,dblCashPrice				= CASE WHEN ISNULL(CD.dblCashPrice,0) > 0 THEN CD.dblCashPrice ELSE ISNULL(CD.dblBasis,0) + ISNULL(CD.dblFutures,0) END
+		,intPricingTypeId			= CD.intPricingTypeId
 	FROM tblGRSettleContract SSC
-	JOIN vyuGRGetContracts CD ON CD.intContractDetailId = SSC.intContractDetailId
-	WHERE intSettleStorageId = @intSettleStorageId AND SSC.dblUnits > 0
-	ORDER BY SSC.intSettleContractId
+	INNER JOIN tblCTContractDetail CD
+		ON CD.intContractDetailId = SSC.intContractDetailId
+	WHERE intSettleStorageId = @intSettleStorageId
 
-	SELECT @SettleStorageKey = MIN(intSettleStorageKey)
-	FROM @SettleStorage
-	WHERE dblRemainingUnits > 0
-
-	SET @intSettleStorageTicketId = NULL
-	SET @intCustomerStorageId = NULL
-	SET @dblStorageUnits = NULL
-
-	WHILE @SettleStorageKey > 0
+	WHILE EXISTS(SELECT TOP 1 1 FROM @SettleStorage)
 	BEGIN
-		SELECT @intSettleStorageTicketId = intSettleStorageTicketId
-			  ,@intCustomerStorageId	 = intCustomerStorageId
-			  ,@dblStorageUnits			 = dblRemainingUnits
+		SET @intSettleStorageKey = NULL
+		SET @intCustomerStorageId = NULL
+		SET @dblRemainingUnits = NULL
+		SET @dblRemainingSpotUnits = NULL		
+
+		SELECT TOP 1
+			@intSettleStorageKey		= intSettleStorageKey
+			,@intCustomerStorageId		= intCustomerStorageId
+			,@dblRemainingUnits			= dblRemainingUnits
+			,@dblRemainingSpotUnits		= dblRemainingSpotUnits
+			,@dblFutures				= dblFutures
+			,@dblBasis					= dblBasis
+			,@dblSpotCashPrice			= dblCashPrice
 		FROM @SettleStorage
-		WHERE intSettleStorageKey = @SettleStorageKey
+		ORDER BY intSettleStorageKey
 
-		IF EXISTS (
-				SELECT 1
-				FROM @SettleContract
-				WHERE dblContractUnits > 0
-				)
-		BEGIN
-			SELECT @SettleContractKey = MIN(intSettleContractKey)
-			FROM @SettleContract
-			WHERE dblContractUnits > 0
-
+		--LOOP THRU CONTRACTS
+		WHILE EXISTS(SELECT TOP 1 1 FROM @SettleContract)
+		BEGIN 
+			SET @dblContractRemainingUnits = NULL
 			SET @intContractDetailId = NULL
-			SET @dblContractUnits = NULL
+			SET @intContractPricingTypeId = NULL
 			SET @dblCashPrice = NULL
-			SET @intPricingTypeId = NULL
 
-			WHILE @SettleContractKey > 0
+			SELECT @dblRemainingUnits = dblRemainingUnits FROM @SettleStorage WHERE intSettleStorageKey = @intSettleStorageKey
+
+			SELECT TOP 1 
+				@intSettleContractId		= intSettleContractId
+				,@intContractDetailId		= intContractDetailId
+				,@dblContractRemainingUnits	= dblContractRemaningUnits
+				,@intContractPricingTypeId	= intPricingTypeId
+				,@dblCashPrice				= dblCashPrice
+			FROM @SettleContract
+			ORDER BY intSettleContractId
+			
+			IF ISNULL(@dblRemainingUnits,0) > 0
 			BEGIN
-				SELECT 
-					 @intContractDetailId = intContractDetailId
-					,@dblContractUnits	  = dblContractUnits
-					,@dblCashPrice		  = dblCashPrice
-					,@intPricingTypeId	  = intPricingTypeId
-					,@dblContractBasis	  = dblBasis
-				FROM @SettleContract
-				WHERE intSettleContractKey = @SettleContractKey
-
-
-				
-				IF @dblStorageUnits <= @dblContractUnits
+				IF ISNULL(@dblContractRemainingUnits,0) > 0
 				BEGIN
-					UPDATE @SettleContract
-					SET dblContractUnits = dblContractUnits - @dblStorageUnits
-					WHERE intSettleContractKey = @SettleContractKey
-
-					UPDATE @SettleStorage
-					SET dblRemainingUnits = 0
-					WHERE intSettleStorageKey = @SettleStorageKey
-															
-					INSERT INTO @SettleVoucherCreate 
+					INSERT INTO @SettleStorageToSave
 					(
-						 intCustomerStorageId
-						,strOrderType
-						,intContractDetailId
-						,dblUnits
-						,dblCashPrice
-						,intItemId
-						,intItemType
-						,IsProcessed
-						,intPricingTypeId
+						intCustomerStorageId
+						,dblSpotUnits
+						,dblFutures
 						,dblBasis
-					)
-					SELECT 
-						 intCustomerStorageId = @intCustomerStorageId
-						,strOrderType		  = 'Contract'
-						,intContractDetailId  = @intContractDetailId
-						,dblUnits			  = @dblStorageUnits
-						,dblCashPrice		  = @dblCashPrice
-						,intItemId			  = @ItemId
-						,intItemType		  = 1
-						,IsProcessed		  = 0
-						,intPricingTypeId	  = @intPricingTypeId
-						,dblBasis			  = @dblContractBasis
-
-					BREAK;
-				END
-				ELSE
-				BEGIN
-					UPDATE @SettleContract
-					SET dblContractUnits = dblContractUnits - @dblContractUnits
-					WHERE intSettleContractKey = @SettleContractKey
-
-					UPDATE @SettleStorage
-					SET dblRemainingUnits = dblRemainingUnits - @dblContractUnits
-					WHERE intSettleStorageKey = @SettleStorageKey
-
-					INSERT INTO @SettleVoucherCreate 
-					(
-						 intCustomerStorageId
-						,strOrderType
+						,dblSpotCashPrice
 						,intContractDetailId
-						,dblUnits
+						,dblContractUnits
 						,dblCashPrice
-						,intItemId
-						,intItemType
-						,IsProcessed
-						,intPricingTypeId
-						,dblBasis
+						,intContractPricingTypeId
+						,isSaved
 					)
-					SELECT 
-						 intCustomerStorageId = @intCustomerStorageId
-						,strOrderType		  = 'Contract'
-						,intContractDetailId  = @intContractDetailId
-						,dblUnits			  = @dblContractUnits
-						,dblCashPrice		  = @dblCashPrice
-						,intItemId			  = @ItemId
-						,intItemType		  = 1
-						,IsProcessed		  = 0
-						,intPricingTypeId	  = @intPricingTypeId
-						,dblBasis			  = @dblContractBasis
-
-					BREAK;
+					SELECT
+						intCustomerStorageId		= @intCustomerStorageId
+						,dblSpotUnits				= 0
+						,dblFutures					= 0
+						,dblBasis					= 0
+						,dblSpotCashPrice			= 0
+						,intContractDetailId		= @intContractDetailId
+						,dblContractUnits			= CASE 
+														WHEN ISNULL(@dblRemainingUnits,0) >= ISNULL(@dblContractRemainingUnits,0) THEN @dblContractRemainingUnits
+														ELSE @dblRemainingUnits
+													END
+						,dblCashPrice				= @dblCashPrice
+						,intContractPricingTypeId	= @intContractPricingTypeId
+						,0
 				END
-
-				SELECT @SettleContractKey = MIN(intSettleContractKey)
-				FROM @SettleContract
-				WHERE intSettleContractKey > @SettleContractKey AND dblContractUnits > 0
-			END
-
-			SELECT @SettleStorageKey = MIN(intSettleStorageKey)
-			FROM @SettleStorage
-			WHERE intSettleStorageKey >= @SettleStorageKey AND dblRemainingUnits > 0
-		END
-		ELSE IF @dblSpotUnits > 0
-		BEGIN
-			IF @dblStorageUnits <= @dblSpotUnits
-			BEGIN
 				UPDATE @SettleStorage
-				SET dblRemainingUnits = dblRemainingUnits - @dblStorageUnits
-				WHERE intSettleStorageKey = @SettleStorageKey
+				SET dblRemainingUnits = @dblRemainingUnits - @dblContractRemainingUnits
+				WHERE intCustomerStorageId = @intCustomerStorageId
 
-				SET @dblSpotUnits = @dblSpotUnits - @dblStorageUnits
+				UPDATE @SettleContract
+				SET dblContractRemaningUnits = @dblContractRemainingUnits - (CASE 
+													WHEN ISNULL(@dblRemainingUnits,0) >= ISNULL(@dblContractRemainingUnits,0) THEN @dblContractRemainingUnits
+													ELSE @dblRemainingUnits
+												END)
+				WHERE intSettleContractId = @intSettleContractId
 
-				INSERT INTO @SettleVoucherCreate 
-				(
-					 intCustomerStorageId
-					,strOrderType
-					,intContractDetailId
-					,dblUnits
-					,dblCashPrice
-					,intItemId
-					,intItemType
-					,IsProcessed
-				)
-				SELECT 
-					 intCustomerStorageId = @intCustomerStorageId
-					,strOrderType		  = 'Direct'
-					,intContractDetailId  = NULL
-					,dblUnits			  = @dblStorageUnits
-					,dblCashPrice		  = @dblSpotCashPrice
-					,intItemId			  = @ItemId
-					,intItemType		  = 1
-					,IsProcessed		  = 0
+				IF @dblContractRemainingUnits = 0
+				BEGIN
+					DELETE FROM @SettleContract WHERE intSettleContractId = @intSettleContractId
+				END
 			END
 			ELSE
 			BEGIN
-				UPDATE @SettleStorage
-				SET dblRemainingUnits = dblRemainingUnits - @dblSpotUnits
-				WHERE intSettleStorageKey = @SettleStorageKey
-
-				INSERT INTO @SettleVoucherCreate 
-				(
-					 intCustomerStorageId
-					,strOrderType
-					,intContractDetailId
-					,dblUnits
-					,dblCashPrice
-					,intItemId
-					,intItemType
-					,IsProcessed
-				)
-				SELECT 
-					 intCustomerStorageId = @intCustomerStorageId
-					,strOrderType		  = 'Direct'
-					,intContractDetailId  = NULL
-					,dblUnits			  = @dblSpotUnits
-					,dblCashPrice		  = @dblSpotCashPrice
-					,intItemId			  = @ItemId
-					,intItemType		  = 1
-					,IsProcessed		  = 0
-
-				SET @dblSpotUnits = 0
+				BREAK;
 			END
-
-			SELECT @SettleStorageKey = MIN(intSettleStorageKey)
-			FROM @SettleStorage
-			WHERE intSettleStorageKey >= @SettleStorageKey AND dblRemainingUnits > 0
 		END
-		ELSE
-			BREAK;
-	END
-
-	--select 'settle voucher create', * from @SettleVoucherCreate
-	SELECT @intSettleVoucherKey = MIN(intSettleVoucherKey)
-	FROM @SettleVoucherCreate
-	WHERE IsProcessed = 0 
-
-	WHILE @intSettleVoucherKey > 0
-	BEGIN
-		DECLARE @_intCustomerStorageId INT
-		SET @_intCustomerStorageId = NULL
-		SET @strOrderType = NULL
-		SET @dblUnits = NULL
-		SET @dblDiscountUnpaid = NULL
-
-		SELECT 
-			 @_intCustomerStorageId = intCustomerStorageId
-			,@strOrderType		   = strOrderType
-			,@dblUnits			   = dblUnits
-		FROM @SettleVoucherCreate
-		WHERE intSettleVoucherKey = @intSettleVoucherKey
-
-		SELECT @dblDiscountUnpaid = dblDiscountUnPaid
-		FROM vyuGRGetStorageTickets
-		WHERE intCustomerStorageId = @_intCustomerStorageId
 		
-		SELECT @strCalcMethod = TD.strCalcMethod,
-				@dblGrossQuantity = CS.dblGrossQuantity,
-				@dblOpenBalance = CS.dblOpenBalance						
-		FROM tblGRCustomerStorage CS
-		INNER JOIN vyuGRTicketDiscount TD
-			ON TD.intTicketFileId = CS.intCustomerStorageId
-				AND TD.strSourceType = 'Storage'
-		WHERE CS.intCustomerStorageId = @_intCustomerStorageId
-			AND TD.dblDiscountDue > 0
-
-		--select 'order type',@strOrderType, @intSettleVoucherKey
-		IF @strOrderType = 'Direct'
+		--SPOT UNITS
+		IF ISNULL(@dblRemainingUnits,0) > 0 AND ISNULL(@dblRemainingSpotUnits,0) > 0
 		BEGIN
-			SET @dblStorageDuePerUnit = 0
-			SET @dblStorageDueAmount = 0
-			SET @dblStorageDueTotalPerUnit = 0
-			SET @dblStorageDueTotalAmount = 0
-			SET @dblStorageBilledPerUnit = 0
-			SET @dblStorageBilledAmount = 0
-			SET @dblFlatFeeTotal = 0
-			SET @dblTicketStorageDue = 0
+			SELECT TOP 1 @dblRemainingUnits	= dblRemainingUnits FROM @SettleStorage WHERE intSettleStorageKey = @intSettleStorageKey
 
-			EXEC uspGRCalculateStorageCharge 
-				 @strProcessType
-				,@strUpdateType
-				,@_intCustomerStorageId
-				,NULL
-				,NULL
-				,@dblUnits
-				,@dtmCalculateStorageThrough
-				,@intCreatedUserId
-				,0
-				,NULL
-				,@dblStorageDuePerUnit OUTPUT
-				,@dblStorageDueAmount OUTPUT
-				,@dblStorageDueTotalPerUnit OUTPUT
-				,@dblStorageDueTotalAmount OUTPUT
-				,@dblStorageBilledPerUnit OUTPUT
-				,@dblStorageBilledAmount OUTPUT
-				,@dblFlatFeeTotal OUTPUT
-
-			IF @strStorageAdjustment = 'Override'
-				SET @dblTicketStorageDue = @dblAdjustPerUnit + @dblStorageDuePerUnit + @dblStorageDueTotalPerUnit - @dblStorageBilledPerUnit
-			ELSE
-				SET @dblTicketStorageDue = @dblStorageDuePerUnit + @dblStorageDueTotalPerUnit - @dblStorageBilledPerUnit
-
-			INSERT INTO tblGRSettleStorage 
+			INSERT INTO @SettleStorageToSave
 			(
-				 intConcurrencyId
-				,intEntityId
-				,intCompanyLocationId
-				,intItemId
+				intCustomerStorageId
 				,dblSpotUnits
-				,dblFuturesPrice
-				,dblFuturesBasis
-				,dblCashPrice
-				,strStorageAdjustment
-				,dtmCalculateStorageThrough
-				,dblAdjustPerUnit
-				,dblStorageDue
-				,strStorageTicket
-				,dblSelectedUnits
-				,dblUnpaidUnits
-				,dblSettleUnits
-				,dblDiscountsDue
-				,dblNetSettlement
-				,ysnPosted
-				,intCommodityId
-				,intCommodityStockUomId
-				,intCreatedUserId
-				,intBillId
-				,dtmCreated
-				,intParentSettleStorageId
-				,intItemUOMId
-			)
-			SELECT 
-				 intConcurrencyId			= 1
-				,intEntityId				= intEntityId
-				,intCompanyLocationId		= intCompanyLocationId
-				,intItemId					= intItemId
-				,dblSpotUnits				= @dblUnits
-				,dblFuturesPrice			= dblFuturesPrice
-				,dblFuturesBasis			= dblFuturesBasis
-				,dblCashPrice				= dblCashPrice
-				,strStorageAdjustment		= strStorageAdjustment
-				,dtmCalculateStorageThrough = dtmCalculateStorageThrough
-				,dblAdjustPerUnit		    = dblAdjustPerUnit
-				,dblStorageDue				= @dblTicketStorageDue * @dblUnits + ISNULL(@dblFlatFeeTotal,0)
-				,strStorageTicket			= strStorageTicket + '/' + LTRIM(@Counter)
-				,dblSelectedUnits			= @dblUnits
-				,dblUnpaidUnits				= 0
-				,dblSettleUnits				= @dblUnits
-				,dblDiscountsDue			= CASE WHEN @strCalcMethod = 3 
-												   THEN @dblDiscountUnpaid * (@dblGrossQuantity * (@dblUnits / @dblOpenBalance)) 
-												   ELSE @dblDiscountUnpaid * (@dblUnitsByOrderType - @dblUnpaidUnits)
-											  END 
-				,dblNetSettlement			= (@dblUnits * dblCashPrice) - (@dblTicketStorageDue*@dblUnits) - (CASE WHEN @strCalcMethod = 3 
-												   THEN @dblDiscountUnpaid * (@dblGrossQuantity * (@dblUnits / @dblOpenBalance)) 
-												   ELSE @dblDiscountUnpaid * (@dblUnitsByOrderType - @dblUnpaidUnits)
-											  END )-ISNULL(@dblFlatFeeTotal,0)
-				,ysnPosted					= 0
-				,intCommodityId				= intCommodityId
-				,intCommodityStockUomId		= intCommodityStockUomId
-				,intCreatedUserId			= intCreatedUserId
-				,intBillId					= NULL
-				,dtmCreated					= dtmCreated
-				,intParentSettleStorageId	= @intSettleStorageId
-				,intItemUOMId				= @intItemUOMId
-			FROM tblGRSettleStorage
-			WHERE intSettleStorageId = @intSettleStorageId
-
-			SET @NewSettleStorageId = SCOPE_IDENTITY()
-
-			INSERT INTO tblGRSettleStorageTicket 
-			(
-				 intConcurrencyId
-				,intSettleStorageId
-				,intCustomerStorageId
-				,dblUnits
-			)
-			SELECT 
-				 intConcurrencyId		= 1
-				,intSettleStorageId		= @NewSettleStorageId
-				,intCustomerStorageId	= @_intCustomerStorageId
-				,dblUnits				= @dblUnits
-		END
-		ELSE IF @strOrderType = 'Contract'
-		BEGIN
-			
-			SELECT @dblUnitsByOrderType = SUM(dblUnits)
-			FROM @SettleVoucherCreate
-			WHERE intCustomerStorageId = @_intCustomerStorageId AND strOrderType = @strOrderType
-
-			--select 'customer storage and units by order type', @_intCustomerStorageId, @dblUnitsByOrderType
-
-			SELECT @dblUnpaidUnits = ISNULL(SUM(dblUnits),0)
-			FROM @SettleVoucherCreate
-			WHERE intCustomerStorageId = @_intCustomerStorageId AND strOrderType = @strOrderType AND intPricingTypeId NOT IN (1,6)
-
-			SELECT @dblContractAmount = ISNULL(SUM(dblUnits*dblCashPrice),0)
-			FROM @SettleVoucherCreate
-			WHERE intCustomerStorageId = @_intCustomerStorageId AND strOrderType = @strOrderType AND  intPricingTypeId IN (1,6)
-			
-
-			SET @dblStorageDuePerUnit = 0
-			SET @dblStorageDueAmount = 0
-			SET @dblStorageDueTotalPerUnit = 0
-			SET @dblStorageDueTotalAmount = 0
-			SET @dblStorageBilledPerUnit = 0
-			SET @dblStorageBilledAmount = 0
-			SET @dblFlatFeeTotal = 0
-			SET @dblTicketStorageDue = 0
-
-			EXEC uspGRCalculateStorageCharge 
-				 @strProcessType
-				,@strUpdateType
-				,@_intCustomerStorageId
-				,NULL
-				,NULL
-				,@dblUnitsByOrderType
-				,@dtmCalculateStorageThrough
-				,@intCreatedUserId
-				,0
-				,NULL
-				,@dblStorageDuePerUnit OUTPUT
-				,@dblStorageDueAmount OUTPUT
-				,@dblStorageDueTotalPerUnit OUTPUT
-				,@dblStorageDueTotalAmount OUTPUT
-				,@dblStorageBilledPerUnit OUTPUT
-				,@dblStorageBilledAmount OUTPUT
-				,@dblFlatFeeTotal OUTPUT
-
-			IF @strStorageAdjustment = 'Override'
-				SET @dblTicketStorageDue = @dblAdjustPerUnit + @dblStorageDuePerUnit + @dblStorageDueTotalPerUnit - @dblStorageBilledPerUnit
-			ELSE
-				SET @dblTicketStorageDue = @dblStorageDuePerUnit + @dblStorageDueTotalPerUnit - @dblStorageBilledPerUnit
-
-			INSERT INTO tblGRSettleStorage 
-			(
-				 intConcurrencyId
-				,intEntityId
-				,intCompanyLocationId
-				,intItemId
-				,dblSpotUnits
-				,dblFuturesPrice
-				,dblFuturesBasis
-				,dblCashPrice
-				,strStorageAdjustment
-				,dtmCalculateStorageThrough
-				,dblAdjustPerUnit
-				,dblStorageDue
-				,strStorageTicket
-				,dblSelectedUnits
-				,dblUnpaidUnits
-				,dblSettleUnits
-				,dblDiscountsDue
-				,dblNetSettlement
-				,ysnPosted
-				,intCommodityId
-				,intCommodityStockUomId
-				,intCreatedUserId
-				,intBillId
-				,dtmCreated
-				,intParentSettleStorageId
-				,intItemUOMId
-				)
-			SELECT 
-				 intConcurrencyId				= 1
-				,intEntityId					= intEntityId
-				,intCompanyLocationId			= intCompanyLocationId
-				,intItemId						= intItemId
-				,dblSpotUnits					= 0
-				,dblFuturesPrice				= 0
-				,dblFuturesBasis				= 0
-				,dblCashPrice					= 0
-				,strStorageAdjustment			= strStorageAdjustment
-				,dtmCalculateStorageThrough		= dtmCalculateStorageThrough
-				,dblAdjustPerUnit				= dblAdjustPerUnit
-				,dblStorageDue					= @dblTicketStorageDue*@dblUnitsByOrderType + ISNULL(@dblFlatFeeTotal,0)
-				,strStorageTicket				= strStorageTicket + '/' + LTRIM(@Counter)
-				,dblSelectedUnits				= @dblUnitsByOrderType
-				,dblUnpaidUnits					= @dblUnpaidUnits
-				,dblSettleUnits					= @dblUnitsByOrderType - @dblUnpaidUnits
-				,dblDiscountsDue				= CASE WHEN @strCalcMethod = 3 
-														THEN @dblDiscountUnpaid * (@dblGrossQuantity * (@dblUnits / @dblOpenBalance)) 
-														ELSE @dblDiscountUnpaid * (@dblUnitsByOrderType - @dblUnpaidUnits)
-												  END
-				,dblNetSettlement				= @dblContractAmount - (@dblTicketStorageDue*@dblUnitsByOrderType) - (
-														CASE WHEN @strCalcMethod = 3 
-															 THEN @dblDiscountUnpaid * (@dblGrossQuantity * (@dblUnits / @dblOpenBalance)) 
-															 ELSE @dblDiscountUnpaid * (@dblUnitsByOrderType - @dblUnpaidUnits)
-														END 
-												  ) - ISNULL(@dblFlatFeeTotal,0)
-				,ysnPosted						= 0
-				,intCommodityId					= intCommodityId
-				,intCommodityStockUomId			= intCommodityStockUomId
-				,intCreatedUserId				= intCreatedUserId
-				,intBillId						= NULL
-				,dtmCreated						= dtmCreated
-				,intParentSettleStorageId		= @intSettleStorageId
-				,intItemUOMId					= @intItemUOMId
-			FROM tblGRSettleStorage
-			WHERE intSettleStorageId = @intSettleStorageId
-
-			SET @NewSettleStorageId = SCOPE_IDENTITY()
-
-			INSERT INTO tblGRSettleStorageTicket 
-			(
-				 intConcurrencyId
-				,intSettleStorageId
-				,intCustomerStorageId
-				,dblUnits
-			)
-			SELECT 
-				 intConcurrencyId	    = 1
-				,intSettleStorageId		= @NewSettleStorageId
-				,intCustomerStorageId   = @_intCustomerStorageId
-				,dblUnits				= @dblUnitsByOrderType
-
-			INSERT INTO tblGRSettleContract 
-			(
-				 intConcurrencyId
-				,intSettleStorageId
+				,dblFutures
+				,dblBasis
+				,dblSpotCashPrice
 				,intContractDetailId
-				,dblUnits
+				,dblContractUnits
+				,dblCashPrice
+				,intContractPricingTypeId
+				,isSaved
 			)
-			SELECT 
-				 intConcurrencyId	    = 1
-				,intSettleStorageId		= @NewSettleStorageId
-				,intContractDetailId	= intContractDetailId
-				,dblUnits				= dblUnits
-			FROM @SettleVoucherCreate
-			WHERE intCustomerStorageId = @_intCustomerStorageId AND strOrderType = @strOrderType
-
+			SELECT
+				intCustomerStorageId		= @intCustomerStorageId
+				,dblSpotUnits				= CASE 
+												WHEN @dblRemainingUnits >= @dblRemainingSpotUnits THEN @dblRemainingSpotUnits
+												ELSE @dblRemainingUnits
+											END
+				,dblFutures					= @dblFutures
+				,dblBasis					= @dblBasis
+				,dblSpotCashPrice			= @dblSpotCashPrice
+				,intContractDetailId		= 0
+				,dblContractUnits			= 0
+				,dblCashPrice				= 0
+				,intContractPricingTypeId	= -1
+				,0
+				
+			UPDATE @SettleStorage
+			SET dblRemainingUnits = @dblRemainingUnits - @dblRemainingSpotUnits
+			WHERE intCustomerStorageId = @intCustomerStorageId
 		END
 
-		SET @Counter = @Counter + 1 
-		UPDATE @SettleVoucherCreate
-		SET IsProcessed = 1
-		WHERE intCustomerStorageId = @_intCustomerStorageId AND strOrderType = @strOrderType
-
-		--select 'loop settle voucher create ', * from @SettleVoucherCreate
-		SELECT @intSettleVoucherKey = MIN(intSettleVoucherKey)
-		FROM @SettleVoucherCreate
-		WHERE intSettleVoucherKey > @intSettleVoucherKey AND IsProcessed = 0 -- order by intSettleVoucherKey asc
-
-		--select 'loop settle voucher create ', * from @SettleVoucherCreate
-
+		IF ISNULL(@dblRemainingUnits,0) <= 0
+		BEGIN
+			DELETE FROM @SettleStorage WHERE intCustomerStorageId = @intCustomerStorageId
+		END
 	END
 
-	--select 'settle storage ticket', * from tblGRSettleStorageTicket where intCustomerStorageId = @_intCustomerStorageId
+	--WILL BE SAVED ONLY IN tblGRSettleStorage
+	INSERT INTO @MainSettleStorageToSave
+	--PRICED and CASH contracts
+	SELECT 
+		intCustomerStorageId
+		,0
+		,dblContractUnits = SUM(dblContractUnits)
+		,0
+		,'Priced'
+	FROM @SettleStorageToSave
+	WHERE intContractPricingTypeId IN (1,6)
+	GROUP BY intCustomerStorageId
+	UNION
+	--BASIS CONTRACT
+	SELECT 
+		intCustomerStorageId
+		,0
+		,dblContractUnits
+		,intContractDetailId
+		,'Basis'
+	FROM @SettleStorageToSave
+	WHERE intContractPricingTypeId = 2
+	UNION
+	--SPOT
+	SELECT 
+		intCustomerStorageId
+		,dblSpotUnits
+		,0
+		,0
+		,'Spot'
+	FROM @SettleStorageToSave
+	WHERE intContractPricingTypeId = -1
 
+	--START SAVING THE SETTLEMENTS IN TABLES
+	WHILE EXISTS(SELECT TOP 1 1 FROM @MainSettleStorageToSave)
+	BEGIN
+		SET @intCustomerStorageId = NULL
+		SET @dblTotalUnitsForSettle = NULL
+		SET @strType = NULL
+		SET @intSettleStorageKey = NULL
+		SET @intNewSettleStorageId = NULL
+		SET @intContractDetailId = NULL
 
+		SELECT TOP 1
+			@intSettleStorageKey		= intSettleStorageKey
+			,@intCustomerStorageId		= intCustomerStorageId
+			,@dblTotalUnitsForSettle	= CASE WHEN dblContractUnits > 0 THEN dblContractUnits ELSE dblSpotUnits END
+			,@strType					= strType
+			,@intContractDetailId		= intContractDetailId
+		FROM @MainSettleStorageToSave
+		ORDER BY intSettleStorageKey		
+
+		--ALWAYS GET THE COMPANY LOCATION SINCE IT'S NOT REQUIRED
+		SELECT @intCompanyLocationId = intCompanyLocationId FROM tblGRCustomerStorage WHERE intCustomerStorageId = @intCustomerStorageId
+
+		INSERT INTO tblGRSettleStorage 
+		(
+			intConcurrencyId
+			,intEntityId
+			,intCompanyLocationId
+			,intItemId
+			,dblSpotUnits
+			,dblFuturesPrice
+			,dblFuturesBasis
+			,dblCashPrice
+			,strStorageAdjustment
+			,dtmCalculateStorageThrough
+			,dblAdjustPerUnit
+			,dblStorageDue
+			,strStorageTicket
+			,dblSelectedUnits
+			,dblUnpaidUnits
+			,dblSettleUnits
+			,dblDiscountsDue
+			,dblNetSettlement
+			,ysnPosted
+			,intCommodityId
+			,intCommodityStockUomId
+			,intCreatedUserId
+			,dtmCreated
+			,intParentSettleStorageId
+			,intItemUOMId
+		)
+		SELECT 
+			intConcurrencyId			= 1
+			,intEntityId				= intEntityId
+			,intCompanyLocationId		= @intCompanyLocationId
+			,intItemId					= intItemId
+			,dblSpotUnits				= CASE WHEN @strType = 'Spot' THEN @dblTotalUnitsForSettle ELSE 0 END
+			,dblFuturesPrice			= CASE WHEN @strType = 'Spot' THEN dblFuturesPrice ELSE 0 END
+			,dblFuturesBasis			= CASE WHEN @strType = 'Spot' THEN dblFuturesBasis ELSE 0 END
+			,dblCashPrice				= CASE WHEN @strType = 'Spot' THEN dblCashPrice ELSE 0 END
+			,strStorageAdjustment		= strStorageAdjustment
+			,dtmCalculateStorageThrough = dtmCalculateStorageThrough
+			,dblAdjustPerUnit		    = dblAdjustPerUnit
+			,dblStorageDue				= (@dblTotalUnitsForSettle / dblSelectedUnits) * dblStorageDue
+			,strStorageTicket			= strStorageTicket + '/' + LTRIM(@intSettleStorageKey)
+			,dblSelectedUnits			= @dblTotalUnitsForSettle
+			,dblUnpaidUnits				= CASE WHEN @strType = 'Basis' THEN @dblTotalUnitsForSettle ELSE 0 END
+			,dblSettleUnits				= CASE WHEN @strType <> 'Basis' THEN @dblTotalUnitsForSettle ELSE 0 END
+			,dblDiscountsDue			= (@dblTotalUnitsForSettle / dblSelectedUnits) * dblDiscountsDue
+			,dblNetSettlement			= (@dblTotalUnitsForSettle / dblSelectedUnits) * dblNetSettlement
+			,ysnPosted					= 0
+			,intCommodityId				= intCommodityId
+			,intCommodityStockUomId		= intCommodityStockUomId
+			,intCreatedUserId			= intCreatedUserId
+			,dtmCreated					= dtmCreated
+			,intParentSettleStorageId	= @intSettleStorageId
+			,intItemUOMId				= intItemUOMId
+		FROM tblGRSettleStorage
+		WHERE intSettleStorageId = @intSettleStorageId
+
+		SET @intNewSettleStorageId = SCOPE_IDENTITY()
+
+		IF @strType <> 'Spot'
+		BEGIN
+			IF @intContractDetailId > 0 --BASIS
+			BEGIN
+				INSERT INTO tblGRSettleContract 
+				(
+					 intConcurrencyId
+					,intSettleStorageId
+					,intContractDetailId
+					,dblUnits
+				)
+				SELECT 
+					 intConcurrencyId	    = 1
+					,intSettleStorageId		= @intNewSettleStorageId
+					,intContractDetailId	= @intContractDetailId
+					,dblUnits				= @dblTotalUnitsForSettle
+				FROM @SettleStorageToSave SS
+				WHERE intCustomerStorageId = @intCustomerStorageId 
+					AND intContractDetailId = @intContractDetailId
+			END
+			ELSE --PRICED, CASH
+			BEGIN
+				INSERT INTO tblGRSettleContract 
+				(
+					 intConcurrencyId
+					,intSettleStorageId
+					,intContractDetailId
+					,dblUnits
+				)
+				SELECT 
+					 intConcurrencyId	    = 1
+					,intSettleStorageId		= @intNewSettleStorageId
+					,intContractDetailId	= SS.intContractDetailId
+					,dblUnits				= SS.dblContractUnits
+				FROM @SettleStorageToSave SS
+				WHERE intCustomerStorageId = @intCustomerStorageId 
+					AND intContractPricingTypeId IN (1,6)
+			END
+		END
+
+		INSERT INTO tblGRSettleStorageTicket 
+		(
+			intConcurrencyId
+			,intSettleStorageId
+			,intCustomerStorageId
+			,dblUnits
+		)
+		SELECT 
+			intConcurrencyId	    = 1
+			,intSettleStorageId		= @intNewSettleStorageId
+			,intCustomerStorageId   = @intCustomerStorageId
+			,dblUnits				= @dblTotalUnitsForSettle
+
+		DELETE FROM @MainSettleStorageToSave WHERE intSettleStorageKey = @intSettleStorageKey
+	END
+	SELECT * FROM tblGRSettleStorage ORDER BY intSettleStorageId DESC
+	SELECT * FROM tblGRSettleContract ORDER BY intSettleContractId DESC
+	SELECT * FROM tblGRSettleStorageTicket ORDER BY intSettleStorageTicketId DESC
 END TRY
 
 BEGIN CATCH
 	SET @ErrMsg = ERROR_MESSAGE()
 	RAISERROR (@ErrMsg,16,1,'WITH NOWAIT')
 END CATCH
+
