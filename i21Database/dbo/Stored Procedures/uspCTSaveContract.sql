@@ -397,7 +397,9 @@ BEGIN TRY
 		UPDATE tblCTContractHeader SET dtmSigned = DATEADD(d, 0, DATEDIFF(d, 0, GETDATE())) WHERE intContractHeaderId = @intContractHeaderId		
 	END
 
-	EXEC	uspCTCreateDetailHistory		@intContractHeaderId
+	EXEC	uspCTCreateDetailHistory		@intContractHeaderId 	= @intContractHeaderId,
+											@strSource 				= 'Contract',
+											@strProcess 			= 'Contract Sequence'
 	EXEC	uspCTInterCompanyContract		@intContractHeaderId
 
 	-- Add Payables if Create Other Cost Payable on Save Contract set to true

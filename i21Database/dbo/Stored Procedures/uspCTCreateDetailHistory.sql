@@ -4,6 +4,7 @@
 	@strComment				   NVARCHAR(100) = NULL,
 	@intSequenceUsageHistoryId INT = NULL,
 	@ysnUseContractDate		   BIT = 0,
+	@strSource				   NVARCHAR(50) = '',
 	@strProcess				   NVARCHAR(50) = ''
 AS	   
 
@@ -26,9 +27,7 @@ BEGIN TRY
 				@dblFutures				NUMERIC(18,6),
 				@dblBasis				NUMERIC(18,6),
 				@dblCashPrice			NUMERIC(18,6),
-				@ExistingHistory		AS RKSummaryLog,
-				@strTransactionType		NVARCHAR(50)
-
+				@strTransactionType		NVARCHAR(20) 
 	
 		DECLARE @tblHeader AS TABLE 
 		(
@@ -215,7 +214,7 @@ BEGIN TRY
 		JOIN	tblSMCompanyLocation	    CL  ON  CL.intCompanyLocationId =	CD.intCompanyLocationId
 		JOIN	tblCTContractType		    CT  ON  CT.intContractTypeId	=	CH.intContractTypeId
 		JOIN	tblCTPricingType		    PT  ON  PT.intPricingTypeId		=	CD.intPricingTypeId
-		JOIN	tblICCommodityUnitMeasure	QU  ON  QU.intCommodityId		=	CH.intCommodityId
+ LEFT	JOIN	tblICCommodityUnitMeasure	QU  ON  QU.intCommodityId		=	CH.intCommodityId
 												AND QU.intUnitMeasureId		=	ISNULL(CD.intUnitMeasureId,QU.intUnitMeasureId)
  LEFT   JOIN	tblCTPriceFixation		    PF  ON  PF.intContractDetailId	=	CD.intContractDetailId
  LEFT	JOIN	tblCTBook					BK	ON BK.intBookId				=	CD.intBookId
@@ -235,6 +234,14 @@ BEGIN TRY
 		SELECT @intPrevHistoryId = NULL
 		SELECT @intContractDetailId = intContractDetailId FROM tblCTSequenceHistory WHERE intSequenceHistoryId = @intSequenceHistoryId
 		SELECT @intPrevHistoryId = intSequenceHistoryId FROM tblCTSequenceHistory WITH (NOLOCK) WHERE intSequenceHistoryId < @intSequenceHistoryId AND intContractDetailId = @intContractDetailId
+
+		-- CONTRACT BALANCE LOG
+		DECLARE @contractDetails AS [dbo].[ContractDetailTable]
+		EXEC uspCTLogSummary @intContractHeaderId 	= 	@intContractHeaderId,
+							 @intContractDetailId 	= 	@intContractDetailId,
+							 @strSource			 	= 	@strSource,
+							 @strProcess		 	= 	@strProcess,
+							 @contractDetail 		= 	@contractDetails		
 
 		IF @intPrevHistoryId IS NULL
 		BEGIN
@@ -672,50 +679,6 @@ BEGIN TRY
 		   AND CurrentRow.intContractDetailId = PreviousRow.intContractDetailId
 		END     
 	END
-
-	SELECT @strTransactionType = CASE 
-									WHEN @strProcess = 'Price Fixation' THEN 'Price Fixation'
-									ELSE 'Contract'
-								 END
-
-	INSERT INTO @ExistingHistory(strTransactionType
-		, intTransactionRecordId
-		, strTransactionNumber
-		, dtmTransactionDate
-		, intContractDetailId
-		, intContractHeaderId
-		, intCommodityId
-		, intBookId
-		, intSubBookId
-		, intFutureMarketId
-		, intFutureMonthId
-		, dblNoOfLots
-		, dblPrice
-		, intEntityId
-		, intUserId
-		, strNotes)
-	SELECT strTransactionType = @strTransactionType
-		, intTransactionRecordId = intContractDetailId
-		, strTransactionNumber = strContractNumber + '-' + CAST(intContractSeq AS NVARCHAR(10))
-		, dtmTransactionDate = dtmHistoryCreated
-		, intContractDetailId = intContractDetailId
-		, intContractHeaderId = intContractHeaderId
-		, intCommodityId = intCommodityId
-		, intBookId = intBookId
-		, intSubBookId = intSubBookId
-		, intFutureMarketId = intFutureMarketId
-		, intFutureMonthId = intFutureMonthId
-		, dblNoOfLots = dblLotsPriced
-		, dblPrice = dblFinalPrice
-		, intEntityId = intEntityId
-		, intUserId = intUserId
-		, strNotes = ''
-	FROM tblCTSequenceHistory SH
-	INNER JOIN @SCOPE_IDENTITY NR ON SH.intSequenceHistoryId = NR.intSequenceHistoryId
-	ORDER BY NR.intSequenceHistoryId ASC
-
-	EXEC uspRKLogRiskPosition @ExistingHistory, 1
-
 END TRY
 
 BEGIN CATCH

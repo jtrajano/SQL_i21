@@ -8498,6 +8498,8 @@
     <Build Include="dbo\Functions\fnRKGetBucketBasisDeliveries.sql" />
     <Build Include="dbo\Functions\fnRKGetBucketCustomerOwned.sql" />
     <Build Include="dbo\Functions\fnRKGetBucketDelayedPricing.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTLogSummary.sql" />
+    <Build Include="dbo\User Defined Types\ContractDetailTable.sql" />
     <Build Include="dbo\Stored Procedures\uspAPReverseTransaction.sql" />
   </ItemGroup>
   <ItemGroup>

@@ -1200,8 +1200,7 @@ BEGIN TRY
 
 
 		   SELECT @intPriceFixationDetailId = MIN(intPriceFixationDetailId) FROM tblCTPriceFixationDetail WHERE intPriceFixationId = @intPriceFixationId AND intPriceFixationDetailId > @intPriceFixationDetailId
-	    END
-
+	    END	
     END
 
 	/*CT-4127 - Move here outside the Price Fixation Detail loop the creation of Invoice from Contract Partial Pricing*/
@@ -1519,7 +1518,6 @@ BEGIN TRY
 		CLOSE @shipment
 		DEALLOCATE @shipment
 		/*---End Loop Shipment---*/
-
 	END
 
 

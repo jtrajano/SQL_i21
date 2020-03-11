@@ -109,7 +109,9 @@ BEGIN TRY
 	@intContractHeaderId		=	NULL,
     @intContractDetailId		=	@intContractDetailId,
 	@strComment				    =	NULL,
-	@intSequenceUsageHistoryId  =	@intSequenceUsageHistoryId
+	@intSequenceUsageHistoryId  =	@intSequenceUsageHistoryId,
+	@strSource	 				= 	'Inventory',
+	@strProcess 				= 	'Sequence Quantity'
 
 END TRY
 
