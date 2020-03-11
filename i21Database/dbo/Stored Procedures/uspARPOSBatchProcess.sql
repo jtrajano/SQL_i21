@@ -567,7 +567,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM #POSTRANSACTIONS)
 				 , intPOSPaymentId		= POSP.intPOSPaymentId
 				 , strPaymentMethod		= CASE WHEN POSP.strPaymentMethod = 'Credit Card' THEN 'Manual Credit Card' ELSE POSP.strPaymentMethod END
 				 , strReferenceNo		= POSP.strReferenceNo
-				 , dblAmount			= POSP.dblAmount
+				 , dblAmount			= POSP.dblAmountTendered
 			INTO #POSPAYMENTS
 			FROM tblARPOS POS
 			INNER JOIN tblARInvoiceIntegrationLogDetail I ON POS.intPOSId = I.intSourceId AND POS.strReceiptNumber = I.strSourceId
