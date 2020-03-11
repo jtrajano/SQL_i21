@@ -11,6 +11,8 @@ SELECT DISTINCT
 				THEN 'ATM Replenishment'
 			WHEN REPLACE(ITEM, '_ItemId', '') = 'EndBalanceActual'
 				THEN 'ATM End Balance'
+			WHEN REPLACE(ITEM, '_ItemId', '') = 'EndBalanceCalculated'
+				THEN 'ATM End Balance Calculated'
 			WHEN REPLACE(ITEM, '_ItemId', '') = 'Variance'
 				THEN 'ATM Variance'
 		END AS strType,
