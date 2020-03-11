@@ -8539,6 +8539,7 @@
     <Build Include="dbo\Stored Procedures\uspARProcessPreStageInvoice.sql" />
     <Build Include="dbo\Stored Procedures\uspARInvoicePopulateStgXML.sql" />
     <Build Include="dbo\Stored Procedures\uspARInvoiceTransferStgXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessSAPSample_ST.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
