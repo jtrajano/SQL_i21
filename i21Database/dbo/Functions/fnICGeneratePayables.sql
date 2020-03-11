@@ -459,7 +459,9 @@ WHERE
 	AND (
 		Contracts.intContractDetailId IS NULL OR 
 		(
-			CASE WHEN Contracts.intContractDetailId IS NOT NULL AND A.strReceiptType = 'Purchase Contract' 
+			CASE WHEN 
+				Contracts.intContractDetailId IS NOT NULL 
+				AND A.strReceiptType = 'Purchase Contract' 				
 				AND EXISTS(
 					SELECT TOP 1 1 
 					FROM tblAPVoucherPayable 
@@ -469,6 +471,7 @@ WHERE
 					AND intInventoryReceiptItemId IS NULL
 					AND intInventoryReceiptChargeId IS NULL 
 					AND intInventoryShipmentChargeId IS NULL
+					AND intItemId = B.intItemId
 				)
 				THEN 0 ELSE 1 
 			END = 1
