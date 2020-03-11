@@ -1368,6 +1368,29 @@ BEGIN TRY
 			END
 		END
 
+		IF @strProcess = 'Voucher Delete'
+		BEGIN
+			DECLARE @billId INT,
+					@billCreatedId INT
+
+			SELECT @billId = intBillId 
+			FROM tblAPBillDetail a
+			INNER JOIN @cbLogCurrent b ON a.intBillDetailId = b.intTransactionReferenceId
+
+			EXEC uspAPReverseTransaction @billId, @intUserId, @billCreatedId
+		END
+		ELSE IF @strProcess = 'Invoice Delete'
+		BEGIN
+			DECLARE @invoiceId INT,
+					@intNewInvoiceId INT
+
+			SELECT @invoiceId = intInvoiceId 
+			FROM tblARInvoiceDetail a
+			INNER JOIN @cbLogCurrent b ON a.intInvoiceDetailId = b.intTransactionReferenceId
+
+			EXEC uspARReturnInvoice @invoiceId, @intNewInvoiceId
+		END
+
 		DELETE FROM @cbLogCurrent WHERE intContractDetailId = @currentContractDetalId
 	END
 
