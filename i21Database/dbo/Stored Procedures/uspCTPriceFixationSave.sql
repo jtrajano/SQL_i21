@@ -199,7 +199,10 @@ BEGIN TRY
 
 			UPDATE tblCTContractDetail SET intSplitFromId = NULL WHERE intSplitFromId = @intContractDetailId
 
-			EXEC	uspCTCreateDetailHistory	@intContractHeaderId,@intContractDetailId, 'Pricing Delete'
+			EXEC	uspCTCreateDetailHistory	@intContractHeaderId	= @intContractHeaderId, 
+												@intContractDetailId 	= @intContractDetailId, 
+												@strSource 			 	= 'Pricing',
+												@strProcess 			= 'Price Delete'
 
 			IF	@ysnMultiplePriceFixation = 1
 			BEGIN
@@ -582,7 +585,10 @@ BEGIN TRY
 		
 		EXEC	uspCTSequencePriceChanged @intContractDetailId, @intUserId, 'Price Contract', 0
 
-		EXEC	uspCTCreateDetailHistory	@intContractHeaderId = @intContractHeaderId, @intContractDetailId = @intContractDetailId, @strProcess = 'Price Fixation'
+		EXEC	uspCTCreateDetailHistory	@intContractHeaderId	= @intContractHeaderId, 
+											@intContractDetailId 	= @intContractDetailId, 
+											@strSource				= 'Pricing',
+											@strProcess 			= 'Price Fixation'
 		
 		/*CT-3569 - this will create amendment for newly added sequence from partial pricing SPLIT function.*/
 		  if (ISNULL(@ysnSplit,0) = 1 )

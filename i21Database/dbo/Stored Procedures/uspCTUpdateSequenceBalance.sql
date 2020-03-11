@@ -129,10 +129,12 @@ BEGIN TRY
 			@strScreenName			=	@strScreenName
 
 	EXEC	uspCTCreateDetailHistory	
-	@intContractHeaderId		=	NULL,
-    @intContractDetailId		=	@intContractDetailId,
-	@strComment				    =	NULL,
-	@intSequenceUsageHistoryId  =	@intSequenceUsageHistoryId
+			@intContractHeaderId		=	NULL,
+			@intContractDetailId		=	@intContractDetailId,
+			@strComment				    =	NULL,
+			@intSequenceUsageHistoryId  =	@intSequenceUsageHistoryId,
+			@strSource	 				= 	'Inventory',
+			@strProcess 				= 	'Balance'
 
 END TRY
 

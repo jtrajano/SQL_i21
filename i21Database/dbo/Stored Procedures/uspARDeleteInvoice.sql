@@ -48,6 +48,21 @@ BEGIN TRY
 			DELETE FROM tblARInvoiceDetailTax 
 			WHERE intInvoiceDetailId = @InvoiceDetailId
 
+			-- Log summary	
+			DECLARE @intContractHeaderId INT,
+					@intContractDetailId INT,
+					@contractDetails AS [dbo].[ContractDetailTable]
+			SELECT @intContractHeaderId = intContractHeaderId, @intContractDetailId = intContractDetailId
+			FROM tblARInvoiceDetail
+			WHERE intInvoiceDetailId = @InvoiceDetailId
+
+			EXEC uspCTLogSummary @intContractHeaderId 	= 	@intContractHeaderId,
+								@intContractDetailId 	= 	@intContractDetailId,
+								@strSource			 	= 	'Pricing',
+								@strProcess			 	= 	'Invoice Delete',
+								@contractDetail 		= 	@contractDetails,
+								@intUserId				= 	@UserId
+
 			DELETE FROM tblARInvoiceDetail 
 			WHERE intInvoiceDetailId = @InvoiceDetailId
 
