@@ -378,7 +378,7 @@ BEGIN TRY
 			)
 			SELECT 
 				 intSettleStorageTicketId = SST.intSettleStorageTicketId
-				,intCustomerStorageId	  = SST.intCustomerStorageId
+				,intCustomerStorageId	  	= SST.intCustomerStorageId
 				,dblStorageUnits          = SST.dblUnits
 				,dblRemainingUnits        = SST.dblUnits
 				,dblOpenBalance           = CS.dblOpenBalance
@@ -393,11 +393,12 @@ BEGIN TRY
 				ON CS.intCustomerStorageId = SST.intCustomerStorageId
 			OUTER APPLY (
 				SELECT DISTINCT
-					intContractHeaderId
-				FROM tblGRStorageHistory
+					CH.intContractHeaderId
+				FROM tblGRStorageHistory SH
+				INNER JOIN tblCTContractHeader CH
+					ON CH.intContractHeaderId = SH.intContractHeaderId
+						AND CH.intPricingTypeId = 5
 				WHERE intCustomerStorageId = CS.intCustomerStorageId
-					AND intContractHeaderId IS NOT NULL
-					AND intInventoryReceiptId IS NOT NULL
 			) SH 
 			WHERE SST.intSettleStorageId = @intSettleStorageId 
 				AND SST.dblUnits > 0
