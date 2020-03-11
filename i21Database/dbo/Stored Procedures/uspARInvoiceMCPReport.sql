@@ -291,7 +291,7 @@ OUTER APPLY (
 UPDATE STAGING
 SET strComments = ISNULL(MESSAGES.strMessage, '')
 FROM tblARInvoiceReportStagingTable STAGING
-CROSS APPLY (
+OUTER APPLY (
 	SELECT TOP 1 strMessage
 	FROM tblEMEntityMessage EM
 	WHERE EM.strMessageType = 'Invoice'
