@@ -13,7 +13,8 @@ CREATE TABLE [dbo].[tblSTLotteryGame] (
     [dblTicketValue]    NUMERIC (18, 6) NULL,
     [intConcurrencyId]  INT              NOT NULL,
     CONSTRAINT [PK_tblSTLotteryGame] PRIMARY KEY CLUSTERED ([intLotteryGameId] ASC),
-    CONSTRAINT [FK_tblSTLotteryGame_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [dbo].[tblICItem] ([intItemId])
+    CONSTRAINT [FK_tblSTLotteryGame_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [dbo].[tblICItem] ([intItemId]),
+    CONSTRAINT [AK_tblSTLotteryGame_strState_strGame] UNIQUE NONCLUSTERED ([strState],[strGame])
 );
 
 
