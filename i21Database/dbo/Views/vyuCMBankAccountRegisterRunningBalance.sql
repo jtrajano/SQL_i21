@@ -48,6 +48,7 @@ strPayee =
 	ELSE ISNULL(CM.strPayee, '') END,
 CM.strReferenceNo,
 CM.strTransactionId,
+CM.strFiscalPeriod,
 CM.ysnCheckVoid,
 CM.ysnClr
 FROM tblCMBankTransaction CM 
