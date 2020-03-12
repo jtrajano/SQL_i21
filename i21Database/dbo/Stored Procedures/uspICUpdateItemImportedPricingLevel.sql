@@ -1,4 +1,4 @@
-CREATE PROCEDURE dbo.uspICUpdateItemImportedPricingLevel
+CREATE  PROCEDURE dbo.uspICUpdateItemImportedPricingLevel
 AS
 
 UPDATE p
@@ -8,8 +8,10 @@ SET p.dblSalePrice =
 		p.dblStandardCost, 
 		p.dblLastCost, 
 		p.dblAverageCost, 
-		p.dblAmountPercent
-	)
+		p.dblAmountPercent,
+		p.dblSalePrice
+	),
+	p.strPricingMethod = ISNULL(NULLIF(p.strPricingMethod, ''), 'None')
 FROM tblICItemPricing p
 WHERE p.intImportFlagInternal = 1
 
