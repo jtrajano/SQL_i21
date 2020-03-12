@@ -21,9 +21,9 @@ BEGIN
 	ELSE IF @strPricingMethod = 'Markup Avg Cost'
 		SET @dblSalePrice = (@dblAvgCost * (@dblAmount / 100.00)) + @dblAvgCost
 	ELSE
-		SET @dblSalePrice = 0.00
+		SET @dblSalePrice = @dblProposedSalePrice
 	
-	IF @strPricingMethod IS NULL OR @strPricingMethod = 'None'
+	IF NOT (@strPricingMethod IS NULL OR @strPricingMethod = 'None')
 	BEGIN
 		IF @dblAmount <> 0 AND @dblStandardCost <> 0
 			SET @dblSalePrice = @dblProposedSalePrice
