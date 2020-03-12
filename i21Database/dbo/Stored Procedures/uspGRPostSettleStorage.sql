@@ -3644,7 +3644,7 @@ BEGIN TRY
 							
 						if( (@dblCurrentContractBalance) + (@dblUnits)  < 0.01)
 						begin
-							set @dblUnits = @dblCurrentContractBalance
+							set @dblUnits = @dblCurrentContractBalance * -1
 						end
 						
 
