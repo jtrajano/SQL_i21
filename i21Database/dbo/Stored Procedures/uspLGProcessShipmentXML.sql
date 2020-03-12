@@ -85,6 +85,9 @@ BEGIN TRY
 		,@intVendorEntityId INT
 		,@intPContractHeaderId INT
 		,@strCustomerContract NVARCHAR(50)
+		,@intSACompanyLocationId int
+		,@intSContractHeaderId int
+		,@intCustomerEntityId int
 	DECLARE @tblLGLoadDetail TABLE (intLoadDetailId INT)
 	DECLARE @strItemNo NVARCHAR(50)
 		,@strItemUOM NVARCHAR(50)
@@ -1967,6 +1970,21 @@ BEGIN TRY
 						,@strCustomerContract = strCustomerContract
 					FROM tblCTContractHeader
 					WHERE intContractHeaderId = @intPContractHeaderId
+					---************
+					SELECT @intSACompanyLocationId = NULL
+						,@intSContractHeaderId = NULL
+
+					SELECT @intSACompanyLocationId = intCompanyLocationId
+						,@intSContractHeaderId = intContractHeaderId
+					FROM tblCTContractDetail
+					WHERE intContractDetailId = @intSContractDetailId
+
+					SELECT @intCustomerEntityId = NULL
+						,@strCustomerContract = NULL
+
+					SELECT @intCustomerEntityId = intEntityId
+					FROM tblCTContractHeader
+					WHERE intContractHeaderId = @intSContractHeaderId
 				END
 
 				IF NOT EXISTS (
@@ -2039,7 +2057,11 @@ BEGIN TRY
 							ELSE PCH.intEntityId
 							END
 						,@intVendorLocationId
-						,@intCustomerId
+						,CASE 
+							WHEN @strTransactionType = 'Drop Shipment'
+								THEN @intCustomerEntityId
+							ELSE @intCustomerId
+							END
 						,@intCustomerLocationId
 						,@intItemId
 						,CASE 
@@ -2053,7 +2075,11 @@ BEGIN TRY
 								THEN @intPACompanyLocationId
 							ELSE PCD.intCompanyLocationId
 							END
-						,@intSCompanyLocationId
+						,CASE 
+							WHEN @strTransactionType = 'Drop Shipment'
+								THEN @intSACompanyLocationId
+							ELSE @intSCompanyLocationId
+							END
 						,x.[dblQuantity]
 						,@intItemUOMId
 						,x.[dblGross]
@@ -2169,7 +2195,11 @@ BEGIN TRY
 							ELSE PCH.intEntityId
 							END
 						,[intVendorEntityLocationId] = @intVendorLocationId
-						,[intCustomerEntityId] = @intCustomerId
+						,[intCustomerEntityId] = CASE 
+							WHEN @strTransactionType = 'Drop Shipment'
+								THEN @intCustomerEntityId
+							ELSE @intCustomerId
+							END
 						,[intCustomerEntityLocationId] = @intCustomerLocationId
 						,[intItemId] = @intItemId
 						,[intPContractDetailId] = (
@@ -2185,7 +2215,11 @@ BEGIN TRY
 								THEN @intPACompanyLocationId
 							ELSE PCD.intCompanyLocationId
 							END
-						,[intSCompanyLocationId] = @intSCompanyLocationId
+						,[intSCompanyLocationId] = CASE 
+							WHEN @strTransactionType = 'Drop Shipment'
+								THEN @intSACompanyLocationId
+							ELSE @intSCompanyLocationId
+							END
 						,[dblQuantity] = x.[dblQuantity]
 						,[intItemUOMId] = @intItemUOMId
 						,[dblGross] = x.[dblGross]
