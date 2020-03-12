@@ -75,6 +75,7 @@ BEGIN
             ,[dblForeignRate]
 			,[dblReportingRate]
 			,strSourceDocumentId
+			,strPeriod
 			,intSourceLocationId
 			,intSourceUOMId
 			,dblSourceUnitDebit
@@ -119,6 +120,7 @@ BEGIN
             ,[dblForeignRate]
 			,ISNULL([dblReportingRate],0)
 			,ISNULL(strSourceDocumentId,'')
+			,F.strPeriod
 			,intSourceLocationId
 			,intSourceUOMId
 			,ISNULL(dblSourceUnitDebit,0)
@@ -131,6 +133,7 @@ BEGIN
 			CROSS APPLY dbo.fnGetCredit(ISNULL(GLEntries.dblDebit, 0) - ISNULL(GLEntries.dblCredit, 0))  Credit
 			CROSS APPLY dbo.fnGetDebit(ISNULL(GLEntries.dblDebitForeign, 0) - ISNULL(GLEntries.dblCreditForeign, 0)) DebitForeign
 			CROSS APPLY dbo.fnGetCredit(ISNULL(GLEntries.dblDebitForeign, 0) - ISNULL(GLEntries.dblCreditForeign, 0))  CreditForeign
+			CROSS APPLY dbo.fnGLGetFiscalPeriod([dtmDate]) F
 END
 ;
 
