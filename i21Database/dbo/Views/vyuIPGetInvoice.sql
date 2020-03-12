@@ -9,9 +9,11 @@ SELECT IV.strTransactionType
 	,C.strCurrency
 	,IV.strComments
 	,IV.intInvoiceId
+	,E.strName as strCreatedBy
 FROM dbo.tblARInvoice IV
 JOIN dbo.tblCTBook B ON B.intBookId = IV.intBookId
 LEFT JOIN dbo.tblCTSubBook SB ON SB.intSubBookId = IV.intSubBookId
 JOIN dbo.tblSMCompanyLocation CL ON CL.intCompanyLocationId = IV.intCompanyLocationId
 JOIN dbo.tblSMCurrency C ON C.intCurrencyID = IV.intCurrencyId
+JOIN dbo.tblEMEntity E on E.intEntityId=IV.intEntityId
 
