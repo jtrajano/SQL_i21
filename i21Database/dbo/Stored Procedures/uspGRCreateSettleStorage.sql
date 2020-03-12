@@ -413,9 +413,6 @@ BEGIN TRY
 
 		DELETE FROM @MainSettleStorageToSave WHERE intSettleStorageKey = @intSettleStorageKey
 	END
-	SELECT * FROM tblGRSettleStorage ORDER BY intSettleStorageId DESC
-	SELECT * FROM tblGRSettleContract ORDER BY intSettleContractId DESC
-	SELECT * FROM tblGRSettleStorageTicket ORDER BY intSettleStorageTicketId DESC
 END TRY
 
 BEGIN CATCH
