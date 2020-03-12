@@ -524,6 +524,7 @@ FROM #tmpGLDetail
 			,ysnCheckVoid
 			,ysnPosted
 			,strLink
+			,strFiscalPeriod
 			,ysnClr
 			,intEntityId
 			,dtmDateReconciled
@@ -562,6 +563,7 @@ FROM #tmpGLDetail
 				,ysnCheckVoid				= 0
 				,ysnPosted					= 1
 				,strLink					= A.strTransactionId
+				,strFiscalPeriod			= F.strPeriod
 				,ysnClr						= 0
 				,intEntityId				= A.intEntityId
 				,dtmDateReconciled			= NULL
@@ -574,8 +576,9 @@ FROM #tmpGLDetail
 					ON A.intGLAccountIdFrom = GLAccnt.intAccountId		
 				INNER JOIN [dbo].tblGLAccountGroup GLAccntGrp
 					ON GLAccnt.intAccountGroupId = GLAccntGrp.intAccountGroupId
-				
-
+		CROSS APPLY(
+			SELECT TOP 1 strPeriod FROM tblGLFiscalYearPeriod WHERE A.dtmDate BETWEEN dtmStartDate AND dtmEndDate
+		)F
 		WHERE	A.strTransactionId = @strTransactionId
 	
 		-- Bank Transaction Debit
@@ -610,6 +613,7 @@ FROM #tmpGLDetail
 				,ysnCheckVoid				= 0
 				,ysnPosted					= 1
 				,strLink					= A.strTransactionId
+				,strFiscalPeriod			= F.strPeriod
 				,ysnClr						= 0
 				,intEntityId				= A.intEntityId
 				,dtmDateReconciled			= NULL
@@ -630,6 +634,9 @@ FROM #tmpGLDetail
 												   ELSE A.dblAmount
 											  END Val
 				)Amount
+				CROSS APPLY(
+					SELECT TOP 1 strPeriod FROM tblGLFiscalYearPeriod WHERE A.dtmDate BETWEEN dtmStartDate AND dtmEndDate
+				)F
 			
 		WHERE	A.strTransactionId = @strTransactionId	
 	END

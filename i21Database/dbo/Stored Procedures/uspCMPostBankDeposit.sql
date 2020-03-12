@@ -537,12 +537,17 @@ FROM #tmpGLDetail
 		
 	IF @@ERROR <> 0	OR @PostResult <> 0 GOTO Post_Rollback
 
+	UPDATE T
+	SET		ysnPosted = @ysnPost
+			,strFiscalPeriod = F.strPeriod
+			,intConcurrencyId += 1 
+	FROM tblCMBankTransaction T
+	CROSS APPLY(
+		SELECT TOP 1 CASE WHEN ysnPosted = 1 THEN strPeriod ELSE '' END  strPeriod FROM tblGLFiscalYearPeriod WHERE T.dtmDate BETWEEN dtmStartDate AND dtmEndDate
+	)F
+	WHERE	strTransactionId = @strTransactionId
 
-	UPDATE tblCMBankTransaction
-		SET		ysnPosted = @ysnPost
-				,intConcurrencyId += 1 
-		WHERE	strTransactionId = @strTransactionId
-		IF @@ERROR <> 0	GOTO Post_Rollback
+	IF @@ERROR <> 0	GOTO Post_Rollback
 END -- @ysnRecap = 0
 
 --=====================================================================================================================================
