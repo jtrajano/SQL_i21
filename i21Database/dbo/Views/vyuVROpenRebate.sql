@@ -65,6 +65,7 @@ FROM (
 			AND invoice.dtmDate >= programCategory.dtmBeginDate
 			AND invoice.dtmDate <= ISNULL(programCategory.dtmEndDate, '12/31/9999')
 			AND ISNULL(programCategory.dblRebateRate, 0) <> 0
+			AND programCategory.intItemId = item.intItemId
 		LEFT OUTER JOIN tblICItemUOM uom ON uom.intItemId = invoiceDetail.intItemId
 			AND uom.intUnitMeasureId = programItem.intUnitMeasureId
 		LEFT OUTER JOIN tblICUnitMeasure unitMeasure ON unitMeasure.intUnitMeasureId = uom.intUnitMeasureId
