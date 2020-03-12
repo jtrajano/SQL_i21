@@ -4123,8 +4123,6 @@
     <Build Include="dbo\User Defined Types\OrderDetailInformation.sql" />
     <Build Include="dbo\User Defined Types\OrderHeaderInformation.sql" />
     <Build Include="dbo\Functions\fnICIsShrinkableUOM.sql" />
-    <Build Include="dbo\Functions\fnICCalculatePrice.sql" />
-    <Build Include="dbo\Functions\fnICCalculateSalePriceLevel.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateItemComponent.sql" />
     <Build Include="dbo\Stored Procedures\uspSOUpdateItemComponent.sql" />
     <Build Include="dbo\Tables\tblARInvoiceDetailComponent.sql" />
@@ -4271,7 +4269,6 @@
     <Build Include="dbo\Stored Procedures\uspRKSettlementPriceImport.sql" />
     <Build Include="dbo\Stored Procedures\uspRKSettlementPriceImportValidate.sql" />
     <Build Include="dbo\Stored Procedures\uspICValidateReceiptItemLocations.sql" />
-    <Build Include="dbo\Stored Procedures\uspICUpdateItemImportedPricingLevel.sql" />
     <Build Include="dbo\Tables\tblCRMStatus.sql" />
     <Build Include="dbo\Tables\tblCRMType.sql" />
     <Build Include="dbo\Tables\tblCRMPriority.sql" />
@@ -8233,6 +8230,7 @@
     <Build Include="dbo\Stored Procedures\uspRKSaveDerivativeEntry.sql" />
     <Build Include="dbo\Stored Procedures\uspRKSaveCollateral.sql" />
     <Build Include="dbo\Tables\tblICCommodityAccountM2M.sql" />
+    <Build Include="dbo\Functions\fnGetCommodityGLAccountM2M.sql" />
     <Build Include="dbo\Tables\tblSCCertificateOfAnalysis.sql" />
     <Build Include="dbo\Tables\tblSCTicketCertificateOfAnalysis.sql" />
     <Build Include="dbo\Tables\tblSCInventoryReceiptAllowVoucherTracker.sql" />
@@ -8373,29 +8371,6 @@
     <Build Include="dbo\Stored Procedures\uspIPCoverageEntryProcessAckXML.sql" />
     <Build Include="dbo\Stored Procedures\uspIPCoverageEntryProcessStgXML.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportReleaseInstruction.sql" />
-    <Build Include="dbo\Functions\fnRKGetBucketCollateral.sql" />
-    <Build Include="dbo\Views\vyuRKGetSummaryLog.sql" />
-    <Build Include="dbo\Tables\tblRKDPRHeader.sql" />
-    <Build Include="dbo\Tables\tblRKDPRInventory.sql" />
-    <Build Include="dbo\Tables\tblRKDPRContractHedge.sql" />
-    <Build Include="dbo\Tables\tblRKDPRContractHedgeByMonth.sql" />
-    <Build Include="dbo\Views\vyuRKGetDPRInventorySummary.sql" />
-    <Build Include="dbo\Views\vyuRKGetDPRContractHedgeSummary.sql" />
-    <Build Include="dbo\Views\vyuRKGetDPRContractHedgeByMonthSummary.sql" />
-    <Build Include="dbo\Tables\tblRKDPRYearToDate.sql" />
-    <Build Include="dbo\Views\vyuRKGetDPRYearToDateSummary.sql" />
-    <Build Include="dbo\Functions\fnRKGetBucketDerivatives.sql" />
-    <Build Include="dbo\Functions\fnRKGetMiscFieldPivotDerivative.sql" />
-    <Build Include="dbo\Functions\fnRKGetMiscFieldTable.sql" />
-    <Build Include="dbo\Functions\fnRKConvertMiscFieldString.sql" />
-    <Build Include="dbo\User Defined Types\RKMiscField.sql" />
-    <Build Include="dbo\Views\vyuRKGetDPRHeader.sql" />
-    <Build Include="dbo\Stored Procedures\uspRKRebuildSummaryLog.sql" />
-    <Build Include="dbo\Functions\fnRKGetMatchedQtyAsOf.sql" />
-    <Build Include="dbo\Stored Procedures\uspRKSaveMatchDerivative.sql" />
-    <Build Include="dbo\Views\vyuRKGetMatchDerivativesFromSummaryLog.sql" />
-    <Build Include="dbo\Functions\fnRKGetBucketCompanyOwned.sql" />
-    <Build Include="dbo\Functions\fnRKGetBucketInTransit.sql" />
     <Build Include="dbo\Stored Procedures\uspSTRebatePreviewSubmissionNew.sql" />
     <Build Include="dbo\Stored Procedures\uspSTGenerateVendorRebate.sql" />
     <Build Include="dbo\Stored Procedures\uspCTUpdateBasisComponents.sql" />
@@ -8405,6 +8380,7 @@
     <Build Include="dbo\Tables\tblRKOptionsMatchPnSHeaderAckStage.sql" />
     <Build Include="dbo\Views\vyuIPGetOptionsMatchPnS.sql" />
     <Build Include="dbo\Views\vyuIPGetOptionsPnSExpired.sql" />
+    <None Include="Scripts\Post-Deployment\CT\2010_ContractSummaryLog.sql" />
     <Build Include="dbo\Stored Procedures\uspIPOptionsPnSProcessPreStage.sql" />
     <Build Include="dbo\Stored Procedures\uspIPOptionsPnSPopulateStgXML.sql" />
     <Build Include="dbo\Stored Procedures\uspIPOptionsPnSTransferStgXML.sql" />
@@ -8496,53 +8472,9 @@
     <Build Include="dbo\Views\vyuSTCigaretteRebateProgramRegion.sql" />
     <Build Include="dbo\Views\vyuSTCigaretteRebateProgramStore.sql" />
     <Build Include="dbo\Stored Procedures\uspSCCheckTicketContractAfterManualDistribution.sql" />
-    <Build Include="dbo\Stored Procedures\uspAPLogVoucherDetailRisk.sql" />
-    <Build Include="dbo\Stored Procedures\uspRKGenerateDPR.sql" />
-    <Build Include="dbo\Functions\fnRKGetBucketContractBalance.sql" />
-    <Build Include="dbo\Functions\fnRKGetBucketBasisDeliveries.sql" />
-    <Build Include="dbo\Functions\fnRKGetBucketCustomerOwned.sql" />
-    <Build Include="dbo\Functions\fnRKGetBucketDelayedPricing.sql" />
-    <Build Include="dbo\Stored Procedures\uspICFixICvsGLAmountDisrecpany.sql" />
-    <Build Include="dbo\Functions\fnRKGetAccountIdForLocationLOB.sql" />
-    <Build Include="dbo\Stored Procedures\uspRKGetGLAccountsForPosting.sql" />
-    <Build Include="dbo\Functions\fnGRCalculateStorageUnits.sql" />
-    <Build Include="dbo\Views\vyuCTPriceContractApproverView.sql" />
-    <Build Include="dbo\Stored Procedures\uspAPLogVoucherDetailRisk.sql" />
-    <Build Include="dbo\Stored Procedures\uspAPLogPaymentRisk.sql" />
-    <Build Include="dbo\User Defined Types\StagingCommanderDepartment.sql" />
-    <Build Include="dbo\User Defined Types\StagingCommanderFPHose.sql" />
-    <Build Include="dbo\User Defined Types\StagingCommanderPlu.sql" />
-    <Build Include="dbo\User Defined Types\StagingCommanderSummary.sql" />
-    <Build Include="dbo\User Defined Types\StagingCommanderTax.sql" />
-    <Build Include="dbo\Tables\tblAPImportVoucherLassus.sql" />
-    <Build Include="dbo\Stored Procedures\uspAPImportVoucherLassus.sql" />
-    <Build Include="dbo\Stored Procedures\uspAPImportVoucherLassusSas.sql" />
-    <Build Include="dbo\Tables\tblAPImportVoucherLassusSas.sql" />
-    <Build Include="dbo\Stored Procedures\uspIPGenerateSAPPOIDOC_ST.sql" />
-    <Build Include="dbo\Stored Procedures\uspIPProcessSAPAcknowledgement_ST.sql" />
-    <Build Include="dbo\Stored Procedures\uspIPStageSAPShipmentStatus_ST.sql" />
-    <Build Include="dbo\Tables\tblIPShipmentStatusStage.sql" />
-    <Build Include="dbo\Tables\tblIPShipmentStatusError.sql" />
-    <Build Include="dbo\Tables\tblIPShipmentStatusArchive.sql" />
-    <Build Include="dbo\Stored Procedures\uspIPProcessSAPShipmentStatus_ST.sql" />
-    <Build Include="dbo\Tables\tblIPSampleStage.sql" />
-    <Build Include="dbo\Tables\tblIPSampleError.sql" />
-    <Build Include="dbo\Tables\tblIPSampleArchive.sql" />
-    <Build Include="dbo\Tables\tblIPSampleTestResultStage.sql" />
-    <Build Include="dbo\Tables\tblIPSampleTestResultError.sql" />
-    <Build Include="dbo\Tables\tblIPSampleTestResultArchive.sql" />
-    <Build Include="dbo\Stored Procedures\uspIPStageSAPSample_ST.sql" />
-    <Build Include="dbo\Stored Procedures\uspCTLogSummary.sql" />
-    <Build Include="dbo\User Defined Types\ContractDetailTable.sql" />
-    <Build Include="dbo\Stored Procedures\uspAPReverseTransaction.sql" />
-    <Build Include="dbo\Tables\tblARInvoiceStage.sql" />
-    <Build Include="dbo\Views\vyuIPGetInvoice.sql" />
-    <Build Include="dbo\Views\vyuIPGetInvoiceDetail.sql" />
-    <Build Include="dbo\Stored Procedures\uspARProcessPreStageInvoice.sql" />
-    <Build Include="dbo\Stored Procedures\uspARInvoicePopulateStgXML.sql" />
-    <Build Include="dbo\Stored Procedures\uspARInvoiceTransferStgXML.sql" />
-    <Build Include="dbo\Stored Procedures\uspIPProcessSAPSample_ST.sql" />
-    <Build Include="dbo\Stored Procedures\uspSTReportCheckoutChangeFundDetail.sql" />
+    <Build Include="dbo\Tables\tblFRReportHierarchy.sql" />
+    <Build Include="dbo\Tables\tblFRReportHierarchyDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspFRDBuildHierarchyFilterString.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -8785,7 +8717,6 @@
     <Build Include="dbo\Views\vyuARGetPayment.sql" />
     <Build Include="dbo\Stored Procedures\uspICCallInterCompanyPreStageItem.sql" />
     <Build Include="dbo\Functions\fnARGetItemContractPricingDetails.sql" />
-    <Build Include="dbo\Views\vyuEMEntityLocationSearch.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
@@ -8961,6 +8892,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\GR\ImportSettleStorageBillDetail.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\GR\Populate_Risk_Summary_Log.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\SC\Populate_Risk_Summary_Log.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\CT\1920_Add_Accrued_Payables.sql" />
