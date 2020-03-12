@@ -85,7 +85,7 @@ FROM (
 		,CCV.intConcurrencyId
 		,CCV.intContractDetailId
 		,CCV.intItemId
-		,CH.intEntityId
+		,E.intEntityId
 		,CCV.strCostMethod
 		,CCV.intCurrencyId
 		,CCV.dblRate
