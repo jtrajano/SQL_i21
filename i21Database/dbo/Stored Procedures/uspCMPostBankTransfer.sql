@@ -576,9 +576,7 @@ FROM #tmpGLDetail
 					ON A.intGLAccountIdFrom = GLAccnt.intAccountId		
 				INNER JOIN [dbo].tblGLAccountGroup GLAccntGrp
 					ON GLAccnt.intAccountGroupId = GLAccntGrp.intAccountGroupId
-		CROSS APPLY(
-			SELECT TOP 1 strPeriod FROM tblGLFiscalYearPeriod WHERE A.dtmDate BETWEEN dtmStartDate AND dtmEndDate
-		)F
+		CROSS APPLY dbo.fnGLGetFiscalPeriod(A.dtmDate) F
 		WHERE	A.strTransactionId = @strTransactionId
 	
 		-- Bank Transaction Debit
@@ -634,10 +632,7 @@ FROM #tmpGLDetail
 												   ELSE A.dblAmount
 											  END Val
 				)Amount
-				CROSS APPLY(
-					SELECT TOP 1 strPeriod FROM tblGLFiscalYearPeriod WHERE A.dtmDate BETWEEN dtmStartDate AND dtmEndDate
-				)F
-			
+				CROSS APPLY dbo.fnGLGetFiscalPeriod(A.dtmDate) F
 		WHERE	A.strTransactionId = @strTransactionId	
 	END
 	ELSE

@@ -539,12 +539,10 @@ FROM #tmpGLDetail
 
 	UPDATE T
 	SET		ysnPosted = @ysnPost
-			,strFiscalPeriod = F.strPeriod
+			,strFiscalPeriod =  CASE WHEN @ysnPost = 1 THEN F.strPeriod ELSE '' END 
 			,intConcurrencyId += 1 
 	FROM tblCMBankTransaction T
-	CROSS APPLY(
-		SELECT TOP 1 CASE WHEN ysnPosted = 1 THEN strPeriod ELSE '' END  strPeriod FROM tblGLFiscalYearPeriod WHERE T.dtmDate BETWEEN dtmStartDate AND dtmEndDate
-	)F
+	CROSS APPLY dbo.fnGLGetFiscalPeriod(T.dtmDate) F
 	WHERE	strTransactionId = @strTransactionId
 
 	IF @@ERROR <> 0	GOTO Post_Rollback

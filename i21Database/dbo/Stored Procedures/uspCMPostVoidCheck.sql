@@ -441,11 +441,16 @@ BEGIN
 	EXEC @PostResult = uspGLBookEntries @GLEntries, @ysnPost
 		
 	IF @@ERROR <> 0 OR @PostResult <> 0	GOTO Post_Rollback
-	
-	UPDATE tblCMBankTransaction
+
+	UPDATE T
 	SET		ysnPosted = @ysnPost
+			,strFiscalPeriod = CASE WHEN @ysnPost = 1 THEN F.strPeriod ELSE '' END  
 			,intConcurrencyId += 1 
+	FROM tblCMBankTransaction T
+	CROSS APPLY dbo.fnGLGetFiscalPeriod(T.dtmDate) F
 	WHERE	strTransactionId = @strTransactionId
+
+
 	IF @@ERROR <> 0	GOTO Post_Rollback
 END
 
