@@ -5,7 +5,7 @@
 	MTDBalance numeric (38, 6) NULL,
 	YTDBalance numeric(38, 6) NULL,
 	intGLFiscalYearPeriodId int NULL,
-	[strPeriod] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	[strFiscalPeriod] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	intConcurrencyId int NULL,
 	dtmDateModified datetime NULL,
  CONSTRAINT [PK_tblGLTrialBalance] PRIMARY KEY CLUSTERED 

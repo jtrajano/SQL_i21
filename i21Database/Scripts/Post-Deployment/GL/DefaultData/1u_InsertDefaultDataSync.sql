@@ -3,7 +3,7 @@ GO
 GO
     IF NOT EXISTS (SELECT TOP 1 1 FROM tblGLDataSync WHERE strSyncName = 'tblGLDetail_FiscalPeriod')
     BEGIN
-        UPDATE T set strPeriod = F.strPeriod FROM tblGLDetail T join tblGLFiscalYearPeriod F on T.dtmDate between F.dtmStartDate and F.dtmEndDate
+        UPDATE T set strFiscalPeriod = F.strPeriod FROM tblGLDetail T join tblGLFiscalYearPeriod F on T.dtmDate between F.dtmStartDate and F.dtmEndDate
         INSERT INTO tblGLDataSync VALUES( 'tblGLDetail_FiscalPeriod', 1)
         PRINT N'UPDATED tblGLDetail Fiscal Period'
     END
@@ -19,7 +19,7 @@ GO
 
     IF NOT EXISTS (SELECT TOP 1 1 FROM tblGLDataSync WHERE strSyncName = 'tblGLTrialBalance_FiscalPeriod')	
     BEGIN
-        UPDATE T SET strPeriod = F.strPeriod 
+        UPDATE T SET strFiscalPeriod = F.strPeriod 
         FROM tblGLTrialBalance T JOIN
             tblGLFiscalYearPeriod F 
         ON T.intGLFiscalYearPeriodId = F.intGLFiscalYearPeriodId

@@ -3,7 +3,7 @@ GO
 GO
     IF NOT EXISTS (SELECT TOP 1 1 FROM tblCMDataSync WHERE strSyncName = 'tblCMBankTransaction_FiscalPeriod')
     BEGIN
-        UPDATE T set strPeriod = F.strPeriod FROM tblCMBankTransaction T
+        UPDATE T set strFiscalPeriod = F.strPeriod FROM tblCMBankTransaction T
         JOIN tblGLFiscalYearPeriod F on T.dtmDate between F.dtmStartDate AND F.dtmEndDate
         AND T.ysnPosted = 1
 

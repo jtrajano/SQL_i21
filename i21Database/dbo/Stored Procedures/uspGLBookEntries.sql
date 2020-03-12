@@ -75,7 +75,7 @@ BEGIN
             ,[dblForeignRate]
 			,[dblReportingRate]
 			,strSourceDocumentId
-			,strPeriod
+			,strFiscalPeriod
 			,intSourceLocationId
 			,intSourceUOMId
 			,dblSourceUnitDebit
