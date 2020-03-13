@@ -159,9 +159,9 @@ BEGIN
 	)
 	SELECT
 		CASE 
-			WHEN @totalIssues > 0 THEN 'Some voucher(s) successfullly imported from CSV'
+			WHEN @totalIssues > 0 THEN 'Some voucher(s) successfully imported from CSV'
 		ELSE
-			'Successfullly imported voucher(s) from CSV'
+			'Successfully imported voucher(s) from CSV'
 		END,
 		(SELECT TOP 1 strVersionNo FROM tblSMBuildNumber ORDER BY intVersionID DESC),
 		@userId,
