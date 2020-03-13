@@ -1351,22 +1351,24 @@ BEGIN TRY
 					begin
 						set @dblPriced = case when @dblInvoicedPriced > 0 then @dblInvoicedPriced else @dblShippedForInvoice end
 					end
-
-					--Check if Priced Detail has remaining quantity. If no, skip Pricing Loop
-					if (@dblPriced = @dblInvoicedPriced)
+					else
 					begin
-						goto SkipPricingLoop;
-					end
+						--Check if Priced Detail has remaining quantity. If no, skip Pricing Loop
+						if (@dblPriced = @dblInvoicedPriced)
+						begin
+							goto SkipPricingLoop;
+						end
 
-					if (@dblPriced > @dblInvoicedPriced)
-					begin
-						set @dblPricedForInvoice = (@dblPriced - @dblInvoicedPriced);
-					end
+						if (@dblPriced > @dblInvoicedPriced)
+						begin
+							set @dblPricedForInvoice = (@dblPriced - @dblInvoicedPriced);
+						end
 
-					set @dblQuantityForInvoice = @dblPricedForInvoice;
-					if (@dblPricedForInvoice > @dblShippedForInvoice)
-					begin
-						set @dblQuantityForInvoice = @dblShippedForInvoice;	
+						set @dblQuantityForInvoice = @dblPricedForInvoice;
+						if (@dblPricedForInvoice > @dblShippedForInvoice)
+						begin
+							set @dblQuantityForInvoice = @dblShippedForInvoice;	
+						end					
 					end
 
 					print @dblQuantityForInvoice;
