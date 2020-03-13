@@ -11,6 +11,7 @@ CREATE TYPE [dbo].[StorageHistoryStagingTable] AS TABLE
 	[intInventoryShipmentId] INT NULL,
     [intBillId] INT NULL,
 	[intContractHeaderId] INT NULL,
+    [intInventoryAdjustmentId] INT NULL,
     [dblUnits] NUMERIC(38,20) NULL,
 	[dtmHistoryDate] DATETIME NULL,
     [dblPaidAmount] NUMERIC(38,20) NULL,
