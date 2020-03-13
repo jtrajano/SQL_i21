@@ -227,7 +227,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 			ON A.[intJournalId] = B.[intJournalId]
 		WHERE B.[intJournalId] IN (SELECT [intJournalId] FROM @tmpValidJournals)
 		DECLARE @SkipICValidation BIT = 0
-		IF @strJournalType = 'Imported Journal' THEN SET @SkipICValidation = 1
+		IF @strJournalType = 'Imported Journal' SET @SkipICValidation = 1
 
 		DECLARE @PostResult INT
 		EXEC @PostResult = uspGLBookEntries 
