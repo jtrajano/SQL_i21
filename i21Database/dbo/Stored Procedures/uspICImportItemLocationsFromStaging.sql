@@ -188,7 +188,7 @@ FROM tblICImportStagingItemLocation s
 	LEFT OUTER JOIN tblICStorageLocation su ON LOWER(su.strName) = LTRIM(RTRIM(LOWER(s.strStorageUnit)))
 	LEFT OUTER JOIN tblSTSubcategory family ON LOWER(family.strSubcategoryId) = LTRIM(RTRIM(LOWER(s.strFamily))) AND family.strSubcategoryType = 'F'
 	LEFT OUTER JOIN tblSTSubcategory class ON LOWER(class.strSubcategoryId) = LTRIM(RTRIM(LOWER(s.strClass))) AND class.strSubcategoryType = 'C'
-	LEFT OUTER JOIN tblSTSubcategoryRegProd pc ON LOWER(pc.strRegProdCode) = LTRIM(RTRIM(LOWER(s.strProductCode))) AND pc.intStoreId <> 0
+	LEFT OUTER JOIN tblSTSubcategoryRegProd pc ON LOWER(pc.strRegProdCode) = LTRIM(RTRIM(LOWER(s.strProductCode)))
     OUTER APPLY (
 		SELECT intCostingMethod
 		FROM (

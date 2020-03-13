@@ -26,8 +26,8 @@ JOIN tblICItemLocation IL
 LEFT JOIN tblSTSubcategoryRegProd SubCat 
 	ON SubCat.intRegProdId = IL.intProductCodeId
 JOIN tblSTStore ST 
-	ON ST.intStoreId = SubCat.intStoreId
-	AND IL.intLocationId = ST.intCompanyLocationId
+	--ON ST.intStoreId = SubCat.intStoreId
+	ON IL.intLocationId = ST.intCompanyLocationId
 JOIN tblSMCompanyLocation L 
 	ON L.intCompanyLocationId = IL.intLocationId
 JOIN tblICItemUOM IUOM 
