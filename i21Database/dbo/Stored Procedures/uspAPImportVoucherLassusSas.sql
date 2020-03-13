@@ -70,7 +70,8 @@ INSERT INTO @voucherPayables
     dblQuantityToBill,
     dblCost,
 	intAccountId,
-	strVendorOrderNumber
+	strVendorOrderNumber,
+	ysnStage
 )
 SELECT
 	intPartitionId,
@@ -81,13 +82,26 @@ SELECT
     dblQuantityToBill,
     dblCost,
 	intAccountId,
-	strVendorOrderNumber
+	strVendorOrderNumber,
+	0
 FROM #tmpConvertedLassusSasData A
 WHERE 
 	A.intAccountId > 0
 
+IF NOT EXISTS(SELECT 1 FROM @voucherPayables)
+BEGIN
+	RAISERROR('No valid record to import.', 16, 1);
+	RETURN;
+END
+
 DECLARE @createdVoucher NVARCHAR(MAX);
 EXEC uspAPCreateVoucher @voucherPayables = @voucherPayables, @userId = @userId, @throwError = 1, @createdVouchersId = @createdVoucher OUT
+
+IF @createdVoucher IS NULL 
+BEGIN 
+	RAISERROR('No valid record to create the voucher.', 16, 1);
+	RETURN;
+END
 
 DECLARE @batchIdUsed NVARCHAR(50);
 DECLARE @failedPostCount INT;
