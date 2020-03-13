@@ -151,12 +151,10 @@ FROM	dbo.tblCMBankTransaction CHK
 		LEFT JOIN tblAPPayment PYMT ON CHK.strTransactionId = PYMT.strPaymentRecordNum
 		LEFT JOIN tblAPVendor VENDOR ON VENDOR.[intEntityId] = ISNULL(PYMT.[intEntityVendorId], CHK.intEntityId)
 		LEFT JOIN tblEMEntity ENTITY ON VENDOR.[intEntityId] = ENTITY.intEntityId
-		LEFT JOIN [tblEMEntityLocation] LOCATION ON VENDOR.[intEntityId] = LOCATION.intEntityId AND ysnDefaultLocation = 1 
 		OUTER APPLY (SElECT TOP 1 strCompanyName,ISNULL(dbo.fnConvertToFullAddress(strAddress,strCity,strState,strZip),'') strCompanyAddress FROM tblSMCompanySetup) COMPANY
 		OUTER APPLY (SELECT ISNULL(dbo.fnCMGetBankAccountMICR(CHK.intBankAccountId,CHK.strReferenceNo),'') strText) MICR
 		OUTER APPLY (SELECT ISNULL(dbo.fnConvertToFullAddress(BNK.strAddress, BNK.strCity, BNK.strState, BNK.strZipCode), '') strAddress) BANK
 		OUTER APPLY (SELECT ISNULL(dbo.fnConvertToFullAddress(CHK.strAddress, CHK.strCity, CHK.strState, CHK.strZipCode), '') strAddress) CHEK
-		OUTER APPLY (SELECT ISNULL(dbo.fnConvertToFullAddress(LOCATION.strAddress, LOCATION.strCity, LOCATION.strState, LOCATION.strZipCode), '') strAddress) LOC
 		OUTER APPLY
 		(
 			SELECT LTRIM(RTRIM(REPLACE(CHK.strAmountInWords, '*', ''))) + REPLICATE(' *', (100 - LEN(LTRIM(RTRIM(REPLACE(CHK.strAmountInWords, '*', '')))))/2) Val
@@ -192,19 +190,12 @@ FROM	dbo.tblCMBankTransaction CHK
 		OUTER APPLY (
 			SELECT 
 			CASE WHEN ISNULL(PYMT.ysnOverrideCheckPayee, 0) = 0
-				THEN 
-				CASE WHEN CHEK.strAddress <> ''  
-				THEN CHEK.strAddress
-				ELSE LOC.strAddress
-				END
+				THEN ISNULL(CHEK.strAddress,'')
 			ELSE
 				''
 			END
 			Value
 		)Address
-	
-
-
 WHERE	CHK.intBankAccountId = @intBankAccountId
 		AND CHK.strTransactionId IN (SELECT strValues COLLATE Latin1_General_CI_AS FROM dbo.fnARGetRowsFromDelimitedValues(@strTransactionId))
 		AND CHK.dblAmount != 0 AND PYMT.intPaymentMethodId ! = 3
