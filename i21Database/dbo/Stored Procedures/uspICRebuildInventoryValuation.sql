@@ -3560,40 +3560,21 @@ BEGIN
 						,RebuildInvTrans.dtmDate  
 						,RebuildInvTrans.dblQty  
 						,ISNULL(ItemUOM.dblUnitQty, RebuildInvTrans.dblUOMQty) 
-						,dblCost  = CASE
-										WHEN RebuildInvTrans.dblQty < 0 THEN 
-											CASE	
-													WHEN dbo.fnGetCostingMethod(RebuildInvTrans.intItemId, RebuildInvTrans.intItemLocationId) = @AVERAGECOST THEN 
-														dbo.fnGetItemAverageCost(
-															RebuildInvTrans.intItemId
-															, RebuildInvTrans.intItemLocationId
-															, RebuildInvTrans.intItemUOMId
-														) 
-													ELSE 
-														dbo.fnCalculateCostBetweenUOM (
-															StockUOM.intItemUOMId
-															,RebuildInvTrans.intItemUOMId
-															,ISNULL(lot.dblLastCost, itemPricing.dblLastCost) 
-														)
-											END 
-
-										-- When it is a credit memo:
-										WHEN RebuildInvTrans.dblQty > 0 THEN 
-											
-											CASE	WHEN dbo.fnGetCostingMethod(RebuildInvTrans.intItemId, RebuildInvTrans.intItemLocationId) = @AVERAGECOST THEN 
+						,dblCost  = 
+								ISNULL(
+									dbo.fnCalculateCostBetweenUOM(
+											StockUOM.intItemUOMId
+											,RebuildInvTrans.intItemUOMId
+											,CASE	WHEN dbo.fnGetCostingMethod(RebuildInvTrans.intItemId, RebuildInvTrans.intItemLocationId) = @AVERAGECOST THEN 
 														-- If using Average Costing, use Ave Cost.
-														dbo.fnGetItemAverageCost(
-															RebuildInvTrans.intItemId
-															, RebuildInvTrans.intItemLocationId
-															, RebuildInvTrans.intItemUOMId
-														) 
+														itemPricing.dblAverageCost 
 													ELSE
-														-- Otherwise, get the last cost. 
-														ISNULL(lot.dblLastCost, itemPricing.dblLastCost)
+														-- Otherwise, get the last cost. 														
+														COALESCE(lot.dblLastCost, itemPricing.dblLastCost) 
 											END 
-										ELSE 
-											RebuildInvTrans.dblCost
-									END 
+									)
+									,RebuildInvTrans.dblCost
+								)
 						,RebuildInvTrans.dblSalesPrice  
 						,RebuildInvTrans.intCurrencyId  
 						,RebuildInvTrans.dblExchangeRate  
@@ -3632,7 +3613,8 @@ BEGIN
 
 						OUTER APPLY (
 							SELECT TOP 1 
-								dblLastCost 
+								dblLastCost
+								, dblAverageCost 
 							FROM 
 								tblICItemPricing p
 							WHERE 
