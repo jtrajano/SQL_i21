@@ -1615,6 +1615,7 @@ BEGIN
 	WHERE	intInventoryReceiptId = @ReceiptId
 END
 
+/*
 BEGIN
 	INSERT INTO [dbo].[tblQMTicketDiscount]
        ([intConcurrencyId]     
@@ -1653,7 +1654,7 @@ BEGIN
 	ON ISH.intSourceId = SD.intTicketId AND SD.strSourceType = 'Scale' AND
 	SD.intTicketFileId = @intTicketId WHERE	ISH.intSourceId = @intTicketId AND ISH.intInventoryReceiptId = @InventoryReceiptId
 END
-
+*/
 GO
 
 
