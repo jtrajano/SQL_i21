@@ -166,7 +166,7 @@ BEGIN
 		,strTransactionType
 	FROM @CompanyTitle
 	WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110) BETWEEN CONVERT(DATETIME, @dtmFromTransactionDate) AND CONVERT(DATETIME, @dtmToTransactionDate)
-		AND intTransactionId IS NOT NULL
+		AND strTransactionId IS NOT NULL
 	ORDER BY dtmDate desc, strTransactionId desc, intTransactionId desc
 	
 
@@ -663,35 +663,6 @@ BEGIN
 	ORDER BY dtmDate
 
 
-	----------------------------------
-	---- Generate Grain Inventory ----
-	----------------------------------
-	--DECLARE @tblInvResult TABLE (Id INT identity(1,1)
-	--	, dtmDate datetime
-	--	, tranShipmentNumber nvarchar(50) COLLATE Latin1_General_CI_AS
-	--	, tranShipQty NUMERIC(24,10)
-	--	, tranReceiptNumber nvarchar(50) COLLATE Latin1_General_CI_AS
-	--	, tranRecQty NUMERIC(24,10)
-	--	, BalanceForward NUMERIC(24,10)
-	--	, tranAdjNumber nvarchar(50) COLLATE Latin1_General_CI_AS
-	--	, dblAdjustmentQty NUMERIC(24,10)
-	--	, tranInvoiceNumber nvarchar(50) COLLATE Latin1_General_CI_AS
-	--	, dblInvoiceQty NUMERIC(24,10)
-	--	, tranCountNumber nvarchar(50) COLLATE Latin1_General_CI_AS
-	--	, dblCountQty NUMERIC(24,10)
-	--	, strDistributionOption nvarchar(50) COLLATE Latin1_General_CI_AS
-	--	, strShipDistributionOption nvarchar(50) COLLATE Latin1_General_CI_AS
-	--	, strAdjDistributionOption nvarchar(50) COLLATE Latin1_General_CI_AS
-	--	, strCountDistributionOption nvarchar(50) COLLATE Latin1_General_CI_AS
-	--	, intInventoryReceiptId int
-	--	, intInventoryShipmentId int
-	--	, intInventoryAdjustmentId int
-	--	, intInventoryCountId int
-	--	, intInvoiceId int
-	--	, intDeliverySheetId int
-	--	, deliverySheetNumber nvarchar(50) COLLATE Latin1_General_CI_AS
-	--	, intTicketId int
-	--	, ticketNumber nvarchar(50) COLLATE Latin1_General_CI_AS)
 
 	IF (ISNULL(@intItemId, 0) = 0)
 	BEGIN

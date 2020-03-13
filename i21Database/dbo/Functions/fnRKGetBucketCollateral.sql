@@ -35,6 +35,21 @@ RETURNS @returntable TABLE
 )
 AS
 BEGIN
+
+	; WITH Contracts (
+		dtmEndDate
+		, intContractHeaderId
+	) AS (
+		SELECT 
+			dtmEndDate = MAX(dtmEndDate)
+			, CH.intContractHeaderId 
+		FROM tblCTContractDetail CD
+		INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId  
+		WHERE intContractStatusId <> 3
+			AND intCommodityId = @intCommodityId
+		GROUP BY CH.intContractHeaderId
+	)
+
 	INSERT @returntable
 	SELECT dblTotal
 		, intCollateralId
@@ -88,7 +103,7 @@ BEGIN
 			, c.intFutureMonthId
 			, c.strFutureMarket
 			, c.strFutureMonth
-			, cd.dtmEndDate
+			, Cnt.dtmEndDate
 			, Col.ysnIncludeInPriceRiskAndCompanyTitled
 		FROM vyuRKGetSummaryLog c
 		LEFT JOIN (
@@ -107,9 +122,7 @@ BEGIN
 			GROUP BY intCollateralId
 		) ca ON c.intTransactionRecordHeaderId = ca.intCollateralId
 		JOIN tblRKCollateral Col ON Col.intCollateralId = c.intTransactionRecordId
-		CROSS APPLY (
-			SELECT TOP 1 dtmEndDate FROM tblCTContractDetail WHERE intContractHeaderId = c.intContractHeaderId AND intContractStatusId <> 3
-		) cd
+		LEFT JOIN Contracts Cnt ON Cnt.intContractHeaderId = c.intContractHeaderId
 		WHERE strTransactionType = 'Collateral'
 			AND CONVERT(DATETIME, CONVERT(VARCHAR(10), c.dtmTransactionDate, 110), 110) <= CONVERT(DATETIME, @dtmDate)
 			AND CONVERT(DATETIME, CONVERT(VARCHAR(10), c.dtmCreatedDate, 110), 110) <= CONVERT(DATETIME, @dtmDate)

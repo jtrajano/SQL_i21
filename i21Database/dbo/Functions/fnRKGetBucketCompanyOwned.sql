@@ -22,6 +22,7 @@ RETURNS @returntable TABLE
 	, strTransactionNumber NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, strTransactionType NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, intTransactionRecordId INT
+	, intTransactionRecordHeaderId INT
 	, intOrigUOMId INT
 	, intTicketId INT
 	, strTicketNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS
@@ -52,6 +53,7 @@ BEGIN
 		, strTransactionNumber
 		, strTransactionType
 		, intTransactionRecordId
+		, intTransactionRecordHeaderId
 		, intOrigUOMId
 		, intTicketId
 		, strTicketNumber
@@ -79,6 +81,7 @@ BEGIN
 			, strTransactionNumber
 			, strTransactionType
 			, intTransactionRecordId
+			, intTransactionRecordHeaderId
 			, intOrigUOMId
 			, intTicketId
 			, strTicketNumber

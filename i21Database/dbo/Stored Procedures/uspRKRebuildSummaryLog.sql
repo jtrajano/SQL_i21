@@ -1008,6 +1008,7 @@ BEGIN
 			, intCommodityId
 			, intLocationId
 			, dblQty
+			, intCommodityUOMId
 			, intUserId
 			, strNotes)
 		SELECT
@@ -1020,15 +1021,17 @@ BEGIN
 			, dtmTransactionDate = dtmAdjustmentDate
 			, intContractDetailId = CA.intCollateralAdjustmentId
 			, intContractHeaderId = C.intContractHeaderId
-			, intCommodityId = intCommodityId
+			, intCommodityId = C.intCommodityId
 			, intLocationId = intLocationId
 			, dblQty = CA.dblAdjustmentAmount
+			, intOrigUOMId = CUM.intCommodityUnitMeasureId
 			, intUserId = (SELECT TOP 1 e.intEntityId
 							FROM (tblEMEntity e LEFT JOIN tblEMEntityType et ON et.intEntityId = e.intEntityId AND et.strType = 'User')
 							INNER JOIN tblRKCollateralHistory colhis ON colhis.strUserName = e.strName where colhis.intCollateralId = C.intCollateralId and colhis.strAction = 'ADD')
 			, strNotes = strType + ' Collateral'
 		FROM tblRKCollateralAdjustment CA
 		JOIN tblRKCollateral C ON C.intCollateralId = CA.intCollateralId
+		LEFT JOIN tblICCommodityUnitMeasure CUM ON CUM.intUnitMeasureId = C.intUnitMeasureId AND CUM.intCommodityId = C.intCommodityId
 		WHERE intCollateralAdjustmentId NOT IN (SELECT DISTINCT adj.intCollateralAdjustmentId
 				FROM tblRKCollateralAdjustment adj
 				JOIN tblRKSummaryLog history ON history.intTransactionRecordId = adj.intCollateralId AND strTransactionType = 'Collateral Adjustments'
@@ -1412,7 +1415,7 @@ BEGIN
 		--=======================================
 		PRINT 'Populate RK Summary Log - Customer Owned'
 		
-		SELECT dtmDeliveryDate = (CASE WHEN sh.strType = 'Transfer' THEN RIGHT(CONVERT(VARCHAR(11), sh.dtmHistoryDate, 106), 8) ELSE RIGHT(CONVERT(VARCHAR(11), cs.dtmDeliveryDate, 106), 8) END) COLLATE Latin1_General_CI_AS
+		SELECT dtmDeliveryDate = (CASE WHEN sh.strType = 'Transfer' THEN  sh.dtmHistoryDate ELSE cs.dtmDeliveryDate END)
 			, strBucketType = 'Customer Owned'
 			, strTransactionType = CASE WHEN intTransactionTypeId IN (1, 5)
 											THEN CASE WHEN sh.intInventoryReceiptId IS NOT NULL THEN 'Inventory Receipt'
@@ -1467,7 +1470,7 @@ BEGIN
 		LEFT JOIN tblSMCompanyLocationSubLocation sl ON sl.intCompanyLocationSubLocationId = t.intSubLocationId AND sl.intCompanyLocationId = t.intProcessingLocationId
 	
 		UNION ALL
-		SELECT dtmDeliveryDate = (CASE WHEN sh.strType = 'Transfer' THEN RIGHT(CONVERT(VARCHAR(11), sh.dtmHistoryDate, 106), 8) ELSE RIGHT(CONVERT(VARCHAR(11), cs.dtmDeliveryDate, 106), 8) END) COLLATE Latin1_General_CI_AS
+		SELECT dtmDeliveryDate = (CASE WHEN sh.strType = 'Transfer' THEN  sh.dtmHistoryDate ELSE cs.dtmDeliveryDate END)
 			, strBucketType = 'Delayed Pricing'
 			, strTransactionType = CASE WHEN intTransactionTypeId IN (1, 5)
 											THEN CASE WHEN sh.intInventoryReceiptId IS NOT NULL THEN 'Inventory Receipt'
@@ -1521,7 +1524,7 @@ BEGIN
 		LEFT JOIN tblSMCompanyLocationSubLocation sl ON sl.intCompanyLocationSubLocationId = t.intSubLocationId AND sl.intCompanyLocationId = t.intProcessingLocationId
 		
 		UNION ALL
-		SELECT dtmDeliveryDate = (CASE WHEN sh.strType = 'Transfer' THEN RIGHT(CONVERT(VARCHAR(11), sh.dtmHistoryDate, 106), 8) ELSE RIGHT(CONVERT(VARCHAR(11), cs.dtmDeliveryDate, 106), 8) END) COLLATE Latin1_General_CI_AS
+		SELECT dtmDeliveryDate = (CASE WHEN sh.strType = 'Transfer' THEN  sh.dtmHistoryDate ELSE cs.dtmDeliveryDate END)
 			, strBucketType = 'Company Owned'
 			, strTransactionType = 'Storage Settlement'
 			, intTransactionRecordId = sh.intSettleStorageId
@@ -1608,6 +1611,78 @@ BEGIN
 		EXEC uspRKLogRiskPosition @ExistingHistory, 1, 0
 		PRINT 'End Populate RK Summary Log - Customer Owned'
 		DELETE FROM @ExistingHistory
+
+		
+        --=======================================
+        --                ON HOLD
+        --=======================================
+        PRINT 'Populate RK Summary Log - On Hold'
+
+        INSERT INTO @ExistingHistory (    
+            strBatchId
+            ,strBucketType
+            ,strTransactionType
+            ,intTransactionRecordId 
+            ,intTransactionRecordHeaderId
+            ,strDistributionType
+            ,strTransactionNumber 
+            ,dtmTransactionDate 
+            ,intContractDetailId 
+            ,intContractHeaderId 
+            ,intTicketId 
+            ,intCommodityId 
+            ,intCommodityUOMId 
+            ,intItemId 
+            ,intBookId 
+            ,intSubBookId 
+            ,intLocationId 
+            ,intFutureMarketId 
+            ,intFutureMonthId 
+            ,dblNoOfLots 
+            ,dblQty 
+            ,dblPrice 
+            ,intEntityId 
+            ,ysnDelete 
+            ,intUserId 
+            ,strNotes     
+        )
+         SELECT
+            strBatchId = NULL
+            ,strBucketType = 'On Hold'
+            ,strTransactionType = 'Scale Ticket'
+            ,intTransactionRecordId = intTicketId
+            ,intTransactionRecordHeaderId = intTicketId
+            ,strDistributionType = strStorageTypeDescription
+            ,strTransactionNumber = strTicketNumber
+            ,dtmTransactionDate  = dtmTicketDateTime
+            ,intContractDetailId = intContractId
+            ,intContractHeaderId = intContractSequence
+            ,intTicketId  = intTicketId
+            ,intCommodityId  = TV.intCommodityId
+            ,intCommodityUOMId  = CUM.intCommodityUnitMeasureId
+            ,intItemId = TV.intItemId
+            ,intBookId = NULL
+            ,intSubBookId = NULL
+            ,intLocationId = intProcessingLocationId
+            ,intFutureMarketId = NULL
+            ,intFutureMonthId = NULL
+            ,dblNoOfLots = 0
+            ,dblQty = CASE WHEN strInOutFlag = 'I' THEN dblNetUnits ELSE dblNetUnits * -1 END 
+            ,dblPrice = dblUnitPrice
+            ,intEntityId 
+            ,ysnDelete = 0
+            ,intUserId = NULL
+            ,strNotes = strTicketComment
+        FROM tblSCTicket TV
+        LEFT JOIN tblGRStorageType ST on ST.intStorageScheduleTypeId = TV.intStorageScheduleTypeId 
+        LEFT JOIN tblICItemUOM IUM ON IUM.intItemUOMId = TV.intItemUOMIdTo
+        LEFT JOIN tblICCommodityUnitMeasure CUM ON CUM.intUnitMeasureId = IUM.intUnitMeasureId AND CUM.intCommodityId = TV.intCommodityId
+        WHERE ISNULL(strTicketStatus,'') = 'H'
+
+
+        EXEC uspRKLogRiskPosition @ExistingHistory, 1, 0
+        PRINT 'End Populate RK Summary Log - On Hold'
+        DELETE FROM @ExistingHistory
 		
 	--Update ysnAllowRebuildSummaryLog to FALSE
 	UPDATE tblRKCompanyPreference SET ysnAllowRebuildSummaryLog = 0

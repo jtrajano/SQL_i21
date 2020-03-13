@@ -814,11 +814,66 @@ BEGIN
 		---------------------------------------
 		------------- Scale --------------
 		---------------------------------------
-		ELSE IF @strTransactionType = ''
+		ELSE IF @strBucketType = 'On Hold'
 		BEGIN
-			PRINT 'BEGIN ' + @strTransactionType
 
-			PRINT 'END ' + @strTransactionType
+			INSERT INTO @FinalTable(strBatchId
+				, strBucketType
+				, strTransactionType
+				, intTransactionRecordId
+				, intTransactionRecordHeaderId
+				, strDistributionType
+				, strTransactionNumber
+				, dtmTransactionDate
+				, intContractDetailId
+				, intContractHeaderId
+				, intFutureMarketId
+				, intFutureMonthId
+				, intFutOptTransactionId
+				, intCommodityId
+				, intItemId
+				, intProductTypeId
+				, intOrigUOMId
+				, intBookId
+				, intSubBookId
+				, intLocationId
+				, strInOut
+				, dblOrigQty
+				, dblPrice
+				, intEntityId
+				, intTicketId
+				, intUserId
+				, strNotes
+				, strMiscFields)
+			SELECT TOP 1 @strBatchId
+				, @strBucketType
+				, @strTransactionType
+				, @intTransactionRecordId
+				, @intTransactionRecordHeaderId
+				, @strDistributionType
+				, @strTransactionNumber
+				, @dtmTransactionDate
+				, @intContractDetailId
+				, @intContractHeaderId
+				, @intFutureMarketId
+				, @intFutureMonthId
+				, @intTransactionRecordId
+				, @intCommodityId
+				, @intItemId
+				, intProductTypeId = NULL--I.intProductTypeId
+				, intOrigUOMId = @intCommodityUOMId
+				, @intBookId
+				, @intSubBookId
+				, @intLocationId
+				, strInOut = CASE WHEN ISNULL(@dblQty, 0) >= 0 THEN 'IN' ELSE 'OUT' END
+				, dblOrigQty = @dblQty
+				, dblPrice = @dblPrice
+				, @intEntityId
+				, @intTicketId
+				, @intUserId
+				, @strNotes
+				, @strMiscFields
+
 		END
 
 		---------------------------------------
