@@ -59,6 +59,8 @@ BEGIN TRY
 		,@dtmCurrentDate DATETIME
 		,@intPreviousSampleStatusId INT
 	DECLARE @intNewStageSampleId INT
+	DECLARE @intValidDate INT
+	DECLARE @strDescription AS NVARCHAR(MAX)
 
 	--DECLARE @dtmNewArrivedInPort DATETIME
 	--	,@dtmNewCustomsReleased DATETIME
@@ -125,6 +127,8 @@ BEGIN TRY
 				,@dtmCurrentDate = NULL
 				,@intPreviousSampleStatusId = NULL
 
+			SELECT @strDescription = NULL
+
 			--SELECT @dtmNewArrivedInPort = NULL
 			--	,@dtmNewCustomsReleased = NULL
 			--	,@ysnNewArrivedInPort = NULL
@@ -161,54 +165,14 @@ BEGIN TRY
 			SELECT @dtmCurrentUTCDate = DATEADD(mi, DATEDIFF(mi, GETDATE(), GETUTCDATE()), GETDATE())
 				,@dtmCurrentDate = GETDATE()
 
+			SELECT @intValidDate = (
+					SELECT DATEPART(dy, GETDATE())
+					)
+
 			IF ISNULL(@strSampleNumber, '') = ''
 			BEGIN
 				RAISERROR (
 						'Invalid Sample No. '
-						,16
-						,1
-						)
-			END
-
-			IF ISNULL(@strERPPONumber, '') = ''
-			BEGIN
-				RAISERROR (
-						'Invalid ERP PO No. '
-						,16
-						,1
-						)
-			END
-
-			IF ISNULL(@strERPItemNumber, '') = ''
-			BEGIN
-				RAISERROR (
-						'Invalid ERP Item No. '
-						,16
-						,1
-						)
-			END
-
-			SELECT @intContractDetailId = CD.intContractDetailId
-				,@intLocationId = CD.intCompanyLocationId
-				,@intProductTypeId = 8
-				,@intProductValueId = CD.intContractDetailId
-				,@intItemContractId = CD.intItemContractId
-				,@intCountryID = ISNULL(CA.intCountryID, IC.intCountryId)
-				,@strCountry = ISNULL(CA.strDescription, CG.strCountry)
-				,@intBookId = CD.intBookId
-				,@intSubBookId = CD.intSubBookId
-			FROM tblCTContractDetail CD WITH (NOLOCK)
-			JOIN tblICItem IM WITH (NOLOCK) ON IM.intItemId = CD.intItemId
-			LEFT JOIN tblICCommodityAttribute CA WITH (NOLOCK) ON CA.intCommodityAttributeId = IM.intOriginId
-			LEFT JOIN tblICItemContract IC WITH (NOLOCK) ON IC.intItemContractId = CD.intItemContractId
-			LEFT JOIN tblSMCountry CG WITH (NOLOCK) ON CG.intCountryID = IC.intCountryId
-			WHERE CD.strERPPONumber = @strERPPONumber
-				AND CD.strERPItemNumber = @strERPItemNumber
-
-			IF ISNULL(@intContractDetailId, 0) = 0
-			BEGIN
-				RAISERROR (
-						'Invalid Contract. '
 						,16
 						,1
 						)
@@ -240,11 +204,73 @@ BEGIN TRY
 						)
 			END
 
+			IF LOWER(@strSampleTypeName) = LOWER('Offer Sample')
+			BEGIN
+				SELECT @intContractDetailId = NULL
+					,@intLocationId = NULL
+					,@intProductTypeId = 2 -- Item
+					,@intProductValueId = IM.intItemId
+					,@intItemContractId = NULL
+					,@intCountryID = CA.intCountryID
+					,@strCountry = CA.strDescription
+					,@intBookId = NULL
+					,@intSubBookId = NULL
+				FROM tblICItem IM WITH (NOLOCK)
+				LEFT JOIN tblICCommodityAttribute CA WITH (NOLOCK) ON CA.intCommodityAttributeId = IM.intOriginId
+				WHERE IM.intItemId = @intItemId
+			END
+			ELSE
+			BEGIN
+				IF ISNULL(@strERPPONumber, '') = ''
+				BEGIN
+					RAISERROR (
+							'Invalid ERP PO No. '
+							,16
+							,1
+							)
+				END
+
+				IF ISNULL(@strERPItemNumber, '') = ''
+				BEGIN
+					RAISERROR (
+							'Invalid ERP Item No. '
+							,16
+							,1
+							)
+				END
+
+				SELECT @intContractDetailId = CD.intContractDetailId
+					,@intLocationId = CD.intCompanyLocationId
+					,@intProductTypeId = 8 -- Contract Line Item
+					,@intProductValueId = CD.intContractDetailId
+					,@intItemContractId = CD.intItemContractId
+					,@intCountryID = ISNULL(CA.intCountryID, IC.intCountryId)
+					,@strCountry = ISNULL(CA.strDescription, CG.strCountry)
+					,@intBookId = CD.intBookId
+					,@intSubBookId = CD.intSubBookId
+				FROM tblCTContractDetail CD WITH (NOLOCK)
+				JOIN tblICItem IM WITH (NOLOCK) ON IM.intItemId = CD.intItemId
+				LEFT JOIN tblICCommodityAttribute CA WITH (NOLOCK) ON CA.intCommodityAttributeId = IM.intOriginId
+				LEFT JOIN tblICItemContract IC WITH (NOLOCK) ON IC.intItemContractId = CD.intItemContractId
+				LEFT JOIN tblSMCountry CG WITH (NOLOCK) ON CG.intCountryID = IC.intCountryId
+				WHERE CD.strERPPONumber = @strERPPONumber
+					AND CD.strERPItemNumber = @strERPItemNumber
+
+				IF ISNULL(@intContractDetailId, 0) = 0
+				BEGIN
+					RAISERROR (
+							'Invalid Contract. '
+							,16
+							,1
+							)
+				END
+			END
+
 			IF ISNULL(@strVendor, '') <> ''
 			BEGIN
 				SELECT @intEntityId = t.intEntityId
-				FROM tblEMEntity t
-				JOIN tblEMEntityType ET ON ET.intEntityId = t.intEntityId
+				FROM tblEMEntity t WITH (NOLOCK)
+				JOIN tblEMEntityType ET WITH (NOLOCK) ON ET.intEntityId = t.intEntityId
 				WHERE ET.strType IN (
 						'Vendor'
 						,'Customer'
@@ -305,19 +331,6 @@ BEGIN TRY
 				BEGIN
 					RAISERROR (
 							'Invalid Sub Location. '
-							,16
-							,1
-							)
-				END
-
-				IF NOT EXISTS (
-						SELECT 1
-						FROM tblICItemUOM t WITH (NOLOCK)
-						WHERE t.intUnitMeasureId = @intRepresentingUOMId
-						)
-				BEGIN
-					RAISERROR (
-							'Invalid Item UOM. '
 							,16
 							,1
 							)
@@ -529,35 +542,103 @@ BEGIN TRY
 
 				SELECT @intSampleId = SCOPE_IDENTITY()
 
-				-- Inter Company for Quality
-				EXEC uspQMInterCompanyPreStageSample @intSampleId
-					,'Added'
-					--SELECT @dtmNewArrivedInPort = L.dtmArrivedInPort
-					--	,@dtmNewCustomsReleased = L.dtmCustomsReleased
-					--	,@ysnNewArrivedInPort = L.ysnArrivedInPort
-					--	,@ysnNewCustomsReleased = L.ysnCustomsReleased
-					--FROM tblLGLoad L WITH (NOLOCK)
-					--WHERE L.intLoadId = @intLoadId
-					-- Audit Log
-					--SELECT @strDetails = ''
-					--IF (@dtmOldArrivedInPort <> @dtmNewArrivedInPort)
-					--	SET @strDetails += '{"change":"dtmArrivedInPort","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@dtmOldArrivedInPort, '')) + '","to":"' + LTRIM(ISNULL(@dtmNewArrivedInPort, '')) + '","leaf":true,"changeDescription":"Arrived in Port Date"},'
-					--IF (@dtmOldCustomsReleased <> @dtmNewCustomsReleased)
-					--	SET @strDetails += '{"change":"dtmCustomsReleased","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@dtmOldCustomsReleased, '')) + '","to":"' + LTRIM(ISNULL(@dtmNewCustomsReleased, '')) + '","leaf":true,"changeDescription":"Customs Released Date"},'
-					--IF (@ysnOldArrivedInPort <> @ysnNewArrivedInPort)
-					--	SET @strDetails += '{"change":"ysnArrivedInPort","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@ysnOldArrivedInPort, '')) + '","to":"' + LTRIM(ISNULL(@ysnNewArrivedInPort, '')) + '","leaf":true,"changeDescription":"Arrived In Port"},'
-					--IF (@ysnOldCustomsReleased <> @ysnNewCustomsReleased)
-					--	SET @strDetails += '{"change":"ysnCustomsReleased","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@ysnOldCustomsReleased, '')) + '","to":"' + LTRIM(ISNULL(@ysnNewCustomsReleased, '')) + '","leaf":true,"changeDescription":"Customs Released"},'
-					--IF (LEN(@strDetails) > 1)
-					--BEGIN
-					--	SET @strDetails = SUBSTRING(@strDetails, 0, LEN(@strDetails))
-					--	EXEC uspSMAuditLog @keyValue = @intLoadId
-					--		,@screenName = 'Quality.view.QualitySample'
-					--		,@entityId = @intUserId
-					--		,@actionType = 'Updated'
-					--		,@actionIcon = 'small-tree-modified'
-					--		,@details = @strDetails
-					--END
+				INSERT INTO tblQMTestResult (
+					intConcurrencyId
+					,intSampleId
+					,intProductId
+					,intProductTypeId
+					,intProductValueId
+					,intTestId
+					,intPropertyId
+					,strPanelList
+					,strPropertyValue
+					,dtmCreateDate
+					,strResult
+					,ysnFinal
+					,strComment
+					,intSequenceNo
+					,dtmValidFrom
+					,dtmValidTo
+					,strPropertyRangeText
+					,dblMinValue
+					,dblMaxValue
+					,dblLowValue
+					,dblHighValue
+					,intUnitMeasureId
+					,strFormulaParser
+					,dblCrdrPrice
+					,dblCrdrQty
+					,intProductPropertyValidityPeriodId
+					,intPropertyValidityPeriodId
+					,intControlPointId
+					,intParentPropertyId
+					,intRepNo
+					,strFormula
+					,intListItemId
+					,strIsMandatory
+					,dtmPropertyValueCreated
+					,intCreatedUserId
+					,dtmCreated
+					,intLastModifiedUserId
+					,dtmLastModified
+					)
+				SELECT DISTINCT 1
+					,@intSampleId
+					,@intProductId
+					,@intProductTypeId
+					,@intProductValueId
+					,PP.intTestId
+					,PP.intPropertyId
+					,''
+					,''
+					,@dtmCurrentDate
+					,''
+					,0
+					,''
+					,PP.intSequenceNo
+					,PPV.dtmValidFrom
+					,PPV.dtmValidTo
+					,PPV.strPropertyRangeText
+					,PPV.dblMinValue
+					,PPV.dblMaxValue
+					,PPV.dblLowValue
+					,PPV.dblHighValue
+					,PPV.intUnitMeasureId
+					,PP.strFormulaParser
+					,NULL
+					,NULL
+					,PPV.intProductPropertyValidityPeriodId
+					,NULL
+					,PC.intControlPointId
+					,NULL
+					,0
+					,PP.strFormulaField
+					,NULL
+					,PP.strIsMandatory
+					,NULL
+					,@intCreatedUserId
+					,@dtmCurrentDate
+					,@intCreatedUserId
+					,@dtmCurrentDate
+				FROM tblQMProduct AS PRD WITH (NOLOCK)
+				JOIN tblQMProductControlPoint PC WITH (NOLOCK) ON PC.intProductId = PRD.intProductId
+				JOIN tblQMProductProperty AS PP WITH (NOLOCK) ON PP.intProductId = PRD.intProductId
+				JOIN tblQMProductTest AS PT WITH (NOLOCK) ON PT.intProductId = PP.intProductId
+					AND PT.intProductId = PRD.intProductId
+				JOIN tblQMTest AS T WITH (NOLOCK) ON T.intTestId = PP.intTestId
+					AND T.intTestId = PT.intTestId
+				JOIN tblQMTestProperty AS TP WITH (NOLOCK) ON TP.intPropertyId = PP.intPropertyId
+					AND TP.intTestId = PP.intTestId
+					AND TP.intTestId = T.intTestId
+					AND TP.intTestId = PT.intTestId
+				JOIN tblQMProperty AS PRT WITH (NOLOCK) ON PRT.intPropertyId = PP.intPropertyId
+					AND PRT.intPropertyId = TP.intPropertyId
+				JOIN tblQMProductPropertyValidityPeriod AS PPV WITH (NOLOCK) ON PPV.intProductPropertyId = PP.intProductPropertyId
+				WHERE PRD.intProductId = @intProductId
+					AND PC.intSampleTypeId = @intSampleTypeId
+					AND @intValidDate BETWEEN DATEPART(dy, PPV.dtmValidFrom)
+						AND DATEPART(dy, PPV.dtmValidTo)
+				ORDER BY PP.intSequenceNo
 			END
 
 			IF ISNULL(@strTransactionType, '') = 'SAMPLE_UPDATE'
@@ -606,10 +687,119 @@ BEGIN TRY
 					,intLastModifiedUserId = @intCreatedUserId
 					,dtmLastModified = @dtmCurrentDate
 				WHERE intSampleId = @intSampleId
+			END
 
-				-- Inter Company for Quality
-				EXEC uspQMInterCompanyPreStageSample @intSampleId
-					,'Modified'
+			IF ISNULL(@strTransactionType, '') = 'SAMPLE_CREATE'
+				OR ISNULL(@strTransactionType, '') = 'SAMPLE_UPDATE'
+			BEGIN
+				-- Update Properties Value, Comment
+				-- Setting Bit to lower case then only in sencha client, it is recogonizing
+				UPDATE tblQMTestResult
+				SET strPropertyValue = (
+						CASE P.intDataTypeId
+							WHEN 4
+								THEN LOWER(SR.strActualValue)
+							ELSE SR.strActualValue
+							END
+						)
+					,strComment = SR.strTestComment
+					,dtmPropertyValueCreated = (
+						CASE 
+							WHEN SR.strActualValue <> ''
+								THEN GETDATE()
+							ELSE NULL
+							END
+						)
+				FROM tblQMTestResult TR
+				JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
+					AND TR.intSampleId = @intSampleId
+				JOIN tblIPSampleTestResultStage SR ON SR.strPropertyName = P.strPropertyName
+					AND SR.intStageSampleId = @intMinRowNo
+
+				-- Setting result for properties
+				UPDATE tblQMTestResult
+				SET strResult = dbo.fnQMGetPropertyTestResult(TR.intTestResultId)
+				FROM tblQMTestResult TR
+				WHERE TR.intSampleId = @intSampleId
+					AND ISNULL(TR.strResult, '') = ''
+
+				-- Setting correct date format
+				UPDATE tblQMTestResult
+				SET strPropertyValue = CONVERT(DATETIME, TR.strPropertyValue, 120)
+				FROM tblQMTestResult TR
+				JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
+					AND TR.intSampleId = @intSampleId
+					AND ISNULL(TR.strPropertyValue, '') <> ''
+					AND P.intDataTypeId = 12
+
+				IF ISNULL(@strTransactionType, '') = 'SAMPLE_CREATE'
+				BEGIN
+					-- Audit Log
+					IF (@intSampleId > 0)
+					BEGIN
+						SELECT @strDescription = 'Sample created from external system. '
+
+						EXEC uspSMAuditLog @keyValue = @intSampleId
+							,@screenName = 'Quality.view.QualitySample'
+							,@entityId = @intUserId
+							,@actionType = 'Created'
+							,@actionIcon = 'small-new-plus'
+							,@changeDescription = @strDescription
+							,@fromValue = ''
+							,@toValue = @strSampleNumber
+					END
+
+					-- Inter Company for Quality
+					EXEC uspQMInterCompanyPreStageSample @intSampleId
+						,'Added'
+				END
+				ELSE
+				BEGIN
+					-- Audit Log
+					--SELECT @dtmNewArrivedInPort = L.dtmArrivedInPort
+					--	,@dtmNewCustomsReleased = L.dtmCustomsReleased
+					--	,@ysnNewArrivedInPort = L.ysnArrivedInPort
+					--	,@ysnNewCustomsReleased = L.ysnCustomsReleased
+					--FROM tblLGLoad L WITH (NOLOCK)
+					--WHERE L.intLoadId = @intLoadId
+					-- Audit Log
+					--SELECT @strDetails = ''
+					--IF (@dtmOldArrivedInPort <> @dtmNewArrivedInPort)
+					--	SET @strDetails += '{"change":"dtmArrivedInPort","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@dtmOldArrivedInPort, '')) + '","to":"' + LTRIM(ISNULL(@dtmNewArrivedInPort, '')) + '","leaf":true,"changeDescription":"Arrived in Port Date"},'
+					--IF (@dtmOldCustomsReleased <> @dtmNewCustomsReleased)
+					--	SET @strDetails += '{"change":"dtmCustomsReleased","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@dtmOldCustomsReleased, '')) + '","to":"' + LTRIM(ISNULL(@dtmNewCustomsReleased, '')) + '","leaf":true,"changeDescription":"Customs Released Date"},'
+					--IF (@ysnOldArrivedInPort <> @ysnNewArrivedInPort)
+					--	SET @strDetails += '{"change":"ysnArrivedInPort","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@ysnOldArrivedInPort, '')) + '","to":"' + LTRIM(ISNULL(@ysnNewArrivedInPort, '')) + '","leaf":true,"changeDescription":"Arrived In Port"},'
+					--IF (@ysnOldCustomsReleased <> @ysnNewCustomsReleased)
+					--	SET @strDetails += '{"change":"ysnCustomsReleased","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@ysnOldCustomsReleased, '')) + '","to":"' + LTRIM(ISNULL(@ysnNewCustomsReleased, '')) + '","leaf":true,"changeDescription":"Customs Released"},'
+					--IF (LEN(@strDetails) > 1)
+					--BEGIN
+					--	SET @strDetails = SUBSTRING(@strDetails, 0, LEN(@strDetails))
+					--	EXEC uspSMAuditLog @keyValue = @intLoadId
+					--		,@screenName = 'Quality.view.QualitySample'
+					--		,@entityId = @intUserId
+					--		,@actionType = 'Updated'
+					--		,@actionIcon = 'small-tree-modified'
+					--		,@details = @strDetails
+					--END
+					IF (@intSampleId > 0)
+					BEGIN
+						SELECT @strDescription = 'Sample updated from external system. '
+
+						EXEC uspSMAuditLog @keyValue = @intSampleId
+							,@screenName = 'Quality.view.QualitySample'
+							,@entityId = @intUserId
+							,@actionType = 'Updated'
+							,@actionIcon = 'small-new-plus'
+							,@changeDescription = @strDescription
+							,@fromValue = ''
+							,@toValue = @strSampleNumber
+					END
+
+					-- Inter Company for Quality
+					EXEC uspQMInterCompanyPreStageSample @intSampleId
+						,'Modified'
+				END
 			END
 
 			IF ISNULL(@strTransactionType, '') = 'SAMPLE_DELETE'
@@ -630,6 +820,21 @@ BEGIN TRY
 				DELETE
 				FROM tblQMSample
 				WHERE intSampleId = @intSampleId
+
+				-- Audit Log
+				IF (@intSampleId > 0)
+				BEGIN
+					SELECT @strDescription = 'Sample deleted from external system. '
+
+					EXEC uspSMAuditLog @keyValue = @intSampleId
+						,@screenName = 'Quality.view.QualitySample'
+						,@entityId = @intUserId
+						,@actionType = 'Deleted'
+						,@actionIcon = 'small-new-plus'
+						,@changeDescription = @strDescription
+						,@fromValue = ''
+						,@toValue = @strSampleNumber
+				END
 
 				-- Inter Company for Quality
 				EXEC uspQMInterCompanyPreStageSample @intSampleId
