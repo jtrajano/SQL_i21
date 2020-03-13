@@ -794,10 +794,11 @@ BEGIN TRY
 															'Price to be fixed basis ' + strFutMarketName + ' ' + 
 															strFutureMonthYear + CASE WHEN SQ.dblBasis < 0 THEN ' '+@rtMinus+' ' ELSE ' '+@rtPlus+' ' END +
 															SQ.strBasisCurrency + ' ' + dbo.fnCTChangeNumericScale(abs(SQ.dblBasis),2) + '/'+ SQ.strBasisUnitMeasure +' at '+ SQ.strFixationBy+'''s option prior to first notice day of '+strFutureMonthYear+' or on presentation of documents,whichever is earlier.'
-														ELSE	
-															'Priced ' + strFutMarketName + ' ' + 
-															strFutureMonthYear + ' ' +
-															SQ.strBasisCurrency + ' ' + dbo.fnCTChangeNumericScale(SQ.dblCashPrice,2) + '/'+ SQ.strBasisUnitMeasure +' at '+ SQ.strFixationBy+'''s option prior to first notice day of '+strFutureMonthYear+' or on presentation of documents,whichever is earlier.'
+														ELSE
+															'' + dbo.fnCTChangeNumericScale(SQ.dblCashPrice,2) + ' ' + strPriceCurrencyAndUOMForPriced2	
+															--'Priced ' + strFutMarketName + ' ' + 
+															--strFutureMonthYear + ' ' +
+															--SQ.strBasisCurrency + ' ' + dbo.fnCTChangeNumericScale(SQ.dblCashPrice,2) + '/'+ SQ.strBasisUnitMeasure +' at '+ SQ.strFixationBy+'''s option prior to first notice day of '+strFutureMonthYear+' or on presentation of documents,whichever is earlier.'
 														END
 			--,strStraussCondition					=	CB.strFreightTerm + '('+CB.strDescription+')' + ' ' + strDestinationPointName + ' ' + W1.strWeightGradeDesc
 			,strStraussCondition     				= 	CB.strFreightTerm + '('+CB.strDescription+')' + ' ' + isnull(CT.strCity,'') + ' ' + isnull(W1.strWeightGradeDesc,'')  
@@ -889,6 +890,7 @@ BEGIN TRY
 							CD.intPricingTypeId,
 							CY.strCurrency + '-' + dbo.fnCTGetTranslation('Inventory.view.ReportTranslation',UM.intUnitMeasureId,@intLaguageId,'Name',UM.strUnitMeasure) AS	strPriceCurrencyAndUOM,
 							CY.strCurrency + '/' + dbo.fnCTGetTranslation('Inventory.view.ReportTranslation',UM.intUnitMeasureId,@intLaguageId,'Name',UM.strUnitMeasure) AS	strPriceCurrencyAndUOMForPriced,
+							CY.strCurrency + ' per ' + dbo.fnCTGetTranslation('Inventory.view.ReportTranslation',UM.intUnitMeasureId,@intLaguageId,'Name',UM.strUnitMeasure) AS	strPriceCurrencyAndUOMForPriced2,
 							CD.dtmStartDate,
 							CD.dtmEndDate,
 							dbo.fnCTGetTranslation('RiskManagement.view.FuturesTradingMonths',CD.intFutureMonthId,@intLaguageId,'Future Trading Month',MO.strFutureMonth) strFutureMonth,
