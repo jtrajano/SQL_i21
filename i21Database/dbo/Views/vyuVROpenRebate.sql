@@ -60,7 +60,7 @@ FROM (
 				AND invoice.dtmDate >= programItem.dtmBeginDate
 				AND invoice.dtmDate <= ISNULL(programItem.dtmEndDate, '12/31/9999')
 				AND (ISNULL(programItem.dblRebateRate, 0) <> 0)
-		LEFT OUTER JOIN tblVRProgramItem programCategory ON programCategory.intProgramId = programItem.intProgramId
+		LEFT OUTER JOIN tblVRProgramItem programCategory ON (programCategory.intProgramId = programItem.intProgramId OR programItem.intProgramId IS NULL)
 			AND programCategory.intCategoryId = item.intCategoryId
 			AND invoice.dtmDate >= programCategory.dtmBeginDate
 			AND invoice.dtmDate <= ISNULL(programCategory.dtmEndDate, '12/31/9999')
