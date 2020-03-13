@@ -134,6 +134,9 @@ BEGIN TRY
 	-- THIS IS THE STORAGE UNIT
 	DECLARE @dblSelectedUnits AS DECIMAL(24,10)
 	declare @doPartialHistory bit = 0
+
+	DECLARE @strSettleTicket NVARCHAR(40)
+
 	DECLARE @SettleStorage AS TABLE 
 	(
 		 intSettleStorageKey INT IDENTITY(1, 1)
@@ -280,6 +283,7 @@ BEGIN TRY
 			,@intCashPriceUOMId 			= intItemUOMId
 			,@origdblSpotUnits				= dblSpotUnits
 			,@dblSelectedUnits				= dblSelectedUnits
+			,@strSettleTicket					= strStorageTicket
 		FROM tblGRSettleStorage
 		WHERE intSettleStorageId = @intSettleStorageId
 	
@@ -3720,6 +3724,7 @@ BEGIN TRY
 					, intContractHeaderId
 					, dtmHistoryDate
 					, intSettleStorageId
+					, strSettleTicket
 					, dblPaidAmount
 					, intBillId
 				)
@@ -3733,6 +3738,7 @@ BEGIN TRY
 					, SV.intContractHeaderId
 					, GETDATE()
 					, @intSettleStorageId
+					, @strSettleTicket
 					, SV.dblCashPrice
 					, CASE WHEN @intVoucherId = 0 THEN NULL ELSE @intVoucherId END
 				FROM @SettleVoucherCreate SV
