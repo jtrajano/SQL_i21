@@ -392,14 +392,15 @@ BEGIN
 	IF @strStatus = 'Success'
 	BEGIN
 		SELECT @strDetail = @strDetail + '<tr>
-			   <td>&nbsp;' + ISNULL(CONVERT(NVARCHAR,S.intFutOptTransactionHeaderId),'') + '</td>' + 
-			   '<td>&nbsp;' + ISNULL(CONVERT(NVARCHAR(20), S.dtmTransactionDate, 106), '') + '</td>' + 
-			   '<td>&nbsp;' + ISNULL(S.strFromCompanyName, '') + '</td>' + 
+			   <td>&nbsp;' + ISNULL(CONVERT(NVARCHAR,intFutOptTransactionHeaderId),'') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(CONVERT(NVARCHAR(20), dtmTransactionDate, 106), '') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(strFromCompanyName, '') + '</td>' + 
 			   '<td>&nbsp;' + 'Success' + '</td>
 		</tr>'
+		FROM (SELECT DISTINCT S.intFutOptTransactionHeaderId,S.dtmTransactionDate,S.strFromCompanyName
 		FROM tblRKFutOptTransactionHeaderStage S WITH (NOLOCK)
 		WHERE ISNULL(S.strFeedStatus, '') = 'Processed'
-			AND ISNULL(S.ysnMailSent, 0) = 0
+			AND ISNULL(S.ysnMailSent, 0) = 0) t
 
 		UPDATE tblRKFutOptTransactionHeaderStage
 		SET ysnMailSent = 1
@@ -409,14 +410,15 @@ BEGIN
 	ELSE IF @strStatus = 'Failure'
 	BEGIN
 		SELECT @strDetail = @strDetail + '<tr>
-			   <td>&nbsp;' + ISNULL(CONVERT(NVARCHAR,S.intFutOptTransactionHeaderId),'') + '</td>' + 
-			   '<td>&nbsp;' + ISNULL(CONVERT(NVARCHAR(20), S.dtmTransactionDate, 106), '') + '</td>' + 
-			   '<td>&nbsp;' + ISNULL(S.strFromCompanyName, '') + '</td>' + 
-			   '<td>&nbsp;' + ISNULL(S.strMessage, '') + '</td>
+			   <td>&nbsp;' + ISNULL(CONVERT(NVARCHAR,intFutOptTransactionHeaderId),'') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(CONVERT(NVARCHAR(20), dtmTransactionDate, 106), '') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(strFromCompanyName, '') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(strMessage, '') + '</td>
 		</tr>'
+		FROM (SELECT DISTINCT S.intFutOptTransactionHeaderId,S.dtmTransactionDate,S.strFromCompanyName,S.strMessage
 		FROM tblRKFutOptTransactionHeaderStage S WITH (NOLOCK)
 		WHERE ISNULL(S.strFeedStatus, '') = 'Failed'
-			AND ISNULL(S.ysnMailSent, 0) = 0
+			AND ISNULL(S.ysnMailSent, 0) = 0) t
 
 		UPDATE tblRKFutOptTransactionHeaderStage
 		SET ysnMailSent = 1
@@ -488,9 +490,10 @@ BEGIN
 			   '<td>&nbsp;' + ISNULL(strFromCompanyName, '') + '</td>' + 
 			   '<td>&nbsp;' + 'Success' + '</td>
 		</tr>'
+		FROM (SELECT DISTINCT intOptionsMatchPnSHeaderId, strFromCompanyName
 		FROM tblRKOptionsMatchPnSHeaderStage WITH (NOLOCK)
 		WHERE ISNULL(strFeedStatus, '') = 'Processed'
-			AND ISNULL(ysnMailSent, 0) = 0
+			AND ISNULL(ysnMailSent, 0) = 0) t
 
 		UPDATE tblRKOptionsMatchPnSHeaderStage
 		SET ysnMailSent = 1
@@ -504,9 +507,10 @@ BEGIN
 			   '<td>&nbsp;' + ISNULL(strFromCompanyName, '') + '</td>' + 
 			   '<td>&nbsp;' + ISNULL(strMessage, '') + '</td>
 		</tr>'
+		FROM (SELECT DISTINCT intOptionsMatchPnSHeaderId, strFromCompanyName, strMessage
 		FROM tblRKOptionsMatchPnSHeaderStage WITH (NOLOCK)
 		WHERE ISNULL(strFeedStatus, '') = 'Failed'
-			AND ISNULL(ysnMailSent, 0) = 0
+			AND ISNULL(ysnMailSent, 0) = 0) t
 
 		UPDATE tblRKOptionsMatchPnSHeaderStage
 		SET ysnMailSent = 1
