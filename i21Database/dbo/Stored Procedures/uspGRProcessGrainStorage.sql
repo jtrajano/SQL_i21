@@ -49,6 +49,9 @@ BEGIN TRY
 
 	DECLARE @intTicketId INT
 
+	DECLARE @StorageHistoryStagingTable AS [StorageHistoryStagingTable]
+	DECLARE @intStorageHistoryId INT
+
 	DECLARE @BillDiscounts AS TABLE 
 	(
 		intBillDiscountKey INT IDENTITY(1, 1)
@@ -409,30 +412,59 @@ BEGIN TRY
 				BEGIN					
 					COMMIT TRANSACTION
 					
-						INSERT INTO [dbo].[tblGRStorageHistory] 
+						-- INSERT INTO [dbo].[tblGRStorageHistory] 
+						-- (
+						-- 	 [intConcurrencyId]
+						-- 	,[intCustomerStorageId]							
+						-- 	,[intInvoiceId]							
+						-- 	,[dblUnits]
+						-- 	,[dtmHistoryDate]
+						-- 	,[dblPaidAmount]							
+						-- 	,[strType]
+						-- 	,[strUserName]							
+						-- )
+						-- SELECT 
+						-- 	 [intConcurrencyId] = 1
+						-- 	,[intCustomerStorageId] = ARD.intCustomerStorageId														
+						-- 	,[intInvoiceId] = AR.intInvoiceId							
+						-- 	,[dblUnits] = ARD.dblQtyOrdered
+						-- 	,[dtmHistoryDate]=GetDATE()
+						-- 	,[dblPaidAmount]=ARD.dblPrice							
+						-- 	,[strType]='Generated Storage Invoice'
+						-- 	,[strUserName]=(SELECT strUserName FROM tblSMUserSecurity WHERE [intEntityId] = @UserKey)
+						-- 	 FROM tblARInvoice AR
+						-- 	 JOIN tblARInvoiceDetail ARD ON ARD.intInvoiceId = AR.intInvoiceId
+						-- 	 WHERE AR.intInvoiceId = CONVERT(INT,@CreatedIvoices)
+
+						INSERT INTO @StorageHistoryStagingTable
 						(
-							 [intConcurrencyId]
-							,[intCustomerStorageId]							
-							,[intInvoiceId]							
+							[intCustomerStorageId]
+							,[intInvoiceId]
 							,[dblUnits]
 							,[dtmHistoryDate]
-							,[dblPaidAmount]							
+							,[dblPaidAmount]
+							,[intTransactionTypeId]
+							,[strPaidDescription]
 							,[strType]
-							,[strUserName]							
+							,[intUserId]
 						)
 						SELECT 
-							 [intConcurrencyId] = 1
-							,[intCustomerStorageId] = ARD.intCustomerStorageId														
-							,[intInvoiceId] = AR.intInvoiceId							
-							,[dblUnits] = ARD.dblQtyOrdered
-							,[dtmHistoryDate]=GetDATE()
-							,[dblPaidAmount]=ARD.dblPrice							
-							,[strType]='Generated Storage Invoice'
-							,[strUserName]=(SELECT strUserName FROM tblSMUserSecurity WHERE [intEntityId] = @UserKey)
-							 FROM tblARInvoice AR
-							 JOIN tblARInvoiceDetail ARD ON ARD.intInvoiceId = AR.intInvoiceId
-							 WHERE AR.intInvoiceId = CONVERT(INT,@CreatedIvoices)
-						
+							[intCustomerStorageId]	= @intCustomerStorageId
+							,[intInvoiceId] 		= AR.intInvoiceId
+							,[dblUnits]				= ARD.dblQtyOrdered
+							,[dtmHistoryDate]		= GETDATE()
+							,[dblPaidAmount]		= ARD.dblPrice
+							,[intTransactionTypeId]	= 2
+							,[strPaidDescription]	= 'Generated Storage Invoice'
+							,[strType]				= 'Generated Storage Invoice'
+							,[intUserId]			= (SELECT strUserName FROM tblSMUserSecurity WHERE [intEntityId] = @UserKey)
+						FROM tblARInvoice AR
+						INNER JOIN tblARInvoiceDetail ARD 
+							ON ARD.intInvoiceId = AR.intInvoiceId
+						WHERE AR.intInvoiceId = CONVERT(INT,@CreatedIvoices)
+
+						EXEC uspGRInsertStorageHistoryRecord @StorageHistoryStagingTable, @intStorageHistoryId OUTPUT
+
 						UPDATE CS
 						SET CS.dtmLastStorageAccrueDate = @StorageChargeDate
 						FROM tblGRCustomerStorage CS

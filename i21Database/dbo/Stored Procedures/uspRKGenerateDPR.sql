@@ -269,7 +269,7 @@ BEGIN TRY
 		, strCommodityCode
 		, strOwnedPhysicalStock
 		, strStorageTypeDescription
-		, ysnReceiptedStorage
+		, ysnReceiptedStorage = ISNULL(ysnReceiptedStorage, 0)
 		, ysnActive
 		, intItemId
 		, strItemNo

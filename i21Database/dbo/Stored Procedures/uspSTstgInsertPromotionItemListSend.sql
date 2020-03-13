@@ -218,8 +218,8 @@ BEGIN
 							ON IUM.intUnitMeasureId = IUOM.intUnitMeasureId 
 						INNER JOIN tblICCategory Cat 
 							ON Cat.intCategoryId = I.intCategoryId
-						LEFT JOIN tblSTSubcategoryRegProd SubCat 
-							ON SubCat.intStoreId = ST.intStoreId
+						--LEFT JOIN tblSTSubcategoryRegProd SubCat 
+						--	ON SubCat.intStoreId = ST.intStoreId
 						INNER JOIN tblSTRegister R 
 							ON R.intStoreId = ST.intStoreId
 						WHERE I.ysnFuelItem = CAST(0 AS BIT) 
@@ -347,8 +347,8 @@ BEGIN
 					ON ST.intCompanyLocationId = L.intCompanyLocationId 
 				JOIN tblICCategory Cat 
 					ON Cat.intCategoryId = I.intCategoryId
-				LEFT JOIN tblSTSubcategoryRegProd SubCat 
-					ON SubCat.intStoreId = ST.intStoreId
+				--LEFT JOIN tblSTSubcategoryRegProd SubCat 
+				--	ON SubCat.intStoreId = ST.intStoreId
 				JOIN tblSTRegister R 
 					ON R.intStoreId = ST.intStoreId
 				JOIN tblSTPromotionItemList PIL 

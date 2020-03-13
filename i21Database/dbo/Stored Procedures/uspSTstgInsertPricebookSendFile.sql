@@ -428,8 +428,7 @@ BEGIN
 						LEFT JOIN tblSTSubcategoryRegProd SubCat 
 							ON SubCat.intRegProdId = IL.intProductCodeId
 						INNER JOIN tblSTStore ST 
-							ON ST.intStoreId = SubCat.intStoreId
-							AND IL.intLocationId = ST.intCompanyLocationId
+							ON IL.intLocationId = ST.intCompanyLocationId
 							AND CatLoc.intLocationId = ST.intCompanyLocationId
 						INNER JOIN tblSMCompanyLocation L 
 							ON L.intCompanyLocationId = ST.intCompanyLocationId
@@ -781,8 +780,7 @@ BEGIN
 						LEFT JOIN tblSTSubcategoryRegProd SubCat 
 							ON SubCat.intRegProdId = IL.intProductCodeId
 						JOIN tblSTStore ST 
-							ON ST.intStoreId = SubCat.intStoreId
-							   AND IL.intLocationId = ST.intCompanyLocationId
+							ON IL.intLocationId = ST.intCompanyLocationId
 						JOIN tblSMCompanyLocation L 
 							ON L.intCompanyLocationId = IL.intLocationId
 						JOIN tblICItemUOM IUOM 
@@ -910,8 +908,8 @@ BEGIN
 						LEFT JOIN tblSTSubcategoryRegProd SubCat 
 							ON SubCat.intRegProdId = IL.intProductCodeId
 						JOIN tblSTStore ST 
-							ON ST.intStoreId = SubCat.intStoreId
-							   AND IL.intLocationId = ST.intCompanyLocationId
+							--ON ST.intStoreId = SubCat.intStoreId
+							ON IL.intLocationId = ST.intCompanyLocationId
 						JOIN tblSMCompanyLocation L 
 							ON L.intCompanyLocationId = IL.intLocationId
 						JOIN tblICItemUOM IUOM 
@@ -1081,8 +1079,8 @@ BEGIN
 					ON Category.intCategoryId = CategoryLoc.intCategoryId
 				INNER JOIN tblSTStore Store
 					ON CategoryLoc.intLocationId = Store.intCompanyLocationId
-				INNER JOIN tblSTSubcategoryRegProd StorePCode
-					ON Store.intStoreId = StorePCode.intStoreId
+				--INNER JOIN tblSTSubcategoryRegProd StorePCode
+				--	ON Store.intStoreId = StorePCode.intStoreId
 				INNER JOIN tblICItemLocation ItemLoc
 					ON Item.intItemId = ItemLoc.intItemId
 					AND Store.intCompanyLocationId = ItemLoc.intLocationId

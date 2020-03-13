@@ -370,6 +370,8 @@ BEGIN
 			, strTransactionId = suh.strNumber
 			, sh.intContractStatusId
 			, ch.intContractTypeId
+			, sh.intFutureMarketId
+			, sh.intFutureMonthId
 		into #tblBasisDeliveries
 		from vyuCTSequenceUsageHistory suh
 			inner join tblCTSequenceHistory sh ON sh.intSequenceUsageHistoryId = suh.intSequenceUsageHistoryId
@@ -402,6 +404,8 @@ BEGIN
 			, strTransactionId = suh.strNumber
 			, sh.intContractStatusId
 			, ch.intContractTypeId
+			, sh.intFutureMarketId
+			, sh.intFutureMonthId
 		from vyuCTSequenceUsageHistory suh
 			inner join tblCTSequenceHistory sh ON sh.intSequenceUsageHistoryId = suh.intSequenceUsageHistoryId
 			inner join tblCTContractDetail cd ON cd.intContractDetailId = sh.intContractDetailId
@@ -433,6 +437,8 @@ BEGIN
 			, strTransactionId = suh.strNumber
 			, sh.intContractStatusId
 			, ch.intContractTypeId
+			, sh.intFutureMarketId
+			, sh.intFutureMonthId
 		from vyuCTSequenceUsageHistory suh
 			inner join tblCTSequenceHistory sh ON sh.intSequenceUsageHistoryId = suh.intSequenceUsageHistoryId
 			inner join tblCTContractDetail cd ON cd.intContractDetailId = sh.intContractDetailId
@@ -467,6 +473,8 @@ BEGIN
 				, strTransactionReference = strTransactionType
 				, intTransactionReferenceId = intTransactionId
 				, strTransactionReferenceNo = strTransactionId
+				, intFutureMarketId
+				, intFutureMonthId
 			from #tblBasisDeliveries
 
 			union all
@@ -490,6 +498,8 @@ BEGIN
 				, strTransactionType = 'Voucher'
 				, intTransactionId = bd.intBillDetailId
 				, strTransactionId = b.strBillId
+				, intFutureMarketId
+				, intFutureMonthId
 			from tblAPBillDetail bd
 			inner join tblAPBill b ON b.intBillId = bd.intBillId
 			inner join #tblBasisDeliveries ba ON ba.intTransactionId = bd.intInventoryReceiptItemId and ba.strTransactionType <> 'Load Schedule' and ba.intContractTypeId = 1
@@ -515,6 +525,8 @@ BEGIN
 				, strTransactionType = 'Voucher'
 				, intTransactionId = bd.intBillDetailId
 				, strTransactionId = b.strBillId
+				, intFutureMarketId
+				, intFutureMonthId
 			from tblAPBillDetail bd
 			inner join tblAPBill b ON b.intBillId = bd.intBillId
 			inner join #tblBasisDeliveries ba ON ba.intTransactionId = bd.intLoadDetailId and ba.strTransactionType = 'Load Schedule' and ba.intContractTypeId = 1
@@ -540,6 +552,8 @@ BEGIN
 				, strTransactionType = 'Invoice'
 				, intTransactionId = id.intInvoiceDetailId
 				, strTransactionId = i.strInvoiceNumber
+				, intFutureMarketId
+				, intFutureMonthId
 			from tblARInvoiceDetail id
 			inner join tblARInvoice i ON i.intInvoiceId = id.intInvoiceId
 			inner join #tblBasisDeliveries ba ON ba.intTransactionId = id.intInventoryShipmentItemId and ba.strTransactionType <> 'Load Schedule' and ba.intContractTypeId = 2
@@ -565,6 +579,8 @@ BEGIN
 				, strTransactionType = 'Invoice'
 				, intTransactionId = id.intInvoiceDetailId
 				, strTransactionId = i.strInvoiceNumber
+				, intFutureMarketId
+				, intFutureMonthId
 			from tblARInvoiceDetail id
 			inner join tblARInvoice i ON i.intInvoiceId = id.intInvoiceId
 			inner join #tblBasisDeliveries ba ON ba.intTransactionId = id.intLoadDetailId and ba.strTransactionType = 'Load Schedule' and ba.intContractTypeId = 2
@@ -590,6 +606,8 @@ BEGIN
 			, intQtyUOMId
 			, intPricingTypeId
 			, intContractStatusId
+			, intFutureMarketId
+			, intFutureMonthId
 		)
 		SELECT 
 			strBatch = NULL
@@ -611,6 +629,8 @@ BEGIN
 			, intQtyUOMId
 			, intPricingTypeId
 			, intContractStatusId
+			, intFutureMarketId
+			, intFutureMonthId
 		FROM #tblFinalBasisDeliveries 
 
 		EXEC uspCTLogContractBalance @cbLog, 1
