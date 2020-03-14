@@ -183,6 +183,7 @@ FROM (
 		,Item.strItemNo
 		,strItemDescription = Item.strDescription
 		,strItemUnitMeasure = UM.strUnitMeasure
+		,strItemOrigin = CA.strDescription
 		,strVendor = CASE 
 			WHEN ISNULL(CD.ysnClaimsToProducer, 0) = 1
 				THEN DProducer.strName
@@ -435,7 +436,8 @@ FROM (
 		,intReportLogoHeight = ISNULL(CP.intReportLogoHeight,0)
 		,intReportLogoWidth = ISNULL(CP.intReportLogoWidth,0)			
 		,strShipmentPeriod = UPPER(CONVERT(NVARCHAR,CD.dtmStartDate,106)) + ' - ' + UPPER(CONVERT(NVARCHAR,CD.dtmEndDate,106))
-		,strMarkingInstruction = L.strMarks			
+		,strMarkingInstruction = L.strMarks
+		,strPositionInfo = DATENAME(mm, CD.dtmEndDate) + ' / ' + CAST(DATEPART(yy, CD.dtmEndDate) AS NVARCHAR(10)) + ' ' + POS.strPosition
 	FROM tblLGLoad L
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 	JOIN tblICItem Item ON Item.intItemId = LD.intItemId
@@ -505,6 +507,8 @@ FROM (
 	LEFT JOIN tblSMFreightTerms CB ON CB.intFreightTermId = CH.intFreightTermId
 	LEFT JOIN tblSMCity LoadingPort ON LoadingPort.intCityId = CD.intLoadingPortId AND LoadingPort.ysnPort = 1
 	LEFT JOIN tblSMCity DestinationPort ON DestinationPort.intCityId = CD.intLoadingPortId AND DestinationPort.ysnPort = 1
+	LEFT JOIN tblCTPosition POS ON POS.intPositionId = CH.intPositionId
+	LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = Item.intOriginId
 	CROSS APPLY tblLGCompanyPreference CP
 	OUTER APPLY (SELECT TOP 1 strOwner, strFreightClause FROM tblLGShippingLineServiceContractDetail SLSCD
 			 INNER JOIN tblLGShippingLineServiceContract SLSC ON SLSCD.intShippingLineServiceContractId = SLSC.intShippingLineServiceContractId
