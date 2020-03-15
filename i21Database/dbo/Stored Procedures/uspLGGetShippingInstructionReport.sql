@@ -13,6 +13,8 @@ BEGIN
 			@strZip						NVARCHAR(12),
 			@strCountry					NVARCHAR(25),
 			@strPhone					NVARCHAR(50),
+			@strFax						NVARCHAR(50),
+			@strWeb						NVARCHAR(200),
 			@strFullName				NVARCHAR(100),
 			@strUserName				NVARCHAR(100),
 			@strLogisticsCompanyName	NVARCHAR(MAX),
@@ -76,6 +78,8 @@ BEGIN
 			,@strZip = strZip
 			,@strCountry = strCountry
 			,@strPhone = strPhone
+			,@strFax = strFax
+			,@strWeb = strWebSite 
 	FROM tblSMCompanySetup
 	
 	SELECT @strFullName = E.strName,
@@ -164,6 +168,8 @@ SELECT *
 	,strCompanyZip = @strZip 
 	,strCompanyCountry = @strCountry 
 	,strCompanyPhone = @strPhone
+	,strCompanyFax = @strFax
+	,strCompanyWebSite = @strWeb
 	,strCityStateZip = @strCity + ', ' + @strState + ', ' + @strZip + ','
 	,strCityAndDate = @strCity + ', '+ DATENAME(dd,getdate()) + ' ' + LEFT(DATENAME(MONTH,getdate()),3) + ' ' + DATENAME(yyyy,getdate())
 	,strShipmentPeriod
