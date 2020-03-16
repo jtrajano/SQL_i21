@@ -478,7 +478,8 @@ ELSE
 			BEGIN
 				EXEC dbo.uspGLBookEntries @GLEntries		= @GLEntries
 										, @ysnPost			= @post
-										--, @XACT_ABORT_ON	= @raiseError
+										, @SkipGLValidation	 = 1
+        								, @SkipICValidation	 = 1
 			END
 
 		DECLARE @tmpBatchId NVARCHAR(100)
