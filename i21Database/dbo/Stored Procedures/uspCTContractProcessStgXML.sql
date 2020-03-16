@@ -2397,6 +2397,7 @@ BEGIN TRY
 						,strFixationBy
 						,intConvPriceCurrencyId
 						,dblConvertedBasis
+						,intSubBookId
 						)
 					SELECT @intNewContractHeaderId
 						,@intItemBundleId
@@ -2488,6 +2489,7 @@ BEGIN TRY
 						,strFixationBy
 						,@intConvPriceCurrencyId
 						,dblConvertedBasis
+						,@intSubBookId
 					FROM OPENXML(@idoc, 'vyuIPContractDetailViews/vyuIPContractDetailView', 2) WITH (
 							strEntityName NVARCHAR(100) Collate Latin1_General_CI_AS
 							,dtmContractDate DATETIME
