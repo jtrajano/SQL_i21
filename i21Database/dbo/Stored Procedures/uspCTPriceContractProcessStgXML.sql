@@ -1636,9 +1636,12 @@ BEGIN TRY
 					,@intTransactionRefId
 					,@intCompanyRefId
 
-				EXECUTE dbo.uspSMInterCompanyUpdateMapping @currentTransactionId = @intTransactionRefId
-					,@referenceTransactionId = @intTransactionId
-					,@referenceCompanyId = @intCompanyId
+				IF @strRowState <> 'Delete'
+				BEGIN
+					EXECUTE dbo.uspSMInterCompanyUpdateMapping @currentTransactionId = @intTransactionRefId
+						,@referenceTransactionId = @intTransactionId
+						,@referenceCompanyId = @intCompanyId
+				END
 
 				UPDATE tblCTPriceContractStage
 				SET strFeedStatus = 'Processed'

@@ -6,27 +6,31 @@ BEGIN TRY
 	SET NOCOUNT ON
 
 	DECLARE @ErrMsg NVARCHAR(MAX)
-	DECLARE @strInsert NVARCHAR(100)
-	DECLARE @strUpdate NVARCHAR(100)
-	DECLARE @strDelete NVARCHAR(100)
+		,@strInsert NVARCHAR(100)
+		,@strUpdate NVARCHAR(100)
+		,@strDelete NVARCHAR(100)
+		,@intToCompanyId INT
+		,@strTransactionType NVARCHAR(50)
 
 	IF EXISTS (
 			SELECT 1
-		FROM tblSMInterCompanyTransactionConfiguration TC
-		JOIN tblSMInterCompanyTransactionType TT ON TT.intInterCompanyTransactionTypeId = TC.intFromTransactionTypeId
-		JOIN tblSMInterCompanyTransactionType TT1 ON TT1.intInterCompanyTransactionTypeId = TC.intToTransactionTypeId
-		JOIN tblCTPriceContract PC ON PC.intCompanyId = TC.intFromCompanyId
-		JOIN tblCTPriceFixation PF ON PF.intPriceContractId = PC.intPriceContractId
-		JOIN tblCTContractHeader CH ON CH.intContractHeaderId = PF.intContractHeaderId
-			AND CH.intBookId = TC.intToBookId
-		WHERE TT.strTransactionType = 'Sales Price Fixation'
-			AND PC.intPriceContractId = @intPriceContractId
-			AND CH.intContractTypeId=2
+			FROM tblSMInterCompanyTransactionConfiguration TC
+			JOIN tblSMInterCompanyTransactionType TT ON TT.intInterCompanyTransactionTypeId = TC.intFromTransactionTypeId
+			JOIN tblSMInterCompanyTransactionType TT1 ON TT1.intInterCompanyTransactionTypeId = TC.intToTransactionTypeId
+			JOIN tblCTPriceContract PC ON PC.intCompanyId = TC.intFromCompanyId
+			JOIN tblCTPriceFixation PF ON PF.intPriceContractId = PC.intPriceContractId
+			JOIN tblCTContractHeader CH ON CH.intContractHeaderId = PF.intContractHeaderId
+				AND CH.intBookId = TC.intToBookId
+			WHERE TT.strTransactionType = 'Sales Price Fixation'
+				AND PC.intPriceContractId = @intPriceContractId
+				AND CH.intContractTypeId = 2
 			)
 	BEGIN
 		SELECT @strInsert = TC.strInsert
 			,@strUpdate = TC.strUpdate
 			,@strDelete = TC.strDelete
+			,@intToCompanyId = intToCompanyId
+			,@strTransactionType=TT1.strTransactionType
 		FROM tblSMInterCompanyTransactionConfiguration TC
 		JOIN tblSMInterCompanyTransactionType TT ON TT.intInterCompanyTransactionTypeId = TC.intFromTransactionTypeId
 		JOIN tblSMInterCompanyTransactionType TT1 ON TT1.intInterCompanyTransactionTypeId = TC.intToTransactionTypeId
@@ -36,7 +40,7 @@ BEGIN TRY
 			AND CH.intBookId = TC.intToBookId
 		WHERE TT.strTransactionType = 'Sales Price Fixation'
 			AND PC.intPriceContractId = @intPriceContractId
-			AND CH.intContractTypeId=2
+			AND CH.intContractTypeId = 2
 
 		IF (
 				(
@@ -69,9 +73,13 @@ BEGIN TRY
 			INSERT INTO dbo.tblCTPriceContractPreStage (
 				intPriceContractId
 				,strRowState
+				,intMultiCompanyId
+				,strTransactionType
 				)
 			SELECT @intPriceContractId
 				,@strRowState
+				,@intToCompanyId
+				,@strTransactionType
 		END
 	END
 END TRY
