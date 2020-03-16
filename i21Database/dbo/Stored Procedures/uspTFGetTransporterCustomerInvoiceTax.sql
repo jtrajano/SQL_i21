@@ -456,7 +456,7 @@ BEGIN TRY
             DELETE FROM @tmpTransaction WHERE intTransactionDetailId IN (
 				SELECT A.intTransactionDetailId FROM @tmpTransaction A 
 				INNER JOIN tblTFReportingComponentAccountStatusCode B ON B.intAccountStatusId = A.intAccountStatusId 
-				WHERE B.ysnInclude = 0)
+				WHERE B.ysnInclude = 0 AND B.intReportingComponentId = @RCId)
         END
 
 		-- Has included account status code
@@ -465,7 +465,7 @@ BEGIN TRY
             DELETE FROM @tmpTransaction WHERE intId NOT IN (
 				SELECT A.intId FROM @tmpTransaction A 
 				INNER JOIN tblTFReportingComponentAccountStatusCode B ON B.intAccountStatusId = A.intAccountStatusId 
-				WHERE B.ysnInclude = 1)
+				WHERE B.ysnInclude = 1 AND B.intReportingComponentId = @RCId)
         END
 
 		INSERT INTO @tmpInvoiceDetailUniqueAccountStatusCode

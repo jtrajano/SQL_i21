@@ -41,10 +41,10 @@ FROM
 )t
 unpivot
 (
-	intItemId for ITEM in (BegBalance_ItemId, EndBalance_ItemId, Replenishment_ItemId)
+	intItemId for ITEM in (BegBalance_ItemId, EndBalance_ItemId, Replenishment_ItemId, FundIncreaseDecrease_ItemId)
 ) o
 unpivot
 (
-	dblItemAmount for ITEMAMOUNT in (BegBalance_Amount, EndBalance_Amount, Replenishment_Amount)
+	dblItemAmount for ITEMAMOUNT in (BegBalance_Amount, EndBalance_Amount, Replenishment_Amount, FundIncreaseDecrease_Amount)
 ) n
 WHERE  REPLACE(ITEM, '_ItemId', '') = REPLACE(ITEMAMOUNT, '_Amount', '')
