@@ -516,50 +516,31 @@ BEGIN
 					, dblNoOfLots = dblOpenContract
 				FROM (
 					SELECT intDailyAveragePriceDetailId
-						, dblOpenContract = SUM(dblNoOfContract) 
-						, dblPrice = SUM(dblPrice * dblNoOfContract)
+						, dblPrice = SUM(CASE WHEN strBuySell = 'Buy' THEN dblPrice * dblNewNoOfContract ELSE 0 END)
+						, dblOpenContract = SUM((CASE WHEN strBuySell = 'Buy' THEN dblNewNoOfContract ELSE 0 END))
 					FROM (
-						SELECT 
-								intDailyAveragePriceDetailId, 
-								strTransactionType = 'FutOptTransaction', 
-								dblNoOfContract, 
-								dblPrice
-							FROM tblRKDailyAveragePriceDetailTransaction
-							WHERE strTransactionType = 'FutOptTransaction' AND strInstrumentType='Futures' AND strBuySell = 'Buy'
-								AND intDailyAveragePriceDetailId IN (SELECT intDailyAveragePriceDetailId FROM tblRKDailyAveragePriceDetail WHERE intDailyAveragePriceId = @intDailyAveragePriceId)
-
-						UNION ALL
-
-						SELECT 
-							intDailyAveragePriceDetailId
-							, strTransactionType
-							, dblNoOfContract = SUM (dblNoOfContract) 
-							, dblPrice = SUM(dblPrice)
-						FROM (
-							SELECT 
-								intDailyAveragePriceDetailId, 
-								strTransactionType = 'DailyAveragePrice', 
-								dblNoOfContract, 
-								dblPrice = 0.0
-							FROM tblRKDailyAveragePriceDetailTransaction
-								WHERE strTransactionType = 'FutOptTransaction' AND strInstrumentType='Futures' AND strBuySell = 'Sell'
-									AND intDailyAveragePriceDetailId IN (SELECT intDailyAveragePriceDetailId FROM tblRKDailyAveragePriceDetail WHERE intDailyAveragePriceId = @intDailyAveragePriceId)
-
-							UNION ALL
-
-							SELECT 
-								intDailyAveragePriceDetailId, 
-								strTransactionType = 'DailyAveragePrice', 
-								dblNoOfContract, 
-								dblPrice
-							FROM tblRKDailyAveragePriceDetailTransaction
-								WHERE strTransactionType = 'DailyAveragePrice' AND strInstrumentType='Futures' AND strBuySell = 'Buy'
-									AND intDailyAveragePriceDetailId IN (SELECT intDailyAveragePriceDetailId FROM tblRKDailyAveragePriceDetail WHERE intDailyAveragePriceId = @intDailyAveragePriceId)
-						) t2
-						GROUP BY intDailyAveragePriceDetailId, strTransactionType
-					) t1
+						SELECT *
+							, dblNewNoOfContract = CASE WHEN strInstrumentType = 'Futures' THEN dblNoOfContract ELSE 0 END
+						FROM tblRKDailyAveragePriceDetailTransaction
+					) tblRKDailyAveragePriceDetailTransaction
+					WHERE intDailyAveragePriceDetailId IN (SELECT intDailyAveragePriceDetailId FROM tblRKDailyAveragePriceDetail WHERE intDailyAveragePriceId = @intDailyAveragePriceId)
 					GROUP BY intDailyAveragePriceDetailId
 				) t
+			) tblPatch
+			WHERE tblPatch.intDailyAveragePriceDetailId = tblRKDailyAveragePriceDetail.intDailyAveragePriceDetailId
+
+			UPDATE tblRKDailyAveragePriceDetail
+			SET dblNoOfLots = dblNoOfLots + dblSellContract
+			FROM (
+					SELECT intDailyAveragePriceDetailId
+						, dblSellContract = SUM((CASE WHEN strBuySell = 'Sell' THEN dblNewNoOfContract ELSE 0 END))
+					FROM (
+						SELECT *
+							, dblNewNoOfContract = CASE WHEN strInstrumentType = 'Futures' THEN dblNoOfContract ELSE 0 END
+						FROM tblRKDailyAveragePriceDetailTransaction
+					) tblRKDailyAveragePriceDetailTransaction
+					WHERE intDailyAveragePriceDetailId IN (SELECT intDailyAveragePriceDetailId FROM tblRKDailyAveragePriceDetail WHERE intDailyAveragePriceId = @intDailyAveragePriceId)
+					GROUP BY intDailyAveragePriceDetailId
 			) tblPatch
 			WHERE tblPatch.intDailyAveragePriceDetailId = tblRKDailyAveragePriceDetail.intDailyAveragePriceDetailId
 
