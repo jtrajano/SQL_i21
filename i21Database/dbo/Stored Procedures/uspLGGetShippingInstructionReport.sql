@@ -239,6 +239,14 @@ FROM (
 			WHEN L.strDocPresentationType = 'Bank' THEN Bank.strBankName
 			WHEN L.strDocPresentationType = 'Forwarding Agent' THEN DocPres.strName
 			ELSE '' END
+		,strDocPresentationAddress = CASE
+			WHEN L.strDocPresentationType = 'Bank' THEN Bank.strAddress
+			WHEN L.strDocPresentationType = 'Forwarding Agent' THEN DocPresLoc.strAddress
+			ELSE '' END
+		,strDocPresentationCityStateZip = CASE
+			WHEN L.strDocPresentationType = 'Bank' THEN Bank.strCity + ', ' + Bank.strState + ', ' + Bank.strZipCode
+			WHEN L.strDocPresentationType = 'Forwarding Agent' THEN DocPresLoc.strCity + ', ' + DocPresLoc.strState + ', ' + DocPresLoc.strZipCode
+			ELSE '' END
 		,L.dtmETAPOL
 		,L.dtmETAPOD
 		,L.dtmETSPOL
@@ -472,6 +480,7 @@ FROM (
 	LEFT JOIN tblEMEntity ForAgent ON ForAgent.intEntityId = L.intForwardingAgentEntityId
 	LEFT JOIN tblEMEntity BLDraft ON BLDraft.intEntityId = L.intBLDraftToBeSentId
 	LEFT JOIN tblEMEntity DocPres ON DocPres.intEntityId = L.intDocPresentationId
+	LEFT JOIN tblEMEntityLocation DocPresLoc ON DocPres.intEntityId = DocPresLoc.intEntityId AND DocPresLoc.ysnDefaultLocation = 1
 	LEFT JOIN tblEMEntity Shipper ON Shipper.intEntityId = CD.intShipperId
 	LEFT JOIN tblCMBank Bank ON Bank.intBankId = L.intDocPresentationId
 	LEFT JOIN tblLGLoadNotifyParties FLNP ON L.intLoadId = FLNP.intLoadId AND FLNP.strNotifyOrConsignee = 'First Notify'
