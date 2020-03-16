@@ -66,7 +66,8 @@ FROM (
 		LEFT OUTER JOIN tblAPVendor vendor ON vendor.intEntityId = vendorSetup.intEntityId
 		LEFT OUTER JOIN tblEMEntity entity ON entity.intEntityId = vendor.intEntityId
 		LEFT OUTER JOIN tblSMCompanyLocation companyLocation ON companyLocation.intCompanyLocationId = invoice.intCompanyLocationId
-	WHERE  invoice.ysnPosted = 1
+	WHERE NOT EXISTS(SELECT TOP 1 1 FROM tblVRRebate WHERE intInvoiceDetailId = invoiceDetail.intInvoiceDetailId)
+		AND invoice.ysnPosted = 1
 		AND invoice.strTransactionType IN ('Invoice', 'Credit Memo')
 
 	UNION ALL
@@ -132,7 +133,8 @@ FROM (
 		LEFT OUTER JOIN tblAPVendor vendor ON vendor.intEntityId = vendorSetup.intEntityId
 		LEFT OUTER JOIN tblEMEntity entity ON entity.intEntityId = vendor.intEntityId
 		LEFT OUTER JOIN tblSMCompanyLocation companyLocation ON companyLocation.intCompanyLocationId = invoice.intCompanyLocationId
-	WHERE  invoice.ysnPosted = 1
+	WHERE NOT EXISTS(SELECT TOP 1 1 FROM tblVRRebate WHERE intInvoiceDetailId = invoiceDetail.intInvoiceDetailId)
+		AND invoice.ysnPosted = 1
 		AND invoice.strTransactionType IN ('Invoice', 'Credit Memo')
 ) openRebates
 WHERE openRebates.strProgram IS NOT NULL
