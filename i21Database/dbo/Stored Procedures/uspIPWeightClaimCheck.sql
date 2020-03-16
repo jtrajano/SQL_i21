@@ -26,6 +26,8 @@ BEGIN
 
 		SELECT @intLoadId = NULL
 
+		SELECT @intNewWeightClaimId = NULL
+
 		SELECT @intLoadDetailId = intSourceId
 		FROM tblICInventoryReceiptItem
 		WHERE intInventoryReceiptId = @intInventoryReceiptId
@@ -39,7 +41,7 @@ BEGIN
 				FROM vyuIPGetOpenWeightClaim
 				WHERE intLoadId = @intLoadId
 					AND intContainerCount = intIRCount
-					AND IsNULL(dblClaimableWt, 0)+IsNULL(dblFranchiseWt, 0) < 0
+					AND IsNULL(dblClaimableWt, 0) + IsNULL(dblFranchiseWt, 0) < 0
 				)
 		BEGIN
 			EXEC dbo.uspIPCreateWeightClaims @intLoadId = @intLoadId
@@ -49,8 +51,14 @@ BEGIN
 				,@strRowState = 'Added'
 		END
 
-		INSERT INTO tblIPInventoryReceiptWeightClaim (intInventoryReceiptId,intLoadId)
-		SELECT @intInventoryReceiptId,@intLoadId
+		INSERT INTO tblIPInventoryReceiptWeightClaim (
+			intInventoryReceiptId
+			,intLoadId
+			,intWeightClaimId
+			)
+		SELECT @intInventoryReceiptId
+			,@intLoadId
+			,@intNewWeightClaimId
 
 		SELECT @intInventoryReceiptId = MIN(intInventoryReceiptId)
 		FROM @tblIPInventoryReceipt
