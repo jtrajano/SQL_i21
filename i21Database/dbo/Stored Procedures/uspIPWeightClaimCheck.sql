@@ -39,7 +39,7 @@ BEGIN
 				FROM vyuIPGetOpenWeightClaim
 				WHERE intLoadId = @intLoadId
 					AND intContainerCount = intIRCount
-					AND IsNULL(dblClaimableWt, 0) < 0
+					AND IsNULL(dblClaimableWt, 0)+IsNULL(dblFranchiseWt, 0) < 0
 				)
 		BEGIN
 			EXEC dbo.uspIPCreateWeightClaims @intLoadId = @intLoadId
