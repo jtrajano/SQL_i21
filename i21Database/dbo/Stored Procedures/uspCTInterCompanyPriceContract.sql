@@ -12,12 +12,16 @@ BEGIN TRY
 
 	IF EXISTS (
 			SELECT 1
-			FROM tblSMInterCompanyTransactionConfiguration TC
-			JOIN tblSMInterCompanyTransactionType TT ON TT.intInterCompanyTransactionTypeId = TC.intFromTransactionTypeId
-			WHERE TT.strTransactionType IN (
-					'Purchase Price Fixation'
-					,'Sales Price Fixation'
-					)
+		FROM tblSMInterCompanyTransactionConfiguration TC
+		JOIN tblSMInterCompanyTransactionType TT ON TT.intInterCompanyTransactionTypeId = TC.intFromTransactionTypeId
+		JOIN tblSMInterCompanyTransactionType TT1 ON TT1.intInterCompanyTransactionTypeId = TC.intToTransactionTypeId
+		JOIN tblCTPriceContract PC ON PC.intCompanyId = TC.intFromCompanyId
+		JOIN tblCTPriceFixation PF ON PF.intPriceContractId = PC.intPriceContractId
+		JOIN tblCTContractHeader CH ON CH.intContractHeaderId = PF.intContractHeaderId
+			AND CH.intBookId = TC.intToBookId
+		WHERE TT.strTransactionType = 'Sales Price Fixation'
+			AND PC.intPriceContractId = @intPriceContractId
+			AND CH.intContractTypeId=2
 			)
 	BEGIN
 		SELECT @strInsert = TC.strInsert
@@ -32,6 +36,7 @@ BEGIN TRY
 			AND CH.intBookId = TC.intToBookId
 		WHERE TT.strTransactionType = 'Sales Price Fixation'
 			AND PC.intPriceContractId = @intPriceContractId
+			AND CH.intContractTypeId=2
 
 		IF (
 				(
