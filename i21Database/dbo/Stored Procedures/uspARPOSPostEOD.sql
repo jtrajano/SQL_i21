@@ -236,7 +236,10 @@ BEGIN
 		) EOD
 		--End of Cash Over/Short to Cash Over/ Account
 
-		EXEC dbo.uspGLBookEntries	@GLEntries, 1
+		EXEC dbo.uspGLBookEntries @GLEntries         = @GLEntries
+        						, @ysnPost           = 1
+        						, @SkipGLValidation	 = 1
+        						, @SkipICValidation	 = 1
 
 		SELECT TOP 1 @isSuccess = 1
 		FROM tblGLDetail
