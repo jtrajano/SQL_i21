@@ -53,12 +53,26 @@ BEGIN TRY
 		        ,@intCompanyId int
         ,@intTransactionId int
         ,@intLoadScreenId int
+		,@intBookId int
+		,@intSubBookId int
+		,@strBook nvarchar(50)
+		,@strSubBook nvarchar(50)
 
 	SELECT @strLoadNumber = strLoadNumber
 		,@intSourceType = intSourceType
 		,@intCompanyId=intCompanyId
+		,@intBookId=intBookId
+		,@intSubBookId=intSubBookId
 	FROM tblLGLoad
 	WHERE intLoadId = @intLoadId
+
+	Select @strBook=strBook
+	from tblCTBook
+	Where intBookId=@intBookId
+
+	Select @strSubBook=strSubBook
+	from tblCTSubBook
+	Where intSubBookId=@intSubBookId
 
 	IF (@intSourceType = 7)
 		RETURN;
@@ -327,6 +341,8 @@ BEGIN TRY
 		,intToBookId
 		,intTransactionId 
         ,intCompanyId 
+		,strBook
+		,strSubBook
 		)
 	SELECT @intLoadId
 		,@strLoadNumber
@@ -349,6 +365,8 @@ BEGIN TRY
 		,@intToBookId
 		,@intTransactionId
         ,@intCompanyId
+		,@strBook
+		,@strSubBook
 END TRY
 
 BEGIN CATCH
