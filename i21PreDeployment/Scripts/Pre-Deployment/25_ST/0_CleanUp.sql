@@ -832,5 +832,25 @@ IF EXISTS(SELECT TOP 1 1 FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = N't
 ----------------------------------------------------------------------------------------------------------------------------------
 
 
+----------------------------------------------------------------------------------------------------------------------------------
+-- [START] - Remove Constraints 
+----------------------------------------------------------------------------------------------------------------------------------
+IF EXISTS (
+SELECT
+* 
+FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS 
+WHERE CONSTRAINT_NAME ='AK_tblSTSubcategoryRegProd_strRegProdCode'
+and TABLE_NAME = 'tblSTSubcategoryRegProd' ) 
+BEGIN
+	ALTER TABLE tblSTSubcategoryRegProd
+	DROP CONSTRAINT AK_tblSTSubcategoryRegProd_strRegProdCode
+END
+----------------------------------------------------------------------------------------------------------------------------------
+-- [END] - Remove Duplicate data of tblSTSubcategoryRegProd  
+----------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
 PRINT('*** ST Cleanup - End ***')
 PRINT('')
