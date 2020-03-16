@@ -127,18 +127,14 @@ BEGIN
 	INTO #tempDateRange
 	FROM Dates AS d
 
-	--TODO:
-	SELECT InTran.dtmDate
-		, dblInTransitQty = dbo.fnCTConvertQuantityToTargetCommodityUOM(cum.intCommodityUnitMeasureId, @intCommodityUnitMeasureId, ISNULL((InTran.dblInTransitQty), 0))
+	SELECT dtmDate = InTran.dtmTransactionDate 
+		, dblInTransitQty = dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId , @intCommodityUnitMeasureId, ISNULL((InTran.dblTotal), 0))
 	INTO #InTransitDateRange
-	FROM dbo.fnICOutstandingInTransitAsOf(NULL, @intCommodityId, @dtmToTransactionDate) InTran
-	INNER JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = InTran.intItemUOMId
-	INNER JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
-	INNER JOIN tblICItemLocation IL ON IL.intItemLocationId = InTran.intItemLocationId
-	JOIN tblICCommodityUnitMeasure cum ON cum.intCommodityId = @intCommodityId AND cum.intUnitMeasureId = UOM.intUnitMeasureId
-	WHERE InTran.intItemId = ISNULL(@intItemId, InTran.intItemId)
-		AND IL.intLocationId = ISNULL(@intLocationId, IL.intLocationId ) 
-		AND IL.intLocationId  IN (SELECT intCompanyLocationId FROM #LicensedLocation)
+	FROM dbo.fnRKGetBucketInTransit(@dtmToTransactionDate,@intCommodityId,NULL) InTran
+	WHERE InTran.strBucketType = 'Sales In-Transit'
+		AND InTran.intItemId = ISNULL(@intItemId, InTran.intItemId)
+		AND InTran.intLocationId = ISNULL(@intLocationId, InTran.intLocationId ) 
+		AND InTran.intLocationId  IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 			
 	DECLARE @tblBalanceInvByDate AS TABLE (dtmDate DATE NULL
 		, dblBalanceInv NUMERIC(18,6)
