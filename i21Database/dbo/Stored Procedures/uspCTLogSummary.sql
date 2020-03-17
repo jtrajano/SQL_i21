@@ -18,7 +18,7 @@ BEGIN TRY
 			@ysnMatched				BIT,
 			@ysnDirect				BIT = 0
 
-	SELECT @strSource, @strProcess
+	--SELECT @strSource, @strProcess
 
 	IF @strProcess = 'Scheduled Quantity'
 	BEGIN
