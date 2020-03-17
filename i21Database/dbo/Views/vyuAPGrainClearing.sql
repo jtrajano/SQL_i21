@@ -56,13 +56,15 @@ LEFT JOIN tblGRSettleContract ST
 	ON ST.intSettleStorageId = SS.intSettleStorageId
 LEFT JOIN tblCTContractDetail CT
 	ON CT.intContractDetailId = ST.intContractDetailId
+left join tblCTContractHeader CH
+		on CH.intContractHeaderId = CT.intContractHeaderId
 LEFT JOIN 
 (
     tblICItemUOM itemUOM INNER JOIN tblICUnitMeasure unitMeasure
         ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId
 )
     ON itemUOM.intItemUOMId = CS.intItemUOMId
-
+where (CH.intContractHeaderId is null or (CH.intContractHeaderId is not null and CH.intPricingTypeId = 2))
 
 UNION ALL
 SELECT
@@ -193,6 +195,14 @@ LEFT JOIN
         ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId
 )
     ON itemUOM.intItemUOMId = CS.intItemUOMId
+LEFT JOIN tblGRSettleContract ST
+	ON ST.intSettleStorageId = SS.intSettleStorageId
+LEFT JOIN tblCTContractDetail CT
+	ON CT.intContractDetailId = ST.intContractDetailId
+left join tblCTContractHeader CH
+		on CH.intContractHeaderId = CT.intContractHeaderId
+where (CH.intContractHeaderId is null or (CH.intContractHeaderId is not null and CH.intPricingTypeId = 2))
+
 	--WHERE SS.strStorageTicket = 'STR-49/3'
 
 
@@ -320,6 +330,9 @@ LEFT JOIN tblGRSettleContract SC
 --BUT WE WILL INCLUDE THE OTHERS FOR NOW TO IDENTIFY THE DATA ISSUES ON AP CLEARING
 LEFT JOIN tblCTContractDetail CD
 		ON CD.intContractDetailId = SC.intContractDetailId 
+left join tblCTContractHeader CH
+		on CH.intContractHeaderId = CD.intContractHeaderId
+
 LEFT JOIN 
 (
     tblICItemUOM itemUOM INNER JOIN tblICUnitMeasure unitMeasure
@@ -341,6 +354,7 @@ OUTER APPLY
 WHERE 
 	QM.strSourceType = 'Storage' 
 AND QM.dblDiscountDue <> 0
+AND (CH.intContractHeaderId is null or (CH.intContractHeaderId is not null and CH.intPricingTypeId = 2))
 --AND SS.strStorageTicket = 'STR-49/3'
 
 
