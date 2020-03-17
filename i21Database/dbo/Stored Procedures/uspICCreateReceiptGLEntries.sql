@@ -311,7 +311,7 @@ AS
 			,t.dblQty
 			,t.dblUOMQty
 			,t.dblCost
-			,t.dblValue
+			,dblValue = ROUND(t.dblValue, 2) 
 			,t.intTransactionTypeId
 			,ISNULL(t.intCurrencyId, @intFunctionalCurrencyId) intCurrencyId
 			,t.dblExchangeRate
@@ -388,7 +388,7 @@ AS
 			,dblQty = 0
 			,dblUOMQty = 0 
 			,dblCost = 0 
-			,dblValue = ri.[dblRecomputeLineTotal] - topRi.dblLineTotal
+			,dblValue = ROUND(ri.[dblRecomputeLineTotal] - topRi.dblLineTotal, 2) 
 			,t.intTransactionTypeId
 			,ISNULL(t.intCurrencyId, @intFunctionalCurrencyId) intCurrencyId
 			,t.dblExchangeRate
