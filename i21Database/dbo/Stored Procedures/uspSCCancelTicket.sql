@@ -40,23 +40,65 @@ DECLARE @dblTicketScheduledQty NUMERIC(18,6)
 DECLARE @intTicketItemUOMId INT
 DECLARE @intTicketLoadDetailId INT
 DECLARE @_intInventoryReceiptShipmentItemId INT
+DECLARE @intMatchTicketId INT
+DECLARE @strMatchTicketStatus NVARCHAR(1)
+dECLARE @intMatchLoadDetailId INT
+DECLARE @TransferEntries AS InventoryTransferStagingTable
+DECLARE @intTicketItemId INT
+DECLARE @intLotType INT
+DECLARE @_intInventoryTransfer INT
+DECLARE @_strInventoryTransferNumber NVARCHAR(50)
 
 BEGIN TRY
-		SELECT TOP 1
-			@strInOutFlag = strInOutFlag
-			,@strTicketStatus = strTicketStatus
-			,@intTicketPoolId = intTicketPoolId
-			,@intTicketType = intTicketType
-			,@strTicketNumber = strTicketNumber
-			,@intProcessingLocationId = intProcessingLocationId
-			,@intDeliverySheetId = intDeliverySheetId
-			,@strDistributionOption = strDistributionOption
-			,@intTicketContractDetailId = intContractId
-			,@intTicketLoadDetailId = intLoadDetailId
-			,@dblTicketScheduledQty = dblScheduleQty
-			,@intTicketItemUOMId = intItemUOMIdTo
-		FROM tblSCTicket SC
-		WHERE intTicketId = @intTicketId
+
+
+		---get ticket information
+		BEGIN
+			SELECT TOP 1
+				@strInOutFlag = strInOutFlag
+				,@strTicketStatus = strTicketStatus
+				,@intTicketPoolId = intTicketPoolId
+				,@intTicketType = intTicketType
+				,@strTicketNumber = strTicketNumber
+				,@intProcessingLocationId = intProcessingLocationId
+				,@intDeliverySheetId = intDeliverySheetId
+				,@strDistributionOption = strDistributionOption
+				,@intTicketContractDetailId = intContractId
+				,@intTicketLoadDetailId = intLoadDetailId
+				,@dblTicketScheduledQty = dblScheduleQty
+				,@intTicketItemUOMId = intItemUOMIdTo
+				,@intMatchTicketId = intMatchTicketId
+				,@intTicketItemId = intItemId
+			FROM tblSCTicket SC
+			WHERE intTicketId = @intTicketId
+
+			SELECT @intLotType = dbo.fnGetItemLotType(@intTicketItemId) 
+		END
+
+
+		
+
+		--get match ticket information for direct 
+		BEGIN
+			SET @intMatchTicketId = ISNULL(@intMatchTicketId,0)
+			IF(@intMatchTicketId > 0)
+			BEGIN
+				SELECT TOP 1
+					@strMatchTicketStatus = strTicketStatus
+					,@intMatchLoadDetailId = intLoadDetailId
+				FROM tblSCTicket SC
+				WHERE intTicketId = @intMatchTicketId
+			END
+		END
+
+		IF(@intMatchTicketId > 0 AND @intTicketType = 6)
+		BEGIN
+			IF ISNULL(@strMatchTicketStatus,'') = 'C'
+			BEGIN
+				RAISERROR('Unable to reverse ticket, match ticket already completed', 11, 1);
+				RETURN;
+			END
+		END
 
 		IF(@strTicketStatus <> 'C')
 		BEGIN
@@ -260,18 +302,18 @@ BEGIN TRY
 						
 					END
 
-					---- Update contract schedule if ticket Distribution type is load and link it to reversal IS
+					---- Update contract schedule if ticket Distribution type is load and link it to reversal IR
 					BEGIN
 						SET @_ysnReceiptShipmetContainTicketContract = 0 
 						SET @_intInventoryReceiptShipmentItemId = 0
 
 						SELECT TOP 1 
-								@_intInventoryReceiptShipmentItemId = B.intInventoryShipmentItemId
-						FROM tblICInventoryShipment A
-						INNER JOIN tblICInventoryShipmentItem B
-							ON A.intInventoryShipmentId = B.intInventoryShipmentId
-						WHERE A.intInventoryShipmentId = @_intInventoryReceiptShipmentId
-							AND intLineNo = @intTicketContractDetailId
+								@_intInventoryReceiptShipmentItemId = B.intInventoryReceiptItemId
+						FROM tblICInventoryReceipt A
+						INNER JOIN tblICInventoryReceiptItem B
+							ON A.intInventoryReceiptId = B.intInventoryReceiptId
+						WHERE A.intInventoryReceiptId = @_intInventoryReceiptShipmentId
+							AND intContractDetailId = @intTicketContractDetailId
 						
 						IF(ISNULL(@_intInventoryReceiptShipmentItemId,0) > 0)		
 						BEGIN
@@ -328,7 +370,7 @@ BEGIN TRY
 								END
 								ELSE ---Load based contract
 								BEGIN
-									EXEC uspCTUpdateScheduleQuantityUsingUOM @intTicketContractDetailId, 1, @intUserId, @_intInventoryReceiptShipmentItemId, 'Inventory Shipment', @intTicketItemUOMId
+									EXEC uspCTUpdateScheduleQuantityUsingUOM @intTicketContractDetailId, 1, @intUserId, @_intInventoryReceiptShipmentItemId, 'Inventory Receipt', @intTicketItemUOMId
 								END
 							END
 						END
@@ -353,6 +395,8 @@ BEGIN TRY
 					
 				END
 			END
+
+			
 		END
 		ELSE
 		BEGIN
@@ -376,7 +420,7 @@ BEGIN TRY
 			FROM @TicketReceiptShipmentIds
 			
 
-			---Create reversal
+			---Create IS reversal
 			WHILE ISNULL(@_intInventoryReceiptShipmentId,0) > 0
 			BEGIN
 				SET @_intReversalReceiptShipmentId = 0
@@ -395,7 +439,7 @@ BEGIN TRY
 					-----insert into storage history of storage based on the previous IS			
 					BEGIN
 						SET @intCustomerStorageId = 0
-						SET @intCustomerStorageId = (SELECT TOP 1 intCustomerStorageId FROM tblGRStorageHistory WHERE intInventoryReceiptId = @_intInventoryReceiptShipmentId)
+						SET @intCustomerStorageId = (SELECT TOP 1 intCustomerStorageId FROM tblGRStorageHistory WHERE intInventoryShipmentId = @_intInventoryReceiptShipmentId)
 						IF ISNULL(@intCustomerStorageId,0)> 0
 						BEGIN
 
@@ -474,38 +518,34 @@ BEGIN TRY
 									INNER JOIN tblICInventoryShipmentItem BB
 										ON  AA.intInventoryShipmentId = BB.intInventoryShipmentId
 									WHERE AA.intInventoryShipmentId = @_intReversalReceiptShipmentId) B
-							WHERE A.intInventoryReceiptId = @_intInventoryReceiptShipmentId
+							WHERE A.intInventoryShipmentId = @_intInventoryReceiptShipmentId
 
 
 							
 							--update customer storage
 							BEGIN
-
 								--update orignal and open balance
 								UPDATE tblGRCustomerStorage
 								SET dblOriginalBalance = dbo.[fnGRCalculateStorageUnits](@intCustomerStorageId)
 									,dblOpenBalance = dbo.[fnGRCalculateStorageUnits](@intCustomerStorageId)
 								WHERE intCustomerStorageId = @intCustomerStorageId
-
-
-								
 							END
 						END
 
 					END
 
-					---- Update contract schedule if ticket Distribution type is load and link it to reversal IR
+					---- Update contract schedule if ticket Distribution type is load and link it to reversal IS
 						BEGIN
 							SET @_ysnReceiptShipmetContainTicketContract = 0 
 							SET @_intInventoryReceiptShipmentItemId = 0
 
 							SELECT TOP 1 
-									@_intInventoryReceiptShipmentItemId = B.intInventoryReceiptItemId
-							FROM tblICInventoryReceipt A
-							INNER JOIN tblICInventoryReceiptItem B
-								ON A.intInventoryReceiptId = B.intInventoryReceiptId
-							WHERE A.intInventoryReceiptId = @_intInventoryReceiptShipmentId
-								AND intContractDetailId = @intTicketContractDetailId
+									@_intInventoryReceiptShipmentItemId = B.intInventoryShipmentItemId
+							FROM tblICInventoryShipmentItem A
+							INNER JOIN tblICInventoryShipmentItem B
+								ON A.intInventoryShipmentId = B.intInventoryShipmentId
+							WHERE A.intInventoryShipmentId = @_intInventoryReceiptShipmentId
+								AND B.intLineNo  = @intTicketContractDetailId
 							
 							IF(ISNULL(@_intInventoryReceiptShipmentItemId,0) > 0)		
 							BEGIN
@@ -557,12 +597,12 @@ BEGIN TRY
 										IF @_dblLoadUsedQty <> 0
 										BEGIN
 								
-											EXEC uspCTUpdateScheduleQuantityUsingUOM @intTicketContractDetailId, @_dblLoadUsedQty, @intUserId, @_intInventoryReceiptShipmentItemId, 'Inventory Receipt', @intTicketItemUOMId
+											EXEC uspCTUpdateScheduleQuantityUsingUOM @intTicketContractDetailId, @_dblLoadUsedQty, @intUserId, @_intInventoryReceiptShipmentItemId, 'Inventory Shipment', @intTicketItemUOMId
 										END
 									END
 									ELSE ---Load based contract
 									BEGIN
-										EXEC uspCTUpdateScheduleQuantityUsingUOM @intTicketContractDetailId, 1, @intUserId, @_intInventoryReceiptShipmentItemId, 'Inventory Receipt', @intTicketItemUOMId
+										EXEC uspCTUpdateScheduleQuantityUsingUOM @intTicketContractDetailId, 1, @intUserId, @_intInventoryReceiptShipmentItemId, 'Inventory Shipment', @intTicketItemUOMId
 									END
 								END
 							END
@@ -586,16 +626,112 @@ BEGIN TRY
 					
 				END
 			END
-
-			
-
-			
 		END
 
+		-----Single Ticket Transfer reversal
+		IF @intTicketType = 7		
+		BEGIN
+			IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpAddInventoryTransferResult'))
+			BEGIN
+				CREATE TABLE #tmpAddInventoryTransferResult (
+					intSourceId INT
+					,intInventoryTransferId INT
+				)
+			END
+			
+			-- Insert the data needed to create the inventory transfer.
+			INSERT INTO @TransferEntries (
+				-- Header
+				[dtmTransferDate]
+				,[strTransferType]
+				,[intSourceType]
+				,[strDescription]
+				,[intFromLocationId]
+				,[intToLocationId]
+				,[ysnShipmentRequired]
+				,[intStatusId]
+				,[intShipViaId]
+				,[intFreightUOMId]
+				-- Detail
+				,[intItemId]
+				,[intLotId]
+				,[intItemUOMId]
+				,[dblQuantityToTransfer]
+				,[intItemWeightUOMId]		
+				,[dblGrossWeight]			
+				,[dblTareWeight]			
+				,[strNewLotId]
+				,[intFromSubLocationId]
+				,[intToSubLocationId]
+				,[intFromStorageLocationId]
+				,[intToStorageLocationId]
+				,[ysnWeights]
+				-- Integration Field
+				,[intInventoryTransferId]
+				,[intSourceId]   
+				,[strSourceId]  
+				,[strSourceScreenName]
+			)
+			SELECT      
+				-- Header
+				[dtmTransferDate]           = GETDATE()
+				,[strTransferType]          = 'Location to Location'
+				,[intSourceType]            = 1
+				,[strDescription]           = (select top 1 strDescription from vyuICGetItemStock IC where SC.intItemId = IC.intItemId)
+				,[intFromLocationId]        = SC.intTransferLocationId
+				,[intToLocationId]          = SC.intProcessingLocationId
+				,[ysnShipmentRequired]      = 0
+				,[intStatusId]              = 1
+				,[intShipViaId]             = NULL
+				,[intFreightUOMId]          = NULL
+				-- Detail
+				,[intItemId]                = SC.intItemId
+				,[intLotId]                 = SC.intLotId
+				,[intItemUOMId]             = SC.intItemUOMIdTo
+				,[dblQuantityToTransfer]    = SC.dblNetUnits
+				,[intItemWeightUOMId]		= CASE WHEN ISNULL(@intLotType,0) != 0 AND ISNULL(IC.ysnLotWeightsRequired,0) = 1 THEN SC.intItemUOMIdFrom ELSE SC.intItemUOMIdTo END
+				,[dblGrossWeight]			= CASE WHEN ISNULL(@intLotType,0) != 0 AND ISNULL(IC.ysnLotWeightsRequired,0) = 1 THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo, SC.intItemUOMIdFrom, SC.dblGrossUnits) ELSE SC.dblGrossUnits END
+				,[dblTareWeight]			= CASE WHEN ISNULL(@intLotType,0) != 0 AND ISNULL(IC.ysnLotWeightsRequired,0) = 1 THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo, SC.intItemUOMIdFrom, SC.dblShrink) ELSE CASE WHEN SC.dblShrink > 0 THEN SC.dblShrink ELSE 0 END END
+				,[strNewLotId]              = NULL
+				,[intFromSubLocationId]     = SC.intSubLocationToId
+				,[intToSubLocationId]       = SC.intSubLocationId
+				,[intFromStorageLocationId] = SC.intStorageLocationToId
+				,[intToStorageLocationId]   = SC.intStorageLocationId  
+				,[ysnWeights]				= CASE
+												WHEN SC.intWeightId > 0 THEN 1
+												ELSE 0
+											END
+				-- Integration Field
+				,[intInventoryTransferId]   = NULL
+				,[intSourceId]              = SC.intTicketId
+				,[strSourceId]				= SC.strTicketNumber
+				,[strSourceScreenName]		= 'Scale Ticket'
+			FROM tblSCTicket SC 
+			INNER JOIN tblSCScaleSetup SCS ON SC.intScaleSetupId = SCS.intScaleSetupId
+			INNER JOIN tblICItem IC ON IC.intItemId = SC.intItemId
+			WHERE SC.intTicketId = @intTicketId 
 
+			---- create transfer
+			EXEC dbo.uspICAddInventoryTransfer
+						@TransferEntries
+						,@intUserId
 
-		
+			--Post Transfer
+			BEGIN
+				SELECT TOP 1 
+					@_intInventoryTransfer = intInventoryTransferId 
+				FROM #tmpAddInventoryTransferResult
+				
 
+				SELECT TOP 1
+					@_strInventoryTransferNumber = strTransferNo
+				FROM tblICInventoryTransfer
+				WHERE intInventoryTransferId = @_intInventoryTransfer
+
+				EXEC [dbo].[uspICPostInventoryTransfer] 1, 0, @_strInventoryTransferNumber, @intUserId;
+			END	
+		END
+	
 		--- Generate reversal ticket number
 		BEGIN
 			SET @intRecordCounter = 1
@@ -1074,6 +1210,9 @@ BEGIN TRY
 				EXEC uspCTUpdateScheduleQuantityUsingUOM @intTicketContractDetailId, @dblTicketScheduledQty, @intUserId, @intDuplicateTicketId, 'Scale', @intTicketItemUOMId
 			END
 		END
+
+		
+
 	_Exit:
 
 END TRY
