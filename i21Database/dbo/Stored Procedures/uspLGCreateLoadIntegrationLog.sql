@@ -719,10 +719,6 @@ BEGIN TRY
 								,intConcurrencyId = intConcurrencyId + 1 
 							WHERE intContractDetailId = @intContractDetailId 
 
-							EXEC uspCTContractApproved @intContractHeaderId = @intContractHeaderId,
-								@intApprovedById =  @intApprovedById, 
-								@intContractDetailId = @intContractDetailId
-
 							SELECT @ysnIsETAUpdated = 1
 						END
 
@@ -738,6 +734,11 @@ BEGIN TRY
 						
 						IF (@ysnIsETAUpdated = 1) 
 						BEGIN
+
+							EXEC uspCTContractApproved @intContractHeaderId = @intContractHeaderId,
+								@intApprovedById =  @intApprovedById, 
+								@intContractDetailId = @intContractDetailId
+
 							UPDATE tblCTContractDetail 
 							SET intConcurrencyId = intConcurrencyId + 1 
 							WHERE intContractDetailId = @intContractDetailId 
