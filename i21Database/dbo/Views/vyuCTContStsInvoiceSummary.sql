@@ -16,7 +16,7 @@ AS
 				JOIN	(
 							SELECT		intContractDetailId,CAST(ISNULL(SUM(dblTotal),0)AS NUMERIC(18, 6)) AS dblTotal,MAX(strCurrency)  strCurrency
 							FROM		vyuCTContStsVendorInvoice
-							WHERE strBillId NOT LIKE CONCAT((SELECT strPrefix FROM tblSMStartingNumber WHERE strTransactionType = 'Claim' and strModule = 'Accounts Payable'),'%') 
+							WHERE strBillId NOT LIKE ((SELECT strPrefix FROM tblSMStartingNumber WHERE strTransactionType = 'Claim' and strModule = 'Accounts Payable') + '%') 
 							Group By	intContractDetailId
 						)	VI	  ON	VI.intContractDetailId		=	CD.intContractDetailId
 				JOIN	(
