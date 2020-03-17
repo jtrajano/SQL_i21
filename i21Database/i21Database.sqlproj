@@ -8549,10 +8549,20 @@
     <Build Include="dbo\Functions\fnRKGetBucketOnHold.sql" />
     <Build Include="dbo\Stored Procedures\uspGRRiskSummaryLog.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGenerateM2M.sql" />
-    <Build Include="dbo\Tables\tblRKM2MMarketData.sql" />
+    <Build Include="dbo\Tables\tblRKM2MDifferentialBasis.sql" />
     <Build Include="dbo\Tables\tblRKM2MHeader.sql" />
     <Build Include="dbo\Tables\tblRKM2MType.sql" />
     <Build Include="dbo\Tables\tblRKM2MTransaction.sql" />
+    <Build Include="dbo\Tables\tblRKM2MValidateError.sql" />
+    <Build Include="dbo\Tables\tblRKM2MSettlementPrice.sql" />
+    <Build Include="dbo\Tables\tblRKM2MCounterPartyExposure.sql" />
+    <Build Include="dbo\Views\vyuRKGetM2MHeader.sql" />
+    <Build Include="dbo\Views\vyuRKGetM2MDifferentialBasis.sql" />
+    <Build Include="dbo\Views\vyuRKGetM2MSettlementPrice.sql" />
+    <Build Include="dbo\Views\vyuRKGetM2MTransaction.sql" />
+    <Build Include="dbo\Views\vyuRKGetM2MSummary.sql" />
+    <Build Include="dbo\Views\vyuRKGetM2MCounterPartyExposure.sql" />
+    <Build Include="dbo\Tables\tblRKM2MSummary.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
