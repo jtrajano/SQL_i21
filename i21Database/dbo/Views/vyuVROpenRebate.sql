@@ -5,7 +5,7 @@ SELECT *
 		ELSE CAST((dblRebateQuantity * dblRebateRate * dblCost / 100) AS NUMERIC(18, 6))
 		END
 FROM (
-	SELECT
+	SELECT 'Item Level' AS Mode,
 		intRowId = CAST(ROW_NUMBER() OVER(ORDER BY invoice.intInvoiceId) AS INT)
 		, strVendorNumber = vendor.strVendorId
 		, strVendorName = entity.strName
@@ -72,7 +72,7 @@ FROM (
 
 	UNION ALL
 
-	SELECT
+	SELECT 'Category Level' AS Mode,
 		intRowId = CAST(ROW_NUMBER() OVER(ORDER BY invoice.intInvoiceId) AS INT)
 		, strVendorNumber = vendor.strVendorId
 		, strVendorName = entity.strName
@@ -122,11 +122,12 @@ FROM (
 			FROM tblVRProgramItem pi
 				LEFT JOIN tblICItemUOM uom ON pi.intItemId = uom.intItemId
 					AND pi.intUnitMeasureId = uom.intUnitMeasureId
-		) programCategory ON programCategory.intProgramId = programCategory.intProgramId
+		) programCategory ON programCategory.intProgramId = program.intProgramId
 			AND programCategory.intItemId IS NULL
 			AND invoice.dtmDate >= programCategory.dtmBeginDate
 			AND invoice.dtmDate <= ISNULL(programCategory.dtmEndDate, '12/31/9999')
 			AND (ISNULL(programCategory.dblRebateRate, 0) <> 0)
+			AND programCategory.intCategoryId = item.intCategoryId
 		LEFT OUTER JOIN tblICItemUOM uom ON uom.intItemId = invoiceDetail.intItemId
 			AND uom.intUnitMeasureId = programCategory.intUnitMeasureId
 		LEFT OUTER JOIN tblICUnitMeasure unitMeasure ON unitMeasure.intUnitMeasureId = uom.intUnitMeasureId
