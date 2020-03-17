@@ -302,6 +302,20 @@ BEGIN TRY
 							,1
 							)
 				END
+				
+				IF NOT EXISTS (
+						SELECT 1
+						FROM tblCTContractDetail t WITH (NOLOCK)
+						WHERE t.intContractDetailId = @intContractDetailId
+							AND t.intItemId = @intItemId
+						)
+				BEGIN
+					RAISERROR (
+							'Item No is not matching with Contract Sequence Item. '
+							,16
+							,1
+							)
+				END
 			END
 
 			IF ISNULL(@strVendor, '') <> ''
@@ -808,7 +822,6 @@ BEGIN TRY
 				SET strResult = dbo.fnQMGetPropertyTestResult(TR.intTestResultId)
 				FROM tblQMTestResult TR
 				WHERE TR.intSampleId = @intSampleId
-					AND ISNULL(TR.strResult, '') = ''
 
 				-- Setting correct date format
 				UPDATE tblQMTestResult
@@ -991,7 +1004,7 @@ BEGIN TRY
 												      "isField":true,
 												      "keyValue":' + LTRIM(@intTestResultId) + ',
 												      "associationKey":"tblQMTestResults",
-												      "changeDescription":"Comment",
+												      "changeDescription":"Comments",
 												      "hidden":false
 												     },'
 
@@ -999,7 +1012,7 @@ BEGIN TRY
 								SET @details = @details + '
 												     {  
 												        "change":"strResult",
-												        "from":' + LTRIM(@strOldResult) + ',
+												        "from":"' + LTRIM(@strOldResult) + '",
 												        "to":"' + LTRIM(@strNewResult) + '",
 												        "leaf":true,
 												        "iconCls":"small-gear",
