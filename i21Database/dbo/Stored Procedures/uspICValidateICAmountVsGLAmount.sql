@@ -26,7 +26,7 @@ BEGIN
 		,intAccountId INT NULL 
 		,strItemDescription NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL
 		,strAccountDescription NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL
-		,CONSTRAINT [PK_uspICValidateICAmountVsGLAmount_result] PRIMARY KEY (strTransactionType, strTransactionId, strBatchId, intAccountId),
+		--,CONSTRAINT [PK_uspICValidateICAmountVsGLAmount_result] PRIMARY KEY (strTransactionType, strTransactionId, strBatchId, intAccountId),
 	)
 END 
 ELSE
