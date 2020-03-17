@@ -95,7 +95,7 @@ SELECT DISTINCT TOP 100 PERCENT
 											WHEN SH.strType = 'Invoice' OR SH.strType = 'Generated Storage Invoice' THEN SH.dtmDistributionDate
 											ELSE SH.dtmHistoryDate
 										END
-	,dblPaidAmount						= ISNULL(SH.dblPaidAmount,0)
+	,dblPaidAmount						= case when ISNULL(CH.intPricingTypeId, 0) = 2 then 0 else ISNULL(SH.dblPaidAmount,0) end
 	,strPaidDescription					= CASE 
 											WHEN SH.intTransactionTypeId = 3 THEN SH.strType 
 											ELSE ISNULL(SH.strPaidDescription,SH.strType) 
