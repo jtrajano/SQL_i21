@@ -7623,4 +7623,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intM2MSummaryId" />
   </Operation>
+<Operaation Name="Rename Refactor" Key="29157043-063c-4b26-9b39-6860e15a0e50" ChangeDateTime="03/18/2020 02:10:52">
+    <Property Name="ElementName" Value="[dbo].[tblRKRebuildSummaryLog].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblRKRebuildSummaryLog]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intRebuildSummaryLogId" />
+</Operation>
 </Operations>

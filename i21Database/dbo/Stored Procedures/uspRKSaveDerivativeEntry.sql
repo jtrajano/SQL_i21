@@ -96,7 +96,7 @@ BEGIN
 			UNION ALL SELECT 'dblStrike', CAST(@dblStrike AS NVARCHAR)
 			UNION ALL SELECT 'strOptionType', @strOptionType
 			UNION ALL SELECT 'strInstrumentType', @strInstrumentType
-			UNION ALL SELECT 'intBrokerageAccountId', @intBrokerageAccountId
+			UNION ALL SELECT 'intBrokerageAccountId', CAST(@intBrokerageAccountId AS NVARCHAR)
 			UNION ALL SELECT 'strBrokerAccount', @strBrokerAccount
 			UNION ALL SELECT 'strBroker', @strBroker
 			UNION ALL SELECT 'ysnPreCrush', CAST(@ysnPreCrush AS NVARCHAR)

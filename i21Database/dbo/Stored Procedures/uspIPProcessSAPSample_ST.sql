@@ -61,17 +61,44 @@ BEGIN TRY
 	DECLARE @intNewStageSampleId INT
 	DECLARE @intValidDate INT
 	DECLARE @strDescription AS NVARCHAR(MAX)
+	DECLARE @strOldSampleTypeName NVARCHAR(50)
+		,@strOldContractNumber NVARCHAR(50)
+		,@strOldItemNo NVARCHAR(50)
+		,@intOldProductValueId INT
+		,@strOldCountry NVARCHAR(50)
+		,@strOldVendor NVARCHAR(50)
+		,@dblOldQuantity NUMERIC(18, 6)
+		,@strOldQuantityUOM NVARCHAR(50)
+		,@strOldSampleRefNo NVARCHAR(30)
+		,@strOldSampleNote NVARCHAR(512)
+		,@strOldSampleStatus NVARCHAR(30)
+		,@strOldRefNo NVARCHAR(100)
+		,@strOldMarks NVARCHAR(100)
+		,@strOldSamplingMethod NVARCHAR(50)
+		,@strOldSubLocationName NVARCHAR(50)
+		,@strOldCourier NVARCHAR(50)
+		,@strOldCourierRef NVARCHAR(50)
+		,@strOldComment NVARCHAR(MAX)
+		,@strNewContractNumber NVARCHAR(50)
+	DECLARE @tblQMTestResultChanges TABLE (
+		strOldPropertyValue NVARCHAR(MAX)
+		,strOldComment NVARCHAR(MAX)
+		,strOldResult NVARCHAR(20)
+		,strNewPropertyValue NVARCHAR(MAX)
+		,strNewComment NVARCHAR(MAX)
+		,strNewResult NVARCHAR(20)
+		,intTestResultId INT
+		,strPropertyName NVARCHAR(100)
+		)
+	DECLARE @strOldPropertyValue NVARCHAR(MAX)
+		,@strOldTestComment NVARCHAR(MAX)
+		,@strOldResult NVARCHAR(20)
+		,@strNewPropertyValue NVARCHAR(MAX)
+		,@strNewTestComment NVARCHAR(MAX)
+		,@strNewResult NVARCHAR(20)
+		,@intTestResultId INT
+		,@strPropertyName NVARCHAR(100)
 
-	--DECLARE @dtmNewArrivedInPort DATETIME
-	--	,@dtmNewCustomsReleased DATETIME
-	--	,@ysnNewArrivedInPort BIT
-	--	,@ysnNewCustomsReleased BIT
-	--	,@dtmOldArrivedInPort DATETIME
-	--	,@dtmOldCustomsReleased DATETIME
-	--	,@ysnOldArrivedInPort BIT
-	--	,@ysnOldCustomsReleased BIT
-	--	,@dtmOldETA DATETIME
-	--	,@strDetails NVARCHAR(MAX)
 	SELECT @intMinRowNo = Min(intStageSampleId)
 	FROM tblIPSampleStage WITH (NOLOCK)
 
@@ -129,15 +156,26 @@ BEGIN TRY
 
 			SELECT @strDescription = NULL
 
-			--SELECT @dtmNewArrivedInPort = NULL
-			--	,@dtmNewCustomsReleased = NULL
-			--	,@ysnNewArrivedInPort = NULL
-			--	,@ysnNewCustomsReleased = NULL
-			--	,@dtmOldArrivedInPort = NULL
-			--	,@dtmOldCustomsReleased = NULL
-			--	,@ysnOldArrivedInPort = NULL
-			--	,@ysnOldCustomsReleased = NULL
-			--	,@dtmOldETA = NULL
+			SELECT @strOldSampleTypeName = NULL
+				,@strOldContractNumber = NULL
+				,@strOldItemNo = NULL
+				,@intOldProductValueId = NULL
+				,@strOldCountry = NULL
+				,@strOldVendor = NULL
+				,@dblOldQuantity = NULL
+				,@strOldQuantityUOM = NULL
+				,@strOldSampleRefNo = NULL
+				,@strOldSampleNote = NULL
+				,@strOldSampleStatus = NULL
+				,@strOldRefNo = NULL
+				,@strOldMarks = NULL
+				,@strOldSamplingMethod = NULL
+				,@strOldSubLocationName = NULL
+				,@strOldCourier = NULL
+				,@strOldCourierRef = NULL
+				,@strOldComment = NULL
+				,@strNewContractNumber = NULL
+
 			SELECT @strERPPONumber = strERPPONumber
 				,@strERPItemNumber = strERPItemNumber
 				,@strSampleNumber = strSampleNumber
@@ -260,6 +298,20 @@ BEGIN TRY
 				BEGIN
 					RAISERROR (
 							'Invalid Contract. '
+							,16
+							,1
+							)
+				END
+				
+				IF NOT EXISTS (
+						SELECT 1
+						FROM tblCTContractDetail t WITH (NOLOCK)
+						WHERE t.intContractDetailId = @intContractDetailId
+							AND t.intItemId = @intItemId
+						)
+				BEGIN
+					RAISERROR (
+							'Item No is not matching with Contract Sequence Item. '
 							,16
 							,1
 							)
@@ -657,6 +709,30 @@ BEGIN TRY
 							)
 				END
 
+				SELECT @intOldProductValueId = S.intProductValueId
+					,@strOldCountry = S.strCountry
+					,@dblOldQuantity = S.dblRepresentingQty
+					,@strOldSampleRefNo = S.strSampleRefNo
+					,@strOldSampleNote = S.strSampleNote
+					,@strOldRefNo = S.strRefNo
+					,@strOldMarks = S.strMarks
+					,@strOldSamplingMethod = S.strSamplingMethod
+					,@strOldCourier = S.strCourier
+					,@strOldCourierRef = S.strCourierRef
+					,@strOldComment = S.strComment
+				FROM tblQMSample S WITH (NOLOCK)
+				WHERE S.intSampleId = @intSampleId
+
+				SELECT @strOldSampleTypeName = S.strSampleTypeName
+					,@strOldContractNumber = S.strSequenceNumber
+					,@strOldItemNo = S.strItemNo
+					,@strOldVendor = S.strPartyName
+					,@strOldQuantityUOM = S.strRepresentingUOM
+					,@strOldSampleStatus = S.strSampleStatus
+					,@strOldSubLocationName = S.strSubLocationName
+				FROM vyuQMSampleNotMapped S WITH (NOLOCK)
+				WHERE S.intSampleId = @intSampleId
+
 				UPDATE tblQMSample
 				SET intConcurrencyId = intConcurrencyId + 1
 					,intSampleTypeId = @intSampleTypeId
@@ -687,11 +763,36 @@ BEGIN TRY
 					,intLastModifiedUserId = @intCreatedUserId
 					,dtmLastModified = @dtmCurrentDate
 				WHERE intSampleId = @intSampleId
+
+				SELECT @strNewContractNumber = CH.strContractNumber + ' - ' + LTRIM(CD.intContractSeq)
+				FROM tblQMSample S WITH (NOLOCK)
+				LEFT JOIN tblCTContractDetail CD WITH (NOLOCK) ON CD.intContractDetailId = S.intContractDetailId
+				LEFT JOIN tblCTContractHeader CH WITH (NOLOCK) ON CH.intContractHeaderId = CD.intContractHeaderId
+				WHERE S.intSampleId = @intSampleId
 			END
 
 			IF ISNULL(@strTransactionType, '') = 'SAMPLE_CREATE'
 				OR ISNULL(@strTransactionType, '') = 'SAMPLE_UPDATE'
 			BEGIN
+				DELETE
+				FROM @tblQMTestResultChanges
+
+				INSERT INTO @tblQMTestResultChanges (
+					strOldPropertyValue
+					,strOldComment
+					,strOldResult
+					,intTestResultId
+					,strPropertyName
+					)
+				SELECT TR.strPropertyValue
+					,TR.strComment
+					,TR.strResult
+					,TR.intTestResultId
+					,P.strPropertyName
+				FROM tblQMTestResult TR WITH (NOLOCK)
+				JOIN tblQMProperty P WITH (NOLOCK) ON P.intPropertyId = TR.intPropertyId
+					AND intSampleId = @intSampleId
+
 				-- Update Properties Value, Comment
 				-- Setting Bit to lower case then only in sencha client, it is recogonizing
 				UPDATE tblQMTestResult
@@ -721,7 +822,6 @@ BEGIN TRY
 				SET strResult = dbo.fnQMGetPropertyTestResult(TR.intTestResultId)
 				FROM tblQMTestResult TR
 				WHERE TR.intSampleId = @intSampleId
-					AND ISNULL(TR.strResult, '') = ''
 
 				-- Setting correct date format
 				UPDATE tblQMTestResult
@@ -731,6 +831,13 @@ BEGIN TRY
 					AND TR.intSampleId = @intSampleId
 					AND ISNULL(TR.strPropertyValue, '') <> ''
 					AND P.intDataTypeId = 12
+
+				UPDATE @tblQMTestResultChanges
+				SET strNewPropertyValue = TR.strPropertyValue
+					,strNewComment = TR.strComment
+					,strNewResult = TR.strResult
+				FROM @tblQMTestResultChanges OLD
+				JOIN tblQMTestResult TR ON TR.intTestResultId = OLD.intTestResultId
 
 				IF ISNULL(@strTransactionType, '') = 'SAMPLE_CREATE'
 				BEGIN
@@ -756,44 +863,194 @@ BEGIN TRY
 				ELSE
 				BEGIN
 					-- Audit Log
-					--SELECT @dtmNewArrivedInPort = L.dtmArrivedInPort
-					--	,@dtmNewCustomsReleased = L.dtmCustomsReleased
-					--	,@ysnNewArrivedInPort = L.ysnArrivedInPort
-					--	,@ysnNewCustomsReleased = L.ysnCustomsReleased
-					--FROM tblLGLoad L WITH (NOLOCK)
-					--WHERE L.intLoadId = @intLoadId
-					-- Audit Log
-					--SELECT @strDetails = ''
-					--IF (@dtmOldArrivedInPort <> @dtmNewArrivedInPort)
-					--	SET @strDetails += '{"change":"dtmArrivedInPort","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@dtmOldArrivedInPort, '')) + '","to":"' + LTRIM(ISNULL(@dtmNewArrivedInPort, '')) + '","leaf":true,"changeDescription":"Arrived in Port Date"},'
-					--IF (@dtmOldCustomsReleased <> @dtmNewCustomsReleased)
-					--	SET @strDetails += '{"change":"dtmCustomsReleased","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@dtmOldCustomsReleased, '')) + '","to":"' + LTRIM(ISNULL(@dtmNewCustomsReleased, '')) + '","leaf":true,"changeDescription":"Customs Released Date"},'
-					--IF (@ysnOldArrivedInPort <> @ysnNewArrivedInPort)
-					--	SET @strDetails += '{"change":"ysnArrivedInPort","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@ysnOldArrivedInPort, '')) + '","to":"' + LTRIM(ISNULL(@ysnNewArrivedInPort, '')) + '","leaf":true,"changeDescription":"Arrived In Port"},'
-					--IF (@ysnOldCustomsReleased <> @ysnNewCustomsReleased)
-					--	SET @strDetails += '{"change":"ysnCustomsReleased","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@ysnOldCustomsReleased, '')) + '","to":"' + LTRIM(ISNULL(@ysnNewCustomsReleased, '')) + '","leaf":true,"changeDescription":"Customs Released"},'
-					--IF (LEN(@strDetails) > 1)
-					--BEGIN
-					--	SET @strDetails = SUBSTRING(@strDetails, 0, LEN(@strDetails))
-					--	EXEC uspSMAuditLog @keyValue = @intLoadId
-					--		,@screenName = 'Quality.view.QualitySample'
-					--		,@entityId = @intUserId
-					--		,@actionType = 'Updated'
-					--		,@actionIcon = 'small-tree-modified'
-					--		,@details = @strDetails
-					--END
 					IF (@intSampleId > 0)
 					BEGIN
-						SELECT @strDescription = 'Sample updated from external system. '
+						DECLARE @strDetails NVARCHAR(MAX) = ''
 
-						EXEC uspSMAuditLog @keyValue = @intSampleId
-							,@screenName = 'Quality.view.QualitySample'
-							,@entityId = @intUserId
-							,@actionType = 'Updated'
-							,@actionIcon = 'small-new-plus'
-							,@changeDescription = @strDescription
-							,@fromValue = ''
-							,@toValue = @strSampleNumber
+						IF (@strOldSampleTypeName <> @strSampleTypeName)
+							SET @strDetails += '{"change":"strSampleTypeName","iconCls":"small-gear","from":"' + LTRIM(@strOldSampleTypeName) + '","to":"' + LTRIM(@strSampleTypeName) + '","leaf":true,"changeDescription":"Sample Type"},'
+
+						IF (@strOldContractNumber <> @strNewContractNumber)
+							SET @strDetails += '{"change":"strSequenceNumber","iconCls":"small-gear","from":"' + LTRIM(@strOldContractNumber) + '","to":"' + LTRIM(@strNewContractNumber) + '","leaf":true,"changeDescription":"Contract Number"},'
+
+						IF (@strOldItemNo <> @strItemNo)
+							SET @strDetails += '{"change":"strItemNo","iconCls":"small-gear","from":"' + LTRIM(@strOldItemNo) + '","to":"' + LTRIM(@strItemNo) + '","leaf":true,"changeDescription":"Item No"},'
+
+						IF (@intOldProductValueId <> @intProductValueId)
+							SET @strDetails += '{"change":"intProductValueId","iconCls":"small-gear","from":"' + LTRIM(@intOldProductValueId) + '","to":"' + LTRIM(@intProductValueId) + '","leaf":true,"changeDescription":"Product Value"},'
+
+						IF (@strOldCountry <> @strCountry)
+							SET @strDetails += '{"change":"strCountry","iconCls":"small-gear","from":"' + LTRIM(@strOldCountry) + '","to":"' + LTRIM(@strCountry) + '","leaf":true,"changeDescription":"Origin"},'
+
+						IF (@strOldVendor <> @strVendor)
+							SET @strDetails += '{"change":"strPartyName","iconCls":"small-gear","from":"' + LTRIM(@strOldVendor) + '","to":"' + LTRIM(@strVendor) + '","leaf":true,"changeDescription":"Party Name"},'
+
+						IF (@dblOldQuantity <> @dblQuantity)
+							SET @strDetails += '{"change":"dblRepresentingQty","iconCls":"small-gear","from":"' + LTRIM(@dblOldQuantity) + '","to":"' + LTRIM(@dblQuantity) + '","leaf":true,"changeDescription":"Representing Qty"},'
+
+						IF (@strOldQuantityUOM <> @strQuantityUOM)
+							SET @strDetails += '{"change":"strRepresentingUOM","iconCls":"small-gear","from":"' + LTRIM(@strOldQuantityUOM) + '","to":"' + LTRIM(@strQuantityUOM) + '","leaf":true,"changeDescription":"Representing Qty UOM"},'
+
+						IF (@strOldSampleRefNo <> @strSampleRefNo)
+							SET @strDetails += '{"change":"strSampleRefNo","iconCls":"small-gear","from":"' + LTRIM(@strOldSampleRefNo) + '","to":"' + LTRIM(@strSampleRefNo) + '","leaf":true,"changeDescription":"Sample Ref No"},'
+
+						IF (@strOldSampleNote <> @strSampleNote)
+							SET @strDetails += '{"change":"strSampleNote","iconCls":"small-gear","from":"' + LTRIM(@strOldSampleNote) + '","to":"' + LTRIM(@strSampleNote) + '","leaf":true,"changeDescription":"Sample Note"},'
+
+						IF (@strOldSampleStatus <> @strSampleStatus)
+							SET @strDetails += '{"change":"strSampleStatus","iconCls":"small-gear","from":"' + LTRIM(@strOldSampleStatus) + '","to":"' + LTRIM(@strSampleStatus) + '","leaf":true,"changeDescription":"Sample Status"},'
+
+						IF (@strOldRefNo <> @strRefNo)
+							SET @strDetails += '{"change":"strRefNo","iconCls":"small-gear","from":"' + LTRIM(@strOldRefNo) + '","to":"' + LTRIM(@strRefNo) + '","leaf":true,"changeDescription":"Reference No"},'
+
+						IF (@strOldMarks <> @strMarks)
+							SET @strDetails += '{"change":"strMarks","iconCls":"small-gear","from":"' + LTRIM(@strOldMarks) + '","to":"' + LTRIM(@strMarks) + '","leaf":true,"changeDescription":"Marks"},'
+
+						IF (@strOldSamplingMethod <> @strSamplingMethod)
+							SET @strDetails += '{"change":"strSamplingMethod","iconCls":"small-gear","from":"' + LTRIM(@strOldSamplingMethod) + '","to":"' + LTRIM(@strSamplingMethod) + '","leaf":true,"changeDescription":"Sampling Method"},'
+
+						IF (@strOldSubLocationName <> @strSubLocationName)
+							SET @strDetails += '{"change":"strSubLocationName","iconCls":"small-gear","from":"' + LTRIM(@strOldSubLocationName) + '","to":"' + LTRIM(@strSubLocationName) + '","leaf":true,"changeDescription":"Warehouse"},'
+
+						IF (@strOldCourier <> @strCourier)
+							SET @strDetails += '{"change":"strCourier","iconCls":"small-gear","from":"' + LTRIM(@strOldCourier) + '","to":"' + LTRIM(@strCourier) + '","leaf":true,"changeDescription":"Courier"},'
+
+						IF (@strOldCourierRef <> @strCourierRef)
+							SET @strDetails += '{"change":"strCourierRef","iconCls":"small-gear","from":"' + LTRIM(@strOldCourierRef) + '","to":"' + LTRIM(@strCourierRef) + '","leaf":true,"changeDescription":"Courier Ref"},'
+
+						IF (@strOldComment <> @strComment)
+							SET @strDetails += '{"change":"strComment","iconCls":"small-gear","from":"' + LTRIM(@strOldComment) + '","to":"' + LTRIM(@strComment) + '","leaf":true,"changeDescription":"Comments"},'
+
+						IF (LEN(@strDetails) > 1)
+						BEGIN
+							SET @strDetails = SUBSTRING(@strDetails, 0, LEN(@strDetails))
+
+							EXEC uspSMAuditLog @keyValue = @intSampleId
+								,@screenName = 'Quality.view.QualitySample'
+								,@entityId = @intUserId
+								,@actionType = 'Updated'
+								,@actionIcon = 'small-tree-modified'
+								,@details = @strDetails
+						END
+
+						-- Test Result Audit Log
+						DECLARE @details NVARCHAR(MAX) = ''
+
+						WHILE EXISTS (
+								SELECT TOP 1 NULL
+								FROM @tblQMTestResultChanges
+								)
+						BEGIN
+							SELECT @strOldPropertyValue = NULL
+								,@strOldTestComment = NULL
+								,@strOldResult = NULL
+								,@strNewPropertyValue = NULL
+								,@strNewTestComment = NULL
+								,@strNewResult = NULL
+								,@intTestResultId = NULL
+								,@strPropertyName = NULL
+
+							SELECT TOP 1 @strOldPropertyValue = strOldPropertyValue
+								,@strOldTestComment = strOldComment
+								,@strOldResult = strOldResult
+								,@strNewPropertyValue = strNewPropertyValue
+								,@strNewTestComment = strNewComment
+								,@strNewResult = strNewResult
+								,@intTestResultId = intTestResultId
+								,@strPropertyName = strPropertyName
+							FROM @tblQMTestResultChanges
+
+							SET @details = '{  
+								 "action":"Updated",
+								 "change":"Updated - Record: ' + LTRIM(@intSampleId) + '",
+								 "keyValue":' + LTRIM(@intSampleId) + ',
+								 "iconCls":"small-tree-modified",
+								 "children":[  
+									 {  
+											"change":"tblQMTestResults",
+											"children":[  
+											 {  
+												"action":"Updated",
+												"change":"Updated - Record: ' + LTRIM(@strPropertyName) + '",
+												"keyValue":' + LTRIM(@intTestResultId) + ',
+												"iconCls":"small-tree-modified",
+												"children":
+												 [   
+													 '
+
+							IF @strOldPropertyValue <> @strNewPropertyValue
+								SET @details = @details + '
+													 {  
+												        "change":"strPropertyValue",
+												        "from":"' + LTRIM(@strOldPropertyValue) + '",
+												        "to":"' + LTRIM(@strNewPropertyValue) + '",
+												        "leaf":true,
+												        "iconCls":"small-gear",
+												        "isField":true,
+												        "keyValue":' + LTRIM(@intTestResultId) + ',
+												        "associationKey":"tblQMTestResults",
+												        "changeDescription":"Actual Value",
+														"hidden":false
+												     },'
+
+							IF @strOldTestComment <> @strNewTestComment
+								SET @details = @details + '
+													 {  
+												      "change":"strComment",
+												      "from":"' + LTRIM(@strOldTestComment) + '",
+												      "to":"' + LTRIM(@strNewTestComment) + '",
+												      "leaf":true,
+												      "iconCls":"small-gear",
+												      "isField":true,
+												      "keyValue":' + LTRIM(@intTestResultId) + ',
+												      "associationKey":"tblQMTestResults",
+												      "changeDescription":"Comments",
+												      "hidden":false
+												     },'
+
+							IF @strOldResult <> @strNewResult
+								SET @details = @details + '
+												     {  
+												        "change":"strResult",
+												        "from":"' + LTRIM(@strOldResult) + '",
+												        "to":"' + LTRIM(@strNewResult) + '",
+												        "leaf":true,
+												        "iconCls":"small-gear",
+												        "isField":true,
+												        "keyValue":' + LTRIM(@intTestResultId) + ',
+												        "associationKey":"tblQMTestResults",
+												        "changeDescription":"Result",
+												        "hidden":false
+												     },'
+
+							IF RIGHT(@details, 1) = ','
+								SET @details = SUBSTRING(@details, 0, LEN(@details))
+							SET @details = @details + '
+												]
+										  }
+									   ],
+										"iconCls":"small-tree-grid",
+										"changeDescription":"Test Detail"
+									  }
+									]
+								 }'
+
+							IF @strOldPropertyValue <> @strNewPropertyValue
+								OR @strOldTestComment <> @strNewTestComment
+								OR @strOldResult <> @strNewResult
+							BEGIN
+								EXEC uspSMAuditLog @keyValue = @intSampleId
+									,@screenName = 'Quality.view.QualitySample'
+									,@entityId = @intUserId
+									,@actionType = 'Updated'
+									,@actionIcon = 'small-tree-modified'
+									,@details = @details
+							END
+
+							DELETE
+							FROM @tblQMTestResultChanges
+							WHERE intTestResultId = @intTestResultId
+						END
 					END
 
 					-- Inter Company for Quality

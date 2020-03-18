@@ -167,7 +167,7 @@ SELECT
 	,[intItemLocationId]			= ICIT.[intItemLocationId]
 	,[intItemUOMId]					= ICIT.[intItemUOMId]
 	,[dtmDate]						= ISNULL(ARID.[dtmPostDate], ARID.[dtmShipDate])
-	,[dblQty]						= -ICIT.[dblQty]
+	,[dblQty]                       = - CASE WHEN ISNULL(CP.intPricingCount, 0) > 1 AND (ISNULL(ICS.ysnDestinationWeightsAndGrades, 0) = 0 OR ISNULL(ICS.intDestinationWeightId, 0) = 0) THEN ARID.dblQtyShipped ELSE ICIT.[dblQty] END
 	,[dblUOMQty]					= ICIT.[dblUOMQty]
 	,[dblCost]						= ICIT.[dblCost]
 	,[dblValue]						= 0
@@ -205,6 +205,16 @@ INNER JOIN tblICInventoryTransaction ICIT ON ICIT.[intTransactionId] = ICS.[intI
 										 AND ICIT.[intItemId] = ARID.[intItemId]
 										 AND ICIT.[ysnIsUnposted] = 0
 										 AND ISNULL(ICIT.[intInTransitSourceLocationId], 0) <> 0 
+LEFT JOIN (
+    SELECT intContractDetailId  = CPF.intContractDetailId
+        , intContractHeaderId    = CPF.intContractHeaderId 
+        , intPricingCount        = COUNT(*)
+    FROM tblCTPriceFixation CPF
+    INNER JOIN tblCTPriceFixationDetail CPFD ON CPF.intPriceFixationId = CPFD.intPriceFixationId
+    GROUP BY CPF.intContractDetailId, CPF.intContractHeaderId
+    HAVING COUNT(*) > 1
+) CP ON ARID.intContractHeaderId = CP.intContractHeaderId
+    AND ARID.intContractDetailId = CP.intContractDetailId
 LEFT JOIN (
 	SELECT [intInvoiceDetailLotId]
 		 , [intInvoiceDetailId]

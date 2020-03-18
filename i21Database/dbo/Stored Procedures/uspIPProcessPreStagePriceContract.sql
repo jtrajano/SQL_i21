@@ -90,6 +90,11 @@ BEGIN TRY
 				WHERE intPriceContractId = @intPriceContractId
 				)
 		BEGIN
+			SELECT @strToTransactionType=strTransactionType
+				,@intToCompanyId = intMultiCompanyId
+			FROM tblCTPriceContractPreStage
+			WHERE intPriceContractId = @intPriceContractId
+
 			EXEC uspCTPriceContractPopulateStgXML @intPriceContractId
 				,@intToEntityId
 				,@strToTransactionType

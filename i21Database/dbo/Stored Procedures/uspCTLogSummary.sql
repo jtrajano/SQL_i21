@@ -18,7 +18,7 @@ BEGIN TRY
 			@ysnMatched				BIT,
 			@ysnDirect				BIT = 0
 
-	SELECT @strSource, @strProcess
+	--SELECT @strSource, @strProcess
 
 	IF @strProcess = 'Scheduled Quantity'
 	BEGIN
@@ -1373,22 +1373,32 @@ BEGIN TRY
 			DECLARE @billId INT,
 					@billCreatedId INT
 
-			SELECT @billId = intBillId 
+			SELECT @billId = c.intBillId 
 			FROM tblAPBillDetail a
 			INNER JOIN @cbLogCurrent b ON a.intBillDetailId = b.intTransactionReferenceId
+			INNER JOIN tblAPBill c ON a.intBillId = c.intBillId
+			WHERE c.ysnPosted = 1
 
-			EXEC uspAPReverseTransaction @billId, @intUserId, @billCreatedId
+			IF @billId IS NOT NULL
+			BEGIN
+				EXEC uspAPReverseTransaction @billId, @intUserId, @billCreatedId
+			END			
 		END
 		ELSE IF @strProcess = 'Invoice Delete'
 		BEGIN
 			DECLARE @invoiceId INT,
 					@intNewInvoiceId INT
 
-			SELECT @invoiceId = intInvoiceId 
+			SELECT @invoiceId = c.intInvoiceId 
 			FROM tblARInvoiceDetail a
 			INNER JOIN @cbLogCurrent b ON a.intInvoiceDetailId = b.intTransactionReferenceId
-
-			EXEC uspARReturnInvoice @invoiceId, @intNewInvoiceId
+			INNER JOIN tblARInvoice c ON a.intInvoiceId = c.intInvoiceId
+			WHERE c.ysnPosted = 1
+			
+			IF @invoiceId IS NOT NULL
+			BEGIN
+				EXEC uspARReturnInvoice @invoiceId, @intNewInvoiceId
+			END			
 		END
 
 		DELETE FROM @cbLogCurrent WHERE intContractDetailId = @currentContractDetalId

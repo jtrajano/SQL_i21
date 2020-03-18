@@ -8563,6 +8563,7 @@
     <Build Include="dbo\Views\vyuRKGetM2MSummary.sql" />
     <Build Include="dbo\Views\vyuRKGetM2MCounterPartyExposure.sql" />
     <Build Include="dbo\Tables\tblRKM2MSummary.sql" />
+    <Build Include="dbo\Tables\tblRKRebuildSummaryLog.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

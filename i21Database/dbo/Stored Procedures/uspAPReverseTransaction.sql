@@ -171,6 +171,30 @@ INNER JOIN @billDetailTaxes B ON A.intBillDetailId = B.originalBillDetailId
 INSERT INTO tblAPBillDetailTax
 SELECT * FROM #tmpVoucherDetailDetailTaxes
 
+IF (SELECT ysnPosted FROM #tmpDuplicateBill) = 1
+BEGIN
+	DECLARE @billToPost NVARCHAR(50) = CAST(@billCreatedId AS NVARCHAR);
+	DECLARE @postSuccess BIT = 0;
+	DECLARE @batchIdUsed NVARCHAR(50);
+
+	EXEC uspAPPostBill 
+		@post=1,
+		@recap=0,
+		@isBatch=0,
+		@param=@billToPost,
+		@userId=@userId,
+		@batchIdUsed = @batchIdUsed OUTPUT,
+		@success= @postSuccess OUTPUT
+
+	IF @postSuccess = 0
+	BEGIN
+		DECLARE @postError NVARCHAR(200);
+		SET @postError = (SELECT TOP 1 strMessage FROM tblAPPostResult WHERE intTransactionId = @billCreatedId AND strBatchNumber = @batchIdUsed)
+		RAISERROR(@postError, 16, 1);
+		RETURN;
+	END
+END
+
 IF @transCount = 0 COMMIT TRANSACTION
 
 END TRY

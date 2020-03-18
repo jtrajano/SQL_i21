@@ -2,7 +2,44 @@
 	@intContractDetailId	INT
 AS
 
-	SELECT		CC.*,
+	SELECT		--CC.*,
+				CC.intContractCostId
+				,CC.intConcurrencyId
+				,CC.intPrevConcurrencyId
+				,CC.intContractDetailId
+				,CC.intItemId
+				,CC.intVendorId
+				,CC.strCostMethod
+				,CC.intCurrencyId
+				,CC.dblRate
+				,CC.intItemUOMId
+				,CC.intRateTypeId
+				,CC.dblFX
+				,CC.ysnAccrue
+				,CC.ysnMTM
+				,CC.ysnPrice
+				,CC.ysnAdditionalCost
+				,CC.ysnBasis
+				,CC.ysnReceivable
+				,CC.strParty
+				,CC.strPaidBy
+				,CC.dtmDueDate
+				,CC.strReference
+				,CC.ysn15DaysFromShipment
+				,CC.strRemarks
+				,CC.strStatus
+				,CC.strCostStatus
+				,CC.dblReqstdAmount
+				,CC.dblRcvdPaidAmount
+				,dblActualAmount = isnull(CC.dblActualAmount,0.00)
+				,CC.dblAccruedAmount
+				,CC.dblRemainingPercent
+				,CC.dtmAccrualDate
+				,CC.strAPAR
+				,CC.strPayToReceiveFrom
+				,CC.strReferenceNo
+				,CC.intContractCostRefId
+				,CC.ysnFromBasisComponent,
 
 				IM.strItemNo, 
 				IM.strDescription strItemDescription,

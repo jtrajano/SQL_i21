@@ -71,7 +71,7 @@ BEGIN
 		,dblFuturesinCommodityStockUOM 		= CAST (MAX(dblFuturesinCommodityStockUOM) AS NUMERIC(20,6))
 		,dblBasisinCommodityStockUOM		= CAST (dblBasisinCommodityStockUOM AS NUMERIC(20,6))
 		,dblCashPriceinCommodityStockUOM 	= CAST (MAX(dblCashPriceinCommodityStockUOM) AS NUMERIC(20,6))
-		,dblAmountinCommodityStockUOM 		= CAST (MAX(dblAmountinCommodityStockUOM) AS NUMERIC(20,6))
+		,dblAmountinCommodityStockUOM 		= CAST (SUM(dblAmountinCommodityStockUOM) AS NUMERIC(20,6))
 		,strPrintOption
 	FROM
 	(

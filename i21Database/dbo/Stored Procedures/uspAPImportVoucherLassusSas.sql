@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspAPImportVoucherLassusSas]
-	@file NVARCHAR(500),
+	@file NVARCHAR(500) = NULL,
 	@userId INT,
 	@intVendorId INT,
 	@importLogId INT OUTPUT
@@ -23,20 +23,22 @@ DECLARE @totalIssues INT;
 -- SET @path = SUBSTRING(@file, 0, @lastindex + 1)
 SET @errorFile = REPLACE(@file, 'csv', 'txt');
 
-DELETE FROM tblAPImportVoucherLassusSas
+IF @file IS NOT NULL
+BEGIN
+	DELETE FROM tblAPImportVoucherLassusSas
 
-SET @sql = 'BULK INSERT tblAPImportVoucherLassusSas FROM ''' + @file + ''' WITH
-        (
-        FIELDTERMINATOR = '','',
-		ROWTERMINATOR = ''\n'',
-		ROWS_PER_BATCH = 10000, 
-		FIRSTROW = 1,
-		TABLOCK,
-		ERRORFILE = ''' + @errorFile + '''
-        )'
+	SET @sql = 'BULK INSERT tblAPImportVoucherLassusSas FROM ''' + @file + ''' WITH
+			(
+			FIELDTERMINATOR = '','',
+			ROWTERMINATOR = ''\n'',
+			ROWS_PER_BATCH = 10000, 
+			FIRSTROW = 1,
+			TABLOCK,
+			ERRORFILE = ''' + @errorFile + '''
+			)'
 
-EXEC(@sql)
-
+	EXEC(@sql)
+END
 DECLARE @voucherTotal DECIMAL(18,2);
 
 SELECT
@@ -68,7 +70,8 @@ INSERT INTO @voucherPayables
     dblQuantityToBill,
     dblCost,
 	intAccountId,
-	strVendorOrderNumber
+	strVendorOrderNumber,
+	ysnStage
 )
 SELECT
 	intPartitionId,
@@ -78,14 +81,27 @@ SELECT
 	dblQuantityToBill,
     dblQuantityToBill,
     dblCost,
-	intAccountI d,
-	strVendorOrderNumber
+	intAccountId,
+	strVendorOrderNumber,
+	0
 FROM #tmpConvertedLassusSasData A
 WHERE 
 	A.intAccountId > 0
 
+IF NOT EXISTS(SELECT 1 FROM @voucherPayables)
+BEGIN
+	RAISERROR('No valid record to import.', 16, 1);
+	RETURN;
+END
+
 DECLARE @createdVoucher NVARCHAR(MAX);
 EXEC uspAPCreateVoucher @voucherPayables = @voucherPayables, @userId = @userId, @throwError = 1, @createdVouchersId = @createdVoucher OUT
+
+IF @createdVoucher IS NULL 
+BEGIN 
+	RAISERROR('No valid record to create the voucher.', 16, 1);
+	RETURN;
+END
 
 DECLARE @batchIdUsed NVARCHAR(50);
 DECLARE @failedPostCount INT;
