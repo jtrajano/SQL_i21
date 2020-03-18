@@ -149,23 +149,35 @@ BEGIN TRY
 			FROM #temp 
 			WHERE strInternalTradeNo = @id
 
-			SET @newTransactionId = SCOPE_IDENTITY()
-
-			EXEC [uspRKFutOptTransactionHistory] @intFutOptTransactionId = @newTransactionId
-				, @intFutOptTransactionHeaderId = NULL
-				, @strScreenName = 'Derivative Entry Import'
-				, @intUserId = @intEntityUserId
-				, @action = 'ADD'
-
-			EXEC uspIPInterCompanyPreStageFutOptTransaction @intFutOptTransactionHeaderId = @intFutOptTransactionHeaderId
-				, @strRowState = 'Added'
-				, @intUserId = @intEntityUserId
-
+		
 			DELETE FROM  #temp WHERE strInternalTradeNo = @id
 		END
 	END
 
 	COMMIT TRAN
+
+	SELECT intFutOptTransactionId 
+	INTO #tmpDerivativeIds
+	FROM tblRKFutOptTransaction
+	WHERE intFutOptTransactionHeaderId = @intFutOptTransactionHeaderId
+	ORDER BY intFutOptTransactionId
+
+	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpDerivativeIds)
+	BEGIN
+		SELECT TOP 1 @newTransactionId = intFutOptTransactionId FROM #tmpDerivativeIds ORDER BY intFutOptTransactionId
+
+		EXEC [uspRKFutOptTransactionHistory] @intFutOptTransactionId = @newTransactionId
+				, @intFutOptTransactionHeaderId = NULL
+				, @strScreenName = 'Derivative Entry Import'
+				, @intUserId = @intEntityUserId
+				, @action = 'ADD'
+
+		DELETE FROM #tmpDerivativeIds WHERE intFutOptTransactionId = @newTransactionId
+	END
+
+	EXEC uspIPInterCompanyPreStageFutOptTransaction @intFutOptTransactionHeaderId = @intFutOptTransactionHeaderId
+			, @strRowState = 'Added'
+			, @intUserId = @intEntityUserId
 
 	--This will return the newly created Derivative Entry
 	SELECT DE.strInternalTradeNo AS Result1
