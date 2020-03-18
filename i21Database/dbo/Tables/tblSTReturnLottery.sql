@@ -1,9 +1,12 @@
-﻿CREATE TABLE [dbo].[tblSTReturnLottery] (
+﻿
+CREATE TABLE [dbo].[tblSTReturnLottery] (
     [intReturnLotteryId]    INT             IDENTITY (1, 1) NOT NULL,
     [intLotteryBookId]      INT             NULL,
     [intInventoryReceiptId] INT             NULL,
     [dtmReturnDate]         DATETIME        NOT NULL,
     [dblQuantity]           NUMERIC (18, 6) NULL,
+    [dblOriginalQuantity]   NUMERIC (18, 6) NULL,
+    [ysnReadyForPosting]    BIT             CONSTRAINT [DF_tblSTReturnLottery_ysnReadyForPosting] DEFAULT ((0)) NOT NULL,
     [ysnPosted]             BIT             CONSTRAINT [DF_tblSTReturnLottery_ysnPosted] DEFAULT ((0)) NOT NULL,
     [intConcurrencyId]      INT             CONSTRAINT [DF_tblSTReturnLottery_intConcurrencyId] DEFAULT ((1)) NULL,
     CONSTRAINT [PK_tblSTReturnLottery] PRIMARY KEY CLUSTERED ([intReturnLotteryId] ASC),

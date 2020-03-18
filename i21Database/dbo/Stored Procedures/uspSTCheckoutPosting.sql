@@ -5128,12 +5128,20 @@ IF(@ysnDebug = CAST(1 AS BIT))
 				----------------- LOTTERY COUNT  ---------------------
 				------------------------------------------------------
 				
+				--SUBTRACT QTY ON LOTTERY BOOK--
 				UPDATE tblSTLotteryBook SET tblSTLotteryBook.dblQuantityRemaining = tblSTLotteryBook.dblQuantityRemaining - tblSTCheckoutLotteryCount.dblQuantitySold
 				FROM tblSTCheckoutLotteryCount 
 				WHERE tblSTCheckoutLotteryCount.intLotteryBookId = tblSTLotteryBook.intLotteryBookId
 				AND tblSTCheckoutLotteryCount.intCheckoutId = @intCheckoutId
-				--AND tblSTCheckoutLotteryCount.strSoldOut = 'Yes'
 				AND tblSTLotteryBook.strStatus = 'Active'
+
+
+				--SUBTRACT QTY ON RETURN LOTTERY PLACE HOLDER (INCASE OF DELETE)--
+				UPDATE tblSTReturnLottery SET tblSTReturnLottery.dblOriginalQuantity = tblSTReturnLottery.dblOriginalQuantity - tblSTCheckoutLotteryCount.dblQuantitySold
+				FROM tblSTCheckoutLotteryCount 
+				WHERE tblSTCheckoutLotteryCount.intLotteryBookId = tblSTReturnLottery.intLotteryBookId
+				AND tblSTCheckoutLotteryCount.intCheckoutId = @intCheckoutId
+				AND ISNULL(tblSTReturnLottery.ysnPosted,0) = 0
 
 
 				UPDATE tblSTLotteryBook 

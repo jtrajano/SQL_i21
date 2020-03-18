@@ -231,19 +231,31 @@ BEGIN TRANSACTION
 			RETURN
 		END
 
+		DECLARE @dblUnpostedQuantitySold NUMERIC(18,6)
+
+		SELECT @dblUnpostedQuantitySold = ISNULL(SUM(ISNULL(dblQuantitySold,0)),0)
+		FROM tblSTCheckoutLotteryCount
+		INNER JOIN tblSTCheckoutHeader 
+		ON tblSTCheckoutLotteryCount.intCheckoutId = tblSTCheckoutHeader.intCheckoutId
+		WHERE ISNULL(tblSTCheckoutHeader.ysnPosted,0) = 0 AND tblSTCheckoutLotteryCount.intLotteryBookId = @Id
+
 		--INSERT RETURN LOTTERY ENTRY--
 		INSERT INTO tblSTReturnLottery
 		(
 			intLotteryBookId
 			,dtmReturnDate
 			,dblQuantity
+			,dblOriginalQuantity
 			,ysnPosted
+			,ysnReadyForPosting
 		)
 		SELECT TOP 1 
 			 intLotteryBookId
 			,GETDATE()
+			,dblQuantityRemaining - @dblUnpostedQuantitySold
 			,dblQuantityRemaining
 			,0
+			,CASE WHEN @dblUnpostedQuantitySold = 0 THEN 1 ELSE 0 END
 		FROM tblSTLotteryBook WHERE intLotteryBookId = @Id
 		SET @intReturnLotteryId = SCOPE_IDENTITY()
 
@@ -379,8 +391,8 @@ BEGIN TRANSACTION
 
 		UPDATE tblSTLotteryBook 
 		SET 
-			dblQuantityRemaining = dblQuantity,
-			strStatus = 'In Active'
+			dblQuantityRemaining = dblOriginalQuantity,
+			strStatus = 'Inactive'
 		FROM 
 		tblSTReturnLottery
 		WHERE intReturnLotteryId = @Id AND tblSTReturnLottery.intLotteryBookId = tblSTLotteryBook.intLotteryBookId
