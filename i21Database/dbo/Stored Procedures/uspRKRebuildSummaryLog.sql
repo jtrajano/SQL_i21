@@ -2,13 +2,22 @@
 	@intCurrentUserId INT	
 AS
 
-BEGIN
+BEGIN TRY
 	IF EXISTS (SELECT TOP 1 1 FROM tblRKCompanyPreference WHERE ysnAllowRebuildSummaryLog = 0)
 	BEGIN
 		RAISERROR('You are not allowed to rebuild the Summary Log!', 16, 1)
 	END
 
+	DECLARE @RebuildLogId INT
+	-- Truncate table
 	TRUNCATE TABLE tblRKSummaryLog
+	--Update ysnAllowRebuildSummaryLog to FALSE
+	UPDATE tblRKCompanyPreference SET ysnAllowRebuildSummaryLog = 0
+
+	INSERT INTO tblRKRebuildSummaryLog(dtmRebuildDate, intUserId, ysnSuccess)
+	VALUES (GETDATE(), @intCurrentUserId, 0)
+
+	SET @RebuildLogId = SCOPE_IDENTITY()
 
 	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblRKSummaryLog')
 	BEGIN
@@ -1685,13 +1694,28 @@ BEGIN
         EXEC uspRKLogRiskPosition @ExistingHistory, 1, 0
         PRINT 'End Populate RK Summary Log - On Hold'
         DELETE FROM @ExistingHistory
-		
-	--Update ysnAllowRebuildSummaryLog to FALSE
-	UPDATE tblRKCompanyPreference SET ysnAllowRebuildSummaryLog = 0
 
-	INSERT INTO tblRKRebuildSummaryLog(dtmRebuildDate, intUserId)
-	VALUES (GETDATE(), @intCurrentUserId)
+		UPDATE tblRKRebuildSummaryLog
+		SET ysnSuccess = 1
+		WHERE intRebuildSummaryLogId = @RebuildLogId
 
 	END
 	
-END
+END TRY
+
+BEGIN CATCH
+	DECLARE @ErrMsg NVARCHAR(MAX) = ERROR_MESSAGE()
+	
+	UPDATE tblRKRebuildSummaryLog
+	SET ysnSuccess = 0
+		, strErrorMessage = @ErrMsg
+	WHERE intRebuildSummaryLogId = @RebuildLogId
+
+	IF (@ErrMsg != 'You are not allowed to rebuild the Summary Log!')
+	BEGIN
+		UPDATE tblRKCompanyPreference
+		SET ysnAllowRebuildSummaryLog = 1
+	END
+	
+	RAISERROR (@ErrMsg,16,1,'WITH NOWAIT')
+END CATCH
