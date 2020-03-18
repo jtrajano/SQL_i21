@@ -200,6 +200,7 @@
     <Build Include="dbo\Tables\tblAPRecurringTransaction.sql" />
     <Build Include="dbo\Tables\tblAPVendor.sql" />
     <Build Include="dbo\Tables\tblCMBank.sql" />
+    <Build Include="dbo\Tables\tblCMResponsibleParty.sql" />
     <Build Include="dbo\Tables\tblCMBankAccount.sql" />
     <Build Include="dbo\Tables\tblCMBankFileFormat.sql" />
     <Build Include="dbo\Tables\tblCMBankFileFormatDetail.sql" />
