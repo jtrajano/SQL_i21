@@ -3,22 +3,23 @@
 AS
 
 BEGIN TRY
+	DECLARE @RebuildLogId INT
+	
+	INSERT INTO tblRKRebuildSummaryLog(dtmRebuildDate, intUserId, ysnSuccess)
+	VALUES (GETDATE(), @intCurrentUserId, 0)
+	
+	SET @RebuildLogId = SCOPE_IDENTITY()
+
 	IF EXISTS (SELECT TOP 1 1 FROM tblRKCompanyPreference WHERE ysnAllowRebuildSummaryLog = 0)
 	BEGIN
 		RAISERROR('You are not allowed to rebuild the Summary Log!', 16, 1)
 	END
-
-	DECLARE @RebuildLogId INT
+		
 	-- Truncate table
 	TRUNCATE TABLE tblRKSummaryLog
 	--Update ysnAllowRebuildSummaryLog to FALSE
 	UPDATE tblRKCompanyPreference SET ysnAllowRebuildSummaryLog = 0
-
-	INSERT INTO tblRKRebuildSummaryLog(dtmRebuildDate, intUserId, ysnSuccess)
-	VALUES (GETDATE(), @intCurrentUserId, 0)
-
-	SET @RebuildLogId = SCOPE_IDENTITY()
-
+	
 	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblRKSummaryLog')
 	BEGIN
 		DECLARE @ExistingHistory AS RKSummaryLog
