@@ -426,7 +426,22 @@ DECLARE @tblSMAuditLog TABLE (
  dtmDate    DATE,    
  intEntityId   INT,    
  intTransactionId INT    
-)    
+) 
+DECLARE @FifthTable TABLE(
+ intAuditId INT,     
+ intParentAuditId INT,     
+ intLogId INT,     
+ strAction NVARCHAR(100),     
+ strChange NVARCHAR(MAX),     
+ intKeyValue INT,     
+ strFrom NVARCHAR(MAX),     
+ strTo NVARCHAR(MAX),     
+ strAlias NVARCHAR(MAX),    
+ ysnHidden BIT,    
+ ysnField BIT,     
+ intConcurrencyId INT
+ 
+)      
     
 --=====================================================================================================================================      
 --  GET ALL AUDIT LOGS BASED ON THE NAMESPACE AND PRIMARY KEY     
@@ -743,7 +758,8 @@ FROM (
     WHERE  B.[intAuditId] = A.[intParentId]    
  ) C  
 )  
- INSERT INTO tblSMAudit(    
+ INSERT INTO @FifthTable
+ (
  intAuditId,     
  intParentAuditId,     
  intLogId,     
@@ -755,9 +771,9 @@ FROM (
  strAlias,    
  ysnHidden,    
  ysnField,     
- intConcurrencyId    
- )    
- SELECT   
+ intConcurrencyId   
+ )
+  SELECT   
  intAuditId,     
  intParentAuditId,    
  @logId,     
@@ -772,7 +788,61 @@ FROM (
  ysnField,     
  1     
  FROM FifthLayer    
- WHERE intAuditId > @maxAuditId + 1    
+ WHERE intAuditId > @maxAuditId + 1   
+
+UPDATE @FifthTable SET ysnHidden = 0 WHERE
+intAuditId IN
+(
+SELECT intParentAuditId FROM @FifthTable
+ WHERE intAuditId IN (SELECT intAuditId FROM @FifthTable WHERE ISNULL(intParentAuditId,0) <> 0 AND ISNULL(ysnHidden,0) = 0)
+ AND ISNULL(strAction,'') <> ''
+
+ )
+
+ INSERT INTO tblSMAudit(    
+ intAuditId,     
+ intParentAuditId,     
+ intLogId,     
+ strAction,     
+ strChange,     
+ intKeyValue,     
+ strFrom,     
+ strTo,     
+ strAlias,    
+ ysnHidden,    
+ ysnField,     
+ intConcurrencyId    
+ )
+  SELECT   
+ intAuditId,     
+ intParentAuditId,    
+ intLogId,     
+ strAction,     
+ strChange,     
+ intKeyValue, 
+ strFrom,     
+ strTo,     
+ strAlias,    
+ ysnHidden,   
+ ysnField,     
+ 1     
+ FROM @FifthTable     
+--  SELECT   
+--  intAuditId,     
+--  intParentAuditId,    
+--  @logId,     
+--  strAction,     
+--  strChange,     
+--  CAST(strKeyValue AS INT) intKeyValue,     
+--  strFrom,     
+--  strTo,     
+--  strAlias,    
+--  CASE WHEN (ISNULL(strAction,'') = '' AND ISNULL(strAlias,'') = '') AND ISNULL(ysnField,'') = ''  
+--  AND (ISNULL(strFrom,'') = '' AND ISNULL(strTo, '') = '') THEN 1 ELSE ysnHidden END AS 'ysnHidden',    
+--  ysnField,     
+--  1     
+--  FROM FifthLayer    
+--  WHERE intAuditId > @maxAuditId + 1    
     
      
  UPDATE tblSMAuditLog SET ysnProcessed = 1 WHERE intAuditLogId = @intAuditLogId    
@@ -780,7 +850,8 @@ FROM (
  DELETE FROM @tblSMAuditLog WHERE intAuditLogId = @intAuditLogId    
   
  DELETE FROM @JsonData  
- DELETE FROM @JsonTransformed  
+ DELETE FROM @JsonTransformed 
+ DELETE FROM @FifthTable
 END     
     
 SET IDENTITY_INSERT dbo.tblSMAudit OFF;
