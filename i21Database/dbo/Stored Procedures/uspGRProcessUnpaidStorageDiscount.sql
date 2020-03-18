@@ -318,6 +318,7 @@ BEGIN TRY
 					, @UserKey
 					, 1
 					, 6
+					, 'Generated Storage Invoice'
 					, ARD.dblQtyOrdered
 					, AR.intInvoiceId
 					, GETDATE()
