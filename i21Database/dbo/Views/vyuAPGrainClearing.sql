@@ -134,13 +134,15 @@ LEFT JOIN
 )
     ON itemUOM.intItemUOMId = CS.intItemUOMId
 LEFT JOIN tblGRSettleContract ST
-	ON ST.intSettleStorageId = SS.intSettleStorageId AND ST.intContractDetailId = billDetail.intContractDetailId
+	ON ST.intSettleStorageId = SS.intSettleStorageId --AND ST.intContractDetailId = billDetail.intContractDetailId
 LEFT JOIN tblCTContractDetail CT
 	ON CT.intContractDetailId = ST.intContractDetailId
+left join tblCTContractHeader CH
+		on CH.intContractHeaderId = CT.intContractHeaderId
 WHERE bill.ysnPosted = 1
 --AND SS.strStorageTicket IN ('STR-56/1')
 AND glAccnt.intAccountCategoryId = 45
-
+AND (CH.intContractHeaderId is null or (CH.intContractHeaderId is not null and CH.intPricingTypeId = 2))
 ------- Charges
 
 UNION ALL
@@ -267,9 +269,17 @@ LEFT JOIN
         ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId
 )
     ON itemUOM.intItemUOMId = CS.intItemUOMId
+LEFT JOIN tblGRSettleContract ST
+	ON ST.intSettleStorageId = SS.intSettleStorageId
+LEFT JOIN tblCTContractDetail CT
+	ON CT.intContractDetailId = ST.intContractDetailId
+left join tblCTContractHeader CH
+		on CH.intContractHeaderId = CT.intContractHeaderId
+
 WHERE bill.ysnPosted = 1
 --AND SS.strStorageTicket = 'STR-49/3'
 AND glAccnt.intAccountCategoryId = 45
+AND (CH.intContractHeaderId is null or (CH.intContractHeaderId is not null and CH.intPricingTypeId = 2))
 
 --DISCOUNTS
 UNION ALL
@@ -431,6 +441,12 @@ LEFT JOIN
         ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId
 )
     ON itemUOM.intItemUOMId = billDetail.intUnitOfMeasureId
+LEFT JOIN tblGRSettleContract ST
+	ON ST.intSettleStorageId = SS.intSettleStorageId
+LEFT JOIN tblCTContractDetail CT
+	ON CT.intContractDetailId = ST.intContractDetailId
+left join tblCTContractHeader CH
+		on CH.intContractHeaderId = CT.intContractHeaderId
 WHERE bill.ysnPosted = 1
 AND EXISTS (
 	SELECT 1
@@ -441,7 +457,7 @@ AND EXISTS (
 		AND billDetail.intCustomerStorageId = QM.intTicketFileId
 )
 AND glAccnt.intAccountCategoryId = 45
-
+AND (CH.intContractHeaderId is null or (CH.intContractHeaderId is not null and CH.intPricingTypeId = 2))
 
 /*
 -- SELECT 
