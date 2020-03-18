@@ -44,11 +44,8 @@ BEGIN TRY
 										END
 			,intTransactionRecordId 	= CASE 
 											WHEN intTransactionTypeId IN (1, 5)
-												THEN CASE 
-														WHEN sh.intInventoryReceiptId IS NOT NULL THEN sh.intInventoryReceiptId
-														WHEN sh.intInventoryShipmentId IS NOT NULL THEN sh.intInventoryShipmentId
-														ELSE NULL 
-													END
+												THEN 
+													nullif(coalesce(sh.intInventoryReceiptId, sh.intInventoryShipmentId, sh.intTicketId, -99), -99)
 											WHEN intTransactionTypeId = 3 THEN sh.intTransferStorageId
 											WHEN intTransactionTypeId = 4 THEN sh.intSettleStorageId
 											WHEN intTransactionTypeId = 9 THEN sh.intInventoryAdjustmentId 
@@ -59,6 +56,7 @@ BEGIN TRY
 												THEN CASE 
 														WHEN sh.intInventoryReceiptId IS NOT NULL THEN sh.strReceiptNumber
 														WHEN sh.intInventoryShipmentId IS NOT NULL THEN sh.strShipmentNumber
+														WHEN sh.intTicketId is not null then t.strTicketNumber
 														ELSE NULL 
 													END
 											WHEN intTransactionTypeId = 3 THEN sh.strTransferTicket
@@ -109,11 +107,8 @@ BEGIN TRY
 										END
 			,intTransactionRecordId 	= CASE 
 											WHEN intTransactionTypeId IN (1, 5)
-												THEN CASE 
-														WHEN sh.intInventoryReceiptId IS NOT NULL THEN sh.intInventoryReceiptId
-														WHEN sh.intInventoryShipmentId IS NOT NULL THEN sh.intInventoryShipmentId
-														ELSE NULL 
-													END
+												THEN 
+													nullif(coalesce(sh.intInventoryReceiptId, sh.intInventoryShipmentId, sh.intTicketId, -99), -99)
 											WHEN intTransactionTypeId = 3 THEN sh.intTransferStorageId
 											WHEN intTransactionTypeId = 4 THEN sh.intSettleStorageId
 											WHEN intTransactionTypeId = 9 THEN sh.intInventoryAdjustmentId 
@@ -124,6 +119,7 @@ BEGIN TRY
 												THEN CASE 
 														WHEN sh.intInventoryReceiptId IS NOT NULL THEN sh.strReceiptNumber
 														WHEN sh.intInventoryShipmentId IS NOT NULL THEN sh.strShipmentNumber
+														WHEN sh.intTicketId is not null then t.strTicketNumber
 														ELSE NULL 
 													END
 											WHEN intTransactionTypeId = 3 THEN sh.strTransferTicket
@@ -196,6 +192,8 @@ BEGIN TRY
 		WHERE sh.intTransactionTypeId = 4
 			AND sh.intStorageHistoryId = @intStorageHistoryId
 		
+		
+		UPDATE @SummaryLogs set strTransactionNumber = '' where strTransactionNumber is null
 		EXEC uspRKLogRiskPosition @SummaryLogs
 	END
 
