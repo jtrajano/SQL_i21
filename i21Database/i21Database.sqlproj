@@ -8548,6 +8548,7 @@
     <Build Include="dbo\Stored Procedures\uspFRDBuildHierarchyFilterString.sql" />
     <Build Include="dbo\Functions\fnRKGetBucketOnHold.sql" />
     <Build Include="dbo\Stored Procedures\uspGRRiskSummaryLog.sql" />
+    <Build Include="dbo\Tables\tblRKRebuildSummaryLog.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

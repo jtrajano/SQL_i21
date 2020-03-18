@@ -3,10 +3,12 @@
 AS
 
 BEGIN
-	--IF EXISTS (SELECT TOP 1 1 FROM tblRKCompanyPreference WHERE ysnAllowRebuildSummaryLog = 0)
-	--BEGIN
-	--	RAISERROR('You are not allowed to rebuild the Summary Log!', 16, 1)
-	--END
+	IF EXISTS (SELECT TOP 1 1 FROM tblRKCompanyPreference WHERE ysnAllowRebuildSummaryLog = 0)
+	BEGIN
+		RAISERROR('You are not allowed to rebuild the Summary Log!', 16, 1)
+	END
+
+	TRUNCATE TABLE tblRKSummaryLog
 
 	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblRKSummaryLog')
 	BEGIN
@@ -1687,15 +1689,9 @@ BEGIN
 	--Update ysnAllowRebuildSummaryLog to FALSE
 	UPDATE tblRKCompanyPreference SET ysnAllowRebuildSummaryLog = 0
 
-	--TODO: Log to table Rebuild Summary Log Activities
-	--User, DateTime
-	DECLARE @strCurrentUserName NVARCHAR(100)
+	INSERT INTO tblRKRebuildSummaryLog(dtmRebuildDate, intUserId)
+	VALUES (GETDATE(), @intCurrentUserId)
 
-	SElECT @strCurrentUserName = strName FROM tblEMEntity WHERE intEntityId = @intCurrentUserId
-
-	PRINT 'Rebuild by User: ' + @strCurrentUserName + ' ON ' + CAST(GETDATE() AS NVARCHAR(100))
-
-	
 	END
 	
 END
