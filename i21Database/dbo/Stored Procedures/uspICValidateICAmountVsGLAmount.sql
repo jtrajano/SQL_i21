@@ -66,7 +66,6 @@ END
 
 -- Get the inventory value from the Inventory Valuation 
 BEGIN 
-
 	IF EXISTS (SELECT TOP 1 1 FROM @GLEntries)
 	BEGIN 
 		INSERT INTO #uspICValidateICAmountVsGLAmount_result (
@@ -90,13 +89,7 @@ BEGIN
 				ON t.intTransactionTypeId = ty.intTransactionTypeId			
 			INNER JOIN tblICItem i
 				ON i.intItemId = t.intItemId 
-			INNER JOIN (
-				SELECT DISTINCT 
-					gl.strTransactionId
-					,gl.strBatchId 					
-				FROM 
-					@GLEntries gl
-			) gl
+			INNER JOIN @glTransactions gl
 				ON t.strTransactionId = gl.strTransactionId 
 				AND t.strBatchId = gl.strBatchId
 		WHERE	
@@ -106,8 +99,15 @@ BEGIN
 			,t.strTransactionId
 			,t.strBatchId
 			,dbo.fnGetItemGLAccount(t.intItemId, t.intItemLocationId, 'Inventory')
+
 		-- Get the Consume Inventory Transactions 
-		UNION ALL 
+		INSERT INTO #uspICValidateICAmountVsGLAmount_result (
+			strTransactionType 
+			,strTransactionId
+			,strBatchId
+			,dblICAmount
+			,intAccountId  
+		)
 		SELECT	
 			[strTransactionType] = ty.strName
 			,[strTransactionId] = t.strTransactionId
@@ -122,56 +122,57 @@ BEGIN
 				ON t.intTransactionTypeId = ty.intTransactionTypeId			
 			INNER JOIN tblICItem i
 				ON i.intItemId = t.intItemId 
-			INNER JOIN (
-				SELECT DISTINCT 
-					gl.strTransactionId
-					,gl.strBatchId 					
-				FROM 
-					@GLEntries gl
-			) gl
+			INNER JOIN @glTransactions gl
 				ON t.strTransactionId = gl.strTransactionId 
 				AND t.strBatchId = gl.strBatchId
 		WHERE	
 			t.intInTransitSourceLocationId IS NULL 
-			AND ty.strName IN ('Consume')
+			AND ty.strName IN ('Consume', 'Produce')
 		GROUP BY 
 			ty.strName 
 			,t.strTransactionId
 			,t.strBatchId
 			,dbo.fnGetItemGLAccount(t.intItemId, t.intItemLocationId, 'Work In Progress')
-		-- Get the Produce Inventory Transactions 
-		UNION ALL 
-		SELECT	
-			[strTransactionType] = ty.strName
-			,[strTransactionId] = t.strTransactionId
-			,[strBatchId] = t.strBatchId			
-			,[dblICAmount] = 
-				SUM (
-					-ROUND(dbo.fnMultiply(t.dblQty, t.dblCost) + ISNULL(t.dblValue, 0), 2)
-				)
-			,[intAccountId] = dbo.fnGetItemGLAccount(t.intItemId, t.intItemLocationId, 'Work In Progress')
-		FROM	
-			tblICInventoryTransaction t INNER JOIN tblICInventoryTransactionType ty
-				ON t.intTransactionTypeId = ty.intTransactionTypeId			
-			INNER JOIN tblICItem i
-				ON i.intItemId = t.intItemId 
-			INNER JOIN (
-				SELECT DISTINCT 
-					gl.strTransactionId
-					,gl.strBatchId 					
-				FROM 
-					@GLEntries gl
-			) gl
-				ON t.strTransactionId = gl.strTransactionId 
-				AND t.strBatchId = gl.strBatchId
-		WHERE	
-			t.intInTransitSourceLocationId IS NULL 
-			AND ty.strName IN ('Produce')
-		GROUP BY 
-			ty.strName 
-			,t.strTransactionId
-			,t.strBatchId
-			,dbo.fnGetItemGLAccount(t.intItemId, t.intItemLocationId, 'Work In Progress')
+
+		---- Get the Produce Inventory Transactions 
+		--INSERT INTO #uspICValidateICAmountVsGLAmount_result (
+		--	strTransactionType 
+		--	,strTransactionId
+		--	,strBatchId
+		--	,dblICAmount
+		--	,intAccountId  
+		--)
+		--SELECT	
+		--	[strTransactionType] = ty.strName
+		--	,[strTransactionId] = t.strTransactionId
+		--	,[strBatchId] = t.strBatchId			
+		--	,[dblICAmount] = 
+		--		SUM (
+		--			-ROUND(dbo.fnMultiply(t.dblQty, t.dblCost) + ISNULL(t.dblValue, 0), 2)
+		--		)
+		--	,[intAccountId] = dbo.fnGetItemGLAccount(t.intItemId, t.intItemLocationId, 'Work In Progress')
+		--FROM	
+		--	tblICInventoryTransaction t INNER JOIN tblICInventoryTransactionType ty
+		--		ON t.intTransactionTypeId = ty.intTransactionTypeId			
+		--	INNER JOIN tblICItem i
+		--		ON i.intItemId = t.intItemId 
+		--	INNER JOIN (
+		--		SELECT DISTINCT 
+		--			gl.strTransactionId
+		--			,gl.strBatchId 					
+		--		FROM 
+		--			@GLEntries gl
+		--	) gl
+		--		ON t.strTransactionId = gl.strTransactionId 
+		--		AND t.strBatchId = gl.strBatchId
+		--WHERE	
+		--	t.intInTransitSourceLocationId IS NULL 
+		--	AND ty.strName IN ('Produce')
+		--GROUP BY 
+		--	ty.strName 
+		--	,t.strTransactionId
+		--	,t.strBatchId
+		--	,dbo.fnGetItemGLAccount(t.intItemId, t.intItemLocationId, 'Work In Progress')
 		-- Get the Cost Adjustment from MFG. 
 		--UNION ALL 
 		--SELECT	
@@ -512,10 +513,6 @@ IF @ysnThrowError = 1
 			SUM(ISNULL(dblICAmount, 0) - ISNULL(dblGLAmount, 0)) <> 0 
 	)
 BEGIN 
-	SELECT 'DEBUG #uspICValidateICAmountVsGLAmount_result', * FROM #uspICValidateICAmountVsGLAmount_result
-	SELECT 'DEBUG @GLEntries', intJournalLineNo, dblDebit, dblCredit, intAccountId, strDescription FROM @GLEntries WHERE intAccountId = 8 order by intJournalLineNo
-	SELECT 'T', intInventoryTransactionId, v = round(dbo.fnMultiply(t.dblQty, t.dblCost) + t.dblValue, 2) FROM tblICInventoryTransaction t WHERE t.strTransactionId = @strTransactionId order by intInventoryTransactionId
-
 	DECLARE @difference AS NUMERIC(18, 6) 
 			,@strItemDescription NVARCHAR(500) 
 			,@strAccountDescription NVARCHAR(500)
