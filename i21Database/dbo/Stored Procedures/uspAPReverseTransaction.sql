@@ -177,6 +177,11 @@ BEGIN
 	DECLARE @postSuccess BIT = 0;
 	DECLARE @batchIdUsed NVARCHAR(50);
 
+	UPDATE A
+	SET A.ysnPosted = 0
+	FROM tblAPBill A
+	WHERE A.intBillId = @billCreatedId
+
 	EXEC uspAPPostBill 
 		@post=1,
 		@recap=0,
