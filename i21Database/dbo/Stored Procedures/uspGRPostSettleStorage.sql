@@ -2263,7 +2263,10 @@ BEGIN TRY
 															
 					,[dblOldCost]					=  case when @ysnFromPriceBasisContract = 0 then null 
 														else 
-															case WHEN a.[intContractHeaderId] IS NOT NULL AND @ysnFromPriceBasisContract = 1 
+															case 
+															when (a.intContractHeaderId is not null and a.intPricingTypeId = 1 and CH.intPricingTypeId <> 2) or
+																(@origdblSpotUnits > 0) then null
+															WHEN a.[intContractHeaderId] IS NOT NULL AND @ysnFromPriceBasisContract = 1 
 															--and (@dblQtyFromCt = @dblSelectedUnits) 
 															THEN 															
 																(select dblCost from tblICInventoryTransaction IT
