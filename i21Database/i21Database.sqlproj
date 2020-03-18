@@ -8527,6 +8527,11 @@
     <Build Include="dbo\Tables\tblIPSampleTestResultArchive.sql" />
     <Build Include="dbo\Stored Procedures\uspIPStageSAPSample_ST.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessSAPSample_ST.sql" />
+    <Build Include="dbo\Tables\tblIPLotStage.sql" />
+    <Build Include="dbo\Tables\tblIPLotError.sql" />
+    <Build Include="dbo\Tables\tblIPLotArchive.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPStageSAPStock_ST.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessSAPStock_ST.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
