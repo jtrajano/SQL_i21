@@ -34,8 +34,8 @@ BEGIN
 		,strAccountDescription NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL
 	)
 
-	CREATE NONCLUSTERED INDEX [IX_ValidateICAmountVsGLAmount_result]
-		ON [dbo].[#uspICValidateICAmountVsGLAmount_result](strTransactionType asc, strTransactionId asc, strBatchId asc, intAccountId asc)
+	--CREATE NONCLUSTERED INDEX [IX_ValidateICAmountVsGLAmount_result]
+	--	ON [dbo].[#uspICValidateICAmountVsGLAmount_result](strTransactionType asc, strTransactionId asc, strBatchId asc, intAccountId asc)
 END 
 
 DECLARE @glTransactions TABLE (
