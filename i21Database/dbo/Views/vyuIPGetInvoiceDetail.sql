@@ -6,7 +6,7 @@ SELECT I.strItemNo
 	,IVD.dblQtyOrdered
 	,IVD.dblQtyShipped
 	,UM.strUnitMeasure
-	,IVD.dblPrice
+	,IVD.dblUnitPrice AS dblPrice
 	,IVD.dblTotal
 	,IVD.dblShipmentNetWt
 	,IVD.dblItemWeight
