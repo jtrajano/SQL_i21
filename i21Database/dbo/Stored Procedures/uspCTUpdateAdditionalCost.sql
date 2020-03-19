@@ -89,6 +89,8 @@ BEGIN TRY
 			 AND  tblBilled.intEntityVendorId				 = CC.intVendorId
 		WHERE	CC.intContractDetailId = @intContractDetailId
 
+		/*CT-4526 ---Commented this block, intItemUOMId should be based on sequence basis Unit Measure and Cost Item --*/
+		/*
 		UPDATE	CC 
 		SET		CC.intItemUOMId		=	CU.intItemUOMId
 		FROM	tblCTContractCost	CC
@@ -97,6 +99,8 @@ BEGIN TRY
 		JOIN	tblICItemUOM		CU	ON	CU.intItemId			=	CC.intItemId
 										AND	CU.intUnitMeasureId		=	IU.intUnitMeasureId
 		WHERE	CC.intContractDetailId = @intContractDetailId AND CC.ysnBasis = 1
+
+		*/
 
 		SELECT @intContractDetailId = MIN(intContractDetailId) FROM tblCTContractDetail WHERE intContractHeaderId = @intContractHeaderId AND intContractDetailId > @intContractDetailId
 	END
