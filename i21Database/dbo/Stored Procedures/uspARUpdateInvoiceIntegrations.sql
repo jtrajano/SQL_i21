@@ -1,7 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspARUpdateInvoiceIntegrations] 
-	 @InvoiceId		INT = NULL
-	,@ForDelete		BIT = 0    
-	,@UserId		INT = NULL     
+	 @InvoiceId			INT = NULL	
+	,@ForDelete			BIT = 0    
+	,@UserId			INT = NULL
+	,@InvoiceDetailId 	INT = NULL     
 AS  
 
 SET QUOTED_IDENTIFIER OFF  
@@ -46,9 +47,6 @@ BEGIN TRY
 	FROM tblARInvoice 
 	WHERE intInvoiceId = @InvoiceId
 
-
-
-
 	IF @strTransactionType = 'Proforma Invoice'
 		BEGIN
 			IF @intTranCount = 0
@@ -58,7 +56,6 @@ BEGIN TRY
 		END
 
 	EXEC dbo.[uspARUpdateProvisionalOnStandardInvoice] @intInvoiceId, @ForDelete, @intUserId
-
 	
     --FOR PREPAID ITEM CONTRACT
 	SELECT TOP 1 
@@ -115,7 +112,7 @@ BEGIN TRY
 	EXEC dbo.[uspARUpdateGrainOpenBalance] @intInvoiceId, @ForDelete, @intUserId
 	EXEC dbo.[uspARUpdateContractOnInvoice] @intInvoiceId, @ForDelete, @intUserId, @InvoiceIds
 	EXEC dbo.[uspARUpdateItemContractOnInvoice] @intInvoiceId, @ForDelete, @intUserId
-	IF @ForDelete = 1 EXEC dbo.[uspCTBeforeInvoiceDelete] @intInvoiceId, @intUserId
+	IF @ForDelete = 1 AND @InvoiceDetailId IS NULL EXEC dbo.[uspCTBeforeInvoiceDelete] @intInvoiceId, @intUserId
 	EXEC dbo.[uspARUpdateReturnedInvoice] @intInvoiceId, @ForDelete, @intUserId 
 	EXEC dbo.[uspARUpdateInvoiceAccruals] @intInvoiceId	
 
