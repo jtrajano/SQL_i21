@@ -1,7 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblCMResponsibleParty](
 	[intResponsiblePartyId] [int] IDENTITY(1,1) NOT NULL,
 	[strContainText] [nvarchar](100)  COLLATE SQL_Latin1_General_CP1_CS_AS NOT NULL,
-	[strTransferFrom] [nvarchar](100) COLLATE SQL_Latin1_General_CP1_CS_AS NOT NULL,
+	[intBankAccountIdFrom] [int] NOT NULL,
 	[intBankAccountIdTo] [int] NOT NULL,
 	[intConcurrencyId] int null,
  CONSTRAINT [PK_tblCMResponsibleParty] PRIMARY KEY CLUSTERED 
