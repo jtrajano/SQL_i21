@@ -169,7 +169,14 @@ BEGIN TRY
 		,@intTransactionRefId INT
 		,@intCompanyRefId INT
 		,@strSubBook NVARCHAR(100)
-		,@intSubBookId int
+		,@intSubBookId INT
+		,@strApprover NVARCHAR(100)
+		,@intCurrentUserEntityId INT
+
+	SELECT @intCompanyRefId = intCompanyId
+	FROM dbo.tblIPMultiCompany
+	WHERE ysnCurrentCompany = 1
+
 	DECLARE @tblCTContractCost TABLE (intContractCostId INT)
 
 	SELECT @intContractStageId = MIN(intContractStageId)
@@ -547,7 +554,7 @@ BEGIN TRY
 					,@strTextCode = NULL
 					,@strCountry = NULL
 					,@ysnApproval = NULL
-					,@strSubBook=NULL
+					,@strSubBook = NULL
 
 				SELECT @strSalespersonId = strSalesperson
 					,@strCommodityCode = strCommodityCode
@@ -567,7 +574,7 @@ BEGIN TRY
 					,@strTextCode = strTextCode
 					,@strCountry = strCountry
 					,@ysnApproval = ysnApproval
-					,@strSubBook=strSubBook
+					,@strSubBook = strSubBook
 				FROM OPENXML(@idoc, 'vyuIPContractHeaderViews/vyuIPContractHeaderView', 2) WITH (
 						strSalesperson NVARCHAR(100) Collate Latin1_General_CI_AS
 						,strCommodityCode NVARCHAR(50) Collate Latin1_General_CI_AS
@@ -631,7 +638,7 @@ BEGIN TRY
 						SELECT 1
 						FROM vyuCTEntity SP
 						WHERE SP.strEntityName = @strSalespersonId
-						and SP.strEntityType ='Salesperson'
+							AND SP.strEntityType = 'Salesperson'
 						)
 				BEGIN
 					IF @strErrorMessage <> ''
@@ -835,7 +842,7 @@ BEGIN TRY
 
 				SELECT @intSubBookId = NULL
 
-				SELECT @intSubBookId = intSubBookId 
+				SELECT @intSubBookId = intSubBookId
 				FROM tblCTSubBook
 				WHERE strSubBook = @strSubBook
 
@@ -909,7 +916,7 @@ BEGIN TRY
 				SELECT @intSalespersonId = intEntityId
 				FROM vyuCTEntity SP
 				WHERE SP.strEntityName = @strSalespersonId
-				and SP.strEntityType ='Salesperson'
+					AND SP.strEntityType = 'Salesperson'
 
 				SELECT @intCropYearId = intCropYearId
 				FROM tblCTCropYear YR
@@ -1088,6 +1095,7 @@ BEGIN TRY
 					,ysnReceivedSignedFixationLetter
 					,ysnReadOnlyInterCoContract
 					,intSubBookId
+					,intCompanyId
 					)
 				OUTPUT INSERTED.intEntityId
 				INTO @MyTableVar
@@ -1150,6 +1158,7 @@ BEGIN TRY
 					,IsNULL(ysnReceivedSignedFixationLetter, 0)
 					,1 AS ysnReadOnlyInterCoContract
 					,@intSubBookId
+					,@intCompanyRefId
 				FROM OPENXML(@idoc, 'vyuIPContractHeaderViews/vyuIPContractHeaderView', 2) WITH (
 						strEntityName NVARCHAR(100) Collate Latin1_General_CI_AS
 						,dtmContractDate DATETIME
@@ -1225,6 +1234,10 @@ BEGIN TRY
 					EXEC uspCTInsertINTOTableFromXML 'tblCTContractHeader'
 						,@strTblXML
 						,@intNewContractHeaderId OUTPUT
+
+					UPDATE tblCTContractHeader
+					SET intCompanyId = @intCompanyRefId
+					WHERE intContractHeaderId = @intNewContractHeaderId
 				END
 
 				IF @strRowState = 'Modified'
@@ -1332,8 +1345,9 @@ BEGIN TRY
 						,CH.intInvoiceTypeId = CH1.intInvoiceTypeId
 						,CH.intArbitrationId = CH1.intArbitrationId
 						,CH.intCountryId = CH1.intCountryId
-						,CH.ysnReadOnlyInterCoContract=1
-						,CH.intSubBookId =@intSubBookId
+						,CH.ysnReadOnlyInterCoContract = 1
+						,CH.intSubBookId = @intSubBookId
+						,CH.intCompanyId = @intCompanyRefId
 					FROM tblCTContractHeader CH
 					JOIN #tmpContractHeader CH1 ON CH.intContractHeaderRefId = CH1.intContractHeaderRefId
 					WHERE CH.intContractHeaderRefId = @intContractHeaderRefId
@@ -3853,7 +3867,7 @@ BEGIN TRY
 
 				----------------------------CALL Stored procedure for APPROVAL -----------------------------------------------------------
 				SELECT @intCreatedById = intCreatedById
-					,@intCompanyRefId = intCompanyId
+				--,@intCompanyRefId = intCompanyId
 				FROM tblCTContractHeader
 				WHERE intContractHeaderId = @intNewContractHeaderId
 
@@ -3864,11 +3878,22 @@ BEGIN TRY
 				SELECT 'Contract Type'
 					,'Purchase'
 
+				SELECT @strApprover = strApprover
+				FROM tblIPMultiCompany
+				WHERE intCompanyId = @intCompanyRefId
+
+				SELECT @intCurrentUserEntityId = intEntityId
+				FROM tblSMUserSecurity
+				WHERE strUserName = @strApprover
+
+				IF @intCurrentUserEntityId IS NULL
+					SELECT @intCurrentUserEntityId = @intCreatedById
+
 				EXEC uspSMSubmitTransaction @type = 'ContractManagement.view.Contract'
 					,@recordId = @intNewContractHeaderId
 					,@transactionNo = @strNewContractNumber
 					,@transactionEntityId = @intEntityId
-					,@currentUserEntityId = @intCreatedById
+					,@currentUserEntityId = @intCurrentUserEntityId
 					,@amount = 0
 					,@approverConfiguration = @config
 
@@ -3899,7 +3924,7 @@ BEGIN TRY
 					,intTransactionRefId
 					,intCompanyRefId
 					)
-				SELECT @NewContractHeaderId
+				SELECT @intNewContractHeaderId
 					,@strNewContractNumber
 					,GETDATE()
 					,'Success'

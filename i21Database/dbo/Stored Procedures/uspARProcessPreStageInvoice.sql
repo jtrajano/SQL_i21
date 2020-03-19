@@ -13,6 +13,16 @@ BEGIN TRY
 		,@intCompanyLocationId INT
 		,@intToBookId INT
 		,@ysnApproval BIT
+		,@intCompanyId INT
+
+	SELECT @intCompanyId = intCompanyId
+	FROM dbo.tblIPMultiCompany
+	WHERE ysnCurrentCompany = 1
+
+	UPDATE dbo.tblARInvoice
+	SET intCompanyId = @intCompanyId
+	WHERE intCompanyId IS NULL
+
 	DECLARE @tblARInvoicePreStage TABLE (
 		intInvoicePreStageId INT
 		,intInvoiceId INT

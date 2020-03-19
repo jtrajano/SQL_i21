@@ -49,6 +49,14 @@ BEGIN TRY
 		,@dblUnitPriceInSupplierContract NUMERIC(18, 6)
 		,@dblClaimAmountInSupplierContract NUMERIC(18, 6)
 
+				,@intCurrentCompanyId INT
+
+	SELECT @intCurrentCompanyId = intCompanyId
+	FROM dbo.tblIPMultiCompany
+	WHERE ysnCurrentCompany = 1
+
+
+
 	--,@strNewWeightClaimReferenceNo nvarchar(50)
 	SELECT @intWeightClaimStageId = MIN(intWeightClaimStageId)
 	FROM tblLGWeightClaimStage
@@ -251,6 +259,7 @@ BEGIN TRY
 					,intSubBookId
 					,intPaymentMethodId
 					,intWeightClaimRefId
+					,intCompanyId 
 					)
 				SELECT 1 intConcurrencyId
 					,@strReferenceNumber
@@ -272,6 +281,7 @@ BEGIN TRY
 					,@intSubBookId
 					,@intPaymentMethodId
 					,@intWeightClaimId
+					,@intCurrentCompanyId
 				FROM OPENXML(@idoc, 'vyuIPGetWeightClaims/vyuIPGetWeightClaim', 2) WITH (
 						strReferenceNumber NVARCHAR(50) Collate Latin1_General_CI_AS
 						,dtmTransDate DATETIME
@@ -879,6 +889,7 @@ BEGIN TRY
 					,intSubBookId
 					,intPaymentMethodId
 					,intWeightClaimRefId
+					,intCompanyId
 					)
 				SELECT intConcurrencyId
 					,@strReferenceNumber
@@ -894,6 +905,7 @@ BEGIN TRY
 					,intSubBookId
 					,intPaymentMethodId
 					,@intNewWeightClaimId
+					,@intCurrentCompanyId
 				FROM tblLGWeightClaim
 				WHERE intWeightClaimId = @intNewWeightClaimId
 
