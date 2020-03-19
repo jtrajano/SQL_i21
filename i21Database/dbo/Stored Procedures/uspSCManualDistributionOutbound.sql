@@ -338,24 +338,26 @@ ELSE
 	LEFT JOIN tblCTContractDetail CTD ON CTD.intContractDetailId = ISI.intLineNo
 	WHERE intInventoryShipmentId = @InventoryShipmentId
 
-	IF ISNULL(@InventoryShipmentId, 0) != 0 AND EXISTS(SELECT TOP 1 1 FROM tblICInventoryShipmentItem WHERE ysnAllowInvoice = 1 AND intInventoryShipmentId = @InventoryShipmentId)
-		BEGIN
-			EXEC @intInvoiceId = dbo.uspARCreateInvoiceFromShipment @InventoryShipmentId, @intUserId, NULL, 0, 1;
-			IF @intInvoiceId = 0
-				SET @intInvoiceId = NULL
-		END
-	ELSE
-		IF (@intPricingTypeId = 2)
-		BEGIN
-			IF EXISTS(SELECT TOP 1 1 FROM tblCTPriceFixation WHERE intContractDetailId = @intContractDetailId)
-				EXEC uspCTCreateVoucherInvoiceForPartialPricing @intContractDetailId, @intUserId
-		END
-			SELECT @intInvoiceId = id.intInvoiceId
-			FROM tblICInventoryShipment s 
-			JOIN tblICInventoryShipmentItem si ON si.intInventoryShipmentId = s.intInventoryShipmentId
-			join tblARInvoiceDetail id on id.intInventoryShipmentItemId = si.intInventoryShipmentItemId
-			WHERE si.intInventoryShipmentId = @InventoryShipmentId AND s.intOrderType = 1
-	
+	IF(ISNULL(@strWhereFinalizedWeight, 'Origin') <> 'Destination' AND ISNULL(@strWhereFinalizedGrade, 'Origin') <> 'Destination' )
+	BEGIN
+		IF ISNULL(@InventoryShipmentId, 0) != 0 AND EXISTS(SELECT TOP 1 1 FROM tblICInventoryShipmentItem WHERE ysnAllowInvoice = 1 AND intInventoryShipmentId = @InventoryShipmentId)
+			BEGIN
+				EXEC @intInvoiceId = dbo.uspARCreateInvoiceFromShipment @InventoryShipmentId, @intUserId, NULL, 0, 1;
+				IF @intInvoiceId = 0
+					SET @intInvoiceId = NULL
+			END
+		ELSE
+			IF (@intPricingTypeId = 2)
+			BEGIN
+				IF EXISTS(SELECT TOP 1 1 FROM tblCTPriceFixation WHERE intContractDetailId = @intContractDetailId)
+					EXEC uspCTCreateVoucherInvoiceForPartialPricing @intContractDetailId, @intUserId
+			END
+				SELECT @intInvoiceId = id.intInvoiceId
+				FROM tblICInventoryShipment s 
+				JOIN tblICInventoryShipmentItem si ON si.intInventoryShipmentId = s.intInventoryShipmentId
+				join tblARInvoiceDetail id on id.intInventoryShipmentItemId = si.intInventoryShipmentItemId
+				WHERE si.intInventoryShipmentId = @InventoryShipmentId AND s.intOrderType = 1
+	END
 
 	EXEC dbo.uspSMAuditLog 
 		@keyValue			= @intTicketId				-- Primary Key Value of the Ticket. 
