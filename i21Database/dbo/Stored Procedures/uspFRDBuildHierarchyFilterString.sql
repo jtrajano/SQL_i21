@@ -92,8 +92,11 @@ BEGIN
 										FROM tblFRReportHierarchyDetail 
 										WHERE intReportHierarchyId = @intReportHierarchyId and strFilterString IS NOT NULL and strFilterString <> '' and intParentGroupId = @intReportHierarchyDetailId  FOR XML PATH(''))
 			
-			UPDATE tblFRReportHierarchyDetail SET strFilterString = SUBSTRING(@AllFilterString, 0,LEN(@AllFilterString) - CHARINDEX('or',REVERSE(@AllFilterString))-1)  WHERE intReportHierarchyDetailId = @intReportHierarchyDetailId		
-			SET @strFilterString_NEW = ''			
+			IF(LEN(@AllFilterString) > 5)
+			BEGIN
+				UPDATE tblFRReportHierarchyDetail SET strFilterString = SUBSTRING(@AllFilterString, 0,LEN(@AllFilterString) - CHARINDEX('or',REVERSE(@AllFilterString))-1)  WHERE intReportHierarchyDetailId = @intReportHierarchyDetailId		
+				SET @strFilterString_NEW = ''			
+			END			
 		END		
 	END
 
