@@ -227,13 +227,9 @@ IF ISNULL(@ysnRecap, 0) = 0
 			ON A.[intJournalId] = B.[intJournalId]
 		WHERE B.[intJournalId] IN (SELECT [intJournalId] FROM @tmpValidJournals)
 		DECLARE @SkipICValidation BIT = 0
-		IF @strJournalType = 'Imported Journal' SET @SkipICValidation = 1
 
 		DECLARE @PostResult INT
-		EXEC @PostResult = uspGLBookEntries 
-			@GLEntries = @GLEntries, 
-			@ysnPost = @ysnPost,
-			@SkipICValidation = @SkipICValidation
+		EXEC @PostResult = uspGLBookEntries @GLEntries = @GLEntries, @ysnPost = @ysnPost, @SkipICValidation = 1
 		
 		IF @@ERROR <> 0	OR @PostResult <> 0 GOTO Post_Rollback;
 	END
