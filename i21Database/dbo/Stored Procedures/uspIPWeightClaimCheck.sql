@@ -1,4 +1,4 @@
-﻿Alter PROCEDURE uspIPWeightClaimCheck
+﻿CREATE PROCEDURE uspIPWeightClaimCheck
 AS
 BEGIN
 	DECLARE @intInventoryReceiptId INT
