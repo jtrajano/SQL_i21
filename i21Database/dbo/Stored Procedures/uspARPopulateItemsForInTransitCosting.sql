@@ -167,7 +167,7 @@ SELECT
 	,[intItemLocationId]			= ICIT.[intItemLocationId]
 	,[intItemUOMId]					= ICIT.[intItemUOMId]
 	,[dtmDate]						= ISNULL(ARID.[dtmPostDate], ARID.[dtmShipDate])
-	,[dblQty]						= - CASE WHEN ISNULL(CP.intPricingCount, 0) > 1 AND (ISNULL(ICS.ysnDestinationWeightsAndGrades, 0) = 0 OR ISNULL(ICS.intDestinationWeightId, 0) = 0) THEN ARID.dblQtyShipped ELSE ICIT.[dblQty] END
+	,[dblQty]                       = - CASE WHEN ISNULL(CP.intPricingCount, 0) > 1 AND (ISNULL(ICS.ysnDestinationWeightsAndGrades, 0) = 0 OR ISNULL(ICS.intDestinationWeightId, 0) = 0) THEN ARID.dblQtyShipped ELSE ICIT.[dblQty] END
 	,[dblUOMQty]					= ICIT.[dblUOMQty]
 	,[dblCost]						= ICIT.[dblCost]
 	,[dblValue]						= 0
@@ -188,6 +188,7 @@ SELECT
 	,[dblForexRate]					= ARID.[dblCurrencyExchangeRate]
 	,[intLinkedItem]				= ICS.intChildItemLinkId
 FROM #ARPostInvoiceDetail ARID
+INNER JOIN tblICItem ITEM ON ARID.intItemId = ITEM.intItemId
 INNER JOIN (	
 	SELECT ICIS.[intInventoryShipmentId]		
 		 , ICIS.[strShipmentNumber]		
@@ -205,13 +206,13 @@ INNER JOIN tblICInventoryTransaction ICIT ON ICIT.[intTransactionId] = ICS.[intI
 										 AND ICIT.[ysnIsUnposted] = 0
 										 AND ISNULL(ICIT.[intInTransitSourceLocationId], 0) <> 0 
 LEFT JOIN (
-	SELECT intContractDetailId  = CPF.intContractDetailId
-		, intContractHeaderId	= CPF.intContractHeaderId 
-		, intPricingCount		= COUNT(*)
-	FROM tblCTPriceFixation CPF
-	INNER JOIN tblCTPriceFixationDetail CPFD ON CPF.intPriceFixationId = CPFD.intPriceFixationId
-	GROUP BY CPF.intContractDetailId, CPF.intContractHeaderId
-	HAVING COUNT(*) > 1
+    SELECT intContractDetailId  = CPF.intContractDetailId
+        , intContractHeaderId    = CPF.intContractHeaderId 
+        , intPricingCount        = COUNT(*)
+    FROM tblCTPriceFixation CPF
+    INNER JOIN tblCTPriceFixationDetail CPFD ON CPF.intPriceFixationId = CPFD.intPriceFixationId
+    GROUP BY CPF.intContractDetailId, CPF.intContractHeaderId
+    HAVING COUNT(*) > 1
 ) CP ON ARID.intContractHeaderId = CP.intContractHeaderId
     AND ARID.intContractDetailId = CP.intContractDetailId
 LEFT JOIN (
@@ -224,6 +225,7 @@ WHERE ISNULL(ARID.[intLoadDetailId], 0) = 0
   AND ((ARID.[strType] <> 'Provisional' AND ARID.[ysnFromProvisional] = 0) OR (ARID.[strType] = 'Provisional' AND ARID.[ysnProvisionalWithGL] = 1))
   AND ARID.[strTransactionType] <> 'Credit Memo'
   AND ISNULL(ARIDL.[intInvoiceDetailLotId],0) = 0
+  AND ISNULL(ITEM.strLotTracking, 'No') = 'No'
 
 UNION ALL
 
@@ -233,7 +235,7 @@ SELECT
 	,[intItemLocationId]			= ICIT.[intItemLocationId]
 	,[intItemUOMId]					= ICIT.[intItemUOMId]
 	,[dtmDate]						= ISNULL(ARID.[dtmPostDate], ARID.[dtmShipDate])
-	,[dblQty]						= - CASE WHEN ISNULL(CP.intPricingCount, 0) > 1 AND (ISNULL(ICS.ysnDestinationWeightsAndGrades, 0) = 0 OR ISNULL(ICS.intDestinationWeightId, 0) = 0) THEN ARID.dblQtyShipped ELSE ICIT.[dblQty] END
+	,[dblQty]						= -ICIT.[dblQty]
 	,[dblUOMQty]					= ICIT.[dblUOMQty]
 	,[dblCost]						= ICIT.[dblCost]
 	,[dblValue]						= 0
@@ -260,6 +262,7 @@ INNER JOIN (
 		 , ICISI.[intInventoryShipmentItemId]
 		 , ICISI.[intChildItemLinkId]
 		 , ICISI.[intDestinationWeightId]
+		 , ICISI.[intDestinationGradeId]
 		 , ICISI.[ysnDestinationWeightsAndGrades]
 	FROM tblICInventoryShipmentItem ICISI WITH (NOLOCK)  
 	INNER JOIN tblICInventoryShipment ICIS WITH (NOLOCK) ON ICISI.intInventoryShipmentId = ICIS.intInventoryShipmentId
@@ -271,27 +274,13 @@ INNER JOIN (
 		, [intLotId]
 	FROM tblARInvoiceDetailLot ARIDL		
 ) ARIDL	ON ARIDL.[intInvoiceDetailId] = ARID.[intInvoiceDetailId]
-CROSS APPLY (
-	SELECT TOP 1 IT.* 
-	FROM tblICInventoryTransaction IT 
-	WHERE IT.[intTransactionId] = ICS.[intInventoryShipmentId] 
-	  AND IT.[strTransactionId] = ICS.[strShipmentNumber] 
-	  AND IT.[intTransactionDetailId] = ICS.[intInventoryShipmentItemId]
-	  AND IT.[intItemId] = ARID.[intItemId]
-	  AND IT.[ysnIsUnposted] = 0
-	  AND IT.[intLotId] = ARIDL.[intLotId]
-	  AND ISNULL(IT.[intInTransitSourceLocationId], 0) <> 0 
-) ICIT
-LEFT JOIN (
-	SELECT intContractDetailId  = CPF.intContractDetailId
-		, intContractHeaderId	= CPF.intContractHeaderId 
-		, intPricingCount		= COUNT(*)
-	FROM tblCTPriceFixation CPF
-	INNER JOIN tblCTPriceFixationDetail CPFD ON CPF.intPriceFixationId = CPFD.intPriceFixationId
-	GROUP BY CPF.intContractDetailId, CPF.intContractHeaderId
-	HAVING COUNT(*) > 1
-) CP ON ARID.intContractHeaderId = CP.intContractHeaderId
-    AND ARID.intContractDetailId = CP.intContractDetailId
+INNER JOIN tblICInventoryTransaction ICIT ON ICIT.[intTransactionId] = ICS.[intInventoryShipmentId] 
+										 AND ICIT.[strTransactionId] = ICS.[strShipmentNumber] 
+										 AND ICIT.[intTransactionDetailId] = ICS.[intInventoryShipmentItemId]
+										 AND ICIT.[intItemId] = ARID.[intItemId]
+										 AND ICIT.[ysnIsUnposted] = 0
+										 AND ICIT.[intLotId] = ARIDL.[intLotId]
+										 AND ISNULL(ICIT.[intInTransitSourceLocationId], 0) <> 0 
 WHERE ISNULL(ARID.[intLoadDetailId], 0) = 0
   AND ARID.[intTicketId] IS NOT NULL
   AND ((ARID.[strType] <> 'Provisional' AND ARID.[ysnFromProvisional] = 0) OR (ARID.[strType] = 'Provisional' AND ARID.[ysnProvisionalWithGL] = 1))
