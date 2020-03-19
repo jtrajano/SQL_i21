@@ -13,6 +13,16 @@ BEGIN TRY
 		,@strRowState NVARCHAR(50) = NULL
 		,@intUserId INT
 		,@intItemPreStageId INT
+		,@intCompanyId INT
+
+	SELECT @intCompanyId = intCompanyId
+	FROM dbo.tblIPMultiCompany
+	WHERE ysnCurrentCompany = 1
+
+	UPDATE dbo.tblICItem
+	SET intCompanyId = @intCompanyId
+	WHERE intCompanyId IS NULL
+
 	DECLARE @tblICItemPreStage TABLE (intItemPreStageId INT)
 
 	INSERT INTO @tblICItemPreStage (intItemPreStageId)

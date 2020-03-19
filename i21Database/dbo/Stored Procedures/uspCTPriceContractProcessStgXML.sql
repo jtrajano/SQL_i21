@@ -117,6 +117,11 @@ BEGIN TRY
 		,@strDescription NVARCHAR(100)
 		,@strApproverXML NVARCHAR(MAX)
 
+	SELECT @intCompanyRefId = intCompanyId
+	FROM dbo.tblIPMultiCompany
+	WHERE ysnCurrentCompany = 1
+
+
 	SELECT @intPriceContractStageId = MIN(intPriceContractStageId)
 	FROM tblCTPriceContractStage
 	WHERE ISNULL(strFeedStatus, '') = ''
@@ -691,6 +696,7 @@ BEGIN TRY
 						,dtmLastModified
 						,intConcurrencyId
 						,intPriceContractRefId
+						,intCompanyId
 						)
 					SELECT @strNewPriceContractNo
 						,@intCommodityId
@@ -702,7 +708,7 @@ BEGIN TRY
 						,@dtmLastModified
 						,1 AS intConcurrencyId
 						,@intPriceContractId
-
+						,@intCompanyRefId
 					SELECT @intNewPriceContractId = SCOPE_IDENTITY()
 
 					SELECT @strDescription = 'Created from inter-company : ' + @strNewPriceContractNo
@@ -731,9 +737,9 @@ BEGIN TRY
 						AND intPriceContractId = @intNewPriceContractId
 				END
 
-				SELECT @intCompanyRefId = intCompanyId
-				FROM tblCTPriceContract
-				WHERE intPriceContractId = @intNewPriceContractId
+				--SELECT @intCompanyRefId = intCompanyId
+				--FROM tblCTPriceContract
+				--WHERE intPriceContractId = @intNewPriceContractId
 
 				EXEC sp_xml_removedocument @idoc
 

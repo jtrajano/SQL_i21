@@ -16,6 +16,16 @@ BEGIN TRY
 		,@strRowState NVARCHAR(50) = NULL
 		,@intSamplePreStageId INT
 		,@strFromCompanyName NVARCHAR(150)
+		,@intCompanyId INT
+
+	SELECT @intCompanyId = intCompanyId
+	FROM dbo.tblIPMultiCompany
+	WHERE ysnCurrentCompany = 1
+
+	UPDATE dbo.tblQMSample
+	SET intCompanyId = @intCompanyId
+	WHERE intCompanyId IS NULL
+
 	DECLARE @tblQMSamplePreStage TABLE (intSamplePreStageId INT)
 
 	INSERT INTO @tblQMSamplePreStage (intSamplePreStageId)
