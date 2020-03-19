@@ -200,6 +200,7 @@
     <Build Include="dbo\Tables\tblAPRecurringTransaction.sql" />
     <Build Include="dbo\Tables\tblAPVendor.sql" />
     <Build Include="dbo\Tables\tblCMBank.sql" />
+    <Build Include="dbo\Tables\tblCMResponsibleParty.sql" />
     <Build Include="dbo\Tables\tblCMBankAccount.sql" />
     <Build Include="dbo\Tables\tblCMBankFileFormat.sql" />
     <Build Include="dbo\Tables\tblCMBankFileFormatDetail.sql" />
@@ -8532,6 +8533,29 @@
     <Build Include="dbo\Tables\tblIPSampleTestResultError.sql" />
     <Build Include="dbo\Tables\tblIPSampleTestResultArchive.sql" />
     <Build Include="dbo\Stored Procedures\uspIPStageSAPSample_ST.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTLogSummary.sql" />
+    <Build Include="dbo\User Defined Types\ContractDetailTable.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPReverseTransaction.sql" />
+    <Build Include="dbo\Tables\tblARInvoiceStage.sql" />
+    <Build Include="dbo\Views\vyuIPGetInvoice.sql" />
+    <Build Include="dbo\Views\vyuIPGetInvoiceDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspARProcessPreStageInvoice.sql" />
+    <Build Include="dbo\Stored Procedures\uspARInvoicePopulateStgXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspARInvoiceTransferStgXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessSAPSample_ST.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTReportCheckoutChangeFundDetail.sql" />
+    <Build Include="dbo\Tables\tblFRReportHierarchy.sql" />
+    <Build Include="dbo\Tables\tblFRReportHierarchyDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspFRDBuildHierarchyFilterString.sql" />
+    <Build Include="dbo\Functions\fnRKGetBucketOnHold.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRRiskSummaryLog.sql" />
+    <Build Include="dbo\Tables\tblRKRebuildSummaryLog.sql" />
+    <Build Include="dbo\Tables\tblIPLotStage.sql" />
+    <Build Include="dbo\Tables\tblIPLotError.sql" />
+    <Build Include="dbo\Tables\tblIPLotArchive.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPStageSAPStock_ST.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessSAPStock_ST.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTRecalculateReturnLottery.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

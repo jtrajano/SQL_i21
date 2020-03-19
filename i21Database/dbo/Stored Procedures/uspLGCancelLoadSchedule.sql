@@ -99,6 +99,24 @@ BEGIN TRY
 					RAISERROR(@strErrMsg, 16, 1);
 					RETURN 0;
 				END
+
+				--Validate if Inventory Receipt exists
+				IF EXISTS (SELECT TOP 1 1 FROM tblICInventoryReceiptItem IRI
+					INNER JOIN tblICInventoryReceipt IR ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId AND IR.intSourceType = 2
+					INNER JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = IRI.intSourceId AND LD.intPContractDetailId = IRI.intLineNo AND LD.intLoadId = @intLoadId)
+				BEGIN
+					SELECT TOP 1 @strTransactionNo = IR.strReceiptNumber
+					FROM tblICInventoryReceiptItem IRI
+					INNER JOIN tblICInventoryReceipt IR ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId AND IR.intSourceType = 2
+					INNER JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = IRI.intSourceId AND LD.intPContractDetailId = IRI.intLineNo AND LD.intLoadId = @intLoadId
+
+					SET @strErrMsg = 'Inventory Receipt ' + @strTransactionNo + ' has been generated for ' + @strLoadNumber 
+						+ '. Cannot cancel.';
+
+					RAISERROR (@strErrMsg,16,1);
+
+					RETURN 0;
+				END
 			END
 			ELSE
 			BEGIN

@@ -64,6 +64,9 @@ BEGIN TRY
 	DECLARE @idoc INT
 	EXEC sp_xml_preparedocument @idoc OUTPUT,@strPeriodData
 	
+	DECLARE @StorageHistoryStagingTable AS [StorageHistoryStagingTable]
+	DECLARE @intStorageHistoryId INT
+
 	SET @ActualStorageChargeDate=@StorageChargeDate	
 	
 	DECLARE @tblGRStorageSchedulePeriod AS TABLE 
@@ -5238,45 +5241,67 @@ BEGIN TRY
 										 
 			WHERE intCustomerStorageId = @intCustomerStorageId
 
-			INSERT INTO [dbo].[tblGRStorageHistory] 
+			-- INSERT INTO [dbo].[tblGRStorageHistory] 
+			-- (
+			-- 	 [intConcurrencyId]
+			-- 	,[intCustomerStorageId]
+			-- 	,[intTicketId]
+			-- 	,[intInventoryReceiptId]
+			-- 	,[intInvoiceId]
+			-- 	,[intContractHeaderId]
+			-- 	,[dblUnits]
+			-- 	,[dtmHistoryDate]
+			-- 	,[dblPaidAmount]
+			-- 	,[strPaidDescription]
+			-- 	,[dblCurrencyRate]
+			-- 	,[strType]				
+			-- 	,[strUserName]
+			-- 	,[intUserId]
+			-- 	,[intTransactionTypeId]
+			-- 	,[intEntityId]
+			-- 	,[intCompanyLocationId]
+			-- )
+			-- SELECT
+			-- 	 [intConcurrencyId]		 = 1
+			-- 	,[intCustomerStorageId]	 = @intCustomerStorageId
+			-- 	,[intTicketId]			 = NULL
+			-- 	,[intInventoryReceiptId] = NULL
+			-- 	,[intInvoiceId]			 = NULL
+			-- 	,[intContractHeaderId]	 = NULL
+			-- 	,[dblUnits]				 = @dblOpenBalance
+			-- 	,[dtmHistoryDate]		 = @ActualStorageChargeDate
+			-- 	,[dblPaidAmount]		 = @dblStorageDuePerUnit + @dblFlatFeeTotal
+			-- 	,[strPaidDescription]	 = NULL
+			-- 	,[dblCurrencyRate]		 = NULL
+			-- 	,[strType]				 = 'Accrued Storage Due'
+			-- 	,[strUserName]			 = NULL
+			-- 	,[intUserId]			 = @UserKey
+			-- 	,[intTransactionTypeId]	 = NULL
+			-- 	,[intEntityId]			 = NULL
+			-- 	,[intCompanyLocationId]	 = NULL
+			
+			INSERT INTO @StorageHistoryStagingTable
 			(
-				 [intConcurrencyId]
-				,[intCustomerStorageId]
-				,[intTicketId]
-				,[intInventoryReceiptId]
-				,[intInvoiceId]
-				,[intContractHeaderId]
+				[intCustomerStorageId]
 				,[dblUnits]
 				,[dtmHistoryDate]
 				,[dblPaidAmount]
-				,[strPaidDescription]
-				,[dblCurrencyRate]
-				,[strType]				
-				,[strUserName]
-				,[intUserId]
 				,[intTransactionTypeId]
-				,[intEntityId]
-				,[intCompanyLocationId]
+				,[strPaidDescription]
+				,[strType]
+				,[intUserId]
 			)
-			SELECT
-				 [intConcurrencyId]		 = 1
-				,[intCustomerStorageId]	 = @intCustomerStorageId
-				,[intTicketId]			 = NULL
-				,[intInventoryReceiptId] = NULL
-				,[intInvoiceId]			 = NULL
-				,[intContractHeaderId]	 = NULL
-				,[dblUnits]				 = @dblOpenBalance
-				,[dtmHistoryDate]		 = @ActualStorageChargeDate
-				,[dblPaidAmount]		 = @dblStorageDuePerUnit + @dblFlatFeeTotal
-				,[strPaidDescription]	 = NULL
-				,[dblCurrencyRate]		 = NULL
-				,[strType]				 = 'Accrued Storage Due'
-				,[strUserName]			 = NULL
-				,[intUserId]			 = @UserKey
-				,[intTransactionTypeId]	 = NULL
-				,[intEntityId]			 = NULL
-				,[intCompanyLocationId]	 = NULL
-			
+			SELECT 
+				[intCustomerStorageId]	= @intCustomerStorageId
+				,[dblUnits]							= @dblOpenBalance
+				,[dtmHistoryDate]				= @ActualStorageChargeDate
+				,[dblPaidAmount]				= @dblStorageDuePerUnit + @dblFlatFeeTotal
+				,[intTransactionTypeId]	= 2
+				,[strPaidDescription]		= 'Accrued Storage Due'
+				,[strType]							= 'Accrue Storage'
+				,[intUserId]						= @UserKey
+
+			EXEC uspGRInsertStorageHistoryRecord @StorageHistoryStagingTable, @intStorageHistoryId OUTPUT
 		END
 	END
 
@@ -5290,44 +5315,67 @@ BEGIN TRY
 		FROM tblGRCustomerStorage
 		WHERE intCustomerStorageId = @intCustomerStorageId
 
-		INSERT INTO [dbo].[tblGRStorageHistory] 
-		(
-			 [intConcurrencyId]
-			,[intCustomerStorageId]
-			,[intTicketId]
-			,[intInventoryReceiptId]
-			,[intInvoiceId]
-			,[intContractHeaderId]
-			,[dblUnits]
-			,[dtmHistoryDate]
-			,[dblPaidAmount]
-			,[strPaidDescription]
-			,[dblCurrencyRate]
-			,[strType]
-			,[strUserName]
-			,[intUserId]
-			,[intTransactionTypeId]
-			,[intEntityId]
-			,[intCompanyLocationId]
-		)
-		SELECT 
-			 [intConcurrencyId]		 = 1
-			,[intCustomerStorageId]	 = @intCustomerStorageId
-			,[intTicketId]			 = NULL
-			,[intInventoryReceiptId] = NULL
-			,[intInvoiceId]			 = NULL
-			,[intContractHeaderId]	 = NULL
-			,[dblUnits]				 = @dblOpenBalance
-			,[dtmHistoryDate]		 = @ActualStorageChargeDate
-			,[dblPaidAmount]		 = (@dblNewStoragePaid - @dblOldStoragePaid)
-			,[strPaidDescription]	 = NULL
-			,[dblCurrencyRate]		 = NULL
-			,[strType]				 = 'Storage Paid'
-			,[strUserName]			 = NULL
-			,[intUserId]			 = @UserKey
-			,[intTransactionTypeId]	 = NULL
-			,[intEntityId]			 = NULL
-			,[intCompanyLocationId]	 = NULL
+		-- INSERT INTO [dbo].[tblGRStorageHistory] 
+		-- (
+		-- 	 [intConcurrencyId]
+		-- 	,[intCustomerStorageId]
+		-- 	,[intTicketId]
+		-- 	,[intInventoryReceiptId]
+		-- 	,[intInvoiceId]
+		-- 	,[intContractHeaderId]
+		-- 	,[dblUnits]
+		-- 	,[dtmHistoryDate]
+		-- 	,[dblPaidAmount]
+		-- 	,[strPaidDescription]
+		-- 	,[dblCurrencyRate]
+		-- 	,[strType]
+		-- 	,[strUserName]
+		-- 	,[intUserId]
+		-- 	,[intTransactionTypeId]
+		-- 	,[intEntityId]
+		-- 	,[intCompanyLocationId]
+		-- )
+		-- SELECT 
+		-- 	 [intConcurrencyId]		 = 1
+		-- 	,[intCustomerStorageId]	 = @intCustomerStorageId
+		-- 	,[intTicketId]			 = NULL
+		-- 	,[intInventoryReceiptId] = NULL
+		-- 	,[intInvoiceId]			 = NULL
+		-- 	,[intContractHeaderId]	 = NULL
+		-- 	,[dblUnits]				 = @dblOpenBalance
+		-- 	,[dtmHistoryDate]		 = @ActualStorageChargeDate
+		-- 	,[dblPaidAmount]		 = (@dblNewStoragePaid - @dblOldStoragePaid)
+		-- 	,[strPaidDescription]	 = NULL
+		-- 	,[dblCurrencyRate]		 = NULL
+		-- 	,[strType]				 = 'Storage Paid'
+		-- 	,[strUserName]			 = NULL
+		-- 	,[intUserId]			 = @UserKey
+		-- 	,[intTransactionTypeId]	 = NULL
+		-- 	,[intEntityId]			 = NULL
+		-- 	,[intCompanyLocationId]	 = NULL
+
+		INSERT INTO @StorageHistoryStagingTable
+			(
+				[intCustomerStorageId]
+				,[dblUnits]
+				,[dtmHistoryDate]
+				,[dblPaidAmount]
+				,[intTransactionTypeId]
+				,[strPaidDescription]
+				,[strType]
+				,[intUserId]
+			)
+			SELECT 
+				[intCustomerStorageId]	= @intCustomerStorageId
+				,[dblUnits]							= @dblOpenBalance
+				,[dtmHistoryDate]				= @ActualStorageChargeDate
+				,[dblPaidAmount]				= (@dblNewStoragePaid - @dblOldStoragePaid)
+				,[intTransactionTypeId]	= 2
+				,[strPaidDescription]		= 'Storage Paid'
+				,[strType]							= 'Storage Paid'
+				,[intUserId]						= @UserKey
+
+			EXEC uspGRInsertStorageHistoryRecord @StorageHistoryStagingTable, @intStorageHistoryId OUTPUT
 			
 	END
 	

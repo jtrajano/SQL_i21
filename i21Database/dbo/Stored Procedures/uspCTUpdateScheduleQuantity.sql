@@ -159,10 +159,12 @@ BEGIN TRY
 	END
 
 	EXEC	uspCTCreateDetailHistory	
-	@intContractHeaderId		=	NULL,
-    @intContractDetailId		=	@intContractDetailId,
-	@strComment				    =	NULL,
-	@intSequenceUsageHistoryId  =	@intSequenceUsageHistoryId
+			@intContractHeaderId		=	NULL,
+			@intContractDetailId		=	@intContractDetailId,
+			@strComment				    =	NULL,
+			@intSequenceUsageHistoryId  =	@intSequenceUsageHistoryId,
+			@strSource	 				= 	'Inventory',
+			@strProcess 				= 	'Scheduled Quantity'
 
 END TRY
 

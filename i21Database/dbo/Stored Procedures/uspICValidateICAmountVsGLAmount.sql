@@ -14,16 +14,44 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-DECLARE @result TABLE (
-	strTransactionType NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL
-	,strTransactionId NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+-- Create the temp table for the specific items/categories to rebuild
+IF OBJECT_ID('tempdb..#uspICValidateICAmountVsGLAmount_result') IS NOT NULL  
+BEGIN 
+	DROP TABLE #uspICValidateICAmountVsGLAmount_result
+END 
+
+IF OBJECT_ID('tempdb..#uspICValidateICAmountVsGLAmount_result') IS NULL  
+BEGIN 
+	CREATE TABLE #uspICValidateICAmountVsGLAmount_result (
+		intId INT IDENTITY(1, 1) 
+		,strTransactionType NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL
+		,strTransactionId NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+		,strBatchId NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+		,dblICAmount NUMERIC(18, 6) NULL 
+		,dblGLAmount NUMERIC(18, 6) NULL 
+		,intAccountId INT NULL 
+		,strItemDescription NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL
+		,strAccountDescription NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL
+	)
+
+	--CREATE NONCLUSTERED INDEX [IX_ValidateICAmountVsGLAmount_result]
+	--	ON [dbo].[#uspICValidateICAmountVsGLAmount_result](strTransactionType asc, strTransactionId asc, strBatchId asc, intAccountId asc)
+END 
+
+DECLARE @glTransactions TABLE (
+	strTransactionId NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 	,strBatchId NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
-	,dblICAmount NUMERIC(18, 6) NULL 
-	,dblGLAmount NUMERIC(18, 6) NULL 
-	,intAccountId INT NULL 
-	,strItemDescription NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL
-	,strAccountDescription NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL
 )
+
+INSERT INTO @glTransactions (
+	strTransactionId
+	,strBatchId
+)
+SELECT DISTINCT 
+	gl.strTransactionId
+	,gl.strBatchId 					
+FROM 
+	@GLEntries gl
 
 DECLARE @strBatchId AS NVARCHAR(50) = NULL 
 
@@ -38,10 +66,9 @@ END
 
 -- Get the inventory value from the Inventory Valuation 
 BEGIN 
-
 	IF EXISTS (SELECT TOP 1 1 FROM @GLEntries)
 	BEGIN 
-		INSERT INTO @result (
+		INSERT INTO #uspICValidateICAmountVsGLAmount_result (
 			strTransactionType 
 			,strTransactionId
 			,strBatchId
@@ -62,13 +89,7 @@ BEGIN
 				ON t.intTransactionTypeId = ty.intTransactionTypeId			
 			INNER JOIN tblICItem i
 				ON i.intItemId = t.intItemId 
-			INNER JOIN (
-				SELECT DISTINCT 
-					gl.strTransactionId
-					,gl.strBatchId 					
-				FROM 
-					@GLEntries gl
-			) gl
+			INNER JOIN @glTransactions gl
 				ON t.strTransactionId = gl.strTransactionId 
 				AND t.strBatchId = gl.strBatchId
 		WHERE	
@@ -78,8 +99,15 @@ BEGIN
 			,t.strTransactionId
 			,t.strBatchId
 			,dbo.fnGetItemGLAccount(t.intItemId, t.intItemLocationId, 'Inventory')
+
 		-- Get the Consume Inventory Transactions 
-		UNION ALL 
+		INSERT INTO #uspICValidateICAmountVsGLAmount_result (
+			strTransactionType 
+			,strTransactionId
+			,strBatchId
+			,dblICAmount
+			,intAccountId  
+		)
 		SELECT	
 			[strTransactionType] = ty.strName
 			,[strTransactionId] = t.strTransactionId
@@ -94,56 +122,57 @@ BEGIN
 				ON t.intTransactionTypeId = ty.intTransactionTypeId			
 			INNER JOIN tblICItem i
 				ON i.intItemId = t.intItemId 
-			INNER JOIN (
-				SELECT DISTINCT 
-					gl.strTransactionId
-					,gl.strBatchId 					
-				FROM 
-					@GLEntries gl
-			) gl
+			INNER JOIN @glTransactions gl
 				ON t.strTransactionId = gl.strTransactionId 
 				AND t.strBatchId = gl.strBatchId
 		WHERE	
 			t.intInTransitSourceLocationId IS NULL 
-			AND ty.strName IN ('Consume')
+			AND ty.strName IN ('Consume', 'Produce')
 		GROUP BY 
 			ty.strName 
 			,t.strTransactionId
 			,t.strBatchId
 			,dbo.fnGetItemGLAccount(t.intItemId, t.intItemLocationId, 'Work In Progress')
-		-- Get the Produce Inventory Transactions 
-		UNION ALL 
-		SELECT	
-			[strTransactionType] = ty.strName
-			,[strTransactionId] = t.strTransactionId
-			,[strBatchId] = t.strBatchId			
-			,[dblICAmount] = 
-				SUM (
-					-ROUND(dbo.fnMultiply(t.dblQty, t.dblCost) + ISNULL(t.dblValue, 0), 2)
-				)
-			,[intAccountId] = dbo.fnGetItemGLAccount(t.intItemId, t.intItemLocationId, 'Work In Progress')
-		FROM	
-			tblICInventoryTransaction t INNER JOIN tblICInventoryTransactionType ty
-				ON t.intTransactionTypeId = ty.intTransactionTypeId			
-			INNER JOIN tblICItem i
-				ON i.intItemId = t.intItemId 
-			INNER JOIN (
-				SELECT DISTINCT 
-					gl.strTransactionId
-					,gl.strBatchId 					
-				FROM 
-					@GLEntries gl
-			) gl
-				ON t.strTransactionId = gl.strTransactionId 
-				AND t.strBatchId = gl.strBatchId
-		WHERE	
-			t.intInTransitSourceLocationId IS NULL 
-			AND ty.strName IN ('Produce')
-		GROUP BY 
-			ty.strName 
-			,t.strTransactionId
-			,t.strBatchId
-			,dbo.fnGetItemGLAccount(t.intItemId, t.intItemLocationId, 'Work In Progress')
+
+		---- Get the Produce Inventory Transactions 
+		--INSERT INTO #uspICValidateICAmountVsGLAmount_result (
+		--	strTransactionType 
+		--	,strTransactionId
+		--	,strBatchId
+		--	,dblICAmount
+		--	,intAccountId  
+		--)
+		--SELECT	
+		--	[strTransactionType] = ty.strName
+		--	,[strTransactionId] = t.strTransactionId
+		--	,[strBatchId] = t.strBatchId			
+		--	,[dblICAmount] = 
+		--		SUM (
+		--			-ROUND(dbo.fnMultiply(t.dblQty, t.dblCost) + ISNULL(t.dblValue, 0), 2)
+		--		)
+		--	,[intAccountId] = dbo.fnGetItemGLAccount(t.intItemId, t.intItemLocationId, 'Work In Progress')
+		--FROM	
+		--	tblICInventoryTransaction t INNER JOIN tblICInventoryTransactionType ty
+		--		ON t.intTransactionTypeId = ty.intTransactionTypeId			
+		--	INNER JOIN tblICItem i
+		--		ON i.intItemId = t.intItemId 
+		--	INNER JOIN (
+		--		SELECT DISTINCT 
+		--			gl.strTransactionId
+		--			,gl.strBatchId 					
+		--		FROM 
+		--			@GLEntries gl
+		--	) gl
+		--		ON t.strTransactionId = gl.strTransactionId 
+		--		AND t.strBatchId = gl.strBatchId
+		--WHERE	
+		--	t.intInTransitSourceLocationId IS NULL 
+		--	AND ty.strName IN ('Produce')
+		--GROUP BY 
+		--	ty.strName 
+		--	,t.strTransactionId
+		--	,t.strBatchId
+		--	,dbo.fnGetItemGLAccount(t.intItemId, t.intItemLocationId, 'Work In Progress')
 		-- Get the Cost Adjustment from MFG. 
 		--UNION ALL 
 		--SELECT	
@@ -183,10 +212,11 @@ BEGIN
 		--	,t.strTransactionId
 		--	,t.strBatchId
 		--	,glAccount.intAccountId
+		--SELECT * FROM @GLEntries
 	END 
 	ELSE 
 	BEGIN 
-		INSERT INTO @result (
+		INSERT INTO #uspICValidateICAmountVsGLAmount_result (
 			strTransactionType 
 			,dblICAmount
 		)
@@ -222,7 +252,7 @@ BEGIN
 				AND (@strBatchId IS NULL OR gd.strBatchId = @strBatchId)  
 		) 
 	BEGIN 		
-		MERGE INTO @result 
+		MERGE INTO #uspICValidateICAmountVsGLAmount_result 
 		AS result
 		USING (
 			SELECT 
@@ -282,7 +312,7 @@ BEGIN
 			)
 		;
 
-		MERGE INTO @result 
+		MERGE INTO #uspICValidateICAmountVsGLAmount_result 
 		AS result
 		USING (
 			SELECT 
@@ -350,7 +380,7 @@ BEGIN
 	END 
 	ELSE IF EXISTS (SELECT TOP 1 1 FROM @GLEntries)
 	BEGIN 
-		MERGE INTO @result 
+		MERGE INTO #uspICValidateICAmountVsGLAmount_result 
 		AS result
 		USING (
 			SELECT 
@@ -401,7 +431,7 @@ BEGIN
 		WHEN MATCHED THEN 
 			UPDATE 
 			SET 
-				dblGLAmount = ISNULL(result.dblGLAmount, 0) + ISNULL(glResult.[dblGLAmount], 0)
+				dblGLAmount = ROUND(ISNULL(result.dblGLAmount, 0) + ISNULL(glResult.[dblGLAmount], 0), 2) 
 
 		WHEN NOT MATCHED THEN
 			INSERT (
@@ -420,7 +450,7 @@ BEGIN
 	END 
 	ELSE 
 	BEGIN	
-		MERGE INTO @result 
+		MERGE INTO #uspICValidateICAmountVsGLAmount_result 
 		AS result
 		USING (
 			SELECT 
@@ -456,7 +486,7 @@ BEGIN
 		WHEN MATCHED THEN 
 			UPDATE 
 			SET 
-				dblGLAmount = ISNULL(result.dblGLAmount, 0) + ISNULL(glResult.[dblGLAmount], 0)			
+				dblGLAmount = ROUND(ISNULL(result.dblGLAmount, 0) + ISNULL(glResult.[dblGLAmount], 0), 2) 
 		WHEN NOT MATCHED THEN
 			INSERT (
 				strTransactionType 
@@ -468,6 +498,7 @@ BEGIN
 			)
 		;
 	END 
+	--SELECT * FROM @GLEntries
 END
 
 IF @ysnThrowError = 1 
@@ -475,7 +506,7 @@ IF @ysnThrowError = 1
 		SELECT TOP 1 
 			SUM(ISNULL(dblICAmount, 0) - ISNULL(dblGLAmount, 0))
 		FROM 
-			@result 
+			#uspICValidateICAmountVsGLAmount_result 
 		GROUP BY
 			intAccountId
 		HAVING 
@@ -485,7 +516,7 @@ BEGIN
 	DECLARE @difference AS NUMERIC(18, 6) 
 			,@strItemDescription NVARCHAR(500) 
 			,@strAccountDescription NVARCHAR(500)
-
+	
 	SELECT TOP 1 
 		@strTransactionId = ISNULL(@strTransactionId, strTransactionId) 
 		,@strTransactionType = strTransactionType
@@ -493,10 +524,10 @@ BEGIN
 		,@strItemDescription = strItemDescription
 		,@strAccountDescription = strAccountDescription
 	FROM 
-		@result
+		#uspICValidateICAmountVsGLAmount_result
 	WHERE 
 		ISNULL(dblICAmount, 0) - ISNULL(dblGLAmount, 0) <> 0
-
+	SELECT * FROM #uspICValidateICAmountVsGLAmount_result
 	IF @strTransactionId IS NOT NULL 
 		AND @strItemDescription IS NOT NULL 
 		AND @strAccountDescription IS NOT NULL 
@@ -528,7 +559,7 @@ BEGIN
 		,[dblICAmount] = ISNULL(dblICAmount, 0)
 		,[dblGLAmount] = ISNULL(dblGLAmount, 0)
 		--,[difference] = ISNULL(dblICAmount, 0) - ISNULL(dblGLAmount, 0)
-	FROM @result
+	FROM #uspICValidateICAmountVsGLAmount_result
 	WHERE 
 		ISNULL(dblICAmount, 0) - ISNULL(dblGLAmount, 0) <> 0 
-END 
+END

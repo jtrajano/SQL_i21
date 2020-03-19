@@ -95,7 +95,7 @@ BEGIN
 			from tblGRStorageHistory 
 				where intCustomerStorageId = CS.intCustomerStorageId 
 					and dbo.fnRemoveTimeOnDate(dtmHistoryDate) <= @dtmStorageChargeDate
-					and intTransactionTypeId in ( 1, 4 )
+					and intTransactionTypeId in ( 1, 4, 3, 5 )
 	) as MagicalOpenBalance
 	INNER JOIN tblGRStorageType ST
 		ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
@@ -196,7 +196,7 @@ BEGIN
 			from tblGRStorageHistory 
 				where intCustomerStorageId = CS.intCustomerStorageId 
 					and dbo.fnRemoveTimeOnDate(dtmHistoryDate) <= @dtmStorageChargeDate
-					and intTransactionTypeId in ( 1, 4 )
+					and intTransactionTypeId in ( 1, 4, 3, 5 )
 	) as MagicalOpenBalance
 	INNER JOIN @BillStorageValues SV
 		ON SV.intCustomerStorageId = CS.intCustomerStorageId

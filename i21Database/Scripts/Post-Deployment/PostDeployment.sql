@@ -369,7 +369,7 @@ print 'BEGIN POST DEPLOYMENT'
 :R .\CT\172To173.sql
 :R .\CT\174To181.sql
 :R .\CT\ExcelAndTableColumnMap.sql
-:R .\CT\fnCTGetBasisDeliveryAboveR2.sql
+-- :R .\CT\fnCTGetBasisDeliveryAboveR2.sql
 :R .\CT\uspCTRebuildScheduledQuantityAboveR2.sql
 :R .\CT\PariallyToPartially.sql
 :R .\CT\TitleToCode.sql

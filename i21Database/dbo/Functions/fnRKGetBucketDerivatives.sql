@@ -11,22 +11,32 @@ RETURNS @returntable TABLE
 	, intCommodityId INT
 	, strCommodityCode NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, strInternalTradeNo NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	, intLocationId INT
 	, strLocationName NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, dblContractSize NUMERIC(24,10)
 	, intOrigUOMId INT
+	, strUnitMeasure NVARCHAR(50) COLLATE Latin1_General_CI_AS
+	, intFutureMarketId INT
 	, strFutureMarket NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	, intFutureMonthId INT
 	, strFutureMonth NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	, dtmFutureMonthsDate DATETIME
 	, intOptionMonthId INT
 	, strOptionMonth NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, dblStrike NUMERIC(24,10)
 	, strOptionType NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, strInstrumentType NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	, intBrokerageAccountId INT
 	, strBrokerAccount NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	, intEntityId INT
 	, strBroker NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, strBuySell NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, ysnPreCrush BIT
 	, strNotes NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
 	, strBrokerTradeNo NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	, intFutOptTransactionHeaderId INT
+	, intCurrencyId INT
+	, strCurrency NVARCHAR(50) COLLATE Latin1_General_CI_AS
 )
 AS
 BEGIN
@@ -65,30 +75,39 @@ BEGIN
 			, intOrigUOMId
 		HAVING SUM(ISNULL(dblOrigNoOfLots, 0)) > 0
 	)
-
-
+	
 	INSERT @returntable	
 	SELECT intFutOptTransactionId 
 		, dblOpenContract
 		, intCommodityId
 		, strCommodityCode
 		, strInternalTradeNo
+		, intLocationId
 		, strLocationName
 		, dblContractSize
 		, intOrigUOMId
+		, strUnitMeasure
+		, intFutureMarketId
 		, strFutureMarket
+		, intFutureMonthId
 		, strFutureMonth
+		, dtmFutureMonthsDate
 		, intOptionMonthId
 		, strOptionMonth
 		, dblStrike 
 		, strOptionType
 		, strInstrumentType 
+		, intBrokerageAccountId
 		, strBrokerAccount 
+		, intEntityId
 		, strBroker
 		, strBuySell
 		, ysnPreCrush
 		, strNotes
 		, strBrokerTradeNo
+		, intFutOptTransactionHeaderId
+		, intCurrencyId
+		, strCurrency
 	FROM (
 		SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY c.intTransactionRecordId ORDER BY c.intSummaryLogId DESC)
 			, c.intFutOptTransactionId
@@ -96,26 +115,36 @@ BEGIN
 			, intCommodityId
 			, strCommodityCode
 			, strInternalTradeNo = strTransactionNumber
+			, intLocationId
 			, strLocationName
 			, dblContractSize = CAST(ISNULL(c.dblContractSize, 0.00) AS NUMERIC(24, 10))
 			, c.intOrigUOMId
+			, strUnitMeasure
+			, intFutureMarketId
 			, strFutureMarket
+			, intFutureMonthId
 			, strFutureMonth
+			, dtmFutureMonthsDate
 			, intOptionMonthId = mf.intOptionMonthId
 			, strOptionMonth = mf.strOptionMonth
 			, dblStrike = CAST(ISNULL(mf.dblStrike, 0.00) AS NUMERIC(24, 10))
 			, strOptionType = mf.strOptionType
 			, strInstrumentType = mf.strInstrumentType
+			, mf.intBrokerageAccountId
 			, strBrokerAccount = mf.strBrokerAccount
+			, intEntityId
 			, strBroker = mf.strBroker
 			, strBuySell = mf.strBuySell
 			, ysnPreCrush = CAST(ISNULL(mf.ysnPreCrush, 0) AS BIT)
 			, strNotes
-			, strBrokerTradeNo = mf.strBrokerTradeNo
+			, strBrokerTradeNo = mf.strBrokerTradeNo			
+			, mf.intFutOptTransactionHeaderId
+			, c.intCurrencyId
+			, c.strCurrency
 		FROM vyuRKGetSummaryLog c
 		CROSS APPLY dbo.fnRKGetMiscFieldPivotDerivative(c.strMiscField) mf
 		LEFT JOIN MatchDerivatives md ON md.intTransactionRecordId = c.intTransactionRecordId
-		WHERE strTransactionType IN ('Derivatives')
+		WHERE strTransactionType IN ('Derivative Entry')
 			AND CONVERT(DATETIME, CONVERT(VARCHAR(10), c.dtmCreatedDate, 110), 110) <= CONVERT(DATETIME, @dtmDate)
 			AND CONVERT(DATETIME, CONVERT(VARCHAR(10), c.dtmTransactionDate, 110), 110) <= CONVERT(DATETIME, @dtmDate)
 			AND ISNULL(c.intCommodityId,0) = ISNULL(@intCommodityId, ISNULL(c.intCommodityId, 0)) 
@@ -123,7 +152,6 @@ BEGIN
 			AND intFutOptTransactionId NOT IN (SELECT intTransactionRecordId FROM OptionsLifecycle)
 
 	) t WHERE intRowNum = 1
-
 
 RETURN
 

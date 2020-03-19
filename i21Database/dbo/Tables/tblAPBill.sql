@@ -257,14 +257,20 @@ AS
 BEGIN
 	DECLARE @billRecord NVARCHAR(50);
 	DECLARE @billId INT;
+	DECLARE @intTransactionReversed INT;
 	DECLARE @error NVARCHAR(500);
-	SELECT TOP 1 @billRecord = del.strBillId, @billId = del.intBillId FROM tblGLDetail glDetail
+	SELECT TOP 1 @billRecord = del.strBillId, @billId = del.intBillId, @intTransactionReversed = del.intTransactionReversed FROM tblGLDetail glDetail
 					INNER JOIN DELETED del ON glDetail.strTransactionId = del.strBillId AND glDetail.intTransactionId = del.intBillId
 				WHERE glDetail.ysnIsUnposted = 0
 
 	IF @billId > 0
 	BEGIN
 		SET @error = 'You cannot delete posted voucher (' + @billRecord + ')';
+		RAISERROR(@error, 16, 1);
+	END
+	ELSE IF @intTransactionReversed > 0
+	BEGIN
+		SET @error = 'You cannot delete reversal transaction (' + @billRecord + ')';
 		RAISERROR(@error, 16, 1);
 	END
 	ELSE

@@ -223,7 +223,7 @@ BEGIN TRY
 			,[intCurrencyId] = L.intCurrencyId
 			,[intEntityVendorId] = LD.intVendorEntityId
 			,[intLocationId] = LD.intPCompanyLocationId
-			,[ysnPrice] = 0
+			,[ysnPrice] = CV.ysnPrice
 			,[ysnSubCurrency] = CUR.ysnSubCurrency
 			,[intCostCurrencyId] = CV.intCurrencyId
 			,[intShipFromId] = EL.intEntityLocationId
@@ -256,6 +256,7 @@ BEGIN TRY
 			,EL.intEntityLocationId
 			,L.intCurrencyId
 			,CUR.ysnSubCurrency
+			,CV.ysnPrice
 
 		UNION ALL
 
@@ -786,7 +787,7 @@ BEGIN TRY
 			,[intCurrencyId] = L.intCurrencyId
 			,[intEntityVendorId] = LD.intVendorEntityId
 			,[intLocationId] = LD.intPCompanyLocationId
-			,[ysnPrice] = 0
+			,[ysnPrice] = CV.ysnPrice
 			,[ysnSubCurrency] = CUR.ysnSubCurrency
 			,[intCostCurrencyId] = CV.intCurrencyId
 			,[intShipFromId] = EL.intEntityLocationId
@@ -819,6 +820,7 @@ BEGIN TRY
 			,EL.intEntityLocationId
 			,L.intCurrencyId
 			,CUR.ysnSubCurrency
+			,CV.ysnPrice
 
 		UNION ALL
 

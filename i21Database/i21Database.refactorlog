@@ -7497,11 +7497,39 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intSummaryLogHelperId" />
   </Operation>
-<Operation Name="Rename Refactor" Key="fd2cfe9a-0359-45ae-a41c-2b69eeb7a718" ChangeDateTime="02/03/2020 11:32:39">
+  <Operation Name="Rename Refactor" Key="fd2cfe9a-0359-45ae-a41c-2b69eeb7a718" ChangeDateTime="02/03/2020 11:32:39">
     <Property Name="ElementName" Value="[dbo].[tblRKCoverageEntryDetail].[intMonthsCovered]" />
     <Property Name="ElementType" Value="SqlSimpleColumn" />
     <Property Name="ParentElementName" Value="[dbo].[tblRKCoverageEntryDetail]" />
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="dblMonthsCovered" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="8d2df8c0-c744-4ec6-918d-b3502b986083" ChangeDateTime="03/05/2020 01:40:38">
+    <Property Name="ElementName" Value="[dbo].[tblRKDPRInventory].[strFutMarketName]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblRKDPRInventory]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strFutureMarket" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="bfcc87ed-e96e-4edc-908b-75f63ca4f7d3" ChangeDateTime="03/05/2020 01:41:05">
+    <Property Name="ElementName" Value="[dbo].[tblRKDPRContractHedge].[strFutMarketName]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblRKDPRContractHedge]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strFutureMarket" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="79addc69-40f7-4cae-a187-b53c437fb66a" ChangeDateTime="03/05/2020 01:41:15">
+    <Property Name="ElementName" Value="[dbo].[tblRKDPRContractHedgeByMonth].[strFutMarketName]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblRKDPRContractHedgeByMonth]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strFutureMarket" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="29157043-063c-4b26-9b39-6860e15a0e50" ChangeDateTime="03/18/2020 02:10:52">
+    <Property Name="ElementName" Value="[dbo].[tblRKRebuildSummaryLog].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblRKRebuildSummaryLog]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intRebuildSummaryLogId" />
   </Operation>
 </Operations>

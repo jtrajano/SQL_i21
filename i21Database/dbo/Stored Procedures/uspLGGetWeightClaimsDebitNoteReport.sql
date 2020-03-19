@@ -162,7 +162,7 @@ SELECT DISTINCT WC.intWeightClaimId
 	,dblTare = ISNULL(LD.dblTare, 0)
 	,dblNet = ISNULL(LD.dblNet, 0)
 	,strLoadWeightUnitMeasure = isnull(rtUMTranslation.strTranslation,UM.strUnitMeasure)
-	,dblFranchise = ISNULL(WCD.dblFranchise, 0)
+	,dblFranchise = ISNULL(WG.dblFranchise, 0)
 	,dblFranchiseWt = ISNULL(WCD.dblFranchiseWt, 0)
 	,dblClaimableWt = ABS(WCD.dblClaimableWt)
 	,WCD.dblUnitPrice
@@ -211,6 +211,7 @@ JOIN (
 	FROM tblLGLoadDetail LOD
 	WHERE LOD.intLoadId = @intLoadId
 	) LD ON WCD.intContractDetailId = LD.intPContractDetailId
+LEFT JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = CH.intWeightId
 LEFT JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = CASE WHEN LD.intVendorEntityId <> WCD.intPartyEntityId THEN E.intDefaultLocationId 
 																ELSE ISNULL(LD.intVendorEntityLocationId, E.intDefaultLocationId) END
 LEFT JOIN tblAPBill B ON B.intBillId = WCD.intBillId
@@ -314,7 +315,7 @@ GROUP BY WC.intWeightClaimId
 	,LD.dblNet
 	,UM.strUnitMeasure
 	,WCD.dblFranchise
-	,WCD.dblFranchise
+	,WG.dblFranchise
 	,WCD.dblFranchiseWt
 	,WCD.dblClaimableWt
 	,WCD.dblUnitPrice

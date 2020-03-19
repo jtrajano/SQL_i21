@@ -32,6 +32,8 @@ BEGIN TRY
 	DECLARE @intTransactionTypeId AS INT
 	DECLARE @ItemCostingTableType AS ItemCostingTableType
 	DECLARE @dblFlatFeeTotal		DECIMAL(24, 10)
+	DECLARE @StorageHistoryStagingTable AS [StorageHistoryStagingTable]
+	DECLARE @intStorageHistoryId INT
 
 	SELECT @intItemUOMId = intItemUOMId
 	FROM dbo.tblICItemUOM
@@ -327,38 +329,48 @@ BEGIN TRY
 		FROM tblGRCustomerStorage CS
 		JOIN @StorageTicketInfoByFIFO tblFIFO ON CS.intCustomerStorageId = tblFIFO.intCustomerStorageId AND tblFIFO.strItemType = 'Inventory'
 
-		INSERT INTO [dbo].[tblGRStorageHistory] 
+		INSERT INTO @StorageHistoryStagingTable
 		(
-			[intConcurrencyId]
-			,[intCustomerStorageId]
+			[intCustomerStorageId]
 			,[intTicketId]
 			,[intInvoiceId]
 			,[intInventoryShipmentId]
 			,[dblUnits]
 			,[dtmHistoryDate]
 			,[dblPaidAmount]
+			,[intTransactionTypeId]
 			,[strType]
-			,[strUserName]
+			,[strPaidDescription]
 			,[intUserId]
 		)
 		SELECT 
-			 [intConcurrencyId] = 1
-			,[intCustomerStorageId] = intCustomerStorageId
-			,[intTicketId] = CASE WHEN @strSourceType = 'Scale' THEN @IntSourceKey ELSE NULL END
-			,[intInvoiceId] = CASE WHEN @strSourceType = 'Invoice' THEN @IntSourceKey ELSE NULL END
-			,[intInventoryShipmentId] = CASE WHEN @strSourceType = 'InventoryShipment' THEN @IntSourceKey ELSE NULL END
-			,[dblUnits] = dblOpenBalance
-			,[dtmHistoryDate] = dbo.fnRemoveTimeOnDate(dtmDeliveryDate)
-			,[dblPaidAmount] = [dblCharge] * dblOpenBalance + ISNULL(dblFlatFee,0)
-			,[strType] = CASE
-							 WHEN @strSourceType = 'Invoice' THEN 'Reduced By Invoice' 
-							 WHEN @strSourceType = 'InventoryShipment' THEN 'Reduced By Inventory Shipment'
-							 WHEN @strSourceType = 'Scale'      THEN 'Reduced By Scale'
-					     END
-			,[strUserName] = NULL
-			,[intUserId] = @intUserId
+			[intCustomerStorageId] 		= intCustomerStorageId
+			,[intTicketId] 				= CASE WHEN @strSourceType = 'Scale' THEN @IntSourceKey ELSE NULL END
+			,[intInvoiceId] 			= CASE WHEN @strSourceType = 'Invoice' THEN @IntSourceKey ELSE NULL END
+			,[intInventoryShipmentId] 	= CASE WHEN @strSourceType = 'InventoryShipment' THEN @IntSourceKey ELSE NULL END
+			,[dblUnits] 				= dblOpenBalance
+			,[dtmHistoryDate] 			= dbo.fnRemoveTimeOnDate(dtmDeliveryDate)
+			,[dblPaidAmount] 			= [dblCharge] * dblOpenBalance + ISNULL(dblFlatFee,0)
+			,[intTransactionTypeId] 	= CASE
+											WHEN @strSourceType = 'Invoice' THEN 6
+											WHEN @strSourceType = 'InventoryShipment' THEN 8
+											WHEN @strSourceType = 'Scale' THEN 1
+										END
+			,[strType] 					= CASE
+											WHEN @strSourceType = 'Invoice' THEN 'Reduced By Invoice' 
+											WHEN @strSourceType = 'InventoryShipment' THEN 'Reduced By Inventory Shipment'
+											WHEN @strSourceType = 'Scale' THEN 'Reduced By Scale'
+										END
+			,[strPaidDescription] 		= CASE
+											WHEN @strSourceType = 'Invoice' THEN 'Reduced By Invoice' 
+											WHEN @strSourceType = 'InventoryShipment' THEN 'Reduced By Inventory Shipment'
+											WHEN @strSourceType = 'Scale' THEN 'Reduced By Scale'
+										END
+			,[intUserId] 				= @intUserId
 		FROM @StorageTicketInfoByFIFO
 		WHERE strItemType = 'Inventory'
+
+		EXEC uspGRInsertStorageHistoryRecord @StorageHistoryStagingTable, @intStorageHistoryId OUTPUT
 
 		IF @strSourceType = 'InventoryShipment'
 		BEGIN

@@ -48,7 +48,8 @@ BEGIN TRY
 			@intFutureMarketId			INT,
 			@intFutureMonthId			INT,
 			@dblFutures					NUMERIC(18, 6),
-			@ysnUniqueEntityReference	BIT
+			@ysnUniqueEntityReference	BIT,
+			@ysnUsed					BIT = 0
 
 	SELECT	@ysnUniqueEntityReference = ysnUniqueEntityReference FROM tblCTCompanyPreference
 	--SELECT	@XML	=	dbo.[fnCTRemoveStringXMLTag](@XML,'strAmendmentLog')
@@ -369,7 +370,14 @@ BEGIN TRY
 		FROM	tblCTContractHeader
 		WHERE	intContractHeaderId	=	@intContractHeaderId
 
-		IF @ysnMultiplePriceFixation = 1
+		SELECT * FROM vyuCTSequenceUsageHistory WHERE intContractHeaderId = @intContractHeaderId
+
+		IF EXISTS(SELECT TOP 1 1 FROM vyuCTSequenceUsageHistory WHERE intContractHeaderId = @intContractHeaderId AND ysnDeleted <> 1)
+		BEGIN
+			SET @ysnUsed = 1
+		END
+
+		IF @ysnMultiplePriceFixation = 1 AND @ysnUsed = 1
 		BEGIN
 			SELECT @dblLotsFixed = dblLotsFixed FROM tblCTPriceFixation WHERE intContractHeaderId = @intContractHeaderId
 			IF @dblLotsFixed IS NOT NULL AND @dblNoOfLots IS NOT NULL AND @dblNoOfLots < @dblLotsFixed 

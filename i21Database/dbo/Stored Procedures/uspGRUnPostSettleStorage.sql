@@ -32,6 +32,8 @@ BEGIN TRY
 	DECLARE @isParentSettleStorage AS BIT
 	DECLARE @intDecimalPrecision INT
 	DECLARE @success BIT
+	DECLARE @StorageHistoryStagingTable AS [StorageHistoryStagingTable]
+	DECLARE @intStorageHistoryId INT
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXml
@@ -450,42 +452,71 @@ BEGIN TRY
 				--EXEC uspGRDeleteStorageHistory 
 				--	 'Voucher'
 				--	,@BillId			
-				INSERT INTO [dbo].[tblGRStorageHistory] 
+				-- INSERT INTO [dbo].[tblGRStorageHistory] 
+				-- (
+				-- 	 [intConcurrencyId]
+				-- 	,[intCustomerStorageId]
+				-- 	,[intContractHeaderId]
+				-- 	,[dblUnits]
+				-- 	,[dtmHistoryDate]
+				-- 	,[strType]
+				-- 	,[strUserName]
+				-- 	,[intUserId]
+				-- 	,[intEntityId]
+				-- 	,[strSettleTicket]
+				-- 	,[intTransactionTypeId]
+				-- 	,[dblPaidAmount]
+				-- 	,[intBillId]
+				-- 	,[intSettleStorageId]
+				-- 	,[strVoucher]
+				-- )
+				-- SELECT 
+				-- 	 [intConcurrencyId]		= 1 
+				-- 	,[intCustomerStorageId] = [intCustomerStorageId]
+				-- 	,[intContractHeaderId]  = [intContractHeaderId]
+				-- 	,[dblUnits]				= [dblUnits]
+				-- 	,[dtmHistoryDate]		= GETDATE()
+				-- 	,[strType]				= 'Reverse Settlement'
+				-- 	,[strUserName]			= NULL
+				-- 	,[intUserId]			= @UserId
+				-- 	,[intEntityId]			= [intEntityId]
+				-- 	,[strSettleTicket]		= [strSettleTicket]
+				-- 	,[intTransactionTypeId]	= 4
+				-- 	,[dblPaidAmount]		= [dblPaidAmount]
+				-- 	,[intBillId]			= NULL
+				-- 	,[intSettleStorageId]   = NULL
+				-- 	,[strVoucher]           = strVoucher
+				-- FROM tblGRStorageHistory
+				-- WHERE intSettleStorageId = @intSettleStorageId
+
+				INSERT INTO @StorageHistoryStagingTable
 				(
-					 [intConcurrencyId]
-					,[intCustomerStorageId]
+					[intCustomerStorageId]
 					,[intContractHeaderId]
 					,[dblUnits]
 					,[dtmHistoryDate]
 					,[strType]
-					,[strUserName]
 					,[intUserId]
-					,[intEntityId]
 					,[strSettleTicket]
 					,[intTransactionTypeId]
 					,[dblPaidAmount]
-					,[intBillId]
-					,[intSettleStorageId]
 					,[strVoucher]
 				)
 				SELECT 
-					 [intConcurrencyId]		= 1 
-					,[intCustomerStorageId] = [intCustomerStorageId]
+					[intCustomerStorageId] = [intCustomerStorageId]
 					,[intContractHeaderId]  = [intContractHeaderId]
 					,[dblUnits]				= [dblUnits]
 					,[dtmHistoryDate]		= GETDATE()
 					,[strType]				= 'Reverse Settlement'
-					,[strUserName]			= NULL
 					,[intUserId]			= @UserId
-					,[intEntityId]			= [intEntityId]
 					,[strSettleTicket]		= [strSettleTicket]
 					,[intTransactionTypeId]	= 4
 					,[dblPaidAmount]		= [dblPaidAmount]
-					,[intBillId]			= NULL
-					,[intSettleStorageId]   = NULL
 					,[strVoucher]           = strVoucher
 				FROM tblGRStorageHistory
 				WHERE intSettleStorageId = @intSettleStorageId
+
+				EXEC uspGRInsertStorageHistoryRecord @StorageHistoryStagingTable, @intStorageHistoryId OUTPUT
 
 				UPDATE tblGRStorageHistory SET intSettleStorageId = NULL,intBillId = NULL WHERE intSettleStorageId = @intSettleStorageId
 

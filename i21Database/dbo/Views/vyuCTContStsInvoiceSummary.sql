@@ -15,12 +15,18 @@ AS
 				FROM	tblCTContractDetail CD LEFT
 				JOIN	(
 							SELECT		intContractDetailId,CAST(ISNULL(SUM(dblTotal),0)AS NUMERIC(18, 6)) AS dblTotal,MAX(strCurrency)  strCurrency
-							FROM		vyuCTContStsVendorInvoice 
+							FROM		vyuCTContStsVendorInvoice
+							WHERE strBillId NOT LIKE ((SELECT strPrefix FROM tblSMStartingNumber WHERE strTransactionType = 'Claim' and strModule = 'Accounts Payable') + '%') 
 							Group By	intContractDetailId
 						)	VI	  ON	VI.intContractDetailId		=	CD.intContractDetailId
 				JOIN	(
-							SELECT		intContractDetailId,CAST(ISNULL(SUM(dblTotal),0)AS NUMERIC(18, 6)) AS dblTotal,MAX(strCurrency)  strCurrency,CAST(ISNULL(SUM(dblNetWeight),0)AS NUMERIC(18, 6)) dblNetWeight
-							FROM		vyuCTContStsCustomerInvoice 
+							SELECT		intContractDetailId,
+							CASE WHEN (MAX(tblARInvoice.strTransactionType) NOT IN ('Credit Memo') AND  ISNULL(MAX(tblARInvoice.intInvoiceId),0) NOT IN (SELECT ISNULL(MAX(intInvoiceId),0) FROM tblLGWeightClaimDetail))
+							THEN CAST(ISNULL(SUM(dblTotal),0)AS NUMERIC(18, 6)) ELSE MAX(dblTotal) - MIN(dblTotal) END dblTotal,
+							MAX(strCurrency)  strCurrency,
+								CASE WHEN (MAX(tblARInvoice.strTransactionType) NOT IN ('Credit Memo') AND  ISNULL(MAX(tblARInvoice.intInvoiceId),0) NOT IN (SELECT ISNULL(MAX(intInvoiceId),0) FROM tblLGWeightClaimDetail))
+								THEN CAST(ISNULL(SUM(dblNetWeight),0)AS NUMERIC(18, 6)) ELSE MAX(dblNetWeight) - MIN(dblNetWeight) END dblNetWeight
+							FROM		vyuCTContStsCustomerInvoice inner join tblARInvoice  ON tblARInvoice.strInvoiceNumber = vyuCTContStsCustomerInvoice.strInvoiceNumber
 							Group By	intContractDetailId
 						)	CI	  ON	CI.intContractDetailId		=	CD.intContractDetailId	
 				JOIN	tblICItemUOM	QU	ON	QU.intItemUOMId	=	CD.intItemUOMId			CROSS	

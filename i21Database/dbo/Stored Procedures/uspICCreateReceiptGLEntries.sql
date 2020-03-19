@@ -311,7 +311,7 @@ AS
 			,t.dblQty
 			,t.dblUOMQty
 			,t.dblCost
-			,t.dblValue
+			,dblValue = ROUND(t.dblValue, 2) 
 			,t.intTransactionTypeId
 			,ISNULL(t.intCurrencyId, @intFunctionalCurrencyId) intCurrencyId
 			,t.dblExchangeRate
@@ -388,12 +388,12 @@ AS
 			,dblQty = 0
 			,dblUOMQty = 0 
 			,dblCost = 0 
-			,dblValue = ri.[dblRecomputeLineTotal] - topRi.dblLineTotal
+			,dblValue = ROUND(ri.[dblRecomputeLineTotal] - topRi.dblLineTotal, 2) 
 			,t.intTransactionTypeId
 			,ISNULL(t.intCurrencyId, @intFunctionalCurrencyId) intCurrencyId
 			,t.dblExchangeRate
 			,t.intInventoryTransactionId
-			,strInventoryTransactionTypeName = TransType.strName
+			,strInventoryTransactionTypeName = t.strTransactionType
 			,t.strTransactionForm 
 			,strDescription = 
 				dbo.fnFormatMessage(
@@ -486,20 +486,23 @@ AS
 			) topRi 		
 
 			CROSS APPLY (
-				SELECT TOP 1 t.* 
-				FROM tblICInventoryTransaction t 
+				SELECT TOP 1 
+					t.* 
+					,strTransactionType = ty.strName
+				FROM 
+					tblICInventoryTransaction t INNER JOIN tblICInventoryTransactionType ty
+						ON t.intTransactionTypeId = ty.intTransactionTypeId
 				WHERE
 					t.strTransactionId = ri.strReceiptNumber
 					AND t.intTransactionId = ri.intInventoryReceiptId
 					AND t.intTransactionDetailId = ri.intInventoryReceiptItemId
+					AND ty.strName = 'Inventory Receipt'
 				ORDER BY t.intInventoryTransactionId DESC 
 			) t
 
 			INNER JOIN tblICItem i 
-				ON i.intItemId = t.intItemId 
+				ON i.intItemId = t.intItemId
 
-			INNER JOIN dbo.tblICInventoryTransactionType TransType
-				ON t.intTransactionTypeId = TransType.intTransactionTypeId
 			LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType
 				ON currencyRateType.intCurrencyExchangeRateTypeId = t.intForexRateTypeId
 

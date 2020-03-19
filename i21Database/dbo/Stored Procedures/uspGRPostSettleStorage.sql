@@ -134,6 +134,9 @@ BEGIN TRY
 	-- THIS IS THE STORAGE UNIT
 	DECLARE @dblSelectedUnits AS DECIMAL(24,10)
 	declare @doPartialHistory bit = 0
+
+	DECLARE @strSettleTicket NVARCHAR(40)
+
 	DECLARE @SettleStorage AS TABLE 
 	(
 		 intSettleStorageKey INT IDENTITY(1, 1)
@@ -280,6 +283,7 @@ BEGIN TRY
 			,@intCashPriceUOMId 			= intItemUOMId
 			,@origdblSpotUnits				= dblSpotUnits
 			,@dblSelectedUnits				= dblSelectedUnits
+			,@strSettleTicket					= strStorageTicket
 		FROM tblGRSettleStorage
 		WHERE intSettleStorageId = @intSettleStorageId
 	
@@ -378,7 +382,7 @@ BEGIN TRY
 			)
 			SELECT 
 				 intSettleStorageTicketId = SST.intSettleStorageTicketId
-				,intCustomerStorageId	  = SST.intCustomerStorageId
+				,intCustomerStorageId	  	= SST.intCustomerStorageId
 				,dblStorageUnits          = SST.dblUnits
 				,dblRemainingUnits        = SST.dblUnits
 				,dblOpenBalance           = CS.dblOpenBalance
@@ -393,11 +397,12 @@ BEGIN TRY
 				ON CS.intCustomerStorageId = SST.intCustomerStorageId
 			OUTER APPLY (
 				SELECT DISTINCT
-					intContractHeaderId
-				FROM tblGRStorageHistory
+					CH.intContractHeaderId
+				FROM tblGRStorageHistory SH
+				INNER JOIN tblCTContractHeader CH
+					ON CH.intContractHeaderId = SH.intContractHeaderId
+						AND CH.intPricingTypeId = 5
 				WHERE intCustomerStorageId = CS.intCustomerStorageId
-					AND intContractHeaderId IS NOT NULL
-					AND intInventoryReceiptId IS NOT NULL
 			) SH 
 			WHERE SST.intSettleStorageId = @intSettleStorageId 
 				AND SST.dblUnits > 0
@@ -2574,6 +2579,8 @@ BEGIN TRY
 							(CH.intPricingTypeId = 2 and 
 								a.intContractDetailId is not null 
 								and availableQtyForVoucher.dblAvailableQuantity > 0)
+						or (availableQtyForVoucher.intContractDetailId is not null 
+							and isnull(availableQtyForVoucher.intPricingTypeId, 0) = 1)
 					)
 				and a.intSettleVoucherKey not in ( select id from @DiscountSCRelation )
 				ORDER BY SST.intSettleStorageTicketId
@@ -3201,7 +3208,8 @@ BEGIN TRY
 
 				IF @dblVoucherTotal > 0 AND EXISTS(SELECT NULL FROM @voucherPayable DS INNER JOIN tblICItem I on I.intItemId = DS.intItemId WHERE I.strType = 'Inventory'  and dblOrderQty <> 0)
 				BEGIN
-				EXEC uspAPCreateVoucher @voucherPayable, @voucherPayableTax, @intCreatedUserId, 1, @ErrMsg, @createdVouchersId OUTPUT
+					update @voucherPayable set ysnStage = 0
+					EXEC uspAPCreateVoucher @voucherPayable, @voucherPayableTax, @intCreatedUserId, 1, @ErrMsg, @createdVouchersId OUTPUT
 				END
 				ELSE 
 					IF(EXISTS(SELECT NULL FROM @voucherPayable DS INNER JOIN tblICItem I on I.intItemId = DS.intItemId WHERE I.strType = 'Inventory' and dblOrderQty <> 0))
@@ -3642,7 +3650,7 @@ BEGIN TRY
 							
 						if( (@dblCurrentContractBalance) + (@dblUnits)  < 0.01)
 						begin
-							set @dblUnits = @dblCurrentContractBalance
+							set @dblUnits = @dblCurrentContractBalance * -1
 						end
 						
 
@@ -3718,6 +3726,7 @@ BEGIN TRY
 					, intContractHeaderId
 					, dtmHistoryDate
 					, intSettleStorageId
+					, strSettleTicket
 					, dblPaidAmount
 					, intBillId
 				)
@@ -3731,6 +3740,7 @@ BEGIN TRY
 					, SV.intContractHeaderId
 					, GETDATE()
 					, @intSettleStorageId
+					, @strSettleTicket
 					, SV.dblCashPrice
 					, CASE WHEN @intVoucherId = 0 THEN NULL ELSE @intVoucherId END
 				FROM @SettleVoucherCreate SV

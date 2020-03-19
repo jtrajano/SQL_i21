@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspAPImportVoucherLassus]
-	@file NVARCHAR(500),
+	@file NVARCHAR(500) = NULL,
 	@userId INT,
 	@importLogId INT OUTPUT
 AS
@@ -22,19 +22,24 @@ DECLARE @totalIssues INT;
 -- SET @path = SUBSTRING(@file, 0, @lastindex + 1)
 SET @errorFile = REPLACE(@file, 'csv', 'txt');
 
-DELETE FROM tblAPImportVoucherLassus
+IF @file IS NOT NULL
+BEGIN
 
-SET @sql = 'BULK INSERT tblAPImportVoucherLassus FROM ''' + @file + ''' WITH
-        (
-        FIELDTERMINATOR = '','',
-		ROWTERMINATOR = ''\n'',
-		ROWS_PER_BATCH = 10000, 
-		FIRSTROW = 1,
-		TABLOCK,
-		ERRORFILE = ''' + @errorFile + '''
-        )'
+	DELETE FROM tblAPImportVoucherLassus
 
-EXEC(@sql)
+	SET @sql = 'BULK INSERT tblAPImportVoucherLassus FROM ''' + @file + ''' WITH
+			(
+			FIELDTERMINATOR = '','',
+			ROWTERMINATOR = ''\n'',
+			ROWS_PER_BATCH = 10000, 
+			FIRSTROW = 1,
+			TABLOCK,
+			ERRORFILE = ''' + @errorFile + '''
+			)'
+
+	EXEC(@sql)
+
+END
 
 DECLARE @voucherTotal DECIMAL(18,2);
 
@@ -117,8 +122,20 @@ AND A.intAccountId > 0
 AND (A.intTransactionType > 0)
 AND (A.dblQuantityToBill != 0)
 
+IF NOT EXISTS(SELECT 1 FROM @voucherPayables)
+BEGIN
+	RAISERROR('No valid record to import.', 16, 1);
+	RETURN;
+END
+
 DECLARE @createdVoucher NVARCHAR(MAX);
 EXEC uspAPCreateVoucher @voucherPayables = @voucherPayables, @userId = @userId, @throwError = 1, @createdVouchersId = @createdVoucher OUT
+
+IF @createdVoucher IS NULL 
+BEGIN 
+	RAISERROR('No valid record to create the voucher.', 16, 1);
+	RETURN;
+END
 
 DECLARE @batchIdUsed NVARCHAR(50);
 DECLARE @failedPostCount INT;
@@ -159,9 +176,9 @@ BEGIN
 	)
 	SELECT
 		CASE 
-			WHEN @totalIssues > 0 THEN 'Some voucher(s) successfullly imported from CSV'
+			WHEN @totalIssues > 0 THEN 'Some voucher(s) successfully imported from CSV'
 		ELSE
-			'Successfullly imported voucher(s) from CSV'
+			'Successfully imported voucher(s) from CSV'
 		END,
 		(SELECT TOP 1 strVersionNo FROM tblSMBuildNumber ORDER BY intVersionID DESC),
 		@userId,

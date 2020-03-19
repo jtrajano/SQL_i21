@@ -8,8 +8,10 @@ SET p.dblSalePrice =
 		p.dblStandardCost, 
 		p.dblLastCost, 
 		p.dblAverageCost, 
-		p.dblAmountPercent
-	)
+		p.dblAmountPercent,
+		p.dblSalePrice
+	),
+	p.strPricingMethod = CASE WHEN NULLIF(LTRIM(p.strPricingMethod), '') IS NULL THEN 'None' ELSE ISNULL(p.strPricingMethod, 'None') END
 FROM tblICItemPricing p
 WHERE p.intImportFlagInternal = 1
 
