@@ -350,6 +350,7 @@ BEGIN TRY
 						SELECT 1
 						FROM tblICItemUOM t WITH (NOLOCK)
 						WHERE t.intUnitMeasureId = @intRepresentingUOMId
+							AND t.intItemId = @intItemId
 						)
 				BEGIN
 					RAISERROR (

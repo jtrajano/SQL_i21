@@ -13,6 +13,8 @@
 	dblCost						NUMERIC(38,20),
 	strCostUOM					NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 	strCostCurrency				NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	strBook						NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	strSubBook					NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 
 	strTransactionType			NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 	strErrorMessage				NVARCHAR(MAX) COLLATE Latin1_General_CI_AS,
