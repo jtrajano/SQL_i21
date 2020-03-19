@@ -13,6 +13,15 @@ BEGIN TRY
 	DECLARE @strToTransactionType NVARCHAR(100)
 		,@intToBookId INT
 		,@strDelete NVARCHAR(50)
+		,@intCompanyId INT
+
+	SELECT @intCompanyId = intCompanyId
+	FROM dbo.tblIPMultiCompany
+	WHERE ysnCurrentCompany = 1
+
+	UPDATE dbo.tblCTContractHeader
+	SET intCompanyId = @intCompanyId
+	WHERE intCompanyId IS NULL
 
 	IF EXISTS (
 			SELECT 1

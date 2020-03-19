@@ -11,6 +11,15 @@ BEGIN TRY
 		,@strDelete NVARCHAR(100)
 		,@intToCompanyId INT
 		,@strTransactionType NVARCHAR(50)
+		,@intCompanyId INT
+
+	SELECT @intCompanyId = intCompanyId
+	FROM dbo.tblIPMultiCompany
+	WHERE ysnCurrentCompany = 1
+
+	UPDATE dbo.tblCTPriceContract
+	SET intCompanyId = @intCompanyId
+	WHERE intCompanyId IS NULL
 
 	IF EXISTS (
 			SELECT 1
@@ -30,7 +39,7 @@ BEGIN TRY
 			,@strUpdate = TC.strUpdate
 			,@strDelete = TC.strDelete
 			,@intToCompanyId = intToCompanyId
-			,@strTransactionType=TT1.strTransactionType
+			,@strTransactionType = TT1.strTransactionType
 		FROM tblSMInterCompanyTransactionConfiguration TC
 		JOIN tblSMInterCompanyTransactionType TT ON TT.intInterCompanyTransactionTypeId = TC.intFromTransactionTypeId
 		JOIN tblSMInterCompanyTransactionType TT1 ON TT1.intInterCompanyTransactionTypeId = TC.intToTransactionTypeId
