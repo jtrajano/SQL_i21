@@ -5,7 +5,7 @@ SELECT *
 		ELSE CAST((dblRebateQuantity * dblRebateRate * dblCost / 100) AS NUMERIC(18, 6))
 		END
 FROM (
-	SELECT 'Item Level' AS Mode,
+	SELECT CASE WHEN pi.intItemId IS NULL THEN 'Category Level' ELSE 'Item Level' END AS Mode,
 		intRowId = CAST(ROW_NUMBER() OVER(ORDER BY invoice.intInvoiceId) AS INT)
 		, strVendorNumber = vendor.strVendorId
 		, strVendorName = entity.strName
@@ -19,90 +19,33 @@ FROM (
 		, strItemDescription = item.strDescription
 		, category.strCategoryCode
 		, dblQtyShipped = CASE WHEN invoice.strTransactionType = 'Credit Memo' THEN (invoiceDetail.dblQtyShipped * -1) ELSE invoiceDetail.dblQtyShipped END
-		, unitMeasure.strUnitMeasure
-		, uom.dblUnitQty
+		, strUnitMeasure = CASE WHEN pi.intItemId IS NULL THEN unitMeasure.strUnitMeasure ELSE itemUnitMeasure.strUnitMeasure END
+		, dblUnitQty = CASE WHEN pi.intItemId IS NULL THEN uom.dblUnitQty ELSE itemUOM.dblUnitQty END
 		, dblCost = invoiceDetail.dblPrice
-		, dblRebateRate = ISNULL(programItem.dblRebateRate, 0.00)
-		, dblRebateQuantity = CASE WHEN invoice.strTransactionType = 'Credit Memo' THEN
-				ISNULL(CAST((dbo.fnCalculateQtyBetweenUOM(invoiceDetail.intItemUOMId, 
-					programItem.intUnitMeasureId, invoiceDetail.dblQtyShipped)) AS NUMERIC(18, 6)) * -1,
-					(invoiceDetail.dblQtyShipped * -1))
-				ELSE
-				ISNULL(CAST((dbo.fnCalculateQtyBetweenUOM(invoiceDetail.intItemUOMId, programItem.intUnitMeasureId, 
-				invoiceDetail.dblQtyShipped)) AS NUMERIC(18, 6)),
-					invoiceDetail.dblQtyShipped)
+		, dblRebateRate = CASE WHEN pi.intItemId IS NULL THEN ISNULL(programCategory.dblRebateRate, 0.00) ELSE ISNULL(pi.dblRebateRate, 0.00) END
+		, dblRebateQuantity =
+			CASE WHEN pi.intItemId IS NULL THEN 
+				CASE WHEN invoice.strTransactionType = 'Credit Memo' THEN
+					ISNULL(CAST((dbo.fnCalculateQtyBetweenUOM(invoiceDetail.intItemUOMId, 
+						programCategory.intUnitMeasureId, invoiceDetail.dblQtyShipped)) AS NUMERIC(18, 6)) * -1,
+						(invoiceDetail.dblQtyShipped * -1))
+					ELSE ISNULL(CAST((dbo.fnCalculateQtyBetweenUOM(invoiceDetail.intItemUOMId, programCategory.intUnitMeasureId, 
+						invoiceDetail.dblQtyShipped)) AS NUMERIC(18, 6)),
+							invoiceDetail.dblQtyShipped)
 				END
+			ELSE
+				CASE WHEN invoice.strTransactionType = 'Credit Memo' THEN
+					ISNULL(CAST((dbo.fnCalculateQtyBetweenUOM(invoiceDetail.intItemUOMId, 
+						pi.intUnitMeasureId, invoiceDetail.dblQtyShipped)) AS NUMERIC(18, 6)) * -1,
+						(invoiceDetail.dblQtyShipped * -1))
+					ELSE ISNULL(CAST((dbo.fnCalculateQtyBetweenUOM(invoiceDetail.intItemUOMId, pi.intUnitMeasureId, 
+						invoiceDetail.dblQtyShipped)) AS NUMERIC(18, 6)), invoiceDetail.dblQtyShipped)
+				END
+			END		
 		, invoiceDetail.intInvoiceDetailId
 		, invoiceDetail.intConcurrencyId
 		, program.intProgramId
-		, strRebateBy = programItem.strRebateBy
-		, companyLocation.strLocationName
-		, intVendorSetupId = program.intVendorSetupId
-		, invoice.intInvoiceId
-		, program.ysnActive
-	FROM tblARInvoiceDetail invoiceDetail
-		INNER JOIN tblARInvoice invoice ON invoice.intInvoiceId = invoiceDetail.intInvoiceId
-		INNER JOIN tblICItem item ON item.intItemId = invoiceDetail.intItemId
-		INNER JOIN tblICCategory category ON category.intCategoryId = item.intCategoryId
-		LEFT OUTER JOIN tblARCustomer customer ON customer.intEntityId = invoice.intEntityCustomerId
-		LEFT OUTER JOIN tblEMEntity entityCustomer ON entityCustomer.intEntityId = customer.intEntityId
-		--LEFT OUTER JOIN tblVRCustomerXref customerXref ON customerXref.intEntityId = invoice.intEntityCustomerId
-		LEFT OUTER JOIN tblVRProgramCustomer programCustomer ON programCustomer.intEntityId = invoice.intEntityCustomerId
-		LEFT OUTER JOIN tblVRProgram program ON program.intProgramId = programCustomer.intProgramId
-		LEFT OUTER JOIN tblVRVendorSetup vendorSetup ON vendorSetup.intVendorSetupId = program.intVendorSetupId
-		LEFT OUTER JOIN (
-			SELECT pi.*, uom.intItemUOMId
-			FROM tblVRProgramItem pi
-				LEFT JOIN tblICItemUOM uom ON pi.intItemId = uom.intItemId
-					AND pi.intUnitMeasureId = uom.intUnitMeasureId
-			) programItem ON programItem.intProgramId = program.intProgramId
-				AND item.intItemId = programItem.intItemId
-				AND invoice.dtmDate >= programItem.dtmBeginDate
-				AND invoice.dtmDate <= ISNULL(programItem.dtmEndDate, '12/31/9999')
-				AND (ISNULL(programItem.dblRebateRate, 0) <> 0)
-		LEFT OUTER JOIN tblICItemUOM uom ON uom.intItemId = invoiceDetail.intItemId
-			AND uom.intUnitMeasureId = programItem.intUnitMeasureId
-		LEFT OUTER JOIN tblICUnitMeasure unitMeasure ON unitMeasure.intUnitMeasureId = uom.intUnitMeasureId
-		LEFT OUTER JOIN tblAPVendor vendor ON vendor.intEntityId = vendorSetup.intEntityId
-		LEFT OUTER JOIN tblEMEntity entity ON entity.intEntityId = vendor.intEntityId
-		LEFT OUTER JOIN tblSMCompanyLocation companyLocation ON companyLocation.intCompanyLocationId = invoice.intCompanyLocationId
-	WHERE NOT EXISTS(SELECT TOP 1 1 FROM tblVRRebate WHERE intInvoiceDetailId = invoiceDetail.intInvoiceDetailId)
-		AND invoice.ysnPosted = 1
-		AND invoice.strTransactionType IN ('Invoice', 'Credit Memo')
-
-	UNION ALL
-
-	SELECT 'Category Level' AS Mode,
-		intRowId = CAST(ROW_NUMBER() OVER(ORDER BY invoice.intInvoiceId) AS INT)
-		, strVendorNumber = vendor.strVendorId
-		, strVendorName = entity.strName
-		, program.strProgram
-		, customer.strCustomerNumber
-		, strVendorCustomer = entityCustomer.strName
-		, invoice.strInvoiceNumber
-		, invoice.strBOLNumber
-		, invoice.dtmDate
-		, strItemNumber = item.strItemNo
-		, strItemDescription = item.strDescription
-		, category.strCategoryCode
-		, dblQtyShipped = CASE WHEN invoice.strTransactionType = 'Credit Memo' THEN (invoiceDetail.dblQtyShipped * -1) ELSE invoiceDetail.dblQtyShipped END
-		, unitMeasure.strUnitMeasure
-		, uom.dblUnitQty
-		, dblCost = invoiceDetail.dblPrice
-		, dblRebateRate = ISNULL(programCategory.dblRebateRate, 0.00)
-		, dblRebateQuantity = CASE WHEN invoice.strTransactionType = 'Credit Memo' THEN
-				ISNULL(CAST((dbo.fnCalculateQtyBetweenUOM(invoiceDetail.intItemUOMId, 
-					programCategory.intUnitMeasureId, invoiceDetail.dblQtyShipped)) AS NUMERIC(18, 6)) * -1,
-					(invoiceDetail.dblQtyShipped * -1))
-				ELSE
-				ISNULL(CAST((dbo.fnCalculateQtyBetweenUOM(invoiceDetail.intItemUOMId, programCategory.intUnitMeasureId, 
-				invoiceDetail.dblQtyShipped)) AS NUMERIC(18, 6)),
-					invoiceDetail.dblQtyShipped)
-				END
-		, invoiceDetail.intInvoiceDetailId
-		, invoiceDetail.intConcurrencyId
-		, program.intProgramId
-		, strRebateBy = programCategory.strRebateBy
+		, strRebateBy = CASE WHEN pi.intItemId IS NULL THEN programCategory.strRebateBy ELSE pi.strRebateBy END
 		, companyLocation.strLocationName
 		, intVendorSetupId = program.intVendorSetupId
 		, invoice.intInvoiceId
@@ -134,6 +77,12 @@ FROM (
 		LEFT OUTER JOIN tblAPVendor vendor ON vendor.intEntityId = vendorSetup.intEntityId
 		LEFT OUTER JOIN tblEMEntity entity ON entity.intEntityId = vendor.intEntityId
 		LEFT OUTER JOIN tblSMCompanyLocation companyLocation ON companyLocation.intCompanyLocationId = invoice.intCompanyLocationId
+
+		LEFT OUTER JOIN tblVRProgramItem pi ON pi.intProgramId = program.intProgramId
+			AND pi.intItemId = item.intItemId
+		LEFT OUTER JOIN tblICItemUOM itemUOM ON itemUOM.intItemId = invoiceDetail.intItemId
+			and itemUOM.intUnitMeasureId = pi.intUnitMeasureId
+		LEFT OUTER JOIN tblICUnitMeasure itemUnitMeasure ON itemUnitMeasure.intUnitMeasureId = pi.intUnitMeasureId
 	WHERE NOT EXISTS(SELECT TOP 1 1 FROM tblVRRebate WHERE intInvoiceDetailId = invoiceDetail.intInvoiceDetailId)
 		AND invoice.ysnPosted = 1
 		AND invoice.strTransactionType IN ('Invoice', 'Credit Memo')
