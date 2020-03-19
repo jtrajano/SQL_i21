@@ -35,6 +35,15 @@ DECLARE @CustomerStorageStagingTable AS CustomerStorageStagingTable
 DECLARE @dblInitialSplitQty			NUMERIC (38,20)
 
 BEGIN TRY
+
+	---Check for reversal config
+	IF((SELECT TOP 1 ISNULL(ysnImposeReversalTransaction,0) FROM tblRKCompanyPreference) = 1)
+	BEGIN
+		EXEC uspSCProcessReversalDeliverySheetSummaryToTicket @intDeliverySheetId, @intUserId
+
+		GOTO _Exit
+	END
+
 	-- SELECT @currencyDecimal = intCurrencyDecimal from tblSMCompanyPreference
 	SET @currencyDecimal = 20
 	DECLARE @splitTable TABLE(
@@ -226,7 +235,7 @@ BEGIN TRY
 		,CASE WHEN @strFreightCostMethod = 'Amount' THEN (SUM(dblFreight)/SUM(dblNetUnits)) ELSE SUM(dblFreight) END AS dblFreightPerUnit 
 		FROM @processTicket WHERE intDeliverySheetId = @intDeliverySheetId
 	) SC
-
+	_Exit:
 END TRY
 
 BEGIN CATCH

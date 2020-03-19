@@ -48,6 +48,29 @@ DECLARE @intTicketItemId INT
 DECLARE @intLotType INT
 DECLARE @_intInventoryTransfer INT
 DECLARE @_strInventoryTransferNumber NVARCHAR(50)
+DECLARE @intTicketInvoiceId INT
+DECLARE @intInvoiceDetailCount INT
+DECLARE @_intInvoiceDetail INT
+DECLARE @strInvoiceDetailIds NVARCHAR(500)
+DECLARE @ysnPost BIT
+DECLARE @intTicketStorageScheduleTypeId INT
+DECLARE @intTicketBillId INT
+DECLARE @intReversedBillId INT
+DECLARE @ItemsToIncreaseInTransitDirect AS InTransitTableType
+dECLARE @dblTicketNetUnits NUMERIC(18,6)
+DECLARE @dblQtyUpdate NUMERIC(18,6)
+DECLARE @strMatchTicketNumber NVARCHAR(50)
+DECLARE @intNewInvoiceId INT
+
+
+--------------------------------
+DECLARE @successfulCount INT
+DECLARE	@invalidCount INT
+DECLARE	@success INT
+DECLARE	@batchIdUsed NVARCHAR(100)
+DECLARE	@recapId INT
+
+
 
 BEGIN TRY
 
@@ -69,6 +92,9 @@ BEGIN TRY
 				,@intTicketItemUOMId = intItemUOMIdTo
 				,@intMatchTicketId = intMatchTicketId
 				,@intTicketItemId = intItemId
+				,@intTicketStorageScheduleTypeId = intStorageScheduleTypeId
+				,@intTicketBillId = intBillId
+				,@dblTicketNetUnits = dblNetUnits
 			FROM tblSCTicket SC
 			WHERE intTicketId = @intTicketId
 
@@ -88,17 +114,11 @@ BEGIN TRY
 					,@intMatchLoadDetailId = intLoadDetailId
 				FROM tblSCTicket SC
 				WHERE intTicketId = @intMatchTicketId
+					AND ysnReversed = 0
 			END
 		END
 
-		IF(@intMatchTicketId > 0 AND @intTicketType = 6)
-		BEGIN
-			IF ISNULL(@strMatchTicketStatus,'') = 'C'
-			BEGIN
-				RAISERROR('Unable to reverse ticket, match ticket already completed', 11, 1);
-				RETURN;
-			END
-		END
+		
 
 		IF(@strTicketStatus <> 'C')
 		BEGIN
@@ -108,6 +128,16 @@ BEGIN TRY
 
 		IF(@strInOutFlag = 'I')
 		BEGIN
+
+			IF(@intMatchTicketId > 0 AND @intTicketType = 6)
+			BEGIN
+				IF ISNULL(@strMatchTicketStatus,'') = 'C'
+				BEGIN
+					RAISERROR('Unable to reverse ticket, match ticket is already completed.', 11, 1);
+					RETURN;
+				END
+			END
+		
 			--GEt all IR for the ticket that don't have reversals
 			BEGIN
 				INSERT INTO @TicketReceiptShipmentIds
@@ -396,7 +426,88 @@ BEGIN TRY
 				END
 			END
 
-			
+			-- reverse voucher for direct shipment
+			SET @ysnPost = 0
+			IF(@intTicketType = 6)
+			BEGIN
+				print 'voucher reversal'
+
+				---Load distribution
+				IF(@intTicketStorageScheduleTypeId = -6)
+				BEGIN
+
+					--delink the load from matching ticket
+					IF(ISNULL(@intMatchLoadDetailId,0) > 0)
+					BEGIN
+						EXEC [dbo].[uspLGUpdateLoadDetails] @intMatchLoadDetailId, 0;
+					END
+					
+					SET @dblQtyUpdate = @dblTicketNetUnits * - 1
+
+
+					--Update contract quantity
+					EXEC uspCTUpdateSequenceBalance @intTicketContractDetailId, @dblQtyUpdate, @intUserId, @intTicketId, 'Scale'
+					EXEC uspCTUpdateScheduleQuantity
+										@intContractDetailId	=	@intTicketContractDetailId,
+										@dblQuantityToUpdate	=	@dblTicketNetUnits,
+										@intUserId				=	@intUserId,
+										@intExternalId			=	@intTicketId,
+										@strScreenName			=	'Scale'	
+
+				END
+
+				---Contract Distribution
+				IF(@intTicketStorageScheduleTypeId = -2)
+				BEGIN
+					print ('inbound direct contract')
+				END
+
+				--reversal entry for voucher
+				BEGIN
+					SELECT TOP 1
+						@intTicketBillId = intBillId
+					FROM tblAPBillDetail
+					WHERE intScaleTicketId = @intTicketId
+
+					IF(ISNULL(@intTicketBillId,0) > 0)
+					BEGIN
+						EXEC uspAPReverseTransaction @intTicketBillId, @intUserId, @intReversedBillId OUTPUT
+					END
+				END
+
+				--- update in transit direct
+				BEGIN
+					INSERT INTO @ItemsToIncreaseInTransitDirect(
+								[intItemId]
+								,[intItemLocationId]
+								,[intItemUOMId]
+								,[intLotId]
+								,[intSubLocationId]
+								,[intStorageLocationId]
+								,[dblQty]
+								,[intTransactionId]
+								,[strTransactionId]
+								,[intTransactionTypeId]
+								,[intFOBPointId]
+							)
+					SELECT 
+						intItemId = SC.intItemId
+						,intItemLocationId = ICIL.intItemLocationId
+						,intItemUOMId = SC.intItemUOMIdTo
+						,intLotId = SC.intLotId
+						,intSubLocationId = SC.intSubLocationId
+						,intStorageLocationId = SC.intStorageLocationId
+						,dblQty = (SC.dblNetUnits * -1)
+						,intTransactionId = 1
+						,strTransactionId = SC.strTicketNumber
+						,intTransactionTypeId = 1
+						,intFOBPointId = NULL
+					FROM tblSCTicket SC 
+					INNER JOIN dbo.tblICItemLocation ICIL ON ICIL.intItemId = SC.intItemId AND ICIL.intLocationId = SC.intProcessingLocationId
+					WHERE SC.intTicketId = @intTicketId
+					EXEC uspICIncreaseInTransitDirectQty @ItemsToIncreaseInTransitDirect;
+				END
+			END
 		END
 		ELSE
 		BEGIN
@@ -420,7 +531,7 @@ BEGIN TRY
 			FROM @TicketReceiptShipmentIds
 			
 
-			---Create IS reversal
+			---Create IS reversal 
 			WHILE ISNULL(@_intInventoryReceiptShipmentId,0) > 0
 			BEGIN
 				SET @_intReversalReceiptShipmentId = 0
@@ -626,6 +737,143 @@ BEGIN TRY
 					
 				END
 			END
+
+			-- reverse invoice for direct shipment
+			SET @ysnPost = 0
+			IF(@intTicketType = 6)
+			BEGIN
+				IF OBJECT_ID (N'tempdb.dbo.#tmpSCInvoiceDetail') IS NOT NULL DROP TABLE #tmpSCInvoiceDetail
+
+
+				-- get the invoice detail for the ticket 
+				SELECT 
+					A.ysnPosted
+					,A.intInvoiceId
+					,B.intInvoiceDetailId
+				INTO #tmpSCInvoiceDetail
+				FROM tblARInvoiceDetail B
+				INNER JOIN tblARInvoice A
+					ON A.intInvoiceId = B.intInvoiceId
+				WHERE intTicketId = @intTicketId
+
+				SELECT TOP 1 
+					@intTicketInvoiceId = intInvoiceId
+					,@ysnPost = ysnPosted
+				FROM #tmpSCInvoiceDetail
+
+				IF(ISNULL(@ysnPost,0) = 0)
+				BEGIN
+					--Delete/update Invoice
+					IF ISNULL(@intTicketInvoiceId, 0) > 0
+					BEGIN
+						---Check if there are multiple IS on the invoice.
+						IF (SELECT TOP 1 COUNT(DISTINCT ISNULL(strDocumentNumber,''))
+							FROM tblARInvoiceDetail
+							WHERE intInvoiceId = @intTicketInvoiceId) > 1
+						BEGIN
+							--Delete invoice details
+							BEGIN 
+								SET @_intInvoiceDetail = 0
+								SELECT TOP 1
+									@_intInvoiceDetail = MIN(intInvoiceDetailId)
+								FROM #tmpSCInvoiceDetail
+
+								---loop and delete invoice detail from invoice
+								WHILE ISNULL(@_intInvoiceDetail,0) > 0
+								BEGIN
+									--Delete
+									EXEC uspARDeleteInvoice @intTicketInvoiceId, @intUserId, @_intInvoiceDetail
+
+									--------Loop Iterator
+									BEGIN
+										IF(EXISTS(SELECT TOP 1 1 FROM #tmpSCInvoiceDetail WHERE intInvoiceDetailId > @_intInvoiceDetail))
+										BEGIN
+											SELECT TOP 1
+												@_intInvoiceDetail = MIN(intInvoiceDetailId)
+											FROM #tmpSCInvoiceDetail
+											WHERE intInvoiceDetailId > @_intInvoiceDetail
+										END
+										ELSE
+										BEGIN
+											SET @_intInvoiceDetail = 0
+										END
+									END
+
+								END
+							END
+						
+							EXEC dbo.uspARUpdateInvoiceIntegrations @intTicketInvoiceId, 0, @intUserId
+							EXEC dbo.uspARReComputeInvoiceTaxes @intTicketInvoiceId
+							
+						END
+						ELSE
+						BEGIN
+							EXEC [dbo].[uspARDeleteInvoice] @intTicketInvoiceId, @intUserId
+						END
+
+					END
+				END
+				ELSE
+				BEGIN
+					---Create credit memo
+					BEGIN
+						---Check if there are multiple IS on the invoice.
+						IF (SELECT TOP 1 COUNT(DISTINCT ISNULL(strDocumentNumber,''))
+							FROM tblARInvoiceDetail
+							WHERE intInvoiceId = @intTicketInvoiceId) > 1
+						BEGIN
+							--reverse invoice details
+							BEGIN 
+								SET @_intInvoiceDetail = 0
+								SELECT TOP 1
+									@_intInvoiceDetail = MIN(intInvoiceDetailId)
+								FROM #tmpSCInvoiceDetail
+
+								SET @strInvoiceDetailIds = (SELECT STUFF((SELECT ',' + CAST(intInvoiceDetailId AS NVARCHAR)
+																			FROM #tmpSCInvoiceDetail
+																			FOR XML PATH('')),1,1,''))
+
+								EXEC uspARReturnInvoice @intTicketInvoiceId, @intUserId,@strInvoiceDetailIds, 1, @intNewInvoiceId OUTPUT	
+							END
+						END
+						ELSE
+						BEGIN
+							EXEC uspARReturnInvoice @intTicketInvoiceId, @intUserId,null,1,@intNewInvoiceId	OUTPUT
+						END
+					END
+
+					--Post credit memo
+					IF(ISNULL(@intNewInvoiceId,0) > 0)
+					BEGIN
+						EXEC [dbo].[uspARPostInvoice]
+								@batchId			= NULL,
+								@post				= 1,
+								@recap				= 0,
+								@param				= @intNewInvoiceId,
+								@userId				= @intUserId,
+								@beginDate			= NULL,
+								@endDate			= NULL,
+								@beginTransaction	= NULL,
+								@endTransaction		= NULL,
+								@exclude			= NULL,
+								@successfulCount	= @successfulCount OUTPUT,
+								@invalidCount		= @invalidCount OUTPUT,
+								@success			= @success OUTPUT,
+								@batchIdUsed		= @batchIdUsed OUTPUT,
+								@recapId			= @recapId OUTPUT,
+								@transType			= N'all',
+								@accrueLicense		= 0,
+								@raiseError			= 1
+					END
+				END
+
+				SELECT TOP 1
+					@intInvoiceDetailCount = COUNT(intInvoiceDetailId)
+				FROM tblARInvoiceDetail
+				WHERE intInvoiceId = @intTicketInvoiceId
+
+			END
+			
 		END
 
 		-----Single Ticket Transfer reversal
@@ -742,10 +990,9 @@ BEGIN TRY
 								AND [intTicketPoolId] = @intTicketPoolId
 								AND [intTicketType] = @intTicketType
 								AND [strInOutFlag] = @strInOutFlag
-								AND [strTicketNumber] = @strReversalTicketNumber
 								AND [intProcessingLocationId] = @intProcessingLocationId)
 			BEGIN
-				SET @strReversalTicketNumber = @strTicketNumber + '-R-' + CAST(@intRecordCounter AS NVARCHAR)
+				SET @strReversalTicketNumber = @strTicketNumber + '-R' + CAST(@intRecordCounter AS NVARCHAR)
 				SET @intRecordCounter = @intRecordCounter + 1
 			END
 		END
@@ -1067,11 +1314,11 @@ BEGIN TRY
 					,[intEntityContactId]
 					,[strPlateNumber]
 					,[blbPlateNumber]
-					,[ysnDestinationWeightGradePost]
+					,[ysnDestinationWeightGradePost] = 0
 					,[strSourceType]
 					,[ysnReadyToTransfer]
 					,[ysnExport] = 0
-					,[dtmImportedDate]
+					,[dtmImportedDate] = NULL
 					,[strUberStatusCode]
 					,[intEntityShipViaTrailerId]
 					,[intLoadDetailId]
@@ -1182,6 +1429,42 @@ BEGIN TRY
 
 		END
 
+		-----Direct Shipment
+		IF(@intMatchTicketId > 0 AND @intTicketType = 6)
+		BEGIN
+			IF(@strInOutFlag = 'I')
+			BEGIN
+				print('inbound direct')
+
+				UPDATE tblSCTicket
+				SET intMatchTicketId = @intDuplicateTicketId
+					,strTicketStatus = 'V'
+					,dtmTicketVoidDateTime = GETDATE()
+					,ysnReversed = 1
+					,strTicketNumber = @strReversalTicketNumber + '-B'
+					,intConcurrencyId = ISNULL(intConcurrencyId,0) + 1
+				WHERE intTicketId = @intMatchTicketId
+					AND ysnReversed = 0
+
+				UPDATE tblSCTicket
+					SET intMatchTicketId = NULL
+				WHERE intTicketId = @intDuplicateTicketId
+
+			END
+			ELSE
+			BEGIN
+				print('outbound direct')
+				
+				---update the matching ticket to the duplicate ticket ID
+				UPDATE tblSCTicket
+				SET intMatchTicketId = @intDuplicateTicketId
+					,intConcurrencyId = ISNULL(intConcurrencyId,0) + 1
+				WHERE intTicketId = @intMatchTicketId
+					AND ysnReversed = 0
+
+			END
+		END
+
 		--Apply load to the reversed ticket
 		IF(@strDistributionOption = 'LOD')
 		BEGIN
@@ -1211,7 +1494,6 @@ BEGIN TRY
 			END
 		END
 
-		
 
 	_Exit:
 

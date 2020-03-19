@@ -304,24 +304,24 @@ BEGIN TRY
 					DECLARE @dblScheduleQuantityToReduce DECIMAL(18,6);
 					SET @dblScheduleQuantityToReduce = @dblContractAvailableQty *-1
 					
-					IF(ISNULL(@intDirectLoadId,0) = 0)
-					BEGIN
-						EXEC uspCTUpdateScheduleQuantity
-										@intContractDetailId	=	@intContractDetailId,
-										@dblQuantityToUpdate	=	@dblContractAvailableQty,
-										@intUserId				=	@intUserId,
-										@intExternalId			=	@intTicketId,
-										@strScreenName			=	'Scale'	
-					END
+					-- IF(ISNULL(@intDirectLoadId,0) = 0)
+					-- BEGIN
+					-- 	EXEC uspCTUpdateScheduleQuantity
+					-- 					@intContractDetailId	=	@intContractDetailId,
+					-- 					@dblQuantityToUpdate	=	@dblContractAvailableQty,
+					-- 					@intUserId				=	@intUserId,
+					-- 					@intExternalId			=	@intTicketId,
+					-- 					@strScreenName			=	'Scale'	
+					-- END
 
 
-					EXEC uspCTUpdateSequenceBalance @intContractDetailId, @dblContractAvailableQty, @intUserId, @intTicketId, 'Scale'
-					EXEC uspCTUpdateScheduleQuantity
-									@intContractDetailId	=	@intContractDetailId,
-									@dblQuantityToUpdate	=	@dblScheduleQuantityToReduce,
-									@intUserId				=	@intUserId,
-									@intExternalId			=	@intTicketId,
-									@strScreenName			=	'Scale'	
+					-- EXEC uspCTUpdateSequenceBalance @intContractDetailId, @dblContractAvailableQty, @intUserId, @intTicketId, 'Scale'
+					-- EXEC uspCTUpdateScheduleQuantity
+					-- 				@intContractDetailId	=	@intContractDetailId,
+					-- 				@dblQuantityToUpdate	=	@dblScheduleQuantityToReduce,
+					-- 				@intUserId				=	@intUserId,
+					-- 				@intExternalId			=	@intTicketId,
+					-- 				@strScreenName			=	'Scale'	
 				END
 					
 				--EXEC uspSCDirectCreateInvoice @intTicketId,@intEntityId,@intLocationId,@intUserId
