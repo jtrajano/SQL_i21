@@ -91,9 +91,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\1910_UpdateNoSpaceModuleName.sql
 :r .\SM\1910_DeleteDuplicateUserPreference.sql
 :r .\SM\2010_RemoveF9Shortcut.sql
-
-
-
+:r .\SM\1920_DeleteDuplicateEntityPhoneNumber.sql
 
 
 -- Canned Report
