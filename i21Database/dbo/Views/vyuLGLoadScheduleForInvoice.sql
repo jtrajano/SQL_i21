@@ -49,7 +49,6 @@ SELECT strTransactionType = 'Load Schedule' COLLATE Latin1_General_CI_AS
 	,dblShipmentQuantity = dbo.fnCalculateQtyBetweenUOM(ISNULL(LD.intItemUOMId, CD.intItemUOMId), ISNULL(LD.intWeightItemUOMId, CD.intNetWeightUOMId), ISNULL(LD.dblQuantity, CD.dblQuantity))
 	,dblShipmentQtyShippedTotal = dbo.fnCalculateQtyBetweenUOM(ISNULL(LD.intItemUOMId, CD.intItemUOMId), ISNULL(LD.intWeightItemUOMId, CD.intNetWeightUOMId), ISNULL(LD.dblQuantity, CD.dblQuantity))
 	,dblQtyRemaining = dbo.fnCalculateQtyBetweenUOM(ISNULL(LD.intItemUOMId, CD.intItemUOMId), ISNULL(LD.intWeightItemUOMId, CD.intNetWeightUOMId), ISNULL(LD.dblQuantity, CD.dblQuantity))
-					- ISNULL(LD.dblNet, 0)
 	,dblDiscount = 0.0000000
 	,dblPrice = CASE 
 				WHEN L.intSourceType = 7
