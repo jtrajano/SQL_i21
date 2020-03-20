@@ -8,7 +8,7 @@
     [strReferenceNo] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL, 
     [strRTN] NVARCHAR(12) COLLATE Latin1_General_CI_AS NULL, 
     [strBankAccountNo] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL, 
-    [strDescription] nvarchar(255) COLLATE Latin1_General_CI_AS NULL,
+    [strBankDescription] nvarchar(255) COLLATE Latin1_General_CI_AS NULL,
     [dblAmount] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
     [dblDepositAmount] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
     [dblWithdrawalAmount] NUMERIC(18, 6) NOT NULL DEFAULT 0,	
