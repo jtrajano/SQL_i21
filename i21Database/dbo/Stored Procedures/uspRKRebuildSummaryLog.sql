@@ -1368,6 +1368,8 @@ BEGIN TRY
 				, id.intContractHeaderId
 				, ld.intSContractDetailId
 				, cd.intContractHeaderId
+				, cd.intFutureMarketId
+				, cd.intFutureMonthId
 
 			UNION ALL
 			SELECT strBatchId = t.strBatchId
@@ -1424,7 +1426,8 @@ BEGIN TRY
 				, v.intStorageLocationId
 				, ri.intContractDetailId
 				, ri.intContractHeaderId
-
+				, cd.intFutureMarketId
+				, cd.intFutureMonthId
 		) t
 		ORDER BY intInventoryTransactionId
 	
