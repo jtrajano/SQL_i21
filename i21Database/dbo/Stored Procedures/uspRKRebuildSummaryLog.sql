@@ -1320,8 +1320,8 @@ BEGIN TRY
 				, intBookId = NULL
 				, intSubBookId = NULL
 				, intLocationId = v.intLocationId
-				, intFutureMarketId = NULL
-				, intFutureMonthId = NULL
+				, intFutureMarketId = cd.intFutureMarketId
+				, intFutureMonthId = cd.intFutureMonthId
 				, dblNoOfLots = NULL
 				, dblQty = SUM(t.dblQty)
 				, dblPrice = AVG(t.dblCost)
@@ -1386,8 +1386,8 @@ BEGIN TRY
 				, intBookId = NULL
 				, intSubBookId = NULL
 				, intLocationId = v.intLocationId
-				, intFutureMarketId = NULL
-				, intFutureMonthId = NULL
+				, intFutureMarketId = cd.intFutureMarketId
+				, intFutureMonthId = cd.intFutureMonthId
 				, dblNoOfLots = NULL
 				, dblQty = SUM(t.dblQty)
 				, dblPrice = AVG(t.dblCost)
@@ -1401,6 +1401,7 @@ BEGIN TRY
 			INNER JOIN tblICUnitMeasure u ON u.strUnitMeasure = v.strUOM
 			INNER JOIN tblICCommodityUnitMeasure cum ON cum.intCommodityId = v.intCommodityId AND cum.intUnitMeasureId = u.intUnitMeasureId
 			LEFT JOIN tblICInventoryReceiptItem ri ON t.intTransactionDetailId = ri.intInventoryReceiptItemId AND v.strTransactionType = 'Inventory Receipt'
+			LEFT JOIN tblCTContractDetail cd ON cd.intContractDetailId = ri.intContractDetailId
 			WHERE t.dblQty <> 0 
 				AND v.ysnInTransit = 1
 				AND v.strTransactionType IN ('Inventory Receipt', 'Inventory Transfer with Shipment')
