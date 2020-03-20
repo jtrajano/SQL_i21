@@ -317,8 +317,8 @@ BEGIN TRY
 					  ARD.intCustomerStorageId
 					, @UserKey
 					, 1
-					, 33 -- Transaction Type Id for Invoice
-					, 'Generated Discount Invoice'
+					, 6
+					, 'Generated Storage Invoice'
 					, ARD.dblQtyOrdered
 					, AR.intInvoiceId
 					, GETDATE()

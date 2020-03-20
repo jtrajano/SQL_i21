@@ -210,6 +210,10 @@ BEGIN TRY
 		,ysnNoClaim BIT
 		)
 
+	SELECT @intCompanyRefId = intCompanyId
+	FROM dbo.tblIPMultiCompany
+	WHERE ysnCurrentCompany = 1
+
 	SELECT @intId = MIN(intId)
 	FROM tblLGIntrCompLogisticsStg
 	WHERE strFeedStatus IS NULL
@@ -773,7 +777,7 @@ BEGIN TRY
 
 			SELECT @intNewLoadId = intLoadId
 				,@strNewLoadNumber = strLoadNumber
-				,@intCompanyRefId = intCompanyId
+				--,@intCompanyRefId = intCompanyId
 			FROM tblLGLoad
 			WHERE intLoadRefId = @intLoadRefId
 			AND intBookId =@intBookId
@@ -933,7 +937,7 @@ BEGIN TRY
 					,strGenerateLoadHauler
 					,ysnDocumentsReceived
 					,ysnSubCurrency
-					,intCompanyId
+					--,intCompanyId
 					,intBookId
 					,intSubBookId
 					,intLoadRefId
@@ -958,6 +962,7 @@ BEGIN TRY
 					,[strDestinationPort4]
 					,[dtmETSPOL4]
 					,[dtmETAPOD4]
+					,intCompanyId
 					)
 				SELECT 1 AS intConcurrencyId
 					,@strNewLoadNumber
@@ -1092,7 +1097,7 @@ BEGIN TRY
 					,strGenerateLoadHauler
 					,ysnDocumentsReceived
 					,ysnSubCurrency
-					,intCompanyId
+					--,intCompanyId
 					,@intBookId
 					,@intSubBookId
 					,@intLoadRefId
@@ -1117,6 +1122,7 @@ BEGIN TRY
 					,[strDestinationPort4]
 					,[dtmETSPOL4]
 					,[dtmETAPOD4]
+					,@intCompanyRefId
 				FROM OPENXML(@idoc, 'vyuIPLoadViews/vyuIPLoadView', 2) WITH (
 						strHauler NVARCHAR(100) Collate Latin1_General_CI_AS
 						,strDriver NVARCHAR(100) Collate Latin1_General_CI_AS

@@ -232,17 +232,26 @@ BEGIN TRY
 								  @strProcess 			= 'Fixation Detail Delete'
 	END
 
-	SELECT @Id = MIN(Id), @DetailId = MIN(DetailId) FROM #ItemInvoice
-	WHILE ISNULL(@Id,0) > 0
+	DECLARE @dId INT
+	SELECT @DetailId = MIN(DetailId) FROM #ItemInvoice
+	WHILE ISNULL(@DetailId,0) > 0
 	BEGIN
-		-- SELECT @Count = COUNT(*) FROM tblCTPriceFixationDetailAPAR WHERE intInvoiceId = @Id
-		-- IF @Count = 1
-		-- 	SELECT @DetailId = NULL
-		-- ELSE
-			DELETE FROM tblCTPriceFixationDetailAPAR WHERE intInvoiceId = @Id AND intInvoiceDetailId = @DetailId
+		SELECT @Id = intInvoiceId FROM tblCTPriceFixationDetailAPAR WHERE intInvoiceDetailId = @DetailId
+		SELECT @Count = COUNT(*) FROM tblCTPriceFixationDetailAPAR WHERE intInvoiceId = @Id
 
-		EXEC uspARDeleteInvoice @Id,@intUserId,@DetailId
-		SELECT @Id = MIN(Id) FROM #ItemInvoice WHERE Id > @Id
+		IF @Count > 1
+		BEGIN
+			SELECT @dId = @DetailId
+		END
+		ELSE
+		BEGIN
+			SELECT @dId = NULL
+		END
+
+		DELETE FROM tblCTPriceFixationDetailAPAR WHERE intInvoiceDetailId = @DetailId
+		EXEC uspARDeleteInvoice @Id,@intUserId, @dId
+
+		SELECT @DetailId = MIN(DetailId) FROM #ItemInvoice WHERE DetailId > @DetailId
 	END
 
 END TRY

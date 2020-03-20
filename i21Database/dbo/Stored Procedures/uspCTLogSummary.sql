@@ -1377,29 +1377,27 @@ BEGIN TRY
 			FROM tblAPBillDetail a
 			INNER JOIN @cbLogCurrent b ON a.intBillDetailId = b.intTransactionReferenceId
 			INNER JOIN tblAPBill c ON a.intBillId = c.intBillId
-			WHERE c.ysnPosted = 1
 
 			IF @billId IS NOT NULL
 			BEGIN
 				EXEC uspAPReverseTransaction @billId, @intUserId, @billCreatedId
 			END			
 		END
-		ELSE IF @strProcess = 'Invoice Delete'
-		BEGIN
-			DECLARE @invoiceId INT,
-					@intNewInvoiceId INT
+		-- ELSE IF @strProcess = 'Invoice Delete'
+		-- BEGIN
+		-- 	DECLARE @invoiceId INT,
+		-- 			@intNewInvoiceId INT
 
-			SELECT @invoiceId = c.intInvoiceId 
-			FROM tblARInvoiceDetail a
-			INNER JOIN @cbLogCurrent b ON a.intInvoiceDetailId = b.intTransactionReferenceId
-			INNER JOIN tblARInvoice c ON a.intInvoiceId = c.intInvoiceId
-			WHERE c.ysnPosted = 1
+		-- 	SELECT @invoiceId = c.intInvoiceId 
+		-- 	FROM tblARInvoiceDetail a
+		-- 	INNER JOIN @cbLogCurrent b ON a.intInvoiceDetailId = b.intTransactionReferenceId
+		-- 	INNER JOIN tblARInvoice c ON a.intInvoiceId = c.intInvoiceId
 			
-			IF @invoiceId IS NOT NULL
-			BEGIN
-				EXEC uspARReturnInvoice @invoiceId, @intNewInvoiceId
-			END			
-		END
+		-- 	IF @invoiceId IS NOT NULL
+		-- 	BEGIN
+		-- 		EXEC uspARReturnInvoice @invoiceId, @intNewInvoiceId
+		-- 	END			
+		-- END
 
 		DELETE FROM @cbLogCurrent WHERE intContractDetailId = @currentContractDetalId
 	END

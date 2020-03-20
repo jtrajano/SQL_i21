@@ -26,6 +26,9 @@ CREATE PROCEDURE [dbo].[uspMFPostProduction] @ysnPost BIT = 0
 	,@dblUnitCost NUMERIC(38, 20) = NULL
 	,@strNotes NVARCHAR(MAX) = NULL
 	,@intLotStatusId INT = NULL
+	,@intBookId INT = NULL
+	,@intSubBookId INT = NULL
+	,@intOriginId INT = NULL
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -298,6 +301,8 @@ BEGIN
 		,intSourceTransactionTypeId
 		,intShiftId
 		,strParentLotNumber
+		,intBookId
+		,intSubBookId
 		)
 	SELECT intLotId = NULL
 		,strLotNumber = @strLotNumber
@@ -312,7 +317,7 @@ BEGIN
 		,intWeightUOMId = @intWeightUOMId
 		,dtmExpiryDate = @dtmExpiryDate
 		,dtmManufacturedDate = @dtmProductionDate
-		,intOriginId = NULL
+		,intOriginId = @intOriginId
 		,strBOLNo = NULL
 		,strVessel = @strVessel
 		,strReceiptNumber = NULL
@@ -328,6 +333,8 @@ BEGIN
 		,intSourceTransactionTypeId = @INVENTORY_PRODUCE
 		,intShiftId = @intShiftId
 		,strParentLotNumber = @strParentLotNumber
+		,intBookId = @intBookId
+		,intSubBookId = @intSubBookId
 
 	EXEC dbo.uspICCreateUpdateLotNumber @ItemsThatNeedLotId
 		,@intUserId

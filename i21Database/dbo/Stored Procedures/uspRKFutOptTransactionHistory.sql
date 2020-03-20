@@ -235,45 +235,68 @@ BEGIN TRY
 			END
 			ELSE
 			BEGIN
-				INSERT INTO @SummaryLog(strTransactionType
+				INSERT INTO @SummaryLog(
+					  strBucketType
+					, strTransactionType
 					, intTransactionRecordId
+					, intTransactionRecordHeaderId
+					, strDistributionType
 					, strTransactionNumber
 					, dtmTransactionDate
 					, intContractDetailId
 					, intContractHeaderId
 					, intCommodityId
-					, intLocationId
 					, intBookId
 					, intSubBookId
 					, intFutureMarketId
 					, intFutureMonthId
 					, dblNoOfLots
+					, dblContractSize
 					, dblPrice
 					, intEntityId
 					, intUserId
+					, intLocationId
+					, intCommodityUOMId
 					, strNotes
-					, intCommodityUOMId)
-				SELECT strTransactionType = 'Derivatives'
+					, strMiscFields)
+				SELECT
+					  strBucketType = 'Derivatives' 
+					, strTransactionType = 'Derivative Entry'
 					, intTransactionRecordId = der.intFutOptTransactionId
+					, intTransactionRecordHeaderId = der.intFutOptTransactionHeaderId
+					, strDistributionType = der.strNewBuySell
 					, strTransactionNumber = der.strInternalTradeNo
 					, dtmTransactionDate = der.dtmTransactionDate
 					, intContractDetailId = der.intContractDetailId
 					, intContractHeaderId = der.intContractHeaderId
 					, intCommodityId = der.intCommodityId
-					, intLocationId = der.intLocationId
 					, intBookId = der.intBookId
 					, intSubBookId = der.intSubBookId
 					, intFutureMarketId = der.intFutureMarketId
 					, intFutureMonthId = der.intFutureMonthId
-					, dblNoOfLots = der.dblNoOfContract
+					, dblNoOfLots = der.dblNewNoOfLots
+					, dblContractSize = m.dblContractSize
 					, dblPrice = der.dblPrice
 					, intEntityId = der.intEntityId
-					, intUserId = @intUserId
-					, strNotes = der.strReference
-					, intCommodityUOMId = cUOM.intCommodityUnitMeasureId
-				FROM tblRKFutOptTransaction der
+					, intUserId = der.intUserId
+					, der.intLocationId
+					, cUOM.intCommodityUnitMeasureId
+					, strNotes = strNotes
+					, strMiscFields = '{intOptionMonthId = "' + ISNULL(CAST(intOptionMonthId AS NVARCHAR), '') +'"}'
+										+ ' {strOptionMonth = "' + ISNULL(strOptionMonth, '') +'"}'
+										+ ' {dblStrike = "' + CAST(ISNULL(dblStrike,0) AS NVARCHAR) +'"}'
+										+ ' {strOptionType = "' + ISNULL(strOptionType, '') +'"}'
+										+ ' {strInstrumentType = "' + ISNULL(strInstrumentType, '') +'"}'
+										+ ' {intBrokerageAccountId = "' + ISNULL(CAST(intBrokerId AS NVARCHAR), '') +'"}'
+										+ ' {strBrokerAccount = "' + ISNULL(strBrokerAccount, '') +'"}'
+										+ ' {strBroker = "' + ISNULL(strBroker, '') +'"}'
+										+ ' {strBuySell = "' + ISNULL(strNewBuySell, '') +'"}'
+										+ ' {ysnPreCrush = "' + CAST(ISNULL(ysnPreCrush,0) AS NVARCHAR) +'"}'
+										+ ' {strBrokerTradeNo = "' + ISNULL(strBrokerTradeNo, '') +'"}'
+				FROM vyuRKGetFutOptTransactionHistory der
 				JOIN tblRKFutureMarket m ON m.intFutureMarketId = der.intFutureMarketId
 				LEFT JOIN tblICCommodityUnitMeasure cUOM ON cUOM.intCommodityId = der.intCommodityId AND cUOM.intUnitMeasureId = m.intUnitMeasureId
+				WHERE der.intFutOptTransactionId = @intFutOptTransactionId
 			END
 		END
 	END

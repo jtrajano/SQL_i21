@@ -90,7 +90,7 @@ BEGIN TRY
                  (
 		            SELECT ',' + QUOTENAME(d.PivotColumn)
 					FROM (
-							SELECT DISTINCT c.[PivotColumn] PivotColumn, c.[PivotColumnId]
+							SELECT DISTINCT REPLACE(c.[PivotColumn], '''', '''''') PivotColumn, c.[PivotColumnId]
 							FROM (							
 									SELECT *
 									FROM ##StorageDiscounts
@@ -116,7 +116,8 @@ BEGIN TRY
 									col_6 VARCHAR(50), col_7 VARCHAR(50), col_8 VARCHAR(50), col_9 VARCHAR(50), col_10 VARCHAR(50), 
 									col_11 VARCHAR(50), col_12 VARCHAR(50), col_13 VARCHAR(50), col_14 VARCHAR(50), col_15 VARCHAR(50), 
 									col_16 VARCHAR(50), col_17 VARCHAR(50), col_18 VARCHAR(50), col_19 VARCHAR(50), col_20 VARCHAR(50),
-									col_21 VARCHAR(50), col_22 VARCHAR(50), col_23 VARCHAR(50), col_24 VARCHAR(50), col_25 VARCHAR(50))';
+									col_21 VARCHAR(50), col_22 VARCHAR(50), col_23 VARCHAR(50), col_24 VARCHAR(50), col_25 VARCHAR(50),
+									col_26 VARCHAR(50), col_27 VARCHAR(50), col_28 VARCHAR(50), col_29 VARCHAR(50), col_30 VARCHAR(50))';
 	EXEC(@sql);
 
 	SELECT @cnt = (COUNT(*) + 1)
@@ -129,7 +130,7 @@ BEGIN TRY
 
 	IF @cnt > 1
 	BEGIN
-		WHILE (@cnt < 25)
+		WHILE (@cnt < 30)
 		BEGIN
 			SET @cnt = @cnt + 1;
 
@@ -162,7 +163,8 @@ BEGIN TRY
 			, t1.col_9, t1.col_10, t1.col_11, t1.col_12, t1.col_13
 			, t1.col_14, t1.col_15, t1.col_16, t1.col_17, t1.col_18
 			, t1.col_19, t1.col_20, t1.col_21, t1.col_22, t1.col_23
-			, t1.col_24, t1.col_25 
+			, t1.col_24, t1.col_25, t1.col_26, t1.col_27, t1.col_28
+			, t1.col_29, t1.col_30
 		FROM ##StorageDiscounts S
 		OUTER APPLY (
 			SELECT * FROM ##TableFinalResult2
@@ -206,6 +208,11 @@ BEGIN TRY
 				, CONVERT(NVARCHAR(MAX),SUM(CONVERT(NUMERIC(18,2),ISNULL(col_23,0)))) col_23
 				, CONVERT(NVARCHAR(MAX),SUM(CONVERT(NUMERIC(18,2),ISNULL(col_24,0)))) col_24
 				, CONVERT(NVARCHAR(MAX),SUM(CONVERT(NUMERIC(18,2),ISNULL(col_25,0)))) col_25
+				, CONVERT(NVARCHAR(MAX),SUM(CONVERT(NUMERIC(18,2),ISNULL(col_26,0)))) col_26
+				, CONVERT(NVARCHAR(MAX),SUM(CONVERT(NUMERIC(18,2),ISNULL(col_27,0)))) col_27
+				, CONVERT(NVARCHAR(MAX),SUM(CONVERT(NUMERIC(18,2),ISNULL(col_28,0)))) col_28
+				, CONVERT(NVARCHAR(MAX),SUM(CONVERT(NUMERIC(18,2),ISNULL(col_29,0)))) col_29
+				, CONVERT(NVARCHAR(MAX),SUM(CONVERT(NUMERIC(18,2),ISNULL(col_30,0)))) col_30
 		FROM ##TableFinalResult2 
 		WHERE col_1 <> '1'
 		GROUP BY col_1,col_2,col_3,col_4 --fixed columns
@@ -235,6 +242,11 @@ BEGIN TRY
 				, CONVERT(NVARCHAR(MAX),SUM(CONVERT(NUMERIC(18,2),ISNULL(col_23,0)))) col_23
 				, CONVERT(NVARCHAR(MAX),SUM(CONVERT(NUMERIC(18,2),ISNULL(col_24,0)))) col_24
 				, CONVERT(NVARCHAR(MAX),SUM(CONVERT(NUMERIC(18,2),ISNULL(col_25,0)))) col_25
+				, CONVERT(NVARCHAR(MAX),SUM(CONVERT(NUMERIC(18,2),ISNULL(col_26,0)))) col_26
+				, CONVERT(NVARCHAR(MAX),SUM(CONVERT(NUMERIC(18,2),ISNULL(col_27,0)))) col_27
+				, CONVERT(NVARCHAR(MAX),SUM(CONVERT(NUMERIC(18,2),ISNULL(col_28,0)))) col_28
+				, CONVERT(NVARCHAR(MAX),SUM(CONVERT(NUMERIC(18,2),ISNULL(col_29,0)))) col_29
+				, CONVERT(NVARCHAR(MAX),SUM(CONVERT(NUMERIC(18,2),ISNULL(col_30,0)))) col_30
 		FROM ##TableFinalResult2 
 		WHERE col_1 <> '1'
 		GROUP BY col_1,col_2,col_3 --fixed columns

@@ -16,6 +16,7 @@ BEGIN TRY
 	DECLARE @strContractType NVARCHAR(100)
 	DECLARE @intRecordId INT
 	DECLARE @strReceiptNumber NVARCHAR(100)
+	DECLARE @ysnPosted BIT
 	DECLARE @tblLoadContract TABLE 
 			(intRecordId INT Identity(1, 1)
 			,intContractDetailId INT
@@ -25,9 +26,11 @@ BEGIN TRY
 
 	SELECT @intLoadDetailContainerLinkId = LDCL.intLoadDetailContainerLinkId
 		  ,@strLoadContainerNumber = LC.strContainerNumber
+		  ,@ysnPosted = ISNULL(L.ysnPosted, 0)
 	FROM tblLGLoadContainer LC
 	JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadContainerId = LC.intLoadContainerId
 	JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = LDCL.intLoadDetailId
+	JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
 	WHERE LDCL.intLoadContainerId = @intLoadContainerId
 		AND LD.intPContractDetailId = @intContractDetailId
 
@@ -99,7 +102,9 @@ BEGIN TRY
 					,@intLoadDetailItemUOMId = intLoadDetailItemUOMId
 			FROM @tblLoadContract WHERE intRecordId = @intRecordId
 
-			EXEC uspCTUpdateScheduleQuantityUsingUOM
+			/* Impact Scheduled Qty only if LS is posted already*/
+			IF (@ysnPosted = 1)
+				EXEC uspCTUpdateScheduleQuantityUsingUOM
 							@intContractDetailId	= @intContractDetailId,
 							@dblQuantityToUpdate	= @dblContainerLinkQty,
 							@intUserId				= @intEntityUserId,
