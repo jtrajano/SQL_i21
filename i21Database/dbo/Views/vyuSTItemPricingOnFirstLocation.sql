@@ -15,7 +15,9 @@ SELECT
 		strItemNoAndDescription = ISNULL(tblICItem.strItemNo,'') + '-' + ISNULL(tblICItem.strDescription,''),
 		tblICCategory.strCategoryCode,
 		strCategoryDescription = tblICCategory.strDescription,
-		tblICCategory.intCategoryId
+		tblICCategory.intCategoryId,
+		tblEMEntity.strName,
+		tblICItemLocation.intVendorId
 	FROM 
 	(
 		SELECT * FROM (
@@ -39,3 +41,6 @@ SELECT
 		ON tblICItemUOM.intItemUOMId = tblICItemLocation.intIssueUOMId
 	LEFT JOIN tblICCategory
 		ON tblICCategory.intCategoryId = tblICItem.intCategoryId
+	LEFT JOIN tblEMEntity 
+		ON tblEMEntity.intEntityId = tblICItemLocation.intVendorId
+
