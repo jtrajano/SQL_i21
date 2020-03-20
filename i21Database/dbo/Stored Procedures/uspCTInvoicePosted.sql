@@ -105,7 +105,7 @@ BEGIN TRY
 	AND (
 		(I.strTransactionType <> 'Credit Memo' AND I.[intInventoryShipmentItemId] IS NULL AND I.[intShipmentPurchaseSalesContractId] IS NULL AND (I.[intLoadDetailId] IS NULL OR (I.intLoadDetailId IS NOT NULL AND ISNULL(LG.intPurchaseSale, 0) = 3)))
 		OR
-		(I.strTransactionType = 'Credit Memo' AND (I.[intInventoryShipmentItemId] IS NOT NULL OR I.[intShipmentPurchaseSalesContractId] IS NOT NULL OR I.[intLoadDetailId] IS NOT NULL))
+		(I.strTransactionType = 'Credit Memo' AND (I.[intInventoryShipmentItemId] IS NOT NULL OR I.[intShipmentPurchaseSalesContractId] IS NOT NULL OR I.[intLoadDetailId] IS NOT NULL OR ISNULL(RI.[intInvoiceId], 0) <> 0))
 	)
 
 	IF NOT EXISTS(SELECT * FROM @tblToProcess)
