@@ -78,6 +78,7 @@ SELECT
 	, Receipt.dblGrandTotal
 	, Receipt.dtmCreated 
 	, Receipt.strInternalComments
+	, fiscal.strPeriod strAccountingPeriod
 	--, WeightLoss.dblClaimableWt
 FROM tblICInventoryReceipt Receipt
 	LEFT JOIN vyuAPVendor Vendor ON Vendor.[intEntityId] = Receipt.intEntityVendorId
@@ -126,3 +127,8 @@ FROM tblICInventoryReceipt Receipt
 			AND trans.intRecordId = Receipt.intInventoryReceiptId
 		ORDER BY approval.intApprovalId DESC, approval.dtmDate DESC
 	) submissionStatus
+	OUTER APPLY (
+		SELECT TOP 1 fp.strPeriod
+		FROM tblGLFiscalYearPeriod fp
+		WHERE Receipt.dtmReceiptDate BETWEEN fp.dtmStartDate AND fp.dtmEndDate
+	) fiscal

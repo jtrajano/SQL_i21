@@ -43,6 +43,7 @@ SELECT
 	, Link.strInvoiceNumber
 	, Link.strShipmentNumber
 	, Link.strReceiptNumber
+	, fiscal.strPeriod strAccountingPeriod
 FROM tblICInventoryAdjustment Adj
 LEFT JOIN vyuICInventoryAdjustmentSourceLink Link
 	on Link.intInventoryAdjustmentId = Adj.intInventoryAdjustmentId
@@ -81,3 +82,8 @@ CROSS APPLY (
 		AND trans.intRecordId = Adj.intInventoryAdjustmentId
 	ORDER BY approval.intApprovalId DESC, approval.dtmDate DESC
 ) submissionStatus
+OUTER APPLY (
+	SELECT TOP 1 fp.strPeriod
+	FROM tblGLFiscalYearPeriod fp
+	WHERE Adj.dtmAdjustmentDate BETWEEN fp.dtmStartDate AND fp.dtmEndDate
+) fiscal

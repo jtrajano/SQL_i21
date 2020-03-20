@@ -51,6 +51,7 @@ SELECT ReceiptCharge.intInventoryReceiptChargeId
 	, Book.strBook
 	, SubBook.strSubBook
     , permission.intEntityContactId
+	, fiscal.strPeriod strAccountingPeriod
 FROM tblICInventoryReceiptCharge ReceiptCharge
 	LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = ReceiptCharge.intCostUOMId
 	LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
@@ -82,5 +83,10 @@ FROM tblICInventoryReceiptCharge ReceiptCharge
 		WHERE sl.intCompanyLocationId = Receipt.intLocationId
 			AND sl.intVendorId = permission.intEntityId
 	) accessibleReceipts
+	OUTER APPLY (
+		SELECT TOP 1 fp.strPeriod
+		FROM tblGLFiscalYearPeriod fp
+		WHERE Receipt.dtmReceiptDate BETWEEN fp.dtmStartDate AND fp.dtmEndDate
+	) fiscal
 WHERE Receipt.strReceiptType = 'Purchase Contract'
 	AND Receipt.intSourceType = 2

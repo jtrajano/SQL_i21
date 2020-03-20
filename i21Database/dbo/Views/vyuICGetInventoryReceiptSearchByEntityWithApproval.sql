@@ -78,6 +78,7 @@ SELECT
 	, Receipt.dblGrandTotal
 	, permission.intEntityContactId
 	, Receipt.dtmCreated 
+	, fiscal.strPeriod strAccountingPeriod
 FROM tblICInventoryReceipt Receipt
 	LEFT JOIN vyuAPVendor Vendor ON Vendor.[intEntityId] = Receipt.intEntityVendorId
 	LEFT JOIN vyuAPVendor ShipFromEntity ON ShipFromEntity.[intEntityId] = Receipt.intShipFromEntityId
@@ -141,5 +142,10 @@ FROM tblICInventoryReceipt Receipt
 			AND trans.intRecordId = Receipt.intInventoryReceiptId
 		ORDER BY approval.intApprovalId DESC, approval.dtmDate DESC
 	) submissionStatus
+	OUTER APPLY (
+		SELECT TOP 1 fp.strPeriod
+		FROM tblGLFiscalYearPeriod fp
+		WHERE Receipt.dtmReceiptDate BETWEEN fp.dtmStartDate AND fp.dtmEndDate
+	) fiscal
 WHERE Receipt.strReceiptType = 'Purchase Contract'
 	AND Receipt.intSourceType = 2
