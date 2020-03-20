@@ -282,7 +282,9 @@ BEGIN TRY
 
 			EXEC sp_xml_preparedocument @idoc OUTPUT
 				,@strDetailXML
-
+			
+			Delete from @tblIPInvoiceDetail
+			Delete from @tblIPFinalInvoiceDetail
 			INSERT INTO @tblIPInvoiceDetail (
 				strItemNo
 				,intContractHeaderId
@@ -507,11 +509,11 @@ BEGIN TRY
 			WHERE intInvoiceRefId = @intInvoiceId
 
 			SELECT @type = CASE 
-					WHEN @strDocType = 'AP Voucher'
+					WHEN @strTransactionType = 'Invoice'
 						THEN 1
 					ELSE 3
 					END
-
+			Delete from @voucherNonInvDetails
 			INSERT INTO @voucherNonInvDetails (
 				intEntityVendorId
 				,intTransactionType
@@ -531,9 +533,10 @@ BEGIN TRY
 				,intWeightUOMId
 				,strVendorOrderNumber
 				,intBillId
+				,ysnStage
 				)
 			SELECT @intEntityId
-				,@type
+				,1
 				,@intLocationId
 				--,@intUserId
 				,intItemId
@@ -549,7 +552,7 @@ BEGIN TRY
 				,dblItemWeight
 				,intWeightUnitMeasureId
 				,@strInvoiceNumber
-				,@intBillId
+				,@intBillId,0
 			FROM @tblIPFinalInvoiceDetail
 
 			EXEC uspAPCreateVoucher @voucherPayables = @voucherNonInvDetails
@@ -562,6 +565,11 @@ BEGIN TRY
 				,intSubBookId = @intSubBookId
 				,intEntityId = @intEntityId
 				,intInvoiceRefId = @intInvoiceId
+				,intTransactionType =CASE 
+					WHEN @strTransactionType = 'Invoice'
+						THEN 1
+					ELSE 3
+					END
 			WHERE intBillId = @intBillInvoiceId
 
 			--UPDATE tblAPBillDetail
