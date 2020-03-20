@@ -8573,6 +8573,7 @@
     <Build Include="dbo\Stored Procedures\uspSTRecalculateReturnLottery.sql" />
     <Build Include="dbo\Stored Procedures\uspARInvoiceProcessStgXML.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportContractS2018.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTReportPriceFixationStrauss.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
