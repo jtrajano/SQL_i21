@@ -332,13 +332,138 @@ SELECT
 	,[dblCurrencyExchangeRate]				= ARSI.[dblCurrencyExchangeRate]
 	,[intSubCurrencyId]						= ARSI.[intSubCurrencyId]
 	,[dblSubCurrencyRate]					= ARSI.[dblSubCurrencyRate]
-FROM
-	vyuARShippedItems ARSI
-WHERE
-	ARSI.[strTransactionType] = 'Inventory Shipment'
-	AND ARSI.[intInventoryShipmentId] = @ShipmentId
-	AND ARSI.intEntityCustomerId = @EntityCustomerId
-	AND (ISNULL(ARSI.intPricingTypeId, 0) <> 2 OR (ISNULL(ARSI.intPricingTypeId, 0) = 2 AND ISNULL(dbo.fnCTGetAvailablePriceQuantity(ARSI.[intContractDetailId],0), 0) > 0))
+FROM vyuARShippedItems ARSI
+OUTER APPLY (
+	SELECT TOP 1 intPriceFixationId
+	FROM tblCTPriceFixation CPF
+	WHERE CPF.intContractDetailId = ARSI.intContractDetailId
+	  AND CPF.intContractHeaderId = ARSI.intContractHeaderId
+) PRICE
+WHERE ARSI.[strTransactionType] = 'Inventory Shipment'
+  AND ARSI.[intInventoryShipmentId] = @ShipmentId
+  AND ARSI.intEntityCustomerId = @EntityCustomerId
+  AND (ISNULL(ARSI.intPricingTypeId, 0) <> 2 OR (ISNULL(ARSI.intPricingTypeId, 0) = 2 AND ISNULL(dbo.fnCTGetAvailablePriceQuantity(ARSI.[intContractDetailId],0), 0) > 0))
+  AND ISNULL(PRICE.intPriceFixationId, 0) = 0
+
+UNION ALL
+
+SELECT
+	 [strSourceTransaction]					= 'Inventory Shipment'
+	,[intSourceId]							= @ShipmentId
+	,[strSourceId]							= @ShipmentNumber
+	,[intInvoiceId]							= NULL
+	,[intEntityCustomerId]					= @EntityCustomerId 
+	,[intCompanyLocationId]					= @CompanyLocationId 
+	,[intCurrencyId]						= @CurrencyId 
+	,[intTermId]							= NULL 
+	,[intPeriodsToAccrue]					= @PeriodsToAccrue 
+	,[dtmDate]								= @Date 
+	,[dtmDueDate]							= NULL
+	,[dtmShipDate]							= @ShipDate 
+	,[intEntitySalespersonId]				= @EntitySalespersonId 
+	,[intFreightTermId]						= @FreightTermId 
+	,[intShipViaId]							= @ShipViaId 
+	,[intPaymentMethodId]					= NULL 
+	,[strInvoiceOriginId]					= NULL 
+	,[strPONumber]							= @PONumber 
+	,[strBOLNumber]							= @BOLNumber 
+	,[strComments]							= @Comments 
+	,[intShipToLocationId]					= @intShipToLocationId 
+	,[intBillToLocationId]					= NULL
+	,[ysnTemplate]							= 0
+	,[ysnForgiven]							= 0
+	,[ysnCalculated]						= 0
+	,[ysnSplitted]							= 0
+	,[intPaymentId]							= NULL
+	,[intSplitId]							= (SELECT TOP 1 intSplitId FROM tblSOSalesOrder WHERE intSalesOrderId = ARSI.intSalesOrderId)
+	,[intDistributionHeaderId]				= NULL
+	,[strActualCostId]						= NULL
+	,[intShipmentId]						= NULL
+	,[intTransactionId]						= NULL
+	,[intOriginalInvoiceId]					= NULL
+	,[intEntityId]							= @UserId
+	,[ysnResetDetails]						= 0
+	,[ysnRecap]								= 0
+	,[ysnPost]								= 0
+																																																		
+	,[intInvoiceDetailId]					= NULL
+	,[intItemId]							= ARSI.[intItemId]
+	,[ysnInventory]							= 1
+	,[strDocumentNumber]					= @ShipmentNumber 
+	,[strItemDescription]					= ARSI.[strItemDescription]
+	,[intOrderUOMId]						= ARSI.[intOrderUOMId] 
+	,[dblQtyOrdered]						= ARSI.[dblQtyOrdered] 
+	,[intItemUOMId]							= ARSI.[intItemUOMId] 
+	,[intPriceUOMId]						= CASE WHEN ISNULL(@OnlyUseShipmentPrice, 0) = 0 THEN ARSI.[intPriceUOMId] ELSE ARSI.[intItemUOMId] END
+	,[dblQtyShipped]						= ARSI.[dblQtyShipped]
+	,[dblContractPriceUOMQty]				= CASE WHEN ISNULL(@OnlyUseShipmentPrice, 0) = 0 THEN ARSI.[dblPriceUOMQuantity] ELSE ARSI.[dblQtyShipped] END 
+	,[dblDiscount]							= ARSI.[dblDiscount] 
+	,[dblItemWeight]						= ARSI.[dblWeight]  
+	,[intItemWeightUOMId]					= ARSI.[intWeightUOMId] 
+	,[dblPrice]								= CASE WHEN ARSI.[intOwnershipType] = 2 THEN 0 ELSE ARSI.[dblShipmentUnitPrice] END
+	,[dblUnitPrice]							= CASE WHEN ARSI.[intOwnershipType] = 2 THEN 0 ELSE (CASE WHEN ISNULL(@OnlyUseShipmentPrice, 0) = 0 THEN ARSI.[dblUnitPrice] ELSE ARSI.[dblShipmentUnitPrice] END) END
+	,[strPricing]							= ARSI.[strPricing]
+	,[ysnRefreshPrice]						= 0
+	,[strMaintenanceType]					= NULL
+	,[strFrequency]							= NULL
+	,[dtmMaintenanceDate]					= NULL
+	,[dblMaintenanceAmount]					= @ZeroDecimal 
+	,[dblLicenseAmount]						= @ZeroDecimal
+	,[intTaxGroupId]						= ARSI.[intTaxGroupId] 
+	,[intStorageLocationId]					= ARSI.[intStorageLocationId] 
+	,[intCompanyLocationSubLocationId]		= ARSI.[intSubLocationId]
+	,[ysnRecomputeTax]						= (CASE WHEN ISNULL(ARSI.[intSalesOrderDetailId], 0) = 0 THEN 1 ELSE 0 END)	
+	,[intSCInvoiceId]						= NULL
+	,[strSCInvoiceNumber]					= NULL
+	,[intSCBudgetId]						= NULL
+	,[strSCBudgetDescription]				= NULL
+	,[intInventoryShipmentItemId]			= ARSI.[intInventoryShipmentItemId] 
+	,[intInventoryShipmentChargeId]			= ARSI.[intInventoryShipmentChargeId]
+	,[strShipmentNumber]					= ARSI.[strInventoryShipmentNumber] 
+	,[intRecipeItemId]						= ARSI.[intRecipeItemId] 
+	,[intRecipeId]							= ARSI.[intRecipeId]
+	,[intSubLocationId]						= ARSI.[intSubLocationId]
+	,[intCostTypeId]						= ARSI.[intCostTypeId]
+	,[intMarginById]						= ARSI.[intMarginById]
+	,[intCommentTypeId]						= ARSI.[intCommentTypeId]
+	,[dblMargin]							= ARSI.[dblMargin]
+	,[dblRecipeQuantity]					= ARSI.[dblRecipeQuantity]
+	,[intSalesOrderDetailId]				= ARSI.[intSalesOrderDetailId] 
+	,[strSalesOrderNumber]					= ARSI.[strSalesOrderNumber] 
+	,[intContractHeaderId]					= ARSI.[intContractHeaderId] 
+	,[intContractDetailId]					= ARSI.[intContractDetailId] 
+	,[intShipmentPurchaseSalesContractId]	= NULL
+	,[dblShipmentGrossWt]					= ARSI.[dblGrossWt] 
+	,[dblShipmentTareWt]					= ARSI.[dblTareWt] 
+	,[dblShipmentNetWt]						= ARSI.[dblNetWt] 
+	,[intTicketId]							= ARSI.[intTicketId] 
+	,[intTicketHoursWorkedId]				= NULL
+	,[intOriginalInvoiceDetailId]			= NULL
+	,[intSiteId]							= NULL
+	,[strBillingBy]							= NULL
+	,[dblPercentFull]						= NULL
+	,[dblNewMeterReading]					= @ZeroDecimal
+	,[dblPreviousMeterReading]				= @ZeroDecimal
+	,[dblConversionFactor]					= @ZeroDecimal
+	,[intPerformerId]						= NULL
+	,[ysnLeaseBilling]						= 0
+	,[ysnVirtualMeterReading]				= 0
+	,[ysnClearDetailTaxes]					= 0
+	,[intTempDetailIdForTaxes]				= ARSI.[intSalesOrderDetailId]
+	,[ysnBlended]							= ARSI.[ysnBlended]
+	,[intStorageScheduleTypeId]				= @StorageScheduleTypeId
+	,[intDestinationGradeId]				= ARSI.[intDestinationGradeId]
+	,[intDestinationWeightId]				= ARSI.[intDestinationWeightId]
+	,[intCurrencyExchangeRateTypeId]		= ARSI.[intCurrencyExchangeRateTypeId]
+	,[intCurrencyExchangeRateId]			= ARSI.[intCurrencyExchangeRateId]
+	,[dblCurrencyExchangeRate]				= ARSI.[dblCurrencyExchangeRate]
+	,[intSubCurrencyId]						= ARSI.[intSubCurrencyId]
+	,[dblSubCurrencyRate]					= ARSI.[dblSubCurrencyRate]
+FROM vyuARShippedItems ARSI
+WHERE ARSI.[strTransactionType] = 'Inventory Shipment Contract Pricing'
+  AND ARSI.[intInventoryShipmentId] = @ShipmentId
+  AND ARSI.intEntityCustomerId = @EntityCustomerId
+  AND (ISNULL(ARSI.intPricingTypeId, 0) <> 2 OR (ISNULL(ARSI.intPricingTypeId, 0) = 2 AND ISNULL(dbo.fnCTGetAvailablePriceQuantity(ARSI.[intContractDetailId],0), 0) > 0))
 
 UNION ALL
 
@@ -454,18 +579,13 @@ SELECT
 	,[dblCurrencyExchangeRate]				= SOD.[dblCurrencyExchangeRate]
 	,[intSubCurrencyId]						= SOD.[intSubCurrencyId]
 	,[dblSubCurrencyRate]					= SOD.[dblSubCurrencyRate]
-FROM 
-	tblICInventoryShipment ICIS
-	INNER JOIN tblSOSalesOrder SO 
-		ON SO.strSalesOrderNumber = @strReferenceNumber
-		AND ICIS.intEntityCustomerId = SO.intEntityCustomerId 
-	INNER JOIN tblSOSalesOrderDetail SOD 
-		ON SO.intSalesOrderId = SOD.intSalesOrderId 
-		AND SOD.intCommentTypeId IN (0,1,3)
-		AND SOD.dblQtyOrdered = 0
-WHERE 
-	ICIS.intInventoryShipmentId = @ShipmentId
-
+FROM tblICInventoryShipment ICIS
+INNER JOIN tblSOSalesOrder SO ON SO.strSalesOrderNumber = @strReferenceNumber
+							 AND ICIS.intEntityCustomerId = SO.intEntityCustomerId 
+INNER JOIN tblSOSalesOrderDetail SOD ON SO.intSalesOrderId = SOD.intSalesOrderId 
+								    AND SOD.intCommentTypeId IN (0,1,3)
+									AND SOD.dblQtyOrdered = 0
+WHERE ICIS.intInventoryShipmentId = @ShipmentId
 
 UNION ALL
 
@@ -710,7 +830,8 @@ BEGIN
 	RAISERROR(@ErrorMessage, 16, 1);
 	RETURN 0;
 END	
-	
+
+--TAX ENTRIES	
 DECLARE	 @LineItemTaxEntries	LineItemTaxDetailStagingTable
 		,@CurrentErrorMessage NVARCHAR(250)
 		,@CreatedIvoices NVARCHAR(MAX)
@@ -764,22 +885,87 @@ INNER JOIN tblSOSalesOrderDetailTax SOSODT ON EFI.[intTempDetailIdForTaxes] = SO
 ORDER BY EFI.[intSalesOrderDetailId] ASC
 	   , SOSODT.[intSalesOrderDetailTaxId] ASC
 
---GET EXISTING INVOICE FOR BATCH SCALE
-SELECT TOP 1 @intContractShipToLocationId = CD.intShipToId
+ --CONTRACT PRICE FIXATION
+ IF EXISTS (SELECT TOP 1 NULL FROM @EntriesForInvoice WHERE intContractDetailId IS NOT NULL)
+     BEGIN
+         DECLARE @dblShipmentQty                NUMERIC(18, 6) = 0
+ 
+         DECLARE @tblEntries TABLE (
+               intId                            INT
+             , intInventoryShipmentItemId    INT
+             , intContractDetailId            INT
+             , intItemUOMId                    INT
+             , dblQtyShipped                    NUMERIC(18, 6)
+         )
+         
+         INSERT INTO @tblEntries
+         SELECT IE.intId
+              , IE.intInventoryShipmentItemId
+              , IE.intContractDetailId
+              , IE.intItemUOMId
+              , IE.dblQtyShipped
+         FROM @EntriesForInvoice    IE
+         INNER JOIN tblCTPriceFixation CPF ON IE.intContractHeaderId = CPF.intContractHeaderId AND IE.intContractDetailId = CPF.intContractDetailId
+         INNER JOIN tblICInventoryShipmentItem ISI ON IE.intInventoryShipmentItemId = ISI.intInventoryShipmentItemId
+                                                  AND IE.intContractDetailId = ISI.intLineNo 
+                                                  AND IE.intContractHeaderId = ISI.intOrderId
+         WHERE ISI.intInventoryShipmentId = @ShipmentId
+           AND IE.intContractDetailId IS NOT NULL
+ 
+         SELECT @dblShipmentQty = SUM(ISI.dblQuantity) 
+         FROM tblICInventoryShipmentItem ISI
+         INNER JOIN tblCTPriceFixation CPF ON CPF.intContractDetailId = ISI.intLineNo 
+                                          AND CPF.intContractHeaderId = ISI.intOrderId
+         WHERE ISI.intInventoryShipmentId = @ShipmentId
+           AND ISNULL(CPF.intPriceFixationId, 0) <> 0
+ 
+         WHILE EXISTS (SELECT TOP 1 NULL FROM @tblEntries)
+             BEGIN
+                 DECLARE @intId    INT
+                 DECLARE @dblQty    NUMERIC(18, 6) = 0
+                 
+                 SELECT TOP 1 @intId        = intId 
+                            , @dblQty    = dblQtyShipped
+                 FROM @tblEntries 
+                 ORDER BY intId DESC
+                 
+                 IF @dblQty <= @dblShipmentQty
+                     SET @dblShipmentQty = @dblShipmentQty - @dblQty
+                 ELSE IF @dblQty > @dblShipmentQty
+                     BEGIN
+                         UPDATE @EntriesForInvoice
+                         SET dblQtyShipped = @dblShipmentQty
+                         WHERE intId = @intId
+ 
+                         SET @dblShipmentQty = 0
+                     END
+ 
+                 IF @dblShipmentQty = 0
+                     BEGIN
+                         DELETE IE 
+                         FROM @EntriesForInvoice IE
+                         INNER JOIN @tblEntries TBL ON IE.intId = TBL.intId AND IE.intId <> @intId
+ 
+                         DELETE FROM @tblEntries
+                     END
+ 
+                 DELETE FROM @tblEntries WHERE intId = @intId
+             END
+     END
+
+--GET DISTINCT SHIP TO FROM CONTRACT DETAIL
+UPDATE IE
+SET intShipToLocationId 			= ISNULL(CD.intShipToId, @intShipToLocationId)
+  , strComments						= ISNULL(IE.strComments, '') + ' Contract #' + ISNULL(CH.strContractNumber, '')
+  , @intContractShipToLocationId	= ISNULL(CD.intShipToId, @intShipToLocationId)
 FROM @EntriesForInvoice IE
 INNER JOIN tblCTContractDetail CD ON IE.intContractDetailId = CD.intContractDetailId
-WHERE CD.intContractDetailId IS NOT NULL
-  AND CD.intShipToId IS NOT NULL
+INNER JOIN tblCTContractHeader CH ON CD.intContractHeaderId = CH.intContractHeaderId
+WHERE IE.intContractDetailId IS NOT NULL
+  AND ISNULL(CD.intShipToId, 0) <> @intShipToLocationId
 
-IF ISNULL(@intContractShipToLocationId, 0) <> 0
-	BEGIN
-		SET @intShipToLocationId = @intContractShipToLocationId
-
-		UPDATE @EntriesForInvoice
-		SET intShipToLocationId = @intContractShipToLocationId		
-	END
-
-SELECT @intExistingInvoiceId = dbo.fnARGetInvoiceForBatch(@EntityCustomerId, @intShipToLocationId)
+SET @intContractShipToLocationId = ISNULL(@intContractShipToLocationId, @intShipToLocationId) 
+SELECT @intExistingInvoiceId = dbo.fnARGetInvoiceForBatch(@EntityCustomerId, @intContractShipToLocationId)
 
 --CREATE INVOICE IF THERE's NONE
 IF ISNULL(@intExistingInvoiceId, 0) = 0
