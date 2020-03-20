@@ -8574,6 +8574,14 @@
     <Build Include="dbo\Stored Procedures\uspARInvoiceProcessStgXML.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportContractS2018.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportPriceFixationStrauss.sql" />
+    <Build Include="dbo\Tables\tblIPLoadStage.sql" />
+    <Build Include="dbo\Tables\tblIPLoadError.sql" />
+    <Build Include="dbo\Tables\tblIPLoadArchive.sql" />
+    <Build Include="dbo\Tables\tblIPLoadDetailStage.sql" />
+    <Build Include="dbo\Tables\tblIPLoadDetailError.sql" />
+    <Build Include="dbo\Tables\tblIPLoadDetailArchive.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPStageSAPShippingInstruction.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessSAPShippingInstruction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
