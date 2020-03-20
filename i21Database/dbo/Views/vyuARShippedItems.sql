@@ -1199,7 +1199,7 @@ FROM (
 	     , intItemId						= intItemId
 	     , strItemDescription				= strItemDescription
 	     , intItemUOMId						= intItemUOMId
-		 , intPriceUOMId					= intPriceUOMId
+		 , intPriceUOMId					= intShipmentItemUOMId --intPriceUOMId CHANGES SOON FOR LG-2475
 	     , intOrderUOMId					= intOrderUOMId
 	     , intShipmentItemUOMId				= intShipmentItemUOMId
 		 , intWeightUOMId					= intItemUOMId
@@ -1213,7 +1213,7 @@ FROM (
 	     , dblDiscount						= dblDiscount
 	     , dblPrice							= CAST(dblPrice AS DECIMAL(18,6))
 		 , dblUnitPrice						= CAST(dblPrice AS DECIMAL(18,6))
-	     , dblShipmentUnitPrice				= CAST(dblShipmentUnitPrice AS DECIMAL(18,6))
+	     , dblShipmentUnitPrice				= CAST(dblPrice AS DECIMAL(18,6)) --dblShipmentUnitPrice CHANGES SOON FOR LG-2475
 	     , strPricing						= strPricing
 	     , strVFDDocumentNumber				= strVFDDocumentNumber
 	     , dblTotalTax						= dblTotalTax
