@@ -8131,6 +8131,14 @@
     <Build Include="dbo\Stored Procedures\uspIPProcessPOAcknowledgement_CA.sql" />
     <Build Include="dbo\Functions\fnAPCreateVoucherPayableTaxFromDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspRKReassignMatchDerivatives.sql" />
+    <Build Include="dbo\Tables\tblIPLoadStage.sql" />
+    <Build Include="dbo\Tables\tblIPLoadError.sql" />
+    <Build Include="dbo\Tables\tblIPLoadArchive.sql" />
+    <Build Include="dbo\Tables\tblIPLoadDetailStage.sql" />
+    <Build Include="dbo\Tables\tblIPLoadDetailError.sql" />
+    <Build Include="dbo\Tables\tblIPLoadDetailArchive.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPStageSAPShippingInstruction.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessSAPShippingInstruction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
