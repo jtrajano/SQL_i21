@@ -1,20 +1,22 @@
 ﻿CREATE PROCEDURE [dbo].[uspARPopulateItemsForInTransitCosting]
-
 AS
 SET QUOTED_IDENTIFIER OFF  
 SET ANSI_NULLS ON  
 SET NOCOUNT ON  
 SET ANSI_WARNINGS OFF
 
-DECLARE @FOB_ORIGIN AS INT = 1
-		,@FOB_DESTINATION AS INT = 2
-
-DECLARE @INVENTORY_INVOICE_TYPE AS INT = 33
-DECLARE	@AVERAGECOST AS INT	= 1
+DECLARE @FOB_ORIGIN 					AS INT = 1
+	  , @FOB_DESTINATION 				AS INT = 2
+	  , @INVENTORY_INVOICE_TYPE 		AS INT = 33
+	  , @AVERAGECOST 					AS INT	= 1
+	  , @ysnImposeReversalTransaction	BIT = 0
 
 SELECT	@INVENTORY_INVOICE_TYPE = [intTransactionTypeId] 
 FROM	tblICInventoryTransactionType WITH (NOLOCK)
 WHERE	[strName] = 'Invoice'
+
+SELECT TOP 1 @ysnImposeReversalTransaction  = ISNULL(ysnImposeReversalTransaction, 0)
+FROM tblRKCompanyPreference
 
 DECLARE @ZeroDecimal DECIMAL(18,6)
 SET @ZeroDecimal = 0.000000			
@@ -167,7 +169,8 @@ SELECT
 	,[intItemLocationId]			= ICIT.[intItemLocationId]
 	,[intItemUOMId]					= ICIT.[intItemUOMId]
 	,[dtmDate]						= ISNULL(ARID.[dtmPostDate], ARID.[dtmShipDate])
-	,[dblQty]                       = - CASE WHEN ISNULL(CP.intPricingCount, 0) > 1 AND (ISNULL(ICS.ysnDestinationWeightsAndGrades, 0) = 0 OR ISNULL(ICS.intDestinationWeightId, 0) = 0) THEN ARID.dblQtyShipped ELSE ICIT.[dblQty] END
+	,[dblQty]                       = CASE WHEN ISNULL(CP.intPricingCount, 0) > 1 AND (ISNULL(ICS.ysnDestinationWeightsAndGrades, 0) = 0 OR ISNULL(ICS.intDestinationWeightId, 0) = 0) THEN ARID.dblQtyShipped ELSE ICIT.[dblQty] END *
+									  (CASE WHEN ARID.strTransactionType = 'Credit Memo' THEN 1 ELSE -1 END)
 	,[dblUOMQty]					= ICIT.[dblUOMQty]
 	,[dblCost]						= ICIT.[dblCost]
 	,[dblValue]						= 0
@@ -223,7 +226,7 @@ LEFT JOIN (
 WHERE ISNULL(ARID.[intLoadDetailId], 0) = 0
   AND ARID.[intTicketId] IS NOT NULL
   AND ((ARID.[strType] <> 'Provisional' AND ARID.[ysnFromProvisional] = 0) OR (ARID.[strType] = 'Provisional' AND ARID.[ysnProvisionalWithGL] = 1))
-  AND ARID.[strTransactionType] <> 'Credit Memo'
+  AND (ARID.[strTransactionType] <> 'Credit Memo' OR @ysnImposeReversalTransaction = 1)
   AND ISNULL(ARIDL.[intInvoiceDetailLotId],0) = 0
   AND ISNULL(ITEM.strLotTracking, 'No') = 'No'
 
@@ -235,7 +238,7 @@ SELECT
 	,[intItemLocationId]			= ICIT.[intItemLocationId]
 	,[intItemUOMId]					= ICIT.[intItemUOMId]
 	,[dtmDate]						= ISNULL(ARID.[dtmPostDate], ARID.[dtmShipDate])
-	,[dblQty]						= -ICIT.[dblQty]
+	,[dblQty]						= CASE WHEN ARID.strTransactionType = 'Credit Memo' THEN ICIT.[dblQty] ELSE -ICIT.[dblQty] END
 	,[dblUOMQty]					= ICIT.[dblUOMQty]
 	,[dblCost]						= ICIT.[dblCost]
 	,[dblValue]						= 0
@@ -284,7 +287,7 @@ INNER JOIN tblICInventoryTransaction ICIT ON ICIT.[intTransactionId] = ICS.[intI
 WHERE ISNULL(ARID.[intLoadDetailId], 0) = 0
   AND ARID.[intTicketId] IS NOT NULL
   AND ((ARID.[strType] <> 'Provisional' AND ARID.[ysnFromProvisional] = 0) OR (ARID.[strType] = 'Provisional' AND ARID.[ysnProvisionalWithGL] = 1))
-  AND ARID.[strTransactionType] <> 'Credit Memo'
+  AND (ARID.[strTransactionType] <> 'Credit Memo' OR @ysnImposeReversalTransaction = 1)
 
 UNION ALL
 
