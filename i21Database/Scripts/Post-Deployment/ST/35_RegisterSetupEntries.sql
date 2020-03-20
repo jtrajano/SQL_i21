@@ -973,6 +973,53 @@ IF (@intTableCount = 3)
 			END
 
 
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblSTRegisterSetupDetail WHERE intRegisterSetupId = @intRegisterSetupId)
+		BEGIN
+			-- INSERT
+			INSERT INTO tblSTRegisterSetupDetail 
+			(
+				intRegisterSetupId, 
+				-- intImportFileHeaderId, 
+				-- strImportFileHeaderName, 
+				strFileType, strFilePrefix, 
+				strFileNamePattern, 
+				strURICommand, 
+				strStoredProcedure, 
+				intConcurrencyId
+			)
+			SELECT 
+				intRegisterSetupId			= @intRegisterSetupId, 
+				-- intImportFileHeaderId		= @intImportFileHeaderId, 
+				-- strImportFileHeaderName		= @strImportFileHeader, 
+				strFileType					= @strFileType, 
+				strFilePrefix				= @strFilePrefix, 
+				strFileNamePattern			= @strFileNamePattern, 
+				strURICommand				= NULL, 
+				strStoredProcedure			= @strStoredProcedure, 
+				intConcurrencyId			= 1
+		END
+		ELSE
+		BEGIN
+							
+			SELECT TOP 1
+				@intRegisterSetupDetailId = intRegisterSetupDetailId
+			FROM tblSTRegisterSetupDetail
+			WHERE intRegisterSetupId = @intRegisterSetupId 
+				AND intImportFileHeaderId = @intImportFileHeaderId
+
+			-- UPDATE
+			UPDATE tblSTRegisterSetupDetail
+			SET 
+				-- strImportFileHeaderName		= @strImportFileHeader, 
+				strFileType					= @strFileType, 
+				strFilePrefix				= @strFilePrefix, 
+				strFileNamePattern			= @strFileNamePattern, 
+				strURICommand				= NULL, 
+				strStoredProcedure			= @strStoredProcedure, 
+				intConcurrencyId			= 1
+			WHERE intRegisterSetupDetailId = @intRegisterSetupDetailId
+		END
+
 			-- vrubyrept-plu
 			BEGIN
 				SET @strImportFileHeader	= N'Commander PLU'
