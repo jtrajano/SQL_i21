@@ -154,7 +154,15 @@ BEGIN TRY
 			ELSE
 				SET @dblFinalSplitQty = @dblTempSplitQty
 
-			SELECT @intCustomerStorageId = intCustomerStorageId  FROM tblGRCustomerStorage WHERE intEntityId = @intEntityId AND intItemId = @intItemId AND intCompanyLocationId = @intLocationId AND intDeliverySheetId = @intDeliverySheetId
+			SELECT TOP 1
+				@intCustomerStorageId = intCustomerStorageId  
+			FROM tblGRCustomerStorage 
+			WHERE intEntityId = @intEntityId 
+				AND intItemId = @intItemId 
+				AND intCompanyLocationId = @intLocationId 
+				AND intDeliverySheetId = @intDeliverySheetId
+				AND intStorageTypeId = @intStorageScheduleTypeId
+				AND ISNULL(ysnTransferStorage,0) = 0
 
 			UPDATE tblGRCustomerStorage SET dblOpenBalance = 0 , dblOriginalBalance = 0 WHERE intCustomerStorageId = @intCustomerStorageId
 

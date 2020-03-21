@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspSCCancelTicket]
+﻿CREATE PROCEDURE [dbo].[uspSCReverseTicket]
 	@intTicketId INT,
 	@intUserId INT,
 	@intDuplicateTicketId INT OUTPUT
@@ -61,8 +61,8 @@ dECLARE @dblTicketNetUnits NUMERIC(18,6)
 DECLARE @dblQtyUpdate NUMERIC(18,6)
 DECLARE @strMatchTicketNumber NVARCHAR(50)
 DECLARE @intNewInvoiceId INT
-
-
+DECLARE @dblTicketGrossUnits NUMERIC(18,6)
+DECLARE @ysnDeliverySheetPosted BIT
 --------------------------------
 DECLARE @successfulCount INT
 DECLARE	@invalidCount INT
@@ -73,7 +73,6 @@ DECLARE	@recapId INT
 
 
 BEGIN TRY
-
 
 		---get ticket information
 		BEGIN
@@ -95,6 +94,7 @@ BEGIN TRY
 				,@intTicketStorageScheduleTypeId = intStorageScheduleTypeId
 				,@intTicketBillId = intBillId
 				,@dblTicketNetUnits = dblNetUnits
+				,@dblTicketGrossUnits = dblGrossUnits
 			FROM tblSCTicket SC
 			WHERE intTicketId = @intTicketId
 
@@ -102,7 +102,22 @@ BEGIN TRY
 		END
 
 
-		
+		---get Delivery sheet info
+		IF(ISNULL(@intDeliverySheetId,0) > 0)
+		BEGIN
+			SELECT TOP 1
+				@ysnDeliverySheetPosted = ysnPost
+			FROM tblSCDeliverySheet
+			WHERE intDeliverySheetId = @intDeliverySheetId
+		END
+
+
+		---Validation
+		IF(@ysnDeliverySheetPosted = 1)
+		BEGIN
+			SET @ErrorMessage = 'Delivery Sheet is already posted.';
+			RAISERROR(@ErrorMessage, 11, 1);
+		END
 
 		--get match ticket information for direct 
 		BEGIN
@@ -117,9 +132,8 @@ BEGIN TRY
 					AND ysnReversed = 0
 			END
 		END
-
 		
-
+		---Validation
 		IF(@strTicketStatus <> 'C')
 		BEGIN
 			SET @ErrorMessage = 'Ticket is not yet completed. Use the void process instead.';
@@ -128,7 +142,8 @@ BEGIN TRY
 
 		IF(@strInOutFlag = 'I')
 		BEGIN
-
+			
+			--Get Match Ticket
 			IF(@intMatchTicketId > 0 AND @intTicketType = 6)
 			BEGIN
 				IF ISNULL(@strMatchTicketStatus,'') = 'C'
@@ -153,276 +168,282 @@ BEGIN TRY
 				ORDER BY A.intInventoryReceiptId ASC
 			END
 
-			SELECT TOP 1 
-				@_intInventoryReceiptShipmentId = MIN(intId)
-			FROM @TicketReceiptShipmentIds
 			
-
-			---Create reversal
-			WHILE ISNULL(@_intInventoryReceiptShipmentId,0) > 0
+			---Create reversal IR
 			BEGIN
-				SET @_intReversalReceiptShipmentId = 0
-				
-				EXEC uspICReverseInventoryReceipt NULL,@_intInventoryReceiptShipmentId, @intUserId, NULL, @_intReversalReceiptShipmentId OUTPUT
-
-				
-				IF ISNULL(@_intReversalReceiptShipmentId,0) > 0
+				SELECT TOP 1 
+					@_intInventoryReceiptShipmentId = MIN(intId)
+				FROM @TicketReceiptShipmentIds
+						
+				WHILE ISNULL(@_intInventoryReceiptShipmentId,0) > 0
 				BEGIN
-					SELECT TOP 1 
-						@_strReceiptShipmentNumber = strReceiptNumber
-						,@_intInventoryReceiptShipmentEntityId = intEntityVendorId
-					FROM tblICInventoryReceipt
-					WHERE intInventoryReceiptId = @_intReversalReceiptShipmentId
 
-					EXEC dbo.uspICPostInventoryReceipt 1, 0, @_strReceiptShipmentNumber, @intUserId;
+					---Reverse voucher
+					EXEC [uspSCReverseInventoryReceiptVoucher] @intTicketId, @intUserId, @_intInventoryReceiptShipmentId
+
+					SET @_intReversalReceiptShipmentId = 0
+					EXEC uspICReverseInventoryReceipt NULL,@_intInventoryReceiptShipmentId, @intUserId, NULL, @_intReversalReceiptShipmentId OUTPUT
+
 				
-					-----insert into storage history of storage based on the previous IR and update customer storage open balance		
+					IF ISNULL(@_intReversalReceiptShipmentId,0) > 0
 					BEGIN
-						SET @intCustomerStorageId = 0
-						SET @intCustomerStorageId = (SELECT TOP 1 intCustomerStorageId FROM tblGRStorageHistory WHERE intInventoryReceiptId = @_intInventoryReceiptShipmentId)
+						SELECT TOP 1 
+							@_strReceiptShipmentNumber = strReceiptNumber
+							,@_intInventoryReceiptShipmentEntityId = intEntityVendorId
+						FROM tblICInventoryReceipt
+						WHERE intInventoryReceiptId = @_intReversalReceiptShipmentId
+
+						EXEC dbo.uspICPostInventoryReceipt 1, 0, @_strReceiptShipmentNumber, @intUserId;
+				
+						-----insert into storage history of storage based on the previous IR and update customer storage open balance		
+						BEGIN
+							SET @intCustomerStorageId = 0
+							SET @intCustomerStorageId = (SELECT TOP 1 intCustomerStorageId FROM tblGRStorageHistory WHERE intInventoryReceiptId = @_intInventoryReceiptShipmentId)
 
 						
-						IF ISNULL(@intCustomerStorageId,0)> 0
+							IF ISNULL(@intCustomerStorageId,0)> 0
 						
 							
-						--insert customer history
-						INSERT INTO tblGRStorageHistory (
-							intConcurrencyId
-							,intCustomerStorageId
-							,intTicketId
-							,intInventoryReceiptId
-							,intInvoiceId
-							,intInventoryShipmentId
-							,intBillId
-							,intContractHeaderId
-							,dblUnits
-							,dtmHistoryDate
-							,dblPaidAmount
-							,strPaidDescription
-							,dblCurrencyRate
-							,strType
-							,strUserName
-							,intUserId
-							,intTransactionTypeId
-							,intEntityId
-							,intCompanyLocationId
-							,strTransferTicket
-							,strSettleTicket
-							,strVoucher
-							,intSettleStorageId
-							,intDeliverySheetId
-							,dtmDistributionDate
-							,strTransactionId
-							,intTransferStorageId
-							,ysnPost
-							,intInventoryAdjustmentId
-							,dblOldCost
+							--insert customer history
+							INSERT INTO tblGRStorageHistory (
+								intConcurrencyId
+								,intCustomerStorageId
+								,intTicketId
+								,intInventoryReceiptId
+								,intInvoiceId
+								,intInventoryShipmentId
+								,intBillId
+								,intContractHeaderId
+								,dblUnits
+								,dtmHistoryDate
+								,dblPaidAmount
+								,strPaidDescription
+								,dblCurrencyRate
+								,strType
+								,strUserName
+								,intUserId
+								,intTransactionTypeId
+								,intEntityId
+								,intCompanyLocationId
+								,strTransferTicket
+								,strSettleTicket
+								,strVoucher
+								,intSettleStorageId
+								,intDeliverySheetId
+								,dtmDistributionDate
+								,strTransactionId
+								,intTransferStorageId
+								,ysnPost
+								,intInventoryAdjustmentId
+								,dblOldCost
 
-						)
-						SELECT TOP 1
-							intConcurrencyId						= 1
-							,intCustomerStorageId					= A.intCustomerStorageId
-							,intTicketId							= A.intTicketId
-							,intInventoryReceiptId					= B.intInventoryReceiptId
-							,intInvoiceId							= A.intInvoiceId
-							,intInventoryShipmentId					= A.intInventoryShipmentId
-							,intBillId								= A.intBillId
-							,intContractHeaderId					= A.intContractHeaderId
-							,dblUnits								= B.dblOpenReceive
-							,dtmHistoryDate							= B.dtmReceiptDate
-							,dblPaidAmount							= A.dblPaidAmount
-							,strPaidDescription						= A.strPaidDescription
-							,dblCurrencyRate						= A.dblCurrencyRate
-							,strType								= A.strType
-							,strUserName							= NULL
-							,intUserId								= B.intEntityId
-							,intTransactionTypeId					= A.intTransactionTypeId
-							,intEntityId							= A.intEntityId
-							,intCompanyLocationId					= A.intCompanyLocationId
-							,strTransferTicket						= A.strTransferTicket
-							,strSettleTicket						= A.strSettleTicket
-							,strVoucher								= strVoucher
-							,intSettleStorageId						= A.intSettleStorageId
-							,intDeliverySheetId						= A.intDeliverySheetId
-							,dtmDistributionDate					= B.dtmDateCreated
-							,strTransactionId						= A.strTransactionId
-							,intTransferStorageId					= A.intTransferStorageId
-							,ysnPost								= A.ysnPost
-							,intInventoryAdjustmentId				= A.intInventoryAdjustmentId
-							,dblOldCost								= A.dblOldCost
-						FROM tblGRStorageHistory A
-							,(SELECT TOP 1 
-									AA.intEntityId
-									,AA.intInventoryReceiptId
-									,BB.dblOpenReceive
-									,AA.dtmReceiptDate
-									,AA.dtmDateCreated
-								FROM tblICInventoryReceipt AA
-								INNER JOIN tblICInventoryReceiptItem BB
-									ON  AA.intInventoryReceiptId = BB.intInventoryReceiptId
-								WHERE AA.intInventoryReceiptId = @_intReversalReceiptShipmentId) B
-						WHERE A.intInventoryReceiptId = @_intInventoryReceiptShipmentId
+							)
+							SELECT TOP 1
+								intConcurrencyId						= 1
+								,intCustomerStorageId					= A.intCustomerStorageId
+								,intTicketId							= A.intTicketId
+								,intInventoryReceiptId					= B.intInventoryReceiptId
+								,intInvoiceId							= A.intInvoiceId
+								,intInventoryShipmentId					= A.intInventoryShipmentId
+								,intBillId								= A.intBillId
+								,intContractHeaderId					= A.intContractHeaderId
+								,dblUnits								= B.dblOpenReceive
+								,dtmHistoryDate							= B.dtmReceiptDate
+								,dblPaidAmount							= A.dblPaidAmount
+								,strPaidDescription						= A.strPaidDescription
+								,dblCurrencyRate						= A.dblCurrencyRate
+								,strType								= A.strType
+								,strUserName							= NULL
+								,intUserId								= B.intEntityId
+								,intTransactionTypeId					= A.intTransactionTypeId
+								,intEntityId							= A.intEntityId
+								,intCompanyLocationId					= A.intCompanyLocationId
+								,strTransferTicket						= A.strTransferTicket
+								,strSettleTicket						= A.strSettleTicket
+								,strVoucher								= strVoucher
+								,intSettleStorageId						= A.intSettleStorageId
+								,intDeliverySheetId						= A.intDeliverySheetId
+								,dtmDistributionDate					= B.dtmDateCreated
+								,strTransactionId						= A.strTransactionId
+								,intTransferStorageId					= A.intTransferStorageId
+								,ysnPost								= A.ysnPost
+								,intInventoryAdjustmentId				= A.intInventoryAdjustmentId
+								,dblOldCost								= A.dblOldCost
+							FROM tblGRStorageHistory A
+								,(SELECT TOP 1 
+										AA.intEntityId
+										,AA.intInventoryReceiptId
+										,BB.dblOpenReceive
+										,AA.dtmReceiptDate
+										,AA.dtmDateCreated
+									FROM tblICInventoryReceipt AA
+									INNER JOIN tblICInventoryReceiptItem BB
+										ON  AA.intInventoryReceiptId = BB.intInventoryReceiptId
+									WHERE AA.intInventoryReceiptId = @_intReversalReceiptShipmentId) B
+							WHERE A.intInventoryReceiptId = @_intInventoryReceiptShipmentId
 
-						--update customer storage
-						UPDATE tblGRCustomerStorage
-						SET dblOriginalBalance = dbo.[fnGRCalculateStorageUnits](@intCustomerStorageId)
-							,dblOpenBalance = dbo.[fnGRCalculateStorageUnits](@intCustomerStorageId)
-						WHERE intCustomerStorageId = @intCustomerStorageId
+							--update customer storage
+							UPDATE tblGRCustomerStorage
+							SET dblOriginalBalance = dbo.[fnGRCalculateStorageUnits](@intCustomerStorageId)
+								,dblOpenBalance = dbo.[fnGRCalculateStorageUnits](@intCustomerStorageId)
+							WHERE intCustomerStorageId = @intCustomerStorageId
 
-						--Update storage discount
-						IF(ISNULL(@intDeliverySheetId,0) = 0) 
-						BEGIN
-
-							--backup discount
-							INSERT INTO [dbo].[tblSCTicketDiscountHistory]
-								([intTicketDiscountId]
-								,[intConcurrencyId]
-								,[dblGradeReading]
-								,[strCalcMethod]
-								,[strShrinkWhat]
-								,[dblShrinkPercent]
-								,[dblDiscountAmount]
-								,[dblDiscountDue]
-								,[dblDiscountPaid]
-								,[ysnGraderAutoEntry]
-								,[intDiscountScheduleCodeId]
-								,[dtmDiscountPaidDate]
-								,[intTicketId]
-								,[intTicketFileId]
-								,[strSourceType]
-								,[intSort]
-								,[strDiscountChargeType]
-								,[dtmCreatedDate])
-							SELECT 
-								[intTicketDiscountId]
-								,[intConcurrencyId] =1
-								,[dblGradeReading]
-								,[strCalcMethod]
-								,[strShrinkWhat]
-								,[dblShrinkPercent]
-								,[dblDiscountAmount]
-								,[dblDiscountDue]
-								,[dblDiscountPaid]
-								,[ysnGraderAutoEntry]
-								,[intDiscountScheduleCodeId]
-								,[dtmDiscountPaidDate]
-								,[intTicketId]
-								,[intTicketFileId]
-								,[strSourceType]
-								,[intSort]
-								,[strDiscountChargeType]
-								,[dtmCreatedDate] = GETDATE()
-							FROM tblQMTicketDiscount A
-							WHERE intTicketFileId = @intCustomerStorageId
-								AND strSourceType = 'Storage'
-								AND NOT EXISTS(SELECT TOP 1 1 FROM tblSCTicketDiscountHistory WHERE intTicketDiscountId = A.intTicketDiscountId)
-
-							--delete old discount
-							DELETE FROM tblQMTicketDiscount
-							WHERE intTicketFileId = @intCustomerStorageId
-								AND strSourceType = 'Storage'
-
-						END
-						ELSE
-						BEGIN
-							--Discount is updated during posting of delivery sheet
-							print 'with delivery sheet'
-						END
-
-						
-					END
-
-					---- Update contract schedule if ticket Distribution type is load and link it to reversal IR
-					BEGIN
-						SET @_ysnReceiptShipmetContainTicketContract = 0 
-						SET @_intInventoryReceiptShipmentItemId = 0
-
-						SELECT TOP 1 
-								@_intInventoryReceiptShipmentItemId = B.intInventoryReceiptItemId
-						FROM tblICInventoryReceipt A
-						INNER JOIN tblICInventoryReceiptItem B
-							ON A.intInventoryReceiptId = B.intInventoryReceiptId
-						WHERE A.intInventoryReceiptId = @_intInventoryReceiptShipmentId
-							AND intContractDetailId = @intTicketContractDetailId
-						
-						IF(ISNULL(@_intInventoryReceiptShipmentItemId,0) > 0)		
-						BEGIN
-							SET @_ysnReceiptShipmetContainTicketContract = 1  
-						END
-
-						IF(@strDistributionOption = 'LOD')
-						BEGIN
-							--- check if the current loop IS have the selected contract in ticket
-							IF(@_ysnReceiptShipmetContainTicketContract = 1)							
+							--Update storage discount
+							IF(ISNULL(@intDeliverySheetId,0) = 0) 
 							BEGIN
 
-								SET @_ysnLoadBaseContract = 0
-								SELECT TOP 1 
-									@_ysnLoadBaseContract = ysnLoad
-								FROM tblCTContractHeader A
-								INNER JOIN tblCTContractDetail B
-									ON A.intContractHeaderId = B.intContractHeaderId
-								WHERE intContractDetailId = @intTicketContractDetailId
+								--backup discount
+								INSERT INTO [dbo].[tblSCTicketDiscountHistory]
+									([intTicketDiscountId]
+									,[intConcurrencyId]
+									,[dblGradeReading]
+									,[strCalcMethod]
+									,[strShrinkWhat]
+									,[dblShrinkPercent]
+									,[dblDiscountAmount]
+									,[dblDiscountDue]
+									,[dblDiscountPaid]
+									,[ysnGraderAutoEntry]
+									,[intDiscountScheduleCodeId]
+									,[dtmDiscountPaidDate]
+									,[intTicketId]
+									,[intTicketFileId]
+									,[strSourceType]
+									,[intSort]
+									,[strDiscountChargeType]
+									,[dtmCreatedDate])
+								SELECT 
+									[intTicketDiscountId]
+									,[intConcurrencyId] =1
+									,[dblGradeReading]
+									,[strCalcMethod]
+									,[strShrinkWhat]
+									,[dblShrinkPercent]
+									,[dblDiscountAmount]
+									,[dblDiscountDue]
+									,[dblDiscountPaid]
+									,[ysnGraderAutoEntry]
+									,[intDiscountScheduleCodeId]
+									,[dtmDiscountPaidDate]
+									,[intTicketId]
+									,[intTicketFileId]
+									,[strSourceType]
+									,[intSort]
+									,[strDiscountChargeType]
+									,[dtmCreatedDate] = GETDATE()
+								FROM tblQMTicketDiscount A
+								WHERE intTicketFileId = @intCustomerStorageId
+									AND strSourceType = 'Storage'
+									AND NOT EXISTS(SELECT TOP 1 1 FROM tblSCTicketDiscountHistory WHERE intTicketDiscountId = A.intTicketDiscountId)
 
-								SET @_ysnLoadBaseContract = ISNULL(@_ysnLoadBaseContract,0)
+								--delete old discount
+								DELETE FROM tblQMTicketDiscount
+								WHERE intTicketFileId = @intCustomerStorageId
+									AND strSourceType = 'Storage'
 
-								--NON Load based contract
-								IF(@_ysnLoadBaseContract = 0)
+							END
+							ELSE
+							BEGIN
+								--Discount is updated during posting of delivery sheet
+								print 'with delivery sheet'
+							END
+
+						
+						END
+
+						---- Update contract schedule if ticket Distribution type is load and link it to reversal IR
+						BEGIN
+							SET @_ysnReceiptShipmetContainTicketContract = 0 
+							SET @_intInventoryReceiptShipmentItemId = 0
+
+							SELECT TOP 1 
+									@_intInventoryReceiptShipmentItemId = B.intInventoryReceiptItemId
+							FROM tblICInventoryReceipt A
+							INNER JOIN tblICInventoryReceiptItem B
+								ON A.intInventoryReceiptId = B.intInventoryReceiptId
+							WHERE A.intInventoryReceiptId = @_intInventoryReceiptShipmentId
+								AND intContractDetailId = @intTicketContractDetailId
+						
+							IF(ISNULL(@_intInventoryReceiptShipmentItemId,0) > 0)		
+							BEGIN
+								SET @_ysnReceiptShipmetContainTicketContract = 1  
+							END
+
+							IF(@strDistributionOption = 'LOD')
+							BEGIN
+								--- check if the current loop IR have the selected contract in ticket
+								IF(@_ysnReceiptShipmetContainTicketContract = 1)							
 								BEGIN
-									SET @_dblLoadUsedQty = 0
-									SELECT TOP 1 
-										@_dblLoadUsedQty = dblQty
-									FROM tblSCTicketLoadUsed
-									WHERE intTicketId = @intTicketId
-										AND intLoadDetailId = @intTicketLoadDetailId
-										AND intEntityId = @_intInventoryReceiptShipmentEntityId
 
-									SET @_dblContractAvailableQty = 0
+									SET @_ysnLoadBaseContract = 0
 									SELECT TOP 1 
-										@_dblContractAvailableQty = ISNULL(dblAvailableQtyInItemStockUOM,0)
-									FROM vyuCTContractDetailView
+										@_ysnLoadBaseContract = ysnLoad
+									FROM tblCTContractHeader A
+									INNER JOIN tblCTContractDetail B
+										ON A.intContractHeaderId = B.intContractHeaderId
 									WHERE intContractDetailId = @intTicketContractDetailId
 
-									IF @dblTicketScheduledQty <= @_dblContractAvailableQty
-									BEGIN
-										SET @_dblLoadUsedQty = @dblTicketScheduledQty
-									END
-									ELSE
-									BEGIN
-										SET @_dblLoadUsedQty = @_dblContractAvailableQty
-									END
+									SET @_ysnLoadBaseContract = ISNULL(@_ysnLoadBaseContract,0)
 
-									IF @_dblLoadUsedQty <> 0
+									--NON Load based contract
+									IF(@_ysnLoadBaseContract = 0)
 									BEGIN
+										SET @_dblLoadUsedQty = 0
+										SELECT TOP 1 
+											@_dblLoadUsedQty = dblQty
+										FROM tblSCTicketLoadUsed
+										WHERE intTicketId = @intTicketId
+											AND intLoadDetailId = @intTicketLoadDetailId
+											AND intEntityId = @_intInventoryReceiptShipmentEntityId
+
+										SET @_dblContractAvailableQty = 0
+										SELECT TOP 1 
+											@_dblContractAvailableQty = ISNULL(dblAvailableQtyInItemStockUOM,0)
+										FROM vyuCTContractDetailView
+										WHERE intContractDetailId = @intTicketContractDetailId
+
+										IF @dblTicketScheduledQty <= @_dblContractAvailableQty
+										BEGIN
+											SET @_dblLoadUsedQty = @dblTicketScheduledQty
+										END
+										ELSE
+										BEGIN
+											SET @_dblLoadUsedQty = @_dblContractAvailableQty
+										END
+
+										IF @_dblLoadUsedQty <> 0
+										BEGIN
 							
-										EXEC uspCTUpdateScheduleQuantityUsingUOM @intTicketContractDetailId, @_dblLoadUsedQty, @intUserId, @_intInventoryReceiptShipmentItemId, 'Inventory Receipt', @intTicketItemUOMId
+											EXEC uspCTUpdateScheduleQuantityUsingUOM @intTicketContractDetailId, @_dblLoadUsedQty, @intUserId, @_intInventoryReceiptShipmentItemId, 'Inventory Receipt', @intTicketItemUOMId
+										END
 									END
-								END
-								ELSE ---Load based contract
-								BEGIN
-									EXEC uspCTUpdateScheduleQuantityUsingUOM @intTicketContractDetailId, 1, @intUserId, @_intInventoryReceiptShipmentItemId, 'Inventory Receipt', @intTicketItemUOMId
+									ELSE ---Load based contract
+									BEGIN
+										EXEC uspCTUpdateScheduleQuantityUsingUOM @intTicketContractDetailId, 1, @intUserId, @_intInventoryReceiptShipmentItemId, 'Inventory Receipt', @intTicketItemUOMId
+									END
 								END
 							END
 						END
+
+					
 					END
 
-					
-				END
 
-
-
-				-------------------------- Loop Iterator
-				IF NOT EXISTS (SELECT TOP 1 1 FROM @TicketReceiptShipmentIds WHERE intId > @_intInventoryReceiptShipmentId)
-				BEGIN
-					SET @_intInventoryReceiptShipmentId = 0
-				END
-				ELSE
-				BEGIN
-					SELECT TOP 1 
-						@_intInventoryReceiptShipmentId = MIN(intId)
-					FROM @TicketReceiptShipmentIds
-					WHERE intId > @_intInventoryReceiptShipmentId
-					
+					-------------------------- Loop Iterator
+					BEGIN
+						IF NOT EXISTS (SELECT TOP 1 1 FROM @TicketReceiptShipmentIds WHERE intId > @_intInventoryReceiptShipmentId)
+						BEGIN
+							SET @_intInventoryReceiptShipmentId = 0
+						END
+						ELSE
+						BEGIN
+							SELECT TOP 1 
+								@_intInventoryReceiptShipmentId = MIN(intId)
+							FROM @TicketReceiptShipmentIds
+							WHERE intId > @_intInventoryReceiptShipmentId
+						
+						END
+					END
 				END
 			END
 
@@ -430,11 +451,14 @@ BEGIN TRY
 			SET @ysnPost = 0
 			IF(@intTicketType = 6)
 			BEGIN
-				print 'voucher reversal'
-
 				---Load distribution
 				IF(@intTicketStorageScheduleTypeId = -6)
 				BEGIN
+		
+					SELECT TOP 1
+						@intMatchLoadDetailId = intLoadDetailId
+					FROM tblSCTicket
+					WHERE intTicketId = @intMatchTicketId
 
 					--delink the load from matching ticket
 					IF(ISNULL(@intMatchLoadDetailId,0) > 0)
@@ -443,7 +467,6 @@ BEGIN TRY
 					END
 					
 					SET @dblQtyUpdate = @dblTicketNetUnits * - 1
-
 
 					--Update contract quantity
 					EXEC uspCTUpdateSequenceBalance @intTicketContractDetailId, @dblQtyUpdate, @intUserId, @intTicketId, 'Scale'
@@ -461,20 +484,11 @@ BEGIN TRY
 				BEGIN
 					print ('inbound direct contract')
 				END
+				
+				--reverse voucher
+				EXEC [uspSCReverseInventoryReceiptVoucher] @intTicketId, @intUserId
 
-				--reversal entry for voucher
-				BEGIN
-					SELECT TOP 1
-						@intTicketBillId = intBillId
-					FROM tblAPBillDetail
-					WHERE intScaleTicketId = @intTicketId
-
-					IF(ISNULL(@intTicketBillId,0) > 0)
-					BEGIN
-						EXEC uspAPReverseTransaction @intTicketBillId, @intUserId, @intReversedBillId OUTPUT
-					END
-				END
-
+					
 				--- update in transit direct
 				BEGIN
 					INSERT INTO @ItemsToIncreaseInTransitDirect(
@@ -507,6 +521,7 @@ BEGIN TRY
 					WHERE SC.intTicketId = @intTicketId
 					EXEC uspICIncreaseInTransitDirectQty @ItemsToIncreaseInTransitDirect;
 				END
+
 			END
 		END
 		ELSE
@@ -531,11 +546,15 @@ BEGIN TRY
 			FROM @TicketReceiptShipmentIds
 			
 
-			---Create IS reversal 
+			---Create IS and invoice reversal 
 			WHILE ISNULL(@_intInventoryReceiptShipmentId,0) > 0
 			BEGIN
+
+				---Check for Invoices and reverse those invoice 
+				EXEC uspSCReverseInventoryShipmentInvoice @intTicketId,@intUserId,@_intInventoryReceiptShipmentId
+
+				---Reversal IS
 				SET @_intReversalReceiptShipmentId = 0
-				
 				EXEC uspICReverseInventoryShipment NULL,@_intInventoryReceiptShipmentId, @intUserId, NULL, @_intReversalReceiptShipmentId OUTPUT
 
 				IF ISNULL(@_intReversalReceiptShipmentId,0) > 0
@@ -722,7 +741,6 @@ BEGIN TRY
 
 				END
 
-			
 				-------------------------- Loop Iterator
 				IF NOT EXISTS (SELECT TOP 1 1 FROM @TicketReceiptShipmentIds WHERE intId > @_intInventoryReceiptShipmentId)
 				BEGIN
@@ -739,139 +757,9 @@ BEGIN TRY
 			END
 
 			-- reverse invoice for direct shipment
-			SET @ysnPost = 0
 			IF(@intTicketType = 6)
 			BEGIN
-				IF OBJECT_ID (N'tempdb.dbo.#tmpSCInvoiceDetail') IS NOT NULL DROP TABLE #tmpSCInvoiceDetail
-
-
-				-- get the invoice detail for the ticket 
-				SELECT 
-					A.ysnPosted
-					,A.intInvoiceId
-					,B.intInvoiceDetailId
-				INTO #tmpSCInvoiceDetail
-				FROM tblARInvoiceDetail B
-				INNER JOIN tblARInvoice A
-					ON A.intInvoiceId = B.intInvoiceId
-				WHERE intTicketId = @intTicketId
-
-				SELECT TOP 1 
-					@intTicketInvoiceId = intInvoiceId
-					,@ysnPost = ysnPosted
-				FROM #tmpSCInvoiceDetail
-
-				IF(ISNULL(@ysnPost,0) = 0)
-				BEGIN
-					--Delete/update Invoice
-					IF ISNULL(@intTicketInvoiceId, 0) > 0
-					BEGIN
-						---Check if there are multiple IS on the invoice.
-						IF (SELECT TOP 1 COUNT(DISTINCT ISNULL(strDocumentNumber,''))
-							FROM tblARInvoiceDetail
-							WHERE intInvoiceId = @intTicketInvoiceId) > 1
-						BEGIN
-							--Delete invoice details
-							BEGIN 
-								SET @_intInvoiceDetail = 0
-								SELECT TOP 1
-									@_intInvoiceDetail = MIN(intInvoiceDetailId)
-								FROM #tmpSCInvoiceDetail
-
-								---loop and delete invoice detail from invoice
-								WHILE ISNULL(@_intInvoiceDetail,0) > 0
-								BEGIN
-									--Delete
-									EXEC uspARDeleteInvoice @intTicketInvoiceId, @intUserId, @_intInvoiceDetail
-
-									--------Loop Iterator
-									BEGIN
-										IF(EXISTS(SELECT TOP 1 1 FROM #tmpSCInvoiceDetail WHERE intInvoiceDetailId > @_intInvoiceDetail))
-										BEGIN
-											SELECT TOP 1
-												@_intInvoiceDetail = MIN(intInvoiceDetailId)
-											FROM #tmpSCInvoiceDetail
-											WHERE intInvoiceDetailId > @_intInvoiceDetail
-										END
-										ELSE
-										BEGIN
-											SET @_intInvoiceDetail = 0
-										END
-									END
-
-								END
-							END
-						
-							EXEC dbo.uspARUpdateInvoiceIntegrations @intTicketInvoiceId, 0, @intUserId
-							EXEC dbo.uspARReComputeInvoiceTaxes @intTicketInvoiceId
-							
-						END
-						ELSE
-						BEGIN
-							EXEC [dbo].[uspARDeleteInvoice] @intTicketInvoiceId, @intUserId
-						END
-
-					END
-				END
-				ELSE
-				BEGIN
-					---Create credit memo
-					BEGIN
-						---Check if there are multiple IS on the invoice.
-						IF (SELECT TOP 1 COUNT(DISTINCT ISNULL(strDocumentNumber,''))
-							FROM tblARInvoiceDetail
-							WHERE intInvoiceId = @intTicketInvoiceId) > 1
-						BEGIN
-							--reverse invoice details
-							BEGIN 
-								SET @_intInvoiceDetail = 0
-								SELECT TOP 1
-									@_intInvoiceDetail = MIN(intInvoiceDetailId)
-								FROM #tmpSCInvoiceDetail
-
-								SET @strInvoiceDetailIds = (SELECT STUFF((SELECT ',' + CAST(intInvoiceDetailId AS NVARCHAR)
-																			FROM #tmpSCInvoiceDetail
-																			FOR XML PATH('')),1,1,''))
-
-								EXEC uspARReturnInvoice @intTicketInvoiceId, @intUserId,@strInvoiceDetailIds, 1, @intNewInvoiceId OUTPUT	
-							END
-						END
-						ELSE
-						BEGIN
-							EXEC uspARReturnInvoice @intTicketInvoiceId, @intUserId,null,1,@intNewInvoiceId	OUTPUT
-						END
-					END
-
-					--Post credit memo
-					IF(ISNULL(@intNewInvoiceId,0) > 0)
-					BEGIN
-						EXEC [dbo].[uspARPostInvoice]
-								@batchId			= NULL,
-								@post				= 1,
-								@recap				= 0,
-								@param				= @intNewInvoiceId,
-								@userId				= @intUserId,
-								@beginDate			= NULL,
-								@endDate			= NULL,
-								@beginTransaction	= NULL,
-								@endTransaction		= NULL,
-								@exclude			= NULL,
-								@successfulCount	= @successfulCount OUTPUT,
-								@invalidCount		= @invalidCount OUTPUT,
-								@success			= @success OUTPUT,
-								@batchIdUsed		= @batchIdUsed OUTPUT,
-								@recapId			= @recapId OUTPUT,
-								@transType			= N'all',
-								@accrueLicense		= 0,
-								@raiseError			= 1
-					END
-				END
-
-				SELECT TOP 1
-					@intInvoiceDetailCount = COUNT(intInvoiceDetailId)
-				FROM tblARInvoiceDetail
-				WHERE intInvoiceId = @intTicketInvoiceId
-
+				EXEC uspSCReverseInventoryShipmentInvoice @intTicketId,@intUserId
 			END
 			
 		END
@@ -1003,7 +891,7 @@ BEGIN TRY
 			EXEC uspLGUpdateLoadDetails @intTicketLoadDetailId, 0
 		END
 
-		--Mark the ticket as void and reveresed
+		--Mark the ticket as void and reversed
 		UPDATE tblSCTicket
 		SET strTicketStatus = 'V'
 			,intConcurrencyId = ISNULL(intConcurrencyId,0) + 1
@@ -1494,6 +1382,12 @@ BEGIN TRY
 			END
 		END
 
+
+		--Update Delivery Sheet
+		UPDATE tblSCDeliverySheet
+		SET dblGross = dblGross - @dblTicketGrossUnits
+			,intConcurrencyId = ISNULL(intConcurrencyId,1)
+		WHERE intDeliverySheetId = @intDeliverySheetId
 
 	_Exit:
 
