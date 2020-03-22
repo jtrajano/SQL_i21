@@ -148,7 +148,21 @@ BEGIN TRY
 		FETCH NEXT FROM splitCursor INTO @intEntityId, @dblSplitPercent, @strDistributionOption, @intStorageScheduleId, @intItemId, @intLocationId, @intStorageScheduleTypeId, @shipFromEntityId, @shipFrom;  
 		WHILE @@FETCH_STATUS = 0  
 		BEGIN
-			SELECT @intCustomerStorageId = intCustomerStorageId  FROM tblGRCustomerStorage WHERE intEntityId = @intEntityId AND intItemId = @intItemId AND intCompanyLocationId = @intLocationId AND intDeliverySheetId = @intDeliverySheetId
+			SET @dblFinalSplitQty =  ROUND((@dblNetUnits * @dblSplitPercent) / 100, @currencyDecimal);
+			IF @dblTempSplitQty > @dblFinalSplitQty
+				SET @dblTempSplitQty = @dblTempSplitQty - @dblFinalSplitQty;
+			ELSE
+				SET @dblFinalSplitQty = @dblTempSplitQty
+
+			SELECT TOP 1
+				@intCustomerStorageId = intCustomerStorageId  
+			FROM tblGRCustomerStorage 
+			WHERE intEntityId = @intEntityId 
+				AND intItemId = @intItemId 
+				AND intCompanyLocationId = @intLocationId 
+				AND intDeliverySheetId = @intDeliverySheetId
+				AND intStorageTypeId = @intStorageScheduleTypeId
+				AND ISNULL(ysnTransferStorage,0) = 0
 
 			-- SET @dblFinalSplitQty =  ROUND((@dblNetUnits * @dblSplitPercent) / 100, @currencyDecimal);
 			SET @dblFinalSplitQty = (SELECT dbo.fnGRCalculateStorageUnits(@intCustomerStorageId))

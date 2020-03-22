@@ -41,10 +41,13 @@ OUTER APPLY (
 		,intTicketId
 	FROM ( 
 	SELECT TOP 1 
-		intLoadDetailId 
-		,intTicketId
-	FROM tblSCTicketLoadUsed 
-	WHERE intLoadDetailId = A.intLoadDetailId
+		AA.intLoadDetailId 
+		,AA.intTicketId
+	FROM tblSCTicketLoadUsed AA 
+	INNER JOIN tblSCTicket BB
+		ON AA.intTicketId = BB.intTicketId
+	WHERE AA.intLoadDetailId = A.intLoadDetailId
+		AND BB.ysnReversed = 0
 	UNION ALL
 
 	SELECT TOP 1
@@ -52,6 +55,7 @@ OUTER APPLY (
 		,intTicketId
 	FROM tblSCTicket 
 	WHERE intLoadDetailId = A.intLoadDetailId
+		AND ysnReversed = 0
 	)A1
 )B
 

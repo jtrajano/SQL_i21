@@ -8582,6 +8582,10 @@
     <Build Include="dbo\Tables\tblIPLoadDetailArchive.sql" />
     <Build Include="dbo\Stored Procedures\uspIPStageSAPShippingInstruction.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessSAPShippingInstruction.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCReverseTicket.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCReverseInventoryShipmentInvoice.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCReverseInventoryReceiptVoucher.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCReverseDeliverySheet.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

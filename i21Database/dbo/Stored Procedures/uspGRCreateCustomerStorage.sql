@@ -24,10 +24,11 @@ DECLARE @intStorageScheduleId INT
 DECLARE @intShipFromLocationId INT
 DECLARE @intShipFromEntityId INT
 DECLARE @ysnDPOwnedType BIT
+DECLARE @strStorageTicketNumber NVARCHAR(50)
 
 BEGIN TRY
 	--check if a storage already exists 
-	SELECT 
+	SELECT TOP 1
 		@intEntityId				= CS.intEntityId
 		, @intItemId				= CS.intItemId
 		, @intLocationId			= CS.intCompanyLocationId
@@ -37,13 +38,31 @@ BEGIN TRY
 		, @intStorageScheduleId		= CS.intStorageScheduleId
 		, @intShipFromLocationId	= CS.intShipFromLocationId
 		, @intShipFromEntityId		= CS.intShipFromEntityId
+		, @strStorageTicketNumber 	= CS.strTransactionNumber
 	FROM @CustomerStorageStagingTable CS	
 
 	SELECT @ysnDPOwnedType = ysnDPOwnedType FROM tblGRStorageType WHERE intStorageScheduleTypeId = @intStorageTypeId
 
-	IF EXISTS(SELECT 1 FROM tblGRCustomerStorage WHERE intEntityId = @intEntityId AND intItemId = @intItemId AND intCompanyLocationId = @intLocationId AND intDeliverySheetId = @intDeliverySheetId AND intStorageTypeId = @intStorageTypeId)
+	IF EXISTS(SELECT TOP 1 1
+				FROM tblGRCustomerStorage 
+				WHERE intEntityId = @intEntityId 
+					AND intItemId = @intItemId 
+					AND intCompanyLocationId = @intLocationId 
+					AND ISNULL(intDeliverySheetId,0) = ISNULL(@intDeliverySheetId,0)
+					AND intStorageTypeId = @intStorageTypeId
+					AND ISNULL(ysnTransferStorage,0) = 0
+					AND strStorageTicketNumber = @strStorageTicketNumber)
 	BEGIN
-		SELECT @intCustomerStorageId = intCustomerStorageId FROM tblGRCustomerStorage WHERE intEntityId = @intEntityId AND intItemId = @intItemId AND intCompanyLocationId = @intLocationId AND intDeliverySheetId = @intDeliverySheetId AND intStorageTypeId = @intStorageTypeId
+		SELECT TOP 1
+			@intCustomerStorageId = intCustomerStorageId 
+		FROM tblGRCustomerStorage 
+		WHERE intEntityId = @intEntityId 
+			AND intItemId = @intItemId 
+			AND intCompanyLocationId = @intLocationId 
+			AND ISNULL(intDeliverySheetId,0) = ISNULL(@intDeliverySheetId,0)
+			AND intStorageTypeId = @intStorageTypeId
+			AND ISNULL(ysnTransferStorage,0) = 0
+			AND strStorageTicketNumber = @strStorageTicketNumber
 
 		EXEC uspGRCustomerStorageBalance
 				@intEntityId = NULL
