@@ -218,9 +218,9 @@ BEGIN
 								END)								 
 								+ dblDeviation)
 					WHEN strPriceBasis = 'S'
-						THEN VI.dblSalePrice - (VI.dblSalePrice * (dblDeviation/100.00)) 
+						THEN ISNULL(CPL.dblUnitPrice, VI.dblSalePrice) - (ISNULL(CPL.dblUnitPrice, VI.dblSalePrice) * (dblDeviation/100.00)) 
 					WHEN strPriceBasis = 'M'
-						THEN VI.dblSalePrice - dblDeviation
+						THEN ISNULL(CPL.dblUnitPrice, VI.dblSalePrice) - dblDeviation
 					WHEN strPriceBasis = '1'
 						THEN PL1.dblUnitPrice + dblDeviation
 					WHEN strPriceBasis = '2'
@@ -306,7 +306,7 @@ BEGIN
 					WHEN strPriceBasis = 'S'
 						THEN VI.dblSalePrice
 					WHEN strPriceBasis = 'M'
-						THEN VI.dblSalePrice
+						THEN ISNULL(CPL.dblUnitPrice, VI.dblSalePrice)
 					WHEN strPriceBasis = '1'
 						THEN PL1.dblUnitPrice
 					WHEN strPriceBasis = '2'
@@ -320,6 +320,16 @@ BEGIN
 				END)
 		FROM
 			vyuICGetItemStock VI
+		LEFT OUTER JOIN (
+			SELECT TOP 1 IPL.intItemId, IPL.intItemUnitMeasureId AS intItemUOM, IPL.dblMin, IPL.dblMax, IPL.dblUnitPrice, ICL.intCompanyLocationId AS intLocationId 
+			FROM tblARCustomer C
+			INNER JOIN tblICItemPricingLevel IPL ON C.intCompanyLocationPricingLevelId = IPL.intCompanyLocationPricingLevelId
+			INNER JOIN tblSMCompanyLocationPricingLevel ICL ON IPL.strPriceLevel = ICL.strPricingLevelName
+			WHERE C.intEntityId = @CustomerId
+			  AND IPL.intItemId = @ItemId
+			  AND ICL.intCompanyLocationId = @LocationId
+			  AND @Quantity BETWEEN IPL.dblMin  AND IPL.dblMax
+		) AS CPL ON VI.intItemId = CPL.intItemId AND VI.intLocationId = CPL.intLocationId AND VI.intStockUOMId = CPL.intItemUOM AND @Quantity BETWEEN CPL.dblMin AND CPL.dblMax
 		LEFT OUTER JOIN
 			(
 				SELECT TOP 1 PL.intItemId, PL.intItemUnitMeasureId AS intItemUOM, PL.dblMin, PL.dblMax, PL.dblUnitPrice, ICL.intLocationId 
