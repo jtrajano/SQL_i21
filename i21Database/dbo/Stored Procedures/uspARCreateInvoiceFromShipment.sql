@@ -891,20 +891,22 @@ ORDER BY EFI.[intSalesOrderDetailId] ASC
          DECLARE @dblShipmentQty                NUMERIC(18, 6) = 0
  
          DECLARE @tblEntries TABLE (
-               intId                            INT
-             , intInventoryShipmentItemId    INT
-             , intContractDetailId            INT
-             , intItemUOMId                    INT
-             , dblQtyShipped                    NUMERIC(18, 6)
+               intId                        INT
+             , intInventoryShipmentItemId   INT
+             , intContractDetailId          INT
+             , intItemUOMId                 INT
+			 , intShipmentItemUOMId			INT
+             , dblQtyShipped                NUMERIC(18, 6)
          )
          
          INSERT INTO @tblEntries
-         SELECT IE.intId
-              , IE.intInventoryShipmentItemId
-              , IE.intContractDetailId
-              , IE.intItemUOMId
-              , IE.dblQtyShipped
-         FROM @EntriesForInvoice    IE
+         SELECT intId						= IE.intId
+              , intInventoryShipmentItemId	= IE.intInventoryShipmentItemId
+              , intContractDetailId			= IE.intContractDetailId
+              , intItemUOMId				= IE.intItemUOMId
+			  , intShipmentItemUOMId		= ISI.intItemUOMId
+              , dblQtyShipped				= IE.dblQtyShipped
+         FROM @EntriesForInvoice IE
          INNER JOIN tblCTPriceFixation CPF ON IE.intContractHeaderId = CPF.intContractHeaderId AND IE.intContractDetailId = CPF.intContractDetailId
          INNER JOIN tblICInventoryShipmentItem ISI ON IE.intInventoryShipmentItemId = ISI.intInventoryShipmentItemId
                                                   AND IE.intContractDetailId = ISI.intLineNo 
@@ -912,10 +914,11 @@ ORDER BY EFI.[intSalesOrderDetailId] ASC
          WHERE ISI.intInventoryShipmentId = @ShipmentId
            AND IE.intContractDetailId IS NOT NULL
  
-         SELECT @dblShipmentQty = SUM(ISI.dblQuantity) 
+         SELECT @dblShipmentQty = SUM(dbo.fnCalculateQtyBetweenUOM(ISI.intItemUOMId, CD.intItemUOMId, ISI.dblQuantity)) 
          FROM tblICInventoryShipmentItem ISI
          INNER JOIN tblCTPriceFixation CPF ON CPF.intContractDetailId = ISI.intLineNo 
                                           AND CPF.intContractHeaderId = ISI.intOrderId
+		 INNER JOIN tblCTContractDetail CD ON CPF.intContractDetailId = CD.intContractDetailId
          WHERE ISI.intInventoryShipmentId = @ShipmentId
            AND ISNULL(CPF.intPriceFixationId, 0) <> 0
  
@@ -924,7 +927,7 @@ ORDER BY EFI.[intSalesOrderDetailId] ASC
                  DECLARE @intId    INT
                  DECLARE @dblQty    NUMERIC(18, 6) = 0
                  
-                 SELECT TOP 1 @intId        = intId 
+                 SELECT TOP 1 @intId     = intId 
                             , @dblQty    = dblQtyShipped
                  FROM @tblEntries 
                  ORDER BY intId DESC
