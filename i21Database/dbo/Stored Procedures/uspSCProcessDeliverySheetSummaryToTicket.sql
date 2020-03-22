@@ -33,16 +33,12 @@ DECLARE @CustomerStorageStagingTable AS CustomerStorageStagingTable
 		,@strFeesCostMethod			NVARCHAR(40)
 		,@intBillId					INT
 DECLARE @dblInitialSplitQty			NUMERIC (38,20)
+DECLARE @DeliverySheetTicketIds		Id
+DECLARE @ysnImposeReversalTransaction BIT
+DECLARE @_intTicketId INT
+DECLARE @_intReversedTicketId INT
 
 BEGIN TRY
-
-	---Check for reversal config
-	IF((SELECT TOP 1 ISNULL(ysnImposeReversalTransaction,0) FROM tblRKCompanyPreference) = 1)
-	BEGIN
-		EXEC uspSCProcessReversalDeliverySheetSummaryToTicket @intDeliverySheetId, @intUserId
-
-		GOTO _Exit
-	END
 
 	-- SELECT @currencyDecimal = intCurrencyDecimal from tblSMCompanyPreference
 	SET @currencyDecimal = 20
@@ -77,38 +73,112 @@ BEGIN TRY
 	DECLARE @TicketCurrentRowCount INT
 	DECLARE @TicketRowMaxCount INT
 
-	INSERT INTO @processTicket(
-		[intTicketId]
-		,[intDeliverySheetId]
-		,[intEntityId]
-		,[dblNetUnits]
-		,[dblFreight] 
-		,[dblFees] 
-	)
-	SELECT 
-		[intTicketId]			= intTicketId
-		,[intDeliverySheetId]	= intDeliverySheetId
-		,[intEntityId]			= intEntityId
-		,[dblNetUnits]			= dblNetUnits
-		,[dblFreight]			= dblFreightRate
-		,[dblFees]				= dblTicketFees
-	FROM tblSCTicket 
-	WHERE intDeliverySheetId = @intDeliverySheetId AND strTicketStatus = 'C'
-
-
-	SET @TicketCurrentRowCount = 1
-	SELECT @TicketRowMaxCount = COUNT(1) FROM @processTicket
-
-	WHILE (@TicketCurrentRowCount <= @TicketRowMaxCount)
-	BEGIN
-		SELECT TOP 1 @intTicketId = intTicketId 
-		FROM @processTicket
-		WHERE cntId = @TicketCurrentRowCount
-
-		EXEC [dbo].[uspSCUndistributeTicket] @intTicketId, @intUserId, @intEntityId, 'I', 0, 0, 1	
-		UPDATE tblSCTicket SET strTicketStatus = 'R' WHERE intTicketId = @intTicketId
 	
-		SET @TicketCurrentRowCount = @TicketCurrentRowCount + 1
+
+
+	SET @ysnImposeReversalTransaction = 0
+	
+	SELECT TOP 1
+		@ysnImposeReversalTransaction = ysnImposeReversalTransaction
+	FROM tblRKCompanyPreference
+	
+	IF(@ysnImposeReversalTransaction = 1)
+	--REversal
+	BEGIN
+		INSERT INTO @DeliverySheetTicketIds
+		SELECT 
+			intTicketId
+		FROM tblSCTicket 
+		WHERE intDeliverySheetId = @intDeliverySheetId AND strTicketStatus = 'C'
+			AND ysnReversed = 0
+
+		SELECT 
+			@_intTicketId = MIN(intId) 
+		FROM @DeliverySheetTicketIds
+
+		DELETE FROM @processTicket
+
+		WHILE (ISNULL(@_intTicketId,0) > 0)
+		BEGIN
+			EXEC uspSCReverseTicket @_intTicketId, @intUserId, @_intReversedTicketId OUTPUT
+
+			INSERT INTO @processTicket(
+				[intTicketId]
+				,[intDeliverySheetId]
+				,[intEntityId]
+				,[dblNetUnits]
+				,[dblFreight] 
+				,[dblFees] 
+			)
+			SELECT 
+				[intTicketId]			= intTicketId
+				,[intDeliverySheetId]	= intDeliverySheetId
+				,[intEntityId]			= intEntityId
+				,[dblNetUnits]			= dblNetUnits
+				,[dblFreight]			= dblFreightRate
+				,[dblFees]				= dblTicketFees
+			FROM tblSCTicket 
+			WHERE intTicketId = @_intReversedTicketId
+				AND ysnReversed = 0
+
+			SET @_intReversedTicketId = 0
+			--Loop Iterator
+			BEGIN
+				IF EXISTS(SELECT TOP 1 1 FROM @DeliverySheetTicketIds WHERE intId > @_intTicketId)
+				BEGIN
+					SELECT 
+						@_intTicketId = MIN(intId) 
+					FROM @DeliverySheetTicketIds
+					WHERE intId > @_intTicketId
+				END
+				ELSE
+				BEGIN
+					SET @_intTicketId =  0
+				END
+			END
+
+		END
+	END
+	ELSE
+	--None reversal
+	BEGIN
+		SET @TicketCurrentRowCount = 1
+		SELECT @TicketRowMaxCount = COUNT(1) FROM @processTicket
+
+		INSERT INTO @processTicket(
+			[intTicketId]
+			,[intDeliverySheetId]
+			,[intEntityId]
+			,[dblNetUnits]
+			,[dblFreight] 
+			,[dblFees] 
+		)
+		SELECT 
+			[intTicketId]			= intTicketId
+			,[intDeliverySheetId]	= intDeliverySheetId
+			,[intEntityId]			= intEntityId
+			,[dblNetUnits]			= dblNetUnits
+			,[dblFreight]			= dblFreightRate
+			,[dblFees]				= dblTicketFees
+		FROM tblSCTicket 
+		WHERE intDeliverySheetId = @intDeliverySheetId AND strTicketStatus = 'C'
+			AND ysnReversed = 0
+
+		WHILE (@TicketCurrentRowCount <= @TicketRowMaxCount)
+		BEGIN
+			SELECT TOP 1 @intTicketId = intTicketId 
+			FROM @processTicket
+			WHERE cntId = @TicketCurrentRowCount
+
+			EXEC [dbo].[uspSCUndistributeTicket] @intTicketId, @intUserId, @intEntityId, 'I', 0, 0, 1	
+			UPDATE tblSCTicket SET strTicketStatus = 'R' WHERE intTicketId = @intTicketId
+		
+			SET @TicketCurrentRowCount = @TicketCurrentRowCount + 1
+		END
+
+		
+		DELETE FROM tblGRCustomerStorage
+		WHERE intDeliverySheetId = @intDeliverySheetId
 	END
 
 	-- UPDATE tblGRCustomerStorage
@@ -116,8 +186,6 @@ BEGIN TRY
 	-- 	,dblOpenBalance = 0
 	-- WHERE intDeliverySheetId = @intDeliverySheetId
 
-	DELETE FROM tblGRCustomerStorage
-	WHERE intDeliverySheetId = @intDeliverySheetId
 
 	DELETE FROM @splitTable
 		
@@ -145,7 +213,11 @@ BEGIN TRY
 
 	--REset All Ticket Splits
 	DELETE FROM tblSCTicketSplit 
-	WHERE intTicketId IN (SELECT intTicketId FROM tblSCTicket WHERE intDeliverySheetId = @intDeliverySheetId)
+	WHERE intTicketId IN (SELECT intTicketId 
+						FROM tblSCTicket 
+						WHERE intDeliverySheetId = @intDeliverySheetId
+							AND ysnReversed = 0)
+		
 
 	IF EXISTS(SELECT NULL FROM @splitTable)
 	BEGIN
@@ -204,15 +276,16 @@ BEGIN TRY
 		DEALLOCATE splitCursor;
 
 		UPDATE SC  
-		SET SC.strTicketStatus = 'C' 
-		,SC.intStorageScheduleTypeId = CASE WHEN StagingTable.splitCount > 1 THEN -4 ELSE StagingTable.intStorageScheduleTypeId END
-		,SC.strDistributionOption = CASE WHEN StagingTable.splitCount > 1 THEN 'SPL' ELSE StagingTable.strDistributionOption END
-		,SC.intStorageScheduleId = CASE WHEN StagingTable.splitCount > 1 THEN NULL ELSE StagingTable.intStorageScheduleId END
+		SET SC.strTicketStatus = 'C'
+		-- ,SC.intStorageScheduleTypeId = CASE WHEN StagingTable.splitCount > 1 THEN -4 ELSE StagingTable.intStorageScheduleTypeId END
+		-- ,SC.strDistributionOption = CASE WHEN StagingTable.splitCount > 1 THEN 'SPL' ELSE StagingTable.strDistributionOption END
+		-- ,SC.intStorageScheduleId = CASE WHEN StagingTable.splitCount > 1 THEN NULL ELSE StagingTable.intStorageScheduleId END
+			,SC.intConcurrencyId = ISNULL(SC.intConcurrencyId,0) + 1
 		FROM tblSCTicket SC
-		OUTER APPLY(
-			SELECT (SELECT COUNT(intTicketId) FROM @splitTable) AS splitCount,intStorageScheduleTypeId,intStorageScheduleId,strDistributionOption
-			FROM @splitTable WHERE intTicketId = @intTicketId
-		) StagingTable
+		-- OUTER APPLY(
+		-- 	SELECT (SELECT COUNT(intTicketId) FROM @splitTable) AS splitCount,intStorageScheduleTypeId,intStorageScheduleId,strDistributionOption
+		-- 	FROM @splitTable WHERE intTicketId = @intTicketId
+		-- ) StagingTable
 		WHERE SC.intTicketId = @intTicketId
 
 		FETCH NEXT FROM ticketCursor INTO @intTicketId, @intEntityId, @dblNetUnits;

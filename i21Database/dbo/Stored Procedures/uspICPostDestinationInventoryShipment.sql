@@ -94,6 +94,8 @@ BEGIN
 			)
 				ON invD.intInventoryShipmentItemId = si.intInventoryShipmentItemId
 	WHERE	inv.strInvoiceNumber IS NOT NULL 
+		AND NOT EXISTS(SELECT TOP 1 1 FROM tblARInvoiceDetail WHERE ISNULL(intOriginalInvoiceDetailId,0) = invD.intInvoiceDetailId)
+		AND inv.strTransactionType = 'Invoice'
 	
 
 	IF @strShipmentNumber IS NOT NULL 

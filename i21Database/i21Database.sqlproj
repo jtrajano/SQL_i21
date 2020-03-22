@@ -8501,8 +8501,10 @@
     <Build Include="dbo\Functions\fnRKGetAccountIdForLocationLOB.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetGLAccountsForPosting.sql" />
     <Build Include="dbo\Views\vyuCTPriceContractApproverView.sql" />
-    <Build Include="dbo\Stored Procedures\uspSCCancelTicket.sql" />
-    <Build Include="dbo\Stored Procedures\uspSCProcessReversalDeliverySheetSummaryToTicket.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCReverseTicket.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCReverseInventoryShipmentInvoice.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCReverseInventoryReceiptVoucher.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCReverseDeliverySheet.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
