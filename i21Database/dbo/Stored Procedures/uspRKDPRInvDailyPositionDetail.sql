@@ -307,16 +307,13 @@ BEGIN
 					, strCategory = Category.strCategoryCode
 					, ium.intCommodityUnitMeasureId
 					, t.dtmTicketDateTime
-					, intTicketId = (CASE WHEN gh.intTransactionTypeId = 1 THEN gh.intTicketId
-										WHEN gh.intTransactionTypeId = 4 THEN gh.intSettleStorageId
+					, intTicketId = (CASE WHEN gh.intTransactionTypeId = 4 THEN gh.intSettleStorageId
 										WHEN gh.intTransactionTypeId = 3 THEN gh.intTransferStorageId
 										ELSE gh.intCustomerStorageId END)
-					, strTicketType = (CASE WHEN gh.intTransactionTypeId = 1 THEN 'Scale Storage'
-										WHEN gh.intTransactionTypeId = 4 THEN 'Settle Storage'
+					, strTicketType = (CASE WHEN gh.intTransactionTypeId = 4 THEN 'Settle Storage'
 										WHEN gh.intTransactionTypeId = 3 THEN 'Transfer Storage'
 										ELSE 'Customer/Maintain Storage' END) COLLATE Latin1_General_CI_AS
-					, strTicketNumber = (CASE WHEN gh.intTransactionTypeId = 1 THEN t.strTicketNumber
-										WHEN gh.intTransactionTypeId = 4 THEN gh.strSettleTicket
+					, strTicketNumber = (CASE WHEN gh.intTransactionTypeId = 4 THEN gh.strSettleTicket
 										WHEN gh.intTransactionTypeId = 3 THEN gh.strTransferTicket
 										ELSE a.strStorageTicketNumber END)
 					, gh.intInventoryReceiptId
@@ -377,16 +374,13 @@ BEGIN
 					, strCategory = Category.strCategoryCode
 					, ium.intCommodityUnitMeasureId
 					, dtmTicketDateTime = NULL
-					, intTicketId = (CASE WHEN gh.intTransactionTypeId = 1 THEN gh.intTicketId
-										WHEN gh.intTransactionTypeId = 4 THEN gh.intSettleStorageId
+					, intTicketId = (CASE WHEN gh.intTransactionTypeId = 4 THEN gh.intSettleStorageId
 										WHEN gh.intTransactionTypeId = 3 THEN gh.intTransferStorageId
 										ELSE gh.intCustomerStorageId END)
-					, strTicketType = (CASE WHEN gh.intTransactionTypeId = 1 THEN 'Scale Storage'
-										WHEN gh.intTransactionTypeId = 4 THEN 'Settle Storage'
+					, strTicketType = (CASE WHEN gh.intTransactionTypeId = 4 THEN 'Settle Storage'
 										WHEN gh.intTransactionTypeId = 3 THEN 'Transfer Storage'
 										ELSE 'Customer/Maintain Storage' END) COLLATE Latin1_General_CI_AS
-					, strTicketNumber = (CASE WHEN gh.intTransactionTypeId = 1 THEN NULL
-										WHEN gh.intTransactionTypeId = 4 THEN gh.strSettleTicket
+					, strTicketNumber = (CASE WHEN gh.intTransactionTypeId = 4 THEN gh.strSettleTicket
 										WHEN gh.intTransactionTypeId = 3 THEN gh.strTransferTicket
 										ELSE a.strStorageTicketNumber END)
 					, intInventoryReceiptId = (CASE WHEN gh.strType = 'From Inventory Adjustment' THEN gh.intInventoryAdjustmentId ELSE gh.intInventoryReceiptId END)
@@ -1447,7 +1441,9 @@ BEGIN
 				, intFromCommodityUnitMeasureId
 				, intCompanyLocationId
 				, intTicketId
-				, dtmTicketDateTime)
+				, dtmTicketDateTime
+				, strDistributionOption
+				, strTicketType)
 			SELECT * FROM (
 				SELECT intSeqId = 12
 					, strStorageType
@@ -1473,6 +1469,8 @@ BEGIN
 					, intCompanyLocationId
 					, r.intTicketId
 					, dtmTicketDateTime
+					, strDistributionOption = 'Storage' COLLATE Latin1_General_CI_AS
+					, strTicketType  
 				FROM #tblGetStorageDetailByDate r
 				JOIN tblICItem i ON r.intItemId = i.intItemId
 				JOIN tblICItemUOM iuom ON i.intItemId = iuom.intItemId AND ysnStockUnit = 1
