@@ -667,6 +667,7 @@ BEGIN TRY
 			, intCommodityId
 			, intBookId
 			, intSubBookId
+			, intFutOptTransactionId
 			, intFutureMarketId
 			, intFutureMonthId
 			, dblNoOfLots
@@ -691,6 +692,7 @@ BEGIN TRY
 			, intCommodityId = der.intCommodityId
 			, intBookId = der.intBookId
 			, intSubBookId = der.intSubBookId
+			, der.intFutOptTransactionId
 			, intFutureMarketId = der.intFutureMarketId
 			, intFutureMonthId = der.intFutureMonthId
 			, dblNoOfLots = der.dblNewNoOfLots
@@ -715,6 +717,7 @@ BEGIN TRY
 		FROM vyuRKGetFutOptTransactionHistory der
 		JOIN tblRKFutureMarket m ON m.intFutureMarketId = der.intFutureMarketId
 		LEFT JOIN tblICCommodityUnitMeasure cUOM ON cUOM.intCommodityId = der.intCommodityId AND cUOM.intUnitMeasureId = m.intUnitMeasureId
+		ORDER BY dtmTransactionDate
 
 		EXEC uspRKLogRiskPosition @ExistingHistory, 1, 0
 
@@ -740,6 +743,7 @@ BEGIN TRY
 			, intLocationId
 			, intBookId
 			, intSubBookId
+			, intFutOptTransactionId
 			, intFutureMarketId
 			, intFutureMonthId
 			, strNotes
@@ -764,6 +768,7 @@ BEGIN TRY
 			, intLocationId
 			, intBookId
 			, intSubBookId
+			, intFutOptTransactionId
 			, intFutureMarketId
 			, intFutureMonthId
 			, strNotes
@@ -787,6 +792,7 @@ BEGIN TRY
 				, de.intLocationId
 				, intBookId = de.intBookId
 				, intSubBookId = de.intSubBookId
+				, intFutOptTransactionId = history.intLFutOptTransactionId
 				, intFutureMarketId = de.intFutureMarketId
 				, intFutureMonthId = de.intFutureMonthId
 				, strNotes = 'IN'
@@ -823,6 +829,7 @@ BEGIN TRY
 				, intLocationId
 				, intBookId = de.intBookId
 				, intSubBookId = de.intSubBookId
+				, intFutOptTransactionId = history.intSFutOptTransactionId
 				, intFutureMarketId = de.intFutureMarketId
 				, intFutureMonthId = de.intFutureMonthId
 				, strNotes = 'OUT'
@@ -873,6 +880,7 @@ BEGIN TRY
 			, intLocationId
 			, intBookId
 			, intSubBookId
+			, intFutOptTransactionId
 			, intFutureMarketId
 			, intFutureMonthId
 			, strNotes
@@ -897,6 +905,7 @@ BEGIN TRY
 			, intLocationId
 			, intBookId
 			, intSubBookId
+			, intFutOptTransactionId
 			, intFutureMarketId
 			, intFutureMonthId
 			, strNotes
@@ -920,6 +929,7 @@ BEGIN TRY
 				, de.intLocationId
 				, intBookId = de.intBookId
 				, intSubBookId = de.intSubBookId
+				, intFutOptTransactionId = detail.intFutOptTransactionId
 				, intFutureMarketId = de.intFutureMarketId
 				, intFutureMonthId = de.intFutureMonthId
 				, strNotes = CASE WHEN de.strBuySell = 'Buy' THEN 'IN' ELSE 'OUT' END
@@ -948,6 +958,7 @@ BEGIN TRY
 				, de.intLocationId
 				, intBookId = de.intBookId
 				, intSubBookId = de.intSubBookId
+				, intFutOptTransactionId = detail.intFutOptTransactionId
 				, intFutureMarketId = de.intFutureMarketId
 				, intFutureMonthId = de.intFutureMonthId
 				, strNotes = CASE WHEN de.strBuySell = 'Buy' THEN 'IN' ELSE 'OUT' END

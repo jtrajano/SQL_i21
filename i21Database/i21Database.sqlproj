@@ -8588,6 +8588,7 @@
     <Build Include="dbo\Stored Procedures\uspSCReverseDeliverySheet.sql" />
     <Build Include="dbo\Views\vyuHDTicketForExport.sql" />
     <Build Include="dbo\Stored Procedures\uspICCreateReturnGLEntriesForNonStockItems.sql" />
+    <Build Include="dbo\Views\vyuRKGetDPRCommodityLocation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
