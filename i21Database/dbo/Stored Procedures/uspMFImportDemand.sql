@@ -117,7 +117,7 @@ BEGIN TRY
 		,intCreatedUserId
 		)
 	SELECT DISTINCT strDemandName
-		,CONVERT(NVARCHAR, GETDATE(), @intConvertYear)
+		,CONVERT(NVARCHAR, GETDATE(), 101)
 		,strBook
 		,strSubBook
 		,intCreatedUserId
