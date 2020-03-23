@@ -133,6 +133,7 @@ BEGIN TRANSACTION
 		,dtmStoreAppLastDateLog
 		--,strHandheldScannerServerFolderPath
 		,intConcurrencyId
+		,ysnLotterySetupMode
 	)
 	SELECT TOP 1
 		@newStoreTransactionId
@@ -251,6 +252,7 @@ BEGIN TRANSACTION
 		,dtmStoreAppLastDateLog
 		--,''
 		,intConcurrencyId
+		,ysnLotterySetupMode
 	FROM tblSTStore
 	WHERE ISNULL(intStoreId,0) = ISNULL(@StoreId,0)
 
