@@ -8586,6 +8586,7 @@
     <Build Include="dbo\Stored Procedures\uspSCReverseInventoryShipmentInvoice.sql" />
     <Build Include="dbo\Stored Procedures\uspSCReverseInventoryReceiptVoucher.sql" />
     <Build Include="dbo\Stored Procedures\uspSCReverseDeliverySheet.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCreateReturnGLEntriesForNonStockItems.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

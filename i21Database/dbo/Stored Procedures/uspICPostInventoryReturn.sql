@@ -1285,7 +1285,7 @@ BEGIN
 				,[intSourceEntityId]
 				,[intCommodityId]
 		)
-		EXEC	@intReturnValue = uspICCreateReceiptGLEntriesForNonStockItems
+		EXEC	@intReturnValue = uspICCreateReturnGLEntriesForNonStockItems
 					@NonInventoryItemsForPost 
 					,@strBatchId 
 					,@intTransactionId 
