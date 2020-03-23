@@ -1156,7 +1156,54 @@ BEGIN
 			INNER JOIN dbo.tblICLot Lot 
 				ON Lot.intLotId = ItemLot.intLotId
 	WHERE	Receipt.intInventoryReceiptId = @intTransactionId
-			AND Receipt.strReceiptNumber = @strTransactionId			
+			AND Receipt.strReceiptNumber = @strTransactionId		
+			
+	-- Process the GL Entries for the Non-Stock Items
+	BEGIN 
+		INSERT INTO @GLEntries (
+				[dtmDate] 
+				,[strBatchId]
+				,[intAccountId]
+				,[dblDebit]
+				,[dblCredit]
+				,[dblDebitUnit]
+				,[dblCreditUnit]
+				,[strDescription]
+				,[strCode]
+				,[strReference]
+				,[intCurrencyId]
+				,[dblExchangeRate]
+				,[dtmDateEntered]
+				,[dtmTransactionDate]
+				,[strJournalLineDescription]
+				,[intJournalLineNo]
+				,[ysnIsUnposted]
+				,[intUserId]
+				,[intEntityId]
+				,[strTransactionId]
+				,[intTransactionId]
+				,[strTransactionType]
+				,[strTransactionForm]
+				,[strModuleName]
+				,[intConcurrencyId]
+				,[dblDebitForeign]	
+				,[dblDebitReport]	
+				,[dblCreditForeign]	
+				,[dblCreditReport]	
+				,[dblReportingRate]	
+				,[dblForeignRate]
+				,[strRateType]
+				,[intSourceEntityId]
+				,[intCommodityId]
+		)
+		EXEC	@intReturnValue = uspICCreateReturnGLEntriesForNonStockItems
+					@NonInventoryItemsForPost 
+					,@strBatchId 
+					,@intTransactionId 
+					,@intEntityUserSecurityId 					
+
+		IF @intReturnValue < 0 GOTO With_Rollback_Exit
+	END
 
 END   
 

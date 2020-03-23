@@ -8501,6 +8501,7 @@
     <Build Include="dbo\Functions\fnRKGetAccountIdForLocationLOB.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetGLAccountsForPosting.sql" />
     <Build Include="dbo\Views\vyuCTPriceContractApproverView.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCreateReturnGLEntriesForNonStockItems.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
