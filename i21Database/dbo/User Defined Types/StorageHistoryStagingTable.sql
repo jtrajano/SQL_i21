@@ -17,7 +17,7 @@ CREATE TYPE [dbo].[StorageHistoryStagingTable] AS TABLE
     [dblPaidAmount] NUMERIC(38,20) NULL,
     [dblCurrencyRate] NUMERIC(38, 20) NULL,
     [intUserId] INT NOT NULL,
-    [ysnPost] BIT NOT NULL,
+    [ysnPost] BIT NOT NULL DEFAULT(1),
     [intTransactionTypeId] INT NOT NULL,
     [strPaidDescription] NVARCHAR(100) COLLATE Latin1_General_CI_AS,
     [strType] NVARCHAR(100) COLLATE Latin1_General_CI_AS,
