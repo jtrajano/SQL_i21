@@ -44,6 +44,7 @@ AS
 		left join Invoice on Invoice.intContractDetailId = LD.intPContractDetailId and Invoice.intLoadId = LO.intLoadId
 		WHERE   NOT (LO.intPurchaseSale	    =   1 AND LO.intShipmentStatus    IN(4,11,7))
 		AND	LD.intPContractDetailId IS NOT NULL
+		AND isnull(LO.ysnCancelled,convert(bit,0)) = convert(bit,0)
 
 		UNION ALL
 
@@ -53,6 +54,7 @@ AS
 		left join Invoice on Invoice.intContractDetailId = LD.intSContractDetailId and Invoice.intLoadId = LO.intLoadId
 		WHERE   NOT (LO.intPurchaseSale	    =   2 AND LO.intShipmentStatus    IN(6,11,7))
 		AND	LD.intSContractDetailId IS NOT NULL
+		AND isnull(LO.ysnCancelled,convert(bit,0)) = convert(bit,0)
 
 		UNION ALL
 
