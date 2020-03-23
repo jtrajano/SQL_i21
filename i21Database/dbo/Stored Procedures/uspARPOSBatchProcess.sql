@@ -586,7 +586,14 @@ IF EXISTS (SELECT TOP 1 NULL FROM #POSTRANSACTIONS)
 				 , dblAmount			= POSP.dblAmountTendered
 			INTO #POSPAYMENTS
 			FROM tblARPOS POS
-			INNER JOIN tblARInvoiceIntegrationLogDetail I ON POS.intPOSId = I.intSourceId AND POS.strReceiptNumber = I.strSourceId
+			INNER JOIN 
+			(SELECT DISTINCT intSourceId,
+							 strSourceId, 
+							 intIntegrationLogId, 
+							 ysnHeader, 
+							 ysnSuccess, 
+							 ysnPosted 
+			FROM  tblARInvoiceIntegrationLogDetail) I ON POS.intPOSId = I.intSourceId AND POS.strReceiptNumber = I.strSourceId
 			INNER JOIN tblARPOSPayment POSP ON POS.intPOSId = POSP.intPOSId
 			WHERE intIntegrationLogId = @intInvoiceLogId
 			  AND ISNULL(ysnHeader, 0) = 1
@@ -883,8 +890,8 @@ IF EXISTS (SELECT TOP 1 NULL FROM #POSTRANSACTIONS)
 			FROM #POSPAYMENTS POSP
 			INNER JOIN #POSTRANSACTIONS POS ON POSP.intPOSId = POS.intPOSId
 			WHERE POSP.strPaymentMethod IN ('Cash', 'Check')
-			   AND POS.strPOSType = 'Returned'
-
+			  AND ( (POS.strPOSType = 'Returned' OR POS.strPOSType = 'Return')
+					OR POS.strPOSType = 'Mixed' AND POSP.dblAmount < 0 )
 			UPDATE tblARPOSEndOfDay
 			SET dblExpectedEndingBalance = ISNULL(dblExpectedEndingBalance, 0) + ISNULL(@dblCashReceipt, 0)
 			  , dblCashReturn			 = ISNULL(dblCashReturn, 0) + ISNULL(@dblCashReturn, 0)
