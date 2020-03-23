@@ -8170,6 +8170,7 @@
     <Build Include="dbo\Tables\tblIPLoadDetailArchive.sql" />
     <Build Include="dbo\Stored Procedures\uspIPStageSAPShippingInstruction.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessSAPShippingInstruction.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCreateReturnGLEntriesForNonStockItems.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
