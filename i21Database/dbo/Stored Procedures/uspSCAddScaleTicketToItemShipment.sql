@@ -268,10 +268,11 @@ BEGIN
 											WHEN CNT.intPricingTypeId = 5 
 												THEN 0 
 											WHEN CNT.intPricingTypeId = 2
-												THEN 0 
-											ELSE
-											 	CASE WHEN ISNULL(Fixation.ysnHasPricing,0) = 1 THEN 0 ELSE LI.ysnAllowVoucher END 
-											
+												THEN 
+													CASE WHEN CNT.dblAvailablePriceContractQty > 0
+														THEN 1
+													ELSE 0 END
+											ELSE LI.ysnAllowVoucher 
 										END
 									END
 		FROM @Items LI INNER JOIN  dbo.tblSCTicket SC ON SC.intTicketId = LI.intTransactionId
@@ -322,12 +323,6 @@ BEGIN
 		) CNT ON CNT.intContractDetailId = LI.intTransactionDetailId
 		INNER JOIN tblICItem IC ON IC.intItemId = LI.intItemId
 		LEFT JOIN tblICLot ICL ON ICL.intLotId = SC.intLotId
-		OUTER APPLY(
-			SELECT TOP 1 
-				ysnHasPricing = 1
-			FROM tblCTPriceFixation
-			WHERE intContractDetailId = LI.intTransactionDetailId
-		)Fixation
 		WHERE	SC.intTicketId = @intTicketId AND (SC.dblNetUnits != 0 or SC.dblFreightRate != 0)
 END 
 
