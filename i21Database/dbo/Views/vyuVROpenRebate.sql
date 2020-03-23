@@ -80,6 +80,8 @@ FROM (
 
 		LEFT OUTER JOIN tblVRProgramItem pi ON pi.intProgramId = program.intProgramId
 			AND pi.intItemId = item.intItemId
+			AND invoice.dtmDate >= pi.dtmBeginDate
+			AND invoice.dtmDate <= ISNULL(pi.dtmEndDate, '12/31/9999')
 		LEFT OUTER JOIN tblICItemUOM itemUOM ON itemUOM.intItemId = invoiceDetail.intItemId
 			and itemUOM.intUnitMeasureId = pi.intUnitMeasureId
 		LEFT OUTER JOIN tblICUnitMeasure itemUnitMeasure ON itemUnitMeasure.intUnitMeasureId = pi.intUnitMeasureId
