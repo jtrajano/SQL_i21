@@ -61,7 +61,7 @@ AS
 		JOIN	tblLGLoad			   LO  ON  LO.intLoadId			    =   LD.intLoadId
 		left join Invoice on Invoice.intContractDetailId = LD.intPContractDetailId and Invoice.intLoadId = LO.intLoadId
 		left join schedule on schedule.intContractDetailId = LD.intPContractDetailId
-		WHERE   NOT (LO.intPurchaseSale	    =   1 AND LO.intShipmentStatus    IN(4,11))
+		WHERE   NOT (LO.intPurchaseSale	    =   1 AND LO.intShipmentStatus    IN(4,11,7))
 		AND	LD.intPContractDetailId IS NOT NULL
 
 		UNION ALL
@@ -71,7 +71,7 @@ AS
 		JOIN	tblLGLoad				LO  ON  LO.intLoadId			    =   LD.intLoadId
 		left join Invoice on Invoice.intContractDetailId = LD.intSContractDetailId and Invoice.intLoadId = LO.intLoadId
 		left join schedule on schedule.intContractDetailId = LD.intSContractDetailId
-		WHERE   NOT (LO.intPurchaseSale	    =   2 AND LO.intShipmentStatus    IN(6,11))
+		WHERE   NOT (LO.intPurchaseSale	    =   2 AND LO.intShipmentStatus    IN(6,11,7))
 		AND	LD.intSContractDetailId IS NOT NULL
 
 		UNION ALL
