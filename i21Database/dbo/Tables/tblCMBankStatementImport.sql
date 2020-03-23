@@ -16,6 +16,7 @@
     [intCreatedUserId] INT NULL DEFAULT 0, 
     [dtmCreated] DATETIME NULL, 
     [intLastModifiedUserId] INT NULL, 
+    [intResponsibleEntityId] INT NULL, 
     [dtmLastModified] DATETIME NULL, 
     [intConcurrencyId] INT NULL,
 	CONSTRAINT [FK_tblCMBankAccounttblCMBankStatementImport] FOREIGN KEY ([intBankAccountId]) REFERENCES [dbo].[tblCMBankAccount] ([intBankAccountId]), 
