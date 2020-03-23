@@ -24,6 +24,7 @@ DECLARE @intTicketType INT
 DECLARE @_intBillId INT
 DECLARE @ysnPost BIT
 DECLARE @intReversedBillId INT
+DECLARE @strDebitMemoNumber NVARCHAR(MAX)
 
 BEGIN TRY
 
@@ -112,6 +113,26 @@ BEGIN TRY
 		BEGIN
 			---create voucher reversal for posted voucher
 			EXEC uspAPReverseTransaction @_intBillId, @intUserId, @intReversedBillId OUTPUT
+
+
+			-- Audit log Entry
+			IF(ISNULL(@intReversedBillId,0) > 0)
+			BEGIN
+				SELECT TOP 1
+					@strDebitMemoNumber = strBillId
+				FROM tblAPBill
+				WHERE intBillId = @intReversedBillId
+
+				EXEC dbo.uspSMAuditLog 
+					@keyValue			= @intTicketId				-- Primary Key Value of the Ticket. 
+					,@screenName		= 'Grain.view.Scale'				-- Screen Namespace
+					,@entityId			= @intUserId						-- Entity Id.
+					,@actionType		= 'Updated'							-- Action Type
+					,@changeDescription	= 'Debit Memo' 				-- Description
+					,@fromValue			= ''								-- Old Value
+					,@toValue			= @strDebitMemoNumber								-- New Value
+					,@details			= '';
+			END
 		END
 
 		--Loop Iterator
