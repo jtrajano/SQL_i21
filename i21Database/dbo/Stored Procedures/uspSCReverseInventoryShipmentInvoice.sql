@@ -18,6 +18,7 @@ DECLARE @_intInvoiceId INT
 DECLARE @_intInvoiceDetail INT
 DECLARE @ysnPost BIT
 DECLARE @intNewInvoiceId INT
+DECLARE @strNewInvoiceNumber NVARCHAR(50)
 
 
 --------------------------------
@@ -182,9 +183,14 @@ BEGIN TRY
 				END
 			END
 
-			--Post credit memo
+			--Post credit memo and audit log entry
 			IF(ISNULL(@intNewInvoiceId,0) > 0)
 			BEGIN
+				SELECT TOP 1
+					@strNewInvoiceNumber = strInvoiceNumber
+				FROM tblARInvoice
+				WHERE intInvoiceId = @intNewInvoiceId
+
 				EXEC [dbo].[uspARPostInvoice]
 						@batchId			= NULL,
 						@post				= 1,
@@ -204,6 +210,18 @@ BEGIN TRY
 						@transType			= N'all',
 						@accrueLicense		= 0,
 						@raiseError			= 1
+
+				-- Audit log Entry
+				
+					EXEC dbo.uspSMAuditLog 
+						@keyValue			= @intTicketId				-- Primary Key Value of the Ticket. 
+						,@screenName		= 'Grain.view.Scale'				-- Screen Namespace
+						,@entityId			= @intUserId						-- Entity Id.
+						,@actionType		= 'Updated'							-- Action Type
+						,@changeDescription	= 'Credit Memo' 				-- Description
+						,@fromValue			= ''								-- Old Value
+						,@toValue			= @strNewInvoiceNumber								-- New Value
+						,@details			= '';
 			END
 		END
 

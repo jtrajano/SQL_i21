@@ -63,6 +63,20 @@ DECLARE @strMatchTicketNumber NVARCHAR(50)
 DECLARE @intNewInvoiceId INT
 DECLARE @dblTicketGrossUnits NUMERIC(18,6)
 DECLARE @ysnDeliverySheetPosted BIT
+DECLARE @dtmTransactionDate DATETIME
+DECLARE @strLogDescription NVARCHAR(MAX)
+DECLARE @strDeliverySheetNumber NVARCHAR(50)
+DECLARE @ItemReservationTableType AS ItemReservationTableType
+DECLARE @InTransitTableType AS InTransitTableType
+DECLARE @ItemsForInTransitCosting AS ItemInTransitCostingTableType
+DECLARE @_intTransctionTypeId INT
+DECLARE @_intTransactionId INT
+DECLARE @_strTransactionId INT
+DECLARE @_strBatchId NVARCHAR(100)
+DECLARE @SummaryLogs AS RKSummaryLog
+
+
+
 --------------------------------
 DECLARE @successfulCount INT
 DECLARE	@invalidCount INT
@@ -101,12 +115,14 @@ BEGIN TRY
 			SELECT @intLotType = dbo.fnGetItemLotType(@intTicketItemId) 
 		END
 
+		SET @dtmTransactionDate = GETDATE()
 
 		---get Delivery sheet info
 		IF(ISNULL(@intDeliverySheetId,0) > 0)
 		BEGIN
 			SELECT TOP 1
 				@ysnDeliverySheetPosted = ysnPost
+				,@strDeliverySheetNumber = strDeliverySheetNumber
 			FROM tblSCDeliverySheet
 			WHERE intDeliverySheetId = @intDeliverySheetId
 		END
@@ -134,7 +150,7 @@ BEGIN TRY
 		END
 		
 		---Validation
-		IF(@strTicketStatus <> 'C')
+		IF(@strTicketStatus <> 'C' AND @strTicketStatus <> 'H')
 		BEGIN
 			SET @ErrorMessage = 'Ticket is not yet completed. Use the void process instead.';
 			RAISERROR(@ErrorMessage, 11, 1);
@@ -177,6 +193,24 @@ BEGIN TRY
 						
 				WHILE ISNULL(@_intInventoryReceiptShipmentId,0) > 0
 				BEGIN
+					--Storage Validation
+					BEGIN
+						SET @intCustomerStorageId = 0
+						SET @intCustomerStorageId = (SELECT TOP 1 intCustomerStorageId FROM tblGRStorageHistory WHERE intInventoryReceiptId = @_intInventoryReceiptShipmentId)
+
+
+						IF ISNULL(@intCustomerStorageId,0)> 0
+						BEGIN
+							IF(ISNULL(@intDeliverySheetId,0) > 0)
+							BEGIN
+								EXEC uspGRCheckStorageTicketStatus @intDeliverySheetId, @strDeliverySheetNumber, @intUserId
+							END
+							ELSE
+							BEGIN
+								EXEC uspGRCheckStorageTicketStatus @intTicketId, @strTicketNumber, @intUserId
+							END
+						END
+					END
 
 					---Reverse voucher
 					EXEC [uspSCReverseInventoryReceiptVoucher] @intTicketId, @intUserId, @_intInventoryReceiptShipmentId
@@ -196,12 +230,9 @@ BEGIN TRY
 						EXEC dbo.uspICPostInventoryReceipt 1, 0, @_strReceiptShipmentNumber, @intUserId;
 				
 						-----insert into storage history of storage based on the previous IR and update customer storage open balance		
+						IF ISNULL(@intCustomerStorageId,0)> 0
 						BEGIN
-							SET @intCustomerStorageId = 0
-							SET @intCustomerStorageId = (SELECT TOP 1 intCustomerStorageId FROM tblGRStorageHistory WHERE intInventoryReceiptId = @_intInventoryReceiptShipmentId)
-
 						
-							IF ISNULL(@intCustomerStorageId,0)> 0
 						
 							
 							--insert customer history
@@ -330,7 +361,7 @@ BEGIN TRY
 									,[strSourceType]
 									,[intSort]
 									,[strDiscountChargeType]
-									,[dtmCreatedDate] = GETDATE()
+									,[dtmCreatedDate] = @dtmTransactionDate
 								FROM tblQMTicketDiscount A
 								WHERE intTicketFileId = @intCustomerStorageId
 									AND strSourceType = 'Storage'
@@ -425,7 +456,20 @@ BEGIN TRY
 							END
 						END
 
-					
+						---Audit Log Entry
+						BEGIN
+							--- Duplicate Ticket
+							SET @strLogDescription = 'Inventory Receipt'
+								EXEC dbo.uspSMAuditLog 
+									@keyValue			= @intTicketId				-- Primary Key Value of the Ticket. 
+									,@screenName		= 'Grain.view.Scale'				-- Screen Namespace
+									,@entityId			= @intUserId						-- Entity Id.
+									,@actionType		= 'Updated'						-- Action Type
+									,@changeDescription	= @strLogDescription				-- Description
+									,@fromValue			= ''								-- Old Value
+									,@toValue			= @_strReceiptShipmentNumber								-- New Value
+									,@details			= '';
+						END
 					END
 
 
@@ -665,80 +709,93 @@ BEGIN TRY
 					END
 
 					---- Update contract schedule if ticket Distribution type is load and link it to reversal IS
+					BEGIN
+						SET @_ysnReceiptShipmetContainTicketContract = 0 
+						SET @_intInventoryReceiptShipmentItemId = 0
+
+						SELECT TOP 1 
+								@_intInventoryReceiptShipmentItemId = B.intInventoryShipmentItemId
+						FROM tblICInventoryShipmentItem A
+						INNER JOIN tblICInventoryShipmentItem B
+							ON A.intInventoryShipmentId = B.intInventoryShipmentId
+						WHERE A.intInventoryShipmentId = @_intInventoryReceiptShipmentId
+							AND B.intLineNo  = @intTicketContractDetailId
+						
+						IF(ISNULL(@_intInventoryReceiptShipmentItemId,0) > 0)		
 						BEGIN
-							SET @_ysnReceiptShipmetContainTicketContract = 0 
-							SET @_intInventoryReceiptShipmentItemId = 0
+							SET @_ysnReceiptShipmetContainTicketContract = 1  
+						END
 
-							SELECT TOP 1 
-									@_intInventoryReceiptShipmentItemId = B.intInventoryShipmentItemId
-							FROM tblICInventoryShipmentItem A
-							INNER JOIN tblICInventoryShipmentItem B
-								ON A.intInventoryShipmentId = B.intInventoryShipmentId
-							WHERE A.intInventoryShipmentId = @_intInventoryReceiptShipmentId
-								AND B.intLineNo  = @intTicketContractDetailId
-							
-							IF(ISNULL(@_intInventoryReceiptShipmentItemId,0) > 0)		
+						IF(@strDistributionOption = 'LOD')
+						BEGIN
+							--- check if the current loop IS have the selected contract in ticket
+							IF(@_ysnReceiptShipmetContainTicketContract = 1)							
 							BEGIN
-								SET @_ysnReceiptShipmetContainTicketContract = 1  
-							END
 
-							IF(@strDistributionOption = 'LOD')
-							BEGIN
-								--- check if the current loop IS have the selected contract in ticket
-								IF(@_ysnReceiptShipmetContainTicketContract = 1)							
+								SET @_ysnLoadBaseContract = 0
+								SELECT TOP 1 
+									@_ysnLoadBaseContract = ysnLoad
+								FROM tblCTContractHeader A
+								INNER JOIN tblCTContractDetail B
+									ON A.intContractHeaderId = B.intContractHeaderId
+								WHERE intContractDetailId = @intTicketContractDetailId
+
+								SET @_ysnLoadBaseContract = ISNULL(@_ysnLoadBaseContract,0)
+
+								--NON Load based contract
+								IF(@_ysnLoadBaseContract = 0)
 								BEGIN
-
-									SET @_ysnLoadBaseContract = 0
+									SET @_dblLoadUsedQty = 0
 									SELECT TOP 1 
-										@_ysnLoadBaseContract = ysnLoad
-									FROM tblCTContractHeader A
-									INNER JOIN tblCTContractDetail B
-										ON A.intContractHeaderId = B.intContractHeaderId
+										@_dblLoadUsedQty = dblQty
+									FROM tblSCTicketLoadUsed
+									WHERE intTicketId = @intTicketId
+										AND intLoadDetailId = @intTicketLoadDetailId
+										AND intEntityId = @_intInventoryReceiptShipmentEntityId
+
+									SET @_dblContractAvailableQty = 0
+									SELECT TOP 1 
+										@_dblContractAvailableQty = ISNULL(dblAvailableQtyInItemStockUOM,0)
+									FROM vyuCTContractDetailView
 									WHERE intContractDetailId = @intTicketContractDetailId
 
-									SET @_ysnLoadBaseContract = ISNULL(@_ysnLoadBaseContract,0)
-
-									--NON Load based contract
-									IF(@_ysnLoadBaseContract = 0)
+									IF @dblTicketScheduledQty <= @_dblContractAvailableQty
 									BEGIN
-										SET @_dblLoadUsedQty = 0
-										SELECT TOP 1 
-											@_dblLoadUsedQty = dblQty
-										FROM tblSCTicketLoadUsed
-										WHERE intTicketId = @intTicketId
-											AND intLoadDetailId = @intTicketLoadDetailId
-											AND intEntityId = @_intInventoryReceiptShipmentEntityId
-
-										SET @_dblContractAvailableQty = 0
-										SELECT TOP 1 
-											@_dblContractAvailableQty = ISNULL(dblAvailableQtyInItemStockUOM,0)
-										FROM vyuCTContractDetailView
-										WHERE intContractDetailId = @intTicketContractDetailId
-
-										IF @dblTicketScheduledQty <= @_dblContractAvailableQty
-										BEGIN
-											SET @_dblLoadUsedQty = @dblTicketScheduledQty
-										END
-										ELSE
-										BEGIN
-											SET @_dblLoadUsedQty = @_dblContractAvailableQty
-										END
-
-										IF @_dblLoadUsedQty <> 0
-										BEGIN
-								
-											EXEC uspCTUpdateScheduleQuantityUsingUOM @intTicketContractDetailId, @_dblLoadUsedQty, @intUserId, @_intInventoryReceiptShipmentItemId, 'Inventory Shipment', @intTicketItemUOMId
-										END
+										SET @_dblLoadUsedQty = @dblTicketScheduledQty
 									END
-									ELSE ---Load based contract
+									ELSE
 									BEGIN
-										EXEC uspCTUpdateScheduleQuantityUsingUOM @intTicketContractDetailId, 1, @intUserId, @_intInventoryReceiptShipmentItemId, 'Inventory Shipment', @intTicketItemUOMId
+										SET @_dblLoadUsedQty = @_dblContractAvailableQty
 									END
+
+									IF @_dblLoadUsedQty <> 0
+									BEGIN
+							
+										EXEC uspCTUpdateScheduleQuantityUsingUOM @intTicketContractDetailId, @_dblLoadUsedQty, @intUserId, @_intInventoryReceiptShipmentItemId, 'Inventory Shipment', @intTicketItemUOMId
+									END
+								END
+								ELSE ---Load based contract
+								BEGIN
+									EXEC uspCTUpdateScheduleQuantityUsingUOM @intTicketContractDetailId, 1, @intUserId, @_intInventoryReceiptShipmentItemId, 'Inventory Shipment', @intTicketItemUOMId
 								END
 							END
 						END
+					END
 					
-
+					---Audit Log Entry
+					BEGIN
+						--- Duplicate Ticket
+						SET @strLogDescription = 'Inventory Shipment'
+							EXEC dbo.uspSMAuditLog 
+								@keyValue			= @intTicketId				-- Primary Key Value of the Ticket. 
+								,@screenName		= 'Grain.view.Scale'				-- Screen Namespace
+								,@entityId			= @intUserId						-- Entity Id.
+								,@actionType		= 'Updated'						-- Action Type
+								,@changeDescription	= @strLogDescription				-- Description
+								,@fromValue			= ''								-- Old Value
+								,@toValue			= @_strReceiptShipmentNumber								-- New Value
+								,@details			= '';
+					END
 				END
 
 				-------------------------- Loop Iterator
@@ -810,7 +867,7 @@ BEGIN TRY
 			)
 			SELECT      
 				-- Header
-				[dtmTransferDate]           = GETDATE()
+				[dtmTransferDate]           = @dtmTransactionDate
 				,[strTransferType]          = 'Location to Location'
 				,[intSourceType]            = 1
 				,[strDescription]           = (select top 1 strDescription from vyuICGetItemStock IC where SC.intItemId = IC.intItemId)
@@ -867,6 +924,208 @@ BEGIN TRY
 				EXEC [dbo].[uspICPostInventoryTransfer] 1, 0, @_strInventoryTransferNumber, @intUserId;
 			END	
 		END
+		---- HOLD Distribution
+		ELSE IF @intTicketStorageScheduleTypeId = -5
+		BEGIN
+			SET @_strBatchId = NULL
+
+			---IC Staging tables
+			BEGIN
+
+				IF(@strInOutFlag = 'O')
+				BEGIN
+					INSERT INTO @ItemReservationTableType (
+					[intItemId]
+					,[intItemLocationId]
+					,[intItemUOMId]
+					,[intLotId]
+					,[intSubLocationId]
+					,[intStorageLocationId]
+					,[dblQty]
+					,[intTransactionId]
+					,[strTransactionId]
+					,[intTransactionTypeId]
+					)
+					SELECT	[intItemId]				= SC.intItemId
+							,[intItemLocationId]	= ICIL.intItemLocationId
+							,[intItemUOMId]			= SC.intItemUOMIdTo
+							,[intLotId]				= NULL
+							,[intSubLocationId]		= SC.intSubLocationId
+							,[intStorageLocationId]	= SC.intStorageLocationId
+							,[dblQty]				= CASE WHEN @ysnPost = 1 THEN SC.dblNetUnits ELSE SC.dblNetUnits*-1  END
+							,[intTransactionId]		= @intTicketId
+							,[strTransactionId]		= SC.strTicketNumber
+							,[intTransactionTypeId] = 52
+					FROM	tblSCTicket SC
+					INNER JOIN dbo.tblICItemLocation ICIL 
+						ON ICIL.intItemId = SC.intItemId 
+							AND ICIL.intLocationId = SC.intProcessingLocationId
+					WHERE SC.intTicketId = @intTicketId
+				END
+				ELSE
+				BEGIN
+					INSERT INTO @InTransitTableType (
+						[intItemId]
+						,[intItemLocationId]
+						,[intItemUOMId]
+						,[intLotId]
+						,[intSubLocationId]
+						,[intStorageLocationId]
+						,[dblQty]
+						,[intTransactionId]
+						,[strTransactionId]
+						,[intTransactionTypeId]
+					)
+					SELECT	[intItemId]				= SC.intItemId
+							,[intItemLocationId]	= ICIL.intItemLocationId
+							,[intItemUOMId]			= SC.intItemUOMIdTo
+							,[intLotId]				= NULL
+							,[intSubLocationId]		= SC.intSubLocationId
+							,[intStorageLocationId]	= SC.intStorageLocationId
+							,[dblQty]				= CASE WHEN @ysnPost = 1 THEN SC.dblNetUnits ELSE SC.dblNetUnits * -1 END
+							,[intTransactionId]		= @intTicketId
+							,[strTransactionId]		= SC.strTicketNumber
+							,[intTransactionTypeId] = 52
+					FROM	tblSCTicket SC
+					INNER JOIN dbo.tblICItemLocation ICIL 
+						ON ICIL.intItemId = SC.intItemId 
+						AND ICIL.intLocationId = SC.intProcessingLocationId
+					WHERE SC.intTicketId = @intTicketId
+
+					INSERT INTO @ItemsForInTransitCosting (
+						[intItemId]
+						,[intItemLocationId]
+						,[intItemUOMId]
+						,[dtmDate]
+						,[dblQty]
+						,[dblUOMQty]
+						,[dblCost]
+						,[intCurrencyId]
+						,[intTransactionId]
+						,[intTransactionDetailId]
+						,[strTransactionId]
+						,[intSourceTransactionId]
+						,[intSourceTransactionDetailId]
+						,[strSourceTransactionId]
+						,[intInTransitSourceLocationId]
+						,[intTransactionTypeId]
+					)
+					SELECT
+						[intItemId]							= SC.intItemId
+						,[intItemLocationId]				= ICIL.intItemLocationId
+						,[intItemUOMId]						= SC.intItemUOMIdTo
+						,[dtmDate]							= SC.dtmTicketDateTime
+						,[dblQty]							= SC.dblNetUnits
+						,[dblUOMQty]						= SC.dblConvertedUOMQty
+						,[dblCost]							= 0
+						,[intCurrencyId]					= SC.intCurrencyId
+						,[intTransactionId]					= SC.intTicketId
+						,[intTransactionDetailId]			= NULL
+						,[strTransactionId]					= SC.strTicketNumber
+						,[intSourceTransactionId]			= SC.intTicketId
+						,[intSourceTransactionDetailId]		= NULL
+						,[strSourceTransactionId]			= SC.strTicketNumber
+						,[intInTransitSourceLocationId]		= ICIL.intItemLocationId
+						,[intTransactionTypeId]				= 52
+					FROM vyuSCTicketScreenView SC
+					INNER JOIN dbo.tblICItemLocation ICIL 
+						ON ICIL.intItemId = SC.intItemId 
+							AND ICIL.intLocationId = SC.intProcessingLocationId
+					WHERE SC.intTicketId = @intTicketId
+				END
+			END
+
+			IF(@strInOutFlag = 'O')
+			BEGIN
+				SELECT TOP 1 
+					@_intTransctionTypeId = intTransactionTypeId
+					,@_intTransactionId = intTransactionId  
+				FROM @ItemReservationTableType
+				EXEC dbo.uspICPostStockReservation @_intTransactionId,@_intTransctionTypeId, 1
+			END
+			ELSE
+			BEGIN
+				EXEC dbo.uspSMGetStartingNumber 3, @_strBatchId OUTPUT, @intProcessingLocationId
+				SELECT @_strTransactionId = strTransactionId, 
+					@_intTransactionId = intTransactionId 
+				FROM @ItemsForInTransitCosting
+				EXEC dbo.uspICUnpostCosting @_intTransactionId, @_strTransactionId , @_strBatchId, NULL, @intUserId
+				
+			END
+
+			---Risk Summary Log 
+			BEGIN
+				INSERT INTO @SummaryLogs (    
+					strBatchId
+					,strBucketType
+					,strTransactionType
+					,intTransactionRecordId 
+					,intTransactionRecordHeaderId
+					,strDistributionType
+					,strTransactionNumber 
+					,dtmTransactionDate 
+					,intContractDetailId 
+					,intContractHeaderId 
+					,intTicketId 
+					,intCommodityId 
+					,intCommodityUOMId 
+					,intItemId 
+					,intBookId 
+					,intSubBookId 
+					,intLocationId 
+					,intFutureMarketId 
+					,intFutureMonthId 
+					,dblNoOfLots 
+					,dblQty 
+					,dblPrice 
+					,intEntityId 
+					,ysnDelete 
+					,intUserId 
+					,strNotes     
+				)
+				SELECT
+					strBatchId = NULL
+					,strBucketType = 'On Hold'
+					,strTransactionType = 'Scale Ticket'
+					,intTransactionRecordId = intTicketId
+					,intTransactionRecordHeaderId = intTicketId
+					,strDistributionType = strStorageTypeDescription
+					,strTransactionNumber = strTicketNumber
+					,dtmTransactionDate  = dtmTicketDateTime
+					,intContractDetailId = intContractId
+					,intContractHeaderId = intContractSequence
+					,intTicketId  = intTicketId
+					,intCommodityId  = TV.intCommodityId
+					,intCommodityUOMId  = CUM.intCommodityUnitMeasureId
+					,intItemId = TV.intItemId
+					,intBookId = NULL
+					,intSubBookId = NULL
+					,intLocationId = intProcessingLocationId
+					,intFutureMarketId = NULL
+					,intFutureMonthId = NULL
+					,dblNoOfLots = 0
+					,dblQty = CASE WHEN @ysnPost = 1
+								THEN 
+									(CASE WHEN strInOutFlag = 'I' THEN dblNetUnits ELSE dblNetUnits * -1 END )
+								ELSE
+									(CASE WHEN strInOutFlag = 'I' THEN dblNetUnits * -1 ELSE dblNetUnits END )
+								END
+
+					,dblPrice = dblUnitPrice
+					,intEntityId 
+					,ysnDelete = 0
+					,intUserId = NULL
+					,strNotes = strTicketComment
+				FROM tblSCTicket TV
+				LEFT JOIN tblGRStorageType ST on ST.intStorageScheduleTypeId = TV.intStorageScheduleTypeId 
+				LEFT JOIN tblICItemUOM IUM ON IUM.intItemUOMId = TV.intItemUOMIdTo
+				LEFT JOIN tblICCommodityUnitMeasure CUM ON CUM.intUnitMeasureId = IUM.intUnitMeasureId AND CUM.intCommodityId = TV.intCommodityId
+				WHERE TV.intTicketId = @intTicketId
+
+				EXEC uspRKLogRiskPosition @SummaryLogs
+			END
+
+		END
 	
 		--- Generate reversal ticket number
 		BEGIN
@@ -895,7 +1154,7 @@ BEGIN TRY
 		UPDATE tblSCTicket
 		SET strTicketStatus = 'V'
 			,intConcurrencyId = ISNULL(intConcurrencyId,0) + 1
-			,dtmTicketVoidDateTime = GETDATE()
+			,dtmTicketVoidDateTime = @dtmTransactionDate
 			,ysnReversed = 1
 			,strTicketNumber = @strReversalTicketNumber 
 		WHERE intTicketId = @intTicketId
@@ -1070,7 +1329,7 @@ BEGIN TRY
 					,[intTicketLocationId]
 					,[intTicketType]
 					,[strInOutFlag]
-					,[dtmTicketDateTime] = GETDATE()
+					,[dtmTicketDateTime] = @dtmTransactionDate
 					,[dtmTicketTransferDateTime] = NULL
 					,[dtmTicketVoidDateTime] = NULL
 					,[dtmTransactionDateTime]
@@ -1327,7 +1586,7 @@ BEGIN TRY
 				UPDATE tblSCTicket
 				SET intMatchTicketId = @intDuplicateTicketId
 					,strTicketStatus = 'V'
-					,dtmTicketVoidDateTime = GETDATE()
+					,dtmTicketVoidDateTime = @dtmTransactionDate
 					,ysnReversed = 1
 					,strTicketNumber = @strReversalTicketNumber + '-B'
 					,intConcurrencyId = ISNULL(intConcurrencyId,0) + 1
@@ -1388,6 +1647,34 @@ BEGIN TRY
 		SET dblGross = dblGross - @dblTicketGrossUnits
 			,intConcurrencyId = ISNULL(intConcurrencyId,1)
 		WHERE intDeliverySheetId = @intDeliverySheetId
+
+		--Audit Log Entry
+		BEGIN
+			--- Duplicate Ticket
+			SET @strLogDescription = 'Created during reversal of Ticket: ' + @strReversalTicketNumber
+				EXEC dbo.uspSMAuditLog 
+					@keyValue			= @intDuplicateTicketId				-- Primary Key Value of the Ticket. 
+					,@screenName		= 'Grain.view.Scale'				-- Screen Namespace
+					,@entityId			= @intUserId						-- Entity Id.
+					,@actionType		= 'Updated'						-- Action Type
+					,@changeDescription	= @strLogDescription				-- Description
+					,@fromValue			= ''								-- Old Value
+					,@toValue			= ''								-- New Value
+					,@details			= '';
+			
+			-- Orignal Ticket
+			SET @strLogDescription = 'Ticket Reversed: ' + @strTicketNumber
+				EXEC dbo.uspSMAuditLog 
+					@keyValue			= @intTicketId				-- Primary Key Value of the Ticket. 
+					,@screenName		= 'Grain.view.Scale'				-- Screen Namespace
+					,@entityId			= @intUserId						-- Entity Id.
+					,@actionType		= 'Updated'							-- Action Type
+					,@changeDescription	= @strLogDescription				-- Description
+					,@fromValue			= ''								-- Old Value
+					,@toValue			= ''								-- New Value
+					,@details			= '';
+
+		END
 
 	_Exit:
 
