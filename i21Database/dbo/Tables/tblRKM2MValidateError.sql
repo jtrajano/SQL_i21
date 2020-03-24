@@ -13,7 +13,7 @@
     [strItemNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [strPricingType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [strFutureMonth] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
-    [strFutMarketName] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+    [strFutureMarket] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [dtmLastTradingDate] DATETIME NULL, 
     [strPhysicalOrFuture] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [strErrorMsg] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
