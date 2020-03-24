@@ -328,8 +328,8 @@ BEGIN
 			WHERE C.intEntityId = @CustomerId
 			  AND IPL.intItemId = @ItemId
 			  AND ICL.intCompanyLocationId = @LocationId
-			  AND @Quantity BETWEEN IPL.dblMin  AND IPL.dblMax
-		) AS CPL ON VI.intItemId = CPL.intItemId AND VI.intLocationId = CPL.intLocationId AND VI.intStockUOMId = CPL.intItemUOM AND @Quantity BETWEEN CPL.dblMin AND CPL.dblMax
+			  AND ((@Quantity BETWEEN ISNULL(IPL.dblMin, 0) AND ISNULL(NULLIF(IPL.dblMax, 0), 999999999999)) OR ( ISNULL(IPL.dblMin, 0) = 0 AND ISNULL(IPL.dblMax, 0) = 0))
+		) AS CPL ON VI.intItemId = CPL.intItemId AND VI.intLocationId = CPL.intLocationId AND VI.intStockUOMId = CPL.intItemUOM
 		LEFT OUTER JOIN
 			(
 				SELECT TOP 1 PL.intItemId, PL.intItemUnitMeasureId AS intItemUOM, PL.dblMin, PL.dblMax, PL.dblUnitPrice, ICL.intLocationId 
