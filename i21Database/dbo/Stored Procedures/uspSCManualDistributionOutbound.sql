@@ -495,31 +495,33 @@ END
 			join tblARInvoiceDetail id on id.intInventoryShipmentItemId = si.intInventoryShipmentItemId
 			WHERE si.intInventoryShipmentId = @InventoryShipmentId AND s.intOrderType = 1
 	*/
-
-	IF ISNULL(@InventoryShipmentId, 0) != 0 AND ISNULL(@strWhereFinalizedWeight, 'Origin') = 'Origin' AND ISNULL(@strWhereFinalizedGrade, 'Origin') = 'Origin' AND EXISTS(SELECT TOP 1 1 FROM tblICInventoryShipmentItem WHERE intInventoryShipmentId = @InventoryShipmentId AND ysnAllowInvoice = 1)
+	IF(ISNULL(@strWhereFinalizedWeight, 'Origin') <> 'Destination' AND ISNULL(@strWhereFinalizedGrade, 'Origin') <> 'Destination')
 	BEGIN
-		EXEC @intInvoiceId = dbo.uspARCreateInvoiceFromShipment @InventoryShipmentId, @intUserId, NULL, 0, 1;
-	END
-
-	WHILE ISNULL(@_intContractDetailId,0) > 0
-	BEGIN
-
-		IF EXISTS(SELECT TOP 1 1 FROM tblCTPriceFixation WHERE intContractDetailId = @_intContractDetailId)
+		IF ISNULL(@InventoryShipmentId, 0) != 0 AND  EXISTS(SELECT TOP 1 1 FROM tblICInventoryShipmentItem WHERE intInventoryShipmentId = @InventoryShipmentId AND ysnAllowInvoice = 1)
 		BEGIN
-			EXEC uspCTCreateVoucherInvoiceForPartialPricing @_intContractDetailId, @intUserId
+			EXEC @intInvoiceId = dbo.uspARCreateInvoiceFromShipment @InventoryShipmentId, @intUserId, @intInvoiceId , 0, 1;
 		END
 
+		WHILE ISNULL(@_intContractDetailId,0) > 0
+		BEGIN
 
-		SET @_intContractDetailId = NULL
+			IF EXISTS(SELECT TOP 1 1 FROM tblCTPriceFixation WHERE intContractDetailId = @_intContractDetailId)
+			BEGIN
+				EXEC uspCTCreateVoucherInvoiceForPartialPricing @_intContractDetailId, @intUserId
+			END
 
-		SELECT 
-			@_intContractDetailId = MIN(si.intLineNo)
-		FROM tblICInventoryShipment s 
-		JOIN tblICInventoryShipmentItem si ON si.intInventoryShipmentId = s.intInventoryShipmentId
-		WHERE si.intInventoryShipmentId = @InventoryShipmentId AND s.intOrderType = 1
-			AND ISNULL(intLineNo,0) > @__intContractDetailId
 
-		SET @__intContractDetailId = @_intContractDetailId
+			SET @_intContractDetailId = NULL
+
+			SELECT 
+				@_intContractDetailId = MIN(si.intLineNo)
+			FROM tblICInventoryShipment s 
+			JOIN tblICInventoryShipmentItem si ON si.intInventoryShipmentId = s.intInventoryShipmentId
+			WHERE si.intInventoryShipmentId = @InventoryShipmentId AND s.intOrderType = 1
+				AND ISNULL(intLineNo,0) > @__intContractDetailId
+
+			SET @__intContractDetailId = @_intContractDetailId
+		END
 	END
 
 	EXEC dbo.uspSMAuditLog 
