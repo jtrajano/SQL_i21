@@ -626,32 +626,46 @@ BEGIN TRY
 		AND ISNULL(intInventoryReceiptId, 0) <> 0
 		AND intLoadHeaderId = @intLoadHeaderId
 		
-	SELECT intLoadReceiptId
-		, intInventoryTransferId
-	INTO #TransferDeleteTable
-	FROM tblTRLoadReceipt TR
-	JOIN vyuICGetItemStock IC ON TR.intItemId = IC.intItemId
-		AND TR.intCompanyLocationId = IC.intLocationId
-	WHERE (IC.strType = 'Non-Inventory' 
-		OR (TR.strOrigin ='Terminal'
-			AND (TR.dblUnitCost = 0
-				AND TR.dblFreightRate = 0
-				AND TR.dblPurSurcharge = 0)))
-		AND ISNULL(intInventoryTransferId,0) <> 0
-		AND intLoadHeaderId = @intLoadHeaderId
-	UNION ALL
-	SELECT intLoadReceiptId
+	-- SELECT intLoadReceiptId
+	-- 	, intInventoryTransferId
+	-- INTO #TransferDeleteTable
+	-- FROM tblTRLoadReceipt TR
+	-- JOIN vyuICGetItemStock IC ON TR.intItemId = IC.intItemId
+	-- 	AND TR.intCompanyLocationId = IC.intLocationId
+	-- WHERE (IC.strType = 'Non-Inventory' 
+	-- 	OR (TR.strOrigin ='Terminal'
+	-- 		AND (TR.dblUnitCost = 0
+	-- 			AND TR.dblFreightRate = 0
+	-- 			AND TR.dblPurSurcharge = 0)))
+	-- 	AND ISNULL(intInventoryTransferId,0) <> 0
+	-- 	AND intLoadHeaderId = @intLoadHeaderId
+	-- UNION ALL
+	-- SELECT intLoadReceiptId
+	-- 	,TR.intInventoryTransferId
+	-- FROM tblTRLoadDistributionHeader DH
+	-- JOIN tblTRLoadDistributionDetail DD ON DH.intLoadDistributionHeaderId = DD.intLoadDistributionHeaderId
+	-- JOIN tblTRLoadReceipt TR ON TR.intLoadHeaderId = DH.intLoadHeaderId
+	-- 	AND TR.strReceiptLine IN (SELECT Item FROM dbo.fnTRSplit(DD.strReceiptLink,','))
+	-- WHERE ((TR.strOrigin = 'Terminal'
+	-- 	AND DH.strDestination = 'Location'
+	-- 	AND TR.intCompanyLocationId = DH.intCompanyLocationId)
+	-- 	OR (TR.strOrigin = 'Location' AND DH.strDestination = 'Customer' AND TR.intCompanyLocationId = DH.intCompanyLocationId)
+	-- 	OR (TR.strOrigin = 'Terminal' AND DH.strDestination = 'Customer' AND TR.intCompanyLocationId = DH.intCompanyLocationId))
+	-- 	AND ISNULL(TR.intInventoryTransferId,0) != 0 AND DH.intLoadHeaderId = @intLoadHeaderId
+
+	SELECT DISTINCT TR.intLoadReceiptId
 		,TR.intInventoryTransferId
+		,0 AS ysnTran
+	INTO #TransferDeleteTable
 	FROM tblTRLoadDistributionHeader DH
-	JOIN tblTRLoadDistributionDetail DD ON DH.intLoadDistributionHeaderId = DD.intLoadDistributionHeaderId
-	JOIN tblTRLoadReceipt TR ON TR.intLoadHeaderId = DH.intLoadHeaderId
-		AND TR.strReceiptLine IN (SELECT Item FROM dbo.fnTRSplit(DD.strReceiptLink,','))
-	WHERE ((TR.strOrigin = 'Terminal'
-		AND DH.strDestination = 'Location'
-		AND TR.intCompanyLocationId = DH.intCompanyLocationId)
-		OR (TR.strOrigin = 'Location' AND DH.strDestination = 'Customer' AND TR.intCompanyLocationId = DH.intCompanyLocationId)
-		OR (TR.strOrigin = 'Terminal' AND DH.strDestination = 'Customer' AND TR.intCompanyLocationId = DH.intCompanyLocationId))
-		AND ISNULL(TR.intInventoryTransferId,0) != 0 AND DH.intLoadHeaderId = @intLoadHeaderId
+		JOIN tblTRLoadReceipt TR ON TR.intLoadHeaderId = DH.intLoadHeaderId
+ 	WHERE TR.intLoadHeaderId = @intLoadHeaderId
+	 	AND ISNULL(TR.intInventoryTransferId,0) != 0
+		AND ((TR.strOrigin = 'Location' AND DH.strDestination = 'Location') 
+			OR (TR.strOrigin = 'Terminal' AND DH.strDestination = 'Location' AND TR.intCompanyLocationId != DH.intCompanyLocationId)
+			OR (TR.strOrigin = 'Location' AND DH.strDestination = 'Customer' AND TR.intCompanyLocationId != DH.intCompanyLocationId)
+			OR (TR.strOrigin = 'Terminal' AND DH.strDestination = 'Customer' AND TR.intCompanyLocationId != DH.intCompanyLocationId))
+
 
 	SELECT intLoadDistributionHeaderId
 		, intInvoiceId
@@ -681,20 +695,43 @@ BEGIN TRY
 		DELETE FROM #ReceiptDeleteTable WHERE intLoadReceiptId = @intLoadReceiptId
 	END
 	
-	WHILE EXISTS (SELECT TOP 1 1 FROM #TransferDeleteTable)
+	-- WHILE EXISTS (SELECT TOP 1 1 FROM #TransferDeleteTable)
+	-- BEGIN
+	-- 	SELECT TOP 1 @intLoadReceiptId = intLoadReceiptId
+	-- 		, @intInventoryTransferId = intInventoryTransferId
+	-- 	FROM #TransferDeleteTable
+		
+	-- 	UPDATE tblTRLoadReceipt
+	-- 	set intInventoryTransferId = NULL
+	-- 	where intLoadReceiptId = @intLoadReceiptId
+		
+	-- 	EXEC uspICDeleteInventoryTransfer @intInventoryTransferId, @intEntityUserSecurityId
+		
+	-- 	DELETE FROM #TransferDeleteTable WHERE intLoadReceiptId = @intLoadReceiptId
+	-- END
+
+	WHILE EXISTS (SELECT TOP 1 1 FROM #TransferDeleteTable WHERE ysnTran = 0)
 	BEGIN
 		SELECT TOP 1 @intLoadReceiptId = intLoadReceiptId
-			, @intInventoryTransferId = intInventoryTransferId
-		FROM #TransferDeleteTable
+		FROM #TransferDeleteTable WHERE ysnTran = 0
 		
 		UPDATE tblTRLoadReceipt
 		set intInventoryTransferId = NULL
 		where intLoadReceiptId = @intLoadReceiptId
+	
+		UPDATE #TransferDeleteTable SET ysnTran = 1 WHERE intLoadReceiptId = @intLoadReceiptId
+	END
+
+	WHILE EXISTS (SELECT TOP 1 1 FROM #TransferDeleteTable WHERE ysnTran = 1)
+	BEGIN
+		SET @intInventoryTransferId = NULL
+		SELECT TOP 1 @intInventoryTransferId = intInventoryTransferId
+		FROM #TransferDeleteTable WHERE ysnTran = 1
 		
 		EXEC uspICDeleteInventoryTransfer @intInventoryTransferId, @intEntityUserSecurityId
-		
-		DELETE FROM #TransferDeleteTable WHERE intLoadReceiptId = @intLoadReceiptId
-	END
+
+		DELETE FROM #TransferDeleteTable WHERE intInventoryTransferId = @intInventoryTransferId
+	END	
 	
 	WHILE EXISTS (SELECT TOP 1 1 FROM #InvoiceDeleteTable)
 	BEGIN
