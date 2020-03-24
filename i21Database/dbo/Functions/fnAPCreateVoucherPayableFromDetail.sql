@@ -88,6 +88,9 @@ RETURNS TABLE AS RETURN
 	INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
 	INNER JOIN @voucherDetailIds C ON B.intBillDetailId = C.intId
 	WHERE
+		A.intTransactionType IN (1, 3)
+		AND
+		(
 		B.intPurchaseDetailId > 0
 	OR	B.intInventoryReceiptItemId > 0
 	OR 	B.intInventoryReceiptChargeId > 0
@@ -101,5 +104,6 @@ RETURNS TABLE AS RETURN
 	OR	B.intBuybackChargeId > 0
 	OR	B.intScaleTicketId > 0
 	OR	B.intInventoryShipmentChargeId > 0
+		)
 )
 
