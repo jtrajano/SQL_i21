@@ -19,7 +19,10 @@ DECLARE @intEntityId int;
 
 BEGIN TRY
 
-BEGIN TRANSACTION
+	IF (@@TRANCOUNT > 0)
+	BEGIN 
+		BEGIN TRANSACTION
+	END
 
 	DECLARE @ReceiptStagingTable ReceiptStagingTable
 		,@OtherCharges ReceiptOtherChargesTableType
@@ -57,16 +60,31 @@ BEGIN TRANSACTION
 
 		DECLARE @receiveLotteryId INT
 		DECLARE @inventoryReceiptid INT
+		DECLARE @storeId INT
+		DECLARE @lotterySetupMode BIT
 
 		SELECT TOP 1  
 		@receiveLotteryId =  intReceiveLotteryId,
-		@inventoryReceiptid = intInventoryReceiptId
+		@inventoryReceiptid = intInventoryReceiptId,
+		@storeId = intStoreId
 		FROM tblSTReceiveLottery WHERE intReceiveLotteryId = @Id
-	
+
 		IF (ISNULL(@receiveLotteryId,0) = 0)
 		BEGIN
 			SET @Success = CAST(0 AS BIT)
 			SET @StatusMsg = 'There are no records to process.'
+			GOTO EXITWITHROLLBACK
+			RETURN
+		END
+
+		SELECT TOP 1 @lotterySetupMode = ISNULL(ysnLotterySetupMode,0)
+		FROM tblSTStore WHERE intStoreId = @storeId
+
+		IF (ISNULL(@lotterySetupMode,0) = 1)
+		BEGIN
+			SET @Success = CAST(1 AS BIT)
+			SET @StatusMsg = 'Lottery Setup Mode - No need to create IR.'
+			GOTO EXITWITHROLLBACK
 			RETURN
 		END
 
@@ -128,7 +146,7 @@ BEGIN TRANSACTION
 		,intContractDetailId	= NULL
 		,dtmDate				= tblSTReceiveLottery.dtmReceiptDate
 		,intShipViaId			= NULL
-		,dblQty					= tblSTLotteryGame.intTicketPerPack
+		,dblQty					= tblSTReceiveLottery.intTicketPerPack
 		,dblCost				= tblSTLotteryGame.dblInventoryCost 
 		,intCurrencyId			= @defaultCurrency
 		,dblExchangeRate		= 1
@@ -187,35 +205,51 @@ BEGIN TRANSACTION
 	END
 	ELSE IF(@ProcessType = 3) --DELETE--
 	BEGIN
-		DELETE FROM tblICInventoryReceipt WHERE intInventoryReceiptId = @Id
-		SET @Success = CAST(1 AS BIT)
-		SET @StatusMsg = ''
+
+		IF(ISNULL(@Id,0) != 0)
+		BEGIN
+			DELETE FROM tblICInventoryReceipt WHERE intInventoryReceiptId = @Id
+			SET @Success = CAST(1 AS BIT)
+			SET @StatusMsg = 'Successfully deleted inventory receipt'
+		END
+		ELSE
+		BEGIN
+			SET @Success = CAST(1 AS BIT)
+			SET @StatusMsg = 'No inventory receipt associated in lottery'
+		END
 	END
 	ELSE IF(@ProcessType = 4) --POST--
 	BEGIN
-
-		BEGIN TRY
-			
-			SELECT TOP 1 @inventoryReceiptid = intInventoryReceiptId FROM tblSTReceiveLottery WHERE intReceiveLotteryId = @Id
 		
-			SELECT	@receiptNumber = strReceiptNumber 
-			FROM	tblICInventoryReceipt 
-			WHERE	intInventoryReceiptId = @inventoryReceiptid
+		SELECT TOP 1 @inventoryReceiptid = intInventoryReceiptId FROM tblSTReceiveLottery WHERE intReceiveLotteryId = @Id
+		IF(ISNULL(@inventoryReceiptid,0) != 0)
+		BEGIN
+			BEGIN TRY
+				SELECT	@receiptNumber = strReceiptNumber 
+				FROM	tblICInventoryReceipt 
+				WHERE	intInventoryReceiptId = @inventoryReceiptid
 		
-			EXEC dbo.uspICPostInventoryReceipt 1, 0, @receiptNumber, @UserId;		
+				EXEC dbo.uspICPostInventoryReceipt 1, 0, @receiptNumber, @UserId;		
 			
-			 UPDATE tblSTReceiveLottery SET ysnPosted = 1 WHERE intReceiveLotteryId = @Id	
+				 UPDATE tblSTReceiveLottery SET ysnPosted = 1 WHERE intReceiveLotteryId = @Id	
 
+				SET @Success = CAST(1 AS BIT)
+				SET @StatusMsg = ''
+			END TRY
+			BEGIN CATCH
+			
+				UPDATE tblSTReceiveLottery SET ysnPosted = 0 WHERE intReceiveLotteryId = @Id	 
+
+				SET @StatusMsg = ERROR_MESSAGE()
+				SET @Success = CAST(0 AS BIT)
+			END CATCH
+		END
+		ELSE
+		BEGIN
 			SET @Success = CAST(1 AS BIT)
-			SET @StatusMsg = ''
-		END TRY
-		BEGIN CATCH
-			
-			UPDATE tblSTReceiveLottery SET ysnPosted = 0 WHERE intReceiveLotteryId = @Id	 
-
-			SET @StatusMsg = ERROR_MESSAGE()
-			SET @Success = CAST(0 AS BIT)
-		END CATCH
+			SET @StatusMsg = 'No inventory receipt to post'
+			GOTO EXITWITHROLLBACK
+		END
 		
 	END
 	ELSE IF(@ProcessType = 5) --CREATE RETURN RECEIPT--
@@ -433,7 +467,8 @@ BEGIN TRANSACTION
 
 
 
-	COMMIT TRANSACTION
+	
+	IF (@@TRANCOUNT > 0) COMMIT TRANSACTION
 	
 	
 END TRY
@@ -454,7 +489,8 @@ BEGIN CATCH
 		SET @StatusMsg = @ErrorMessage
 		SET @Success = CAST(0 AS BIT)
 	
-	ROLLBACK TRANSACTION
+
+	IF (@@TRANCOUNT > 0) ROLLBACK TRANSACTION 
 
 
 	IF(@ProcessType = 1)  --ADD 
@@ -468,4 +504,11 @@ BEGIN CATCH
 		@ErrorSeverity, -- Severity.
 		@ErrorState -- State.
 	);
+
+	RETURN 
 END CATCH
+
+
+
+EXITWITHROLLBACK: 
+IF (@@TRANCOUNT > 0) ROLLBACK TRANSACTION 
