@@ -32,9 +32,20 @@ BEGIN TRY
 		RETURN;
 	END
 
-	IF EXISTS(SELECT 1 FROM tblPOPurchase WHERE intPurchaseId = @poId AND dblTotal = 0)
+	-- IF EXISTS(SELECT 1 FROM tblPOPurchase WHERE intPurchaseId = @poId AND dblTotal = 0)
+	-- BEGIN
+	-- 	RAISERROR('Cannot process Purchase Order with 0 amount.', 16, 1)
+	-- 	RETURN;
+	-- END
+
+	IF EXISTS(
+				SELECT 1 
+				FROM tblPOPurchaseDetail A
+				INNER JOIN tblICItem B ON A.intItemId = B.intItemId
+				WHERE A.intPurchaseId = @poId AND A.dblTotal = 0 AND B.strLotTracking != 'No'
+			 )
 	BEGIN
-		RAISERROR('Cannot process Purchase Order with 0 amount.', 16, 1)
+		RAISERROR('Cannot process Purchase Order with 0 amount, unless Non Lotted Item.', 16, 1)
 		RETURN;
 	END
 
