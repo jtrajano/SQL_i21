@@ -270,7 +270,7 @@ BEGIN
 											WHEN CNT.intPricingTypeId = 2
 												THEN 0 
 											ELSE
-											 	CASE WHEN ISNULL(Fixation.ysnHasPricing,0) = 1 THEN 0 ELSE LI.ysnAllowVoucher END 
+											 	LI.ysnAllowVoucher --CASE WHEN ISNULL(Fixation.ysnHasPricing,0) = 1 THEN 0 ELSE LI.ysnAllowVoucher END 
 											
 										END
 									END
