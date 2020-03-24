@@ -775,10 +775,10 @@ FROM (
 			 , dblCashPrice						= ISNULL(CPFD.dblCashPrice, CONTRACTS.dblCashPrice)
 			 , dblUnitPrice						= ISNULL(CPFD.dblCashPrice, CONTRACTS.dblCashPrice)
 			 , dblOrderPrice					= ISNULL(CPFD.dblCashPrice, CONTRACTS.dblCashPrice)
-			 , dblDetailQuantity				= ISNULL(ISNULL(CPFD.dblQuantity, 0) - ISNULL(CPFD.dblQuantityAppliedAndPriced, 0), CONTRACTS.dblDetailQuantity)
+			 , dblDetailQuantity				= ISNULL(ISNULL(CPFD.dblQuantityAppliedAndPriced, 0), CONTRACTS.dblDetailQuantity)
 			 , intFreightTermId	
-			 , dblShipQuantity					= ISNULL(ISNULL(CPFD.dblQuantity, 0) - ISNULL(CPFD.dblQuantityAppliedAndPriced, 0), CONTRACTS.dblDetailQuantity)
-			 , dblOrderQuantity					= ISNULL(ISNULL(CPFD.dblQuantity, 0) - ISNULL(CPFD.dblQuantityAppliedAndPriced, 0), CONTRACTS.dblDetailQuantity)
+			 , dblShipQuantity					= ISNULL(ISNULL(CPFD.dblQuantityAppliedAndPriced, 0), CONTRACTS.dblDetailQuantity)
+			 , dblOrderQuantity					= ISNULL(ISNULL(CPFD.dblQuantityAppliedAndPriced, 0), CONTRACTS.dblDetailQuantity)
 			 , dblSubCurrencyRate
 			 , intCurrencyExchangeRateTypeId
 			 , strCurrencyExchangeRateType
@@ -791,9 +791,8 @@ FROM (
 		 FROM dbo.vyuCTCustomerContract CONTRACTS WITH (NOLOCK)
 		 INNER JOIN tblCTPriceFixation CPF ON CONTRACTS.intContractHeaderId = CPF.intContractHeaderId
 										 AND CONTRACTS.intContractDetailId = CPF.intContractDetailId
-										 --AND CONTRACTS.intPricingTypeId = 1
 		 INNER JOIN tblCTPriceFixationDetail CPFD ON CPF.intPriceFixationId = CPFD.intPriceFixationId
-		 WHERE ISNULL(CPFD.dblQuantity, 0) - ISNULL(CPFD.dblQuantityAppliedAndPriced, 0) <> 0
+		 WHERE ISNULL(CPFD.dblQuantityAppliedAndPriced, 0) <> 0
 	) ARCC ON ICISI.intLineNo = ARCC.intContractDetailId 
 		  AND ICIS.intOrderType = 1
 	LEFT OUTER JOIN (
