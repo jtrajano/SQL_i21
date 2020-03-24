@@ -146,8 +146,9 @@ BEGIN
 	,ysnOpenGetBasisDelivery = 1--CASE WHEN @dtmDate IS NULL OR CBL1.dtmTransactionDate <= @dtmDate AND CBL1.dblQty > 0 THEN 1 ELSE 0 END
 	FROM tblCTContractBalanceLog CBL1
 	INNER JOIN tblCTContractBalanceLog CBL2 ON CBL1.intContractBalanceLogId >= CBL2.intContractBalanceLogId
-	AND CBL1.intContractHeaderId = CBL2.intContractHeaderId
-	AND CBL1.intContractDetailId = CBL2.intContractDetailId
+		AND CBL1.intContractHeaderId = CBL2.intContractHeaderId
+		AND CBL1.intContractDetailId = CBL2.intContractDetailId
+		AND CBL2.strTransactionType LIKE '%Basis Deliveries'
 	INNER JOIN vyuCTEntity ET ON ET.intEntityId = CBL1.intEntityId AND ET.strEntityType = (CASE WHEN CBL1.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END)
 	INNER JOIN tblICCommodity CY ON CBL1.intCommodityId = CY.intCommodityId
 	INNER JOIN tblICItem IM ON IM.intItemId = CBL1.intItemId

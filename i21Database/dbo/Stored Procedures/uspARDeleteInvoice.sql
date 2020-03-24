@@ -46,7 +46,7 @@ BEGIN TRY
 			EXEC [dbo].[uspARInsertTransactionDetail] @InvoiceId = @InvoiceId
 
 			DELETE FROM tblARInvoiceDetailTax 
-			WHERE intInvoiceDetailId = @InvoiceDetailId
+			WHERE intInvoiceDetailId = @InvoiceDetailId		
 
 			-- Log summary	
 			DECLARE @intContractHeaderId INT,
@@ -56,15 +56,15 @@ BEGIN TRY
 			FROM tblARInvoiceDetail
 			WHERE intInvoiceDetailId = @InvoiceDetailId
 
+			DELETE FROM tblARInvoiceDetail 
+			WHERE intInvoiceDetailId = @InvoiceDetailId
+
 			EXEC uspCTLogSummary @intContractHeaderId 	= 	@intContractHeaderId,
 								@intContractDetailId 	= 	@intContractDetailId,
 								@strSource			 	= 	'Pricing',
 								@strProcess			 	= 	'Invoice Delete',
 								@contractDetail 		= 	@contractDetails,
 								@intUserId				= 	@UserId
-
-			DELETE FROM tblARInvoiceDetail 
-			WHERE intInvoiceDetailId = @InvoiceDetailId
 
 			EXEC [dbo].[uspARUpdateInvoiceIntegrations] @InvoiceId = @InvoiceId, @ForDelete = 1, @UserId = @UserEntityID, @InvoiceDetailId = @InvoiceDetailId
 
