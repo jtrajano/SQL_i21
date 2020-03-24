@@ -86,7 +86,7 @@ USING
 	, dblAverageCost		
 	, dblDefaultGrossPrice	
 	, dtmDateCreated		
-	, intCreatedByUserId	
+	, intCreatedByUserId
 	FROM #tmp s
 ) AS source ON target.intItemId = source.intItemId
 	AND target.intItemLocationId = source.intItemLocationId
