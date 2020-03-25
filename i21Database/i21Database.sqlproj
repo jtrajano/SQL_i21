@@ -8126,6 +8126,7 @@
     <Build Include="dbo\Stored Procedures\uspICFixOtherChargeBilledQty.sql" />
     <Build Include="dbo\Stored Procedures\uspSTRecalculateReturnLottery.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetCollateralItems.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPGenerateSAPPOIDOC_CA.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
