@@ -1,5 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspARInvoiceProcessStgXML]
-	--@intToCompanyId INT
+﻿CREATE PROCEDURE [dbo].[uspARInvoiceProcessStgXML] @intMultiCompanyId INT
 AS
 BEGIN TRY
 	SET NOCOUNT ON
@@ -49,6 +48,7 @@ BEGIN TRY
 		,@intBillInvoiceId INT
 		,@intVoucherScreenId INT
 		,@intBillId INT
+		,@intLoadId INT
 	DECLARE @tblIPInvoiceDetail TABLE (
 		intInvoiceDetailId INT identity(1, 1)
 		,strItemNo NVARCHAR(50)
@@ -63,6 +63,8 @@ BEGIN TRY
 		,dblItemWeight NUMERIC(18, 6)
 		,strWeightUnitMeasure NVARCHAR(50)
 		,intInvoiceId INT
+		,intLoadId INT
+		,intLoadDetailId INT
 		)
 	DECLARE @tblIPFinalInvoiceDetail TABLE (
 		intItemId INT
@@ -77,11 +79,14 @@ BEGIN TRY
 		,dblItemWeight NUMERIC(18, 6)
 		,intWeightUnitMeasureId INT
 		,intInvoiceId INT
+		,intLoadId INT
+		,intLoadDetailId INT
 		)
 
 	SELECT @intInvoiceStageId = MIN(intInvoiceStageId)
 	FROM tblARInvoiceStage
 	WHERE ISNULL(strFeedStatus, '') = ''
+		AND intMultiCompanyId = @intMultiCompanyId
 
 	WHILE @intInvoiceStageId > 0
 	BEGIN
@@ -282,9 +287,13 @@ BEGIN TRY
 
 			EXEC sp_xml_preparedocument @idoc OUTPUT
 				,@strDetailXML
-			
-			Delete from @tblIPInvoiceDetail
-			Delete from @tblIPFinalInvoiceDetail
+
+			DELETE
+			FROM @tblIPInvoiceDetail
+
+			DELETE
+			FROM @tblIPFinalInvoiceDetail
+
 			INSERT INTO @tblIPInvoiceDetail (
 				strItemNo
 				,intContractHeaderId
@@ -298,19 +307,23 @@ BEGIN TRY
 				,dblItemWeight
 				,strWeightUnitMeasure
 				,intInvoiceId
+				,intLoadId
+				,intLoadDetailId
 				)
-			SELECT strItemNo
-				,intContractHeaderId
-				,intContractDetailId
-				,dblQtyOrdered
-				,dblQtyShipped
-				,strUnitMeasure
-				,dblPrice
-				,dblTotal
-				,dblShipmentNetWt
-				,dblItemWeight
-				,strWeightUnitMeasure
-				,intInvoiceId
+			SELECT x.strItemNo
+				,x.intContractHeaderId
+				,x.intContractDetailId
+				,x.dblQtyOrdered
+				,x.dblQtyShipped
+				,x.strUnitMeasure
+				,x.dblPrice / 100
+				,x.dblTotal / 100
+				,x.dblShipmentNetWt
+				,x.dblItemWeight
+				,x.strWeightUnitMeasure
+				,x.intInvoiceId
+				,L.intLoadId
+				,LD.intLoadDetailId
 			FROM OPENXML(@idoc, 'vyuIPGetInvoiceDetails/vyuIPGetInvoiceDetail', 2) WITH (
 					strItemNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
 					,intContractHeaderId INT
@@ -324,7 +337,11 @@ BEGIN TRY
 					,dblItemWeight NUMERIC(18, 6)
 					,strWeightUnitMeasure NVARCHAR(50) COLLATE Latin1_General_CI_AS
 					,intInvoiceId INT
-					)
+					,intLoadId INT
+					,intLoadDetailId INT
+					) x
+			LEFT JOIN tblLGLoad L ON L.intLoadRefId = x.intLoadId
+			LEFT JOIN tblLGLoadDetail LD ON LD.intLoadDetailRefId = x.intLoadDetailId
 
 			SELECT @intInvoiceDetailId = min(intInvoiceDetailId)
 			FROM @tblIPInvoiceDetail
@@ -483,6 +500,8 @@ BEGIN TRY
 					,dblItemWeight
 					,intWeightUnitMeasureId
 					,intInvoiceId
+					,intLoadId
+					,intLoadDetailId
 					)
 				SELECT @intItemId
 					,@intContractHeaderId
@@ -496,6 +515,8 @@ BEGIN TRY
 					,dblItemWeight
 					,@intWeightItemUOMId
 					,intInvoiceId
+					,intLoadId
+					,intLoadDetailId
 				FROM @tblIPInvoiceDetail
 				WHERE intInvoiceDetailId = @intInvoiceDetailId
 
@@ -513,7 +534,10 @@ BEGIN TRY
 						THEN 1
 					ELSE 3
 					END
-			Delete from @voucherNonInvDetails
+
+			DELETE
+			FROM @voucherNonInvDetails
+
 			INSERT INTO @voucherNonInvDetails (
 				intEntityVendorId
 				,intTransactionType
@@ -527,13 +551,14 @@ BEGIN TRY
 				,dblQuantityToBill
 				,intQtyToBillUOMId
 				,dblCost
-				--,dblTotal
 				,dblNetWeight
 				,dblWeight
 				,intWeightUOMId
 				,strVendorOrderNumber
 				,intBillId
 				,ysnStage
+				,intLoadShipmentId
+				,intLoadShipmentDetailId
 				)
 			SELECT @intEntityId
 				,1
@@ -547,12 +572,19 @@ BEGIN TRY
 				,dblQtyShipped
 				,intUnitMeasureId
 				,dblPrice
-				--,dblTotal
 				,dblShipmentNetWt
 				,dblItemWeight
 				,intWeightUnitMeasureId
 				,@strInvoiceNumber
-				,@intBillId,0
+				,@intBillId
+				,0
+				,intLoadId
+				,intLoadDetailId
+			FROM @tblIPFinalInvoiceDetail
+
+			SELECT @intLoadId = NULL
+
+			SELECT @intLoadId = intLoadId
 			FROM @tblIPFinalInvoiceDetail
 
 			EXEC uspAPCreateVoucher @voucherPayables = @voucherNonInvDetails
@@ -565,18 +597,33 @@ BEGIN TRY
 				,intSubBookId = @intSubBookId
 				,intEntityId = @intEntityId
 				,intInvoiceRefId = @intInvoiceId
-				,intTransactionType =CASE 
+				,intTransactionType = CASE 
 					WHEN @strTransactionType = 'Invoice'
-						THEN 1
-					ELSE 3
+						THEN 1 --Voucher
+					WHEN EXISTS (
+							SELECT *
+							FROM tblLGWeightClaim
+							WHERE intLoadId = @intLoadId
+							)
+						THEN 11 --Claim
+					ELSE 3 --Debit Note
 					END
 			WHERE intBillId = @intBillInvoiceId
 
-			--UPDATE tblAPBillDetail
-			--SET dblQtyOrdered = 0
-			--	,intLocationId = @intCompanyLocationId
-			--	,strMiscDescription = @strMiscComment
-			--WHERE intBillId = @intBillInvoiceId
+			IF @strTransactionType = 'Invoice'
+			BEGIN
+				UPDATE tblAPBillDetail
+				SET dblCost = dblCost / 100
+					,dblTotal = dblTotal / 100
+				WHERE intBillId = @intBillInvoiceId
+			END
+			ELSE
+			BEGIN
+				UPDATE tblAPBillDetail
+				SET dblTotal = dblCost *dblQtyReceived 
+				WHERE intBillId = @intBillInvoiceId
+			END
+
 			ext:
 
 			EXEC sp_xml_removedocument @idoc
@@ -638,6 +685,7 @@ BEGIN TRY
 		SELECT @intInvoiceStageId = MIN(intInvoiceStageId)
 		FROM tblARInvoiceStage
 		WHERE intInvoiceStageId > @intInvoiceStageId
+			AND intMultiCompanyId = @intMultiCompanyId
 			AND ISNULL(strFeedStatus, '') = ''
 	END
 END TRY
