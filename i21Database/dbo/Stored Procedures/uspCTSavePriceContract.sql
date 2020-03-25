@@ -225,7 +225,7 @@ BEGIN TRY
 		IF ISNULL(@intContractDetailId,0) > 0 
 		BEGIN
 			DECLARE @ticketId INT
-			SELECT TOP 1 @ticketId = intTicketId FROM tblSCTicket WHERE intTicketId = 6 AND intContractId = @intContractDetailId
+			SELECT TOP 1 @ticketId = intTicketId FROM tblSCTicket WHERE intTicketType = 6 AND intContractId = @intContractDetailId
 			IF @ticketId IS NOT NULL
 			BEGIN
 				DECLARE @newInvoiceId INT
