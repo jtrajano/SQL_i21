@@ -5853,6 +5853,7 @@
     <Build Include="dbo\Tables\tblICItemLicense.sql" />
     <Build Include="dbo\Tables\tblVRRebate.sql" />
     <Build Include="dbo\Views\vyuVROpenRebate.sql" />
+    <Build Include="dbo\Views\vyuVROpenRebateAll.sql" />
     <Build Include="dbo\Views\vyuVRRebate.sql" />
     <Build Include="dbo\Stored Procedures\uspSMValidateRemoteServerRole.sql" />
     <Build Include="dbo\Tables\tblVRSubmitted.sql" />
