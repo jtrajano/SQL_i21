@@ -8173,6 +8173,7 @@
     <Build Include="dbo\Stored Procedures\uspIPStageSAPShippingInstruction.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessSAPShippingInstruction.sql" />
     <Build Include="dbo\Stored Procedures\uspICCreateReturnGLEntriesForNonStockItems.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPGenerateSAPPOIDOC_CA.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
