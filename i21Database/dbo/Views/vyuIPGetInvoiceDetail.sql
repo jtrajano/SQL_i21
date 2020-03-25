@@ -12,9 +12,12 @@ SELECT I.strItemNo
 	,IVD.dblItemWeight
 	,WUM.strUnitMeasure AS strWeightUnitMeasure
 	,IV.intInvoiceId
+	,LD.intLoadId 
+	,LD.intLoadDetailId
 FROM dbo.tblARInvoice IV
 JOIN dbo.tblARInvoiceDetail IVD ON IV.intInvoiceId = IVD.intInvoiceId
 JOIN dbo.tblCTBook B ON B.intBookId = IV.intBookId
+LEFT JOIN tblLGLoadDetail LD on LD.intLoadDetailId =IVD.intLoadDetailId
 LEFT JOIN dbo.tblCTSubBook SB ON SB.intSubBookId = IV.intSubBookId
 JOIN dbo.tblICItem I ON I.intItemId = IVD.intItemId
 JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = IVD.intItemUOMId
