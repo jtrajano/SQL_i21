@@ -15,6 +15,7 @@
 	[intImportStatus] INT NULL DEFAULT 0, 
     [intCreatedUserId] INT NULL DEFAULT 0, 
     [dtmCreated] DATETIME NULL, 
+    [intTaskStatus] INT NULL,
     [intLastModifiedUserId] INT NULL, 
     [intResponsibleEntityId] INT NULL, 
     [dtmLastModified] DATETIME NULL, 
