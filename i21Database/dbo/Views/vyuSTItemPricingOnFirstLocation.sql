@@ -16,7 +16,7 @@ SELECT
 		tblICCategory.strCategoryCode,
 		strCategoryDescription = tblICCategory.strDescription,
 		tblICCategory.intCategoryId,
-		tblEMEntity.strName,
+		tblEMEntity.strName as strVendorId,
 		tblICItemLocation.intVendorId
 	FROM 
 	(
