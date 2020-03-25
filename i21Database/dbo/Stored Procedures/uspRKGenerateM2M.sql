@@ -3760,7 +3760,7 @@ BEGIN TRY
 		SELECT DISTINCT trans.*
 			, strProducer = (CASE WHEN ISNULL(ysnClaimsToProducer, 0) = 1 THEN e.strName ELSE NULL END)
 			, intProducerId = (CASE WHEN ISNULL(ysnClaimsToProducer, 0) = 1 THEN ch.intProducerId ELSE NULL END)
-		INTO #temp
+		INTO #tmpCPE
 		FROM #tmpM2MTransaction trans
 		JOIN tblCTContractDetail ch ON ch.intContractHeaderId = trans.intContractHeaderId
 		LEFT JOIN tblEMEntity e ON e.intEntityId = ch.intProducerId
@@ -3851,7 +3851,7 @@ BEGIN TRY
 																, dbo.fnCTConvertQuantityToTargetCommodityUOM(fd.intCommodityUnitMeasureId
 																											, ISNULL(intPriceUOMId, fd.intCommodityUnitMeasureId)
 																											, fd.dblOpenQty * ((ISNULL(fd.dblContractBasis,0))+(isnull(fd.dblFuturePrice,0)))))
-				FROM #temp fd
+				FROM #tmpCPE fd
 				JOIN tblCTContractDetail det ON fd.intContractDetailId = det.intContractDetailId
 				JOIN tblCTContractHeader ch ON ch.intContractHeaderId = det.intContractHeaderId
 				JOIN tblICItemUOM ic ON det.intPriceItemUOMId = ic.intItemUOMId
@@ -3929,7 +3929,7 @@ BEGIN TRY
 															, dbo.fnCTConvertQuantityToTargetCommodityUOM(fd.intCommodityUnitMeasureId
 																										, ISNULL(intPriceUOMId, fd.intCommodityUnitMeasureId)
 																										, fd.dblOpenQty * (ISNULL(fd.dblContractBasis, 0) + ISNULL(fd.dblFuturePrice, 0))))
-				FROM #temp fd
+				FROM #tmpCPE fd
 				JOIN tblCTContractDetail det ON fd.intContractDetailId = det.intContractDetailId
 				join tblCTContractHeader ch ON ch.intContractHeaderId = det.intContractHeaderId
 				JOIN tblICItemUOM ic ON det.intPriceItemUOMId = ic.intItemUOMId
@@ -3978,6 +3978,7 @@ BEGIN TRY
 			, dblUnfixedPurchaseValue
 		FROM @tmpCPEDetail
 
+		DROP TABLE #tmpCPE
 		DROP TABLE #tmpM2MDifferentialBasis
 		DROP TABLE #tmpM2MTransaction
 	END
