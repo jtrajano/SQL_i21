@@ -8591,6 +8591,7 @@
     <Build Include="dbo\Stored Procedures\uspICCreateReturnGLEntriesForNonStockItems.sql" />
     <Build Include="dbo\Views\vyuRKGetDPRCommodityLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateSAPPOIDOC_CA.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessPOAcknowledgement_CA.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
