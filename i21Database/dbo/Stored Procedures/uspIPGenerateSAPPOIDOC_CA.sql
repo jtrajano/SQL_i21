@@ -243,7 +243,7 @@ BEGIN
 				)
 
 			UPDATE tblCTContractFeed
-			SET strFeedStatus = 'Awt Ack'
+			SET strThirdPartyFeedStatus = 'Awt Ack'
 			WHERE intContractFeedId = @intContractFeedId
 		END
 
