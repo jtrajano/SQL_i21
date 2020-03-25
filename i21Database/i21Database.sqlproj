@@ -8160,6 +8160,7 @@
     <Build Include="dbo\User Defined Types\StagingCommanderTax.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateSAPPOIDOC_CA.sql" />
     <Build Include="dbo\Stored Procedures\uspIPNotifySAPPOIDOC_CA.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessPOAcknowledgement_CA.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
