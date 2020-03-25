@@ -100,6 +100,8 @@ SELECT	i21.intBankAccountId
 		,i21.strCbkNo
 		,i21.intConcurrencyId
 		,i21.intPayToDown
+		,i21.intResponsibleEntityId
+		,strResponsibleEntity = E.strName
 		-- The following fields are from the origin system		
 		,apcbk_comment = CAST(NULL AS NVARCHAR(30))	 COLLATE Latin1_General_CI_AS -- CHAR (30)
 		,apcbk_password = CAST(NULL AS NVARCHAR(16)) COLLATE Latin1_General_CI_AS	-- CHAR (16)
@@ -129,7 +131,7 @@ SELECT	i21.intBankAccountId
 						UNION ALL SELECT strSourceTransactionId FROM dbo.tblCMUndepositedFund WHERE intBankAccountId = i21.intBankAccountId AND (strReferenceNo <> '' OR strReferenceNo IS NOT NULL) AND intBankFileAuditId IS NOT NULL
 						) tbl),0) AS bit)
 FROM	dbo.tblCMBankAccount i21
-
+LEFT JOIN dbo.tblEMEntity E on E.intEntityId = i21.intResponsibleEntityId
 GO
 --Create trigger that will insert on the main table
 
@@ -229,6 +231,7 @@ CREATE TRIGGER trg_insert_vyuCMBankAccount
 						,intConcurrencyId
 						,strCbkNo
 						,intPayToDown
+						,intResponsibleEntityId
 				)
 				OUTPUT 	inserted.intBankAccountId
 				SELECT	intBankId							= i.intBankId
@@ -312,6 +315,7 @@ CREATE TRIGGER trg_insert_vyuCMBankAccount
 						,intConcurrencyId					= i.intConcurrencyId
 						,strCbkNo							= i.strCbkNo
 						,intPayToDown						= i.intPayToDown
+						,intResponsibleEntityId				= i.intResponsibleEntityId
 				FROM	inserted i 
 				IF @@ERROR <> 0 GOTO EXIT_TRIGGER
 			EXIT_TRIGGER: 
@@ -418,6 +422,7 @@ CREATE TRIGGER trg_update_vyuCMBankAccount
 					,intConcurrencyId					= i.intConcurrencyId
 					,strCbkNo							= i.strCbkNo
 					,intPayToDown						= i.intPayToDown
+					,intResponsibleEntityId				= i.intResponsibleEntityId
 			FROM	inserted i INNER JOIN dbo.tblCMBankAccount B
 						ON i.intBankAccountId = B.intBankAccountId
 
