@@ -44,6 +44,7 @@ BEGIN
 	WHERE strThirdPartyFeedStatus IS NULL
 		AND strERPPONumber <> ''
 		AND dtmPlannedAvailabilityDate - GetDATE() <= @intThirdPartyContractWaitingPeriod
+		AND strCommodityCode='Coffee'
 
 	SELECT @intContractFeedId = MIN(intContractFeedId)
 	FROM @tblCTContractFeed
@@ -228,7 +229,7 @@ BEGIN
 				)
 
 			UPDATE tblCTContractFeed
-			SET strFeedStatus = 'Awt Ack'
+			SET strThirdPartyFeedStatus = 'Awt Ack'
 			WHERE intContractFeedId = @intContractFeedId
 		END
 
