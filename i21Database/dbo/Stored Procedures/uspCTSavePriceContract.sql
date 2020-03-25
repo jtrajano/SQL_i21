@@ -224,7 +224,17 @@ BEGIN TRY
 
 		IF ISNULL(@intContractDetailId,0) > 0 
 		BEGIN
-			EXEC uspCTCreateVoucherInvoiceForPartialPricing @intContractDetailId, @intUserId, 1
+			DECLARE @ticketId INT
+			SELECT TOP 1 @ticketId = intTicketId FROM tblSCTicket WHERE intTicketType = 6 AND intContractId = @intContractDetailId
+			IF @ticketId IS NOT NULL
+			BEGIN
+				DECLARE @newInvoiceId INT
+				EXEC uspSCCreateInvoiceForPostedDestinationWeightsAndGrades @ticketId, @intUserId, @newInvoiceId OUTPUT
+			END
+			ELSE
+			BEGIN
+				EXEC uspCTCreateVoucherInvoiceForPartialPricing @intContractDetailId, @intUserId, 1
+			END			
 		END
 
 	/*(CT-4647) - this block will re-order the pricing number upon deleting pricing layer.*/
