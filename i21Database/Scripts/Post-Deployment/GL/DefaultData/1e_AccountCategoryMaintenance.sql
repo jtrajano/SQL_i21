@@ -31,7 +31,8 @@ SELECT 'Variance Account'UNION
 SELECT 'Write-Off Sold'UNION
 SELECT 'Sales Adv Account'UNION
 SELECT 'Auto-Variance' UNION
-SELECT 'Fee Expense'
+SELECT 'Fee Expense' UNION
+SELECT 'Deferred Expense'
 
 DECLARE @intGeneralCategoryId INT
 SELECT @intGeneralCategoryId = intAccountCategoryId FROM tblGLAccountCategory  WHERE strAccountCategory = 'General'
