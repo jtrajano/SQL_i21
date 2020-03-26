@@ -14,6 +14,7 @@ BEGIN TRY
 		,@intPriceContractId INT
 		,@intContractHeaderId INT
 
+
 	SELECT @intPriceContractPreStageId = MIN(intPriceContractPreStageId)
 	FROM tblCTPriceContractPreStage
 	WHERE strFeedStatus IS NULL

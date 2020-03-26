@@ -31,6 +31,15 @@ BEGIN TRY
 		,@strSubBook NVARCHAR(100)
 		,@intBookId INT
 		,@intSubBookId INT
+		,@intCompanyId INT
+
+	SELECT @intCompanyId = intCompanyId
+	FROM dbo.tblIPMultiCompany
+	WHERE ysnCurrentCompany = 1
+
+	UPDATE dbo.tblLGLoad
+	SET intCompanyId = @intCompanyId
+	WHERE intCompanyId IS NULL
 
 	IF @strRowState = 'Delete'
 	BEGIN

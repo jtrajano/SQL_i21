@@ -1933,7 +1933,7 @@ AS
 		, PriceStatus
 		, strFutureMonth
 		, strAccountNumber
-		, dblNoOfContract = CASE WHEN SUM(dblNoOfLot) OVER (PARTITION BY strFutureMonth) = 0 THEN 0 ELSE (dblQuantity) / SUM(dblNoOfLot) OVER (PARTITION BY strFutureMonth) END
+		, dblNoOfContract = CASE WHEN SUM(dblNoOfLot) OVER (PARTITION BY strFutureMonth) = 0 THEN 0 ELSE (CONVERT(NUMERIC(24,10),dblQuantity)) / SUM(CONVERT(NUMERIC(24,10),dblNoOfLot)) OVER (PARTITION BY strFutureMonth) END
 		, strTradeNo
 		, TransactionDate = GETDATE()
 		, NULL

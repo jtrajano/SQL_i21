@@ -4,7 +4,8 @@
 	[intCompanyId] INT NOT NULL,
 	[strName] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL,
 	[ysnParent] BIT NOT NULL CONSTRAINT [DF_tblIPMultiCompany_ysnParent] DEFAULT 0,
-	[intBookId] INT,
-
-	CONSTRAINT [PK_tblIPMultiCompany] PRIMARY KEY ([intMultiCompanyId])
+	[intBookId] INT
+	,strApprover nvarchar(100) COLLATE Latin1_General_CI_AS
+	,ysnCurrentCompany BIT
+	,CONSTRAINT [PK_tblIPMultiCompany] PRIMARY KEY ([intMultiCompanyId])
 )

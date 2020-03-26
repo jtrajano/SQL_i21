@@ -8501,6 +8501,9 @@
     <Build Include="dbo\Functions\fnRKGetAccountIdForLocationLOB.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetGLAccountsForPosting.sql" />
     <Build Include="dbo\Views\vyuCTPriceContractApproverView.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCreateReturnGLEntriesForNonStockItems.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTReportPriceFixationStrauss.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTReportContractS2018.sql" />
     <Build Include="dbo\Tables\tblLGLoadCondition.sql" />
     <Build Include="dbo\Tables\tblLGCustomFee.sql" />
   </ItemGroup>

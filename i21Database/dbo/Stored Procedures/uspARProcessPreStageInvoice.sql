@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE uspIPProcessPreStageContract
+﻿CREATE PROCEDURE uspARProcessPreStageInvoice
 AS
 BEGIN TRY
 	SET NOCOUNT ON
@@ -7,57 +7,62 @@ BEGIN TRY
 		,@intToCompanyId INT
 		,@intToEntityId INT
 		,@strToTransactionType NVARCHAR(100)
-		,@intContractPreStageId INT
-		,@intContractHeaderId INT
+		,@intInvoicePreStageId INT
+		,@intInvoiceId INT
 		,@strRowState NVARCHAR(50)
 		,@intCompanyLocationId INT
 		,@intToBookId INT
 		,@ysnApproval BIT
-	DECLARE @tblCTContractPreStage TABLE (
-		intContractPreStageId INT
-		,intContractHeaderId INT
+		,@intCompanyId INT
+
+	SELECT @intCompanyId = intCompanyId
+	FROM dbo.tblIPMultiCompany
+	WHERE ysnCurrentCompany = 1
+
+	UPDATE dbo.tblARInvoice
+	SET intCompanyId = @intCompanyId
+	WHERE intCompanyId IS NULL
+
+	DECLARE @tblARInvoicePreStage TABLE (
+		intInvoicePreStageId INT
+		,intInvoiceId INT
 		,strFeedStatus NVARCHAR(50) COLLATE Latin1_General_CI_AS
 		,dtmFeedDate DATETIME
 		,strRowState NVARCHAR(50) COLLATE Latin1_General_CI_AS
-		,ysnApproval BIT
 		)
 
-	INSERT INTO @tblCTContractPreStage (
-		intContractPreStageId
-		,intContractHeaderId
+	INSERT INTO @tblARInvoicePreStage (
+		intInvoicePreStageId
+		,intInvoiceId
 		,strFeedStatus
 		,dtmFeedDate
 		,strRowState
-		,ysnApproval
 		)
-	SELECT intContractPreStageId
-		,intContractHeaderId
+	SELECT intInvoicePreStageId
+		,intInvoiceId
 		,strFeedStatus
 		,dtmFeedDate
 		,strRowState
-		,ysnApproval
-	FROM tblCTContractPreStage
+	FROM tblARInvoicePreStage
 	WHERE strFeedStatus IS NULL
 
-	SELECT @intContractPreStageId = MIN(intContractPreStageId)
-	FROM @tblCTContractPreStage
+	SELECT @intInvoicePreStageId = MIN(intInvoicePreStageId)
+	FROM @tblARInvoicePreStage
 
-	WHILE @intContractPreStageId IS NOT NULL
+	WHILE @intInvoicePreStageId IS NOT NULL
 	BEGIN
-		SELECT @intContractHeaderId = NULL
+		SELECT @intInvoiceId = NULL
 			,@strRowState = NULL
 			,@intToCompanyId = NULL
 			,@intToEntityId = NULL
 			,@strToTransactionType = NULL
 			,@intCompanyLocationId = NULL
 			,@intToBookId = NULL
-			,@ysnApproval = NULL
 
-		SELECT @intContractHeaderId = intContractHeaderId
+		SELECT @intInvoiceId = intInvoiceId
 			,@strRowState = strRowState
-			,@ysnApproval = ysnApproval
-		FROM @tblCTContractPreStage
-		WHERE intContractPreStageId = @intContractPreStageId
+		FROM @tblARInvoicePreStage
+		WHERE intInvoicePreStageId = @intInvoicePreStageId
 
 		SELECT @intToCompanyId = TC.intToCompanyId
 			,@intToEntityId = TC.intEntityId
@@ -67,28 +72,26 @@ BEGIN TRY
 		FROM tblSMInterCompanyTransactionConfiguration TC
 		JOIN tblSMInterCompanyTransactionType TT ON TT.intInterCompanyTransactionTypeId = TC.intFromTransactionTypeId
 		JOIN tblSMInterCompanyTransactionType TT1 ON TT1.intInterCompanyTransactionTypeId = TC.intToTransactionTypeId
-		JOIN tblCTContractHeader CH ON CH.intCompanyId = TC.intFromCompanyId
-			AND CH.intBookId = TC.intToBookId
-		WHERE TT.strTransactionType = 'Sales Contract'
-			AND CH.intContractHeaderId = @intContractHeaderId
+		JOIN tblARInvoice IV ON IV.intCompanyId = TC.intFromCompanyId
+			AND IV.intBookId = TC.intToBookId
+		WHERE TT.strTransactionType = 'Sales Invoice'
+			AND IV.intInvoiceId = @intInvoiceId
 
-		EXEC uspCTContractPopulateStgXML @intContractHeaderId
+		EXEC dbo.uspARInvoicePopulateStgXML @intInvoiceId
 			,@intToEntityId
 			,@intCompanyLocationId
 			,@strToTransactionType
 			,@intToCompanyId
 			,@strRowState
-			,0
 			,@intToBookId
-			,@ysnApproval
 
-		UPDATE tblCTContractPreStage
+		UPDATE tblARInvoicePreStage
 		SET strFeedStatus = 'Processed'
-		WHERE intContractPreStageId = @intContractPreStageId
+		WHERE intInvoicePreStageId = @intInvoicePreStageId
 
-		SELECT @intContractPreStageId = MIN(intContractPreStageId)
-		FROM @tblCTContractPreStage
-		WHERE intContractPreStageId > @intContractPreStageId
+		SELECT @intInvoicePreStageId = MIN(intInvoicePreStageId)
+		FROM @tblARInvoicePreStage
+		WHERE intInvoicePreStageId > @intInvoicePreStageId
 	END
 END TRY
 
