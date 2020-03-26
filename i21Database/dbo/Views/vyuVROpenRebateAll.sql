@@ -1,4 +1,4 @@
-﻿CREATE VIEW [dbo].[vyuVROpenRebate]
+CREATE VIEW [dbo].[vyuVROpenRebateAll]
 AS
 SELECT *
 	, dblRebateAmount = CASE WHEN strRebateBy = 'Unit' THEN CAST((dblRebateQuantity * dblRebateRate) AS NUMERIC(18, 6))
@@ -71,13 +71,6 @@ FROM (
 			AND invoice.dtmDate <= ISNULL(programCategory.dtmEndDate, '12/31/9999')
 			AND (ISNULL(programCategory.dblRebateRate, 0) <> 0)
 			AND programCategory.intCategoryId = item.intCategoryId
-			AND NOT EXISTS (
-				SELECT TOP 1 1
-				FROM vyuVROpenRebateAll v
-				WHERE Mode = 'Item Level'
-					AND v.intInvoiceDetailId = invoiceDetail.intInvoiceDetailId
-					AND v.strItemNumber = item.strItemNo
-			)
 		LEFT OUTER JOIN tblICItemUOM uom ON uom.intItemId = invoiceDetail.intItemId
 			AND uom.intUnitMeasureId = programCategory.intUnitMeasureId
 		LEFT OUTER JOIN tblICUnitMeasure unitMeasure ON unitMeasure.intUnitMeasureId = uom.intUnitMeasureId
