@@ -8592,6 +8592,8 @@
     <Build Include="dbo\Views\vyuRKGetDPRCommodityLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateSAPPOIDOC_CA.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessPOAcknowledgement_CA.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTUpdateItemContractSequenceBalance.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTUpdateItemContractSequenceQuantity.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
