@@ -142,7 +142,7 @@ BEGIN TRY
 	-----------------------------------------------------------------------------------------------
 	------------------------------ Customer Storage Update
 	-----------------------------------------------------------------------------------------------
-	BEGIN
+	/*BEGIN
 		DECLARE splitCursor CURSOR FOR SELECT intEntityId, dblSplitPercent, strDistributionOption, intStorageScheduleId, intItemId, intCompanyLocationId, intStorageScheduleTypeId, intShipFromEntityId, intShipFrom FROM @splitTable
 		OPEN splitCursor;  
 		FETCH NEXT FROM splitCursor INTO @intEntityId, @dblSplitPercent, @strDistributionOption, @intStorageScheduleId, @intItemId, @intLocationId, @intStorageScheduleTypeId, @shipFromEntityId, @shipFrom;  
@@ -154,7 +154,22 @@ BEGIN TRY
 			ELSE
 				SET @dblFinalSplitQty = @dblTempSplitQty
 
-			SELECT @intCustomerStorageId = intCustomerStorageId  FROM tblGRCustomerStorage WHERE intEntityId = @intEntityId AND intItemId = @intItemId AND intCompanyLocationId = @intLocationId AND intDeliverySheetId = @intDeliverySheetId
+			SELECT TOP 1
+				@intCustomerStorageId = intCustomerStorageId  
+			FROM tblGRCustomerStorage 
+			WHERE intEntityId = @intEntityId 
+				AND intItemId = @intItemId 
+				AND intCompanyLocationId = @intLocationId 
+				AND intDeliverySheetId = @intDeliverySheetId
+				AND intStorageTypeId = @intStorageScheduleTypeId
+				AND ISNULL(ysnTransferStorage,0) = 0
+
+			SET @dblFinalSplitQty =  ROUND((@dblNetUnits * @dblSplitPercent) / 100, @currencyDecimal);
+			SET @dblFinalSplitQty = (SELECT dbo.fnGRCalculateStorageUnits(@intCustomerStorageId))
+			IF @dblTempSplitQty > @dblFinalSplitQty
+				SET @dblTempSplitQty = @dblTempSplitQty - @dblFinalSplitQty;
+			ELSE
+				SET @dblFinalSplitQty = @dblTempSplitQty
 
 			UPDATE tblGRCustomerStorage SET dblOpenBalance = 0 , dblOriginalBalance = 0 WHERE intCustomerStorageId = @intCustomerStorageId
 
@@ -165,7 +180,7 @@ BEGIN TRY
 		CLOSE splitCursor;  
 		DEALLOCATE splitCursor;
 	END
-
+*/
 
 	DECLARE @ysnDPOwned as BIT = 0;
 	SELECT @ysnDPOwned = CASE WHEN CD.intPricingTypeId = 5 AND ISNULL(GR.strOwnedPhysicalStock, 'Company') = 'Company' THEN 1 ELSE 0 END 
@@ -544,6 +559,15 @@ BEGIN TRY
 	AND SCDS.intEntityId = GRS.intEntityId
 	AND SCDS.intStorageScheduleTypeId = GRS.intStorageTypeId  
 	where SCDS.intDeliverySheetId = @intDeliverySheetId and GRS.ysnTransferStorage = 0
+
+	UPDATE A
+	SET dblOpenBalance = B.dblQty
+		,dblOriginalBalance = B.dblQty
+	FROM tblGRCustomerStorage A
+	OUTER APPLY (SELECT dblQty = dbo.fnGRCalculateStorageUnits(A.intCustomerStorageId)) B
+	WHERE intDeliverySheetId = @intDeliverySheetId 
+
+
 
 	EXEC [dbo].[uspSCUpdateDeliverySheetStatus] @intDeliverySheetId, 0;
 
