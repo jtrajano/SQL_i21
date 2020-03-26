@@ -1150,13 +1150,14 @@ BEGIN TRY
 			EXEC uspLGUpdateLoadDetails @intTicketLoadDetailId, 0
 		END
 
-		--Mark the ticket as void and reversed
+		--Mark the ticket as void, reversed and destinationweight to unpostecd
 		UPDATE tblSCTicket
 		SET strTicketStatus = 'V'
 			,intConcurrencyId = ISNULL(intConcurrencyId,0) + 1
 			,dtmTicketVoidDateTime = @dtmTransactionDate
 			,ysnReversed = 1
 			,strTicketNumber = @strReversalTicketNumber 
+			,ysnDestinationWeightGradePost = 0
 		WHERE intTicketId = @intTicketId
 
 		--Duplicate Ticket

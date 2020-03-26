@@ -1,7 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspSCReverseInventoryShipmentInvoice]
-	@intTicketId INT,
-	@intUserId INT,
-	@intInventoryShipmentId INT = NULL
+	@intTicketId INT
+	,@intUserId INT
+	,@intInventoryShipmentId INT = NULL
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -19,6 +19,7 @@ DECLARE @_intInvoiceDetail INT
 DECLARE @ysnPost BIT
 DECLARE @intNewInvoiceId INT
 DECLARE @strNewInvoiceNumber NVARCHAR(50)
+DECLARE @intCreditMemoId INT
 
 
 --------------------------------
@@ -32,6 +33,16 @@ DECLARE @strInvoiceDetailIds NVARCHAR(50)
 
 
 BEGIN TRY
+
+	IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpSCCheckInvoiceForTicketResult'))
+	BEGIN
+		CREATE TABLE #tmpSCCheckInvoiceForTicketResult (
+			intTicketId INT
+			,intInventoryShipmentId INT
+			,intInvoiceId INT
+			,intCreditMemoId INT
+		)
+	END
 
 	IF OBJECT_ID (N'tempdb.dbo.#tmpSCInvoiceDetail') IS NOT NULL DROP TABLE #tmpSCInvoiceDetail
 	CREATE TABLE #tmpSCInvoiceDetail(
@@ -225,6 +236,7 @@ BEGIN TRY
 			END
 		END
 
+		
 		--Loop Iterator
 		BEGIN
 			IF EXISTS(SELECT TOP 1 1 FROM #tmpSCInvoiceDetail WHERE intInvoiceId > @_intInvoiceId)
