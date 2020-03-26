@@ -49,6 +49,9 @@ BEGIN TRY
 		,@intVoucherScreenId INT
 		,@intBillId INT
 		,@intLoadId INT
+		,@strOrderUnitMeasure nvarchar(50)
+		,@intOrderUnitMeasureId int
+		,@intOrderItemUOMId int
 	DECLARE @tblIPInvoiceDetail TABLE (
 		intInvoiceDetailId INT identity(1, 1)
 		,strItemNo NVARCHAR(50)
@@ -65,9 +68,11 @@ BEGIN TRY
 		,intInvoiceId INT
 		,intLoadId INT
 		,intLoadDetailId INT
+		,strOrderUnitMeasure NVARCHAR(50)
 		)
 	DECLARE @tblIPFinalInvoiceDetail TABLE (
-		intItemId INT
+		intFinalInvoiceDetailId INT identity(1, 1)
+		,intItemId INT
 		,intContractHeaderId INT
 		,intContractDetailId INT
 		,dblQtyOrdered NUMERIC(18, 6)
@@ -81,6 +86,7 @@ BEGIN TRY
 		,intInvoiceId INT
 		,intLoadId INT
 		,intLoadDetailId INT
+		,intOrderItemUOMId int
 		)
 
 	SELECT @intInvoiceStageId = MIN(intInvoiceStageId)
@@ -309,6 +315,7 @@ BEGIN TRY
 				,intInvoiceId
 				,intLoadId
 				,intLoadDetailId
+				,strOrderUnitMeasure
 				)
 			SELECT x.strItemNo
 				,x.intContractHeaderId
@@ -324,6 +331,7 @@ BEGIN TRY
 				,x.intInvoiceId
 				,L.intLoadId
 				,LD.intLoadDetailId
+				,x.strOrderUnitMeasure
 			FROM OPENXML(@idoc, 'vyuIPGetInvoiceDetails/vyuIPGetInvoiceDetail', 2) WITH (
 					strItemNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
 					,intContractHeaderId INT
@@ -339,6 +347,7 @@ BEGIN TRY
 					,intInvoiceId INT
 					,intLoadId INT
 					,intLoadDetailId INT
+					,strOrderUnitMeasure NVARCHAR(50) COLLATE Latin1_General_CI_AS
 					) x
 			LEFT JOIN tblLGLoad L ON L.intLoadRefId = x.intLoadId
 			LEFT JOIN tblLGLoadDetail LD ON LD.intLoadDetailRefId = x.intLoadDetailId
@@ -353,11 +362,13 @@ BEGIN TRY
 					,@strWeightUnitMeasure = NULL
 					,@intContractDetailRefId = NULL
 					,@strErrorMessage = ''
+					,@strOrderUnitMeasure=NULL
 
 				SELECT @strItemNo = strItemNo
 					,@strUnitMeasure = strUnitMeasure
 					,@strWeightUnitMeasure = strWeightUnitMeasure
 					,@intContractDetailRefId = intContractDetailId
+					,@strOrderUnitMeasure=strOrderUnitMeasure
 				FROM @tblIPInvoiceDetail
 				WHERE intInvoiceDetailId = @intInvoiceDetailId
 
@@ -458,6 +469,46 @@ BEGIN TRY
 					END
 				END
 
+				SELECT @intOrderUnitMeasureId = NULL
+
+				SELECT @intOrderUnitMeasureId = intUnitMeasureId
+				FROM tblICUnitMeasure
+				WHERE strUnitMeasure = @strOrderUnitMeasure
+
+				IF @strOrderUnitMeasure IS NOT NULL
+					AND @intOrderUnitMeasureId IS NULL
+				BEGIN
+					IF @strErrorMessage <> ''
+					BEGIN
+						SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Order Unit Measure ' + @strWeightUnitMeasure + ' is not available.'
+					END
+					ELSE
+					BEGIN
+						SELECT @strErrorMessage = 'Order Unit Measure ' + @strWeightUnitMeasure + ' is not available.'
+					END
+				END
+
+
+				SELECT @intOrderItemUOMId = NULL
+
+				SELECT @intOrderItemUOMId = intItemUOMId
+				FROM tblICItemUOM
+				WHERE intItemId = @intItemId
+					AND intUnitMeasureId = @intOrderUnitMeasureId
+
+				IF @strOrderUnitMeasure IS NOT NULL
+					AND @intOrderItemUOMId IS NULL
+				BEGIN
+					IF @strErrorMessage <> ''
+					BEGIN
+						SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Order Unit Measure ' + @strUnitMeasure + ' is not associated for the item ' + @strItemNo + '.'
+					END
+					ELSE
+					BEGIN
+						SELECT @strErrorMessage = 'Order Unit Measure ' + @strUnitMeasure + ' is not associated for the item ' + @strItemNo + '.'
+					END
+				END
+
 				SELECT @intContractDetailId = NULL
 					,@intContractHeaderId = NULL
 
@@ -502,6 +553,7 @@ BEGIN TRY
 					,intInvoiceId
 					,intLoadId
 					,intLoadDetailId
+					,intOrderItemUOMId
 					)
 				SELECT @intItemId
 					,@intContractHeaderId
@@ -517,6 +569,7 @@ BEGIN TRY
 					,intInvoiceId
 					,intLoadId
 					,intLoadDetailId
+					,@intOrderItemUOMId
 				FROM @tblIPInvoiceDetail
 				WHERE intInvoiceDetailId = @intInvoiceDetailId
 
@@ -559,6 +612,7 @@ BEGIN TRY
 				,ysnStage
 				,intLoadShipmentId
 				,intLoadShipmentDetailId
+				,intLineNo 
 				)
 			SELECT @intEntityId
 				,1
@@ -568,7 +622,7 @@ BEGIN TRY
 				,intContractHeaderId
 				,intContractDetailId
 				,dblQtyOrdered
-				,intUnitMeasureId
+				,intOrderItemUOMId
 				,dblQtyShipped
 				,intUnitMeasureId
 				,dblPrice
@@ -580,6 +634,7 @@ BEGIN TRY
 				,0
 				,intLoadId
 				,intLoadDetailId
+				,intFinalInvoiceDetailId
 			FROM @tblIPFinalInvoiceDetail
 
 			SELECT @intLoadId = NULL
@@ -600,11 +655,7 @@ BEGIN TRY
 				,intTransactionType = CASE 
 					WHEN @strTransactionType = 'Invoice'
 						THEN 1 --Voucher
-					WHEN EXISTS (
-							SELECT *
-							FROM tblLGWeightClaim
-							WHERE intLoadId = @intLoadId
-							)
+					WHEN @strTransactionType = 'Claim'
 						THEN 11 --Claim
 					ELSE 3 --Debit Note
 					END
@@ -619,9 +670,14 @@ BEGIN TRY
 			END
 			ELSE
 			BEGIN
-				UPDATE tblAPBillDetail
-				SET dblTotal = dblCost *dblQtyReceived 
-				WHERE intBillId = @intBillInvoiceId
+				UPDATE BD
+				SET dblTotal = VD.dblQuantityToBill*VD.dblCost 
+					,dblQtyReceived=VD.dblQuantityToBill 
+					,dblCost =VD.dblCost 
+					,intUnitOfMeasureId =VD.intQtyToBillUOMId 
+				From tblAPBillDetail BD
+				JOIN @voucherNonInvDetails VD on VD.intLineNo =BD.intLineNo 
+				WHERE BD.intBillId = @intBillInvoiceId
 			END
 
 			ext:
