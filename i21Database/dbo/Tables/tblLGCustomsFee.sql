@@ -7,5 +7,5 @@
 	 [dblProcessingFee] NUMERIC(18, 6),
 	 [dblProcessingFeeCap] NUMERIC(18, 6),
 	 [intConcurrencyId] INT NOT NULL DEFAULT 0,
-	 CONSTRAINT [PK_tblLGCustomFee_intCustomFeeId] PRIMARY KEY CLUSTERED ([intCustomFeeId] ASC)
+	 CONSTRAINT [PK_tblLGCustomFee_intCustomsFeeId] PRIMARY KEY CLUSTERED ([intCustomsFeeId] ASC)
 )
