@@ -8594,6 +8594,10 @@
     <Build Include="dbo\Stored Procedures\uspIPProcessPOAcknowledgement_CA.sql" />
     <Build Include="dbo\Stored Procedures\uspCTUpdateItemContractSequenceBalance.sql" />
     <Build Include="dbo\Stored Procedures\uspCTUpdateItemContractSequenceQuantity.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCPostDestinationWeightsAndGradesReversalProcess.sql" />
+    <Build Include="dbo\User Defined Types\SCTicketDestinationWeightsAndGradesPosting.sql" />
+    <Build Include="dbo\User Defined Types\SCDiscountDestinationWeightsAndGradesPosting.sql" />
+
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
