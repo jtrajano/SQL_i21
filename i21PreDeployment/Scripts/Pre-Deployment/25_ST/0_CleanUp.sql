@@ -918,6 +918,168 @@ END
 ----------------------------------------------------------------------------------------------------------------------------------
 
 
+----------------------------------------------------------------------------------------------------------------------------------
+-- [START] - Consolidate duplicate records of tblSTLotteryGame
+----------------------------------------------------------------------------------------------------------------------------------
+IF EXISTS(SELECT TOP 1 1 FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = N'tblSTLotteryGame') 
+	BEGIN
+		
+	IF EXISTS(SELECT TOP 1 COUNT(1) FROM tblSTLotteryGame GROUP BY strGame,strState HAVING COUNT(1) > 1) 
+	BEGIN
+		print 'STORE > Begin consolidating duplicate records of tblSTLotteryGame'
+
+		--***************INSERT LOTTERY GAME INTO TEMP TABLE******************--
+		
+		IF EXISTS(SELECT TOP 1 1 FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = N'tblSTLotterGameFromOldVersion') 
+		BEGIN
+			EXEC ('DELETE FROM tblSTLotterGameFromOldVersion')
+		END
+		
+		CREATE TABLE tblSTLotterGameFromOldVersion
+		(
+				intLotteryGameId	int
+			,strState			nvarchar(max)	
+			,strGame			nvarchar(max)	
+			,intItemId			int
+			,intStartingNumber	int
+			,intEndingNumber	int
+			,intTicketPerPack	int
+			,dtmExpirationDate	datetime
+			,dblInventoryCost	numeric(18,6)
+			,dblTicketValue		numeric(18,6)
+			,intConcurrencyId	int	
+			,dtmUpgradeDate		datetime	
+			,strVersion			nvarchar(max)	
+		)
+
+		DECLARE @version NVARCHAR(MAX)
+		DECLARE @upgradeDate DATETIME 
+		
+		SELECT TOP 1 @version = strVersionNo FROM tblSMBuildNumber ORDER BY intVersionID DESC
+		SET @upgradeDate = GETDATE()
+
+		INSERT INTO tblSTLotterGameFromOldVersion(
+			 intLotteryGameId	
+			,strState			
+			,strGame			
+			,intItemId			
+			,intStartingNumber	
+			,intEndingNumber	
+			,intTicketPerPack	
+			,dtmExpirationDate	
+			,dblInventoryCost	
+			,dblTicketValue		
+			,intConcurrencyId	
+			,dtmUpgradeDate	
+			,strVersion		
+		)
+		SELECT 
+			 intLotteryGameId	
+			,strState			
+			,strGame			
+			,intItemId			
+			,intStartingNumber	
+			,intEndingNumber	
+			,intTicketPerPack	
+			,dtmExpirationDate	
+			,dblInventoryCost	
+			,dblTicketValue		
+			,intConcurrencyId	
+			,@upgradeDate	
+			,@version		
+		FROM tblSTLotteryGame
+
+		--***************INSERT LOTTERY GAME INTO TEMP TABLE******************--
+
+		DECLARE @tblTempLotteryGame TABLE 
+		(
+			 intLotteryGameId				INT,
+			 strGame						NVARCHAR(MAX)
+		)
+
+		DECLARE @tblTempReceiveLottery TABLE 
+		(
+			 intLotteryGameId				INT,
+			 intReceiveLotteryId			INT,
+			 strGame						NVARCHAR(MAX)
+		)
+
+		DECLARE @tblTempLotteryBook TABLE 
+		(
+			 intLotteryGameId				INT,
+			 intLotteryBookId				INT,
+			 strGame						NVARCHAR(MAX)
+		)
+
+		INSERT INTO @tblTempLotteryGame
+		(
+			intLotteryGameId,
+			strGame
+		)
+
+		SELECT intLotteryGameId,strGame FROM (
+				SELECT intLotteryGameId, intPartitionNo ,strGame
+				FROM (
+					SELECT intPartitionNo = ROW_NUMBER() OVER (PARTITION BY strGame, strState ORDER BY strGame,strState) , intLotteryGameId, strGame 
+					FROM tblSTLotteryGame ) 
+					as subquery where intPartitionNo = 1
+			) as subquery1
+
+		
+
+		IF EXISTS(SELECT TOP 1 1 FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = N'tblSTLotteryBook') 
+		BEGIN
+			INSERT INTO @tblTempLotteryBook 
+		(
+			 intLotteryGameId
+			,strGame		
+			,intLotteryBookId
+		)
+		SELECT
+			 tblSTLotteryGame.intLotteryGameId
+			,tblSTLotteryGame.strGame		
+			,tblSTLotteryBook.intLotteryBookId
+		FROM 
+		tblSTLotteryBook
+		INNER JOIN tblSTLotteryGame
+		ON tblSTLotteryBook.intLotteryGameId = tblSTLotteryGame.intLotteryGameId
+
+			UPDATE @tblTempLotteryBook SET intLotteryGameId = [@tblTempLotteryGame].intLotteryGameId FROM @tblTempLotteryGame WHERE [@tblTempLotteryGame].strGame = [@tblTempLotteryBook].strGame
+			UPDATE tblSTLotteryBook SET tblSTLotteryBook.intLotteryGameId = [@tblTempLotteryBook].intLotteryGameId FROM @tblTempLotteryBook WHERE [@tblTempLotteryBook].intLotteryBookId = tblSTLotteryBook.intLotteryBookId
+		END
+
+
+		IF EXISTS(SELECT TOP 1 1 FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = N'tblSTReceiveLottery') 
+		BEGIN
+			INSERT INTO @tblTempReceiveLottery 
+		(
+			 intLotteryGameId
+			,strGame		
+			,intReceiveLotteryId
+		)
+		SELECT
+			 tblSTLotteryGame.intLotteryGameId
+			,tblSTLotteryGame.strGame		
+			,tblSTReceiveLottery.intReceiveLotteryId
+		FROM 
+		tblSTReceiveLottery
+		INNER JOIN tblSTLotteryGame
+		ON tblSTReceiveLottery.intLotteryGameId = tblSTLotteryGame.intLotteryGameId
+
+			UPDATE @tblTempReceiveLottery SET intLotteryGameId = [@tblTempLotteryGame].intLotteryGameId FROM @tblTempLotteryGame WHERE [@tblTempLotteryGame].strGame = [@tblTempReceiveLottery].strGame
+			UPDATE tblSTReceiveLottery SET tblSTReceiveLottery.intLotteryGameId = [@tblTempReceiveLottery].intLotteryGameId FROM @tblTempReceiveLottery WHERE [@tblTempReceiveLottery].intReceiveLotteryId = tblSTReceiveLottery.intReceiveLotteryId
+		END
+
+		DELETE FROM tblSTLotteryGame WHERE intLotteryGameId NOT IN ( SELECT intLotteryGameId FROM @tblTempLotteryGame ) 
+		print 'STORE > End consolidating duplicate records of tblSTLotteryGame'
+	END
+
+END
+----------------------------------------------------------------------------------------------------------------------------------
+-- [END] - Consolidate duplicate records of tblSTLotteryGame
+----------------------------------------------------------------------------------------------------------------------------------
+
+
 
 
 
