@@ -458,7 +458,7 @@ BEGIN TRY
 						  intCustomerStorageId
 						, @UserKey
 						, 1
-						, 27 -- Transaction Type Id for Bill (Voucher)
+						, 10 -- Transaction Type Id for Bill (Voucher)
 						, 'Generated Bill'
 						, dblOpenBalance
 						, @intCreatedBillId

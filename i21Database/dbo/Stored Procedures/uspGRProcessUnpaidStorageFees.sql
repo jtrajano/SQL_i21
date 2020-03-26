@@ -304,7 +304,7 @@ BEGIN TRY
 					  ARD.intCustomerStorageId
 					, @UserKey
 					, 1
-					, 33 -- Transaction Type Id for Invoice
+					, 6 -- Transaction Type Id for Invoice
 					, 'Generated Fee Invoice'
 					, dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, CU.intUnitMeasureId, CS.intUnitMeasureId, ARD.dblQtyOrdered)
 					, AR.intInvoiceId

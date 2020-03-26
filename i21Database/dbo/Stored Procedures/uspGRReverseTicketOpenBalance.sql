@@ -51,7 +51,7 @@ BEGIN TRY
 			  intCustomerStorageId
 			, @intUserId
 			, 0
-			, @intTransactionTypeId--10 -- Transaction Type Id for Inventory Adjustment - Quantity
+			, 8--10 -- Transaction Type Id for Inventory Adjustment - Quantity
 			, 'Reverse By Inventory Shipment'
 			, dblUnits
 			, intInvoiceId
@@ -155,7 +155,7 @@ BEGIN TRY
 			  intCustomerStorageId
 			, @intUserId
 			, 0
-			, @intTransactionTypeId -- Transaction Type Id for Invoice
+			, 1 -- Transaction Type Id for Invoice
 			, 'Reverse By Scale'
 			, dblUnits
 			, intInventoryShipmentId
@@ -258,7 +258,7 @@ BEGIN TRY
 			  intCustomerStorageId
 			, @intUserId
 			, 0
-			, @intTransactionTypeId -- Transaction Type Id for Invoice
+			, 6 -- Transaction Type Id for Invoice
 			, 'Reverse By Invoice'
 			, dblUnits
 			, intInventoryShipmentId
