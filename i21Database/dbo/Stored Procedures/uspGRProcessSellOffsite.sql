@@ -333,7 +333,7 @@ BEGIN TRY
 						@intCustomerStorageId
 						, @UserKey
 						, 1
-						, 33 -- Transaction Type Id for Invoice
+						, 6 -- Transaction Type Id for Invoice
 						, 'Settlement'
 						, @dblStorageUnits
 						, @intContractHeaderId
@@ -413,7 +413,7 @@ BEGIN TRY
 						@intCustomerStorageId
 						, @UserKey
 						, 1
-						, 33 -- Transaction Type Id for Invoice
+						, 6 -- Transaction Type Id for Invoice
 						, 'Settlement'
 						, @dblContractUnits
 						, @intContractHeaderId
@@ -562,7 +562,7 @@ BEGIN TRY
 					@intCustomerStorageId
 					, @UserKey
 					, 1
-					, 33 -- Transaction Type Id for Invoice
+					, 6 -- Transaction Type Id for Invoice
 					, 'Settlement'
 					, @dblStorageUnits
 					, NULL
@@ -627,7 +627,7 @@ BEGIN TRY
 					@intCustomerStorageId
 					, @UserKey
 					, 1
-					, 33 -- Transaction Type Id for Invoice
+					, 6 -- Transaction Type Id for Invoice
 					, 'Settlement'
 					, @dblSpotUnits
 					, NULL
@@ -871,7 +871,7 @@ BEGIN TRY
 				ARD.intCustomerStorageId
 				, @UserKey
 				, 1
-				, 33 -- Transaction Type Id for Invoice
+				, 6 -- Transaction Type Id for Invoice
 				, 'Generated Invoice'
 				, ARD.dblQtyOrdered
 				, NULL
