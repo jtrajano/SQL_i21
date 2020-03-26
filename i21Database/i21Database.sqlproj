@@ -8505,6 +8505,9 @@
     <Build Include="dbo\Stored Procedures\uspSCReverseInventoryShipmentInvoice.sql" />
     <Build Include="dbo\Stored Procedures\uspSCReverseInventoryReceiptVoucher.sql" />
     <Build Include="dbo\Stored Procedures\uspSCReverseDeliverySheet.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCPostDestinationWeightsAndGradesReversalProcess.sql" />
+    <Build Include="dbo\User Defined Types\SCTicketDestinationWeightsAndGradesPosting.sql" />
+    <Build Include="dbo\User Defined Types\SCDiscountDestinationWeightsAndGradesPosting.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
