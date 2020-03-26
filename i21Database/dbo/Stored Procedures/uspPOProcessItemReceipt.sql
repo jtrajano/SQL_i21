@@ -32,11 +32,11 @@ BEGIN TRY
 		RETURN;
 	END
 
-	IF EXISTS(SELECT 1 FROM tblPOPurchase WHERE intPurchaseId = @poId AND dblTotal = 0)
-	BEGIN
-		RAISERROR('Cannot process Purchase Order with 0 amount.', 16, 1)
-		RETURN;
-	END
+	-- IF EXISTS(SELECT 1 FROM tblPOPurchase WHERE intPurchaseId = @poId AND dblTotal = 0)
+	-- BEGIN
+	-- 	RAISERROR('Cannot process Purchase Order with 0 amount.', 16, 1)
+	-- 	RETURN;
+	-- END
 
 	--CHECK IF ALL QUANTITY ARE RECEIVED
 	IF 
