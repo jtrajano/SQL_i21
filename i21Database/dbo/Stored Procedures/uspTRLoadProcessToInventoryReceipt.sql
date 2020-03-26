@@ -170,7 +170,7 @@ END
 			,strSourceScreenName
 			,intPaymentOn
 			,strChargesLink
-			,intGrossNetUOMId
+			--,intGrossNetUOMId
 	)	
 	SELECT strReceiptType		= strReceiptType
 		,intEntityVendorId		= intEntityVendorId
@@ -207,7 +207,7 @@ END
 		,strSourceScreenName	= strSourceScreenName
 		,intPaymentOn			= intPaymentOn
 		,strChargesLink			= strChargesLink
-		,intGrossNetUOMId		= CASE WHEN dblFreightRate != 0 THEN intGrossNetUOMId ELSE NULL END
+		--,intGrossNetUOMId		= CASE WHEN dblFreightRate != 0 THEN intGrossNetUOMId ELSE NULL END
 	FROM #tmpReceipts
 
 	--SELECT TOP 1 @intFreightItemId = intItemForFreightId FROM tblTRCompanyPreference
