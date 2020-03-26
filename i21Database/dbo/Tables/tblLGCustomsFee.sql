@@ -1,6 +1,6 @@
-﻿CREATE TABLE tblLGCustomFee 
+﻿CREATE TABLE tblLGCustomsFee 
 (
-	 [intCustomFeeId] INT NOT NULL IDENTITY (1, 1),
+	 [intCustomsFeeId] INT NOT NULL IDENTITY (1, 1),
 	 [strOrigin] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	 [dblHarborFee] NUMERIC(18, 6),
 	 [dblHarborFeeCap] NUMERIC(18, 6),

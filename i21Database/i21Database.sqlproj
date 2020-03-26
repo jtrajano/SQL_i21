@@ -8505,7 +8505,7 @@
     <Build Include="dbo\Stored Procedures\uspCTReportPriceFixationStrauss.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportContractS2018.sql" />
     <Build Include="dbo\Tables\tblLGLoadCondition.sql" />
-    <Build Include="dbo\Tables\tblLGCustomFee.sql" />
+    <Build Include="dbo\Tables\tblLGCustomsFee.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
