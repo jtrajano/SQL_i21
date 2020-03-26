@@ -13,251 +13,855 @@ BEGIN TRY
 		,@ErrMsg NVARCHAR(MAX)
 		,@strFinalErrMsg NVARCHAR(MAX) = ''
 		,@intEntityId INT
-	DECLARE @strContractNumber NVARCHAR(50)
-		,@intContractSeq INT
+		,@strRowState NVARCHAR(50)
+	DECLARE @strCustomerReference NVARCHAR(100)
+		,@strERPPONumber NVARCHAR(100)
+		,@strOriginPort NVARCHAR(200)
+		,@strDestinationPort NVARCHAR(200)
+		,@dtmETAPOD DATETIME
+		,@dtmETAPOL DATETIME
+		,@strBookingReference NVARCHAR(100)
 		,@strBLNumber NVARCHAR(100)
-		,@strStatus NVARCHAR(100)
-		,@dtmArrivedInPort DATETIME
-		,@dtmCustomsReleased DATETIME
-		,@dtmETA DATETIME
+		,@strMVessel NVARCHAR(200)
+		,@strMVoyageNumber NVARCHAR(100)
+		,@strShippingMode NVARCHAR(100)
+		,@intNumberOfContainers INT
+		,@strContainerType NVARCHAR(50)
 	DECLARE @strLoadNumber NVARCHAR(100)
-		,@strDeliveryNo NVARCHAR(50)
 		,@intLoadId INT
-	DECLARE @dtmNewArrivedInPort DATETIME
-		,@dtmNewCustomsReleased DATETIME
-		,@ysnNewArrivedInPort BIT
-		,@ysnNewCustomsReleased BIT
-		,@dtmOldArrivedInPort DATETIME
-		,@dtmOldCustomsReleased DATETIME
-		,@ysnOldArrivedInPort BIT
-		,@ysnOldCustomsReleased BIT
-		,@dtmOldETA DATETIME
-		,@strDetails NVARCHAR(MAX)
+		,@intContractDetailId INT
+		,@intOriginPortId INT
+		,@intDestinationPortId INT
+		,@intShippingModeId INT
+		,@intContainerTypeId INT
+		,@intShipmentType INT
+		,@intShipmentStatus INT
+		,@intSourceType INT
+		,@intTransportationMode INT
+		,@intPurchaseSale INT
+		,@intPositionId INT
+		,@intBookId INT
+		,@intSubBookId INT
+		,@ysnLoadBased BIT
+		,@intTransUsedBy INT
+		,@intFreightTermId INT
+		,@intWeightUnitMeasureId INT
+		,@intCurrencyId INT
+		,@strPackingDescription NVARCHAR(50)
+		,@dtmStartDate DATETIME
+		,@dtmEndDate DATETIME
+		,@dtmPlannedAvailabilityDate DATETIME
+	DECLARE @strDescription NVARCHAR(MAX)
+		,@intOldPurchaseSale INT
+		,@intOldPositionId INT
+		,@strOldOriginPort NVARCHAR(200)
+		,@strOldDestinationPort NVARCHAR(200)
+		,@dtmOldETAPOD DATETIME
+		,@dtmOldETAPOL DATETIME
+		,@strOldBookingReference NVARCHAR(100)
+		,@strOldBLNumber NVARCHAR(100)
+		,@strOldMVessel NVARCHAR(200)
+		,@strOldMVoyageNumber NVARCHAR(100)
+		,@strOldShippingMode NVARCHAR(100)
+		,@intOldNumberOfContainers INT
+		,@intOldContainerTypeId INT
+		,@strOldContainerType NVARCHAR(50)
+		,@strOldPackingDescription NVARCHAR(50)
+		,@dtmOldStartDate DATETIME
+		,@dtmOldEndDate DATETIME
+		,@dtmOldPlannedAvailabilityDate DATETIME
+	DECLARE @intNewStageLoadId INT
+	DECLARE @tblLGLoadDetail TABLE (intStageLoadDetailId INT)
+	DECLARE @intStageLoadDetailId INT
+		,@strCommodityCode NVARCHAR(50)
+		,@strItemNo NVARCHAR(50)
+		,@strContractItemName NVARCHAR(100)
+		,@dblQuantity NUMERIC(18, 6)
+		,@dblGrossWeight NUMERIC(18, 6)
+		,@strPackageType NVARCHAR(50)
+	DECLARE @intCommodityId INT
+		,@intItemId INT
+		,@intItemContractId INT
+		,@intVendorEntityId INT
+		,@intCompanyLocationId INT
+		,@intItemUOMId INT
+		,@intWeightItemUOMId INT
+		,@strPriceStatus NVARCHAR(100)
+		,@dblUnitPrice NUMERIC(18, 6)
+		,@intPriceCurrencyId INT
+		,@intPriceUOMId INT
+		,@dblAmount NUMERIC(18, 6)
+		,@strVendorReference NVARCHAR(200)
+		,@intPSubLocationId INT
+		,@intPNumberOfContainers INT
 
-	SELECT @intMinRowNo = Min(intStageShipmentStatusId)
-	FROM tblIPShipmentStatusStage WITH (NOLOCK)
+	SELECT @intMinRowNo = Min(intStageLoadId)
+	FROM tblIPLoadStage WITH (NOLOCK)
+	WHERE ISNULL(strTransactionType, '') = 'ShippingInstruction'
 
 	WHILE (@intMinRowNo IS NOT NULL)
 	BEGIN
 		BEGIN TRY
 			SET @intNoOfRowsAffected = 1
 
-			SELECT @strContractNumber = NULL
-				,@intContractSeq = NULL
+			SELECT @strCustomerReference = NULL
+				,@strERPPONumber = NULL
+				,@strOriginPort = NULL
+				,@strDestinationPort = NULL
+				,@dtmETAPOD = NULL
+				,@dtmETAPOL = NULL
+				,@strBookingReference = NULL
 				,@strBLNumber = NULL
-				,@strStatus = NULL
-				,@dtmArrivedInPort = NULL
-				,@dtmCustomsReleased = NULL
-				,@dtmETA = NULL
+				,@strMVessel = NULL
+				,@strMVoyageNumber = NULL
+				,@strShippingMode = NULL
+				,@intNumberOfContainers = NULL
+				,@strContainerType = NULL
 
 			SELECT @strLoadNumber = NULL
-				,@strDeliveryNo = NULL
 				,@intLoadId = NULL
+				,@intContractDetailId = NULL
+				,@intOriginPortId = NULL
+				,@intDestinationPortId = NULL
+				,@intShippingModeId = NULL
+				,@intContainerTypeId = NULL
+				,@intShipmentType = NULL
+				,@intShipmentStatus = NULL
+				,@intSourceType = NULL
+				,@intTransportationMode = NULL
+				,@intPurchaseSale = NULL
+				,@intPositionId = NULL
+				,@intBookId = NULL
+				,@intSubBookId = NULL
+				,@ysnLoadBased = NULL
+				,@intTransUsedBy = NULL
+				,@intFreightTermId = NULL
+				,@intWeightUnitMeasureId = NULL
+				,@intCurrencyId = NULL
+				,@strPackingDescription = NULL
+				,@dtmStartDate = NULL
+				,@dtmEndDate = NULL
+				,@dtmPlannedAvailabilityDate = NULL
 
-			SELECT @dtmNewArrivedInPort = NULL
-				,@dtmNewCustomsReleased = NULL
-				,@ysnNewArrivedInPort = NULL
-				,@ysnNewCustomsReleased = NULL
-				,@dtmOldArrivedInPort = NULL
-				,@dtmOldCustomsReleased = NULL
-				,@ysnOldArrivedInPort = NULL
-				,@ysnOldCustomsReleased = NULL
-				,@dtmOldETA = NULL
+			SELECT @strDescription = NULL
+				,@intOldPurchaseSale = NULL
+				,@intOldPositionId = NULL
+				,@strOldOriginPort = NULL
+				,@strOldDestinationPort = NULL
+				,@dtmOldETAPOD = NULL
+				,@dtmOldETAPOL = NULL
+				,@strOldBookingReference = NULL
+				,@strOldBLNumber = NULL
+				,@strOldMVessel = NULL
+				,@strOldMVoyageNumber = NULL
+				,@strOldShippingMode = NULL
+				,@intOldNumberOfContainers = NULL
+				,@intOldContainerTypeId = NULL
+				,@strOldContainerType = NULL
+				,@strOldPackingDescription = NULL
+				,@dtmOldStartDate = NULL
+				,@dtmOldEndDate = NULL
+				,@dtmOldPlannedAvailabilityDate = NULL
 
-			SELECT @strContractNumber = strContractNumber
-				,@intContractSeq = intContractSeq
+			SELECT @intStageLoadDetailId = NULL
+				,@strRowState = ''
+
+			SELECT @strCustomerReference = strCustomerReference
+				,@strERPPONumber = strERPPONumber
+				,@strOriginPort = strOriginPort
+				,@strDestinationPort = strDestinationPort
+				,@dtmETAPOD = dtmETAPOD
+				,@dtmETAPOL = dtmETAPOL
+				,@strBookingReference = strBookingReference
 				,@strBLNumber = strBLNumber
-				,@strStatus = strStatus
-				,@dtmArrivedInPort = dtmArrivedInPort
-				,@dtmCustomsReleased = dtmCustomsReleased
-				,@dtmETA = dtmETA
-			FROM tblIPShipmentStatusStage WITH (NOLOCK)
-			WHERE intStageShipmentStatusId = @intMinRowNo
+				,@strMVessel = strMVessel
+				,@strMVoyageNumber = strMVoyageNumber
+				,@strShippingMode = strShippingMode
+				,@intNumberOfContainers = ISNULL(intNumberOfContainers, 0)
+				,@strContainerType = strContainerType
+			FROM tblIPLoadStage WITH (NOLOCK)
+			WHERE intStageLoadId = @intMinRowNo
+
+			IF ISNULL(@strCustomerReference, '') = ''
+			BEGIN
+				RAISERROR (
+						'Invalid Customer Reference. '
+						,16
+						,1
+						)
+			END
+
+			SELECT @intContractDetailId = t.intContractDetailId
+			FROM tblCTContractDetail t WITH (NOLOCK)
+			WHERE t.strERPPONumber = @strERPPONumber
+
+			IF ISNULL(@strERPPONumber, '') = ''
+				OR ISNULL(@intContractDetailId, 0) = 0
+			BEGIN
+				RAISERROR (
+						'Invalid ERP PO Number. '
+						,16
+						,1
+						)
+			END
+
+			SELECT @intOriginPortId = t.intCityId
+			FROM tblSMCity t WITH (NOLOCK)
+			WHERE t.strCity = @strOriginPort
+				AND t.ysnPort = 1
+
+			IF ISNULL(@intOriginPortId, 0) = 0
+			BEGIN
+				RAISERROR (
+						'Invalid Loading Port. '
+						,16
+						,1
+						)
+			END
+
+			SELECT @intDestinationPortId = t.intCityId
+			FROM tblSMCity t WITH (NOLOCK)
+			WHERE t.strCity = @strDestinationPort
+				AND t.ysnPort = 1
+
+			IF ISNULL(@intDestinationPortId, 0) = 0
+			BEGIN
+				RAISERROR (
+						'Invalid Destination Port. '
+						,16
+						,1
+						)
+			END
+
+			IF @dtmETAPOD IS NULL
+			BEGIN
+				RAISERROR (
+						'Invalid ETA POD. '
+						,16
+						,1
+						)
+			END
+
+			IF @dtmETAPOL IS NULL
+			BEGIN
+				RAISERROR (
+						'Invalid ETA POL. '
+						,16
+						,1
+						)
+			END
+
+			SELECT @intShippingModeId = t.intShippingModeId
+			FROM tblLGShippingMode t WITH (NOLOCK)
+			WHERE t.strShippingMode = @strShippingMode
+
+			IF ISNULL(@intShippingModeId, 0) = 0
+			BEGIN
+				RAISERROR (
+						'Invalid Shipping Mode. '
+						,16
+						,1
+						)
+			END
+
+			SELECT @intContainerTypeId = t.intContainerTypeId
+			FROM tblLGContainerType t WITH (NOLOCK)
+			WHERE t.strContainerType = @strContainerType
+
+			IF ISNULL(@intContainerTypeId, 0) = 0
+			BEGIN
+				RAISERROR (
+						'Invalid Container Type. '
+						,16
+						,1
+						)
+			END
 
 			SELECT @strLoadNumber = L.strLoadNumber
-				,@strDeliveryNo = L.strExternalShipmentNumber
 				,@intLoadId = L.intLoadId
-				,@dtmOldArrivedInPort = L.dtmArrivedInPort
-				,@dtmOldCustomsReleased = L.dtmCustomsReleased
-				,@ysnOldArrivedInPort = L.ysnArrivedInPort
-				,@ysnOldCustomsReleased = L.ysnCustomsReleased
-				,@dtmOldETA = L.dtmETAPOD
 			FROM tblLGLoad L WITH (NOLOCK)
-			JOIN tblLGLoadDetail LD WITH (NOLOCK) ON LD.intLoadId = L.intLoadId
-				AND L.intShipmentType = 1
-				AND L.strBLNumber = @strBLNumber
-			JOIN tblCTContractDetail CD WITH (NOLOCK) ON CD.intContractDetailId = LD.intPContractDetailId
-				AND CD.intContractSeq = @intContractSeq
-			JOIN tblCTContractHeader CH WITH (NOLOCK) ON CH.intContractHeaderId = CD.intContractHeaderId
-				AND CH.strContractNumber = @strContractNumber
+			WHERE L.intShipmentType = 2
+				AND L.strCustomerReference = @strCustomerReference
 
-			SET @strInfo1 = ISNULL(@strLoadNumber, '') + ' / ' + ISNULL(@strDeliveryNo, '')
-			SET @strInfo2 = ISNULL(CONVERT(VARCHAR(10), @dtmETA, 121), '')
+			SELECT @intShipmentType = 2
+				,@intShipmentStatus = 7
+				,@intSourceType = 2
+				,@intTransportationMode = 2
+				,@intTransUsedBy = 1
 
+			SELECT TOP 1 @intFreightTermId = intDefaultFreightTermId
+				,@intWeightUnitMeasureId = intWeightUOMId
+			FROM tblLGCompanyPreference WITH (NOLOCK)
+
+			SELECT TOP 1 @intCurrencyId = intDefaultCurrencyId
+			FROM tblSMCompanyPreference WITH (NOLOCK)
+
+			IF ISNULL(@intLoadId, 0) = 0
+			BEGIN
+				SELECT @strRowState = 'Create'
+
+				SELECT @intContractDetailId = CD.intContractDetailId
+					,@intPurchaseSale = CH.intContractTypeId
+					,@intPositionId = CH.intPositionId
+					,@intBookId = CH.intBookId
+					,@intSubBookId = CH.intSubBookId
+					,@ysnLoadBased = CH.ysnLoad
+					,@strPackingDescription = CD.strPackingDescription
+					,@dtmStartDate = CD.dtmStartDate
+					,@dtmEndDate = CD.dtmEndDate
+					,@dtmPlannedAvailabilityDate = CD.dtmPlannedAvailabilityDate
+				FROM tblCTContractDetail CD WITH (NOLOCK)
+				JOIN tblCTContractHeader CH WITH (NOLOCK) ON CH.intContractHeaderId = CD.intContractHeaderId
+					AND CD.strERPPONumber = @strERPPONumber
+			END
+			ELSE
+			BEGIN
+				SELECT @strRowState = 'Update'
+
+				SELECT @strLoadNumber = L.strLoadNumber
+					,@intContractDetailId = CD.intContractDetailId
+					,@intPurchaseSale = CH.intContractTypeId
+					,@intPositionId = CH.intPositionId
+					,@intBookId = CH.intBookId
+					,@intSubBookId = CH.intSubBookId
+					,@ysnLoadBased = CH.ysnLoad
+					,@strPackingDescription = CD.strPackingDescription
+					,@dtmStartDate = CD.dtmStartDate
+					,@dtmEndDate = CD.dtmEndDate
+					,@dtmPlannedAvailabilityDate = CD.dtmPlannedAvailabilityDate
+				FROM tblLGLoad L WITH (NOLOCK)
+				JOIN tblLGLoadDetail LD WITH (NOLOCK) ON LD.intLoadId = L.intLoadId
+					AND L.intLoadId = @intLoadId
+				JOIN tblCTContractDetail CD WITH (NOLOCK) ON CD.intContractDetailId = LD.intPContractDetailId
+				JOIN tblCTContractHeader CH WITH (NOLOCK) ON CH.intContractHeaderId = CD.intContractHeaderId
+			END
+
+			SET @strInfo1 = ISNULL(@strCustomerReference, '') + ' / ' + ISNULL(@strERPPONumber, '')
+
+			--SET @strInfo2 = ISNULL(@strLoadNumber, '')
 			SELECT @intEntityId = intEntityId
 			FROM tblSMUserSecurity WITH (NOLOCK)
 			WHERE strUserName = 'IRELYADMIN'
 
-			IF @strStatus IS NULL
-				AND @dtmETA IS NULL
-			BEGIN
-				RAISERROR (
-						'Invalid Status and ETA. '
-						,16
-						,1
-						)
-			END
-
-			IF ISNULL(@intLoadId, 0) = 0
-			BEGIN
-				RAISERROR (
-						'Invalid Load No. '
-						,16
-						,1
-						)
-			END
-
 			BEGIN TRAN
 
-			-- Shipment Status Update
-			IF ISNULL(@strStatus, '') <> ''
+			-- Shipment Instruction Create / Update
+			IF @strRowState = 'Create'
 			BEGIN
-				IF @strStatus <> 'Arrived in Port'
-					AND @strStatus <> 'Customs Released'
+				EXEC uspSMGetStartingNumber 106
+					,@strLoadNumber OUTPUT
+
+				INSERT INTO tblLGLoad (
+					intConcurrencyId
+					,strLoadNumber
+					,intPurchaseSale
+					,dtmScheduledDate
+					,intUserSecurityId
+					,intSourceType
+					,intPositionId
+					,intWeightUnitMeasureId
+					,intTransportationMode
+					,intShipmentStatus
+					,intTransUsedBy
+					,intShipmentType
+					,intFreightTermId
+					,intCurrencyId
+					,strPackingDescription
+					,dtmStartDate
+					,dtmEndDate
+					,dtmPlannedAvailabilityDate
+					,strCustomerReference
+					,strOriginPort
+					,strDestinationPort
+					,strOriginPort1
+					,strDestinationPort1
+					,dtmETAPOD
+					,dtmETAPOL
+					,strBookingReference
+					,strBLNumber
+					,strMVessel
+					,strMVoyageNumber
+					,strShippingMode
+					,intNumberOfContainers
+					,intContainerTypeId
+					)
+				SELECT 1
+					,@strLoadNumber
+					,@intPurchaseSale
+					,GETDATE()
+					,@intEntityId
+					,@intSourceType
+					,@intPositionId
+					,@intWeightUnitMeasureId
+					,@intTransportationMode
+					,@intShipmentStatus
+					,@intTransUsedBy
+					,@intShipmentType
+					,@intFreightTermId
+					,@intCurrencyId
+					,@strPackingDescription
+					,@dtmStartDate
+					,@dtmEndDate
+					,@dtmPlannedAvailabilityDate
+					,@strCustomerReference
+					,@strOriginPort
+					,@strDestinationPort
+					,@strOriginPort
+					,@strDestinationPort
+					,@dtmETAPOD
+					,@dtmETAPOL
+					,@strBookingReference
+					,@strBLNumber
+					,@strMVessel
+					,@strMVoyageNumber
+					,@strShippingMode
+					,@intNumberOfContainers
+					,@intContainerTypeId
+
+				SELECT @intLoadId = SCOPE_IDENTITY()
+
+				-- Audit Log
+				IF (@intLoadId > 0)
 				BEGIN
-					RAISERROR (
-							'Invalid Status. '
-							,16
-							,1
-							)
+					SELECT @strDescription = 'Load created from external system. '
+
+					EXEC uspSMAuditLog @keyValue = @intLoadId
+						,@screenName = 'Logistics.view.ShipmentSchedule'
+						,@entityId = @intEntityId
+						,@actionType = 'Created'
+						,@actionIcon = 'small-new-plus'
+						,@changeDescription = @strDescription
+						,@fromValue = ''
+						,@toValue = @strLoadNumber
 				END
-
-				UPDATE tblLGLoad
-				SET intConcurrencyId = intConcurrencyId + 1
-					,ysnArrivedInPort = CASE 
-						WHEN @strStatus = 'Arrived in Port'
-							THEN 1
-						ELSE ysnArrivedInPort
-						END
-					,ysnCustomsReleased = CASE 
-						WHEN @strStatus = 'Customs Released'
-							THEN 1
-						ELSE ysnCustomsReleased
-						END
-					,dtmArrivedInPort = CASE 
-						WHEN @dtmArrivedInPort IS NOT NULL
-							THEN @dtmArrivedInPort
-						ELSE dtmArrivedInPort
-						END
-					,dtmCustomsReleased = CASE 
-						WHEN @dtmCustomsReleased IS NOT NULL
-							THEN @dtmCustomsReleased
-						ELSE dtmCustomsReleased
-						END
-				WHERE intLoadId = @intLoadId
-					AND intShipmentStatus = 3
-
-				SELECT @dtmNewArrivedInPort = L.dtmArrivedInPort
-					,@dtmNewCustomsReleased = L.dtmCustomsReleased
-					,@ysnNewArrivedInPort = L.ysnArrivedInPort
-					,@ysnNewCustomsReleased = L.ysnCustomsReleased
+			END
+			ELSE IF @strRowState = 'Update'
+			BEGIN
+				SELECT @intOldPurchaseSale = intPurchaseSale
+					,@intOldPositionId = intPositionId
+					,@strOldOriginPort = strOriginPort
+					,@strOldDestinationPort = strDestinationPort
+					,@dtmOldETAPOD = dtmETAPOD
+					,@dtmOldETAPOL = dtmETAPOL
+					,@strOldBookingReference = strBookingReference
+					,@strOldBLNumber = strBLNumber
+					,@strOldMVessel = strMVessel
+					,@strOldMVoyageNumber = strMVoyageNumber
+					,@strOldShippingMode = strShippingMode
+					,@intOldNumberOfContainers = intNumberOfContainers
+					,@intOldContainerTypeId = intContainerTypeId
+					,@strOldPackingDescription = strPackingDescription
+					,@dtmOldStartDate = dtmStartDate
+					,@dtmOldEndDate = dtmEndDate
+					,@dtmOldPlannedAvailabilityDate = dtmPlannedAvailabilityDate
 				FROM tblLGLoad L WITH (NOLOCK)
 				WHERE L.intLoadId = @intLoadId
 
+				SELECT @strOldContainerType = t.strContainerType
+				FROM tblLGContainerType t WITH (NOLOCK)
+				WHERE t.intContainerTypeId = @intOldContainerTypeId
+
+				UPDATE tblLGLoad
+				SET intConcurrencyId = intConcurrencyId + 1
+					,intPurchaseSale = @intPurchaseSale
+					,intPositionId = @intPositionId
+					,strPackingDescription = @strPackingDescription
+					,dtmStartDate = @dtmStartDate
+					,dtmEndDate = @dtmEndDate
+					,dtmPlannedAvailabilityDate = @dtmPlannedAvailabilityDate
+					,strOriginPort = @strOriginPort
+					,strDestinationPort = @strDestinationPort
+					,strOriginPort1 = @strOriginPort
+					,strDestinationPort1 = @strDestinationPort
+					,dtmETAPOD = @dtmETAPOD
+					,dtmETAPOL = @dtmETAPOL
+					,strBookingReference = @strBookingReference
+					,strBLNumber = @strBLNumber
+					,strMVessel = @strMVessel
+					,strMVoyageNumber = @strMVoyageNumber
+					,strShippingMode = @strShippingMode
+					,intNumberOfContainers = @intNumberOfContainers
+					,intContainerTypeId = @intContainerTypeId
+				WHERE intLoadId = @intLoadId
+
 				-- Audit Log
-				SELECT @strDetails = ''
-
-				IF (@dtmOldArrivedInPort <> @dtmNewArrivedInPort)
-					SET @strDetails += '{"change":"dtmArrivedInPort","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@dtmOldArrivedInPort, '')) + '","to":"' + LTRIM(ISNULL(@dtmNewArrivedInPort, '')) + '","leaf":true,"changeDescription":"Arrived in Port Date"},'
-
-				IF (@dtmOldCustomsReleased <> @dtmNewCustomsReleased)
-					SET @strDetails += '{"change":"dtmCustomsReleased","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@dtmOldCustomsReleased, '')) + '","to":"' + LTRIM(ISNULL(@dtmNewCustomsReleased, '')) + '","leaf":true,"changeDescription":"Customs Released Date"},'
-
-				IF (@ysnOldArrivedInPort <> @ysnNewArrivedInPort)
-					SET @strDetails += '{"change":"ysnArrivedInPort","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@ysnOldArrivedInPort, '')) + '","to":"' + LTRIM(ISNULL(@ysnNewArrivedInPort, '')) + '","leaf":true,"changeDescription":"Arrived In Port"},'
-
-				IF (@ysnOldCustomsReleased <> @ysnNewCustomsReleased)
-					SET @strDetails += '{"change":"ysnCustomsReleased","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@ysnOldCustomsReleased, '')) + '","to":"' + LTRIM(ISNULL(@ysnNewCustomsReleased, '')) + '","leaf":true,"changeDescription":"Customs Released"},'
-
-				IF (LEN(@strDetails) > 1)
+				IF (@intLoadId > 0)
 				BEGIN
-					SET @strDetails = SUBSTRING(@strDetails, 0, LEN(@strDetails))
+					DECLARE @strDetails NVARCHAR(MAX) = ''
 
-					EXEC uspSMAuditLog @keyValue = @intLoadId
-						,@screenName = 'Logistics.view.ShipmentSchedule'
-						,@entityId = @intEntityId
-						,@actionType = 'Updated'
-						,@actionIcon = 'small-tree-modified'
-						,@details = @strDetails
+					IF (@intOldPurchaseSale <> @intPurchaseSale)
+						SET @strDetails += '{"change":"intPurchaseSale","iconCls":"small-gear","from":"' + LTRIM(@intOldPurchaseSale) + '","to":"' + LTRIM(@intPurchaseSale) + '","leaf":true,"changeDescription":"intPurchaseSale"},'
+
+					IF (@intOldPositionId <> @intPositionId)
+						SET @strDetails += '{"change":"intPositionId","iconCls":"small-gear","from":"' + LTRIM(@intOldPositionId) + '","to":"' + LTRIM(@intPositionId) + '","leaf":true,"changeDescription":"intPositionId"},'
+
+					IF (@strOldOriginPort <> @strOriginPort)
+						SET @strDetails += '{"change":"strOriginPort","iconCls":"small-gear","from":"' + LTRIM(@strOldOriginPort) + '","to":"' + LTRIM(@strOriginPort) + '","leaf":true,"changeDescription":"Loading Port"},'
+
+					IF (@strOldDestinationPort <> @strDestinationPort)
+						SET @strDetails += '{"change":"strDestinationPort","iconCls":"small-gear","from":"' + LTRIM(@strOldDestinationPort) + '","to":"' + LTRIM(@strDestinationPort) + '","leaf":true,"changeDescription":"Destination Port"},'
+
+					IF (@dtmOldETAPOD <> @dtmETAPOD)
+						SET @strDetails += '{"change":"dtmETAPOD","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@dtmOldETAPOD, '')) + '","to":"' + LTRIM(ISNULL(@dtmETAPOD, '')) + '","leaf":true,"changeDescription":"ETA POD"},'
+
+					IF (@dtmOldETAPOL <> @dtmETAPOL)
+						SET @strDetails += '{"change":"dtmETAPOL","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@dtmOldETAPOL, '')) + '","to":"' + LTRIM(ISNULL(@dtmETAPOL, '')) + '","leaf":true,"changeDescription":"ETA POL"},'
+
+					IF (@strOldBookingReference <> @strBookingReference)
+						SET @strDetails += '{"change":"strBookingReference","iconCls":"small-gear","from":"' + LTRIM(@strOldBookingReference) + '","to":"' + LTRIM(@strBookingReference) + '","leaf":true,"changeDescription":"Booking Ref."},'
+
+					IF (@strOldBLNumber <> @strBLNumber)
+						SET @strDetails += '{"change":"strBLNumber","iconCls":"small-gear","from":"' + LTRIM(@strOldBLNumber) + '","to":"' + LTRIM(@strBLNumber) + '","leaf":true,"changeDescription":"BOL No."},'
+
+					IF (@strOldMVessel <> @strMVessel)
+						SET @strDetails += '{"change":"strMVessel","iconCls":"small-gear","from":"' + LTRIM(@strOldMVessel) + '","to":"' + LTRIM(@strMVessel) + '","leaf":true,"changeDescription":"MV Name"},'
+
+					IF (@strOldMVoyageNumber <> @strMVoyageNumber)
+						SET @strDetails += '{"change":"strMVoyageNumber","iconCls":"small-gear","from":"' + LTRIM(@strOldMVoyageNumber) + '","to":"' + LTRIM(@strMVoyageNumber) + '","leaf":true,"changeDescription":"MV Voyage No."},'
+
+					IF (@strOldShippingMode <> @strShippingMode)
+						SET @strDetails += '{"change":"strShippingMode","iconCls":"small-gear","from":"' + LTRIM(@strOldShippingMode) + '","to":"' + LTRIM(@strShippingMode) + '","leaf":true,"changeDescription":"Shipping Mode"},'
+
+					IF (@intOldNumberOfContainers <> @intNumberOfContainers)
+						SET @strDetails += '{"change":"intNumberOfContainers","iconCls":"small-gear","from":"' + LTRIM(@intOldNumberOfContainers) + '","to":"' + LTRIM(@intNumberOfContainers) + '","leaf":true,"changeDescription":"No. of Containers"},'
+
+					IF (@intOldContainerTypeId <> @intContainerTypeId)
+						SET @strDetails += '{"change":"strContainerType","iconCls":"small-gear","from":"' + LTRIM(@strOldContainerType) + '","to":"' + LTRIM(@strContainerType) + '","leaf":true,"changeDescription":"Container Type"},'
+
+					IF (@strOldPackingDescription <> @strPackingDescription)
+						SET @strDetails += '{"change":"strPackingDescription","iconCls":"small-gear","from":"' + LTRIM(@strOldPackingDescription) + '","to":"' + LTRIM(@strPackingDescription) + '","leaf":true,"changeDescription":"Packing Description"},'
+
+					IF (@dtmOldStartDate <> @dtmStartDate)
+						SET @strDetails += '{"change":"dtmStartDate","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@dtmOldStartDate, '')) + '","to":"' + LTRIM(ISNULL(@dtmStartDate, '')) + '","leaf":true,"changeDescription":"Start Date"},'
+
+					IF (@dtmOldEndDate <> @dtmEndDate)
+						SET @strDetails += '{"change":"dtmEndDate","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@dtmOldEndDate, '')) + '","to":"' + LTRIM(ISNULL(@dtmEndDate, '')) + '","leaf":true,"changeDescription":"End Date"},'
+
+					IF (@dtmOldPlannedAvailabilityDate <> @dtmPlannedAvailabilityDate)
+						SET @strDetails += '{"change":"dtmPlannedAvailabilityDate","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@dtmOldPlannedAvailabilityDate, '')) + '","to":"' + LTRIM(ISNULL(@dtmPlannedAvailabilityDate, '')) + '","leaf":true,"changeDescription":"Planned Availability"},'
+
+					IF (LEN(@strDetails) > 1)
+					BEGIN
+						SET @strDetails = SUBSTRING(@strDetails, 0, LEN(@strDetails))
+
+						EXEC uspSMAuditLog @keyValue = @intLoadId
+							,@screenName = 'Logistics.view.ShipmentSchedule'
+							,@entityId = @intEntityId
+							,@actionType = 'Updated'
+							,@actionIcon = 'small-tree-modified'
+							,@details = @strDetails
+					END
 				END
 			END
 
-			-- ETA Date Update
-			IF @dtmETA IS NOT NULL
+			IF @strRowState = 'Create'
+				OR @strRowState = 'Update'
 			BEGIN
-				IF ISNULL(CONVERT(VARCHAR(10), @dtmOldETA, 112), '') <> ISNULL(CONVERT(VARCHAR(10), @dtmETA, 112), '')
+				DELETE
+				FROM @tblLGLoadDetail
+
+				INSERT INTO @tblLGLoadDetail (intStageLoadDetailId)
+				SELECT intStageLoadDetailId
+				FROM tblIPLoadDetailStage
+				WHERE intStageLoadId = @intMinRowNo
+
+				SELECT @intStageLoadDetailId = MIN(intStageLoadDetailId)
+				FROM @tblLGLoadDetail
+
+				WHILE @intStageLoadDetailId IS NOT NULL
 				BEGIN
-					UPDATE tblLGLoad
-					SET intConcurrencyId = intConcurrencyId + 1
-						,dtmETAPOD = @dtmETA
-					WHERE intLoadId = @intLoadId
+					SELECT @strCommodityCode = NULL
+						,@strItemNo = NULL
+						,@strContractItemName = NULL
+						,@dblQuantity = NULL
+						,@dblGrossWeight = NULL
+						,@strPackageType = NULL
 
-					-- To set Contract Updated Availability Date and send Contract Update feed to SAP
-					EXEC uspLGCreateLoadIntegrationLog @intLoadId = @intLoadId
-						,@strRowState = 'Modified'
-						,@intShipmentType = 1
+					SELECT @intCommodityId = NULL
+						,@intItemId = NULL
+						,@intItemContractId = NULL
+						,@intVendorEntityId = NULL
+						,@intCompanyLocationId = NULL
+						,@intItemUOMId = NULL
+						,@intWeightItemUOMId = NULL
+						,@strPriceStatus = NULL
+						,@dblUnitPrice = NULL
+						,@intPriceCurrencyId = NULL
+						,@intPriceUOMId = NULL
+						,@dblAmount = NULL
+						,@strVendorReference = NULL
+						,@intPSubLocationId = NULL
+						,@intPNumberOfContainers = NULL
 
-					-- To send LS Update to Inter Company
-					EXEC uspLGInterCompanyTransaction @intLoadId = @intLoadId
-						,@strRowState = 'Modified'
+					SELECT @strCommodityCode = strCommodityCode
+						,@strItemNo = strItemNo
+						,@strContractItemName = strContractItemName
+						,@dblQuantity = ISNULL(dblQuantity, 0)
+						,@dblGrossWeight = ISNULL(dblGrossWeight, 0)
+						,@strPackageType = strPackageType
+					FROM tblIPLoadDetailStage
+					WHERE intStageLoadDetailId = @intStageLoadDetailId
 
-					-- Audit Log
-					SELECT @strDetails = ''
+					SELECT @intCommodityId = t.intCommodityId
+					FROM tblICCommodity t WITH (NOLOCK)
+					WHERE t.strCommodityCode = @strCommodityCode
 
-					SET @strDetails += '{"change":"dtmETAPOD","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@dtmOldETA, '')) + '","to":"' + LTRIM(ISNULL(@dtmETA, '')) + '","leaf":true,"changeDescription":"ETA POD"}'
+					IF ISNULL(@intCommodityId, 0) = 0
+					BEGIN
+						RAISERROR (
+								'Invalid Commodity. '
+								,16
+								,1
+								)
+					END
 
-					EXEC uspSMAuditLog @keyValue = @intLoadId
-						,@screenName = 'Logistics.view.ShipmentSchedule'
-						,@entityId = @intEntityId
-						,@actionType = 'Updated'
-						,@actionIcon = 'small-tree-modified'
-						,@details = @strDetails
+					IF LOWER(@strCommodityCode) <> 'coffee'
+					BEGIN
+						RAISERROR (
+								'Commodity should be Coffee. '
+								,16
+								,1
+								)
+					END
+
+					SELECT @intItemId = t.intItemId
+					FROM tblICItem t WITH (NOLOCK)
+					WHERE t.strItemNo = @strItemNo
+
+					IF ISNULL(@intItemId, 0) = 0
+					BEGIN
+						RAISERROR (
+								'Invalid Item No. '
+								,16
+								,1
+								)
+					END
+
+					IF NOT EXISTS (
+							SELECT 1
+							FROM tblCTContractDetail t WITH (NOLOCK)
+							WHERE t.intContractDetailId = @intContractDetailId
+								AND t.intItemId = @intItemId
+							)
+					BEGIN
+						RAISERROR (
+								'Item No is not matching with Contract Sequence Item. '
+								,16
+								,1
+								)
+					END
+
+					SELECT @intItemContractId = t.intItemContractId
+					FROM tblICItemContract t WITH (NOLOCK)
+					WHERE t.intItemId = @intItemId
+						AND t.strContractItemName = @strContractItemName
+
+					IF ISNULL(@intItemContractId, 0) = 0
+					BEGIN
+						RAISERROR (
+								'Invalid Contract Item. '
+								,16
+								,1
+								)
+					END
+
+					IF NOT EXISTS (
+							SELECT 1
+							FROM tblCTContractDetail t WITH (NOLOCK)
+							WHERE t.intContractDetailId = @intContractDetailId
+								AND t.intItemId = @intItemId
+								AND t.intItemContractId = @intItemContractId
+							)
+					BEGIN
+						RAISERROR (
+								'Contract Item is not matching in the Contract Sequence. '
+								,16
+								,1
+								)
+					END
+
+					IF @dblQuantity <= 0
+					BEGIN
+						RAISERROR (
+								'Invalid Quantity. '
+								,16
+								,1
+								)
+					END
+
+					IF @dblGrossWeight <= 0
+					BEGIN
+						RAISERROR (
+								'Invalid Weight. '
+								,16
+								,1
+								)
+					END
+
+					SELECT @intVendorEntityId = CH.intEntityId
+						,@intCompanyLocationId = CD.intCompanyLocationId
+						--,CD.dblQuantity
+						,@intItemUOMId = CD.intItemUOMId
+						--,CD.dblNetWeight
+						,@intWeightItemUOMId = CD.intNetWeightUOMId
+						,@strPriceStatus = PT.strPricingType
+						,@dblUnitPrice = CD.dblCashPrice
+						,@intPriceCurrencyId = CD.intCurrencyId
+						,@intPriceUOMId = CD.intPriceItemUOMId
+						,@dblAmount = CD.dblTotalCost
+						,@strVendorReference = CH.strCustomerContract
+						,@intPSubLocationId = CD.intSubLocationId
+						,@intPNumberOfContainers = CD.intNumberOfContainers
+					FROM tblCTContractDetail CD WITH (NOLOCK)
+					JOIN tblCTContractHeader CH WITH (NOLOCK) ON CH.intContractHeaderId = CD.intContractHeaderId
+						AND CD.intContractDetailId = @intContractDetailId
+					LEFT JOIN tblCTPricingType PT ON PT.intPricingTypeId = CD.intPricingTypeId
+
+					IF @strRowState = 'Create'
+					BEGIN
+						INSERT INTO tblLGLoadDetail (
+							intConcurrencyId
+							,intLoadId
+							,intVendorEntityId
+							,intItemId
+							,intPContractDetailId
+							,intPCompanyLocationId
+							,dblQuantity
+							,intItemUOMId
+							,dblGross
+							,dblTare
+							,dblNet
+							,intWeightItemUOMId
+							,strPriceStatus
+							,dblUnitPrice
+							,intPriceCurrencyId
+							,intPriceUOMId
+							,dblAmount
+							,ysnPrintScheduleInfo
+							,ysnPrintLoadDirections
+							,strVendorReference
+							,intPSubLocationId
+							,intNumberOfContainers
+							)
+						SELECT 1
+							,@intLoadId
+							,@intVendorEntityId
+							,@intItemId
+							,@intContractDetailId
+							,@intCompanyLocationId
+							,@dblQuantity
+							,@intItemUOMId
+							,@dblGrossWeight
+							,0
+							,@dblGrossWeight
+							,@intWeightItemUOMId
+							,@strPriceStatus
+							,@dblUnitPrice
+							,@intPriceCurrencyId
+							,@intPriceUOMId
+							,@dblAmount
+							,1
+							,1
+							,@strVendorReference
+							,@intPSubLocationId
+							,@intPNumberOfContainers
+					END
+					ELSE
+					BEGIN
+						UPDATE tblLGLoadDetail
+						SET intConcurrencyId = intConcurrencyId + 1
+							,intVendorEntityId = @intVendorEntityId
+							,intPCompanyLocationId = @intCompanyLocationId
+							,dblQuantity = @dblQuantity
+							,intItemUOMId = @intItemUOMId
+							,dblGross = @dblGrossWeight
+							,dblNet = @dblGrossWeight
+							,intWeightItemUOMId = @intWeightItemUOMId
+							,strPriceStatus = @strPriceStatus
+							,dblUnitPrice = @dblUnitPrice
+							,intPriceCurrencyId = @intPriceCurrencyId
+							,intPriceUOMId = @intPriceUOMId
+							,dblAmount = @dblAmount
+							,strVendorReference = @strVendorReference
+							,intPSubLocationId = @intPSubLocationId
+							,intNumberOfContainers = @intPNumberOfContainers
+						WHERE intLoadId = @intLoadId
+							AND intPContractDetailId = @intContractDetailId
+							AND intItemId = @intItemId
+					END
+
+					SELECT @intStageLoadDetailId = MIN(intStageLoadDetailId)
+					FROM @tblLGLoadDetail
+					WHERE intStageLoadDetailId > @intStageLoadDetailId
 				END
 			END
 
 			--Move to Archive
-			INSERT INTO tblIPShipmentStatusArchive (
-				strContractNumber
-				,intContractSeq
+			INSERT INTO tblIPLoadArchive (
+				strCustomerReference
+				,strERPPONumber
+				,strOriginPort
+				,strDestinationPort
+				,dtmETAPOD
+				,dtmETAPOL
+				,strBookingReference
 				,strBLNumber
-				,strStatus
-				,dtmArrivedInPort
-				,dtmCustomsReleased
-				,dtmETA
-				,strLoadNumber
+				,strMVessel
+				,strMVoyageNumber
+				,strShippingMode
+				,intNumberOfContainers
+				,strContainerType
 				,strTransactionType
 				,strErrorMessage
 				,strImportStatus
 				,strSessionId
 				)
-			SELECT strContractNumber
-				,intContractSeq
+			SELECT strCustomerReference
+				,strERPPONumber
+				,strOriginPort
+				,strDestinationPort
+				,dtmETAPOD
+				,dtmETAPOL
+				,strBookingReference
 				,strBLNumber
-				,strStatus
-				,dtmArrivedInPort
-				,dtmCustomsReleased
-				,dtmETA
-				,strLoadNumber
+				,strMVessel
+				,strMVoyageNumber
+				,strShippingMode
+				,intNumberOfContainers
+				,strContainerType
 				,strTransactionType
 				,''
 				,'Success'
 				,strSessionId
-			FROM tblIPShipmentStatusStage
-			WHERE intStageShipmentStatusId = @intMinRowNo
+			FROM tblIPLoadStage
+			WHERE intStageLoadId = @intMinRowNo
+
+			SELECT @intNewStageLoadId = SCOPE_IDENTITY()
+
+			INSERT INTO tblIPLoadDetailArchive (
+				intStageLoadId
+				,strCustomerReference
+				,strCommodityCode
+				,strItemNo
+				,strContractItemName
+				,dblQuantity
+				,dblGrossWeight
+				,strPackageType
+				)
+			SELECT @intNewStageLoadId
+				,strCustomerReference
+				,strCommodityCode
+				,strItemNo
+				,strContractItemName
+				,dblQuantity
+				,dblGrossWeight
+				,strPackageType
+			FROM tblIPLoadDetailStage
+			WHERE intStageLoadId = @intMinRowNo
 
 			DELETE
-			FROM tblIPShipmentStatusStage
-			WHERE intStageShipmentStatusId = @intMinRowNo
+			FROM tblIPLoadStage
+			WHERE intStageLoadId = @intMinRowNo
 
 			COMMIT TRAN
 		END TRY
@@ -271,43 +875,77 @@ BEGIN TRY
 			SET @strFinalErrMsg = @strFinalErrMsg + @ErrMsg
 
 			--Move to Error
-			INSERT INTO tblIPShipmentStatusError (
-				strContractNumber
-				,intContractSeq
+			INSERT INTO tblIPLoadError (
+				strCustomerReference
+				,strERPPONumber
+				,strOriginPort
+				,strDestinationPort
+				,dtmETAPOD
+				,dtmETAPOL
+				,strBookingReference
 				,strBLNumber
-				,strStatus
-				,dtmArrivedInPort
-				,dtmCustomsReleased
-				,dtmETA
-				,strLoadNumber
+				,strMVessel
+				,strMVoyageNumber
+				,strShippingMode
+				,intNumberOfContainers
+				,strContainerType
 				,strTransactionType
 				,strErrorMessage
 				,strImportStatus
 				,strSessionId
 				)
-			SELECT strContractNumber
-				,intContractSeq
+			SELECT strCustomerReference
+				,strERPPONumber
+				,strOriginPort
+				,strDestinationPort
+				,dtmETAPOD
+				,dtmETAPOL
+				,strBookingReference
 				,strBLNumber
-				,strStatus
-				,dtmArrivedInPort
-				,dtmCustomsReleased
-				,dtmETA
-				,strLoadNumber
+				,strMVessel
+				,strMVoyageNumber
+				,strShippingMode
+				,intNumberOfContainers
+				,strContainerType
 				,strTransactionType
 				,@ErrMsg
 				,'Failed'
 				,strSessionId
-			FROM tblIPShipmentStatusStage
-			WHERE intStageShipmentStatusId = @intMinRowNo
+			FROM tblIPLoadStage
+			WHERE intStageLoadId = @intMinRowNo
+
+			SELECT @intNewStageLoadId = SCOPE_IDENTITY()
+
+			INSERT INTO tblIPLoadDetailError (
+				intStageLoadId
+				,strCustomerReference
+				,strCommodityCode
+				,strItemNo
+				,strContractItemName
+				,dblQuantity
+				,dblGrossWeight
+				,strPackageType
+				)
+			SELECT @intNewStageLoadId
+				,strCustomerReference
+				,strCommodityCode
+				,strItemNo
+				,strContractItemName
+				,dblQuantity
+				,dblGrossWeight
+				,strPackageType
+			FROM tblIPLoadDetailStage
+			WHERE intStageLoadId = @intMinRowNo
 
 			DELETE
-			FROM tblIPShipmentStatusStage
-			WHERE intStageShipmentStatusId = @intMinRowNo
+			FROM tblIPLoadStage
+			WHERE intStageLoadId = @intMinRowNo
 		END CATCH
 
-		SELECT @intMinRowNo = Min(intStageShipmentStatusId)
-		FROM tblIPShipmentStatusStage WITH (NOLOCK)
-		WHERE intStageShipmentStatusId > @intMinRowNo
+		SELECT @intMinRowNo = Min(intStageLoadId)
+		FROM tblIPLoadStage WITH (NOLOCK)
+		WHERE intStageLoadId > @intMinRowNo
+			AND ISNULL(strTransactionType, '') = 'ShippingInstruction'
 	END
 
 	IF ISNULL(@strFinalErrMsg, '') <> ''
