@@ -8753,6 +8753,7 @@
     <Build Include="dbo\Views\vyuARGetPayment.sql" />
     <Build Include="dbo\Stored Procedures\uspICCallInterCompanyPreStageItem.sql" />
     <Build Include="dbo\Functions\fnARGetItemContractPricingDetails.sql" />
+    <None Include="Scripts\Post-Deployment\HD\20_1_FixCustomLayout.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
