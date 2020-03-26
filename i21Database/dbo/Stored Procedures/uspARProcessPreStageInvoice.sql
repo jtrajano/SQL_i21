@@ -46,10 +46,10 @@ BEGIN TRY
 			SELECT intInvoiceId
 			FROM tblARInvoice
 			WHERE ysnPosted = 1
-				AND strTransactionType NOT IN (
+				AND (strTransactionType NOT IN (
 					'Invoice'
 					,'Credit Memo'
-					)
+					) or intOriginalInvoiceId is not null)
 			)
 
 	DECLARE @tblARInvoicePreStage TABLE (
