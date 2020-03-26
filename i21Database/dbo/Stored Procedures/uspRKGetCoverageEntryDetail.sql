@@ -102,7 +102,7 @@ BEGIN
 		UNION ALL SELECT strType = 'Stock'
 			, Lots.intBookId
 			, Lots.intSubBookId
-			, dblBalance = SUM(ISNULL(dbo.[fnCTConvertQuantityToTargetItemUOM](Lots.intItemId, ItemUOM.intUnitMeasureId, @intUnitMeasureId, Lots.dblBalance), 0))
+			, dblBalance = SUM(ISNULL(dbo.[fnCTConvertQuantityToTargetItemUOM](Lots.intItemId, ItemUOM.intUnitMeasureId, @intUnitMeasureId, Lots.dblQty), 0))
 			, Lots.intCommodityId
 			, Item.intProductTypeId
 		FROM vyuLGPickOpenInventoryLots Lots
