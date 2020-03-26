@@ -8520,8 +8520,8 @@
     <Build Include="dbo\Functions\fnGRCalculateStorageUnits.sql" />
     <Build Include="dbo\Views\vyuCTPriceContractApproverView.sql" />
     <Build Include="dbo\Tables\tblLGLoadCondition.sql" />
+    <Build Include="dbo\Tables\tblLGCustomsFee.sql" />
     <Build Include="dbo\Stored Procedures\uspAPLogVoucherDetailRisk.sql" />
-    <Build Include="dbo\Tables\tblLGCustomFee.sql" />
     <Build Include="dbo\Stored Procedures\uspAPLogPaymentRisk.sql" />
     <Build Include="dbo\User Defined Types\StagingCommanderDepartment.sql" />
     <Build Include="dbo\User Defined Types\StagingCommanderFPHose.sql" />
