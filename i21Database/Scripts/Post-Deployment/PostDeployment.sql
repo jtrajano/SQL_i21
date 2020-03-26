@@ -596,6 +596,7 @@ print 'BEGIN POST DEPLOYMENT'
 :R .\HD\CustomField.sql
 :R .\HD\RemoveHDObsoleteScreen.sql
 :R .\HD\RenameHDScreen.sql
+:R .\HD\20_1_FixCustomLayout.sql
 
 --CRM
 :R .\CRM\SplitCRMData.sql
