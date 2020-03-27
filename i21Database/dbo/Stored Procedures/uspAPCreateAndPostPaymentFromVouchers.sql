@@ -170,7 +170,9 @@ BEGIN
 		,voucher.dblAmountDue
 		,payMethod.strPaymentMethod
 		,ysnLienExists = CAST(CASE WHEN lienInfo.strPayee IS NULL THEN 0 ELSE 1 END AS BIT)
-		,strPayee = payTo.strCheckPayeeName + ' ' + lienInfo.strPayee
+		
+		,strPayee = ISNULL(payTo.strCheckPayeeName,'') + ' ' + ISNULL(lienInfo.strPayee,'') 
+					+ CHAR(13) + CHAR(10) + ISNULL(dbo.fnConvertToFullAddress(ISNULL(payTo.strAddress,''), ISNULL(payTo.strCity,''), ISNULL(payTo.strState,''), ISNULL(payTo.strZipCode,'')),'')
 	INTO #tmpPartitionedVouchers 
 	FROM dbo.fnAPPartitonPaymentOfVouchers(@ids) result
 	INNER JOIN tblAPBill voucher ON result.intBillId = voucher.intBillId
@@ -360,6 +362,7 @@ BEGIN
 		UPDATE pay
 			SET 
 				strPaymentRecordNum = @payPrefix + CAST(@payStartingNumber - 1 AS NVARCHAR)
+				-- ,strPayee = dbo.fnAPGetCheckPayee(@payPrefix + CAST(@payStartingNumber - 1 AS NVARCHAR), pay.dtmDatePaid , pay.intEntityVendorId, pay.intPayToAddressId)
 				,@payStartingNumber = @payStartingNumber + 1
 		FROM tblAPPayment pay
 		INNER JOIN #tmpMultiVouchersCreatedPayment createdPay ON pay.intPaymentId = createdPay.intCreatePaymentId
