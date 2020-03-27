@@ -52,7 +52,7 @@ SELECT
 	,[intItemLocationId]			= ICIT.[intItemLocationId]
 	,[intItemUOMId]					= ICIT.[intItemUOMId]
 	,[dtmDate]						= ISNULL(ARID.[dtmPostDate], ARID.[dtmShipDate])
-	,[dblQty]						= - ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARID.intItemUOMId, ICIT.[intItemUOMId], ISNULL(ARID.[dblQtyShipped], ICS.dblQuantity)), @ZeroDecimal)  --ICIT.[dblQty]
+	,[dblQty]						= ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARID.intItemUOMId, ICIT.[intItemUOMId], ISNULL(ARID.[dblQtyShipped], ICS.dblQuantity)), @ZeroDecimal) * (CASE WHEN ARID.strTransactionType = 'Credit Memo' THEN 1 ELSE -1 END)
 	,[dblUOMQty]					= ICIT.[dblUOMQty]
 	,[dblCost]						= ICIT.[dblCost]
 	,[dblValue]						= 0
@@ -101,7 +101,7 @@ LEFT JOIN (
 WHERE ISNULL(ARID.[intLoadDetailId], 0) = 0
     AND ARID.[intTicketId] IS NULL
 	AND ((ARID.[strType] <> 'Provisional' AND ARID.[ysnFromProvisional] = 0) OR (ARID.[strType] = 'Provisional' AND ARID.[ysnProvisionalWithGL] = 1))
-	AND ARID.[strTransactionType] <> 'Credit Memo'
+	AND (ARID.[strTransactionType] <> 'Credit Memo' OR (ARID.[strTransactionType] = 'Credit Memo' AND ARID.[ysnReversal] = 1))
     AND ISNULL(ARIDL.[intInvoiceDetailLotId],0) = 0
 	
 UNION ALL
@@ -112,7 +112,7 @@ SELECT
 	,[intItemLocationId]			= ICIT.[intItemLocationId]
 	,[intItemUOMId]					= ICIT.[intItemUOMId]
 	,[dtmDate]						= ISNULL(ARID.[dtmPostDate], ARID.[dtmShipDate])
-	,[dblQty]						= - ICIT.[dblQty]
+	,[dblQty]						= ICIT.[dblQty] * (CASE WHEN ARID.strTransactionType = 'Credit Memo' THEN 1 ELSE -1 END)
 	,[dblUOMQty]					= ICIT.[dblUOMQty]
 	,[dblCost]						= ICIT.[dblCost]
 	,[dblValue]						= 0
@@ -158,7 +158,7 @@ WHERE ISNULL(ARID.[intLoadDetailId], 0) = 0
   AND ARID.[intTicketId] IS NULL
   AND ISNULL(ICIT.[intInTransitSourceLocationId], 0) <> 0
   AND ((ARID.[strType] <> 'Provisional' AND ARID.[ysnFromProvisional] = 0) OR (ARID.[strType] = 'Provisional' AND ARID.[ysnProvisionalWithGL] = 1))
-  AND ARID.[strTransactionType] <> 'Credit Memo'
+  AND (ARID.[strTransactionType] <> 'Credit Memo' OR (ARID.[strTransactionType] = 'Credit Memo' AND ARID.[ysnReversal] = 1))
   AND ISNULL(ARIDL.[intInvoiceDetailLotId],0) <> 0
 	
 UNION ALL
@@ -226,7 +226,7 @@ LEFT JOIN (
 WHERE ISNULL(ARID.[intLoadDetailId], 0) = 0
   AND ARID.[intTicketId] IS NOT NULL
   AND ((ARID.[strType] <> 'Provisional' AND ARID.[ysnFromProvisional] = 0) OR (ARID.[strType] = 'Provisional' AND ARID.[ysnProvisionalWithGL] = 1))
-  AND (ARID.[strTransactionType] <> 'Credit Memo' OR @ysnImposeReversalTransaction = 1)
+  AND (ARID.[strTransactionType] <> 'Credit Memo' OR (ARID.[strTransactionType] = 'Credit Memo' AND ARID.[ysnReversal] = 1))
   AND ISNULL(ARIDL.[intInvoiceDetailLotId],0) = 0
   AND ISNULL(ITEM.strLotTracking, 'No') = 'No'
 
@@ -287,7 +287,7 @@ INNER JOIN tblICInventoryTransaction ICIT ON ICIT.[intTransactionId] = ICS.[intI
 WHERE ISNULL(ARID.[intLoadDetailId], 0) = 0
   AND ARID.[intTicketId] IS NOT NULL
   AND ((ARID.[strType] <> 'Provisional' AND ARID.[ysnFromProvisional] = 0) OR (ARID.[strType] = 'Provisional' AND ARID.[ysnProvisionalWithGL] = 1))
-  AND (ARID.[strTransactionType] <> 'Credit Memo' OR @ysnImposeReversalTransaction = 1)
+  AND (ARID.[strTransactionType] <> 'Credit Memo' OR (ARID.[strTransactionType] = 'Credit Memo' AND ARID.[ysnReversal] = 1))
 
 UNION ALL
 
