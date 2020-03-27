@@ -785,7 +785,7 @@ SELECT
 	,[dblQtyShipped]				= CASE WHEN ID.[strTransactionType] = 'Credit Memo' AND ID.[intLoadDetailId] IS NOT NULL AND ISNULL(CH.[ysnLoad], 0) = 1 
 										   THEN 1 
 										   ELSE 
-												CASE WHEN ID.intInventoryShipmentItemId IS NOT NULL AND ISI.[intDestinationGradeId] IS NOT NULL AND ISI.[intDestinationWeightId] IS NOT NULL AND ID.[dblQtyShipped] > ISNULL(ISI.dblQuantity, 0)
+												CASE WHEN ID.intInventoryShipmentItemId IS NOT NULL AND ISI.[intDestinationGradeId] IS NOT NULL AND ISI.[intDestinationWeightId] IS NOT NULL AND ID.[dblQtyShipped] > ISNULL(ISI.dblQuantity, 0) AND ISNULL(CD.dblBalance, 0) = 0
 												     THEN ID.[dblQtyShipped] - ISNULL(ISI.dblQuantity, 0)
 													 ELSE ID.[dblQtyShipped] 
 												END
