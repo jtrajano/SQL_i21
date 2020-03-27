@@ -1322,7 +1322,7 @@ BEGIN TRY
 					,[intParentTicketId]
 					,[intTicketTransactionType]
 					,[ysnReversed])
-			SELECT 	[strTicketStatus] = 'O'
+			SELECT 	[strTicketStatus] = 'R'
 					,[strTicketNumber]	= @strTicketNumber
 					,[strOriginalTicketNumber]
 					,[intScaleSetupId]
