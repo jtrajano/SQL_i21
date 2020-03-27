@@ -142,7 +142,7 @@ BEGIN TRY
 	-----------------------------------------------------------------------------------------------
 	------------------------------ Customer Storage Update
 	-----------------------------------------------------------------------------------------------
-	/*BEGIN
+	BEGIN
 		DECLARE splitCursor CURSOR FOR SELECT intEntityId, dblSplitPercent, strDistributionOption, intStorageScheduleId, intItemId, intCompanyLocationId, intStorageScheduleTypeId, intShipFromEntityId, intShipFrom FROM @splitTable
 		OPEN splitCursor;  
 		FETCH NEXT FROM splitCursor INTO @intEntityId, @dblSplitPercent, @strDistributionOption, @intStorageScheduleId, @intItemId, @intLocationId, @intStorageScheduleTypeId, @shipFromEntityId, @shipFrom;  
@@ -180,7 +180,7 @@ BEGIN TRY
 		CLOSE splitCursor;  
 		DEALLOCATE splitCursor;
 	END
-*/
+
 
 	DECLARE @ysnDPOwned as BIT = 0;
 	SELECT @ysnDPOwned = CASE WHEN CD.intPricingTypeId = 5 AND ISNULL(GR.strOwnedPhysicalStock, 'Company') = 'Company' THEN 1 ELSE 0 END 
@@ -562,7 +562,6 @@ BEGIN TRY
 
 	UPDATE A
 	SET dblOpenBalance = B.dblQty
-		,dblOriginalBalance = B.dblQty
 	FROM tblGRCustomerStorage A
 	OUTER APPLY (SELECT dblQty = dbo.fnGRCalculateStorageUnits(A.intCustomerStorageId)) B
 	WHERE intDeliverySheetId = @intDeliverySheetId 
