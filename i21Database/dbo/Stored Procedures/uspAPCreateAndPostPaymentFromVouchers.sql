@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspAPCreateAndPostPaymentFromVouchers]
+﻿ALTER PROCEDURE [dbo].[uspAPCreateAndPostPaymentFromVouchers]
 	@userId INT,
 	@recap BIT,
 	@bankAccount INT,
@@ -170,8 +170,9 @@ BEGIN
 		,voucher.dblAmountDue
 		,payMethod.strPaymentMethod
 		,ysnLienExists = CAST(CASE WHEN lienInfo.strPayee IS NULL THEN 0 ELSE 1 END AS BIT)
-		,strPayee = payTo.strCheckPayeeName + ' ' + ISNULL(lienInfo.strPayee,'') 
-					+ CHAR(13) + CHAR(10) + ISNULL(dbo.fnConvertToFullAddress(payTo.strAddress, payTo.strCity, payTo.strState, payTo.strZipCode),'')
+		
+		,strPayee = ISNULL(payTo.strCheckPayeeName,'') + ' ' + ISNULL(lienInfo.strPayee,'') 
+					+ CHAR(13) + CHAR(10) + ISNULL(dbo.fnConvertToFullAddress(ISNULL(payTo.strAddress,''), ISNULL(payTo.strCity,''), ISNULL(payTo.strState,''), ISNULL(payTo.strZipCode,'')),'')
 	INTO #tmpPartitionedVouchers 
 	FROM dbo.fnAPPartitonPaymentOfVouchers(@ids) result
 	INNER JOIN tblAPBill voucher ON result.intBillId = voucher.intBillId
