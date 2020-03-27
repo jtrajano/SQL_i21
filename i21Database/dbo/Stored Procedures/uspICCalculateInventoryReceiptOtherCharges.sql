@@ -81,14 +81,14 @@ BEGIN
 												* dbo.fnCalculateQtyBetweenUOM(
 													ISNULL(ReceiptItem.intWeightUOMId, ReceiptItem.intUnitMeasureId)
 													, dbo.fnGetMatchingItemUOMId(ReceiptItem.intItemId, Charge.intCostUOMId)
-													, CASE WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN ISNULL(ReceiptItem.dblNet, 0) ELSE ISNULL(ReceiptItem.dblOpenReceive, 0) END 
+													, COALESCE(NULLIF(ReceiptItem.dblNet, 0), ReceiptItem.dblOpenReceive, 0) --CASE WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN ISNULL(ReceiptItem.dblNet, 0) ELSE ISNULL(ReceiptItem.dblOpenReceive, 0) END 
 												)
 												, 2
 											 )
 			,[dblCalculatedQty]				= dbo.fnCalculateQtyBetweenUOM (
 												ISNULL(ReceiptItem.intWeightUOMId, ReceiptItem.intUnitMeasureId)
 												, dbo.fnGetMatchingItemUOMId(ReceiptItem.intItemId, Charge.intCostUOMId)
-												, CASE WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN ISNULL(ReceiptItem.dblNet, 0) ELSE ISNULL(ReceiptItem.dblOpenReceive, 0) END 
+												, COALESCE(NULLIF(ReceiptItem.dblNet, 0), ReceiptItem.dblOpenReceive, 0) --CASE WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN ISNULL(ReceiptItem.dblNet, 0) ELSE ISNULL(ReceiptItem.dblOpenReceive, 0) END 
 											 )
 			,[intContractId]				= Charge.intContractId
 			,[intContractDetailId]			= Charge.intContractDetailId
