@@ -90,6 +90,22 @@ BEGIN TRY
 
 		SET @strReceiptType = 'Direct'
 		SET @strSourceScreenName = 'Lottery Module'
+
+		-- Validate if there is Item UOM setup
+		IF EXISTS(SELECT TOP 1 1 FROM tblSTReceiveLottery RL
+			INNER JOIN tblSTStore S ON S.intStoreId = RL.intStoreId
+			INNER JOIN tblSTLotteryGame LG ON LG.intLotteryGameId = RL.intLotteryGameId
+			LEFT JOIN tblICItemLocation IL ON IL.intLocationId = S.intCompanyLocationId
+				AND IL.intItemId = LG.intItemId
+			LEFT JOIN tblICItemUOM IU ON IU.intItemUOMId = IL.intIssueUOMId
+			WHERE RL.intReceiveLotteryId = @Id
+			AND IU.intItemUOMId IS NULL)
+		BEGIN
+			SET @Success = CAST(0 AS BIT)
+			SET @StatusMsg = 'Missing UOM setup on Item Location.'
+			GOTO EXITWITHROLLBACK
+			RETURN
+		END
 	
 		INSERT INTO @ReceiptStagingTable(
 			 strReceiptType
