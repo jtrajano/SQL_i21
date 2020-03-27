@@ -1,4 +1,4 @@
-﻿Create PROCEDURE uspMFUnpostCycleCount (@strXML NVARCHAR(MAX))
+﻿CREATE PROCEDURE uspMFUnpostCycleCount (@strXML NVARCHAR(MAX))
 AS
 BEGIN TRY
 	DECLARE @intWorkOrderId INT
@@ -322,6 +322,7 @@ BEGIN TRY
 				EXEC dbo.uspGLBookEntries @GLEntries
 					,0
 					,1
+					,1
 			END
 			ELSE
 			BEGIN
@@ -417,7 +418,6 @@ BEGIN TRY
 			,@strBatchId
 			,@intUserId
 
-
 		IF EXISTS (
 				SELECT *
 				FROM tblMFWorkOrderRecipeItem WRI
@@ -429,12 +429,13 @@ BEGIN TRY
 			EXEC dbo.uspGLBookEntries @GLEntries
 				,0
 				,1
+				,1
 		END
 		ELSE
 		BEGIN
 			EXEC dbo.uspGLBookEntries @GLEntries
 				,0
-		END 
+		END
 
 		SELECT @intWorkOrderProducedLotTransactionId = MIN(intWorkOrderProducedLotTransactionId)
 		FROM tblMFWorkOrderProducedLotTransaction PL
@@ -521,6 +522,7 @@ BEGIN TRY
 			BEGIN
 				EXEC dbo.uspGLBookEntries @GLEntries
 					,0
+					,1
 					,1
 			END
 			ELSE
@@ -704,6 +706,7 @@ BEGIN TRY
 					)
 			BEGIN
 				EXEC dbo.uspGLBookEntries @GLEntries
+					,1
 					,1
 					,1
 			END
