@@ -170,7 +170,7 @@ BEGIN
 		,voucher.dblAmountDue
 		,payMethod.strPaymentMethod
 		,ysnLienExists = CAST(CASE WHEN lienInfo.strPayee IS NULL THEN 0 ELSE 1 END AS BIT)
-		,strPayee = payTo.strCheckPayeeName + ' ' + lienInfo.strPayee
+		,strPayee = ISNULL(payTo.strCheckPayeeName,'') + ' ' + ISNULL(lienInfo.strPayee,'')
 	INTO #tmpPartitionedVouchers 
 	FROM dbo.fnAPPartitonPaymentOfVouchers(@ids) result
 	INNER JOIN tblAPBill voucher ON result.intBillId = voucher.intBillId
