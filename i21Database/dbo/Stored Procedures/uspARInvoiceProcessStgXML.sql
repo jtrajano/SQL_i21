@@ -49,9 +49,12 @@ BEGIN TRY
 		,@intVoucherScreenId INT
 		,@intBillId INT
 		,@intLoadId INT
-		,@strOrderUnitMeasure nvarchar(50)
-		,@intOrderUnitMeasureId int
-		,@intOrderItemUOMId int
+		,@strOrderUnitMeasure NVARCHAR(50)
+		,@intOrderUnitMeasureId INT
+		,@intOrderItemUOMId INT
+		,@intItemLocationId INT
+		,@intAccountId INT
+		,@intWeightClaimId INT
 	DECLARE @tblIPInvoiceDetail TABLE (
 		intInvoiceDetailId INT identity(1, 1)
 		,strItemNo NVARCHAR(50)
@@ -69,6 +72,7 @@ BEGIN TRY
 		,intLoadId INT
 		,intLoadDetailId INT
 		,strOrderUnitMeasure NVARCHAR(50)
+		,intAccountId INT
 		)
 	DECLARE @tblIPFinalInvoiceDetail TABLE (
 		intFinalInvoiceDetailId INT identity(1, 1)
@@ -86,7 +90,8 @@ BEGIN TRY
 		,intInvoiceId INT
 		,intLoadId INT
 		,intLoadDetailId INT
-		,intOrderItemUOMId int
+		,intOrderItemUOMId INT
+		,intAccountId INT
 		)
 
 	SELECT @intInvoiceStageId = MIN(intInvoiceStageId)
@@ -103,6 +108,8 @@ BEGIN TRY
 			,@intCompanyId = NULL
 			,@strErrorMessage = ''
 			,@intEntityId = NULL
+			,@intItemLocationId = NULL
+			,@intAccountId = NULL
 
 		SELECT @strHeaderXML = strHeaderXML
 			,@strDetailXML = strDetailXML
@@ -362,13 +369,15 @@ BEGIN TRY
 					,@strWeightUnitMeasure = NULL
 					,@intContractDetailRefId = NULL
 					,@strErrorMessage = ''
-					,@strOrderUnitMeasure=NULL
+					,@strOrderUnitMeasure = NULL
+					,@intItemLocationId = NULL
+					,@intAccountId = NULL
 
 				SELECT @strItemNo = strItemNo
 					,@strUnitMeasure = strUnitMeasure
 					,@strWeightUnitMeasure = strWeightUnitMeasure
 					,@intContractDetailRefId = intContractDetailId
-					,@strOrderUnitMeasure=strOrderUnitMeasure
+					,@strOrderUnitMeasure = strOrderUnitMeasure
 				FROM @tblIPInvoiceDetail
 				WHERE intInvoiceDetailId = @intInvoiceDetailId
 
@@ -488,7 +497,6 @@ BEGIN TRY
 					END
 				END
 
-
 				SELECT @intOrderItemUOMId = NULL
 
 				SELECT @intOrderItemUOMId = intItemUOMId
@@ -529,6 +537,25 @@ BEGIN TRY
 					END
 				END
 
+				SELECT @intItemLocationId = intItemLocationId
+				FROM tblICItemLocation
+				WHERE intItemId = @intItemId
+					AND intLocationId = @intLocationId
+
+				SELECT @intAccountId = [dbo].[fnGetItemGLAccount](@intItemId, @intItemLocationId, 'AP Clearing')
+
+				IF @intAccountId IS NULL
+				BEGIN
+					IF @strErrorMessage <> ''
+					BEGIN
+						SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'AP Clearing is not configured for the item ' + @strItemNo
+					END
+					ELSE
+					BEGIN
+						SELECT @strErrorMessage = 'AP Clearing is not configured for the item ' + @strItemNo
+					END
+				END
+
 				IF @strErrorMessage <> ''
 				BEGIN
 					RAISERROR (
@@ -554,6 +581,7 @@ BEGIN TRY
 					,intLoadId
 					,intLoadDetailId
 					,intOrderItemUOMId
+					,intAccountId
 					)
 				SELECT @intItemId
 					,@intContractHeaderId
@@ -570,6 +598,7 @@ BEGIN TRY
 					,intLoadId
 					,intLoadDetailId
 					,@intOrderItemUOMId
+					,@intAccountId
 				FROM @tblIPInvoiceDetail
 				WHERE intInvoiceDetailId = @intInvoiceDetailId
 
@@ -612,7 +641,8 @@ BEGIN TRY
 				,ysnStage
 				,intLoadShipmentId
 				,intLoadShipmentDetailId
-				,intLineNo 
+				,intLineNo
+				,intAccountId
 				)
 			SELECT @intEntityId
 				,1
@@ -635,7 +665,8 @@ BEGIN TRY
 				,intLoadId
 				,intLoadDetailId
 				,intFinalInvoiceDetailId
-			FROM @tblIPFinalInvoiceDetail
+				,intAccountId
+			FROM @tblIPFinalInvoiceDetail FID
 
 			SELECT @intLoadId = NULL
 
@@ -671,13 +702,24 @@ BEGIN TRY
 			ELSE
 			BEGIN
 				UPDATE BD
-				SET dblTotal = VD.dblQuantityToBill*VD.dblCost 
-					,dblQtyReceived=VD.dblQuantityToBill 
-					,dblCost =VD.dblCost 
-					,intUnitOfMeasureId =VD.intQtyToBillUOMId 
-				From tblAPBillDetail BD
-				JOIN @voucherNonInvDetails VD on VD.intLineNo =BD.intLineNo 
+				SET dblTotal = VD.dblQuantityToBill * VD.dblCost
+					,dblQtyReceived = VD.dblQuantityToBill
+					,dblCost = VD.dblCost
+					,intUnitOfMeasureId = VD.intQtyToBillUOMId
+				FROM tblAPBillDetail BD
+				JOIN @voucherNonInvDetails VD ON VD.intLineNo = BD.intLineNo
 				WHERE BD.intBillId = @intBillInvoiceId
+			END
+
+			IF @strTransactionType = 'Claim'
+			BEGIN
+				SELECT @intWeightClaimId = intWeightClaimId
+				FROM tblLGWeightClaim
+				WHERE intLoadId = @intLoadId
+
+				UPDATE tblLGWeightClaimDetail
+				SET intBillId = @intBillInvoiceId
+				WHERE intWeightClaimId = @intWeightClaimId
 			END
 
 			ext:
