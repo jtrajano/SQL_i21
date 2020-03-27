@@ -54,7 +54,7 @@ BEGIN
      	WHERE	TL.intLoadHeaderId = @intLoadHeaderId 
      			AND TR.strOrigin = 'Terminal'
 				AND IC.strType != 'Non-Inventory'
-     			--AND (TR.dblUnitCost != 0 or TR.dblFreightRate != 0 or TR.dblPurSurcharge != 0);
+     			AND (TR.dblUnitCost != 0 or TR.dblFreightRate != 0 or TR.dblPurSurcharge != 0);
 	SELECT @total = COUNT(*) FROM #tmpAddItemReceiptResult;
     IF (@total = 0)
 	   BEGIN
@@ -107,7 +107,6 @@ END
 		,strChargesLink				= MIN(TR.strReceiptLine)
 		,strDestinationType			= ISNULL(MIN(TLD.strDestination), MIN(BID.strDestination))
 		,strFreightBilledBy			= MIN(ShipVia.strFreightBilledBy)
-		,intGrossNetUOMId			= MIN(IC.intStockUOMId)
 	INTO #tmpReceipts
 	FROM tblTRLoadHeader TL
 	LEFT JOIN tblTRLoadReceipt TR ON TR.intLoadHeaderId = TL.intLoadHeaderId			
@@ -120,7 +119,7 @@ END
 	WHERE	TL.intLoadHeaderId = @intLoadHeaderId --333333
 			AND TR.strOrigin = 'Terminal'
 			AND IC.strType != 'Non-Inventory'
-			--AND (TR.dblUnitCost != 0 or TR.dblFreightRate != 0 or TR.dblPurSurcharge != 0)
+			AND (TR.dblUnitCost != 0 or TR.dblFreightRate != 0 or TR.dblPurSurcharge != 0)
     group by TR.intLoadReceiptId
 	ORDER BY intEntityVendorId
 		,strBillOfLadding
@@ -170,7 +169,6 @@ END
 			,strSourceScreenName
 			,intPaymentOn
 			,strChargesLink
-			,intGrossNetUOMId
 	)	
 	SELECT strReceiptType		= strReceiptType
 		,intEntityVendorId		= intEntityVendorId
@@ -207,7 +205,6 @@ END
 		,strSourceScreenName	= strSourceScreenName
 		,intPaymentOn			= intPaymentOn
 		,strChargesLink			= strChargesLink
-		,intGrossNetUOMId		= CASE WHEN dblFreightRate != 0 THEN intGrossNetUOMId ELSE NULL END
 	FROM #tmpReceipts
 
 	--SELECT TOP 1 @intFreightItemId = intItemForFreightId FROM tblTRCompanyPreference
