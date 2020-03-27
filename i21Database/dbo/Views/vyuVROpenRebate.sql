@@ -77,6 +77,7 @@ FROM (
 				WHERE Mode = 'Item Level'
 					AND v.intInvoiceDetailId = invoiceDetail.intInvoiceDetailId
 					AND v.strItemNumber = item.strItemNo
+					AND v.intVendorSetupId = program.intVendorSetupId
 			)
 		LEFT OUTER JOIN tblICItemUOM uom ON uom.intItemId = invoiceDetail.intItemId
 			AND uom.intUnitMeasureId = programCategory.intUnitMeasureId
