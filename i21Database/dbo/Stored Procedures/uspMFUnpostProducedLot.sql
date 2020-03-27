@@ -171,6 +171,7 @@ BEGIN TRY
 			EXEC dbo.uspGLBookEntries @GLEntries
 				,0
 				,1
+				,1
 		END
 		ELSE
 		BEGIN
