@@ -632,6 +632,7 @@ BEGIN TRY
 					EXEC dbo.uspGLBookEntries @GLEntries
 						,1
 						,1
+						,1
 				END
 				ELSE
 				BEGIN
