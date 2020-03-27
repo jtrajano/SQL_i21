@@ -1,4 +1,4 @@
-﻿ALTER PROCEDURE [dbo].[uspAPCreateAndPostPaymentFromVouchers]
+﻿CREATE PROCEDURE [dbo].[uspAPCreateAndPostPaymentFromVouchers]
 	@userId INT,
 	@recap BIT,
 	@bankAccount INT,
