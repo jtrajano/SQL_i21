@@ -4,6 +4,7 @@ CREATE FUNCTION dbo.fnICCalculatePrice(
 	, @dblLastCost NUMERIC(16, 9)
 	, @dblAvgCost NUMERIC(16, 9)
 	, @dblAmount NUMERIC(16, 9)
+	, @dblProposedSalePrice NUMERIC(16, 9)
 )
 RETURNS NUMERIC(16, 9)
 AS
@@ -20,7 +21,17 @@ BEGIN
 	ELSE IF @strPricingMethod = 'Markup Avg Cost'
 		SET @dblSalePrice = (@dblAvgCost * (@dblAmount / 100.00)) + @dblAvgCost
 	ELSE
-		SET @dblSalePrice = 0.00
+		SET @dblSalePrice = @dblProposedSalePrice
+	
+	IF NOT (@strPricingMethod IS NULL OR @strPricingMethod = 'None')
+	BEGIN
+		IF @dblAmount <> 0 AND @dblStandardCost <> 0
+			SET @dblSalePrice = @dblProposedSalePrice
+	END
+	ELSE
+	BEGIN
+		SET @dblSalePrice = @dblProposedSalePrice
+	END
 
 	RETURN @dblSalePrice
 END
