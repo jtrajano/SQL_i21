@@ -84,7 +84,7 @@ BEGIN
 	END
 	ELSE IF(@intParentId_previous <> @intParentGroupId)
 	BEGIN
-		IF((SELECT TOP 1 1 FROM tblFRReportHierarchyDetail WHERE intParentGroupId = @intParentGroupId and intReportHierarchyDetailId < @intReportHierarchyDetailId) IS NULL)
+		IF((SELECT TOP 1 1 FROM tblFRReportHierarchyDetail WHERE intReportHierarchyId = @intReportHierarchyId and intParentGroupId = @intParentGroupId and intReportHierarchyDetailId < @intReportHierarchyDetailId) IS NULL)
 		BEGIN	
 			DECLARE @AllFilterString VARCHAR(8000) 
 
