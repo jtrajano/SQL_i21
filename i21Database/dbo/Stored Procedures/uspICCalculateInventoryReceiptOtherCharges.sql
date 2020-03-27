@@ -81,14 +81,14 @@ BEGIN
 												* dbo.fnCalculateQtyBetweenUOM(
 													ISNULL(ReceiptItem.intWeightUOMId, ReceiptItem.intUnitMeasureId)
 													, dbo.fnGetMatchingItemUOMId(ReceiptItem.intItemId, Charge.intCostUOMId)
-													, CASE WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN ISNULL(ReceiptItem.dblNet, 0) ELSE ISNULL(ReceiptItem.dblOpenReceive, 0) END 
+													, COALESCE(NULLIF(ReceiptItem.dblNet, 0), ReceiptItem.dblOpenReceive, 0) --CASE WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN ISNULL(ReceiptItem.dblNet, 0) ELSE ISNULL(ReceiptItem.dblOpenReceive, 0) END 
 												)
 												, 2
 											 )
 			,[dblCalculatedQty]				= dbo.fnCalculateQtyBetweenUOM (
 												ISNULL(ReceiptItem.intWeightUOMId, ReceiptItem.intUnitMeasureId)
 												, dbo.fnGetMatchingItemUOMId(ReceiptItem.intItemId, Charge.intCostUOMId)
-												, CASE WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN ISNULL(ReceiptItem.dblNet, 0) ELSE ISNULL(ReceiptItem.dblOpenReceive, 0) END 
+												, COALESCE(NULLIF(ReceiptItem.dblNet, 0), ReceiptItem.dblOpenReceive, 0) --CASE WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN ISNULL(ReceiptItem.dblNet, 0) ELSE ISNULL(ReceiptItem.dblOpenReceive, 0) END 
 											 )
 			,[intContractId]				= Charge.intContractId
 			,[intContractDetailId]			= Charge.intContractDetailId
@@ -230,14 +230,14 @@ BEGIN
 			,[dblCalculatedAmount]			= ROUND (			
 												Charge.dblRate 
 												* dbo.fnCalculateQtyBetweenUOM(
-													ReceiptItem.intWeightUOMId
+													ISNULL(ReceiptItem.intWeightUOMId, ReceiptItem.intUnitMeasureId)
 													, dbo.fnGetMatchingItemUOMId(ReceiptItem.intItemId, Charge.intCostUOMId)
 													, ISNULL(ReceiptItem.dblGross, 0)
 												)
 												, 2
 											 )
 			,[dblCalculatedQty]				= dbo.fnCalculateQtyBetweenUOM (
-												ReceiptItem.intWeightUOMId
+												ISNULL(ReceiptItem.intWeightUOMId, ReceiptItem.intUnitMeasureId)
 												, dbo.fnGetMatchingItemUOMId(ReceiptItem.intItemId, Charge.intCostUOMId)
 												, ISNULL(ReceiptItem.dblGross, 0)
 											 )
@@ -257,7 +257,7 @@ BEGIN
 			INNER JOIN tblICItem Item
 				ON Item.intItemId = ReceiptItem.intItemId
 	WHERE	ReceiptItem.intInventoryReceiptId = @intInventoryReceiptId
-			AND ReceiptItem.intWeightUOMId IS NOT NULL 
+			--AND ReceiptItem.intWeightUOMId IS NOT NULL 
 			AND Charge.strCostMethod = @COST_METHOD_GROSS_UNIT
 			AND 
 			(

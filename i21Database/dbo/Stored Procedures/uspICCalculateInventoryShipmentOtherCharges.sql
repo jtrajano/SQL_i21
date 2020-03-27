@@ -84,7 +84,7 @@ BEGIN
 														WHEN ShipmentItem.ysnDestinationWeightsAndGrades = 1 THEN 
 															ISNULL(ShipmentItem.dblDestinationQuantity, 0) 
 														ELSE 
-															ISNULL(ShipmentItem.dblQuantity, 0) 
+															COALESCE(NULLIF(ShipmentItem.dblGross - ShipmentItem.dblTare, 0), ShipmentItem.dblQuantity, 0) 
 													  END  
 												)
 												, 2
@@ -96,7 +96,7 @@ BEGIN
 														WHEN ShipmentItem.ysnDestinationWeightsAndGrades = 1 THEN 
 															ISNULL(ShipmentItem.dblDestinationQuantity, 0) 
 														ELSE 
-															ISNULL(ShipmentItem.dblQuantity, 0) 
+															COALESCE(NULLIF(ShipmentItem.dblGross - ShipmentItem.dblTare, 0), ShipmentItem.dblQuantity, 0) 
 													  END  
 
 											)
@@ -240,7 +240,7 @@ BEGIN
 			,[dblCalculatedAmount]			= ROUND (			
 												Charge.dblRate 
 												* dbo.fnCalculateQtyBetweenUOM(
-													ShipmentItem.intWeightUOMId
+													ISNULL(ShipmentItem.intWeightUOMId, ShipmentItem.intItemUOMId)
 													, dbo.fnGetMatchingItemUOMId(ShipmentItem.intItemId, Charge.intCostUOMId)
 													, CASE 
 														WHEN ShipmentItem.ysnDestinationWeightsAndGrades = 1 THEN 
@@ -253,7 +253,7 @@ BEGIN
 												, 2
 											 )
 			,[dblCalculatedQty]				= dbo.fnCalculateQtyBetweenUOM (
-													ShipmentItem.intWeightUOMId
+													ISNULL(ShipmentItem.intWeightUOMId, ShipmentItem.intItemUOMId)
 													, dbo.fnGetMatchingItemUOMId(ShipmentItem.intItemId, Charge.intCostUOMId)
 													, CASE 
 														WHEN ShipmentItem.ysnDestinationWeightsAndGrades = 1 THEN 
@@ -277,7 +277,7 @@ BEGIN
 			INNER JOIN dbo.tblICItem Item 
 				ON Item.intItemId = ShipmentItem.intItemId
 	WHERE	ShipmentItem.intInventoryShipmentId = @intInventoryShipmentId
-			AND ShipmentItem.intWeightUOMId IS NOT NULL 
+			--AND ShipmentItem.intWeightUOMId IS NOT NULL 
 			AND Charge.strCostMethod = @COST_METHOD_GROSS_UNIT
 			AND 
 			(
