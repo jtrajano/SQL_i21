@@ -217,6 +217,32 @@ BEGIN TRY
 		RAISERROR('There is no more open units available for settlement. Please check the available units for settlement and try again.',16,1,1)
 		RETURN;
 	end
+
+
+	if @ysnFromPriceBasisContract = 0 
+	begin
+		declare @invalid_tickets_with_special_discount nvarchar(500)
+		set @invalid_tickets_with_special_discount = ''
+			select @invalid_tickets_with_special_discount = @invalid_tickets_with_special_discount + d.strTicketNumber + ','
+				from tblGRSettleStorageTicket  a
+					join tblGRSettleStorage b
+						on a.intSettleStorageId= b.intSettleStorageId 
+							and b.intParentSettleStorageId is null	
+					join tblGRCustomerStorage c
+						on a.intCustomerStorageId = c.intCustomerStorageId
+					join tblSCTicket d
+						on c.intTicketId = d.intTicketId
+							and d.ysnHasSpecialDiscount = 1
+							and d.ysnSpecialGradePosted = 0		 
+					where a.intSettleStorageId = @intSettleStorageId
+
+		if replace(ltrim(rtrim(@invalid_tickets_with_special_discount)),',', '') <> ''
+		begin
+			set @ErrMsg = 'The following Tickets have special discount that is not yet posted ( ' + substring(@invalid_tickets_with_special_discount, 1, len(@invalid_tickets_with_special_discount) - 1) +  ' )'
+			RAISERROR(@ErrMsg, 16,1,1)
+			RETURN;
+		end
+	end
 	
 	----- DEBUG POINT -----
 
