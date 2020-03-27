@@ -73,6 +73,7 @@ SELECT intInvoiceId							= INV.intInvoiceId
 	 , ysnExcludeFromPayment				= INV.ysnExcludeFromPayment
 	 , ysnFromProvisional					= INV.ysnFromProvisional
      , ysnReturned							= INV.ysnReturned
+     , ysnReversal                          = INV.ysnReversal
      , intPaymentId							= INV.intPaymentId
      , intSplitId							= INV.intSplitId
      , intDistributionHeaderId				= INV.intDistributionHeaderId

@@ -32,6 +32,7 @@
 	,@ImportedFromOrigin 			BIT				= 0
 	,@ImportedAsPosted				BIT				= 0
 	,@FromProvisional				BIT				= 0
+	,@Reversal						BIT 			= 0
 	,@ServiceChargeCredit			BIT				= 0
 	,@Template						BIT				= 0			
 	,@Forgiven						BIT				= 0			
@@ -467,6 +468,7 @@ BEGIN TRY
 		,[ysnSplitted]
 		,[ysnImpactInventory]
 		,[ysnFromProvisional]
+		,[ysnReversal]
         ,[ysnProvisionalWithGL]
 		,[ysnServiceChargeCredit]
 		,[intPaymentId]
@@ -551,6 +553,7 @@ BEGIN TRY
 		,[ysnSplitted]					= ISNULL(@Splitted,0)		
 		,[ysnImpactInventory]			= ISNULL(@ImpactInventory, CAST(1 AS BIT))	
 		,[ysnFromProvisional]			= ISNULL(@FromProvisional, 0)
+		,[ysnReversal]					= ISNULL(@Reversal, 0)
 		,[ysnProvisionalWithGL]			= ISNULL(@ImpactForProvisional, 0)	
 		,[ysnServiceChargeCredit]		= ISNULL(@ServiceChargeCredit, 0)
 		,[intPaymentId]					= @PaymentId 

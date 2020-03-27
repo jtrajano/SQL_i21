@@ -219,6 +219,7 @@ DECLARE  @Id									INT
 		,@ImportedFromOrigin					BIT
 		,@ImportedAsPosted						BIT
 		,@FromProvisional						BIT
+		,@Reversal								BIT
 		,@UpdateAvailableDiscount				BIT
 		,@ServiceChargeCredit					BIT
 		,@ImportFormat							NVARCHAR(50)
@@ -415,6 +416,7 @@ BEGIN
 		,@ImportedFromOrigin 			= ISNULL([ysnImportedFromOrigin],0)
 		,@ImportedAsPosted				= ISNULL([ysnImportedAsPosted],0)
         ,@FromProvisional               = ISNULL([ysnFromProvisional], 0)
+		,@Reversal						= ISNULL([ysnReversal], 0)
 		,@UpdateAvailableDiscount		= [ysnUpdateAvailableDiscount]
 		,@ServiceChargeCredit			= ISNULL([ysnServiceChargeCredit],0)
 		,@ImportFormat					= [strImportFormat]
@@ -637,7 +639,8 @@ BEGIN
 			,@Posted						= @Post					
 			,@ImportedFromOrigin			= @ImportedFromOrigin 	
 			,@ImportedAsPosted   			= @ImportedAsPosted		
-			,@FromProvisional   			= @FromProvisional		
+			,@FromProvisional   			= @FromProvisional	
+			,@Reversal						= @Reversal	
 			,@ServiceChargeCredit			= @ServiceChargeCredit
 			,@TransactionType				= @TransactionType
 			,@Type							= @Type

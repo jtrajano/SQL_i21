@@ -118,6 +118,7 @@ INSERT #ARPostInvoiceHeader
     ,[ysnExcludeInvoiceFromPayment]
     ,[ysnRefundProcessed]
     ,[ysnIsInvoicePositive]
+    ,[ysnReversal]
 
     ,[intInvoiceDetailId]
     ,[intItemId]
@@ -193,6 +194,8 @@ INSERT #ARPostInvoiceHeader
     ,[intStorageLocationId]
     ,[ysnAutoBlend]
     ,[ysnBlended]
+    ,[ysnItemReturned]
+	,[ysnReversed]
     ,[dblQuantity]
     ,[dblMaxQuantity]
     ,[strOptionType]
@@ -269,6 +272,7 @@ SELECT
     ,[ysnExcludeInvoiceFromPayment]     = ISNULL(@ExcludeInvoiceFromPayment, @ZeroBit)
     ,[ysnRefundProcessed]               = ISNULL(ARI.[ysnRefundProcessed], @ZeroBit)
     ,[ysnIsInvoicePositive]             = (CASE WHEN [dbo].[fnARGetInvoiceAmountMultiplier](ARI.[strTransactionType]) = @OneDecimal THEN @OneBit ELSE @ZeroBit END)
+    ,[ysnReversal]                      = ISNULL(ARI.ysnReversal, @ZeroBit)
 
     ,[intInvoiceDetailId]               = NULL
     ,[intItemId]                        = NULL
@@ -344,6 +348,8 @@ SELECT
     ,[intStorageLocationId]             = NULL
     ,[ysnAutoBlend]                     = @ZeroBit
     ,[ysnBlended]                       = @ZeroBit
+    ,[ysnItemReturned]                  = @ZeroBit
+	,[ysnReversed]                      = @ZeroBit
     ,[dblQuantity]                      = @ZeroDecimal
     ,[dblMaxQuantity]                   = @ZeroDecimal
     ,[strOptionType]                    = NULL
@@ -461,6 +467,7 @@ INSERT #ARPostInvoiceHeader
     ,[ysnExcludeInvoiceFromPayment]
     ,[ysnRefundProcessed]
     ,[ysnIsInvoicePositive]
+    ,[ysnReversal]
 
     ,[intInvoiceDetailId]
     ,[intItemId]
@@ -536,6 +543,8 @@ INSERT #ARPostInvoiceHeader
     ,[intStorageLocationId]
     ,[ysnAutoBlend]
     ,[ysnBlended]
+    ,[ysnItemReturned]
+	,[ysnReversed]
     ,[dblQuantity]
     ,[dblMaxQuantity]
     ,[strOptionType]
@@ -612,6 +621,7 @@ SELECT
     ,[ysnExcludeInvoiceFromPayment]     = ISNULL(@ExcludeInvoiceFromPayment, @ZeroBit)
     ,[ysnRefundProcessed]               = ISNULL(ARI.[ysnRefundProcessed], @ZeroBit)
     ,[ysnIsInvoicePositive]             = (CASE WHEN [dbo].[fnARGetInvoiceAmountMultiplier](ARI.[strTransactionType]) = 1 THEN @OneBit ELSE @ZeroBit END)
+    ,[ysnReversal]                      = ISNULL(ARI.ysnReversal, @ZeroBit)
 
     ,[intInvoiceDetailId]               = NULL
     ,[intItemId]                        = NULL
@@ -687,6 +697,8 @@ SELECT
     ,[intStorageLocationId]             = NULL
     ,[ysnAutoBlend]                     = @ZeroBit
     ,[ysnBlended]                       = @ZeroBit
+    ,[ysnItemReturned]                  = @ZeroBit
+	,[ysnReversed]                      = @ZeroBit
     ,[dblQuantity]                      = @ZeroDecimal
     ,[dblMaxQuantity]                   = @ZeroDecimal
     ,[strOptionType]                    = NULL
@@ -797,6 +809,7 @@ INSERT #ARPostInvoiceHeader
     ,[ysnExcludeInvoiceFromPayment]
     ,[ysnRefundProcessed]
     ,[ysnIsInvoicePositive]
+    ,[ysnReversal]
 
     ,[intInvoiceDetailId]
     ,[intItemId]
@@ -872,6 +885,8 @@ INSERT #ARPostInvoiceHeader
     ,[intStorageLocationId]
     ,[ysnAutoBlend]
     ,[ysnBlended]
+    ,[ysnItemReturned]
+	,[ysnReversed]
     ,[dblQuantity]
     ,[dblMaxQuantity]
     ,[strOptionType]
@@ -948,6 +963,7 @@ SELECT
     ,[ysnExcludeInvoiceFromPayment]     = ISNULL(@ExcludeInvoiceFromPayment, @ZeroBit)
     ,[ysnRefundProcessed]               = ISNULL(ARI.[ysnRefundProcessed], @ZeroBit)
     ,[ysnIsInvoicePositive]             = (CASE WHEN [dbo].[fnARGetInvoiceAmountMultiplier](ARI.[strTransactionType]) = 1 THEN @OneBit ELSE @ZeroBit END)
+    ,[ysnReversal]                      = ISNULL(ARI.ysnReversal, @ZeroBit)
 
     ,[intInvoiceDetailId]               = NULL
     ,[intItemId]                        = NULL
@@ -1023,6 +1039,8 @@ SELECT
     ,[intStorageLocationId]             = NULL
     ,[ysnAutoBlend]                     = @ZeroBit
     ,[ysnBlended]                       = @ZeroBit
+    ,[ysnItemReturned]                  = @ZeroBit
+	,[ysnReversed]                      = @ZeroBit
     ,[dblQuantity]                      = @ZeroDecimal
     ,[dblMaxQuantity]                   = @ZeroDecimal
     ,[strOptionType]                    = NULL
@@ -1132,6 +1150,7 @@ INSERT #ARPostInvoiceDetail
     ,[ysnExcludeInvoiceFromPayment]
     ,[ysnRefundProcessed]
     ,[ysnIsInvoicePositive]
+    ,[ysnReversal]
 
     ,[intInvoiceDetailId]
     ,[intItemId]
@@ -1207,6 +1226,8 @@ INSERT #ARPostInvoiceDetail
     ,[intStorageLocationId]
     ,[ysnAutoBlend]
     ,[ysnBlended]
+    ,[ysnItemReturned]
+	,[ysnReversed]
     ,[dblQuantity]
     ,[dblMaxQuantity]
     ,[strOptionType]
@@ -1283,6 +1304,7 @@ SELECT
     ,[ysnExcludeInvoiceFromPayment]     = ARI.[ysnExcludeInvoiceFromPayment]
     ,[ysnRefundProcessed]               = ARI.[ysnRefundProcessed]
     ,[ysnIsInvoicePositive]             = ARI.[ysnIsInvoicePositive]
+    ,[ysnReversal]                      = ISNULL(ARI.ysnReversal, @ZeroBit)
 
     ,[intInvoiceDetailId]               = ARID.[intInvoiceDetailId]
     ,[intItemId]                        = ARID.[intItemId]
@@ -1359,6 +1381,8 @@ SELECT
     ,[intStorageLocationId]             = ARID.[intStorageLocationId]
     ,[ysnAutoBlend]                     = ISNULL(ICI.[ysnAutoBlend], @ZeroBit)
     ,[ysnBlended]                       = ISNULL(ARID.[ysnBlended], @ZeroBit)
+    ,[ysnItemReturned]                  = ISNULL(ARID.[ysnReturned], @ZeroBit)
+	,[ysnReversed]                      = ISNULL(ARID.[ysnReversed], @ZeroBit)
     ,[dblQuantity]                      = NULL
     ,[dblMaxQuantity]                   = NULL
     ,[strOptionType]                    = NULL
@@ -1473,6 +1497,7 @@ INSERT #ARPostInvoiceDetail
     ,[ysnExcludeInvoiceFromPayment]
     ,[ysnRefundProcessed]
     ,[ysnIsInvoicePositive]
+    ,[ysnReversal]
 
     ,[intInvoiceDetailId]
     ,[intItemId]
@@ -1548,6 +1573,8 @@ INSERT #ARPostInvoiceDetail
     ,[intStorageLocationId]
     ,[ysnAutoBlend]
     ,[ysnBlended]
+    ,[ysnItemReturned]
+	,[ysnReversed]
     ,[dblQuantity]
     ,[dblMaxQuantity]
     ,[strOptionType]
@@ -1624,6 +1651,7 @@ SELECT
     ,[ysnExcludeInvoiceFromPayment]     = ARI.[ysnExcludeInvoiceFromPayment]
     ,[ysnRefundProcessed]               = ARI.[ysnRefundProcessed]
     ,[ysnIsInvoicePositive]             = ARI.[ysnIsInvoicePositive]
+    ,[ysnReversal]                      = ARI.[ysnReversal]
 
     ,[intInvoiceDetailId]               = ARID.[intInvoiceDetailId]
     ,[intItemId]                        = ARID.[intItemId]
@@ -1759,6 +1787,8 @@ SELECT
     ,[intStorageLocationId]             = ARID.[intStorageLocationId]
     ,[ysnAutoBlend]                     = ISNULL(ICI.[ysnAutoBlend], @ZeroBit)
     ,[ysnBlended]                       = ISNULL(ARID.[ysnBlended], @ZeroBit)
+    ,[ysnItemReturned]                  = ISNULL(ARID.[ysnReturned], @ZeroBit)
+	,[ysnReversed]                      = ISNULL(ARID.[ysnReversed], @ZeroBit)
     ,[dblQuantity]                      = NULL
     ,[dblMaxQuantity]                   = NULL
     ,[strOptionType]                    = NULL
@@ -1861,6 +1891,7 @@ INSERT #ARPostInvoiceDetail
     ,[ysnExcludeInvoiceFromPayment]
     ,[ysnRefundProcessed]
     ,[ysnIsInvoicePositive]
+    ,[ysnReversal]
 
     ,[intInvoiceDetailId]
     ,[intItemId]
@@ -1932,6 +1963,8 @@ INSERT #ARPostInvoiceDetail
     ,[intStorageLocationId]
     ,[ysnAutoBlend]
     ,[ysnBlended]
+    ,[ysnItemReturned]
+	,[ysnReversed]
     ,[dblQuantity]
     ,[dblMaxQuantity]
     ,[strOptionType]
@@ -2008,6 +2041,7 @@ SELECT
     ,[ysnExcludeInvoiceFromPayment]     = ARI.[ysnExcludeInvoiceFromPayment]
     ,[ysnRefundProcessed]               = ARI.[ysnRefundProcessed]
     ,[ysnIsInvoicePositive]             = ARI.[ysnIsInvoicePositive]
+    ,[ysnReversal]                      = ARI.[ysnReversal]
 
     ,[intInvoiceDetailId]               = ARID.[intInvoiceDetailId]
     ,[intItemId]                        = NULL
@@ -2079,6 +2113,8 @@ SELECT
     ,[intStorageLocationId]             = ARID.[intStorageLocationId]
     ,[ysnAutoBlend]                     = @ZeroBit
     ,[ysnBlended]                       = @ZeroBit
+    ,[ysnItemReturned]                  = ISNULL(ARID.[ysnReturned], @ZeroBit)
+	,[ysnReversed]                      = ISNULL(ARID.[ysnReversed], @ZeroBit)
     ,[dblQuantity]                      = NULL
     ,[dblMaxQuantity]                   = NULL
     ,[strOptionType]                    = NULL

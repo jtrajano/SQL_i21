@@ -64,7 +64,7 @@ BEGIN
 	WHERE ID.intInvoiceId = @TransactionId 
 	AND (ID.intInventoryShipmentItemId IS NOT NULL OR ID.intLoadDetailId IS NOT NULL)
 	AND (ID.intTicketId IS NULL OR (ID.intTicketId IS NOT NULL AND ISNULL(TICKET.strInOutFlag, '') = 'O'))
-	AND (RI.[intInvoiceId] IS NULL OR (@ysnImposeReversalTransaction = 1 AND I.strTransactionType = 'Credit Memo'))
+	AND (RI.[intInvoiceId] IS NULL OR (I.ysnReversal = 1 AND I.strTransactionType = 'Credit Memo'))
 	AND (
 			(I.[strType] <> 'Provisional' AND I.[ysnProvisionalWithGL] = 0)
 		OR
