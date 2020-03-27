@@ -1214,6 +1214,7 @@ BEGIN TRY
 										WHEN ISNULL(@intCompanyId, 0) = 0 THEN ISNULL(L.intCompanyId,0)
 										ELSE @intCompanyId
 								       END	
+		AND Invoice.dtmPostDate IS NULL
 	 UNION
 	---DROP SHIP SALE-----
 		SELECT 
@@ -1387,7 +1388,8 @@ BEGIN TRY
 		AND ISNULL(L.intCompanyId,0) = CASE 
 										WHEN ISNULL(@intCompanyId, 0) = 0 THEN ISNULL(L.intCompanyId,0)
 										ELSE @intCompanyId
-								       END								  		
+								       END
+		AND Invoice.dtmPostDate IS NULL
 	  UNION									   		
 	
 	--Inventory
