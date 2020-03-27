@@ -51,6 +51,7 @@ BEGIN TRY
 		,@dtmStartDate DATETIME
 		,@dtmEndDate DATETIME
 		,@dtmPlannedAvailabilityDate DATETIME
+		,@intLocationId INT
 	DECLARE @strDescription NVARCHAR(MAX)
 		,@intOldPurchaseSale INT
 		,@intOldPositionId INT
@@ -94,6 +95,21 @@ BEGIN TRY
 		,@strVendorReference NVARCHAR(200)
 		,@intPSubLocationId INT
 		,@intPNumberOfContainers INT
+	DECLARE @tblLGLoadDetailChanges TABLE (
+		dblOldQuantity NUMERIC(18, 6)
+		,dblNewQuantity NUMERIC(18, 6)
+		,dblOldGross NUMERIC(18, 6)
+		,dblNewGross NUMERIC(18, 6)
+		,intLoadDetailId INT
+		,strAuditLogInfo NVARCHAR(200)
+		,intPContractDetailId INT
+		)
+	DECLARE @dblOldQuantity NUMERIC(18, 6)
+		,@dblNewQuantity NUMERIC(18, 6)
+		,@dblOldGross NUMERIC(18, 6)
+		,@dblNewGross NUMERIC(18, 6)
+		,@intLoadDetailId INT
+		,@strAuditLogInfo NVARCHAR(200)
 
 	SELECT @intMinRowNo = Min(intStageLoadId)
 	FROM tblIPLoadStage WITH (NOLOCK)
@@ -142,6 +158,7 @@ BEGIN TRY
 				,@dtmStartDate = NULL
 				,@dtmEndDate = NULL
 				,@dtmPlannedAvailabilityDate = NULL
+				,@intLocationId = NULL
 
 			SELECT @strDescription = NULL
 				,@intOldPurchaseSale = NULL
@@ -310,6 +327,7 @@ BEGIN TRY
 					,@dtmStartDate = CD.dtmStartDate
 					,@dtmEndDate = CD.dtmEndDate
 					,@dtmPlannedAvailabilityDate = CD.dtmPlannedAvailabilityDate
+					,@intLocationId = CD.intCompanyLocationId
 				FROM tblCTContractDetail CD WITH (NOLOCK)
 				JOIN tblCTContractHeader CH WITH (NOLOCK) ON CH.intContractHeaderId = CD.intContractHeaderId
 					AND CD.strERPPONumber = @strERPPONumber
@@ -329,6 +347,7 @@ BEGIN TRY
 					,@dtmStartDate = CD.dtmStartDate
 					,@dtmEndDate = CD.dtmEndDate
 					,@dtmPlannedAvailabilityDate = CD.dtmPlannedAvailabilityDate
+					,@intLocationId = CD.intCompanyLocationId
 				FROM tblLGLoad L WITH (NOLOCK)
 				JOIN tblLGLoadDetail LD WITH (NOLOCK) ON LD.intLoadId = L.intLoadId
 					AND L.intLoadId = @intLoadId
@@ -336,9 +355,6 @@ BEGIN TRY
 				JOIN tblCTContractHeader CH WITH (NOLOCK) ON CH.intContractHeaderId = CD.intContractHeaderId
 			END
 
-			SET @strInfo1 = ISNULL(@strCustomerReference, '') + ' / ' + ISNULL(@strERPPONumber, '')
-
-			--SET @strInfo2 = ISNULL(@strLoadNumber, '')
 			SELECT @intEntityId = intEntityId
 			FROM tblSMUserSecurity WITH (NOLOCK)
 			WHERE strUserName = 'IRELYADMIN'
@@ -484,6 +500,14 @@ BEGIN TRY
 					,intContainerTypeId = @intContainerTypeId
 				WHERE intLoadId = @intLoadId
 
+				IF @dtmETAPOD <> @dtmOldETAPOD
+				BEGIN
+					-- To set Contract Planned Availability Date and send Contract Update feed to SAP
+					EXEC uspLGCreateLoadIntegrationLog @intLoadId = @intLoadId
+						,@strRowState = 'Modified'
+						,@intShipmentType = 2 -- LSI
+				END
+
 				-- Audit Log
 				IF (@intLoadId > 0)
 				BEGIN
@@ -554,11 +578,36 @@ BEGIN TRY
 				END
 			END
 
+			SET @strInfo1 = ISNULL(@strCustomerReference, '') + ' / ' + ISNULL(@strERPPONumber, '')
+			SET @strInfo2 = ISNULL(@strLoadNumber, '')
+
 			IF @strRowState = 'Create'
 				OR @strRowState = 'Update'
 			BEGIN
 				DELETE
 				FROM @tblLGLoadDetail
+
+				DELETE
+				FROM @tblLGLoadDetailChanges
+
+				INSERT INTO @tblLGLoadDetailChanges (
+					dblOldQuantity
+					,dblOldGross
+					,intLoadDetailId
+					,intPContractDetailId
+					,strAuditLogInfo
+					)
+				SELECT LD.dblQuantity
+					,LD.dblGross
+					,LD.intLoadDetailId
+					,LD.intPContractDetailId
+					,CH.strContractNumber + '/' + LTRIM(CD.intContractSeq) + ' - ' + ISNULL(IC.strContractItemName, IM.strDescription)
+				FROM tblLGLoadDetail LD
+				JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
+				JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+				JOIN tblICItem IM ON IM.intItemId = CD.intItemId
+				LEFT JOIN tblICItemContract IC ON IC.intItemContractId = CD.intItemContractId
+				WHERE LD.intLoadId = @intLoadId
 
 				INSERT INTO @tblLGLoadDetail (intStageLoadDetailId)
 				SELECT intStageLoadDetailId
@@ -653,7 +702,9 @@ BEGIN TRY
 
 					SELECT @intItemContractId = t.intItemContractId
 					FROM tblICItemContract t WITH (NOLOCK)
-					WHERE t.intItemId = @intItemId
+					JOIN tblICItemLocation IL ON IL.intItemLocationId = t.intItemLocationId
+						AND IL.intLocationId = @intLocationId
+						AND t.intItemId = @intItemId
 						AND t.strContractItemName = @strContractItemName
 
 					IF ISNULL(@intItemContractId, 0) = 0
@@ -793,6 +844,111 @@ BEGIN TRY
 					SELECT @intStageLoadDetailId = MIN(intStageLoadDetailId)
 					FROM @tblLGLoadDetail
 					WHERE intStageLoadDetailId > @intStageLoadDetailId
+				END
+
+				UPDATE @tblLGLoadDetailChanges
+				SET dblNewQuantity = LD.dblQuantity
+					,dblNewGross = LD.dblGross
+				FROM @tblLGLoadDetailChanges OLD
+				JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = OLD.intLoadDetailId
+
+				-- Load Detail Audit Log
+				DECLARE @details NVARCHAR(MAX) = ''
+
+				WHILE EXISTS (
+						SELECT TOP 1 NULL
+						FROM @tblLGLoadDetailChanges
+						)
+				BEGIN
+					SELECT @dblOldQuantity = NULL
+						,@dblNewQuantity = NULL
+						,@dblOldGross = NULL
+						,@dblNewGross = NULL
+						,@intLoadDetailId = NULL
+						,@strAuditLogInfo = NULL
+
+					SELECT TOP 1 @dblOldQuantity = dblOldQuantity
+						,@dblNewQuantity = dblNewQuantity
+						,@dblOldGross = dblOldGross
+						,@dblNewGross = dblNewGross
+						,@intLoadDetailId = intLoadDetailId
+						,@strAuditLogInfo = strAuditLogInfo
+					FROM @tblLGLoadDetailChanges
+
+					SET @details = '{  
+							"action":"Updated",
+							"change":"Updated - Record: ' + LTRIM(@intLoadId) + '",
+							"keyValue":' + LTRIM(@intLoadId) + ',
+							"iconCls":"small-tree-modified",
+							"children":[  
+								{  
+									"change":"tblLGLoadDetails",
+									"children":[  
+										{  
+										"action":"Updated",
+										"change":"Updated - Record: ' + LTRIM(@strAuditLogInfo) + '",
+										"keyValue":' + LTRIM(@intLoadDetailId) + ',
+										"iconCls":"small-tree-modified",
+										"children":
+											[   
+												'
+
+					IF @dblOldQuantity <> @dblNewQuantity
+						SET @details = @details + '
+												{  
+												"change":"dblQuantity",
+												"from":"' + LTRIM(@dblOldQuantity) + '",
+												"to":"' + LTRIM(@dblNewQuantity) + '",
+												"leaf":true,
+												"iconCls":"small-gear",
+												"isField":true,
+												"keyValue":' + LTRIM(@intLoadDetailId) + ',
+												"associationKey":"tblLGLoadDetails",
+												"changeDescription":"Quantity",
+												"hidden":false
+												},'
+
+					IF @dblOldGross <> @dblNewGross
+						SET @details = @details + '
+												{  
+												"change":"dblGross",
+												"from":"' + LTRIM(@dblOldGross) + '",
+												"to":"' + LTRIM(@dblNewGross) + '",
+												"leaf":true,
+												"iconCls":"small-gear",
+												"isField":true,
+												"keyValue":' + LTRIM(@intLoadDetailId) + ',
+												"associationKey":"tblLGLoadDetails",
+												"changeDescription":"Gross",
+												"hidden":false
+												},'
+
+					IF RIGHT(@details, 1) = ','
+						SET @details = SUBSTRING(@details, 0, LEN(@details))
+					SET @details = @details + '
+										]
+									}
+								],
+								"iconCls":"small-tree-grid",
+								"changeDescription":"Orders"
+								}
+							]
+							}'
+
+					IF @dblOldQuantity <> @dblNewQuantity
+						OR @dblOldGross <> @dblNewGross
+					BEGIN
+						EXEC uspSMAuditLog @keyValue = @intLoadId
+							,@screenName = 'Logistics.view.ShipmentSchedule'
+							,@entityId = @intEntityId
+							,@actionType = 'Updated'
+							,@actionIcon = 'small-tree-modified'
+							,@details = @details
+					END
+
+					DELETE
+					FROM @tblLGLoadDetailChanges
+					WHERE intLoadDetailId = @intLoadDetailId
 				END
 			END
 
