@@ -14,8 +14,7 @@ BEGIN TRY
 			@intUniqueId INT,
 			@intContractDetailId INT,
 			@strContractNumber NVARCHAR(20),
-			@dblHistorySchedQuantity NUMERIC(18,6),
-			@ysnLoad BIT = 0
+			@dblHistorySchedQuantity NUMERIC(18,6)
 
 	DECLARE @Contract TABLE 
 	(  
@@ -48,11 +47,6 @@ BEGIN TRY
 		intContractDetailId INT
 	)
 	----------------------------------------------------------
-
-	IF EXISTS(SELECT TOP 1 1 FROM tblCTContractHeader WHERE intContractHeaderId = @intContractHeaderId AND ysnLoad = 1)
-	BEGIN
-		SET @ysnLoad = 1
-	END
 
 	INSERT INTO @ContractDetail
 	SELECT intContractDetailId
@@ -99,21 +93,10 @@ BEGIN TRY
 			SELECT	@strContractNumber = strContractNumber, @dblHistorySchedQuantity = dblHistorySchedQuantity FROM @Contract WHERE intUniqueId = @intUniqueId
 
 			-- INSERT TO TEMPORARY TABLE TO CALCULATE RUNNING BALANCE
-			IF @ysnLoad = 1
-			BEGIN
-				INSERT @temporary
-				SELECT -1, intNoOfLoad, intContractHeaderId, intContractDetailId
-				FROM tblCTContractDetail
-				WHERE intContractDetailId = @intContractDetailId
-			END
-			ELSE
-			BEGIN
-				INSERT @temporary
-				SELECT -1, dblQuantity, intContractHeaderId, intContractDetailId
-				FROM tblCTContractDetail
-				WHERE intContractDetailId = @intContractDetailId
-			END
-
+			INSERT @temporary
+			SELECT -1, dblQuantity, intContractHeaderId, intContractDetailId
+			FROM tblCTContractDetail
+			WHERE intContractDetailId = @intContractDetailId
 
 			INSERT @temporary
 			SELECT intSequenceUsageHistoryId,
@@ -152,20 +135,10 @@ BEGIN TRY
 			INNER JOIN @history b ON a.intSequenceUsageHistoryId = b.intSequenceUsageHistoryId
 			WHERE a.intContractDetailId = @intContractDetailId
 
-			IF @ysnLoad = 1
-			BEGIN
-				UPDATE a SET dblBalanceLoad = b.dblNewValue
-				FROM tblCTContractDetail a
-				INNER JOIN (SELECT TOP 1 * FROM @history ORDER BY intId DESC) b ON a.intContractDetailId = b.intContractDetailId
-				WHERE a.intContractDetailId = @intContractDetailId
-			END
-			ELSE
-			BEGIN
-				UPDATE a SET dblBalance = b.dblNewValue
-				FROM tblCTContractDetail a
-				INNER JOIN (SELECT TOP 1 * FROM @history ORDER BY intId DESC) b ON a.intContractDetailId = b.intContractDetailId
-				WHERE a.intContractDetailId = @intContractDetailId
-			END
+			UPDATE a SET dblBalance = b.dblNewValue
+			FROM tblCTContractDetail a
+			INNER JOIN (SELECT TOP 1 * FROM @history ORDER BY intId DESC) b ON a.intContractDetailId = b.intContractDetailId
+			WHERE a.intContractDetailId = @intContractDetailId
 	
 			DELETE FROM @history
 			DELETE FROM @temporary
