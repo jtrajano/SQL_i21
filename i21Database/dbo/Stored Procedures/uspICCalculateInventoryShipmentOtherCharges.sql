@@ -84,7 +84,7 @@ BEGIN
 														WHEN ShipmentItem.ysnDestinationWeightsAndGrades = 1 THEN 
 															ISNULL(ShipmentItem.dblDestinationQuantity, 0) 
 														ELSE 
-															ISNULL(ShipmentItem.dblQuantity, 0) 
+															COALESCE(NULLIF(ShipmentItem.dblGross - ShipmentItem.dblTare, 0), ShipmentItem.dblQuantity, 0) 
 													  END  
 												)
 												, 2
@@ -96,7 +96,7 @@ BEGIN
 														WHEN ShipmentItem.ysnDestinationWeightsAndGrades = 1 THEN 
 															ISNULL(ShipmentItem.dblDestinationQuantity, 0) 
 														ELSE 
-															ISNULL(ShipmentItem.dblQuantity, 0) 
+															COALESCE(NULLIF(ShipmentItem.dblGross - ShipmentItem.dblTare, 0), ShipmentItem.dblQuantity, 0) 
 													  END  
 
 											)
