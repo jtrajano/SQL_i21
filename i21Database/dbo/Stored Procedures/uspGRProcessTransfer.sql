@@ -25,7 +25,6 @@ BEGIN
 	DECLARE @intSourceItemUOMId INT
 	DECLARE @intCustomerStorageId INT --new customer storage id
 	DECLARE @intStorageHistoryId INT = 0
-	DECLARE @intDecimalPrecision INT = 20
 	DECLARE @intTransferStorageSplitId INT
 	DECLARE @XML NVARCHAR(MAX)
 	DECLARE @strScreenName NVARCHAR(50)
@@ -33,6 +32,7 @@ BEGIN
 	DECLARE @intNewContractDetailId INT
 	DECLARE @intEntityId INT
 	DECLARE @intToEntityId INT
+	DECLARE @intTransferStorageReferenceId INT
 
 	DECLARE @newCustomerStorageIds AS TABLE 
 	(
@@ -44,10 +44,6 @@ BEGIN
 		,dtmProcessDate DATETIME NOT NULL DEFAULT(GETDATE())
 	)
 	DECLARE @GLForItem AS GLForItem
-	SELECT @intDecimalPrecision = intCurrencyDecimal FROM tblSMCompanyPreference
-	DECLARE @intTransferStorageReferenceId INT
-
-	--return
 
 	---START---TRANSACTIONS FOR THE SOURCE-----	
 	IF EXISTS(SELECT TOP 1 1 
@@ -68,7 +64,7 @@ BEGIN
 			FOR XML PATH('')
 		),1,1,'')
 		
-		SET @ErrMsg = 'The Open balance of ticket ' + @TicketNo + ' has been modified by another user.  Transfer process cannot proceed.'
+		SET @ErrMsg = 'The Open balance of ticket ' + @TicketNo + ' has been modified by another user. Transfer process cannot proceed.'
 		
 		RAISERROR(@ErrMsg,16,1)
 		RETURN;
@@ -125,7 +121,7 @@ BEGIN
 
 		--update the source's customer storage open balance
 		UPDATE A
-		SET A.dblOpenBalance 	= ROUND(B.dblOriginalUnits - B.dblDeductedUnits,@intDecimalPrecision)
+		SET A.dblOpenBalance 	= CASE WHEN (ROUND(B.dblOriginalUnits - B.dblDeductedUnits,6)) > A.dblOriginalBalance THEN A.dblOriginalBalance ELSE ROUND(B.dblOriginalUnits - B.dblDeductedUnits,6) END
 		FROM tblGRCustomerStorage A 
 		INNER JOIN tblGRTransferStorageSourceSplit B 
 			ON B.intSourceCustomerStorageId = A.intCustomerStorageId
@@ -226,7 +222,7 @@ BEGIN
 			,[intDiscountScheduleId]			= CS.intDiscountScheduleId
 			,[dblTotalPriceShrink]				= CS.dblTotalPriceShrink		
 			,[dblTotalWeightShrink]				= CS.dblTotalWeightShrink		
-			,[dblQuantity]						= SourceStorage.dblOriginalUnits * (TransferStorageSplit.dblSplitPercent / 100)
+			,[dblQuantity]						= ROUND(SourceStorage.dblOriginalUnits * (TransferStorageSplit.dblSplitPercent / 100),6)
 			,[dtmDeliveryDate]					= CS.dtmDeliveryDate
 			,[dtmZeroBalanceDate]				= CS.dtmZeroBalanceDate			
 			,[strDPARecieptNumber]				= CS.strDPARecieptNumber		
@@ -256,9 +252,9 @@ BEGIN
 			,[intTicketId]						= CS.intTicketId
 			,[intDeliverySheetId]				= CS.intDeliverySheetId
 			,[ysnTransferStorage]				= 1
-			,[dblGrossQuantity]					= ROUND(((SourceStorage.dblOriginalUnits * (TransferStorageSplit.dblSplitPercent / 100)) / CS.dblOriginalBalance) * CS.dblGrossQuantity,@intDecimalPrecision)
+			,[dblGrossQuantity]					= ROUND(((SourceStorage.dblOriginalUnits * (TransferStorageSplit.dblSplitPercent / 100)) / CS.dblOriginalBalance) * CS.dblGrossQuantity,6)
 			,[intSourceCustomerStorageId]		= CS.intCustomerStorageId
-			,[dblUnitQty]						= SourceStorage.dblOriginalUnits * (TransferStorageSplit.dblSplitPercent / 100)
+			,[dblUnitQty]						= ROUND(SourceStorage.dblOriginalUnits * (TransferStorageSplit.dblSplitPercent / 100),6)
 			,[intSplitPercent]					= TransferStorageSplit.dblSplitPercent
 		FROM tblGRCustomerStorage CS
 		INNER JOIN tblGRTransferStorageSourceSplit SourceStorage
