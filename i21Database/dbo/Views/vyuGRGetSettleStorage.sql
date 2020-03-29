@@ -33,11 +33,7 @@ SELECT DISTINCT
 	,dblUnpaidUnits				= SS.dblUnpaidUnits
 	,dblSettleUnits				= SS.dblSettleUnits
 	,dblDiscountsDue			= SS.dblDiscountsDue
-	,dblNetSettlement			= case when SS.intParentSettleStorageId is not null and Bill.intBillId is not null then
-										SS.dblSelectedUnits
-									else
-										SS.dblNetSettlement
-									end
+	,dblNetSettlement			= SS.dblNetSettlement
 	,intCreatedUserId			= SS.intCreatedUserId
 	,strUserName				= Entity.strUserName
 	,dtmCreated					= SS.dtmCreated
@@ -91,6 +87,7 @@ SELECT DISTINCT
 								END COLLATE Latin1_General_CI_AS AS strTransactionCode
 	, strCommodityCode
 	, strCategoryCode	= Category.strCategoryCode
+	, SS.ysnReversed
 FROM tblGRSettleStorage SS
 JOIN tblGRSettleStorageTicket ST
 	ON ST.intSettleStorageId = SS.intSettleStorageId

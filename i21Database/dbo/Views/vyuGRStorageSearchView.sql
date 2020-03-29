@@ -19,7 +19,7 @@ SELECT DISTINCT
 									END COLLATE Latin1_General_CI_AS as strTransaction
 	,intEntityId				  	= CS.intEntityId
 	,strName					  	= E.strName  
-	,strStorageTicketNumber		  = CASE WHEN CS.ysnTransferStorage = 1 THEN TS.strTransferStorageTicket ELSE CS.strStorageTicketNumber END
+	,strStorageTicketNumber			= CASE WHEN CS.ysnTransferStorage = 1 THEN TS.strTransferStorageTicket ELSE CS.strStorageTicketNumber END
 	,intStorageTypeId			  	= CS.intStorageTypeId
 	,strStorageTypeDescription	  	= ST.strStorageTypeDescription
 	,intCommodityId				  	= CS.intCommodityId
@@ -105,7 +105,7 @@ SELECT DISTINCT
 									END
 	,TSR.intSourceCustomerStorageId
 	,CS.ysnTransferStorage
-	,strStorageTransactionNumber = CASE WHEN CS.ysnTransferStorage = 1 THEN CS.strStorageTicketNumber ELSE TS.strTransferStorageTicket END
+	,strStorageTransactionNumber = CS.strStorageTicketNumber
 FROM tblGRCustomerStorage CS  
 JOIN tblSMCompanyLocation LOC
 	ON LOC.intCompanyLocationId = CS.intCompanyLocationId  
@@ -152,6 +152,7 @@ LEFT JOIN (
 		LEFT JOIN tblGRTransferStorageReference TSR
 			ON TSR.intTransferStorageSplitId  = TSS.intTransferStorageSplitId
 	) ON ISNULL(TSR.intToCustomerStorageId,TSS.intTransferToCustomerStorageId) = CS.intCustomerStorageId
+		AND TS.strTransferStorageTicket NOT LIKE '%-R'
 LEFT JOIN tblCTContractDetail CD_Transfer
     ON CD_Transfer.intContractDetailId = TSS.intContractDetailId
 		AND CS.ysnTransferStorage = 1
