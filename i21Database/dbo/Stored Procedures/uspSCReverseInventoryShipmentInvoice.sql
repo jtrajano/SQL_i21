@@ -20,6 +20,8 @@ DECLARE @ysnPost BIT
 DECLARE @intNewInvoiceId INT
 DECLARE @strNewInvoiceNumber NVARCHAR(50)
 DECLARE @intCreditMemoId INT
+DECLARE @strCreditMemoNumber NVARCHAR(50)
+DECLARE @strIvoiceNumber NVARCHAR(50)
 
 
 --------------------------------
@@ -54,6 +56,54 @@ BEGIN TRY
 	IF(ISNULL(@intInventoryShipmentId,0) > 0)
 	BEGIN
 		print 'has IS'
+
+		---Check for regular credit memo
+		BEGIN
+			INSERT INTO #tmpSCInvoiceDetail(
+				ysnPosted
+				,intInvoiceId
+				,intInvoiceDetailId
+			)
+			SELECT TOP 1
+				A.ysnPosted
+				,A.intInvoiceId
+				,B.intInvoiceDetailId
+			FROM tblARInvoiceDetail B
+			INNER JOIN tblARInvoice A
+				ON A.intInvoiceId = B.intInvoiceId
+			INNER JOIN tblICInventoryShipmentItem C
+				ON B.intInventoryShipmentItemId = C.intInventoryShipmentItemId
+			INNER JOIN tblICInventoryShipment D
+				ON C.intInventoryShipmentId = D.intInventoryShipmentId
+			WHERE B.intTicketId = @intTicketId
+				AND D.intInventoryShipmentId = @intInventoryShipmentId
+				AND ISNULL(B.intOriginalInvoiceDetailId,0) = 0
+				AND A.strTransactionType = 'Invoice'
+				AND EXISTS(SELECT TOP 1 1 
+								FROM tblARInvoiceDetail 
+								WHERE ISNULL(intOriginalInvoiceDetailId,0) = B.intInvoiceDetailId
+									AND ISNULL(ysnReversal,0) = 0 )
+		
+				--- Get the credit memo
+				SET @strCreditMemoNumber = ''
+				SELECT TOP 1
+					@strCreditMemoNumber = B.strInvoiceNumber
+				FROM tblARInvoiceDetail A
+				INNER JOIN 	tblARInvoice B
+					ON A.intInvoiceId = B.intInvoiceId
+				WHERE A.intOriginalInvoiceDetailId IN (SELECT intInvoiceDetailId FROM #tmpSCInvoiceDetail)
+
+				IF(ISNULL(@strCreditMemoNumber,'') <> '')
+				BEGIN
+					SET @ErrorMessage = 'Credit memo ''' + @strCreditMemoNumber +''' already been created.';
+					RAISERROR(@ErrorMessage, 11, 1);
+					GOTO _Exit
+				END
+			
+		END
+
+
+
 		INSERT INTO #tmpSCInvoiceDetail(
 			ysnPosted
 			,intInvoiceId
@@ -185,12 +235,12 @@ BEGIN TRY
 																	WHERE intInvoiceId = @_intInvoiceId
 																	FOR XML PATH('')),1,1,''))
 
-						EXEC uspARReturnInvoice @_intInvoiceId, @intUserId,@strInvoiceDetailIds, 1, @intNewInvoiceId OUTPUT	
+						EXEC uspARReturnInvoice @_intInvoiceId, @intUserId,@strInvoiceDetailIds, 1,  @intNewInvoiceId OUTPUT, NULL, 1	
 					END
 				END
 				ELSE
 				BEGIN
-					EXEC uspARReturnInvoice @_intInvoiceId, @intUserId,null,1,@intNewInvoiceId	OUTPUT
+					EXEC uspARReturnInvoice @_intInvoiceId, @intUserId,null,1,@intNewInvoiceId	OUTPUT, NULL, 1	
 				END
 			END
 
