@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspARPOSBatchProcess]
 	  @intPOSEndOfDayId	INT
-	, @intEntityUserId	INT
+	, @intPOSId			INT = NULL
+	, @intEntityUserId	INT = NULL
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -17,6 +18,12 @@ DECLARE @intDiscountAccountId			INT = NULL
 	  , @intDebitMemoPaymentMethodId	INT = NULL
 	  , @dblCashReceipt					NUMERIC(18, 6) = 0
 	  , @dblCashReturn					NUMERIC(18, 6) = 0
+
+SET @intPOSId = NULLIF(@intPOSId, 0)
+SET @intEntityUserId = NULLIF(@intEntityUserId, 0)
+
+IF @intEntityUserId IS NULL
+	SELECT TOP 1 @intEntityUserId = intEntityId FROM tblSMUserSecurity
 
 --CREATE DEFAULT PAYMENT METHODS IF DOES NOT EXISTS
 IF NOT EXISTS (SELECT TOP 1 NULL FROM dbo.tblSMPaymentMethod WITH (NOLOCK) WHERE UPPER(strPaymentMethod) = 'CASH')
@@ -141,6 +148,7 @@ WHERE POS.ysnHold = 0
   AND POS.dblTotal > 0
   AND NEGQTY.intPOSId IS NULL
   AND EOD.intPOSEndOfDayId = @intPOSEndOfDayId
+  AND (@intPOSId IS NULL OR POS.intPOSId = @intPOSId)
 
 UNION ALL
 
@@ -156,6 +164,7 @@ WHERE ((POS.ysnReturn = 1 AND POS.intOriginalPOSTransactionId IS NOT NULL) OR (P
   AND POS.intCreditMemoId IS NULL
   AND POS.dblTotal < 0
   AND EOD.intPOSEndOfDayId = @intPOSEndOfDayId
+  AND (@intPOSId IS NULL OR POS.intPOSId = @intPOSId)
 
 UNION ALL
 
@@ -184,6 +193,7 @@ WHERE POS.ysnReturn = 0
   AND POS.intInvoiceId IS NULL
   AND POS.intCreditMemoId IS NULL
   AND EOD.intPOSEndOfDayId = @intPOSEndOfDayId
+  AND (@intPOSId IS NULL OR POS.intPOSId = @intPOSId)
 
 --CLEAR BATCH PROCESS LOG
 DELETE BP
