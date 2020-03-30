@@ -23,7 +23,9 @@ SELECT
 FROM tblSTCheckoutLotteryCount
 INNER JOIN tblSTCheckoutHeader 
 ON tblSTCheckoutLotteryCount.intCheckoutId = tblSTCheckoutHeader.intCheckoutId
-WHERE ISNULL(tblSTCheckoutHeader.ysnPosted,0) = 0 
+WHERE 
+-- ISNULL(tblSTCheckoutHeader.ysnPosted,0) = 0  -- not in use?? 
+ISNULL(LOWER(tblSTCheckoutHeader.strCheckoutStatus),'') != 'posted'
 GROUP BY intLotteryBookId
 
 
