@@ -6,7 +6,7 @@ AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
-SET XACT_ABORT ON
+SET XACT_ABORT OFF
 SET ANSI_WARNINGS OFF
 
 DECLARE @ErrorMessage NVARCHAR(4000)
@@ -28,7 +28,7 @@ DECLARE @strDebitMemoNumber NVARCHAR(MAX)
 
 BEGIN TRY
 
-	print 'voucher reversal'
+	-- print 'voucher reversal'
 
 	IF OBJECT_ID (N'tempdb.dbo.#tmpSCVoucherDetail') IS NOT NULL DROP TABLE #tmpSCVoucherDetail
 	CREATE TABLE #tmpSCVoucherDetail(
@@ -49,7 +49,7 @@ BEGIN TRY
 	--Populate voucher table list
 	IF(ISNULL(@intInventoryReceiptId,0) > 0)
 	BEGIN
-		print 'has IR'
+		-- print 'has IR'
 		INSERT INTO #tmpSCVoucherDetail(
 			ysnPosted
 			,intBillId
@@ -74,7 +74,7 @@ BEGIN TRY
 	END
 	ELSE
 	BEGIN
-		print 'direct voucher'
+		-- print 'direct voucher'
 		-- get the invoice detail for the ticket 
 		INSERT INTO #tmpSCVoucherDetail(
 			ysnPosted

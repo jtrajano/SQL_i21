@@ -6,7 +6,7 @@ AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
-SET XACT_ABORT ON
+SET XACT_ABORT OFF
 SET ANSI_WARNINGS OFF
 
 DECLARE @ErrorMessage NVARCHAR(4000)
@@ -373,11 +373,11 @@ BEGIN TRY
 									AND strSourceType = 'Storage'
 
 							END
-							ELSE
-							BEGIN
-								--Discount is updated during posting of delivery sheet
-								print 'with delivery sheet'
-							END
+							-- ELSE
+							-- BEGIN
+							-- 	--Discount is updated during posting of delivery sheet
+							-- 	print 'with delivery sheet'
+							-- END
 
 						
 						END
@@ -524,10 +524,10 @@ BEGIN TRY
 				END
 
 				---Contract Distribution
-				IF(@intTicketStorageScheduleTypeId = -2)
-				BEGIN
-					print ('inbound direct contract')
-				END
+				-- IF(@intTicketStorageScheduleTypeId = -2)
+				-- BEGIN
+				-- 	 print ('inbound direct contract')
+				-- END
 				
 				--reverse voucher
 				EXEC [uspSCReverseInventoryReceiptVoucher] @intTicketId, @intUserId
