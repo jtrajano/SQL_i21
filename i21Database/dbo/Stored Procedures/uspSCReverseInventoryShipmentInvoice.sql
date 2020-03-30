@@ -131,6 +131,49 @@ BEGIN TRY
 	ELSE
 	BEGIN
 		print 'direct invoice'
+
+		-- credit memo checking
+		BEGIN
+			INSERT INTO #tmpSCInvoiceDetail(
+				ysnPosted
+				,intInvoiceId
+				,intInvoiceDetailId
+			)
+			SELECT 
+				A.ysnPosted
+				,A.intInvoiceId
+				,B.intInvoiceDetailId
+			FROM tblARInvoiceDetail B
+			INNER JOIN tblARInvoice A
+				ON A.intInvoiceId = B.intInvoiceId
+			WHERE intTicketId = @intTicketId
+				AND A.strTransactionType = 'Invoice'
+				AND ISNULL(B.intOriginalInvoiceDetailId,0) = 0
+				AND EXISTS(SELECT TOP 1 1 
+								FROM tblARInvoiceDetail 
+								WHERE ISNULL(intOriginalInvoiceDetailId,0) = B.intInvoiceDetailId
+									AND ISNULL(ysnReversal,0) = 0 )
+		
+				--- Get the credit memo
+				SET @strCreditMemoNumber = ''
+				SELECT TOP 1
+					@strCreditMemoNumber = B.strInvoiceNumber
+				FROM tblARInvoiceDetail A
+				INNER JOIN 	tblARInvoice B
+					ON A.intInvoiceId = B.intInvoiceId
+				WHERE A.intOriginalInvoiceDetailId IN (SELECT intInvoiceDetailId FROM #tmpSCInvoiceDetail)
+
+				IF(ISNULL(@strCreditMemoNumber,'') <> '')
+				BEGIN
+					SET @ErrorMessage = 'Credit memo ''' + @strCreditMemoNumber +''' already been created.';
+					RAISERROR(@ErrorMessage, 11, 1);
+					GOTO _Exit
+				END
+			
+		END
+
+
+
 		-- get the invoice detail for the ticket 
 		INSERT INTO #tmpSCInvoiceDetail(
 			ysnPosted
