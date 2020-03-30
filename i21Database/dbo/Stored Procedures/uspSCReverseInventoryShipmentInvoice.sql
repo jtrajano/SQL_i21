@@ -6,7 +6,7 @@ AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
-SET XACT_ABORT ON
+SET XACT_ABORT OFF
 SET ANSI_WARNINGS OFF
 
 DECLARE @ErrorMessage NVARCHAR(4000)
@@ -55,7 +55,7 @@ BEGIN TRY
 
 	IF(ISNULL(@intInventoryShipmentId,0) > 0)
 	BEGIN
-		print 'has IS'
+		-- print 'has IS'
 
 		---Check for regular credit memo
 		BEGIN
@@ -130,7 +130,7 @@ BEGIN TRY
 	END
 	ELSE
 	BEGIN
-		print 'direct invoice'
+		-- print 'direct invoice'
 
 		-- credit memo checking
 		BEGIN
