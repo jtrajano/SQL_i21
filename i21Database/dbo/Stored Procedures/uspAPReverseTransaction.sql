@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspAPReverseTransaction]
 	@billId AS INT,
 	@userId AS INT,
+	@transactionType NVARCHAR(30) = NULL,
 	@billCreatedId INT OUTPUT
 AS
 
@@ -186,6 +187,7 @@ BEGIN
 		@post=1,
 		@recap=0,
 		@isBatch=0,
+		@transactionType = @transactionType,
 		@param=@billToPost,
 		@userId=@userId,
 		@batchIdUsed = @batchIdUsed OUTPUT,
