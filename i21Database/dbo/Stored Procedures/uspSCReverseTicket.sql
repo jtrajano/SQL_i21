@@ -156,7 +156,7 @@ BEGIN TRY
 			RAISERROR(@ErrorMessage, 11, 1);
 		END
 
-		IF(@strInOutFlag = 'I')
+		IF(@strInOutFlag = 'I' AND @intTicketType <> 3)
 		BEGIN
 			
 			--Get Match Ticket
@@ -814,10 +814,12 @@ BEGIN TRY
 			END
 
 			-- reverse invoice for direct shipment
-			IF(@intTicketType = 6)
+			IF(@intTicketType = 6 OR @intTicketType = 3)
 			BEGIN
 				EXEC uspSCReverseInventoryShipmentInvoice @intTicketId,@intUserId
 			END
+
+			
 			
 		END
 
