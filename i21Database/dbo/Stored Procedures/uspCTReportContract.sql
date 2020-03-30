@@ -66,7 +66,9 @@ BEGIN TRY
 			@strBrkgCommn				NVARCHAR(MAX),
 			@strApplicableLaw			NVARCHAR(MAX),
 			@strGeneralCondition		NVARCHAR(MAX),
-			@ysnExternal				BIT
+			@ysnExternal				BIT,
+			@intStraussCompanyId INT,
+			@intMultiCompanyParentId INT = 0
 
 	IF	LTRIM(RTRIM(@xmlParam)) = ''   
 		SET @xmlParam = NULL   
@@ -159,10 +161,16 @@ BEGIN TRY
 
 	SELECT	@strCommodityCode	=	CM.strCommodityCode,
 			@ysnPrinted			=	CH.ysnPrinted,
-			@strReportTo		=	strReportTo
+			@strReportTo		=	strReportTo,
+   			@intStraussCompanyId = CH.intCompanyId
 	FROM	tblCTContractHeader CH	WITH (NOLOCK)
 	JOIN	tblICCommodity		CM	WITH (NOLOCK) ON	CM.intCommodityId		=	CH.intCommodityId
 	WHERE	CH.intContractHeaderId = @intContractHeaderId
+
+	 if (@intStraussCompanyId is not null and @intStraussCompanyId > 0)
+	 begin
+		set @intMultiCompanyParentId = (select isnull(intMultiCompanyParentId,0) from tblSMMultiCompany where intMultiCompanyId = @intStraussCompanyId);
+	 end
 
 	IF @IsFullApproved = 1	
 	BEGIN	
@@ -677,7 +685,9 @@ BEGIN TRY
 			,FirstApprovalName						= CASE WHEN @IsFullApproved=1 AND @strCommodityCode = 'Coffee' THEN @FirstApprovalName ELSE NULL END
 			,SecondApprovalName						= CASE WHEN @IsFullApproved=1 AND @strCommodityCode = 'Coffee' THEN @SecondApprovalName ELSE NULL END
 			,StraussContractApproverSignature		=  @StraussContractApproverSignature
-			,StraussContractSubmitSignature			=  @StraussContractSubmitSignature
+			--,StraussContractSubmitSignature			=  @StraussContractSubmitSignature
+			,StraussContractSubmitSignature   		=  (case when @intMultiCompanyParentId > 0 and CH.intContractTypeId = 1 then null else @StraussContractSubmitSignature  end)
+   			,StraussContractSubmitByParentSignature =  (case when @intMultiCompanyParentId > 0 and CH.intContractTypeId = 1 then @StraussContractSubmitSignature else null  end)
 			,InterCompApprovalSign					= @InterCompApprovalSign
 			,strAmendedColumns						= @strAmendedColumns
 			,lblArbitration							= CASE WHEN ISNULL(AN.strComment,'') <>''	 AND ISNULL(AB.strState,'') <>''		 AND ISNULL(RY.strCountry,'') <>'' THEN @rtArbitration + ':'  ELSE NULL END
