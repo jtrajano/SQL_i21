@@ -362,7 +362,7 @@ BEGIN
 				select
 					 dtmDate =  CONVERT(DATETIME, CONVERT(VARCHAR(10),Inv.dtmDate, 110), 110)
 					,dblQtyReceived = dbo.fnCalculateQtyBetweenUOM(BD.intUnitOfMeasureId, IUM.intItemUOMId, BD.dblQtyReceived)
-					,dblPartialPaidQty = dbo.fnCalculateQtyBetweenUOM(BD.intUnitOfMeasureId, Inv.intItemUOMId,(BD.dblQtyReceived / CASE WHEN B.dblTotal = 0 THEN 1 ELSE B.dblTotal END) * dblPayment )
+					,dblPartialPaidQty = dbo.fnCalculateQtyBetweenUOM(BD.intUnitOfMeasureId, IUM.intItemUOMId,(BD.dblQtyReceived / CASE WHEN B.dblTotal = 0 THEN 1 ELSE B.dblTotal END) * dblPayment )
 					,B.strBillId 
 					,B.intBillId 
 					,strDistribution =  ISNULL(ST.strStorageTypeCode,ISNULL(TV.strDistributionOption, ''))
