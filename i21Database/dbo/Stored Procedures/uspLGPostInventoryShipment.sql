@@ -54,6 +54,7 @@ BEGIN
 	DECLARE @ysnDirectShip BIT;
 	DECLARE @ysnCancel BIT;
 	DECLARE @ysnIsReturn BIT = 0
+	DECLARE @strCreditMemo NVARCHAR(50)
 	DECLARE @strFOBPoint NVARCHAR(50)
 	DECLARE @intFOBPointId INT
 	DECLARE @ItemsToPost ItemInTransitCostingTableType
@@ -200,6 +201,13 @@ BEGIN
 
 		RETURN - 1;
 	END
+
+	SELECT TOP 1 @ysnIsReturn = 1, @strCreditMemo = I.strInvoiceNumber
+	 FROM tblLGLoad L JOIN tblARInvoice I ON L.intLoadId = I.intLoadId
+	 WHERE L.intLoadId = @intTransactionId
+	 AND I.strTransactionType = 'Credit Memo'
+	 AND I.ysnPosted = 1
+
 END
 
 -- Get the next batch number
@@ -491,7 +499,7 @@ BEGIN
 			,[intTransactionTypeId]
 			,[intLotId]
 			,[intTransactionId]
-			,[strTransactionId]
+			,CASE WHEN (@ysnIsReturn = 1 AND @ysnCancel = 1) THEN NULL ELSE [strTransactionId] END
 			,[intTransactionDetailId]
 			,[intFobPointId] = @intFOBPointId
 			,[intInTransitSourceLocationId] = t.intItemLocationId
@@ -503,7 +511,7 @@ BEGIN
 			AND t.ysnIsUnposted = 0
 			AND t.strBatchId = @strBatchId
 			AND @intFOBPointId = 2
-			AND ((@ysnCancel = 0 AND t.dblQty < 0)  -- Ensure the Qty is negative. Credit Memo are positive Qtys.  Credit Memo does not ship out but receives stock. 
+			AND ((@ysnCancel = 0 AND t.dblQty < 0)
 				OR (@ysnCancel = 1 AND t.dblQty > 0))
 
 		IF EXISTS (
@@ -555,7 +563,7 @@ BEGIN
 
 			IF @intReturnValue < 0
 				GOTO With_Rollback_Exit
-		END
+		END 
 	END
 END
 
@@ -780,12 +788,6 @@ SELECT @ysnDirectShip = CASE
 		END
 FROM tblLGLoad S
 WHERE intLoadId = @intTransactionId
-
-SELECT @ysnIsReturn = CASE WHEN EXISTS (SELECT TOP 1 1
- FROM tblLGLoad L JOIN tblARInvoice I ON L.intLoadId = I.intLoadId
- WHERE L.intLoadId = @intTransactionId
- AND I.strTransactionType = 'Credit Memo'
- AND I.ysnPosted = 1) THEN 1 ELSE 0 END
  
 IF (@ysnDirectShip <> 1 AND @ysnIsReturn <> 1)
 BEGIN
