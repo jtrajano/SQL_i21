@@ -1202,7 +1202,7 @@ BEGIN TRY
 			
 			--REVERSE VOUCHER
 			BEGIN		
-				EXEC uspAPReverseTransaction @BillId, @UserId ,@billCreatedId OUTPUT
+				EXEC uspAPReverseTransaction @BillId, @UserId, 'Debit Memo', @billCreatedId OUTPUT
 			END		
 
 			--SET THE ysnReversed OF SETTLED STORAGE TO 1
