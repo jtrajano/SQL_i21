@@ -58,6 +58,8 @@ BEGIN
 		, strMiscFields = '{intInventoryReceiptItemId = "'+ CAST(ISNULL(bd.intInventoryReceiptItemId,'') AS NVARCHAR) +'"} {intLoadDetailId = "' + CAST(ISNULL(bd.intLoadDetailId,'') AS NVARCHAR) +'"}'
 	FROM tblAPBill b
 	INNER JOIN tblAPBillDetail bd ON bd.intBillId = b.intBillId
+	INNER JOIN @voucherDetailIds bb
+		on bb.intId = b.intBillId
 	CROSS APPLY (
 		SELECT * FROM dbo.fnAPGetVoucherCommodity(b.intBillId)
 	) c
