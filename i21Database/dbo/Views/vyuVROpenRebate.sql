@@ -98,3 +98,4 @@ FROM (
 ) openRebates
 WHERE openRebates.strProgram IS NOT NULL
 	AND openRebates.dblRebateRate <> 0
+	AND openRebates.ysnActive = 1
