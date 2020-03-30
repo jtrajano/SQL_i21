@@ -112,7 +112,10 @@ BEGIN TRY
 		ELSE
 		BEGIN
 			---create voucher reversal for posted voucher
-			EXEC uspAPReverseTransaction @_intBillId, @intUserId, @intReversedBillId OUTPUT
+			EXEC uspAPReverseTransaction 
+				@billId = @_intBillId
+				,@userId = @intUserId
+				,@billCreatedId = @intReversedBillId OUTPUT
 
 
 			-- Audit log Entry
