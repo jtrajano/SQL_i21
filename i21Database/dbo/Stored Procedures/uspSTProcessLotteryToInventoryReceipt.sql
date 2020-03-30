@@ -237,7 +237,7 @@ BEGIN TRANSACTION
 		FROM tblSTCheckoutLotteryCount
 		INNER JOIN tblSTCheckoutHeader 
 		ON tblSTCheckoutLotteryCount.intCheckoutId = tblSTCheckoutHeader.intCheckoutId
-		WHERE ISNULL(tblSTCheckoutHeader.ysnPosted,0) = 0 AND tblSTCheckoutLotteryCount.intLotteryBookId = @Id
+		WHERE ISNULL(LOWER(tblSTCheckoutHeader.strCheckoutStatus),'') != 'posted' AND tblSTCheckoutLotteryCount.intLotteryBookId = @Id
 
 		--INSERT RETURN LOTTERY ENTRY--
 		INSERT INTO tblSTReturnLottery
