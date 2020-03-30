@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE dbo.uspLGProcessShipmentXML (
 	@strInfo1 NVARCHAR(MAX) = '' OUTPUT
 	,@ysnDropShip BIT = 0
+	,@intMultiCompanyId INT
 	)
 AS
 BEGIN TRY
@@ -27,7 +28,7 @@ BEGIN TRY
 		,@strFeedStatus NVARCHAR(MAX)
 		,@dtmFeedDate DATETIME
 		,@strMessage NVARCHAR(MAX)
-		,@intMultiCompanyId INT
+		--,@intMultiCompanyId INT
 		,@intReferenceId INT
 		,@intEntityId INT
 		,@strTransactionType NVARCHAR(MAX)
@@ -85,9 +86,9 @@ BEGIN TRY
 		,@intVendorEntityId INT
 		,@intPContractHeaderId INT
 		,@strCustomerContract NVARCHAR(50)
-		,@intSACompanyLocationId int
-		,@intSContractHeaderId int
-		,@intCustomerEntityId int
+		,@intSACompanyLocationId INT
+		,@intSContractHeaderId INT
+		,@intCustomerEntityId INT
 	DECLARE @tblLGLoadDetail TABLE (intLoadDetailId INT)
 	DECLARE @strItemNo NVARCHAR(50)
 		,@strItemUOM NVARCHAR(50)
@@ -216,6 +217,7 @@ BEGIN TRY
 	SELECT @intId = MIN(intId)
 	FROM tblLGIntrCompLogisticsStg
 	WHERE strFeedStatus IS NULL
+		AND intMultiCompanyId = @intMultiCompanyId
 
 	WHILE @intId > 0
 	BEGIN
@@ -775,11 +777,11 @@ BEGIN TRY
 
 			SELECT @intNewLoadId = intLoadId
 				,@strNewLoadNumber = strLoadNumber
-				--,@intCompanyRefId = intCompanyId
+			--,@intCompanyRefId = intCompanyId
 			FROM tblLGLoad
 			WHERE intLoadRefId = @intLoadRefId
-			AND intBookId =@intBookId
-			AND IsNULL(intSubBookId,0) =IsNULL(@intSubBookId,0) 
+				AND intBookId = @intBookId
+				AND IsNULL(intSubBookId, 0) = IsNULL(@intSubBookId, 0)
 
 			SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -1068,8 +1070,12 @@ BEGIN TRY
 					,intDischargeUnitMeasureId
 					,strDischargePerUnit
 					,intTransportationMode
-					,intShipmentStatus
-					,0 As ysnPosted
+					,CASE 
+						WHEN intShipmentType = 1
+							THEN 1
+						ELSE intShipmentStatus
+						END
+					,0 AS ysnPosted
 					--,dtmPostedDate
 					,intTransUsedBy
 					,intShipmentType
@@ -1397,7 +1403,11 @@ BEGIN TRY
 					,intDischargeUnitMeasureId = x.intDischargeUnitMeasureId
 					,strDischargePerUnit = x.strDischargePerUnit
 					,intTransportationMode = x.intTransportationMode
-					,intShipmentStatus = x.intShipmentStatus
+					,intShipmentStatus = CASE 
+						WHEN x.intShipmentType = 1
+							THEN L.intShipmentStatus
+						ELSE x.intShipmentStatus
+						END
 					--,ysnPosted = x.ysnPosted
 					--,dtmPostedDate = x.dtmPostedDate
 					,intTransUsedBy = x.intTransUsedBy
@@ -1976,6 +1986,7 @@ BEGIN TRY
 						,@strCustomerContract = strCustomerContract
 					FROM tblCTContractHeader
 					WHERE intContractHeaderId = @intPContractHeaderId
+
 					---************
 					SELECT @intSACompanyLocationId = NULL
 						,@intSContractHeaderId = NULL
@@ -4051,6 +4062,7 @@ BEGIN TRY
 		FROM tblLGIntrCompLogisticsStg
 		WHERE intId > @intId
 			AND IsNULL(strFeedStatus, '') = ''
+			AND intMultiCompanyId = @intMultiCompanyId
 	END
 
 	IF @strTransactionType IN (
