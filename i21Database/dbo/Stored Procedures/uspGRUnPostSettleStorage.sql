@@ -557,6 +557,10 @@ BEGIN TRY
 
 		WHILE EXISTS(SELECT TOP 1 1 FROM @SettleStorageIds)
 		BEGIN
+			DELETE FROM @GLEntries
+			DELETE FROM @ItemsToStorage
+			DELETE FROM @ItemsToPost
+
 			SELECT TOP 1 
 				@_intSettleStorageId	= intId
 				,@intCustomerStorageId	= SST.intCustomerStorageId
@@ -781,11 +785,7 @@ BEGIN TRY
 
 				EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT
 
-				IF @@ERROR <> 0 GOTO SettleStorage_Exit;
-
-				DELETE FROM @GLEntries
-				DELETE FROM @ItemsToStorage
-				DELETE FROM @ItemsToPost
+				IF @@ERROR <> 0 GOTO SettleStorage_Exit;				
 
 				INSERT INTO @ItemsToStorage
 				(
@@ -927,6 +927,8 @@ BEGIN TRY
 						,@strBatchId  
 						,'AP Clearing'
 						,@UserId
+
+						--select '0',* from @DummyGLEntries
 	
 					IF @intReturnValue < 0 GOTO SettleStorage_Exit;
 
@@ -1010,7 +1012,7 @@ BEGIN TRY
 					) S
 					WHERE intTransactionId = @_intSettleStorageId
 						AND strTransactionForm = 'Storage Settlement'
-
+						--select '1',* from @GLEntries
 					--GL entries for STOCK RETURNS
 					--ITEMS
 					IF EXISTS(SELECT TOP 1 1 FROM @DummyGLEntries)
@@ -1058,6 +1060,7 @@ BEGIN TRY
 							,[dblReportingRate]	
 							,[dblForeignRate]
 							,[strRateType]
+							--,[strComments]
 						)
 						SELECT --'TEST',
 							GL.[dtmDate]
@@ -1092,9 +1095,12 @@ BEGIN TRY
 							,[dblReportingRate]	
 							,[dblForeignRate]
 							,[strRateType]
-						FROM @GLEntries GL
+							--,[strComments]	= '0'
+						FROM @DummyGLEntries GL
 						INNER JOIN tblGLAccount GLA
-							ON GLA.intAccountId = GL.intAccountId						
+							ON GLA.intAccountId = GL.intAccountId
+
+						--select '2',* from @GLEntries
 					END					
 
 					--CHARGES/DISCOUNTS
@@ -1140,14 +1146,13 @@ BEGIN TRY
 						,@strBatchId
 						,@UserId
 						,1
-
-						SELECT '@GLEntries',* FROM @GLEntries
 												
 					IF EXISTS (SELECT TOP 1 1 FROM @GLEntries) 
 					BEGIN 
 						UPDATE @GLEntries 
 						SET dblDebit = dblCredit, dblDebitUnit = dblCreditUnit
 							,dblCredit = dblDebit, dblCreditUnit = dblDebitUnit
+						--WHERE strComments IS NULL
 					END
 				END
 				
