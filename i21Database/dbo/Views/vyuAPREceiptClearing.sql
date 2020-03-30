@@ -250,6 +250,8 @@ INNER JOIN tblICInventoryReceipt receipt
     ON receipt.intInventoryReceiptId  = receiptItem.intInventoryReceiptId
 INNER JOIN tblSMCompanyLocation compLoc
     ON receipt.intLocationId = compLoc.intCompanyLocationId
+INNER JOIN vyuGLAccountDetail APClearing
+    ON APClearing.intAccountId = billDetail.intAccountId AND APClearing.intAccountCategoryId = 45
 LEFT JOIN tblSMFreightTerms ft
     ON ft.intFreightTermId = receipt.intFreightTermId
 LEFT JOIN 
@@ -258,10 +260,10 @@ LEFT JOIN
         ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId
 )
     ON itemUOM.intItemUOMId = COALESCE(billDetail.intWeightUOMId, billDetail.intUnitOfMeasureId)
-LEFT JOIN vyuAPReceiptClearingGL APClearing
-    ON APClearing.strTransactionId = receipt.strReceiptNumber
-        AND APClearing.intItemId = receiptItem.intItemId
-        AND APClearing.intTransactionDetailId = receiptItem.intInventoryReceiptItemId
+-- LEFT JOIN vyuAPReceiptClearingGL APClearing
+--     ON APClearing.strTransactionId = receipt.strReceiptNumber
+--         AND APClearing.intItemId = receiptItem.intItemId
+--         AND APClearing.intTransactionDetailId = receiptItem.intInventoryReceiptItemId
 --OUTER APPLY (
 -- LEFT JOIN (
 -- 	SELECT 
