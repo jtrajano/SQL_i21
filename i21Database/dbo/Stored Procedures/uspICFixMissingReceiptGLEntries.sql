@@ -375,6 +375,8 @@ BEGIN
 			,[dblReportingRate]	
 			,[dblForeignRate]
 			,[strRateType]
+			,[intSourceEntityId]
+			,[intCommodityId]
 	)
 	EXEC @intReturnValue = uspICCreateReceiptGLEntriesForNonStockItems
 		@NonInventoryItemsForPost 
