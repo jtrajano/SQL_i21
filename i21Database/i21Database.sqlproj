@@ -7722,6 +7722,7 @@
     <Build Include="dbo\Views\vyuCTContractBasis.sql" />
     <Build Include="dbo\Tables\tblGROldTransactionMapping.sql" />
     <Build Include="dbo\Stored Procedures\uspICFixICvsGLAmountDisrecpany.sql" />
+    <Build Include="dbo\Stored Procedures\uspICFixMissingReceiptGLEntries.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
