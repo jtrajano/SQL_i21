@@ -2352,6 +2352,17 @@ BEGIN TRY
 			WHERE intRecordId = @intNewSampleId
 				AND intScreenId = @intScreenId
 
+			IF @ysnParent = 1
+			BEGIN
+				SELECT TOP 1 @intMultiCompanyId = intCompanyId
+				FROM tblIPMultiCompany
+				WHERE ysnParent = 1
+			END
+			ELSE
+			BEGIN
+				SELECT @intMultiCompanyId = @intCompanyId
+			END
+
 			INSERT INTO tblQMSampleAcknowledgementStage (
 				intSampleId
 				,strSampleAckNumber
@@ -2396,6 +2407,7 @@ BEGIN TRY
 				,intNewSampleId = @intNewSampleId
 				,strNewSampleNumber = @strNewSampleNumber
 				,strNewSampleTypeName = @strSampleTypeName
+				,strMessage = 'Success'
 			WHERE intSampleStageId = @intSampleStageId
 
 			IF @intTransactionCount = 0
