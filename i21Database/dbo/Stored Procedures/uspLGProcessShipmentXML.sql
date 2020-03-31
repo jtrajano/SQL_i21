@@ -2606,7 +2606,7 @@ BEGIN TRY
 			SELECT 1 AS [intConcurrencyId]
 				,@intNewLoadId
 				,x.[strNotifyOrConsignee]
-				,x.[strType]
+				,Case When x.[strType]='Customer' Then 'Company' Else x.[strType] End
 				,NULL
 				,C.[intCompanySetupID]
 				,B.[intBankId]
@@ -2629,17 +2629,12 @@ BEGIN TRY
 					,strParty NVARCHAR(100) COLLATE Latin1_General_CI_AS
 					,strPartyLocation NVARCHAR(50) COLLATE Latin1_General_CI_AS
 					) x
-			--LEFT JOIN tblEMEntity E ON E.strName = x.strParty
-			--LEFT JOIN tblEMEntityType ET1 ON ET1.intEntityId = E.intEntityId
-			--	AND ET1.strType = x.[strType]
 			LEFT JOIN tblSMCompanySetup C ON C.strCompanyName = x.strParty
-				AND x.strType = 'Company'
+				AND x.strType = 'Customer'
 			LEFT JOIN tblCMBank B ON B.strBankName = x.strParty
 				AND x.strType = 'Bank'
-			--LEFT JOIN tblEMEntityLocation EL ON EL.strLocationName = x.strPartyLocation
-			--	AND EL.intEntityId = E.intEntityId
 			LEFT JOIN tblSMCompanyLocation CL ON CL.strLocationName = x.strPartyLocation
-				AND x.strType = 'Company'
+				AND x.strType = 'Customer'
 			WHERE NOT EXISTS (
 					SELECT *
 					FROM tblLGLoadNotifyParties NP
@@ -2650,7 +2645,7 @@ BEGIN TRY
 			UPDATE NP
 			SET [intConcurrencyId] = NP.[intConcurrencyId] + 1
 				,[strNotifyOrConsignee] = NP.[strNotifyOrConsignee]
-				,[strType] = NP.[strType]
+				,[strType] = Case When x.[strType]='Customer' Then 'Company' Else x.[strType] End
 				--,[intEntityId] = E.[intEntityId]
 				,[intCompanySetupID] = C.[intCompanySetupID]
 				,[intBankId] = B.[intBankId]
@@ -2672,17 +2667,12 @@ BEGIN TRY
 					,strParty NVARCHAR(100) COLLATE Latin1_General_CI_AS
 					,strPartyLocation NVARCHAR(50) COLLATE Latin1_General_CI_AS
 					) x
-			--LEFT JOIN tblEMEntity E ON E.strName = x.strParty
-			--JOIN tblEMEntityType ET1 ON ET1.intEntityId = E.intEntityId
-			--	AND ET1.strType = x.[strType]
 			LEFT JOIN tblSMCompanySetup C ON C.strCompanyName = x.strParty
-				AND x.strType = 'Company'
+				AND x.strType = 'Customer'
 			LEFT JOIN tblCMBank B ON B.strBankName = x.strParty
 				AND x.strType = 'Bank'
-			--LEFT JOIN tblEMEntityLocation EL ON EL.strLocationName = x.strPartyLocation
-			--	AND EL.intEntityId = E.intEntityId
 			LEFT JOIN tblSMCompanyLocation CL ON CL.strLocationName = x.strPartyLocation
-				AND x.strType = 'Company'
+				AND x.strType = 'Customer'
 			JOIN tblLGLoadNotifyParties NP ON NP.intLoadId = @intNewLoadId
 				AND NP.intLoadNotifyPartyRefId = x.intLoadNotifyPartyId
 
