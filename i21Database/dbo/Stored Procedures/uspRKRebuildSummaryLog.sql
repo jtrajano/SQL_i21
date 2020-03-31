@@ -17,6 +17,7 @@ BEGIN TRY
 		
 	-- Truncate table
 	TRUNCATE TABLE tblRKSummaryLog
+	TRUNCATE TABLE tblCTContractBalanceLog
 	--Update ysnAllowRebuildSummaryLog to FALSE
 	UPDATE tblRKCompanyPreference SET ysnAllowRebuildSummaryLog = 0
 	
@@ -1714,8 +1715,7 @@ BEGIN TRY
         LEFT JOIN tblICItemUOM IUM ON IUM.intItemUOMId = TV.intItemUOMIdTo
         LEFT JOIN tblICCommodityUnitMeasure CUM ON CUM.intUnitMeasureId = IUM.intUnitMeasureId AND CUM.intCommodityId = TV.intCommodityId
         WHERE ISNULL(strTicketStatus,'') = 'H'
-
-
+		
         EXEC uspRKLogRiskPosition @ExistingHistory, 1, 0
         PRINT 'End Populate RK Summary Log - On Hold'
         DELETE FROM @ExistingHistory
@@ -1725,6 +1725,7 @@ BEGIN TRY
 		WHERE intRebuildSummaryLogId = @RebuildLogId
 
 	END
+	RETURN;
 	
 END TRY
 
