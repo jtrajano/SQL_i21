@@ -8127,6 +8127,7 @@
     <Build Include="dbo\Stored Procedures\uspSTRecalculateReturnLottery.sql" />
 
   	<Build Include="dbo\Functions\fnGRCalculateStorageUnits.sql" />
+    <Build Include="dbo\Stored Procedures\uspICFixMissingReceiptGLEntries.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
