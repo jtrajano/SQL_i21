@@ -27,18 +27,18 @@ FROM (
 			CASE WHEN pi.intItemId IS NULL THEN 
 				CASE WHEN invoice.strTransactionType = 'Credit Memo' THEN
 					ISNULL(CAST((dbo.fnCalculateQtyBetweenUOM(invoiceDetail.intItemUOMId, 
-						programCategory.intUnitMeasureId, invoiceDetail.dblQtyShipped)) AS NUMERIC(18, 6)) * -1,
+						uom.intItemUOMId, invoiceDetail.dblQtyShipped)) AS NUMERIC(18, 6)) * -1,
 						(invoiceDetail.dblQtyShipped * -1))
-					ELSE ISNULL(CAST((dbo.fnCalculateQtyBetweenUOM(invoiceDetail.intItemUOMId, programCategory.intUnitMeasureId, 
+					ELSE ISNULL(CAST((dbo.fnCalculateQtyBetweenUOM(invoiceDetail.intItemUOMId, uom.intItemUOMId, 
 						invoiceDetail.dblQtyShipped)) AS NUMERIC(18, 6)),
 							invoiceDetail.dblQtyShipped)
 				END
 			ELSE
 				CASE WHEN invoice.strTransactionType = 'Credit Memo' THEN
 					ISNULL(CAST((dbo.fnCalculateQtyBetweenUOM(invoiceDetail.intItemUOMId, 
-						pi.intUnitMeasureId, invoiceDetail.dblQtyShipped)) AS NUMERIC(18, 6)) * -1,
+						itemUOM.intItemUOMId, invoiceDetail.dblQtyShipped)) AS NUMERIC(18, 6)) * -1,
 						(invoiceDetail.dblQtyShipped * -1))
-					ELSE ISNULL(CAST((dbo.fnCalculateQtyBetweenUOM(invoiceDetail.intItemUOMId, pi.intUnitMeasureId, 
+					ELSE ISNULL(CAST((dbo.fnCalculateQtyBetweenUOM(invoiceDetail.intItemUOMId, itemUOM.intItemUOMId, 
 						invoiceDetail.dblQtyShipped)) AS NUMERIC(18, 6)), invoiceDetail.dblQtyShipped)
 				END
 			END		
