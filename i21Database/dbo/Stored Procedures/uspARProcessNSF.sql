@@ -234,7 +234,8 @@ IF EXISTS (SELECT TOP 1 1 FROM @GLEntries)
 	BEGIN
 		EXEC dbo.uspGLBookEntries @GLEntries		= @GLEntries
 								, @ysnPost			= 1
-								, @SkipValidation	= 1
+								, @SkipGLValidation	= 1
+								, @SkipICValidation	= 1
 	END
 
 --UPDATE CASH INVOICE RECORDS
