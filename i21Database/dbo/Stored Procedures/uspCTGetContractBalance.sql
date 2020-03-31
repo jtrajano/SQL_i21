@@ -34,7 +34,7 @@ BEGIN
 	SELECT @blbHeaderLogo = dbo.fnSMGetCompanyLogo('Header')
 
 	-- FOR IMPROVEMENT
-	IF ISNULL(@strCallingApp,'') <> 'DPR'
+	IF ISNULL(@strCallingApp,'') = 'DPR'
 	BEGIN
 		DELETE FROM tblCTContractBalance WHERE dtmEndDate = @dtmEndDate
 		INSERT INTO tblCTContractBalance(dtmEndDate
