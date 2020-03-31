@@ -1623,21 +1623,24 @@ BEGIN TRY
 			END
 		END
 
-		IF @strProcess = 'Voucher Delete'
-		BEGIN
-			DECLARE @billId INT,
-					@billCreatedId INT
+		-- IF @strProcess = 'Voucher Delete'
+		-- BEGIN
+		-- 	DECLARE @billId INT,
+		-- 			@billCreatedId INT
 
-			SELECT @billId = c.intBillId 
-			FROM tblAPBillDetail a
-			INNER JOIN @cbLogCurrent b ON a.intBillDetailId = b.intTransactionReferenceId
-			INNER JOIN tblAPBill c ON a.intBillId = c.intBillId
+		-- 	SELECT @billId = c.intBillId 
+		-- 	FROM tblAPBillDetail a
+		-- 	INNER JOIN @cbLogCurrent b ON a.intBillDetailId = b.intTransactionReferenceId
+		-- 	INNER JOIN tblAPBill c ON a.intBillId = c.intBillId
 
-			IF @billId IS NOT NULL
-			BEGIN
-				EXEC uspAPReverseTransaction @billId, @intUserId, @billCreatedId
-			END			
-		END
+		-- 	IF @billId IS NOT NULL
+		-- 	BEGIN
+		-- 		IF EXISTS(SELECT TOP 1 1 FROM tblRKCompanyPreference WHERE ysnImposeReversalTransaction = 1)
+		-- 		BEGIN
+		-- 			EXEC uspAPReverseTransaction @billId, @intUserId, null, @billCreatedId
+		-- 		END
+		-- 	END			
+		-- END
 		-- ELSE IF @strProcess = 'Invoice Delete'
 		-- BEGIN
 		-- 	DECLARE @invoiceId INT,

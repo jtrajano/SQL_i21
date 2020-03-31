@@ -181,6 +181,7 @@ BEGIN TRY
 	INNER JOIN tblCTPriceFixationDetail PFD ON PF.intPriceFixationId = PFD.intPriceFixationId
 	INNER JOIN tblCTPriceFixationDetailAPAR APAR ON PFD.intPriceFixationDetailId = APAR.intPriceFixationDetailId
 	WHERE PF.intContractDetailId = @intContractDetailId
+	AND ISNULL(APAR.ysnReverse,0) = 0
 
     IF @intContractTypeId = 1 
     BEGIN
@@ -238,6 +239,13 @@ BEGIN TRY
 					JOIN	tblCTPriceFixationTicket	FT	ON	FT.intInventoryReceiptId		=	RI.intInventoryReceiptId 
 															AND	FT.intPricingId					=	@intPriceFixationDetailId
 					WHERE	RI.intLineNo	=   @intContractDetailId
+					AND		IR.strDataSource <> 'Reverse'
+					AND 	IR.intInventoryReceiptId NOT IN 
+							(
+								SELECT intSourceInventoryReceiptId
+								FROM tblICInventoryReceipt 
+								WHERE strDataSource = 'Reverse'
+							)
 					ORDER BY dblTotalIVForSHQty DESC
 
 					SET @ysnTicketBased = 1
@@ -267,6 +275,13 @@ BEGIN TRY
 					JOIN    tblCTContractDetail			CD  ON  CD.intContractDetailId			=   RI.intLineNo
 					WHERE	RI.intLineNo	=  @intContractDetailId 
 						AND (@ysnLoad = 0 or RI.dblBillQty <> dblOpenReceive)
+							AND	IR.strDataSource <> 'Reverse'
+							AND IR.intInventoryReceiptId NOT IN 
+							(
+								SELECT intSourceInventoryReceiptId
+								FROM tblICInventoryReceipt 
+								WHERE strDataSource = 'Reverse'
+							)
 				END
 				
 				SELECT	@dblRemainingQty = 0
@@ -294,6 +309,7 @@ BEGIN TRY
 					FROM	tblCTPriceFixationDetailAPAR	AA
 					JOIN	tblAPBillDetail					AD	ON	AD.intBillDetailId	=	AA.intBillDetailId
 					WHERE	intPriceFixationDetailId = @intPriceFixationDetailId
+					AND		ISNULL(AA.ysnReverse,0) = 0
 
 					SELECT	@dblTotalIVForPFQty = ISNULL(@dblTotalIVForPFQty,0)
 
