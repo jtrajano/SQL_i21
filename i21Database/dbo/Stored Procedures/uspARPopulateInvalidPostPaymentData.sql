@@ -71,6 +71,27 @@ BEGIN
         ,[intTransactionDetailId]
         ,[strBatchId]
         ,[strError])
+	SELECT
+         [intTransactionId]         = P.[intTransactionId]
+        ,[strTransactionId]         = P.[strTransactionId]
+        ,[strTransactionType]       = @TransType
+        ,[intTransactionDetailId]   = P.[intTransactionDetailId]
+        ,[strBatchId]               = P.[strBatchId]
+        ,[strError]                 = 'Missing AR Account Category.'
+    FROM
+	 #ARPostPaymentHeader P
+	INNER JOIN
+    vyuGLAccountDetail GLAD
+        ON P.[intUndepositedFundsId] = GLAD.[intAccountId]
+	WHERE GLAD.[strAccountCategory] IS NULL
+
+    INSERT INTO #ARInvalidPaymentData
+        ([intTransactionId]
+        ,[strTransactionId]
+        ,[strTransactionType]
+        ,[intTransactionDetailId]
+        ,[strBatchId]
+        ,[strError])
 	--Payment without payment on detail (get all detail that has 0 payment)
 	SELECT
          [intTransactionId]         = P.[intTransactionId]
