@@ -8601,6 +8601,8 @@
     <Build Include="dbo\Stored Procedures\uspGRReverseTransferStorage.sql" />
     <None Include="Scripts\Post-Deployment\GR\PriorPeriodTransactions.sql" />
     <Build Include="dbo\Tables\tblRKM2MUnrealized.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTPriceFixationDetailReverse.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTCreateDebitMemo.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
