@@ -1,6 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuSTConsolidatedCheckoutATMFundReport]
 	AS 
-SELECT TOP 100 PERCENT ST.intStoreId
+SELECT ST.intStoreId
 	, ST.intStoreNo
 	, ST.strRegion
 	, ST.strDistrict
