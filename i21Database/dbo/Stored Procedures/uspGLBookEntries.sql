@@ -1,7 +1,9 @@
 ﻿CREATE PROCEDURE uspGLBookEntries
 	@GLEntries RecapTableType READONLY
 	,@ysnPost AS BIT 
-	,@SkipValidation BIT = 0
+	,@SkipGLValidation BIT = 0
+	,@SkipICValidation BIT = 0
+	
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -11,11 +13,16 @@ SET ANSI_WARNINGS OFF
 --=====================================================================================================================================
 -- 	VALIDATION
 ------------------------------------------------------------------------------------------------------------------------------------
-IF (ISNULL(@SkipValidation,0)  = 0)
-BEGIN 
-	DECLARE @errorCode INT
+DECLARE @errorCode INT
+
+IF (ISNULL(@SkipGLValidation,0)  = 0)
+BEGIN
 	EXEC  @errorCode = dbo.uspGLValidateGLEntries @GLEntries, @ysnPost
 	IF @errorCode > 0	RETURN @errorCode
+END
+
+IF (ISNULL(@SkipICValidation,0)  = 0)
+BEGIN 
 	
 	EXEC  @errorCode = dbo.uspICValidateICAmountVsGLAmount 
 			@strTransactionId = NULL 
@@ -28,7 +35,8 @@ BEGIN
 
 	IF @errorCode > 0	RETURN @errorCode
 END 
-;
+
+
 --=====================================================================================================================================
 -- 	BOOK THE G/L ENTRIES TO THE tblGLDetail table.
 --------------------------------------------------------------------------------------------------------------------------------------

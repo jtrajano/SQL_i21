@@ -884,7 +884,8 @@ IF(OBJECT_ID('tempdb..#ARPaymentGLEntries') IS NOT NULL)
     EXEC dbo.uspGLBookEntries
              @GLEntries         = @GLEntries
             ,@ysnPost           = @Post
-            ,@SkipValidation	= 1
+            ,@SkipGLValidation	= 1
+			,@SkipICValidation	= 1
 
     EXEC [dbo].[uspARPostPaymentIntegration]
          @Post					= @Post

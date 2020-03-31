@@ -121,7 +121,9 @@ FROM
 EXEC dbo.uspGLBookEntries
          @GLEntries         = @GLPost
         ,@ysnPost           = @Post
-        ,@SkipValidation	= 1
+        ,@SkipGLValidation	= 1
+        ,@SkipICValidation	= 1
+		
 
 IF @Post = 0
     BEGIN
