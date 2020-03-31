@@ -11,19 +11,15 @@ SELECT DISTINCT
 	,dblSpotUnits				= SS.dblSpotUnits
 	,dblFuturesPrice			= SS.dblFuturesPrice
 	,dblFuturesBasis			= SS.dblFuturesBasis
-	,dblCashPrice				= case when SS.intParentSettleStorageId is null then
-										isnull(computed_header.dblCashPrice, 0) / NULLIF(isnull(SS.dblSelectedUnits, 1),0)
-									else
+	,dblCashPrice				= CASE 
+									WHEN SS.intParentSettleStorageId IS NULL AND ISNULL(SS.dblSelectedUnits,0) = 0 THEN 0
+									WHEN SS.intParentSettleStorageId IS NULL AND ISNULL(SS.dblSelectedUnits,0) > 0 THEN isnull(computed_header.dblCashPrice, 0) / NULLIF(isnull(SS.dblSelectedUnits, 1),0)
+									ELSE
 										CASE 
 											WHEN ISNULL(_dblCashPrice.dblCashPrice,0) > 0 THEN _dblCashPrice.dblCashPrice
-											ELSE
-												SS.dblCashPrice
-												-- CASE 
-												-- 	WHEN SS.intParentSettleStorageId IS NOT NULL THEN SS.dblCashPrice
-												-- 	ELSE 0
-												-- END
+											ELSE SS.dblCashPrice
 										END
-									end
+								END
 	,strStorageAdjustment		= SS.strStorageAdjustment
 	,dtmCalculateStorageThrough = SS.dtmCalculateStorageThrough
 	,dblAdjustPerUnit			= SS.dblAdjustPerUnit
@@ -164,24 +160,24 @@ OUTER APPLY (
 	WHERE CD.intPricingTypeId <> 2
 ) AS _dblCashPrice
 OUTER APPLY (
-	select sum(_son.dblCashPrice) as dblCashPrice from (
+	SELECT dblCashPrice = SUM(_son.dblCashPrice)
+	FROM (
 		SELECT 
-			SUM(CD.dblCashPrice * SC.dblUnits) AS dblCashPrice
+			dblCashPrice = SUM(CD.dblCashPrice * SC.dblUnits)
 		FROM tblGRSettleContract SC
-			JOIN tblGRSettleStorage SSS
-				on SC.intSettleStorageId = SSS.intSettleStorageId 
-					and SSS.intParentSettleStorageId = SS.intSettleStorageId
-			JOIN tblCTContractDetail CD
-				ON CD.intContractDetailId = SC.intContractDetailId
+		JOIN tblGRSettleStorage SSS
+			ON SC.intSettleStorageId = SSS.intSettleStorageId 
+				AND SSS.intParentSettleStorageId = SS.intSettleStorageId
+		JOIN tblCTContractDetail CD
+			ON CD.intContractDetailId = SC.intContractDetailId
 		WHERE CD.intPricingTypeId <> 2
-			and SS.intParentSettleStorageId is null
-		
-		Union all
-		select SUM(TSS.dblSpotUnits * TSS.dblCashPrice) dblCashPrice 
-			from tblGRSettleStorageTicket T
-				join tblGRSettleStorage TSS
-					on T.intSettleStorageId = TSS.intSettleStorageId
-						and TSS.intParentSettleStorageId = SS.intSettleStorageId
-				where SS.intParentSettleStorageId is null 
+			AND SS.intParentSettleStorageId IS NULL		
+		UNION ALL
+		SELECT dblCashPrice  = SUM(TSS.dblSpotUnits * TSS.dblCashPrice)
+		FROM tblGRSettleStorageTicket T
+		JOIN tblGRSettleStorage TSS
+			ON T.intSettleStorageId = TSS.intSettleStorageId
+				AND TSS.intParentSettleStorageId = SS.intSettleStorageId
+		WHERE SS.intParentSettleStorageId IS NULL
 	) _son
 ) AS computed_header

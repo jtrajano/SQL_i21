@@ -830,7 +830,7 @@ BEGIN TRY
 				FROM tblGRSettledItemsToStorage 
 				WHERE intTransactionId = @_intSettleStorageId
 					AND ysnIsStorage = 1
-
+					--select '@ItemsToStorage',* from @ItemsToStorage
 				 EXEC @intReturnValue = dbo.uspICPostStorage
 					 @ItemsToStorage
 					,@strBatchId
@@ -883,7 +883,7 @@ BEGIN TRY
 					FROM tblGRSettledItemsToStorage 
 					WHERE intTransactionId = @_intSettleStorageId
 						AND ysnIsStorage = 0
-						
+						--select '@ItemsToPost',* from @ItemsToPost
 					DELETE FROM @DummyGLEntries
 					INSERT INTO @DummyGLEntries 
 					(
@@ -928,7 +928,7 @@ BEGIN TRY
 						,'AP Clearing'
 						,@UserId
 
-						--select '0',* from @DummyGLEntries
+						--select '@DummyGLEntries',* from @DummyGLEntries
 	
 					IF @intReturnValue < 0 GOTO SettleStorage_Exit;
 
@@ -1012,17 +1012,30 @@ BEGIN TRY
 					) S
 					WHERE intTransactionId = @_intSettleStorageId
 						AND strTransactionForm = 'Storage Settlement'
-						--select '1',* from @GLEntries
+						--select '@GLEntries1',* from @GLEntries
+					IF EXISTS (SELECT TOP 1 1 FROM @GLEntries) 
+					BEGIN 
+						UPDATE @GLEntries 
+						SET dblDebit = dblCredit, dblDebitUnit = dblCreditUnit
+							,dblCredit = dblDebit, dblCreditUnit = dblDebitUnit
+						--WHERE strComments IS NULL
+					END
 					--GL entries for STOCK RETURNS
 					--ITEMS
 					IF EXISTS(SELECT TOP 1 1 FROM @DummyGLEntries)
 					BEGIN
 						DECLARE @dblCostDiff AS NUMERIC(38, 20)
 						DECLARE @strItemNo NVARCHAR(50)
+						DECLARE @dblItemCost AS NUMERIC(38, 20)
+						DECLARE @dblAvgCost AS NUMERIC(38, 20)
 
-						SELECT @dblCostDiff = ABS(ITP.dblCost - AvgCost.AverageCost)
+						SELECT @dblItemCost = dblCost FROM @ItemsToPost
+
+						SELECT @dblAvgCost = AvgCost.AverageCost
 						FROM @ItemsToPost ITP
 						CROSS APPLY [dbo].[fnGetItemAverageCostAsTable](ITP.intItemId,ITP.intItemLocationId,ITP.intItemUOMId) AvgCost
+
+						SELECT @dblCostDiff = ABS(@dblItemCost - @dblAvgCost)
 
 						SELECT @strItemNo = C.strItemNo FROM @ItemsToPost I INNER JOIN tblICItem C ON C.intItemId = I.intItemId					
 
@@ -1066,12 +1079,22 @@ BEGIN TRY
 							GL.[dtmDate]
 							,@strBatchId
 							,GL.[intAccountId]
-							,[dblDebit]			= CASE WHEN dblDebit <> 0 THEN dblDebitUnit * @dblCostDiff ELSE 0 END
-							,[dblCredit]		= CASE WHEN dblCredit <> 0 THEN dblCreditUnit * @dblCostDiff ELSE 0 END
-							,[dblDebitUnit]
-							,[dblCreditUnit]
+							,[dblDebit]			= CASE 
+													WHEN @dblItemCost > @dblAvgCost THEN 
+														CASE WHEN dblCredit <> 0 THEN dblCreditUnit * @dblCostDiff ELSE 0 END
+													ELSE
+														CASE WHEN dblDebit <> 0 THEN dblDebitUnit * @dblCostDiff ELSE 0 END
+												END
+							,[dblCredit]		= CASE 
+													WHEN @dblItemCost > @dblAvgCost THEN 
+														CASE WHEN dblDebit <> 0 THEN dblDebitUnit * @dblCostDiff ELSE 0 END														
+													ELSE
+														CASE WHEN dblCredit <> 0 THEN dblCreditUnit * @dblCostDiff ELSE 0 END
+												END
+							,[dblDebitUnit]		= CASE WHEN @dblItemCost > @dblAvgCost THEN dblCreditUnit ELSE dblDebitUnit END
+							,[dblCreditUnit]	= CASE WHEN @dblItemCost > @dblAvgCost THEN dblDebitUnit ELSE dblCreditUnit END
 							,[strDescription]	= GLA.strDescription + ' ' + dbo.[fnICDescribeSoldStock](@strItemNo, (CASE WHEN dblDebitUnit = 0 THEN dblCreditUnit ELSE dblDebitUnit END), @dblCostDiff)
-							,[strCode]
+							,[strCode]			= 'STR'
 							,[strReference]
 							,GL.[intCurrencyId]
 							,GL.[dblExchangeRate]
@@ -1086,7 +1109,7 @@ BEGIN TRY
 							,[intTransactionId]	= @intNewSettleStorageId
 							,[strTransactionType]
 							,[strTransactionForm]
-							,[strModuleName]
+							,[strModuleName]	= 'Grain'
 							,GL.[intConcurrencyId]
 							,[dblDebitForeign]	
 							,[dblDebitReport]	
@@ -1100,62 +1123,10 @@ BEGIN TRY
 						INNER JOIN tblGLAccount GLA
 							ON GLA.intAccountId = GL.intAccountId
 
-						--select '2',* from @GLEntries
-					END					
-
-					--CHARGES/DISCOUNTS
-					INSERT INTO @GLEntries
-					(	 
-						[dtmDate] 
-						,[strBatchId]
-						,[intAccountId]
-						,[dblDebit]
-						,[dblCredit]
-						,[dblDebitUnit]
-						,[dblCreditUnit]
-						,[strDescription]
-						,[strCode]
-						,[strReference]
-						,[intCurrencyId]
-						,[dblExchangeRate]
-						,[dtmDateEntered]
-						,[dtmTransactionDate]
-						,[strJournalLineDescription]
-						,[intJournalLineNo]
-						,[ysnIsUnposted]
-						,[intUserId]
-						,[intEntityId]
-						,[strTransactionId]
-						,[intTransactionId]
-						,[strTransactionType]
-						,[strTransactionForm]
-						,[strModuleName]
-						,[intConcurrencyId]
-						,[dblDebitForeign]	
-						,[dblDebitReport]	
-						,[dblCreditForeign]	
-						,[dblCreditReport]	
-						,[dblReportingRate]	
-						,[dblForeignRate]
-						,[strRateType]
-					)
-					EXEC uspGRCreateGLEntries 
-						'Storage Settlement'
-						,'OtherCharges'
-						,@intNewSettleStorageId
-						,@strBatchId
-						,@UserId
-						,1
-												
-					IF EXISTS (SELECT TOP 1 1 FROM @GLEntries) 
-					BEGIN 
-						UPDATE @GLEntries 
-						SET dblDebit = dblCredit, dblDebitUnit = dblCreditUnit
-							,dblCredit = dblDebit, dblCreditUnit = dblDebitUnit
-						--WHERE strComments IS NULL
-					END
+						--select '@GLEntries2',* from @GLEntries
+					END											
 				END
-				
+				--SELECT '@GLEntries3',* FROM @GLEntries
 				IF EXISTS (SELECT TOP 1 1 FROM @GLEntries) 
 				BEGIN 
 					EXEC dbo.uspGLBookEntries @GLEntries, 0 
@@ -1244,14 +1215,14 @@ BEGIN TRY
 			FROM tblGRSettleStorage SS
 			OUTER APPLY (
 				SELECT 
-					dblAdjustPerUnit	= SUM(ISNULL(dblAdjustPerUnit,0))
-					,dblDiscountsDue	= SUM(ISNULL(dblDiscountsDue,0))
-					,dblNetSettlement	= SUM(ISNULL(dblNetSettlement,0))
-					,dblSelectedUnits	= SUM(ISNULL(dblSelectedUnits,0))
-					,dblSettleUnits		= SUM(ISNULL(dblSettleUnits,0))
-					,dblSpotUnits		= SUM(ISNULL(dblSpotUnits,0))
-					,dblStorageDue		= SUM(ISNULL(dblStorageDue,0))
-					,dblUnpaidUnits		= SUM(ISNULL(dblUnpaidUnits,0))
+					dblAdjustPerUnit	= ISNULL(SUM(ISNULL(dblAdjustPerUnit,0)),0)
+					,dblDiscountsDue	= ISNULL(SUM(ISNULL(dblDiscountsDue,0)),0)
+					,dblNetSettlement	= ISNULL(SUM(ISNULL(dblNetSettlement,0)),0)
+					,dblSelectedUnits	= ISNULL(SUM(ISNULL(dblSelectedUnits,0)),0)
+					,dblSettleUnits		= ISNULL(SUM(ISNULL(dblSettleUnits,0)),0)
+					,dblSpotUnits		= ISNULL(SUM(ISNULL(dblSpotUnits,0)),0)
+					,dblStorageDue		= ISNULL(SUM(ISNULL(dblStorageDue,0)),0)
+					,dblUnpaidUnits		= ISNULL(SUM(ISNULL(dblUnpaidUnits,0)),0)
 				FROM tblGRSettleStorage
 				WHERE intParentSettleStorageId = @intParentSettleStorageId
 					AND ysnReversed = 0
