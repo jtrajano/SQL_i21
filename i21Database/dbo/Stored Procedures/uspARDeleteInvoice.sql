@@ -15,6 +15,11 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 BEGIN TRY
+	-- Summary Log Variables
+	DECLARE @intContractHeaderId INT,
+		@intContractDetailId INT,
+		@contractDetails AS [dbo].[ContractDetailTable]
+
 	DECLARE @UserEntityID INT
 	SET @UserEntityID = ISNULL((SELECT [intEntityId] FROM tblSMUserSecurity WHERE [intEntityId] = @UserId),@UserId) 
 		
@@ -49,9 +54,6 @@ BEGIN TRY
 			WHERE intInvoiceDetailId = @InvoiceDetailId		
 
 			-- Log summary	
-			DECLARE @intContractHeaderId INT,
-					@intContractDetailId INT,
-					@contractDetails AS [dbo].[ContractDetailTable]
 			SELECT @intContractHeaderId = intContractHeaderId, @intContractDetailId = intContractDetailId
 			FROM tblARInvoiceDetail
 			WHERE intInvoiceDetailId = @InvoiceDetailId
@@ -134,9 +136,22 @@ BEGIN TRY
 			WHERE intPrepaymentId = @InvoiceId
 			  AND ysnApplied = 0
 
+			-- Log summary	
+			SELECT @intContractHeaderId = intContractHeaderId, @intContractDetailId = intContractDetailId
+			FROM tblARInvoiceDetail
+			WHERE intInvoiceId = @InvoiceId
+
+			EXEC uspCTLogSummary @intContractHeaderId 	= 	@intContractHeaderId,
+					@intContractDetailId 	= 	@intContractDetailId,
+					@strSource			 	= 	'Pricing',
+					@strProcess			 	= 	'Invoice Delete',
+					@contractDetail 		= 	@contractDetails,
+					@intUserId				= 	@UserId
+
 			DELETE FROM tblARInvoiceDetail 
 			WHERE intInvoiceId = @InvoiceId
 
+			
 			DELETE FROM tblARInvoice 
 			WHERE intInvoiceId = @InvoiceId
 

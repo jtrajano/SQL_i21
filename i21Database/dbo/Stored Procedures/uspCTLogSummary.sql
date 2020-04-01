@@ -18,7 +18,7 @@ BEGIN TRY
 			@ysnMatched				BIT,
 			@ysnDirect				BIT = 0
 
-	-- SELECT @strSource, @strProcess
+	--SELECT @strSource, @strProcess
 
 	IF @strProcess = 'Scheduled Quantity'
 	BEGIN
@@ -1575,7 +1575,7 @@ BEGIN TRY
 			END
 			ELSE IF @strProcess IN ('Voucher Delete', 'Invoice Delete')
 			BEGIN
-				UPDATE @cbLogCurrent SET dblQty = @dblPricedDel - dblQty 
+				--UPDATE @cbLogCurrent SET dblQty = @dblPricedDel - dblQty 
 				EXEC uspCTLogContractBalance @cbLogCurrent, 1
 			END
 			ELSE IF @strProcess = 'Reverse'
