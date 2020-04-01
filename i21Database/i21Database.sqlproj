@@ -8612,6 +8612,7 @@
     <Build Include="dbo\Stored Procedures\uspCTPriceFixationDetailReverse.sql" />
     <Build Include="dbo\Stored Procedures\uspCTCreateDebitMemo.sql" />
     <Build Include="dbo\Stored Procedures\uspICFixMissingReceiptGLEntries.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTReportContractStrauss.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
