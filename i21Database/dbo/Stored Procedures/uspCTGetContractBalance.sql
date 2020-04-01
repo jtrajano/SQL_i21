@@ -248,63 +248,61 @@ BEGIN TRY
 
 	INSERT INTO @Shipment
 	  (
-	    intContractTypeId
-	   ,intContractHeaderId	
-	   ,intContractDetailId	
-	   ,dtmDate	
-	   ,dtmEndDate			
-	   ,dblQuantity
-	   ,dblAllocatedQuantity
-	   ,intNoOfLoad
-	   ,intSourceId
-	   ,strType
+		intContractTypeId
+		,intContractHeaderId	
+		,intContractDetailId	
+		,dtmDate	
+		,dtmEndDate			
+		,dblQuantity
+		,dblAllocatedQuantity
+		,intNoOfLoad
+		,intSourceId
+		,strType
 	  )
-	   SELECT 
-	   CH.intContractTypeId 
-	  ,CH.intContractHeaderId
-	  ,CD.intContractDetailId
-	  ,InvTran.dtmDate	  
-	  ,@dtmEndDate AS dtmEndDate
-	  ,dblQuantity = ISNULL(dbo.fnMFConvertCostToTargetItemUOM(CD.intItemUOMId,ShipmentItem.intPriceUOMId,
-					 CASE
-			 			WHEN ISNULL(INV.ysnPosted, 0) = 1 AND ShipmentItem.dblDestinationNet IS NOT NULL
-							THEN MAX(ShipmentItem.dblDestinationNet * 1)
-			 			ELSE SUM(InvTran.dblQty * - 1)
-					 END)
-					 ,0)
-	  ,0
-	  ,COUNT(DISTINCT Shipment.intInventoryShipmentId)
-	  ,Shipment.intInventoryShipmentId	  
-	  ,'Inventory Shipment'
-	   FROM tblICInventoryTransaction InvTran
-	   JOIN tblICInventoryShipment Shipment ON Shipment.intInventoryShipmentId = InvTran.intTransactionId AND Shipment.intOrderType = 1
-	   JOIN tblICInventoryShipmentItem ShipmentItem ON ShipmentItem.intInventoryShipmentId = InvTran.intTransactionId
-	   AND Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
-	   AND ShipmentItem.intInventoryShipmentItemId = InvTran.intTransactionDetailId
-	   JOIN tblCTContractHeader CH ON CH.intContractHeaderId = ShipmentItem.intOrderId
-	   JOIN tblCTContractDetail CD ON CD.intContractDetailId = ShipmentItem.intLineNo 
-	   AND CD.intContractHeaderId = CH.intContractHeaderId
-	   LEFT JOIN 
-	   (
-			SELECT DISTINCT ID.intInventoryShipmentItemId, IV.ysnPosted
-			FROM tblARInvoice IV
-			INNER JOIN tblARInvoiceDetail ID ON IV.intInvoiceId = ID.intInvoiceId
-	   ) INV ON INV.intInventoryShipmentItemId = ShipmentItem.intInventoryShipmentItemId	  
-	   WHERE InvTran.strTransactionForm = 'Inventory Shipment'	   
-	   	AND InvTran.ysnIsUnposted = 0
-	   	AND dbo.fnRemoveTimeOnDate(InvTran.dtmDate) <= CASE WHEN @dtmEndDate IS NOT NULL   THEN @dtmEndDate   ELSE dbo.fnRemoveTimeOnDate(InvTran.dtmDate) END
-	   	AND intContractTypeId = 2
-	   	AND InvTran.intInTransitSourceLocationId IS NULL
-	   GROUP BY 
-	     CH.intContractTypeId
-		,CH.intContractHeaderId
-	   	,CD.intContractDetailId
-		,InvTran.dtmDate
+	  SELECT
+	   CH.intContractTypeId
+	   ,CH.intContractHeaderId
+	   ,CD.intContractDetailId
+	   ,Shipment.dtmShipDate
+	   ,@dtmEndDate AS dtmEndDate
+	   ,dblQuantity = ISNULL(dbo.fnMFConvertCostToTargetItemUOM(CD.intItemUOMId,ShipmentItem.intPriceUOMId,
+                    CASE
+                     WHEN ISNULL(INV.ysnPosted, 0) = 1 AND ShipmentItem.dblDestinationNet IS NOT NULL
+                        THEN MAX(ShipmentItem.dblDestinationNet * 1)
+                     ELSE SUM(ShipmentItem.dblQuantity)
+                    END)
+                    ,0)
+		,0
+		,COUNT(DISTINCT Shipment.intInventoryShipmentId)
 		,Shipment.intInventoryShipmentId
-		,INV.ysnPosted
-		,ShipmentItem.dblDestinationNet
-		,CD.intItemUOMId
-		,ShipmentItem.intPriceUOMId
+		,'Inventory Shipment'
+		FROM
+		--tblICInventoryTransaction InvTran
+		tblICInventoryShipment Shipment
+		JOIN tblICInventoryShipmentItem ShipmentItem 
+			ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
+		JOIN tblCTContractHeader CH ON CH.intContractHeaderId = ShipmentItem.intOrderId
+		JOIN tblCTContractDetail CD ON CD.intContractDetailId = ShipmentItem.intLineNo
+		AND CD.intContractHeaderId = CH.intContractHeaderId
+		LEFT JOIN 
+		(
+			SELECT DISTINCT ID.intInventoryShipmentItemId, IV.ysnPosted
+			FROM tblARInvoice IV INNER JOIN tblARInvoiceDetail ID ON IV.intInvoiceId = ID.intInvoiceId
+		) INV ON INV.intInventoryShipmentItemId = ShipmentItem.intInventoryShipmentItemId      
+		WHERE Shipment.intOrderType = 1
+		AND Shipment.ysnPosted = 1
+		AND dbo.fnRemoveTimeOnDate(Shipment.dtmShipDate) <= CASE WHEN @dtmEndDate IS NOT NULL THEN @dtmEndDate  ELSE dbo.fnRemoveTimeOnDate(Shipment.dtmShipDate) END
+		AND intContractTypeId = 2
+		GROUP BY 
+		  CH.intContractTypeId
+		  ,CH.intContractHeaderId
+		  ,CD.intContractDetailId
+		  ,Shipment.dtmShipDate
+		  ,Shipment.intInventoryShipmentId
+		  ,INV.ysnPosted
+		  ,ShipmentItem.dblDestinationNet
+		  ,CD.intItemUOMId
+		  ,ShipmentItem.intPriceUOMId
 		
 	INSERT INTO @Shipment
 	  (
@@ -993,7 +991,8 @@ BEGIN TRY
 								WHEN ISNULL(CD.intNoOfLoad, 0) = 0 THEN ISNULL(PF.dblQuantity,0) - ISNULL(PF.dblShippedQty,0) 
 								ELSE (PF.intNoOfLoad - 
 										(CASE 
-											WHEN ISNULL(PF.dblShippedQty, 0) > CD.dblQuantityPerLoad THEN FLOOR(ISNULL(PF.dblShippedQty, 0) / CD.dblQuantityPerLoad)
+											WHEN ISNULL(PF.dblShippedQty, 0) > CD.dblQuantityPerLoad AND PF.intShippedNoOfLoad = 1
+												THEN FLOOR(ISNULL(PF.dblShippedQty, 0) / CD.dblQuantityPerLoad)
 											ELSE CEILING(ISNULL(PF.dblShippedQty, 0) / CD.dblQuantityPerLoad)
 										END)) * CD.dblQuantityPerLoad
 							  END
@@ -1006,7 +1005,8 @@ BEGIN TRY
 									WHEN ISNULL(CD.intNoOfLoad, 0) = 0 THEN ISNULL(PF.dblQuantity,0) - ISNULL(PF.dblShippedQty,0) 
 									ELSE (PF.intNoOfLoad - 
 											(CASE 
-												WHEN ISNULL(PF.dblShippedQty, 0) > CD.dblQuantityPerLoad THEN FLOOR(ISNULL(PF.dblShippedQty, 0) / CD.dblQuantityPerLoad)
+												WHEN ISNULL(PF.dblShippedQty, 0) > CD.dblQuantityPerLoad AND PF.intShippedNoOfLoad = 1
+													THEN FLOOR(ISNULL(PF.dblShippedQty, 0) / CD.dblQuantityPerLoad)
 												ELSE CEILING(ISNULL(PF.dblShippedQty, 0) / CD.dblQuantityPerLoad)
 											END)) * CD.dblQuantityPerLoad
 								  END)), 0)
@@ -1015,7 +1015,8 @@ BEGIN TRY
 								WHEN ISNULL(CD.intNoOfLoad, 0) = 0 THEN ISNULL(PF.dblQuantity,0) - ISNULL(PF.dblShippedQty,0) 
 								ELSE (PF.intNoOfLoad - 
 										(CASE 
-											WHEN ISNULL(PF.dblShippedQty, 0) > CD.dblQuantityPerLoad THEN FLOOR(ISNULL(PF.dblShippedQty, 0) / CD.dblQuantityPerLoad)
+											WHEN ISNULL(PF.dblShippedQty, 0) > CD.dblQuantityPerLoad AND PF.intShippedNoOfLoad = 1
+												THEN FLOOR(ISNULL(PF.dblShippedQty, 0) / CD.dblQuantityPerLoad)
 											ELSE CEILING(ISNULL(PF.dblShippedQty, 0) / CD.dblQuantityPerLoad)
 										END)) * CD.dblQuantityPerLoad
 							  END
@@ -1032,7 +1033,8 @@ BEGIN TRY
 										WHEN ISNULL(CD.intNoOfLoad, 0) = 0 THEN ISNULL(PF.dblQuantity,0) - ISNULL(PF.dblShippedQty,0) 
 										ELSE (PF.intNoOfLoad - 
 												(CASE 
-													WHEN ISNULL(PF.dblShippedQty, 0) > CD.dblQuantityPerLoad THEN FLOOR(ISNULL(PF.dblShippedQty, 0) / CD.dblQuantityPerLoad)
+													WHEN ISNULL(PF.dblShippedQty, 0) > CD.dblQuantityPerLoad AND PF.intShippedNoOfLoad = 1
+														THEN FLOOR(ISNULL(PF.dblShippedQty, 0) / CD.dblQuantityPerLoad)
 													ELSE CEILING(ISNULL(PF.dblShippedQty, 0) / CD.dblQuantityPerLoad)
 												END)) * CD.dblQuantityPerLoad
 									END)), 0)
