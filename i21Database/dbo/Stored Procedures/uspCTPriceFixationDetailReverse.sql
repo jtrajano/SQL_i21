@@ -49,11 +49,12 @@ BEGIN TRY
 			DECLARE	@billCreatedId INT		
 			EXEC uspAPReverseTransaction @Id, @intUserId, null, @billCreatedId OUTPUT
 		END
-		ELSE
-		BEGIN
+		
+		--ELSE
+		--BEGIN
 			-- Else create a debit memo for line items
 			--EXEC uspCTCreateDebitMemo
-		END
+		--END
 
 		SELECT DISTINCT @Id = MIN(Id) FROM #ItemBill WHERE Id > @Id
 	END
