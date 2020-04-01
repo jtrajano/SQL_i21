@@ -8159,6 +8159,8 @@
     <Build Include="dbo\Tables\tblIPAcknowledgementStage.sql" />
     <Build Include="dbo\Tables\tblIPAcknowledgementError.sql" />
     <Build Include="dbo\Tables\tblIPAcknowledgementArchive.sql" />
+    <Build Include="dbo\Stored Procedures\uspICFixReceiptAPClearingDiscrepancy.sql" />
+    <Build Include="dbo\Stored Procedures\uspICFixICvsGLAmountDisrecpany.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
