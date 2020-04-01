@@ -49,8 +49,8 @@ SELECT
 	CONI.strContractItemNo,
 	CONI.strContractItemName,
 	OG.strCountry AS strOrigin,
-	BILL.strBillId,
-	BILL.intBillId,
+	strBillId = CASE WHEN (WC.intPurchaseSale = 2) THEN INVC.strInvoiceNumber ELSE BILL.strBillId END,
+	intBillId = CASE WHEN (WC.intPurchaseSale = 2) THEN INVC.intInvoiceId ELSE BILL.intBillId END,
 	WC.intBookId, 
 	BO.strBook,
 	WC.intSubBookId, 
@@ -74,31 +74,7 @@ JOIN tblLGWeightClaimDetail WD ON WD.intWeightClaimId = WC.intWeightClaimId
 JOIN tblLGLoad L ON L.intLoadId = WC.intLoadId
 JOIN tblICUnitMeasure WUOM ON WUOM.intUnitMeasureId = L.intWeightUnitMeasureId
 JOIN tblCTContractDetail CD ON CD.intContractDetailId = WD.intContractDetailId
-JOIN (SELECT
-			intContractDetailId = CD.intContractDetailId
-			,intSeqPriceUOMId = ISNULL(CD.intAdjItemUOMId,CD.intPriceItemUOMId)
-			,strSeqPriceUOM = ISNULL(FM.strUnitMeasure, UM.strUnitMeasure)
-			,intSeqCurrencyId = COALESCE(CYXT.intToCurrencyId, CYXF.intFromCurrencyId, CY.intCurrencyID)
-			,strSeqCurrency = COALESCE(CYT.strCurrency, CYF.strCurrency, CY.strCurrency)
-			,ysnSeqSubCurrency = COALESCE(CYT.ysnSubCurrency, CYF.ysnSubCurrency, CY.ysnSubCurrency)
-			,dblSeqPrice = CD.dblCashPrice / ISNULL(CY.intCent, 1) * (CASE WHEN (CYXT.intToCurrencyId IS NOT NULL) THEN 1 / ISNULL(CD.dblRate, 1) ELSE ISNULL(CD.dblRate, 1) END)
-		FROM tblCTContractDetail CD
-			LEFT JOIN tblICItemUOM IU ON IU.intItemUOMId = CD.intPriceItemUOMId
-			LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
-			LEFT JOIN tblICItemUOM FU ON ISNULL(CD.ysnUseFXPrice,0) = 1 AND CD.intCurrencyExchangeRateId IS NOT NULL AND CD.dblRate IS NOT NULL AND CD.intFXPriceUOMId IS NOT NULL AND FU.intItemUOMId = CD.intFXPriceUOMId
-			LEFT JOIN tblICUnitMeasure FM ON FM.intUnitMeasureId = FU.intUnitMeasureId
-			LEFT JOIN tblSMCurrency CY ON CY.intCurrencyID = CD.intCurrencyId
-			LEFT JOIN tblSMCurrency MCY ON MCY.intCurrencyID = CY.intMainCurrencyId
-			LEFT JOIN tblSMCurrencyExchangeRate CYXF 
-				ON ISNULL(CD.ysnUseFXPrice,0) = 1 AND CD.intCurrencyExchangeRateId IS NOT NULL AND CD.dblRate IS NOT NULL AND CD.intFXPriceUOMId IS NOT NULL
-				AND CYXF.intCurrencyExchangeRateId = CD.intCurrencyExchangeRateId 
-				AND CYXF.intFromCurrencyId = ISNULL(CY.intMainCurrencyId, CY.intCurrencyID)
-			LEFT JOIN tblSMCurrency CYF ON CYF.intCurrencyID = CYXF.intFromCurrencyId
-			LEFT JOIN tblSMCurrencyExchangeRate CYXT 
-				ON ISNULL(CD.ysnUseFXPrice,0) = 1 AND CD.intCurrencyExchangeRateId IS NOT NULL AND CD.dblRate IS NOT NULL AND CD.intFXPriceUOMId IS NOT NULL
-				AND CYXT.intCurrencyExchangeRateId = CD.intCurrencyExchangeRateId 
-				AND CYXT.intToCurrencyId = ISNULL(CY.intMainCurrencyId, CY.intCurrencyID)
-			LEFT JOIN tblSMCurrency CYT ON CYT.intCurrencyID = CYXT.intFromCurrencyId) AD ON AD.intContractDetailId = CD.intContractDetailId
+JOIN vyuLGAdditionalColumnForContractDetailView AD ON AD.intContractDetailId = CD.intContractDetailId
 JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 JOIN tblEMEntity EM ON EM.intEntityId = CH.intEntityId
 JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = CH.intWeightId 
@@ -119,6 +95,7 @@ LEFT JOIN tblSMCurrency SM ON SM.intCurrencyID = WD.intCurrencyId
 LEFT JOIN vyuICGetItemUOM ItemUOM ON ItemUOM.intItemUOMId = WD.intPriceItemUOMId
 LEFT JOIN tblEMEntity PTEM ON PTEM.intEntityId = WD.intPartyEntityId
 LEFT JOIN tblAPBill BILL ON BILL.intBillId = WD.intBillId
+LEFT JOIN tblARInvoice INVC ON INVC.intInvoiceId = WD.intInvoiceId
 LEFT JOIN tblCTBook BO ON BO.intBookId = WC.intBookId
 LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = WC.intSubBookId
 LEFT JOIN tblSMPurchasingGroup PG ON PG.intPurchasingGroupId = CD.intPurchasingGroupId
