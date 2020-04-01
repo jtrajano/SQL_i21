@@ -200,16 +200,20 @@ OPEN intListCursor;
 							BEGIN  
 								IF(@ysnLoadContract = 0)
 								BEGIN
-									IF(@dblLoopContractUnits > @dblTicketScheduleQuantity )
+									declare @convertedLoopContractUnits numeric(38,20)
+
+									set @convertedLoopContractUnits = dbo.fnCalculateQtyBetweenUOM(@intTicketItemUOMId,@_intContractItemUom, @dblLoopContractUnits)
+
+
+									IF(@convertedLoopContractUnits > @dblTicketScheduleQuantity )
 									BEGIN
-										SET @dblLoopAdjustedScheduleQuantity = @dblLoopContractUnits - @dblTicketScheduleQuantity
+										SET @dblLoopAdjustedScheduleQuantity = @convertedLoopContractUnits - @dblTicketScheduleQuantity
 									END
 									ELSE
 									BEGIN
-										SET @dblLoopAdjustedScheduleQuantity = (@dblTicketScheduleQuantity - @dblLoopContractUnits) * -1
+										SET @dblLoopAdjustedScheduleQuantity = (@dblTicketScheduleQuantity - @convertedLoopContractUnits) * -1
 									END
 									
-
 									IF @dblLoopAdjustedScheduleQuantity <> 0
 									BEGIN
 										EXEC	uspCTUpdateScheduleQuantity 

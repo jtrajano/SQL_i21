@@ -1432,13 +1432,23 @@ IF @intLotType != 0
 			, intItemLotGroup			= SE.intItemLotGroup
 			, intLotId					= SC.intLotId
 			, dblQuantity				= SE.dblQuantity
-			, dblGrossWeight			= SE.dblGross 
-			, dblTareWeight				= SE.dblTare
+			, dblGrossWeight			= case when Lot.intLotId is not null 
+												then dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo, Lot.intItemUOMId, SE.dblGross) 
+											else 
+												SE.dblGross 
+											end 
+			, dblTareWeight				= case when Lot.intLotId is not null 
+												then dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo, Lot.intWeightUOMId, SE.dblTare) 
+											else 
+												SE.dblTare
+											end 
 			, dblWeightPerQty			= 0
 			, strWarehouseCargoNumber	= SC.strTicketNumber
 			FROM @ShipmentStagingTable SE 
 			INNER JOIN tblSCTicket SC ON SC.intTicketId = SE.intSourceId
 			INNER JOIN tblICItem IC ON IC.intItemId = SE.intItemId
+			LEFT JOIN tblICLot Lot
+				on SC.intLotId = Lot.intLotId
 	END
 
 EXEC dbo.uspICAddItemShipment
