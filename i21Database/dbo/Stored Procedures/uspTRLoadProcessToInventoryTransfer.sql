@@ -67,7 +67,7 @@ BEGIN TRY
 		WHILE @@FETCH_STATUS = 0
 		BEGIN
 			EXEC dbo.uspICDeleteInventoryTransfer @InvTranferId, @intUserId
-			FETCH NEXT FROM@CursorITTran INTO @InvTranferId
+			FETCH NEXT FROM @CursorITTran INTO @InvTranferId
 		END
 		CLOSE @CursorITTran
 		DEALLOCATE @CursorITTran
