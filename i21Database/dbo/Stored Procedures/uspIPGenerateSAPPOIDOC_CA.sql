@@ -25,6 +25,7 @@ BEGIN
 		,@intRecordId INT
 		,@intThirdPartyContractWaitingPeriod INT
 		,@strError NVARCHAR(MAX) = ''
+		,@dtmFeedCreated DATETIME
 	DECLARE @tblCTContractFeed TABLE (intContractFeedId INT)
 	DECLARE @tblOutput AS TABLE (
 		intRowNo INT IDENTITY(1, 1)
@@ -44,7 +45,7 @@ BEGIN
 	WHERE strThirdPartyFeedStatus IS NULL
 		AND strERPPONumber <> ''
 		AND dtmPlannedAvailabilityDate - GetDATE() <= @intThirdPartyContractWaitingPeriod
-		AND strCommodityCode='Coffee'
+		AND strCommodityCode = 'Coffee'
 
 	SELECT @intContractFeedId = MIN(intContractFeedId)
 	FROM @tblCTContractFeed
@@ -64,6 +65,7 @@ BEGIN
 			,@strRowState = NULL
 			,@intEntityId = NULL
 			,@strContractNo = NULL
+			,@dtmFeedCreated=NULL
 
 		SELECT @strError = ''
 
@@ -77,6 +79,7 @@ BEGIN
 			,@dtmPlannedAvailabilityDate = dtmPlannedAvailabilityDate
 			,@intContractHeaderId = intContractHeaderId
 			,@strRowState = strRowState
+			,@dtmFeedCreated=dtmFeedCreated
 		FROM tblCTContractFeed
 		WHERE intContractFeedId = @intContractFeedId
 
@@ -143,73 +146,84 @@ BEGIN
 			GOTO X
 		END
 
-		SELECT @strXML = '<Shipment>'
+		IF @strRowState = 'Delete'
+		BEGIN
+			SELECT @strXML = '<Shipment>'
+			SELECT @strXML = @strXML + '<Reference>' + @strERPPONumber + '</Reference>'
+			SELECT @strXML = @strXML + '<Status>800</Status>'
+			SELECT @strXML = @strXML + '<Timestamp>' + CONVERT(VARCHAR(10), @dtmFeedCreated, 112) + '</Timestamp>'
+			SELECT @strXML = @strXML + '</Shipment>'
+		END
+		ELSE
+		BEGIN
+			SELECT @strXML = '<Shipment>'
 
-		SELECT @strXML = @strXML + '<Incoterm>FOB</Incoterm>'
+			SELECT @strXML = @strXML + '<Incoterm>FOB</Incoterm>'
 
-		SELECT @strXML = @strXML + '<Parties>'
+			SELECT @strXML = @strXML + '<Parties>'
 
-		SELECT @strXML = @strXML + '<Party>'
+			SELECT @strXML = @strXML + '<Party>'
 
-		SELECT @strXML = @strXML + '<Alias>JDE</Alias>'
+			SELECT @strXML = @strXML + '<Alias>JDE</Alias>'
 
-		SELECT @strXML = @strXML + '<Name>JDE</Name>'
+			SELECT @strXML = @strXML + '<Name>JDE</Name>'
 
-		SELECT @strXML = @strXML + '<Type>BUY</Type>'
+			SELECT @strXML = @strXML + '<Type>BUY</Type>'
 
-		SELECT @strXML = @strXML + '<Reference>' + @strERPPONumber + '</Reference>'
+			SELECT @strXML = @strXML + '<Reference>' + @strERPPONumber + '</Reference>'
 
-		SELECT @strXML = @strXML + '</Party>'
+			SELECT @strXML = @strXML + '</Party>'
 
-		SELECT @strXML = @strXML + '<Party>'
+			SELECT @strXML = @strXML + '<Party>'
 
-		SELECT @strXML = @strXML + '<Alias>' + IsNULL(@strVendorAccountNum, '') + '</Alias>'
+			SELECT @strXML = @strXML + '<Alias>' + IsNULL(@strVendorAccountNum, '') + '</Alias>'
 
-		SELECT @strXML = @strXML + '<Name>' + @strVendorName + '</Name>'
+			SELECT @strXML = @strXML + '<Name>' + @strVendorName + '</Name>'
 
-		SELECT @strXML = @strXML + '<Type>SUP</Type>'
+			SELECT @strXML = @strXML + '<Type>SUP</Type>'
 
-		SELECT @strXML = @strXML + '<Reference>' + IsNULL(@strVendorRefNo, '') + '</Reference>'
+			SELECT @strXML = @strXML + '<Reference>' + IsNULL(@strVendorRefNo, '') + '</Reference>'
 
-		SELECT @strXML = @strXML + '</Party>'
+			SELECT @strXML = @strXML + '</Party>'
 
-		SELECT @strXML = @strXML + '<Party>'
+			SELECT @strXML = @strXML + '<Party>'
 
-		SELECT @strXML = @strXML + '<Alias>' + IsNULL(@strVendorAccountNum, '') + '</Alias>'
+			SELECT @strXML = @strXML + '<Alias>' + IsNULL(@strVendorAccountNum, '') + '</Alias>'
 
-		SELECT @strXML = @strXML + '<Name>' + IsNULL(@strShipperName, '') + '</Name>'
+			SELECT @strXML = @strXML + '<Name>' + IsNULL(@strShipperName, '') + '</Name>'
 
-		SELECT @strXML = @strXML + '<Type>SZ</Type>'
+			SELECT @strXML = @strXML + '<Type>SZ</Type>'
 
-		SELECT @strXML = @strXML + '</Party>'
+			SELECT @strXML = @strXML + '</Party>'
 
-		SELECT @strXML = @strXML + '</Parties>'
+			SELECT @strXML = @strXML + '</Parties>'
 
-		SELECT @strXML = @strXML + '<Pol>' + IsNULL(@strLoadingPoint, '') + '</Pol>'
+			SELECT @strXML = @strXML + '<Pol>' + IsNULL(@strLoadingPoint, '') + '</Pol>'
 
-		SELECT @strXML = @strXML + '<Pod>' + IsNULL(@strDestinationPoint, '') + '</Pod>'
+			SELECT @strXML = @strXML + '<Pod>' + IsNULL(@strDestinationPoint, '') + '</Pod>'
 
-		SELECT @strXML = @strXML + '<Eta>' + CONVERT(VARCHAR(10), @dtmPlannedAvailabilityDate, 112) + '</Eta>'
+			SELECT @strXML = @strXML + '<Eta>' + CONVERT(VARCHAR(10), @dtmPlannedAvailabilityDate, 112) + '</Eta>'
 
-		SELECT @strXML = @strXML + '<CommodityItems>'
+			SELECT @strXML = @strXML + '<CommodityItems>'
 
-		SELECT @strXML = @strXML + '<CommodityItem>'
+			SELECT @strXML = @strXML + '<CommodityItem>'
 
-		SELECT @strXML = @strXML + '<ArticleCode>' + @strItemNo + '</ArticleCode>'
+			SELECT @strXML = @strXML + '<ArticleCode>' + @strItemNo + '</ArticleCode>'
 
-		SELECT @strXML = @strXML + '<ArticleDescription>' + IsNULL(@strContractItemNo, '') + '</ArticleDescription>'
+			SELECT @strXML = @strXML + '<ArticleDescription>' + IsNULL(@strContractItemNo, '') + '</ArticleDescription>'
 
-		SELECT @strXML = @strXML + '<CommodityCode>Coffee</CommodityCode>'
+			SELECT @strXML = @strXML + '<CommodityCode>Coffee</CommodityCode>'
 
-		SELECT @strXML = @strXML + '<GrossWeight>' + Ltrim(@dblNetWeight) + '</GrossWeight>'
+			SELECT @strXML = @strXML + '<GrossWeight>' + Ltrim(@dblNetWeight) + '</GrossWeight>'
 
-		SELECT @strXML = @strXML + '<Packages>' + ltrim(@dblQuantity) + '</Packages>'
+			SELECT @strXML = @strXML + '<Packages>' + ltrim(@dblQuantity) + '</Packages>'
 
-		SELECT @strXML = @strXML + '</CommodityItem>'
+			SELECT @strXML = @strXML + '</CommodityItem>'
 
-		SELECT @strXML = @strXML + '</CommodityItems>'
+			SELECT @strXML = @strXML + '</CommodityItems>'
 
-		SELECT @strXML = @strXML + '</Shipment>'
+			SELECT @strXML = @strXML + '</Shipment>'
+		END
 
 		IF @strXML IS NOT NULL
 		BEGIN
