@@ -631,48 +631,36 @@ BEGIN TRY
 		AND intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 	
 
-	SELECT dblTotal = dbo.fnCalculateQtyBetweenUOM(iuomStck.intItemUOMId, iuomTo.intItemUOMId, (ISNULL(s.dblQuantity , 0)))
-		, strCustomer = s.strEntity
-		, strContractEndMonth = RIGHT(CONVERT(VARCHAR(11), dtmDate, 106), 8) COLLATE Latin1_General_CI_AS
-		, strDeliveryDate = dbo.fnRKFormatDate(cd.dtmEndDate, 'MMM yyyy')
-		, s.strLocationName
-		, i.intItemId
-		, s.strItemNo
-		, intCommodityId = @intCommodityId
-		, intFromCommodityUnitMeasureId = @intCommodityUnitMeasureId
+	SELECT dblTotal = dbo.fnCTConvertQuantityToTargetCommodityUOM(t.intOrigUOMId, @intCommodityUnitMeasureId, (ISNULL(t.dblTotal, 0)))
+		, strCustomer = t.strEntityName
+		, strContractEndMonth = RIGHT(CONVERT(VARCHAR(11), t.dtmEndDate, 106), 8) COLLATE Latin1_General_CI_AS
+		, strDeliveryDate = dbo.fnRKFormatDate(t.dtmEndDate, 'MMM yyyy')
+		, t.strLocationName
+		, t.intItemId
+		, t.strItemNo
+		, intCommodityId = t.intCommodityId
+		, intFromCommodityUnitMeasureId = intOrigUOMId
 		, strTruckName = ''
 		, strDriverName = ''
 		, dblStorageDue = NULL
-		, s.intLocationId
-		, intTransactionId
-		, strTransactionId
-		, strTransactionType
-		, s.intCategoryId
-		, s.strCategory
-		, t.strDistributionOption
-		, t.dtmTicketDateTime
+		, t.intLocationId
+		, t.intTransactionRecordId
+		, t.strTransactionNumber
+		, t.strTransactionType
+		, t.intCategoryId
+		, t.strCategoryCode
+		, t.strDistributionType
+		, t.dtmTransactionDate
 		, t.intTicketId
 		, t.strTicketNumber
-		, intContractHeaderId = ch.intContractHeaderId
-		, strContractNumber = ch.strContractNumber
-		, strFutureMonth = fmnt.strFutureMonth
-		, s.strCurrency
+		, intContractHeaderId
+		, strContractNumber
+		, strFutureMonth
+		, strCurrency
 	INTO #invQty
-	FROM vyuRKGetInventoryValuation s
-	JOIN tblICItem i ON i.intItemId = s.intItemId
-	JOIN tblICItemUOM iuomStck ON s.intItemId = iuomStck.intItemId AND iuomStck.ysnStockUnit = 1
-	JOIN tblICItemUOM iuomTo ON s.intItemId = iuomTo.intItemId AND iuomTo.intUnitMeasureId = @intCommodityStockUOMId
-	LEFT JOIN tblSCTicket t ON s.intSourceId = t.intTicketId
-	LEFT JOIN tblCTContractDetail cd ON cd.intContractDetailId = s.intTransactionDetailId 
-	LEFT JOIN tblCTContractHeader ch ON cd.intContractHeaderId = ch.intContractHeaderId
-	LEFT JOIN tblRKFuturesMonth fmnt ON cd.intFutureMonthId = fmnt.intFutureMonthId
-	WHERE i.intCommodityId = @intCommodityId AND ISNULL(s.dblQuantity, 0) <> 0
-		AND s.intLocationId = ISNULL(@intLocationId, s.intLocationId)
-		AND ISNULL(strTicketStatus, '') <> 'V'
-		AND ISNULL(s.intEntityId, 0) = ISNULL(@intVendorId, ISNULL(s.intEntityId, 0))
-		AND CONVERT(DATETIME, CONVERT(VARCHAR(10), s.dtmDate, 110), 110) <= cONVERT(DATETIME, @dtmToDate)
-		AND ysnInTransit = 0
-		AND s.intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
+	FROM dbo.fnRKGetBucketCompanyOwned(@dtmToDate, @intCommodityId, @intVendorId) t
+	WHERE t.intLocationId = ISNULL(@intLocationId, t.intLocationId)
+		AND t.intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 
 	--=============================
 	-- Transfer
@@ -892,18 +880,18 @@ BEGIN TRY
 		, intItemId
 		, strItemNo
 		, intCategoryId
-		, strCategory
+		, strCategoryCode
 		, intCommodityId = @intCommodityId
 		, intFromCommodityUnitMeasureId = @intCommodityUnitMeasureId
 		, intCompanyLocationId = intLocationId
-		, strTransactionId
-		, intTransactionId
-		, strDistributionOption
+		, strTransactionNumber
+		, intTransactionRecordId
+		, strDistributionType
 		, strContractEndMonth
 		, strDeliveryDate
 		, strTicketNumber
 		, intTicketId
-		, dtmTicketDateTime
+		, dtmTransactionDate
 		, strTransactionType
 		, intContractHeaderId
 		, strContractNumber
@@ -3204,7 +3192,7 @@ BEGIN TRY
 			, intItemId
 			, strItemNo
 			, intCategoryId
-			, strCategory
+			, strCategoryCode
 			, intFromCommodityUnitMeasureId
 			, intCommodityId
 			, strLocationName
@@ -3215,7 +3203,7 @@ BEGIN TRY
 		GROUP BY intItemId
 			, strItemNo
 			, intCategoryId
-			, strCategory
+			, strCategoryCode
 			, intFromCommodityUnitMeasureId
 			, strLocationName
 			, intCommodityId
@@ -5671,7 +5659,7 @@ BEGIN TRY
 			, strInventoryType)
 		SELECT strCommodityCode = @strCommodityCode
 			, strItemNo
-			, strCategory
+			, strCategoryCode
 			, dblTotal = dblTotal
 			, strLocationName
 			, intCommodityId = @intCommodityId

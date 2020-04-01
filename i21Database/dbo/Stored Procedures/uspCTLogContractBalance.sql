@@ -16,8 +16,6 @@ BEGIN
 		, @strTransactionReferenceNo NVARCHAR(100)
 		, @intContractDetailId INT
 		, @intContractHeaderId INT
-		, @strContractNumber NVARCHAR (50)
-		, @intContractSeq INT
 		, @intContractTypeId INT
 		, @intEntityId INT
 		, @intCommodityId INT
@@ -60,8 +58,6 @@ BEGIN
 		, [strTransactionReferenceNo] NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL
 		, [intContractDetailId] INT NOT NULL
 		, [intContractHeaderId] INT NOT NULL
-		, [strContractNumber] NVARCHAR (50)
-		, [intContractSeq] INT
 		, [intContractTypeId] INT NOT NULL
 		, [intEntityId] INT NOT NULL
 		, [intCommodityId] INT NOT NULL
@@ -97,8 +93,6 @@ BEGIN
 		, [strTransactionReferenceNo] NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL
 		, [intContractDetailId] INT NOT NULL
 		, [intContractHeaderId] INT NOT NULL
-		, [strContractNumber] NVARCHAR (50)
-		, [intContractSeq] INT
 		, [intContractTypeId] INT NOT NULL
 		, [intEntityId] INT NOT NULL
 		, [intCommodityId] INT NOT NULL
@@ -126,11 +120,6 @@ BEGIN
 
 	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpLogItems)
 	BEGIN
-		IF (@Rebuild = 1)
-		BEGIN
-			DELETE FROM @FinalTable
-		END
-
 		SELECT TOP 1 @Id = intId
 			, @strBatchId = strBatchId
 			, @dtmTransactionDate = dtmTransactionDate
@@ -141,8 +130,6 @@ BEGIN
 			, @intContractDetailId = intContractDetailId
 			, @intContractHeaderId = intContractHeaderId
 			, @intContractTypeId = intContractTypeId
-			, @strContractNumber = strContractNumber
-			, @intContractSeq = intContractSeq
 			, @intEntityId = intEntityId
 			, @intCommodityId = intCommodityId
 			, @intItemId = intItemId
@@ -166,249 +153,133 @@ BEGIN
 			, @strNotes = strNotes
 		FROM #tmpLogItems
 
-		IF (@strTransactionType = 'Contract Balance' AND @strTransactionReference = 'Contract Sequence')
-		BEGIN
-			SELECT * INTO #tmpPrevLogList
-			FROM tblCTContractBalanceLog
-			WHERE intContractDetailId = @intContractDetailId
-				AND strTransactionType = @strTransactionType
-				AND ISNULL(ysnNegated, 0) = 0 
-				AND intContractBalanceLogId NOT IN (SELECT intRefContractBalanceId FROM tblCTContractBalanceLog)
-			ORDER BY intContractBalanceLogId ASC
+		--SELECT * INTO #tmpPrevLogList
+		--FROM tblCTContractBalanceLog
+		--WHERE intContractDetailId = @intContractDetailId
+		--	AND strTransactionType = @strTransactionType
+		--	AND ISNULL(ysnNegated, 0) = 0 
+		--	AND intRefContractBalanceId NOT IN (SELECT intContractBalanceLogId FROM tblCTContractBalanceLog WHERE ysnNegated = 1)
+		--ORDER BY intContractBalanceLogId ASC
 
-			IF (SELECT COUNT(*) FROM #tmpPrevLogList ) > 1
-			BEGIN
-				IF EXISTS(SELECT TOP 1 1 FROM #tmpPrevLogList WHERE intPricingTypeId = 1)
-				BEGIN
-					INSERT INTO @PrevLog
-					SELECT TOP 1 intContractBalanceLogId
-						, strBatchId
-						, dtmTransactionDate
-						, dtmCreatedDate
-						, strTransactionType
-						, strTransactionReference
-						, intTransactionReferenceId
-						, strTransactionReferenceNo
-						, intContractDetailId
-						, intContractHeaderId
-						, strContractNumber
-						, intContractSeq
-						, intContractTypeId
-						, intEntityId
-						, intCommodityId
-						, intItemId
-						, intLocationId
-						, intPricingTypeId
-						, intFutureMarketId
-						, intFutureMonthId
-						, dblBasis
-						, dblFutures
-						, intQtyUOMId
-						, intQtyCurrencyId
-						, intBasisUOMId
-						, intBasisCurrencyId
-						, intPriceUOMId
-						, dtmStartDate
-						, dtmEndDate
-						, dblQty
-						, intContractStatusId
-						, intBookId
-						, intSubBookId
-						, strNotes
-						, ysnNegated
-						, intRefContractBalanceId
-					FROM #tmpPrevLogList WHERE intPricingTypeId = 1
-					ORDER BY intContractBalanceLogId ASC
-				END
-				ELSE
-				BEGIN
-					INSERT INTO @PrevLog
-					SELECT TOP 1 intContractBalanceLogId
-						, strBatchId
-						, dtmTransactionDate
-						, dtmCreatedDate
-						, strTransactionType
-						, strTransactionReference
-						, intTransactionReferenceId
-						, strTransactionReferenceNo
-						, intContractDetailId
-						, intContractHeaderId
-						, strContractNumber
-						, intContractSeq
-						, intContractTypeId
-						, intEntityId
-						, intCommodityId
-						, intItemId
-						, intLocationId
-						, intPricingTypeId
-						, intFutureMarketId
-						, intFutureMonthId
-						, dblBasis
-						, dblFutures
-						, intQtyUOMId
-						, intQtyCurrencyId
-						, intBasisUOMId
-						, intBasisCurrencyId
-						, intPriceUOMId
-						, dtmStartDate
-						, dtmEndDate
-						, dblQty
-						, intContractStatusId
-						, intBookId
-						, intSubBookId
-						, strNotes
-						, ysnNegated
-						, intRefContractBalanceId
-					FROM #tmpPrevLogList ORDER BY intContractBalanceLogId ASC
-				END
-			END
-			ELSE
-			BEGIN
-				INSERT INTO @PrevLog
-				SELECT TOP 1 intContractBalanceLogId
-					, strBatchId
-					, dtmTransactionDate
-					, dtmCreatedDate
-					, strTransactionType
-					, strTransactionReference
-					, intTransactionReferenceId
-					, strTransactionReferenceNo
-					, intContractDetailId
-					, intContractHeaderId
-					, strContractNumber
-					, intContractSeq
-					, intContractTypeId
-					, intEntityId
-					, intCommodityId
-					, intItemId
-					, intLocationId
-					, intPricingTypeId
-					, intFutureMarketId
-					, intFutureMonthId
-					, dblBasis
-					, dblFutures
-					, intQtyUOMId
-					, intQtyCurrencyId
-					, intBasisUOMId
-					, intBasisCurrencyId
-					, intPriceUOMId
-					, dtmStartDate
-					, dtmEndDate
-					, dblQty
-					, intContractStatusId
-					, intBookId
-					, intSubBookId
-					, strNotes
-					, ysnNegated
-					, intRefContractBalanceId
-				FROM #tmpPrevLogList
-			END
-			
-			-- Validate if no changes was detected on fields with bearing
-			IF EXISTS(SELECT TOP 1 1
-				FROM @PrevLog
-				WHERE @intContractDetailId = intContractDetailId
-					AND @intContractHeaderId = intContractHeaderId
-					AND @intContractTypeId = intContractTypeId
-					AND @intEntityId = intEntityId
-					AND @intCommodityId = intCommodityId
-					AND @intItemId = intItemId
-					AND @intLocationId = intLocationId
-					AND @intPricingTypeId = intPricingTypeId
-					AND @intFutureMarketId = intFutureMarketId
-					AND @intFutureMonthId = intFutureMonthId
-					AND @dblBasis = dblBasis
-					AND @dblFutures = dblFutures
-					AND @intQtyUOMId = intQtyUOMId
-					AND @intQtyCurrencyId = intQtyCurrencyId
-					AND @intBasisUOMId = intBasisUOMId
-					AND @intBasisCurrencyId = intBasisCurrencyId
-					AND @intPriceUOMId = intPriceUOMId
-					AND @dtmStartDate = dtmStartDate
-					AND @dtmEndDate = dtmEndDate
-					AND @dblQty = dblQty
-					AND @intContractStatusId = intContractStatusId
-					AND @intBookId = intBookId
-					AND @intSubBookId = intSubBookId)
-			BEGIN
-				CONTINUE
-			END
+		--IF (SELECT COUNT(*) FROM #tmpPrevLogList ) > 1
+		--BEGIN
+		--	IF EXISTS(SELECT TOP 1 1 FROM #tmpPrevLogList WHERE intPricingTypeId = 1)
+		--	BEGIN
+		--		INSERT INTO @PrevLog
+		--		SELECT TOP 1 * FROM #tmpPrevLogList WHERE intPricingTypeId = 1
+		--		ORDER BY intContractBalanceLogId ASC
+		--	END
+		--	ELSE
+		--	BEGIN
+		--		INSERT INTO @PrevLog
+		--		SELECT TOP 1 * FROM #tmpPrevLogList ORDER BY intContractBalanceLogId ASC
+		--	END
+		--END
+		--ELSE
+		--BEGIN
+		--	INSERT INTO @PrevLog
+		--	SELECT TOP 1 * FROM #tmpPrevLogList
+		--END		
 
-			IF EXISTS(SELECT TOP 1 1 FROM @PrevLog)
-			BEGIN
-				INSERT INTO @FinalTable(strBatchId
-					, dtmTransactionDate
-					, strTransactionType
-					, strTransactionReference
-					, intTransactionReferenceId
-					, strTransactionReferenceNo
-					, intContractDetailId
-					, intContractHeaderId
-					, intContractTypeId
-					, strContractNumber
-					, intContractSeq
-					, intEntityId
-					, intCommodityId
-					, intItemId
-					, intLocationId
-					, intPricingTypeId
-					, intFutureMarketId
-					, intFutureMonthId
-					, dblBasis
-					, dblFutures
-					, intQtyUOMId
-					, intQtyCurrencyId
-					, intBasisUOMId
-					, intBasisCurrencyId
-					, intPriceUOMId
-					, dtmStartDate
-					, dtmEndDate
-					, dblQty
-					, intContractStatusId
-					, intBookId
-					, intSubBookId
-					, strNotes
-					, ysnNegated
-					, intRefContractBalanceId)
-				SELECT @strBatchId
-					, dtmTransactionDate
-					, strTransactionType
-					, strTransactionReference
-					, intTransactionReferenceId
-					, strTransactionReferenceNo
-					, intContractDetailId
-					, intContractHeaderId
-					, intContractTypeId
-					, strContractNumber
-					, intContractSeq
-					, intEntityId
-					, intCommodityId
-					, intItemId
-					, intLocationId
-					, intPricingTypeId
-					, intFutureMarketId
-					, intFutureMonthId
-					, dblBasis
-					, dblFutures
-					, intQtyUOMId
-					, intQtyCurrencyId
-					, intBasisUOMId
-					, intBasisCurrencyId
-					, intPriceUOMId
-					, dtmStartDate
-					, dtmEndDate
-					, dblQty * - 1
-					, intContractStatusId
-					, intBookId
-					, intSubBookId
-					, strNotes = ISNULL(strNotes, '')
-					, ysnNegated = 1
-					, intRefContractBalanceId = intContractBalanceLogId
-				FROM @PrevLog
-			END
+		---- Validate if no changes was detected on fields with bearing
+		--IF EXISTS(SELECT TOP 1 1
+		--	FROM @PrevLog
+		--	WHERE @intContractDetailId = intContractDetailId
+		--		AND @intContractHeaderId = intContractHeaderId
+		--		AND @intContractTypeId = intContractTypeId
+		--		AND @intEntityId = intEntityId
+		--		AND @intCommodityId = intCommodityId
+		--		AND @intItemId = intItemId
+		--		AND @intLocationId = intLocationId
+		--		AND @intPricingTypeId = intPricingTypeId
+		--		AND @intFutureMarketId = intFutureMarketId
+		--		AND @intFutureMonthId = intFutureMonthId
+		--		AND @dblBasis = dblBasis
+		--		AND @dblFutures = dblFutures
+		--		AND @intQtyUOMId = intQtyUOMId
+		--		AND @intQtyCurrencyId = intQtyCurrencyId
+		--		AND @intBasisUOMId = intBasisUOMId
+		--		AND @intBasisCurrencyId = intBasisCurrencyId
+		--		AND @intPriceUOMId = intPriceUOMId
+		--		AND @dtmStartDate = dtmStartDate
+		--		AND @dtmEndDate = dtmEndDate
+		--		AND @dblQty = dblQty
+		--		AND @intContractStatusId = intContractStatusId
+		--		AND @intBookId = intBookId
+		--		AND @intSubBookId = intSubBookId)
+		--BEGIN
+		--	CONTINUE
+		--END
 
-			DROP TABLE #tmpPrevLogList
-		END
+		--IF EXISTS(SELECT TOP 1 1 FROM @PrevLog)
+		--BEGIN
+		--	INSERT INTO @FinalTable(strBatchId
+		--		, dtmTransactionDate
+		--		, strTransactionType
+		--		, strTransactionReference
+		--		, intTransactionReferenceId
+		--		, strTransactionReferenceNo
+		--		, intContractDetailId
+		--		, intContractHeaderId
+		--		, intContractTypeId
+		--		, intEntityId
+		--		, intCommodityId
+		--		, intItemId
+		--		, intLocationId
+		--		, intPricingTypeId
+		--		, intFutureMarketId
+		--		, intFutureMonthId
+		--		, dblBasis
+		--		, dblFutures
+		--		, intQtyUOMId
+		--		, intQtyCurrencyId
+		--		, intBasisUOMId
+		--		, intBasisCurrencyId
+		--		, intPriceUOMId
+		--		, dtmStartDate
+		--		, dtmEndDate
+		--		, dblQty
+		--		, intContractStatusId
+		--		, intBookId
+		--		, intSubBookId
+		--		, strNotes
+		--		, ysnNegated
+		--		, intRefContractBalanceId)
+		--	SELECT @strBatchId
+		--		, dtmTransactionDate
+		--		, strTransactionType
+		--		, strTransactionReference
+		--		, intTransactionReferenceId
+		--		, strTransactionReferenceNo
+		--		, intContractDetailId
+		--		, intContractHeaderId
+		--		, intContractTypeId
+		--		, intEntityId
+		--		, intCommodityId
+		--		, intItemId
+		--		, intLocationId
+		--		, intPricingTypeId
+		--		, intFutureMarketId
+		--		, intFutureMonthId
+		--		, dblBasis
+		--		, dblFutures
+		--		, intQtyUOMId
+		--		, intQtyCurrencyId
+		--		, intBasisUOMId
+		--		, intBasisCurrencyId
+		--		, intPriceUOMId
+		--		, dtmStartDate
+		--		, dtmEndDate
+		--		, dblQty
+		--		, intContractStatusId
+		--		, intBookId
+		--		, intSubBookId
+		--		, strNotes = ISNULL(strNotes, '')
+		--		, ysnNegated = 1
+		--		, intRefContractBalanceId = intContractBalanceLogId
+		--	FROM @PrevLog
+		--END
+
 
 		INSERT INTO @FinalTable(strBatchId
 			, dtmTransactionDate
@@ -418,8 +289,6 @@ BEGIN
 			, strTransactionReferenceNo
 			, intContractDetailId
 			, intContractHeaderId
-			, strContractNumber
-			, intContractSeq
 			, intContractTypeId
 			, intEntityId
 			, intCommodityId
@@ -441,9 +310,7 @@ BEGIN
 			, intContractStatusId
 			, intBookId
 			, intSubBookId
-			, strNotes
-			, ysnNegated
-			, intRefContractBalanceId)
+			, strNotes)
 		SELECT strBatchId
 			, dtmTransactionDate
 			, strTransactionType
@@ -452,8 +319,6 @@ BEGIN
 			, strTransactionReferenceNo
 			, intContractDetailId
 			, intContractHeaderId
-			, strContractNumber
-			, intContractSeq
 			, intContractTypeId
 			, intEntityId
 			, intCommodityId
@@ -476,164 +341,80 @@ BEGIN
 			, intBookId
 			, intSubBookId
 			, strNotes
-			, ysnNegated = 0
-			, intRefContractBalanceId = NULL
 		FROM #tmpLogItems WHERE intId = @Id
 
-		IF (@Rebuild = 1)
-		BEGIN
-			INSERT INTO tblCTContractBalanceLog(strBatchId
-				, dtmTransactionDate
-				, dtmCreatedDate
-				, strTransactionType
-				, strTransactionReference
-				, intTransactionReferenceId
-				, strTransactionReferenceNo
-				, intContractDetailId
-				, intContractHeaderId
-				, strContractNumber
-				, intContractSeq
-				, intContractTypeId
-				, intEntityId
-				, intCommodityId
-				, intItemId
-				, intLocationId
-				, intPricingTypeId
-				, intFutureMarketId
-				, intFutureMonthId
-				, dblBasis
-				, dblFutures
-				, intQtyUOMId
-				, intQtyCurrencyId
-				, intBasisUOMId
-				, intBasisCurrencyId
-				, intPriceUOMId
-				, dtmStartDate
-				, dtmEndDate
-				, dblQty
-				, intContractStatusId
-				, intBookId
-				, intSubBookId
-				, strNotes
-				, ysnNegated
-				, intRefContractBalanceId)
-			SELECT strBatchId
-				, dtmTransactionDate
-				, dtmCreatedDate = CASE WHEN @Rebuild = 1 THEN dtmTransactionDate ELSE GETDATE() END
-				, strTransactionType
-				, strTransactionReference
-				, intTransactionReferenceId
-				, strTransactionReferenceNo
-				, intContractDetailId
-				, intContractHeaderId
-				, strContractNumber
-				, intContractSeq
-				, intContractTypeId
-				, intEntityId
-				, intCommodityId
-				, intItemId
-				, intLocationId
-				, intPricingTypeId
-				, intFutureMarketId
-				, intFutureMonthId
-				, dblBasis
-				, dblFutures
-				, intQtyUOMId
-				, intQtyCurrencyId
-				, intBasisUOMId
-				, intBasisCurrencyId
-				, intPriceUOMId
-				, dtmStartDate
-				, dtmEndDate
-				, dblQty
-				, intContractStatusId
-				, intBookId
-				, intSubBookId
-				, strNotes
-				, ysnNegated
-				, intRefContractBalanceId
-			FROM @FinalTable
-			ORDER BY dtmTransactionDate
-		END
+		--DROP TABLE #tmpPrevLogList
 
 		DELETE FROM #tmpLogItems WHERE intId = @Id
 	END
 
-	IF (@Rebuild <> 1)
-	BEGIN
-		INSERT INTO tblCTContractBalanceLog(strBatchId
-			, dtmTransactionDate
-			, dtmCreatedDate
-			, strTransactionType
-			, strTransactionReference
-			, intTransactionReferenceId
-			, strTransactionReferenceNo
-			, intContractDetailId
-			, intContractHeaderId
-			, strContractNumber
-			, intContractSeq
-			, intContractTypeId
-			, intEntityId
-			, intCommodityId
-			, intItemId
-			, intLocationId
-			, intPricingTypeId
-			, intFutureMarketId
-			, intFutureMonthId
-			, dblBasis
-			, dblFutures
-			, intQtyUOMId
-			, intQtyCurrencyId
-			, intBasisUOMId
-			, intBasisCurrencyId
-			, intPriceUOMId
-			, dtmStartDate
-			, dtmEndDate
-			, dblQty
-			, intContractStatusId
-			, intBookId
-			, intSubBookId
-			, strNotes
-			, ysnNegated
-			, intRefContractBalanceId)
-		SELECT strBatchId
-			, dtmTransactionDate
-			, dtmCreatedDate = CASE WHEN @Rebuild = 1 THEN dtmTransactionDate ELSE GETDATE() END
-			, strTransactionType
-			, strTransactionReference
-			, intTransactionReferenceId
-			, strTransactionReferenceNo
-			, intContractDetailId
-			, intContractHeaderId
-			, strContractNumber
-			, intContractSeq
-			, intContractTypeId
-			, intEntityId
-			, intCommodityId
-			, intItemId
-			, intLocationId
-			, intPricingTypeId
-			, intFutureMarketId
-			, intFutureMonthId
-			, dblBasis
-			, dblFutures
-			, intQtyUOMId
-			, intQtyCurrencyId
-			, intBasisUOMId
-			, intBasisCurrencyId
-			, intPriceUOMId
-			, dtmStartDate
-			, dtmEndDate
-			, dblQty
-			, intContractStatusId
-			, intBookId
-			, intSubBookId
-			, strNotes
-			, ysnNegated
-			, intRefContractBalanceId
-		FROM @FinalTable
-		ORDER BY dtmTransactionDate
-	END
+	INSERT INTO tblCTContractBalanceLog(strBatchId
+		, dtmTransactionDate
+		, dtmCreatedDate
+		, strTransactionType
+		, strTransactionReference
+		, intTransactionReferenceId
+		, strTransactionReferenceNo
+		, intContractDetailId
+		, intContractHeaderId
+		, intContractTypeId
+		, intEntityId
+		, intCommodityId
+		, intItemId
+		, intLocationId
+		, intPricingTypeId
+		, intFutureMarketId
+		, intFutureMonthId
+		, dblBasis
+		, dblFutures
+		, intQtyUOMId
+		, intQtyCurrencyId
+		, intBasisUOMId
+		, intBasisCurrencyId
+		, intPriceUOMId
+		, dtmStartDate
+		, dtmEndDate
+		, dblQty
+		, intContractStatusId
+		, intBookId
+		, intSubBookId
+		, strNotes
+		, ysnNegated
+		, intRefContractBalanceId)
+	SELECT strBatchId
+		, dtmTransactionDate
+		, dtmCreatedDate = CASE WHEN @Rebuild = 1 THEN dtmTransactionDate ELSE GETDATE() END
+		, strTransactionType
+		, strTransactionReference
+		, intTransactionReferenceId
+		, strTransactionReferenceNo
+		, intContractDetailId
+		, intContractHeaderId
+		, intContractTypeId
+		, intEntityId
+		, intCommodityId
+		, intItemId
+		, intLocationId
+		, intPricingTypeId
+		, intFutureMarketId
+		, intFutureMonthId
+		, dblBasis
+		, dblFutures
+		, intQtyUOMId
+		, intQtyCurrencyId
+		, intBasisUOMId
+		, intBasisCurrencyId
+		, intPriceUOMId
+		, dtmStartDate
+		, dtmEndDate
+		, dblQty
+		, intContractStatusId
+		, intBookId
+		, intSubBookId
+		, strNotes
+		, ysnNegated
+		, intRefContractBalanceId
+	FROM @FinalTable
 
 	DROP TABLE #tmpLogItems
 END
