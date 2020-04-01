@@ -74,7 +74,7 @@ FROM	(
 						AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)
 			WHERE	t.strBatchId = @strBatchId
 					AND t.strTransactionId = ISNULL(@strRebuildTransactionId, t.strTransactionId)
-					AND i.strType <> 'Non-Inventory'
+					--AND i.strType <> 'Non-Inventory' -- Comment this out. It breaking the stock rebuild. See IC-8360. 
 					AND (dbo.fnDateEquals(t.dtmDate, @dtmRebuildDate) = 1 OR @dtmRebuildDate IS NULL) 
 
 		) Query
