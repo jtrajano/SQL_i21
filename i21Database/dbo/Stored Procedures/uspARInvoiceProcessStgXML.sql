@@ -709,6 +709,22 @@ BEGIN TRY
 				FROM tblAPBillDetail BD
 				JOIN @voucherNonInvDetails VD ON VD.intLineNo = BD.intLineNo
 				WHERE BD.intBillId = @intBillInvoiceId
+
+				--UPDATE HEADER TOTAL
+				UPDATE A
+				SET A.dblTotal = CAST((DetailTotal.dblTotal + DetailTotal.dblTotalTax) AS DECIMAL(18, 2))
+					,A.dblTotalController = CAST((DetailTotal.dblTotal + DetailTotal.dblTotalTax) AS DECIMAL(18, 2))
+					,A.dblSubtotal = CAST((DetailTotal.dblTotal) AS DECIMAL(18, 2))
+					,A.dblAmountDue = CAST((DetailTotal.dblTotal + DetailTotal.dblTotalTax) - A.dblPayment AS DECIMAL(18, 2))
+					,A.dblTax = DetailTotal.dblTotalTax
+				FROM tblAPBill A
+				CROSS APPLY (
+					SELECT SUM(dblTax) dblTotalTax
+						,SUM(dblTotal) dblTotal
+					FROM tblAPBillDetail C
+					WHERE C.intBillId = A.intBillId
+					) DetailTotal
+				WHERE A.intBillId=@intBillInvoiceId
 			END
 
 			IF @strTransactionType = 'Claim'
