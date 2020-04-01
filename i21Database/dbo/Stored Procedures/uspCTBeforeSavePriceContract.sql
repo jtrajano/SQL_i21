@@ -39,8 +39,7 @@ BEGIN TRY
 	SELECT @intContractTypeId = b.intContractTypeId
 	FROM tblCTPriceFixation a
 	INNER JOIN tblCTContractHeader b on a.intContractHeaderId = b.intContractHeaderId
-	WHERE b.intContractTypeId = 2
-	AND a.intPriceContractId = @intPriceContractId
+	WHERE a.intPriceContractId = @intPriceContractId
 
 	IF @strXML = 'Delete'
 	BEGIN
