@@ -69,55 +69,70 @@ BEGIN TRY
 			, strNotes = ''
 			, intOrderBy
 		INTO #tblContractBalance
-		FROM(
-			select 
-				Row_Number() OVER (PARTITION BY sh.intContractDetailId ORDER BY cd.dtmCreated  DESC, sh.intSequenceHistoryId DESC) AS Row_Num
-				, dtmTransactionDate = dbo.fnRemoveTimeOnDate(cd.dtmCreated)
-				, sh.intContractHeaderId
-				, sh.intContractDetailId
-				, dblQty = sh.dblBalance - isnull(sh.dblOldQuantity,0)
-				, intQtyUOMId = ch.intCommodityUOMId
-				, sh.intPricingTypeId
-				, sh.strPricingType
-				, strTransactionType = 'Contract Sequence'
-				, intTransactionId = sh.intContractDetailId
-				, strTransactionId = sh.strContractNumber + '-' + CAST(sh.intContractSeq AS NVARCHAR(10))
-				, sh.dblFutures
-				, sh.dblBasis
-				, cd.intBasisUOMId
-				, cd.intBasisCurrencyId
-				, intPriceUOMId = sh.intDtlQtyInCommodityUOMId
-				, sh.intContractStatusId
+		FROM (
+			SELECT DISTINCT ROW_NUMBER() OVER (PARTITION BY intContractDetailId ORDER BY dtmTransactionDate DESC, intSequenceHistoryId DESC) AS Row_Num
+				, dtmTransactionDate
+				, intContractHeaderId
+				, intContractDetailId
+				, dblQty
+				, intQtyUOMId
+				, intPricingTypeId
+				, strPricingType
+				, strTransactionType
+				, intTransactionId
+				, strTransactionId
+				, dblFutures
+				, dblBasis
+				, intBasisUOMId
+				, intBasisCurrencyId
+				, intPriceUOMId
+				, intContractStatusId
 				, intOrderBy = 1
-			from tblCTSequenceHistory sh
-			inner join tblCTContractDetail cd ON cd.intContractDetailId = sh.intContractDetailId
-			inner join tblCTContractHeader ch ON ch.intContractHeaderId = cd.intContractHeaderId
-			where intSequenceUsageHistoryId is null and strPricingStatus not in ( 'Partially Priced', 'Fully Priced')
+			FROM (
+				SELECT sh.intSequenceHistoryId
+					, dtmTransactionDate = dbo.fnRemoveTimeOnDate(cd.dtmCreated)
+					, sh.intContractHeaderId
+					, sh.intContractDetailId
+					, dblQty = sh.dblBalance - isnull(sh.dblOldQuantity,0)
+					, intQtyUOMId = ch.intCommodityUOMId
+					, sh.intPricingTypeId
+					, sh.strPricingType
+					, strTransactionType = 'Contract Sequence'
+					, intTransactionId = sh.intContractDetailId
+					, strTransactionId = sh.strContractNumber + '-' + CAST(sh.intContractSeq AS NVARCHAR(10))
+					, sh.dblFutures
+					, sh.dblBasis
+					, cd.intBasisUOMId
+					, cd.intBasisCurrencyId
+					, intPriceUOMId = sh.intDtlQtyInCommodityUOMId
+					, sh.intContractStatusId
+				FROM tblCTSequenceHistory sh
+				INNER JOIN tblCTContractDetail cd ON cd.intContractDetailId = sh.intContractDetailId
+				INNER JOIN tblCTContractHeader ch ON ch.intContractHeaderId = cd.intContractHeaderId
+				WHERE intSequenceUsageHistoryId IS NULL AND strPricingStatus NOT IN ( 'Partially Priced', 'Fully Priced')
 
-			union
-			select 
-				Row_Number() OVER (PARTITION BY sh.intContractDetailId ORDER BY cd.dtmCreated  DESC, sh.intSequenceHistoryId) AS Row_Num
-				, dtmTransactionDate = dbo.fnRemoveTimeOnDate(cd.dtmCreated)
-				, sh.intContractHeaderId
-				, sh.intContractDetailId
-				, dblQty = sh.dblBalance
-				, intQtyUOMId = ch.intCommodityUOMId
-				, sh.intPricingTypeId
-				, sh.strPricingType
-				, strTransactionType = 'Contract Sequence'
-				, intTransactionId = sh.intContractDetailId
-				, strTransactionId = sh.strContractNumber + '-' + CAST(sh.intContractSeq AS NVARCHAR(10))
-				, sh.dblFutures
-				, sh.dblBasis
-				, cd.intBasisUOMId
-				, cd.intBasisCurrencyId
-				, intPriceUOMId = sh.intDtlQtyInCommodityUOMId
-				, sh.intContractStatusId
-				, intOrderBy = 1
-			from tblCTSequenceHistory sh
-			inner join tblCTContractDetail cd ON cd.intContractDetailId = sh.intContractDetailId
-			inner join tblCTContractHeader ch ON ch.intContractHeaderId = cd.intContractHeaderId
-			where intSequenceUsageHistoryId is null 
+				UNION ALL SELECT sh.intSequenceHistoryId
+					, dtmTransactionDate = dbo.fnRemoveTimeOnDate(cd.dtmCreated)
+					, sh.intContractHeaderId
+					, sh.intContractDetailId
+					, dblQty = sh.dblBalance
+					, intQtyUOMId = ch.intCommodityUOMId
+					, sh.intPricingTypeId
+					, sh.strPricingType
+					, strTransactionType = 'Contract Sequence'
+					, intTransactionId = sh.intContractDetailId
+					, strTransactionId = sh.strContractNumber + '-' + CAST(sh.intContractSeq AS NVARCHAR(10))
+					, sh.dblFutures
+					, sh.dblBasis
+					, cd.intBasisUOMId
+					, cd.intBasisCurrencyId
+					, intPriceUOMId = sh.intDtlQtyInCommodityUOMId
+					, sh.intContractStatusId
+				FROM tblCTSequenceHistory sh
+				INNER JOIN tblCTContractDetail cd ON cd.intContractDetailId = sh.intContractDetailId
+				INNER JOIN tblCTContractHeader ch ON ch.intContractHeaderId = cd.intContractHeaderId
+				WHERE intSequenceUsageHistoryId IS NULL AND strPricingStatus IN ( 'Partially Priced', 'Fully Priced')
+			) t
 
 			union all --HTA (Priced) decrease
 			select 
