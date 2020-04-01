@@ -138,7 +138,7 @@ BEGIN
 		
 	SELECT 
 		intRowNum = CONVERT(INT, ROW_NUMBER() OVER (ORDER BY dtmCreateDate ASC))
-		,dtmTransactionDate = dtmCreateDate
+		,dtmTransactionDate = CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmCreateDate, 110), 110)
 		,dblIn = CASE WHEN dblTotal > 0 THEN dblTotal ELSE 0 END
 		,dblOut = CASE WHEN dblTotal < 0 THEN ABS(dblTotal) ELSE 0 END
 		,strTransactionId = strTransactionNumber
@@ -150,7 +150,7 @@ BEGIN
 	FROM @CompanyTitle
 	WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmCreateDate, 110), 110) BETWEEN CONVERT(DATETIME, @dtmFromTransactionDate) AND CONVERT(DATETIME, @dtmToTransactionDate)
 		--AND intTransactionId IS NOT NULL
-	ORDER BY dtmCreateDate 
+	ORDER BY CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmCreateDate, 110), 110) 
 
 	SELECT	intRowNum, dtmTransactionDate 
 	INTO #tempDateRange
