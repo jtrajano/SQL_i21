@@ -38,6 +38,7 @@ BEGIN
 	DECLARE @ysnIncludeDerivatives BIT
 	DECLARE @ysnIncludeInTransitM2M BIT
 	DECLARE @ysnEnterSeparateMarketBasisDifferentialsForBuyVsSell BIT
+	DECLARE @strEvaluationByZone NVARCHAR(50)
 
 	SELECT TOP 1 @dtmPriceDate = dtmM2MBasisDate FROM tblRKM2MBasis WHERE intM2MBasisId = @intM2MBasisId
 
@@ -49,6 +50,7 @@ BEGIN
 		, @ysnIncludeDerivatives = ysnIncludeDerivatives
 		, @ysnIncludeInTransitM2M = ysnIncludeInTransitM2M
 		, @ysnEnterSeparateMarketBasisDifferentialsForBuyVsSell = ysnEnterSeparateMarketBasisDifferentialsForBuyVsSell
+		, @strEvaluationByZone = strEvaluationByZone
 	FROM tblRKCompanyPreference
 
 	SELECT TOP 1 @dtmSettlemntPriceDate = dtmPriceDate FROM tblRKFuturesSettlementPrice WHERE intFutureSettlementPriceId = @intFutureSettlementPriceId
@@ -869,7 +871,9 @@ BEGIN
 														THEN CASE WHEN ISNULL(tmp.intContractTypeId,0) = 0 THEN tmp.intContractTypeId ELSE cd.intContractTypeId END
 														ELSE tmp.intContractTypeId
 														END 
-											AND tmp.intCompanyLocationId = ISNULL(cd.intCompanyLocationId, tmp.intCompanyLocationId)
+											AND tmp.intCompanyLocationId = CASE WHEN @strEvaluationByZone <> 'Company'
+																				THEN ISNULL(cd.intCompanyLocationId, tmp.intCompanyLocationId)
+																			ELSE tmp.intCompanyLocationId END
 											AND tmp.strPeriodTo = CASE WHEN @ysnEnterForwardCurveForMarketBasisDifferential = 1
 																			THEN CASE WHEN tmp.strPeriodTo = '' THEN tmp.strPeriodTo ELSE dbo.fnRKFormatDate(cd.dtmEndDate,'MMM yyyy') END
 																		ELSE tmp.strPeriodTo END
@@ -881,7 +885,9 @@ BEGIN
 														THEN CASE WHEN ISNULL(tmp.intContractTypeId,0) = 0 THEN tmp.intContractTypeId ELSE cd.intContractTypeId END
 														ELSE tmp.intContractTypeId
 														END 
-											AND tmp.intCompanyLocationId = ISNULL(cd.intCompanyLocationId, tmp.intCompanyLocationId)
+											AND tmp.intCompanyLocationId = CASE WHEN @strEvaluationByZone <> 'Company'
+																				THEN ISNULL(cd.intCompanyLocationId, tmp.intCompanyLocationId)
+																			ELSE tmp.intCompanyLocationId END
 											AND tmp.strPeriodTo = CASE WHEN @ysnEnterForwardCurveForMarketBasisDifferential = 1
 																			THEN CASE WHEN tmp.strPeriodTo = '' THEN tmp.strPeriodTo ELSE dbo.fnRKFormatDate(cd.dtmEndDate,'MMM yyyy') END
 																		ELSE tmp.strPeriodTo END
@@ -893,7 +899,9 @@ BEGIN
 														THEN CASE WHEN ISNULL(tmp.intContractTypeId,0) = 0 THEN tmp.intContractTypeId ELSE cd.intContractTypeId END
 														ELSE tmp.intContractTypeId
 														END 
-											AND tmp.intCompanyLocationId = ISNULL(cd.intCompanyLocationId, tmp.intCompanyLocationId)
+											AND tmp.intCompanyLocationId = CASE WHEN @strEvaluationByZone <> 'Company'
+																				THEN ISNULL(cd.intCompanyLocationId, tmp.intCompanyLocationId)
+																			ELSE tmp.intCompanyLocationId END
 											AND tmp.strPeriodTo = CASE WHEN @ysnEnterForwardCurveForMarketBasisDifferential = 1
 																			THEN CASE WHEN tmp.strPeriodTo = '' THEN tmp.strPeriodTo ELSE dbo.fnRKFormatDate(cd.dtmEndDate,'MMM yyyy') END
 																		ELSE tmp.strPeriodTo END
@@ -905,7 +913,9 @@ BEGIN
 														THEN CASE WHEN ISNULL(tmp.intContractTypeId,0) = 0 THEN tmp.intContractTypeId ELSE cd.intContractTypeId END
 														ELSE tmp.intContractTypeId
 														END 
-											AND tmp.intCompanyLocationId = ISNULL(cd.intCompanyLocationId, tmp.intCompanyLocationId)
+											AND tmp.intCompanyLocationId = CASE WHEN @strEvaluationByZone <> 'Company'
+																				THEN ISNULL(cd.intCompanyLocationId, tmp.intCompanyLocationId)
+																			ELSE tmp.intCompanyLocationId END
 											AND tmp.strPeriodTo = CASE WHEN @ysnEnterForwardCurveForMarketBasisDifferential = 1
 																			THEN CASE WHEN tmp.strPeriodTo = '' THEN tmp.strPeriodTo ELSE dbo.fnRKFormatDate(cd.dtmEndDate,'MMM yyyy') END
 																		ELSE tmp.strPeriodTo END
@@ -917,7 +927,9 @@ BEGIN
 														THEN CASE WHEN ISNULL(tmp.intContractTypeId,0) = 0 THEN tmp.intContractTypeId ELSE cd.intContractTypeId END
 														ELSE tmp.intContractTypeId
 														END 
-											AND tmp.intCompanyLocationId = ISNULL(cd.intCompanyLocationId, tmp.intCompanyLocationId)
+											AND tmp.intCompanyLocationId = CASE WHEN @strEvaluationByZone <> 'Company'
+																				THEN ISNULL(cd.intCompanyLocationId, tmp.intCompanyLocationId)
+																			ELSE tmp.intCompanyLocationId END
 											AND tmp.strPeriodTo = CASE WHEN @ysnEnterForwardCurveForMarketBasisDifferential = 1
 																			THEN CASE WHEN tmp.strPeriodTo = '' THEN tmp.strPeriodTo ELSE dbo.fnRKFormatDate(cd.dtmEndDate,'MMM yyyy') END
 																		ELSE tmp.strPeriodTo END

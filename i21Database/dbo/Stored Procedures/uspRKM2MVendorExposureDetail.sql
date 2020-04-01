@@ -99,6 +99,61 @@ BEGIN TRY
 		, @intLocationId = @intLocationId
 		, @intMarketZoneId = @intMarketZoneId
 
+	DECLARE @dtmSettlemntPriceDate DATETIME 
+	DECLARE @intMarkExpiredMonthPositionId INT
+
+	SELECT TOP 1 @dtmSettlemntPriceDate = dtmPriceDate FROM tblRKFuturesSettlementPrice WHERE intFutureSettlementPriceId = @intFutureSettlementPriceId
+	SELECT TOP 1 
+		 @intMarkExpiredMonthPositionId = intMarkExpiredMonthPositionId
+	FROM tblRKCompanyPreference
+
+	DECLARE @tblGetSettlementPrice TABLE (dblLastSettle NUMERIC(24,10)
+		, intFutureMonthId INT
+		, intFutureMarketId INT)
+
+	IF (@intMarkExpiredMonthPositionId = 2 OR @intMarkExpiredMonthPositionId = 3)
+	BEGIN
+		INSERT INTO @tblGetSettlementPrice
+		SELECT dblLastSettle
+			, intFutureMonthId
+			, intFutureMarketId
+		FROM (
+			SELECT ROW_NUMBER() OVER (PARTITION BY pm.intFutureMonthId ORDER BY dtmPriceDate DESC) intRowNum
+				, dblLastSettle = dblLastSettle /  CASE WHEN c.ysnSubCurrency = 1 THEN 100 ELSE 1 END
+				, fm.intFutureMonthId
+				, p.intFutureMarketId
+				, fm.ysnExpired ysnExpired
+				, strFutureMonth
+			FROM tblRKFuturesSettlementPrice p
+			INNER JOIN tblRKFutSettlementPriceMarketMap pm ON p.intFutureSettlementPriceId = pm.intFutureSettlementPriceId
+			JOIN tblRKFuturesMonth fm ON fm.intFutureMonthId= pm.intFutureMonthId
+			JOIN tblRKFutureMarket m on m.intFutureMarketId = p.intFutureMarketId
+			JOIN tblSMCurrency c ON c.intCurrencyID = m.intCurrencyId
+			WHERE p.intFutureMarketId =fm.intFutureMarketId
+				AND CONVERT(NVARCHAR, dtmPriceDate, 111) <= CONVERT(NVARCHAR, @dtmSettlemntPriceDate, 111)
+		) t WHERE t.intRowNum = 1
+	END
+	ELSE
+	BEGIN
+		INSERT INTO @tblGetSettlementPrice
+		SELECT dblLastSettle = dblLastSettle /  CASE WHEN c.ysnSubCurrency = 1 THEN 100 ELSE 1 END
+			, fm.intFutureMonthId
+			, fm.intFutureMarketId
+		FROM tblRKFuturesSettlementPrice p
+		INNER JOIN tblRKFutSettlementPriceMarketMap pm ON p.intFutureSettlementPriceId = pm.intFutureSettlementPriceId
+		JOIN tblRKFuturesMonth fm ON fm.intFutureMonthId = CASE WHEN ISNULL(fm.ysnExpired, 0) = 0 THEN pm.intFutureMonthId
+																ELSE (SELECT TOP 1 intFutureMonthId
+																		FROM tblRKFuturesMonth fm
+																		WHERE ysnExpired = 0 AND fm.intFutureMarketId = p.intFutureMarketId
+																			AND CONVERT(DATETIME, '01 ' + strFutureMonth) > GETDATE()
+																		ORDER BY CONVERT(DATETIME, '01 ' + strFutureMonth) ASC) END
+		JOIN tblRKFutureMarket m on m.intFutureMarketId = p.intFutureMarketId
+		JOIN tblSMCurrency c ON c.intCurrencyID = m.intCurrencyId
+		WHERE p.intFutureMarketId =fm.intFutureMarketId
+			AND CONVERT(NVARCHAR, dtmPriceDate, 111) = CONVERT(NVARCHAR, @dtmSettlemntPriceDate, 111)
+		ORDER BY dtmPriceDate DESC
+	END
+
 	SELECT DISTINCT cd.*
 		, strProducer = (CASE WHEN ISNULL(ysnClaimsToProducer, 0) = 1 THEN e.strName ELSE NULL END)
 		, intProducerId = (CASE WHEN ISNULL(ysnClaimsToProducer, 0) = 1 THEN ch.intProducerId ELSE NULL END)
@@ -187,12 +242,11 @@ BEGIN TRY
 																										, ISNULL(intPriceUOMId, fd.intCommodityUnitMeasureId)
 																										, fd.dblOpenQty))
 				, dblUPContractBasis = ISNULL(fd.dblContractBasis, 0)
-				, dblUPFutures = ISNULL(fd.dblFuturePrice, 0)
-				, dblQtyUnFixedPrice = dbo.fnCTConvertQuantityToTargetCommodityUOM(CASE WHEN ISNULL(intQuantityUOMId, 0) = 0 THEN fd.intCommodityUnitMeasureId ELSE intQuantityUOMId END
+				, dblUPFutures = (select top 1 ISNULL(dblLastSettle,0) from @tblGetSettlementPrice where intFutureMonthId = fd.intFutureMonthId), dblQtyUnFixedPrice = dbo.fnCTConvertQuantityToTargetCommodityUOM(CASE WHEN ISNULL(intQuantityUOMId, 0) = 0 THEN fd.intCommodityUnitMeasureId ELSE intQuantityUOMId END
 															, fd.intCommodityUnitMeasureId
 															, dbo.fnCTConvertQuantityToTargetCommodityUOM(fd.intCommodityUnitMeasureId
 																										, ISNULL(intPriceUOMId, fd.intCommodityUnitMeasureId)
-																										, fd.dblOpenQty * ((ISNULL(fd.dblContractBasis,0))+(isnull(fd.dblFuturePrice,0)))))
+																										, fd.dblOpenQty * ((ISNULL(fd.dblContractBasis,0))+(select top 1 ISNULL(dblLastSettle,0) from @tblGetSettlementPrice where intFutureMonthId = fd.intFutureMonthId))))
 			FROM #temp fd
 			JOIN tblCTContractDetail det ON fd.intContractDetailId = det.intContractDetailId
 			JOIN tblCTContractHeader ch ON ch.intContractHeaderId = det.intContractHeaderId
@@ -266,12 +320,12 @@ BEGIN TRY
 																									, ISNULL(intPriceUOMId, fd.intCommodityUnitMeasureId)
 																									, fd.dblOpenQty))
 				, dblUPContractBasis = ISNULL(fd.dblContractBasis, 0)
-				, dblUPFutures = ISNULL(fd.dblFuturePrice, 0)
+				, dblUPFutures = (select top 1 ISNULL(dblLastSettle,0) from @tblGetSettlementPrice where intFutureMonthId = fd.intFutureMonthId)
 				, dblQtyUnFixedPrice = dbo.fnCTConvertQuantityToTargetCommodityUOM(CASE WHEN ISNULL(intQuantityUOMId, 0) = 0 THEN fd.intCommodityUnitMeasureId ELSE intQuantityUOMId END
 														, fd.intCommodityUnitMeasureId
 														, dbo.fnCTConvertQuantityToTargetCommodityUOM(fd.intCommodityUnitMeasureId
 																									, ISNULL(intPriceUOMId, fd.intCommodityUnitMeasureId)
-																									, fd.dblOpenQty * (ISNULL(fd.dblContractBasis, 0) + ISNULL(fd.dblFuturePrice, 0))))
+																									, fd.dblOpenQty * (ISNULL(fd.dblContractBasis, 0) + (select top 1 ISNULL(dblLastSettle,0) from @tblGetSettlementPrice where intFutureMonthId = fd.intFutureMonthId))))
 			FROM #temp fd
 			JOIN tblCTContractDetail det ON fd.intContractDetailId = det.intContractDetailId
 			join tblCTContractHeader ch ON ch.intContractHeaderId = det.intContractHeaderId
