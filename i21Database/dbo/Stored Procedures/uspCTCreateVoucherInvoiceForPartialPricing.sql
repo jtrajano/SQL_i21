@@ -329,6 +329,11 @@ BEGIN TRY
 					BEGIN
 						SELECT	@strVendorOrderNumber = ISNULL(strPrefix,'') + @strVendorOrderNumber FROM tblSMStartingNumber WHERE strTransactionType = 'Ticket Management' AND strModule = 'Ticket Management'
 					END		
+
+					IF @strVendorOrderNumber IS NULL
+					BEGIN
+						SELECT @strVendorOrderNumber = strReceiptNumber FROM tblICInventoryReceipt WHERE intInventoryReceiptId = @intInventoryReceiptId
+					END
 					
 					IF @dblTotalIVForPFQty = @dblPriceFxdQty
 					BEGIN
@@ -569,8 +574,7 @@ BEGIN TRY
 
 							IF (@intNewBillId IS NOT NULL AND @intNewBillId > 0)
 							BEGIN
-
-								IF EXISTS(SELECT TOP 1 1 FROM tblAPBill WHERE intBillId = @intNewBillId AND dtmDate < @dtmFixationDate AND @intTransactionId IS NULL)
+								IF EXISTS(SELECT TOP 1 1 FROM tblAPBill WHERE intBillId = @intNewBillId AND dtmDate <= @dtmFixationDate AND @intTransactionId IS NULL)
 								BEGIN
 									UPDATE	
 										tblAPBill 
