@@ -1,8 +1,9 @@
-﻿CREATE PROCEDURE [dbo].[uspCTPriceFixationDetailReverse]
+﻿CREATE PROCEDURE [dbo].[uspCTValidatePriceFixationDetailReverse]
+		
 	@intPriceFixationId			INT = NULL,
 	@intPriceFixationDetailId	INT = NULL,
-	@intPriceFixationTicketId	INT = NULL,
-	@intUserId					INT
+	@intPriceFixationTicketId	INT = NULL
+	
 AS
 BEGIN TRY
 	
@@ -15,11 +16,7 @@ BEGIN TRY
 			@BillDetailId			INT,
 			@ItemId					INT,
 			@Quantity				NUMERIC(18,6),
-			@TransQty				NUMERIC(18,6),
-			@ysnSuccess				BIT,
-			@intContractHeaderId 	INT,
-			@intContractDetailId 	INT,
-			@billCreatedId 			INT		
+			@TransQty				NUMERIC(18,6)
 
 	SELECT  DA.intPriceFixationDetailAPARId
 			,BL.intBillId AS Id
@@ -41,28 +38,17 @@ BEGIN TRY
 	SELECT DISTINCT @Id = MIN(Id) FROM #ItemBill
 	WHILE ISNULL(@Id,0) > 0
 	BEGIN
-		EXEC uspAPReverseTransaction @Id, @intUserId, null, @billCreatedId OUTPUT
+		-- Check if received is equal with the delete pricing
+		SELECT @Quantity = SUM(Quantity) FROM #ItemBill WHERE Id = @Id
+		SELECT @TransQty = SUM(dblQtyReceived) FROM tblAPBillDetail WHERE intBillId = @Id AND intInventoryReceiptChargeId IS NULL
+		-- If equal debit memo the voucher
+		IF @Quantity <> @TransQty
+		BEGIN
+			SET @ErrMsg = 'Unable to delete pricing, try to delete the whole pricing.'
+			RAISERROR(@ErrMsg,16,1)
+		END
 		SELECT DISTINCT @Id = MIN(Id) FROM #ItemBill WHERE Id > @Id
 	END
-
-	-- Tag APAR as reverse
-	UPDATE  tblCTPriceFixationDetailAPAR SET ysnReverse = 1
-	WHERE intPriceFixationDetailAPARId IN 
-	(
-		SELECT intPriceFixationDetailAPARId FROM #ItemBill
-	)
-
-	IF (@intPriceFixationId IS NULL OR @intPriceFixationId < 1)
-	BEGIN
-		SELECT @intPriceFixationId = intPriceFixationId FROM  tblCTPriceFixationDetail WHERE intPriceFixationDetailId = @intPriceFixationDetailId
-	END
-
-	SELECT @intContractHeaderId = intContractHeaderId, @intContractDetailId = intContractDetailId from tblCTPriceFixation where intPriceFixationId = @intPriceFixationId
-
-	EXEC uspCTCreateDetailHistory @intContractHeaderId 	= @intContractHeaderId, 
-								@intContractDetailId 	= @intContractDetailId, 
-								@strSource 				= 'Pricing',
-								@strProcess 			= 'Reverse'
 
 END TRY
 
