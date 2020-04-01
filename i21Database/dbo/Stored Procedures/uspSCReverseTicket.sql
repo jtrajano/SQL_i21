@@ -74,6 +74,7 @@ DECLARE @_intTransactionId INT
 DECLARE @_strTransactionId INT
 DECLARE @_strBatchId NVARCHAR(100)
 DECLARE @SummaryLogs AS RKSummaryLog
+DECLARE @_intStorageHistoryId INT
 
 
 
@@ -312,6 +313,10 @@ BEGIN TRY
 										ON  AA.intInventoryReceiptId = BB.intInventoryReceiptId
 									WHERE AA.intInventoryReceiptId = @_intReversalReceiptShipmentId) B
 							WHERE A.intInventoryReceiptId = @_intInventoryReceiptShipmentId
+
+							--Log summary Risk
+							SET @_intStorageHistoryId = SCOPE_IDENTITY()
+							EXEC uspGRRiskSummaryLog @_intStorageHistoryId
 
 							--update customer storage
 							UPDATE tblGRCustomerStorage

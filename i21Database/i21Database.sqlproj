@@ -8606,6 +8606,7 @@
     <Build Include="dbo\Stored Procedures\uspCTReportContractStrauss.sql" />
     <Build Include="dbo\Stored Procedures\uspCTValidatePriceFixationDetailReverse.sql" />
     <Build Include="dbo\Views\vyuSTConsolidatedCheckoutChangeFundDetailReport.sql" />
+    <Build Include="dbo\Tables\tblSCTicketDiscountHistory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
