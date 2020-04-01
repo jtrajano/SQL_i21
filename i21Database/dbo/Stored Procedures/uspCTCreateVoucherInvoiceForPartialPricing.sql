@@ -225,9 +225,11 @@ BEGIN TRY
 							dbo.fnCTConvertQtyToTargetItemUOM(RI.intUnitMeasureId,CD.intItemUOMId,RI.dblReceived) dblReceived,
 							IR.strReceiptNumber,
 							(
-								SELECT  SUM(dbo.fnCTConvertQtyToTargetItemUOM(ID.intUnitOfMeasureId,@intItemUOMId,dblQtyReceived)) 
-								FROM	tblAPBillDetail ID 
-								WHERE	intInventoryReceiptItemId = RI.intInventoryReceiptItemId AND intInventoryReceiptChargeId IS NULL
+								SELECT SUM(dbo.fnCTConvertQtyToTargetItemUOM(BD.intUnitOfMeasureId,@intItemUOMId,BD.dblQtyReceived)) 
+								FROM tblAPBill B 
+								LEFT JOIN tblAPBill B1 ON B.intBillId = B1.intBillId
+								INNER JOIN tblAPBillDetail BD ON B.intBillId = BD.intBillId
+								WHERE B.intTransactionType = 1 AND BD.intInventoryReceiptItemId = RI.intInventoryReceiptItemId AND BD.intInventoryReceiptChargeId IS NULL AND B.intBillId IS NULL
 							) AS dblTotalIVForSHQty,
 							FT.dblQuantity,
 							RI.intLoadReceive
@@ -263,9 +265,11 @@ BEGIN TRY
 							dbo.fnCTConvertQtyToTargetItemUOM(RI.intUnitMeasureId,CD.intItemUOMId,RI.dblReceived) dblReceived,
 							IR.strReceiptNumber,
 							(
-								SELECT  SUM(dbo.fnCTConvertQtyToTargetItemUOM(ID.intUnitOfMeasureId,@intItemUOMId,dblQtyReceived)) 
-								FROM	tblAPBillDetail ID 
-								WHERE	intInventoryReceiptItemId = RI.intInventoryReceiptItemId AND intInventoryReceiptChargeId IS NULL
+								SELECT SUM(dbo.fnCTConvertQtyToTargetItemUOM(BD.intUnitOfMeasureId,@intItemUOMId,BD.dblQtyReceived)) 
+								FROM tblAPBill B 
+								LEFT JOIN tblAPBill B1 ON B.intBillId = B1.intBillId
+								INNER JOIN tblAPBillDetail BD ON B.intBillId = BD.intBillId
+								WHERE B.intTransactionType = 1 AND BD.intInventoryReceiptItemId = RI.intInventoryReceiptItemId AND BD.intInventoryReceiptChargeId IS NULL AND B.intBillId IS NULL
 							) AS dblTotalIVForSHQty,
 							0,
 							RI.intLoadReceive
@@ -274,7 +278,7 @@ BEGIN TRY
 															AND IR.strReceiptType				=   'Purchase Contract'
 					JOIN    tblCTContractDetail			CD  ON  CD.intContractDetailId			=   RI.intLineNo
 					WHERE	RI.intLineNo	=  @intContractDetailId 
-						AND (@ysnLoad = 0 or RI.dblBillQty <> dblOpenReceive)
+						AND (ISNULL(@ysnLoad,0) = 0 or RI.dblBillQty <> dblOpenReceive)
 							AND	IR.strDataSource <> 'Reverse'
 							AND IR.intInventoryReceiptId NOT IN 
 							(
@@ -571,7 +575,7 @@ BEGIN TRY
 							END
 
 							INSERT INTO @tblCreatedTransaction VALUES (@intNewBillId)
-
+							
 							IF (@intNewBillId IS NOT NULL AND @intNewBillId > 0)
 							BEGIN
 								IF EXISTS(SELECT TOP 1 1 FROM tblAPBill WHERE intBillId = @intNewBillId AND dtmDate <= @dtmFixationDate AND @intTransactionId IS NULL)
@@ -1559,5 +1563,3 @@ BEGIN CATCH
 	RAISERROR (@ErrMsg,18,1,'WITH NOWAIT')  
 	
 END CATCH
-
-GO
