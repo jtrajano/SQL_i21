@@ -8510,6 +8510,7 @@
     <Build Include="dbo\Stored Procedures\uspARInvoicePopulateStgXML.sql" />
     <Build Include="dbo\Stored Procedures\uspARInvoiceTransferStgXML.sql" />
     <Build Include="dbo\Stored Procedures\uspARInvoiceProcessStgXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTReportContractStrauss.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
