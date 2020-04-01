@@ -102,14 +102,20 @@ BEGIN TRY
 			IF @ysnLoad = 1
 			BEGIN
 				INSERT @temporary
-				SELECT -1, intNoOfLoad, intContractHeaderId, intContractDetailId
+				SELECT -1
+					,CASE WHEN intPricingTypeId = 5 THEN 0 ELSE intNoOfLoad END
+					,intContractHeaderId
+					,intContractDetailId
 				FROM tblCTContractDetail
 				WHERE intContractDetailId = @intContractDetailId
 			END
 			ELSE
 			BEGIN
 				INSERT @temporary
-				SELECT -1, dblQuantity, intContractHeaderId, intContractDetailId
+				SELECT -1
+					,CASE WHEN intPricingTypeId = 5 THEN 0 ELSE dblQuantity END
+					,intContractHeaderId
+					,intContractDetailId
 				FROM tblCTContractDetail
 				WHERE intContractDetailId = @intContractDetailId
 			END
