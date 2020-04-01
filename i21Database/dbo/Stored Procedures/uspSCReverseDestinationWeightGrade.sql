@@ -74,7 +74,7 @@ BEGIN TRY
 				,@success = @success OUTPUT
 			END
 			IF ISNULL(@intBillId, 0) > 0
-				EXEC [dbo].[uspAPDeleteVoucher] @intBillId, @intUserId
+				EXEC [dbo].[uspAPDeleteVoucher] @intBillId, @intUserId, 2
 
 			IF ISNULL(@intContractDetailId,0) != 0
 			BEGIN
