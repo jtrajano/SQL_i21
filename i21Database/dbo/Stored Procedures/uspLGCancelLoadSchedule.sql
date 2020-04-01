@@ -50,6 +50,8 @@ BEGIN TRY
 			IF EXISTS (SELECT TOP 1 1 FROM tblRKCompanyPreference WHERE ysnImposeReversalTransaction = 1)
 			BEGIN
 				DECLARE @strTransactionNo NVARCHAR(100)
+				DECLARE @strInvoiceNo NVARCHAR(100) = ''
+				DECLARE @strVoucherNo NVARCHAR(100) = ''
 				/* Validations to Reverse related transactions */
 
 				--Validate if Load has posted Weight Claim
@@ -67,34 +69,26 @@ BEGIN TRY
 				END
 
 				--Validate if Invoice exists
-				IF EXISTS (
-					SELECT TOP 1 1
-					FROM tblLGLoad L
-					JOIN tblARInvoice I ON L.intLoadId = I.intLoadId
-					WHERE L.intLoadId = @intLoadId
-					AND I.ysnReturned = 0 and I.strTransactionType <> 'Credit Memo'
-					)
-				BEGIN
-					SELECT TOP 1 @strTransactionNo = I.strInvoiceNumber
+				SELECT TOP 1 @strInvoiceNo = I.strInvoiceNumber
 					FROM tblLGLoad L
 					JOIN tblARInvoice I ON L.intLoadId = I.intLoadId
 					WHERE L.intLoadId = @intLoadId
 						AND I.ysnReturned = 0 and I.strTransactionType <> 'Credit Memo'
 
-					SET @strErrMsg = 'Invoice ' + @strTransactionNo + ' has been generated for ' + @strLoadNumber 
-						+ '. Cannot cancel.';
-
-					RAISERROR (@strErrMsg,16,1);
-
-					RETURN 0;
-				END
-
 				--Validate if Voucher exists
-				IF EXISTS(SELECT TOP 1 1 FROM tblAPBillDetail BD 
+				SELECT TOP 1 @strVoucherNo = B.strBillId
+				FROM tblAPBillDetail BD 
+				JOIN tblAPBill B ON B.intBillId = BD.intBillId
 				JOIN tblLGLoadDetail LD ON BD.intLoadDetailId = LD.intLoadDetailId
-				WHERE LD.intLoadId = @intLoadId)
+				WHERE LD.intLoadId = @intLoadId
+
+				IF (@strInvoiceNo IS NOT NULL OR @strVoucherNo IS NOT NULL)
 				BEGIN
-					SET @strErrMsg = 'Voucher was already created for ' + @strLoadNumber + '. Cannot cancel.';
+					SET @strErrMsg = CASE WHEN (@strInvoiceNo IS NOT NULL) THEN 'Invoice ' + @strInvoiceNo + ' ' ELSE '' END
+						+ CASE WHEN (@strInvoiceNo IS NOT NULL AND @strVoucherNo IS NOT NULL) THEN 'and ' ELSE '' END
+						+ CASE WHEN (@strVoucherNo IS NOT NULL) THEN 'Voucher ' + @strVoucherNo + ' ' ELSE '' END 
+						+ CASE WHEN (@strInvoiceNo IS NOT NULL AND @strVoucherNo IS NOT NULL) THEN 'were ' ELSE 'was ' END
+						+ 'already created for ' + @strLoadNumber + '. Cannot cancel.';
 
 					RAISERROR(@strErrMsg, 16, 1);
 					RETURN 0;
