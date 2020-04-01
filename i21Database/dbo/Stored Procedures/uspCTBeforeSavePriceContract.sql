@@ -20,7 +20,8 @@ BEGIN TRY
 			@intPriceFixationTicketId	INT,
 			@intFutOptTransactionId		INT,
 			@strAction					NVARCHAR(50) = '',
-			@intFutOptTransactionHeaderId INT = NULL
+			@intFutOptTransactionHeaderId INT = NULL,
+			@intContractTypeId 			INT
 
 	--IF @strXML = 'Delete'
 	--BEGIN
@@ -35,6 +36,11 @@ BEGIN TRY
 	--	END
 	--END
 
+	SELECT @intContractTypeId = b.intContractTypeId
+	FROM tblCTPriceFixation a
+	INNER JOIN tblCTContractHeader b on a.intContractHeaderId = b.intContractHeaderId
+	WHERE b.intContractTypeId = 2
+	AND a.intPriceContractId = @intPriceContractId
 
 	IF @strXML = 'Delete'
 	BEGIN
@@ -105,7 +111,7 @@ BEGIN TRY
 		
 		IF @strRowState = 'Delete'
 		BEGIN			
-			IF EXISTS(SELECT TOP 1 1 FROM tblRKCompanyPreference WHERE ysnImposeReversalTransaction = 1)
+			IF EXISTS(SELECT TOP 1 1 FROM tblRKCompanyPreference WHERE ysnImposeReversalTransaction = 1 AND @intContractTypeId = 1)
 			BEGIN
 				EXEC uspCTValidatePriceFixationDetailReverse @intPriceFixationId = @intPriceFixationId
 				EXEC uspCTPriceFixationDetailReverse @intPriceFixationId = @intPriceFixationId, @intUserId = @intUserId
@@ -164,7 +170,7 @@ BEGIN TRY
 		
 		IF @strRowState = 'Delete'
 		BEGIN
-			IF EXISTS(SELECT TOP 1 1 FROM tblRKCompanyPreference WHERE ysnImposeReversalTransaction = 1)
+			IF EXISTS(SELECT TOP 1 1 FROM tblRKCompanyPreference WHERE ysnImposeReversalTransaction = 1 AND @intContractTypeId = 1)
 			BEGIN
 				EXEC uspCTValidatePriceFixationDetailReverse @intPriceFixationDetailId = @intPriceFixationDetailId
 				EXEC uspCTPriceFixationDetailReverse @intPriceFixationDetailId = @intPriceFixationDetailId, @intUserId = @intUserId
@@ -205,7 +211,7 @@ BEGIN TRY
 		
 		IF @strRowState = 'Delete'
 		BEGIN
-			IF EXISTS(SELECT TOP 1 1 FROM tblRKCompanyPreference WHERE ysnImposeReversalTransaction = 1)
+			IF EXISTS(SELECT TOP 1 1 FROM tblRKCompanyPreference WHERE ysnImposeReversalTransaction = 1 AND @intContractTypeId = 1)
 			BEGIN
 				EXEC uspCTValidatePriceFixationDetailUpdateDelete @intPriceFixationTicketId = @intPriceFixationTicketId
 				EXEC uspCTPriceFixationDetailReverse @intPriceFixationTicketId = @intPriceFixationTicketId, @intUserId = @intUserId
