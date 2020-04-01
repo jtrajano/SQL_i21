@@ -10,6 +10,7 @@
 	7 = LG
 	8 = Payroll
 	9 = Credit Card
+	10 = BuyBack
 */
 CREATE PROCEDURE [dbo].[uspAPDeleteVoucher]
 	 @intBillId	INT   
@@ -43,7 +44,20 @@ BEGIN TRY
 	
 	--CHECK IF POSTED
 	IF(EXISTS(SELECT NULL FROM dbo.tblAPBill WHERE intBillId = @intBillId AND ISNULL(ysnPosted,0) = 1))
-		RAISERROR('The transaction is already posted.',16,1)			
+	BEGIN
+		RAISERROR('The transaction is already posted.',16,1);
+		RETURN;
+	END
+
+	--DO NOT ALLOW TO DELETE IF ORIGINAL RECORD FOR REVERSAL IS POSTED
+	--WE WILL HAVE CLEARING/COSTING ISSUE
+	IF((SELECT B.ysnPosted FROM tblAPBill A 
+			INNER JOIN tblAPBill B ON A.intReversalId = B.intBillId
+			WHERE A.intBillId = @intBillId AND A.intTransactionType = 1) = 1)
+	BEGIN
+		RAISERROR('Unable to delete. Transaction reversal is posted.',16,1);
+		RETURN;
+	END			
 
 	IF EXISTS(SELECT 1 FROM tblCTPriceFixationDetailAPAR WHERE intBillId = @intBillId)
 	BEGIN

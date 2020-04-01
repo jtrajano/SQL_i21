@@ -99,7 +99,7 @@ AS
 					FROM (SELECT DISTINCT intInvoiceDetailId FROM tblBBBuybackDetail WHERE intBuybackId = @intBuyBackId) A
 					WHERE tblARInvoiceDetail.intInvoiceDetailId = A.intInvoiceDetailId
 
-					EXEC [uspAPDeleteVoucher] @intBillId, @intUserId
+					EXEC [uspAPDeleteVoucher] @intBillId, @intUserId, 10
 				COMMIT
 			END TRY
 			BEGIN CATCH

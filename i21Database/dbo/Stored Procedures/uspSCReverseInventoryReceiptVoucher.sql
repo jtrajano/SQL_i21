@@ -107,7 +107,7 @@ BEGIN TRY
 		IF(ISNULL(@ysnPost,0) = 0)
 		BEGIN
 			DELETE FROM tblCTPriceFixationDetailAPAR WHERE intBillId = @_intBillId
-			EXEC [dbo].[uspAPDeleteVoucher] @_intBillId, @intUserId
+			EXEC [dbo].[uspAPDeleteVoucher] @_intBillId, @intUserId, 2
 		END
 		ELSE
 		BEGIN

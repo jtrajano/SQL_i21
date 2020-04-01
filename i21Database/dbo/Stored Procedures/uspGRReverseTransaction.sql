@@ -279,7 +279,7 @@ BEGIN TRY
 		IF @NoOFHistorysForBill = 1
 		BEGIN		
 				EXEC uspGRDeleteStorageHistory 'Voucher',@intBillId
-				EXEC uspAPDeleteVoucher @intBillId,@intEntityUserSecurityId		
+				EXEC uspAPDeleteVoucher @intBillId,@intEntityUserSecurityId, 1		
 		END
 		ELSE
 		BEGIN

@@ -282,7 +282,7 @@ BEGIN TRY
 								RETURN;
 							END
 						END
-						EXEC [dbo].[uspAPDeleteVoucher] @intBillId, @intUserId
+						EXEC [dbo].[uspAPDeleteVoucher] @intBillId, @intUserId, 2
 						FETCH NEXT FROM voucherCursor INTO @intBillId;
 					END
 
