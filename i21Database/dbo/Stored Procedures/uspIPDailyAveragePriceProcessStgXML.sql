@@ -574,9 +574,22 @@ BEGIN TRY
 				,@intTransactionRefId
 				,@intCompanyRefId
 
-			EXECUTE dbo.uspSMInterCompanyUpdateMapping @currentTransactionId = @intTransactionRefId
-				,@referenceTransactionId = @intTransactionId
-				,@referenceCompanyId = @intCompanyId
+			IF @intTransactionRefId IS NULL
+			BEGIN
+				SELECT @strErrorMessage = 'Current Transaction Id is not available. '
+
+				RAISERROR (
+							@strErrorMessage
+							,16
+							,1
+							)
+			END
+			ELSE
+			BEGIN
+				EXECUTE dbo.uspSMInterCompanyUpdateMapping @currentTransactionId = @intTransactionRefId
+					,@referenceTransactionId = @intTransactionId
+					,@referenceCompanyId = @intCompanyId
+			END
 
 			UPDATE tblRKDailyAveragePriceStage
 			SET strFeedStatus = 'Processed'
