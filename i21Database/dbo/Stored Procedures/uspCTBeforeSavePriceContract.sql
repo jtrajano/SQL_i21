@@ -104,14 +104,15 @@ BEGIN TRY
 		WHERE	intUniqueId				=	 @intUniqueId
 		
 		IF @strRowState = 'Delete'
-		BEGIN
-			EXEC uspCTValidatePriceFixationDetailUpdateDelete @intPriceFixationId = @intPriceFixationId
+		BEGIN			
 			IF EXISTS(SELECT TOP 1 1 FROM tblRKCompanyPreference WHERE ysnImposeReversalTransaction = 1)
 			BEGIN
+				EXEC uspCTValidatePriceFixationDetailReverse @intPriceFixationId = @intPriceFixationId
 				EXEC uspCTPriceFixationDetailReverse @intPriceFixationId = @intPriceFixationId, @intUserId = @intUserId
 			END	
 			ELSE
 			BEGIN
+				EXEC uspCTValidatePriceFixationDetailUpdateDelete @intPriceFixationId = @intPriceFixationId
 				EXEC uspCTPriceFixationDetailDelete @intPriceFixationId = @intPriceFixationId, @intUserId = @intUserId
 			END		
 		END
@@ -163,13 +164,14 @@ BEGIN TRY
 		
 		IF @strRowState = 'Delete'
 		BEGIN
-			EXEC uspCTValidatePriceFixationDetailUpdateDelete @intPriceFixationDetailId = @intPriceFixationDetailId
 			IF EXISTS(SELECT TOP 1 1 FROM tblRKCompanyPreference WHERE ysnImposeReversalTransaction = 1)
 			BEGIN
-				EXEC uspCTPriceFixationDetailReverse @intPriceFixationId = @intPriceFixationId, @intUserId = @intUserId
+				EXEC uspCTValidatePriceFixationDetailReverse @intPriceFixationDetailId = @intPriceFixationDetailId
+				EXEC uspCTPriceFixationDetailReverse @intPriceFixationDetailId = @intPriceFixationDetailId, @intUserId = @intUserId
 			END	
 			ELSE
 			BEGIN
+				EXEC uspCTValidatePriceFixationDetailUpdateDelete @intPriceFixationDetailId = @intPriceFixationDetailId
 				EXEC uspCTPriceFixationDetailDelete @intPriceFixationDetailId = @intPriceFixationDetailId, @intUserId = @intUserId
 			END		
 		END
@@ -203,15 +205,16 @@ BEGIN TRY
 		
 		IF @strRowState = 'Delete'
 		BEGIN
-			EXEC uspCTValidatePriceFixationDetailUpdateDelete @intPriceFixationTicketId = @intPriceFixationTicketId
 			IF EXISTS(SELECT TOP 1 1 FROM tblRKCompanyPreference WHERE ysnImposeReversalTransaction = 1)
 			BEGIN
-				EXEC uspCTPriceFixationDetailReverse @intPriceFixationId = @intPriceFixationId, @intUserId = @intUserId
+				EXEC uspCTValidatePriceFixationDetailUpdateDelete @intPriceFixationTicketId = @intPriceFixationTicketId
+				EXEC uspCTPriceFixationDetailReverse @intPriceFixationTicketId = @intPriceFixationTicketId, @intUserId = @intUserId
 			END
 			ELSE
 			BEGIN
+				EXEC uspCTValidatePriceFixationDetailUpdateDelete @intPriceFixationTicketId = @intPriceFixationTicketId
 				EXEC uspCTPriceFixationDetailDelete @intPriceFixationTicketId = @intPriceFixationTicketId, @intUserId = @intUserId
-			END		
+			END
 		END
 				
 		SELECT @intUniqueId = MIN(intUniqueId) FROM #ProcessFixationTicket WHERE intUniqueId > @intUniqueId
