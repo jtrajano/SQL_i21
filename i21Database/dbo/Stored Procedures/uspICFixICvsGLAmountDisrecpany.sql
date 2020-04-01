@@ -13,6 +13,7 @@ DECLARE
 	,@intInventoryTransactionId AS INT
 	,@dtmDate AS DATETIME 
 	,@dblDiff AS NUMERIC(18,6)
+	,@strPreviousTransactionId AS NVARCHAR(50)
  
 DECLARE	@GLEntries AS RecapTableType 
 
@@ -41,62 +42,45 @@ SELECT
 	,ic.strBatchId
 	,ic.intInventoryTransactionId
 	,ic.dtmDate
-	,ic.[ic amount]
+	,[ic amount] = round(dbo.fnMultiply(ic.dblQty, ic.dblCost) + ic.dblValue, 2)
 	,gl.[gl amount]
-	,[diff] = 
-		CASE 
-			WHEN SIGN(ISNULL(ic.[ic amount], 0)) = 1 THEN ISNULL(ic.[ic amount], 0) - ISNULL(gl.[gl amount], 0)
-			ELSE -(ISNULL(ic.[ic amount], 0) - ISNULL(gl.[gl amount], 0))
-		END
-FROM 
-	(
-
-	SELECT	--'IC Only'
-			t.strTransactionId
-			,t.strBatchId
-			,t.intInventoryTransactionId
-			,t.dtmDate
-			,[ic amount] = SUM (ROUND(dbo.fnMultiply(t.dblQty, t.dblCost) + t.dblValue, 2))
-	FROM	tblICInventoryTransaction t INNER JOIN tblICInventoryTransactionType ty
-				ON t.intTransactionTypeId = ty.intTransactionTypeId
-	WHERE	
-			(MONTH(t.dtmDate) = @intMonth OR @intMonth IS NULL)
-			AND (YEAR(t.dtmDate) = @intYear OR @intYear IS NULL) 
-			AND ty.strName = @strType
-			AND t.ysnIsUnposted = 0 
-	GROUP BY 
-			t.strTransactionId
-			,t.strBatchId
-			,t.intInventoryTransactionId
-			,t.dtmDate
-	) ic
+	,[diff] = round(dbo.fnMultiply(ic.dblQty, ic.dblCost) + ic.dblValue, 2) - ISNULL(gl.[gl amount], 0)
+FROM	
+	tblICInventoryTransaction ic INNER JOIN tblICInventoryTransactionType ty
+		ON ic.intTransactionTypeId = ty.intTransactionTypeId
 	OUTER APPLY (
 		SELECT 
 			--'GL Only'
-			[gl amount] = SUM(ROUND(dblDebit - dblCredit, 2))	
-		FROM	tblGLDetail gd INNER JOIN tblGLAccount ga
-					ON gd.intAccountId = ga.intAccountId
-				INNER JOIN tblGLAccountSegmentMapping gs
-					ON gs.intAccountId = ga.intAccountId
-				INNER JOIN tblGLAccountSegment gm
-					ON gm.intAccountSegmentId = gs.intAccountSegmentId
-				INNER JOIN tblGLAccountCategory ac 
-					ON ac.intAccountCategoryId = gm.intAccountCategoryId 
+			[gl amount] = ISNULL(SUM(ROUND(dblDebit - dblCredit, 2)), 0) 
+		FROM	
+			tblGLDetail gd INNER JOIN tblGLAccount ga
+				ON gd.intAccountId = ga.intAccountId
+			INNER JOIN tblGLAccountSegmentMapping gs
+				ON gs.intAccountId = ga.intAccountId
+			INNER JOIN tblGLAccountSegment gm
+				ON gm.intAccountSegmentId = gs.intAccountSegmentId
+			INNER JOIN tblGLAccountCategory ac 
+				ON ac.intAccountCategoryId = gm.intAccountCategoryId 
+			INNER JOIN tblGLAccountStructure gst
+				ON gm.intAccountStructureId = gst.intAccountStructureId
+
 		WHERE 
-			(MONTH(gd.dtmDate) = @intMonth OR @intMonth IS NULL)
-			AND (YEAR(gd.dtmDate) = @intYear OR @intYear IS NULL) 
-			AND gd.strTransactionType = @strType
-			--AND dbo.fnDateEquals(gd.dtmDate, ic.dtmDate) = 1
-			AND ac.strAccountCategory IN ('Inventory', 'Inventory In-Transit')
-			AND gd.ysnIsUnposted = 0 
-			AND gm.intAccountStructureId = 1
-			AND gd.strTransactionId = ic.strTransactionId
+			gd.strTransactionId = ic.strTransactionId
 			AND gd.strBatchId = ic.strBatchId
 			AND gd.intJournalLineNo = ic.intInventoryTransactionId
-			
+			AND gd.ysnIsUnposted = 0 
+
+			AND ac.strAccountCategory IN ('Inventory', 'Inventory In-Transit')			
+			and gst.strType = 'Primary'
 	) gl 
-where
-	ic.[ic amount] <> isnull(gl.[gl amount], 0) 
+WHERE	
+	ty.strName = @strType
+	AND ic.ysnIsUnposted = 0 
+	AND	round(dbo.fnMultiply(ic.dblQty, ic.dblCost) + ic.dblValue, 2) <> isnull(gl.[gl amount], 0) 
+ORDER BY 
+	ic.intInventoryTransactionId
+
+--select 'debug @discrepancyList', * from @discrepancyList 
 
 -- If the list is empty, exit the sp immediately. 
 IF NOT EXISTS (SELECT TOP 1 1 FROM @discrepancyList)
@@ -128,42 +112,108 @@ FETCH NEXT FROM loopDiscrepancy INTO
 -----------------------------------------------------------------------------------------------------------------------------
 WHILE @@FETCH_STATUS = 0
 BEGIN 
-	DELETE FROM @GLEntries
+	PRINT 'Transaction Id: ' + @strTransactionId
 
 	-- Check if the fiscal year period is open
 	IF dbo.isOpenAccountingDate(@dtmDate) = 1
 	BEGIN 
-		--print 'fyp is open'
+		print 'fyp is open'
 		-- When FYP is open, update the existing GL Entries and match it with the value from IC. 
 		UPDATE gd
 		SET 
-			gd.dblDebit = gd.dblDebit + @dblDiff
+			gd.dblDebit = --gd.dblDebit + @dblDiff
+				CASE 
+					WHEN gd.dblDebit <> 0 THEN gd.dblDebit + Debit.[Value] - Credit.[Value]
+					ELSE gd.dblDebit
+				END
+			,gd.dblCredit =  
+				CASE 
+					WHEN gd.dblCredit <> 0 THEN gd.dblCredit + Credit.[Value] - Debit.[Value]
+					ELSE gd.dblCredit
+				END
 		FROM
 			tblGLDetail gd
-			--CROSS APPLY dbo.fnGetDebit(@dblDiff) Debit
-		WHERE	
-			gd.strTransactionId = @strTransactionId
-			AND gd.strBatchId = @strBatchId
-			AND gd.intJournalLineNo = @intInventoryTransactionId
-			AND gd.dblDebit <> 0 
+			INNER JOIN (
+				SELECT TOP 1 
+					gd.intGLDetailId
+				FROM 
+					tblGLDetail gd INNER JOIN tblGLAccount ga
+						ON gd.intAccountId = ga.intAccountId
+					INNER JOIN tblGLAccountSegmentMapping gs
+						ON gs.intAccountId = ga.intAccountId
+					INNER JOIN tblGLAccountSegment gm
+						ON gm.intAccountSegmentId = gs.intAccountSegmentId
+					INNER JOIN tblGLAccountCategory ac 
+						ON ac.intAccountCategoryId = gm.intAccountCategoryId
+				WHERE
+					gd.strTransactionId = @strTransactionId
+					AND gd.strBatchId = @strBatchId
+					AND gd.intJournalLineNo = @intInventoryTransactionId
+					--AND	gd.dblDebit <> 0 
+					AND ac.strAccountCategory IN ('Inventory', 'Inventory In-Transit')
+					AND gm.intAccountStructureId = 1
+			) topGd
+				ON gd.intGLDetailId = topGd.intGLDetailId
+			CROSS APPLY dbo.fnGetDebit(@dblDiff) Debit
+			CROSS APPLY dbo.fnGetCredit(@dblDiff) Credit
 
 		UPDATE gd
 		SET 
-			gd.dblCredit = gd.dblCredit + @dblDiff
+			gd.dblCredit = -- gd.dblCredit + @dblDiff
+				CASE 
+					WHEN gd.dblCredit <> 0 THEN gd.dblCredit + Credit.[Value] - Debit.[Value]
+					ELSE gd.dblCredit
+				END
+			,gd.dblDebit =  
+				CASE 
+					WHEN gd.dblDebit <> 0 THEN gd.dblDebit + Debit.[Value] - Credit.[Value]
+					ELSE gd.dblDebit
+				END
 		FROM
 			tblGLDetail gd
-			--CROSS APPLY dbo.fnGetCredit(@dblDiff) Credit
-		WHERE	
-			gd.strTransactionId = @strTransactionId
-			AND gd.strBatchId = @strBatchId
-			AND gd.intJournalLineNo = @intInventoryTransactionId
-			AND gd.dblCredit <> 0 
+			INNER JOIN (
+				SELECT TOP 1 
+					gd.intGLDetailId
+				FROM 
+					tblGLDetail gd INNER JOIN tblGLAccount ga
+						ON gd.intAccountId = ga.intAccountId
+					INNER JOIN tblGLAccountSegmentMapping gs
+						ON gs.intAccountId = ga.intAccountId
+					INNER JOIN tblGLAccountSegment gm
+						ON gm.intAccountSegmentId = gs.intAccountSegmentId
+					INNER JOIN tblGLAccountCategory ac 
+						ON ac.intAccountCategoryId = gm.intAccountCategoryId
+				WHERE
+					gd.strTransactionId = @strTransactionId
+					AND gd.strBatchId = @strBatchId
+					AND gd.intJournalLineNo = @intInventoryTransactionId
+					--AND gd.dblCredit <> 0 
+					AND ac.strAccountCategory NOT IN ('Inventory', 'Inventory In-Transit')
+					AND gm.intAccountStructureId = 1
+
+			) topGd
+				ON gd.intGLDetailId = topGd.intGLDetailId		
+			CROSS APPLY dbo.fnGetDebit(@dblDiff) Debit
+			CROSS APPLY dbo.fnGetCredit(@dblDiff) Credit
+						
 	END 
 
 	-- FYP is closed. 
 	ELSE 
 	BEGIN
-		--print 'fyp is closed' 
+		IF @strPreviousTransactionId <> @strTransactionId
+		BEGIN 
+			PRINT 'different transaction'
+			IF EXISTS (SELECT TOP 1 1 FROM @GLEntries)
+			BEGIN
+				--select 'debug discrepancy fix 1', * from @GLEntries
+				EXEC dbo.uspGLBookEntries @GLEntries, 1				
+			END
+
+			DELETE FROM @GLEntries
+		END 
+
+		print 'fyp is closed' 
 		INSERT INTO @GLEntries (
 			[dtmDate] 
 			,[strBatchId]
@@ -233,14 +283,31 @@ BEGIN
 			,[dblForeignRate] = gd.dblForeignRate
 			,[strRateType] = ''
 		FROM
-			tblGLDetail gd
+			tblGLDetail gd 
+			INNER JOIN (
+				SELECT TOP 1 
+					gd.intGLDetailId
+				FROM 
+					tblGLDetail gd INNER JOIN tblGLAccount ga
+						ON gd.intAccountId = ga.intAccountId
+					INNER JOIN tblGLAccountSegmentMapping gs
+						ON gs.intAccountId = ga.intAccountId
+					INNER JOIN tblGLAccountSegment gm
+						ON gm.intAccountSegmentId = gs.intAccountSegmentId
+					INNER JOIN tblGLAccountCategory ac 
+						ON ac.intAccountCategoryId = gm.intAccountCategoryId 
+				WHERE
+					gd.strTransactionId = @strTransactionId
+					AND gd.strBatchId = @strBatchId
+					AND gd.intJournalLineNo = @intInventoryTransactionId
+					--AND gd.dblDebit <> 0
+					AND ac.strAccountCategory IN ('Inventory', 'Inventory In-Transit')
+					AND gm.intAccountStructureId = 1
+			) topGd
+				ON gd.intGLDetailId = topGd.intGLDetailId
 			CROSS APPLY dbo.fnGetDebit(@dblDiff) Debit
 			CROSS APPLY dbo.fnGetCredit(@dblDiff) Credit
-		WHERE	
-			gd.strTransactionId = @strTransactionId
-			AND gd.strBatchId = @strBatchId
-			AND gd.intJournalLineNo = @intInventoryTransactionId
-			AND gd.dblDebit <> 0
+			
 		UNION ALL
 		SELECT 
 			[dtmDate] = @dtmTargetOpenDate
@@ -277,16 +344,32 @@ BEGIN
 			,[strRateType] = ''
 		FROM
 			tblGLDetail gd
+			INNER JOIN (
+				SELECT TOP 1 
+					gd.intGLDetailId
+				FROM 
+					tblGLDetail gd INNER JOIN tblGLAccount ga
+						ON gd.intAccountId = ga.intAccountId
+					INNER JOIN tblGLAccountSegmentMapping gs
+						ON gs.intAccountId = ga.intAccountId
+					INNER JOIN tblGLAccountSegment gm
+						ON gm.intAccountSegmentId = gs.intAccountSegmentId
+					INNER JOIN tblGLAccountCategory ac 
+						ON ac.intAccountCategoryId = gm.intAccountCategoryId 
+				WHERE
+					gd.strTransactionId = @strTransactionId
+					AND gd.strBatchId = @strBatchId
+					AND gd.intJournalLineNo = @intInventoryTransactionId
+					--AND gd.dblCredit <> 0
+					AND ac.strAccountCategory NOT IN ('Inventory', 'Inventory In-Transit')
+					AND gm.intAccountStructureId = 1
+			) topGd
+				ON gd.intGLDetailId = topGd.intGLDetailId
 			CROSS APPLY dbo.fnGetDebit(@dblDiff) Debit
 			CROSS APPLY dbo.fnGetCredit(@dblDiff) Credit
-		WHERE	
-			gd.strTransactionId = @strTransactionId
-			AND gd.strBatchId = @strBatchId
-			AND gd.intJournalLineNo = @intInventoryTransactionId
-			AND gd.dblCredit <> 0
-
-		EXEC dbo.uspGLBookEntries @GLEntries, 1
 	END 
+
+	SET @strPreviousTransactionId = @strTransactionId
 
 	FETCH NEXT FROM loopDiscrepancy INTO 
 		@strTransactionId
@@ -300,3 +383,10 @@ END
 -----------------------------------------------------------------------------------------------------------------------------
 -- End of the loop
 -----------------------------------------------------------------------------------------------------------------------------
+
+IF EXISTS (SELECT TOP 1 1 FROM @GLEntries)
+BEGIN
+	PRINT 'Last GL Book Entries'
+	--select 'debug discrepancy fix 2', * from @GLEntries
+	EXEC dbo.uspGLBookEntries @GLEntries, 1
+END
