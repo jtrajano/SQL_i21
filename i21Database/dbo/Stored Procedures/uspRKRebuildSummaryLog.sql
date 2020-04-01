@@ -1433,7 +1433,7 @@ BEGIN TRY
 			LEFT JOIN tblCTContractDetail cd ON cd.intContractDetailId = ri.intContractDetailId
 			WHERE t.dblQty <> 0 
 				AND v.ysnInTransit = 1
-				AND v.strTransactionType IN ('Inventory Receipt', 'Inventory Transfer with Shipment')
+				AND v.strTransactionType IN ('Inventory Receipt','Inbound Shipments','Inventory Transfer with Shipment')
 				AND ISNULL(t.ysnIsUnposted,0) = 0
 			GROUP BY t.strBatchId
 				, v.strTransactionType
