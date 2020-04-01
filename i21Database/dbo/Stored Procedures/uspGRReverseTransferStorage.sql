@@ -221,7 +221,7 @@ BEGIN
 			,intCustomerStorageId
 		) AS (
 			SELECT intTransferContractDetailId	= SourceSplit.intContractDetailId,
-				dblTransferUnits				= -(CASE WHEN (SourceSplit.dblOriginalUnits - SourceSplit.dblDeductedUnits) = 0 THEN SourceSplit.dblOriginalUnits ELSE (SourceSplit.dblOriginalUnits - SourceSplit.dblDeductedUnits) END),
+				dblTransferUnits				= (CASE WHEN (SourceSplit.dblOriginalUnits - SourceSplit.dblDeductedUnits) = 0 THEN SourceSplit.dblOriginalUnits ELSE (SourceSplit.dblOriginalUnits - SourceSplit.dblDeductedUnits) END),
 				intSourceItemUOMId				= TransferStorage.intItemUOMId,
 				intCustomerStorageId			= SourceSplit.intSourceCustomerStorageId
 			FROM tblGRTransferStorageSourceSplit SourceSplit
@@ -289,7 +289,7 @@ BEGIN
 			,[ysnPost]				= 1
 			,[intTransactionTypeId]	= 3
 			,[strPaidDescription]	= 'Generated from Transfer Storage'
-			,[strType]				= 'Reverse Transfer'
+			,[strType]				= 'Reversed Transfer'
 			,[strTransferTicket]	= TS.strTransferStorageTicket
 		FROM tblGRTransferStorageSourceSplit SourceSplit
 		LEFT JOIN tblCTContractDetail CD
@@ -337,7 +337,7 @@ BEGIN
 					,dtmTransferStorageDate
 					,dbo.fnCTConvertQuantityToTargetItemUOM(ToStorage.intItemId, IU.intUnitMeasureId, ToStorage.intUnitMeasureId, SR.dblUnitQty) 
 						* CASE WHEN (FromType.ysnDPOwnedType = 0 AND ToType.ysnDPOwnedType = 1) THEN -1 ELSE 1 END
-					,-IU.dblUnitQty
+					,IU.dblUnitQty
 					,0
 					,dblSalesPrice = 0
 					, ToStorage.intCurrencyId
@@ -921,7 +921,7 @@ BEGIN
 			,[ysnPost]				= 1
 			,[intTransactionTypeId]	= 3
 			,[strPaidDescription]	= 'Generated from Transfer Storage'
-			,[strType]				= 'Reversed from Transfer'
+			,[strType]				= 'Reversed Transfer'
 		FROM tblGRTransferStorageSplit TSS
 		LEFT JOIN tblCTContractDetail CD
 			ON CD.intContractDetailId = TSS.intContractDetailId
