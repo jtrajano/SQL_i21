@@ -151,7 +151,7 @@ UPDATE #tmpEmployees
 											AND P.intEntityEmployeeId = #tmpEmployees.intEntityId
 											AND P.dtmDateTo <= GETDATE()
 											AND P.dtmDateTo > #tmpEmployees.dtmLastAwardTemp
-											AND GETDATE() < #tmpEmployees.dtmNextAward 
+											--AND GETDATE() < #tmpEmployees.dtmNextAward -- PR-2104
 											AND EE.intEmployeeAccrueTimeOffId = @intTypeTimeOffId), 0)
 							ELSE 0
 						END * dblRate * dblRateFactor * CASE WHEN (ysnPaycheckPosted = 0) THEN -1 ELSE 1 END
@@ -172,7 +172,8 @@ UPDATE #tmpEmployees
 											AND P.intPaycheckId = #tmpEmployees.intPaycheckId
 											AND P.intEntityEmployeeId = #tmpEmployees.intEntityId
 											AND P.dtmDateTo <= GETDATE()
-											AND (GETDATE() >= #tmpEmployees.dtmNextAward OR P.dtmDateTo <= #tmpEmployees.dtmLastAwardTemp) 
+											--AND (GETDATE() >= #tmpEmployees.dtmNextAward OR P.dtmDateTo <= #tmpEmployees.dtmLastAwardTemp) -- 
+											AND P.dtmDateTo <= #tmpEmployees.dtmLastAwardTemp -- PR-2104
 											AND EE.intEmployeeAccrueTimeOffId = @intTypeTimeOffId), 0)
 							WHEN (strPeriod = 'Day') THEN 
 								DATEDIFF(DD, dtmLastAward, dtmNextAward) / ISNULL(NULLIF(dblPerPeriod, 0), 1)
