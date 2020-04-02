@@ -76,6 +76,16 @@ BEGIN
 	END 
 END 
 
+-- Check the reversal date. 
+BEGIN 
+	IF dbo.fnRemoveTimeOnDate(@dtmReversalDate) < dbo.fnRemoveTimeOnDate(GETDATE())
+	BEGIN 
+		-- 'Back-dated reversal is not allowed.'  
+		EXEC uspICRaiseError 80248;
+		RETURN -80248
+	END 
+END 
+
 -- Duplicate the IR header. 
 INSERT INTO tblICInventoryReceipt (	
 	strReceiptType
