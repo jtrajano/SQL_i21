@@ -50,8 +50,8 @@ BEGIN TRY
 			IF EXISTS (SELECT TOP 1 1 FROM tblRKCompanyPreference WHERE ysnImposeReversalTransaction = 1)
 			BEGIN
 				DECLARE @strTransactionNo NVARCHAR(100)
-				DECLARE @strInvoiceNo NVARCHAR(100) = ''
-				DECLARE @strVoucherNo NVARCHAR(100) = ''
+				DECLARE @strInvoiceNo NVARCHAR(100) = NULL
+				DECLARE @strVoucherNo NVARCHAR(100) = NULL
 				/* Validations to Reverse related transactions */
 
 				--Validate if Load has posted Weight Claim
