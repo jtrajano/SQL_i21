@@ -111,7 +111,9 @@ BEGIN
 		AND	(s.intInventoryShipmentId = @intInventoryShipmentId OR @intInventoryShipmentId IS NULL)			
 		AND (@strShipmentNumber IS NOT NULL OR @intInventoryShipmentId IS NOT NULL) 
 		AND s.ysnPosted = 1
+		AND s.intSourceType = 1 -- Scale Ticket
 		AND cmD.intInvoiceDetailId IS NOT NULL 
+		AND cm.ysnReversal <> 1
 
 	IF @strCreditMemo IS NOT NULL 
 	BEGIN 
