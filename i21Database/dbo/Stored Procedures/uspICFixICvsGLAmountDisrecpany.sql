@@ -284,8 +284,6 @@ BEGIN
 			AND gd.strBatchId = @strBatchId
 			AND gd.intJournalLineNo = @intInventoryTransactionId
 			AND gd.dblCredit <> 0
-
-		EXEC dbo.uspGLBookEntries @GLEntries, 1
 	END 
 
 	FETCH NEXT FROM loopDiscrepancy INTO 
@@ -300,3 +298,8 @@ END
 -----------------------------------------------------------------------------------------------------------------------------
 -- End of the loop
 -----------------------------------------------------------------------------------------------------------------------------
+
+IF EXISTS (SELECT TOP 1 1 FROM @GLEntries)
+BEGIN
+	EXEC dbo.uspGLBookEntries @GLEntries, 1
+END
