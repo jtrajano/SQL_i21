@@ -6290,8 +6290,8 @@ BEGIN
 		IF(@ysnReRunCalcTax = 0)
 			BEGIN
 				
-				SET @dblLocalIndexRetailGrossPrice = ROUND((@dblAdjustmentWithIndex - ROUND((@totalCalculatedTaxExempt / @dblQuantity),6) + ROUND((ISNULL(@dblSpecialTax,0) / @dblQuantity),6) ),6)
-				SET @dblLocalIndexRetailGrossPriceZeroQty = ROUND((@dblAdjustmentWithIndex - ROUND((@totalCalculatedTaxExemptZeroQuantity/ @dblZeroQuantity),6)+ ROUND((ISNULL(@dblSpecialTaxZeroQty,0) / @dblZeroQuantity),6) ),6)
+				SET @dblLocalIndexRetailGrossPrice = ROUND((@dblAdjustmentWithIndex - ROUND((@totalCalculatedTaxExempt / @dblQuantity),6)),6)
+				SET @dblLocalIndexRetailGrossPriceZeroQty = ROUND((@dblAdjustmentWithIndex - ROUND((@totalCalculatedTaxExemptZeroQuantity/ @dblZeroQuantity),6)),6)
 
 				SET @dblPrice100kQty = @dblLocalIndexRetailGrossPriceZeroQty
 				SET @dblPriceQty = @dblLocalIndexRetailGrossPrice

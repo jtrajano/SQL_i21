@@ -123,7 +123,7 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM @temp_xml_table WHERE [fieldname] IN ('strC
 					END
 				ELSE IF @fieldname = 'strAccountStatusCode'
 					BEGIN
-						SELECT @strAccountStatusIds = ISNULL(@strAccountStatusIds, '') + LEFT(intAccountStatusId, LEN(intAccountStatusId) - 1)
+						SELECT @strAccountStatusIds = LEFT(intAccountStatusId, LEN(intAccountStatusId) - 1) +','+ ISNULL(@strAccountStatusIds,'')
 						FROM (
 							SELECT DISTINCT CAST(S.intAccountStatusId AS VARCHAR(200))  + ', '
 							FROM tblARAccountStatus S
@@ -170,7 +170,7 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM @temp_xml_table WHERE [fieldname] IN ('strC
 					END
 				ELSE IF @fieldname = 'strAccountStatusCode'
 					BEGIN
-						SELECT @strAccountStatusIds = LEFT(intAccountStatusId, LEN(intAccountStatusId) - 1)
+						SELECT @strAccountStatusIds = LEFT(intAccountStatusId, LEN(intAccountStatusId) - 1) +','+ ISNULL(@strAccountStatusIds,'')
 						FROM (
 							SELECT DISTINCT CAST(intAccountStatusId AS VARCHAR(200))  + ', '
 							FROM tblARAccountStatus 

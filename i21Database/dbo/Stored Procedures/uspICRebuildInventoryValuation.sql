@@ -1395,7 +1395,6 @@ BEGIN
 		SET @intFunctionalCurrencyId = dbo.fnSMGetDefaultCurrency('FUNCTIONAL') 
 	END 
 
-
 	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpICInventoryTransaction) 
 	BEGIN 
 		IF ISNULL(@isPeriodic, 0) = 1
@@ -1796,7 +1795,13 @@ BEGIN
 							ON ICTrans.strTransactionId = Header.strTransferNo				
 						INNER JOIN dbo.tblICInventoryTransferDetail Detail
 							ON Detail.intInventoryTransferId = Header.intInventoryTransferId
-							AND Detail.intInventoryTransferDetailId = ICTrans.intTransactionDetailId 
+							AND Detail.intInventoryTransferDetailId = ICTrans.intTransactionDetailId
+							AND Detail.intItemId = ICTrans.intItemId 
+						INNER JOIN tblICItem i
+							ON i.intItemId = Detail.intItemId 
+						INNER JOIN #tmpRebuildList list
+							ON i.intItemId  = COALESCE(list.intItemId, i.intItemId) 
+							AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId) 
 						INNER JOIN tblICItemUOM StockUOM
 							ON StockUOM.intItemId = ICTrans.intItemId 
 							AND StockUOM.ysnStockUnit = 1
@@ -1814,6 +1819,7 @@ BEGIN
 								AND intItemLocationId = ICTrans.intItemLocationId
 						) itemPricing
 				WHERE	strBatchId = @strBatchId
+						AND ICTrans.strTransactionId = @strTransactionId
 						AND ICTrans.dblQty < 0 
 
 				EXEC @intReturnValue = dbo.uspICRepostCosting
@@ -1907,7 +1913,7 @@ BEGIN
 					IF @intReturnValue <> 0 GOTO _EXIT_WITH_ERROR
 				END
 				ELSE 
-				BEGIN 
+				BEGIN
 					DELETE FROM @ItemsToPost
 					INSERT INTO @ItemsToPost (
 							intItemId  
@@ -1971,6 +1977,7 @@ BEGIN
 								AND TransferSource.strTransactionId = Header.strTransferNo
 								AND TransferSource.strBatchId = @strBatchId
 								AND TransferSource.dblQty < 0
+								AND TransferSource.ysnIsUnposted = 0 
 							LEFT JOIN dbo.tblICItemUOM ItemUOM
 								ON TransferSource.intItemId = ItemUOM.intItemId
 								AND TransferSource.intItemUOMId = ItemUOM.intItemUOMId

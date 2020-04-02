@@ -559,7 +559,7 @@ SELECT
 		, intStorageLocationId
 		, intItemCurrencyId
 		, intWeightUOMId
-		, dblUnitPrice
+		, ISNULL(dblUnitPrice, 0.00)
 		, intDockDoorId
 		, strNotes
 		, intGradeId

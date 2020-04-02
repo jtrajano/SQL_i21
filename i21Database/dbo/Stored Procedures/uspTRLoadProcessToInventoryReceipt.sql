@@ -107,7 +107,6 @@ END
 		,strChargesLink				= MIN(TR.strReceiptLine)
 		,strDestinationType			= ISNULL(MIN(TLD.strDestination), MIN(BID.strDestination))
 		,strFreightBilledBy			= MIN(ShipVia.strFreightBilledBy)
-		,intGrossNetUOMId			= MIN(IC.intStockUOMId)
 	INTO #tmpReceipts
 	FROM tblTRLoadHeader TL
 	LEFT JOIN tblTRLoadReceipt TR ON TR.intLoadHeaderId = TL.intLoadHeaderId			
@@ -170,7 +169,6 @@ END
 			,strSourceScreenName
 			,intPaymentOn
 			,strChargesLink
-			,intGrossNetUOMId
 	)	
 	SELECT strReceiptType		= strReceiptType
 		,intEntityVendorId		= intEntityVendorId
@@ -207,7 +205,6 @@ END
 		,strSourceScreenName	= strSourceScreenName
 		,intPaymentOn			= intPaymentOn
 		,strChargesLink			= strChargesLink
-		,intGrossNetUOMId		= CASE WHEN dblFreightRate != 0 THEN intGrossNetUOMId ELSE NULL END
 	FROM #tmpReceipts
 
 	--SELECT TOP 1 @intFreightItemId = intItemForFreightId FROM tblTRCompanyPreference

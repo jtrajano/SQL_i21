@@ -49,6 +49,35 @@ BEGIN TRY
 			END
 	END
 
+	-- Upon posting, check if there is a existing IT transaction that is related to TR. If exist delete upon posting
+	IF @ysnPostOrUnPost = 1 AND @ysnRecap = 0
+	BEGIN
+		-- Delete the IT
+		DECLARE @InvTranferId AS INT = NULL
+		DECLARE @CursorITTran AS CURSOR
+		SET @CursorITTran = CURSOR FOR
+			SELECT DISTINCT ITD.intInventoryTransferId FROM tblICInventoryTransfer IT
+			INNER JOIN tblICInventoryTransferDetail ITD ON ITD.intInventoryTransferId = IT.intInventoryTransferId
+			INNER JOIN tblTRLoadReceipt LR ON LR.intLoadReceiptId = ITD.intSourceId
+			WHERE LR.intLoadHeaderId = @intLoadHeaderId
+			AND IT.intSourceType = 3
+
+		OPEN @CursorITTran
+		FETCH NEXT FROM @CursorITTran INTO @InvTranferId
+		WHILE @@FETCH_STATUS = 0
+		BEGIN
+
+			UPDATE tblTRLoadReceipt SET intInventoryTransferId = NULL WHERE intLoadHeaderId = @intLoadHeaderId
+			AND intInventoryTransferId = @InvTranferId
+
+			EXEC dbo.uspICDeleteInventoryTransfer @InvTranferId, @intUserId
+			
+			FETCH NEXT FROM @CursorITTran INTO @InvTranferId
+		END
+		CLOSE @CursorITTran
+		DEALLOCATE @CursorITTran
+	END
+
 	-- Insert the data needed to create the inventory transfer.
     INSERT INTO @TransferEntries (
         [dtmTransferDate]

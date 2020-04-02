@@ -21,7 +21,7 @@ SELECT intInvoiceId				= I.intInvoiceId
 	 , strComments				= I.strComments
 	 , dblQtyShipped			= CASE WHEN (I.strTransactionType  IN ('Invoice', 'Debit Memo', 'Cash', 'Proforma Invoice')) THEN ISNULL(ID.dblQtyShipped, 0) ELSE ISNULL(ID.dblQtyShipped, 0) * -1 END
 	 , dblItemWeight			= CASE WHEN (I.strTransactionType  IN ('Invoice', 'Debit Memo', 'Cash', 'Proforma Invoice')) THEN ISNULL(ID.dblItemWeight, 0) ELSE ISNULL(ID.dblItemWeight, 0) * -1 END
-	 , dblUnitCost				= ISNULL(ID.dblPrice, 0)
+	 , dblUnitCost				= ISNULL(ISNULL(CT.dblCashPrice, ID.dblPrice),0)
 	 , dblCostPerUOM			= ISNULL(ID.dblPrice, 0)
 	 , dblUnitCostCurrency		= ISNULL(ID.dblPrice, 0)
 	 , dblTotalTax				= CASE WHEN (I.strTransactionType  IN ('Invoice', 'Debit Memo', 'Cash', 'Proforma Invoice')) THEN ISNULL(ID.dblTotalTax, 0) ELSE ISNULL(ID.dblTotalTax, 0) * -1 END
@@ -71,11 +71,13 @@ LEFT JOIN (SELECT CTH.intContractHeaderId
 				, CTH.strContractNumber
 				, CTD.intContractDetailId
 				, CTD.intContractSeq
+				, CTD.dblCashPrice
 		   FROM 
 			dbo.tblCTContractHeader CTH WITH (NOLOCK)
 		   INNER JOIN (SELECT intContractHeaderId
 							, intContractDetailId
 							, intContractSeq
+							, dblCashPrice
 					   FROM 
 						dbo.tblCTContractDetail WITH (NOLOCK)
 					 ) CTD ON CTH.intContractHeaderId = CTD.intContractHeaderId

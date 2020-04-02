@@ -460,10 +460,17 @@ SELECT
 	,[intSubCurrencyId]						= ARSI.[intSubCurrencyId]
 	,[dblSubCurrencyRate]					= ARSI.[dblSubCurrencyRate]
 FROM vyuARShippedItems ARSI
-WHERE ARSI.[strTransactionType] = 'Inventory Shipment Contract Pricing'
+OUTER APPLY (
+	SELECT TOP 1 intPriceFixationId
+	FROM tblCTPriceFixation CPF
+	WHERE CPF.intContractDetailId = ARSI.intContractDetailId
+	  AND CPF.intContractHeaderId = ARSI.intContractHeaderId
+) PRICE
+WHERE (ARSI.[strTransactionType] = 'Inventory Shipment Contract Pricing' OR (ARSI.[strTransactionType] = 'Inventory Shipment' AND ARSI.intInventoryShipmentChargeId IS NOT NULL))
   AND ARSI.[intInventoryShipmentId] = @ShipmentId
   AND ARSI.intEntityCustomerId = @EntityCustomerId
   AND (ISNULL(ARSI.intPricingTypeId, 0) <> 2 OR (ISNULL(ARSI.intPricingTypeId, 0) = 2 AND ISNULL(dbo.fnCTGetAvailablePriceQuantity(ARSI.[intContractDetailId],0), 0) > 0))
+  AND ISNULL(PRICE.intPriceFixationId, 0) <> 0
 
 UNION ALL
 
@@ -885,87 +892,22 @@ INNER JOIN tblSOSalesOrderDetailTax SOSODT ON EFI.[intTempDetailIdForTaxes] = SO
 ORDER BY EFI.[intSalesOrderDetailId] ASC
 	   , SOSODT.[intSalesOrderDetailTaxId] ASC
 
- --CONTRACT PRICE FIXATION
- IF EXISTS (SELECT TOP 1 NULL FROM @EntriesForInvoice WHERE intContractDetailId IS NOT NULL)
-     BEGIN
-         DECLARE @dblShipmentQty                NUMERIC(18, 6) = 0
- 
-         DECLARE @tblEntries TABLE (
-               intId                            INT
-             , intInventoryShipmentItemId    INT
-             , intContractDetailId            INT
-             , intItemUOMId                    INT
-             , dblQtyShipped                    NUMERIC(18, 6)
-         )
-         
-         INSERT INTO @tblEntries
-         SELECT IE.intId
-              , IE.intInventoryShipmentItemId
-              , IE.intContractDetailId
-              , IE.intItemUOMId
-              , IE.dblQtyShipped
-         FROM @EntriesForInvoice    IE
-         INNER JOIN tblCTPriceFixation CPF ON IE.intContractHeaderId = CPF.intContractHeaderId AND IE.intContractDetailId = CPF.intContractDetailId
-         INNER JOIN tblICInventoryShipmentItem ISI ON IE.intInventoryShipmentItemId = ISI.intInventoryShipmentItemId
-                                                  AND IE.intContractDetailId = ISI.intLineNo 
-                                                  AND IE.intContractHeaderId = ISI.intOrderId
-         WHERE ISI.intInventoryShipmentId = @ShipmentId
-           AND IE.intContractDetailId IS NOT NULL
- 
-         SELECT @dblShipmentQty = SUM(ISI.dblQuantity) 
-         FROM tblICInventoryShipmentItem ISI
-         INNER JOIN tblCTPriceFixation CPF ON CPF.intContractDetailId = ISI.intLineNo 
-                                          AND CPF.intContractHeaderId = ISI.intOrderId
-         WHERE ISI.intInventoryShipmentId = @ShipmentId
-           AND ISNULL(CPF.intPriceFixationId, 0) <> 0
- 
-         WHILE EXISTS (SELECT TOP 1 NULL FROM @tblEntries)
-             BEGIN
-                 DECLARE @intId    INT
-                 DECLARE @dblQty    NUMERIC(18, 6) = 0
-                 
-                 SELECT TOP 1 @intId        = intId 
-                            , @dblQty    = dblQtyShipped
-                 FROM @tblEntries 
-                 ORDER BY intId DESC
-                 
-                 IF @dblQty <= @dblShipmentQty
-                     SET @dblShipmentQty = @dblShipmentQty - @dblQty
-                 ELSE IF @dblQty > @dblShipmentQty
-                     BEGIN
-                         UPDATE @EntriesForInvoice
-                         SET dblQtyShipped = @dblShipmentQty
-                         WHERE intId = @intId
- 
-                         SET @dblShipmentQty = 0
-                     END
- 
-                 IF @dblShipmentQty = 0
-                     BEGIN
-                         DELETE IE 
-                         FROM @EntriesForInvoice IE
-                         INNER JOIN @tblEntries TBL ON IE.intId = TBL.intId AND IE.intId <> @intId
- 
-                         DELETE FROM @tblEntries
-                     END
- 
-                 DELETE FROM @tblEntries WHERE intId = @intId
-             END
-     END
-
 --GET DISTINCT SHIP TO FROM CONTRACT DETAIL
-UPDATE IE
-SET intShipToLocationId 			= ISNULL(CD.intShipToId, @intShipToLocationId)
-  , strComments						= ISNULL(IE.strComments, '') + ' Contract #' + ISNULL(CH.strContractNumber, '')
-  , @intContractShipToLocationId	= ISNULL(CD.intShipToId, @intShipToLocationId)
-FROM @EntriesForInvoice IE
-INNER JOIN tblCTContractDetail CD ON IE.intContractDetailId = CD.intContractDetailId
-INNER JOIN tblCTContractHeader CH ON CD.intContractHeaderId = CH.intContractHeaderId
-WHERE IE.intContractDetailId IS NOT NULL
-  AND ISNULL(CD.intShipToId, 0) <> @intShipToLocationId
+IF EXISTS (SELECT TOP 1 NULL FROM tblARCustomer WHERE ISNULL(strBatchInvoiceBy, '') <> '' AND intEntityId = @EntityCustomerId)
+	BEGIN
+		UPDATE IE
+		SET intShipToLocationId 			= ISNULL(CD.intShipToId, @intShipToLocationId)
+		, strComments						= ISNULL(IE.strComments, '') + ' Contract #' + ISNULL(CH.strContractNumber, '')
+		, @intContractShipToLocationId	= ISNULL(CD.intShipToId, @intShipToLocationId)
+		FROM @EntriesForInvoice IE
+		INNER JOIN tblCTContractDetail CD ON IE.intContractDetailId = CD.intContractDetailId
+		INNER JOIN tblCTContractHeader CH ON CD.intContractHeaderId = CH.intContractHeaderId
+		WHERE IE.intContractDetailId IS NOT NULL
+		AND ISNULL(CD.intShipToId, 0) <> @intShipToLocationId
 
-SET @intContractShipToLocationId = ISNULL(@intContractShipToLocationId, @intShipToLocationId) 
-SELECT @intExistingInvoiceId = dbo.fnARGetInvoiceForBatch(@EntityCustomerId, @intContractShipToLocationId)
+		SET @intContractShipToLocationId = ISNULL(@intContractShipToLocationId, @intShipToLocationId) 
+		SELECT @intExistingInvoiceId = dbo.fnARGetInvoiceForBatch(@EntityCustomerId, @intContractShipToLocationId)
+	END
 
 --CREATE INVOICE IF THERE's NONE
 IF ISNULL(@intExistingInvoiceId, 0) = 0

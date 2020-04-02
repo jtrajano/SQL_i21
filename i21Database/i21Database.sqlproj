@@ -5853,6 +5853,7 @@
     <Build Include="dbo\Tables\tblICItemLicense.sql" />
     <Build Include="dbo\Tables\tblVRRebate.sql" />
     <Build Include="dbo\Views\vyuVROpenRebate.sql" />
+    <Build Include="dbo\Views\vyuVROpenRebateAll.sql" />
     <Build Include="dbo\Views\vyuVRRebate.sql" />
     <Build Include="dbo\Stored Procedures\uspSMValidateRemoteServerRole.sql" />
     <Build Include="dbo\Tables\tblVRSubmitted.sql" />
@@ -8161,6 +8162,20 @@
     <Build Include="dbo\User Defined Types\StagingCommanderPlu.sql" />
     <Build Include="dbo\User Defined Types\StagingCommanderSummary.sql" />
     <Build Include="dbo\User Defined Types\StagingCommanderTax.sql" />
+    <Build Include="dbo\Views\vyuHDTicketForExport.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTRecalculateReturnLottery.sql" />
+    <Build Include="dbo\Tables\tblIPLoadStage.sql" />
+    <Build Include="dbo\Tables\tblIPLoadError.sql" />
+    <Build Include="dbo\Tables\tblIPLoadArchive.sql" />
+    <Build Include="dbo\Tables\tblIPLoadDetailStage.sql" />
+    <Build Include="dbo\Tables\tblIPLoadDetailError.sql" />
+    <Build Include="dbo\Tables\tblIPLoadDetailArchive.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPStageSAPShippingInstruction.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessSAPShippingInstruction.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCreateReturnGLEntriesForNonStockItems.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPGenerateSAPPOIDOC_CA.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessPOAcknowledgement_CA.sql" />
+    <Build Include="dbo\Stored Procedures\uspICFixMissingReceiptGLEntries.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -8402,6 +8417,7 @@
     <Build Include="dbo\Functions\fnARGetInvoiceForBatch.sql" />
     <Build Include="dbo\Views\vyuARGetPayment.sql" />
     <Build Include="dbo\Views\vyuEMEntityLocationSearch.sql" />
+    <None Include="Scripts\Post-Deployment\SM\1920_DeleteDuplicateEntityPhoneNumber.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
