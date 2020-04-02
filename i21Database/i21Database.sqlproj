@@ -7724,6 +7724,7 @@
     <Build Include="dbo\Functions\fnGRCalculateStorageUnits.sql" />
     <Build Include="dbo\Views\vyuCTContractBasis.sql" />
     <Build Include="dbo\Tables\tblGROldTransactionMapping.sql" />
+    <Build Include="dbo\Stored Procedures\uspICFixReceiptAPClearingDiscrepancy.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
