@@ -61,7 +61,7 @@ BEGIN
 		FROM tblAPBill A 
 		INNER JOIN @voucherPrepayIds B ON A.intBillId = B.intId
 		WHERE EXISTS(SELECT TOP 1 1 FROM tblAPBillDetail C WHERE C.intBillId = A.intBillId AND C.dblCost = 0)
-
+	
 		INSERT INTO @returntable
 		SELECT 
 			'The transaction is already posted.',
