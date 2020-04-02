@@ -8194,6 +8194,7 @@
     <Build Include="dbo\Tables\tblARPostingQueue.sql" />
     <Build Include="dbo\Stored Procedures\uspRKReassignMatchDerivatives.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateSAPAcknowledgement_CA.sql" />
+    <Build Include="dbo\Stored Procedures\uspICFixReceiptAPClearingDiscrepancy.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
