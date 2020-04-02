@@ -8,7 +8,8 @@ SELECT DISTINCT
 	,strLocationName			= ISNULL(L.strLocationName, 'Multi')
 	,intItemId					= SS.intItemId
 	,strItemNo					= Item.strItemNo
-	,dblSpotUnits				= SS.dblSpotUnits
+	,dblSpotUnits				= CASE WHEN SS.strStorageTicket NOT LIKE '%-R' THEN SS.dblSpotUnits ELSE SS.dblSpotUnits END
+	--,dblSpotUnits				= SS.dblSpotUnits
 	,dblFuturesPrice			= SS.dblFuturesPrice
 	,dblFuturesBasis			= SS.dblFuturesBasis
 	,dblCashPrice				= CASE 
@@ -22,14 +23,21 @@ SELECT DISTINCT
 								END
 	,strStorageAdjustment		= SS.strStorageAdjustment
 	,dtmCalculateStorageThrough = SS.dtmCalculateStorageThrough
-	,dblAdjustPerUnit			= SS.dblAdjustPerUnit
-	,dblStorageDue				= SS.dblStorageDue
+	,dblAdjustPerUnit			= CASE WHEN SS.strStorageTicket NOT LIKE '%-R' THEN SS.dblAdjustPerUnit * -1 ELSE SS.dblAdjustPerUnit END
+	,dblStorageDue				= CASE WHEN SS.strStorageTicket NOT LIKE '%-R' THEN SS.dblStorageDue * -1 ELSE SS.dblStorageDue END
+	-- ,dblAdjustPerUnit			= SS.dblAdjustPerUnit
+	-- ,dblStorageDue				= SS.dblStorageDue
 	,strStorageTicket			= SS.strStorageTicket
-	,dblSelectedUnits			= SS.dblSelectedUnits
-	,dblUnpaidUnits				= SS.dblUnpaidUnits
-	,dblSettleUnits				= SS.dblSettleUnits
-	,dblDiscountsDue			= SS.dblDiscountsDue
-	,dblNetSettlement			= SS.dblNetSettlement
+	,dblSelectedUnits			= CASE WHEN SS.strStorageTicket NOT LIKE '%-R' THEN SS.dblSelectedUnits * -1 ELSE SS.dblSelectedUnits END
+	,dblUnpaidUnits				= CASE WHEN SS.strStorageTicket NOT LIKE '%-R' THEN SS.dblUnpaidUnits * -1 ELSE SS.dblUnpaidUnits END
+	,dblSettleUnits				= CASE WHEN SS.strStorageTicket NOT LIKE '%-R' THEN SS.dblSettleUnits * -1 ELSE SS.dblSettleUnits END
+	,dblDiscountsDue			= CASE WHEN SS.strStorageTicket NOT LIKE '%-R' THEN SS.dblDiscountsDue * -1 ELSE SS.dblDiscountsDue END
+	,dblNetSettlement			= CASE WHEN SS.strStorageTicket NOT LIKE '%-R' THEN SS.dblNetSettlement * -1 ELSE SS.dblNetSettlement END
+	-- ,dblSelectedUnits			= SS.dblSelectedUnits
+	-- ,dblUnpaidUnits				= SS.dblUnpaidUnits
+	-- ,dblSettleUnits				= SS.dblSettleUnits
+	-- ,dblDiscountsDue			= SS.dblDiscountsDue
+	-- ,dblNetSettlement			= SS.dblNetSettlement
 	,intCreatedUserId			= SS.intCreatedUserId
 	,strUserName				= Entity.strUserName
 	,dtmCreated					= SS.dtmCreated
@@ -38,9 +46,17 @@ SELECT DISTINCT
 	,strBillId					= ISNULL(Bill.strBillId,'')
 	,strContractIds				= _strContractIds.strContractIds
 	,strContractNumbers         = STUFF(_strContractNumbers.strContractNumbers,1,1,'') 
-	,strUnits                   =  CASE
-										WHEN SS.intParentSettleStorageId IS NOT NULL THEN CONVERT(VARCHAR(MAX), dbo.fnRemoveTrailingZeroes(dbo.fnCTConvertQtyToTargetItemUOM(ISNULL(SS.intItemUOMId, CS.intItemUOMId), ItemUOM.intItemUOMId, ST.dblUnits))) + ' ' + UOM.strSymbol
-										ELSE CONVERT(VARCHAR(MAX), dbo.fnRemoveTrailingZeroes(dbo.fnCTConvertQtyToTargetItemUOM(ISNULL(SS.intItemUOMId, CS.intItemUOMId), ItemUOM.intItemUOMId, SS.dblSettleUnits))) + ' ' + UOM.strSymbol
+	,strUnits                   = CASE
+										WHEN SS.intParentSettleStorageId IS NOT NULL THEN
+											CASE 
+												WHEN SS.strStorageTicket NOT LIKE '%-R' THEN CONVERT(VARCHAR(MAX), dbo.fnRemoveTrailingZeroes(dbo.fnCTConvertQtyToTargetItemUOM(ISNULL(SS.intItemUOMId, CS.intItemUOMId), ItemUOM.intItemUOMId, (ST.dblUnits * -1)))) + ' ' + UOM.strSymbol
+												ELSE CONVERT(VARCHAR(MAX), dbo.fnRemoveTrailingZeroes(dbo.fnCTConvertQtyToTargetItemUOM(ISNULL(SS.intItemUOMId, CS.intItemUOMId), ItemUOM.intItemUOMId, ST.dblUnits))) + ' ' + UOM.strSymbol 
+											END
+										ELSE 
+											CASE 
+												WHEN SS.strStorageTicket NOT LIKE '%-R' THEN CONVERT(VARCHAR(MAX), dbo.fnRemoveTrailingZeroes(dbo.fnCTConvertQtyToTargetItemUOM(ISNULL(SS.intItemUOMId, CS.intItemUOMId), ItemUOM.intItemUOMId, (SS.dblSettleUnits * -1)))) + ' ' + UOM.strSymbol
+												ELSE CONVERT(VARCHAR(MAX), dbo.fnRemoveTrailingZeroes(dbo.fnCTConvertQtyToTargetItemUOM(ISNULL(SS.intItemUOMId, CS.intItemUOMId), ItemUOM.intItemUOMId, SS.dblSettleUnits))) + ' ' + UOM.strSymbol 
+											END
 								END
 	,intTransactionId			= CASE 
 									WHEN SS.intParentSettleStorageId IS NULL THEN 99999999
