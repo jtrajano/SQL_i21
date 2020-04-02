@@ -1490,6 +1490,7 @@ BEGIN TRY
 									WHEN intTransactionTypeId = 3 THEN sh.strTransferTicket
 									WHEN intTransactionTypeId = 4 THEN sh.strSettleTicket
 									WHEN intTransactionTypeId = 9 THEN sh.strAdjustmentNo END
+			, intTransactionRecordHeaderId = sh.intCustomerStorageId
 			, sh.intContractHeaderId
 			, cs.intCommodityId
 			, cs.intItemId
@@ -1545,6 +1546,7 @@ BEGIN TRY
 									WHEN intTransactionTypeId = 3 THEN sh.strTransferTicket
 									WHEN intTransactionTypeId = 4 THEN sh.strSettleTicket
 									WHEN intTransactionTypeId = 9 THEN sh.strAdjustmentNo END
+			, intTransactionRecordHeaderId = sh.intCustomerStorageId
 			, sh.intContractHeaderId
 			, cs.intCommodityId
 			, cs.intItemId
@@ -1580,7 +1582,8 @@ BEGIN TRY
 			, strBucketType = 'Company Owned'
 			, strTransactionType = 'Storage Settlement'
 			, intTransactionRecordId = sh.intSettleStorageId
-			, strTransactioneNo = sh.strSettleTicket
+			, strTransactionNo = sh.strSettleTicket
+			, intTransactionRecordHeaderId = sh.intCustomerStorageId
 			, sh.intContractHeaderId
 			, cs.intCommodityId
 			, cs.intItemId
@@ -1616,6 +1619,7 @@ BEGIN TRY
 			, strBucketType
 			, strTransactionType
 			, intTransactionRecordId 
+			, intTransactionRecordHeaderId
 			, strDistributionType
 			, strTransactionNumber 
 			, dtmTransactionDate 
@@ -1634,6 +1638,7 @@ BEGIN TRY
 			, strBucketType
 			, strTransactionType
 			, intTransactionRecordId
+			, intTransactionRecordHeaderId
 			, strDistributionType
 			, strTransactioneNo
 			, dtmDeliveryDate
