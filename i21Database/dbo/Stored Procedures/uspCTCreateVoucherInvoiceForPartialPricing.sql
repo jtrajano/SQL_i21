@@ -332,9 +332,9 @@ BEGIN TRY
 					IF CHARINDEX('TKT-', @strVendorOrderNumber) = 0
 					BEGIN
 						SELECT	@strVendorOrderNumber = ISNULL(strPrefix,'') + @strVendorOrderNumber FROM tblSMStartingNumber WHERE strTransactionType = 'Ticket Management' AND strModule = 'Ticket Management'
-					END		
+					END	
 
-					IF @strVendorOrderNumber IS NULL
+					IF NOT EXISTS(SELECT TOP 1 1 FROM tblSCTicket WHERE intInventoryReceiptId = @intInventoryReceiptId)
 					BEGIN
 						SELECT @strVendorOrderNumber = strReceiptNumber FROM tblICInventoryReceipt WHERE intInventoryReceiptId = @intInventoryReceiptId
 					END
