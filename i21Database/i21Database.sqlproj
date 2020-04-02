@@ -8607,6 +8607,12 @@
     <Build Include="dbo\Stored Procedures\uspCTValidatePriceFixationDetailReverse.sql" />
     <Build Include="dbo\Views\vyuSTConsolidatedCheckoutChangeFundDetailReport.sql" />
     <Build Include="dbo\Tables\tblSCTicketDiscountHistory.sql" />
+    <Build Include="dbo\Tables\tblRKFutureMarketStage.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPFutureMarketProcessPreStage.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPFutureMarketPopulateStgXML.sql" />
+    <Build Include="dbo\Views\vyuIPGetFutureMarket.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPFutureMarketTransferStgXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPFutureMarketProcessStgXML.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
