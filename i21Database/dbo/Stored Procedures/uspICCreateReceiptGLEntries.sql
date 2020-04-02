@@ -77,7 +77,7 @@ FROM	(
 							AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)
 				WHERE	t.strBatchId = @strBatchId
 						AND t.strTransactionId = ISNULL(@strRebuildTransactionId, t.strTransactionId)
-						AND i.strType <> 'Non-Inventory'
+						--AND i.strType <> 'Non-Inventory'
 				UNION ALL 
 				SELECT	DISTINCT 
 						t.intItemId
@@ -91,7 +91,7 @@ FROM	(
 				WHERE	t.strBatchId = @strBatchId
 						AND t.strTransactionId = ISNULL(@strRebuildTransactionId, t.strTransactionId)
 						AND t.intInTransitSourceLocationId IS NOT NULL
-						AND i.strType <> 'Non-Inventory'
+						--AND i.strType <> 'Non-Inventory'
 				UNION ALL 
 				SELECT	DISTINCT 
 						t.intItemId
@@ -106,7 +106,7 @@ FROM	(
 						AND t.strTransactionId = ISNULL(@strRebuildTransactionId, t.strTransactionId)
 						AND t.intItemLocationId IS NOT NULL
 						AND t.intInTransitSourceLocationId IS NULL
-						AND i.strType <> 'Non-Inventory'
+						--AND i.strType <> 'Non-Inventory'
 			) InnerQuery
 		) Query
 
