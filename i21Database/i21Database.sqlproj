@@ -8120,6 +8120,7 @@
     <Build Include="dbo\Views\vyuAPReceiptClearingGL.sql" />
     <Build Include="dbo\Functions\fnSCGetDPContract.sql" />
     <Build Include="dbo\Stored Procedures\uspSCCreateInvoiceForPostedDestinationWeightsAndGrades.sql" />
+    <Build Include="dbo\Stored Procedures\uspICFixReceiptAPClearingDiscrepancy.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
