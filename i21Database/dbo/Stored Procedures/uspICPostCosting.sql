@@ -1156,7 +1156,7 @@ BEGIN
 			,intContractHeaderId = NULL
 			,intTicketId = v.intTicketId
 			,intCommodityId = v.intCommodityId
-			,intCommodityUOMId = u.intUnitMeasureId
+			,intCommodityUOMId = commodityUOM.intCommodityUnitMeasureId
 			,intItemId = t.intItemId
 			,intBookId = NULL
 			,intSubBookId = NULL
@@ -1179,6 +1179,10 @@ BEGIN
 				ON iu.intItemUOMId = t.intItemUOMId
 			INNER JOIN tblICUnitMeasure u
 				ON u.intUnitMeasureId = iu.intUnitMeasureId
+			INNER JOIN tblICCommodityUnitMeasure commodityUOM
+				ON commodityUOM.intCommodityId = v.intCommodityId 
+				AND commodityUOM.intUnitMeasureId = u.intUnitMeasureId	
+
 		WHERE
 			t.strTransactionId = @strTransactionId
 			AND t.strBatchId = @strBatchId
@@ -1229,7 +1233,7 @@ BEGIN
 			,intContractHeaderId = iri.intContractHeaderId
 			,intTicketId = v.intTicketId
 			,intCommodityId = v.intCommodityId
-			,intCommodityUOMId = u.intUnitMeasureId
+			,intCommodityUOMId = commodityUOM.intCommodityUnitMeasureId
 			,intItemId = t.intItemId
 			,intBookId = NULL
 			,intSubBookId = NULL
@@ -1255,6 +1259,9 @@ BEGIN
 			INNER JOIN tblICInventoryReceiptItem iri 
 				ON iri.intInventoryReceiptItemId = t.intTransactionDetailId	
 				AND iri.intInventoryReceiptId = t.intTransactionId
+			INNER JOIN tblICCommodityUnitMeasure commodityUOM
+				ON commodityUOM.intCommodityId = v.intCommodityId 
+				AND commodityUOM.intUnitMeasureId = u.intUnitMeasureId	
 		WHERE
 			t.strTransactionId = @strTransactionId
 			AND t.strBatchId = @strBatchId
@@ -1305,7 +1312,7 @@ BEGIN
 			,intContractHeaderId = isi.intOrderId 
 			,intTicketId = v.intTicketId
 			,intCommodityId = v.intCommodityId
-			,intCommodityUOMId = u.intUnitMeasureId
+			,intCommodityUOMId = commodityUOM.intCommodityUnitMeasureId
 			,intItemId = t.intItemId
 			,intBookId = NULL
 			,intSubBookId = NULL
@@ -1331,6 +1338,9 @@ BEGIN
 			INNER JOIN tblICInventoryShipmentItem isi 
 				ON isi.intInventoryShipmentItemId = t.intTransactionDetailId	
 				AND isi.intInventoryShipmentId = t.intTransactionId
+			INNER JOIN tblICCommodityUnitMeasure commodityUOM
+				ON commodityUOM.intCommodityId = v.intCommodityId 
+				AND commodityUOM.intUnitMeasureId = u.intUnitMeasureId	
 		WHERE
 			t.strTransactionId = @strTransactionId
 			AND t.strBatchId = @strBatchId
@@ -1381,7 +1391,7 @@ BEGIN
 			,intContractHeaderId = NULL 
 			,intTicketId = v.intTicketId
 			,intCommodityId = v.intCommodityId
-			,intCommodityUOMId = u.intUnitMeasureId
+			,intCommodityUOMId = commodityUOM.intCommodityUnitMeasureId
 			,intItemId = t.intItemId
 			,intBookId = NULL
 			,intSubBookId = NULL
@@ -1404,6 +1414,9 @@ BEGIN
 				ON iu.intItemUOMId = t.intItemUOMId
 			INNER JOIN tblICUnitMeasure u
 				ON u.intUnitMeasureId = iu.intUnitMeasureId
+			INNER JOIN tblICCommodityUnitMeasure commodityUOM
+				ON commodityUOM.intCommodityId = v.intCommodityId 
+				AND commodityUOM.intUnitMeasureId = u.intUnitMeasureId	
 		WHERE
 			t.strTransactionId = @strTransactionId
 			AND t.strBatchId = @strBatchId
@@ -1454,7 +1467,7 @@ BEGIN
 			,intContractHeaderId = NULL 
 			,intTicketId = v.intTicketId
 			,intCommodityId = v.intCommodityId
-			,intCommodityUOMId = u.intUnitMeasureId
+			,intCommodityUOMId = commodityUOM.intCommodityUnitMeasureId
 			,intItemId = t.intItemId
 			,intBookId = NULL
 			,intSubBookId = NULL
@@ -1477,6 +1490,9 @@ BEGIN
 				ON iu.intItemUOMId = t.intItemUOMId
 			INNER JOIN tblICUnitMeasure u
 				ON u.intUnitMeasureId = iu.intUnitMeasureId
+			INNER JOIN tblICCommodityUnitMeasure commodityUOM
+				ON commodityUOM.intCommodityId = v.intCommodityId 
+				AND commodityUOM.intUnitMeasureId = u.intUnitMeasureId	
 		WHERE
 			t.strTransactionId = @strTransactionId
 			AND t.strBatchId = @strBatchId
