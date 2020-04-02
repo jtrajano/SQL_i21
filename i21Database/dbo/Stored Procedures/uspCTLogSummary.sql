@@ -18,7 +18,7 @@ BEGIN TRY
 			@ysnMatched				BIT,
 			@ysnDirect				BIT = 0
 
-	--SELECT @strSource, @strProcess
+	-- SELECT @strSource, @strProcess
 
 	IF @strProcess = 'Scheduled Quantity'
 	BEGIN
@@ -514,123 +514,260 @@ BEGIN TRY
 		BEGIN
 			IF @strProcess = 'Voucher'
 			BEGIN
-				INSERT INTO @cbLogCurrent (strBatchId
-					, dtmTransactionDate
-					, strTransactionType
-					, strTransactionReference
-					, intTransactionReferenceId
-					, strTransactionReferenceNo
-					, intContractDetailId
-					, intContractHeaderId
-					, strContractNumber
-					, intContractSeq
-					, intContractTypeId
-					, intEntityId
-					, intCommodityId
-					, intItemId
-					, intLocationId
-					, intPricingTypeId
-					, intFutureMarketId
-					, intFutureMonthId
-					, dblBasis
-					, dblFutures
-					, intQtyUOMId
-					, intQtyCurrencyId
-					, intBasisUOMId
-					, intBasisCurrencyId
-					, intPriceUOMId
-					, dtmStartDate
-					, dtmEndDate
-					, dblQty
-					, intContractStatusId
-					, intBookId
-					, intSubBookId
-					, strNotes
-				)
-				SELECT strBatchId = NULL
-					, dtmTransactionDate
-					, strTransactionType = CASE WHEN intContractTypeId = 1 THEN 'Purchase Basis Deliveries' ELSE 'Sales Basis Deliveries' END 
-					, strTransactionReference = strTransactionType
-					, intTransactionReferenceId = intTransactionId
-					, strTransactionReferenceNo = strTransactionId
-					, intContractDetailId
-					, intContractHeaderId
-					, strContractNumber		
-					, intContractSeq
-					, intContractTypeId
-					, intEntityId
-					, intCommodityId
-					, intItemId
-					, intCompanyLocationId
-					, intPricingTypeId
-					, intFutureMarketId
-					, intFutureMonthId
-					, dblBasis
-					, dblFutures
-					, intQtyUOMId
-					, intQtyCurrencyId = NULL
-					, intBasisUOMId
-					, intBasisCurrencyId
-					, intPriceUOMId
-					, dtmStartDate
-					, dtmEndDate
-					, dblQty
-					, intContractStatusId
-					, intBookId
-					, intSubBookId
-					, strNotes = ''
-				FROM
+				IF NOT EXISTS
 				(
-					SELECT dtmTransactionDate = dbo.fnRemoveTimeOnDate(b.dtmBillDate)
-						, strTransactionType = 'Voucher'
-						, intTransactionId = bd.intBillDetailId
-						, strTransactionId = b.strBillId
-						, sh.intContractDetailId
-						, sh.intContractHeaderId		
-						, sh.strContractNumber
-						, sh.intContractSeq
-						, ch.intContractTypeId
-						, sh.intEntityId
-						, ch.intCommodityId
-						, sh.intItemId
-						, sh.intCompanyLocationId
-						, sh.intPricingTypeId
-						, sh.intFutureMarketId
-						, sh.intFutureMonthId
-						, sh.dblBasis
-						, sh.dblFutures
-						, intQtyUOMId = ch.intCommodityUOMId
-						, cd.intBasisUOMId
-						, cd.intBasisCurrencyId
-						, intPriceUOMId = sh.intDtlQtyInCommodityUOMId
-						, sh.dtmStartDate
-						, sh.dtmEndDate
-						, dblQty = (CASE WHEN ISNULL(cd.intNoOfLoad,0) = 0 THEN bd.dblQtyReceived 
-										ELSE cd.dblQuantityPerLoad END) --* -1
-						, sh.intContractStatusId
-						, sh.intBookId
-						, sh.intSubBookId					
-					FROM vyuCTSequenceUsageHistory suh
-					INNER JOIN tblCTSequenceHistory sh ON sh.intSequenceUsageHistoryId = suh.intSequenceUsageHistoryId
-					INNER JOIN tblCTContractDetail cd ON cd.intContractDetailId = sh.intContractDetailId
-					INNER JOIN tblCTContractHeader ch ON ch.intContractHeaderId = cd.intContractHeaderId
-					INNER JOIN tblAPBillDetail bd ON suh.intExternalId = bd.intInventoryReceiptItemId
-					INNER JOIN tblAPBill b ON b.intBillId = bd.intBillId
-					WHERE strFieldName = 'Balance'
-					AND sh.strPricingStatus = 'Unpriced'
-					AND sh.strPricingType = 'Basis'
-					AND bd.intInventoryReceiptChargeId IS NULL
-					AND bd.intBillDetailId NOT IN 
-					(
-						SELECT intTransactionReferenceId
-						FROM tblCTContractBalanceLog 
-						WHERE intContractDetailId = cd.intContractDetailId
-						AND strTransactionReference = 'Voucher'
+					SELECT TOP 1 1  
+					FROM vyuCTSequenceUsageHistory a
+					INNER JOIN tblAPBillDetail b ON a.intContractHeaderId = b.intContractHeaderId
+							AND a.intContractDetailId = b.intContractDetailId
+					WHERE a.intContractHeaderId = @intContractHeaderId
+						AND a.intContractDetailId = ISNULL(@intContractDetailId, a.intContractDetailId)
+						AND b.intBillDetailId NOT IN 
+						(
+							SELECT intTransactionReferenceId
+							FROM tblCTContractBalanceLog 
+							WHERE intContractDetailId = a.intContractDetailId
+							AND strTransactionReference = 'Voucher'
+						)
+						AND a.strScreenName = 'Settle Storage'
+				)
+				BEGIN
+					INSERT INTO @cbLogCurrent (strBatchId
+						, dtmTransactionDate
+						, strTransactionType
+						, strTransactionReference
+						, intTransactionReferenceId
+						, strTransactionReferenceNo
+						, intContractDetailId
+						, intContractHeaderId
+						, strContractNumber
+						, intContractSeq
+						, intContractTypeId
+						, intEntityId
+						, intCommodityId
+						, intItemId
+						, intLocationId
+						, intPricingTypeId
+						, intFutureMarketId
+						, intFutureMonthId
+						, dblBasis
+						, dblFutures
+						, intQtyUOMId
+						, intQtyCurrencyId
+						, intBasisUOMId
+						, intBasisCurrencyId
+						, intPriceUOMId
+						, dtmStartDate
+						, dtmEndDate
+						, dblQty
+						, intContractStatusId
+						, intBookId
+						, intSubBookId
+						, strNotes
 					)
-
-				) tbl
-				WHERE intContractHeaderId = @intContractHeaderId
-				AND intContractDetailId = ISNULL(@intContractDetailId, intContractDetailId)
+					SELECT strBatchId = NULL
+						, dtmTransactionDate
+						, strTransactionType = CASE WHEN intContractTypeId = 1 THEN 'Purchase Basis Deliveries' ELSE 'Sales Basis Deliveries' END 
+						, strTransactionReference = strTransactionType
+						, intTransactionReferenceId = intTransactionId
+						, strTransactionReferenceNo = strTransactionId
+						, intContractDetailId
+						, intContractHeaderId
+						, strContractNumber		
+						, intContractSeq
+						, intContractTypeId
+						, intEntityId
+						, intCommodityId
+						, intItemId
+						, intCompanyLocationId
+						, intPricingTypeId
+						, intFutureMarketId
+						, intFutureMonthId
+						, dblBasis
+						, dblFutures
+						, intQtyUOMId
+						, intQtyCurrencyId = NULL
+						, intBasisUOMId
+						, intBasisCurrencyId
+						, intPriceUOMId
+						, dtmStartDate
+						, dtmEndDate
+						, dblQty
+						, intContractStatusId
+						, intBookId
+						, intSubBookId
+						, strNotes = ''
+					FROM
+					(
+						SELECT dtmTransactionDate = dbo.fnRemoveTimeOnDate(b.dtmBillDate)
+							, strTransactionType = 'Voucher'
+							, intTransactionId = bd.intBillDetailId
+							, strTransactionId = b.strBillId
+							, sh.intContractDetailId
+							, sh.intContractHeaderId		
+							, sh.strContractNumber
+							, sh.intContractSeq
+							, ch.intContractTypeId
+							, sh.intEntityId
+							, ch.intCommodityId
+							, sh.intItemId
+							, sh.intCompanyLocationId
+							, sh.intPricingTypeId
+							, sh.intFutureMarketId
+							, sh.intFutureMonthId
+							, sh.dblBasis
+							, sh.dblFutures
+							, intQtyUOMId = ch.intCommodityUOMId
+							, cd.intBasisUOMId
+							, cd.intBasisCurrencyId
+							, intPriceUOMId = sh.intDtlQtyInCommodityUOMId
+							, sh.dtmStartDate
+							, sh.dtmEndDate
+							, dblQty = (CASE WHEN ISNULL(cd.intNoOfLoad,0) = 0 THEN bd.dblQtyReceived 
+											ELSE cd.dblQuantityPerLoad END) --* -1
+							, sh.intContractStatusId
+							, sh.intBookId
+							, sh.intSubBookId					
+						FROM vyuCTSequenceUsageHistory suh
+						INNER JOIN tblCTSequenceHistory sh ON sh.intSequenceUsageHistoryId = suh.intSequenceUsageHistoryId
+						INNER JOIN tblCTContractDetail cd ON cd.intContractDetailId = sh.intContractDetailId
+						INNER JOIN tblCTContractHeader ch ON ch.intContractHeaderId = cd.intContractHeaderId
+						INNER JOIN tblAPBillDetail bd ON suh.intExternalId = bd.intInventoryReceiptItemId
+						INNER JOIN tblAPBill b ON b.intBillId = bd.intBillId
+						WHERE strFieldName = 'Balance'
+						AND sh.strPricingStatus = 'Unpriced'
+						AND sh.strPricingType = 'Basis'
+						AND bd.intInventoryReceiptChargeId IS NULL
+						AND bd.intBillDetailId NOT IN 
+						(
+							SELECT intTransactionReferenceId
+							FROM tblCTContractBalanceLog 
+							WHERE intContractDetailId = cd.intContractDetailId
+							AND strTransactionReference = 'Voucher'
+						)
+					) tbl
+					WHERE intContractHeaderId = @intContractHeaderId
+					AND intContractDetailId = ISNULL(@intContractDetailId, intContractDetailId)
+				END
+				ELSE
+				BEGIN
+					INSERT INTO @cbLogCurrent (strBatchId
+						, dtmTransactionDate
+						, strTransactionType
+						, strTransactionReference
+						, intTransactionReferenceId
+						, strTransactionReferenceNo
+						, intContractDetailId
+						, intContractHeaderId
+						, strContractNumber
+						, intContractSeq
+						, intContractTypeId
+						, intEntityId
+						, intCommodityId
+						, intItemId
+						, intLocationId
+						, intPricingTypeId
+						, intFutureMarketId
+						, intFutureMonthId
+						, dblBasis
+						, dblFutures
+						, intQtyUOMId
+						, intQtyCurrencyId
+						, intBasisUOMId
+						, intBasisCurrencyId
+						, intPriceUOMId
+						, dtmStartDate
+						, dtmEndDate
+						, dblQty
+						, intContractStatusId
+						, intBookId
+						, intSubBookId
+						, strNotes
+					)
+					SELECT strBatchId = NULL
+						, dtmTransactionDate
+						, strTransactionType = CASE WHEN intContractTypeId = 1 THEN 'Purchase Basis Deliveries' ELSE 'Sales Basis Deliveries' END 
+						, strTransactionReference = strTransactionType
+						, intTransactionReferenceId = intTransactionId
+						, strTransactionReferenceNo = strTransactionId
+						, intContractDetailId
+						, intContractHeaderId
+						, strContractNumber		
+						, intContractSeq
+						, intContractTypeId
+						, intEntityId
+						, intCommodityId
+						, intItemId
+						, intCompanyLocationId
+						, intPricingTypeId
+						, intFutureMarketId
+						, intFutureMonthId
+						, dblBasis
+						, dblFutures
+						, intQtyUOMId
+						, intQtyCurrencyId = NULL
+						, intBasisUOMId
+						, intBasisCurrencyId
+						, intPriceUOMId
+						, dtmStartDate
+						, dtmEndDate
+						, dblQty
+						, intContractStatusId
+						, intBookId
+						, intSubBookId
+						, strNotes = ''
+					FROM
+					(
+						SELECT dtmTransactionDate = dbo.fnRemoveTimeOnDate(b.dtmBillDate)
+							, strTransactionType = 'Voucher'
+							, intTransactionId = bd.intBillDetailId
+							, strTransactionId = b.strBillId
+							, sh.intContractDetailId
+							, sh.intContractHeaderId		
+							, sh.strContractNumber
+							, sh.intContractSeq
+							, ch.intContractTypeId
+							, sh.intEntityId
+							, ch.intCommodityId
+							, sh.intItemId
+							, sh.intCompanyLocationId
+							, sh.intPricingTypeId
+							, sh.intFutureMarketId
+							, sh.intFutureMonthId
+							, sh.dblBasis
+							, sh.dblFutures
+							, intQtyUOMId = ch.intCommodityUOMId
+							, cd.intBasisUOMId
+							, cd.intBasisCurrencyId
+							, intPriceUOMId = sh.intDtlQtyInCommodityUOMId
+							, sh.dtmStartDate
+							, sh.dtmEndDate
+							, dblQty = (CASE WHEN ISNULL(cd.intNoOfLoad,0) = 0 THEN bd.dblQtyReceived 
+											ELSE cd.dblQuantityPerLoad END) --* -1
+							, sh.intContractStatusId
+							, sh.intBookId
+							, sh.intSubBookId					
+						FROM vyuCTSequenceUsageHistory suh
+						INNER JOIN tblCTSequenceHistory sh ON sh.intSequenceUsageHistoryId = suh.intSequenceUsageHistoryId
+						INNER JOIN tblCTContractDetail cd ON cd.intContractDetailId = sh.intContractDetailId
+						INNER JOIN tblCTContractHeader ch ON ch.intContractHeaderId = cd.intContractHeaderId
+						INNER JOIN tblAPBillDetail bd ON suh.intContractHeaderId = bd.intContractHeaderId and suh.intContractDetailId = bd.intContractDetailId
+						INNER JOIN tblAPBill b ON b.intBillId = bd.intBillId
+						WHERE strFieldName = 'Balance'
+						AND sh.strPricingStatus = 'Unpriced'
+						AND sh.strPricingType = 'Basis'
+						AND bd.intInventoryReceiptChargeId IS NULL
+						AND bd.intBillDetailId NOT IN 
+						(
+							SELECT intTransactionReferenceId
+							FROM tblCTContractBalanceLog 
+							WHERE intContractDetailId = cd.intContractDetailId
+							AND strTransactionReference = 'Voucher'
+						)
+					) tbl
+					WHERE intContractHeaderId = @intContractHeaderId
+					AND intContractDetailId = ISNULL(@intContractDetailId, intContractDetailId)
+				END
 			END
 			ELSE IF @strProcess = 'Reverse'
 			BEGIN
