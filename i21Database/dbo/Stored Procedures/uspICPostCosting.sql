@@ -1101,6 +1101,10 @@ END
 -----------------------------------------
 BEGIN 
 	DECLARE @SummaryLogs AS RKSummaryLog 
+		,@strTransactionType AS NVARCHAR(500) 
+		,@strBucketType_CompanyOwned AS NVARCHAR(50) = 'Company Owned'
+		,@strBucketType_SalesInTransit AS NVARCHAR(50) = 'Sales In-Transit'
+		,@strBucketType_PurchaseInTransit AS NVARCHAR(50) = 'Purchase In-Transit'
 
 	SET @intInventoryTransactionId = NULL 
 	SELECT	TOP 1 
