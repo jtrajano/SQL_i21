@@ -501,6 +501,20 @@ BEGIN
 			)
 		) payDetails
 		WHERE  A.[intPaymentId] IN (SELECT intId FROM @paymentIds)
+
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
+		SELECT 
+			'Amount due for ' + B.strBillId + ' is greater than its total.',
+			'Payable',
+			A.strPaymentRecordNum,
+			A.intPaymentId
+		FROM tblAPPayment A 
+		INNER JOIN tblAPPaymentDetail A2 ON A.intPaymentId = A2.intPaymentId
+		INNER JOIN tblAPBill B ON A2.intBillId = B.intBillId
+		WHERE 
+			A.[intPaymentId] IN (SELECT intId FROM @paymentIds)
+		AND A2.dblPayment != 0
+		AND A2.dblAmountDue > A2.dblTotal
 	END
 	ELSE
 	BEGIN
