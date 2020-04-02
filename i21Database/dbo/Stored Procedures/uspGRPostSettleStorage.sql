@@ -1469,51 +1469,54 @@ BEGIN TRY
 				) DiscountCost
 				WHERE SV.intItemType = 1
 
-				--insert in table which will be used when unposting
-				INSERT INTO [dbo].[tblGRSettledItemsToStorage]
-				(
-					intItemId
-					,intItemLocationId
-					,intItemUOMId
-					,dtmDate
-					,dblQty
-					,dblUOMQty
-					,dblCost
-					,dblSalesPrice
-					,intCurrencyId
-					,dblExchangeRate
-					,intTransactionId
-					,intTransactionDetailId
-					,strTransactionId
-					,intTransactionTypeId
-					,intLotId
-					,intSubLocationId
-					,intStorageLocationId
-					,ysnIsStorage
-				)
-				SELECT intItemId
-					,intItemLocationId
-					,intItemUOMId
-					,dtmDate
-					,dblQty
-					,dblUOMQty
-					,dblCost
-					,dblSalesPrice
-					,intCurrencyId
-					,dblExchangeRate
-					,intTransactionId
-					,intTransactionDetailId
-					,strTransactionId
-					,intTransactionTypeId
-					,intLotId
-					,intSubLocationId
-					,intStorageLocationId
-					,ysnIsStorage 
-				FROM (
-					SELECT * FROM @ItemsToStorage
-					UNION ALL
-					SELECT * FROM @ItemsToPost
-				) I                                                                                                                
+				IF @ysnFromPriceBasisContract = 0
+				BEGIN
+					--insert in table which will be used when unposting
+					INSERT INTO [dbo].[tblGRSettledItemsToStorage]
+					(
+						intItemId
+						,intItemLocationId
+						,intItemUOMId
+						,dtmDate
+						,dblQty
+						,dblUOMQty
+						,dblCost
+						,dblSalesPrice
+						,intCurrencyId
+						,dblExchangeRate
+						,intTransactionId
+						,intTransactionDetailId
+						,strTransactionId
+						,intTransactionTypeId
+						,intLotId
+						,intSubLocationId
+						,intStorageLocationId
+						,ysnIsStorage
+					)
+					SELECT intItemId
+						,intItemLocationId
+						,intItemUOMId
+						,dtmDate
+						,dblQty
+						,dblUOMQty
+						,dblCost
+						,dblSalesPrice
+						,intCurrencyId
+						,dblExchangeRate
+						,intTransactionId
+						,intTransactionDetailId
+						,strTransactionId
+						,intTransactionTypeId
+						,intLotId
+						,intSubLocationId
+						,intStorageLocationId
+						,ysnIsStorage 
+					FROM (
+						SELECT * FROM @ItemsToStorage
+						UNION ALL
+						SELECT * FROM @ItemsToPost
+					) I
+				END				
 
 				-- we should only execute the update price in the tblGRSettleContract upon settlement and not per pricing
 				-- that field is being used in the ap clearing report and i think even if there is no report 
