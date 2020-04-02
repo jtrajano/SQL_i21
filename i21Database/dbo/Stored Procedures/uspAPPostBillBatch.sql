@@ -80,3 +80,8 @@ UPDATE tblAPBillBatch
 		WHERE intBillBatchId IN (SELECT intBillBatchId FROM #tmpPostBillBatchData)
 
 END
+
+UPDATE A
+SET A.intConcurrencyId = ISNULL(A.intConcurrencyId,0) + 1
+FROM tblAPBillBatch A
+WHERE A.intBillBatchId IN (SELECT intBillBatchId FROM #tmpPostBillBatchData)

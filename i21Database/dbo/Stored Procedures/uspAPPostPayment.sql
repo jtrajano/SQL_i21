@@ -723,7 +723,7 @@ BEGIN
 	
 	--Update posted status
 	UPDATE tblAPPayment
-		SET		ysnPosted = @post
+		SET		ysnPosted = @post, intConcurrencyId = ISNULL(intConcurrencyId,0) + 1
 	WHERE	intPaymentId IN (SELECT intId FROM @payments UNION ALL SELECT intId FROM @prepayIds)
 
 	--CREATE BANK TRANSACTION
