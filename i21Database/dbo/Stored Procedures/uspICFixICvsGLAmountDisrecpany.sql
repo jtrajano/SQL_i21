@@ -140,24 +140,36 @@ BEGIN
 			gd.dblDebit = gd.dblDebit + @dblDiff
 		FROM
 			tblGLDetail gd
-			--CROSS APPLY dbo.fnGetDebit(@dblDiff) Debit
-		WHERE	
-			gd.strTransactionId = @strTransactionId
-			AND gd.strBatchId = @strBatchId
-			AND gd.intJournalLineNo = @intInventoryTransactionId
-			AND gd.dblDebit <> 0 
+			INNER JOIN (
+				SELECT TOP 1 
+					gd.intGLDetailId
+				FROM 
+					tblGLDetail gd
+				WHERE
+					gd.strTransactionId = @strTransactionId
+					AND gd.strBatchId = @strBatchId
+					AND gd.intJournalLineNo = @intInventoryTransactionId
+					AND gd.dblDebit <> 0 
+			) topGd
+				ON gd.intGLDetailId = topGd.intGLDetailId
 
 		UPDATE gd
 		SET 
 			gd.dblCredit = gd.dblCredit + @dblDiff
 		FROM
 			tblGLDetail gd
-			--CROSS APPLY dbo.fnGetCredit(@dblDiff) Credit
-		WHERE	
-			gd.strTransactionId = @strTransactionId
-			AND gd.strBatchId = @strBatchId
-			AND gd.intJournalLineNo = @intInventoryTransactionId
-			AND gd.dblCredit <> 0 
+			INNER JOIN (
+				SELECT TOP 1 
+					gd.intGLDetailId
+				FROM 
+					tblGLDetail gd
+				WHERE
+					gd.strTransactionId = @strTransactionId
+					AND gd.strBatchId = @strBatchId
+					AND gd.intJournalLineNo = @intInventoryTransactionId
+					AND gd.dblCredit <> 0 
+			) topGd
+				ON gd.intGLDetailId = topGd.intGLDetailId
 	END 
 
 	-- FYP is closed. 
@@ -234,13 +246,21 @@ BEGIN
 			,[strRateType] = ''
 		FROM
 			tblGLDetail gd
+			INNER JOIN (
+				SELECT TOP 1 
+					gd.intGLDetailId
+				FROM 
+					tblGLDetail gd
+				WHERE
+					gd.strTransactionId = @strTransactionId
+					AND gd.strBatchId = @strBatchId
+					AND gd.intJournalLineNo = @intInventoryTransactionId
+					AND gd.dblDebit <> 0
+			) topGd
+				ON gd.intGLDetailId = topGd.intGLDetailId
 			CROSS APPLY dbo.fnGetDebit(@dblDiff) Debit
 			CROSS APPLY dbo.fnGetCredit(@dblDiff) Credit
-		WHERE	
-			gd.strTransactionId = @strTransactionId
-			AND gd.strBatchId = @strBatchId
-			AND gd.intJournalLineNo = @intInventoryTransactionId
-			AND gd.dblDebit <> 0
+			
 		UNION ALL
 		SELECT 
 			[dtmDate] = @dtmTargetOpenDate
@@ -277,13 +297,20 @@ BEGIN
 			,[strRateType] = ''
 		FROM
 			tblGLDetail gd
+			INNER JOIN (
+				SELECT TOP 1 
+					gd.intGLDetailId
+				FROM 
+					tblGLDetail gd
+				WHERE
+					gd.strTransactionId = @strTransactionId
+					AND gd.strBatchId = @strBatchId
+					AND gd.intJournalLineNo = @intInventoryTransactionId
+					AND gd.dblCredit <> 0
+			) topGd
+				ON gd.intGLDetailId = topGd.intGLDetailId
 			CROSS APPLY dbo.fnGetDebit(@dblDiff) Debit
 			CROSS APPLY dbo.fnGetCredit(@dblDiff) Credit
-		WHERE	
-			gd.strTransactionId = @strTransactionId
-			AND gd.strBatchId = @strBatchId
-			AND gd.intJournalLineNo = @intInventoryTransactionId
-			AND gd.dblCredit <> 0
 	END 
 
 	FETCH NEXT FROM loopDiscrepancy INTO 
