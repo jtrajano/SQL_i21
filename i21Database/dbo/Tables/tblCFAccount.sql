@@ -96,10 +96,3 @@ GO
 CREATE NONCLUSTERED INDEX [tblCFAccount_intAccountId]
     ON [dbo].[tblCFAccount]([intAccountId] ASC);
     
-
-GO 
-IF NOT EXISTS ((SELECT TOP 1 intCustomerId FROM tblCFAccount GROUP BY intCustomerId HAVING COUNT(1) > 1)) 
-BEGIN
-	CREATE UNIQUE NONCLUSTERED INDEX [tblCFAccount_UniqueCustomerId]
-    ON [dbo].[tblCFAccount]([intCustomerId] ASC) WITH (FILLFACTOR = 70);
-END
