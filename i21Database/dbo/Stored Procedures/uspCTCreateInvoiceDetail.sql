@@ -92,7 +92,7 @@ BEGIN TRY
 				,@ItemDestinationGradeId				INT             = NULL
 				,@ItemDestinationWeightId				INT             = NULL
 				,@intScaleUOMId							INT  
-				,@ItemPrice								INT  
+				,@ItemPrice								NUMERIC(18,8)  
 				,@InvoiceId								INT
 
 		SELECT	TOP 1
