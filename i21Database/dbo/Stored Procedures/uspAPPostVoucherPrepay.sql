@@ -262,7 +262,7 @@ BEGIN
 	END
 
 	UPDATE prepay
-		SET prepay.ysnPosted = @post
+		SET prepay.ysnPosted = @post, prepay.intConcurrencyId = ISNULL(prepay.intConcurrencyId,0) + 1
 	FROM tblAPBill prepay
 	INNER JOIN @validVoucherPrepay prepayIds ON prepay.intBillId = prepayIds.intId
 END
